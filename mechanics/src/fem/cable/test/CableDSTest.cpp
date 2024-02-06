@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,10 +85,12 @@ void CableDSTest::testBuildInitialProfile() {
   auto qref1 = siconos::algebra::io::readVectorFromJson(reader["rope1"]["q"]);
   auto qref2 = siconos::algebra::io::readVectorFromJson(reader["rope2"]["q"]);
 
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testBuildInitialProfile: check catenary", (qref1->size() == q1->size()),
+                               true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(" testBuildInitialProfile: check catenary", ((*qref1) == (*q1)),
                                true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(" testBuildInitialProfile: check catenary", ((*qref2) == (*q2)),
-                               true);
+                              true);
 
   nb_nodes = 1400;  // FEM number of nodes
   double eps = 0.1;

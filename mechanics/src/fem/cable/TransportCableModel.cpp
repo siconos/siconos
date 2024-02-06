@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2023 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,19 +95,19 @@ const std::vector<siconos::fem::cable::Pile>
 }
 
 void siconos::fem::cable::TransportCableModel::clear() {
-  // raz du modèle
+  // raz du modÃ¨le
   m_piles.clear();
   m_pilesUp.clear();
   m_pilesDown.clear();
 }
 
 int siconos::fem::cable::TransportCableModel::validate() {
-  // Validation du modèle
-  // Création des 2 lignes à partir de la définition des poteaux
+  // Validation du modÃ¨le
+  // CrÃ©ation des 2 lignes Ã  partir de la dÃ©finition des poteaux
   if (m_stationUp > m_stationDown) {
     bool vOk = true;
     if (m_piles.size()) {
-      // les x des poteaux doivent être croissant
+      // les x des poteaux doivent Ãªtre croissant
       std::sort(m_piles.begin(), m_piles.end());
 
       vOk = (m_piles.front() > m_stationDown && m_piles.back() < m_stationUp);

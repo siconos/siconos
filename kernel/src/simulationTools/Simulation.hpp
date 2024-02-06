@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -144,7 +144,8 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
   bool _isInitialized{false};
 
   /** current NSDS changelog position */
-  std::list<siconos::modeling::NonSmoothDynamicalSystem::Change>::const_iterator _nsdsChangeLogPosition;
+  std::list<siconos::modeling::NonSmoothDynamicalSystem::Change>::const_iterator
+      _nsdsChangeLogPosition;
 
   /** map of not-yet-initialized DS variables for each OS. This an internal and temporary map
       that must be empty after initialize. */
@@ -359,6 +360,8 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
    */
   inline bool getPrintStat() const { return _printStat; };
 
+  virtual void computeInitialStateOfTheStep(){};
+
   /**
       update all index sets of the topology, using current y and lambda values of Interactions
    */
@@ -569,6 +572,8 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
    *  Changelog and update the changelog iterator.
    */
   void initializeNSDSChangelog();
+
+  void applyNSDSChangelogForDS();
 
   /** initialize index sets for OSIs */
   void initializeIndexSets();

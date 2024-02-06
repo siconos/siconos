@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2023 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ void siconos::fem::cable::Support::prepare(const Rope &a_rope) {
 }
 
 void siconos::fem::cable::Support::prepare(const Pile &a_start, const Pile &a_end, double T) {
-  // par défaut, ne fait rien
+  // par dÃ©faut, ne fait rien
 }
 
 void siconos::fem::cable::Support::compute(const Point &a_p, double a_tol, double &g, Point &G,

@@ -45,11 +45,11 @@ The directory [ci_gitlab](./) contains cmake/ctest and script files used in .git
 for CI on gricad-gitlab, with:
 
 * [ctest_siconos.sh](./ctest_siconos.sh) is the file call in CI jobs to run ctest (from configure to tests)
-* [siconos_conf](./siconos_conf): contains setup files to be used to configure siconos in CI jobs,
+* [siconos_conf](../siconos_conf): contains setup files to be used to configure siconos in CI jobs,
 as in
 
 ```
-cmake -DUSER_OPTIONS_FILE=<path-to-siconos>/ci_gitlab/siconos_confs/siconos_no_python.cmake
+cmake -DUSER_OPTIONS_FILE=<path-to-siconos>/config_samples/siconos_lite.cmake
 ```
 
   

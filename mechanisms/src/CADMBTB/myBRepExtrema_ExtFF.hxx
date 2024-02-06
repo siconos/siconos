@@ -22,6 +22,7 @@
 #ifndef _myBRepExtrema_ExtFF_HeaderFile
 #define _myBRepExtrema_ExtFF_HeaderFile
 
+
 #ifndef _myExtrema_ExtSS_HeaderFile
 #include "myExtrema_ExtSS.hxx"
 #endif
@@ -34,14 +35,20 @@
 #ifndef _Extrema_SequenceOfPOnSurf_HeaderFile
 #include <Extrema_SequenceOfPOnSurf.hxx>
 #endif
-#ifndef _Handle_BRepAdaptor_HSurface_HeaderFile
-#include <Handle_BRepAdaptor_HSurface.hxx>
-#endif
+// #ifndef _Handle_BRepAdaptor_HSurface_HeaderFile
+// #include <Handle_BRepAdaptor_HSurface.hxx>
+// #endif
+
 #ifndef _Standard_Boolean_HeaderFile
 #include <Standard_Boolean.hxx>
 #endif
 #ifndef _Standard_Real_HeaderFile
 #include <Standard_Real.hxx>
+#endif
+
+
+#ifndef BRepAdaptor_HSurface_HeaderFile
+#include <BRepAdaptor_HSurface.hxx>
 #endif
 class BRepAdaptor_HSurface;
 class StdFail_NotDone;
@@ -49,7 +56,9 @@ class Standard_OutOfRange;
 class Standard_TypeMismatch;
 class TopoDS_Face;
 class gp_Pnt;
+#include "Standard_Handle.hxx"
 
+typedef Handle(BRepAdaptor_HSurface) Handle_BRepAdaptor_HSurface;
 
 #ifndef _Standard_HeaderFile
 #include <Standard.hxx>

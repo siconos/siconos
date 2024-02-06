@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2023 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -166,8 +166,8 @@ void siconos::fem::cable::CableDS::tangentStiffnessMatrix(
       }
     }
   }
-  // dernier point, à voir si on mets dans une seule boucle avec des if
-  // dernier élément - premier élément
+  // dernier point, Ã  voir si on mets dans une seule boucle avec des if
+  // dernier Ã©lÃ©ment - premier Ã©lÃ©ment
   double n_e = 0;
   for (size_t j = 0; j < 3; j++) {
     double d = ((*q)(nb_elem + j) - (*q)(j));

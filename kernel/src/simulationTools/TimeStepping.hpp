@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,8 @@ enum class TimeSteppingType {
   // idem
   LINEAR_IMPLICIT,
   // will perform the newton iterations up to convergence
-  NONLINEAR
+  NONLINEAR,
+  NONLINEAR_FULL
 };
 
 class TimeStepping : public Simulation {
@@ -68,8 +69,9 @@ class TimeStepping : public Simulation {
   unsigned int _newtonCumulativeNbIterations{0};
 
   /** option to update Newton iterations number
-   *  LINEAR or LINEAR_IMPLICIT will force a single iteration of the Newton Solver
-   * NONLINEAR (default) will perform the Newton iterations up to convergence
+   *  LINEAR or LINEAR_IMPLICIT will force a single iteration of the Newton
+   * Solver. NONLINEAR (default) will perform the Newton iterations up to
+   * convergence
    */
   TimeSteppingType _newtonOptions{TimeSteppingType::NONLINEAR};
 
@@ -107,7 +109,11 @@ class TimeStepping : public Simulation {
 
   /** boolean variable to display warning on non-convergence
    */
-  bool _warnOnNonConvergence{true};
+  bool _newtonWarningOnNonConvergence{true};
+
+  /** boolean variable to display warning if osnspb is not correcltys olved
+   */
+  bool _warningNonsmoothSolver{true};
 
   /** boolean variable to resetAllLamda at each step (default true)
    */
@@ -178,7 +184,8 @@ class TimeStepping : public Simulation {
   /** Overload Simulation::initialize */
   void initialize() override;
 
-  /** update indexSets[i] of the topology, using current y and lambda values of Interactions
+  /** update indexSets[i] of the topology, using current y and lambda values of
+   * Interactions
    *
    *  \param i the number of the set to be updated
    */
@@ -187,13 +194,15 @@ class TimeStepping : public Simulation {
   // /** Used by the updateIndexSet function in order to deactivate
   // std::shared_ptr<siconos::modeling::Interaction>.
   //  */
-  // virtual bool predictorDeactivate(std::shared_ptr<siconos::modeling::Interaction> inter,
+  // virtual bool
+  // predictorDeactivate(std::shared_ptr<siconos::modeling::Interaction> inter,
   // unsigned int i);
 
   // /** Used by the updateIndexSet function in order to activate
   // std::shared_ptr<siconos::modeling::Interaction>.
   //  */
-  // virtual bool predictorActivate(std::shared_ptr<siconos::modeling::Interaction> inter,
+  // virtual bool
+  // predictorActivate(std::shared_ptr<siconos::modeling::Interaction> inter,
   // unsigned int i);
 
   /** increment model current time according to User TimeDiscretisation and call
@@ -232,9 +241,8 @@ class TimeStepping : public Simulation {
    *  It computes the initial residu and set the, if needed to Newton variable
    *  to start the newton algorithm.
    */
-  void initializeNewtonLoop();
-
-  void computeInitialNewtonState();
+  void initializeNewtonSolve();
+  void computeInitialStateOfTheStep() override;
   void prepareNewtonIteration();
 
   /** check the convergence of Newton algorithm according to criterion
@@ -267,10 +275,15 @@ class TimeStepping : public Simulation {
   bool displayNewtonConvergence() { return _displayNewtonConvergence; };
   void setDisplayNewtonConvergence(bool newval) { _displayNewtonConvergence = newval; };
 
-  void setWarnOnNonConvergence(bool newval) { _warnOnNonConvergence = newval; };
-  bool warnOnNonConvergence() { return _warnOnNonConvergence; };
-  void displayNewtonConvergenceAtTheEnd(int info, unsigned int maxStep);
+  void setNewtonWarningOnNonConvergence(bool newval) {
+    _newtonWarningOnNonConvergence = newval;
+  };
+  bool newtonWarningOnNonConvergence() { return _newtonWarningOnNonConvergence; };
 
+  void setWarningNonsmoothSolver(bool newval) { _warningNonsmoothSolver = newval; };
+  bool warningNonsmoothSolver() { return _warningNonsmoothSolver; };
+
+  void displayNewtonConvergenceAtTheEnd(int info, unsigned int maxStep);
   void displayNewtonConvergenceInTheLoop();
 
   void setResetAllLambda(bool newval) { _resetAllLambda = newval; };

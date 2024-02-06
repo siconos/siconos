@@ -8,11 +8,11 @@ Sub-directories are named according to the standard image used as a base to prep
 
 
 
-For instance, to create a new image, named sico-bulls, based on Debian bullseye version, run 
+For instance, to create a new image, named sico-bulls, based on Debian bookworm version, run 
 
 
 ```
-docker build -t sico-bulls -f $CI_PROJECT_DIR/ci_gitlab/dockerfiles/debian-bullseye/Dockerfile $CI_PROJECT_DIR
+docker build -t sico-bulls -f $CI_PROJECT_DIR/ci_gitlab/dockerfiles/debian-bookworm/Dockerfile $CI_PROJECT_DIR
 ```
 
 - Image name, sico-bulls here, can be set to any value you want.

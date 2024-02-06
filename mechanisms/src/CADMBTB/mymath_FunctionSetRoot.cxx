@@ -8,7 +8,26 @@
 //mymath_FunctionSetRoot.cxx
 
 
-#include "mymath_FunctionSetRoot.ixx"
+//#include "mymath_FunctionSetRoot.ixx"
+#ifndef _StdFail_NotDone_HeaderFile
+#include <StdFail_NotDone.hxx>
+#endif
+#ifndef _Standard_DimensionError_HeaderFile
+#include <Standard_DimensionError.hxx>
+#endif
+#ifndef _math_FunctionSetWithDerivatives_HeaderFile
+#include <math_FunctionSetWithDerivatives.hxx>
+#endif
+#ifndef _math_Vector_HeaderFile
+#include <math_Vector.hxx>
+#endif
+#ifndef _math_Matrix_HeaderFile
+#include <math_Matrix.hxx>
+#endif
+#ifndef _mymath_FunctionSetRoot_HeaderFile
+#include "mymath_FunctionSetRoot.hxx"
+#endif
+
 #include <Standard_DimensionError.hxx>
 #include <math_Gauss.hxx>
 #include <math_SVD.hxx>
@@ -199,7 +218,7 @@ static Standard_Boolean MinimizeDirection(const math_Vector&   P0,
   F.Initialize(P1, Delta);
 
   // (2) On minimise
-  if (mydebug)cout << "      minimisation dans la direction" << endl;
+  if (mydebug)std::cout << "      minimisation dans la direction" << std::endl;
   ax = -1; bx = 0;
   cx = (P2-P1).Norm()*invnorme;
   if (cx < 1.e-2) return Standard_False;
@@ -241,7 +260,7 @@ static Standard_Boolean MinimizeDirection(const math_Vector&   P,
     
   // (1) On realise une premiere interpolation quadratique
   Standard_Real ax, bx, cx, df1, df2, Delta, tsol, fsol, tsolbis;
-  if (mydebug) { cout << "     essai d interpolation" << endl;}
+  if (mydebug) { std::cout << "     essai d interpolation" << std::endl;}
 
   df1 = Gradient*Dir;
   df2 = DGradient*Dir;
@@ -283,7 +302,7 @@ static Standard_Boolean MinimizeDirection(const math_Vector&   P,
   if (fsol<PValue) { 
     good = Standard_True;
     Result = fsol;
-    if (mydebug) cout << "t= "<<tsol<<" F = " << fsol << " OldF = "<<PValue <<endl;
+    if (mydebug) std::cout << "t= "<<tsol<<" F = " << fsol << " OldF = "<<PValue <<std::endl;
   }
 
   // (2) Si l'on a pas assez progresser on realise une recherche 
@@ -296,15 +315,15 @@ static Standard_Boolean MinimizeDirection(const math_Vector&   P,
     else {
       ax = 0.0; bx = tsol; cx = 1.0;
     }
-    if (mydebug) cout << " minimisation dans la direction" << endl;
+    if (mydebug) std::cout << " minimisation dans la direction" << std::endl;
     math_BrentMinimum Sol(tol1d, 100, tol1d);
     Sol.Perform(F, ax, bx, cx);
     if(Sol.IsDone()) {
       if (Sol.Minimum() <= Result) {
 	tsol = Sol.Location();
 	good = Standard_True;
-	if (mydebug) cout << "t= "<<tsol<<" F ="<< Sol.Minimum() 
-	                  << " OldF = "<<Result <<endl;
+	if (mydebug) std::cout << "t= "<<tsol<<" F ="<< Sol.Minimum() 
+			       << " OldF = "<<Result <<std::endl;
       }
     }
   }
@@ -335,7 +354,7 @@ static void SearchDirection(const math_Matrix& DF,
       math_Gauss Solut(DF, 1.e-9);
       if (Solut.IsDone()) Solut.Solve(Direction);
       else { // we have to "forget" singular directions.
-	if (mydebug) cout << " Matrice singuliere : On prend SVD" << endl;
+	if (mydebug) std::cout << " Matrice singuliere : On prend SVD" << std::endl;
 	math_SVD SolvebySVD(DF);
         if (SolvebySVD.IsDone()) SolvebySVD.Solve(-1*FF, Direction);
 	else ChangeDirection = Standard_True;
@@ -374,7 +393,7 @@ static void SearchDirection(const math_Matrix& DF,
 //   }
 //   if (ChangeDirection) { // On va faire un gradient !
 //     if (mydebug) {
-//       cout << "SearchDirection utilisation de GH ???."<<endl;
+//       std::cout << "SearchDirection utilisation de GH ???."<<std::endl;
 //     }
 //     for (i = Direction.Lower(); i <= Direction.Upper(); i++) {
 //       Direction(i) = - GH(i);
@@ -712,7 +731,7 @@ void mymath_FunctionSetRoot::Perform(math_FunctionSetWithDerivatives& F,
     Done = Standard_False;
     State = F.GetStateNumber();
     if (mydebug) {
-      cout << "Failure - Perform stop because F_Dir.Value failed."<<endl;
+      std::cout << "Failure - Perform stop because F_Dir.Value failed."<<std::endl;
     }
     return;
   }
@@ -723,15 +742,15 @@ void mymath_FunctionSetRoot::Perform(math_FunctionSetWithDerivatives& F,
   Save(0) = Max (F2, Sqrt(Eps));
 
   if (mydebug) {
-    cout << "=== Mode Debug de Function Set Root"<<endl;
-    cout << "    F2 Initial = " << F2 << endl;
+    std::cout << "=== Mode Debug de Function Set Root"<<std::endl;
+    std::cout << "    F2 Initial = " << F2 << std::endl;
   }
 
   if ((F2 <= Eps) || (Sqrt(Gnr1) <= Eps)) {
     Done = Standard_True;
     State = F.GetStateNumber();
     if (mydebug) {
-      cout << "return with true because  F2 and Gnr1 small."<<endl;
+      std::cout << "return with true because  F2 and Gnr1 small."<<std::endl;
     }
     return;
   }
@@ -744,13 +763,13 @@ void mymath_FunctionSetRoot::Perform(math_FunctionSetWithDerivatives& F,
 
     SearchDirection(DF, GH, FF, ChangeDirection, InvLengthMax, DH, Dy);
     if (mydebug) {
-      cout << "Search direction Dy = "<<Dy<<endl;
+      std::cout << "Search direction Dy = "<<Dy<<std::endl;
     }
     if (Abs(Dy) <= Eps) {
       Done = Standard_True;
       State = F.GetStateNumber();
       if (mydebug) {
-	cout << "Perform stop because of small value of Dy."<<endl;
+	std::cout << "Perform stop because of small value of Dy."<<std::endl;
       }
       return;
     }
@@ -776,22 +795,22 @@ void mymath_FunctionSetRoot::Perform(math_FunctionSetWithDerivatives& F,
       Done = Standard_False;
       State = F.GetStateNumber();
       if (mydebug) {
-	cout << "False because aof F_Dir"<<endl;
+	std::cout << "False because aof F_Dir"<<std::endl;
       }
  return;
     }
 
 #if DEB
     if (mydebug) {
-      cout << "Kount         = " << Kount << endl;
-      cout << "Le premier F2 = " << F2 << endl;
-      cout << "Direction     = " << ChangeDirection << endl;
+      std::cout << "Kount         = " << Kount << std::endl;
+      std::cout << "Le premier F2 = " << F2 << std::endl;
+      std::cout << "Direction     = " << ChangeDirection << std::endl;
     }
 #endif
 
     if ((F2 <= Eps) || (Sqrt(Gnr1) <= Eps)) {
       if (mydebug) {
-	cout << "Perform stop because of small value of F2 and Gnr1."<<endl;
+	std::cout << "Perform stop because of small value of F2 and Gnr1."<<std::endl;
       }
       Done = Standard_True;
       State = F.GetStateNumber();
@@ -813,7 +832,7 @@ void mymath_FunctionSetRoot::Perform(math_FunctionSetWithDerivatives& F,
 	while((F2/PreviousMinimum > Progres) && !Stop) {
 	  if (F2 < OldF && (Dy < 0.0)) {
 	    // On essaye de progresser dans cette direction.
-	    if (mydebug)  cout << " iteration de descente = " << DescenteIter<<endl;
+	    if (mydebug)  std::cout << " iteration de descente = " << DescenteIter<<std::endl;
 	    DescenteIter++;
 	    SolSave = Sol;
 	    OldF = F2;
@@ -822,7 +841,7 @@ void mymath_FunctionSetRoot::Perform(math_FunctionSetWithDerivatives& F,
 	  }
 	    Stop = Bounds(InfBound, SupBound, Tol, Sol, SolSave, 
 			  Constraints, Delta);
-	    if (mydebug) { cout << " Augmentation de lambda" << endl;}
+	    if (mydebug) { std::cout << " Augmentation de lambda" << std::endl;}
 	    Ambda *= 1.7;
 	  }
 	  else {
@@ -859,7 +878,7 @@ void mymath_FunctionSetRoot::Perform(math_FunctionSetWithDerivatives& F,
 //	  F_Dir.Value(Sol, FF, DF, GH, F2, Gnr1);
 	  if(!F_Dir.Value(Sol, FF, DF, GH, F2, Gnr1)) {
 	    if (mydebug) {
-	      cout << "False because of F_Dir 2"<<endl;
+	      std::cout << "False because of F_Dir 2"<<std::endl;
 	    }
 	    Done = Standard_False;
 	    State = F.GetStateNumber();
@@ -870,7 +889,7 @@ void mymath_FunctionSetRoot::Perform(math_FunctionSetWithDerivatives& F,
 	    State = F.GetStateNumber();
 	    Done = Standard_True;
 	    if (mydebug) {
-	      cout << "True because of small Dy."<<endl;
+	      std::cout << "True because of small Dy."<<std::endl;
 	    }
 	    if (F2 > OldF) Sol = SolSave;
 	    return;
@@ -880,8 +899,8 @@ void mymath_FunctionSetRoot::Perform(math_FunctionSetWithDerivatives& F,
 	  }
 	}
 	if (mydebug) {
-	  cout << "--- Sortie du Traitement Standard"<<endl;
-	  cout << "    DescenteIter = "<<DescenteIter << " F2 = " << F2 << endl;
+	  std::cout << "--- Sortie du Traitement Standard"<<std::endl;
+	  std::cout << "    DescenteIter = "<<DescenteIter << " F2 = " << F2 << std::endl;
 	}
       }
       // ------------------------------------
@@ -899,7 +918,7 @@ void mymath_FunctionSetRoot::Perform(math_FunctionSetWithDerivatives& F,
 	  OldF = F2;
 	  SearchDirection(DF, GH, FF,  Constraints, Sol, 
 			  ChangeDirection, InvLengthMax, DH, Dy);
-	  if (mydebug) { cout << " Conditional Direction = " << ChangeDirection << endl;}
+	  if (mydebug) { std::cout << " Conditional Direction = " << ChangeDirection << std::endl;}
 	  if (Dy<-Eps) { //Pour eviter des calculs inutiles et des /0...
 	    if (ChangeDirection) {
 
@@ -922,7 +941,7 @@ void mymath_FunctionSetRoot::Perform(math_FunctionSetWithDerivatives& F,
 //	    F_Dir.Value(Sol, FF, DF, GH, F2, Gnr1);
 	    if(!F_Dir.Value(Sol, FF, DF, GH, F2, Gnr1)) {
 	      if (mydebug) {
-		cout << "False because of F_Dir 3."<<endl;
+		std::cout << "False because of F_Dir 3."<<std::endl;
 	      }
 	      Done = Standard_False;
 	      State = F.GetStateNumber();
@@ -930,8 +949,8 @@ void mymath_FunctionSetRoot::Perform(math_FunctionSetWithDerivatives& F,
 	    }
 	    Ambda2 = Gnr1;
 	     if (mydebug) {
-	       cout << "---  Iteration au bords : " << DescenteIter << endl; 
-	       cout << "---  F2 = " << F2 << endl;
+	       std::cout << "---  Iteration au bords : " << DescenteIter << std::endl; 
+	       std::cout << "---  F2 = " << F2 << std::endl;
 	     }
 	  }
 	  else {
@@ -940,8 +959,8 @@ void mymath_FunctionSetRoot::Perform(math_FunctionSetWithDerivatives& F,
 
 	  while((F2/PreviousMinimum > Progres) && (F2<OldF) && (!Stop) ) {
 	    DescenteIter++;
-	    if (mydebug)  cout << "--- Iteration de descente conditionnel = " 
-	      << DescenteIter<<endl;
+	    if (mydebug)  std::cout << "--- Iteration de descente conditionnel = " 
+	      << DescenteIter<<std::endl;
 	    if (F2 < OldF && Dy < 0.0) {
 	      // On essaye de progresser dans cette direction.
 	      SolSave = Sol;
@@ -956,7 +975,7 @@ void mymath_FunctionSetRoot::Perform(math_FunctionSetWithDerivatives& F,
 //	    F_Dir.Value(Sol, FF, DF, GH, F2, Gnr1);
 	    if(!F_Dir.Value(Sol, FF, DF, GH, F2, Gnr1)) {
 	      if (mydebug) {
-		cout << "False because of F_Dir 4."<<endl;
+		std::cout << "False because of F_Dir 4."<<std::endl;
 	      }
 	      Done = Standard_False;
 	      State = F.GetStateNumber();
@@ -985,7 +1004,7 @@ void mymath_FunctionSetRoot::Perform(math_FunctionSetWithDerivatives& F,
 //	  F_Dir.Value(Sol, FF, DF, GH, F2, Gnr1);
 	  if(!F_Dir.Value(Sol, FF, DF, GH, F2, Gnr1)) {
 	    if (mydebug) {
-	      cout << "False because of F_Dir 5."<<endl;
+	      std::cout << "False because of F_Dir 5."<<std::endl;
 	    }
 	    Done = Standard_False;
 	    State = F.GetStateNumber();
@@ -994,8 +1013,8 @@ void mymath_FunctionSetRoot::Perform(math_FunctionSetWithDerivatives& F,
 	  Dy = GH*DH;
 	}	
 	if (mydebug) {
-	  cout << "--- Sortie du Traitement des Bords"<<endl;
-	  cout << "--- DescenteIter = "<<DescenteIter << " F2 = " << F2 << endl;
+	  std::cout << "--- Sortie du Traitement des Bords"<<std::endl;
+	  std::cout << "--- DescenteIter = "<<DescenteIter << " F2 = " << F2 << std::endl;
 	}      
       }
     }
@@ -1025,7 +1044,7 @@ void mymath_FunctionSetRoot::Perform(math_FunctionSetWithDerivatives& F,
 	State = F.GetStateNumber();
 	Done = Standard_True;
 	if (mydebug) {
-	  cout << "True IsSolutionReached ."<<endl;
+	  std::cout << "True IsSolutionReached ."<<std::endl;
 	}
 	return;
       }
@@ -1040,7 +1059,7 @@ void mymath_FunctionSetRoot::Perform(math_FunctionSetWithDerivatives& F,
 	  if (!ChangeDirection) ChangeDirection = Standard_True;
 	  else {
 	    if (mydebug) {
-	      cout << "??? Analyse de la progression... ."<<endl;
+	      std::cout << "??? Analyse de la progression... ."<<std::endl;
 	    }
 	    Done = Standard_True;
 	    State = F.GetStateNumber();
@@ -1069,7 +1088,7 @@ void mymath_FunctionSetRoot::Perform(math_FunctionSetWithDerivatives& F,
 	  Done = Standard_True;
 	  State = F.GetStateNumber();
 	  if (mydebug) {
-	      cout << "True IsSolutionReached 2 ."<<endl;
+	      std::cout << "True IsSolutionReached 2 ."<<std::endl;
 	  }
 	  return;
 	}
@@ -1082,7 +1101,7 @@ void mymath_FunctionSetRoot::Perform(math_FunctionSetWithDerivatives& F,
 //	F_Dir.Value(Sol, FF, DF, GH, F2, Gnr1);
 	if(!F_Dir.Value(Sol, FF, DF, GH, F2, Gnr1)) {
 	  if (mydebug) {
-	    cout << "False Fdir 6 ."<<endl;
+	    std::cout << "False Fdir 6 ."<<std::endl;
 	  }
 	  Done = Standard_False;
 	  State = F.GetStateNumber();
@@ -1091,17 +1110,16 @@ void mymath_FunctionSetRoot::Perform(math_FunctionSetWithDerivatives& F,
       }
       else {
 	if (mydebug) {
-	  cout << "??? plus d'issues ."<<endl;
+	  std::cout << "??? plus d'issues ."<<std::endl;
 	}
 	return; // y a plus d'issues
       }
     }
   }
   if (mydebug) {
-    cout << "end"<<endl;
+    std::cout << "end"<<std::endl;
   }
 }
-
 
 
 

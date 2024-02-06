@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,6 @@
 
 #include "SiconosVector.hpp"
 
-#include <boost/numeric/bindings/blas.hpp>
-#include <boost/numeric/bindings/std/vector.hpp>
-#include <boost/numeric/bindings/ublas/matrix.hpp>
-#include <boost/numeric/bindings/ublas/vector.hpp>
 #include <boost/numeric/ublas/io.hpp>            // for >>
 #include <boost/numeric/ublas/vector_proxy.hpp>  // for project
 #include <boost/numeric/ublas/vector_sparse.hpp>
@@ -29,8 +25,12 @@
 #include "BlockVector.hpp"
 #include "SiconosConfig.h"
 #include "SiconosException.hpp"
-#include "SiconosVectorOp.hpp"  // For setBlock decl. ...
 #include "SiconosMatrixVectorOp.hpp"  // For outer_prod decl. ...
+#include "SiconosVectorOp.hpp"        // For setBlock decl. ...
+#include "boost/numeric/bindings/blas.hpp"
+#include "boost/numeric/bindings/std/vector.hpp"
+#include "boost/numeric/bindings/ublas/matrix.hpp"
+#include "boost/numeric/bindings/ublas/vector.hpp"
 // #define DEBUG_MESSAGES
 #include "SimpleMatrix.hpp"
 #include "io.hpp"

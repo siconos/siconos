@@ -1,0 +1,24 @@
+name: siconosenv
+channels:
+  - conda-forge
+dependencies:
+  - python >=3.7
+  - numpy
+  - scipy
+  - wheel
+  - matplotlib
+  - packaging
+  - lxml
+  - pytest
+  - pybind11
+  - vtk
+  - boost
+  - bullet
+  - h5py
+  - clang-format
+  - cmake
+  - gmp
+  - cppunit
+  - suitesparse
+  - openblas
+  - lp_solve

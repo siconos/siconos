@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,8 @@ siconos::simulation::TimeSteppingDirectProjection::TimeSteppingDirectProjection(
     : TimeStepping{nsds, td, osi, osnspb_velo}, _indexSetLevelForProjection{level} {
   if (not std::dynamic_pointer_cast<siconos::integrators::MoreauJeanDirectProjectionOSI>(osi))
     THROW_EXCEPTION(
-        "siconos::simulation::TimeSteppingDirectProjection::TimeSteppingDirectProjection.  "
+        "siconos::simulation::TimeSteppingDirectProjection::"
+        "TimeSteppingDirectProjection.  "
         "wrong type of OneStepIntegrator");
 
   (*_allNSProblems).resize(SICONOS_NB_OSNSP_TSP);
@@ -110,7 +111,8 @@ void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() {
   /** Second step, Perform the projection on constraints.*/
 
   DEBUG_PRINT(
-      "siconos::simulation::TimeSteppingDirectProjection::newtonSolve begin projection:\n");
+      "siconos::simulation::TimeSteppingDirectProjection::newtonSolve begin "
+      "projection:\n");
 
   auto dsGraph = _nsds->dynamicalSystems();
 
@@ -126,12 +128,13 @@ void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() {
 
   bool runningProjection = false;
   _nbProjectionIteration = 0;
-  // for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end();
-  // it++){
+  // for (InteractionsIterator it = allInteractions->begin(); it !=
+  // allInteractions->end(); it++){
   //   double criteria = (*it)->relation()->y(0)->getValue(0);
   //   if (Type::value(*((*it)->nonSmoothLaw())) ==
   //   siconos::modeling::Type::NewtonImpactFrictionNSL ||
-  //  Type::value(*((*it)->nonSmoothLaw())) == siconos::modeling::Type::NewtonImpactNSL){
+  //  Type::value(*((*it)->nonSmoothLaw())) ==
+  //  siconos::modeling::Type::NewtonImpactNSL){
   //     auto ri = std::static_pointer_cast<NewtonEuler1DR> ((*it)->relation());
   //     if (criteria < -1e-7){
   //  ri->_isOnContact=true;
@@ -165,7 +168,8 @@ void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() {
       *workVectors[siconos::integrators::MoreauJeanOSI::QTMP] = *d->q();
     } else
       THROW_EXCEPTION(
-          "siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() :: - Ds is not "
+          "siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() "
+          ":: - Ds is not "
           "from NewtonEulerDS neither from LagrangianDS.");
   }
 
@@ -191,11 +195,10 @@ void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() {
     DEBUG_PRINTF("IndexSet1->size() = %i\n", (int)_nsds->topology()->indexSet(1)->size());
     DEBUG_EXPR(oneStepNSProblem(siconos::simulation::SICONOS_OSNSP_TS_POS)->display());
 
-    if (info && _warnOnNonConvergence) {
-      std::cout
-          << "[kernel] siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() "
-             "project on constraints. solver failed."
-          << std::endl;
+    if (info && _newtonWarningOnNonConvergence) {
+      std::cout << "[kernel] "
+                   "siconos::simulation::TimeSteppingDirectProjection::"
+                   "advanceToEvent() project on constraints. solver failed.\n";
     }
     _nsds->updateInput(nextTime(), 0);
 
@@ -212,7 +215,8 @@ void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() {
           inter->lambda(0)->display();
         });
 
-    // This part should be in MoreauJeanOSIProjectOnConstraintsOS::updateState(level =0)
+    // This part should be in
+    // MoreauJeanOSIProjectOnConstraintsOS::updateState(level =0)
     for (auto aVi2 : *dsGraph) {
       auto ds = dsGraph->bundle(aVi2);
       auto& workVectors = *dsGraph->properties(aVi2).workVectors;
@@ -243,18 +247,21 @@ void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() {
         }
       } else
         THROW_EXCEPTION(
-            "siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() :: - Ds is "
+            "siconos::simulation::TimeSteppingDirectProjection::advanceToEvent("
+            ") :: - Ds is "
             "not from NewtonEulerDS neither from LagrangianDS.");
     }
 
     computeCriteria(&runningProjection);
 
-    // cout<<"||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||  Z:"<<endl;
+    // cout<<"||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+    // Z:"<<endl;
     //(*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_TS_POS]->display();
     //(std::static_pointer_cast<LinearOSNS>((*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_TS_POS]))->z()->display();
 
     DEBUG_EXPR_WE(
-        std::cout << "siconos::simulation::TimeSteppingDirectProjection::Projection end : "
+        std::cout << "siconos::simulation::TimeSteppingDirectProjection::"
+                     "Projection end : "
                      "Number of iterations="
                   << _nbProjectionIteration << "\n";
         std ::cout << "After update state in position\n";
@@ -285,14 +292,16 @@ void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() {
         });
 
     // cout<<"during projection before normalizing of q:\n";
-    // for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end();
-    // it++)
+    // for (InteractionsIterator it = allInteractions->begin(); it !=
+    // allInteractions->end(); it++)
     //{
     //   (*it)->relation()->computeh(getTkp1());
     // }
-  }  // end while(runningProjection && _nbProjectionIteration < _projectionMaxIteration)
+  }  // end while(runningProjection && _nbProjectionIteration <
+     // _projectionMaxIteration)
 
-  // We update forces to start the Newton Loop the next tiem step with a correct value in swap
+  // We update forces to start the Newton Loop the next tiem step with a correct
+  // value in swap
   for (auto aVi2 : *dsGraph) {
     auto ds = dsGraph->bundle(aVi2);
     if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
@@ -304,15 +313,17 @@ void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() {
     } else if (std::dynamic_pointer_cast<siconos::modeling::LagrangianLinearTIDS>(ds)) {
     } else
       THROW_EXCEPTION(
-          "TimeSteppingCombinedProjection::advanceToEvent() - Ds is not from NewtonEulerDS "
+          "TimeSteppingCombinedProjection::advanceToEvent() - Ds is not from "
+          "NewtonEulerDS "
           "neither from LagrangianDS.");
   }
 
-  if (_nbProjectionIteration == _projectionMaxIteration && _warnOnNonConvergence) {
-    std::cout
-        << "[kernel] siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() Max "
-           "number of projection iterations reached ("
-        << _nbProjectionIteration << ")" << std::endl;
+  if (_nbProjectionIteration == _projectionMaxIteration && _newtonWarningOnNonConvergence) {
+    std::cout << "[kernel] "
+                 "siconos::simulation::TimeSteppingDirectProjection::"
+                 "advanceToEvent() Max "
+                 "number of projection iterations reached ("
+              << _nbProjectionIteration << ")" << std::endl;
     printf("[kernel]                max criteria equality =  %e.\n", _maxViolationEquality);
     printf("[kernel]                max criteria unilateral =  %e.\n",
            _maxViolationUnilateral);
@@ -322,11 +333,12 @@ void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() {
 
   return;
   // #ifdef TSPROJ_CORRECTIONVELOCITIES
-  //    /*The following reduces the velocity because the position step increase the energy of
-  //    the system. This formulation works only with simple systems.To activate it, comment the
-  //    next line.*/
+  //    /*The following reduces the velocity because the position step increase
+  //    the energy of the system. This formulation works only with simple
+  //    systems.To activate it, comment the next line.*/
 
-  //   for(DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi != dsGraph->end(); ++vi)
+  //   for(DynamicalSystemsGraph::VIterator vi = dsGraph->begin(); vi !=
+  //   dsGraph->end(); ++vi)
   //   {
   //     auto ds = dsGraph->bundle(*vi);
   //     Type::Siconos dsType = Type::value(*ds);
@@ -356,22 +368,28 @@ void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() {
   //       //if (n2q < 1e-14)
   //       // continue;
 
-  //       auto  FextNorm = std::make_shared<siconos::algebra::SiconosVector>(3));
+  //       auto  FextNorm =
+  //       std::make_shared<siconos::algebra::SiconosVector>(3));
   //       FextNorm->setValue(0,neds->fExt()->getValue(0));
   //       FextNorm->setValue(1,neds->fExt()->getValue(1));
   //       FextNorm->setValue(2,neds->fExt()->getValue(2));
   // DEBUG_EXPR_WE(
-  //       std::cout<<"siconos::simulation::TimeSteppingDirectProjection::newtonSolve deltaQ
+  //       std::cout<<"siconos::simulation::TimeSteppingDirectProjection::newtonSolve
+  //       deltaQ
   //       :\n"; neds->deltaq()->display();
-  //       std::cout<<"siconos::simulation::TimeSteppingDirectProjection::newtonSolve Fext
+  //       std::cout<<"siconos::simulation::TimeSteppingDirectProjection::newtonSolve
+  //       Fext
   //       :\n"; FextNorm->display();
   //       );
 
   //       (*FextNorm)*=(1./n2);
   //       /*work of external forces.*/
-  //       double workFext= neds->fExt()->getValue(0) * neds->deltaq()->getValue(0)+
-  //                        neds->fExt()->getValue(1) * neds->deltaq()->getValue(1)+
-  //                        neds->fExt()->getValue(2) * neds->deltaq()->getValue(2);
+  //       double workFext= neds->fExt()->getValue(0) *
+  //       neds->deltaq()->getValue(0)+
+  //                        neds->fExt()->getValue(1) *
+  //                        neds->deltaq()->getValue(1)+
+  //                        neds->fExt()->getValue(2) *
+  //                        neds->deltaq()->getValue(2);
   //       //workFext*=2.0;
   //       double VkFNorm=FextNorm->getValue(0)*neds->velocity()->getValue(0)+
   //                      FextNorm->getValue(1)*neds->velocity()->getValue(1)+
@@ -388,9 +406,11 @@ void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() {
   //       else
   //         VkcFNorm=0;
   //       // if (VkFNorm >= 0 && workFext >0){
-  //       //   ;//VkcFNorm=sqrt (2*workFext/(neds->massValue())+VkFNorm*VkFNorm);
+  //       //   ;//VkcFNorm=sqrt
+  //       (2*workFext/(neds->massValue())+VkFNorm*VkFNorm);
   //       // }else if (VkFNorm <= 0 && workFext < 0){
-  //       //   ;//VkcFNorm=-sqrt (fabs(2*workFext/(neds->massValue())+VkFNorm*VkFNorm));
+  //       //   ;//VkcFNorm=-sqrt
+  //       (fabs(2*workFext/(neds->massValue())+VkFNorm*VkFNorm));
   //       // }else if (VkFNorm > 0 && workFext <0){
   //       //   VkcFNorm= VkFNorm*VkFNorm + 2*workFext/(neds->massValue());
   //       //   if (VkcFNorm >0)
@@ -405,19 +425,20 @@ void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() {
   //       //     VkcFNorm=0;
   //       // }
   // DEBUG_EXPR_WE(
-  //       printf("siconos::simulation::TimeSteppingDirectProjection::newtonSolve velocity
-  //       before update(prevComp=%e, newComp=%e)\n",VkFNorm,VkcFNorm); printf("VELOCITY1 ");
-  //       neds->velocity()->display();
+  //       printf("siconos::simulation::TimeSteppingDirectProjection::newtonSolve
+  //       velocity before update(prevComp=%e, newComp=%e)\n",VkFNorm,VkcFNorm);
+  //       printf("VELOCITY1 "); neds->velocity()->display();
   // );
-  //       neds->velocity()->setValue(0,neds->velocity()->getValue(0)+(VkcFNorm -
-  //       VkFNorm)*FextNorm->getValue(0));
-  //       neds->velocity()->setValue(1,neds->velocity()->getValue(1)+(VkcFNorm -
-  //       VkFNorm)*FextNorm->getValue(1));
-  //       neds->velocity()->setValue(2,neds->velocity()->getValue(2)+(VkcFNorm -
-  //       VkFNorm)*FextNorm->getValue(2));
+  //       neds->velocity()->setValue(0,neds->velocity()->getValue(0)+(VkcFNorm
+  //       - VkFNorm)*FextNorm->getValue(0));
+  //       neds->velocity()->setValue(1,neds->velocity()->getValue(1)+(VkcFNorm
+  //       - VkFNorm)*FextNorm->getValue(1));
+  //       neds->velocity()->setValue(2,neds->velocity()->getValue(2)+(VkcFNorm
+  //       - VkFNorm)*FextNorm->getValue(2));
   // DEBUG_EXPR_WE(
-  //       std::cout<<"siconos::simulation::TimeSteppingDirectProjection::newtonSolve velocity
-  //       updated\n"; printf("VELOCITY2 "); neds->velocity()->display();
+  //       std::cout<<"siconos::simulation::TimeSteppingDirectProjection::newtonSolve
+  //       velocity updated\n"; printf("VELOCITY2 ");
+  //       neds->velocity()->display();
   // )
   //     }
   //     auto T = neds->T();
@@ -485,7 +506,8 @@ void siconos::simulation::TimeSteppingDirectProjection::computeCriteria(
   DEBUG_PRINTF("              min criteria equality =  %e.\n", minViolationEquality);
   DEBUG_PRINTF("              max criteria equality =  %e.\n", maxViolationEquality);
   DEBUG_PRINTF("              max criteria unilateral =  %e.\n", maxViolationUnilateral);
-  // DEBUG_PRINTF("              min criteria unilateral =  %e.\n",minViolationUnilateral);
+  // DEBUG_PRINTF("              min criteria unilateral =
+  // %e.\n",minViolationUnilateral);
 }
 
 void siconos::simulation::TimeSteppingDirectProjection::newtonSolve(double criterion,
@@ -493,11 +515,10 @@ void siconos::simulation::TimeSteppingDirectProjection::newtonSolve(double crite
   bool isNewtonConverge = false;
   _newtonNbIterations = 0;  // number of Newton iterations
   int info = 0;
-  // cout<<"||||||||||||||||||||||||||||||| ||||||||||||||||||||||||||||||| BEGIN NEWTON IT
-  // "<<endl;
+
   bool isLinear = _nsds->isLinear();
   auto indexSet = _nsds->topology()->indexSet(0);
-  initializeNewtonLoop();
+  initializeNewtonSolve();
 
   if ((_newtonOptions == TimeSteppingType::LINEAR ||
        _newtonOptions == TimeSteppingType::LINEAR_IMPLICIT) ||
@@ -552,13 +573,14 @@ void siconos::simulation::TimeSteppingDirectProjection::newtonSolve(double crite
       }
     }
     if (!isNewtonConverge) {
-      if (_warnOnNonConvergence) {
-        std::cout
-            << "TimeStepping::newtonSolve -- Newton process stopped: max. number of steps ("
-            << maxStep << ") reached." << std::endl;
+      if (_newtonWarningOnNonConvergence) {
+        std::cout << "TimeStepping::newtonSolve -- Newton process stopped: "
+                     "max. number of steps ("
+                  << maxStep << ") reached." << std::endl;
       }
-    } else if (info && _warnOnNonConvergence) {
-      std::cout << "TimeStepping::newtonSolve -- Newton process stopped: solver failed."
+    } else if (info && _newtonWarningOnNonConvergence) {
+      std::cout << "TimeStepping::newtonSolve -- Newton process stopped: "
+                   "solver failed."
                 << std::endl;
     }
     //    else

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,6 @@
 
 #ifndef SiconosLAPACK_H
 #define SiconosLAPACK_H
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-variable"
 
 // Definition of the interface to cblas library. 
 #include "SiconosBlas.h"
@@ -264,7 +261,5 @@ extern "C"
 #if defined(__cplusplus)
 }
 #endif
-
-#pragma GCC diagnostic pop
 
 #endif // SICONOSLAPACK_H

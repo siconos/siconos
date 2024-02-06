@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,45 +17,6 @@
 */
 
 #ifdef _MSC_VER
-
-// before MSVC 2013
-#if _MSC_VER < 1800
-#include <float.h>
-
-float _sqrtf(float x)
-{
-  return sqrtf(x);
-}
-float _logf(float x)
-{
-  return logf(x);
-}
-
-extern "C" long int lroundf(float x)
-{
-  return (long int)floorl(x + .5);
-}
-
-// Classify floating point number - usually defined in math.h
-extern "C" int __fpclassify(double x)
-{
-  return _fpclass(x);
-}/* This is really bad --xhub */
-
-#ifdef __cplusplus
-namespace std
-{
-int isfinite(double x)
-{
-  return _finite(x);
-}
-}
-
-#endif
-
-#endif /* _MSC_VER < 1800 */
-
-
 
 extern "C" double __cdecl __powidf2(double a, int b)
 {

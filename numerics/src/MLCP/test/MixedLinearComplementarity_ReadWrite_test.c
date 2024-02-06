@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@
 #include <string.h>                             // for strncpy, strcmp, strcpy
 #include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
 #include "NumericsFwd.h"                        // for MixedLinearComplement...
-#include "SiconosCompat.h"                      // for SN_SIZE_T_F
 int write_newformat(char *filename);
 int write_newformat(char *filename)
 {
@@ -29,7 +28,7 @@ int write_newformat(char *filename)
   printf("Test on %s\n", filename);
   int info = 0;
   size_t sizeoffilename = strlen(filename);
-  printf("sizeoffilename " SN_SIZE_T_F "\n",  sizeoffilename);
+  printf("sizeoffilename %zu\n",  sizeoffilename);
   char  extension[4] = "ext";
   strncpy(extension, &filename[sizeoffilename - 3], 3);
   printf("extension %s\n",  extension);

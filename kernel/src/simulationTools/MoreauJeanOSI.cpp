@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -663,6 +663,7 @@ void siconos::integrators::MoreauJeanOSI::_computeWBoundaryConditions(
             1e-10))  // Warning this operation could be quite expensive
     {
       // iteration_matrix.display();
+      std::cout << "Warning, we apply boundary conditions assuming W symmetric\n";
     }
     for (const auto itindex : d.boundaryConditions()->velocityIndices()) {
       iteration_matrix.getCol(itindex, *columntmp);

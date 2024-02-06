@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@
 #include <string.h>            // for memcpy
 #include "NumericsArrays.h"    // for NA_merge_and_sort_sorted_arrays
 #include "SiconosBlas.h"       // for cblas_dscal, cblas_dgemv, CblasNoTrans, max
-#include "SiconosCompat.h"     // for SN_SIZE_T_Fn
 #include "SiconosLapack.h"     // for lapack_int, DGETRF, DGETRI
 /* #define DEBUG_NOCOLOR 1 */
 /* #define DEBUG_STDOUT 1 */
@@ -245,7 +244,7 @@ void SBM_print(const SparseBlockStructuredMatrix* const m)
           nbColumns -= m->blocksize1[colNumber - 1];
         assert(nbColumns);
 
-        printf("block[" SN_SIZE_T_F "] of size %dX%d\n", blockNum, nbRows, nbColumns);
+        printf("block[ %zu ] of size %dX%d\n", blockNum, nbRows, nbColumns);
         if(m->block[blockNum])
         {
           unsigned int sizemax = 10;
@@ -255,17 +254,17 @@ void SBM_print(const SparseBlockStructuredMatrix* const m)
             {
               for(unsigned int j = 0; j < nbColumns; j++)
               {
-                printf("block[" SN_SIZE_T_F "](%i,%i) = %12.8e\n", blockNum, i, j, m->block[blockNum][i + j * nbRows]);
+                printf("block[%zu](%i,%i) = %12.8e\n", blockNum, i, j, m->block[blockNum][i + j * nbRows]);
               }
             }
           }
           else
           {
-            printf("Block[" SN_SIZE_T_F "] is too large to be displayed\n", blockNum);
+            printf("Block[%zu] is too large to be displayed\n", blockNum);
           }
         }
         else
-          printf("Block[" SN_SIZE_T_F "] --> NULL \n", blockNum);
+          printf("Block[%zu] --> NULL \n", blockNum);
 
       }
     }
@@ -1781,7 +1780,7 @@ void SBM_write_in_file(const SparseBlockStructuredMatrix* const m, FILE * file)
       if(colNumber != 0)
         nbColumns -= m->blocksize1[colNumber - 1];
       //fprintf(file,"block[%i] of size %dX%d\n", blockNum, nbRows,nbColumns);
-      fprintf(file, SN_SIZE_T_F "\n", blockNum);
+      fprintf(file, "%zu\n", blockNum);
       DEBUG_PRINTF("nbRows * nbColumns = %i\n", (int)(nbRows * nbColumns));
       assert(m->block[blockNum]);
       for(unsigned int i = 0; i < nbRows * nbColumns; i++)
@@ -1861,7 +1860,7 @@ void SBM_write_in_fileForScilab(const SparseBlockStructuredMatrix* const m, FILE
       if(colNumber != 0)
         nbColumns -= m->blocksize1[colNumber - 1];
       //fprintf(file,"block[%i] of size %dX%d\n", blockNum, nbRows,nbColumns);
-      fprintf(file, "block" SN_SIZE_T_F " = [ \n", blockNum);
+      fprintf(file, "block %zu = [ \n", blockNum);
 
       for(unsigned int i = 0; i < nbRows; i++)
       {

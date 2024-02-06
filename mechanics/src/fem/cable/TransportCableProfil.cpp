@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2023 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ void siconos::fem::cable::TransportCableProfil::computeInitialProfil(int nb_node
   meca.set_T(r_results.rope1.get_T0());
   r_results.rope2.compute(meca, r_model.get_piles2(), nb_nodes, a_tol, a_nmax);
 
-  // prépare les supports: pile, station -> support
+  // prÃ©pare les supports: pile, station -> support
   r_results.prepareSupport();
 }
 

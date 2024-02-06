@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -864,6 +864,8 @@ extern "C"
 
   int NM_gesv_expert_multiple_rhs(NumericsMatrix* A, double *b, unsigned int n_rhs, unsigned keep);
 
+  int NM_Linear_solver_finalize(NumericsMatrix* Ao);
+ 
   /** Computation of the inverse of a NumericsMatrix A usinf NM_gesv_expert
    *
    *  \param[in,out] A a NumericsMatrix.
