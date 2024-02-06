@@ -832,6 +832,36 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
     strToken_name = strtok ( strToken_name, "." );
 
 
+    // // TESTING: tol varies from 1e-3 to 1e-10.
+    // options->dparam[SICONOS_DPARAM_TOL] = 1e-2;
+    // For performance profile
+    FILE *pp_complete, *pp_subs;
+    char pp_name_complete[20], pp_name_subs[20];
+    // ###########################
+
+    // for (int index_tol=3; index_tol<11; index_tol++)
+    // {
+    //   options->dparam[SICONOS_DPARAM_TOL] /= 10.;
+
+    //   // For performance profile
+    //   sprintf(pp_name_complete, "pp_complete_%02d.pp", index_tol);
+    //   sprintf(pp_name_subs, "pp_subs_%02d.pp", index_tol);
+    //   pp_complete = fopen(pp_name_complete, "a+");
+    //   pp_subs = fopen(pp_name_subs, "a+");
+    //   int info_subs = 0;
+    //   // ###########################
+
+
+    // For performance profile
+    for (int index_tol=3; index_tol<11; index_tol++)
+    {
+      sprintf(pp_name_complete, "pp_complete_%02d.pp", index_tol);
+      sprintf(pp_name_subs, "pp_subs_%02d.pp", index_tol);
+      pp_complete = fopen(pp_name_complete, "a+");
+      pp_subs = fopen(pp_name_subs, "a+");
+    }
+    int info_subs = 0;
+    // ###########################
 
     // // TESTING: change of friction coef.
     // double mu_start = 0.;
@@ -839,7 +869,7 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
     // {
     //   mu_start += 0.1;
     //   for(int i = 0; i < problem->numberOfContacts ; i++) problem->mu[i]= mu_start;
-    for(int i = 0; i < problem->numberOfContacts ; i++) problem->mu[i]= 0.1;
+    // for(int i = 0; i < problem->numberOfContacts ; i++) problem->mu[i]= 0.3;
 
 
 
@@ -928,11 +958,11 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
     // ###########################
 
 
-    // For performance profile
-    FILE *pp_complete = fopen("pp_complete.pp", "a+");
-    FILE *pp_subs = fopen("pp_subs.pp", "a+");
-    int info_subs = 0;
-    // ###########################
+    // // For performance profile
+    // FILE *pp_complete = fopen("pp_complete.pp", "a+");
+    // FILE *pp_subs = fopen("pp_subs.pp", "a+");
+    // int info_subs = 0;
+    // // ###########################
 
 
 
@@ -1106,6 +1136,7 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
       // ###########################
 
 
+
       if (info)
       {
         printf("test: failure\n");
@@ -1161,6 +1192,56 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
     //   for (int j=0; j<3; j++) printf(" %.2e", reaction[i*3+j]);
     // }
     // printf("\n\n");
+
+
+
+    // // For performance profile with different tols
+    // FILE *tempFile = fopen("temp_BNR.res", "r");
+    // if (tempFile == NULL) {
+    //     fprintf(stderr, "gfc3d_driver: temp_BNR.res is not found.\n");
+    //     fclose(tempFile);
+    //     exit(EXIT_FAILURE);
+    // }
+    // char buffer[100];
+    // int lineCounter = 3;
+    // size_t lineLength = 0;
+
+    // // 'temp_BNR.res' consists of 7 lines of 'sumry' regarding 7 tols from 1e-3 to 1e-10
+    // // We seek the lines from this temporary file, then add each line to corresponding file,
+    // // then append this line with the additional text (ex: BNRT, execution time, ...)
+    // while (fgets(buffer, sizeof(buffer), tempFile) != NULL)
+    // {
+    //   // open the corresponding file
+    //   sprintf(pp_name_subs, "pp_subs_%02d.pp", lineCounter);
+    //   pp_subs = fopen(pp_name_subs, "a+");
+
+    //   // write the line to pp_name_subs
+    //   fprintf(pp_subs, "%s", buffer);
+
+    //   // Move to the position just before the '\n' character to add more text
+    //   lineLength = strlen(buffer);
+    //   fseek(pp_subs, lineLength - 1, SEEK_SET);
+    //   fprintf(pp_subs, "%.4f ",);
+
+    //   fclose(pp_subs);
+
+
+    //   lineCounter++;
+    // }
+    // fclose(tempFile);
+    // // ###########################
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     // Double-check the result
@@ -1280,13 +1361,11 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
     if (info)
     {
       printf("failure\n");
-      n_fail++;
       fprintf(stats,"'result', 'fail',");
     }
     else
     {
       printf("success\n");
-      n_succ++;
       fprintf(stats,"'result', 'succ',");
     }
 
@@ -1341,6 +1420,7 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
 
 
     // }// End of TESTING: change of friction coef.
+    // }// End of TESTING: tol varies from 1e-3 to 1e-10.
     free(str);
     break;
   }
