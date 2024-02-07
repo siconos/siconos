@@ -1288,13 +1288,18 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
   size_t H_nzmax = NM_nnz(H);
   size_t M_nzmax = NM_nnz(M);
 
+  // For TEST7
   double tols_TEST7 = 0;  // Var used for checking stopping test satisfying different tols
   int num_TEST7 = 3;
   FILE *file_TEST7 = NULL, *file_all_TEST7 = NULL;
   char name_file_TEST7[20];
+  ComputeErrorPtr computeError = NULL;
+  *computeError = (ComputeErrorPtr)&fc3d_compute_error;
+
   // Timer
   long clk_tck = CLOCKS_PER_SEC;
   clock_t t1, t2;
+  // ###############################
 
   if(options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_GET_PROBLEM_INFO] == SICONOS_FRICTION_3D_IPM_GET_PROBLEM_INFO_YES)
   {
@@ -3188,8 +3193,8 @@ while(findParam)
 
       /* regularization */
       // double regul = -1.*fmin(1e-6, 1.*fmax(diff_fixp, udotr));
-      double regul = -1.*1e-7;
-      NM_insert(J, NM_scalar(nd, regul), m + nd, m + nd);
+      // double regul = -1.*1e-7;
+      // NM_insert(J, NM_scalar(nd, regul), m + nd, m + nd);
 
       if(arrow_r) { NM_free(arrow_r); arrow_r = NULL; }
       if(arrow_u) { NM_free(arrow_u); arrow_u = NULL; }

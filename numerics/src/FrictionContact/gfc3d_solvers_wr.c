@@ -37,6 +37,7 @@
 #include <time.h>
 #include <math.h>
 #include <float.h>
+#include <string.h>
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
@@ -167,22 +168,36 @@ void  gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double *reaction, dou
 
       // Compute residuals
       // Current velocity = [u0; ub]
-      primalResidual(velocity, H, globalVelocity, w, primalConstraint, &pinfeas, 1e-8);
-      dualResidual(M, globalVelocity, H, reaction, f, dualConstraint, &dinfeas, 1e-8);
+      // primalResidual(velocity, H, globalVelocity, w, primalConstraint, &pinfeas, 1e-8);
+      // dualResidual(M, globalVelocity, H, reaction, f, dualConstraint, &dinfeas, 1e-8);
+      primalResidual_type(velocity, H, globalVelocity, w, primalConstraint, &pinfeas, 1e-10, NORM_INF);
+      dualResidual_type(M, globalVelocity, H, reaction, f, dualConstraint, &dinfeas, 1e-10, NORM_INF);
 
-      #include <string.h>
-      char *problem_name = (char *) malloc(200);
-      FILE *fileName = fopen("problem_name.res", "r");
-      if (fileName)
+
+
+
+      // char *problem_name = (char *) malloc(200);
+      char *str = (char *) malloc(200);
+      // strcpy( str, problem_name );
+
+      // FILE *fileName = fopen("problem_name.res", "r");
+      // if (fileName)
+      // {
+      //   fscanf(fileName, "%s", problem_name);
+      // }
+      // else
+      //   printf("\ngfc3d_nsgs_wr: can not find the name file!!!\n\n");
+      // fclose(fileName);
+
+      if (problem->name)
       {
-        fscanf(fileName, "%s", problem_name);
+        strcpy( str, problem->name );
       }
       else
-        printf("\ngfc3d_nsgs_wr: can not find the name file!!!\n\n");
-      fclose(fileName);
+      {
+        strcpy( str, "foo_" );
+      }
 
-      char *str = (char *) malloc(200);
-      strcpy( str, problem_name );
       const char * separators = "/";
       char *strToken = strtok( str, separators );
       for(int i=0; i<5; i++)
@@ -227,6 +242,10 @@ void  gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double *reaction, dou
       }
       complem = complemResidualNorm(velocity, reaction, nd, n);
       udotr = cblas_ddot(nd, velocity, 1, reaction, 1)/n;
+
+
+      udotr = xdoty_type(n, nd, velocity, reaction, type);
+
 
 
       printf("\n============ Printing in the same style as in IPM solver ============\n");
