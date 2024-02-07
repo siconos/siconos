@@ -175,7 +175,7 @@ void siconos::mechanics::fem::FiniteElementModel::AssembleElementary_B_Matrix(st
     for(std::shared_ptr<FENode> node1 : fe.nodes())
     {
         auto& dofIndex1 = *node1->dofIndex();
-        for(int i=0;i<3;i++)
+        for(int i=0;i<3;i++)  // 3 because in 2D ?
             for(int j=0;j<dofIndex1.size();j++){
                 bigB->setValue(3*elem_cnt+i, dofIndex1[j], Be.getValue(i,j+node1_cnt*dofIndex1.size())+ bigB->getValue(3*elem_cnt+i, dofIndex1[j]));
             }
@@ -186,17 +186,12 @@ void siconos::mechanics::fem::FiniteElementModel::AssembleElementary_B_Matrix(st
 void siconos::mechanics::fem::FiniteElementModel::AssembleElementary_S_Matrix(std::shared_ptr<siconos::algebra::SiconosMatrix> S,
                                                                                       siconos::algebra::SimpleMatrix& Se, FElement& fe, int elem_cnt)
 {
-    int dimStress = _mesh->dim()*(_mesh->dim()+1)/2;
-    int node1_cnt =0;
-    for(std::shared_ptr<FENode> node1 : fe.nodes())
-    {
-        auto& dofIndex1 = *node1->dofIndex();
+//    int dimStress = _mesh->dim()*(_mesh->dim()+1)/2;
+    int dimStress = (_mesh->dim() == 2) ? 3 : 6;
         for(int i=0;i<dimStress;i++)
             for(int j=0;j<dimStress;j++){
                 S->setValue(dimStress*elem_cnt+i, dimStress*elem_cnt+j, Se.getValue(i,j)+ S->getValue(dimStress*elem_cnt+i, dimStress*elem_cnt+j));
             }
-        node1_cnt++;
-    }
 }
 
 
@@ -936,7 +931,8 @@ void siconos::mechanics::fem::FiniteElementModel::computeSMatrix(
   Material & mate= *(mat[0]);
   std::shared_ptr<siconos::algebra::SimpleMatrix> D, Dinv;
   D = std::make_shared<siconos::algebra::SimpleMatrix>(dimStress,dimStress);
-  Dinv = std::make_shared<siconos::algebra::SimpleMatrix>(dimStress,dimStress);
+
+//  Dinv = std::make_shared<siconos::algebra::SimpleMatrix>(dimStress,dimStress);
   std::cout << "D initialized ! " << std::endl;
   double E;
   double nu;
@@ -975,8 +971,8 @@ void siconos::mechanics::fem::FiniteElementModel::computeSMatrix(
       (*D)(2,0) = 0.0;
       (*D)(2,1) = 0.0;
       (*D)(2,2) = 0.5*coef*(1.0 - 2* nu);
-      std::cout << "before D Display ! " << (*D)(0,0) << std::endl;
-      D->display();
+      Dinv = std::make_shared<siconos::algebra::SimpleMatrix>(*D);
+      Dinv->display();
       (*Dinv)(0,0) = (*D)(0,0)/((*D)(0,0)*(*D)(0,0) - (*D)(0,1)*(*D)(0,1));
       (*Dinv)(0,1) = (*D)(0,1)/((*D)(0,1)*(*D)(0,1) - (*D)(0,0)*(*D)(0,0));
       (*Dinv)(0,2) = 0.0;
@@ -988,8 +984,6 @@ void siconos::mechanics::fem::FiniteElementModel::computeSMatrix(
       (*Dinv)(2,0) = 0.0;
       (*Dinv)(2,1) = 0.0;
       (*Dinv)(2,2) = 1.0/(*D)(2,2);
-      std::cout << "After PLU inverse: " << std::endl;
-      Dinv->display();
 
 //      std::shared_ptr<siconos::algebra::SimpleMatrix> Se = std::make_shared<siconos::algebra::SimpleMatrix>(dimStress, dimStress);
       AssembleElementary_S_Matrix(S, *Dinv, *fe, elem_cnt);

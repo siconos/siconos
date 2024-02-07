@@ -192,18 +192,13 @@ void siconos::integrators::MoreauJeanOSI::initializeWorkVectorsForDS(
   // Initialize work vectors
   auto &ds_work_vectors = *_initializeDSWorkVectors(ds);
   ds_work_vectors.resize(siconos::integrators::MoreauJeanOSI::WORK_LENGTH);
-  if (dsType != siconos::modeling::Type::SolidLinearTIDS){
+
       ds_work_vectors[siconos::integrators::MoreauJeanOSI::RESIDU_FREE] =
               std::make_shared<siconos::algebra::SiconosVector>(sods->dimension());
       ds_work_vectors[siconos::integrators::MoreauJeanOSI::VFREE] =
               std::make_shared<siconos::algebra::SiconosVector>(sods->dimension());
-  }else
-  {
+  if (dsType == siconos::modeling::Type::SolidLinearTIDS){
       auto solidds = std::static_pointer_cast<siconos::mechanics::fem::SolidLinearTIDS>(ds);
-      ds_work_vectors[siconos::integrators::MoreauJeanOSI::RESIDU_FREE] =
-              std::make_shared<siconos::algebra::SiconosVector>(solidds->velocityDimension());
-      ds_work_vectors[siconos::integrators::MoreauJeanOSI::VFREE] =
-              std::make_shared<siconos::algebra::SiconosVector>(solidds->velocityDimension());
       ds_work_vectors[siconos::integrators::MoreauJeanOSI::RESIDU_SIGMAFREE] =
               std::make_shared<siconos::algebra::SiconosVector>(solidds->stressDimension());
       ds_work_vectors[siconos::integrators::MoreauJeanOSI::SIGMAFREE] =
@@ -427,10 +422,10 @@ void siconos::integrators::MoreauJeanOSI::initializeIterationMatrixW(
 //      \boldsymbol M v_{k} + h\theta F_{ext,k+\theta} + \theta \boldsymbol H p_{N,k+1}\\
 //      -\boldsymbol S \sigma_{k} -h\theta z_{k+\theta}
 //      \end{bmatrix}$
-
       auto d =
           std::static_pointer_cast<siconos::mechanics::fem::SolidLinearTIDS>(ds);
 
+      sizeW = d->dimension()+d->stressDimension();
       auto K = d->K();
       auto C = d->C();
       auto S = d->S();
@@ -440,7 +435,7 @@ void siconos::integrators::MoreauJeanOSI::initializeIterationMatrixW(
       auto W = _dynamicalSystemsGraph->properties(dsv).W;
       std::vector<std::size_t> subDim(2);
       std::vector<std::size_t> subPos(4);
-      subDim[0] = d->velocityDimension();
+      subDim[0] = d->dimension();
       subDim[1] = subDim[0];
       subPos[0] = 0;
       subPos[1] = 0;
@@ -452,7 +447,7 @@ void siconos::integrators::MoreauJeanOSI::initializeIterationMatrixW(
       subDim[1] = subDim[0];
       subPos[0] = 0;
       subPos[1] = 0;
-      subPos[2] = d->velocityDimension();
+      subPos[2] = d->dimension();
       subPos[3] = subPos[2];
 //      std::shared_ptr<siconos::algebra::SiconosMatrix> Z;
 //      Z->zero();
@@ -466,25 +461,26 @@ void siconos::integrators::MoreauJeanOSI::initializeIterationMatrixW(
       siconos::algebra::scal(-1.0, *S, *minusS,
                              true);  // minusS = -S
 
-      siconos::algebra::setBlock(*minusS, W, subDim, subPos); // W = [M 0; 0 -S]
+//      siconos::algebra::setBlock(*minusS, W, subDim, subPos); // W = [M 0; 0 -S]
+      siconos::algebra::setBlock(*S, W, subDim, subPos); // W = [M 0; 0 S]
       siconos::algebra::scal(h*_theta, *B, *hThetaB,
                              true);  // hThetaB = h*_theta * B
       siconos::algebra::scal(h*_theta, *Btrans, *hThetaBtrans,
                              true);  // hThetaBtrans = h*_theta * B^T
 
       subDim[0] = d->stressDimension();
-      subDim[1] = d->velocityDimension();
+      subDim[1] = d->dimension();
       subPos[0] = 0;
       subPos[1] = 0;
-      subPos[2] = d->velocityDimension();
+      subPos[2] = d->dimension();
       subPos[3] = 0;
       siconos::algebra::setBlock(*hThetaB, W, subDim, subPos); // W = [M 0; h*theta*B -S]
-      subDim[0] = d->velocityDimension();
+      subDim[0] = d->dimension();
       subDim[1] = d->stressDimension();
       subPos[0] = 0;
       subPos[1] = 0;
       subPos[2] = 0;
-      subPos[3] = d->velocityDimension();
+      subPos[3] = d->dimension();
 
       siconos::algebra::setBlock(*hThetaBtrans, W, subDim, subPos); // W = [M h*theta*B^T; h*theta*B -S]
       if (d->boundaryConditions())
@@ -610,8 +606,13 @@ void siconos::integrators::MoreauJeanOSI::
       dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS ||
       dsType == siconos::modeling::Type::SolidLinearTIDS) {
     // Memory allocation for WBoundaryConditions
-    auto sizeWBoundaryConditions =
-        ds.dimension();  // n for first order systems, ndof for lagrangian.
+      unsigned int sizeWBoundaryConditions;
+      if (dsType == siconos::modeling::Type::SolidLinearTIDS){
+          auto &d = static_cast<siconos::mechanics::fem::SolidLinearTIDS &>(ds);
+          sizeWBoundaryConditions = d.dimension() + d.stressDimension();
+      } else
+          sizeWBoundaryConditions =
+                  ds.dimension();  // n for first order systems, ndof for lagrangian.
 
     auto &d = static_cast<siconos::modeling::SecondOrderDS &>(ds);
     _dynamicalSystemsGraph->properties(dsv).WBoundaryConditions =
@@ -652,8 +653,12 @@ void siconos::integrators::MoreauJeanOSI::_computeWBoundaryConditions(
       dsType == siconos::modeling::Type::NewtonEulerDS ||
       dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS ||
       dsType == siconos::modeling::Type::SolidLinearTIDS) {
-    auto columntmp = std::make_shared<siconos::algebra::SiconosVector>(
-        ds.dimension(), WBoundaryConditions.num());
+      auto columntmp = std::make_shared<siconos::algebra::SiconosVector>(
+                  ds.dimension(), WBoundaryConditions.num());
+      if (dsType == siconos::modeling::Type::SolidLinearTIDS){
+          auto &d = static_cast<siconos::mechanics::fem::SolidLinearTIDS &>(ds);
+          columntmp->resize(d.dimension() + d.stressDimension());
+      }
 
     int columnindex = 0;
 
@@ -678,7 +683,7 @@ void siconos::integrators::MoreauJeanOSI::_computeWBoundaryConditions(
       double diag = iteration_matrix.getValue(itindex, itindex);
       columntmp->zero();
       (*columntmp)(itindex) = diag;
-      iteration_matrix.setCol(itindex, *columntmp);
+      iteration_matrix.setCol(itindex, *columntmp); // Attention: ici toute la colonne va être mise à jour, y compris la partie concernant sigma.
       iteration_matrix.setRow(itindex, *columntmp);
       columnindex++;
     }
@@ -776,7 +781,14 @@ siconos::integrators::MoreauJeanOSI::Winverse(
   auto W = _dynamicalSystemsGraph->properties(dsv).W;
   auto Winverse = _dynamicalSystemsGraph->properties(dsv).Winverse;
   if (!Winverse) {
-    auto sizeW = ds->dimension();
+      unsigned int sizeW;
+      auto dsType = siconos::types::type_value(*ds);
+      if (dsType == siconos::modeling::Type::SolidLinearTIDS){
+          auto &d = static_cast<siconos::mechanics::fem::SolidLinearTIDS &>(*ds);
+          sizeW = d.dimension()+d.stressDimension();
+      }
+      else
+          sizeW = ds->dimension();
     _dynamicalSystemsGraph->properties(dsv).Winverse =
         std::make_shared<siconos::algebra::SimpleMatrix>(sizeW, sizeW);
     Winverse = _dynamicalSystemsGraph->properties(dsv).Winverse;
@@ -860,6 +872,12 @@ void siconos::integrators::MoreauJeanOSI::applyBoundaryConditions(
         *_dynamicalSystemsGraph->properties(*dsi).WBoundaryConditions;
     auto columntmp =
         std::make_shared<siconos::algebra::SiconosVector>(d.dimension());
+    auto dsType = siconos::types::type_value(d);
+    if (dsType == siconos::modeling::Type::SolidLinearTIDS){
+        auto &sod = static_cast<siconos::mechanics::fem::SolidLinearTIDS &>(d);
+        columntmp->resize(sod.dimension() + sod.stressDimension());
+    }
+
 
     for (const auto itindex : d.boundaryConditions()->velocityIndices()) {
       double DeltaPrescribedVelocity =
@@ -883,6 +901,7 @@ void siconos::integrators::MoreauJeanOSI::applyBoundaryConditions(
 }
 
 double siconos::integrators::MoreauJeanOSI::computeResidu() {
+
   DEBUG_BEGIN("siconos::integrators::MoreauJeanOSI::computeResidu()\n");
   // This function is used to compute the residu for each
   // "MoreauJeanOSI-discretized" dynamical system. It then computes the norm of
@@ -1110,6 +1129,7 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
       //     normResidu = realresiduFree->norm2();
     }
     else if (dsType == siconos::modeling::Type::SolidLinearTIDS) {
+
       DEBUG_PRINT(
           "siconos::integrators::MoreauJeanOSI::computeResidu(), dsType == "
           "siconos::modeling::Type::LagrangianLinearTIDS\n");
@@ -1146,7 +1166,8 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
 //          auto Btrans = std::make_shared<algebra::SimpleMatrix>(*(d.B()));
 //          siconos::algebra::prod(-h, *Btrans, sigmaold, residuFree, true); // residufree = -h*B^T sigma_i
           siconos::algebra::prod( sigmaold, *(d.B()), residuFree, true); // residufree = B^T sigma_i
-          siconos::algebra::scal( -h, residuFree, residuFree, true); // residufree = -h*B^T sigma_i
+//          siconos::algebra::scal( -h, residuFree, residuFree, true); // residufree = -h*B^T sigma_i
+          siconos::algebra::scal( h, residuFree, residuFree, true); // residufree = h*B^T sigma_i
 
       }
 
@@ -1166,8 +1187,8 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
           siconos::algebra::scal(h, *fextTheta, residuFree ,
                                  false);  // residufree += h*fext_k+theta
        }
-      siconos::algebra::prod(-h, *d.B(), vold, residuSigfreed, true); // residuSigmaFree = -h*B*v_i
 
+      siconos::algebra::prod(-h, *d.B(), vold, residuSigfreed, true); // residuSigmaFree = -h*B*v_i
 //      double coeff;
 //      // -- No need to update W --
 
@@ -1230,6 +1251,7 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
 //        siconos::algebra::scal(coeff, *(d.fExt()), residuFree,
 //                               false);  // vfree -= h*_theta * fext(ti+1)
 //      }
+
       applyBoundaryConditions(d, residuFree, dsi, t, vold);
       free = residuFree;            // copy residuFree into free
       if (d.p(1)) free -= *d.p(1);  // Compute Residu in Workfree Notation !!
@@ -1396,6 +1418,7 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
 }
 
 void siconos::integrators::MoreauJeanOSI::computeFreeState() {
+
   DEBUG_BEGIN("siconos::integrators::MoreauJeanOSI::computeFreeState()\n");
   // This function computes "free" states of the DS belonging to this
   // Integrator. "Free" means without taking non-smooth effects into account.
@@ -1460,7 +1483,6 @@ void siconos::integrators::MoreauJeanOSI::computeFreeState() {
     auto &residuFree =
         *ds_work_vectors[siconos::integrators::MoreauJeanOSI::RESIDU_FREE];
     auto &vfree = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::VFREE];
-
     vfree = residuFree;
     DEBUG_EXPR(vfree.display());
     // -- Update W --
@@ -1490,19 +1512,17 @@ void siconos::integrators::MoreauJeanOSI::computeFreeState() {
             *ds_work_vectors[siconos::integrators::MoreauJeanOSI::RESIDU_SIGMAFREE];
         auto &sigmafree = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::SIGMAFREE];
         auto &qSigmafree = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::Q_SIGMAFREE];
-
         residuFree.toBlock(qSigmafree, d.velocityDimension(), 0, 0);
         residusigmafree.toBlock(qSigmafree, d.stressDimension(), 0, d.velocityDimension());  // q_sigma_free = [residuFree; residuSigmaFree]
 
-
         // -- sigmafree =   W^{-1} q_sigma --
-
+        
         // -> Solve WX = sigmafree and set sigmafree = X
         W.Solve(qSigmafree);
         //qSigma
         vfree = vold;
         sigmafree = sigmaold;
-
+        
 
         std::vector<std::size_t> subCoord(4);
         subCoord[0] = 0;
@@ -1677,6 +1697,7 @@ void siconos::integrators::MoreauJeanOSI::computeFreeState() {
     //   - not yet implemented for Dynamical system of type: " +
     //   siconos::types::type_name(ds));
   }
+
   DEBUG_END("siconos::integrators::MoreauJeanOSI::computeFreeState()\n");
 }
 
@@ -2157,7 +2178,6 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
   DEBUG_BEGIN(
       "siconos::integrators::MoreauJeanOSI::updateState(const unsigned int "
       ")\n");
-
   double RelativeTol = _simulation->relativeConvergenceTol();
   bool useRCC = _simulation->useRelativeConvergenceCriteron();
   if (useRCC) _simulation->setRelativeConvergenceCriterionHeld(true);
@@ -2328,7 +2348,7 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
         if (d.boundaryConditions()) {
           int bc = 0;
           auto columntmp =
-              std::make_shared<siconos::algebra::SiconosVector>(ds.dimension());
+              std::make_shared<siconos::algebra::SiconosVector>(d.dimension()+d.stressDimension());
 
           for (const auto itindex : d.boundaryConditions()->velocityIndices()) {
             _dynamicalSystemsGraph->properties(*dsi).WBoundaryConditions->getCol(
@@ -2427,6 +2447,7 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
           "Dynamical system of type: " +
           siconos::types::type_name(ds));
   }
+
   DEBUG_END(
       "siconos::integrators::MoreauJeanOSI::updateState(const unsigned int)\n");
 }

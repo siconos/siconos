@@ -82,7 +82,8 @@ siconos::mechanics::fem::SolidLinearTIDS::SolidLinearTIDS(std::shared_ptr<Mesh> 
     _ndof = _FEModel->init();
     int nElements = _FEModel->elements().size();
     int dim = _FEModel->mesh()->dim();
-    int dimStressInElem = (dim == 2) ? 4 : 9;
+//    int dimStressInElem = (dim == 2) ? 4 : 9;
+    int dimStressInElem = (dim == 2) ? 3 : 6;
     _dimStress = dimStressInElem*nElements;
 //    _dimStress = dim*(dim+1)/2;
 
@@ -209,14 +210,8 @@ void siconos::mechanics::fem::SolidLinearTIDS::initMemory(unsigned int steps) {
 void siconos::mechanics::fem::SolidLinearTIDS::swapInMemory() {
   std::cout << "In  swapInMemory from SolidLinearTIDS" << std::endl;
   _qMemory.swap(*_q[0]);
-  std::cout << "Pos done!" << std::endl;
   _velocityMemory.swap(*_q[1]);
-  std::cout << "Velocity Done" << std::endl;
-  std::cout << "q1 " << _q[1] << std::endl;
-  std::cout << _sigma << std::endl;
-  std::cout << "That was sigma" << std::endl;
   _stressMemory.swap(*_sigma);
-  std::cout << "Stress Done" << std::endl;
   if (_forces) _forcesMemory.swap(*_forces);
 
   // initialization of the reaction force due to the non smooth law

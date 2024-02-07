@@ -49,7 +49,7 @@ protected:
   std::shared_ptr<siconos::algebra::SiconosMatrix> _B;
 
   /** stress of the system */
-  std::shared_ptr<siconos::algebra::SiconosVector> _sigma{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> _sigma{nullptr}; // Opposite of stress to keep W positive definite: sigma = - sigma !
   /** Initial stress of the system */
   std::shared_ptr<siconos::algebra::SiconosVector> _sigma0{nullptr};
 
@@ -113,7 +113,7 @@ public:
   inline std::shared_ptr<siconos::algebra::SiconosMatrix> B() const { return _B; }
 
   inline unsigned int stressDimension()  { return _dimStress; }
-  inline unsigned int dimension() const override { return _n; }
+//  inline unsigned int dimension() const override { return _n; }
   inline unsigned int velocityDimension() const { return _ndof; }
 
 
