@@ -2430,11 +2430,12 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         isNewtonConverge = False
         explode_computeOneStep = self._run_options.get('explode_computeOneStep')
 
-        #self.log(s.initializeNewtonLoop, with_timer)()
-        if s.newtonOptions() == sk.SICONOS_TS_NONLINEAR :
-            self.log(s.updateDSPlugins, with_timer)(s.nextTime())
-            self.log(s.computeResidu, with_timer)()
 
+        # self.log(s.initializeNewtonSolve, with_timer)()
+        # explode version
+        self.log(s.updateDSPlugins, with_timer)(s.nextTime())
+        self.log(s.computeResidu, with_timer)()
+        self.log(s.updateAllInput, with_timer)() #??
         # missing computeResiduY
         # self.log(s.computeResiduY, with_timer)()
 
