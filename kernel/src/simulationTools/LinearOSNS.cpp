@@ -846,6 +846,25 @@ void LinearOSNS::computeM()
 #endif
     // ComputeM
     _M->computeM(_W_inverse->numericsMatrix(), _H->numericsMatrix());
+
+    // ugly hack for FremondImpactFrictionNSL. VA 12/02/2024
+    InteractionsGraph::VIterator vi, viend;
+    for(std::tie(vi, viend) = indexSet.vertices();
+        vi != viend; ++vi)
+    {
+      Interaction &inter = *indexSet.bundle(*vi);
+      NonSmoothLaw & nslaw = *inter.nonSmoothLaw();
+      if (Type::value(nslaw) == Type::FremondImpactFrictionNSL)
+      {
+	SP::DynamicalSystem ds1= indexSet.properties(*vi).source;
+	OneStepIntegrator& osi = *DSG0.properties(DSG0.descriptor(ds1)).osi;
+	double theta =(static_cast<MoreauJeanOSI&>(osi)).theta();
+	NM_scal(theta,&*_M->numericsMatrix());
+      }
+      break;
+    }
+
+
 #ifdef WITH_TIMER
     end_old=end;
     end = std::chrono::system_clock::now();
