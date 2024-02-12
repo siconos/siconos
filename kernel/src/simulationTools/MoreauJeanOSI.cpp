@@ -32,6 +32,7 @@
 #include "NewtonImpactNSL.hpp"
 #include "MultipleImpactNSL.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
+#include "FremondImpactFrictionNSL.hpp"
 #include "NewtonImpactRollingFrictionNSL.hpp"
 #include "TypeName.hpp"
 
@@ -1375,6 +1376,31 @@ void MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(const NewtonImpactFrictionNSL&
       osnsp_rhs(2) +=  nslaw.et()  * _inter.y_k(_osnsp.inputOutputLevel())(2);    }
   }
 }
+void MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(const FremondImpactFrictionNSL& nslaw)
+{
+  SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[MoreauJeanOSI::OSNSP_RHS];
+
+  // compute the local tangential velocity at t_{k+theta}
+  osnsp_rhs = _theta*   osnsp_rhs + (1-_theta) * _inter.y_k(_osnsp.inputOutputLevel());
+
+  // The normal part is multiplied depends on en
+  if(nslaw.en() > 0.0)
+  {
+    osnsp_rhs(0) +=  (_theta*(1.+ nslaw.en()) - 1. ) * _inter.y_k(_osnsp.inputOutputLevel())(0);
+  }
+
+  // The tangential part is multiplied depends on et
+  if(nslaw.et() > 0.0)
+  {
+    if(nslaw.et() > 0.0)
+    {
+      osnsp_rhs(1) +=  nslaw.et()  * _inter.y_k(_osnsp.inputOutputLevel())(1);
+      if(_inter.nonSmoothLaw()->size()>2)
+	{
+	  osnsp_rhs(2) +=  nslaw.et()  * _inter.y_k(_osnsp.inputOutputLevel())(2);    }
+    }
+  }
+}
 void MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(const NewtonImpactRollingFrictionNSL& nslaw)
 {
   SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[MoreauJeanOSI::OSNSP_RHS];
@@ -1506,7 +1532,7 @@ void MoreauJeanOSI::computeFreeOutput(InteractionsGraph::VDescriptor& vertex_int
   if(inter.relation()->getType() == Lagrangian || inter.relation()->getType() == NewtonEuler)
   {
     _NSLEffectOnFreeOutput nslEffectOnFreeOutput = _NSLEffectOnFreeOutput(*osnsp, inter,
-        indexSet.properties(vertex_inter));
+									  indexSet.properties(vertex_inter),_theta);
     inter.nonSmoothLaw()->accept(nslEffectOnFreeOutput);
   }
   DEBUG_EXPR(osnsp_rhs.display(););

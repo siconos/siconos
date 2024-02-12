@@ -171,14 +171,17 @@ protected:
     OneStepNSProblem &_osnsp;
     Interaction &_inter;
     InteractionProperties &_interProp;
+    double _theta;
 
     _NSLEffectOnFreeOutput(OneStepNSProblem &p, Interaction &inter,
-                           InteractionProperties &interProp)
-        : _osnsp(p), _inter(inter), _interProp(interProp){};
+                           InteractionProperties &interProp,
+			   double theta)
+      : _osnsp(p), _inter(inter), _interProp(interProp), _theta(theta) {};
 
     void visit(const NewtonImpactNSL &nslaw);
     void visit(const RelayNSL &nslaw);
     void visit(const NewtonImpactFrictionNSL &nslaw);
+    void visit(const FremondImpactFrictionNSL &nslaw);
     void visit(const NewtonImpactRollingFrictionNSL &nslaw);
     void visit(const EqualityConditionNSL &nslaw);
     void visit(const MixedComplementarityConditionNSL &nslaw);

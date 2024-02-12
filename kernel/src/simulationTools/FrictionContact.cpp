@@ -20,6 +20,7 @@
 #include "Simulation.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
+#include "FremondImpactFrictionNSL.hpp"
 #include "OSNSMatrix.hpp"
 #include "NonSmoothDrivers.h" // from numerics, for fcX_driver
 #include <fc2d_Solvers.h>
@@ -153,17 +154,17 @@ bool FrictionContact::checkCompatibleNSLaw(NonSmoothLaw& nslaw)
   float type_number= (float) (Type::value(nslaw) + 0.1 * nslaw.size());
   _nslawtype.insert(type_number);
 
-  if (Type::value(nslaw) != Type::NewtonImpactFrictionNSL)
+  if (not (Type::value(nslaw) == Type::NewtonImpactFrictionNSL || Type::value(nslaw) == Type::FremondImpactFrictionNSL))
   {
     THROW_EXCEPTION("\nFrictionContact::checkCompatibleNSLaw -  \n\
                       The chosen nonsmooth law is not compatible with FrictionalContact one step nonsmooth problem. \n\
-                      Compatible NonSmoothLaw are: NewtonImpactFrictionNSL (2D or 3D) \n");
+                      Compatible NonSmoothLaw are: NewtonImpactFrictionNSL or FremondImpactFrictionNSL   (2D or 3D) \n");
     return false;
   }
   if (_nslawtype.size() > 1)
   {
     THROW_EXCEPTION("\nFrictionContact::checkCompatibleNSLaw -  \n\
-                     Compatible NonSmoothLaw are: NewtonImpactFrictionNSL (2D or 3D), but you cannot mix them \n");
+                     Compatible NonSmoothLaw are: NewtonImpactFrictionNSL or FremondImpactFrictionNSL  (2D or 3D), but you cannot mix them \n");
     return false;
   }
 

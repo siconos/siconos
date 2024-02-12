@@ -560,6 +560,10 @@ void LinearOSNS::computeDiagonalInteractionBlock(const InteractionsGraph::VDescr
             * currentInteractionBlock +=  *std::static_pointer_cast<LagrangianCompliantLinearTIR>(inter->relation())->D()/simulation()->timeStep() ;
           }
         }
+	if (Type::value(*nslaw) == Type::FremondImpactFrictionNSL)
+	{
+	  * currentInteractionBlock *= (static_cast<MoreauJeanOSI&>(osi)).theta() ;
+	}
       }
     }
     else THROW_EXCEPTION("LinearOSNS::computeDiagonalInteractionBlock not yet implemented for relation of type " + std::to_string(relationType));
@@ -744,6 +748,13 @@ void LinearOSNS::computeInteractionBlock(const InteractionsGraph::EDescriptor& e
       centralInteractionBlock->Solve(*rightInteractionBlock);
       //*currentInteractionBlock +=  *leftInteractionBlock ** work;
       prod(*leftInteractionBlock, *rightInteractionBlock, *currentInteractionBlock, false);
+
+      // Once again we assume that inter1 and inter2 have the nslaw ...
+      NonSmoothLaw &nslaw = *inter1->nonSmoothLaw();
+      if (Type::value(nslaw) == Type::FremondImpactFrictionNSL)
+	{
+	  * currentInteractionBlock *= (static_cast<MoreauJeanOSI&>(osi)).theta() ;
+	}
     }
   }
   else THROW_EXCEPTION("LinearOSNS::computeInteractionBlock not yet implemented for relation of type " + std::to_string(relationType1));
