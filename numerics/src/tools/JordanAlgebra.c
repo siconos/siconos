@@ -67,6 +67,49 @@ NumericsMatrix* Arrow_repr(const double* const vec, const unsigned int vecSize,
   return Arw_mat;
 }
 
+void Arrow_repr_fill(NumericsMatrix* Arw_mat, const double* const vec, const unsigned int vecSize,
+                           const size_t varsCount) {
+  /* validation */
+  if (vecSize % varsCount != 0) {
+    fprintf(stderr, "Arrow_repr_fill: %zu variables can not be extracted from vector of size %d.\n",
+            varsCount, vecSize);
+    exit(EXIT_FAILURE);
+  }
+
+  size_t dimension = (size_t)(vecSize / varsCount);
+  if (dimension < 2) {
+    fprintf(stderr,
+            "Arrow_repr_fill: The dimension of variables can not be less than 2 but given %zu.\n",
+            dimension);
+    exit(EXIT_FAILURE);
+  }
+
+  if (!Arw_mat || !Arw_mat->matrix2){
+    fprintf(stderr,
+            "Arrow_repr_fill: The input Arw_mat is NULL. Need a declaration of sparse matrix.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  if (Arw_mat->size0 != vecSize && Arw_mat->size1 != vecSize){
+    fprintf(stderr,
+            "Arrow_repr_fill: Size of the input Arw_mat does not match size of vector.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  /* Arrow matrix filling */
+  size_t pos;
+  for (size_t i = 0; i < varsCount; ++i) {
+    pos = i * dimension;
+    NM_entry(Arw_mat, pos, pos, vec[pos]);
+
+    for (size_t j = 1; j < dimension; ++j) {
+      NM_entry(Arw_mat, pos, pos + j, vec[pos + j]);
+      NM_entry(Arw_mat, pos + j, pos, vec[pos + j]);
+      NM_entry(Arw_mat, pos + j, pos + j, vec[pos]);
+    }
+  }
+}
+
 NumericsMatrix* Reflect_mat(const unsigned int size, NM_types type) {
   NumericsMatrix* Refl_mat = NM_create(type, size, size);
 
