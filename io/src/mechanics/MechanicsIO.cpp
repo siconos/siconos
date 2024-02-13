@@ -175,6 +175,10 @@ struct ForMu : public Question<double>
   {
     answer = nsl . mu();
   }
+  void visit(const FremondImpactFrictionNSL& nsl)
+  {
+    answer = nsl . mu();
+  }
   void visit(const NewtonImpactRollingFrictionNSL& nsl)
   {
     answer = nsl . mu();
@@ -189,6 +193,10 @@ struct ForE : public Question<double>
 {
   using SiconosVisitor::visit;
   void visit(const NewtonImpactFrictionNSL& nsl)
+  {
+    answer = nsl . en();
+  }
+  void visit(const FremondImpactFrictionNSL& nsl)
   {
     answer = nsl . en();
   }
@@ -1008,7 +1016,7 @@ static void compute_contact_work_and_status(SP::Interaction inter, double omega,
       // std::cout << "WARNING: we apply the impact law of positive velocity " << std::endl;
       // std::cout << "pn " << pn << " vn minus " << vn_minus << " vn plus " << vn_plus
       // 		<< " normal_contact_work " << normal_contact_work
-      // 		<< " -e * vn_minus   " << -e*vn_minus 
+      // 		<< " -e * vn_minus   " << -e*vn_minus
       // 		<< std::endl;
       answer.setValue(5, normal_contact_work);
     }

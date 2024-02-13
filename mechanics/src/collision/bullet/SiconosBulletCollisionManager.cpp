@@ -80,6 +80,7 @@ DEFINE_SPTR(UpdateShapeVisitor)
 #include <NonSmoothLaw.hpp>
 #include <OneStepIntegrator.hpp>
 #include <NewtonImpactFrictionNSL.hpp>
+#include <FremondImpactFrictionNSL.hpp>
 #include <NewtonImpactRollingFrictionNSL.hpp>
 
 #include <SiconosMatrix.hpp>
@@ -2803,6 +2804,7 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
 
       /* test nslaw type and then deduce the type of relation to be created */
       SP::NewtonImpactFrictionNSL nslaw_NewtonImpactFrictionNSL(std::dynamic_pointer_cast<NewtonImpactFrictionNSL>(nslaw));
+      SP::FremondImpactFrictionNSL nslaw_FremondImpactFrictionNSL(std::dynamic_pointer_cast<FremondImpactFrictionNSL>(nslaw));
       SP::NewtonImpactRollingFrictionNSL nslaw_NewtonImpactRollingFrictionNSL(std::dynamic_pointer_cast<NewtonImpactRollingFrictionNSL>(nslaw));
 
       // DEBUG_EXPR(std::cout << nslaw_NewtonImpactFrictionNSL << std::endl;);
@@ -2810,7 +2812,7 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
 
       // we assume that this test checks if  we deal with 3D problem with RigidBodies
       // Clearly, it will not be sufficient with meshed FE bodies.
-      if(nslaw && nslaw_NewtonImpactFrictionNSL)
+      if(nslaw && (nslaw_NewtonImpactFrictionNSL || nslaw_FremondImpactFrictionNSL))
       {
         if(nslaw->size() == 3)
         {

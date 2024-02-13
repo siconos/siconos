@@ -1288,6 +1288,31 @@ class MechanicsHdf5(object):
         nslaw.attrs['e'] = e
         nslaw.attrs['gid1'] = collision_group1
         nslaw.attrs['gid2'] = collision_group2
+        
+    def add_Fremond_impact_friction_nsl(self, name, mu, e=0, collision_group1=0,
+                                       collision_group2=0):
+        """
+        Add a nonsmooth law for contact between 2 groups.
+        Only NewtonImpactFrictionNSL are supported.
+        name is an user identifiant and must be unique,
+        mu is the coefficient of friction,
+        e is the coefficient of restitution on the contact normal,
+        gid1 and gid2 define the group identifiants.
+
+        """
+        if name not in self._nslaws_data:
+            nslaw = self._nslaws_data.create_dataset(name, (0,))
+            nslaw.attrs['type'] = 'FremondImpactFrictionNSL'
+        else:
+            nslaw=self._nslaws_data[name]
+            if nslaw.attrs['type'] != 'FremondImpactFrictionNSL':
+                self.print_verbose('[warning] a nslaw is already existing with the same name ', name ,' but not the same type')
+
+        nslaw.attrs['mu'] = mu
+        nslaw.attrs['e'] = e
+        nslaw.attrs['gid1'] = collision_group1
+        nslaw.attrs['gid2'] = collision_group2
+
 
 
     def add_Newton_impact_friction_nsl(self, name, mu, e=0, collision_group1=0,

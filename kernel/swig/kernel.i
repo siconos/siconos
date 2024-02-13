@@ -341,6 +341,11 @@ KERNEL_REGISTRATION()
   {
     return std::dynamic_pointer_cast<NewtonImpactFrictionNSL>(nslaw);
   }
+  
+  SP::FremondImpactFrictionNSL cast_FremondImpactFrictionNSL(SP::NonSmoothLaw nslaw)
+  {
+    return std::dynamic_pointer_cast<FremondImpactFrictionNSL>(nslaw);
+  }
 
   SP::RelayNSL cast_RelayNSL(SP::NonSmoothLaw nslaw)
   {

@@ -1040,6 +1040,11 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     float(self._nslaws_data[name].attrs['e']), 0.,
                     float(self._nslaws_data[name].attrs['mu']),
                     self._dimension)
+            elif nslawClass == sk.FremondImpactFrictionNSL:
+                nslaw = nslawClass(
+                    float(self._nslaws_data[name].attrs['e']), 0.,
+                    float(self._nslaws_data[name].attrs['mu']),
+                    self._dimension)
             elif nslawClass == sk.NewtonImpactRollingFrictionNSL:
                 if self._dimension == 3:
                     nslaw = nslawClass(
@@ -3093,6 +3098,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         osnspb = sk.GenericMechanical(solver_options)
                 else:
                     if ('NewtonImpactFrictionNSL' in set(nslaw_type_list)) or \
+                       ('FremondImpactFrictionNSL' in set(nslaw_type_list)) or \
                        (len(set(nslaw_type_list)) == 0):
                         if (solver_options is None):
                             osnspb = sk.FrictionContact(self._dimension)

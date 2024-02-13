@@ -1381,25 +1381,22 @@ void MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(const FremondImpactFrictionNSL
   SiconosVector & osnsp_rhs = *(*_interProp.workVectors)[MoreauJeanOSI::OSNSP_RHS];
 
   // compute the local tangential velocity at t_{k+theta}
-  osnsp_rhs = _theta*   osnsp_rhs + (1-_theta) * _inter.y_k(_osnsp.inputOutputLevel());
+  osnsp_rhs = _theta*   osnsp_rhs + (1.-_theta) * _inter.y_k(_osnsp.inputOutputLevel());
 
   // The normal part is multiplied depends on en
-  if(nslaw.en() > 0.0)
-  {
-    osnsp_rhs(0) +=  (_theta*(1.+ nslaw.en()) - 1. ) * _inter.y_k(_osnsp.inputOutputLevel())(0);
-  }
+  osnsp_rhs(0) +=  (_theta*(1.+ nslaw.en()) - 1. ) * _inter.y_k(_osnsp.inputOutputLevel())(0);
 
   // The tangential part is multiplied depends on et
+
   if(nslaw.et() > 0.0)
-  {
-    if(nslaw.et() > 0.0)
     {
-      osnsp_rhs(1) +=  nslaw.et()  * _inter.y_k(_osnsp.inputOutputLevel())(1);
-      if(_inter.nonSmoothLaw()->size()>2)
-	{
-	  osnsp_rhs(2) +=  nslaw.et()  * _inter.y_k(_osnsp.inputOutputLevel())(2);    }
+      THROW_EXCEPTION("MoreauJeanOSI::computeFreeOutput : do  not know how to take into account a tangential coefficient of restitution with Fremon NSL");
+      // osnsp_rhs(1) +=  nslaw.et()  * _inter.y_k(_osnsp.inputOutputLevel())(1);
+      // if(_inter.nonSmoothLaw()->size()>2)
+      // 	{
+      // 	  osnsp_rhs(2) +=  nslaw.et()  * _inter.y_k(_osnsp.inputOutputLevel())(2);    }
     }
-  }
+
 }
 void MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(const NewtonImpactRollingFrictionNSL& nslaw)
 {
@@ -1827,6 +1824,7 @@ void MoreauJeanOSI::updateState(const unsigned int)
       // DEBUG_PRINT("MoreauJeanOSI::updateState()\n ")
       // DEBUG_EXPR(d.display());
       DEBUG_PRINT("MoreauJeanOSI::updateState() prev v\n");
+
       DEBUG_EXPR(v.display(););
 
       // failure on bullet sims
