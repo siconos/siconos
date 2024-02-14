@@ -67,11 +67,11 @@ NumericsMatrix* Arrow_repr(const double* const vec, const unsigned int vecSize,
   return Arw_mat;
 }
 
-void Arrow_repr_fill(NumericsMatrix* Arw_mat, const double* const vec, const unsigned int vecSize,
+void Arrow_repr_replace(NumericsMatrix* Arw_mat, const double* const vec, const unsigned int vecSize,
                            const size_t varsCount) {
   /* validation */
   if (vecSize % varsCount != 0) {
-    fprintf(stderr, "Arrow_repr_fill: %zu variables can not be extracted from vector of size %d.\n",
+    fprintf(stderr, "Arrow_repr_replace: %zu variables can not be extracted from vector of size %d.\n",
             varsCount, vecSize);
     exit(EXIT_FAILURE);
   }
@@ -79,7 +79,7 @@ void Arrow_repr_fill(NumericsMatrix* Arw_mat, const double* const vec, const uns
   size_t dimension = (size_t)(vecSize / varsCount);
   if (dimension < 2) {
     fprintf(stderr,
-            "Arrow_repr_fill: The dimension of variables can not be less than 2 but given %zu.\n",
+            "Arrow_repr_replace: The dimension of variables can not be less than 2 but given %zu.\n",
             dimension);
     exit(EXIT_FAILURE);
   }
@@ -88,13 +88,13 @@ void Arrow_repr_fill(NumericsMatrix* Arw_mat, const double* const vec, const uns
       !Arw_mat->matrix2 ||
       Arw_mat->matrix2->origin != NSM_TRIPLET){
     fprintf(stderr,
-            "Arrow_repr_fill: Arw_mat is not valid. Need a declaration of triplet sparse matrix.\n");
+            "Arrow_repr_replace: Arw_mat is not valid. Need a declaration of triplet sparse matrix.\n");
     exit(EXIT_FAILURE);
   }
 
   if (Arw_mat->size0 != vecSize && Arw_mat->size1 != vecSize){
     fprintf(stderr,
-            "Arrow_repr_fill: Size of the input Arw_mat does not match size of vector.\n");
+            "Arrow_repr_replace: Size of the input Arw_mat does not match size of vector.\n");
     exit(EXIT_FAILURE);
   }
 
@@ -104,7 +104,7 @@ void Arrow_repr_fill(NumericsMatrix* Arw_mat, const double* const vec, const uns
 
   if (cs->nz != ((dimension * 3 - 2) * varsCount)){
     fprintf(stderr,
-            "Arrow_repr_fill: Size of allocated triplet memory is not sufficient.\n");
+            "Arrow_repr_replace: Size of allocated triplet memory is not sufficient.\n");
     exit(EXIT_FAILURE);
   }
 
