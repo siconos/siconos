@@ -246,3 +246,5 @@ double projectionError(const double * velocity, const double * reaction, const u
 int *read_fricprob_block(const char* path, int type, int blk_index);
 
 
+void classify_BNRT(const double * velocity, const double * reaction, const unsigned int vecSize, const unsigned int varsCount,
+                   int *nB, int *nN, int *nR, int *nT);

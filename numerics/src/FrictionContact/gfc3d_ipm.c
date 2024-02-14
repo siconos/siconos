@@ -366,8 +366,9 @@ double projectionError(const double * velocity, const double * reaction, const u
    out = sqrt(out);
    norm_u = cblas_dnrm2(3*nc, velocity, 1);
    norm_r = cblas_dnrm2(3*nc, reaction, 1);
-   relative_scaling = fmax(norm_u, norm_r); relative_scaling = 1.;
-   if(relative_scaling > tol)
+   relative_scaling = fmax(norm_u, norm_r); //relative_scaling = 1.;
+   // if(relative_scaling > tol)
+   if(relative_scaling > DBL_EPSILON)
      out = out/relative_scaling;
    return out;
 }
@@ -639,6 +640,44 @@ static void printVectorMatlabFile(int iteration, double * vec, int vecSize, FILE
   }
   fprintf(file,"];\n");
   return;
+}
+
+
+void classify_BNRT(const double * velocity, const double * reaction, const unsigned int vecSize, const unsigned int varsCount,
+                   int *nB, int *nN, int *nR, int *nT)
+{
+  size_t d = (size_t)(vecSize / varsCount);
+  if (d != 3) {
+    fprintf(stderr,
+            "classify_BNRT: This function ONLY supports for 3-dimensional model.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  double somme[3];
+  double dur[3];
+  double cesp = sqrt(DBL_EPSILON);
+  double ns, ndur;
+  *nB = *nN = *nR = *nT = 0;
+  for (int i = 0; i < varsCount; i++)
+  {
+    somme[0] = velocity[3*i] + reaction[3*i];
+    somme[1] = velocity[3*i+1] + reaction[3*i+1];
+    somme[2] = velocity[3*i+2] + reaction[3*i+2];
+    dur[0] = velocity[3*i] - reaction[3*i];
+    dur[1] = velocity[3*i+1] - reaction[3*i+1];
+    dur[2] = velocity[3*i+2] - reaction[3*i+2];
+
+    ns = somme[0] - cblas_dnrm2(2,somme+1,1);
+    ndur = dur[0] - cblas_dnrm2(2,dur+1,1);
+    if (ns > cesp*cblas_dnrm2(3, somme, 1))
+    {
+      if (dur[0] >= cblas_dnrm2(2,dur+1,1))       *nN +=1;
+      else if (-dur[0] >= cblas_dnrm2(2,dur+1,1)) *nB +=1;
+      else                                        *nR +=1;
+    }
+  }
+
+  *nT = varsCount - *nB - *nN - *nR;
 }
 
 
