@@ -24,6 +24,8 @@
 */
 
 #include "NumericsMatrix.h"
+#include "CSparseMatrix.h"
+#include "CSparseMatrix_internal.h"            // for CSparseMatrix, CS_INT, cs_dl_sp...
 
 typedef long double float_type;
 /* typedef double float_type; */
@@ -37,11 +39,11 @@ typedef long double float_type;
 NumericsMatrix* Arrow_repr(const double* const vec, const unsigned int vecSize,
                            const size_t varsCount);
 
-/** Fill the Arrow representation matrix from vector.
+/** Replace the content of an existing Arrow representation matrix from vector.
  * This is an alternative of Arrow_repr, without creation of matrix
  * (not allocation of memory)
  */
-void Arrow_repr_fill(NumericsMatrix* Arw_mat, const double* const vec,
+void Arrow_repr_replace(NumericsMatrix* Arw_mat, const double* const vec,
                       const unsigned int vecSize, const size_t varsCount);
 
 

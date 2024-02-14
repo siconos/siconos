@@ -48,7 +48,7 @@ NumericsMatrix* Arrow_repr(const double* const vec, const unsigned int vecSize,
   }
 
   NumericsMatrix* Arw_mat = NM_create(NM_SPARSE, vecSize, vecSize);
-  size_t nzmax = (dimension * 3 - 2) * varsCount;
+  size_t nzmax = (dimension * 3 - 2) * varsCount;   // This formula is uniquely correct for 3-dimensional mat
   NM_triplet_alloc(Arw_mat, nzmax);
   NM_fill(Arw_mat, NM_SPARSE, vecSize, vecSize, Arw_mat->matrix2);
 
@@ -84,9 +84,11 @@ void Arrow_repr_fill(NumericsMatrix* Arw_mat, const double* const vec, const uns
     exit(EXIT_FAILURE);
   }
 
-  if (!Arw_mat || !Arw_mat->matrix2){
+  if (!Arw_mat ||
+      !Arw_mat->matrix2 ||
+      Arw_mat->matrix2->origin != NSM_TRIPLET){
     fprintf(stderr,
-            "Arrow_repr_fill: The input Arw_mat is NULL. Need a declaration of sparse matrix.\n");
+            "Arrow_repr_fill: Arw_mat is not valid. Need a declaration of triplet sparse matrix.\n");
     exit(EXIT_FAILURE);
   }
 
@@ -98,14 +100,36 @@ void Arrow_repr_fill(NumericsMatrix* Arw_mat, const double* const vec, const uns
 
   /* Arrow matrix filling */
   size_t pos;
+  CSparseMatrix *cs = Arw_mat->matrix2->triplet;
+
+  if (cs->nz != ((dimension * 3 - 2) * varsCount)){
+    fprintf(stderr,
+            "Arrow_repr_fill: Size of allocated triplet memory is not sufficient.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  // Reset data
+  cs->nz = 0;
+
   for (size_t i = 0; i < varsCount; ++i) {
     pos = i * dimension;
-    NM_entry(Arw_mat, pos, pos, vec[pos]);
+
+    cs->x [cs->nz] = vec[pos];
+    cs->i [cs->nz] = pos;
+    cs->p [cs->nz++] = pos;
 
     for (size_t j = 1; j < dimension; ++j) {
-      NM_entry(Arw_mat, pos, pos + j, vec[pos + j]);
-      NM_entry(Arw_mat, pos + j, pos, vec[pos + j]);
-      NM_entry(Arw_mat, pos + j, pos + j, vec[pos]);
+      cs->x [cs->nz] = vec[pos + j];
+      cs->i [cs->nz] = pos;
+      cs->p [cs->nz++] = pos + j;
+
+      cs->x [cs->nz] = vec[pos + j];
+      cs->i [cs->nz] = pos + j;
+      cs->p [cs->nz++] = pos;
+
+      cs->x [cs->nz] = vec[pos];
+      cs->i [cs->nz] = pos + j;
+      cs->p [cs->nz++] = pos + j;
     }
   }
 }
