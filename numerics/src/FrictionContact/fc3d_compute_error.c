@@ -74,7 +74,7 @@ int fc3d_compute_error(
 
   /* Compute the current velocity */
   cblas_dcopy(n, problem->q, incx, w, incy);     // w <-q
-  NM_prod_mv_3x3(n, n, problem->M, z, w); // w = Mz +q
+  NM_prod_mv_3x3(n, n, problem->M, z, w);       // w = Mz +q
 
   DEBUG_PRINTF("norm of the reaction %e\n", cblas_dnrm2(n, z, 1));
   DEBUG_PRINTF("norm of the velocity %e\n", cblas_dnrm2(n, w, 1));
@@ -112,6 +112,41 @@ int fc3d_compute_error(
   return 0;
 }
 
+
+int fc3d_compute_error_norm_infinity_conic(
+  FrictionContactProblem* problem,
+  double *z, double *w, double tolerance,
+  SolverOptions * options, double norm, double * error)
+{
+  DEBUG_BEGIN("fc3d_compute_error_norm_infinity_conic(...)\n");
+  assert(problem);
+  assert(z);
+  assert(w);
+  assert(error);
+
+  /* Computes w = Mz + q */
+  int incx = 1, incy = 1;
+  int nc = problem->numberOfContacts;
+  int n = nc * 3;
+  double *mu = problem->mu;
+  double error_unitary = 0.;
+
+  /* Compute the current velocity */
+  cblas_dcopy(n, problem->q, incx, w, incy);     // w <-q
+  NM_prod_mv_3x3(n, n, problem->M, z, w);       // w = Mz +q
+
+  *error = 0.;
+  int ic, ic3;
+  double worktmp[3];
+  for(ic = 0, ic3 = 0 ; ic < nc ; ic++, ic3 += 3)
+  {
+    fc3d_unitary_compute_and_add_error(z + ic3, w + ic3, mu[ic], &error_unitary, worktmp);
+    *error = fmax(*error, error_unitary);
+  }
+  *error = sqrt(*error);
+
+  return 0;
+}
 
 
 int fc3d_compute_error_velocity(FrictionContactProblem* problem, double *z, double *w, double tolerance,
