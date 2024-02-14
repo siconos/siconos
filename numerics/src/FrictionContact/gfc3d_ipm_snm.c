@@ -36,6 +36,7 @@
 
 #include "NumericsSparseMatrix.h"
 #include "NumericsMatrix.h"
+#include "NumericsMatrix_internal.h"
 
 #include "projectionOnCone.h"
 
@@ -44,6 +45,9 @@
 #include "siconos_debug.h"
 #include "gfc3d_ipm.h"
 #include <stdarg.h>         // for va_list, va_start, va_end
+#include "fc3d_Solvers.h"
+#include "FrictionContactProblem.h"              // for FrictionContactProblem
+#include "GlobalFrictionContactProblem.h"        // for GlobalFrictionContac...
 
 #include "io_tools.h"
 #include <time.h>
@@ -851,6 +855,47 @@ int *read_fricprob_block(const char* path, int type, int blk_index)
 }
 
 
+static void NM_insert_Arrow_to_Triplet(CSparseMatrix *triplet, const unsigned int start_i, const unsigned int start_j,
+                                      const double* const vec, const unsigned int vecSize, const size_t varsCount)
+{
+  size_t dimension = (size_t)(vecSize / varsCount);
+  size_t pos;
+  size_t total_element = (dimension * 3 - 2) * varsCount;
+
+  if (triplet->nzmax < (total_element + triplet->nz))
+  {
+    fprintf(stderr,
+            "NM_insert_Arrow_to_Triplet: Size of allocated triplet memory is not sufficient.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  for (size_t i = 0; i < varsCount; ++i)
+  {
+    pos = i * dimension;
+
+    triplet->x [triplet->nz] = vec[pos];
+    triplet->i [triplet->nz] = start_i + pos;
+    triplet->p [triplet->nz++] = start_j + pos;
+
+    for (size_t j = 1; j < dimension; ++j)
+    {
+      triplet->x [triplet->nz] = vec[pos + j];
+      triplet->i [triplet->nz] = start_i + pos;
+      triplet->p [triplet->nz++] = start_j + pos + j;
+
+      triplet->x [triplet->nz] = vec[pos + j];
+      triplet->i [triplet->nz] = start_i + pos + j;
+      triplet->p [triplet->nz++] = start_j + pos;
+
+      triplet->x [triplet->nz] = vec[pos];
+      triplet->i [triplet->nz] = start_i + pos + j;
+      triplet->p [triplet->nz++] = start_j + pos + j;
+    }
+  }
+}
+
+
+
 
 
 /* --------------------------- Interior-point method implementation ------------------------------ */
@@ -1028,6 +1073,8 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
   unsigned int d = problem->dimension;
   unsigned int n = problem->numberOfContacts;
 
+  unsigned int mp2nd = m + 2*nd;
+
   NumericsMatrix* M = NULL;
   NumericsMatrix* H_tilde = NULL;
 
@@ -1046,7 +1093,10 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
 
 
   //for(int i = 0; i < n ; i++) printf("mu[%d] = %g\n", i, problem->mu[i]);
-  // for(int i = 0; i < n ; i++) problem->mu[i]=0.3;
+  if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] == SICONOS_FRICTION_3D_IPM_IPARAM_LS_4X4_TEST7)
+  {
+    for(int i = 0; i < n ; i++) problem->mu[i]=0.3;
+  }
 
   /* if SICONOS_FRICTION_3D_IPM_FORCED_SPARSE_STORAGE = SICONOS_FRICTION_3D_IPM_FORCED_SPARSE_STORAGE,
      we force the copy into a NM_SPARSE storageType */
@@ -1065,7 +1115,8 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
   }
 
   NumericsMatrix * Minv = NULL;
-  if ( options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] == SICONOS_FRICTION_3D_IPM_IPARAM_LS_1X1_QPH )
+  if ( options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] == SICONOS_FRICTION_3D_IPM_IPARAM_LS_1X1_QPH ||
+       options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] == SICONOS_FRICTION_3D_IPM_IPARAM_LS_4X4_TEST7)
   {
     int block_number_of_M = M->size0/3;
     unsigned int * blocksizes_of_M = (unsigned int*)malloc(block_number_of_M * sizeof(unsigned int));
@@ -1099,7 +1150,6 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
   {
     gfc3d_IPM_SNM_init(problem, options);
     internal_allocation = 1;
-
   }
 
   Gfc3d_IPM_init_data * data = (Gfc3d_IPM_init_data *)options->solverData;
@@ -1283,22 +1333,33 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
   double LS_norm_f = 0.; // fixed point
 
   NumericsMatrix *J = NULL, *J_dense = NULL;
+  NumericsMatrix *arrow_r = NULL, *arrow_u = NULL;
 
   long J_nzmax;
   size_t H_nzmax = NM_nnz(H);
   size_t M_nzmax = NM_nnz(M);
+  size_t arrow_nzmax = 0, subdiff_u_nzmax = 0;
+
+  /* For CLASSIFICATION BNRT */
+  int nB, nN, nR, nT;
+  nB = nN = nR = nT = 0;
 
   // For TEST7
-  double tols_TEST7 = 0;  // Var used for checking stopping test satisfying different tols
-  int num_TEST7 = 3;
-  FILE *file_TEST7 = NULL, *file_all_TEST7 = NULL;
-  char name_file_TEST7[20];
-  ComputeErrorPtr computeError = NULL;
-  *computeError = (ComputeErrorPtr)&fc3d_compute_error;
+  double tols_TEST7 = 0, tols2_TEST7 = 0;  // Var used for checking stopping test satisfying different tols
+  double projerr_TEST7 = 0;
+  double norm_q_TEST7 = 0;
+  int num_TEST7 = 3, num2_TEST7 = 3;
+  size_t J_nz_captured = 0, J_nz_final = 0;
+
+  FILE *file_TEST7 = NULL, *file_all_TEST7 = NULL, *file2_TEST7 = NULL, *file2_all_TEST7 = NULL;
+  char name_file_TEST7[30], name2_file_TEST7[30];
+  ComputeErrorPtr computeError_TEST7 = NULL;
+  FrictionContactProblem* localproblem = NULL;
 
   // Timer
   long clk_tck = CLOCKS_PER_SEC;
   clock_t t1, t2;
+  double total_time = 0;
   // ###############################
 
   if(options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_GET_PROBLEM_INFO] == SICONOS_FRICTION_3D_IPM_GET_PROBLEM_INFO_YES)
@@ -1362,8 +1423,26 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
     case SICONOS_FRICTION_3D_IPM_IPARAM_LS_4X4_TEST7:
     {
       numerics_printf_verbose(-1,"Global friction contact problem - TESTING: 4x4 no scaling + Mehrotra with different tolerences \n");
+
       tols_TEST7 = 1e-3;
-      file_all_TEST7 = fopen("pp_all_complete.pp", "a+");
+      tols2_TEST7 = 1e-3;
+
+      file_all_TEST7 = fopen("ipm-complem.pp", "a+");
+      file2_all_TEST7 = fopen("ipm-prjerr.pp", "a+");
+
+      // For projection error of reduced problem
+      // computeError_TEST7 = (ComputeErrorPtr)&fc3d_compute_error;
+      computeError_TEST7 = (ComputeErrorPtr)&fc3d_compute_error_norm_infinity_conic;
+      numerics_printf_verbose(-1,"Compute W, q of reduced problem for computation of || r - \\Pi_K (r - F(r)) ||_2. It takes a while ...\n");
+      localproblem = globalFrictionContact_reformulation_FrictionContact(problem);
+
+      norm_q_TEST7 = cblas_dnrm2(nd, localproblem->q, 1);
+
+      // Allocation of matrices
+      arrow_nzmax = (d*3-2)*n;
+      subdiff_u_nzmax = 2*n;
+      J_nzmax = M_nzmax + H_nzmax + 2*(d*3-2)*n + H_nzmax + nd + n + 2*n + n;
+
       break;
     }
     default:
@@ -1432,10 +1511,10 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
   }
 
   strToken = strtok ( strToken, "." );
-  for(int i=0; i<strlen(strToken); i++)
-  {
-    if(strToken[i] == '-') strToken[i] = '_';
-  }
+  // for(int i=0; i<strlen(strToken); i++)
+  // {
+  //   if(strToken[i] == '-') strToken[i] = '_';
+  // }
 
   char matlab_name[100], probName[100];
 
@@ -1627,7 +1706,7 @@ while(findParam)
   sigma = 0.1;
 
 
-  t1 = clock();
+
   while(iteration < max_iter)
   {
     int jacobian_is_nan = 0;
@@ -1896,8 +1975,8 @@ while(findParam)
       NM_triplet_alloc(J, J_nzmax);
       J->matrix2->origin = NSM_TRIPLET;
 
-      NumericsMatrix * arrow_r = Arrow_repr(reaction, nd, n);
-      NumericsMatrix * arrow_u = Arrow_repr(velocity, nd, n) ;
+      arrow_r = Arrow_repr(reaction, nd, n);
+      arrow_u = Arrow_repr(velocity, nd, n) ;
 
       // Create subdiff_u
       subdiff_u = NM_create(NM_SPARSE, n, nd);
@@ -2167,8 +2246,8 @@ while(findParam)
       NM_triplet_alloc(J, J_nzmax);
       J->matrix2->origin = NSM_TRIPLET;
 
-      // NumericsMatrix * arrow_r = Arrow_repr(reaction, nd, n);
-      // NumericsMatrix * arrow_u = Arrow_repr(velocity, nd, n) ;
+      // arrow_r = Arrow_repr(reaction, nd, n);
+      // arrow_u = Arrow_repr(velocity, nd, n) ;
 
       // Create subdiff_u
       subdiff_u = NM_create(NM_SPARSE, n, nd);
@@ -2327,8 +2406,8 @@ while(findParam)
       NM_triplet_alloc(J, J_nzmax);
       J->matrix2->origin = NSM_TRIPLET;
 
-      NumericsMatrix * arrow_r = Arrow_repr(reaction, nd, n);
-      NumericsMatrix * arrow_u = Arrow_repr(velocity, nd, n) ;
+      arrow_r = Arrow_repr(reaction, nd, n);
+      arrow_u = Arrow_repr(velocity, nd, n) ;
 
       // Create subdiff_u
       subdiff_u = NM_create(NM_SPARSE, n, nd);
@@ -2518,8 +2597,8 @@ while(findParam)
       NM_triplet_alloc(J, J_nzmax);
       J->matrix2->origin = NSM_TRIPLET;
 
-      NumericsMatrix * arrow_r = Arrow_repr(reaction, nd, n);
-      NumericsMatrix * arrow_u = Arrow_repr(velocity, nd, n) ;
+      arrow_r = Arrow_repr(reaction, nd, n);
+      arrow_u = Arrow_repr(velocity, nd, n) ;
 
       // Create matrix
       //          [ 0 -ub'_1               ]
@@ -2791,8 +2870,8 @@ while(findParam)
       NM_triplet_alloc(J, J_nzmax);
       J->matrix2->origin = NSM_TRIPLET;
 
-      NumericsMatrix * arrow_r = Arrow_repr(reaction, nd, n);
-      NumericsMatrix * arrow_u = Arrow_repr(velocity, nd, n) ;
+      arrow_r = Arrow_repr(reaction, nd, n);
+      arrow_u = Arrow_repr(velocity, nd, n) ;
 
       // Create subdiff_u
       subdiff_u = NM_create(NM_SPARSE, n, nd);
@@ -3007,22 +3086,13 @@ while(findParam)
     */
     case SICONOS_FRICTION_3D_IPM_IPARAM_LS_4X4_TEST7:
     {
+      t1 = clock();
       // Stopping test using norm type
       primalResidual_s_type(velocity, H, globalVelocity, w, s, primalConstraint, &pinfeas, tol, type);
       dualResidual_type(M, globalVelocity, H, reaction, f, dualConstraint, &dinfeas, tol, type);
       udotr = xdoty_type(n, nd, velocity, reaction, type);
       complem = complemResidualNorm(velocity, reaction, nd, n);
       barr_param = cblas_ddot(nd, reaction, 1, velocity, 1) / n;
-
-
-      JA_prod(velocity, reaction, nd, n, complemConstraint);
-      cblas_dcopy(nd, complemConstraint, 1, complemConstraint_mu, 1);
-      for (int k = 0; k < nd; k+=d)
-      {
-        complemConstraint_mu[k] -= 2*sigma*barr_param;
-      }
-      uor_mu = cblas_dnrm2(nd, complemConstraint_mu, 1);
-
 
       diff_fixp = 0.;
       for (unsigned int i = 0; i<nd; i+=d)
@@ -3045,78 +3115,113 @@ while(findParam)
         exit(EXIT_FAILURE);
       }
 
-      // compute Projection Error
-      projerr = projectionError(velocity, reaction, n, tol);
+
+      // // compute Projection Error
+      // projerr = projectionError(velocity, reaction, n, tol);
 
       // totalresidual = fmax(fmax(fmax(pinfeas, dinfeas),diff_fixp),complem);
       totalresidual = fmax(fmax(fmax(pinfeas, dinfeas),diff_fixp),udotr);
 
 
-      // Check Stopping test for different tols, vary from 1e-3 to 1e-10
-      /* Checking strict complementarity */
-      /* For each cone i from 1 to n, one checks if u+r is in the interior of the Lorentz cone */
-      /* One first computes the 3 dimensional vector somme = (u+r)/norm(u+r) */
-      /* Then one checks if somme[0] > sqrt(somme[1]^2 + somme[2]^2) + ceps */
-      double somme[3];
-      double dur[3];
-      double cesp = sqrt(DBL_EPSILON);
-      double ns, ndur;
-      int nsc = 0;
-      int nN = 0;
-      int nB = 0;
-      int nR = 0;
-      for (int i = 0; i < n; i++)
-      {
-        somme[0] = velocity[3*i] + reaction[3*i];
-        somme[1] = velocity[3*i+1] + reaction[3*i+1];
-        somme[2] = velocity[3*i+2] + reaction[3*i+2];
-        dur[0] = velocity[3*i] - reaction[3*i];
-        dur[1] = velocity[3*i+1] - reaction[3*i+1];
-        dur[2] = velocity[3*i+2] - reaction[3*i+2];
+      t2 = clock();
+      total_time += (double)(t2-t1)/(double)clk_tck;
 
-        ns = somme[0] - cblas_dnrm2(2,somme+1,1);
-        ndur = dur[0] - cblas_dnrm2(2,dur+1,1);
-        if (ns > cesp*cblas_dnrm2(3, somme, 1))
-        {
-          nsc +=1;
-          if (dur[0] >= cblas_dnrm2(2,dur+1,1))       nN +=1;
-          else if (-dur[0] >= cblas_dnrm2(2,dur+1,1)) nB +=1;
-          else                                        nR +=1;
-        }
+
+      /* ----- return to original variables ------ */
+      NM_gemv(1.0, P_mu, reaction, 0.0, data->tmp_point->t_reaction);
+      NM_gemv(1.0, P_mu_inv, velocity, 0.0, data->tmp_point->t_velocity);
+      for (unsigned int i = 0; i<nd; i+=d)
+      {
+        data->tmp_point->t_velocity[i] -= problem->mu[i/d]*cblas_dnrm2(2, data->tmp_point->t_velocity+i+1, 1);
       }
 
+      t1 = clock();
+
+      (*computeError_TEST7)(localproblem, data->tmp_point->t_reaction, data->tmp_point->t_velocity, tol, options, norm_q_TEST7, &projerr_TEST7);
+      projerr = projerr_TEST7;
+
+      t2 = clock();
+      total_time += (double)(t2-t1)/(double)clk_tck;
+
+      // Criteria complementarity
       int repeat = 0;
+      // Check Stopping test for different tols, vary from 1e-3 to 1e-10
       while ( totalresidual <= tols_TEST7 && num_TEST7 < 11 )
       {
         repeat++;
         if (repeat == 1)
-          t2 = clock();
+        {
+          // Classification is done only once if totalresidual satisfies many tolerences
+          classify_BNRT(velocity, reaction, nd, n, &nB, &nN, &nR, &nT);
+        }
 
-        sprintf(name_file_TEST7, "pp_complete_%02d.pp", num_TEST7);
+
+        sprintf(name_file_TEST7, "ipm-complem-%02d.pp", num_TEST7);
         file_TEST7 = fopen(name_file_TEST7, "a+");
-        fprintf(file_TEST7, "sumry: 0  %.2e   %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f   %s\n",
-                totalresidual, projerr, iteration, n, m, nB, nN, nR, n-nB-nN-nR,
-                (double)(t2-t1)/(double)clk_tck, strToken);
+        fprintf(file_TEST7, "sumry: 0  %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f   %s\n",
+                totalresidual, iteration, n, m, nB, nN, nR, n-nB-nN-nR,
+                total_time, strToken);
         fclose(file_TEST7);
 
         if (num_TEST7 == 10)
         {
-          fprintf(file_all_TEST7, "sumry: 0  %.2e   %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f   %s\n",
-                totalresidual, projerr, iteration, n, m, nB, nN, nR, n-nB-nN-nR,
-                (double)(t2-t1)/(double)clk_tck, strToken);
+          fprintf(file_all_TEST7, "sumry: 0  %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f   %s\n",
+                totalresidual, iteration, n, m, nB, nN, nR, n-nB-nN-nR,
+                total_time, strToken);
         }
         else
         {
-          fprintf(file_all_TEST7, "sumry: 0  %.2e   %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f\n",
-                totalresidual, projerr, iteration, n, m, nB, nN, nR, n-nB-nN-nR,
-                (double)(t2-t1)/(double)clk_tck);
+          fprintf(file_all_TEST7, "sumry: 0  %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f\n",
+                totalresidual, iteration, n, m, nB, nN, nR, n-nB-nN-nR,
+                total_time);
         }
 
         tols_TEST7 /= 10.;
         num_TEST7++;
       }
 
+      // Criteria projection
+      repeat = 0;
+      while ( projerr_TEST7 <= tols2_TEST7 && num2_TEST7 < 9 )
+      {
+        repeat++;
+        if (repeat == 1)
+        {
+          // Classification is done only once if totalresidual satisfies many tolerences
+          classify_BNRT(velocity, reaction, nd, n, &nB, &nN, &nR, &nT);
+        }
 
+        sprintf(name2_file_TEST7, "ipm-prjerr-%02d.pp", num2_TEST7);
+        file2_TEST7 = fopen(name2_file_TEST7, "a+");
+        fprintf(file2_TEST7, "sumry: 0  %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f   %s\n",
+                projerr_TEST7, iteration, n, m, nB, nN, nR, n-nB-nN-nR,
+                total_time, strToken);
+        fclose(file2_TEST7);
+
+        if (num2_TEST7 == 8)
+        {
+          fprintf(file2_all_TEST7, "sumry: 0  %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f   %s\n",
+                projerr_TEST7, iteration, n, m, nB, nN, nR, n-nB-nN-nR,
+                total_time, strToken);
+        }
+        else
+        {
+          fprintf(file2_all_TEST7, "sumry: 0  %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f\n",
+                projerr_TEST7, iteration, n, m, nB, nN, nR, n-nB-nN-nR,
+                total_time);
+        }
+
+        tols2_TEST7 /= 10.;
+        num2_TEST7++;
+      }
+
+      if (num_TEST7 == 11 && num2_TEST7 == 9)
+      {
+        hasNotConverged = 0;
+        numerics_printf_verbose(-1, "| %3i%c| %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e ||",
+                              iteration, fws, pinfeas, dinfeas, diff_fixp, udotr, complem, projerr, barr_param, sigma);
+        break;
+      }
 
       if ( totalresidual <= tol )
       {
@@ -3146,60 +3251,164 @@ while(findParam)
         break;
       }
 
+      t1 = clock();
 
-
-      // First linear linear system
-      J = NM_create(NM_SPARSE, m + 2*nd + n, m + 2*nd + n);
-      J_nzmax = M_nzmax + H_nzmax + 2*(d*3-2)*n + H_nzmax + nd + n + 2*n + n;
-      NM_triplet_alloc(J, J_nzmax);
-      J->matrix2->origin = NSM_TRIPLET;
-
-      NumericsMatrix * arrow_r = Arrow_repr(reaction, nd, n);
-      NumericsMatrix * arrow_u = Arrow_repr(velocity, nd, n) ;
-
-      // Create subdiff_u
-      subdiff_u = NM_create(NM_SPARSE, n, nd);
-      size_t subdiff_u_nzmax = 2*n;
-      NM_triplet_alloc(subdiff_u, subdiff_u_nzmax);
-      NM_fill(subdiff_u, NM_SPARSE, n, nd, subdiff_u->matrix2);
-
-      /* Matrix filling */
       size_t pos;
       scale_sub_diff = fmax(0.9, alpha_primal);
-
-      for(size_t i = 0; i < n; ++i)
+      if (iteration == 0)
       {
-        pos = i * d;
-        nub = cblas_dnrm2(2, velocity+pos+1, 1);
+        // First linear linear system
+        // Create Jac
+        J = NM_create(NM_SPARSE, m + 2*nd + n, m + 2*nd + n);
+        NM_triplet_alloc(J, J_nzmax);
+        J->matrix2->origin = NSM_TRIPLET;
 
-        NM_entry(subdiff_u, i, pos+1, -1.*scale_sub_diff*velocity[pos+1]/nub);
-        NM_entry(subdiff_u, i, pos+2, -1.*scale_sub_diff*velocity[pos+2]/nub);
+        // Insert fixed data
+        NM_insert(J, M, 0, 0);
+        NM_insert(J, minus_H, m + nd, 0);
+        NM_insert(J, minus_Ht, 0, m + nd);
+        NM_insert(J, eye_nd, m + nd, m);
+        NM_insert(J, minus_e, m + nd, m + 2*nd);
+        NM_insert(J, eye_n, m + 2*nd, m + 2*nd);
 
-        fixpConstraint[i] = s[i] - nub;  // fixpConstraint = s - |u_bar|
+        J_nz_captured = J->matrix2->triplet->nz;  // Save nz at this moment for resetting not fixed data after
+
+        // Compute NOT fixed data
+        arrow_r = Arrow_repr(reaction, nd, n);    // Allocation is done in Arrow_repr
+        arrow_u = Arrow_repr(velocity, nd, n);
+
+        subdiff_u = NM_create(NM_SPARSE, n, nd);  // Allocation of subdiff_u
+        NM_triplet_alloc(subdiff_u, subdiff_u_nzmax);
+        NM_fill(subdiff_u, NM_SPARSE, n, nd, subdiff_u->matrix2);
+
+        for(size_t i = 0; i < n; ++i)
+        {
+          pos = i * d;
+          nub = cblas_dnrm2(2, velocity+pos+1, 1);
+
+          NM_entry(subdiff_u, i, pos+1, -1.*scale_sub_diff*velocity[pos+1]/nub);
+          NM_entry(subdiff_u, i, pos+2, -1.*scale_sub_diff*velocity[pos+2]/nub);
+
+          fixpConstraint[i] = s[i] - nub;  // fixpConstraint = s - |u_bar|
+        }
+
+
+        // Insert NOT fixed data to Jac
+        NM_insert(J, arrow_r, m, m);
+        NM_insert(J, subdiff_u, m + 2*nd, m);
+        NM_insert(J, arrow_u, m, m + nd);
+
+        J_nz_final = J->matrix2->triplet->nz;
+      } // end if iter == 0
+
+      else
+      {
+        // Clear memory no longer used
+        if(arrow_r) { NM_free(arrow_r); arrow_r = NULL; }
+        if(arrow_u) { NM_free(arrow_u); arrow_u = NULL; }
+        if(subdiff_u) { NM_free(subdiff_u); subdiff_u = NULL; }
+
+        // Clear internal data
+        NM_clearCSC(J);
+        if(J->matrix2->linearSolverParams)
+        {
+          NSM_linearSolverParams_free(J->matrix2->linearSolverParams);
+          J->matrix2->linearSolverParams = NULL;
+        }
+        NM_internalData_free(J);
+        if (!NM_destructible(J))
+        {
+          NM_clear(J->destructible);
+          J->destructible = J;
+        }
+        J->matrix2->triplet->nz = J_nz_captured;    // nz goes back the end point of fixed data
+
+        // Replace the matrix content, without reallocation
+        NM_insert_Arrow_to_Triplet(J->matrix2->triplet, m, m, reaction, nd, n);
+        NM_insert_Arrow_to_Triplet(J->matrix2->triplet, m, m+nd, velocity, nd, n);
+
+        CSparseMatrix *J_cs = J->matrix2->triplet;
+
+        for (size_t i = 0; i < n; i++)
+        {
+          pos = i * d;
+          nub = cblas_dnrm2(2, velocity+pos+1, 1);
+
+          for (size_t j = 1; j < d; j++)
+          {
+            J_cs->x [J_cs->nz] = -1.*scale_sub_diff*velocity[pos+j]/nub;
+            J_cs->i [J_cs->nz] = mp2nd + i;
+            J_cs->p [J_cs->nz++] = m + pos + j;
+          }
+
+          fixpConstraint[i] = s[i] - nub;  // fixpConstraint = s - |u_bar|
+        }
       }
 
-      NM_insert(J, M, 0, 0);
-      NM_insert(J, minus_H, m + nd, 0);
 
-      NM_insert(J, arrow_r, m, m);
-      NM_insert(J, eye_nd, m + nd, m);
-      NM_insert(J, subdiff_u, m + 2*nd, m);
 
-      NM_insert(J, minus_Ht, 0, m + nd);
-      NM_insert(J, arrow_u, m, m + nd);
+      // // First linear linear system
+      // J = NM_create(NM_SPARSE, m + 2*nd + n, m + 2*nd + n);
+      // J_nzmax = M_nzmax + H_nzmax + 2*(d*3-2)*n + H_nzmax + nd + n + 2*n + n;
+      // NM_triplet_alloc(J, J_nzmax);
+      // J->matrix2->origin = NSM_TRIPLET;
 
-      NM_insert(J, minus_e, m + nd, m + 2*nd);
-      NM_insert(J, eye_n, m + 2*nd, m + 2*nd);
+      // arrow_r = Arrow_repr(reaction, nd, n);
+      // arrow_u = Arrow_repr(velocity, nd, n);
 
-      /* regularization */
-      // double regul = -1.*fmin(1e-6, 1.*fmax(diff_fixp, udotr));
-      // double regul = -1.*1e-7;
-      // NM_insert(J, NM_scalar(nd, regul), m + nd, m + nd);
+      // // Create subdiff_u
+      // subdiff_u = NM_create(NM_SPARSE, n, nd);
+      // size_t subdiff_u_nzmax = 2*n;
+      // NM_triplet_alloc(subdiff_u, subdiff_u_nzmax);
+      // NM_fill(subdiff_u, NM_SPARSE, n, nd, subdiff_u->matrix2);
 
-      if(arrow_r) { NM_free(arrow_r); arrow_r = NULL; }
-      if(arrow_u) { NM_free(arrow_u); arrow_u = NULL; }
-      if(subdiff_u) { NM_free(subdiff_u); subdiff_u = NULL; }
+      // /* Matrix filling */
+      // size_t pos;
+      // scale_sub_diff = fmax(0.9, alpha_primal);
+      // for(size_t i = 0; i < n; ++i)
+      // {
+      //   pos = i * d;
+      //   nub = cblas_dnrm2(2, velocity+pos+1, 1);
 
+      //   NM_entry(subdiff_u, i, pos+1, -1.*scale_sub_diff*velocity[pos+1]/nub);
+      //   NM_entry(subdiff_u, i, pos+2, -1.*scale_sub_diff*velocity[pos+2]/nub);
+
+      //   fixpConstraint[i] = s[i] - nub;  // fixpConstraint = s - |u_bar|
+      // }
+
+      // // NM_insert(J, M, 0, 0);
+      // // NM_insert(J, minus_H, m + nd, 0);
+
+      // // NM_insert(J, arrow_r, m, m);
+      // // NM_insert(J, eye_nd, m + nd, m);
+      // // NM_insert(J, subdiff_u, m + 2*nd, m);
+
+      // // NM_insert(J, minus_Ht, 0, m + nd);
+      // // NM_insert(J, arrow_u, m, m + nd);
+
+      // // NM_insert(J, minus_e, m + nd, m + 2*nd);
+      // // NM_insert(J, eye_n, m + 2*nd, m + 2*nd);
+
+      // NM_insert(J, M, 0, 0);
+      // NM_insert(J, minus_H, m + nd, 0);
+      // NM_insert(J, minus_Ht, 0, m + nd);
+      // NM_insert(J, eye_nd, m + nd, m);
+      // NM_insert(J, minus_e, m + nd, m + 2*nd);
+      // NM_insert(J, eye_n, m + 2*nd, m + 2*nd);
+
+      // NM_insert(J, arrow_r, m, m);
+      // NM_insert(J, arrow_u, m, m + nd);
+      // NM_insert(J, subdiff_u, m + 2*nd, m);
+
+
+      // // /* regularization */
+      // // // double regul = -1.*fmin(1e-6, 1.*fmax(diff_fixp, udotr));
+      // // // double regul = -1.*1e-7;
+      // // // NM_insert(J, NM_scalar(nd, regul), m + nd, m + nd);
+
+      // if(arrow_r) { NM_free(arrow_r); arrow_r = NULL; }
+      // if(arrow_u) { NM_free(arrow_u); arrow_u = NULL; }
+      // if(subdiff_u) { NM_free(subdiff_u); subdiff_u = NULL; }
 
 
       jacobian_is_nan = NM_isnan(J);
@@ -3320,7 +3529,7 @@ while(findParam)
       cblas_dcopy(nd, sol+m+nd, 1, d_reaction, 1);
       cblas_dcopy(n, sol+m+2*nd, 1, d_s, 1);
 
-      /* computing the affine step-length */
+      /* computing the step-length */
       alpha_primal = getStepLength(velocity, d_velocity, nd, n, gmm);
       alpha_dual = getStepLength(reaction, d_reaction, nd, n, gmm);
       alpha_primal = alpha_dual = fmin(alpha_primal, alpha_dual);
@@ -3329,6 +3538,9 @@ while(findParam)
       cblas_daxpy(nd, alpha_primal, d_velocity, 1, velocity, 1);
       cblas_daxpy(nd, alpha_primal, d_reaction, 1, reaction, 1);
       cblas_daxpy(n, alpha_primal, d_s, 1, s, 1);
+
+      t2 = clock();
+      total_time += (double)(t2-t1)/(double)clk_tck;
 
       if (NV_isnan(globalVelocity, m) | NV_isnan(velocity, nd) | NV_isnan(reaction, nd) | NV_isnan(s, n))
       {
@@ -3382,8 +3594,8 @@ while(findParam)
       NM_triplet_alloc(J, J_nzmax);
       J->matrix2->origin = NSM_TRIPLET;
 
-      NumericsMatrix * arrow_r = Arrow_repr(reaction, nd, n);
-      NumericsMatrix * arrow_u = Arrow_repr(velocity, nd, n) ;
+      arrow_r = Arrow_repr(reaction, nd, n);
+      arrow_u = Arrow_repr(velocity, nd, n) ;
 
       // Create subdiff_u
       subdiff_u = NM_create(NM_SPARSE, n, nd);
@@ -4025,6 +4237,18 @@ while(findParam)
                             LS_norm_p, LS_norm_d, LS_norm_c);
 
     }
+    else if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] == SICONOS_FRICTION_3D_IPM_IPARAM_LS_4X4_NOSCAL ||
+      options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] == SICONOS_FRICTION_3D_IPM_IPARAM_LS_4X4_TEST2  ||
+      options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] == SICONOS_FRICTION_3D_IPM_IPARAM_LS_4X4_TEST7)
+    {
+      numerics_printf_verbose(-1, "| %3i%c| %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e || %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e |",
+                            iteration, fws, pinfeas, dinfeas, diff_fixp, udotr, complem, projerr, barr_param, sigma, alpha_primal,
+                            fabs(d_globalVelocity[cblas_idamax(m, d_globalVelocity, 1)]),
+                            fabs(d_velocity[cblas_idamax(nd, d_velocity, 1)]),
+                            fabs(d_reaction[cblas_idamax(nd, d_reaction, 1)]),
+                            fabs(d_s[cblas_idamax(n, d_s, 1)]),
+             LS_norm_p, LS_norm_d, LS_norm_c, LS_norm_f);
+    }
     else
       numerics_printf_verbose(-1, "| %3i%c| %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e || %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e |",
                             iteration, fws, pinfeas, dinfeas, diff_fixp, complem, udotr, projerr, barr_param, sigma, alpha_primal,
@@ -4099,8 +4323,10 @@ while(findParam)
     //     numerics_printf_verbose(-1, "| it  | pinfeas | dinfeas |  |s-ub| | |uor-mu||2max|uor-mu||   4*mu  |  u'r/n  | prj err | barpram |  alpha  |  |dv|   |  |du|   |  |dr|   |  |ds|   | ls prim | ls dual | ls comp | ls fixP |");
     // }
 
-
-    if(J) { J = NM_free(J); J = NULL;}
+    if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_LS_FORM] != SICONOS_FRICTION_3D_IPM_IPARAM_LS_4X4_TEST7)
+    {
+      if(J) { J = NM_free(J); J = NULL;}
+    }
     if(J_dense) { J_dense = NM_free(J_dense); J_dense = NULL;}
 
     iteration++;
@@ -4115,39 +4341,45 @@ while(findParam)
   /* For each cone i from 1 to n, one checks if u+r is in the interior of the Lorentz cone */
   /* One first computes the 3 dimensional vector somme = (u+r)/norm(u+r) */
   /* Then one checks if somme[0] > sqrt(somme[1]^2 + somme[2]^2) + ceps */
-  double somme[3];
-  double dur[3];
-  double cesp = sqrt(DBL_EPSILON);
-  double ns, ndur;
-  int nsc = 0;
-  int nN = 0;
-  int nB = 0;
-  int nR = 0;
-  for (int i = 0; i < n; i++)
-  {
-    somme[0] = velocity[3*i] + reaction[3*i];
-    somme[1] = velocity[3*i+1] + reaction[3*i+1];
-    somme[2] = velocity[3*i+2] + reaction[3*i+2];
-    dur[0] = velocity[3*i] - reaction[3*i];
-    dur[1] = velocity[3*i+1] - reaction[3*i+1];
-    dur[2] = velocity[3*i+2] - reaction[3*i+2];
+  // double somme[3];
+  // double dur[3];
+  // double cesp = sqrt(DBL_EPSILON);
+  // double ns, ndur;
+  // int nsc = 0;
+  // int nN = 0;
+  // int nB = 0;
+  // int nR = 0;
+  // for (int i = 0; i < n; i++)
+  // {
+  //   somme[0] = velocity[3*i] + reaction[3*i];
+  //   somme[1] = velocity[3*i+1] + reaction[3*i+1];
+  //   somme[2] = velocity[3*i+2] + reaction[3*i+2];
+  //   dur[0] = velocity[3*i] - reaction[3*i];
+  //   dur[1] = velocity[3*i+1] - reaction[3*i+1];
+  //   dur[2] = velocity[3*i+2] - reaction[3*i+2];
 
-    ns = somme[0] - cblas_dnrm2(2,somme+1,1);
-    ndur = dur[0] - cblas_dnrm2(2,dur+1,1);
-    if (ns > cesp*cblas_dnrm2(3, somme, 1))
-    {
-      nsc +=1;
-      if (dur[0] >= cblas_dnrm2(2,dur+1,1))       nN +=1;
-      else if (-dur[0] >= cblas_dnrm2(2,dur+1,1)) nB +=1;
-      else                                        nR +=1;
-    }
-    else
-      printf("cone %i %9.2e %9.2e\n", i, somme[0], cblas_dnrm2(2,somme+1, 1));
-  }
-  if (nsc < n)
-    printf("Ratio of Strict complementarity solutions: %4i / %4i = %4.2f \t %4i %4i %4i\n", nsc, n, (double)nsc/n, nB, nN, nR);
+  //   ns = somme[0] - cblas_dnrm2(2,somme+1,1);
+  //   ndur = dur[0] - cblas_dnrm2(2,dur+1,1);
+  //   if (ns > cesp*cblas_dnrm2(3, somme, 1))
+  //   {
+  //     nsc +=1;
+  //     if (dur[0] >= cblas_dnrm2(2,dur+1,1))       nN +=1;
+  //     else if (-dur[0] >= cblas_dnrm2(2,dur+1,1)) nB +=1;
+  //     else                                        nR +=1;
+  //   }
+  //   else
+  //     printf("cone %i %9.2e %9.2e\n", i, somme[0], cblas_dnrm2(2,somme+1, 1));
+  // }
+  // if (nsc < n)
+  //   printf("Ratio of Strict complementarity solutions: %4i / %4i = %4.2f \t %4i %4i %4i\n", nsc, n, (double)nsc/n, nB, nN, nR);
+  // else
+  //   printf("Strict complementarity satisfied: %4i / %4i  %9.2e %9.2e  %4i %4i %4i\n", nsc, n, ns, ns/cblas_dnrm2(3, somme, 1), nB, nN, nR);
+
+  classify_BNRT(velocity, reaction, nd, n, &nB, &nN, &nR, &nT);
+  if (nT > 0)
+    printf("Ratio of Strict complementarity solutions: %4i / %4i = %4.2f \t %4i %4i %4i\n", n-nT, n, (double)(n-nT)/(double)n, nB, nN, nR);
   else
-    printf("Strict complementarity satisfied: %4i / %4i  %9.2e %9.2e  %4i %4i %4i\n", nsc, n, ns, ns/cblas_dnrm2(3, somme, 1), nB, nN, nR);
+    printf("Strict complementarity satisfied: %4i %4i %4i\n", nB, nN, nR);
 
 
   // Store solution into file
@@ -4244,6 +4476,10 @@ while(findParam)
   if(Ht) Ht = NM_free(Ht);
   if(subdiff_u) subdiff_u = NM_free(subdiff_u);
   if(minus_e) { minus_e = NM_free(minus_e); minus_e = NULL; }
+  if(arrow_r) { NM_free(arrow_r); arrow_r = NULL; }
+  if(arrow_u) { NM_free(arrow_u); arrow_u = NULL; }
+  if(subdiff_u) { NM_free(subdiff_u); subdiff_u = NULL; }
+  if(J) { J = NM_free(J); J = NULL; }
 
 
   if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE])
@@ -4273,32 +4509,61 @@ while(findParam)
     {
       while ( num_TEST7 < 11 )
       {
-        sprintf(name_file_TEST7, "pp_complete_%02d.pp", num_TEST7);
+        sprintf(name_file_TEST7, "ipm-complem-%02d.pp", num_TEST7);
         file_TEST7 = fopen(name_file_TEST7, "a+");
-        fprintf(file_TEST7, "sumry: 1  %.2e   %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f   %s\n",
-                totalresidual, projerr, iteration, n, m, nB, nN, nR, n-nB-nN-nR,
-                (double)(t2-t1)/(double)clk_tck, strToken);
+        fprintf(file_TEST7, "sumry: 1  %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f   %s\n",
+                totalresidual, iteration, n, m, nB, nN, nR, n-nB-nN-nR,
+                total_time, strToken);
         fclose(file_TEST7);
 
         if (num_TEST7 == 10)
         {
-          fprintf(file_all_TEST7, "sumry: 1  %.2e   %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f   %s\n",
-                totalresidual, projerr, iteration, n, m, nB, nN, nR, n-nB-nN-nR,
-                (double)(t2-t1)/(double)clk_tck, strToken);
+          fprintf(file_all_TEST7, "sumry: 1  %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f   %s\n",
+                totalresidual, iteration, n, m, nB, nN, nR, n-nB-nN-nR,
+                total_time, strToken);
         }
         else
         {
-          fprintf(file_all_TEST7, "sumry: 1  %.2e   %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f\n",
-                totalresidual, projerr, iteration, n, m, nB, nN, nR, n-nB-nN-nR,
-                (double)(t2-t1)/(double)clk_tck);
+          fprintf(file_all_TEST7, "sumry: 1  %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f\n",
+                totalresidual, iteration, n, m, nB, nN, nR, n-nB-nN-nR,
+                total_time);
         }
 
         num_TEST7++;
       }
     }
 
+    if (projerr_TEST7 > tols2_TEST7)
+    {
+      while ( num2_TEST7 < 9 )
+      {
+        sprintf(name2_file_TEST7, "ipm-prjerr-%02d.pp", num2_TEST7);
+        file2_TEST7 = fopen(name2_file_TEST7, "a+");
+        fprintf(file2_TEST7, "sumry: 1  %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f   %s\n",
+                projerr_TEST7, iteration, n, m, nB, nN, nR, n-nB-nN-nR,
+                total_time, strToken);
+        fclose(file2_TEST7);
+
+        if (num2_TEST7 == 8)
+        {
+          fprintf(file2_all_TEST7, "sumry: 1  %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f   %s\n",
+                projerr_TEST7, iteration, n, m, nB, nN, nR, n-nB-nN-nR,
+                total_time, strToken);
+        }
+        else
+        {
+          fprintf(file2_all_TEST7, "sumry: 1  %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f\n",
+                projerr_TEST7, iteration, n, m, nB, nN, nR, n-nB-nN-nR,
+                total_time);
+        }
+
+        num2_TEST7++;
+      }
+    }
+
 
     fclose(file_all_TEST7);
+    fclose(file2_all_TEST7);
   }
 
   *info = hasNotConverged;
@@ -4318,8 +4583,8 @@ void gfc3d_ipm_snm_set_default(SolverOptions* options)
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] = SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_YES;
 
-  options->iparam[SICONOS_IPARAM_MAX_ITER] = 200;
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 500;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-14;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_1] = 1e-10;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_2] = 3.;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_3] = 1.;
