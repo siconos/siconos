@@ -25,6 +25,9 @@
 #include <math.h>
 #include <float.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <assert.h>
+
 
 #ifndef M_PI
 #define M_PI        3.14159265358979323846264338327950288   /* pi             */
@@ -401,7 +404,7 @@ static inline void mvp5x5(const double* restrict a, const double* restrict v, do
 
 }
 
-/** add a matrix vector multiplication scaled by alpha 
+/** add a matrix vector multiplication scaled by alpha
  * \param[in] alpha scalar coeff
  * \param[in] a a[9]
  * \param[in] v v[3]
@@ -839,11 +842,10 @@ void print3(double* v);
  * \return 0 if success, 1 if there is a problem
 */
 WARN_RESULT_IGNORED
-static inline int orthoBaseFromVector(double *Ax, double *Ay, double *Az,
+static inline int orthoBaseFromVector_old(double *Ax, double *Ay, double *Az,
                                       double *A1x, double *A1y, double *A1z,
                                       double *A2x, double *A2y, double *A2z)
 {
-
   double normA = sqrt((*Ax) * (*Ax) + (*Ay) * (*Ay) + (*Az) * (*Az));
   if (normA == 0.)
   {
@@ -861,6 +863,7 @@ static inline int orthoBaseFromVector(double *Ax, double *Ay, double *Az,
   (*Ax) /= normA;
   (*Ay) /= normA;
   (*Az) /= normA;
+
   /*build (*A1*/
   if (fabs(*Ax) > fabs(*Ay))
   {
@@ -872,7 +875,7 @@ static inline int orthoBaseFromVector(double *Ax, double *Ay, double *Az,
     }
     else /*(*Az is the biggest*/
     {
-      (*A1z) = (*Ax);
+      (*A1z) = (*Ay);
       (*A1y) = -(*Az);
       (*A1x) = 0;
     }
@@ -885,7 +888,7 @@ static inline int orthoBaseFromVector(double *Ax, double *Ay, double *Az,
   }
   else /*(*Az is the biggest*/
   {
-    (*A1z) = (*Ax);
+    (*A1z) = (*Ay);
     (*A1y) = -(*Az);
     (*A1x) = 0;
   }
@@ -897,10 +900,77 @@ static inline int orthoBaseFromVector(double *Ax, double *Ay, double *Az,
   (*A2x) = *Ay * *A1z - *Az * *A1y;
   (*A2y) = *Az * *A1x - *Ax * *A1z;
   (*A2z) = *Ax * *A1y - *Ay * *A1x;
+
+  /* assertion */
+  assert(fabs(sqrt((*Ax) * (*Ax) + (*Ay) * (*Ay) + (*Az) * (*Az))-1.0) < 1e-14 );
+  assert(fabs(sqrt((*A1x) * (*A1x) + (*A1y) * (*A1y) + (*A1z) * (*A1z))-1.0) < 1e-14 );
+  assert(fabs(*Ax * *A1x + *Ay * *A1y + *Az * *A1z) < 1e-14 );
+  assert(fabs(sqrt((*A2x) * (*A2x) + (*A2y) * (*A2y) + (*A2z) * (*A2z))-1.0) < 1e-14 );
+  assert(fabs(*Ax * *A2x + *Ay * *A2y +  *Az * *A2z) < 1e-14 );
+  assert(fabs(*A1x * *A2x +  *A1y * *A2y +  *A1z * *A2z)< 1e-14 );
+
   return 0;
 }
 
 
+/* function to compute an orthonormal basis form a given vector
+ * taken from
+ * Tom Duff, James Burgess, Per Christensen, Christophe Hery, Andrew Kensler, Max Liani, and Ryusuke Villemin,
+ * Building an Orthonormal Basis, Revisited, Journal of Computer Graphics Techniques (JCGT), vol. 6, no. 1, 1-8, 2017
+ * Available online http://jcgt.org/published/0006/01/01/
+ * void branchlessONB(const Vec3f &n, Vec3f &b1, Vec3f &b2)
+ * {
+ *   float sign = copysignf(1.0f, n.z);
+ *   const float a = -1.0f / (sign + n.z);
+ *   const float b = n.x * n.y * a;
+ *   b1 = Vec3f(1.0f + sign * n.x * n.x * a, sign * b, -sign * n.x);
+ *   b2 = Vec3f(b, sign + n.y * n.y * a, -n.y);
+ * }
+*/
+
+static inline int orthoBaseFromVector(double* Ax, double* Ay, double* Az, double* A1x,
+                                       double* A1y, double* A1z, double* A2x, double* A2y,
+                                       double* A2z)
+
+{
+  double normA = sqrt((*Ax) * (*Ax) + (*Ay) * (*Ay) + (*Az) * (*Az));
+  if (normA == 0.)
+  {
+    (*Ax) = NAN;
+    (*Ay) = NAN;
+    (*Az) = NAN;
+    (*A1x) = NAN;
+    (*A1y) = NAN;
+    (*A1z) = NAN;
+    (*A2x) = NAN;
+    (*A2y) = NAN;
+    (*A2z) = NAN;
+    return 1;
+  }
+  (*Ax) /= normA;
+  (*Ay) /= normA;
+  (*Az) /= normA;
+
+  double sign = copysignf(1.0, *Az);
+  const double  a = -1.0 / (sign + *Az);
+  const double  b = *Ax * *Ay * a;
+
+  *A1x = 1.0+ sign * *Ax * * Ax * a;
+  *A1y = sign  * b;
+  *A1z = - sign * *Ax;
+
+  *A2x = b;
+  *A2y = sign + *Ay * *Ay * a;
+  *A2z = - *Ay;
+
+  /* assertion */
+  assert(fabs(sqrt((*A1x) * (*A1x) + (*A1y) * (*A1y) + (*A1z) * (*A1z))-1.0) < 1e-14 );
+  assert(fabs(*Ax * *A1x + *Ay * *A1y + *Az * *A1z) < 1e-14 );
+  assert(fabs(sqrt((*A2x) * (*A2x) + (*A2y) * (*A2y) + (*A2z) * (*A2z))-1.0) < 1e-14 );
+  assert(fabs(*Ax * *A2x + *Ay * *A2y +  *Az * *A2z) < 1e-14 );
+  assert(fabs(*A1x * *A2x +  *A1y * *A2y +  *A1z * *A2z)< 1e-14 );
+  return 0;
+}
 /** solve Ax = b by partial pivoting Gaussian elimination. This function is 10
  * to 20 times faster than calling LAPACK (tested with netlib).
  *

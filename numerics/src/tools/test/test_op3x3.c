@@ -356,6 +356,73 @@ int main()
 #endif
 
 
+  /* test orthoBaseFromVector */
+
+  double n[3];
+  double t[3];
+  double s[3];
+
+
+  int base[3]={-1,0,1};
+
+  for (int i=0; i < 3; i++)
+    {
+      for (int j=0; j < 3; j++)
+	{
+	  for (int k=0; k < 3; k++)
+	    {
+	      n[0]= base[i];
+	      n[1]= base[j];
+	      n[2] = base[k];
+	      if ((i==1 && j==1) && k==1)
+		{
+		}
+	      else
+		{
+		  info = orthoBaseFromVector(&n[0],&n[1],&n[2],
+					      &t[0],&t[1],&t[2],
+					      &s[0],&s[1],&s[2]);
+		  printf("n : %e %e, %e\n", n[0],n[1],n[2]);
+		  printf("t : %e %e, %e\n", t[0],t[1],t[2]);
+		  printf("t : %e %e, %e\n", s[0],s[1],s[2]);
+		  printf("n.s %e\t", n[0]*s[0]+n[1]*s[1] + n[2]* s[2] );
+		  printf("n.t %e\t", n[0]*t[0]+n[1]*t[1] + n[2]* t[2] );
+		  printf("t.s %e\n", t[0]*s[0]+t[1]*s[1] + t[2]* s[2] );
+		}
+	    }
+	}
+    }
+  for (int i=0; i < 3; i++)
+    {
+      for (int j=0; j < 3; j++)
+	{
+	  for (int k=0; k < 3; k++)
+	    {
+	      n[0]= base[i];
+	      n[1]= base[j];
+	      n[2] = base[k];
+	      if ((i==1 && j==1) && k==1)
+		{
+		}
+	      else
+		{
+		  info = orthoBaseFromVector_old(&n[0],&n[1],&n[2],
+					      &t[0],&t[1],&t[2],
+					      &s[0],&s[1],&s[2]);
+		  printf("n : %e %e, %e\n", n[0],n[1],n[2]);
+		  printf("t : %e %e, %e\n", t[0],t[1],t[2]);
+		  printf("s : %e %e, %e\n", s[0],s[1],s[2]);
+		  printf("n.s %e\t", n[0]*s[0]+n[1]*s[1] + n[2]* s[2] );
+		  printf("n.t %e\t", n[0]*t[0]+n[1]*t[1] + n[2]* t[2] );
+		  printf("t.s %e\n", t[0]*s[0]+t[1]*s[1] + t[2]* s[2] );
+		}
+	    }
+	}
+    }
+
+
+
+
   return 0;
 
 }
