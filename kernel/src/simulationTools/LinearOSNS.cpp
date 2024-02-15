@@ -54,6 +54,8 @@
 // #include "LagrangianLinearTIDS.hpp"
 // #include "NewtonEulerDS.hpp"
 #include "OSNSMatrix.hpp"
+#include "../../mechanics/src/fem/native/SolidLinearTIDS.hpp"
+
 
 // #include "Tools.hpp"
 // #include <chrono>
@@ -357,7 +359,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
   // dynamical system types.
   // - No memory allocation there : blocks should be previously (updateInteractionBlocks) and
   // properly allocated.
-
+  std::cout << "In LinearOSNS::computeDiagonalInteractionBlock " << std::endl;
   // Get dimension of the NonSmoothLaw (ie dim of the interactionBlock)
   auto indexSet = simulation()->indexSet(indexSetLevel());
   std::shared_ptr<siconos::modeling::Interaction> inter = indexSet->bundle(vd);
@@ -435,12 +437,20 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
     auto& osi = *DSG0.properties(DSG0.descriptor(ds)).osi;
     auto osiType = osi.getType();
     auto sizeDS = ds->dimension();
-
     // get _interactionBlocks corresponding to the current DS
     // These _interactionBlocks depends on the relation type.
     leftInteractionBlock = inter->getLeftInteractionBlockForDS(pos, nslawSize, sizeDS);
+    leftInteractionBlock->display();
+    auto dsType = siconos::types::type_value(*ds);
+    if(dsType == siconos::modeling::Type::SolidLinearTIDS){
+        auto solidds = std::static_pointer_cast<siconos::mechanics::fem::SolidLinearTIDS>(ds);
+        leftInteractionBlock->resize(nslawSize,solidds->dimension()+solidds->stressDimension(),true);
+            leftInteractionBlock->display();
+    }
+
     DEBUG_EXPR(leftInteractionBlock->display(););
     // Computing depends on relation type -> move this in Interaction method?
+
     if (relationType == siconos::modeling::RelationType::FirstOrder) {
       ////// TODO : BACK WHEN NAMESPACE OK
 
@@ -481,6 +491,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
       }
     } else if (relationType == siconos::modeling::RelationType::Lagrangian ||
                relationType == siconos::modeling::RelationType::NewtonEuler) {
+
       // Applying boundary conditions
       std::shared_ptr<siconos::modeling::BoundaryCondition> bc;
       auto d = std::static_pointer_cast<siconos::modeling::SecondOrderDS>(ds);
@@ -493,7 +504,6 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
           leftInteractionBlock->setCol(itindex, *coltmp);
         }
       }
-
       if (osiType == siconos::integrators::IntegratorType::MOREAUJEANBILBAOOSI ||
           std::dynamic_pointer_cast<siconos::modeling::LagrangianLinearDiagonalDS>(ds)) {
         auto work = std::make_shared<siconos::algebra::SimpleMatrix>(*leftInteractionBlock);
@@ -792,10 +802,8 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeq(double time) {
 void siconos::nonsmooth_formulations::LinearOSNS::computeM() {
   if (_assemblyType == LinearOSNSAssemblyType::REDUCED_BLOCK) {
     auto& indexSet = *simulation()->indexSet(indexSetLevel());
-
     // Computes new _interactionBlocks if required
     updateInteractionBlocks();
-
     //    _M->fill(indexSet);
     _M->fillM(indexSet, !_hasBeenUpdated);
   } else if (_assemblyType == LinearOSNSAssemblyType::REDUCED_DIRECT) {
@@ -864,9 +872,7 @@ bool siconos::nonsmooth_formulations::LinearOSNS::preCompute(double time) {
     DEBUG_END("bool siconos::nonsmooth_formulations::LinearOSNS::preCompute(double time)\n");
     return false;
   }
-
   auto& indexSet = *simulation()->indexSet(indexSetLevel());
-
   if (indexSet.size() == 0) {
     DEBUG_END("bool siconos::nonsmooth_formulations::LinearOSNS::preCompute(double time)\n");
     return false;
@@ -883,15 +889,14 @@ bool siconos::nonsmooth_formulations::LinearOSNS::preCompute(double time) {
     std::cout << "\nLinearOSNS: ComputeM " << elapsed << " ms" << std::endl;
 #endif
     //      updateOSNSMatrix();
-    _sizeOutput = _M->size();
 
+    _sizeOutput = _M->size();
     // Checks z and _w sizes and reset if necessary
 
     if (_z->size() != _sizeOutput) {
       _z->resize(_sizeOutput, false);
       _z->zero();
     }
-
     if (_w->size() != _sizeOutput) {
       _w->resize(_sizeOutput);
       _w->zero();
