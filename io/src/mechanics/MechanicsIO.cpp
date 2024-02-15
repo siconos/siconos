@@ -912,6 +912,7 @@ struct ContactContactWorkVisitor : public SiconosVisitor
   SP::Interaction inter;
   // std::vector<int> answer; better with a vector of int
   SiconosVector answer;
+  double omega;
   double tol;
   template<typename T>
   void operator()(const T& rel)
@@ -927,7 +928,7 @@ void ContactContactWorkVisitor::operator()(const NewtonEuler3DR& rel)
   answer.resize(6);
 }
 
-static void compute_contact_work_and_status(SP::Interaction inter, double tol, SiconosVector& answer) {
+static void compute_contact_work_and_status(SP::Interaction inter, double omega, double tol, SiconosVector& answer) {
   double mu = ask<ForMu>(*inter->nonSmoothLaw());
   double e = ask<ForE>(*inter->nonSmoothLaw());
   // Compute normal contact work
@@ -935,7 +936,8 @@ static void compute_contact_work_and_status(SP::Interaction inter, double tol, S
   double vn_plus = inter->y(1)->getValue(0);
   double pn  = inter->lambda(1)->getValue(0);
 
-  double normal_contact_work = 0.5 * ( vn_minus + vn_plus)*pn;
+  double vn_average = omega*vn_plus + (1. - omega)*vn_minus;
+  double normal_contact_work = vn_average*pn;
   answer.setValue(1,normal_contact_work);
 
   // Compute tangent contact work of impulse
@@ -945,23 +947,32 @@ static void compute_contact_work_and_status(SP::Interaction inter, double tol, S
   double vt_1_plus = inter->y(1)->getValue(1);
   double vt_2_plus = inter->y(1)->getValue(2);
 
+
+  double vt_1_average = omega*vt_1_plus + (1. - omega)*vt_1_minus;
+  double vt_2_average = omega*vt_2_plus + (1. - omega)*vt_2_minus;
+
   double pt_1  = inter->lambda(1)->getValue(1);
   double pt_2  = inter->lambda(1)->getValue(2);
 
-  double tangent_contact_work = 0.5 * ( vt_1_minus + vt_1_plus)*pt_1 + 0.5 * (vt_2_minus + vt_2_plus)*pt_2;
+  double tangent_contact_work = vt_1_average * pt_1 + vt_2_average * pt_2;
   answer.setValue(2,tangent_contact_work);
 
   // Compute directly work dissipated by friction impulse
-  double theta=1/2.;
-  double norm_vt_plus =  sqrt(vt_1_plus*vt_1_plus+vt_2_plus*vt_2_plus);
-  double norm_vt_minus = sqrt(vt_1_minus*vt_1_minus+vt_2_minus*vt_2_minus);
-
-  double friction_dissipation = mu* (theta * norm_vt_plus  + (1-theta)*norm_vt_minus) * pn;
+  double norm_vt_average =  sqrt(vt_1_average*vt_1_average+vt_2_average*vt_2_average);
+  double friction_dissipation = mu * norm_vt_average  * pn;
   answer.setValue(3,friction_dissipation);
-  // compute contact status
+
+
+
+  /* Compute contact status
+   * Warning the status are consistent for the sticking and sliding
+   * only with fully implicit discretization o NewtonImpact law
+   * and not wih Fremond impact law
+   */
 
   double norm_pt = sqrt(pt_1*pt_1 + pt_2*pt_2);
-
+  double norm_vt_plus =  sqrt(vt_1_plus*vt_1_plus+vt_2_plus*vt_2_plus);
+  double norm_vt_minus = sqrt(vt_1_minus*vt_1_minus+vt_2_minus*vt_2_minus);
   if ( (pn < tol ) and (vn_plus + e * vn_minus > tol) )
     answer.setValue(4,0);// take-off = 0
   else if ( (pn > tol ) and (vn_plus + e * vn_minus  < tol) )
@@ -1030,7 +1041,7 @@ void ContactContactWorkVisitor::operator()(const ContactR& rel)
   double id = inter->number();
   answer.resize(6);
   answer.setValue(0,id);
-  compute_contact_work_and_status(inter,  tol, answer);
+  compute_contact_work_and_status(inter, omega, tol, answer);
 }
 
 template<>
@@ -1041,7 +1052,7 @@ void ContactContactWorkVisitor::operator()(const Contact5DR& rel)
   answer.setValue(0,id);
 
 
-  compute_contact_work_and_status(inter,  tol, answer);
+  compute_contact_work_and_status(inter, omega, tol, answer);
 
 }
 
@@ -1053,7 +1064,7 @@ void ContactContactWorkVisitor::operator()(const Contact2dR& rel)
   answer.setValue(0,id);
 
 
-  compute_contact_work_and_status(inter,  tol, answer);
+  compute_contact_work_and_status(inter, omega, tol, answer);
 
 }
 
@@ -1065,13 +1076,14 @@ void ContactContactWorkVisitor::operator()(const Contact2d3DR& rel)
   answer.setValue(0,id);
 
 
-  compute_contact_work_and_status(inter,  tol, answer);
+  compute_contact_work_and_status(inter, omega, tol, answer);
 
 }
 
 
 SP::SimpleMatrix MechanicsIO::contactContactWork(const NonSmoothDynamicalSystem& nsds,
-						 unsigned int index_set, double tol) const
+						 unsigned int index_set, double omega,
+						 double tol) const
 {
   DEBUG_BEGIN("SP::SimpleMatrix MechanicsIO::contactContactWork");
   SP::SimpleMatrix result(new SimpleMatrix());
@@ -1098,6 +1110,7 @@ SP::SimpleMatrix MechanicsIO::contactContactWork(const NonSmoothDynamicalSystem&
                         ContactContactWorkVisitor>::Make ContactContactWorkInspector;
       ContactContactWorkInspector inspector;
       inspector.inter = graph.bundle(*vi);
+      inspector.omega = omega;
       inspector.tol = tol;
       graph.bundle(*vi)->relation()->accept(inspector);
       SiconosVector& data = inspector.answer;
