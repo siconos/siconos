@@ -317,7 +317,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original, double*
                 double* restrict velocity, double* restrict globalVelocity,
                 int* restrict info, SolverOptions* restrict options)
 {
-  verbose=1;
+  /* verbose=1; */
   int* iparam = options->iparam;
   double* dparam = options->dparam;
   size_t nc = problem_original->numberOfContacts;
