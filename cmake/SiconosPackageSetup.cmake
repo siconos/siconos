@@ -12,7 +12,11 @@ set(cmake_macros
   FindBLASDEV.cmake
   FindLAPACKDEV.cmake
   BlasLapackUtils.cmake
-  )
+)
+
+if(SICONOS_HAS_OpenCASCADE)
+  list(APPEND cmake_macros occ_setup.cmake)
+endif()
 
 foreach(file IN LISTS cmake_macros)
   install(FILES cmake/${file} DESTINATION ${SiconosConfigPackageLocation})

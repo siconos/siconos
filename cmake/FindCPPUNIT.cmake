@@ -40,8 +40,8 @@ endif()
 # Try to help find_package process (pkg-config ...)
 set_find_package_hints(NAME CPPUNIT MODULE cppunit)
 
-find_path(CPPUNIT_INCLUDE_DIR NAMES TestCase.h
-  PATH_SUFFIXES include cppunit
+find_path(CPPUNIT_INCLUDE_DIR NAMES cppunit/TestCase.h
+  PATH_SUFFIXES include cppunit include/cppunit
   ${_CPPUNIT_INC_SEARCH_OPTS}
   )
 

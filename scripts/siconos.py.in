@@ -685,6 +685,11 @@ def generate_cmakelists(args):
     result += ' COMPONENTS @boost_required_components@)\n'
     result += 'endif()\n'
 
+    # OpenCASCADE ?
+    result += "if(@WITH_OpenCASCADE@)\n"
+    result += "include(occ_setup)\n"
+    result += "endif()\n"
+
     # Create executable target
     if not args.is_python and args.driver:
         # -- Main target --

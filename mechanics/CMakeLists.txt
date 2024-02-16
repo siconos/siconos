@@ -96,6 +96,7 @@ if(WITH_OpenCASCADE)
   include(occ_setup)
   # Add opencascade headers and libs to components build
   target_link_libraries(${COMPONENT} PUBLIC $<BUILD_INTERFACE:OpenCASCADE::OpenCASCADE>)
+  target_link_libraries(${COMPONENT} PUBLIC $<INSTALL_INTERFACE:OpenCASCADE::OpenCASCADE>)
 endif()
 
 
