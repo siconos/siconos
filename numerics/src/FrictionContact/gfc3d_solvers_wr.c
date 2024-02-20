@@ -43,6 +43,26 @@
 
 void  gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double *reaction, double *velocity, double* globalVelocity, int *info, SolverOptions* options)
 {
+    char *str = (char *) malloc(200);
+    if (problem->name)
+    {
+      strcpy( str, problem->name );
+    }
+    else
+    {
+      strcpy( str, "foo_" );
+    }
+    const char * separators = "/";
+    char *strToken = strtok( str, separators );
+    for(int i=0; i<5; i++)
+    {
+      if(strToken != NULL) strToken = strtok ( NULL, separators );
+    }
+    strToken = strtok ( strToken, "." );
+    FILE *fileName = fopen("problem_name.res", "w");
+    fprintf(fileName, "%s", strToken);
+    fclose(fileName);
+    free(str);
 
   /* verbose=1; */
   DEBUG_BEGIN("gfc3d_nsgs_wr\n");
@@ -65,6 +85,7 @@ void  gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double *reaction, dou
     fc3d_nsgs(localproblem, reaction, velocity, info, options);
     clock_t t2 = clock();
     printf("\nTIME = %10.4f\n",(double)(t2-t1)/(double)clk_tck);
+    options->iparam[SICONOS_FRICTION_3D_NSGS_PRINTING_LIKE_IPM] = SICONOS_FRICTION_3D_NSGS_PRINTING_LIKE_IPM_FALSE;
 
     globalFrictionContact_computeGlobalVelocity(problem, reaction, globalVelocity);
     /* Number of contacts */
@@ -244,7 +265,7 @@ void  gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double *reaction, dou
       udotr = cblas_ddot(nd, velocity, 1, reaction, 1)/n;
 
 
-      udotr = xdoty_type(n, nd, velocity, reaction, type);
+      udotr = xdoty_type(n, nd, velocity, reaction, NORM_INF);
 
 
 
@@ -293,7 +314,7 @@ void  gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double *reaction, dou
 
 
 
-      free(str); free(problem_name);
+      free(str);
       if(H_tilde) {H_tilde = NM_free(H_tilde); H_tilde = NULL;}
       if(H) {H = NM_free(H); H = NULL;}
       if (w) {free(w); w = NULL;}
