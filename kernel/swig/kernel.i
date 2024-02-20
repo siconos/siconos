@@ -366,6 +366,10 @@ KERNEL_REGISTRATION()
   {
     return std::dynamic_pointer_cast<NewtonEuler1DR>(r);
   }
+  SP::NewtonEulerR cast_NewtonEulerR(SP::Relation r)
+  {
+    return std::dynamic_pointer_cast<NewtonEulerR>(r);
+  }
 
   SP::FrictionContact cast_FrictionContact(SP::OneStepNSProblem osnpb)
   {
