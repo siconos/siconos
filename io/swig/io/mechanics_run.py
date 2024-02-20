@@ -828,6 +828,7 @@ class MechanicsHdf5Runner_run_options(dict):
         d['output_contact_forces']=True,
         d['output_contact_info']=True,
         d['output_contact_work']=True,
+        d['output_energy_work']=False
 
 
         super(self.__class__, self).__init__(d)
@@ -2189,6 +2190,98 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             return 0
         return 0
 
+    def output_energy_and_work(self):
+        """
+        Outputs energy_and_work
+        _output_contact_index_set default value is 1.
+        """
+        if self._nsds.\
+                topology().indexSetsSize() > 1:
+            time = self.current_time()
+
+            kinetic_sum =0.
+            external_forces_work_sum_old= 0.
+            external_forces_work_sum= 0.
+            energy_contact_work=np.zeros(7)
+
+            positions = self._io.positions(self._nsds)
+            nsds = self._nsds
+            if positions is not None:
+                ds_idx  = positions[:,0]
+                for i in ds_idx :
+                    n_ds = int(i)
+                    ds = nsds.dynamicalSystem(n_ds)
+                    neds= sk.cast_NewtonEulerDS(ds)
+                    kinetic = neds.computeKineticEnergy()
+                    kinetic_sum = kinetic + kinetic_sum
+
+            work_forces=self._osi.computeWorkForces()
+            if work_forces is not None:
+                #print(work_forces)
+                external_forces_work_sum = np.sum(work_forces[:,1])
+
+            cf_work = self._io.contactContactWork(self._nsds,
+                                                  self._output_contact_index_set)
+            #print('cf_work', cf_work)
+
+            if cf_work is not None:
+
+                #print('cf_work', cf_work)
+
+                normal_work = cf_work[:,1]
+                normal_work_negative = np.where( normal_work < 0, normal_work, 0)
+                #print('normal_work_negative', normal_work_negative)
+
+                tangent_work = cf_work[:,2]
+                tangent_work_negative = np.where( tangent_work < 0, tangent_work, 0)
+                #print('tangent_work_negative', tangent_work_negative)
+
+
+                normal_work_negative_sum = np.sum(normal_work_negative)
+                tangent_work_negative_sum = np.sum(tangent_work_negative)
+
+                normal_work_sum = np.sum(normal_work)
+                tangent_work_sum = np.sum(tangent_work)
+                friction_work_sum = np.sum(cf_work[:,3])
+
+                #print('normal_work_sum', normal_work_sum)
+                #print('tangent_work_sum', tangent_work_sum)
+                #print('friction_work_sum', friction_work_sum)
+
+            else:
+
+                normal_work_negative_sum = 0.
+                tangent_work_negative_sum = 0.
+
+                normal_work_sum = 0.
+                tangent_work_sum = 0.
+                friction_work_sum = 0.
+
+
+            energy_contact_work[0]=kinetic_sum
+            energy_contact_work[1]=external_forces_work_sum
+
+            energy_contact_work[2] = normal_work_sum
+            energy_contact_work[3] = tangent_work_sum
+            energy_contact_work[4] = friction_work_sum
+
+            energy_contact_work[5] = normal_work_negative_sum
+            energy_contact_work[6] = tangent_work_negative_sum
+
+            current_line = self._energy_work.shape[0]
+            self._energy_work.resize(current_line + 1, 0)
+            times = np.empty((1, 1))
+            times.fill(time)
+            energy_contact_work = np.array(energy_contact_work).reshape((1,len(energy_contact_work)))
+
+            self._energy_work[current_line:, :] = \
+                np.concatenate((times,
+                                energy_contact_work),
+                               axis=1)
+
+        return 0
+
+
     def output_domains(self):
         """
         Outputs domains of contact points
@@ -2257,10 +2350,16 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             self.print_verbose('[warning] output_contact_work is only available with bullet backend for the moment')
             self.print_verbose('          to remove this message set output_contact_info options to False')
 
+
+        if self._output_energy_work:
+            self.log(self.output_energy_and_work, with_timer)()
+
         if self._should_output_domains:
             self.log(self.output_domains, with_timer)()
 
         self.log(self.output_solver_infos, with_timer)()
+
+
 
         self.log(self._out.flush)()
 
@@ -2536,6 +2635,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             output_contact_forces=True,
             output_contact_info=True,
             output_contact_work=True,
+            output_energy_work=False,
             friction_contact_trace_params=None,
             output_contact_index_set=1,
             osi=sk.MoreauJeanOSI,
@@ -2746,6 +2846,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             run_options['output_contact_forces']=output_contact_forces
             run_options['output_contact_info']=output_contact_info
             run_options['output_contact_work']=output_contact_work
+            run_options['output_energy_work']=output_energy_work
 
 
 
@@ -2786,6 +2887,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         if run_options['output_contact_work'] is not None:
             self._output_contact_work = run_options['output_contact_work']
+
+        if run_options['output_energy_work'] is not None:
+            self._output_energy_work = run_options['output_energy_work']
 
         if run_options['gravity_scale'] is not None:
             self._gravity_scale = run_options['gravity_scale']
