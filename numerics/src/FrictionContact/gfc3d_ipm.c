@@ -681,6 +681,77 @@ void classify_BNRT(const double * velocity, const double * reaction, const unsig
 }
 
 
+/* Return the classification BNRT of the input: orignal u (uN;uT) and r (rN; rT)
+ * We need first a change of velocity : u_tilde = (uN + mu*|uT|; mu*uT)
+ * these u_tilde and r belong to friction cones
+ */
+void classify_BNRT_original(const double *mu, const double * velocity, const double * reaction, const unsigned int vecSize, const unsigned int varsCount,
+                   int *nB, int *nN, int *nR, int *nT)
+{
+  size_t d = (size_t)(vecSize / varsCount);
+  if (d != 3) {
+    fprintf(stderr,
+            "classify_BNRT: This function ONLY supports for 3-dimensional model.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  double *velocity_no_mu = (double*)calloc(vecSize, sizeof(double)); // = (uN + mu*|uT|; mu*uT)
+  double *reaction_no_mu = (double*)calloc(vecSize, sizeof(double)); // = (rN          ; rT/mu)
+
+
+  for (unsigned int i = 0; i<vecSize; i+=d)
+  {
+    velocity_no_mu[i] = velocity[i] + mu[i/d]*cblas_dnrm2(2, velocity+i+1, 1);
+    velocity_no_mu[i+1] = mu[i/d]*velocity[i+1];
+    velocity_no_mu[i+2] = mu[i/d]*velocity[i+2];
+
+    reaction_no_mu[i] = reaction[i];
+    reaction_no_mu[i+1] = reaction[i+1]/mu[i/d];
+    reaction_no_mu[i+2] = reaction[i+2]/mu[i/d];
+  }
+
+  classify_BNRT(velocity_no_mu, reaction_no_mu, vecSize, varsCount, nB, nN, nR, nT);
+
+  free(velocity_no_mu);
+  free(reaction_no_mu);
+}
+
+
+/* Return the classification BNRT of the input: orignal u (uN + mu*|uT|; uT) and r (rN; rT)
+ * We need first a change of velocity : u_tilde = (uN + mu*|uT|; mu*uT)
+ * these u_tilde and r belong to friction cones
+ */
+void classify_BNRT_for_ipm_snm(const double *mu, const double * velocity, const double * reaction, const unsigned int vecSize, const unsigned int varsCount,
+                   int *nB, int *nN, int *nR, int *nT)
+{
+  size_t d = (size_t)(vecSize / varsCount);
+  if (d != 3) {
+    fprintf(stderr,
+            "classify_BNRT: This function ONLY supports for 3-dimensional model.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  double *velocity_no_mu = (double*)calloc(vecSize, sizeof(double)); // = (uN + mu*|uT|; mu*uT)
+  double *reaction_no_mu = (double*)calloc(vecSize, sizeof(double)); // = (rN          ; rT/mu)
+
+
+  for (unsigned int i = 0; i<vecSize; i+=d)
+  {
+    velocity_no_mu[i] = velocity[i];
+    velocity_no_mu[i+1] = mu[i/d]*velocity[i+1];
+    velocity_no_mu[i+2] = mu[i/d]*velocity[i+2];
+
+    reaction_no_mu[i] = reaction[i];
+    reaction_no_mu[i+1] = reaction[i+1]/mu[i/d];
+    reaction_no_mu[i+2] = reaction[i+2]/mu[i/d];
+  }
+
+  classify_BNRT(velocity_no_mu, reaction_no_mu, vecSize, varsCount, nB, nN, nR, nT);
+
+  free(velocity_no_mu);
+  free(reaction_no_mu);
+}
+
 /* static int saveMatrix(NumericsMatrix* m, const char * filename) */
 /* { */
 /*     NumericsMatrix * md = NM_create(NM_DENSE, m->size0, m->size1); */
@@ -3477,7 +3548,7 @@ void gfc3d_ipm_set_default(SolverOptions* options)
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] = SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_NO;
 
   options->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-14;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_1] = 1e-10;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_2] = 3.;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_3] = 1.;

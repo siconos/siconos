@@ -246,5 +246,23 @@ double projectionError(const double * velocity, const double * reaction, const u
 int *read_fricprob_block(const char* path, int type, int blk_index);
 
 
+/* Return the classification BNRT of the input: u and r
+ * these vectors belong to Lorentz cones
+ */
 void classify_BNRT(const double * velocity, const double * reaction, const unsigned int vecSize, const unsigned int varsCount,
+                   int *nB, int *nN, int *nR, int *nT);
+
+
+/* Return the classification BNRT of the input: orignal u (uN;uT) and r (rN; rT)
+ * We need first a change of velocity : u_tilde = (uN + mu*|uT|; mu*uT)
+ * these u_tilde and r belong to friction cones
+ */
+void classify_BNRT_original(const double *mu, const double * velocity, const double * reaction, const unsigned int vecSize, const unsigned int varsCount,
+                   int *nB, int *nN, int *nR, int *nT);
+
+/* Return the classification BNRT of the input: u (uN + mu*|uT|; uT) and r (rN; rT)
+ * We need first a change of velocity : u_tilde = (uN + mu*|uT|; mu*uT)
+ * these u_tilde and r belong to friction cones
+ */
+void classify_BNRT_for_ipm_snm(const double *mu, const double * velocity, const double * reaction, const unsigned int vecSize, const unsigned int varsCount,
                    int *nB, int *nN, int *nR, int *nT);
