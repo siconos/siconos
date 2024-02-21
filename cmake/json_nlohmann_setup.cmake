@@ -95,13 +95,13 @@ if(WITH_JSON_INSTALL)
   set(SICONOS_HAS_JSON TRUE CACHE INTERNAL "Json activated and found")
   set(nlohmann_json_DIR ${CMAKE_INSTALL_PREFIX} CACHE INTERNAL "") # for siconos-config generation, to help finding nlhomman at runtime.
   
-elseif(WITH_JSON OR JSON_ROOT)
-  # Up to cmake 3.22 there is no way to get Bullet version using find_package standard.
-  # It's then mandatory to use the 'config' versionb of find_package.
-  # Anyway, find_package is not able to check the version since Bullet does not provide a bullet-config-version or BulettConfigVersion file.
+else()# if(WITH_JSON OR JSON_ROOT)
+  message("Json is required. If research process fails, try to\n
+        - install nlohmann-json (brew, apt ...) and run cmake again for Siconos
+        - OR configure Siconos with WITH_JSON_INSTALL=ON to automatically install nlohmann-json\n
+        - OR use JSON_ROOT=<path-to-nlohmann> to help cmake to find your json install.\n")
   find_package(nlohmann_json 3.2 REQUIRED)
   set(SICONOS_HAS_JSON TRUE CACHE INTERNAL "Json activated and found") 
   set(nlohmann_json_VERSION 3.2 CACHE INTERNAL "Json version") 
-
 endif()
 

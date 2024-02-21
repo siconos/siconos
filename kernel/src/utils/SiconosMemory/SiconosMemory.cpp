@@ -26,9 +26,8 @@
 // From the size of the container (number of saved vectors) and
 // the size of the vectors.
 siconos::algebra::SiconosMemory::SiconosMemory(const unsigned int size,
-                                                const unsigned int vectorSize)
-    : std::vector<siconos::algebra::SiconosVector>(), _indx(size - 1)
-{
+                                               const unsigned int vectorSize)
+    : std::vector<siconos::algebra::SiconosVector>(), _indx(size - 1) {
   for (unsigned int i = 0; i < size; i++) {
     push_back(siconos::algebra::SiconosVector(vectorSize));
   }
@@ -38,15 +37,14 @@ siconos::algebra::SiconosMemory::SiconosMemory(const unsigned int size,
 siconos::algebra::SiconosMemory::SiconosMemory(const SiconosMemory& Mem)
     : std::vector<siconos::algebra::SiconosVector>(),
       _nbVectorsInMemory(Mem.nbVectorsInMemory()),
-      _indx(Mem.size() - 1)
-{
+      _indx(Mem.size() - 1) {
   for (unsigned int i = 0; i < Mem.size(); i++) {
     push_back(Mem[i]);
   }
 }
 
-siconos::algebra::SiconosMemory& siconos::algebra::SiconosMemory::operator=(const SiconosMemory& V)
-{
+siconos::algebra::SiconosMemory& siconos::algebra::SiconosMemory::operator=(
+    const SiconosMemory& V) {
   if (size() != V.size()) {
     this->resize(V.size());  // => copy construction of old content
   }
@@ -62,8 +60,7 @@ siconos::algebra::SiconosMemory& siconos::algebra::SiconosMemory::operator=(cons
 
 // (Re)set the size of an existing SiconosMemory
 void siconos::algebra::SiconosMemory::setMemorySize(const unsigned int steps,
-                                                     const unsigned int vectorSize)
-{
+                                                    const unsigned int vectorSize) {
   _nbVectorsInMemory = 0;
   _indx = steps - 1;
   for (unsigned int i = 0; i < size(); i++) {
@@ -77,21 +74,18 @@ void siconos::algebra::SiconosMemory::setMemorySize(const unsigned int steps,
 // --- GETTERS/SETTERS ---
 
 const siconos::algebra::SiconosVector& siconos::algebra::SiconosMemory::getSiconosVector(
-    const unsigned int index) const
-{
+    const unsigned int index) const {
   assert(index < _nbVectorsInMemory && "getSiconosVector(index) : inconsistent index value");
   return this->at((_indx + 1 + index) % this->size());
 }
 
 siconos::algebra::SiconosVector& siconos::algebra::SiconosMemory::getSiconosVectorMutable(
-    const unsigned int index)
-{
+    const unsigned int index) {
   assert(index < _nbVectorsInMemory && "getSiconosVector(index) : inconsistent index value");
   return *(siconos::algebra::SiconosVector*)(&this->at((_indx + 1 + index) % this->size()));
 }
 
-void siconos::algebra::SiconosMemory::swap(const siconos::algebra::SiconosVector& v)
-{
+void siconos::algebra::SiconosMemory::swap(const siconos::algebra::SiconosVector& v) {
   // Be robust to empty memory
   if (size() == 0) return;
 
@@ -104,8 +98,8 @@ void siconos::algebra::SiconosMemory::swap(const siconos::algebra::SiconosVector
     _indx = this->size() - 1;
 }
 
-void siconos::algebra::SiconosMemory::swap(std::shared_ptr<siconos::algebra::SiconosVector> v)
-{
+void siconos::algebra::SiconosMemory::swap(
+    std::shared_ptr<siconos::algebra::SiconosVector> v) {
   // Be robust to empty memory
   // Be robust to null pointer
   if (size() == 0 || !v) return;
@@ -119,8 +113,7 @@ void siconos::algebra::SiconosMemory::swap(std::shared_ptr<siconos::algebra::Sic
     _indx = this->size() - 1;
 }
 
-void siconos::algebra::SiconosMemory::display() const
-{
+void siconos::algebra::SiconosMemory::display() const {
   std::cout << " ====== Memory vector display ======= " << std::endl;
   std::cout << "| size : " << this->size() << std::endl;
   std::cout << "| _nbVectorsInMemory : " << _nbVectorsInMemory << std::endl;

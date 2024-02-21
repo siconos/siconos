@@ -201,12 +201,12 @@ bool siconos::collision::bullet::SiconosBulletCollisionManager::bulletContactCle
   /* note: stored pointer to shared_ptr! */
   std::shared_ptr<siconos::modeling::Interaction> *p_inter =
       (std::shared_ptr<siconos::modeling::Interaction> *)userPersistentData;
-  assert(p_inter && "Contact point's stored (SP::Interaction*) is null!");
+  assert(p_inter && "Contact point's stored (Interaction*) is null!");
   DEBUG_PRINTF("unlinking interaction %p, number %zu \n", &**p_inter, (*p_inter)->number());
 
   // std::shared_ptr<BulletR>
-  // rel_bulletR(std::dynamic_pointer_cast<BulletR>((*p_inter)->relation())); SP::Bullet5DR
-  // rel_bullet5DR(std::dynamic_pointer_cast<Bullet5DR>((*p_inter)->relation())); SP::Bullet2dR
+  // rel_bulletR(std::dynamic_pointer_cast<BulletR>((*p_inter)->relation())); Bullet5DR
+  // rel_bullet5DR(std::dynamic_pointer_cast<Bullet5DR>((*p_inter)->relation())); Bullet2dR
   // rel_bullet2dR(std::dynamic_pointer_cast<Bullet2dR>((*p_inter)->relation()));
   // auto
   // rel_bullet2d3DR(std::dynamic_pointer_cast<Bullet2d3DR>((*p_inter)->relation())); if

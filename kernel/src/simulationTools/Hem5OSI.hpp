@@ -25,8 +25,7 @@
 
 #include "OneStepIntegrator.hpp"
 #include "SiconosConst.hpp"  // MACHINE_PREC
-#include "SiconosFortran.h" // for siconos::hairer
-
+#include "SiconosFortran.h"  // for siconos::hairer
 
 namespace siconos::integrators {
 
@@ -110,8 +109,9 @@ class Hem5OSI : public OneStepIntegrator {
                double* G, double* GQ, double* F, double* GQQ, double* GT, double* FL,
                double* QDOT, double* UDOT, double* AM);
     void solout(int* MODE, int* NSTEP, int* NQ, int* NV, int* NU, int* NL, int* LDG, int* LDF,
-                int* LDA, int* LRDO, int* LIDO, siconos::hairer::fprobpointer FPROB, double* q,
-                double* v, double* u, double* DOWK, int* IDOWK);
+                int* LDA, int* LRDO, int* LIDO, siconos::fortran::hairer::fprobpointer FPROB,
+                double* q, double* v, double* u, double* DOWK, int* IDOWK);
+
     Hem5OSI_impl(std::shared_ptr<siconos::integrators::Hem5OSI> h) : hem5osi(h) {}
   };
 

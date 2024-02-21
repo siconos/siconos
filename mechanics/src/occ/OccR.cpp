@@ -1,75 +1,80 @@
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2024 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "OccR.hpp"
+
 #include "ContactPoint.hpp"
+#include "Geometer.hpp"
+#include "OccContactEdge.hpp"
+#include "OccContactFace.hpp"
 #include "OccContactShape.hpp"
-#include "ContactShapeDistance.hpp"
-#include "WhichGeometer.hpp"
-#include "SiconosException.hpp"
-#include <limits>
-#include <iostream>
-#include <boost/typeof/typeof.hpp>
+#include "SiconosVector.hpp"
 
 // #define  DEBUG_MESSAGES
 #include "siconos_debug.h"
 
-OccR::OccR(const ContactPoint& contact1,
-           const ContactPoint& contact2,
-           const DistanceCalculatorType& distance_calculator) :
-  NewtonEuler3DR(),
-  _contact1(contact1),
-  _contact2(contact2),
-  _geometer(),
-  _offset1(0.),
-  _offset2(0.)
-{
-  DEBUG_BEGIN("OccR::OccR(const ContactPoint& contact1, const ContactPoint& contact2,                         const DistanceCalculatorType& distance_calculator)\n");
-  switch(Type::value(distance_calculator))
-  {
-  case Type::OccDistanceType:
-    this->_geometer = ask<WhichGeometer<OccDistanceType> >(contact1.contactShape());
-    break;
-  case Type::CadmbtbDistanceType:
-    this->_geometer = ask<WhichGeometer<CadmbtbDistanceType> >(contact1.contactShape());
-    break;
-  default:
-    THROW_EXCEPTION("OccR: Unknown distance calculator");
+siconos::mechanics::occ::OccR::OccR(const ContactPoint& contact1, const ContactPoint& contact2,
+                                    const DistanceCalculator& distance_calculator)
+    : NewtonEuler3DR(), _contact1{contact1}, _contact2{contact2}, dt{distance_calculator} {}
+
+void siconos::mechanics::occ::OccR::computeh(double time,
+                                             const siconos::algebra::BlockVector& q0,
+                                             siconos::algebra::SiconosVector& y) {
+  DEBUG_BEGIN(
+      "siconos::mechanics::occ::OccR::computeh(double time, siconos::algebra::BlockVector& "
+      "q0, "
+      "siconos::algebra::SiconosVector& y)\n");
+  std::shared_ptr<ContactShapeDistance> distance{nullptr};
+
+  if (std::get_if<OccDistanceType>(&dt)) {
+    std::cout << "OCC Case \n";
+    distance = std::visit(Geometer<OccDistanceType>{}, _contact1.contactShape,
+                          _contact2.contactShape);
+
+  } else if (std::get_if<CadmbtbDistanceType>(&dt)) {
+    //(std::is_same<decltype(distance_calculator), CadmbtbDistanceType>::value)
+    std::cout << "CAM Case \n";
+    distance = std::visit(Geometer<CadmbtbDistanceType>{}, _contact1.contactShape,
+                          _contact2.contactShape);
   }
-  this->_contact2.contactShape().accept(*this->_geometer);
-    
-  DEBUG_END("OccR::OccR(const ContactPoint& contact1, const ContactPoint& contact2,                         const DistanceCalculatorType& distance_calculator)\n");
-}
 
+  DEBUG_PRINTF("---->%g P1=(%g, %g, %g) P2=(%g,%g,%g) N=(%g, %g, %g)\n", distance->value,
+               distance->x1, distance->y1, distance->z1, distance->x2, distance->y2,
+               distance->z2, distance->nx, distance->ny, distance->nz);
 
-void OccR::computeh(double time, const siconos::algebra::BlockVector& q0, siconos::algebra::SiconosVector& y)
-{
-  DEBUG_BEGIN("OccR::computeh(double time, siconos::algebra::BlockVector& q0, siconos::algebra::SiconosVector& y)\n");
-  this->_contact2.contactShape().accept(*this->_geometer);
+  _Pc1->setValue(0, distance->x1 + _offset1 * distance->nx);
+  _Pc1->setValue(1, distance->y1 + _offset1 * distance->ny);
+  _Pc1->setValue(2, distance->z1 + _offset1 * distance->nz);
+  _Pc2->setValue(0, distance->x2 - _offset2 * distance->nx);
+  _Pc2->setValue(1, distance->y2 - _offset2 * distance->ny);
+  _Pc2->setValue(2, distance->z2 - _offset2 * distance->nz);
 
-  
-  
-  ContactShapeDistance& dist = this->_geometer->answer;
+  _Nc->setValue(0, distance->nx);
+  _Nc->setValue(1, distance->ny);
+  _Nc->setValue(2, distance->nz);
 
-  DEBUG_PRINTF("---->%g P1=(%g, %g, %g) P2=(%g,%g,%g) N=(%g, %g, %g)\n", dist.value,
-               dist.x1, dist.y1, dist.z1,
-               dist.x2, dist.y2, dist.z2,
-               dist.nx, dist.ny, dist.nz);
+  distance->value -= (_offset1 + _offset2);
 
-  _Pc1->setValue(0, dist.x1 + _offset1*dist.nx);
-  _Pc1->setValue(1, dist.y1 + _offset1*dist.ny);
-  _Pc1->setValue(2, dist.z1 + _offset1*dist.nz);
-  _Pc2->setValue(0, dist.x2 - _offset2*dist.nx);
-  _Pc2->setValue(1, dist.y2 - _offset2*dist.ny);
-  _Pc2->setValue(2, dist.z2 - _offset2*dist.nz);
-
-  _Nc->setValue(0, dist.nx);
-  _Nc->setValue(1, dist.ny);
-  _Nc->setValue(2, dist.nz);
-
-  dist.value -= (_offset1+_offset2);
-
-  y.setValue(0, dist.value);
+  y.setValue(0, distance->value);
 
   DEBUG_EXPR(y.display(););
   DEBUG_EXPR(_Nc->display(););
-  DEBUG_END("OccR::computeh(double time, siconos::algebra::BlockVector& q0, siconos::algebra::SiconosVector& y)\n");
-
+  DEBUG_END(
+      "siconos::mechanics::occ::OccR::computeh(double time, siconos::algebra::BlockVector& "
+      "q0, "
+      "siconos::algebra::SiconosVector& y)\n");
 }

@@ -28,6 +28,7 @@
 #include <vector>
 
 #include "SiconosSerialization.hpp"  // For ACCEPT_SERIALIZATION
+#include "SiconosVector.hpp"  // Required because of inheritance. Works without this with gnu compilers, but not with clang (?)
 
 namespace siconos::algebra {
 
@@ -53,14 +54,12 @@ class SiconosMemory : public std::vector<siconos::algebra::SiconosVector> {
 
   /** the real number of siconos::algebra::SiconosVectors saved in the Memory (ie the ones for
    * which memory has been allocated) */
-  std::vector<siconos::algebra::SiconosVector>::size_type _nbVectorsInMemory = 0;
+  std::vector<siconos::algebra::SiconosVector>::size_type _nbVectorsInMemory{0};
 
   /** index to avoid removal and creation of vectors.
    this[_indx] is to the oldest element in the set */
-  std::vector<siconos::algebra::SiconosVector>::size_type _indx = 0;
+  std::vector<siconos::algebra::SiconosVector>::size_type _indx{0};
 
-  //  Forbid  assignment
-  // void operator=(const SiconosMemory&) = delete;
   SiconosMemory(const std::vector<siconos::algebra::SiconosVector>&) = delete;
   SiconosMemory& operator=(const std::vector<siconos::algebra::SiconosVector>& V) = delete;
 
@@ -82,12 +81,15 @@ class SiconosMemory : public std::vector<siconos::algebra::SiconosVector> {
    */
   SiconosMemory(const SiconosMemory& mem);
 
-  /** destructor */
-  ~SiconosMemory() noexcept = default;
-
   /** Assignment
    */
   SiconosMemory& operator=(const SiconosMemory&);
+
+  // To complete rule of 5
+  SiconosMemory(SiconosMemory&& mem) = default;
+  SiconosMemory& operator=(SiconosMemory&&) = default;
+
+  ~SiconosMemory() noexcept = default;
 
   /** Return the vector number i from the memory
    *
@@ -114,8 +116,7 @@ class SiconosMemory : public std::vector<siconos::algebra::SiconosVector> {
    *
    *  \return int >= 0
    */
-  inline std::vector<siconos::algebra::SiconosVector>::size_type nbVectorsInMemory() const
-  {
+  inline std::vector<siconos::algebra::SiconosVector>::size_type nbVectorsInMemory() const {
     return _nbVectorsInMemory;
   };
 

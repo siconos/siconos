@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /** \file OccBody.hpp
     \brief A Siconos Newton Euler dynamical system with
     associated contact shapes
@@ -23,22 +23,36 @@
 #ifndef OccBody_hpp
 #define OccBody_hpp
 
-#include "MechanicsFwd.hpp"
+#include <TopoDS_Shape.hxx>
 
-#include "SiconosFwd.hpp"
-#include "NewtonEulerDS.hpp"
+#include "NewtonEulerDS.hpp"  // Base class
+#include "OccContactShape.hpp"
 
-class OccBody : public NewtonEulerDS
-{
-public:
-  //  Note: with c++11 =>
-  //  using NewtonEulerDS::NewtonEulerDS;
+namespace siconos::algebra {
+class SiconosVector;
+class SiconosMatrix;
+}  // namespace siconos::algebra
 
+// From OpenCASCADE
+class TopoDS_Shape;
 
-  /* Default constructor.
-   */
-  OccBody() : NewtonEulerDS() {};
+namespace siconos::mechanics::occ {
 
+// class OccContactShape;
+
+class OccBody : public siconos::modeling::NewtonEulerDS {
+ private:
+  using OffSet = std::array<double, 7>;
+  using ContactShape_vector = std::vector<std::tuple<OccContactShapeV&, OffSet, int>>;
+  using TopoDS_Shape_vector = std::vector<std::tuple<std::shared_ptr<TopoDS_Shape>, OffSet>>;
+
+  std::shared_ptr<ContactShape_vector> _contactShapes{nullptr};
+  std::shared_ptr<TopoDS_Shape_vector> _shapes{nullptr};
+
+ public:
+  // using NewtonEulerDS::NewtonEulerDS;
+
+  virtual ~OccBody() noexcept = default;
 
   //! Constructor from a minimum set of data.
   //  \param position initial coordinates of this DynamicalSystem.
@@ -47,8 +61,7 @@ public:
   //  \param inertia the inertia matrix.
   //
   OccBody(std::shared_ptr<siconos::algebra::SiconosVector> position,
-          std::shared_ptr<siconos::algebra::SiconosVector> velocity,
-          double mass ,
+          std::shared_ptr<siconos::algebra::SiconosVector> velocity, double mass,
           std::shared_ptr<siconos::algebra::SiconosMatrix> inertia);
 
   /** Association of a contact shape.
@@ -57,20 +70,23 @@ public:
    * \param orientation relative orientation quaternion w, x, y, z
    * \param group contact group default 0
    */
-  void addContactShape(SP::OccContactShape shape,
-                       std::shared_ptr<siconos::algebra::SiconosVector> position = std::shared_ptr<siconos::algebra::SiconosVector>(),
-                       std::shared_ptr<siconos::algebra::SiconosVector> orientation = std::shared_ptr<siconos::algebra::SiconosVector>(),
-                       unsigned int group=0);
-
+  void addContactShape(OccContactShapeV& shape,
+                       std::shared_ptr<siconos::algebra::SiconosVector> position =
+                           std::shared_ptr<siconos::algebra::SiconosVector>(),
+                       std::shared_ptr<siconos::algebra::SiconosVector> orientation =
+                           std::shared_ptr<siconos::algebra::SiconosVector>(),
+                       unsigned int group = 0);
 
   /** Association of a shape without contact.
    * \param shape the shape
    * \param position relative position (x, y, z).
    * \param orientation relative orientation quaternion w, x, y, z
    */
-  void addShape(SP::TopoDS_Shape shape,
-                std::shared_ptr<siconos::algebra::SiconosVector> position = std::shared_ptr<siconos::algebra::SiconosVector>(),
-                std::shared_ptr<siconos::algebra::SiconosVector> orientation = std::shared_ptr<siconos::algebra::SiconosVector>());
+  void addShape(std::shared_ptr<TopoDS_Shape> shape,
+                std::shared_ptr<siconos::algebra::SiconosVector> position =
+                    std::shared_ptr<siconos::algebra::SiconosVector>(),
+                std::shared_ptr<siconos::algebra::SiconosVector> orientation =
+                    std::shared_ptr<siconos::algebra::SiconosVector>());
 
   /** Update positions and orientations of contact shapes.
    */
@@ -83,20 +99,13 @@ public:
   /** Get an associated contact shape by its rank of association.
    *  \param id the number of the shape.
    */
-  const OccContactShape& contactShape(unsigned int id) const;
+  const OccContactShapeV& contactShape(unsigned int id) const;
 
   /** Get an associated shape by its rank of association.
    *  \param id the number of the shape.
    */
   const TopoDS_Shape& shape(unsigned int id) const;
-
-  ACCEPT_BASE_STD_VISITORS(NewtonEulerDS);
-
-protected:
-  SP::ContactShapes _contactShapes;
-  SP::TopoDS_Shapes _shapes;
-
-  ACCEPT_SERIALIZATION(OccBody);
 };
+}  // namespace siconos::mechanics::occ
 
 #endif
