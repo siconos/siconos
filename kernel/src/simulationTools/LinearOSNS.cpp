@@ -359,7 +359,6 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
   // dynamical system types.
   // - No memory allocation there : blocks should be previously (updateInteractionBlocks) and
   // properly allocated.
-  std::cout << "In LinearOSNS::computeDiagonalInteractionBlock " << std::endl;
   // Get dimension of the NonSmoothLaw (ie dim of the interactionBlock)
   auto indexSet = simulation()->indexSet(indexSetLevel());
   std::shared_ptr<siconos::modeling::Interaction> inter = indexSet->bundle(vd);
@@ -445,7 +444,6 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
     if(dsType == siconos::modeling::Type::SolidLinearTIDS){
         auto solidds = std::static_pointer_cast<siconos::mechanics::fem::SolidLinearTIDS>(ds);
         leftInteractionBlock->resize(nslawSize,solidds->dimension()+solidds->stressDimension(),true);
-            leftInteractionBlock->display();
     }
 
     DEBUG_EXPR(leftInteractionBlock->display(););
@@ -669,6 +667,11 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock(
   // get _interactionBlocks corresponding to the current DS
   // These _interactionBlocks depends on the relation type.
   leftInteractionBlock = inter1->getLeftInteractionBlockForDS(pos1, nslawSize1, sizeDS);
+  auto dsType = siconos::types::type_value(*ds);
+  if(dsType == siconos::modeling::Type::SolidLinearTIDS){
+      auto solidds = std::static_pointer_cast<siconos::mechanics::fem::SolidLinearTIDS>(ds);
+      leftInteractionBlock->resize(nslawSize1,solidds->dimension()+solidds->stressDimension(),true);
+  }
 
   // Computing depends on relation type -> move this in Interaction method?
   if (relationType1 == siconos::modeling::RelationType::FirstOrder &&
@@ -705,17 +708,20 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock(
         leftInteractionBlock->setCol(itindex, *coltmp);
       }
     }
-
     auto dsType = siconos::types::type_value(*ds);
-
     if (osiType == siconos::integrators::IntegratorType::MOREAUJEANBILBAOOSI ||
-        dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS) {
-      // Rightinteractionblock used first as buffer to save left * W-1
-      rightInteractionBlock =
-          std::make_shared<siconos::algebra::SimpleMatrix>(nslawSize2, sizeDS);
-      // auto work(new SimpleMatrix(*leftInteractionBlock));
-      //  Get inverse of the iteration matrix
-      auto& inv_iteration_matrix = *getOSIMatrix(osi, ds);
+            dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS) {
+        // Rightinteractionblock used first as buffer to save left * W-1
+        rightInteractionBlock =
+                std::make_shared<siconos::algebra::SimpleMatrix>(nslawSize2, sizeDS);
+        if(dsType == siconos::modeling::Type::SolidLinearTIDS){
+            auto solidds = std::static_pointer_cast<siconos::mechanics::fem::SolidLinearTIDS>(ds);
+            rightInteractionBlock->resize(nslawSize2,solidds->dimension()+solidds->stressDimension(),true);
+        }
+
+        // auto work(new SimpleMatrix(*leftInteractionBlock));
+        //  Get inverse of the iteration matrix
+        auto& inv_iteration_matrix = *getOSIMatrix(osi, ds);
       // remind that W contains the inverse of the iteration matrix
       siconos::algebra::axpy_prod(*leftInteractionBlock, inv_iteration_matrix,
                                   *rightInteractionBlock, true);
@@ -735,6 +741,10 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock(
       // size checking inside the getBlock function, a
       // getRight call will fail.
       auto centralInteractionBlock = getOSIMatrix(osi, ds);
+      if(dsType == siconos::modeling::Type::SolidLinearTIDS){
+          auto solidds = std::static_pointer_cast<siconos::mechanics::fem::SolidLinearTIDS>(ds);
+          rightInteractionBlock->resize(solidds->dimension()+solidds->stressDimension(),nslawSize2,true);
+      }
       centralInteractionBlock->Solve(*rightInteractionBlock);
       //*currentInteractionBlock +=  *leftInteractionBlock ** work;
       siconos::algebra::prod(*leftInteractionBlock, *rightInteractionBlock,

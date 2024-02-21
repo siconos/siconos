@@ -648,7 +648,6 @@ void siconos::mechanics::fem::FiniteElementModel::
       prod(*BT, *DB, *BTDB, true);
 
       double coeff = gp_w * detJ * thickness;
-
       Ke += (coeff * *BTDB);
 
       // // check with direct computation (see IFEM Chap 15 Felippa)
@@ -850,7 +849,7 @@ void siconos::mechanics::fem::FiniteElementModel::computeStiffnessMatrix(
       "siconos::algebra::SiconosMatrix K, Material& mat )\n");
 }
 
-void siconos::mechanics::fem::FiniteElementModel::computeElementaryBMatrix_direct(FElement& fe, siconos::algebra::SimpleMatrix& B)
+void siconos::mechanics::fem::FiniteElementModel::computeElementaryBMatrix_direct(FElement& fe, siconos::algebra::SimpleMatrix& B, double thickness)
 {
     int ndof = fe.ndof();
     int order = fe.order();
@@ -898,6 +897,8 @@ void siconos::mechanics::fem::FiniteElementModel::computeElementaryBMatrix_direc
     B.setValue(2,5, - y21);
 
     B = 1.0/twoA * B;
+    double coeff = sqrt(twoA / 2.0 * thickness);
+    B = coeff * B;
 
 }
 
@@ -908,12 +909,14 @@ void siconos::mechanics::fem::FiniteElementModel::computeBMatrix(
 {
   DEBUG_BEGIN("siconos::mechanics::fem::native::FiniteElementModel::computeMassMatrix(std::shared_ptr<SiconosMatrix> M, double massDensity )\n");
   int elem_cnt=0;
+
   /* loop over the elements */
   for(std::shared_ptr<FElement> fe : elements())
   {
       int dimStress = fe->ndofPerNode()*(fe->ndofPerNode()+1)/2;
       std::shared_ptr<siconos::algebra::SimpleMatrix> Be = std::make_shared<siconos::algebra::SimpleMatrix>(dimStress, fe->ndof());
-      computeElementaryBMatrix_direct(*fe, *Be);
+      Material &material = *(mat[fe->mElement()->tags(0)]);
+      computeElementaryBMatrix_direct(*fe, *Be, material.thickness());
       AssembleElementary_B_Matrix(B, *Be, *fe, elem_cnt);
       elem_cnt++;
   }
@@ -925,7 +928,6 @@ void siconos::mechanics::fem::FiniteElementModel::computeSMatrix(
   std::map<unsigned int, 	std::shared_ptr<Material> > & mat)
 {
   DEBUG_BEGIN("siconos::mechanics::fem::native::FiniteElementModel::computeMassMatrix(std::shared_ptr<SiconosMatrix> M, double massDensity )\n");
-  std::cout << "Start Compute S matrix ! " << std::endl;
   int elem_cnt=0;
   int dimStress = _mesh->dim()*(_mesh->dim()+1)/2;
   Material & mate= *(mat[0]);
@@ -933,26 +935,9 @@ void siconos::mechanics::fem::FiniteElementModel::computeSMatrix(
   D = std::make_shared<siconos::algebra::SimpleMatrix>(dimStress,dimStress);
 
 //  Dinv = std::make_shared<siconos::algebra::SimpleMatrix>(dimStress,dimStress);
-  std::cout << "D initialized ! " << std::endl;
   double E;
   double nu;
   double coef;
-//  (*D)(0,0) = coef*(1.-nu);
-//  (*D)(0,1) = coef*nu;
-//  (*D)(0,2) = 0.0;
-
-//  (*D)(1,0) = (*D)(0,1);
-//  (*D)(1,1) = (*D)(0,0);
-//  (*D)(1,2) = 0.0;
-
-//  (*D)(2,0) = 0.0;
-//  (*D)(2,1) = 0.0;
-//  (*D)(2,2) = 0.5*coef*(1.0 - 2* nu);
-//  std::cout << "before D Display ! " << std::endl;
-//  D->display();
-//  D->PLUFactorizationInPlace();
-//  std::cout << "After PLU inverse: " << std::endl;
-//  D->display();
   /* loop over the elements */
   for(std::shared_ptr<FElement> fe : elements())
   {

@@ -430,8 +430,7 @@ void siconos::integrators::MoreauJeanOSI::initializeIterationMatrixW(
       auto C = d->C();
       auto S = d->S();
       auto B = d->B();
-      std::cout << "norm of S: " << S->normInf() << " norm of racine de 1/S:" << sqrt(1/S->normInf()) << std::endl;
-      double conditionningMagicCoeff = sqrt(1/S->normInf());
+      double conditionningMagicCoeff = 1/S->normInf();
       auto massScaled = std::make_shared<siconos::algebra::SimpleMatrix>(d->mass()->size(0),d->mass()->size(1));
       siconos::algebra::scal(1/conditionningMagicCoeff, *d->mass(), *massScaled,
                              true);  // Mscaled = M/magicCoeff
@@ -446,7 +445,7 @@ void siconos::integrators::MoreauJeanOSI::initializeIterationMatrixW(
       subPos[1] = 0;
       subPos[2] = 0;
       subPos[3] = 0;
-      siconos::algebra::setBlock(*d->mass(), W, subDim, subPos); // W = [M 0; 0 0]
+      siconos::algebra::setBlock(*massScaled, W, subDim, subPos); // W = [M 0; 0 0]
 
       subDim[0] = d->stressDimension();
       subDim[1] = subDim[0];
@@ -919,7 +918,6 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
   //  h(1-\theta)f(x_k,t_k) - h r$
   //  $\mathcal R_{free}(x,r) = x - x_{k} -h\theta f( x , t_{k+1}) -
   //  h(1-\theta)f(x_k,t_k) $
-  std::cout << "In  computeResidu " << std::endl;
 
   double t = _simulation->nextTime();         // End of the time step
   double told = _simulation->startingTime();  // Beginning of the time step
@@ -1060,7 +1058,6 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
       residuFree.zero();
       double coeff;
       // -- No need to update W --
-
       if (d.C()) {
         siconos::algebra::prod(h, *d.C(), vold, residuFree,
                                false);  // vfree += h*C*vi
@@ -1169,47 +1166,27 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
       DEBUG_EXPR(d.q()->display(););
       DEBUG_EXPR(d.velocity()->display(););
 
-//      siconos::algebra::prod(1.0, *d.mass(), vold, residuFree, true); // residufree = M*v_i
       if (d.B()) {
-//          auto Btrans = std::make_shared<algebra::SimpleMatrix>(*(d.B()));
-//          siconos::algebra::prod(-h, *Btrans, sigmaold, residuFree, true); // residufree = -h*B^T sigma_i
           siconos::algebra::prod( sigmaold, *(d.B()), residuFree, true); // residufree = B^T sigma_i
-//          std::cout << "residuFree: " << std::endl;
-//          residuFree.display();
-
-//          siconos::algebra::scal( -h, residuFree, residuFree, true); // residufree = -h*B^T sigma_i
-          siconos::algebra::scal( h, residuFree, residuFree, true); // residufree = h*B^T sigma_i
-//          std::cout << "residuFree: " << std::endl;
-//          residuFree.display();
-
-
+          siconos::algebra::scal( -h, residuFree, residuFree, true); // residufree = -h*B^T sigma_i
       }
 
       if (d.fExt()) {
-          std::cout << "d.fExt()->size() " << d.fExt()->size() << std::endl;
-          std::cout << "residuFree->size() " << residuFree.size() << std::endl;
-          std::cout << "_theta " << _theta << " h " << h << std::endl;
           // computes Fext(ti)
           d.computeFExt(told);
-//          d.fExt()->display();
           auto fextTheta = std::make_shared<siconos::algebra::SiconosVector>(d.fExt()->size());
           double coeff = (1 - _theta);
           siconos::algebra::scal(coeff, *(d.fExt()), *fextTheta,
                                  true);  // fext_k+theta = (1-_theta) * fext(ti)
-//          fextTheta->display();
           // computes Fext(ti+1)
           d.computeFExt(t);
-//          d.fExt()->display();
           coeff = _theta;
           siconos::algebra::scal(coeff, *(d.fExt()), *fextTheta,
                                  false);  // fext_k+theta += _theta * fext(ti+1)
-//          fextTheta->display();
-          double conditionningMagicCoeff = sqrt(1/d.S()->normInf());
+          double conditionningMagicCoeff = 1/d.S()->normInf();
 
           siconos::algebra::scal(h/conditionningMagicCoeff, *fextTheta, residuFree ,
                                  false);  // residufree += h*fext_k+theta
-//          std::cout << "residuFree: " << std::endl;
-//          residuFree.display();
       }
 
       siconos::algebra::prod(-h, *d.B(), vold, residuSigfreed, true); // residuSigmaFree = -h*B*v_i
@@ -1375,8 +1352,6 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
     if (normResidu > maxResidu) maxResidu = normResidu;
   }
   DEBUG_END("siconos::integrators::MoreauJeanOSI::computeResidu()\n");
-  std::cout << "Out compute residu  " << std::endl;
-
   return maxResidu;
 }
 
@@ -1481,15 +1456,7 @@ void siconos::integrators::MoreauJeanOSI::computeFreeState() {
         // -- sigmafree =   W^{-1} q_sigma --
         
         // -> Solve WX = sigmafree and set sigmafree = X
-        W.display();
-        std::cout << "taille W: " << W.size(0) << " " << W.size(1) << std::endl;
-        std::cout << "W.nnz(): " << W.nnz() << std::endl;
-        std::cout << "W.isPositiveDefinite() ? " << W.isPositiveDefinite() << std::endl;
-        std::cout << "W.is symmetric ? " << W.checkSymmetry(1.0e-10) << std::endl;
         W.Solve(qSigmafree);
-        //qSigma
-        std::cout << "qsigma free in computeFreeState! " << std::endl;
-        qSigmafree.display();
         vfree = vold;
         sigmafree = sigmaold;
         
@@ -1507,7 +1474,8 @@ void siconos::integrators::MoreauJeanOSI::computeFreeState() {
         subCoord[3] = d.stressDimension();
         siconos::algebra::subscal(1.0, qSigmafree, sigmafree,
                                   subCoord, false); // sigmafree += sigmaold + [W^{-1} * qsigmafree](sizeV:end)
-    std::cout << "out of compute free state for solidTIDS " << std::endl;
+
+        vfree.display();
         // We don't need to do vfree = -vfree like is done in the following since we computed the real right hand side in computeResidu(), and not its opposite like it is done for generanl lagrangianDS case
     }
     else
@@ -1669,7 +1637,6 @@ void siconos::integrators::MoreauJeanOSI::computeFreeState() {
   }
 
   DEBUG_END("siconos::integrators::MoreauJeanOSI::computeFreeState()\n");
-  std::cout << "out of compute free state  " << std::endl;
 }
 
 void siconos::integrators::MoreauJeanOSI::prepareNewtonIteration(double time) {
@@ -1719,7 +1686,6 @@ void siconos::integrators::MoreauJeanOSI::computeFreeOutput(
   /** \warning: ensures that it can also work with two different osi for two
    * different ds ?
    */
-std::cout << "In computeFreeOutput " << std::endl;
              DEBUG_BEGIN(
       "siconos::integrators::MoreauJeanOSI::computeFreeOutput("
       "InteractionsGraph::VDescriptor& "
@@ -1855,7 +1821,6 @@ void siconos::integrators::MoreauJeanOSI::integrate(double &tinit, double &tend,
                                                     int &notUsed) {
   // Last parameter is not used (required for LsodarOSI but not for
   // MoreauJeanOSI).
-    std::cout << "In integrate:" << std::endl;
 
   double h = tend - tinit;
   tout = tend;
@@ -2005,13 +1970,11 @@ void siconos::integrators::MoreauJeanOSI::integrate(double &tinit, double &tend,
           "system of type :" +
           siconos::types::type_name(*ds));
   }
-  std::cout << "Out Integrate  " << std::endl;
 
 }
 
 void siconos::integrators::MoreauJeanOSI::updatePosition(
     siconos::modeling::DynamicalSystem &ds) {
-std::cout << "In updatePosition:" << std::endl;
   DEBUG_BEGIN(
       "siconos::integrators::MoreauJeanOSI::updatePosition(std::shared_ptr<"
       "siconos::modeling::"
@@ -2040,10 +2003,6 @@ std::cout << "In updatePosition:" << std::endl;
     coeff = h * (1 - _theta);
     siconos::algebra::scal(coeff, vold, q, false);  // q += h(1-theta)*vold
     q += qold;
-    std::cout << "In updatePosition: v and q" << std::endl;
-
-    v.display();
-            q.display();
   }
 //  else if (dsType == siconos::modeling::Type::SolidLinearTIDS){
 //      auto &d = static_cast<siconos::mechanics::fem::SolidLinearTIDS &>(ds);
@@ -2154,7 +2113,6 @@ std::cout << "In updatePosition:" << std::endl;
 }
 
 void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
-    std::cout << "In updateState:" << std::endl;
   DEBUG_BEGIN(
       "siconos::integrators::MoreauJeanOSI::updateState(const unsigned int "
       ")\n");
@@ -2194,11 +2152,6 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
       auto &v = *d.velocity();
       auto baux = dsType == siconos::modeling::Type::LagrangianDS && useRCC &&
                   _simulation->relativeConvergenceCriterionHeld();
-      std::cout << "v in updateState:" << std::endl;
-      v.display();
-      std::cout << "vfree in updateState:" << std::endl;
-      vfree.display();
-
 
       if (d.p(_levelMaxForInput) && d.p(_levelMaxForInput)->size() > 0) {
         assert(((d.p(_levelMaxForInput)).get()) &&
@@ -2206,8 +2159,7 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
                "*d.p(_levelMaxForInput) "
                "== nullptr.");
         v = *d.p(_levelMaxForInput);  // v = p
-        std::cout << "In updateState for LagrangianlinearTIDS: p is:" << std::endl;
-        v.display();
+
         if (d.boundaryConditions()) {
           for (const auto itindex : d.boundaryConditions()->velocityIndices()) {
             v.setValue(itindex, 0.0);
@@ -2220,13 +2172,7 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
         }
         else {
           W.Solve(v);
-          std::cout << "v in updateState after solve:" << std::endl;
-          v.display();
-
           v += vfree;
-          std::cout << "v + vfree in updateState after solve:" << std::endl;
-          v.display();
-
         }
       } else {
         v = vfree;
@@ -2283,20 +2229,8 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
             *ds_work_vectors[siconos::integrators::MoreauJeanOSI::SIGMAFREE];
 
         auto qSigma = siconos::algebra::SiconosVector(v.size()+sigma.size());
-        std::cout << "qSigma size:" << qSigma.size() << std::endl;
         auto &qsigmafree =
             *ds_work_vectors[siconos::integrators::MoreauJeanOSI::Q_SIGMAFREE];
-        std::cout << "qsigmafree in updateState:" << qSigma.size() << " " << qsigmafree.size() << std::endl;
-        std::cout << "v in updateState:" << std::endl;
-        v.display();
-        std::cout << "vfree in updateState:" << std::endl;
-        vfree.display();
-        std::cout << "sigma in updateState:" << std::endl;
-        sigma.display();
-        std::cout << "sigmafree in updateState:" << std::endl;
-        sigmafree.display();
-
-
 
         double h = _simulation->timeStep();
         if (d.p(_levelMaxForInput) && d.p(_levelMaxForInput)->size() > 0) {
@@ -2305,8 +2239,6 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
                  "*d.p(_levelMaxForInput) "
                  "== nullptr.");
           v = *d.p(_levelMaxForInput);  // v = p
-          std::cout << "In updateState: p is:" << std::endl;
-          v.display();
           if (d.boundaryConditions()) {
             for (const auto itindex : d.boundaryConditions()->velocityIndices()) {
               v.setValue(itindex, 0.0);
@@ -2317,11 +2249,8 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
         {
             v.zero();
         }
-        std::cout << "In updateState: plasticRate is:" << d.plasticRate() << std::endl;
 
         if (d.plasticRate() && d.plasticRate()->size() > 0) {
-            std::cout << "In updateState: plasticRate is:" << std::endl;
-            d.plasticRate()->display();
             siconos::algebra::scal(-h, *d.plasticRate(), sigma, false); // sigma = -h*\dot Epsilon
         }
         else
@@ -2335,74 +2264,48 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
             sigma.toBlock(qSigma, d.stressDimension(), 0, d.velocityDimension());  // q_sigma = [v; sigma]
 
             // -> Solve WX = qSigma and set qSigma = X
-//            std::cout << "displaying W :" << std::endl;
-//            W.display();
-            std::cout << "qSigma before solve:" << std::endl;
-            qSigma.display();
             W.Solve(qSigma);
-            std::cout << "qSigma :" << std::endl;
-            qSigma.display();
             std::vector<std::size_t> subCoord(4);
             subCoord[0] = 0;
             subCoord[1] = d.velocityDimension();
             subCoord[2] = 0;
             subCoord[3] = d.velocityDimension();
             siconos::algebra::subscal(1.0, qSigma, v,
-                                      subCoord, false);
+                                      subCoord, true);
             subCoord[0] = d.velocityDimension();
             subCoord[1] = qSigma.size();
             subCoord[2] = 0;
             subCoord[3] = d.stressDimension();
             siconos::algebra::subscal(1.0, qSigma, sigma,
-                                      subCoord, false);
+                                      subCoord, true);
         }
-        std::cout << "v in updateState after solve:" << std::endl;
-        v.display();
-
         v += vfree;
-        std::cout << "v + vfree in updateState after solve:" << std::endl;
-        v.display();
-
         sigma += sigmafree;
 
-        std::cout << "About to apply BC:" << std::endl;
         if (d.boundaryConditions()) {
-            std::cout << "ploooooooooooooooooooop:" << std::endl;
-            std::cout << d.dimension() << std::endl;
-            std::cout << d.stressDimension() << std::endl;
           int bc = 0;
           auto columntmp22 =
               std::make_shared<siconos::algebra::SiconosVector>(22);
-          std::cout << "columntmp22 declared:" << std::endl;
           auto columntmp =
               std::make_shared<siconos::algebra::SiconosVector>(d.dimension()+d.stressDimension());
-          std::cout << "columntmp declared:" << std::endl;
           for (const auto itindex : d.boundaryConditions()->velocityIndices()) {
-              std::cout << "In loop BC:" << itindex   << std::endl;
-              std::cout << "WBoundaryConditions size:" << _dynamicalSystemsGraph->properties(*dsi).WBoundaryConditions->size(0) << " " << _dynamicalSystemsGraph->properties(*dsi).WBoundaryConditions->size(1)   << std::endl;
-
             _dynamicalSystemsGraph->properties(*dsi).WBoundaryConditions->getCol(
                 bc, *columntmp);
             /*\warning we assume that W is symmetric in the Lagrangian case*/
 
 //            double value = -siconos::algebra::inner_prod(*columntmp, v);
-            std::cout << "About to inner_prod:" << std::endl;
             double value = -siconos::algebra::inner_prod(*columntmp, qSigma);
-            std::cout << "Out inner_prod:" << std::endl;
             if (d.p(_levelMaxForInput) && d.p(_levelMaxForInput)->size() > 0) {
               value += (d.p(_levelMaxForInput))->getValue(itindex);
             }
             /* \warning the computation of reactionToBoundaryConditions take into
                account the contact impulse but not the external and internal
                forces. A complete computation of the residu should be better */
-            std::cout << "d.reactionToBoundaryConditions()->size():" << d.reactionToBoundaryConditions()->size() << std::endl;
             d.reactionToBoundaryConditions()->setValue(bc, value);
             bc++;
           }
         }
-        std::cout << "About to updatePosition:" << std::endl;
         updatePosition(ds);
-        std::cout << "Out of solidTIDS case in update state :" << std::endl;
     }
     else if (dsType == siconos::modeling::Type::NewtonEulerDS) {
       DEBUG_PRINT(
