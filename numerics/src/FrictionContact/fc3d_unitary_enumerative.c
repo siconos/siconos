@@ -39,14 +39,14 @@
 static void solve2x2(double *a, double *b, double *c, double *a1, double *b1, double *c1, double *x, double *y);
 
 
-void compute_racines(double * Poly, int *nbRealRacines, double *Racines)
+void compute_roots(double * Poly, int *nbRealRoots, double *Roots)
 {
   double r[3][5];
   //Roots of poly p[0] x^4 + p[1] x^3...+p[4]=0
   //x=r[1][k] + i r[2][k]  k=1,...,4
 #ifdef FC3D_UE_DEBUG
   double Psav[5];
-  printf("compute_racines: polynome(x)=%e.x4+%e.x3+%e.x2+%e.x+%e\n", Poly[0], Poly[1], Poly[2], Poly[3], Poly[4]);
+  printf("compute_roots: polynome(x)=%e.x4+%e.x3+%e.x2+%e.x+%e\n", Poly[0], Poly[1], Poly[2], Poly[3], Poly[4]);
   for(int k = 0; k < 5; k++)
     Psav[k] = Poly[k];
 #endif
@@ -54,7 +54,7 @@ void compute_racines(double * Poly, int *nbRealRacines, double *Racines)
   {
     Poly[0] = 0.0;
 #ifdef FC3D_UE_DEBUG
-    printf("compute_racines: WARNING, Poly[1]/Poly[0] =%e. set Poly[0]=0\n", fabs(Poly[1] / Poly[0]));
+    printf("compute_roots: WARNING, Poly[1]/Poly[0] =%e. set Poly[0]=0\n", fabs(Poly[1] / Poly[0]));
 #endif
   }
   int degp1 = 5;
@@ -78,26 +78,26 @@ void compute_racines(double * Poly, int *nbRealRacines, double *Racines)
   }
   else
   {
-    if(verbose) printf("FC3D_unitary_enumerative: degre of polynom is 0.");
+    numerics_printf_verbose(2,"FC3D_unitary_enumerative: degre of polynom is 0.");
     degp1 = 1;
   }
-  (*nbRealRacines) = 0;
+  (*nbRealRoots) = 0;
   for(int k = 1; k < degp1; k++)
   {
     if(fabs(r[2][k]) < 1e-10)
     {
-      Racines[*nbRealRacines] = r[1][k];
-      (*nbRealRacines)++;
+      Roots[*nbRealRoots] = r[1][k];
+      (*nbRealRoots)++;
     }
   }
 #ifdef FC3D_UE_DEBUG
-  for(int k = 0; k < *nbRealRacines; k++)
+  for(int k = 0; k < *nbRealRoots; k++)
   {
-    printf("compute_racines debug : Psav(Racines[%d]=%e)=%e\n", k, Racines[k],
-           Psav[0]*Racines[k]*Racines[k]*Racines[k]*Racines[k] +
-           Psav[1]*Racines[k]*Racines[k]*Racines[k] +
-           Psav[2]*Racines[k]*Racines[k] +
-           Psav[3]*Racines[k] +
+    printf("compute_roots debug : Psav(Roots[%d]=%e)=%e\n", k, Roots[k],
+           Psav[0]*Roots[k]*Roots[k]*Roots[k]*Roots[k] +
+           Psav[1]*Roots[k]*Roots[k]*Roots[k] +
+           Psav[2]*Roots[k]*Roots[k] +
+           Psav[3]*Roots[k] +
            Psav[4]);
   }
 #endif
@@ -469,25 +469,25 @@ int fc3d_unitary_enumerative_solve_sliding(FrictionContactProblem* problem, doub
   Poly4[2] = 4 * BB - 2 * AA;
   Poly4[3] = 2 * CC + 2 * DD;
   Poly4[4] = AA + EE;
-  int nbRealRacines;
-  double Racines[4];
+  int nbRealRoots;
+  double Roots[4];
   double PossiblesTheta[8];
 
-  compute_racines(Poly4, &nbRealRacines, Racines);
-  for(int numR = 0; numR < nbRealRacines; numR++)
-    PossiblesTheta[numR] = 2 * atan(Racines[numR]);
+  compute_roots(Poly4, &nbRealRoots, Roots);
+  for(int numR = 0; numR < nbRealRoots; numR++)
+    PossiblesTheta[numR] = 2 * atan(Roots[numR]);
   /*Case RTb[x]==0*/
-  PossiblesTheta[nbRealRacines] = -M_PI / 2;
-  PossiblesTheta[nbRealRacines + 1] = M_PI / 2;
-  PossiblesTheta[nbRealRacines + 2] = M_PI;
-  PossiblesTheta[nbRealRacines + 3] = 0;
-  for(int numR = 0; numR < nbRealRacines + 4; numR++)
+  PossiblesTheta[nbRealRoots] = -M_PI / 2;
+  PossiblesTheta[nbRealRoots + 1] = M_PI / 2;
+  PossiblesTheta[nbRealRoots + 2] = M_PI;
+  PossiblesTheta[nbRealRoots + 3] = 0;
+  for(int numR = 0; numR < nbRealRoots + 4; numR++)
   {
 #ifdef FC3D_UE_DEBUG
-    if(numR >= nbRealRacines)
+    if(numR >= nbRealRoots)
       printf("FC3D_UE_DEBUG: The last attempt is R_T1 or R_T2 equal to 0?\n");
 #endif
-    //    double R=Racines[numR];
+    //    double R=Roots[numR];
     double theta = PossiblesTheta[numR]; //2*atan(R);
     double costheta = cos(theta);
     double sintheta = sin(theta);
@@ -500,10 +500,10 @@ int fc3d_unitary_enumerative_solve_sliding(FrictionContactProblem* problem, doub
     *reaction0 = sqrt((*reaction1) * (*reaction1) + (*reaction2) * (*reaction2)) / (*mu);
 
     //In particular case RTb[x]==0, then check :
-    if(numR >= nbRealRacines)
+    if(numR >= nbRealRoots)
     {
       //RTb[0]==0
-      if(numR < nbRealRacines + 2)
+      if(numR < nbRealRoots + 2)
       {
         alpha = (-Q2b[1] + a2 * fabsradius) / RTb[1] - D2;
         if(fabs(Q2b[0] - a1 * fabsradius) > tol)
@@ -526,10 +526,10 @@ int fc3d_unitary_enumerative_solve_sliding(FrictionContactProblem* problem, doub
 #ifdef FC3D_UE_DEBUG
     double alpha1 = 0.0;
     double alpha2 = 0.0;
-    if(numR >= nbRealRacines)
+    if(numR >= nbRealRoots)
     {
       //RTb[0]==0
-      if(numR < nbRealRacines + 2)
+      if(numR < nbRealRoots + 2)
         alpha1 = (-Q2b[1] + a2 * fabsradius) / RTb[1] - D2;
       else
         alpha2 = (-Q2b[0] + a1 * fabsradius) / RTb[0] - D1;
@@ -593,11 +593,15 @@ int fc3d_unitary_enumerative_solve_sliding(FrictionContactProblem* problem, doub
 #ifdef FC3D_UE_DEBUG
   printf("FC3D_UE_DEBUG: Solver failed\n");
 #endif
-  printf("fc3d_unitary_enumerative (failed) M:\n");
-  print3x3(M);
+  numerics_printf_verbose(2,"fc3d_unitary_enumerative (failed) \n");
+  if (verbose >= 2)
+    {
+      printf("M : \n");
+      print3x3(M);
+      printf("Q : \n");
+      print3(Q);
+    }
   M = M00;
-  printf("fc3d_unitary_enumerative (failed) Q:\n");
-  print3(Q);
   Q = Q0;
   projectionOnCone(reaction, *mu);
   return -1;
@@ -638,8 +642,8 @@ int fc3d_unitary_enumerative_solve_poly_nu_sliding(FrictionContactProblem* probl
 
   double cg[5];
 
-  int nbRealRacines;
-  double Racines[4];
+  int nbRealRoots;
+  double Roots[4];
 
   double W0 = *M00 ;
   double invW0 = 1 / W0;
@@ -667,19 +671,19 @@ int fc3d_unitary_enumerative_solve_poly_nu_sliding(FrictionContactProblem* probl
   cg[3] = 2 * beta * mu * mu * q * q2 * lambda12 * lambda12 + 2 * (lambda1 + lambda2) * mu * mu * q * q * lambda12 * lambda12 - 4 * W0 * W0 * q1 * q2 * lambda12 - 2 * (lambda1 * lambda1 + 2 * lambda1 * lambda2) * beta * mu * mu * q * q2 + 2 * (lambda1 + lambda2) * alpha * mu * mu * q * q2 * lambda12 - (2 * lambda1 * lambda1 * lambda2 + 2 * lambda1 * lambda2 * lambda2) * mu * mu * q * q + 2 * (lambda1 + lambda2) * beta * mu * mu * q * q1 * lambda12 + 2 * alpha * beta * mu * mu * q2 * q2 * lambda12 + 2 * lambda1 * W0 * W0 * q2 * q2 + 2 * beta * beta * mu * mu * q1 * q2 * lambda12 - 2 * lambda2 * alpha * alpha * mu * mu * q1 * q1 - 2 * (lambda1 + lambda2) * alpha * beta * mu * mu * q1 * q2 - 2 * (2 * lambda1 * lambda2 + lambda2 * lambda2) * alpha * mu * mu * q * q1 + 2 * mu * mu * alpha * alpha * q1 * q2 * lambda12 + 2 * mu * mu * beta * alpha * q1 * q1 * lambda12 + 2 * mu * mu * q * alpha * q1 * lambda12 * lambda12 + 2 * lambda2 * W0 * W0 * q1 * q1 - 2 * lambda1 * beta * beta * mu * mu * q2 * q2;
   cg[4] = -beta * beta * mu * mu * q1 * q1 * lambda12 * lambda12 - alpha * alpha * mu * mu * q2 * q2 * lambda12 * lambda12 - lambda1 * lambda1 * beta * beta * mu * mu * q2 * q2 - lambda1 * lambda1 * lambda2 * lambda2 * mu * mu * q * q - lambda2 * lambda2 * alpha * alpha * mu * mu * q1 * q1 + lambda2 * lambda2 * W0 * W0 * q1 * q1 + lambda1 * lambda1 * W0 * W0 * q2 * q2 + W0 * W0 * q1 * q1 * lambda12 * lambda12 - 2 * beta * mu * mu * q * q1 *  pow((double) lambda12, (double) 3) - 2 * alpha * mu * mu * q * q2 *  pow((double) lambda12, (double) 3) + 2 * lambda1 * lambda2 * beta * mu * mu * q * q1 * lambda12 + 2 * lambda1 * lambda2 * alpha * mu * mu * q * q2 * lambda12 - 2 * lambda1 * lambda2 * alpha * beta * mu * mu * q1 * q2 - 2 * alpha * beta * mu * mu * q1 * q2 * lambda12 * lambda12 + 2 * lambda2 * alpha * beta * mu * mu * q1 * q1 * lambda12 + 2 * lambda2 * alpha * alpha * mu * mu * q1 * q2 * lambda12 + 2 * lambda1 * beta * mu * mu * q * q2 * lambda12 * lambda12 + 2 * lambda1 * beta * beta * mu * mu * q1 * q2 * lambda12 + 2 * lambda1 * alpha * beta * mu * mu * q2 * q2 * lambda12 - 2 * lambda1 * lambda2 * lambda2 * alpha * mu * mu * q * q1 - 2 * lambda1 * lambda1 * lambda2 * beta * mu * mu * q * q2 + 2 * lambda2 * alpha * mu * mu * q * q1 * lambda12 * lambda12 - mu * mu * q * q *  pow((double) lambda12, (double) 4) + W0 * W0 * q2 * q2 * lambda12 * lambda12 - 2 * lambda2 * W0 * W0 * q1 * q2 * lambda12 - 2 * lambda1 * W0 * W0 * q1 * q2 * lambda12 + 2 * lambda1 * lambda2 * mu * mu * q * q * lambda12 * lambda12;
 
-  compute_racines(cg, &nbRealRacines, Racines);
+  compute_roots(cg, &nbRealRoots, Roots);
   double nu = -1;
-  for(int i = 0; i < nbRealRacines; i++)
+  for(int i = 0; i < nbRealRoots; i++)
   {
-    if(nu < 0 && Racines[i] > 0)
-      nu = Racines[i];
-    else if(Racines[i] > 0 && Racines[i] < nu)
-      nu = Racines[i];
+    if(nu < 0 && Roots[i] > 0)
+      nu = Roots[i];
+    else if(Roots[i] > 0 && Roots[i] < nu)
+      nu = Roots[i];
   }
   if(nu > 0)
   {
 #ifdef FC3D_UE_DEBUG
-    printf("nb racines :%d\n", nbRealRacines);
+    printf("nb roots :%d\n", nbRealRoots);
     printf("nu=%e\n", nu);
 #endif
     /*system Mt*Rt=qt*/
