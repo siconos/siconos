@@ -374,6 +374,65 @@ double projectionError(const double * velocity, const double * reaction, const u
 }
 
 
+/* Computation of the projection error |r - proj(r-u)|_inf */
+double projectionError_norm_infinity_conic(const double * velocity, const double * reaction, const unsigned int nc, const double tol)
+{
+  // printf("\nu = "); NV_display(velocity, nc*3); printf("\n");
+  double worktmp[3];
+  double out = 0.0;
+  double norm_u, norm_r, relative_scaling;
+
+  for(int ic = 0 ; ic < nc ; ic++)
+  {
+    worktmp[0] = reaction[3*ic] -  velocity[3*ic] ;
+    worktmp[1] = reaction[3*ic+1] -  velocity[3*ic+1] ;
+    worktmp[2] = reaction[3*ic+2] -  velocity[3*ic+2] ;
+    projectionOnCone(worktmp, 1.0);
+    worktmp[0] = reaction[3*ic] -  worktmp[0];
+    worktmp[1] = reaction[3*ic+1] -  worktmp[1];
+    worktmp[2] = reaction[3*ic+2] -  worktmp[2];
+    out =  fmax(out, worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2]);
+  }
+
+  return sqrt(out);
+}
+
+
+/* Computation of the projection error |r - proj(r-u)|_inf with recomputation of u and v */
+double projectionError_based_reaction_norm_infinity_conic(NumericsMatrix *H, NumericsMatrix *M,
+                    const double * f, const double * w, const double * reaction, const unsigned int varsCount, const double tol)
+{
+  size_t m = M->size0;
+  size_t d = 3;
+  size_t nd = varsCount*d;
+
+  double *globalVelocity = (double*)calloc(m, sizeof(double));
+  double *velocity = (double*)calloc(nd, sizeof(double));
+
+  // Re-compute v = M\(H'*r+f)
+  cblas_dcopy(m, f, 1, globalVelocity, 1);
+  NM_tgemv(1.0, H, reaction, 1.0, globalVelocity);
+  NM_Cholesky_solve(M, globalVelocity, 1);
+
+  // Re-compute u = Hv + w + phi(Hv + w)
+  cblas_dcopy(nd, w, 1, velocity, 1);
+  NM_gemv(1, H, globalVelocity, 1.0, velocity);
+  for (int i = 0; i < nd; i += d)
+  {
+    velocity[i] += cblas_dnrm2(2, velocity + i + 1, 1);
+  }
+
+  double out = projectionError_norm_infinity_conic(velocity, reaction, varsCount, tol);
+
+  free(globalVelocity);
+  free(velocity);
+
+  return out;
+}
+
+
+
+
 void setErrorArray(double * error, const double pinfeas, const double dinfeas, const double udotr, const double dualgap, const double complem, const double projerr)
 {
   error[0] = pinfeas;

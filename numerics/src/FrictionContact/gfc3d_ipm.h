@@ -237,6 +237,9 @@ void NM_clear_cone_matrix_H(NumericsMatrix *H, unsigned int n_cones_to_clear, in
 NumericsMatrix * NM_extract(NumericsMatrix *A, int n_rows, int *target_rows, int n_cols, int *target_cols);
 
 double projectionError(const double * velocity, const double * reaction, const unsigned int nc, const double tol);
+double projectionError_norm_infinity_conic(const double * velocity, const double * reaction, const unsigned int nc, const double tol);
+double projectionError_based_reaction_norm_infinity_conic(NumericsMatrix *H, NumericsMatrix *M,
+                    const double * f, const double * w, const double * reaction, const unsigned int varsCount, const double tol);
 
 /* Routine is to read matrix-block in hdf5 file
  * type = 0 : return number of blocks (blk_index is neglected)
