@@ -22,22 +22,21 @@
 const char ** data_collection()
 {
 
-  int n_data_1=1091;
+  int n_data_1=1081;
 
   const char ** data_collection_1 = (const char **)malloc(n_data_1*sizeof(const char *));
   int n_data=0;
 
-  int listprob[7] = {1, 0, 0, 0, 0, 0, 0};
+  int listprob[7] = {0, 0, 1, 0, 0, 0, 0};
   // int listprob[7] = {1, 1, 1, 1, 1, 1, 1};
-  /* 0: BoxStacks      #28  problems mu = 0.3 */   // kappa_mu = 0.1; kappa_eps = n;      // kappa_mu = 0.5 then 0.98 (res<1e-4); kappa_eps = n;
-  /* 1: Capsules       #200 problems mu = 0.3 */
-  /* 2: KaplasTower    #240 problems mu = 0.3 */
-  /* 3: PrimitiveSoup  #200 problems mu = 0.7 */
-  /* 4: Spheres        #200 problems mu = 0.7 */
-  /* 5: Spheres1mm      #41 problems mu = 0.7 */
-  /* 6: Chute*         #182 problems mu = 1.0 */
-  /*   TOTAL          #1091 problems */
-  /* 7: BoxStacks_selected  #16  problems mu = 0.3 */
+  /* 0: BoxStacks           #16  problems mu = 0.3 */
+  /* 1: Capsules            #200 problems mu = 0.3 */
+  /* 2: KaplasTower         #200 problems mu = 0.3 */
+  /* 3: PrimitiveSoup       #200 problems mu = 0.7 */
+  /* 4: Spheres             #200 problems mu = 0.7 */
+  /* 5: Spheres1mmScaled    #46 problems mu = 0.7 */
+  /* 6: Chute*              #175 problems mu = 1.0 */
+  /*   TOTAL                #1081 problems */
 
   if (listprob[0]==1)
   {
@@ -626,18 +625,12 @@ const char ** data_collection()
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2616-648.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2633-643.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2639-651.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2649-657.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2708-701.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2714-674.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2720-703.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2722-717.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2724-713.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2734-712.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2738-740.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2739-747.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2744-737.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2785-772.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2876-870.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2893-938.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2902-990.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2920-1003.hdf5";
@@ -873,60 +866,52 @@ const char ** data_collection()
 
   if (listprob[5]==1)
   {
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-3987-26.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-429-0.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-2873-1.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-3206-2.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-3988-17.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4008-41.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4015-48.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4021-36.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4024-43.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4045-53.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4053-54.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4094-72.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4099-89.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4155-120.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4170-136.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4174-103.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4184-164.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4231-185.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4234-221.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4238-220.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4242-201.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4255-231.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4282-281.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4284-273.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4291-289.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4308-500.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4328-627.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4348-343.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4353-562.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4369-653.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4374-591.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4376-594.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4380-659.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4387-1021.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4391-741.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4399-902.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4401-1017.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4405-796.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4410-905.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4422-772.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4423-1085.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4424-773.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4432-956.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4439-953.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4466-1178.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4476-1125.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4481-1135.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4484-1136.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4486-1191.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4524-1960.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4527-1978.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4536-1600.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4540-1612.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mm/Spheres1mm-ndof-12000-nc-4547-1617.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-731-0.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-904-1.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-1332-2.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-2407-3.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-2444-5.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-2481-4.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-2730-6.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-2941-7.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-3120-8.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-3284-9.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-3389-10.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-3459-11.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-3940-12.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4025-13.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4144-14.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4369-17.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4383-18.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4430-20.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4432-21.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4451-85.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4464-23.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4481-105.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4484-70.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4487-76.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4488-135.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4489-114.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4490-51.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4500-148.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4506-172.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4515-182.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4520-251.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4536-377.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4547-441.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4557-720.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4559-682.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4564-791.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4573-845.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4575-901.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4581-866.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4603-1534.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4610-1948.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4613-1698.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4615-1898.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4620-1879.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4625-1864.hdf5";
+    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4627-1845.hdf5";
   }
 
   if (listprob[6]==1)
@@ -940,8 +925,6 @@ const char ** data_collection()
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-4992-nc-284-1376.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-4992-nc-323-1386.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-4992-nc-329-1390.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-5040-nc-315-1425.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-5112-nc-331-1428.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-5376-nc-381-1489.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-5376-nc-384-1499.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-5376-nc-434-1550.hdf5";
@@ -980,17 +963,6 @@ const char ** data_collection()
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-8448-nc-1436-2501.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-8574-nc-1557-2575.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-8604-nc-1556-2580.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-8832-nc-1523-2605.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-8832-nc-1581-2621.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-8832-nc-1612-2637.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-8832-nc-1626-2644.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-8832-nc-1649-2652.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-8832-nc-1650-2640.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-8832-nc-1657-2651.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-8832-nc-1694-2675.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-8844-nc-1705-2680.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-8934-nc-1711-2693.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-9096-nc-1768-2717.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-9216-nc-1885-2782.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-9216-nc-1900-2778.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-9216-nc-1957-2807.hdf5";
@@ -998,19 +970,7 @@ const char ** data_collection()
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-9600-nc-2037-2879.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-9600-nc-2063-2881.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-9600-nc-2065-2894.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-9654-nc-2100-2949.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-9804-nc-2171-2968.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-9918-nc-2178-2978.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-10296-nc-2242-3111.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-10368-nc-2256-3117.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-10368-nc-2296-3128.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-10374-nc-2400-3189.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-10512-nc-2358-3202.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-10596-nc-2401-3209.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-10620-nc-2422-3212.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-10626-nc-2328-3214.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-10752-nc-2385-3278.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-10752-nc-2396-3244.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-10752-nc-2459-3293.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-10752-nc-2514-3305.hdf5";
     data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-10872-nc-2558-3334.hdf5";
