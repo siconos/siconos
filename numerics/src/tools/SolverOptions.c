@@ -687,6 +687,7 @@ SolverOptions * solver_options_create(int solverId)
   case SICONOS_FRICTION_3D_NSGS:
   case SICONOS_GLOBAL_FRICTION_3D_NSGS:
   case SICONOS_GLOBAL_FRICTION_3D_NSGS_WR:
+  case SICONOS_GLOBAL_FRICTION_3D_NSGS_SEP_WR:
   {
     options = solver_options_initialize(solverId, 1000, 1e-4, 1);
     fc3d_nsgs_set_default(options);
