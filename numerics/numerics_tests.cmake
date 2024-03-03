@@ -320,6 +320,16 @@ if(WITH_TESTING)
       EXTRA_SOURCES data_collection_gfc3d_fclib.c test_admm_gfc3d_1.c DEPS FCLIB::fclib
       HDF5 ON
       )
+    new_tests_collection(
+      DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_ADMM_COLLECTION_FCLIB_FULL
+      EXTRA_SOURCES data_collection_gfc3d_fclib_full.c test_admm_gfc3d_1.c DEPS FCLIB::fclib
+      HDF5 ON
+      )
+    new_tests_collection(
+      DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_ADMM_SEP_COLLECTION_FCLIB_FULL
+      EXTRA_SOURCES data_collection_gfc3d_fclib_full.c test_admm_sep_gfc3d_1.c DEPS FCLIB::fclib
+      HDF5 ON
+      )
 
     new_tests_collection(
       DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_WR_COLLECTION_FCLIB
