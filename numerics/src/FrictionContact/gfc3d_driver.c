@@ -146,17 +146,200 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double *reaction, double
   }
   case SICONOS_GLOBAL_FRICTION_3D_NSGS_SEP_WR:
   {
+    char *str = (char *) malloc(200);
+    if (problem->name)
+    {
+      strcpy( str, problem->name );
+    }
+    else
+    {
+      strcpy( str, "foo_" );
+    }
+    char * separators = "/";
+    char *strToken_name = strtok( str, separators );
+    for(int i=0; i<5; i++)
+    {
+      if(strToken_name != NULL) strToken_name = strtok ( NULL, separators );
+    }
+    strToken_name = strtok ( strToken_name, "." );
+
+    char *line = NULL, *saveptr = NULL;
+    int load_data = 0, len_prob_name = 0, n_blocks = 0.;
+    size_t len = 0;
+    FILE *varsep = fopen("varsep.res", "r");
+    if (!varsep) printf("\n\n ERROR: varsep.res file is not available!!! \n\n");
+    else
+    {
+      // Traverse the problem names in data file for a match
+      for (int i=0; i<1081; i++)
+      {
+        if (getline(&line, &len, varsep))     // Read 1st line = problem name
+        {
+          len_prob_name = strlen(line);
+          if (len_prob_name > 0 && line[len_prob_name - 1] == '\n')
+          {
+              line[len_prob_name - 1] = '\0';  // Replace the newline character with null terminator
+          }
+          if (strcmp(line, strToken_name) == 0) // Problem names are matched
+          {
+            load_data = 1;
+          }
+        }
+        else
+        {
+          printf("ERROR: Error reading from varsep.res file.\n");
+          break;
+        }
 
 
+        // Read No. of blocks of the current test
+        if (getline(&line, &len, varsep))     // Read 2nd line = n_blocks
+        {
+          n_blocks = atoi(line);
+        }
 
 
+        if (load_data) break;
+
+        // Go to the next problem name
+        for (int i=0; i<n_blocks; i++)
+          for (int j=0; j<4; j++) // each block has exaclty 4 lines
+            getline(&line, &len, varsep);
+      }
+    }
 
 
+    /*** Solve separate sub-problems ***/
+    int blk_index = -1, count_contact_cp = 0, count_contact_full = 0, count_body_cp = 0, count_body_full = 0;
+    int *permu_contact_cp = NULL, *permu_contact_full = NULL, *permu_body_cp = NULL, *permu_body_full = NULL;
+    int Hc_m = -1, Hc_n = -1, Hc_rank = -1;
+    ssize_t read;
+    separators = " \t\n";
+
+    for (int blk_i=0; blk_i<n_blocks; blk_i++)
+    {
+      // Block index
+      getline(&line, &len, varsep);
+      blk_index = atoi(line);
+
+      // Permutation contact
+      count_contact_cp = 0, count_contact_full = 0;
+      read = getline(&line, &len, varsep);
+      permu_contact_cp = malloc(read * sizeof(int)); // cp = compressed
+      permu_contact_full = malloc(read * sizeof(int) * 3);
+      char *strToken = strtok (line, separators);
+
+      while (strToken != NULL)
+      {
+        // Convert the strToken to an integer and store it in permu_contact_cp array
+        permu_contact_cp[count_contact_cp] = atoi(strToken)-1;
+        for (int k=0; k<3; k++) permu_contact_full[count_contact_full++] = permu_contact_cp[count_contact_cp]*3+k;
+        count_contact_cp++;
+
+        // Get the next token
+        strToken = strtok(NULL, separators);
+      }
+
+      // Permutation body
+      count_body_cp = 0, count_body_full = 0;
+      read = getline(&line, &len, varsep);
+      permu_body_cp = malloc(read * sizeof(int));
+      permu_body_full = malloc(read * sizeof(int) * 6);
+      strToken = strtok (line, separators);
+      while (strToken != NULL)
+      {
+        permu_body_cp[count_body_cp] = atoi(strToken)-1;
+        for (int k=0; k<6; k++) permu_body_full[count_body_full++] = permu_body_cp[count_body_cp]*6+k;
+        count_body_cp++;
+
+        strToken = strtok(NULL, separators);
+      }
 
 
+      // Hc info
+      getline(&line, &len, varsep);
+      strToken = strtok (line, separators);
+      strToken = strtok(NULL, separators);
+      strToken = strtok(NULL, separators);
+      Hc_rank = atoi(strToken);
 
-    numerics_printf_verbose(1," ========================== Call NSGS_SEP_WR solver with reformulation into Friction-Contact 3D problem ==========================\n");
-    gfc3d_nsgs_wr(problem, reaction, velocity, globalVelocity, &info, options);
+
+      // Create sub-problem
+      GlobalFrictionContactProblem * sub_prob = globalFrictionContactProblem_new();
+      sub_prob->dimension = problem->dimension;
+      sub_prob->numberOfContacts = count_contact_cp;
+      sub_prob->M = NM_extract(problem->M, count_body_full, permu_body_full, count_body_full, permu_body_full);
+      sub_prob->env = NULL;
+
+      // Attention: matrix H stored in hdf5 is transposed!
+      sub_prob->H = NM_extract(problem->H, count_body_full, permu_body_full, count_contact_full, permu_contact_full);
+
+      // vector f = problem->q
+      sub_prob->q = (double*)malloc(count_body_full*sizeof(double));
+      for (int i=0; i<count_body_full; i++) sub_prob->q[i] = problem->q[permu_body_full[i]];
+
+      // vector w = problem->b
+      sub_prob->b = (double*)malloc(count_contact_full*sizeof(double));
+      for (int i=0; i<count_contact_full; i++) sub_prob->b[i] = problem->b[permu_contact_full[i]];
+
+      // friction coef mu
+      sub_prob->mu = (double*)malloc(count_contact_cp*sizeof(double));
+      for (int i=0; i<count_contact_cp; i++) sub_prob->mu[i] = problem->mu[permu_contact_cp[i]];
+
+      // name
+      sub_prob->name = problem->name;
+
+      // Sub-solutions
+      double *sub_reaction = (double*)calloc(count_contact_full, sizeof(double));
+      double *sub_velocity = (double*)calloc(count_contact_full, sizeof(double));
+      double *sub_globalVelocity = (double*)calloc(count_body_full, sizeof(double));
+      double *sub_reaction_tmp = (double*)calloc(count_contact_full, sizeof(double));
+      double *sub_velocity_tmp = (double*)calloc(count_contact_full, sizeof(double));
+
+      // Save the block number to append in the test name
+      options->solverData = (char *)malloc(10*sizeof(char));
+      char *blk_num_name = (char *)options->solverData;
+      sprintf(blk_num_name, "-%d", blk_i);
+
+
+      printf("\n********** START sub-problem %d / %d, H (ndxm)/rank = %dx%d / %d *************************************************************\n", blk_i+1, n_blocks, count_contact_full, count_body_full, Hc_rank);
+      info = -1;
+      gfc3d_nsgs_wr(sub_prob, sub_reaction, sub_velocity, sub_globalVelocity, &info, options);
+
+      if (info)
+      {
+        printf("test: failure\n");
+      }
+      else
+      {
+        printf("test: success\n");
+      }
+      printf("*************** END sub-problem %d / %d **************************************************************************************\n\n", blk_i+1, n_blocks);
+
+      // Copy sub-solutions to main solutions
+      for (int i=0; i<count_contact_full; i++)
+      {
+        reaction[permu_contact_full[i]] = sub_reaction[i];
+        velocity[permu_contact_full[i]] = sub_velocity[i];
+      }
+
+      // for (int i=0; i<count_body_full; i++)
+      // {
+      //   globalVelocity[permu_body_full[i]] = sub_globalVelocity[i];
+      // }
+
+
+      free(sub_reaction); free(sub_velocity); free(sub_globalVelocity);
+      free(sub_reaction_tmp); free(sub_velocity_tmp);
+      globalFrictionContact_free(sub_prob);
+
+      free(permu_contact_cp); free(permu_contact_full);
+      free(permu_body_cp); free(permu_body_full);
+    } // loop for n_blocks
+
+    fclose(varsep);
+    free(str);
+
     break;
   }
   case SICONOS_GLOBAL_FRICTION_3D_NSGSV_WR:
