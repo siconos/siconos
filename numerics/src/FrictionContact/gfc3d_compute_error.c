@@ -285,6 +285,7 @@ int gfc3d_compute_error_norm_infinity_conic(GlobalFrictionContactProblem* proble
                         double*  globalVelocity,
                         double tolerance,
                         SolverOptions * options,
+                        double norm_q, double norm_b,
                         double* restrict error)
 
 {
