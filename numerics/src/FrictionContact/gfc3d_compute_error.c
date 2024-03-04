@@ -277,8 +277,54 @@ int gfc3d_compute_error_r(GlobalFrictionContactProblem* problem,
     DEBUG_END("gfc3d_compute_error(...)\n");
     return 0;
   }
-
 }
+
+
+int gfc3d_compute_error_norm_infinity_conic(GlobalFrictionContactProblem* problem,
+                        double*  reaction, double*  velocity,
+                        double*  globalVelocity,
+                        double tolerance,
+                        SolverOptions * options,
+                        double* restrict error)
+
+{
+  /* Checks inputs */
+  if(problem == NULL || globalVelocity == NULL || reaction == NULL)
+    numerics_error("gfc3d_compute_error_norm_infinity_conic", "null input");
+
+  /* Computes error = dnorm2( GlobalVelocity -M^-1( q + H reaction)*/
+  int nc = problem->numberOfContacts;
+  int m = nc * 3;
+  size_t n = problem->M->size0;
+  double *mu = problem->mu;
+  double *q = problem->q;
+  double error_unitary = 0.;
+
+  /* we re-compute local velocity */
+  /* the error in the equation u = H^T v +b is then accurate at the machine precision */
+  cblas_dcopy(m, problem->b, 1, velocity, 1);
+  NM_tgemv(1, H, globalVelocity, 1.0, velocity);
+
+  double worktmp[3];
+  for(int ic = 0 ; ic < nc ; ic++)
+  {
+    fc3d_unitary_compute_and_add_error(&reaction[ic * 3], &velocity[ic * 3], mu[ic],
+                                       &error_unitary,  worktmp);
+    *error = fmax(*error, error_unitary);
+  }
+  *error = sqrt(*error);
+
+
+  if(*error > tolerance)
+  {
+    return 1;
+  }
+  else
+  {
+    return 0;
+  }
+}
+
 
 static inline  void fc3d_unitary_compute_and_add_error_convex(double* restrict r, double* restrict u, double mu, double* restrict error, double * worktmp)
 {
