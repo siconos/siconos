@@ -340,7 +340,7 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double * reaction, double 
 
         // resLocalSolver = NM_gesv(&M, sol, true);
         resLocalSolver = NM_LU_solve(NM_preserve(&M), sol, 1);
-
+	NM_unpreserve(&M);
         M.matrix0 = NULL;
         NM_clear(&M);
         break;

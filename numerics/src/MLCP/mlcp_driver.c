@@ -124,10 +124,14 @@ static void mlcp_driver_allocate_work_arrays(MixedLinearComplementarityProblem* 
   options->dWorkSize = dwsize;
   if(options->iWorkSize)
   {
+    if (options->iWork) free(options->iWork); 
     options->iWork = (int*)calloc(options->iWorkSize, sizeof(int));
   }
   if(options->dWorkSize)
+  {
+    if (options->dWork) free(options->dWork); 
     options->dWork = (double*)calloc(options->dWorkSize, sizeof(double));
+  }
 }
 
 void mlcp_driver_init(MixedLinearComplementarityProblem* problem, SolverOptions* options)
