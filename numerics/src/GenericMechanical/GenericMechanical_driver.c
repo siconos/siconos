@@ -214,12 +214,7 @@ int gmp_compute_error(GenericMechanicalProblem* pGMP, double *reaction, double *
     curProblem = curProblem->nextProblem;
     currentRowNumber++;
   }
-#ifdef GENERICMECHANICAL_DEBUG_COMPUTE_ERROR
-  if(*err > tol)
-    numerics_printf("GenericMechanical_driver compute_error END:, err>tol: error : %e\n", *err);
-  else
-    numerics_printf("GenericMechanical_driver compute_error END:, err<tol: error : %e\n", *err);
-#endif
+
   if(storageType == NM_DENSE)
     free(bufForLocalProblemDense);
 
@@ -483,35 +478,11 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double * reaction, double 
     it++;
     //numerics_printf("---GenericalMechanical_drivers,  IT=%d, err=%e.\n",it,err);
   }
-  /*
-  FILE * titi  = fopen("GMP_FAILED_scilab.txt", "w");
-  FILE * tata  = fopen("SBM.txt", "w");
-  numerics_printf("GMP_drivers, print file SBM\n");
-  SBM_write_in_file(pGMP->M->matrix1,tata);
-  fclose(tata);
-  SBM_write_in_fileForScilab(pGMP->M->matrix1,titi);
-  fclose(titi);
-  */
-  options->iparam[SICONOS_IPARAM_ITER_DONE] = it;
-#ifdef GMP_WRITE_FAILED_PRB
-  FILE * toto  = fopen("GMP_NOT_FAILED.txt", "w");
-  genericMechanicalProblem_printInFile(pGMP, toto);
-  fclose(toto);
-#endif
+
   if(tolViolate)
   {
     if(verbose > 0)
       numerics_printf("gmp_gauss_seidel failed with Iteration %i Residual = %14.7e <= %7.3e\n", it, *err, options->dparam[SICONOS_DPARAM_TOL]);
-
-#ifdef GMP_WRITE_FAILED_PRB
-    FILE * toto  = fopen("GMP_FAILED.txt", "w");
-    genericMechanicalProblem_printInFile(pGMP, toto);
-    fclose(toto);
-#endif
-
-    //    if (storageType==NM_DENSE)
-    //      free(bufForLocalProblemDense);
-    //    exit(0);
   }
   else
   {
@@ -541,6 +512,12 @@ void gmp_gauss_seidel(GenericMechanicalProblem* pGMP, double * reaction, double 
   *info = tolViolate;
   if(storageType == NM_DENSE)
     free(bufForLocalProblemDense);
+
+
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = it;
+
+
+  
   DEBUG_END("gmp_gauss_seidel(...)\n");
 }
 
@@ -617,7 +594,8 @@ void gmp_set_default(SolverOptions* options)
   options->dparam[SICONOS_DPARAM_GMP_COEFF_LS] = 1.0;
 
   options->internalSolvers[0] = solver_options_create(SICONOS_LCP_LEMKE);
-  options->internalSolvers[1] = solver_options_create(SICONOS_FRICTION_3D_ONECONTACT_QUARTIC);
+  //options->internalSolvers[1] = solver_options_create(SICONOS_FRICTION_3D_ONECONTACT_QUARTIC);
+  options->internalSolvers[1] = solver_options_create(SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID);
   options->internalSolvers[2] = solver_options_create(SICONOS_RELAY_LEMKE);
   options->internalSolvers[3] = solver_options_create(SICONOS_FRICTION_2D_NSGS);
 

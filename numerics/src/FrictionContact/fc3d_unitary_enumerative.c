@@ -626,7 +626,7 @@ void solve2x2(double *a, double *b, double *c, double *a1, double *b1, double *c
 
 }
 /*
- *Implementation from Gilles Davier : quatic formulation in respect of alpha.
+ *Implementation from Gilles Daviet : quartic formulation with respect to alpha.
  */
 int fc3d_unitary_enumerative_solve_poly_nu_sliding(FrictionContactProblem* problem, double * reaction, SolverOptions* options)
 {
