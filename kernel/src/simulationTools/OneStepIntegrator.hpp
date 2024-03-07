@@ -302,7 +302,7 @@ public:
      \param time value for output computation
      \param interaction_properties properties of the interaction, in the Interaction Graph I0
   */
-  void update_interaction_output(Interaction& inter, double time, InteractionProperties& interaction_properties);
+  void UpdateAndSwapAllOutput(Interaction& inter, double time, InteractionProperties& interaction_properties);
 
   /** compute the initial state (for dynamical system variables) of the Newton loop. */
   virtual void computeInitialNewtonState(){
