@@ -147,6 +147,10 @@ protected:
    */
   bool _isWSymmetricDefinitePositive;
 
+  /** a boolean to perform activation with negative relative velocity
+   */
+  bool _activateWithNegativeRelativeVelocity;
+
   /**
       A set of work indices for the selected coordinates when
       we subprod in computeFreeOuput
@@ -348,6 +352,26 @@ public:
   {
     _explicitNewtonEulerDSOperators = newExplicitNewtonEulerDSOperators;
   };
+
+  /** get boolean _activateWithNegativeRelativeVelocity
+   *
+   *  \return a Boolean
+   */
+  inline bool activateWithNegativeRelativeVelocity()
+  {
+    return _activateWithNegativeRelativeVelocity;
+  };
+
+  /** set the boolean to perform activation with negative relative velocity
+   *
+   *  \param newActivateWithNegativeRealtiveVelocity a Boolean
+   */
+  inline void
+  SetActivateWithNegativeRealtiveVelocity(bool newActivateWithNegativeRelativeVelocity)
+  {
+    _activateWithNegativeRelativeVelocity = newActivateWithNegativeRelativeVelocity;
+  };
+
 
   // --- OTHER FUNCTIONS ---
 

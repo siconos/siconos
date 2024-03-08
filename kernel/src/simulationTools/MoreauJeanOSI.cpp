@@ -64,7 +64,8 @@ MoreauJeanOSI::MoreauJeanOSI(double theta, double gamma):
   _constraintActivationThreshold(0.0),
   _useGammaForRelation(false),
   _explicitNewtonEulerDSOperators(false),
-  _isWSymmetricDefinitePositive(false)
+  _isWSymmetricDefinitePositive(false),
+  _activateWithNegativeRelativeVelocity(false)
 {
   _levelMinForOutput= 0;
   _levelMaxForOutput =1;
@@ -269,7 +270,6 @@ void MoreauJeanOSI::initializeIterationMatrixW(double time, SP::SecondOrderDS ds
     THROW_EXCEPTION("MoreauJeanOSI::initializeIterationMatrixW(t,ds) - ds does not belong to the OSI.");
 
   const DynamicalSystemsGraph::VDescriptor& dsv = _dynamicalSystemsGraph->descriptor(ds);
-
   if(_dynamicalSystemsGraph->properties(dsv).W)
     THROW_EXCEPTION("MoreauJeanOSI::initializeIterationMatrixW(t,ds) - W(ds) is already in the map and has been initialized.");
 
@@ -440,7 +440,7 @@ void MoreauJeanOSI::_computeWBoundaryConditions(SecondOrderDS& ds,
   // When this function is called, WBoundaryConditionsMap[ds] is
   // supposed to exist and not to be null Memory allocation has been
   // done during initializeIterationMatrixWBoundaryConditions.
-  
+
   Type::Siconos dsType = Type::value(ds);
   if(dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS ||  dsType == Type::NewtonEulerDS || dsType == Type::LagrangianLinearDiagonalDS)
   {
@@ -1799,8 +1799,8 @@ void MoreauJeanOSI::updateState(const unsigned int)
       SiconosVector& v = *d.twist();
       // DEBUG_PRINT("MoreauJeanOSI::updateState()\n ")
       // DEBUG_EXPR(d.display());
-      DEBUG_PRINT("MoreauJeanOSI::updateState() prev v\n")
-      DEBUG_EXPR(v.display());
+      DEBUG_PRINT("MoreauJeanOSI::updateState() prev v\n");
+      DEBUG_EXPR(v.display(););
 
       // failure on bullet sims
       // d.p(_levelMaxForInput) is checked in next condition
@@ -1878,21 +1878,39 @@ bool MoreauJeanOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int
   assert(i == 1);
   double h = _simulation->timeStep();
   double y = (inter->y(i - 1))->getValue(0); // for i=1 y(i-1) is the position
-  double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
+  double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the current velocity
+  double yDot_k = (inter->y_k(i)).getValue(0); // for i=1 y(i) is the velocity et the beginning of the time step
+
 
   double gamma = 1.0 / 2.0;
   if(_useGamma)
   {
     gamma = _gamma;
   }
-  DEBUG_PRINTF("MoreauJeanOSI::addInteractionInIndexSet of level = %i yref=%e, yDot=%e, y_estimated=%e.,  _constraintActivationThreshold=%e\n", i,  y, yDot, y + gamma * h * yDot, _constraintActivationThreshold);
-  y += gamma * h * yDot;
+  DEBUG_PRINTF("MoreauJeanOSI::addInteractionInIndexSet of level = %i yref=%e, yDot=%e, yDot_k=%e, y_estimated=%e.,  _constraintActivationThreshold=%e\n", i,  y, yDot, yDot_k, y + gamma * h * yDot, _constraintActivationThreshold);
+  y += gamma * h * yDot_k;
   assert(!std::isnan(y));
-  DEBUG_EXPR_WE(
-    if(y <= _constraintActivationThreshold)
-      std::cout << "MoreauJeanOSI::addInteractionInIndexSet ACTIVATE." << y << "<= " <<  _constraintActivationThreshold <<  std::endl;;
-  );
-  return (y <= _constraintActivationThreshold);
+
+  if (_activateWithNegativeRelativeVelocity)
+    {
+      DEBUG_EXPR_WE(
+		    if((y <= _constraintActivationThreshold) and (yDot_k <= _constraintActivationThreshold))
+		      std::cout << "MoreauJeanOSI::addInteractionInIndexSet ACTIVATE."
+				<< " y=" << y << "<= " <<  _constraintActivationThreshold
+				<< " yDot_k ="<< yDot_k << "<= " <<  _constraintActivationThreshold
+				<< std::endl;
+		    );
+      return ((y <= _constraintActivationThreshold) and (yDot <= _constraintActivationThreshold));
+    }
+  else
+    {
+      DEBUG_EXPR_WE(
+		    if(y <= _constraintActivationThreshold)
+		      std::cout << "MoreauJeanOSI::addInteractionInIndexSet ACTIVATE."
+				<< y << "<= " <<  _constraintActivationThreshold <<  std::endl;
+		    );
+      return (y <= _constraintActivationThreshold);
+    }
 }
 
 
