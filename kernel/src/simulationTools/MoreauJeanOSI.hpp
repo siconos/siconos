@@ -515,7 +515,10 @@ public:
    */
   void updateState(const unsigned int level) override;
 
-
+  /** Compute the matrix of work of forces by ds
+     \return SP::Siconosmatrix
+   */
+  SP::SimpleMatrix computeWorkForces();
 
   /** Displays the data of the MoreauJeanOSI's integrator
    */

@@ -1902,6 +1902,149 @@ bool MoreauJeanOSI::removeInteractionFromIndexSet(SP::Interaction inter, unsigne
 }
 
 
+SP::SimpleMatrix MoreauJeanOSI::computeWorkForces()
+{
+  DEBUG_BEGIN("MoreauJeanOSI::computeWorkForces()\n");
+
+  double t = _simulation->nextTime(); // End of the time step
+  double told = _simulation->startingTime(); // Beginning of the time step
+  double h = t - told; // time step length
+
+  DEBUG_PRINTF("nextTime %f\n", t);
+  DEBUG_PRINTF("startingTime %f\n", told);
+  DEBUG_PRINTF("time step size %f\n", h);
+
+
+  // Operators computed at told have index i, and (i+1) at t.
+
+  // Iteration through the set of Dynamical Systems.
+  //
+  //SP::DynamicalSystem ds; // Current Dynamical System.
+  Type::Siconos dsType ; // Type of the current DS.
+
+
+  size_t number_of_ds= _simulation->nonSmoothDynamicalSystem()->getNumberOfDS();
+  SP::SimpleMatrix workForces (new SimpleMatrix(number_of_ds, 2));
+
+  size_t cnt_ds=0;
+
+  DynamicalSystemsGraph::VIterator dsi, dsend;
+  for(std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  {
+    if(!checkOSI(dsi)) continue;
+    DynamicalSystem& ds = *_dynamicalSystemsGraph->bundle(*dsi);
+    VectorOfVectors& ds_work_vectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
+
+    dsType = Type::value(ds); // Its type
+
+    // 3 - Lagrangian Non Linear Systems
+    if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
+    {
+
+      // -- Convert the DS into a Lagrangian one.
+      LagrangianDS& d = static_cast<LagrangianDS&>(ds);
+
+      // Get state i (previous time step) from Memories -> var. indexed with "Old"
+      const SiconosVector &vold = d.velocityMemory().getSiconosVector(0);
+
+      const SiconosVector &v = *d.velocity(); // v = v_k,i+1
+
+      SP::SiconosVector f_k_theta (new SiconosVector(v.size()));
+      SP::SiconosVector v_k_theta (new SiconosVector(v.size()));
+      f_k_theta->zero();
+      v_k_theta->zero();
+
+
+      if(d.forces())
+      {
+        // Cheaper version: get forces(ti,vi,qi) from memory
+        const SiconosVector& fold = d.forcesMemory().getSiconosVector(0);
+        double coef =  (1 - _theta);
+        scal(coef, fold, *f_k_theta, false);
+	scal(coef, vold, *v_k_theta, false);
+
+        // computes forces(ti+1, v_k,i+1, q_k,i+1) = forces(t,v,q)
+        d.computeForces(t,d.q(),d.velocity());
+        coef = _theta;
+	scal(coef, *d.forces(), *f_k_theta, false);
+	scal(coef, v, *v_k_theta, false);
+
+	DEBUG_PRINT("MoreauJeanOSI:: new forces :\n");
+        DEBUG_EXPR(d.forces()->display(););
+        DEBUG_EXPR(f_k_theta->display(););
+
+	// scalar product
+	workForces->setValue(ds.number(),0,  ds.number());
+	workForces->setValue(ds.number(),1,  h* inner_prod(*f_k_theta,*v_k_theta));
+
+	DEBUG_EXPR(workForces->display(););
+      }
+    }
+    else if(dsType == Type::NewtonEulerDS)
+    {
+      DEBUG_PRINT("MoreauJeanOSI::computeWorkForces(), dsType == Type::NewtonEulerDS\n");
+      // residu = M (v_k,i+1 - v_i) - h*_theta*forces(t,v_k,i+1, q_k,i+1) - h*(1-_theta)*forces(ti,vi,qi) - pi+1
+
+      // -- Convert the DS into a NewtonEulerDS one.
+      NewtonEulerDS& d = static_cast<NewtonEulerDS&>(ds);
+
+      // Get the state  (previous time step) from memory vector
+      // -> var. indexed with "Old"
+      const SiconosVector& vold = d.twistMemory().getSiconosVector(0);
+
+      // Get the current state vector
+      //SiconosVector& q = *d.q();
+      const SiconosVector& v = *d.twist(); // v = v_k,i+1
+
+      SP::SiconosVector f_k_theta (new SiconosVector(v.size()));
+      SP::SiconosVector v_k_theta (new SiconosVector(v.size()));
+      f_k_theta->zero();
+      v_k_theta->zero();
+
+      if(d.forces())   // if fL exists
+      {
+        DEBUG_PRINTF("MoreauJeanOSI:: _theta = %e\n",_theta);
+        DEBUG_PRINTF("MoreauJeanOSI:: h = %e\n",h);
+
+        // Cheaper version: get forces(ti,vi,qi) from memory
+        const SiconosVector& fold = d.forcesMemory().getSiconosVector(0);
+        DEBUG_PRINT("MoreauJeanOSI:: old forces :\n");
+        DEBUG_EXPR(fold.display(););
+
+        double coef = (1 - _theta);
+        scal(coef, fold, *f_k_theta, false);
+	scal(coef, vold, *v_k_theta, false);
+
+        // computes forces(ti,v,q)
+        d.computeForces(t,d.q(),d.twist());
+        coef =  _theta;
+        scal(coef, *d.forces(), *f_k_theta, false);
+	scal(coef, v, *v_k_theta, false);
+
+        DEBUG_PRINT("MoreauJeanOSI:: new forces :\n");
+        DEBUG_EXPR(d.forces()->display(););
+        DEBUG_EXPR(f_k_theta->display(););
+
+	// scalar product
+	workForces->setValue(cnt_ds, 0,  ds.number());
+	workForces->setValue(cnt_ds, 1,  h* inner_prod(*f_k_theta,*v_k_theta));
+
+      }
+
+      cnt_ds++;
+
+      DEBUG_PRINT("MoreauJeanOSI::computeWorkForces :\n");
+
+    }
+    else
+      THROW_EXCEPTION("MoreauJeanOSI::computeWorkForces - not yet implemented for Dynamical system of type: " + Type::name(ds));
+
+  }
+
+  DEBUG_END("MoreauJeanOSI::computeWorkForces()\n");
+  return workForces;
+}
+
 
 void MoreauJeanOSI::display()
 {
