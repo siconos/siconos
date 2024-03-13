@@ -492,9 +492,11 @@ void TimeStepping::initializeNewtonSolve() {
   double tkp1 = getTkp1();
   assert(!std::isnan(tkp1));
 
-  updateDSPlugins(tkp1);  // is it useful since the integrator update the plugin computeResidu?
+  computeInitialStateOfTheStep();
 
-  computeResidu();  // Is is mandatory for SICONOS_TS_LINEAR ?
+  updateDSPlugins(tkp1);
+
+  computeResidu();
 
   updateAllInput();  //??
 
@@ -702,11 +704,11 @@ void TimeStepping::DefaultCheckSolverOutput(int info) {
   // info = 0 => ok
   // else: depend on solver
   if (info != 0 and _warningNonsmoothSolver) {
-    
+
     SolverOptions * options = (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->numericsSolverOptions().get();
 
     std::cout << "[kernel] TimeStepping at time " << getTkp1()
-	      << " --numerics solver warning -- info=" << info 
+	      << " --numerics solver warning -- info=" << info
 	      << " reached accuracy : " << options->dparam[SICONOS_DPARAM_RESIDU]
 	      << " iteration done  : " << options->iparam[SICONOS_IPARAM_ITER_DONE] << std::endl;
   }
