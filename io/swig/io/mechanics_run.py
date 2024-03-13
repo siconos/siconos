@@ -789,7 +789,7 @@ class MechanicsHdf5Runner_run_options(dict):
         d['h']=0.0005
         d['multipoints_iterations']=None
         d['theta']=0.50001
-        d['gamma']=0.0
+        d['gamma']=None
         d['Newton_options']=sk.SICONOS_TS_NONLINEAR
         d['Newton_max_iter']=20
         d['Newton_tolerance']=1e-10
