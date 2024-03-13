@@ -38,7 +38,8 @@ void siconos::mechanics::occ::OccR::computeh(double time,
       "siconos::mechanics::occ::OccR::computeh(double time, siconos::algebra::BlockVector& "
       "q0, "
       "siconos::algebra::SiconosVector& y)\n");
-  std::shared_ptr<ContactShapeDistance> distance{nullptr};
+  // std::shared_ptr<ContactShapeDistance> distance{nullptr};
+  ContactShapeDistance distance{};
 
   if (std::get_if<OccDistanceType>(&dt)) {
     std::cout << "OCC Case \n";
@@ -52,24 +53,25 @@ void siconos::mechanics::occ::OccR::computeh(double time,
                           _contact2.contactShape);
   }
 
-  DEBUG_PRINTF("---->%g P1=(%g, %g, %g) P2=(%g,%g,%g) N=(%g, %g, %g)\n", distance->value,
-               distance->x1, distance->y1, distance->z1, distance->x2, distance->y2,
-               distance->z2, distance->nx, distance->ny, distance->nz);
+  DEBUG_PRINTF("---->%g P1=(%g, %g, %g) P2=(%g,%g,%g) N=(%g, %g, %g)\n", distance.value,
+               distance.point1.X(), distance.point1.Y(), distance.point1.Z(),
+               distance.point2.X(), distance.point2.Y(), distance.point2.Z(),
+               distance.normal.X(), distance.normal.Y(), distance.normal.Z());
 
-  _Pc1->setValue(0, distance->x1 + _offset1 * distance->nx);
-  _Pc1->setValue(1, distance->y1 + _offset1 * distance->ny);
-  _Pc1->setValue(2, distance->z1 + _offset1 * distance->nz);
-  _Pc2->setValue(0, distance->x2 - _offset2 * distance->nx);
-  _Pc2->setValue(1, distance->y2 - _offset2 * distance->ny);
-  _Pc2->setValue(2, distance->z2 - _offset2 * distance->nz);
+  _Pc1->setValue(0, distance.point1.X() + _offset1 * distance.normal.X());
+  _Pc1->setValue(1, distance.point1.Y() + _offset1 * distance.normal.Y());
+  _Pc1->setValue(2, distance.point1.Z() + _offset1 * distance.normal.Z());
+  _Pc2->setValue(0, distance.point2.X() - _offset2 * distance.normal.X());
+  _Pc2->setValue(1, distance.point2.Y() - _offset2 * distance.normal.Y());
+  _Pc2->setValue(2, distance.point2.Z() - _offset2 * distance.normal.Z());
 
-  _Nc->setValue(0, distance->nx);
-  _Nc->setValue(1, distance->ny);
-  _Nc->setValue(2, distance->nz);
+  _Nc->setValue(0, distance.normal.X());
+  _Nc->setValue(1, distance.normal.Y());
+  _Nc->setValue(2, distance.normal.Z());
 
-  distance->value -= (_offset1 + _offset2);
+  distance.value -= (_offset1 + _offset2);
 
-  y.setValue(0, distance->value);
+  y.setValue(0, distance.value);
 
   DEBUG_EXPR(y.display(););
   DEBUG_EXPR(_Nc->display(););

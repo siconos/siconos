@@ -23,7 +23,7 @@
 #ifndef RigidBodyDS_h
 #define RigidBodyDS_h
 
-#include <NewtonEulerDS.hpp>
+#include "NewtonEulerDS.hpp"
 
 namespace siconos::collision {
 class SiconosContactorSet;

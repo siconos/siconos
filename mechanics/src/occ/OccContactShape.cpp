@@ -101,8 +101,7 @@ void siconos::mechanics::occ::OccContactShape::importBRepFromString(const std::s
 std::shared_ptr<TopoDS_Face> siconos::mechanics::occ::OccContactShape::face(unsigned int index) const {
   auto return_value = std::make_shared<TopoDS_Face>();
 
-  TopExp_Explorer exp;
-  exp.Init(data(), TopAbs_FACE);
+  TopExp_Explorer exp{data(), TopAbs_FACE};
   for (unsigned int i = 0; i < index; ++i, exp.Next())
     ;
   if (exp.More()) {

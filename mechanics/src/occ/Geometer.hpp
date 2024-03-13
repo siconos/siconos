@@ -20,7 +20,8 @@
 
 // OpenCASCADE include
 #include <Standard_TypeDef.hxx>  // For Standard_Real ...
-#include <iostream>              //TMP
+#include <gp_Dir.hxx>
+#include <iostream>  //TMP
 #include <limits>
 #include <memory>
 #include <variant>
@@ -40,141 +41,92 @@ struct OccContactFace;
 struct OccContactEdge;
 
 template <typename DistType>
-void distanceFaceFace(const OccContactFace& csh1, const OccContactFace& csh2,
-                      Standard_Real& X1, Standard_Real& Y1, Standard_Real& Z1,
-                      Standard_Real& X2, Standard_Real& Y2, Standard_Real& Z2,
-                      Standard_Real& nX, Standard_Real& nY, Standard_Real& nZ,
-                      Standard_Real& MinDist) {}
+ContactShapeDistance distanceFaceFace(const OccContactFace& csh1, const OccContactFace& csh2) {
+}
 
 template <typename DistType>
-void distanceFaceEdge(const OccContactFace& csh1, const OccContactEdge& csh2,
-                      Standard_Real& X1, Standard_Real& Y1, Standard_Real& Z1,
-                      Standard_Real& X2, Standard_Real& Y2, Standard_Real& Z2,
-                      Standard_Real& nX, Standard_Real& nY, Standard_Real& nZ,
-                      Standard_Real& MinDist) {}
+ContactShapeDistance distanceFaceEdge(const OccContactFace& csh1, const OccContactEdge& csh2) {
+}
 
 template <typename DistType>
-void distanceEdgeEdge(const OccContactEdge& csh1, const OccContactEdge& csh2,
-                      Standard_Real& X1, Standard_Real& Y1, Standard_Real& Z1,
-                      Standard_Real& X2, Standard_Real& Y2, Standard_Real& Z2,
-                      Standard_Real& nX, Standard_Real& nY, Standard_Real& nZ,
-                      Standard_Real& MinDist) {
+ContactShapeDistance distanceEdgeEdge(const OccContactEdge& csh1, const OccContactEdge& csh2) {
   throw "Geometer: Edge-Edge distance unimplemented";
 }
 
 template <>
-void distanceFaceFace<CadmbtbDistanceType>(const OccContactFace& csh1,
-                                           const OccContactFace& csh2, Standard_Real& X1,
-                                           Standard_Real& Y1, Standard_Real& Z1,
-                                           Standard_Real& X2, Standard_Real& Y2,
-                                           Standard_Real& Z2, Standard_Real& nX,
-                                           Standard_Real& nY, Standard_Real& nZ,
-                                           Standard_Real& MinDist) {
-  cadmbtb::distanceFaceFace(csh1, csh2, X1, Y1, Z1, X2, Y2, Z2, nX, nY, nZ, MinDist);
+ContactShapeDistance distanceFaceFace<CadmbtbDistanceType>(const OccContactFace& csh1,
+                                                           const OccContactFace& csh2) {
+  return cadmbtb::distanceFaceFace(csh1, csh2);
 }
 
 template <>
-void distanceFaceEdge<CadmbtbDistanceType>(const OccContactFace& csh1,
-                                           const OccContactEdge& csh2, Standard_Real& X1,
-                                           Standard_Real& Y1, Standard_Real& Z1,
-                                           Standard_Real& X2, Standard_Real& Y2,
-                                           Standard_Real& Z2, Standard_Real& nX,
-                                           Standard_Real& nY, Standard_Real& nZ,
-                                           Standard_Real& MinDist) {
-  cadmbtb::distanceFaceEdge(csh1, csh2, X1, Y1, Z1, X2, Y2, Z2, nX, nY, nZ, MinDist);
+ContactShapeDistance distanceFaceEdge<CadmbtbDistanceType>(const OccContactFace& csh1,
+                                                           const OccContactEdge& csh2) {
+  return cadmbtb::distanceFaceEdge(csh1, csh2);
 }
 
 template <>
-void distanceFaceFace<OccDistanceType>(const OccContactFace& csh1, const OccContactFace& csh2,
-                                       Standard_Real& X1, Standard_Real& Y1, Standard_Real& Z1,
-                                       Standard_Real& X2, Standard_Real& Y2, Standard_Real& Z2,
-                                       Standard_Real& nX, Standard_Real& nY, Standard_Real& nZ,
-                                       Standard_Real& MinDist) {
-  occ_distanceFaceFace(csh1, csh2, X1, Y1, Z1, X2, Y2, Z2, nX, nY, nZ, MinDist);
+ContactShapeDistance distanceFaceFace<OccDistanceType>(const OccContactFace& csh1,
+                                                       const OccContactFace& csh2) {
+  return occ_distanceFaceFace(csh1, csh2);
 }
 
 template <>
-void distanceFaceEdge<OccDistanceType>(const OccContactFace& csh1, const OccContactEdge& csh2,
-                                       Standard_Real& X1, Standard_Real& Y1, Standard_Real& Z1,
-                                       Standard_Real& X2, Standard_Real& Y2, Standard_Real& Z2,
-                                       Standard_Real& nX, Standard_Real& nY, Standard_Real& nZ,
-                                       Standard_Real& MinDist) {
-  occ_distanceFaceEdge(csh1, csh2, X1, Y1, Z1, X2, Y2, Z2, nX, nY, nZ, MinDist);
+ContactShapeDistance distanceFaceEdge<OccDistanceType>(const OccContactFace& csh1,
+                                                       const OccContactEdge& csh2) {
+  return occ_distanceFaceEdge(csh1, csh2);
 }
 
 template <typename DistType>
 struct Geometer {
-  std::shared_ptr<ContactShapeDistance> dist{nullptr};
+  // std::shared_ptr<ContactShapeDistance> dist{nullptr};
 
   Geometer() {
     std::cout << "BUILD A MG\n";
-    dist = std::make_shared<ContactShapeDistance>();
-    dist->value = std::numeric_limits<double>::infinity();
+    // dist = std::make_shared<ContactShapeDistance>();
+    // dist->value = std::numeric_limits<double>::infinity();
   };
 
-  std::shared_ptr<ContactShapeDistance> operator()(const OccContactFace& face1,
-                                                   const OccContactFace& face2) {
+  ContactShapeDistance operator()(const OccContactFace& face1, const OccContactFace& face2) {
     std::cout << "ok ........\n";
-    distanceFaceFace<DistType>(face1, face2, dist->x1, dist->y1, dist->z1, dist->x2, dist->y2,
-                               dist->z2, dist->nx, dist->ny, dist->nz, dist->value);
-    return dist;
+    return distanceFaceFace<DistType>(face1, face2);
   };
 
-  std::shared_ptr<ContactShapeDistance> operator()(const OccContactFace& face1,
-                                                   const OccContactEdge& edge2) {
-    distanceFaceEdge<DistType>(face1, edge2, dist->x1, dist->y1, dist->z1, dist->x2, dist->y2,
-                               dist->z2, dist->nx, dist->ny, dist->nz, dist->value);
-    dist->nx = -dist->nx;
-    dist->ny = -dist->ny;
-    dist->nz = -dist->nz;
-    return dist;
+  ContactShapeDistance operator()(const OccContactFace& face1, const OccContactEdge& edge2) {
+    auto dist2 = distanceFaceEdge<DistType>(face1, edge2);
+    dist2.normal.Reverse();
+    return dist2;
   };
 
-  std::shared_ptr<ContactShapeDistance> operator()(const OccContactEdge& edge1,
-                                                   const OccContactFace& face2) {
-    distanceFaceEdge<DistType>(face2, edge1, dist->x1, dist->y1, dist->z1, dist->x2, dist->y2,
-                               dist->z2, dist->nx, dist->ny, dist->nz, dist->value);
-    return dist;
-  };
-  std::shared_ptr<ContactShapeDistance> operator()(const OccContactEdge& edge1,
-                                                   const OccContactEdge& edge2) {
-    distanceEdgeEdge<DistType>(edge1, edge2, dist->x1, dist->y1, dist->z1, dist->x2, dist->y2,
-                               dist->z2, dist->nx, dist->ny, dist->nz, dist->value);
-    return dist;
+  ContactShapeDistance operator()(const OccContactEdge& edge1, const OccContactFace& face2) {
+    return distanceFaceEdge<DistType>(face2, edge1);
   };
 
-  std::shared_ptr<ContactShapeDistance> operator()(std::shared_ptr<OccContactFace> face1,
-                                                   std::shared_ptr<OccContactFace> face2) {
+  ContactShapeDistance operator()(const OccContactEdge& edge1, const OccContactEdge& edge2) {
+    return distanceEdgeEdge<DistType>(edge1, edge2);
+  };
+
+  ContactShapeDistance operator()(std::shared_ptr<OccContactFace> face1,
+                                  std::shared_ptr<OccContactFace> face2) {
     std::cout << "ok ........\n";
-    std::cout << "yyyayyazyzyayzyazyzyz " << dist->value << "\n";
-    distanceFaceFace<DistType>(*face1, *face2, dist->x1, dist->y1, dist->z1, dist->x2,
-                               dist->y2, dist->z2, dist->nx, dist->ny, dist->nz, dist->value);
-    std::cout << "yyyayyazyzyayzyazyzyz " << dist->value << "\n";
-    return dist;
+    return distanceFaceFace<DistType>(*face1, *face2);
   };
 
-  std::shared_ptr<ContactShapeDistance> operator()(std::shared_ptr<OccContactFace> face1,
-                                                   std::shared_ptr<OccContactEdge> edge2) {
-    distanceFaceEdge<DistType>(*face1, *edge2, dist->x1, dist->y1, dist->z1, dist->x2,
-                               dist->y2, dist->z2, dist->nx, dist->ny, dist->nz, dist->value);
-    dist->nx = -dist->nx;
-    dist->ny = -dist->ny;
-    dist->nz = -dist->nz;
-    return dist;
+  ContactShapeDistance operator()(std::shared_ptr<OccContactFace> face1,
+                                  std::shared_ptr<OccContactEdge> edge2) {
+    auto dist2 = distanceFaceEdge<DistType>(*face1, *edge2);
+    dist2.normal.Reverse();
+    return dist2;
   };
 
-  std::shared_ptr<ContactShapeDistance> operator()(std::shared_ptr<OccContactEdge> edge1,
-                                                   std::shared_ptr<OccContactFace> face2) {
-    distanceFaceEdge<DistType>(*face2, *edge1, dist->x1, dist->y1, dist->z1, dist->x2,
-                               dist->y2, dist->z2, dist->nx, dist->ny, dist->nz, dist->value);
-    return dist;
+  ContactShapeDistance operator()(std::shared_ptr<OccContactEdge> edge1,
+                                  std::shared_ptr<OccContactFace> face2) {
+    return distanceFaceEdge<DistType>(*face2, *edge1);
   };
 
-  std::shared_ptr<ContactShapeDistance> operator()(std::shared_ptr<OccContactEdge> edge1,
-                                                   std::shared_ptr<OccContactEdge> edge2) {
-    distanceEdgeEdge<DistType>(*edge1, *edge2, dist->x1, dist->y1, dist->z1, dist->x2,
-                               dist->y2, dist->z2, dist->nx, dist->ny, dist->nz, dist->value);
-    return dist;
+  ContactShapeDistance operator()(std::shared_ptr<OccContactEdge> edge1,
+                                  std::shared_ptr<OccContactEdge> edge2) {
+    return distanceEdgeEdge<DistType>(*edge1, *edge2);
   };
 };
 

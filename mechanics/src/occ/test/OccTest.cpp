@@ -10,6 +10,7 @@
 #include <gp_Quaternion.hxx>
 #include <gp_XYZ.hxx>
 #include <iostream>
+#include <numbers>  // pi
 
 #include "ContactPoint.hpp"
 #include "ContactShapeDistance.hpp"
@@ -120,12 +121,13 @@ void OccTest::move() {
   CPPUNIT_ASSERT(std::abs(rotat.Z() - 0.62360956446232352) < 1e-9);
   CPPUNIT_ASSERT(std::abs(rotat.W() - 0.35634832254989918) < 1e-9);
 }
+
 #ifdef HAS_FORTRAN
 void OccTest::distance() {
-  const double pi = boost::math::constants::pi<double>();
+  constexpr auto pi = std::numbers::pi;
 
-  BRepPrimAPI_MakeSphere mksphere1(1, pi);
-  BRepPrimAPI_MakeSphere mksphere2(1, pi);
+  BRepPrimAPI_MakeSphere mksphere1{1, pi};
+  BRepPrimAPI_MakeSphere mksphere2{1, pi};
 
   siconos::mechanics::occ::OccContactShape sphere1{mksphere1.Shape()};
   siconos::mechanics::occ::OccContactShape sphere2{mksphere2.Shape()};
@@ -194,14 +196,14 @@ void OccTest::distance() {
       siconos::mechanics::occ::Geometer<siconos::mechanics::occ::CadmbtbDistanceType>{},
       body1->contactShape(0), body2->contactShape(0));
 
-  std::cout << dist->value << "\n";
+  std::cout << dist.value << "\n";
 
-  std::cout << dist->x1 << "," << dist->y1 << "," << dist->z1 << "\n";
+  std::cout << dist.point1.X() << "," << dist.point1.Y() << "," << dist.point1.Z() << "\n";
 
-  std::cout << dist->x2 << "," << dist->y2 << "," << dist->z2 << "\n";
+  std::cout << dist.point2.X() << "," << dist.point2.Y() << "," << dist.point2.Z() << "\n";
 
-  std::cout << dist->nx << "," << dist->ny << "," << dist->nz << "\n";
+  std::cout << dist.normal.X() << "," << dist.normal.Y() << "," << dist.normal.Z() << "\n";
 
-  CPPUNIT_ASSERT(std::abs(dist->value - 1.0) < 1e-9);
+  CPPUNIT_ASSERT(std::abs(dist.value - 1.0) < 1e-9);
 }
 #endif

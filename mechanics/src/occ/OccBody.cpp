@@ -26,10 +26,10 @@
 #include "OccUtils.hpp"
 #include "SiconosVector.hpp"
 
-siconos::mechanics::occ::OccBody::OccBody(std::shared_ptr<siconos::algebra::SiconosVector> position,
-                               std::shared_ptr<siconos::algebra::SiconosVector> velocity,
-                               double mass,
-                               std::shared_ptr<siconos::algebra::SiconosMatrix> inertia)
+siconos::mechanics::occ::OccBody::OccBody(
+    std::shared_ptr<siconos::algebra::SiconosVector> position,
+    std::shared_ptr<siconos::algebra::SiconosVector> velocity, double mass,
+    std::shared_ptr<siconos::algebra::SiconosMatrix> inertia)
     : NewtonEulerDS(position, velocity, mass, inertia),
       _contactShapes(std::make_shared<ContactShape_vector>()),
       _shapes(std::make_shared<TopoDS_Shape_vector>()) {}
@@ -59,9 +59,9 @@ void siconos::mechanics::occ::OccBody::addContactShape(
   std::visit(computeUVBounds, shape);
 }
 
-void siconos::mechanics::occ::OccBody::addShape(std::shared_ptr<TopoDS_Shape> shape,
-                                     std::shared_ptr<siconos::algebra::SiconosVector> pos,
-                                     std::shared_ptr<siconos::algebra::SiconosVector> ori) {
+void siconos::mechanics::occ::OccBody::addShape(
+    std::shared_ptr<TopoDS_Shape> shape, std::shared_ptr<siconos::algebra::SiconosVector> pos,
+    std::shared_ptr<siconos::algebra::SiconosVector> ori) {
   OffSet offset = {0, 0, 0, 1, 0, 0, 0};
   if (pos) {
     offset[0] = (*pos)(0);
@@ -137,8 +137,8 @@ void siconos::mechanics::occ::OccBody::updateShapes() {
   }
 }
 
-const siconos::mechanics::occ::OccContactShapeV& siconos::mechanics::occ::OccBody::contactShape(
-    unsigned int id) const {
+const siconos::mechanics::occ::OccContactShapeV&
+siconos::mechanics::occ::OccBody::contactShape(unsigned int id) const {
   return std::get<0>((*_contactShapes)[id]);
 }
 

@@ -27,11 +27,10 @@
 // #include <BRepAdaptor_Surface.hxx>
 // #include <BRep_Tool.hxx>
 
-siconos::mechanics::occ::OccContactFace::OccContactFace(const OccContactShape& shape, unsigned int index)
+siconos::mechanics::occ::OccContactFace::OccContactFace(const OccContactShape& shape,
+                                                        unsigned int index)
     : OccContactShape(shape), _index(index), _face(shape.face(index)) {
-
-      std::cout << "FACE O?DEX CONSTRUC \n";
-
+  std::cout << "FACE O?DEX CONSTRUC \n";
 
   computeUVBounds();
 };
@@ -41,8 +40,7 @@ std::shared_ptr<const TopoDS_Face> siconos::mechanics::occ::OccContactFace::cont
 }
 
 void siconos::mechanics::occ::OccContactFace::computeUVBounds() {
-  TopExp_Explorer exp;
-  exp.Init(data(), TopAbs_FACE);
+  TopExp_Explorer exp{data(), TopAbs_FACE};
   for (unsigned int i = 0; i < _index; ++i, exp.Next())
     ;
   if (exp.More()) {
