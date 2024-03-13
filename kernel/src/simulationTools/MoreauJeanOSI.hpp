@@ -151,6 +151,11 @@ protected:
    */
   bool _activateWithNegativeRelativeVelocity;
 
+  /** Constraint activation threshold
+   *
+   */
+  double _constraintActivationThresholdVelocity;
+
   /**
       A set of work indices for the selected coordinates when
       we subprod in computeFreeOuput
@@ -332,6 +337,17 @@ public:
   inline double constraintActivationThreshold()
   {
     return _constraintActivationThreshold;
+  }
+  /** set the constraint activation threshold */
+  inline void setConstraintActivationThresholdVelocity(double v)
+  {
+    _constraintActivationThresholdVelocity = v;
+  }
+
+  /** get the constraint activation threshold */
+  inline double constraintActivationThresholdVelocity()
+  {
+    return _constraintActivationThresholdVelocity;
   }
 
   /** get boolean _explicitNewtonEulerDSOperators for the relation

@@ -59,13 +59,14 @@ template <typename T> static std::shared_ptr<T> ptr(const T& a)
 }
 
 // --- constructor from a set of data ---
-MoreauJeanOSI::MoreauJeanOSI(double theta, double gamma):
-  OneStepIntegrator(OSI::MOREAUJEANOSI),
-  _constraintActivationThreshold(0.0),
-  _useGammaForRelation(false),
-  _explicitNewtonEulerDSOperators(false),
-  _isWSymmetricDefinitePositive(false),
-  _activateWithNegativeRelativeVelocity(false)
+MoreauJeanOSI::MoreauJeanOSI(double theta, double gamma)
+  : OneStepIntegrator(OSI::MOREAUJEANOSI),
+    _constraintActivationThreshold(0.0),
+    _constraintActivationThresholdVelocity(0.0),
+    _useGammaForRelation(false),
+    _explicitNewtonEulerDSOperators(false),
+    _isWSymmetricDefinitePositive(false),
+    _activateWithNegativeRelativeVelocity(false)
 {
   _levelMinForOutput= 0;
   _levelMaxForOutput =1;
@@ -1870,6 +1871,7 @@ void MoreauJeanOSI::updateState(const unsigned int)
   DEBUG_END("MoreauJeanOSI::updateState(const unsigned int)\n");
 }
 
+//#define DEBUG_ACTIVATION 1
 
 bool MoreauJeanOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int i)
 {
@@ -1883,6 +1885,7 @@ bool MoreauJeanOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int
 
 
   double gamma = 1.0 / 2.0;
+
   if(_useGamma)
   {
     gamma = _gamma;
@@ -1893,17 +1896,83 @@ bool MoreauJeanOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int
 
   if (_activateWithNegativeRelativeVelocity)
     {
+#ifdef DEBUG_ACTIVATION
+      if (fabs(yDot-yDot_k)> 1e-10)
+	{
+
+	  std::cout << "MoreauJeanOSI::addInteractionInIndexSet ACTIVATE."
+		    << y << "<= " <<  _constraintActivationThreshold <<  std::endl;
+
+	  getchar();
+	}
       DEBUG_EXPR_WE(
 		    if((y <= _constraintActivationThreshold) and (yDot_k <= _constraintActivationThreshold))
 		      std::cout << "MoreauJeanOSI::addInteractionInIndexSet ACTIVATE."
+				<< " gamma " << gamma
 				<< " y=" << y << "<= " <<  _constraintActivationThreshold
 				<< " yDot_k ="<< yDot_k << "<= " <<  _constraintActivationThreshold
 				<< std::endl;
-		    );
-      return ((y <= _constraintActivationThreshold) and (yDot <= _constraintActivationThreshold));
+		    	    );
+     if (y <= _constraintActivationThreshold)
+	{
+	  if (not (yDot <=threshold))
+	    {
+	      std::cout << "\n MoreauJeanOSI::addInteractionInIndexSet activation at the position level but not at the velocity level."
+			<< "\n number :" << inter->number()
+			<< " y=" << y << "<= " <<  _constraintActivationThreshold
+			<< " yDot_k ="<< yDot_k
+			<< " yDot ="<< yDot
+			<<std::endl;
+	      //getchar();
+	    }
+	  else
+	    {
+	      // std::cout
+	      // 		<< "\n activate number :" << inter->number()
+	      // 		<< " y=" << y << "<= " <<  _constraintActivationThreshold
+	      // 		<< " yDot_k ="<< yDot_k
+	      // 		<< " yDot ="<< yDot
+	      // 		<<std::endl;
+	  }
+
+	}
+#endif
+
+
+      return ((y <= _constraintActivationThreshold) and (yDot <= _constraintActivationThresholdVelocity));
     }
   else
     {
+#ifdef DEBUG_ACTIVATION
+      if (fabs(yDot-yDot_k)> 1e-10)
+	{
+	  if(y <= _constraintActivationThreshold)
+		      std::cout << "MoreauJeanOSI::addInteractionInIndexSet ACTIVATE."
+				<< y << "<= " <<  _constraintActivationThreshold <<  std::endl;
+
+	  getchar();
+	}
+      if (y <= _constraintActivationThreshold)
+	{
+	  std::cout << "ACTIVATED "
+			<< "number :" << inter->number()
+			<< " y=" << y << "<= " <<  _constraintActivationThreshold
+			<< " yDot_k ="<< yDot_k
+			<< " yDot ="<< yDot
+			<< std::endl;
+	}
+      else
+	{
+	  std::cout << "NOT ACTIVATED "
+			<< " number :" << inter->number()
+			<< " y=" << y << "<= " <<  _constraintActivationThreshold
+			<< " yDot_k ="<< yDot_k
+			<< " yDot ="<< yDot
+			<<std::endl;
+	  //getchar();
+	}
+
+#endif
       DEBUG_EXPR_WE(
 		    if(y <= _constraintActivationThreshold)
 		      std::cout << "MoreauJeanOSI::addInteractionInIndexSet ACTIVATE."
