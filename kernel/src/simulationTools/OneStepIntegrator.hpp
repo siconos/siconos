@@ -297,12 +297,19 @@ public:
 
   /**
      compute interaction output (y) for all levels and swaps in memory
+     \param time value for output computation
+     \param interaction_properties properties of the interaction, in the Interaction Graph I0
+  */
+  void UpdateAndSwapAllOutput(double time);
+
+  /**
+     compute interaction output (y) for all levels and swaps in memory
 
      \param inter the interaction to update
      \param time value for output computation
      \param interaction_properties properties of the interaction, in the Interaction Graph I0
   */
-  void UpdateAndSwapAllOutput(Interaction& inter, double time, InteractionProperties& interaction_properties);
+  void UpdateAndSwapAllOutput(Interaction& inter, double time);
 
   /** compute the initial state (for dynamical system variables) of the Newton loop. */
   virtual void computeInitialNewtonState(){

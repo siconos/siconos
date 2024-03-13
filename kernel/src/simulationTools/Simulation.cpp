@@ -504,12 +504,12 @@ void Simulation::initializeInteraction(double time, SP::Interaction inter) {
 
   if (&osi1 == &osi2) {
     osi1.initializeWorkVectorsForInteraction(*inter, i_prop, DSG);
-    osi1.UpdateAndSwapAllOutput(*inter, time, i_prop);
+    osi1.UpdateAndSwapAllOutput(*inter, time);
   } else {
     osi1.initializeWorkVectorsForInteraction(*inter, i_prop, DSG);
-    osi1.UpdateAndSwapAllOutput(*inter, time, i_prop);
+    osi1.UpdateAndSwapAllOutput(*inter, time);
     osi2.initializeWorkVectorsForInteraction(*inter, i_prop, DSG);
-    osi2.UpdateAndSwapAllOutput(*inter, time, i_prop);
+    osi2.UpdateAndSwapAllOutput(*inter, time);
   }
   DEBUG_END("Simulation::initializeInteraction(double time, SP::Interaction inter)\n");
 

@@ -62,8 +62,20 @@ void OneStepIntegrator::initialize()
   _isInitialized=true;
 
 }
+void OneStepIntegrator::UpdateAndSwapAllOutput(double time)
+{
+  InteractionsGraph::VIterator ui, uiend;
+  InteractionsGraph & indexSet0 = *_simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
+  for(std::tie(ui, uiend) = indexSet0.vertices(); ui != uiend; ++ui)
+  {
+    if(!checkInteractionOSI(indexSet0, ui)) continue;
+    Interaction & inter = *indexSet0.bundle(*ui);
+    UpdateAndSwapAllOutput(inter,time);
+  }
+}
 
-void OneStepIntegrator::UpdateAndSwapAllOutput(Interaction& inter, double time, InteractionProperties& interaction_properties)
+
+void OneStepIntegrator::UpdateAndSwapAllOutput(Interaction& inter, double time)
 {
   // - compute interaction output (y) for all levels
   // - swaps in memory
