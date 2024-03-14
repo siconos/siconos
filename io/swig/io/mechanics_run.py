@@ -788,47 +788,67 @@ class MechanicsHdf5Runner_run_options(dict):
         d['T']=10
         d['h']=0.0005
         d['multipoints_iterations']=None
-        d['theta']=0.50001
+
+        # default osi options
+        d['osi']=sk.MoreauJeanOSI
+        d['theta']=0.5
         d['gamma']=None
+        d['constraint_activation_threshold']=None
+        d['constraint_activation_threshold_velocity']=None
+        d['activate_with_negative_relative_velocity']=None
+        d['projection_itermax']=20
+        d['projection_tolerance']=1e-8
+        d['projection_tolerance_unilateral']=1e-8
+
+        # default Newton solve options
         d['Newton_options']=sk.SICONOS_TS_NONLINEAR
         d['Newton_max_iter']=20
         d['Newton_tolerance']=1e-10
         d['Newton_warning_on_nonconvergence']=True
         d['Warning_nonsmooth_solver']=True
-        d['set_external_forces']=None
-        d['solver_options']=None
-        d['solver_options_pos']=None
-        d['osnspb_max_size']=0
-        d['exit_tolerance']=None
-        d['projection_itermax']=20
-        d['projection_tolerance']=1e-8
-        d['projection_tolerance_unilateral']=1e-8
-        d['numerics_verbose']=False
-        d['numerics_verbose_level']=0
-        d['violation_verbose']=False
-        d['verbose']=True
-        d['verbose_progress']=True
-        d['output_frequency']=None
-        d['output_backup']=False
-        d['output_backup_frequency']=None
-        d['friction_contact_trace_params']=None
-        d['output_contact_index_set']=1
-        d['osi']=sk.MoreauJeanOSI
-        d['constraint_activation_threshold']=0.0
-        d['explode_Newton_solve']=False
-        d['explode_computeOneStep']=False
         d['display_Newton_convergence']=False
-        d['start_run_iteration_hook']=None
-        d['before_next_step_iteration_hook']=None
-        d['end_run_iteration_hook']=None
         d['skip_last_update_output']=False
         d['skip_last_update_input']=False
         d['skip_reset_lambdas']=False
+
+        d['explode_Newton_solve']=False
+        d['explode_computeOneStep']=False
+
+
+        #default osnpb options
+        d['osnspb_max_size']=0
         d['osns_assembly_type']= None
+        d['set_external_forces']=None
+        d['solver_options']=None
+        d['solver_options_pos']=None
+        d['friction_contact_trace_params']=None
+        d['osnspb_max_size']=0
+
+
+        # default output options
+        d['output_frequency']=None
+        d['output_backup']=False
+        d['output_backup_frequency']=None
+        d['output_contact_index_set']=1
         d['output_contact_forces']=True,
         d['output_contact_info']=True,
         d['output_contact_work']=True,
         d['output_energy_work']=False
+
+        #default verbose options
+        d['verbose']=True
+        d['verbose_progress']=True
+        d['numerics_verbose']=False
+        d['numerics_verbose_level']=0
+        d['violation_verbose']=False
+
+        #default hook options
+        d['start_run_iteration_hook']=None
+        d['before_next_step_iteration_hook']=None
+        d['end_run_iteration_hook']=None
+
+
+
 
 
         super(self.__class__, self).__init__(d)
@@ -2979,11 +2999,19 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # (1) OneStepIntegrators
         osi = run_options.get('osi')
         self._osi = osi(run_options.get('theta'))
-        self._osi.setConstraintActivationThreshold(
-            run_options['constraint_activation_threshold'])
-
         if run_options.get('gamma'):
             self._osi.setGamma(run_options.get('gamma'))
+        if run_options.get('constraint_activation_threshold'):
+            self._osi.setConstraintActivationThreshold(
+                run_options['constraint_activation_threshold'])
+
+        if run_options.get('activate_with_negative_relative_velocity'):
+            self._osi.setActivateWithNegativeRelativeVelocity(
+                run_options['activate_with_negative_relative_velocity'])
+
+        if run_options.get('constraint_activation_threshold_velocity'):
+            self._osi.setConstraintActivationThresholdVelocity(
+                run_options['constraint_activation_threshold_velocity'])
 
 
         # (2) Time discretisation --
