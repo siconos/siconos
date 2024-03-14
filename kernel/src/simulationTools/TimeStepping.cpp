@@ -322,7 +322,7 @@ void TimeStepping::updateIndexSet(unsigned int i) {
 //   (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY] = osns;
 // }
 
-void TimeStepping::initOSNS() {
+void TimeStepping::initializeOneStepNSProblem() {
   // === creates links between work vector in OSI and work vector in
   // Interactions
   SP::OneStepIntegrator osi;
@@ -354,10 +354,10 @@ void TimeStepping::initOSNS() {
         (*itOsns)->initialize(shared_from_this());
       else
         THROW_EXCEPTION(
-            "TimeStepping::initOSNS failed. A OneStepNSProblem has not been set. ");
+            "TimeStepping::initializeOneStepNSProblem failed. A OneStepNSProblem has not been set. ");
     }
   }
-  // Since initOSNS calls updateIndexSets() which resets the
+  // Since initializeOneStepNSProblem calls updateIndexSets() which resets the
   // topology->hasChanged() flag, it must be specified explicitly.
   // Otherwise OneStepNSProblem may fail to update its matrices.
   _nsds->topology()->setHasChanged(true);
@@ -605,7 +605,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep) {
         updateOutput();
         if (_newtonOptions == SICONOS_TS_NONLINEAR_FULL) {
 	  updateIndexSets();
-          initOSNS();
+          initializeOneStepNSProblem();
         }
       }
       _isNewtonConverge = newtonCheckConvergence(criterion);

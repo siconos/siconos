@@ -143,7 +143,7 @@ protected:
 public:
   /** initialisation specific to TimeStepping for OneStepNSProblem.
    */
-  void initOSNS() override;
+  void initializeOneStepNSProblem() override;
 
   /** Standard constructor
    *

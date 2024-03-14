@@ -111,11 +111,11 @@ struct TimeSteppingCombinedProjection::_SimulationEffectOnOSNSP : public Siconos
 };
 
 
-void TimeSteppingCombinedProjection::initOSNS()
+void TimeSteppingCombinedProjection::initializeOneStepNSProblem()
 {
 
   updateIndexSets();
-  TimeStepping::initOSNS();
+  TimeStepping::initializeOneStepNSProblem();
 
 
   SP::OneStepNSProblem osnspb_pos = (*_allNSProblems)[SICONOS_OSNSP_TS_POS];

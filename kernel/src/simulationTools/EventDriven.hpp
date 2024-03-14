@@ -42,7 +42,7 @@ private:
    */
   int _istate;
 
-  void initOSNS() override;
+  void initializeOneStepNSProblem() override;
 
   /** Initialize OneStepIntergrators */
   void initOSIs();

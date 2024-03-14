@@ -1267,7 +1267,7 @@ void SpaceFilter::updateInteractions(SP::Simulation sim)
   {
     DSG0->bundle(*vi)->acceptSP(findInteractions);
   }
-  //model()->simulation()->initOSNS();
+  //model()->simulation()->initializeOneStepNSProblem();
 }
 
 //std::pair<space_hash::iterator, space_hash::iterator> SpaceFilter::neighbours(SP::Hashed h)

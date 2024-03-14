@@ -412,7 +412,7 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
 
   /** initialisation for OneStepNSProblem.
    */
-  virtual void initOSNS() = 0;
+  virtual void initializeOneStepNSProblem() = 0;
 
   /** step from current event to next event of EventsManager
    */

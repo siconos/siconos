@@ -40,7 +40,7 @@ private:
 
 protected:
   /** initialisation specific to TimeSteppingD1Minus for OneStepNSProblem */
-  void initOSNS() override;
+  void initializeOneStepNSProblem() override;
 
 public:
   /** constructor with the time-discretisation

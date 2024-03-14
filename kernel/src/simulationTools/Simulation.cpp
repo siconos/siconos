@@ -278,7 +278,7 @@ void Simulation::applyNSDSChangelogForDS() {
   //   // Initialize OneStepNSProblem(s). Depends on the type of simulation.
   //   // Warning FP : must be done in any case, even if the interactions set
   //   // is empty.
-  //   initOSNS();
+  //   initializeOneStepNSProblem();
 
   //   // Since initOSNS calls updateIndexSets() which resets the
   //   // topology->hasChanged() flag, it must be specified explicitly.
@@ -345,7 +345,7 @@ void Simulation::initializeNSDSChangelog() {
     // Warning FP : must be done in any case, even if the interactions set
     // is empty.
     updateIndexSets();
-    initOSNS();
+    initializeOneStepNSProblem();
 
     // Since initOSNS calls updateIndexSets() which resets the
     // topology->hasChanged() flag, it must be specified explicitly.
@@ -455,7 +455,7 @@ void Simulation::initialize() {
   //  is empty.
   if (Type::value(*this) != Type::EventDriven) {
     updateIndexSets();
-    initOSNS();
+    initializeOneStepNSProblem();
   }
 
   // 7 - First initialization of the simulation

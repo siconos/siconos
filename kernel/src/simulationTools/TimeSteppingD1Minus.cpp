@@ -46,7 +46,7 @@ using namespace std::placeholders;
 
 using namespace RELATION;
 
-void TimeSteppingD1Minus::initOSNS()
+void TimeSteppingD1Minus::initializeOneStepNSProblem()
 {
   // initialize OSNS for InteractionsGraph from Topology
   SP::Topology topo =  _nsds->topology();

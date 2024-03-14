@@ -90,7 +90,7 @@ public:
                                SP::OneStepNSProblem osnspb_pos,
                                unsigned int _level = 1);
 
-  void initOSNS() override;
+  void initializeOneStepNSProblem() override;
 
   /** default constructor
    */

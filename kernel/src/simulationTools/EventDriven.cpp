@@ -237,9 +237,9 @@ void EventDriven::updateIndexSetsWithDoubleCondition()
   }
 }
 
-void EventDriven::initOSNS()
+void EventDriven::initializeOneStepNSProblem()
 {
-  DEBUG_BEGIN("EventDriven::initOSNS()\n");
+  DEBUG_BEGIN("EventDriven::initializeOneStepNSProblem()\n");
   assert(_nsds);
   assert(_nsds->topology());
   // for all Interactions in indexSet[i-1], compute y[i-1] and
@@ -305,7 +305,7 @@ void EventDriven::initOSNS()
     //   };
     // }
   }
-  DEBUG_END("EventDriven::initOSNS()\n");
+  DEBUG_END("EventDriven::initializeOneStepNSProblem()\n");
 }
 
 void EventDriven::initOSIs()

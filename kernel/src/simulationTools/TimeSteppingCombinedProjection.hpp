@@ -98,7 +98,7 @@ protected:
   friend struct _SimulationEffectOnOSNSP;
 
 public:
-  void initOSNS() override;
+  void initializeOneStepNSProblem() override;
 
   /** Constructor with the time-discretisation.
    *

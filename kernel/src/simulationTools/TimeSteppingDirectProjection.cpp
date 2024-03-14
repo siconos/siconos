@@ -60,9 +60,9 @@ TimeSteppingDirectProjection::TimeSteppingDirectProjection(
   _maxViolationEquality = 0.0;
 }
 
-void TimeSteppingDirectProjection::initOSNS() {
+void TimeSteppingDirectProjection::initializeOneStepNSProblem() {
   updateIndexSets();
-  TimeStepping::initOSNS();
+  TimeStepping::initializeOneStepNSProblem();
 
   (*_allNSProblems)[SICONOS_OSNSP_TS_POS]->setIndexSetLevel(_indexSetLevelForProjection);
   (*_allNSProblems)[SICONOS_OSNSP_TS_POS]->setInputOutputLevel(0);
