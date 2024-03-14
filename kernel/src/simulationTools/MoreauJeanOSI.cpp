@@ -1891,7 +1891,7 @@ bool MoreauJeanOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int
     gamma = _gamma;
   }
   DEBUG_PRINTF("MoreauJeanOSI::addInteractionInIndexSet of level = %i yref=%e, yDot=%e, yDot_k=%e, y_estimated=%e.,  _constraintActivationThreshold=%e\n", i,  y, yDot, yDot_k, y + gamma * h * yDot, _constraintActivationThreshold);
-  y += gamma * h * yDot_k;
+  y += gamma * h * yDot;
   assert(!std::isnan(y));
 
   if (_activateWithNegativeRelativeVelocity)

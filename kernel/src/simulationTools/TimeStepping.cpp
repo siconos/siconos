@@ -492,7 +492,7 @@ void TimeStepping::initializeNewtonSolve() {
   double tkp1 = getTkp1();
   assert(!std::isnan(tkp1));
 
-  computeInitialStateOfTheStep();
+  //computeInitialStateOfTheStep();
 
   updateDSPlugins(tkp1);
 

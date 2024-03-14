@@ -426,6 +426,10 @@ void Simulation::initialize() {
   // 3 - initialize new ds
   applyNSDSChangelogForDS();
 
+  computeInitialStateOfTheStep();
+
+
+  
   // 4 - update the world from DS
   // for external contact detection library for instance
   updateWorldFromDS();
