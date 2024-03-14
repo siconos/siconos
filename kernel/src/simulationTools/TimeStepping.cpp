@@ -30,8 +30,9 @@
 #include "RelayNSL.hpp"
 #include "SiconosException.hpp"
 #include "SiconosVector.hpp"
-#include "Topology.hpp"
+#include "SolverOptions.h"
 #include "Tools.hpp"  // for enum_to_string
+#include "Topology.hpp"
 // #define DEBUG_BEGIN_END_ONLY
 // #define DEBUG_STDOUT
 // #define DEBUG_NOCOLOR
@@ -713,35 +714,12 @@ void siconos::simulation::TimeStepping::DefaultCheckSolverOutput(int info) {
   // info = 0 => ok
   // else: depend on solver
   if (info != 0 and _warningNonsmoothSolver) {
-    std::cout << "[kernel] TimeStepping::DefaultCheckSolverOutput:\n";
-    std::cout << "[kernel] Non smooth solver warning : output message from numerics solver is "
-                 "equal to "
-              << info << "\n";
-    //       std::cout << "=> may have failed? (See Numerics solver documentation for details
-    //       on the message meaning)." <<std::endl;
-    //      std::cout << "=> may have failed? (See Numerics solver documentation for details
-    //      on the message meaning)." <<std::endl;
-    //     THROW_EXCEPTION(" Non smooth problem, solver convergence failed ");
-    /*      if(info == 1)
-            std::cout <<" reach max iterations number with solver " <<
-       solverName <<std::endl; else if (info == 2)
-            {
-            if (solverName == "LexicoLemke" || solverName == "CPG" || solverName
-       == "NLGS") THROW_EXCEPTION(" negative diagonal term with solver
-       "+solverName); else if (solverName == "QP" || solverName == "NSQP" )
-            THROW_EXCEPTION(" can not satisfy convergence criteria for solver
-       "+solverName); else if (solverName == "Latin") THROW_EXCEPTION(" Choleski
-       factorisation failed with solver Latin");
-            }
-            else if (info == 3 && solverName == "CPG")
-            std::cout << "pWp null in solver CPG" <<std::endl;
-            else if (info == 3 && solverName == "Latin")
-            THROW_EXCEPTION("Null diagonal term with solver Latin");
-            else if (info == 5 && (solverName == "QP" || solverName == "NSQP"))
-            THROW_EXCEPTION("Length of working array insufficient in solver
-       "+solverName); else THROW_EXCEPTION("Unknown error type in solver "+
-       solverName);
-    */
+    auto options = (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->numericsSolverOptions();
+
+    std::cout << "[kernel] TimeStepping at time " << getTkp1()
+              << " --numerics solver warning -- info=" << info
+              << " reached accuracy : " << options->dparam[SICONOS_DPARAM_RESIDU]
+              << " iteration done  : " << options->iparam[SICONOS_IPARAM_ITER_DONE] << "\n";
   }
 }
 

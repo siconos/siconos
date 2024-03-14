@@ -74,7 +74,7 @@ void siconos::integrators::OneStepIntegrator::initialize() {
   _isInitialized = true;
 }
 
-void siconos::integrators::OneStepIntegrator::update_interaction_output(
+void siconos::integrators::OneStepIntegrator::OneStepIntegrator::UpdateAndSwapAllOutput(
     siconos::modeling::Interaction& inter, double time,
     siconos::graphs::InteractionProperties& interaction_properties) {
   // - compute interaction output (y) for all levels
@@ -87,7 +87,7 @@ void siconos::integrators::OneStepIntegrator::update_interaction_output(
   //      - contact detection
   //      - inter = ew interaction + link with ds
   //      - simu->osi->initializeWorkVectorsForInteraction(inter)
-  //      - simu->osi->update_interaction_output()
+  //      - simu->osi->UpdateAndSwapAllOutput()
 
   if (_steps > 1)  // Multi--step methods
   {
