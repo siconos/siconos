@@ -383,7 +383,7 @@ public:
    *  \param newActivateWithNegativeRealtiveVelocity a Boolean
    */
   inline void
-  SetActivateWithNegativeRealtiveVelocity(bool newActivateWithNegativeRelativeVelocity)
+  setActivateWithNegativeRelativeVelocity(bool newActivateWithNegativeRelativeVelocity)
   {
     _activateWithNegativeRelativeVelocity = newActivateWithNegativeRelativeVelocity;
   };

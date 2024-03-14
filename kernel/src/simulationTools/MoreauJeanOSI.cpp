@@ -1905,39 +1905,40 @@ bool MoreauJeanOSI::addInteractionInIndexSet(SP::Interaction inter, unsigned int
 
 	  getchar();
 	}
-      DEBUG_EXPR_WE(
-		    if((y <= _constraintActivationThreshold) and (yDot_k <= _constraintActivationThreshold))
-		      std::cout << "MoreauJeanOSI::addInteractionInIndexSet ACTIVATE."
-				<< " gamma " << gamma
-				<< " y=" << y << "<= " <<  _constraintActivationThreshold
-				<< " yDot_k ="<< yDot_k << "<= " <<  _constraintActivationThreshold
-				<< std::endl;
-		    	    );
+
      if (y <= _constraintActivationThreshold)
 	{
-	  if (not (yDot <=threshold))
+	  if (not (yDot <=_constraintActivationThresholdVelocity))
 	    {
 	      std::cout << "\n MoreauJeanOSI::addInteractionInIndexSet activation at the position level but not at the velocity level."
 			<< "\n number :" << inter->number()
 			<< " y=" << y << "<= " <<  _constraintActivationThreshold
-			<< " yDot_k ="<< yDot_k
-			<< " yDot ="<< yDot
+			<< " yDot_k ="<< yDot_k << " > " <<  _constraintActivationThresholdVelocity
+			<< " yDot ="<< yDot << " > "  << _constraintActivationThresholdVelocity
 			<<std::endl;
 	      //getchar();
 	    }
 	  else
 	    {
-	      // std::cout
-	      // 		<< "\n activate number :" << inter->number()
-	      // 		<< " y=" << y << "<= " <<  _constraintActivationThreshold
-	      // 		<< " yDot_k ="<< yDot_k
-	      // 		<< " yDot ="<< yDot
-	      // 		<<std::endl;
+	      std::cout << "\n MoreauJeanOSI::addInteractionInIndexSet activation at the position level but not at the velocity level."
+			<< "\n number :" << inter->number()
+			<< " y=" << y << "<= " <<  _constraintActivationThreshold
+			<< " yDot_k ="<< yDot_k << "<= " <<  _constraintActivationThresholdVelocity
+			<< " yDot ="<< yDot << " <= "  << _constraintActivationThresholdVelocity
+			<< std::endl;
+
 	  }
 
 	}
 #endif
-
+      DEBUG_EXPR_WE(
+		    if((y <= _constraintActivationThreshold) and (yDot_k <= _constraintActivationThreshold))
+		      std::cout << "MoreauJeanOSI::addInteractionInIndexSet ACTIVATE with velocity threshold."
+				<< " gamma " << gamma
+				<< " y=" << y << "<= " <<  _constraintActivationThreshold
+				<< " yDot_k ="<< yDot_k << "<= " <<  _constraintActivationThresholdVelocity
+				<< std::endl;
+		    	    );
 
       return ((y <= _constraintActivationThreshold) and (yDot <= _constraintActivationThresholdVelocity));
     }
