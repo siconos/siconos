@@ -61,6 +61,7 @@ TimeSteppingDirectProjection::TimeSteppingDirectProjection(
 }
 
 void TimeSteppingDirectProjection::initOSNS() {
+  updateIndexSets();
   TimeStepping::initOSNS();
 
   (*_allNSProblems)[SICONOS_OSNSP_TS_POS]->setIndexSetLevel(_indexSetLevelForProjection);

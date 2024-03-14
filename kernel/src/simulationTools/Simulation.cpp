@@ -344,6 +344,7 @@ void Simulation::initializeNSDSChangelog() {
     // Initialize OneStepNSProblem(s). Depends on the type of simulation.
     // Warning FP : must be done in any case, even if the interactions set
     // is empty.
+    updateIndexSets();
     initOSNS();
 
     // Since initOSNS calls updateIndexSets() which resets the
@@ -453,6 +454,7 @@ void Simulation::initialize() {
   // Warning FP : must be done in any case, even if the interactions set
   //  is empty.
   if (Type::value(*this) != Type::EventDriven) {
+    updateIndexSets();
     initOSNS();
   }
 

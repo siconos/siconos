@@ -345,7 +345,7 @@ void TimeStepping::initOSNS() {
     // for degree 0 case where we keep 0.
 
     // === update all index sets ===
-    updateIndexSets();
+    //updateIndexSets();
 
     // initialization of  OneStepNonSmoothProblem
     for (OSNSIterator itOsns = _allNSProblems->begin(); itOsns != _allNSProblems->end();
@@ -604,6 +604,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep) {
         }
         updateOutput();
         if (_newtonOptions == SICONOS_TS_NONLINEAR_FULL) {
+	  updateIndexSets();
           initOSNS();
         }
       }

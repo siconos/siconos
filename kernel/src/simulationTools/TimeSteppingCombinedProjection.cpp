@@ -113,6 +113,8 @@ struct TimeSteppingCombinedProjection::_SimulationEffectOnOSNSP : public Siconos
 
 void TimeSteppingCombinedProjection::initOSNS()
 {
+
+  updateIndexSets();
   TimeStepping::initOSNS();
 
 

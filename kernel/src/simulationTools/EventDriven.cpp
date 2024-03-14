@@ -249,7 +249,7 @@ void EventDriven::initOSNS()
   SP::Topology topo = _nsds->topology();
 
   // === update all index sets ===
-  updateIndexSets();
+  //updateIndexSets();
   initOSIRhs();
 
   if(!_allNSProblems->empty())  // ie if at least a non smooth problem has been built.

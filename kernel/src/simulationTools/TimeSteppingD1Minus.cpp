@@ -58,7 +58,7 @@ void TimeSteppingD1Minus::initOSNS()
       THROW_EXCEPTION("TimeSteppingD1Minus::initOSNS, TimeSteppingD1Minus simulation must have two OneStepNonsmoothProblems.");
 
     //update all index sets
-    updateIndexSets();
+    //updateIndexSets();
 
     // update output
     updateOutput();
