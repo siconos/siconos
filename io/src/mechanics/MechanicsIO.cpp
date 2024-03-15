@@ -939,6 +939,8 @@ void ContactContactWorkVisitor::operator()(const NewtonEuler3DR& rel)
 static void compute_contact_work_and_status(SP::Interaction inter, double omega, double tol, SiconosVector& answer) {
   double mu = ask<ForMu>(*inter->nonSmoothLaw());
   double e = ask<ForE>(*inter->nonSmoothLaw());
+
+ 
   // Compute normal contact work
   double vn_minus =  inter->y_k(1).getValue(0);
   double vn_plus = inter->y(1)->getValue(0);
@@ -1023,7 +1025,7 @@ static void compute_contact_work_and_status(SP::Interaction inter, double omega,
   // double id = inter->number();
   // std::cout << "\nid "<< id << std::endl;
   // std::cout << " e "<< e  << " mu "<< mu << std::endl;
-  // std::cout << " tol "<< tol<< std::endl;
+  // std::cout << " tol "<< tol << " omega " << omega << std::endl;
   // std::cout << "vn_plus "<< vn_plus << std::endl;
   // std::cout << "vn_minus "<< vn_minus << std::endl;
   // std::cout << "pn "<< pn << std::endl;
@@ -1090,12 +1092,12 @@ void ContactContactWorkVisitor::operator()(const Contact2d3DR& rel)
 
 
 SP::SimpleMatrix MechanicsIO::contactContactWork(const NonSmoothDynamicalSystem& nsds,
-						 unsigned int index_set, double omega,
-						 double tol) const
+						 unsigned int index_set, double omega) const
 {
   DEBUG_BEGIN("SP::SimpleMatrix MechanicsIO::contactContactWork");
   SP::SimpleMatrix result(new SimpleMatrix());
   InteractionsGraph::VIterator vi, viend;
+  double tol=1e-08;
   if(nsds.topology()->numberOfIndexSet() > 0)
   {
     InteractionsGraph& graph =

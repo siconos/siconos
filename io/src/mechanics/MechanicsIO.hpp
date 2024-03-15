@@ -84,7 +84,9 @@ public:
    * \param tol double for the computation of contact status
    \return a matrix where the columns are id, normal contact work, tangent contact work, friction dissipation, contact status
   */
-  SP::SimpleMatrix contactContactWork(const NonSmoothDynamicalSystem& nsds, unsigned int index_set=1, double omega = 0.5, double tol=1e-08) const;
+  SP::SimpleMatrix contactContactWork(const NonSmoothDynamicalSystem& nsds,
+				      unsigned int index_set=1,
+				      double omega = 0.5) const;
 
   /** get the domain of each contact point
    * \param nsds current nonsmooth dynamical system
