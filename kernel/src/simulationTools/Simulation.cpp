@@ -428,8 +428,6 @@ void Simulation::initialize() {
   applyNSDSChangelogForDS();
 
   computeInitialStateOfTheStep();
-
-
   
   // 4 - update the world from DS
   // for external contact detection library for instance
@@ -440,23 +438,6 @@ void Simulation::initialize() {
 
   // 6 - initialize new interactions
   initializeNSDSChangelog();
-
-  // 7 - updateOutput
-  // we compute the new values of the output needed
-  // by the updateIndexSet method
-  updateOutput();
-
-  // 8 - Initialize OneStepNSProblem(s)
-  DEBUG_PRINT("Initialize OneStepNSProblem(s)\n");
-
-  // Initialize OneStepNSProblem(s). Depends on the type of simulation.
-  //  this calls in particular updateIndexSet
-  // Warning FP : must be done in any case, even if the interactions set
-  //  is empty.
-  if (Type::value(*this) != Type::EventDriven) {
-    updateIndexSets();
-    initializeOneStepNSProblem();
-  }
 
   // 7 - First initialization of the simulation
   firstInitialize();

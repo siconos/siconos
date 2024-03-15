@@ -491,6 +491,12 @@ void TimeStepping::initializeNewtonSolve() {
   DEBUG_BEGIN("TimeStepping::initializeNewtonSolve()\n");
   double tkp1 = getTkp1();
   assert(!std::isnan(tkp1));
+  
+  updateOutput();
+
+  updateIndexSets();
+
+  initializeOneStepNSProblem();
 
   //computeInitialStateOfTheStep();
 
