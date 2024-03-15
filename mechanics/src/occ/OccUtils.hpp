@@ -19,6 +19,7 @@
 #define OCC_UTILS
 
 #include <Standard_TypeDef.hxx>  // From Opencascade
+
 #include "ContactShapeDistance.hpp"
 
 // OpenCascade forward declarations
@@ -34,11 +35,13 @@ namespace siconos::mechanics::occ {
 class OccContactFace;
 class OccContactEdge;
 
-void occ_move(TopoDS_Shape& shape, const siconos::algebra::SiconosVector& pos);
+void occ_move(TopoDS_Shape& shape, const std::array<double, 7>& pos);
 
-auto occ_distanceFaceFace(const OccContactFace& csh1, const OccContactFace& csh2) -> ContactShapeDistance;
+auto occ_distanceFaceFace(std::shared_ptr<OccContactFace> csh1,
+                          std::shared_ptr<OccContactFace> csh2) -> ContactShapeDistance;
 
-auto occ_distanceFaceEdge(const OccContactFace& csh1, const OccContactEdge& csh2) -> ContactShapeDistance;
+auto occ_distanceFaceEdge(std::shared_ptr<OccContactFace> csh1,
+                          std::shared_ptr<OccContactEdge> csh2) -> ContactShapeDistance;
 
 }  // namespace siconos::mechanics::occ
 #endif

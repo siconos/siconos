@@ -38,10 +38,10 @@ class OccContactEdge;
 namespace cadmbtb {
 
 // Functions required in mechanics APIS (User, Python ...)
-auto distanceFaceFace(const OccContactFace& csh1, const OccContactFace& csh2)
-    -> ContactShapeDistance;
+auto distanceFaceFace(std::shared_ptr<OccContactFace> csh1,
+                      std::shared_ptr<OccContactFace> csh2) -> ContactShapeDistance;
 
-auto distanceFaceEdge(const OccContactFace& sh1, const OccContactEdge& sh2)
+auto distanceFaceEdge(std::shared_ptr<OccContactFace> sh1, std::shared_ptr<OccContactEdge> sh2)
     -> ContactShapeDistance;
 
 namespace tools {
@@ -64,8 +64,8 @@ namespace tools {
     \return a tuple, first elem = square magnitude of distance func,
    second = array with gradient components
  */
-auto myf_FaceFace(std::span<const double> x, const TopoDS_Face& face1,
-                  const TopoDS_Face& face2)
+auto myf_FaceFace(std::span<const double> x, std::shared_ptr<TopoDS_Face> face1,
+                  std::shared_ptr<TopoDS_Face> face2)
     -> std::tuple<double, std::unique_ptr<std::array<double, 4>>>;
 
 /** Computes distance between two faces and its gradient
@@ -75,7 +75,8 @@ auto myf_FaceFace(std::span<const double> x, const TopoDS_Face& face1,
    tuple, first elem = square magnitude of distance func, second = array
    with gradient components
 */
-auto myf_FaceEdge(std::span<const double> x, const TopoDS_Face& face, const TopoDS_Edge& edge)
+auto myf_FaceEdge(std::span<const double> x, std::shared_ptr<TopoDS_Face> face,
+                  std::shared_ptr<TopoDS_Edge> edge)
     -> std::tuple<double, std::unique_ptr<std::array<double, 3>>>;
 
 /** \return a point from the parameters values on the face

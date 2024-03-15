@@ -23,17 +23,14 @@
 #include <SiconosException.hpp>
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
-// #include <limits>
 
-// #include "ContactShapeDistance.hpp"
-// #include "cadmbtb.hpp"
-
-siconos::mechanics::occ::OccContactEdge::OccContactEdge(const OccContactShape& shape, unsigned int index)
+siconos::mechanics::occ::OccContactEdge::OccContactEdge(const OccContactShape& shape,
+							int index)
     : OccContactShape(shape), _index(index), _edge(shape.edge(index)) {
   computeUVBounds();
 };
 
-const std::shared_ptr<const TopoDS_Edge> siconos::mechanics::occ::OccContactEdge::contact() const {
+std::shared_ptr<TopoDS_Edge> siconos::mechanics::occ::OccContactEdge::contact() const {
   return edge(_index);
 }
 
@@ -51,23 +48,3 @@ void siconos::mechanics::occ::OccContactEdge::computeUVBounds() {
     bsup1[1] = 0.;
   }
 }
-
-// template <typename T>
-// siconos::mechanics::occ::OccContactShape1::OccContactShape1() {}
-
-// template <typename T>
-// std::shared_ptr<T> siconos::mechanics::occ::OccContactShape1::edge_or_face(int index) const {
-//   auto return_value = std::make_shared<TopoDS_Face>();
-
-//   TopExp_Explorer exp {data(), TopAbs_FACE);
-//     for (unsigned int i = 0; i < index; ++i, exp.Next())
-//       ;
-//     if (exp.More()) {
-//       // taking a ref fail!
-//       *return_value = TopoDS::Face(exp.Current());
-//     } else {
-//       THROW_EXCEPTION("siconos::mechanics::occ::OccContactShape::face failed");
-//     }
-
-//     return return_value;
-//   }

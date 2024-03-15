@@ -60,23 +60,23 @@ contains
   subroutine n2qn12c (n, x, f, g, dxmin, df1, epsabs,mode, binf, bsup, iz, rz) bind(c, name="n2qn1")
     !! Note FP: since there are no comments in qnb.f, which is a full F77 file, it's quite hard to guess properly all the intent/types. This probably needs to
     !! be reviewed and check properly.
-    integer(c_long), intent(in) :: n
+    integer(c_int), intent(in) :: n
     real(c_double), intent(inout) :: x(n)
-    real(c_double), intent(in) :: f
+    real(c_double), intent(inout) :: f
     real(c_double), intent(inout) :: g(n)
-    real(c_double), intent(inout) :: dxmin
-    real(c_double), intent(in) :: df1
+    real(c_double), intent(inout) :: dxmin(n)
+    real(c_double), intent(inout) :: df1
     real(c_double), intent(inout) :: epsabs
     integer(c_int), intent(inout) :: mode
     real(c_double), intent(in) :: binf(n), bsup(n)
-    integer(c_int), intent(inout), target :: iz
-    real(c_double), intent(inout), target :: rz
+    integer(c_int), intent(inout), target :: iz(29)
+    real(c_double), intent(inout) :: rz(45)
 
-    integer :: imp = 0
+    integer :: imp = 3!!0
     integer :: io = 16
-    integer, parameter :: iter = 500
+    integer :: iter = 500
     logical :: reverse = .true.
-    integer :: nsim = 3*iter
+    integer :: nsim = 3*500
     call n2qn1(n, x, f, g, dxmin, df1, epsabs, imp, io, mode, iter, nsim, binf, bsup, iz, rz, reverse)
 
   end subroutine n2qn12c

@@ -105,12 +105,12 @@ namespace optim {
     \param[in, out] iz work vector (size = 2n+1)
     \param[in, out] rz work vector (size = 1/2*n*(n+9))
 */
-extern "C" void n2qn1(int n, double* x, double* f, double* g, double* dxmin, double* df1,
+extern "C" void n2qn1(const int *n, double* x, double* f, double* g, double* dxmin, double* df1,
                       double* epsabs, int* mode, const double* binf, const double* bsup, int* iz,
                       double* rz);
 
 #else
-extern "C" inline void n2qn1(int n, double* x, double* f, double* g, double* dxmin,
+extern "C" inline void n2qn1(int* n, double* x, double* f, double* g, double* dxmin,
                              double* df1, double* epsabs, int* mode, const double* binf,
                              const double* bsup, int* iz, double* rz) {
   printf("Siconos Fortran API is off. This function (n2qn1) has no effects.\n");

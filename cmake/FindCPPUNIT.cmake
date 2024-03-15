@@ -46,9 +46,9 @@ find_path(CPPUNIT_INCLUDE_DIR NAMES cppunit/TestCase.h
   )
 
 if(NOT CPPUNIT_LIBRARIES)
-    find_library(CPPUNIT_LIBRARIES NAMES cppunit
-      ${_CPPUNIT_SEARCH_OPTS}
-      PATH_SUFFIXES lib lib64)
+  find_library(CPPUNIT_LIBRARIES NAMES cppunit
+    ${_CPPUNIT_SEARCH_OPTS}
+    PATH_SUFFIXES lib lib64)
 endif()
 
 # -- Library setup --

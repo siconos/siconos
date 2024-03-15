@@ -20,28 +20,22 @@
 #include <BRepTools.hxx>
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
-// #include "OccUtils.hpp"
-// #include "ContactShapeDistance.hpp"
-// #include "cadmbtb.hpp"
-
-// #include <BRepAdaptor_Surface.hxx>
-// #include <BRep_Tool.hxx>
 
 siconos::mechanics::occ::OccContactFace::OccContactFace(const OccContactShape& shape,
-                                                        unsigned int index)
+                                                        int index)
     : OccContactShape(shape), _index(index), _face(shape.face(index)) {
-  std::cout << "FACE O?DEX CONSTRUC \n";
+  // Note FP: what's the point of copying the input shape rather than just "pointer-link" it?
 
   computeUVBounds();
 };
 
-std::shared_ptr<const TopoDS_Face> siconos::mechanics::occ::OccContactFace::contact() const {
+std::shared_ptr<TopoDS_Face> siconos::mechanics::occ::OccContactFace::contact() const {
   return face(_index);
 }
 
 void siconos::mechanics::occ::OccContactFace::computeUVBounds() {
   TopExp_Explorer exp{data(), TopAbs_FACE};
-  for (unsigned int i = 0; i < _index; ++i, exp.Next())
+  for (auto i = 0; i < _index; ++i, exp.Next())
     ;
   if (exp.More()) {
     const TopoDS_Face& face = TopoDS::Face(exp.Current());

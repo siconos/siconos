@@ -41,16 +41,16 @@
 #include "siconos_debug.h"
 
 // adapted from _CADMBTB_getMinDistanceFace*_using_n2qn1  (Olivier Bonnefon)
-auto siconos::mechanics::occ::cadmbtb::distanceFaceFace(const OccContactFace& csh1,
-                                                        const OccContactFace& csh2)
+auto siconos::mechanics::occ::cadmbtb::distanceFaceFace(std::shared_ptr<OccContactFace> csh1,
+                                                        std::shared_ptr<OccContactFace> csh2)
     -> ContactShapeDistance {
   // need the 2 sp pointers to keep memory
-  const TopoDS_Face& face1 = *csh1.contact();
-  const TopoDS_Face& face2 = *csh2.contact();
+  auto face1 = csh1->contact();
+  auto face2 = csh2->contact();
 
   constexpr int N = 4;
-  std::array<double, N> bsup{csh1.bsup1[0], csh1.bsup1[1], csh2.bsup1[0], csh2.bsup1[1]};
-  std::array<double, N> binf{csh1.binf1[0], csh1.binf1[1], csh2.binf1[0], csh2.binf1[1]};
+  std::array<double, N> bsup{csh1->bsup1[0], csh1->bsup1[1], csh2->bsup1[0], csh2->bsup1[1]};
+  std::array<double, N> binf{csh1->binf1[0], csh1->binf1[1], csh2->binf1[0], csh2->binf1[1]};
 
   std::array<double, N> dxim{};
   std::transform(bsup.begin(), bsup.end(), binf.begin(), dxim.begin(),
@@ -59,9 +59,9 @@ auto siconos::mechanics::occ::cadmbtb::distanceFaceFace(const OccContactFace& cs
   std::transform(bsup.begin(), bsup.end(), binf.begin(), x.begin(),
                  [](double e1, double e2) { return 0.5 * (e1 + e2); });
 
-  auto [f, g] = tools::myf_FaceFace(x, face1, face2);
+  auto [dist, g] = tools::myf_FaceFace(x, face1, face2);
 
-  auto df1 = f;
+  auto df1 = dist;
 
   int mode = 1;
 
@@ -70,28 +70,33 @@ auto siconos::mechanics::occ::cadmbtb::distanceFaceFace(const OccContactFace& cs
   // Note FP: work array sizes are not those given in the paper
   // https://who.rocq.inria.fr/Jean-Charles.Gilbert/modulopt/optimization-routines/m2qn1/m2qn1.pdf
   // Why ?
-  std::array<double, N*(N + 9) / 2 + 1> rz;
-  std::array<int, 2 * N + 1> iz;
+  // std::array<double, N*(N + 9) / 2 + 1> rz;
+  // std::array<int, 2 * N + 1> iz;
+  std::array<double, 45> rz;
+  std::array<int, 29> iz;
 
-  siconos::fortran::optim::n2qn1(N, x.data(), &f, g->data(), dxim.data(), &df1, &epsabs, &mode,
-                                 binf.data(), bsup.data(), iz.data(), rz.data());
+  siconos::fortran::optim::n2qn1(&N, x.data(), &dist, g->data(), dxim.data(), &df1, &epsabs,
+                                 &mode, binf.data(), bsup.data(), iz.data(), rz.data());
+
   while (mode > 7) {
     auto [f, g] = tools::myf_FaceFace(x, face1, face2);
-    siconos::fortran::optim::n2qn1(N, x.data(), &f, g->data(), dxim.data(), &df1, &epsabs,
+    siconos::fortran::optim::n2qn1(&N, x.data(), &f, g->data(), dxim.data(), &df1, &epsabs,
                                    &mode, binf.data(), bsup.data(), iz.data(), rz.data());
+    dist = f;
   }
 
   DEBUG_PRINTF("mode=%d and min value at u=%e,v=%e f=%e\n", mode, x[0], x[1], sqrt(f));
   DEBUG_PRINTF("siconos::mechanics::occ::cadmbtb::distanceFaceFace( dist = %e\n", sqrt(f));
-  ContactShapeDistance dist{};
-  dist.value = sqrt(f);
+  ContactShapeDistance distance{};
+  distance.value = sqrt(dist);
 
-  dist.normal = tools::FaceNormal(face2, x[2], x[3]);
-  dist.point1 = tools::FacePoint(face1, x[0], x[1]);
-  dist.point2 = tools::FacePoint(face2, x[2], x[3]);
+  distance.normal = tools::FaceNormal(*face2, x[2], x[3]);
+  distance.point1 = tools::FacePoint(*face1, x[0], x[1]);
+  distance.point2 = tools::FacePoint(*face2, x[2], x[3]);
   /**check orientation of normal from face 2**/
-  dist.oriantates();
-  return dist;  // no copy, RVO
+  distance.orientates();
+
+  return distance;  // no copy, RVO
 }
 
 // template <std::size_t N>
@@ -149,16 +154,17 @@ auto siconos::mechanics::occ::cadmbtb::distanceFaceFace(const OccContactFace& cs
 //   return std::make_tuple(x, minDist, g);
 // }
 
-auto siconos::mechanics::occ::cadmbtb::distanceFaceEdge(const OccContactFace& csh1,
-                                                        const OccContactEdge& csh2)
+auto siconos::mechanics::occ::cadmbtb::distanceFaceEdge(std::shared_ptr<OccContactFace> csh1,
+                                                        std::shared_ptr<OccContactEdge> csh2)
     -> ContactShapeDistance {
   // need the 2 sp pointers to keep memory
-  const TopoDS_Face& face = *csh1.contact();
-  const TopoDS_Edge& edge = *csh2.contact();
+
+  auto face = csh1->contact();
+  auto edge = csh2->contact();
 
   constexpr int N = 3;
-  std::array<double, N> bsup{csh1.bsup1[0], csh1.bsup1[1], csh2.bsup1[0]};
-  std::array<double, N> binf{csh1.binf1[0], csh1.binf1[1], csh2.binf1[0]};
+  std::array<double, N> bsup{csh1->bsup1[0], csh1->bsup1[1], csh2->bsup1[0]};
+  std::array<double, N> binf{csh1->binf1[0], csh1->binf1[1], csh2->binf1[0]};
 
   std::array<double, N> dxim{};
   std::transform(bsup.begin(), bsup.end(), binf.begin(), dxim.begin(),
@@ -167,12 +173,11 @@ auto siconos::mechanics::occ::cadmbtb::distanceFaceEdge(const OccContactFace& cs
   std::transform(bsup.begin(), bsup.end(), binf.begin(), x.begin(),
                  [](double e1, double e2) { return 0.5 * (e1 + e2); });
 
-  auto [f, g] = tools::myf_FaceEdge(x, face, edge);
+  auto [dist, g] = tools::myf_FaceEdge(x, face, edge);
 
-  auto df1 = f;
+  auto df1 = dist;
 
   int mode = 1;
-
   double epsabs = 0;
 
   // Note FP: work array sizes are not those given in the paper
@@ -181,37 +186,38 @@ auto siconos::mechanics::occ::cadmbtb::distanceFaceEdge(const OccContactFace& cs
   std::array<double, 4 * (4 + 9) / 2 + 1> rz;
   std::array<int, 2 * 4 + 1> iz;
 
-  siconos::fortran::optim::n2qn1(N, x.data(), &f, g->data(), dxim.data(), &df1, &epsabs, &mode,
-                                 binf.data(), bsup.data(), iz.data(), rz.data());
+  siconos::fortran::optim::n2qn1(&N, x.data(), &dist, g->data(), dxim.data(), &df1, &epsabs,
+                                 &mode, binf.data(), bsup.data(), iz.data(), rz.data());
   while (mode > 7) {
     auto [f, g] = tools::myf_FaceEdge(x, face, edge);
-    siconos::fortran::optim::n2qn1(N, x.data(), &f, g->data(), dxim.data(), &df1, &epsabs,
+    siconos::fortran::optim::n2qn1(&N, x.data(), &f, g->data(), dxim.data(), &df1, &epsabs,
                                    &mode, binf.data(), bsup.data(), iz.data(), rz.data());
+    dist = f;
   }
 
-  ContactShapeDistance dist{};
-  dist.value = sqrt(f);
+  ContactShapeDistance distance{};
+  distance.value = sqrt(dist);
 
-  DEBUG_PRINTF("mode=%d and min value at u=%e,v=%e f=%e\n", mode, x[0], x[1], dist.value);
-  DEBUG_PRINTF("cadmbtb_getMinDistanceFaceEdge_using_n2qn1 dist = %e\n", dist.value);
+  DEBUG_PRINTF("mode=%d and min value at u=%e,v=%e f=%e\n", mode, x[0], x[1], distance.value);
+  DEBUG_PRINTF("cadmbtb_getMinDistanceFaceEdge_using_n2qn1 dist = %e\n", distance.value);
 
   /** V.A. Normal is always computed from the surface which is safer  */
-  dist.normal = tools::FaceNormal(face, x[0], x[1]);
-  dist.point1 = tools::FacePoint(face, x[0], x[1]);
-  dist.point2 = tools::EdgePoint(edge, x[2]);
+  distance.normal = tools::FaceNormal(*face, x[0], x[1]);
+  distance.point1 = tools::FacePoint(*face, x[0], x[1]);
+  distance.point2 = tools::EdgePoint(*edge, x[2]);
   /** check orientation of normal*/
-  dist.oriantates();
-  return dist;  // RVO, no copy
+  distance.orientates();
+  return distance;  // RVO, no copy
 }
 
 auto siconos::mechanics::occ::cadmbtb::tools::myf_FaceFace(std::span<const double> x,
-                                                           const TopoDS_Face& face1,
-                                                           const TopoDS_Face& face2)
+                                                           std::shared_ptr<TopoDS_Face> face1,
+                                                           std::shared_ptr<TopoDS_Face> face2)
     -> std::tuple<double, std::unique_ptr<std::array<double, 4>>> {
   assert(x.size() == 4);
 
   // Face of the BRep topology as a 3D surface
-  BRepAdaptor_Surface SF1{face1};
+  BRepAdaptor_Surface SF1{*face1};
   // Computes the point and the first derivatives on the surface, from parameters x[0] and
   // x[1]
   gp_Pnt point_on_face1;
@@ -220,7 +226,7 @@ auto siconos::mechanics::occ::cadmbtb::tools::myf_FaceFace(std::span<const doubl
   SF1.D1(x[0], x[1], point_on_face1, aV1u, aV1v);
 
   // Face of the BRep topology as a 3D surface
-  BRepAdaptor_Surface SF2{face2};
+  BRepAdaptor_Surface SF2{*face2};
   // Computes the point and the first derivatives on the surface, from parameters x[2] and
   // x[3]
   gp_Pnt point_on_face2;
@@ -243,13 +249,13 @@ auto siconos::mechanics::occ::cadmbtb::tools::myf_FaceFace(std::span<const doubl
 }
 
 auto siconos::mechanics::occ::cadmbtb::tools::myf_FaceEdge(std::span<const double> x,
-                                                           const TopoDS_Face& face,
-                                                           const TopoDS_Edge& edge)
+                                                           std::shared_ptr<TopoDS_Face> face,
+                                                           std::shared_ptr<TopoDS_Edge> edge)
     -> std::tuple<double, std::unique_ptr<std::array<double, 3>>> {
   assert(x.size() == 3);
 
   // Face of the BRep topology as a 3D surface
-  BRepAdaptor_Surface SF1{face};
+  BRepAdaptor_Surface SF1{*face};
   // Computes the point and the first derivatives on the surface, from parameters x[0] and
   // x[1]
   gp_Pnt point_on_face;
@@ -258,7 +264,7 @@ auto siconos::mechanics::occ::cadmbtb::tools::myf_FaceEdge(std::span<const doubl
   SF1.D1(x[0], x[1], point_on_face, aV1u, aV1v);
 
   // Creates a Curve to access the geometry of edge
-  BRepAdaptor_Curve SC(edge);
+  BRepAdaptor_Curve SC(*edge);
   // Computes the point of parameter x[2] on the curve with its first derivative.
   gp_Pnt point_on_curve;
   gp_Vec aV2u;

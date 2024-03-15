@@ -27,21 +27,8 @@
 
 #include "SiconosException.hpp"
 #include "SiconosPointers.hpp"  // For createSPtr
-// #include <TopoDS_Face.hxx>
-// #include <gp_Ax3.hxx>
-// #include <gp_Lin.hxx>
-// #include <gp_Vec.hxx>
-// #include <limits>
-
 // #define DEBUG_MESSAGES 1
 #include "siconos_debug.h"
-
-siconos::mechanics::occ::OccContactShape::OccContactShape() : _shape{std::make_shared<TopoDS_Shape>()} {}
-
-siconos::mechanics::occ::OccContactShape::OccContactShape(const OccContactShape& shape)
-    : _shape{shape.shape()} {
-  std::cout << "SHAPE CTDS CONSTRUC \n";
-};
 
 siconos::mechanics::occ::OccContactShape::OccContactShape(TopoDS_Shape& shape)
     : _shape{siconos::pointers::createSPtr(shape)} {};
@@ -59,8 +46,8 @@ void siconos::mechanics::occ::OccContactShape::setData(TopoDS_Shape& data) {
   computeUVBounds();
 }
 
-siconos::mechanics::occ::OccContactShape::ContactTypeValue siconos::mechanics::occ::OccContactShape::contactType()
-    const {
+siconos::mechanics::occ::OccContactShape::ContactTypeValue
+siconos::mechanics::occ::OccContactShape::contactType() const {
   switch (_shape->ShapeType()) {
     case TopAbs_EDGE: {
       return ContactTypeValue::Edge;
@@ -75,7 +62,8 @@ siconos::mechanics::occ::OccContactShape::ContactTypeValue siconos::mechanics::o
 
 void siconos::mechanics::occ::OccContactShape::computeUVBounds() {
   THROW_EXCEPTION(
-      "siconos::mechanics::occ::OccContactShape::computeUVBounds() : cannot compute UV bounds for this "
+      "siconos::mechanics::occ::OccContactShape::computeUVBounds() : cannot compute UV bounds "
+      "for this "
       "contact shape");
 }
 
@@ -87,7 +75,8 @@ std::string siconos::mechanics::occ::OccContactShape::exportBRepToString() const
   return out.str();
 }
 
-void siconos::mechanics::occ::OccContactShape::importBRepFromString(const std::string& brepstr) {
+void siconos::mechanics::occ::OccContactShape::importBRepFromString(
+    const std::string& brepstr) {
   std::stringstream in;
   BRep_Builder brep_builder;
 
@@ -98,7 +87,8 @@ void siconos::mechanics::occ::OccContactShape::importBRepFromString(const std::s
   computeUVBounds();
 }
 
-std::shared_ptr<TopoDS_Face> siconos::mechanics::occ::OccContactShape::face(unsigned int index) const {
+std::shared_ptr<TopoDS_Face> siconos::mechanics::occ::OccContactShape::face(
+    unsigned int index) const {
   auto return_value = std::make_shared<TopoDS_Face>();
 
   TopExp_Explorer exp{data(), TopAbs_FACE};
@@ -114,7 +104,8 @@ std::shared_ptr<TopoDS_Face> siconos::mechanics::occ::OccContactShape::face(unsi
   return return_value;
 }
 
-std::shared_ptr<TopoDS_Edge> siconos::mechanics::occ::OccContactShape::edge(unsigned int index) const {
+std::shared_ptr<TopoDS_Edge> siconos::mechanics::occ::OccContactShape::edge(
+    unsigned int index) const {
   auto return_value = std::make_shared<TopoDS_Edge>();
 
   TopExp_Explorer exp;

@@ -25,40 +25,17 @@ class TopoDS_Edge;
 
 namespace siconos::mechanics::occ {
 
-// template <typename T>
-// class OccContactShape1
-
-// {
-//  public:
-//   std::shared_ptr<TopoDS_Shape> _shape{nullptr};
-//   std::shared_ptr<const T> _edge{nullptr};
-//   unsigned int _index{0};
-//   unsigned int contactGroup{0};
-//   unsigned int _id{0};
-//   std::array<double, 8> boundaries{0., 0., 0., 0., 0., 0., 0., 0.};
-
-//   OccContactShape1(const OccContactShape& shape, unsigned int index);
-
-//   ~OccContactShape1() noexcept = default;
-
-//   const std::shared_ptr<const T> contact() const;
-
-//   void computeUVBounds();
-
-//   std::shared_ptr<T> edge_or_face(int index) const;
-// };
-
 struct OccContactEdge : public OccContactShape {
-  OccContactEdge(const OccContactShape& shape, unsigned int index);
+  OccContactEdge(const OccContactShape& shape, int index);
 
-  virtual ~OccContactEdge() noexcept = default;
+  ~OccContactEdge() noexcept = default;
 
-  virtual const std::shared_ptr<const TopoDS_Edge> contact() const;
+  virtual std::shared_ptr<TopoDS_Edge> contact() const;
 
-  virtual void computeUVBounds();
+  virtual void computeUVBounds() override;
 
   std::shared_ptr<const TopoDS_Edge> _edge{nullptr};
-  unsigned int _index{0};
+  int _index{0};
 };
 }  // namespace siconos::mechanics::occ
 #endif

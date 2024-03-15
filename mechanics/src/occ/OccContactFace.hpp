@@ -20,23 +20,19 @@
 
 #include "OccContactShape.hpp"
 
-
 // OpenCASCADE classes
 class TopoDS_Face;
 
 namespace siconos::mechanics::occ {
 struct OccContactFace : public OccContactShape {
+  OccContactFace(const OccContactShape& shape, int index);
+  ~OccContactFace() noexcept = default;
 
-  OccContactFace() : OccContactShape() { std::cout << "FACE  DEFAULT CONSTRUC \n"; };
+  virtual std::shared_ptr<TopoDS_Face> contact() const;
 
-  OccContactFace(const OccContactShape& shape, unsigned int index);
-  ~OccContactFace() noexcept { std::cout << "FACE  DESTR \n"; } // = default
+  virtual void computeUVBounds() override;
 
-  virtual std::shared_ptr<const TopoDS_Face> contact() const;
-
-  virtual void computeUVBounds();
-
-  unsigned int _index{0};
+  int _index{0};
   std::shared_ptr<const TopoDS_Face> _face{nullptr};
 };
 }  // namespace siconos::mechanics::occ

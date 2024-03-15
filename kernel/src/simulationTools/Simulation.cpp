@@ -472,12 +472,12 @@ void siconos::simulation::Simulation::initializeInteraction(
 
   if (&osi1 == &osi2) {
     osi1.initializeWorkVectorsForInteraction(*inter, i_prop, DSG);
-    osi1.UpdateAndSwapAllOutput(*inter, time, i_prop);
+    osi1.updateAndSwapAllOutput(*inter, time, i_prop);
   } else {
     osi1.initializeWorkVectorsForInteraction(*inter, i_prop, DSG);
-    osi1.UpdateAndSwapAllOutput(*inter, time, i_prop);
+    osi1.updateAndSwapAllOutput(*inter, time, i_prop);
     osi2.initializeWorkVectorsForInteraction(*inter, i_prop, DSG);
-    osi2.UpdateAndSwapAllOutput(*inter, time, i_prop);
+    osi2.updateAndSwapAllOutput(*inter, time, i_prop);
   }
   DEBUG_END(
       "siconos::simulation::Simulation::initializeInteraction(double time, "

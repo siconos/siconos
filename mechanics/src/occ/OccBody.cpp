@@ -36,7 +36,7 @@ siconos::mechanics::occ::OccBody::OccBody(
 
 void siconos::mechanics::occ::OccBody::addContactShape(
     OccContactShapeV& shape, std::shared_ptr<siconos::algebra::SiconosVector> pos,
-    std::shared_ptr<siconos::algebra::SiconosVector> ori, unsigned int group) {
+    std::shared_ptr<siconos::algebra::SiconosVector> ori, int group) {
   OffSet offset = {0, 0, 0, 1, 0, 0, 0};
 
   if (pos) {
@@ -81,67 +81,69 @@ void siconos::mechanics::occ::OccBody::addShape(
 }
 
 void siconos::mechanics::occ::OccBody::updateContactShapes() {
-  boost::math::quaternion<double> q((*_q)(3), (*_q)(4), (*_q)(5), (*_q)(6));
+  boost::math::quaternion<double> q{(*_q)(3), (*_q)(4), (*_q)(5), (*_q)(6)};
 
   for (auto& cs : *_contactShapes) {
     auto offset = std::get<1>(cs);
 
-    boost::math::quaternion<double> pv =
-        boost::math::quaternion<double>(0, offset[0], offset[1], offset[2]);
+    boost::math::quaternion<double> pv{0, offset[0], offset[1], offset[2]};
 
     boost::math::quaternion<double> rv = q * pv * boost::math::conj(q);
 
     boost::math::quaternion<double> r =
-        q * boost::math::quaternion<double>(offset[3], offset[4], offset[5], offset[6]);
+        q * boost::math::quaternion<double>{offset[3], offset[4], offset[5], offset[6]};
 
-    siconos::algebra::SiconosVector fp = siconos::algebra::SiconosVector{7};
-    fp(0) = (*_q)(0) + rv.R_component_2();
-    fp(1) = (*_q)(1) + rv.R_component_3();
-    fp(2) = (*_q)(2) + rv.R_component_4();
-    fp(3) = r.R_component_1();
-    fp(4) = r.R_component_2();
-    fp(5) = r.R_component_3();
-    fp(6) = r.R_component_4();
+    std::array<double, 7> fp;
+    fp[0] = (*_q)(0) + rv.R_component_2();
+    fp[1] = (*_q)(1) + rv.R_component_3();
+    fp[2] = (*_q)(2) + rv.R_component_4();
+    fp[3] = r.R_component_1();
+    fp[4] = r.R_component_2();
+    fp[5] = r.R_component_3();
+    fp[6] = r.R_component_4();
 
     auto getdata = [](auto& obj) { return obj->shape(); };
     auto shape_data = std::visit(getdata, std::get<0>(cs));
 
-    siconos::mechanics::occ::occ_move(*shape_data, fp);
+    occ_move(*shape_data, fp);
   }
 }
 
 void siconos::mechanics::occ::OccBody::updateShapes() {
-  boost::math::quaternion<double> q((*_q)(3), (*_q)(4), (*_q)(5), (*_q)(6));
+  boost::math::quaternion<double> q{(*_q)(3), (*_q)(4), (*_q)(5), (*_q)(6)};
 
   for (auto& cs : *_shapes) {
+    // Get the offset of the current shape
     auto offset = std::get<1>(cs);
 
-    boost::math::quaternion<double> pv =
-        boost::math::quaternion<double>(0, offset[0], offset[1], offset[2]);
+    // Compute quaternions according to the current body position
+
+    boost::math::quaternion<double> pv{0, offset[0], offset[1], offset[2]};
 
     boost::math::quaternion<double> rv = q * pv * boost::math::conj(q);
 
     boost::math::quaternion<double> r =
-        q * boost::math::quaternion<double>(offset[3], offset[4], offset[5], offset[6]);
+        q * boost::math::quaternion<double>{offset[3], offset[4], offset[5], offset[6]};
 
-    siconos::algebra::SiconosVector fp = siconos::algebra::SiconosVector{7};
-    fp(0) = (*_q)(0) + rv.R_component_2();
-    fp(1) = (*_q)(1) + rv.R_component_3();
-    fp(2) = (*_q)(2) + rv.R_component_4();
-    fp(3) = r.R_component_1();
-    fp(4) = r.R_component_2();
-    fp(5) = r.R_component_3();
-    fp(6) = r.R_component_4();
+    std::array<double, 7> fp;
+    fp[0] = (*_q)(0) + rv.R_component_2();
+    fp[1] = (*_q)(1) + rv.R_component_3();
+    fp[2] = (*_q)(2) + rv.R_component_4();
+    fp[3] = r.R_component_1();
+    fp[4] = r.R_component_2();
+    fp[5] = r.R_component_3();
+    fp[6] = r.R_component_4();
 
+    // Set shape position
     occ_move(*(std::get<0>(cs)), fp);
   }
 }
 
 const siconos::mechanics::occ::OccContactShapeV&
-siconos::mechanics::occ::OccBody::contactShape(unsigned int id) const {
+siconos::mechanics::occ::OccBody::contactShape(int id) const {
   return std::get<0>((*_contactShapes)[id]);
 }
 
-const TopoDS_Shape& siconos::mechanics::occ::OccBody::shape(unsigned int id) const {
+const TopoDS_Shape& siconos::mechanics::occ::OccBody::shape(int id) const {
   return *std::get<0>((*_shapes)[id]);
 }

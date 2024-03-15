@@ -41,39 +41,39 @@ struct OccContactFace;
 struct OccContactEdge;
 
 template <typename DistType>
-ContactShapeDistance distanceFaceFace(const OccContactFace& csh1, const OccContactFace& csh2) {
+ContactShapeDistance distanceFaceFace(std::shared_ptr<OccContactFace> csh1, std::shared_ptr<OccContactFace> csh2) {
 }
 
 template <typename DistType>
-ContactShapeDistance distanceFaceEdge(const OccContactFace& csh1, const OccContactEdge& csh2) {
+ContactShapeDistance distanceFaceEdge(std::shared_ptr<OccContactFace> csh1, std::shared_ptr<OccContactEdge> csh2) {
 }
 
 template <typename DistType>
-ContactShapeDistance distanceEdgeEdge(const OccContactEdge& csh1, const OccContactEdge& csh2) {
+ContactShapeDistance distanceEdgeEdge(std::shared_ptr<OccContactEdge> csh1, std::shared_ptr<OccContactEdge> csh2) {
   throw "Geometer: Edge-Edge distance unimplemented";
 }
 
 template <>
-ContactShapeDistance distanceFaceFace<CadmbtbDistanceType>(const OccContactFace& csh1,
-                                                           const OccContactFace& csh2) {
+ContactShapeDistance distanceFaceFace<CadmbtbDistanceType>(std::shared_ptr<OccContactFace> csh1,
+                                                           std::shared_ptr<OccContactFace> csh2) {
   return cadmbtb::distanceFaceFace(csh1, csh2);
 }
 
 template <>
-ContactShapeDistance distanceFaceEdge<CadmbtbDistanceType>(const OccContactFace& csh1,
-                                                           const OccContactEdge& csh2) {
+ContactShapeDistance distanceFaceEdge<CadmbtbDistanceType>(std::shared_ptr<OccContactFace> csh1,
+                                                           std::shared_ptr<OccContactEdge> csh2) {
   return cadmbtb::distanceFaceEdge(csh1, csh2);
 }
 
 template <>
-ContactShapeDistance distanceFaceFace<OccDistanceType>(const OccContactFace& csh1,
-                                                       const OccContactFace& csh2) {
+ContactShapeDistance distanceFaceFace<OccDistanceType>(std::shared_ptr<OccContactFace> csh1,
+                                                       std::shared_ptr<OccContactFace> csh2) {
   return occ_distanceFaceFace(csh1, csh2);
 }
 
 template <>
-ContactShapeDistance distanceFaceEdge<OccDistanceType>(const OccContactFace& csh1,
-                                                       const OccContactEdge& csh2) {
+ContactShapeDistance distanceFaceEdge<OccDistanceType>(std::shared_ptr<OccContactFace> csh1,
+                                                       std::shared_ptr<OccContactEdge> csh2) {
   return occ_distanceFaceEdge(csh1, csh2);
 }
 
@@ -109,24 +109,24 @@ struct Geometer {
   ContactShapeDistance operator()(std::shared_ptr<OccContactFace> face1,
                                   std::shared_ptr<OccContactFace> face2) {
     std::cout << "ok ........\n";
-    return distanceFaceFace<DistType>(*face1, *face2);
+    return distanceFaceFace<DistType>(face1, face2);
   };
 
   ContactShapeDistance operator()(std::shared_ptr<OccContactFace> face1,
                                   std::shared_ptr<OccContactEdge> edge2) {
-    auto dist2 = distanceFaceEdge<DistType>(*face1, *edge2);
+    auto dist2 = distanceFaceEdge<DistType>(face1, edge2);
     dist2.normal.Reverse();
     return dist2;
   };
 
   ContactShapeDistance operator()(std::shared_ptr<OccContactEdge> edge1,
                                   std::shared_ptr<OccContactFace> face2) {
-    return distanceFaceEdge<DistType>(*face2, *edge1);
+    return distanceFaceEdge<DistType>(face2, edge1);
   };
 
   ContactShapeDistance operator()(std::shared_ptr<OccContactEdge> edge1,
                                   std::shared_ptr<OccContactEdge> edge2) {
-    return distanceEdgeEdge<DistType>(*edge1, *edge2);
+    return distanceEdgeEdge<DistType>(edge1, edge2);
   };
 };
 

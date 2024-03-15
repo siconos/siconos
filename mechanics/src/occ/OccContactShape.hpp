@@ -20,9 +20,6 @@
  */
 #ifndef OccContactShape_hpp
 #define OccContactShape_hpp
-
-#include <iostream>  //TMP
-#include <memory>
 #include <string>
 #include <variant>
 // Opencascade classes
@@ -66,10 +63,10 @@ struct OccContactShape {
 
   /** Default constructor.
    */
-  OccContactShape();
+  OccContactShape() = delete;  // should we consider a default empty shape?
 
   /** Copy constructor */
-  OccContactShape(const OccContactShape& shape);
+  OccContactShape(const OccContactShape& shape) = default;
 
   // Rule of five
   OccContactShape(OccContactShape&& shape) = default;
@@ -89,7 +86,7 @@ struct OccContactShape {
   OccContactShape(const TopoDS_Shape& shape);
 
   /** Destructor */
-  virtual ~OccContactShape() noexcept { std::cout << "SHAPE  DESTR \n"; }  //= default;
+  virtual ~OccContactShape() noexcept = default;
 
   /** Return shared pointer to OpenCascade data
    */

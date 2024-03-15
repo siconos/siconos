@@ -124,6 +124,7 @@ void OccTest::move() {
 
 #ifdef HAS_FORTRAN
 void OccTest::distance() {
+  std::cout << "Start distance computation test \n";
   constexpr auto pi = std::numbers::pi;
 
   BRepPrimAPI_MakeSphere mksphere1{1, pi};

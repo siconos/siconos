@@ -279,7 +279,7 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
      \param time value for output computation
      \param interaction_properties properties of the interaction, in the Interaction Graph I0
   */
-  void UpdateAndSwapAllOutput(
+  void updateAndSwapAllOutput(
       siconos::modeling::Interaction& inter, double time,
       siconos::graphs::InteractionProperties& interaction_properties);
 

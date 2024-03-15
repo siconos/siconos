@@ -25,12 +25,10 @@
 #include "OccContactEdge.hpp"
 #include "OccContactFace.hpp"
 #include "SiconosException.hpp"
-#include "SiconosVector.hpp"
 
-void siconos::mechanics::occ::occ_move(TopoDS_Shape& shape,
-                                       const siconos::algebra::SiconosVector& q) {
-  const gp_Vec translat{q(0), q(1), q(2)};
-  const gp_Quaternion rota{q(4), q(5), q(6), q(3)};
+void siconos::mechanics::occ::occ_move(TopoDS_Shape& shape, const std::array<double, 7>& q) {
+  const gp_Vec translat{q[0], q[1], q[2]};
+  const gp_Quaternion rota{q[4], q[5], q[6], q[3]};
 
   gp_Trsf transfo;
   transfo.SetRotation(rota);
@@ -40,13 +38,14 @@ void siconos::mechanics::occ::occ_move(TopoDS_Shape& shape,
   shape.Location(TopLoc_Location(transfo));
 }
 
-auto siconos::mechanics::occ::occ_distanceFaceFace(const OccContactFace& csh1,
-                                                   const OccContactFace& csh2) -> ContactShapeDistance {
+auto siconos::mechanics::occ::occ_distanceFaceFace(std::shared_ptr<OccContactFace> csh1,
+                                                   std::shared_ptr<OccContactFace> csh2)
+    -> ContactShapeDistance {
   // need the 2 sp pointers to keep memory
-  const TopoDS_Face& face1 = *csh1.contact();
-  const TopoDS_Face& face2 = *csh2.contact();
-
-  BRepExtrema_DistShapeShape measure{face1, face2};
+  auto face1 = csh1->contact();
+  auto face2 = csh2->contact();
+  
+  BRepExtrema_DistShapeShape measure{*face1, *face2};
   auto isDone = measure.Perform();
   ContactShapeDistance dist{};
 
@@ -64,9 +63,9 @@ auto siconos::mechanics::occ::occ_distanceFaceFace(const OccContactFace& csh1,
         Standard_Real u, v;
 
         measure.ParOnFaceS2(i, u, v);
-        dist.normal = cadmbtb::tools::FaceNormal(face2, u, v);
+        dist.normal = cadmbtb::tools::FaceNormal(*face2, u, v);
         /**check orientation of normal from face 2**/
-        dist.oriantates();
+        dist.orientates();
         dist.value = measure.Value();
         break;
       }
@@ -77,14 +76,16 @@ auto siconos::mechanics::occ::occ_distanceFaceFace(const OccContactFace& csh1,
   return dist;  // RVO, no copy
 }
 
-auto siconos::mechanics::occ::occ_distanceFaceEdge(const OccContactFace& csh1,
-                                                   const OccContactEdge& csh2) -> ContactShapeDistance {
+auto siconos::mechanics::occ::occ_distanceFaceEdge(std::shared_ptr<OccContactFace> csh1,
+                                                   std::shared_ptr<OccContactEdge> csh2)
+    -> ContactShapeDistance {
   // need the 2 sp pointers to keep memory
-  const TopoDS_Face& face = *csh1.contact();
-  const TopoDS_Edge& edge = *csh2.contact();
+  auto face = csh1->contact();
+  auto edge = csh2->contact();
+  
 
   ContactShapeDistance dist{};
-  BRepExtrema_DistShapeShape measure{face, edge};
+  BRepExtrema_DistShapeShape measure{*face, *edge};
   auto isDone = measure.Perform();
 
   if (isDone) {
@@ -99,8 +100,8 @@ auto siconos::mechanics::occ::occ_distanceFaceEdge(const OccContactFace& csh1,
         Standard_Real u, v;
 
         measure.ParOnFaceS1(1, u, v);
-        dist.normal = cadmbtb::tools::FaceNormal(face, u, v);
-        dist.oriantates();
+        dist.normal = cadmbtb::tools::FaceNormal(*face, u, v);
+        dist.orientates();
         dist.value = measure.Value();
         break;
       }
