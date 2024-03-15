@@ -1,40 +1,54 @@
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2024 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "OccTest.hpp"
 
-#include "MechanicsFwd.hpp"
-#include "OccContactShape.hpp"
-#include "OccContactFace.hpp"
-#include "OccContactEdge.hpp"
-#include "ContactShapeDistance.hpp"
-#include "ContactPoint.hpp"
-#include "WhichGeometer.hpp"
-#include "WhichGeometer.hpp"
-
-#include <TopoDS_Shape.hxx>
 #include <BRepPrimAPI_MakeSphere.hxx>
 #include <BRepTools.hxx>
+#include <Geometer2.hpp>
+#include <OccBody.hpp>
+#include <OccBody2.hpp>
+#include <SiconosVector.hpp>
+#include <SimpleMatrix.hpp>
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
-#include <gp_XYZ.hxx>
-#include <gp_Quaternion.hxx>
-
-#include <cmath>
+#include <TopoDS_Shape.hxx>
 #include <boost/math/constants/constants.hpp>
-
+#include <cmath>
+#include <gp_Quaternion.hxx>
+#include <gp_XYZ.hxx>
 #include <iostream>
+
+#include "ContactPoint.hpp"
+#include "ContactShapeDistance.hpp"
+#include "MechanicsFwd.hpp"
+#include "OccContactEdge.hpp"
+#include "OccContactFace.hpp"
+#include "OccContactShape.hpp"
+#include "OccContactShape2.hpp"
+#include "WhichGeometer.hpp"
 
 CPPUNIT_TEST_SUITE_REGISTRATION(OccTest);
 
-void OccTest::setUp()
-{
-}
+void OccTest::setUp() {}
 
-void OccTest::tearDown()
-{
-}
+void OccTest::tearDown() {}
 
-void OccTest::exportBRepAsString()
-{
-
+void OccTest::exportBRepAsString() {
   BRepPrimAPI_MakeSphere mksphere(1.0);
 
   OccContactShape sphere(mksphere.Shape());
@@ -46,12 +60,9 @@ void OccTest::exportBRepAsString()
   BRepTools::Write(mksphere.Shape(), out);
 
   CPPUNIT_ASSERT(out.str() == s1);
-
 }
 
-void OccTest::computeUVBounds()
-{
-
+void OccTest::computeUVBounds() {
   TopExp_Explorer exp;
   BRepPrimAPI_MakeSphere mksphere(1.0);
 
@@ -69,15 +80,9 @@ void OccTest::computeUVBounds()
 
   std::cout << sphere_face.bsup1[0] << "," << sphere_face.bsup1[1] << std::endl;
   std::cout << sphere_face.binf1[0] << "," << sphere_face.binf1[1] << std::endl;
-
 }
 
-
-#include <SiconosVector.hpp>
-#include <SimpleMatrix.hpp>
-#include <OccBody.hpp>
-void OccTest::move()
-{
+void OccTest::move() {
   BRepPrimAPI_MakeSphere mksphere(1.0);
 
   TopExp_Explorer exp;
@@ -95,7 +100,7 @@ void OccTest::move()
 
   SP::SiconosVector position(new SiconosVector(7));
   SP::SiconosVector velocity(new SiconosVector(6));
-  SP::SimpleMatrix inertia(new SimpleMatrix(3,3));
+  SP::SimpleMatrix inertia(new SimpleMatrix(3, 3));
   position->zero();
   (*position)(0) = 1.;
   (*position)(1) = 2.;
@@ -114,28 +119,23 @@ void OccTest::move()
 
   body->addContactShape(createSPtrOccContactShape(sphere_contact));
 
-  gp_XYZ translat = body->contactShape(0).data().Location().Transformation().
-                    TranslationPart();
+  gp_XYZ translat = body->contactShape(0).data().Location().Transformation().TranslationPart();
 
-  std::cout << translat.X() << "," << translat.Y() << "," << translat.Z()
-            << std::endl;
+  std::cout << translat.X() << "," << translat.Y() << "," << translat.Z() << std::endl;
 
   CPPUNIT_ASSERT(translat.X() == 1.);
   CPPUNIT_ASSERT(translat.Y() == 2.);
   CPPUNIT_ASSERT(translat.Z() == 3.);
 
-  gp_Quaternion rotat = body->contactShape(0).data().Location().Transformation().
-                        GetRotation();
+  gp_Quaternion rotat = body->contactShape(0).data().Location().Transformation().GetRotation();
 
   CPPUNIT_ASSERT(std::abs(rotat.X() - 0.44543540318737401) < 1e-9);
   CPPUNIT_ASSERT(std::abs(rotat.Y() - 0.53452248382484879) < 1e-9);
   CPPUNIT_ASSERT(std::abs(rotat.Z() - 0.62360956446232352) < 1e-9);
   CPPUNIT_ASSERT(std::abs(rotat.W() - 0.35634832254989918) < 1e-9);
-
 }
 #ifdef HAS_FORTRAN
-void OccTest::distance()
-{
+void OccTest::distance() {
   const double pi = boost::math::constants::pi<double>();
 
   BRepPrimAPI_MakeSphere mksphere1(1, pi);
@@ -150,7 +150,7 @@ void OccTest::distance()
   SP::SiconosVector position1(new SiconosVector(7));
   SP::SiconosVector position2(new SiconosVector(7));
   SP::SiconosVector velocity(new SiconosVector(6));
-  SP::SimpleMatrix inertia(new SimpleMatrix(3,3));
+  SP::SimpleMatrix inertia(new SimpleMatrix(3, 3));
   position1->zero();
   (*position1)(0) = 0.;
   (*position1)(1) = 0.;
@@ -163,8 +163,8 @@ void OccTest::distance()
   (*position2)(1) = 0.;
   (*position2)(2) = 0.;
 
-  (*position2)(3) = cos(pi/2.);
-  (*position2)(5) = sin(pi/2.);
+  (*position2)(3) = cos(pi / 2.);
+  (*position2)(5) = sin(pi / 2.);
 
   velocity->zero();
   inertia->eye();
@@ -174,7 +174,6 @@ void OccTest::distance()
 
   body1->addContactShape(createSPtrOccContactShape(sphere1_contact));
   body2->addContactShape(createSPtrOccContactShape(sphere2_contact));
-
 
   std::cout << "umin1:" << body1->contactShape(0).binf1[0] << std::endl;
   std::cout << "umax1:" << body1->contactShape(0).bsup1[0] << std::endl;
@@ -186,18 +185,15 @@ void OccTest::distance()
   std::cout << "vmin2:" << body2->contactShape(0).binf1[1] << std::endl;
   std::cout << "vmax2:" << body2->contactShape(0).bsup1[1] << std::endl;
 
-  gp_XYZ translat1 = body1->contactShape(0).data().Location().Transformation().
-                     TranslationPart();
+  gp_XYZ translat1 =
+      body1->contactShape(0).data().Location().Transformation().TranslationPart();
 
-  std::cout << translat1.X() << "," << translat1.Y() << "," << translat1.Z()
-            << std::endl;
+  std::cout << translat1.X() << "," << translat1.Y() << "," << translat1.Z() << std::endl;
 
+  gp_XYZ translat2 =
+      body2->contactShape(0).data().Location().Transformation().TranslationPart();
 
-  gp_XYZ translat2 = body2->contactShape(0).data().Location().Transformation().
-                     TranslationPart();
-
-  std::cout << translat2.X() << "," << translat2.Y() << "," << translat2.Z()
-            << std::endl;
+  std::cout << translat2.X() << "," << translat2.Y() << "," << translat2.Z() << std::endl;
 
   SP::Geometer geometer = ask<WhichGeometer<CadmbtbDistanceType> >(body1->contactShape(0));
 
@@ -214,6 +210,5 @@ void OccTest::distance()
   std::cout << dist.nx << "," << dist.ny << "," << dist.nz << std::endl;
 
   CPPUNIT_ASSERT(std::abs(dist.value - 1.0) < 1e-9);
-
 }
 #endif
