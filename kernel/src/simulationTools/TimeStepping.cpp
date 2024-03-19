@@ -489,22 +489,33 @@ void TimeStepping::computeInitialStateOfTheStep() {
 
 void TimeStepping::initializeNewtonSolve() {
   DEBUG_BEGIN("TimeStepping::initializeNewtonSolve()\n");
+
   double tkp1 = getTkp1();
   assert(!std::isnan(tkp1));
-  
-  updateOutput();
 
+
+  // Compute all output and Jacobians at the beginning of the step
+  // this way the value of output are consistent with the value
+  // of the step at the beginning of the time step.
+  
+  for (OSIIterator it = _allOSI->begin(); it != _allOSI->end(); ++it)
+    {
+      (*it)->UpdateAndSwapAllOutput(tkp1);
+    }
+
+  updateOutput(); // needed? 
+  
   updateIndexSets();
 
   initializeOneStepNSProblem();
 
-  //computeInitialStateOfTheStep();
+  computeInitialStateOfTheStep();
 
   updateDSPlugins(tkp1);
 
   computeResidu();
 
-  updateAllInput();  //??
+  updateAllInput();  // needed ?
 
   if (_computeResiduY) {
     SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet0();
