@@ -429,13 +429,13 @@ void Simulation::initialize() {
   // 3 - initialize new ds
   applyNSDSChangelogForDS();
 
-  //computeInitialStateOfTheStep();
-  
   // 4 - update the world from DS
   // for external contact detection library for instance
   updateWorldFromDS();
 
   // 5 - call the InteractionManager to add/remove interactions
+  // this routine sometimes may update the external objects
+  // from the state of ds.
   updateInteractions();
 
   // 6 - initialize new interactions
@@ -443,29 +443,6 @@ void Simulation::initialize() {
 
   // 7 - First initialization of the simulation
   firstInitialize();
-
-
-
-  // // Come back in position
-  // DynamicalSystemsGraph::VIterator dsi, dsend;
-  // DynamicalSystemsGraph& DSG = *_nsds->topology()->dSG(0);
-  // for(std::tie(dsi, dsend) = DSG.vertices(); dsi != dsend; ++dsi)
-  // {
-  //   DynamicalSystem&  ds = *DSG.bundle(*dsi);
-    
-
-  //   if(Type::value(ds) == Type::SecondOrderDS)
-  //     {
-  // 	SecondOrderDS& d = static_cast<SecondOrderDS&>(ds);
-  // 	const SiconosVector& qold = d.qMemory().getSiconosVector(0);
-  // 	SP::SiconosVector q = d.q();
-
-  // 	*q= qold;
-	
-  //     }
-    
-  // }
-  
 
   DEBUG_END("Simulation::initialize()\n");
 }

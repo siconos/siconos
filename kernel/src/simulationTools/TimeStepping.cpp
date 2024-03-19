@@ -502,8 +502,6 @@ void TimeStepping::initializeNewtonSolve() {
     {
       (*it)->UpdateAndSwapAllOutput(tkp1);
     }
-
-  updateOutput(); // needed? 
   
   updateIndexSets();
 
@@ -514,8 +512,6 @@ void TimeStepping::initializeNewtonSolve() {
   updateDSPlugins(tkp1);
 
   computeResidu();
-
-  updateAllInput();  // needed ?
 
   if (_computeResiduY) {
     SP::InteractionsGraph indexSet0 = _nsds->topology()->indexSet0();
