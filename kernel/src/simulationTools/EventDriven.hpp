@@ -42,7 +42,7 @@ class EventDriven : public Simulation {
    */
   int _istate{1};
 
-  void initOSNS() override;
+  void initializeOneStepNSProblem() override;
 
   /** Initialize OneStepIntergrators */
   void initOSIs();

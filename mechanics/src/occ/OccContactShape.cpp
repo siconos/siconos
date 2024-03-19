@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "OccContactShape.hpp"
 
 #include <BRepTools.hxx>
@@ -108,8 +107,7 @@ std::shared_ptr<TopoDS_Edge> siconos::mechanics::occ::OccContactShape::edge(
     unsigned int index) const {
   auto return_value = std::make_shared<TopoDS_Edge>();
 
-  TopExp_Explorer exp;
-  exp.Init(data(), TopAbs_EDGE);
+  TopExp_Explorer exp{data(), TopAbs_EDGE};
   for (unsigned int i = 0; i < index; ++i, exp.Next())
     ;
   if (exp.More()) {

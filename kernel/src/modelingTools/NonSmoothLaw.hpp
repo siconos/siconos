@@ -82,8 +82,7 @@ class NonSmoothLaw {
      \return a boolean value which determines if the NS Law is verified.
      Not implemented for the moment.
   */
-  virtual bool isVerified() const
-  {
+  virtual bool isVerified() const {
     THROW_EXCEPTION("NonSmoothLaw::isVerified, not yet implemented!");
     return false;
   }

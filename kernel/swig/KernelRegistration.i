@@ -6,6 +6,7 @@
   PY_REGISTER(NonSmoothLaw, Kernel);                                            \
   PY_REGISTER(NewtonImpactNSL, Kernel);                                         \
   PY_REGISTER(NewtonImpactFrictionNSL, Kernel);                                 \
+  PY_REGISTER(FremondImpactFrictionNSL, Kernel);			\
   PY_REGISTER(NewtonImpactRollingFrictionNSL, Kernel);                  \
   PY_REGISTER(MixedComplementarityConditionNSL, Kernel);                        \
   PY_REGISTER(ComplementarityConditionNSL, Kernel);                             \

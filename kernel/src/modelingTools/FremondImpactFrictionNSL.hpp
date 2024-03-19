@@ -16,24 +16,24 @@
  * limitations under the License.
  */
 /*! \file NewtonImpactFrictionNSL.hpp
-  Newton-Impact Non-Smooth Law
+  Fremond-Impact Non-Smooth Law
 */
 
-#ifndef NEWTONIMPACTFRICTIONNSLAW_H
-#define NEWTONIMPACTFRICTIONNSLAW_H
+#ifndef FREMONDIMPACTFRICTIONNSLAW_H
+#define FREMONDIMPACTFRICTIONNSLAW_H
 
 #include "NonSmoothLaw.hpp"
 
 namespace siconos::modeling {
 
-/** Newton Impact-Friction Non Smooth Law
+/** Fremond Impact-Friction Non Smooth Law
  *
  */
-class NewtonImpactFrictionNSL : public NonSmoothLaw {
+class FremondImpactFrictionNSL : public NonSmoothLaw {
  private:
-  ACCEPT_SERIALIZATION(NewtonImpactFrictionNSL);
+  ACCEPT_SERIALIZATION(FremondImpactFrictionNSL);
 
-  /** The Newton coefficient of restitution
+  /** The Fremond coefficient of restitution
    */
   double _en{0.};
   double _et{0.};
@@ -42,33 +42,27 @@ class NewtonImpactFrictionNSL : public NonSmoothLaw {
 
   /** default constructor
    */
-  NewtonImpactFrictionNSL() = default;
+  FremondImpactFrictionNSL() = default;
 
  public:
   /** basic constructor
    *
    *  \param size size of the ns law
    */
-  NewtonImpactFrictionNSL(unsigned int size) : NonSmoothLaw(size){};
+  FremondImpactFrictionNSL(unsigned int size) : NonSmoothLaw(size){};
 
-  /** constructor with the value of the NewtonImpactFrictionNSL attributes
+  /** constructor with the value of the FremondImpactFrictionNSL attributes
    *
    *  \param en double : normal e coefficient
    *  \param et double : tangent e coefficient
    *  \param mu double : friction coefficient
    *  \param size unsigned int: size of the ns law
    */
-  NewtonImpactFrictionNSL(double en, double et, double mu, unsigned int size)
+  FremondImpactFrictionNSL(double en, double et, double mu, unsigned int size)
       : NonSmoothLaw(size), _en(en), _et(et), _mu(mu){};
 
   /** Destructor */
-  ~NewtonImpactFrictionNSL() noexcept = default;
-
-  /** check the ns law to see if it is verified
-   *
-   *  \return a boolean value whioch determines if the NS Law is verified
-   */
-  bool isVerified(void) const override;
+  ~FremondImpactFrictionNSL() noexcept = default;
 
   // GETTERS/SETTERS
 
@@ -112,7 +106,8 @@ class NewtonImpactFrictionNSL : public NonSmoothLaw {
   void accept(siconos::internal::SiconosVisitor& tourist) const override {
     tourist.visit(*this);
   }
+
   Type acceptType(types::FindType& ft) const override { return ft.visit(*this); }
 };
 }  // namespace siconos::modeling
-#endif  // NewtonImpactFrictionNSL_H
+#endif  // FremondImpactFrictionNSL_H

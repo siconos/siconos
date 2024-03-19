@@ -15,16 +15,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef OccSpaceFilter_hpp
-#define OccSpaceFilter_hpp
 
-#include "SpaceFilter.hpp"
+#include "FremondImpactFrictionNSL.hpp"
 
-namespace siconos::mechanics::occ {
-class OccSpaceFilter : public siconos::collision::native::SpaceFilter {
- public:
-  // Do we need a default constructor ?
-  virtual void updateInteractions(std::shared_ptr<siconos::simulation::Simulation>){};
-};
-}  // namespace siconos::mechanics::occ
-#endif
+#include <iostream>
+
+void siconos::modeling::FremondImpactFrictionNSL::display() const {
+  std::cout << "=== Fremond impact-friction non-smooth law data display ===\n";
+  std::cout << " Normal Fremond coefficient of restitution: " << _en << "\n";
+  std::cout << " Tangential Fremond coefficient of restitution: " << _et << "\n";
+  std::cout << "Friction coefficient: " << _mu << "\n";
+  std::cout << "==========================================================\n";
+}

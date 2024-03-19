@@ -98,7 +98,7 @@ class TimeSteppingCombinedProjection : public TimeStepping {
   // struct _SimulationEffectOnOSNSP;
 
  public:
-  void initOSNS() override;
+  void initializeOneStepNSProblem() override;
 
   /** Constructor with the time-discretisation.
    *
@@ -133,8 +133,7 @@ class TimeSteppingCombinedProjection : public TimeStepping {
    *
    *  \return unsigned int
    */
-  inline unsigned int nbCumulatedProjectionIteration()
-  {
+  inline unsigned int nbCumulatedProjectionIteration() {
     return _nbCumulatedProjectionIteration;
   }
 

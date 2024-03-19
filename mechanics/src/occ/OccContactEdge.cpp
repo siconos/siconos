@@ -23,9 +23,8 @@
 #include <SiconosException.hpp>
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
-
 siconos::mechanics::occ::OccContactEdge::OccContactEdge(const OccContactShape& shape,
-							int index)
+                                                        int index)
     : OccContactShape(shape), _index(index), _edge(shape.edge(index)) {
   computeUVBounds();
 };

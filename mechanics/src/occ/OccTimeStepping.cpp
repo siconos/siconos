@@ -15,15 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "OccTimeStepping.hpp"
 
 #include <memory>
 
 #include "NonSmoothDynamicalSystem.hpp"
 #include "OccBody.hpp"
-#include "SimulationGraphs.hpp"
 #include "SiconosVector.hpp"
+#include "SimulationGraphs.hpp"
 
 // namespace siconos::mechanics::occ::internal {
 // struct UpdateShapes {
@@ -41,10 +40,9 @@ void siconos::mechanics::occ::OccTimeStepping::updateWorldFromDS() {
   std::tie(dsi, dsiend) = dsg.vertices();
 
   for (; dsi != dsiend; ++dsi) {
-    if(auto ds = std::dynamic_pointer_cast<OccBody>(dsg.bundle(*dsi)))
-      {
-	ds->updateShapes();
-	ds->updateContactShapes();
-      }
+    if (auto ds = std::dynamic_pointer_cast<OccBody>(dsg.bundle(*dsi))) {
+      ds->updateShapes();
+      ds->updateContactShapes();
+    }
   }
 }

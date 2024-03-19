@@ -516,6 +516,7 @@ class MechanicsHdf5(object):
         self._cf_data = None
         self._cf_info = None
         self._cf_work = None
+        self._enery_work = None
         self._domain_data = None
         self._solv_data = None
         self._run_options = None
@@ -625,6 +626,19 @@ class MechanicsHdf5(object):
         except Exception as e:
             self.print_io_mechanics('Warning -  cf_work in the hdf5 file')
             self.print_io_mechanics('        -  group(self._cf_work, log ) : ', e)
+        try:
+            self._energy_work = data(self._data, 'energy_work', 8,
+                                    use_compression=self._use_compression)
+
+            if self._mode == 'w':
+                self._energy_work.attrs['info'] = '[0] : time,\n [1] : kinetic energy,\n'
+                self._energy_work.attrs['info'] += ' [2] : force work, \n'
+                self._energy_work.attrs['info'] += ' [3] : normal contact work,\n [4] : tangent contact work,\n'
+                self._energy_work.attrs['info'] += ' [5] : friction dissipation,\n [6,7] only negative part '
+        except Exception as e:
+            self.print_io_mechanics('Warning -  cf_work in the hdf5 file')
+            self.print_io_mechanics('        -  group(self._cf_work, log ) : ', e)
+
 
         if self._should_output_domains or 'domain' in self._data:
             self._domain_data = data(self._data, 'domain', 3,
@@ -1274,6 +1288,32 @@ class MechanicsHdf5(object):
         nslaw.attrs['e'] = e
         nslaw.attrs['gid1'] = collision_group1
         nslaw.attrs['gid2'] = collision_group2
+        
+    def add_Fremond_impact_friction_nsl(self, name, mu, e=0, collision_group1=0,
+                                       collision_group2=0):
+        """
+        Add a nonsmooth law for contact between 2 groups.
+        Only NewtonImpactFrictionNSL are supported.
+        name is an user identifiant and must be unique,
+        mu is the coefficient of friction,
+        e is the coefficient of restitution on the contact normal,
+        gid1 and gid2 define the group identifiants.
+
+        """
+        if name not in self._nslaws_data:
+            nslaw = self._nslaws_data.create_dataset(name, (0,))
+            nslaw.attrs['type'] = 'FremondImpactFrictionNSL'
+        else:
+            nslaw=self._nslaws_data[name]
+            if nslaw.attrs['type'] != 'FremondImpactFrictionNSL':
+                self.print_verbose('[warning] a nslaw is already existing with the same name ', name ,' but not the same type')
+
+        nslaw.attrs['mu'] = mu
+        nslaw.attrs['e'] = e
+        nslaw.attrs['gid1'] = collision_group1
+        nslaw.attrs['gid2'] = collision_group2
+
+
 
     def add_Newton_impact_friction_nsl(self, name, mu, e=0, collision_group1=0,
                                        collision_group2=0):

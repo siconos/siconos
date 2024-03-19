@@ -105,6 +105,7 @@ class Bullet2d3DR : public siconos::modeling::Lagrangian2d3DR {};
 #include "DiskDiskR.hpp"
 #include "DiskPlanR.hpp"
 #include "DynamicalSystem.hpp"
+#include "FremondImpactFrictionNSL.hpp"
 #include "Interaction.hpp"
 #include "KneeJointR.hpp"
 #include "Lagrangian2d2DR.hpp"
@@ -161,6 +162,7 @@ struct siconos::io::ForMu : public siconos::internal::Question<double> {
   using SiconosVisitor::visit;
 
   void visit(const siconos::modeling::NewtonImpactFrictionNSL& nsl) { answer = nsl.mu(); }
+  void visit(const siconos::modeling::FremondImpactFrictionNSL& nsl) { answer = nsl.mu(); }
   void visit(const siconos::modeling::NewtonImpactRollingFrictionNSL& nsl) {
     answer = nsl.mu();
   }
@@ -169,8 +171,8 @@ struct siconos::io::ForMu : public siconos::internal::Question<double> {
 
 struct siconos::io::ForE : public siconos::internal::Question<double> {
   using SiconosVisitor::visit;
-
   void visit(const siconos::modeling::NewtonImpactFrictionNSL& nsl) { answer = nsl.en(); }
+  void visit(const siconos::modeling::FremondImpactFrictionNSL& nsl) { answer = nsl.en(); }
   void visit(const siconos::modeling::NewtonImpactRollingFrictionNSL& nsl) {
     answer = nsl.en();
   }
@@ -837,6 +839,7 @@ struct ContactContactWorkVisitor : public siconos::internal::SiconosVisitor {
   std::shared_ptr<siconos::modeling::Interaction> inter{nullptr};
   // std::vector<int> answer; better with a vector of int
   siconos::algebra::SiconosVector answer;
+  double omega;
   double tol;
   template <typename T>
   void operator()(const T& rel) {}
@@ -850,7 +853,7 @@ void ContactContactWorkVisitor::operator()(const siconos::modeling::NewtonEuler3
 }
 
 static void compute_contact_work_and_status(
-    std::shared_ptr<siconos::modeling::Interaction> inter, double tol,
+    std::shared_ptr<siconos::modeling::Interaction> inter, double omega, double tol,
     siconos::algebra::SiconosVector& answer) {
   auto mu = siconos::internal::ask<ForMu>(*inter->nonSmoothLaw());
   auto e = siconos::internal::ask<ForE>(*inter->nonSmoothLaw());
@@ -859,6 +862,7 @@ static void compute_contact_work_and_status(
   auto vn_plus = inter->y(1)->getValue(0);
   auto pn = inter->lambda(1)->getValue(0);
 
+  double vn_average = omega * vn_plus + (1. - omega) * vn_minus;
   auto normal_contact_work = 0.5 * (vn_minus + vn_plus) * pn;
   answer.setValue(1, normal_contact_work);
 
@@ -869,24 +873,29 @@ static void compute_contact_work_and_status(
   auto vt_1_plus = inter->y(1)->getValue(1);
   auto vt_2_plus = inter->y(1)->getValue(2);
 
-  auto pt_1 = inter->lambda(1)->getValue(1);
-  auto pt_2 = inter->lambda(1)->getValue(2);
+  double vt_1_average = omega * vt_1_plus + (1. - omega) * vt_1_minus;
+  double vt_2_average = omega * vt_2_plus + (1. - omega) * vt_2_minus;
 
-  auto tangent_contact_work =
-      0.5 * (vt_1_minus + vt_1_plus) * pt_1 + 0.5 * (vt_2_minus + vt_2_plus) * pt_2;
+  double pt_1 = inter->lambda(1)->getValue(1);
+  double pt_2 = inter->lambda(1)->getValue(2);
+
+  double tangent_contact_work = vt_1_average * pt_1 + vt_2_average * pt_2;
   answer.setValue(2, tangent_contact_work);
 
   // Compute directly work dissipated by friction impulse
-  auto theta = 1 / 2.;
-  auto norm_vt_plus = sqrt(vt_1_plus * vt_1_plus + vt_2_plus * vt_2_plus);
-  auto norm_vt_minus = sqrt(vt_1_minus * vt_1_minus + vt_2_minus * vt_2_minus);
-
-  auto friction_dissipation = mu * (theta * norm_vt_plus + (1 - theta) * norm_vt_minus) * pn;
+  double norm_vt_average = sqrt(vt_1_average * vt_1_average + vt_2_average * vt_2_average);
+  double friction_dissipation = mu * norm_vt_average * pn;
   answer.setValue(3, friction_dissipation);
-  // compute contact status
 
-  auto norm_pt = sqrt(pt_1 * pt_1 + pt_2 * pt_2);
+  /* Compute contact status
+   * Warning the status are consistent for the sticking and sliding
+   * only with fully implicit discretization o NewtonImpact law
+   * and not wih Fremond impact law
+   */
 
+  double norm_pt = sqrt(pt_1 * pt_1 + pt_2 * pt_2);
+  double norm_vt_plus = sqrt(vt_1_plus * vt_1_plus + vt_2_plus * vt_2_plus);
+  double norm_vt_minus = sqrt(vt_1_minus * vt_1_minus + vt_2_minus * vt_2_minus);
   if ((pn < tol) and (vn_plus + e * vn_minus > tol))
     answer.setValue(4, 0);  // take-off = 0
   else if ((pn > tol) and (vn_plus + e * vn_minus < tol)) {
@@ -917,7 +926,7 @@ static void compute_contact_work_and_status(
     // 		<< std::endl;
     answer.setValue(5, normal_contact_work);
   }
-  // auto id = inter->number();
+  // double id = inter->number();
   // std::cout << "\nid "<< id << std::endl;
   // std::cout << " e "<< e  << " mu "<< mu << std::endl;
   // std::cout << " tol "<< tol<< std::endl;
@@ -946,7 +955,7 @@ void siconos::io::ContactContactWorkVisitor::operator()(
   auto id = inter->number();
   answer.resize(6);
   answer.setValue(0, id);
-  compute_contact_work_and_status(inter, tol, answer);
+  compute_contact_work_and_status(inter, omega, tol, answer);
 }
 
 template <>
@@ -956,7 +965,7 @@ void siconos::io::ContactContactWorkVisitor::operator()(
   answer.resize(6);
   answer.setValue(0, id);
 
-  compute_contact_work_and_status(inter, tol, answer);
+  compute_contact_work_and_status(inter, omega, tol, answer);
 }
 
 template <>
@@ -966,7 +975,7 @@ void siconos::io::ContactContactWorkVisitor::operator()(
   answer.resize(6);
   answer.setValue(0, id);
 
-  compute_contact_work_and_status(inter, tol, answer);
+  compute_contact_work_and_status(inter, omega, tol, answer);
 }
 
 template <>
@@ -976,12 +985,12 @@ void siconos::io::ContactContactWorkVisitor::operator()(
   answer.resize(6);
   answer.setValue(0, id);
 
-  compute_contact_work_and_status(inter, tol, answer);
+  compute_contact_work_and_status(inter, omega, tol, answer);
 }
 
 std::shared_ptr<siconos::algebra::SimpleMatrix> siconos::io::MechanicsIO::contactContactWork(
     const siconos::modeling::NonSmoothDynamicalSystem& nsds, unsigned int index_set,
-    double tol) const {
+    double omega, double tol) const {
   DEBUG_BEGIN("SimpleMatrix MechanicsIO::contactContactWork");
 
   siconos::graphs::InteractionsGraph::VIterator vi, viend;
@@ -1005,6 +1014,7 @@ std::shared_ptr<siconos::algebra::SimpleMatrix> siconos::io::MechanicsIO::contac
       auto inspector = std::make_shared<ContactContactWorkInspector>();
       inspector->inter = graph.bundle(*vi);
       inspector->tol = tol;
+      inspector->omega = omega;
       graph.bundle(*vi)->relation()->accept(inspector);
       auto& data = inspector->answer;
       data_size = data.size();

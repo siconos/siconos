@@ -30,38 +30,32 @@
 // #include <fc2d_Solvers.h>
 // #include <fc3d_Solvers.h>
 
-siconos::nonsmooth_formulations::FrictionContact::FrictionContact(int dimPb, int numericsSolverId)
-    : FrictionContact{dimPb, std::shared_ptr<SolverOptions>(
-                                 solver_options_create(numericsSolverId),
-                                 solver_options_delete)}
-{
-}
+siconos::nonsmooth_formulations::FrictionContact::FrictionContact(int dimPb,
+                                                                  int numericsSolverId)
+    : FrictionContact{dimPb,
+                      std::shared_ptr<SolverOptions>(solver_options_create(numericsSolverId),
+                                                     solver_options_delete)} {}
 
 siconos::nonsmooth_formulations::FrictionContact::FrictionContact(
     int dimPb, std::shared_ptr<SolverOptions> options)
-    : LinearOSNS{options}, _contactProblemDim{dimPb}
-{
+    : LinearOSNS{options}, _contactProblemDim{dimPb} {
   if (dimPb == 2 && options->solverId == SICONOS_FRICTION_3D_NSGS) {
-    _numerics_solver_options.reset(
-        solver_options_create(SICONOS_FRICTION_2D_NSGS),
-        solver_options_delete);
+    _numerics_solver_options.reset(solver_options_create(SICONOS_FRICTION_2D_NSGS),
+                                   solver_options_delete);
   }
 
   if (dimPb == 2) {
     _frictionContact_driver = &fc2d_driver;
-  }
-  else if (dimPb == 3) {
+  } else if (dimPb == 3) {
     _frictionContact_driver = &fc3d_driver;
-  }
-  else
+  } else
     THROW_EXCEPTION("Wrong dimension value (must be 2 or 3) for FrictionContact constructor.");
 
   _mu = std::make_shared<std::vector<double>>();
 }
 
 void siconos::nonsmooth_formulations::FrictionContact::initialize(
-    std::shared_ptr<siconos::simulation::Simulation> sim)
-{
+    std::shared_ptr<siconos::simulation::Simulation> sim) {
   // - Checks memory allocation for main variables (M,q,w,z)
   // - Formalizes the problem if the topology is time-invariant
 
@@ -97,8 +91,7 @@ void siconos::nonsmooth_formulations::FrictionContact::initialize(
   }
 }
 
-void siconos::nonsmooth_formulations::FrictionContact::updateMu()
-{
+void siconos::nonsmooth_formulations::FrictionContact::updateMu() {
   _mu->clear();
   auto indexSet = simulation()->indexSet(indexSetLevel());
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
@@ -110,8 +103,7 @@ void siconos::nonsmooth_formulations::FrictionContact::updateMu()
 }
 
 std::shared_ptr<FrictionContactProblem>
-siconos::nonsmooth_formulations::FrictionContact::frictionContactProblem()
-{
+siconos::nonsmooth_formulations::FrictionContact::frictionContactProblem() {
   auto numerics_problem = std::make_shared<FrictionContactProblem>();
   numerics_problem->dimension = _contactProblemDim;
   numerics_problem->numberOfContacts = _sizeOutput / _contactProblemDim;
@@ -121,7 +113,8 @@ siconos::nonsmooth_formulations::FrictionContact::frictionContactProblem()
   return numerics_problem;
 }
 
-// FrictionContactProblem *siconos::nonsmooth_formulations::FrictionContact::frictionContactProblemPtr()
+// FrictionContactProblem
+// *siconos::nonsmooth_formulations::FrictionContact::frictionContactProblemPtr()
 // {
 //   auto *numerics_problem = &_numerics_problem;
 //   numerics_problem->dimension = _contactProblemDim;
@@ -133,8 +126,7 @@ siconos::nonsmooth_formulations::FrictionContact::frictionContactProblem()
 // }
 
 int siconos::nonsmooth_formulations::FrictionContact::solve(
-    std::shared_ptr<FrictionContactProblem> problem)
-{
+    std::shared_ptr<FrictionContactProblem> problem) {
   if (!problem) {
     problem = frictionContactProblem();
   }
@@ -144,13 +136,15 @@ int siconos::nonsmooth_formulations::FrictionContact::solve(
 }
 
 bool siconos::nonsmooth_formulations::FrictionContact::checkCompatibleNSLaw(
-    siconos::modeling::NonSmoothLaw &nslaw)
-{
+    siconos::modeling::NonSmoothLaw &nslaw) {
   float type_number =
       static_cast<float>(siconos::types::type_value(nslaw)) + 0.1 * nslaw.size();
   _nslawtype.insert(type_number);
 
-  if (siconos::types::type_value(nslaw) != siconos::modeling::Type::NewtonImpactFrictionNSL) {
+  if (not(siconos::types::type_value(nslaw) ==
+              siconos::modeling::Type::NewtonImpactFrictionNSL ||
+          siconos::types::type_value(nslaw) ==
+              siconos::modeling::Type::NewtonImpactFrictionNSL)) {
     THROW_EXCEPTION(
         "\nsiconos::nonsmooth_formulations::FrictionContact::checkCompatibleNSLaw -  \n\
                       The chosen nonsmooth law is not compatible with FrictionalContact one step nonsmooth problem. \n\
@@ -167,8 +161,7 @@ bool siconos::nonsmooth_formulations::FrictionContact::checkCompatibleNSLaw(
   return true;
 }
 
-int siconos::nonsmooth_formulations::FrictionContact::compute(double time)
-{
+int siconos::nonsmooth_formulations::FrictionContact::compute(double time) {
   int info = 0;
   // --- Prepare data for FrictionContact computing ---
   bool cont = preCompute(time);
@@ -197,8 +190,7 @@ int siconos::nonsmooth_formulations::FrictionContact::compute(double time)
   return info;
 }
 
-void siconos::nonsmooth_formulations::FrictionContact::display() const
-{
+void siconos::nonsmooth_formulations::FrictionContact::display() const {
   std::cout << "===== " << _contactProblemDim << "D Friction Contact Problem \n";
   std::cout << "of size " << _sizeOutput << "(ie " << _sizeOutput / _contactProblemDim
             << " contacts).\n";

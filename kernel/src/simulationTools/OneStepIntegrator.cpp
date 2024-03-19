@@ -73,10 +73,18 @@ void siconos::integrators::OneStepIntegrator::initialize() {
   initialize_nonsmooth_problems();
   _isInitialized = true;
 }
+void siconos::integrators::OneStepIntegrator::updateAndSwapAllOutput(double time) {
+  siconos::graphs::InteractionsGraph::VIterator ui, uiend;
+  auto& indexSet0 = *_simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
+  for (std::tie(ui, uiend) = indexSet0.vertices(); ui != uiend; ++ui) {
+    if (!checkInteractionOSI(indexSet0, ui)) continue;
+    auto& inter = *indexSet0.bundle(*ui);
+    updateAndSwapAllOutput(inter, time);
+  }
+}
 
 void siconos::integrators::OneStepIntegrator::OneStepIntegrator::updateAndSwapAllOutput(
-    siconos::modeling::Interaction& inter, double time,
-    siconos::graphs::InteractionProperties& interaction_properties) {
+    siconos::modeling::Interaction& inter, double time) {
   // - compute interaction output (y) for all levels
   // - swaps in memory
 

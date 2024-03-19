@@ -427,7 +427,7 @@ void siconos::integrators::MoreauJeanGOSI::NonSmoothLawContributionToOutput(
     auto& indexSet = *osnsp.simulation()->indexSet(osnsp.indexSetLevel());
     auto ivd = indexSet.descriptor(inter);
     struct MoreauJeanOSI::_NSLEffectOnFreeOutput nslEffectOnFreeOutput =
-        _NSLEffectOnFreeOutput(osnsp, *inter, indexSet.properties(ivd));
+        _NSLEffectOnFreeOutput(osnsp, *inter, indexSet.properties(ivd), _theta);
     auto& osnsp_rhs = *(*indexSet.properties(ivd).workVectors)[MoreauJeanOSI::OSNSP_RHS];
     osnsp_rhs.zero();
     inter->nonSmoothLaw()->accept(nslEffectOnFreeOutput);

@@ -165,6 +165,15 @@ class MoreauJeanOSI : public OneStepIntegrator {
    */
   bool _isWSymmetricDefinitePositive{false};
 
+  /** a boolean to perform activation with negative relative velocity
+   */
+  bool _activateWithNegativeRelativeVelocity{false};
+
+  /** Constraint activation threshold
+   *
+   */
+  double _constraintActivationThresholdVelocity;
+
   /**
       A set of work indices for the selected coordinates when
       we subprod in computeFreeOuput
@@ -179,15 +188,17 @@ class MoreauJeanOSI : public OneStepIntegrator {
     siconos::nonsmooth_formulations::OneStepNSProblem &_osnsp;
     siconos::modeling::Interaction &_inter;
     siconos::graphs::InteractionProperties &_interProp;
+    double _theta{0.};
 
     _NSLEffectOnFreeOutput(siconos::nonsmooth_formulations::OneStepNSProblem &p,
                            siconos::modeling::Interaction &inter,
-                           siconos::graphs::InteractionProperties &interProp);
+                           siconos::graphs::InteractionProperties &interProp, double theta);
 
     void visit(const siconos::modeling::NewtonImpactNSL &nslaw) const override;
 
     void visit(const siconos::modeling::RelayNSL &nslaw) const override{};
     void visit(const siconos::modeling::NewtonImpactFrictionNSL &nslaw) const override;
+    void visit(const siconos::modeling::FremondImpactFrictionNSL &nslaw) const override;
     void visit(const siconos::modeling::NewtonImpactRollingFrictionNSL &nslaw) const override;
     void visit(const siconos::modeling::EqualityConditionNSL &nslaw) const override{};
     void visit(
@@ -324,6 +335,16 @@ class MoreauJeanOSI : public OneStepIntegrator {
   /** get the constraint activation threshold */
   inline double constraintActivationThreshold() { return _constraintActivationThreshold; }
 
+  /** set the constraint activation threshold */
+  inline void setConstraintActivationThresholdVelocity(double v) {
+    _constraintActivationThresholdVelocity = v;
+  }
+
+  /** get the constraint activation threshold */
+  inline double constraintActivationThresholdVelocity() {
+    return _constraintActivationThresholdVelocity;
+  }
+
   /** get boolean _explicitNewtonEulerDSOperators for the relation
    *
    *  \return a Boolean
@@ -336,6 +357,23 @@ class MoreauJeanOSI : public OneStepIntegrator {
    */
   inline void setExplicitNewtonEulerDSOperators(bool newExplicitNewtonEulerDSOperators) {
     _explicitNewtonEulerDSOperators = newExplicitNewtonEulerDSOperators;
+  };
+
+  /** get boolean _activateWithNegativeRelativeVelocity
+   *
+   *  \return a Boolean
+   */
+  inline bool activateWithNegativeRelativeVelocity() {
+    return _activateWithNegativeRelativeVelocity;
+  };
+
+  /** set the boolean to perform activation with negative relative velocity
+   *
+   *  \param newActivateWithNegativeRealtiveVelocity a Boolean
+   */
+  inline void setActivateWithNegativeRelativeVelocity(
+      bool newActivateWithNegativeRelativeVelocity) {
+    _activateWithNegativeRelativeVelocity = newActivateWithNegativeRelativeVelocity;
   };
 
   // --- OTHER FUNCTIONS ---
@@ -511,6 +549,11 @@ class MoreauJeanOSI : public OneStepIntegrator {
    *  \param level the level of interest for the dynamics: not used at the time
    */
   void updateState(const unsigned int level) override;
+
+  /** Compute the matrix of work of forces by ds
+     \return SP::Siconosmatrix
+   */
+  std::shared_ptr<siconos::algebra::SimpleMatrix> computeWorkForces();
 
   /** Displays the data of the MoreauJeanOSI's integrator
    */

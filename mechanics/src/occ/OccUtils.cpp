@@ -44,7 +44,7 @@ auto siconos::mechanics::occ::occ_distanceFaceFace(std::shared_ptr<OccContactFac
   // need the 2 sp pointers to keep memory
   auto face1 = csh1->contact();
   auto face2 = csh2->contact();
-  
+
   BRepExtrema_DistShapeShape measure{*face1, *face2};
   auto isDone = measure.Perform();
   ContactShapeDistance dist{};
@@ -82,7 +82,6 @@ auto siconos::mechanics::occ::occ_distanceFaceEdge(std::shared_ptr<OccContactFac
   // need the 2 sp pointers to keep memory
   auto face = csh1->contact();
   auto edge = csh2->contact();
-  
 
   ContactShapeDistance dist{};
   BRepExtrema_DistShapeShape measure{*face, *edge};

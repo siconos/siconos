@@ -274,14 +274,18 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
 
   /**
      compute interaction output (y) for all levels and swaps in memory
-
-     \param inter the interaction to update
      \param time value for output computation
      \param interaction_properties properties of the interaction, in the Interaction Graph I0
   */
-  void updateAndSwapAllOutput(
-      siconos::modeling::Interaction& inter, double time,
-      siconos::graphs::InteractionProperties& interaction_properties);
+  void updateAndSwapAllOutput(double time);
+
+  /**
+     compute interaction output (y) for all levels and swaps in memory
+
+     \param inter the interaction to update
+     \param time value for output computation
+  */
+  void updateAndSwapAllOutput(siconos::modeling::Interaction& inter, double time);
 
   /** compute the initial state (for dynamical system variables) of the Newton loop. */
   virtual void computeInitialNewtonState() {

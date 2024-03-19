@@ -297,28 +297,15 @@ void siconos::simulation::TimeStepping::updateIndexSet(unsigned int i) {
       indexSet1->size());
 }
 
-// void
-// siconos::simulation::TimeStepping::insertNonSmoothProblem(std::shared_ptr<OneStepNSProblem>
-// osns)
-// {
-//   // A the time, a time stepping simulation can only have one non
-//   // smooth problem.
-//   if((*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY])
-//      THROW_EXCEPTION
-//        ("TimeStepping,  insertNonSmoothProblem - A non smooth problem already
-//        exist. You can not have more than one.");
-
-//   (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY] = osns;
-// }
-
 void siconos::simulation::TimeStepping::initialize() {
   Simulation::initialize();
-  initOSNS();
-  // 7 - First initialization of the simulation
+  updateIndexSets();
+  initializeOneStepNSProblem();
+  // First initialization of the simulation
   firstInitialize();
 }
 
-void siconos::simulation::TimeStepping::initOSNS() {
+void siconos::simulation::TimeStepping::initializeOneStepNSProblem() {
   // === creates links between work vector in OSI and work vector in
   // Interactions
   std::shared_ptr<siconos::integrators::OneStepIntegrator> osi;
@@ -342,7 +329,7 @@ void siconos::simulation::TimeStepping::initOSNS() {
     // for degree 0 case where we keep 0.
 
     // === update all index sets ===
-    updateIndexSets();
+    // updateIndexSets();
 
     // initialization of  OneStepNonSmoothProblem
     for (auto osns : *_allNSProblems) {
@@ -355,7 +342,7 @@ void siconos::simulation::TimeStepping::initOSNS() {
             "set. ");
     }
   }
-  // Since initOSNS calls updateIndexSets() which resets the
+  // Since initializeOneStepNSProblem calls updateIndexSets() which resets the
   // topology->hasChanged() flag, it must be specified explicitly.
   // Otherwise OneStepNSProblem may fail to update its matrices.
   _nsds->topology()->setHasChanged(true);
@@ -501,9 +488,11 @@ void siconos::simulation::TimeStepping::initializeNewtonSolve() {
   double tkp1 = getTkp1();
   assert(!std::isnan(tkp1));
 
-  updateDSPlugins(tkp1);  // is it useful since the integrator update the plugin computeResidu?
+  // computeInitialStateOfTheStep();
 
-  computeResidu();  // Is is mandatory for SICONOS_TS_LINEAR ?
+  updateDSPlugins(tkp1);
+
+  computeResidu();
 
   updateAllInput();  //??
 
@@ -613,7 +602,8 @@ void siconos::simulation::TimeStepping::newtonSolve(double criterion, unsigned i
         }
         updateOutput();
         if (_newtonOptions == TimeSteppingType::NONLINEAR_FULL) {
-          initOSNS();
+          updateIndexSets();
+          initializeOneStepNSProblem();
         }
       }
       _isNewtonConverge = newtonCheckConvergence(criterion);
