@@ -40,7 +40,7 @@ class StressLinearTIR : public LagrangianLinearTIR {
   ACCEPT_SERIALIZATION(StressLinearTIR);
 
  public:
-  enum SolidLinearDS { sigma, dotEpsilon, solidDSlinkSize };
+  enum SolidLinearDS { sigma, sigma1, sigma2, epsilonp, epsilonp1, epsilonp2, solidDSlinkSize };
 
 
   /** Default constructor

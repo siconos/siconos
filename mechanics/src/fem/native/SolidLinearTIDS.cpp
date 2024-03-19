@@ -95,7 +95,8 @@ siconos::mechanics::fem::SolidLinearTIDS::SolidLinearTIDS(std::shared_ptr<Mesh> 
     _sigma0.reset(new siconos::algebra::SiconosVector(_dimStress,0.0));
 
     // -- Memory allocation for stress --
-    _sigma = std::make_shared<siconos::algebra::SiconosVector>(*_sigma0);
+//    _sigma = std::make_shared<siconos::algebra::SiconosVector>(*_sigma0);
+    _stress[0] = std::make_shared<siconos::algebra::SiconosVector>(*_sigma0);
 
 //  LagrangianDS::_init(_q0,_velocity0);
 
@@ -211,14 +212,17 @@ void siconos::mechanics::fem::SolidLinearTIDS::swapInMemory() {
   std::cout << "In  swapInMemory from SolidLinearTIDS" << std::endl;
   _qMemory.swap(*_q[0]);
   _velocityMemory.swap(*_q[1]);
-  _stressMemory.swap(*_sigma);
+//  _stressMemory.swap(*_sigma);
+  _stressMemory.swap(*_stress[0]);
+  _stressRateMemory.swap(*_stress[1]);
   if (_forces) _forcesMemory.swap(*_forces);
 
   // initialization of the reaction force due to the non smooth law
   // note: these are a no-op if either memory or vector is null
   _pMemory[0].swap(_p[0]);
   _pMemory[1].swap(_p[1]);
-  _plasticRateMemory.swap(*_plasticRate);
+  _plasticDeformationMemory.swap(*_epsilonp[0]);
+  _plasticRateMemory.swap(*_epsilonp[1]);
 
   _pMemory[2].swap(_p[2]);
 

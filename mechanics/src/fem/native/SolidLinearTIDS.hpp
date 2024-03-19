@@ -49,15 +49,24 @@ protected:
   std::shared_ptr<siconos::algebra::SiconosMatrix> _B;
 
   /** stress of the system */
-  std::shared_ptr<siconos::algebra::SiconosVector> _sigma{nullptr}; // Opposite of stress to keep W positive definite: sigma = - sigma !
+  std::shared_ptr<siconos::algebra::SiconosVector> _sigma{nullptr};
+
+  std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> _stress = {nullptr, nullptr,
+                                                                      nullptr};
+
   /** Initial stress of the system */
   std::shared_ptr<siconos::algebra::SiconosVector> _sigma0{nullptr};
 
+  std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> _epsilonp = {nullptr, nullptr,
+                                                                      nullptr};
   std::shared_ptr<siconos::algebra::SiconosVector> _plasticRate = {nullptr};
 
   unsigned int _dimStress{0};
   /** memory of previous coordinates of the system */
   siconos::algebra::SiconosMemory _stressMemory;
+  siconos::algebra::SiconosMemory _stressRateMemory;
+
+  siconos::algebra::SiconosMemory _plasticDeformationMemory;
   siconos::algebra::SiconosMemory _plasticRateMemory;
 
 public:
@@ -84,10 +93,22 @@ public:
 
   inline std::shared_ptr<siconos::algebra::SiconosVector> stress() const
   {
-    return _sigma;
+//    return _sigma;
+    return _stress[0];
+  }
+
+  inline std::shared_ptr<siconos::algebra::SiconosVector> stressRate() const
+  {
+//    return _sigma;
+    return _stress[1];
   }
 
 
+
+  inline std::shared_ptr<siconos::algebra::SiconosVector> plasticDeformation() const
+  {
+    return _epsilonp[0];
+  }
   /** get \dot \epsilon_p
    *
    *  \param level unsigned int, required level for p, default = 2
@@ -95,7 +116,8 @@ public:
    */
   inline std::shared_ptr<siconos::algebra::SiconosVector> plasticRate() const
   {
-    return _plasticRate;
+//    return _plasticRate;
+    return _epsilonp[1];
   }
 
 

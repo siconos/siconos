@@ -123,7 +123,7 @@ void siconos::modeling::StressLinearTIR::computeInput(double time, Interaction& 
   DEBUG_EXPR(lambda.display(););
   DEBUG_EXPR(_jachq->display(););
   DEBUG_EXPR(DSlink[SolidLinearDS::dotEpsilon]->display(););
-  siconos::algebra::prod(lambda, *_jachq, *DSlink[LagrangianR::DSlinkSize+SolidLinearDS::dotEpsilon + level], false);
+  siconos::algebra::prod(lambda, *_jachq, *DSlink[LagrangianR::DSlinkSize+SolidLinearDS::epsilonp + level], false);
   DEBUG_END(
       "void siconos::modeling::StressLinearTIR::computeInput(double time, Interaction& "
       "inter, unsigned int level)\n")
