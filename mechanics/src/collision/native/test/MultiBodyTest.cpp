@@ -131,7 +131,7 @@ void Disks::init(std::string disks_input)
 
     std::cout << "====> nsds loading ..." << std::endl << std::endl;
 
-    _plans = std::make_shared<siconos::algebra::SimpleMatrix>("plans.dat", true);
+    _plans = std::make_shared<siconos::algebra::SimpleMatrix>(siconos::algebra::readMatrixFromFile("plans.dat"));
     if (_plans->size(0) == 0) {
       /* default plans */
       double A1 = P1A;
@@ -185,7 +185,7 @@ void Disks::init(std::string disks_input)
         (*_moving_plans)(0,4) = &DB;
         (*_moving_plans)(0,5) = &DC;*/
 
-    auto Disks = std::make_shared<siconos::algebra::SimpleMatrix>(disks_input, true);
+    auto Disks = std::make_shared<siconos::algebra::SimpleMatrix>(siconos::algebra::readMatrixFromFile(disks_input));
 
     // -- OneStepIntegrators --
     auto osi = std::make_shared<siconos::integrators::MoreauJeanOSI>(theta);
