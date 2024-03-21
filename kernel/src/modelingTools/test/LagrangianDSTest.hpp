@@ -23,10 +23,10 @@
 #include "LagrangianDS.hpp"
 #include "SiconosException.hpp"
 
-namespace siconos::algebra {
-class SiconosVector;
-class SiconosMatrix;
-}  // namespace siconos::algebra
+// namespace siconos::algebra {
+// class SiconosVector;
+// class SiconosMatrix;
+// }  // namespace siconos::algebra
 
 class LagrangianDSTest : public CppUnit::TestFixture {
  private:

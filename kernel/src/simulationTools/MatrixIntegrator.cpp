@@ -116,7 +116,8 @@ void siconos::simulation::MatrixIntegrator::integrate()
   std::shared_ptr<siconos::algebra::SiconosVector> Ecol =
       static_cast<siconos::modeling::FirstOrderLinearDS&>(*_DS).b();
   if (!Ecol && _E) {
-    Ecol = std::make_shared<siconos::algebra::SiconosVector>(_DS->n(), 0);
+    Ecol = std::make_shared<siconos::algebra::SiconosVector>(_DS->n());
+    Ecol->setZero();
     static_cast<siconos::modeling::FirstOrderLinearDS&>(*_DS).setbPtr(Ecol);
   }
   unsigned int p = _mat->size(1);

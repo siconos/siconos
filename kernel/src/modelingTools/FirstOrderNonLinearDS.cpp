@@ -50,8 +50,10 @@ siconos::modeling::FirstOrderNonLinearDS::FirstOrderNonLinearDS(
   // _x.resize(2); done in base class constructor.
   _x[0] = std::make_shared<siconos::algebra::SiconosVector>(*_x0);
   _x[1] = std::make_shared<siconos::algebra::SiconosVector>(_n);
+  _x[1]->setZero();
   _r = std::make_shared<siconos::algebra::SiconosVector>(
       _n);  // FP: move this to initializeNonSmoothInput?
+  _r->setZero();
   _zeroPlugin();
   // dot x = r
 }
@@ -112,10 +114,12 @@ void siconos::modeling::FirstOrderNonLinearDS::initRhs(double time)
   {
     if (_jacobianfx && !_M)  // if M is not defined, then jacobianfx = jacobianRhsx, no memory
                              // allocation for that one.
-      _jacxRhs->block(0, 0) = _jacobianfx;
-    else  //  if (_jacobianfx && _M) or if(!jacobianRhsx)
-      _jacxRhs->block(0, 0) = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);
-
+      _jacxRhs = std::make_shared<siconos::algebra::BlockMatrix>(_jacobianfx);
+    else { //  if (_jacobianfx && _M) or if(!jacobianRhsx)
+      auto tmp = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);
+      tmp->setZero();
+      _jacxRhs = std::make_shared<siconos::algebra::BlockMatrix>(*tmp);
+    }
     // else no allocation, jacobian is equal to 0.
   }
   computeJacobianRhsx(time);
@@ -274,7 +278,7 @@ void siconos::modeling::FirstOrderNonLinearDS::computeJacobianRhsx(double time)
   computeJacobianfx(time, _x[0]);
   // solve M*jacobianXRhS = jacobianfx
   if (_M && _jacobianfx) {
-    _jacxRhs->block(0, 0) = _jacobianfx;
+    (_jacxRhs->copyBlock(0, 0, _jacobianfx));
     // copy _M into _invM for LU-factorisation, at the first call of this function.
 
     computeM(time);

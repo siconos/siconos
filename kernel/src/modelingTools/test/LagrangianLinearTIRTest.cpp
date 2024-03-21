@@ -28,8 +28,8 @@ CPPUNIT_TEST_SUITE_REGISTRATION(LagrangianLinearTIRTest);
 
 void LagrangianLinearTIRTest::setUp()
 {
-  C = std::make_shared<siconos::algebra::SimpleMatrix>("matC.dat", true);
-  F = std::make_shared<siconos::algebra::SimpleMatrix>("matF.dat", true);
+  C = std::make_shared<siconos::algebra::SimpleMatrix>(siconos::algebra::readMatrixFromFile("matC.dat"));
+  F = std::make_shared<siconos::algebra::SimpleMatrix>(siconos::algebra::readMatrixFromFile("matF.dat"));
   e = std::make_shared<siconos::algebra::SiconosVector>(1);
   (*e)(0) = 0.1;
 }

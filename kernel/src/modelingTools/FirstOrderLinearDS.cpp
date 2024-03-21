@@ -117,6 +117,7 @@ void siconos::modeling::FirstOrderLinearDS::initRhs(double time) {
       //////// _jacxRhs = _A; /// WARNING FP: constructor is missing
     } else if (_A && _M) {
       auto tmp = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);
+      tmp->setZero();
       _jacxRhs = std::make_shared<siconos::algebra::BlockMatrix>(*tmp);
       // else no allocation, jacobian is equal to 0.
     }
@@ -207,7 +208,7 @@ void siconos::modeling::FirstOrderLinearDS::computeJacobianRhsx(double time) {
     computeA(time);
     if (_M) {
       computeM(time);
-      _jacxRhs->block(0, 0) = _A;
+      _jacxRhs->copyBlock(0, 0, _A);
       if (!_invM)
         _invM = std::make_shared<siconos::algebra::SimpleMatrix>(*_M);
       else if (_pluginM->fPtr)  // if M is plugged, invM must be updated

@@ -42,9 +42,12 @@ static void computeA1(double, unsigned int, double*, double* A, unsigned int, do
 
 void EulerMoreauTest::setUp()
 {
-  _A = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n, 0);
-  _b = std::make_shared<siconos::algebra::SiconosVector>(_n, 0);
-  _x0 = std::make_shared<siconos::algebra::SiconosVector>(_n, 0);
+  _A = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);
+  _b = std::make_shared<siconos::algebra::SiconosVector>(_n);
+  _x0 = std::make_shared<siconos::algebra::SiconosVector>(_n);
+  _A->setZero();
+  _b->setZero();
+  _x0->setZero();
 }
 
 void EulerMoreauTest::init(bool initDS)

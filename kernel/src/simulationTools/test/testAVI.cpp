@@ -30,9 +30,12 @@ CPPUNIT_TEST_SUITE_REGISTRATION(AVITest);
 
 void AVITest::setUp()
 {
-  _A = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n, 0);
-  _b = std::make_shared<siconos::algebra::SiconosVector>(_n, 0);
-  _x0 = std::make_shared<siconos::algebra::SiconosVector>(_n, 0);
+  _A = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);
+  _b = std::make_shared<siconos::algebra::SiconosVector>(_n);
+  _x0 = std::make_shared<siconos::algebra::SiconosVector>(_n);
+  _A->setZero();
+  _b->setZero();
+  _x0->setZero();
 }
 
 void AVITest::init()
@@ -63,7 +66,8 @@ void AVITest::testAVI()
   _x0->zero();
   (*_x0)(0) = 10.0;
   (*_x0)(1) = 10.0;
-  auto B = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n, 0);
+  auto B = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);
+  B->setZero();
   auto C = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);
   (*B)(1, 0) = G;
   (*B)(1, 1) = G * beta;
@@ -123,7 +127,7 @@ void AVITest::testAVI()
   dataPlotRef.zero();
   siconos::algebra::io::read("testAVI.ref", dataPlotRef);
   auto err = std::make_shared<siconos::algebra::SiconosVector>(dataPlot.size(1));
-  (dataPlot - dataPlotRef).normInfByColumn(err);
+  siconos::algebra::normInfByColumn(dataPlot - dataPlotRef, *err);
   err->display();
 
   double maxErr =
@@ -134,7 +138,8 @@ void AVITest::testAVI()
   std::cout << "------- Integration Ok, error = " << maxErr << " -------" << std::endl;
   if (maxErr > _tol) {
     dataPlot.display();
-    (dataPlot - dataPlotRef).display();
+    siconos::algebra::SiconosMatrix diff = dataPlot - dataPlotRef;
+    diff.display();
   }
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAVI : ", maxErr < _tol, true);
 }

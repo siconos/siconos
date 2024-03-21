@@ -18,6 +18,7 @@
 #include "FirstOrderLinearTIDS.hpp"
 
 #include <iostream>
+#include <memory>
 
 #include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
@@ -30,10 +31,11 @@ void siconos::modeling::FirstOrderLinearTIDS::initRhs(double time) {
 
   if (!_jacxRhs)  // if not allocated with a set or anything else
   {
-    if (_A &&
-        !_M)  // if M is not defined, then A = _jacxRhs, no memory allocation for that one.
+    if (_A && !_M)  // if M is not defined, then A = _jacxRhs, no memory allocation for that one.
+    {
       //////// jacxRhs = _A; /// WARNING FP CONSTRUCTOR IS MISSING
-      std::cout << "NOT IMPLEMENTED\n";
+      _jacxRhs = std::make_shared<siconos::algebra::BlockMatrix>(_A);
+    }
 
     else if (_A && _M) {
       _jacxRhs = std::make_shared<siconos::algebra::BlockMatrix>(*_A);  // Copy A into _jacxRhs

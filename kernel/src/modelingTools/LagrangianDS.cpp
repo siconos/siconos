@@ -53,7 +53,7 @@ siconos::modeling::LagrangianDS::LagrangianDS(
 
   /** \todo lazy Memory allocation */
   _p[1] = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
-
+  _p[1]->setZero();
   _zeroPlugin();
 }
 
@@ -69,6 +69,7 @@ siconos::modeling::LagrangianDS::LagrangianDS(
 void siconos::modeling::LagrangianDS::allocateMass() {
   if (!_mass) {
     _mass = std::make_shared<siconos::algebra::SimpleMatrix>(_ndof, _ndof);
+    _mass->setZero();
   }
 }
 
@@ -97,7 +98,10 @@ void siconos::modeling::LagrangianDS::_zeroPlugin() {
 }
 
 void siconos::modeling::LagrangianDS::initializeNonSmoothInput(unsigned int level) {
-  if (!_p[level]) _p[level] = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
+  if (!_p[level]) {
+    _p[level] = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
+    _p[level]->setZero();
+  }
 }
 
 void siconos::modeling::LagrangianDS::resetToInitialState() {
@@ -165,20 +169,26 @@ void siconos::modeling::LagrangianDS::initRhs(double time) {
   // if the system is involved in more than one interaction. So, we must check
   // if p2 and q2 already exist to be sure that DSlink won't be lost.
 
-  algebra::concatenateVectors(*_x0, *_q0, *_velocity0);
+  _x0 = algebra::concatenateVectors(*_q0, *_velocity0);
 
-  algebra::concatenateVectors(*(_x[0]), *_q[0], *_q[1]);
+  _x[0] = algebra::concatenateVectors(*_q[0], *_q[1]);
 
-  if (!_q[2]) _q[2] = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
+  if (!_q[2]) {
+    _q[2] = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
+    _q[2]->setZero();
+  }
 
-  algebra::concatenateVectors(*(_x[1]), *_q[1], *_q[2]);
+  _x[1] = algebra::concatenateVectors(*_q[1], *_q[2]);
 
   // Everything concerning rhs and its jacobian is handled in initRhs and computeXXX related
   // functions.
 
   _rhsMatrices.resize(numberOfRhsMatrices_);
 
-  if (!_p[2]) _p[2] = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
+  if (!_p[2]) {
+    _p[2] = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
+    _p[2]->setZero();
+  }
 
   init_forces();
   init_inverse_mass();
@@ -498,6 +508,7 @@ void siconos::modeling::LagrangianDS::computeForces(
     std::shared_ptr<siconos::algebra::SiconosVector> velocity) {
   if (!_forces) {
     _forces = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
+    _forces->setZero();
   } else
     _forces->zero();
 

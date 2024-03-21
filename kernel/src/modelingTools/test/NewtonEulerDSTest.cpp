@@ -109,7 +109,7 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternion() {
   double angle = 1e24;
   double angleref = 1e24;
 
-  angle = siconos::geometry::axisAngleFromConfiguration(q0, axis);
+  angle = siconos::geometry::axisAngleFromConfiguration(*q0, *axis);
   std::cout << "q0 angle : " << angle << std::endl;
   std::cout << "q0 axis : " << std::endl;
   axis->display();
@@ -121,7 +121,7 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternion() {
   auto R = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
   siconos::algebra::SimpleMatrix Rref(3, 3);
 
-  siconos::geometry::computeRotationMatrix(q0, R);
+  siconos::geometry::computeRotationMatrix(*q0, *R);
   R->display();
   Rref.eye();
 
@@ -134,7 +134,7 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternion() {
   (*v)(1) = 1.0;
   (*v)(2) = 1.0;
 
-  siconos::geometry::quaternionRotate(q0, v);
+  siconos::geometry::quaternionRotate(*q0, *v);
   std::cout << "v : " << std::endl;
   v->display();
   (*vref)(0) = 1.0;
@@ -146,7 +146,7 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternion() {
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testNewtonEulerDSQuaternionC : ", *(R) == Rref, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testNewtonEulerDSQuaternionC : ", *(v) == *(vref), true);
 
-  angle = siconos::geometry::axisAngleFromConfiguration(q01, axis);
+  angle = siconos::geometry::axisAngleFromConfiguration(*q01, *axis);
   std::cout << "q01 angle : " << angle << std::endl;
   std::cout << "q01 axis : " << std::endl;
   axis->display();
@@ -156,11 +156,11 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternion() {
   angleref = 0.0;
 
   Rref.eye();
-  siconos::geometry::computeRotationMatrix(q01, R);
+  siconos::geometry::computeRotationMatrix(*q01, *R);
   R->display();
   Rref.display();
 
-  siconos::geometry::quaternionRotate(q01, v);
+  siconos::geometry::quaternionRotate(*q01, *v);
   std::cout << "v : " << std::endl;
   v->display();
   (*vref)(0) = 1.0;
@@ -182,7 +182,7 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternion() {
   std::cout << "q02 angle : " << angle << std::endl;
   std::cout << "q02 axis : " << std::endl;
   axis->display();
-  siconos::geometry::quaternionFromAxisAngle(axis, angle, q02);
+  siconos::geometry::quaternionFromAxisAngle(*axis, angle, *q02);
   std::cout << "q02  : " << std::endl;
   q02->display();
 
@@ -191,7 +191,7 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternion() {
   (*q02ref)(3) = cos(angle / 2.0);
   (*q02ref)(5) = sin(angle / 2.0);
   q02ref->display();
-  siconos::geometry::computeRotationMatrix(q02, R);
+  siconos::geometry::computeRotationMatrix(*q02, *R);
   R->display();
   Rref.zero();
   Rref(2, 0) = -1.0;
@@ -199,7 +199,7 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternion() {
   Rref(0, 2) = 1.0;
   Rref.display();
 
-  siconos::geometry::quaternionRotate(q02, v);
+  siconos::geometry::quaternionRotate(*q02, *v);
   std::cout << "v : " << std::endl;
   v->display();
   (*vref)(0) = -1.0;
@@ -207,11 +207,14 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternion() {
   (*vref)(2) = -1.0;
   std::cout << "vref : " << std::endl;
   vref->display();
-  std::cout << (*v - *vref).normInf() << std::endl;
+  auto diff = (*v) - (*vref);
+  std::cout << diff.normInf() << std::endl;
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testNewtonEulerDSQuaternionG : ", *(q02) == *(q02ref), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testNewtonEulerDSQuaternionH : ", *(R) == Rref, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testNewtonEulerDSQuaternion : ", *(v) == *(vref), true);
+  R->display();
+  Rref.display();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testNewtonEulerDSQuaternionH : ", R->isApprox(Rref), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testNewtonEulerDSQuaternion : ", v->isApprox(*vref), true);
 
   std::cout << " ---------- test with q03 (rotation of pi/4 about the y-axis)" << std::endl;
 
@@ -223,7 +226,7 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternion() {
   std::cout << "q03 angle : " << angle << std::endl;
   std::cout << "q03 axis : " << std::endl;
   axis->display();
-  siconos::geometry::quaternionFromAxisAngle(axis, angle, q03);
+  siconos::geometry::quaternionFromAxisAngle(*axis, angle, *q03);
   std::cout << "q03  : " << std::endl;
   q03->display();
 
@@ -232,7 +235,7 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternion() {
   (*q03ref)(3) = cos(angle / 2.0);
   (*q03ref)(5) = sin(angle / 2.0);
   q03ref->display();
-  siconos::geometry::computeRotationMatrix(q03, R);
+  siconos::geometry::computeRotationMatrix(*q03, *R);
   R->display();
   Rref.zero();
   Rref(0, 0) = sqrt(2.0) / 2.0;
@@ -243,7 +246,7 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternion() {
   Rref(2, 2) = sqrt(2.0) / 2.0;
   Rref.display();
 
-  siconos::geometry::quaternionRotate(q03, v);
+  siconos::geometry::quaternionRotate(*q03, *v);
   std::cout << "v : " << std::endl;
   v->display();
   (*vref)(0) = -sqrt(2.0);
@@ -251,13 +254,14 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternion() {
   (*vref)(2) = 0.0;
   std::cout << "vref : " << std::endl;
   vref->display();
-  std::cout << (*v - *vref).normInf() << std::endl;
+  auto diff2 = (*v) - (*vref);
+  std::cout << diff2.normInf() << std::endl;
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testNewtonEulerDSQuaternionG : ", *(q03) == *(q03ref), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testNewtonEulerDSQuaternionH : ", *(R) == Rref, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testNewtonEulerDSQuaternionH : ", R->isApprox(Rref), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testNewtonEulerDSQuaternion : ",
-      ((*v - *vref).normInf() <= std::numeric_limits<double>::epsilon() * 10.0), true);
+      (diff2.normInf() <= std::numeric_limits<double>::epsilon() * 10.0), true);
 
   std::cout << "--> quaternion 2 test ended with success." << std::endl;
 }
@@ -275,7 +279,7 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternionMatrix() {
   std::cout << "q03 angle : " << angle << std::endl;
   std::cout << "q03 axis : " << std::endl;
   axis->display();
-  siconos::geometry::quaternionFromAxisAngle(axis, angle, q03);
+  siconos::geometry::quaternionFromAxisAngle(*axis, angle, *q03);
   std::cout << "q03  : " << std::endl;
   q03->display();
 
@@ -291,46 +295,48 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternionMatrix() {
   v->display();
   std::cout << "vref : " << std::endl;
   vref->display();
-  std::cout << (*v - *vref).normInf() << std::endl;
+  siconos::algebra::SiconosVector diff = (*v) - (*vref);
+  std::cout << diff.normInf() << std::endl;
 
   // Old version
   siconos::algebra::SiconosVector aux(3);
   auto matrix = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
-  siconos::geometry::computeRotationMatrix(q03, matrix);  // compute R
+  siconos::geometry::computeRotationMatrix(*q03, *matrix);  // compute R
   siconos::algebra::prod(*matrix, *v, aux);               // multiply by R
   *v = aux;
   std::cout << "v : " << std::endl;
   v->display();
+  diff = *v - *vref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testNewtonEulerDSQuaternion : ",
-      ((*v - *vref).normInf() <= std::numeric_limits<double>::epsilon() * 10.0), true);
+      (diff.normInf() <= std::numeric_limits<double>::epsilon() * 10.0), true);
 
   // double transpose version
   (*v)(0) = 1.0;
   (*v)(1) = 1.0;
   (*v)(2) = 1.0;
-  siconos::geometry::computeRotationMatrixTransposed(q03,
-                                                     matrix);  // Compute R^T for the moment
+  siconos::geometry::computeRotationMatrixTransposed(*q03,
+                                                     *matrix);  // Compute R^T for the moment
   siconos::algebra::prod(*v, *matrix, aux);                    // multiply by R^T^T
   *v = aux;
   std::cout << "v : " << std::endl;
   v->display();
-
+  diff = *v -*vref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testNewtonEulerDSQuaternion : ",
-      ((*v - *vref).normInf() <= std::numeric_limits<double>::epsilon() * 10.0), true);
+      (diff.normInf() <= std::numeric_limits<double>::epsilon() * 10.0), true);
 
   // New version
   (*v)(0) = 1.0;
   (*v)(1) = 1.0;
   (*v)(2) = 1.0;
-  siconos::geometry::quaternionRotate(q03, v);
+  siconos::geometry::quaternionRotate(*q03, *v);
   std::cout << "v : " << std::endl;
   v->display();
-
+  diff = *v - *vref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testNewtonEulerDSQuaternion : ",
-      ((*v - *vref).normInf() <= std::numeric_limits<double>::epsilon() * 10.0), true);
+      (diff.normInf() <= std::numeric_limits<double>::epsilon() * 10.0), true);
 
   auto m = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
   m->zero();
@@ -348,15 +354,15 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternionMatrix() {
   (*mref)(0, 2) = sqrt(2.0);
   (*mref)(1, 2) = 1.0;
 
-  siconos::geometry::quaternionRotate(q03, m);
+  siconos::geometry::quaternionRotate(*q03, *m);
   std::cout << "m : " << std::endl;
   m->display();
   std::cout << "mref : " << std::endl;
   mref->display();
-
+  siconos::algebra::SiconosMatrix diff2 = *m - *mref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testNewtonEulerDSQuaternion : ",
-      ((*m - *mref).normInf() <= std::numeric_limits<double>::epsilon() * 10.0), true);
+      (diff2.normInf() <= std::numeric_limits<double>::epsilon() * 10.0), true);
 }
 
 // void NewtonEulerDSTest::testcomputeDS()
