@@ -45,9 +45,16 @@ void SiconosMemoryTest::setUp()
   z[0] = 7;
   z[1] = 8;
   z[2] = 9;
-  q1 = std::make_shared<siconos::algebra::SiconosVector>(v);
-  q2 = std::make_shared<siconos::algebra::SiconosVector>(w);
-  q3 = std::make_shared<siconos::algebra::SiconosVector>(z);
+  q1 = std::make_shared<siconos::algebra::SiconosVector>(v.size());
+  q2 = std::make_shared<siconos::algebra::SiconosVector>(w.size());
+  q3 = std::make_shared<siconos::algebra::SiconosVector>(z.size());
+  for (int i = 0; i < 3; i++)
+  {
+    (*q1)(i) = v[i];
+    (*q2)(i) = w[i];
+    (*q3)(i) = z[i];
+  }
+  
   c1 = std::make_shared<siconos::algebra::BlockVector>();
   c2 = std::make_shared<siconos::algebra::BlockVector>();
 
