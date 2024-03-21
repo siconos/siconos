@@ -75,6 +75,12 @@ class BlockMatrix {
   BlockMatrix() = default;
 
  public:
+
+  /** no-copy constructor
+   *  \param m a SiconosMatrix
+   */
+  BlockMatrix(std::shared_ptr<SiconosMatrix> m);
+
   /** copy constructor
    *  \param m a SiconosMatrix
    */
@@ -244,6 +250,16 @@ class BlockMatrix {
    *  \return SiconosMatrix the converted matrix
    */
   std::shared_ptr<siconos::algebra::SiconosMatrix> toSiconosMatrix() const;
+
+  /** 
+   * 
+  */
+  void copyBlock(unsigned int i, unsigned int j, std::shared_ptr<siconos::algebra::SiconosMatrix>);
+
+  /** Set new block pointer 
+   * 
+  */
+  void setBlock(unsigned int i, unsigned int j, std::shared_ptr<siconos::algebra::SiconosMatrix>);
 
   // /** get row index of current matrix and save it in  v
   //  *  \param r index of required line
