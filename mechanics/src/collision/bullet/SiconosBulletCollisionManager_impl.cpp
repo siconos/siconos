@@ -75,7 +75,7 @@ std::pair<std::shared_ptr<btTriangleIndexVertexArray>, SCALAR *> make_bt_vertex_
   assert(mesh->vertices()->size(0) == 3);
   auto bttris = std::make_shared<btTriangleIndexVertexArray>(
       mesh->indexes()->size() / 3, (int *)mesh->indexes()->data(), sizeof(int) * 3,
-      mesh->vertices()->size(1), mesh->vertices()->getArray(), sizeof(btScalar) * 3);
+      mesh->vertices()->size(1), mesh->vertices()->data(), sizeof(btScalar) * 3);
 
   return std::make_pair(bttris, (btScalar *)nullptr);
 }

@@ -918,7 +918,7 @@ siconos::collision::bullet::SiconosBulletCollisionManager::lineIntersectionQuery
         result->point->setValue(0, rayResult.m_hitPointWorld.getX());
         result->point->setValue(1, rayResult.m_hitPointWorld.getY());
         result->point->setValue(2, rayResult.m_hitPointWorld.getZ());
-        result->distance = (*result->point - start).norm2();
+        result->distance = (*result->point - start).norm();
         result->body = rec->ds;  // note: may be null for static contactors
         result->shape = rec->sshape;
         result->contactor = rec->contactor;
@@ -949,7 +949,7 @@ siconos::collision::bullet::SiconosBulletCollisionManager::lineIntersectionQuery
           result->point->setValue(0, rayResult.m_hitPointWorld[i].getX());
           result->point->setValue(1, rayResult.m_hitPointWorld[i].getY());
           result->point->setValue(2, rayResult.m_hitPointWorld[i].getZ());
-          result->distance = (*result->point - start).norm2();
+          result->distance = (*result->point - start).norm();
           result->body = rec->ds;  // note: null for static contactors
           result->shape = rec->sshape;
           result->contactor = rec->contactor;
