@@ -70,7 +70,6 @@ void siconos::algebra::prod(const SiconosMatrix& A, const SiconosVector& x,
   if (init) {
     if (&x != &y)  // if no common memory between x and y.
     {
-      assert(y != x);
       y.noalias() = A * x;
     } else  // if x and y are the same object => alias
     {

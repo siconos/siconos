@@ -30,6 +30,16 @@ void siconos::algebra::concatenateVectors(
   target.tail(b.size()) = b;
 }
 
+std::shared_ptr<siconos::algebra::SiconosVector> siconos::algebra::concatenateVectors(
+    const siconos::algebra::SiconosVector& a,
+    const siconos::algebra::SiconosVector& b) {
+  std::shared_ptr<siconos::algebra::SiconosVector> tmp{nullptr};
+  tmp = std::make_shared<siconos::algebra::SiconosVector>(a.size() + b.size());
+  tmp->head(a.size()) = a;
+  tmp->tail(b.size()) = b;
+  return tmp;
+}
+
 void siconos::algebra::scal(double a, const SiconosVector& x, SiconosVector& y,
                             bool init) {
   // To compute y = a *x (init = true) or y += a*x (init = false)

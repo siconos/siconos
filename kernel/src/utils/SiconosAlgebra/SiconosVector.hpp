@@ -86,6 +86,7 @@ using SiconosVector = Eigen::Matrix<double_t, Eigen::Dynamic, 1, Eigen::ColMajor
 using SiconosVector3 = Eigen::Matrix<double_t, 3, 1, Eigen::ColMajor>;
 
 void concatenateVectors(SiconosVector& target, const SiconosVector& a, const SiconosVector& b);
+std::shared_ptr<SiconosVector> concatenateVectors(const SiconosVector& a, const SiconosVector& b);
 
 }  // namespace siconos::algebra
 
