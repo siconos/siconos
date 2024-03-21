@@ -20,15 +20,6 @@
 
 #include "SiconosConfig.h"
 
-#undef BULLET_CLASSES
-#undef OCC_CLASSES
-#undef MECHANISMS_CLASSES
-
-#define BULLET_CLASSES() \
-  REGISTER(BulletR)      \
-  REGISTER(Bullet5DR)    \
-  REGISTER(Bullet2dR)    \
-  REGISTER(Bullet2d3DR)
 
 #ifdef SICONOS_HAS_BULLET
 #include <Bullet2d3DR.hpp>
@@ -48,50 +39,6 @@ class Bullet2d3DR : public siconos::modeling::Lagrangian2d3DR {};
 }  // namespace siconos::collision::bullet
 
 #endif
-
-// // The following classes are common classes of mechanics/src
-
-// #define OCC_CLASSES() \
-//   REGISTER(OccBody)   \
-//   REGISTER(OccR)
-// #ifdef SICONOS_HAS_OpenCASCADE
-// #include <OccBody.hpp>
-// #include <OccR.hpp>
-// #else
-// #include <NewtonEuler3DR.hpp>
-// #include <NewtonEulerDS.hpp>
-
-// DUMMY(OccBody, NewtonEulerDS);
-// DUMMY(OccR, NewtonEuler3DR);
-// #endif
-
-// #define MECHANISMS_CLASSES()         \
-//   REGISTER(MBTB_FC3DContactRelation) \
-//   REGISTER(MBTB_ContactRelation)
-
-// #ifdef HAVE_SICONOS_MECHANISMS
-// #include <MBTB_ContactRelation.hpp>
-// #include <MBTB_FC3DContactRelation.hpp>
-// #else
-// #include <NewtonEuler1DR.hpp>
-// #include <NewtonEuler3DR.hpp>
-// DUMMY(MBTB_FC3DContactRelation, NewtonEuler3DR);
-// DUMMY(MBTB_ContactRelation, NewtonEuler1DR);
-// #endif
-
-/* all the classes that may be visited */
-// #define VISITOR_CLASSES()   \
-//   BULLET_CLASSES()
-//   // MECHANISMS_CLASSES()  \
-//   // OCC_CLASSES()             \
-
-// #undef SICONOS_VISITABLES
-// #define SICONOS_VISITABLES() VISITOR_CLASSES()
-
-// /* ... */
-// /* to be fixed: forward mess with mpl::is_base_of who needs fully
-//  * declared classes */
-// #include <SiconosKernel.hpp>
 
 #include "BlockVector.hpp"
 #include "BodyShapeRecord.hpp"

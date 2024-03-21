@@ -306,6 +306,7 @@ void siconos::simulation::TimeStepping::initialize() {
 }
 
 void siconos::simulation::TimeStepping::initializeOneStepNSProblem() {
+
   // === creates links between work vector in OSI and work vector in
   // Interactions
   std::shared_ptr<siconos::integrators::OneStepIntegrator> osi;

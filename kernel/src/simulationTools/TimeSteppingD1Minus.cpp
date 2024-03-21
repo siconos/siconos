@@ -34,6 +34,7 @@
 #include "siconos_debug.h"
 
 void siconos::simulation::TimeSteppingD1Minus::initializeOneStepNSProblem() {
+
   // initialize OSNS for InteractionsGraph from Topology
   auto topo = _nsds->topology();
 

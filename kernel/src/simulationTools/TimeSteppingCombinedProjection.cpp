@@ -72,7 +72,6 @@ siconos::simulation::TimeSteppingCombinedProjection::TimeSteppingCombinedProject
 // };
 
 void siconos::simulation::TimeSteppingCombinedProjection::initializeOneStepNSProblem() {
-  updateIndexSets();
   TimeStepping::initializeOneStepNSProblem();
 
   auto osnspb_pos = (*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_TS_POS];

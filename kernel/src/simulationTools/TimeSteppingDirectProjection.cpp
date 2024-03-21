@@ -61,7 +61,6 @@ siconos::simulation::TimeSteppingDirectProjection::TimeSteppingDirectProjection(
 }
 
 void siconos::simulation::TimeSteppingDirectProjection::initializeOneStepNSProblem() {
-  updateIndexSets();
   TimeStepping::initializeOneStepNSProblem();
 
   (*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_TS_POS]->setIndexSetLevel(
