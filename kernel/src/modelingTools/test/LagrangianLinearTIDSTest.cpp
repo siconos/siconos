@@ -68,6 +68,7 @@ void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS1() {
   auto ds =
       std::make_shared<siconos::modeling::LagrangianLinearTIDS>(q0, velocity0, mass, K, C);
   siconos::algebra::SiconosVector zero(3);
+  zero.setZero();
 
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ", Type::value(*ds) ==
   // Type::LagrangianLinearTIDS, true);

@@ -141,10 +141,11 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS2() {
 
   ds->initRhs(time);
   siconos::algebra::SimpleMatrix m0(3, 3);
+  m0.setZero();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", *(ds->rhs()) == zero,
                                true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildFirstOrderNonLinearDS2 : ", *(ds->jacobianRhsx()) == m0, true);
+      "testBuildFirstOrderNonLinearDS2 : ", *(ds->jacobianRhsx()->block(0, 0)) == m0, true);
 
   std::cout << "--> Constructor 2 test ended with success." << std::endl;
 }
@@ -174,7 +175,7 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS3() {
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testBuildFirstOrderNonLinearDS3 : ", *(ds->rhs()) == time * *x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildFirstOrderNonLinearDS3 : ", *(ds->jacobianRhsx()) == *J0, true);
+      "testBuildFirstOrderNonLinearDS3 : ", *(ds->jacobianRhsx()->block(0, 0)) == *J0, true);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3 : ", *(ds->f()) == time * *x0,
                                true);
