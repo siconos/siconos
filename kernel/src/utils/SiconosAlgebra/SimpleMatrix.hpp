@@ -52,6 +52,8 @@ bool checkSymmetry(SiconosMatrix &m, double tol);
 
 void solveInPlace(SimpleMatrix &A, SiconosVector &B);
 void solveInPlace(SimpleMatrix &A, SimpleMatrix &B);
+void solveByLeastSquares(SimpleMatrix &A, SiconosVector &B);
+void solveByLeastSquares(SimpleMatrix &A, SiconosMatrix &B);
 siconos::algebra::SimpleMatrix readMatrixFromFile(const std::string &filename, bool ascii = true);
 
 }  // namespace siconos::algebra

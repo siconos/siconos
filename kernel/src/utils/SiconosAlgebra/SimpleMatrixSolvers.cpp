@@ -20,10 +20,13 @@
 
 #include "BlockMatrix.hpp"
 #include "NumericsToolsNamespace.h"
+#include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 #include "cholesky.hpp"
 #include <Eigen/Dense>
+#include <algorithm>
+#include "SiconosLapack.h"
 
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -37,6 +40,7 @@
 
 void siconos::algebra::solveInPlace(SimpleMatrix &A, SiconosVector &B)
 {
+  assert(A.cols() == B.rows());
   if(A.lu_siconos == nullptr) {
     A.lu_siconos.reset(new Eigen::FullPivLU<SiconosMatrix>(A));
     // A.isFactorized = true;
@@ -62,4 +66,65 @@ void siconos::algebra::solveInPlace(SimpleMatrix &A, SimpleMatrix &B)
     B = A.lu_siconos->solve(B);
   }
   // std::cout << "A  apres" << std::endl << A << std::endl;
+}
+
+
+void  siconos::algebra::solveByLeastSquares(SimpleMatrix &A, SiconosMatrix &B)
+{
+  int info = 0;
+// #ifdef USE_OPTIMAL_WORKSPACE
+//   info += lapack::gels(*mat.Dense, *(B.dense()), lapack::optimal_workspace());
+// #endif
+// #ifdef USE_MINIMAL_WORKSPACE
+//   info += lapack::gels(*mat.Dense, *(B.dense()), lapack::minimal_workspace());
+// #endif
+  std::cout << B << std::endl;
+  int M_ = A.rows();
+  int N_ = B.cols();
+  int NRHS_ = B.cols();
+  int LDA_ = std::max(1, M_);
+  int LDB_ = std::max(LDA_, N_);
+  
+  DGELS('T', M_, N_, NRHS_, A.data(), LDA_, B.data(), LDB_, &info);
+  if(info != 0)
+    THROW_EXCEPTION("SimpleMatrix::SolveByLeastSquares failed.");
+  std::cout << B << std::endl << "************************" << std::endl;
+}
+
+
+
+
+void  siconos::algebra::solveByLeastSquares(SimpleMatrix &A, SiconosVector &B)
+{
+  // std::cout << B << std::endl;
+  SiconosMatrix tmpB(B.size(), 1);
+  tmpB.col(0) = B; // Conversion of vector to matrix. Temporary solution.
+  std::cout << "tpmB" << std::endl << tmpB << std::endl;
+  int info = 0;
+
+// #ifdef USE_OPTIMAL_WORKSPACE
+//   info += lapack::gels(*mat.Dense, tmpB, lapack::optimal_workspace());
+// #endif
+// #ifdef USE_MINIMAL_WORKSPACE
+//   info += lapack::gels(*mat.Dense, tmpB, lapack::minimal_workspace());
+// #endif
+
+  int M_ = A.rows();
+  int N_ = B.cols();
+  int NRHS_ = B.cols();
+  int LDA_ = std::max(1, M_);
+  int LDB_ = std::max(LDA_, N_);
+
+  DGELS('T', M_, N_, NRHS_, A.data(), LDA_, tmpB.data(), LDB_, &info);
+  if(info != 0)
+  {
+    std::cout << "info = " << info << std::endl;
+    THROW_EXCEPTION("SimpleMatrix::SolveByLeastSquares failed.");
+  }
+  else
+  {
+    B = tmpB.col(0);
+    std::cout << "B out :" << std::endl << B << "************************" << std::endl;
+  }
+
 }
