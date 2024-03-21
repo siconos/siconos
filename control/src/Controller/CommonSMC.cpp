@@ -16,7 +16,11 @@
  * limitations under the License.
  */
 
+#include "EigenInclude.hpp"
 #include "CommonSMC.hpp"
+#include "SiconosVector.hpp"
+#include "SimpleMatrix.hpp"
+#include <Eigen/LU>
 
 #include "ControlSensor.hpp"
 #include "EulerMoreauOSI.hpp"
@@ -35,8 +39,8 @@
 #include "SiconosAlgebraTools.hpp"
 #include "SiconosMatrixOp.hpp"
 #include "SiconosMatrixVectorOp.hpp"
-#include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+// #include "SiconosVector.hpp"
+// #include "SimpleMatrix.hpp"
 #include "TimeDiscretisation.hpp"
 #include "TimeStepping.hpp"
 #include "Topology.hpp"
