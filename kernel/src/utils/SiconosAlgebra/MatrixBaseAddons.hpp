@@ -51,7 +51,7 @@ inline void setCol(Index c, const MatrixBase<OtherDerived>& vIn) {
     assert(c < this->cols() && "r is out of range.");
     assert(vIn.size() == this->rows() && "inconsistent sizes between this and v.");
 
-    this->row(c) = vIn;
+    this->col(c) = vIn;
 }
 
 /** set row r of the current matrix with vector v
@@ -65,7 +65,7 @@ inline void setRow(Index r, const MatrixBase<OtherDerived>& vIn) {
     assert(r < this->rows() && "r is out of range.");
     assert(vIn.size() == this->cols() && "inconsistent sizes between this and v.");
 
-    this->col(r) = vIn;
+    this->row(r) = vIn;
 }
 
 
