@@ -143,7 +143,7 @@ void siconos::control::SlidingReducedOrderObserver::process() {
     siconos::algebra::SimpleMatrix tmpC(*_C);
     for (decltype(_e->size()) i = 0; i < _e->size(); ++i) tmpV(i) = (*_e)(i);
 
-    tmpC.SolveByLeastSquares(tmpV);
+    siconos::algebra::solveByLeastSquares(tmpC, tmpV);
     *(_xHat) -= tmpV;
     *(_DS->x()) -= tmpV;
     _DS->initMemory(1);

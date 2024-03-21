@@ -81,9 +81,11 @@ void PIDTest::testPIDZOH() {
   dataRef.zero();
   siconos::algebra::io::read("PID.ref", dataRef);
 
-  std::cout << "------- Integration done, error = " << (data - dataRef).normInf() << " -------"
+  auto diff = data - dataRef;
+  // std::cout << diff << std::endl;
+  std::cout << "------- Integration done, error = " << diff.normInf() << " -------"
             << std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testPIDZOH : ", (data - dataRef).normInf() < _tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testPIDZOH : ", (diff).normInf() < _tol, true);
 }
 
 void PIDTest::testPIDLsodar() {
@@ -101,7 +103,8 @@ void PIDTest::testPIDLsodar() {
   siconos::algebra::SimpleMatrix dataRef(data);
   dataRef.zero();
   siconos::algebra::io::read("PID.ref", dataRef);
-  std::cout << "------- Integration done, error = " << (data - dataRef).normInf() << " -------"
+  auto diff = data - dataRef;
+  std::cout << "------- Integration done, error = " << diff.normInf() << " -------"
             << std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testPIDLsodar : ", (data - dataRef).normInf() < _tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testPIDLsodar : ", diff.normInf() < _tol, true);
 }
