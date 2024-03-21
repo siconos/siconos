@@ -24,13 +24,11 @@ contactors maintained by a SiconosCollisionManager.
 #ifndef SiconosCollisionQueryResult_h
 #define SiconosCollisionQueryResult_h
 
+#include "SiconosVector.hpp"
 #include <memory>
 
 #include "SiconosSerialization.hpp"
 
-namespace siconos::algebra {
-class SiconosVector;
-}
 
 namespace siconos::modeling {
 class SecondOrderDS;

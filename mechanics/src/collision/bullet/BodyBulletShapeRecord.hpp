@@ -25,12 +25,10 @@ shape in a contactor.
 #ifndef BodyBulletShapeRecord_h
 #define BodyBulletShapeRecord_h
 
+#include "SiconosVector.hpp"
 #include "BodyShapeRecord.hpp"
 #include "BulletDeclarations.h"
 
-namespace siconos::algebra {
-class SiconosVector;
-}
 
 namespace siconos::collision {
 class StaticBody;
