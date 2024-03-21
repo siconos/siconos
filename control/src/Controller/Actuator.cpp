@@ -36,7 +36,8 @@ siconos::control::Actuator::Actuator(ActuatorType type, std::shared_ptr<ControlS
     : _type(type), _B(B), _sensor(sensor)
 {
   if (B) {
-    _u = std::make_shared<siconos::algebra::SiconosVector>(B->size(1), 0);
+    _u = std::make_shared<siconos::algebra::SiconosVector>(B->size(1));
+    _u->setZero();
   }
 }
 
@@ -84,7 +85,8 @@ void siconos::control::Actuator::setSizeu(unsigned size)
 {
   if (_B && size != _B->size(1)) {
   }
-  _u= std::make_shared<siconos::algebra::SiconosVector>(size, 0);
+  _u= std::make_shared<siconos::algebra::SiconosVector>(size);
+  _u->setZero();
 }
 
 std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> siconos::control::Actuator::getInternalNSDS() const

@@ -34,7 +34,8 @@ siconos::control::PID::PID(std::shared_ptr<ControlSensor> sensor,
                            std::shared_ptr<siconos::algebra::SimpleMatrix> B)
     : Actuator(ActuatorType::PID, sensor, B)
 {
-  _u = std::make_shared<siconos::algebra::SiconosVector>(1, 0);
+  _u = std::make_shared<siconos::algebra::SiconosVector>(1);
+  _u->setZero();
 }
 
 void siconos::control::PID::initialize(const siconos::modeling::NonSmoothDynamicalSystem& nsds,

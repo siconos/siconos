@@ -34,13 +34,15 @@ CPPUNIT_TEST_SUITE_REGISTRATION(PIDTest);
 
 void PIDTest::setUp() {
   _A = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);
+  _A->setZero();
   (*_A)(0, 1) = 1.0;
-  _x0 = std::make_shared<siconos::algebra::SiconosVector>(_n, 0);
+  _x0 = std::make_shared<siconos::algebra::SiconosVector>(_n);
+  _x0->setZero();
   (*_x0)(0) = 10.0;
   (*_x0)(1) = 0.0;
   _xFinal = 0.0;
 
-  _K = std::make_shared<siconos::algebra::SiconosVector>(3, 0);
+  _K = std::make_shared<siconos::algebra::SiconosVector>(3);
   (*_K)(0) = .25;
   (*_K)(1) = .125;
   (*_K)(2) = 2.0;
@@ -48,10 +50,12 @@ void PIDTest::setUp() {
 
 void PIDTest::init() {
   _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(_x0, _A);
-  auto C = std::make_shared<siconos::algebra::SimpleMatrix>(1, 2, 0);
+  auto C = std::make_shared<siconos::algebra::SimpleMatrix>(1, 2);
+  C->zero();
   (*C)(0, 0) = 1;
   _sensor = std::make_shared<siconos::control::LinearSensor>(_DS, C);
   auto B = std::make_shared<siconos::algebra::SimpleMatrix>(2, 1);
+  B->setZero();
   (*B)(1, 0) = 1;
   _PIDcontroller = std::make_shared<siconos::control::PID>(_sensor, B);
   _PIDcontroller->setRef(_xFinal);

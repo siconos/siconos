@@ -38,21 +38,25 @@ CPPUNIT_TEST_SUITE_REGISTRATION(ObserverTest);
 
 void ObserverTest::setUp()
 {
-  _A = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n, 0);
+  _A = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);
+  _A->setZero();
   (*_A)(0, 1) = 1.0;
   (*_A)(1, 0) = -1.0;
 
-  _x0 = std::make_shared<siconos::algebra::SiconosVector>(_n, 0);
+  _x0 = std::make_shared<siconos::algebra::SiconosVector>(_n);
+  _x0->setZero();
   (*_x0)(0) = 10.0;
   (*_x0)(1) = 0.0;
 
-  _C = std::make_shared<siconos::algebra::SimpleMatrix>(1, 2, 0);
+  _C = std::make_shared<siconos::algebra::SimpleMatrix>(1, 2);
+  _C->setZero();
   (*_C)(0, 0) = 1.0;
 
   _B = std::make_shared<siconos::algebra::SimpleMatrix>(2, 1);
   (*_B)(1, 0) = 1.0;
 
-  _Csurface = std::make_shared<siconos::algebra::SimpleMatrix>(1, 2, 0);
+  _Csurface = std::make_shared<siconos::algebra::SimpleMatrix>(1, 2);
+  _Csurface->setZero();
   (*_Csurface)(0, 0) = 1.0;
   (*_Csurface)(0, 1) = 1.0;
 
@@ -64,7 +68,7 @@ void ObserverTest::setUp()
   (*_xHat0)(0) = (*_x0)(0);
   (*_xHat0)(1) = -5.0;
 
-  _K = std::make_shared<siconos::algebra::SiconosVector>(3, 0);
+  _K = std::make_shared<siconos::algebra::SiconosVector>(3);
   (*_K)(0) = .25;
   (*_K)(1) = .125;
   (*_K)(2) = 2.0;

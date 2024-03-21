@@ -35,22 +35,25 @@
 CPPUNIT_TEST_SUITE_REGISTRATION(SMCTest);
 
 void SMCTest::setUp() {
-  _A = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n, 0);
+  _A = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);
+  _A->setZero();
   (*_A)(0, 1) = 1.0;
   (*_A)(1, 0) = 19.0;
   (*_A)(1, 1) = -2.0;
 
-  _x0 = std::make_shared<siconos::algebra::SiconosVector>(_n, 0);
+  _x0 = std::make_shared<siconos::algebra::SiconosVector>(_n);
+  _x0->setZero();
   (*_x0)(0) = -15.0;
   (*_x0)(1) = 20.0;
 
-  _C = std::make_shared<siconos::algebra::SimpleMatrix>(2, 2, 0);
+  _C = std::make_shared<siconos::algebra::SimpleMatrix>(2, 2);
   _C->eye();
 
   _B = std::make_shared<siconos::algebra::SimpleMatrix>(2, 1);
   (*_B)(1, 0) = 1.0;
 
-  _Csurface = std::make_shared<siconos::algebra::SimpleMatrix>(1, 2, 0);
+  _Csurface = std::make_shared<siconos::algebra::SimpleMatrix>(1, 2);
+  _Csurface->setZero();
   (*_Csurface)(0, 0) = 1.0;
   (*_Csurface)(0, 1) = 1.0;
 }

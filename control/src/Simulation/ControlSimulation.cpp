@@ -206,6 +206,7 @@ void siconos::control::ControlSimulation::initialize()
     }
   }
   _dataM = std::make_shared<siconos::algebra::SimpleMatrix>(_N, _nDim + 1);
+  _dataM->setZero();
   // we save the system state
 }
 

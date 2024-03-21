@@ -61,14 +61,15 @@ void siconos::control::CommonSMC::initialize(
         "the Actuator");
   } else {
     if (_Csurface && !_u)
-      _u = std::make_shared<siconos::algebra::SiconosVector>(_Csurface->size(0), 0);
+      _u = std::make_shared<siconos::algebra::SiconosVector>(_Csurface->size(0));
+      _u->setZero();
 
     Actuator::initialize(nsds, s);
   }
   // We can only work with FirstOrderNonLinearDS, FirstOrderLinearDS and FirstOrderLinearTIDS
   // We can use the Visitor mighty power to check if we have the right type
   auto DS = _sensor->getDS();
-  // create the DS for the controller
+  // create the DS for the controller 
   // if the DS we use is different from the DS we are controlling
   // when we want for instant to see how well the controller behaves
   // if the plant model is not exact, we can use the setSimulatedDS
@@ -76,7 +77,8 @@ void siconos::control::CommonSMC::initialize(
   if (auto folds = std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearTIDS>(DS)) {
     _DS_SMC = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(*folds);
     // We have to reset the _pluginb
-    auto dummyb = std::make_shared<siconos::algebra::SiconosVector>(_DS_SMC->n(), 0);
+    auto dummyb = std::make_shared<siconos::algebra::SiconosVector>(_DS_SMC->n());
+    dummyb->setZero();
     std::static_pointer_cast<siconos::modeling::FirstOrderLinearTIDS>(_DS_SMC)->setbPtr(
         dummyb);
   } else if (auto folds =
@@ -85,7 +87,8 @@ void siconos::control::CommonSMC::initialize(
     std::static_pointer_cast<siconos::modeling::FirstOrderLinearDS>(_DS_SMC)
         ->setComputebFunction(nullptr);
     // We have to reset the _pluginb
-    auto dummyb = std::make_shared<siconos::algebra::SiconosVector>(_DS_SMC->n(), 0);
+    auto dummyb = std::make_shared<siconos::algebra::SiconosVector>(_DS_SMC->n());
+    dummyb->setZero();
     std::static_pointer_cast<siconos::modeling::FirstOrderLinearDS>(_DS_SMC)->setbPtr(dummyb);
   } else if (auto folds =
                  std::dynamic_pointer_cast<siconos::modeling::FirstOrderNonLinearDS>(DS)) {
@@ -214,7 +217,9 @@ void siconos::control::CommonSMC::initialize(
   _lambda = std::make_shared<siconos::algebra::SiconosVector>(sDim);
   _lambda = _interactionSMC->lambda(0);
   _us = std::make_shared<siconos::algebra::SiconosVector>(sDim);
+  _us->setZero();
   _ueq = std::make_shared<siconos::algebra::SiconosVector>(sDim);
+  _ueq->setZero();
 
   if (_Csurface) {
     auto tmpM =
