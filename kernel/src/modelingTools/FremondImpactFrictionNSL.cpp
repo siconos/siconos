@@ -14,34 +14,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
-/** \file OccBody_impl.hpp
-    \brief OccBody implementation details
  */
 
-#ifndef OccBody_impl_hpp
-#define OccBody_impl_hpp
+#include "FremondImpactFrictionNSL.hpp"
 
-#include "OccContactShape.hpp"
+#include <iostream>
 
-#include <vector>
-#include <boost/tuple/tuple.hpp>
-
-/* same things in BulletDS_impl.hpp */
-/* long unsigned int with bullet stuff ? */
-typedef std::array<double, 7> OffSet;
-
-struct ContactShapes : public std::vector<boost::tuple<SP::OccContactShape, OffSet, int > >
-{
-private:
-  ACCEPT_SERIALIZATION(ContactShapes);
-};
-
-struct TopoDS_Shapes : public std::vector<boost::tuple<SP::TopoDS_Shape, OffSet > >
-{
-private:
-  ACCEPT_SERIALIZATION(TopoDS_Shapes);
-};
-
-
-#endif
+void siconos::modeling::FremondImpactFrictionNSL::display() const {
+  std::cout << "=== Fremond impact-friction non-smooth law data display ===\n";
+  std::cout << " Normal Fremond coefficient of restitution: " << _en << "\n";
+  std::cout << " Tangential Fremond coefficient of restitution: " << _et << "\n";
+  std::cout << "Friction coefficient: " << _mu << "\n";
+  std::cout << "==========================================================\n";
+}

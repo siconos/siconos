@@ -247,7 +247,7 @@ void siconos::simulation::Simulation::applyNSDSChangelogForDS() {
   //   // Initialize OneStepNSProblem(s). Depends on the type of simulation.
   //   // Warning FP : must be done in any case, even if the interactions set
   //   // is empty.
-  //   initOSNS();
+  //   initializeOneStepNSProblem();
 
   //   // Since initOSNS calls updateIndexSets() which resets the
   //   // topology->hasChanged() flag, it must be specified explicitly.
@@ -318,7 +318,8 @@ void siconos::simulation::Simulation::initializeNSDSChangelog() {
     // Initialize OneStepNSProblem(s). Depends on the type of simulation.
     // Warning FP : must be done in any case, even if the interactions set
     // is empty.
-    initOSNS();
+    updateIndexSets();
+    initializeOneStepNSProblem();
 
     // Since initOSNS calls updateIndexSets() which resets the
     // topology->hasChanged() flag, it must be specified explicitly.
@@ -400,7 +401,6 @@ void siconos::simulation::Simulation::initialize() {
   // 3 - initialize new ds
   applyNSDSChangelogForDS();
 
-  // 3.1- Compute a first initial step if it is different the previous state
   computeInitialStateOfTheStep();
 
   // 4 - update the world from DS
@@ -417,9 +417,6 @@ void siconos::simulation::Simulation::initialize() {
   // we compute the new values of the output needed
   // by the updateIndexSet method
   updateOutput();
-
-  // 8 - Initialize OneStepNSProblem(s)
-  DEBUG_PRINT("Initialize OneStepNSProblem(s)\n");
 
   DEBUG_END("Simulation::initialize()\n");
 }
@@ -472,13 +469,12 @@ void siconos::simulation::Simulation::initializeInteraction(
 
   if (&osi1 == &osi2) {
     osi1.initializeWorkVectorsForInteraction(*inter, i_prop, DSG);
-
-    osi1.update_interaction_output(*inter, time, i_prop);
+    osi1.updateAndSwapAllOutput(*inter, time);
   } else {
     osi1.initializeWorkVectorsForInteraction(*inter, i_prop, DSG);
-    osi1.update_interaction_output(*inter, time, i_prop);
+    osi1.updateAndSwapAllOutput(*inter, time);
     osi2.initializeWorkVectorsForInteraction(*inter, i_prop, DSG);
-    osi2.update_interaction_output(*inter, time, i_prop);
+    osi2.updateAndSwapAllOutput(*inter, time);
   }
   DEBUG_END(
       "siconos::simulation::Simulation::initializeInteraction(double time, "

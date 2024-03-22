@@ -4,27 +4,12 @@ if(WITH_TESTING)
   add_custom_target(kernel-tests echo "Start kernel tests")
 
   # ---- Siconos Algebra tests ----
-  begin_tests(src/utils/SiconosAlgebra/test)
-
-  # new_test(
-  #   NAME testSiconosAlgebra
-  #   SOURCES  SiconosVectorTest.cpp BlockVectorTest.cpp SimpleMatrixTest.cpp BlockMatrixTest.cpp AlgebraToolsTest.cpp  EigenProblemsTest.cpp ${SIMPLE_TEST_MAIN}
-  #   DEPS "numerics;CPPUNIT::CPPUNIT;externals"
-  #   )
-  new_test(
-    NAME testSiconosAlgebra
-    SOURCES  SimpleMatrixTest.cpp ${SIMPLE_TEST_MAIN}
-    DEPS "numerics;CPPUNIT::CPPUNIT;externals"
-    )
+  begin_tests(src/utils/SiconosAlgebra/test DEPS "externals;numerics;CPPUNIT::CPPUNIT")
+  new_test(SOURCES  SiconosVectorTest.cpp BlockVectorTest.cpp SimpleMatrixTest.cpp BlockMatrixTest.cpp AlgebraToolsTest.cpp  EigenProblemsTest.cpp ${SIMPLE_TEST_MAIN})
 
   # ---- Siconos Memory tests ----
-  begin_tests(src/utils/SiconosMemory/test)
-
-  new_test(
-    NAME testSiconosMemory
-    SOURCES SiconosMemoryTest.cpp ${SIMPLE_TEST_MAIN}
-    DEPS "numerics;CPPUNIT::CPPUNIT"
-    )
+  begin_tests(src/utils/SiconosMemory/test DEPS "numerics;CPPUNIT::CPPUNIT")
+  new_test(SOURCES SiconosMemoryTest.cpp ${SIMPLE_TEST_MAIN})
 
   add_library(TestPlugin MODULE ${CMAKE_CURRENT_SOURCE_DIR}/src/utils/plugins/test/TestPlugin.cpp)
   set_target_properties(TestPlugin 

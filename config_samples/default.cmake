@@ -7,7 +7,7 @@
 # ===============================================================================
 
 # --- List of siconos components to build and install ---
-set(COMPONENTS externals numerics kernel control mechanics CACHE INTERNAL "List of siconos components to build and install")
+set(COMPONENTS externals numerics kernel control mechanics io CACHE INTERNAL "List of siconos components to build and install")
 option(WITH_PYB11_WRAPPER "Build and install python bindings" ON)
 
 # --- Build/compiling options ---
@@ -19,7 +19,7 @@ option(WITH_DOCUMENTATION "Build Documentation" OFF)
 
 # --- List of external libraries/dependencies to be searched (or not) ---
 option(WITH_BULLET "compilation with Bullet Bindings" ON)
-option(WITH_OCE "compilation with OpenCascade Bindings" OFF)
+option(WITH_OpenCASCADE "compilation with OpenCascade Bindings" OFF)
 option(WITH_MUMPS "Compilation with the MUMPS solver" OFF)
 option(WITH_UMFPACK "Compilation with the UMFPACK solver" OFF)
 option(WITH_SUPERLU "Compilation with the SuperLU solver" OFF)

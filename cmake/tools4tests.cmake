@@ -226,7 +226,7 @@ function(new_test)
   # ... or with GLOBAL_TEST_DEPS variable. GLOBAL_TEST_DEPS is
   # set during call to begin_test and useful only
   # when some dependencies are required by all tests
-  foreach(libtarget IN LISTS GLOBAL_TEST_DEPS) 
+  foreach(libtarget IN LISTS GLOBAL_TEST_DEPS)
     target_link_libraries(${TEST_NAME} PRIVATE ${libtarget})
   endforeach()
 

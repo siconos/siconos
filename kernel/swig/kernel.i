@@ -339,6 +339,11 @@ KERNEL_REGISTRATION()
   {
     return std::dynamic_pointer_cast<NewtonImpactFrictionNSL>(nslaw);
   }
+  
+  SP::FremondImpactFrictionNSL cast_FremondImpactFrictionNSL(SP::NonSmoothLaw nslaw)
+  {
+    return std::dynamic_pointer_cast<FremondImpactFrictionNSL>(nslaw);
+  }
 
   SP::RelayNSL cast_RelayNSL(SP::NonSmoothLaw nslaw)
   {
@@ -363,6 +368,10 @@ KERNEL_REGISTRATION()
   SP::NewtonEuler1DR cast_NewtonEuler1DR(SP::Relation r)
   {
     return std::dynamic_pointer_cast<NewtonEuler1DR>(r);
+  }
+  SP::NewtonEulerR cast_NewtonEulerR(SP::Relation r)
+  {
+    return std::dynamic_pointer_cast<NewtonEulerR>(r);
   }
 
   SP::FrictionContact cast_FrictionContact(SP::OneStepNSProblem osnpb)

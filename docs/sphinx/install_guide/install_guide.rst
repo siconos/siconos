@@ -293,7 +293,7 @@ Developers or advanced users options
 	source ci_gitlab/Dockerfiles/install_bullet.sh 
 
 
-* WITH_OCE=ON/OFF : enable/disable OpenCascade bindings (https://github.com/tpaviot/oce)
+* WITH_OpenCASCADE=ON/OFF : enable/disable OpenCascade bindings (https://github.com/tpaviot/pythonocc-core)
 
 .. note::
   for most of the required or optional dependencies, you can add some hints regarding their installation path to

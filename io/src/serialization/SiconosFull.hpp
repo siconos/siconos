@@ -173,7 +173,7 @@ REGISTER_BOOST_SERIALIZATION(__mpf_struct);
 
 
 template <class Archive>
-void siconos_io(Archive & ar, SiconosVector & v, unsigned int version)
+void siconos_io(Archive & ar, siconos::algebra::SiconosVector & v, unsigned int version)
 {
   ar & boost::serialization::make_nvp("_dense", v._dense);
   if (v._dense)
@@ -185,7 +185,7 @@ void siconos_io(Archive & ar, SiconosVector & v, unsigned int version)
     ar & boost::serialization::make_nvp("vect", v.vect.Sparse);
   }
 }
-REGISTER_BOOST_SERIALIZATION(SiconosVector);
+REGISTER_BOOST_SERIALIZATION(siconos::algebra::SiconosVector);
 
 template <class Archive>
 void siconos_io(Archive & ar, SimpleMatrix & m, unsigned int version)
@@ -348,7 +348,7 @@ namespace Siconos
   MAKE_SICONOS_IO_SP_PROPERTIES(OneStepIntegrator);
   MAKE_SICONOS_IO_SP_PROPERTIES(SiconosMatrix);
   MAKE_SICONOS_IO_SP_PROPERTIES(SimpleMatrix);
-  MAKE_SICONOS_IO_SP_PROPERTIES(SiconosVector);
+  MAKE_SICONOS_IO_SP_PROPERTIES(siconos::algebra::SiconosVector);
   MAKE_SICONOS_IO_PROPERTIES(std::string);
   MAKE_SICONOS_IO_PROPERTIES(unsigned int);
   MAKE_SICONOS_IO_PROPERTIES(double);
@@ -410,7 +410,7 @@ void basic_text_iprimitive<std::istream>::load<double>( double& t );
 // changelog of the Simulation's NSDS.
 namespace boost { namespace serialization {
 template <class Archive>
-void save(Archive & ar, const NonSmoothDynamicalSystem::ChangeLogIter & i, unsigned int version)
+void save(Archive & ar, const siconos::modeling::NonSmoothDynamicalSystem::ChangeLogIter & i, unsigned int version)
 {
   ar & BOOST_SERIALIZATION_NVP(i._log);
   int pos = std::distance(i._log->begin(), i.it);
@@ -418,7 +418,7 @@ void save(Archive & ar, const NonSmoothDynamicalSystem::ChangeLogIter & i, unsig
   DEBUG_PRINTF("serialize %s\n", "NonSmoothDynamicalSystem::ChangeLogIter");
 };
 template <class Archive>
-void load(Archive & ar, NonSmoothDynamicalSystem::ChangeLogIter & i, unsigned int version)
+void load(Archive & ar, siconos::modeling::NonSmoothDynamicalSystem::ChangeLogIter & i, unsigned int version)
 {
   ar & BOOST_SERIALIZATION_NVP(i._log);
   int pos;
@@ -429,13 +429,13 @@ void load(Archive & ar, NonSmoothDynamicalSystem::ChangeLogIter & i, unsigned in
   DEBUG_PRINTF("serialize %s\n", "NonSmoothDynamicalSystem::ChangeLogIter");
 };
 }}
-BOOST_SERIALIZATION_SPLIT_FREE(NonSmoothDynamicalSystem::ChangeLogIter)
+BOOST_SERIALIZATION_SPLIT_FREE(siconos::modeling::NonSmoothDynamicalSystem::ChangeLogIter)
 
 template <class Archive>
 void siconos_io_register_Kernel(Archive& ar)
 {
   ar.register_type(static_cast<SimpleMatrix*>(nullptr));
-  ar.register_type(static_cast<SiconosVector*>(nullptr));
+  ar.register_type(static_cast<siconos::algebra::SiconosVector*>(nullptr));
 
   siconos_io_register_generated_Kernel(ar);
 

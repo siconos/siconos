@@ -30,8 +30,9 @@
 #include "RelayNSL.hpp"
 #include "SiconosException.hpp"
 #include "SiconosVector.hpp"
-#include "Topology.hpp"
+#include "SolverOptions.h"
 #include "Tools.hpp"  // for enum_to_string
+#include "Topology.hpp"
 // #define DEBUG_BEGIN_END_ONLY
 // #define DEBUG_STDOUT
 // #define DEBUG_NOCOLOR
@@ -296,28 +297,16 @@ void siconos::simulation::TimeStepping::updateIndexSet(unsigned int i) {
       indexSet1->size());
 }
 
-// void
-// siconos::simulation::TimeStepping::insertNonSmoothProblem(std::shared_ptr<OneStepNSProblem>
-// osns)
-// {
-//   // A the time, a time stepping simulation can only have one non
-//   // smooth problem.
-//   if((*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY])
-//      THROW_EXCEPTION
-//        ("TimeStepping,  insertNonSmoothProblem - A non smooth problem already
-//        exist. You can not have more than one.");
-
-//   (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY] = osns;
-// }
-
 void siconos::simulation::TimeStepping::initialize() {
   Simulation::initialize();
-  initOSNS();
-  // 7 - First initialization of the simulation
+  updateIndexSets();
+  initializeOneStepNSProblem();
+  // First initialization of the simulation
   firstInitialize();
 }
 
-void siconos::simulation::TimeStepping::initOSNS() {
+void siconos::simulation::TimeStepping::initializeOneStepNSProblem() {
+
   // === creates links between work vector in OSI and work vector in
   // Interactions
   std::shared_ptr<siconos::integrators::OneStepIntegrator> osi;
@@ -341,7 +330,7 @@ void siconos::simulation::TimeStepping::initOSNS() {
     // for degree 0 case where we keep 0.
 
     // === update all index sets ===
-    updateIndexSets();
+    // updateIndexSets();
 
     // initialization of  OneStepNonSmoothProblem
     for (auto osns : *_allNSProblems) {
@@ -354,7 +343,7 @@ void siconos::simulation::TimeStepping::initOSNS() {
             "set. ");
     }
   }
-  // Since initOSNS calls updateIndexSets() which resets the
+  // Since initializeOneStepNSProblem calls updateIndexSets() which resets the
   // topology->hasChanged() flag, it must be specified explicitly.
   // Otherwise OneStepNSProblem may fail to update its matrices.
   _nsds->topology()->setHasChanged(true);
@@ -500,9 +489,11 @@ void siconos::simulation::TimeStepping::initializeNewtonSolve() {
   double tkp1 = getTkp1();
   assert(!std::isnan(tkp1));
 
-  updateDSPlugins(tkp1);  // is it useful since the integrator update the plugin computeResidu?
+  // computeInitialStateOfTheStep();
 
-  computeResidu();  // Is is mandatory for SICONOS_TS_LINEAR ?
+  updateDSPlugins(tkp1);
+
+  computeResidu();
 
   updateAllInput();  //??
 
@@ -612,7 +603,8 @@ void siconos::simulation::TimeStepping::newtonSolve(double criterion, unsigned i
         }
         updateOutput();
         if (_newtonOptions == TimeSteppingType::NONLINEAR_FULL) {
-          initOSNS();
+          updateIndexSets();
+          initializeOneStepNSProblem();
         }
       }
       _isNewtonConverge = newtonCheckConvergence(criterion);
@@ -713,35 +705,12 @@ void siconos::simulation::TimeStepping::DefaultCheckSolverOutput(int info) {
   // info = 0 => ok
   // else: depend on solver
   if (info != 0 and _warningNonsmoothSolver) {
-    std::cout << "[kernel] TimeStepping::DefaultCheckSolverOutput:\n";
-    std::cout << "[kernel] Non smooth solver warning : output message from numerics solver is "
-                 "equal to "
-              << info << "\n";
-    //       std::cout << "=> may have failed? (See Numerics solver documentation for details
-    //       on the message meaning)." <<std::endl;
-    //      std::cout << "=> may have failed? (See Numerics solver documentation for details
-    //      on the message meaning)." <<std::endl;
-    //     THROW_EXCEPTION(" Non smooth problem, solver convergence failed ");
-    /*      if(info == 1)
-            std::cout <<" reach max iterations number with solver " <<
-       solverName <<std::endl; else if (info == 2)
-            {
-            if (solverName == "LexicoLemke" || solverName == "CPG" || solverName
-       == "NLGS") THROW_EXCEPTION(" negative diagonal term with solver
-       "+solverName); else if (solverName == "QP" || solverName == "NSQP" )
-            THROW_EXCEPTION(" can not satisfy convergence criteria for solver
-       "+solverName); else if (solverName == "Latin") THROW_EXCEPTION(" Choleski
-       factorisation failed with solver Latin");
-            }
-            else if (info == 3 && solverName == "CPG")
-            std::cout << "pWp null in solver CPG" <<std::endl;
-            else if (info == 3 && solverName == "Latin")
-            THROW_EXCEPTION("Null diagonal term with solver Latin");
-            else if (info == 5 && (solverName == "QP" || solverName == "NSQP"))
-            THROW_EXCEPTION("Length of working array insufficient in solver
-       "+solverName); else THROW_EXCEPTION("Unknown error type in solver "+
-       solverName);
-    */
+    auto options = (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->numericsSolverOptions();
+
+    std::cout << "[kernel] TimeStepping at time " << getTkp1()
+              << " --numerics solver warning -- info=" << info
+              << " reached accuracy : " << options->dparam[SICONOS_DPARAM_RESIDU]
+              << " iteration done  : " << options->iparam[SICONOS_IPARAM_ITER_DONE] << "\n";
   }
 }
 

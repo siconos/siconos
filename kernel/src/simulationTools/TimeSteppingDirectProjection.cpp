@@ -60,8 +60,8 @@ siconos::simulation::TimeSteppingDirectProjection::TimeSteppingDirectProjection(
   insertNonSmoothProblem(osnspb_pos, siconos::simulation::SICONOS_OSNSP_TS_POS);
 }
 
-void siconos::simulation::TimeSteppingDirectProjection::initOSNS() {
-  TimeStepping::initOSNS();
+void siconos::simulation::TimeSteppingDirectProjection::initializeOneStepNSProblem() {
+  TimeStepping::initializeOneStepNSProblem();
 
   (*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_TS_POS]->setIndexSetLevel(
       _indexSetLevelForProjection);

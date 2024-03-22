@@ -7,7 +7,7 @@
 
 MBTB_JointR::MBTB_JointR()
 {
-  _M.reset(new SimpleMatrix(6,6));
+  _M.reset = std::make_shared<siconos::algebra::SimpleMatrix>(6,6));
   _F.reset(new SiconosVector(6));
 }
 
@@ -33,7 +33,7 @@ void MBTB_JointR::computeEquivalentForces()
   ::boost::math::quaternion<double>    quattrf(q1,q2,q3,q4);
   ::boost::math::quaternion<double>    cquattrf(q1,-q2,-q3,-q4);
   ::boost::math::quaternion<double>    quatbuff;
-  SP::SiconosVector Blambda=_jointR->contactForce();
+  auto Blambda=_jointR->contactForce();
   SiconosVector FL(3);
   FL.setValue(0,Blambda->getValue(0));
   FL.setValue(1,Blambda->getValue(1));
@@ -44,7 +44,7 @@ void MBTB_JointR::computeEquivalentForces()
   ML_G.setValue(0,Blambda->getValue(3));
   ML_G.setValue(1,Blambda->getValue(4));
   ML_G.setValue(2,Blambda->getValue(5));
-  SP::SiconosVector spML_G_abs(new SiconosVector(3));
+  auto spML_G_abs = std::make_shared<siconos::algebra::SiconosVector>(3);
   *spML_G_abs = ML_G;
   changeFrameBodyToAbs(_ds1->q(),spML_G_abs);
   ML_G_abs = * spML_G_abs;

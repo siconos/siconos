@@ -235,6 +235,7 @@ static void mlcp_enum_block(MixedLinearComplementarityProblem* problem, double *
         // options->iparam[1]=scurrent-1;
         numerics_printf_verbose(1,"mlcp_enum_block END");
         options->dparam[SICONOS_DPARAM_RESIDU] = err;
+	free(enum_struct);
         return;
       }
     }
@@ -245,8 +246,11 @@ static void mlcp_enum_block(MixedLinearComplementarityProblem* problem, double *
 
     }
   }
+  free(enum_struct);
   *info = 1;
-  numerics_printf_verbose(1,"mlcp_enum_block failed!\n");
+  double err;
+  mlcp_compute_error(problem, z, w, tol, &err);
+  numerics_printf_verbose(1,"mlcp_enum_block failed! with error = %e\n", err);
   DEBUG_END(" mlcp_enum_block(...)\n");
 }
 

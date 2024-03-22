@@ -23,11 +23,11 @@
 #define MESH_H
 
 // #include <iostream>
-// #include <string>
+#include <memory>
+#include <string>
 #include <vector>
 
 #include "FETypes.hpp"
-#include <memory>
 
 namespace siconos::mechanics::fem {
 
@@ -171,7 +171,7 @@ class Mesh {
 
       \param brief true to toggle verbose mode off, default = true
    */
-  
+
   void display(bool brief = true) const;
 };
 

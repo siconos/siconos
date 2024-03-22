@@ -15,12 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "TimeSteppingCombinedProjection.hpp"
 
+#include "Interaction.hpp"
 #include "LagrangianLinearTIDS.hpp"
 #include "MLCPProjectOnConstraints.hpp"
-#include "Interaction.hpp"
 #include "MoreauJeanOSI.hpp"
 #include "NewtonEulerDS.hpp"
 #include "NonSmoothLaw.hpp"
@@ -34,7 +33,6 @@
 // #define DEBUG_MESSAGES
 // #define DEBUG_WHERE_MESSAGES
 #include "siconos_debug.h"
-
 
 siconos::simulation::TimeSteppingCombinedProjection::TimeSteppingCombinedProjection(
     std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
@@ -73,8 +71,8 @@ siconos::simulation::TimeSteppingCombinedProjection::TimeSteppingCombinedProject
 //   void visit(MLCPProjectOnConstraints onsnsp) { std::cout << "hello\n"; }
 // };
 
-void siconos::simulation::TimeSteppingCombinedProjection::initOSNS() {
-  TimeStepping::initOSNS();
+void siconos::simulation::TimeSteppingCombinedProjection::initializeOneStepNSProblem() {
+  TimeStepping::initializeOneStepNSProblem();
 
   auto osnspb_pos = (*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_TS_POS];
 

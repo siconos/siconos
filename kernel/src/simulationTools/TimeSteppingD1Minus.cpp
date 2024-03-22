@@ -33,7 +33,8 @@
 #include "SiconosVector.hpp"
 #include "siconos_debug.h"
 
-void siconos::simulation::TimeSteppingD1Minus::TimeSteppingD1Minus::initOSNS() {
+void siconos::simulation::TimeSteppingD1Minus::initializeOneStepNSProblem() {
+
   // initialize OSNS for InteractionsGraph from Topology
   auto topo = _nsds->topology();
 
@@ -45,7 +46,7 @@ void siconos::simulation::TimeSteppingD1Minus::TimeSteppingD1Minus::initOSNS() {
           "must have two OneStepNonsmoothProblems.");
 
     // update all index sets
-    updateIndexSets();
+    // updateIndexSets();
 
     // update output
     updateOutput();
@@ -61,7 +62,8 @@ siconos::simulation::TimeSteppingD1Minus::TimeSteppingD1Minus(
 
 void siconos::simulation::TimeSteppingD1Minus::initialize() {
   Simulation::initialize();
-  initOSNS();
+  updateIndexSets();
+  initializeOneStepNSProblem();
   // 7 - First initialization of the simulation
   firstInitialize();
 }

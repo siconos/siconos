@@ -67,7 +67,7 @@ extern "C" void Hem5OSI_fprob_wrapper(int* IFCN, int* NQ, int* NV, int* NU, int*
 // This function must have the same signature as argument SOLOUT in HEM5
 extern "C" void Hem5OSI_solout_wrapper(int* MODE, int* NSTEP, int* NQ, int* NV, int* NU,
                                        int* NL, int* LDG, int* LDF, int* LDA, int* LRDO,
-                                       int* LIDO, siconos::hairer::fprobpointer FPROB,
+                                       int* LIDO, siconos::fortran::hairer::fprobpointer FPROB,
                                        double* q, double* v, double* u, double* DOWK,
                                        int* IDOWK) {
   return hem5_global_object->_impl->solout(MODE, NSTEP, NQ, NV, NU, NL, LDG, LDF, LDA, LRDO,
@@ -534,8 +534,8 @@ void siconos::integrators::Hem5OSI::initialize() {
 
 void siconos::integrators::Hem5OSI::Hem5OSI_impl::solout(
     int* MODE, int* NSTEP, int* NQ, int* NV, int* NU, int* NL, int* LDG, int* LDF, int* LDA,
-    int* LRDO, int* LIDO, siconos::hairer::fprobpointer FPROB, double* q, double* v, double* u,
-    double* DOWK, int* IDOWK)
+    int* LRDO, int* LIDO, siconos::fortran::hairer::fprobpointer FPROB, double* q, double* v,
+    double* u, double* DOWK, int* IDOWK)
 
 {}
 unsigned int siconos::integrators::Hem5OSI::numberOfConstraints() {
@@ -690,7 +690,7 @@ void siconos::integrators::Hem5OSI::integrate(double& tinit, double& tend, doubl
   else
     pointerToXL = &(*_lambdatmp)(0);
   // call HEM5 to integrate dynamical equation
-  siconos::hairer::hem5(
+  siconos::fortran::hairer::hem5(
       &(_intData[0]), &(_intData[1]), &(_intData[2]), &(_intData[3]), &Hem5OSI_fprob_wrapper,
       &tinit_DR, &(*_qtmp)(0), &(*_vtmp)(0), pointerToU, &(*_atmp)(0), pointerToXL, &tend_DR,
       &_timeStep, &rtol.front(), &atol.front(), &(_intData[4]), &Hem5OSI_solout_wrapper,

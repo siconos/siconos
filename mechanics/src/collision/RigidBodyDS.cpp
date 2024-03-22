@@ -26,7 +26,7 @@ siconos::collision::RigidBodyDS::RigidBodyDS(
     std::shared_ptr<siconos::algebra::SiconosVector> position,
     std::shared_ptr<siconos::algebra::SiconosVector> velocity, double mass,
     std::shared_ptr<siconos::algebra::SiconosMatrix> inertia)
-    : siconos::modeling::NewtonEulerDS(position, velocity, mass, inertia),
+  : siconos::modeling::NewtonEulerDS{position, velocity, mass, inertia},
       _contactors(std::make_shared<siconos::collision::SiconosContactorSet>()) {}
 
 void siconos::collision::RigidBodyDS::acceptSP(

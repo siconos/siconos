@@ -22,12 +22,17 @@
 #include "D1MinusLinearOSI.hpp"
 #include "DynamicalSystem.hpp"
 #include "EulerMoreauOSI.hpp"
+#include "FremondImpactFrictionNSL.hpp"  // For the nslaw visitor
 #include "Interaction.hpp"
+#include "LagrangianCompliantLinearTIR.hpp"
+#include "LagrangianLinearDiagonalDS.hpp"
 #include "LsodarOSI.hpp"
 #include "MoreauJeanBilbaoOSI.hpp"
 #include "MoreauJeanOSI.hpp"
 #include "NewMarkAlphaOSI.hpp"
 #include "NonSmoothLaw.hpp"
+#include "NumericsMatrix.h"  // NM_scal
+#include "OSNSMatrix.hpp"
 #include "OneStepIntegrator.hpp"
 #include "Relation.hpp"
 #include "SchatzmanPaoliOSI.hpp"
@@ -40,24 +45,8 @@
 #include "SimpleMatrix.hpp"
 #include "Simulation.hpp"
 #include "Topology.hpp"
+// #include "TypeName.hpp"  // for Type::...NSL
 #include "ZeroOrderHoldOSI.hpp"
-// #include "NewtonEulerR.hpp"
-// #include "FirstOrderLinearR.hpp"
-// #include "FirstOrderLinearTIR.hpp"
-#include "LagrangianCompliantLinearTIR.hpp"
-#include "LagrangianLinearDiagonalDS.hpp"
-// #include "NewtonImpactNSL.hpp"
-// #include "MultipleImpactNSL.hpp"
-// #include "NewtonImpactFrictionNSL.hpp"
-// #include "NonSmoothDynamicalSystem.hpp"
-// #include "LagrangianRheonomousR.hpp"
-// #include "LagrangianScleronomousR.hpp"
-// #include "LagrangianLinearTIDS.hpp"
-// #include "NewtonEulerDS.hpp"
-#include "OSNSMatrix.hpp"
-
-// #include "Tools.hpp"
-// #include <chrono>
 
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -791,9 +780,8 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeq(double time) {
 }
 
 void siconos::nonsmooth_formulations::LinearOSNS::computeM() {
+  auto& indexSet = *simulation()->indexSet(indexSetLevel());
   if (_assemblyType == LinearOSNSAssemblyType::REDUCED_BLOCK) {
-    auto& indexSet = *simulation()->indexSet(indexSetLevel());
-
     // Computes new _interactionBlocks if required
     updateInteractionBlocks();
 
@@ -802,6 +790,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeM() {
   } else if (_assemblyType == LinearOSNSAssemblyType::REDUCED_DIRECT) {
     auto& indexSet = *simulation()->indexSet(indexSetLevel());
     auto& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
+
 #ifdef WITH_TIMER
     std::chrono::time_point<std::chrono::system_clock> start, end, end_old;
     start = std::chrono::system_clock::now();
@@ -823,6 +812,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeM() {
 #endif
     // ComputeM
     _M->computeM(_W_inverse->numericsMatrix(), _H->numericsMatrix());
+
 #ifdef WITH_TIMER
     end_old = end;
     end = std::chrono::system_clock::now();
@@ -833,11 +823,30 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeM() {
     THROW_EXCEPTION(
         "siconos::nonsmooth_formulations::LinearOSNS::computeM unknown _assemblyTYPE");
 
+  // ugly hack for FremondImpactFrictionNSL. VA 12/02/2024
+  siconos::graphs::InteractionsGraph::VIterator vi, viend;
+  auto DSG0 = simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
+
+  for (std::tie(vi, viend) = indexSet.vertices(); vi != viend; ++vi) {
+    auto& inter = *indexSet.bundle(*vi);
+    auto& nslaw = *inter.nonSmoothLaw();
+    if (siconos::types::type_value(nslaw) ==
+        siconos::modeling::Type::FremondImpactFrictionNSL) {
+      auto ds1 = indexSet.properties(*vi).source;
+      auto& osi = *DSG0->properties(DSG0->descriptor(ds1)).osi;
+      double theta = (static_cast<siconos::integrators::MoreauJeanOSI&>(osi)).theta();
+      NM_scal(theta, &*_M->numericsMatrix());
+    }
+    break;
+  }
+
   DEBUG_EXPR(_M->display(););
   // NumericsMatrix *   M_NM = _M->numericsMatrix().get();
   // if (M_NM )
   //   NM_display(M_NM);
-
+  // NumericsMatrix * M = &*_M->numericsMatrix();
+  // CSparseMatrix * A = NM_csc(M);
+  // CSparseMatrix_print(A, 0);
   // getchar();
 }
 

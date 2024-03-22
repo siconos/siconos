@@ -42,7 +42,7 @@ if(WITH_FORTRAN)
   #target_compile_options(externals_fortran PRIVATE "-fallow-argument-mismatch")
   # --- ql0001 ---
   #if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/optim_misc/ql0001/ql0001.f")
-  target_sources(externals_fortran PRIVATE optim_misc/ql0001/ql0001.f)
+  target_sources(externals_fortran PRIVATE optim_misc/ql0001/ql0001.f optim_misc/qnb.f)
   set(HAVE_QL0001 TRUE CACHE INTERNAL "True if ql0001 is available in externals.")
 
 
@@ -122,8 +122,8 @@ siconos_component_install_setup(externals NODOC)
 install(FILES tools/SiconosFortran.h DESTINATION include/siconos)
 
 # - Optional OCE Renderer setup (install only) -
-if(WITH_OCE)
-  include(oce_renderer)
+if(WITH_OpenCASCADE)
+  include(occ_renderer)
 endif()
 
 if(WITH_SERIALIZATION AND INSTALL_EXTERNAL_HEADERS AND NOT WITH_SYSTEM_BOOST_SERIALIZATION)

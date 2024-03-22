@@ -43,10 +43,11 @@
 #include "RelayNSL.hpp"
 #include "SimpleMatrix.hpp"
 // include "SimulationGraphs.hpp"
+#include "FremondImpactFrictionNSL.hpp"
 #include "Relation.hpp"
+#include "SiconosMatrixOp.hpp"  // For setBlock
 #include "SiconosVector.hpp"
 #include "SiconosVisitor.hpp"
-#include "SiconosMatrixOp.hpp" // For setBlock
 #include "siconos_debug.h"
 
 // Test : the following line is allowed only from C++17.
@@ -209,6 +210,22 @@ struct siconos::modeling::Interaction::SetLevels : public siconos::internal::Sic
           "nslaw ");
     }
   }
+
+  void visit(const FremondImpactFrictionNSL& nslaw) const override {
+    auto relationType = interaction_->relation()->getType();
+    if (relationType == RelationType::Lagrangian ||
+        relationType == RelationType::NewtonEuler) {
+      interaction_->setLowerLevelForOutput(0);
+      interaction_->setUpperLevelForOutput(1);
+
+      interaction_->setLowerLevelForInput(0);
+      interaction_->setUpperLevelForInput(1);
+
+    } else {
+      THROW_EXCEPTION("Interaction::_setLevels::visit - unknown relation type for the nslaw ");
+    }
+  }
+
   void visit(const MultipleImpactNSL& nslaw) const override {
     RelationType relationType = interaction_->relation()->getType();
     if (relationType == RelationType::Lagrangian ||

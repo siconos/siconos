@@ -12,6 +12,7 @@
 
 %import <Standard_Macro.hxx>
 %import <Standard_Real.hxx>
+
 #define DEFINE_STANDARD_ALLOC
 
 %{

@@ -1,3 +1,4 @@
+
 # cmake utilities to build mechanics component
 #================================================================
 #
@@ -7,15 +8,13 @@
 # - COMPONENT component name
 # - <COMPONENT>_DIRS: the list of paths (relative to CMAKE_CURRENT_SOURCE_DIR) that
 #   contain source files
-# - <COMPONENT>_EXCLUDE_SRCS: the list of files, in <COMPONENT>_DIRS, that must be excluded
-#   from build.
 # - <COMPONENT>_INTERFACE_INCLUDE_DIRECTORIES: a list of directories
 #   to populate the interface of the target for include directories at build time
 
 # This component has two optional sub-parts:
 # - collision/bullet which requires bullet physics software  (and thus -DWITH_BULLET=ON cmake option)
-# - occ which requires open-cascade community edition (and thus -DWITH_OCE=ON cmake option)
-# Those parts are automatically built and installed if bullet and/or oce are available and properly detected by cmake.
+# - occ which requires open-cascade community edition (and thus -DWITH_OpenCASCADE=ON cmake option)
+# Those parts are automatically built and installed if bullet and/or opencascade are available and properly detected by cmake.
 
 
 set(COMPONENT mechanics)
@@ -47,9 +46,9 @@ if(WITH_BULLET)
   list(APPEND ${COMPONENT}_DIRS src/collision/bullet)
 endif()
 
-# -- OCE --
-# - add extra mechanics sources, depending on occ/oce, to the build process
-if(WITH_OCE OR WITH_OCC)
+# -- OPenCascade --
+# - add extra mechanics sources, depending on opencascade, to the build process
+if(WITH_OpenCASCADE)
   list(APPEND ${COMPONENT}_DIRS src/occ)
 endif()
 
@@ -85,18 +84,12 @@ target_link_libraries(mechanics PUBLIC
 # Different options are available. Check BulletSetup.cmake file
 include(bullet_setup)
 
-# -- OCE --
-# - add occ to the build process
-# - set SICONOS_HAS_OCE var (distributed in siconosConfig.cmake)
-if(WITH_OCE)
-  # Add oce headers and libs to components build
-  target_link_libraries(${COMPONENT} PUBLIC $<BUILD_INTERFACE:OCE::OCE>)
-endif()
-
-if(WITH_OCC)
+# -- Open Cascade --
+if(WITH_OpenCASCADE)
   include(occ_setup)
-  # Add oce headers and libs to components build
+  # Add opencascade headers and libs to components build
   target_link_libraries(${COMPONENT} PUBLIC $<BUILD_INTERFACE:OpenCASCADE::OpenCASCADE>)
+  target_link_libraries(${COMPONENT} PUBLIC $<INSTALL_INTERFACE:OpenCASCADE::OpenCASCADE>)
 endif()
 
 
@@ -122,11 +115,3 @@ siconos_component_install_setup(${COMPONENT})
 
 # --- tests ---
 include(${COMPONENT}_tests.cmake)
-
-# if(WITH_OCE OR CMAKE_SKIP_RPATH)
-#   # if no RPATH, then linking does not work for tests without specifying externals
-#   # for n2qn1
-#   set(${COMPONENT}_LINK_LIBRARIES ${${COMPONENT}_LINK_LIBRARIES} externals)
-
-# TODO : check this !
-# endif()

@@ -26,13 +26,13 @@
 #include <iostream>
 #include <memory>
 #include <vector>
-#include"SiconosMatrix.hpp"
-#include "SiconosVector.hpp"
-#include "BlockMatrix.hpp"
 
+#include "BlockMatrix.hpp"
 #include "PluggedObject.hpp"
 #include "PluginTypes.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosMemory.hpp"
+#include "SiconosVector.hpp"
 #include "TypeName.hpp"  // visitor to get ds type
 namespace siconos::internal {
 
@@ -209,8 +209,7 @@ class DynamicalSystem {
    *
    *  \return the previous value of number
    */
-  inline size_t setNumber(size_t new_number)
-  {
+  inline size_t setNumber(size_t new_number) {
     size_t old_n = _number;
     _number = new_number;
     return old_n;
@@ -311,8 +310,7 @@ class DynamicalSystem {
    *
    *  \return std::shared_ptr<siconos::algebra::SiconosMatrix>
    */
-  inline std::shared_ptr<siconos::algebra::BlockMatrix> jacobianRhsx() const
-  {
+  inline std::shared_ptr<siconos::algebra::BlockMatrix> jacobianRhsx() const {
     return _jacxRhs;
   }
 
@@ -399,8 +397,7 @@ class DynamicalSystem {
    *
    *  \return the previous value of count
    */
-  static inline size_t resetCount(size_t new_count = 0)
-  {
+  static inline size_t resetCount(size_t new_count = 0) {
     size_t old_count = __count;
     __count = new_count;
     return old_count;

@@ -205,7 +205,7 @@ void _MBTB_BodyBuildComputeInitPosition(unsigned int numDS,   double mass,
   CADMBTB_moveGraphicalModelFromModel(numDS,numDS);
 
   // //In current version I = Id3
-  // sI[numDS].reset(new SimpleMatrix(3,3));
+  // sI[numDS].reset = std::make_shared<siconos::algebra::SimpleMatrix>(3,3));
   // sI[numDS]->zero();
   // //sI[numDS]->setValue(0,0,sMass[numDS]);sI[numDS]->setValue(1,1,sMass[numDS]);sI[numDS]->setValue(2,2,sMass[numDS]);
   // sI[numDS]->setValue(0,0,sMassMatrix[9*numDS+0]*sMassMatrixScale[numDS]);
@@ -421,7 +421,7 @@ void MBTB_JointBuild(unsigned int numJ,const std::string& JointName,
 
   lNbEq = sJointRelations[numJ]->_jointR->numberOfConstraints();
 
-  SP::SimpleMatrix lH(new SimpleMatrix(lNbEq,nbDS*qDim));
+  SP::SimpleMatrix lH = std::make_shared<siconos::algebra::SimpleMatrix>(lNbEq,nbDS*qDim));
   lH->zero();
   SP::EqualityConditionNSL lNSL(new EqualityConditionNSL(lNbEq));
 
