@@ -43,9 +43,31 @@ NM_UMFPACK_WS* NM_UMFPACK_factorize(NumericsMatrix* A)
   /* TODO UMFPACK_PIVOT_TOLERANCE, UMFPACK_ORDERING, UMFPACK_SCALE
    * UMFPACK_DROPTOL, UMFPACK_STRATEGY, UMFPACK_IRSTEP*/
 
-  CSparseMatrix* C = NM_csc(A);
-
   CS_INT status;
+  CSparseMatrix* C = NULL;
+
+  NumericsSparseMatrix* Asp = numericsSparseMatrix(A);
+
+  if (!Asp->csc && Asp->triplet) {
+       // Fix issue https://github.com/siconos/siconos/issues/496
+       CSparseMatrix* Atri = NM_triplet(A);
+
+       NM_csc_alloc(A, Atri->nz);
+
+       C = Asp->csc;
+
+       status = umfpack_dl_triplet_to_col (Atri->m, Atri->n, Atri->nz, Atri->i, Atri->p, Atri->x,
+                                           C->p, C->i, C->x, NULL);
+
+       if(status)
+       {
+            umfpack_ws->control[UMFPACK_PRL] = 1;
+            UMFPACK_FN(report_status)(umfpack_ws->control, status);
+            return NULL;
+       }
+  } else {
+       C = NM_csc(A);
+  }
 
   status = UMFPACK_FN(symbolic)(C->m, C->n, C->p, C->i, C->x, &(umfpack_ws->symbolic), umfpack_ws->control, umfpack_ws->info);
 
