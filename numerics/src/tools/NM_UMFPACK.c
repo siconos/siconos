@@ -56,7 +56,7 @@ NM_UMFPACK_WS* NM_UMFPACK_factorize(NumericsMatrix* A)
 
        C = Asp->csc;
 
-       status = umfpack_dl_triplet_to_col (Atri->m, Atri->n, Atri->nz, Atri->i, Atri->p, Atri->x,
+       status = UMFPACK_FN(triplet_to_col)(Atri->m, Atri->n, Atri->nz, Atri->i, Atri->p, Atri->x,
                                            C->p, C->i, C->x, NULL);
 
        if(status)
