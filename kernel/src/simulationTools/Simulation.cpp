@@ -434,8 +434,8 @@ void Simulation::initialize() {
   updateWorldFromDS();
 
   // 5 - call the InteractionManager to add/remove interactions
-  // this routine sometimes may update the external objects
-  // from the state of ds.
+  // Warning: this routine sometimes may update the external objects
+  // from the state of ds without using updateWorldFromDS()
   updateInteractions();
 
   // 6 - initialize new interactions
