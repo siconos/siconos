@@ -45,6 +45,9 @@ protected:
    *  collide. See also NewtonEulerJointR::_allowSelfCollide */
   bool _allowSelfCollide = true;
 
+
+  SP::SiconosVector _qExtrapolated;
+
 public:
 
   RigidBodyDS(SP::SiconosVector position,
@@ -78,6 +81,14 @@ public:
    *
    *  \return a SP::SiconosVector */
   virtual SP::SiconosVector base_position() { return q(); }
+
+
+  virtual SP::SiconosVector base_extrapolated_position(){return _qExtrapolated;};
+  virtual void compute_extrapolated_position(double extrapolationCoefficient);
+
+
+
+
 
   ACCEPT_BASE_VISITORS(NewtonEulerDS);
 };

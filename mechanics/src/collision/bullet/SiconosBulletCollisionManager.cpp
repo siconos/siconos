@@ -149,7 +149,7 @@ DEFINE_SPTR(UpdateShapeVisitor)
 // This value is compared to the initial distance computed
 // at the creation of the interaction
 // if distance < - WARNING_TOLERANCE_AT_CREATION_INTERACTION
-// a warning is raised. 
+// a warning is raised.
 #define WARNING_TOLERANCE_AT_CREATION_INTERACTION 1e-5
 
 // Comment this to try un-queued static contactor behaviour
@@ -238,6 +238,7 @@ SiconosBulletOptions::SiconosBulletOptions()
   , enableSatConvex(false)
   , enablePolyhedralContactClipping(false)
   , Depth2D(0.04)
+  , extrapolationCoefficient(0.0)
 {
 }
 
@@ -809,7 +810,18 @@ void SiconosBulletCollisionManager_impl::updateShapePosition(const BodyBulletSha
     if(record.base->size() ==7)
     {
       DEBUG_PRINT("3D DS\n");
-      q = *record.base;
+      if (_options.extrapolationCoefficient){
+	if (record.ds)
+	  {
+	    //record.ds->display();
+	    SP::RigidBodyDS rbds=std::static_pointer_cast<RigidBodyDS>(record.ds);
+	    rbds->compute_extrapolated_position(_options.extrapolationCoefficient);
+	  }
+
+	q = *record.base;
+      }
+      else
+	q = *record.base;
     }
     else if(record.base->size() ==3)
     {
@@ -2130,7 +2142,18 @@ void SiconosBulletCollisionManager_impl::createCollisionObjectsForBodyContactorS
   {
     DEBUG_PRINT("RigidBodyDS case");
     con = rbds->contactors();
-    base = rbds->q();
+    // printf("\n\n extrapolation %e\n", _options.extrapolationCoefficient);
+    //getchar();
+    if (_options.extrapolationCoefficient > 0.)
+      {
+	rbds->compute_extrapolated_position(_options.extrapolationCoefficient);
+	base = rbds->base_extrapolated_position();
+      }
+    else
+      {
+	base = rbds->base_position();
+	//base->display();
+      }
   }
   if(rb2dds)
   {

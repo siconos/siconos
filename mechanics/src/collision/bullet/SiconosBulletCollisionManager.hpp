@@ -62,6 +62,7 @@ public:
   bool enableSatConvex;
   bool enablePolyhedralContactClipping;
   double Depth2D;
+  double extrapolationCoefficient;
 };
 
 struct SiconosBulletStatistics
