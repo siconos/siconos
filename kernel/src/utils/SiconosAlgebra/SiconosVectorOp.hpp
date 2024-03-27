@@ -25,8 +25,9 @@
 
 #include <memory>
 #include <vector>
-#include "SiconosVector.hpp"
+
 #include "BlockVector.hpp"
+#include "SiconosVector.hpp"
 
 namespace siconos::algebra {
 
@@ -189,10 +190,8 @@ void getMin(const SiconosVector&, double&, unsigned int&);
     \param v1 first vector to compare with
     \param v2 second vecstor to compare with
 */
-bool isComparableTo(const BlockVector &v1, const BlockVector &v2);
+bool isComparableTo(const BlockVector& v1, const BlockVector& v2);
 
-
-  
 }  // namespace siconos::algebra
 
 #endif

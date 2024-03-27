@@ -1999,14 +1999,14 @@ siconos::integrators::MoreauJeanOSI::computeWorkForces() {
         // Cheaper version: get forces(ti,vi,qi) from memory
         const auto &fold = lds->forcesMemory().getSiconosVector(0);
         double coef = (1 - _theta);
-        scal(coef, fold, *f_k_theta, false);
-        scal(coef, vold, *v_k_theta, false);
+        siconos::algebra::scal(coef, fold, *f_k_theta, false);
+        siconos::algebra::scal(coef, vold, *v_k_theta, false);
 
         // computes forces(ti+1, v_k,i+1, q_k,i+1) = forces(t,v,q)
         lds->computeForces(t, lds->q(), lds->velocity());
         coef = _theta;
-        scal(coef, *lds->forces(), *f_k_theta, false);
-        scal(coef, *v, *v_k_theta, false);
+        siconos::algebra::scal(coef, *lds->forces(), *f_k_theta, false);
+        siconos::algebra::scal(coef, *v, *v_k_theta, false);
 
         DEBUG_PRINT("MoreauJeanOSI:: new forces :\n");
         DEBUG_EXPR(lds->forces()->display(););
@@ -2014,7 +2014,8 @@ siconos::integrators::MoreauJeanOSI::computeWorkForces() {
 
         // scalar product
         workForces->setValue(ds->number(), 0, ds->number());
-        workForces->setValue(ds->number(), 1, h * inner_prod(*f_k_theta, *v_k_theta));
+        workForces->setValue(ds->number(), 1,
+                             h * siconos::algebra::inner_prod(*f_k_theta, *v_k_theta));
 
         DEBUG_EXPR(workForces->display(););
       }
@@ -2050,14 +2051,14 @@ siconos::integrators::MoreauJeanOSI::computeWorkForces() {
         DEBUG_EXPR(fold.display(););
 
         double coef = (1 - _theta);
-        scal(coef, fold, *f_k_theta, false);
-        scal(coef, vold, *v_k_theta, false);
+        siconos::algebra::scal(coef, fold, *f_k_theta, false);
+        siconos::algebra::scal(coef, vold, *v_k_theta, false);
 
         // computes forces(ti,v,q)
         neds->computeForces(t, neds->q(), neds->twist());
         coef = _theta;
-        scal(coef, *neds->forces(), *f_k_theta, false);
-        scal(coef, v, *v_k_theta, false);
+        siconos::algebra::scal(coef, *neds->forces(), *f_k_theta, false);
+        siconos::algebra::scal(coef, v, *v_k_theta, false);
 
         DEBUG_PRINT("MoreauJeanOSI:: new forces :\n");
         DEBUG_EXPR(neds->forces()->display(););
@@ -2065,7 +2066,8 @@ siconos::integrators::MoreauJeanOSI::computeWorkForces() {
 
         // scalar product
         workForces->setValue(cnt_ds, 0, ds->number());
-        workForces->setValue(cnt_ds, 1, h * inner_prod(*f_k_theta, *v_k_theta));
+        workForces->setValue(cnt_ds, 1,
+                             h * siconos::algebra::inner_prod(*f_k_theta, *v_k_theta));
       }
 
       cnt_ds++;
