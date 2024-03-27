@@ -26,6 +26,14 @@ ubuntu22.04:docker-build:
     RESULT_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
   extends: .docker-build
 
+ubuntu23.04:docker-build:
+  variables:
+    IMAGE_NAME: ubuntu23.04
+    SICONOS_DOCKER_TARGET: siconos-base-python
+    RESULT_NAME: $SICONOS_REGISTRY/sources/ubuntu23.04
+  extends: .docker-build
+
+  
 image4doc:docker-build:
   variables:
     IMAGE_NAME: ubuntu22.04
