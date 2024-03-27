@@ -188,25 +188,29 @@ int globalFrictionContact_test_function(TestCase* current)
   else
     printf("test: failure\n");
 
-  // Take projerr value from test
-  double *projerr_ptr = current->options->solverData;
 
   // classification BNRT
   int nB, nN, nR, nT;
   if (current->options->solverId == SICONOS_GLOBAL_FRICTION_3D_IPM_SNM)
   {
+    // Take projerr value from test
+    double *projerr_ptr = current->options->solverData;
     classify_BNRT_for_ipm_snm(problem->mu, velocity, reaction, NC*dim, NC, &nB, &nN, &nR, &nT);
-  }
-  else
-  {
-    classify_BNRT_original(problem->mu, velocity, reaction, NC*dim, NC, &nB, &nN, &nR, &nT);
-  }
-
-  printf("\nsumry: %d  %.2e %.2e   %5i %5i   %4i %4i %4i %4i    %.6f   %s\n",
+    printf("\nsumry: %d  %.2e %.2e   %5i %5i   %4i %4i %4i %4i    %.6f   %s\n",
           info, current->options->dparam[SICONOS_DPARAM_RESIDU], *projerr_ptr,
           current->options->iparam[SICONOS_IPARAM_ITER_DONE], NC,
           nB, nN, nR, NC-nB-nN-nR,
           (double)(t2-t1)/(double)clk_tck, problem_name);
+  }
+  else
+  {
+    // classify_BNRT_original(problem->mu, velocity, reaction, NC*dim, NC, &nB, &nN, &nR, &nT);
+    printf("\nsumry: %d  %9.2e  %5i  %10.4f", info, current->options->dparam[SICONOS_DPARAM_RESIDU], current->options->iparam[SICONOS_IPARAM_ITER_DONE], (double)(t2-t1)/(double)clk_tck);
+    printf("%3i %5i %5i     %s\n\n", dim, NC, n, current->filename);
+
+  }
+
+
 
   /* system(filename); */
 

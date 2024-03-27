@@ -35,6 +35,9 @@
 #include "NumericsSparseMatrix.h"                // for NSM_TRIPLET ...
 #include "gfc3d_balancing.h"
 
+#include "gfc3d_ipm.h"
+#include <time.h>
+
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
@@ -323,10 +326,77 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original, double*
   size_t nc = problem_original->numberOfContacts;
   size_t n = problem_original->M->size0;
   size_t m = 3 * nc;
-  for (int contact = 0 ; contact < nc ; ++contact)
+
+  // FOR COMPARISON ################################################################################################
+  // Get problem name
+  char *problem_name = (char *) malloc(200);
+  char *blk_num_name = NULL;
+  if (options->solverId == SICONOS_GLOBAL_FRICTION_3D_ADMM_SEP)
   {
-     problem_original->mu[contact]=0.3;
+    blk_num_name = (char *)malloc(10*sizeof(char));
+    char *blk_num_ptr = options->solverData;
+    strcpy(blk_num_name, blk_num_ptr);
+    free(options->solverData); options->solverData = NULL;
   }
+
+  char *str = (char *) malloc(200);
+  if (problem_original->name)
+  {
+    strcpy( str, problem_original->name );
+  }
+  else
+  {
+    strcpy( str, "foo_" );
+  }
+  const char * separators = "/";
+  char *strToken = strtok( str, separators );
+  for(int i=0; i<5; i++)
+  {
+    if(strToken != NULL) strToken = strtok ( NULL, separators );
+  }
+  strToken = strtok ( strToken, "." );
+  strcat(strToken, blk_num_name);
+  strcpy(problem_name, strToken);
+
+  if (blk_num_name) {free(blk_num_name); blk_num_name = NULL;}
+  if (str) {free(str); str = NULL;}
+
+  if (options->iparam[SICONOS_FRICTION_3D_ADMM_PRINTING_LIKE_IPM] == SICONOS_FRICTION_3D_ADMM_PRINTING_LIKE_IPM_TRUE)
+  {
+    for (int i=0; i<nc; i++) problem_original->mu[i] = 0.3;
+  }
+  // Timer
+  long clk_tck = CLOCKS_PER_SEC;
+  clock_t t1, t2;
+  double total_time = 0;
+
+  double tols_TEST7 = 1e-3, tols2_TEST7 = 1e-3;  // Var used for checking stopping test satisfying different tols
+  int num_TEST7 = 3, num2_TEST7 = 3;
+  FILE *file_TEST7 = NULL, *file_all_TEST7 = NULL, *file2_TEST7 = NULL, *file2_all_TEST7 = NULL;
+  char name_file_TEST7[30], name2_file_TEST7[30];
+
+
+  /* For CLASSIFICATION BNRT */
+  int nB, nN, nR, nT;
+  nB = nN = nR = nT = 0;
+
+  // ATTENTION:
+  // nc, n in ADMM are n, m in IPM
+  double totalresidual = -1.;
+  unsigned int d = 3;
+  unsigned int nd = nc*d;
+  double udotr = 1e300, prjerr = 1e300;
+  double prjR = 0., prjU = 0.;
+
+  double *velocity_tilde = (double*)calloc(nd, sizeof(double));
+  double *worktmp = (double*)calloc(d, sizeof(double));
+  double *velocity_no_mu = (double*)calloc(nd, sizeof(double));
+  double *reaction_no_mu = (double*)calloc(nd, sizeof(double));
+
+  FILE *file = NULL;
+  // ################################################################################################
+
+
   /**************************************************************************/
   /* Balancing                        ***************************************/
   /**************************************************************************/
@@ -380,7 +450,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original, double*
 
   DEBUG_PRINT("Strategies for dealing with symmetry \n");
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] = SICONOS_FRICTION_3D_ADMM_SYMMETRIZE;
-  options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] = SICONOS_FRICTION_3D_ADMM_FORCED_SYMMETRY;
+  // options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] = SICONOS_FRICTION_3D_ADMM_FORCED_SYMMETRY;
 
   LinearSolverPtr linear_solver;
   NumericsMatrix *Msym = NULL;
@@ -572,7 +642,8 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original, double*
   if(options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_UPDATE_S]==
       SICONOS_FRICTION_3D_ADMM_UPDATE_S_YES)
   {
-    computeError = (ComputeErrorGlobalPtr)&gfc3d_compute_error;
+    // computeError = (ComputeErrorGlobalPtr)&gfc3d_compute_error;
+    computeError = (ComputeErrorGlobalPtr)&gfc3d_compute_error_norm_infinity_conic;
   }
   else
   {
@@ -605,6 +676,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original, double*
   
   while((iter < itermax) && (hasNotConverged > 0))
   {
+    t1 = clock();
     ++iter;
     /********************/
     /*  0 - Compute b   */
@@ -1023,10 +1095,194 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original, double*
       }
       //getchar();
     }
+
+
+    t2 = clock();
+    total_time += (double)(t2-t1)/(double)clk_tck;
+
+    // For comparaison
+    if (options->iparam[SICONOS_FRICTION_3D_ADMM_PRINTING_LIKE_IPM] == SICONOS_FRICTION_3D_ADMM_PRINTING_LIKE_IPM_TRUE)
+    {
+      udotr = prjerr = 1e300;
+      prjR = prjU = 0.;
+
+      // Re-compute u
+      cblas_dcopy(nd, problem->b, 1, velocity_tilde, 1);
+      NM_tgemv(1, problem->H, v, 1.0, velocity_tilde); // velocity_tilde = H'v + w
+
+      for (unsigned int i = 0; i<nd; i+=d)
+      {
+        velocity_tilde[i] += problem->mu[i/d]*cblas_dnrm2(2, velocity_tilde+i+1, 1);  // velocity_tilde = Wr + q + Phi(Wr + q)
+
+        // Compute || r - Pi_K(r) ||_inf
+        cblas_dcopy(d, reaction+i, 1, worktmp, 1);
+        projectionOnCone(worktmp, problem->mu[i/d]);  // worktmp = Pi_K(r_i)
+        cblas_dscal(d, -1., worktmp, 1);
+        cblas_daxpy(d, 1.0, reaction+i, 1, worktmp, 1);
+        prjR = fmax(prjR, NV_norm_type(d, worktmp, NORM_INF));
+
+        // Compute || u - Pi_K*(u) ||_inf
+        cblas_dcopy(d, velocity_tilde+i, 1, worktmp, 1);
+        projectionOnDualCone(worktmp, problem->mu[i/d]);  // worktmp = Pi_K(r_i)
+        cblas_dscal(d, -1., worktmp, 1);
+        cblas_daxpy(d, 1.0, velocity_tilde+i, 1, worktmp, 1);
+        prjU = fmax(prjU, NV_norm_type(d, worktmp, NORM_INF));
+
+        // Compute u <- Pmu * u,   r <- Pmu^-1 * r
+        velocity_no_mu[i] = velocity_tilde[i];
+        velocity_no_mu[i+1] = problem->mu[i/d]*velocity_tilde[i+1];
+        velocity_no_mu[i+2] = problem->mu[i/d]*velocity_tilde[i+2];
+
+        reaction_no_mu[i] = reaction[i];
+        reaction_no_mu[i+1] = reaction[i+1]/problem->mu[i/d];
+        reaction_no_mu[i+2] = reaction[i+2]/problem->mu[i/d];
+      }
+
+      // udotr = xdoty_type(nc, nd, velocity_tilde, reaction, NORM_INF);
+      udotr = xdoty_type(nc, nd, velocity_no_mu, reaction_no_mu, NORM_2_INF);
+
+      // velocity_no_mu will be re-computed by reaction in this routine
+      (*computeError)(problem, reaction, velocity_no_mu, v,  tolerance, options, norm_q, norm_b, &prjerr);
+
+
+      totalresidual = fmax(fmax(prjR, prjU), udotr);
+
+
+      // file = fopen("admm-all.res", "a+");
+      // if(iter == 1)
+      // {
+      //   fprintf(file, "\n\nTEST: %s\n\n", problem_name);
+      //   fprintf(file, "|  it  |  prjR   |  prjU   | u'r_inf |  prjerr |\n");
+      // }
+      // fprintf(file, "| %4d | %.1e | %.1e | %.1e | %.1e |\n", iter, prjR, prjU, udotr, prjerr);
+      // fclose(file);
+
+
+      // Criteria complementarity
+      int repeat = 0;
+      while ( totalresidual <= tols_TEST7 && num_TEST7 < 11 )
+      {
+        repeat++;
+        if (repeat == 1)
+        {
+          for (unsigned int i = 0; i<nd; i+=d)
+          {
+            // Compute u <- Pmu * u,   r <- Pmu^-1 * r
+            velocity_no_mu[i] = velocity_tilde[i];
+            velocity_no_mu[i+1] = problem->mu[i/d]*velocity_tilde[i+1];
+            velocity_no_mu[i+2] = problem->mu[i/d]*velocity_tilde[i+2];
+
+            reaction_no_mu[i] = reaction[i];
+            reaction_no_mu[i+1] = reaction[i+1]/problem->mu[i/d];
+            reaction_no_mu[i+2] = reaction[i+2]/problem->mu[i/d];
+          }
+          // Classification is done only once if totalresidual satisfies many tolerences
+          classify_BNRT(velocity_no_mu, reaction_no_mu, nd, nc, &nB, &nN, &nR, &nT);
+        }
+
+        sprintf(name_file_TEST7, "admm-complem-%02d.pp", num_TEST7);
+        file_TEST7 = fopen(name_file_TEST7, "a+");
+        fprintf(file_TEST7, "sumry: 0  %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f   %s\n",
+                totalresidual, iter, (int)nc, (int)n, nB, nN, nR, (int)nc-nB-nN-nR,
+                total_time, problem_name);
+        fclose(file_TEST7);
+
+
+        file_all_TEST7 = fopen("admm-complem.pp", "a+");
+        if (num_TEST7 == 10)
+        {
+          fprintf(file_all_TEST7, "sumry: 0  %.2e  %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f   %s\n",
+                totalresidual, prjerr, iter, (int)nc, (int)n, nB, nN, nR, (int)nc-nB-nN-nR,
+                total_time, problem_name);
+        }
+        else
+        {
+          fprintf(file_all_TEST7, "sumry: 0  %.2e  %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f\n",
+                totalresidual, prjerr, iter, (int)nc, (int)n, nB, nN, nR, (int)nc-nB-nN-nR,
+                total_time);
+        }
+        fclose(file_all_TEST7);
+
+        tols_TEST7 /= 10.;
+        num_TEST7++;
+      }
+
+      // Criteria projection
+      repeat = 0;
+      while ( prjerr <= tols2_TEST7 && num2_TEST7 < 11 )
+      {
+        repeat++;
+        if (repeat == 1)
+        {
+          for (unsigned int i = 0; i<nd; i+=d)
+          {
+            // Compute u <- Pmu * u,   r <- Pmu^-1 * r
+            velocity_no_mu[i] = velocity_tilde[i];
+            velocity_no_mu[i+1] = problem->mu[i/d]*velocity_tilde[i+1];
+            velocity_no_mu[i+2] = problem->mu[i/d]*velocity_tilde[i+2];
+
+            reaction_no_mu[i] = reaction[i];
+            reaction_no_mu[i+1] = reaction[i+1]/problem->mu[i/d];
+            reaction_no_mu[i+2] = reaction[i+2]/problem->mu[i/d];
+          }
+          // Classification is done only once if totalresidual satisfies many tolerences
+          classify_BNRT(velocity_no_mu, reaction_no_mu, nd, nc, &nB, &nN, &nR, &nT);
+        }
+
+        sprintf(name2_file_TEST7, "admm-prjerr-%02d.pp", num2_TEST7);
+        file2_TEST7 = fopen(name2_file_TEST7, "a+");
+        fprintf(file2_TEST7, "sumry: 0  %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f   %s\n",
+                prjerr, iter, (int)nc, (int)n, nB, nN, nR, (int)nc-nB-nN-nR,
+                total_time, problem_name);
+        fclose(file2_TEST7);
+
+        file2_all_TEST7 = fopen("admm-prjerr.pp", "a+");
+        if (num2_TEST7 == 10)
+        {
+          fprintf(file2_all_TEST7, "sumry: 0  %.2e  %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f   %s\n",
+                totalresidual, prjerr, iter, (int)nc, (int)n, nB, nN, nR, (int)nc-nB-nN-nR,
+                total_time, problem_name);
+        }
+        else
+        {
+          fprintf(file2_all_TEST7, "sumry: 0  %.2e  %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f\n",
+                totalresidual, prjerr, iter, (int)nc, (int)n, nB, nN, nR, (int)nc-nB-nN-nR,
+                total_time);
+        }
+        fclose(file2_all_TEST7);
+
+        tols2_TEST7 /= 10.;
+        num2_TEST7++;
+      }
+
+
+      // Stopping test
+      if (num_TEST7 == 11 && num2_TEST7 == 11)
+      {
+        hasNotConverged = 0;
+        *info = hasNotConverged;
+        break;
+      }
+
+      // if (totalresidual < options->dparam[SICONOS_DPARAM_TOL])
+      // {
+      //   break;
+      // }
+
+
+    }
+    // END for comparison #################
+
+
+
+
+
     *info = hasNotConverged;
 
   }
 
+
+  t1 = clock();
   if(iter==itermax)
   {
     cblas_dscal(m, rho, reaction, 1);
@@ -1051,6 +1307,83 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original, double*
   }
 
   cblas_dcopy(m, u, 1, velocity, 1);
+
+  t2 = clock();
+  total_time += (double)(t2-t1)/(double)clk_tck;
+
+  if (options->iparam[SICONOS_FRICTION_3D_ADMM_PRINTING_LIKE_IPM] == SICONOS_FRICTION_3D_ADMM_PRINTING_LIKE_IPM_TRUE)
+  {
+    while ( num_TEST7 < 11 )
+    {
+      sprintf(name_file_TEST7, "admm-complem-%02d.pp", num_TEST7);
+      file_TEST7 = fopen(name_file_TEST7, "a+");
+      fprintf(file_TEST7, "sumry: 1  %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f   %s\n",
+              totalresidual, iter, (int)nc, (int)n, nB, nN, nR, (int)nc-nB-nN-nR,
+              total_time, problem_name);
+      fclose(file_TEST7);
+
+      file_all_TEST7 = fopen("admm-complem.pp", "a+");
+      if (num_TEST7 == 10)
+      {
+        fprintf(file_all_TEST7, "sumry: 1  %.2e  %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f   %s\n",
+              totalresidual, prjerr, iter, (int)nc, (int)n, nB, nN, nR, (int)nc-nB-nN-nR,
+              total_time, problem_name);
+      }
+      else
+      {
+        fprintf(file_all_TEST7, "sumry: 1  %.2e  %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f\n",
+              totalresidual, prjerr, iter, (int)nc, (int)n, nB, nN, nR, (int)nc-nB-nN-nR,
+              total_time);
+      }
+      fclose(file_all_TEST7);
+
+      num_TEST7++;
+    }
+
+
+
+    // Criteria projection
+    while ( num2_TEST7 < 11 )
+    {
+      sprintf(name2_file_TEST7, "admm-prjerr-%02d.pp", num2_TEST7);
+      file2_TEST7 = fopen(name2_file_TEST7, "a+");
+      fprintf(file2_TEST7, "sumry: 1  %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f   %s\n",
+              prjerr, iter, (int)nc, (int)n, nB, nN, nR, (int)nc-nB-nN-nR,
+              total_time, problem_name);
+      fclose(file2_TEST7);
+
+      file2_all_TEST7 = fopen("admm-prjerr.pp", "a+");
+      if (num2_TEST7 == 10)
+      {
+        fprintf(file2_all_TEST7, "sumry: 1  %.2e  %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f   %s\n",
+              totalresidual, prjerr, iter, (int)nc, (int)n, nB, nN, nR, (int)nc-nB-nN-nR,
+              total_time, problem_name);
+      }
+      else
+      {
+        fprintf(file2_all_TEST7, "sumry: 1  %.2e  %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f\n",
+              totalresidual, prjerr, iter, (int)nc, (int)n, nB, nN, nR, (int)nc-nB-nN-nR,
+              total_time);
+      }
+      fclose(file2_all_TEST7);
+
+        num2_TEST7++;
+      }
+
+
+
+
+    if (velocity_tilde) {free(velocity_tilde); velocity_tilde = NULL;}
+    if (worktmp) {free(worktmp); worktmp = NULL;}
+    if (reaction_no_mu) {free(reaction_no_mu); reaction_no_mu = NULL;}
+    if (velocity_no_mu) {free(velocity_no_mu); velocity_no_mu = NULL;}
+    if (problem_name) {free(problem_name); problem_name = NULL;}
+  }
+
+
+
+
+
 
   
   dparam[SICONOS_DPARAM_RESIDU] = error;
@@ -1112,4 +1445,6 @@ void gfc3d_admm_set_default(SolverOptions* options)
 
   options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING]=SICONOS_FRICTION_3D_RESCALING_NO;
   options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING_CONE]=SICONOS_FRICTION_3D_RESCALING_CONE_NO;
+
+  options->iparam[SICONOS_FRICTION_3D_ADMM_PRINTING_LIKE_IPM] = SICONOS_FRICTION_3D_ADMM_PRINTING_LIKE_IPM_TRUE;
 }

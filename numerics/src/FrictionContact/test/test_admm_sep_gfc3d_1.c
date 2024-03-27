@@ -36,7 +36,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     // GFC3D, ADMM, set rho strategy.
     collection[current].filename = data_collection[d];
     collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_ADMM_SEP);
-    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-18;
     collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 50000;
     collection[current].options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_RHO_STRATEGY] = SICONOS_FRICTION_3D_ADMM_RHO_STRATEGY_SCALED_RESIDUAL_BALANCING;
     current++;
