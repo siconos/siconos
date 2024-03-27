@@ -3,10 +3,7 @@ channels:
   - conda-forge
 dependencies:
   - python >=3.7
-<<<<<<< HEAD
-=======
-  - swig
->>>>>>> master
+  - swig  # kept to remain complient with master
   - jupyterlab
   - numpy
   - wheel
@@ -35,4 +32,5 @@ dependencies:
   - flake8
   - autopep8
   - pyhull
+  - eigen
 
