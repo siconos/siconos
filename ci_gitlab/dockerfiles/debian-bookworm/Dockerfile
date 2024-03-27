@@ -33,6 +33,7 @@ RUN apt update  && apt install  --no-install-recommends -y -qq \
 	libbullet-extras-dev \
 	libeigen3-dev \
 	libeigen3-doc \
+	wget \
         vim && apt clean && apt autoremove && rm -rf /var/lib/apt/lists/*
 RUN useradd -ms /bin/bash siconos-user
 RUN wget https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.bz2 && \
