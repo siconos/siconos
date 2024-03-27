@@ -78,7 +78,8 @@ typedef long double float_type;
 #define NORM_2 1
 #define NORM_INF 2
 #define NORM_2_INF 3
-
+#define ON_DUAL_CONE 1
+#define NOT_ON_DUAL_CONE 0
 
 /* Returns the 2-norm of a vector - uses long double - based on blas_dnrm2 */
 float_type dnrm2l(const unsigned int n, const double * x);
@@ -237,9 +238,17 @@ void NM_clear_cone_matrix_H(NumericsMatrix *H, unsigned int n_cones_to_clear, in
 NumericsMatrix * NM_extract(NumericsMatrix *A, int n_rows, int *target_rows, int n_cols, int *target_cols);
 
 double projectionError(const double * velocity, const double * reaction, const unsigned int nc, const double tol);
-double projectionError_norm_infinity_conic(const double * velocity, const double * reaction, const unsigned int nc, const double tol);
+double projectionError_norm_infinity_conic(const double * velocity, const double * reaction, const unsigned int nc);
+double projectionError_dual_norm_infinity_conic(const double * velocity, const double * reaction, const unsigned int nc);
+
+/*
+ * Velocity u is re-computed by vector r
+ * on_dual_cone = 0: Error projection on cone K = max{ | ri - Pi_K (ri - ui) |_2 }, i = 1,...,n
+ * on_dual_cone = 1: Error projection on dual cone K* = max{ | ui - Pi_K* (ui - ri) |_2 }, i = 1,...,n
+ */
 double projectionError_based_reaction_norm_infinity_conic(NumericsMatrix *H, NumericsMatrix *M,
-                    const double * f, const double * w, const double * reaction, const unsigned int varsCount, const double tol);
+                    const double * f, const double * w, const double * reaction, const unsigned int varsCount,
+                    const int on_dual_cone);
 
 /* Routine is to read matrix-block in hdf5 file
  * type = 0 : return number of blocks (blk_index is neglected)
@@ -269,3 +278,5 @@ void classify_BNRT_original(const double *mu, const double * velocity, const dou
  */
 void classify_BNRT_for_ipm_snm(const double *mu, const double * velocity, const double * reaction, const unsigned int vecSize, const unsigned int varsCount,
                    int *nB, int *nN, int *nR, int *nT);
+
+void printBlockVec(double * vec, int vecSize, int sizeBlock, int cl);

@@ -540,6 +540,9 @@ FrictionContactProblem * globalFrictionContact_reformulation_FrictionContact(Glo
 	printf("block_number = %i\n", block_number );
 	/* for (unsigned int k = 0; k < block_number; k++) */
 	/*   printf("blocksize[%i] = %i\n", k , (blocksizes)[k]); */
+  block_number = M->size0/3;
+  for (unsigned int k = 0; k < block_number; k++)
+    blocksizes[k] = 3;
 	Minv =  NM_inverse_diagonal_block_matrix(M, block_number, blocksizes);
 	free(blocksizes);
 	blocksizes=NULL;
@@ -552,8 +555,9 @@ FrictionContactProblem * globalFrictionContact_reformulation_FrictionContact(Glo
 	}
     }
     DEBUG_EXPR(NM_display(Minv););
-
-
+// printf("\nNSGS: M = \n"); NM_display(problem->M);
+// printf("\nNSGS: H = \n"); NM_display(problem->H);
+// printf("\nNSGS: Minv = \n"); NM_display(Minv);
     numerics_printf_verbose(1,"multiplication  H^T M^{-1} H ...");
     NumericsMatrix* MinvH = NM_multiply(Minv,H);
     DEBUG_EXPR(NM_display(MinvH););

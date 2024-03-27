@@ -55,6 +55,18 @@ void fc3d_unitary_compute_and_add_error(double* restrict r, double* restrict u, 
   *error +=  worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2];
 }
 
+void fc3d_unitary_compute_dual_and_add_error(double* restrict r, double* restrict u, double mu, double* restrict error, double * worktmp)
+{
+  worktmp[0] = u[0] + mu * sqrt(u[1] * u[1] + u[2] * u[2]) - r[0];
+  worktmp[1] = u[1] - r[1];
+  worktmp[2] = u[2] - r[2];
+  projectionOnDualCone(worktmp, mu);
+  worktmp[0] = u[0] + mu * sqrt(u[1] * u[1] + u[2] * u[2]) -  worktmp[0];
+  worktmp[1] = u[1] -  worktmp[1];
+  worktmp[2] = u[2] -  worktmp[2];
+  *error +=  worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2];
+}
+
 int fc3d_compute_error(
   FrictionContactProblem* problem,
   double *z, double *w, double tolerance,
@@ -116,7 +128,7 @@ int fc3d_compute_error(
 int fc3d_compute_error_norm_infinity_conic(
   FrictionContactProblem* problem,
   double *z, double *w, double tolerance,
-  SolverOptions * options, double norm, double * error)
+  SolverOptions * options, double norm, double * error, int on_dual_cone)
 {
   DEBUG_BEGIN("fc3d_compute_error_norm_infinity_conic(...)\n");
   assert(problem);
@@ -135,12 +147,21 @@ int fc3d_compute_error_norm_infinity_conic(
   cblas_dcopy(n, problem->q, incx, w, incy);     // w <-q
   NM_prod_mv_3x3(n, n, problem->M, z, w);       // w = Mz +q
 
-  *error = 0.;
+  *error = -1.;
   int ic, ic3;
   double worktmp[3];
   for(ic = 0, ic3 = 0 ; ic < nc ; ic++, ic3 += 3)
   {
-    fc3d_unitary_compute_and_add_error(z + ic3, w + ic3, mu[ic], &error_unitary, worktmp);
+    error_unitary = 0.;
+    if (on_dual_cone)
+    {
+      fc3d_unitary_compute_dual_and_add_error(z + ic3, w + ic3, mu[ic], &error_unitary, worktmp);
+    }
+    else
+    {
+      fc3d_unitary_compute_and_add_error(z + ic3, w + ic3, mu[ic], &error_unitary, worktmp);
+    }
+
     *error = fmax(*error, error_unitary);
   }
   *error = sqrt(*error);

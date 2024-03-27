@@ -304,8 +304,9 @@ int gfc3d_compute_error_norm_infinity_conic(GlobalFrictionContactProblem* proble
   /* we re-compute local velocity */
   /* the error in the equation u = H^T v +b is then accurate at the machine precision */
   cblas_dcopy(m, problem->b, 1, velocity, 1);
-  NM_tgemv(1, H, globalVelocity, 1.0, velocity);
+  NM_tgemv(1, problem->H, globalVelocity, 1.0, velocity);
 
+  *error = 0.;
   double worktmp[3];
   for(int ic = 0 ; ic < nc ; ic++)
   {

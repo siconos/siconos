@@ -42,6 +42,10 @@
 #include "siconos_debug.h"                                     // for DEBUG_EXPR
 #include "NumericsVector.h"
 
+#include "gfc3d_ipm.h"
+#include "projectionOnCone.h"        // for projectionOnCone
+#include <time.h>
+
 //#define FCLIB_OUTPUT
 
 #ifdef FCLIB_OUTPUT
@@ -561,7 +565,7 @@ void statsIterationCallback(FrictionContactProblem *problem,
 void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
                double *velocity, int* info, SolverOptions* options)
 {
-  /* verbose=1; */
+  // verbose=1;
   /* int and double parameters */
   int* iparam = options->iparam;
   double* dparam = options->dparam;
@@ -569,10 +573,49 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
   /* Number of contacts */
   unsigned int nc = problem->numberOfContacts;
 
-  // for (int i=0; i<nc; i++)
-  // {
-  //   problem->mu[i] = 0.3;
-  // }
+  // FOR COMPARISON ################################################################################################
+  if (options->iparam[SICONOS_FRICTION_3D_NSGS_PRINTING_LIKE_IPM] == SICONOS_FRICTION_3D_NSGS_PRINTING_LIKE_IPM_TRUE)
+  {
+    for (int i=0; i<nc; i++) problem->mu[i] = 0.3;
+  }
+
+  // Timer
+  long clk_tck = CLOCKS_PER_SEC;
+  clock_t t1, t2;
+  double total_time = 0;
+
+  double tols_TEST7 = 1e-3, tols2_TEST7 = 1e-3;  // Var used for checking stopping test satisfying different tols
+  int num_TEST7 = 3, num2_TEST7 = 3;
+  FILE *file_TEST7 = NULL, *file_all_TEST7 = NULL, *file2_TEST7 = NULL, *file2_all_TEST7 = NULL;
+  char name_file_TEST7[30], name2_file_TEST7[30];
+
+  // Get problem name
+  FILE *fileName = fopen("problem_name.res", "r");
+  char *problem_name = (char *) malloc(200);
+  if (fileName)
+  {
+    fscanf(fileName, "%s", problem_name);
+  }
+  else
+    printf("\nfc3d_nsgs: can not find the name file!!!\n\n");
+  fclose(fileName);
+
+  /* For CLASSIFICATION BNRT */
+  int nB, nN, nR, nT;
+  nB = nN = nR = nT = 0;
+
+  double totalresidual = -1.;
+  unsigned int d = 3;
+  unsigned int nd = nc*d;
+  unsigned int n = nc;
+  double udotr = 1e300, prjerr = 1e300, prjerr_u = 1e300;
+  double prjR = 0., prjU = 0., light_err = 0.;
+
+  double *velocity_tilde = (double*)calloc(nd, sizeof(double));
+  double *worktmp = (double*)calloc(d, sizeof(double));
+  double *velocity_no_mu = (double*)calloc(nd, sizeof(double));
+  double *reaction_no_mu = (double*)calloc(nd, sizeof(double));
+  // ################################################################################################
 
   /* Maximum number of iterations */
   int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
@@ -692,9 +735,11 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
    * common cases to avoid checking booleans on every iteration. **/
   else
   {
-    verbose=1;
-    while((iter < itermax) && (hasNotConverged > 0))
+    // verbose=1;
+    // while((iter < itermax) && (hasNotConverged > 0))
+    while(iter < itermax)
     {
+      t1 = clock();
       ++iter;
       double light_error_sum = 0.0;
       double light_error_2 = 0.0;
@@ -806,13 +851,11 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
 
 
 
-
       // if (options->iparam[SICONOS_FRICTION_3D_NSGS_PRINTING_LIKE_IPM] == SICONOS_FRICTION_3D_NSGS_PRINTING_LIKE_IPM_TRUE)
       // {
       //   // FILE *iterates = NULL;
       //   NumericsMatrix *W = problem->M;
       //   iterates = fopen("iterates_BoxStacks_GS.m", "a+");
-      //   #include "gfc3d_ipm.h"
       //   if (iter == 1)
       //   {
       //     char *problem_name = (char *) malloc(200);
@@ -885,8 +928,238 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
       //   fclose(iterates);
       // }
 
+      t2 = clock();
+      total_time += (double)(t2-t1)/(double)clk_tck;
+
+      // For comparaison
+      if (options->iparam[SICONOS_FRICTION_3D_NSGS_PRINTING_LIKE_IPM] == SICONOS_FRICTION_3D_NSGS_PRINTING_LIKE_IPM_TRUE)
+      {
+        udotr = prjerr = 1e300;
+        prjR = prjU = light_err = 0.;
 
 
+        NumericsMatrix *W = problem->M;
+
+        cblas_dcopy(nd, problem->q, 1, velocity_tilde, 1);
+        NM_gemv(1.0, W, reaction, 1.0, velocity_tilde);     // velocity_tilde = Wr + q
+
+        for (unsigned int i = 0; i<nd; i+=d)
+        {
+          velocity_tilde[i] += problem->mu[i/d]*cblas_dnrm2(2, velocity_tilde+i+1, 1);  // velocity_tilde = Wr + q + Phi(Wr + q)
+
+          // Compute || r - Pi_K(r) ||_inf
+          cblas_dcopy(d, reaction+i, 1, worktmp, 1);
+          projectionOnCone(worktmp, problem->mu[i/d]);  // worktmp = Pi_K(r_i)
+          cblas_dscal(d, -1., worktmp, 1);
+          cblas_daxpy(d, 1.0, reaction+i, 1, worktmp, 1);
+          prjR = fmax(prjR, NV_norm_type(d, worktmp, NORM_INF));
+
+          // Compute || u - Pi_K*(u) ||_inf
+          cblas_dcopy(d, velocity_tilde+i, 1, worktmp, 1);
+          projectionOnDualCone(worktmp, problem->mu[i/d]);  // worktmp = Pi_K(r_i)
+          cblas_dscal(d, -1., worktmp, 1);
+          cblas_daxpy(d, 1.0, velocity_tilde+i, 1, worktmp, 1);
+          prjU = fmax(prjU, NV_norm_type(d, worktmp, NORM_INF));
+
+          // Compute u <- Pmu * u,   r <- Pmu^-1 * r
+          velocity_no_mu[i] = velocity_tilde[i];
+          velocity_no_mu[i+1] = problem->mu[i/d]*velocity_tilde[i+1];
+          velocity_no_mu[i+2] = problem->mu[i/d]*velocity_tilde[i+2];
+
+          reaction_no_mu[i] = reaction[i];
+          reaction_no_mu[i+1] = reaction[i+1]/problem->mu[i/d];
+          reaction_no_mu[i+2] = reaction[i+2]/problem->mu[i/d];
+        }
+
+        // udotr = xdoty_type(nc, nd, velocity_tilde, reaction, NORM_2_INF);
+        udotr = xdoty_type(nc, nd, velocity_no_mu, reaction_no_mu, NORM_2_INF);
+        fc3d_compute_error_norm_infinity_conic(problem, reaction, velocity, tolerance, options, norm_q, &prjerr, NOT_ON_DUAL_CONE);
+        // fc3d_compute_error_norm_infinity_conic(problem, reaction, velocity, tolerance, options, norm_q, &prjerr_u, ON_DUAL_CONE);
+        // light_err = calculateLightError(light_error_sum, nc, reaction, norm_r);
+
+        totalresidual = fmax(fmax(prjR, prjU), udotr);
+
+
+        // FILE *file = fopen("nsgs-all.res", "a+");
+        // if(iter == 1)
+        // {
+        //   fprintf(file, "\n\nTEST: %s\n\n", problem_name);
+        //   fprintf(file, "|  it  |  prjR   |  prjU   | u'r_inf |  prjerr |\n");
+        // }
+        // fprintf(file, "| %4d | %.1e | %.1e | %.1e | %.1e |\n", iter, prjR, prjU, udotr, prjerr);
+        // fclose(file);
+
+
+
+        // Criteria complementarity
+        int repeat = 0;
+        while ( totalresidual <= tols_TEST7 && num_TEST7 < 11 )
+        {
+          repeat++;
+          if (repeat == 1)
+          {
+            for (unsigned int i = 0; i<nd; i+=d)
+            {
+              // Compute u <- Pmu * u,   r <- Pmu^-1 * r
+              velocity_no_mu[i] = velocity_tilde[i];
+              velocity_no_mu[i+1] = problem->mu[i/d]*velocity_tilde[i+1];
+              velocity_no_mu[i+2] = problem->mu[i/d]*velocity_tilde[i+2];
+
+              reaction_no_mu[i] = reaction[i];
+              reaction_no_mu[i+1] = reaction[i+1]/problem->mu[i/d];
+              reaction_no_mu[i+2] = reaction[i+2]/problem->mu[i/d];
+            }
+            // Classification is done only once if totalresidual satisfies many tolerences
+            classify_BNRT(velocity_no_mu, reaction_no_mu, nd, n, &nB, &nN, &nR, &nT);
+          }
+
+          sprintf(name_file_TEST7, "nsgs-complem-%02d.pp", num_TEST7);
+          file_TEST7 = fopen(name_file_TEST7, "a+");
+          fprintf(file_TEST7, "sumry: 0  %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f   %s\n",
+                  totalresidual, iter, n, -1, nB, nN, nR, n-nB-nN-nR,
+                  total_time, problem_name);
+          fclose(file_TEST7);
+
+
+          file_all_TEST7 = fopen("nsgs-complem.pp", "a+");
+          if (num_TEST7 == 10)
+          {
+            fprintf(file_all_TEST7, "sumry: 0  %.2e  %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f   %s\n",
+                  totalresidual, prjerr, iter, n, -1, nB, nN, nR, n-nB-nN-nR,
+                  total_time, problem_name);
+          }
+          else
+          {
+            fprintf(file_all_TEST7, "sumry: 0  %.2e  %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f\n",
+                  totalresidual, prjerr, iter, n, -1, nB, nN, nR, n-nB-nN-nR,
+                  total_time);
+          }
+          fclose(file_all_TEST7);
+
+          tols_TEST7 /= 10.;
+          num_TEST7++;
+        }
+
+        // Criteria projection
+        repeat = 0;
+        while ( prjerr <= tols2_TEST7 && num2_TEST7 < 11 )
+        {
+
+          // double worktmp[3], wktpm_3 = -1, wktpm_4 = -1;
+          // for (int ic = 0 ; ic < n ; ic++)
+          // {
+          //   worktmp[0] = reaction[3*ic]   -  velocity_tilde[3*ic];
+          //   worktmp[1] = reaction[3*ic+1] -  velocity_tilde[3*ic+1];
+          //   worktmp[2] = reaction[3*ic+2] -  velocity_tilde[3*ic+2];
+          //   projectionOnCone(worktmp, problem->mu[ic]);
+          //   printf("\nCone %d: |Pi_K(r-u)| = %e, ", ic, cblas_dnrm2(3, worktmp, 1));
+          //   worktmp[0] = reaction[3*ic]   -  worktmp[0];
+          //   worktmp[1] = reaction[3*ic+1] -  worktmp[1];
+          //   worktmp[2] = reaction[3*ic+2] -  worktmp[2];
+          //   wktpm_3 = fmax(wktpm_3, cblas_dnrm2(3, worktmp, 1));
+          //   printf("|r - Pi_K(r-u)| = %e, \t", cblas_dnrm2(3, worktmp, 1));
+
+          //   worktmp[0] = velocity_tilde[3*ic]   - reaction[3*ic];
+          //   worktmp[1] = velocity_tilde[3*ic+1] - reaction[3*ic+1];
+          //   worktmp[2] = velocity_tilde[3*ic+2] - reaction[3*ic+2];
+          //   projectionOnDualCone(worktmp, problem->mu[ic]);
+          //   printf("|Pi_K*(u-r)| = %e, ", cblas_dnrm2(3, worktmp, 1));
+          //   worktmp[0] = velocity_tilde[3*ic]   -  worktmp[0];
+          //   worktmp[1] = velocity_tilde[3*ic+1] -  worktmp[1];
+          //   worktmp[2] = velocity_tilde[3*ic+2] -  worktmp[2];
+          //   wktpm_4 = fmax(wktpm_4, cblas_dnrm2(3, worktmp, 1));
+          //   printf("|u - Pi_K*(u-r)| = %e", cblas_dnrm2(3, worktmp, 1));
+          // }
+          // printf("\n\t\t\t\tmax |r - Pi_K(r-u)| = %e, \t\t\t\t max |u - Pi_K*(u-r)| = %e\n", wktpm_3, wktpm_4);
+          // printf("sumry: %.2e  %.2e  %.2e\n\n\n",
+          //         totalresidual, prjerr, prjerr_u);
+
+
+
+
+
+
+
+          repeat++;
+          if (repeat == 1)
+          {
+            for (unsigned int i = 0; i<nd; i+=d)
+            {
+              // Compute u <- Pmu * u,   r <- Pmu^-1 * r
+              velocity_no_mu[i] = velocity_tilde[i];
+              velocity_no_mu[i+1] = problem->mu[i/d]*velocity_tilde[i+1];
+              velocity_no_mu[i+2] = problem->mu[i/d]*velocity_tilde[i+2];
+
+              reaction_no_mu[i] = reaction[i];
+              reaction_no_mu[i+1] = reaction[i+1]/problem->mu[i/d];
+              reaction_no_mu[i+2] = reaction[i+2]/problem->mu[i/d];
+            }
+            // Classification is done only once if totalresidual satisfies many tolerences
+            classify_BNRT(velocity_no_mu, reaction_no_mu, nd, n, &nB, &nN, &nR, &nT);
+          }
+
+          sprintf(name2_file_TEST7, "nsgs-prjerr-%02d.pp", num2_TEST7);
+          file2_TEST7 = fopen(name2_file_TEST7, "a+");
+          fprintf(file2_TEST7, "sumry: 0  %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f   %s\n",
+                  prjerr, iter, n, -1, nB, nN, nR, n-nB-nN-nR,
+                  total_time, problem_name);
+          fclose(file2_TEST7);
+
+          file2_all_TEST7 = fopen("nsgs-prjerr.pp", "a+");
+          if (num2_TEST7 == 10)
+          {
+            fprintf(file2_all_TEST7, "sumry: 0  %.2e  %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f   %s\n",
+                  totalresidual, prjerr, iter, n, -1, nB, nN, nR, n-nB-nN-nR,
+                  total_time, problem_name);
+          }
+          else
+          {
+            fprintf(file2_all_TEST7, "sumry: 0  %.2e  %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f\n",
+                  totalresidual, prjerr, iter, n, -1, nB, nN, nR, n-nB-nN-nR,
+                  total_time);
+          }
+          fclose(file2_all_TEST7);
+
+          // printf("\n\n\nCriteria projection - Tol = %.1e, %.2e  %.2e", tols2_TEST7, totalresidual, prjerr);
+          // printf("\nNSGS u = "); printBlockVec(velocity_no_mu, nd, 3, 1);
+          // printf("\n\nNSGS r = "); printBlockVec(reaction_no_mu, nd, 3, 1);
+
+
+          // if (prjerr < 1e-10)
+          // {
+          //   FILE *sol_file = fopen("sol_data.res", "w");
+          //   // store r
+          //   for (int i=0; i < nd; i++)
+          //   {
+          //     fprintf(sol_file, "%8.20e ", reaction[i]);
+          //   }
+          //   fprintf(sol_file, "\n");
+          //   fclose(sol_file);
+          //   // printf("\nSave reaction here\n");
+          // }
+
+
+          tols2_TEST7 /= 10.;
+          num2_TEST7++;
+        }
+
+
+        // // Stopping test
+        // if (num_TEST7 == 11 && num2_TEST7 == 11)
+        // {
+        //   break;
+        // }
+
+        // if (totalresidual < options->dparam[SICONOS_DPARAM_TOL])
+        // {
+        //   break;
+        // }
+
+
+      }
+      // END for comparison #################
+
+      t1 = clock();
 
       if(iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT)
       {
@@ -931,17 +1204,24 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
       /*   } */
       /*   printf("number of frozen contacts %i at iter : %i over number of contacts: %i\n", frozen_contact, iter, nc ); */
       /* } */
+
+
+
+      t2 = clock();
+      total_time += (double)(t2-t1)/(double)clk_tck;
+
+      // // Stopping test
+      // if (num_TEST7 == 11 && num2_TEST7 == 11)
+      // {
+      //   iter = itermax;
+      // }
     }
-    // if (options->iparam[SICONOS_FRICTION_3D_NSGS_PRINTING_LIKE_IPM] == SICONOS_FRICTION_3D_NSGS_PRINTING_LIKE_IPM_TRUE)
-    // {
-    //   iterates = fopen("iterates_BoxStacks_GS.m", "a+");
-    //   fprintf(iterates, "];\n\n");
-    //   fclose(iterates);
-    // }
+
 
 
   }
 
+  t1 = clock();
 
   /* Full criterium */
   if(iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL)
@@ -953,6 +1233,82 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
 
 
   }
+
+  t2 = clock();
+  total_time += (double)(t2-t1)/(double)clk_tck;
+
+  if (options->iparam[SICONOS_FRICTION_3D_NSGS_PRINTING_LIKE_IPM] == SICONOS_FRICTION_3D_NSGS_PRINTING_LIKE_IPM_TRUE)
+  {
+    while ( num_TEST7 < 11 )
+    {
+      sprintf(name_file_TEST7, "nsgs-complem-%02d.pp", num_TEST7);
+      file_TEST7 = fopen(name_file_TEST7, "a+");
+      fprintf(file_TEST7, "sumry: 1  %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f   %s\n",
+              totalresidual, iter, n, -1, nB, nN, nR, n-nB-nN-nR,
+              total_time, problem_name);
+      fclose(file_TEST7);
+
+      file_all_TEST7 = fopen("nsgs-complem.pp", "a+");
+      if (num_TEST7 == 10)
+      {
+        fprintf(file_all_TEST7, "sumry: 1  %.2e  %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f   %s\n",
+              totalresidual, prjerr, iter, n, -1, nB, nN, nR, n-nB-nN-nR,
+              total_time, problem_name);
+      }
+      else
+      {
+        fprintf(file_all_TEST7, "sumry: 1  %.2e  %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f\n",
+              totalresidual, prjerr, iter, n, -1, nB, nN, nR, n-nB-nN-nR,
+              total_time);
+      }
+      fclose(file_all_TEST7);
+
+      num_TEST7++;
+    }
+
+
+
+    // Criteria projection
+    while ( num2_TEST7 < 11 )
+    {
+      sprintf(name2_file_TEST7, "nsgs-prjerr-%02d.pp", num2_TEST7);
+      file2_TEST7 = fopen(name2_file_TEST7, "a+");
+      fprintf(file2_TEST7, "sumry: 1  %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f   %s\n",
+              prjerr, iter, n, -1, nB, nN, nR, n-nB-nN-nR,
+              total_time, problem_name);
+      fclose(file2_TEST7);
+
+      file2_all_TEST7 = fopen("nsgs-prjerr.pp", "a+");
+      if (num2_TEST7 == 10)
+      {
+        fprintf(file2_all_TEST7, "sumry: 1  %.2e  %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f   %s\n",
+              totalresidual, prjerr, iter, n, -1, nB, nN, nR, n-nB-nN-nR,
+              total_time, problem_name);
+      }
+      else
+      {
+        fprintf(file2_all_TEST7, "sumry: 1  %.2e  %.2e   %5i %5i %5i %4i %4i %4i %4i  %.6f\n",
+              totalresidual, prjerr, iter, n, -1, nB, nN, nR, n-nB-nN-nR,
+              total_time);
+      }
+      fclose(file2_all_TEST7);
+
+      num2_TEST7++;
+    }
+
+
+
+
+
+    free(problem_name);
+
+    if (velocity_tilde) {free(velocity_tilde); velocity_tilde = NULL;}
+    if (worktmp) {free(worktmp); worktmp = NULL;}
+    if (reaction_no_mu) {free(reaction_no_mu); reaction_no_mu = NULL;}
+    if (velocity_no_mu) {free(velocity_no_mu); velocity_no_mu = NULL;}
+  }
+
+
 
 
   *info = hasNotConverged;

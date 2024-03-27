@@ -58,8 +58,7 @@ extern "C"
       \param[in,out] error value
       \return 0 if ok
    */
-  int fc3d_compute_error_norm_infinity_conic(FrictionContactProblem* problem, double *z , double *w, double tolerance, SolverOptions * options, double norm, double * error);
-
+  int fc3d_compute_error_norm_infinity_conic(FrictionContactProblem* problem, double *z , double *w, double tolerance, SolverOptions * options, double norm, double * error, int on_dual_cone);
 
   /** 
       Error computation (using the normal map residual) for one friction-contact 3D problem
@@ -71,6 +70,18 @@ extern "C"
       \param[in,out] error value
    */
   void fc3d_unitary_compute_and_add_error(double r[3] , double u[3], double mu, double * error, double * worktmp);
+
+  /**
+      Error computation on dual cone (using the normal map residual) for one friction-contact 3D problem
+
+      \param r the reaction force
+      \param u the local velocity
+      \param mu coeficient of friction
+      \param worktmp work vector
+      \param[in,out] error value
+   */
+  void fc3d_unitary_compute_dual_and_add_error(double r[3] , double u[3], double mu, double * error, double * worktmp);
+
 
   /** 
       Error computation for a friction-contact 3D problem

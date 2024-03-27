@@ -97,7 +97,22 @@ void  gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double *reaction, dou
     clock_t t2 = clock();
     printf("\nTIME = %10.4f\n",(double)(t2-t1)/(double)clk_tck);
 
+
+    // // printf("\n\n Compute v of NSGS: \n");
+    // FILE *sol_file = fopen("sol_data.res", "r");
+    // for (int i=0; i < problem->numberOfContacts*3; i++)
+    // {
+    //   fscanf(sol_file, "%lf ", reaction+i);
+    // }
+    // fscanf(sol_file, "\n");
+    // fclose(sol_file);
+
     globalFrictionContact_computeGlobalVelocity(problem, reaction, globalVelocity);
+
+
+    // printf("\n\nNSGS v = "); printBlockVec(globalVelocity, problem->M->size0, 3, 0);
+    // printf("\n\n");
+
     /* Number of contacts */
     int nc = problem->numberOfContacts;
     /* Dimension of the problem */

@@ -375,20 +375,18 @@ double projectionError(const double * velocity, const double * reaction, const u
 
 
 /* Computation of the projection error |r - proj(r-u)|_inf */
-double projectionError_norm_infinity_conic(const double * velocity, const double * reaction, const unsigned int nc, const double tol)
+double projectionError_norm_infinity_conic(const double * velocity, const double * reaction, const unsigned int nc)
 {
-  // printf("\nu = "); NV_display(velocity, nc*3); printf("\n");
   double worktmp[3];
   double out = 0.0;
-  double norm_u, norm_r, relative_scaling;
 
   for(int ic = 0 ; ic < nc ; ic++)
   {
-    worktmp[0] = reaction[3*ic] -  velocity[3*ic] ;
-    worktmp[1] = reaction[3*ic+1] -  velocity[3*ic+1] ;
-    worktmp[2] = reaction[3*ic+2] -  velocity[3*ic+2] ;
+    worktmp[0] = reaction[3*ic]   -  velocity[3*ic];
+    worktmp[1] = reaction[3*ic+1] -  velocity[3*ic+1];
+    worktmp[2] = reaction[3*ic+2] -  velocity[3*ic+2];
     projectionOnCone(worktmp, 1.0);
-    worktmp[0] = reaction[3*ic] -  worktmp[0];
+    worktmp[0] = reaction[3*ic]   -  worktmp[0];
     worktmp[1] = reaction[3*ic+1] -  worktmp[1];
     worktmp[2] = reaction[3*ic+2] -  worktmp[2];
     out =  fmax(out, worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2]);
@@ -397,10 +395,32 @@ double projectionError_norm_infinity_conic(const double * velocity, const double
   return sqrt(out);
 }
 
+/* Computation of the projection error on dual cone |u - proj(u-r)|_inf */
+double projectionError_dual_norm_infinity_conic(const double * velocity, const double * reaction, const unsigned int nc)
+{
+  double worktmp[3];
+  double out = 0.0;
 
-/* Computation of the projection error |r - proj(r-u)|_inf with recomputation of u and v */
+  for(int ic = 0 ; ic < nc ; ic++)
+  {
+    worktmp[0] = velocity[3*ic]   - reaction[3*ic];
+    worktmp[1] = velocity[3*ic+1] - reaction[3*ic+1];
+    worktmp[2] = velocity[3*ic+2] - reaction[3*ic+2];
+    projectionOnDualCone(worktmp, 1.0);
+    worktmp[0] = velocity[3*ic]   -  worktmp[0];
+    worktmp[1] = velocity[3*ic+1] -  worktmp[1];
+    worktmp[2] = velocity[3*ic+2] -  worktmp[2];
+    out =  fmax(out, worktmp[0] * worktmp[0] + worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2]);
+  }
+
+  return sqrt(out);
+}
+
+
+/* Computation of the projection error with recomputation of u and v */
 double projectionError_based_reaction_norm_infinity_conic(NumericsMatrix *H, NumericsMatrix *M,
-                    const double * f, const double * w, const double * reaction, const unsigned int varsCount, const double tol)
+                    const double * f, const double * w, const double * reaction, const unsigned int varsCount,
+                    const int on_dual_cone)
 {
   size_t m = M->size0;
   size_t d = 3;
@@ -422,15 +442,22 @@ double projectionError_based_reaction_norm_infinity_conic(NumericsMatrix *H, Num
     velocity[i] += cblas_dnrm2(2, velocity + i + 1, 1);
   }
 
-  double out = projectionError_norm_infinity_conic(velocity, reaction, varsCount, tol);
+  double out = -1;
+
+  if (on_dual_cone)
+  {
+    out = projectionError_dual_norm_infinity_conic(velocity, reaction, varsCount);
+  }
+  else
+  {
+    out = projectionError_norm_infinity_conic(velocity, reaction, varsCount);
+  }
 
   free(globalVelocity);
   free(velocity);
 
   return out;
 }
-
-
 
 
 void setErrorArray(double * error, const double pinfeas, const double dinfeas, const double udotr, const double dualgap, const double complem, const double projerr)
@@ -839,6 +866,30 @@ void classify_BNRT_for_ipm_snm(const double *mu, const double * velocity, const 
 /*     fclose(f); */
 /*     return 0; */
 /* } */
+
+// cl: classify
+void printBlockVec(double * vec, int vecSize, int sizeBlock, int cl)
+{
+  if (cl > 0)
+  {
+    for(unsigned int i=0; i<vecSize; i++)
+    {
+      if (i%sizeBlock == 0) printf("\n%4i-%4i: ", i, i+sizeBlock-1);
+      printf(" %.8e,", vec[i]);
+      if ((i+1)%sizeBlock == 0) printf("\t\t x0 - |xb| = %.2e", vec[((i+1)/sizeBlock-1)*sizeBlock] - cblas_dnrm2(sizeBlock-1, vec+((i+1)/sizeBlock-1)*sizeBlock+1, 1));
+    }
+  }
+
+  else
+  {
+    for(unsigned int i=0; i<vecSize; i++)
+    {
+      if (i%sizeBlock == 0) printf("\n%4i-%4i: ", i, i+sizeBlock-1);
+      printf(" %.15e", vec[i]);
+    }
+  }
+  return;
+}
 
 
 
