@@ -347,7 +347,7 @@ void Simulation::initializeNSDSChangelog() {
     updateIndexSets();
     initializeOneStepNSProblem();
 
-    // Since initOSNS calls updateIndexSets() which resets the
+    // Since updateIndexSets() call resets the
     // topology->hasChanged() flag, it must be specified explicitly.
     // Otherwise OneStepNSProblem may fail to update its matrices.
     _nsds->topology()->setHasChanged(true);
@@ -429,8 +429,6 @@ void Simulation::initialize() {
 
   computeInitialStateOfTheStep();
 
-
-  
   // 4 - update the world from DS
   // for external contact detection library for instance
   updateWorldFromDS();
