@@ -15,6 +15,7 @@ import vtk
 from vtk.util.vtkAlgorithm import VTKPythonAlgorithmBase
 from vtk.numpy_interface import dataset_adapter as dsa
 
+from vtkmodules.vtkRenderingCore import vtkTextActor
 import h5py
 
 # Exports from this module
@@ -2645,6 +2646,29 @@ class VView(object):
         self.widget.SetEnabled(True)
         self.widget.InteractiveOn()
 
+    def setup_siconos_text(self):
+        self.print_verbose_level(1,'setup_siconos_text')
+        # Create a text actor.
+        txt = vtkTextActor()
+        txt.SetInput('Siconos')
+        txtprop = txt.GetTextProperty()
+        txtprop.SetFontFamilyToArial()
+        txtprop.BoldOn()
+        txtprop.SetFontSize(88)
+        txtprop.ShadowOn()
+        txtprop.SetShadowOffset(4, 4)
+        background_color = self.config.get('background_color', [.0,.0,.0])
+        reverse_background_color =numpy.ones(3) - background_color
+
+        txtprop.SetColor(*reverse_background_color)
+        txt.SetDisplayPosition(20, 30)
+
+        # Assign actor to the renderer.
+        self.renderer.AddActor(txt)
+        #self._renderer.SetBackground(colors.GetColor3d('DarkGreen'))
+
+
+
     # this should be extracted from the VView class
     def export(self):
         self.print_verbose('export start')
@@ -2993,6 +3017,7 @@ class VView(object):
         if self.opts.with_charts:
             self.setup_charts()
         self.setup_axes()
+        self.setup_siconos_text()
 
         self.gui_initialized = True
 
