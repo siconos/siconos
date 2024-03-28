@@ -20,24 +20,15 @@
 
 #include "SiconosConfig.h"
 
-
 #ifdef SICONOS_HAS_BULLET
-#include <Bullet2d3DR.hpp>
-#include <Bullet2dR.hpp>
-#include <Bullet5DR.hpp>
-#include <BulletR.hpp>
+#include "Bullet2d3DR.hpp"
+#include "Bullet2dR.hpp"
+#include "Bullet5DR.hpp"
+#include "BulletR.hpp"
 #else
-#include <NewtonEuler3DR.hpp>
-#include <NewtonEuler5DR.hpp>
-#include <SpaceFilter.hpp>
-
-namespace siconos::collision::bullet {
-class BulletR : public siconos::collision::NewtonEuler3DR {};
-class Bullet5DR : public siconos::collision::NewtonEuler5DR {};
-class Bullet2dR : public siconos::modeling::Lagrangian2d2DR {};
-class Bullet2d3DR : public siconos::modeling::Lagrangian2d3DR {};
-}  // namespace siconos::collision::bullet
-
+#include "NewtonEuler3DR.hpp"
+#include "NewtonEuler5DR.hpp"
+#include "SpaceFilter.hpp"
 #endif
 
 #include "BlockVector.hpp"
