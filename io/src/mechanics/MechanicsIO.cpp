@@ -867,7 +867,7 @@ static void compute_contact_work_and_status(
   // double id = inter->number();
   // std::cout << "\nid "<< id << std::endl;
   // std::cout << " e "<< e  << " mu "<< mu << std::endl;
-  // std::cout << " tol "<< tol<< std::endl;
+  // std::cout << " tol "<< tol << " omega " << omega << std::endl;
   // std::cout << "vn_plus "<< vn_plus << std::endl;
   // std::cout << "vn_minus "<< vn_minus << std::endl;
   // std::cout << "pn "<< pn << std::endl;
@@ -934,6 +934,7 @@ std::shared_ptr<siconos::algebra::SimpleMatrix> siconos::io::MechanicsIO::contac
   siconos::graphs::InteractionsGraph::VIterator vi, viend;
   if (nsds.topology()->numberOfIndexSet() > 0) {
     auto& graph = *nsds.topology()->indexSet(index_set);
+
     unsigned int current_row;
     auto result =
         std::make_shared<siconos::algebra::SimpleMatrix>(graph.vertices_number(), 25);
