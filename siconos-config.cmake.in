@@ -80,6 +80,8 @@ if(@SICONOS_HAS_JSON@)
   find_dependency(nlohmann_json @nlohmann_json_VERSION@ CONFIG REQUIRED)
 endif()
 
+find_dependency(Eigen3 CONFIG REQUIRED)
+
 # include siconos project targets
 include("${CMAKE_CURRENT_LIST_DIR}/siconosTargets.cmake")
 
