@@ -13,12 +13,13 @@ RUN apt update  && apt upgrade -y && apt install --no-install-recommends -y -qq 
 	g++ \
         gfortran \
 	libgl-dev  &&  apt autoclean -y && apt autoremove -y&& rm -rf /var/lib/apt/lists/*
-RUN micromamba config prepend channels conda-forge && micromamba self-update
+RUN micromamba config prepend channels conda-forge && micromamba self-update && \
+    micromamba clean --all --yes
 
 
 FROM mamba-base AS mambaenv
 USER $MAMBA_USER
-RUN micromamba config prepend channels conda-forge && micromamba config set channel_priority strict
+     RUN micromamba config prepend channels conda-forge && micromamba config set channel_priority strict
 COPY --chown=$MAMBA_USER:$MAMBA_USER ci_gitlab/sicolabenv.yml /home/sicolabenv.yml
 ENV MAMBA_DISABLE_LOCKFILE TRUE
 RUN micromamba install -y -f /home/sicolabenv.yml && \
@@ -27,3 +28,4 @@ ARG MAMBA_DOCKERFILE_ACTIVATE=1  # (otherwise python, cmake ... will not be foun
 ENV SHELL /bin/bash
 ENV PATH /opt/conda/bin:$PATH
 WORKDIR /home/mambauser
+
