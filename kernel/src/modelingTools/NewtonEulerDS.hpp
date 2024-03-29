@@ -301,7 +301,6 @@ class NewtonEulerDS : public SecondOrderDS {
    *  protected member.*/
   std::vector<std::shared_ptr<siconos::algebra::SimpleMatrix>> _rhsMatrices = {
       nullptr, nullptr, nullptr, nullptr};
-  ;
 
   /** Default constructor
    */

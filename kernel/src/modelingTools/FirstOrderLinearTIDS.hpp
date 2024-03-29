@@ -54,8 +54,7 @@ class FirstOrderLinearTIDS : public FirstOrderLinearDS {
 
   /** default constructor
    */
-  FirstOrderLinearTIDS()
-  {
+  FirstOrderLinearTIDS() {
     _hasConstantA = true;
     _hasConstantB = true;
   };
@@ -107,12 +106,10 @@ class FirstOrderLinearTIDS : public FirstOrderLinearDS {
    *  \param time current time
    */
   void computeJacobianRhsx(double time) override;
-  ;
 
   /** data display on screen
    */
   void display(bool brief = true) const override;
-  ;
 
   /** Dumb function, there is no plugin here
    *

@@ -432,8 +432,7 @@ function(apply_compiler_options COMPONENT)
     list(APPEND COMP_OPTIONS -pedantic)
 
     # Warn if a function is declared or defined without specifying the argument types.
-    list(APPEND COMP_OPTIONS -Wstrict-prototypes)
-
+    list(APPEND COMP_OPTIONS $<$<COMPILE_LANGUAGE:C>:-Wstrict-prototypes>)
   elseif(COMP_DIAGNOSTICS_LEVEL EQUAL 3)
     # -- Paranoid mode  options --
     # Warnings = errors
@@ -444,7 +443,7 @@ function(apply_compiler_options COMPONENT)
     list(APPEND COMP_OPTIONS -Werror=conversion)
 
     # Warn if a function is declared or defined without specifying the argument types.
-    list(APPEND COMP_OPTIONS -Werror=strict-prototypes)
+    list(APPEND COMP_OPTIONS $<$<COMPILE_LANGUAGE:C>:-Werror=strict-prototypes>)
   endif()
 
   # Note FP: this part is untested and I don't know to what ends it's written?

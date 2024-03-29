@@ -20,24 +20,15 @@
 
 #include "SiconosConfig.h"
 
-
 #ifdef SICONOS_HAS_BULLET
-#include <Bullet2d3DR.hpp>
-#include <Bullet2dR.hpp>
-#include <Bullet5DR.hpp>
-#include <BulletR.hpp>
+#include "Bullet2d3DR.hpp"
+#include "Bullet2dR.hpp"
+#include "Bullet5DR.hpp"
+#include "BulletR.hpp"
 #else
-#include <NewtonEuler3DR.hpp>
-#include <NewtonEuler5DR.hpp>
-#include <SpaceFilter.hpp>
-
-namespace siconos::collision::bullet {
-class BulletR : public siconos::collision::NewtonEuler3DR {};
-class Bullet5DR : public siconos::collision::NewtonEuler5DR {};
-class Bullet2dR : public siconos::modeling::Lagrangian2d2DR {};
-class Bullet2d3DR : public siconos::modeling::Lagrangian2d3DR {};
-}  // namespace siconos::collision::bullet
-
+#include "NewtonEuler3DR.hpp"
+#include "NewtonEuler5DR.hpp"
+#include "SpaceFilter.hpp"
 #endif
 
 #include "BlockVector.hpp"
@@ -876,7 +867,7 @@ static void compute_contact_work_and_status(
   // double id = inter->number();
   // std::cout << "\nid "<< id << std::endl;
   // std::cout << " e "<< e  << " mu "<< mu << std::endl;
-  // std::cout << " tol "<< tol<< std::endl;
+  // std::cout << " tol "<< tol << " omega " << omega << std::endl;
   // std::cout << "vn_plus "<< vn_plus << std::endl;
   // std::cout << "vn_minus "<< vn_minus << std::endl;
   // std::cout << "pn "<< pn << std::endl;
@@ -943,6 +934,7 @@ std::shared_ptr<siconos::algebra::SimpleMatrix> siconos::io::MechanicsIO::contac
   siconos::graphs::InteractionsGraph::VIterator vi, viend;
   if (nsds.topology()->numberOfIndexSet() > 0) {
     auto& graph = *nsds.topology()->indexSet(index_set);
+
     unsigned int current_row;
     auto result =
         std::make_shared<siconos::algebra::SimpleMatrix>(graph.vertices_number(), 25);
