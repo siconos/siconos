@@ -349,7 +349,7 @@ void Simulation::initializeNSDSChangelog() {
     updateIndexSets();
     initializeOneStepNSProblem();
 
-    // Since initOSNS calls updateIndexSets() which resets the
+    // Since updateIndexSets() call resets the
     // topology->hasChanged() flag, it must be specified explicitly.
     // Otherwise OneStepNSProblem may fail to update its matrices.
     _nsds->topology()->setHasChanged(true);
