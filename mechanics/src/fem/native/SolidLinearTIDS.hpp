@@ -56,6 +56,8 @@ protected:
 
   /** Initial stress of the system */
   std::shared_ptr<siconos::algebra::SiconosVector> _sigma0{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> _epsilonp0{nullptr};
+
 
   std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> _epsilonp = {nullptr, nullptr,
                                                                       nullptr};
@@ -103,7 +105,15 @@ public:
     return _stress[1];
   }
 
-
+  /** get epsilonp
+   *
+   *  \param level unsigned int, required level for epsilonp, default = 2
+   *  \return pointer on a siconos::algebra::SiconosVector
+   */
+  inline std::shared_ptr<siconos::algebra::SiconosVector> epsilonp(unsigned int level = 2) const
+  {
+    return _epsilonp[level];
+  }
 
   inline std::shared_ptr<siconos::algebra::SiconosVector> plasticDeformation() const
   {

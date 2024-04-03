@@ -411,10 +411,17 @@ void siconos::modeling::Interaction::__initDataLagrangian(
     if (&ds1 != &ds2) __initDSDataLagrangian(ds2, DSlink);
     if(relationSubType == RelationSubType::StressLinearTIR){
         auto& lds = static_cast<siconos::mechanics::fem::SolidLinearTIDS &>(ds1);
-        DSlink[LagrangianR::DSlinkSize + StressLinearTIR::SolidLinearDS::epsilonp]->insertPtr(lds.plasticDeformation());
-        DSlink[LagrangianR::DSlinkSize + StressLinearTIR::SolidLinearDS::epsilonp1]->insertPtr(lds.plasticRate());
+        DSlink[LagrangianR::DSlinkSize + StressLinearTIR::SolidLinearDS::sigma] = std::make_shared<siconos::algebra::BlockVector>();
         DSlink[LagrangianR::DSlinkSize + StressLinearTIR::SolidLinearDS::sigma]->insertPtr(lds.stress());
+
+        DSlink[LagrangianR::DSlinkSize + StressLinearTIR::SolidLinearDS::sigma1] = std::make_shared<siconos::algebra::BlockVector>();
         DSlink[LagrangianR::DSlinkSize + StressLinearTIR::SolidLinearDS::sigma1]->insertPtr(lds.stressRate());
+
+        DSlink[LagrangianR::DSlinkSize + StressLinearTIR::SolidLinearDS::epsilonp] = std::make_shared<siconos::algebra::BlockVector>();
+        DSlink[LagrangianR::DSlinkSize + StressLinearTIR::SolidLinearDS::epsilonp]->insertPtr(lds.plasticDeformation());
+
+        DSlink[LagrangianR::DSlinkSize + StressLinearTIR::SolidLinearDS::epsilonp1] = std::make_shared<siconos::algebra::BlockVector>();
+        DSlink[LagrangianR::DSlinkSize + StressLinearTIR::SolidLinearDS::epsilonp1]->insertPtr(lds.plasticRate());
     }
 }
 

@@ -1193,9 +1193,13 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
 
       applyBoundaryConditions(d, residuFree, dsi, t, vold);
       free = residuFree;            // copy residuFree into free
-      if (d.p(1)) free -= *d.p(1);  // Compute Residu in Workfree Notation !!
+//      if (d.p(1)) free -= *d.p(1);  // Compute Residu in Workfree Notation !!
+      if (d.p(1)) free += *d.p(1);  // Compute Residu in Workfree Notation !!
+
       sigfreed = residuSigfreed;
-      if (d.plasticRate()) sigfreed -= *d.plasticRate();
+      if (d.epsilonp(1)) {
+          sigfreed -= *d.epsilonp(1)*h;
+      }
 
       // We use free as tmp buffer
       DEBUG_EXPR(free.display());
@@ -1475,7 +1479,6 @@ void siconos::integrators::MoreauJeanOSI::computeFreeState() {
         siconos::algebra::subscal(1.0, qSigmafree, sigmafree,
                                   subCoord, false); // sigmafree += sigmaold + [W^{-1} * qsigmafree](sizeV:end)
 
-        vfree.display();
         // We don't need to do vfree = -vfree like is done in the following since we computed the real right hand side in computeResidu(), and not its opposite like it is done for generanl lagrangianDS case
     }
     else
@@ -1912,7 +1915,7 @@ void siconos::integrators::MoreauJeanOSI::integrate(double &tinit, double &tend,
         //
 
         v = p;
-        sigma = h * epsilonPointp;
+        sigma = -h * epsilonPointp;
 
 
         double coeff;
@@ -2249,20 +2252,18 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
         {
             v.zero();
         }
-
-        if (d.plasticRate() && d.plasticRate()->size() > 0) {
-            siconos::algebra::scal(-h, *d.plasticRate(), sigma, false); // sigma = -h*\dot Epsilon
+        if (d.epsilonp(_levelMaxForInput) && d.epsilonp(_levelMaxForInput)->size() > 0) {
+            siconos::algebra::scal(-h, *d.epsilonp(_levelMaxForInput), sigma, true); // sigma = -h*\dot Epsilon
         }
         else
         {
             sigma.zero();
         }
 
-        if ((d.p(_levelMaxForInput) && d.p(_levelMaxForInput)->size() > 0) || (d.plasticRate() && d.plasticRate()->size() > 0)) // si l'on a au moins contact ou plasticité
+        if ((d.p(_levelMaxForInput) && d.p(_levelMaxForInput)->size() > 0) || (d.epsilonp(_levelMaxForInput) && d.epsilonp(_levelMaxForInput)->size() > 0)) // si l'on a au moins contact ou plasticité
         {
             v.toBlock(qSigma, d.velocityDimension(), 0, 0); // q_sigma = [v; 0]
             sigma.toBlock(qSigma, d.stressDimension(), 0, d.velocityDimension());  // q_sigma = [v; sigma]
-
             // -> Solve WX = qSigma and set qSigma = X
             W.Solve(qSigma);
             std::vector<std::size_t> subCoord(4);

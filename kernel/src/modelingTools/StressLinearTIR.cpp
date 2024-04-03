@@ -62,13 +62,11 @@ siconos::modeling::StressLinearTIR::StressLinearTIR(
 }
 
 void siconos::modeling::StressLinearTIR::checkSize(Interaction& inter) {
-    std::cout << "Enter StressLinearTIR::checkSize" << std::endl;
 
   auto sizeY = inter.dimension();
-  std::cout << "Enter StressLinearTIR::checkSize 1" << std::endl;
   auto& DSlink = inter.linkToDSVariables();
-  std::cout << "Enter StressLinearTIR::checkSize 2" << std::endl;
-  if (!(_jachq) || _jachq->size(1) != inter.getSizeOfDS() || _jachq->size(0) != sizeY)
+DSlink[LagrangianR::DSlinkSize + SolidLinearDS::sigma]->size();
+  if (!(_jachq) || _jachq->size(1) != DSlink[LagrangianR::DSlinkSize + SolidLinearDS::sigma]->size() || _jachq->size(0) != sizeY)
     THROW_EXCEPTION(
         "siconos::modeling::StressLinearTIR::checkSize inconsistent sizes between H "
         "matrix and the interaction.");

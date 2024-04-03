@@ -93,11 +93,14 @@ siconos::mechanics::fem::SolidLinearTIDS::SolidLinearTIDS(std::shared_ptr<Mesh> 
 //    _q0.reset(new siconos::algebra::SiconosVector(_ndof,0.0));
 //    _velocity0.reset(new siconos::algebra::SiconosVector(_ndof,0.0));
     _sigma0.reset(new siconos::algebra::SiconosVector(_dimStress,0.0));
-
+    _epsilonp0.reset(new siconos::algebra::SiconosVector(_dimStress,0.0));
     // -- Memory allocation for stress --
 //    _sigma = std::make_shared<siconos::algebra::SiconosVector>(*_sigma0);
     _stress[0] = std::make_shared<siconos::algebra::SiconosVector>(*_sigma0);
-
+    _stress[1] = std::make_shared<siconos::algebra::SiconosVector>(*_sigma0);
+    _stress[2] = std::make_shared<siconos::algebra::SiconosVector>(*_sigma0);
+    _epsilonp[0] = std::make_shared<siconos::algebra::SiconosVector>(_dimStress);
+_epsilonp[1] = std::make_shared<siconos::algebra::SiconosVector>(*_epsilonp0);
 //  LagrangianDS::_init(_q0,_velocity0);
 
 
@@ -209,7 +212,6 @@ void siconos::mechanics::fem::SolidLinearTIDS::initMemory(unsigned int steps) {
 }
 
 void siconos::mechanics::fem::SolidLinearTIDS::swapInMemory() {
-  std::cout << "In  swapInMemory from SolidLinearTIDS" << std::endl;
   _qMemory.swap(*_q[0]);
   _velocityMemory.swap(*_q[1]);
 //  _stressMemory.swap(*_sigma);
@@ -231,7 +233,6 @@ void siconos::mechanics::fem::SolidLinearTIDS::swapInMemory() {
 
 double siconos::mechanics::fem::SolidLinearTIDS::kineticEnergy() const
 {
-std::cout << "In  kineticEnergy from SolidLinearTIDS" << std::endl;
   siconos::algebra::SiconosVector * tmp = new siconos::algebra::SiconosVector(_ndof);
   siconos::algebra::SiconosVector& velocity = *(_q[1]);
   siconos::algebra::prod(*_mass, velocity, *tmp, true);
@@ -241,7 +242,6 @@ std::cout << "In  kineticEnergy from SolidLinearTIDS" << std::endl;
 
 double siconos::mechanics::fem::SolidLinearTIDS::elasticPotentialEnergy() const
 {
-std::cout << "In  elasticPotentialEnergy from SolidLinearTIDS" << std::endl;
   siconos::algebra::SiconosVector * tmp = new siconos::algebra::SiconosVector(_ndof);
   siconos::algebra::SiconosVector& displacement = *(_q[0]);
   siconos::algebra::prod(*_K, displacement, *tmp, true);
