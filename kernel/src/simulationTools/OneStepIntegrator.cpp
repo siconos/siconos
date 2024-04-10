@@ -89,25 +89,28 @@ void OneStepIntegrator::UpdateAndSwapAllOutput(Interaction& inter, double time)
   //      - simu->osi->initializeWorkVectorsForInteraction(inter)
   //      - simu->osi->UpdateAndSwapAllOutput()
 
-  // if(_steps > 1)  // Multi--step methods
-  // {
-  //   // Compute the old Values of Output with stored values in Memory
-  //   for(unsigned int k = 0; k < _steps - 1; k++)
-  //   {
-  //     /** ComputeOutput to fill the Memory
-  //      * We assume the state x is stored in xMemory except for the  initial
-  //      * condition which has not been swap yet.
-  //      */
-  //     //        relation()->LinkDataFromMemory(k);
-  //     for(unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
-  //     {
-  //       inter.computeOutput(time, i);
-  //       //_yMemory[i]->swap(*_y[i]);
-  //     }
-  //   }
-  //   inter.swapInMemory();
-  // }
+  if(_steps > 1)  // Multi--step methods
+  {
+    // Compute the old Values of Output with stored values in Memory
+    for(unsigned int k = 0; k < _steps - 1; k++)
+    {
+      /** ComputeOutput to fill the Memory
+       * We assume the state x is stored in xMemory except for the  initial
+       * condition which has not been swap yet.
+       */
+      //        relation()->LinkDataFromMemory(k);
+      for(unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i)
+      {
+        inter.computeOutput(time, i);
+        //_yMemory[i]->swap(*_y[i]);
+      }
+    }
+    inter.swapInMemory();
+  }
+
+  
   // Compute a first value for the output
+  // VA 10/04/2024 What is the interest of the following line ?
   inter.computeOutput(time,  0);
 
   // prepare the gradients
