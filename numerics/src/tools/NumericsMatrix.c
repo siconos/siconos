@@ -2685,8 +2685,28 @@ CSparseMatrix* NM_csc(NumericsMatrix* A) {
     switch (A->matrix2->origin) {
       case NSM_TRIPLET:
       case NSM_UNKNOWN: {
+#ifdef WITH_UMFPACK
+       // Fix issue https://github.com/siconos/siconos/issues/496
+       CSparseMatrix* Atri = NM_triplet(A);
+
+       NM_csc_alloc(A, Atri->nz);
+
+       CSparseMatrix* Acsc = A->matrix2->csc;
+
+       assert(Acsc);
+
+       CS_INT status = UMFPACK_FN(triplet_to_col)(Atri->m, Atri->n, Atri->nz, Atri->i, Atri->p, Atri->x,
+                                                  Acsc->p, Acsc->i, Acsc->x, NULL);
+
+       if(status)
+       {
+            numerics_error("NM_csc", "umfpack_*_triplet_to_col: cannot get csc from triplet");
+            return NULL;
+       }
+#else
         /*  triplet -> csc with allocation */
         A->matrix2->csc = cs_compress(NM_triplet(A));
+#endif
         NSM_set_version(A->matrix2, NSM_CSC, NSM_version(A->matrix2, NSM_TRIPLET));
         break;
       }
