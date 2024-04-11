@@ -14,6 +14,10 @@ set(cmake_macros
   BlasLapackUtils.cmake
 )
 
+
+if(SICONOS_HAS_OCE) # Legacy. Should be removed when mechanics will be occt complient
+  list(APPEND cmake_macros occ_old_setup.cmake)
+endif()
 if(SICONOS_HAS_OpenCASCADE)
   list(APPEND cmake_macros occ_setup.cmake)
 endif()

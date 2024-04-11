@@ -19,11 +19,6 @@
 
 #include <BRepPrimAPI_MakeSphere.hxx>
 #include <BRepTools.hxx>
-#include <Geometer2.hpp>
-#include <OccBody.hpp>
-#include <OccBody2.hpp>
-#include <SiconosVector.hpp>
-#include <SimpleMatrix.hpp>
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Shape.hxx>
@@ -35,11 +30,12 @@
 
 #include "ContactPoint.hpp"
 #include "ContactShapeDistance.hpp"
+#include "Geometer.hpp"
 #include "MechanicsFwd.hpp"
+#include "OccBody.hpp"
 #include "OccContactEdge.hpp"
 #include "OccContactFace.hpp"
 #include "OccContactShape.hpp"
-#include "OccContactShape2.hpp"
 #include "WhichGeometer.hpp"
 
 CPPUNIT_TEST_SUITE_REGISTRATION(OccTest);

@@ -56,7 +56,7 @@ class Standard_OutOfRange;
 class Standard_TypeMismatch;
 class TopoDS_Face;
 class gp_Pnt;
-#include "Standard_Handle.hxx"
+//#include "Standard_Handle.hxx"
 
 typedef Handle(BRepAdaptor_HSurface) Handle_BRepAdaptor_HSurface;
 
