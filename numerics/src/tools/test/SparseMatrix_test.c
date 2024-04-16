@@ -273,13 +273,13 @@ static int test_CSparseMatrix_spsolve_unit(CSparseMatrix *M )
     printf("problem in spsolve\n");
     return info;
   }
-  CSparseMatrix* I = cs_multiply(M, B);
+  CSparseMatrix* II = cs_multiply(M, B);
   //printf(" M * M^-1:\n");
   //cs_print(I, 0);
 
   CSparseMatrix *Id = cs_compress(b_triplet);
 
-  CSparseMatrix* check = cs_add(I, Id, 1.0, -1.0);
+  CSparseMatrix* check = cs_add(II, Id, 1.0, -1.0);
   //cs_print(check, 0);
 
   double error = cs_norm(check);
@@ -289,7 +289,7 @@ static int test_CSparseMatrix_spsolve_unit(CSparseMatrix *M )
   cs_spfree(B);
   cs_spfree(X);
   CSparseMatrix_free_lu_factors(cs_lu_M);
-  cs_spfree(I);
+  cs_spfree(II);
   cs_spfree(Id);
   cs_spfree(check);
 
@@ -384,13 +384,13 @@ static int test_CSparseMatrix_chol_spsolve_unit(CSparseMatrix *M )
     printf("problem in chol_spsolve\n");
     return info;
   }
-  CSparseMatrix* I = cs_multiply(M, B);
+  CSparseMatrix* II = cs_multiply(M, B);
   //printf(" M * M^-1:\n");
   //cs_print(I, 0);
 
   CSparseMatrix *Id = cs_compress(b_triplet);
 
-  CSparseMatrix* check = cs_add(I, Id, 1.0, -1.0);
+  CSparseMatrix* check = cs_add(II, Id, 1.0, -1.0);
   //cs_print(check, 0);
 
   double error = cs_norm(check);
@@ -399,7 +399,7 @@ static int test_CSparseMatrix_chol_spsolve_unit(CSparseMatrix *M )
   cs_spfree(B);
   cs_spfree(X);
   CSparseMatrix_free_lu_factors(cs_chol_M);
-  cs_spfree(I);
+  cs_spfree(II);
   cs_spfree(Id);
   cs_spfree(check);
 
