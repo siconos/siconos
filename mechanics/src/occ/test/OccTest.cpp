@@ -19,6 +19,10 @@
 
 #include <BRepPrimAPI_MakeSphere.hxx>
 #include <BRepTools.hxx>
+#include <Geometer.hpp>
+#include <OccBody.hpp>
+#include <SiconosVector.hpp>
+#include <SimpleMatrix.hpp>
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Shape.hxx>

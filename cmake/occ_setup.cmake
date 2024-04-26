@@ -13,9 +13,9 @@ if(OpenCASCADE_FOUND)
   message("    OpenCASCADE headers path : ${OpenCASCADE_INCLUDE_DIR}")
 endif()
 
-if(NOT OpenCASCADE_VERSION VERSION_EQUAL 7.4)
-  message(FATAL_ERROR "Uncompatible opencascade version")
-endif()
+#if(NOT OpenCASCADE_VERSION VERSION_EQUAL 7.4)
+#  message(FATAL_ERROR "Uncompatible opencascade version")
+#endif()
 
 set(SICONOS_HAS_OpenCASCADE TRUE CACHE INTERNAL "True if OpenCASCADE API has been found and is activated.)")
 

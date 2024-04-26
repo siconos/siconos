@@ -16,6 +16,7 @@
 #define DEFINE_STANDARD_ALLOC
 
 %{
+#include <Standard_DefineAlloc.hxx>
 #include <TopoDS_Shape.hxx>
 %}
 %typecheck(SWIG_TYPECHECK_INTEGER) (const TopoDS_Shape& shape) ()
@@ -45,7 +46,7 @@
     if (!SWIG_IsOK(res)) {
       res = SWIG_ConvertPtrAndOwn($input, &argp, SWIGTYPE_p_TopoDS_Compound,  0 , &newmem);
       if (!SWIG_IsOK(res)) {
-        SWIG_exception_fail(SWIG_ArgError(res), "in method '" "new_OccContactShape" "', argument " "1"" of type '" "TopoDS_[Shape|Compound] const &""'"); 
+        SWIG_exception_fail(SWIG_ArgError(res), "in method '" "new_OccContactShape" "', argument " "1"" of type '" "TopoDS_[Shape|Compound] const &""'");
       }
     }
   }
@@ -53,6 +54,7 @@
 
 %}
 %shared_ptr(TopoDS_Shape)
+#define Handle(Class) opencascade::handle<Class>
 %include <TopoDS_Shape.hxx>
 
 %{
