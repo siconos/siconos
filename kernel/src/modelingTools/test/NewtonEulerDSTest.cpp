@@ -20,7 +20,7 @@
 #include "SiconosMatrixOp.hpp"
 #include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
   if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -55,7 +55,7 @@ void NewtonEulerDSTest::setUp() {
   (*velocity0)(4) = 8;
   (*velocity0)(5) = 9;
 
-  inertia = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
+  inertia = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
   (*inertia)(0, 0) = 1;
   (*inertia)(1, 1) = 2;
   (*inertia)(2, 2) = 3;
@@ -77,7 +77,7 @@ void NewtonEulerDSTest::testBuildNewtonEulerDS1() {
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNewtonEulerDS1D : ", ds->getqDim() == 7, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNewtonEulerDS1D : ", ds->scalarMass() == mass, true);
 
-  auto massMatrix = std::make_shared<siconos::algebra::SimpleMatrix>(6, 6);
+  auto massMatrix = std::make_shared<siconos::algebra::SiconosMatrix>(6, 6);
   massMatrix->setValue(0, 0, mass);
   massMatrix->setValue(1, 1, mass);
   massMatrix->setValue(2, 2, mass);
@@ -118,8 +118,8 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternion() {
   axisref(2) = 0.0;
   angleref = M_PI;
 
-  auto R = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
-  siconos::algebra::SimpleMatrix Rref(3, 3);
+  auto R = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
+  siconos::algebra::SiconosMatrix Rref(3, 3);
 
   siconos::geometry::computeRotationMatrix(*q0, *R);
   R->display();
@@ -300,7 +300,7 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternionMatrix() {
 
   // Old version
   siconos::algebra::SiconosVector aux(3);
-  auto matrix = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
+  auto matrix = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
   siconos::geometry::computeRotationMatrix(*q03, *matrix);  // compute R
   siconos::algebra::prod(*matrix, *v, aux);               // multiply by R
   *v = aux;
@@ -338,14 +338,14 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternionMatrix() {
       "testNewtonEulerDSQuaternion : ",
       (diff.normInf() <= std::numeric_limits<double>::epsilon() * 10.0), true);
 
-  auto m = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
+  auto m = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
   m->zero();
   (*m)(2, 0) = 1.0;
   (*m)(0, 1) = 1.0;
   (*m)(0, 2) = 1.0;
   (*m)(1, 2) = 1.0;
   (*m)(2, 2) = 1.0;
-  auto mref = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
+  auto mref = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
   mref->zero();
   (*mref)(0, 0) = sqrt(2.0) / 2.0;
   (*mref)(2, 0) = sqrt(2.0) / 2.0;
@@ -376,7 +376,7 @@ void NewtonEulerDSTest::testNewtonEulerDSQuaternionMatrix() {
 //   std::cout << "-->Test: computeDS." <<std::endl;
 //   ds->computeJacobianRhsx(time);
 //   std::cout << "-->Test: computeDS." <<std::endl;
-//   SimpleMatrix M(3, 3);
+//   SiconosMatrix M(3, 3);
 //   M(0, 0) = 1;
 //   M(1, 1) = 2;
 //   M(2, 2) = 3;

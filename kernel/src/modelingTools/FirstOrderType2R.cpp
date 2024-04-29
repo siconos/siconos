@@ -23,7 +23,7 @@
 #include "PluggedObject.hpp"
 #include "SiconosException.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -74,24 +74,24 @@ void siconos::modeling::FirstOrderType2R::initialize(Interaction& inter)
 
   if (!_C)
     relationMat[FirstOrderR::mat_C] =
-        std::make_shared<siconos::algebra::SimpleMatrix>(sizeY, sizeDS);
+        std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeDS);
   if (!_D)
     relationMat[FirstOrderR::mat_D] =
-        std::make_shared<siconos::algebra::SimpleMatrix>(sizeY, sizeY);
+        std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeY);
   if (!_F)
     relationMat[FirstOrderR::mat_F] =
-        std::make_shared<siconos::algebra::SimpleMatrix>(sizeY, sizeZ);
+        std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeZ);
   if (!_B)
     relationMat[FirstOrderR::mat_B] =
-        std::make_shared<siconos::algebra::SimpleMatrix>(sizeDS, sizeY);
+        std::make_shared<siconos::algebra::SiconosMatrix>(sizeDS, sizeY);
   if (!_K)
     relationMat[FirstOrderR::mat_K] =
-        std::make_shared<siconos::algebra::SimpleMatrix>(sizeDS, sizeDS);
+        std::make_shared<siconos::algebra::SiconosMatrix>(sizeDS, sizeDS);
 
   //  if (!_jacgx)
   //  {
   //    relationMat[FirstOrderR::mat_K] =
-  //    std::make_shared<siconos::algebra::siconos::algebra::SimpleMatrix>(sizeDS, sizeDS));
+  //    std::make_shared<siconos::algebra::siconos::algebra::SiconosMatrix>(sizeDS, sizeDS));
   // TODO add this back to workV of the DS -> needed for X partial NS
   //  }
 }
@@ -142,13 +142,13 @@ void siconos::modeling::FirstOrderType2R::computeInput(double time, Interaction&
 
 void siconos::modeling::FirstOrderType2R::computeJachlambda(
     double time, const siconos::algebra::BlockVector& x,
-    const siconos::algebra::SiconosVector& lambda, siconos::algebra::SimpleMatrix& D)
+    const siconos::algebra::SiconosVector& lambda, siconos::algebra::SiconosMatrix& D)
 {
   THROW_EXCEPTION("siconos::modeling::FirstOrderType2R::computeJachlambda must be overload.");
 }
 void siconos::modeling::FirstOrderType2R::computeJachx(
     double time, const siconos::algebra::BlockVector& x,
-    const siconos::algebra::SiconosVector& lambda, siconos::algebra::SimpleMatrix& C)
+    const siconos::algebra::SiconosVector& lambda, siconos::algebra::SiconosMatrix& C)
 {
   THROW_EXCEPTION("siconos::modeling::FirstOrderType2R::computeJachx must be overload.");
   // Note FP: so this class should be virtual, isn't it?
@@ -173,7 +173,7 @@ void siconos::modeling::FirstOrderType2R::computeJach(double time, Interaction& 
 
 void siconos::modeling::FirstOrderType2R::computeJacglambda(
     double time, const siconos::algebra::SiconosVector& lambda,
-    siconos::algebra::SimpleMatrix& B)
+    siconos::algebra::SiconosMatrix& B)
 {
   THROW_EXCEPTION("siconos::modeling::FirstOrderType2R::computeJacglambda must be overload.");
 }

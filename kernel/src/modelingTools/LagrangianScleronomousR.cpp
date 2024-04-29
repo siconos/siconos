@@ -27,7 +27,7 @@
 #include "PluginTypes.hpp"            // FPtr2 ...
 #include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 // #define DEBUG_MESSAGES
 // #define DEBUG_STDOUT
@@ -73,7 +73,7 @@ void siconos::modeling::LagrangianScleronomousR::initialize(Interaction& inter) 
   if (!_jachq) {
     unsigned int sizeY = inter.dimension();
     unsigned int sizeDS = inter.getSizeOfDS();
-    _jachq = std::make_shared<siconos::algebra::SimpleMatrix>(sizeY, sizeDS);
+    _jachq = std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeDS);
   }
 }
 
@@ -157,7 +157,7 @@ void siconos::modeling::LagrangianScleronomousR::computeOutput(double time, Inte
       if (!_dotjachq) {
         auto sizeY = inter.dimension();
         auto sizeDS = inter.getSizeOfDS();
-        _dotjachq = std::make_shared<siconos::algebra::SimpleMatrix>(sizeY, sizeDS);
+        _dotjachq = std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeDS);
       }
       computeDotJachq(*DSlink[LagrangianR::q0], *DSlink[LagrangianR::z],
                       *DSlink[LagrangianR::q1]);
@@ -202,7 +202,7 @@ void siconos::modeling::LagrangianScleronomousR::computeJach(double time, Intera
   if (!_dotjachq) {
     auto sizeY = inter.dimension();
     auto sizeDS = inter.getSizeOfDS();
-    _dotjachq = std::make_shared<siconos::algebra::SimpleMatrix>(sizeY, sizeDS);
+    _dotjachq = std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeDS);
   }
   computeDotJachq(*DSlink[LagrangianR::q0], *DSlink[LagrangianR::z], *DSlink[LagrangianR::q1]);
   // computeJachlambda(time, inter);

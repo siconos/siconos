@@ -129,7 +129,7 @@ class FirstOrderType2R : public FirstOrderR {
   */
   virtual void computeJachx(double time, const siconos::algebra::BlockVector& x,
                             const siconos::algebra::SiconosVector& lambda,
-                            siconos::algebra::SimpleMatrix& C);
+                            siconos::algebra::SiconosMatrix& C);
 
   /**
      to compute  \f$  B = \nabla_{\lambda}g  \f$
@@ -139,7 +139,7 @@ class FirstOrderType2R : public FirstOrderR {
      \param[out] B the resulting matrix
   */
   virtual void computeJacglambda(double time, const siconos::algebra::SiconosVector& lambda,
-                                 siconos::algebra::SimpleMatrix& B);
+                                 siconos::algebra::SiconosMatrix& B);
 
   /**
      to compute \f$ D = \nabla_{\lambda}h \f$
@@ -151,7 +151,7 @@ class FirstOrderType2R : public FirstOrderR {
   */
   virtual void computeJachlambda(double time, const siconos::algebra::BlockVector& x,
                                  const siconos::algebra::SiconosVector& lambda,
-                                 siconos::algebra::SimpleMatrix& D);
+                                 siconos::algebra::SiconosMatrix& D);
 
   /** default function to compute y, using the data from the Interaction and DS
    *

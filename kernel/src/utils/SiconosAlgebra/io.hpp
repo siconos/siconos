@@ -30,14 +30,14 @@
 // #include <string>
 #include "SiconosVector.hpp"
 #include "SiconosMatrix.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 /** utilities to handle file input/output for vectors and matrices */
 namespace siconos::algebra {
 
 // class SiconosMatrix;
 // class SiconosVector;
-// class SimpleMatrix;
+// class SiconosMatrix;
 namespace io {
 /** Format to read binary data */
 constexpr std::ios_base::openmode BINARY_IN = std::ios_base::in | std::ios_base::binary;
@@ -145,7 +145,7 @@ bool write(const std::string &fileName, const SiconosMatrix &m,
  *  \return Positive or 0.0 if the file was loaded and the comparison was performed,
  *  otherwise -1.
  */
-double compareRefFile(const SimpleMatrix &data, std::string filename, double epsilon,
+double compareRefFile(const SiconosMatrix &data, std::string filename, double epsilon,
                       std::vector<int> index = {},
                       const std::ios_base::openmode mode = std::ios_base::in,
                       bool verbose = true);

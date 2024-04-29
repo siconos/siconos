@@ -37,7 +37,7 @@
 #include "SiconosCollisionManager.hpp"
 #include "SiconosContactor.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "StaticBody.hpp"
 #include "siconos_debug.h"
 

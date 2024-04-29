@@ -194,7 +194,7 @@ class LagrangianDS : public SecondOrderDS {
    * from of LagrangianDS system values (jacobianXBloc10, jacobianXBloc11,
    * zeroMatrix, idMatrix) No get-set functions at the time. Only used as a
    * protected member.*/
-  std::vector<std::shared_ptr<siconos::algebra::SimpleMatrix>> _rhsMatrices = {
+  std::vector<std::shared_ptr<siconos::algebra::SiconosMatrix>> _rhsMatrices = {
       nullptr, nullptr, nullptr, nullptr};
 
   // pointers to functions member to compute plug-in functions

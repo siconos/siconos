@@ -22,7 +22,7 @@
 
 #include "BlockVector.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 siconos::collision::native::bodies::DiskDiskR::DiskDiskR(double r, double rr) : CircularR(r, rr)
 {

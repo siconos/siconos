@@ -21,7 +21,7 @@
 #include "FirstOrderLinearTIDS.hpp"
 #include "FirstOrderLinearTIR.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "Interaction.hpp"
 
 // #define DEBUG_NOCOLOR
@@ -32,10 +32,10 @@
 //  constructor
 siconos::modeling::LinearComplementaritySystemsNSDS::LinearComplementaritySystemsNSDS(
     double t0, double T, std::shared_ptr<siconos::algebra::SiconosVector> x0,
-    std::shared_ptr<siconos::algebra::SimpleMatrix> A,
-    std::shared_ptr<siconos::algebra::SimpleMatrix> B,
-    std::shared_ptr<siconos::algebra::SimpleMatrix> C,
-    std::shared_ptr<siconos::algebra::SimpleMatrix> D,
+    std::shared_ptr<siconos::algebra::SiconosMatrix> A,
+    std::shared_ptr<siconos::algebra::SiconosMatrix> B,
+    std::shared_ptr<siconos::algebra::SiconosMatrix> C,
+    std::shared_ptr<siconos::algebra::SiconosMatrix> D,
     std::shared_ptr<siconos::algebra::SiconosVector> a,
     std::shared_ptr<siconos::algebra::SiconosVector> b)
     : NonSmoothDynamicalSystem(t0, T)

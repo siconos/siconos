@@ -20,7 +20,7 @@
 #include "SiconosMatrixOp.hpp"
 #include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
   if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -35,8 +35,8 @@ void FirstOrderNonLinearDSTest::setUp() {
   (*x0)(1) = 2;
   (*x0)(2) = 3;
   
-  J0 = std::make_shared<siconos::algebra::SimpleMatrix>(siconos::algebra::readMatrixFromFile("matJ0.dat"));
-  M = std::make_shared<siconos::algebra::SimpleMatrix>(siconos::algebra::readMatrixFromFile("matM.dat"));
+  J0 = std::make_shared<siconos::algebra::SiconosMatrix>(siconos::algebra::readMatrixFromFile("matJ0.dat"));
+  M = std::make_shared<siconos::algebra::SiconosMatrix>(siconos::algebra::readMatrixFromFile("matM.dat"));
 }
 
 void FirstOrderNonLinearDSTest::tearDown() {}
@@ -66,7 +66,7 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS1() {
 
   siconos::algebra::SiconosVector zero(3);
   zero.setZero();
-  siconos::algebra::SimpleMatrix m0(3, 3);
+  siconos::algebra::SiconosMatrix m0(3, 3);
   m0.setZero();
   ds->update(time);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", ds->rhs()->isApprox(zero),
@@ -86,7 +86,7 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS1() {
   ds->computeJacobianfx(time, ds->x());
   ds->setComputeMFunction("TestPlugin", "computeM");
   ds->computeM(time);
-  siconos::algebra::SimpleMatrix Mref(3, 3);
+  siconos::algebra::SiconosMatrix Mref(3, 3);
   Mref.setZero();
   Mref(0, 0) = 1. * time;
   Mref(1, 1) = 2. * time;
@@ -97,7 +97,7 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS1() {
       "testBuildFirstOrderNonLinearDS1 : ", *(ds->jacobianfx()) == *J0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", *(ds->M()) == Mref, true);
   ds->initRhs(time);
-  siconos::algebra::SimpleMatrix invM(3, 3);
+  siconos::algebra::SiconosMatrix invM(3, 3);
   invM.setZero();
   invM(0, 0) = 1. / time;
   invM(1, 1) = 1. / (2. * time);
@@ -140,7 +140,7 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS2() {
       "testBuildFirstOrderNonLinearDS2 : ", ds->jacobianRhsx() == nullptr, true);
 
   ds->initRhs(time);
-  siconos::algebra::SimpleMatrix m0(3, 3);
+  siconos::algebra::SiconosMatrix m0(3, 3);
   m0.setZero();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", *(ds->rhs()) == zero,
                                true);

@@ -23,7 +23,7 @@
 #include <iostream>
 
 #include "PluggedObject.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosVisitor.hpp"
 
 void siconos::modeling::LagrangianR::_zeroPlugin()

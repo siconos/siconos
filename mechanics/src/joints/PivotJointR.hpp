@@ -121,7 +121,7 @@ class PivotJointR : public KneeJointR {
   /** Compute the jacobian of linear and angular DoF with respect to some q */
   virtual void computeJachqDoF(double time, siconos::modeling::Interaction& inter,
                                std::shared_ptr<siconos::algebra::BlockVector> q0,
-                               siconos::algebra::SimpleMatrix& jachq,
+                               siconos::algebra::SiconosMatrix& jachq,
                                unsigned int axis) override;
 
   /**

@@ -56,19 +56,19 @@ class Lagrangian2d1DR : public LagrangianScleronomousR {
    * coordinate. This matrix contains the unit vector(s)of the contact frame in
    * row.
    */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _RotationAbsToContactFrame;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _RotationAbsToContactFrame;
 
   /* Matrix converting */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _rotationMatrixAbsToBody;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _rotationMatrixAbsToBody;
 
   /* Cross product matrices that correspond the lever arm from
    * contact point to center of mass*/
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _NPG1;
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _NPG2;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _NPG1;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _NPG2;
 
   /*buffer matrices*/
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _AUX1;
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _AUX2;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _AUX1;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _AUX2;
 
   /** Set the coordinates of first contact point.  Must only be done
    * in a computeh() override.

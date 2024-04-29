@@ -32,7 +32,7 @@
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"  // for subscal
 #include "SiconosVisitor.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "Simulation.hpp"
 #include "Tools.hpp"  // enum_to_string
 #include "Topology.hpp"
@@ -865,7 +865,7 @@ void siconos::integrators::Hem5OSI::computeFreeOutput(
       siconos::algebra::subprod(*C, *Xfree, osnsp_rhs, coord, true);
     }
 
-    auto ID = std::make_shared<siconos::algebra::SimpleMatrix>(sizeY, sizeY);
+    auto ID = std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeY);
     ID->eye();
 
     std::vector<std::size_t> xcoord = {0, sizeY, 0, sizeY, 0, sizeY, 0, sizeY};

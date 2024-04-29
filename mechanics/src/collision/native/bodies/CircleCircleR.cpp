@@ -22,7 +22,7 @@
 
 #include "BlockVector.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 double siconos::collision::native::bodies::CircleCircleR::distance(double x1, double y1,
                                                                    double r1, double x2,

@@ -27,7 +27,7 @@
 #include "NumericsSolversNamespace.h"  // for SolverOptions tools
 #include "SiconosBodies.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "SpaceFilter.hpp"
 #include "TimeDiscretisation.hpp"
 #include "TimeStepping.hpp"
@@ -131,7 +131,7 @@ void Disks::init(std::string disks_input)
 
     std::cout << "====> nsds loading ..." << std::endl << std::endl;
 
-    _plans = std::make_shared<siconos::algebra::SimpleMatrix>(siconos::algebra::readMatrixFromFile("plans.dat"));
+    _plans = std::make_shared<siconos::algebra::SiconosMatrix>(siconos::algebra::readMatrixFromFile("plans.dat"));
     if (_plans->size(0) == 0) {
       /* default plans */
       double A1 = P1A;
@@ -141,7 +141,7 @@ void Disks::init(std::string disks_input)
       double B2 = P2B;
       double C2 = P2C;
 
-      _plans = std::make_shared<siconos::algebra::SimpleMatrix>(6, 6);
+      _plans = std::make_shared<siconos::algebra::SiconosMatrix>(6, 6);
       _plans->zero();
       (*_plans)(0, 0) = 0;
       (*_plans)(0, 1) = 1;
@@ -185,7 +185,7 @@ void Disks::init(std::string disks_input)
         (*_moving_plans)(0,4) = &DB;
         (*_moving_plans)(0,5) = &DC;*/
 
-    auto Disks = std::make_shared<siconos::algebra::SimpleMatrix>(siconos::algebra::readMatrixFromFile(disks_input));
+    auto Disks = std::make_shared<siconos::algebra::SiconosMatrix>(siconos::algebra::readMatrixFromFile(disks_input));
 
     // -- OneStepIntegrators --
     auto osi = std::make_shared<siconos::integrators::MoreauJeanOSI>(theta);

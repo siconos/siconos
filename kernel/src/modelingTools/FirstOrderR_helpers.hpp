@@ -30,7 +30,7 @@
 namespace siconos::modeling::FirstOrderRHelpers {
 
 static inline void JacglambdaSetter(siconos::modeling::FirstOrderR& rel,
-                                    std::shared_ptr<siconos::algebra::SimpleMatrix> B,
+                                    std::shared_ptr<siconos::algebra::SiconosMatrix> B,
                                     std::string& pluginName) {
   if (B) {
     rel.setBPtr(B);
@@ -42,7 +42,7 @@ static inline void JacglambdaSetter(siconos::modeling::FirstOrderR& rel,
 }
 
 static inline void JachxSetter(siconos::modeling::FirstOrderR& rel,
-                               std::shared_ptr<siconos::algebra::SimpleMatrix> C,
+                               std::shared_ptr<siconos::algebra::SiconosMatrix> C,
                                std::string& pluginName) {
   if (C) {
     rel.setCPtr(C);
@@ -55,7 +55,7 @@ static inline void JachxSetter(siconos::modeling::FirstOrderR& rel,
 }
 
 static inline void JachlambdaSetter(siconos::modeling::FirstOrderR& rel,
-                                    std::shared_ptr<siconos::algebra::SimpleMatrix> D,
+                                    std::shared_ptr<siconos::algebra::SiconosMatrix> D,
                                     std::string& pluginName) {
   if (D) {
     rel.setCPtr(D);

@@ -21,15 +21,15 @@
 #include "SiconosException.hpp"
 #include "SiconosMatrixVectorOp.hpp"  // mat-vec prod
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 siconos::control::LinearSensor::LinearSensor(
     std::shared_ptr<siconos::modeling::DynamicalSystem> ds)
     : ControlSensor(SensorType::Linear, ds) {}
 
 siconos::control::LinearSensor::LinearSensor(
     std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
-    std::shared_ptr<siconos::algebra::SimpleMatrix> matC,
-    std::shared_ptr<siconos::algebra::SimpleMatrix> matD)
+    std::shared_ptr<siconos::algebra::SiconosMatrix> matC,
+    std::shared_ptr<siconos::algebra::SiconosMatrix> matD)
     : ControlSensor(SensorType::Linear, ds), _matC(matC), _matD(matD) {}
 
 void siconos::control::LinearSensor::initialize(
@@ -80,10 +80,10 @@ void siconos::control::LinearSensor::capture() {
     _bufferY.push_back(_storedY);
   }
 }
-void siconos::control::LinearSensor::setC(const siconos::algebra::SimpleMatrix& C) {
+void siconos::control::LinearSensor::setC(const siconos::algebra::SiconosMatrix& C) {
   *_matC = C;
 }
 
-void siconos::control::LinearSensor::setD(const siconos::algebra::SimpleMatrix& D) {
+void siconos::control::LinearSensor::setD(const siconos::algebra::SiconosMatrix& D) {
   *_matD = D;
 }

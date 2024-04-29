@@ -21,7 +21,7 @@
 #include "SiconosMatrix.hpp"
 #include "SiconosMatrixOp.hpp"        // for prod
 #include "SiconosMatrixVectorOp.hpp"  // for prod
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "Tools.hpp"
 // namespace ublas = boost::numeric::ublas;
 
@@ -36,15 +36,15 @@ CPPUNIT_TEST_SUITE_REGISTRATION(SimpleMatrixTest);
 // Note FP: tests are (rather) complete for Dense objects but many are missing for other cases
 // (Triang, Symm etc ...).
 
-using SimpleMatrix = siconos::algebra::SimpleMatrix;
+using SiconosMatrix = siconos::algebra::SiconosMatrix;
 
 void SimpleMatrixTest::setUp() {
   tol = 1e-9;
 
   fic1 = "mat1.dat";  // 2 X 2
   fic2 = "mat2.dat";  // 2 X 3
-  SicM = std::make_shared<SimpleMatrix>(siconos::algebra::readMatrixFromFile(fic1));
-  SimM = std::make_shared<SimpleMatrix>(siconos::algebra::readMatrixFromFile(fic2));
+  SicM = std::make_shared<SiconosMatrix>(siconos::algebra::readMatrixFromFile(fic1));
+  SimM = std::make_shared<SiconosMatrix>(siconos::algebra::readMatrixFromFile(fic2));
 
   std::vector<double> v3(2, 0);
   std::vector<double> v4(2, 0);
@@ -136,18 +136,18 @@ void SimpleMatrixTest::setUp() {
   size = 10;
   size2 = 10;
 
-  C = std::make_shared<SimpleMatrix>(size, size);
-  A = std::make_shared<SimpleMatrix>(siconos::algebra::readMatrixFromFile("A.dat"));
-  B = std::make_shared<SimpleMatrix>(siconos::algebra::readMatrixFromFile("B.dat"));
+  C = std::make_shared<SiconosMatrix>(size, size);
+  A = std::make_shared<SiconosMatrix>(siconos::algebra::readMatrixFromFile("A.dat"));
+  B = std::make_shared<SiconosMatrix>(siconos::algebra::readMatrixFromFile("B.dat"));
 
-  m1 = std::make_shared<SimpleMatrix>(size - 2, size - 2);
-  m2 = std::make_shared<SimpleMatrix>(size - 2, 2);
-  m3 = std::make_shared<SimpleMatrix>(2, size - 2);
-  m4 = std::make_shared<SimpleMatrix>(2, 2);
-  m5 = std::make_shared<SimpleMatrix>(size2 - 2, size2 - 2);
-  m6 = std::make_shared<SimpleMatrix>(size2 - 2, 2);
-  m7 = std::make_shared<SimpleMatrix>(2, size2 - 2);
-  m8 = std::make_shared<SimpleMatrix>(2, 2);
+  m1 = std::make_shared<SiconosMatrix>(size - 2, size - 2);
+  m2 = std::make_shared<SiconosMatrix>(size - 2, 2);
+  m3 = std::make_shared<SiconosMatrix>(2, size - 2);
+  m4 = std::make_shared<SiconosMatrix>(2, 2);
+  m5 = std::make_shared<SiconosMatrix>(size2 - 2, size2 - 2);
+  m6 = std::make_shared<SiconosMatrix>(size2 - 2, 2);
+  m7 = std::make_shared<SiconosMatrix>(2, size2 - 2);
+  m8 = std::make_shared<SiconosMatrix>(2, 2);
   Ab = (std::make_shared<siconos::algebra::BlockMatrix>(m1, m2, m3, m4))->toSiconosMatrix();
   Bb = (std::make_shared<siconos::algebra::BlockMatrix>(3 * *Ab)->toSiconosMatrix());
   Cb = std::make_shared<siconos::algebra::BlockMatrix>(m5, m6, m7, m8)->toSiconosMatrix();
@@ -163,7 +163,7 @@ void SimpleMatrixTest::testConstructor0()  // constructor with TYP and dim
   std::cout << "=== Simple Matrix tests start ...=== " << std::endl;
   std::cout << "====================================" << std::endl;
   std::cout << "--> Test: constructor 0." << std::endl;
-  auto test = std::make_shared<SimpleMatrix>(2, 3);
+  auto test = std::make_shared<SiconosMatrix>(2, 3);
 
   // CPPUNIT_ASSERT_EQUAL_MESSAGE(
   //     "testConstructor0 : ", test->num() == siconos::algebra::UblasType::DENSE, true);
@@ -173,10 +173,10 @@ void SimpleMatrixTest::testConstructor0()  // constructor with TYP and dim
   std::cout << "--> Constructor 0 test ended with success." << std::endl;
 }
 
-void SimpleMatrixTest::testConstructor1()  // Copy constructor, from a SimpleMatrix
+void SimpleMatrixTest::testConstructor1()  // Copy constructor, from a SiconosMatrix
 {
   std::cout << "--> Test: constructor 1." << std::endl;
-  auto test = std::make_shared<SimpleMatrix>(*SimM);
+  auto test = std::make_shared<SiconosMatrix>(*SimM);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", *test == *SimM, true);
   std::cout << "--> Constructor 1 (copy) test ended with success." << std::endl;
 }
@@ -184,7 +184,7 @@ void SimpleMatrixTest::testConstructor1()  // Copy constructor, from a SimpleMat
 void SimpleMatrixTest::testConstructor2()  // Copy constructor, from a SiconosMatrix
 {
   std::cout << "--> Test: constructor 2." << std::endl;
-  auto test = std::make_shared<SimpleMatrix>(*SicM);
+  auto test = std::make_shared<SiconosMatrix>(*SicM);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", *test == *SicM, true);
   std::cout << "--> Constructor 2 (copy) test ended with success." << std::endl;
 }
@@ -192,14 +192,14 @@ void SimpleMatrixTest::testConstructor2()  // Copy constructor, from a SiconosMa
 void SimpleMatrixTest::testConstructor3()  // Copy constructor, from a BlockMatrix
 {
   std::cout << "--> Test: constructor 3." << std::endl;
-  auto test = std::make_shared<SimpleMatrix>(*Ab);
+  auto test = std::make_shared<SiconosMatrix>(*Ab);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", *test == *Ab, true);
   std::cout << "--> Constructor 3 (copy) test ended with success." << std::endl;
 }
 
 void SimpleMatrixTest::testConstructor4() {
   std::cout << "--> Test: constructor 4." << std::endl;
-  auto test = std::make_shared<SimpleMatrix>(*D);
+  auto test = std::make_shared<SiconosMatrix>(*D);
   // CPPUNIT_ASSERT_EQUAL_MESSAGE(
       // "testConstructor4 : ", test->num() == siconos::algebra::UblasType::DENSE, true);
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", (*test - *D).normInf() == 0,   // SAM : TODO
@@ -209,7 +209,7 @@ void SimpleMatrixTest::testConstructor4() {
 
 // void SimpleMatrixTest::testConstructor5() {
 //   std::cout << "--> Test: constructor 5." << std::endl;
-//   auto test = std::make_shared<SimpleMatrix>(*T);
+//   auto test = std::make_shared<SiconosMatrix>(*T);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE(
 //       "testConstructor5 : ", test->num() == siconos::algebra::UblasType::TRIANGULAR, true);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", norm_inf(test->getTriang() - *T) == 0,
@@ -219,7 +219,7 @@ void SimpleMatrixTest::testConstructor4() {
 
 // void SimpleMatrixTest::testConstructor6() {
 //   std::cout << "--> Test: constructor 6." << std::endl;
-//   auto test = std::make_shared<SimpleMatrix>(*S);
+//   auto test = std::make_shared<SiconosMatrix>(*S);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE(
 //       "testConstructor6 : ", test->num() == siconos::algebra::UblasType::SYMMETRIC, true);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor6 : ", norm_inf(test->getSym() - *S) == 0,
@@ -229,7 +229,7 @@ void SimpleMatrixTest::testConstructor4() {
 
 // void SimpleMatrixTest::testConstructor7() {
 //   std::cout << "--> Test: constructor 7." << std::endl;
-//   auto test = std::make_shared<SimpleMatrix>(*SP);
+//   auto test = std::make_shared<SiconosMatrix>(*SP);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE(
 //       "testConstructor7 : ", test->num() == siconos::algebra::UblasType::SPARSE, true);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor7 : ", norm_inf(test->getSparse() - *SP) == 0,
@@ -240,7 +240,7 @@ void SimpleMatrixTest::testConstructor4() {
 // void SimpleMatrixTest::testConstructor8() {
 //   std::cout << "--> Test: constructor 8." << std::endl;
 //   std::cout << "--> Constructor 8 test ended with success." << std::endl;
-//   auto test = std::make_shared<SimpleMatrix>(*Band);
+//   auto test = std::make_shared<SiconosMatrix>(*Band);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE(
 //       "testConstructor8 : ", test->num() == siconos::algebra::UblasType::BANDED, true);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor8 : ", norm_inf(test->getBanded() - *Band) == 0,
@@ -250,7 +250,7 @@ void SimpleMatrixTest::testConstructor4() {
 // void SimpleMatrixTest::testConstructor9()  // constructor with TYP and dim and input value
 // {
 //   std::cout << "--> Test: constructor 9." << std::endl;
-//   auto test = std::make_shared<SimpleMatrix>(2, 3, 4.5);
+//   auto test = std::make_shared<SiconosMatrix>(2, 3, 4.5);
 
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE(
 //       "testConstructor9 : ", test->num() == siconos::algebra::UblasType::DENSE, true);
@@ -265,7 +265,7 @@ void SimpleMatrixTest::testConstructor4() {
 
 // void SimpleMatrixTest::testConstructor10() {
 //   std::cout << "--> Test: constructor 10." << std::endl;
-//   auto test = std::make_shared<SimpleMatrix>(fic1);
+//   auto test = std::make_shared<SiconosMatrix>(fic1);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor10 : ", *test == *SicM, true);
 //   std::cout << "--> Constructor 10 test ended with success." << std::endl;
 // }
@@ -273,7 +273,7 @@ void SimpleMatrixTest::testConstructor4() {
 // void SimpleMatrixTest::testConstructor11() {
 //   std::cout << "--> Test: constructor 11." << std::endl;
 //   std::cout << "--> Constructor 11 test ended with success." << std::endl;
-//   auto test = std::make_shared<SimpleMatrix>(*Z);
+//   auto test = std::make_shared<SiconosMatrix>(*Z);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE(
 //       "testConstructor11 : ", test->num() == siconos::algebra::UblasType::ZERO, true);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor11 : ", test->normInf() == 0, true);
@@ -282,7 +282,7 @@ void SimpleMatrixTest::testConstructor4() {
 // void SimpleMatrixTest::testConstructor12() {
 //   std::cout << "--> Test: constructor 12." << std::endl;
 //   std::cout << "--> Constructor 12 test ended with success." << std::endl;
-//   auto test = std::make_shared<SimpleMatrix>(*I);
+//   auto test = std::make_shared<SiconosMatrix>(*I);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE(
 //       "testConstructor12 : ", test->num() == siconos::algebra::UblasType::IDENTITY, true);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor12 : ", test->normInf() == 1, true);
@@ -290,7 +290,7 @@ void SimpleMatrixTest::testConstructor4() {
 
 // void SimpleMatrixTest::testConstructor13() {
 //   std::cout << "--> Test: constructor 13." << std::endl;
-//   auto test = std::make_shared<SimpleMatrix>(4, 4, siconos::algebra::UblasType::SPARSE);
+//   auto test = std::make_shared<SiconosMatrix>(4, 4, siconos::algebra::UblasType::SPARSE);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE(
 //       "testConstructor3 : ", test->num() == siconos::algebra::UblasType::SPARSE, true);
 //   std::cout << "--> Constructor 13 test ended with success." << std::endl;
@@ -298,7 +298,7 @@ void SimpleMatrixTest::testConstructor4() {
 // void SimpleMatrixTest::testConstructor14() {
 //   std::cout << "--> Test: constructor 14." << std::endl;
 //   auto test =
-//       std::make_shared<SimpleMatrix>(4, 4, siconos::algebra::UblasType::SPARSE_COORDINATE);
+//       std::make_shared<SiconosMatrix>(4, 4, siconos::algebra::UblasType::SPARSE_COORDINATE);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE(
 //       "testConstructor14 : ", test->num() == siconos::algebra::UblasType::SPARSE_COORDINATE,
 //       true);
@@ -310,7 +310,7 @@ void SimpleMatrixTest::testConstructor4() {
 
 void SimpleMatrixTest::testZero() {
   std::cout << "--> Test: zero." << std::endl;
-  auto tmp = std::make_shared<SimpleMatrix>(*SimM);
+  auto tmp = std::make_shared<SiconosMatrix>(*SimM);
   tmp->zero();
   unsigned int n1 = tmp->size(0);
   unsigned int n2 = tmp->size(1);
@@ -322,7 +322,7 @@ void SimpleMatrixTest::testZero() {
 
 void SimpleMatrixTest::testEye() {
   std::cout << "--> Test: eye." << std::endl;
-  auto tmp = std::make_shared<SimpleMatrix>(*SimM);
+  auto tmp = std::make_shared<SiconosMatrix>(*SimM);
   tmp->eye();
   unsigned int n1 = tmp->size(0);
   unsigned int n2 = tmp->size(1);
@@ -337,7 +337,7 @@ void SimpleMatrixTest::testEye() {
 
 void SimpleMatrixTest::testResize() {
   std::cout << "--> Test: resize." << std::endl;
-  auto tmp = std::make_shared<SimpleMatrix>(*SicM);
+  auto tmp = std::make_shared<SiconosMatrix>(*SicM);
   tmp->conservativeResize(3, 4);
   unsigned int n1 = SicM->size(0);
   unsigned int n2 = SicM->size(1);
@@ -384,11 +384,11 @@ void SimpleMatrixTest::testSetBlock() {
   std::cout << "--> Test: testSetBlock." << std::endl;
 
   // Copy of a sub-block of a Simple into a Simple
-  auto MIn = std::make_shared<SimpleMatrix>(10, 10);
+  auto MIn = std::make_shared<SiconosMatrix>(10, 10);
   for (unsigned int i = 0; i < 10; ++i)
     for (unsigned int j = 0; j < 10; ++j) (*MIn)(i, j) = i + j;
 
-  auto MOut = std::make_shared<SimpleMatrix>(5, 5);
+  auto MOut = std::make_shared<SiconosMatrix>(5, 5);
 
   std::vector<std::size_t> subDim(2);
   std::vector<std::size_t> subPos(4);
@@ -417,7 +417,7 @@ void SimpleMatrixTest::testSetBlock() {
 
   // Copy of a sub-block of a Block into a Simple
 
-  MOut = std::make_shared<SimpleMatrix>(5, 5);
+  MOut = std::make_shared<SiconosMatrix>(5, 5);
   siconos::algebra::setBlock(*Ab, MOut, subDim, subPos);
 
   for (unsigned int i = subPos[2]; i < subPos[2] + subDim[0]; ++i)
@@ -431,9 +431,9 @@ void SimpleMatrixTest::testSetBlock() {
 void SimpleMatrixTest::testSetBlock2() {
   std::cout << "--> Test: testSetBlock2." << std::endl;
   // Copy of a Simple into a sub-block of Simple
-  auto MOut = std::make_shared<SimpleMatrix>(10, 10);
+  auto MOut = std::make_shared<SiconosMatrix>(10, 10);
 
-  auto MIn = std::make_shared<SimpleMatrix>(5, 5);
+  auto MIn = std::make_shared<SiconosMatrix>(5, 5);
   for (unsigned int i = 0; i < 5; ++i)
     for (unsigned int j = 0; j < 5; ++j) (*MIn)(i, j) = i + j;
 
@@ -507,8 +507,8 @@ void SimpleMatrixTest::testTrans() {
   std::cout << "--> Test: trans." << std::endl;
 
   // Transpose in place ...
-  auto ref = std::make_shared<SimpleMatrix>(*D);
-  auto tRef = std::make_shared<SimpleMatrix>(*ref);
+  auto ref = std::make_shared<SiconosMatrix>(*D);
+  auto tRef = std::make_shared<SiconosMatrix>(*ref);
 
   tRef->transposeInPlace();
   for (unsigned int i = 0; i < ref->size(0); ++i)
@@ -531,15 +531,15 @@ void SimpleMatrixTest::testTrans() {
         CPPUNIT_ASSERT_EQUAL_MESSAGE("testTrans: ", (*tRef)(i, j) == (*ref)(j, i), true);
 
   // // Sym
-  // ref = std::make_shared<SimpleMatrix>(*S);
-  // tRef = std::make_shared<SimpleMatrix>(*ref);
+  // ref = std::make_shared<SiconosMatrix>(*S);
+  // tRef = std::make_shared<SiconosMatrix>(*ref);
   // std::cout << siconos::tools::enum_to_string(ref->num()) << " "
   //           << siconos::tools::enum_to_string(tRef->num()) << "\n";
   // tRef->trans(*ref);
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testTrans: ", (*tRef) == (*ref), true);
   // // Sparse
-  // ref = std::make_shared<SimpleMatrix>(*SP);
-  // tRef = std::make_shared<SimpleMatrix>(*ref);
+  // ref = std::make_shared<SiconosMatrix>(*SP);
+  // tRef = std::make_shared<SiconosMatrix>(*ref);
   // tRef->trans(*ref);
   //   for(unsigned int i = 0; i<ref->size(0); ++i)
   //     {
@@ -550,8 +550,8 @@ void SimpleMatrixTest::testTrans() {
   //    CPPUNIT_ASSERT_EQUAL_MESSAGE("testTrans: ", (*tRef)(i,j) == (*ref)(j,i) , true);
   //     }
   // Banded
-  //   ref = std::make_shared<SimpleMatrix>(*Band);
-  //   tRef = std::make_shared<SimpleMatrix>(*ref);
+  //   ref = std::make_shared<SiconosMatrix>(*Band);
+  //   tRef = std::make_shared<SiconosMatrix>(*ref);
   //   *tRef = trans(*ref);
   //   for(unsigned int i = 0; i<ref->size(0); ++i)
   //     for(unsigned int j = 0 ; j< ref->size(1); ++j)
@@ -567,94 +567,94 @@ void SimpleMatrixTest::testAssignment0() {
 
   // Simple = Simple
 
-  auto ref = std::make_shared<SimpleMatrix>(*D);
-  auto tRef = std::make_shared<SimpleMatrix>(*SicM);
+  auto ref = std::make_shared<SiconosMatrix>(*D);
+  auto tRef = std::make_shared<SiconosMatrix>(*SicM);
   // Dense = any type:
   *tRef = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef) == (*ref), true);
-  // ref = std::make_shared<SimpleMatrix>(*T);
-  // auto tRef3 = std::make_shared<SimpleMatrix>(3, 3);
+  // ref = std::make_shared<SiconosMatrix>(*T);
+  // auto tRef3 = std::make_shared<SiconosMatrix>(3, 3);
   // *tRef3 = *ref;
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef3) == (*ref), true);
 
-  // ref = std::make_shared<SimpleMatrix>(*S);
+  // ref = std::make_shared<SiconosMatrix>(*S);
   // *tRef3 = *ref;
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef3) == (*ref), true);
 
-  // auto tRef4 = std::make_shared<SimpleMatrix>(4, 4);
-  // ref = std::make_shared<SimpleMatrix>(*SP);
+  // auto tRef4 = std::make_shared<SiconosMatrix>(4, 4);
+  // ref = std::make_shared<SiconosMatrix>(*SP);
   // *tRef4 = *ref;
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef4) == (*ref), true);
 
-  // ref = std::make_shared<SimpleMatrix>(*Band);
+  // ref = std::make_shared<SiconosMatrix>(*Band);
   // *tRef4 = *ref;
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef4) == (*ref), true);
-  // ref = std::make_shared<SimpleMatrix>(*Z);
+  // ref = std::make_shared<SiconosMatrix>(*Z);
   // *tRef3 = *ref;
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef3) == (*ref), true);
 
-  // ref = std::make_shared<SimpleMatrix>(*I);
+  // ref = std::make_shared<SiconosMatrix>(*I);
   // *tRef3 = *ref;
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef3) == (*ref), true);
 
   // // Triang = Triang, Zero or Identity
-  // ref = std::make_shared<SimpleMatrix>(*T);
-  // tRef = std::make_shared<SimpleMatrix>(*T);
+  // ref = std::make_shared<SiconosMatrix>(*T);
+  // tRef = std::make_shared<SiconosMatrix>(*T);
   // tRef->zero();
   // *tRef = *ref;
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef) == (*ref), true);
 
-  // ref = std::make_shared<SimpleMatrix>(*Z);
+  // ref = std::make_shared<SiconosMatrix>(*Z);
   // *tRef = *ref;
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef) == (*ref), true);
 
-  // ref = std::make_shared<SimpleMatrix>(*I);
+  // ref = std::make_shared<SiconosMatrix>(*I);
   // *tRef = *ref;
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef) == (*ref), true);
   // // Sym = Sym, Zero or Id
-  // ref = std::make_shared<SimpleMatrix>(*S);
-  // tRef = std::make_shared<SimpleMatrix>(*S);
+  // ref = std::make_shared<SiconosMatrix>(*S);
+  // tRef = std::make_shared<SiconosMatrix>(*S);
   // tRef->zero();
   // *tRef = *ref;
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef) == (*ref), true);
-  // ref = std::make_shared<SimpleMatrix>(*Z);
+  // ref = std::make_shared<SiconosMatrix>(*Z);
   // *tRef = *ref;
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef) == (*ref), true);
-  // ref = std::make_shared<SimpleMatrix>(*I);
+  // ref = std::make_shared<SiconosMatrix>(*I);
   // *tRef = *ref;
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef) == (*ref), true);
 
   // // Sparse => Sparse or Zero
-  // ref = std::make_shared<SimpleMatrix>(*SP);
-  // tRef = std::make_shared<SimpleMatrix>(*SP);
+  // ref = std::make_shared<SiconosMatrix>(*SP);
+  // tRef = std::make_shared<SiconosMatrix>(*SP);
   // tRef->zero();
   // *tRef = *ref;
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef) == (*ref), true);
 
-  // ref = std::make_shared<SimpleMatrix>(*Z2);
+  // ref = std::make_shared<SiconosMatrix>(*Z2);
   // *tRef = *ref;
 
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef) == (*ref), true);
 
   // // // Sparse coordinate => Sparse
-  // ref = std::make_shared<SimpleMatrix>(*SP_coor);
+  // ref = std::make_shared<SiconosMatrix>(*SP_coor);
   // // ref->display();
-  // tRef = std::make_shared<SimpleMatrix>(*SP);
+  // tRef = std::make_shared<SiconosMatrix>(*SP);
   // tRef->zero();
   // *tRef = *ref;
   // // tRef->displayExpert();
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef) == (*ref), true);
 
   // // Banded = Banded, Id or Zero
-  // ref = std::make_shared<SimpleMatrix>(*Band);
-  // tRef = std::make_shared<SimpleMatrix>(*Band);
+  // ref = std::make_shared<SiconosMatrix>(*Band);
+  // tRef = std::make_shared<SiconosMatrix>(*Band);
   // tRef->zero();
   // *tRef = *ref;
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef) == (*ref), true);
-  // ref = std::make_shared<SimpleMatrix>(*Z2);
+  // ref = std::make_shared<SiconosMatrix>(*Z2);
   // *tRef = *ref;
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef) == (*ref), true);
-  // ref = std::make_shared<SimpleMatrix>(*I2);
+  // ref = std::make_shared<SiconosMatrix>(*I2);
   // *tRef = *ref;
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment0: ", (*tRef) == (*ref), true);
 
@@ -676,84 +676,84 @@ void SimpleMatrixTest::testAssignment2() {
 
   // Simple = Siconos(Simple)
 
-  auto ref = std::make_shared<SimpleMatrix>(*D);
-  auto tRef = std::make_shared<SimpleMatrix>(*SicM);
+  auto ref = std::make_shared<SiconosMatrix>(*D);
+  auto tRef = std::make_shared<SiconosMatrix>(*SicM);
   // Dense = any type:
   *tRef = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment2: ", (*tRef) == (*ref), true);
 
-  // ref = std::make_shared<SimpleMatrix>(*T);
-  // auto tRef3 = std::make_shared<SimpleMatrix>(3, 3);
+  // ref = std::make_shared<SiconosMatrix>(*T);
+  // auto tRef3 = std::make_shared<SiconosMatrix>(3, 3);
   // *tRef3 = *ref;
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment2: ", (*tRef3) == (*ref), true);
 
-  // ref = std::make_shared<SimpleMatrix>(*S);
+  // ref = std::make_shared<SiconosMatrix>(*S);
   // *tRef3 = *ref;
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment2: ", (*tRef3) == (*ref), true);
 
-  // auto tRef4 = std::make_shared<SimpleMatrix>(4, 4);
-  // ref = std::make_shared<SimpleMatrix>(*SP);
+  // auto tRef4 = std::make_shared<SiconosMatrix>(4, 4);
+  // ref = std::make_shared<SiconosMatrix>(*SP);
   // *tRef4 = *ref;
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment2: ", (*tRef4) == (*ref), true);
 
-  // ref = std::make_shared<SimpleMatrix>(*Band);
+  // ref = std::make_shared<SiconosMatrix>(*Band);
   // *tRef4 = *ref;
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment2: ", (*tRef4) == (*ref), true);
-  // ref = std::make_shared<SimpleMatrix>(*Z);
+  // ref = std::make_shared<SiconosMatrix>(*Z);
   // *tRef3 = *ref;
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment2: ", (*tRef3) == (*ref), true);
 
-  // ref = std::make_shared<SimpleMatrix>(*I);
+  // ref = std::make_shared<SiconosMatrix>(*I);
   // *tRef3 = *ref;
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment2: ", (*tRef3) == (*ref), true);
   // // Triang = Triang, Zero or Identity
-  // ref = std::make_shared<SimpleMatrix>(*T);
-  // tRef = std::make_shared<SimpleMatrix>(*T);
+  // ref = std::make_shared<SiconosMatrix>(*T);
+  // tRef = std::make_shared<SiconosMatrix>(*T);
   // tRef->zero();
   // *tRef = *ref;
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment2: ", (*tRef) == (*ref), true);
 
-  // ref = std::make_shared<SimpleMatrix>(*Z);
+  // ref = std::make_shared<SiconosMatrix>(*Z);
   // *tRef = *ref;
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment2: ", (*tRef) == (*ref), true);
 
-  // ref = std::make_shared<SimpleMatrix>(*I);
+  // ref = std::make_shared<SiconosMatrix>(*I);
   // *tRef = *ref;
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment2: ", (*tRef) == (*ref), true);
   // // Sym = Sym, Zero or Id
-  // ref = std::make_shared<SimpleMatrix>(*S);
-  // tRef = std::make_shared<SimpleMatrix>(*S);
+  // ref = std::make_shared<SiconosMatrix>(*S);
+  // tRef = std::make_shared<SiconosMatrix>(*S);
   // tRef->zero();
   // *tRef = *ref;
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment2: ", (*tRef) == (*ref), true);
-  // ref = std::make_shared<SimpleMatrix>(*Z);
+  // ref = std::make_shared<SiconosMatrix>(*Z);
   // *tRef = *ref;
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment2: ", (*tRef) == (*ref), true);
 
-  // ref = std::make_shared<SimpleMatrix>(*I);
+  // ref = std::make_shared<SiconosMatrix>(*I);
   // *tRef = *ref;
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment2: ", (*tRef) == (*ref), true);
   // // Sparse = Sparse or Zero
-  // ref = std::make_shared<SimpleMatrix>(*SP);
-  // tRef = std::make_shared<SimpleMatrix>(*SP);
+  // ref = std::make_shared<SiconosMatrix>(*SP);
+  // tRef = std::make_shared<SiconosMatrix>(*SP);
   // tRef->zero();
   // *tRef = *ref;
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment2: ", (*tRef) == (*ref), true);
 
-  // ref = std::make_shared<SimpleMatrix>(*Z2);
+  // ref = std::make_shared<SiconosMatrix>(*Z2);
   // *tRef = *ref;
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment2: ", (*tRef) == (*ref), true);
   // // Banded = Banded, Id or Zero
-  // ref = std::make_shared<SimpleMatrix>(*Band);
-  // tRef = std::make_shared<SimpleMatrix>(*Band);
+  // ref = std::make_shared<SiconosMatrix>(*Band);
+  // tRef = std::make_shared<SiconosMatrix>(*Band);
   // tRef->zero();
   // *tRef = *ref;
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment2: ", (*tRef) == (*ref), true);
 
-  // ref = std::make_shared<SimpleMatrix>(*Z2);
+  // ref = std::make_shared<SiconosMatrix>(*Z2);
   // *tRef = *ref;
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment2: ", (*tRef) == (*ref), true);
-  // ref = std::make_shared<SimpleMatrix>(*I2);
+  // ref = std::make_shared<SiconosMatrix>(*I2);
   // *tRef = *ref;
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment2: ", (*tRef) == (*ref), true);
   std::cout << "-->  test assignment2 ended with success." << std::endl;
@@ -763,7 +763,7 @@ void SimpleMatrixTest::testOperators1() {
   std::cout << "--> Test: operators1." << std::endl;
   //+=, -=, *=, /=
 
-  auto tmp = std::make_shared<SimpleMatrix>(*D);
+  auto tmp = std::make_shared<SiconosMatrix>(*D);
   // Dense *=, /=
   double a = 2.2;
   int a1 = 2;
@@ -825,8 +825,8 @@ void SimpleMatrixTest::testOperators1() {
 void SimpleMatrixTest::testOperators2() {
   std::cout << "--> Test: operators2." << std::endl;
   // // +=, -=, *=, /= triangular
-  // auto tmp = std::make_shared<SimpleMatrix>(*T);
-  // auto tmp2 = std::make_shared<SimpleMatrix>(*T);
+  // auto tmp = std::make_shared<SiconosMatrix>(*T);
+  // auto tmp2 = std::make_shared<SiconosMatrix>(*T);
   // *tmp += *tmp2;
   // for (unsigned int i = 0; i < tmp->size(0); ++i)
   //   for (unsigned int j = i; j < tmp->size(1); ++j)
@@ -868,8 +868,8 @@ void SimpleMatrixTest::testOperators2() {
 void SimpleMatrixTest::testOperators3() {
   std::cout << "--> Test: operators3." << std::endl;
   // +=, -=, *=, /= Symmetric
-  // auto tmp = std::make_shared<SimpleMatrix>(*S);
-  // auto tmp2 = std::make_shared<SimpleMatrix>(*S);
+  // auto tmp = std::make_shared<SiconosMatrix>(*S);
+  // auto tmp2 = std::make_shared<SiconosMatrix>(*S);
   // *tmp += *tmp2;
   // for (unsigned int i = 0; i < tmp->size(0); ++i)
   //   for (unsigned int j = i; j < tmp->size(1); ++j)
@@ -911,12 +911,12 @@ void SimpleMatrixTest::testOperators3() {
 void SimpleMatrixTest::testOperators4() {
   std::cout << "--> Test: operators4." << std::endl;
   // +=, -=, *=, /= sparse
-  // auto tmp = std::make_shared<SimpleMatrix>(*SP);
-  // auto tmp2 = std::make_shared<SimpleMatrix>(*SP);
-  // auto tmp3 = std::make_shared<SimpleMatrix>(*T2);
+  // auto tmp = std::make_shared<SiconosMatrix>(*SP);
+  // auto tmp2 = std::make_shared<SiconosMatrix>(*SP);
+  // auto tmp3 = std::make_shared<SiconosMatrix>(*T2);
 
-  // auto tmp4 = std::make_shared<SimpleMatrix>(*Band);
-  // auto tmp5 = std::make_shared<SimpleMatrix>(*S2);
+  // auto tmp4 = std::make_shared<SiconosMatrix>(*Band);
+  // auto tmp5 = std::make_shared<SiconosMatrix>(*S2);
 
   // *tmp += *tmp2;
   // for (unsigned int i = 0; i < tmp->size(0); ++i)
@@ -1008,14 +1008,14 @@ void SimpleMatrixTest::testOperators4() {
 void SimpleMatrixTest::testOperators4bis() {
   std::cout << "--> Test: operators4bis." << std::endl;
   // +=, -=, *=, /= sparse
-//   auto tmp = std::make_shared<SimpleMatrix>(*SP_coor);
-//   auto tmp2 = std::make_shared<SimpleMatrix>(*SP_coor);
-//   auto tmp3 = std::make_shared<SimpleMatrix>(*T2);
+//   auto tmp = std::make_shared<SiconosMatrix>(*SP_coor);
+//   auto tmp2 = std::make_shared<SiconosMatrix>(*SP_coor);
+//   auto tmp3 = std::make_shared<SiconosMatrix>(*T2);
 
-//   auto tmp4 = std::make_shared<SimpleMatrix>(*Band);
-//   auto tmp5 = std::make_shared<SimpleMatrix>(*S2);
+//   auto tmp4 = std::make_shared<SiconosMatrix>(*Band);
+//   auto tmp5 = std::make_shared<SiconosMatrix>(*S2);
 
-//   auto tmp6 = std::make_shared<SimpleMatrix>(*SP);
+//   auto tmp6 = std::make_shared<SiconosMatrix>(*SP);
 //   *tmp += *tmp2;
 //   for (unsigned int i = 0; i < tmp->size(0); ++i)
 //     for (unsigned int j = 0; j < tmp->size(1); ++j)
@@ -1126,8 +1126,8 @@ void SimpleMatrixTest::testOperators4bis() {
 // void SimpleMatrixTest::testOperators5() {
 //   std::cout << "--> Test: operators5." << std::endl;
 //   // +=, -=, *=, /= banded
-//   auto tmp = std::make_shared<SimpleMatrix>(*Band);
-//   auto tmp2 = std::make_shared<SimpleMatrix>(*Band);
+//   auto tmp = std::make_shared<SiconosMatrix>(*Band);
+//   auto tmp2 = std::make_shared<SiconosMatrix>(*Band);
 //   *tmp += *tmp2;
 //   for (signed i = 0; i < signed(Band->size1()); ++i)
 //     for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(Band->size2())); ++j)
@@ -1480,9 +1480,9 @@ void SimpleMatrixTest::testOperators6Ter() {
   // +, - for non-dense matrices.
 
   // // Triang +,-,* Triang
-  // auto tmp = std::make_shared<SimpleMatrix>(*T);
-  // auto tmp2 = std::make_shared<SimpleMatrix>(*T);
-  // auto res = std::make_shared<SimpleMatrix>(3, 3, siconos::algebra::UblasType::TRIANGULAR);
+  // auto tmp = std::make_shared<SiconosMatrix>(*T);
+  // auto tmp2 = std::make_shared<SiconosMatrix>(*T);
+  // auto res = std::make_shared<SiconosMatrix>(3, 3, siconos::algebra::UblasType::TRIANGULAR);
   // *res = *tmp + *tmp2;
   // for (unsigned int i = 0; i < res->size(0); ++i)
   //   for (unsigned int j = i; j < res->size(1); ++j)
@@ -1500,9 +1500,9 @@ void SimpleMatrixTest::testOperators6Ter() {
   // // 0, true);
 
   // // Sym +,-,* Sym
-  // tmp = std::make_shared<SimpleMatrix>(*S);
-  // tmp2 = std::make_shared<SimpleMatrix>(*S);
-  // res = std::make_shared<SimpleMatrix>(3, 3, siconos::algebra::UblasType::SYMMETRIC);
+  // tmp = std::make_shared<SiconosMatrix>(*S);
+  // tmp2 = std::make_shared<SiconosMatrix>(*S);
+  // res = std::make_shared<SiconosMatrix>(3, 3, siconos::algebra::UblasType::SYMMETRIC);
   // *res = *tmp + *tmp2;
   // for (unsigned int i = 0; i < res->size(0); ++i)
   //   for (unsigned int j = i; j < res->size(1); ++j)
@@ -1521,9 +1521,9 @@ void SimpleMatrixTest::testOperators6Ter() {
   // // == 0, true);
 
   // // Sparse +,-,* Sparse
-  // tmp = std::make_shared<SimpleMatrix>(*SP);
-  // tmp2 = std::make_shared<SimpleMatrix>(*SP);
-  // res = std::make_shared<SimpleMatrix>(4, 4, siconos::algebra::UblasType::SPARSE);
+  // tmp = std::make_shared<SiconosMatrix>(*SP);
+  // tmp2 = std::make_shared<SiconosMatrix>(*SP);
+  // res = std::make_shared<SiconosMatrix>(4, 4, siconos::algebra::UblasType::SPARSE);
   // *res = *tmp + *tmp2;
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators6Ter: ", (*res) == (2.0 * (*tmp)), true);
 
@@ -1537,9 +1537,9 @@ void SimpleMatrixTest::testOperators6Ter() {
 
   // // SparseCoordinate +,-,* SparseCoordinate
 
-  // tmp = std::make_shared<SimpleMatrix>(*SP_coor);
-  // tmp2 = std::make_shared<SimpleMatrix>(*SP_coor);
-  // res = std::make_shared<SimpleMatrix>(4, 4, siconos::algebra::UblasType::SPARSE_COORDINATE);
+  // tmp = std::make_shared<SiconosMatrix>(*SP_coor);
+  // tmp2 = std::make_shared<SiconosMatrix>(*SP_coor);
+  // res = std::make_shared<SiconosMatrix>(4, 4, siconos::algebra::UblasType::SPARSE_COORDINATE);
   // *res = *tmp + *tmp2;
 
   // // res->displayExpert();
@@ -1557,9 +1557,9 @@ void SimpleMatrixTest::testOperators6Ter() {
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators6Ter: ", (*res) == *tmp, true);
 
   // // Banded +,- Banded
-  // tmp = std::make_shared<SimpleMatrix>(*Band);
-  // tmp2 = std::make_shared<SimpleMatrix>(*Band);
-  // res = std::make_shared<SimpleMatrix>(4, 4, siconos::algebra::UblasType::BANDED);
+  // tmp = std::make_shared<SiconosMatrix>(*Band);
+  // tmp2 = std::make_shared<SiconosMatrix>(*Band);
+  // res = std::make_shared<SiconosMatrix>(4, 4, siconos::algebra::UblasType::BANDED);
   // *res = *tmp + *tmp2;
   // for (signed i = 0; i < signed(Band->size1()); ++i)
   //   for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(Band->size2())); ++j)
@@ -1575,16 +1575,16 @@ void SimpleMatrixTest::testOperators6Ter() {
 
 void SimpleMatrixTest::testOperators7() {
   std::cout << "--> Test: operator7." << std::endl;
-  auto tmp1 = std::make_shared<SimpleMatrix>(*D);
+  auto tmp1 = std::make_shared<SiconosMatrix>(*D);
   tmp1->resize(4, 4);
-  // auto tmp2 = std::make_shared<SimpleMatrix>(*T2);
-  // auto tmp3 = std::make_shared<SimpleMatrix>(*S2);
-  // auto tmp4 = std::make_shared<SimpleMatrix>(*SP);
-  // auto tmp5 = std::make_shared<SimpleMatrix>(*Band);
-  // auto tmp6 = std::make_shared<SimpleMatrix>(*Z2);
-  // auto tmp7 = std::make_shared<SimpleMatrix>(*I2);
+  // auto tmp2 = std::make_shared<SiconosMatrix>(*T2);
+  // auto tmp3 = std::make_shared<SiconosMatrix>(*S2);
+  // auto tmp4 = std::make_shared<SiconosMatrix>(*SP);
+  // auto tmp5 = std::make_shared<SiconosMatrix>(*Band);
+  // auto tmp6 = std::make_shared<SiconosMatrix>(*Z2);
+  // auto tmp7 = std::make_shared<SiconosMatrix>(*I2);
 
-  auto res = std::make_shared<SimpleMatrix>(4, 4);
+  auto res = std::make_shared<SiconosMatrix>(4, 4);
 
   // dense + ...
   // ... triang
@@ -2191,7 +2191,7 @@ void SimpleMatrixTest::testOperators7() {
 //   // Block = Simple * Simple
 //   // *Cb = ublas::prod(*A, *B);
 //   // siconos::algebra::DenseMat Dtmp = ublas::prod(*A->dense(), *B->dense());
-//   // auto tmp = std::make_shared<SimpleMatrix>(Dtmp);
+//   // auto tmp = std::make_shared<SiconosMatrix>(Dtmp);
 //   // for (unsigned int i = 0; i < C->size(0); ++i)
 //   //   for (unsigned int j = i ; j < C->size(1); ++j)
 //   //     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", fabs((*Cb)(i, j) - (*tmp)(i, j)) <
@@ -2199,13 +2199,13 @@ void SimpleMatrixTest::testOperators7() {
 
 //   // Others ...
 
-//   auto tmp1 = std::make_shared<SimpleMatrix>(4, 4, 2.3);
-//   auto tmp2 = std::make_shared<SimpleMatrix>(*T2);
-//   auto tmp3 = std::make_shared<SimpleMatrix>(*S2);
-//   auto tmp4 = std::make_shared<SimpleMatrix>(*SP);
-//   auto tmp5 = std::make_shared<SimpleMatrix>(*Band);
+//   auto tmp1 = std::make_shared<SiconosMatrix>(4, 4, 2.3);
+//   auto tmp2 = std::make_shared<SiconosMatrix>(*T2);
+//   auto tmp3 = std::make_shared<SiconosMatrix>(*S2);
+//   auto tmp4 = std::make_shared<SiconosMatrix>(*SP);
+//   auto tmp5 = std::make_shared<SiconosMatrix>(*Band);
 
-//   auto res = std::make_shared<SimpleMatrix>(4, 4, 0);
+//   auto res = std::make_shared<SiconosMatrix>(4, 4, 0);
 
 //   // Dense * ...
 //   // triang
@@ -2307,7 +2307,7 @@ void SimpleMatrixTest::testOperators8Bis() {
   // // Block = Simple * Simple
   // siconos::algebra::prod(*A, *B, *Cb);
   // siconos::algebra::DenseMat Dtmp = ublas::prod(*A->dense(), *B->dense());
-  // auto tmp = std::make_shared<SimpleMatrix>(Dtmp);
+  // auto tmp = std::make_shared<SiconosMatrix>(Dtmp);
   // for (unsigned int i = 0; i < Cb->size(0); ++i)
   //   for (unsigned int j = i; j < Cb->size(1); ++j)
   //     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", fabs((*Cb)(i, j) - (*tmp)(i, j)) < tol,
@@ -2316,13 +2316,13 @@ void SimpleMatrixTest::testOperators8Bis() {
   // Others ...
 
   // Others ...
-//   auto tmp1 = std::make_shared<SimpleMatrix>(4, 4, 2.4);
-//   auto tmp2 = std::make_shared<SimpleMatrix>(*T2);
-//   auto tmp3 = std::make_shared<SimpleMatrix>(*S2);
-//   auto tmp4 = std::make_shared<SimpleMatrix>(*SP);
-//   auto tmp5 = std::make_shared<SimpleMatrix>(*Band);
+//   auto tmp1 = std::make_shared<SiconosMatrix>(4, 4, 2.4);
+//   auto tmp2 = std::make_shared<SiconosMatrix>(*T2);
+//   auto tmp3 = std::make_shared<SiconosMatrix>(*S2);
+//   auto tmp4 = std::make_shared<SiconosMatrix>(*SP);
+//   auto tmp5 = std::make_shared<SiconosMatrix>(*Band);
 
-//   auto res = std::make_shared<SimpleMatrix>(4, 4);
+//   auto res = std::make_shared<SiconosMatrix>(4, 4);
 
 //   // Dense * ...
 //   // triang
@@ -2442,7 +2442,7 @@ void SimpleMatrixTest::testOperators8Bis() {
 //       norm_inf(*C->dense() - ublas::prod(*A->dense(), *B->dense())) < tol, true);
 
 //   // Simple += Simple * Simple
-//   auto backUp = std::make_shared<SimpleMatrix>(*C);
+//   auto backUp = std::make_shared<SiconosMatrix>(*C);
 
 //   siconos::algebra::axpy_prod(*A, *B, *C, false);
 
@@ -2453,7 +2453,7 @@ void SimpleMatrixTest::testOperators8Bis() {
 //   // Block = Simple * Simple
 //   siconos::algebra::axpy_prod(*A, *B, *Cb, true);
 //   siconos::algebra::DenseMat Dtmp = ublas::prod(*A->dense(), *B->dense());
-//   auto tmp = std::make_shared<SimpleMatrix>(Dtmp);
+//   auto tmp = std::make_shared<SiconosMatrix>(Dtmp);
 //   for (unsigned int i = 0; i < Cb->size(0); ++i)
 //     for (unsigned int j = i; j < Cb->size(1); ++j)
 //       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", fabs((*Cb)(i, j) - (*tmp)(i, j)) < tol,
@@ -2488,7 +2488,7 @@ void SimpleMatrixTest::testOperators8_4()  // C += A*B
   // siconos::algebra::prod(*A, *B, *Cb, false);
   // siconos::algebra::prod(*A, *B, *Cb, false);
   // siconos::algebra::DenseMat Dtmp = ublas::prod(*A->dense(), *B->dense());
-  // auto tmp = std::make_shared<SimpleMatrix>(Dtmp);
+  // auto tmp = std::make_shared<SiconosMatrix>(Dtmp);
   // for (unsigned int i = 0; i < Cb->size(0); ++i)
   //   for (unsigned int j = i; j < Cb->size(1); ++j)
   //     CPPUNIT_ASSERT_EQUAL_MESSAGE(
@@ -2572,7 +2572,7 @@ void SimpleMatrixTest::testOperators8_5() {
   //   // Others ...
   // Triang
 
-  // auto A2 = std::make_shared<SimpleMatrix>(10, 10, siconos::algebra::UblasType::TRIANGULAR);
+  // auto A2 = std::make_shared<SiconosMatrix>(10, 10, siconos::algebra::UblasType::TRIANGULAR);
   // for (unsigned i = 0; i < A2->size(0); ++i)
   //   for (unsigned j = i; j < A2->size(1); ++j) (*A2)(i, j) = 3 * i + j;
 
@@ -2586,7 +2586,7 @@ void SimpleMatrixTest::testOperators8_5() {
   //     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs((*y)(i)) < tol, true);
   // }
   // // Sym
-  // A2 = std::make_shared<SimpleMatrix>(10, 10, siconos::algebra::UblasType::SYMMETRIC);
+  // A2 = std::make_shared<SiconosMatrix>(10, 10, siconos::algebra::UblasType::SYMMETRIC);
   // for (unsigned i = 0; i < A2->size(0); ++i)
   //   for (unsigned j = i; j < A2->size(1); ++j) (*A2)(i, j) = 3 * i + j;
 
@@ -2601,7 +2601,7 @@ void SimpleMatrixTest::testOperators8_5() {
   // }
 
   // // Sparse
-  // A2 = std::make_shared<SimpleMatrix>(10, 10, siconos::algebra::UblasType::SPARSE);
+  // A2 = std::make_shared<SiconosMatrix>(10, 10, siconos::algebra::UblasType::SPARSE);
   // for (unsigned i = 0; i < A2->size(0); ++i)
   //   for (unsigned j = i; j < A2->size(1); ++j) A2->setValue(i, j, 3 * i + j);
 
@@ -2616,7 +2616,7 @@ void SimpleMatrixTest::testOperators8_5() {
   // }
 
   // // Banded
-  // A2 = std::make_shared<SimpleMatrix>(10, 10, siconos::algebra::UblasType::BANDED);
+  // A2 = std::make_shared<SiconosMatrix>(10, 10, siconos::algebra::UblasType::BANDED);
   // for (signed i = 0; i < signed(A2->size(0)); ++i)
   //   for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(A2->size(1))); ++j)
   //     (*A2)(i, j) = 3 * i + j;
@@ -2714,7 +2714,7 @@ void SimpleMatrixTest::testOperators8_6() {
   //   // Others ...
   // Triang
 
-  // auto A2 = std::make_shared<SimpleMatrix>(10, 10, siconos::algebra::UblasType::TRIANGULAR);
+  // auto A2 = std::make_shared<SiconosMatrix>(10, 10, siconos::algebra::UblasType::TRIANGULAR);
   // for (unsigned i = 0; i < A2->size(0); ++i)
   //   for (unsigned j = i; j < A2->size(1); ++j) (*A2)(i, j) = 3 * i + j;
 
@@ -2730,7 +2730,7 @@ void SimpleMatrixTest::testOperators8_6() {
   // }
 
   // // Sym
-  // A2 = std::make_shared<SimpleMatrix>(10, 10, siconos::algebra::UblasType::SYMMETRIC);
+  // A2 = std::make_shared<SiconosMatrix>(10, 10, siconos::algebra::UblasType::SYMMETRIC);
   // for (unsigned i = 0; i < A2->size(0); ++i)
   //   for (unsigned j = i; j < A2->size(1); ++j) (*A2)(i, j) = 3 * i + j;
 
@@ -2746,7 +2746,7 @@ void SimpleMatrixTest::testOperators8_6() {
   // }
 
   // // Sparse
-  // A2 = std::make_shared<SimpleMatrix>(10, 10, siconos::algebra::UblasType::SPARSE);
+  // A2 = std::make_shared<SiconosMatrix>(10, 10, siconos::algebra::UblasType::SPARSE);
   // for (unsigned i = 0; i < A2->size(0); ++i)
   //   for (unsigned j = i; j < A2->size(1); ++j) A2->setValue(i, j, 3 * i + j);
 
@@ -2762,7 +2762,7 @@ void SimpleMatrixTest::testOperators8_6() {
   // }
 
   // // Banded
-  // A2 = std::make_shared<SimpleMatrix>(10, 10, siconos::algebra::UblasType::BANDED);
+  // A2 = std::make_shared<SiconosMatrix>(10, 10, siconos::algebra::UblasType::BANDED);
   // for (signed i = 0; i < signed(A2->size(0)); ++i)
   //   for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(A2->size(1))); ++j)
   //     (*A2)(i, j) = 3 * i + j;
@@ -2994,8 +2994,8 @@ void SimpleMatrixTest::testOperators10() {
   std::cout << "--> Test: operator10." << std::endl;
   // double m = 2.2;
   // int i = 3;
-  // auto tmp1 = std::make_shared<SimpleMatrix>(*T);
-  // auto res = std::make_shared<SimpleMatrix>(3, 3, siconos::algebra::UblasType::TRIANGULAR);
+  // auto tmp1 = std::make_shared<SiconosMatrix>(*T);
+  // auto res = std::make_shared<SiconosMatrix>(3, 3, siconos::algebra::UblasType::TRIANGULAR);
   // *res = m * *tmp1;
   // CPPUNIT_ASSERT_EQUAL_MESSAGE(
   //     "testOperators: ", norm_inf(res->getTriang() - tmp1->getTriang() * m) < tol, true);
@@ -3015,8 +3015,8 @@ void SimpleMatrixTest::testOperators11() {
   // double m = 2.2;
   // int i = 3;
 
-  // auto tmp1 = std::make_shared<SimpleMatrix>(*S);
-  // auto res = std::make_shared<SimpleMatrix>(3, 3, siconos::algebra::UblasType::SYMMETRIC);
+  // auto tmp1 = std::make_shared<SiconosMatrix>(*S);
+  // auto res = std::make_shared<SiconosMatrix>(3, 3, siconos::algebra::UblasType::SYMMETRIC);
   // *res = m * *tmp1;
   // CPPUNIT_ASSERT_EQUAL_MESSAGE(
   //     "testOperators: ", norm_inf(res->getSym() - tmp1->getSym() * m) < tol, true);
@@ -3034,8 +3034,8 @@ void SimpleMatrixTest::testOperators12() {
   std::cout << "--> Test: operator12." << std::endl;
   double m = 2.2;
   int i = 3;
-  // auto tmp1 = std::make_shared<SimpleMatrix>(*SP);
-  // auto res = std::make_shared<SimpleMatrix>(4, 4, siconos::algebra::UblasType::SPARSE);
+  // auto tmp1 = std::make_shared<SiconosMatrix>(*SP);
+  // auto res = std::make_shared<SiconosMatrix>(4, 4, siconos::algebra::UblasType::SPARSE);
   // *res = m * *tmp1;
   // CPPUNIT_ASSERT_EQUAL_MESSAGE(
   //     "testOperators: ", norm_inf(res->getSparse() - tmp1->getSparse() * m) < tol, true);
@@ -3054,8 +3054,8 @@ void SimpleMatrixTest::testOperators13() {
   std::cout << "--> Test: operator13." << std::endl;
   //   double m = 2.2;
   //   int i = 3;
-  //   auto tmp1 = std::make_shared<SimpleMatrix>(*Band);
-  //   auto res = std::make_shared<SimpleMatrix>(*Band);//4,4,BANDED,1,1);
+  //   auto tmp1 = std::make_shared<SiconosMatrix>(*Band);
+  //   auto res = std::make_shared<SiconosMatrix>(*Band);//4,4,BANDED,1,1);
   //   *res = m * *tmp1;
   //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getBanded()-
   //   tmp1->getBanded()*m)<tol, true); *res = i ** tmp1;
@@ -3129,10 +3129,10 @@ void SimpleMatrixTest::testProd()  // y = A*x
 
   // Others or old stuff ...
 
-  // auto tmp2 = std::make_shared<SimpleMatrix>(*T);
-  // auto tmp3 = std::make_shared<SimpleMatrix>(*S);
-  // auto tmp4 = std::make_shared<SimpleMatrix>(*SP);
-  // auto tmp5 = std::make_shared<SimpleMatrix>(*Band2);
+  // auto tmp2 = std::make_shared<SiconosMatrix>(*T);
+  // auto tmp3 = std::make_shared<SiconosMatrix>(*S);
+  // auto tmp4 = std::make_shared<SiconosMatrix>(*SP);
+  // auto tmp5 = std::make_shared<SiconosMatrix>(*Band2);
   // auto v = std::make_shared<siconos::algebra::SiconosVector>(3);
   // (*v)(0) = 1;
   // (*v)(1) = 2;
@@ -3248,10 +3248,10 @@ void SimpleMatrixTest::testProdBis() {
   //
   // Others or old stuff ...
 
-  // auto tmp2 = std::make_shared<SimpleMatrix>(*T);
-  // auto tmp3 = std::make_shared<SimpleMatrix>(*S);
-  // auto tmp4 = std::make_shared<SimpleMatrix>(*SP);
-  // auto tmp5 = std::make_shared<SimpleMatrix>(*Band2);
+  // auto tmp2 = std::make_shared<SiconosMatrix>(*T);
+  // auto tmp3 = std::make_shared<SiconosMatrix>(*S);
+  // auto tmp4 = std::make_shared<SiconosMatrix>(*SP);
+  // auto tmp5 = std::make_shared<SiconosMatrix>(*Band2);
   // auto v = std::make_shared<siconos::algebra::SiconosVector>(3);
   // (*v)(0) = 1;
   // (*v)(1) = 2;
@@ -3421,10 +3421,10 @@ void SimpleMatrixTest::testProdTer() {
   //  }
   //  // Others or old stuff ...
 
-  // auto tmp2 = std::make_shared<SimpleMatrix>(*T);
-  // auto tmp3 = std::make_shared<SimpleMatrix>(*S);
-  // auto tmp4 = std::make_shared<SimpleMatrix>(*SP);
-  // auto tmp5 = std::make_shared<SimpleMatrix>(*Band2);
+  // auto tmp2 = std::make_shared<SiconosMatrix>(*T);
+  // auto tmp3 = std::make_shared<SiconosMatrix>(*S);
+  // auto tmp4 = std::make_shared<SiconosMatrix>(*SP);
+  // auto tmp5 = std::make_shared<SiconosMatrix>(*Band2);
   // auto v = std::make_shared<siconos::algebra::SiconosVector>(3);
   // (*v)(0) = 1;
   // (*v)(1) = 2;
@@ -3631,7 +3631,7 @@ void SimpleMatrixTest::testProd6()  // y += trans(A)*x
   auto yB = std::make_shared<siconos::algebra::BlockVector>(*xB);
   yB->zero();
 
-  auto tmp = std::make_shared<SimpleMatrix>(*A);
+  auto tmp = std::make_shared<SiconosMatrix>(*A);
   tmp->transposeInPlace();
   // Matrix - vector ublas::product
 
@@ -3723,7 +3723,7 @@ void SimpleMatrixTest::testProd6()  // y += trans(A)*x
 //   double a = 2.3;
 //   double b = 1.5;
 //   *C = *A;
-//   auto backUp = std::make_shared<SimpleMatrix>(*C);
+//   auto backUp = std::make_shared<SiconosMatrix>(*C);
 
 //   gemm(a, *A, *B, b, *C);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGemm: ", norm_inf(*C->dense() - a *
@@ -3740,13 +3740,13 @@ void SimpleMatrixTest::testProd6()  // y += trans(A)*x
 void SimpleMatrixTest::testFromAndFillCSC() {
 //   std::cout << "Start SimpleMatrixTest::testFromAndFillCSC() " << std::endl;
 
-//   auto Sparse4 = std::make_shared<SimpleMatrix>(*SP4);
+//   auto Sparse4 = std::make_shared<SiconosMatrix>(*SP4);
 //   Sparse4->updateNumericsMatrix();
 //   auto NM = Sparse4->numericsMatrix();
 //   NM_display(NM);
 //   //  auto NM_1 = NM_create(4,4, NM_SPARSE);
 
-//   auto Sparse1 = std::make_shared<SimpleMatrix>(4, 4, siconos::algebra::UblasType::SPARSE);
+//   auto Sparse1 = std::make_shared<SiconosMatrix>(4, 4, siconos::algebra::UblasType::SPARSE);
 //   Sparse1->fromCSC(NM_csc(NM));
 //   Sparse1->displayExpert();
 
@@ -3764,19 +3764,19 @@ void SimpleMatrixTest::testFromAndFillCSC() {
 // void SimpleMatrixTest::testPLUFactorizationInPlace() {
 //   std::cout << "--> Test: PLUFactorizationInPlace." << std::endl;
 
-//   auto Dense = std::make_shared<SimpleMatrix>(*D);
+//   auto Dense = std::make_shared<SiconosMatrix>(*D);
 //   Dense->display();
 //   Dense->PLUFactorizationInPlace();
 //   Dense->display();
 //   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testPLUFactorizationInPlace: ",  < tol, true);
 
-//   auto Sparse = std::make_shared<SimpleMatrix>(4, 4, siconos::algebra::UblasType::SPARSE);
+//   auto Sparse = std::make_shared<SiconosMatrix>(4, 4, siconos::algebra::UblasType::SPARSE);
 //   Sparse->eye();
 //   Sparse->display();
 //   Sparse->PLUFactorizationInPlace();
 //   Sparse->display();
 
-//   auto Sparse2 = std::make_shared<SimpleMatrix>(*SP4);
+//   auto Sparse2 = std::make_shared<SiconosMatrix>(*SP4);
 //   DEBUG_EXPR(Sparse2->display(););
 //   Sparse2->PLUFactorizationInPlace();
 //   DEBUG_EXPR(Sparse2->display(););
@@ -3787,18 +3787,18 @@ void SimpleMatrixTest::testFromAndFillCSC() {
 // void SimpleMatrixTest::testFactorize() {
 //   std::cout << "--> Test: Factorize (LU)." << std::endl;
 
-//   auto Dense = std::make_shared<SimpleMatrix>(*D);
+//   auto Dense = std::make_shared<SiconosMatrix>(*D);
 //   Dense->display();
 //   Dense->Factorize();
 //   Dense->display();
 //   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testFactorize: ",  < tol, true);
 
-//   auto Sparse = std::make_shared<SimpleMatrix>(4, 4, siconos::algebra::UblasType::SPARSE);
+//   auto Sparse = std::make_shared<SiconosMatrix>(4, 4, siconos::algebra::UblasType::SPARSE);
 //   Sparse->eye();
 //   Sparse->display();
 //   Sparse->Factorize();
 
-//   Sparse = std::make_shared<SimpleMatrix>(*SP3);
+//   Sparse = std::make_shared<SiconosMatrix>(*SP3);
 //   Sparse->display();
 //   Sparse->displayExpert();
 //   Sparse->Factorize();
@@ -3806,7 +3806,7 @@ void SimpleMatrixTest::testFromAndFillCSC() {
 
 //   // Other types than SPARSE are not working since fillCSC is not implemented.
 //   // std::cout << "--> Test: Factorize -- Triangle" <<std::endl;
-//   // auto Triangle = std::make_shared<SimpleMatrix>(*T2);
+//   // auto Triangle = std::make_shared<SiconosMatrix>(*T2);
 //   // Triangle->display();
 //   // Triangle->displayExpert();
 //   // Triangle->Factorize();
@@ -3814,7 +3814,7 @@ void SimpleMatrixTest::testFromAndFillCSC() {
 
 //   /* A last column full of zero caused memory corruption in cs_lusol
 //      since ublas does not fill the last entry correctly*/
-//   // Sparse = std::make_shared<SimpleMatrix>(*SP2);
+//   // Sparse = std::make_shared<SiconosMatrix>(*SP2);
 //   // Sparse->display();
 //   // Sparse->displayExpert();
 //   // Sparse->PLUFactorizationInPlace();
@@ -3822,11 +3822,11 @@ void SimpleMatrixTest::testFromAndFillCSC() {
 
 //   std::cout << "--> Test: Factorize (Cholesky)." << std::endl;
 
-//   Dense = std::make_shared<SimpleMatrix>(*D);
+//   Dense = std::make_shared<SiconosMatrix>(*D);
 //   /* conpute DD^T */
-//   auto DenseT = std::make_shared<SimpleMatrix>(*Dense);
+//   auto DenseT = std::make_shared<SiconosMatrix>(*Dense);
 //   DenseT->trans();
-//   auto DDT = std::make_shared<SimpleMatrix>(Dense->size(0), Dense->size(1));
+//   auto DDT = std::make_shared<SiconosMatrix>(Dense->size(0), Dense->size(1));
 //   siconos::algebra::prod(*Dense, *DenseT, *DDT);
 //   DDT->display();
 //   DDT->setIsSymmetric(true);
@@ -3842,13 +3842,13 @@ void SimpleMatrixTest::testSolve() {
   std::cout << "\n--> Test: Solve. Dense. LU." << std::endl;
 
   // Test dense matrix
-  auto Dense = std::make_shared<SimpleMatrix>(*D);
+  auto Dense = std::make_shared<SiconosMatrix>(*D);
   auto b = std::make_shared<siconos::algebra::SiconosVector>(Dense->size(0));
   for (int i = 0; i < Dense->size(0); i++) {
     (*b)(i) = 1.0;
   }
   auto backup = std::make_shared<siconos::algebra::SiconosVector>(*b);
-  auto D_backup = std::make_shared<SimpleMatrix>(*Dense);
+  auto D_backup = std::make_shared<SiconosMatrix>(*Dense);
   Dense->display();
   siconos::algebra::solveInPlace(*Dense, *b);
   Dense->display();
@@ -3857,7 +3857,7 @@ void SimpleMatrixTest::testSolve() {
       "testSolve: ", (siconos::algebra::prod(*D_backup, *b) - *backup).norm() < tol, true);
 
   // // Test dense matrix and sparse rhs
-  // Dense = std::make_shared<SimpleMatrix>(*D);
+  // Dense = std::make_shared<SiconosMatrix>(*D);
   // auto b_sparse = std::make_shared<siconos::algebra::SiconosVector>(Dense->size(0),
   // siconos::algebra::UblasType::SPARSE); for( int i =0; i <Dense->size(0); i++)
   // {
@@ -3871,16 +3871,16 @@ void SimpleMatrixTest::testSolve() {
   // *backup).norm2() < tol, true);
 
   std::cout << "\n\n--> Test: Solve. Dense. Cholesky." << std::endl;
-  Dense = std::make_shared<SimpleMatrix>(*D);
+  Dense = std::make_shared<SiconosMatrix>(*D);
   b = std::make_shared<siconos::algebra::SiconosVector>(Dense->size(0));
   for (int i = 0; i < Dense->size(0); i++) {
     (*b)(i) = 1.0;
   }
-  auto DenseT = std::make_shared<SimpleMatrix>(*Dense);
+  auto DenseT = std::make_shared<SiconosMatrix>(*Dense);
   DenseT->transposeInPlace();
-  auto DDT = std::make_shared<SimpleMatrix>(Dense->size(0), Dense->size(1));
+  auto DDT = std::make_shared<SiconosMatrix>(Dense->size(0), Dense->size(1));
   siconos::algebra::prod(*Dense, *DenseT, *DDT);
-  auto DDT_backup = std::make_shared<SimpleMatrix>(*DDT);
+  auto DDT_backup = std::make_shared<SiconosMatrix>(*DDT);
   // DDT->setIsSymmetric(true);
   // DDT->setIsPositiveDefinite(true);
   siconos::algebra::solveInPlace(*DDT, *b);
@@ -3892,9 +3892,9 @@ void SimpleMatrixTest::testSolve() {
 
   // Test sparse matrix identity
 
-  // auto Sparse = std::make_shared<SimpleMatrix>(4, 4, siconos::algebra::UblasType::SPARSE);
+  // auto Sparse = std::make_shared<SiconosMatrix>(4, 4, siconos::algebra::UblasType::SPARSE);
   // auto Sparse_backup =
-  //     std::make_shared<SimpleMatrix>(4, 4, siconos::algebra::UblasType::SPARSE);
+  //     std::make_shared<SiconosMatrix>(4, 4, siconos::algebra::UblasType::SPARSE);
   // b = std::make_shared<siconos::algebra::SiconosVector>(Sparse->size(0));
   // for (int i = 0; i < Sparse->size(0); i++) {
   //   (*b)(i) = 1.0;
@@ -3909,7 +3909,7 @@ void SimpleMatrixTest::testSolve() {
   //     true);
 
   // // test sparse matrix 3x3
-  // Sparse = std::make_shared<SimpleMatrix>(*SP3);
+  // Sparse = std::make_shared<SiconosMatrix>(*SP3);
   // b = std::make_shared<siconos::algebra::SiconosVector>(Sparse->size(0));
   // for (int i = 0; i < Sparse->size(0); i++) {
   //   (*b)(i) = 1.0;
@@ -3933,7 +3933,7 @@ void SimpleMatrixTest::testSolve() {
 
   // // test sparse matrix 4x4 SP4
 
-  // Sparse = std::make_shared<SimpleMatrix>(*SP4);
+  // Sparse = std::make_shared<SiconosMatrix>(*SP4);
   // b = std::make_shared<siconos::algebra::SiconosVector>(Sparse->size(0));
   // for (int i = 0; i < Sparse->size(0); i++) {
   //   (*b)(i) = 1.0;
@@ -3947,8 +3947,8 @@ void SimpleMatrixTest::testSolve() {
   // std::cout << "\n\n--> Test: Solve. Sparse. LU.  Sparse rhs" << std::endl;
 
   // // test sparse matrix 3x3 sparse RhS. trivial solution (Id)
-  // Sparse = std::make_shared<SimpleMatrix>(*SP3);
-  // auto Sparse_rhs = std::make_shared<SimpleMatrix>(*SP3);
+  // Sparse = std::make_shared<SiconosMatrix>(*SP3);
+  // auto Sparse_rhs = std::make_shared<SiconosMatrix>(*SP3);
   // Sparse->Solve(*Sparse_rhs);
   // // std::cout << "Sparse_rhs :" << std::endl;
   // // Sparse_rhs->display();
@@ -3961,11 +3961,11 @@ void SimpleMatrixTest::testSolve() {
   //     true);
 
   // // test sparse matrix 3x3 sparse RhS. inverse
-  // Sparse = std::make_shared<SimpleMatrix>(*SP3);
-  // Sparse_rhs = std::make_shared<SimpleMatrix>(3, 3);
+  // Sparse = std::make_shared<SiconosMatrix>(*SP3);
+  // Sparse_rhs = std::make_shared<SiconosMatrix>(3, 3);
   // Sparse_rhs->eye();
   // Sparse->Solve(*Sparse_rhs);
-  // auto Id = std::make_shared<SimpleMatrix>(3, 3);
+  // auto Id = std::make_shared<SiconosMatrix>(3, 3);
   // Id->eye();
 
   // // Sparse_rhs->display();
@@ -3979,8 +3979,8 @@ void SimpleMatrixTest::testSolve() {
   // std::cout << "\n\n--> Test: Solve. Sparse. Cholesky." << std::endl;
 
   // // Test sparse matrix identity
-  // Sparse = std::make_shared<SimpleMatrix>(4, 4, siconos::algebra::UblasType::SPARSE);
-  // Sparse_backup = std::make_shared<SimpleMatrix>(4, 4, siconos::algebra::UblasType::SPARSE);
+  // Sparse = std::make_shared<SiconosMatrix>(4, 4, siconos::algebra::UblasType::SPARSE);
+  // Sparse_backup = std::make_shared<SiconosMatrix>(4, 4, siconos::algebra::UblasType::SPARSE);
   // b = std::make_shared<siconos::algebra::SiconosVector>(Sparse->size(0));
   // for (int i = 0; i < Sparse->size(0); i++) {
   //   (*b)(i) = 1.0;
@@ -3997,15 +3997,15 @@ void SimpleMatrixTest::testSolve() {
   //     true);
 
   // // test sparse matrix 3x3
-  // Sparse = std::make_shared<SimpleMatrix>(*SP3);
+  // Sparse = std::make_shared<SiconosMatrix>(*SP3);
   // b = std::make_shared<siconos::algebra::SiconosVector>(Sparse->size(0));
   // for (int i = 0; i < Sparse->size(0); i++) {
   //   (*b)(i) = 1.0;
   // }
   // backup = std::make_shared<siconos::algebra::SiconosVector>(*b);
-  // auto SparseT = std::make_shared<SimpleMatrix>(*SP3);
+  // auto SparseT = std::make_shared<SiconosMatrix>(*SP3);
   // SparseT->trans();
-  // auto SST = std::make_shared<SimpleMatrix>(Sparse->size(0), Sparse->size(1),
+  // auto SST = std::make_shared<SiconosMatrix>(Sparse->size(0), Sparse->size(1),
   //                                           siconos::algebra::UblasType::SPARSE);
   // siconos::algebra::prod(*Sparse, *SparseT, *SST);
   // SST->setIsSymmetric(true);
@@ -4027,15 +4027,15 @@ void SimpleMatrixTest::testSolve() {
   //     "testSolve: ", (siconos::algebra::prod(*SST, *b) - *backup).norm2() < tol, true);
 
   // // test sparse matrix 4x4 SP4
-  // Sparse = std::make_shared<SimpleMatrix>(*SP4);
+  // Sparse = std::make_shared<SiconosMatrix>(*SP4);
   // b = std::make_shared<siconos::algebra::SiconosVector>(Sparse->size(0));
   // for (int i = 0; i < Sparse->size(0); i++) {
   //   (*b)(i) = 1.0;
   // }
   // backup = std::make_shared<siconos::algebra::SiconosVector>(*b);
-  // SparseT = std::make_shared<SimpleMatrix>(*SP4);
+  // SparseT = std::make_shared<SiconosMatrix>(*SP4);
   // SparseT->trans();
-  // SST = std::make_shared<SimpleMatrix>(Sparse->size(0), Sparse->size(1),
+  // SST = std::make_shared<SiconosMatrix>(Sparse->size(0), Sparse->size(1),
   //                                      siconos::algebra::UblasType::SPARSE);
   // siconos::algebra::prod(*Sparse, *SparseT, *SST);
   // SST->setIsSymmetric(true);
@@ -4048,13 +4048,13 @@ void SimpleMatrixTest::testSolve() {
   // std::cout << "\n\n--> Test: Solve. Sparse. Cholesky.  Sparse rhs" << std::endl;
 
   // // test sparse matrix 3x3 sparse RhS. trivial solution (Id)
-  // Sparse = std::make_shared<SimpleMatrix>(*SP3);
-  // SparseT = std::make_shared<SimpleMatrix>(*SP3);
+  // Sparse = std::make_shared<SiconosMatrix>(*SP3);
+  // SparseT = std::make_shared<SiconosMatrix>(*SP3);
   // SparseT->trans();
-  // SST = std::make_shared<SimpleMatrix>(Sparse->size(0), Sparse->size(1),
+  // SST = std::make_shared<SiconosMatrix>(Sparse->size(0), Sparse->size(1),
   //                                      siconos::algebra::UblasType::SPARSE);
   // siconos::algebra::prod(*Sparse, *SparseT, *SST);
-  // Sparse_rhs = std::make_shared<SimpleMatrix>(*SST);
+  // Sparse_rhs = std::make_shared<SiconosMatrix>(*SST);
   // // std::cout << "SST" << std::endl;
   // // SST->display();
   // SST->setIsSymmetric(true);
@@ -4067,10 +4067,10 @@ void SimpleMatrixTest::testSolve() {
   //     "testSolve: ", (siconos::algebra::prod(*SST, *Sparse_rhs) - *SST).normInf() < tol, true);
 
   // // test sparse matrix 3x3 sparse RhS. inverse
-  // SST = std::make_shared<SimpleMatrix>(Sparse->size(0), Sparse->size(1),
+  // SST = std::make_shared<SiconosMatrix>(Sparse->size(0), Sparse->size(1),
   //                                      siconos::algebra::UblasType::SPARSE);
   // siconos::algebra::prod(*Sparse, *SparseT, *SST);
-  // Sparse_rhs = std::make_shared<SimpleMatrix>(3, 3, siconos::algebra::UblasType::SPARSE);
+  // Sparse_rhs = std::make_shared<SiconosMatrix>(3, 3, siconos::algebra::UblasType::SPARSE);
   // Sparse_rhs->eye();
   // // std::cout << "SST" << std::endl;
   // // SST->display();
@@ -4091,6 +4091,6 @@ void SimpleMatrixTest::testSolve() {
 
 void SimpleMatrixTest::End() {
   std::cout << "======================================" << std::endl;
-  std::cout << " ===== End of SimpleMatrix Tests ===== " << std::endl;
+  std::cout << " ===== End of SiconosMatrix Tests ===== " << std::endl;
   std::cout << "======================================" << std::endl;
 }

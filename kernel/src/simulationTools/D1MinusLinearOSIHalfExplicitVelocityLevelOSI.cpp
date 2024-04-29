@@ -29,7 +29,7 @@
 #include "SiconosPointers.hpp"        // For createSPtr
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"  // for scal
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "Simulation.hpp"
 #include "Tools.hpp"  // for enum_to_string
 #include "Topology.hpp"

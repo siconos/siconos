@@ -145,7 +145,7 @@ class FirstOrderNonLinearR : public FirstOrderR {
   virtual void computeJachx(double time, const siconos::algebra::BlockVector &x,
                             const siconos::algebra::SiconosVector &lambda,
                             siconos::algebra::BlockVector &z,
-                            siconos::algebra::SimpleMatrix &C);
+                            siconos::algebra::SiconosMatrix &C);
 
   /** default function to compute \f$ D = \nabla_{\lambda} h \f$
    *
@@ -158,7 +158,7 @@ class FirstOrderNonLinearR : public FirstOrderR {
   virtual void computeJachlambda(double time, const siconos::algebra::BlockVector &x,
                                  const siconos::algebra::SiconosVector &lambda,
                                  siconos::algebra::BlockVector &z,
-                                 siconos::algebra::SimpleMatrix &D);
+                                 siconos::algebra::SiconosMatrix &D);
 
   void computeJach(double time, Interaction &inter) override;
 
@@ -173,7 +173,7 @@ class FirstOrderNonLinearR : public FirstOrderR {
   virtual void computeJacglambda(double time, const siconos::algebra::BlockVector &x,
                                  const siconos::algebra::SiconosVector &lambda,
                                  siconos::algebra::BlockVector &z,
-                                 siconos::algebra::SimpleMatrix &B);
+                                 siconos::algebra::SiconosMatrix &B);
 
   /** default function to compute \f$ K = \nabla_{\lambda}g \f$
    *
@@ -186,7 +186,7 @@ class FirstOrderNonLinearR : public FirstOrderR {
   virtual void computeJacgx(double time, const siconos::algebra::BlockVector &x,
                             const siconos::algebra::SiconosVector &lambda,
                             siconos::algebra::BlockVector &z,
-                            siconos::algebra::SimpleMatrix &K);
+                            siconos::algebra::SiconosMatrix &K);
 
   void computeJacg(double time, Interaction &inter) override;
 

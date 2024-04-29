@@ -41,7 +41,7 @@
 #include "NewtonImpactRollingFrictionNSL.hpp"
 // #include "RelationType.hpp"
 #include "RelayNSL.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 // include "SimulationGraphs.hpp"
 #include "FremondImpactFrictionNSL.hpp"
 #include "Relation.hpp"
@@ -719,7 +719,7 @@ siconos::modeling::Interaction::getLeftInteractionBlockForDS(unsigned int pos, u
             static_cast<std::underlying_type<RelationSubType>::type>(relationType)));
 
   auto InteractionBlock =
-      std::make_shared<siconos::algebra::SimpleMatrix>(size, sizeDS);
+      std::make_shared<siconos::algebra::SiconosMatrix>(size, sizeDS);
 
   // copy sub-interactionBlock of originalMatrix into InteractionBlock
   // dim of the sub-interactionBlock
@@ -812,7 +812,7 @@ siconos::modeling::Interaction::getRightInteractionBlockForDS(unsigned int pos,
             static_cast<std::underlying_type<RelationSubType>::type>(relationType)));
 
   std::shared_ptr<siconos::algebra::SiconosMatrix> InteractionBlock =
-      std::make_shared<siconos::algebra::SimpleMatrix>(sizeDS, size);
+      std::make_shared<siconos::algebra::SiconosMatrix>(sizeDS, size);
 
   if (!originalMatrix)
     THROW_EXCEPTION(

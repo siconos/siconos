@@ -18,7 +18,7 @@
 
 #include "SubPluggedObject.hpp"
 
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 siconos::plugins::SubPluggedObject::SubPluggedObject(const PluggedObject& PO,
                                                      const unsigned int n,
@@ -26,7 +26,7 @@ siconos::plugins::SubPluggedObject::SubPluggedObject(const PluggedObject& PO,
                                                      const unsigned int indx)
   : PluggedObject{"Sub" + PO.pluginName()}, _indx(indx), _p(p)
 {
-  _tmpMat = std::make_shared<siconos::algebra::SimpleMatrix>(n, p);
+  _tmpMat = std::make_shared<siconos::algebra::SiconosMatrix>(n, p);
 #if (__GNUG__ && !(__clang__ || __INTEL_COMPILER || __APPLE__) && \
      (((__GNUC__ > 5) && (__GNUC_MINOR__ > 0))))
 #pragma GCC diagnostic ignored "-Wpmf-conversions"
@@ -41,7 +41,7 @@ siconos::plugins::SubPluggedObject::SubPluggedObject(const PluggedObject& PO,
 //   : PluggedObject(SPO), _indx(SPO.getIndex()), _p(SPO.getp())
 // {
 //   _parentfPtr = SPO.getParentfPtr();
-//   _tmpMat = std::make_shared<siconos::algebra::SimpleMatrix>(SPO.getTmpMat());
+//   _tmpMat = std::make_shared<siconos::algebra::SiconosMatrix>(SPO.getTmpMat());
 // }
 
 void siconos::plugins::SubPluggedObject::computeAndExtract(double time, unsigned int n,

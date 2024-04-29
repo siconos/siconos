@@ -26,7 +26,7 @@
 #include "LuenbergerObserver.hpp"
 #include "PID.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "SlidingReducedOrderObserver.hpp"
 #include "io.hpp"
 
@@ -38,7 +38,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION(ObserverTest);
 
 void ObserverTest::setUp()
 {
-  _A = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);
+  _A = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
   _A->setZero();
   (*_A)(0, 1) = 1.0;
   (*_A)(1, 0) = -1.0;
@@ -48,19 +48,19 @@ void ObserverTest::setUp()
   (*_x0)(0) = 10.0;
   (*_x0)(1) = 0.0;
 
-  _C = std::make_shared<siconos::algebra::SimpleMatrix>(1, 2);
+  _C = std::make_shared<siconos::algebra::SiconosMatrix>(1, 2);
   _C->setZero();
   (*_C)(0, 0) = 1.0;
 
-  _B = std::make_shared<siconos::algebra::SimpleMatrix>(2, 1);
+  _B = std::make_shared<siconos::algebra::SiconosMatrix>(2, 1);
   (*_B)(1, 0) = 1.0;
 
-  _Csurface = std::make_shared<siconos::algebra::SimpleMatrix>(1, 2);
+  _Csurface = std::make_shared<siconos::algebra::SiconosMatrix>(1, 2);
   _Csurface->setZero();
   (*_Csurface)(0, 0) = 1.0;
   (*_Csurface)(0, 1) = 1.0;
 
-  _L = std::make_shared<siconos::algebra::SimpleMatrix>(2, 1);
+  _L = std::make_shared<siconos::algebra::SiconosMatrix>(2, 1);
   (*_L)(0, 0) = -7.5125146;
   (*_L)(1, 0) = -50.04168751;
 

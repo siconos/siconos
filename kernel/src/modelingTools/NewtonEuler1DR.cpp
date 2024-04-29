@@ -27,7 +27,7 @@
 #include "SiconosMatrixVectorOp.hpp"  // for mat-vec prod
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"  // for inner_prod
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 // #define NERI_DEBUG
 
@@ -171,17 +171,17 @@ void siconos::modeling::NewtonEuler1DR::NIcomputeJachqTFromContacts(
 void siconos::modeling::NewtonEuler1DR::initialize(Interaction& inter) {
   NewtonEulerR::initialize(inter);
   // proj_with_q  _jachqProj =
-  // std::make_shared<siconos::algebra::SimpleMatrix>(_jachq->size(0),_jachq->size(1)));
+  // std::make_shared<siconos::algebra::SiconosMatrix>(_jachq->size(0),_jachq->size(1)));
   auto qSize = 7 * (inter.getSizeOfDS() / 6);
-  _jachq = std::make_shared<siconos::algebra::SimpleMatrix>(1, qSize);
+  _jachq = std::make_shared<siconos::algebra::SiconosMatrix>(1, qSize);
 
   /* VA 12/04/2016 All of what follows should be put in WorkM*/
-  _rotationAbsoluteToContactFrame = std::make_shared<siconos::algebra::SimpleMatrix>(1, 3);
-  _rotationBodyToAbsoluteFrame = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
-  _AUX1 = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
-  _AUX2 = std::make_shared<siconos::algebra::SimpleMatrix>(1, 3);
-  _NPG1 = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
-  _NPG2 = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
+  _rotationAbsoluteToContactFrame = std::make_shared<siconos::algebra::SiconosMatrix>(1, 3);
+  _rotationBodyToAbsoluteFrame = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
+  _AUX1 = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
+  _AUX2 = std::make_shared<siconos::algebra::SiconosMatrix>(1, 3);
+  _NPG1 = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
+  _NPG2 = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
   //  _isContact=1;
 }
 

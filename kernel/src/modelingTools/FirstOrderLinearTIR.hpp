@@ -61,8 +61,8 @@ class FirstOrderLinearTIR : public FirstOrderR {
    *  \param C the matrix C
    *  \param B the matrix B
    */
-  FirstOrderLinearTIR(std::shared_ptr<siconos::algebra::SimpleMatrix> C,
-                      std::shared_ptr<siconos::algebra::SimpleMatrix> B);
+  FirstOrderLinearTIR(std::shared_ptr<siconos::algebra::SiconosMatrix> C,
+                      std::shared_ptr<siconos::algebra::SiconosMatrix> B);
 
   /** create the Relation from a set of data
    *
@@ -72,11 +72,11 @@ class FirstOrderLinearTIR : public FirstOrderR {
    *  \param e the e matrix
    *  \param B the B matrix
    */
-  FirstOrderLinearTIR(std::shared_ptr<siconos::algebra::SimpleMatrix> C,
-                      std::shared_ptr<siconos::algebra::SimpleMatrix> D,
-                      std::shared_ptr<siconos::algebra::SimpleMatrix> F,
+  FirstOrderLinearTIR(std::shared_ptr<siconos::algebra::SiconosMatrix> C,
+                      std::shared_ptr<siconos::algebra::SiconosMatrix> D,
+                      std::shared_ptr<siconos::algebra::SiconosMatrix> F,
                       std::shared_ptr<siconos::algebra::SiconosVector> e,
-                      std::shared_ptr<siconos::algebra::SimpleMatrix> B);
+                      std::shared_ptr<siconos::algebra::SiconosMatrix> B);
 
   /** destructor
    */

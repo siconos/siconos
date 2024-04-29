@@ -38,7 +38,7 @@ typedef void (*FInt_NE)(double t, double *q, double *v, double *f, unsigned int 
 typedef void (*FExt_NE)(double t, double *f, unsigned int size_z, double *z);
 
 void computeT(std::shared_ptr<siconos::algebra::SiconosVector> q,
-              std::shared_ptr<siconos::algebra::SimpleMatrix> T);
+              std::shared_ptr<siconos::algebra::SiconosMatrix> T);
 
 /** Compute the force and moment vectors applied to a body with state
  *  q from a force vector at a given position. */
@@ -135,13 +135,13 @@ class NewtonEulerDS : public SecondOrderDS {
   /** Matrix depending on the parametrization of the orientation
    * \f$ v = T(q) \dot q \f$
    */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _T{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _T{nullptr};
 
   /** Time derivative of T.
    *
    * \f$ \dot v = \dot T(q) \dot q + T(q) \ddot q \f$
    */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _Tdot{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _Tdot{nullptr};
 
   /** external forces of the system */
   std::shared_ptr<siconos::algebra::SiconosVector> _fExt{nullptr};
@@ -170,25 +170,25 @@ class NewtonEulerDS : public SecondOrderDS {
   std::shared_ptr<siconos::algebra::SiconosVector> _mInt{nullptr};
 
   /** jacobian_q FInt  w.r.t q*/
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _jacobianFIntq{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _jacobianFIntq{nullptr};
 
   /** jacobian_twist FInt  w.r.t the twist*/
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _jacobianFInttwist{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _jacobianFInttwist{nullptr};
 
   /** jacobian_q MInt w.r.t q */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _jacobianMIntq{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _jacobianMIntq{nullptr};
 
   /** jacobian_twist MInt  w.r.t the twist*/
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _jacobianMInttwist{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _jacobianMInttwist{nullptr};
 
   /** jacobian_q MExt w.r.t q*/
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _jacobianMExtq{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _jacobianMExtq{nullptr};
 
   /** gyroscpical moment  */
   std::shared_ptr<siconos::algebra::SiconosVector> _mGyr{nullptr};
 
   /** jacobian_twist of mGyr w.r.t the twist*/
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _jacobianMGyrtwist{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _jacobianMGyrtwist{nullptr};
 
   /** wrench (q,twist,t)= [ fExt - fInt ; mExtBodyFrame - mGyr - mInt ]^T */
   std::shared_ptr<siconos::algebra::SiconosVector> _wrench{nullptr};
@@ -234,9 +234,9 @@ class NewtonEulerDS : public SecondOrderDS {
   // *  Will be needed by a fully implicit scheme for instance.
   // */
   /* jacobian_q */
-  //  std::shared_ptr<siconos::algebra::SimpleMatrix> _jacobianqmInt;
+  //  std::shared_ptr<siconos::algebra::SiconosMatrix> _jacobianqmInt;
   /* jacobian_{qDot} */
-  //  std::shared_ptr<siconos::algebra::SimpleMatrix> _jacobianqDotmInt;
+  //  std::shared_ptr<siconos::algebra::SiconosMatrix> _jacobianqDotmInt;
 
   /** NewtonEulerDS plug-in to compute \f$ \nabla_qF_{Int}(\dot q, q, t) \f$, id =
    *  "jacobianFIntq"
@@ -299,7 +299,7 @@ class NewtonEulerDS : public SecondOrderDS {
    *  from of NewtonEulerDS system values (jacobianXBloc10, jacobianXBloc11,
    *  zeroMatrix, idMatrix) No get-set functions at the time. Only used as a
    *  protected member.*/
-  std::vector<std::shared_ptr<siconos::algebra::SimpleMatrix>> _rhsMatrices = {
+  std::vector<std::shared_ptr<siconos::algebra::SiconosMatrix>> _rhsMatrices = {
       nullptr, nullptr, nullptr, nullptr};
 
   /** Default constructor
@@ -606,8 +606,8 @@ class NewtonEulerDS : public SecondOrderDS {
    */
   inline std::shared_ptr<siconos::algebra::SiconosVector> mGyr() const { return _mGyr; }
 
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> T() { return _T; }
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> Tdot() {
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> T() { return _T; }
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> Tdot() {
     assert(_Tdot);
     return _Tdot;
   }

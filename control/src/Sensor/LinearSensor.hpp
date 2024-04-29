@@ -36,13 +36,13 @@ class LinearSensor : public ControlSensor {
   /** A matrix for output */
   std::shared_ptr<siconos::algebra::SiconosMatrix> _data{nullptr};
   /** A matrix for saving all values */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _dataPlot{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _dataPlot{nullptr};
   /** counter */
   unsigned int _k{0};
 
   /** Canonical matrices */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _matC{nullptr};
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _matD{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _matC{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _matD{nullptr};
 
   /** Number of time steps*/
   unsigned int _nSteps{0};
@@ -65,8 +65,8 @@ class LinearSensor : public ControlSensor {
    *  \param D a std::shared_ptr<siconos::algebra::SiconosMatrix> (optional).
    */
   LinearSensor(std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
-               std::shared_ptr<siconos::algebra::SimpleMatrix> C,
-               std::shared_ptr<siconos::algebra::SimpleMatrix> D = nullptr);
+               std::shared_ptr<siconos::algebra::SiconosMatrix> C,
+               std::shared_ptr<siconos::algebra::SiconosMatrix> D = nullptr);
 
   /** Destructor
    */
@@ -83,27 +83,27 @@ class LinearSensor : public ControlSensor {
 
   /** Set the C matrix.
    *
-   *  \param C a SimpleMatrix
+   *  \param C a SiconosMatrix
    */
-  void setC(const siconos::algebra::SimpleMatrix& C);
+  void setC(const siconos::algebra::SiconosMatrix& C);
 
   /** Set the C matrix
    *
-   *  \param C a std::shared_ptr<siconos::algebra::SimpleMatrix>
+   *  \param C a std::shared_ptr<siconos::algebra::SiconosMatrix>
    */
-  inline void setCPtr(std::shared_ptr<siconos::algebra::SimpleMatrix> C) { _matC = C; };
+  inline void setCPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> C) { _matC = C; };
 
   /** Set the D matrix
    *
-   *  \param D a SimpleMatrix
+   *  \param D a SiconosMatrix
    */
-  void setD(const siconos::algebra::SimpleMatrix& D);
+  void setD(const siconos::algebra::SiconosMatrix& D);
 
   /** Set the D matrix
    *
-   *  \param D a std::shared_ptr<siconos::algebra::SimpleMatrix>
+   *  \param D a std::shared_ptr<siconos::algebra::SiconosMatrix>
    */
-  inline void setDPtr(std::shared_ptr<siconos::algebra::SimpleMatrix> D) { _matD = D; };
+  inline void setDPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> D) { _matD = D; };
 };
 
 // Register the sensor into the factory

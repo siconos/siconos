@@ -23,7 +23,7 @@
 #include "SiconosException.hpp"
 #include "BlockVector.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "op3x3.h"
 
 siconos::collision::native::bodies::SphereLDSSphereLDSR::SphereLDSSphereLDSR(double r,

@@ -54,13 +54,13 @@
 #include <memory>
 
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "BlockVector.hpp"
 #include "BlockMatrix.hpp"
 #include "SiconosException.hpp"
 
 namespace siconos::algebra {
-// class SimpleMatrix;
+// class SiconosMatrix;
 // class BlockMatrix;
 // class SiconosVector;
 // class BlockVector;

@@ -24,7 +24,7 @@
 #include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"  // for subprod
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 void siconos::algebra::subprod(const SiconosMatrix &A, const SiconosVector &x,
                                SiconosVector &y,

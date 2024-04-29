@@ -19,7 +19,7 @@
 #include "CableDS.hpp"
 
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 siconos::fem::cable::CableDS::CableDS(
     std::shared_ptr<siconos::algebra::SiconosVector> q0,
@@ -39,7 +39,7 @@ siconos::fem::cable::CableDS::CableDS(
   // The call to LagrangianDS base constructor  ensures a proper allocation of memories for q0,
   // v0 Mass is just a pointer link. Mass alloc : to be done in cable model if mass is a shared
   // pointer input. _mass =
-  // std::make_shared<siconos::algebra::siconos::algebra::SimpleMatrix>(_ndof, _ndof,
+  // std::make_shared<siconos::algebra::siconos::algebra::SiconosMatrix>(_ndof, _ndof,
   // UBLAS_TYPE::SPARSE);
   // We can deal with variable mass later.
   _hasConstantMass = true;
@@ -68,10 +68,10 @@ siconos::fem::cable::CableDS::CableDS(
   // matrices.
   // Those are attributes of LagrangianDS class.
 
-  _jacobianqForces = std::make_shared<siconos::algebra::SimpleMatrix>(
+  _jacobianqForces = std::make_shared<siconos::algebra::SiconosMatrix>(
       _ndof, _ndof, siconos::algebra::UblasType::SPARSE);
 
-  _jacobianqDotForces = std::make_shared<siconos::algebra::SimpleMatrix>(
+  _jacobianqDotForces = std::make_shared<siconos::algebra::SiconosMatrix>(
       _ndof, _ndof, siconos::algebra::UblasType::SPARSE);
 }
 
@@ -127,7 +127,7 @@ void siconos::fem::cable::CableDS::tangentStiffnessMatrix(
   size_t nb_elem = _ndof - 3;
   double k = _EA / _l_e;
   auto Tq = std::make_shared<siconos::algebra::SiconosVector>(6);
-  auto TqqT = std::make_shared<siconos::algebra::SimpleMatrix>(6, 6);
+  auto TqqT = std::make_shared<siconos::algebra::SiconosMatrix>(6, 6);
 
   // tous les points moins le dernier
   for (size_t i = 0; i < nb_elem - 3; i += 3) {
@@ -253,7 +253,7 @@ void siconos::fem::cable::CableDS::matmult(
 
 void siconos::fem::cable::CableDS::matmult2(
     const std::shared_ptr<siconos::algebra::SiconosVector> &V,
-    std::shared_ptr<siconos::algebra::SimpleMatrix> &R) {
+    std::shared_ptr<siconos::algebra::SiconosMatrix> &R) {
   size_t n = V->size();
   for (size_t i = 0; i < n; i++) {
     for (size_t j = 0; j < n; j++) {
@@ -261,8 +261,8 @@ void siconos::fem::cable::CableDS::matmult2(
     }
   }
 }
-std::shared_ptr<siconos::algebra::SimpleMatrix> siconos::fem::cable::CableDS::TRNp_NpMatrix() {
-  auto vTRNp_Np = std::make_shared<siconos::algebra::SimpleMatrix>(
+std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::fem::cable::CableDS::TRNp_NpMatrix() {
+  auto vTRNp_Np = std::make_shared<siconos::algebra::SiconosMatrix>(
       6, 6, siconos::algebra::UblasType::SPARSE);
   /* vector<vector<double>> TRNp_Np = {{1, 0, 0, -1, 0, 0},
                                                                          {0, 1, 0, 0, -1, 0},

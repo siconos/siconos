@@ -27,7 +27,7 @@
 #include "NumericsToolsNamespace.h"  // for SparseBlockStructuredmatrix
 #include "SiconosException.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "Tools.hpp"     // For print
 #include "TypeName.hpp"  // for DS type visitor
 

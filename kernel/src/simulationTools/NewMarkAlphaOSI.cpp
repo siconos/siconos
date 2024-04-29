@@ -28,7 +28,7 @@
 #include "SiconosMatrixOp.hpp"        // scal
 #include "SiconosMatrixVectorOp.hpp"  // mat-vec prod
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "Simulation.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -53,7 +53,7 @@ siconos::integrators::NewMarkAlphaOSI::NewMarkAlphaOSI(double rho_infty, bool fl
   _IsVelocityLevel = flag;
 }
 
-std::shared_ptr<siconos::algebra::SimpleMatrix> siconos::integrators::NewMarkAlphaOSI::W(
+std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::integrators::NewMarkAlphaOSI::W(
     std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
   assert(ds && "siconos::integrators::NewMarkAlphaOSI::W(ds): ds == nullptr.");
   assert(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W &&
@@ -79,7 +79,7 @@ void siconos::integrators::NewMarkAlphaOSI::initializeIterationMatrixW(
         "already in the map and has been initialized.");
 
   _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W =
-      std::make_shared<siconos::algebra::SimpleMatrix>(ds->dimension(), ds->dimension());
+      std::make_shared<siconos::algebra::SiconosMatrix>(ds->dimension(), ds->dimension());
 
   computeW(ds, *_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W);
 }
@@ -320,7 +320,7 @@ void siconos::integrators::NewMarkAlphaOSI::computeFreeOutput(
           osnsp)  // LCP at acceleration level
       {
         siconos::algebra::subprod(*C, *q_free, osnsp_rhs, coord, true);
-        auto ID = std::make_shared<siconos::algebra::SimpleMatrix>(sizeY, sizeY);
+        auto ID = std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeY);
         ID->eye();
         std::vector<std::size_t> xcoord(8);
         xcoord[0] = 0;
@@ -419,7 +419,7 @@ void siconos::integrators::NewMarkAlphaOSI::initializeWorkVectorsForDS(
     // Allocate the memory to stock coefficients of the polynomial for the dense output
     workMatrices.resize(siconos::integrators::NewMarkAlphaOSI::MAT_WORK_LENGTH);
     workMatrices[siconos::integrators::NewMarkAlphaOSI::DENSE_OUTPUT_COEFFICIENTS] =
-        std::make_shared<siconos::algebra::SimpleMatrix>(ds->dimension(),
+        std::make_shared<siconos::algebra::SiconosMatrix>(ds->dimension(),
                                                          (getOrderDenseOutput() + 1));
 
     //*(lds->workspace(DynamicalSystem::acce_like)) = *(lds->acceleration());
@@ -468,7 +468,7 @@ void siconos::integrators::NewMarkAlphaOSI::initializeWorkVectorsForInteraction(
 
   if (!interProp.workMatrices) {
     interProp.workMatrices =
-        std::make_shared<std::vector<std::shared_ptr<siconos::algebra::SimpleMatrix>>>(
+        std::make_shared<std::vector<std::shared_ptr<siconos::algebra::SiconosMatrix>>>(
             siconos::integrators::NewMarkAlphaOSI::MAT_WORK_LENGTH);
   }
 

@@ -19,7 +19,7 @@
 #include "EigenInclude.hpp"
 #include "CommonSMC.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include <Eigen/LU>
 
 #include "ControlSensor.hpp"
@@ -39,8 +39,6 @@
 #include "SiconosAlgebraTools.hpp"
 #include "SiconosMatrixOp.hpp"
 #include "SiconosMatrixVectorOp.hpp"
-// #include "SiconosVector.hpp"
-// #include "SimpleMatrix.hpp"
 #include "TimeDiscretisation.hpp"
 #include "TimeStepping.hpp"
 #include "Topology.hpp"
@@ -133,7 +131,7 @@ void siconos::control::CommonSMC::initialize(
       siconos::modeling::FirstOrderRHelpers::JachxSetter(*_relationSMC, _Csurface,
                                                          _pluginJachxName);
       if (_pluginJachlambdaName.empty() && !_D) {
-        _D = std::make_shared<siconos::algebra::SimpleMatrix>(sDim, sDim);
+        _D = std::make_shared<siconos::algebra::SiconosMatrix>(sDim, sDim);
         _D->zero();
       }
       siconos::modeling::FirstOrderRHelpers::JachlambdaSetter(*_relationSMC, _D,
@@ -227,8 +225,8 @@ void siconos::control::CommonSMC::initialize(
 
   if (_Csurface) {
     auto tmpM =
-        std::make_shared<siconos::algebra::SimpleMatrix>(_Csurface->size(0), _B->size(1));
-    _invCB = std::make_shared<siconos::algebra::SimpleMatrix>(*tmpM);
+        std::make_shared<siconos::algebra::SiconosMatrix>(_Csurface->size(0), _B->size(1));
+    _invCB = std::make_shared<siconos::algebra::SiconosMatrix>(*tmpM);
     siconos::algebra::prod(*_Csurface, *_B, *tmpM);
     // siconos::algebra::InvertMatrix(*tmpM->dense(), *_invCB->dense());
     *_invCB = tmpM->inverse();
@@ -250,10 +248,10 @@ void siconos::control::CommonSMC::computeUeq() {
       *std::static_pointer_cast<siconos::modeling::FirstOrderLinearDS>(_DS_SMC);
   auto n = LinearDS_SMC.A()->size(1);
   // equivalent part, explicit contribution
-  auto tmpM1 = std::make_shared<siconos::algebra::SimpleMatrix>(_Csurface->size(0), n);
-  auto tmpN = std::make_shared<siconos::algebra::SimpleMatrix>(n, n);
-  auto quasiProjB_A = std::make_shared<siconos::algebra::SimpleMatrix>(_invCB->size(0), n);
-  auto tmpW = std::make_shared<siconos::algebra::SimpleMatrix>(n, n);
+  auto tmpM1 = std::make_shared<siconos::algebra::SiconosMatrix>(_Csurface->size(0), n);
+  auto tmpN = std::make_shared<siconos::algebra::SiconosMatrix>(n, n);
+  auto quasiProjB_A = std::make_shared<siconos::algebra::SiconosMatrix>(_invCB->size(0), n);
+  auto tmpW = std::make_shared<siconos::algebra::SiconosMatrix>(n, n);
   tmpW->zero();
   auto xTk = std::make_shared<siconos::algebra::SiconosVector>(_sensor->y());
   tmpW->eye();
@@ -284,13 +282,13 @@ void siconos::control::CommonSMC::computeUeq() {
 }
 
 void siconos::control::CommonSMC::setCsurface(
-    std::shared_ptr<siconos::algebra::SimpleMatrix> newC) {
+    std::shared_ptr<siconos::algebra::SiconosMatrix> newC) {
   // check dimensions ...
   _Csurface = newC;
 }
 
 void siconos::control::CommonSMC::setSaturationMatrix(
-    std::shared_ptr<siconos::algebra::SimpleMatrix> newSat) {
+    std::shared_ptr<siconos::algebra::SiconosMatrix> newSat) {
   // check dimensions ...
   if (newSat->size(1) != _B->size(1)) {
     THROW_EXCEPTION(

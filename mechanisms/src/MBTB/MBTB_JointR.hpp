@@ -29,7 +29,7 @@ public:
   //! Joint forces. F1: F[0,1,2]. F2: F[3,4,5].
   SP::SiconosVector _F;
   //! A matrix such that  _M * F = BLambda
-  SP::SimpleMatrix _M;
+  SP::SiconosMatrix _M;
 
 
   //!It consists in building the system  _M * F = BLambda  and solving it.

@@ -23,7 +23,7 @@
 #include "SiconosMatrixOp.hpp"
 #include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "TimeStepping.hpp"
 // #define DEBUG_WHERE_MESSAGES
 //  #define DEBUG_NOCOLOR
@@ -36,8 +36,8 @@ siconos::control::LinearSMC::LinearSMC(std::shared_ptr<ControlSensor> sensor,
     : CommonSMC(type, sensor) {}
 
 siconos::control::LinearSMC::LinearSMC(std::shared_ptr<ControlSensor> sensor,
-                                       std::shared_ptr<siconos::algebra::SimpleMatrix> B,
-                                       std::shared_ptr<siconos::algebra::SimpleMatrix> D,
+                                       std::shared_ptr<siconos::algebra::SiconosMatrix> B,
+                                       std::shared_ptr<siconos::algebra::SiconosMatrix> D,
                                        ActuatorType type)
     : CommonSMC(type, sensor, B, D) {}
 

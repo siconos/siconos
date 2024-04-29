@@ -22,7 +22,7 @@
 #include "PluginTypes.hpp"
 #include "SiconosVector.hpp"
 #include "SiconosVisitor.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 // #define DEBUG_MESSAGES
 // #define DEBUG_STDOUT
 #include <iostream>
@@ -78,10 +78,10 @@ siconos::modeling::FirstOrderNonLinearDS::FirstOrderNonLinearDS(
     const FirstOrderNonLinearDS &FONLDS)
     : DynamicalSystem(FONLDS)
 {
-  if (FONLDS.M()) _M = std::make_shared<siconos::algebra::SimpleMatrix>(*(FONLDS.M()));
+  if (FONLDS.M()) _M = std::make_shared<siconos::algebra::SiconosMatrix>(*(FONLDS.M()));
   if (FONLDS.f()) _f = std::make_shared<siconos::algebra::SiconosVector>(*(FONLDS.f()));
   if (FONLDS.jacobianfx())
-    _jacobianfx = std::make_shared<siconos::algebra::SimpleMatrix>(*(FONLDS.jacobianfx()));
+    _jacobianfx = std::make_shared<siconos::algebra::SiconosMatrix>(*(FONLDS.jacobianfx()));
   if (FONLDS.getPluginF())
     _pluginf = std::make_shared<siconos::plugins::PluggedObject>(*(FONLDS.getPluginF()));
   if (FONLDS.getPluginJacxf())
@@ -90,7 +90,7 @@ siconos::modeling::FirstOrderNonLinearDS::FirstOrderNonLinearDS(
   if (FONLDS.getPluginM())
     _pluginM = std::make_shared<siconos::plugins::PluggedObject>(*(FONLDS.getPluginM()));
   if (FONLDS.invM())
-    _invM = std::make_shared<siconos::algebra::SimpleMatrix>(*(FONLDS.invM()));
+    _invM = std::make_shared<siconos::algebra::SiconosMatrix>(*(FONLDS.invM()));
 
   // Memory stuff to me moved to graph/osi
   if (FONLDS.fold())
@@ -116,7 +116,7 @@ void siconos::modeling::FirstOrderNonLinearDS::initRhs(double time)
                              // allocation for that one.
       _jacxRhs = std::make_shared<siconos::algebra::BlockMatrix>(_jacobianfx);
     else { //  if (_jacobianfx && _M) or if(!jacobianRhsx)
-      auto tmp = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);
+      auto tmp = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
       tmp->setZero();
       _jacxRhs = std::make_shared<siconos::algebra::BlockMatrix>(*tmp);
     }
@@ -178,14 +178,14 @@ void siconos::modeling::FirstOrderNonLinearDS::swapInMemory()
 void siconos::modeling::FirstOrderNonLinearDS::setComputeMFunction(
     const std::string &pluginPath, const std::string &functionName)
 {
-  if (!_M) _M = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);
+  if (!_M) _M = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
 
   _pluginM->setComputeFunction(pluginPath, functionName);
 }
 
 void siconos::modeling::FirstOrderNonLinearDS::setComputeMFunction(siconos::plugins::FPtr1 fct)
 {
-  if (!_M) _M = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);
+  if (!_M) _M = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
 
   _pluginM->setComputeFunction((void *)fct);
 }
@@ -207,14 +207,14 @@ void siconos::modeling::FirstOrderNonLinearDS::setComputeFFunction(siconos::plug
 void siconos::modeling::FirstOrderNonLinearDS::setComputeJacobianfxFunction(
     const std::string &pluginPath, const std::string &functionName)
 {
-  if (!_jacobianfx) _jacobianfx = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);
+  if (!_jacobianfx) _jacobianfx = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
   _pluginJacxf->setComputeFunction(pluginPath, functionName);
 }
 
 void siconos::modeling::FirstOrderNonLinearDS::setComputeJacobianfxFunction(
     siconos::plugins::FPtr1 fct)
 {
-  if (!_jacobianfx) _jacobianfx = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);
+  if (!_jacobianfx) _jacobianfx = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
   _pluginJacxf->setComputeFunction((void *)fct);
 }
 
@@ -258,7 +258,7 @@ void siconos::modeling::FirstOrderNonLinearDS::computeRhs(double time)
     computeM(time);
     // allocate invM at the first call of the present function
     if (!_invM)
-      _invM = std::make_shared<siconos::algebra::SimpleMatrix>(*_M);
+      _invM = std::make_shared<siconos::algebra::SiconosMatrix>(*_M);
     else if (_pluginM->fPtr)  // if M is plugged, invM must be updated
       *_invM = *_M;
     algebra::solveInPlace(*_invM, *(_x[1]));
@@ -284,7 +284,7 @@ void siconos::modeling::FirstOrderNonLinearDS::computeJacobianRhsx(double time)
     computeM(time);
 
     if (!_invM)
-      _invM = std::make_shared<siconos::algebra::SimpleMatrix>(*_M);
+      _invM = std::make_shared<siconos::algebra::SiconosMatrix>(*_M);
     else if (_pluginM->fPtr)  // if M is plugged, invM must be updated
       *_invM = *_M;
     algebra::solveInPlace(*_invM, *(_jacxRhs->block(0, 0)));

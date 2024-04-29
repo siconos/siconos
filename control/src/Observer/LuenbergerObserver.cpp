@@ -23,7 +23,7 @@
 #include "FirstOrderLinearTIDS.hpp"
 #include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "TimeStepping.hpp"
 #include "Topology.hpp"
 #include "ZeroOrderHoldOSI.hpp"

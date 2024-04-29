@@ -59,12 +59,12 @@ class NewtonEulerR : public Relation {
   /** The Jacobian of the constraints with respect to the generalized coodinates
    *  \f$ q \f$  i.e. \f[\nabla^T_q h(t,q,\dot q,\ldots)\f]
    */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _jachq{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _jachq{nullptr};
 
   /** The Jacobian of the constraints with respect to the generalized velocities
    *  \f$ \dot q \f$  i.e. \f[\nabla^T_{\dot q} h(t,q,\dot q,\ldots)\f]
    */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _jachqDot{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _jachqDot{nullptr};
 
   /** The time-derivative of Jacobian of the constraints with respect
    *  to the generalized coordinates  \f$ q \f$
@@ -72,10 +72,10 @@ class NewtonEulerR : public Relation {
    *  This value is useful to compute the second-order
    *  time--derivative of the constraints with respect to time.
    */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _dotjachq{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _dotjachq{nullptr};
 
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _jachlambda{nullptr};
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _jacglambda{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _jachlambda{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _jacglambda{nullptr};
 
   /** vector e*/
   std::shared_ptr<siconos::algebra::SiconosVector> _e{nullptr};
@@ -89,10 +89,10 @@ class NewtonEulerR : public Relation {
      In the case of the bilateral constrains, it is _jachq._T.
      In the case of a local frame, _jachqT is built from the geometrical
      datas(local frame, point of contact).*/
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _jachqT{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _jachqT{nullptr};
 
   /** local storage of _T as working vector to compute JachqT from q */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _T{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _T{nullptr};
 
   // /** basic constructor
   //  *
@@ -112,17 +112,17 @@ class NewtonEulerR : public Relation {
 
   /** get a pointer on matrix Jach[index]
    *
-   *  \return a pointer on a SimpleMatrix
+   *  \return a pointer on a SiconosMatrix
    */
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> jachq() const { return _jachq; }
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> jachq() const { return _jachq; }
 
-  // proj_with_q  inline std::shared_ptr<siconos::algebra::SimpleMatrix> jachqProj() const {
+  // proj_with_q  inline std::shared_ptr<siconos::algebra::SiconosMatrix> jachqProj() const {
   // return _jachqProj;
   // }
-  void setJachq(std::shared_ptr<siconos::algebra::SimpleMatrix> newJachq);
+  void setJachq(std::shared_ptr<siconos::algebra::SiconosMatrix> newJachq);
 
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> jachqDot() const { return _jachqDot; }
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> dotJachq() const
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> jachqDot() const { return _jachqDot; }
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> dotJachq() const
   {
     assert(_dotjachq);
     return _dotjachq;
@@ -134,28 +134,28 @@ class NewtonEulerR : public Relation {
     return _secondOrderTimeDerivativeTerms;
   };
 
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> jachlambda() const
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> jachlambda() const
   {
     return _jachlambda;
   }
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> jacglambda() const
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> jacglambda() const
   {
     return _jacglambda;
   }
   inline void setE(std::shared_ptr<siconos::algebra::SiconosVector> newE) { _e = newE; }
 
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> jachqT() const { return _jachqT; }
-  inline void setJachqT(std::shared_ptr<siconos::algebra::SimpleMatrix> newJachqT)
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> jachqT() const { return _jachqT; }
+  inline void setJachqT(std::shared_ptr<siconos::algebra::SiconosMatrix> newJachqT)
   {
     _jachqT = newJachqT;
   }
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> H() const override { return _jachqT; }
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> H() const override { return _jachqT; }
 
   /** set Jach[index] to pointer newPtr (pointer link)
    *
    *  \param newPtr the new matrix
    */
-  void setJachqPtr(std::shared_ptr<siconos::algebra::SimpleMatrix> newPtr);
+  void setJachqPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr);
 
   /** Plugin object for the time--derivative of Jacobian i.e.
    *  \f$ \frac{d}{dt} \nabla^T_{q} h(t,q,\dot q,\ldots) \f$
@@ -312,12 +312,12 @@ class NewtonEulerR : public Relation {
    *  The matrix C in the linear case, else it returns Jacobian of the output
    *  with respect to x.
    */
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> C() const override { return _jachq; }
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> C() const override { return _jachq; }
   /** return a SP on the D matrix.
    *  The matrix D in the linear case, else it returns Jacobian of the output
    *  with respect to lambda.
    */
-  virtual inline std::shared_ptr<siconos::algebra::SimpleMatrix> D() const
+  virtual inline std::shared_ptr<siconos::algebra::SiconosMatrix> D() const
   {
     return _jachlambda;
   }
@@ -325,7 +325,7 @@ class NewtonEulerR : public Relation {
    *  The matrix B in the linear case, else it returns Jacobian of the input with
    *  respect to lambda.
    */
-  virtual inline std::shared_ptr<siconos::algebra::SimpleMatrix> B() const
+  virtual inline std::shared_ptr<siconos::algebra::SiconosMatrix> B() const
   {
     return _jacglambda;
   }

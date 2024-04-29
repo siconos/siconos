@@ -30,7 +30,7 @@
 #include "SiconosMatrixOp.hpp"  // mat prod
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"  // for setBlock
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "Simulation.hpp"
 #include "Tools.hpp"  // enum_to_string
 // #define DEBUG_NOCOLOR
@@ -142,7 +142,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::updateInteractio
         DEBUG_PRINTF("Allocation of blockProj of size %i x %i for interaction %i \n",
                      nslawSize, nslawSize, inter->number());
         indexSet->blockProj[*vi] =
-            std::make_shared<siconos::algebra::SimpleMatrix>(nslawSize, nslawSize);
+            std::make_shared<siconos::algebra::SiconosMatrix>(nslawSize, nslawSize);
       }
 
       if (!isLinear || !_hasBeenUpdated) {
@@ -201,7 +201,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::updateInteractio
         {
           if (!indexSet->upper_blockProj[ed1]) {
             indexSet->upper_blockProj[ed1] =
-                std::make_shared<siconos::algebra::SimpleMatrix>(nslawSize1, nslawSize2);
+                std::make_shared<siconos::algebra::SiconosMatrix>(nslawSize1, nslawSize2);
             initialized[indexSet->upper_blockProj[ed1]] = false;
 
 #ifdef MLCPPROJ_DEBUG
@@ -241,7 +241,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::updateInteractio
                       << " and interaction " << inter2->number() << "\n";
 #endif
             indexSet->lower_blockProj[ed1] =
-                std::make_shared<siconos::algebra::SimpleMatrix>(nslawSize1, nslawSize2);
+                std::make_shared<siconos::algebra::SiconosMatrix>(nslawSize1, nslawSize2);
             initialized[indexSet->lower_blockProj[ed1]] = false;
             if (ed2 != ed1) indexSet->lower_blockProj[ed2] = indexSet->lower_blockProj[ed1];
           }
@@ -479,7 +479,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::
         }
       }
       // (inter1 == inter2)
-      auto work = std::make_shared<siconos::algebra::SimpleMatrix>(*leftInteractionBlock);
+      auto work = std::make_shared<siconos::algebra::SiconosMatrix>(*leftInteractionBlock);
       //
       //        std::cout<<"LinearOSNS : leftUBlock\n";
       //        work->display();
@@ -509,14 +509,14 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::
 #ifdef MLCPPROJ_WITH_CT
       auto sizeDS = neds->dimension();
       auto T = neds->T();
-      auto workT = std::make_shared<siconos::algebra::SimpleMatrix>(*T);
+      auto workT = std::make_shared<siconos::algebra::SiconosMatrix>(*T);
       workT->trans();
-      auto workT2 = std::make_shared<siconos::algebra::SimpleMatrix>(6, 6);
+      auto workT2 = std::make_shared<siconos::algebra::SiconosMatrix>(6, 6);
       siconos::algebra::prod(*workT, *T, *workT2, true);
       auto leftInteractionBlock =
-          std::make_shared<siconos::algebra::SimpleMatrix>(sizeY, sizeDS);
+          std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeDS);
       inter->getLeftInteractionBlockForDS(pos, leftInteractionBlock);
-      auto work = std::make_shared<siconos::algebra::SimpleMatrix>(*leftInteractionBlock);
+      auto work = std::make_shared<siconos::algebra::SiconosMatrix>(*leftInteractionBlock);
       std::cout << "LinearOSNS : leftUBlock\n";
       work->display();
       work->trans();
@@ -529,20 +529,20 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::
       {
         //        auto sizeDS = neds->dimension();
         //        auto T = neds->T();
-        //        auto workT = std::make_shared<siconos::algebra::SimpleMatrix>(*T));
+        //        auto workT = std::make_shared<siconos::algebra::SiconosMatrix>(*T));
         //        workT->trans();
-        //        auto workT2 = std::make_shared<siconos::algebra::SimpleMatrix>(6, 6));
+        //        auto workT2 = std::make_shared<siconos::algebra::SiconosMatrix>(6, 6));
         //        siconos::algebra::prod(*workT, *T, *workT2, true);
         //        leftInteractionBlock1 =
-        //        std::make_shared<siconos::algebra::SimpleMatrix>(sizeY, sizeDS));
+        //        std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeDS));
         //        inter->getLeftInteractionBlockForDS(pos, leftInteractionBlock);
-        //        leftInteractionBlock = std::make_shared<siconos::algebra::SimpleMatrix>(1,
+        //        leftInteractionBlock = std::make_shared<siconos::algebra::SiconosMatrix>(1,
         //        sizeDS)); for (auto ii = 0; ii < sizeDS; ii++)
         //          leftInteractionBlock->setValue(1, ii, leftInteractionBlock1->getValue(1,
         //          ii));
         //
         //        auto work =
-        //        std::make_shared<siconos::algebra::SimpleMatrix>(*leftInteractionBlock));
+        //        std::make_shared<siconos::algebra::SiconosMatrix>(*leftInteractionBlock));
         //        //cout<<"LinearOSNS : leftUBlock\n";
         //        //work->display();
         //        work->trans();
@@ -555,7 +555,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::
         auto sizeDS =
             (std::static_pointer_cast<siconos::modeling::NewtonEulerDS>(ds))->getqDim();
         auto leftInteractionBlock =
-            std::make_shared<siconos::algebra::SimpleMatrix>(sizeY, sizeDS);
+            std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeDS);
         inter->getLeftInteractionBlockForDSProjectOnConstraints(pos, leftInteractionBlock);
         // #ifdef MLCPPROJ_DEBUG
         //          std::cout <<
@@ -564,7 +564,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::
         //         leftInteractionBlock->display();
         // #endif
 
-        auto work = std::make_shared<siconos::algebra::SimpleMatrix>(*leftInteractionBlock);
+        auto work = std::make_shared<siconos::algebra::SiconosMatrix>(*leftInteractionBlock);
         // cout<<"LinearOSNS sizeY="<<sizeY<<": leftUBlock\n";
         // work->display();
         work->transposeInPlace();
@@ -662,7 +662,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::computeInteracti
     //     if (! indexSet->properties(ed).upper_block)
     //     {
     //       indexSet->properties(ed).upper_block =
-    //       std::make_shared<siconos::algebra::SimpleMatrix>(sizeY1, sizeY2));
+    //       std::make_shared<siconos::algebra::SiconosMatrix>(sizeY1, sizeY2));
     //     }
 
     currentInteractionBlock = indexSet->upper_blockProj[ed];
@@ -691,7 +691,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::computeInteracti
     //     if (! indexSet->properties(ed).lower_block)
     //     {
     //       indexSet->properties(ed).lower_block =
-    //       std::make_shared<siconos::algebra::SimpleMatrix>(sizeY1, sizeY2));
+    //       std::make_shared<siconos::algebra::SiconosMatrix>(sizeY1, sizeY2));
     //     }
 
     assert(indexSet->lower_blockProj[ed]->size(0) == sizeY1);
@@ -714,16 +714,16 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::computeInteracti
 #ifdef MLCPPROJ_WITH_CT
     auto sizeDS = (std::static_pointer_cast<NewtonEulerDS>(ds))->dimension();
     auto leftInteractionBlock =
-        std::make_shared<siconos::algebra::SimpleMatrix>(sizeY1, sizeDS);
+        std::make_shared<siconos::algebra::SiconosMatrix>(sizeY1, sizeDS);
     inter1->getLeftInteractionBlockForDS(pos1, leftInteractionBlock);
     auto neds = (std::static_pointer_cast<NewtonEulerDS>(ds));
     auto T = neds->T();
-    auto workT = std::make_shared<siconos::algebra::SimpleMatrix>(*T);
+    auto workT = std::make_shared<siconos::algebra::SiconosMatrix>(*T);
     workT->trans();
-    auto workT2 = std::make_shared<siconos::algebra::SimpleMatrix>(6, 6);
+    auto workT2 = std::make_shared<siconos::algebra::SiconosMatrix>(6, 6);
     siconos::algebra::prod(*workT, *T, *workT2, true);
     auto rightInteractionBlock =
-        std::make_shared<siconos::algebra::SimpleMatrix>(sizeY2, sizeDS);
+        std::make_shared<siconos::algebra::SiconosMatrix>(sizeY2, sizeDS);
     inter2->getLeftInteractionBlockForDS(pos2, rightInteractionBlock);
     rightInteractionBlock->trans();
     workT2->Solve(*rightInteractionBlock);
@@ -734,11 +734,11 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::computeInteracti
 
     auto sizeDS = (std::static_pointer_cast<siconos::modeling::NewtonEulerDS>(ds))->getqDim();
     auto leftInteractionBlock =
-        std::make_shared<siconos::algebra::SimpleMatrix>(sizeY1, sizeDS);
+        std::make_shared<siconos::algebra::SiconosMatrix>(sizeY1, sizeDS);
     inter1->getLeftInteractionBlockForDSProjectOnConstraints(pos1, leftInteractionBlock);
     auto neds = (std::static_pointer_cast<siconos::modeling::NewtonEulerDS>(ds));
     auto rightInteractionBlock =
-        std::make_shared<siconos::algebra::SimpleMatrix>(sizeY2, sizeDS);
+        std::make_shared<siconos::algebra::SiconosMatrix>(sizeY2, sizeDS);
     inter2->getLeftInteractionBlockForDSProjectOnConstraints(pos2, rightInteractionBlock);
     rightInteractionBlock->transposeInPlace();
     siconos::algebra::prod(*leftInteractionBlock, *rightInteractionBlock,
@@ -951,7 +951,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::postComputeLagra
   auto aBuff = std::make_shared<siconos::algebra::SiconosVector>(nslawsize);
   siconos::algebra::setBlock(*_z, aBuff, sizeY, pos, 0);
   auto J = lr->jachq();
-  auto aux = std::make_shared<siconos::algebra::SimpleMatrix>(*J);
+  auto aux = std::make_shared<siconos::algebra::SiconosMatrix>(*J);
   aux->trans();
   // std::shared_ptr<siconos::algebra::SiconosVector> tmp =
   // std::make_shared<siconos::algebra::SiconosVector>(*(lr->q())));
@@ -969,7 +969,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::postComputeLagra
   // // The update of the position in DS should be made
   // //  in MoreauJeanOSI::upateState or ProjectedMoreauJeanOSI::updateState
   // auto J=lr->jachq();
-  // auto aux = std::make_shared<siconos::algebra::SimpleMatrix>(*J));
+  // auto aux = std::make_shared<siconos::algebra::SiconosMatrix>(*J));
   // aux->trans();
 
   // std::shared_ptr<siconos::algebra::SiconosVector> tmp  =

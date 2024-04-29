@@ -19,7 +19,7 @@
 
 #include "PluggedObject.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
   if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -29,9 +29,9 @@ CPPUNIT_TEST_SUITE_REGISTRATION(LagrangianCompliantLinearTIRTest);
 
 void LagrangianCompliantLinearTIRTest::setUp()
 {
-  C = std::make_shared<siconos::algebra::SimpleMatrix>(siconos::algebra::readMatrixFromFile("matC.dat"));
-  D = std::make_shared<siconos::algebra::SimpleMatrix>(siconos::algebra::readMatrixFromFile("matD.dat"));
-  F = std::make_shared<siconos::algebra::SimpleMatrix>(siconos::algebra::readMatrixFromFile("matF.dat"));
+  C = std::make_shared<siconos::algebra::SiconosMatrix>(siconos::algebra::readMatrixFromFile("matC.dat"));
+  D = std::make_shared<siconos::algebra::SiconosMatrix>(siconos::algebra::readMatrixFromFile("matD.dat"));
+  F = std::make_shared<siconos::algebra::SiconosMatrix>(siconos::algebra::readMatrixFromFile("matF.dat"));
   e = std::make_shared<siconos::algebra::SiconosVector>(1);
   (*e)(0) = 0.1;
 }
@@ -90,11 +90,11 @@ void LagrangianCompliantLinearTIRTest::testBuildLagrangianCompliantLinearTIR3()
 void LagrangianCompliantLinearTIRTest::testSetCPtr()
 {
   std::cout << "--> Test: setCPtr." << std::endl;
-  std::shared_ptr<siconos::algebra::SimpleMatrix> tmpC =
-      std::make_shared<siconos::algebra::SimpleMatrix>(*C);
+  std::shared_ptr<siconos::algebra::SiconosMatrix> tmpC =
+      std::make_shared<siconos::algebra::SiconosMatrix>(*C);
   tmpC->zero();
-  std::shared_ptr<siconos::algebra::SimpleMatrix> tmpD =
-      std::make_shared<siconos::algebra::SimpleMatrix>(*D);
+  std::shared_ptr<siconos::algebra::SiconosMatrix> tmpD =
+      std::make_shared<siconos::algebra::SiconosMatrix>(*D);
   tmpD->zero();
   auto folr = std::make_shared<siconos::modeling::LagrangianCompliantLinearTIR>(tmpC, tmpD);
   folr->setCPtr(C);
@@ -108,8 +108,8 @@ void LagrangianCompliantLinearTIRTest::testSetCPtr()
 void LagrangianCompliantLinearTIRTest::testSetDPtr()
 {
   std::cout << "--> Test: setDPtr." << std::endl;
-  std::shared_ptr<siconos::algebra::SimpleMatrix> tmp =
-      std::make_shared<siconos::algebra::SimpleMatrix>(*D);
+  std::shared_ptr<siconos::algebra::SiconosMatrix> tmp =
+      std::make_shared<siconos::algebra::SiconosMatrix>(*D);
   tmp->zero();
   auto folr = std::make_shared<siconos::modeling::LagrangianCompliantLinearTIR>(C, tmp);
   folr->setDPtr(D);

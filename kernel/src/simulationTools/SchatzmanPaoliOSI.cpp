@@ -31,7 +31,7 @@
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"  // for subscal
 #include "SiconosVisitor.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "Simulation.hpp"
 #include "Tools.hpp"
 // #define DEBUG_NOCOLOR
@@ -54,7 +54,7 @@ siconos::integrators::SchatzmanPaoliOSI::SchatzmanPaoliOSI(double theta, double 
   _sizeMem = SCHATZMANPAOLISTEPSINMEMORY;
 }
 
-std::shared_ptr<siconos::algebra::SimpleMatrix> siconos::integrators::SchatzmanPaoliOSI::W(
+std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::integrators::SchatzmanPaoliOSI::W(
     std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
   assert(ds && "siconos::integrators::SchatzmanPaoliOSI::W(ds): ds == nullptr.");
   return _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W;
@@ -227,10 +227,10 @@ void siconos::integrators::SchatzmanPaoliOSI::initializeIterationMatrixW(
   if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianLinearTIDS>(ds)) {
     if (d->mass()) {
       _dynamicalSystemsGraph->properties(dsv).W =
-          std::make_shared<siconos::algebra::SimpleMatrix>(*d->mass());  //*W = *d->mass();
+          std::make_shared<siconos::algebra::SiconosMatrix>(*d->mass());  //*W = *d->mass();
     } else {
       _dynamicalSystemsGraph->properties(dsv).W =
-          std::make_shared<siconos::algebra::SimpleMatrix>(sizeW, sizeW);
+          std::make_shared<siconos::algebra::SiconosMatrix>(sizeW, sizeW);
       _dynamicalSystemsGraph->properties(dsv).W->eye();
     }
 

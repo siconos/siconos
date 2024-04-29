@@ -22,7 +22,7 @@
 #ifndef ROTATIONQUATERNION_H
 #define ROTATIONQUATERNION_H
 
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 #include <boost/math_fwd.hpp>  // for quaternion
 #include <memory>
@@ -30,7 +30,7 @@
 namespace siconos::algebra {
 
 // class SiconosVector;
-// class SimpleMatrix;
+// class SiconosMatrix;
 }  // namespace siconos::algebra
 
 namespace siconos::geometry {
@@ -91,7 +91,7 @@ void normalizeq(siconos::algebra::SiconosVector &q);
  */
 
 void computeRotationMatrix(double q0, double q1, double q2, double q3,
-                           siconos::algebra::SimpleMatrix &rotationMatrix);
+                           siconos::algebra::SiconosMatrix &rotationMatrix);
 
 /* For a given configuration vector q composed of a position and a quaternion,
  * compute the associated rotation matrix
@@ -101,7 +101,7 @@ void computeRotationMatrix(double q0, double q1, double q2, double q3,
  */
 
 void computeRotationMatrix(siconos::algebra::SiconosVector &q,
-                           siconos::algebra::SimpleMatrix &rotationMatrix);
+                           siconos::algebra::SiconosMatrix &rotationMatrix);
 
 /* For a given configuration vector q composed of a position and a quaternion,
  * compute the transposed associated rotation matrix
@@ -111,7 +111,7 @@ void computeRotationMatrix(siconos::algebra::SiconosVector &q,
  */
 void computeRotationMatrixTransposed(
     siconos::algebra::SiconosVector &q,
-    siconos::algebra::SimpleMatrix &rotationMatrix);
+    siconos::algebra::SiconosMatrix &rotationMatrix);
 
 /* For a given configuration vector q composed of a position and a quaternion,
  *  performs the rotation of the vector v
@@ -131,7 +131,7 @@ void quaternionRotate(double q0, double q1, double q2, double q3,
                       siconos::algebra::SiconosVector &v);
 
 void quaternionRotate(double q0, double q1, double q2, double q3,
-                      siconos::algebra::SimpleMatrix &m);
+                      siconos::algebra::SiconosMatrix &m);
 
 /* For a given configuration vector q composed of a position and a quaternion,
  * performs the rotation of the matrix m
@@ -140,7 +140,7 @@ void quaternionRotate(double q0, double q1, double q2, double q3,
  * \param[in,out] m the vector to be rotated
  */
 void quaternionRotate(siconos::algebra::SiconosVector &q,
-                      siconos::algebra::SimpleMatrix &m);
+                      siconos::algebra::SiconosMatrix &m);
 
 /* For a given  configuration vector q composed of a position and a quaternion,
  * express the vector v given in
@@ -156,14 +156,14 @@ void changeFrameAbsToBody(const siconos::algebra::SiconosVector& q,
 void changeFrameAbsToBody(siconos::algebra::SiconosVector &q,
                           siconos::algebra::SiconosVector &v);
 void changeFrameAbsToBody(siconos::algebra::SiconosVector &q,
-                          siconos::algebra::SimpleMatrix &m);
+                          siconos::algebra::SiconosMatrix &m);
 
 void changeFrameBodyToAbs(const siconos::algebra::SiconosVector& q,
                           siconos::algebra::SiconosVector& v);
 void changeFrameBodyToAbs(siconos::algebra::SiconosVector &q,
                           siconos::algebra::SiconosVector &v);
 void changeFrameBodyToAbs(siconos::algebra::SiconosVector &q,
-                          siconos::algebra::SimpleMatrix &m);
+                          siconos::algebra::SiconosMatrix &m);
 
 void compositionLawLieGroup(const siconos::algebra::SiconosVector& a,
                             siconos::algebra::SiconosVector& b,

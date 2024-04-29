@@ -142,7 +142,7 @@ class NewtonEulerJointR : public siconos::modeling::NewtonEulerR {
   /** Compute the jacobian of linear and angular DoF with respect to some q */
   virtual void computeJachqDoF(double time, siconos::modeling::Interaction& inter,
                                std::shared_ptr<siconos::algebra::BlockVector> q0,
-                               siconos::algebra::SimpleMatrix& jachq, unsigned int axis = 0) {}
+                               siconos::algebra::SiconosMatrix& jachq, unsigned int axis = 0) {}
 
   /** Project a vector onto the given 0-indexed free axis. Useful for
    *  calculating velocities in the axis, or for calculating

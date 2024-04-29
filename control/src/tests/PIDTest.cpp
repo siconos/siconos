@@ -23,7 +23,7 @@
 #include "LinearSensor.hpp"
 #include "PID.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "io.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
@@ -33,7 +33,7 @@
 CPPUNIT_TEST_SUITE_REGISTRATION(PIDTest);
 
 void PIDTest::setUp() {
-  _A = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);
+  _A = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
   _A->setZero();
   (*_A)(0, 1) = 1.0;
   _x0 = std::make_shared<siconos::algebra::SiconosVector>(_n);
@@ -50,11 +50,11 @@ void PIDTest::setUp() {
 
 void PIDTest::init() {
   _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(_x0, _A);
-  auto C = std::make_shared<siconos::algebra::SimpleMatrix>(1, 2);
+  auto C = std::make_shared<siconos::algebra::SiconosMatrix>(1, 2);
   C->zero();
   (*C)(0, 0) = 1;
   _sensor = std::make_shared<siconos::control::LinearSensor>(_DS, C);
-  auto B = std::make_shared<siconos::algebra::SimpleMatrix>(2, 1);
+  auto B = std::make_shared<siconos::algebra::SiconosMatrix>(2, 1);
   B->setZero();
   (*B)(1, 0) = 1;
   _PIDcontroller = std::make_shared<siconos::control::PID>(_sensor, B);
@@ -77,7 +77,7 @@ void PIDTest::testPIDZOH() {
   siconos::algebra::io::write("PIDZOH.dat", data, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  siconos::algebra::SimpleMatrix dataRef(data);
+  siconos::algebra::SiconosMatrix dataRef(data);
   dataRef.zero();
   siconos::algebra::io::read("PID.ref", dataRef);
 
@@ -100,7 +100,7 @@ void PIDTest::testPIDLsodar() {
   siconos::algebra::io::write("PIDLsodar.dat", data, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  siconos::algebra::SimpleMatrix dataRef(data);
+  siconos::algebra::SiconosMatrix dataRef(data);
   dataRef.zero();
   siconos::algebra::io::read("PID.ref", dataRef);
   auto diff = data - dataRef;

@@ -15,7 +15,7 @@
 #include "SiconosContactor.hpp"
 #include "SiconosShape.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "StaticBody.hpp"
 #include "TimeDiscretisation.hpp"
 #include "TimeStepping.hpp"
@@ -98,7 +98,7 @@ static BounceResult bounceTest(std::string moving, std::string ground,
   // Set up a Siconos Mechanics environment:
   // A RigidBody2dDS with a contactor consisting of a single disk.
 
-  auto mass = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
+  auto mass = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
   mass->setValue(0, 0, params.mass);
   mass->setValue(1, 1, params.mass);
   mass->setValue(2, 2, params.mass);
@@ -118,7 +118,7 @@ static BounceResult bounceTest(std::string moving, std::string ground,
     contactors->push_back(std::make_shared<siconos::collision::SiconosContactor>(box));
   } else if (moving == "ch2d") {
     float siz = params.size;
-    auto pts = std::make_shared<siconos::algebra::SimpleMatrix>(4, 2);
+    auto pts = std::make_shared<siconos::algebra::SiconosMatrix>(4, 2);
     (*pts)(0, 0) = 0.0;
     (*pts)(0, 1) = 0.0;
     (*pts)(1, 1) = siz;

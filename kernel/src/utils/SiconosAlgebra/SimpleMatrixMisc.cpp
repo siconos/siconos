@@ -23,7 +23,7 @@
 #include "SiconosMatrixOp.hpp"
 #include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "Simulation.hpp"
 #include "Tools.hpp"  // enum_to_string
 #include "boost/numeric/bindings/lapack.hpp"
@@ -36,7 +36,7 @@
 #include "io.hpp"
 
 
-void siconos::algebra::normInfByColumn(const SimpleMatrix &m, SiconosVector &v)
+void siconos::algebra::normInfByColumn(const SiconosMatrix &m, SiconosVector &v)
 {
     if(v.size() != m.size(1)) THROW_EXCEPTION("the given vector does not have the right length");
     for (size_t i = 0; i < m.size(1); i++)
@@ -57,8 +57,8 @@ bool siconos::algebra::checkSymmetry(SiconosMatrix &m, double tol) {
 }
 
 
-siconos::algebra::SimpleMatrix siconos::algebra::readMatrixFromFile(const std::string &filename, bool ascii) {
-    SimpleMatrix m;
+siconos::algebra::SiconosMatrix siconos::algebra::readMatrixFromFile(const std::string &filename, bool ascii) {
+    SiconosMatrix m;
     if (ascii) {
         io::read(filename, m, io::ASCII_IN);
     } else {

@@ -25,7 +25,7 @@
 #include "BlockVector.hpp"
 #include "NewtonEulerDS.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 // #include <boost/math/quaternion.hpp>
 // #include <cfloat>
 // #include <iostream>
@@ -213,8 +213,8 @@ void siconos::joints::CouplerJointR::computeh(double time,
 void siconos::joints::CouplerJointR::computeJachq(
     double time, siconos::modeling::Interaction& inter,
     std::shared_ptr<siconos::algebra::BlockVector> q0) {
-  auto jachq1 = std::make_shared<siconos::algebra::SimpleMatrix>(1, q0->size());
-  auto jachq2 = std::make_shared<siconos::algebra::SimpleMatrix>(1, q0->size());
+  auto jachq1 = std::make_shared<siconos::algebra::SiconosMatrix>(1, q0->size());
+  auto jachq2 = std::make_shared<siconos::algebra::SiconosMatrix>(1, q0->size());
 
   // Get jacobians for the implicated degrees of freedom
   // Compute the jacobian for the required range of axes
@@ -269,15 +269,15 @@ void siconos::joints::CouplerJointR::computehDoF(double time,
 
 void siconos::joints::CouplerJointR::computeJachqDoF(
     double time, siconos::modeling::Interaction& inter,
-    std::shared_ptr<siconos::algebra::BlockVector> q0, siconos::algebra::SimpleMatrix& jachq,
+    std::shared_ptr<siconos::algebra::BlockVector> q0, siconos::algebra::SiconosMatrix& jachq,
     unsigned int axis) {
   // The Jacobian of the DoF of the constraint is the same as the
   // Jacobian of the constraint itself. (Same as computeJachq(), but
   // don't store result in member object.)
   assert(axis == 0);
 
-  auto jachq1 = std::make_shared<siconos::algebra::SimpleMatrix>(1, q0->size());
-  auto jachq2 = std::make_shared<siconos::algebra::SimpleMatrix>(1, q0->size());
+  auto jachq1 = std::make_shared<siconos::algebra::SiconosMatrix>(1, q0->size());
+  auto jachq2 = std::make_shared<siconos::algebra::SiconosMatrix>(1, q0->size());
 
   // Get jacobians for the implicated degrees of freedom
   // Compute the jacobian for the required range of axes

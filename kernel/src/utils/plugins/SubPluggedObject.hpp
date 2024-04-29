@@ -73,7 +73,7 @@ class SubPluggedObject : public PluggedObject {
   //     : PluggedObject(SPO), _indx(SPO.getIndex()), _p(SPO.getp())
   // {
   //   _parentfPtr = SPO.getParentfPtr();
-  //   _tmpMat = std::make_shared<siconos::algebra::SimpleMatrix>(SPO.getTmpMat());
+  //   _tmpMat = std::make_shared<siconos::algebra::SiconosMatrix>(SPO.getTmpMat());
   // }
 
   /** destructor

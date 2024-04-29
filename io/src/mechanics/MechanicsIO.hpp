@@ -31,7 +31,7 @@
 
 namespace siconos::algebra {
 
-class SimpleMatrix;
+class SiconosMatrix;
 class SiconosVector;
 }  // namespace siconos::algebra
 
@@ -53,7 +53,7 @@ struct ContactContactWorkVisitor;
 class MechanicsIO {
  protected:
   template <typename T, typename G>
-  std::shared_ptr<siconos::algebra::SimpleMatrix> visitAllVerticesForVector(
+  std::shared_ptr<siconos::algebra::SiconosMatrix> visitAllVerticesForVector(
       const G& graph) const;
 
   template <typename T, typename G>
@@ -73,11 +73,11 @@ class MechanicsIO {
 
   /** get all positions: translation (x,y,z) + orientation quaternion (qw, qx, qy, qz)
    *  \param nsds current nonsmooth dynamical system
-   *  \return a std::shared_ptr<siconos::algebra::SimpleMatrix> where the columns are
+   *  \return a std::shared_ptr<siconos::algebra::SiconosMatrix> where the columns are
    *   id, x, y, z, qw, qx, qy, qz
    *   id being the DynamicalSystem number + 1
    */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> positions(
+  std::shared_ptr<siconos::algebra::SiconosMatrix> positions(
       const siconos::modeling::NonSmoothDynamicalSystem& nsds) const;
 
   /** get all velocities: translation (xdot, ydot, zdot) + orientation velocities ox, oy, oz
@@ -86,7 +86,7 @@ class MechanicsIO {
    *   ox, oy, oz
    *   id is the DynamicalSystem number + 1
    */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> velocities(
+  std::shared_ptr<siconos::algebra::SiconosMatrix> velocities(
       const siconos::modeling::NonSmoothDynamicalSystem& nsds) const;
 
   /** get the coordinates of all contact points, normals, reactions and velocities
@@ -95,7 +95,7 @@ class MechanicsIO {
    *  \return a matrix where the columns are mu x y z, nx, ny, nz, rx, ry, rz, vx, vy, vz, ox,
    *   oy, oz, id
    */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> contactPoints(
+  std::shared_ptr<siconos::algebra::SiconosMatrix> contactPoints(
       const siconos::modeling::NonSmoothDynamicalSystem& nsds,
       unsigned int index_set = 1) const;
 
@@ -106,7 +106,7 @@ class MechanicsIO {
    *   object number (if possible)
    */
 
-  std::shared_ptr<siconos::algebra::SimpleMatrix> contactInfo(
+  std::shared_ptr<siconos::algebra::SiconosMatrix> contactInfo(
       const siconos::modeling::NonSmoothDynamicalSystem& nsds,
       unsigned int index_set = 1) const;
 
@@ -122,7 +122,7 @@ class MechanicsIO {
       \return a matrix where the columns are id, normal contact work, tangent contact work,
       friction dissipation, contact status
   */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> contactContactWork(
+  std::shared_ptr<siconos::algebra::SiconosMatrix> contactContactWork(
       const siconos::modeling::NonSmoothDynamicalSystem& nsds, unsigned int index_set = 1,
       double omega = 0.5, double tol = 1e-08) const;
 
@@ -130,7 +130,7 @@ class MechanicsIO {
    *  \param nsds current nonsmooth dynamical system
    *  \return a matrix where the columns are domain, id
    */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> domains(
+  std::shared_ptr<siconos::algebra::SiconosMatrix> domains(
       const siconos::modeling::NonSmoothDynamicalSystem& nsds) const;
 };
 

@@ -22,7 +22,7 @@
 #include "Pulley.h"
 #include "Rope.h"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "Support.h"
 
 siconos::fem::cable::TransportCableResult::TransportCableResult() { rope2.set_Down(true); }

@@ -73,17 +73,17 @@ class LagrangianR : public Relation {
   ACCEPT_SERIALIZATION(LagrangianR);
 
   /** Jacobian matrices of  \f$ y = h(t,q,\dot q,\ldots) \f$  */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _jachlambda{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _jachlambda{nullptr};
 
   /** The Jacobian of the constraints with respect to the generalized coodinates   \f$ q \f$
    *  i.e.  \f$ \nabla^\top_q h(t,q,\dot q,\ldots) \f$
    */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _jachq{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _jachq{nullptr};
 
   /**The Jacobian of the constraints with respect to the generalized velocities   \f$ \dot q
    * \f$ i.e.  \f$ \nabla^\top_{\dot q} h(t,q,\dot q,\ldots) \f$
    */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _jachqDot{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _jachqDot{nullptr};
 
   /** The time-derivative of Jacobian of the constraints with respect
    *  to the generalized coordinates   \f$  q \f$
@@ -91,7 +91,7 @@ class LagrangianR : public Relation {
    *  This value is useful to compute the second-order
    *  time--derivative of the constraints with respect to time.
    */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _dotjachq{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _dotjachq{nullptr};
 
   std::shared_ptr<siconos::plugins::PluggedObject> _pluginJachq{nullptr};
 
@@ -118,12 +118,12 @@ class LagrangianR : public Relation {
 
   /** get a pointer on matrix Jach[index]
    *
-   *  \return a pointer on a SimpleMatrix
+   *  \return a pointer on a SiconosMatrix
    */
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> jachq() const { return _jachq; }
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> jachqDot() const { return _jachqDot; }
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> dotJachq() const { return _dotjachq; }
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> jachlambda() const
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> jachq() const { return _jachq; }
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> jachqDot() const { return _jachqDot; }
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> dotJachq() const { return _dotjachq; }
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> jachlambda() const
   {
     return _jachlambda;
   }
@@ -132,14 +132,14 @@ class LagrangianR : public Relation {
    *
    *  \param newPtr the new matrix
    */
-  inline void setJachqPtr(std::shared_ptr<siconos::algebra::SimpleMatrix> newPtr)
+  inline void setJachqPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr)
   {
     _jachq = newPtr;
   }
 
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> C() const override { return _jachq; }
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> C() const override { return _jachq; }
 
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> H() const override { return _jachq; }
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> H() const override { return _jachq; }
 
   /** main relation members display
    */

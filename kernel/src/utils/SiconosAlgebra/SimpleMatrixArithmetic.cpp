@@ -18,7 +18,7 @@
 
 #include "SiconosException.hpp"
 #include "SiconosMatrixOp.hpp"  // for matrix op. declarations
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 void siconos::algebra::add(const SiconosMatrix &A, const SiconosMatrix &B,
                            SiconosMatrix &C) {

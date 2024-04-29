@@ -24,7 +24,7 @@
 #include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosMatrixOp.hpp"  // For isComparableto
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 
 void siconos::algebra::scal(double a, const SiconosMatrix &A, SiconosMatrix &B, bool init) {

@@ -28,7 +28,7 @@
 #include "NewtonEulerDS.hpp"
 #include "RotationQuaternion.hpp"  // rotquat, posquat ...
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 // #include <cfloat>
 // #include <iostream>
 
@@ -45,7 +45,7 @@ void siconos::joints::KneeJointR::initialize(siconos::modeling::Interaction& int
     auto xSize = inter.getSizeOfDS();
     auto qSize = 7 * (xSize / 6);
 
-    _dotjachq = std::make_shared<siconos::algebra::SimpleMatrix>(sizeY, qSize);
+    _dotjachq = std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, qSize);
   }
 }
 

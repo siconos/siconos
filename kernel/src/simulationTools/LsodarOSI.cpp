@@ -35,7 +35,7 @@
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"  // For subscal
 #include "SiconosVisitor.hpp"   // for NSLEffectOnFreeOutput visitor
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -724,7 +724,7 @@ void siconos::integrators::LsodarOSI::computeFreeOutput(
       siconos::algebra::subprod(*C, *Xfree, osnsp_rhs, coord, true);
     }
 
-    auto ID = std::make_shared<siconos::algebra::SimpleMatrix>(sizeY, sizeY);
+    auto ID = std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeY);
     ID->eye();
 
     std::vector<size_t> xcoord(8);

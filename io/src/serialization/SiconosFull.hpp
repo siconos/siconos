@@ -33,7 +33,7 @@
 #endif
 #include "SiconosFullNumerics.hpp"
 
-#include <SimpleMatrix.hpp>
+#include <SiconosMatrix.hpp>
 #include <SiconosVector.hpp>
 #include <fc2d_Solvers.h>
 #include <fc3d_Solvers.h>
@@ -188,7 +188,7 @@ void siconos_io(Archive & ar, siconos::algebra::SiconosVector & v, unsigned int 
 REGISTER_BOOST_SERIALIZATION(siconos::algebra::SiconosVector);
 
 template <class Archive>
-void siconos_io(Archive & ar, SimpleMatrix & m, unsigned int version)
+void siconos_io(Archive & ar, SiconosMatrix & m, unsigned int version)
 {
   ar & boost::serialization::make_nvp("num", m._num);
   ar & boost::serialization::make_nvp("_ipiv", m._ipiv);
@@ -235,7 +235,7 @@ void siconos_io(Archive & ar, SimpleMatrix & m, unsigned int version)
   ar &  boost::serialization::make_nvp("SiconosMatrix",
                                        boost::serialization::base_object<SiconosMatrix>(m));
 }
-REGISTER_BOOST_SERIALIZATION(SimpleMatrix);
+REGISTER_BOOST_SERIALIZATION(SiconosMatrix);
 
 template<typename Archive>
 void siconos_io(Archive& ar, LsodarOSI& osi, unsigned int version)
@@ -341,13 +341,13 @@ namespace Siconos
   MAKE_SICONOS_IO_PROPERTIES(SP::PluggedObject);
   MAKE_SICONOS_IO_PROPERTIES(SP::OneStepIntegrator);
   MAKE_SICONOS_IO_PROPERTIES(SP::SiconosMatrix);
-  MAKE_SICONOS_IO_PROPERTIES(SP::SimpleMatrix);
+  MAKE_SICONOS_IO_PROPERTIES(SP::SiconosMatrix);
   MAKE_SICONOS_IO_PROPERTIES(SP::SiconosVector);
   MAKE_SICONOS_IO_SP_PROPERTIES(MatrixIntegrator);
   MAKE_SICONOS_IO_SP_PROPERTIES(PluggedObject);
   MAKE_SICONOS_IO_SP_PROPERTIES(OneStepIntegrator);
   MAKE_SICONOS_IO_SP_PROPERTIES(SiconosMatrix);
-  MAKE_SICONOS_IO_SP_PROPERTIES(SimpleMatrix);
+  MAKE_SICONOS_IO_SP_PROPERTIES(SiconosMatrix);
   MAKE_SICONOS_IO_SP_PROPERTIES(siconos::algebra::SiconosVector);
   MAKE_SICONOS_IO_PROPERTIES(std::string);
   MAKE_SICONOS_IO_PROPERTIES(unsigned int);
@@ -434,7 +434,7 @@ BOOST_SERIALIZATION_SPLIT_FREE(siconos::modeling::NonSmoothDynamicalSystem::Chan
 template <class Archive>
 void siconos_io_register_Kernel(Archive& ar)
 {
-  ar.register_type(static_cast<SimpleMatrix*>(nullptr));
+  ar.register_type(static_cast<SiconosMatrix*>(nullptr));
   ar.register_type(static_cast<siconos::algebra::SiconosVector*>(nullptr));
 
   siconos_io_register_generated_Kernel(ar);

@@ -17,7 +17,7 @@
  */
 #include "LagrangianDSTest.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "BlockMatrix.hpp"
 #include "SiconosMatrixOp.hpp"
 
@@ -42,7 +42,7 @@ void LagrangianDSTest::setUp()
   (*u0)(0) = 4;
   (*u0)(1) = 5;
 
-  mass = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
+  mass = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
   mass->setZero();
   (*mass)(0, 0) = 1;
   (*mass)(1, 1) = 2;
@@ -91,7 +91,7 @@ void LagrangianDSTest::testBuildLagrangianDS1()
                                true);
 
   double time = 1.;
-  auto m0 = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
+  auto m0 = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
   m0->setZero();
 
   ds->computeForces(time, ds->q(), ds->velocity());
@@ -108,7 +108,7 @@ void LagrangianDSTest::testBuildLagrangianDS1()
   siconos::algebra::SiconosVector rhs0;
   siconos::algebra::concatenateVectors(x0, *q0, *velocity0);
   siconos::algebra::concatenateVectors(rhs0, *velocity0, zero);
-  siconos::algebra::SimpleMatrix i0(3, 3);
+  siconos::algebra::SiconosMatrix i0(3, 3);
   i0(0, 0) = i0(1, 1) = i0(2, 2) = 1.;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", ds->n() == 2 * 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", *(ds->x0()) == x0, true);
@@ -170,9 +170,9 @@ void LagrangianDSTest::testBuildLagrangianDS4()
   siconos::algebra::SiconosVector rhs0;
   siconos::algebra::concatenateVectors(x0, *q0, *velocity0);
   siconos::algebra::concatenateVectors(rhs0, *velocity0, zero);
-  auto m0 = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
+  auto m0 = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
   m0->setZero();
-  siconos::algebra::SimpleMatrix i0(3, 3);
+  siconos::algebra::SiconosMatrix i0(3, 3);
   i0.setZero();
   i0(0, 0) = i0(1, 1) = i0(2, 2) = 1.;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4 : ", ds->n() == 2 * 3, true);
@@ -199,7 +199,7 @@ void LagrangianDSTest::testBuildLagrangianDS5()
 
   siconos::algebra::SiconosVector zero(3);
   zero.setZero();
-  auto m0 = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
+  auto m0 = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
   m0->setZero();
 
   // CPPUNIT_ASSERT_EQUAL_MESSAGE(
@@ -242,7 +242,7 @@ void LagrangianDSTest::testBuildLagrangianDS5()
   siconos::algebra::SiconosVector rhs0;
   siconos::algebra::concatenateVectors(x0, *q0, *velocity0);
   siconos::algebra::concatenateVectors(rhs0, *velocity0, zero);
-  siconos::algebra::SimpleMatrix i0(3, 3);
+  siconos::algebra::SiconosMatrix i0(3, 3);
   i0(0, 0) = i0(1, 1) = i0(2, 2) = 1.;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5 : ", ds->n() == 2 * 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5 : ", *(ds->x0()) == x0, true);

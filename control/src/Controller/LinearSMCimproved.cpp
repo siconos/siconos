@@ -26,7 +26,7 @@
 #include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVectorOp.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "TimeStepping.hpp"
 #include "ZeroOrderHoldOSI.hpp"
 
@@ -34,8 +34,8 @@ siconos::control::LinearSMCimproved::LinearSMCimproved(std::shared_ptr<ControlSe
     : LinearSMC(sensor, ActuatorType::LinearSMCimproved) {}
 
 siconos::control::LinearSMCimproved::LinearSMCimproved(
-    std::shared_ptr<ControlSensor> sensor, std::shared_ptr<siconos::algebra::SimpleMatrix> B,
-    std::shared_ptr<siconos::algebra::SimpleMatrix> D)
+    std::shared_ptr<ControlSensor> sensor, std::shared_ptr<siconos::algebra::SiconosMatrix> B,
+    std::shared_ptr<siconos::algebra::SiconosMatrix> D)
     : LinearSMC(sensor, B, D, ActuatorType::LinearSMCimproved) {}
 
 void siconos::control::LinearSMCimproved::initialize(
@@ -50,7 +50,7 @@ void siconos::control::LinearSMCimproved::initialize(
 }
 
 void siconos::control::LinearSMCimproved::predictionPerturbation(
-    const siconos::algebra::SiconosVector& xTk, siconos::algebra::SimpleMatrix& CBstar) {
+    const siconos::algebra::SiconosVector& xTk, siconos::algebra::SiconosMatrix& CBstar) {
   if (_us->normInf() < _alpha) {
     if (_inDisceteTimeSlidingPhase) {
       auto& up = *_up;
@@ -115,8 +115,8 @@ void siconos::control::LinearSMCimproved::predictionPerturbation(
 
 void siconos::control::LinearSMCimproved::actuate() {
   auto sDim = _u->size();
-  auto tmpM1 = std::make_shared<siconos::algebra::SimpleMatrix>(*_Csurface);
-  auto CBstar = std::make_shared<siconos::algebra::SimpleMatrix>(sDim, sDim);
+  auto tmpM1 = std::make_shared<siconos::algebra::SiconosMatrix>(*_Csurface);
+  auto CBstar = std::make_shared<siconos::algebra::SiconosMatrix>(sDim, sDim);
   CBstar->zero();
   auto xTk = std::make_shared<siconos::algebra::SiconosVector>(_sensor->y());
 

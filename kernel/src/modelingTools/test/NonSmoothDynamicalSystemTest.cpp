@@ -21,7 +21,7 @@
 #include "LagrangianLinearTIR.hpp"
 #include "NewtonImpactNSL.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "Topology.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
@@ -96,7 +96,7 @@ void NonSmoothDynamicalSystemTest::testinsertInteraction()
       " testinsertInteractionC: ", nsds->dynamicalSystem(23)->number() == 23, true);
 
   auto r = std::make_shared<siconos::modeling::LagrangianLinearTIR>(
-      std::make_shared<siconos::algebra::SimpleMatrix>(1, 3));
+      std::make_shared<siconos::algebra::SiconosMatrix>(1, 3));
   auto nsl = std::make_shared<siconos::modeling::NewtonImpactNSL>(0.0);
   auto inter = std::make_shared<siconos::modeling::Interaction>(nsl, r);
 
@@ -132,9 +132,9 @@ void NonSmoothDynamicalSystemTest::testremoveDynamicalSystem()
       " testremoveDynamicalSystemC: ", nsds->dynamicalSystem(23)->number() == 23, true);
 
   auto r1 = std::make_shared<siconos::modeling::LagrangianLinearTIR>(
-      std::make_shared<siconos::algebra::SimpleMatrix>(1, 3));
+      std::make_shared<siconos::algebra::SiconosMatrix>(1, 3));
   auto r2 = std::make_shared<siconos::modeling::LagrangianLinearTIR>(
-      std::make_shared<siconos::algebra::SimpleMatrix>(1, 6));
+      std::make_shared<siconos::algebra::SiconosMatrix>(1, 6));
   auto nsl = std::make_shared<siconos::modeling::NewtonImpactNSL>(0.0);
   auto inter1 = std::make_shared<siconos::modeling::Interaction>(nsl, r1);
   auto inter2 = std::make_shared<siconos::modeling::Interaction>(nsl, r1);
@@ -198,7 +198,7 @@ void NonSmoothDynamicalSystemTest::testremoveInteraction()
       " testremoveInteractionC: ", nsds->dynamicalSystem(23)->number() == 23, true);
 
   auto r = std::make_shared<siconos::modeling::LagrangianLinearTIR>(
-      std::make_shared<siconos::algebra::SimpleMatrix>(1, 3));
+      std::make_shared<siconos::algebra::SiconosMatrix>(1, 3));
   auto nsl = std::make_shared<siconos::modeling::NewtonImpactNSL>(0.0);
   auto inter = std::make_shared<siconos::modeling::Interaction>(nsl, r);
 

@@ -23,7 +23,7 @@
 #include "BlockVector.hpp"
 #include "PluggedObject.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 siconos::collision::native::bodies::DiskMovingPlanR::DiskMovingPlanR(
     siconos::plugins::FTime FA, siconos::plugins::FTime FB, siconos::plugins::FTime FC,

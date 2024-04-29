@@ -24,7 +24,7 @@
 #include "SiconosException.hpp"
 #include "SiconosMatrixOp.hpp"  // for mat prod
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "op3x3.h"  // numerics: orthobasefromvector
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -43,10 +43,10 @@ void siconos::modeling::NewtonEuler5DR::initialize(Interaction& inter) {
   NewtonEuler1DR::initialize(inter);
   unsigned int qSize = 7 * (inter.getSizeOfDS() / 6);
   /*keep only the distance.*/
-  _jachq = std::make_shared<siconos::algebra::SimpleMatrix>(5, qSize);
+  _jachq = std::make_shared<siconos::algebra::SiconosMatrix>(5, qSize);
 
-  _rotationAbsoluteToContactFrame = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
-  _AUX2 = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
+  _rotationAbsoluteToContactFrame = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
+  _AUX2 = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
   //  _isContact=1;
   DEBUG_END(
       "siconos::modeling::NewtonEuler5DR::siconos::modeling::NewtonEuler5DR::initialize("
@@ -160,8 +160,8 @@ void siconos::modeling::NewtonEuler5DR::RFC3DcomputeJachqTFromContacts(
   DEBUG_EXPR(_jachqT->display(););
 
   // DEBUG_EXPR_WE(
-  //   std::shared_ptr<siconos::algebra::SimpleMatrix> jaux =
-  //   std::make_shared<siconos::algebra::SimpleMatrix>(*_jachqT)); jaux->trans();
+  //   std::shared_ptr<siconos::algebra::SiconosMatrix> jaux =
+  //   std::make_shared<siconos::algebra::SiconosMatrix>(*_jachqT)); jaux->trans();
   //   std::shared_ptr<siconos::algebra::SiconosVector> v =
   //   std::make_shared<siconos::algebra::SiconosVector>(3));
   //   std::shared_ptr<siconos::algebra::SiconosVector> vRes =

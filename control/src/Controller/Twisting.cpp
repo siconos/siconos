@@ -25,7 +25,7 @@
 #include "FirstOrderNonLinearDS.hpp"
 #include "NormalConeNSL.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "TimeStepping.hpp"
 
 siconos::control::Twisting::Twisting(std::shared_ptr<ControlSensor> sensor, double gain,
@@ -37,7 +37,7 @@ siconos::control::Twisting::Twisting(std::shared_ptr<ControlSensor> sensor, doub
     std::cout << "Twisting constructor: beta is not in (0, 1)" << std::endl;
   }
 
-  _B = std::make_shared<siconos::algebra::SimpleMatrix>(2, 2);
+  _B = std::make_shared<siconos::algebra::SiconosMatrix>(2, 2);
   (*_B)(1, 0) = gain;
   (*_B)(1, 1) = gain * beta;
 
@@ -53,8 +53,8 @@ siconos::control::Twisting::Twisting(std::shared_ptr<ControlSensor> sensor, doub
 
 void siconos::control::Twisting::setNSdata(double hControl)
 {
-  std::shared_ptr<siconos::algebra::SimpleMatrix> H =
-      std::make_shared<siconos::algebra::SimpleMatrix>(4, 2);
+  std::shared_ptr<siconos::algebra::SiconosMatrix> H =
+      std::make_shared<siconos::algebra::SiconosMatrix>(4, 2);
   (*H)(0, 0) = 1.0;
   (*H)(1, 0) = -hControl / 2.0;
   (*H)(2, 0) = -1.0;

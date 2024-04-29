@@ -42,7 +42,7 @@
 #include "SiconosMatrixOp.hpp"  // for prod
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"  // for setBlock
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "Simulation.hpp"
 #include "Topology.hpp"
 // #include "TypeName.hpp"  // for Type::...NSL
@@ -486,7 +486,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
 
       if (osiType == siconos::integrators::IntegratorType::MOREAUJEANBILBAOOSI ||
           std::dynamic_pointer_cast<siconos::modeling::LagrangianLinearDiagonalDS>(ds)) {
-        auto work = std::make_shared<siconos::algebra::SimpleMatrix>(*leftInteractionBlock);
+        auto work = std::make_shared<siconos::algebra::SiconosMatrix>(*leftInteractionBlock);
         // Get inverse of the iteration matrix
         auto& inv_iteration_matrix = *getOSIMatrix(osi, ds);
         // work = HW (remind that W contains the inverse of the iteration matrix)
@@ -508,7 +508,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
         DEBUG_PRINT("leftInteractionBlock after application of boundary conditions\n");
         DEBUG_EXPR(leftInteractionBlock->display(););
         // (inter1 == inter2)
-        auto work = std::make_shared<siconos::algebra::SimpleMatrix>(*leftInteractionBlock);
+        auto work = std::make_shared<siconos::algebra::SiconosMatrix>(*leftInteractionBlock);
         work->transposeInPlace();
         auto centralInteractionBlock = getOSIMatrix(osi, ds);
         DEBUG_EXPR_WE(std::cout << std::boolalpha
@@ -692,8 +692,8 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock(
         dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS) {
       // Rightinteractionblock used first as buffer to save left * W-1
       rightInteractionBlock =
-          std::make_shared<siconos::algebra::SimpleMatrix>(nslawSize2, sizeDS);
-      // auto work(new SimpleMatrix(*leftInteractionBlock));
+          std::make_shared<siconos::algebra::SiconosMatrix>(nslawSize2, sizeDS);
+      // auto work(new SiconosMatrix(*leftInteractionBlock));
       //  Get inverse of the iteration matrix
       auto& inv_iteration_matrix = *getOSIMatrix(osi, ds);
       // remind that W contains the inverse of the iteration matrix

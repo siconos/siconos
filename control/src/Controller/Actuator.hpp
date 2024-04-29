@@ -30,7 +30,7 @@
 #include <string>
 
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosSerialization.hpp"
 
 namespace siconos::modeling {
@@ -111,7 +111,7 @@ class Actuator {
   std::shared_ptr<siconos::algebra::SiconosVector> _u{nullptr};
 
   /** B Matrix */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _B{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _B{nullptr};
 
   /** name of the plugin for g (nonlinear affine in control system)*/
   std::string _plugingName;
@@ -143,7 +143,7 @@ class Actuator {
    *  \param sensor the ControlSensor feeding the Actuator
    */
   Actuator(ActuatorType type, std::shared_ptr<ControlSensor> sensor,
-           std::shared_ptr<siconos::algebra::SimpleMatrix> B);
+           std::shared_ptr<siconos::algebra::SiconosMatrix> B);
 
   /** destructor
    */
@@ -183,7 +183,7 @@ class Actuator {
    *
    *  \param B the new B matrix
    */
-  inline void setB(std::shared_ptr<siconos::algebra::SimpleMatrix> B) { _B = B; };
+  inline void setB(std::shared_ptr<siconos::algebra::SiconosMatrix> B) { _B = B; };
 
   /** Set the name of the plugin for computing g
    *

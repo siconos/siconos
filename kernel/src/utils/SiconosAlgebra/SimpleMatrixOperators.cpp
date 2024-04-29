@@ -24,4 +24,4 @@
 #include "BlockMatrix.hpp"
 #include "SiconosConfig.h"
 #include "SiconosException.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"

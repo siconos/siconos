@@ -28,7 +28,7 @@
 #include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "Simulation.hpp"
 // #define DEBUG_STDOUT
 // #define DEBUG_NOCOLOR

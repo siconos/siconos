@@ -26,7 +26,7 @@
 #include "BlockVector.hpp"
 #include "NewtonEulerJointR.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 // #define DEBUG_BEGIN_END_ONLY
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -119,7 +119,7 @@ void siconos::joints::JointStopR::computeJachq(
   unsigned int n = _axisMax - _axisMin + 1;
 
   if (!_jachqTmp || !(_jachqTmp->size(1) == q0->size() && _jachqTmp->size(0) == n)) {
-    _jachqTmp = std::make_shared<siconos::algebra::SimpleMatrix>(n, q0->size());
+    _jachqTmp = std::make_shared<siconos::algebra::SiconosMatrix>(n, q0->size());
   }
 
   // Compute the jacobian for the required range of axes

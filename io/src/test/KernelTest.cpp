@@ -72,8 +72,8 @@ void KernelTest::t0() {
 }
 
 void KernelTest::t1() {
-  auto m1 = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
-  auto m2 = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
+  auto m1 = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
+  auto m2 = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
 
   m1->eye();
   (*m1)(1, 0) = 3.0;
@@ -82,14 +82,14 @@ void KernelTest::t1() {
   std::ofstream ofs("Kernelt1.xml");
   {
     boost::archive::xml_oarchive oa(ofs);
-    oa.register_type(static_cast<siconos::algebra::SimpleMatrix*>(nullptr));
+    oa.register_type(static_cast<siconos::algebra::SiconosMatrix*>(nullptr));
     oa << NVP(m1);
   }
 
   std::ifstream ifs("Kernelt1.xml");
   {
     boost::archive::xml_iarchive ia(ifs);
-    ia.register_type(static_cast<siconos::algebra::SimpleMatrix*>(nullptr));
+    ia.register_type(static_cast<siconos::algebra::SiconosMatrix*>(nullptr));
     ia >> NVP(m2);
   }
 
@@ -100,7 +100,7 @@ void KernelTest::t1() {
 }
 
 void KernelTest::t2() {
-  auto m = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
+  auto m = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
   auto v = std::make_shared<siconos::algebra::SiconosVector>(3);
   auto q = std::make_shared<siconos::algebra::SiconosVector>(3);
 
@@ -112,7 +112,7 @@ void KernelTest::t2() {
   std::ofstream ofs("Kernelt2.xml");
   {
     boost::archive::xml_oarchive oa(ofs);
-    oa.register_type(static_cast<siconos::algebra::SimpleMatrix*>(nullptr));
+    oa.register_type(static_cast<siconos::algebra::SiconosMatrix*>(nullptr));
     oa.register_type(static_cast<siconos::algebra::SiconosVector*>(nullptr));
     oa.register_type(static_cast<siconos::modeling::LagrangianDS*>(nullptr));
     oa << NVP(ds1);
@@ -121,7 +121,7 @@ void KernelTest::t2() {
   std::ifstream ifs("Kernelt2.xml");
   {
     boost::archive::xml_iarchive ia(ifs);
-    ia.register_type(static_cast<siconos::algebra::SimpleMatrix*>(nullptr));
+    ia.register_type(static_cast<siconos::algebra::SiconosMatrix*>(nullptr));
     ia.register_type(static_cast<siconos::algebra::SiconosVector*>(nullptr));
     ia.register_type(static_cast<siconos::modeling::LagrangianDS*>(nullptr));
     ia >> NVP(ds2);
@@ -161,7 +161,7 @@ void KernelTest::t3() {
 
 // void KernelTest::t4()
 // {
-//   auto m = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3));
+//   auto m = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3));
 //   auto v = std::make_shared<siconos::algebra::SiconosVector>(3));
 //   auto q = std::make_shared<siconos::algebra::SiconosVector>(3));
 
@@ -178,7 +178,7 @@ void KernelTest::t3() {
 //   std::ofstream ofs("t4.xml");
 //   {
 //     boost::archive::xml_oarchive oa(ofs);
-//     oa.register_type(static_cast<SimpleMatrix*>(nullptr));
+//     oa.register_type(static_cast<SiconosMatrix*>(nullptr));
 //     oa.register_type(static_cast<siconos::algebra::SiconosVector*>(nullptr));
 //     oa.register_type(static_cast<siconos::modeling::LagrangianDS*>(nullptr));
 //     oa << NVP(dsset);
@@ -189,7 +189,7 @@ void KernelTest::t3() {
 //   std::ifstream ifs("t4.xml");
 //   {
 //     boost::archive::xml_iarchive ia(ifs);
-//     ia.register_type(static_cast<siconos::algebra::SimpleMatrix*>(nullptr));
+//     ia.register_type(static_cast<siconos::algebra::SiconosMatrix*>(nullptr));
 //     ia.register_type(static_cast<siconos::algebra::SiconosVector*>(nullptr));
 //     ia.register_type(static_cast<siconos::modeling::LagrangianDS*>(nullptr));
 //     ia >> NVP(dssetfromfile);
@@ -220,7 +220,7 @@ void KernelTest::t5() {
 
   cout << "====> Model loading ..." << endl << endl;
 
-  auto Mass = std::make_shared<siconos::algebra::SimpleMatrix>(nDof, nDof);
+  auto Mass = std::make_shared<siconos::algebra::SiconosMatrix>(nDof, nDof);
   (*Mass)(0, 0) = m;
   (*Mass)(1, 1) = m;
   (*Mass)(2, 2) = 3. / 5 * m * R * R;
@@ -248,7 +248,7 @@ void KernelTest::t5() {
 
   // Interaction ball-floor
   //
-  auto H = std::make_shared<siconos::algebra::SimpleMatrix>(1, nDof);
+  auto H = std::make_shared<siconos::algebra::SiconosMatrix>(1, nDof);
   (*H)(0, 0) = 1.0;
 
   auto nslaw = std::make_shared<siconos::modeling::NewtonImpactNSL>(e);
@@ -327,7 +327,7 @@ void KernelTest::t6() {
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
     unsigned int outputSize = 5;
-    siconos::algebra::SimpleMatrix dataPlot(N + 1, outputSize);
+    siconos::algebra::SiconosMatrix dataPlot(N + 1, outputSize);
 
     auto q = ball->q();
     auto v = ball->velocity();
@@ -362,7 +362,7 @@ void KernelTest::t6() {
     dataPlot.resize(k, outputSize);
     ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
     // Comparison with a reference file
-    siconos::algebra::SimpleMatrix dataPlotRef(dataPlot);
+    siconos::algebra::SiconosMatrix dataPlotRef(dataPlot);
     dataPlotRef.zero();
     ioMatrix::read("result.ref", "ascii", dataPlotRef);
 

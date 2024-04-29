@@ -25,7 +25,7 @@
 #include "SiconosConfig.h"
 #include "SiconosMatrixOp.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
   if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -38,12 +38,12 @@ using BlockMatrix = siconos::algebra::BlockMatrix;
 void BlockMatrixTest::setUp() {
   tol = 1e-12;
 
-  B = std::make_shared<siconos::algebra::SimpleMatrix>(2, 2, 1);
-  C = std::make_shared<siconos::algebra::SimpleMatrix>(2, 4, 2);
-  D = std::make_shared<siconos::algebra::SimpleMatrix>(2, 1, 3);
-  E = std::make_shared<siconos::algebra::SimpleMatrix>(3, 2, 4);
-  F = std::make_shared<siconos::algebra::SimpleMatrix>(3, 4, 5);
-  G = std::make_shared<siconos::algebra::SimpleMatrix>(3, 1, 6);
+  B = std::make_shared<siconos::algebra::SiconosMatrix>(2, 2, 1);
+  C = std::make_shared<siconos::algebra::SiconosMatrix>(2, 4, 2);
+  D = std::make_shared<siconos::algebra::SiconosMatrix>(2, 1, 3);
+  E = std::make_shared<siconos::algebra::SiconosMatrix>(3, 2, 4);
+  F = std::make_shared<siconos::algebra::SiconosMatrix>(3, 4, 5);
+  G = std::make_shared<siconos::algebra::SiconosMatrix>(3, 1, 6);
 
   m.resize(6);
   m[0] = B;
@@ -133,7 +133,7 @@ void BlockMatrixTest::testConstructor2()  // Copy constructor, from a SiconosMat
 void BlockMatrixTest::testConstructor3()  // Copy constructor, from a SiconosMatrix(Simple)
 {
   std::cout << "--> Test: constructor 3." << std::endl;
-  auto ref = std::make_shared<siconos::algebra::SimpleMatrix>(5, 7, 2.3);
+  auto ref = std::make_shared<siconos::algebra::SiconosMatrix>(5, 7, 2.3);
   auto test = std::make_shared<BlockMatrix>(*ref);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", test->isBlock() == true, true);
@@ -220,13 +220,13 @@ void BlockMatrixTest::testNormInf() {
 
 void BlockMatrixTest::testZero() {
   std::cout << "--> Test: zero." << std::endl;
-  auto A = std::make_shared<siconos::algebra::SimpleMatrix>(2, 2);
+  auto A = std::make_shared<siconos::algebra::SiconosMatrix>(2, 2);
   A->eye();
-  auto H = std::make_shared<siconos::algebra::SimpleMatrix>(2, 4);
+  auto H = std::make_shared<siconos::algebra::SiconosMatrix>(2, 4);
   H->eye();
-  auto I = std::make_shared<siconos::algebra::SimpleMatrix>(5, 2);
+  auto I = std::make_shared<siconos::algebra::SiconosMatrix>(5, 2);
   I->eye();
-  auto J = std::make_shared<siconos::algebra::SimpleMatrix>(5, 4);
+  auto J = std::make_shared<siconos::algebra::SiconosMatrix>(5, 4);
   J->eye();
 
   std::vector<std::shared_ptr<siconos::algebra::SiconosMatrix>> v(4);
@@ -259,10 +259,10 @@ void BlockMatrixTest::testZero() {
 
 void BlockMatrixTest::testEye() {
   std::cout << "--> Test: eye." << std::endl;
-  auto A = std::make_shared<siconos::algebra::SimpleMatrix>(2, 2);
-  auto H = std::make_shared<siconos::algebra::SimpleMatrix>(2, 4);
-  auto I = std::make_shared<siconos::algebra::SimpleMatrix>(5, 2);
-  auto J = std::make_shared<siconos::algebra::SimpleMatrix>(5, 4);
+  auto A = std::make_shared<siconos::algebra::SiconosMatrix>(2, 2);
+  auto H = std::make_shared<siconos::algebra::SiconosMatrix>(2, 4);
+  auto I = std::make_shared<siconos::algebra::SiconosMatrix>(5, 2);
+  auto J = std::make_shared<siconos::algebra::SiconosMatrix>(5, 4);
 
   std::vector<std::shared_ptr<siconos::algebra::SiconosMatrix>> v(4);
   v[0] = A;
@@ -311,10 +311,10 @@ void BlockMatrixTest::testGetSetRowCol() {
   auto tmp1 = std::make_shared<siconos::algebra::SiconosVector>(6);
   (*tmp1)(0) = 1;
   (*tmp1)(2) = 2;
-  auto A = std::make_shared<siconos::algebra::SimpleMatrix>(2, 2);
-  auto H = std::make_shared<siconos::algebra::SimpleMatrix>(2, 4);
-  auto I = std::make_shared<siconos::algebra::SimpleMatrix>(5, 2);
-  auto J = std::make_shared<siconos::algebra::SimpleMatrix>(5, 4);
+  auto A = std::make_shared<siconos::algebra::SiconosMatrix>(2, 2);
+  auto H = std::make_shared<siconos::algebra::SiconosMatrix>(2, 4);
+  auto I = std::make_shared<siconos::algebra::SiconosMatrix>(5, 2);
+  auto J = std::make_shared<siconos::algebra::SiconosMatrix>(5, 4);
   std::vector<std::shared_ptr<siconos::algebra::SiconosMatrix>> v(4);
   v[0] = A;
   v[1] = H;
@@ -344,15 +344,15 @@ void BlockMatrixTest::testGetSetRowCol() {
 
 void BlockMatrixTest::testAssignment() {
   std::cout << "--> Test: assignment." << std::endl;
-  auto Btmp = std::make_shared<siconos::algebra::SimpleMatrix>(2, 2);
-  auto Ctmp = std::make_shared<siconos::algebra::SimpleMatrix>(2, 5);
-  auto Dtmp = std::make_shared<siconos::algebra::SimpleMatrix>(3, 2);
-  auto Etmp = std::make_shared<siconos::algebra::SimpleMatrix>(3, 5);
+  auto Btmp = std::make_shared<siconos::algebra::SiconosMatrix>(2, 2);
+  auto Ctmp = std::make_shared<siconos::algebra::SiconosMatrix>(2, 5);
+  auto Dtmp = std::make_shared<siconos::algebra::SiconosMatrix>(3, 2);
+  auto Etmp = std::make_shared<siconos::algebra::SiconosMatrix>(3, 5);
 
   auto test = std::make_shared<BlockMatrix>(Btmp, Ctmp, Dtmp, Etmp);
   // Block = Siconos(Simple)
   unsigned int size0 = test->size(0), size1 = test->size(1);
-  auto ref = std::make_shared<siconos::algebra::SimpleMatrix>(size0, size1);
+  auto ref = std::make_shared<siconos::algebra::SiconosMatrix>(size0, size1);
   for (unsigned int i = 0; i < size0; ++i)
     for (unsigned int j = 0; j < size1; ++j) (*ref)(i, j) = i + j;
   *test = *ref;
@@ -377,7 +377,7 @@ void BlockMatrixTest::testOperators1() {
   double tol = 1e-10;
   auto Ab = std::make_shared<BlockMatrix>(m, 2, 3);
   auto Cb = std::make_shared<BlockMatrix>(*Ab);
-  auto A = std::make_shared<siconos::algebra::SimpleMatrix>(5, 7);
+  auto A = std::make_shared<siconos::algebra::SiconosMatrix>(5, 7);
 
   for (unsigned int i = 0; i < 5; ++i)
     for (unsigned int j = 0; j < 7; ++j) (*A)(i, j) = i + j;

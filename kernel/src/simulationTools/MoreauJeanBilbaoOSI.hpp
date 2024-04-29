@@ -103,7 +103,7 @@ class MoreauJeanBilbaoOSI : public OneStepIntegrator {
    *  \param ds a pointer to DynamicalSystem
    *  \return pointer to a SiconosMatrix
    */
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> iteration_matrix(
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> iteration_matrix(
       std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
     return _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W;
   }

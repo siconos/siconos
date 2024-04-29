@@ -44,17 +44,6 @@ namespace siconos::algebra {
    \todo: review resize function for Banded, Symetric and Triangular. Error in tests.
 
 */
-using SimpleMatrix = SiconosMatrix;
-
-void normInfByColumn(const SimpleMatrix &m, SiconosVector &v);
-
-bool checkSymmetry(SiconosMatrix &m, double tol);
-
-void solveInPlace(SimpleMatrix &A, SiconosVector &B);
-void solveInPlace(SimpleMatrix &A, SimpleMatrix &B);
-void solveByLeastSquares(SimpleMatrix &A, SiconosVector &B);
-void solveByLeastSquares(SimpleMatrix &A, SiconosMatrix &B);
-siconos::algebra::SimpleMatrix readMatrixFromFile(const std::string &filename, bool ascii = true);
 
 }  // namespace siconos::algebra
 

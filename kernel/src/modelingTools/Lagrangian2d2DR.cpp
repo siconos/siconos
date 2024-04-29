@@ -24,7 +24,7 @@
 #include "SiconosException.hpp"
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"  // inner_prod
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -33,7 +33,7 @@
 
 void siconos::modeling::Lagrangian2d2DR::initialize(Interaction& inter) {
   // proj_with_q  _jachqProj =
-  // std::make_shared<siconos::algebra::siconos::algebra::SimpleMatrix>(_jachq->size(0),_jachq->size(1)));
+  // std::make_shared<siconos::algebra::siconos::algebra::SiconosMatrix>(_jachq->size(0),_jachq->size(1)));
 
   if ((inter.getSizeOfDS() != 3) and (inter.getSizeOfDS() != 6)) {
     THROW_EXCEPTION(
@@ -41,7 +41,7 @@ void siconos::modeling::Lagrangian2d2DR::initialize(Interaction& inter) {
         "must of size 3");
   }
   unsigned int qSize = 3 * (inter.getSizeOfDS() / 3);
-  _jachq = std::make_shared<siconos::algebra::SimpleMatrix>(2, qSize);
+  _jachq = std::make_shared<siconos::algebra::SiconosMatrix>(2, qSize);
 }
 
 double siconos::modeling::Lagrangian2d2DR::distance() const {

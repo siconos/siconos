@@ -19,11 +19,11 @@
 #include "Disk.hpp"
 
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 void siconos::collision::native::bodies::Disk::MassSetup()
 {
-  _mass = std::make_shared<siconos::algebra::SimpleMatrix>(_ndof, _ndof);
+  _mass = std::make_shared<siconos::algebra::SiconosMatrix>(_ndof, _ndof);
   //  mass->resize(ndof,ndof);
   _mass->zero();
   (*_mass)(0, 0) = (*_mass)(1, 1) = massValue;

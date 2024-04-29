@@ -23,7 +23,7 @@
 #include "LsodarOSI.hpp"
 #include "SiconosConst.hpp"  // MACHINE_PREC
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "SubPluggedObject.hpp"
 #include "TimeDiscretisation.hpp"
 // #define DEBUG_WHERE_MESSAGES
@@ -75,7 +75,7 @@ siconos::simulation::MatrixIntegrator::MatrixIntegrator(
   _OSI->setTol(1, 10 * siconos::internal::MACHINE_PREC, 5 * siconos::internal::MACHINE_PREC);
 
   if (_E) {
-    _mat = std::make_shared<siconos::algebra::SimpleMatrix>(*E);
+    _mat = std::make_shared<siconos::algebra::SiconosMatrix>(*E);
     _mat->zero();
   }
 }
@@ -90,7 +90,7 @@ siconos::simulation::MatrixIntegrator::MatrixIntegrator(
   _plugin = plugin;
   _isConst = false;
   auto n = ds.n();
-  _mat = std::make_shared<siconos::algebra::SimpleMatrix>(n, p);
+  _mat = std::make_shared<siconos::algebra::SiconosMatrix>(n, p);
   _mat->setZero();
   _spo = std::make_shared<siconos::plugins::SubPluggedObject>(*_plugin, n, p);
   std::static_pointer_cast<siconos::modeling::FirstOrderLinearDS>(_DS)->setPluginB(_spo);
@@ -103,7 +103,7 @@ siconos::simulation::MatrixIntegrator::MatrixIntegrator(
     : MatrixIntegrator{ds, nsds, td, nullptr}
 {
   unsigned int n = ds.n();
-  _mat = std::make_shared<siconos::algebra::SimpleMatrix>(n, n);
+  _mat = std::make_shared<siconos::algebra::SiconosMatrix>(n, n);
   _mat->setZero();
 }
 

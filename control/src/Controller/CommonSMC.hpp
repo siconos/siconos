@@ -75,10 +75,10 @@ class CommonSMC : public Actuator {
 
   /** the vector defining the linear contribution of the state to the sliding variable  ( \f$
    * \sigma = Cx \f$ ) */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _Csurface{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _Csurface{nullptr};
 
   /** matrix describing the influence of \f$ lambda \f$  on \f$ \sigma \f$ */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _D{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _D{nullptr};
 
   /** scalar multiplying Sign; \f$ u^s = - \alpha Sign \f$ */
   double _alpha{1.};
@@ -126,7 +126,7 @@ class CommonSMC : public Actuator {
   std::shared_ptr<siconos::modeling::NonSmoothLaw> _nsLawSMC{nullptr};
 
   /** inverse of CB */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _invCB{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _invCB{nullptr};
 
   /** Store  \f$ u^{eq} \f$  */
   std::shared_ptr<siconos::algebra::SiconosVector> _ueq{nullptr};
@@ -164,8 +164,8 @@ class CommonSMC : public Actuator {
    *  \param D the saturation matrix (optional)
    */
   CommonSMC(ActuatorType type, std::shared_ptr<ControlSensor> sensor,
-            std::shared_ptr<siconos::algebra::SimpleMatrix> B,
-            std::shared_ptr<siconos::algebra::SimpleMatrix> D = nullptr)
+            std::shared_ptr<siconos::algebra::SiconosMatrix> B,
+            std::shared_ptr<siconos::algebra::SiconosMatrix> D = nullptr)
       : Actuator(type, sensor, B), _D(D)
   {
   }
@@ -192,17 +192,17 @@ class CommonSMC : public Actuator {
 
   /** Set Csurface
    *
-   *  \param Csurface a std::shared_ptr<siconos::algebra::SimpleMatrix> containing the new
+   *  \param Csurface a std::shared_ptr<siconos::algebra::SiconosMatrix> containing the new
    * value for _Csurface
    */
-  void setCsurface(std::shared_ptr<siconos::algebra::SimpleMatrix> Csurface);
+  void setCsurface(std::shared_ptr<siconos::algebra::SiconosMatrix> Csurface);
 
   /** Set _D to pointer newPtr
    *
-   *  \param newSat a std::shared_ptr<siconos::algebra::SimpleMatrix> containing the new value
+   *  \param newSat a std::shared_ptr<siconos::algebra::SiconosMatrix> containing the new value
    * for _D
    */
-  void setSaturationMatrix(std::shared_ptr<siconos::algebra::SimpleMatrix> newSat);
+  void setSaturationMatrix(std::shared_ptr<siconos::algebra::SiconosMatrix> newSat);
 
   /** Set _alpha
    *

@@ -33,7 +33,7 @@
 #include "SiconosMatrixVectorOp.hpp"  // for mat-vec prod
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"  // for subscal
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "Simulation.hpp"
 #include "Topology.hpp"
 
@@ -80,7 +80,7 @@ void siconos::integrators::ZeroOrderHoldOSI::initializeWorkVectorsForDS(
         "initialized for ds the DS");
 
   if ((static_cast<const siconos::modeling::FirstOrderLinearDS&>(*ds)).b()) {
-    auto E = std::make_shared<siconos::algebra::SimpleMatrix>(ds->n(), ds->n());
+    auto E = std::make_shared<siconos::algebra::SiconosMatrix>(ds->n(), ds->n());
     E->eye();
     DSG0.AdInt.insert(dsgVD, std::make_shared<siconos::simulation::MatrixIntegrator>(
                                  *ds, *_simulation->nonSmoothDynamicalSystem(),

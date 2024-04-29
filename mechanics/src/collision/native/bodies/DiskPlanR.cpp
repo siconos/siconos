@@ -22,7 +22,7 @@
 
 #include "BlockVector.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 siconos::collision::native::bodies::DiskPlanR::DiskPlanR(double r, double A, double B,
                                                          double C, double xC, double yC,

@@ -24,7 +24,7 @@
 #include "SiconosMatrixVectorOp.hpp"  // for mat-vec prod
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"  // for setBlock
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "Simulation.hpp"
 #include "Topology.hpp"
 #include "io.hpp"  // for siconos::algebra::write
@@ -224,7 +224,7 @@ void siconos::nonsmooth_formulations::MultipleImpact::AllocateMemory() {
   // for the data matrix
   auto _numberCols = EstimateNdataCols();
   if (!_DataMatrix)
-    _DataMatrix = std::make_shared<siconos::algebra::SimpleMatrix>(_sizeDataSave, _numberCols);
+    _DataMatrix = std::make_shared<siconos::algebra::SiconosMatrix>(_sizeDataSave, _numberCols);
   else {
     if ((_DataMatrix->size(0) != _sizeDataSave) || (_DataMatrix->size(1) != _numberCols))
       _DataMatrix->resize(_sizeDataSave, _numberCols);

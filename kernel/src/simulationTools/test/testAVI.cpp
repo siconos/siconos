@@ -18,7 +18,7 @@
 #include "testAVI.hpp"
 
 #include "EventsManager.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "io.hpp"
 
@@ -30,7 +30,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION(AVITest);
 
 void AVITest::setUp()
 {
-  _A = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);
+  _A = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
   _b = std::make_shared<siconos::algebra::SiconosVector>(_n);
   _x0 = std::make_shared<siconos::algebra::SiconosVector>(_n);
   _A->setZero();
@@ -66,15 +66,15 @@ void AVITest::testAVI()
   _x0->zero();
   (*_x0)(0) = 10.0;
   (*_x0)(1) = 10.0;
-  auto B = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);
+  auto B = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
   B->setZero();
-  auto C = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);
+  auto C = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
   (*B)(1, 0) = G;
   (*B)(1, 1) = G * beta;
   C->eye();
   auto rel = std::make_shared<siconos::modeling::FirstOrderLinearTIR>(C, B);
   // H-K representation: the feasible set is given by all the element λ such that Hλ ≥ K
-  auto H = std::make_shared<siconos::algebra::SimpleMatrix>(4, 2);
+  auto H = std::make_shared<siconos::algebra::SiconosMatrix>(4, 2);
   (*H)(0, 0) = 1.0;
   (*H)(1, 0) = -_h / 2.0;
   (*H)(2, 0) = -1.0;
@@ -99,7 +99,7 @@ void AVITest::testAVI()
   auto osnspb = std::make_shared<siconos::nonsmooth_formulations::AVI>();
   _sim->insertNonSmoothProblem(osnspb);
 
-  siconos::algebra::SimpleMatrix dataPlot((unsigned)ceil((_T - _t0) / _h) + 10, 5);
+  siconos::algebra::SiconosMatrix dataPlot((unsigned)ceil((_T - _t0) / _h) + 10, 5);
   auto& xProc = *_DS->x();
   auto& lambda = *inter->lambda(0);
   unsigned int k = 0;
@@ -123,7 +123,7 @@ void AVITest::testAVI()
   siconos::algebra::io::write("testAVI.dat", dataPlot, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  siconos::algebra::SimpleMatrix dataPlotRef(dataPlot);
+  siconos::algebra::SiconosMatrix dataPlotRef(dataPlot);
   dataPlotRef.zero();
   siconos::algebra::io::read("testAVI.ref", dataPlotRef);
   auto err = std::make_shared<siconos::algebra::SiconosVector>(dataPlot.size(1));

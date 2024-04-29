@@ -110,7 +110,7 @@ class SchatzmanPaoliOSI : public OneStepIntegrator {
    *  nullptr. get W[0] in that case
    *  \return pointer to a SiconosMatrix
    */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> W(
+  std::shared_ptr<siconos::algebra::SiconosMatrix> W(
       std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
   /** set the value of W[ds] to newValue
@@ -126,7 +126,7 @@ class SchatzmanPaoliOSI : public OneStepIntegrator {
    *  \param newPtr std::shared_ptr<siconos::algebra::SiconosMatrix>
    *  \param ds a pointer to DynamicalSystem
    */
-  void setWPtr(std::shared_ptr<siconos::algebra::SimpleMatrix> newPtr,
+  void setWPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr,
                std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
   /** get WBoundaryConditions corresponding to DynamicalSystem ds

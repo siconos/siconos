@@ -295,7 +295,7 @@ class OneStepNSProblem {
       \param ds the concerned dynamical system
       \return the required matrix
   */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> getOSIMatrix(
+  std::shared_ptr<siconos::algebra::SiconosMatrix> getOSIMatrix(
       siconos::integrators::OneStepIntegrator& osi,
       std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 };

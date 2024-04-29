@@ -22,7 +22,7 @@
 #include "SiconosMatrixVectorOp.hpp"
 #include "SiconosMatrixOp.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
   if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -41,7 +41,7 @@ void FirstOrderLinearDSTest::setUp() {
   (*b0)(1) = 5;
   (*b0)(2) = 6;
 
-  A0 = std::make_shared<siconos::algebra::SimpleMatrix>(siconos::algebra::readMatrixFromFile("matA0.dat"));
+  A0 = std::make_shared<siconos::algebra::SiconosMatrix>(siconos::algebra::readMatrixFromFile("matA0.dat"));
 }
 void FirstOrderLinearDSTest::tearDown() {}
 
@@ -75,7 +75,7 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS0() {
 
   ds->setComputeMFunction("TestPlugin", "computeM");
   ds->computeM(time);
-  siconos::algebra::SimpleMatrix Mref(3, 3);
+  siconos::algebra::SiconosMatrix Mref(3, 3);
   Mref(0, 0) = 1. * time;
   Mref(1, 1) = 2. * time;
   Mref(2, 2) = 3. * time;
@@ -114,14 +114,14 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS1() {
       "testBuildFirstOrderLinearDS1 : ", *(ds->jacobianfx()) == *(ds->A()), true);
   ds->setComputeMFunction("TestPlugin", "computeM");
   ds->computeM(time);
-  siconos::algebra::SimpleMatrix Mref(3, 3);
+  siconos::algebra::SiconosMatrix Mref(3, 3);
   Mref.setZero();
   Mref(0, 0) = 1. * time;
   Mref(1, 1) = 2. * time;
   Mref(2, 2) = 3. * time;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", ds->M()->isApprox(Mref), true);
   ds->initRhs(time);
-  siconos::algebra::SimpleMatrix invM(3, 3);
+  siconos::algebra::SiconosMatrix invM(3, 3);
   invM.setZero();
   invM(0, 0) = 1. / time;
   invM(1, 1) = 1. / (2. * time);

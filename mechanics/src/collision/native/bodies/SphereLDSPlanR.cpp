@@ -23,7 +23,7 @@
 #include "SiconosException.hpp"
 #include "BlockVector.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "op3x3.h"  // for orthoBaseFromVector
 
 siconos::collision::native::bodies::SphereLDSPlanR::SphereLDSPlanR(double r, double A,

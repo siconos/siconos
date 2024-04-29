@@ -23,7 +23,7 @@
 #include "PluggedObject.hpp"
 #include "SiconosException.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 // #include "FirstOrderNonLinearDS.hpp"
 
 // #include "siconos::algebra::BlockVector.hpp"
@@ -48,13 +48,13 @@ void siconos::modeling::FirstOrderNonLinearR::initialize(Interaction& inter)
   auto& relationMat = inter.relationMatrices();
 
   relationMat[FirstOrderR::mat_C] =
-      std::make_shared<siconos::algebra::SimpleMatrix>(sizeY, sizeDS);
+      std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeDS);
   relationMat[FirstOrderR::mat_D] =
-      std::make_shared<siconos::algebra::SimpleMatrix>(sizeY, sizeY);
+      std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeY);
   relationMat[FirstOrderR::mat_B] =
-      std::make_shared<siconos::algebra::SimpleMatrix>(sizeDS, sizeY);
+      std::make_shared<siconos::algebra::SiconosMatrix>(sizeDS, sizeY);
   relationMat[FirstOrderR::mat_K] =
-      std::make_shared<siconos::algebra::SimpleMatrix>(sizeDS, sizeDS);
+      std::make_shared<siconos::algebra::SiconosMatrix>(sizeDS, sizeDS);
 
   // F ?
 }
@@ -104,7 +104,7 @@ void siconos::modeling::FirstOrderNonLinearR::computeg(
 void siconos::modeling::FirstOrderNonLinearR::computeJachx(
     double time, const siconos::algebra::BlockVector& x,
     const siconos::algebra::SiconosVector& lambda, siconos::algebra::BlockVector& z,
-    siconos::algebra::SimpleMatrix& C)
+    siconos::algebra::SiconosMatrix& C)
 {
   if (_pluginJachx) {
     auto xp = x.toSiconosVector();
@@ -122,7 +122,7 @@ void siconos::modeling::FirstOrderNonLinearR::computeJachx(
 void siconos::modeling::FirstOrderNonLinearR::computeJachlambda(
     double time, const siconos::algebra::BlockVector& x,
     const siconos::algebra::SiconosVector& lambda, siconos::algebra::BlockVector& z,
-    siconos::algebra::SimpleMatrix& D)
+    siconos::algebra::SiconosMatrix& D)
 {
   if (_pluginJachlambda) {
     auto xp = x.toSiconosVector();
@@ -141,7 +141,7 @@ void siconos::modeling::FirstOrderNonLinearR::computeJachlambda(
 void siconos::modeling::FirstOrderNonLinearR::computeJacglambda(
     double time, const siconos::algebra::BlockVector& x,
     const siconos::algebra::SiconosVector& lambda, siconos::algebra::BlockVector& z,
-    siconos::algebra::SimpleMatrix& B)
+    siconos::algebra::SiconosMatrix& B)
 {
   if (_pluginJacglambda) {
     auto xp = x.toSiconosVector();
@@ -160,7 +160,7 @@ void siconos::modeling::FirstOrderNonLinearR::computeJacglambda(
 void siconos::modeling::FirstOrderNonLinearR::computeJacgx(
     double time, const siconos::algebra::BlockVector& x,
     const siconos::algebra::SiconosVector& lambda, siconos::algebra::BlockVector& z,
-    siconos::algebra::SimpleMatrix& K)
+    siconos::algebra::SiconosMatrix& K)
 {
   if (_pluginJacgx) {
     auto xp = x.toSiconosVector();

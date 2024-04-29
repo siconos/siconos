@@ -21,7 +21,7 @@
 #include <cmath>
 
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 constexpr double TWOPI = 2.0 * M_PI;
 
@@ -46,7 +46,7 @@ siconos::collision::native::bodies::SphereLDS::SphereLDS(
   assert(qinit->size() == _ndof);
   assert(vinit->size() == _ndof);
 
-  _mass = std::make_shared<siconos::algebra::SimpleMatrix>(_ndof, _ndof);
+  _mass = std::make_shared<siconos::algebra::SiconosMatrix>(_ndof, _ndof);
   _mass->zero();
   I = massValue * radius * radius * 2. / 5.;
   (*_mass)(0, 0) = (*_mass)(1, 1) = (*_mass)(2, 2) = massValue;
@@ -55,8 +55,8 @@ siconos::collision::native::bodies::SphereLDS::SphereLDS(
 
   computeMass();
 
-  _jacobianFGyrq = std::make_shared<siconos::algebra::SimpleMatrix>(_ndof, _ndof);
-  _jacobianFGyrqDot = std::make_shared<siconos::algebra::SimpleMatrix>(_ndof, _ndof);
+  _jacobianFGyrq = std::make_shared<siconos::algebra::SiconosMatrix>(_ndof, _ndof);
+  _jacobianFGyrqDot = std::make_shared<siconos::algebra::SiconosMatrix>(_ndof, _ndof);
 
   _fGyr = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
   _fGyr->zero();

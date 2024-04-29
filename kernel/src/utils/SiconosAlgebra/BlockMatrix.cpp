@@ -20,7 +20,7 @@
 #include "SiconosMatrixOp.hpp"  // For setBlock, isComparableto ...
 #include "SiconosAlgebraTools.hpp"  // for isComparableTo
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosException.hpp"
 
@@ -54,7 +54,7 @@ siconos::algebra::BlockMatrix::BlockMatrix(const SiconosMatrix &m)
   _tabCol->reserve(1);
   // _mat construction
   _mat = std::make_shared<BlocksMatrix>(1, 1);
-  _mat->setValue(0, 0, std::make_shared<SimpleMatrix>(m));
+  _mat->setValue(0, 0, std::make_shared<SiconosMatrix>(m));
 
   _dimRow = m.size(0);
   _dimCol = m.size(1);
@@ -492,7 +492,7 @@ void siconos::algebra::BlockMatrix::setValue(unsigned int row, unsigned int col,
 //                                               const SiconosMatrix &m)
 // {
 //   // Add a part of m (starting from (indRow,indCol) to the current matrix.
-//   // m must be a SimpleMatrix.
+//   // m must be a SiconosMatrix.
 
 //   // At the end of the present function, indRow (resp. indCol) is equal to indRow + the
 //   // corresponding dimension of the added sub-matrix.
@@ -550,7 +550,7 @@ void siconos::algebra::BlockMatrix::setValue(unsigned int row, unsigned int col,
 //                                               const SiconosMatrix &m)
 // {
 //   // subtract a part of m (starting from (indRow,indCol) to the current matrix.
-//   // m must be a SimpleMatrix.
+//   // m must be a SiconosMatrix.
 
 //   // At the end of the present function, indRow (resp. indCol) is equal to indRow + the
 //   // corresponding dimension of the subtracted sub-matrix.
@@ -640,7 +640,7 @@ void siconos::algebra::BlockMatrix::setValue(unsigned int row, unsigned int col,
 //         for (unsigned int j = 0; j < _dimCol; ++j) (*this)(i, j) = m(i, j);
 //     }
 //   }
-//   else  // if m is a SimpleMatrix
+//   else  // if m is a SiconosMatrix
 //   {
 //     unsigned int posRow = 0;
 //     unsigned int posCol = 0;
@@ -741,7 +741,7 @@ void siconos::algebra::BlockMatrix::setValue(unsigned int row, unsigned int col,
 //         for (unsigned int j = 0; j < _dimCol; ++j) (*this)(i, j) += m(i, j);
 //     }
 //   }
-//   else  // if m is a SimpleMatrix
+//   else  // if m is a SiconosMatrix
 //   {
 //     unsigned int indRow = 0, indCol = 0;
 //     addSimple(indRow, indCol, m);  // a sub-block of m is added to each block of this.
@@ -784,7 +784,7 @@ void siconos::algebra::BlockMatrix::setValue(unsigned int row, unsigned int col,
 //         for (unsigned int j = 0; j < _dimCol; ++j) (*this)(i, j) -= m(i, j);
 //     }
 //   }
-//   else  // if m is a SimpleMatrix
+//   else  // if m is a SiconosMatrix
 //   {
 //     unsigned int indRow = 0, indCol = 0;
 //     subSimple(indRow, indCol, m);  // a sub-block of m is subtracted to each block of this.

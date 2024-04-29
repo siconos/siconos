@@ -46,7 +46,7 @@ void MBTB_BodyLoadCADFile(unsigned int numDS,const std::string& CADFile,unsigned
   \param [in] mass double , the mass.
   \param [in] initPos SP::SiconosVector , a R^7 vector representing the position (translation in R^3, vector in R^3, angle in R) that must be appyed after the load to get the initial position of the object.
   \param [in] initCenterMass SP::SiconosVector , coordinate of the mass center in the just loaded model
-  \param [in] inertialMatrix SP::SimpleMatrix , matrix in R^{3,3}
+  \param [in] inertialMatrix SP::SiconosMatrix , matrix in R^{3,3}
   \param [in] pluginFextLib const std::string& , the path to the plugin library.
   \param [in] pluginFextFct const std::string& , the name of the pluged fonction.
   \param [in] pluginMextLib const std::string& , the path to the plugin library.
@@ -69,7 +69,7 @@ void MBTB_BodyLoadCADFile(unsigned int numDS,const std::string& CADFile,unsigned
  */
 void MBTB_BodyBuild(unsigned int numDS, const std::string& BodyName,double mass,
                     SP::SiconosVector initPos, SP::SiconosVector initCenterMass,
-                    SP::SimpleMatrix inertialMatrix,
+                    SP::SiconosMatrix inertialMatrix,
                     const std::string& pluginFextLib,  const std::string& pluginFextFct,
                     const std::string& pluginMextLib,  const std::string& pluginMextFct,
                     const std::string& pluginFintLib,  const std::string& pluginFintFct,

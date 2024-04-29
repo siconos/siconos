@@ -28,7 +28,7 @@
 #include "BlockVector.hpp"
 #include "NewtonEulerDS.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "op3x3.h"  // for orthoBaseFromVector
 // #include <iostream>
 
@@ -475,7 +475,7 @@ void siconos::joints::PivotJointR::computehDoF(double time,
 /** Compute the jacobian of linear and angular DoF with respect to some q */
 void siconos::joints::PivotJointR::computeJachqDoF(
     double time, siconos::modeling::Interaction& inter,
-    std::shared_ptr<siconos::algebra::BlockVector> q0, siconos::algebra::SimpleMatrix& jachq,
+    std::shared_ptr<siconos::algebra::BlockVector> q0, siconos::algebra::SiconosMatrix& jachq,
     unsigned int axis) {
   // Normally we fill jachq starting at axis up to the number of rows,
   // but in this case there is only one, so just don't do anything if

@@ -25,7 +25,7 @@
 #include "OSNSMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "SiconosVisitor.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "Simulation.hpp"
 #include "TypeName.hpp"  // check nslaw type, should be replaced by dynamic_cast or variant ?
 // START visitor for nslaw

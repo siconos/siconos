@@ -24,12 +24,12 @@
 #include "SiconosException.hpp"
 #include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 // Minimum data (C as pointer) constructor
 siconos::modeling::LagrangianCompliantLinearTIR::LagrangianCompliantLinearTIR(
-    std::shared_ptr<siconos::algebra::SimpleMatrix> C,
-    std::shared_ptr<siconos::algebra::SimpleMatrix> D)
+    std::shared_ptr<siconos::algebra::SiconosMatrix> C,
+    std::shared_ptr<siconos::algebra::SiconosMatrix> D)
     : LagrangianR(RelationSubType::CompliantLinearTIR) {
   _jachq = C;
   _jachlambda = D;
@@ -37,9 +37,9 @@ siconos::modeling::LagrangianCompliantLinearTIR::LagrangianCompliantLinearTIR(
 
 // Constructor from a complete set of data
 siconos::modeling::LagrangianCompliantLinearTIR::LagrangianCompliantLinearTIR(
-    std::shared_ptr<siconos::algebra::SimpleMatrix> C,
-    std::shared_ptr<siconos::algebra::SimpleMatrix> D,
-    std::shared_ptr<siconos::algebra::SimpleMatrix> F,
+    std::shared_ptr<siconos::algebra::SiconosMatrix> C,
+    std::shared_ptr<siconos::algebra::SiconosMatrix> D,
+    std::shared_ptr<siconos::algebra::SiconosMatrix> F,
     std::shared_ptr<siconos::algebra::SiconosVector> e)
     : LagrangianR(RelationSubType::CompliantLinearTIR) {
   _jachq = C;
@@ -50,8 +50,8 @@ siconos::modeling::LagrangianCompliantLinearTIR::LagrangianCompliantLinearTIR(
 
 // Minimum data (C, e as pointers) constructor
 siconos::modeling::LagrangianCompliantLinearTIR::LagrangianCompliantLinearTIR(
-    std::shared_ptr<siconos::algebra::SimpleMatrix> C,
-    std::shared_ptr<siconos::algebra::SimpleMatrix> D,
+    std::shared_ptr<siconos::algebra::SiconosMatrix> C,
+    std::shared_ptr<siconos::algebra::SiconosMatrix> D,
     std::shared_ptr<siconos::algebra::SiconosVector> e)
     : LagrangianR(RelationSubType::CompliantLinearTIR) {
   _jachq = C;

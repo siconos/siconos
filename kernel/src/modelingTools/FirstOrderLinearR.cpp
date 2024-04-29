@@ -24,7 +24,7 @@
 #include "PluggedObject.hpp"
 #include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -61,8 +61,8 @@ siconos::modeling::FirstOrderLinearR::FirstOrderLinearR(const std::string &Cname
 
 // Minimum data (C, B as pointers) constructor
 siconos::modeling::FirstOrderLinearR::FirstOrderLinearR(
-    std::shared_ptr<siconos::algebra::SimpleMatrix> C,
-    std::shared_ptr<siconos::algebra::SimpleMatrix> B)
+    std::shared_ptr<siconos::algebra::SiconosMatrix> C,
+    std::shared_ptr<siconos::algebra::SiconosMatrix> B)
     : FirstOrderR(RelationSubType::LinearR) {
   _C = C;
   _B = B;
@@ -70,11 +70,11 @@ siconos::modeling::FirstOrderLinearR::FirstOrderLinearR(
 
 // // Constructor from a complete set of data
 siconos::modeling::FirstOrderLinearR::FirstOrderLinearR(
-    std::shared_ptr<siconos::algebra::SimpleMatrix> C,
-    std::shared_ptr<siconos::algebra::SimpleMatrix> D,
-    std::shared_ptr<siconos::algebra::SimpleMatrix> F,
+    std::shared_ptr<siconos::algebra::SiconosMatrix> C,
+    std::shared_ptr<siconos::algebra::SiconosMatrix> D,
+    std::shared_ptr<siconos::algebra::SiconosMatrix> F,
     std::shared_ptr<siconos::algebra::SiconosVector> E,
-    std::shared_ptr<siconos::algebra::SimpleMatrix> B)
+    std::shared_ptr<siconos::algebra::SiconosMatrix> B)
     : FirstOrderR(RelationSubType::LinearR) {
   _C = C;
   _B = B;
@@ -97,16 +97,16 @@ void siconos::modeling::FirstOrderLinearR::initialize(Interaction &inter) {
 
   if (!_C && _pluginJachx->fPtr)
     relationMat[FirstOrderR::mat_C] =
-        std::make_shared<siconos::algebra::SimpleMatrix>(sizeY, sizeX);
+        std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeX);
   if (!_D && _pluginJachlambda->fPtr)
     relationMat[FirstOrderR::mat_D] =
-        std::make_shared<siconos::algebra::SimpleMatrix>(sizeY, sizeY);
+        std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeY);
   if (!_B && _pluginJacglambda->fPtr)
     relationMat[FirstOrderR::mat_B] =
-        std::make_shared<siconos::algebra::SimpleMatrix>(sizeX, sizeY);
+        std::make_shared<siconos::algebra::SiconosMatrix>(sizeX, sizeY);
   if (!_F && _pluginf->fPtr)
     relationMat[FirstOrderR::mat_F] =
-        std::make_shared<siconos::algebra::SimpleMatrix>(sizeY, sizeZ);
+        std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeZ);
   if (!_e && _plugine->fPtr)
     relationVec[FirstOrderR::e] = std::make_shared<siconos::algebra::SiconosVector>(sizeY);
 
@@ -172,7 +172,7 @@ void siconos::modeling::FirstOrderLinearR::checkSize(Interaction &inter) {
 }
 void siconos::modeling::FirstOrderLinearR::computeC(double time,
                                                     siconos::algebra::BlockVector &z,
-                                                    siconos::algebra::SimpleMatrix &C) {
+                                                    siconos::algebra::SiconosMatrix &C) {
   if (_pluginJachx->fPtr) {
     auto zp = z.toSiconosVector();
     ((FOMatPtr1)(_pluginJachx->fPtr))(time, C.size(0), C.size(1), &(C)(0, 0), zp->size(),
@@ -183,7 +183,7 @@ void siconos::modeling::FirstOrderLinearR::computeC(double time,
 
 void siconos::modeling::FirstOrderLinearR::computeD(double time,
                                                     siconos::algebra::BlockVector &z,
-                                                    siconos::algebra::SimpleMatrix &D) {
+                                                    siconos::algebra::SiconosMatrix &D) {
   if (_pluginJachlambda->fPtr) {
     auto zp = z.toSiconosVector();
     ((FOMatPtr1)(_pluginJachlambda->fPtr))(time, D.size(0), D.size(1), &(D)(0, 0), zp->size(),
@@ -194,7 +194,7 @@ void siconos::modeling::FirstOrderLinearR::computeD(double time,
 
 void siconos::modeling::FirstOrderLinearR::computeF(double time,
                                                     siconos::algebra::BlockVector &z,
-                                                    siconos::algebra::SimpleMatrix &F) {
+                                                    siconos::algebra::SiconosMatrix &F) {
   if (_pluginf->fPtr) {
     auto zp = z.toSiconosVector();
     ((FOMatPtr1)(_pluginf->fPtr))(time, F.size(0), F.size(1), &(F)(0, 0), zp->size(),
@@ -215,7 +215,7 @@ void siconos::modeling::FirstOrderLinearR::computee(double time,
 
 void siconos::modeling::FirstOrderLinearR::computeB(double time,
                                                     siconos::algebra::BlockVector &z,
-                                                    siconos::algebra::SimpleMatrix &B) {
+                                                    siconos::algebra::SiconosMatrix &B) {
   if (_pluginJacglambda->fPtr) {
     auto zp = z.toSiconosVector();
     ((FOMatPtr1)_pluginJacglambda->fPtr)(time, B.size(0), B.size(1), &(B)(0, 0), zp->size(),

@@ -29,7 +29,7 @@
 #include <string>
 
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosSerialization.hpp"
 

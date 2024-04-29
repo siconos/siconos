@@ -24,7 +24,7 @@
 #include "Interaction.hpp"
 #include "Observer.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "Simulation.hpp"
 #include "TimeDiscretisation.hpp"
 #include "Topology.hpp"
@@ -109,7 +109,7 @@ static inline std::pair<unsigned, std::string> getNumberOfStates(
 static inline unsigned storeAllStates(unsigned indx, unsigned startColumn,
                                       siconos::graphs::DynamicalSystemsGraph& DSG0,
                                       siconos::graphs::InteractionsGraph& IG0,
-                                      siconos::algebra::SimpleMatrix& data)
+                                      siconos::algebra::SiconosMatrix& data)
 {
   siconos::graphs::DynamicalSystemsGraph::VIterator dsvi, dsvdend;
   auto column = startColumn;
@@ -205,7 +205,7 @@ void siconos::control::ControlSimulation::initialize()
       }
     }
   }
-  _dataM = std::make_shared<siconos::algebra::SimpleMatrix>(_N, _nDim + 1);
+  _dataM = std::make_shared<siconos::algebra::SiconosMatrix>(_N, _nDim + 1);
   _dataM->setZero();
   // we save the system state
 }

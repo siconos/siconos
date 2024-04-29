@@ -65,7 +65,7 @@
 #include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
 #include "SiconosVisitor.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "SimulationGraphs.hpp"
 #include "StaticBody.hpp"
 #include "Topology.hpp"
@@ -499,11 +499,11 @@ void siconos::io::ContactPointDomainVisitor::operator()(
   answer.setValue(1, inter->number());
 }
 
-std::shared_ptr<siconos::algebra::SimpleMatrix> siconos::io::MechanicsIO::domains(
+std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::domains(
     const siconos::modeling::NonSmoothDynamicalSystem& nsds) const {
   if (nsds.topology()->numberOfIndexSet() > 0) {
     auto& graph = *nsds.topology()->indexSet(1);
-    auto result = std::make_shared<siconos::algebra::SimpleMatrix>(graph.vertices_number(), 2);
+    auto result = std::make_shared<siconos::algebra::SiconosMatrix>(graph.vertices_number(), 2);
     siconos::graphs::InteractionsGraph::VIterator vi, viend;
     unsigned int current_row;
     for (current_row = 0, std::tie(vi, viend) = graph.vertices(); vi != viend;
@@ -529,9 +529,9 @@ std::shared_ptr<siconos::algebra::SimpleMatrix> siconos::io::MechanicsIO::domain
 }
 
 template <typename T, typename G>
-std::shared_ptr<siconos::algebra::SimpleMatrix>
+std::shared_ptr<siconos::algebra::SiconosMatrix>
 siconos::io::MechanicsIO::visitAllVerticesForVector(const G& graph) const {
-  auto result = std::make_shared<siconos::algebra::SimpleMatrix>(0, 0);
+  auto result = std::make_shared<siconos::algebra::SiconosMatrix>(0, 0);
 
   typename G::VIterator vi, viend;
   unsigned int current_row;
@@ -562,7 +562,7 @@ siconos::io::MechanicsIO::visitAllVerticesForDouble(const G& graph) const {
   return result;
 }
 
-std::shared_ptr<siconos::algebra::SimpleMatrix> siconos::io::MechanicsIO::positions(
+std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::positions(
     const siconos::modeling::NonSmoothDynamicalSystem& nsds) const {
   using Getter =
       siconos::internal::Visitor<siconos::internal::Classes<siconos::modeling::LagrangianDS,
@@ -572,7 +572,7 @@ std::shared_ptr<siconos::algebra::SimpleMatrix> siconos::io::MechanicsIO::positi
   return visitAllVerticesForVector<Getter>(*(nsds.topology()->dSG(0)));
 };
 
-std::shared_ptr<siconos::algebra::SimpleMatrix> siconos::io::MechanicsIO::velocities(
+std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::velocities(
     const siconos::modeling::NonSmoothDynamicalSystem& nsds) const {
   using Getter =
       siconos::internal::Visitor<siconos::internal::Classes<siconos::modeling::LagrangianDS,
@@ -582,14 +582,14 @@ std::shared_ptr<siconos::algebra::SimpleMatrix> siconos::io::MechanicsIO::veloci
   return visitAllVerticesForVector<Getter>(*nsds.topology()->dSG(0));
 }
 
-std::shared_ptr<siconos::algebra::SimpleMatrix> siconos::io::MechanicsIO::contactPoints(
+std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::contactPoints(
     const siconos::modeling::NonSmoothDynamicalSystem& nsds, unsigned int index_set) const {
   siconos::graphs::InteractionsGraph::VIterator vi, viend;
   if (nsds.topology()->numberOfIndexSet() > 0) {
     auto& graph = *nsds.topology()->indexSet(index_set);
     unsigned int current_row;
     auto result =
-        std::make_shared<siconos::algebra::SimpleMatrix>(graph.vertices_number(), 25);
+        std::make_shared<siconos::algebra::SiconosMatrix>(graph.vertices_number(), 25);
 
     int data_size = 0;
     for (current_row = 0, std::tie(vi, viend) = graph.vertices(); vi != viend; ++vi) {
@@ -716,7 +716,7 @@ void ContactInfoVisitor::operator()(const siconos::collision::Contact2d3DR& rel)
     answer.setValue(3, 0);
 }
 
-std::shared_ptr<siconos::algebra::SimpleMatrix> siconos::io::MechanicsIO::contactInfo(
+std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::contactInfo(
     const siconos::modeling::NonSmoothDynamicalSystem& nsds, unsigned int index_set) const {
   DEBUG_BEGIN("MechanicsIO::contactInfo");
 
@@ -724,7 +724,7 @@ std::shared_ptr<siconos::algebra::SimpleMatrix> siconos::io::MechanicsIO::contac
   if (nsds.topology()->numberOfIndexSet() > 0) {
     auto& graph = *nsds.topology()->indexSet(index_set);
     unsigned int current_row;
-    auto result = std::make_shared<siconos::algebra::SimpleMatrix>(graph.vertices_number(), 4);
+    auto result = std::make_shared<siconos::algebra::SiconosMatrix>(graph.vertices_number(), 4);
 
     int data_size = 0;
     for (current_row = 0, std::tie(vi, viend) = graph.vertices(); vi != viend; ++vi) {
@@ -764,7 +764,7 @@ std::shared_ptr<siconos::algebra::SimpleMatrix> siconos::io::MechanicsIO::contac
     DEBUG_EXPR(result->display(););
     return result;
   }
-  DEBUG_END("SP::SimpleMatrix MechanicsIO::contactInfo");
+  DEBUG_END("SP::SiconosMatrix MechanicsIO::contactInfo");
 
   return nullptr;
 }
@@ -926,10 +926,10 @@ void siconos::io::ContactContactWorkVisitor::operator()(
   compute_contact_work_and_status(inter, omega, tol, answer);
 }
 
-std::shared_ptr<siconos::algebra::SimpleMatrix> siconos::io::MechanicsIO::contactContactWork(
+std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::contactContactWork(
     const siconos::modeling::NonSmoothDynamicalSystem& nsds, unsigned int index_set,
     double omega, double tol) const {
-  DEBUG_BEGIN("SimpleMatrix MechanicsIO::contactContactWork");
+  DEBUG_BEGIN("SiconosMatrix MechanicsIO::contactContactWork");
 
   siconos::graphs::InteractionsGraph::VIterator vi, viend;
   if (nsds.topology()->numberOfIndexSet() > 0) {
@@ -937,7 +937,7 @@ std::shared_ptr<siconos::algebra::SimpleMatrix> siconos::io::MechanicsIO::contac
 
     unsigned int current_row;
     auto result =
-        std::make_shared<siconos::algebra::SimpleMatrix>(graph.vertices_number(), 25);
+        std::make_shared<siconos::algebra::SiconosMatrix>(graph.vertices_number(), 25);
 
     int data_size = 0;
     for (current_row = 0, std::tie(vi, viend) = graph.vertices(); vi != viend; ++vi) {
@@ -972,7 +972,7 @@ std::shared_ptr<siconos::algebra::SimpleMatrix> siconos::io::MechanicsIO::contac
     DEBUG_EXPR(result->display(););
     return result;
   }
-  DEBUG_END("SP::SimpleMatrix MechanicsIO::contactContactWork");
+  DEBUG_END("SP::SiconosMatrix MechanicsIO::contactContactWork");
 
   // result->display();
   return nullptr;

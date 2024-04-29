@@ -23,7 +23,7 @@
 #include "SiconosVector.hpp"
 #include "SiconosVectorIterator.hpp"
 #include "SiconosVectorOp.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 void siconos::algebra::prod(const SiconosMatrix& A, const SiconosVector& x,
                             BlockVector& y, bool init) {
@@ -147,9 +147,9 @@ siconos::algebra::SiconosVector siconos::algebra::prod(const SiconosMatrix& A,
   return A * x;
 }
 
-const siconos::algebra::SimpleMatrix siconos::algebra::prod(
+const siconos::algebra::SiconosMatrix siconos::algebra::prod(
     const SiconosMatrix& A, const SiconosMatrix& B) {
-  SimpleMatrix C(A.size(0), B.size(1));
+  SiconosMatrix C(A.size(0), B.size(1));
   prod(A, B, C);
   return C;
 }

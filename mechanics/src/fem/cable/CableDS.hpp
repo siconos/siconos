@@ -59,12 +59,12 @@ class CableDS : public siconos::modeling::LagrangianDS {
   double _EA{1};
   double _l_e{1};
 
-  std::shared_ptr<siconos::algebra::SimpleMatrix> TRNp_Np{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> TRNp_Np{nullptr};
 
   void matmult(const std::shared_ptr<siconos::algebra::SiconosVector> &V, size_t a_startIdx,
                std::shared_ptr<siconos::algebra::SiconosVector> &R);
   void matmult2(const std::shared_ptr<siconos::algebra::SiconosVector> &V,
-                std::shared_ptr<siconos::algebra::SimpleMatrix> &R);
+                std::shared_ptr<siconos::algebra::SiconosMatrix> &R);
 
   CableDS() = delete;
   CableDS(const CableDS &) = delete;
@@ -101,7 +101,7 @@ class CableDS : public siconos::modeling::LagrangianDS {
   void dampingMatrix();
   // + some access op to be added later, if required
 
-  std::shared_ptr<siconos::algebra::SimpleMatrix> TRNp_NpMatrix();
+  std::shared_ptr<siconos::algebra::SiconosMatrix> TRNp_NpMatrix();
 };
 }  // namespace siconos::fem::cable
 

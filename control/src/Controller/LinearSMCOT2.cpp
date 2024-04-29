@@ -27,7 +27,7 @@
 #include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "TimeDiscretisation.hpp"
 
 siconos::control::LinearSMCOT2::LinearSMCOT2(std::shared_ptr<ControlSensor> sensor)
@@ -76,7 +76,7 @@ void siconos::control::LinearSMCOT2::initialize(
   // XXX What if there is more than one sensor ...
 
   _indx = 0;
-  //  _Phi= std::make_shared<SimpleMatrix(_nDim, _nDim));
+  //  _Phi= std::make_shared<SiconosMatrix(_nDim, _nDim));
   //  _Phi->eye();
   //  _Xold= std::make_shared<siconos::algebra::SiconosVector>(_nDim));
   //  *_Xold = *(_sensor->y());

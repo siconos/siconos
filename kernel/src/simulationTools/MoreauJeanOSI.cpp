@@ -41,7 +41,7 @@
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"  // for prod, subprod ...
 #include "SiconosVisitor.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "Simulation.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -140,7 +140,7 @@ siconos::integrators::MoreauJeanOSI::MoreauJeanOSI(double theta, double gamma)
   }
 }
 
-const siconos::algebra::SimpleMatrix siconos::integrators::MoreauJeanOSI::getW(
+const siconos::algebra::SiconosMatrix siconos::integrators::MoreauJeanOSI::getW(
     std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
   assert(ds && "siconos::integrators::MoreauJeanOSI::getW(ds): ds == nullptr.");
   assert(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W &&
@@ -149,13 +149,13 @@ const siconos::algebra::SimpleMatrix siconos::integrators::MoreauJeanOSI::getW(
   return *_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W;
 }
 
-std::shared_ptr<siconos::algebra::SimpleMatrix> siconos::integrators::MoreauJeanOSI::W(
+std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::integrators::MoreauJeanOSI::W(
     std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
   assert(ds && "siconos::integrators::MoreauJeanOSI::W(ds): ds == nullptr.");
   return _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W;
 }
 
-const siconos::algebra::SimpleMatrix
+const siconos::algebra::SiconosMatrix
 siconos::integrators::MoreauJeanOSI::getWBoundaryConditions(
     std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
   assert(ds &&
@@ -359,10 +359,10 @@ void siconos::integrators::MoreauJeanOSI::initializeIterationMatrixW(
     if (d.mass()) {
       d.computeMass(d.q());
       _dynamicalSystemsGraph->properties(dsv).W =
-          std::make_shared<siconos::algebra::SimpleMatrix>(*d.mass());  //*W = *d->mass();
+          std::make_shared<siconos::algebra::SiconosMatrix>(*d.mass());  //*W = *d->mass();
     } else {
       _dynamicalSystemsGraph->properties(dsv).W =
-          std::make_shared<siconos::algebra::SimpleMatrix>(sizeW, sizeW);
+          std::make_shared<siconos::algebra::SiconosMatrix>(sizeW, sizeW);
       _dynamicalSystemsGraph->properties(dsv).W->eye();
     }
     // Compute the W matrix
@@ -375,10 +375,10 @@ void siconos::integrators::MoreauJeanOSI::initializeIterationMatrixW(
     auto d = std::static_pointer_cast<siconos::modeling::LagrangianLinearTIDS>(ds);
     if (d->mass()) {
       _dynamicalSystemsGraph->properties(dsv).W =
-          std::make_shared<siconos::algebra::SimpleMatrix>(*d->mass());  //*W = *d->mass();
+          std::make_shared<siconos::algebra::SiconosMatrix>(*d->mass());  //*W = *d->mass();
     } else {
       _dynamicalSystemsGraph->properties(dsv).W =
-          std::make_shared<siconos::algebra::SimpleMatrix>(sizeW, sizeW);
+          std::make_shared<siconos::algebra::SiconosMatrix>(sizeW, sizeW);
       _dynamicalSystemsGraph->properties(dsv).W->eye();
     }
 
@@ -396,7 +396,7 @@ void siconos::integrators::MoreauJeanOSI::initializeIterationMatrixW(
     auto &lldds = static_cast<siconos::modeling::LagrangianLinearDiagonalDS &>(*ds);
     auto ndof = lldds.dimension();
     _dynamicalSystemsGraph->properties(dsv).W =
-        std::make_shared<siconos::algebra::SimpleMatrix>(
+        std::make_shared<siconos::algebra::SiconosMatrix>(
             ndof, ndof);  // WARNING : Use bandmatrix instead ?
     auto &W = *_dynamicalSystemsGraph->properties(dsv).W;
 
@@ -433,7 +433,7 @@ void siconos::integrators::MoreauJeanOSI::initializeIterationMatrixW(
   else if (dsType == siconos::modeling::Type::NewtonEulerDS) {
     auto &d = static_cast<siconos::modeling::NewtonEulerDS &>(*ds);
     _dynamicalSystemsGraph->properties(dsv).W =
-        std::make_shared<siconos::algebra::SimpleMatrix>(*d.mass());
+        std::make_shared<siconos::algebra::SiconosMatrix>(*d.mass());
 
     computeW(time, d, *_dynamicalSystemsGraph->properties(dsv).W);
 
@@ -493,7 +493,7 @@ void siconos::integrators::MoreauJeanOSI::_initializeIterationMatrixWBoundaryCon
 
     auto &d = static_cast<siconos::modeling::SecondOrderDS &>(ds);
     _dynamicalSystemsGraph->properties(dsv).WBoundaryConditions =
-        std::make_shared<siconos::algebra::SimpleMatrix>(sizeWBoundaryConditions,
+        std::make_shared<siconos::algebra::SiconosMatrix>(sizeWBoundaryConditions,
                                                          d.boundaryConditions()->size());
     _computeWBoundaryConditions(ds,
                                 *_dynamicalSystemsGraph->properties(dsv).WBoundaryConditions,
@@ -618,7 +618,7 @@ void siconos::integrators::MoreauJeanOSI::computeW(double t,
       auto &T = *d.T();
       DEBUG_EXPR(T.display(););
       DEBUG_EXPR(K.display(););
-      auto buffer = std::make_shared<siconos::algebra::SimpleMatrix>(*d.mass());
+      auto buffer = std::make_shared<siconos::algebra::SiconosMatrix>(*d.mass());
       siconos::algebra::prod(K, T, *buffer, true);
       siconos::algebra::scal(-h * h * _theta * _theta, *buffer, W, false);
       //*W -= h*h*_theta*_theta**K;
@@ -638,7 +638,7 @@ void siconos::integrators::MoreauJeanOSI::computeW(double t,
   // Function PLUForwardBackward will do that if required.
 }
 
-std::shared_ptr<siconos::algebra::SimpleMatrix> siconos::integrators::MoreauJeanOSI::Winverse(
+std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::integrators::MoreauJeanOSI::Winverse(
     std::shared_ptr<siconos::modeling::SecondOrderDS> ds, bool keepW) {
   /* We compute and return the current inverse the W matrix */
 
@@ -649,12 +649,12 @@ std::shared_ptr<siconos::algebra::SimpleMatrix> siconos::integrators::MoreauJean
   if (!Winverse) {
     auto sizeW = ds->dimension();
     _dynamicalSystemsGraph->properties(dsv).Winverse =
-        std::make_shared<siconos::algebra::SimpleMatrix>(sizeW, sizeW);
+        std::make_shared<siconos::algebra::SiconosMatrix>(sizeW, sizeW);
     Winverse = _dynamicalSystemsGraph->properties(dsv).Winverse;
     Winverse->eye();
     if (keepW) {
       // std::cout << "MoreauJeanOSI keepW" << std::endl;
-      auto Wtmp = std::make_shared<siconos::algebra::SimpleMatrix>(*W);
+      auto Wtmp = std::make_shared<siconos::algebra::SiconosMatrix>(*W);
       siconos::algebra::solveInPlace(*Wtmp, *Winverse);
     } else {
       siconos::algebra::solveInPlace(*W, *Winverse);
@@ -667,7 +667,7 @@ std::shared_ptr<siconos::algebra::SimpleMatrix> siconos::integrators::MoreauJean
     } else {
       Winverse->eye();
       if (keepW) {
-        auto Wtmp = std::make_shared<siconos::algebra::SimpleMatrix>(*W);
+        auto Wtmp = std::make_shared<siconos::algebra::SiconosMatrix>(*W);
         siconos::algebra::solveInPlace(*Wtmp, *Winverse);
       } else {
         siconos::algebra::solveInPlace(*W, *Winverse);
@@ -1316,7 +1316,7 @@ void siconos::integrators::MoreauJeanOSI::computeFreeState() {
     //   // -- Update W --
     //   // Note: during computeW, mass and jacobians of forces will be
     //   computed/
-    //   //SimpleMatrix& W = *_dynamicalSystemsGraph->properties(*dsi).W;
+    //   //SiconosMatrix& W = *_dynamicalSystemsGraph->properties(*dsi).W;
     //   computeW(t, d, W);
     //   const auto& v = *d.twist(); // v = v_k,i+1
 
@@ -1444,7 +1444,7 @@ void siconos::integrators::MoreauJeanOSI::computeFreeOutput(
         std::static_pointer_cast<siconos::modeling::LagrangianRheonomousR>(inter.relation())
             ->computehDot(simulation()->getTkp1(), *DSlink[siconos::modeling::LagrangianR::q0],
                           *DSlink[siconos::modeling::LagrangianR::z]);
-        auto ID = std::make_shared<siconos::algebra::SimpleMatrix>(sizeY, sizeY);
+        auto ID = std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeY);
         ID->eye();
         // This should be optimized -- vacary
         siconos::algebra::subprod(
@@ -1951,7 +1951,7 @@ bool siconos::integrators::MoreauJeanOSI::removeInteractionFromIndexSet(
   return !(addInteractionInIndexSet(inter, i));
 }
 
-std::shared_ptr<siconos::algebra::SimpleMatrix>
+std::shared_ptr<siconos::algebra::SiconosMatrix>
 siconos::integrators::MoreauJeanOSI::computeWorkForces() {
   DEBUG_BEGIN("MoreauJeanOSI::computeWorkForces()\n");
 
@@ -1969,7 +1969,7 @@ siconos::integrators::MoreauJeanOSI::computeWorkForces() {
   //
 
   auto number_of_ds = _simulation->nonSmoothDynamicalSystem()->getNumberOfDS();
-  auto workForces = std::make_shared<siconos::algebra::SimpleMatrix>(number_of_ds, 2);
+  auto workForces = std::make_shared<siconos::algebra::SiconosMatrix>(number_of_ds, 2);
 
   size_t cnt_ds = 0;
 

@@ -22,10 +22,10 @@
 
 #include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 void siconos::modeling::FirstOrderLinearTIDS::initRhs(double time) {
-  if (_M && !_invM) _invM = std::make_shared<siconos::algebra::SimpleMatrix>(*_M);
+  if (_M && !_invM) _invM = std::make_shared<siconos::algebra::SiconosMatrix>(*_M);
 
   computeRhs(time);
 
@@ -56,7 +56,7 @@ void siconos::modeling::FirstOrderLinearTIDS::computeRhs(double time) {
 
   if (_M) {
     // allocate invM at the first call of the present function
-    if (!_invM) _invM = std::make_shared<siconos::algebra::SimpleMatrix>(*_M);
+    if (!_invM) _invM = std::make_shared<siconos::algebra::SiconosMatrix>(*_M);
     // _invM->Solve(*_x[1]);
     algebra::solveInPlace(*_invM, *(_x[1]));
   }

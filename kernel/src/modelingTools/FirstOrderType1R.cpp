@@ -21,7 +21,7 @@
 #include "Interaction.hpp"
 #include "PluggedObject.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 siconos::modeling::FirstOrderType1R::FirstOrderType1R(const std::string& pluginh,
                                                       const std::string& pluging)
@@ -67,16 +67,16 @@ void siconos::modeling::FirstOrderType1R::initialize(Interaction& inter)
   auto& relationMat = inter.relationMatrices();
   if (!_C)
     relationMat[FirstOrderR::mat_C] =
-        std::make_shared<siconos::algebra::SimpleMatrix>(sizeY, sizeDS);
+        std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeDS);
   if (!_D)
     relationMat[FirstOrderR::mat_D] =
-        std::make_shared<siconos::algebra::SimpleMatrix>(sizeY, sizeY);
+        std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeY);
   if (!_F)
     relationMat[FirstOrderR::mat_F] =
-        std::make_shared<siconos::algebra::SimpleMatrix>(sizeY, sizeZ);
+        std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeZ);
   if (!_B)
     relationMat[FirstOrderR::mat_B] =
-        std::make_shared<siconos::algebra::SimpleMatrix>(sizeDS, sizeY);
+        std::make_shared<siconos::algebra::SiconosMatrix>(sizeDS, sizeY);
 }
 
 void siconos::modeling::FirstOrderType1R::computeh(double time,
@@ -139,7 +139,7 @@ void siconos::modeling::FirstOrderType1R::computeInput(double time, Interaction&
 void siconos::modeling::FirstOrderType1R::computeJachx(double time,
                                                        const siconos::algebra::BlockVector& x,
                                                        siconos::algebra::BlockVector& z,
-                                                       siconos::algebra::SimpleMatrix& C)
+                                                       siconos::algebra::SiconosMatrix& C)
 {
   //
   assert(_pluginJachx &&
@@ -157,7 +157,7 @@ void siconos::modeling::FirstOrderType1R::computeJachx(double time,
 void siconos::modeling::FirstOrderType1R::computeJachz(double time,
                                                        const siconos::algebra::BlockVector& x,
                                                        siconos::algebra::BlockVector& z,
-                                                       siconos::algebra::SimpleMatrix& F)
+                                                       siconos::algebra::SiconosMatrix& F)
 {
   if (_pluginJachz && _pluginJachz->fPtr) {
     auto xp = x.toSiconosVector();
@@ -170,7 +170,7 @@ void siconos::modeling::FirstOrderType1R::computeJachz(double time,
 
 void siconos::modeling::FirstOrderType1R::computeJacglambda(
     double time, const siconos::algebra::SiconosVector& lambda,
-    siconos::algebra::BlockVector& z, siconos::algebra::SimpleMatrix& B)
+    siconos::algebra::BlockVector& z, siconos::algebra::SiconosMatrix& B)
 {
   assert(_pluginJacglambda &&
          "siconos::modeling::FirstOrderType1R::computeJacobiang() failed; not linked to a "

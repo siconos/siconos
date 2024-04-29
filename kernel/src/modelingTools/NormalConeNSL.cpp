@@ -23,10 +23,10 @@
 
 #include "SiconosException.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 siconos::modeling::NormalConeNSL::NormalConeNSL(
-    unsigned size, std::shared_ptr<siconos::algebra::SimpleMatrix> H,
+    unsigned size, std::shared_ptr<siconos::algebra::SiconosMatrix> H,
     std::shared_ptr<siconos::algebra::SiconosVector> K)
     : NonSmoothLaw(size), _H(H), _K(K)
 {

@@ -26,7 +26,7 @@
 #include "PluginTypes.hpp"            // FPtr4 ...
 #include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -54,7 +54,7 @@ void siconos::modeling::LagrangianRheonomousR::initialize(Interaction& inter) {
   if (!_jachq) {
     unsigned int sizeY = inter.dimension();
     unsigned int sizeDS = inter.getSizeOfDS();
-    _jachq = std::make_shared<siconos::algebra::SimpleMatrix>(sizeY, sizeDS);
+    _jachq = std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeDS);
   }
 }
 

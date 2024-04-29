@@ -31,7 +31,7 @@
 #include "SiconosMatrixVectorOp.hpp"  // for prod and subprod
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"  // for scal
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "Simulation.hpp"
 #include "Topology.hpp"
 // #define DEBUG_NOCOLOR
@@ -51,7 +51,7 @@ siconos::integrators::EulerMoreauOSI::EulerMoreauOSI(double theta, double gamma)
       _gamma{gamma},
       _useGamma{true} {}
 
-const siconos::algebra::SimpleMatrix siconos::integrators::EulerMoreauOSI::getW(
+const siconos::algebra::SiconosMatrix siconos::integrators::EulerMoreauOSI::getW(
     std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
   assert(ds && "siconos::integrators::EulerMoreauOSI::getW(ds): ds == nullptr.");
   assert(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W &&
@@ -60,13 +60,13 @@ const siconos::algebra::SimpleMatrix siconos::integrators::EulerMoreauOSI::getW(
                .W);  // Copy !!
 }
 
-std::shared_ptr<siconos::algebra::SimpleMatrix> siconos::integrators::EulerMoreauOSI::W(
+std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::integrators::EulerMoreauOSI::W(
     std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
   assert(ds && "siconos::integrators::EulerMoreauOSI::W(ds): ds == nullptr.");
   return _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W;
 }
 
-const siconos::algebra::SimpleMatrix
+const siconos::algebra::SiconosMatrix
 siconos::integrators::EulerMoreauOSI::getWBoundaryConditions(
     std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
   assert(ds &&
@@ -136,7 +136,7 @@ void siconos::integrators::EulerMoreauOSI::initializeWorkVectorsForInteraction(
   }
   if (!interProp.workMatrices) {
     interProp.workMatrices =
-        std::make_shared<std::vector<std::shared_ptr<siconos::algebra::SimpleMatrix>>>(
+        std::make_shared<std::vector<std::shared_ptr<siconos::algebra::SiconosMatrix>>>(
             siconos::integrators::EulerMoreauOSI::MAT_WORK_LENGTH);
   }
   if (!interProp.workBlockVectors) {
@@ -189,9 +189,9 @@ void siconos::integrators::EulerMoreauOSI::initializeWorkVectorsForInteraction(
         inter_work[siconos::integrators::EulerMoreauOSI::VEC_RESIDU_R] =
             std::make_shared<siconos::algebra::SiconosVector>(sizeOfDS);
         inter_work_mat[siconos::integrators::EulerMoreauOSI::MAT_KHAT] =
-            std::make_shared<siconos::algebra::SimpleMatrix>(sizeOfDS, sizeY);
+            std::make_shared<siconos::algebra::SiconosMatrix>(sizeOfDS, sizeY);
         inter_work_mat[siconos::integrators::EulerMoreauOSI::MAT_KTILDE] =
-            std::make_shared<siconos::algebra::SimpleMatrix>(sizeOfDS, sizeY);
+            std::make_shared<siconos::algebra::SiconosMatrix>(sizeOfDS, sizeY);
       }
 
       if (!inter_work_block[siconos::integrators::EulerMoreauOSI::XFREE]) {
@@ -309,11 +309,11 @@ void siconos::integrators::EulerMoreauOSI::initializeIterationMatrixW(
     {
       d->computeM(time);
       _dynamicalSystemsGraph->properties(dsv).W =
-          std::make_shared<siconos::algebra::SimpleMatrix>(*d->M());
+          std::make_shared<siconos::algebra::SiconosMatrix>(*d->M());
     } else  // W = I
     {
       _dynamicalSystemsGraph->properties(dsv).W =
-          std::make_shared<siconos::algebra::SimpleMatrix>(sizeW, sizeW);
+          std::make_shared<siconos::algebra::SiconosMatrix>(sizeW, sizeW);
       _dynamicalSystemsGraph->properties(dsv).W->eye();
     }
 
@@ -450,7 +450,7 @@ void siconos::integrators::EulerMoreauOSI::computeW(
 
 void siconos::integrators::EulerMoreauOSI::computeKhat(
     siconos::modeling::Interaction& inter, siconos::algebra::SiconosMatrix& m,
-    std::vector<std::shared_ptr<siconos::algebra::SimpleMatrix>>& workM, double h) const {
+    std::vector<std::shared_ptr<siconos::algebra::SiconosMatrix>>& workM, double h) const {
   auto relationType = inter.relation()->getType();
   if ((relationType == siconos::modeling::RelationType::FirstOrder) &&
       (workM[siconos::integrators::EulerMoreauOSI::MAT_KHAT])) {

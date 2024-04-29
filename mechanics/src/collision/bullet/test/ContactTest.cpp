@@ -22,7 +22,7 @@
 #include "SiconosContactor.hpp"
 #include "SiconosShape.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "StaticBody.hpp"
 #include "TimeDiscretisation.hpp"
 #include "TimeStepping.hpp"
@@ -121,7 +121,7 @@ static BounceResult bounceTest(std::string moving, std::string ground,
     contactors->push_back(std::make_shared<siconos::collision::SiconosContactor>(box));
   } else if (moving == "ch") {
     float siz = params.size;
-    auto pts = std::make_shared<siconos::algebra::SimpleMatrix>(4, 3);
+    auto pts = std::make_shared<siconos::algebra::SiconosMatrix>(4, 3);
     (*pts)(0, 0) = 0.0;
     (*pts)(0, 1) = 0.0;
     (*pts)(0, 2) = 0.0;

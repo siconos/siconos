@@ -23,7 +23,7 @@
 #include "Interaction.hpp"
 #include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -32,15 +32,15 @@
 
 // Minimum data (C as pointer) constructor
 siconos::modeling::LagrangianLinearTIR::LagrangianLinearTIR(
-    std::shared_ptr<siconos::algebra::SimpleMatrix> C)
+    std::shared_ptr<siconos::algebra::SiconosMatrix> C)
     : LagrangianR(RelationSubType::LinearTIR) {
   _jachq = C;
 }
 
 // Constructor from a complete set of data
 siconos::modeling::LagrangianLinearTIR::LagrangianLinearTIR(
-    std::shared_ptr<siconos::algebra::SimpleMatrix> C,
-    std::shared_ptr<siconos::algebra::SimpleMatrix> F,
+    std::shared_ptr<siconos::algebra::SiconosMatrix> C,
+    std::shared_ptr<siconos::algebra::SiconosMatrix> F,
     std::shared_ptr<siconos::algebra::SiconosVector> e)
     : LagrangianR(RelationSubType::LinearTIR) {
   _jachq = C;
@@ -50,7 +50,7 @@ siconos::modeling::LagrangianLinearTIR::LagrangianLinearTIR(
 
 // Minimum data (C, e as pointers) constructor
 siconos::modeling::LagrangianLinearTIR::LagrangianLinearTIR(
-    std::shared_ptr<siconos::algebra::SimpleMatrix> C,
+    std::shared_ptr<siconos::algebra::SiconosMatrix> C,
     std::shared_ptr<siconos::algebra::SiconosVector> e)
     : LagrangianR(RelationSubType::LinearTIR) {
   _jachq = C;

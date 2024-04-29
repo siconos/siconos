@@ -24,7 +24,7 @@
 #include "LinearSMC.hpp"
 #include "LinearSensor.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "Twisting.hpp"
 #include "io.hpp"
 
@@ -35,7 +35,7 @@
 CPPUNIT_TEST_SUITE_REGISTRATION(SMCTest);
 
 void SMCTest::setUp() {
-  _A = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);
+  _A = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
   _A->setZero();
   (*_A)(0, 1) = 1.0;
   (*_A)(1, 0) = 19.0;
@@ -46,13 +46,13 @@ void SMCTest::setUp() {
   (*_x0)(0) = -15.0;
   (*_x0)(1) = 20.0;
 
-  _C = std::make_shared<siconos::algebra::SimpleMatrix>(2, 2);
+  _C = std::make_shared<siconos::algebra::SiconosMatrix>(2, 2);
   _C->eye();
 
-  _B = std::make_shared<siconos::algebra::SimpleMatrix>(2, 1);
+  _B = std::make_shared<siconos::algebra::SiconosMatrix>(2, 1);
   (*_B)(1, 0) = 1.0;
 
-  _Csurface = std::make_shared<siconos::algebra::SimpleMatrix>(1, 2);
+  _Csurface = std::make_shared<siconos::algebra::SiconosMatrix>(1, 2);
   _Csurface->setZero();
   (*_Csurface)(0, 0) = 1.0;
   (*_Csurface)(0, 1) = 1.0;
@@ -79,7 +79,7 @@ void SMCTest::initTwisting() {
   _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(_x0, _A);
   _sensor = std::make_shared<siconos::control::LinearSensor>(_DS, _C);
   _itw = std::make_shared<siconos::control::Twisting>(_sensor, 300., _beta, _h);
-  auto eye = std::make_shared<siconos::algebra::SimpleMatrix>(2, 2);
+  auto eye = std::make_shared<siconos::algebra::SiconosMatrix>(2, 2);
   eye->eye();
   _itw->setCsurface(eye);
 }
@@ -186,7 +186,7 @@ void SMCTest::test_itw_ZOH() {
   siconos::algebra::io::write("itw_ZOH.dat", data, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  siconos::algebra::SimpleMatrix dataRef(data);
+  siconos::algebra::SiconosMatrix dataRef(data);
   dataRef.zero();
   siconos::algebra::io::read("itw.ref", dataRef);
   // it is a bad idea to compare solutions to an AVI that does not admit a unique solution
@@ -223,7 +223,7 @@ void SMCTest::test_itw_Lsodar() {
   siconos::algebra::io::write("itw_Lsodar.dat", data, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  siconos::algebra::SimpleMatrix dataRef(data);
+  siconos::algebra::SiconosMatrix dataRef(data);
   dataRef.zero();
   siconos::algebra::io::read("itw.ref", dataRef);
   // it is a bad idea to compare solutions to an AVI that does not admit a unique

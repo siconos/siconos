@@ -28,7 +28,7 @@
 #include <vector>
 
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 namespace siconos::modeling {
 class BoundaryCondition;
@@ -103,7 +103,7 @@ class FiniteElementModel {
 
   /* Assembly method for elemetary matrix */
   void AssembleElementaryMatrix(std::shared_ptr<siconos::algebra::SiconosMatrix> M,
-                                siconos::algebra::SimpleMatrix& Me, FElement& fe);
+                                siconos::algebra::SiconosMatrix& Me, FElement& fe);
 
   /** compute Mass Matrix
    * should be computeMass of LagrangianDS ?
@@ -114,7 +114,7 @@ class FiniteElementModel {
   /** compute elementary Mass Matrix
    * should be computeMass of LagrangianDS ?
    **/
-  void computeElementaryMassMatrix(siconos::algebra::SimpleMatrix& Me, FElement& fe,
+  void computeElementaryMassMatrix(siconos::algebra::SiconosMatrix& Me, FElement& fe,
                                    double massDensity);
 
   /** compute Stiffness Matrix
@@ -126,16 +126,16 @@ class FiniteElementModel {
   /** compute elementary Stiffness Matrix
    * should be computeMass of LagrangianDS ?
    **/
-  void computeElementaryStiffnessMatrix(siconos::algebra::SimpleMatrix& Me, FElement& fe,
-                                        std::shared_ptr<siconos::algebra::SimpleMatrix> D,
+  void computeElementaryStiffnessMatrix(siconos::algebra::SiconosMatrix& Me, FElement& fe,
+                                        std::shared_ptr<siconos::algebra::SiconosMatrix> D,
                                         double thickness);
 
   /** compute elementary Stiffness Matrix with a direct method
    * for linear element
    **/
   void computeElementaryStiffnessMatrix_direct(
-      siconos::algebra::SimpleMatrix& Me, FElement& fe,
-      std::shared_ptr<siconos::algebra::SimpleMatrix> D, double thickness);
+      siconos::algebra::SiconosMatrix& Me, FElement& fe,
+      std::shared_ptr<siconos::algebra::SiconosMatrix> D, double thickness);
 
   /** apply Dirichlet Boundary conditions for a given tag on element.
    **/

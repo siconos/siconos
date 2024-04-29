@@ -141,7 +141,7 @@ class CylindricalJointR : public NewtonEulerJointR {
   /** Compute the jacobian of linear and angular DoF with respect to some q */
   virtual void computeJachqDoF(double time, siconos::modeling::Interaction& inter,
                                std::shared_ptr<siconos::algebra::BlockVector> q0,
-                               siconos::algebra::SimpleMatrix& jachq,
+                               siconos::algebra::SiconosMatrix& jachq,
                                unsigned int axis) override;
 
   void Jd1d2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13,

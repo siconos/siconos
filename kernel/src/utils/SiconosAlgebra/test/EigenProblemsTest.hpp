@@ -19,7 +19,7 @@
 #define __EigenProblemsTest__
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 class EigenProblemsTest : public CppUnit::TestFixture
 {

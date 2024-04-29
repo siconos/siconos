@@ -20,7 +20,7 @@
 #include "SiconosException.hpp"
 #include "SiconosMatrixVectorOp.hpp"  // For prod matrix-vectors
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 // #define DEBUG_MESSAGES
 // #define DEBUG_STDOUT
 #include <iostream>
@@ -91,7 +91,7 @@ siconos::modeling::FirstOrderLinearDS::FirstOrderLinearDS(
     : FirstOrderNonLinearDS(FOLDS) {
   _zeroPlugin();
   if (FOLDS.A())
-    _A = std::make_shared<siconos::algebra::SimpleMatrix>(*(FOLDS.A()));
+    _A = std::make_shared<siconos::algebra::SiconosMatrix>(*(FOLDS.A()));
   if (FOLDS.b())
     _b = std::make_shared<siconos::algebra::SiconosVector>(*(FOLDS.b()));
 
@@ -116,7 +116,7 @@ void siconos::modeling::FirstOrderLinearDS::initRhs(double time) {
       std::cout << "NOT IMPLEMENTED\n";
       //////// _jacxRhs = _A; /// WARNING FP: constructor is missing
     } else if (_A && _M) {
-      auto tmp = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);
+      auto tmp = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
       tmp->setZero();
       _jacxRhs = std::make_shared<siconos::algebra::BlockMatrix>(*tmp);
       // else no allocation, jacobian is equal to 0.
@@ -133,14 +133,14 @@ void siconos::modeling::FirstOrderLinearDS::updatePlugins(double time) {
 
 void siconos::modeling::FirstOrderLinearDS::setComputeAFunction(
     const std::string &pluginPath, const std::string &functionName) {
-  if (!_A) _A = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);
+  if (!_A) _A = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
   _pluginA->setComputeFunction(pluginPath, functionName);
   _hasConstantA = false;
 }
 
 void siconos::modeling::FirstOrderLinearDS::setComputeAFunction(
     LDSPtrFunction fct) {
-  if (!_A) _A = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);
+  if (!_A) _A = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
   _pluginA->setComputeFunction((void *)fct);
   _hasConstantA = false;
 }
@@ -196,7 +196,7 @@ void siconos::modeling::FirstOrderLinearDS::computeRhs(double time) {
   if (_M) {
     computeM(time);
     // allocate invM at the first call of the present function
-    if (!_invM) _invM = std::make_shared<siconos::algebra::SimpleMatrix>(*_M);
+    if (!_invM) _invM = std::make_shared<siconos::algebra::SiconosMatrix>(*_M);
 
     // _invM->Solve(*_x[1]);
     algebra::solveInPlace(*_invM, *(_x[1]));
@@ -210,7 +210,7 @@ void siconos::modeling::FirstOrderLinearDS::computeJacobianRhsx(double time) {
       computeM(time);
       _jacxRhs->copyBlock(0, 0, _A);
       if (!_invM)
-        _invM = std::make_shared<siconos::algebra::SimpleMatrix>(*_M);
+        _invM = std::make_shared<siconos::algebra::SiconosMatrix>(*_M);
       else if (_pluginM->fPtr)  // if M is plugged, invM must be updated
         *_invM = *_M;
       // solve MjacobianRhsx = A
@@ -277,7 +277,7 @@ void siconos::modeling::FirstOrderLinearDS::setA(
   if (_A)
     *_A = newA;
   else
-    _A = std::make_shared<siconos::algebra::SimpleMatrix>(newA);
+    _A = std::make_shared<siconos::algebra::SiconosMatrix>(newA);
   _hasConstantA = true;
 }
 

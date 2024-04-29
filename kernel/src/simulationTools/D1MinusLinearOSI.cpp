@@ -30,7 +30,7 @@
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"  // for subscal
 #include "SiconosVisitor.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "Simulation.hpp"
 #include "Tools.hpp"  // For enum_to_string
 // #define DEBUG_BEGIN_END_ONLY
@@ -353,7 +353,7 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeState() {
       DEBUG_EXPR(vold.display());
 
       // get right information
-      // auto M = std::make_shared<siconos::algebra::SimpleMatrix>(*(d->mass()))); // we copy
+      // auto M = std::make_shared<siconos::algebra::SiconosMatrix>(*(d->mass()))); // we copy
       // the mass matrix to avoid its factorization;
       auto& vfree = *d->twist();  // POINTER CONSTRUCTOR : contains free velocity
       auto& residuFree = *ds_work_vectors[siconos::integrators::D1MinusLinearOSI::RESIDU_FREE];

@@ -17,7 +17,7 @@
  */
 
 #include "Actuator.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "Topology.hpp"
 #include "SiconosVector.hpp"
 #include "ControlSensor.hpp"
@@ -32,7 +32,7 @@ siconos::control::Actuator::Actuator(ActuatorType type, std::shared_ptr<ControlS
 }
 
 siconos::control::Actuator::Actuator(ActuatorType type, std::shared_ptr<ControlSensor> sensor,
-                                     std::shared_ptr<siconos::algebra::SimpleMatrix> B)
+                                     std::shared_ptr<siconos::algebra::SiconosMatrix> B)
     : _type(type), _B(B), _sensor(sensor)
 {
   if (B) {

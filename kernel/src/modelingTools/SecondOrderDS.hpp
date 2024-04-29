@@ -27,7 +27,7 @@
 
 #include "DynamicalSystem.hpp"
 #include "SiconosException.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 namespace siconos::algebra {
 
@@ -128,7 +128,7 @@ class SecondOrderDS : public DynamicalSystem {
   bool _hasConstantMass = false;
 
   /** inverse or factorization of the mass of the system */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _inverseMass{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _inverseMass{nullptr};
 
   /** "Reaction", generalized forces or imuplses due to the non smooth law
    * The index corresponds to the kinematic
@@ -192,9 +192,9 @@ class SecondOrderDS : public DynamicalSystem {
   /** get (pointer) inverse or LU-factorization of the mass,
    *  used for LU-forward-backward computation
    *
-   *  \return pointer std::shared_ptr<siconos::algebra::SimpleMatrix>
+   *  \return pointer std::shared_ptr<siconos::algebra::SiconosMatrix>
    */
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> inverseMass() const
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> inverseMass() const
   {
     return _inverseMass;
   }
@@ -203,7 +203,7 @@ class SecondOrderDS : public DynamicalSystem {
    *
    *  \param newPtr a plugged matrix SP
    */
-  void setMassPtr(std::shared_ptr<siconos::algebra::SimpleMatrix> newPtr);
+  void setMassPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr);
 
   /** set the value of the right-hand side, \f$ \dot x \f$
    *

@@ -160,7 +160,7 @@ void CableDSTest::testComputeBouncingBall() {
 
   cout << "====> Model loading ..." << endl;
 
-  auto Mass = std::make_shared<siconos::algebra::SimpleMatrix>(nDof, nDof);
+  auto Mass = std::make_shared<siconos::algebra::SiconosMatrix>(nDof, nDof);
   (*Mass)(0, 0) = m;
   (*Mass)(1, 1) = m;
   (*Mass)(2, 2) = 2. / 5 * m * R * R;
@@ -188,7 +188,7 @@ void CableDSTest::testComputeBouncingBall() {
 
   // Interaction ball-floor
   //
-  auto H = std::make_shared<siconos::algebra::SimpleMatrix>(1, nDof);
+  auto H = std::make_shared<siconos::algebra::SiconosMatrix>(1, nDof);
   (*H)(0, 0) = 1.0;
 
   auto nslaw = std::make_shared<siconos::modeling::NewtonImpactNSL>(e);
@@ -232,7 +232,7 @@ void CableDSTest::testComputeBouncingBall() {
   // --- Get the values to be plotted ---
   // -> saved in a matrix dataPlot
   unsigned int outputSize = 5;
-  siconos::algebra::SimpleMatrix dataPlot(N + 1, outputSize);
+  siconos::algebra::SiconosMatrix dataPlot(N + 1, outputSize);
 
   auto q = ball->q();
   auto v = ball->velocity();

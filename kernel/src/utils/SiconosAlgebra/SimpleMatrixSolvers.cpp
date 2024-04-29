@@ -22,7 +22,7 @@
 #include "NumericsToolsNamespace.h"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "cholesky.hpp"
 #include <Eigen/Dense>
 #include <algorithm>
@@ -38,7 +38,7 @@
 
 // namespace lapack = boost::numeric::bindings::lapack;
 
-void siconos::algebra::solveInPlace(SimpleMatrix &A, SiconosVector &B)
+void siconos::algebra::solveInPlace(SiconosMatrix &A, SiconosVector &B)
 {
   assert(A.cols() == B.rows());
   if(A.lu_siconos == nullptr) {
@@ -51,7 +51,7 @@ void siconos::algebra::solveInPlace(SimpleMatrix &A, SiconosVector &B)
   }
 }
 
-void siconos::algebra::solveInPlace(SimpleMatrix &A, SimpleMatrix &B)
+void siconos::algebra::solveInPlace(SiconosMatrix &A, SiconosMatrix &B)
 {
   assert(A.rows() == B.rows());
   // std::cout << "A " << std::endl << A << std::endl;
@@ -62,14 +62,14 @@ void siconos::algebra::solveInPlace(SimpleMatrix &A, SimpleMatrix &B)
     B = A.lu_siconos->solve(B); // TODO : avoid temp copy
     // std::cout << "solve results " << std::endl << tmp << std::endl;
   } else {
-    SimpleMatrix tmp = A.lu().solve(B);
+    SiconosMatrix tmp = A.lu().solve(B);
     B = A.lu_siconos->solve(B);
   }
   // std::cout << "A  apres" << std::endl << A << std::endl;
 }
 
 
-void  siconos::algebra::solveByLeastSquares(SimpleMatrix &A, SiconosMatrix &B)
+void  siconos::algebra::solveByLeastSquares(SiconosMatrix &A, SiconosMatrix &B)
 {
   int info = 0;
 // #ifdef USE_OPTIMAL_WORKSPACE
@@ -87,14 +87,14 @@ void  siconos::algebra::solveByLeastSquares(SimpleMatrix &A, SiconosMatrix &B)
   
   DGELS('T', M_, N_, NRHS_, A.data(), LDA_, B.data(), LDB_, &info);
   if(info != 0)
-    THROW_EXCEPTION("SimpleMatrix::SolveByLeastSquares failed.");
+    THROW_EXCEPTION("SiconosMatrix::SolveByLeastSquares failed.");
   std::cout << B << std::endl << "************************" << std::endl;
 }
 
 
 
 
-void  siconos::algebra::solveByLeastSquares(SimpleMatrix &A, SiconosVector &B)
+void  siconos::algebra::solveByLeastSquares(SiconosMatrix &A, SiconosVector &B)
 {
   // std::cout << B << std::endl;
   SiconosMatrix tmpB(B.size(), 1);
@@ -119,7 +119,7 @@ void  siconos::algebra::solveByLeastSquares(SimpleMatrix &A, SiconosVector &B)
   if(info != 0)
   {
     std::cout << "info = " << info << std::endl;
-    THROW_EXCEPTION("SimpleMatrix::SolveByLeastSquares failed.");
+    THROW_EXCEPTION("SiconosMatrix::SolveByLeastSquares failed.");
   }
   else
   {

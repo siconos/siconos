@@ -28,7 +28,7 @@
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"  // for subscal
 #include "SiconosVisitor.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "Simulation.hpp"
 // #define DEBUG_MESSAGES
 // #define DEBUG_STDOUT
@@ -174,7 +174,7 @@ void siconos::integrators::MoreauJeanBilbaoOSI::_initialize_iteration_matrix(
     // Allocate work buffers for:
     // - Iteration matrix
     _dynamicalSystemsGraph->properties(dsv).W =
-        std::make_shared<siconos::algebra::SimpleMatrix>(ndof, ndof); // WARNING : Use bandmatrix instead ?
+        std::make_shared<siconos::algebra::SiconosMatrix>(ndof, ndof); // WARNING : Use bandmatrix instead ?
 
     // - I - theta
     // ds_work_vectors[siconos::integrators::MoreauJeanBilbaoOSI::ONE_MINUS_THETA] =

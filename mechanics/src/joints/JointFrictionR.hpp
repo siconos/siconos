@@ -40,7 +40,7 @@ class JointFrictionR : public siconos::modeling::NewtonEulerR {
   std::shared_ptr<std::vector<unsigned int>> _axis{nullptr};
 
   unsigned int _axisMin{0}, _axisMax{0};
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _jachqTmp{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _jachqTmp{nullptr};
 
  public:
   /** Initialize a joint friction for a common case: a single axis with a

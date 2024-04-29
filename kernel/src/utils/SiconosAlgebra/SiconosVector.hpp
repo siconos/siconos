@@ -38,7 +38,7 @@ namespace siconos::algebra {
 // struct SiconosVectorIterator;
 // struct SiconosVectorConstIterator;
 // class BlockVector;
-// class SimpleMatrix;
+// class SiconosMatrix;
 
 // adaptor to allow construction of a boost vector from memory without
 // copy

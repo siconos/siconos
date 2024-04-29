@@ -24,7 +24,7 @@
 // #include <boost/numeric/bindings/traits/ublas_matrix.hpp>
 #include "SiconosMatrix.hpp"
 #include "SiconosMatrixOp.hpp"  // for matrix operators declaration
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 // namespace ublas = boost::numeric::ublas;
 // namespace bindings_blas = boost::numeric::bindings::blas;
@@ -35,7 +35,7 @@
 // Note FP: this function is never used. We keep it for the record. Remove it
 // later ?
 
-// const SimpleMatrix prod(const SiconosMatrix &A, const SiconosMatrix& B)
+// const SiconosMatrix prod(const SiconosMatrix &A, const SiconosMatrix& B)
 // {
 //   // To compute C = A * B
 //   assert(!(B.isPLUFactorized()) && "B is PLUFactorized in prod !!");
@@ -54,11 +54,11 @@
 
 //   if(numA == UblasType::IDENTITY || numB == UblasType::ZERO)  // A = identity
 //   or B = 0
-//     return SimpleMatrix(B);
+//     return SiconosMatrix(B);
 
 //   else if(numB == UblasType::IDENTITY || numA == UblasType::ZERO)  // B =
 //   identity or A = 0
-//     return SimpleMatrix(A);
+//     return SiconosMatrix(A);
 
 //   else // neither A or B is equal to identity or zero.
 //   {

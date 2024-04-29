@@ -47,12 +47,12 @@ using complex_vector = ublas::vector<std::complex<double>>;
 
 void EigenProblemsTest::setUp() {
   size = 5;
-  A = std::make_shared<siconos::algebra::SimpleMatrix>(size, size);
+  A = std::make_shared<siconos::algebra::SiconosMatrix>(size, size);
   // Initialize A with random values.
   A->randomize();
-  Aref = std::make_shared<siconos::algebra::SimpleMatrix>(*A);
+  Aref = std::make_shared<siconos::algebra::SiconosMatrix>(*A);
 
-  Asym = std::make_shared<siconos::algebra::SimpleMatrix>(
+  Asym = std::make_shared<siconos::algebra::SiconosMatrix>(
       size, size, siconos::algebra::UblasType::SYMMETRIC);
   Asym->randomize();
 }
@@ -69,7 +69,7 @@ void EigenProblemsTest::testSyev() {
 
   // Initialize EigenVectors with A
   auto EigenValues = std::make_shared<siconos::algebra::SiconosVector>(size);
-  auto EigenVectors = std::make_shared<siconos::algebra::SimpleMatrix>(*A);
+  auto EigenVectors = std::make_shared<siconos::algebra::SiconosMatrix>(*A);
   //  *EigenVectors = *A;
 
   siconos::algebra::syev(*EigenValues, *EigenVectors);

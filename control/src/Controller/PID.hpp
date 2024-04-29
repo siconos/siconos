@@ -51,7 +51,7 @@ class PID : public Actuator {
    *  \param B the B matrix
    */
   PID(std::shared_ptr<ControlSensor> sensor,
-      std::shared_ptr<siconos::algebra::SimpleMatrix> B = nullptr);
+      std::shared_ptr<siconos::algebra::SiconosMatrix> B = nullptr);
 
   /** destructor
    */

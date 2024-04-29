@@ -71,7 +71,7 @@ private:
 
   // Members
 
-  std::shared_ptr<siconos::algebra::SimpleMatrix> C, B, F, D;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> C, B, F, D;
   std::shared_ptr<siconos::algebra::SiconosVector> e;
   std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds;
 

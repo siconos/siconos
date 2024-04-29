@@ -28,7 +28,7 @@
 #include <memory>
 #include <vector>
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrix.hpp"
 #include "BlockVector.hpp"
 
@@ -38,7 +38,7 @@ namespace siconos::algebra {
 class SiconosMemory;
 // class SiconosVector;
 // class SiconosMatrix;
-// class SimpleMatrix;
+// class SiconosMatrix;
 // class BlockVector;
 }  // namespace siconos::algebra
 
@@ -141,7 +141,7 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
    * and OneStepIntegrator classes. */
   std::vector<std::shared_ptr<siconos::algebra::BlockVector>> _linkToDSVariables= {};
 
-  std::vector<std::shared_ptr<siconos::algebra::SimpleMatrix>> _relationMatrices= {};
+  std::vector<std::shared_ptr<siconos::algebra::SiconosMatrix>> _relationMatrices= {};
 
   std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> _relationVectors= {};
 
@@ -533,7 +533,7 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
     return _relationVectors;
   };
 
-  inline std::vector<std::shared_ptr<siconos::algebra::SimpleMatrix>>& relationMatrices()
+  inline std::vector<std::shared_ptr<siconos::algebra::SiconosMatrix>>& relationMatrices()
   {
     return _relationMatrices;
   };

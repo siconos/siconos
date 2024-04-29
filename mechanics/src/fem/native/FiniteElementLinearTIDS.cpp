@@ -23,7 +23,7 @@
 #include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 //
 // #define DEBUG_STDOUT
 // #define DEBUG_NOCOLOR
@@ -65,14 +65,14 @@ siconos::mechanics::fem::FiniteElementLinearTIDS::FiniteElementLinearTIDS(
   _n = 2 * _ndof;
 
   if (!_mass) {
-    _mass = std::make_shared<siconos::algebra::SimpleMatrix>(_ndof, _ndof, _storageType);
+    _mass = std::make_shared<siconos::algebra::SiconosMatrix>(_ndof, _ndof, _storageType);
     _mass->setIsSymmetric(true);
     _mass->setIsPositiveDefinite(true);
   }
   _FEModel->computeMassMatrix(_mass, _materials);
 
   if (!_K) {
-    _K = std::make_shared<siconos::algebra::SimpleMatrix>(_ndof, _ndof, _storageType);
+    _K = std::make_shared<siconos::algebra::SiconosMatrix>(_ndof, _ndof, _storageType);
     _K->setIsSymmetric(true);
     _K->setIsPositiveDefinite(true);
   }
@@ -80,7 +80,7 @@ siconos::mechanics::fem::FiniteElementLinearTIDS::FiniteElementLinearTIDS(
 
   // if(!_C)
   // {
-  //   _C = std::make_shared<siconos::algebra::SimpleMatrix>(_ndof, _ndof, _storageType);
+  //   _C = std::make_shared<siconos::algebra::SiconosMatrix>(_ndof, _ndof, _storageType);
   // }
   // _C->zero();
 

@@ -163,9 +163,9 @@ class NewMarkAlphaOSI : public OneStepIntegrator {
 
   /** get pointer to the maxtrix W
    * \param ds std::shared_ptr<siconos::modeling::DynamicalSystem> DynamicalSystem concerned
-   * \return  std::shared_ptr<siconos::algebra::SimpleMatrix>
+   * \return  std::shared_ptr<siconos::algebra::SiconosMatrix>
    */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> W(
+  std::shared_ptr<siconos::algebra::SiconosMatrix> W(
       std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
   /** initialize W matrix

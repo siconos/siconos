@@ -22,7 +22,7 @@
 #include "Interaction.hpp"
 #include "SiconosException.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -31,7 +31,7 @@
 
 void siconos::fem::cable::Cable2d3DR::initialize(siconos::modeling::Interaction& inter) {
   auto qSize = inter.getSizeOfDS();
-  _jachq = std::make_shared<siconos::algebra::SimpleMatrix>(2, qSize);
+  _jachq = std::make_shared<siconos::algebra::SiconosMatrix>(2, qSize);
 }
 
 void siconos::fem::cable::Cable2d3DR::computeh(const siconos::algebra::BlockVector& q,

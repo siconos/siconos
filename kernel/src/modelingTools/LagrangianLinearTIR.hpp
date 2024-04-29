@@ -41,7 +41,7 @@ class LagrangianLinearTIR : public LagrangianR {
   ACCEPT_SERIALIZATION(LagrangianLinearTIR);
 
   /** F matrix, coefficient of z */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _F;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _F;
 
   /** e*/
   std::shared_ptr<siconos::algebra::SiconosVector> _e;
@@ -55,7 +55,7 @@ class LagrangianLinearTIR : public LagrangianR {
    *
    *  \param C the matrix C
    */
-  LagrangianLinearTIR(std::shared_ptr<siconos::algebra::SimpleMatrix> C);
+  LagrangianLinearTIR(std::shared_ptr<siconos::algebra::SiconosMatrix> C);
 
   /** create the Relation from a set of data
    *
@@ -63,8 +63,8 @@ class LagrangianLinearTIR : public LagrangianR {
    *  \param F the matrix F
    *  \param e the vector e
    */
-  LagrangianLinearTIR(std::shared_ptr<siconos::algebra::SimpleMatrix> C,
-                      std::shared_ptr<siconos::algebra::SimpleMatrix> F,
+  LagrangianLinearTIR(std::shared_ptr<siconos::algebra::SiconosMatrix> C,
+                      std::shared_ptr<siconos::algebra::SiconosMatrix> F,
                       std::shared_ptr<siconos::algebra::SiconosVector> e);
 
   /** create the Relation from a set of data
@@ -72,7 +72,7 @@ class LagrangianLinearTIR : public LagrangianR {
    *  \param C the matrix C
    *  \param e the vector e
    */
-  LagrangianLinearTIR(std::shared_ptr<siconos::algebra::SimpleMatrix> C,
+  LagrangianLinearTIR(std::shared_ptr<siconos::algebra::SiconosMatrix> C,
                       std::shared_ptr<siconos::algebra::SiconosVector> e);
 
   /** destructor
@@ -125,13 +125,13 @@ class LagrangianLinearTIR : public LagrangianR {
   // -- C --
   /** \return pointer on a plugged matrix
    */
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> C() const override { return _jachq; }
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> C() const override { return _jachq; }
 
   /** set C to pointer newPtr
    *
    *  \param newPtr a SP to plugged matrix
    */
-  inline void setCPtr(std::shared_ptr<siconos::algebra::SimpleMatrix> newPtr)
+  inline void setCPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr)
   {
     _jachq = newPtr;
   }
@@ -140,13 +140,13 @@ class LagrangianLinearTIR : public LagrangianR {
 
   /** \return pointer on a plugged matrix
    */
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> D() const { return _jachlambda; }
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> D() const { return _jachlambda; }
 
   /** set D to pointer newPtr
    *
    *  \param newPtr a SP to plugged matrix
    */
-  inline void setDPtr(std::shared_ptr<siconos::algebra::SimpleMatrix> newPtr)
+  inline void setDPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr)
   {
     _jachlambda = newPtr;
   }
@@ -155,13 +155,13 @@ class LagrangianLinearTIR : public LagrangianR {
 
   /** \return pointer on a plugged matrix
    */
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> F() const { return _F; }
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> F() const { return _F; }
 
   /** set F to pointer newPtr
    *
    *  \param newPtr a SP to plugged matrix
    */
-  inline void setFPtr(std::shared_ptr<siconos::algebra::SimpleMatrix> newPtr) { _F = newPtr; }
+  inline void setFPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr) { _F = newPtr; }
 
   // -- e --
 

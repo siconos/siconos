@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 #include "LagrangianLinearDiagonalDS.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "SiconosException.hpp"
 // #define DEBUG_STDOUT
@@ -34,7 +34,7 @@ siconos::modeling::LagrangianLinearDiagonalDS::LagrangianLinearDiagonalDS(
     std::shared_ptr<siconos::algebra::SiconosVector> mass)
     : LagrangianDS(q0, velocity0)
 {
-  _mass = std::make_shared<siconos::algebra::SimpleMatrix>(dimension(), dimension()); // WARNING : use Eigen banded matrix?
+  _mass = std::make_shared<siconos::algebra::SiconosMatrix>(dimension(), dimension()); // WARNING : use Eigen banded matrix?
   for (unsigned int i = 0; i < dimension(); ++i) (*_mass)(i, i) = (*mass)(i);
   _stiffness = stiffness;
   _damping = damping;

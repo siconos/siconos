@@ -18,7 +18,7 @@
 #include "FirstOrderLinearRTest.hpp"
 
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
   if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -28,10 +28,10 @@ CPPUNIT_TEST_SUITE_REGISTRATION(FirstOrderLinearRTest);
 
 void FirstOrderLinearRTest::setUp()
 {
-  C = std::make_shared<siconos::algebra::SimpleMatrix>(siconos::algebra::readMatrixFromFile("matC.dat"));
-  D = std::make_shared<siconos::algebra::SimpleMatrix>(siconos::algebra::readMatrixFromFile("matD.dat"));
-  B = std::make_shared<siconos::algebra::SimpleMatrix>(siconos::algebra::readMatrixFromFile("matB.dat"));
-  F = std::make_shared<siconos::algebra::SimpleMatrix>(siconos::algebra::readMatrixFromFile("matF.dat"));
+  C = std::make_shared<siconos::algebra::SiconosMatrix>(siconos::algebra::readMatrixFromFile("matC.dat"));
+  D = std::make_shared<siconos::algebra::SiconosMatrix>(siconos::algebra::readMatrixFromFile("matD.dat"));
+  B = std::make_shared<siconos::algebra::SiconosMatrix>(siconos::algebra::readMatrixFromFile("matB.dat"));
+  F = std::make_shared<siconos::algebra::SiconosMatrix>(siconos::algebra::readMatrixFromFile("matF.dat"));
 
 
 

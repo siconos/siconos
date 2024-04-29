@@ -23,7 +23,7 @@
 #include "SiconosException.hpp"
 #include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -31,8 +31,8 @@
 
 // Minimum data (C, B as pointers) constructor
 siconos::modeling::FirstOrderLinearTIR::FirstOrderLinearTIR(
-    std::shared_ptr<siconos::algebra::SimpleMatrix> C,
-    std::shared_ptr<siconos::algebra::SimpleMatrix> B)
+    std::shared_ptr<siconos::algebra::SiconosMatrix> C,
+    std::shared_ptr<siconos::algebra::SiconosMatrix> B)
     : FirstOrderR(RelationSubType::LinearTIR) {
   _C = C;
   _B = B;
@@ -40,11 +40,11 @@ siconos::modeling::FirstOrderLinearTIR::FirstOrderLinearTIR(
 
 // Constructor from a complete set of data
 siconos::modeling::FirstOrderLinearTIR::FirstOrderLinearTIR(
-    std::shared_ptr<siconos::algebra::SimpleMatrix> C,
-    std::shared_ptr<siconos::algebra::SimpleMatrix> D,
-    std::shared_ptr<siconos::algebra::SimpleMatrix> F,
+    std::shared_ptr<siconos::algebra::SiconosMatrix> C,
+    std::shared_ptr<siconos::algebra::SiconosMatrix> D,
+    std::shared_ptr<siconos::algebra::SiconosMatrix> F,
     std::shared_ptr<siconos::algebra::SiconosVector> e,
-    std::shared_ptr<siconos::algebra::SimpleMatrix> B)
+    std::shared_ptr<siconos::algebra::SiconosMatrix> B)
     : FirstOrderR(RelationSubType::LinearTIR) {
   _C = C;
   _B = B;

@@ -18,7 +18,7 @@
 #include "FirstOrderLinearTIRTest.hpp"
 
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
   if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -28,10 +28,10 @@ CPPUNIT_TEST_SUITE_REGISTRATION(FirstOrderLinearTIRTest);
 
 void FirstOrderLinearTIRTest::setUp()
 {
-  C = std::make_shared<siconos::algebra::SimpleMatrix>(siconos::algebra::readMatrixFromFile("matC.dat"));
-  D = std::make_shared<siconos::algebra::SimpleMatrix>(siconos::algebra::readMatrixFromFile("matD.dat"));
-  B = std::make_shared<siconos::algebra::SimpleMatrix>(siconos::algebra::readMatrixFromFile("matB.dat"));
-  F = std::make_shared<siconos::algebra::SimpleMatrix>(siconos::algebra::readMatrixFromFile("matF.dat"));
+  C = std::make_shared<siconos::algebra::SiconosMatrix>(siconos::algebra::readMatrixFromFile("matC.dat"));
+  D = std::make_shared<siconos::algebra::SiconosMatrix>(siconos::algebra::readMatrixFromFile("matD.dat"));
+  B = std::make_shared<siconos::algebra::SiconosMatrix>(siconos::algebra::readMatrixFromFile("matB.dat"));
+  F = std::make_shared<siconos::algebra::SiconosMatrix>(siconos::algebra::readMatrixFromFile("matF.dat"));
   e = std::make_shared<siconos::algebra::SiconosVector>(1);
   (*e)(0) = 0.1;
 }
@@ -79,8 +79,8 @@ void FirstOrderLinearTIRTest::testBuildFirstOrderLinearTIR2()
 void FirstOrderLinearTIRTest::testSetCPtr()
 {
   std::cout << "--> Test: setCPtr." << std::endl;
-  std::shared_ptr<siconos::algebra::SimpleMatrix> tmp =
-      std::make_shared<siconos::algebra::SimpleMatrix>(*C);
+  std::shared_ptr<siconos::algebra::SiconosMatrix> tmp =
+      std::make_shared<siconos::algebra::SiconosMatrix>(*C);
   tmp->zero();
   auto folr = std::make_shared<siconos::modeling::FirstOrderLinearTIR>(tmp, B);
   folr->setCPtr(C);
@@ -130,8 +130,8 @@ void FirstOrderLinearTIRTest::testSetEPtr()
 void FirstOrderLinearTIRTest::testSetBPtr()
 {
   std::cout << "--> Test: setBPtr." << std::endl;
-  std::shared_ptr<siconos::algebra::SimpleMatrix> tmp =
-      std::make_shared<siconos::algebra::SimpleMatrix>(*B);
+  std::shared_ptr<siconos::algebra::SiconosMatrix> tmp =
+      std::make_shared<siconos::algebra::SiconosMatrix>(*B);
   tmp->zero();
   auto folr = std::make_shared<siconos::modeling::FirstOrderLinearTIR>(C, tmp);
   folr->setBPtr(B);

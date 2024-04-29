@@ -24,7 +24,7 @@
 #include "ControlZOHAdditionalTerms.hpp"
 #include "Event.hpp"
 #include "EventsManager.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "TimeStepping.hpp"
 #include "Topology.hpp"  //#define DEBUG_BEGIN_END_ONLY
 #include "ZeroOrderHoldOSI.hpp"

@@ -967,7 +967,7 @@ void SiconosVectorTest::testOperators7() {
 void SiconosVectorTest::testOperators8() {
   std::cout << "--> Test: operators8." << std::endl;
 
-  auto res = std::make_shared<siconos::algebra::SimpleMatrix>(size1, size);
+  auto res = std::make_shared<siconos::algebra::SiconosMatrix>(size1, size);
   *res = siconos::algebra::outer_prod(*tmp1, *x);  // dense*dense
 
   for (unsigned int i = 0; i < size1; ++i)
@@ -985,7 +985,7 @@ void SiconosVectorTest::testOperators8() {
 
   res->zero();
   auto v = std::make_shared<SiconosVector>(*sv);
-  auto res2 = std::make_shared<siconos::algebra::SimpleMatrix>(size, size);
+  auto res2 = std::make_shared<siconos::algebra::SiconosMatrix>(size, size);
   *res2 = siconos::algebra::outer_prod(*v, *w);  // sparse*sparse
   for (unsigned int i = 0; i < size1; ++i)
     for (unsigned int j = 0; j < size; ++j)

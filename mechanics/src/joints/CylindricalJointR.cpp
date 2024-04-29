@@ -29,7 +29,7 @@
 #include "RotationQuaternion.hpp"  // for changeFrameBodyToAbs
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"  // for scal
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -821,7 +821,7 @@ void siconos::joints::CylindricalJointR::computehDoF(double time,
 /** Compute the jacobian of linear and angular DoF with respect to some q */
 void siconos::joints::CylindricalJointR::computeJachqDoF(
     double time, siconos::modeling::Interaction& inter,
-    std::shared_ptr<siconos::algebra::BlockVector> q0, siconos::algebra::SimpleMatrix& jachq,
+    std::shared_ptr<siconos::algebra::BlockVector> q0, siconos::algebra::SiconosMatrix& jachq,
     unsigned int axis) {
   if (axis > 1) return;
 

@@ -24,7 +24,7 @@
 #define SICOMATVEC_OPH
 
 // #include <boost/numeric/ublas/fwd.hpp>
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include <complex>
 #include "SiconosVector.hpp"
 #include "BlockVector.hpp"
@@ -34,9 +34,9 @@ namespace siconos::algebra {
 
 /** compute the product m1 * trans(m2)
  *  \param 2 SiconosVectors
- *  \return a SimpleMatrix
+ *  \return a SiconosMatrix
  */
-SimpleMatrix outer_prod(const SiconosVector&, const SiconosVector&);
+SiconosMatrix outer_prod(const SiconosVector&, const SiconosVector&);
 
 /** prod(A, x, y, init) computes y = A*x or y += A*x if init = false
   \param A a SiconosMatrix

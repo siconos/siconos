@@ -99,8 +99,8 @@ class FirstOrderLinearR : public FirstOrderR {
    *  \param C the C matrix
    *  \param B the B matrix
    */
-  FirstOrderLinearR(std::shared_ptr<siconos::algebra::SimpleMatrix> C,
-                    std::shared_ptr<siconos::algebra::SimpleMatrix> B);
+  FirstOrderLinearR(std::shared_ptr<siconos::algebra::SiconosMatrix> C,
+                    std::shared_ptr<siconos::algebra::SiconosMatrix> B);
 
   /** create the Relation from a set of data
    *
@@ -110,11 +110,11 @@ class FirstOrderLinearR : public FirstOrderR {
    *  \param e the e matrix
    *  \param B the B matrix
    */
-  FirstOrderLinearR(std::shared_ptr<siconos::algebra::SimpleMatrix> C,
-                    std::shared_ptr<siconos::algebra::SimpleMatrix> D,
-                    std::shared_ptr<siconos::algebra::SimpleMatrix> F,
+  FirstOrderLinearR(std::shared_ptr<siconos::algebra::SiconosMatrix> C,
+                    std::shared_ptr<siconos::algebra::SiconosMatrix> D,
+                    std::shared_ptr<siconos::algebra::SiconosMatrix> F,
                     std::shared_ptr<siconos::algebra::SiconosVector> e,
-                    std::shared_ptr<siconos::algebra::SimpleMatrix> B);
+                    std::shared_ptr<siconos::algebra::SiconosMatrix> B);
 
   /** destructor
    */
@@ -156,7 +156,7 @@ class FirstOrderLinearR : public FirstOrderR {
    *  \param C the C matrix
    */
   virtual void computeC(double time, siconos::algebra::BlockVector &z,
-                        siconos::algebra::SimpleMatrix &C);
+                        siconos::algebra::SiconosMatrix &C);
 
   /** Function to compute the matrix D
    *
@@ -165,7 +165,7 @@ class FirstOrderLinearR : public FirstOrderR {
    *  \param D the D matrix
    */
   virtual void computeD(double time, siconos::algebra::BlockVector &z,
-                        siconos::algebra::SimpleMatrix &D);
+                        siconos::algebra::SiconosMatrix &D);
 
   /** Function to compute the matrix F
    *
@@ -174,7 +174,7 @@ class FirstOrderLinearR : public FirstOrderR {
    *  \param F the F matrix
    */
   virtual void computeF(double time, siconos::algebra::BlockVector &z,
-                        siconos::algebra::SimpleMatrix &F);
+                        siconos::algebra::SiconosMatrix &F);
 
   /** Function to compute the vector e
    *
@@ -192,7 +192,7 @@ class FirstOrderLinearR : public FirstOrderR {
    *  \param B the B matrix
    */
   virtual void computeB(double time, siconos::algebra::BlockVector &z,
-                        siconos::algebra::SimpleMatrix &B);
+                        siconos::algebra::SiconosMatrix &B);
 
   /**
      to compute the output y = h(t,x,...) of the Relation

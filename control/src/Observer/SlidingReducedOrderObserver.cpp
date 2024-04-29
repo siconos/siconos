@@ -25,7 +25,7 @@
 #include "SiconosException.hpp"
 #include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "TimeStepping.hpp"
 #include "Topology.hpp"
 #include "ZeroOrderHoldOSI.hpp"
@@ -140,7 +140,7 @@ void siconos::control::SlidingReducedOrderObserver::process() {
     *_e -= y;
 
     siconos::algebra::SiconosVector tmpV(_DS->n());
-    siconos::algebra::SimpleMatrix tmpC(*_C);
+    siconos::algebra::SiconosMatrix tmpC(*_C);
     for (decltype(_e->size()) i = 0; i < _e->size(); ++i) tmpV(i) = (*_e)(i);
 
     siconos::algebra::solveByLeastSquares(tmpC, tmpV);
@@ -161,7 +161,7 @@ void siconos::control::SlidingReducedOrderObserver::process() {
     //    *_e -= y;
     //
     //    SiconosVector tmpV(_DS->n());
-    //    SimpleMatrix tmpC(*_C);
+    //    SiconosMatrix tmpC(*_C);
     //    for (unsigned int i = 0; i < _e->size(); ++i)
     //      tmpV(i) = (*_e)(i);
     //

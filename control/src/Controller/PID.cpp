@@ -31,7 +31,7 @@
 #include "siconos_debug.h"
 
 siconos::control::PID::PID(std::shared_ptr<ControlSensor> sensor,
-                           std::shared_ptr<siconos::algebra::SimpleMatrix> B)
+                           std::shared_ptr<siconos::algebra::SiconosMatrix> B)
     : Actuator(ActuatorType::PID, sensor, B)
 {
   _u = std::make_shared<siconos::algebra::SiconosVector>(1);

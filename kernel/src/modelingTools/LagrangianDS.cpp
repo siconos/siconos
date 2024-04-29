@@ -29,7 +29,7 @@
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"  // for inner_prod
 #include "SiconosVisitor.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -68,7 +68,7 @@ siconos::modeling::LagrangianDS::LagrangianDS(
 
 void siconos::modeling::LagrangianDS::allocateMass() {
   if (!_mass) {
-    _mass = std::make_shared<siconos::algebra::SimpleMatrix>(_ndof, _ndof);
+    _mass = std::make_shared<siconos::algebra::SiconosMatrix>(_ndof, _ndof);
     _mass->setZero();
   }
 }
@@ -126,7 +126,7 @@ void siconos::modeling::LagrangianDS::init_generalized_coordinates(unsigned int 
 void siconos::modeling::LagrangianDS::init_inverse_mass() {
   if (_mass && !_inverseMass) {
     computeMass();
-    _inverseMass = std::make_shared<siconos::algebra::SimpleMatrix>(*_mass);
+    _inverseMass = std::make_shared<siconos::algebra::SiconosMatrix>(*_mass);
   }
 }
 
@@ -147,9 +147,9 @@ void siconos::modeling::LagrangianDS::init_forces() {
 
   if (_fInt || _fGyr) {
     if (!_jacobianqForces)
-      _jacobianqForces = std::make_shared<siconos::algebra::SimpleMatrix>(_ndof, _ndof);
+      _jacobianqForces = std::make_shared<siconos::algebra::SiconosMatrix>(_ndof, _ndof);
     if (!_jacobianqDotForces)
-      _jacobianqDotForces = std::make_shared<siconos::algebra::SimpleMatrix>(_ndof, _ndof);
+      _jacobianqDotForces = std::make_shared<siconos::algebra::SiconosMatrix>(_ndof, _ndof);
   }
 }
 
@@ -201,7 +201,7 @@ void siconos::modeling::LagrangianDS::initRhs(double time) {
     computeJacobianqForces(time);
 
     _rhsMatrices[jacobianXBloc10_] =
-        std::make_shared<siconos::algebra::SimpleMatrix>(*_jacobianqForces);
+        std::make_shared<siconos::algebra::SiconosMatrix>(*_jacobianqForces);
     algebra::solveInPlace(*_inverseMass, *_rhsMatrices[jacobianXBloc10_]);
     flag1 = true;
   }
@@ -210,18 +210,18 @@ void siconos::modeling::LagrangianDS::initRhs(double time) {
     // Solve MjacobianX(1,1) = jacobianFL[1]
     computeJacobianqDotForces(time);
     _rhsMatrices[jacobianXBloc11_] =
-        std::make_shared<siconos::algebra::SimpleMatrix>(*_jacobianqDotForces);
+        std::make_shared<siconos::algebra::SiconosMatrix>(*_jacobianqDotForces);
     algebra::solveInPlace(*_inverseMass, *_rhsMatrices[jacobianXBloc11_]);
     flag2 = true;
   }
 
   if (!_rhsMatrices[zeroMatrix_]) {
-    _rhsMatrices[zeroMatrix_] = std::make_shared<siconos::algebra::SimpleMatrix>(
+    _rhsMatrices[zeroMatrix_] = std::make_shared<siconos::algebra::SiconosMatrix>(
         _ndof, _ndof);
     _rhsMatrices[zeroMatrix_]->zero();
   }
   if (!_rhsMatrices[idMatrix_]) {
-    _rhsMatrices[idMatrix_] = std::make_shared<siconos::algebra::SimpleMatrix>(
+    _rhsMatrices[idMatrix_] = std::make_shared<siconos::algebra::SiconosMatrix>(
         _ndof, _ndof);
     _rhsMatrices[idMatrix_]->setIdentity();
   }
@@ -715,13 +715,13 @@ void siconos::modeling::LagrangianDS::allocateFInt() {
 void siconos::modeling::LagrangianDS::setComputeMassFunction(const std::string& pluginPath,
                                                              const std::string& functionName) {
   _pluginMass->setComputeFunction(pluginPath, functionName);
-  if (!_mass) _mass = std::make_shared<siconos::algebra::SimpleMatrix>(_ndof, _ndof);
+  if (!_mass) _mass = std::make_shared<siconos::algebra::SiconosMatrix>(_ndof, _ndof);
   _hasConstantMass = false;
 }
 
 void siconos::modeling::LagrangianDS::setComputeMassFunction(siconos::plugins::FPtr7 fct) {
   _pluginMass->setComputeFunction((void*)fct);
-  if (!_mass) _mass = std::make_shared<siconos::algebra::SimpleMatrix>(_ndof, _ndof);
+  if (!_mass) _mass = std::make_shared<siconos::algebra::SiconosMatrix>(_ndof, _ndof);
   _hasConstantMass = false;
 }
 
@@ -772,7 +772,7 @@ void siconos::modeling::LagrangianDS::setComputeFGyrFunction(siconos::plugins::F
 
 void siconos::modeling::LagrangianDS::allocateJacobianFIntq() {
   if (!_jacobianFIntq)
-    _jacobianFIntq = std::make_shared<siconos::algebra::SimpleMatrix>(_ndof, _ndof);
+    _jacobianFIntq = std::make_shared<siconos::algebra::SiconosMatrix>(_ndof, _ndof);
 }
 
 void siconos::modeling::LagrangianDS::setComputeJacobianFIntqFunction(
@@ -784,7 +784,7 @@ void siconos::modeling::LagrangianDS::setComputeJacobianFIntqFunction(
 
 void siconos::modeling::LagrangianDS::allocateJacobianFIntqDot() {
   if (!_jacobianFIntqDot)
-    _jacobianFIntqDot = std::make_shared<siconos::algebra::SimpleMatrix>(_ndof, _ndof);
+    _jacobianFIntqDot = std::make_shared<siconos::algebra::SiconosMatrix>(_ndof, _ndof);
 }
 
 void siconos::modeling::LagrangianDS::setComputeJacobianFIntqDotFunction(
@@ -812,7 +812,7 @@ void siconos::modeling::LagrangianDS::setComputeJacobianFGyrqFunction(
     const std::string& pluginPath, const std::string& functionName) {
   _pluginJacqFGyr->setComputeFunction(pluginPath, functionName);
   if (!_jacobianFGyrq)
-    _jacobianFGyrq = std::make_shared<siconos::algebra::SimpleMatrix>(_ndof, _ndof);
+    _jacobianFGyrq = std::make_shared<siconos::algebra::SiconosMatrix>(_ndof, _ndof);
   init_forces();
 }
 
@@ -820,7 +820,7 @@ void siconos::modeling::LagrangianDS::setComputeJacobianFGyrqDotFunction(
     const std::string& pluginPath, const std::string& functionName) {
   _pluginJacqDotFGyr->setComputeFunction(pluginPath, functionName);
   if (!_jacobianFGyrqDot)
-    _jacobianFGyrqDot = std::make_shared<siconos::algebra::SimpleMatrix>(_ndof, _ndof);
+    _jacobianFGyrqDot = std::make_shared<siconos::algebra::SiconosMatrix>(_ndof, _ndof);
   init_forces();
 }
 
@@ -828,7 +828,7 @@ void siconos::modeling::LagrangianDS::setComputeJacobianFGyrqFunction(
     siconos::plugins::FPtr5 fct) {
   _pluginJacqFGyr->setComputeFunction((void*)fct);
   if (!_jacobianFGyrq)
-    _jacobianFGyrq = std::make_shared<siconos::algebra::SimpleMatrix>(_ndof, _ndof);
+    _jacobianFGyrq = std::make_shared<siconos::algebra::SiconosMatrix>(_ndof, _ndof);
   init_forces();
 }
 
@@ -836,7 +836,7 @@ void siconos::modeling::LagrangianDS::setComputeJacobianFGyrqDotFunction(
     siconos::plugins::FPtr5 fct) {
   _pluginJacqDotFGyr->setComputeFunction((void*)fct);
   if (!_jacobianFGyrqDot)
-    _jacobianFGyrqDot = std::make_shared<siconos::algebra::SimpleMatrix>(_ndof, _ndof);
+    _jacobianFGyrqDot = std::make_shared<siconos::algebra::SiconosMatrix>(_ndof, _ndof);
 }
 
 double siconos::modeling::LagrangianDS::computeKineticEnergy() {

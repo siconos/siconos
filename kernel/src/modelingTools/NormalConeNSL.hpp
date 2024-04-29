@@ -56,7 +56,7 @@ class NormalConeNSL : public NonSmoothLaw {
   ACCEPT_SERIALIZATION(NormalConeNSL);
 
   /** matrix in the (H-K)-representation of the polytope */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _H{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _H{nullptr};
 
   /** vector in the (H-K)-representation of polytope */
   std::shared_ptr<siconos::algebra::SiconosVector> _K{nullptr};
@@ -72,7 +72,7 @@ class NormalConeNSL : public NonSmoothLaw {
    *  \param H matrix in the (H-K)-representation of the polytope P
    *  \param K vector in the (H-K)-representation of the polytope P
    */
-  NormalConeNSL(unsigned size, std::shared_ptr<siconos::algebra::SimpleMatrix> H,
+  NormalConeNSL(unsigned size, std::shared_ptr<siconos::algebra::SiconosMatrix> H,
                 std::shared_ptr<siconos::algebra::SiconosVector> K);
 
   virtual ~NormalConeNSL() noexcept = default;
@@ -81,7 +81,7 @@ class NormalConeNSL : public NonSmoothLaw {
    *
    *  \return a reference to the H matrix
    */
-  inline siconos::algebra::SimpleMatrix& H() { return *_H; };
+  inline siconos::algebra::SiconosMatrix& H() { return *_H; };
 
   /** get K
    *

@@ -31,7 +31,7 @@
 #include "SiconosMatrixVectorOp.hpp"  // mat-vec prod
 #include "SiconosVector.hpp"
 #include "SiconosVisitor.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 // #define DEBUG_BEGIN_END_ONLY
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -46,7 +46,7 @@ void siconos::modeling::NewtonEulerR::initialize(Interaction& inter) {
   unsigned int qSize = 7 * (xSize / 6);
 
   if (!_jachq)
-    _jachq = std::make_shared<siconos::algebra::SimpleMatrix>(ySize, qSize);
+    _jachq = std::make_shared<siconos::algebra::SiconosMatrix>(ySize, qSize);
   else {
     if (_jachq->size(0) == 0) {
       // if the matrix dim are null
@@ -65,10 +65,10 @@ void siconos::modeling::NewtonEulerR::initialize(Interaction& inter) {
 
   DEBUG_EXPR(_jachq->display());
 
-  if (!_jachqT) _jachqT = std::make_shared<siconos::algebra::SimpleMatrix>(ySize, xSize);
+  if (!_jachqT) _jachqT = std::make_shared<siconos::algebra::SiconosMatrix>(ySize, xSize);
 
   if (!_T) {
-    _T = std::make_shared<siconos::algebra::SimpleMatrix>(7, 6);
+    _T = std::make_shared<siconos::algebra::SiconosMatrix>(7, 6);
     _T->zero();
     _T->setValue(0, 0, 1.0);
     _T->setValue(1, 1, 1.0);
@@ -98,12 +98,12 @@ void siconos::modeling::NewtonEulerR::checkSize(Interaction& inter) {
 }
 
 void siconos::modeling::NewtonEulerR::setJachq(
-    std::shared_ptr<siconos::algebra::SimpleMatrix> newJachq) {
+    std::shared_ptr<siconos::algebra::SiconosMatrix> newJachq) {
   _jachq = newJachq;
 }
 
 void siconos::modeling::NewtonEulerR::setJachqPtr(
-    std::shared_ptr<siconos::algebra::SimpleMatrix> newPtr) {
+    std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr) {
   _jachq = newPtr;
 }
 
@@ -235,8 +235,8 @@ void siconos::modeling::NewtonEulerR::computeJachqT(
 
   unsigned int k = 0;
   auto ySize = inter.dimension();
-  auto auxBloc = std::make_shared<siconos::algebra::SimpleMatrix>(ySize, 7);
-  auto auxBloc2 = std::make_shared<siconos::algebra::SimpleMatrix>(ySize, 6);
+  auto auxBloc = std::make_shared<siconos::algebra::SiconosMatrix>(ySize, 7);
+  auto auxBloc2 = std::make_shared<siconos::algebra::SiconosMatrix>(ySize, 6);
   std::vector<std::size_t> dimIndex(2);
   std::vector<std::size_t> startIndex(4);
 
@@ -322,7 +322,7 @@ void siconos::modeling::NewtonEulerR::computeSecondOrderTimeDerivativeTerms(
     auto xSize = inter.getSizeOfDS();
     auto qSize = 7 * (xSize / 6);
 
-    _dotjachq = std::make_shared<siconos::algebra::SimpleMatrix>(sizeY, qSize);
+    _dotjachq = std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, qSize);
   }
   // Compute the product of the time derivative of the Jacobian with dotq
   // we assume that dotq is up to date !
@@ -346,12 +346,12 @@ void siconos::modeling::NewtonEulerR::computeSecondOrderTimeDerivativeTerms(
   unsigned int k = 0;
   auto ySize = inter.dimension();
   auto xSize = inter.getSizeOfDS();
-  auto auxBloc = std::make_shared<siconos::algebra::SimpleMatrix>(ySize, 7);
-  auto auxBloc2 = std::make_shared<siconos::algebra::SimpleMatrix>(ySize, 6);
+  auto auxBloc = std::make_shared<siconos::algebra::SiconosMatrix>(ySize, 7);
+  auto auxBloc2 = std::make_shared<siconos::algebra::SiconosMatrix>(ySize, 6);
   std::vector<std::size_t> dimIndex(2);
   std::vector<std::size_t> startIndex(4);
 
-  auto jachqTdot = std::make_shared<siconos::algebra::SimpleMatrix>(ySize, xSize);
+  auto jachqTdot = std::make_shared<siconos::algebra::SiconosMatrix>(ySize, xSize);
   bool endl = false;
   for (auto ds = ds1; !endl; ds = ds2) {
     endl = (ds == ds2);

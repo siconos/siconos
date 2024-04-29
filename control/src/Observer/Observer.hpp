@@ -31,7 +31,7 @@
 #include <string>
 
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosSerialization.hpp"
 
 namespace siconos::modeling {

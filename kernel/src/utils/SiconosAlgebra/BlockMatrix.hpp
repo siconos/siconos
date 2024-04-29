@@ -121,8 +121,8 @@ class BlockMatrix {
   unsigned int numberOfBlocks(unsigned int i) const;
 
   /** return the address of the array of double values of the matrix
-   *  \param row position for the required block ->useless for SimpleMatrix
-   *  \param col position for the required block ->useless for SimpleMatrix
+   *  \param row position for the required block ->useless for SiconosMatrix
+   *  \param col position for the required block ->useless for SiconosMatrix
    *  \return double* : the pointer on the double array
    */
   double *getArray(unsigned int row = 0, unsigned int col = 0) const;
@@ -357,7 +357,7 @@ class BlockMatrix {
 
   //ACCEPT_STD_VISITORS();
 
-  // friend class SimpleMatrix;
+  // friend class SiconosMatrix;
   friend void scal(double, const SiconosMatrix &, SiconosMatrix &, bool);
   friend SiconosMatrix &operator*=(SiconosMatrix &m, const double &s);
   friend SiconosMatrix &operator/=(SiconosMatrix &m, const double &s);

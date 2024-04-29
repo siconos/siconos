@@ -22,13 +22,13 @@
 #include "SiconosMatrixOp.hpp"
 #include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 siconos::control::ExplicitLinearSMC::ExplicitLinearSMC(std::shared_ptr<ControlSensor> sensor)
     : CommonSMC(ActuatorType::ExplicitLinearSMC, sensor) {}
 
 siconos::control::ExplicitLinearSMC::ExplicitLinearSMC(
-    std::shared_ptr<ControlSensor> sensor, std::shared_ptr<siconos::algebra::SimpleMatrix> B)
+    std::shared_ptr<ControlSensor> sensor, std::shared_ptr<siconos::algebra::SiconosMatrix> B)
     : CommonSMC(ActuatorType::ExplicitLinearSMC, sensor, B) {}
 
 void siconos::control::ExplicitLinearSMC::initialize(

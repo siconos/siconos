@@ -26,7 +26,7 @@
 #include "LinearSensor.hpp"
 #include "RegularTwisting.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "Twisting.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
@@ -36,7 +36,7 @@
 CPPUNIT_TEST_SUITE_REGISTRATION(TwistingTest);
 
 void TwistingTest::setUp() {
-  _A = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);
+  _A = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
   _A->setZero();
   (*_A)(0, 1) = 1.0;
   (*_A)(1, 0) = 19.0;
@@ -47,14 +47,14 @@ void TwistingTest::setUp() {
   (*_x0)(0) = -15.0;
   (*_x0)(1) = 20.0;
 
-  _C = std::make_shared<siconos::algebra::SimpleMatrix>(2, 2);
+  _C = std::make_shared<siconos::algebra::SiconosMatrix>(2, 2);
   _C->setZero();
   _C->eye();
 
-  _B = std::make_shared<siconos::algebra::SimpleMatrix>(2, 1);
+  _B = std::make_shared<siconos::algebra::SiconosMatrix>(2, 1);
   (*_B)(1, 0) = 1.0;
 
-  _Csurface = std::make_shared<siconos::algebra::SimpleMatrix>(1, 2);
+  _Csurface = std::make_shared<siconos::algebra::SiconosMatrix>(1, 2);
   _Csurface->setZero();
   (*_Csurface)(0, 0) = 1.0;
   (*_Csurface)(0, 1) = 1.0;
@@ -66,7 +66,7 @@ void TwistingTest::initTwisting() {
   _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(_x0, _A);
   _sensor = std::make_shared<siconos::control::LinearSensor>(_DS, _C);
   _itw = std::make_shared<siconos::control::Twisting>(_sensor, 300., _beta, _h);
-  auto eye = std::make_shared<siconos::algebra::SimpleMatrix>(2, 2);
+  auto eye = std::make_shared<siconos::algebra::SiconosMatrix>(2, 2);
   eye->eye();
   _itw->setCsurface(eye);
 }
@@ -75,7 +75,7 @@ void TwistingTest::initRegularTwisting() {
   _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(_x0, _A);
   _sensor = std::make_shared<siconos::control::LinearSensor>(_DS, _C);
   _reg_itw = std::make_shared<siconos::control::RegularTwisting>(_sensor, 300., _beta);
-  auto eye = std::make_shared<siconos::algebra::SimpleMatrix>(2, 2);
+  auto eye = std::make_shared<siconos::algebra::SiconosMatrix>(2, 2);
   eye->eye();
   _reg_itw->setCsurface(eye);
 }
@@ -85,7 +85,7 @@ void TwistingTest::initExplicitTwisting() {
   _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(_x0, _A);
   _sensor = std::make_shared<siconos::control::LinearSensor>(_DS, _C);
   _expl_tw = std::make_shared<siconos::control::ExplicitTwisting>(_sensor, 300., _beta);
-  auto eye = std::make_shared<siconos::algebra::SimpleMatrix>(2, 2);
+  auto eye = std::make_shared<siconos::algebra::SiconosMatrix>(2, 2);
   eye->eye();
   _expl_tw->setCsurface(eye);
 }
@@ -147,7 +147,7 @@ void TwistingTest::test_Twisting_ZOH() {
   siconos::algebra::io::write("itw_ZOH.dat", data, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  siconos::algebra::SimpleMatrix dataRef(data);
+  siconos::algebra::SiconosMatrix dataRef(data);
   dataRef.zero();
   siconos::algebra::io::read("itw2.ref", dataRef);
   // it is a bad idea to compare solutions to an AVI that does not admit a unique solution
@@ -183,7 +183,7 @@ void TwistingTest::test_Twisting_Lsodar() {
   siconos::algebra::io::write("itw_Lsodar.dat", data, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  siconos::algebra::SimpleMatrix dataRef(data);
+  siconos::algebra::SiconosMatrix dataRef(data);
   dataRef.zero();
   siconos::algebra::io::read("itw2.ref", dataRef);
   // it is a bad idea to compare solutions to an AVI that does not admit a unique
@@ -220,7 +220,7 @@ void TwistingTest::test_RegularTwisting_ZOH() {
   siconos::algebra::io::write("reg_itw_ZOH.dat", data, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  siconos::algebra::SimpleMatrix dataRef(data);
+  siconos::algebra::SiconosMatrix dataRef(data);
   dataRef.zero();
   siconos::algebra::io::read("reg_itw.ref", dataRef);
   // it is a bad idea to compare solutions to an AVI that does not admit a
@@ -258,7 +258,7 @@ void TwistingTest::test_RegularTwisting_Lsodar() {
   siconos::algebra::io::write("reg_itw_Lsodar..dat", data, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  siconos::algebra::SimpleMatrix dataRef(data);
+  siconos::algebra::SiconosMatrix dataRef(data);
   dataRef.zero();
   siconos::algebra::io::read("reg_itw.ref", dataRef);
   // it is a bad idea to compare solutions to an AVI that does not

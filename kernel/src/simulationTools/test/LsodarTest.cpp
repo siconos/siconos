@@ -17,7 +17,7 @@
 */
 #include "LsodarTest.hpp"
 #include "EventsManager.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "FirstOrderLinearTIDS.hpp"
 #include "LsodarOSI.hpp"
 #include "SiconosVector.hpp"
@@ -45,7 +45,7 @@ static void computeA1(double, unsigned int, double*, double* A, unsigned int, do
 
 void LsodarTest::setUp()
 {
-  _A = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);// siconos::algebra::UBlasType::BLOCK);
+  _A = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);// siconos::algebra::UBlasType::BLOCK);
   _b = std::make_shared<siconos::algebra::SiconosVector>(_n);
   _x0 = std::make_shared<siconos::algebra::SiconosVector>(_n);
   _A->setZero();

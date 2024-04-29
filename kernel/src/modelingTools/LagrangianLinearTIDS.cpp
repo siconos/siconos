@@ -21,7 +21,7 @@
 #include "SiconosMatrixOp.hpp"
 #include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include <iostream>
@@ -56,7 +56,7 @@ void siconos::modeling::LagrangianLinearTIDS::initRhs(double time) {
     //  bloc10 of jacobianX is solution of Mass*Bloc10 = K
     if (!_rhsMatrices[jacobianXBloc10_])
       _rhsMatrices[jacobianXBloc10_] =
-          std::make_shared<siconos::algebra::SimpleMatrix>(-1 * *_K);
+          std::make_shared<siconos::algebra::SiconosMatrix>(-1 * *_K);
     algebra::solveInPlace(*_inverseMass, *_rhsMatrices[jacobianXBloc10_]);
   } else
     _rhsMatrices[jacobianXBloc10_] = _rhsMatrices[zeroMatrix_];
@@ -65,7 +65,7 @@ void siconos::modeling::LagrangianLinearTIDS::initRhs(double time) {
     //  bloc11 of jacobianX is solution of Mass*Bloc11 = C
     if (!_rhsMatrices[jacobianXBloc11_])
       _rhsMatrices[jacobianXBloc11_] =
-          std::make_shared<siconos::algebra::SimpleMatrix>(-1 * *_C);
+          std::make_shared<siconos::algebra::SiconosMatrix>(-1 * *_C);
     algebra::solveInPlace(*_inverseMass, *_rhsMatrices[jacobianXBloc11_]);
   } else
     _rhsMatrices[jacobianXBloc11_] = _rhsMatrices[zeroMatrix_];
@@ -82,7 +82,7 @@ void siconos::modeling::LagrangianLinearTIDS::setK(
     THROW_EXCEPTION("LagrangianLinearTIDS - setK: inconsistent input matrix size ");
 
   if (!_K)
-    _K = std::make_shared<siconos::algebra::SimpleMatrix>(newValue);
+    _K = std::make_shared<siconos::algebra::SiconosMatrix>(newValue);
   else
     *_K = newValue;
 }
@@ -100,7 +100,7 @@ void siconos::modeling::LagrangianLinearTIDS::setC(
     THROW_EXCEPTION("LagrangianLinearTIDS - setC: inconsistent input matrix size ");
 
   if (!_C)
-    _C = std::make_shared<siconos::algebra::SimpleMatrix>(newValue);
+    _C = std::make_shared<siconos::algebra::SiconosMatrix>(newValue);
   else
     *_C = newValue;
 }

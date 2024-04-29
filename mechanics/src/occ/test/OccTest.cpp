@@ -37,7 +37,7 @@
 #include "OccContactFace.hpp"
 #include "OccContactShape.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 CPPUNIT_TEST_SUITE_REGISTRATION(OccTest);
 
@@ -99,7 +99,7 @@ void OccTest::move() {
 
   auto position = std::make_shared<siconos::algebra::SiconosVector>(7);
   auto velocity = std::make_shared<siconos::algebra::SiconosVector>(6);
-  auto inertia = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
+  auto inertia = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
   position->zero();
   (*position)(0) = 1.;
   (*position)(1) = 2.;
@@ -158,7 +158,7 @@ void OccTest::distance() {
   auto position1 = std::make_shared<siconos::algebra::SiconosVector>(7);
   auto position2 = std::make_shared<siconos::algebra::SiconosVector>(7);
   auto velocity = std::make_shared<siconos::algebra::SiconosVector>(6);
-  auto inertia = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
+  auto inertia = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
   position1->zero();
   (*position1)(0) = 0.;
   (*position1)(1) = 0.;

@@ -24,7 +24,7 @@
 #define FIRSTORDERNONLINEARDS_H
 
 #include "SiconosMatrix.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "SiconosMemory.hpp"
 #include "DynamicalSystem.hpp"
@@ -32,7 +32,7 @@
 namespace siconos::algebra {
 
 // class SiconosMatrix;
-// class SimpleMatrix;
+// class SiconosMatrix;
 // class SiconosVector;
 // class SiconosMemory;
 }  // namespace siconos::algebra

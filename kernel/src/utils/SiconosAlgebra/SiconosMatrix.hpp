@@ -26,6 +26,7 @@
 // #include <boost/numeric/ublas/fwd.hpp>  // boost::numeric fwd
 #include "EigenInclude.hpp"
 #include <Eigen/Core>
+#include "SiconosVector.hpp"
 // #include <memory>                       // shared_ptr
 // #include <vector>
 
@@ -48,7 +49,7 @@ namespace siconos::algebra {
    Matrices can be either block or Simple.
    See Derived classes for details.
 
-   In Siconos, a "matrix" can be either a SimpleMatrix or a BlockMatrix, ie a container of
+   In Siconos, a "matrix" can be either a SiconosMatrix or a BlockMatrix, ie a container of
    several pointers to SiconosMatrix
 
    You can find an overview on how to build and use vectors and matrices in siconos users guide
@@ -67,6 +68,15 @@ using SiconosMatrix = Eigen::Matrix<double_t, Eigen::Dynamic, Eigen::Dynamic, Ei
    *  \return the number of non-zeros
    */
   bool fillTriplet(SiconosMatrix& m, CSparseMatrix *csc, size_t row_off, size_t col_off, double tol = 1e-14);
+  void normInfByColumn(const SiconosMatrix &m, SiconosVector &v);
+
+  bool checkSymmetry(SiconosMatrix &m, double tol);
+
+  void solveInPlace(SiconosMatrix &A, SiconosVector &B);
+  void solveInPlace(SiconosMatrix &A, SiconosMatrix &B);
+  void solveByLeastSquares(SiconosMatrix &A, SiconosVector &B);
+  void solveByLeastSquares(SiconosMatrix &A, SiconosMatrix &B);
+  siconos::algebra::SiconosMatrix readMatrixFromFile(const std::string &filename, bool ascii = true);
 
 }  // namespace siconos::algebra
 #endif

@@ -7,7 +7,7 @@
 
 MBTB_JointR::MBTB_JointR()
 {
-  _M.reset = std::make_shared<siconos::algebra::SimpleMatrix>(6,6));
+  _M.reset = std::make_shared<siconos::algebra::SiconosMatrix>(6,6));
   _F.reset(new SiconosVector(6));
 }
 

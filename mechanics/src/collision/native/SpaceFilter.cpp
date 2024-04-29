@@ -13,7 +13,7 @@
 #include "ExternalBody.hpp"
 #include "Interaction.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "Simulation.hpp"
 #include "SimulationGraphs.hpp"
 #include "SpaceFilter_impl.hpp"
@@ -1055,7 +1055,7 @@ double siconos::collision::native::SpaceFilter::minDistance(
 void siconos::collision::native::SpaceFilter::insertLine(double a, double b, double c) {
   size_t row;
   if (!_plans) {
-    _plans = std::make_shared<siconos::algebra::SimpleMatrix>(1, 6);
+    _plans = std::make_shared<siconos::algebra::SiconosMatrix>(1, 6);
     row = 0;
   } else {
     _plans->resize(_plans->size(0) + 1, 6);

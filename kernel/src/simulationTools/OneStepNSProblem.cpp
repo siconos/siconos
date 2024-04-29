@@ -24,7 +24,7 @@
 #include "NewMarkAlphaOSI.hpp"
 #include "OneStepIntegrator.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "Simulation.hpp"
 #include "Topology.hpp"
 #include "MoreauJeanBilbaoOSI.hpp"
@@ -91,7 +91,7 @@ void siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks(
       auto nslawSize = inter->nonSmoothLaw()->size();
       if (!indexSet->properties(*vi).block) {
         indexSet->properties(*vi).block =
-            std::make_shared<siconos::algebra::SimpleMatrix>(nslawSize, nslawSize);
+            std::make_shared<siconos::algebra::SiconosMatrix>(nslawSize, nslawSize);
       }
 
       if (!isLinear || !_hasBeenUpdated) {
@@ -132,7 +132,7 @@ void siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks(
       {
         if (!indexSet->properties(ed1).upper_block) {
           indexSet->properties(ed1).upper_block =
-              std::make_shared<siconos::algebra::SimpleMatrix>(nslawSize1, nslawSize2);
+              std::make_shared<siconos::algebra::SiconosMatrix>(nslawSize1, nslawSize2);
           if (ed2 != ed1)
             indexSet->properties(ed2).upper_block = indexSet->properties(ed1).upper_block;
         }
@@ -142,7 +142,7 @@ void siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks(
       {
         if (!indexSet->properties(ed1).lower_block) {
           indexSet->properties(ed1).lower_block =
-              std::make_shared<siconos::algebra::SimpleMatrix>(nslawSize1, nslawSize2);
+              std::make_shared<siconos::algebra::SiconosMatrix>(nslawSize1, nslawSize2);
           if (ed2 != ed1)
             indexSet->properties(ed2).lower_block = indexSet->properties(ed1).lower_block;
         }
@@ -165,7 +165,7 @@ void siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks(
         {
           if (!indexSet->properties(ed1).lower_block) {
             indexSet->properties(ed1).lower_block =
-                std::make_shared<siconos::algebra::SimpleMatrix>(
+                std::make_shared<siconos::algebra::SiconosMatrix>(
                     indexSet->properties(ed1).upper_block->size(1),
                     indexSet->properties(ed1).upper_block->size(0));
           }
@@ -176,7 +176,7 @@ void siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks(
           assert(itar < isrc);  // lower block has been computed
           if (!indexSet->properties(ed1).upper_block) {
             indexSet->properties(ed1).upper_block =
-                std::make_shared<siconos::algebra::SimpleMatrix>(
+                std::make_shared<siconos::algebra::SiconosMatrix>(
                     indexSet->properties(ed1).lower_block->size(1),
                     indexSet->properties(ed1).lower_block->size(0));
           }
@@ -201,7 +201,7 @@ void siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks(
       auto nslawSize = inter->nonSmoothLaw()->size();
       if (!indexSet->properties(*vi).block) {
         indexSet->properties(*vi).block =
-            std::make_shared<siconos::algebra::SimpleMatrix>(nslawSize, nslawSize);
+            std::make_shared<siconos::algebra::SiconosMatrix>(nslawSize, nslawSize);
       }
 
       if (!isLinear || !_hasBeenUpdated) {
@@ -262,7 +262,7 @@ void siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks(
         {
           if (!indexSet->properties(ed1).upper_block) {
             indexSet->properties(ed1).upper_block =
-                std::make_shared<siconos::algebra::SimpleMatrix>(nslawSize1, nslawSize2);
+                std::make_shared<siconos::algebra::SiconosMatrix>(nslawSize1, nslawSize2);
             initialized[indexSet->properties(ed1).upper_block] = false;
             if (ed2 != ed1)
               indexSet->properties(ed2).upper_block = indexSet->properties(ed1).upper_block;
@@ -273,7 +273,7 @@ void siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks(
         {
           if (!indexSet->properties(ed1).lower_block) {
             indexSet->properties(ed1).lower_block =
-                std::make_shared<siconos::algebra::SimpleMatrix>(nslawSize1, nslawSize2);
+                std::make_shared<siconos::algebra::SiconosMatrix>(nslawSize1, nslawSize2);
             initialized[indexSet->properties(ed1).lower_block] = false;
             if (ed2 != ed1)
               indexSet->properties(ed2).lower_block = indexSet->properties(ed1).lower_block;
@@ -348,7 +348,7 @@ void siconos::nonsmooth_formulations::OneStepNSProblem::initialize(
     _maxSize = simulation()->nonSmoothDynamicalSystem()->topology()->numberOfConstraints();
 }
 
-std::shared_ptr<siconos::algebra::SimpleMatrix>
+std::shared_ptr<siconos::algebra::SiconosMatrix>
 siconos::nonsmooth_formulations::OneStepNSProblem::getOSIMatrix(
     siconos::integrators::OneStepIntegrator& Osi,
     std::shared_ptr<siconos::modeling::DynamicalSystem> ds)
@@ -356,7 +356,7 @@ siconos::nonsmooth_formulations::OneStepNSProblem::getOSIMatrix(
   // Returns the integration matrix from one-step integrator and dynamical system.
 
   // Matrix depends on OSI type.
-  std::shared_ptr<siconos::algebra::SimpleMatrix> block;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> block;
 
   auto osiType = Osi.getType();
   // auto dsType = Type::value(*ds);
@@ -421,13 +421,13 @@ siconos::nonsmooth_formulations::OneStepNSProblem::getOSIMatrix(
 
       // DEBUG_EXPR(std::cout << (*Mass-*Mold).normInf() << std::endl;);
       /*Copy of the current mass matrix. */
-      block = std::make_shared<siconos::algebra::SimpleMatrix>(*Mass);
+      block = std::make_shared<siconos::algebra::SiconosMatrix>(*Mass);
     }
     else if (auto d = dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
       //   d->computeMass();
       //   d->mass()->resetFactorizationFlags();
       DEBUG_EXPR(d->mass()->display(););
-      block = std::make_shared<siconos::algebra::SimpleMatrix>(*(d->mass()));
+      block = std::make_shared<siconos::algebra::SiconosMatrix>(*(d->mass()));
     }
     else
       THROW_EXCEPTION(
@@ -437,7 +437,7 @@ siconos::nonsmooth_formulations::OneStepNSProblem::getOSIMatrix(
   // for ZeroOrderHoldOSI, the central block is Ad = \int exp{As} ds over t_k, t_{k+1}
   else if (osiType == siconos::integrators::IntegratorType::ZOHOSI) {
     if (!block)
-      block = std::make_shared<siconos::algebra::SimpleMatrix>(
+      block = std::make_shared<siconos::algebra::SiconosMatrix>(
           (static_cast<siconos::integrators::ZeroOrderHoldOSI&>(Osi)).Ad(ds));
     else
       *block = (static_cast<siconos::integrators::ZeroOrderHoldOSI&>(Osi)).Ad(ds);

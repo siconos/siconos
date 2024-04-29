@@ -18,7 +18,7 @@
 #include "EulerMoreauTest.hpp"
 #include "EventsManager.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
             if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -42,7 +42,7 @@ static void computeA1(double, unsigned int, double*, double* A, unsigned int, do
 
 void EulerMoreauTest::setUp()
 {
-  _A = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);
+  _A = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
   _b = std::make_shared<siconos::algebra::SiconosVector>(_n);
   _x0 = std::make_shared<siconos::algebra::SiconosVector>(_n);
   _A->setZero();

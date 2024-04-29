@@ -193,9 +193,9 @@ class EulerMoreauOSI : public OneStepIntegrator {
    *
    *  \param ds a pointer to DynamicalSystem, optional, default =
    *  nullptr. get W[0] in that case
-   *  \return SimpleMatrix
+   *  \return SiconosMatrix
    */
-  const siconos::algebra::SimpleMatrix getW(
+  const siconos::algebra::SiconosMatrix getW(
       std::shared_ptr<siconos::modeling::DynamicalSystem> ds = nullptr);
 
   /** get W corresponding to DynamicalSystem ds
@@ -203,7 +203,7 @@ class EulerMoreauOSI : public OneStepIntegrator {
    *  \param ds a pointer to DynamicalSystem
    *  \return pointer to a SiconosMatrix
    */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> W(
+  std::shared_ptr<siconos::algebra::SiconosMatrix> W(
       std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
   // -- WBoundaryConditions --
@@ -212,9 +212,9 @@ class EulerMoreauOSI : public OneStepIntegrator {
    *
    *  \param ds a pointer to DynamicalSystem, optional, default =
    *  nullptr. get WBoundaryConditions[0] in that case
-   *  \return SimpleMatrix
+   *  \return SiconosMatrix
    */
-  const siconos::algebra::SimpleMatrix getWBoundaryConditions(
+  const siconos::algebra::SiconosMatrix getWBoundaryConditions(
       std::shared_ptr<siconos::modeling::DynamicalSystem> ds =
           std::shared_ptr<siconos::modeling::DynamicalSystem>());
 
@@ -341,7 +341,7 @@ class EulerMoreauOSI : public OneStepIntegrator {
                 siconos::algebra::SiconosMatrix &W);
 
   void computeKhat(siconos::modeling::Interaction &inter, siconos::algebra::SiconosMatrix &m,
-                   std::vector<std::shared_ptr<siconos::algebra::SimpleMatrix>> &workM,
+                   std::vector<std::shared_ptr<siconos::algebra::SiconosMatrix>> &workM,
                    double h) const;
 
   /** compute WBoundaryConditionsMap[ds] EulerMoreauOSI matrix at time t

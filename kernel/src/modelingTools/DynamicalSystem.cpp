@@ -18,7 +18,7 @@
 #include "DynamicalSystem.hpp"
 #include "SiconosVector.hpp"
 #include "SiconosException.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosMemory.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_MESSAGES

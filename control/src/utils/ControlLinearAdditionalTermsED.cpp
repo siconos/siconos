@@ -21,7 +21,7 @@
 #include "DynamicalSystem.hpp"
 #include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 namespace siconos::control {
 
@@ -42,7 +42,7 @@ void siconos::control::ControlLinearAdditionalTermsED::init(
     }
     if (DSG0.pluginJacgx.hasKey(*dsvi)) {
       DSG0.jacgx[*dsvi] =
-          std::make_shared<siconos::algebra::SimpleMatrix>(ds.getx().size(), ds.getx().size());
+          std::make_shared<siconos::algebra::SiconosMatrix>(ds.getx().size(), ds.getx().size());
     }
   }
 }

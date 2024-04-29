@@ -226,9 +226,9 @@ class MoreauJeanOSI : public OneStepIntegrator {
    *
    *  \param ds a pointer to DynamicalSystem, optional, default =
    *  nullptr. get W[0] in that case
-   *  \return SimpleMatrix
+   *  \return SiconosMatrix
    */
-  const siconos::algebra::SimpleMatrix getW(
+  const siconos::algebra::SiconosMatrix getW(
       std::shared_ptr<siconos::modeling::DynamicalSystem> ds =
           std::shared_ptr<siconos::modeling::DynamicalSystem>());
 
@@ -237,7 +237,7 @@ class MoreauJeanOSI : public OneStepIntegrator {
    *  \param ds a pointer to DynamicalSystem
    *  \return pointer to a SiconosMatrix
    */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> W(
+  std::shared_ptr<siconos::algebra::SiconosMatrix> W(
       std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
   inline bool isWSymmetricDefinitePositive() const { return _isWSymmetricDefinitePositive; };
@@ -250,9 +250,9 @@ class MoreauJeanOSI : public OneStepIntegrator {
    *
    *  \param ds a pointer to DynamicalSystem, optional, default =
    *  nullptr. get WBoundaryConditions[0] in that case
-   *  \return SimpleMatrix
+   *  \return SiconosMatrix
    */
-  const siconos::algebra::SimpleMatrix getWBoundaryConditions(
+  const siconos::algebra::SiconosMatrix getWBoundaryConditions(
       std::shared_ptr<siconos::modeling::DynamicalSystem> ds =
           std::shared_ptr<siconos::modeling::DynamicalSystem>());
 
@@ -437,7 +437,7 @@ class MoreauJeanOSI : public OneStepIntegrator {
    *  \param Winverse the result in Winverse
    *  \param keepW
    */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> Winverse(
+  std::shared_ptr<siconos::algebra::SiconosMatrix> Winverse(
       std::shared_ptr<siconos::modeling::SecondOrderDS> ds, bool keepW = false);
 
   /** compute WBoundaryConditionsMap[ds] MoreauJeanOSI matrix at time t
@@ -550,7 +550,7 @@ class MoreauJeanOSI : public OneStepIntegrator {
   /** Compute the matrix of work of forces by ds
      \return SP::Siconosmatrix
    */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> computeWorkForces();
+  std::shared_ptr<siconos::algebra::SiconosMatrix> computeWorkForces();
 
   /** Displays the data of the MoreauJeanOSI's integrator
    */

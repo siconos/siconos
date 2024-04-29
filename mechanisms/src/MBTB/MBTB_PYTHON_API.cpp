@@ -135,7 +135,7 @@ void MBTB_ContactLoadCADFile(unsigned int contactId,const std::string& CADFile1,
 #endif
 }
 void _MBTB_BodyBuildComputeInitPosition(unsigned int numDS,   double mass,
-                                        SP::SiconosVector initPos, SP::SiconosVector modelCenterMass,SP::SimpleMatrix inertialMatrix, SP::SiconosVector& q10,SP::SiconosVector& v10)
+                                        SP::SiconosVector initPos, SP::SiconosVector modelCenterMass,SP::SiconosMatrix inertialMatrix, SP::SiconosVector& q10,SP::SiconosVector& v10)
 {
   assert(sNbOfBodies > numDS &&"MBTB_BodyBuild numDS out of range.");
   /*2)  move the cad model to the initial position*/
@@ -205,7 +205,7 @@ void _MBTB_BodyBuildComputeInitPosition(unsigned int numDS,   double mass,
   CADMBTB_moveGraphicalModelFromModel(numDS,numDS);
 
   // //In current version I = Id3
-  // sI[numDS].reset = std::make_shared<siconos::algebra::SimpleMatrix>(3,3));
+  // sI[numDS].reset = std::make_shared<siconos::algebra::SiconosMatrix>(3,3));
   // sI[numDS]->zero();
   // //sI[numDS]->setValue(0,0,sMass[numDS]);sI[numDS]->setValue(1,1,sMass[numDS]);sI[numDS]->setValue(2,2,sMass[numDS]);
   // sI[numDS]->setValue(0,0,sMassMatrix[9*numDS+0]*sMassMatrixScale[numDS]);
@@ -225,7 +225,7 @@ void _MBTB_BodyBuildComputeInitPosition(unsigned int numDS,   double mass,
 /*Build the MBTB_body and set to the initial postion.*/
 void MBTB_BodyBuild(unsigned int numDS, const std::string& BodyName,  double mass,
                     SP::SiconosVector initPos, SP::SiconosVector modelCenterMass,
-                    SP::SimpleMatrix inertialMatrix,
+                    SP::SiconosMatrix inertialMatrix,
                     const std::string& pluginFextLib,  const std::string& pluginFextFct,
                     const std::string& pluginMextLib,  const std::string& pluginMextFct,
                     const std::string& pluginFintLib,  const std::string& pluginFintFct,
@@ -375,7 +375,7 @@ void MBTB_JointBuild(unsigned int numJ,const std::string& JointName,
   sJointType[numJ]=jointType;
   sJointIndexDS[2*numJ]=indexDS1;
   sJointIndexDS[2*numJ+1]=indexDS2;
-  /*BUILD H SimpleMatrix and NSLAW*/
+  /*BUILD H SiconosMatrix and NSLAW*/
   if(jointType == PIVOT_0 || jointType == PIVOT_1)
   {
     nbDS=1;
@@ -421,7 +421,7 @@ void MBTB_JointBuild(unsigned int numJ,const std::string& JointName,
 
   lNbEq = sJointRelations[numJ]->_jointR->numberOfConstraints();
 
-  SP::SimpleMatrix lH = std::make_shared<siconos::algebra::SimpleMatrix>(lNbEq,nbDS*qDim));
+  SP::SiconosMatrix lH = std::make_shared<siconos::algebra::SiconosMatrix>(lNbEq,nbDS*qDim));
   lH->zero();
   SP::EqualityConditionNSL lNSL(new EqualityConditionNSL(lNbEq));
 

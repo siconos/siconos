@@ -48,7 +48,7 @@ class LagrangianCompliantLinearTIR : public LagrangianR {
   ACCEPT_SERIALIZATION(LagrangianCompliantLinearTIR);
 
   /** F matrix, coefficient of z */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _F{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _F{nullptr};
 
   /** e*/
   std::shared_ptr<siconos::algebra::SiconosVector> _e{nullptr};
@@ -62,16 +62,16 @@ class LagrangianCompliantLinearTIR : public LagrangianR {
    *  \param C the matrix C
    *  \param D the matrix D
    */
-  LagrangianCompliantLinearTIR(std::shared_ptr<siconos::algebra::SimpleMatrix> C,
-                               std::shared_ptr<siconos::algebra::SimpleMatrix> D);
+  LagrangianCompliantLinearTIR(std::shared_ptr<siconos::algebra::SiconosMatrix> C,
+                               std::shared_ptr<siconos::algebra::SiconosMatrix> D);
 
   /** create the Relation from a set of data
    *  \param C the matrix C
    *  \param D the matrix D
    *  \param e the vector e
    */
-  LagrangianCompliantLinearTIR(std::shared_ptr<siconos::algebra::SimpleMatrix> C,
-                               std::shared_ptr<siconos::algebra::SimpleMatrix> D,
+  LagrangianCompliantLinearTIR(std::shared_ptr<siconos::algebra::SiconosMatrix> C,
+                               std::shared_ptr<siconos::algebra::SiconosMatrix> D,
                                std::shared_ptr<siconos::algebra::SiconosVector> e);
 
   /** create the Relation from a set of data
@@ -80,9 +80,9 @@ class LagrangianCompliantLinearTIR : public LagrangianR {
    *  \param F the matrix F
    *  \param e the vector e
    */
-  LagrangianCompliantLinearTIR(std::shared_ptr<siconos::algebra::SimpleMatrix> C,
-                               std::shared_ptr<siconos::algebra::SimpleMatrix> D,
-                               std::shared_ptr<siconos::algebra::SimpleMatrix> F,
+  LagrangianCompliantLinearTIR(std::shared_ptr<siconos::algebra::SiconosMatrix> C,
+                               std::shared_ptr<siconos::algebra::SiconosMatrix> D,
+                               std::shared_ptr<siconos::algebra::SiconosMatrix> F,
                                std::shared_ptr<siconos::algebra::SiconosVector> e);
 
   /** destructor
@@ -132,7 +132,7 @@ class LagrangianCompliantLinearTIR : public LagrangianR {
   /** set C to pointer newPtr
    *  \param newPtr a SP to plugged matrix
    */
-  inline void setCPtr(std::shared_ptr<siconos::algebra::SimpleMatrix> newPtr)
+  inline void setCPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr)
   {
     _jachq = newPtr;
   }
@@ -142,12 +142,12 @@ class LagrangianCompliantLinearTIR : public LagrangianR {
   /** get D
    *  \return pointer on a plugged matrix
    */
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> D() const { return _jachlambda; }
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> D() const { return _jachlambda; }
 
   /** set D to pointer newPtr
    * \param newPtr a SP to plugged matrix
    */
-  inline void setDPtr(std::shared_ptr<siconos::algebra::SimpleMatrix> newPtr)
+  inline void setDPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr)
   {
     _jachlambda = newPtr;
   }
@@ -157,12 +157,12 @@ class LagrangianCompliantLinearTIR : public LagrangianR {
   /** get F
    *  \return pointer on a plugged matrix
    */
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> F() const { return _F; }
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> F() const { return _F; }
 
   /** set F to pointer newPtr
    * \param newPtr a SP to plugged matrix
    */
-  inline void setFPtr(std::shared_ptr<siconos::algebra::SimpleMatrix> newPtr) { _F = newPtr; }
+  inline void setFPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr) { _F = newPtr; }
 
   // -- e --
 
@@ -177,7 +177,7 @@ class LagrangianCompliantLinearTIR : public LagrangianR {
   inline void setEPtr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) { _e = newPtr; }
 
   /** get a pointer on matrix Jach[index]
-   *  \return a pointer on a SimpleMatrix
+   *  \return a pointer on a SiconosMatrix
    */
 
   /** print the data to the screen

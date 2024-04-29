@@ -26,7 +26,7 @@
 #include "EventDriven.hpp"
 #include "EventsManager.hpp"
 #include "LsodarOSI.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "Topology.hpp"
 
 siconos::control::ControlLsodarSimulation::ControlLsodarSimulation(double t0, double T,

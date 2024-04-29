@@ -25,13 +25,13 @@
 #include <memory>
 #include <string>
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "BlockVector.hpp"
 
 #include "SiconosSerialization.hpp"  // For ACCEPT_SERIALIZATION
 
 namespace siconos::algebra {
-// class SimpleMatrix;
+// class SiconosMatrix;
 // class SiconosVector;
 // class BlockVector;
 }  // namespace siconos::algebra
@@ -284,9 +284,9 @@ class Relation {
    */
   virtual void computeInput(double time, Interaction &inter, unsigned int level = 0) = 0;
 
-  virtual std::shared_ptr<siconos::algebra::SimpleMatrix> C() const = 0;
+  virtual std::shared_ptr<siconos::algebra::SiconosMatrix> C() const = 0;
 
-  virtual std::shared_ptr<siconos::algebra::SimpleMatrix> H() const = 0;
+  virtual std::shared_ptr<siconos::algebra::SiconosMatrix> H() const = 0;
 
   /**
      return true if the relation is linear.

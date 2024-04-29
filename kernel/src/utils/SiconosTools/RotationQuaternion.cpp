@@ -25,12 +25,12 @@
 #include <Eigen/Geometry>
 
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "siconos_debug.h"
 
 void siconos::geometry::computeRotationMatrix(
     double q0, double q1, double q2, double q3,
-    siconos::algebra::SimpleMatrix &rotationMatrix) {
+    siconos::algebra::SiconosMatrix &rotationMatrix) {
   /* Brute force version by multiplication of quaternion
    */
   // boost::math::quaternion<double>    quatQ(q0, q1, q2, q3);
@@ -76,16 +76,16 @@ void siconos::geometry::quaternionRotate(double q0, double q1, double q2, double
   Eigen::Map<algebra::SiconosVector3> v3(v.data());
 
   // First way. Using the rotation matrix
-  // std::shared_ptr<siconos::algebra::SimpleMatrix> rotationMatrix(new
-  // siconos::algebra::SimpleMatrix(3,3)); siconos::algebra::SiconosVector tmp(3);
+  // std::shared_ptr<siconos::algebra::SiconosMatrix> rotationMatrix(new
+  // siconos::algebra::SiconosMatrix(3,3)); siconos::algebra::SiconosVector tmp(3);
   // ::computeRotationMatrix(q0,q1,q2,q3, rotationMatrix);
   // prod(*rotationMatrix, v, tmp);
   // v = tmp;
   // return;
 
   // Second way. Using the transpose of the rotation matrix
-  // std::shared_ptr<siconos::algebra::SimpleMatrix> rotationMatrix(new
-  // siconos::algebra::SimpleMatrix(3,3)); siconos::algebra::SiconosVector tmp(3);
+  // std::shared_ptr<siconos::algebra::SiconosMatrix> rotationMatrix(new
+  // siconos::algebra::SiconosMatrix(3,3)); siconos::algebra::SiconosVector tmp(3);
   // ::computeRotationMatrix(q0,-q1,-q2,-q3, rotationMatrix);
   // prod(v, *rotationMatrix, tmp);
   // v = tmp;
@@ -121,10 +121,10 @@ void siconos::geometry::quaternionRotate(double q0, double q1, double q2, double
 // }
 
 void siconos::geometry::quaternionRotate(double q0, double q1, double q2, double q3,
-                                         siconos::algebra::SimpleMatrix &m) {
+                                         siconos::algebra::SiconosMatrix &m) {
   DEBUG_BEGIN(
       "::quaternionRotate(double q0, double q1, double q2, double q3, "
-      "std::shared_ptr<siconos::algebra::SimpleMatrix> m )\n");
+      "std::shared_ptr<siconos::algebra::SiconosMatrix> m )\n");
   DEBUG_EXPR(m->display(););
   DEBUG_PRINTF("( q0 = %16.12e,  q1 = %16.12e,  q2= %16.12e,  q3= %16.12e )\n", q0, q1, q2,
                q3);
@@ -132,7 +132,7 @@ void siconos::geometry::quaternionRotate(double q0, double q1, double q2, double
   // Direct computation with cross product for each column
   assert(m.size(0) == 3 &&
          "::quaternionRotate(double q0, double q1, double q2, double q3, "
-         "std::shared_ptr<siconos::algebra::SimpleMatrix> m ) m must have 3 rows");
+         "std::shared_ptr<siconos::algebra::SiconosMatrix> m ) m must have 3 rows");
   algebra::SiconosVector3 t, tmp, qvect, v;
   qvect(0) = q1;
   qvect(1) = q2;
@@ -153,7 +153,7 @@ void siconos::geometry::quaternionRotate(double q0, double q1, double q2, double
   DEBUG_EXPR(m->display(););
   DEBUG_END(
       "::quaternionRotate(double q0, double q1, double q2, double q3, "
-      "std::shared_ptr<siconos::algebra::SimpleMatrix> m )\n");
+      "std::shared_ptr<siconos::algebra::SiconosMatrix> m )\n");
 }
 
 void siconos::geometry::quaternionRotate(siconos::algebra::SiconosVector &q,
@@ -169,15 +169,15 @@ void siconos::geometry::quaternionRotate(siconos::algebra::SiconosVector &q,
 }
 
 void siconos::geometry::quaternionRotate(siconos::algebra::SiconosVector &q,
-                                         siconos::algebra::SimpleMatrix &m) {
+                                         siconos::algebra::SiconosMatrix &m) {
   DEBUG_BEGIN(
       "::quaternionRotate(std::shared_ptr<siconos::algebra::SiconosVector> q, "
-      "std::shared_ptr<siconos::algebra::SimpleMatrix> m )\n");
+      "std::shared_ptr<siconos::algebra::SiconosMatrix> m )\n");
   siconos::geometry::quaternionRotate(q(3), q(4), q(5),
                                       q(6), m);
   DEBUG_END(
       "::quaternionRotate(std::shared_ptr<siconos::algebra::SiconosVector> q, "
-      "std::shared_ptr<siconos::algebra::SimpleMatrix> m)\n");
+      "std::shared_ptr<siconos::algebra::SiconosMatrix> m)\n");
 }
 
 void siconos::geometry::changeFrameAbsToBody(const siconos::algebra::SiconosVector& q,
@@ -205,15 +205,15 @@ void siconos::geometry::changeFrameAbsToBody(
 }
 void siconos::geometry::changeFrameAbsToBody(
     siconos::algebra::SiconosVector &q,
-    siconos::algebra::SimpleMatrix &m) {
+    siconos::algebra::SiconosMatrix &m) {
   DEBUG_BEGIN(
       "::changeFrameAbsToBody(std::shared_ptr<siconos::algebra::SiconosVector> q, "
-      "std::shared_ptr<siconos::algebra::SimpleMatrix> m )\n");
+      "std::shared_ptr<siconos::algebra::SiconosMatrix> m )\n");
   siconos::geometry::quaternionRotate(q(3), -q(4), -q(5),
                                       -q(6), m);
   DEBUG_END(
       "::changeFrameAbsToBody(std::shared_ptr<siconos::algebra::SiconosVector> q, "
-      "std::shared_ptr<siconos::algebra::SimpleMatrix> m )\n");
+      "std::shared_ptr<siconos::algebra::SiconosMatrix> m )\n");
 }
 
 void siconos::geometry::changeFrameBodyToAbs(const siconos::algebra::SiconosVector& q,
@@ -241,26 +241,26 @@ void siconos::geometry::changeFrameBodyToAbs(
 }
 void siconos::geometry::changeFrameBodyToAbs(
     siconos::algebra::SiconosVector &q,
-    siconos::algebra::SimpleMatrix &m) {
+    siconos::algebra::SiconosMatrix &m) {
   DEBUG_BEGIN(
       "::changeFrameBodyToAbs(std::shared_ptr<siconos::algebra::SiconosVector> q, "
-      "std::shared_ptr<siconos::algebra::SimpleMatrix> m )\n");
+      "std::shared_ptr<siconos::algebra::SiconosMatrix> m )\n");
   siconos::geometry::quaternionRotate(q(3), q(4), q(5),
                                       q(6), m);
   DEBUG_END(
       "::changeFrameBodyToAbs(std::shared_ptr<siconos::algebra::SiconosVector> q, "
-      "std::shared_ptr<siconos::algebra::SimpleMatrix> m )\n");
+      "std::shared_ptr<siconos::algebra::SiconosMatrix> m )\n");
 }
 
 void siconos::geometry::computeRotationMatrix(
     siconos::algebra::SiconosVector &q,
-    siconos::algebra::SimpleMatrix &rotationMatrix) {
+    siconos::algebra::SiconosMatrix &rotationMatrix) {
   siconos::geometry::computeRotationMatrix(q(3), q(4), q(5),
                                            q(6), rotationMatrix);
 }
 void siconos::geometry::computeRotationMatrixTransposed(
     siconos::algebra::SiconosVector &q,
-    siconos::algebra::SimpleMatrix &rotationMatrix) {
+    siconos::algebra::SiconosMatrix &rotationMatrix) {
   siconos::geometry::computeRotationMatrix(q(3), -q(4), -q(5),
                                            -q(6), rotationMatrix);
 }

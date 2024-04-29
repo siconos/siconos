@@ -27,7 +27,7 @@
 #include "SiconosException.hpp"
 #include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 siconos::modeling::LagrangianCompliantR::LagrangianCompliantR(
     const std::string& pluginh, const std::string& pluginJacobianhq,
@@ -52,7 +52,7 @@ void siconos::modeling::LagrangianCompliantR::initialize(Interaction& inter) {
   auto sizeY = inter.dimension();
 
   if (!_jachlambda)
-    _jachlambda = std::make_shared<siconos::algebra::SimpleMatrix>(sizeY, sizeY);
+    _jachlambda = std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeY);
   else
     _jachlambda->resize(sizeY, sizeY);
 }

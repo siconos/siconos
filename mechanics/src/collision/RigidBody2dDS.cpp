@@ -21,7 +21,7 @@
 #include "SiconosContactor.hpp"
 #include "SiconosVector.hpp"
 #include "SiconosVisitor.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 siconos::collision::RigidBody2dDS::RigidBody2dDS(
     std::shared_ptr<siconos::algebra::SiconosVector> position,
@@ -44,7 +44,7 @@ siconos::collision::RigidBody2dDS::RigidBody2dDS(
     std::shared_ptr<siconos::algebra::SiconosVector> position,
     std::shared_ptr<siconos::algebra::SiconosVector> velocity, double mass, double inertia)
     : LagrangianLinearTIDS(position, velocity,
-                           std::make_shared<siconos::algebra::SimpleMatrix>(3, 3)),
+                           std::make_shared<siconos::algebra::SiconosMatrix>(3, 3)),
       _scalarMass(mass),
       _contactors(std::make_shared<siconos::collision::SiconosContactorSet>())
 {

@@ -34,7 +34,7 @@
 // struct siconos::integrators::OneStepIntegrator::IterationMatrixVisitor : public
 // siconos::internal::SiconosVisitor {
 
-//   std::shared_ptr<siconos::algebra::SimpleMatrix> visit(const MoreauJeanOSI& osi,
+//   std::shared_ptr<siconos::algebra::SiconosMatrix> visit(const MoreauJeanOSI& osi,
 //   std::shared_ptr<siconos::modeling::DynamicalSystem> ds) const
 //   {
 //     return osi.W(ds);

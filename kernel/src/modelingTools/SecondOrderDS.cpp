@@ -19,7 +19,7 @@
 
 #include "BoundaryCondition.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -39,7 +39,7 @@ void siconos::modeling::SecondOrderDS::setBoundaryConditions(
 };
 
 void siconos::modeling::SecondOrderDS::setMassPtr(
-    std::shared_ptr<siconos::algebra::SimpleMatrix> newPtr) {
+    std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr) {
   _mass = newPtr;
   _hasConstantMass = true;
 }

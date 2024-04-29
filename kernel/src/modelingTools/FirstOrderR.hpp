@@ -72,21 +72,21 @@ class FirstOrderR : public Relation {
    */
 
   /** A matrix to store the constant Jacobian of h(t, X, lambda, Z) w.r.t X */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _C{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _C{nullptr};
 
   /** A matrix to store the constant Jacobian of h(t, X, lambda, Z) w.r.t lambda
    */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _D{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _D{nullptr};
 
   /** A matrix to store the constant Jacobian of h(t, X, lambda, Z) w.r.t Z */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _F{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _F{nullptr};
 
   /** A matrix to store the constant Jacobian of g(t, X, lambda, Z) w.r.t lambda
    */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _B{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _B{nullptr};
 
   /** A matrix to store the constant Jacobian of g(t, X, lambda, Z) w.r.t X */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _K{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _K{nullptr};
 
  public:
   /** destructor
@@ -103,62 +103,62 @@ class FirstOrderR : public Relation {
    *
    *  \param newC the C matrix
    */
-  inline void setCPtr(std::shared_ptr<siconos::algebra::SimpleMatrix> newC) { _C = newC; }
+  inline void setCPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newC) { _C = newC; }
 
   /** set B to pointer newB
    *
    *  \param newB the B matrix
    */
-  inline void setBPtr(std::shared_ptr<siconos::algebra::SimpleMatrix> newB) { _B = newB; }
+  inline void setBPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newB) { _B = newB; }
 
   /** set D to pointer newPtr
    *
    *  \param newD the D matrix
    */
-  inline void setDPtr(std::shared_ptr<siconos::algebra::SimpleMatrix> newD) { _D = newD; }
+  inline void setDPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newD) { _D = newD; }
 
   /** set F to pointer newPtr
    *
    *  \param newF the F matrix
    */
-  inline void setFPtr(std::shared_ptr<siconos::algebra::SimpleMatrix> newF) { _F = newF; }
+  inline void setFPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newF) { _F = newF; }
 
   /** get C
    *
    *  \return C matrix
    */
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> C() const override { return _C; }
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> C() const override { return _C; }
   // Note FP: final would be better than override but swig cannot handle it.
 
   /** get H
    *
    *  \return C matrix
    */
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> H() const override { return _C; }
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> H() const override { return _C; }
 
   /** get D
    *
    *  \return D matrix
    */
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> D() const { return _D; }
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> D() const { return _D; }
 
   /** get F
    *
    *  \return F matrix
    */
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> F() const { return _F; }
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> F() const { return _F; }
 
   /** get B
    *
    *  \return B matrix
    */
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> B() const { return _B; }
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> B() const { return _B; }
 
   /** get K
    *
    *  \return K matrix
    */
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> K() const { return _K; }
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> K() const { return _K; }
   // Visitors stuff
   void accept(std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const override;
 };

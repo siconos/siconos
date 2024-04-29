@@ -30,7 +30,7 @@
 #include "SiconosConfig.h"  // for HAS_FORTRAN
 #include "SiconosException.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "Topology.hpp"
 
 // #define DEBUG_NOCOLOR

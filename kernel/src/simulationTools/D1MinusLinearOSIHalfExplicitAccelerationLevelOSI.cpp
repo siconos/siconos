@@ -30,7 +30,7 @@
 #include "SiconosPointers.hpp"        // For createSPtr
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"  // for scal
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "Simulation.hpp"
 #include "Tools.hpp"  // for enum_to_string
 #include "Topology.hpp"
@@ -698,7 +698,7 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitAccele
     DEBUG_EXPR(osnsp_rhs.display(););
 
     // in osnsp_rhs corrections have to be added
-    auto ID = std::make_shared<siconos::algebra::SimpleMatrix>(sizeY, sizeY);
+    auto ID = std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeY);
     ID->eye();
 
     std::vector<std::size_t> xcoord = {0, sizeY, 0, sizeY, 0, sizeY, 0, sizeY};
@@ -765,7 +765,7 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitAccele
 
     if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]).get() == osnsp) {
       // in osnsp_rhs corrections have to be added
-      auto ID = std::make_shared<siconos::algebra::SimpleMatrix>(sizeY, sizeY);
+      auto ID = std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeY);
       ID->eye();
 
       std::vector<std::size_t> xcoord = {0, sizeY, 0, sizeY, 0, sizeY, 0, sizeY};

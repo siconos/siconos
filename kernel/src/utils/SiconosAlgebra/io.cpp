@@ -25,7 +25,7 @@
 #include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 // #include <boost/numeric/ublas/io.hpp>
 
 bool siconos::algebra::io::read(const std::string &fileName, SiconosVector &m,
@@ -164,11 +164,11 @@ bool siconos::algebra::io::write(const std::string &filename,
 }
 
 double siconos::algebra::io::compareRefFile(
-    const SimpleMatrix &data, std::string filename, double epsilon,
+    const SiconosMatrix &data, std::string filename, double epsilon,
     std::vector<int> index, const std::ios_base::openmode mode, bool verbose) {
-  auto ref = std::make_shared<SimpleMatrix>(0, 0);
+  auto ref = std::make_shared<SiconosMatrix>(0, 0);
   bool compare = false;
-  // SimpleMatrix ref{0, 0};
+  // SiconosMatrix ref{0, 0};
   try {
     compare = read(filename, *ref, mode);
   } catch (...) {
