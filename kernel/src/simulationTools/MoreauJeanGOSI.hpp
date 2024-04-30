@@ -81,6 +81,11 @@ class MoreauJeanGOSI : public MoreauJeanOSI {
   /** Perform the integration of the dynamical systems linked to this integrator
    *  without taking into account the nonsmooth input (_r or _p)
    */
+
+  void applyBoundaryConditions(siconos::modeling::SecondOrderDS &d,
+                               siconos::algebra::SiconosVector &residu,
+                               siconos::graphs::DynamicalSystemsGraph::VIterator dsi, double t);
+
   void computeFreeState() override;
 
   /** integrate the system, between tinit and tend (->iout=true), with possible

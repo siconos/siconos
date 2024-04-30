@@ -18,6 +18,7 @@
 #include "MoreauJeanGOSI.hpp"
 
 #include "BlockVector.hpp"
+#include "BoundaryCondition.hpp"
 #include "Interaction.hpp"
 #include "LagrangianLinearTIDS.hpp"
 #include "NewtonEulerDS.hpp"
@@ -214,7 +215,7 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
       auto K = d->K();
       if (K) {
         coeff = -h * h * _theta;
-        siconos::algebra::prod(coeff, *K, vold, residu,
+        siconos::algebra::prod(coeff, *K, vold, free_rhs,
                                false);                          // free_rhs += -h^2*_theta*K*vi
         siconos::algebra::prod(-h, *K, qold, free_rhs, false);  // free_rhs += -h*K*qi
       }
@@ -231,12 +232,13 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
         scal(coeff, *(d->fExt()), free_rhs, false);  // free_rhs += h*_theta * fext(ti+1)
       }
       DEBUG_EXPR(free_rhs.display());
+      applyBoundaryConditions(*d, free_rhs, dsi, t);
 
-      if (d->boundaryConditions()) {
-        THROW_EXCEPTION(
-            "siconos::integrators::MoreauJeanGOSI::computeResidu - boundary conditions not "
-            "yet implemented for this type of Dynamical system\n");
-      }
+//      if (d->boundaryConditions()) {
+//        THROW_EXCEPTION(
+//            "siconos::integrators::MoreauJeanGOSI::computeResidu - boundary conditions not "
+//            "yet implemented for this type of Dynamical system\n");
+//      }
 
       // residu = -1.0*free_rhs;
       // siconos::algebra::prod(1.0, W, *v, residu, false);
@@ -412,6 +414,47 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
     if (normResidu > maxResidu) maxResidu = normResidu;
   }
   return maxResidu;
+}
+
+void siconos::integrators::MoreauJeanGOSI::applyBoundaryConditions(
+    siconos::modeling::SecondOrderDS &d,
+    siconos::algebra::SiconosVector &residu,
+    siconos::graphs::DynamicalSystemsGraph::VIterator dsi, double t) {
+    std::cout << " In applyBoundaryConditions " << std::endl;
+
+  DEBUG_BEGIN(
+      "siconos::integrators::MoreauJeanOSI::applyBoundaryConditions(...)\n");
+  if (d.boundaryConditions()) {
+    d.boundaryConditions()->computePrescribedVelocity(t);
+
+    unsigned int columnindex = 0;
+    auto &WBoundaryConditions =
+        *_dynamicalSystemsGraph->properties(*dsi).WBoundaryConditions;
+    auto columntmp =
+        std::make_shared<siconos::algebra::SiconosVector>(d.dimension());
+    auto dsType = siconos::types::type_value(d);
+
+    for (const auto itindex : d.boundaryConditions()->velocityIndices()) {
+        std::cout << "Iterating BCs with GOSI: " << itindex << " val: " << d.boundaryConditions()->prescribedVelocity()->getValue(columnindex) <<std::endl;
+      double DeltaPrescribedVelocity =
+          d.boundaryConditions()->prescribedVelocity()->getValue(columnindex);
+      DEBUG_PRINTF(
+          "index  = %i, value = %e\n", *itindex,
+          d.boundaryConditions()->prescribedVelocity()->getValue(columnindex));
+      DEBUG_PRINTF("DeltaPrescribedVelocity = %e\n", DeltaPrescribedVelocity);
+      WBoundaryConditions.getCol(columnindex, *columntmp);
+      residu -= *columntmp * (DeltaPrescribedVelocity);
+
+      residu.setValue(
+          itindex, -columntmp->getValue(itindex) * (DeltaPrescribedVelocity));
+
+      columnindex++;
+    }
+  }
+  std::cout << " Out applyBoundaryConditions " << std::endl;
+
+  DEBUG_END(
+      "siconos::integrators::MoreauJeanOSI::applyBoundaryConditions(...)\n");
 }
 
 void siconos::integrators::MoreauJeanGOSI::computeFreeState() {

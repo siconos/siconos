@@ -314,7 +314,60 @@ bool siconos::algebra::SiconosMatrix::fillTriplet(CSparseMatrix* triplet, size_t
                              std::numeric_limits<double>::epsilon());
       }
     }
-  } else {
+  } else if (_num == UblasType::SPARSE)  // sparse
+  {
+    std::cout << "In fillTriplet Sparse !" << std::endl;
+    const auto& colPtr = sparse()->index1_data();
+    const auto& indx = sparse()->index2_data();
+    const ublas::unbounded_array<double>& vals = sparse()->value_data();
+
+    size_t nnz = sparse()->nnz();
+
+    assert(ptr.size() == ncol + 1);
+    assert(indx.size() == nnz);
+    assert(vals.size() == nnz);
+//    std::cout << "nrow:  " << nrow << " ncol:  " << ncol << std::endl;
+
+//    std::cout << "non zero element (nnz) = " << sparse()->nnz() << "\n";
+//    std::cout << "non zero element (nnz_capacity) = " << sparse()->nnz_capacity() << "\n";
+//    std::cout << "filled1 = " << sparse()->filled1() << "\n";
+//    std::cout << "filled2 = " << sparse()->filled2() << "\n";
+
+//    std::cout << "index_data1 = [ ";
+//    size_t i = 0;
+//    for (i = 0; i < sparse()->filled1() - 1; i++) {
+//      std::cout << sparse()->index1_data()[i] << ", ";
+//    }
+//    std::cout << sparse()->index1_data()[i] << "]"
+//              << "\n";
+
+//    std::cout << "index_data2 = [";
+//    for (i = 0; i < sparse()->filled2() - 1; i++) {
+//      std::cout << sparse()->index2_data()[i] << ", ";
+//    }
+//    std::cout << sparse()->index2_data()[i] << "]"
+//              << "\n";
+
+//    std::cout << "value_data = [";
+//    for (i = 0; i < sparse()->filled2() - 1; i++) {
+//      std::cout << sparse()->value_data()[i] << ", ";
+//    }
+//    std::cout << sparse()->value_data()[i] << "]"
+//              << "\n";
+    size_t rowID,colID;
+    double val;
+    for (size_t col = 1; col < sparse()->filled1(); ++col) {
+        for (size_t i = colPtr[col-1]; i < colPtr[col]; ++i)
+        {
+            val = vals[i];
+            rowID = row_off + indx[i];
+            colID = col_off + col-1;
+            CSparseMatrix_zentry(triplet, rowID, colID, val,
+                                 std::numeric_limits<double>::epsilon());
+        }
+    }
+  }
+  else {
     THROW_EXCEPTION("not implemented for the given matrix type");
   }
 
