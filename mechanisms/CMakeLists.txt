@@ -28,11 +28,8 @@ set(${COMPONENT}_DIRS
   src/MBTB
   src/TIMERMBTB)
 
-if(WITH_PYTHON_WRAPPER) # Keep this until mechanics/swig is complient with modern occt3d versions
-  include(occ_old_setup)
-else()
-  include(occ_setup)
-endif()
+include(occ_setup)
+
 # ------ include interface ------
 # What is needed at build time
 # by other targets to compile with current component.

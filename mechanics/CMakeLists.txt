@@ -93,11 +93,7 @@ include(bullet_setup)
 
 # -- Open Cascade --
 if(WITH_OpenCASCADE)
-#  if(WITH_PYTHON_WRAPPER) # Keep this until mechanics/swig is fixed to be complient with modern version of occt3d
-#    include(occ_old_setup)
-#  else()
   include(occ_setup)
-#  endif()
   # Add opencascade headers and libs to components build
   target_link_libraries(${COMPONENT} PUBLIC $<BUILD_INTERFACE:OpenCASCADE::OpenCASCADE>)
   target_link_libraries(${COMPONENT} PUBLIC $<INSTALL_INTERFACE:OpenCASCADE::OpenCASCADE>)

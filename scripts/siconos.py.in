@@ -687,8 +687,7 @@ def generate_cmakelists(args):
 
     # OpenCASCADE ?
     result += "if(@WITH_OpenCASCADE@)\n"
-    #result += "include(occ_setup)\n"
-    result+= "include(occ_old_setup)\n"
+    result += "include(occ_setup)\n"
     result += "endif()\n"
 
     # Create executable target
