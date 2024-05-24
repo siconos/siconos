@@ -210,7 +210,7 @@ ubuntu22.04-mechanisms:configure:
      CONF_FILE: $SICONOS_CMAKE_CONF_PATH/with_mechanisms.cmake
    extends:
     - .siconos-configure
-   when: manual
+   #when: manual
    needs:
     - job: opencascade:docker-build
       optional: true
@@ -222,7 +222,7 @@ ubuntu22.04-mechanisms:build:
   extends:
     - .siconos-build
   needs: ["ubuntu22.04-mechanisms:configure"]
-  when: manual
+  #when: manual
 
 ubuntu22.04-mechanisms:test:
   variables:
@@ -231,7 +231,7 @@ ubuntu22.04-mechanisms:test:
   extends:
     - .siconos-test
   needs: ["ubuntu22.04-mechanisms:build"]
-  when: manual
+  #when: manual
 
     
 # ------ debian bookworm, default setup -------
