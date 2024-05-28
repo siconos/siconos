@@ -212,7 +212,7 @@ ubuntu22.04-mechanisms:configure:
     - .siconos-configure
    image:
     name: $IMAGE_NAME
-    entrypoint: [""]
+    entrypoint: ["/bin/bash"]
    #when: manual
    needs:
     - job: opencascade:docker-build
@@ -226,7 +226,7 @@ ubuntu22.04-mechanisms:build:
     - .siconos-build
   image:
     name: $IMAGE_NAME
-    entrypoint: [""]
+    entrypoint: ["/bin/bash"]
   needs: ["ubuntu22.04-mechanisms:configure"]
   #when: manual
 
@@ -238,7 +238,7 @@ ubuntu22.04-mechanisms:test:
     - .siconos-test
   image:
     name: $IMAGE_NAME
-    entrypoint: [""]
+    entrypoint: ["/bin/bash"]
   needs: ["ubuntu22.04-mechanisms:build"]
   #when: manual
 
