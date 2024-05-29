@@ -40,6 +40,7 @@ opencascade:docker-build:
     IMAGE_NAME: opencascade
     SICONOS_DOCKER_TARGET: mamba-occenv
     RESULT_NAME: $SICONOS_REGISTRY/sources/opencascade
+    SICONOS_DOCKER_TARGET: mamba-occenv
   extends: .docker-build
   when: manual
 
@@ -210,9 +211,6 @@ ubuntu22.04-mechanisms:configure:
      CONF_FILE: $SICONOS_CMAKE_CONF_PATH/with_mechanisms.cmake
    extends:
     - .siconos-configure
-   image:
-    name: $IMAGE_NAME
-    entrypoint: ["/bin/bash"]
    #when: manual
    needs:
     - job: opencascade:docker-build
@@ -224,9 +222,6 @@ ubuntu22.04-mechanisms:build:
     CDASH_SUBMIT: 1
   extends:
     - .siconos-build
-  image:
-    name: $IMAGE_NAME
-    entrypoint: ["/bin/bash"]
   needs: ["ubuntu22.04-mechanisms:configure"]
   #when: manual
 
@@ -236,9 +231,6 @@ ubuntu22.04-mechanisms:test:
     CDASH_SUBMIT: 1
   extends:
     - .siconos-test
-  image:
-    name: $IMAGE_NAME
-    entrypoint: ["/bin/bash"]
   needs: ["ubuntu22.04-mechanisms:build"]
   #when: manual
 
