@@ -4,7 +4,7 @@ ARG DEFAULT_IMAGE=sources/opencascade
 ARG IMAGENAME=$REGISTRY/$PROJECT/$DEFAULT_IMAGE
 FROM $IMAGENAME AS siconoslab
 ARG BUILD_DIR=build
-# ARG MAMBA_DOCKERFILE_ACTIVATE=1  # (otherwise python, cmake ... will not be found)
+ARG MAMBA_DOCKERFILE_ACTIVATE=1  # (otherwise python, cmake ... will not be found)
 RUN cmake --install $BUILD_DIR
 # install Siconos. Assume a previous built in $BUILD_DIR
 RUN siconos --info
