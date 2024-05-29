@@ -322,11 +322,11 @@ jupyterlab:install:
 mambalab:install:
     variables:
       IMAGE_NAME: siconoslab-mamba
-      RESULT_NAME: $CI_REGISTRY/nonsmooth/siconos-tutorials/siconoslab-mamba
+      RESULT_NAME: $CI_REGISTRY/nonsmooth/siconos-tutorials/siconoslab-occ
       SICONOS_DOCKER_TARGET: siconoslab
     extends:
       - .siconos-jupyterlab-install
-    needs: ["mambalab:build"]
+    needs: ["ubuntu22.04-mechanisms:build"]
 
 # Job run when a new tag (release) is created.
 release_job:
