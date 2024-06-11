@@ -26,10 +26,14 @@
 #include "OneStepNSProblem.hpp"
 #include "Relation.hpp"
 #include "SiconosException.hpp"
+#include "SiconosMatrixOp.hpp"        // for prod, scal, ...
 #include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
+#include "SiconosVectorOp.hpp"  // for prod, subprod ...
 #include "SimpleMatrix.hpp"
 #include "Simulation.hpp"
+#include "../../mechanics/src/fem/native/SolidLinearTIDS.hpp"
+
 // #define DEBUG_STDOUT
 // #define DEBUG_NOCOLOR
 // #define DEBUG_MESSAGES
@@ -54,7 +58,16 @@ void siconos::integrators::MoreauJeanGOSI::initializeWorkVectorsForDS(
         std::make_shared<siconos::algebra::SiconosVector>(lds->dimension());
     ds_work_vectors[siconos::integrators::MoreauJeanGOSI::LOCAL_BUFFER] =
         std::make_shared<siconos::algebra::SiconosVector>(lds->dimension());
-
+    auto dsType = siconos::types::type_value(*ds);
+    if (dsType == siconos::modeling::Type::SolidLinearTIDS) {
+        auto solidds = std::static_pointer_cast<siconos::mechanics::fem::SolidLinearTIDS>(ds);
+        ds_work_vectors[siconos::integrators::MoreauJeanOSI::RESIDU_SIGMAFREE] =
+                std::make_shared<siconos::algebra::SiconosVector>(solidds->stressDimension());
+        ds_work_vectors[siconos::integrators::MoreauJeanOSI::SIGMAFREE] =
+                std::make_shared<siconos::algebra::SiconosVector>(solidds->stressDimension());
+        ds_work_vectors[siconos::integrators::MoreauJeanOSI::Q_SIGMAFREE] =
+                std::make_shared<siconos::algebra::SiconosVector>(solidds->dimension()+solidds->stressDimension());
+    }
     lds->computeForces(t, lds->q(), lds->velocity());
     lds->swapInMemory();
   } else if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
@@ -155,6 +168,7 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
   auto t = _simulation->nextTime();         // End of the time step
   auto told = _simulation->startingTime();  // Beginning of the time step
   auto h = t - told;                        // time step length
+  siconos::modeling::Type dsType;  // Type of the current DS.
 
   DEBUG_PRINTF("nextTime %f\n", t);
   DEBUG_PRINTF("startingTime %f\n", told);
@@ -174,6 +188,7 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
     if (!checkOSI(dsi)) continue;
     ds = _dynamicalSystemsGraph->bundle(*dsi);
     auto& ds_work_vectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
+    dsType = siconos::types::type_value(*ds);  // Its type
 
     if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianLinearTIDS>(ds)) {
       DEBUG_PRINT(
@@ -248,6 +263,104 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
 
       normResidu = 0.0;  // we assume that v = vfree + W^(-1) p
     }
+    else     if (dsType == siconos::modeling::Type::SolidLinearTIDS) {
+        DEBUG_PRINT(
+            "siconos::integrators::MoreauJeanGOSI::computeResidu(), dsType == "
+            "Type::LagrangianLinearTIDS\n");
+        // ResiduFree = h*C*v_i + h*Kq_i +h*h*theta*Kv_i+hFext_theta     (1)
+        // This formulae is only valid for the first computation of the residual for v = v_i
+        // otherwise the complete formulae must be applied, that is
+        // ResiduFree = M(v - vold) + h*((1-theta)*(C v_i + K q_i) +theta * ( C*v +
+        // K(q_i+h(1-theta)v_i+h theta v)))
+        //                     +hFext_theta     (2)
+        // for v != vi, the formulae (1) is wrong.
+        // in the sequel, only the equation (1) is implemented
+
+        // Get state i (previous time step) from Memories -> var. indexed with "Old"
+        auto &solid = static_cast<siconos::mechanics::fem::SolidLinearTIDS &>(*ds);
+
+        const auto& qold = solid.qMemory().getSiconosVector(0);         // qi
+        const auto& vold = solid.velocityMemory().getSiconosVector(0);  // vi
+        const auto &sigmaold = solid.stressMemory().getSiconosVector(0);  // sigmai
+        const auto &sigma = solid.stress(); //sigmaf
+
+
+        DEBUG_EXPR(qold.display(););
+        DEBUG_EXPR(vold.display(););
+        DEBUG_EXPR(d->q()->display(););
+        DEBUG_EXPR(d->velocity()->display(););
+
+        auto& residu = *ds_work_vectors[siconos::integrators::MoreauJeanGOSI::RESIDU_FREE];
+        auto& free_rhs = *ds_work_vectors[siconos::integrators::MoreauJeanGOSI::FREE];
+        auto &residusigmafree = *ds_work_vectors[siconos::integrators::MoreauJeanGOSI::RESIDU_SIGMAFREE];
+        auto &sigmafree = *ds_work_vectors[siconos::integrators::MoreauJeanGOSI::SIGMAFREE];
+
+        // --- ResiduFree computation Equation (1) ---
+        residu.zero();
+        auto& W = *_dynamicalSystemsGraph->properties(*dsi).W;
+        auto qSigmaold = siconos::algebra::SiconosVector(solid.velocityDimension()+solid.stressDimension());
+
+        vold.toBlock(qSigmaold, solid.velocityDimension(), 0, 0);
+        sigmaold.toBlock(qSigmaold, solid.stressDimension(), 0, solid.velocityDimension());  // q_sigma = [v; sigma]
+
+        siconos::algebra::prod(W, qSigmaold, free_rhs);
+
+        if (solid.B()) {
+            siconos::algebra::prod( sigmaold, *(solid.B()), free_rhs, true); // residufree = B^T sigma_i
+            siconos::algebra::scal( -h, free_rhs, free_rhs, true); // residufree = -h*B^T sigma_i
+        }
+
+        if (solid.fExt()) {
+            // computes Fext(ti)
+            solid.computeFExt(told);
+            auto fextTheta = std::make_shared<siconos::algebra::SiconosVector>(solid.fExt()->size());
+            double coeff = (1 - _theta);
+            siconos::algebra::scal(coeff, *(solid.fExt()), *fextTheta,
+                                   true);  // fext_k+theta = (1-_theta) * fext(ti)
+            // computes Fext(ti+1)
+            solid.computeFExt(t);
+            coeff = _theta;
+            siconos::algebra::scal(coeff, *(solid.fExt()), *fextTheta,
+                                   false);  // fext_k+theta += _theta * fext(ti+1)
+            double conditionningMagicCoeff = 1/solid.S()->normInf();
+
+            siconos::algebra::scal(h/conditionningMagicCoeff, *fextTheta, free_rhs ,
+                                   false);  // residufree += h*fext_k+theta
+        }
+
+        siconos::algebra::prod(-h, *solid.B(), vold, residusigmafree, true); // residuSigmaFree = -h*B*v_i
+
+        applyBoundaryConditions(solid, free_rhs, dsi, t);
+//        free = residuFree;            // copy residuFree into free
+  //      if (d.p(1)) free -= *d.p(1);  // Compute Residu in Workfree Notation !!
+//        if (solid.p(1)) free += *solid.p(1);  // Compute Residu in Workfree Notation !!
+
+//        sigfreed = residuSigfreed;
+//        if (d.epsilonp(1)) {
+//            sigfreed -= *d.epsilonp(1)*h;
+//        }
+
+
+        normResidu = 0.0;  // we assume that v_sigma = vfree_sigma + W^(-1)  [ p ; z]
+
+        DEBUG_EXPR(free_rhs.display());
+//        applyBoundaryConditions(*d, free_rhs, dsi, t);
+
+  //      if (d->boundaryConditions()) {
+  //        THROW_EXCEPTION(
+  //            "siconos::integrators::MoreauJeanGOSI::computeResidu - boundary conditions not "
+  //            "yet implemented for this type of Dynamical system\n");
+  //      }
+
+        // residu = -1.0*free_rhs;
+        // siconos::algebra::prod(1.0, W, *v, residu, false);
+        // DEBUG_EXPR(free_rhs.display());
+        // if(d->p(1))
+        //   residu -= *d->p(1); // Compute Residu in Workfree Notation !!
+
+        normResidu = 0.0;  // we assume that v = vfree + W^(-1) p
+      }
+
 
     else if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
       DEBUG_PRINT(
@@ -420,7 +533,6 @@ void siconos::integrators::MoreauJeanGOSI::applyBoundaryConditions(
     siconos::modeling::SecondOrderDS &d,
     siconos::algebra::SiconosVector &residu,
     siconos::graphs::DynamicalSystemsGraph::VIterator dsi, double t) {
-    std::cout << " In applyBoundaryConditions " << std::endl;
 
   DEBUG_BEGIN(
       "siconos::integrators::MoreauJeanOSI::applyBoundaryConditions(...)\n");
@@ -451,8 +563,6 @@ void siconos::integrators::MoreauJeanGOSI::applyBoundaryConditions(
       columnindex++;
     }
   }
-  std::cout << " Out applyBoundaryConditions " << std::endl;
-
   DEBUG_END(
       "siconos::integrators::MoreauJeanOSI::applyBoundaryConditions(...)\n");
 }
