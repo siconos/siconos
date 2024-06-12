@@ -26,7 +26,6 @@
 #include "OneStepNSProblem.hpp"
 #include "Relation.hpp"
 #include "SiconosException.hpp"
-#include "SiconosMatrixOp.hpp"        // for prod, scal, ...
 #include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"  // for prod, subprod ...
@@ -61,6 +60,7 @@ void siconos::integrators::MoreauJeanGOSI::initializeWorkVectorsForDS(
     auto dsType = siconos::types::type_value(*ds);
     if (dsType == siconos::modeling::Type::SolidLinearTIDS) {
         auto solidds = std::static_pointer_cast<siconos::mechanics::fem::SolidLinearTIDS>(ds);
+//        ds_work_vectors[siconos::integrators::MoreauJeanGOSI::FREE]->resize(solidds->velocityDimension()+solidds->stressDimension());
         ds_work_vectors[siconos::integrators::MoreauJeanOSI::RESIDU_SIGMAFREE] =
                 std::make_shared<siconos::algebra::SiconosVector>(solidds->stressDimension());
         ds_work_vectors[siconos::integrators::MoreauJeanOSI::SIGMAFREE] =
@@ -189,8 +189,8 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
     ds = _dynamicalSystemsGraph->bundle(*dsi);
     auto& ds_work_vectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
     dsType = siconos::types::type_value(*ds);  // Its type
-
-    if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianLinearTIDS>(ds)) {
+    if (dsType == siconos::modeling::Type::LagrangianLinearTIDS) {
+        auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianLinearTIDS>(ds)
       DEBUG_PRINT(
           "siconos::integrators::MoreauJeanGOSI::computeResidu(), dsType == "
           "Type::LagrangianLinearTIDS\n");
@@ -266,7 +266,7 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
     else     if (dsType == siconos::modeling::Type::SolidLinearTIDS) {
         DEBUG_PRINT(
             "siconos::integrators::MoreauJeanGOSI::computeResidu(), dsType == "
-            "Type::LagrangianLinearTIDS\n");
+            "Type::SolidLinearTIDS\n");
         // ResiduFree = h*C*v_i + h*Kq_i +h*h*theta*Kv_i+hFext_theta     (1)
         // This formulae is only valid for the first computation of the residual for v = v_i
         // otherwise the complete formulae must be applied, that is
@@ -299,11 +299,27 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
         residu.zero();
         auto& W = *_dynamicalSystemsGraph->properties(*dsi).W;
         auto qSigmaold = siconos::algebra::SiconosVector(solid.velocityDimension()+solid.stressDimension());
+        auto full_free_rhs = siconos::algebra::SiconosVector(solid.velocityDimension()+solid.stressDimension());
+
 
         vold.toBlock(qSigmaold, solid.velocityDimension(), 0, 0);
         sigmaold.toBlock(qSigmaold, solid.stressDimension(), 0, solid.velocityDimension());  // q_sigma = [v; sigma]
 
-        siconos::algebra::prod(W, qSigmaold, free_rhs);
+        siconos::algebra::prod(W, qSigmaold, full_free_rhs);
+        std::vector<std::size_t> subCoord(4);
+        subCoord[0] = 0;
+        subCoord[1] = solid.velocityDimension();
+        subCoord[2] = 0;
+        subCoord[3] = solid.velocityDimension();
+        siconos::algebra::subscal(1.0, full_free_rhs, free_rhs,
+                                  subCoord, true);
+        subCoord[0] = solid.velocityDimension();
+        subCoord[1] = qSigmaold.size();
+        subCoord[2] = 0;
+        subCoord[3] = solid.stressDimension();
+        siconos::algebra::subscal(1.0, full_free_rhs, residusigmafree,
+                                  subCoord, true);
+
 
         if (solid.B()) {
             siconos::algebra::prod( sigmaold, *(solid.B()), free_rhs, true); // residufree = B^T sigma_i
@@ -341,7 +357,6 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
 //        }
 
 
-        normResidu = 0.0;  // we assume that v_sigma = vfree_sigma + W^(-1)  [ p ; z]
 
         DEBUG_EXPR(free_rhs.display());
 //        applyBoundaryConditions(*d, free_rhs, dsi, t);
@@ -358,7 +373,7 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
         // if(d->p(1))
         //   residu -= *d->p(1); // Compute Residu in Workfree Notation !!
 
-        normResidu = 0.0;  // we assume that v = vfree + W^(-1) p
+        normResidu = 0.0;  // we assume that v_sigma = vfree_sigma + W^(-1)  [ p ; z]
       }
 
 
@@ -545,7 +560,10 @@ void siconos::integrators::MoreauJeanGOSI::applyBoundaryConditions(
     auto columntmp =
         std::make_shared<siconos::algebra::SiconosVector>(d.dimension());
     auto dsType = siconos::types::type_value(d);
-
+    if (dsType == siconos::modeling::Type::SolidLinearTIDS){
+        auto &solid = static_cast<siconos::mechanics::fem::SolidLinearTIDS &>(d);
+        columntmp->resize(solid.dimension() + solid.stressDimension());
+    }
     for (const auto itindex : d.boundaryConditions()->velocityIndices()) {
         std::cout << "Iterating BCs with GOSI: " << itindex << " val: " << d.boundaryConditions()->prescribedVelocity()->getValue(columnindex) <<std::endl;
       double DeltaPrescribedVelocity =
@@ -554,6 +572,7 @@ void siconos::integrators::MoreauJeanGOSI::applyBoundaryConditions(
           "index  = %i, value = %e\n", *itindex,
           d.boundaryConditions()->prescribedVelocity()->getValue(columnindex));
       DEBUG_PRINTF("DeltaPrescribedVelocity = %e\n", DeltaPrescribedVelocity);
+      std::cout << "columnindex: " << columnindex << " columntmp size: " << columntmp->size() << " WBoundaryConditions size: " << WBoundaryConditions.size(0) << " " << WBoundaryConditions.size(1) << std::endl;
       WBoundaryConditions.getCol(columnindex, *columntmp);
       residu -= *columntmp * (DeltaPrescribedVelocity);
 
