@@ -28,6 +28,8 @@
 #include "SiconosVectorOp.hpp"  // setBlock
 #include "Simulation.hpp"
 #include "Topology.hpp"
+#include "../../mechanics/src/fem/native/SolidLinearTIDS.hpp"
+
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -179,7 +181,7 @@ bool siconos::nonsmooth_formulations::GlobalFrictionContact::preCompute(double t
     auto& indexSet =
         *simulation()->nonSmoothDynamicalSystem()->topology()->indexSet(_indexSetLevel);
     auto& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
-
+//    simulation()->nonSmoothDynamicalSystem()->display();
     // compute size and nnz of M and collect all matrices
     // compute nnz of H and collect H blocks
     // fill  mu
@@ -249,7 +251,17 @@ bool siconos::nonsmooth_formulations::GlobalFrictionContact::preCompute(double t
           DSG0.properties(DSG0.descriptor(ds)).osi);
       if (mjgosi) {
         auto& ds_work_vectors = *DSG0.properties(DSG0.descriptor(ds)).workVectors;
-        if ((std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) ||
+        auto dsType = siconos::types::type_value(*ds);
+        if (dsType == siconos::modeling::Type::SolidLinearTIDS){
+            auto &solid = static_cast<siconos::mechanics::fem::SolidLinearTIDS &>(*ds);
+            auto& vfree = *ds_work_vectors[siconos::integrators::MoreauJeanGOSI::FREE];
+            auto& sigmafree = *ds_work_vectors[siconos::integrators::MoreauJeanGOSI::RESIDU_SIGMAFREE];
+            auto qSigmafree = siconos::algebra::SiconosVector(vfree.size()+sigmafree.size());
+            vfree.toBlock(qSigmafree, solid.velocityDimension(), 0, 0); // q_sigma = [v; 0]
+            sigmafree.toBlock(qSigmafree, solid.stressDimension(), 0, solid.velocityDimension());  // q_sigma = [v; sigma]
+            siconos::algebra::setBlock(qSigmafree, _q, dss+solid.stressDimension(), 0, offset);
+
+        }else if ((std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) ||
             (std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds))) {
           auto& vfree = *ds_work_vectors[siconos::integrators::MoreauJeanGOSI::FREE];
           siconos::algebra::setBlock(vfree, _q, dss, 0, offset);
@@ -415,8 +427,21 @@ void siconos::nonsmooth_formulations::GlobalFrictionContact::postCompute() {
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
   for (std::tie(dsi, dsend) = DSG0.vertices(); dsi != dsend; ++dsi) {
     auto ds = DSG0.bundle(*dsi);
-
-    if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+    auto dsType = siconos::types::type_value(*ds);
+    if (dsType == siconos::modeling::Type::SolidLinearTIDS){
+        auto &solid = static_cast<siconos::mechanics::fem::SolidLinearTIDS &>(*ds);
+        auto sizeDS = solid.dimension();
+        auto velocity = solid.velocity();
+        auto stress = solid.stress();
+        DEBUG_PRINTF("ds.number() : %i \n", ds.number());
+        DEBUG_EXPR(velocity->display(););
+        DEBUG_EXPR(stress->display(););
+        DEBUG_EXPR(_globalVelocities->display(););
+        pos = DSG0.properties(*dsi).absolute_position;
+        siconos::algebra::setBlock(*_globalVelocities, velocity, sizeDS, pos, 0);
+        siconos::algebra::setBlock(*_globalVelocities, stress, solid.stressDimension(), pos+solid.velocityDimension(), 0);
+    }
+    else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
       auto sizeDS = d->dimension();
       auto velocity = d->velocity();
       DEBUG_PRINTF("ds.number() : %i \n", ds.number());

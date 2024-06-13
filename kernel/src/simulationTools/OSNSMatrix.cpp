@@ -30,6 +30,8 @@
 #include "SecondOrderDS.hpp"
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
+#include "../../mechanics/src/fem/native/SolidLinearTIDS.hpp"
+
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -175,7 +177,13 @@ unsigned siconos::nonsmooth_formulations::OSNSMatrix::updateSizeAndPositions(
   for (std::tie(dsi, dsend) = DSG.vertices(); dsi != dsend; ++dsi) {
     std::shared_ptr<siconos::modeling::DynamicalSystem> ds = DSG.bundle(*dsi);
     DSG.properties(*dsi).absolute_position = dim;
+
     dim += ds->dimension();
+    auto dsType = siconos::types::type_value(*ds);
+    if (dsType == siconos::modeling::Type::SolidLinearTIDS) {
+        auto &solid = static_cast<siconos::mechanics::fem::SolidLinearTIDS &>(*ds);
+        dim += solid.stressDimension();
+    }
   }
 
   return dim;
