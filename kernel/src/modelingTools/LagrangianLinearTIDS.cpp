@@ -56,8 +56,11 @@ void LagrangianLinearTIDS::initRhs(double time)
   {
     //  bloc10 of jacobianX is solution of Mass*Bloc10 = K
     if(!_rhsMatrices[jacobianXBloc10])
-      _rhsMatrices[jacobianXBloc10].reset(new SimpleMatrix(-1 * *_K));
-    _inverseMass->Solve(*_rhsMatrices[jacobianXBloc10]);
+      {
+	// We assume the stiffness matrix is constant
+	_rhsMatrices[jacobianXBloc10].reset(new SimpleMatrix(-1 * *_K));
+	_inverseMass->Solve(*_rhsMatrices[jacobianXBloc10]);
+      }
   }
   else
     _rhsMatrices[jacobianXBloc10] = _rhsMatrices[zeroMatrix] ;
@@ -66,8 +69,11 @@ void LagrangianLinearTIDS::initRhs(double time)
   {
     //  bloc11 of jacobianX is solution of Mass*Bloc11 = C
     if(!_rhsMatrices[jacobianXBloc11])
+      {
+	// We assume the damping matrix is constant
       _rhsMatrices[jacobianXBloc11].reset(new SimpleMatrix(-1 * *_C));
-    _inverseMass->Solve(*_rhsMatrices[jacobianXBloc11]);
+      _inverseMass->Solve(*_rhsMatrices[jacobianXBloc11]);
+      }
   }
   else
     _rhsMatrices[jacobianXBloc11] = _rhsMatrices[zeroMatrix] ;
