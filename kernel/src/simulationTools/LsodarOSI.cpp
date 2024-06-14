@@ -451,7 +451,7 @@ void LsodarOSI::initialize()
 
 
   // 7 - JT, Jacobian type indicator
-  _intData[8] = 2;   // jt, Jacobian type indicator.
+  _intData[8] = 1;   // jt, Jacobian type indicator.
   //           1 means a user-supplied full (NEQ by NEQ) Jacobian.
   //           2 means an internally generated (difference quotient) full Jacobian (using NEQ extra calls to f per df/dx value).
   //           4 means a user-supplied banded Jacobian.
