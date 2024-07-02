@@ -351,7 +351,7 @@ bridge:examples:
     strategy : depend
     forward :  
       yaml_variables: false
-  needs: ["jupyterlab:install"]
+  needs: ["mambalab:install"]
   rules:
     - if: $CI_COMMIT_MESSAGE =~ /\[with examples\]/
     
