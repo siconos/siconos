@@ -124,6 +124,7 @@ class NewtonEulerDS : public SecondOrderDS {
   siconos::algebra::SiconosMemory _forcesMemory;
   siconos::algebra::SiconosMemory _dotqMemory;
 
+  
   /** Inertial matrix
    */
   std::shared_ptr<siconos::algebra::SiconosMatrix> _I{nullptr};

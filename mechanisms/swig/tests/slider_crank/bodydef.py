@@ -125,7 +125,7 @@ jointName = np.array(['Part1_0',
                       'Part1_2'])
 """joints' names"""
 
-jointType = array.array('I', [mbtb.PIVOT_0,
+jointType = array.array('I', [mbtb.JointsType::Pivot0,
                               mbtb.PIVOT_1,
                               mbtb.PIVOT_1])
 """joints' types"""

@@ -1,211 +1,259 @@
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2024 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include "MBTB_PYTHON_API.hpp"
+
+#include <cassert>
+
+#include "CADMBTB_API.hpp"  // for CADMBTB_init ...
+#include "MBTB_Body.hpp"
 #include "MBTB_DATA.hpp"
-#include "MBTB_internalTool.hpp"
-#include "CADMBTB_API.hpp"
-#include "CADMBTB_PYTHON_API.hpp"
+#include "MBTB_internalTool.hpp"  // For MBTB_updateContactFromDS
+#include "SiconosVector.hpp"
+#include "SimpleMatrix.hpp"
+// #include "CADMBTB_PYTHON_API.hpp"
 #include <boost/math/quaternion.hpp>
-#include "KneeJointR.hpp"
+// #include "KneeJointR.hpp"
+#include "BoundaryCondition.hpp"
+#include "EqualityConditionNSL.hpp"
+#include "Interaction.hpp"
+#include "MBTB_Contact.hpp"
+#include "MBTB_ContactRelation.hpp"
+#include "MBTB_FC3DContactRelation.hpp"
+#include "MBTB_JointR.hpp"
+#include "MBTB_TimeStepping.hpp"
+#include "MBTB_TimeSteppingCombinedProj.hpp"
+#include "MBTB_TimeSteppingProj.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
+#include "OneStepNSProblem.hpp"
 #include "PivotJointR.hpp"
 #include "PrismaticJointR.hpp"
+#include "TimeStepping.hpp"
 #include "ace.h"
-#include "MBTB_FC3DContactRelation.hpp"
-#include "MBTB_TimeStepping.hpp"
-#include "MBTB_TimeSteppingProj.hpp"
-#include "MBTB_TimeSteppingCombinedProj.hpp"
-#include <BRepTools.hxx>
-#include "SolverOptions.h" // for SolverOptions struct
-
-//#define MBTB_MOREAU_YES
-// #define DEBUG_STDOUT
-// #define DEBUG_NOCOLOR
-// #define DEBUG_MESSAGES
+// #include <BRepTools.hxx>
+#include "GenericMechanical.hpp"
+#include "MLCPProjectOnConstraints.hpp"
+#include "MoreauJeanCombinedProjectionOSI.hpp"
+#include "MoreauJeanDirectProjectionOSI.hpp"
+#include "NewtonImpactFrictionNSL.hpp"
+#include "NewtonImpactNSL.hpp"
+#include "SolverOptions.h"  // for SolverOptions struct
+#include "Topology.hpp"
+#include "TimeDiscretisation.hpp"
+// #define MBTB_MOREAU_YES
+//  #define DEBUG_STDOUT
+//  #define DEBUG_NOCOLOR
+//  #define DEBUG_MESSAGES
 #include "siconos_debug.h"
-
-
-
 #ifdef MBTB_MOREAU_YES
 #include "MBTB_MoreauJeanOSI.hpp"
 #endif
 
 #define MBTB_LOAD_CONTACT
 
-void MBTB_init(unsigned int NumOfBodies, unsigned int NumOfJoints, unsigned int NumOfContacts)
-{
-  assert(NumOfBodies<MBTB_MAX_BODIES_NUMBER &&"MBTB_init NumOfBodies out of range");
-  assert(NumOfJoints<MBTB_MAX_JOINTS_NUMBER &&"MBTB_init NumOfJoints out of range");
-  assert(NumOfContacts<MBTB_MAX_CONTACTS_NUMBER &&"MBTB_init NumOfContacts out of range");
+void siconos::mechanisms::MBTB_init(unsigned int NumOfBodies,
+                                    unsigned int NumOfJoints,
+                                    unsigned int NumOfContacts) {
+  assert(NumOfBodies < MBTB_MAX_BODIES_NUMBER &&
+         "MBTB_init NumOfBodies out of range");
+  assert(NumOfJoints < MBTB_MAX_JOINTS_NUMBER &&
+         "MBTB_init NumOfJoints out of range");
+  assert(NumOfContacts < MBTB_MAX_CONTACTS_NUMBER &&
+         "MBTB_init NumOfContacts out of range");
   ACE_INIT_TIME();
-  sNbOfBodies=NumOfBodies;
-  sNbOfJoints=NumOfJoints;
-  sNbOfContacts=NumOfContacts;
-  //sDS = (SP::MBTB_Body *) malloc(sNbOfBody*sizeof(SP::MBTB_Body));
-  //sPieceDraw = (bool*) malloc(sNbOfBody*sizeof(bool));
-  CADMBTB_init(sNbOfBodies + 2*NumOfContacts,NumOfContacts);
-  CADMBTB_setNbOfArtefacts(4*NumOfContacts); /** P1P2, NORMAL, REACTION */
+  mbtb::data::sNbOfBodies = NumOfBodies;
+  mbtb::data::sNbOfJoints = NumOfJoints;
+  mbtb::data::sNbOfContacts = NumOfContacts;
+  // mbtb::data::sDS = (SP::MBTB_Body *)
+  // malloc(sNbOfBody*sizeof(SP::MBTB_Body)); sPieceDraw = (bool*)
+  // malloc(sNbOfBody*sizeof(bool));
+  CADMBTB_init(mbtb::data::sNbOfBodies + 2 * NumOfContacts, NumOfContacts);
+  CADMBTB_setNbOfArtefacts(4 * NumOfContacts); /** P1P2, NORMAL, REACTION */
 
-  myt0 = 0;
-  myTf = std::numeric_limits<double>::max();
+  mbtb::data::myt0 = 0;
+  mbtb::data::myTf = std::numeric_limits<double>::max();
 
   // -------------
   // --- Model ---
   // -------------
-  myNsds.reset(new NonSmoothDynamicalSystem(myt0, myTf));
+  mbtb::data::myNsds =
+      std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(
+          mbtb::data::myt0, mbtb::data::myTf);
 }
 
 /*get the quaternion from siconos and 1787update the CADs model*/
-void MBTB_updateDSFromSiconos()
-{
-  //ACE_times[ACE_TIMER_UPDATE_POS].start();
-  for(unsigned int numDS=0; numDS<sNbOfBodies; numDS++)
-  {
-    SP::SiconosVector q = sDS[numDS]->q();
-    //printf("step %d siconos %s ->q:\n",mTimerCmp,sPieceName[numDS]);
-    //q->display();
-    double x=q->getValue(0);
-    double y=q->getValue(1);
-    double z=q->getValue(2);
-    double q1=q->getValue(3);
-    double q2=q->getValue(4);
-    double q3=q->getValue(5);
-    double q4=q->getValue(6);
+void siconos::mechanisms::MBTB_updateDSFromSiconos() {
+  // ACE_times[ACE_TIMER_UPDATE_POS].start();
+  for (unsigned int numDS = 0; numDS < mbtb::data::sNbOfBodies; numDS++) {
+    auto q = mbtb::data::sDS[numDS]->q();
+    // printf("step %d siconos %s ->q:\n",mTimerCmp,sPieceName[numDS]);
+    // q->display();
+    double x = q->getValue(0);
+    double y = q->getValue(1);
+    double z = q->getValue(2);
+    double q1 = q->getValue(3);
+    double q2 = q->getValue(4);
+    double q3 = q->getValue(5);
+    double q4 = q->getValue(6);
     ACE_times[ACE_TIMER_UPDATE_POS].start();
-    CADMBTB_moveObjectFromQ(numDS,x,y,z,q1,q2,q3,q4);
+    CADMBTB_moveObjectFromQ(numDS, x, y, z, q1, q2, q3, q4);
     ACE_times[ACE_TIMER_UPDATE_POS].stop();
-    int res = sTimerCmp%FREQ_UPDATE_GRAPHIC;
+    int res = mbtb::data::sTimerCmp % FREQ_UPDATE_GRAPHIC;
     ACE_times[ACE_TIMER_GRAPHIC].start();
-    if(!res)
-    {
+    if (!res) {
       /*THIS CODE REBUILD THE GRAPHICAL MODEL
-      getContext()->Erase(spAISToposDS[numDS]);
-      spAISToposDS[numDS] = new AIS_Shape( sTopoDSPiece[numDS] );
-      getContext()->Display( spAISToposDS[numDS], false );*/
+      getContext()->Erase(data::spAISToposDS[numDS]);
+      data::spAISToposDS[numDS] = new AIS_Shape( data::sTopoDSPiece[numDS] );
+      getContext()->Display( data::spAISToposDS[numDS], false );*/
 
-      //spAISToposDS[numDS]->SetTransformation(&(sGeomTrsf[numDS]),true,false);//new Geom_Transformation(sTrsfPiece[numDS]),true);
+      // data::spAISToposDS[numDS]->SetTransformation(&(data::sGeomTrsf[numDS]),true,false);//new
+      // Geom_Transformation(sTrsfPiece[numDS]),true);
 
-      CADMBTB_moveGraphicalModelFromModel(numDS,numDS);
+      CADMBTB_moveGraphicalModelFromModel(numDS, numDS);
 
-      //spAISToposDS[numDS]->SetTransformation(&(sGeomTrsf[numDS])
+      // data::spAISToposDS[numDS]->SetTransformation(&(data::sGeomTrsf[numDS])
       //				     ,false,true);
-      //      getContext()->Display( spAISToposDS[numDS], false );
+      //       getContext()->Display( data::spAISToposDS[numDS], false );
     }
     ACE_times[ACE_TIMER_GRAPHIC].stop();
   }
-
 }
-void MBTB_BodyLoadCADFile(unsigned int numDS,const std::string& CADFile,unsigned int withGraphicModel)
-{
-  assert(sNbOfBodies > numDS &&"MBTB_BodyLoadCADFile numDS out of range.");
+void siconos::mechanisms::MBTB_BodyLoadCADFile(unsigned int numDS,
+                                               const std::string& CADFile,
+                                               unsigned int withGraphicModel) {
+  assert(mbtb::data::sNbOfBodies > numDS &&
+         "MBTB_BodyLoadCADFile numDS out of range.");
   /*1) load the CAD model*/
-  char * data = (char*)calloc((CADFile.length()+1), sizeof(char));
+  char* data = (char*)calloc((CADFile.length() + 1), sizeof(char));
   //  memset((void*)data,0,sizeof(*data));
-  strcpy(data,CADFile.c_str());
+  strcpy(data, CADFile.c_str());
   CADMBTB_loadCADFile(numDS, data);
   free(data);
-  if(withGraphicModel)
-    CADMBTB_buildGraphicalModel(numDS);
+  if (withGraphicModel) CADMBTB_buildGraphicalModel(numDS);
 }
 
-void MBTB_ContactLoadCADFile(unsigned int contactId,const std::string& CADFile1,const std::string& CADFile2,unsigned int withGraphicModel1,unsigned int withGraphicModel2)
-{
-  assert(sNbOfContacts > contactId &&"MBTB_ContactLoadCADFile contactId out of range.");
-  char * data = (char*)calloc((CADFile1.length()+1), sizeof(char));
-  unsigned int IdInCAD=sNbOfBodies+2*contactId;
+void siconos::mechanisms::MBTB_ContactLoadCADFile(
+    unsigned int contactId, const std::string& CADFile1,
+    const std::string& CADFile2, unsigned int withGraphicModel1,
+    unsigned int withGraphicModel2) {
+  assert(mbtb::data::sNbOfContacts > contactId &&
+         "MBTB_ContactLoadCADFile contactId out of range.");
+  char* data = (char*)calloc((CADFile1.length() + 1), sizeof(char));
+  unsigned int IdInCAD = mbtb::data::sNbOfBodies + 2 * contactId;
 
-  strcpy(data,CADFile1.c_str());
-  CADMBTB_loadCADFile(IdInCAD, data);//CADFile1.c_str());
+  strcpy(data, CADFile1.c_str());
+  CADMBTB_loadCADFile(IdInCAD, data);  // CADFile1.c_str());
   free(data);
-  data = (char*)calloc((CADFile2.length()+1), sizeof(char));
+  data = (char*)calloc((CADFile2.length() + 1), sizeof(char));
 
-  strcpy(data,CADFile2.c_str());
-  CADMBTB_loadCADFile(IdInCAD+1, data);//CADFile2.c_str());
+  strcpy(data, CADFile2.c_str());
+  CADMBTB_loadCADFile(IdInCAD + 1, data);  // CADFile2.c_str());
   free(data);
-  if(withGraphicModel1)
-    CADMBTB_buildGraphicalModel(IdInCAD);
-  if(withGraphicModel2)
-    CADMBTB_buildGraphicalModel(IdInCAD+1);
+  if (withGraphicModel1) CADMBTB_buildGraphicalModel(IdInCAD);
+  if (withGraphicModel2) CADMBTB_buildGraphicalModel(IdInCAD + 1);
   CADMBTB_computeUVBounds(IdInCAD);
-  CADMBTB_computeUVBounds(IdInCAD+1);
+  CADMBTB_computeUVBounds(IdInCAD + 1);
   CADMBTB_initContact(contactId);
 #ifdef MBTB_LOAD_CONTACT
-  double U1,U2,V1,V2;
-  CADMBTB_getUVBounds(IdInCAD,U1,U2,V1,V2);
-  printf("MBTB_LOAD_CONTACT UVBOUNDS idContact1=%d,U1=%e,U2=%e,V1=%e,V2=%e\n",contactId,U1,U2,V1,V2);
-  CADMBTB_getUVBounds(IdInCAD+1,U1,U2,V1,V2);
-  printf("MBTB_LOAD_CONTACT UVBOUNDS idContact2=%d,U1=%e,U2=%e,V1=%e,V2=%e\n",contactId,U1,U2,V1,V2);
+  double U1, U2, V1, V2;
+  CADMBTB_getUVBounds(IdInCAD, U1, U2, V1, V2);
+  printf("MBTB_LOAD_CONTACT UVBOUNDS idContact1=%d,U1=%e,U2=%e,V1=%e,V2=%e\n",
+         contactId, U1, U2, V1, V2);
+  CADMBTB_getUVBounds(IdInCAD + 1, U1, U2, V1, V2);
+  printf("MBTB_LOAD_CONTACT UVBOUNDS idContact2=%d,U1=%e,U2=%e,V1=%e,V2=%e\n",
+         contactId, U1, U2, V1, V2);
 #endif
 }
-void _MBTB_BodyBuildComputeInitPosition(unsigned int numDS,   double mass,
-                                        SP::SiconosVector initPos, SP::SiconosVector modelCenterMass,SP::SimpleMatrix inertialMatrix, SP::SiconosVector& q10,SP::SiconosVector& v10)
-{
-  assert(sNbOfBodies > numDS &&"MBTB_BodyBuild numDS out of range.");
-  /*2)  move the cad model to the initial position*/
-  /*It consists in going to the position (x,y,z,q1,q2,q3,q4) starting from (0,0,0,1,0,0,0).
-    Endeed, after loading the CAD, the cad model must be moved to the initial position of the simulation.
-    This position is not q0 of the siconos::DS because siconos work in the frame of G, and G is not necessary at the origin.*/
-  double q1=cos(0.5*initPos->getValue(6));
-  double q2=initPos->getValue(3)*sin(0.5*initPos->getValue(6));
-  double q3=initPos->getValue(4)*sin(0.5*initPos->getValue(6));
-  double q4=initPos->getValue(5)*sin(0.5*initPos->getValue(6));
-  double x=initPos->getValue(0);
-  double y=initPos->getValue(1);
-  double z=initPos->getValue(2);
 
-  CADMBTB_moveObjectFromQ(numDS,
-                          x,
-                          y,
-                          z,
-                          q1,
-                          q2,
-                          q3,
-                          q4);
-  _MBTB_updateContactFromDS(numDS);
-  /*3) compute the q0 of Siconos, that is the coordinate of G at the initial position*/
-  //unsigned int qDim=7;
-  //unsigned int nDof = 3;
-  //unsigned int nDim = 6;
-  //SP::SiconosVector q10(new SiconosVector(qDim));
-  //SP::SiconosVector v10(new SiconosVector(nDim));
+namespace siconos::mechanisms::mbtb::internal {  // Local use only
+void MBTB_BodyBuildComputeInitPosition(
+    unsigned int numDS, double mass,
+    std::shared_ptr<siconos::algebra::SiconosVector> initPos,
+    std::shared_ptr<siconos::algebra::SiconosVector> modelCenterMass,
+    std::shared_ptr<siconos::algebra::SimpleMatrix> inertialMatrix,
+    std::shared_ptr<siconos::algebra::SiconosVector>& q10,
+    std::shared_ptr<siconos::algebra::SiconosVector>& v10) {
+  assert(mbtb::data::sNbOfBodies > numDS &&
+         "MBTB_BodyBuild numDS out of range.");
+  /*2)  move the cad model to the initial position*/
+  /*It consists in going to the position (x,y,z,q1,q2,q3,q4) starting from
+    (0,0,0,1,0,0,0). Endeed, after loading the CAD, the cad model must be moved
+    to the initial position of the simulation. This position is not q0 of the
+    siconos::DS because siconos work in the frame of G, and G is not necessary
+    at the origin.*/
+  double q1 = cos(0.5 * initPos->getValue(6));
+  double q2 = initPos->getValue(3) * sin(0.5 * initPos->getValue(6));
+  double q3 = initPos->getValue(4) * sin(0.5 * initPos->getValue(6));
+  double q4 = initPos->getValue(5) * sin(0.5 * initPos->getValue(6));
+  double x = initPos->getValue(0);
+  double y = initPos->getValue(1);
+  double z = initPos->getValue(2);
+
+  CADMBTB_moveObjectFromQ(numDS, x, y, z, q1, q2, q3, q4);
+  internal::MBTB_updateContactFromDS(numDS);
+  /*3) compute the q0 of Siconos, that is the coordinate of G at the initial
+   * position*/
+  // unsigned int qDim=7;
+  // unsigned int nDof = 3;
+  // unsigned int nDim = 6;
+  // auto q10(new SiconosVector(qDim));
+  // auto v10(new SiconosVector(nDim));
   q10->zero();
   v10->zero();
 
-
-  /*From the siconos point of view, the dynamic equation are written at the center of gravity.*/
+  /*From the siconos point of view, the dynamic equation are written at the
+   * center of gravity.*/
   /*q10 is the coordinate of G in the initial pos:
     --> The initial orientation is still computed.
     --> The translation must be updated because of G.
    */
-  ::boost::math::quaternion<double>    quattrf(q1,q2,q3,q4);
+  ::boost::math::quaternion<double> quattrf(q1, q2, q3, q4);
 
-  ::boost::math::quaternion<double>    quatOG(0,
-      modelCenterMass->getValue(0),
-      modelCenterMass->getValue(1),
-      modelCenterMass->getValue(2));
-  ::boost::math::quaternion<double>    quatRes(0,0,0,0);
-  quatRes=quattrf*quatOG/quattrf;
+  ::boost::math::quaternion<double> quatOG(0, modelCenterMass->getValue(0),
+                                           modelCenterMass->getValue(1),
+                                           modelCenterMass->getValue(2));
+  ::boost::math::quaternion<double> quatRes(0, 0, 0, 0);
+  quatRes = quattrf * quatOG / quattrf;
 
-  q10->setValue(0,quatRes.R_component_2()+initPos->getValue(0));
-  q10->setValue(1,quatRes.R_component_3()+initPos->getValue(1));
-  q10->setValue(2,quatRes.R_component_4()+initPos->getValue(2));
-  //In current version, the initial orientation is (1,0,0,0)
-  q10->setValue(3,q1);
-  q10->setValue(4,q2);
-  q10->setValue(5,q3);
-  q10->setValue(6,q4);
-  //sq10[numDS]->display();
-  //gp_Ax3 aux=GetPosition(sTopoDSPiece[numDS]);
-  //printf("and sould be : %e, %e, %e\n",aux.Location().X(),aux.Location().Y(),aux.Location().Z());
+  q10->setValue(0, quatRes.R_component_2() + initPos->getValue(0));
+  q10->setValue(1, quatRes.R_component_3() + initPos->getValue(1));
+  q10->setValue(2, quatRes.R_component_4() + initPos->getValue(2));
+  // In current version, the initial orientation is (1,0,0,0)
+  q10->setValue(3, q1);
+  q10->setValue(4, q2);
+  q10->setValue(5, q3);
+  q10->setValue(6, q4);
+  // sq10[numDS]->display();
+  // gp_Ax3 aux=GetPosition(data::sTopoDSPiece[numDS]);
+  // printf("and sould be : %e, %e,
+  // %e\n",aux.Location().X(),aux.Location().Y(),aux.Location().Z());
 
-  //set the translation of the CAD model.
-  double q10x=q10->getValue(0);
-  double q10y=q10->getValue(1);
-  double q10z=q10->getValue(2);
-  CADMBTB_setLocation(numDS,q10x,q10y,q10z);
+  // set the translation of the CAD model.
+  double q10x = q10->getValue(0);
+  double q10y = q10->getValue(1);
+  double q10z = q10->getValue(2);
+  CADMBTB_setLocation(numDS, q10x, q10y, q10z);
 
   // sStartPiece[numDS]=Ax3Aux2;
-  CADMBTB_moveGraphicalModelFromModel(numDS,numDS);
+  CADMBTB_moveGraphicalModelFromModel(numDS, numDS);
 
   // //In current version I = Id3
-  // sI[numDS].reset = std::make_shared<siconos::algebra::SimpleMatrix>(3,3));
+  // sI[numDS] = std::make_shared<siconos::algebra::SimpleMatrix>(3,3));
   // sI[numDS]->zero();
   // //sI[numDS]->setValue(0,0,sMass[numDS]);sI[numDS]->setValue(1,1,sMass[numDS]);sI[numDS]->setValue(2,2,sMass[numDS]);
   // sI[numDS]->setValue(0,0,sMassMatrix[9*numDS+0]*sMassMatrixScale[numDS]);
@@ -222,111 +270,101 @@ void _MBTB_BodyBuildComputeInitPosition(unsigned int numDS,   double mass,
   //			       pluginLib, plunginFct);
   // NewtonEulerDS * p1 =new NewtonEulerDS(q10,v10,mass,inertialMatrix);
 }
+
+}  // namespace siconos::mechanisms::mbtb::internal
+
 /*Build the MBTB_body and set to the initial postion.*/
-void MBTB_BodyBuild(unsigned int numDS, const std::string& BodyName,  double mass,
-                    SP::SiconosVector initPos, SP::SiconosVector modelCenterMass,
-                    SP::SimpleMatrix inertialMatrix,
-                    const std::string& pluginFextLib,  const std::string& pluginFextFct,
-                    const std::string& pluginMextLib,  const std::string& pluginMextFct,
-                    const std::string& pluginFintLib,  const std::string& pluginFintFct,
-                    const std::string& pluginMintLib,  const std::string& pluginMintFct,
-                    const std::string& pluginFintJacqLib,  const std::string& pluginFintJacqFct,
-                    const std::string& pluginMintJacqLib,  const std::string& pluginMintJacqFct,
-                    const std::string& pluginFintJacvLib,  const std::string& pluginFintJacvFct,
-                    const std::string& pluginMintJacvLib,  const std::string& pluginMintJacvFct,
-                    const std::string& pluginBoundaryConditionLib,  const std::string& pluginBoundaryConditionFct,
-                    SP::IndexInt boundaryConditionIndex)
-{
-  assert(sNbOfBodies > numDS &&"MBTB_BodyBuild numDS out of range.");
-  unsigned int qDim=7;
-  //unsigned int nDof = 3;
+void siconos::mechanisms::MBTB_BodyBuild(
+    unsigned int numDS, const std::string& BodyName, double mass,
+    std::shared_ptr<siconos::algebra::SiconosVector> initPos,
+    std::shared_ptr<siconos::algebra::SiconosVector> modelCenterMass,
+    std::shared_ptr<siconos::algebra::SimpleMatrix> inertialMatrix,
+    const std::string& pluginFextLib, const std::string& pluginFextFct,
+    const std::string& pluginMextLib, const std::string& pluginMextFct,
+    const std::string& pluginFintLib, const std::string& pluginFintFct,
+    const std::string& pluginMintLib, const std::string& pluginMintFct,
+    const std::string& pluginFintJacqLib, const std::string& pluginFintJacqFct,
+    const std::string& pluginMintJacqLib, const std::string& pluginMintJacqFct,
+    const std::string& pluginFintJacvLib, const std::string& pluginFintJacvFct,
+    const std::string& pluginMintJacvLib, const std::string& pluginMintJacvFct,
+    const std::string& pluginBoundaryConditionLib,
+    const std::string& pluginBoundaryConditionFct,
+    const siconos::modeling::BoundaryCondition::Indices&
+        boundaryConditionIndex) {
+  assert(mbtb::data::sNbOfBodies > numDS &&
+         "MBTB_BodyBuild numDS out of range.");
+  unsigned int qDim = 7;
+  // unsigned int nDof = 3;
   unsigned int nDim = 6;
 
-  SP::SiconosVector q10(new SiconosVector(qDim));
-  SP::SiconosVector v10(new SiconosVector(nDim));
-  _MBTB_BodyBuildComputeInitPosition(numDS,mass,initPos,modelCenterMass,inertialMatrix,q10,v10);
-  MBTB_Body * p=nullptr;
-  p =new MBTB_Body(q10,v10,mass,inertialMatrix,modelCenterMass,
-                   BodyName, BodyName);
-
+  auto q10 = std::make_shared<siconos::algebra::SiconosVector>(qDim);
+  auto v10 = std::make_shared<siconos::algebra::SiconosVector>(nDim);
+  mbtb::internal::MBTB_BodyBuildComputeInitPosition(
+      numDS, mass, initPos, modelCenterMass, inertialMatrix, q10, v10);
+  MBTB_Body* p = new MBTB_Body(q10, v10, mass, inertialMatrix, modelCenterMass,
+                               BodyName, BodyName);
 
   // We fix a ds number just to be able to use postprocessing based on hdf5 file
-  p->setNumber(numDS+1);
+  p->setNumber(numDS + 1);
   // set external forces plugin
-  if(pluginFextFct.length()>1)
-  {
-    p->setComputeFExtFunction(pluginFextLib,pluginFextFct);
+  if (pluginFextFct.length() > 1) {
+    p->setComputeFExtFunction(pluginFextLib, pluginFextFct);
   }
-  if(pluginMextFct.length()>1)
-  {
-    p->setComputeMExtFunction(pluginMextLib,pluginMextFct);
+  if (pluginMextFct.length() > 1) {
+    p->setComputeMExtFunction(pluginMextLib, pluginMextFct);
   }
   // set internal forces plugin
-  if(pluginFintFct.length()>1)
-  {
-    p->setComputeFIntFunction(pluginFintLib,pluginFintFct);
+  if (pluginFintFct.length() > 1) {
+    p->setComputeFIntFunction(pluginFintLib, pluginFintFct);
 
-    if(pluginFintJacqFct.length()>1)
-    {
-      if(pluginFintJacqFct == "FiniteDifference")
-      {
-        std::cout <<"setComputeJacobianFIntqByFD(true)" <<std::endl;
+    if (pluginFintJacqFct.length() > 1) {
+      if (pluginFintJacqFct == "FiniteDifference") {
+        std::cout << "setComputeJacobianFIntqByFD(true)" << std::endl;
         p->setComputeJacobianFIntqByFD(true);
-      }
-      else
-      {
-        p->setComputeJacobianFIntqFunction(pluginFintJacqLib,pluginFintJacqFct);
+      } else {
+        p->setComputeJacobianFIntqFunction(pluginFintJacqLib,
+                                           pluginFintJacqFct);
       }
     }
-    if(pluginFintJacvFct.length()>1)
-    {
-      if(pluginFintJacvFct == "FiniteDifference")
-      {
-        std::cout <<"setComputeJacobianFIntvByFD(true)" <<std::endl;
+    if (pluginFintJacvFct.length() > 1) {
+      if (pluginFintJacvFct == "FiniteDifference") {
+        std::cout << "setComputeJacobianFIntvByFD(true)" << std::endl;
         p->setComputeJacobianFIntvByFD(true);
-      }
-      else
-      {
-        p->setComputeJacobianFIntvFunction(pluginFintJacvLib,pluginFintJacvFct);
+      } else {
+        p->setComputeJacobianFIntvFunction(pluginFintJacvLib,
+                                           pluginFintJacvFct);
       }
     }
   }
 
-  if(pluginMintFct.length()>1)
-  {
-    p->setComputeMIntFunction(pluginMintLib,pluginMintFct);
+  if (pluginMintFct.length() > 1) {
+    p->setComputeMIntFunction(pluginMintLib, pluginMintFct);
 
-    if(pluginMintJacqFct.length()>1)
-    {
-      if(pluginMintJacqFct == "FiniteDifference")
-      {
-        std::cout <<"setComputeJacobianMIntqByFD(true)" <<std::endl;
+    if (pluginMintJacqFct.length() > 1) {
+      if (pluginMintJacqFct == "FiniteDifference") {
+        std::cout << "setComputeJacobianMIntqByFD(true)" << std::endl;
         p->setComputeJacobianMIntqByFD(true);
-      }
-      else
-      {
-        p->setComputeJacobianMIntqFunction(pluginMintJacqLib,pluginMintJacqFct);
+      } else {
+        p->setComputeJacobianMIntqFunction(pluginMintJacqLib,
+                                           pluginMintJacqFct);
       }
     }
-    if(pluginMintJacvFct.length()>1)
-    {
-      if(pluginMintJacvFct == "FiniteDifference")
-      {
-        std::cout <<"setComputeJacobianMIntvByFD(true)" <<std::endl;
+    if (pluginMintJacvFct.length() > 1) {
+      if (pluginMintJacvFct == "FiniteDifference") {
+        std::cout << "setComputeJacobianMIntvByFD(true)" << std::endl;
         p->setComputeJacobianMIntvByFD(true);
-      }
-      else
-      {
-        p->setComputeJacobianMIntvFunction(pluginMintJacvLib,pluginMintJacvFct);
+      } else {
+        p->setComputeJacobianMIntvFunction(pluginMintJacvLib,
+                                           pluginMintJacvFct);
       }
     }
   }
   // set boundary condition
-  if(pluginBoundaryConditionFct.length() >1)
-  {
-    //SP::IndexInt bdindex(new IndexInt(1));
+  if (pluginBoundaryConditionFct.length() > 1) {
+    // SP::IndexInt bdindex(new IndexInt(1));
     //(*bdindex)[0] = 4;
-    DEBUG_PRINT("################################################################\n");
+    DEBUG_PRINT(
+        "################################################################\n");
 
     DEBUG_PRINT("###\n");
 
@@ -335,291 +373,312 @@ void MBTB_BodyBuild(unsigned int numDS, const std::string& BodyName,  double mas
     DEBUG_PRINT("###\n");
 
     DEBUG_PRINTF("Set boundary Condition for body numDs = %i\n", numDS);
-    DEBUG_EXPR(
-      for(std::vector<unsigned int>::iterator  itindex = boundaryConditionIndex->begin() ;
-          itindex != boundaryConditionIndex->end();
-          ++itindex)
-  {
-    std::cout << *itindex <<std::endl;
-  };
-  );
+    DEBUG_EXPR(for (std::vector<unsigned int>::iterator itindex =
+                        boundaryConditionIndex->begin();
+                    itindex != boundaryConditionIndex->end();
+                    ++itindex) { std::cout << *itindex << std::endl; };);
 
-    SP::BoundaryCondition bd(new BoundaryCondition(boundaryConditionIndex));
-    bd->setComputePrescribedVelocityFunction(pluginBoundaryConditionLib, pluginBoundaryConditionFct);
+    auto bd = std::make_shared<siconos::modeling::BoundaryCondition>(
+        boundaryConditionIndex);
+    bd->setComputePrescribedVelocityFunction(pluginBoundaryConditionLib,
+                                             pluginBoundaryConditionFct);
     p->setBoundaryConditions(bd);
   }
 
-
-  sDS[numDS].reset(p);
-  //sAllDS.insert(sDS[numDS]);
-  // std::cout << "MBTB_BodyBuild()" <<std::endl;
-  // sDS[numDS]->display();
-  // myModel->nonSmoothDynamicalSystem()->insertDynamicalSystem(sDS[numDS]);
+  mbtb::data::sDS[numDS].reset(p);
+  // sAllDS.insert(mbtb::data::sDS[numDS]);
+  //  std::cout << "MBTB_BodyBuild()" <<std::endl;
+  //  mbtb::data::sDS[numDS]->display();
+  //  myModel->nonSmoothDynamicalSystem()->insertDynamicalSystem(mbtb::data::sDS[numDS]);
 }
 
-void MBTB_JointBuild(unsigned int numJ,const std::string& JointName,
-                     unsigned int jointType,
-                     unsigned int indexDS1, unsigned int indexDS2,
-                     SP::SiconosVector jointPosition)
-{
-  assert(sNbOfJoints > numJ &&"MBTB_JointBuild numJ >=sNbOfJoints.");
-  if(numJ >= sNbOfJoints)
-  {
-    printf("MBTB_JointBuild  numJoint >sNbOfJoints\n");
+void siconos::mechanisms::MBTB_JointBuild(
+    unsigned int numJ, const std::string& JointName, JointsType jointType,
+    unsigned int indexDS1, unsigned int indexDS2,
+    std::shared_ptr<siconos::algebra::SiconosVector> jointPosition) {
+  assert(mbtb::data::sNbOfJoints > numJ &&
+         "MBTB_JointBuild numJ >=mbtb::data::sNbOfJoints.");
+  if (numJ >= mbtb::data::sNbOfJoints) {
+    printf("MBTB_JointBuild  numJoint >mbtb::data::sNbOfJoints\n");
     return;
   }
-  unsigned int lNbEq=0;
-  unsigned int nbDS=1;
-  unsigned int qDim=7;
+  unsigned int lNbEq = 0;
+  unsigned int nbDS = 1;
+  unsigned int qDim = 7;
   /*Data to build the graph*/
-  sJointType[numJ]=jointType;
-  sJointIndexDS[2*numJ]=indexDS1;
-  sJointIndexDS[2*numJ+1]=indexDS2;
+  mbtb::data::sJointType[numJ] = jointType;
+  mbtb::data::sJointIndexDS[2 * numJ] = indexDS1;
+  mbtb::data::sJointIndexDS[2 * numJ + 1] = indexDS2;
   /*BUILD H SimpleMatrix and NSLAW*/
-  if(jointType == PIVOT_0 || jointType == PIVOT_1)
-  {
-    nbDS=1;
-    if(jointType == PIVOT_1)
-    {
-      nbDS=2;
+  if (jointType == JointsType::Pivot0 || jointType == JointsType::Pivot1) {
+    nbDS = 1;
+    if (jointType == JointsType::Pivot1) {
+      nbDS = 2;
     }
-  }
-  else if(jointType == PRISMATIC_0)
-  {
-    nbDS=1;
+  } else if (jointType == JointsType::Prismatic0) {
+    nbDS = 1;
   }
 
-  SP::SiconosVector P(new SiconosVector(3));
-  SP::SiconosVector A(new SiconosVector(3));
-  SP::SiconosVector ds1CenterOfMass = sDS[indexDS1]->centerOfMass();
-  P->setValue(0,jointPosition->getValue(3)-ds1CenterOfMass->getValue(0));
-  P->setValue(1,jointPosition->getValue(4)-ds1CenterOfMass->getValue(1));
-  P->setValue(2,jointPosition->getValue(5)-ds1CenterOfMass->getValue(2));
-  A->setValue(0,jointPosition->getValue(0));
-  A->setValue(1,jointPosition->getValue(1));
-  A->setValue(2,jointPosition->getValue(2));
-  sJointRelations[numJ]= new MBTB_JointR();
-  if(jointType == PIVOT_1)
-  {
-    sJointRelations[numJ]->_jointR.reset(new PivotJointR(P,A,false,sDS[ indexDS1],sDS[indexDS2]));
-    sJointRelations[numJ]->_ds1 = sDS[indexDS1];
-    //sAllDSByInter[numJ].insert(sDS[indexDS1]);
-    //sAllDSByInter[numJ].insert(sDS[indexDS2]);
-  }
-  else if(jointType == PIVOT_0)
-  {
-    sJointRelations[numJ]->_jointR.reset(new PivotJointR(P,A,false,sDS[indexDS1]));
-    sJointRelations[numJ]->_ds1 = sDS[indexDS1];
-    // sAllDSByInter[numJ].insert(sDS[indexDS1]);
-  }
-  else if(jointType == PRISMATIC_0)
-  {
-    sJointRelations[numJ]->_jointR.reset(new PrismaticJointR(A,false,sDS[indexDS1]));
-    sJointRelations[numJ]->_ds1 = sDS[indexDS1];
-    // sAllDSByInter[numJ].insert(sDS[indexDS1]);
+  auto P = std::make_shared<siconos::algebra::SiconosVector>(3);
+  auto A = std::make_shared<siconos::algebra::SiconosVector>(3);
+  auto ds1CenterOfMass = mbtb::data::sDS[indexDS1]->centerOfMass();
+  P->setValue(0, jointPosition->getValue(3) - ds1CenterOfMass->getValue(0));
+  P->setValue(1, jointPosition->getValue(4) - ds1CenterOfMass->getValue(1));
+  P->setValue(2, jointPosition->getValue(5) - ds1CenterOfMass->getValue(2));
+  A->setValue(0, jointPosition->getValue(0));
+  A->setValue(1, jointPosition->getValue(1));
+  A->setValue(2, jointPosition->getValue(2));
+  mbtb::data::sJointRelations[numJ] = new MBTB_JointR();
+  if (jointType == JointsType::Pivot1) {
+    mbtb::data::sJointRelations[numJ]->_jointR =
+        std::make_shared<siconos::joints::PivotJointR>(
+            P, A, false, mbtb::data::sDS[indexDS1], mbtb::data::sDS[indexDS2]);
+    mbtb::data::sJointRelations[numJ]->_ds1 = mbtb::data::sDS[indexDS1];
+    // sAllDSByInter[numJ].insert(mbtb::data::sDS[indexDS1]);
+    // sAllDSByInter[numJ].insert(mbtb::data::sDS[indexDS2]);
+  } else if (jointType == JointsType::Pivot0) {
+    mbtb::data::sJointRelations[numJ]->_jointR =
+        std::make_shared<siconos::joints::PivotJointR>(
+            P, A, false, mbtb::data::sDS[indexDS1]);
+    mbtb::data::sJointRelations[numJ]->_ds1 = mbtb::data::sDS[indexDS1];
+    // sAllDSByInter[numJ].insert(mbtb::data::sDS[indexDS1]);
+  } else if (jointType == JointsType::Prismatic0) {
+    mbtb::data::sJointRelations[numJ]->_jointR =
+        std::make_shared<siconos::joints::PrismaticJointR>(
+            A, false, mbtb::data::sDS[indexDS1]);
+    mbtb::data::sJointRelations[numJ]->_ds1 = mbtb::data::sDS[indexDS1];
+    // sAllDSByInter[numJ].insert(mbtb::data::sDS[indexDS1]);
   }
 
-  lNbEq = sJointRelations[numJ]->_jointR->numberOfConstraints();
+  lNbEq = mbtb::data::sJointRelations[numJ]->_jointR->numberOfConstraints();
 
-  SP::SimpleMatrix lH = std::make_shared<siconos::algebra::SimpleMatrix>(lNbEq,nbDS*qDim));
+  auto lH =
+      std::make_shared<siconos::algebra::SimpleMatrix>(lNbEq, nbDS * qDim);
   lH->zero();
-  SP::EqualityConditionNSL lNSL(new EqualityConditionNSL(lNbEq));
+  auto lNSL = std::make_shared<siconos::modeling::EqualityConditionNSL>(lNbEq);
 
-  sJointRelations[numJ]->_jointR->setJachq(lH);
-//  sInterJoints[numJ].reset(new Interaction(JointName, sAllDSByInter[numJ],
-//                                           numJ, lNbEq , lNSL,
-//                                           sJointRelations[numJ]->_jointR));
-  sInterJoints[numJ].reset(new Interaction(lNSL, sJointRelations[numJ]->_jointR));
-  sJointRelations[numJ]->_interaction = sInterJoints[numJ];
-  // myModel->nonSmoothDynamicalSystem()->link(sInterJoints[numJ],
-  //                                           sDS[indexDS1]);
-  // if(sJointType[numJ]==PIVOT_1)
-  //   myModel->nonSmoothDynamicalSystem()->link(sInterJoints[numJ],
-  //                                             sDS[indexDS2]);
-
-
+  mbtb::data::sJointRelations[numJ]->_jointR->setJachq(lH);
+  //  mbtb::data::sInterJoints[numJ].reset(new Interaction(JointName,
+  //  sAllDSByInter[numJ],
+  //                                           numJ, lNbEq , lNSL,
+  //                                           mbtb::data::sJointRelations[numJ]->_jointR));
+  mbtb::data::sInterJoints[numJ] =
+      std::make_shared<siconos::modeling::Interaction>(
+          lNSL, mbtb::data::sJointRelations[numJ]->_jointR);
+  mbtb::data::sJointRelations[numJ]->_interaction =
+      mbtb::data::sInterJoints[numJ];
+  // myModel->nonSmoothDynamicalSystem()->link(mbtb::data::sInterJoints[numJ],
+  //                                           mbtb::data::sDS[indexDS1]);
+  // if(mbtb::data::sJointType[numJ]==JointsType::Pivot1)
+  //   myModel->nonSmoothDynamicalSystem()->link(mbtb::data::sInterJoints[numJ],
+  //                                             mbtb::data::sDS[indexDS2]);
 }
 
-void MBTB_ContactBuild(unsigned int numContact, const std::string& ContactName,
-                       unsigned int indexBody1, int indexBody2,
-                       unsigned int withFriction, double mu, double en, double et)
-{
-  assert(sNbOfContacts > numContact &&"MBTB_ContactBuild contactId out of range.");
-  sContacts[numContact]=new MBTB_Contact(numContact,ContactName,
-                                         indexBody1, indexBody2,
-                                         sNbOfBodies+2*numContact,
-                                         sNbOfBodies+2*numContact+1,
-                                         withFriction);
-  sContacts[numContact]->_en=en;
+void siconos::mechanisms::MBTB_ContactBuild(unsigned int numContact,
+                                            const std::string& ContactName,
+                                            unsigned int indexBody1,
+                                            int indexBody2,
+                                            unsigned int withFriction,
+                                            double mu, double en, double et) {
+  assert(mbtb::data::sNbOfContacts > numContact &&
+         "MBTB_ContactBuild contactId out of range.");
+  mbtb::data::sContacts[numContact] = std::make_shared<MBTB_Contact>(
+      numContact, ContactName, indexBody1, indexBody2,
+      mbtb::data::sNbOfBodies + 2 * numContact,
+      mbtb::data::sNbOfBodies + 2 * numContact + 1, withFriction);
+  mbtb::data::sContacts[numContact]->set_en(en);
 
-  if(withFriction)
-  {
-    sContacts[numContact]->_et=et;
-    SP::NonSmoothLaw nslaw0(new NewtonImpactFrictionNSL(en,et,mu,3));
-    sInterContacts[numContact].reset(new Interaction(nslaw0,sContacts[numContact]->relation()));
+  if (withFriction) {
+    auto relation = std::make_shared<MBTB_FC3DContactRelation>(
+        mbtb::data::sContacts[numContact]);
+    mbtb::data::sContacts[numContact]->relation() = relation;
+    mbtb::data::sContacts[numContact]->set_et(et);
+    auto nslaw0 = std::make_shared<siconos::modeling::NewtonImpactFrictionNSL>(
+        en, et, mu, 3);
+    mbtb::data::sInterContacts[numContact] =
+        std::make_shared<siconos::modeling::Interaction>(
+            nslaw0, mbtb::data::sContacts[numContact]->relation());
     // MB : contactName is already in MBTB_Contact!
-    // sInterContacts[numContact]->setId(ContactName);
-  }
-  else
-  {
-    SP::NewtonImpactNSL lNSL(new NewtonImpactNSL(sContacts[numContact]->_en));
-    sInterContacts[numContact].reset(new Interaction(lNSL,
-                                     sContacts[numContact]->relation()));
-//    sInterContacts[numContact]->setId(ContactName);
-  }
+    // mbtb::data::sInterContacts[numContact]->setId(ContactName);
+  } else {
+    auto relation = std::make_shared<MBTB_ContactRelation>(
+        mbtb::data::sContacts[numContact]);
+    mbtb::data::sContacts[numContact]->relation() = relation;
 
-  sContacts[numContact]->setInteraction(sInterContacts[numContact]);
-
-  // myModel->nonSmoothDynamicalSystem()->link(sInterContacts[numContact],
-  //                                           sDS[sContacts[numContact]->_indexBody1]);
-  // std::cout << "MBTB_ContactBuild() insert "<< sContacts[numContact]->_indexBody1 <<std::endl;
-
-  // sDS[sContacts[numContact]->_indexBody1]->display();
-  // if(sContacts[numContact]->_indexBody2!=-1)
-  //   myModel->nonSmoothDynamicalSystem()->link(sInterContacts[numContact],
-  //                                             sDS[sContacts[numContact]->_indexBody2]);
-
-
-}
-void MBTB_setSolverIOption(int i,int value)
-{
-  sSimu->oneStepNSProblem(0)->numericsSolverOptions()->iparam[i]=value;
-}
-void MBTB_setSolverDOption(int i,double value)
-{
-  sSimu->oneStepNSProblem(0)->numericsSolverOptions()->dparam[i]=value;
-}
-void  MBTB_initSimu(double hTS, int withProj)
-{
-
-  for(unsigned int numDS =0; numDS<sNbOfBodies; numDS++)
-    myNsds->insertDynamicalSystem(sDS[numDS]);
-  for(unsigned int numJ=0; numJ<sNbOfJoints; numJ++)
-  {
-    if(sJointType[numJ]==PIVOT_0)
-      myNsds->link(sInterJoints[numJ],
-                   sDS[sJointIndexDS[2*numJ]]);
-    if(sJointType[numJ]==PIVOT_1)
-      myNsds->link(sInterJoints[numJ],
-                   sDS[sJointIndexDS[2*numJ]],
-                   sDS[sJointIndexDS[2*numJ+1]]);
+    auto lNSL = std::make_shared<siconos::modeling::NewtonImpactNSL>(
+        mbtb::data::sContacts[numContact]->en());
+    mbtb::data::sInterContacts[numContact] =
+        std::make_shared<siconos::modeling::Interaction>(
+            lNSL, mbtb::data::sContacts[numContact]->relation());
+    //    mbtb::data::sInterContacts[numContact]->setId(ContactName);
   }
 
-  for(unsigned int numC=0; numC<sNbOfContacts; numC++)
-  {
+  mbtb::data::sContacts[numContact]->setInteraction(
+      mbtb::data::sInterContacts[numContact]);
 
-    if(sContacts[numC]->_indexBody2!=-1)
-    {
-      DEBUG_PRINT("MBTB_initSimu(double hTS, int withProj). Link contact with two bodies\n");
-      myNsds->link(sInterContacts[numC],
-                   sDS[sContacts[numC]->_indexBody1],
-                   sDS[sContacts[numC]->_indexBody2]);
-      // sInterContacts[numC]->insert(   sDS[sContacts[numC]->_indexBody2]  );
+  // myModel->nonSmoothDynamicalSystem()->link(mbtb::data::sInterContacts[numContact],
+  //                                           mbtb::data::sDS[mbtb::data::sContacts[numContact]->_indexBody1]);
+  // std::cout << "MBTB_ContactBuild() insert "<<
+  // mbtb::data::sContacts[numContact]->_indexBody1 <<std::endl;
 
+  // mbtb::data::sDS[mbtb::data::sContacts[numContact]->_indexBody1]->display();
+  // if(mbtb::data::sContacts[numContact]->_indexBody2!=-1)
+  //   myModel->nonSmoothDynamicalSystem()->link(mbtb::data::sInterContacts[numContact],
+  //                                             mbtb::data::sDS[mbtb::data::sContacts[numContact]->_indexBody2]);
+}
+void siconos::mechanisms::MBTB_setSolverIOption(int i, int value) {
+  mbtb::data::sSimu->oneStepNSProblem(0)->numericsSolverOptions()->iparam[i] =
+      value;
+}
+void siconos::mechanisms::MBTB_setSolverDOption(int i, double value) {
+  mbtb::data::sSimu->oneStepNSProblem(0)->numericsSolverOptions()->dparam[i] =
+      value;
+}
+void siconos::mechanisms::MBTB_initSimu(double hTS, int withProj) {
+  for (unsigned int numDS = 0; numDS < mbtb::data::sNbOfBodies; numDS++)
+    mbtb::data::myNsds->insertDynamicalSystem(mbtb::data::sDS[numDS]);
+  for (unsigned int numJ = 0; numJ < mbtb::data::sNbOfJoints; numJ++) {
+    if (mbtb::data::sJointType[numJ] == JointsType::Pivot0)
+      mbtb::data::myNsds->link(
+          mbtb::data::sInterJoints[numJ],
+          mbtb::data::sDS[mbtb::data::sJointIndexDS[2 * numJ]]);
+    if (mbtb::data::sJointType[numJ] == JointsType::Pivot1)
+      mbtb::data::myNsds->link(
+          mbtb::data::sInterJoints[numJ],
+          mbtb::data::sDS[mbtb::data::sJointIndexDS[2 * numJ]],
+          mbtb::data::sDS[mbtb::data::sJointIndexDS[2 * numJ + 1]]);
+  }
+
+  for (unsigned int numC = 0; numC < mbtb::data::sNbOfContacts; numC++) {
+    if (mbtb::data::sContacts[numC]->indexBody2() != -1) {
+      DEBUG_PRINT(
+          "MBTB_initSimu(double hTS, int withProj). Link contact with two "
+          "bodies\n");
+      mbtb::data::myNsds->link(
+          mbtb::data::sInterContacts[numC],
+          mbtb::data::sDS[mbtb::data::sContacts[numC]->indexBody1()],
+          mbtb::data::sDS[mbtb::data::sContacts[numC]->indexBody2()]);
+      // mbtb::data::sInterContacts[numC]->insert(
+      // mbtb::data::sDS[mbtb::data::sContacts[numC]->_indexBody2]  );
+
+    } else {
+      DEBUG_PRINT(
+          "MBTB_initSimu(double hTS, int withProj). Link contact with one "
+          "body\n");
+      mbtb::data::myNsds->link(
+          mbtb::data::sInterContacts[numC],
+          mbtb::data::sDS[mbtb::data::sContacts[numC]->indexBody1()]);
+
+      // std::cout <<"link(mbtb::data::sInterContacts[numC],
+      // mbtb::data::sDS[mbtb::data::sContacts[numC]->_indexBody1]); " <<
+      // std::endl; std::cout <<
+      // "============"<<   mbtb::data::sInterContacts[numC] <<std::endl;
+      // mbtb::data::sInterContacts[numC]->display();
+      // std::cout << mbtb::data::sDS[mbtb::data::sContacts[numC]->_indexBody1]
+      // << std::endl;
+      // mbtb::data::sDS[mbtb::data::sContacts[numC]->_indexBody1]->display();
+      // mbtb::data::sInterContacts[numC]->insert(
+      // mbtb::data::sDS[mbtb::data::sContacts[numC]->_indexBody1]  );
+      // mbtb::data::sInterContacts[numC]->display();
+      //    mbtb::data::sInterContacts[numC]->dynamicalSystem(0)->display();
     }
-    else
-    {
-      DEBUG_PRINT("MBTB_initSimu(double hTS, int withProj). Link contact with one body\n");
-      myNsds->link(sInterContacts[numC],
-                   sDS[sContacts[numC]->_indexBody1]);
-
-
-      // std::cout <<"link(sInterContacts[numC],       sDS[sContacts[numC]->_indexBody1]); " << std::endl;
-      // std::cout <<  "============"<<   sInterContacts[numC] <<std::endl;
-      // sInterContacts[numC]->display();
-      // std::cout << sDS[sContacts[numC]->_indexBody1] << std::endl;
-      // sDS[sContacts[numC]->_indexBody1]->display();
-      // sInterContacts[numC]->insert(   sDS[sContacts[numC]->_indexBody1]  );
-      // sInterContacts[numC]->display();
-      //    sInterContacts[numC]->dynamicalSystem(0)->display();
-    }
   }
-
-
 
   // -- (2) Time discretisation --
-  SP::TimeDiscretisation t(new TimeDiscretisation(myt0,hTS));
+  auto t = std::make_shared<siconos::simulation::TimeDiscretisation>(
+      mbtb::data::myt0, hTS);
 
   // -- (3) one step non smooth problem
-  //osnspb.reset(new Equality());
-  //osnspb.reset(new MLCP(SICONOS_MLCP_PATH));
-  SP::LinearOSNS osnspb(new GenericMechanical(SICONOS_FRICTION_3D_ONECONTACT_NSN_GP));
-  //SP::LinearOSNS osnspb(new GenericMechanical());
+  // osnspb.reset(new Equality());
+  // osnspb.reset(new MLCP(SICONOS_MLCP_PATH));
+  auto osnspb =
+      std::make_shared<siconos::nonsmooth_formulations::GenericMechanical>(
+          SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
+
   osnspb->setKeepLambdaAndYState(true);
-  //osnspb->numericsSolverOptions()->iparam[1]=0;
-  osnspb->numericsSolverOptions()->dWork=(double*) malloc(512*sizeof(double));
-  //osnspb->setNumericsVerboseMode(true);
+  // osnspb->numericsSolverOptions()->iparam[1]=0;
+  osnspb->numericsSolverOptions()->dWork =
+      (double*)malloc(512 * sizeof(double));
+  // osnspb->setNumericsVerboseMode(true);
 
-  //osnspb->numericsSolverOptions()->iparam[1]=0;
-  //osnspb->numericsSolverOptions()->dparam[0]=1e-5;
-  SP::MLCPProjectOnConstraints osnspb_pos;
+  // osnspb->numericsSolverOptions()->iparam[1]=0;
+  // osnspb->numericsSolverOptions()->dparam[0]=1e-5;
+  std::shared_ptr<siconos::nonsmooth_formulations::MLCPProjectOnConstraints>
+      osnspb_pos;
 
-  if(withProj)
-  {
-    osnspb_pos.reset(new MLCPProjectOnConstraints(SICONOS_MLCP_ENUM));
-    //osnspb_pos->setNumericsVerboseMode(1);
+  if (withProj) {
+    osnspb_pos = std::make_shared<
+        siconos::nonsmooth_formulations::MLCPProjectOnConstraints>(
+        SICONOS_MLCP_ENUM);
+    // osnspb_pos->setNumericsVerboseMode(1);
   }
-
-
-
 
   // -- (4) Simulation setup with (1) (2) (3)
 #ifdef MBTB_MOREAU_YES
-  SP::MBTB_MoreauJeanOSI pOSI1;
-  SP::MoreauJeanCombinedProjectionOSI pOSI2;
-  if(withProj==0 or withProj==1)
-  {
-    pOSI1.reset(new MBTB_MoreauJeanOSI(sDParams[0]));
-    pOS11->insertDynamicalSystem(sDS[0]);
-    pOSI1->_deactivateYPosThreshold= sDParams[4];
-    pOSI1->_deactivateYVelThreshold= sDParams[5];
-    pOSI1->_activateYPosThreshold= sDParams[6];
-    pOSI1->_activateYVelThreshold= sDParams[7];
+  std::shared_ptr<siconos::mechanisms::MBTB_MoreauJeanOSI> pOSI1;
+  std::shared_ptr<siconos::integrators::MoreauJeanCombinedProjectionOSI> pOSI2;
+  if (withProj == 0 or withProj == 1) {
+    pOSI1 = std::make_shared<siconos::mechanisms::MBTB_MoreauJeanOSI>(
+        mbtb::data::sDParams[0]);
+    pOS11->insertDynamicalSystem(mbtb::data::sDS[0]);
+    pOSI1->_deactivateYPosThreshold = mbtb::data::sDParams[4];
+    pOSI1->_deactivateYVelThreshold = mbtb::data::sDParams[5];
+    pOSI1->_activateYPosThreshold = mbtb::data::sDParams[6];
+    pOSI1->_activateYVelThreshold = mbtb::data::sDParams[7];
   }
 #else
-  SP::MoreauJeanOSI pOSI0;
-  SP::MoreauJeanDirectProjectionOSI pOSI1;
-  SP::MoreauJeanCombinedProjectionOSI pOSI2;
-  if(withProj==0)
-  {
-    pOSI0.reset(new MoreauJeanOSI(sDParams[0]));
-    //pOSI0->insertDynamicalSystem(sDS[0]);
-  }
-  else if(withProj==1)
-  {
-    pOSI1.reset(new MoreauJeanDirectProjectionOSI(sDParams[0]));
-    //pOSI1->insertDynamicalSystem(sDS[0]);
-    pOSI1->setDeactivateYPosThreshold(sDParams[4]);
-    pOSI1->setDeactivateYVelThreshold(sDParams[5]);
-    pOSI1->setActivateYPosThreshold(sDParams[6]);
-    pOSI1->setActivateYVelThreshold(sDParams[7]);
+  std::shared_ptr<siconos::integrators::MoreauJeanOSI> pOSI0;
+  std::shared_ptr<siconos::integrators::MoreauJeanDirectProjectionOSI> pOSI1;
+  std::shared_ptr<siconos::integrators::MoreauJeanCombinedProjectionOSI> pOSI2;
+  if (withProj == 0) {
+    pOSI0 = std::make_shared<siconos::integrators::MoreauJeanOSI>(
+        mbtb::data::sDParams[0]);
+    // pOSI0->insertDynamicalSystem(mbtb::data::sDS[0]);
+  } else if (withProj == 1) {
+    pOSI1 =
+        std::make_shared<siconos::integrators::MoreauJeanDirectProjectionOSI>(
+            mbtb::data::sDParams[0]);
+    // pOSI1->insertDynamicalSystem(mbtb::data::sDS[0]);
+    pOSI1->setDeactivateYPosThreshold(mbtb::data::sDParams[4]);
+    pOSI1->setDeactivateYVelThreshold(mbtb::data::sDParams[5]);
+    pOSI1->setActivateYPosThreshold(mbtb::data::sDParams[6]);
+    pOSI1->setActivateYVelThreshold(mbtb::data::sDParams[7]);
   }
 #endif
-  else if(withProj==2)
-  {
-    pOSI2.reset(new MoreauJeanCombinedProjectionOSI(sDParams[0]));
-    //pOSI2->insertDynamicalSystem(sDS[0]);
+  else if (withProj == 2) {
+    pOSI2 =
+        std::make_shared<siconos::integrators::MoreauJeanCombinedProjectionOSI>(
+            mbtb::data::sDParams[0]);
+    // pOSI2->insertDynamicalSystem(mbtb::data::sDS[0]);
   }
 
-
-  if(withProj==0)
-  {
-    sSimu.reset(new MBTB_TimeStepping(myNsds,t,pOSI0,osnspb));
-    SP::MBTB_TimeStepping spSimu = (std::static_pointer_cast<MBTB_TimeStepping>(sSimu));
-  }
-  else if(withProj==1)
-  {
-    sSimu.reset(new MBTB_TimeSteppingProj(myNsds,t,pOSI1,osnspb,osnspb_pos,sDParams[11]));
-    (std::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setProjectionMaxIteration(sDParams[8]);
-    (std::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setConstraintTol(sDParams[9]);
-    (std::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setConstraintTolUnilateral(sDParams[10]);
-  }
-  else if(withProj==2)
-  {
-    sSimu.reset(new MBTB_TimeSteppingCombinedProj(myNsds,t,pOSI2,osnspb,osnspb_pos,2));
-    (std::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->setProjectionMaxIteration(sDParams[8]);
-    (std::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->setConstraintTol(sDParams[9]);
-    (std::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(sSimu))->setConstraintTolUnilateral(sDParams[10]);
+  if (withProj == 0) {
+    mbtb::data::sSimu =
+        std::make_shared<siconos::mechanisms::MBTB_TimeStepping>(
+            mbtb::data::myNsds, t, pOSI0, osnspb);
+    auto spSimu =
+        (std::static_pointer_cast<MBTB_TimeStepping>(mbtb::data::sSimu));
+  } else if (withProj == 1) {
+    mbtb::data::sSimu =
+        std::make_shared<siconos::mechanisms::MBTB_TimeSteppingProj>(
+            mbtb::data::myNsds, t, pOSI1, osnspb, osnspb_pos,
+            mbtb::data::sDParams[11]);
+    (std::static_pointer_cast<MBTB_TimeSteppingProj>(mbtb::data::sSimu))
+        ->setProjectionMaxIteration(mbtb::data::sDParams[8]);
+    (std::static_pointer_cast<MBTB_TimeSteppingProj>(mbtb::data::sSimu))
+        ->setConstraintTol(mbtb::data::sDParams[9]);
+    (std::static_pointer_cast<MBTB_TimeSteppingProj>(mbtb::data::sSimu))
+        ->setConstraintTolUnilateral(mbtb::data::sDParams[10]);
+  } else if (withProj == 2) {
+    mbtb::data::sSimu =
+        std::make_shared<siconos::mechanisms::MBTB_TimeSteppingCombinedProj>(
+            mbtb::data::myNsds, t, pOSI2, osnspb, osnspb_pos, 2);
+    (std::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(mbtb::data::sSimu))
+        ->setProjectionMaxIteration(mbtb::data::sDParams[8]);
+    (std::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(mbtb::data::sSimu))
+        ->setConstraintTol(mbtb::data::sDParams[9]);
+    (std::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(mbtb::data::sSimu))
+        ->setConstraintTolUnilateral(mbtb::data::sDParams[10]);
   }
 
   // --  OneStepIntegrators --
@@ -630,228 +689,213 @@ void  MBTB_initSimu(double hTS, int withProj)
    *  9/06/2015 :  VA commented the use of multiple OSI
    */
 
-  for(unsigned int numDS =1; numDS<sNbOfBodies; numDS++)
-  {
+  for (unsigned int numDS = 1; numDS < mbtb::data::sNbOfBodies; numDS++) {
 #ifdef MBTB_MOREAU_YES
-    if(withProj==0 or withProj==1)
-    {
-      //pOSI1.reset(new MBTB_MoreauJeanOSI(sDParams[0]));
-      //pOSI1->insertDynamicalSystem(sDS[numDS]);
-      // pOSI1->_deactivateYPosThreshold= sDParams[4];
-      // pOSI1->_deactivateYVelThreshold= sDParams[5];
-      // pOSI1->_activateYPosThreshold= sDParams[6];
-      // pOSI1->_activateYVelThreshold= sDParams[7];
-      // sSimu->insertIntegrator(pOSI1);
+    if (withProj == 0 or withProj == 1) {
+      // pOSI1.reset(new MBTB_MoreauJeanOSI(mbtb::data::sDParams[0]));
+      // pOSI1->insertDynamicalSystem(mbtb::data::sDS[numDS]);
+      //  pOSI1->_deactivateYPosThreshold= mbtb::data::sDParams[4];
+      //  pOSI1->_deactivateYVelThreshold= mbtb::data::sDParams[5];
+      //  pOSI1->_activateYPosThreshold= mbtb::data::sDParams[6];
+      //  pOSI1->_activateYVelThreshold= mbtb::data::sDParams[7];
+      //  mbtb::data::sSimu->insertIntegrator(pOSI1);
     }
 #else
-    if(withProj==0)
-    {
-      //pOSI0.reset(new MoreauJeanOSI(sDParams[0]));
-      //pOSI0->insertDynamicalSystem(sDS[numDS]);
-      // sSimu->insertIntegrator(pOSI0);
-    }
-    else if(withProj==1)
-    {
-      //pOSI1.reset(new MoreauJeanDirectProjectionOSI(sDParams[0]));
-      //pOSI1->insertDynamicalSystem(sDS[numDS]);
-      // pOSI1->setDeactivateYPosThreshold(sDParams[4]);
-      // pOSI1->setDeactivateYVelThreshold(sDParams[5]);
-      // pOSI1->setActivateYPosThreshold(sDParams[6];
-      // pOSI1->setActivateYVelThreshold(sDParams[7]);
-      // sSimu->insertIntegrator(pOSI1);
+    if (withProj == 0) {
+      // pOSI0.reset(new MoreauJeanOSI(mbtb::data::sDParams[0]));
+      // pOSI0->insertDynamicalSystem(mbtb::data::sDS[numDS]);
+      //  mbtb::data::sSimu->insertIntegrator(pOSI0);
+    } else if (withProj == 1) {
+      // pOSI1.reset(new
+      // MoreauJeanDirectProjectionOSI(mbtb::data::sDParams[0]));
+      // pOSI1->insertDynamicalSystem(mbtb::data::sDS[numDS]);
+      //  pOSI1->setDeactivateYPosThreshold(mbtb::data::sDParams[4]);
+      //  pOSI1->setDeactivateYVelThreshold(mbtb::data::sDParams[5]);
+      //  pOSI1->setActivateYPosThreshold(mbtb::data::sDParams[6];
+      //  pOSI1->setActivateYVelThreshold(mbtb::data::sDParams[7]);
+      //  mbtb::data::sSimu->insertIntegrator(pOSI1);
     }
 #endif
-    else if(withProj==2)
-    {
-      //pOSI2.reset(new MoreauJeanCombinedProjectionOSI(sDParams[0]));
-      //pOSI2->insertDynamicalSystem(sDS[numDS]);
-      // sSimu->insertIntegrator(pOSI2);
+    else if (withProj == 2) {
+      // pOSI2.reset(new
+      // MoreauJeanCombinedProjectionOSI(mbtb::data::sDParams[0]));
+      // pOSI2->insertDynamicalSystem(mbtb::data::sDS[numDS]);
+      //  mbtb::data::sSimu->insertIntegrator(pOSI2);
     }
   }
 
-
   printf("====> COMPUTE H OF INTERATIONS: (just for display)\n");
-  SP::InteractionsGraph indexSet0 = myNsds->topology()->indexSet0();
-  for(unsigned int numJ=0; numJ<sNbOfJoints; numJ++)
-  {
-    printf("-->compute h of %d \n",numJ);
-    SP::Interaction inter = sJointRelations[numJ]->_interaction;
-    SiconosVector& y = *(inter->y(0));
-    sJointRelations[numJ]->_jointR->computeOutput(0.,*inter,0);
+  auto indexSet0 = mbtb::data::myNsds->topology()->indexSet0();
+  for (unsigned int numJ = 0; numJ < mbtb::data::sNbOfJoints; numJ++) {
+    printf("-->compute h of %d \n", numJ);
+    auto inter = mbtb::data::sJointRelations[numJ]->_interaction;
+    auto& y = *(inter->y(0));
+    mbtb::data::sJointRelations[numJ]->_jointR->computeOutput(0., *inter, 0);
     y.display();
   }
   printf("====> COMPUTE H OF INTERATION END)\n");
 
-  FILE *fp;
+  FILE* fp;
   fp = fopen("simulation_results.dat", "w");
-  _MBTB_printHeader(fp);
-  fclose(fp) ;
-  cout <<"====> end of initialisation" <<endl<<endl;
+  mbtb::internal::MBTB_printHeader(fp);
+  fclose(fp);
+  cout << "====> end of initialisation" << endl << endl;
 }
-SP::NonSmoothDynamicalSystem MBTB_nsds()
-{
-  return myNsds;
+std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem>
+siconos::mechanisms::MBTB_nsds() {
+  return mbtb::data::myNsds;
 }
-SP::Simulation MBTB_simulation()
-{
-  return sSimu;
-}
-
-void MBTB_doProj(unsigned int v)
-{
-  (std::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setDoProj(v);
-}
-void MBTB_doOnlyProj(unsigned int v)
-{
-  (std::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setDoOnlyProj(v);
-}
-void MBTB_projectionMaxIteration(unsigned int v)
-{
-  (std::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setProjectionMaxIteration(v);
-}
-void MBTB_constraintTol(double v)
-{
-  (std::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setConstraintTol(v);
+std::shared_ptr<siconos::simulation::Simulation>
+siconos::mechanisms::MBTB_simulation() {
+  return mbtb::data::sSimu;
 }
 
-void MBTB_constraintTolUnilateral(double v)
-{
-  (std::static_pointer_cast<MBTB_TimeSteppingProj>(sSimu))->setConstraintTolUnilateral(v);
+void siconos::mechanisms::MBTB_doProj(unsigned int v) {
+  (std::static_pointer_cast<MBTB_TimeSteppingProj>(mbtb::data::sSimu))
+      ->setDoProj(v);
+}
+void siconos::mechanisms::MBTB_doOnlyProj(unsigned int v) {
+  (std::static_pointer_cast<MBTB_TimeSteppingProj>(mbtb::data::sSimu))
+      ->setDoOnlyProj(v);
+}
+void siconos::mechanisms::MBTB_projectionMaxIteration(unsigned int v) {
+  (std::static_pointer_cast<MBTB_TimeSteppingProj>(mbtb::data::sSimu))
+      ->setProjectionMaxIteration(v);
+}
+void siconos::mechanisms::MBTB_constraintTol(double v) {
+  (std::static_pointer_cast<MBTB_TimeSteppingProj>(mbtb::data::sSimu))
+      ->setConstraintTol(v);
 }
 
-void MBTB_run(int NbSteps)
-{
+void siconos::mechanisms::MBTB_constraintTolUnilateral(double v) {
+  (std::static_pointer_cast<MBTB_TimeSteppingProj>(mbtb::data::sSimu))
+      ->setConstraintTolUnilateral(v);
+}
 
-  FILE *fp;
+void siconos::mechanisms::MBTB_run(int NbSteps) {
+  FILE* fp;
   fp = fopen("simulation_results.dat", "a");
-  int currentTimerCmp = sTimerCmp;
-  for(int ii=0; ii<NbSteps; ii++)
-  {
-    //while (true){
-    sTimerCmp++;
-    if(sTimerCmp%sFreqOutput==0)
-    {
-      printf("STEP Number = %d < %d.\n",sTimerCmp,NbSteps+currentTimerCmp);
+  int currentTimerCmp = mbtb::data::sTimerCmp;
+  for (int ii = 0; ii < NbSteps; ii++) {
+    // while (true){
+    mbtb::data::sTimerCmp++;
+    if (mbtb::data::sTimerCmp % mbtb::data::sFreqOutput == 0) {
+      printf("STEP Number = %d < %d.\n", mbtb::data::sTimerCmp,
+             NbSteps + currentTimerCmp);
     }
     /*NB: first step not useful*/
-    _MBTB_STEP();
-    _MBTB_displayStep();
-    if(sTimerCmp%sFreqOutput==0)
-    {
-      _MBTB_printStep(fp);
+    mbtb::internal::MBTB_STEP();
+    mbtb::internal::MBTB_displayStep();
+    if (mbtb::data::sTimerCmp % mbtb::data::sFreqOutput == 0) {
+      mbtb::internal::MBTB_printStep(fp);
     }
 
-
-
-    //if (sTimerCmp%sFreqGraphic==0){
-    //   CADMBTB_DumpGraphic();
-    //}
-    //break;
+    // if (mbtb::data::sTimerCmp%mbtb::data::sFreqGraphic==0){
+    //    CADMBTB_DumpGraphic();
+    // }
+    // break;
   }
-  fclose(fp) ;
+  fclose(fp);
   ACE_PRINT_TIME();
-  //updateDSFromSiconos();
-  //updateContactFromDS();
-  //QList<MDIWindow*>::iterator i;
+  // updateDSFromSiconos();
+  // updateContactFromDS();
+  // QList<MDIWindow*>::iterator i;
 }
 
-void MBTB_moveBodyToPosWithSpeed(unsigned int numDS, SP::SiconosVector aPos, SP::SiconosVector aVel)
-{
-  SP::SiconosVector q = sDS[numDS]->q();
-  *q= *aPos;
-  SP::SiconosVector v = sDS[numDS]->twist();
-  *v= *aVel;
+void siconos::mechanisms::MBTB_moveBodyToPosWithSpeed(
+    unsigned int numDS, std::shared_ptr<siconos::algebra::SiconosVector> aPos,
+    std::shared_ptr<siconos::algebra::SiconosVector> aVel) {
+  auto q = mbtb::data::sDS[numDS]->q();
+  *q = *aPos;
+  auto v = mbtb::data::sDS[numDS]->twist();
+  *v = *aVel;
   MBTB_updateDSFromSiconos();
-  _MBTB_updateContactFromDS();
-  sDS[numDS]->swapInMemory();
+  mbtb::internal::MBTB_updateContactFromDS();
+  mbtb::data::sDS[numDS]->swapInMemory();
 }
-void MBTB_setGraphicFreq(unsigned int freq)
-{
-  sFreqGraphic=freq;
+void siconos::mechanisms::MBTB_setGraphicFreq(unsigned int freq) {
+  mbtb::data::sFreqGraphic = freq;
 }
-void MBTB_setOutputFreq(unsigned int freq)
-{
-  sFreqOutput=freq;
+void siconos::mechanisms::MBTB_setOutputFreq(unsigned int freq) {
+  mbtb::data::sFreqOutput = freq;
 }
-void MBTB_setJointPoints(unsigned int numJ, SP::SiconosVector G0C1,SP::SiconosVector G0C2)
-{
-  sJointRelations[numJ]->_G0C1=G0C1;
-  sJointRelations[numJ]->_G0C2=G0C2;
+void siconos::mechanisms::MBTB_setJointPoints(
+    unsigned int numJ, std::shared_ptr<siconos::algebra::SiconosVector> G0C1,
+    std::shared_ptr<siconos::algebra::SiconosVector> G0C2) {
+  mbtb::data::sJointRelations[numJ]->_G0C1 = G0C1;
+  mbtb::data::sJointRelations[numJ]->_G0C2 = G0C2;
 }
 
-void MBTB_ContactSetDParam(unsigned int paramId,unsigned int contactId,unsigned int idShape,double v)
-{
-  assert(sNbOfContacts > contactId &&"MBTB_ContactLoadCADFile contactId out of range.");
-  // unsigned int IdInCAD=sNbOfBodies+2*contactId;
-  switch(paramId)
-  {
-  case 1:
-    sContacts[contactId]->_Offset=v;
-    break;
-  case 2:
-    sArtefactLength=v;
-    break;
-  case 3:
-    sArtefactThreshold=v;
-    break;
-  case 4:
-    sNominalForce=v;
-    break;
-  default:
-    printf("Error: MBTB_ContactSetDParam paramId out of range \n");
+void siconos::mechanisms::MBTB_ContactSetDParam(unsigned int paramId,
+                                                unsigned int contactId,
+                                                unsigned int idShape,
+                                                double v) {
+  assert(mbtb::data::sNbOfContacts > contactId &&
+         "MBTB_ContactLoadCADFile contactId out of range.");
+  // unsigned int IdInCAD=mbtb::data::sNbOfBodies+2*contactId;
+  switch (paramId) {
+    case 1:
+      mbtb::data::sContacts[contactId]->set_offset(v);
+      break;
+    case 2:
+      mbtb::data::sArtefactLength = v;
+      break;
+    case 3:
+      mbtb::data::sArtefactThreshold = v;
+      break;
+    case 4:
+      mbtb::data::sNominalForce = v;
+      break;
+    default:
+      printf("Error: MBTB_ContactSetDParam paramId out of range \n");
   }
 }
-void MBTB_ContactSetIParam(unsigned int paramId,unsigned int contactId,unsigned int idShape,  int v)
-{
-  switch(paramId)
-  {
-  case 0:
-    sContacts[contactId]->_OffsetP1=v;
-    break;
-  case 1:
-    sContacts[contactId]->_normalFromFace1=v;
-    break;
-  case 2:
-    sDrawMode=(unsigned int)v;
-    break;
-  default:
-    printf("Error: MBTB_ContactSetIParam paramId out of range \n");
+void siconos::mechanisms::MBTB_ContactSetIParam(unsigned int paramId,
+                                                unsigned int contactId,
+                                                unsigned int idShape, bool v) {
+  switch (paramId) {
+    case 0:
+      mbtb::data::sContacts[contactId]->set_offset_to_P1(v);
+      break;
+    case 1:
+      mbtb::data::sContacts[contactId]->set_normal_from_face1(v);
+      break;
+    case 2:
+      mbtb::data::sDrawMode = v;
+      break;
+    default:
+      printf("Error: MBTB_ContactSetIParam paramId out of range \n");
   }
 }
-void MBTB_BodySetDParam(unsigned int paramId,unsigned int bodyId,double v)
-{
+void siconos::mechanisms::MBTB_BodySetDParam(unsigned int paramId,
+                                             unsigned int bodyId, double v) {
   printf("MBTB_BodySetDParam not yet implemented\n");
 }
 
-void MBTB_BodySetIParam(unsigned int paramId,unsigned int bodyId,int v)
-{
+void siconos::mechanisms::MBTB_BodySetIParam(unsigned int paramId,
+                                             unsigned int bodyId, int v) {
   printf("MBTB_BodySetIParam not yet implemented\n");
 }
-void MBTB_BodySetVelocity(unsigned int numDS, SP::SiconosVector aVel)
-{
-  SP::SiconosVector v = sDS[numDS]->twist();
-  *v= *aVel;
-  SP::SiconosVector v0 = sDS[numDS]->twist0();
-  *v0=*aVel;
+void siconos::mechanisms::MBTB_BodySetVelocity(
+    unsigned int numDS, std::shared_ptr<siconos::algebra::SiconosVector> aVel) {
+  auto v = mbtb::data::sDS[numDS]->twist();
+  *v = *aVel;
+  auto v0 = mbtb::data::sDS[numDS]->twist0();
+  *v0 = *aVel;
 }
-void MBTB_SetDParam(unsigned int paramId,double v)
-{
-  sDParams[paramId]=v;
+void siconos::mechanisms::MBTB_SetDParam(unsigned int paramId, double v) {
+  mbtb::data::sDParams[paramId] = v;
 }
-void MBTB_print_dist(unsigned int v)
-{
-  sPrintDist=v;
+void siconos::mechanisms::MBTB_print_dist(unsigned int v) {
+  mbtb::data::sPrintDist = v;
 }
 
-void MBTB_displayStep_bodies(unsigned int v)
-{
-  sDisplayStepBodies=v;
+void siconos::mechanisms::MBTB_displayStep_bodies(unsigned int v) {
+  mbtb::data::sDisplayStepBodies = v;
 }
-void MBTB_displayStep_joints(unsigned int v)
-{
-  sDisplayStepJoints=v;
+void siconos::mechanisms::MBTB_displayStep_joints(unsigned int v) {
+  mbtb::data::sDisplayStepJoints = v;
 }
-void MBTB_displayStep_contacts(unsigned int v)
-{
-  sDisplayStepContacts=v;
+void siconos::mechanisms::MBTB_displayStep_contacts(unsigned int v) {
+  mbtb::data::sDisplayStepContacts = v;
 }

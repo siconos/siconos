@@ -154,7 +154,7 @@ siconos::modeling::NewtonEulerDS::NewtonEulerDS(
     std::shared_ptr<siconos::algebra::SiconosVector> Q0,
     std::shared_ptr<siconos::algebra::SiconosVector> Twist0, double mass,
     std::shared_ptr<siconos::algebra::SiconosMatrix> inertialMatrix)
-    : NewtonEulerDS()
+  : NewtonEulerDS{}
 
 {
   DEBUG_BEGIN(

@@ -16,6 +16,7 @@
 #define DEFINE_STANDARD_ALLOC
 
 %{
+#include <Standard_DefineAlloc.hxx>  
 #include <TopoDS_Shape.hxx>
 %}
 %typecheck(SWIG_TYPECHECK_INTEGER) (const TopoDS_Shape& shape) ()
@@ -53,6 +54,7 @@
 
 %}
 %shared_ptr(TopoDS_Shape)
+#define Handle(Class) opencascade::handle<Class>
 %include <TopoDS_Shape.hxx>
 
 %{
