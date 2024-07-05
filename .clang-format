@@ -1,5 +1,5 @@
 # Doc: https://clang.llvm.org/docs/ClangFormatStyleOptions.html
-# Rules: https://llvm.org/docs/CodingStandards.html 
+# Rules: https://google.github.io/styleguide/cppguide.html
 BasedOnStyle: Google
 # BreakBeforeBraces: Microsoft
 IncludeBlocks: Regroup

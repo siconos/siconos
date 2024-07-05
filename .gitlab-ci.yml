@@ -26,6 +26,14 @@ ubuntu22.04:docker-build:
     RESULT_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
   extends: .docker-build
 
+ubuntu23.04:docker-build:
+  variables:
+    IMAGE_NAME: ubuntu23.04
+    SICONOS_DOCKER_TARGET: siconos-base-python
+    RESULT_NAME: $SICONOS_REGISTRY/sources/ubuntu23.04
+  extends: .docker-build
+
+  
 image4doc:docker-build:
   variables:
     IMAGE_NAME: ubuntu22.04
@@ -77,6 +85,37 @@ mambaenv:docker-build:
 # -------------- Configure, build and test Siconos --------------
 
 # -- Jobs that will always be executed (rule .devel-rules) --
+
+# ------ ubuntu 22, debug setup -------
+ubuntu23.04-debug:configure:
+  variables:
+    IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu23.04
+    CDASH_SUBMIT: 1
+    CONF_FILE: $SICONOS_CMAKE_CONF_PATH/siconos_devmode.cmake
+  extends:
+    - .siconos-configure
+    - .devel-rules
+  needs:
+    - job: ubuntu23.04:docker-build
+      optional: true
+
+ubuntu23.04-debug:build:
+  variables:
+      IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu23.04
+      CDASH_SUBMIT: 1
+  extends:
+    - .siconos-build
+    - .devel-rules
+  needs: ["ubuntu23.04-debug:configure"]
+
+ubuntu23.04-debug:test:
+    variables:
+      IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu23.04
+      CDASH_SUBMIT: 1
+    extends:
+      - .siconos-test
+      - .devel-rules
+    needs: ["ubuntu23.04-debug:build"]
 
 # ------ ubuntu 22, debug setup -------
 ubuntu22.04-debug:configure:
@@ -171,6 +210,37 @@ mambalab:test:
       - .devel-rules
     needs: ["mambalab:build"]
     
+# ------ ubuntu 22, with mechanisms component -------
+# optional (manual)
+ubuntu22.04-mechanisms:configure:
+  variables:
+     IMAGE_NAME: $SICONOS_REGISTRY/sources/opencascade
+     CDASH_SUBMIT: 1
+     CONF_FILE: $SICONOS_CMAKE_CONF_PATH/with_mechanisms.cmake
+  extends:
+    - .siconos-configure
+    - .devel-rules
+  needs:
+    - job: opencascade:docker-build
+      optional: true
+    
+ubuntu22.04-mechanisms:build:
+  variables:
+    IMAGE_NAME: $SICONOS_REGISTRY/sources/opencascade
+    CDASH_SUBMIT: 1
+  extends:
+    - .siconos-build
+    - .devel-rules
+  needs: ["ubuntu22.04-mechanisms:configure"]
+
+ubuntu22.04-mechanisms:test:
+  variables:
+    IMAGE_NAME: $SICONOS_REGISTRY/sources/opencascade
+    CDASH_SUBMIT: 1
+  extends:
+    - .siconos-test
+    - .devel-rules
+  needs: ["ubuntu22.04-mechanisms:build"]
 
 # -- Jobs executed for MR or main branch only --
 
@@ -202,37 +272,6 @@ ubuntu22.04-numerics-fclib:test:
     - .siconos-test
   needs: ["ubuntu22.04-numerics-fclib:build"]
 
-# ------ ubuntu 22, with mechanisms component -------
-# optional (manual)
-ubuntu22.04-mechanisms:configure:
-   variables:
-     IMAGE_NAME: $SICONOS_REGISTRY/sources/opencascade
-     CDASH_SUBMIT: 1
-     CONF_FILE: $SICONOS_CMAKE_CONF_PATH/with_mechanisms.cmake
-   extends:
-    - .siconos-configure
-   #when: manual
-   needs:
-    - job: opencascade:docker-build
-      optional: true
-    
-ubuntu22.04-mechanisms:build:
-  variables:
-    IMAGE_NAME: $SICONOS_REGISTRY/sources/opencascade
-    CDASH_SUBMIT: 1
-  extends:
-    - .siconos-build
-  needs: ["ubuntu22.04-mechanisms:configure"]
-  #when: manual
-
-ubuntu22.04-mechanisms:test:
-  variables:
-    IMAGE_NAME: $SICONOS_REGISTRY/sources/opencascade
-    CDASH_SUBMIT: 1
-  extends:
-    - .siconos-test
-  needs: ["ubuntu22.04-mechanisms:build"]
-  #when: manual
 
     
 # ------ debian bookworm, default setup -------
