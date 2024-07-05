@@ -38,23 +38,13 @@
 #include "fc3d_projection.h"
 #include "fc3d_unitary_enumerative.h"
 
-/** pointer to function used to call local solver */
-typedef int (*SolverPtr)(FrictionContactProblem *, double *, SolverOptions *);
 
-/** pointer to function used to update local problem */
-typedef void (*UpdatePtr)(int, FrictionContactProblem *,
-                          FrictionContactProblem *, double *, SolverOptions *);
 
-/** pointer to function used to post-processed results after a call to the
- * (local) solver */
-typedef void (*PostSolverPtr)(int, double *);
 
 /** pointer to function used to update velocity and compute error */
 typedef void (*ComputeErrorPtr)(FrictionContactProblem *, double *, double *,
                                 double, SolverOptions *, double, double *);
 
-/** pointer to function used to free memory for objects used in solvers */
-typedef void (*FreeSolverPtr)(void);
 
 /** pointer to function used to free memory for objects used in nsgs solvers */
 typedef void (*FreeSolverNSGSPtr)(FrictionContactProblem *,
@@ -64,6 +54,10 @@ typedef void (*FreeSolverNSGSPtr)(FrictionContactProblem *,
  */
 typedef void (*internalSolverPtr)(FrictionContactProblem *, double *, double *,
                                   int *, SolverOptions *);
+
+
+typedef void (*CopyLocalReactionPtr)(double *, double *);
+
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C" {
@@ -124,12 +118,6 @@ extern "C" {
 void fc3d_nsgs(FrictionContactProblem *problem, double *reaction,
                double *velocity, int *info, SolverOptions *options);
 
-void fc3d_nsgs_initialize_local_solver(SolverPtr *solve, UpdatePtr *update,
-                                       FreeSolverNSGSPtr *freeSolver,
-                                       ComputeErrorPtr *computeError,
-                                       FrictionContactProblem *problem,
-                                       FrictionContactProblem *localproblem,
-                                       SolverOptions *options);
 
 void fc3d_admm(FrictionContactProblem *problem, double *reaction,
                double *velocity, int *info, SolverOptions *options);

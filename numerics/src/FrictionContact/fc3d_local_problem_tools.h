@@ -28,12 +28,40 @@
 extern "C"
 {
 #endif
-  FrictionContactProblem* fc3d_local_problem_allocate(FrictionContactProblem* problem);
-  void fc3d_local_problem_free(FrictionContactProblem* localproblem,
-                               FrictionContactProblem* problem);
-  void fc3d_local_problem_compute_q(FrictionContactProblem * problem, FrictionContactProblem * localproblem, double *reaction, int contact);
-  void fc3d_local_problem_fill_M(FrictionContactProblem * problem, FrictionContactProblem * localproblem, int contact);
-  
+
+
+/** pointer to function used to call local solver */
+typedef int (*SolverPtr)(FrictionContactProblem *, double *, SolverOptions *);
+
+/** pointer to function used to update local problem */
+typedef void (*UpdatePtr)(int, FrictionContactProblem *,
+                          FrictionContactProblem *, double *, SolverOptions *);
+
+/** pointer to function used to post-processed results after a call to the
+ * (local) solver */
+typedef void (*PostSolverPtr)(int, double *);
+
+/** pointer to function used to free memory for objects used in solvers */
+typedef void (*FreeSolverPtr)(void);
+
+struct LocalProblemFunctionToolkit {
+  SolverPtr local_solver;
+  UpdatePtr update_local_problem;
+  PostSolverPtr post_processed_local_result;
+  FreeSolverPtr free_local_solver;
+};
+
+struct LocalProblemFunctionToolkit *localProblemFunctionToolkit_new();
+void localProblemFunctionToolkit_display(struct LocalProblemFunctionToolkit *);
+
+FrictionContactProblem *fc3d_local_problem_allocate(FrictionContactProblem *problem);
+void fc3d_local_problem_free(FrictionContactProblem *localproblem,
+                             FrictionContactProblem *problem);
+void fc3d_local_problem_compute_q(FrictionContactProblem *problem,
+                                  FrictionContactProblem *localproblem, double *reaction,
+                                  int contact);
+void fc3d_local_problem_fill_M(FrictionContactProblem *problem,
+                               FrictionContactProblem *localproblem, int contact);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

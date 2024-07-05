@@ -24,6 +24,22 @@
 #include "NumericsMatrix.h"          // for NM_create_from_data, NumericsMatrix
 
 
+struct LocalProblemFunctionToolkit* localProblemFunctionToolkit_new() {
+  struct LocalProblemFunctionToolkit * lpft = (struct LocalProblemFunctionToolkit*)malloc(sizeof(struct LocalProblemFunctionToolkit));
+   
+  lpft->local_solver = NULL;
+  lpft->update_local_problem = NULL;
+  lpft->post_processed_local_result = NULL;
+  lpft->free_local_solver =NULL;
+  return lpft;
+}
+void localProblemFunctionToolkit_display(struct LocalProblemFunctionToolkit* lpft)
+{
+  printf("local_solver %p\n ", lpft->local_solver);
+  printf("update_local_problem %p\n ", lpft->update_local_problem);
+  printf("post_processed_local_result %p\n ", lpft->post_processed_local_result);
+  printf("free_local_solver %p\n ", lpft->free_local_solver);
+};
 void fc3d_local_problem_compute_q(FrictionContactProblem * problem, FrictionContactProblem * localproblem, double *reaction, int contact)
 {
 
