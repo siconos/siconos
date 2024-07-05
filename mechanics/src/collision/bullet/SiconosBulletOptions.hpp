@@ -46,6 +46,8 @@ class SiconosBulletOptions {
   bool enableSatConvex{false};
   bool enablePolyhedralContactClipping{false};
   double Depth2D{0.04};
+  double extrapolationCoefficient{0.};
+
 
   ~SiconosBulletOptions() noexcept = default;
 };

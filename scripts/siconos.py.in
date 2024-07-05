@@ -687,6 +687,8 @@ def generate_cmakelists(args):
 
     # OpenCASCADE ?
     result += "if(@WITH_OpenCASCADE@)\n"
+    result += "find_package(VTK REQUIRED)\n"
+    result += "link_directories(${VTK_PREFIX_PATH}/lib)\n"
     result += "include(occ_setup)\n"
     result += "endif()\n"
 

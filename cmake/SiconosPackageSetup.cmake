@@ -14,6 +14,7 @@ set(cmake_macros
   BlasLapackUtils.cmake
 )
 
+
 if(SICONOS_HAS_OpenCASCADE)
   list(APPEND cmake_macros occ_setup.cmake)
 endif()

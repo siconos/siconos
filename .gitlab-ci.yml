@@ -16,7 +16,7 @@ fedora38:docker-build:
   variables:
     IMAGE_NAME: fedora-38
     SICONOS_DOCKER_TARGET: siconos-base-python
-    RESULT_NAME: $SICONOS_REGISTRY/sources/fedora38
+    RESULT_NAME: $SICONOS_REGISTRY/sources/fedora-38
   extends: .docker-build
 
 ubuntu22.04:docker-build:
@@ -48,6 +48,7 @@ opencascade:docker-build:
     IMAGE_NAME: opencascade
     SICONOS_DOCKER_TARGET: mamba-occenv
     RESULT_NAME: $SICONOS_REGISTRY/sources/opencascade
+    SICONOS_DOCKER_TARGET: mamba-occenv
   extends: .docker-build
   when: manual
 
@@ -249,7 +250,7 @@ ubuntu22.04-mechanisms:configure:
      CONF_FILE: $SICONOS_CMAKE_CONF_PATH/with_mechanisms.cmake
    extends:
     - .siconos-configure
-   when: manual
+   #when: manual
    needs:
     - job: opencascade:docker-build
       optional: true
@@ -261,7 +262,7 @@ ubuntu22.04-mechanisms:build:
   extends:
     - .siconos-build
   needs: ["ubuntu22.04-mechanisms:configure"]
-  when: manual
+  #when: manual
 
 ubuntu22.04-mechanisms:test:
   variables:
@@ -270,7 +271,7 @@ ubuntu22.04-mechanisms:test:
   extends:
     - .siconos-test
   needs: ["ubuntu22.04-mechanisms:build"]
-  when: manual
+  #when: manual
 
     
 # ------ debian bookworm, default setup -------
@@ -360,11 +361,11 @@ jupyterlab:install:
 mambalab:install:
     variables:
       IMAGE_NAME: siconoslab-mamba
-      RESULT_NAME: $CI_REGISTRY/nonsmooth/siconos-tutorials/siconoslab-mamba
+      RESULT_NAME: $CI_REGISTRY/nonsmooth/siconos-tutorials/siconoslab-occ
       SICONOS_DOCKER_TARGET: siconoslab
     extends:
       - .siconos-jupyterlab-install
-    needs: ["mambalab:build"]
+    needs: ["ubuntu22.04-mechanisms:build"]
 
 # Job run when a new tag (release) is created.
 release_job:
@@ -389,7 +390,7 @@ bridge:examples:
     strategy : depend
     forward :  
       yaml_variables: false
-  needs: ["jupyterlab:install"]
+  needs: ["mambalab:install"]
   rules:
     - if: $CI_COMMIT_MESSAGE =~ /\[with examples\]/
     

@@ -113,7 +113,10 @@ void siconos::integrators::OneStepIntegrator::OneStepIntegrator::updateAndSwapAl
     }
     inter.swapInMemory();
   }
+
+  
   // Compute a first value for the output
+  // VA 10/04/2024 What is the interest of the following line ?
   inter.computeOutput(time, 0);
 
   // prepare the gradients

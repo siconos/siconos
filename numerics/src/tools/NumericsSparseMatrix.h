@@ -299,19 +299,19 @@ void NSM_reset_versions(NumericsSparseMatrix* M);
  */
 void NSM_reset_version(NumericsSparseMatrix* M, NSM_t type);
 
-/** Increment the version of a NumericsSparseMatrix.
- *
- *  \param M the NumericsSparseMatrix,
- *  \param type the NumericsSparseOrigin of storage
- */
-void NSM_inc_version(NumericsSparseMatrix* M, NSM_t type);
-
 /** Get the NumericsSparseOrigin with the latest version.
  *
  *  \param M the NumericsSparseMatrix
  *  \return the NumericsSparseOrigin.
  */
 NSM_t NSM_latest_id(const NumericsSparseMatrix* M);
+
+/** Get current version of a type of csparse matrix.
+ *
+ *  \param M the NumericsSparseMatrix,
+ *  \param type the type of sparse storage from NumericsSparseOrigin
+ *  \return a comparable version. */
+version_t NSM_version(const NumericsSparseMatrix* M, NSM_t type);
 
 /** Get most recent CSparseMatrix.
  *
@@ -320,8 +320,15 @@ NSM_t NSM_latest_id(const NumericsSparseMatrix* M);
  */
 CSparseMatrix* NSM_latest(const NumericsSparseMatrix* M);
 
+/** Increment the version of a NumericsSparseMatrix.
+ *
+ *  \param M the NumericsSparseMatrix,
+ *  \param type the NumericsSparseOrigin of storage
+ */
+void NSM_inc_version(NumericsSparseMatrix* M, NSM_t type);
+
 /** Sync matrix origin and version
- * \param M the NumericsSparseMatrix
+ *  \param M the NumericsSparseMatrix
  */
 void NSM_version_sync(NumericsSparseMatrix* M);
 

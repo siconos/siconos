@@ -87,7 +87,8 @@ void OccTest::move() {
 
   exp.Init(mksphere.Shape(), TopAbs_SHELL);
 
-  TopoDS_Shell shell = TopoDS::Shell(exp.Current().Composed(mksphere.Shape().Orientation()));
+  TopoDS_Shell shell =
+      TopoDS::Shell(exp.Current().Composed(mksphere.Shape().Orientation()));
 
   exp.Init(shell, TopAbs_FACE);
 
@@ -114,24 +115,29 @@ void OccTest::move() {
   velocity->zero();
   inertia->eye();
 
-  auto body =
-      std::make_shared<siconos::mechanics::occ::OccBody>(position, velocity, 1, inertia);
+  auto body = std::make_shared<siconos::mechanics::occ::OccBody>(
+      position, velocity, 1, inertia);
 
   body->addContactShape(sphere_contact);
 
   auto data = [](const auto& obj) { return obj->data(); };
 
-  gp_XYZ translat =
-      std::visit(data, body->contactShape(0)).Location().Transformation().TranslationPart();
+  gp_XYZ translat = std::visit(data, body->contactShape(0))
+                        .Location()
+                        .Transformation()
+                        .TranslationPart();
 
-  std::cout << translat.X() << "," << translat.Y() << "," << translat.Z() << std::endl;
+  std::cout << translat.X() << "," << translat.Y() << "," << translat.Z()
+            << std::endl;
 
   CPPUNIT_ASSERT(translat.X() == 1.);
   CPPUNIT_ASSERT(translat.Y() == 2.);
   CPPUNIT_ASSERT(translat.Z() == 3.);
 
-  gp_Quaternion rotat =
-      std::visit(data, body->contactShape(0)).Location().Transformation().GetRotation();
+  gp_Quaternion rotat = std::visit(data, body->contactShape(0))
+                            .Location()
+                            .Transformation()
+                            .GetRotation();
 
   CPPUNIT_ASSERT(std::abs(rotat.X() - 0.44543540318737401) < 1e-9);
   CPPUNIT_ASSERT(std::abs(rotat.Y() - 0.53452248382484879) < 1e-9);
@@ -177,10 +183,10 @@ void OccTest::distance() {
   velocity->zero();
   inertia->eye();
 
-  auto body1 =
-      std::make_shared<siconos::mechanics::occ::OccBody>(position1, velocity, 1, inertia);
-  auto body2 =
-      std::make_shared<siconos::mechanics::occ::OccBody>(position2, velocity, 1, inertia);
+  auto body1 = std::make_shared<siconos::mechanics::occ::OccBody>(
+      position1, velocity, 1, inertia);
+  auto body2 = std::make_shared<siconos::mechanics::occ::OccBody>(
+      position2, velocity, 1, inertia);
   body1->addContactShape(sphere1_contact);
   body2->addContactShape(sphere2_contact);
 
@@ -200,27 +206,36 @@ void OccTest::distance() {
 
   auto data = [](const auto& obj) { return obj->data(); };
 
-  gp_XYZ translat1 =
-      std::visit(data, body1->contactShape(0)).Location().Transformation().TranslationPart();
+  gp_XYZ translat1 = std::visit(data, body1->contactShape(0))
+                         .Location()
+                         .Transformation()
+                         .TranslationPart();
 
-  std::cout << "t1 " << translat1.X() << "," << translat1.Y() << "," << translat1.Z() << "\n";
+  std::cout << "t1 " << translat1.X() << "," << translat1.Y() << ","
+            << translat1.Z() << "\n";
 
-  gp_XYZ translat2 =
-      std::visit(data, body2->contactShape(0)).Location().Transformation().TranslationPart();
+  gp_XYZ translat2 = std::visit(data, body2->contactShape(0))
+                         .Location()
+                         .Transformation()
+                         .TranslationPart();
 
-  std::cout << "t2 " << translat2.X() << "," << translat2.Y() << "," << translat2.Z() << "\n";
+  std::cout << "t2 " << translat2.X() << "," << translat2.Y() << ","
+            << translat2.Z() << "\n";
 
-  auto dist = std::visit(
-      siconos::mechanics::occ::Geometer<siconos::mechanics::occ::CadmbtbDistanceType>{},
-      body1->contactShape(0), body2->contactShape(0));
+  auto dist = std::visit(siconos::mechanics::occ::Geometer<
+                             siconos::mechanics::occ::CadmbtbDistanceType>{},
+                         body1->contactShape(0), body2->contactShape(0));
 
   std::cout << dist.value << "\n";
 
-  std::cout << dist.point1.X() << "," << dist.point1.Y() << "," << dist.point1.Z() << "\n";
+  std::cout << dist.point1.X() << "," << dist.point1.Y() << ","
+            << dist.point1.Z() << "\n";
 
-  std::cout << dist.point2.X() << "," << dist.point2.Y() << "," << dist.point2.Z() << "\n";
+  std::cout << dist.point2.X() << "," << dist.point2.Y() << ","
+            << dist.point2.Z() << "\n";
 
-  std::cout << dist.normal.X() << "," << dist.normal.Y() << "," << dist.normal.Z() << "\n";
+  std::cout << dist.normal.X() << "," << dist.normal.Y() << ","
+            << dist.normal.Z() << "\n";
 
   CPPUNIT_ASSERT(std::abs(dist.value - 1.0) < 1e-9);
 }

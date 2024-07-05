@@ -1,10 +1,3 @@
-**First steps with Siconos**
-
-:ref:`siconos_getting_started`
-
+**Siconos tutorials and examples**
 :ref:`siconos_examples`
-
-or 
-
-:ref:`download`
 

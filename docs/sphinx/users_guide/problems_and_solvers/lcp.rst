@@ -340,7 +340,7 @@ parameters:
 AVI reformulation
 -----------------
 
-AVI with Cao/Ferris solver (:enumerator:`SICONOS_AVI_CAOFERRIS`)
+AVI with Cao/Ferris solver (:enumerator:`SICONOS_LCP_AVI_CAOFERRIS`)
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Reformulates the LCP as an :ref:`avi_problem`, then uses the solver by Cao and
