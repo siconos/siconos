@@ -29,32 +29,47 @@ extern "C"
 {
 #endif
 
-
 /** pointer to function used to call local solver */
 typedef int (*SolverPtr)(FrictionContactProblem *, double *, SolverOptions *);
 
 /** pointer to function used to update local problem */
-typedef void (*UpdatePtr)(int, FrictionContactProblem *,
-                          FrictionContactProblem *, double *, SolverOptions *);
+typedef void (*UpdatePtr)(int, FrictionContactProblem *, FrictionContactProblem *, double *,
+                          SolverOptions *);
 
 /** pointer to function used to post-processed results after a call to the
  * (local) solver */
 typedef void (*PostSolverPtr)(int, double *);
 
-/** pointer to function used to free memory for objects used in solvers */
-typedef void (*FreeSolverPtr)(void);
+/** pointer to function used to free memory for objects used in nsgs solvers */
+typedef void (*FreeLocalSolverPtr)(FrictionContactProblem *, FrictionContactProblem *,
+                                   SolverOptions *);
+
+typedef void (*CopyLocalReactionPtr)(double *, double *);
+
+typedef void (*PerformRelaxationPtr)(double *, double *, double);
+
+typedef double (*LightErrorSquaredPtr)(double *, double *);
+
+
+typedef double (*SquaredNormPtr)(double *);
 
 struct LocalProblemFunctionToolkit {
   SolverPtr local_solver;
   UpdatePtr update_local_problem;
   PostSolverPtr post_processed_local_result;
-  FreeSolverPtr free_local_solver;
+  FreeLocalSolverPtr free_local_solver;
+  CopyLocalReactionPtr copy_local_reaction;
+  PerformRelaxationPtr perform_relaxation;
+  LightErrorSquaredPtr light_error_squared;
+  SquaredNormPtr squared_norm;
 };
 
 struct LocalProblemFunctionToolkit *localProblemFunctionToolkit_new();
+
 void localProblemFunctionToolkit_display(struct LocalProblemFunctionToolkit *);
 
 FrictionContactProblem *fc3d_local_problem_allocate(FrictionContactProblem *problem);
+
 void fc3d_local_problem_free(FrictionContactProblem *localproblem,
                              FrictionContactProblem *problem);
 void fc3d_local_problem_compute_q(FrictionContactProblem *problem,

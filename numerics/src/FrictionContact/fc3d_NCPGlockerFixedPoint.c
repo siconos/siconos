@@ -30,10 +30,6 @@
 /* Pointer to function used to update the solver, to formalize the local problem for example. */
 typedef void (*UpdateSolverPtr)(int, double*);
 
-static UpdateSolverPtr updateSolver = NULL;
-static PostSolverPtr postSolver = NULL;
-static FreeSolverPtr freeSolver = NULL;
-
 /* size of a block */
 static int Fsize;
 
@@ -69,9 +65,7 @@ void fc3d_FixedP_initialize(FrictionContactProblem* problem, FrictionContactProb
   {
     Fsize = 5;
     NCPGlocker_initialize(problem, localproblem);
-    /*     updateSolver = &NCPGlocker_update; */
-    postSolver = &NCPGlocker_post;
-    freeSolver = &NCPGlocker_free;
+
   }
   else
   {
@@ -101,9 +95,7 @@ int fc3d_FixedP_solve(FrictionContactProblem * localproblem, double* reaction, S
 
 void fc3d_FixedP_free(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions * localsolver_option)
 {
-  updateSolver = NULL;
-  postSolver = NULL;
-  (*freeSolver)();
+
 }
 
 /*

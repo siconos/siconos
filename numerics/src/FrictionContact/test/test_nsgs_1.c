@@ -19,6 +19,7 @@
 #include <stdlib.h>                      // for malloc
 #include "Friction_cst.h"                // for SICONOS_FRICTION_3D_ONECONTA...
 #include "NumericsFwd.h"                 // for SolverOptions
+#include "NumericsVerbose.h"
 #include "SolverOptions.h"               // for SolverOptions, solver_option...
 #include "frictionContact_test_utils.h"  // for build_test_collection
 #include "test_utils.h"                  // for TestCase
@@ -29,7 +30,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
   *number_of_tests = n_data * n_solvers;
   TestCase * collection = malloc((*number_of_tests) * sizeof(TestCase));
 
-
+  numerics_set_verbose(2);
   // "External" solver parameters
   // -> same values for all tests.
 

@@ -115,7 +115,7 @@ int fc3d_Path_solve(FrictionContactProblem * localproblem, double* reaction, Sol
 
 void fc3d_Path_free()
 {
-  NCPGlocker_free();
+
 }
 
 void fc3d_Path_computeError(int n, double* velocity, double* reaction, double * error)
