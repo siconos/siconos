@@ -598,7 +598,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
   ComputeErrorPtr computeError = NULL;
 
   struct LocalProblemFunctionToolkit* localProblemFunctionToolkit = localProblemFunctionToolkit_new();
-  localProblemFunctionToolkit_display(localProblemFunctionToolkit);
+  /* localProblemFunctionToolkit_display(localProblemFunctionToolkit); */
 
   
   FrictionContactProblem* localproblem;
@@ -621,7 +621,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
   fc3d_nsgs_initialize_local_solver(localProblemFunctionToolkit, &computeError,
                                     problem, localproblem, options);
 
-  localProblemFunctionToolkit_display(localProblemFunctionToolkit);
+  /* localProblemFunctionToolkit_display(localProblemFunctionToolkit); */
   scontacts = allocShuffledContacts(problem, options);
   freeze_contacts = allocfreezingContacts(problem, options);
   /*****  Check solver options *****/
