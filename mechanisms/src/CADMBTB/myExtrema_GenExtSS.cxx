@@ -88,7 +88,7 @@ void siconos::mechanisms::myExtrema_GenExtSS::Initialize(
     const Standard_Integer NbV, const Standard_Real U2min,
     const Standard_Real U2sup, const Standard_Real V2min,
     const Standard_Real V2sup, const Standard_Real Tol2) {
-  myS2 = (Adaptor3d_SurfacePtr)&S2;
+  myS2 = (Adaptor3d_Surface*)&S2;
   mypoints1 = new TColgp_HArray2OfPnt(0, NbU + 1, 0, NbV + 1);
   mypoints2 = new TColgp_HArray2OfPnt(0, NbU + 1, 0, NbV + 1);
   myusample = NbU;
@@ -326,6 +326,6 @@ Extrema_POnSurf siconos::mechanisms::myExtrema_GenExtSS::PointOnS2(
 // purpose  :
 //=======================================================================
 
-Adaptor3d_SurfacePtr siconos::mechanisms::myExtrema_GenExtSS::Bidon() const {
-  return (Adaptor3d_SurfacePtr) nullptr;
+Adaptor3d_Surface* siconos::mechanisms::myExtrema_GenExtSS::Bidon() const {
+  return (Adaptor3d_Surface*) nullptr;
 }

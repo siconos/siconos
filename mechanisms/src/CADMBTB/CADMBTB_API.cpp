@@ -26,6 +26,7 @@
 #include <BRepPrim_Cone.hxx>
 #include <BRepPrim_Cylinder.hxx>
 #include <BRepTools.hxx>
+#include <Geom_Transformation.hxx>
 #include <STEPControl_Reader.hxx>
 #include <TopExp_Explorer.hxx>
 #include <V3d_View.hxx>

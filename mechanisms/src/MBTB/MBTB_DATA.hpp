@@ -36,6 +36,7 @@
 //! The maximal number of contacts.
 #define MBTB_MAX_CONTACTS_NUMBER 100
 
+#include <limits>
 #include <memory>
 #include <vector>
 
@@ -70,86 +71,96 @@ enum class JointsType {
   Prismatic1 = 3
 };
 
-/** Artefact constants.
+// /** Artefact constants.
 
-This constant are used to display info at contact :
-<ul>
-<li> ArtefactP1P2 draws the detected contact points and a line that
-links them</li> <li> ArtefactReaction draws the reaction forces</li>
-<li> ArtefactNormal draws the unit normal vector at contact</li>
-<li> FaceNormal1 draws the unit normal of surface of contact</li>
-</ul>
-Use with bit to bit test.
-*/
-enum class MBTBConstant {
-  ArtefactP1P2 = 1,
-  ArtefactReaction = 2,
-  ArtefactNormal = 4,
-  FaceNormal1 = 5
-};
+// This constant are used to display info at contact :
+// <ul>
+// <li> ArtefactP1P2 draws the detected contact points and a line that
+// links them</li> <li> ArtefactReaction draws the reaction forces</li>
+// <li> ArtefactNormal draws the unit normal vector at contact</li>
+// <li> FaceNormal1 draws the unit normal of surface of contact</li>
+// </ul>
+// Use with bit to bit test.
+// */
+//   enum class MBTBConstant : int {
+//   ArtefactP1P2 = 1,
+//   ArtefactReaction = 2,
+//   ArtefactNormal = 4,
+//   FaceNormal1 = 5
+// };
+
+namespace mbtb::draw {
+
+inline constexpr bool ArtefactP1P2{true};
+inline constexpr bool ArtefactReaction{true};
+inline constexpr bool ArtefactNormal{true};
+inline constexpr bool FaceNormal1{true};
+
+}  // namespace mbtb::draw
 
 namespace mbtb::data {
 
 //! The dynamical bodies.
-extern std::shared_ptr<siconos::mechanisms::MBTB_Body>
+inline std::shared_ptr<siconos::mechanisms::MBTB_Body>
     sDS[MBTB_MAX_BODIES_NUMBER];
 //! The joint relations.
-extern MBTB_JointR* sJointRelations[MBTB_MAX_JOINTS_NUMBER];
+inline MBTB_JointR* sJointRelations[MBTB_MAX_JOINTS_NUMBER];
 //! The contacts.
-  std::vector<std::shared_ptr<siconos::mechanisms::MBTB_Contact>> sContacts(MBTB_MAX_CONTACTS_NUMBER);
+inline std::vector<std::shared_ptr<siconos::mechanisms::MBTB_Contact>>
+    sContacts(MBTB_MAX_CONTACTS_NUMBER);
 //! The number of bodies.
-extern unsigned int sNbOfBodies;
+inline unsigned int sNbOfBodies{0};
 //! The number of joints.
-extern unsigned int sNbOfJoints;
+inline unsigned int sNbOfJoints{0};
 //! The number of contacts.
-extern unsigned int sNbOfContacts;
+inline unsigned int sNbOfContacts{0};
 //! The counter of step of simulation.
-extern unsigned int sTimerCmp;
+inline unsigned int sTimerCmp{0};
 //! The graphical frequency.
-extern unsigned int sFreqGraphic;
+inline unsigned int sFreqGraphic{100};
 //! The output frequency.
-extern unsigned int sFreqOutput;
+inline unsigned int sFreqOutput{100};
 //! The siconos joint interactions.
-extern std::shared_ptr<siconos::modeling::Interaction>
+inline std::shared_ptr<siconos::modeling::Interaction>
     sInterJoints[MBTB_MAX_JOINTS_NUMBER];
 //! The siconos contact interactions.
-extern std::shared_ptr<siconos::modeling::Interaction>
+inline std::shared_ptr<siconos::modeling::Interaction>
     sInterContacts[MBTB_MAX_CONTACTS_NUMBER];
 //! siconos model.
-extern std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> myNsds;
+inline std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> myNsds;
 //! siconos model t0.
-extern double myt0;
+inline double myt0{0.};
 //! siconos model Tf.
-extern double myTf;
+inline double myTf{std::numeric_limits<double>::max()};
 //! use the gravity vector
-extern unsigned int sUseGravity;
+inline unsigned int sUseGravity{0};
 
 //! for the graph building.
 //!  The dynamical systems involved in the joint 'numJ' have indices
 //!  sJointIndexDS[2*numJ] and sJointIndexDS[2*numJ+1].
-extern int sJointIndexDS[2 * MBTB_MAX_JOINTS_NUMBER];
+inline int sJointIndexDS[2 * MBTB_MAX_JOINTS_NUMBER];
 //! The type of joint see JOINTS_TYPE.
-extern siconos::mechanisms::JointsType sJointType[MBTB_MAX_JOINTS_NUMBER];
+inline siconos::mechanisms::JointsType sJointType[MBTB_MAX_JOINTS_NUMBER];
 //! The siconos simulation.
-extern std::shared_ptr<siconos::simulation::TimeStepping> sSimu;
+inline std::shared_ptr<siconos::simulation::TimeStepping> sSimu;
 //! The draw mode of the artefacts (forces, normals). Used with bit to bit test
 //! with MBTB_CST.
-extern bool sDrawMode;
+inline bool sDrawMode{false};
 //! The verbose mode for print_dist
-extern unsigned int sPrintDist;
+inline unsigned int sPrintDist{0};
 //! The verbose mode for displayStep_bodies
-extern unsigned int sDisplayStepBodies;
+inline unsigned int sDisplayStepBodies{0};
 //! The verbose mode for displayStep_joints
-extern unsigned int sDisplayStepJoints;
+inline unsigned int sDisplayStepJoints{0};
 //! The verbose mode for displayStep_contacts
-extern unsigned int sDisplayStepContacts;
+inline unsigned int sDisplayStepContacts{0};
 //! The nominal length of an artefact.
-extern double sArtefactLength;
+inline double sArtefactLength{1.0};
 //! The minimal length drawing.
-extern double sArtefactThreshold;
+inline double sArtefactThreshold{1.e-7};
 //! The nominal forces.
-extern double sNominalForce;
-extern double sDParams[20];
+inline double sNominalForce{0};
+inline double sDParams[20];
 }  // namespace mbtb::data
 }  // namespace siconos::mechanisms
 #endif

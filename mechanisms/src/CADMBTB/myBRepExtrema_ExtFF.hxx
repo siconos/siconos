@@ -31,10 +31,6 @@
 #ifndef _Extrema_SequenceOfPOnSurf_HeaderFile
 #include <Extrema_SequenceOfPOnSurf.hxx>
 #endif
-// #ifndef _Handle_BRepAdaptor_HSurface_HeaderFile
-// #include <Handle_BRepAdaptor_HSurface.hxx>
-// #endif
-
 #ifndef _Standard_Boolean_HeaderFile
 #include <Standard_Boolean.hxx>
 #endif
@@ -42,18 +38,15 @@
 #include <Standard_Real.hxx>
 #endif
 
-#ifndef BRepAdaptor_HSurface_HeaderFile
-#include <BRepAdaptor_HSurface.hxx>
-#endif
-class BRepAdaptor_HSurface;
+//#include <BRepAdaptor_Surface.hxx>
+
+class BRepAdaptor_Surface;
 class StdFail_NotDone;
 class Standard_OutOfRange;
 class Standard_TypeMismatch;
 class TopoDS_Face;
 class gp_Pnt;
 //#include "Standard_Handle.hxx"
-
-typedef Handle(BRepAdaptor_HSurface) Handle_BRepAdaptor_HSurface;
 
 #ifndef _Standard_HeaderFile
 #include <Standard.hxx>
@@ -146,7 +139,7 @@ class myBRepExtrema_ExtFF {
   TColStd_SequenceOfReal mydist;
   Extrema_SequenceOfPOnSurf myPointsOnS1;
   Extrema_SequenceOfPOnSurf myPointsOnS2;
-  Handle_BRepAdaptor_HSurface myHS;
+  Handle(BRepAdaptor_Surface) myHS;
 };
 
 // other Inline functions and methods (like "C++: function call" methods)

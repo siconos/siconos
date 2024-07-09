@@ -20,7 +20,7 @@
 #define _myExtrema_ExtSS_HeaderFile
 
 #ifndef _Adaptor3d_SurfacePtr_HeaderFile
-#include <Adaptor3d_SurfacePtr.hxx>
+#include <Adaptor3d_Surface.hxx>
 #endif
 #ifndef _Standard_Boolean_HeaderFile
 #include <Standard_Boolean.hxx>
@@ -57,6 +57,9 @@ class Extrema_POnSurf;
 #endif
 
 namespace siconos::mechanisms {
+
+  // FP: TEMP to fit with occt 7.7 Should be reviewed.
+  using Adaptor3d_SurfacePtr = Adaptor3d_Surface*;
 
 /**
  * \brief This class has been built from OCC in view of overloding the distance
@@ -141,6 +144,8 @@ class myExtrema_ExtSS {
 
   // Fields PRIVATE
   //
+
+  
   Adaptor3d_SurfacePtr myS2;
   Standard_Boolean myDone;
   Standard_Boolean myIsPar;

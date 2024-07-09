@@ -18,7 +18,8 @@ RUN  apt update && apt upgrade -y && apt install --no-install-recommends -y -qq 
 	libbullet-extras-dev \
         python3-full \
 	libpython3-dev \
- 	libxrender1 \
+	swig \
+	libxrender1 \
 	valgrind \
 	vim \
 	bzip2 \

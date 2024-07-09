@@ -86,8 +86,8 @@ siconos::mechanisms::myExtrema_FuncExtSS::myExtrema_FuncExtSS() {
 
 siconos::mechanisms::myExtrema_FuncExtSS::myExtrema_FuncExtSS(
     const Adaptor3d_Surface& S1, const Adaptor3d_Surface& S2) {
-  myS1 = (Adaptor3d_SurfacePtr)&S1;
-  myS2 = (Adaptor3d_SurfacePtr)&S2;
+  myS1 = (Adaptor3d_Surface*)&S1;
+  myS2 = (Adaptor3d_Surface*)&S2;
   myS1init = Standard_True;
   myS2init = Standard_True;
 }
@@ -99,8 +99,8 @@ siconos::mechanisms::myExtrema_FuncExtSS::myExtrema_FuncExtSS(
 
 void siconos::mechanisms::myExtrema_FuncExtSS::Initialize(
     const Adaptor3d_Surface& S1, const Adaptor3d_Surface& S2) {
-  myS1 = (Adaptor3d_SurfacePtr)&S1;
-  myS2 = (Adaptor3d_SurfacePtr)&S2;
+  myS1 = (Adaptor3d_Surface*)&S1;
+  myS2 = (Adaptor3d_Surface*)&S2;
   myS1init = Standard_True;
   myS2init = Standard_True;
   myPoint1.Clear();

@@ -145,6 +145,12 @@ class MBTB_Contact {
   /** \return index of the body carrying the second face of the contact*/
   auto indexBody2() const { return _indexBody2; }
 
+  /** \return index of the CAD model */
+  auto indexCAD1() const { return _indexCAD1; }
+
+  /** \return index of the CAD model */
+  auto indexCAD2() const { return _indexCAD2; }
+
   /** Set if offset must be applied to P1  (or not) */
   void set_offset_to_P1(bool val) { _OffsetP1 = val; }
 

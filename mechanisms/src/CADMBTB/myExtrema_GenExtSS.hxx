@@ -38,9 +38,7 @@
 #ifndef _myExtrema_FuncExtSS_HeaderFile
 #include "myExtrema_FuncExtSS.hxx"
 #endif
-#ifndef _Adaptor3d_SurfacePtr_HeaderFile
-#include <Adaptor3d_SurfacePtr.hxx>
-#endif
+#include <Adaptor3d_Surface.hxx>
 
 class TColgp_HArray2OfPnt;
 // class Handle_TColgp_HArray2OfPnt;
@@ -161,7 +159,7 @@ class myExtrema_GenExtSS {
   // Methods PRIVATE
   //
 
-  Standard_EXPORT Adaptor3d_SurfacePtr Bidon() const;
+  Standard_EXPORT Adaptor3d_Surface* Bidon() const;
 
   // Fields PRIVATE
   //
@@ -182,8 +180,8 @@ class myExtrema_GenExtSS {
   Standard_Real mytol1;
   Standard_Real mytol2;
   myExtrema_FuncExtSS myF;
-  // Adaptor3d_SurfacePtr myS1;
-  Adaptor3d_SurfacePtr myS2;
+  // Adaptor3d_Surface* myS1;
+  Adaptor3d_Surface* myS2;
   //  Standard_Real myGuessU1;
   //  Standard_Real myGuessV1;
   //  Standard_Real myGuessU2;

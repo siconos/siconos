@@ -19,9 +19,7 @@
 #ifndef _myExtrema_FuncExtSS_HeaderFile
 #define _myExtrema_FuncExtSS_HeaderFile
 
-#ifndef _Adaptor3d_SurfacePtr_HeaderFile
-#include <Adaptor3d_SurfacePtr.hxx>
-#endif
+#include <Adaptor3d_Surface.hxx>
 #ifndef _gp_Pnt_HeaderFile
 #include <gp_Pnt.hxx>
 #endif
@@ -124,12 +122,12 @@ class myExtrema_FuncExtSS : public math_FunctionSetWithDerivatives {
   // Methods PRIVATE
   //
 
-  Standard_EXPORT Adaptor3d_SurfacePtr Bidon() const;
+  Standard_EXPORT Adaptor3d_Surface* Bidon() const;
 
   // Fields PRIVATE
   //
-  Adaptor3d_SurfacePtr myS1;
-  Adaptor3d_SurfacePtr myS2;
+  Adaptor3d_Surface* myS1;
+  Adaptor3d_Surface* myS2;
   gp_Pnt myP1;
   gp_Pnt myP2;
   Standard_Real myU1;

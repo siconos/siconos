@@ -79,14 +79,8 @@ void siconos::mechanisms::MBTB_init(unsigned int NumOfBodies,
   mbtb::data::sNbOfBodies = NumOfBodies;
   mbtb::data::sNbOfJoints = NumOfJoints;
   mbtb::data::sNbOfContacts = NumOfContacts;
-  // mbtb::data::sDS = (SP::MBTB_Body *)
-  // malloc(sNbOfBody*sizeof(SP::MBTB_Body)); sPieceDraw = (bool*)
-  // malloc(sNbOfBody*sizeof(bool));
   CADMBTB_init(mbtb::data::sNbOfBodies + 2 * NumOfContacts, NumOfContacts);
   CADMBTB_setNbOfArtefacts(4 * NumOfContacts); /** P1P2, NORMAL, REACTION */
-
-  mbtb::data::myt0 = 0;
-  mbtb::data::myTf = std::numeric_limits<double>::max();
 
   // -------------
   // --- Model ---
@@ -735,10 +729,9 @@ void siconos::mechanisms::MBTB_initSimu(double hTS, int withProj) {
   }
   printf("====> COMPUTE H OF INTERATION END)\n");
 
-  FILE* fp;
-  fp = fopen("simulation_results.dat", "w");
-  mbtb::internal::MBTB_printHeader(fp);
-  fclose(fp);
+  std::ofstream myfile("simulation_results.dat");
+  mbtb::internal::MBTB_printHeader(myfile);
+  myfile.close();
   cout << "====> end of initialisation" << endl << endl;
 }
 std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem>
@@ -773,8 +766,7 @@ void siconos::mechanisms::MBTB_constraintTolUnilateral(double v) {
 }
 
 void siconos::mechanisms::MBTB_run(int NbSteps) {
-  FILE* fp;
-  fp = fopen("simulation_results.dat", "a");
+  std::ofstream fp("simulation_results.dat", std::ios::app);
   int currentTimerCmp = mbtb::data::sTimerCmp;
   for (int ii = 0; ii < NbSteps; ii++) {
     // while (true){
@@ -795,7 +787,7 @@ void siconos::mechanisms::MBTB_run(int NbSteps) {
     // }
     // break;
   }
-  fclose(fp);
+  fp.close();
   ACE_PRINT_TIME();
   // updateDSFromSiconos();
   // updateContactFromDS();

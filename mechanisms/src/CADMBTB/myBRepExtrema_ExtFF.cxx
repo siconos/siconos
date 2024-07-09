@@ -22,6 +22,7 @@
 #include <BRepTools.hxx>
 #include <BRep_Tool.hxx>
 #include <StdFail_NotDone.hxx>
+#include <BRepAdaptor_Surface.hxx>
 
 #include "CADMBTB_API.hpp"  // for getUVBounds
 #include "ace.h"
@@ -61,8 +62,8 @@ siconos::mechanisms::myBRepExtrema_ExtFF::myBRepExtrema_ExtFF(
 void siconos::mechanisms::myBRepExtrema_ExtFF::Initialize(
     const TopoDS_Face& F2) {
   BRepAdaptor_Surface Surf(F2);
-  myHS = new BRepAdaptor_HSurface(Surf);
-  ;
+  myHS = new BRepAdaptor_Surface(Surf);
+  
   Standard_Real Tol = BRep_Tool::Tolerance(F2);
   Standard_Real U1, U2, V1, V2;
   BRepTools::UVBounds(F2, U1, U2, V1, V2);
@@ -90,7 +91,7 @@ void siconos::mechanisms::myBRepExtrema_ExtFF::Perform(const TopoDS_Face& F1,
   ACE_times[ACE_TIMER_CAD_14].stop();
 
   ACE_times[ACE_TIMER_CAD_OK].start();
-  Handle(BRepAdaptor_HSurface) HS1 = new BRepAdaptor_HSurface(Surf1);
+  Handle(BRepAdaptor_Surface) HS1 = new BRepAdaptor_Surface(Surf1);
   // ACE_times[ACE_TIMER_CAD_OK].start();
   Standard_Real Tol1 = BRep_Tool::Tolerance(F1);
   ACE_times[ACE_TIMER_CAD_OK].stop();

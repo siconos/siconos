@@ -41,19 +41,19 @@ void MBTB_updateContactFromDS();
  */
 void MBTB_updateContactFromDS(int numDS);
 
-FILE *MBTB_open(std::string filename, std::string args);
+  auto MBTB_open(std::string& filename);
 
-void MBTB_close(FILE *);
+  void MBTB_close(std::ofstream&);
 
 /**!It prints the header of the output file.
  * \param fp output file
  */
-void MBTB_printHeader(FILE *fp);
+  void MBTB_printHeader(std::ofstream& fp);
 
 /**It prints the current state in the output file.
  * \param fp output file
  */
-void MBTB_printStep(FILE *fp);
+  void MBTB_printStep(std::ofstream& fp);
 
 /** It displays the current state on std output.
  */
