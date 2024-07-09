@@ -39,7 +39,9 @@ extern "C"
 #endif
 
   FrictionContactProblem* from_fclib_local(const fclib_local *fclib_problem);
-
+  
+  FrictionContactProblem* from_fclib_local_sparse(const fclib_local* fclib_problem);
+  
 
   FrictionContactProblem* frictionContact_fclib_read(const char *path);
 
