@@ -2761,6 +2761,8 @@ CSparseMatrix* NM_csr(NumericsMatrix* A) {
 
   if (numericsSparseMatrix(A)->csr &&
       (NM_max_version(A) > NSM_version(numericsSparseMatrix(A), NSM_CSR))) {
+    printf("clear CSR\n");
+
     NM_clearCSR(A);
   }
 

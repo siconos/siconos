@@ -94,6 +94,34 @@ CSparseMatrix* NM_triplet_to_csr(CSparseMatrix* triplet)
 
   return csr;
 #else
+
+    CS_INT m, n, nz, p, k, *Cp, *Ci, *w, *Ti, *Tj ;
+    CS_ENTRY *Cx, *Tx ;
+    if (!CS_TRIPLET (triplet)) return (NULL) ;                /* check inputs */
+
+    m = triplet->m ; n = triplet->n ; Ti = triplet->i ; Tj = triplet->p ; Tx = triplet->x ; nz = triplet->nz ;
+
+    CSparseMatrix* csr = cs_spalloc (m, n, nz, Tx != NULL, 0) ;          /* allocate result */
+
+    w = cs_calloc (n, sizeof (CS_INT)) ;
+
+    if (!csr || !w) return (cs_done (csr, w, NULL, 0)) ;    /* out of memory */
+    for (k = 0 ; k < nz ; k++) w [Ti [k]]++ ;           /* rows counts */
+
+    Cp = csr->p ; Ci = csr->i ; Cx = csr->x ;
+
+    cs_cumsum (Cp, w, n) ;    /* row pointers */
+    for (k = 0 ; k < nz ; k++)
+    {
+        Ci [p = w [Ti [k]]++] = Tj [k] ;    /* A(i,j) is the pth entry in C */
+        if (Cx) Cx [p] = Tx [k] ;
+    }
+
+    csr->nz=-2;
+
+    return (cs_done (csr, w, NULL, 1)) ;      /* success; free w and return C */
+
+
   fprintf(stderr, "NM_triplet_to_csr :: MKL not enabled\n");
   exit(EXIT_FAILURE);
 #endif
@@ -122,6 +150,11 @@ CSparseMatrix* NM_csr_to_triplet(CSparseMatrix* csr)
 
   return triplet;
 #else
+
+
+
+
+
   fprintf(stderr, "NM_csr_to_triplet :: MKL not enabled\n");
   exit(EXIT_FAILURE);
 #endif
@@ -150,6 +183,9 @@ CSparseMatrix* NM_csc_to_csr(CSparseMatrix* csc)
 
   return csr;
 #else
+
+
+
   fprintf(stderr, "NM_csc_to_csr :: MKL not enabled\n");
   exit(EXIT_FAILURE);
 #endif
@@ -177,7 +213,80 @@ CSparseMatrix* NM_csr_to_csc(CSparseMatrix* csr)
 
   return csc;
 #else
-  fprintf(stderr, "NM_csr_to_csc :: MKL not enabled\n");
-  exit(EXIT_FAILURE);
+  if(csr->m != csr->n)
+    {
+      fprintf(stderr, "NM_csr_to_csc :: the matrix has to be square\n");
+      exit(EXIT_FAILURE);
+    }
+  assert(csr);
+
+  CSparseMatrix* csc = cs_spalloc(csr->m, csr->n, csr->nzmax, 1, 0);
+  assert(csc);
+  CS_INT* Ap = csr->p;
+  CS_INT* Ai = csr->i;
+  CS_ENTRY* Ax = csr->x;
+
+  CS_INT* Bp = csc->p;
+  CS_INT* Bi = csc->i;
+  CS_ENTRY* Bx = csc->x;
+
+
+  CS_INT n = csr->n;
+  CS_INT nnz = csr->p[n];
+
+
+  for (CS_INT col =0; col < csr->n+1 ; col++)
+    {
+      Bp[col] =0.0;
+    }
+
+
+  //compute number of non-zero entries per column of csr
+  for (CS_INT i =0; i < nnz ; i++)
+    {
+
+      /* printf("Ai[%i] = %i ", i, Ai[i]); */
+      Bp[Ai[i]]++;
+    }
+
+    // cumsum the nnz per column to get Bp[]
+    CS_INT cumsum = 0;
+    for (CS_INT col = 0; col < csr->n; col++) {
+      CS_INT temp = Bp[col];
+      Bp[col] = cumsum;
+      cumsum += temp;
+    }
+    Bp[csr->n] = csr->nzmax;
+
+    /* for (CS_INT col = 0; col < csr->n +1; col++) */
+    /*   { */
+    /* 	printf("Bp[%i] = %i ", col, Bp[col]); */
+    /*   } */
+
+
+    for(CS_INT row = 0; row < csr->m; row++){
+        for(CS_INT jj = Ap[row]; jj < Ap[row+1]; jj++){
+            CS_INT col  = Ai[jj];
+            CS_INT dest = Bp[col];
+
+            Bi[dest] = row;
+            Bx[dest] = Ax[jj];
+
+            Bp[col]++;
+        }
+    }
+    CS_INT last = 0;
+    for(CS_INT col = 0; col <= csr->n; col++){
+      CS_INT temp  = Bp[col];
+      Bp[col] = last;
+      last    = temp;
+    }
+
+
+    /* cs_print(csc,1); */
+    return csc;
+  /* fprintf(stderr, "NM_csr_to_csc :: MKL not enabled\n"); */
+  /* exit(EXIT_FAILURE); */
+
 #endif
 }

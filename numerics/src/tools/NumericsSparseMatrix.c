@@ -904,9 +904,10 @@ void NSM_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, size_t
   /* Clear memory */
   memset(blockM, 0, block_row_size*block_col_size * sizeof(double));
 
-//  switch (Msparse->origin)
+  switch (M->matrix2->origin)
   {
-//  case NSM_CSC:
+  case NSM_TRIPLET:
+  case NSM_CSC:
     {
       CSparseMatrix* Mcsc = NM_csc(M);
       assert(Mcsc);
@@ -933,10 +934,41 @@ void NSM_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, size_t
           }
         }
       }
-//    break;
+    break;
     }
-//  default:
-//    printf("NSM_extract_block :: unsupported matrix type %d\n", Msparse->origin);
-//    exit(EXIT_FAILURE);
+  case NSM_CSR:
+    {
+      CSparseMatrix* Mcsr = M->matrix2->csr;
+      assert(Mcsr);
+      CS_INT* Mp = Mcsr->p;
+      CS_INT* Mi = Mcsr->i;
+      double* Mx = Mcsr->x;
+
+      
+      for(size_t i = pos_row; i < pos_row + block_row_size; ++i)
+      {
+        for(CS_INT p = Mp[i]; p < Mp[i+1]; ++p)
+        {
+          CS_INT col_nb = Mi[p];
+          /* Warning : the following strategy work only if the csc storage is
+             correclty ordered. Use NSM_fix_csc to be sure*/
+          if(col_nb >= (CS_INT) pos_col)
+          {
+            if(col_nb >= (CS_INT)(pos_col + block_col_size))
+            {
+              break;
+            }
+            else
+            {
+              blockM[(col_nb-pos_col)*block_col_size + i - pos_row] = Mx[p];
+            }
+          }
+        }
+      }
+    break;
+    }
+  default:
+    printf("NSM_extract_block :: unsupported matrix type %d\n", M->matrix2->origin);
+    exit(EXIT_FAILURE);
   }
 }

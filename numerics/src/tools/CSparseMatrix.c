@@ -47,15 +47,32 @@
 
 double CSparseMatrix_get_value(const CSparseMatrix *A, CS_INT i, CS_INT j)
 {
-  CS_INT * Ai =   A->i;
-  CS_INT * Ap =   A->p;
-  double * Ax =   A->x;
+  CS_INT *Ai = A->i;
+  CS_INT *Ap = A->p;
+  double *Ax = A->x;
 
-  for(CS_INT row = Ap[j]; row < Ap[j+1] ; row++)
-  {
-    if(i == Ai[row])
-      return  Ax[row];
+  if (A->nz == -1) {
+
+    for (CS_INT row = Ap[j]; row < Ap[j + 1]; row++) {
+      if (i == Ai[row]) return Ax[row];
+    }
   }
+  else if (A->nz >= 0) {
+    for (CS_INT row = 0 ; row < A->nz; row++) {
+      if ((i == Ai[row]) && (j == Ap[row]) ) return Ax[row];
+    }
+  }
+  else if (A->nz == -2) {
+    for (CS_INT col = Ap[i]; col < Ap[i + 1]; col++) {
+      if (j == Ai[col]) return Ax[col];
+    }
+  }
+
+  else
+    {
+      fprintf(stderr, "CSparseMatrix_get_value :: format\n");
+      exit(EXIT_FAILURE);
+    }
   return 0.0;
 }
 
@@ -77,6 +94,28 @@ void CSparseMatrix_write_in_file_python(const CSparseMatrix* const m, FILE* file
   fprintf(file, "]");
 }
 
+int CSparseMatrix_is_equal(const CSparseMatrix *A, const CSparseMatrix *B, double tol) {
+
+
+  CS_INT m  = A->n;
+  CS_INT n = A->m;
+  double *Ax = A->x;
+
+  if (m != B->m) return 1;
+  if (n != B->n) return 1;
+
+
+  for (CS_INT i =0; i < m; i++)
+    {
+      for (CS_INT j =0; j < n; j++)
+	{
+	  if (fabs(CSparseMatrix_get_value(A, i,j) - CSparseMatrix_get_value(B, i,j)) > tol)
+	    return 0;
+	}
+    }
+
+  return 1;
+}
 
 
 /* y = alpha*A*x+beta*y */
@@ -478,7 +517,7 @@ CS_INT CSparseMatrix_spsolve(CSparseMatrix_factors* cs_lu_A,  CSparseMatrix* X, 
 CS_INT CSparseMatrix_chol_solve(CSparseMatrix_factors* cs_chol_A, double* x, double *b)
 {
   assert(cs_chol_A);
-  
+
   CS_INT ok;
   CS_INT n = cs_chol_A->n;
   css* S = cs_chol_A->S;
@@ -853,7 +892,7 @@ CS_INT CSparseMatrix_block_dense_zentry(CSparseMatrix *T,  CS_INT row_off, CS_IN
     for(size_t i = 0; i < row_size; ++i)
     {
       // col-major
-      
+
       CSparseMatrix_zentry(T, i + row_off, j + col_off, x[i + j*row_size], DBL_EPSILON);
     }
   }
@@ -876,7 +915,47 @@ CS_INT CSparseMatrix_symmetric_zentry(CSparseMatrix *T, CS_INT i, CS_INT j, doub
 
 int CSparseMatrix_print(const CSparseMatrix *A, int brief)
 {
-  cs_print(A, brief);
+  CS_INT nz = A->nz;
+  if (nz > -2)  // triplet and csc cases
+  {
+    cs_print(A, brief);
+  } else {
+    CS_INT p, j, m, n, nzmax, nz, *Ap, *Ai;
+    CS_ENTRY *Ax;
+    if (!A) {
+      printf("(null)\n");
+      return (0);
+    }
+    m = A->m;
+    n = A->n;
+    Ap = A->p;
+    Ai = A->i;
+    Ax = A->x;
+    nzmax = A->nzmax;
+    nz = A->nz;
+    printf("CXSparse Version %d.%d.%d, %s.  %s\n", CS_VER, CS_SUBVER, CS_SUBSUB, CS_DATE,
+           CS_COPYRIGHT);
+    printf("csr :%g-by-%g, nzmax: %g nnz: %g, 1-norm: %g\n", (double)m, (double)n,
+           (double)nzmax, (double)(Ap[n]), cs_norm(A));
+    for (j = 0; j < n; j++) {
+      printf("    row %g : locations %g to %g\n", (double)j, (double)(Ap[j]),
+             (double)(Ap[j + 1] - 1));
+      for (p = Ap[j]; p < Ap[j + 1]; p++) {
+        printf("      %g : ", (double)(Ai[p]));
+#ifdef CS_COMPLEX
+        printf("(%g, %g)\n", Ax ? CS_REAL(Ax[p]) : 1, Ax ? CS_IMAG(Ax[p]) : 0);
+#else
+        printf("%g\n", Ax ? Ax[p] : 1);
+#endif
+        if (brief && p > 20) {
+          printf("  ...\n");
+          return (1);
+        }
+      }
+    }
+  }
+
+
   return 0;
 }
 
@@ -1134,7 +1213,7 @@ void CSparseMatrix_copy(const CSparseMatrix* const A, CSparseMatrix* B)
   }
   else
     numerics_error("CSparseMatrix_copy", "Wrong nz value in CSparseMatrix.");
- 
+
   memcpy(B->p, A->p, size_cpy * sizeof(CS_INT));
 }
 
