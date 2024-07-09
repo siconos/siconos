@@ -34,25 +34,31 @@
 // #define DEBUG_WHERE_MESSAGES
 #include "siconos_debug.h"
 
-siconos::simulation::TimeSteppingCombinedProjection::TimeSteppingCombinedProjection(
-    std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
-    std::shared_ptr<TimeDiscretisation> td,
-    std::shared_ptr<siconos::integrators::OneStepIntegrator> osi,
-    std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem> osnspb_velo,
-    std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem> osnspb_pos,
-    unsigned int level)
-    : TimeStepping{nsds, td, osi, osnspb_velo}, _indexSetLevelForProjection{level} {
+siconos::simulation::TimeSteppingCombinedProjection::
+    TimeSteppingCombinedProjection(
+        std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
+        std::shared_ptr<TimeDiscretisation> td,
+        std::shared_ptr<siconos::integrators::OneStepIntegrator> osi,
+        std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem>
+            osnspb_velo,
+        std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem>
+            osnspb_pos,
+        unsigned int level)
+    : TimeStepping{nsds, td, osi, osnspb_velo},
+      _indexSetLevelForProjection{level} {
   (*_allNSProblems).resize(SICONOS_NB_OSNSP_TSP);
   insertNonSmoothProblem(osnspb_pos, siconos::simulation::SICONOS_OSNSP_TS_POS);
 
   if (_indexSetLevelForProjection != 2) {
     THROW_EXCEPTION(
-        "siconos::simulation::TimeSteppingCombinedProjection::TimeSteppingCombinedProjection "
+        "siconos::simulation::TimeSteppingCombinedProjection::"
+        "TimeSteppingCombinedProjection "
         "level not equal to 2 is not yet implemented.  ");
   }
 }
 
-// struct siconos::simulation::TimeSteppingCombinedProjection::_SimulationEffectOnOSNSP
+// struct
+// siconos::simulation::TimeSteppingCombinedProjection::_SimulationEffectOnOSNSP
 //   : public ssiconos::internal::SiconosVisitor {
 
 //   TimeSteppingCombinedProjection* _parent{nullptr};
@@ -71,27 +77,33 @@ siconos::simulation::TimeSteppingCombinedProjection::TimeSteppingCombinedProject
 //   void visit(MLCPProjectOnConstraints onsnsp) { std::cout << "hello\n"; }
 // };
 
-void siconos::simulation::TimeSteppingCombinedProjection::initializeOneStepNSProblem() {
+void siconos::simulation::TimeSteppingCombinedProjection::
+    initializeOneStepNSProblem() {
+  updateIndexSets();
   TimeStepping::initializeOneStepNSProblem();
 
-  auto osnspb_pos = (*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_TS_POS];
+  auto osnspb_pos =
+      (*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_TS_POS];
 
   osnspb_pos->setIndexSetLevel(_indexSetLevelForProjection);
   osnspb_pos->setInputOutputLevel(0);
 
-  (*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->setIndexSetLevel(1);
-  (*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]->setInputOutputLevel(1);
+  (*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]
+      ->setIndexSetLevel(1);
+  (*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]
+      ->setInputOutputLevel(1);
 
-  if (auto mlcp =
-          std::dynamic_pointer_cast<siconos::nonsmooth_formulations::MLCPProjectOnConstraints>(
-              osnspb_pos)) {
+  if (auto mlcp = std::dynamic_pointer_cast<
+          siconos::nonsmooth_formulations::MLCPProjectOnConstraints>(
+          osnspb_pos)) {
     mlcp->setDoProjOnEquality(_doCombinedProjOnEquality);
   }
 }
 
 void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
   DEBUG_PRINT("================================================");
-  DEBUG_PRINT("siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent()");
+  DEBUG_PRINT(
+      "siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent()");
   DEBUG_PRINT("================================================\n");
 
   initialize();
@@ -120,7 +132,8 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
       inter1->lambda(1)->zero();
       indexSet1->eraseProperties(*ui);
       siconos::graphs::InteractionsGraph::OEIterator oei, oeiend;
-      for (std::tie(oei, oeiend) = indexSet1->out_edges(*ui); oei != oeiend; ++oei) {
+      for (std::tie(oei, oeiend) = indexSet1->out_edges(*ui); oei != oeiend;
+           ++oei) {
         siconos::graphs::InteractionsGraph::EDescriptor ed1, ed2;
         std::tie(ed1, ed2) =
             indexSet1->edges(indexSet1->source(*oei), indexSet1->target(*oei));
@@ -140,7 +153,8 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
       ++vnext;
       indexSet2->eraseProperties(*ui);
       siconos::graphs::InteractionsGraph::OEIterator oei, oeiend;
-      for (std::tie(oei, oeiend) = indexSet2->out_edges(*ui); oei != oeiend; ++oei) {
+      for (std::tie(oei, oeiend) = indexSet2->out_edges(*ui); oei != oeiend;
+           ++oei) {
         siconos::graphs::InteractionsGraph::EDescriptor ed1, ed2;
         std::tie(ed1, ed2) =
             indexSet2->edges(indexSet2->source(*oei), indexSet2->target(*oei));
@@ -197,7 +211,8 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
       assert(inter->lowerLevelForOutput() <= level);
       assert(inter->upperLevelForOutput() >= level);
 
-      // std::cout << "inter->getSizeOfDS()" << inter->getSizeOfDS()     << std::endl;
+      // std::cout << "inter->getSizeOfDS()" << inter->getSizeOfDS()     <<
+      // std::endl;
       std::cout << "inter->y(" << level << ")\n";
       inter->y(level)->display();
 
@@ -207,7 +222,8 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
       level = 1;
       assert(inter->lowerLevelForOutput() <= level);
       assert(inter->upperLevelForOutput() >= level);
-      // std::cout << "inter->getSizeOfDS()" << inter->getSizeOfDS()     << std::endl;
+      // std::cout << "inter->getSizeOfDS()" << inter->getSizeOfDS()     <<
+      // std::endl;
       std::cout << "inter->y(" << level << ")\n";
       inter->y(level)->display();
       std::cout << "inter->y_k(" << level << ")\n";
@@ -219,7 +235,8 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
     if (_nbIndexSetsIteration > _kIndexSetMax) {
       THROW_EXCEPTION(
           "siconos::simulation::TimeSteppingCombinedProjection::"
-          "TimeSteppingCombinedProjection _nbIndexSetsIteration >  _kIndexSetMax ");
+          "TimeSteppingCombinedProjection _nbIndexSetsIteration >  "
+          "_kIndexSetMax ");
     }
 
     /** First step, Solve the standard velocity formulation.*/
@@ -237,7 +254,8 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
       assert(inter->lowerLevelForOutput() <= level);
       assert(inter->upperLevelForOutput() >= level);
 
-      //   std::cout << "inter->getSizeOfDS()" << inter->getSizeOfDS()     << std::endl;
+      //   std::cout << "inter->getSizeOfDS()" << inter->getSizeOfDS()     <<
+      //   std::endl;
       std::cout << "inter->y(" << level << ")\n";
       inter->y(level)->display();
       std::cout << "inter->y_k(" << level << ")\n";
@@ -246,7 +264,8 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
       level = 1;
       assert(inter->lowerLevelForOutput() <= level);
       assert(inter->upperLevelForOutput() >= level);
-      // std::cout << "inter->getSizeOfDS()" << inter->getSizeOfDS()     << std::endl;
+      // std::cout << "inter->getSizeOfDS()" << inter->getSizeOfDS()     <<
+      // std::endl;
       std::cout << "inter->y(" << level << ")\n";
       inter->y(level)->display();
       std::cout << "inter->y_k(" << level << ")\n";
@@ -270,7 +289,8 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
 #else
     /** Second step, Perform the projection on constraints.*/
     DEBUG_PRINT(
-        "siconos::simulation::TimeSteppingCombinedProjection::newtonSolve begin "
+        "siconos::simulation::TimeSteppingCombinedProjection::newtonSolve "
+        "begin "
         "projection:\n");
 
     auto dsGraph = _nsds->dynamicalSystems();
@@ -310,27 +330,34 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
 
     // Store the q vector of each DS.
 
-    for (auto aVi2 : *dsGraph) {  // = dsGraph->begin(); aVi2 != dsGraph->end(); ++aVi2) {
+    for (auto aVi2 :
+         *dsGraph) {  // = dsGraph->begin(); aVi2 != dsGraph->end(); ++aVi2) {
       auto ds = dsGraph->bundle(aVi2);
       auto& workVectors = *dsGraph->properties(aVi2).workVectors;
 
-      if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
+      if (auto neds =
+              std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
         *workVectors[siconos::integrators::MoreauJeanOSI::QTMP] = *neds->q();
-      } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+      } else if (auto d =
+                     std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(
+                         ds)) {
         *workVectors[siconos::integrators::MoreauJeanOSI::QTMP] = *d->q();
       } else
         THROW_EXCEPTION(
-            "siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() :: - Ds is "
+            "siconos::simulation::TimeSteppingCombinedProjection::"
+            "advanceToEvent() :: - Ds is "
             "not from NewtonEulerDS neither from LagrangianDS.");
     }
 
     _nbProjectionIteration = 0;
 
-    while ((runningProjection && _nbProjectionIteration < _projectionMaxIteration) &&
+    while ((runningProjection &&
+            _nbProjectionIteration < _projectionMaxIteration) &&
            _doCombinedProj) {
       _nbProjectionIteration++;
 
-      DEBUG_PRINTF("Projection iteration number   %d\t", _nbProjectionIteration);
+      DEBUG_PRINTF("Projection iteration number   %d\t",
+                   _nbProjectionIteration);
       DEBUG_PRINT("================================================\n");
 
       // Zeroing Lambda Muliplier of indexSet()
@@ -349,7 +376,8 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
       info = computeOneStepNSProblem(siconos::simulation::SICONOS_OSNSP_TS_POS);
 
       if (info) {
-        std::cout << " siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() "
+        std::cout << " siconos::simulation::TimeSteppingCombinedProjection::"
+                     "advanceToEvent() "
                      "project on constraints. solver failed."
                   << std::endl;
         return;
@@ -361,7 +389,9 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
         auto ds = dsGraph->bundle(aVi2);
         auto& workVectors = *dsGraph->properties(aVi2).workVectors;
 
-        if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
+        if (auto neds =
+                std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(
+                    ds)) {
           auto q = neds->q();
           auto qtmp = workVectors[siconos::integrators::MoreauJeanOSI::QTMP];
           if (neds->p(0)) {
@@ -374,7 +404,8 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
 #ifdef TSPROJ_DEBUG_LEVEL1
           neds->display();
 #endif
-        } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+        } else if (auto d = std::dynamic_pointer_cast<
+                       siconos::modeling::LagrangianDS>(ds)) {
           auto q = d->q();
           auto qtmp = workVectors[siconos::integrators::MoreauJeanOSI::QTMP];
           if (d->p(0)) {
@@ -391,7 +422,8 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
 #endif
         } else
           THROW_EXCEPTION(
-              "siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() - Ds is "
+              "siconos::simulation::TimeSteppingCombinedProjection::"
+              "advanceToEvent() - Ds is "
               "not from NewtonEulerDS neither from LagrangianDS.");
       }
 
@@ -399,7 +431,8 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
 
       computeCriteria(&runningProjection);
 
-      // cout<<"||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||  Z:"<<endl;
+      // cout<<"||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+      // Z:"<<endl;
       //(*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_TS_POS]->display();
       //(std::static_pointer_cast<LinearOSNS>((*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_TS_POS]))->z()->display();
 
@@ -422,48 +455,58 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
 #endif
 
       // cout<<"during projection before normalizing of q:\n";
-      // for (InteractionsIterator it = allInteractions->begin(); it != allInteractions->end();
-      // it++)
+      // for (InteractionsIterator it = allInteractions->begin(); it !=
+      // allInteractions->end(); it++)
       //{
       //   (*it)->relation()->computeh(getTkp1());
       // }
-    }  // end while ((runningProjection && _nbProjectionIteration < _projectionMaxIteration) &&
-       // _doCombinedProj)
+    }  // end while ((runningProjection && _nbProjectionIteration <
+       // _projectionMaxIteration) && _doCombinedProj)
 
     DEBUG_PRINTF(
-        "siconos::simulation::TimeSteppingCombinedProjection::Projection end : Number of "
+        "siconos::simulation::TimeSteppingCombinedProjection::Projection end : "
+        "Number of "
         "iterations= %i\n",
         _nbProjectionIteration);
 
     _nbCumulatedProjectionIteration += _nbProjectionIteration;
     if (_nbProjectionIteration == _projectionMaxIteration) {
-      std::cout << "siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() Max "
+      std::cout << "siconos::simulation::TimeSteppingCombinedProjection::"
+                   "advanceToEvent() Max "
                    "number of projection iterations reached ("
                 << _nbProjectionIteration << ")\n";
-      printf("              max criteria equality =  %e.\n", _maxViolationEquality);
-      printf("              max criteria unilateral =  %e.\n", _maxViolationUnilateral);
+      printf("              max criteria equality =  %e.\n",
+             _maxViolationEquality);
+      printf("              max criteria unilateral =  %e.\n",
+             _maxViolationUnilateral);
     }
 
 #endif  // TSPROJ_WITHOUT_PROJECTION
 
     DEBUG_PRINT(
-        "siconos::simulation::TimeSteppingCombinedProjection::newtonSolve end projection:\n");
+        "siconos::simulation::TimeSteppingCombinedProjection::newtonSolve end "
+        "projection:\n");
 
-    // We update forces to start the Newton Loop the next tiem step with a correct value in
-    // swap
+    // We update forces to start the Newton Loop the next tiem step with a
+    // correct value in swap
     for (auto aVi2 : *dsGraph) {
       auto ds = dsGraph->bundle(aVi2);
-      if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
+      if (auto neds =
+              std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
         double time = nextTime();
         neds->computeForces(time, neds->q(), neds->twist());
-      } else if (std::dynamic_pointer_cast<siconos::modeling::LagrangianLinearTIDS>(
+      } else if (std::dynamic_pointer_cast<
+                     siconos::modeling::LagrangianLinearTIDS>(
                      ds)) {  // nothing ...
-      } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+      } else if (auto d =
+                     std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(
+                         ds)) {
         auto time = nextTime();
         d->computeForces(time, d->q(), d->velocity());
       } else
         THROW_EXCEPTION(
-            "siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() - Ds is "
+            "siconos::simulation::TimeSteppingCombinedProjection::"
+            "advanceToEvent() - Ds is "
             "not from NewtonEulerDS neither from LagrangianDS.");
     }
 
@@ -512,7 +555,8 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
   }  // end  while (!_isIndexSetsStable)
 
   DEBUG_PRINTF(
-      "siconos::simulation::TimeSteppingCombinedProjection::indexset stable end : Number of "
+      "siconos::simulation::TimeSteppingCombinedProjection::indexset stable "
+      "end : Number of "
       "iterations= %i \n ",
       _nbIndexSetsIteration);
 
@@ -522,7 +566,8 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
 void siconos::simulation::TimeSteppingCombinedProjection::computeCriteria(
     bool* runningProjection) {
   DEBUG_PRINT(
-      "siconos::simulation::TimeSteppingCombinedProjection::computeCriteria(bool * "
+      "siconos::simulation::TimeSteppingCombinedProjection::computeCriteria("
+      "bool * "
       "runningProjection)\n");
   // auto indexSet = _nsds->topology()->indexSet(_indexSetLevelForProjection);
   auto indexSet = _nsds->topology()->indexSet(_indexSetLevelForProjection);
@@ -546,7 +591,9 @@ void siconos::simulation::TimeSteppingCombinedProjection::computeCriteria(
             siconos::modeling::Type::NewtonImpactNSL) {
 #ifdef TSPROJ_DEBUG_LEVEL1
       printf(
-          "  siconos::simulation::TimeSteppingCombinedProjection::computeCriteria  "
+          "  "
+          "siconos::simulation::TimeSteppingCombinedProjection::"
+          "computeCriteria  "
           "Unilateral "
           "interac->y(0)->getValue(0) %e.\n",
           interac->y(0)->getValue(0));
@@ -554,7 +601,8 @@ void siconos::simulation::TimeSteppingCombinedProjection::computeCriteria(
       if (!_doCombinedProjOnEquality) {
         if (maxViolationUnilateral > _constraintTolUnilateral) {
           double criteria = std::max(0.0, -interac->y(0)->getValue(0));
-          if (criteria > maxViolationUnilateral) maxViolationUnilateral = criteria;
+          if (criteria > maxViolationUnilateral)
+            maxViolationUnilateral = criteria;
 
           *runningProjection = true;
 #ifdef TSPROJ_DEBUG_LEVEL1
@@ -563,7 +611,8 @@ void siconos::simulation::TimeSteppingCombinedProjection::computeCriteria(
         }
       } else {
         auto criteria = interac->y(0)->getValue(0);
-        if (criteria > maxViolationUnilateral) maxViolationUnilateral = criteria;
+        if (criteria > maxViolationUnilateral)
+          maxViolationUnilateral = criteria;
 
         if (std::abs(criteria) >= _constraintTolUnilateral) {
           *runningProjection = true;
@@ -581,7 +630,8 @@ void siconos::simulation::TimeSteppingCombinedProjection::computeCriteria(
       if (interac->y(0)->normInf() > _constraintTol) {
         *runningProjection = true;
 #ifdef TSPROJ_DEBUG_LEVEL1
-        printf("TSProj  newton criteria equality true %e.\n", interac->y(0)->normInf());
+        printf("TSProj  newton criteria equality true %e.\n",
+               interac->y(0)->normInf());
 #endif
       }
     }
@@ -590,25 +640,32 @@ void siconos::simulation::TimeSteppingCombinedProjection::computeCriteria(
   _maxViolationUnilateral = maxViolationUnilateral;
   _maxViolationEquality = maxViolationEquality;
 
-  DEBUG_PRINTF("              max criteria equality =  %e.\n", _maxViolationEquality);
-  DEBUG_PRINTF("              max criteria unilateral =  %e.\n", _maxViolationUnilateral);
+  DEBUG_PRINTF("              max criteria equality =  %e.\n",
+               _maxViolationEquality);
+  DEBUG_PRINTF("              max criteria unilateral =  %e.\n",
+               _maxViolationUnilateral);
 
 #ifdef TSPROJ_DEBUG_LEVEL1
   printf("TSProj newton min/max criteria projection\n");
-  std::cout << "                 runningProjection  " << *runningProjection << std::endl;
+  std::cout << "                 runningProjection  " << *runningProjection
+            << std::endl;
   printf("              max criteria equality =  %e.\n", maxViolationEquality);
-  printf("              max criteria unilateral =  %e.\n", maxViolationUnilateral);
-  //  printf("              min criteria unilateral =  %e.\n",minViolationUnilateral);
+  printf("              max criteria unilateral =  %e.\n",
+         maxViolationUnilateral);
+  //  printf("              min criteria unilateral =
+  //  %e.\n",minViolationUnilateral);
 #endif
 }
 
-void siconos::simulation::TimeSteppingCombinedProjection::updateIndexSet(unsigned int i) {
+void siconos::simulation::TimeSteppingCombinedProjection::updateIndexSet(
+    unsigned int i) {
   // To update IndexSet i: add or remove Interactions from
   // this set, depending on y values.
   // boost::default_color_type is used to organize update in InteractionsGraph:
   // - white_color : undiscovered vertex (Interaction)
   // - gray_color : discovered vertex (Interactions) but searching descendants
-  // - black_color : discovered vertex (Interaction) together with the descendants
+  // - black_color : discovered vertex (Interaction) together with the
+  // descendants
 
   assert(_nsds);
   assert(_nsds->topology());
@@ -617,8 +674,10 @@ void siconos::simulation::TimeSteppingCombinedProjection::updateIndexSet(unsigne
 
   assert(i < topo->indexSetsSize() &&
          "TimeStepping::updateIndexSet(i), indexSets[i] does not exist.");
-  // IndexSets[0] must not be updated in simulation, since it belongs to Topology.
-  assert(i > 0 && "TimeStepping::updateIndexSet(i=0), indexSets[0] cannot be updated.");
+  // IndexSets[0] must not be updated in simulation, since it belongs to
+  // Topology.
+  assert(i > 0 &&
+         "TimeStepping::updateIndexSet(i=0), indexSets[0] cannot be updated.");
 
   // For all Interactions in indexSet[i-1], compute y[i-1] and
   // update the indexSet[i].
@@ -633,7 +692,8 @@ void siconos::simulation::TimeSteppingCombinedProjection::updateIndexSet(unsigne
 
   topo->setHasChanged(false);
 
-  DEBUG_PRINTF("update indexSets start : indexSet0 size : %i\n", (int)(indexSet0->size()));
+  DEBUG_PRINTF("update indexSets start : indexSet0 size : %i\n",
+               (int)(indexSet0->size()));
 
   // Check indexSet1
 
@@ -643,7 +703,8 @@ void siconos::simulation::TimeSteppingCombinedProjection::updateIndexSet(unsigne
     std::tie(ui1, ui1end) = indexSet1->vertices();
     _isIndexSetsStable = true;
 
-    DEBUG_PRINTF("update IndexSets start : indexSet1 size : %i\n", (int)(indexSet1->size()));
+    DEBUG_PRINTF("update IndexSets start : indexSet1 size : %i\n",
+                 (int)(indexSet1->size()));
     // indexSet1->display();
     // Remove interactions from the indexSet1
     for (v1next = ui1; ui1 != ui1end; ui1 = v1next) {
@@ -691,7 +752,8 @@ void siconos::simulation::TimeSteppingCombinedProjection::updateIndexSet(unsigne
           if (siconos::types::type_value(*(inter0->nonSmoothLaw())) !=
               siconos::modeling::Type::EqualityConditionNSL) {
             // auto Osi = indexSet0->properties(*ui0).osi;
-            //  We assume that the integrator of the ds1 drive the update of the index set
+            //  We assume that the integrator of the ds1 drive the update of the
+            //  index set
             auto ds1 = indexSet1->properties(*ui0).source;
             auto& osi = *DSG0.properties(DSG0.descriptor(ds1)).osi;
 
@@ -712,8 +774,10 @@ void siconos::simulation::TimeSteppingCombinedProjection::updateIndexSet(unsigne
     indexSet1->update_vertices_indices();
     indexSet1->update_edges_indices();
     assert(indexSet1->size() <= indexSet0->size());
-    DEBUG_PRINTF("update indexSets end : indexSet0 size : %i\n", (int)(indexSet0->size()));
-    DEBUG_PRINTF("update IndexSets end : indexSet1 size : %i\n", (int)(indexSet1->size()));
+    DEBUG_PRINTF("update indexSets end : indexSet0 size : %i\n",
+                 (int)(indexSet0->size()));
+    DEBUG_PRINTF("update IndexSets end : indexSet1 size : %i\n",
+                 (int)(indexSet1->size()));
   }  // i==1
 
   if (i == 2) {
@@ -724,7 +788,8 @@ void siconos::simulation::TimeSteppingCombinedProjection::updateIndexSet(unsigne
       ++v1next;
       indexSet2->eraseProperties(*ui1);
       siconos::graphs::InteractionsGraph::OEIterator oei, oeiend;
-      for (std::tie(oei, oeiend) = indexSet2->out_edges(*ui1); oei != oeiend; ++oei) {
+      for (std::tie(oei, oeiend) = indexSet2->out_edges(*ui1); oei != oeiend;
+           ++oei) {
         siconos::graphs::InteractionsGraph::EDescriptor ed1, ed2;
         std::tie(ed1, ed2) =
             indexSet2->edges(indexSet2->source(*oei), indexSet2->target(*oei));
@@ -738,7 +803,8 @@ void siconos::simulation::TimeSteppingCombinedProjection::updateIndexSet(unsigne
     }
 
     indexSet2->clear();
-    DEBUG_PRINTF("update IndexSets start : indexSet2 size : %i\n", (int)(indexSet2->size()));
+    DEBUG_PRINTF("update IndexSets start : indexSet2 size : %i\n",
+                 (int)(indexSet2->size()));
 
     // Scan indexSet1
     std::tie(ui1, ui1end) = indexSet1->vertices();
@@ -749,7 +815,8 @@ void siconos::simulation::TimeSteppingCombinedProjection::updateIndexSet(unsigne
       if (siconos::types::type_value(*(inter1->nonSmoothLaw())) !=
           siconos::modeling::Type::EqualityConditionNSL) {
         // auto Osi = indexSet1->properties(*ui1).osi;
-        //  We assume that the integrator of the ds1 drive the update of the index set
+        //  We assume that the integrator of the ds1 drive the update of the
+        //  index set
         auto ds1 = indexSet1->properties(*ui1).source;
         auto& osi = *DSG0.properties(DSG0.descriptor(ds1)).osi;
 
@@ -764,8 +831,10 @@ void siconos::simulation::TimeSteppingCombinedProjection::updateIndexSet(unsigne
         assert(indexSet2->is_vertex(inter1));
       }
     }
-    DEBUG_PRINTF("update IndexSets end : indexSet0 size : %i\n", (int)(indexSet0->size()));
-    DEBUG_PRINTF("update IndexSets end : indexSet2 size : %i\n", (int)(indexSet2->size()));
+    DEBUG_PRINTF("update IndexSets end : indexSet0 size : %i\n",
+                 (int)(indexSet0->size()));
+    DEBUG_PRINTF("update IndexSets end : indexSet2 size : %i\n",
+                 (int)(indexSet2->size()));
     indexSet2->update_vertices_indices();
     indexSet2->update_edges_indices();
   }

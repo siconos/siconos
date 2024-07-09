@@ -55,9 +55,6 @@ class TimeSteppingD1Minus : public Simulation {
   /** destructor */
   ~TimeSteppingD1Minus() noexcept = default;
 
-  /** Overload Simulation::initialize */
-  void initialize() override;
-
   /** updateIndexSet using current y and lambda values of interactions
    *  \param i the  number of the set to be updated
    *  0 : ALL interactions (NEVER)

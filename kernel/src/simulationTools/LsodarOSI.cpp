@@ -30,12 +30,12 @@
 #include "OneStepNSProblem.hpp"
 #include "Relation.hpp"
 #include "SiconosException.hpp"
-#include "SiconosFortran.h"           // for lsodar
+#include "SiconosFortran.h"  // for lsodar
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixVectorOp.hpp"  // mat-vec prod
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"  // For subscal
 #include "SiconosVisitor.hpp"   // for NSLEffectOnFreeOutput visitor
-#include "SiconosMatrix.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -459,7 +459,7 @@ void siconos::integrators::LsodarOSI::initialize() {
   //                 output message.
 
   // 7 - JT, Jacobian type indicator
-  //_intData[6] = 2;  // jt, Jacobian type indicator.
+  _intData[6] = 1;  // jt, Jacobian type indicator.
   //           1 means a user-supplied full (NEQ by NEQ) Jacobian.
   //           2 means an internally generated (difference quotient) full
   //           Jacobian (using NEQ extra calls to f per df/dx value). 4 means a

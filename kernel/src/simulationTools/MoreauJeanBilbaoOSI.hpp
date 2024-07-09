@@ -51,9 +51,15 @@ class MoreauJeanBilbaoOSI : public OneStepIntegrator {
     WORK_LENGTH
   };
 
-  enum MoreauJeanBilbaoOSI_interaction_workVector_id { OSNSP_RHS, WORK_INTERACTION_LENGTH };
+  enum MoreauJeanBilbaoOSI_interaction_workVector_id {
+    OSNSP_RHS,
+    WORK_INTERACTION_LENGTH
+  };
 
-  enum MoreauJeanBilbaoOSI_interaction_workBlockVector_id { xfree, BLOCK_WORK_LENGTH };
+  enum MoreauJeanBilbaoOSI_interaction_workBlockVector_id {
+    xfree,
+    BLOCK_WORK_LENGTH
+  };
 
   /** Constructor - No extra parameters: depends only on connected ds and
    *  simulation time step
@@ -70,7 +76,8 @@ class MoreauJeanBilbaoOSI : public OneStepIntegrator {
    *  \param ds the dynamical system
    */
   void initializeWorkVectorsForDS(
-      double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) override;
+      double t,
+      std::shared_ptr<siconos::modeling::DynamicalSystem> ds) override;
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi
@@ -80,10 +87,16 @@ class MoreauJeanBilbaoOSI : public OneStepIntegrator {
    *  \param DSG the dynamical systems graph
    */
   void initializeWorkVectorsForInteraction(
-      siconos::modeling::Interaction &inter, siconos::graphs::InteractionProperties &interProp,
+      siconos::modeling::Interaction &inter,
+      siconos::graphs::InteractionProperties &interProp,
       siconos::graphs::DynamicalSystemsGraph &DSG) override;
 
-  void _initialize_iteration_matrix(std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
+  void _initialize_iteration_matrix(
+      std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
+
+  /** compute the initial state of the Newton loop.
+   */
+  void computeInitialNewtonState() override;
 
   /** Initialization process of the nonsmooth problems
       linked to this OSI*/
@@ -95,8 +108,8 @@ class MoreauJeanBilbaoOSI : public OneStepIntegrator {
    */
   unsigned int numberOfIndexSets() const override { return 2; };
 
-  void compute_parameters(double time_step, double omega, double sigma, double &theta,
-                          double &sigma_star);
+  void compute_parameters(double time_step, double omega, double sigma,
+                          double &theta, double &sigma_star);
 
   /** get iteration_matrix (pointer link) corresponding to DynamicalSystem ds
    *
@@ -105,7 +118,9 @@ class MoreauJeanBilbaoOSI : public OneStepIntegrator {
    */
   inline std::shared_ptr<siconos::algebra::SiconosMatrix> iteration_matrix(
       std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
-    return _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W;
+    return _dynamicalSystemsGraph
+        ->properties(_dynamicalSystemsGraph->descriptor(ds))
+        .W;
   }
 
   /** integrate the system, between tinit and tend (->iout=true), with possible
@@ -136,16 +151,18 @@ class MoreauJeanBilbaoOSI : public OneStepIntegrator {
    *  \param vertex_inter vertex of the interaction graph
    *  \param osnsp pointer to OneStepNSProblem
    */
-  void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
-                         siconos::nonsmooth_formulations::OneStepNSProblem *osnsp) override;
+  void computeFreeOutput(
+      siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
+      siconos::nonsmooth_formulations::OneStepNSProblem *osnsp) override;
 
-  /** return the workVector corresponding to the right hand side of the OneStepNonsmooth
-   * problem
+  /** return the workVector corresponding to the right hand side of the
+   * OneStepNonsmooth problem
    */
   siconos::algebra::SiconosVector &osnsp_rhs(
       siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
       siconos::graphs::InteractionsGraph &indexSet) override {
-    return *(*indexSet.properties(vertex_inter).workVectors)[MoreauJeanBilbaoOSI::OSNSP_RHS];
+    return *(*indexSet.properties(vertex_inter)
+                  .workVectors)[MoreauJeanBilbaoOSI::OSNSP_RHS];
   };
 
   /** update the state of the dynamical systems
@@ -174,8 +191,9 @@ class MoreauJeanBilbaoOSI : public OneStepIntegrator {
    *  \param i level of the IndexSet
    *  \return Boolean
    */
-  bool addInteractionInIndexSet(std::shared_ptr<siconos::modeling::Interaction> inter,
-                                unsigned int i) override;
+  bool addInteractionInIndexSet(
+      std::shared_ptr<siconos::modeling::Interaction> inter,
+      unsigned int i) override;
 
   /** Apply the rule to one Interaction to know if it should be removed from the
    *  IndexSet of level i
@@ -184,8 +202,9 @@ class MoreauJeanBilbaoOSI : public OneStepIntegrator {
    *  \param i level of the IndexSet
    *  \return Boolean
    */
-  bool removeInteractionFromIndexSet(std::shared_ptr<siconos::modeling::Interaction> inter,
-                                     unsigned int i) override;
+  bool removeInteractionFromIndexSet(
+      std::shared_ptr<siconos::modeling::Interaction> inter,
+      unsigned int i) override;
 };
 }  // namespace siconos::integrators
 

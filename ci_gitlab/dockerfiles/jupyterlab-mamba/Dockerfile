@@ -3,7 +3,7 @@
 # in the last step, after build, install, to avoid all the mess
 # with entrypoint and CI.
 #### Mamba setup ### 
-ARG MAMBAIMAGE=mambaorg/micromamba:1.5.5
+ARG MAMBAIMAGE=mambaorg/micromamba:1.5.8
 FROM $MAMBAIMAGE AS mamba-base
 LABEL maintainer="Siconos team <siconos-team@inria.fr>"
 USER root
@@ -19,13 +19,11 @@ RUN micromamba config prepend channels conda-forge && micromamba self-update && 
 
 FROM mamba-base AS mambaenv
 USER $MAMBA_USER
-     RUN micromamba config prepend channels conda-forge && micromamba config set channel_priority strict
+RUN micromamba config prepend channels conda-forge && micromamba config set channel_priority strict
 COPY --chown=$MAMBA_USER:$MAMBA_USER ci_gitlab/sicolabenv.yml /home/sicolabenv.yml
-ENV MAMBA_DISABLE_LOCKFILE TRUE
 RUN micromamba install -y -f /home/sicolabenv.yml && \
     micromamba clean --all --yes
 ARG MAMBA_DOCKERFILE_ACTIVATE=1  # (otherwise python, cmake ... will not be found)
 ENV SHELL /bin/bash
 ENV PATH /opt/conda/bin:$PATH
 WORKDIR /home/mambauser
-

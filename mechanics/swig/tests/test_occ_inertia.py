@@ -3,8 +3,13 @@
 
 from siconos.mechanics.collision.tools import Contactor, Shape, Volume, Material
 from siconos.io.mechanics_run import MechanicsHdf5Runner
-from OCC.BRepPrimAPI import BRepPrimAPI_MakeCylinder, BRepPrimAPI_MakeSphere
-from OCC.gp import gp_Pnt, gp_Ax2, gp_Dir
+from OCC.Core.BRepPrimAPI import BRepPrimAPI_MakeCylinder, BRepPrimAPI_MakeSphere
+from OCC.Core.gp import gp_Pnt
+from OCC.Core.gp import gp_Pnt, gp_Ax2, gp_Dir
+from OCC.Core.BRep import BRep_Builder
+from OCC.Core.TopoDS import TopoDS_Compound
+
+
 #import mechanics_run
 #mechanics_run.set_backend('occ')
 import siconos.io.mechanics_run
@@ -37,16 +42,9 @@ sphere_r001_shape = sphere_r001.Shape()
 
 
 
-from OCC.BRep import BRep_Builder
-from OCC.TopoDS import TopoDS_Compound
-
 builder = BRep_Builder()
 comp = TopoDS_Compound()
 builder.MakeCompound(comp)
-
-from OCC.BRep import BRep_Builder
-from OCC.TopoDS import TopoDS_Compound
-
 builder.Add(comp, sphere_r1_shape)
 
 radius=1.0

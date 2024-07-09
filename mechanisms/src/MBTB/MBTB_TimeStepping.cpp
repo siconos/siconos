@@ -1,22 +1,31 @@
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2024 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include "MBTB_TimeStepping.hpp"
-#include "MBTB_PYTHON_API.hpp"
-#include "MBTB_internalTool.hpp"
-#include <boost/math/quaternion.hpp>
-//#define TS_DEBUG
-MBTB_TimeStepping::MBTB_TimeStepping(
-  SP::NonSmoothDynamicalSystem nsds,
-  SP::TimeDiscretisation td,
-  SP::OneStepIntegrator osi,
-  SP::OneStepNSProblem osnspb_velo):TimeStepping(nsds,td,osi,osnspb_velo)
-{
-}
 
+#include "MBTB_PYTHON_API.hpp"    // For MBTB_updateDSFromSiconos
+#include "MBTB_internalTool.hpp"  // For  _MBTB_updateContactFromDS();
+// #define TS_DEBUG
 
-void MBTB_TimeStepping::updateWorldFromDS()
-{
+void siconos::mechanisms::MBTB_TimeStepping::updateWorldFromDS() {
 #ifdef TS_DEBUG
   printf("MBTB_TimeStepping::updateWordFromDS \n");
 #endif
   MBTB_updateDSFromSiconos();
-  _MBTB_updateContactFromDS();
+  mbtb::internal::MBTB_updateContactFromDS();
 }

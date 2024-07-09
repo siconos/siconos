@@ -1,14 +1,31 @@
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2024 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include "MBTB_TimeSteppingProj.hpp"
+
 #include "MBTB_PYTHON_API.hpp"
 #include "MBTB_internalTool.hpp"
-#include <boost/math/quaternion.hpp>
-//#define TSPROJ_DEBUG
+// #define TSPROJ_DEBUG
 
-void MBTB_TimeSteppingProj::updateWorldFromDS()
-{
+void siconos::mechanisms::MBTB_TimeSteppingProj::updateWorldFromDS() {
 #ifdef TSPROJ_DEBUG
   printf("MBTB_TimeSteppingProj::updateWordFromDS \n");
 #endif
   MBTB_updateDSFromSiconos();
-  _MBTB_updateContactFromDS();
+  mbtb::internal::MBTB_updateContactFromDS();
 }
