@@ -212,7 +212,7 @@ extern "C"
    *  \return the triplet sparse Matrix created in A.
    */
   CSparseMatrix* NM_half_triplet(NumericsMatrix* A);
-  
+
   /** Creation, if needed, of compress column storage of a NumericsMatrix.
    *
    *  \param[in,out] A a NumericsMatrix with sparse block storage initialized
@@ -268,7 +268,7 @@ extern "C"
    *  \param A a matrix
    */
   void NM_null(NumericsMatrix* A);
-  
+
   /** Check if a matrix is destructible.
    *
    *  \param[in] A the NumericsMatrix
@@ -348,7 +348,7 @@ extern "C"
   void NM_triplet_alloc(NumericsMatrix* A, CS_INT nzmax);
 
 
-  /** 
+  /**
       Free memory for a NumericsMatrix. Warning: call this function only if you are sure that
       memory has been allocated for the structure in Numerics. This function is assumed that the memory is "owned" by this structure.
       Note that this function does not free m.
@@ -360,9 +360,9 @@ extern "C"
 
   NumericsMatrix *  NM_free(NumericsMatrix* m);
 
-  /** 
+  /**
       Free memory for a NumericsMatrix except the dense matrix that is assumed not to be owned.
-      
+
       \param m the matrix to be cleared.
    */
   void NM_clear_not_dense(NumericsMatrix* m);
@@ -370,7 +370,7 @@ extern "C"
   /**
      Free memory for a NumericsMatrix except the SBM matrix that is assumed not to be owned.
      Note that this function does not free m.
-     
+
      \param m the matrix to be cleared.
    */
   void NM_clear_not_SBM(NumericsMatrix* m);
@@ -380,7 +380,7 @@ extern "C"
   /** Free memory for a NumericsMatrix except for a given storage. Warning: call this function only if you are sure that
       memory has been allocated for the structure in Numerics. This function is assumed that the memory is "owned" by this structure.
       Note that this function does not free m.
-      
+
       \param m the matrix to be deleted.
       \param storageType to be kept.
    */
@@ -455,6 +455,9 @@ extern "C"
   void NM_extract_diag_block(NumericsMatrix* M, int block_row_nb, size_t start_row,
                              int size, double **Block);
 
+  SparseBlockStructuredMatrix *  NM_extract_diagonal_blocks(NumericsMatrix* M, size_t block_size);
+
+
   /** get a 3x3 diagonal block of a NumericsMatrix. No allocation is done.
    *
    *  \param[in] M a NumericsMatrix
@@ -506,11 +509,11 @@ extern "C"
   void NM_insert(NumericsMatrix* A, const NumericsMatrix* const B,
                  const unsigned int start_i, const unsigned int start_j);
 
-  //  Matrix - vector product 
+  //  Matrix - vector product
 
-  /** 
+  /**
       Matrix - vector product y = A*x + y
-      
+
       \param[in] sizeX dim of the vector x
       \param[in] sizeY dim of the vector y
       \param[in] A the matrix to be multiplied
@@ -520,9 +523,9 @@ extern "C"
   void NM_prod_mv_3x3(int sizeX, int sizeY,  NumericsMatrix* A,
                              double* const x, double* y);
 
-  /** 
+  /**
       Row of a Matrix - vector product y = rowA*x or y += rowA*x, rowA being a submatrix of A (sizeY rows and sizeX columns)
-      
+
       \param[in] sizeX dim of the vector x
       \param[in] sizeY dim of the vector y
       \param[in] currentRowNumber position of the first row of rowA in A (warning: real row if A is a double*, block-row if A is a SparseBlockStructuredMatrix)
@@ -533,9 +536,9 @@ extern "C"
   */
   void NM_row_prod(int sizeX, int sizeY, int currentRowNumber, NumericsMatrix*  A, const double* const x, double* y, int init);
 
-  /** 
+  /**
       Row of a Matrix - vector product y = rowA*x or y += rowA*x, rowA being a submatrix of A (sizeY rows and sizeX columns)
-      
+
       \param[in] sizeX dim of the vector x
       \param[in] sizeY dim of the vector y
       \param[in] block_start block number (only used for SBM)
@@ -548,9 +551,9 @@ extern "C"
   */
   void NM_row_prod_no_diag(size_t sizeX, size_t sizeY, int block_start, size_t row_start, NumericsMatrix* A, double* x, double* y, double* xsave, bool init);
 
-  /** 
+  /**
       Row of a Matrix - vector product y = rowA*x or y += rowA*x, rowA being a submatrix of A (3 rows and sizeX columns)
-      
+
       \param[in] sizeX dim of the vector x
       \param[in] block_start block number (only used for SBM)
       \param[in] row_start position of the first row of A (unused if A is SBM)
@@ -625,7 +628,7 @@ extern "C"
 
   /**
      Copy a NumericsMatrix into another with dense storage.
-     
+
      \param A source matrix (any kind of storage)
      \param B targeted matrix, must be dense with the same dimension as A
   */
@@ -633,7 +636,7 @@ extern "C"
 
   /**
      Screen display of the matrix content stored as a double * array in Fortran style
-     
+
      \param m the matrix to be displayed
      \param nRow the number of rows
      \param nCol the number of columns
@@ -643,7 +646,7 @@ extern "C"
 
   /**
      Screen display of the matrix content stored as a double * array in Fortran style
-     
+
      \param m the matrix to be displayed
      \param nRow the number of rows
      \param nCol the number of columns
@@ -653,7 +656,7 @@ extern "C"
 
   /**
      Screen display of the vector content stored as a double * array
-     
+
      \param m the vector to be displayed
      \param nRow the number of rows
    */
@@ -662,14 +665,14 @@ extern "C"
 
   /**
      Screen display of the matrix content
-     
+
      \param M the matrix to be displayed
    */
   void NM_display(const NumericsMatrix* const M);
 
   /**
      Screen display of the matrix storage
-     
+
      \param M the matrix to be displayed
    */
   void NM_display_storageType(const NumericsMatrix* const M);
@@ -677,7 +680,7 @@ extern "C"
 
   /**
      Screen display raw by raw of the matrix content
-     
+
      \param m the matrix to be displayed
   */
   void NM_display_row_by_row(const NumericsMatrix* const m);
@@ -688,7 +691,7 @@ extern "C"
 
   /**
      PrintInFile  of the matrix content
-     
+
      \param M the matrix to be printed
      \param filename the corresponding name of the file
   */
@@ -696,7 +699,7 @@ extern "C"
 
   /**
      Read in file  of the matrix content
-     
+
      \param M the matrix to be read
      \param filename the corresponding name of the file
   */
@@ -704,7 +707,7 @@ extern "C"
 
   /**
      PrintInFile  of the matrix content
-     
+
      \param M the matrix to be printed
      \param file filename the corresponding file
   */
@@ -713,7 +716,7 @@ extern "C"
 
   /**
      Read in file  of the matrix content without performing memory allocation
-     
+
      \param M the matrix to be read
      \param file the corresponding  file
   */
@@ -721,7 +724,7 @@ extern "C"
 
   /**
      Create from file a NumericsMatrix with  memory allocation
-     
+
      \param file the corresponding  file
      \return 0 if the matrix
   */
@@ -730,13 +733,13 @@ extern "C"
 
   /**
      NM_write_in_file_scilab of the matrix content
-  
+
      \param M the matrix to be printed
      \param file the corresponding file
   */
   void NM_write_in_file_scilab(const NumericsMatrix* const M, FILE* file);
 
- /**   
+ /**
        NM_write_in_file_python of the matrix content
 
        \param M the matrix to be printed
@@ -746,7 +749,7 @@ extern "C"
 
   /**
      Read in file for scilab  of the matrix content
-     
+
      \param M the matrix to be read
      \param file the corresponding  file
   */
@@ -838,9 +841,9 @@ extern "C"
      subsequent calls to NM_LU_solve.
      If the matrix is not preserved, then it is replaced by the
      factorized part.
-   
+
      \param[in] A the NumericsMatrix
-     \return an int, 0 means the matrix has been factorized. 
+     \return an int, 0 means the matrix has been factorized.
   */
   int NM_LU_factorize(NumericsMatrix* A);
   int NM_Cholesky_factorize(NumericsMatrix* A);
@@ -873,7 +876,7 @@ extern "C"
   int NM_gesv_expert_multiple_rhs(NumericsMatrix* A, double *b, unsigned int n_rhs, unsigned keep);
 
   int NM_Linear_solver_finalize(NumericsMatrix* Ao);
- 
+
   /** Computation of the inverse of a NumericsMatrix A usinf NM_gesv_expert
    *
    *  \param[in,out] A a NumericsMatrix.

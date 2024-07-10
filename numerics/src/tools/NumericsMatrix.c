@@ -1662,6 +1662,40 @@ void NM_extract_diag_block5(NumericsMatrix* M, int block_row_nb, double** Block)
     }
   }
 }
+SparseBlockStructuredMatrix *   NM_extract_diagonal_blocks(NumericsMatrix* M, size_t block_size)
+{
+  assert(M);
+  NM_types storageType = M->storageType;
+
+
+  if (M->size0 != M->size1)
+    return NULL;
+  if (M->size0 % block_size != 0)
+    return NULL;
+
+
+  SparseBlockStructuredMatrix * sbm = SBM_new();
+  sbm->nbblocks= M->size0 / block_size;
+
+
+  switch (storageType) {
+    /* case NM_DENSE: { */
+    /*   break; */
+    /* } */
+    /* case NM_SPARSE_BLOCK: { */
+    /*   break; */
+    /* } */
+    case NM_SPARSE: {
+      sbm->block =  NSM_extract_diagonal_blocks(M, block_size);
+      break;
+    }
+    default: {
+      printf("NM_extract_diagonal_blocks :: unknown matrix storage");
+      exit(EXIT_FAILURE);
+    }
+  }
+  return sbm;
+}
 
 void NM_copy_diag_block3(NumericsMatrix* M, int block_row_nb, double** Block) {
   NM_types storageType = M->storageType;

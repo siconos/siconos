@@ -83,7 +83,19 @@ SparseBlockStructuredMatrix* SBM_new(void)
 
   return sbm;
 }
-
+void SBM_clear_block(SparseBlockStructuredMatrix* sbm) {
+  assert(sbm);
+  if (sbm->block) {
+    for (unsigned int i = 0; i < sbm->nbblocks; i++) {
+      if (sbm->block[i]) {
+        free(sbm->block[i]);
+        sbm->block[i] = NULL;
+      }
+    }
+    free(sbm->block);
+    sbm->block = NULL;
+  }
+}
 void SBM_clear(SparseBlockStructuredMatrix *sbm)
 {
   /* Free memory for SparseBlockStructuredMatrix */
@@ -111,22 +123,8 @@ void SBM_clear(SparseBlockStructuredMatrix *sbm)
     free(sbm->blocksize1);
     sbm->blocksize1 = NULL;
   }
-
-  for(unsigned int i = 0 ; i < sbm->nbblocks ; i++)
-  {
-    if(sbm->block[i])
-    {
-      free(sbm->block[i]);
-      sbm->block[i] = NULL;
-    }
-  }
-
-  if(sbm->block)
-  {
-    free(sbm->block);
-    sbm->block = NULL;
-  }
-
+  
+  SBM_clear_block(sbm);
 
   if(sbm->index1_data)
   {

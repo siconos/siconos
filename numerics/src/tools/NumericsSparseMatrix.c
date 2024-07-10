@@ -944,7 +944,7 @@ void NSM_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, size_t
       CS_INT* Mi = Mcsr->i;
       double* Mx = Mcsr->x;
 
-      
+
       for(size_t i = pos_row; i < pos_row + block_row_size; ++i)
       {
         for(CS_INT p = Mp[i]; p < Mp[i+1]; ++p)
@@ -971,4 +971,75 @@ void NSM_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, size_t
     printf("NSM_extract_block :: unsupported matrix type %d\n", M->matrix2->origin);
     exit(EXIT_FAILURE);
   }
+}
+
+
+double **  NSM_extract_diagonal_blocks(NumericsMatrix* M, size_t block_size)
+{
+  assert(M);
+  assert(M->storageType == NM_SPARSE);
+  assert(M->matrix2);
+
+  double ** diag_blocks = NULL;
+  CS_INT number_of_diagonal_blocks = 0;
+  switch (M->matrix2->origin)
+  {
+  case NSM_TRIPLET:
+  case NSM_CSC:
+    {
+      CSparseMatrix* Mcsc = NM_csc(M);
+      assert(Mcsc);
+
+      CS_INT n = Mcsc->n;
+      CS_INT m = Mcsc->m;
+
+      if (n != m )
+	return diag_blocks;
+
+      if (n % block_size != 0) {
+        return diag_blocks;
+      } else {
+        number_of_diagonal_blocks = n / block_size;
+      }
+
+
+    break;
+    }
+  case NSM_CSR:
+    {
+      CSparseMatrix* Mcsr = M->matrix2->csr;
+      assert(Mcsr);
+      CS_INT n = Mcsr->n;
+      CS_INT m = Mcsr->m;
+
+      if (n != m )
+	return diag_blocks;
+
+      if (n % block_size != 0) {
+        return diag_blocks;
+      } else {
+        number_of_diagonal_blocks = n / block_size;
+      }
+
+
+    break;
+    }
+  default:
+    printf("NSM_extract_block :: unsupported matrix type %d\n", M->matrix2->origin);
+    exit(EXIT_FAILURE);
+  }
+
+  diag_blocks = (double **) malloc (number_of_diagonal_blocks*sizeof(double*));
+
+
+  for (CS_INT b = 0; b < number_of_diagonal_blocks; b++) {
+    diag_blocks[b] = (double*)malloc(block_size * block_size * sizeof(double));
+
+    size_t pos_row = b * block_size;
+    size_t pos_col = b * block_size;
+
+    NSM_extract_block(M, diag_blocks[b], pos_row, pos_col, block_size, block_size);
+  }
+
+  return diag_blocks;
 }
