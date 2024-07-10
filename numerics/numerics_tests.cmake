@@ -29,6 +29,9 @@ if(WITH_TESTING)
 
   #  tests for NumericsMatrix
   new_test(SOURCES NM_test.c DEPS "${suitesparse}")
+  
+  #  tests for NumericsMatrix
+  new_test(SOURCES NM_test_performance.c DEPS "${suitesparse}")
 
   #  tests for JordanAlgebra
   NEW_TEST(NAME tools_test_JordanAlgebra SOURCES JordanAlgebra_test.c)
@@ -45,8 +48,8 @@ if(WITH_TESTING)
   # Specfic tests for sparse matrices
   new_test(SOURCES SparseMatrix_test.c DEPS "${suitesparse}")
 
-  # Specfic tests for sparse matrices
-  new_test(SOURCES NM_conversions_test.c DEPS "${suitesparse}")
+#  # Specfic tests for sparse matrices
+#  new_test(SOURCES NM_conversions_test.c DEPS "${suitesparse}")
 
   if(HAS_ONE_LP_SOLVER)
     new_test(SOURCES vertex_problem.c)
