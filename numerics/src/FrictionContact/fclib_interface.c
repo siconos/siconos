@@ -170,12 +170,7 @@ FrictionContactProblem* from_fclib_local_sparse(const fclib_local* fclib_problem
 
   W->x = fclib_problem->W->x;
   W->nz = fclib_problem->W->nz;
-
-  getchar();
- 
-    
   
-
   NM_reset_versions(problem->M);
 
   return problem;

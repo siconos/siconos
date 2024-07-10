@@ -25,7 +25,10 @@
 #include "Friction_cst.h"                              // for SICONOS_FRICTI...
 #include "NumericsArrays.h"                            // for uint_shuffle
 #include "NumericsFwd.h"                               // for SolverOptions
+#include "NumericsMatrix.h"
+#include "NumericsSparseMatrix.h"
 #include "SolverOptions.h"                             // for SolverOptions
+#include "SparseBlockMatrix.h"
 #include "fc3d_2NCP_Glocker.h"                         // for NCPGlocker_update
 #include "fc3d_NCPGlockerFixedPoint.h"                 // for fc3d_FixedP_in...
 #include "fc3d_Path.h"                                 // for fc3d_Path_init...
@@ -126,7 +129,7 @@ void statsIterationCallback(FrictionContactProblem *problem,
 
 
 
-void fc3d_nsgs_update(int contact, FrictionContactProblem* problem, FrictionContactProblem* localproblem, double * reaction, SolverOptions* options)
+static void fc3d_nsgs_update(int contact, FrictionContactProblem* problem, FrictionContactProblem* localproblem, double * reaction, SolverOptions* options)
 {
   /* Build a local problem for a specific contact
      reaction corresponds to the global vector (size n) of the global problem.
@@ -154,13 +157,13 @@ void fc3d_nsgs_initialize_local_solver(struct LocalProblemFunctionToolkit  * loc
                                        FrictionContactProblem* localproblem,
                                        SolverOptions * options)
 {
-  
-  
+
+
   SolverOptions * localsolver_options = options->internalSolvers[0];
 
 
   *computeError = (ComputeErrorPtr)&fc3d_compute_error;
-  
+
   if (problem->dimension == 3) {
     local_function_toolkit->copy_local_reaction = cpy3;
     local_function_toolkit->perform_relaxation = &performRelaxation_3;
@@ -183,7 +186,7 @@ void fc3d_nsgs_initialize_local_solver(struct LocalProblemFunctionToolkit  * loc
   case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone:
   {
     local_function_toolkit->local_solver = &fc3d_projectionOnCone_solve;
-    local_function_toolkit->update_local_problem = &fc3d_projection_update;
+    local_function_toolkit->update_local_problem = &fc3d_nsgs_update;
     local_function_toolkit->free_local_solver = &fc3d_projection_free;
     fc3d_projection_initialize(problem, localproblem);
     break;
@@ -191,7 +194,7 @@ void fc3d_nsgs_initialize_local_solver(struct LocalProblemFunctionToolkit  * loc
   case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration:
   {
     local_function_toolkit->local_solver = &fc3d_projectionOnConeWithLocalIteration_solve;
-    local_function_toolkit->update_local_problem = &fc3d_projection_update;
+    local_function_toolkit->update_local_problem = &fc3d_nsgs_update;
     local_function_toolkit->free_local_solver = &fc3d_projectionOnConeWithLocalIteration_free;
     fc3d_projectionOnConeWithLocalIteration_initialize(problem, localproblem,localsolver_options);
     break;
@@ -301,6 +304,9 @@ void fc3d_nsgs_initialize_local_solver(struct LocalProblemFunctionToolkit  * loc
   }
 
 
+
+
+
 }
 
 
@@ -355,6 +361,9 @@ int solveLocalReaction(UpdatePtr update_localproblem, SolverPtr local_solver,
                        FrictionContactProblem *localproblem, double *reaction,
                        SolverOptions *localsolver_options, double localreaction[3])
 {
+
+
+
   (*update_localproblem)(contact, problem, localproblem,
                          reaction, localsolver_options);
 
@@ -600,7 +609,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
   struct LocalProblemFunctionToolkit* localProblemFunctionToolkit = localProblemFunctionToolkit_new();
   /* localProblemFunctionToolkit_display(localProblemFunctionToolkit); */
 
-  
+
   FrictionContactProblem* localproblem;
   double localreaction[3];
 
@@ -614,6 +623,17 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
 
   if(*info == 0)
     return;
+
+  double **diagonal_blocks = NULL;
+  SparseBlockStructuredMatrix* matrix1 = problem->M->matrix1;
+  if (problem->M->storageType == NM_SPARSE) {
+    if (problem->M->matrix1)
+      {
+	printf("Warning matrix 1 different from NULL");
+      }
+
+    problem->M->matrix1 = NM_extract_diagonal_blocks(problem->M, problem->dimension);
+  }
 
   /*****  Initialize various solver options *****/
   localproblem = fc3d_local_problem_allocate(problem);
@@ -883,6 +903,11 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;
 
   /** Free memory **/
+  if (problem->M->storageType == NM_SPARSE) {
+    SBM_clear_block(problem->M->matrix1);
+    SBM_clear(problem->M->matrix1);
+    problem->M->matrix1= matrix1;
+  }
   localProblemFunctionToolkit->free_local_solver(problem,localproblem,localsolver_options);
   fc3d_local_problem_free(localproblem, problem);
   if(scontacts) free(scontacts);
