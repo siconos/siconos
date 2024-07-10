@@ -29,6 +29,8 @@
 #include "Simulation.hpp"
 #include "Topology.hpp"
 #include "../../mechanics/src/fem/native/SolidLinearTIDS.hpp"
+#include <chrono>
+
 
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -215,7 +217,13 @@ bool siconos::nonsmooth_formulations::GlobalFrictionContact::preCompute(double t
     start = std::chrono::system_clock::now();
 #endif
     // fill _W
+    auto start = std::chrono::high_resolution_clock::now();
+
     _W->fillW(DSG0);
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::milli> float_ms = end - start;
+    std::cout << "W fill time:" << float_ms.count() << " ms" <<std::endl;
+
     sizeM = _W->size();
     _sizeGlobalOutput = sizeM;
     DEBUG_PRINTF("sizeM = %lu \n", sizeM);
@@ -227,7 +235,13 @@ bool siconos::nonsmooth_formulations::GlobalFrictionContact::preCompute(double t
 
     if (_assemblyType == LinearOSNSAssemblyType::GLOBAL_REDUCED) {
       // fill _W_inverse
+        auto start = std::chrono::high_resolution_clock::now();
+
       _W_inverse->fillWinverse(DSG0);
+      auto end = std::chrono::high_resolution_clock::now();
+      std::chrono::duration<double, std::milli> float_ms = end - start;
+      std::cout << "W inverse time:" << float_ms.count() << " ms" <<std::endl;
+
     }
 #ifdef WITH_TIMER
     end_old = end;
@@ -254,12 +268,13 @@ bool siconos::nonsmooth_formulations::GlobalFrictionContact::preCompute(double t
         auto dsType = siconos::types::type_value(*ds);
         if (dsType == siconos::modeling::Type::SolidLinearTIDS){
             auto &solid = static_cast<siconos::mechanics::fem::SolidLinearTIDS &>(*ds);
+            dss+=solid.stressDimension();
             auto& vfree = *ds_work_vectors[siconos::integrators::MoreauJeanGOSI::FREE];
             auto& sigmafree = *ds_work_vectors[siconos::integrators::MoreauJeanGOSI::RESIDU_SIGMAFREE];
             auto qSigmafree = siconos::algebra::SiconosVector(vfree.size()+sigmafree.size());
             vfree.toBlock(qSigmafree, solid.velocityDimension(), 0, 0); // q_sigma = [v; 0]
             sigmafree.toBlock(qSigmafree, solid.stressDimension(), 0, solid.velocityDimension());  // q_sigma = [v; sigma]
-            siconos::algebra::setBlock(qSigmafree, _q, dss+solid.stressDimension(), 0, offset);
+            siconos::algebra::setBlock(qSigmafree, _q, dss, 0, offset);
 
         }else if ((std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) ||
             (std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds))) {
@@ -285,10 +300,13 @@ bool siconos::nonsmooth_formulations::GlobalFrictionContact::preCompute(double t
     /************************************/
 
     // fill H
+    std::cout << "About to fill H..." << std::endl;
     _H->fillH(DSG0, indexSet);
     DEBUG_EXPR(NM_display(_H->numericsMatrix().get()););
 
     _sizeOutput = _H->sizeColumn();
+    std::cout << "_sizeOutput aka size H column:" << _sizeOutput << std::endl;
+    std::cout << "_H->size(): row? :" << _H->size() << std::endl;
     DEBUG_PRINTF("_sizeOutput = %i\n ", _sizeOutput);
 #ifdef WITH_TIMER
     end_old = end;
@@ -369,16 +387,31 @@ bool siconos::nonsmooth_formulations::GlobalFrictionContact::preCompute(double t
 int siconos::nonsmooth_formulations::GlobalFrictionContact::compute(double time) {
   int info = 0;
   // --- Prepare data for GlobalFrictionContact computing ---
+  auto start = std::chrono::high_resolution_clock::now();
   bool cont = preCompute(time);
+  auto end = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double, std::milli> float_ms = end - start;
+  std::cout << "preCompute time:" << float_ms.count() << " ms" <<std::endl;
+
   if (!cont) return info;
   updateMu();
 
   // --- Call Numerics solver ---
   // if(_sizeGlobalOutput != 0)
   {
+     start = std::chrono::high_resolution_clock::now();
     info = solve();
+     end = std::chrono::high_resolution_clock::now();
+     float_ms = end - start;
+    std::cout << "solve time:" << float_ms.count() << " ms" <<std::endl;
+
     DEBUG_EXPR(display(););
+     start = std::chrono::high_resolution_clock::now();
     postCompute();
+     end = std::chrono::high_resolution_clock::now();
+     float_ms = end - start;
+    std::cout << "postCompute time:" << float_ms.count() << " ms" <<std::endl;
+
   }
   return info;
 }
@@ -388,8 +421,14 @@ int siconos::nonsmooth_formulations::GlobalFrictionContact::solve(
   if (!problem) {
     problem = globalFrictionContactProblem();
   }
-  return (*_gfc_driver)(&*problem, _z->getArray(), _w->getArray(),
-                        _globalVelocities->getArray(), &*_numerics_solver_options);
+  display();
+  auto info = (*_gfc_driver)(&*problem, _z->getArray(), _w->getArray(),
+                             _globalVelocities->getArray(), &*_numerics_solver_options);
+  std::cout << "display of z and w" << std::endl;
+  _z->display();
+  _w->display();
+//  getchar();
+  return info;
 }
 
 void siconos::nonsmooth_formulations::GlobalFrictionContact::postCompute() {
@@ -419,7 +458,14 @@ void siconos::nonsmooth_formulations::GlobalFrictionContact::postCompute() {
 
     // siconos::algebra::setBlock(*_w, y, y->size(), pos, 0);// Warning: yEquivalent is
     //  saved in y !!
+    std::cout << "_z in postCompute:" << std::endl;
+    _z->display();
+
     siconos::algebra::setBlock(*_z, lambda, lambda->size(), pos, 0);
+    std::cout << "And lambda/epsilonp in postCompute with inputOutputLevel():" << inputOutputLevel() << std::endl;
+    inter.lambda(inputOutputLevel())->display();
+//    std::cout << "inter.display() in postCompute:" << std::endl;
+//    inter.display();
     DEBUG_EXPR(lambda->display(););
   }
   auto& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
@@ -438,6 +484,8 @@ void siconos::nonsmooth_formulations::GlobalFrictionContact::postCompute() {
         DEBUG_EXPR(stress->display(););
         DEBUG_EXPR(_globalVelocities->display(););
         pos = DSG0.properties(*dsi).absolute_position;
+        std::cout << "_globalVelocities in postCompute:" << std::endl;
+        _globalVelocities->display();
         siconos::algebra::setBlock(*_globalVelocities, velocity, sizeDS, pos, 0);
         siconos::algebra::setBlock(*_globalVelocities, stress, solid.stressDimension(), pos+solid.velocityDimension(), 0);
     }

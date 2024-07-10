@@ -32,11 +32,13 @@
 #include "SimpleMatrix.hpp"
 #include "Simulation.hpp"
 #include "../../mechanics/src/fem/native/SolidLinearTIDS.hpp"
+#include <chrono>
 
 // #define DEBUG_STDOUT
 // #define DEBUG_NOCOLOR
 // #define DEBUG_MESSAGES
 // #define DEBUG_WHERE_MESSAGES
+#include "StressLinearTIR.hpp"
 #include "siconos_debug.h"
 
 void siconos::integrators::MoreauJeanGOSI::initializeWorkVectorsForDS(
@@ -61,11 +63,11 @@ void siconos::integrators::MoreauJeanGOSI::initializeWorkVectorsForDS(
     if (dsType == siconos::modeling::Type::SolidLinearTIDS) {
         auto solidds = std::static_pointer_cast<siconos::mechanics::fem::SolidLinearTIDS>(ds);
 //        ds_work_vectors[siconos::integrators::MoreauJeanGOSI::FREE]->resize(solidds->velocityDimension()+solidds->stressDimension());
-        ds_work_vectors[siconos::integrators::MoreauJeanOSI::RESIDU_SIGMAFREE] =
+        ds_work_vectors[siconos::integrators::MoreauJeanGOSI::RESIDU_SIGMAFREE] =
                 std::make_shared<siconos::algebra::SiconosVector>(solidds->stressDimension());
-        ds_work_vectors[siconos::integrators::MoreauJeanOSI::SIGMAFREE] =
+        ds_work_vectors[siconos::integrators::MoreauJeanGOSI::SIGMAFREE] =
                 std::make_shared<siconos::algebra::SiconosVector>(solidds->stressDimension());
-        ds_work_vectors[siconos::integrators::MoreauJeanOSI::Q_SIGMAFREE] =
+        ds_work_vectors[siconos::integrators::MoreauJeanGOSI::Q_SIGMAFREE] =
                 std::make_shared<siconos::algebra::SiconosVector>(solidds->dimension()+solidds->stressDimension());
     }
     lds->computeForces(t, lds->q(), lds->velocity());
@@ -91,6 +93,8 @@ void siconos::integrators::MoreauJeanGOSI::initializeWorkVectorsForDS(
 void siconos::integrators::MoreauJeanGOSI::initializeWorkVectorsForInteraction(
     siconos::modeling::Interaction& inter, siconos::graphs::InteractionProperties& interProp,
     siconos::graphs::DynamicalSystemsGraph& DSG) {
+    std::cout << "In MoreauJeanGOSI::initializeWorkVectorsForInteraction !!! " << std::endl;
+
   auto ds1 = interProp.source;
   auto ds2 = interProp.target;
   assert(ds1);
@@ -137,9 +141,23 @@ void siconos::integrators::MoreauJeanGOSI::initializeWorkVectorsForInteraction(
     DEBUG_PRINTF("ds1->number() %i is taken into account\n", ds1->number());
     assert(DSG.properties(DSG.descriptor(ds1)).workVectors);
     auto& workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
+    std::cout << "About to setVectorPtr !!! " << std::endl;
+    auto relationSubType = inter.relation()->getSubType();
+    std::cout << "relationSubType : " << (int)relationSubType << std::endl;
+    if(relationSubType == modeling::RelationSubType::StressLinearTIR){
 
+        std::cout << "StressLinearTIR !!! " << std::endl;
+//        inter_block_work[xfree]->setVectorPtr(
+//            0, workVds1[siconos::integrators::MoreauJeanGOSI::RESIDU_SIGMAFREE]);
+        inter_block_work[xfree]->setVectorPtr(
+            0, workVds1[siconos::integrators::MoreauJeanGOSI::Q_SIGMAFREE]);
+
+    }
+    else
+    {
     inter_block_work[xfree]->setVectorPtr(
         0, workVds1[siconos::integrators::MoreauJeanGOSI::FREE]);
+    }
   }
   DEBUG_PRINTF("ds1->number() %i\n", ds1->number());
   DEBUG_PRINTF("ds2->number() %i\n", ds2->number());
@@ -219,7 +237,12 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
       // --- ResiduFree computation Equation (1) ---
       residu.zero();
       auto& W = *_dynamicalSystemsGraph->properties(*dsi).W;
+      auto start = std::chrono::high_resolution_clock::now();
+
       siconos::algebra::prod(W, vold, free_rhs);
+      auto end = std::chrono::high_resolution_clock::now();
+      std::chrono::duration<double, std::milli> float_ms = end - start;
+      std::cout << "W*v time:" << float_ms.count() << " ms" <<std::endl;
 
       double coeff;
       // -- No need to update W --
@@ -295,17 +318,20 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
         auto& free_rhs = *ds_work_vectors[siconos::integrators::MoreauJeanGOSI::FREE];
         auto &residusigmafree = *ds_work_vectors[siconos::integrators::MoreauJeanGOSI::RESIDU_SIGMAFREE];
         auto &sigmafree = *ds_work_vectors[siconos::integrators::MoreauJeanGOSI::SIGMAFREE];
+        auto& full_free_rhs = *ds_work_vectors[siconos::integrators::MoreauJeanGOSI::Q_SIGMAFREE];
+
 
         // --- ResiduFree computation Equation (1) ---
         residu.zero();
         auto& W = *_dynamicalSystemsGraph->properties(*dsi).W;
         auto minusHsigmaold = siconos::algebra::SiconosVector(solid.stressDimension());
         auto qSigmaold = siconos::algebra::SiconosVector(solid.velocityDimension()+solid.stressDimension());
-        auto full_free_rhs = siconos::algebra::SiconosVector(solid.velocityDimension()+solid.stressDimension());
+//        auto full_free_rhs = siconos::algebra::SiconosVector(solid.velocityDimension()+solid.stressDimension());
+
+        auto start = std::chrono::high_resolution_clock::now();
 
         vold.toBlock(qSigmaold, solid.velocityDimension(), 0, 0);
         sigmaold.toBlock(qSigmaold, solid.stressDimension(), 0, solid.velocityDimension());  // q_sigma = [v; sigma]
-
         siconos::algebra::prod(W, qSigmaold, full_free_rhs);
         std::vector<std::size_t> subCoord(4);
         subCoord[0] = 0;
@@ -320,6 +346,9 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
         subCoord[3] = solid.stressDimension();
         siconos::algebra::subscal(1.0, full_free_rhs, residusigmafree,
                                   subCoord, true);
+        auto end = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double, std::milli> float_ms = end - start;
+        std::cout << "W*[v;sigma] time:" << float_ms.count() << " ms" <<std::endl;
 
 
         if (solid.B()) {
@@ -341,7 +370,9 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
             coeff = _theta;
             siconos::algebra::scal(coeff, *(solid.fExt()), *fextTheta,
                                    false);  // fext_k+theta += _theta * fext(ti+1)
-            double conditionningMagicCoeff = 1/solid.S()->normInf();
+//            double conditionningMagicCoeff = 1/solid.S()->normInf();
+            double conditionningMagicCoeff = 1.0;
+
 
             siconos::algebra::scal(h/conditionningMagicCoeff, *fextTheta, free_rhs ,
                                    false);  // residufree += h*fext_k+theta
@@ -349,7 +380,12 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
 
         siconos::algebra::prod(-h, *solid.B(), vold, residusigmafree, false); // residuSigmaFree = -h*B*v_i
 
+
+
         applyBoundaryConditions(solid, free_rhs, dsi, t);
+        free_rhs.toBlock(qSigmaold, solid.velocityDimension(), 0, 0);
+        residusigmafree.toBlock(qSigmaold, solid.stressDimension(), 0, solid.velocityDimension());  // q_sigma = [v; sigma]
+
 //        free = residuFree;            // copy residuFree into free
   //      if (d.p(1)) free -= *d.p(1);  // Compute Residu in Workfree Notation !!
 //        if (solid.p(1)) free += *solid.p(1);  // Compute Residu in Workfree Notation !!
@@ -594,7 +630,7 @@ void siconos::integrators::MoreauJeanGOSI::computeFreeState() {
 void siconos::integrators::MoreauJeanGOSI::NonSmoothLawContributionToOutput(
     std::shared_ptr<siconos::modeling::Interaction> inter,
     siconos::nonsmooth_formulations::OneStepNSProblem& osnsp) {
-
+std::cout << " MoreauJeanGOSI::NonSmoothLawContributionToOutput " << std::endl;
   if (inter->relation()->getType() == siconos::modeling::RelationType::Lagrangian ||
       inter->relation()->getType() == siconos::modeling::RelationType::NewtonEuler) {
     auto& indexSet = *osnsp.simulation()->indexSet(osnsp.indexSetLevel());

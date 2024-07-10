@@ -31,6 +31,8 @@
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 #include "../../mechanics/src/fem/native/SolidLinearTIDS.hpp"
+#include "Relation.hpp"
+#include "StressLinearTIR.hpp"
 
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -526,8 +528,10 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillHtrans(
           auto& inter = *indexSet.bundle(*ui);
           size_t sizeY = inter.dimension();
           leftInteractionBlock = inter.getLeftInteractionBlock();
+          std::cout << "taille H:" << leftInteractionBlock->size(0) << " " << leftInteractionBlock->size(1) << std::endl;
 
-          double* array = &*leftInteractionBlock->getArray();
+          double* array = (double *) calloc(leftInteractionBlock->size(0)*leftInteractionBlock->size(1),sizeof(double));
+          array = &*leftInteractionBlock->getArray();
            double * array_with_bc= nullptr;
 
           auto ds1 = indexSet.properties(*ui).source;
@@ -542,7 +546,16 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillHtrans(
           for (auto ds = ds1; !endl; ds = ds2, posBlock = pos_ds2) {
             endl = (ds == ds2);
             size_t sizeDS = ds->dimension();
+            size_t sizeH = sizeDS;
             abs_pos_ds = DSG.properties(DSG.descriptor(ds)).absolute_position;
+
+            auto relationSubType = inter.relation()->getSubType();
+            if(relationSubType == modeling::RelationSubType::StressLinearTIR){
+                auto &solid = static_cast<siconos::mechanics::fem::SolidLinearTIDS &>(*ds);
+                sizeDS=solid.stressDimension();
+                sizeH = solid.stressDimension();
+                abs_pos_ds +=solid.velocityDimension();
+            }
 
             auto sods = dynamic_cast<siconos::modeling::SecondOrderDS*>(ds.get());
 
@@ -550,10 +563,10 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillHtrans(
 
                 std::shared_ptr<siconos::modeling::BoundaryCondition> bc;
                 bc = sods->boundaryConditions();
-                NM_dense_display(array,sizeY,sizeDS,sizeY);
+//                NM_dense_display(array,sizeY,sizeDS,sizeY);
                 array_with_bc = (double *) calloc(sizeY*sizeDS,sizeof(double));
                 memcpy(array_with_bc, array ,sizeY*sizeDS*sizeof(double));
-                NM_dense_display(array_with_bc,sizeY,sizeDS,sizeY);
+//                NM_dense_display(array_with_bc,sizeY,sizeDS,sizeY);
                 for(const auto itindex: bc->velocityIndices())
                 {
 
