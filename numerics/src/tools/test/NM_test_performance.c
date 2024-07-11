@@ -27,6 +27,7 @@
 #include <stdio.h>                       // for printf, fclose, fopen, NULL
 #include <stdlib.h>                      // for free, malloc, calloc
 #include <float.h>                       // for DBL_EPSILON
+#include "CSparseMatrix.h"
 #include "SiconosBlas.h"                 // for cblas_ddot, cblas_dgemv, cbl...
 #include "CSparseMatrix_internal.h"               // for CS_INT, cs_print, cs
 #include "NumericsFwd.h"                 // for NumericsMatrix, SparseBlockS...
@@ -42,11 +43,27 @@
 #include <time.h>
 
 
-static int test_NM_row_prod_no_diag3(NumericsMatrix * A)
+static double test_NM_row_prod_no_diag3(NumericsMatrix * A, int number_of_prod)
 {
   int n = A->size0;
   int nc = n/3;
-  
+
+
+  if (A->storageType == NM_SPARSE_BLOCK)
+    {
+      printf("test_NM_row_prod_no_diag3 for a storage SBM. n =%i, number_od_prod= %i\n", A->size0, number_of_prod);
+    }
+  else if (A->storageType == NM_SPARSE)
+     {
+       if (A->matrix2->origin == NSM_CSR)
+	 printf("test_NM_row_prod_no_diag3 for a storage CSR. n =%i, number_od_prod= %i\n", A->size0, number_of_prod);
+       if (A->matrix2->origin == NSM_CSC)
+	 printf("test_NM_row_prod_no_diag3 for a storage CSC. n =%i, number_od_prod= %i\n", A->size0, number_of_prod);
+       if (A->matrix2->origin == NSM_TRIPLET)
+	 printf("test_NM_row_prod_no_diag3 for a storage COO. n =%i, number_od_prod= %i\n", A->size0, number_of_prod);
+
+     }
+
   double * reaction = (double *) malloc (n *sizeof(double));
 
   for (int k =0 ; k < n; k++)
@@ -58,41 +75,116 @@ static int test_NM_row_prod_no_diag3(NumericsMatrix * A)
     {
       q[k] = 1.0;
     }
-  
+
   // Execute a single test
-  long clk_tck = CLOCKS_PER_SEC; 
+  long clk_tck = CLOCKS_PER_SEC;
   clock_t t1 = clock();
-  for (int i=0 ; i <1000; i++){
-    
+  for (int i=0 ; i <number_of_prod; i++)
+
+  /* while(1){ */
+    {
   for (int contact =0; contact <nc; contact++)
     {
       NM_row_prod_no_diag3(n, contact, 3*contact, A, reaction, q, false);
     }
   }
   clock_t t2 = clock();
+  //printf("norm of result = %e\n",cblas_dnrm2(n,q,1) );
+
   (void)printf("time (s) : %lf \n", (double)(t2-t1)/(double)clk_tck);
+
+  free(reaction);
+  free(q);
+
+
+
+  return (double)(t2-t1)/(double)clk_tck;
 }
 
+static double test_NM_prod_mv_3x3(NumericsMatrix * A, int number_of_prod)
+{
+  int n = A->size0;
+  int nc = n/3;
+
+
+  if (A->storageType == NM_SPARSE_BLOCK)
+    {
+      printf("test_NM_prod_mv_3x3 for a storage SBM. n =%i, number_of_prod= %i\n", A->size0, number_of_prod);
+    }
+  else if (A->storageType == NM_SPARSE)
+     {
+       if (A->matrix2->origin == NSM_CSR)
+	 printf("test_NM_prod_mv_3x3 for a storage CSR. n =%i, number_of_prod= %i\n", A->size0, number_of_prod);
+       if (A->matrix2->origin == NSM_CSC)
+	 printf("test_NM_prod_mv_3x3 for a storage CSC. n =%i, number_of_prod= %i\n", A->size0, number_of_prod);
+       if (A->matrix2->origin == NSM_TRIPLET)
+	 printf("test_NM_prod_mv_3x3 for a storage COO. n =%i, number_of_prod= %i\n", A->size0, number_of_prod);
+
+     }
+
+  double * reaction = (double *) malloc (n *sizeof(double));
+
+  for (int k =0 ; k < n; k++)
+    {
+      reaction[k] = 1.0;
+    }
+  double * q = (double *) malloc (n *sizeof(double));
+  for (int k =0 ; k < n; k++)
+    {
+      q[k] = 1.0;
+    }
+
+  // Execute a single test
+  long clk_tck = CLOCKS_PER_SEC;
+  clock_t t1 = clock();
+
+
+
+
+  for (int i=0 ; i <number_of_prod; i++)
+
+    NM_prod_mv_3x3(n, n, A, reaction, q);
+
+
+  clock_t t2 = clock();
+  (void)printf("time (s) : %lf \n", (double)(t2-t1)/(double)clk_tck);
+  //printf("norm of result = %e\n",cblas_dnrm2(n,q,1) );
+  free(reaction);
+  free(q);
+
+
+
+  return (double)(t2-t1)/(double)clk_tck;
+}
 int main(int argc, char *argv[])
 {
 
   int info =0;
+  int number_of_prod =5000;
 
-  
+
   NumericsMatrix * A_sbm = NM_new_from_filename("./data/matrix_sbm.dat");
-  test_NM_row_prod_no_diag3(A_sbm);
- 
- 
+  test_NM_row_prod_no_diag3(A_sbm,number_of_prod);
+
   NumericsMatrix * A_sparse = NM_new_from_filename("./data/matrix_sparse.dat");
   //NM_display(A_sparse);
-  test_NM_row_prod_no_diag3(A_sparse);
+  test_NM_row_prod_no_diag3(A_sparse,number_of_prod);
 
 
-  A_sparse->matrix2->csr = NM_csc_trans(A_sparse);
-  A_sparse->matrix2->origin = NSM_CSR;
-  test_NM_row_prod_no_diag3(A_sparse);
-  
-  
-  
+
+  NumericsMatrix * A_sparse_csc = NM_new_from_filename("./data/matrix_sparse.dat");
+  A_sparse_csc->matrix2->csc = NM_csc(A_sparse_csc);
+  A_sparse_csc->matrix2->origin = NSM_CSC;
+  //NM_display(A_sparse_csc);
+  test_NM_row_prod_no_diag3(A_sparse_csc,number_of_prod);
+
+
+
+  test_NM_prod_mv_3x3(A_sbm,number_of_prod);
+  test_NM_prod_mv_3x3(A_sparse,number_of_prod);
+  test_NM_prod_mv_3x3(A_sparse_csc,number_of_prod);
+
+
+
   return info;
 }

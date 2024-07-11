@@ -122,6 +122,82 @@ static int test_NM_conversion(NumericsMatrix *M) {
   return 0;
 };
 
+
+static int test_read_write_sparse(NumericsMatrix *M_orig) {
+
+
+  NumericsMatrix * M = NM_new();
+
+  NM_copy(M_orig, M);
+
+
+  FILE * foutput  =  fopen("matrix_sparse_triplet.dat", "w");
+  NM_write_in_file(M, foutput);
+  fclose(foutput);
+
+  FILE * finput  =  fopen("matrix_sparse_triplet.dat", "r");
+  NumericsMatrix * M_new = NM_new_from_file(finput);
+  fclose(finput);
+
+  int is_equal =  NM_equal(M, M_new);
+
+  if (is_equal)
+    printf("equal triplet\n");
+  else
+    printf("equal not triplet\n");
+
+  CSparseMatrix * csc = NM_csc(M);
+
+  NM_clearSparseStorage(M_new);
+  M_new->matrix2->origin = NSM_CSC;
+  M_new->matrix2->csc = csc;
+  //NM_display(M_new);
+
+
+  foutput  =  fopen("matrix_sparse_csc.dat", "w");
+  NM_write_in_file(M_new, foutput);
+  fclose(foutput);
+
+  finput  =  fopen("matrix_sparse_csc.dat", "r");
+  NumericsMatrix * M_csc = NM_new_from_file(finput);
+  fclose(finput);
+
+  is_equal =  NM_equal(M_new, M_csc);
+
+  if (is_equal)
+    printf("equal csc\n");
+  else
+    printf("equal not csc\n");
+
+  CSparseMatrix * csr = NM_csr(M);
+
+  NM_clearSparseStorage(M_new);
+  M_new->matrix2->origin = NSM_CSR;
+  M_new->matrix2->csr = csr;
+  //NM_display(M_new);
+
+
+  foutput  =  fopen("matrix_sparse_csr.dat", "w");
+  NM_write_in_file(M_new, foutput);
+  fclose(foutput);
+
+  finput  =  fopen("matrix_sparse_csr.dat", "r");
+  NumericsMatrix * M_csr = NM_new_from_file(finput);
+  //NM_display(M_csr);
+  fclose(finput);
+
+  is_equal =  NM_equal(M_new, M_csr);
+
+  if (is_equal)
+    printf("equal csr\n");
+  else
+    printf("equal not csr\n");
+
+
+  return 0;
+};
+
+
 int main() {
   int n = 5;
   int m = 5;
@@ -134,15 +210,21 @@ int main() {
       if ((i != j) && (i != j + 2)) NM_entry(M, i, j, i + j);
     }
   }
+
+  test_read_write_sparse(M);
+
+
+
+
   NM_display(M);
 
   int info = test_NM_conversion(M);
 
-  const char * filename =  "./data/NSM_csc_162x162.dat";
-  NumericsMatrix *A = NM_new_from_filename(filename);
+  /* const char * filename =  "./data/NSM_csc_162x162.dat"; */
+  /* NumericsMatrix *A = NM_new_from_filename(filename); */
 
-  
-  info = test_NM_conversion(A);
-  
+
+  /* info = test_NM_conversion(A); */
+
   return info;
 }
