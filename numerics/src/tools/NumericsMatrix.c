@@ -477,7 +477,7 @@ void NM_row_prod_no_diag3(size_t sizeX, int block_start, size_t row_start, Numer
 
       CS_INT* Mp = M->p;
       CS_INT* Mi = M->i;
-      double* Mx = M->x;
+      CS_ENTRY* Mx = M->x;
 
       for (size_t i = 0, j = row_start; i < 3; ++i, ++j) {
         for (CS_INT p = Mp[j]; p < Mp[j + 1]; ++p) {
@@ -485,6 +485,8 @@ void NM_row_prod_no_diag3(size_t sizeX, int block_start, size_t row_start, Numer
         }
       }
 
+
+      
       x[in] = rin;
       x[it] = rit;
       x[is] = ris;
@@ -1056,7 +1058,19 @@ double NM_get_value(const NumericsMatrix* const M, int i, int j) {
           }
           return 0.0;
           break;
-        }
+	}
+      case NSM_CSR: {
+          assert(M->matrix2->csr);
+          CS_INT* Mi = M->matrix2->csr->i;
+          CS_INT* Mp = M->matrix2->csr->p;
+          double* Mx = M->matrix2->csr->x;
+
+          for (CS_INT col = Mp[i]; col < Mp[i + 1]; col++) {
+            if (j == Mi[col]) return Mx[col];
+          }
+          return 0.0;
+          break;
+	  }
         default: {
           fprintf(stderr, "NM_get_value ::  unknown origin %d for sparse matrix\n",
                   M->matrix2->origin);
@@ -1229,19 +1243,25 @@ void NM_display(const NumericsMatrix* const m) {
         }
       }
 
+      int brief= 1;
       printf("========== size0 = %i, size1 = %i\n", m->size0, m->size1);
       if (m->matrix2->triplet) {
         printf("========== a matrix in format triplet is stored\n");
-        cs_print(m->matrix2->triplet, 0);
+        cs_print(m->matrix2->triplet, brief);
       }
       if (m->matrix2->csc) {
         printf("========== a matrix in format csc is stored\n");
-        cs_print(m->matrix2->csc, 0);
+        cs_print(m->matrix2->csc, brief);
       }
       if (m->matrix2->trans_csc) {
         printf("========== a matrix in format trans_csc is stored\n");
-        cs_print(m->matrix2->trans_csc, 0);
+        cs_print(m->matrix2->trans_csc, brief);
       }
+     if (m->matrix2->csr) {
+        printf("========== a matrix in format csr is stored\n");
+        CSparseMatrix_print(m->matrix2->csr, brief);
+      }
+      
       /* else */
       /* { */
       /*   fprintf(stderr, "display for sparse matrix: no matrix found!\n"); */
