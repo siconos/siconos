@@ -317,7 +317,6 @@ size_t SBM_nnz(SparseBlockStructuredMatrix * A)
     nbRows = A->blocksize0[currentRowNumber];
     if(currentRowNumber != 0)
       nbRows -= A->blocksize0[currentRowNumber - 1];
-    assert((nbRows <= sizeY));
     for(size_t blockNum = A->index1_data[currentRowNumber];
         blockNum < A->index1_data[currentRowNumber + 1]; ++blockNum)
     {
