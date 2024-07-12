@@ -624,7 +624,6 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
   if(*info == 0)
     return;
 
-  double **diagonal_blocks = NULL;
   SparseBlockStructuredMatrix* matrix1 = problem->M->matrix1;
   if (problem->M->storageType == NM_SPARSE) {
 
