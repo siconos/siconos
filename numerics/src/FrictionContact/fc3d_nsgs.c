@@ -40,8 +40,8 @@
 #include "fc3d_unitary_enumerative.h"                  // for fc3d_unitary_e...
 #include "numerics_verbose.h"                          // for numerics_printf
 #include "SiconosBlas.h"                                     // for cblas_dnrm2
-#define DEBUG_STDOUT
-#define DEBUG_MESSAGES
+/* #define DEBUG_STDOUT */
+/* #define DEBUG_MESSAGES */
 #include "op3x3.h"
 #include "siconos_debug.h"                                     // for DEBUG_EXPR
 
@@ -627,6 +627,7 @@ void fc3d_nsgs(FrictionContactProblem* problem, double *reaction,
   double **diagonal_blocks = NULL;
   SparseBlockStructuredMatrix* matrix1 = problem->M->matrix1;
   if (problem->M->storageType == NM_SPARSE) {
+
     if (problem->M->matrix1)
       {
 	printf("Warning matrix 1 different from NULL");
