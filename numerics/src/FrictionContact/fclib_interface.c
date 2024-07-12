@@ -189,7 +189,7 @@ FrictionContactProblem* frictionContact_fclib_read(const char *path)
     return NULL;
   }
 
-  return from_fclib_local_sparse(fclib_problem);
+  return from_fclib_local(fclib_problem);
 }
 
 int frictionContact_fclib_write_csr(FrictionContactProblem* problem, char * title, char * description, char * mathInfo,
