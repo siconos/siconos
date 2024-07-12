@@ -30,7 +30,7 @@ const char ** data_collection()
 
   data_collection_1[n_data++] = "./data/Capsules-i125-1213.hdf5";
   data_collection_1[n_data++] = "./data/LMGC_100_PR_PerioBox-i00361-60-03000.hdf5";
-  data_collection_1[n_data++] = "./fclib-library/Local/siconos/Chute_4000/Chute_4000-i0339-17651-52.hdf5";
+  //data_collection_1[n_data++] = "./fclib-library/Local/siconos/Chute_4000/Chute_4000-i0339-17651-52.hdf5";
 
   data_collection_1[n_data++] = "---";
 
