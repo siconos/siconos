@@ -468,6 +468,7 @@ void NM_row_prod_no_diag3(size_t sizeX, int block_start, size_t row_start, Numer
       x[it] = 0.;
       x[is] = 0.;
 
+
       CSparseMatrix* M;
       if (A->matrix2->origin == NSM_CSR) {
         M = NM_csr(A);
@@ -479,14 +480,53 @@ void NM_row_prod_no_diag3(size_t sizeX, int block_start, size_t row_start, Numer
       CS_INT* Mi = M->i;
       CS_ENTRY* Mx = M->x;
 
-      for (size_t i = 0, j = row_start; i < 3; ++i, ++j) {
-        for (CS_INT p = Mp[j]; p < Mp[j + 1]; ++p) {
-          y[i] += Mx[p] * x[Mi[p]];
-        }
-      }
+      /* for (size_t i = 0, j = row_start; i < 3; ++i, ++j) { */
+      /*   for (CS_INT p = Mp[j]; p < Mp[j + 1]; ++p) { */
+      /*     y[i] += Mx[p] * x[Mi[p]]; */
+      /*   } */
+      /* } */
 
 
-      
+      // try to optimize for 3x3 blocks
+      // the idea is to optimize cache access by using continuous values in each x
+
+      CS_INT j =row_start;
+      CS_INT p = Mp[j];
+      CS_INT p_1 =  Mp[j+1];
+      CS_INT p_2 =  Mp[j+2];
+
+      while (p < Mp[j + 1])
+	{
+	 y[0]+=  Mx[p] * x[Mi[p]] + Mx[p+1] * x[Mi[p+1]]+ Mx[p+2] * x[Mi[p+2]];
+	 y[1]+=  Mx[p_1] * x[Mi[p_1]]+ Mx[p_1+1] * x[Mi[p_1+1]]+ Mx[p_1+2] * x[Mi[p_1+2]];;
+	 y[2]+=  Mx[p_2] * x[Mi[p_2]]+ Mx[p_2+1] * x[Mi[p_2+1]]+ Mx[p_2+2] * x[Mi[p_2+2]];;
+	 //printf("j = %i\t p = %i \t, i = %i % i %i \n", j, p, Mi[p], Mi[p_1], Mi[p_2]);
+	 p = p+3;
+	 p_1 = p_1+3;
+	 p_2 = p_2+3;
+	}
+
+      /* // the following version is slower? */
+      /* while (p < Mp[j + 1]) */
+      /* 	{ */
+      /* 	  CS_INT i0 = Mi[p]; */
+      /* 	  CS_INT i1 = Mi[p+1]; */
+      /* 	  CS_INT i2 = Mi[p+2]; */
+
+      /* 	 y[0]+=  Mx[p] * x[i0] + Mx[p+1] * x[i1]+ Mx[p+2] * x[i2]; */
+      /* 	 y[1]+=  Mx[p_1] * x[i0]+ Mx[p_1+1] * x[i1]+ Mx[p_1+2] * x[i2];; */
+      /* 	 y[2]+=  Mx[p_2] * x[i0]+ Mx[p_2+1] * x[i1]+ Mx[p_2+2] * x[i2];; */
+      /* 	 //printf("j = %i\t p = %i \t, i = %i % i %i \n", j, p, Mi[p], Mi[p_1], Mi[p_2]); */
+      /* 	 p = p+3; */
+      /* 	 p_1 = p_1+3; */
+      /* 	 p_2 = p_2+3; */
+      /* 	} */
+
+
+
+
+
+
       x[in] = rin;
       x[it] = rit;
       x[is] = ris;
@@ -1260,7 +1300,7 @@ void NM_display(const NumericsMatrix* const m) {
         printf("========== a matrix in format csr is stored\n");
         CSparseMatrix_print(m->matrix2->csr, brief);
       }
-      
+
       /* else */
       /* { */
       /*   fprintf(stderr, "display for sparse matrix: no matrix found!\n"); */
@@ -1727,7 +1767,7 @@ NumericsMatrix *   NM_remove_diagonal_blocks(NumericsMatrix* M, size_t block_siz
     return NULL;
 
   NumericsMatrix* out =NULL;
- 
+
   switch (storageType) {
     /* case NM_DENSE: { */
     /*   break; */

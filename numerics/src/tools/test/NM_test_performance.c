@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
 {
 
   int info =0;
-  int number_of_prod =100;
+  int number_of_prod =1000;
 
 
   NumericsMatrix * A_sbm = NM_new_from_filename("./data/matrix_sbm.dat");
