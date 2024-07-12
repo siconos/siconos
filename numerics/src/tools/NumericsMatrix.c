@@ -490,7 +490,6 @@ void NM_row_prod_no_diag3(size_t sizeX, int block_start, size_t row_start, Numer
       x[in] = rin;
       x[it] = rit;
       x[is] = ris;
-
       break;
     }
     default: {
@@ -1716,7 +1715,40 @@ SparseBlockStructuredMatrix *   NM_extract_diagonal_blocks(NumericsMatrix* M, si
   }
   return sbm;
 }
+NumericsMatrix *   NM_remove_diagonal_blocks(NumericsMatrix* M, size_t block_size)
+{
+  assert(M);
+  NM_types storageType = M->storageType;
 
+
+  if (M->size0 != M->size1)
+    return NULL;
+  if (M->size0 % block_size != 0)
+    return NULL;
+
+  NumericsMatrix* out =NULL;
+ 
+  switch (storageType) {
+    /* case NM_DENSE: { */
+    /*   break; */
+    /* } */
+    /* case NM_SPARSE_BLOCK: { */
+    /*   break; */
+    /* } */
+    case NM_SPARSE: {
+      CSparseMatrix * out_cs =  NSM_remove_diagonal_blocks(M, block_size);
+      out  =  NM_create(NM_SPARSE,M->size0, M->size1);
+      out->matrix2->origin = NSM_TRIPLET;
+      out->matrix2->triplet = out_cs;
+      break;
+    }
+    default: {
+      printf("NM_extract_diagonal_blocks :: unknown matrix storage");
+      exit(EXIT_FAILURE);
+    }
+  }
+  return out;
+}
 void NM_copy_diag_block3(NumericsMatrix* M, int block_row_nb, double** Block) {
   NM_types storageType = M->storageType;
   switch (storageType) {
@@ -4503,7 +4535,13 @@ int NM_check(const NumericsMatrix* const A) {
 size_t NM_nnz(const NumericsMatrix* M) {
   switch (M->storageType) {
     case NM_DENSE:
+      {
       return M->size0 * M->size1;
+      }
+  case NM_SPARSE_BLOCK:
+    {
+      return SBM_nnz(M->matrix1);
+    }
     case NM_SPARSE: {
       assert(M->matrix2);
       return NSM_nnz(NSM_get_origin(M->matrix2));

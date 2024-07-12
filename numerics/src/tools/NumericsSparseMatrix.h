@@ -205,6 +205,9 @@ extern "C"
 
   double **  NSM_extract_diagonal_blocks(NumericsMatrix* M, size_t block_size);
 
+
+  CSparseMatrix *   NSM_remove_diagonal_blocks(NumericsMatrix* M, size_t block_size);
+
   /** Free allocated space for NSM_linear_solver_params.
    *
    *  \param p a NSM_linear_solver_params

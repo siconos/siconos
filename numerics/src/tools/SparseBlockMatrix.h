@@ -214,7 +214,8 @@ extern "C"
    *  \param sbm a matrix
    */
   void SBM_null(SparseBlockStructuredMatrix* sbm);
-
+  
+  size_t SBM_nnz(SparseBlockStructuredMatrix * A);
   /**
      SparseMatrix - vector product y = alpha*A*x + beta*y
 

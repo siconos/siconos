@@ -304,6 +304,36 @@ static sparse_matrix_iterator sparseMatrixBegin(const CSparseMatrix* const spars
 static int sparseMatrixNext(sparse_matrix_iterator* it);
 
 
+size_t SBM_nnz(SparseBlockStructuredMatrix * A)
+{
+  size_t nnz=0;
+  /* Column (block) position of the current block*/
+  size_t colNumber;
+  /* Number of rows/columns of the current block */
+  unsigned int nbRows, nbColumns;
+  for(unsigned int currentRowNumber = 0 ; currentRowNumber < A->filled1 - 1; ++currentRowNumber)
+  {
+    /* Get dim. of the current block */
+    nbRows = A->blocksize0[currentRowNumber];
+    if(currentRowNumber != 0)
+      nbRows -= A->blocksize0[currentRowNumber - 1];
+    assert((nbRows <= sizeY));
+    for(size_t blockNum = A->index1_data[currentRowNumber];
+        blockNum < A->index1_data[currentRowNumber + 1]; ++blockNum)
+    {
+      assert(blockNum < A->filled2);
+
+      nbColumns = A->blocksize1[colNumber];
+      if(colNumber != 0)
+        nbColumns -= A->blocksize1[colNumber - 1];
+      nnz += nbRows*nbColumns;
+    }
+  }
+
+  return  nnz;
+};
+
+
 void SBM_gemv(unsigned int sizeX, unsigned int sizeY, double alpha, const SparseBlockStructuredMatrix* const restrict A, const double* restrict x, double beta, double* restrict y)
 {
   /* Product SparseMat - vector, y = A*x (init = 1 = true) or y += A*x (init = 0 = false) */
@@ -1532,6 +1562,9 @@ void SBM_row_prod_no_diag(unsigned int sizeX, unsigned int sizeY, unsigned int c
     }
   }
 }
+/* static int op_counter_mul =0; */
+/* static int op_counter_add = 0; */
+
 void SBM_row_prod_no_diag_3x3(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, double* const x, double* y)
 {
   /*
@@ -1589,8 +1622,12 @@ void SBM_row_prod_no_diag_3x3(unsigned int sizeX, unsigned int sizeY, unsigned i
       /* cblas_dgemv(CblasColMajor,CblasNoTrans, nbRows, nbColumns, 1.0, A->block[blockNum], nbRows, &x[posInX], 1, 1.0, y, 1); */
       assert((nbColumns == 3));
       mvp3x3(A->block[blockNum], &x[posInX], y);
+      /* op_counter_mul += 9 ; */
+      /* op_counter_add += 9 ; */
     }
   }
+  /* printf("op_counter_mul = %i\t", op_counter_mul); */
+  /* printf("op_counter_add = %i\n", op_counter_add); */
 }
 void SBM_row_prod_no_diag_2x2(unsigned int sizeX, unsigned int sizeY, unsigned int currentRowNumber, const SparseBlockStructuredMatrix* const A, double* const x, double* y)
 {

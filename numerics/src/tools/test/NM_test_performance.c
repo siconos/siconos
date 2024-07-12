@@ -51,16 +51,16 @@ static double test_NM_row_prod_no_diag3(NumericsMatrix * A, int number_of_prod)
 
   if (A->storageType == NM_SPARSE_BLOCK)
     {
-      printf("test_NM_row_prod_no_diag3 for a storage SBM. n =%i, number_od_prod= %i\n", A->size0, number_of_prod);
+      printf("test_NM_row_prod_no_diag3 for a storage SBM. n =%i, number_of_prod= %i\n", A->size0, number_of_prod);
     }
   else if (A->storageType == NM_SPARSE)
      {
        if (A->matrix2->origin == NSM_CSR)
-	 printf("test_NM_row_prod_no_diag3 for a storage CSR. n =%i, number_od_prod= %i\n", A->size0, number_of_prod);
+	 printf("test_NM_row_prod_no_diag3 for a storage CSR. n =%i, number_of_prod= %i\n", A->size0, number_of_prod);
        if (A->matrix2->origin == NSM_CSC)
-	 printf("test_NM_row_prod_no_diag3 for a storage CSC. n =%i, number_od_prod= %i\n", A->size0, number_of_prod);
+	 printf("test_NM_row_prod_no_diag3 for a storage CSC. n =%i, number_of_prod= %i\n", A->size0, number_of_prod);
        if (A->matrix2->origin == NSM_TRIPLET)
-	 printf("test_NM_row_prod_no_diag3 for a storage COO. n =%i, number_od_prod= %i\n", A->size0, number_of_prod);
+	 printf("test_NM_row_prod_no_diag3 for a storage COO. n =%i, number_of_prod= %i\n", A->size0, number_of_prod);
 
      }
 
@@ -70,8 +70,8 @@ static double test_NM_row_prod_no_diag3(NumericsMatrix * A, int number_of_prod)
     {
       reaction[k] = 1.0;
     }
-  double * q = (double *) malloc (3 *sizeof(double));
-  for (int k =0 ; k < 3; k++)
+  double * q = (double *) malloc (n *sizeof(double));
+  for (int k =0 ; k < n; k++)
     {
       q[k] = 1.0;
     }
@@ -85,11 +85,11 @@ static double test_NM_row_prod_no_diag3(NumericsMatrix * A, int number_of_prod)
     {
   for (int contact =0; contact <nc; contact++)
     {
-      NM_row_prod_no_diag3(n, contact, 3*contact, A, reaction, q, false);
+      NM_row_prod_no_diag3(n, contact, 3*contact, A, reaction, &q[contact], false);
     }
   }
   clock_t t2 = clock();
-  //printf("norm of result = %e\n",cblas_dnrm2(n,q,1) );
+  printf("norm of result = %e\n",cblas_dnrm2(n,q,1) );
 
   (void)printf("time (s) : %lf \n", (double)(t2-t1)/(double)clk_tck);
 
@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
 {
 
   int info =0;
-  int number_of_prod =5000;
+  int number_of_prod =100;
 
 
   NumericsMatrix * A_sbm = NM_new_from_filename("./data/matrix_sbm.dat");
@@ -179,10 +179,33 @@ int main(int argc, char *argv[])
   test_NM_row_prod_no_diag3(A_sparse_csc,number_of_prod);
 
 
+  NumericsMatrix * A_sparse_remove = NM_new_from_filename("./data/matrix_sparse.dat");
 
-  test_NM_prod_mv_3x3(A_sbm,number_of_prod);
-  test_NM_prod_mv_3x3(A_sparse,number_of_prod);
-  test_NM_prod_mv_3x3(A_sparse_csc,number_of_prod);
+  CSparseMatrix * a_remove = NSM_remove_diagonal_blocks(A_sparse_remove, 3);
+
+  NM_clearSparseStorage(A_sparse_remove);
+  A_sparse_remove->matrix2->triplet= a_remove;
+  A_sparse_remove->matrix2->origin = NSM_TRIPLET;
+
+  //NM_display(A_sparse_remove);
+
+  test_NM_row_prod_no_diag3(A_sparse_remove,number_of_prod);
+
+
+
+  printf("\n A sparse remove nnz =%li \n", NM_nnz(A_sparse_remove) );
+  printf("A sparse nnz =%li \n", NM_nnz(A_sparse) );
+  printf("SBM nnz =%li \n", NM_nnz(A_sbm) );
+
+  printf("Estimation of number of mul operation\n");
+  printf("sparse = %li\n", NM_nnz(A_sparse)*number_of_prod  );
+  printf("sparse remove = %li\n", NM_nnz(A_sparse_remove)*number_of_prod  );
+
+  printf("sbm = %li\n", (NM_nnz(A_sbm) - (A_sbm->size0/3)*9) *number_of_prod );
+
+  /* test_NM_prod_mv_3x3(A_sbm,number_of_prod); */
+  /* test_NM_prod_mv_3x3(A_sparse,number_of_prod); */
+  /* test_NM_prod_mv_3x3(A_sparse_csc,number_of_prod); */
 
 
 

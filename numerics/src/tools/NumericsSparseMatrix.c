@@ -1043,3 +1043,54 @@ double **  NSM_extract_diagonal_blocks(NumericsMatrix* M, size_t block_size)
 
   return diag_blocks;
 }
+
+
+
+CSparseMatrix *   NSM_remove_diagonal_blocks(NumericsMatrix* M, size_t block_size)
+{
+  assert(M);
+  assert(M->storageType == NM_SPARSE);
+  assert(M->matrix2);
+
+  CSparseMatrix * out = cs_spalloc(M->size0, M->size1, 0, 1, 1);
+
+
+  CSparseMatrix * M_triplet = NM_triplet(M);
+
+
+  CS_INT* Mp = M_triplet->p;
+  CS_INT* Mi = M_triplet->i;
+  CS_ENTRY* Mx = M_triplet->x;
+
+  CS_INT nz = M_triplet->nz;
+
+  for (CS_INT e = 0; e < nz; e++)
+    {
+      CS_INT i = Mi[e];
+      CS_INT j = Mp[e];
+
+      int is_block_diagonal_element= 0;
+
+
+      int index = i % block_size;
+
+      if ((j >= i - index ) && (j < i -index + block_size))
+	{
+	  is_block_diagonal_element= 1;
+	}
+
+      /* if (is_block_diagonal_element) */
+      /* 	printf("%i %i is diagonal \n", i, j); */
+      /* else */
+      /* 	printf("%i %i is NOT diagonal \n", i, j); */
+
+
+      if (!is_block_diagonal_element)
+	{
+	  CSparseMatrix_entry(out, i, j, Mx[e]); // to be improved
+	}
+    }
+
+  return out;
+
+}
