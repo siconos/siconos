@@ -7101,6 +7101,7 @@ void NM_clear_cone_matrix_H(NumericsMatrix *H, unsigned int n_cones_to_clear, in
       double *val = H_triplet->x;
       for (unsigned int i=0; i<n_cones_to_clear; i++)
       {
+        // printf("\nNM_clear_cone_matrix_H: cones_to_clear[%d] = %d\n",i,cones_to_clear[i]);
         target = (cs_long_t)cones_to_clear[i]*3;
         if (target > H_triplet->m)
         {
@@ -7175,6 +7176,7 @@ void NM_clear_cone_matrix_H(NumericsMatrix *H, unsigned int n_cones_to_clear, in
 
       NM_csc(H);
       H->matrix2->origin= NSM_CSC;
+      H->size0 -= 3*n_cones_to_clear;
     }
     else
       assert(0 && "NM_clear_cone_matrix_H supports only NSM_TRIPLET and NSM_CSC, or unknown origin");
