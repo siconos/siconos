@@ -1306,7 +1306,7 @@ static csn *cs_chol_2 (const cs *A, const css *S, size_t iteration)
     {
         /* --- Nonzero pattern of L(k,:) ------------------------------------ */
         top = cs_ereach (C, k, parent, s, c) ;      /* find pattern of L(k,:) */
-        if(iteration==8)printf("top = %ld\n", top);
+        if(iteration==8)printf("top = %lld\n", top);
         x [k] = 0. ;                                 /* x (0:k) is now zero */
         for (p = Cp [k] ; p < Cp [k+1] ; p++)       /* x = full(triu(C(:,k))) */
         {
@@ -1334,7 +1334,7 @@ static csn *cs_chol_2 (const cs *A, const css *S, size_t iteration)
             Lx [p] = lki ;
             if(iteration==8)
             {
-              printf("k=%ld, i=%ld, p=%ld, Li[p]=%ld, Lp[p]=%ld, Lx [p]=%5.40e, lki=%5.40Le, d=%5.40Le\n",k,i,p,Li[p],Lp[p],Lx [p],lki, d);
+              printf("k=%lld, i=%lld, p=%lld, Li[p]=%lld, Lp[p]=%lld, Lx [p]=%5.40e, lki=%5.40Le, d=%5.40Le\n",k,i,p,Li[p],Lp[p],Lx [p],lki, d);
             }
         }
         /* --- Compute L(k,k) ----------------------------------------------- */
@@ -1343,7 +1343,7 @@ static csn *cs_chol_2 (const cs *A, const css *S, size_t iteration)
         // if (CS_REAL (d) <= 0 || CS_IMAG (d) != 0)
         if (creall (d) <= 0 || cimagl (d) != 0)
         {
-          printf("\n\n Factorized matrix has a negative eigenvalue at the cone i = %ld. \n\n", k/5+1);
+          printf("\n\n Factorized matrix has a negative eigenvalue at the cone i = %lld. \n\n", k/5+1);
           return (cs_ndone (N, E, c, x, 0)) ; /* not pos def */
         }
         // if (d < 0.) d = 1e-40;
@@ -1351,7 +1351,7 @@ static csn *cs_chol_2 (const cs *A, const css *S, size_t iteration)
         Li [p] = k ;                /* store L(k,k) = sqrt (d) in column k */
         // Lx [p] = sqrt (d) ;
         Lx [p] = sqrtl (d) ;
-        if(iteration==8)printf("k=%ld, p2=%ld, Li[p]=%ld, Lp[p]=%ld, Lx [p]=%5.40e\n",k,p,Li[p],Lp[p],Lx [p]);
+        if(iteration==8)printf("k=%lld, p2=%lld, Li[p]=%lld, Lp[p]=%lld, Lx [p]=%5.40e\n",k,p,Li[p],Lp[p],Lx [p]);
     }
     Lp [n] = cp [n] ;               /* finalize L */
     // if(iteration==16) printf("\n\n cs_chol_2 001  \n\n");
@@ -2493,7 +2493,7 @@ static void compute_errors(NumericsMatrix * M, NumericsMatrix * H, const double 
   NM_tgemv(1.0, H, r, 0.0, HTr);         // HTr = H'r
   cblas_daxpy(m, -1.0, HTr, 1, dualConstraint, 1); // dualConstraint = Mv - f - H'r
   max_val = fmax(max_val, cblas_dnrm2(m, f, 1));
-  max_val = fmax(max_val, cblas_dnrm2(m, HTr, 1)); // max_val = max{|Mv|, |f|, |H'r|}
+  max_val = fmax(max_val, cblas_dnrm2(m, HTr, 1)); // max_val = max{|Mv|, |f|, |H'r|, typr}
 
   *dinfeas = cblas_dnrm2(m, dualConstraint, 1);
   if(max_val >= tolerance)
@@ -2508,9 +2508,9 @@ static void compute_errors(NumericsMatrix * M, NumericsMatrix * H, const double 
   cblas_daxpy(nd, -1.0, w, 1, primalConstraint, 1);         // primalConstraint = -Hv - w
   cblas_daxpy(nd, 1.0, u, 1, primalConstraint, 1); // primalConstraint = u - Hv - w
   max_val = fmax(max_val, norm_u);
-  max_val = fmax(max_val, cblas_dnrm2(nd, w, 1));           // max_val = max{|Hv|, |u|, |w|}
+  max_val = fmax(max_val, cblas_dnrm2(nd, w, 1));           // max_val = max{|Hv|, |u|, |w|, typu}
 
-  *pinfeas = cblas_dnrm2(nd, primalConstraint, 1);
+  *pinfeas = cblas_dnrm2(nd, primalConstraint, 1);  // max_val = 1;
   if(max_val >= tolerance)
     *pinfeas /= max_val;
 
@@ -2524,7 +2524,7 @@ static void compute_errors(NumericsMatrix * M, NumericsMatrix * H, const double 
   }
   *proj_error = sqrt(*proj_error);
 
-  max_val = fmax(norm_u, norm_r);
+  max_val = fmax(norm_u, norm_r); //max_val = 1;
   if(max_val >= tolerance)
     *proj_error /= max_val;
 
@@ -3130,6 +3130,9 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
   {
     H_origin = NM_transpose(problem->H);  // H <== H' because some different storages in fclib and paper
   }
+
+  printf("nnz H = %8zu density = %9.4f, \t mu = %.2e\n",NM_nnz(problem->H), NM_nnz(problem->H)/1.0/nd/m, problem->mu[0]);
+
 
   // initialize solver if it is not set
   int internal_allocation=0;
@@ -3741,8 +3744,10 @@ while(1)
   else
   {
     // numerics_printf_verbose(-1, "| it| rel gap | pinfeas | dinfeas |  <u, r> | proj err| complem1| complem2| full err| barparam| alpha_p | alpha_d | sigma | |dv|/|v| | |du|/|u| | |dr|/|r| |residu m|residu nd|  n(d+1) |");
-    numerics_printf_verbose(-1, "| it| rel gap | pinfeas | dinfeas |  <u, r> | proj err| complem1| complem2| full err| barparam| alpha_p | alpha_d | sigma | |dv|/|v| | |du|/|u| | |dr|/|r| | 1st residu m nd n(d+1) | 2nd residu m nd n(d+1) |");
-    numerics_printf_verbose(-1, "-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
+    // numerics_printf_verbose(-1, "| it| rel gap | pinfeas | dinfeas |  <u, r> | proj err| complem1| complem2| full err| barparam| alpha_p | alpha_d | sigma | |dv|/|v| | |du|/|u| | |dr|/|r| | 1st residu m nd n(d+1) | 2nd residu m nd n(d+1) |");
+    // numerics_printf_verbose(-1, "-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
+    numerics_printf_verbose(-1, "| it| rel gap | pinfeas | dinfeas |  <u, r> | proj err| complem1| complem2| barparam|  alpha  | sigma | |dv|/|v| | |du|/|u| | |dr|/|r| | residu   m  nd  n(d+1) |");
+    numerics_printf_verbose(-1, "----------------------------------------------------------------------------------------------------------------------------------------------------------------");
   }
 
   // int stop;
@@ -3898,7 +3903,8 @@ while(1)
     }
 
 
-    if (fmax(pinfeas, fmax(dinfeas, fmin(udotr, proj_error))) <= tol)
+    // if (fmax(pinfeas, fmax(dinfeas, fmin(udotr, proj_error))) <= tol)
+    if (fmax(pinfeas, fmax(dinfeas, udotr)) <= tol)
     {
 
       if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] == SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_YES)
@@ -3908,8 +3914,10 @@ while(1)
       }
       else
       {
-        numerics_printf_verbose(-1, "| %2i| %7.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e |",
-                                iteration, relgap, pinfeas, dinfeas, udotr, proj_error, complem_1, complem_2, full_error, barr_param);
+        // numerics_printf_verbose(-1, "| %2i| %7.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e |",
+        //                         iteration, relgap, pinfeas, dinfeas, udotr, proj_error, complem_1, complem_2, full_error, barr_param);
+        numerics_printf_verbose(-1, "| %2i| %7.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e |",
+                                iteration, relgap, pinfeas, dinfeas, udotr, proj_error, complem_1, complem_2, barr_param);
       }
 
 
@@ -4141,11 +4149,11 @@ while(1)
       /* affine barrier parameter */
       // barr_param_a = (cblas_ddot(nd, v_plus_dv, 1, r_plus_dr, 1) / nd)*sigma;
       // barr_param_a = cblas_ddot(nd, v_plus_dv, 1, r_plus_dr, 1) / nd;
-      barr_param_a = cblas_ddot(nd, v_plus_dv, 1, r_plus_dr, 1) / (n);
+      barr_param_a = cblas_ddot(nd, v_plus_dv, 1, r_plus_dr, 1) / n;
 
       /* computing the centralization parameter */
       e = barr_param > sgmp1 ? fmax(1.0, sgmp2 * alpha_primal * alpha_primal) : sgmp3;
-      sigma = fmin(1.0, pow(barr_param_a / barr_param, e))/d;
+      sigma = fmin(1.0, pow(barr_param_a / barr_param, e)) / d;
       // sigma = fmin(1.0, pow(barr_param_a / barr_param, e));
 
 
@@ -4960,10 +4968,14 @@ while(1)
         break;
       }
 
+
+
       if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] == SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_YES)
       {
-        cblas_dcopy(m + nd + n_dplus1, rhs, 1, rhs_save, 1);
-        // NM_LDLT_refine(Jac, rhs, rhs_save, 1, 1e-14, 200, 0);
+        double *rhs_TMP = (double*)calloc(m + nd + n_dplus1,sizeof(double));
+        cblas_dcopy(m + nd + n_dplus1, rhs, 1, rhs_TMP, 1);
+        NM_LDLT_refine(Jac, rhs, rhs_TMP, 1, 1e-12, 10, 0);
+        free(rhs_TMP);
 
       /*   NM_LDLT_factorize(Jac); */
       /*   NumericsMatrix *A = Jac->destructible; */
@@ -4989,7 +5001,7 @@ while(1)
       /*       } */
       /*     } */
       /*   } */
-	NM_LDLT_refine(J, rhs, rhs_save, 1, tol, 10, 0);
+        // NM_LDLT_refine(J, rhs, rhs_save, 1, 1e-14, 10, 0);
       } 
       else
         NM_LDLT_solve(Jac, rhs, 1);
@@ -6988,12 +7000,18 @@ while(1)
                             residu_LS1_m, residu_LS1_nd, residu_LS1_ndplus1, residu_LS2_m, residu_LS2_nd, residu_LS2_ndplus1, residu_refine);}
     else
     {
-      numerics_printf_verbose(-1, "| %2i| %7.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e %.1e %.1e | %.1e %.1e %.1e |",
-                            iteration, relgap, pinfeas, dinfeas, udotr, proj_error, complem_1, complem_2, full_error, barr_param, alpha_primal, alpha_dual, sigma,
+      // numerics_printf_verbose(-1, "| %2i| %7.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e %.1e %.1e | %.1e %.1e %.1e |",
+      //                       iteration, relgap, pinfeas, dinfeas, udotr, proj_error, complem_1, complem_2, full_error, barr_param, alpha_primal, alpha_dual, sigma,
+      //                       cblas_dnrm2(m, d_globalVelocity, 1)/cblas_dnrm2(m, globalVelocity, 1),
+      //                       cblas_dnrm2(nd, d_velocity, 1)/cblas_dnrm2(nd, velocity, 1),
+      //                       cblas_dnrm2(nd, d_reaction, 1)/cblas_dnrm2(nd, reaction, 1),
+      //                       residu_LS1_m, residu_LS1_nd, residu_LS1_ndplus1, residu_LS2_m, residu_LS2_nd, residu_LS2_ndplus1);
+      numerics_printf_verbose(-1, "| %2i| %7.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e %.1e %.1e |",
+                            iteration, relgap, pinfeas, dinfeas, udotr, proj_error, complem_1, complem_2, barr_param, alpha_primal, sigma,
                             cblas_dnrm2(m, d_globalVelocity, 1)/cblas_dnrm2(m, globalVelocity, 1),
                             cblas_dnrm2(nd, d_velocity, 1)/cblas_dnrm2(nd, velocity, 1),
                             cblas_dnrm2(nd, d_reaction, 1)/cblas_dnrm2(nd, reaction, 1),
-                            residu_LS1_m, residu_LS1_nd, residu_LS1_ndplus1, residu_LS2_m, residu_LS2_nd, residu_LS2_ndplus1);
+                            residu_LS2_m, residu_LS2_nd, residu_LS2_ndplus1);
     }
 
 
@@ -7163,6 +7181,9 @@ else break;
     grfc3d_IPM_free(problem,options);
   }
 
+  options->solverData = (double *)malloc(sizeof(double));
+  double *projerr_ptr = (double *)options->solverData;
+  *projerr_ptr = proj_error;
 
 
 
@@ -7451,7 +7472,7 @@ void grfc3d_IPM_set_default(SolverOptions* options)
 
   // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] = SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_AFTER;
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] = SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_NO;
-  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_CHOLESKY] = SICONOS_FRICTION_3D_IPM_IPARAM_CHOLESKY_NO;
+  options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_CHOLESKY] = SICONOS_FRICTION_3D_IPM_IPARAM_CHOLESKY_YES;
 
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING_METHOD] = SICONOS_FRICTION_3D_IPM_NESTEROV_TODD_SCALING_WITH_QP;
   // options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_NESTEROV_TODD_SCALING_METHOD] = SICONOS_FRICTION_3D_IPM_NESTEROV_TODD_SCALING_WITH_F;
@@ -7459,7 +7480,7 @@ void grfc3d_IPM_set_default(SolverOptions* options)
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_MATLAB_FILE] = 0;
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_ITERATES_PYTHON_FILE] = 0;
 
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_1] = 1e-5;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_2] = 3.;
   options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_3] = 1.;
