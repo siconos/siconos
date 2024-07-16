@@ -54,6 +54,8 @@ struct GlobalRollingFrictionContactProblem {
       coefficients
       (\f$ n_c = \f$ numberOfContacts) */
   double *mu_r;
+  /** name of the problem **/
+  char * name;
 };
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

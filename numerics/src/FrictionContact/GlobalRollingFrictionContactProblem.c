@@ -49,6 +49,7 @@ GlobalRollingFrictionContactProblem* globalRollingFrictionContactProblem_new(voi
   problem->b = NULL;
   problem->mu = NULL;
   problem->mu_r = NULL;
+  problem->name = NULL;
 
   return problem;
 }
