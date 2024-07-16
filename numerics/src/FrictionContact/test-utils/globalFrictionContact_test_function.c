@@ -32,7 +32,7 @@
 #include "SiconosConfig.h"                 // for HAVE_GAMS_C_API // IWYU pragma: keep
 #include <string.h>
 #include "SiconosLapack.h"
-#include "gfc3d_ipm.h"                     // for classify_BNRT_original, ...
+#include "gfc3d_ipm.h"                     // for classify_BNRT_velocity_original, ...
 
 
 void print_problem_data_in_Matlab_file(GlobalFrictionContactProblem * problem, FILE * file);
@@ -191,12 +191,13 @@ int globalFrictionContact_test_function(TestCase* current)
 
   // classification BNRT
   int nB, nN, nR, nT;
-  if (current->options->solverId == SICONOS_GLOBAL_FRICTION_3D_IPM_SNM)
+  if (current->options->solverId == SICONOS_GLOBAL_FRICTION_3D_IPM_SNM ||
+      current->options->solverId == SICONOS_GLOBAL_FRICTION_3D_IPM)
   {
     // Take projerr value from test
     double *projerr_ptr = current->options->solverData;
-    classify_BNRT_for_ipm_snm(problem->mu, velocity, reaction, NC*dim, NC, &nB, &nN, &nR, &nT);
-    printf("\nsumry: %d  %.2e %.2e   %5i %5i   %4i %4i %4i %4i    %.6f   %s\n",
+    classify_BNRT_velocity_modified(problem->mu, velocity, reaction, NC*dim, NC, &nB, &nN, &nR, &nT);
+    printf("\nsumry: %d  %.2e  %.2e   %5i %5i   %4i %4i %4i %4i    %.6f   %s\n",
           info, current->options->dparam[SICONOS_DPARAM_RESIDU], *projerr_ptr,
           current->options->iparam[SICONOS_IPARAM_ITER_DONE], NC,
           nB, nN, nR, NC-nB-nN-nR,
@@ -204,7 +205,7 @@ int globalFrictionContact_test_function(TestCase* current)
   }
   else
   {
-    // classify_BNRT_original(problem->mu, velocity, reaction, NC*dim, NC, &nB, &nN, &nR, &nT);
+    // classify_BNRT_velocity_original(problem->mu, velocity, reaction, NC*dim, NC, &nB, &nN, &nR, &nT);
     printf("\nsumry: %d  %9.2e  %5i  %10.4f", info, current->options->dparam[SICONOS_DPARAM_RESIDU], current->options->iparam[SICONOS_IPARAM_ITER_DONE], (double)(t2-t1)/(double)clk_tck);
     printf("%3i %5i %5i     %s\n\n", dim, NC, n, current->filename);
 
