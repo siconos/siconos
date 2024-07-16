@@ -71,7 +71,7 @@ typedef struct
 
 
 typedef long double float_type;
-/* typedef double float_type; */
+ // typedef double float_type;
 
 #define MIN_RELATIVE_SCALING sqrt(DBL_EPSILON)
 #define STANDARD 0
@@ -196,6 +196,12 @@ double xdoty_type(const unsigned int varsCount, const unsigned int vecSize, cons
 double complemResidualNorm(const double * const velocity, const double * const reaction,
                                   const unsigned int vecSize, const unsigned int varsCount);
 
+/* Returns the type-norm of the complementarity residual vector = type-norm of the Jordan product velocity o reaction
+ *\param type is the norm type used: NORM_2 = L-2, NORM_INF = L-inf, NORM_2_INF = L-inf conic = max {ui o ri}
+ */
+double complemResidualNorm_type(const double * const velocity, const double * const reaction,
+                           const unsigned int vecSize, const unsigned int varsCount, const int type);
+
 
 /* Returns the 2-norm of the complementarity residual vector = 2-norm of the Jordan product (Qp*velocity) o (Qp_inv * reaction)  */
 double complemResidualNorm_p(const double * const velocity, const double * const reaction,
@@ -269,14 +275,16 @@ void classify_BNRT(const double * velocity, const double * reaction, const unsig
  * We need first a change of velocity : u_tilde = (uN + mu*|uT|; mu*uT)
  * these u_tilde and r belong to friction cones
  */
-void classify_BNRT_original(const double *mu, const double * velocity, const double * reaction, const unsigned int vecSize, const unsigned int varsCount,
+void classify_BNRT_velocity_original(const double *mu, const double * velocity, const double * reaction, const unsigned int vecSize, const unsigned int varsCount,
                    int *nB, int *nN, int *nR, int *nT);
 
-/* Return the classification BNRT of the input: u (uN + mu*|uT|; uT) and r (rN; rT)
- * We need first a change of velocity : u_tilde = (uN + mu*|uT|; mu*uT)
- * these u_tilde and r belong to friction cones
+/* Return the classification BNRT of the input: modified u (uN + mu*|uT|; uT) and r (rN; rT)
+ * these u and r belong to friction cones
  */
-void classify_BNRT_for_ipm_snm(const double *mu, const double * velocity, const double * reaction, const unsigned int vecSize, const unsigned int varsCount,
+void classify_BNRT_velocity_modified(const double *mu, const double * velocity, const double * reaction, const unsigned int vecSize, const unsigned int varsCount,
                    int *nB, int *nN, int *nR, int *nT);
+
+void classify_indices_R(const double * velocity, const double * reaction, const unsigned int vecSize, const unsigned int varsCount,
+                   int *nR, int *setR);
 
 void printBlockVec(double * vec, int vecSize, int sizeBlock, int cl);
