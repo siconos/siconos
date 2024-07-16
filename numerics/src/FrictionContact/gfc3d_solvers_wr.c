@@ -43,15 +43,6 @@
 
 void  gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double *reaction, double *velocity, double* globalVelocity, int *info, SolverOptions* options)
 {
-  char *blk_num_name = NULL;
-  if (options->solverId == SICONOS_GLOBAL_FRICTION_3D_NSGS_SEP_WR)
-  {
-    blk_num_name = (char *)malloc(10*sizeof(char));
-    char *blk_num_ptr = options->solverData;
-    strcpy(blk_num_name, blk_num_ptr);
-    free(options->solverData); options->solverData = NULL;
-  }
-
   char *str = (char *) malloc(200);
   if (problem->name)
   {
@@ -68,12 +59,10 @@ void  gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double *reaction, dou
     if(strToken != NULL) strToken = strtok ( NULL, separators );
   }
   strToken = strtok ( strToken, "." );
-  strcat(strToken, blk_num_name);
   FILE *fileName = fopen("problem_name.res", "w");
   fprintf(fileName, "%s", strToken);
   fclose(fileName);
   free(str);
-  free(blk_num_name);
 
   /* verbose=1; */
   DEBUG_BEGIN("gfc3d_nsgs_wr\n");
