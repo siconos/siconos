@@ -19,7 +19,7 @@
 
 #include <assert.h>  // for assert
 
-#include "CSparseMatrix_internal.h"  // for CSparseMatrix, CS_INT, cs_dl_spfree
+#include "CSparseMatrix.h"  // for CSparseMatrix, CS_INT, cs_dl_spfree
 #ifndef __cplusplus
 #include <stdbool.h>  // for bool, false, true
 #endif

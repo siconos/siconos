@@ -130,7 +130,7 @@ static inline double squared_norm(double localreaction[2]) {
   return (localreaction[0] * localreaction[0] + localreaction[1] * localreaction[1]);
 }
 
-static void inline accumulateLightErrorSum(double *light_error_sum, double localreaction[3],
+static inline void accumulateLightErrorSum(double *light_error_sum, double localreaction[2],
                                            double *oldreaction) {
   double x0 = oldreaction[0] - localreaction[0];
   double x1 = oldreaction[1] - localreaction[1];

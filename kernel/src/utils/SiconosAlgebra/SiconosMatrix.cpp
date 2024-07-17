@@ -36,7 +36,7 @@
 #include "SiconosVector.hpp"                          // for SiconosVector
 #include "SimpleMatrixFriends.hpp"                    // for isComparableTo
 
-#include "CSparseMatrix_internal.h"                   // for CSparseMatrix
+#include "CSparseMatrix.h"                   // for CSparseMatrix
 #include "NumericsSparseMatrix.h"                     // for NSM_fix_csc
 #include "SiconosException.hpp"
 

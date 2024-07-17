@@ -22,7 +22,7 @@
 #include <stdio.h>   // for fprintf, stderr
 #include <stdlib.h>  // for exit, EXIT_FAILURE
 
-#include "CSparseMatrix_internal.h"  // for CSparseMatrix, CS_INT
+#include "CSparseMatrix.h"  // for CSparseMatrix, CS_INT
 #include "SiconosConfig.h"           // for WITH_MKL_SPBLAS  // IWYU pragma: keep
 
 #ifdef WITH_MKL_SPBLAS

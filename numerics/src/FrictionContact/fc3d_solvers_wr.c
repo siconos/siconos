@@ -19,7 +19,7 @@
 
 #include <stdlib.h>  // for malloc, calloc
 
-#include "CSparseMatrix_internal.h"        // for CSparseMatrix
+#include "CSparseMatrix.h"        // for CSparseMatrix
 #include "FrictionContactProblem.h"        // for FrictionContactProblem
 #include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
 #include "NumericsMatrix.h"                // for NM_create, NM_display, NM_eye

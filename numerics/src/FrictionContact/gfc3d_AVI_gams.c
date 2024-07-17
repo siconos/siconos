@@ -27,7 +27,7 @@
 #include <math.h>
 #include <string.h>
 
-#include "CSparseMatrix_internal.h"
+#include "CSparseMatrix.h"
 #include "GAMSlink.h"
 #include "GlobalFrictionContactProblem.h"
 #include "NumericsMatrix.h"

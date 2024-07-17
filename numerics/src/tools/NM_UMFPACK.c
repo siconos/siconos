@@ -20,7 +20,7 @@
 #include "numerics_verbose.h"
 #include "siconos_debug.h"
 #ifdef WITH_UMFPACK
-#include "CSparseMatrix_internal.h"
+#include "CSparseMatrix.h"
 #include "NumericsMatrix.h"
 #include "NumericsMatrix_internal.h"
 #include "NumericsSparseMatrix.h"

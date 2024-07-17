@@ -108,13 +108,6 @@ if(HAVE_SORT)
   list(APPEND ${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES sort) # NumericsSparseMatrix needs this
 endif()
 
-if(NOT WITH_SYSTEM_SUITESPARSE)
-  # else suite sparse is an external dependency of numerics and handled in numerics
-  # CMakeLists.txt.
-  list(APPEND ${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES SuiteSparse SuiteSparse/CXSparse SuiteSparse/LDL  )
-endif()
-# TEST TEST TEST
-
 # ---- Final setup for the library ----
 
 # Windows stuff --> should probably be reviewed and updated
@@ -174,18 +167,6 @@ target_compile_options(externals PRIVATE "-Wno-unused-parameter")
 if(WITH_FORTRAN)
   target_compile_options(externals PRIVATE $<$<AND:$<VERSION_GREATER_EQUAL:${CMAKE_Fortran_COMPILER_VERSION},10>,$<COMPILE_LANGUAGE:Fortran>>:-fallow-argument-mismatch>)
 endif()
-# - Extras, optional -
-# --- SuiteSparse ---
-# It is allowed to switch between system or local suitesparse,
-# depending on the chosen user option.
-# 'local' : use WITH_SYSTEM_SUITESPARSE=OFF, 'system' WITH_SYSTEM_SUITESPARSE=ON (default).
-# For 'local' suite sparse, some extra setup is required in externals,
-# while system suitesparse is searched for and configured
-# during numerics component setup.
-if(NOT WITH_SYSTEM_SUITESPARSE)
-  include(suite_sparse_setup)
-endif()
-
 
 # ---- Installation ----
 # Call siconos_component_install_setup(<COMPONENT>)

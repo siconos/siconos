@@ -25,7 +25,7 @@
 #include <stdlib.h>  // for malloc, free, exit, realloc, calloc
 #include <string.h>  // for memcpy
 
-#include "CSparseMatrix_internal.h"
+#include "CSparseMatrix.h"
 #include "NumericsArrays.h"  // for NA_merge_and_sort_sorted_arrays
 #include "SiconosBlas.h"     // for cblas_dscal, cblas_dgemv, CblasNoTrans, max
 #include "SiconosCompat.h"   // for SN_SIZE_T_Fn

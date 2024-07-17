@@ -25,7 +25,7 @@
 #include <string.h>
 
 #include "AffineVariationalInequalities.h"
-#include "CSparseMatrix_internal.h"
+#include "CSparseMatrix.h"
 #include "NumericsMatrix.h"
 #include "PATHVI_SDK/include/csc_matrix.h"
 #include "PATHVI_SDK/include/printv.h"

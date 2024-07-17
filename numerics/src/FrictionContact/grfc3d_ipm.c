@@ -23,7 +23,7 @@
 #include <stdio.h>
 #include <time.h>  // for clock()
 
-#include "CSparseMatrix_internal.h"
+#include "CSparseMatrix.h"
 #include "JordanAlgebra.h"  // for JA functions
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"

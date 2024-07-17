@@ -26,7 +26,7 @@
 #include <math.h>
 #include <stdio.h>
 
-#include "CSparseMatrix_internal.h"
+#include "CSparseMatrix.h"
 #include "Friction_cst.h"
 #include "JordanAlgebra.h"
 #include "NumericsMatrix.h"

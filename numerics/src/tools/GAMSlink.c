@@ -32,7 +32,7 @@ static inline char* strdup(const char* src) {
 #include <stdbool.h>
 #include <stdio.h>
 
-#include "CSparseMatrix_internal.h"
+#include "CSparseMatrix.h"
 #include "FrictionContactProblem.h"
 #include "GAMSlink.h"
 #include "NumericsMatrix.h"

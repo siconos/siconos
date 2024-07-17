@@ -27,6 +27,12 @@ set(PACKAGE_NAME siconos)
 set_and_check(siconos_ROOT "@CMAKE_INSTALL_PREFIX@")
 set_and_check(siconos_SCRIPT "@CMAKE_INSTALL_PREFIX@/bin/siconos")
 
+# list of directories specifying installation prefixes to be searched by the find... routines
+# of CMake. If set during build process of Siconos, it may be also useful at runtime.
+if(CMAKE_PREFIX_PATH)
+  set(CMAKE_PREFIX_PATH "@CMAKE_PREFIX_PATH@")
+endif()
+
 # set list of targets build by siconos project
 set(installed_targets "@installed_targets@")
 

@@ -20,7 +20,7 @@
 #ifdef WITH_MUMPS
 #include <string.h>  // for memcpy
 
-#include "CSparseMatrix_internal.h"
+#include "CSparseMatrix.h"
 #include "NM_MPI.h"
 #include "NumericsMatrix.h"
 #include "NumericsMatrix_internal.h"

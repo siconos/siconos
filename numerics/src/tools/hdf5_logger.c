@@ -31,7 +31,7 @@
 #include "NumericsSparseMatrix.h"
 #include "assert.h"
 //#include "CSparseMatrix.h"
-#include "CSparseMatrix_internal.h"
+#include "CSparseMatrix.h"
 
 bool SN_logh5_check_gzip(void) {
   unsigned filter_info;

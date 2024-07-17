@@ -29,7 +29,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "CSparseMatrix_internal.h"
+#include "CSparseMatrix.h"
 #include "FrictionContactProblem.h"
 #include "GAMSlink.h"
 #include "NumericsMatrix.h"

@@ -18,7 +18,7 @@
  */
 #define _POSIX_C_SOURCE 200112L
 
-#include "CSparseMatrix_internal.h"
+#include "CSparseMatrix.h"
 #include <assert.h>            // for assert
 #include <cs.h>                // for CS_INT, CS_ID, cs_dl_spalloc, cs_dl_free
 #include <float.h>             // for DBL_EPSILON
@@ -28,7 +28,6 @@
 #include <string.h>            // for strtok_r, memcpy, strncmp
 #include "SiconosCompat.h"     // for SN_PTRDIFF_T_F
 #include "numerics_verbose.h"  // for CHECK_IO
-#define LDL_LONG
 #include "ldl.h"
 #if defined(__cplusplus)
 #undef restrict
