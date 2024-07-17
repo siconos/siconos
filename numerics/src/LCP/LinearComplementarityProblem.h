@@ -21,20 +21,18 @@
 /*!\file LinearComplementarityProblem.h
  */
 
-#include "NumericsFwd.h"   // for LinearComplementarityProblem, NumericsMatrix
-#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include <stdio.h>  // for FILE
 
-#include <stdio.h> // for FILE
+#include "NumericsFwd.h"    // for LinearComplementarityProblem, NumericsMatrix
+#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 /**
    Structure that contains and defines a LCP Problem.
 */
 struct LinearComplementarityProblem {
-
-  int size; /**<  size of the problem */
-  NumericsMatrix
-      *M;    /**< M matrix of the LCP (see the mathematical description)*/
-  double *q; /**< vector of the LCP (see the mathematical description)*/
+  int size;          /**<  size of the problem */
+  NumericsMatrix *M; /**< M matrix of the LCP (see the mathematical description)*/
+  double *q;         /**< vector of the LCP (see the mathematical description)*/
 };
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
@@ -53,8 +51,7 @@ void linearComplementarity_display(LinearComplementarityProblem *problem);
  *  \param file pointer to a FILE
  *  \return 0 if ok
  */
-int linearComplementarity_printInFile(LinearComplementarityProblem *problem,
-                                      FILE *file);
+int linearComplementarity_printInFile(LinearComplementarityProblem *problem, FILE *file);
 
 /** Read and create a LinearComplementarityProblem
  *  from a file
@@ -63,8 +60,7 @@ int linearComplementarity_printInFile(LinearComplementarityProblem *problem,
  *  \param file pointer to a FILE
  *  \return 0 if ok
  */
-int linearComplementarity_newFromFile(LinearComplementarityProblem *problem,
-                                      FILE *file);
+int linearComplementarity_newFromFile(LinearComplementarityProblem *problem, FILE *file);
 
 /** Read and create a LinearComplementarityProblem
  *  from a file

@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #ifndef fc2d_compute_error_H
 #define fc2d_compute_error_H
@@ -24,24 +24,25 @@
 
 */
 
-#include "NumericsFwd.h"  // for FrictionContactProblem
-#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"    // for FrictionContactProblem
+#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-extern "C"
-{
+extern "C" {
 #endif
-  
-  void fc2d_unitary_compute_and_add_error(double* restrict r, double* restrict u, double mu, double* restrict error, double * worktmp);
-  /** Error computation for friction-contact 3D problem
-      \param problem the structure which defines the friction-contact problem
-      \param z vector
-      \param w vector
-      \param tolerance value for error computation
-      \param[in,out] error value
-      \return 0 if ok
-   */
-  int fc2d_compute_error(FrictionContactProblem* problem, double *z , double *w, double tolerance, double norm, double * error);
+
+void fc2d_unitary_compute_and_add_error(double* restrict r, double* restrict u, double mu,
+                                        double* restrict error, double* worktmp);
+/** Error computation for friction-contact 3D problem
+    \param problem the structure which defines the friction-contact problem
+    \param z vector
+    \param w vector
+    \param tolerance value for error computation
+    \param[in,out] error value
+    \return 0 if ok
+ */
+int fc2d_compute_error(FrictionContactProblem* problem, double* z, double* w, double tolerance,
+                       double norm, double* error);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

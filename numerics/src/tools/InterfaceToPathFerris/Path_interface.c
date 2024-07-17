@@ -14,42 +14,38 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
-#include "SiconosConfig.h"    // for HAVE_PATHFERRIS  // IWYU pragma: keep
-#include "SolverOptions_helpers.h" // for SN_set..., SN_get...
+#include "SiconosConfig.h"          // for HAVE_PATHFERRIS  // IWYU pragma: keep
+#include "SolverOptions_helpers.h"  // for SN_set..., SN_get...
 #ifdef HAVE_PATHFERRIS
 
+#include <assert.h>
 #include <limits.h>
 #include <stdio.h>
-#include <assert.h>
 
 #if defined(__cplusplus)
-extern "C"
-{
+extern "C" {
 #endif
 #include "PATH_SDK/include/MCP_Interface.h"
-
+#include "PATH_SDK/include/Macros.h"
+#include "PATH_SDK/include/Options.h"
+#include "PATH_SDK/include/Output_Interface.h"
 #include "PATH_SDK/include/Path.h"
 #include "PATH_SDK/include/PathOptions.h"
-
-#include "PATH_SDK/include/Macros.h"
-#include "PATH_SDK/include/Output_Interface.h"
-#include "PATH_SDK/include/Options.h"
 #if defined(__cplusplus)
 }
 #endif
 
 #include "NonlinearComplementarityProblem.h"
 #include "PathAlgebra.h"
-#include "SolverOptions.h"
-
 #include "Path_interface.h"
+#include "SolverOptions.h"
 
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
-#include "siconos_debug.h"
 #include "numerics_verbose.h"
+#include "siconos_debug.h"
 
 #if defined(__cplusplus)
 #undef restrict
@@ -58,14 +54,14 @@ extern "C"
 
 #if defined(USE_OUTPUT_INTERFACE)
 /* callback to register with PATH: output from PATH will go here */
-static CB_FUNC(void) messageCB(void *data, int mode, char *buf)
-{
+static CB_FUNC(void) messageCB(void* data, int mode, char* buf) {
   fprintf(stdout, "%s", buf);
 } /* messageCB */
 #endif
 
-void SN_path_interface(MCP_Interface* restrict mcp_interface, double* restrict z, double* restrict F, int* restrict info, double* restrict dparam, int* restrict iparam)
-{
+void SN_path_interface(MCP_Interface* restrict mcp_interface, double* restrict z,
+                       double* restrict F, int* restrict info, double* restrict dparam,
+                       int* restrict iparam) {
   assert(mcp_interface);
   assert(z);
   assert(F);
@@ -73,25 +69,20 @@ void SN_path_interface(MCP_Interface* restrict mcp_interface, double* restrict z
   assert(dparam);
   assert(iparam);
 
-  unsigned n = ((SN_generic_path_env*) mcp_interface->interface_data)->n;
-  unsigned nnz = ((SN_generic_path_env*) mcp_interface->interface_data)->nnz;
+  unsigned n = ((SN_generic_path_env*)mcp_interface->interface_data)->n;
+  unsigned nnz = ((SN_generic_path_env*)mcp_interface->interface_data)->nnz;
 
-  Options_Interface *o;
-  MCP *m;
+  Options_Interface* o;
+  MCP* m;
   MCP_Termination t;
   Information info_path;
-  double *tempZ;
-  double *tempF;
+  double* tempZ;
+  double* tempF;
   double dnnz;
   unsigned int i;
 
 #if defined(USE_OUTPUT_INTERFACE)
-  Output_Interface outputInterface =
-  {
-    NULL,
-    messageCB,
-    NULL
-  };
+  Output_Interface outputInterface = {NULL, messageCB, NULL};
   Output_SetInterface(&outputInterface);
 #else
   /* N.B.: the Output_SetLog call does not work when using a DLL:
@@ -105,26 +96,24 @@ void SN_path_interface(MCP_Interface* restrict mcp_interface, double* restrict z
 
   DEBUG_PRINTF("%s: Standalone-C Link\n", Path_Version());
 
-  if(n == 0)
-  {
+  if (n == 0) {
     fprintf(stdout, "\n ** EXIT - solution found (degenerate model).\n");
     (*info) = MCP_Solved;
     Options_Destroy(o);
     return;
   }
 
-  dnnz = MIN(1.0*nnz, 1.0*n*n);
-  if(dnnz > INT_MAX)
-  {
+  dnnz = MIN(1.0 * nnz, 1.0 * n * n);
+  if (dnnz > INT_MAX) {
     fprintf(stdout, "\n ** EXIT - model too large.\n");
     (*info) = MCP_Error;
     Options_Destroy(o);
     return;
   }
-  nnz = (int) dnnz;
+  nnz = (int)dnnz;
 
-  DEBUG_PRINTF("%d row/cols, %d non-zeros, %3.2f%% dense.\n\n",
-               n, nnz, 100.0*nnz/(1.0*n*n));
+  DEBUG_PRINTF("%d row/cols, %d non-zeros, %3.2f%% dense.\n\n", n, nnz,
+               100.0 * nnz / (1.0 * n * n));
   nnz++;
 
   m = MCP_Create(n, nnz);
@@ -134,12 +123,9 @@ void SN_path_interface(MCP_Interface* restrict mcp_interface, double* restrict z
   Options_SetDouble(o, "con_tol", SN_get_tolerance(dparam)); /* XXX  */
   DEBUG_OR_VERBOSE(Options_Display(o););
 
-  if(verbose > 0)
-  {
+  if (verbose > 0) {
     info_path.generate_output = Output_Log | Output_Status | Output_Listing;
-  }
-  else
-  {
+  } else {
     info_path.generate_output = 0;
   }
   info_path.use_start = True;
@@ -150,46 +136,32 @@ void SN_path_interface(MCP_Interface* restrict mcp_interface, double* restrict z
   tempZ = MCP_GetX(m);
   tempF = MCP_GetF(m);
 
-  for(i = 0; i < n; ++i)
-  {
+  for (i = 0; i < n; ++i) {
     z[i] = tempZ[i];
     F[i] = tempF[i];
   }
 
   DEBUG_PRINTF("ncp_path :: return code from the solver: %d\n", t);
-  if(t == MCP_Solved)
-  {
+  if (t == MCP_Solved) {
     *info = 0;
 
-    if(verbose > 0)
-      printf("PATH : NCP Solved, error\n");
-  }
-  else if(t == MCP_Error)
-  {
+    if (verbose > 0) printf("PATH : NCP Solved, error\n");
+  } else if (t == MCP_Error) {
     *info = 1;
-    if(verbose > 0)
-      printf("PATH : Error in the solution.\n");
-  }
-  else if(t == MCP_NoProgress)
-  {
+    if (verbose > 0) printf("PATH : Error in the solution.\n");
+  } else if (t == MCP_NoProgress) {
     DEBUG_PRINT("ncp_path :: no progress here\n");
-    if(info_path.residual < SN_get_tolerance(dparam))
-    {
+    if (info_path.residual < SN_get_tolerance(dparam)) {
       *info = 0;
       DEBUG_PRINTF("ncp_path :: no progress, but residual  = %e\n", info_path.residual);
-    }
-    else
-    {
+    } else {
       *info = 1;
       DEBUG_PRINTF("ncp_path :: no progress and residual  = %e\n", info_path.residual);
     }
     *info = 0;
-  }
-  else
-  {
+  } else {
     *info = t;
-    if(verbose > 0)
-      printf("PATH : Other error: %d\n", t);
+    if (verbose > 0) printf("PATH : Other error: %d\n", t);
   }
 
   SN_set_residual(dparam, info_path.residual);

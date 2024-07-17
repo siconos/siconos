@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef FRICTIONCONTACT3DSOLVERS_WR_H
 #define FRICTIONCONTACT3DSOLVERS_WR_H
 
@@ -22,15 +22,15 @@
   Subroutines for the resolution of contact problems with friction (3-dimensional case).
 
 */
-#include "NumericsFwd.h"  // for FrictionContactProblem, GlobalFrictionConta...
-#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"    // for FrictionContactProblem, GlobalFrictionConta...
+#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-extern "C"
-{
+extern "C" {
 #endif
 
-  GlobalFrictionContactProblem * fc3d_reformulation_global_problem(FrictionContactProblem* problem);
+GlobalFrictionContactProblem* fc3d_reformulation_global_problem(
+    FrictionContactProblem* problem);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

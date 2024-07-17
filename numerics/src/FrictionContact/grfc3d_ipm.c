@@ -2021,8 +2021,8 @@ static NumericsMatrix *multiply_UinvH(CSparseMatrix *chol_U, NumericsMatrix *H) 
 }
 
 static NumericsMatrix *compute_factor_U(const double *u1, const double *r1, const double *u2,
-                                 const double *r2, const size_t vecSize,
-                                 const size_t varsCount) {
+                                        const double *r2, const size_t vecSize,
+                                        const size_t varsCount) {
   size_t d3 = (size_t)(vecSize / varsCount);  // d3 = 3
   assert(d3 == 3);
   size_t d5 = d3 + 2;  // d5 = 5
@@ -2597,7 +2597,8 @@ static void print_NAN_in_matrix(const NumericsMatrix *const m) {
   }
 }
 
-static void is_in_int_of_Lcone(const double *const x, const size_t vecSize, const size_t varsCount) {
+static void is_in_int_of_Lcone(const double *const x, const size_t vecSize,
+                               const size_t varsCount) {
   size_t dim = vecSize / varsCount, id3 = 0;
   assert(dim == 3);
   float_type diffL = 0.;
@@ -2628,7 +2629,7 @@ static void is_in_int_of_Lcone(const double *const x, const size_t vecSize, cons
 }
 
 static void update_w(double *w, double *w_origin, const double *velocity, const size_t vecSize,
-              const size_t varsCount, int update) {
+                     const size_t varsCount, int update) {
   if (update == 0) return;
 
   size_t dim = vecSize / varsCount;
@@ -2642,9 +2643,10 @@ static void update_w(double *w, double *w_origin, const double *velocity, const 
 }
 
 static double compute_min_steplenght_of4(const double *x, const double *dx, const double *y,
-                                  const double *dy, const double *z, const double *dz,
-                                  const double *t, const double *dt, const size_t vecSize,
-                                  const size_t varsCount, double gamma) {
+                                         const double *dy, const double *z, const double *dz,
+                                         const double *t, const double *dt,
+                                         const size_t vecSize, const size_t varsCount,
+                                         double gamma) {
   double alpha_primal_1 = getStepLength(x, dx, vecSize, varsCount, gamma);
   double alpha_primal_2 = getStepLength(y, dy, vecSize, varsCount, gamma);
   double alpha_dual_1 = getStepLength(z, dz, vecSize, varsCount, gamma);
@@ -2677,7 +2679,8 @@ static double compute_min_steplenght_of4(const double *x, const double *dx, cons
  *      | ...   ...   ...   ...   ...   ...   ...   ...   ...   ...   ... ...  |
  */
 static NumericsMatrix *compute_JQinv(const double *u1, const double *r1, const double *u2,
-                              const double *r2, const size_t vecSize, const size_t varsCount) {
+                                     const double *r2, const size_t vecSize,
+                                     const size_t varsCount) {
   size_t d3 = (size_t)(vecSize / varsCount);  // d3 = 3
   assert(d3 == 3);
   size_t d5 = d3 + 2;  // d5 = 5

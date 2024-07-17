@@ -14,29 +14,28 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #include <stdio.h>
 #include <stdlib.h>
-#include "NonSmoothDrivers.h"
-#include "frictionContact_test_utils.h"
+
 #include "Friction_cst.h"
+#include "NonSmoothDrivers.h"
 #include "SolverOptions.h"
 #include "fc3d_Solvers.h"
+#include "frictionContact_test_utils.h"
 
-int main(void)
-{
+int main(void) {
   printf("\n Start of test on Default SolverOptions\n");
-  int info = 0 ;
-  SolverOptions * options = NULL;
-  int solvers[] = {SICONOS_FRICTION_3D_NSGS, SICONOS_FRICTION_3D_NSGSV, SICONOS_FRICTION_3D_PROX,
-                   SICONOS_FRICTION_3D_TFP, SICONOS_FRICTION_3D_DSFP, SICONOS_FRICTION_3D_EG, SICONOS_FRICTION_3D_HP
-                  };
-
+  int info = 0;
+  SolverOptions* options = NULL;
+  int solvers[] = {SICONOS_FRICTION_3D_NSGS, SICONOS_FRICTION_3D_NSGSV,
+                   SICONOS_FRICTION_3D_PROX, SICONOS_FRICTION_3D_TFP,
+                   SICONOS_FRICTION_3D_DSFP, SICONOS_FRICTION_3D_EG,
+                   SICONOS_FRICTION_3D_HP};
 
   int n_solvers = (int)(sizeof(solvers) / sizeof(solvers[0]));
 
-  for(int s=0; s<n_solvers; ++s)
-  {
+  for (int s = 0; s < n_solvers; ++s) {
     options = solver_options_create(solvers[s]);
     solver_options_print(options);
     solver_options_delete(options);

@@ -14,35 +14,42 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef FRICTIONCONTACT3DUNITARY_ENUMERATIVE_H
 #define FRICTIONCONTACT3DUNITARY_ENUMERATIVE_H
 
 /*!\file fc3d_unitary_enumerative.h
-  \brief Typedef and functions declarations related to the quartic solver for 3 dimension frictional contact problems.
+  \brief Typedef and functions declarations related to the quartic solver for 3 dimension
+  frictional contact problems.
 
   Each solver must have 4 functions in its interface:
   - initialize: link local static variables to the global ones (M,q,...)
-  - update: link/fill the local variables corresponding to sub-blocks of the full problem, for a specific contact
+  - update: link/fill the local variables corresponding to sub-blocks of the full problem, for
+  a specific contact
   - solve: solve the local problem
   - free
 
 */
-#include "NumericsFwd.h"  // for FrictionContactProblem, SolverOptions
-#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"    // for FrictionContactProblem, SolverOptions
+#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-extern "C"
-{
+extern "C" {
 #endif
-  void fc3d_unitary_enumerative_free(FrictionContactProblem* problem);
-  void fc3d_unitary_enumerative_initialize(FrictionContactProblem* problem);
-  /*API for the nsgs*/
-  int fc3d_unitary_enumerative_solve(FrictionContactProblem* problem, double * reaction, SolverOptions* options);
-  int fc3d_unitary_enumerative_solve_sliding(FrictionContactProblem* problem, double * reaction, SolverOptions* options);
-  int fc3d_unitary_enumerative_test_non_sliding(FrictionContactProblem* problem, double * reaction, double * velocity, SolverOptions* options);
-  int fc3d_unitary_enumerative(FrictionContactProblem* problem, double * reaction, double * velocity, int *info, SolverOptions* options);
-  int fc3d_unitary_enumerative_solve_poly_nu_sliding(FrictionContactProblem* problem, double * reaction, SolverOptions* options);
+void fc3d_unitary_enumerative_free(FrictionContactProblem* problem);
+void fc3d_unitary_enumerative_initialize(FrictionContactProblem* problem);
+/*API for the nsgs*/
+int fc3d_unitary_enumerative_solve(FrictionContactProblem* problem, double* reaction,
+                                   SolverOptions* options);
+int fc3d_unitary_enumerative_solve_sliding(FrictionContactProblem* problem, double* reaction,
+                                           SolverOptions* options);
+int fc3d_unitary_enumerative_test_non_sliding(FrictionContactProblem* problem,
+                                              double* reaction, double* velocity,
+                                              SolverOptions* options);
+int fc3d_unitary_enumerative(FrictionContactProblem* problem, double* reaction,
+                             double* velocity, int* info, SolverOptions* options);
+int fc3d_unitary_enumerative_solve_poly_nu_sliding(FrictionContactProblem* problem,
+                                                   double* reaction, SolverOptions* options);
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

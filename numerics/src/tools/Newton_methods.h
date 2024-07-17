@@ -29,17 +29,16 @@
  *
  */
 
-#include "NumericsFwd.h"   // for SolverOptions, NumericsMatrix
-#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include <stddef.h>  // for NULL, size_t
 
-#include <stddef.h> // for NULL, size_t
+#include "NumericsFwd.h"    // for SolverOptions, NumericsMatrix
+#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 #ifndef __cplusplus
-#include <stdbool.h> // for bool
+#include <stdbool.h>  // for bool
 #endif
 
 typedef void (*compute_F_ptr)(void *data_opaque, double *z, double *F);
-typedef void (*compute_F_merit_ptr)(void *data_opaque, double *z, double *F,
-                                    double *F_merit);
+typedef void (*compute_F_merit_ptr)(void *data_opaque, double *z, double *F, double *F_merit);
 
 /**
     Struct holding the necessary pointers to functions needed by the
@@ -49,20 +48,17 @@ typedef struct {
   compute_F_ptr compute_F;             /**< function to evaluate w = F(z) */
   compute_F_merit_ptr compute_F_merit; /**< function to evaluate F_merit(z)
                                           (e.g. F_FB, F_{min}, ...) */
-  void (*compute_H)(
-      void *data_opaque, double *z, double *w, double *workV1, double *workV2,
-      NumericsMatrix *H); /**< function to get an element H of T */
-  void (*compute_error)(void *data_opaque, double *z, double *w,
-                        double *nabla_theta, double tol,
-                        double *err); /**< function to compute the error */
+  void (*compute_H)(void *data_opaque, double *z, double *w, double *workV1, double *workV2,
+                    NumericsMatrix *H); /**< function to get an element H of T */
+  void (*compute_error)(void *data_opaque, double *z, double *w, double *nabla_theta,
+                        double tol, double *err); /**< function to compute the error */
   void (*compute_RHS_desc)(
       void *data_opaque, double *z, double *w,
       double *F_desc); /**< function to evaluate F_desc(z) (e.g. F_FB, F_{min},
                           ...), optional */
   void (*compute_H_desc)(
       void *data_opaque, double *z, double *w, double *workV1, double *workV2,
-      NumericsMatrix *
-          H_desc); /**< function to get an element H_desc of T_desc, optional */
+      NumericsMatrix *H_desc); /**< function to get an element H_desc of T_desc, optional */
   int (*compute_descent_direction)(
       void *data_opaque, double *z, double *w, double *descent_dir,
       SolverOptions *options); /**< function to get the descent direction, used
@@ -74,9 +70,8 @@ typedef struct {
                                   for instance in the Newton-Josephy method */
   void *(*get_set_from_problem_data)(
       void *problem); /**< Function returning the set description from the  */
-  int (*ls_failure_fn)(
-      void *problem, double *z, double *w, double *descent_dir, double err,
-      size_t status); /**< Function to call when the line search fails */
+  int (*ls_failure_fn)(void *problem, double *z, double *w, double *descent_dir, double err,
+                       size_t status); /**< Function to call when the line search fails */
 } functions_LSA;
 
 // id of the stat structure
@@ -93,13 +88,13 @@ typedef struct {
 
 /** \struct newton_LSA_param Newton_methods.h*/
 typedef struct {
-  double p; /**<  p value for the acceptance test of the direction solution of
-               the linear system */
-  double sigma; /**< ratio for the decrease in norm of the C-function
-                   (\f$ gamma' \f$ in VFBLSA)*/
-  double rho;   /**< coefficient for the direction check*/
-  bool keep_H;  /**< keep the matrix H untouched. Only used in the dense case,
-                   where a copy of the matrix is factorized */
+  double p;               /**<  p value for the acceptance test of the direction solution of
+                             the linear system */
+  double sigma;           /**< ratio for the decrease in norm of the C-function
+                             (\f$ gamma' \f$ in VFBLSA)*/
+  double rho;             /**< coefficient for the direction check*/
+  bool keep_H;            /**< keep the matrix H untouched. Only used in the dense case,
+                             where a copy of the matrix is factorized */
   bool check_dir_quality; /**< Check the quality of the descent direction
                              (Eqn 9.1.6 p. 805 in Facchinei & Pang)*/
 } newton_LSA_param;
@@ -184,10 +179,8 @@ void newton_LSA(unsigned n, double *z, double *w, int *info, void *data,
  *  \param compute_F function to compute F
  *  \param merit_function function to compute F_merit
  */
-static inline void init_lsa_functions(functions_LSA *functions,
-                                      compute_F_ptr compute_F,
-                                      compute_F_merit_ptr merit_function)
-{
+static inline void init_lsa_functions(functions_LSA *functions, compute_F_ptr compute_F,
+                                      compute_F_merit_ptr merit_function) {
   functions->compute_F = compute_F;
   functions->compute_F_merit = merit_function;
   functions->compute_H = NULL;

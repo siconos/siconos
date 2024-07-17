@@ -14,28 +14,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #include "NSSTools.h"  // for min_part
 
 void min_part(double* x, double* sol, int n)
 
 {
-
-  int     i;
-  double  minx;
-
-
+  int i;
+  double minx;
 
   minx = x[0];
 
-  for(i = 1 ; i < n ; i++)
-  {
-
-    if(minx > x[i]) minx = x[i] ;
-
+  for (i = 1; i < n; i++) {
+    if (minx > x[i]) minx = x[i];
   }
 
-
   *sol = minx;
-
 }

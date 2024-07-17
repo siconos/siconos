@@ -14,8 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
-
+ */
 
 #ifndef SN_SANITIZER_H
 #define SN_SANITIZER_H
@@ -26,9 +25,10 @@
 
 #include "SiconosBlas.h"
 
-#if defined(__has_feature) 
-#if  __has_feature(memory_sanitizer)
-#define MSAN_INIT_VAR(v, n) for (size_t ii = 0; ii < (size_t)n; ++ii) v[ii] = 0.;
+#if defined(__has_feature)
+#if __has_feature(memory_sanitizer)
+#define MSAN_INIT_VAR(v, n) \
+  for (size_t ii = 0; ii < (size_t)n; ++ii) v[ii] = 0.;
 
 #else
 
@@ -49,8 +49,8 @@
  * \param dest destination
  * \param inc_src increment on the destination
  */
-static inline void cblas_dcopy_msan(int n, double* src, int inc_src, double* dest, int inc_dest)
-{
+static inline void cblas_dcopy_msan(int n, double* src, int inc_src, double* dest,
+                                    int inc_dest) {
   MSAN_INIT_VAR(dest, n);
   cblas_dcopy(n, src, inc_src, dest, inc_dest);
 }

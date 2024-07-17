@@ -14,8 +14,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
-#include <stdlib.h>                        // for free, malloc, calloc
+ */
+#include <stdlib.h>  // for free, malloc, calloc
+
 #include "LCP_Solvers.h"                   // for lcp_qp, linearComplementar...
 #include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
 #include "NumericsFwd.h"                   // for SolverOptions, LinearCompl...
@@ -28,8 +29,8 @@
 #ifndef HAS_FORTRAN
 #include "numerics_verbose.h"
 #endif
-void lcp_qp(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
-{
+void lcp_qp(LinearComplementarityProblem *problem, double *z, double *w, int *info,
+            SolverOptions *options) {
   /* size of the LCP */
   int n = problem->size;
 
@@ -37,7 +38,6 @@ void lcp_qp(LinearComplementarityProblem* problem, double *z, double *w, int *in
 
   int nmax;
   int m, me, mmax, mnn;
-
 
   double *Q, *A;
   double *p, *b, *xl, *xu;
@@ -48,7 +48,7 @@ void lcp_qp(LinearComplementarityProblem* problem, double *z, double *w, int *in
   int *iwar;
   double *war;
 
-  double tol = options->dparam[SICONOS_DPARAM_TOL]/10.0;
+  double tol = options->dparam[SICONOS_DPARAM_TOL] / 10.0;
 
   /*/ m :        total number of constraints.*/
   m = 0;
@@ -62,34 +62,33 @@ void lcp_qp(LinearComplementarityProblem* problem, double *z, double *w, int *in
   /*/mnn :      must be equal to m + n + n. */
   mnn = m + n + n;
 
-  for(i = 0; i < n; i++)
-  {
+  for (i = 0; i < n; i++) {
     z[i] = 0.0;
     w[i] = 0.0;
   }
 
-  /*/ Creation of objective function matrix Q and the the constant vector of the objective function p
+  /*/ Creation of objective function matrix Q and the the constant vector of the objective
+  function p
 
   // Q= M;*/
-  double * vec = problem->M->matrix0;
+  double *vec = problem->M->matrix0;
   Q = (double *)malloc(nmax * nmax * sizeof(double));
-  for(j = 0; j < n; j++)
-  {
-    for(i = 0; i < n; i++) Q[j * nmax + i] = vec[j * n + i];
+  for (j = 0; j < n; j++) {
+    for (i = 0; i < n; i++) Q[j * nmax + i] = vec[j * n + i];
   }
 
   p = (double *)malloc(nmax * sizeof(double));
-  for(i = 0; i < n; i++)
-    p[i] = problem->q[i] ;
+  for (i = 0; i < n; i++) p[i] = problem->q[i];
 
-  /* / Creation of the data matrix of the linear constraints, A and  the constant data of the linear constraints b*/
+  /* / Creation of the data matrix of the linear constraints, A and  the constant data of the
+   * linear constraints b*/
   A = (double *)calloc(mmax * nmax, sizeof(double));
 
   b = (double *)calloc(mmax, sizeof(double));
 
   /* Creation of the the lower and upper bounds for the variables.*/
   xu = (double *)malloc(n * sizeof(double));
-  for(i = 0; i < n; i++) xu[i] = 1e32 ;
+  for (i = 0; i < n; i++) xu[i] = 1e32;
   xl = (double *)calloc(n, sizeof(double));
 
   /*  on return, lambda contains the lagrange multipliers.*/
@@ -106,25 +105,25 @@ void lcp_qp(LinearComplementarityProblem* problem, double *z, double *w, int *in
   lwar = 3 * nmax * nmax / 2 + 10 * nmax + 2 * mmax;
   war = (double *)malloc(lwar * sizeof(double));
   /* / integer working array. */
-  liwar = n ;
+  liwar = n;
   iwar = (int *)malloc(liwar * sizeof(int));
   iwar[0] = 1;
 
 #ifdef HAVE_QL0001
 #ifdef HAS_FORTRAN
-  ql0001_(&m, &me, &mmax, &n, &nmax, &mnn, Q, p, A, b, xl, xu,
-          z, lambda, &iout, info, &un, war, &lwar, iwar, &liwar, &tol);
+  ql0001_(&m, &me, &mmax, &n, &nmax, &mnn, Q, p, A, b, xl, xu, z, lambda, &iout, info, &un,
+          war, &lwar, iwar, &liwar, &tol);
 #else
-  numerics_error("lcp_qp","Fortran language is not enabled in siconos numerics");
+  numerics_error("lcp_qp", "Fortran language is not enabled in siconos numerics");
 #endif
 #else
-  numerics_error("lcp_qp","ql0001 is not available in siconos numerics");
+  numerics_error("lcp_qp", "ql0001 is not available in siconos numerics");
 #endif
   /* /    printf("tol = %10.4e\n",*tol);
   //for (i=0;i<mnn;i++) printf("lambda[%i] = %g\n",i,lambda[i]);
 
   // getting the multiplier due to the lower bounds*/
-  for(i = 0; i < n; i++) w[i] = lambda[m + i] ;
+  for (i = 0; i < n; i++) w[i] = lambda[m + i];
 
   /*/ memory freeing*/
   free(A);
@@ -136,5 +135,4 @@ void lcp_qp(LinearComplementarityProblem* problem, double *z, double *w, int *in
   free(war);
   free(iwar);
   free(Q);
-
 }

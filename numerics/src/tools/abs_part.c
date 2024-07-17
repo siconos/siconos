@@ -14,33 +14,23 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #include "NSSTools.h"  // for abs_part
 
 void abs_part(double x[], double sol[], int n)
 
 {
-  int      i;
-  double   eps;
-
+  int i;
+  double eps;
 
   eps = 1.e-12;
 
-
-  for(i = 0 ; i < n ; i++)
-  {
-
-
-    if(x[i] >= eps)
-    {
+  for (i = 0; i < n; i++) {
+    if (x[i] >= eps) {
       sol[i] = x[i];
+    } else {
+      sol[i] = -x[i];
     }
-    else
-    {
-      sol[i] =  -x[i];
-    }
-
   }
-
 }

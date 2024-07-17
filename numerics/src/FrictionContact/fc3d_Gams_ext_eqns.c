@@ -12,23 +12,25 @@
 
 #if 0
 
-#include <math.h>
 #include <assert.h>
-
-#include "geheader.h"
-
-#include "SiconosBlas.h"
+#include <math.h>
 
 #include "GlobalFrictionContactProblem.h"
+#include "SiconosBlas.h"
+#include "geheader.h"
 #include "gfc3d_Gams.h"
-
 
 #define BOGUS_EXTEQ 2
 
 static int nchars;
 static int mmode;
 /* use the do-while loop so the macro acts like one statement */
-#define MSGCB(mode,buf) do { mmode = mode; nchars=strlen(buf); msgcb(&mmode,&nchars,buf,nchars);} while (0)
+#define MSGCB(mode, buf)                 \
+  do {                                   \
+    mmode = mode;                        \
+    nchars = strlen(buf);                \
+    msgcb(&mmode, &nchars, buf, nchars); \
+  } while (0)
 
 
 /* Goal of this plugin: we want to compute v from the problem data and r */

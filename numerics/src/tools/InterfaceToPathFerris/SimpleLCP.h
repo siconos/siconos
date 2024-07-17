@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file SimpleLCP.h
 
@@ -47,8 +47,9 @@
 #ifndef SIMPLELCP_H
 #define SIMPLELCP_H
 
-#include "SiconosConfig.h"
 #include <stdint.h>
+
+#include "SiconosConfig.h"
 
 #ifdef HAVE_PATHFERRIS
 #include "PATH_SDK/include/Types.h"
@@ -56,35 +57,29 @@
 typedef void MCP_Termination;
 #endif
 
-//const unsigned short int *__ctype_b;
-//const int32_t *__ctype_tolower ;
+// const unsigned short int *__ctype_b;
+// const int32_t *__ctype_tolower ;
 
 /**
 
 
  */
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-extern "C"
-{
+extern "C" {
 #endif
-void SimpleLCP(int variables,
-               int m_nnz, int *m_i, int *m_j, double *m_ij, double *q,
-               double *lb, double *ub,
-               MCP_Termination *status, double *z);
+void SimpleLCP(int variables, int m_nnz, int *m_i, int *m_j, double *m_ij, double *q,
+               double *lb, double *ub, MCP_Termination *status, double *z);
 
-
-
-void printLCP(int variables,
-              int m_nnz, int *m_i, int *m_j, double *m_ij, double *q,
+void printLCP(int variables, int m_nnz, int *m_i, int *m_j, double *m_ij, double *q,
               double *lb, double *ub);
 
 int nbNonNulElems(int n, double *M, double tol);
 void FortranToPathSparse(int n, double *M, double tol, int *m_i, int *m_j, double *m_ij);
-void ABCDtoM(int n , int m, double *A , double *B , double *C , double *D , double *a, double *b, double *M, double *q);
+void ABCDtoM(int n, int m, double *A, double *B, double *C, double *D, double *a, double *b,
+             double *M, double *q);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 
 #endif
-

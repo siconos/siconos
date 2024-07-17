@@ -735,7 +735,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem *restrict problem, double *restrict 
   if (!(NM_is_symmetric(problem->M))) {
     printf("#################### SYMMETRIZATION ####################\n");
     NumericsMatrix *MT = NM_transpose(problem->M);
-    NumericsMatrix * MSym = NM_add(1 / 2., problem->M, 1 / 2., MT);
+    NumericsMatrix *MSym = NM_add(1 / 2., problem->M, 1 / 2., MT);
     NM_free(problem->M);
     problem->M = MSym;
     NM_free(MT);
@@ -841,14 +841,12 @@ void gfc3d_IPM(GlobalFrictionContactProblem *restrict problem, double *restrict 
   cblas_dcopy(nd, data->starting_point->velocity, 1, velocity, 1);
   cblas_dcopy(m, data->starting_point->globalVelocity, 1, globalVelocity, 1);
 
-
   NumericsMatrix *minus_M = NM_create(
-				      M->storageType, M->size0,
-				      M->size1);  // store the matrix -M to build the matrix of the Newton linear system
+      M->storageType, M->size0,
+      M->size1);  // store the matrix -M to build the matrix of the Newton linear system
   /* Create the matrix -M to build the matrix of the reduced linear system */
   NM_copy(M, minus_M);
   NM_scal(-1.0, minus_M);
-
 
   /* COMPUTATION OF A NEW STARTING POINT */
 
@@ -932,8 +930,6 @@ void gfc3d_IPM(GlobalFrictionContactProblem *restrict problem, double *restrict 
   // double * r_p = (double*)calloc(nd,sizeof(double));                          // scaling
   // vector p
 
-
-
   // NumericsMatrix *QpH = NM_create(H->storageType, H->size0, H->size1);        // store the
   // matrix Qp*H
   double *r_rhs = (double *)calloc(m + nd, sizeof(double));
@@ -962,8 +958,6 @@ void gfc3d_IPM(GlobalFrictionContactProblem *restrict problem, double *restrict 
   double LS_norm_p = 0;  // primal feasibility
   double LS_norm_d = 0;  // dual feaqsibility
   double LS_norm_c = 0;  // complementarity
-
-
 
   NumericsMatrix *J = 0;
 
@@ -1268,17 +1262,16 @@ void gfc3d_IPM(GlobalFrictionContactProblem *restrict problem, double *restrict 
         cblas_dscal(m + nd + nd, -1.0, rhs, 1);
 
         cblas_dcopy(m + 2 * nd, rhs, 1, rhs_2, 1);
-	if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] ==
+        if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] ==
             SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_YES) {
-	  double *rhs_save = (double *)calloc(m + 2 * nd, sizeof(double));
+          double *rhs_save = (double *)calloc(m + 2 * nd, sizeof(double));
           cblas_dcopy(m + 2 * nd, rhs, 1, rhs_save, 1);
-          //NM_LU_refine(J, rhs, rhs_save, 1, tol, 10, 0);
-	  double residu;
-	  NM_LU_refine(J, rhs,  tol, 10,  &residu);
+          // NM_LU_refine(J, rhs, rhs_save, 1, tol, 10, 0);
+          double residu;
+          NM_LU_refine(J, rhs, tol, 10, &residu);
           free(rhs_save);
-	}
-	else
-	  NM_LU_solve(J, rhs, 1);
+        } else
+          NM_LU_solve(J, rhs, 1);
 
         cblas_dcopy(m, rhs, 1, d_globalVelocity, 1);
         cblas_dcopy(nd, rhs + m, 1, d_velocity, 1);
@@ -1599,13 +1592,14 @@ void gfc3d_IPM(GlobalFrictionContactProblem *restrict problem, double *restrict 
         /*   cblas_daxpy(m + 2 * nd, 1.0, rhs_tmp, 1, sol, 1); */
         /*   cblas_dcopy(m + 2 * nd, rhs_2, 1, rhs_tmp, 1); */
         /*   NM_gemv(-1.0, J, sol, 1.0, rhs_tmp); */
-        /*   printf("refinement iterations = %i %8.2e < %8.2e\n",itr, cblas_dnrm2(m+2*nd, rhs_tmp, 1), tol); */
-	/*   printf("J size %i %i\n", J->size0, J->size1); */
-	/*   NM_write_in_filename(J, "J_IPM_LU.txt"); */
+        /*   printf("refinement iterations = %i %8.2e < %8.2e\n",itr, cblas_dnrm2(m+2*nd,
+         * rhs_tmp, 1), tol); */
+        /*   printf("J size %i %i\n", J->size0, J->size1); */
+        /*   NM_write_in_filename(J, "J_IPM_LU.txt"); */
         /*   if (cblas_dnrm2(m + 2 * nd, rhs_tmp, 1) <= tol) { */
         /*     break; */
         /*   } */
-	/*   getchar(); */
+        /*   getchar(); */
         /* } */
         /* cblas_dcopy(m, sol, 1, d_globalVelocity, 1); */
         /* cblas_dcopy(nd, sol + m, 1, d_velocity, 1); */
@@ -1613,20 +1607,16 @@ void gfc3d_IPM(GlobalFrictionContactProblem *restrict problem, double *restrict 
 
         /* NM_gemv(1.0, J, sol, -1.0, rhs_2); */
 
-	if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] ==
+        if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] ==
             SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_YES) {
-	  double *rhs_save = (double *)calloc(m + 2 * nd, sizeof(double));
+          double *rhs_save = (double *)calloc(m + 2 * nd, sizeof(double));
           cblas_dcopy(m + 2 * nd, rhs_tmp, 1, rhs_save, 1);
-          //NM_LU_refine(J, rhs, rhs_save, 1, tol, 10, 0);
-	  double residu;
-	  NM_LU_refine(J, rhs_tmp,  tol, 10,  &residu);
+          // NM_LU_refine(J, rhs, rhs_save, 1, tol, 10, 0);
+          double residu;
+          NM_LU_refine(J, rhs_tmp, tol, 10, &residu);
           free(rhs_save);
-	}
-	else
-	  NM_LU_solve(J, rhs_tmp, 1);
-
-
-
+        } else
+          NM_LU_solve(J, rhs_tmp, 1);
 
         cblas_dcopy(m, rhs_tmp, 1, d_globalVelocity, 1);
         cblas_dcopy(nd, rhs_tmp + m, 1, d_velocity, 1);
@@ -1638,7 +1628,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem *restrict problem, double *restrict 
         LS_norm_p = cblas_dnrm2(nd, rhs_2 + m + nd, 1);
 
         free(rhs_tmp);
-        //free(sol);
+        // free(sol);
 
         J = NM_free(J);
 
@@ -1699,7 +1689,6 @@ void gfc3d_IPM(GlobalFrictionContactProblem *restrict problem, double *restrict 
 
         double *rhs_tmp = (double *)calloc(m + 2 * nd, sizeof(double));
         cblas_dcopy(m + 2 * nd, rhs_2, 1, rhs_tmp, 1);
-
 
         if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] ==
             SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_YES) {
@@ -1881,7 +1870,6 @@ void gfc3d_IPM(GlobalFrictionContactProblem *restrict problem, double *restrict 
           NM_LDLT_solve(JR, r_rhs_2, 1);
         }
 
-
         /* NM_LDLT_solve(JR, r_rhs_2, 1); */
 
         cblas_dcopy(m, r_rhs_2, 1, d_globalVelocity, 1);
@@ -1937,7 +1925,6 @@ void gfc3d_IPM(GlobalFrictionContactProblem *restrict problem, double *restrict 
         } else {
           NM_LDLT_solve(JR, sr_rhs_2, 1);
         }
-
 
         /* NM_LDLT_solve(JR, sr_rhs_2, 1); */
 

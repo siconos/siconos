@@ -21,11 +21,11 @@
 /*!\file FrictionContactProblem.h
   Definition of a structure to handle friction-contact (2D or 3D) problems.
 */
-#include "NumericsFwd.h"    // for FrictionContactProblem, NumericsMatrix
-#include "NumericsMatrix.h" // for RawNumericsMatrix
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include <stdio.h>  // for FILE
 
-#include <stdio.h> // for FILE
+#include "NumericsFwd.h"     // for FrictionContactProblem, NumericsMatrix
+#include "NumericsMatrix.h"  // for RawNumericsMatrix
+#include "SiconosConfig.h"   // for BUILD_AS_CPP // IWYU pragma: keep
 
 /**
     The structure that defines a (reduced or dual) Friction-Contact (3D or 2D)
@@ -74,8 +74,7 @@ FrictionContactProblem *frictionContactProblem_new(void);
  *  \return a pointer to a FrictionContactProblem structure
  */
 FrictionContactProblem *frictionContactProblem_new_with_data(int dim, int nc,
-                                                             NumericsMatrix *M,
-                                                             double *q,
+                                                             NumericsMatrix *M, double *q,
                                                              double *mu);
 
 /** free a FrictionContactProblem
@@ -104,8 +103,7 @@ int frictionContact_printInFile(FrictionContactProblem *problem, FILE *file);
  *  \param filename the dest file
  *  \return 0 if successfull
  */
-int frictionContact_printInFilename(FrictionContactProblem *problem,
-                                    char *filename);
+int frictionContact_printInFilename(FrictionContactProblem *problem, char *filename);
 
 /** read a FrictionContactProblem from a file descriptor
  *
@@ -122,13 +120,11 @@ FrictionContactProblem *frictionContact_newFromFile(FILE *file);
  */
 FrictionContactProblem *frictionContact_new_from_filename(const char *filename);
 
-void createSplittedFrictionContactProblem(
-    FrictionContactProblem *problem,
-    SplittedFrictionContactProblem *splitted_problem);
+void createSplittedFrictionContactProblem(FrictionContactProblem *problem,
+                                          SplittedFrictionContactProblem *splitted_problem);
 
 void frictionContactProblem_compute_statistics(FrictionContactProblem *problem,
-                                               double *reaction,
-                                               double *velocity, double tol,
+                                               double *reaction, double *velocity, double tol,
                                                int do_print);
 
 /**
@@ -151,8 +147,7 @@ FrictionContactProblem *frictionContact_copy(FrictionContactProblem *problem);
     \param alpha rescaling factor
     \param gamma rescaling factor
 */
-void frictionContact_rescaling(FrictionContactProblem *problem, double alpha,
-                               double gamma);
+void frictionContact_rescaling(FrictionContactProblem *problem, double alpha, double gamma);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

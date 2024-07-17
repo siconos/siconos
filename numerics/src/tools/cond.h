@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #ifndef Cond_H
 #define Cond_H
@@ -24,17 +24,15 @@
  */
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
-  /** Compute the conditioning of dense matrix with column major storage
-  \param A the matrix to be read
-  \param n the number of rows of A
-  \param m the number of columns of A
-  \return the condition number
-  */
-  double cond(double * A, int n, int m);
-
+/** Compute the conditioning of dense matrix with column major storage
+\param A the matrix to be read
+\param n the number of rows of A
+\param m the number of columns of A
+\return the condition number
+*/
+double cond(double* A, int n, int m);
 
 #ifdef __cplusplus
 }

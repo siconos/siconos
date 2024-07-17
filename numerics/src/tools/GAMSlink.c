@@ -2,7 +2,7 @@
 
 #define _XOPEN_SOURCE 700
 
-#if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
+#if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
 #include <unistd.h>
 #endif
 
@@ -14,8 +14,7 @@
 #elif _MSC_VER
 #define strdup _strdup
 #else
-static inline char* strdup(const char* src)
-{
+static inline char* strdup(const char* src) {
   size_t len = strlen(src) + 1;
   char* dest = (char*)malloc(len * sizeof(char));
   strncpy(dest, src, len);
@@ -23,24 +22,21 @@ static inline char* strdup(const char* src)
 }
 #endif
 
-#include "SiconosConfig.h" // for HAVE_GAMS_C_API
 #include <math.h>
 
+#include "SiconosConfig.h"  // for HAVE_GAMS_C_API
+
 #ifdef HAVE_GAMS_C_API
-#include <stdio.h>
 #include <assert.h>
-#include <stdbool.h>
 #include <float.h>
+#include <stdbool.h>
+#include <stdio.h>
 
 #include "CSparseMatrix_internal.h"
-#include "NumericsMatrix.h"
 #include "FrictionContactProblem.h"
-#include "SolverOptions.h"
-
 #include "GAMSlink.h"
-
-
-
+#include "NumericsMatrix.h"
+#include "SolverOptions.h"
 #include "sanitizer.h"
 
 #define DEBUG_NOCOLOR
@@ -58,51 +54,40 @@ static inline char* strdup(const char* src)
 
 //#define SMALL_APPROX
 
+#include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <errno.h>
 
-static int cp(const char *to, const char *from)
-{
+static int cp(const char* to, const char* from) {
   int fd_to, fd_from;
   char buf[4096];
   ssize_t nread;
   int saved_errno;
 
   fd_from = open(from, O_RDONLY);
-  if(fd_from < 0)
-    return -1;
+  if (fd_from < 0) return -1;
 
   fd_to = open(to, O_WRONLY | O_CREAT | O_EXCL, 0666);
-  if(fd_to < 0)
-    goto out_error;
+  if (fd_to < 0) goto out_error;
 
-  while(nread = read(fd_from, buf, sizeof buf), nread > 0)
-  {
-    char *out_ptr = buf;
+  while (nread = read(fd_from, buf, sizeof buf), nread > 0) {
+    char* out_ptr = buf;
     ssize_t nwritten;
 
-    do
-    {
+    do {
       nwritten = write(fd_to, out_ptr, nread);
 
-      if(nwritten >= 0)
-      {
+      if (nwritten >= 0) {
         nread -= nwritten;
         out_ptr += nwritten;
-      }
-      else if(errno != EINTR)
-      {
+      } else if (errno != EINTR) {
         goto out_error;
       }
-    }
-    while(nread > 0);
+    } while (nread > 0);
   }
 
-  if(nread == 0)
-  {
-    if(close(fd_to) < 0)
-    {
+  if (nread == 0) {
+    if (close(fd_to) < 0) {
       fd_to = -1;
       goto out_error;
     }
@@ -116,38 +101,32 @@ out_error:
   saved_errno = errno;
 
   close(fd_from);
-  if(fd_to >= 0)
-    close(fd_to);
+  if (fd_to >= 0) close(fd_to);
 
   errno = saved_errno;
   return -1;
 }
 
-static void setDashedOptions(const char* optName, const char* optValue, const char* paramFileName)
-{
+static void setDashedOptions(const char* optName, const char* optValue,
+                             const char* paramFileName) {
   FILE* f = fopen(paramFileName, "a");
-  if(f)
-  {
+  if (f) {
     fprintf(f, "%s %s\n", optName, paramFileName);
     fclose(f);
-  }
-  else
-  {
-    printf("Failed to create option %s with value %s in %s\n", optName, optValue, paramFileName);
+  } else {
+    printf("Failed to create option %s with value %s in %s\n", optName, optValue,
+           paramFileName);
   }
 }
 
-void filename_datafiles(const int iter, const int solverId, const char* base_name, unsigned len, char* template_name, char* log_filename)
-{
+void filename_datafiles(const int iter, const int solverId, const char* base_name,
+                        unsigned len, char* template_name, char* log_filename) {
   char iterStr[40];
   snprintf(iterStr, sizeof(iterStr), "-i%d-%s", iter, solver_options_id_to_name(solverId));
-  if(base_name)
-  {
+  if (base_name) {
     strncpy(template_name, base_name, len);
     strncpy(log_filename, base_name, len);
-  }
-  else
-  {
+  } else {
     strncpy(template_name, "fc3d_avi-condensed", len);
     strncpy(log_filename, "fc3d_avi-condense-log", len);
   }
@@ -157,68 +136,57 @@ void filename_datafiles(const int iter, const int solverId, const char* base_nam
   strncat(log_filename, ".log", len - strlen(log_filename) - 1);
 }
 
-
-
-int NM_to_GDX(idxHandle_t Xptr, const char* name, const char* descr, NumericsMatrix* M)
-{
+int NM_to_GDX(idxHandle_t Xptr, const char* name, const char* descr, NumericsMatrix* M) {
   char msg[GMS_SSSIZE];
 
   int dims[2];
   dims[0] = M->size0;
   dims[1] = M->size1;
-  if(idxDataWriteStart(Xptr, name, descr, 2, dims, msg, GMS_SSSIZE) == 0)
+  if (idxDataWriteStart(Xptr, name, descr, 2, dims, msg, GMS_SSSIZE) == 0)
     idxerrorR(idxGetLastError(Xptr), "idxDataWriteStart");
 
-  switch(M->storageType)
-  {
-  case NM_DENSE:
-  {
-    assert(M->matrix0);
-    idxDataWriteDenseColMajor(Xptr, 2, M->matrix0);
-    break;
-  }
-  case NM_SPARSE_BLOCK: /* Perform a conversion to sparse storage */
-  case NM_SPARSE:
-  {
-    CSparseMatrix* cs = NM_csc(M);
-    assert(cs->p);
-    assert(cs->i);
-    assert(cs->x);
-    int* p_int = (int*)malloc((cs->n+1) * sizeof(int));
-    int* i_int = (int*)malloc(cs->nzmax * sizeof(int));
-    assert(cs->n == M->size1);
-    assert(cs->m == M->size0);
-    for(unsigned i = 0; i < cs->n+1; ++i)
-    {
-      p_int[i] = (int) cs->p[i];
+  switch (M->storageType) {
+    case NM_DENSE: {
+      assert(M->matrix0);
+      idxDataWriteDenseColMajor(Xptr, 2, M->matrix0);
+      break;
     }
+    case NM_SPARSE_BLOCK: /* Perform a conversion to sparse storage */
+    case NM_SPARSE: {
+      CSparseMatrix* cs = NM_csc(M);
+      assert(cs->p);
+      assert(cs->i);
+      assert(cs->x);
+      int* p_int = (int*)malloc((cs->n + 1) * sizeof(int));
+      int* i_int = (int*)malloc(cs->nzmax * sizeof(int));
+      assert(cs->n == M->size1);
+      assert(cs->m == M->size0);
+      for (unsigned i = 0; i < cs->n + 1; ++i) {
+        p_int[i] = (int)cs->p[i];
+      }
 
-    for(unsigned i = 0; i < cs->nzmax; ++i)
-    {
-      i_int[i] = (int) cs->i[i];
+      for (unsigned i = 0; i < cs->nzmax; ++i) {
+        i_int[i] = (int)cs->i[i];
+      }
+
+      idxDataWriteSparseColMajor(Xptr, p_int, i_int, cs->x);
+
+      free(p_int);
+      free(i_int);
+      break;
     }
-
-    idxDataWriteSparseColMajor(Xptr, p_int, i_int, cs->x);
-
-    free(p_int);
-    free(i_int);
-    break;
-  }
-  default:
-  {
-    printf("NM_to_GDX :: unsupported matrix storage\n");
-    exit(EXIT_FAILURE);
-  }
+    default: {
+      printf("NM_to_GDX :: unsupported matrix storage\n");
+      exit(EXIT_FAILURE);
+    }
   }
 
-
-  if(0==idxDataWriteDone(Xptr))
-    idxerrorR(idxGetLastError(Xptr), "idxDataWriteDone");
+  if (0 == idxDataWriteDone(Xptr)) idxerrorR(idxGetLastError(Xptr), "idxDataWriteDone");
 
   return 0;
 }
-int SN_gams_solve(unsigned iter, optHandle_t Optr, char* sysdir, char* model, const char* base_name, SolverOptions* options, SN_GAMS_gdx* gdx_data)
-{
+int SN_gams_solve(unsigned iter, optHandle_t Optr, char* sysdir, char* model,
+                  const char* base_name, SolverOptions* options, SN_GAMS_gdx* gdx_data) {
   assert(gdx_data);
   SN_GAMS_NM_gdx* mat_for_gdx = gdx_data->mat_for_gdx;
   SN_GAMS_NV_gdx* vec_for_gdx = gdx_data->vec_for_gdx;
@@ -233,22 +201,19 @@ int SN_gams_solve(unsigned iter, optHandle_t Optr, char* sysdir, char* model, co
   /* Create objects */
 
   DEBUG_PRINT("FC3D_AVI_GAMS :: creating gamsx object\n");
-  if(! gamsxCreateD(&Gptr, sysdir, msg, sizeof(msg)))
-  {
+  if (!gamsxCreateD(&Gptr, sysdir, msg, sizeof(msg))) {
     fprintf(stderr, "Could not create gamsx object: %s\n", msg);
     return 1;
   }
 
   DEBUG_PRINT("FC3D_AVI_GAMS :: creating gdx object\n");
-  if(! idxCreateD(&Xptr, sysdir, msg, sizeof(msg)))
-  {
+  if (!idxCreateD(&Xptr, sysdir, msg, sizeof(msg))) {
     fprintf(stderr, "Could not create gdx object: %s\n", msg);
     return 1;
   }
 
   DEBUG_PRINT("FC3D_AVI_GAMS :: creating gmo object\n");
-  if(! gmoCreateD(&gmoPtr, sysdir, msg, sizeof(msg)))
-  {
+  if (!gmoCreateD(&gmoPtr, sysdir, msg, sizeof(msg))) {
     fprintf(stderr, "Could not create gmo object: %s\n", msg);
     return 1;
   }
@@ -256,7 +221,7 @@ int SN_gams_solve(unsigned iter, optHandle_t Optr, char* sysdir, char* model, co
   /* create input and output gdx names*/
   char gdxFileName[GMS_SSSIZE];
   char solFileName[GMS_SSSIZE];
-//  char paramFileName[GMS_SSSIZE];
+  //  char paramFileName[GMS_SSSIZE];
 
   strncpy(gdxFileName, base_name, sizeof(gdxFileName));
   strncpy(solFileName, base_name, sizeof(solFileName));
@@ -264,27 +229,24 @@ int SN_gams_solve(unsigned iter, optHandle_t Optr, char* sysdir, char* model, co
 
   strncat(gdxFileName, ".gdx", sizeof(gdxFileName) - strlen(gdxFileName) - 1);
   strncat(solFileName, ".gdx", sizeof(solFileName) - strlen(solFileName) - 1);
-//  strncat(paramFileName, ".txt", sizeof(paramFileName));
+  //  strncat(paramFileName, ".txt", sizeof(paramFileName));
 
   /* XXX ParmFile is not a string option */
-//  optSetStrStr(Optr, "ParmFile", paramFileName);
-//  setDashedOptions("filename", gdxFileName, paramFileName);
+  //  optSetStrStr(Optr, "ParmFile", paramFileName);
+  //  setDashedOptions("filename", gdxFileName, paramFileName);
   optSetStrStr(Optr, "User1", gdxFileName);
   optSetStrStr(Optr, "User2", solFileName);
 
   idxOpenWrite(Xptr, gdxFileName, "Siconos/Numerics NM_to_GDX", &status);
-  if(status)
-    idxerrorR(status, "idxOpenWrite");
+  if (status) idxerrorR(status, "idxOpenWrite");
   DEBUG_PRINT("FC3D_AVI_GAMS :: fc3d_avi-condensed.gdx opened\n");
 
-  while(mat_for_gdx)
-  {
+  while (mat_for_gdx) {
     char mat_descr[30];
     assert(mat_for_gdx->name);
     assert(mat_for_gdx->mat);
     snprintf(mat_descr, sizeof(mat_descr), "%s matrix", mat_for_gdx->name);
-    if((status=NM_to_GDX(Xptr, mat_for_gdx->name, mat_descr, mat_for_gdx->mat)))
-    {
+    if ((status = NM_to_GDX(Xptr, mat_for_gdx->name, mat_descr, mat_for_gdx->mat))) {
       fprintf(stderr, "Model data for matrix %s not written\n", mat_for_gdx->name);
       infos[1] = (double)-ETERMINATE;
       goto fail;
@@ -293,58 +255,48 @@ int SN_gams_solve(unsigned iter, optHandle_t Optr, char* sysdir, char* model, co
     mat_for_gdx = mat_for_gdx->next;
   }
 
-  while(vec_for_gdx)
-  {
+  while (vec_for_gdx) {
     char vec_descr[30];
     assert(vec_for_gdx->name);
     assert(vec_for_gdx->vec);
     assert(vec_for_gdx->size > 0);
     snprintf(vec_descr, sizeof(vec_descr), "%s vector", vec_for_gdx->name);
 
-    if((status=NV_to_GDX(Xptr, vec_for_gdx->name, vec_descr, vec_for_gdx->vec, vec_for_gdx->size)))
-    {
+    if ((status = NV_to_GDX(Xptr, vec_for_gdx->name, vec_descr, vec_for_gdx->vec,
+                            vec_for_gdx->size))) {
       fprintf(stderr, "Model data for vector %s not written\n", vec_for_gdx->name);
       infos[1] = (double)-ETERMINATE;
       goto fail;
     }
     DEBUG_PRINTF("FC3D_AVI_GAMS :: %s vector written\n", vec_for_gdx->name);
     vec_for_gdx = vec_for_gdx->next;
-
   }
 
-  if(idxClose(Xptr))
-    idxerrorR(idxGetLastError(Xptr), "idxClose");
+  if (idxClose(Xptr)) idxerrorR(idxGetLastError(Xptr), "idxClose");
 
+  //   cp(gdxFileName, "fc3d_avi-condensed.gdx");
 
-//   cp(gdxFileName, "fc3d_avi-condensed.gdx");
-
-
-  if((status=CallGams(Gptr, Optr, sysdir, model)))
-  {
+  if ((status = CallGams(Gptr, Optr, sysdir, model))) {
     fprintf(stderr, "Call to GAMS failed\n");
     infos[1] = (double)-ETERMINATE;
     goto fail;
   }
 
-
   /************************************************
    * Read back solution
    ************************************************/
   idxOpenRead(Xptr, solFileName, &status);
-  if(status)
-    idxerrorR(status, "idxOpenRead");
+  if (status) idxerrorR(status, "idxOpenRead");
 
-  while(vec_from_gdx)
-  {
+  while (vec_from_gdx) {
     assert(vec_from_gdx->name);
     assert(vec_from_gdx->vec);
     assert(vec_from_gdx->size > 0);
     double* data = vec_from_gdx->vec;
     unsigned size = vec_from_gdx->size;
     /* GAMS does not set a value to 0 ... --xhub */
-    memset(data, 0, size*sizeof(double));
-    if((status=GDX_to_NV(Xptr, vec_from_gdx->name, data, size)))
-    {
+    memset(data, 0, size * sizeof(double));
+    if ((status = GDX_to_NV(Xptr, vec_from_gdx->name, data, size))) {
       fprintf(stderr, "Model data %s could not be read\n", vec_from_gdx->name);
       infos[1] = (double)-ETERMINATE;
       goto fail;
@@ -352,15 +304,13 @@ int SN_gams_solve(unsigned iter, optHandle_t Optr, char* sysdir, char* model, co
     vec_from_gdx = vec_from_gdx->next;
   }
 
-  if((status=GDX_to_NV(Xptr, "infos", infos, sizeof(infos)/sizeof(double))))
-  {
+  if ((status = GDX_to_NV(Xptr, "infos", infos, sizeof(infos) / sizeof(double)))) {
     fprintf(stderr, "infos could not be read\n");
     infos[1] = (double)-ETERMINATE;
     goto fail;
   }
 
-  if(idxClose(Xptr))
-    idxerrorR(idxGetLastError(Xptr), "idxClose");
+  if (idxClose(Xptr)) idxerrorR(idxGetLastError(Xptr), "idxClose");
 
   options->iparam[TOTAL_ITER] += (int)infos[2];
   options->iparam[LAST_MODEL_STATUS] = (int)infos[0];
@@ -379,62 +329,53 @@ fail:
   return (int)infos[1];
 }
 
-#define GAMS_ADD_OPT(GAMSP_OPT_L, GAMSP_OPT_T) \
-GAMSP_OPT_T* next_opt = GAMSP_OPT_L; \
-GAMSP_OPT_T* new_opt; \
-if (next_opt) \
-{ \
-  while (next_opt->next_opt) \
-  { \
-    next_opt = next_opt->next_opt; \
-  } \
-  next_opt->next_opt = (GAMSP_OPT_T*)malloc(sizeof(GAMSP_OPT_T)); \
-  new_opt = next_opt->next_opt; \
-} \
-else \
-{ \
-  GAMSP_OPT_L = (GAMSP_OPT_T*)malloc(sizeof(GAMSP_OPT_T)); \
-  new_opt = GAMSP_OPT_L; \
-} \
-new_opt->name = lname; \
-new_opt->value = value; \
-new_opt->type = type; \
-new_opt->next_opt = NULL; \
+#define GAMS_ADD_OPT(GAMSP_OPT_L, GAMSP_OPT_T)                      \
+  GAMSP_OPT_T* next_opt = GAMSP_OPT_L;                              \
+  GAMSP_OPT_T* new_opt;                                             \
+  if (next_opt) {                                                   \
+    while (next_opt->next_opt) {                                    \
+      next_opt = next_opt->next_opt;                                \
+    }                                                               \
+    next_opt->next_opt = (GAMSP_OPT_T*)malloc(sizeof(GAMSP_OPT_T)); \
+    new_opt = next_opt->next_opt;                                   \
+  } else {                                                          \
+    GAMSP_OPT_L = (GAMSP_OPT_T*)malloc(sizeof(GAMSP_OPT_T));        \
+    new_opt = GAMSP_OPT_L;                                          \
+  }                                                                 \
+  new_opt->name = lname;                                            \
+  new_opt->value = value;                                           \
+  new_opt->type = type;                                             \
+  new_opt->next_opt = NULL;
 
 #define GAMS_ADD_PREP(GP, name) \
-assert(GP); \
-assert(name); \
-char* lname = strdup(name);
+  assert(GP);                   \
+  assert(name);                 \
+  char* lname = strdup(name);
 
-void add_GAMS_opt_str(SN_GAMSparams* GP, char* name, char* value_orig, unsigned type)
-{
+void add_GAMS_opt_str(SN_GAMSparams* GP, char* name, char* value_orig, unsigned type) {
   GAMS_ADD_PREP(GP, name);
   assert(value_orig);
   char* value = strdup(value_orig);
   GAMS_ADD_OPT(GP->opt_str_list, GAMS_opt_str);
 }
 
-void add_GAMS_opt_bool(SN_GAMSparams* GP, char* name, bool value, unsigned type)
-{
+void add_GAMS_opt_bool(SN_GAMSparams* GP, char* name, bool value, unsigned type) {
   GAMS_ADD_PREP(GP, name);
   GAMS_ADD_OPT(GP->opt_bool_list, GAMS_opt_bool);
 }
 
-void add_GAMS_opt_int(SN_GAMSparams* GP, char* name, int value, unsigned type)
-{
+void add_GAMS_opt_int(SN_GAMSparams* GP, char* name, int value, unsigned type) {
   GAMS_ADD_PREP(GP, name);
   GAMS_ADD_OPT(GP->opt_int_list, GAMS_opt_int);
 }
 
-void add_GAMS_opt_double(SN_GAMSparams* GP, char* name, double value, unsigned type)
-{
+void add_GAMS_opt_double(SN_GAMSparams* GP, char* name, double value, unsigned type) {
   GAMS_ADD_PREP(GP, name);
   GAMS_ADD_OPT(GP->opt_double_list, GAMS_opt_double);
 }
 
-SN_GAMSparams* createGAMSparams(char* model_dir, char* gams_dir)
-{
-  SN_GAMSparams* GP = (SN_GAMSparams*) malloc(sizeof(SN_GAMSparams));
+SN_GAMSparams* createGAMSparams(char* model_dir, char* gams_dir) {
+  SN_GAMSparams* GP = (SN_GAMSparams*)malloc(sizeof(SN_GAMSparams));
 
   GP->model_dir = strdup(model_dir);
   GP->gams_dir = strdup(gams_dir);
@@ -450,25 +391,20 @@ SN_GAMSparams* createGAMSparams(char* model_dir, char* gams_dir)
   return GP;
 }
 
-void deleteGAMSparams(SN_GAMSparams* GP)
-{
-  if(GP->model_dir)
-  {
+void deleteGAMSparams(SN_GAMSparams* GP) {
+  if (GP->model_dir) {
     free(GP->model_dir);
     GP->model_dir = NULL;
   }
 
-  if(GP->gams_dir)
-  {
+  if (GP->gams_dir) {
     free(GP->gams_dir);
     GP->gams_dir = NULL;
   }
 
-  if(GP->opt_str_list)
-  {
+  if (GP->opt_str_list) {
     GAMS_opt_str* next_opt = GP->opt_str_list;
-    do
-    {
+    do {
       GAMS_opt_str* str_opt = next_opt;
       next_opt = str_opt->next_opt;
       assert(str_opt->name);
@@ -479,53 +415,43 @@ void deleteGAMSparams(SN_GAMSparams* GP)
       str_opt->value = NULL;
       str_opt->next_opt = NULL;
       free(str_opt);
-    }
-    while(next_opt);
+    } while (next_opt);
     GP->opt_str_list = NULL;
   }
-  if(GP->opt_bool_list)
-  {
+  if (GP->opt_bool_list) {
     GAMS_opt_bool* next_opt = GP->opt_bool_list;
-    do
-    {
+    do {
       GAMS_opt_bool* bool_opt = next_opt;
       next_opt = bool_opt->next_opt;
       bool_opt->name = NULL;
       bool_opt->value = false;
       bool_opt->next_opt = NULL;
       free(bool_opt);
-    }
-    while(next_opt);
+    } while (next_opt);
     GP->opt_bool_list = NULL;
   }
-  if(GP->opt_int_list)
-  {
+  if (GP->opt_int_list) {
     GAMS_opt_int* next_opt = GP->opt_int_list;
-    do
-    {
+    do {
       GAMS_opt_int* int_opt = next_opt;
       next_opt = int_opt->next_opt;
       int_opt->name = NULL;
       int_opt->value = 0;
       int_opt->next_opt = NULL;
       free(int_opt);
-    }
-    while(next_opt);
+    } while (next_opt);
     GP->opt_int_list = NULL;
   }
-  if(GP->opt_double_list)
-  {
+  if (GP->opt_double_list) {
     GAMS_opt_double* next_opt = GP->opt_double_list;
-    do
-    {
+    do {
       GAMS_opt_double* double_opt = next_opt;
       next_opt = double_opt->next_opt;
       double_opt->name = NULL;
       double_opt->value = 0.;
       double_opt->next_opt = NULL;
       free(double_opt);
-    }
-    while(next_opt);
+    } while (next_opt);
     GP->opt_double_list = NULL;
   }
   free(GP);
@@ -558,4 +484,3 @@ static void FC3D_gams_generate_first_constraints(NumericsMatrix* Akmat, double* 
 }
 */
 #endif
-

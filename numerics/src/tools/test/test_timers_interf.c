@@ -1,31 +1,36 @@
 
 /* to be compared with :
-   valgrind --tool=callgrind --dump-instr=yes --dump-line=yes --collect-jumps=yes  --simulate-cache=yes */
+   valgrind --tool=callgrind --dump-instr=yes --dump-line=yes --collect-jumps=yes
+   --simulate-cache=yes */
 
-#include "SiconosConfig.h" // for WITH_TIMERS // IWYU pragma: keep
+#include "SiconosConfig.h"  // for WITH_TIMERS // IWYU pragma: keep
 
 #ifdef WITH_TIMERS
 #define TIMER_FFTW_CYCLE
 #endif
 
-#include <math.h>           // for pow
-#include <stdlib.h>         // for free, malloc, exit
+#include <math.h>    // for pow
+#include <stdlib.h>  // for free, malloc, exit
+
 #include "timers_interf.h"  // for DECL_TIMER, PRINT_ELAPSED, START_TIMER
 
 #define SIZE 1000000
 
-#define DO(X)                                               \
-  do {for (unsigned int i=0;i<SIZE;++i) {X;};} while(0)
+#define DO(X)                                 \
+  do {                                        \
+    for (unsigned int i = 0; i < SIZE; ++i) { \
+      X;                                      \
+    };                                        \
+  } while (0)
 
-int main()
-{
+int main() {
   double *a;
   double *b;
   double *c;
 
-  a = (double *) malloc(SIZE * sizeof(double));
-  b = (double *) malloc(SIZE * sizeof(double));
-  c = (double *) malloc(SIZE * sizeof(double));
+  a = (double *)malloc(SIZE * sizeof(double));
+  b = (double *)malloc(SIZE * sizeof(double));
+  c = (double *)malloc(SIZE * sizeof(double));
 
   DECL_TIMER(T0);
   DECL_TIMER(T1);
@@ -88,4 +93,3 @@ int main()
   free(c);
   exit(0);
 }
-

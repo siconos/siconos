@@ -14,26 +14,25 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #ifndef MCP_PROBLEM_C
 #define MCP_PROBLEM_C
 #include "MixedComplementarityProblem.h"
-#include <stdio.h>           // for NULL
-#include <stdlib.h>          // for free, malloc
+
+#include <stdio.h>   // for NULL
+#include <stdlib.h>  // for free, malloc
+
 #include "NumericsMatrix.h"  // for NM_clear
 
-void mixedComplementarityProblem_old_free(MixedComplementarityProblem_old* problem)
-{
-//  if (problem->Fmcp) free(problem->Fmcp);
-//  if (problem->nablaFmcp) free(problem->nablaFmcp);
+void mixedComplementarityProblem_old_free(MixedComplementarityProblem_old* problem) {
+  //  if (problem->Fmcp) free(problem->Fmcp);
+  //  if (problem->nablaFmcp) free(problem->nablaFmcp);
   free(problem);
 }
 
-void mixedComplementarityProblem_free(MixedComplementarityProblem* mcp)
-{
-  if(mcp->nabla_Fmcp)
-  {
+void mixedComplementarityProblem_free(MixedComplementarityProblem* mcp) {
+  if (mcp->nabla_Fmcp) {
     NM_clear(mcp->nabla_Fmcp);
     free(mcp->nabla_Fmcp);
     mcp->nabla_Fmcp = NULL;
@@ -42,9 +41,9 @@ void mixedComplementarityProblem_free(MixedComplementarityProblem* mcp)
   free(mcp);
 }
 
-MixedComplementarityProblem* mixedComplementarityProblem_new(void)
-{
-  MixedComplementarityProblem* mcp = (MixedComplementarityProblem*) malloc(sizeof(MixedComplementarityProblem));
+MixedComplementarityProblem* mixedComplementarityProblem_new(void) {
+  MixedComplementarityProblem* mcp =
+      (MixedComplementarityProblem*)malloc(sizeof(MixedComplementarityProblem));
 
   mcp->n1 = 0;
   mcp->n2 = 0;
@@ -55,6 +54,5 @@ MixedComplementarityProblem* mixedComplementarityProblem_new(void)
 
   return mcp;
 }
-
 
 #endif

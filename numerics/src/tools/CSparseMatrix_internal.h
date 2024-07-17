@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #ifndef SparseMatrix_internal_H
 #define SparseMatrix_internal_H
@@ -44,8 +44,7 @@
  * std::complex). */
 #define NCOMPLEX
 
+#include "CSparseMatrix.h"
 #include "cs.h"
 
-#include "CSparseMatrix.h"
-
-#endif // SparseMatrix_internal_H
+#endif  // SparseMatrix_internal_H

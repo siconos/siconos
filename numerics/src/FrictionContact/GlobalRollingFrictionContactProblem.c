@@ -14,33 +14,33 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #include "GlobalRollingFrictionContactProblem.h"
-#include "GlobalFrictionContactProblem.h"
-#include "RollingFrictionContactProblem.h"
-#include "FrictionContactProblem.h"
-#include <assert.h>            // for assert
-#include <math.h>              // for fabs
-#include <stdio.h>             // for printf, fprintf, fscanf, NULL, fclose
-#include <stdlib.h>            // for free, malloc, exit, EXIT_FAILURE
-#include <sys/errno.h>         // for errno
-#include "SiconosBlas.h"         // for cblas_dscal, cblas_dcopy
-#include "NumericsMatrix.h"    // for NM_vector_display, NM_display, NM_clear
-#include "numerics_verbose.h"  // for CHECK_IO, numerics_printf_verbose
-#include "io_tools.h"          // for check_hdf5_file
 
+#include <assert.h>     // for assert
+#include <math.h>       // for fabs
+#include <stdio.h>      // for printf, fprintf, fscanf, NULL, fclose
+#include <stdlib.h>     // for free, malloc, exit, EXIT_FAILURE
+#include <sys/errno.h>  // for errno
+
+#include "FrictionContactProblem.h"
+#include "GlobalFrictionContactProblem.h"
+#include "NumericsMatrix.h"  // for NM_vector_display, NM_display, NM_clear
+#include "RollingFrictionContactProblem.h"
+#include "SiconosBlas.h"       // for cblas_dscal, cblas_dcopy
+#include "io_tools.h"          // for check_hdf5_file
+#include "numerics_verbose.h"  // for CHECK_IO, numerics_printf_verbose
 
 //#define DEBUG_STDOUT
 //#define DEBUG_MESSAGES
-#include "siconos_debug.h"             // for DEBUG_PRINT, DEBUG_PRINTF
+#include "siconos_debug.h"  // for DEBUG_PRINT, DEBUG_PRINTF
 #if defined(WITH_FCLIB)
-#include "fclib_interface.h"    // for globalRollingFrictionContact_fclib_read
+#include "fclib_interface.h"  // for globalRollingFrictionContact_fclib_read
 #endif
 
-
-GlobalRollingFrictionContactProblem* globalRollingFrictionContactProblem_new(void)
-{
-  GlobalRollingFrictionContactProblem* problem = (GlobalRollingFrictionContactProblem*) malloc(sizeof(GlobalRollingFrictionContactProblem));
+GlobalRollingFrictionContactProblem* globalRollingFrictionContactProblem_new(void) {
+  GlobalRollingFrictionContactProblem* problem = (GlobalRollingFrictionContactProblem*)malloc(
+      sizeof(GlobalRollingFrictionContactProblem));
   problem->dimension = 0;
   problem->numberOfContacts = 0;
   problem->M = NULL;
@@ -53,11 +53,7 @@ GlobalRollingFrictionContactProblem* globalRollingFrictionContactProblem_new(voi
   return problem;
 }
 
-
-
-void globalRollingFrictionContact_display(GlobalRollingFrictionContactProblem* problem)
-{
-
+void globalRollingFrictionContact_display(GlobalRollingFrictionContactProblem* problem) {
   assert(problem);
   int n = problem->dimension * problem->numberOfContacts;
   printf("GlobalRollingFrictionContact Display :\n-------------\n");
@@ -65,104 +61,82 @@ void globalRollingFrictionContact_display(GlobalRollingFrictionContactProblem* p
   printf("numberOfContacts:%d \n", problem->numberOfContacts);
   int m = problem->M->size0;
 
-  if(problem->M)
-  {
+  if (problem->M) {
     printf("M matrix:\n");
     NM_display(problem->M);
-  }
-  else
+  } else
     printf("No M matrix:\n");
 
-  if(problem->H)
-  {
+  if (problem->H) {
     printf("H matrix:\n");
     NM_display(problem->H);
-  }
-  else
+  } else
     printf("No H matrix:\n");
 
-  if(problem->q)
-  {
+  if (problem->q) {
     printf("q vector:\n");
-    for(unsigned int i = 0; i < m; i++) printf("q[ %i ] = %12.8e\n", i, problem->q[i]);
-  }
-  else
+    for (unsigned int i = 0; i < m; i++) printf("q[ %i ] = %12.8e\n", i, problem->q[i]);
+  } else
     printf("No q vector:\n");
-  if(problem->b)
-  {
+  if (problem->b) {
     printf("b vector:\n");
-    for(unsigned int i = 0; i < n; i++) printf("b[ %i ] = %12.8e\n", i, problem->b[i]);
-  }
-  else
+    for (unsigned int i = 0; i < n; i++) printf("b[ %i ] = %12.8e\n", i, problem->b[i]);
+  } else
     printf("No b vector:\n");
 
-  if(problem->mu)
-  {
+  if (problem->mu) {
     printf("mu vector:\n");
-    NM_vector_display(problem->mu,problem->numberOfContacts);
-  }
-  else
+    NM_vector_display(problem->mu, problem->numberOfContacts);
+  } else
     printf("No mu vector:\n");
 
-  if(problem->mu_r)
-  {
+  if (problem->mu_r) {
     printf("mu_R vector:\n");
-    NM_vector_display(problem->mu_r,problem->numberOfContacts);
-  }
-  else
+    NM_vector_display(problem->mu_r, problem->numberOfContacts);
+  } else
     printf("No mu_R vector:\n");
-
 }
 
-
-
-
-
-int globalRollingFrictionContact_printInFile(GlobalRollingFrictionContactProblem*  problem, FILE* file)
-{
-  if(! problem)
-  {
-    fprintf(stderr, "Numerics, GlobalRollingFrictionContactProblem printInFile failed, NULL input.\n");
+int globalRollingFrictionContact_printInFile(GlobalRollingFrictionContactProblem* problem,
+                                             FILE* file) {
+  if (!problem) {
+    fprintf(stderr,
+            "Numerics, GlobalRollingFrictionContactProblem printInFile failed, NULL input.\n");
     exit(EXIT_FAILURE);
   }
   int i;
 
-  int d  = problem->dimension;
+  int d = problem->dimension;
   fprintf(file, "%d\n", d);
   int nc = problem->numberOfContacts;
   fprintf(file, "%d\n", nc);
   NM_write_in_file(problem->M, file);
   NM_write_in_file(problem->H, file);
-  for(i = 0; i < problem->M->size1; i++)
-  {
+  for (i = 0; i < problem->M->size1; i++) {
     fprintf(file, "%32.24e ", problem->q[i]);
   }
   fprintf(file, "\n");
-  for(i = 0; i < problem->H->size1; i++)
-  {
+  for (i = 0; i < problem->H->size1; i++) {
     fprintf(file, "%32.24e ", problem->b[i]);
   }
   fprintf(file, "\n");
-  for(i = 0; i < nc; i++)
-  {
+  for (i = 0; i < nc; i++) {
     fprintf(file, "%32.24e ", problem->mu[i]);
   }
   fprintf(file, "\n");
-  for(i = 0; i < nc; i++)
-  {
+  for (i = 0; i < nc; i++) {
     fprintf(file, "%32.24e ", problem->mu_r[i]);
   }
   fprintf(file, "\n");
   return 0;
 }
 
-int globalRollingFrictionContact_printInFilename(GlobalRollingFrictionContactProblem* problem, char* filename)
-{
+int globalRollingFrictionContact_printInFilename(GlobalRollingFrictionContactProblem* problem,
+                                                 char* filename) {
   int info = 0;
-  FILE * file = fopen(filename, "w");
+  FILE* file = fopen(filename, "w");
 
-  if(!file)
-  {
+  if (!file) {
     return errno;
   }
 
@@ -172,125 +146,121 @@ int globalRollingFrictionContact_printInFilename(GlobalRollingFrictionContactPro
   return info;
 }
 
-GlobalRollingFrictionContactProblem* globalRollingFrictionContact_newFromFile(FILE* file)
-{
+GlobalRollingFrictionContactProblem* globalRollingFrictionContact_newFromFile(FILE* file) {
   GlobalRollingFrictionContactProblem* problem = globalRollingFrictionContactProblem_new();
   assert(file);
-  DEBUG_PRINT("Start -- int globalRollingFrictionContact_newFromFile(GlobalRollingFrictionContactProblem* problem, FILE* file)\n");
+  DEBUG_PRINT(
+      "Start -- int "
+      "globalRollingFrictionContact_newFromFile(GlobalRollingFrictionContactProblem* problem, "
+      "FILE* file)\n");
   int nc = 0, d = 0;
   int i;
   CHECK_IO(fscanf(file, "%d\n", &d));
   problem->dimension = d;
-  DEBUG_PRINTF("problem->dimension = %i \n",problem->dimension);
+  DEBUG_PRINTF("problem->dimension = %i \n", problem->dimension);
   CHECK_IO(fscanf(file, "%d\n", &nc));
   problem->numberOfContacts = nc;
-  problem->M =  NM_new_from_file(file);
-  problem->H =  NM_new_from_file(file);
+  problem->M = NM_new_from_file(file);
+  problem->H = NM_new_from_file(file);
 
-  problem->q = (double *) malloc(problem->M->size1 * sizeof(double));
-  for(i = 0; i < problem->M->size1; i++)
-  {
+  problem->q = (double*)malloc(problem->M->size1 * sizeof(double));
+  for (i = 0; i < problem->M->size1; i++) {
     CHECK_IO(fscanf(file, "%lf ", &(problem->q[i])));
   }
-  problem->b = (double *) malloc(problem->H->size1 * sizeof(double));
-  for(int i = 0; i < problem->H->size1; ++i)
-  {
+  problem->b = (double*)malloc(problem->H->size1 * sizeof(double));
+  for (int i = 0; i < problem->H->size1; ++i) {
     CHECK_IO(fscanf(file, "%lf ", &(problem->b[i])));
   }
-  problem->mu = (double *) malloc(nc * sizeof(double));
-  for(i = 0; i < nc; i++)
-  {
+  problem->mu = (double*)malloc(nc * sizeof(double));
+  for (i = 0; i < nc; i++) {
     CHECK_IO(fscanf(file, "%lf ", &(problem->mu[i])));
   }
-  problem->mu_r = (double *) malloc(nc * sizeof(double));
-  for(i = 0; i < nc; i++)
-  {
+  problem->mu_r = (double*)malloc(nc * sizeof(double));
+  for (i = 0; i < nc; i++) {
     CHECK_IO(fscanf(file, "%lf ", &(problem->mu_r[i])));
   }
-  DEBUG_PRINT("End --  int globalRollingFrictionContact_newFromFile(GlobalRollingFrictionContactProblem* problem, FILE* file)\n");
+  DEBUG_PRINT(
+      "End --  int "
+      "globalRollingFrictionContact_newFromFile(GlobalRollingFrictionContactProblem* problem, "
+      "FILE* file)\n");
 
   return problem;
 }
 
-GlobalRollingFrictionContactProblem* globalRollingFrictionContact_new_from_filename(const char* filename)
-{
+GlobalRollingFrictionContactProblem* globalRollingFrictionContact_new_from_filename(
+    const char* filename) {
   GlobalRollingFrictionContactProblem* problem = NULL;
-  //printf("\n globalRollingFrictionContactProblem globalRollingFrictionContact_new_from_filename 001 OK\n");
+  // printf("\n globalRollingFrictionContactProblem
+  // globalRollingFrictionContact_new_from_filename 001 OK\n");
   int is_hdf5 = check_hdf5_file(filename);
 
-  if(is_hdf5)
-  {
-    //printf("\n globalRollingFrictionContactProblem globalRollingFrictionContact_new_from_filename 002 OK\n");
+  if (is_hdf5) {
+    // printf("\n globalRollingFrictionContactProblem
+    // globalRollingFrictionContact_new_from_filename 002 OK\n");
 #if defined(WITH_FCLIB)
-    //printf("\n globalRollingFrictionContactProblem globalRollingFrictionContact_new_from_filename 003 OK\n");
+    // printf("\n globalRollingFrictionContactProblem
+    // globalRollingFrictionContact_new_from_filename 003 OK\n");
     problem = globalRollingFrictionContact_fclib_read(filename);
-    //printf("\n globalRollingFrictionContactProblem globalRollingFrictionContact_new_from_filename 004 OK\n");
+    // printf("\n globalRollingFrictionContactProblem
+    // globalRollingFrictionContact_new_from_filename 004 OK\n");
 #else
     numerics_error("GlobalRollingFrictionContactProblem",
-                   "Try to read an hdf5 file, while fclib interface is not active. Recompile Siconos with fclib.",
+                   "Try to read an hdf5 file, while fclib interface is not active. Recompile "
+                   "Siconos with fclib.",
                    filename);
 #endif
   }
 
-  else
-  {
-    FILE * file = fopen(filename, "r");
-    if(!file)
+  else {
+    FILE* file = fopen(filename, "r");
+    if (!file)
       numerics_error("GlobalRollingFrictionContactProblem", "Can not open file ", filename);
 
     problem = globalRollingFrictionContact_newFromFile(file);
     fclose(file);
   }
-  //printf("\n globalRollingFrictionContactProblem 009 OK\n");
+  // printf("\n globalRollingFrictionContactProblem 009 OK\n");
   return problem;
 }
 
-void globalRollingFrictionContactProblem_free(GlobalRollingFrictionContactProblem* problem)
-{
+void globalRollingFrictionContactProblem_free(GlobalRollingFrictionContactProblem* problem) {
   assert(problem);
-  if(problem->M)
-  {
+  if (problem->M) {
     NM_clear(problem->M);
     free(problem->M);
     problem->M = NULL;
   }
-  if(problem->H)
-  {
+  if (problem->H) {
     NM_clear(problem->H);
     free(problem->H);
     problem->H = NULL;
   }
 
-  if(problem->mu)
-  {
+  if (problem->mu) {
     free(problem->mu);
     problem->mu = NULL;
   }
-  if(problem->mu_r)
-  {
+  if (problem->mu_r) {
     free(problem->mu_r);
     problem->mu_r = NULL;
   }
 
-  if(problem->q)
-  {
+  if (problem->q) {
     free(problem->q);
     problem->q = NULL;
   }
-  if(problem->b)
-  {
+  if (problem->b) {
     free(problem->b);
     problem->b = NULL;
   }
 
   free(problem);
-
 }
 
-
-GlobalRollingFrictionContactProblem* globalRollingFrictionContactProblem_new_with_data(int dim, int nc, NumericsMatrix* M, double* q, double* mu, double* mu_r)
-{
-  GlobalRollingFrictionContactProblem* fcp = (GlobalRollingFrictionContactProblem*) malloc(sizeof(GlobalRollingFrictionContactProblem));
+GlobalRollingFrictionContactProblem* globalRollingFrictionContactProblem_new_with_data(
+    int dim, int nc, NumericsMatrix* M, double* q, double* mu, double* mu_r) {
+  GlobalRollingFrictionContactProblem* fcp = (GlobalRollingFrictionContactProblem*)malloc(
+      sizeof(GlobalRollingFrictionContactProblem));
 
   fcp->dimension = dim;
   fcp->numberOfContacts = nc;
@@ -303,21 +273,17 @@ GlobalRollingFrictionContactProblem* globalRollingFrictionContactProblem_new_wit
 }
 
 int globalRollingFrictionContact_computeGlobalVelocity(
-  GlobalRollingFrictionContactProblem* problem,
-  double * reaction,
-  double * globalVelocity)
-{
+    GlobalRollingFrictionContactProblem* problem, double* reaction, double* globalVelocity) {
   int info = -1;
 
   int n = problem->M->size0;
   int m = problem->H->size1;
 
   /* globalVelocity <- problem->q */
-  cblas_dcopy(n,  problem->q, 1, globalVelocity, 1);
+  cblas_dcopy(n, problem->q, 1, globalVelocity, 1);
 
   // We compute only if the problem has contacts
-  if(m>0)
-  {
+  if (m > 0) {
     /* globalVelocity <-  H*reaction + globalVelocity*/
     NM_gemv(1.0, problem->H, reaction, 1.0, globalVelocity);
     DEBUG_EXPR(NM_vector_display(reaction, m));
@@ -331,14 +297,13 @@ int globalRollingFrictionContact_computeGlobalVelocity(
   return info;
 }
 
-
-
-RollingFrictionContactProblem * globalRollingFrictionContact_reformulation_RollingFrictionContact(GlobalRollingFrictionContactProblem* problem)
-{
+RollingFrictionContactProblem*
+globalRollingFrictionContact_reformulation_RollingFrictionContact(
+    GlobalRollingFrictionContactProblem* problem) {
   /* we use the code in gfc3d_reformulation_local_problem */
   GlobalFrictionContactProblem* gfc3d = globalFrictionContactProblem_new();
   gfc3d->numberOfContacts = problem->numberOfContacts;
-  gfc3d->dimension =  problem->dimension;
+  gfc3d->dimension = problem->dimension;
   gfc3d->M = problem->M;
   gfc3d->H = problem->H;
   gfc3d->q = problem->q;
@@ -347,12 +312,12 @@ RollingFrictionContactProblem * globalRollingFrictionContact_reformulation_Rolli
 
   FrictionContactProblem* fc3d = globalFrictionContact_reformulation_FrictionContact(gfc3d);
 
-  RollingFrictionContactProblem * localproblem =  rollingFrictionContactProblem_new();
+  RollingFrictionContactProblem* localproblem = rollingFrictionContactProblem_new();
 
   localproblem->numberOfContacts = problem->numberOfContacts;
-  localproblem->dimension =  problem->dimension;
+  localproblem->dimension = problem->dimension;
 
-  localproblem->mu =  fc3d->mu;
+  localproblem->mu = fc3d->mu;
   localproblem->M = fc3d->M;
   localproblem->q = fc3d->q;
   localproblem->mu = fc3d->mu;
@@ -363,5 +328,4 @@ RollingFrictionContactProblem * globalRollingFrictionContact_reformulation_Rolli
   free(gfc3d);
   free(fc3d);
   return localproblem;
-
 }
