@@ -23,25 +23,17 @@
 #ifndef SICOMAT
 #define SICOMAT
 
-// #include <boost/numeric/ublas/fwd.hpp>  // boost::numeric fwd
-#include "EigenInclude.hpp"
+#include "EigenInclude.hpp"  // Must be included before Eigen/Core
+//
 #include <Eigen/Core>
+#include <Eigen/SparseCore>  // For Eigen Sparse matrices
+
+#include "CSparseMatrix.h"  // For CSparseMatrix
 #include "SiconosVector.hpp"
-// #include <memory>                       // shared_ptr
-// #include <vector>
 
-#include "CSparseMatrix.h"          // For CSparseMatrix
-// #include "SiconosAlgebraTypes.hpp"  // for UblasType
-// #include "SiconosException.hpp"
-// #include "SiconosSerialization.hpp"  // for ACCEPT_SERIALIZATION
-
-// #include "NumericsFwd.h"  // For NumericsMatrix
-// typedef struct NumericsMatrix NumericsMatrix;
 struct NumericsMatrix;
 
 namespace siconos::algebra {
-
-
 
 /**
    Abstract class to provide interface for matrices handling
@@ -49,34 +41,43 @@ namespace siconos::algebra {
    Matrices can be either block or Simple.
    See Derived classes for details.
 
-   In Siconos, a "matrix" can be either a SiconosMatrix or a BlockMatrix, ie a container of
-   several pointers to SiconosMatrix
+   In Siconos, a "matrix" can be either a SiconosMatrix or a BlockMatrix, ie a
+   container of several pointers to SiconosMatrix
 
-   You can find an overview on how to build and use vectors and matrices in siconos users guide
+   You can find an overview on how to build and use vectors and matrices in
+   siconos users guide
    .
 
 */
 
 using SiconosMatrix = Eigen::Matrix<double_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor>;
 
+/** Sparse matrix storage */
+using SiconosSparseMatrix = Eigen::SparseMatrix<double, Eigen::ColMajor, int>;
+using Triplet = Eigen::Triplet<double>;  // Used to fill sparse matrices
+
+enum class StorageType { dense, sparse };
+
 /** return the number of non-zero in the matrix
-   *
-   *  \param csc the compressed column sparse matrix
-   *  \param row_off
-   *  \param col_off
-   *  \param tol the tolerance to consider a number zero (not used if the matrix is sparse)
-   *  \return the number of non-zeros
-   */
-  bool fillTriplet(SiconosMatrix& m, CSparseMatrix *csc, size_t row_off, size_t col_off, double tol = 1e-14);
-  void normInfByColumn(const SiconosMatrix &m, SiconosVector &v);
+ *
+ *  \param csc the compressed column sparse matrix
+ *  \param row_off
+ *  \param col_off
+ *  \param tol the tolerance to consider a number zero (not used if the matrix
+ * is sparse) \return the number of non-zeros
+ */
+bool fillTriplet(SiconosMatrix &m, CSparseMatrix *csc, size_t row_off, size_t col_off,
+                 double tol = 1e-14);
+void normInfByColumn(const SiconosMatrix &m, SiconosVector &v);
 
-  bool checkSymmetry(SiconosMatrix &m, double tol);
+bool checkSymmetry(SiconosMatrix &m, double tol);
 
-  void solveInPlace(SiconosMatrix &A, SiconosVector &B);
-  void solveInPlace(SiconosMatrix &A, SiconosMatrix &B);
-  void solveByLeastSquares(SiconosMatrix &A, SiconosVector &B);
-  void solveByLeastSquares(SiconosMatrix &A, SiconosMatrix &B);
-  siconos::algebra::SiconosMatrix readMatrixFromFile(const std::string &filename, bool ascii = true);
+void solveInPlace(SiconosMatrix &A, SiconosVector &B);
+void solveInPlace(SiconosMatrix &A, SiconosMatrix &B);
+void solveByLeastSquares(SiconosMatrix &A, SiconosVector &B);
+void solveByLeastSquares(SiconosMatrix &A, SiconosMatrix &B);
+siconos::algebra::SiconosMatrix readMatrixFromFile(const std::string &filename,
+                                                   bool ascii = true);
 
 }  // namespace siconos::algebra
 #endif

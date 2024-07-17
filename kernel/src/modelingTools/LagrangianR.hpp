@@ -112,7 +112,7 @@ class LagrangianR : public Relation {
    *
    *  \param inter the interaction using this relation
    */
-  inline void initialize(Interaction &inter) override{};
+  inline void initialize(Interaction &inter) override {};
 
   // -- Jach --
 
@@ -121,10 +121,13 @@ class LagrangianR : public Relation {
    *  \return a pointer on a SiconosMatrix
    */
   inline std::shared_ptr<siconos::algebra::SiconosMatrix> jachq() const { return _jachq; }
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> jachqDot() const { return _jachqDot; }
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> dotJachq() const { return _dotjachq; }
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> jachlambda() const
-  {
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> jachqDot() const {
+    return _jachqDot;
+  }
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> dotJachq() const {
+    return _dotjachq;
+  }
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> jachlambda() const {
     return _jachlambda;
   }
 
@@ -132,8 +135,7 @@ class LagrangianR : public Relation {
    *
    *  \param newPtr the new matrix
    */
-  inline void setJachqPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr)
-  {
+  inline void setJachqPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr) {
     _jachq = newPtr;
   }
 
@@ -147,7 +149,6 @@ class LagrangianR : public Relation {
 
   // Visitors stuff
   void accept(std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const override;
-
 };
 
 }  // namespace siconos::modeling

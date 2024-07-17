@@ -17,8 +17,9 @@
  */
 
 /*! \file SiconosBulletCollisionManager.cpp
-  \brief Definition of a Bullet-based interaction handler for contact
-  detection.
+
+    \brief Definition of a Bullet-based interaction handler for contact
+    detection.
 */
 
 // Note, in general the "outside margin" is not implemented.  What is

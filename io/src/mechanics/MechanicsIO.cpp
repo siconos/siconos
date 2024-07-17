@@ -62,10 +62,10 @@
 #include "Question.hpp"
 #include "RigidBody2dDS.hpp"
 #include "RigidBodyDS.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
 #include "SiconosVisitor.hpp"
-#include "SiconosMatrix.hpp"
 #include "SimulationGraphs.hpp"
 #include "StaticBody.hpp"
 #include "Topology.hpp"
@@ -185,7 +185,7 @@ void siconos::io::ContactPointVisitor::operator()(
   auto mu = siconos::internal::ask<ForMu>(*inter->nonSmoothLaw());
   const auto& jachqT = *rel.jachqT();
   siconos::algebra::SiconosVector cf(jachqT.size(1));
-  prod(*inter->lambda(1), jachqT, cf, true);
+  siconos::algebra::prod(*inter->lambda(1), jachqT, cf, true);
   answer.resize(23);
 
   answer.setValue(0, mu);
@@ -240,7 +240,7 @@ void siconos::io::ContactPointVisitor::operator()(
   auto mu = siconos::internal::ask<ForMu>(*inter->nonSmoothLaw());
   const auto& jachq = *rel.jachq();
   siconos::algebra::SiconosVector cf(jachq.size(1));
-  prod(*inter->lambda(1), jachq, cf, true);
+  siconos::algebra::prod(*inter->lambda(1), jachq, cf, true);
 
   answer.resize(16);
 
@@ -307,7 +307,7 @@ void siconos::io::ContactPointVisitor::operator()(
   auto mu = siconos::internal::ask<ForMu>(*inter->nonSmoothLaw());
   const auto& jachq = *rel.jachq();
   siconos::algebra::SiconosVector cf(jachq.size(1));
-  prod(*inter->lambda(1), jachq, cf, true);
+  siconos::algebra::prod(*inter->lambda(1), jachq, cf, true);
 
   answer.resize(16);
 
@@ -364,7 +364,7 @@ void siconos::io::ContactPointVisitor::operator()(
   auto mu = siconos::internal::ask<ForMu>(*inter->nonSmoothLaw());
   const auto& jachq = *rel.jachq();
   siconos::algebra::SiconosVector cf(jachq.size(1));
-  prod(*inter->lambda(1), jachq, cf, true);
+  siconos::algebra::prod(*inter->lambda(1), jachq, cf, true);
 
   answer.resize(16);
 
@@ -406,7 +406,7 @@ void siconos::io::ContactPointVisitor::operator()(
   auto mu = siconos::internal::ask<ForMu>(*inter->nonSmoothLaw());
   const auto& jachq = *rel.jachq();
   siconos::algebra::SiconosVector cf(jachq.size(1));
-  prod(*inter->lambda(1), jachq, cf, true);
+  siconos::algebra::prod(*inter->lambda(1), jachq, cf, true);
 
   answer.resize(16);
 
@@ -448,7 +448,7 @@ void siconos::io::ContactPointVisitor::operator()(
   auto mu = siconos::internal::ask<ForMu>(*inter->nonSmoothLaw());
   const auto& jachq = *rel.jachq();
   siconos::algebra::SiconosVector cf(jachq.size(1));
-  prod(*inter->lambda(1), jachq, cf, true);
+  siconos::algebra::prod(*inter->lambda(1), jachq, cf, true);
 
   answer.resize(16);
 
@@ -503,7 +503,8 @@ std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::domai
     const siconos::modeling::NonSmoothDynamicalSystem& nsds) const {
   if (nsds.topology()->numberOfIndexSet() > 0) {
     auto& graph = *nsds.topology()->indexSet(1);
-    auto result = std::make_shared<siconos::algebra::SiconosMatrix>(graph.vertices_number(), 2);
+    auto result =
+        std::make_shared<siconos::algebra::SiconosMatrix>(graph.vertices_number(), 2);
     siconos::graphs::InteractionsGraph::VIterator vi, viend;
     unsigned int current_row;
     for (current_row = 0, std::tie(vi, viend) = graph.vertices(); vi != viend;
@@ -724,7 +725,8 @@ std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::conta
   if (nsds.topology()->numberOfIndexSet() > 0) {
     auto& graph = *nsds.topology()->indexSet(index_set);
     unsigned int current_row;
-    auto result = std::make_shared<siconos::algebra::SiconosMatrix>(graph.vertices_number(), 4);
+    auto result =
+        std::make_shared<siconos::algebra::SiconosMatrix>(graph.vertices_number(), 4);
 
     int data_size = 0;
     for (current_row = 0, std::tie(vi, viend) = graph.vertices(); vi != viend; ++vi) {

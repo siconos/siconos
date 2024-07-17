@@ -23,10 +23,8 @@
 #pragma once
 
 #include "Point.h"
+#include "SiconosVector.hpp"
 
-namespace siconos::algebra {
-class SiconosVector;
-}
 namespace siconos::modeling {
 
 class NonSmoothLaw;
@@ -60,8 +58,7 @@ class Support {
   Support(const Pile &a_pile);
   virtual ~Support() noexcept = default;
   virtual double get_radius() const;
-  virtual const Point &get_center() const {  return m_p;};
- 
+  virtual const Point &get_center() const { return m_p; };
 
   //------------ statique -------------
   virtual void prepare(const Rope &a_rope);
@@ -80,7 +77,6 @@ class Support {
   inline std::shared_ptr<siconos::algebra::SiconosVector> normal() const { return m_normal; }
   inline std::shared_ptr<siconos::algebra::SiconosVector> tangent() const { return m_tangent; }
 
-
   bool isContact(const double &a_tol, const double &dx, const double &dy, const double &dz,
                  double &g,
 
@@ -89,8 +85,7 @@ class Support {
                  double &tx, double &ty, double &tz);
 };
 
-  //------ Export ----------
-  void to_json(ojson &j, const Support &p);
+//------ Export ----------
+void to_json(ojson &j, const Support &p);
 
-  
 }  // namespace siconos::fem::cable

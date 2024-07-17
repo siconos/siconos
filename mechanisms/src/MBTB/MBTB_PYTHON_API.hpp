@@ -35,11 +35,8 @@
 
 #include "BoundaryCondition.hpp"
 #include "MBTB_DATA.hpp"  // for JointsType enum
-
-namespace siconos::algebra {
-class SiconosVector;
-class SimpleMatrix;
-}  // namespace siconos::algebra
+#include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 
 namespace siconos::modeling {
 class NonSmoothDynamicalSystem;
@@ -110,7 +107,7 @@ void MBTB_BodyBuild(
     unsigned int numDS, const std::string& BodyName, double mass,
     std::shared_ptr<siconos::algebra::SiconosVector> initPos,
     std::shared_ptr<siconos::algebra::SiconosVector> initCenterMass,
-    std::shared_ptr<siconos::algebra::SimpleMatrix> inertialMatrix,
+    std::shared_ptr<siconos::algebra::SiconosMatrix> inertialMatrix,
     const std::string& pluginFextLib, const std::string& pluginFextFct,
     const std::string& pluginMextLib, const std::string& pluginMextFct,
     const std::string& pluginFintLib, const std::string& pluginFintFct,
@@ -121,8 +118,7 @@ void MBTB_BodyBuild(
     const std::string& pluginMintJacvLib, const std::string& pluginMintJacvFct,
     const std::string& pluginBoundaryConditionLib,
     const std::string& pluginBoundaryConditionFct,
-    const siconos::modeling::BoundaryCondition::Indices&
-        boundaryConditionIndex);
+    const siconos::modeling::BoundaryCondition::Indices& boundaryConditionIndex);
 /** To build a joint.
  *
  *  \param [in] numJ  an identifier
@@ -137,10 +133,9 @@ void MBTB_BodyBuild(
  * body).
  *
  */
-void MBTB_JointBuild(
-    unsigned int numJ, const std::string& JointName, JointsType jointType,
-    unsigned int indexDS1, unsigned int indexDS2,
-    std::shared_ptr<siconos::algebra::SiconosVector> xsujointPosition);
+void MBTB_JointBuild(unsigned int numJ, const std::string& JointName, JointsType jointType,
+                     unsigned int indexDS1, unsigned int indexDS2,
+                     std::shared_ptr<siconos::algebra::SiconosVector> xsujointPosition);
 
 /** To set the location where is computed the equivalente forces.
 
@@ -169,10 +164,8 @@ void MBTB_setJointPoints(unsigned int numJ,
  *  \param [in]  withGraphicModel1 1 to draw the corresponding object else 0
  *  \param [in]  withGraphicModel2 1 to draw the corresponding object else 0
  */
-void MBTB_ContactLoadCADFile(unsigned int contactId,
-                             const std::string& CADFile1,
-                             const std::string& CADFile2,
-                             unsigned int withGraphicModel1,
+void MBTB_ContactLoadCADFile(unsigned int contactId, const std::string& CADFile1,
+                             const std::string& CADFile2, unsigned int withGraphicModel1,
                              unsigned int withGraphicModel2);
 
 /** To set a double parameter.(extendable, without modifying the API)
@@ -189,8 +182,8 @@ void MBTB_ContactLoadCADFile(unsigned int contactId,
     \param  [in] idShape : identifier of the shape of the contact (0 or 1).
     \param  [in] v : value.
  */
-void MBTB_ContactSetDParam(unsigned int paramId, unsigned int contactId,
-                           unsigned int idShape, double v);
+void MBTB_ContactSetDParam(unsigned int paramId, unsigned int contactId, unsigned int idShape,
+                           double v);
 
 /** To set a integer parameter.(extendable, without modifying the API)
 
@@ -205,8 +198,8 @@ void MBTB_ContactSetDParam(unsigned int paramId, unsigned int contactId,
     \param idShape : identifier of the shape of the contact (0 or 1).
     \param v : value.
  */
-void MBTB_ContactSetIParam(unsigned int paramId, unsigned int contactId,
-                           unsigned int idShape, bool v);
+void MBTB_ContactSetIParam(unsigned int paramId, unsigned int contactId, unsigned int idShape,
+                           bool v);
 
 /** To build a contact.
 
@@ -223,9 +216,8 @@ void MBTB_ContactSetIParam(unsigned int paramId, unsigned int contactId,
     \param [in] et (not used).
  */
 void MBTB_ContactBuild(unsigned int numContact, const std::string& ContactName,
-                       unsigned int indexBody1, int indexBody2,
-                       unsigned int withFriction, double mu, double en,
-                       double et);
+                       unsigned int indexBody1, int indexBody2, unsigned int withFriction,
+                       double mu, double en, double et);
 
 /** initializes the simulation.
 
@@ -254,17 +246,17 @@ void MBTB_run(int nbSteps);
   \param [in] aPos the target position.
   \param [in] aVel the target velocity.
  */
-void MBTB_moveBodyToPosWithSpeed(
-    unsigned int numDS, std::shared_ptr<siconos::algebra::SiconosVector> aPos,
-    std::shared_ptr<siconos::algebra::SiconosVector> aVel);
+void MBTB_moveBodyToPosWithSpeed(unsigned int numDS,
+                                 std::shared_ptr<siconos::algebra::SiconosVector> aPos,
+                                 std::shared_ptr<siconos::algebra::SiconosVector> aVel);
 
 /** Set the velocity.
 
     \param [in] numDS the id of the ds.
     \param [in] aVel the targeted velocity.
  */
-void MBTB_BodySetVelocity(
-    unsigned int numDS, std::shared_ptr<siconos::algebra::SiconosVector> aVel);
+void MBTB_BodySetVelocity(unsigned int numDS,
+                          std::shared_ptr<siconos::algebra::SiconosVector> aVel);
 
 /** Defines the graphic frequency.
 

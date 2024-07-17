@@ -27,8 +27,8 @@
 #include "NonSmoothDynamicalSystem.hpp"
 #include "OneStepNSProblem.hpp"
 #include "Rope.h"
-#include "SiconosVector.hpp"
 #include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 #include "Support.h"
 #include "TimeDiscretisation.hpp"
 #include "TimeStepping.hpp"
@@ -201,8 +201,8 @@ void siconos::fem::cable::TransportCableManager::compute_mass(double a_length, d
   */
   int ndof = m_results.q0->size();
   if (not m_results.mass)
-    m_results.mass = std::make_shared<siconos::algebra::SiconosMatrix>(
-        ndof, ndof, siconos::algebra::UblasType::SPARSE);
+    m_results.mass =
+        std::make_shared<siconos::algebra::SiconosMatrix>(ndof, ndof);  // FP: must be SPARSE
   double k = a_rho * a_length / 3.0;
   for (auto i = 0; i < ndof - 3; i++) {
     m_results.mass->setValue(i, i, 4 * k);

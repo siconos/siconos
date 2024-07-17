@@ -185,8 +185,7 @@ class LagrangianScleronomousR : public LagrangianR {
 
   /** \return the product of  the time--derivative of Jacobian with the velocity
    * qdot */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> dotjacqhXqdot()
-  {
+  inline std::shared_ptr<siconos::algebra::SiconosVector> dotjacqhXqdot() {
     return _dotjacqhXqdot;
   };
 

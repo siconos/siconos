@@ -24,8 +24,8 @@
 #include "MBTB_Body.hpp"
 #include "MBTB_DATA.hpp"
 #include "MBTB_internalTool.hpp"  // For MBTB_updateContactFromDS
+#include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
 // #include "CADMBTB_PYTHON_API.hpp"
 #include <boost/math/quaternion.hpp>
 // #include "KneeJointR.hpp"
@@ -53,8 +53,8 @@
 #include "NewtonImpactFrictionNSL.hpp"
 #include "NewtonImpactNSL.hpp"
 #include "SolverOptions.h"  // for SolverOptions struct
-#include "Topology.hpp"
 #include "TimeDiscretisation.hpp"
+#include "Topology.hpp"
 // #define MBTB_MOREAU_YES
 //  #define DEBUG_STDOUT
 //  #define DEBUG_NOCOLOR
@@ -66,15 +66,11 @@
 
 #define MBTB_LOAD_CONTACT
 
-void siconos::mechanisms::MBTB_init(unsigned int NumOfBodies,
-                                    unsigned int NumOfJoints,
+void siconos::mechanisms::MBTB_init(unsigned int NumOfBodies, unsigned int NumOfJoints,
                                     unsigned int NumOfContacts) {
-  assert(NumOfBodies < MBTB_MAX_BODIES_NUMBER &&
-         "MBTB_init NumOfBodies out of range");
-  assert(NumOfJoints < MBTB_MAX_JOINTS_NUMBER &&
-         "MBTB_init NumOfJoints out of range");
-  assert(NumOfContacts < MBTB_MAX_CONTACTS_NUMBER &&
-         "MBTB_init NumOfContacts out of range");
+  assert(NumOfBodies < MBTB_MAX_BODIES_NUMBER && "MBTB_init NumOfBodies out of range");
+  assert(NumOfJoints < MBTB_MAX_JOINTS_NUMBER && "MBTB_init NumOfJoints out of range");
+  assert(NumOfContacts < MBTB_MAX_CONTACTS_NUMBER && "MBTB_init NumOfContacts out of range");
   ACE_INIT_TIME();
   mbtb::data::sNbOfBodies = NumOfBodies;
   mbtb::data::sNbOfJoints = NumOfJoints;
@@ -85,9 +81,8 @@ void siconos::mechanisms::MBTB_init(unsigned int NumOfBodies,
   // -------------
   // --- Model ---
   // -------------
-  mbtb::data::myNsds =
-      std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(
-          mbtb::data::myt0, mbtb::data::myTf);
+  mbtb::data::myNsds = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(
+      mbtb::data::myt0, mbtb::data::myTf);
 }
 
 /*get the quaternion from siconos and 1787update the CADs model*/
@@ -127,11 +122,9 @@ void siconos::mechanisms::MBTB_updateDSFromSiconos() {
     ACE_times[ACE_TIMER_GRAPHIC].stop();
   }
 }
-void siconos::mechanisms::MBTB_BodyLoadCADFile(unsigned int numDS,
-                                               const std::string& CADFile,
+void siconos::mechanisms::MBTB_BodyLoadCADFile(unsigned int numDS, const std::string& CADFile,
                                                unsigned int withGraphicModel) {
-  assert(mbtb::data::sNbOfBodies > numDS &&
-         "MBTB_BodyLoadCADFile numDS out of range.");
+  assert(mbtb::data::sNbOfBodies > numDS && "MBTB_BodyLoadCADFile numDS out of range.");
   /*1) load the CAD model*/
   char* data = (char*)calloc((CADFile.length() + 1), sizeof(char));
   //  memset((void*)data,0,sizeof(*data));
@@ -141,10 +134,11 @@ void siconos::mechanisms::MBTB_BodyLoadCADFile(unsigned int numDS,
   if (withGraphicModel) CADMBTB_buildGraphicalModel(numDS);
 }
 
-void siconos::mechanisms::MBTB_ContactLoadCADFile(
-    unsigned int contactId, const std::string& CADFile1,
-    const std::string& CADFile2, unsigned int withGraphicModel1,
-    unsigned int withGraphicModel2) {
+void siconos::mechanisms::MBTB_ContactLoadCADFile(unsigned int contactId,
+                                                  const std::string& CADFile1,
+                                                  const std::string& CADFile2,
+                                                  unsigned int withGraphicModel1,
+                                                  unsigned int withGraphicModel2) {
   assert(mbtb::data::sNbOfContacts > contactId &&
          "MBTB_ContactLoadCADFile contactId out of range.");
   char* data = (char*)calloc((CADFile1.length() + 1), sizeof(char));
@@ -166,24 +160,22 @@ void siconos::mechanisms::MBTB_ContactLoadCADFile(
 #ifdef MBTB_LOAD_CONTACT
   double U1, U2, V1, V2;
   CADMBTB_getUVBounds(IdInCAD, U1, U2, V1, V2);
-  printf("MBTB_LOAD_CONTACT UVBOUNDS idContact1=%d,U1=%e,U2=%e,V1=%e,V2=%e\n",
-         contactId, U1, U2, V1, V2);
+  printf("MBTB_LOAD_CONTACT UVBOUNDS idContact1=%d,U1=%e,U2=%e,V1=%e,V2=%e\n", contactId, U1,
+         U2, V1, V2);
   CADMBTB_getUVBounds(IdInCAD + 1, U1, U2, V1, V2);
-  printf("MBTB_LOAD_CONTACT UVBOUNDS idContact2=%d,U1=%e,U2=%e,V1=%e,V2=%e\n",
-         contactId, U1, U2, V1, V2);
+  printf("MBTB_LOAD_CONTACT UVBOUNDS idContact2=%d,U1=%e,U2=%e,V1=%e,V2=%e\n", contactId, U1,
+         U2, V1, V2);
 #endif
 }
 
 namespace siconos::mechanisms::mbtb::internal {  // Local use only
 void MBTB_BodyBuildComputeInitPosition(
-    unsigned int numDS, double mass,
-    std::shared_ptr<siconos::algebra::SiconosVector> initPos,
+    unsigned int numDS, double mass, std::shared_ptr<siconos::algebra::SiconosVector> initPos,
     std::shared_ptr<siconos::algebra::SiconosVector> modelCenterMass,
-    std::shared_ptr<siconos::algebra::SimpleMatrix> inertialMatrix,
+    std::shared_ptr<siconos::algebra::SiconosMatrix> inertialMatrix,
     std::shared_ptr<siconos::algebra::SiconosVector>& q10,
     std::shared_ptr<siconos::algebra::SiconosVector>& v10) {
-  assert(mbtb::data::sNbOfBodies > numDS &&
-         "MBTB_BodyBuild numDS out of range.");
+  assert(mbtb::data::sNbOfBodies > numDS && "MBTB_BodyBuild numDS out of range.");
   /*2)  move the cad model to the initial position*/
   /*It consists in going to the position (x,y,z,q1,q2,q3,q4) starting from
     (0,0,0,1,0,0,0). Endeed, after loading the CAD, the cad model must be moved
@@ -247,7 +239,7 @@ void MBTB_BodyBuildComputeInitPosition(
   CADMBTB_moveGraphicalModelFromModel(numDS, numDS);
 
   // //In current version I = Id3
-  // sI[numDS] = std::make_shared<siconos::algebra::SimpleMatrix>(3,3));
+  // sI[numDS] = std::make_shared<siconos::algebra::SiconosMatrix>(3,3));
   // sI[numDS]->zero();
   // //sI[numDS]->setValue(0,0,sMass[numDS]);sI[numDS]->setValue(1,1,sMass[numDS]);sI[numDS]->setValue(2,2,sMass[numDS]);
   // sI[numDS]->setValue(0,0,sMassMatrix[9*numDS+0]*sMassMatrixScale[numDS]);
@@ -272,7 +264,7 @@ void siconos::mechanisms::MBTB_BodyBuild(
     unsigned int numDS, const std::string& BodyName, double mass,
     std::shared_ptr<siconos::algebra::SiconosVector> initPos,
     std::shared_ptr<siconos::algebra::SiconosVector> modelCenterMass,
-    std::shared_ptr<siconos::algebra::SimpleMatrix> inertialMatrix,
+    std::shared_ptr<siconos::algebra::SiconosMatrix> inertialMatrix,
     const std::string& pluginFextLib, const std::string& pluginFextFct,
     const std::string& pluginMextLib, const std::string& pluginMextFct,
     const std::string& pluginFintLib, const std::string& pluginFintFct,
@@ -283,20 +275,18 @@ void siconos::mechanisms::MBTB_BodyBuild(
     const std::string& pluginMintJacvLib, const std::string& pluginMintJacvFct,
     const std::string& pluginBoundaryConditionLib,
     const std::string& pluginBoundaryConditionFct,
-    const siconos::modeling::BoundaryCondition::Indices&
-        boundaryConditionIndex) {
-  assert(mbtb::data::sNbOfBodies > numDS &&
-         "MBTB_BodyBuild numDS out of range.");
+    const siconos::modeling::BoundaryCondition::Indices& boundaryConditionIndex) {
+  assert(mbtb::data::sNbOfBodies > numDS && "MBTB_BodyBuild numDS out of range.");
   unsigned int qDim = 7;
   // unsigned int nDof = 3;
   unsigned int nDim = 6;
 
   auto q10 = std::make_shared<siconos::algebra::SiconosVector>(qDim);
   auto v10 = std::make_shared<siconos::algebra::SiconosVector>(nDim);
-  mbtb::internal::MBTB_BodyBuildComputeInitPosition(
-      numDS, mass, initPos, modelCenterMass, inertialMatrix, q10, v10);
-  MBTB_Body* p = new MBTB_Body(q10, v10, mass, inertialMatrix, modelCenterMass,
-                               BodyName, BodyName);
+  mbtb::internal::MBTB_BodyBuildComputeInitPosition(numDS, mass, initPos, modelCenterMass,
+                                                    inertialMatrix, q10, v10);
+  MBTB_Body* p =
+      new MBTB_Body(q10, v10, mass, inertialMatrix, modelCenterMass, BodyName, BodyName);
 
   // We fix a ds number just to be able to use postprocessing based on hdf5 file
   p->setNumber(numDS + 1);
@@ -316,8 +306,7 @@ void siconos::mechanisms::MBTB_BodyBuild(
         std::cout << "setComputeJacobianFIntqByFD(true)" << std::endl;
         p->setComputeJacobianFIntqByFD(true);
       } else {
-        p->setComputeJacobianFIntqFunction(pluginFintJacqLib,
-                                           pluginFintJacqFct);
+        p->setComputeJacobianFIntqFunction(pluginFintJacqLib, pluginFintJacqFct);
       }
     }
     if (pluginFintJacvFct.length() > 1) {
@@ -325,8 +314,7 @@ void siconos::mechanisms::MBTB_BodyBuild(
         std::cout << "setComputeJacobianFIntvByFD(true)" << std::endl;
         p->setComputeJacobianFIntvByFD(true);
       } else {
-        p->setComputeJacobianFIntvFunction(pluginFintJacvLib,
-                                           pluginFintJacvFct);
+        p->setComputeJacobianFIntvFunction(pluginFintJacvLib, pluginFintJacvFct);
       }
     }
   }
@@ -339,8 +327,7 @@ void siconos::mechanisms::MBTB_BodyBuild(
         std::cout << "setComputeJacobianMIntqByFD(true)" << std::endl;
         p->setComputeJacobianMIntqByFD(true);
       } else {
-        p->setComputeJacobianMIntqFunction(pluginMintJacqLib,
-                                           pluginMintJacqFct);
+        p->setComputeJacobianMIntqFunction(pluginMintJacqLib, pluginMintJacqFct);
       }
     }
     if (pluginMintJacvFct.length() > 1) {
@@ -348,8 +335,7 @@ void siconos::mechanisms::MBTB_BodyBuild(
         std::cout << "setComputeJacobianMIntvByFD(true)" << std::endl;
         p->setComputeJacobianMIntvByFD(true);
       } else {
-        p->setComputeJacobianMIntvFunction(pluginMintJacvLib,
-                                           pluginMintJacvFct);
+        p->setComputeJacobianMIntvFunction(pluginMintJacvLib, pluginMintJacvFct);
       }
     }
   }
@@ -357,8 +343,7 @@ void siconos::mechanisms::MBTB_BodyBuild(
   if (pluginBoundaryConditionFct.length() > 1) {
     // SP::IndexInt bdindex(new IndexInt(1));
     //(*bdindex)[0] = 4;
-    DEBUG_PRINT(
-        "################################################################\n");
+    DEBUG_PRINT("################################################################\n");
 
     DEBUG_PRINT("###\n");
 
@@ -367,13 +352,12 @@ void siconos::mechanisms::MBTB_BodyBuild(
     DEBUG_PRINT("###\n");
 
     DEBUG_PRINTF("Set boundary Condition for body numDs = %i\n", numDS);
-    DEBUG_EXPR(for (std::vector<unsigned int>::iterator itindex =
-                        boundaryConditionIndex->begin();
-                    itindex != boundaryConditionIndex->end();
-                    ++itindex) { std::cout << *itindex << std::endl; };);
+    DEBUG_EXPR(
+        for (std::vector<unsigned int>::iterator itindex = boundaryConditionIndex->begin();
+             itindex != boundaryConditionIndex->end();
+             ++itindex) { std::cout << *itindex << std::endl; };);
 
-    auto bd = std::make_shared<siconos::modeling::BoundaryCondition>(
-        boundaryConditionIndex);
+    auto bd = std::make_shared<siconos::modeling::BoundaryCondition>(boundaryConditionIndex);
     bd->setComputePrescribedVelocityFunction(pluginBoundaryConditionLib,
                                              pluginBoundaryConditionFct);
     p->setBoundaryConditions(bd);
@@ -390,8 +374,7 @@ void siconos::mechanisms::MBTB_JointBuild(
     unsigned int numJ, const std::string& JointName, JointsType jointType,
     unsigned int indexDS1, unsigned int indexDS2,
     std::shared_ptr<siconos::algebra::SiconosVector> jointPosition) {
-  assert(mbtb::data::sNbOfJoints > numJ &&
-         "MBTB_JointBuild numJ >=mbtb::data::sNbOfJoints.");
+  assert(mbtb::data::sNbOfJoints > numJ && "MBTB_JointBuild numJ >=mbtb::data::sNbOfJoints.");
   if (numJ >= mbtb::data::sNbOfJoints) {
     printf("MBTB_JointBuild  numJoint >mbtb::data::sNbOfJoints\n");
     return;
@@ -403,7 +386,7 @@ void siconos::mechanisms::MBTB_JointBuild(
   mbtb::data::sJointType[numJ] = jointType;
   mbtb::data::sJointIndexDS[2 * numJ] = indexDS1;
   mbtb::data::sJointIndexDS[2 * numJ + 1] = indexDS2;
-  /*BUILD H SimpleMatrix and NSLAW*/
+  /*BUILD H SiconosMatrix and NSLAW*/
   if (jointType == JointsType::Pivot0 || jointType == JointsType::Pivot1) {
     nbDS = 1;
     if (jointType == JointsType::Pivot1) {
@@ -425,29 +408,27 @@ void siconos::mechanisms::MBTB_JointBuild(
   mbtb::data::sJointRelations[numJ] = new MBTB_JointR();
   if (jointType == JointsType::Pivot1) {
     mbtb::data::sJointRelations[numJ]->_jointR =
-        std::make_shared<siconos::joints::PivotJointR>(
-            P, A, false, mbtb::data::sDS[indexDS1], mbtb::data::sDS[indexDS2]);
+        std::make_shared<siconos::joints::PivotJointR>(P, A, false, mbtb::data::sDS[indexDS1],
+                                                       mbtb::data::sDS[indexDS2]);
     mbtb::data::sJointRelations[numJ]->_ds1 = mbtb::data::sDS[indexDS1];
     // sAllDSByInter[numJ].insert(mbtb::data::sDS[indexDS1]);
     // sAllDSByInter[numJ].insert(mbtb::data::sDS[indexDS2]);
   } else if (jointType == JointsType::Pivot0) {
     mbtb::data::sJointRelations[numJ]->_jointR =
-        std::make_shared<siconos::joints::PivotJointR>(
-            P, A, false, mbtb::data::sDS[indexDS1]);
+        std::make_shared<siconos::joints::PivotJointR>(P, A, false, mbtb::data::sDS[indexDS1]);
     mbtb::data::sJointRelations[numJ]->_ds1 = mbtb::data::sDS[indexDS1];
     // sAllDSByInter[numJ].insert(mbtb::data::sDS[indexDS1]);
   } else if (jointType == JointsType::Prismatic0) {
     mbtb::data::sJointRelations[numJ]->_jointR =
-        std::make_shared<siconos::joints::PrismaticJointR>(
-            A, false, mbtb::data::sDS[indexDS1]);
+        std::make_shared<siconos::joints::PrismaticJointR>(A, false,
+                                                           mbtb::data::sDS[indexDS1]);
     mbtb::data::sJointRelations[numJ]->_ds1 = mbtb::data::sDS[indexDS1];
     // sAllDSByInter[numJ].insert(mbtb::data::sDS[indexDS1]);
   }
 
   lNbEq = mbtb::data::sJointRelations[numJ]->_jointR->numberOfConstraints();
 
-  auto lH =
-      std::make_shared<siconos::algebra::SimpleMatrix>(lNbEq, nbDS * qDim);
+  auto lH = std::make_shared<siconos::algebra::SiconosMatrix>(lNbEq, nbDS * qDim);
   lH->zero();
   auto lNSL = std::make_shared<siconos::modeling::EqualityConditionNSL>(lNbEq);
 
@@ -456,11 +437,9 @@ void siconos::mechanisms::MBTB_JointBuild(
   //  sAllDSByInter[numJ],
   //                                           numJ, lNbEq , lNSL,
   //                                           mbtb::data::sJointRelations[numJ]->_jointR));
-  mbtb::data::sInterJoints[numJ] =
-      std::make_shared<siconos::modeling::Interaction>(
-          lNSL, mbtb::data::sJointRelations[numJ]->_jointR);
-  mbtb::data::sJointRelations[numJ]->_interaction =
-      mbtb::data::sInterJoints[numJ];
+  mbtb::data::sInterJoints[numJ] = std::make_shared<siconos::modeling::Interaction>(
+      lNSL, mbtb::data::sJointRelations[numJ]->_jointR);
+  mbtb::data::sJointRelations[numJ]->_interaction = mbtb::data::sInterJoints[numJ];
   // myModel->nonSmoothDynamicalSystem()->link(mbtb::data::sInterJoints[numJ],
   //                                           mbtb::data::sDS[indexDS1]);
   // if(mbtb::data::sJointType[numJ]==JointsType::Pivot1)
@@ -470,45 +449,39 @@ void siconos::mechanisms::MBTB_JointBuild(
 
 void siconos::mechanisms::MBTB_ContactBuild(unsigned int numContact,
                                             const std::string& ContactName,
-                                            unsigned int indexBody1,
-                                            int indexBody2,
-                                            unsigned int withFriction,
-                                            double mu, double en, double et) {
+                                            unsigned int indexBody1, int indexBody2,
+                                            unsigned int withFriction, double mu, double en,
+                                            double et) {
   assert(mbtb::data::sNbOfContacts > numContact &&
          "MBTB_ContactBuild contactId out of range.");
   mbtb::data::sContacts[numContact] = std::make_shared<MBTB_Contact>(
       numContact, ContactName, indexBody1, indexBody2,
-      mbtb::data::sNbOfBodies + 2 * numContact,
-      mbtb::data::sNbOfBodies + 2 * numContact + 1, withFriction);
+      mbtb::data::sNbOfBodies + 2 * numContact, mbtb::data::sNbOfBodies + 2 * numContact + 1,
+      withFriction);
   mbtb::data::sContacts[numContact]->set_en(en);
 
   if (withFriction) {
-    auto relation = std::make_shared<MBTB_FC3DContactRelation>(
-        mbtb::data::sContacts[numContact]);
+    auto relation =
+        std::make_shared<MBTB_FC3DContactRelation>(mbtb::data::sContacts[numContact]);
     mbtb::data::sContacts[numContact]->relation() = relation;
     mbtb::data::sContacts[numContact]->set_et(et);
-    auto nslaw0 = std::make_shared<siconos::modeling::NewtonImpactFrictionNSL>(
-        en, et, mu, 3);
-    mbtb::data::sInterContacts[numContact] =
-        std::make_shared<siconos::modeling::Interaction>(
-            nslaw0, mbtb::data::sContacts[numContact]->relation());
+    auto nslaw0 = std::make_shared<siconos::modeling::NewtonImpactFrictionNSL>(en, et, mu, 3);
+    mbtb::data::sInterContacts[numContact] = std::make_shared<siconos::modeling::Interaction>(
+        nslaw0, mbtb::data::sContacts[numContact]->relation());
     // MB : contactName is already in MBTB_Contact!
     // mbtb::data::sInterContacts[numContact]->setId(ContactName);
   } else {
-    auto relation = std::make_shared<MBTB_ContactRelation>(
-        mbtb::data::sContacts[numContact]);
+    auto relation = std::make_shared<MBTB_ContactRelation>(mbtb::data::sContacts[numContact]);
     mbtb::data::sContacts[numContact]->relation() = relation;
 
     auto lNSL = std::make_shared<siconos::modeling::NewtonImpactNSL>(
         mbtb::data::sContacts[numContact]->en());
-    mbtb::data::sInterContacts[numContact] =
-        std::make_shared<siconos::modeling::Interaction>(
-            lNSL, mbtb::data::sContacts[numContact]->relation());
+    mbtb::data::sInterContacts[numContact] = std::make_shared<siconos::modeling::Interaction>(
+        lNSL, mbtb::data::sContacts[numContact]->relation());
     //    mbtb::data::sInterContacts[numContact]->setId(ContactName);
   }
 
-  mbtb::data::sContacts[numContact]->setInteraction(
-      mbtb::data::sInterContacts[numContact]);
+  mbtb::data::sContacts[numContact]->setInteraction(mbtb::data::sInterContacts[numContact]);
 
   // myModel->nonSmoothDynamicalSystem()->link(mbtb::data::sInterContacts[numContact],
   //                                           mbtb::data::sDS[mbtb::data::sContacts[numContact]->_indexBody1]);
@@ -521,26 +494,22 @@ void siconos::mechanisms::MBTB_ContactBuild(unsigned int numContact,
   //                                             mbtb::data::sDS[mbtb::data::sContacts[numContact]->_indexBody2]);
 }
 void siconos::mechanisms::MBTB_setSolverIOption(int i, int value) {
-  mbtb::data::sSimu->oneStepNSProblem(0)->numericsSolverOptions()->iparam[i] =
-      value;
+  mbtb::data::sSimu->oneStepNSProblem(0)->numericsSolverOptions()->iparam[i] = value;
 }
 void siconos::mechanisms::MBTB_setSolverDOption(int i, double value) {
-  mbtb::data::sSimu->oneStepNSProblem(0)->numericsSolverOptions()->dparam[i] =
-      value;
+  mbtb::data::sSimu->oneStepNSProblem(0)->numericsSolverOptions()->dparam[i] = value;
 }
 void siconos::mechanisms::MBTB_initSimu(double hTS, int withProj) {
   for (unsigned int numDS = 0; numDS < mbtb::data::sNbOfBodies; numDS++)
     mbtb::data::myNsds->insertDynamicalSystem(mbtb::data::sDS[numDS]);
   for (unsigned int numJ = 0; numJ < mbtb::data::sNbOfJoints; numJ++) {
     if (mbtb::data::sJointType[numJ] == JointsType::Pivot0)
-      mbtb::data::myNsds->link(
-          mbtb::data::sInterJoints[numJ],
-          mbtb::data::sDS[mbtb::data::sJointIndexDS[2 * numJ]]);
+      mbtb::data::myNsds->link(mbtb::data::sInterJoints[numJ],
+                               mbtb::data::sDS[mbtb::data::sJointIndexDS[2 * numJ]]);
     if (mbtb::data::sJointType[numJ] == JointsType::Pivot1)
-      mbtb::data::myNsds->link(
-          mbtb::data::sInterJoints[numJ],
-          mbtb::data::sDS[mbtb::data::sJointIndexDS[2 * numJ]],
-          mbtb::data::sDS[mbtb::data::sJointIndexDS[2 * numJ + 1]]);
+      mbtb::data::myNsds->link(mbtb::data::sInterJoints[numJ],
+                               mbtb::data::sDS[mbtb::data::sJointIndexDS[2 * numJ]],
+                               mbtb::data::sDS[mbtb::data::sJointIndexDS[2 * numJ + 1]]);
   }
 
   for (unsigned int numC = 0; numC < mbtb::data::sNbOfContacts; numC++) {
@@ -548,10 +517,9 @@ void siconos::mechanisms::MBTB_initSimu(double hTS, int withProj) {
       DEBUG_PRINT(
           "MBTB_initSimu(double hTS, int withProj). Link contact with two "
           "bodies\n");
-      mbtb::data::myNsds->link(
-          mbtb::data::sInterContacts[numC],
-          mbtb::data::sDS[mbtb::data::sContacts[numC]->indexBody1()],
-          mbtb::data::sDS[mbtb::data::sContacts[numC]->indexBody2()]);
+      mbtb::data::myNsds->link(mbtb::data::sInterContacts[numC],
+                               mbtb::data::sDS[mbtb::data::sContacts[numC]->indexBody1()],
+                               mbtb::data::sDS[mbtb::data::sContacts[numC]->indexBody2()]);
       // mbtb::data::sInterContacts[numC]->insert(
       // mbtb::data::sDS[mbtb::data::sContacts[numC]->_indexBody2]  );
 
@@ -559,9 +527,8 @@ void siconos::mechanisms::MBTB_initSimu(double hTS, int withProj) {
       DEBUG_PRINT(
           "MBTB_initSimu(double hTS, int withProj). Link contact with one "
           "body\n");
-      mbtb::data::myNsds->link(
-          mbtb::data::sInterContacts[numC],
-          mbtb::data::sDS[mbtb::data::sContacts[numC]->indexBody1()]);
+      mbtb::data::myNsds->link(mbtb::data::sInterContacts[numC],
+                               mbtb::data::sDS[mbtb::data::sContacts[numC]->indexBody1()]);
 
       // std::cout <<"link(mbtb::data::sInterContacts[numC],
       // mbtb::data::sDS[mbtb::data::sContacts[numC]->_indexBody1]); " <<
@@ -579,30 +546,25 @@ void siconos::mechanisms::MBTB_initSimu(double hTS, int withProj) {
   }
 
   // -- (2) Time discretisation --
-  auto t = std::make_shared<siconos::simulation::TimeDiscretisation>(
-      mbtb::data::myt0, hTS);
+  auto t = std::make_shared<siconos::simulation::TimeDiscretisation>(mbtb::data::myt0, hTS);
 
   // -- (3) one step non smooth problem
   // osnspb.reset(new Equality());
   // osnspb.reset(new MLCP(SICONOS_MLCP_PATH));
-  auto osnspb =
-      std::make_shared<siconos::nonsmooth_formulations::GenericMechanical>(
-          SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
+  auto osnspb = std::make_shared<siconos::nonsmooth_formulations::GenericMechanical>(
+      SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
 
   osnspb->setKeepLambdaAndYState(true);
   // osnspb->numericsSolverOptions()->iparam[1]=0;
-  osnspb->numericsSolverOptions()->dWork =
-      (double*)malloc(512 * sizeof(double));
+  osnspb->numericsSolverOptions()->dWork = (double*)malloc(512 * sizeof(double));
   // osnspb->setNumericsVerboseMode(true);
 
   // osnspb->numericsSolverOptions()->iparam[1]=0;
   // osnspb->numericsSolverOptions()->dparam[0]=1e-5;
-  std::shared_ptr<siconos::nonsmooth_formulations::MLCPProjectOnConstraints>
-      osnspb_pos;
+  std::shared_ptr<siconos::nonsmooth_formulations::MLCPProjectOnConstraints> osnspb_pos;
 
   if (withProj) {
-    osnspb_pos = std::make_shared<
-        siconos::nonsmooth_formulations::MLCPProjectOnConstraints>(
+    osnspb_pos = std::make_shared<siconos::nonsmooth_formulations::MLCPProjectOnConstraints>(
         SICONOS_MLCP_ENUM);
     // osnspb_pos->setNumericsVerboseMode(1);
   }
@@ -612,8 +574,7 @@ void siconos::mechanisms::MBTB_initSimu(double hTS, int withProj) {
   std::shared_ptr<siconos::mechanisms::MBTB_MoreauJeanOSI> pOSI1;
   std::shared_ptr<siconos::integrators::MoreauJeanCombinedProjectionOSI> pOSI2;
   if (withProj == 0 or withProj == 1) {
-    pOSI1 = std::make_shared<siconos::mechanisms::MBTB_MoreauJeanOSI>(
-        mbtb::data::sDParams[0]);
+    pOSI1 = std::make_shared<siconos::mechanisms::MBTB_MoreauJeanOSI>(mbtb::data::sDParams[0]);
     pOS11->insertDynamicalSystem(mbtb::data::sDS[0]);
     pOSI1->_deactivateYPosThreshold = mbtb::data::sDParams[4];
     pOSI1->_deactivateYVelThreshold = mbtb::data::sDParams[5];
@@ -625,13 +586,11 @@ void siconos::mechanisms::MBTB_initSimu(double hTS, int withProj) {
   std::shared_ptr<siconos::integrators::MoreauJeanDirectProjectionOSI> pOSI1;
   std::shared_ptr<siconos::integrators::MoreauJeanCombinedProjectionOSI> pOSI2;
   if (withProj == 0) {
-    pOSI0 = std::make_shared<siconos::integrators::MoreauJeanOSI>(
-        mbtb::data::sDParams[0]);
+    pOSI0 = std::make_shared<siconos::integrators::MoreauJeanOSI>(mbtb::data::sDParams[0]);
     // pOSI0->insertDynamicalSystem(mbtb::data::sDS[0]);
   } else if (withProj == 1) {
-    pOSI1 =
-        std::make_shared<siconos::integrators::MoreauJeanDirectProjectionOSI>(
-            mbtb::data::sDParams[0]);
+    pOSI1 = std::make_shared<siconos::integrators::MoreauJeanDirectProjectionOSI>(
+        mbtb::data::sDParams[0]);
     // pOSI1->insertDynamicalSystem(mbtb::data::sDS[0]);
     pOSI1->setDeactivateYPosThreshold(mbtb::data::sDParams[4]);
     pOSI1->setDeactivateYVelThreshold(mbtb::data::sDParams[5]);
@@ -640,23 +599,18 @@ void siconos::mechanisms::MBTB_initSimu(double hTS, int withProj) {
   }
 #endif
   else if (withProj == 2) {
-    pOSI2 =
-        std::make_shared<siconos::integrators::MoreauJeanCombinedProjectionOSI>(
-            mbtb::data::sDParams[0]);
+    pOSI2 = std::make_shared<siconos::integrators::MoreauJeanCombinedProjectionOSI>(
+        mbtb::data::sDParams[0]);
     // pOSI2->insertDynamicalSystem(mbtb::data::sDS[0]);
   }
 
   if (withProj == 0) {
-    mbtb::data::sSimu =
-        std::make_shared<siconos::mechanisms::MBTB_TimeStepping>(
-            mbtb::data::myNsds, t, pOSI0, osnspb);
-    auto spSimu =
-        (std::static_pointer_cast<MBTB_TimeStepping>(mbtb::data::sSimu));
+    mbtb::data::sSimu = std::make_shared<siconos::mechanisms::MBTB_TimeStepping>(
+        mbtb::data::myNsds, t, pOSI0, osnspb);
+    auto spSimu = (std::static_pointer_cast<MBTB_TimeStepping>(mbtb::data::sSimu));
   } else if (withProj == 1) {
-    mbtb::data::sSimu =
-        std::make_shared<siconos::mechanisms::MBTB_TimeSteppingProj>(
-            mbtb::data::myNsds, t, pOSI1, osnspb, osnspb_pos,
-            mbtb::data::sDParams[11]);
+    mbtb::data::sSimu = std::make_shared<siconos::mechanisms::MBTB_TimeSteppingProj>(
+        mbtb::data::myNsds, t, pOSI1, osnspb, osnspb_pos, mbtb::data::sDParams[11]);
     (std::static_pointer_cast<MBTB_TimeSteppingProj>(mbtb::data::sSimu))
         ->setProjectionMaxIteration(mbtb::data::sDParams[8]);
     (std::static_pointer_cast<MBTB_TimeSteppingProj>(mbtb::data::sSimu))
@@ -664,9 +618,8 @@ void siconos::mechanisms::MBTB_initSimu(double hTS, int withProj) {
     (std::static_pointer_cast<MBTB_TimeSteppingProj>(mbtb::data::sSimu))
         ->setConstraintTolUnilateral(mbtb::data::sDParams[10]);
   } else if (withProj == 2) {
-    mbtb::data::sSimu =
-        std::make_shared<siconos::mechanisms::MBTB_TimeSteppingCombinedProj>(
-            mbtb::data::myNsds, t, pOSI2, osnspb, osnspb_pos, 2);
+    mbtb::data::sSimu = std::make_shared<siconos::mechanisms::MBTB_TimeSteppingCombinedProj>(
+        mbtb::data::myNsds, t, pOSI2, osnspb, osnspb_pos, 2);
     (std::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(mbtb::data::sSimu))
         ->setProjectionMaxIteration(mbtb::data::sDParams[8]);
     (std::static_pointer_cast<MBTB_TimeSteppingCombinedProj>(mbtb::data::sSimu))
@@ -734,30 +687,25 @@ void siconos::mechanisms::MBTB_initSimu(double hTS, int withProj) {
   myfile.close();
   cout << "====> end of initialisation" << endl << endl;
 }
-std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem>
-siconos::mechanisms::MBTB_nsds() {
+std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> siconos::mechanisms::MBTB_nsds() {
   return mbtb::data::myNsds;
 }
-std::shared_ptr<siconos::simulation::Simulation>
-siconos::mechanisms::MBTB_simulation() {
+std::shared_ptr<siconos::simulation::Simulation> siconos::mechanisms::MBTB_simulation() {
   return mbtb::data::sSimu;
 }
 
 void siconos::mechanisms::MBTB_doProj(unsigned int v) {
-  (std::static_pointer_cast<MBTB_TimeSteppingProj>(mbtb::data::sSimu))
-      ->setDoProj(v);
+  (std::static_pointer_cast<MBTB_TimeSteppingProj>(mbtb::data::sSimu))->setDoProj(v);
 }
 void siconos::mechanisms::MBTB_doOnlyProj(unsigned int v) {
-  (std::static_pointer_cast<MBTB_TimeSteppingProj>(mbtb::data::sSimu))
-      ->setDoOnlyProj(v);
+  (std::static_pointer_cast<MBTB_TimeSteppingProj>(mbtb::data::sSimu))->setDoOnlyProj(v);
 }
 void siconos::mechanisms::MBTB_projectionMaxIteration(unsigned int v) {
   (std::static_pointer_cast<MBTB_TimeSteppingProj>(mbtb::data::sSimu))
       ->setProjectionMaxIteration(v);
 }
 void siconos::mechanisms::MBTB_constraintTol(double v) {
-  (std::static_pointer_cast<MBTB_TimeSteppingProj>(mbtb::data::sSimu))
-      ->setConstraintTol(v);
+  (std::static_pointer_cast<MBTB_TimeSteppingProj>(mbtb::data::sSimu))->setConstraintTol(v);
 }
 
 void siconos::mechanisms::MBTB_constraintTolUnilateral(double v) {
@@ -772,8 +720,7 @@ void siconos::mechanisms::MBTB_run(int NbSteps) {
     // while (true){
     mbtb::data::sTimerCmp++;
     if (mbtb::data::sTimerCmp % mbtb::data::sFreqOutput == 0) {
-      printf("STEP Number = %d < %d.\n", mbtb::data::sTimerCmp,
-             NbSteps + currentTimerCmp);
+      printf("STEP Number = %d < %d.\n", mbtb::data::sTimerCmp, NbSteps + currentTimerCmp);
     }
     /*NB: first step not useful*/
     mbtb::internal::MBTB_STEP();
@@ -818,10 +765,8 @@ void siconos::mechanisms::MBTB_setJointPoints(
   mbtb::data::sJointRelations[numJ]->_G0C2 = G0C2;
 }
 
-void siconos::mechanisms::MBTB_ContactSetDParam(unsigned int paramId,
-                                                unsigned int contactId,
-                                                unsigned int idShape,
-                                                double v) {
+void siconos::mechanisms::MBTB_ContactSetDParam(unsigned int paramId, unsigned int contactId,
+                                                unsigned int idShape, double v) {
   assert(mbtb::data::sNbOfContacts > contactId &&
          "MBTB_ContactLoadCADFile contactId out of range.");
   // unsigned int IdInCAD=mbtb::data::sNbOfBodies+2*contactId;
@@ -842,8 +787,7 @@ void siconos::mechanisms::MBTB_ContactSetDParam(unsigned int paramId,
       printf("Error: MBTB_ContactSetDParam paramId out of range \n");
   }
 }
-void siconos::mechanisms::MBTB_ContactSetIParam(unsigned int paramId,
-                                                unsigned int contactId,
+void siconos::mechanisms::MBTB_ContactSetIParam(unsigned int paramId, unsigned int contactId,
                                                 unsigned int idShape, bool v) {
   switch (paramId) {
     case 0:
@@ -859,13 +803,13 @@ void siconos::mechanisms::MBTB_ContactSetIParam(unsigned int paramId,
       printf("Error: MBTB_ContactSetIParam paramId out of range \n");
   }
 }
-void siconos::mechanisms::MBTB_BodySetDParam(unsigned int paramId,
-                                             unsigned int bodyId, double v) {
+void siconos::mechanisms::MBTB_BodySetDParam(unsigned int paramId, unsigned int bodyId,
+                                             double v) {
   printf("MBTB_BodySetDParam not yet implemented\n");
 }
 
-void siconos::mechanisms::MBTB_BodySetIParam(unsigned int paramId,
-                                             unsigned int bodyId, int v) {
+void siconos::mechanisms::MBTB_BodySetIParam(unsigned int paramId, unsigned int bodyId,
+                                             int v) {
   printf("MBTB_BodySetIParam not yet implemented\n");
 }
 void siconos::mechanisms::MBTB_BodySetVelocity(
@@ -878,9 +822,7 @@ void siconos::mechanisms::MBTB_BodySetVelocity(
 void siconos::mechanisms::MBTB_SetDParam(unsigned int paramId, double v) {
   mbtb::data::sDParams[paramId] = v;
 }
-void siconos::mechanisms::MBTB_print_dist(unsigned int v) {
-  mbtb::data::sPrintDist = v;
-}
+void siconos::mechanisms::MBTB_print_dist(unsigned int v) { mbtb::data::sPrintDist = v; }
 
 void siconos::mechanisms::MBTB_displayStep_bodies(unsigned int v) {
   mbtb::data::sDisplayStepBodies = v;

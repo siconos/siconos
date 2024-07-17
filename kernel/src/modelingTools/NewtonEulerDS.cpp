@@ -22,12 +22,12 @@
 
 #include "BlockMatrix.hpp"
 #include "RotationQuaternion.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixOp.hpp"        // setBlock
 #include "SiconosMatrixVectorOp.hpp"  // mat-vec prod
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"  // inner_prod, setBlock
 #include "SiconosVisitor.hpp"
-#include "SiconosMatrix.hpp"
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"
@@ -35,7 +35,7 @@
 namespace siconos::modeling {
 static void computeJacobianConvectedVectorInBodyFrame(
     double q0, double q1, double q2, double q3,
-    std::shared_ptr<siconos::algebra::SiconosMatrix> jacobian,
+    std::shared_ptr<SecondOrderDS::Matrix> jacobian,
     std::shared_ptr<siconos::algebra::SiconosVector> v) {
   /* This routine compute the jacobian with respect to p of R^T(p)v */
   jacobian->zero();
@@ -86,10 +86,10 @@ static void computeMExt_internal(
 }  // namespace siconos::modeling
 
 void siconos::modeling::computeT(std::shared_ptr<siconos::algebra::SiconosVector> q,
-                                 std::shared_ptr<siconos::algebra::SiconosMatrix> T) {
+                                 std::shared_ptr<SecondOrderDS::Matrix> T) {
   DEBUG_BEGIN(
       "computeT(std::shared_ptr<siconos::algebra::SiconosVector> q, "
-      "std::shared_ptr<siconos::algebra::SiconosMatrix> T)\n")
+      "std::shared_ptr<Matrix> T)\n")
   //  std::cout <<"\n NewtonEulerDS::computeT(std::shared_ptr<siconos::algebra::SiconosVector>
   //  q)\n  " <<std::endl;
   double q0 = q->getValue(3) / 2.0;
@@ -110,7 +110,7 @@ void siconos::modeling::computeT(std::shared_ptr<siconos::algebra::SiconosVector
   T->setValue(6, 5, q0);
   DEBUG_END(
       "computeT(std::shared_ptr<siconos::algebra::SiconosVector> q, "
-      "std::shared_ptr<siconos::algebra::SiconosMatrix> T)\n")
+      "std::shared_ptr<Matrix> T)\n")
 }
 
 // From a set of data; Mass filled-in directly from a siconosMatrix -
@@ -135,11 +135,11 @@ siconos::modeling::NewtonEulerDS::NewtonEulerDS() : SecondOrderDS(13, 6) {
   _p.resize(3);
   _p[1] = std::make_shared<siconos::algebra::SiconosVector>(_ndof);  // Needed in NewtonEulerR
 
-  _mass = std::make_shared<siconos::algebra::SiconosMatrix>(_ndof, _ndof);
+  _mass = std::make_shared<Matrix>(_ndof, _ndof);
   _mass->zero();
-  _T = std::make_shared<siconos::algebra::SiconosMatrix>(_qDim, _ndof);
+  _T = std::make_shared<Matrix>(_qDim, _ndof);
 
-  _I = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
+  _I = std::make_shared<Matrix>(3, 3);
   _I->eye();
   updateMassMatrix();
 
@@ -153,15 +153,15 @@ siconos::modeling::NewtonEulerDS::NewtonEulerDS() : SecondOrderDS(13, 6) {
 siconos::modeling::NewtonEulerDS::NewtonEulerDS(
     std::shared_ptr<siconos::algebra::SiconosVector> Q0,
     std::shared_ptr<siconos::algebra::SiconosVector> Twist0, double mass,
-    std::shared_ptr<siconos::algebra::SiconosMatrix> inertialMatrix)
-  : NewtonEulerDS{}
+    std::shared_ptr<Matrix> inertialMatrix)
+    : NewtonEulerDS{}
 
 {
   DEBUG_BEGIN(
       "siconos::modeling::NewtonEulerDS::NewtonEulerDS(std::shared_ptr<siconos::algebra::"
       "SiconosVector> Q0, "
       "std::shared_ptr<siconos::algebra::SiconosVector> Twist0,double  mass, "
-      "std::shared_ptr<siconos::algebra::SiconosMatrix> inertialMatrix)\n");
+      "std::shared_ptr<Matrix> inertialMatrix)\n");
 
   // Initial conditions
   _q0 = Q0;
@@ -182,7 +182,7 @@ siconos::modeling::NewtonEulerDS::NewtonEulerDS(
       "siconos::modeling::NewtonEulerDS::NewtonEulerDS(std::shared_ptr<siconos::algebra::"
       "SiconosVector> Q0, "
       "std::shared_ptr<siconos::algebra::SiconosVector> Twist0,double  mass, "
-      "std::shared_ptr<siconos::algebra::SiconosMatrix> inertialMatrix)\n");
+      "std::shared_ptr<Matrix> inertialMatrix)\n");
 }
 
 void siconos::modeling::NewtonEulerDS::init_forces() {
@@ -200,8 +200,8 @@ void siconos::modeling::NewtonEulerDS::init_forces() {
    * This should be remove if the integration is explicit or _nullifyMGyr(false) is set to true
    * ?
    */
-  _jacobianMGyrtwist = std::make_shared<siconos::algebra::SiconosMatrix>(3, _ndof);
-  _jacobianWrenchTwist = std::make_shared<siconos::algebra::SiconosMatrix>(_ndof, _ndof);
+  _jacobianMGyrtwist = std::make_shared<Matrix>(3, _ndof);
+  _jacobianWrenchTwist = std::make_shared<Matrix>(_ndof, _ndof);
 }
 
 void siconos::modeling::NewtonEulerDS::updateMassMatrix() {
@@ -280,7 +280,8 @@ void siconos::modeling::NewtonEulerDS::initRhs(double time) {
   // Compute _dotq
   computeT();
   siconos::algebra::prod(*_T, *_twist, *_dotq, true);
-  _x[1] = std::make_shared<siconos::algebra::SiconosVector>(_dotq->size() + _acceleration->size());
+  _x[1] =
+      std::make_shared<siconos::algebra::SiconosVector>(_dotq->size() + _acceleration->size());
   *(_x[1]) << *_dotq, *_acceleration;
 
   // Nothing to do for the initialization of the wrench
@@ -296,16 +297,15 @@ void siconos::modeling::NewtonEulerDS::initRhs(double time) {
   computeRhs(time);
 
   /** \warning the derivative of T w.r.t to q is neglected */
-  _rhsMatrices[jacobianXBloc00_] = std::make_shared<siconos::algebra::SiconosMatrix>(_qDim, _qDim);
+  _rhsMatrices[jacobianXBloc00_] = std::make_shared<Matrix>(_qDim, _qDim);
 
-  _rhsMatrices[jacobianXBloc01_] = std::make_shared<siconos::algebra::SiconosMatrix>(*_T);
+  _rhsMatrices[jacobianXBloc01_] = std::make_shared<Matrix>(*_T);
   bool flag1 = false, flag2 = false;
   if (_jacobianWrenchq) {
     // Solve MjacobianX(1,0) = jacobianFL[0]
     computeJacobianqForces(time);
 
-    _rhsMatrices[jacobianXBloc10_] =
-        std::make_shared<siconos::algebra::SiconosMatrix>(*_jacobianWrenchq);
+    _rhsMatrices[jacobianXBloc10_] = std::make_shared<Matrix>(*_jacobianWrenchq);
     algebra::solveInPlace(*_inverseMass, *_rhsMatrices[jacobianXBloc10_]);
     flag1 = true;
   }
@@ -313,19 +313,18 @@ void siconos::modeling::NewtonEulerDS::initRhs(double time) {
   if (_jacobianWrenchTwist) {
     // Solve MjacobianX(1,1) = jacobianFL[1]
     computeJacobianvForces(time);
-    _rhsMatrices[jacobianXBloc11_] =
-        std::make_shared<siconos::algebra::SiconosMatrix>(*_jacobianWrenchTwist);
+    _rhsMatrices[jacobianXBloc11_] = std::make_shared<Matrix>(*_jacobianWrenchTwist);
     algebra::solveInPlace(*_inverseMass, *_rhsMatrices[jacobianXBloc11_]);
     flag2 = true;
   }
 
   if (!_rhsMatrices[zeroMatrix_]) {
-    _rhsMatrices[zeroMatrix_] = std::make_shared<siconos::algebra::SiconosMatrix>(6, 6);
+    _rhsMatrices[zeroMatrix_] = std::make_shared<Matrix>(6, 6);
     _rhsMatrices[zeroMatrix_]->setZero();
   }
 
   if (!_rhsMatrices[zeroMatrixqDim_]) {
-    _rhsMatrices[zeroMatrixqDim_] = std::make_shared<siconos::algebra::SiconosMatrix>(6, _qDim);
+    _rhsMatrices[zeroMatrixqDim_] = std::make_shared<Matrix>(6, _qDim);
     _rhsMatrices[zeroMatrixqDim_]->setZero();
   }
 
@@ -437,7 +436,7 @@ void siconos::modeling::NewtonEulerDS::resetToInitialState() {
 void siconos::modeling::NewtonEulerDS::init_inverse_mass() {
   if (_mass && !_inverseMass) {
     updateMassMatrix();
-    _inverseMass = std::make_shared<siconos::algebra::SiconosMatrix>(*_mass);
+    _inverseMass = std::make_shared<Matrix>(*_mass);
   }
 }
 
@@ -552,8 +551,9 @@ void siconos::modeling::NewtonEulerDS::computeJacobianMExtqExpressedInInertialFr
 
   DEBUG_EXPR(_jacobianMExtq->display());
 
-  // std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianMExtqtmp (new
-  // SiconosMatrix(*_jacobianMExtq)); computeJacobianMExtqExpressedInInertialFrameByFD(time, q);
+  // std::shared_ptr<Matrix> jacobianMExtqtmp (new
+  // SiconosMatrix(*_jacobianMExtq)); computeJacobianMExtqExpressedInInertialFrameByFD(time,
+  // q);
 
   // std::cout << "#################  " << (*jacobianMExtqtmp- *_jacobianMExtq).normInf() <<
   // std::endl; assert((*jacobianMExtqtmp- *_jacobianMExtq).normInf()< 1e-10);
@@ -817,13 +817,13 @@ void siconos::modeling::NewtonEulerDS::computeRhs(double time) {
 
 void siconos::modeling::NewtonEulerDS::computeJacobianRhsx(double time) {
   if (_jacobianWrenchq) {
-    std::shared_ptr<siconos::algebra::SiconosMatrix> bloc10 = _jacxRhs->block(1, 0);
+    std::shared_ptr<Matrix> bloc10 = _jacxRhs->block(1, 0);
     computeJacobianqForces(time);
     *bloc10 = *_jacobianWrenchq;
     algebra::solveInPlace(*_inverseMass, *bloc10);
   }
   if (_jacobianWrenchTwist) {
-    std::shared_ptr<siconos::algebra::SiconosMatrix> bloc11 = _jacxRhs->block(1, 1);
+    std::shared_ptr<Matrix> bloc11 = _jacxRhs->block(1, 1);
     computeJacobianvForces(time);
     *bloc11 = *_jacobianWrenchTwist;
     algebra::solveInPlace(*_inverseMass, *bloc11);
@@ -834,14 +834,16 @@ void siconos::modeling::NewtonEulerDS::computeForces(double time) {
   computeForces(time, _q, _twist);
 }
 
+namespace {  // Anonymous namespace for local functions (internal linkage)
+
 /** This function has been added to avoid Swig director to wrap _mGyr into numpy.array
  * when we call
  * siconos::modeling::NewtonEulerDS::computeMGyr(std::shared_ptr<siconos::algebra::SiconosVector>
  * twist) that calls in turn computeMGyr(twist, _mGyr)
  */
-static void computeMGyr_internal(std::shared_ptr<siconos::algebra::SiconosMatrix> I,
-                                 std::shared_ptr<siconos::algebra::SiconosVector> twist,
-                                 std::shared_ptr<siconos::algebra::SiconosVector> mGyr) {
+void computeMGyr_internal(std::shared_ptr<siconos::modeling::SecondOrderDS::Matrix> I,
+                          std::shared_ptr<siconos::algebra::SiconosVector> twist,
+                          std::shared_ptr<siconos::algebra::SiconosVector> mGyr) {
   if (I) {
     DEBUG_EXPR(I->display());
     DEBUG_EXPR(twist->display());
@@ -854,6 +856,8 @@ static void computeMGyr_internal(std::shared_ptr<siconos::algebra::SiconosMatrix
     siconos::algebra::cross_product(omega, iomega, *mGyr);
   }
 }
+}  // namespace
+
 void siconos::modeling::NewtonEulerDS::computeMGyr(
     std::shared_ptr<siconos::algebra::SiconosVector> twist,
     std::shared_ptr<siconos::algebra::SiconosVector> mGyr) {
@@ -952,7 +956,7 @@ void siconos::modeling::NewtonEulerDS::computeJacobianqForces(double time) {
     _jacobianWrenchq->zero();
     if (_jacobianFIntq) {
       computeJacobianFIntq(time);
-      std::dynamic_pointer_cast<siconos::algebra::SiconosMatrix>(_jacobianWrenchq)
+      std::dynamic_pointer_cast<Matrix>(_jacobianWrenchq)
           ->setBlock(0, 0, -1.0 * *_jacobianFIntq);
     }
     if (_jacobianMIntq) {
@@ -960,7 +964,7 @@ void siconos::modeling::NewtonEulerDS::computeJacobianqForces(double time) {
     }
     if (_isMextExpressedInInertialFrame && _mExt) {
       computeJacobianMExtqExpressedInInertialFrame(time, _q);
-      std::dynamic_pointer_cast<siconos::algebra::SiconosMatrix>(_jacobianWrenchq)
+      std::dynamic_pointer_cast<Matrix>(_jacobianWrenchq)
           ->setBlock(3, 0, 1.0 * *_jacobianMExtq);
     }
     DEBUG_EXPR(_jacobianWrenchq->display(););
@@ -978,19 +982,19 @@ void siconos::modeling::NewtonEulerDS::computeJacobianvForces(double time) {
     _jacobianWrenchTwist->zero();
     if (_jacobianFInttwist) {
       computeJacobianFIntv(time);
-      std::dynamic_pointer_cast<siconos::algebra::SiconosMatrix>(_jacobianWrenchTwist)
+      std::dynamic_pointer_cast<Matrix>(_jacobianWrenchTwist)
           ->setBlock(0, 0, -1.0 * *_jacobianFInttwist);
     }
     if (_jacobianMInttwist) {
       computeJacobianMIntv(time);
-      std::dynamic_pointer_cast<siconos::algebra::SiconosMatrix>(_jacobianWrenchTwist)
+      std::dynamic_pointer_cast<Matrix>(_jacobianWrenchTwist)
           ->setBlock(3, 0, -1.0 * *_jacobianMInttwist);
     }
     if (!_nullifyMGyr) {
       if (_jacobianMGyrtwist) {
         // computeJacobianMGyrtwistByFD(time,_q,_twist);
         computeJacobianMGyrtwist(time);
-        std::dynamic_pointer_cast<siconos::algebra::SiconosMatrix>(_jacobianWrenchTwist)
+        std::dynamic_pointer_cast<Matrix>(_jacobianWrenchTwist)
             ->setBlock(3, 0, -1.0 * *_jacobianMGyrtwist);
       }
     }
@@ -1032,7 +1036,7 @@ void siconos::modeling::NewtonEulerDS::computeJacobianMGyrtwist(double time) {
   // else nothing.
   DEBUG_EXPR(_jacobianMGyrtwist->display());
   // _jacobianMGyrtwist->display();
-  // std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianMGyrtmp (new
+  // std::shared_ptr<Matrix> jacobianMGyrtmp (new
   // SiconosMatrix(*_jacobianMGyrtwist)); computeJacobianMGyrtwistByFD(time, _q, _twist);
   // jacobianMGyrtmp->display();
   // std::cout << "#################  " << (*jacobianMGyrtmp - *_jacobianMGyrtwist).normInf()
@@ -1090,10 +1094,8 @@ void siconos::modeling::NewtonEulerDS::display(bool brief) const {
 
 void siconos::modeling::NewtonEulerDS::setIsMextExpressedInInertialFrame(bool value) {
   _isMextExpressedInInertialFrame = value;
-  if (!_jacobianMExtq)
-    _jacobianMExtq = std::make_shared<siconos::algebra::SiconosMatrix>(3, _qDim);
-  if (!_jacobianWrenchq)
-    _jacobianWrenchq = std::make_shared<siconos::algebra::SiconosMatrix>(_ndof, _qDim);
+  if (!_jacobianMExtq) _jacobianMExtq = std::make_shared<Matrix>(3, _qDim);
+  if (!_jacobianWrenchq) _jacobianWrenchq = std::make_shared<Matrix>(_ndof, _qDim);
 }
 
 // --- Functions for memory handling ---
@@ -1135,7 +1137,7 @@ void siconos::modeling::NewtonEulerDS::computeT() { siconos::modeling::computeT(
 
 void siconos::modeling::NewtonEulerDS::computeTdot() {
   if (!_Tdot) {
-    _Tdot = std::make_shared<siconos::algebra::SiconosMatrix>(_qDim, _ndof);
+    _Tdot = std::make_shared<Matrix>(_qDim, _ndof);
     _Tdot->zero();
   }
 
@@ -1196,69 +1198,54 @@ void siconos::modeling::NewtonEulerDS::setComputeJacobianFIntqFunction(
     const std::string& pluginPath, const std::string& functionName) {
   //    Plugin::setFunction(&computeJacobianFIntqPtr, pluginPath,functionName);
   _pluginJacqFInt->setComputeFunction(pluginPath, functionName);
-  if (!_jacobianFIntq)
-    _jacobianFIntq = std::make_shared<siconos::algebra::SiconosMatrix>(3, _qDim);
-  if (!_jacobianWrenchq)
-    _jacobianWrenchq = std::make_shared<siconos::algebra::SiconosMatrix>(_ndof, _qDim);
+  if (!_jacobianFIntq) _jacobianFIntq = std::make_shared<Matrix>(3, _qDim);
+  if (!_jacobianWrenchq) _jacobianWrenchq = std::make_shared<Matrix>(_ndof, _qDim);
   _computeJacobianFIntqByFD = false;
 }
 void siconos::modeling::NewtonEulerDS::setComputeJacobianFIntvFunction(
     const std::string& pluginPath, const std::string& functionName) {
   //    Plugin::setFunction(&computeJacobianFIntvPtr, pluginPath,functionName);
   _pluginJactwistFInt->setComputeFunction(pluginPath, functionName);
-  if (!_jacobianFInttwist)
-    _jacobianFInttwist = std::make_shared<siconos::algebra::SiconosMatrix>(3, _ndof);
+  if (!_jacobianFInttwist) _jacobianFInttwist = std::make_shared<Matrix>(3, _ndof);
   _computeJacobianFInttwistByFD = false;
 }
 void siconos::modeling::NewtonEulerDS::setComputeJacobianFIntqFunction(FInt_NE fct) {
   _pluginJacqFInt->setComputeFunction((void*)fct);
-  if (!_jacobianFIntq)
-    _jacobianFIntq = std::make_shared<siconos::algebra::SiconosMatrix>(3, _qDim);
-  if (!_jacobianWrenchq)
-    _jacobianWrenchq = std::make_shared<siconos::algebra::SiconosMatrix>(_ndof, _qDim);
+  if (!_jacobianFIntq) _jacobianFIntq = std::make_shared<Matrix>(3, _qDim);
+  if (!_jacobianWrenchq) _jacobianWrenchq = std::make_shared<Matrix>(_ndof, _qDim);
   _computeJacobianFIntqByFD = false;
 }
 void siconos::modeling::NewtonEulerDS::setComputeJacobianFIntvFunction(FInt_NE fct) {
   _pluginJactwistFInt->setComputeFunction((void*)fct);
-  if (!_jacobianFInttwist)
-    _jacobianFInttwist = std::make_shared<siconos::algebra::SiconosMatrix>(3, _ndof);
-  if (!_jacobianWrenchTwist)
-    _jacobianWrenchTwist = std::make_shared<siconos::algebra::SiconosMatrix>(_ndof, _ndof);
+  if (!_jacobianFInttwist) _jacobianFInttwist = std::make_shared<Matrix>(3, _ndof);
+  if (!_jacobianWrenchTwist) _jacobianWrenchTwist = std::make_shared<Matrix>(_ndof, _ndof);
   _computeJacobianFInttwistByFD = false;
 }
 
 void siconos::modeling::NewtonEulerDS::setComputeJacobianMIntqFunction(
     const std::string& pluginPath, const std::string& functionName) {
   _pluginJacqMInt->setComputeFunction(pluginPath, functionName);
-  if (!_jacobianMIntq)
-    _jacobianMIntq = std::make_shared<siconos::algebra::SiconosMatrix>(3, _qDim);
-  if (!_jacobianWrenchq)
-    _jacobianWrenchq = std::make_shared<siconos::algebra::SiconosMatrix>(_ndof, _qDim);
+  if (!_jacobianMIntq) _jacobianMIntq = std::make_shared<Matrix>(3, _qDim);
+  if (!_jacobianWrenchq) _jacobianWrenchq = std::make_shared<Matrix>(_ndof, _qDim);
   _computeJacobianMIntqByFD = false;
 }
 void siconos::modeling::NewtonEulerDS::setComputeJacobianMIntvFunction(
     const std::string& pluginPath, const std::string& functionName) {
   _pluginJactwistMInt->setComputeFunction(pluginPath, functionName);
-  if (!_jacobianMInttwist)
-    _jacobianMInttwist = std::make_shared<siconos::algebra::SiconosMatrix>(3, _ndof);
-  if (!_jacobianWrenchTwist)
-    _jacobianWrenchTwist = std::make_shared<siconos::algebra::SiconosMatrix>(_ndof, _ndof);
+  if (!_jacobianMInttwist) _jacobianMInttwist = std::make_shared<Matrix>(3, _ndof);
+  if (!_jacobianWrenchTwist) _jacobianWrenchTwist = std::make_shared<Matrix>(_ndof, _ndof);
   _computeJacobianMInttwistByFD = false;
 }
 void siconos::modeling::NewtonEulerDS::setComputeJacobianMIntqFunction(FInt_NE fct) {
   _pluginJacqMInt->setComputeFunction((void*)fct);
-  if (!_jacobianMIntq)
-    _jacobianMIntq = std::make_shared<siconos::algebra::SiconosMatrix>(3, _qDim);
-  if (!_jacobianWrenchq)
-    _jacobianWrenchq = std::make_shared<siconos::algebra::SiconosMatrix>(_ndof, _qDim);
+  if (!_jacobianMIntq) _jacobianMIntq = std::make_shared<Matrix>(3, _qDim);
+  if (!_jacobianWrenchq) _jacobianWrenchq = std::make_shared<Matrix>(_ndof, _qDim);
   _computeJacobianMIntqByFD = false;
 }
 void siconos::modeling::NewtonEulerDS::setComputeJacobianMIntvFunction(FInt_NE fct) {
   _pluginJactwistMInt->setComputeFunction((void*)fct);
-  if (!_jacobianMInttwist)
-    _jacobianMInttwist = std::make_shared<siconos::algebra::SiconosMatrix>(3, _ndof);
-  if (!_jacobianWrenchTwist)
-    _jacobianWrenchTwist = std::make_shared<siconos::algebra::SiconosMatrix>(_ndof, _ndof);
+  if (!_jacobianMInttwist) _jacobianMInttwist = std::make_shared<Matrix>(3, _ndof);
+  if (!_jacobianWrenchTwist) _jacobianWrenchTwist = std::make_shared<Matrix>(_ndof, _ndof);
   _computeJacobianMInttwistByFD = false;
 }
 

@@ -24,11 +24,11 @@
 #define RELATION_H
 #include <memory>
 #include <string>
-#include "SiconosVector.hpp"
-#include "SiconosMatrix.hpp"
-#include "BlockVector.hpp"
 
+#include "BlockVector.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosSerialization.hpp"  // For ACCEPT_SERIALIZATION
+#include "SiconosVector.hpp"
 
 namespace siconos::algebra {
 // class SiconosMatrix;
@@ -152,8 +152,8 @@ class Relation {
    *  \param type type of the relation
    *  \param subtype subtype of the relation
    */
-  Relation(RelationType type, RelationSubType subtype) : _relationType(type), _subType(subtype)
-  {
+  Relation(RelationType type, RelationSubType subtype)
+      : _relationType(type), _subType(subtype) {
     _zeroPlugin();
   };
 
@@ -164,7 +164,6 @@ class Relation {
   Relation(Relation &&) = delete;
   Relation &operator=(const Relation &) = delete;
   Relation &operator=(Relation &&) = delete;
-
 
  public:
   /** destructor */
@@ -311,8 +310,7 @@ class Relation {
 
       \return a shared pointer to the plugin
   */
-  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginh() const
-  {
+  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginh() const {
     return _pluginh;
   };
 
@@ -321,8 +319,7 @@ class Relation {
 
       \return a shared pointer to the plugin
    */
-  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginJachx() const
-  {
+  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginJachx() const {
     return _pluginJachx;
   };
 
@@ -331,8 +328,7 @@ class Relation {
 
       \return a shared pointer to the plugin
   */
-  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginJachlambda() const
-  {
+  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginJachlambda() const {
     return _pluginJachlambda;
   };
 
@@ -341,8 +337,7 @@ class Relation {
 
       \return a shared pointer to the plugin
   */
-  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluging() const
-  {
+  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluging() const {
     return _pluging;
   };
 
@@ -351,8 +346,7 @@ class Relation {
 
       \return a shared pointer to the plugin
   */
-  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginJacLg() const
-  {
+  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginJacLg() const {
     return _pluginJacglambda;
   };
 
@@ -361,8 +355,7 @@ class Relation {
 
       \return a shared pointer to the plugin
   */
-  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginf() const
-  {
+  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginf() const {
     return _pluginf;
   };
 
@@ -371,8 +364,7 @@ class Relation {
 
       \return a shared pointer to the plugin
   */
-  inline std::shared_ptr<siconos::plugins::PluggedObject> getPlugine() const
-  {
+  inline std::shared_ptr<siconos::plugins::PluggedObject> getPlugine() const {
     return _plugine;
   };
 

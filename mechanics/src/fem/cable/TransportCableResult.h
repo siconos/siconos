@@ -25,11 +25,8 @@
 #include <vector>
 
 #include "Ropeway.h"
-
-namespace siconos::algebra {
-class SiconosVector;
-class SiconosMatrix;
-}  // namespace siconos::algebra
+#include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 
 namespace siconos::fem::cable {
 
@@ -80,10 +77,10 @@ class TransportCableResult {
   std::vector<std::vector<Point>> T = {};
   ;
 
-  std::shared_ptr<class siconos::algebra::SiconosVector> q0{nullptr};
-  std::shared_ptr<class siconos::algebra::SiconosVector> v0{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> q0{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> v0{nullptr};
 
-  std::shared_ptr<class siconos::algebra::SiconosMatrix> mass{nullptr};
-  std::shared_ptr<class siconos::algebra::SiconosVector> b{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> mass{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> b{nullptr};
 };
 }  // namespace siconos::fem::cable

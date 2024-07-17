@@ -21,6 +21,9 @@
 
 #include <memory>
 
+#include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
+
 // #include <MechanicsFwd.hpp>
 
 // #ifdef HAVE_SICONOS_MECHANISMS
@@ -28,12 +31,6 @@
 // #endif
 // #include <SiconosFwd.hpp>
 // #include <SiconosPointers.hpp>
-
-namespace siconos::algebra {
-
-class SiconosMatrix;
-class SiconosVector;
-}  // namespace siconos::algebra
 
 namespace siconos::modeling {
 

@@ -37,7 +37,7 @@ namespace siconos::simulation {
 
 class Simulation;
 
-  class InteractionManager : public std::enable_shared_from_this<InteractionManager>{
+class InteractionManager : public std::enable_shared_from_this<InteractionManager> {
   InteractionManager(const InteractionManager&) = delete;
   InteractionManager(InteractionManager&&) = delete;
   InteractionManager operator=(const InteractionManager&&) = delete;
@@ -50,9 +50,8 @@ class Simulation;
 
   /** Called by Simulation after updating positions prior to starting
    * the Newton loop. */
-  virtual void updateInteractions(std::shared_ptr<siconos::simulation::Simulation> simulation)
-  {
-  }
+  virtual void updateInteractions(
+      std::shared_ptr<siconos::simulation::Simulation> simulation) {}
 
   /** Specify a non-smooth law to use for a given combination of
    *  interaction groups.

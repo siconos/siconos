@@ -35,13 +35,13 @@
 #include "Relation.hpp"
 #include "RotationQuaternion.hpp"  // for quaternionFromTwistVector and compositionLawLieGroup
 #include "SiconosException.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixOp.hpp"        // for prod, scal, ...
 #include "SiconosMatrixVectorOp.hpp"  // for prod, subprod ...
 #include "SiconosPointers.hpp"        // For createSPtr
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"  // for prod, subprod ...
 #include "SiconosVisitor.hpp"
-#include "SiconosMatrix.hpp"
 #include "Simulation.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -494,7 +494,7 @@ void siconos::integrators::MoreauJeanOSI::_initializeIterationMatrixWBoundaryCon
     auto &d = static_cast<siconos::modeling::SecondOrderDS &>(ds);
     _dynamicalSystemsGraph->properties(dsv).WBoundaryConditions =
         std::make_shared<siconos::algebra::SiconosMatrix>(sizeWBoundaryConditions,
-                                                         d.boundaryConditions()->size());
+                                                          d.boundaryConditions()->size());
     _computeWBoundaryConditions(ds,
                                 *_dynamicalSystemsGraph->properties(dsv).WBoundaryConditions,
                                 *_dynamicalSystemsGraph->properties(dsv).W);
@@ -1926,13 +1926,11 @@ bool siconos::integrators::MoreauJeanOSI::addInteractionInIndexSet(
       getchar();
     }
     if (y <= _constraintActivationThreshold) {
-      std::cout << "ACTIVATED "
-                << "number :" << inter->number() << " y=" << y
+      std::cout << "ACTIVATED " << "number :" << inter->number() << " y=" << y
                 << "<= " << _constraintActivationThreshold << " yDot_k =" << yDot_k
                 << " yDot =" << yDot << std::endl;
     } else {
-      std::cout << "NOT ACTIVATED "
-                << " number :" << inter->number() << " y=" << y
+      std::cout << "NOT ACTIVATED " << " number :" << inter->number() << " y=" << y
                 << "<= " << _constraintActivationThreshold << " yDot_k =" << yDot_k
                 << " yDot =" << yDot << std::endl;
       // getchar();

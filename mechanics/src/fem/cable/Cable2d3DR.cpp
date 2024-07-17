@@ -21,8 +21,9 @@
 #include "BlockVector.hpp"
 #include "Interaction.hpp"
 #include "SiconosException.hpp"
-#include "SiconosVector.hpp"
 #include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
+#include "SiconosVectorOp.hpp"  // for inner_prod
 
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -92,7 +93,7 @@ double siconos::fem::cable::Cable2d3DR::distance() const {
   DEBUG_EXPR(_Pc2->display(););
   DEBUG_EXPR(dpc.display(););
   DEBUG_END("Cable2d3DR::distance(...)\n")
-  return dpc.norm2() * (inner_prod(*_Normal, dpc) >= 0 ? -1 : 1);
+  return dpc.norm2() * (siconos::algebra::inner_prod(*_Normal, dpc) >= 0 ? -1 : 1);
 }
 
 void siconos::fem::cable::Cable2d3DR::updateContactPoint(

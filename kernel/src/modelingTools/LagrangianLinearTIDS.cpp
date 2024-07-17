@@ -32,9 +32,9 @@
 siconos::modeling::LagrangianLinearTIDS::LagrangianLinearTIDS(
     std::shared_ptr<siconos::algebra::SiconosVector> newQ0,
     std::shared_ptr<siconos::algebra::SiconosVector> newVelocity0,
-    std::shared_ptr<siconos::algebra::SiconosMatrix> newMass,
-    std::shared_ptr<siconos::algebra::SiconosMatrix> newK,
-    std::shared_ptr<siconos::algebra::SiconosMatrix> newC)
+    std::shared_ptr<Matrix> newMass,
+    std::shared_ptr<Matrix> newK,
+    std::shared_ptr<Matrix> newC)
     : LagrangianDS(newQ0, newVelocity0, newMass) {
   assert((newK->size(0) == _ndof && newK->size(1) == _ndof) &&
          "LagrangianLinearTIDS - constructor from data, inconsistent size "
@@ -79,19 +79,19 @@ void siconos::modeling::LagrangianLinearTIDS::initRhs(double time) {
 }
 
 void siconos::modeling::LagrangianLinearTIDS::setK(
-    const siconos::algebra::SiconosMatrix& newValue) {
+    const Matrix& newValue) {
   if (newValue.size(0) != _ndof || newValue.size(1) != _ndof)
     THROW_EXCEPTION(
         "LagrangianLinearTIDS - setK: inconsistent input matrix size ");
 
   if (!_K)
-    _K = std::make_shared<siconos::algebra::SiconosMatrix>(newValue);
+    _K = std::make_shared<Matrix>(newValue);
   else
     *_K = newValue;
 }
 
 void siconos::modeling::LagrangianLinearTIDS::setKPtr(
-    std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr) {
+    std::shared_ptr<Matrix> newPtr) {
   if (newPtr->size(0) != _ndof || newPtr->size(1) != _ndof)
     THROW_EXCEPTION(
         "LagrangianLinearTIDS - setKPtr: inconsistent input matrix size ");
@@ -99,19 +99,19 @@ void siconos::modeling::LagrangianLinearTIDS::setKPtr(
 }
 
 void siconos::modeling::LagrangianLinearTIDS::setC(
-    const siconos::algebra::SiconosMatrix& newValue) {
+    const Matrix& newValue) {
   if (newValue.size(0) != _ndof || newValue.size(1) != _ndof)
     THROW_EXCEPTION(
         "LagrangianLinearTIDS - setC: inconsistent input matrix size ");
 
   if (!_C)
-    _C = std::make_shared<siconos::algebra::SiconosMatrix>(newValue);
+    _C = std::make_shared<Matrix>(newValue);
   else
     *_C = newValue;
 }
 
 void siconos::modeling::LagrangianLinearTIDS::setCPtr(
-    std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr) {
+    std::shared_ptr<Matrix> newPtr) {
   if (newPtr->size(0) != _ndof || newPtr->size(1) != _ndof)
     THROW_EXCEPTION(
         "LagrangianLinearTIDS - setCPtr: inconsistent input matrix size ");

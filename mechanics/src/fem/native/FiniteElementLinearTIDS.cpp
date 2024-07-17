@@ -15,16 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "FiniteElementLinearTIDS.hpp"
 
 #include "BoundaryCondition.hpp"
 #include "FiniteElementModel.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"
-#include "SiconosMatrix.hpp"
-//
 // #define DEBUG_STDOUT
 // #define DEBUG_NOCOLOR
 // #define DEBUG_MESSAGES
@@ -32,7 +30,7 @@
 
 siconos::mechanics::fem::FiniteElementLinearTIDS::FiniteElementLinearTIDS(
     std::shared_ptr<Mesh> mesh, std::map<unsigned int, std::shared_ptr<Material>> materials,
-    siconos::algebra::UblasType storageType)
+    siconos::algebra::StorageType storageType)
     : LagrangianLinearTIDS::LagrangianLinearTIDS(),
       _mesh(mesh),
       _materials(materials),
@@ -52,8 +50,10 @@ siconos::mechanics::fem::FiniteElementLinearTIDS::FiniteElementLinearTIDS(
   _FEModel = std::make_shared<FiniteElementModel>(mesh);
   _ndof = _FEModel->init();
 
-  _q0 = _q0 = std::make_shared<siconos::algebra::SiconosVector>(_ndof, 0.0);
-  _velocity0 = std::make_shared<siconos::algebra::SiconosVector>(_ndof, 0.0);
+  _q0 = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
+  _q0->zero();
+  _velocity0 = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
+  _velocity0->zero();
 
   // -- Memory allocation for vector and matrix members --
   _q[0] = std::make_shared<siconos::algebra::SiconosVector>(*_q0);
@@ -65,22 +65,23 @@ siconos::mechanics::fem::FiniteElementLinearTIDS::FiniteElementLinearTIDS(
   _n = 2 * _ndof;
 
   if (!_mass) {
-    _mass = std::make_shared<siconos::algebra::SiconosMatrix>(_ndof, _ndof, _storageType);
-    _mass->setIsSymmetric(true);
-    _mass->setIsPositiveDefinite(true);
+    _mass = std::make_shared<Matrix>(_ndof, _ndof);
+    // _mass->setIsSymmetric(true);
+    // _mass->setIsPositiveDefinite(true);
   }
   _FEModel->computeMassMatrix(_mass, _materials);
 
   if (!_K) {
-    _K = std::make_shared<siconos::algebra::SiconosMatrix>(_ndof, _ndof, _storageType);
-    _K->setIsSymmetric(true);
-    _K->setIsPositiveDefinite(true);
+    _K = std::make_shared<Matrix>(_ndof, _ndof);
+    // _K->setIsSymmetric(true);
+    // _K->setIsPositiveDefinite(true);
   }
   _FEModel->computeStiffnessMatrix(_K, _materials);
 
   // if(!_C)
   // {
-  //   _C = std::make_shared<siconos::algebra::SiconosMatrix>(_ndof, _ndof, _storageType);
+  //   _C = std::make_shared<siconos::algebra::SiconosMatrix>(_ndof, _ndof,
+  //   _storageType);
   // }
   // _C->zero();
 

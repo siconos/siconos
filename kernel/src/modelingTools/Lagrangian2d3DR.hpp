@@ -104,8 +104,7 @@ class Lagrangian2d3DR : public LagrangianScleronomousR {
       : LagrangianScleronomousR(),
         _Pc1{std::make_shared<siconos::algebra::SiconosVector>(2)},
         _Pc2{std::make_shared<siconos::algebra::SiconosVector>(2)},
-        _Nc{std::make_shared<siconos::algebra::SiconosVector>(2)}
-  {
+        _Nc{std::make_shared<siconos::algebra::SiconosVector>(2)} {
     /*_ds1=nullptr;_ds2=nullptr;*/
   }
 

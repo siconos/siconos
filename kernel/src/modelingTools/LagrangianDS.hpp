@@ -28,42 +28,38 @@
 #include "SecondOrderDS.hpp"
 namespace siconos::modeling {
 /**
-   Lagrangian non linear dynamical systems -  \f$ M(q,z) \dot v = F(v, q, t, z)
-   + p \f$
+   Lagrangian non linear dynamical systems -  \f$ M(q,z) \dot v = F(v, q, t, z) + p \f$
 
-   This class defines and computes a generic ndof-dimensional
-   Lagrangian Non Linear Dynamical System of the form :
+   This class defines and computes a generic ndof-dimensional Lagrangian Non Linear Dynamical
+   System of the form :
 
    \f[
-     M(q,z) \dot v + F_{gyr}(v, q, z) + F_{int}(v , q , t, z) = F_{ext}(t, z) +
-   p \\ \dot q = v \f]
+     M(q,z) \dot v + F_{gyr}(v, q, z) + F_{int}(v , q , t, z) = F_{ext}(t, z) + p \\
+     \dot q = v
+   \f]
 
    where
 
    -  \f$ q \in R^{ndof} \f$ is the set of the generalized coordinates,
-   - \f$ \dot q =v \in R^{ndof} \f$ the velocity, i. e. the time
-   derivative of the generalized coordinates (Lagrangian systems).
-   - \f$ \ddot q =\\dot v \in R^{ndof} \f$ the acceleration, i. e. the second
-   time derivative of the generalized coordinates.
-   - \f$ p \in R^{ndof} \f$ the reaction forces due to the Non Smooth
-   Interaction.
-   - \f$ M(q) \in R^{ndof \times ndof} \f$ is the inertia term (access : mass()
+   - \f$ \dot q =v \in R^{ndof} \f$ the velocity, i. e. the time derivative of the generalized
+   coordinates (Lagrangian systems).
+   - \f$ \ddot q =\\dot v \in R^{ndof} \f$ the acceleration, i. e. the second time derivative
+   of the generalized coordinates.
+   - \f$ p \in R^{ndof} \f$ the reaction forces due to the Non Smooth Interaction.
+   - \f$ M(q) \in R^{ndof \times ndof} \f$ is the inertia term (access : mass() method).
+   - \f$ F_{gyr}(\dot q, q) \in R^{ndof} \f$ is the non linear inertia term (access fGyr()
    method).
-   - \f$ F_{gyr}(\dot q, q) \in R^{ndof} \f$ is the non linear inertia term
-   (access fGyr() method).
-   - \f$ F_{int}(\dot q , q , t) \in R^{ndof} \f$ are the internal
-   forces (access fInt() method).
-   - \f$ F_{ext}(t) \in R^{ndof} \f$ are the external forces (access fExt()
+   - \f$ F_{int}(\dot q , q , t) \in R^{ndof} \f$ are the internal forces (access fInt()
    method).
-   - \f$ z \in R^{zSize} \f$  is a vector of arbitrary algebraic
-   variables, some sort of discrete state.
+   - \f$ F_{ext}(t) \in R^{ndof} \f$ are the external forces (access fExt() method).
+   - \f$ z \in R^{zSize} \f$  is a vector of arbitrary algebraic variables, some sort of
+   discrete state.
 
-   The equation of motion is also shortly denoted as  \f$ M(q,z) \dot v = F(v,
-   q, t, z) + p \f$
+   The equation of motion is also shortly denoted as  \f$ M(q,z) \dot v = F(v,q, t, z) + p \f$
 
    where  \f$ F(v, q, t, z) \in R^{ndof} \f$ collects the total forces acting on
-   the system, that is \f$ F(v, q, t, z) =  F_{ext}(t, z) -  F_{gyr}(v, q, z) +
-   F_{int}(v, q , t, z) \f$
+   the system, that is \f$ F(v, q, t, z) =  F_{ext}(t, z) -  F_{gyr}(v, q, z) + F_{int}(v, q ,
+   t, z) \f$
 
    This vector is saved and may be accessed using forces() method.
 
@@ -125,8 +121,8 @@ class LagrangianDS : public SecondOrderDS {
   ACCEPT_SERIALIZATION(LagrangianDS);
 
   /** state of the system. See details on top of page. */
-  std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> _q = {
-      nullptr, nullptr, nullptr};
+  std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> _q = {nullptr, nullptr,
+                                                                      nullptr};
 
   /** initial velocity of the system */
   std::shared_ptr<siconos::algebra::SiconosVector> _velocity0{nullptr};
@@ -147,10 +143,10 @@ class LagrangianDS : public SecondOrderDS {
   //                              Jacobian_Forces_wrt_qDot, numberOfJacobians};
 
   /** jacobian_q FInt*/
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _jacobianFIntq{nullptr};
+  std::shared_ptr<Matrix> _jacobianFIntq{nullptr};
 
   /** jacobian_{qDot} FInt*/
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _jacobianFIntqDot{nullptr};
+  std::shared_ptr<Matrix> _jacobianFIntqDot{nullptr};
 
   /** external forces applied to the system */
   std::shared_ptr<siconos::algebra::SiconosVector> _fExt{nullptr};
@@ -163,18 +159,18 @@ class LagrangianDS : public SecondOrderDS {
   std::shared_ptr<siconos::algebra::SiconosVector> _fGyr{nullptr};
 
   /** jacobian_q FGyrq*/
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _jacobianFGyrq;
+  std::shared_ptr<Matrix> _jacobianFGyrq;
   /** jacobian_{qDot} FGyrq*/
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _jacobianFGyrqDot;
+  std::shared_ptr<Matrix> _jacobianFGyrqDot;
 
   /** forces(q[0],q[1],t)= fExt - fInt -FGyr */
   std::shared_ptr<siconos::algebra::SiconosVector> _forces{nullptr};
 
   /** jacobian_q forces*/
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _jacobianqForces{nullptr};
+  std::shared_ptr<Matrix> _jacobianqForces{nullptr};
 
   /** jacobian_{qDot} forces*/
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _jacobianqDotForces{nullptr};
+  std::shared_ptr<Matrix> _jacobianqDotForces{nullptr};
 
   /** memory of previous forces of the system */
   siconos::algebra::SiconosMemory _forcesMemory;
@@ -193,8 +189,7 @@ class LagrangianDS : public SecondOrderDS {
    * from of LagrangianDS system values (jacobianXBloc10, jacobianXBloc11,
    * zeroMatrix, idMatrix) No get-set functions at the time. Only used as a
    * protected member.*/
-  std::vector<std::shared_ptr<siconos::algebra::SiconosMatrix>> _rhsMatrices = {
-      nullptr, nullptr, nullptr, nullptr};
+  std::vector<std::shared_ptr<Matrix>> _rhsMatrices = {nullptr, nullptr, nullptr, nullptr};
 
   // pointers to functions member to compute plug-in functions
 
@@ -301,32 +296,29 @@ class LagrangianDS : public SecondOrderDS {
   LagrangianDS() = default;
 
  public:
-  /** constructor from initial state only,  \f$ dv = p  \f$
+  /** constructor from initial state and velocity
    *
-   *  \param position siconos::algebra::SiconosVector : initial coordinates of
-   * this DynamicalSystem \param velocity siconos::algebra::SiconosVector :
-   * initial velocity of this DynamicalSystem
+   *  \param position initial coordinates
+   *  \param velocity initial velocity
    */
   LagrangianDS(std::shared_ptr<siconos::algebra::SiconosVector> position,
                std::shared_ptr<siconos::algebra::SiconosVector> velocity);
 
-  /** constructor from initial state and mass,  \f$ Mdv = p \f$
+  /** constructor from initial state, velocity and mass
    *
-   *  \param position siconos::algebra::SiconosVector : initial coordinates of
-   * this DynamicalSystem \param velocity siconos::algebra::SiconosVector :
-   * initial velocity of this DynamicalSystem \param mass SiconosMatrix : mass
-   * matrix
+   *  \param position initial coordinates
+   *  \param velocity initial velocity
+   *  \param mass mass matrix
    */
   LagrangianDS(std::shared_ptr<siconos::algebra::SiconosVector> position,
                std::shared_ptr<siconos::algebra::SiconosVector> velocity,
-               std::shared_ptr<siconos::algebra::SiconosMatrix> mass);
+               std::shared_ptr<Matrix> mass);
 
-  /** constructor from initial state and mass (plugin)  \f$ Mdv = p \f$
+  /** constructor from initial state, velocity and mass
    *
-   *  \param position siconos::algebra::SiconosVector : initial coordinates of
-   * this DynamicalSystem \param velocity siconos::algebra::SiconosVector :
-   * initial velocity of this DynamicalSystem \param plugin std::string: plugin
-   * path to compute mass matrix
+   *  \param position initial coordinates
+   *  \param velocity initial velocity
+   *  \param plugin name of the plugin used to compute the mass matrix
    */
   LagrangianDS(std::shared_ptr<siconos::algebra::SiconosVector> position,
                std::shared_ptr<siconos::algebra::SiconosVector> velocity,
@@ -376,18 +368,15 @@ class LagrangianDS : public SecondOrderDS {
    *  \param newValue siconos::algebra::SiconosVector
    */
   void setRhs(const siconos::algebra::SiconosVector &newValue) override {
-    THROW_EXCEPTION(
-        "LagrangianDS - setRhs call is forbidden for 2nd order systems.");
+    THROW_EXCEPTION("LagrangianDS - setRhs call is forbidden for 2nd order systems.");
   }
 
   /** set right-hand side, \f$ \dot x \f$ (pointer link)
    *
    *  \param newPtr std::shared_ptr<siconos::algebra::SiconosVector>
    */
-  void setRhsPtr(
-      std::shared_ptr<siconos::algebra::SiconosVector> newPtr) override {
-    THROW_EXCEPTION(
-        "LagrangianDS - setRhsPtr call is forbidden for 2nd order systems.");
+  void setRhsPtr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) override {
+    THROW_EXCEPTION("LagrangianDS - setRhsPtr call is forbidden for 2nd order systems.");
   }
 
   // /* function to compute  \f$ F(v,q,t,z) \f$  for the current state
@@ -403,9 +392,8 @@ class LagrangianDS : public SecondOrderDS {
    *  \param velocity std::shared_ptr<siconos::algebra::SiconosVector>: pointers
    * on velocity
    */
-  void computeForces(
-      double time, std::shared_ptr<siconos::algebra::SiconosVector> q,
-      std::shared_ptr<siconos::algebra::SiconosVector> velocity) override;
+  void computeForces(double time, std::shared_ptr<siconos::algebra::SiconosVector> q,
+                     std::shared_ptr<siconos::algebra::SiconosVector> velocity) override;
 
   /** Compute  \f$ \nabla_qF(v,q,t,z) \f$  for current  \f$ q,v \f$
    *  Default function to compute forces
@@ -418,9 +406,7 @@ class LagrangianDS : public SecondOrderDS {
    *
    *  \param time the current time
    */
-  virtual void computeJacobianqDotForces(double time) {
-    computeJacobianvForces(time);
-  };
+  virtual void computeJacobianqDotForces(double time) { computeJacobianvForces(time); };
 
   /** Compute  \f$ \nabla_{\dot q}F(v,q,t,z) \f$  for current  \f$ q,v \f$
    *
@@ -432,9 +418,7 @@ class LagrangianDS : public SecondOrderDS {
    *
    *  \return pointer on a siconos::algebra::SiconosVector
    */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> q() const override {
-    return _q[0];
-  }
+  inline std::shared_ptr<siconos::algebra::SiconosVector> q() const override { return _q[0]; }
 
   /** set value of generalized coordinates vector (copy)
    *
@@ -446,8 +430,7 @@ class LagrangianDS : public SecondOrderDS {
    *
    *  \param newPtr
    */
-  void setQPtr(
-      std::shared_ptr<siconos::algebra::SiconosVector> newPtr) override;
+  void setQPtr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) override;
 
   /** set initial state (copy)
    *
@@ -459,15 +442,13 @@ class LagrangianDS : public SecondOrderDS {
    *
    *  \param newPtr
    */
-  void setQ0Ptr(
-      std::shared_ptr<siconos::algebra::SiconosVector> newPtr) override;
+  void setQ0Ptr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) override;
 
   /** get velocity vector (pointer link)
    *
    *  \return pointer on a siconos::algebra::SiconosVector
    */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> velocity()
-      const override {
+  inline std::shared_ptr<siconos::algebra::SiconosVector> velocity() const override {
     return _q[1];
   }
 
@@ -481,15 +462,13 @@ class LagrangianDS : public SecondOrderDS {
    *
    *  \param newPtr
    */
-  void setVelocityPtr(
-      std::shared_ptr<siconos::algebra::SiconosVector> newPtr) override;
+  void setVelocityPtr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) override;
 
   /** get initial velocity (pointer)
    *
    *  \return pointer on a siconos::algebra::SiconosVector
    */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> velocity0()
-      const override {
+  inline std::shared_ptr<siconos::algebra::SiconosVector> velocity0() const override {
     return _velocity0;
   }
 
@@ -503,15 +482,13 @@ class LagrangianDS : public SecondOrderDS {
    *
    *  \param newPtr
    */
-  void setVelocity0Ptr(
-      std::shared_ptr<siconos::algebra::SiconosVector> newPtr) override;
+  void setVelocity0Ptr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) override;
 
   /** get acceleration (pointer link)
    *
    *  \return pointer on a siconos::algebra::SiconosVector
    */
-  std::shared_ptr<siconos::algebra::SiconosVector> acceleration()
-      const override {
+  std::shared_ptr<siconos::algebra::SiconosVector> acceleration() const override {
     return _q[2];
   };
 
@@ -519,16 +496,13 @@ class LagrangianDS : public SecondOrderDS {
    *
    *  \return pointer on a plugged vector
    */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> fInt() const {
-    return _fInt;
-  }
+  inline std::shared_ptr<siconos::algebra::SiconosVector> fInt() const { return _fInt; }
 
   /** set  \$F_{int}\$ (pointer link)
    *
    *  \param newPtr a SP to plugged vector
    */
-  inline void setFIntPtr(
-      std::shared_ptr<siconos::algebra::SiconosVector> newPtr) {
+  inline void setFIntPtr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) {
     _fInt = newPtr;
   }
 
@@ -536,16 +510,13 @@ class LagrangianDS : public SecondOrderDS {
    *
    *  \return pointer on a plugged vector
    */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> fExt() const {
-    return _fExt;
-  }
+  inline std::shared_ptr<siconos::algebra::SiconosVector> fExt() const { return _fExt; }
 
   /** set  \f$ F_{ext} \f$ , (pointer link)
    *
    *  \param newPtr a SP to a Simple vector
    */
-  inline void setFExtPtr(
-      std::shared_ptr<siconos::algebra::SiconosVector> newPtr) {
+  inline void setFExtPtr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) {
     _fExt = newPtr;
     _hasConstantFExt = true;
   }
@@ -554,120 +525,61 @@ class LagrangianDS : public SecondOrderDS {
    *
    *  \return pointer on a plugged vector
    */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> fGyr() const {
-    return _fGyr;
-  }
+  inline std::shared_ptr<siconos::algebra::SiconosVector> fGyr() const { return _fGyr; }
 
   /** set  \f$ F_{gyr} \f$ , (pointer link)
    *
    *  \param newPtr a SP to plugged vector
    */
-  inline void setFGyrPtr(
-      std::shared_ptr<siconos::algebra::SiconosVector> newPtr) {
+  inline void setFGyrPtr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) {
     _fGyr = newPtr;
   }
 
-  /** get  \f$ \nabla_qF_{int} \f$ , (pointer link)
-   *
-   *  \return pointer on a SiconosMatrix
-   */
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianFIntq()
-      const {
-    return _jacobianFIntq;
-  }
+  /** \return  \f$ \nabla_qF_{int} \f$ , (pointer link) */
+  inline std::shared_ptr<Matrix> jacobianFIntq() const { return _jacobianFIntq; }
 
-  /** get  \f$ \nabla_{\dot q}F_{int} \f$ , (pointer link)
-   *
-   *  \return pointer on a SiconosMatrix
-   */
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianFIntqDot()
-      const {
-    return _jacobianFIntqDot;
-  }
+  /** \return \f$ \nabla_{\dot q}F_{int} \f$ , (pointer link) */
+  inline std::shared_ptr<Matrix> jacobianFIntqDot() const { return _jacobianFIntqDot; }
   void allocateMass();
   void allocateJacobianFIntq();
   void allocateJacobianFIntqDot();
   void allocateFInt();
   void allocateFExt();
 
-  /** set  \f$ \nabla_{q}F_{int} \f$ , (pointer link)
-   *
-   *  \param newPtr a pointer to a SiconosMatrix
-   */
-  inline void setJacobianFIntqPtr(
-      std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr) {
-    _jacobianFIntq = newPtr;
-  }
+  /** \return \f$ \nabla_{q}F_{int} \f$ , (pointer link) */
+  inline void setJacobianFIntqPtr(std::shared_ptr<Matrix> newPtr) { _jacobianFIntq = newPtr; }
 
-  /** set  \f$ \nabla_{\dot q}F_{int} \f$ , (pointer link)
-   *
-   *  \param newPtr a pointer to a SiconosMatrix
-   */
-  inline void setJacobianFIntqDotPtr(
-      std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr) {
+  /** \return \f$ \nabla_{\dot q}F_{int} \f$ , (pointer link) */
+  inline void setJacobianFIntqDotPtr(std::shared_ptr<Matrix> newPtr) {
     _jacobianFIntqDot = newPtr;
   }
 
-  /** get  \f$ \nabla_{q}F_{gyr} \f$ , (pointer link)
-   *
-   *  \return pointer on a SiconosMatrix
-   */
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianFGyrq()
-      const {
-    return _jacobianFGyrq;
-  }
+  /** \return \f$ \nabla_{q}F_{gyr} \f$ , (pointer link) */
+  inline std::shared_ptr<Matrix> jacobianFGyrq() const { return _jacobianFGyrq; }
 
-  /** get  \f$ \nabla_{\dot q}F_{gyr} \f$ , (pointer link)
-   *
-   *  \return pointer on a SiconosMatrix
-   */
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianFGyrqDot()
-      const {
-    return _jacobianFGyrqDot;
-  }
+  /** \return \f$ \nabla_{\dot q}F_{gyr} \f$ , (pointer link) */
+  inline std::shared_ptr<Matrix> jacobianFGyrqDot() const { return _jacobianFGyrqDot; }
 
-  /** get  \f$ \nabla_{q}F_{gyr} \f$ , (pointer link)
-   *
-   *  \param newPtr a SP SiconosMatrix
-   */
-  inline void setJacobianFGyrqPtr(
-      std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr) {
-    _jacobianFGyrq = newPtr;
-  }
+  /** \return \f$ \nabla_{q}F_{gyr} \f$ , (pointer link) */
+  inline void setJacobianFGyrqPtr(std::shared_ptr<Matrix> newPtr) { _jacobianFGyrq = newPtr; }
 
-  /** get  \f$ \nabla_{\dot q}F_{gyr} \f$ , (pointer link)
-   *
-   *  \param newPtr a SP SiconosMatrix
-   */
-  inline void setJacobianFGyrqDotPtr(
-      std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr) {
+  /** \return \f$ \nabla_{\dot q}F_{gyr} \f$ , (pointer link) */
+  inline void setJacobianFGyrqDotPtr(std::shared_ptr<Matrix> newPtr) {
     _jacobianFGyrqDot = newPtr;
   }
 
-  /** get  \f$  F(v,q,t,z) \f$  (pointer  link)
-   *
-   *  \return pointer on a siconos::algebra::SiconosVector
-   */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> forces()
-      const override {
+  /**  \return  \f$  F(v,q,t,z) \f$  (pointer  link) */
+  inline std::shared_ptr<siconos::algebra::SiconosVector> forces() const override {
     return _forces;
   }
 
-  /** get  \f$  \nabla_qF(v,q,t,z) \f$  (pointer  link)
-   *
-   *  \return pointer on a SiconosMatrix
-   */
-  virtual inline std::shared_ptr<siconos::algebra::SiconosMatrix>
-  jacobianqForces() const override {
+  /** \return \f$  \nabla_qF(v,q,t,z) \f$  (pointer  link)   */
+  virtual inline std::shared_ptr<Matrix> jacobianqForces() const override {
     return _jacobianqForces;
   }
 
-  /** get \f$ \nabla_{\dot q}F(v,q,t,z) \f$  (pointer  link)
-   *
-   *  \return pointer on a SiconosMatrix
-   */
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianvForces()
-      const override {
+  /** \return \f$ \nabla_{\dot q}F(v,q,t,z) \f$  (pointer  link)  */
+  inline std::shared_ptr<Matrix> jacobianvForces() const override {
     return _jacobianqDotForces;
   }
 
@@ -676,9 +588,7 @@ class LagrangianDS : public SecondOrderDS {
    *
    *  \return a memory
    */
-  inline const siconos::algebra::SiconosMemory &qMemory() override {
-    return _qMemory;
-  }
+  inline const siconos::algebra::SiconosMemory &qMemory() override { return _qMemory; }
 
   /** get all the values of the state vector velocity stored in memory.
    *  note: not const due to SchatzmanPaoliOSI::initializeWorkVectorsForDS
@@ -725,8 +635,7 @@ class LagrangianDS : public SecondOrderDS {
    *  \param functionName std::string : the name of the function to use in this
    *  plugin
    */
-  void setComputeMassFunction(const std::string &pluginPath,
-                              const std::string &functionName);
+  void setComputeMassFunction(const std::string &pluginPath, const std::string &functionName);
 
   /** set a specified function to compute Mass
    *
@@ -740,8 +649,7 @@ class LagrangianDS : public SecondOrderDS {
    *  \param functionName std::string : the name of the function to use in this
    *  plugin
    */
-  void setComputeFIntFunction(const std::string &pluginPath,
-                              const std::string &functionName);
+  void setComputeFIntFunction(const std::string &pluginPath, const std::string &functionName);
 
   /** set a specified function to compute fInt
    *
@@ -755,8 +663,7 @@ class LagrangianDS : public SecondOrderDS {
    *  \param functionName std::string : the name of the function to use in this
    * plugin
    */
-  void setComputeFExtFunction(const std::string &pluginPath,
-                              const std::string &functionName);
+  void setComputeFExtFunction(const std::string &pluginPath, const std::string &functionName);
 
   /** set a specified function to compute fExt
    *
@@ -770,8 +677,7 @@ class LagrangianDS : public SecondOrderDS {
    *  \param functionName std::string : the name of the function to use in this
    * plugin
    */
-  void setComputeFGyrFunction(const std::string &pluginPath,
-                              const std::string &functionName);
+  void setComputeFGyrFunction(const std::string &pluginPath, const std::string &functionName);
 
   /** set a specified function to compute FGyr
    *
@@ -848,8 +754,7 @@ class LagrangianDS : public SecondOrderDS {
    *
    *  \param position value used to evaluate the mass matrix
    */
-  void computeMass(
-      std::shared_ptr<siconos::algebra::SiconosVector> position) override;
+  void computeMass(std::shared_ptr<siconos::algebra::SiconosVector> position) override;
 
   /** default function to compute the internal strengths
    *
@@ -865,9 +770,9 @@ class LagrangianDS : public SecondOrderDS {
    *  \param position value used to evaluate the internal forces
    *  \param velocity value used to evaluate the internal forces
    */
-  virtual void computeFInt(
-      double time, std::shared_ptr<siconos::algebra::SiconosVector> position,
-      std::shared_ptr<siconos::algebra::SiconosVector> velocity);
+  virtual void computeFInt(double time,
+                           std::shared_ptr<siconos::algebra::SiconosVector> position,
+                           std::shared_ptr<siconos::algebra::SiconosVector> velocity);
 
   /** default function to compute the external strengths
    *
@@ -886,9 +791,8 @@ class LagrangianDS : public SecondOrderDS {
    *  \param position value used to evaluate the inertia forces
    *  \param velocity value used to evaluate the inertia forces
    */
-  virtual void computeFGyr(
-      std::shared_ptr<siconos::algebra::SiconosVector> position,
-      std::shared_ptr<siconos::algebra::SiconosVector> velocity);
+  virtual void computeFGyr(std::shared_ptr<siconos::algebra::SiconosVector> position,
+                           std::shared_ptr<siconos::algebra::SiconosVector> velocity);
 
   /** To compute the jacobian w.r.t q of the internal forces
    *
@@ -907,9 +811,9 @@ class LagrangianDS : public SecondOrderDS {
    *  \param position value used to evaluate the jacobian
    *  \param velocity value used to evaluate the jacobian
    */
-  virtual void computeJacobianFIntq(
-      double time, std::shared_ptr<siconos::algebra::SiconosVector> position,
-      std::shared_ptr<siconos::algebra::SiconosVector> velocity);
+  virtual void computeJacobianFIntq(double time,
+                                    std::shared_ptr<siconos::algebra::SiconosVector> position,
+                                    std::shared_ptr<siconos::algebra::SiconosVector> velocity);
 
   /** To compute the jacobian w.r.t. qDot of the internal forces
    *
@@ -934,9 +838,8 @@ class LagrangianDS : public SecondOrderDS {
    *  \param position value used to evaluate the jacobian
    *  \param velocity value used to evaluate the jacobian
    */
-  virtual void computeJacobianFGyrq(
-      std::shared_ptr<siconos::algebra::SiconosVector> position,
-      std::shared_ptr<siconos::algebra::SiconosVector> velocity);
+  virtual void computeJacobianFGyrq(std::shared_ptr<siconos::algebra::SiconosVector> position,
+                                    std::shared_ptr<siconos::algebra::SiconosVector> velocity);
 
   /** function to compute the jacobian w.r.t. qDot of the inertia forces
    *
@@ -951,7 +854,7 @@ class LagrangianDS : public SecondOrderDS {
    *
    *  \param time  the current time
    */
-  void updatePlugins(double time) override{};
+  void updatePlugins(double time) override {};
 
   /** To compute the kinetic energy */
   double computeKineticEnergy();
@@ -991,11 +894,8 @@ class LagrangianDS : public SecondOrderDS {
   void init_forces() override;
 
   // visitors hook
-  void acceptSP(std::shared_ptr<siconos::internal::SiconosVisitor> tourist)
-      const override;
-  Type acceptType(types::FindType &ft) const override {
-    return ft.visit(*this);
-  }
+  void acceptSP(std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const override;
+  Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
 };
 
 }  // namespace siconos::modeling

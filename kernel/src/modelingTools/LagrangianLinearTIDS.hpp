@@ -25,12 +25,12 @@
 namespace siconos::modeling {
 
 /**
-    Lagrangian Linear Systems with time invariant coefficients - \f$ M\dot v +
-   Cv + Kq = F_{ext}(t,z) + p \f$
+    Lagrangian Linear Systems with time invariant coefficients -
 
-    The class LagrangianLinearTIDS  allows to define  and compute a generic
-    ndof-dimensional Lagrangian Linear Time Invariant Dynamical System of the
-   form:
+    \f$ M\dot v + Cv + Kq = F_{ext}(t,z) + p \f$
+
+    The class LagrangianLinearTIDS  allows to define  and compute a generic ndof-dimensional
+   Lagrangian Linear Time Invariant Dynamical System of the form:
 
     \f[
     M \ddot q + C \dot q + K q =  F_{ext}(t,z) + p,
@@ -108,10 +108,10 @@ class LagrangianLinearTIDS : public LagrangianDS {
   ACCEPT_SERIALIZATION(LagrangianLinearTIDS);
 
   /** stiffness matrix */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _K{nullptr};
+  std::shared_ptr<Matrix> _K{nullptr};
 
   /** damping matrix */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _C{nullptr};
+  std::shared_ptr<Matrix> _C{nullptr};
 
   /** default constructor */
   LagrangianLinearTIDS() = default;
@@ -127,9 +127,8 @@ class LagrangianLinearTIDS : public LagrangianDS {
    */
   LagrangianLinearTIDS(std::shared_ptr<siconos::algebra::SiconosVector> q0,
                        std::shared_ptr<siconos::algebra::SiconosVector> v0,
-                       std::shared_ptr<siconos::algebra::SiconosMatrix> M,
-                       std::shared_ptr<siconos::algebra::SiconosMatrix> K,
-                       std::shared_ptr<siconos::algebra::SiconosMatrix> C);
+                       std::shared_ptr<Matrix> M, std::shared_ptr<Matrix> K,
+                       std::shared_ptr<Matrix> C);
 
   /** constructor from initial state and mass matrix only. Leads to \f$ M\dot v
    *  = F_{ext}(t,z) + p \f$ .
@@ -140,7 +139,7 @@ class LagrangianLinearTIDS : public LagrangianDS {
    */
   LagrangianLinearTIDS(std::shared_ptr<siconos::algebra::SiconosVector> q0,
                        std::shared_ptr<siconos::algebra::SiconosVector> v0,
-                       std::shared_ptr<siconos::algebra::SiconosMatrix> M)
+                       std::shared_ptr<Matrix> M)
       : LagrangianDS(q0, v0, M){};
 
   /** destructor */
@@ -159,67 +158,44 @@ class LagrangianLinearTIDS : public LagrangianDS {
    *  \param velocity std::shared_ptr<siconos::algebra::SiconosVector>: pointers
    * on velocity
    */
-  void computeForces(
-      double time, std::shared_ptr<siconos::algebra::SiconosVector> q,
-      std::shared_ptr<siconos::algebra::SiconosVector> velocity) override;
+  void computeForces(double time, std::shared_ptr<siconos::algebra::SiconosVector> q,
+                     std::shared_ptr<siconos::algebra::SiconosVector> velocity) override;
 
-  /** get stiffness matrix (pointer link)
-   *
-   *  \return pointer on a SiconosMatrix
-   */
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> K() const {
-    return _K;
-  }
+  /** \return the stiffness matrix (pointer link) */
+  inline std::shared_ptr<Matrix> K() const { return _K; }
 
   /** set (copy) the value of the stiffness matrix
    *
    *  \param K new stiffness matrix
    */
-  void setK(const siconos::algebra::SiconosMatrix &K);
+  void setK(const Matrix &K);
 
   /** set stiffness matrix (pointer link)
    *
    *  \param newPtr pointer to the new Stiffness matrix
    */
-  void setKPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr);
+  void setKPtr(std::shared_ptr<Matrix> newPtr);
 
-  /** get damping matrix (pointer link)
-   *
-   *  \return pointer on a SiconosMatrix
-   */
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> C() const {
-    return _C;
-  }
+  /** \return the damping matrix (pointer link) */
+  inline std::shared_ptr<Matrix> C() const { return _C; }
 
   /** set (copy) the value of the damping matrix
    *
    *  \param C new damping matrix
    */
-  void setC(const siconos::algebra::SiconosMatrix &C);
+  void setC(const Matrix &C);
 
   /** set damping matrix (pointer link)
    *
    *  \param newPtr pointer to the new damping matrix
    */
-  void setCPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr);
+  void setCPtr(std::shared_ptr<Matrix> newPtr);
 
-  /** get \f$ \nabla_qF(v,q,t,z) \f$ (pointer  link)
-   *
-   *  \return pointer on a SiconosMatrix
-   */
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianqForces()
-      const override {
-    return _K;
-  }
+  /** \return \f$ \nabla_qF(v,q,t,z) \f$ (pointer  link) */
+  inline std::shared_ptr<Matrix> jacobianqForces() const override { return _K; }
 
-  /** get \f$ \nabla_{\dot q}F(v,q,t,z) \f$ (pointer  link)
-   *
-   *  \return pointer on a SiconosMatrix
-   */
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianvForces()
-      const override {
-    return _C;
-  }
+  /** \return \f$ \nabla_{\dot q}F(v,q,t,z) \f$ (pointer  link) */
+  inline std::shared_ptr<Matrix> jacobianvForces() const override { return _C; }
 
   /** \return true if the Dynamical system is linear.
    */
@@ -229,9 +205,7 @@ class LagrangianLinearTIDS : public LagrangianDS {
    */
   void display(bool brief = true) const override;
 
-  Type acceptType(types::FindType &ft) const override {
-    return ft.visit(*this);
-  }
+  Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
 };
 }  // namespace siconos::modeling
 #endif  // LAGRANGIANTIDS_H

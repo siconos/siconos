@@ -29,9 +29,7 @@
 #include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
 
-namespace siconos::algebra {
-
-}
+namespace siconos::algebra {}
 
 namespace siconos::modeling {
 
@@ -113,6 +111,10 @@ class BoundaryCondition;
 
 */
 class SecondOrderDS : public DynamicalSystem {
+ public:
+  using Matrix = siconos::algebra::SiconosMatrix;
+  // using Matrix = siconos::algebra::SiconosSparseMatrix;
+
  protected:
   ACCEPT_SERIALIZATION(SecondOrderDS);
 
@@ -122,13 +124,13 @@ class SecondOrderDS : public DynamicalSystem {
   unsigned int _ndof{0};
 
   /** mass of the system */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _mass{nullptr};
+  std::shared_ptr<Matrix> _mass{nullptr};
 
   /** true if the  mass matrix is constant */
   bool _hasConstantMass = false;
 
   /** inverse or factorization of the mass of the system */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _inverseMass{nullptr};
+  std::shared_ptr<Matrix> _inverseMass{nullptr};
 
   /** "Reaction", generalized forces or imuplses due to the non smooth law
    * The index corresponds to the kinematic
@@ -178,39 +180,34 @@ class SecondOrderDS : public DynamicalSystem {
    *  \param level unsigned int, required level for p, default = 2
    *  \return pointer on a siconos::algebra::SiconosVector
    */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> p(unsigned int level = 2) const
-  {
+  inline std::shared_ptr<siconos::algebra::SiconosVector> p(unsigned int level = 2) const {
     return _p[level];
   }
 
   /** get mass matrix (pointer link)
    *
-   *  \return std::shared_ptr<siconos::algebra::SiconosMatrix>
+   *  \return std::shared_ptr<Matrix>
    */
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> mass() const { return _mass; }
+  inline std::shared_ptr<Matrix> mass() const { return _mass; }
 
   /** get (pointer) inverse or LU-factorization of the mass,
    *  used for LU-forward-backward computation
    *
-   *  \return pointer std::shared_ptr<siconos::algebra::SiconosMatrix>
+   *  \return pointer std::shared_ptr<Matrix>
    */
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> inverseMass() const
-  {
-    return _inverseMass;
-  }
+  inline std::shared_ptr<Matrix> inverseMass() const { return _inverseMass; }
 
   /** set mass to pointer newPtr
    *
    *  \param newPtr a plugged matrix SP
    */
-  void setMassPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr);
+  void setMassPtr(std::shared_ptr<Matrix> newPtr);
 
   /** set the value of the right-hand side, \f$ \dot x \f$
    *
    *  \param newValue siconos::algebra::SiconosVector
    */
-  void setRhs(const siconos::algebra::SiconosVector &newValue) override
-  {
+  void setRhs(const siconos::algebra::SiconosVector &newValue) override {
     THROW_EXCEPTION("SecondOrderDS - setRhs call is forbidden for 2nd order systems.");
   }
 
@@ -218,8 +215,7 @@ class SecondOrderDS : public DynamicalSystem {
    *
    *  \param newPtr std::shared_ptr<siconos::algebra::SiconosVector>
    */
-  void setRhsPtr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) override
-  {
+  void setRhsPtr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) override {
     THROW_EXCEPTION("SecondOrderDS - setRhsPtr call is forbidden for 2nd order systems.");
   }
 
@@ -342,13 +338,10 @@ class SecondOrderDS : public DynamicalSystem {
   virtual std::shared_ptr<siconos::algebra::SiconosVector> forces() const = 0;
 
   /** \return \f$ \nabla_qF(v,q,t,z) \f$ (pointer  link) */
-  virtual std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianqForces() const = 0;
+  virtual std::shared_ptr<Matrix> jacobianqForces() const = 0;
 
-  /** get \f$ \nabla_{\dot q}F(v,q,t,z) \f$ (pointer  link)
-   *
-   *  \return pointer on a SiconosMatrix
-   */
-  virtual std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianvForces() const = 0;
+  /** \return \f$ \nabla_{\dot q}F(v,q,t,z) \f$ (pointer  link) */
+  virtual std::shared_ptr<Matrix> jacobianvForces() const = 0;
 
   /** get all the values of the state vector q stored in memory.
    *  note: not const due to SchatzmanPaoliOSI::initializeWorkVectorsForDS
@@ -398,8 +391,7 @@ class SecondOrderDS : public DynamicalSystem {
    *  \return std::shared_ptr<siconos::modeling::BoundaryCondition> pointer on a
    * BoundaryConditions
    */
-  inline std::shared_ptr<siconos::modeling::BoundaryCondition> boundaryConditions()
-  {
+  inline std::shared_ptr<siconos::modeling::BoundaryCondition> boundaryConditions() {
     return _boundaryConditions;
   };
 
@@ -408,8 +400,7 @@ class SecondOrderDS : public DynamicalSystem {
    *  \param newrbd BoundaryConditions pointer
    */
   inline void setReactionToBoundaryConditions(
-      std::shared_ptr<siconos::algebra::SiconosVector> newrbd)
-  {
+      std::shared_ptr<siconos::algebra::SiconosVector> newrbd) {
     _reactionToBoundaryConditions = newrbd;
   };
 
@@ -417,8 +408,7 @@ class SecondOrderDS : public DynamicalSystem {
    *
    *  \return pointer on a BoundaryConditions
    */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> reactionToBoundaryConditions()
-  {
+  inline std::shared_ptr<siconos::algebra::SiconosVector> reactionToBoundaryConditions() {
     return _reactionToBoundaryConditions;
   };
 

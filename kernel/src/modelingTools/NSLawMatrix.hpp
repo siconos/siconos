@@ -39,9 +39,7 @@ class NSLawMatrix
 
  public:
   NSLawMatrix(NSLawMatrix::size_type i = 1)
-      : boost::numeric::ublas::symmetric_matrix<std::shared_ptr<NonSmoothLaw>>(i)
-  {
-  }
+      : boost::numeric::ublas::symmetric_matrix<std::shared_ptr<NonSmoothLaw>>(i) {}
 };
 }  // namespace siconos::modeling
 #endif
