@@ -21,8 +21,8 @@
 /* Returns the maximum step-length to the boundary reduced by a factor gamma.
  * Uses long double. */
 static double getStepLength(const double *const x, const double *const dx,
-                            const unsigned int vecSize,
-                            const unsigned int varsCount, const double gamma) {
+                            const unsigned int vecSize, const unsigned int varsCount,
+                            const double gamma) {
   int dimension = (int)(vecSize / varsCount);
   unsigned int pos;
   float_type aL, bL, cL, dL, alphaL, nxb;
@@ -44,8 +44,7 @@ static double getStepLength(const double *const x, const double *const dx,
       cL = DBL_EPSILON * (x[pos] + nxb);
     else
       cL = (x[pos] - nxb) *
-           (x[pos] +
-            nxb);  // to avoid negative number b/c of different data types
+           (x[pos] + nxb);  // to avoid negative number b/c of different data types
     dL = bL * bL - aL * cL;
     if (aL < 0 || (bL < 0 && dL > 0))
       if (bL > 0)
@@ -66,8 +65,7 @@ static double getStepLength(const double *const x, const double *const dx,
 /* Rel gap = gapVal / (1 + abs(primal value) + abs(dual value)) */
 static double relGap(NumericsMatrix *M, const double *f, const double *w,
                      const double *globalVelocity, const double *reaction,
-                     const unsigned int nd, const unsigned int m,
-                     const double gapVal) {
+                     const unsigned int nd, const unsigned int m, const double gapVal) {
   double *Mv = (double *)calloc(m, sizeof(double));
   double vMv, pval, dval;
 
@@ -81,10 +79,8 @@ static double relGap(NumericsMatrix *M, const double *f, const double *w,
 
 /* Returns the 2-norm of the complementarity residual vector = 2-norm of the
  * Jordan product velocity o reaction  */
-static double complemResidualNorm(const double *const velocity,
-                                  const double *const reaction,
-                                  const unsigned int vecSize,
-                                  const unsigned int varsCount) {
+static double complemResidualNorm(const double *const velocity, const double *const reaction,
+                                  const unsigned int vecSize, const unsigned int varsCount) {
   double *resid = (double *)calloc(vecSize, sizeof(double));
   JA_prod(velocity, reaction, vecSize, varsCount, resid);
   double norm2 = cblas_dnrm2(vecSize, resid, 1);
@@ -92,8 +88,8 @@ static double complemResidualNorm(const double *const velocity,
   return norm2;
 }
 
-NumericsMatrix *compute_JQinv2Jt(const double *u1, const double *r1,
-                                 const double *u2, const double *r2,
-                                 const size_t vecSize, const size_t varsCount);
+NumericsMatrix *compute_JQinv2Jt(const double *u1, const double *r1, const double *u2,
+                                 const double *r2, const size_t vecSize,
+                                 const size_t varsCount);
 
 CS_INT cs_dupl_zeros(cs *A);

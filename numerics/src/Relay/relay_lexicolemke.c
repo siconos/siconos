@@ -14,8 +14,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
-#include <stdlib.h>                        // for malloc, free
+ */
+#include <stdlib.h>  // for malloc, free
+
 #include "LCP_Solvers.h"                   // for lcp_compute_error
 #include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
 #include "NonSmoothDrivers.h"              // for linearComplementarity_driver
@@ -24,13 +25,14 @@
 #include "Relay_Solvers.h"                 // for relay_to_lcp, relay_lexico...
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_DPA...
 #include "lcp_cst.h"                       // for SICONOS_LCP_LEMKE
-#include "relay_cst.h"                       // for SICONOS_LCP_LEMKE
+#include "relay_cst.h"                     // for SICONOS_LCP_LEMKE
 
-void relay_lexicolemke(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options)
-{
+void relay_lexicolemke(RelayProblem *problem, double *z, double *w, int *info,
+                       SolverOptions *options) {
   int i;
   // conversion into LCP
-  LinearComplementarityProblem* lcp_problem = (LinearComplementarityProblem*)malloc(sizeof(LinearComplementarityProblem));
+  LinearComplementarityProblem *lcp_problem =
+      (LinearComplementarityProblem *)malloc(sizeof(LinearComplementarityProblem));
 
   /* Relay_display(problem); */
 
@@ -38,8 +40,8 @@ void relay_lexicolemke(RelayProblem* problem, double *z, double *w, int *info, S
 
   /* linearComplementarity_display(lcp_problem); */
 
-  double *zlcp = (double*)calloc(lcp_problem->size, sizeof(double));
-  double *wlcp = (double*)calloc(lcp_problem->size, sizeof(double));
+  double *zlcp = (double *)calloc(lcp_problem->size, sizeof(double));
+  double *wlcp = (double *)calloc(lcp_problem->size, sizeof(double));
 
   /*  FILE * fcheck = fopen("lcp_relay.dat","w"); */
   /*  info = linearComplementarity_printInFile(lcp_problem,fcheck); */
@@ -47,22 +49,20 @@ void relay_lexicolemke(RelayProblem* problem, double *z, double *w, int *info, S
   // Call the lcp_solver
   options->solverId = SICONOS_LCP_LEMKE;
   *info = linearComplementarity_driver(lcp_problem, zlcp, wlcp, options);
-  if(options->filterOn > 0)
-    lcp_compute_error(lcp_problem, zlcp, wlcp, options->dparam[SICONOS_DPARAM_TOL], &(options->dparam[SICONOS_DPARAM_RESIDU]));
+  if (options->filterOn > 0)
+    lcp_compute_error(lcp_problem, zlcp, wlcp, options->dparam[SICONOS_DPARAM_TOL],
+                      &(options->dparam[SICONOS_DPARAM_RESIDU]));
 
   // Conversion of result
-  for(i = 0; i < problem->size; i++)
-  {
+  for (i = 0; i < problem->size; i++) {
     /* z[i] = 1.0/2.0*(zlcp[i]-wlcp[i+problem->size]); works only for ub=1 and lb=-1 */
-    z[i] = zlcp[i] +  problem->lb[i];
+    z[i] = zlcp[i] + problem->lb[i];
     /* printf("problem->ub[ %i]=%12.10e\n", i, problem->ub[i]); */
     /* printf("zlcp[ %i]=%12.10e\n", i, zlcp[i]); */
     /* printf("z[ %i]=%12.10e\n", i, z[i]); */
 
-
-
     w[i] = wlcp[i] - zlcp[i + problem->size];
-    //printf("w[ %i]=%12.10e\n", i, w[i]);
+    // printf("w[ %i]=%12.10e\n", i, w[i]);
   }
 
   /*        for (i=0; i< lcp_problem->size; i++){  */
@@ -79,7 +79,4 @@ void relay_lexicolemke(RelayProblem* problem, double *z, double *w, int *info, S
   free(zlcp);
   free(wlcp);
   freeLinearComplementarityProblem(lcp_problem);
-
 }
-
-

@@ -14,15 +14,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #include "fc3d_solvers_wr.h"
-#include <stdlib.h>                        // for malloc, calloc
-#include "CSparseMatrix_internal.h"                 // for CSparseMatrix
+
+#include <stdlib.h>  // for malloc, calloc
+
+#include "CSparseMatrix_internal.h"        // for CSparseMatrix
 #include "FrictionContactProblem.h"        // for FrictionContactProblem
 #include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
 #include "NumericsMatrix.h"                // for NM_create, NM_display, NM_eye
 #include "NumericsSparseMatrix.h"          // for NumericsSparseMatrix, NSM_...
-#include "SiconosBlas.h"                         // for cblas_dcopy
+#include "SiconosBlas.h"                   // for cblas_dcopy
 
 //#define TEST_COND
 
@@ -30,40 +32,34 @@
 
 /* Global Variable for the reformulation of the problem */
 
-GlobalFrictionContactProblem*  fc3d_reformulation_global_problem(FrictionContactProblem* problem)
-{
-
-  int dimension  =  problem->dimension;
-  int nc  = problem->numberOfContacts;
+GlobalFrictionContactProblem *fc3d_reformulation_global_problem(
+    FrictionContactProblem *problem) {
+  int dimension = problem->dimension;
+  int nc = problem->numberOfContacts;
   int m = dimension * nc;
 
-
-
-  GlobalFrictionContactProblem*  globalproblem = globalFrictionContactProblem_new();
+  GlobalFrictionContactProblem *globalproblem = globalFrictionContactProblem_new();
 
   globalproblem->numberOfContacts = problem->numberOfContacts;
-  globalproblem->dimension =  problem->dimension;
+  globalproblem->dimension = problem->dimension;
 
-  globalproblem->mu = (double *)malloc(m*sizeof(double));
-  cblas_dcopy(nc,problem->mu,1,globalproblem->mu,1);
-  globalproblem->q = (double *)malloc(m*sizeof(double));
-  cblas_dcopy(m,problem->q,1,globalproblem->q,1);
-  globalproblem->b = (double *)calloc(m,sizeof(double));
+  globalproblem->mu = (double *)malloc(m * sizeof(double));
+  cblas_dcopy(nc, problem->mu, 1, globalproblem->mu, 1);
+  globalproblem->q = (double *)malloc(m * sizeof(double));
+  cblas_dcopy(m, problem->q, 1, globalproblem->q, 1);
+  globalproblem->b = (double *)calloc(m, sizeof(double));
 
   NumericsMatrix *M = problem->M;
 
-
-  NumericsMatrix *Mglobal = NM_create(NM_SPARSE,m,m);
-  CSparseMatrix * M_triplet = NM_triplet(M);
+  NumericsMatrix *Mglobal = NM_create(NM_SPARSE, m, m);
+  CSparseMatrix *M_triplet = NM_triplet(M);
   Mglobal->matrix2->triplet = M_triplet;
   Mglobal->matrix2->origin = NSM_TRIPLET;
-  globalproblem->M=Mglobal;
+  globalproblem->M = Mglobal;
 
   NumericsMatrix *Hglobal = NM_eye(m);
   NM_display(Hglobal);
-  globalproblem->H=M=Hglobal;
-
-
+  globalproblem->H = M = Hglobal;
 
   return globalproblem;
 }

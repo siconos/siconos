@@ -14,23 +14,22 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #ifndef Fixe_H
 #define Fixe_H
 
-#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 /*!\file NCP_FixedP.h
 
 */
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-extern "C"
-{
+extern "C" {
 #endif
 
-  int Fixe(int n, double* z, int* iparam, double* dparam);
+int Fixe(int n, double* z, int* iparam, double* dparam);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

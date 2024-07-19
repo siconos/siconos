@@ -55,24 +55,21 @@ std::shared_ptr<siconos::integrators::LsodarOSI> global_object{nullptr};
 // This first function must have the same signature as argument F (arg 1) in
 // DLSODAR (see opkdmain.f in Numerics) function to compute the righ-hand side
 // of xdot = f(x,t) + Tu
-extern "C" void LsodarOSI_f_wrapper(int* sizeOfX, double* time, double* x,
-                                    double* xdot) {
+extern "C" void LsodarOSI_f_wrapper(int* sizeOfX, double* time, double* x, double* xdot) {
   return global_object->f(sizeOfX, time, x, xdot);
 }
 
 // Function to wrap g: same signature as argument G (arg 18) in DLSODAR (see
 // opkdmain.f in Numerics)
-extern "C" void LsodarOSI_g_wrapper(int* nEq, double* time, double* x, int* ng,
-                                    double* gOut) {
+extern "C" void LsodarOSI_g_wrapper(int* nEq, double* time, double* x, int* ng, double* gOut) {
   return global_object->g(nEq, time, x, ng, gOut);
 }
 
 // Function to wrap jacobianf: same signature as argument JAC (arg 16) in
 // DLSODAR (see opkdmain.f in Numerics) function to compute the Jacobian/x of
 // the rhs.
-extern "C" void LsodarOSI_jacobianf_wrapper(int* sizeOfX, double* time,
-                                            double* x, int* ml, int* mu,
-                                            double* jacob, int* nrowpd) {
+extern "C" void LsodarOSI_jacobianf_wrapper(int* sizeOfX, double* time, double* x, int* ml,
+                                            int* mu, double* jacob, int* nrowpd) {
   return global_object->jacobianfx(sizeOfX, time, x, ml, mu, jacob, nrowpd);
 }
 }  // namespace
@@ -91,8 +88,7 @@ siconos::integrators::LsodarOSI::LsodarOSI()
   _sizeMem = 2;
 }
 
-void siconos::integrators::LsodarOSI::setTol(int newItol,
-                                             std::vector<double>&& newRtol,
+void siconos::integrators::LsodarOSI::setTol(int newItol, std::vector<double>&& newRtol,
                                              std::vector<double>&& newAtol) {
   //            The input parameters ITOL, RTOL, and ATOL determine
   //         the error control performed by the solver.  The solver will
@@ -114,8 +110,7 @@ void siconos::integrators::LsodarOSI::setTol(int newItol,
   _intData[2] = newItol;  // itol
 }
 
-void siconos::integrators::LsodarOSI::setMinMaxStepSizes(double minStep,
-                                                         double maxStep) {
+void siconos::integrators::LsodarOSI::setMinMaxStepSizes(double minStep, double maxStep) {
   rwork[5] = minStep;
   rwork[6] = maxStep;
 }
@@ -124,15 +119,13 @@ void siconos::integrators::LsodarOSI::setMaxNstep(int maxNumberSteps) {
   iwork[5] = maxNumberSteps;
 }
 
-void siconos::integrators::LsodarOSI::setTol(int newItol, double newRtol,
-                                             double newAtol) {
+void siconos::integrators::LsodarOSI::setTol(int newItol, double newRtol, double newAtol) {
   _intData[2] = newItol;  // itol
   rtol[0] = newRtol;      // rtol
   atol[0] = newRtol;      // atol
 }
 
-void siconos::integrators::LsodarOSI::setMaxOrder(int maxorderNonStiff,
-                                                  int maxorderStiff) {
+void siconos::integrators::LsodarOSI::setMaxOrder(int maxorderNonStiff, int maxorderStiff) {
   iwork[7] = maxorderNonStiff;
   iwork[8] = maxorderStiff;
 }
@@ -173,8 +166,7 @@ void siconos::integrators::LsodarOSI::computeRhs(double t) {
       "siconos::integrators::LsodarOSI::computeRhs(double t, "
       "DynamicalSystemsGraph& DSG0)\n")
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
-  for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend;
-       ++dsi) {
+  for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
     if (!checkOSI(dsi)) continue;
     auto ds = _dynamicalSystemsGraph->bundle(*dsi);
     // compute standard rhs stored in the dynamical system
@@ -183,8 +175,7 @@ void siconos::integrators::LsodarOSI::computeRhs(double t) {
     /* This next line is a good protection  */
     assert(_dynamicalSystemsGraph->properties(*dsi).workVectors);
     auto& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
-    if (auto lds =
-            std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+    if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
       auto& free = *workVectors[siconos::integrators::LsodarOSI::FREE];
       // we assume that inverseMass and forces are updated after call of
       // ds->computeRhs(t);
@@ -194,8 +185,7 @@ void siconos::integrators::LsodarOSI::computeRhs(double t) {
     }
     if (_extraAdditionalTerms) {
       auto dsgVD = _dynamicalSystemsGraph->descriptor(ds);
-      _extraAdditionalTerms->addSmoothTerms(*_dynamicalSystemsGraph, dsgVD, t,
-                                            ds->getRhs());
+      _extraAdditionalTerms->addSmoothTerms(*_dynamicalSystemsGraph, dsgVD, t, ds->getRhs());
     }
   }
   DEBUG_END(
@@ -206,34 +196,31 @@ void siconos::integrators::LsodarOSI::computeRhs(double t) {
 void siconos::integrators::LsodarOSI::computeJacobianRhs(
     double t, siconos::graphs::DynamicalSystemsGraph& DSG0) {
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
-  for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend;
-       ++dsi) {
+  for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
     if (!checkOSI(dsi)) continue;
     auto ds = _dynamicalSystemsGraph->bundle(*dsi);
     ds->computeJacobianRhsx(t);
     if (_extraAdditionalTerms) {
       auto dsgVD = DSG0.descriptor(ds);
-      _extraAdditionalTerms->addJacobianRhsContribution(DSG0, dsgVD, t,
-                                                        *(ds->jacobianRhsx()));
+      _extraAdditionalTerms->addJacobianRhsContribution(DSG0, dsgVD, t, *(ds->jacobianRhsx()));
     }
   }
 }
 
-void siconos::integrators::LsodarOSI::f(int* sizeOfX, double* time, double* x,
-                                        double* xdot) {
+void siconos::integrators::LsodarOSI::f(int* sizeOfX, double* time, double* x, double* xdot) {
   std::static_pointer_cast<siconos::simulation::EventDriven>(_simulation)
       ->computef(*this, sizeOfX, time, x, xdot);
 }
 
-void siconos::integrators::LsodarOSI::g(int* nEq, double* time, double* x,
-                                        int* ng, double* gOut) {
+void siconos::integrators::LsodarOSI::g(int* nEq, double* time, double* x, int* ng,
+                                        double* gOut) {
   std::static_pointer_cast<siconos::simulation::EventDriven>(_simulation)
       ->computeg(shared_from_this(), nEq, time, x, ng, gOut);
 }
 
-void siconos::integrators::LsodarOSI::jacobianfx(int* sizeOfX, double* time,
-                                                 double* x, int* ml, int* mu,
-                                                 double* jacob, int* nrowpd) {
+void siconos::integrators::LsodarOSI::jacobianfx(int* sizeOfX, double* time, double* x,
+                                                 int* ml, int* mu, double* jacob,
+                                                 int* nrowpd) {
   std::static_pointer_cast<siconos::simulation::EventDriven>(_simulation)
       ->computeJacobianfx(*this, sizeOfX, time, x, jacob);
 }
@@ -248,8 +235,7 @@ void siconos::integrators::LsodarOSI::initializeWorkVectorsForDS(
 
   ds->initRhs(t);  // This will create p[2] and other required vectors/buffers
 
-  if (auto lds =
-          std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+  if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
     // TODO FP: use buffer in graph for xWork?
     if (!_xWork) _xWork = std::make_shared<siconos::algebra::BlockVector>();
     _xWork->insertPtr(lds->q());
@@ -268,8 +254,7 @@ void siconos::integrators::LsodarOSI::initializeWorkVectorsForDS(
   // 1 - Neq; x vector size.
   _intData[0] = _xWork->size();
   // 5 - lrw, size of rwork
-  _intData[4] =
-      22 + _intData[0] * std::max(16, (int)_intData[0] + 9) + 3 * _intData[1];
+  _intData[4] = 22 + _intData[0] * std::max(16, (int)_intData[0] + 9) + 3 * _intData[1];
   // 6 - liw, size of iwork
   _intData[5] = 20 + _intData[0];
 
@@ -286,8 +271,7 @@ void siconos::integrators::LsodarOSI::initializeWorkVectorsForDS(
 }
 
 void siconos::integrators::LsodarOSI::initializeWorkVectorsForInteraction(
-    siconos::modeling::Interaction& inter,
-    siconos::graphs::InteractionProperties& interProp,
+    siconos::modeling::Interaction& inter, siconos::graphs::InteractionProperties& interProp,
     siconos::graphs::DynamicalSystemsGraph& DSG) {
   auto ds1 = interProp.source;
   auto ds2 = interProp.target;
@@ -296,16 +280,15 @@ void siconos::integrators::LsodarOSI::initializeWorkVectorsForInteraction(
 
   auto& DSlink = inter.linkToDSVariables();
   if (!interProp.workVectors) {
-    interProp.workVectors = std::make_shared<
-        std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>>(
-        siconos::integrators::LsodarOSI::WORK_INTERACTION_LENGTH);
+    interProp.workVectors =
+        std::make_shared<std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>>(
+            siconos::integrators::LsodarOSI::WORK_INTERACTION_LENGTH);
   }
 
   if (!interProp.workBlockVectors) {
-    interProp.workBlockVectors = std::make_shared<
-        std::vector<std::shared_ptr<siconos::algebra::BlockVector>>>();
-    interProp.workBlockVectors->resize(
-        siconos::integrators::LsodarOSI::BLOCK_WORK_LENGTH);
+    interProp.workBlockVectors =
+        std::make_shared<std::vector<std::shared_ptr<siconos::algebra::BlockVector>>>();
+    interProp.workBlockVectors->resize(siconos::integrators::LsodarOSI::BLOCK_WORK_LENGTH);
   }
 
   auto& inter_work = *interProp.workVectors;
@@ -382,8 +365,7 @@ void siconos::integrators::LsodarOSI::initializeWorkVectorsForInteraction(
   if (ds1 != ds2) {
     auto& workVds2 = *DSG.properties(DSG.descriptor(ds2)).workVectors;
     if (relationType == siconos::modeling::RelationType::Lagrangian) {
-      auto& lds =
-          *std::static_pointer_cast<siconos::modeling::LagrangianDS>(ds2);
+      auto& lds = *std::static_pointer_cast<siconos::modeling::LagrangianDS>(ds2);
       inter_work_block[siconos::integrators::LsodarOSI::xfree]->insertPtr(
           workVds2[siconos::integrators::LsodarOSI::FREE]);
       DSlink[siconos::modeling::LagrangianR::p2]->insertPtr(lds.p(2));
@@ -400,8 +382,7 @@ void siconos::integrators::LsodarOSI::initialize() {
   DEBUG_BEGIN("siconos::integrators::LsodarOSI::initialize()\n");
   OneStepIntegrator::initialize();
   // std::string type;
-  //  initialize xWork with x values of the dynamical systems present in the
-  //  set.
+  //  initialize xWork with x values of the dynamical systems present in the set.
 
   // siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
   // for(std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi !=
@@ -429,9 +410,8 @@ void siconos::integrators::LsodarOSI::initialize() {
   //   The link with variable names in opkdmain.f is indicated in comments
 
   // 2 - Ng, number of constraints:
-  _intData[1] =
-      std::static_pointer_cast<siconos::simulation::EventDriven>(_simulation)
-          ->computeSizeOfg();
+  _intData[1] = std::static_pointer_cast<siconos::simulation::EventDriven>(_simulation)
+                    ->computeSizeOfg();
   // 3 - Itol, itask, iopt
   // intData[2,3,4,5] : default values set in class attribute
   // _intData[2] = 1 if ATOL is a scalar, else 2 (ATOL array)
@@ -440,22 +420,19 @@ void siconos::integrators::LsodarOSI::initialize() {
   _intData[3] = 1;  // istate, an index used for input and output to specify the
                     // state of the calculation.
   // On input:
-  //                 1: first call for the problem (initializations will be
-  //                 done). 2: means this is not the first call, and the
-  //                 calculation is to continue normally, with no change in any
-  //                 input
+  //                 1: first call for the problem (initializations will be done).
+  //                 2: means this is not the first call, and the calculation is to continue
+  //                 normally, with no change in any input
   //                    parameters except possibly TOUT and ITASK.
-  //                 3:  means this is not the first call, and the calculation
-  //                 is to continue normally, but with
+  //                 3:  means this is not the first call, and the calculation is to continue
+  //                 normally, but with
   //                     a change in input parameters other than TOUT and ITASK.
   // On output:
-  //                 1: means nothing was done; TOUT = t and ISTATE = 1 on
-  //                 input. 2: means the integration was performed successfully,
-  //                 and no roots were found. 3: means the integration was
-  //                 successful, and one or more roots were found before
-  //                 satisfying the stop condition specified by ITASK. See
-  //                 JROOT. <0: error. See table below, in integrate function
-  //                 output message.
+  //                 1: means nothing was done; TOUT = t and ISTATE = 1 on input.
+  //                 2: means the integration was performed successfully, and no roots were
+  //                 found. 3: means the integration was successful, and one or more roots were
+  //                 found before satisfying the stop condition specified by ITASK. See JROOT.
+  //                 <0: error. See table below, in integrate function output message.
 
   // 7 - JT, Jacobian type indicator
   _intData[6] = 1;  // jt, Jacobian type indicator.
@@ -485,18 +462,16 @@ void siconos::integrators::LsodarOSI::initialize() {
   DEBUG_END("siconos::integrators::LsodarOSI::initialize()\n");
 }
 
-void siconos::integrators::LsodarOSI::integrate(double& tinit, double& tend,
-                                                double& tout, int& istate) {
+void siconos::integrators::LsodarOSI::integrate(double& tinit, double& tend, double& tout,
+                                                int& istate) {
   DEBUG_BEGIN(
       "siconos::integrators::LsodarOSI::integrate(double& tinit, double& tend, "
       "double& tout, "
       "int& istate) with \n");
-  DEBUG_PRINTF("tinit = %f, tend= %f, tout = %f, istate = %i\n", tinit, tend,
-               tout, istate);
+  DEBUG_PRINTF("tinit = %f, tend= %f, tout = %f, istate = %i\n", tinit, tend, tout, istate);
 
   // For details on DLSODAR parameters, see opkdmain.f in externals/odepack
-  double tend_DR =
-      tend;  // next point where output is desired (different from t!)
+  double tend_DR = tend;    // next point where output is desired (different from t!)
   double tinit_DR = tinit;  // current (starting) time
 
   // === Pointers to function ===
@@ -516,33 +491,27 @@ void siconos::integrators::LsodarOSI::integrate(double& tinit, double& tend,
   _intData[3] = istate;
 
   // call LSODAR to integrate dynamical equation
-  siconos::netlib::lsodar(
-      &LsodarOSI_f_wrapper, &(_intData[0]), _xtmp->getArray(), &tinit_DR,
-      &tend_DR, &(_intData[2]), &rtol.front(), &atol.front(), &(_intData[3]),
-      &rwork.front(), &(_intData[4]), &iwork.front(), &(_intData[5]),
-      &LsodarOSI_jacobianf_wrapper, &(_intData[6]), &LsodarOSI_g_wrapper,
-      &(_intData[1]), &jroot.front());
+  siconos::netlib::lsodar(&LsodarOSI_f_wrapper, &(_intData[0]), _xtmp->getArray(), &tinit_DR,
+                          &tend_DR, &(_intData[2]), &rtol.front(), &atol.front(),
+                          &(_intData[3]), &rwork.front(), &(_intData[4]), &iwork.front(),
+                          &(_intData[5]), &LsodarOSI_jacobianf_wrapper, &(_intData[6]),
+                          &LsodarOSI_g_wrapper, &(_intData[1]), &jroot.front());
 
   // jroot: jroot[i] = 1 if g(i) has a root at t, else jroot[i] = 0.
 
   // === Post ===
   if (_intData[3] < 0)  // if istate < 0 => LSODAROSI failed
   {
-    std::cout << "Lsodar::integrate(...) failed - Istate = " << _intData[3]
+    std::cout << "Lsodar::integrate(...) failed - Istate = " << _intData[3] << std::endl;
+    std::cout << " -1 means excess work done on this call (perhaps wrong JT, or so "
+                 "small "
+                 "tolerance (ATOL and RTOL), or small maximum number of steps for "
+                 "one call "
+                 "(MXSTEP)). You should increase ATOL or RTOL or increase the MXSTEP"
               << std::endl;
-    std::cout
-        << " -1 means excess work done on this call (perhaps wrong JT, or so "
-           "small "
-           "tolerance (ATOL and RTOL), or small maximum number of steps for "
-           "one call "
-           "(MXSTEP)). You should increase ATOL or RTOL or increase the MXSTEP"
-        << std::endl;
-    std::cout << " -2 means excess accuracy requested (tolerances too small)."
-              << std::endl;
-    std::cout << " -3 means illegal input detected (see printed message)."
-              << std::endl;
-    std::cout << " -4 means repeated error test failures (check all inputs)."
-              << std::endl;
+    std::cout << " -2 means excess accuracy requested (tolerances too small)." << std::endl;
+    std::cout << " -3 means illegal input detected (see printed message)." << std::endl;
+    std::cout << " -4 means repeated error test failures (check all inputs)." << std::endl;
     std::cout << " -5 means repeated convergence failures (perhaps bad "
                  "Jacobian supplied or "
                  "wrong choice of JT or tolerances)."
@@ -551,8 +520,7 @@ void siconos::integrators::LsodarOSI::integrate(double& tinit, double& tend,
                  "component i "
                  "vanished, and ATOL or ATOL(i) = 0.)"
               << std::endl;
-    std::cout << " -7 means work space insufficient to finish (see messages)."
-              << std::endl;
+    std::cout << " -7 means work space insufficient to finish (see messages)." << std::endl;
     THROW_EXCEPTION("LsodarOSI, integration failed");
   }
 
@@ -582,8 +550,7 @@ void siconos::integrators::LsodarOSI::updateState(const unsigned int level) {
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
   if (level == 1)  // ie impact case: compute velocity
   {
-    for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices();
-         dsi != dsend; ++dsi) {
+    for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
       if (!checkOSI(dsi)) continue;
       auto lds = std::static_pointer_cast<siconos::modeling::LagrangianDS>(
           _dynamicalSystemsGraph->bundle(*dsi));
@@ -591,8 +558,7 @@ void siconos::integrators::LsodarOSI::updateState(const unsigned int level) {
     }
   } else if (level == 2) {
     auto time = _simulation->nextTime();
-    for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices();
-         dsi != dsend; ++dsi) {
+    for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
       if (!checkOSI(dsi)) continue;
       {
         auto ds = _dynamicalSystemsGraph->bundle(*dsi);
@@ -633,17 +599,13 @@ struct siconos::integrators::LsodarOSI::_NSLEffectOnFreeOutput
     subCoord[1] = _inter->nonSmoothLaw()->size();
     subCoord[2] = 0;
     subCoord[3] = subCoord[1];
-    auto& osnsp_rhs =
-        *(*_interProp.workVectors)[siconos::integrators::LsodarOSI::OSNSP_RHS];
-    siconos::algebra::subscal(e, _inter->y_k(_osnsp.inputOutputLevel()),
-                              osnsp_rhs, subCoord,
+    auto& osnsp_rhs = *(*_interProp.workVectors)[siconos::integrators::LsodarOSI::OSNSP_RHS];
+    siconos::algebra::subscal(e, _inter->y_k(_osnsp.inputOutputLevel()), osnsp_rhs, subCoord,
                               false);  // q = q + e * q
   }
 
   // visit function added by Son (9/11/2010)
-  void visit(const siconos::modeling::MultipleImpactNSL& nslaw) const override {
-    ;
-  }
+  void visit(const siconos::modeling::MultipleImpactNSL& nslaw) const override { ; }
 
   // note : no NewtonImpactFrictionNSL
 };
@@ -674,9 +636,8 @@ void siconos::integrators::LsodarOSI::computeFreeOutput(
   std::shared_ptr<siconos::algebra::SiconosMatrix> C;
   //   std::shared_ptr<siconos::algebra::SiconosMatrix>  D;
   //   std::shared_ptr<siconos::algebra::SiconosMatrix>  F;
-  auto& osnsp_rhs =
-      *(*indexSet->properties(vertex_inter)
-             .workVectors)[siconos::integrators::LsodarOSI::OSNSP_RHS];
+  auto& osnsp_rhs = *(*indexSet->properties(vertex_inter)
+                           .workVectors)[siconos::integrators::LsodarOSI::OSNSP_RHS];
 
   std::shared_ptr<siconos::algebra::BlockVector> Xfree;
 
@@ -690,8 +651,7 @@ void siconos::integrators::LsodarOSI::computeFreeOutput(
    */
 
   // auto  allOSNS  = _simulation->oneStepNSProblems();
-  if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_ACC]).get() ==
-      osnsp) {
+  if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp) {
     if (relationType == siconos::modeling::RelationType::Lagrangian) {
       Xfree = inter_work_block[siconos::integrators::LsodarOSI::xfree];
       DEBUG_EXPR(Xfree->display(););
@@ -703,8 +663,7 @@ void siconos::integrators::LsodarOSI::computeFreeOutput(
     assert(Xfree);
     //        std::cout << "Computeqblock Xfree (Gamma)========" << std::endl;
     //       Xfree->display();
-  } else if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_IMPACT]).get() ==
-             osnsp) {
+  } else if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_IMPACT]).get() == osnsp) {
     Xfree = DSlink[siconos::modeling::LagrangianR::q1];
     //        std::cout << "Computeqblock Xfree (Velocity)========" <<
     //        std::endl;
@@ -737,23 +696,19 @@ void siconos::integrators::LsodarOSI::computeFreeOutput(
     xcoord[7] = sizeY;
     // For the relation of type LagrangianRheonomousR
     if (relationSubType == siconos::modeling::RelationSubType::RheonomousR) {
-      if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_ACC])
-              .get() == osnsp) {
+      if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp) {
         THROW_EXCEPTION(
             "siconos::integrators::LsodarOSI::computeFreeOutput not yet "
             "implemented for LCP "
             "at acceleration level with LagrangianRheonomousR");
-      } else if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY])
-                     .get() == osnsp) {
-        std::static_pointer_cast<siconos::modeling::LagrangianRheonomousR>(
-            inter->relation())
-            ->computehDot(simulation()->getTkp1(),
-                          *DSlink[siconos::modeling::LagrangianR::q0],
+      } else if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp) {
+        std::static_pointer_cast<siconos::modeling::LagrangianRheonomousR>(inter->relation())
+            ->computehDot(simulation()->getTkp1(), *DSlink[siconos::modeling::LagrangianR::q0],
                           *DSlink[siconos::modeling::LagrangianR::z]);
         siconos::algebra::subprod(
             *ID,
-            *(std::static_pointer_cast<
-                  siconos::modeling::LagrangianRheonomousR>(inter->relation())
+            *(std::static_pointer_cast<siconos::modeling::LagrangianRheonomousR>(
+                  inter->relation())
                   ->hDot()),
             osnsp_rhs, xcoord, false);  // y += hDot
       } else
@@ -764,15 +719,13 @@ void siconos::integrators::LsodarOSI::computeFreeOutput(
     }
     // For the relation of type LagrangianScleronomousR
     if (relationSubType == siconos::modeling::RelationSubType::ScleronomousR) {
-      if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_ACC])
-              .get() == osnsp) {
-        std::static_pointer_cast<siconos::modeling::LagrangianScleronomousR>(
-            inter->relation())
+      if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp) {
+        std::static_pointer_cast<siconos::modeling::LagrangianScleronomousR>(inter->relation())
             ->computedotjacqhXqdot(simulation()->getTkp1(), *inter);
         siconos::algebra::subprod(
             *ID,
-            *(std::static_pointer_cast<
-                  siconos::modeling::LagrangianScleronomousR>(inter->relation())
+            *(std::static_pointer_cast<siconos::modeling::LagrangianScleronomousR>(
+                  inter->relation())
                   ->dotjacqhXqdot()),
             osnsp_rhs, xcoord, false);  // y += NonLinearPart
       }
@@ -783,17 +736,13 @@ void siconos::integrators::LsodarOSI::computeFreeOutput(
         "implemented for Relation "
         "of type " +
         std::to_string(
-            static_cast<
-                std::underlying_type<siconos::modeling::RelationType>::type>(
+            static_cast<std::underlying_type<siconos::modeling::RelationType>::type>(
                 relationType)));
-  if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_IMPACT]).get() ==
-      osnsp) {
-    if (inter->relation()->getType() ==
-            siconos::modeling::RelationType::Lagrangian ||
-        inter->relation()->getType() ==
-            siconos::modeling::RelationType::NewtonEuler) {
-      _NSLEffectOnFreeOutput nslEffectOnFreeOutput(
-          *osnsp, inter, indexSet->properties(vertex_inter));
+  if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_IMPACT]).get() == osnsp) {
+    if (inter->relation()->getType() == siconos::modeling::RelationType::Lagrangian ||
+        inter->relation()->getType() == siconos::modeling::RelationType::NewtonEuler) {
+      _NSLEffectOnFreeOutput nslEffectOnFreeOutput(*osnsp, inter,
+                                                   indexSet->properties(vertex_inter));
 
       inter->nonSmoothLaw()->accept(nslEffectOnFreeOutput);
     }
@@ -806,7 +755,7 @@ void siconos::integrators::LsodarOSI::display() const {
   std::cout << "Number of constraints: " << _intData[1] << "\n";
   std::cout << "itol, istate, lrw, liw, jt: (for details on what are these "
                "variables see opkdmain.f)\n";
-  std::cout << _intData[2] << ", " << _intData[3] << ", " << _intData[4] << ", "
-            << _intData[5] << ", " << _intData[6] << "\n";
+  std::cout << _intData[2] << ", " << _intData[3] << ", " << _intData[4] << ", " << _intData[5]
+            << ", " << _intData[6] << "\n";
   std::cout << "====================================\n";
 }

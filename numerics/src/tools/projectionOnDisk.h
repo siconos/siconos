@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #ifndef ProjectionOnDisk_H
 #define ProjectionOnDisk_H
@@ -23,25 +23,23 @@
  * \brief functions to project on a cylinder
  */
 
-#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-extern "C"
-{
+extern "C" {
 #endif
 
-  /** projectionOnDisk Projection onto the positive Disk of radius R  \f$  \{ r,  0 \sqrt(r_1^2+r_2^2) \geq R \} \f$
-  \param[in,out] r the vector to be projected
-  \param[in] R the radius of the cone
-  */
-  void projectionOnDisk(double* r, double  R);
+/** projectionOnDisk Projection onto the positive Disk of radius R  \f$  \{ r,  0
+\sqrt(r_1^2+r_2^2) \geq R \} \f$ \param[in,out] r the vector to be projected \param[in] R the
+radius of the cone
+*/
+void projectionOnDisk(double* r, double R);
 
-  /** projectionOnGeneralDisk Projection onto the positive Disk of radius R  \f$  \{ r, 0 \sqrt(r_1^2+r_1^2) \geq R \} \f$
-  \param[in,out] r the vector to be projected
-  \param[in] R the radius of the cone
-  \param[in] dim dimension of the cylinder
-  */
-  void projectionOnGeneralDisk(double* r, double  R, int dim);
+/** projectionOnGeneralDisk Projection onto the positive Disk of radius R  \f$  \{ r, 0
+\sqrt(r_1^2+r_1^2) \geq R \} \f$ \param[in,out] r the vector to be projected \param[in] R the
+radius of the cone \param[in] dim dimension of the cylinder
+*/
+void projectionOnGeneralDisk(double* r, double R, int dim);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

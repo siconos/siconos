@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*!\file op3x3.h
  * \brief linear algebra operations in 3D*/
@@ -22,16 +22,15 @@
 #ifndef _op3x3_h_
 #define _op3x3_h_
 
-#include <math.h>
-#include <float.h>
-#include <stdlib.h>
-#include <stdio.h>
 #include <assert.h>
-
+#include <float.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #ifndef M_PI
-#define M_PI        3.14159265358979323846264338327950288   /* pi             */
-#define M_PI_2      1.57079632679489661923132169163975144   /* pi/2           */
+#define M_PI 3.14159265358979323846264338327950288   /* pi             */
+#define M_PI_2 1.57079632679489661923132169163975144 /* pi/2           */
 #endif
 
 #ifndef MAYBE_UNUSED
@@ -44,7 +43,7 @@
 
 #ifndef WARN_RESULT_IGNORED
 #ifdef __GNUC__
-#define WARN_RESULT_IGNORED __attribute__ ((warn_unused_result))
+#define WARN_RESULT_IGNORED __attribute__((warn_unused_result))
 #else
 #define WARN_RESULT_IGNORED
 #endif
@@ -56,85 +55,86 @@
 #define restrict __restrict
 #endif
 
-#define SOLVE_3X3_GEPP(MAT, X) \
-{ \
-  int res = solve_3x3_gepp(mat, X); \
-  if (res) { printf("%s :: Call solve_3x3_gepp(" #MAT ", " #X " failed!. "\
-                    "No pivot could be selected for column %d\n", __func__, res); } }
-
+#define SOLVE_3X3_GEPP(MAT, X)                             \
+  {                                                        \
+    int res = solve_3x3_gepp(mat, X);                      \
+    if (res) {                                             \
+      printf("%s :: Call solve_3x3_gepp(" #MAT ", " #X     \
+             " failed!. "                                  \
+             "No pivot could be selected for column %d\n", \
+             __func__, res);                               \
+    }                                                      \
+  }
 
 /** OP3X3(EXPR) do EXPR 9 times
  * \param EXPR a C expression that should contains self incrementing
  *        pointers on arrays[9] */
-#define OP3X3(EXPR)                             \
-  do                                            \
-  {                                             \
-    EXPR;                                       \
-    EXPR;                                       \
-    EXPR;                                       \
-    EXPR;                                       \
-    EXPR;                                       \
-    EXPR;                                       \
-    EXPR;                                       \
-    EXPR;                                       \
-    EXPR;                                       \
-  } while(0)                                    \
+#define OP3X3(EXPR) \
+  do {              \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+    EXPR;           \
+  } while (0)
 
 /** OP3(EXPR) do EXPR 3 times
  * \param EXPR a C expression that should contains self incrementing
  *        pointers on arrays[9] */
-#define OP3(EXPR)                               \
-  do                                            \
-  {                                             \
-    EXPR;                                       \
-    EXPR;                                       \
-    EXPR;                                       \
-  } while(0)                                    \
+#define OP3(EXPR) \
+  do {            \
+    EXPR;         \
+    EXPR;         \
+    EXPR;         \
+  } while (0)
 
 /** SET3X3 : set pointers on a 3x3 matrix a (*a00 *a01 *a10 etc.)
  * warning the pointer a is modified (use a00 instead) and is ready
  * for a next SET3X3
  */
-#define SET3X3(V)                                                       \
-  double* V##00 MAYBE_UNUSED = V++;                                     \
-  double* V##10 MAYBE_UNUSED = V++;                                     \
-  double* V##20 MAYBE_UNUSED = V++;                                     \
-  double* V##01 MAYBE_UNUSED = V++;                                     \
-  double* V##11 MAYBE_UNUSED = V++;                                     \
-  double* V##21 MAYBE_UNUSED = V++;                                     \
-  double* V##02 MAYBE_UNUSED = V++;                                     \
-  double* V##12 MAYBE_UNUSED = V++;                                     \
+#define SET3X3(V)                   \
+  double* V##00 MAYBE_UNUSED = V++; \
+  double* V##10 MAYBE_UNUSED = V++; \
+  double* V##20 MAYBE_UNUSED = V++; \
+  double* V##01 MAYBE_UNUSED = V++; \
+  double* V##11 MAYBE_UNUSED = V++; \
+  double* V##21 MAYBE_UNUSED = V++; \
+  double* V##02 MAYBE_UNUSED = V++; \
+  double* V##12 MAYBE_UNUSED = V++; \
   double* V##22 MAYBE_UNUSED = V++;
-#define SET3X3MAYBE(V)                                       \
-  double* V##00 MAYBE_UNUSED = 0;                            \
-  double* V##10 MAYBE_UNUSED = 0;                            \
-  double* V##20 MAYBE_UNUSED = 0;                            \
-  double* V##01 MAYBE_UNUSED = 0;                            \
-  double* V##11 MAYBE_UNUSED = 0;                            \
-  double* V##21 MAYBE_UNUSED = 0;                            \
-  double* V##02 MAYBE_UNUSED = 0;                            \
-  double* V##12 MAYBE_UNUSED = 0;                            \
-  double* V##22 MAYBE_UNUSED = 0;                            \
-  if (V)                                        \
-  {                                             \
-    V##00 = V++;                                \
-    V##10 = V++;                                \
-    V##20 = V++;                                \
-    V##01 = V++;                                \
-    V##11 = V++;                                \
-    V##21 = V++;                                \
-    V##02 = V++;                                \
-    V##12 = V++;                                \
-    V##22 = V++;                                \
+#define SET3X3MAYBE(V)            \
+  double* V##00 MAYBE_UNUSED = 0; \
+  double* V##10 MAYBE_UNUSED = 0; \
+  double* V##20 MAYBE_UNUSED = 0; \
+  double* V##01 MAYBE_UNUSED = 0; \
+  double* V##11 MAYBE_UNUSED = 0; \
+  double* V##21 MAYBE_UNUSED = 0; \
+  double* V##02 MAYBE_UNUSED = 0; \
+  double* V##12 MAYBE_UNUSED = 0; \
+  double* V##22 MAYBE_UNUSED = 0; \
+  if (V) {                        \
+    V##00 = V++;                  \
+    V##10 = V++;                  \
+    V##20 = V++;                  \
+    V##01 = V++;                  \
+    V##11 = V++;                  \
+    V##21 = V++;                  \
+    V##02 = V++;                  \
+    V##12 = V++;                  \
+    V##22 = V++;                  \
   }
 
 /** SET3 : set pointers on a vector3 v (*v0 *v1 *v2)
  * Warning: the pointer v is modified and is ready for a next SET3
  * use *v0 if you need *v
  */
-#define SET3(V)                                 \
-  double* V##0 MAYBE_UNUSED = V++;                           \
-  double* V##1 MAYBE_UNUSED = V++;                           \
+#define SET3(V)                    \
+  double* V##0 MAYBE_UNUSED = V++; \
+  double* V##1 MAYBE_UNUSED = V++; \
   double* V##2 MAYBE_UNUSED = V++;
 
 /** SET3MAYBE : set pointers on a vector3 v (*v0 *v1 *v2) only if v is
@@ -142,82 +142,59 @@
  * Warning: the pointer v is modified and is ready for a next SET3
  * use *v0 if you need *v
  */
-#define SET3MAYBE(V)                                 \
-  double* V##0 MAYBE_UNUSED = 0;                                  \
-  double* V##1 MAYBE_UNUSED = 0;                                  \
-  double* V##2 MAYBE_UNUSED = 0;                                  \
-  if (V)                                             \
-  {                                                  \
-    V##0 = V++;                                      \
-    V##1 = V++;                                      \
-    V##2 = V++;                                      \
+#define SET3MAYBE(V)             \
+  double* V##0 MAYBE_UNUSED = 0; \
+  double* V##1 MAYBE_UNUSED = 0; \
+  double* V##2 MAYBE_UNUSED = 0; \
+  if (V) {                       \
+    V##0 = V++;                  \
+    V##1 = V++;                  \
+    V##2 = V++;                  \
   }
 
 /** copy a 3x3 matrix or a vector[9]
  * \param[in] a  a[9]
  * \param[out] b  b[9]*/
-static inline void cpy3x3(double* restrict a, double* restrict b)
-{
-  OP3X3(*b++ = *a++);
-}
+static inline void cpy3x3(double* restrict a, double* restrict b) { OP3X3(*b++ = *a++); }
 
 /** add a 3x3 matrix or a vector[9]
  *\param[in] a a[9]
  *\param[in,out]  b b[9]*/
-static inline void add3x3(double a[9], double b[9])
-{
-  OP3X3(*b++ += *a++);
-}
+static inline void add3x3(double a[9], double b[9]) { OP3X3(*b++ += *a++); }
 
 /** sub a 3x3 matrix or a vector[9]
  *\param[in] a a[9]
  *\param[in,out] b b[9]*/
-static inline void sub3x3(double a[9], double b[9])
-{
-  OP3X3(*b++ -= *a++);
-}
+static inline void sub3x3(double a[9], double b[9]) { OP3X3(*b++ -= *a++); }
 
 /** copy a vector[3]
  * \param[in] a a[3]
  * \param[out] b b[3]
  */
-static inline void cpy3(double a[3], double b[3])
-{
-  OP3(*b++ = *a++);
-}
+static inline void cpy3(double a[3], double b[3]) { OP3(*b++ = *a++); }
 
 /** add a vector[3]
  * \param[in] a a[3]
  * \param[in,out] b b[3]*/
-static inline void add3(double a[3], double b[3])
-{
-  OP3(*b++ += *a++);
-}
+static inline void add3(double a[3], double b[3]) { OP3(*b++ += *a++); }
 
 /** sub a vector[3]
  * \param[in] a a[3]
  * \param[in,out] b  b[3]
  */
-static inline void sub3(double a[3], double b[3])
-{
-  OP3(*b++ -= *a++);
-}
+static inline void sub3(double a[3], double b[3]) { OP3(*b++ -= *a++); }
 
 /** scalar multiplication of a matrix3x3
  * \param[in] scal double scalar
  * \param[in,out] m  m[9]
  */
-static inline void scal3x3(double scal, double m[9])
-{
-  OP3X3(*m++ *= scal);
-}
+static inline void scal3x3(double scal, double m[9]) { OP3X3(*m++ *= scal); }
 
 /** diagonal scaling of a vector
  * \param[in] scal_coeffs diagonal part of a matrix
  * \param[in,out] v a 3D vector
  */
-static inline void diag_scal3(double* restrict scal_coeffs, double* restrict v)
-{
+static inline void diag_scal3(double* restrict scal_coeffs, double* restrict v) {
   OP3(*v++ *= *scal_coeffs++);
 }
 
@@ -225,18 +202,13 @@ static inline void diag_scal3(double* restrict scal_coeffs, double* restrict v)
  * \param[in] scal double scalar
  * \param[in,out] v v[3]
  */
-static inline void scal3(double scal, double* v)
-{
-  OP3(*v++ *= scal);
-}
-
+static inline void scal3(double scal, double* v) { OP3(*v++ *= scal); }
 
 /** copy & transpose a matrix
  * \param[in] a *a
  * \param[out] b transpose(*a)
  */
-static inline void cpytr3x3(double* restrict a, double* restrict b)
-{
+static inline void cpytr3x3(double* restrict a, double* restrict b) {
   SET3X3(a);
   SET3X3(b);
   *b00 = *a00;
@@ -255,9 +227,7 @@ static inline void cpytr3x3(double* restrict a, double* restrict b)
  * \param[in] v 3 dimensional vector
  * \param[out] r \f$r = a*v\f$
  */
-static inline void mv3x3(double* restrict a, double* restrict v, double* restrict r)
-{
-
+static inline void mv3x3(double* restrict a, double* restrict v, double* restrict r) {
   double* pr;
 
   pr = r;
@@ -284,9 +254,7 @@ static inline void mv3x3(double* restrict a, double* restrict v, double* restric
  * \param[in] v 3 dimensional vector
  * \param[out] r \f$r = a^T*v\f$
  */
-static inline void mtv3x3(double* restrict a, double* restrict v, double* restrict r)
-{
-
+static inline void mtv3x3(double* restrict a, double* restrict v, double* restrict r) {
   double* pv = v;
 
   *r = *a++ * *pv++;
@@ -311,9 +279,8 @@ static inline void mtv3x3(double* restrict a, double* restrict v, double* restri
  * \param[in] v v[2]
  * \param[out] r r[2] the result of r += av
  */
-static inline void mvp2x2(const double* restrict a, const double* restrict v, double* restrict r)
-{
-
+static inline void mvp2x2(const double* restrict a, const double* restrict v,
+                          double* restrict r) {
   double* pr;
 
   pr = r;
@@ -332,9 +299,8 @@ static inline void mvp2x2(const double* restrict a, const double* restrict v, do
  * \param[in] v v[3]
  * \param[out] r r[3] the result of r += av
  */
-static inline void mvp3x3(const double* restrict a, const double* restrict v, double* restrict r)
-{
-
+static inline void mvp3x3(const double* restrict a, const double* restrict v,
+                          double* restrict r) {
   double* pr;
 
   pr = r;
@@ -356,9 +322,8 @@ static inline void mvp3x3(const double* restrict a, const double* restrict v, do
   *pr++ += *a++ * *v++;
 }
 
-static inline void mvp5x5(const double* restrict a, const double* restrict v, double* restrict r)
-{
-
+static inline void mvp5x5(const double* restrict a, const double* restrict v,
+                          double* restrict r) {
   double* pr;
 
   pr = r;
@@ -400,8 +365,6 @@ static inline void mvp5x5(const double* restrict a, const double* restrict v, do
   *pr++ += *a++ * *v;
   *pr++ += *a++ * *v;
   *pr++ += *a++ * *v++;
-
-
 }
 
 /** add a matrix vector multiplication scaled by alpha
@@ -410,9 +373,8 @@ static inline void mvp5x5(const double* restrict a, const double* restrict v, do
  * \param[in] v v[3]
  * \param[out] r r[3] the result of r += av
  */
-static inline void mvp_alpha3x3(double alpha, const double* restrict a, const double* restrict v, double* restrict r)
-{
-
+static inline void mvp_alpha3x3(double alpha, const double* restrict a,
+                                const double* restrict v, double* restrict r) {
   double* pr;
 
   pr = r;
@@ -423,24 +385,22 @@ static inline void mvp_alpha3x3(double alpha, const double* restrict a, const do
 
   pr = r;
 
-  *pr++ += alpha *  *a++ * *v;
-  *pr++ += alpha *  *a++ * *v;
-  *pr++ += alpha *  *a++ * *v++;
+  *pr++ += alpha * *a++ * *v;
+  *pr++ += alpha * *a++ * *v;
+  *pr++ += alpha * *a++ * *v++;
 
   pr = r;
 
-  *pr++ += alpha *  *a++ * *v;
-  *pr++ += alpha *  *a++ * *v;
-  *pr++ += alpha *  *a++ * *v++;
+  *pr++ += alpha * *a++ * *v;
+  *pr++ += alpha * *a++ * *v;
+  *pr++ += alpha * *a++ * *v++;
 }
 /** minux the result a matrix vector multiplication
  * \param[in] a matrix
  * \param[in] v vector
  * \param[out] r the result of r -= av
  */
-static inline void mvm3x3(double* restrict a, double* restrict v, double* restrict r)
-{
-
+static inline void mvm3x3(double* restrict a, double* restrict v, double* restrict r) {
   double* pr;
 
   pr = r;
@@ -462,15 +422,12 @@ static inline void mvm3x3(double* restrict a, double* restrict v, double* restri
   *pr++ -= *a++ * *v++;
 }
 
-
 /** transpose(matrix) vector multiplication
  * \param[in] a 3 by 3 matrix in col-major
  * \param[in] v 3 dimensional vector
  * \param[out] r \f$r = a^T*v\f$
  */
-static inline void mtvm3x3(double* restrict a, double* restrict v, double* restrict r)
-{
-
+static inline void mtvm3x3(double* restrict a, double* restrict v, double* restrict r) {
   double* pv = v;
 
   *r -= *a++ * *pv++;
@@ -494,9 +451,7 @@ static inline void mtvm3x3(double* restrict a, double* restrict v, double* restr
  * \param[in] b b[9]
  * \param[out] c c[9]
  */
-static inline void mm3x3(double* restrict a, double* restrict b, double* restrict c)
-{
-
+static inline void mm3x3(double* restrict a, double* restrict b, double* restrict c) {
   SET3X3(a);
   SET3X3(b);
   SET3X3(c);
@@ -512,7 +467,6 @@ static inline void mm3x3(double* restrict a, double* restrict b, double* restric
   *c20 = *a20 * *b00 + *a21 * *b10 + *a22 * *b20;
   *c21 = *a20 * *b01 + *a21 * *b11 + *a22 * *b21;
   *c22 = *a20 * *b02 + *a21 * *b12 + *a22 * *b22;
-
 }
 
 /** add a matrix matrix multiplication : c += a*b
@@ -520,9 +474,7 @@ static inline void mm3x3(double* restrict a, double* restrict b, double* restric
  * \param[in] b b[9]
  * \param[out] c c[9]
  */
-static inline void mmp3x3(double* restrict a, double* restrict b, double* restrict c)
-{
-
+static inline void mmp3x3(double* restrict a, double* restrict b, double* restrict c) {
   SET3X3(a);
   SET3X3(b);
   SET3X3(c);
@@ -538,7 +490,6 @@ static inline void mmp3x3(double* restrict a, double* restrict b, double* restri
   *c20 += *a20 * *b00 + *a21 * *b10 + *a22 * *b20;
   *c21 += *a20 * *b01 + *a21 * *b11 + *a22 * *b21;
   *c22 += *a20 * *b02 + *a21 * *b12 + *a22 * *b22;
-
 }
 
 /** sub a matrix matrix multiplication : c -= a*b
@@ -546,9 +497,7 @@ static inline void mmp3x3(double* restrict a, double* restrict b, double* restri
  * \param[in] b b[9]
  * \param[out] c c[9]
  */
-static inline void mmm3x3(double* restrict a, double* restrict b, double* restrict c)
-{
-
+static inline void mmm3x3(double* restrict a, double* restrict b, double* restrict c) {
   SET3X3(a);
   SET3X3(b);
   SET3X3(c);
@@ -564,22 +513,18 @@ static inline void mmm3x3(double* restrict a, double* restrict b, double* restri
   *c20 -= *a20 * *b00 + *a21 * *b10 + *a22 * *b20;
   *c21 -= *a20 * *b01 + *a21 * *b11 + *a22 * *b21;
   *c22 -= *a20 * *b02 + *a21 * *b12 + *a22 * *b22;
-
 }
 
 /** determinant
  * \param[in] a double* a
  * \return the value of the determinant
  */
-static inline double det3x3(double* a)
-{
+static inline double det3x3(double* a) {
   SET3X3(a);
 
-  return
-    *a00 * *a11 * *a22 + *a01 * *a12 * *a20 + *a02 * *a10 * *a21 -
-    *a00 * *a12 * *a21 - *a01 * *a10 * *a22 - *a02 * *a11 * *a20;
+  return *a00 * *a11 * *a22 + *a01 * *a12 * *a20 + *a02 * *a10 * *a21 - *a00 * *a12 * *a21 -
+         *a01 * *a10 * *a22 - *a02 * *a11 * *a20;
 }
-
 
 /** system resolution : x <- sol(Ax = b)
  * \param[in] a double a[9]
@@ -588,36 +533,27 @@ static inline double det3x3(double* a)
  * \return 0 if success, 1 if failed
  */
 WARN_RESULT_IGNORED
-static inline int solv3x3(double* restrict a, double* restrict x, double* restrict b)
-{
-
+static inline int solv3x3(double* restrict a, double* restrict x, double* restrict b) {
   SET3X3(a);
   double* b0 = b++;
   double* b1 = b++;
   double* b2 = b;
 
-  double det =
-    *a00 * *a11 * *a22 + *a01 * *a12 * *a20 + *a02 * *a10 * *a21 -
-    *a00 * *a12 * *a21 - *a01 * *a10 * *a22 - *a02 * *a11 * *a20;
+  double det = *a00 * *a11 * *a22 + *a01 * *a12 * *a20 + *a02 * *a10 * *a21 -
+               *a00 * *a12 * *a21 - *a01 * *a10 * *a22 - *a02 * *a11 * *a20;
 
-  if (fabs(det) > DBL_EPSILON)
-  {
+  if (fabs(det) > DBL_EPSILON) {
     double idet = 1.0 / det;
-    *x++ = idet * (*a01 * *a12 * *b2 +  *a02 * *a21 * *b1 +
-                   *a11 * *a22 * *b0 -  *a01 * *a22 * *b1 -
-                   *a02 * *a11 * *b2 -  *a12 * *a21 * *b0);
-    *x++ = idet * (*a00 * *a22 * *b1 +  *a02 * *a10 * *b2 +
-                   *a12 * *a20 * *b0 -  *a00 * *a12 * *b2 -
-                   *a02 * *a20 * *b1 -  *a10 * *a22 * *b0);
-    *x   = idet * (*a00 * *a11 * *b2 +  *a01 * *a20 * *b1 +
-                   *a10 * *a21 * *b0 -  *a00 * *a21 * *b1 -
-                   *a01 * *a10 * *b2 -  *a11 * *a20 * *b0);
-  }
-  else
-  {
+    *x++ = idet * (*a01 * *a12 * *b2 + *a02 * *a21 * *b1 + *a11 * *a22 * *b0 -
+                   *a01 * *a22 * *b1 - *a02 * *a11 * *b2 - *a12 * *a21 * *b0);
+    *x++ = idet * (*a00 * *a22 * *b1 + *a02 * *a10 * *b2 + *a12 * *a20 * *b0 -
+                   *a00 * *a12 * *b2 - *a02 * *a20 * *b1 - *a10 * *a22 * *b0);
+    *x = idet * (*a00 * *a11 * *b2 + *a01 * *a20 * *b1 + *a10 * *a21 * *b0 -
+                 *a00 * *a21 * *b1 - *a01 * *a10 * *b2 - *a11 * *a20 * *b0);
+  } else {
     *x++ = NAN;
     *x++ = NAN;
-    *x   = NAN;
+    *x = NAN;
     return 1;
   }
   return 0;
@@ -628,17 +564,9 @@ static inline int solv3x3(double* restrict a, double* restrict x, double* restri
  * \param[in] b double b[9]
  * \return 1 if true, 0 if false
  */
-static inline int equal3x3(double* restrict a, double* restrict b)
-{
-  return *a++ == *b++ &&
-         *a++ == *b++ &&
-         *a++ == *b++ &&
-         *a++ == *b++ &&
-         *a++ == *b++ &&
-         *a++ == *b++ &&
-         *a++ == *b++ &&
-         *a++ == *b++ &&
-         *a == *b;
+static inline int equal3x3(double* restrict a, double* restrict b) {
+  return *a++ == *b++ && *a++ == *b++ && *a++ == *b++ && *a++ == *b++ && *a++ == *b++ &&
+         *a++ == *b++ && *a++ == *b++ && *a++ == *b++ && *a == *b;
 }
 
 /** check equality : a[3] == b[3]
@@ -646,11 +574,8 @@ static inline int equal3x3(double* restrict a, double* restrict b)
  * \param[in] b double b[3]
  * \return 1 if true, 0 if false
  */
-static inline int equal3(double* restrict a, double* restrict b)
-{
-  return *a++ == *b++ &&
-         *a++ == *b++ &&
-         *a == *b;
+static inline int equal3(double* restrict a, double* restrict b) {
+  return *a++ == *b++ && *a++ == *b++ && *a == *b;
 }
 
 /** scalar product : c <- a.b
@@ -658,11 +583,10 @@ static inline int equal3(double* restrict a, double* restrict b)
  * \param[in] b double b[3]
  * \return the scalar product
  */
-static inline double dot3(double* restrict a, double* restrict b)
-{
+static inline double dot3(double* restrict a, double* restrict b) {
   double r;
-  r = *a++ * * b++;
-  r += *a++ * * b++;
+  r = *a++ * *b++;
+  r += *a++ * *b++;
   r += *a * *b;
   return r;
 }
@@ -672,8 +596,7 @@ static inline double dot3(double* restrict a, double* restrict b)
  * \param[in] b double b[3]
  * \param[out] c double c[3]
  */
-static inline void cross3(double* restrict a, double* restrict b, double* restrict c)
-{
+static inline void cross3(double* restrict a, double* restrict b, double* restrict c) {
   double* a0 = a++;
   double* a1 = a++;
   double* a2 = a;
@@ -683,7 +606,7 @@ static inline void cross3(double* restrict a, double* restrict b, double* restri
 
   *c++ = *a1 * *b2 - *a2 * *b1;
   *c++ = *a2 * *b0 - *a0 * *b2;
-  *c   = *a0 * *b1 - *a1 * *b0;
+  *c = *a0 * *b1 - *a1 * *b0;
 }
 
 /** norm : || a ||
@@ -691,8 +614,7 @@ static inline void cross3(double* restrict a, double* restrict b, double* restri
  * \param[in] a a[2]
  * \return the norm
  */
-static inline double hypot2(double* a)
-{
+static inline double hypot2(double* a) {
   double r;
 
   r = *a * *a;
@@ -700,15 +622,13 @@ static inline double hypot2(double* a)
   r += *a * *a;
   return sqrt(r);
 }
-
 
 /** norm : || a ||
  *  may underflow & overflow
  * \param[in] a a[3]
  * \return the norm
  */
-static inline double hypot3(double* a)
-{
+static inline double hypot3(double* a) {
   double r;
 
   r = *a * *a;
@@ -718,8 +638,7 @@ static inline double hypot3(double* a)
   r += *a * *a;
   return sqrt(r);
 }
-static inline double hypot5(double* a)
-{
+static inline double hypot5(double* a) {
   double r;
 
   r = *a * *a;
@@ -734,8 +653,7 @@ static inline double hypot5(double* a)
 
   return sqrt(r);
 }
-static inline double hypot9(double* a)
-{
+static inline double hypot9(double* a) {
   double r;
 
   r = *a * *a;
@@ -758,7 +676,6 @@ static inline double hypot9(double* a)
 
   return sqrt(r);
 }
-
 
 /** extract3x3 : copy a sub 3x3 matrix of *a into *b */
 /* \param[in] n row numbers of matrix a
@@ -766,9 +683,7 @@ static inline double hypot9(double* a)
  * \param[in] j0 column of first element
  * \param[in] a a[n,n] matrix
  * \param[out] b b[9] a 3x3 matrix */
-static inline void extract3x3(int n, int i0, int j0, double* restrict a, double* restrict b)
-{
-
+static inline void extract3x3(int n, int i0, int j0, double* restrict a, double* restrict b) {
   int k0 = i0 + n * j0;
 
   int nm3 = n - 3;
@@ -785,7 +700,7 @@ static inline void extract3x3(int n, int i0, int j0, double* restrict a, double*
   a += nm3;
   *b++ = *a++;
   *b++ = *a++;
-  *b   = *a;
+  *b = *a;
 }
 
 /** insert3x3 : insert a 3x3 matrix *b into *a */
@@ -794,9 +709,7 @@ static inline void extract3x3(int n, int i0, int j0, double* restrict a, double*
  * \param[in] j0 column of first element
  * \param[in,out] a  a[n,n] matrix
  * \param[in] b b[9] a 3x3 matrix */
-static inline void insert3x3(int n, int i0, int j0, double* restrict a, double* restrict b)
-{
-
+static inline void insert3x3(int n, int i0, int j0, double* restrict a, double* restrict b) {
   int k0 = i0 + n * j0;
 
   int nm3 = n - 3;
@@ -821,7 +734,6 @@ static inline void insert3x3(int n, int i0, int j0, double* restrict a, double* 
  */
 void print3x3(double* mat);
 
-
 /** print a vector
  * \param[in] v the vector
  */
@@ -840,15 +752,13 @@ void print3(double* v);
  * \param[out] A2z third component of the vector A
  *
  * \return 0 if success, 1 if there is a problem
-*/
+ */
 WARN_RESULT_IGNORED
-static inline int orthoBaseFromVector_old(double *Ax, double *Ay, double *Az,
-                                      double *A1x, double *A1y, double *A1z,
-                                      double *A2x, double *A2y, double *A2z)
-{
+static inline int orthoBaseFromVector_old(double* Ax, double* Ay, double* Az, double* A1x,
+                                          double* A1y, double* A1z, double* A2x, double* A2y,
+                                          double* A2z) {
   double normA = sqrt((*Ax) * (*Ax) + (*Ay) * (*Ay) + (*Az) * (*Az));
-  if (normA == 0.)
-  {
+  if (normA == 0.) {
     (*Ax) = NAN;
     (*Ay) = NAN;
     (*Az) = NAN;
@@ -865,28 +775,24 @@ static inline int orthoBaseFromVector_old(double *Ax, double *Ay, double *Az,
   (*Az) /= normA;
 
   /*build (*A1*/
-  if (fabs(*Ax) > fabs(*Ay))
-  {
+  if (fabs(*Ax) > fabs(*Ay)) {
     if (fabs((*Ax)) > fabs((*Az))) /*(*Ax is the bigest*/
     {
       (*A1x) = (*Ay);
       (*A1y) = -(*Ax);
       (*A1z) = 0;
-    }
-    else /*(*Az is the biggest*/
+    } else /*(*Az is the biggest*/
     {
       (*A1z) = (*Ay);
       (*A1y) = -(*Az);
       (*A1x) = 0;
     }
-  }
-  else if (fabs(*Ay) > fabs(*Az)) /*(*Ay is the bigest*/
+  } else if (fabs(*Ay) > fabs(*Az)) /*(*Ay is the bigest*/
   {
     (*A1y) = (*Ax);
     (*A1x) = -(*Ay);
     (*A1z) = 0;
-  }
-  else /*(*Az is the biggest*/
+  } else /*(*Az is the biggest*/
   {
     (*A1z) = (*Ay);
     (*A1y) = -(*Az);
@@ -902,23 +808,23 @@ static inline int orthoBaseFromVector_old(double *Ax, double *Ay, double *Az,
   (*A2z) = *Ax * *A1y - *Ay * *A1x;
 
   /* assertion */
-  assert(fabs(sqrt((*Ax) * (*Ax) + (*Ay) * (*Ay) + (*Az) * (*Az))-1.0) < 1e-14 );
-  assert(fabs(sqrt((*A1x) * (*A1x) + (*A1y) * (*A1y) + (*A1z) * (*A1z))-1.0) < 1e-14 );
-  assert(fabs(*Ax * *A1x + *Ay * *A1y + *Az * *A1z) < 1e-14 );
-  assert(fabs(sqrt((*A2x) * (*A2x) + (*A2y) * (*A2y) + (*A2z) * (*A2z))-1.0) < 1e-14 );
-  assert(fabs(*Ax * *A2x + *Ay * *A2y +  *Az * *A2z) < 1e-14 );
-  assert(fabs(*A1x * *A2x +  *A1y * *A2y +  *A1z * *A2z)< 1e-14 );
+  assert(fabs(sqrt((*Ax) * (*Ax) + (*Ay) * (*Ay) + (*Az) * (*Az)) - 1.0) < 1e-14);
+  assert(fabs(sqrt((*A1x) * (*A1x) + (*A1y) * (*A1y) + (*A1z) * (*A1z)) - 1.0) < 1e-14);
+  assert(fabs(*Ax * *A1x + *Ay * *A1y + *Az * *A1z) < 1e-14);
+  assert(fabs(sqrt((*A2x) * (*A2x) + (*A2y) * (*A2y) + (*A2z) * (*A2z)) - 1.0) < 1e-14);
+  assert(fabs(*Ax * *A2x + *Ay * *A2y + *Az * *A2z) < 1e-14);
+  assert(fabs(*A1x * *A2x + *A1y * *A2y + *A1z * *A2z) < 1e-14);
 
   return 0;
 }
 
-
 /* function to compute an orthonormal basis form a given vector
  * taken from
- * Tom Duff, James Burgess, Per Christensen, Christophe Hery, Andrew Kensler, Max Liani, and Ryusuke Villemin,
- * Building an Orthonormal Basis, Revisited, Journal of Computer Graphics Techniques (JCGT), vol. 6, no. 1, 1-8, 2017
- * Available online http://jcgt.org/published/0006/01/01/
- * void branchlessONB(const Vec3f &n, Vec3f &b1, Vec3f &b2)
+ * Tom Duff, James Burgess, Per Christensen, Christophe Hery, Andrew Kensler, Max Liani, and
+ * Ryusuke Villemin, Building an Orthonormal Basis, Revisited, Journal of Computer Graphics
+ * Techniques (JCGT), vol. 6, no. 1, 1-8, 2017 Available online
+ * http://jcgt.org/published/0006/01/01/ void branchlessONB(const Vec3f &n, Vec3f &b1, Vec3f
+ * &b2)
  * {
  *   float sign = copysignf(1.0f, n.z);
  *   const float a = -1.0f / (sign + n.z);
@@ -926,16 +832,15 @@ static inline int orthoBaseFromVector_old(double *Ax, double *Ay, double *Az,
  *   b1 = Vec3f(1.0f + sign * n.x * n.x * a, sign * b, -sign * n.x);
  *   b2 = Vec3f(b, sign + n.y * n.y * a, -n.y);
  * }
-*/
+ */
 
 static inline int orthoBaseFromVector(double* Ax, double* Ay, double* Az, double* A1x,
-                                       double* A1y, double* A1z, double* A2x, double* A2y,
-                                       double* A2z)
+                                      double* A1y, double* A1z, double* A2x, double* A2y,
+                                      double* A2z)
 
 {
   double normA = sqrt((*Ax) * (*Ax) + (*Ay) * (*Ay) + (*Az) * (*Az));
-  if (normA == 0.)
-  {
+  if (normA == 0.) {
     (*Ax) = NAN;
     (*Ay) = NAN;
     (*Az) = NAN;
@@ -952,23 +857,23 @@ static inline int orthoBaseFromVector(double* Ax, double* Ay, double* Az, double
   (*Az) /= normA;
 
   double sign = copysignf(1.0, *Az);
-  const double  a = -1.0 / (sign + *Az);
-  const double  b = *Ax * *Ay * a;
+  const double a = -1.0 / (sign + *Az);
+  const double b = *Ax * *Ay * a;
 
-  *A1x = 1.0+ sign * *Ax * * Ax * a;
-  *A1y = sign  * b;
-  *A1z = - sign * *Ax;
+  *A1x = 1.0 + sign * *Ax * *Ax * a;
+  *A1y = sign * b;
+  *A1z = -sign * *Ax;
 
   *A2x = b;
   *A2y = sign + *Ay * *Ay * a;
-  *A2z = - *Ay;
+  *A2z = -*Ay;
 
   /* assertion */
-  assert(fabs(sqrt((*A1x) * (*A1x) + (*A1y) * (*A1y) + (*A1z) * (*A1z))-1.0) < 1e-14 );
-  assert(fabs(*Ax * *A1x + *Ay * *A1y + *Az * *A1z) < 1e-14 );
-  assert(fabs(sqrt((*A2x) * (*A2x) + (*A2y) * (*A2y) + (*A2z) * (*A2z))-1.0) < 1e-14 );
-  assert(fabs(*Ax * *A2x + *Ay * *A2y +  *Az * *A2z) < 1e-14 );
-  assert(fabs(*A1x * *A2x +  *A1y * *A2y +  *A1z * *A2z)< 1e-14 );
+  assert(fabs(sqrt((*A1x) * (*A1x) + (*A1y) * (*A1y) + (*A1z) * (*A1z)) - 1.0) < 1e-14);
+  assert(fabs(*Ax * *A1x + *Ay * *A1y + *Az * *A1z) < 1e-14);
+  assert(fabs(sqrt((*A2x) * (*A2x) + (*A2y) * (*A2y) + (*A2z) * (*A2z)) - 1.0) < 1e-14);
+  assert(fabs(*Ax * *A2x + *Ay * *A2y + *Az * *A2z) < 1e-14);
+  assert(fabs(*A1x * *A2x + *A1y * *A2y + *A1z * *A2z) < 1e-14);
   return 0;
 }
 /** solve Ax = b by partial pivoting Gaussian elimination. This function is 10
@@ -980,8 +885,7 @@ static inline int orthoBaseFromVector(double* Ax, double* Ay, double* Az, double
  * \return 0 if ok, otherwise the column where no pivot could be selected
  */
 WARN_RESULT_IGNORED
-static inline int solve_3x3_gepp(const double* restrict a, double* restrict b)
-{
+static inline int solve_3x3_gepp(const double* restrict a, double* restrict b) {
   double lp0, lp1, lp2, lm1, lm2, ln1, ln2;
   double bl, bm, bn;
   double factor1, factor2;
@@ -1002,59 +906,57 @@ static inline int solve_3x3_gepp(const double* restrict a, double* restrict b)
    * |  0  lm1 lm2 ; bm |
    * |  0  ln1 ln2 ; bn |
    */
-  switch (pivot1)
-  {
+  switch (pivot1) {
     case 0: /* first element is pivot, first line does not change */
-      factor1 = a1/a0;
-      factor2 = a2/a0;
+      factor1 = a1 / a0;
+      factor2 = a2 / a0;
       lp0 = a0;
       alp0 = fabs(a0);
       lp1 = a[3];
       lp2 = a[6];
-      lm1 = a[4] - factor1*lp1;
-      lm2 = a[7] - factor1*lp2;
-      ln1 = a[5] - factor2*lp1;
-      ln2 = a[8] - factor2*lp2;
+      lm1 = a[4] - factor1 * lp1;
+      lm2 = a[7] - factor1 * lp2;
+      ln1 = a[5] - factor2 * lp1;
+      ln2 = a[8] - factor2 * lp2;
       bl = b[0];
-      bm = b[1] - factor1*bl;
-      bn = b[2] - factor2*bl;
+      bm = b[1] - factor1 * bl;
+      bn = b[2] - factor2 * bl;
       break;
     case 10: /* first element is pivot, first line does not change */
-      factor1 = a0/a1;
-      factor2 = a2/a1;
+      factor1 = a0 / a1;
+      factor2 = a2 / a1;
       lp0 = a1;
       alp0 = fabs(a1);
       lp1 = a[4];
       lp2 = a[7];
-      lm1 = a[3] - factor1*lp1;
-      lm2 = a[6] - factor1*lp2;
-      ln1 = a[5] - factor2*lp1;
-      ln2 = a[8] - factor2*lp2;
+      lm1 = a[3] - factor1 * lp1;
+      lm2 = a[6] - factor1 * lp2;
+      ln1 = a[5] - factor2 * lp1;
+      ln2 = a[8] - factor2 * lp2;
       bl = b[1];
-      bm = b[0] - factor1*bl;
-      bn = b[2] - factor2*bl;
+      bm = b[0] - factor1 * bl;
+      bn = b[2] - factor2 * bl;
       break;
     case 20: /* first element is pivot, first line does not change */
-      factor1 = a0/a2;
-      factor2 = a1/a2;
+      factor1 = a0 / a2;
+      factor2 = a1 / a2;
       lp0 = a2;
       alp0 = fabs(a2);
       lp1 = a[5];
       lp2 = a[8];
-      lm1 = a[3] - factor1*lp1;
-      lm2 = a[6] - factor1*lp2;
-      ln1 = a[4] - factor2*lp1;
-      ln2 = a[7] - factor2*lp2;
+      lm1 = a[3] - factor1 * lp1;
+      lm2 = a[6] - factor1 * lp2;
+      ln1 = a[4] - factor2 * lp1;
+      ln2 = a[7] - factor2 * lp2;
       bl = b[2];
-      bm = b[0] - factor1*bl;
-      bn = b[1] - factor2*bl;
+      bm = b[0] - factor1 * bl;
+      bn = b[1] - factor2 * bl;
       break;
     default:
       exit(EXIT_FAILURE);
   }
 
-  if (alp0 <= DBL_EPSILON)
-  {
+  if (alp0 <= DBL_EPSILON) {
     info = 1;
     return info;
   }
@@ -1067,32 +969,29 @@ static inline int solve_3x3_gepp(const double* restrict a, double* restrict b)
    * | lm1 lm2 ; bm |
    * | ln1 ln2 ; bn |
    */
-  switch (pivot2)
-  {
+  switch (pivot2) {
     case 0:
-      if (alm1 < DBL_EPSILON)
-      {
+      if (alm1 < DBL_EPSILON) {
         info = 1;
         return info;
       }
-      factor1 = ln1/lm1;
-      sol2 = (bn - factor1*bm)/(ln2 - factor1*lm2);
-      sol1 = (bm - lm2*sol2)/lm1;
+      factor1 = ln1 / lm1;
+      sol2 = (bn - factor1 * bm) / (ln2 - factor1 * lm2);
+      sol1 = (bm - lm2 * sol2) / lm1;
       break;
     case 1:
-      if (aln1 < DBL_EPSILON)
-      {
+      if (aln1 < DBL_EPSILON) {
         info = 1;
         return info;
       }
-      factor1 = lm1/ln1;
-      sol2 = (bm - factor1*bn)/(lm2 - factor1*ln2);
-      sol1 = (bn - ln2*sol2)/ln1;
+      factor1 = lm1 / ln1;
+      sol2 = (bm - factor1 * bn) / (lm2 - factor1 * ln2);
+      sol1 = (bn - ln2 * sol2) / ln1;
       break;
     default:
       exit(EXIT_FAILURE);
   }
-  sol0 = (bl - sol1*lp1 - sol2*lp2)/lp0;
+  sol0 = (bl - sol1 * lp1 - sol2 * lp2) / lp0;
 
   b[0] = sol0;
   b[1] = sol1;
@@ -1101,52 +1000,46 @@ static inline int solve_3x3_gepp(const double* restrict a, double* restrict b)
   return info;
 }
 
-
 #define mat_elem(a, y, x, n) (a + ((y) * (n) + (x)))
 
-static void swap_row(double *a, double *b, int r1, int r2, int n)
-{
-	double tmp, *p1, *p2;
-	int i;
+static void swap_row(double* a, double* b, int r1, int r2, int n) {
+  double tmp, *p1, *p2;
+  int i;
 
-	if (r1 == r2) return;
-	for (i = 0; i < n; i++) {
-		p1 = mat_elem(a, r1, i, n);
-		p2 = mat_elem(a, r2, i, n);
-		tmp = *p1, *p1 = *p2, *p2 = tmp;
-	}
-	tmp = b[r1], b[r1] = b[r2], b[r2] = tmp;
+  if (r1 == r2) return;
+  for (i = 0; i < n; i++) {
+    p1 = mat_elem(a, r1, i, n);
+    p2 = mat_elem(a, r2, i, n);
+    tmp = *p1, *p1 = *p2, *p2 = tmp;
+  }
+  tmp = b[r1], b[r1] = b[r2], b[r2] = tmp;
 }
 
-static inline  void solve_nxn_gepp(int n, double *a, double *b, double *x)
-{
+static inline void solve_nxn_gepp(int n, double* a, double* b, double* x) {
 #define A(y, x) (*mat_elem(a, y, x, n))
-	int  j, col, row, max_row,dia;
-	double max, tmp;
+  int j, col, row, max_row, dia;
+  double max, tmp;
 
-	for (dia = 0; dia < n; dia++) {
-		max_row = dia, max = A(dia, dia);
+  for (dia = 0; dia < n; dia++) {
+    max_row = dia, max = A(dia, dia);
 
-		for (row = dia + 1; row < n; row++)
-			if ((tmp = fabs(A(row, dia))) > max)
-				max_row = row, max = tmp;
+    for (row = dia + 1; row < n; row++)
+      if ((tmp = fabs(A(row, dia))) > max) max_row = row, max = tmp;
 
-		swap_row(a, b, dia, max_row, n);
+    swap_row(a, b, dia, max_row, n);
 
-		for (row = dia + 1; row < n; row++) {
-			tmp = A(row, dia) / A(dia, dia);
-			for (col = dia+1; col < n; col++)
-				A(row, col) -= tmp * A(dia, col);
-			A(row, dia) = 0;
-			b[row] -= tmp * b[dia];
-		}
-	}
-	for (row = n - 1; row >= 0; row--) {
-		tmp = b[row];
-		for (j = n - 1; j > row; j--)
-			tmp -= x[j] * A(row, j);
-		x[row] = tmp / A(row, row);
-	}
+    for (row = dia + 1; row < n; row++) {
+      tmp = A(row, dia) / A(dia, dia);
+      for (col = dia + 1; col < n; col++) A(row, col) -= tmp * A(dia, col);
+      A(row, dia) = 0;
+      b[row] -= tmp * b[dia];
+    }
+  }
+  for (row = n - 1; row >= 0; row--) {
+    tmp = b[row];
+    for (j = n - 1; j > row; j--) tmp -= x[j] * A(row, j);
+    x[row] = tmp / A(row, row);
+  }
 #undef A
 }
 
@@ -1159,38 +1052,34 @@ static inline  void solve_nxn_gepp(int n, double *a, double *b, double *x)
  * \return 0 all the time
  */
 WARN_RESULT_IGNORED
-static inline int eig_3x3(double* restrict a, double* restrict b, double* restrict eig)
-{
+static inline int eig_3x3(double* restrict a, double* restrict b, double* restrict eig) {
   SET3X3(a);
   SET3X3(b);
   double pi = M_PI;
-  double p1 =  *a01* *a01 +  *a02* *a02 +  *a12* *a12;
-  if (p1 == 0)
-  {
+  double p1 = *a01 * *a01 + *a02 * *a02 + *a12 * *a12;
+  if (p1 == 0) {
     /* A is diagonal. */
-    eig[0] =  *a00;
-    eig[1] =  *a11;
-    eig[2] =  *a22;
-  }
-  else
-  {
-    double q = ( *a00+ *a11+ *a22)/3.0;
-    double  p2 = ( *a00 - q)*( *a00 - q) + ( *a11 - q)*( *a11 - q) + ( *a22 - q)*( *a22 - q) + 2 * p1;
+    eig[0] = *a00;
+    eig[1] = *a11;
+    eig[2] = *a22;
+  } else {
+    double q = (*a00 + *a11 + *a22) / 3.0;
+    double p2 =
+        (*a00 - q) * (*a00 - q) + (*a11 - q) * (*a11 - q) + (*a22 - q) * (*a22 - q) + 2 * p1;
     double p = sqrt(p2 / 6.0);
-    *b00 = (1 / p) * ( *a00 - q);
-    *b11 = (1 / p) * ( *a11 - q);
-    *b22 = (1 / p) * ( *a22 - q);
-    *b01 = (1 / p) * ( *a01);
-    *b02 = (1 / p) * ( *a02);
-    *b10 = (1 / p) * ( *a10);
-    *b12 = (1 / p) * ( *a12);
-    *b20 = (1 / p) * ( *a20);
-    *b21 = (1 / p) * ( *a21);
-    //B = (1 / p) * ( *A - q * I)       % I is the identity matrix
-    double det =
-      *b00 * *b11 * *b22 + *b01 * *b12 * *b20 + *b02 * *b10 * *b21 -
-      *b00 * *b12 * *b21 - *b01 * *b10 * *b22 - *b02 * *b11 * *b20;
-    double r = det/2.0;
+    *b00 = (1 / p) * (*a00 - q);
+    *b11 = (1 / p) * (*a11 - q);
+    *b22 = (1 / p) * (*a22 - q);
+    *b01 = (1 / p) * (*a01);
+    *b02 = (1 / p) * (*a02);
+    *b10 = (1 / p) * (*a10);
+    *b12 = (1 / p) * (*a12);
+    *b20 = (1 / p) * (*a20);
+    *b21 = (1 / p) * (*a21);
+    // B = (1 / p) * ( *A - q * I)       % I is the identity matrix
+    double det = *b00 * *b11 * *b22 + *b01 * *b12 * *b20 + *b02 * *b10 * *b21 -
+                 *b00 * *b12 * *b21 - *b01 * *b10 * *b22 - *b02 * *b11 * *b20;
+    double r = det / 2.0;
 
     /* % In exact arithmetic for a symmetric matrix  -1 <= r <= 1 */
     /* % but computation error can leave it slightly outside this range. */
@@ -1202,15 +1091,13 @@ static inline int eig_3x3(double* restrict a, double* restrict b, double* restri
     else
       phi = acos(r) / 3;
 
-   /* % the eigenvalues satisfy eig3 <= eig2 <= eig1 */
+    /* % the eigenvalues satisfy eig3 <= eig2 <= eig1 */
     eig[0] = q + 2 * p * cos(phi);
-    eig[2] = q + 2 * p * cos(phi + (2*pi/3));
-    eig[1] = 3 * q - eig[0] - eig[2];    /* % since trace(A) = eig1 + eig2 + eig3; */
+    eig[2] = q + 2 * p * cos(phi + (2 * pi / 3));
+    eig[1] = 3 * q - eig[0] - eig[2]; /* % since trace(A) = eig1 + eig2 + eig3; */
   }
 
   return 0;
 }
-
-
 
 #endif

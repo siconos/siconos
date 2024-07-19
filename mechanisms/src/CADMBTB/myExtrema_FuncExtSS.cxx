@@ -84,8 +84,8 @@ siconos::mechanisms::myExtrema_FuncExtSS::myExtrema_FuncExtSS() {
 // purpose  :
 //=======================================================================
 
-siconos::mechanisms::myExtrema_FuncExtSS::myExtrema_FuncExtSS(
-    const Adaptor3d_Surface& S1, const Adaptor3d_Surface& S2) {
+siconos::mechanisms::myExtrema_FuncExtSS::myExtrema_FuncExtSS(const Adaptor3d_Surface& S1,
+                                                              const Adaptor3d_Surface& S2) {
   myS1 = (Adaptor3d_Surface*)&S1;
   myS2 = (Adaptor3d_Surface*)&S2;
   myS1init = Standard_True;
@@ -97,8 +97,8 @@ siconos::mechanisms::myExtrema_FuncExtSS::myExtrema_FuncExtSS(
 // purpose  :
 //=======================================================================
 
-void siconos::mechanisms::myExtrema_FuncExtSS::Initialize(
-    const Adaptor3d_Surface& S1, const Adaptor3d_Surface& S2) {
+void siconos::mechanisms::myExtrema_FuncExtSS::Initialize(const Adaptor3d_Surface& S1,
+                                                          const Adaptor3d_Surface& S2) {
   myS1 = (Adaptor3d_Surface*)&S1;
   myS2 = (Adaptor3d_Surface*)&S2;
   myS1init = Standard_True;
@@ -113,26 +113,22 @@ void siconos::mechanisms::myExtrema_FuncExtSS::Initialize(
 // purpose  :
 //=======================================================================
 
-Standard_Integer siconos::mechanisms::myExtrema_FuncExtSS::NbVariables() const {
-  return 4;
-}
+Standard_Integer siconos::mechanisms::myExtrema_FuncExtSS::NbVariables() const { return 4; }
 
 //=======================================================================
 // function : NbEquations
 // purpose  :
 //=======================================================================
 
-Standard_Integer siconos::mechanisms::myExtrema_FuncExtSS::NbEquations() const {
-  return 4;
-}
+Standard_Integer siconos::mechanisms::myExtrema_FuncExtSS::NbEquations() const { return 4; }
 
 //=======================================================================
 // function : Value
 // purpose  :
 //=======================================================================
 
-Standard_Boolean siconos::mechanisms::myExtrema_FuncExtSS::Value(
-    const math_Vector& UV, math_Vector& F) {
+Standard_Boolean siconos::mechanisms::myExtrema_FuncExtSS::Value(const math_Vector& UV,
+                                                                 math_Vector& F) {
   ACE_times[ACE_TIMER_CAD_VALUE].start();
   if (!myS1init || !myS2init) Standard_TypeMismatch::Raise();
   myU1 = UV(1);
@@ -159,8 +155,8 @@ Standard_Boolean siconos::mechanisms::myExtrema_FuncExtSS::Value(
 // purpose  :
 //=======================================================================
 
-Standard_Boolean siconos::mechanisms::myExtrema_FuncExtSS::Derivatives(
-    const math_Vector& UV, math_Matrix& Df) {
+Standard_Boolean siconos::mechanisms::myExtrema_FuncExtSS::Derivatives(const math_Vector& UV,
+                                                                       math_Matrix& Df) {
   math_Vector F(1, 4);
   return Values(UV, F, Df);
 }
@@ -170,8 +166,9 @@ Standard_Boolean siconos::mechanisms::myExtrema_FuncExtSS::Derivatives(
 // purpose  :
 //=======================================================================
 
-Standard_Boolean siconos::mechanisms::myExtrema_FuncExtSS::Values(
-    const math_Vector& UV, math_Vector& F, math_Matrix& Df) {
+Standard_Boolean siconos::mechanisms::myExtrema_FuncExtSS::Values(const math_Vector& UV,
+                                                                  math_Vector& F,
+                                                                  math_Matrix& Df) {
   ACE_times[ACE_TIMER_CAD_VALUES].start();
   if (!myS1init || !myS2init) Standard_TypeMismatch::Raise();
   myU1 = UV(1);
@@ -247,8 +244,7 @@ Standard_Integer siconos::mechanisms::myExtrema_FuncExtSS::NbExt() const {
 // purpose  :
 //=======================================================================
 
-Standard_Real siconos::mechanisms::myExtrema_FuncExtSS::Value(
-    const Standard_Integer N) const {
+Standard_Real siconos::mechanisms::myExtrema_FuncExtSS::Value(const Standard_Integer N) const {
   if (!myS1init || !myS2init) Standard_TypeMismatch::Raise();
   return myValue.Value(N);
 }

@@ -14,13 +14,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #include "NumericsDataVersion.h"
+
 #include "assert.h"
 
-void NDV_inc(NumericsDataVersion* v)
-{
-  assert (v->number < UINT64_MAX);
+void NDV_inc(NumericsDataVersion* v) {
+  assert(v->number < UINT64_MAX);
   v->number += 1;
 }

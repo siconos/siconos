@@ -69,17 +69,14 @@ void NSM_inc_version(NumericsSparseMatrix* M, NSM_t type) {
 }
 
 /* internal compare function */
-static inline NSM_t nsm_max(const NumericsSparseMatrix* M, NSM_t type1,
-                            NSM_t type2) {
+static inline NSM_t nsm_max(const NumericsSparseMatrix* M, NSM_t type1, NSM_t type2) {
   return NSM_version(M, type2) > NSM_version(M, type1) ? type2 : type1;
 }
 
 NSM_t NSM_latest_id(const NumericsSparseMatrix* M) {
   assert(M);
 
-  return (
-      nsm_max(M, nsm_max(M, nsm_max(M, NSM_TRIPLET, NSM_HALF_TRIPLET), NSM_CSC),
-              NSM_CSR));
+  return (nsm_max(M, nsm_max(M, nsm_max(M, NSM_TRIPLET, NSM_HALF_TRIPLET), NSM_CSC), NSM_CSR));
 }
 
 version_t NSM_max_version(const NumericsSparseMatrix* M) {
@@ -104,9 +101,7 @@ CSparseMatrix* NSM_latest(const NumericsSparseMatrix* M) {
   return 0;
 }
 
-void NSM_reset_version(NumericsSparseMatrix* M, NSM_t id) {
-  NDV_reset(&(M->versions[id]));
-}
+void NSM_reset_version(NumericsSparseMatrix* M, NSM_t id) { NDV_reset(&(M->versions[id])); }
 
 void NSM_reset_versions(NumericsSparseMatrix* M) {
   NSM_reset_version(M, NSM_TRIPLET);
@@ -166,8 +161,7 @@ double* NSM_data(NumericsSparseMatrix* A) {
 }
 
 NumericsSparseMatrix* NSM_new(void) {
-  NumericsSparseMatrix* p =
-      (NumericsSparseMatrix*)malloc(sizeof(NumericsSparseMatrix));
+  NumericsSparseMatrix* p = (NumericsSparseMatrix*)malloc(sizeof(NumericsSparseMatrix));
 
   NSM_null(p);
   p->linearSolverParams = NSM_linearSolverParams_new();
@@ -210,8 +204,7 @@ NumericsSparseMatrix* NSM_clear(NumericsSparseMatrix* A) {
   return NULL;
 }
 
-void NSM_version_copy(const NumericsSparseMatrix* const A,
-                      NumericsSparseMatrix* B) {
+void NSM_version_copy(const NumericsSparseMatrix* const A, NumericsSparseMatrix* B) {
   assert(A);
   assert(B);
   switch (A->origin) {
@@ -300,8 +293,7 @@ void NSM_copy(NumericsSparseMatrix* A, NumericsSparseMatrix* B) {
       break;
     }
     default: {
-      fprintf(stderr, "NSM_copy :: error unknown origin %u for sparse matrix\n",
-              A->origin);
+      fprintf(stderr, "NSM_copy :: error unknown origin %u for sparse matrix\n", A->origin);
       exit(EXIT_FAILURE);
     }
   }
@@ -323,9 +315,8 @@ void NSM_copy(NumericsSparseMatrix* A, NumericsSparseMatrix* B) {
     NSM_linearSolverParams_free(B->linearSolverParams);
     B->linearSolverParams = NULL;
   }
-  /* We copy only the id of the solver to keep track of if NM_preserve is used
-   * before factorization. The remaining part is not copied since we have blind
-   * pointer.
+  /* We copy only the id of the solver to keep track of if NM_preserve is used before
+   * factorization. The remaining part is not copied since we have blind pointer.
    */
   if (A->linearSolverParams) {
     B->linearSolverParams = NSM_linearSolverParams_new();
@@ -379,29 +370,23 @@ NSM_linear_solver_params* NSM_linearSolverParams(NumericsMatrix* A) {
   return numericsSparseMatrix(A)->linearSolverParams;
 }
 
-NSM_linear_solver_params* NSM_linearSolverParams_free(
-    NSM_linear_solver_params* p) {
-  /* First free linear_solver_data if some additional information has been given
-   */
+NSM_linear_solver_params* NSM_linearSolverParams_free(NSM_linear_solver_params* p) {
+  /* First free linear_solver_data if some additional information has been given  */
   if (p->solver_free_hook) {
     (*p->solver_free_hook)(p);
     p->solver_free_hook = NULL;
   }
 
   if (p->iWork) {
-    // assert(p->iWorkSize>0); This assertion is commented since it may happen
-    // that we
-    //                         allocate a chunk of memory of size 0 (for an
-    //                         empty matrix !!)
+    // assert(p->iWorkSize>0); This assertion is commented since it may happen that we
+    //                         allocate a chunk of memory of size 0 (for an empty matrix !!)
     free(p->iWork);
     p->iWork = NULL;
   }
 
   if (p->dWork) {
-    // assert(p->dWorkSize>0); This assertion is commented since it may happen
-    // that we
-    //                         allocate a chunk of memory of size 0 (for an
-    //                         empty matrix !!)
+    // assert(p->dWorkSize>0); This assertion is commented since it may happen that we
+    //                         allocate a chunk of memory of size 0 (for an empty matrix !!)
     free(p->dWork);
     p->dWork = NULL;
   }
@@ -424,8 +409,7 @@ NSM_linear_solver_params* NSM_linearSolverParams_free(
 void NSM_clear_p(void* p) {
   assert(p);
   NSM_linear_solver_params* ptr = (NSM_linear_solver_params*)p;
-  CSparseMatrix_factors* cs_lu_A =
-      (CSparseMatrix_factors*)NSM_linear_solver_data(ptr);
+  CSparseMatrix_factors* cs_lu_A = (CSparseMatrix_factors*)NSM_linear_solver_data(ptr);
 
   CSparseMatrix_free_lu_factors(cs_lu_A);
 
@@ -546,8 +530,7 @@ CSparseMatrix* NSM_get_origin(const NumericsSparseMatrix* M) {
     case NSM_CSR:
       return M->csr;
     default:
-      numerics_error_nonfatal("NSM_get_origin", "Unknown matrix origin %d",
-                              M->origin);
+      numerics_error_nonfatal("NSM_get_origin", "Unknown matrix origin %d", M->origin);
       return NULL;
   }
 }
@@ -560,10 +543,10 @@ void NSM_write_in_file(const NumericsSparseMatrix* m, FILE* file) {
 
 NumericsSparseMatrix* NSM_new_from_file(FILE* file) {
   int info;
-  int _origin = 0;
+  NSM_t _origin = 0;
   CHECK_IO(fscanf(file, "%d", &_origin), &info);
   NumericsSparseMatrix* out = NSM_new();
-  out->origin = (NSM_t)_origin;
+  out->origin = _origin;
 
   CSparseMatrix* C = CSparseMatrix_new_from_file(file);
 
@@ -680,17 +663,15 @@ CS_INT* NSM_diag_indices(NumericsMatrix* M) {
   assert(A);
   if (A->diag_indx) return A->diag_indx;
 
-  /* 1-  we assume that all diagonal elements exist, and we search it in a
-   * trivial way */
+  /* 1-  we assume that all diagonal elements exist, and we search it in a trivial way */
   CS_INT* indices = NSM_diag_indices_trivial(M);
   if (indices) {
     return indices;
   }
 
-  /* 2- if not, we compute the diagonal indices in the general case without any
-   * assumption on the existence  of the diagonal elements. This makes sure that
-   * the matrix is replaced by one that has all diagonal elements. The copy of
-   * the matrix could be optimized. */
+  /* 2- if not, we compute the diagonal indices in the general case without any assumption
+   * on the existence  of the diagonal elements. This makes sure that the matrix is replaced
+   * by one that has all diagonal elements. The copy of the matrix could be optimized. */
 
   indices = (CS_INT*)malloc((size_t)M->size0 * sizeof(CS_INT));
   A->diag_indx = indices;
@@ -769,18 +750,15 @@ CS_INT* NSM_diag_indices(NumericsMatrix* M) {
   return indices;
 }
 
-void NSM_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row,
-                       size_t pos_col, size_t block_row_size,
-                       size_t block_col_size) {
+void NSM_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, size_t pos_col,
+                       size_t block_row_size, size_t block_col_size) {
   assert(M);
   assert(M->storageType == NM_SPARSE);
   assert(blockM);
   assert(pos_row < (size_t)M->size0);
   assert(pos_col < (size_t)M->size1);
-  assert(block_row_size > 0 &&
-         block_row_size + pos_row <= (unsigned long int)M->size0);
-  assert(block_col_size > 0 &&
-         block_col_size + pos_col <= (unsigned long int)M->size1);
+  assert(block_row_size > 0 && block_row_size + pos_row <= (unsigned long int)M->size0);
+  assert(block_col_size > 0 && block_col_size + pos_col <= (unsigned long int)M->size1);
 
   assert(M->matrix2);
 
@@ -813,7 +791,7 @@ void NSM_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row,
       //    break;
     }
     //  default:
-    //    printf("NSM_extract_block :: unsupported matrix type %d\n",
-    //    Msparse->origin); exit(EXIT_FAILURE);
+    //    printf("NSM_extract_block :: unsupported matrix type %d\n", Msparse->origin);
+    //    exit(EXIT_FAILURE);
   }
 }

@@ -50,30 +50,21 @@ DEBUG_GLOBAL_VAR_DECL(unsigned* basis_global;);
 
 inline static double* get_q_tilde(double* mat, unsigned n) { return mat; }
 
-inline static double* get_driving_col(double* mat, unsigned n) {
-  return &mat[n];
-}
+inline static double* get_driving_col(double* mat, unsigned n) { return &mat[n]; }
 
-inline static double* get_lexico_mat(double* mat, unsigned n) {
-  return &mat[2 * n];
-}
+inline static double* get_lexico_mat(double* mat, unsigned n) { return &mat[2 * n]; }
 
-inline static double* get_col_tilde(double* mat, unsigned n) {
-  return &mat[(n + 2) * n];
-}
+inline static double* get_col_tilde(double* mat, unsigned n) { return &mat[(n + 2) * n]; }
 
-inline static double* get_cov_vec(double* mat, unsigned n) {
-  return &mat[(n + 3) * n];
-}
+inline static double* get_cov_vec(double* mat, unsigned n) { return &mat[(n + 3) * n]; }
 
-void lcp_pivot_lumod(LinearComplementarityProblem* problem, double* u,
-                     double* s, int* info, SolverOptions* options) {
+void lcp_pivot_lumod(LinearComplementarityProblem* problem, double* u, double* s, int* info,
+                     SolverOptions* options) {
   lcp_pivot_lumod_covering_vector(problem, u, s, info, options, NULL);
 }
 
-void lcp_pivot_lumod_covering_vector(LinearComplementarityProblem* problem,
-                                     double* restrict u, double* restrict s,
-                                     int* info, SolverOptions* options,
+void lcp_pivot_lumod_covering_vector(LinearComplementarityProblem* problem, double* restrict u,
+                                     double* restrict s, int* info, SolverOptions* options,
                                      double* restrict cov_vec) {
   /* matrix M of the LCP */
   assert(problem);
@@ -88,9 +79,8 @@ void lcp_pivot_lumod_covering_vector(LinearComplementarityProblem* problem,
   /* size of the LCP */
   DEBUG_EXPR_WE(
       DEBUG_PRINT("matrix M: ") NM_display(problem->M);
-      DEBUG_PRINT("vector q: ") for (unsigned i = 0; i < dim; ++i) {
-        printf("%e ", problem->q[i]);
-      } printf("\n");
+      DEBUG_PRINT("vector q: ") for (unsigned i = 0; i < dim;
+                                     ++i) { printf("%e ", problem->q[i]); } printf("\n");
       if (cov_vec) {
         DEBUG_PRINT("covering vector: ") for (unsigned i = 0; i < dim; ++i) {
           printf("%e ", cov_vec[i]);
@@ -106,12 +96,10 @@ void lcp_pivot_lumod_covering_vector(LinearComplementarityProblem* problem,
   unsigned leaving = 0;
   unsigned itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
   unsigned preAlloc = options->iparam[SICONOS_IPARAM_PREALLOC];
-  unsigned pivot_selection_rule =
-      options->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE];
+  unsigned pivot_selection_rule = options->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE];
 
   assert(itermax > 0 &&
-         "lcp_pivot_lumod_covering_vector itermax == 0, the algorithm will not "
-         "run");
+         "lcp_pivot_lumod_covering_vector itermax == 0, the algorithm will not run");
   double pivot;
   double tmp;
   unsigned* basis = (unsigned*)malloc(dim * sizeof(unsigned));
@@ -123,11 +111,10 @@ void lcp_pivot_lumod_covering_vector(LinearComplementarityProblem* problem,
 #if 0
   double* t_stack = NULL;
 #endif
-  /* This matrix contains q, the solution to the linear system Hk x =
-   * driving_col, the matrix for the lexicographic ordering and the solution to
-   * the linear system H x = driving_col. */
-  double* mat =
-      (double*)calloc((dim + 4) * dim, sizeof(double)); /* XXX memory save */
+  /* This matrix contains q, the solution to the linear system Hk x = driving_col,
+   * the matrix for the lexicographic ordering and the solution to the linear
+   * system H x = driving_col. */
+  double* mat = (double*)calloc((dim + 4) * dim, sizeof(double)); /* XXX memory save */
   assert(problem->q);
   cblas_dcopy(dim, problem->q, 1, get_q_tilde(mat, dim), 1);
 
@@ -141,12 +128,10 @@ void lcp_pivot_lumod_covering_vector(LinearComplementarityProblem* problem,
   /* Init the lexicographic mat */
   double* lexico_mat = get_lexico_mat(mat, dim);
   for (unsigned i = 0; i < dim * dim; i += dim + 1) lexico_mat[i] = 1.;
-  DEBUG_PRINT_MAT_ROW_MAJOR_NCOLS_SMALL_STR("lexico_mat", lexico_mat, dim, dim,
-                                            dim);
+  DEBUG_PRINT_MAT_ROW_MAJOR_NCOLS_SMALL_STR("lexico_mat", lexico_mat, dim, dim, dim);
 
   /* Maximum number of columns changed in the matrix */
-  /* TODO: user settable and should not be bigger than the size of the matrix?
-   */
+  /* TODO: user settable and should not be bigger than the size of the matrix? */
   unsigned maxmod = 50;
 
   *info = 0;
@@ -192,9 +177,8 @@ void lcp_pivot_lumod_covering_vector(LinearComplementarityProblem* problem,
     case SICONOS_LCP_PIVOT_LEMKE:
     default:
       //      block = pivot_init_lemke(get_q_tilde(mat, dim), dim);
-      block = pivot_selection_lemke2(
-          dim, get_cov_vec(mat, dim), get_q_tilde(mat, dim),
-          get_lexico_mat(mat, dim), INT_MAX, LEXICO_TOL);
+      block = pivot_selection_lemke2(dim, get_cov_vec(mat, dim), get_q_tilde(mat, dim),
+                                     get_lexico_mat(mat, dim), INT_MAX, LEXICO_TOL);
   }
 
   if (block < 0) {
@@ -277,8 +261,7 @@ void lcp_pivot_lumod_covering_vector(LinearComplementarityProblem* problem,
   /* XXX Maybe we should compute theta = q_i/pivot */
   if (fabs(pivot) < DBL_EPSILON) {
     if (verbose > 0)
-      printf("the pivot is quasi-nul %e, the algorithm cannot be used !\n",
-             pivot);
+      printf("the pivot is quasi-nul %e, the algorithm cannot be used !\n", pivot);
 #ifndef WARN_ONLY_SMALL_PIVOT
     *info = LCP_PIVOT_NUL;
     goto exit_lcp_pivot;
@@ -296,69 +279,63 @@ void lcp_pivot_lumod_covering_vector(LinearComplementarityProblem* problem,
     unsigned block_row_indx = block * dim;
     for (unsigned i = 0, j = 0; i < dim; ++i, j += dim) {
       if (j == block_row_indx) continue;
-      cblas_daxpy(dim, -get_cov_vec(mat, dim)[i] / pivot,
-                  &lexico_mat[block_row_indx], 1, &lexico_mat[j], 1);
+      cblas_daxpy(dim, -get_cov_vec(mat, dim)[i] / pivot, &lexico_mat[block_row_indx], 1,
+                  &lexico_mat[j], 1);
     }
     cblas_dscal(dim, -1. / pivot, &lexico_mat[block_row_indx], 1);
-    DEBUG_PRINT_MAT_ROW_MAJOR_NCOLS_SMALL2_STR("lexico_mat", lexico_mat, dim,
-                                               dim, dim, get_cov_vec(mat, dim));
+    DEBUG_PRINT_MAT_ROW_MAJOR_NCOLS_SMALL2_STR("lexico_mat", lexico_mat, dim, dim, dim,
+                                               get_cov_vec(mat, dim));
   }
   DEBUG_PRINT_VEC(get_q_tilde(mat, dim), dim);
 
-  DEBUG_EXPR_WE(
-      DEBUG_PRINT("new basis: ") for (unsigned int i = 0; i < dim; ++i){
-          DEBUG_PRINTF("%i ", basis[i])} DEBUG_PRINT("\n"));
+  DEBUG_EXPR_WE(DEBUG_PRINT("new basis: ") for (unsigned int i = 0; i < dim; ++i){
+      DEBUG_PRINTF("%i ", basis[i])} DEBUG_PRINT("\n"));
 
   while (nb_iter < itermax && !has_sol) {
     ++nb_iter;
     /*  Prepare the search for leaving variable */
     double* driving_col = get_driving_col(mat, dim);
-    if (leaving < dim + BASIS_OFFSET) /* the leaving variable is w_i -> the
-                                         driving variable is z_i */
+    if (leaving <
+        dim + BASIS_OFFSET) /* the leaving variable is w_i -> the driving variable is z_i */
     {
       drive = leaving + dim + BASIS_OFFSET;
       cblas_dcopy(dim, &M[dim * (leaving - BASIS_OFFSET)], 1, driving_col, 1);
-    } else if (leaving > dim + BASIS_OFFSET) /*  the leaving variable is z_i ->
-                                                the driving variable is w_i */
+    } else if (leaving > dim + BASIS_OFFSET) /*  the leaving variable is z_i -> the driving
+                                                variable is w_i */
     {
       drive = leaving - (dim + BASIS_OFFSET);
       memset(driving_col, 0, sizeof(double) * dim);
       driving_col[drive - BASIS_OFFSET] = -1.;
     } else {
       printf(
-          "lcp_pivot_lumod the leaving variable is the auxiliary variable; we "
-          "should not execute those lines!\n");
+          "lcp_pivot_lumod the leaving variable is the auxiliary variable; we should not "
+          "execute those lines!\n");
       exit(EXIT_FAILURE);
     }
     DEBUG_EXPR_WE(DEBUG_PRINT("basis= "); for (unsigned i = 0; i < dim; ++i) {
-      DEBUG_PRINTF("%s%d ", basis_to_name(basis[i], dim),
-                   basis_to_number(basis[i], dim));
+      DEBUG_PRINTF("%s%d ", basis_to_name(basis[i], dim), basis_to_number(basis[i], dim));
     } DEBUG_PRINT("\n"));
-    int solve_info =
-        SN_lumod_dense_solve(lumod_data, driving_col, get_col_tilde(mat, dim));
+    int solve_info = SN_lumod_dense_solve(lumod_data, driving_col, get_col_tilde(mat, dim));
     if (SN_lumod_need_refactorization(solve_info)) {
       DEBUG_PRINT("Refactorizing!\n");
       SN_lumod_factorize(lumod_data, basis, problem->M, get_cov_vec(mat, dim));
-      if (leaving < dim + BASIS_OFFSET) /* the leaving variable is w_i -> the
-                                           driving variable is z_i */
+      if (leaving <
+          dim + BASIS_OFFSET) /* the leaving variable is w_i -> the driving variable is z_i */
       {
         drive = leaving + dim + BASIS_OFFSET;
         cblas_dcopy(dim, &M[dim * (leaving - BASIS_OFFSET)], 1, driving_col, 1);
-      } else if (leaving >
-                 dim + BASIS_OFFSET) /*  the leaving variable is z_i -> the
-                                        driving variable is w_i */
+      } else if (leaving > dim + BASIS_OFFSET) /*  the leaving variable is z_i -> the driving
+                                                  variable is w_i */
       {
         drive = leaving - (dim + BASIS_OFFSET);
         memset(driving_col, 0, sizeof(double) * dim);
         assert(drive >= BASIS_OFFSET);
         driving_col[drive - BASIS_OFFSET] = -1.;
       }
-      solve_info = SN_lumod_dense_solve(lumod_data, driving_col,
-                                        get_col_tilde(mat, dim));
+      solve_info = SN_lumod_dense_solve(lumod_data, driving_col, get_col_tilde(mat, dim));
     }
     if (solve_info != 0) {
-      printf("lcp_pivot_lumod :: SN_lumod_dense_solve failed!, info = %d",
-             solve_info);
+      printf("lcp_pivot_lumod :: SN_lumod_dense_solve failed!, info = %d", solve_info);
       *info = LCP_PIVOT_LUMOD_FAILED;
       goto exit_lcp_pivot;
     }
@@ -394,25 +371,22 @@ void lcp_pivot_lumod_covering_vector(LinearComplementarityProblem* problem,
       case SICONOS_LCP_PIVOT_LEMKE:
       default:
 #ifndef NO_LEXICO_MAT
-        block = pivot_selection_lemke2(
-            dim, get_driving_col(mat, dim), get_q_tilde(mat, dim),
-            get_lexico_mat(mat, dim), aux_indx, LEXICO_TOL);
+        block = pivot_selection_lemke2(dim, get_driving_col(mat, dim), get_q_tilde(mat, dim),
+                                       get_lexico_mat(mat, dim), aux_indx, LEXICO_TOL);
 #else
-        block = pivot_selection_lemke3(
-            dim, get_driving_col(mat, dim), get_q_tilde(mat, dim),
-            get_lexico_mat(mat, dim), basis, candidate_indx, lumod_data,
-            aux_indx, LEXICO_TOL);
+        block = pivot_selection_lemke3(dim, get_driving_col(mat, dim), get_q_tilde(mat, dim),
+                                       get_lexico_mat(mat, dim), basis, candidate_indx,
+                                       lumod_data, aux_indx, LEXICO_TOL);
 #endif
     }
 
     DEBUG_PRINTF("leaving variable %s%d entering variable %s%d\n",
-                 basis_to_name(basis[block], dim),
-                 basis_to_number(basis[block], dim), basis_to_name(drive, dim),
-                 basis_to_number(drive, dim));
+                 basis_to_name(basis[block], dim), basis_to_number(basis[block], dim),
+                 basis_to_name(drive, dim), basis_to_number(drive, dim));
 
     if (block < 0) {
-      /* We stop here: it either mean that the algorithm stops here or that
-       * there is an issue with the LCP */
+      /* We stop here: it either mean that the algorithm stops here or that there
+       * is an issue with the LCP */
       if (block == -1) {
         switch (pivot_selection_rule) {
           case SICONOS_LCP_PIVOT_LEMKE:
@@ -420,14 +394,8 @@ void lcp_pivot_lumod_covering_vector(LinearComplementarityProblem* problem,
             *info = LCP_PIVOT_RAY_TERMINATION;
             DEBUG_PRINT(
                 "The pivot column is nonpositive ! We are on ray !\n"
-                "It either means that the algorithm failed or that the LCP is "
-                "infeasible\n"
-                "Check the class of the M matrix to find out the meaning of "
-                "this\n");
-            break;
-            // Note FP: break statement was missing here. Does that mean that
-            // bck_drive = ... (line below) is required in any case? To be
-            // reviewed ...
+                "It either means that the algorithm failed or that the LCP is infeasible\n"
+                "Check the class of the M matrix to find out the meaning of this\n");
           default:
             bck_drive = drive < dim + 1 ? drive - 1 : drive - dim - 2;
         }
@@ -464,17 +432,15 @@ void lcp_pivot_lumod_covering_vector(LinearComplementarityProblem* problem,
     }
 
     /* Pivot < block , drive > */
-    DEBUG_PRINTF("Pivoting variable at pos %d in basis (%s%d) and (%s%d)\n",
-                 block, basis_to_name(basis[block], dim),
-                 basis_to_number(basis[block], dim), basis_to_name(drive, dim),
-                 basis_to_number(drive, dim));
+    DEBUG_PRINTF("Pivoting variable at pos %d in basis (%s%d) and (%s%d)\n", block,
+                 basis_to_name(basis[block], dim), basis_to_number(basis[block], dim),
+                 basis_to_name(drive, dim), basis_to_number(drive, dim));
 
     pivot = get_driving_col(mat, dim)[block];
     if (fabs(pivot) < DBL_EPSILON) {
       if (verbose > 0)
-        printf("the pivot is quasi-nul %e, danger !\nq[block] = %e; z = %e\n",
-               pivot, get_q_tilde(mat, dim)[block],
-               get_q_tilde(mat, dim)[block] / pivot);
+        printf("the pivot is quasi-nul %e, danger !\nq[block] = %e; z = %e\n", pivot,
+               get_q_tilde(mat, dim)[block], get_q_tilde(mat, dim)[block] / pivot);
 #ifndef WARN_ONLY_SMALL_PIVOT
       *info = LCP_PIVOT_NUL;
       goto exit_lcp_pivot;
@@ -492,9 +458,9 @@ void lcp_pivot_lumod_covering_vector(LinearComplementarityProblem* problem,
       case SICONOS_LCP_PIVOT_LEMKE:
       case SICONOS_LCP_PIVOT_PATHSEARCH:
       default:
-        do_pivot_lumod(lumod_data, problem->M, get_q_tilde(mat, dim),
-                       get_lexico_mat(mat, dim), get_driving_col(mat, dim),
-                       get_col_tilde(mat, dim), basis, block, drive);
+        do_pivot_lumod(lumod_data, problem->M, get_q_tilde(mat, dim), get_lexico_mat(mat, dim),
+                       get_driving_col(mat, dim), get_col_tilde(mat, dim), basis, block,
+                       drive);
     }
     DEBUG_PRINT_VEC(get_q_tilde(mat, dim), dim);
 
@@ -520,31 +486,30 @@ void lcp_pivot_lumod_covering_vector(LinearComplementarityProblem* problem,
         //        if (fabs(mat[t_indx] -1.0) < 1e-8)
         //        {
         //          double pivot = (mat[t_indx] - 1.0)/mat[t_indx + drive*dim];
-        //          for (unsigned int i = 0; i < dim; ++i) mat[i] -= mat[i +
-        //          drive*dim]*pivot; mat[t_indx] = 0; *info = 0; has_sol = 1;
+        //          for (unsigned int i = 0; i < dim; ++i) mat[i] -= mat[i + drive*dim]*pivot;
+        //          mat[t_indx] = 0;
+        //          *info = 0;
+        //          has_sol = 1;
         //        }
         //        break;
       case SICONOS_LCP_PIVOT_LEMKE:
       default:
-        /** one basic variable is leaving and the driving one enters the basis
-         */
+        /** one basic variable is leaving and the driving one enters the basis */
         leaving = basis[block];
         basis[block] = drive;
     }
 
     DEBUG_PRINT_VEC_STR("basis value", get_q_tilde(mat, dim), dim);
 
-    DEBUG_EXPR_WE(
-        DEBUG_PRINT("new basis: ") for (unsigned int i = 0; i < dim; ++i){
-            DEBUG_PRINTF("%i ", basis[i])} DEBUG_PRINT("\n"));
+    DEBUG_EXPR_WE(DEBUG_PRINT("new basis: ") for (unsigned int i = 0; i < dim; ++i){
+        DEBUG_PRINTF("%i ", basis[i])} DEBUG_PRINT("\n"));
 
   } /* end while*/
 
 exit_lcp_pivot:
 
-  DEBUG_EXPR_WE(
-      DEBUG_PRINT("final basis: ") for (unsigned int i = 0; i < dim; ++i){
-          DEBUG_PRINTF("%i ", basis[i])} DEBUG_PRINT("\n"));
+  DEBUG_EXPR_WE(DEBUG_PRINT("final basis: ") for (unsigned int i = 0; i < dim; ++i){
+      DEBUG_PRINTF("%i ", basis[i])} DEBUG_PRINT("\n"));
 
   /* Recover solution */
   double* finalq = get_q_tilde(mat, dim);
@@ -569,8 +534,7 @@ exit_lcp_pivot:
   /* End recover solution  */
 
   DEBUG_PRINT("u s\n");
-  DEBUG_EXPR_WE(for (unsigned int i = 0; i < dim;
-                     ++i){DEBUG_PRINTF("%e %e\n", u[i], s[i])});
+  DEBUG_EXPR_WE(for (unsigned int i = 0; i < dim; ++i){DEBUG_PRINTF("%e %e\n", u[i], s[i])});
 
   options->iparam[SICONOS_IPARAM_ITER_DONE] = nb_iter;
 
@@ -579,8 +543,7 @@ exit_lcp_pivot:
     /* Principal Pivoting Methods  */
     case SICONOS_LCP_PIVOT_BARD:
     case SICONOS_LCP_PIVOT_LEAST_INDEX:
-      *info = lcp_compute_error(problem, u, s,
-                                options->dparam[SICONOS_DPARAM_TOL], &tmp);
+      *info = lcp_compute_error(problem, u, s, options->dparam[SICONOS_DPARAM_TOL], &tmp);
       break;
     case SICONOS_LCP_PIVOT_PATHSEARCH:
       break; /* info should already be set */
@@ -610,6 +573,5 @@ exit_lcp_pivot:
 }
 
 void lcp_pivot_lumod_set_default(SolverOptions* options) {
-  options->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] =
-      SICONOS_LCP_PIVOT_LEMKE;
+  options->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = SICONOS_LCP_PIVOT_LEMKE;
 }

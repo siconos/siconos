@@ -14,20 +14,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
-#include <math.h>
+ */
 #include "projectionOnDisk.h"
 
-void projectionOnDisk(double* r, double  R)
-{
+#include <math.h>
 
+void projectionOnDisk(double* r, double R) {
   double normTsquare = r[0] * r[0] + r[1] * r[1];
-  if(normTsquare <= R * R)
-  {
-    return ;
-  }
-  else
-  {
+  if (normTsquare <= R * R) {
+    return;
+  } else {
     normTsquare = sqrt(normTsquare);
     r[0] = R * r[0] / normTsquare;
     r[1] = R * r[1] / normTsquare;
@@ -35,7 +31,4 @@ void projectionOnDisk(double* r, double  R)
   }
 }
 
-void projectionOnGeneralDisk(double* r, double  R, int dim)
-{
-
-}
+void projectionOnGeneralDisk(double* r, double R, int dim) {}

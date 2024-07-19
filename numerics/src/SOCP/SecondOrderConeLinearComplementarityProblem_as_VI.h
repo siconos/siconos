@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef SOCLCP_AS_VI_H
 #define SOCLCP_AS_VI_H
 
@@ -22,30 +22,27 @@
   \brief Definition of a structure to handle with SOCLCP problems.
 */
 
-#include "NumericsFwd.h"  // for SecondOrderConeLinearComplementarityProblem
-#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"    // for SecondOrderConeLinearComplementarityProblem
+#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
-/** \struct SecondOrderConeLinearComplementarityProblem_as_VI SecondOrderConeLinearComplementarityProblem_as_VI.h
+/** \struct SecondOrderConeLinearComplementarityProblem_as_VI
+ * SecondOrderConeLinearComplementarityProblem_as_VI.h
  *
  */
-struct SecondOrderConeLinearComplementarityProblem_as_VI
-{
+struct SecondOrderConeLinearComplementarityProblem_as_VI {
   /* the VI associated with the FC3D probelem */
-  VariationalInequality * vi;
+  VariationalInequality *vi;
   /* the SOCLCP associated with the VI  */
-  SecondOrderConeLinearComplementarityProblem * soclcp;
+  SecondOrderConeLinearComplementarityProblem *soclcp;
 };
 
-
-
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-extern "C"
-{
+extern "C" {
 #endif
 
-  void Function_VI_SOCLCP(void * self, int n, double *x, double *F);
+void Function_VI_SOCLCP(void *self, int n, double *x, double *F);
 
-  void Projection_VI_SOCLCP(void *viIn, double *x, double *PX);
+void Projection_VI_SOCLCP(void *viIn, double *x, double *PX);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

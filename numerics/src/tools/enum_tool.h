@@ -18,26 +18,20 @@
 #ifndef ENUM_TOOL_H
 #define ENUM_TOOL_H
 
-
-typedef struct EnumerationStruct
-{
+typedef struct EnumerationStruct {
   unsigned long long int current;
   unsigned long long int counter;
   unsigned long long int nb_cases;
-  double progress ;
+  double progress;
 } EnumerationStruct;
 
-
-EnumerationStruct * enum_init(int M);
-int enum_next(int * zw, int size, EnumerationStruct * enum_struct);
-
-
+EnumerationStruct* enum_init(int M);
+int enum_next(int* zw, int size, EnumerationStruct* enum_struct);
 
 /** Compute the total number of cases that should be enumerated
  * \param M the size of the MCLP problem.
  */
 unsigned long long int enum_compute_nb_cases(int M);
-
 
 /* /\** Initialize the enumeration process. */
 /*  * \param M the size of the MCLP problem. */

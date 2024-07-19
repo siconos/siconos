@@ -14,34 +14,31 @@
 /* GAMS stuff */
 
 #define _XOPEN_SOURCE 700
-#include <stdio.h>         // for printf
-#include <stdlib.h>        // for exit, EXIT_FAILURE
+#include <stdio.h>   // for printf
+#include <stdlib.h>  // for exit, EXIT_FAILURE
+
 #include "NumericsFwd.h"   // for FrictionContactProblem, SolverOptions
 #include "fc3d_Solvers.h"  // for fc3d_lcp_gams_path, fc3d_lcp_gams_pathvi
 
 #if 0
 //#ifdef HAVE_GAMS_C_API
 
-#include <string.h>
 #include <assert.h>
-#include <stdbool.h>
 #include <float.h>
+#include <math.h>
+#include <stdbool.h>
+#include <string.h>
 
 #include "CSparseMatrix_internal.h"
-#include "NumericsMatrix.h"
 #include "FrictionContactProblem.h"
+#include "GAMSlink.h"
+#include "NumericsMatrix.h"
 #include "fc3d_Solvers.h"
 #include "fc3d_compute_error.h"
-#include "projectionOnCone.h"
-
-#include "GAMSlink.h"
-
-#include <math.h>
-
-#include "sanitizer.h"
-#include "op3x3.h"
-
 #include "hdf5_logger.h"
+#include "op3x3.h"
+#include "projectionOnCone.h"
+#include "sanitizer.h"
 
 #define DEBUG_NOCOLOR
 //#define DEBUG_STDOUT
@@ -66,9 +63,9 @@ enum { TAKEOFF_CASE, STICKING_CASE, SLIDING_CASE };
 
 //#define SMALL_APPROX
 
+#include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <errno.h>
 
 static int cp(const char *to, const char *from)
 {
@@ -960,7 +957,7 @@ static int fc3d_lcp_gams_base(FrictionContactProblem* problem, double *reaction,
     numericsSparseMatrix(&tildeWt)->csc = cs_multiply(AbT, NM_csc(tmpWmat));
     NM_update_size(&tildeWt);
 
-#ifndef  NDEBUG
+#ifndef NDEBUG
     NumericsMatrix* NM_AbT = NM_create(NM_SPARSE, AbT->m,  AbT->n);
     numericsSparseMatrix(NM_AbT)->csc = AbT;
     SN_logh5_NM(NM_AbT, "AbT", logger_s);
@@ -1420,14 +1417,14 @@ void fc3d_lcp_gams_pathvi(FrictionContactProblem* problem, double* reaction, dou
 
 #else
 
-void fc3d_lcp_gams_path(FrictionContactProblem* problem, double *reaction, double *velocity, int *info, SolverOptions* options)
-{
+void fc3d_lcp_gams_path(FrictionContactProblem *problem, double *reaction, double *velocity,
+                        int *info, SolverOptions *options) {
   printf("fc3d_gams :: gams was not enabled at compile time!\n");
   exit(EXIT_FAILURE);
 }
 
-void fc3d_lcp_gams_pathvi(FrictionContactProblem* problem, double *reaction, double *velocity, int *info, SolverOptions* options)
-{
+void fc3d_lcp_gams_pathvi(FrictionContactProblem *problem, double *reaction, double *velocity,
+                          int *info, SolverOptions *options) {
   printf("fc3d_gams :: gams was not enabled at compile time!\n");
   exit(EXIT_FAILURE);
 }

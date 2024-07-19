@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*
   Tests functions for NumericsMatrix structure
@@ -26,8 +26,7 @@
 
 #define nnz 10
 
-int main(void)
-{
+int main(void) {
   unsigned int Ai[nnz] = {2, 1, 0, 3, 4, 5, 6, 7, 9, 8};
   unsigned int Aj[nnz] = {2, 1, 0, 3, 4, 5, 6, 7, 9, 8};
   double Ax[nnz] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
@@ -37,7 +36,8 @@ int main(void)
   unsigned int blocksize0[nnz] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
   unsigned int blocksize1[nnz] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
-  double* block[nnz] = {&Ax[0], &Ax[1], &Ax[2], &Ax[3], &Ax[4], &Ax[5], &Ax[6], &Ax[7], &Ax[8], &Ax[9] };
+  double* block[nnz] = {&Ax[0], &Ax[1], &Ax[2], &Ax[3], &Ax[4],
+                        &Ax[5], &Ax[6], &Ax[7], &Ax[8], &Ax[9]};
 
   mc.nbblocks = nnz;
   mc.blocknumber0 = 10;
@@ -59,7 +59,5 @@ int main(void)
 
   SBM_free_from_SBCM(m);
 
-  return 1-info1 + 1-info2;
-
+  return 1 - info1 + 1 - info2;
 }
-

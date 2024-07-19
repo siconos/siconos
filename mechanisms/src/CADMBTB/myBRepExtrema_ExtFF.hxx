@@ -38,7 +38,7 @@
 #include <Standard_Real.hxx>
 #endif
 
-//#include <BRepAdaptor_Surface.hxx>
+// #include <BRepAdaptor_Surface.hxx>
 
 class BRepAdaptor_Surface;
 class StdFail_NotDone;
@@ -46,7 +46,7 @@ class Standard_OutOfRange;
 class Standard_TypeMismatch;
 class TopoDS_Face;
 class gp_Pnt;
-//#include "Standard_Handle.hxx"
+// #include "Standard_Handle.hxx"
 
 #ifndef _Standard_HeaderFile
 #include <Standard.hxx>
@@ -75,11 +75,10 @@ class myBRepExtrema_ExtFF {
   Standard_EXPORT myBRepExtrema_ExtFF();
 
   //! It calculates all the distances. <br>
-  Standard_EXPORT myBRepExtrema_ExtFF(const TopoDS_Face& F1,
-                                      const TopoDS_Face& F2);
+  Standard_EXPORT myBRepExtrema_ExtFF(const TopoDS_Face& F1, const TopoDS_Face& F2);
 
-  Standard_EXPORT myBRepExtrema_ExtFF(const TopoDS_Face& F1,
-                                      const TopoDS_Face& F2, int id1, int id2);
+  Standard_EXPORT myBRepExtrema_ExtFF(const TopoDS_Face& F1, const TopoDS_Face& F2, int id1,
+                                      int id2);
   Standard_EXPORT void Initialize(const TopoDS_Face& F2);
 
   //! An exception is raised if the fields have not been <br>
@@ -102,14 +101,12 @@ class myBRepExtrema_ExtFF {
 
   //! Returns the parameters on the  Face F1 of the  <N>th <br>
   //!          extremum distance. <br>
-  Standard_EXPORT void ParameterOnFace1(const Standard_Integer N,
-                                        Standard_Real& U,
+  Standard_EXPORT void ParameterOnFace1(const Standard_Integer N, Standard_Real& U,
                                         Standard_Real& V) const;
 
   //! Returns the parameters on the  Face F2 of the  <N>th <br>
   //!          extremum distance. <br>
-  Standard_EXPORT void ParameterOnFace2(const Standard_Integer N,
-                                        Standard_Real& U,
+  Standard_EXPORT void ParameterOnFace2(const Standard_Integer N, Standard_Real& U,
                                         Standard_Real& V) const;
 
   //! Returns the Point of the <N>th extremum distance. <br>

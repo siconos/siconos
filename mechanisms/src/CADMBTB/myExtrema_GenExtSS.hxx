@@ -83,12 +83,9 @@ class myExtrema_GenExtSS {
   //!          surfaces. <br>
   //!          NbU and NbV are used to locate the close points <br>
   //!          to find the zeros. <br>
-  Standard_EXPORT myExtrema_GenExtSS(const Adaptor3d_Surface& S1,
-                                     const Adaptor3d_Surface& S2,
-                                     const Standard_Integer NbU,
-                                     const Standard_Integer NbV,
-                                     const Standard_Real Tol1,
-                                     const Standard_Real Tol2);
+  Standard_EXPORT myExtrema_GenExtSS(const Adaptor3d_Surface& S1, const Adaptor3d_Surface& S2,
+                                     const Standard_Integer NbU, const Standard_Integer NbV,
+                                     const Standard_Real Tol1, const Standard_Real Tol2);
 
   //! It calculates all the distances. <br>
   //!          The function F(u,v)=distance(P,S(u,v)) has an <br>
@@ -97,41 +94,33 @@ class myExtrema_GenExtSS {
   //!          surface. <br>
   //!          NbU and NbV are used to locate the close points <br>
   //!          to find the zeros. <br>
-  Standard_EXPORT myExtrema_GenExtSS(
-      const Adaptor3d_Surface& S1, const Adaptor3d_Surface& S2,
-      const Standard_Integer NbU, const Standard_Integer NbV,
-      const Standard_Real U1min, const Standard_Real U1sup,
-      const Standard_Real V1min, const Standard_Real V1sup,
-      const Standard_Real U2min, const Standard_Real U2sup,
-      const Standard_Real V2min, const Standard_Real V2sup,
-      const Standard_Real Tol1, const Standard_Real Tol2);
+  Standard_EXPORT myExtrema_GenExtSS(const Adaptor3d_Surface& S1, const Adaptor3d_Surface& S2,
+                                     const Standard_Integer NbU, const Standard_Integer NbV,
+                                     const Standard_Real U1min, const Standard_Real U1sup,
+                                     const Standard_Real V1min, const Standard_Real V1sup,
+                                     const Standard_Real U2min, const Standard_Real U2sup,
+                                     const Standard_Real V2min, const Standard_Real V2sup,
+                                     const Standard_Real Tol1, const Standard_Real Tol2);
 
-  Standard_EXPORT void Initialize(const Adaptor3d_Surface& S2,
-                                  const Standard_Integer NbU,
-                                  const Standard_Integer NbV,
-                                  const Standard_Real Tol2);
+  Standard_EXPORT void Initialize(const Adaptor3d_Surface& S2, const Standard_Integer NbU,
+                                  const Standard_Integer NbV, const Standard_Real Tol2);
 
-  Standard_EXPORT void Initialize(
-      const Adaptor3d_Surface& S2, const Standard_Integer NbU,
-      const Standard_Integer NbV, const Standard_Real U2min,
-      const Standard_Real U2sup, const Standard_Real V2min,
-      const Standard_Real V2sup, const Standard_Real Tol2);
+  Standard_EXPORT void Initialize(const Adaptor3d_Surface& S2, const Standard_Integer NbU,
+                                  const Standard_Integer NbV, const Standard_Real U2min,
+                                  const Standard_Real U2sup, const Standard_Real V2min,
+                                  const Standard_Real V2sup, const Standard_Real Tol2);
 
   //! the algorithm is done with S1 <br>
   //!          An exception is raised if the fields have not <br>
   //!          been initialized. <br>
-  Standard_EXPORT void Perform(const Adaptor3d_Surface& S1,
-                               const Standard_Real Tol1);
+  Standard_EXPORT void Perform(const Adaptor3d_Surface& S1, const Standard_Real Tol1);
 
   //! the algorithm is done withS1 <br>
   //!          An exception is raised if the fields have not <br>
   //!          been initialized. <br>
-  Standard_EXPORT void Perform(const Adaptor3d_Surface& S1,
-                               const Standard_Real U1min,
-                               const Standard_Real U1sup,
-                               const Standard_Real V1min,
-                               const Standard_Real V1sup,
-                               const Standard_Real Tol1);
+  Standard_EXPORT void Perform(const Adaptor3d_Surface& S1, const Standard_Real U1min,
+                               const Standard_Real U1sup, const Standard_Real V1min,
+                               const Standard_Real V1sup, const Standard_Real Tol1);
 
   //! Returns True if the distances are found. <br>
   Standard_EXPORT Standard_Boolean IsDone() const;

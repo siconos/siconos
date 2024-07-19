@@ -78,8 +78,7 @@ class myExtrema_FuncExtSS : public math_FunctionSetWithDerivatives {
                                       const Adaptor3d_Surface& S2);
 
   //! sets the field mysurf of the function. <br>
-  Standard_EXPORT void Initialize(const Adaptor3d_Surface& S1,
-                                  const Adaptor3d_Surface& S2);
+  Standard_EXPORT void Initialize(const Adaptor3d_Surface& S1, const Adaptor3d_Surface& S2);
 
   Standard_EXPORT Standard_Integer NbVariables() const;
 
@@ -89,8 +88,7 @@ class myExtrema_FuncExtSS : public math_FunctionSetWithDerivatives {
   Standard_EXPORT Standard_Boolean Value(const math_Vector& UV, math_Vector& F);
 
   //! Calcul de Fi'(U,V). <br>
-  Standard_EXPORT Standard_Boolean Derivatives(const math_Vector& UV,
-                                               math_Matrix& DF);
+  Standard_EXPORT Standard_Boolean Derivatives(const math_Vector& UV, math_Matrix& DF);
 
   //! Calcul de Fi(U,V) et Fi'(U,V). <br>
   Standard_EXPORT Standard_Boolean Values(const math_Vector& UV, math_Vector& F,

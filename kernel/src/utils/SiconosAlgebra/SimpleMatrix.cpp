@@ -688,8 +688,7 @@ void siconos::algebra::SimpleMatrix::resize(unsigned int row, unsigned int col,
 
 void siconos::algebra::SimpleMatrix::display() const {
   if (size(0) == 0 || size(1) == 0) {
-    std::cout << "siconos::algebra::SimpleMatrix::display(): empty matrix"
-              << "\n";
+    std::cout << "siconos::algebra::SimpleMatrix::display(): empty matrix" << "\n";
   }
   std::cout << "SimpleMatrix storage type - num = "
             << static_cast<std::underlying_type<UblasType>::type>(_num) << "\n";
@@ -721,8 +720,7 @@ void siconos::algebra::SimpleMatrix::displayExpert(bool brief) const {
   std::cout.precision(6);
 
   if (size(0) == 0 || size(1) == 0) {
-    std::cout << "siconos::algebra::SimpleMatrix::display(): empty matrix"
-              << "\n";
+    std::cout << "siconos::algebra::SimpleMatrix::display(): empty matrix" << "\n";
   }
   std::cout << "SimpleMatrix storage type - num = "
             << static_cast<std::underlying_type<UblasType>::type>(_num) << "\n";
@@ -744,22 +742,19 @@ void siconos::algebra::SimpleMatrix::displayExpert(bool brief) const {
     for (i = 0; i < mat.Sparse->filled1() - 1; i++) {
       std::cout << mat.Sparse->index1_data()[i] << ", ";
     }
-    std::cout << mat.Sparse->index1_data()[i] << "]"
-              << "\n";
+    std::cout << mat.Sparse->index1_data()[i] << "]" << "\n";
 
     std::cout << "index_data2 = [";
     for (i = 0; i < mat.Sparse->filled2() - 1; i++) {
       std::cout << mat.Sparse->index2_data()[i] << ", ";
     }
-    std::cout << mat.Sparse->index2_data()[i] << "]"
-              << "\n";
+    std::cout << mat.Sparse->index2_data()[i] << "]" << "\n";
 
     std::cout << "value_data = [";
     for (i = 0; i < mat.Sparse->filled2() - 1; i++) {
       std::cout << mat.Sparse->value_data()[i] << ", ";
     }
-    std::cout << mat.Sparse->value_data()[i] << "]"
-              << "\n";
+    std::cout << mat.Sparse->value_data()[i] << "]" << "\n";
 
     std::cout << *mat.Sparse << "\n";
   } else if (_num == UblasType::SPARSE_COORDINATE) {

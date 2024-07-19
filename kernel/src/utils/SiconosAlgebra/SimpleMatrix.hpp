@@ -284,10 +284,7 @@ class SimpleMatrix : public SiconosMatrix {
 
   void updateNumericsMatrix() override;
 
-  NumericsMatrix* numericsMatrix() const override
-  {
-    return _numericsMatrix.get();
-  };
+  NumericsMatrix* numericsMatrix() const override { return _numericsMatrix.get(); };
 
   /** determines if the matrix has been inversed
    *

@@ -58,8 +58,8 @@ class Extrema_POnSurf;
 
 namespace siconos::mechanisms {
 
-  // FP: TEMP to fit with occt 7.7 Should be reviewed.
-  using Adaptor3d_SurfacePtr = Adaptor3d_Surface*;
+// FP: TEMP to fit with occt 7.7 Should be reviewed.
+using Adaptor3d_SurfacePtr = Adaptor3d_Surface*;
 
 /**
  * \brief This class has been built from OCC in view of overloding the distance
@@ -81,37 +81,28 @@ class myExtrema_ExtSS {
   Standard_EXPORT myExtrema_ExtSS();
 
   //! It calculates all the distances between S1 and S2. <br>
-  Standard_EXPORT myExtrema_ExtSS(const Adaptor3d_Surface& S1,
-                                  const Adaptor3d_Surface& S2,
-                                  const Standard_Real TolS1,
-                                  const Standard_Real TolS2);
+  Standard_EXPORT myExtrema_ExtSS(const Adaptor3d_Surface& S1, const Adaptor3d_Surface& S2,
+                                  const Standard_Real TolS1, const Standard_Real TolS2);
 
   //! It calculates all the distances between S1 and S2. <br>
-  Standard_EXPORT myExtrema_ExtSS(
-      const Adaptor3d_Surface& S1, const Adaptor3d_Surface& S2,
-      const Standard_Real Uinf1, const Standard_Real Usup1,
-      const Standard_Real Vinf1, const Standard_Real Vsup1,
-      const Standard_Real Uinf2, const Standard_Real Usup2,
-      const Standard_Real Vinf2, const Standard_Real Vsup2,
-      const Standard_Real TolS1, const Standard_Real TolS2);
+  Standard_EXPORT myExtrema_ExtSS(const Adaptor3d_Surface& S1, const Adaptor3d_Surface& S2,
+                                  const Standard_Real Uinf1, const Standard_Real Usup1,
+                                  const Standard_Real Vinf1, const Standard_Real Vsup1,
+                                  const Standard_Real Uinf2, const Standard_Real Usup2,
+                                  const Standard_Real Vinf2, const Standard_Real Vsup2,
+                                  const Standard_Real TolS1, const Standard_Real TolS2);
 
   //! Initializes the fields of the algorithm. <br>
-  Standard_EXPORT void Initialize(const Adaptor3d_Surface& S2,
-                                  const Standard_Real Uinf2,
-                                  const Standard_Real Usup2,
-                                  const Standard_Real Vinf2,
-                                  const Standard_Real Vsup2,
-                                  const Standard_Real TolS1);
+  Standard_EXPORT void Initialize(const Adaptor3d_Surface& S2, const Standard_Real Uinf2,
+                                  const Standard_Real Usup2, const Standard_Real Vinf2,
+                                  const Standard_Real Vsup2, const Standard_Real TolS1);
 
   //! Computes the distances. <br>
   //!          An exception is raised if the fieds have not been <br>
   //!          initialized. <br>
-  Standard_EXPORT void Perform(const Adaptor3d_Surface& S1,
-                               const Standard_Real Uinf1,
-                               const Standard_Real Usup1,
-                               const Standard_Real Vinf1,
-                               const Standard_Real Vsup1,
-                               const Standard_Real TolS1);
+  Standard_EXPORT void Perform(const Adaptor3d_Surface& S1, const Standard_Real Uinf1,
+                               const Standard_Real Usup1, const Standard_Real Vinf1,
+                               const Standard_Real Vsup1, const Standard_Real TolS1);
 
   //! Returns True if the distances are found. <br>
   Standard_EXPORT Standard_Boolean IsDone() const;
@@ -145,7 +136,6 @@ class myExtrema_ExtSS {
   // Fields PRIVATE
   //
 
-  
   Adaptor3d_SurfacePtr myS2;
   Standard_Boolean myDone;
   Standard_Boolean myIsPar;

@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef FRICTIONCONTACT3D_NONSMOOTH_NEWTON_SOLVERS_H
 #define FRICTIONCONTACT3D_NONSMOOTH_NEWTON_SOLVERS_H
 
@@ -33,36 +33,23 @@
  - problem_size, mu and rho should be moved outside parameters (inside *data)
 */
 
-
 /** The nonsmooth function signature.
 [...]
  */
-typedef void (*fc3d_nonsmooth_Newton_solversFunPtr)
-(void* data,
- unsigned int problem_size,
- double* reaction,
- double* velocity,
- double* mu,
- double* rho,
- double* F,
- double* A,
- double* B);
+typedef void (*fc3d_nonsmooth_Newton_solversFunPtr)(void* data, unsigned int problem_size,
+                                                    double* reaction, double* velocity,
+                                                    double* mu, double* rho, double* F,
+                                                    double* A, double* B);
 
 /** The nonsmooth function signature for a 3x3 block.
  */
-typedef void (*FrictionContactNSFun3x3Ptr)(double* reaction,
-                                           double* velocity,
-                                           double mu,
-                                           double* rho,
-                                           double* F,
-                                           double* A,
-                                           double* B);
+typedef void (*FrictionContactNSFun3x3Ptr)(double* reaction, double* velocity, double mu,
+                                           double* rho, double* F, double* A, double* B);
 
 /** The nonsmooth equation structure.
 [...]
  */
-typedef struct
-{
+typedef struct {
   FrictionContactProblem* problem;
   void* data;
   fc3d_nonsmooth_Newton_solversFunPtr function;
@@ -79,17 +66,8 @@ typedef struct
     \param options the SolverOptions parameter.
  */
 void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation,
-                                      double* reaction,
-                                      double* velocity,
-                                      int* info,
-                                      SolverOptions* options);
+                                         double* reaction, double* velocity, int* info,
+                                         SolverOptions* options);
 
-
-
-
-void computeAWpB(
-  double *A,
-  NumericsMatrix *W,
-  double *B,
-  NumericsMatrix *AWpB);
+void computeAWpB(double* A, NumericsMatrix* W, double* B, NumericsMatrix* AWpB);
 #endif
