@@ -8,8 +8,9 @@
 
 set(CTEST_PROJECT_NAME "Siconos")
 set(CTEST_NIGHTLY_START_TIME "20:00:00 CET")
-set(CTEST_DROP_METHOD "http")
+set(CTEST_DROP_METHOD "https")
 # -- Drop site = on Nova VM --
-set(CTEST_DROP_SITE "siconos-dashboard.univ-grenoble-alpes.fr:8080")
+#set(CTEST_DROP_SITE "siconos-dashboard.univ-grenoble-alpes.fr:8080")
+set(CTEST_DROP_SITE "siconos-dashboard.univ-grenoble-alpes.fr")
 set(CTEST_DROP_LOCATION "/submit.php?project=siconos")
 set(CTEST_DROP_SITE_CDASH TRUE)
