@@ -23,13 +23,9 @@
 #include "NumericsMatrix.h"                // for NumericsMatrix
 #include "QP_Solvers.h"                    // for ql0001_
 #include "SiconosConfig.h"                 // for HAS_FORTRAN, HAVE_QL0001
-#ifdef HAS_FORTRAN
-#include "SiconosFortran.h"  // for CNAME
-#else
+#include "SolverOptions.h"                 // for SICONOS_DPARAM_TOL, Solver...
 #include "numerics_verbose.h"
-#endif
 
-#include "SolverOptions.h"  // for SICONOS_DPARAM_TOL, Solver...
 void lcp_nsqp(LinearComplementarityProblem *problem, double *z, double *w, int *info,
               SolverOptions *options) {
   /* matrix M/vector q of the lcp */
@@ -127,9 +123,8 @@ void lcp_nsqp(LinearComplementarityProblem *problem, double *z, double *w, int *
   /* / call ql0001_*/
   /*   F77NAME(ql0001)(m, me, mmax, n, nmax, mnn, Q, p, A, b, xl, xu, */
   /*    z, lambda, iout, *info , un, war, lwar, iwar, liwar, tol); */
-  CNAME(ql0001)
-  (&m, &me, &mmax, &n, &nmax, &mnn, Q, p, A, b, xl, xu, z, lambda, &iout, info, &un, war,
-   &lwar, iwar, &liwar, &tol);
+  ql0001(&m, &me, &mmax, &n, &nmax, &mnn, Q, p, A, b, xl, xu, z, lambda, &iout, info, &un, war,
+         &lwar, iwar, &liwar, &tol);
 #else
   numerics_error("lcp_qp", "Fortran language is not enabled in siconos numerics");
 #endif

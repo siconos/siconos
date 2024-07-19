@@ -1,6 +1,7 @@
 include(tools4tests)
 
 if(WITH_TESTING)
+  add_custom_target(kernel-tests echo "Start kernel tests")
 
   # ---- Siconos Algebra tests ----
   begin_tests(src/utils/SiconosAlgebra/test)

@@ -181,7 +181,7 @@ int FrictionContact::compute(double time)
     return info;
   }
   // nothing to do
-  if(indexSetLevel() == LEVELMAX)
+  if(indexSetLevel() == siconos::internal::LEVELMAX)
   {
     return info;
   }

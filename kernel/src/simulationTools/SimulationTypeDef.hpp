@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file SimulationTypeDef.hpp
  * \brief Typedef for simulation-related objects
@@ -23,10 +23,11 @@
 #ifndef SimulationTypedef_H
 #define SimulationTypedef_H
 
-#include <vector>
 #include <set>
-#include "SiconosPointers.hpp" // for TYPEDEF_SPTR
-#include "SiconosFwd.hpp" // for SP::OneStepIntegrator, ...
+#include <vector>
+
+#include "SiconosFwd.hpp"       // for SP::OneStepIntegrator, ...
+#include "SiconosPointers.hpp"  // for TYPEDEF_SPTR
 
 // ================== Objects to handle DS ==================
 
@@ -54,30 +55,18 @@ TYPEDEF_SPTR(OneStepNSProblems)
 
 // ================== Misc ==================
 
-/** default tolerance value, used to update index sets */
-#define DEFAULT_TOLERANCE 10 * MACHINE_PREC
-
-enum SICONOS_OSNSP
-{
-  SICONOS_OSNSP_DEFAULT = 0
-};
-enum SICONOS_OSNSP_ED
-{
+enum SICONOS_OSNSP { SICONOS_OSNSP_DEFAULT = 0 };
+enum SICONOS_OSNSP_ED {
   SICONOS_OSNSP_ED_SMOOTH_ACC,
   SICONOS_OSNSP_ED_IMPACT,
   SICONOS_OSNSP_ED_SMOOTH_POS
 };
-enum SICONOS_OSNSP_TS
-{
-  SICONOS_OSNSP_TS_VELOCITY = 0,
-  SICONOS_OSNSP_TS_POS = 1
-};
+enum SICONOS_OSNSP_TS { SICONOS_OSNSP_TS_VELOCITY = 0, SICONOS_OSNSP_TS_POS = 1 };
 const int SICONOS_NB_OSNSP_TS = 1;
 const int SICONOS_NB_OSNSP_TSP = 2;
 
 /** Event constants */
 #define TD_EVENT 1
 #define NS_EVENT 2
-
 
 #endif

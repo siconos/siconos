@@ -328,7 +328,7 @@ void MoreauJeanOSI::initializeIterationMatrixW(double time, SP::SecondOrderDS ds
   {
     LagrangianLinearDiagonalDS& lldds = static_cast<LagrangianLinearDiagonalDS&>(*ds);
     unsigned int ndof = lldds.dimension();
-    _dynamicalSystemsGraph->properties(dsv).W.reset(new SimpleMatrix(ndof, ndof, Siconos::BANDED, 0, 0));
+    _dynamicalSystemsGraph->properties(dsv).W.reset(new SimpleMatrix(ndof, ndof, siconos::BANDED, 0, 0));
     SiconosMatrix& W = *_dynamicalSystemsGraph->properties(dsv).W;
 
     if(lldds.mass())

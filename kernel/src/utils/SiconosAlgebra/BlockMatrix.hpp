@@ -235,10 +235,6 @@ public:
    */
   void randomize() override;
 
-  /** Initialize a symmetric matrix with random values
-   */
-  void randomize_sym() override;
-
   /** set an identity matrix
    */
   void eye() override;

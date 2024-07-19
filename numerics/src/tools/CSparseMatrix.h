@@ -29,7 +29,7 @@
 #include <stdint.h>  // for intXX_t
 #include <stdio.h>   // for FILE
 
-#include "SiconosConfig.h"  //  for SICONOS_INT64
+#include "SiconosConfig.h"
 
 /* Compile-time assertion: users of SparseMatrix.h must have CS_LONG
  * set if and only if SICONOS_INT64 is also set

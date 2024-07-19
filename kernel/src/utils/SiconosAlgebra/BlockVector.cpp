@@ -33,7 +33,7 @@
 #include "SiconosException.hpp"
 
 
-using Siconos::Algebra::isComparableTo;
+using siconos::algebra::isComparableTo;
 
 // =================================================
 //                CONSTRUCTORS
@@ -376,9 +376,9 @@ BlockVector& BlockVector::operator -= (const SiconosVector& vIn)
   if(dim > _sizeV) THROW_EXCEPTION("invalid ranges");
 
   VectorOfVectors::const_iterator it;
-  Siconos::UBLAS_TYPE numVIn = vIn.num();
+  siconos::UBLAS_TYPE numVIn = vIn.num();
   unsigned int currentSize;
-  Siconos::UBLAS_TYPE currentNum;
+  siconos::UBLAS_TYPE currentNum;
   unsigned int index = 0;
   for(it = _vect.begin(); it != _vect.end(); ++it)
   {
@@ -386,7 +386,7 @@ BlockVector& BlockVector::operator -= (const SiconosVector& vIn)
     currentNum = (*it)->num();
     if(numVIn != currentNum)
       THROW_EXCEPTION("inconsistent types.");
-    if(numVIn == Siconos::DENSE)
+    if(numVIn == siconos::DENSE)
       noalias(*(*it)->dense()) -=  ublas::subrange(*vIn.dense(), index, index + currentSize) ;
     else
       noalias(*(*it)->sparse()) -=  ublas::subrange(*vIn.sparse(), index, index + currentSize) ;
@@ -424,7 +424,7 @@ BlockVector& BlockVector::operator += (const SiconosVector& vIn)
   if(dim > _sizeV) THROW_EXCEPTION("invalid ranges");
 
   VectorOfVectors::const_iterator it;
-  Siconos::UBLAS_TYPE numVIn = vIn.num(), currentNum;
+  siconos::UBLAS_TYPE numVIn = vIn.num(), currentNum;
   unsigned int currentSize;
   unsigned int index = 0;
 
@@ -433,7 +433,7 @@ BlockVector& BlockVector::operator += (const SiconosVector& vIn)
     currentSize = (*it)->size();
     currentNum = (*it)->num();
     if(numVIn != currentNum) THROW_EXCEPTION("inconsistent types.");
-    if(numVIn == Siconos::DENSE)
+    if(numVIn == siconos::DENSE)
       noalias(*(*it)->dense()) += ublas::subrange(*vIn.dense(), index, index + currentSize) ;
     else
       noalias(*(*it)->sparse()) += ublas::subrange(*vIn.sparse(), index, index + currentSize) ;

@@ -23,9 +23,9 @@
 #include "SiconosAlgebraTools.hpp"
 #include <iostream>
 
-namespace Siconos
+namespace siconos
 {
-namespace Algebra
+namespace algebra
 {
 
 bool isComparableTo(const BlockVector& v1, const BlockVector& v2)

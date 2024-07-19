@@ -99,7 +99,7 @@ void LinearOSNS::initOSNSMatrix()
       case NM_SPARSE_BLOCK:
       {
         // = number of Interactionin the largest considered indexSet
-        if(indexSetLevel() != LEVELMAX && simulation()->nonSmoothDynamicalSystem()->topology()->indexSetsSize() > indexSetLevel())
+        if(indexSetLevel() != siconos::internal::LEVELMAX && simulation()->nonSmoothDynamicalSystem()->topology()->indexSetsSize() > indexSetLevel())
         {
           _M.reset(new OSNSMatrix(simulation()->indexSet(indexSetLevel())->size(), _numericsMatrixStorageType));
         }
@@ -896,7 +896,7 @@ bool LinearOSNS::preCompute(double time)
   //   std::cout << "!b || !isLinear :"  << boolalpha <<  (!b || !isLinear) <<  std::endl;
 
   // nothing to do
-  if(indexSetLevel() == LEVELMAX)
+  if(indexSetLevel() == siconos::internal::LEVELMAX)
   {
     DEBUG_END("bool LinearOSNS::preCompute(double time)\n");
     return false;

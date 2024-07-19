@@ -24,11 +24,9 @@
 #include "QP_Solvers.h"                    // for ql0001_
 #include "SiconosConfig.h"                 // for HAS_FORTRAN, HAVE_QL0001
 #include "SolverOptions.h"                 // for SolverOptions, solver_opti...
-#include "sanitizer.h"                     // for MSAN_INIT_VAR
-
-#ifndef HAS_FORTRAN
 #include "numerics_verbose.h"
-#endif
+#include "sanitizer.h"  // for MSAN_INIT_VAR
+
 void lcp_qp(LinearComplementarityProblem *problem, double *z, double *w, int *info,
             SolverOptions *options) {
   /* size of the LCP */
@@ -111,8 +109,8 @@ void lcp_qp(LinearComplementarityProblem *problem, double *z, double *w, int *in
 
 #ifdef HAVE_QL0001
 #ifdef HAS_FORTRAN
-  ql0001_(&m, &me, &mmax, &n, &nmax, &mnn, Q, p, A, b, xl, xu, z, lambda, &iout, info, &un,
-          war, &lwar, iwar, &liwar, &tol);
+  ql0001(&m, &me, &mmax, &n, &nmax, &mnn, Q, p, A, b, xl, xu, z, lambda, &iout, info, &un, war,
+         &lwar, iwar, &liwar, &tol);
 #else
   numerics_error("lcp_qp", "Fortran language is not enabled in siconos numerics");
 #endif

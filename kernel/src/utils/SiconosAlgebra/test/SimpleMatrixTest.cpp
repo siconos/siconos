@@ -35,7 +35,7 @@
 
 CPPUNIT_TEST_SUITE_REGISTRATION(SimpleMatrixTest);
 
-using namespace Siconos;
+using namespace siconos;
 
 #define DEBUG_MESSAGES
 #include "siconos_debug.h"
@@ -176,7 +176,7 @@ void SimpleMatrixTest::testConstructor0() // constructor with TYP and dim
   std::cout << "--> Test: constructor 0." << std::endl;
   SP::SimpleMatrix test(new SimpleMatrix(2, 3));
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->num() == Siconos::DENSE, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->num() == siconos::DENSE, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->size(0) == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->size(1) == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->normInf() < tol, true);
@@ -211,7 +211,7 @@ void SimpleMatrixTest::testConstructor4()
 {
   std::cout << "--> Test: constructor 4." << std::endl;
   SP::SiconosMatrix test(new SimpleMatrix(*D));
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", test->num() == Siconos::DENSE, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", test->num() == siconos::DENSE, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", norm_inf(test->getDense() - *D) == 0,
                                true);
   std::cout << "--> Constructor 4 test ended with success." << std::endl;
@@ -221,7 +221,7 @@ void SimpleMatrixTest::testConstructor5()
 {
   std::cout << "--> Test: constructor 5." << std::endl;
   SP::SiconosMatrix test(new SimpleMatrix(*T));
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", test->num() == Siconos::TRIANGULAR,
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", test->num() == siconos::TRIANGULAR,
                                true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", norm_inf(test->getTriang() - *T) == 0,
                                true);
@@ -232,7 +232,7 @@ void SimpleMatrixTest::testConstructor6()
 {
   std::cout << "--> Test: constructor 6." << std::endl;
   SP::SiconosMatrix test(new SimpleMatrix(*S));
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor6 : ", test->num() == Siconos::SYMMETRIC, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor6 : ", test->num() == siconos::SYMMETRIC, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor6 : ", norm_inf(test->getSym() - *S) == 0,
                                true);
   std::cout << "--> Constructor 6 test ended with success." << std::endl;
@@ -242,7 +242,7 @@ void SimpleMatrixTest::testConstructor7()
 {
   std::cout << "--> Test: constructor 7." << std::endl;
   SP::SiconosMatrix test(new SimpleMatrix(*SP));
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor7 : ", test->num() == Siconos::SPARSE, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor7 : ", test->num() == siconos::SPARSE, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor7 : ", norm_inf(test->getSparse() - *SP) == 0,
                                true);
   std::cout << "--> Constructor 7 test ended with success." << std::endl;
@@ -253,7 +253,7 @@ void SimpleMatrixTest::testConstructor8()
   std::cout << "--> Test: constructor 8." << std::endl;
   std::cout << "--> Constructor 8 test ended with success." << std::endl;
   SP::SiconosMatrix test(new SimpleMatrix(*Band));
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor8 : ", test->num() == Siconos::BANDED, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor8 : ", test->num() == siconos::BANDED, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor8 : ", norm_inf(test->getBanded() - *Band) == 0,
                                true);
 }
@@ -263,7 +263,7 @@ void SimpleMatrixTest::testConstructor9() // constructor with TYP and dim and in
   std::cout << "--> Test: constructor 9." << std::endl;
   SP::SimpleMatrix test(new SimpleMatrix(2, 3, 4.5));
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor9 : ", test->num() == Siconos::DENSE, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor9 : ", test->num() == siconos::DENSE, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor9 : ", test->size(0) == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor9 : ", test->size(1) == 3, true);
   for (unsigned int i = 0; i < 2; ++i)
@@ -286,7 +286,7 @@ void SimpleMatrixTest::testConstructor11()
   std::cout << "--> Test: constructor 11." << std::endl;
   std::cout << "--> Constructor 11 test ended with success." << std::endl;
   SP::SiconosMatrix test(new SimpleMatrix(*Z));
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor11 : ", test->num() == Siconos::ZERO, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor11 : ", test->num() == siconos::ZERO, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor11 : ", test->normInf() == 0, true);
 }
 
@@ -295,23 +295,23 @@ void SimpleMatrixTest::testConstructor12()
   std::cout << "--> Test: constructor 12." << std::endl;
   std::cout << "--> Constructor 12 test ended with success." << std::endl;
   SP::SiconosMatrix test(new SimpleMatrix(*I));
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor12 : ", test->num() == Siconos::IDENTITY, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor12 : ", test->num() == siconos::IDENTITY, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor12 : ", test->normInf() == 1, true);
 }
 
 void SimpleMatrixTest::testConstructor13()
 {
   std::cout << "--> Test: constructor 13." << std::endl;
-  SP::SimpleMatrix test(new SimpleMatrix(4, 4, Siconos::SPARSE));
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", test->num() == Siconos::SPARSE, true);
+  SP::SimpleMatrix test(new SimpleMatrix(4, 4, siconos::SPARSE));
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", test->num() == siconos::SPARSE, true);
   std::cout << "--> Constructor 13 test ended with success." << std::endl;
 }
 void SimpleMatrixTest::testConstructor14()
 {
   std::cout << "--> Test: constructor 14." << std::endl;
-  SP::SimpleMatrix test(new SimpleMatrix(4, 4, Siconos::SPARSE_COORDINATE));
+  SP::SimpleMatrix test(new SimpleMatrix(4, 4, siconos::SPARSE_COORDINATE));
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testConstructor14 : ", test->num() == Siconos::SPARSE_COORDINATE, true);
+      "testConstructor14 : ", test->num() == siconos::SPARSE_COORDINATE, true);
   std::cout << "--> Constructor 14 test ended with success." << std::endl;
 }
 // Add tests with getDense ...
@@ -881,7 +881,7 @@ void SimpleMatrixTest::testOperators2()
 
   *tmp -= *tmp2;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(tmp->getTriang() - *T) == 0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", tmp->num() == Siconos::TRIANGULAR, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", tmp->num() == siconos::TRIANGULAR, true);
 
   std::cout << "-->  test operators2 ended with success." << std::endl;
 }
@@ -924,7 +924,7 @@ void SimpleMatrixTest::testOperators3()
 
   *tmp -= *tmp2;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(tmp->getSym() - *S) == 0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", tmp->num() == Siconos::SYMMETRIC, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", tmp->num() == siconos::SYMMETRIC, true);
 
   std::cout << "-->  test operators3 ended with success." << std::endl;
 }
@@ -974,7 +974,7 @@ void SimpleMatrixTest::testOperators4()
 
   *tmp -= *tmp2;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(tmp->getSparse() - *SP) == 0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", tmp->num() == Siconos::SPARSE, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", tmp->num() == siconos::SPARSE, true);
 
   // += -= a triangular
   *tmp += *tmp3;
@@ -1185,7 +1185,7 @@ void SimpleMatrixTest::testOperators5()
   *tmp -= *tmp2;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(tmp->getBanded() - *Band) == 0,
                                true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", tmp->num() == Siconos::BANDED, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", tmp->num() == siconos::BANDED, true);
 
   std::cout << "-->  test operators5 ended with success." << std::endl;
 }
@@ -1543,7 +1543,7 @@ void SimpleMatrixTest::testOperators6Ter()
   // Sparse +,-,* Sparse
   tmp.reset(new SimpleMatrix(*SP));
   tmp2.reset(new SimpleMatrix(*SP));
-  res.reset(new SimpleMatrix(4, 4, Siconos::SPARSE));
+  res.reset(new SimpleMatrix(4, 4, siconos::SPARSE));
   *res = *tmp + *tmp2;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators6Ter: ", (*res) == (2.0 * (*tmp)), true);
 
@@ -1559,7 +1559,7 @@ void SimpleMatrixTest::testOperators6Ter()
 
   tmp.reset(new SimpleMatrix(*SP_coor));
   tmp2.reset(new SimpleMatrix(*SP_coor));
-  res.reset(new SimpleMatrix(4, 4, Siconos::SPARSE_COORDINATE));
+  res.reset(new SimpleMatrix(4, 4, siconos::SPARSE_COORDINATE));
   *res = *tmp + *tmp2;
 
   // res->displayExpert();
@@ -2626,7 +2626,7 @@ void SimpleMatrixTest::testOperators8_5()
   }
 
   // Sparse
-  A2.reset(new SimpleMatrix(10, 10, Siconos::SPARSE));
+  A2.reset(new SimpleMatrix(10, 10, siconos::SPARSE));
   for (unsigned i = 0; i < A2->size(0); ++i)
     for (unsigned j = i; j < A2->size(1); ++j)
       A2->setValue(i, j, 3 * i + j);
@@ -2775,7 +2775,7 @@ void SimpleMatrixTest::testOperators8_6()
   }
 
   // Sparse
-  A2.reset(new SimpleMatrix(10, 10, Siconos::SPARSE));
+  A2.reset(new SimpleMatrix(10, 10, siconos::SPARSE));
   for (unsigned i = 0; i < A2->size(0); ++i)
     for (unsigned j = i; j < A2->size(1); ++j)
       A2->setValue(i, j, 3 * i + j);
@@ -3070,7 +3070,7 @@ void SimpleMatrixTest::testOperators12()
   double m = 2.2;
   int i = 3;
   SP::SiconosMatrix tmp1(new SimpleMatrix(*SP));
-  SP::SiconosMatrix res(new SimpleMatrix(4, 4, Siconos::SPARSE));
+  SP::SiconosMatrix res(new SimpleMatrix(4, 4, siconos::SPARSE));
   *res = m * *tmp1;
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testOperators: ", norm_inf(res->getSparse() - tmp1->getSparse() * m) < tol, true);
@@ -3764,7 +3764,7 @@ void SimpleMatrixTest::testFromAndFillCSC()
   NM_display(NM);
   //  NumericsMatrix *NM_1 = NM_create(4,4, NM_SPARSE);
 
-  SP::SiconosMatrix Sparse1(new SimpleMatrix(4, 4, Siconos::SPARSE));
+  SP::SiconosMatrix Sparse1(new SimpleMatrix(4, 4, siconos::SPARSE));
   Sparse1->fromCSC(NM_csc(NM));
   Sparse1->displayExpert();
 

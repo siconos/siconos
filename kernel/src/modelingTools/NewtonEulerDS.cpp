@@ -318,7 +318,7 @@ void NewtonEulerDS::initRhs(double time)
   computeRhs(time);
 
   /** \warning the derivative of T w.r.t to q is neglected */
-  _rhsMatrices[jacobianXBloc00].reset(new SimpleMatrix(_qDim, _qDim, Siconos::ZERO));
+  _rhsMatrices[jacobianXBloc00].reset(new SimpleMatrix(_qDim, _qDim, siconos::ZERO));
 
 
   _rhsMatrices[jacobianXBloc01].reset(new SimpleMatrix(*_T));
@@ -343,10 +343,10 @@ void NewtonEulerDS::initRhs(double time)
   }
 
   if(!_rhsMatrices[zeroMatrix])
-    _rhsMatrices[zeroMatrix].reset(new SimpleMatrix(6, 6, Siconos::ZERO));
+    _rhsMatrices[zeroMatrix].reset(new SimpleMatrix(6, 6, siconos::ZERO));
 
   if(!_rhsMatrices[zeroMatrixqDim])
-    _rhsMatrices[zeroMatrixqDim].reset(new SimpleMatrix(6, _qDim, Siconos::ZERO));
+    _rhsMatrices[zeroMatrixqDim].reset(new SimpleMatrix(6, _qDim, siconos::ZERO));
 
   if(flag1 && flag2)
     _jacxRhs.reset(new BlockMatrix(_rhsMatrices[jacobianXBloc00], _rhsMatrices[jacobianXBloc01],

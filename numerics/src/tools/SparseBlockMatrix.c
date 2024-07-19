@@ -28,7 +28,6 @@
 #include "CSparseMatrix.h"
 #include "NumericsArrays.h"  // for NA_merge_and_sort_sorted_arrays
 #include "SiconosBlas.h"     // for cblas_dscal, cblas_dgemv, CblasNoTrans, max
-#include "SiconosCompat.h"   // for SN_SIZE_T_Fn
 #include "SiconosLapack.h"   // for lapack_int, DGETRF, DGETRI
 /* #define DEBUG_NOCOLOR 1 */
 /* #define DEBUG_STDOUT 1 */
@@ -42,7 +41,7 @@
 #include "NumericsMatrix.h"
 #endif
 
-//#define VERBOSE_DEBUG
+// #define VERBOSE_DEBUG
 
 /* Clang 3.6 seems to be at odd with the C99 and C11 std on the conversion from
  * double to _Bool, cf paragraph "6.3.1.2 Boolean type" in the latest C99 or C11 draft  */
@@ -215,21 +214,21 @@ void SBM_print(const SparseBlockStructuredMatrix* const m) {
         if (colNumber != 0) nbColumns -= m->blocksize1[colNumber - 1];
         assert(nbColumns);
 
-        printf("block[" SN_SIZE_T_F "] of size %dX%d\n", blockNum, nbRows, nbColumns);
+        printf("block[ %zu ] of size %dX%d\n", blockNum, nbRows, nbColumns);
         if (m->block[blockNum]) {
           unsigned int sizemax = 10;
           if ((nbRows <= sizemax) & (nbColumns <= sizemax)) {
             for (unsigned int i = 0; i < nbRows; i++) {
               for (unsigned int j = 0; j < nbColumns; j++) {
-                printf("block[" SN_SIZE_T_F "](%i,%i) = %12.8e\n", blockNum, i, j,
+                printf("block[%zu](%i,%i) = %12.8e\n", blockNum, i, j,
                        m->block[blockNum][i + j * nbRows]);
               }
             }
           } else {
-            printf("Block[" SN_SIZE_T_F "] is too large to be displayed\n", blockNum);
+            printf("Block[%zu] is too large to be displayed\n", blockNum);
           }
         } else
-          printf("Block[" SN_SIZE_T_F "] --> NULL \n", blockNum);
+          printf("Block[%zu] --> NULL \n", blockNum);
       }
     }
   } else
@@ -1620,7 +1619,7 @@ void SBM_write_in_file(const SparseBlockStructuredMatrix* const m, FILE* file) {
       nbColumns = m->blocksize1[colNumber];
       if (colNumber != 0) nbColumns -= m->blocksize1[colNumber - 1];
       // fprintf(file,"block[%i] of size %dX%d\n", blockNum, nbRows,nbColumns);
-      fprintf(file, SN_SIZE_T_F "\n", blockNum);
+      fprintf(file, "%zu\n", blockNum);
       DEBUG_PRINTF("nbRows * nbColumns = %i\n", (int)(nbRows * nbColumns));
       assert(m->block[blockNum]);
       for (unsigned int i = 0; i < nbRows * nbColumns; i++) {
@@ -1689,7 +1688,7 @@ void SBM_write_in_fileForScilab(const SparseBlockStructuredMatrix* const m, FILE
       nbColumns = m->blocksize1[colNumber];
       if (colNumber != 0) nbColumns -= m->blocksize1[colNumber - 1];
       // fprintf(file,"block[%i] of size %dX%d\n", blockNum, nbRows,nbColumns);
-      fprintf(file, "block" SN_SIZE_T_F " = [ \n", blockNum);
+      fprintf(file, "block %zu = [ \n", blockNum);
 
       for (unsigned int i = 0; i < nbRows; i++) {
         fprintf(file, "[");
@@ -2889,7 +2888,7 @@ void SBMfree(SparseBlockStructuredMatrix* A, unsigned int level) {
   }
 }
 
-//#define SBM_DEBUG_SBM_row_to_dense
+// #define SBM_DEBUG_SBM_row_to_dense
 void SBM_row_to_dense(const SparseBlockStructuredMatrix* const A, int row, double* denseMat,
                       int rowPos, int rowNb) {
   assert(A);
@@ -2938,7 +2937,7 @@ void SBM_row_to_dense(const SparseBlockStructuredMatrix* const A, int row, doubl
   fclose(titi);
 #endif
 }
-//#define SBM_DEBUG_SBM_ROW_PERM
+// #define SBM_DEBUG_SBM_ROW_PERM
 void SBM_row_permutation(unsigned int* rowIndex, SparseBlockStructuredMatrix* A,
                          SparseBlockStructuredMatrix* C) {
 #ifdef SBM_DEBUG_SBM_ROW_PERM
@@ -2992,7 +2991,7 @@ void SBM_row_permutation(unsigned int* rowIndex, SparseBlockStructuredMatrix* A,
   fclose(titi);
 #endif
 }
-//#define SBM_DEBUG_SBM_COL_PERM
+// #define SBM_DEBUG_SBM_COL_PERM
 void SBM_column_permutation(unsigned int* colIndex, SparseBlockStructuredMatrix* A,
                             SparseBlockStructuredMatrix* C) {
 #ifdef SBM_DEBUG_SBM_COL_PERM

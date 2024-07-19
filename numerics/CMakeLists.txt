@@ -177,18 +177,18 @@ if(NOT DEFINED SICONOS_INT64)
   endif()
 endif()
 
-  #   Note : the CSparse data structures are referred to in
-  #   kernel, but the functions are only called from numerics, so it is
-  #   not a link-time dependency for kernel.
-  find_package(SuiteSparse COMPONENTS CXSparse REQUIRED)
-  # We should turn public to private later (?)
-  # SuiteSparse headers are required by kernel
-  target_link_libraries(numerics PUBLIC $<BUILD_INTERFACE:SuiteSparse::CXSparse>)
-  target_include_directories(numerics PUBLIC $<INSTALL_INTERFACE:${SuiteSparse_CXSparse_INCLUDE_DIR}>)
+#   Note : the CSparse data structures are referred to in
+#   kernel, but the functions are only called from numerics, so it is
+#   not a link-time dependency for kernel.
+find_package(SuiteSparse COMPONENTS CXSparse REQUIRED)
+# We should turn public to private later (?)
+# SuiteSparse headers are required by kernel
+target_link_libraries(numerics PUBLIC $<BUILD_INTERFACE:SuiteSparse::CXSparse>)
+target_include_directories(numerics PUBLIC $<INSTALL_INTERFACE:${SuiteSparse_CXSparse_INCLUDE_DIR}>)
 
-  find_package(SuiteSparse COMPONENTS LDL REQUIRED)
-  target_link_libraries(numerics PUBLIC $<BUILD_INTERFACE:SuiteSparse::LDL>)
-  target_include_directories(numerics PUBLIC $<INSTALL_INTERFACE:${SuiteSparse_LDL_INCLUDE_DIR}>)
+find_package(SuiteSparse COMPONENTS LDL REQUIRED)
+target_link_libraries(numerics PUBLIC $<BUILD_INTERFACE:SuiteSparse::LDL>)
+target_include_directories(numerics PUBLIC $<INSTALL_INTERFACE:${SuiteSparse_LDL_INCLUDE_DIR}>)
 
 if(DEFINED SICONOS_INT64) 
   # Use CS_LONG 

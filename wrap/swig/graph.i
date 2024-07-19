@@ -8,17 +8,17 @@
 
 //%include <SimulationGraphs.hpp>
 
-%extend Siconos::Properties
+%extend siconos::Properties
 {
-  Siconos::Properties::reference __getitem__(const Siconos::Properties::key_type& v)
+  siconos::Properties::reference __getitem__(const siconos::Properties::key_type& v)
   {
     return (*self[v]);
   };
 };
 
-%extend Siconos::SubProperties
+%extend siconos::SubProperties
 {
-  Siconos::SubProperties::reference __getitem__(const Siconos::SubProperties::key_type& v)
+  siconos::SubProperties::reference __getitem__(const siconos::SubProperties::key_type& v)
   {
     return (*self[v]);
   };

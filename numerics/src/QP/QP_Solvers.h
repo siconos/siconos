@@ -112,10 +112,10 @@ extern "C" {
 
 */
 
-void ql0001_(int *m, int *me, int *mmax, int *n, int *nmax, int *mnn, double *c, double *d,
-             double *a, double *b, double *xl, double *xu, double *x, double *u, int *iout,
-             int *ifail, int *iprint, double *war, int *lwar, int *iwar, int *liwar,
-             double *eps);
+void ql0001(int *m, int *me, int *mmax, int *n, int *nmax, int *mnn, double *c, double *d,
+            double *a, double *b, double *xl, double *xu, double *x, double *u, int *iout,
+            int *ifail, int *iprint, double *war, int *lwar, int *iwar, int *liwar,
+            double *eps);
 
 #ifdef __cplusplus
 }

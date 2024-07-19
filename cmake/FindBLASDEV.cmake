@@ -118,6 +118,9 @@ if(BLAS_NAME STREQUAL "Accelerate")
     PATH_SUFFIXES ${BLAS_INCLUDE_SUFFIXES}
     NO_DEFAULT_PATH
     )
+elseif(BLAS_NAME STREQUAL "mkl")
+  # No need to find headers : we will use -qmkl compilation option
+  set(BLAS_INCLUDE_DIR $ENV{MKLROOT}/include)
 else()
   find_path(BLAS_INCLUDE_DIR
     NAMES ${BLAS_HEADER}
@@ -158,7 +161,13 @@ if(NOT TARGET BLAS::BLAS)
 endif()
 
 set_property(TARGET BLAS::BLAS PROPERTY INTERFACE_LINK_LIBRARIES "${BLAS_LIBRARIES}")
-if(BLAS_INCLUDE_DIR)
+if(BLAS_NAME STREQUAL "mkl")
+  find_package(MKL CONFIG REQUIRED)
+  set_target_properties(BLAS::BLAS PROPERTIES COMPILE_OPTIONS "-qmkl")
+  set_property(TARGET BLAS::BLAS PROPERTY INTERFACE_LINK_LIBRARIES MKL::MKL)
+endif()
+
+if(BLAS_INCLUDE_DIR AND NOT (BLAS_NAME STREQUAL "mkl"))
   set_target_properties(BLAS::BLAS PROPERTIES
     INTERFACE_INCLUDE_DIRECTORIES "${BLAS_INCLUDE_DIR}")
 endif()

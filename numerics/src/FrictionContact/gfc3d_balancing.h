@@ -18,8 +18,8 @@
 #ifndef GLOBALFRICTIONCONTACT3DBALANCING_H
 #define GLOBALFRICTIONCONTACT3DBALANCING_H
 
-#include "NumericsMatrix.h"  // For balancing matrix
 #include "GlobalFrictionContactProblem.h"
+#include "NumericsMatrix.h"  // For balancing matrix
 
 struct GlobalFrictionContactProblem_balancing_data {
   BalancingMatrices* B_for_M;

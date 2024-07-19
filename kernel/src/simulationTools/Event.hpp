@@ -35,10 +35,6 @@
 extern "C" double rint(double x);
 #endif
 
-// tick default value
-// it has to be greater than DBL_EPSILON ...
-const double DEFAULT_TICK = 1e-16;
-
 /** 
     Abstract class that represents generic time events.
     

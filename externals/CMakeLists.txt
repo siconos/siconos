@@ -1,186 +1,125 @@
 #================================================================
 # cmake utilities to build external component
 #================================================================
-#
-# The objective is to call component_setup to create the target <COMPONENT>.
-# Before, it's necessary to set:
-# 
-# - COMPONENT component name
-# - <COMPONENT>_DIRS: the list of paths (relative to CMAKE_CURRENT_SOURCE_DIR) that
-#   contain source files
-# - <COMPONENT>_EXCLUDE_SRCS: the list of files, in <COMPONENT>_DIRS, that must be excluded
-#   from build.
-# - <COMPONENT>_INTERFACE_INCLUDE_DIRECTORIES: a list of directories
-#   to populate the interface of the target for include directories at build time
-
 
 # Component name (i.e. target name)
-set(COMPONENT externals)
-message("-- Set up for ${PROJECT_NAME}_${COMPONENT} library ...\n")
+message("-- Set up for ${PROJECT_NAME}_externals library ...\n")
 
-# ------ source directories for current component ------
-# What is needed by component to compile ?
-# List here all directories that contain sources files
-# for current component.
-set(${COMPONENT}_DIRS
-  hairer
-  netlib/dftemplates
-  netlib/odepack
-  optim_misc
-  optim_misc/ql0001
-  SOL/lumod-c
-  sort
-  tools
-)
+include(ComponentSetup)
 
-# boost extras, when c++ is on only
-if(WITH_CXX)
-  list(APPEND ${COMPONENT}_DIRS numeric_bindings boost_contribs)
-  if(WITH_SERIALIZATION AND NOT WITH_SYSTEM_BOOST_SERIALIZATION)
-    # FP : in which case do we need this, since boost serialization is required ??
-    list(APPEND ${COMPONENT}_DIRS boost_serialization)
-  endif()
+if(WITH_FORTRAN)
+  ### Fortran part ###
+  create_siconos_component(externals_fortran)
+  
+  # - netlib
+  target_sources(externals_fortran PRIVATE
+    netlib/odepack/opkda1.f
+    netlib/odepack/opkda2.f
+    netlib/odepack/opkdmain.f
+    )
+
+  # add fallow-argument-mismatch' option to compile fortran when compiler version is 10 or greater
+  # See https://scivision.co/gfortran-type-mismatch-error/
+
+  set_source_files_properties(netlib/odepack/opkda1.f netlib/odepack/opkdmain.f
+    PROPERTIES COMPILE_OPTIONS "-fallow-argument-mismatch")
+  # target_include_directories(externals_fortran INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/netlib>) # For SiconosNetlib.h
+  target_include_directories(externals_fortran INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tools>) # For SiconosFortran.h
+ 
+  # - hairer
+  # https://www.unige.ch/~hairer/software.html
+  target_sources(externals_fortran PRIVATE
+    hairer/linsp.f
+    hairer/decsol.f
+    hairer/hem5.f)
+  set_source_files_properties(hairer/hem5.f PROPERTIES COMPILE_OPTIONS "-fallow-argument-mismatch")
+  # HEM5 calls DGETRF and DGETRS from LAPACK
+  target_link_libraries(externals_fortran PRIVATE $<BUILD_INTERFACE:LAPACK::LAPACK>)
+
+  #target_compile_options(externals PRIVATE "-Wno-unused-local-typedef") # Else boost bindings lead to many warnings
+  #target_compile_options(externals_fortran PRIVATE "-Wno-unused-variable")
+  #target_compile_options(externals_fortran PRIVATE "-Wno-unused-parameter")
+  #target_compile_options(externals_fortran PRIVATE "-fallow-argument-mismatch")
+  # --- ql0001 ---
+  #if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/optim_misc/ql0001/ql0001.f")
+  target_sources(externals_fortran PRIVATE optim_misc/ql0001/ql0001.f optim_misc/qnb.f)
+  set(HAVE_QL0001 TRUE CACHE INTERNAL "True if ql0001 is available in externals.")
+
+
+  # Fortran module used to defines iso_c_bindings API to all f77 routines
+  target_sources(externals_fortran PRIVATE siconos_fortran2c.f90)
+  
+  set_property(TARGET externals_fortran PROPERTY LINKER_LANGUAGE Fortran)
+  target_compile_options(externals_fortran PRIVATE "-w")
+
 endif()
 
-# -- Source files to be excluded from build --
-set(${COMPONENT}_EXCLUDE_SRCS "SOL/lumod-c/sparselib.c" "SOL/lumod-c/lumod_sparse.c")
+# Windows stuff --> should probably be reviewed and updated
+#include(WindowsExternalsSetup)
 
+# -- create/setup component target --
+create_siconos_component(externals)
+target_compile_options(externals PRIVATE "-w")
+# - lumod part -
+target_sources(externals PRIVATE
+  SOL/lumod-c/commonlib.c SOL/lumod-c/lumod_dense.c)
+# For numerics: 
+target_include_directories(externals INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/SOL/lumod-c>)
+
+# - sort -
 # --- Sort ---
 if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/sort/sort.h")
   if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/sort/sort_common.h")
     set(HAVE_SORT TRUE CACHE INTERNAL "True if sort is available in externals.")
+    target_include_directories(externals INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/sort>)
+    # Required by NumericsSparseMatrix
   endif()
-endif()
-
-# --- ql0001 ---
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/optim_misc/ql0001/ql0001.f")
-  set(HAVE_QL0001 TRUE CACHE INTERNAL "True if ql0001 is available in externals.")
 endif()
 
 # --- MA57  ---
 #SET(WITH_MA57 1)
 # - Extra setup for the component -
 if(WITH_MA57) 
-  list(APPEND ${COMPONENT}_DIRS
-    lbl
-    lbl/src
-    lbl/include
-    lbl/ext
-    lbl/metis4)
+  target_sources(externals PRIVATE
+    lbl/src/lbl_lib.c
+    lbl/src/lbl_mem.c
+    lbl/src/ma27_lib.c
+    lbl/src/ma57_lib.c)
+  get_sources(metisMa57 DIRS lbl/metis4)
+  # metis for ma57
+  target_sources(externals PRIVATE ${metisMa57_SRCS})
   # find_package(Metis) Metis 5  is not compatible with MA57. We include metis4
-  list(APPEND ${COMPONENT}_EXCLUDE_SRCS "lbl/src/ma57dummy_lib.c")
-
-endif()
-
-# -- Documentation --
-# List of directories for which no doxygen doc will be generated
-# By default all directories matching "test" are excluded.
-# No docs for externals.
-set(${COMPONENT}_EXCLUDE_DOXY ${${COMPONENT}_DIRS})
-
-
-# TEST TEST TEST
-# ------ include interface ------
-# What is needed at build time
-# by other targets (numerics etc) to compile with externals.
-# It means that a call to
-#  target_link_libraries(truc PRIVATE externals)
-# will imply -I<dirs> with dirs listed in
-# ${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES.
-set(${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES
-  netlib
-   netlib/odepack  # For odepack.h in tests and kernel
-   tools           # For SiconosCompat.h in numerics 
-   blas_lapack     # For SiconosLapack.h in numerics
-   SOL/lumod-c # For lumod_dense.h in numerics
-   hairer # For kernel
-   )
-if (WITH_MA57)
-  list(APPEND ${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES lbl/include/)
+  # if(METIS_FOUND)
+  #   target_link_libraries(externals PUBLIC Metis::Metis)
+  # endif()
+  # --> todo: write Find metis for cmake
+  target_include_directories(externals PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/lbl/include>)
 endif()
  
-if(WITH_CXX)
-  list(APPEND ${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES
-    numeric_bindings boost_contribs) # SiconosAlgebra needs this
-endif()
-
-if(HAVE_SORT)
-  list(APPEND ${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES sort) # NumericsSparseMatrix needs this
-endif()
-
-# ---- Final setup for the library ----
-
-# Windows stuff --> should probably be reviewed and updated
-include(WindowsExternalsSetup)
-
-# -- create/setup component target --
-include(ComponentSetup)
-create_siconos_component(${COMPONENT})
-
 # - Extra setup for the component -
 if(GAMSCAPI_FOUND AND CMAKE_DL_LIBS) # needed by GAMS (?). Here or in numerics ?
   target_link_libraries(externals PRIVATE ${CMAKE_DL_LIBS})
 endif()
 
-# if(METIS_FOUND)
-#   target_link_libraries(externals PUBLIC Metis::Metis)
-# endif()
 
-# Force c++ compiler for c files (for Visual Studio I guess?)
-if(BUILD_AS_CPP)
-  file(GLOB_RECURSE C_FILES ${CMAKE_CURRENT_SOURCE_DIR} *.c)
-  set_source_files_properties(${C_FILES} PROPERTIES LANGUAGE CXX
-    COMPILE_FLAGS -fpermissive) # to allow some nonconforming code to compile
-  # set_target_properties(${COMPONENT} PROPERTIES LINKER_LANGUAGE CXX)
-  # We require C++ 11. PUBLIC to propagate to numerics.
-
-  target_compile_features(externals PUBLIC cxx_std_17)
-  
-else()
-  set_target_properties(${COMPONENT} PROPERTIES LINKER_LANGUAGE C)
-  target_compile_features(externals PUBLIC c_std_11)
-endif()
-
-# externals lib needs blas and lapack while tests need Blas AND lapack.
-# Link only at build time.
-target_link_libraries(externals PUBLIC $<BUILD_INTERFACE:BLAS::BLAS>)
-# HEM5 calls DGETRF and DGETRS from LAPACK
-target_link_libraries(externals PRIVATE $<BUILD_INTERFACE:LAPACK::LAPACK>)
-target_include_directories(externals PRIVATE blas_lapack)
-#target_include_directories(externals PRIVATE ${BLAS_INCLUDE_DIR})
-
-get_target_property(CHECK BLAS::BLAS INTERFACE_INCLUDE_DIRECTORIES)
-
-
-# We don't want warnings from externals libraries.
-get_target_property(externals_COMPILE_FLAGS externals COMPILE_OPTIONS)
-list(REMOVE_ITEM externals_COMPILE_FLAGS -Wall)
-list(REMOVE_ITEM externals_COMPILE_FLAGS -Wunused-variable)
-set_target_properties(externals PROPERTIES COMPILE_OPTIONS "${externals_COMPILE_FLAGS}")
-# This is ugly, but helps with old lumod code (12.08.2021) --xhub
-target_compile_definitions(externals PRIVATE CLOCKTIME)
-target_compile_options(externals PRIVATE "-w")
-target_compile_options(externals PRIVATE "-Wno-unused-variable")
-target_compile_options(externals PRIVATE "-Wno-unused-parameter")
-# An awful command asking to add fallow-argument-mismatch' option to compile fortran when compiler version is 10 or greater
-# See https://scivision.co/gfortran-type-mismatch-error/
 if(WITH_FORTRAN)
-  target_compile_options(externals PRIVATE $<$<AND:$<VERSION_GREATER_EQUAL:${CMAKE_Fortran_COMPILER_VERSION},10>,$<COMPILE_LANGUAGE:Fortran>>:-fallow-argument-mismatch>)
+  target_link_libraries(externals PUBLIC externals_fortran)
+  target_compile_definitions(externals_fortran INTERFACE HAS_FORTRAN)
 endif()
+
+set_target_properties(externals PROPERTIES LINKER_LANGUAGE C)
+target_compile_features(externals PUBLIC c_std_11)
+
+# externals lib and tests need blas and lapack
+target_link_libraries(externals PUBLIC $<BUILD_INTERFACE:BLAS::BLAS>)
+target_include_directories(externals PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/blas_lapack>)
 
 # ---- Installation ----
-# Call siconos_component_install_setup(<COMPONENT>)
-# to prepare installation of the current target.
-# Before, it's necessary to set:
-# 
-# - <COMPONENT>_INSTALL_INTERFACE_INCLUDE_DIRECTORIES with all directories
-#    that contain headers files that must be installed.
-# 
-# common install
-# No headers installed for externals.
-set(${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES)
-# set(${COMPONENT}_HDRS_EXCLUDE tools/SiconosCompat.h)
-siconos_component_install_setup(${COMPONENT})
+if(WITH_FORTRAN)
+  siconos_component_install_setup(externals_fortran NODOC)
+endif()
+siconos_component_install_setup(externals NODOC)
+install(FILES tools/SiconosFortran.h DESTINATION include/siconos)
 
 # - Optional OCE Renderer setup (install only) -
 if(WITH_OpenCASCADE)
@@ -197,24 +136,5 @@ if(WITH_SERIALIZATION AND INSTALL_EXTERNAL_HEADERS AND NOT WITH_SYSTEM_BOOST_SER
 endif()
 
 # --- tests ---
-include(${COMPONENT}_tests.cmake)
-
-
-# # List of directories of headers not to be installed
-# set(${COMPONENT}_HDRS_EXCLUDE_DIR PATH_SDK/include SOL/lumod-c)
-# if(NOT INSTALL_EXTERNAL_HEADERS)
-#   list(APPEND ${COMPONENT}_HDRS_EXCLUDE_DIR
-#     blas_lapack
-#     hairer
-#     netlib/dftemplates
-#     netlib/odepack
-#     optim_misc
-#     optim_misc/ql0001
-#     sort
-#     boost_contribs
-#     tools)
-# endif()
-
-# # List of specific headers not to be installed
-# set(${COMPONENT}_HDRS_EXCLUDE tools/SiconosCompat.h)
+include(externals_tests.cmake)
 

@@ -312,7 +312,7 @@ void Disks::init(std::string disks_input)
 
   catch(...)
   {
-    Siconos::exception::process();
+    siconos::exception::process();
     exit(1);
   }
 }

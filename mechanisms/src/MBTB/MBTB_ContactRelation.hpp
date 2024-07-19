@@ -7,7 +7,7 @@
 //! It is a relation dedicated for the simple unilateral (ie: without  Coulomb friction).
 /*!
   Aggregation to the class MBTB_Contact, the member _pContact contains the CAD information.
-  It derivates from Siconos::NewtonEuler1DR. This class does the link between CAD and Siconos.
+  It derivates from siconos::NewtonEuler1DR. This class does the link between CAD and Siconos.
  */
 class MBTB_ContactRelation : public NewtonEuler1DR
 {

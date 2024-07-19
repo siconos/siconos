@@ -145,8 +145,8 @@ endif()
 # Activate fortran, if needed.
 if(WITH_FORTRAN)
   enable_language(Fortran)
-  include(FCompilerSetup)
   set(HAS_FORTRAN TRUE)
+  set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Modules)
 endif()
 
 # Common setup

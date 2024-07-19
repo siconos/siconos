@@ -227,9 +227,9 @@ void LagrangianDS::initRhs(double time)
   }
 
   if(!_rhsMatrices[zeroMatrix])
-    _rhsMatrices[zeroMatrix].reset(new SimpleMatrix(_ndof, _ndof, Siconos::ZERO));
+    _rhsMatrices[zeroMatrix].reset(new SimpleMatrix(_ndof, _ndof, siconos::ZERO));
   if(!_rhsMatrices[idMatrix])
-    _rhsMatrices[idMatrix].reset(new SimpleMatrix(_ndof, _ndof, Siconos::IDENTITY));
+    _rhsMatrices[idMatrix].reset(new SimpleMatrix(_ndof, _ndof, siconos::IDENTITY));
 
   if(flag1 && flag2)
     _jacxRhs.reset(new BlockMatrix(_rhsMatrices[zeroMatrix], _rhsMatrices[idMatrix],
@@ -690,7 +690,7 @@ void LagrangianDS::resetAllNonSmoothParts()
 
 void LagrangianDS::resetNonSmoothPart(unsigned int level)
 {
-  if(level < LEVELMAX)
+  if(level < siconos::internal::LEVELMAX)
     if(_p[level])
       _p[level]->zero();
 }

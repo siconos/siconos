@@ -25,23 +25,11 @@ Example : if cmake is executed with WITH_MPI=ON
 // -- Global options --
 // openmp required and available -
 #cmakedefine WITH_OPENMP
-// Fortran sources included in the build -
-#cmakedefine HAS_FORTRAN
 // Use c++ to build externals and numerics
 #cmakedefine BUILD_AS_CPP
 // Which version of C++ was used to compile siconos, needed for swig
 //#define SICONOS_CXXVERSION @CXXVERSION@
 #cmakedefine SICONOS_USE_MAP_FOR_HASH
-// are int 64 bits longs
-#cmakedefine SICONOS_INT64
-
-// use to force 32 bits int when creating numpy array
-// Useful to support old scipy version (< 0.14.0)
-#cmakedefine SICONOS_FORCE_NPY_INT32
-
-// on opensuse 42.3 Stdxx.h, failure with cxx11 and using std::isnan
-#cmakedefine SICONOS_STD_ISNAN_ALREADY_HERE_AND_I_DO_NOT_KNOW_WHY
-
 // -- Blas Lapack config --
 // Where does cblas comes from? 
 #cmakedefine HAS_MKL_CBLAS
@@ -91,6 +79,12 @@ Example : if cmake is executed with WITH_MPI=ON
 #cmakedefine WITH_SUPERLU
 #cmakedefine WITH_SUPERLU_MT
 #cmakedefine WITH_SUPERLU_dist
+// -- CSparse config (numerics) --
+#cmakedefine SICONOS_INT64 // are int 64 bits longs
+/* #cmakedefine CS_LONG */
+/* #cmakedefine NCOMPLEX */
+/* #cmakedefine LDL_LONG  Done with target_compile in CMake */
+
 
 #cmakedefine WITH_MA57
 // - internal timer -

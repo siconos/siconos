@@ -22,14 +22,13 @@
 
 #include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
 #include "NumericsFwd.h"                        // for MixedLinearComplement...
-#include "SiconosCompat.h"                      // for SN_SIZE_T_F
 int write_newformat(char *filename);
 int write_newformat(char *filename) {
   printf("\n Start of test \n");
   printf("Test on %s\n", filename);
   int info = 0;
   size_t sizeoffilename = strlen(filename);
-  printf("sizeoffilename " SN_SIZE_T_F "\n", sizeoffilename);
+  printf("sizeoffilename %zu\n", sizeoffilename);
   char extension[4] = "ext";
   strncpy(extension, &filename[sizeoffilename - 3], 3);
   printf("extension %s\n", extension);

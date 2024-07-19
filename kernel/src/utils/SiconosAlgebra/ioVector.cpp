@@ -103,12 +103,12 @@ bool write(const std::string& fileName,
     if(outputType != "noDim")
       outfile << m.size() << std::endl;
 
-    if(m.num() == Siconos::DENSE)
+    if(m.num() == siconos::DENSE)
     {
       DenseVect*  p = m.dense();
       std::copy(p->begin(), p->end(), std::ostream_iterator<double>(outfile, " "));
     }
-    else if(m.num() == Siconos::SPARSE)
+    else if(m.num() == siconos::SPARSE)
     {
       SparseVect* p = m.sparse();
       std::copy(p->begin(), p->end(), std::ostream_iterator<double>(outfile, " "));

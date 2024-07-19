@@ -22,14 +22,14 @@
 #include "BlockMatrix.hpp"
 #include "SiconosAlgebra.hpp"
 
-using namespace Siconos;
+using namespace siconos;
 
 void SimpleMatrix::addBlock(unsigned int row_min, unsigned int col_min, const SiconosMatrix& m)
 {
   // add m to current matrix elements, starting from row row_min and column col_min, to the values of the matrix m.
   // m may be a BlockMatrix.
 
-  if(_num == Siconos::ZERO || _num == Siconos::IDENTITY)
+  if(_num == siconos::ZERO || _num == siconos::IDENTITY)
     THROW_EXCEPTION("SimpleMatrix::addBlock(pos,..., m) forbidden for zero or identity matrix.");
 
   if(&m == this)
@@ -51,9 +51,9 @@ void SimpleMatrix::addBlock(unsigned int row_min, unsigned int col_min, const Si
   if(col_max > size(1))
     THROW_EXCEPTION("SimpleMatrix::addBlock(row,col,m): m.col + col is out of range.");
 
-  Siconos::UBLAS_TYPE numM = m.num();
+  siconos::UBLAS_TYPE numM = m.num();
 
-  if(numM == Siconos::BLOCK)  // if m is a block matrix ...
+  if(numM == siconos::BLOCK)  // if m is a block matrix ...
   {
     const BlockMatrix& mB = static_cast<const BlockMatrix&>(m);
     BlocksMat::const_iterator1 it;
@@ -72,32 +72,32 @@ void SimpleMatrix::addBlock(unsigned int row_min, unsigned int col_min, const Si
       posCol = 0;
     }
   }
-  else if(numM == Siconos::ZERO)  // if m = 0
+  else if(numM == siconos::ZERO)  // if m = 0
   {
     // nothing to do !
   }
   else // if m is a SimpleMatrix
   {
-    if(_num == Siconos::DENSE)
+    if(_num == siconos::DENSE)
     {
       switch(numM)
       {
-      case Siconos::DENSE:
+      case siconos::DENSE:
         noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) += *(m.dense());
         break;
-      case Siconos::TRIANGULAR:
+      case siconos::TRIANGULAR:
         noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) += *(m.triang());
         break;
-      case Siconos::SYMMETRIC:
+      case siconos::SYMMETRIC:
         noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) += *(m.sym());
         break;
-      case Siconos::SPARSE:
+      case siconos::SPARSE:
         noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) += *(m.sparse());
         break;
-      case Siconos::BANDED:
+      case siconos::BANDED:
         noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) += *(m.banded());
         break;
-      case Siconos::IDENTITY:
+      case siconos::IDENTITY:
         noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) += *(m.identity());
         break;
       default:
@@ -116,7 +116,7 @@ void SimpleMatrix::subBlock(unsigned int row_min, unsigned int col_min, const Si
   // sub m to current matrix elements, starting from row row_min and column col_min, to the values of the matrix m.
   // m may be a BlockMatrix.
 
-  if(_num == Siconos::ZERO || _num == Siconos::IDENTITY)
+  if(_num == siconos::ZERO || _num == siconos::IDENTITY)
     THROW_EXCEPTION("SimpleMatrix::subBlock(pos,..., m) forbidden for zero or identity matrix.");
 
   if(&m == this)
@@ -138,7 +138,7 @@ void SimpleMatrix::subBlock(unsigned int row_min, unsigned int col_min, const Si
   if(col_max > size(1))
     THROW_EXCEPTION("SimpleMatrix::subBlock(row,col,m): m.col + col is out of range.");
 
-  Siconos::UBLAS_TYPE numM = m.num();
+  siconos::UBLAS_TYPE numM = m.num();
 
   if(numM == 0)  // if m is a block matrix ...
   {
@@ -159,32 +159,32 @@ void SimpleMatrix::subBlock(unsigned int row_min, unsigned int col_min, const Si
       posCol = 0;
     }
   }
-  else if(numM == Siconos::ZERO)  // if m = 0
+  else if(numM == siconos::ZERO)  // if m = 0
   {
     // nothing to do !
   }
   else // if m is a SimpleMatrix
   {
-    if(_num == Siconos::DENSE)
+    if(_num == siconos::DENSE)
     {
       switch(numM)
       {
-      case Siconos::DENSE:
+      case siconos::DENSE:
         noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) -= *(m.dense());
         break;
-      case Siconos::TRIANGULAR:
+      case siconos::TRIANGULAR:
         noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) -= *(m.triang());
         break;
-      case Siconos::SYMMETRIC:
+      case siconos::SYMMETRIC:
         noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) -= *(m.sym());
         break;
-      case Siconos::SPARSE:
+      case siconos::SPARSE:
         noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) -= *(m.sparse());
         break;
-      case Siconos::BANDED:
+      case siconos::BANDED:
         noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) -= *(m.banded());
         break;
-      case Siconos::IDENTITY:
+      case siconos::IDENTITY:
         noalias(ublas::subrange(*mat.Dense, row_min, row_max, col_min, col_max)) -= *(m.identity());
         break;
       default:

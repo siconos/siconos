@@ -33,9 +33,9 @@
 #include "NumericsFwd.h"                   // for LinearComplementarityProblem
 #include "NumericsMatrix.h"                // for NumericsMatrix
 #include "SolverOptions.h"                 // for SolverOptions, SICONOS_IPA...
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
-//#define DEBUG_NO_MATRIX
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
+// #define DEBUG_NO_MATRIX
 #include "SiconosBlas.h"       // for cblas_dcopy, cblas_daxpy
 #include "lcp_cst.h"           // for SICONOS_LCP_PIVOT_LEMKE
 #include "lcp_pivot.h"         // for LCP_PATHSEARCH_LEAVING_T
