@@ -33,9 +33,6 @@ if(SYSTEM_ARCHITECTURE)
 endif()
 message(STATUS "SYSTEM ARCHITECTURE: ${CMAKE_SWIG_FLAGS}")
 
-# Generate code with Python 3 specific features and syntax
-list(APPEND CMAKE_SWIG_FLAGS "-py3")
-
 # Turn on wrapping of protected members for director classes 
 list(APPEND CMAKE_SWIG_FLAGS "-dirprot")
 # - without "dirprot", swig wrap public methods and only the 

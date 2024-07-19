@@ -553,7 +553,7 @@ def prepare_target(target, extra_args):
     # -- link with siconos components --
     for comp in components:
         result += 'target_link_libraries({}'.format(target)
-        result += ' PRIVATE siconos::{})\n'.format(comp)
+        result += ' PRIVATE Siconos::{})\n'.format(comp)
     # User-defined path to search for libraries
     for libdir in extra_args.link_directories:
         result += '\t target_link_directories({}'.format(target)
