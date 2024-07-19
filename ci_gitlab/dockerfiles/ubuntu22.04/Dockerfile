@@ -28,8 +28,13 @@ RUN  apt update && apt upgrade -y && apt install --no-install-recommends -y -qq 
 	nlohmann-json3-dev \
 	libgl-dev \
 	libgl1 \
+	libeigen3-dev \
+	libeigen3-doc \
 	&&  apt autoclean -y && apt autoremove -y&& rm -rf /var/lib/apt/lists/*
 RUN useradd -ms /bin/bash siconos-user
+RUN wget https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.bz2 && \
+    tar -jxvf boost_1_81_0.tar.bz2 && \
+    mv boost_1_81_0/boost /usr/local/include
 
 
 FROM siconos-base AS siconos-base-python

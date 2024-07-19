@@ -22,6 +22,7 @@ RUN dnf --setopt=deltarpm=false install -y \
         git-core \
         bullet-devel \
 	libXrender-devel \
+	eigen3-devel \
 	&& dnf clean all
 RUN useradd -ms /bin/bash siconos-user
 

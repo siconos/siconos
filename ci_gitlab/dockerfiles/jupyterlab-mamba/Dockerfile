@@ -13,7 +13,8 @@ RUN apt update  && apt upgrade -y && apt install --no-install-recommends -y -qq 
 	g++ \
         gfortran \
 	libgl-dev  &&  apt autoclean -y && apt autoremove -y&& rm -rf /var/lib/apt/lists/*
-RUN micromamba config prepend channels conda-forge && micromamba self-update
+RUN micromamba config prepend channels conda-forge && micromamba self-update && \
+    micromamba clean --all --yes
 
 
 FROM mamba-base AS mambaenv
