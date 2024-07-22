@@ -17,7 +17,7 @@ RUN dnf --setopt=deltarpm=false install -y \
         openblas-devel \
         lapack-devel \
         suitesparse-devel \
-        swig \
+        # swig \ # use more recent version swig from requirements.txt,
 	libglvnd-glx \
         git-core \
         bullet-devel \

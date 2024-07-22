@@ -10,3 +10,4 @@ vtk
 packaging
 bullet
 pyhull
+swig
