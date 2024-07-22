@@ -38,8 +38,6 @@
 #include <Standard_Real.hxx>
 #endif
 
-// #include <BRepAdaptor_Surface.hxx>
-
 class BRepAdaptor_Surface;
 class StdFail_NotDone;
 class Standard_OutOfRange;
@@ -64,6 +62,8 @@ namespace siconos::mechanisms {
 
 class myBRepExtrema_ExtFF {
  public:
+  using Handle_BRepAdaptor_Surface = Handle(BRepAdaptor_Surface);
+
   void* operator new(size_t, void* anAddress) { return anAddress; }
   void* operator new(size_t size) { return Standard::Allocate(size); }
   void operator delete(void* anAddress) {
@@ -136,7 +136,7 @@ class myBRepExtrema_ExtFF {
   TColStd_SequenceOfReal mydist;
   Extrema_SequenceOfPOnSurf myPointsOnS1;
   Extrema_SequenceOfPOnSurf myPointsOnS2;
-  Handle(BRepAdaptor_Surface) myHS;
+  Handle_BRepAdaptor_Surface myHS;
 };
 
 // other Inline functions and methods (like "C++: function call" methods)
