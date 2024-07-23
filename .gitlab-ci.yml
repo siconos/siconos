@@ -310,7 +310,7 @@ fedora-38:configure:
   extends:
     - .siconos-configure
   needs:
-    - job: fedora-38:docker-build
+    - job: fedora38:docker-build
       optional: true
 
 fedora-38:build:
