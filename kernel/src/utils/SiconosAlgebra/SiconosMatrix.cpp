@@ -54,7 +54,7 @@ siconos::algebra::SiconosMatrix& siconos::algebra::operator*=(SiconosMatrix& m,
   else if (m._num == UblasType::BANDED)
     *m.banded() *= s;
   else if (m._num == UblasType::ZERO) {
-  }     // nothing!
+  }  // nothing!
   else  // if(_num == 7)
     THROW_EXCEPTION("invalid type of matrix");
 
@@ -82,7 +82,7 @@ siconos::algebra::SiconosMatrix& siconos::algebra::operator/=(SiconosMatrix& m,
   else if (m._num == UblasType::BANDED)
     *m.banded() /= s;
   else if (m._num == UblasType::ZERO) {
-  }     // nothing!
+  }  // nothing!
   else  // if(_num == 7)
     THROW_EXCEPTION("invalid type of matrix");
 

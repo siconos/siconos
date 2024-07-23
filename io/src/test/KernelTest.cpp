@@ -44,7 +44,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION(KernelTest);
 
 void KernelTest::setUp() { BBxml = "BouncingBall1.xml"; }
 
-void KernelTest::tearDown(){};
+void KernelTest::tearDown() {};
 
 void KernelTest::t0() {
   auto q = std::make_shared<siconos::algebra::SiconosVector>(3);
@@ -288,7 +288,7 @@ void KernelTest::t5() {
 
   // ================================= Computation =================================
 
-  Siconos::save(s, BBxml);
+  siconos::save(s, BBxml);
 
   auto simFromFile = Siconos::load(BBxml);
   auto bouncingBallFromFile = simFromFile->nonSmoothDynamicalSystem();
@@ -375,7 +375,8 @@ void KernelTest::t6() {
   }
 
   catch (...) {
-    Siconos::exception::process();
+    siconos::exception::process();
+
     CPPUNIT_ASSERT(false);
   }
 }
@@ -484,7 +485,7 @@ void KernelTest::t9() {
 
     CPPUNIT_ASSERT(nsds1->finalT() == nsds2->finalT());
   } catch (...) {
-    Siconos::exception::process();
+    siconos::exception::process();
     CPPUNIT_ASSERT(false);
   }
 }

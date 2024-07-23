@@ -22,7 +22,13 @@
 
 #include "SiconosConfig.h"
 
-//#define BIND_FORTRAN_LOWERCASE_UNDERSCORE
+// #define BIND_FORTRAN_LOWERCASE_UNDERSCORE
+#include <boost/numeric/ublas/matrix_sparse.hpp>
+
+#include "BlockMatrix.hpp"
+#include "NumericsToolsNamespace.h"
+#include "SiconosVector.hpp"
+#include "SimpleMatrix.hpp"
 #include "boost/numeric/bindings/blas.hpp"
 #include "boost/numeric/bindings/lapack.hpp"
 #include "boost/numeric/bindings/std/vector.hpp"
@@ -31,12 +37,6 @@
 #include "boost/numeric/bindings/ublas/matrix_proxy.hpp"
 #include "boost/numeric/bindings/ublas/vector.hpp"
 #include "boost/numeric/bindings/ublas/vector_proxy.hpp"
-#include <boost/numeric/ublas/matrix_sparse.hpp>
-
-#include "BlockMatrix.hpp"
-#include "NumericsToolsNamespace.h"
-#include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
 #include "cholesky.hpp"
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -49,8 +49,7 @@
 
 namespace lapack = boost::numeric::bindings::lapack;
 
-void siconos::algebra::SimpleMatrix::PLUFactorizationInPlace()
-{
+void siconos::algebra::SimpleMatrix::PLUFactorizationInPlace() {
   if (_isPLUFactorized) {
     std::cout << "SimpleMatrix::PLUFactorizationInPlace warning: this matrix is already "
                  "PLUFactorized. "
@@ -67,13 +66,11 @@ void siconos::algebra::SimpleMatrix::PLUFactorizationInPlace()
       _isPLUFactorized = false;
       _isPLUFactorizedInPlace = true;
       THROW_EXCEPTION("SimpleMatrix::PLUFactorizationInPlace failed: the matrix is singular.");
-    }
-    else {
+    } else {
       _isPLUFactorized = true;
       _isPLUFactorizedInPlace = true;
     }
-  }
-  else {
+  } else {
     int info = cholesky_decompose(*sparse());
     // \warning: VA 24/11/2010: work only for symmetric matrices. Should be replaced by
     // efficient implementatation (e.g. mumps )
@@ -83,16 +80,14 @@ void siconos::algebra::SimpleMatrix::PLUFactorizationInPlace()
       _isPLUFactorizedInPlace = false;
       std::cout << "Problem in Cholesky Decomposition for the row number" << info << std::endl;
       THROW_EXCEPTION("SimpleMatrix::PLUFactorizationInPlace failed. ");
-    }
-    else {
+    } else {
       _isPLUFactorized = true;
       _isPLUFactorizedInPlace = false;
     }
   }
 }
 
-void siconos::algebra::SimpleMatrix::PLUInverseInPlace()
-{
+void siconos::algebra::SimpleMatrix::PLUInverseInPlace() {
   if (!_isPLUFactorized) PLUFactorizationInPlace();
   if (_num != UblasType::DENSE)
     THROW_EXCEPTION(" SimpleMatrix::PLUInverseInPlace: only implemented for dense matrices.");
@@ -109,8 +104,7 @@ void siconos::algebra::SimpleMatrix::PLUInverseInPlace()
 #endif
 }
 
-void siconos::algebra::SimpleMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B)
-{
+void siconos::algebra::SimpleMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B) {
   if (B.isBlock())
     THROW_EXCEPTION(
         "SimpleMatrix PLUForwardBackwardInPlace(B) failed at solving Ax = B. Not yet "
@@ -138,15 +132,13 @@ void siconos::algebra::SimpleMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B)
         %f\n",info,ierr,S(0),S(2),S(0)/S(2));
       */
       // B now contains solution:
-    }
-    else  // call getrs: only solve using previous lu-factorization
+    } else  // call getrs: only solve using previous lu-factorization
       if (B.num() == UblasType::DENSE)
         info = lapack::getrs(*mat.Dense, *_ipiv, *(B.dense()));
       else
         THROW_EXCEPTION(
             " SimpleMatrix::PLUInverseInPlace: only implemented for dense matrices in RHS.");
-  }
-  else {
+  } else {
     if (!_isPLUFactorized)  // call first PLUFactorizationInPlace
     {
       PLUFactorizationInPlace();
@@ -155,12 +147,10 @@ void siconos::algebra::SimpleMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B)
     if (B.num() == UblasType::DENSE) {
       inplace_solve(*sparse(), *(B.dense()), ublas::lower_tag());
       inplace_solve(ublas::trans(*sparse()), *(B.dense()), ublas::upper_tag());
-    }
-    else if (B.num() == UblasType::SPARSE) {
+    } else if (B.num() == UblasType::SPARSE) {
       inplace_solve(*sparse(), *(B.sparse()), ublas::lower_tag());
       inplace_solve(ublas::trans(*sparse()), *(B.sparse()), ublas::upper_tag());
-    }
-    else
+    } else
       THROW_EXCEPTION(
           " SimpleMatrix::PLUInverseInPlace: only implemented for dense ans sparse matrices "
           "in RHS.");
@@ -172,8 +162,7 @@ void siconos::algebra::SimpleMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B)
   if (info != 0) THROW_EXCEPTION("SimpleMatrix::PLUForwardBackwardInPlace failed.");
 }
 
-void siconos::algebra::SimpleMatrix::PLUForwardBackwardInPlace(SiconosVector &B)
-{
+void siconos::algebra::SimpleMatrix::PLUForwardBackwardInPlace(SiconosVector &B) {
   DenseMat tmpB(B.size(), 1);
   ublas::column(tmpB, 0) =
       *(B.dense());  // Conversion of vector to matrix. Temporary solution.
@@ -202,11 +191,9 @@ void siconos::algebra::SimpleMatrix::PLUForwardBackwardInPlace(SiconosVector &B)
 %f\n",info,ierr,S(0),S(2),S(0)/S(2));
       */
       // B now contains solution:
-    }
-    else  // call getrs: only solve using previous lu-factorization
+    } else  // call getrs: only solve using previous lu-factorization
       info = lapack::getrs(*mat.Dense, *_ipiv, tmpB);
-  }
-  else {
+  } else {
     if (!_isPLUFactorized)  // call first PLUFactorizationInPlace
     {
       PLUFactorizationInPlace();
@@ -221,24 +208,21 @@ void siconos::algebra::SimpleMatrix::PLUForwardBackwardInPlace(SiconosVector &B)
   noalias(*(B.dense())) = ublas::column(tmpB, 0);
 }
 
-void siconos::algebra::SimpleMatrix::resetLU()
-{
+void siconos::algebra::SimpleMatrix::resetLU() {
   if (_ipiv) _ipiv->clear();
   _isPLUFactorized = false;
   _isPLUFactorizedInPlace = false;
   _isPLUInversed = false;
 }
 
-void siconos::algebra::SimpleMatrix::resetCholesky()
-{
+void siconos::algebra::SimpleMatrix::resetCholesky() {
   _isCholeskyFactorized = false;
   _isCholeskyFactorizedInPlace = false;
 }
 
 void siconos::algebra::SimpleMatrix::resetQR() { _isQRFactorized = false; }
 
-void siconos::algebra::SimpleMatrix::resetFactorizationFlags()
-{
+void siconos::algebra::SimpleMatrix::resetFactorizationFlags() {
   resetLU();
   resetCholesky();
   resetQR();
@@ -250,8 +234,7 @@ void siconos::algebra::SimpleMatrix::resetFactorizationFlags()
 //   //  return A;
 // }
 
-void siconos::algebra::SimpleMatrix::SolveByLeastSquares(SiconosMatrix &B)
-{
+void siconos::algebra::SimpleMatrix::SolveByLeastSquares(SiconosMatrix &B) {
   if (B.isBlock())
     THROW_EXCEPTION(
         "SimpleMatrix::SolveByLeastSquares(Siconos Matrix &B) failed. Not yet implemented for "
@@ -266,8 +249,7 @@ void siconos::algebra::SimpleMatrix::SolveByLeastSquares(SiconosMatrix &B)
   if (info != 0) THROW_EXCEPTION("SimpleMatrix::SolveByLeastSquares failed.");
 }
 
-void siconos::algebra::SimpleMatrix::SolveByLeastSquares(SiconosVector &B)
-{
+void siconos::algebra::SimpleMatrix::SolveByLeastSquares(SiconosVector &B) {
   DenseMat tmpB(B.size(), 1);
   ublas::column(tmpB, 0) =
       *(B.dense());  // Conversion of vector to matrix. Temporary solution.
@@ -282,8 +264,7 @@ void siconos::algebra::SimpleMatrix::SolveByLeastSquares(SiconosVector &B)
   if (info != 0) {
     std::cout << "info = " << info << std::endl;
     THROW_EXCEPTION("SimpleMatrix::SolveByLeastSquares failed.");
-  }
-  else {
+  } else {
     noalias(*(B.dense())) = ublas::column(tmpB, 0);
   }
 }
@@ -304,8 +285,7 @@ transpose)
 }
 */
 
-void siconos::algebra::SimpleMatrix::Factorize()
-{
+void siconos::algebra::SimpleMatrix::Factorize() {
   DEBUG_BEGIN("void SimpleMatrix::Factorize()\n");
   if (isFactorized()) {
     std::cout << "SimpleMatrix::PLUFactorize warning: this matrix is already Factorized. "
@@ -329,17 +309,14 @@ void siconos::algebra::SimpleMatrix::Factorize()
       if (info != 0) {
         _isCholeskyFactorized = false;
         THROW_EXCEPTION("SimpleMatrix::Factorize failed (Cholesky)");
-      }
-      else {
+      } else {
         _isCholeskyFactorized = true;
       }
-    }
-    else  //  LDLT Factorization
+    } else  //  LDLT Factorization
     {
       THROW_EXCEPTION("SimpleMatrix::Factorize failed: LDL^T not yet implemented.");
     }
-  }
-  else  //  LU Factorization  by default
+  } else  //  LU Factorization  by default
   {
     DEBUG_PRINT("LU Factorize\n");
     info = NM_LU_factorize(NM);
@@ -348,8 +325,7 @@ void siconos::algebra::SimpleMatrix::Factorize()
       _isPLUFactorized = false;
       if (_num == UblasType::DENSE) _isPLUFactorizedInPlace = true;
       THROW_EXCEPTION("SimpleMatrix::PLUFactorize failed: the matrix is singular.");
-    }
-    else {
+    } else {
       _isPLUFactorized = true;
       if (_num == UblasType::DENSE) _isPLUFactorizedInPlace = true;
     }
@@ -357,10 +333,9 @@ void siconos::algebra::SimpleMatrix::Factorize()
   DEBUG_END("void SimpleMatrix::Factorize()\n");
 }
 
-//#define SPARSE_RHS_COPY_TO_DENSE 1
+// #define SPARSE_RHS_COPY_TO_DENSE 1
 
-void siconos::algebra::SimpleMatrix::Solve(SiconosMatrix &B)
-{
+void siconos::algebra::SimpleMatrix::Solve(SiconosMatrix &B) {
   DEBUG_BEGIN("SimpleMatrix::Solve(SiconosMatrix &B)\n");
 
   if (B.isBlock())
@@ -382,8 +357,7 @@ void siconos::algebra::SimpleMatrix::Solve(SiconosMatrix &B)
 
   if (B.num() == UblasType::DENSE) {
     b = B.getArray();
-  }
-  else if (B.num() == UblasType::SPARSE) {
+  } else if (B.num() == UblasType::SPARSE) {
     // First way.
     // We copy to dense since our sparse solver is not able to take
     // into account for sparse r.h.s, yet.
@@ -397,8 +371,7 @@ void siconos::algebra::SimpleMatrix::Solve(SiconosMatrix &B)
     // into a ublas sparse matrix
     // inplace_solve(*sparse(), *(B.sparse()), ublas::lower_tag());
     // inplace_solve(ublas::trans(*sparse()), *(B.sparse()), ublas::upper_tag());
-  }
-  else
+  } else
     THROW_EXCEPTION(
         " SimpleMatrix::Solve: only implemented for dense and sparse matrices in RHS.");
 
@@ -420,13 +393,11 @@ void siconos::algebra::SimpleMatrix::Solve(SiconosMatrix &B)
       if (info != 0) {
         THROW_EXCEPTION("SimpleMatrix::Solve failed (Cholesky)");
       }
-    }
-    else  //  LDLT Factorization
+    } else  //  LDLT Factorization
     {
       THROW_EXCEPTION("SimpleMatrix::Solve failed: LDL^T not yet implemented.");
     }
-  }
-  else  //  LU Factorization  by default
+  } else  //  LU Factorization  by default
   {
     DEBUG_PRINT("LU Solve\n");
 #ifdef SPARSE_RHS_COPY_TO_DENSE
@@ -453,8 +424,7 @@ void siconos::algebra::SimpleMatrix::Solve(SiconosMatrix &B)
   DEBUG_END("SimpleMatrix::Solve(SiconosMatrix &B)\n");
 }
 
-void siconos::algebra::SimpleMatrix::Solve(SiconosVector &B)
-{
+void siconos::algebra::SimpleMatrix::Solve(SiconosVector &B) {
   DEBUG_BEGIN("SimpleMatrix::Solve(SiconosVector &B)\n");
 
   if (!isFactorized()) {
@@ -470,8 +440,7 @@ void siconos::algebra::SimpleMatrix::Solve(SiconosVector &B)
   if (B.num() == UblasType::DENSE) {
     NM = _numericsMatrix.get();
     b = B.getArray();
-  }
-  else if (B.num() == UblasType::SPARSE) {
+  } else if (B.num() == UblasType::SPARSE) {
     // First way. We copy to dense since our sparse solver is not able to take into account
     // sparse r.h.s
     Bdense = std::make_shared<SiconosVector>(size(0));
@@ -484,8 +453,7 @@ void siconos::algebra::SimpleMatrix::Solve(SiconosVector &B)
     // matrix
     // inplace_solve(*sparse(), *(B.sparse()), ublas::lower_tag());
     // inplace_solve(ublas::trans(*sparse()), *(B.sparse()), ublas::upper_tag());
-  }
-  else
+  } else
     THROW_EXCEPTION(
         " SimpleMatrix::Solve: only implemented for dense and sparse matrices in RHS.");
 
@@ -498,13 +466,11 @@ void siconos::algebra::SimpleMatrix::Solve(SiconosVector &B)
       if (info != 0) {
         THROW_EXCEPTION("SimpleMatrix::Solve failed (Cholesky)");
       }
-    }
-    else  //  LDLT Factorization
+    } else  //  LDLT Factorization
     {
       THROW_EXCEPTION("SimpleMatrix::Solve failed: LDL^T not yet implemented.");
     }
-  }
-  else  //  LU Factorization  by default
+  } else  //  LU Factorization  by default
   {
     DEBUG_PRINT("LU Solve\n");
     info = NM_LU_solve(NM, b, 1);

@@ -25,7 +25,7 @@
 #include <stdlib.h>  // for exit, malloc, free, EXIT_FAILURE
 #include <string.h>  // for memcpy, memset
 
-#include "CSparseMatrix_internal.h"  // for CSparseMatrix, CS_INT, cs_dl_sp...
+#include "CSparseMatrix.h"  // for CSparseMatrix, CS_INT, cs_dl_sp...
 #include "NM_MPI.h"                  // for NM_MPI_copy
 #include "NM_MUMPS.h"                // for NM_MUMPS_copy
 #include "NM_conversions.h"          // for NM_csc_to_csr, NM_csc_to_triplet

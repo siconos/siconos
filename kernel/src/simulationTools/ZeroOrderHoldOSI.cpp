@@ -573,11 +573,9 @@ void siconos::integrators::ZeroOrderHoldOSI::display() const {
   for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
     if (!checkOSI(dsi)) continue;
     auto ds = _dynamicalSystemsGraph->bundle(*dsi);
-    std::cout << "--> Phi of dynamical system number "
-              << ": " << std::endl;
+    std::cout << "--> Phi of dynamical system number " << ": " << std::endl;
     Ad(ds).display();
-    std::cout << "--> Psi of dynamical system number "
-              << ": " << std::endl;
+    std::cout << "--> Psi of dynamical system number " << ": " << std::endl;
     Bd(ds).display();
   }
   std::cout << "================================" << std::endl;

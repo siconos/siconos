@@ -38,8 +38,7 @@ siconos::simulation::MatrixIntegrator::MatrixIntegrator(
     const siconos::modeling::DynamicalSystem& ds,
     const siconos::modeling::NonSmoothDynamicalSystem& nsds,
     std::shared_ptr<TimeDiscretisation> td, std::shared_ptr<siconos::algebra::SiconosMatrix> E)
-    : _E(E)
-{
+    : _E(E) {
   // Copy td
   auto tmp = std::make_shared<siconos::simulation::TimeDiscretisation>(*td);
   _TD = std::make_shared<siconos::simulation::TimeDiscretisation>(*td);
@@ -49,8 +48,7 @@ siconos::simulation::MatrixIntegrator::MatrixIntegrator(
   if (auto foltids = dynamic_cast<const siconos::modeling::FirstOrderLinearTIDS*>(&ds)) {
     _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(*foltids);
     _isConst = _TD->hConst();
-  }
-  else if (auto folds = dynamic_cast<const siconos::modeling::FirstOrderLinearDS*>(&ds)) {
+  } else if (auto folds = dynamic_cast<const siconos::modeling::FirstOrderLinearDS*>(&ds)) {
     _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*folds);
     // std::static_pointer_cast<FirstOrderLinearDS>(_DS)->zeroPlugin();
     if (folds->getPluginA()->isPlugged()) {
@@ -85,8 +83,7 @@ siconos::simulation::MatrixIntegrator::MatrixIntegrator(
     const siconos::modeling::NonSmoothDynamicalSystem& nsds,
     std::shared_ptr<TimeDiscretisation> td,
     std::shared_ptr<siconos::plugins::PluggedObject> plugin, const unsigned int p)
-    : MatrixIntegrator{ds, nsds, td, nullptr}
-{
+    : MatrixIntegrator{ds, nsds, td, nullptr} {
   _plugin = plugin;
   _isConst = false;
   auto n = ds.n();
@@ -99,14 +96,12 @@ siconos::simulation::MatrixIntegrator::MatrixIntegrator(
     const siconos::modeling::DynamicalSystem& ds,
     const siconos::modeling::NonSmoothDynamicalSystem& nsds,
     std::shared_ptr<TimeDiscretisation> td)
-    : MatrixIntegrator{ds, nsds, td, nullptr}
-{
+    : MatrixIntegrator{ds, nsds, td, nullptr} {
   unsigned int n = ds.n();
   _mat = std::make_shared<siconos::algebra::SimpleMatrix>(n, n, 0);
 }
 
-void siconos::simulation::MatrixIntegrator::integrate()
-{
+void siconos::simulation::MatrixIntegrator::integrate() {
   DEBUG_BEGIN("siconos::simulation::MatrixIntegrator::integrate()\n");
   auto& x0 = *_DS->x0();
   auto& x = *_DS->x();

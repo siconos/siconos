@@ -16,7 +16,7 @@ dependencies:
   - openblas
   - boost
   - bullet
-  - pythonocc-core == 7.4.1
+  - pythonocc-core
   - openmpi
   - hdf5
   - h5py

@@ -21,7 +21,6 @@
 
 #include "TimeSteppingCombinedProjection.hpp"
 
-
 namespace siconos::mechanisms {
 
 /**
@@ -44,13 +43,10 @@ class MBTB_TimeSteppingCombinedProj
       std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
       std::shared_ptr<siconos::simulation::TimeDiscretisation> td,
       std::shared_ptr<siconos::integrators::OneStepIntegrator> osi,
-      std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem>
-          osnspb_velo,
-      std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem>
-          osnspb_pos,
+      std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem> osnspb_velo,
+      std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem> osnspb_pos,
       unsigned int level)
-      : TimeSteppingCombinedProjection(nsds, td, osi, osnspb_velo, osnspb_pos,
-                                       level){};
+      : TimeSteppingCombinedProjection(nsds, td, osi, osnspb_velo, osnspb_pos, level){};
 
   virtual ~MBTB_TimeSteppingCombinedProj() noexcept = default;
 

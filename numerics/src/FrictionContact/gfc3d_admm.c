@@ -20,7 +20,7 @@
 #include <stdio.h>   // for NULL, printf
 #include <stdlib.h>  // for calloc, free, malloc
 
-#include "CSparseMatrix_internal.h"
+#include "CSparseMatrix.h"
 #include "Friction_cst.h"                  // for SICONOS_FRICTION_3D_ADMM_I...
 #include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
 #include "NumericsFwd.h"                   // for SolverOptions, GlobalFrict...

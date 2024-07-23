@@ -2,8 +2,8 @@
 // Useful to silent warnings like "Warning 512: Overloaded method ... ignored
 //
 // See for example http://swig.10945.n7.nabble.com/Python-and-C-operators-just-to-verify-td11222.html
-%ignore Siconos::Properties::operator[];
-%ignore Siconos::SubProperties::operator[];
+%ignore siconos::Properties::operator[];
+%ignore siconos::SubProperties::operator[];
 %ignore boost::enable_shared_from_this::operator=;
 %ignore SiconosGraph::bundle const;
 %ignore SiconosGraph::default_color_type const;

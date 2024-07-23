@@ -35,10 +35,8 @@
 #include "siconos_debug.h"
 
 // Constructor with dimensions (one input: square matrix only)
-siconos::nonsmooth_formulations::OSNSMatrix::OSNSMatrix(unsigned int n,
-                                                        NM_types stor)
-    : _dimRow(n), _dimColumn(n), _storageType(stor)
-{
+siconos::nonsmooth_formulations::OSNSMatrix::OSNSMatrix(unsigned int n, NM_types stor)
+    : _dimRow(n), _dimColumn(n), _storageType(stor) {
   // Note:
   // * Dense matrix (_storageType = NM_DENSE), n represents the real
   // dimension of the matrix
@@ -60,7 +58,7 @@ siconos::nonsmooth_formulations::OSNSMatrix::OSNSMatrix(unsigned int n,
     }
     default: {
       _triplet_nzmax = _dimRow; /* at least a non zero element per row */
-    }                           // do nothing here
+    }  // do nothing here
   }
 
   DEBUG_END("siconos:simulation::OSNSMatrix::OSNSMatrix(unsigned int n, int stor) \n");
@@ -68,8 +66,7 @@ siconos::nonsmooth_formulations::OSNSMatrix::OSNSMatrix(unsigned int n,
 
 siconos::nonsmooth_formulations::OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m,
                                                         NM_types stor)
-    : _dimRow(n), _dimColumn(m), _storageType(stor)
-{
+    : _dimRow(n), _dimColumn(m), _storageType(stor) {
   // Note:
 
   // for _storageType = NM_DENSE (dense) n represents the real dimension of
@@ -102,8 +99,7 @@ siconos::nonsmooth_formulations::OSNSMatrix::OSNSMatrix(unsigned int n, unsigned
 // Build from index set (i.e. get size from number of interactions in the set)
 siconos::nonsmooth_formulations::OSNSMatrix::OSNSMatrix(
     siconos::graphs::InteractionsGraph& indexSet, NM_types stor)
-    : _dimRow(0), _dimColumn(0), _storageType(stor)
-{
+    : _dimRow(0), _dimColumn(0), _storageType(stor) {
   DEBUG_BEGIN(
       "siconos:simulation::OSNSMatrix::OSNSMatrix(siconos::graphs::InteractionsGraph& "
       "indexSet, NM_types stor)\n");
@@ -118,18 +114,14 @@ siconos::nonsmooth_formulations::OSNSMatrix::OSNSMatrix(
 // construct by copy of SiconosMatrix
 siconos::nonsmooth_formulations::OSNSMatrix::OSNSMatrix(
     const siconos::algebra::SiconosMatrix& MSource)
-    : _dimRow(MSource.size(0)),
-      _dimColumn(MSource.size(1)),
-      _storageType(NM_DENSE)
-{
+    : _dimRow(MSource.size(0)), _dimColumn(MSource.size(1)), _storageType(NM_DENSE) {
   //  _numericsMatrix = std::make_shared<NumericsMatrix>()
   //  NM_null(_numericsMatrix.get());
   _M1 = std::make_shared<siconos::algebra::SimpleMatrix>(MSource);
 }
 
 unsigned siconos::nonsmooth_formulations::OSNSMatrix::updateSizeAndPositions(
-    siconos::graphs::InteractionsGraph& indexSet)
-{
+    siconos::graphs::InteractionsGraph& indexSet) {
   // === Description ===
 
   // For an interactionBlock (diagonal or extra diagonal) corresponding to
@@ -157,8 +149,7 @@ unsigned siconos::nonsmooth_formulations::OSNSMatrix::updateSizeAndPositions(
   return dim;
 }
 unsigned siconos::nonsmooth_formulations::OSNSMatrix::updateSizeAndPositions(
-    siconos::graphs::DynamicalSystemsGraph& DSG)
-{
+    siconos::graphs::DynamicalSystemsGraph& DSG) {
   // === Description ===
 
   // For an interactionBlock (diagonal or extra diagonal) corresponding to
@@ -182,8 +173,7 @@ unsigned siconos::nonsmooth_formulations::OSNSMatrix::updateSizeAndPositions(
 
 // Fill the matrix W
 void siconos::nonsmooth_formulations::OSNSMatrix::fillM(
-    siconos::graphs::InteractionsGraph& indexSet, bool update)
-{
+    siconos::graphs::InteractionsGraph& indexSet, bool update) {
   DEBUG_BEGIN(
       "void "
       "siconos:simulation::OSNSMatrix::fillM(std::shared_ptr<siconos::graphs::siconos::graphs:"
@@ -258,13 +248,11 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillM(
       std::static_pointer_cast<siconos::algebra::SimpleMatrix>(_M1)->setBlock(
           std::max(pos, col), std::min(pos, col), *indexSet.properties(*ei).lower_block);
     }
-  }
-  else if (_storageType == NM_SPARSE_BLOCK) {
+  } else if (_storageType == NM_SPARSE_BLOCK) {
     if (!_M2) {
       DEBUG_PRINT("Reset _M2 shared pointer with make_shared<BlockCSRMatrix>(indexSet) \n ");
       _M2 = std::make_shared<siconos::simulation::BlockCSRMatrix>(indexSet);
-    }
-    else {
+    } else {
       DEBUG_PRINT("fill existing _M2\n");
       _M2->fill(indexSet);
       DEBUG_EXPR(_M2->display(););
@@ -279,8 +267,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillM(
 }
 
 // convert current matrix to NumericsMatrix structure
-void siconos::nonsmooth_formulations::OSNSMatrix::convert()
-{
+void siconos::nonsmooth_formulations::OSNSMatrix::convert() {
   DEBUG_BEGIN("siconos:simulation::OSNSMatrix::convert()\n");
   DEBUG_PRINTF("_storageType = %i\n", _storageType);
 
@@ -319,8 +306,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::convert()
 // Fill the matrix W
 // Used only in GlobalFrictionContact
 void siconos::nonsmooth_formulations::OSNSMatrix::fillW(
-    siconos::graphs::DynamicalSystemsGraph& DSG, bool update)
-{
+    siconos::graphs::DynamicalSystemsGraph& DSG, bool update) {
   DEBUG_BEGIN(
       "void siconos:simulation::OSNSMatrix::fillW(std::shared_ptr<DynamicalSystemsGraph> DSG, "
       "bool update)\n");
@@ -338,9 +324,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillW(
 
         // We choose a triplet matrix format for inserting values.
         // This simplifies the memory manipulation.
-        _numericsMatrix.reset(
-            NM_create(NM_SPARSE, sizeM, sizeM),
-            NM_free);
+        _numericsMatrix.reset(NM_create(NM_SPARSE, sizeM, sizeM), NM_free);
 
         auto& M_NM = *numericsMatrix();
         NM_triplet_alloc(&M_NM, _triplet_nzmax);
@@ -375,8 +359,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillW(
 // Fill the matrix Winverse
 // Used only in GlobalFrictionContact
 void siconos::nonsmooth_formulations::OSNSMatrix::fillWinverse(
-    siconos::graphs::DynamicalSystemsGraph& DSG, bool update)
-{
+    siconos::graphs::DynamicalSystemsGraph& DSG, bool update) {
   DEBUG_BEGIN(
       "void "
       "siconos:simulation::OSNSMatrix::fillWinverse(std::shared_ptr<siconos::graphs::"
@@ -396,9 +379,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillWinverse(
 
         // We choose a triplet matrix format for inserting values.
         // This simplifies the memory manipulation.
-        _numericsMatrix.reset(
-            NM_create(NM_SPARSE, sizeM, sizeM),
-            NM_free);
+        _numericsMatrix.reset(NM_create(NM_SPARSE, sizeM, sizeM), NM_free);
 
         auto& M_NM = *numericsMatrix();
         NM_triplet_alloc(&M_NM, _triplet_nzmax);
@@ -416,12 +397,10 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillWinverse(
 
           if (auto mosi = dynamic_pointer_cast<siconos::integrators::MoreauJeanGOSI>(osi)) {
             Winverse = mosi->Winverse(sods, true);
-          }
-          else if (auto mosi =
-                       dynamic_pointer_cast<siconos::integrators::MoreauJeanOSI>(osi)) {
+          } else if (auto mosi =
+                         dynamic_pointer_cast<siconos::integrators::MoreauJeanOSI>(osi)) {
             Winverse = mosi->Winverse(sods);
-          }
-          else
+          } else
             THROW_EXCEPTION(
                 "siconos:simulation::OSNSMatrix::fillWinverse not yet implemented for this "
                 "type of OSI  ");
@@ -459,8 +438,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillWinverse(
 // Fill the matrix H
 void siconos::nonsmooth_formulations::OSNSMatrix::fillH(
     siconos::graphs::DynamicalSystemsGraph& DSG, siconos::graphs::InteractionsGraph& indexSet,
-    bool update)
-{
+    bool update) {
   DEBUG_BEGIN(
       "void "
       "siconos:simulation::OSNSMatrix::fillH(std::shared_ptr<siconos::graphs::"
@@ -470,8 +448,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillH(
   fillHtrans(DSG, indexSet, update);
 
   auto Htrans = _numericsMatrix;
-  _numericsMatrix.reset(NM_transpose(Htrans.get()),
-                        NM_free);
+  _numericsMatrix.reset(NM_transpose(Htrans.get()), NM_free);
   _dimColumn = updateSizeAndPositions(indexSet);
   _dimRow = updateSizeAndPositions(DSG);
 
@@ -485,8 +462,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillH(
 // Fill the matrix Htrans
 void siconos::nonsmooth_formulations::OSNSMatrix::fillHtrans(
     siconos::graphs::DynamicalSystemsGraph& DSG, siconos::graphs::InteractionsGraph& indexSet,
-    bool update)
-{
+    bool update) {
   DEBUG_BEGIN(
       "void "
       "siconos:simulation::OSNSMatrix::fillHtrans(std::shared_ptr<siconos::graphs::"
@@ -502,9 +478,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillHtrans(
       if (update) {
         // We choose a triplet matrix format for inserting values.
         // This simplifies the memory manipulation.
-        _numericsMatrix.reset(
-            NM_create(NM_SPARSE, _dimRow, _dimColumn),
-            NM_free);
+        _numericsMatrix.reset(NM_create(NM_SPARSE, _dimRow, _dimColumn), NM_free);
         auto& H_NM = *numericsMatrix();
         NM_triplet_alloc(&H_NM, _triplet_nzmax);
         auto Htriplet = NM_triplet(&H_NM);
@@ -567,8 +541,8 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillHtrans(
 
             abs_pos_ds = DSG.properties(DSG.descriptor(ds)).absolute_position;
             CSparseMatrix_block_dense_zentry(Htriplet, pos, abs_pos_ds,
-                                                                array + posBlock * sizeY,
-                                                                sizeY, sizeDS, DBL_EPSILON);
+                                             array + posBlock * sizeY, sizeY, sizeDS,
+                                             DBL_EPSILON);
           }
         }
         _triplet_nzmax = NM_nnz(&H_NM);
@@ -587,16 +561,13 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillHtrans(
 }
 
 void siconos::nonsmooth_formulations::OSNSMatrix::computeM(
-    std::shared_ptr<NumericsMatrix> Winverse,
-    std::shared_ptr<NumericsMatrix> Htrans)
-{
+    std::shared_ptr<NumericsMatrix> Winverse, std::shared_ptr<NumericsMatrix> Htrans) {
   // Compute M = H^T * Winverse * H
   auto H_NM = NM_transpose(Htrans.get());
 
   auto NM1 = NM_multiply(Winverse.get(), H_NM);
 
-  _numericsMatrix.reset(NM_multiply(Htrans.get(), NM1),
-                        NM_free);
+  _numericsMatrix.reset(NM_multiply(Htrans.get(), NM1), NM_free);
 
   // auto NM1 = NM_multiply(Winverse.get(), H.get());
   // auto Htrans_NM = NM_transpose(H.get());
@@ -612,8 +583,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::computeM(
 }
 
 // Display data
-void siconos::nonsmooth_formulations::OSNSMatrix::display() const
-{
+void siconos::nonsmooth_formulations::OSNSMatrix::display() const {
   if (_storageType == NM_DENSE) {
     std::cout
         << "----- OSNS Matrix ( " << this
@@ -623,8 +593,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::display() const
       std::cout << " matrix = nullptr pointer" << std::endl;
     else
       _M1->display();
-  }
-  else if (_storageType == NM_SPARSE_BLOCK) {
+  } else if (_storageType == NM_SPARSE_BLOCK) {
     std::cout << "----- OSNS Matrix using Sparse InteractionBlock storage type for Numerics "
                  "(SparseBlockStructuredMatrix)"
               << std::endl;
@@ -632,8 +601,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::display() const
       std::cout << " matrix = nullptr pointer" << std::endl;
     else
       _M2->display();
-  }
-  else if (_storageType == NM_SPARSE) {
+  } else if (_storageType == NM_SPARSE) {
     std::cout << "----- OSNS Matrix using sparse storage, nothing to show" << std::endl;
   }
 }

@@ -34,6 +34,7 @@ class BlockVector;
 /**
    Matrix (embedded various types of Boost matrices of double)
 
+
    SimpleMatrix is used in the platform to store matrices (mathematical object) of double.
 
    Possible types: Siconos::DENSE (default),
@@ -42,6 +43,7 @@ class BlockVector;
    Siconos::SPARSE_COORDINATE.
 
    \todo: review resize function for Banded, Symetric and Triangular. Error in tests.
+
 
 */
 class SimpleMatrix : public SiconosMatrix {
@@ -85,31 +87,12 @@ class SimpleMatrix : public SiconosMatrix {
    */
   std::shared_ptr<NumericsMatrix> _numericsMatrix{nullptr};
 
-  /* computes res = subA*x +res, subA being a submatrix of A (rows from startRow to
-   * startRow+sizeY and columns between startCol and startCol+sizeX). If x is a block vector,
-   * it call the present function for all blocks.
-   *
-   *  \param A a pointer to SiconosMatrix
-   *  \param startRow an int, sub-block position
-   *  \param startCol an int, sub-block position
-   *  \param x a pointer to a SiconosVector
-   *  \param res a DenseVect
-   */
-  // friend void private_addprod(const SiconosMatrix& A, unsigned int startRow, unsigned int
-  // startCol, const SiconosVector& x, SiconosVector& res);
-
-  /* computes res = subA*x +res, subA being a submatrix of trans(A) (rows from startRow to
-   * startRow+sizeY and columns between startCol and startCol+sizeX). If x is a block vector,
-   * it call the present function for all blocks. \param x a pointer to a SiconosVector \param
-   * A a pointer to SiconosMatrix \param startRow an int, sub-block position \param startCol an
-   * int, sub-block position \param res a DenseVect, res.
-   */
-  // friend void private_addprod(std::shared_ptr<const SiconosVector> x , std::shared_ptr<const
-  // SiconosMatrix> A,
-  //                             unsigned int startRow, unsigned int startCol,
-  //                             std::shared_ptr<SiconosVector> res);
-
-  /** computes y = subA*x (init =true) or += subA * x (init = false), subA being a submatrix of
+  /** computes y = subA*x (init =true) or += subA * x (init = false), subA being a submatrix
+  of
+   * A (all columns, and rows between start and start+sizeY). If x is a block vector, it call
+   * the present function for all blocks.
+  /** computes y = subA*x (init =true) or += subA * x (init = false), subA being a submatrix
+  of
    * A (all columns, and rows between start and start+sizeY). If x is a block vector, it call
    * the present function for all blocks.
    *
@@ -125,6 +108,9 @@ class SimpleMatrix : public SiconosMatrix {
   /** computes res = subA*x +res, subA being a submatrix of A (rows from startRow to
    * startRow+sizeY and columns between startCol and startCol+sizeX). If x is a block vector,
    * it call the present function for all blocks.
+  /** computes res = subA*x +res, subA being a submatrix of A (rows from startRow to
+   * startRow+sizeY and columns between startCol and startCol+sizeX). If x is a block vector,
+   * it call the present function for all blocks.
    *
    *  \param A a pointer to SiconosMatrix
    *  \param startRow an int, sub-block position
@@ -134,43 +120,6 @@ class SimpleMatrix : public SiconosMatrix {
    */
   void private_addprod(unsigned int startRow, unsigned int startCol, const SiconosVector& x,
                        SiconosVector& res);
-
-  /* computes res = a*subA*x +res, subA being a submatrix of A (rows from startRow to
-   * startRow+sizeY and columns between startCol and startCol+sizeX). If x is a block vector,
-   * it call the present function for all blocks. \param a a double \param A a pointer to
-   * SiconosMatrix \param startRow an int, sub-block position \param startCol an int, sub-block
-   * position \param x a pointer to a SiconosVector \param res a DenseVect
-   */
-  // friend void private_addprod(double a, std::shared_ptr<const SiconosMatrix> A,
-  //                             unsigned int startRow, unsigned int startCol,
-  //                             std::shared_ptr<const SiconosVector> x,
-  //                             std::shared_ptr<SiconosVector> res);
-
-  /* computes y = a*subA*x (init =true) or += a*subA * x (init = false), subA being a submatrix
-   * of A (all columns, and rows between start and start+sizeY). If x is a block vector, it
-   * call the present function for all blocks. \param a a double \param A a pointer to
-   * SiconosMatrix \param start an int, sub-block position \param x a pointer to a
-   * SiconosVector \param y a pointer to a SiconosVector \param init, a bool
-   */
-  // friend void private_prod(double a, std::shared_ptr<const SiconosMatrix> A, unsigned int
-  // start,
-  //                          std::shared_ptr<const SiconosVector> x,
-  //                          std::shared_ptr<SiconosVector> y, bool init);
-
-  /*  computes y = subA*x (init =true) or += subA * x (init = false), subA being a submatrix of
-   * trans(A) (all columns, and rows between start and start+sizeY). If x is a block vector, it
-   * call the present function for all blocks. \param x a pointer to a SiconosVector \param A a
-   * pointer to SiconosMatrix \param start an int, sub-block position \param y a pointer to a
-   * SiconosVector \param init a bool
-   */
-  // friend void private_prod(std::shared_ptr<const SiconosVector> x, std::shared_ptr<const
-  // SiconosMatrix> A, unsigned int start, std::shared_ptr<SiconosVector> y, bool init); friend
-  // void private_prod(std::shared_ptr<const BlockVector>, std::shared_ptr<const
-  // SiconosMatrix>, unsigned int, std::shared_ptr<SiconosVector>, bool); friend void
-  // private_prod(std::shared_ptr<const BlockVector>, std::shared_ptr<const SiconosMatrix>,
-  // unsigned int, std::shared_ptr<BlockVector>, bool); friend void
-  // private_prod(std::shared_ptr<const SiconosVector>, std::shared_ptr<const SiconosMatrix>,
-  // unsigned int, std::shared_ptr<BlockVector>, bool);
 
   /** Default constructor */
   SimpleMatrix() = delete;
@@ -298,6 +247,7 @@ class SimpleMatrix : public SiconosMatrix {
    */
   inline bool isPLUFactorized() const override { return _isPLUFactorized; }
 
+  /** determines if the matrix has been factorized
   /** determines if the matrix has been factorized
    *
    *  \return true if the matrix is factorized
@@ -571,30 +521,6 @@ class SimpleMatrix : public SiconosMatrix {
   */
   void setBlock(unsigned int posRow, unsigned int posCol, const SiconosMatrix& m);
 
-  // friend void setBlock(std::shared_ptr<const SiconosMatrix> , std::shared_ptr<SiconosMatrix>
-  // , const std::vector<std::size_t>&, const std::vector<std::size_t>&);
-
-  // /** get block at position row-col, (current matrix in SimpleMatrix case)
-  //  * \param row row index
-  //  * \param col column index
-  //  * \return a sub-matrix
-  //  */
-  // inline std::shared_ptr<SiconosMatrix> block(unsigned int row = 0, unsigned int col = 0)
-  // {
-  //   return shared_from_this();
-  // };
-
-  // /** get block at position row-col, (current matrix in SimpleMatrix case)
-  //  * \param row row index
-  //  * \param col column index
-  //  * \return a sub-matrix
-  //  */
-  // inline std::shared_ptr<const SiconosMatrix> block(unsigned int row = 0, unsigned int col =
-  // 0) const
-  // {
-  //   return shared_from_this();
-  // };
-
   /** get row index of current matrix and save it into vOut
    *
    *  \param row index row we want to get
@@ -623,8 +549,8 @@ class SimpleMatrix : public SiconosMatrix {
    */
   void setCol(unsigned int col, const SiconosVector& vIn) override;
 
-  /** returns the column number index of current matrix, starting from element at position pos
-   * and save it into vOut
+  /** returns the column number index of current matrix, starting from element at position
+   * pos and save it into vOut
    *
    *  \param index index of required column
    *  \param pos index of the first required element in the column
@@ -633,8 +559,8 @@ class SimpleMatrix : public SiconosMatrix {
   void getSubCol(unsigned int index, unsigned int pos,
                  std::shared_ptr<SiconosVector> vOut) const;
 
-  /** get row number index of current matrix, starting from element at position pos and save it
-   * into vOut
+  /** get row number index of current matrix, starting from element at position pos and save
+   * it into vOut
    *
    *  \param index index of the required row
    *  \param pos index of the first required element in the row
@@ -791,8 +717,6 @@ class SimpleMatrix : public SiconosMatrix {
   */
   void resetFactorizationFlags() override;
 
-  // ACCEPT_STD_VISITORS();
-
   /* List of friend functions of the SimpleMatrix class
 
      Declared in SimpleMatrixFriends.hpp.
@@ -825,40 +749,6 @@ class SimpleMatrix : public SiconosMatrix {
   friend bool operator==(const SiconosMatrix&, const SiconosMatrix&);
 
   friend bool operator!=(const SiconosMatrix&, const SiconosMatrix&);
-
-  // friend const SimpleMatrix prod(const SiconosMatrix&, const SiconosMatrix&);
-
-  // friend void prod(const SiconosMatrix&, const SiconosMatrix&, SiconosMatrix&, bool);
-
-  // friend void axpy_prod(const SiconosMatrix&, const SiconosMatrix&, SiconosMatrix&, bool);
-
-  // friend const SiconosVector prod(const SiconosMatrix&, const SiconosVector&);
-
-  // friend void prod(const SiconosMatrix&, const BlockVector&, SiconosVector&, bool);
-
-  // friend void prod(const SiconosMatrix&, const SiconosVector&, BlockVector&, bool);
-
-  // friend void prod(double, const SiconosMatrix&, const SiconosVector&, SiconosVector&,
-  // bool);
-
-  // friend void subprod(const SiconosMatrix&, const SiconosVector&, SiconosVector&, const
-  // std::vector<std::size_t>&, bool);
-
-  // friend void axpy_prod(const SiconosMatrix&, const SiconosVector&, SiconosVector&, bool);
-
-  // friend void gemvtranspose(double, const SiconosMatrix&, const SiconosVector&, double,
-  // SiconosVector&);
-
-  // friend void gemv(double, const SiconosMatrix&, const SiconosVector&, double,
-  // SiconosVector&);
-
-  // friend void gemmtranspose(double, const SiconosMatrix&, const SiconosMatrix&, double,
-  // SiconosMatrix&);
-
-  // friend void gemm(double, const SiconosMatrix&, const SiconosMatrix&, double,
-  // SiconosMatrix&);
-
-  // friend void scal(double, const SiconosMatrix&, SiconosMatrix&, bool);
 };
 
 }  // namespace siconos::algebra

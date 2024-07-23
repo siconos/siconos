@@ -25,8 +25,8 @@
 
 #include "NumericsMatrix.h"    // for NM_vector_display, NM_display, NM_clear
 #include "numerics_verbose.h"  // for CHECK_IO, numerics_printf_verbose
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "siconos_debug.h"  // for DEBUG_PRINT, DEBUG_PRINTF
 
 void rollingFrictionContact_display(RollingFrictionContactProblem* problem) {
@@ -202,7 +202,7 @@ RollingFrictionContactProblem* rollingFrictionContactProblem_new_with_data(
   return fcp;
 }
 
-//#define SN_SBM_TO_DENSE
+// #define SN_SBM_TO_DENSE
 
 void rollingFrictionContactProblem_compute_statistics(RollingFrictionContactProblem* problem,
                                                       double* reaction, double* velocity,

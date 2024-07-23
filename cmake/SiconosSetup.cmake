@@ -192,7 +192,7 @@ if(WITH_CXX)
   #From boost 1.71, something is wrong in cmake and boost support for multithread
   #https: // gitlab.kitware.com/cmake/cmake/issues/19714
   #set(Boost_USE_MULTITHREADED ON)
-  set(Boost_NO_BOOST_CMAKE 1)
+#  set(Boost_NO_BOOST_CMAKE 1)
   set(boost_min_version 1.75) # This is the minimum for c++20 compatibility of ublas.
   # Set the list of required boost components
   if(WITH_SERIALIZATION)
@@ -201,10 +201,8 @@ if(WITH_CXX)
   if(boost_required_components)
     set(boost_opts COMPONENTS ${boost_required_components})
   endif()
-  
-  # Search boost...
-  find_package(Boost ${boost_min_version} ${boost_opts} REQUIRED)
-  
+#Search boost...
+  find_package(Boost ${boost_min_version} ${boost_opts} REQUIRED CONFIG)
   if(WITH_SERIALIZATION)
     set(WITH_SYSTEM_BOOST_SERIALIZATION ON CACHE INTERNAL "Siconos uses boost serialization lib.")
   endif()

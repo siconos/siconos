@@ -539,10 +539,7 @@ void siconos::integrators::LsodarOSI::integrate(double& tinit, double& tend, dou
   count_NST = iwork[10];
   count_NFE = iwork[11];
   //  tinit = tinit_DR;
-  DEBUG_END(
-      "siconos::integrators::LsodarOSI::integrate(double& tinit, double& tend, "
-      "double& tout, "
-      "int& istate)\n");
+  DEBUG_END("LsodarOSI::integrate(double& tinit, double& tend, double& tout, int& istate)\n");
 }
 
 void siconos::integrators::LsodarOSI::updateState(const unsigned int level) {

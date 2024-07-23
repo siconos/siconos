@@ -39,13 +39,12 @@ siconos::simulation::Simulation::Simulation(
     std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
     std::shared_ptr<TimeDiscretisation> td)
     : _nsds{nsds} {
-  if (!td)
-    THROW_EXCEPTION("Simulation constructor - timeDiscretisation == nullptr.");
+  if (!td) THROW_EXCEPTION("Simulation constructor - timeDiscretisation == nullptr.");
   assert(_nsds);
-  _allOSI = std::make_shared<
-      std::set<std::shared_ptr<siconos::integrators::OneStepIntegrator>>>();
-  _allNSProblems = std::make_shared<std::vector<
-      std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem>>>();
+  _allOSI =
+      std::make_shared<std::set<std::shared_ptr<siconos::integrators::OneStepIntegrator>>>();
+  _allNSProblems = std::make_shared<
+      std::vector<std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem>>>();
   _eventsManager = std::make_shared<EventsManager>(td);
   _eventsManager->updateT(_nsds->finalT());
   _nsdsChangeLogPosition = _nsds->changeLog().begin();
@@ -58,17 +57,11 @@ siconos::simulation::Simulation::~Simulation() noexcept {
   if (statOut.is_open()) statOut.close();
 }
 
-double siconos::simulation::Simulation::getTk() const {
-  return _eventsManager->getTk();
-}
+double siconos::simulation::Simulation::getTk() const { return _eventsManager->getTk(); }
 
-double siconos::simulation::Simulation::getTkp1() const {
-  return _eventsManager->getTkp1();
-}
+double siconos::simulation::Simulation::getTkp1() const { return _eventsManager->getTkp1(); }
 
-double siconos::simulation::Simulation::getTkp2() const {
-  return _eventsManager->getTkp2();
-}
+double siconos::simulation::Simulation::getTkp2() const { return _eventsManager->getTkp2(); }
 
 double siconos::simulation::Simulation::currentTimeStep() const {
   return _eventsManager->currentTimeStep();
@@ -78,9 +71,7 @@ double siconos::simulation::Simulation::startingTime() const {
   return _eventsManager->startingTime();
 }
 
-double siconos::simulation::Simulation::nextTime() const {
-  return _eventsManager->nextTime();
-}
+double siconos::simulation::Simulation::nextTime() const { return _eventsManager->nextTime(); }
 
 bool siconos::simulation::Simulation::hasNextEvent() const {
   return _eventsManager->hasNextEvent();
@@ -111,8 +102,8 @@ void siconos::simulation::Simulation::associate(
   _OSIDSmap[osi].push_back(ds);
 }
 
-std::shared_ptr<siconos::graphs::InteractionsGraph>
-siconos::simulation::Simulation::indexSet(unsigned int i) {
+std::shared_ptr<siconos::graphs::InteractionsGraph> siconos::simulation::Simulation::indexSet(
+    unsigned int i) {
   return _nsds->topology()->indexSet(i);
 }
 
@@ -148,8 +139,7 @@ void siconos::simulation::Simulation::updateDSPlugins(double time) {
 }
 
 void siconos::simulation::Simulation::insertNonSmoothProblem(
-    std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem> osns,
-    int Id) {
+    std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem> osns, int Id) {
   if (_allNSProblems->size() > (unsigned int)Id) {
     if ((*_allNSProblems)[Id])
       THROW_EXCEPTION(
@@ -177,8 +167,7 @@ void siconos::simulation::Simulation::initializeOSIAssociations() {
   }
 
   // 2 - we set the osi of DS that has been defined through associate(ds,osi)
-  std::list<std::shared_ptr<siconos::modeling::DynamicalSystem>>::iterator
-      itlist;
+  std::list<std::shared_ptr<siconos::modeling::DynamicalSystem>>::iterator itlist;
   for (auto& osi_it : _OSIDSmap) {
     DEBUG_PRINT(
         "- 2 - we set the osi of DS that has been defined through "
@@ -214,25 +203,23 @@ void siconos::simulation::Simulation::applyNSDSChangelogForDS() {
     itc++;
 
     DEBUG_EXPR(change.display());
-    if (change.typeOfChange == siconos::modeling::NonSmoothDynamicalSystem::
-                                   ChangeType::addDynamicalSystem) {
+    if (change.typeOfChange ==
+        siconos::modeling::NonSmoothDynamicalSystem::ChangeType::addDynamicalSystem) {
       auto ds = change.ds;
       DEBUG_PRINTF("ds number : %i\n", ds->number());
       if (!DSG->properties(DSG->descriptor(ds)).osi) {
         if (_allOSI->size() == 0)
-          THROW_EXCEPTION(
-              "Simulation::initialize - there is no osi in this Simulation !!");
+          THROW_EXCEPTION("Simulation::initialize - there is no osi in this Simulation !!");
         DEBUG_PRINTF("_allOSI->size() = %lu\n", _allOSI->size());
         auto osi_default = *_allOSI->begin();
         _nsds->topology()->setOSI(ds, osi_default);
         if (_allOSI->size() > 1) {
-          std::cout
-              << "Warning. The simulation has multiple OneStepIntegrators "
-                 "(OSI) but the DS number "
-              << ds->number()
-              << " is not assigned to an "
-                 "OSI. We assign the following OSI to this DS."
-              << std::endl;
+          std::cout << "Warning. The simulation has multiple OneStepIntegrators "
+                       "(OSI) but the DS number "
+                    << ds->number()
+                    << " is not assigned to an "
+                       "OSI. We assign the following OSI to this DS."
+                    << std::endl;
         }
       }
       auto& osi = *DSG->properties(DSG->descriptor(ds)).osi;
@@ -316,14 +303,13 @@ void siconos::simulation::Simulation::initializeNSDSChangelog() {
     //   OneStepIntegrator& osi = *DSG->properties(DSG->descriptor(ds)).osi;
     //   osi.initializeWorkVectorsForDS(getTk(),ds);
     // }
-    if (change.typeOfChange == siconos::modeling::NonSmoothDynamicalSystem::
-                                   ChangeType::addInteraction) {
+    if (change.typeOfChange ==
+        siconos::modeling::NonSmoothDynamicalSystem::ChangeType::addInteraction) {
       auto inter = change.i;
       initializeInteraction(getTk(), inter);
       interactionInitialized = true;
     } else if (change.typeOfChange ==
-               siconos::modeling::NonSmoothDynamicalSystem::ChangeType::
-                   rmDynamicalSystem) {
+               siconos::modeling::NonSmoothDynamicalSystem::ChangeType::rmDynamicalSystem) {
       // ---- A ds has been removed from the NDS ? ----
       // also need to force an update in this case since indexSet1 may
       // still have Interactions that refer to DSs that are not in graph
@@ -360,22 +346,20 @@ void siconos::simulation::Simulation::initializeIndexSets() {
       DEBUG_PRINT("- 4 - we finalize the initialization of osi\n");
       DEBUG_PRINT("osi->initialize\n")
       osi->initialize();
-      _numberOfIndexSets =
-          std::max<int>(osi->numberOfIndexSets(), _numberOfIndexSets);
+      _numberOfIndexSets = std::max<int>(osi->numberOfIndexSets(), _numberOfIndexSets);
     }
   }
 
   auto topo = _nsds->topology();
   auto indxSize = topo->indexSetsSize();
   assert(_numberOfIndexSets > 0);
-  if ((indxSize == siconos::internal::LEVELMAX) ||
-      (indxSize < _numberOfIndexSets)) {
+  if ((indxSize == siconos::internal::LEVELMAX) || (indxSize < _numberOfIndexSets)) {
     DEBUG_PRINT("Topology : a different number of indexSets has been found \n");
     DEBUG_PRINT("Topology :  we resize the number of index sets \n");
     topo->indexSetsResize(_numberOfIndexSets);
     // Init if the size has changed
     for (auto i = indxSize; i < topo->indexSetsSize(); i++)  // ++i ???
-      topo->resetIndexSetPtr(i);  // Creates the interaction graph
+      topo->resetIndexSetPtr(i);                             // Creates the interaction graph
   }
 }
 
@@ -471,8 +455,7 @@ void siconos::simulation::Simulation::initializeInteraction(
     // NDEBUG. may be compiler does something smarter, but still it should be
     // rewritten. --xhub
     siconos::graphs::InteractionsGraph::OEIterator oei, oeiend;
-    for (std::tie(oei, oeiend) = indexSet0->out_edges(ui); oei != oeiend;
-         ++oei) {
+    for (std::tie(oei, oeiend) = indexSet0->out_edges(ui); oei != oeiend; ++oei) {
       // note : at most 4 edges
       ds2 = indexSet0->bundle(*oei);
       if (ds2 != ds1) {
@@ -514,14 +497,12 @@ void siconos::simulation::Simulation::initializeInteraction(
         "Simulation::initializeInteraction: integration of Interaction not yet "
         "implemented "
         "for OSI1 and OSI2 of type " +
-        siconos::tools::enum_to_string(osi1Type) +
-        siconos::tools::enum_to_string(osi2Type));
+        siconos::tools::enum_to_string(osi1Type) + siconos::tools::enum_to_string(osi2Type));
   }
 }
 
 int siconos::simulation::Simulation::computeOneStepNSProblem(int Id) {
-  DEBUG_BEGIN(
-      "siconos::simulation::Simulation::computeOneStepNSProblem(int Id)\n");
+  DEBUG_BEGIN("siconos::simulation::Simulation::computeOneStepNSProblem(int Id)\n");
   DEBUG_PRINTF("with Id = %i\n", Id);
 
   if (!(*_allNSProblems)[Id])
@@ -539,13 +520,12 @@ int siconos::simulation::Simulation::computeOneStepNSProblem(int Id) {
 
   int info = (*_allNSProblems)[Id]->compute(nextTime());
 
-  DEBUG_END(
-      "siconos::simulation::Simulation::computeOneStepNSProblem(int Id)\n");
+  DEBUG_END("siconos::simulation::Simulation::computeOneStepNSProblem(int Id)\n");
   return info;
 }
 
-std::shared_ptr<siconos::algebra::SiconosVector>
-siconos::simulation::Simulation::y(unsigned int level, unsigned int coor) {
+std::shared_ptr<siconos::algebra::SiconosVector> siconos::simulation::Simulation::y(
+    unsigned int level, unsigned int coor) {
   // return output(level) (ie with y[level]) for all Interactions.
   // assert(level>=0);
 
@@ -574,8 +554,8 @@ siconos::simulation::Simulation::y(unsigned int level, unsigned int coor) {
   return y;
 }
 
-std::shared_ptr<siconos::algebra::SiconosVector>
-siconos::simulation::Simulation::lambda(unsigned int level, unsigned int coor) {
+std::shared_ptr<siconos::algebra::SiconosVector> siconos::simulation::Simulation::lambda(
+    unsigned int level, unsigned int coor) {
   // return input(level) (ie with lambda[level]) for all Interactions.
   // assert(level>=0);
 
@@ -613,8 +593,7 @@ void siconos::simulation::Simulation::run() {
     processEvents();
     count++;
   }
-  std::cout << "===== End of simulation. " << count
-            << " events have been processed. ==== \n";
+  std::cout << "===== End of simulation. " << count << " events have been processed. ==== \n";
 }
 
 void siconos::simulation::Simulation::processEvents() {

@@ -15,12 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-//#include <boost/numeric/bindings/ublas/matrix.hpp>
+// #include <boost/numeric/bindings/ublas/matrix.hpp>
+#include <boost/numeric/ublas/banded.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/numeric/ublas/matrix_sparse.hpp>
-#include <boost/numeric/ublas/triangular.hpp>
 #include <boost/numeric/ublas/symmetric.hpp>
-#include <boost/numeric/ublas/banded.hpp>
+#include <boost/numeric/ublas/triangular.hpp>
 
 #include "BlockMatrix.hpp"
 #include "SimpleMatrix.hpp"
@@ -28,8 +28,7 @@
 namespace ublas = boost::numeric::ublas;
 
 void siconos::algebra::SimpleMatrix::addBlock(unsigned int row_min, unsigned int col_min,
-                                              const SiconosMatrix &m)
-{
+                                              const SiconosMatrix &m) {
   // add m to current matrix elements, starting from row row_min and column col_min, to the
   // values of the matrix m. m may be a BlockMatrix.
 
@@ -71,12 +70,10 @@ void siconos::algebra::SimpleMatrix::addBlock(unsigned int row_min, unsigned int
       posRow += (*it)->size(0);
       posCol = 0;
     }
-  }
-  else if (numM == UblasType::ZERO)  // if m = 0
+  } else if (numM == UblasType::ZERO)  // if m = 0
   {
     // nothing to do !
-  }
-  else  // if m is a SimpleMatrix
+  } else  // if m is a SimpleMatrix
   {
     if (_num == UblasType::DENSE) {
       switch (numM) {
@@ -108,16 +105,14 @@ void siconos::algebra::SimpleMatrix::addBlock(unsigned int row_min, unsigned int
           THROW_EXCEPTION("SimpleMatrix::addBlock(...,m): wrong matrix type for m.");
           break;
       }
-    }
-    else
+    } else
       THROW_EXCEPTION("SimpleMatrix::addBlock(...): implemented only for dense matrices.");
     resetFactorizationFlags();
   }
 }
 
 void siconos::algebra::SimpleMatrix::subBlock(unsigned int row_min, unsigned int col_min,
-                                              const SiconosMatrix &m)
-{
+                                              const SiconosMatrix &m) {
   // sub m to current matrix elements, starting from row row_min and column col_min, to the
   // values of the matrix m. m may be a BlockMatrix.
 
@@ -159,12 +154,10 @@ void siconos::algebra::SimpleMatrix::subBlock(unsigned int row_min, unsigned int
       posRow += (*it)->size(0);
       posCol = 0;
     }
-  }
-  else if (numM == UblasType::ZERO)  // if m = 0
+  } else if (numM == UblasType::ZERO)  // if m = 0
   {
     // nothing to do !
-  }
-  else  // if m is a SimpleMatrix
+  } else  // if m is a SimpleMatrix
   {
     if (_num == UblasType::DENSE) {
       switch (numM) {
@@ -196,8 +189,7 @@ void siconos::algebra::SimpleMatrix::subBlock(unsigned int row_min, unsigned int
           THROW_EXCEPTION("SimpleMatrix::subBlock(...,m): wrong matrix type for m.");
           break;
       }
-    }
-    else
+    } else
       THROW_EXCEPTION("SimpleMatrix::subBlock(...): implemented only for dense matrices.");
     resetFactorizationFlags();
   }

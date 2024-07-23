@@ -267,7 +267,7 @@ class Hem5OSI : public OneStepIntegrator {
 
   /** integrates the Interaction linked to this integrator, without taking
    *  non-smooth effects into account
-   * 
+   *
    *  \param vertex_inter of the interaction graph
    *  \param osnsp pointer to siconos::nonsmooth_formulations::OneStepNSProblem
    */

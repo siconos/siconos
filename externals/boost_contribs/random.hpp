@@ -13,7 +13,7 @@
 #include <complex>
 #include <cstdlib>
 
-namespace Siconos {
+namespace siconos {
 namespace algebra {
 
 template <typename T>

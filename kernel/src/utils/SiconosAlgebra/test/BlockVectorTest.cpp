@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 #include "BlockVectorTest.hpp"
+
 #include "BlockVector.hpp"
 
 using namespace boost::numeric::ublas;
@@ -23,8 +24,7 @@ using BlockVector = siconos::algebra::BlockVector;
 
 CPPUNIT_TEST_SUITE_REGISTRATION(BlockVectorTest);
 
-void BlockVectorTest::setUp()
-{
+void BlockVectorTest::setUp() {
   ref = std::make_shared<BlockVector>(1, 5);
   for (unsigned int i = 0; i < 5; ++i) (*ref)(i) = i;
 
@@ -42,8 +42,7 @@ void BlockVectorTest::setUp()
 void BlockVectorTest::tearDown() {}
 
 // Copy from a std vector
-void BlockVectorTest::testConstructor1()
-{
+void BlockVectorTest::testConstructor1() {
   std::cout << "==================================" << std::endl;
   std::cout << "=== BlockVector tests start ...=== " << std::endl;
   std::cout << "==================================" << std::endl;
@@ -67,8 +66,7 @@ void BlockVectorTest::testConstructor1()
   // std::cout << "--> Constructor 1 test ended with success." << std::endl;
 }
 
-void BlockVectorTest::testConstructor2()
-{
+void BlockVectorTest::testConstructor2() {
   std::cout << "--> Test: constructor 2." << std::endl;
   auto w = std::make_shared<siconos::algebra::SiconosVector>(3, 2);
   // auto  z=
@@ -78,7 +76,8 @@ void BlockVectorTest::testConstructor2()
   // *this != (*this)().end() "
 
   auto z = std::make_shared<siconos::algebra::SiconosVector>(5, 3);
-  auto x = std::make_shared<BlockVector>();  // Copy from a siconos::algebra::SiconosVector(Simple)
+  auto x =
+      std::make_shared<BlockVector>();  // Copy from a siconos::algebra::SiconosVector(Simple)
   x->insertPtr(w);
   x->insertPtr(z);
 
@@ -129,8 +128,7 @@ void BlockVectorTest::testConstructor2()
   std::cout << "--> Constructor 2 test ended with success." << std::endl;
 }
 
-void BlockVectorTest::testConstructor3()
-{
+void BlockVectorTest::testConstructor3() {
   std::cout << "--> Test: constructor 3." << std::endl;
   auto w = std::make_shared<siconos::algebra::SiconosVector>(3, 2);
   auto z = std::make_shared<siconos::algebra::SiconosVector>(
@@ -154,8 +152,7 @@ void BlockVectorTest::testConstructor3()
 }
 
 // with number of blocks and their (common) size.
-void BlockVectorTest::testConstructor4()
-{
+void BlockVectorTest::testConstructor4() {
   std::cout << "--> Test: constructor 4." << std::endl;
   auto v = std::make_shared<BlockVector>(3, 4);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", v->size() == 12, true);
@@ -171,8 +168,7 @@ void BlockVectorTest::testConstructor4()
 }
 
 // with number of blocks an empty vector
-void BlockVectorTest::testConstructor5()
-{
+void BlockVectorTest::testConstructor5() {
   std::cout << "--> Test: constructor 5." << std::endl;
   auto v = std::make_shared<BlockVector>(3);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->size() == 0, true);
@@ -228,8 +224,7 @@ void BlockVectorTest::testConstructor5()
 }
 
 // zero
-void BlockVectorTest::testZero()
-{
+void BlockVectorTest::testZero() {
   std::cout << "--> Test: zero." << std::endl;
   auto v = std::make_shared<BlockVector>(*ref);
   v->zero();
@@ -238,8 +233,7 @@ void BlockVectorTest::testZero()
   std::cout << "--> zero test ended with success." << std::endl;
 }
 
-void BlockVectorTest::testFill()
-{
+void BlockVectorTest::testFill() {
   std::cout << "--> Test: fill." << std::endl;
   auto v = std::make_shared<BlockVector>(*ref);
   auto z = std::make_shared<siconos::algebra::SiconosVector>(5, 3);
@@ -252,8 +246,7 @@ void BlockVectorTest::testFill()
   std::cout << "--> fill test ended with success." << std::endl;
 }
 
-void BlockVectorTest::testNorm()
-{
+void BlockVectorTest::testNorm() {
   //  std::cout << "--> Test: norm." <<std::endl;
   //  auto w= std::make_shared<siconos::algebra::SiconosVector>(3);
   //  auto z= std::make_shared<siconos::algebra::SiconosVector>(5);
@@ -280,8 +273,7 @@ void BlockVectorTest::testNorm()
   std::cout << "--> norm test ended with success." << std::endl;
 }
 
-void BlockVectorTest::testSetBlock()
-{
+void BlockVectorTest::testSetBlock() {
   std::cout << "--> Test: set block in BlockVector." << std::endl;
 
   // Block copy from a Simple into a Block.
@@ -301,8 +293,7 @@ void BlockVectorTest::testSetBlock()
 
   BSV->setBlock(*vIn, sizeB, posIn, posOut);
   for (unsigned int i = 0; i < sizeB; ++i)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("test setBlock : ", (*BSV)(i + posOut) == (*vIn)(i +
-    posIn),
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("test setBlock : ", (*BSV)(i + posOut) == (*vIn)(i + posIn),
                                  true);
 
   std::cout << "--> setBlock3 test ended with success." << std::endl;
@@ -310,8 +301,7 @@ void BlockVectorTest::testSetBlock()
 // OPERATORS
 
 // =
-void BlockVectorTest::testAssignment()
-{
+void BlockVectorTest::testAssignment() {
   std::cout << "--> Test: assignment." << std::endl;
   auto w0 = std::make_shared<siconos::algebra::SiconosVector>(3, 2);
   auto z0 = std::make_shared<siconos::algebra::SiconosVector>(5, 3);
@@ -356,8 +346,7 @@ void BlockVectorTest::testAssignment()
 }
 
 // +=
-void BlockVectorTest::testOperators1()
-{
+void BlockVectorTest::testOperators1() {
   std::cout << "--> Test: operators1." << std::endl;
   unsigned int size1 = 3;
   unsigned int size2 = 2;
@@ -382,14 +371,12 @@ void BlockVectorTest::testOperators1()
   // Block += Block
   *v += *xB;
   for (unsigned int i = 0; i < size1 + size2; i++)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(" testOperators1: ", fabs((*v)(i)-4 - (*xB)(i)) < tol,
-    true);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(" testOperators1: ", fabs((*v)(i)-4 - (*xB)(i)) < tol, true);
   std::cout << "--> operators1 test ended with success." << std::endl;
 }
 
 // -=
-void BlockVectorTest::testOperators2()
-{
+void BlockVectorTest::testOperators2() {
   std::cout << "--> Test: operators2." << std::endl;
   unsigned int size1 = 3;
   unsigned int size2 = 2;
@@ -414,15 +401,13 @@ void BlockVectorTest::testOperators2()
   // Block += Block
   *v -= *xB;
   for (unsigned int i = 0; i < size1 + size2; i++)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE(" testOperators2: ", fabs((*v)(i)-4 + (*xB)(i)) < tol,
-    true);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(" testOperators2: ", fabs((*v)(i)-4 + (*xB)(i)) < tol, true);
 
   std::cout << "--> operators2 test ended with success." << std::endl;
 }
 
 // *
-void BlockVectorTest::testOperators3()
-{
+void BlockVectorTest::testOperators3() {
   std::cout << "--> Test: operators3." << std::endl;
   auto v = std::make_shared<BlockVector>(2, 3);
   v->fill(4);
@@ -437,8 +422,7 @@ void BlockVectorTest::testOperators3()
 }
 
 // /=
-void BlockVectorTest::testOperators4()
-{
+void BlockVectorTest::testOperators4() {
   std::cout << "--> Test: operators4." << std::endl;
   auto v = std::make_shared<BlockVector>(2, 3);
   v->fill(4);
@@ -452,8 +436,7 @@ void BlockVectorTest::testOperators4()
   std::cout << "--> operators4 test ended with success." << std::endl;
 }
 
-void BlockVectorTest::testInsert()
-{
+void BlockVectorTest::testInsert() {
   std::cout << "--> Test: insert." << std::endl;
   unsigned int size1 = 3, size2 = 2, size = size1 + size2;
   auto tmp1 = std::make_shared<siconos::algebra::SiconosVector>(size1);
@@ -478,8 +461,7 @@ void BlockVectorTest::testInsert()
   std::cout << "--> insert test ended with success." << std::endl;
 }
 
-void BlockVectorTest::End()
-{
+void BlockVectorTest::End() {
   std::cout << "======================================" << std::endl;
   std::cout << " ===== End of BlockVector Tests ===== " << std::endl;
   std::cout << "======================================" << std::endl;

@@ -1926,13 +1926,11 @@ bool siconos::integrators::MoreauJeanOSI::addInteractionInIndexSet(
       getchar();
     }
     if (y <= _constraintActivationThreshold) {
-      std::cout << "ACTIVATED "
-                << "number :" << inter->number() << " y=" << y
+      std::cout << "ACTIVATED " << "number :" << inter->number() << " y=" << y
                 << "<= " << _constraintActivationThreshold << " yDot_k =" << yDot_k
                 << " yDot =" << yDot << std::endl;
     } else {
-      std::cout << "NOT ACTIVATED "
-                << " number :" << inter->number() << " y=" << y
+      std::cout << "NOT ACTIVATED " << " number :" << inter->number() << " y=" << y
                 << "<= " << _constraintActivationThreshold << " yDot_k =" << yDot_k
                 << " yDot =" << yDot << std::endl;
       // getchar();

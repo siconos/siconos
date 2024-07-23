@@ -2,23 +2,22 @@ FROM ubuntu:23.04 AS siconos-base
 ENV TZ=Europe/Paris
 ENV DEBIAN_FRONTEND=noninteractive
 RUN  apt update && apt upgrade -y && apt install --no-install-recommends -y -qq \
-        cmake \
-        git-core \
-        make \
+    cmake \
+    git-core \
+	make \
 	g++ \
-        gfortran \
-        libgmp-dev \
+    gfortran \
+    libgmp-dev \
 	libopenblas-dev \
-        liblapacke-dev \
-        libcppunit-dev \
+    liblapacke-dev \
+    libcppunit-dev \
 	libhdf5-dev \
 	lp-solve \
-        liblpsolve55-dev \
+    liblpsolve55-dev \
 	libbullet-dev \
 	libbullet-extras-dev \
-        python3-full \
+    python3-full \
 	libpython3-dev \
-	swig \
 	libxrender1 \
 	valgrind \
 	vim \

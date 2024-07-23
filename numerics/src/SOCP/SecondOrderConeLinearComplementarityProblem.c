@@ -22,8 +22,8 @@
 #include <stdlib.h>  // for free, malloc, NULL, exit, EXIT_FAILURE
 
 #include "NumericsMatrix.h"  // for NM_display, NM_clear, NM_new_from_file
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "numerics_verbose.h"  // for CHECK_IO
 #include "siconos_debug.h"     // for DEBUG_PRINT
 

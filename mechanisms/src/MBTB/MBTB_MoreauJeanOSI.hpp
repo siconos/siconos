@@ -24,7 +24,7 @@
 namespace siconos::mechanisms {
 /**
  * \brief This class implements a variant of the std MoreauJeanOSI TS
- * It inherits from Siconos::MoreauJeanOSI
+ * It inherits from siconos::MoreauJeanOSI
  * the main variants lies in the activation and desactivation of constraints
  */
 class MBTB_MoreauJeanOSI : public siconos::integrators::MoreauJeanOSI {

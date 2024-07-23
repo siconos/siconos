@@ -18,6 +18,7 @@
 #ifndef NumericsDataVersion_h
 #define NumericsDataVersion_h
 
+#include <assert.h>
 #include <limits.h>
 #include <stdint.h>
 

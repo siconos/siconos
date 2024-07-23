@@ -24,7 +24,7 @@ namespace siconos::mechanisms {
 
 /**
  * \brief This class implements a body in a multi-bodies system.
- * It inherits from Siconos::NewtonEulerDS.
+ * It inherits from siconos::NewtonEulerDS.
  */
 class MBTB_Body : public siconos::modeling::NewtonEulerDS {
  protected:

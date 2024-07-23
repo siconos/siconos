@@ -76,7 +76,6 @@ enum class EventType {
   - NonSmoothEvent: specific events, detected during simulation, when constraints are
  violated (thanks to roots-finding algorithm)
   - SensorEvent: event dedicated to data capture through user-defined sensors.
-
 */
 
 class Event {
