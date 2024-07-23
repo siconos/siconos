@@ -34,7 +34,7 @@
 
 #define DEBUG_STDOUT
 #define DEBUG_NOCOLOR
-#define DEBUG_MESSAGES
+//#define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
 // #include <stdio.h>
@@ -1007,18 +1007,16 @@ void siconos::mechanics::fem::FiniteElementModel::applyNodalForces(
   for (auto &e : _mesh->elements()) {
     if (e->tags(0) == physical_entity_tag) {
       for (auto &v : e->vertices()) {
-        auto n = _vertexToNode[v];
-        // check if the node is already existing
-        if (find(f_index->begin(), f_index->end(), n->num()) ==
-            f_index->end()) {
-          std::cout << "Apply nodal force on node number " << n->num()
-                    << " vertex number " << v->num() << std::endl;
-          f_index->push_back(n->num());
-          auto n_dof_index = n->dofIndex();
-          for (unsigned int i = 0; i < nodal_forces->size(); i++) {
-            forces->setValue((*n_dof_index)[i], (*nodal_forces)(i));
+          auto n = _vertexToNode[v];
+          // check if the node is already existing
+          if (find(f_index->begin(), f_index->end(), n->num()) ==
+                  f_index->end()) {
+              f_index->push_back(n->num());
+              auto n_dof_index = n->dofIndex();
+              for (unsigned int i = 0; i < nodal_forces->size(); i++) {
+                  forces->setValue((*n_dof_index)[i], (*nodal_forces)(i));
+              }
           }
-        }
       }
     }
   }

@@ -202,6 +202,10 @@ void siconos::mechanics::fem::SolidLinearTIDS::initMemory(unsigned int steps) {
     _forcesMemory.setMemorySize(steps, _ndof);
     _pMemory.resize(3);
 
+    _plasticDeformationMemory.setMemorySize(steps, _dimStress);
+    _plasticRateMemory.setMemorySize(steps, _dimStress);
+
+
     // TODO : initMemory in graph + f(OSI/level)
     for (unsigned int level = 0; level < 3; ++level) {
       if (_pMemory[level].size() == 0) _pMemory[level].setMemorySize(steps, _ndof);

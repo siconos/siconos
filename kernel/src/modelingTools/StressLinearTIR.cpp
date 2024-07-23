@@ -63,29 +63,27 @@ siconos::modeling::StressLinearTIR::StressLinearTIR(
 
 void siconos::modeling::StressLinearTIR::checkSize(Interaction& inter) {
 
-  auto sizeY = inter.dimension();
-  auto& DSlink = inter.linkToDSVariables();
-DSlink[LagrangianR::DSlinkSize + SolidLinearDS::sigma]->size();
-  if (!(_jachq) || _jachq->size(1) != DSlink[LagrangianR::DSlinkSize + SolidLinearDS::sigma]->size() || _jachq->size(0) != sizeY)
-    THROW_EXCEPTION(
-        "siconos::modeling::StressLinearTIR::checkSize inconsistent sizes between H "
-        "matrix and the interaction.");
+    auto sizeY = inter.dimension();
+    auto& DSlink = inter.linkToDSVariables();
+    DSlink[LagrangianR::DSlinkSize + SolidLinearDS::sigma]->size();
+    if (!(_jachq) || _jachq->size(1) != DSlink[LagrangianR::DSlinkSize + SolidLinearDS::sigma]->size() || _jachq->size(0) != sizeY)
+        THROW_EXCEPTION(
+                    "siconos::modeling::StressLinearTIR::checkSize inconsistent sizes between H "
+                    "matrix and the interaction.");
 
-  if ((_e) && _e->size() != sizeY)
-    THROW_EXCEPTION(
-        "siconos::modeling::StressLinearTIR::checkSize inconsistent sizes between e "
-        "vector and the dimension of the interaction.");
-std::cout << "Enter StressLinearTIR::checkSize 3 : " << (DSlink[LagrangianR::z] == NULL) << std::endl;
-int sizeZ;
-if (DSlink[LagrangianR::z] != NULL)
-  sizeZ = DSlink[LagrangianR::z]->size();
-else
-    sizeZ = 0;
-  std::cout << "Enter StressLinearTIR::checkSize 4" << std::endl;
-  if ((_F) && (_F->size(0) != sizeZ || _F->size(1) != sizeZ))
-    THROW_EXCEPTION(
-        "siconos::modeling::StressLinearTIR::checkSize inconsistent sizes between F "
-        "matrix and the interaction.");
+    if ((_e) && _e->size() != sizeY)
+        THROW_EXCEPTION(
+                    "siconos::modeling::StressLinearTIR::checkSize inconsistent sizes between e "
+                    "vector and the dimension of the interaction.");
+    int sizeZ;
+    if (DSlink[LagrangianR::z] != NULL)
+        sizeZ = DSlink[LagrangianR::z]->size();
+    else
+        sizeZ = 0;
+    if ((_F) && (_F->size(0) != sizeZ || _F->size(1) != sizeZ))
+        THROW_EXCEPTION(
+                    "siconos::modeling::StressLinearTIR::checkSize inconsistent sizes between F "
+                    "matrix and the interaction.");
 }
 void siconos::modeling::StressLinearTIR::computeOutput(double time, Interaction& inter,
                                                            unsigned int derivativeNumber) {
@@ -96,11 +94,23 @@ void siconos::modeling::StressLinearTIR::computeOutput(double time, Interaction&
   auto& y = *inter.y(derivativeNumber);
   auto& DSlink = inter.linkToDSVariables();
   siconos::algebra::prod(*_jachq, *DSlink[LagrangianR::DSlinkSize + SolidLinearDS::sigma + derivativeNumber], y);
+  std::cout << "-----------------------  StressLinearTIR::computeOutput -------------------------" << std::endl;
+
+  std::cout << "Computing y (sigma_alpha) at derivativeNumber:" << derivativeNumber << std::endl;
+  std::cout << "DSlink[LagrangianR::DSlinkSize + SolidLinearDS::sigma + derivativeNumber]: " << std::endl;
+  DSlink[LagrangianR::DSlinkSize + SolidLinearDS::sigma + derivativeNumber]->display();
+//    DSlink[LagrangianR::DSlinkSize + SolidLinearDS::sigma + derivativeNumber]->display();
 
   if (derivativeNumber == 0) {
     if (_e) y += *_e;
+
     if (_F) siconos::algebra::prod(*_F, *DSlink[LagrangianR::z], y, false);
   }
+  std::cout << "y : " << std::endl;
+  y.display();
+
+  std::cout << "-----------------------  StressLinearTIR::computeOutput END -------------------------" << std::endl;
+
 
   DEBUG_END(
       "siconos::modeling::StressLinearTIR::computeOutput(double time, Interaction& inter, "
@@ -114,6 +124,8 @@ void siconos::modeling::StressLinearTIR::computeInput(double time, Interaction& 
 
   // get lambda of the concerned interaction
   // Here lambda = plastic Rate
+
+
   siconos::algebra::SiconosVector& lambda = *inter.lambda(level);
   auto& DSlink = inter.linkToDSVariables();
 
@@ -121,7 +133,20 @@ void siconos::modeling::StressLinearTIR::computeInput(double time, Interaction& 
   DEBUG_EXPR(lambda.display(););
   DEBUG_EXPR(_jachq->display(););
   DEBUG_EXPR(DSlink[SolidLinearDS::dotEpsilon]->display(););
+  std::cout << "-----------------------  StressLinearTIR::computeInput -------------------------" << std::endl;
+//  inter.display();
+  std::cout << "level:" << level << " lambda :" << std::endl;
+  lambda.display();
+  std::cout << "_jachq :" << std::endl;
+  _jachq->display();
+
+
+
   siconos::algebra::prod(lambda, *_jachq, *DSlink[LagrangianR::DSlinkSize+SolidLinearDS::epsilonp + level], false);
+  std::cout << "DSlink[LagrangianR::DSlinkSize+SolidLinearDS::epsilonp + level]" << std::endl;
+  DSlink[LagrangianR::DSlinkSize+SolidLinearDS::epsilonp + level]->display();
+  std::cout << "-----------------------  StressLinearTIR::computeInput END-------------------------" << std::endl;
+
   DEBUG_END(
       "void siconos::modeling::StressLinearTIR::computeInput(double time, Interaction& "
       "inter, unsigned int level)\n")

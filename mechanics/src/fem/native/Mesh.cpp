@@ -28,7 +28,7 @@
 
 #define DEBUG_STDOUT
 #define DEBUG_NOCOLOR
-#define DEBUG_MESSAGES
+//#define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
 void siconos::mechanics::fem::MVertex::display() {

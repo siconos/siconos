@@ -361,6 +361,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
   // properly allocated.
   // Get dimension of the NonSmoothLaw (ie dim of the interactionBlock)
   auto indexSet = simulation()->indexSet(indexSetLevel());
+
   std::shared_ptr<siconos::modeling::Interaction> inter = indexSet->bundle(vd);
   // Get osi property from interaction
 
@@ -439,7 +440,6 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
     // get _interactionBlocks corresponding to the current DS
     // These _interactionBlocks depends on the relation type.
     leftInteractionBlock = inter->getLeftInteractionBlockForDS(pos, nslawSize, sizeDS);
-    leftInteractionBlock->display();
     auto dsType = siconos::types::type_value(*ds);
     if(dsType == siconos::modeling::Type::SolidLinearTIDS){
         auto solidds = std::static_pointer_cast<siconos::mechanics::fem::SolidLinearTIDS>(ds);
@@ -920,8 +920,10 @@ bool siconos::nonsmooth_formulations::LinearOSNS::preCompute(double time) {
     // Note : sizeOuput can be unchanged, but positions may have changed. (??)
     if (_keepLambdaAndYState) {
       siconos::graphs::InteractionsGraph::VIterator ui, uiend;
+
       for (std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui) {
         auto& inter = *indexSet.bundle(*ui);
+
         // Get the position of inter-interactionBlock in the vector w
         // or z
         unsigned int pos = indexSet.properties(*ui).absolute_position;

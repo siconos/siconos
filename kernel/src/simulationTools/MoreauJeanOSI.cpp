@@ -76,7 +76,7 @@ void siconos::integrators::MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(
     const siconos::modeling::NewtonImpactFrictionNSL &nslaw) const {
   auto &osnsp_rhs = *(
       *_interProp.workVectors)[siconos::integrators::MoreauJeanOSI::OSNSP_RHS];
-
+  _inter.y_k(_osnsp.inputOutputLevel()).display();
   // The normal part is multiplied depends on en
   if (nslaw.en() > 0.0) {
     osnsp_rhs(0) += nslaw.en() * _inter.y_k(_osnsp.inputOutputLevel())(0);
@@ -430,7 +430,8 @@ void siconos::integrators::MoreauJeanOSI::initializeIterationMatrixW(
       auto C = d->C();
       auto S = d->S();
       auto B = d->B();
-      double conditionningMagicCoeff = 1/S->normInf();
+//      double conditionningMagicCoeff = 1/S->normInf();
+      double conditionningMagicCoeff = 1.0;
       auto massScaled = std::make_shared<siconos::algebra::SimpleMatrix>(d->mass()->size(0),d->mass()->size(1));
       siconos::algebra::scal(1/conditionningMagicCoeff, *d->mass(), *massScaled,
                              true);  // Mscaled = M/magicCoeff
@@ -800,7 +801,6 @@ siconos::integrators::MoreauJeanOSI::Winverse(
     Winverse = _dynamicalSystemsGraph->properties(dsv).Winverse;
     Winverse->eye();
     if (keepW) {
-      // std::cout << "MoreauJeanOSI keepW" << std::endl;
       auto Wtmp = std::make_shared<siconos::algebra::SimpleMatrix>(*W);
       Wtmp->Solve(*Winverse);
     } else {
@@ -2403,7 +2403,6 @@ bool siconos::integrators::MoreauJeanOSI::addInteractionInIndexSet(
   double h = _simulation->timeStep();
   double y = (inter->y(i - 1))->getValue(0);  // for i=1 y(i-1) is the position
   double yDot = (inter->y(i))->getValue(0);   // for i=1 y(i) is the velocity
-
   double gamma = 1.0 / 2.0;
   if (_useGamma) {
     gamma = _gamma;
@@ -2423,6 +2422,7 @@ bool siconos::integrators::MoreauJeanOSI::addInteractionInIndexSet(
                 ;);
 
   return (y <= _constraintActivationThreshold);
+//  return true;
 }
 
 bool siconos::integrators::MoreauJeanOSI::removeInteractionFromIndexSet(
