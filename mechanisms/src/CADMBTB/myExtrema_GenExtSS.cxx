@@ -209,7 +209,7 @@ void myExtrema_GenExtSS::Perform(const Adaptor3d_Surface& S1, const Standard_Rea
 
   Standard_Integer N1Umin = 0, N1Vmin = 0, N2Umin = 0, N2Vmin = 0;
   gp_Pnt PP1min, PP2min;
-  Standard_Integer N1Umax = 0, N1Vmax = 0, N2Umax = 0, N2Vmax = 0;
+  //  Standard_Integer N1Umax = 0, N1Vmax = 0, N2Umax = 0, N2Vmax = 0;
   gp_Pnt PP1max, PP2max;
 
   for (NoU1 = 1, U1 = U10; NoU1 <= myusample; NoU1++, U1 += PasU1) {
@@ -230,10 +230,10 @@ void myExtrema_GenExtSS::Perform(const Adaptor3d_Surface& S1, const Standard_Rea
           }
           if (TheDist > distmax) {
             distmax = TheDist;
-            N1Umax = NoU1;
-            N1Vmax = NoV1;
-            N2Umax = NoU2;
-            N2Vmax = NoV2;
+            // N1Umax = NoU1;
+            // N1Vmax = NoV1;
+            // N2Umax = NoU2;
+            // N2Vmax = NoV2;
             PP1max = P1;
             PP2max = P2;
           }
@@ -319,6 +319,4 @@ Extrema_POnSurf myExtrema_GenExtSS::PointOnS2(const Standard_Integer N) const {
 // purpose  :
 //=======================================================================
 
-Adaptor3d_Surface* myExtrema_GenExtSS::Bidon() const {
-  return (Adaptor3d_Surface*) nullptr;
-}
+Adaptor3d_Surface* myExtrema_GenExtSS::Bidon() const { return (Adaptor3d_Surface*)nullptr; }

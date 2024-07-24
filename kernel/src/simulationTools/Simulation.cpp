@@ -226,7 +226,6 @@ void Simulation::applyNSDSChangelogForDS() {
 
   NonSmoothDynamicalSystem::ChangeLog::const_iterator& itc = _nsdsChangeLogPosition.it;
 
-  bool interactionInitialized = false;
   itc++;
   while (itc != _nsds->changeLog().end()) {
     DEBUG_PRINT("- 3 - we initialize new  ds and interaction \n");

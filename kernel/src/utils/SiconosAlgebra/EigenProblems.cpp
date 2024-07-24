@@ -29,6 +29,7 @@
 #include <boost/numeric/ublas/io.hpp>
 
 #include "SiconosConfig.h"
+#include "Tools.hpp"
 
 // Typedef to define interface to boost ublas.
 // #include "SiconosAlgebraTypeDef.hpp"
@@ -70,7 +71,7 @@ int syev(SiconosVector& eigenval, SiconosMatrix& eigenvec, bool withVect) {
         *eigenvec.dense());
     info += lapack::syev(jobz, s_a, *eigenval.dense(), opt);
   } else
-    THROW_EXCEPTION("Not yet implemented for matrix of type." + num);
+    THROW_EXCEPTION("Not yet implemented for matrix of type." + enum_to_string(num));
 
   std::cout << "Compute eigenvalues ..." << std::endl;
   return info;

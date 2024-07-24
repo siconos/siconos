@@ -68,7 +68,7 @@ int g_rolling_fc3d_driver(GlobalRollingFrictionContactProblem* problem, double* 
     if (fccounter % freq_output == 0) {
       // printf("\n grfc3d_driver.c g_rolling_fc3d_driver 003 OK\n");
       char fname[256];
-      sprintf(fname, "GRFC3D-%.5d-%.5d.hdf5", (int)nc, fccounter);
+      snprintf(fname, sizeof(fname), "GRFC3D-%.5d-%.5d.hdf5", (int)nc, fccounter);
       printf("Dump GRFC3D-%.5d-%.5d.hdf5.\n", (int)nc, fccounter);
       /* printf("ndof = %i.\n", ndof); */
       /* FILE * foutput  =  fopen(fname, "w"); */

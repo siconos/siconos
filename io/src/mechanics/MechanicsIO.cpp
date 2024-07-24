@@ -1,5 +1,23 @@
-#include "SiconosConfig.h"
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2024 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include "MechanicsIO.hpp"
+#include "SiconosConfig.h"
 #include "SiconosAlgebraProd.hpp"
 
 #define DUMMY(X, Y) class X : public Y {}
@@ -932,7 +950,6 @@ struct ContactContactWorkVisitor : public SiconosVisitor
 template<>
 void ContactContactWorkVisitor::operator()(const NewtonEuler3DR& rel)
 {
-  double id = inter->number();
   answer.resize(6);
 }
 
@@ -982,7 +999,7 @@ static void compute_contact_work_and_status(SP::Interaction inter, double omega,
 
   double norm_pt = sqrt(pt_1*pt_1 + pt_2*pt_2);
   double norm_vt_plus =  sqrt(vt_1_plus*vt_1_plus+vt_2_plus*vt_2_plus);
-  double norm_vt_minus = sqrt(vt_1_minus*vt_1_minus+vt_2_minus*vt_2_minus);
+  // double norm_vt_minus = sqrt(vt_1_minus*vt_1_minus+vt_2_minus*vt_2_minus);
   if ( (pn < tol ) and (vn_plus + e * vn_minus > tol) )
     answer.setValue(4,0);// take-off = 0
   else if ( (pn > tol ) and (vn_plus + e * vn_minus  < tol) )

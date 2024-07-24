@@ -531,8 +531,8 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
 
   gfc3d_print_problem_info(problem, options);
 
-  unsigned int iter = 0; /* Current iteration number */
-  double error = 1.;     /* Current error */
+  int iter = 0;      /* Current iteration number */
+  double error = 1.; /* Current error */
   int hasNotConverged = 1;
   assert(rho > 0);
   /**************************************************************************/

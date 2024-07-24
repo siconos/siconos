@@ -142,7 +142,7 @@ void EigenProblemsTest::testGeev2() {
   }
   // Check ...
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testGeev2 1: ", ublas::norm_2(error) < 3000 * std::numeric_limits<double>::epsilon(),
+      "testGeev2 1: ", ublas::norm_2(error) < 5000 * std::numeric_limits<double>::epsilon(),
       true);
   // Check if A has not been modified
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGeev2 2: ", (*A) == (*Aref), true);

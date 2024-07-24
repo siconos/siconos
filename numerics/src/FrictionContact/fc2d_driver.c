@@ -47,7 +47,7 @@ int fc2d_driver(FrictionContactProblem* problem, double* reaction, double* veloc
 #ifdef DUMP_PROBLEM
   char fname[256];
   int ncc = problem->numberOfContacts;
-  sprintf(fname, "fc2d_granularflowonwall_%.5d_%.5d.dat", ncc, fccounter++);
+  snprintf(fname, sizeof(fname), "fc2d_granularflowonwall_%.5d_%.5d.dat", ncc, fccounter++);
   printf("Dump %s file\n", fname);
 
   FILE* foutput = fopen(fname, "w");
@@ -145,7 +145,7 @@ int fc2d_driver(FrictionContactProblem* problem, double* reaction, double* veloc
 #ifdef DUMP_PROBLEM_IF_INFO
     if (info) {
       char fname[256];
-      sprintf(fname, "FrictionContactProblem%.5d.dat", fccounter++);
+      snprintf(fname, sizeof(fname), "FrictionContactProblem%.5d.dat", fccounter++);
       printf("Dump of FrictionContactProblem%.5d.dat\n", fccounter);
 
       FILE* foutput = fopen(fname, "w");

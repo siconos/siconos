@@ -30,7 +30,7 @@
 
 void AVI_display(AffineVariationalInequalities* avi) {
   assert(avi);
-  int i;
+  size_t i;
   size_t n = avi->size;
   printf("AffineVariationalInequalities Display :\n-------------\n");
   printf("size :%zu \n", avi->size);
@@ -42,13 +42,13 @@ void AVI_display(AffineVariationalInequalities* avi) {
 
   if (avi->q) {
     printf("q vector:\n");
-    for (i = 0; i < n; i++) printf("q[ %i ] = %12.8e\n", i, avi->q[i]);
+    for (i = 0; i < n; i++) printf("q[ %zd ] = %12.8e\n", i, avi->q[i]);
   } else
     printf("No q vector.\n");
 
   if (avi->d) {
     printf("d vector:\n");
-    for (i = 0; i < n; i++) printf("d[ %i ] = %12.8e\n", i, avi->d[i]);
+    for (i = 0; i < n; i++) printf("d[ %zd ] = %12.8e\n", i, avi->d[i]);
   } else
     printf("No d vector.\n");
 }

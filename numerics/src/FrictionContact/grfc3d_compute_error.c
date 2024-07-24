@@ -74,7 +74,6 @@ int grfc3d_compute_error(GlobalRollingFrictionContactProblem* problem, double* r
       error == NULL)
     numerics_error("grfc3d_compute_error", "null input");
   // printf("\n\ngrfc3d_compute_error\n\n");
-  int incx = 1, incy = 1;
   int nc = problem->numberOfContacts;
   assert(nc > 0);
   int nd = nc * 5;

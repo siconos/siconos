@@ -157,6 +157,12 @@ void print(Iter first, Iter last, const char* nm = "", const char * sep = "\n", 
   std::copy(first, last, std::ostream_iterator<T>(os, sep));
   os << std::endl;
 }
+
+template <typename T>
+std::string enum_to_string(T value) {
+  return std::to_string(static_cast<typename std::underlying_type<T>::type>(value));
+}
+
 #endif // PRINTSEQUENCE_H
 
 

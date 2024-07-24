@@ -144,7 +144,7 @@ gefunc(int *icntr, double *x, double *func, double *d, msgcb_t msgcb)
     cv = x[1];
 
 #if defined(SOME_DEBUG_STUFF)
-    sprintf(msgBuf, "              dh = %g, dcv = %g, f = %f",
+    snprintf(msgBuf, sizeof(msgBuf), "              dh = %g, dcv = %g, f = %f",
             dfdh, dfdcv, f);
     MSGCB(STAFILE | LOGFILE, msgBuf);
 #endif

@@ -116,7 +116,8 @@ void myBRepExtrema_ExtFF::Perform(const TopoDS_Face& F1, const TopoDS_Face& F2) 
   //  exploration des points et classification:
   BRepClass_FaceClassifier classifier;
   gp_Pnt2d Puv;
-  TopAbs_State state1, state2;
+  //  TopAbs_State state1
+  TopAbs_State state2;
   Standard_Real Tol2 = BRep_Tool::Tolerance(F2);
   Extrema_POnSurf P1, P2;
   mynbext = 0;
@@ -136,7 +137,7 @@ void myBRepExtrema_ExtFF::Perform(const TopoDS_Face& F1, const TopoDS_Face& F2) 
       classifier.Perform(F1, Puv, Tol1); /*Call UVBounds*/
       ACE_times[ACE_TIMER_CAD_15].stop();
       ACE_times[ACE_TIMER_CAD_OK].start();
-      state1 = classifier.State();
+      //       state1 = classifier.State();
       P2.Parameter(U1, U2);
       Puv.SetCoord(U1, U2);
       classifier.Perform(F2, Puv, Tol2);

@@ -377,7 +377,7 @@ int gfc3d_LmgcDriver(double *reaction, double *velocity, double *globalVelocity,
 /*   { */
 /* #ifdef WITH_FCLIB */
 /*     char fname[256]; */
-/*     sprintf(fname, "LMGC_GlobalFrictionContactProblem%.5d.hdf5", gfccounter++); */
+/*     snprintf(fname, sizeof(fname), "LMGC_GlobalFrictionContactProblem%.5d.hdf5", gfccounter++); */
 /*     printf("Dump of LMGC_GlobalFrictionContactProblem%.5d.hdf5", gfccounter); */
 
 /*     FILE * foutput  =  fopen(fname, "w"); */

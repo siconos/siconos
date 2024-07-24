@@ -75,12 +75,12 @@ void globalRollingFrictionContact_display(GlobalRollingFrictionContactProblem* p
 
   if (problem->q) {
     printf("q vector:\n");
-    for (unsigned int i = 0; i < m; i++) printf("q[ %i ] = %12.8e\n", i, problem->q[i]);
+    for (int i = 0; i < m; i++) printf("q[ %i ] = %12.8e\n", i, problem->q[i]);
   } else
     printf("No q vector:\n");
   if (problem->b) {
     printf("b vector:\n");
-    for (unsigned int i = 0; i < n; i++) printf("b[ %i ] = %12.8e\n", i, problem->b[i]);
+    for (int i = 0; i < n; i++) printf("b[ %i ] = %12.8e\n", i, problem->b[i]);
   } else
     printf("No b vector:\n");
 

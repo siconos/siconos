@@ -106,7 +106,7 @@ int frictionContact_test_function(TestCase* current) {
     stime = (unsigned)ltime / 2;
     srand(stime);
     char filename[100];
-    sprintf(filename, "gfc3d_%d.hdf5", rand());
+    snprintf(filename, sizeof(filename), "gfc3d_%d.hdf5", rand());
 
     GlobalFrictionContactProblem* gfc3d = fc3d_reformulation_global_problem(problem);
 

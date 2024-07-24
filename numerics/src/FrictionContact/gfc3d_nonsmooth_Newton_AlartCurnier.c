@@ -696,7 +696,7 @@ void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem *problem,
     static int file_counter = 0;
     char filename[64];
     printf("GLOBALAC: dumping problem\n");
-    sprintf(filename, "GLOBALAC_failure%d.dat", file_counter++);
+    snprintf(filename, sizeof(filename), "GLOBALAC_failure%d.dat", file_counter++);
     FILE *file = fopen(filename, "w");
     frictionContact_printInFile(problem, file);
     fclose(file);
