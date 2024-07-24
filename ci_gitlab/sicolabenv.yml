@@ -2,13 +2,8 @@ name: base
 channels:
   - conda-forge
 dependencies:
-<<<<<<< HEAD
-  - python >=3.7
-  - swig  # kept to remain complient with master
-=======
   - python
   - swig
->>>>>>> master
   - jupyterlab
   - numpy
   - wheel
