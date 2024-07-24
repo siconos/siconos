@@ -2,7 +2,7 @@ name: base
 channels:
   - conda-forge
 dependencies:
-  - python >=3.7
+  - python
   - swig
   - jupyterlab
   - numpy
@@ -25,7 +25,6 @@ dependencies:
   - gmp
   - cppunit
   - suitesparse
-  - openblas
   - lp_solve
   - python-lsp-server
   - black
