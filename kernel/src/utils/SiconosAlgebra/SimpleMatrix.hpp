@@ -87,12 +87,7 @@ class SimpleMatrix : public SiconosMatrix {
    */
   std::shared_ptr<NumericsMatrix> _numericsMatrix{nullptr};
 
-  /** computes y = subA*x (init =true) or += subA * x (init = false), subA being a submatrix
-  of
-   * A (all columns, and rows between start and start+sizeY). If x is a block vector, it call
-   * the present function for all blocks.
-  /** computes y = subA*x (init =true) or += subA * x (init = false), subA being a submatrix
-  of
+  /** computes y = subA*x (init =true) or += subA * x (init = false), subA being a submatrix of
    * A (all columns, and rows between start and start+sizeY). If x is a block vector, it call
    * the present function for all blocks.
    *
@@ -105,9 +100,6 @@ class SimpleMatrix : public SiconosMatrix {
   void private_prod(unsigned int startRow, const SiconosVector& x, SiconosVector& y,
                     bool init);
 
-  /** computes res = subA*x +res, subA being a submatrix of A (rows from startRow to
-   * startRow+sizeY and columns between startCol and startCol+sizeX). If x is a block vector,
-   * it call the present function for all blocks.
   /** computes res = subA*x +res, subA being a submatrix of A (rows from startRow to
    * startRow+sizeY and columns between startCol and startCol+sizeX). If x is a block vector,
    * it call the present function for all blocks.
@@ -131,8 +123,8 @@ class SimpleMatrix : public SiconosMatrix {
    *  \param col number of columns.
    *  \param typ the type of matrix
    *  \param upper if Siconos::UblasType==SPARSE, number of non-zero terms, if
-   * Siconos::UblasType == BANDED, number of diags. under the main diagonal \param lower if
-   * Siconos::UblasType == BANDED, number of diags. over the main diagonal
+   *  Siconos::UblasType == BANDED, number of diags. under the main diagonal
+   *  \param lower if Siconos::UblasType == BANDED, number of diags. over the main diagonal
    */
   SimpleMatrix(unsigned int row, unsigned int col, UblasType typ = UblasType::DENSE,
                unsigned int upper = 1, unsigned int lower = 1);
@@ -144,8 +136,8 @@ class SimpleMatrix : public SiconosMatrix {
    *  \param inputValue double a, so that *this = [a a a ...]
    *  \param typ the type of matrix
    *  \param upper if Siconos::UblasType==SPARSE, number of non-zero terms, if
-   * Siconos::UblasType == BANDED, number of diags. under the main diagonal \param lower if
-   * Siconos::UblasType == BANDED, number of diags. over the main diagonal
+   *   Siconos::UblasType == BANDED, number of diags. under the main diagonal
+   *  \param lower if Siconos::UblasType == BANDED, number of diags. over the main diagonal
    */
   SimpleMatrix(unsigned int row, unsigned int col, double inputValue,
                UblasType typ = UblasType::DENSE, unsigned int upper = 1,
@@ -248,11 +240,11 @@ class SimpleMatrix : public SiconosMatrix {
   inline bool isPLUFactorized() const override { return _isPLUFactorized; }
 
   /** determines if the matrix has been factorized
-  /** determines if the matrix has been factorized
    *
    *  \return true if the matrix is factorized
    */
   inline bool isPLUFactorizedInPlace() const override { return _isPLUFactorizedInPlace; }
+
   /** determines if the matrix has been factorized
    *
    *  \return true if the matrix is factorized
