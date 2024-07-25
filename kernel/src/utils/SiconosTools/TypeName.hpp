@@ -123,7 +123,7 @@ struct FindType {
     return siconos::modeling::Type::EqualityConditionNSL;
   };
   auto visit(const siconos::modeling::FremondImpactFrictionNSL&) const {
-    return siconos::modeling::Type::MixedComplementarityConditionNSL;
+    return siconos::modeling::Type::FremondImpactFrictionNSL;
   };
   auto visit(const siconos::modeling::ComplementarityConditionNSL&) const {
     return siconos::modeling::Type::ComplementarityConditionNSL;

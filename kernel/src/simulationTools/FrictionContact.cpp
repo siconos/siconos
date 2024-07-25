@@ -144,11 +144,11 @@ bool siconos::nonsmooth_formulations::FrictionContact::checkCompatibleNSLaw(
   if (not(siconos::types::type_value(nslaw) ==
               siconos::modeling::Type::NewtonImpactFrictionNSL ||
           siconos::types::type_value(nslaw) ==
-              siconos::modeling::Type::NewtonImpactFrictionNSL)) {
+              siconos::modeling::Type::FremondImpactFrictionNSL)) {
     THROW_EXCEPTION(
         "\nsiconos::nonsmooth_formulations::FrictionContact::checkCompatibleNSLaw -  \n\
                       The chosen nonsmooth law is not compatible with FrictionalContact one step nonsmooth problem. \n\
-                      Compatible siconos::modeling::NonSmoothLaw are: NewtonImpactFrictionNSL (2D or 3D) \n");
+                      Compatible siconos::modeling::NonSmoothLaw are: NewtonImpactFrictionNSL (2D or 3D) or FremondImpactFrictionNSL \n");
     return false;
   }
   if (_nslawtype.size() > 1) {
