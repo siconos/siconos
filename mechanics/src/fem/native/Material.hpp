@@ -56,8 +56,7 @@ class Material {
 
  public:
   /** constructor */
-  Material(double massDensity, double ElasticYoungModulus,
-           double poissonCoefficient)
+  Material(double massDensity, double ElasticYoungModulus, double poissonCoefficient)
       : _massDensity(massDensity),
         _elasticYoungModulus(ElasticYoungModulus),
         _poissonCoefficient(poissonCoefficient) {}
@@ -74,7 +73,6 @@ class Material {
   auto analysisType2D() { return _analysisType2D; }
 
   auto thickness() { return _thickness; }
-
 };
 }  // namespace siconos::mechanics::fem
-#endif 
+#endif

@@ -186,7 +186,7 @@ void siconos::fem::cable::TransportCableManager::computeDS(double a_tolContact, 
 
     s->nextStep();
 
-    //k++;
+    // k++;
   }
   // end = std::chrono::system_clock::now();
   // auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();

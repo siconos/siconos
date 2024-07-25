@@ -31,5 +31,6 @@ double siconos::mechanics::fem::FENode::z() { return _mVertex->z(); }
 void siconos::mechanics::fem::FENode::display() {
   std::cout << "     - Fe Node - number: " << _num
             << "               - ndof:" << _dofIndex->size()
-            << "               - dofIndex: " << _dofIndex->front() << ":" << _dofIndex->back() << "\n";
+            << "               - dofIndex: " << _dofIndex->front() << ":" << _dofIndex->back()
+            << "\n";
 };

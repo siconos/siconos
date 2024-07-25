@@ -85,12 +85,12 @@ void CableDSTest::testBuildInitialProfile() {
   auto qref1 = siconos::algebra::io::readVectorFromJson(reader["rope1"]["q"]);
   auto qref2 = siconos::algebra::io::readVectorFromJson(reader["rope2"]["q"]);
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testBuildInitialProfile: check catenary", (qref1->size() == q1->size()),
-                               true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testBuildInitialProfile: check catenary",
+                               (qref1->size() == q1->size()), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(" testBuildInitialProfile: check catenary", ((*qref1) == (*q1)),
                                true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(" testBuildInitialProfile: check catenary", ((*qref2) == (*q2)),
-                              true);
+                               true);
 
   nb_nodes = 1400;  // FEM number of nodes
   double eps = 0.1;

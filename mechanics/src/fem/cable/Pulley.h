@@ -41,7 +41,8 @@ class Pulley : public Support {
   virtual void prepare(const Pile &a_start, const Pile &a_end, double T) override;
 
   int compute(int nb, std::vector<Point> &a_q, int q_offset = 0) const;
-  virtual void compute(const Point &a_p, double a_tol, double &g, Point &G, Point &T, int &c) override;
+  virtual void compute(const Point &a_p, double a_tol, double &g, Point &G, Point &T,
+                       int &c) override;
   //------------ dynamique -------------
   virtual bool isContact(const std::shared_ptr<siconos::algebra::SiconosVector> &a_p,
                          const double &a_tol) override;

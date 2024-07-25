@@ -55,7 +55,7 @@ class FENode {
       \param dofIndex global dof index
    */
   FENode(size_t num, std::shared_ptr<MVertex> v, std::shared_ptr<std::vector<size_t>> dofIndex)
-      : _num(num), _mVertex(v), _dofIndex(dofIndex){};
+      : _num(num), _mVertex(v), _dofIndex(dofIndex) {};
 
   ~FENode() noexcept = default;
   auto num() { return _num; }

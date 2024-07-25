@@ -18,13 +18,12 @@
 #ifndef __CABLEDSTest__
 #define __CABLEDSTest__
 
-#include "TransportCableManager.h"
-
-
 #include <cppunit/extensions/HelperMacros.h>
 
+#include "TransportCableManager.h"
+
 class CableDSTest : public CppUnit::TestFixture {
-private:
+ private:
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(CableDSTest);
 
@@ -38,7 +37,6 @@ private:
 
   CPPUNIT_TEST_SUITE_END();
 
-
   void testReadModel();
   void testBuildInitialProfile();
   void testComputeDS();
@@ -47,9 +45,8 @@ private:
   void testNoFext();
   void testConstantFext();
   void testVariableFext();
-  
 
-public:      
+ public:
   void setUp();
   void tearDown();
 };
