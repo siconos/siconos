@@ -193,9 +193,7 @@ void siconos::simulation::Simulation::applyNSDSChangelogForDS() {
 
   auto& itc = _nsdsChangeLogPosition;
 
-  bool interactionInitialized = false;
   itc++;
-
   while (itc != _nsds->changeLog().end()) {
     DEBUG_PRINT("- 3 - we initialize new  ds and interaction \n");
     DEBUG_PRINT("The nsds has changed\n");

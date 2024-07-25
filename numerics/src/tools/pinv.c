@@ -44,10 +44,10 @@ double pinv(double *A, int n, int m, double tolerance) {
   DGESVD(JOBU, JOBVT, n, m, A, n, S, U, LDU, VT, LDVT, superb, &InfoDGSVD);
 
   double conditioning = S[0] / S[dimS - 1];
-  int rank = 0;
+  //   int rank = 0;
   for (int i = 0; i < dimS; i++) {
     if (S[i] > tolerance) {
-      rank++;
+      // rank++;
       S[i] = 1.0 / S[i];
     }
   }

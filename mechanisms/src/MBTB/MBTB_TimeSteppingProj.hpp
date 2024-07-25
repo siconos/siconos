@@ -45,7 +45,7 @@ class MBTB_TimeSteppingProj : public siconos::simulation::TimeSteppingDirectProj
       std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem> osnspb_velo,
       std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem> osnspb_pos,
       unsigned int level)
-      : TimeSteppingDirectProjection(nsds, td, osi, osnspb_velo, osnspb_pos, level){};
+      : TimeSteppingDirectProjection(nsds, td, osi, osnspb_velo, osnspb_pos, level) {};
 
   virtual ~MBTB_TimeSteppingProj() noexcept = default;
 

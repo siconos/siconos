@@ -29,8 +29,8 @@
 #define PRINT_FORCE_CONTACTS
 #define MBTB_PRINT_DIST
 
-#include <string>
 #include <cstdio>  // For FILE
+#include <string>
 
 namespace siconos::mechanisms::mbtb::internal {
 /** Updates the contacts CAD model from the body */
@@ -41,19 +41,19 @@ void MBTB_updateContactFromDS();
  */
 void MBTB_updateContactFromDS(int numDS);
 
-  auto MBTB_open(std::string& filename);
+auto MBTB_open(std::string& filename);
 
-  void MBTB_close(std::ofstream&);
+void MBTB_close(std::ofstream&);
 
 /**!It prints the header of the output file.
  * \param fp output file
  */
-  void MBTB_printHeader(std::ofstream& fp);
+void MBTB_printHeader(std::ofstream& fp);
 
 /**It prints the current state in the output file.
  * \param fp output file
  */
-  void MBTB_printStep(std::ofstream& fp);
+void MBTB_printStep(std::ofstream& fp);
 
 /** It displays the current state on std output.
  */

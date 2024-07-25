@@ -44,7 +44,6 @@
 #include "SimpleMatrix.hpp"
 #include "Simulation.hpp"
 #include "Topology.hpp"
-// #include "TypeName.hpp"  // for Type::...NSL
 #include "ZeroOrderHoldOSI.hpp"
 
 // #define DEBUG_NOCOLOR
@@ -417,7 +416,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
   // loop over the DS connected to the interaction.
   bool endl = false;
   unsigned int pos = pos1;
-  for (std::shared_ptr<siconos::modeling::DynamicalSystem> ds = ds1; !endl; ds = ds2) {
+  for (auto ds = ds1; !endl; ds = ds2) {
     assert(ds == ds1 || ds == ds2);
     endl = (ds == ds2);
 
@@ -431,8 +430,6 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
     DEBUG_EXPR(leftInteractionBlock->display(););
     // Computing depends on relation type -> move this in Interaction method?
     if (relationType == siconos::modeling::RelationType::FirstOrder) {
-      ////// TODO : BACK WHEN NAMESPACE OK
-
       rightInteractionBlock = inter->getRightInteractionBlockForDS(pos, sizeDS, nslawSize);
 
       if (osiType == siconos::integrators::IntegratorType::EULERMOREAUOSI) {
@@ -780,29 +777,28 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeq(double time) {
 
 void siconos::nonsmooth_formulations::LinearOSNS::computeM() {
   auto& indexSet = *simulation()->indexSet(indexSetLevel());
+  auto DSG0 = simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
   if (_assemblyType == LinearOSNSAssemblyType::REDUCED_BLOCK) {
     // Computes new _interactionBlocks if required
     updateInteractionBlocks();
 
     //    _M->fill(indexSet);
     _M->fillM(indexSet, !_hasBeenUpdated);
-  } else if (_assemblyType == LinearOSNSAssemblyType::REDUCED_DIRECT) {
-    auto& indexSet = *simulation()->indexSet(indexSetLevel());
-    auto& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
 
+  } else if (_assemblyType == LinearOSNSAssemblyType::REDUCED_DIRECT) {
 #ifdef WITH_TIMER
     std::chrono::time_point<std::chrono::system_clock> start, end, end_old;
     start = std::chrono::system_clock::now();
 #endif
     // fill _Winverse
-    _W_inverse->fillWinverse(DSG0);
+    _W_inverse->fillWinverse(*DSG0);
 #ifdef WITH_TIMER
     end = std::chrono::system_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
     std::cout << "\nLinearOSNS: fill W inverse " << elapsed << " ms" << std::endl;
 #endif
     // fill H
-    _H->fillHtrans(DSG0, indexSet);
+    _H->fillHtrans(*DSG0, indexSet);
 #ifdef WITH_TIMER
     end_old = end;
     end = std::chrono::system_clock::now();
@@ -823,20 +819,15 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeM() {
         "siconos::nonsmooth_formulations::LinearOSNS::computeM unknown _assemblyTYPE");
 
   // ugly hack for FremondImpactFrictionNSL. VA 12/02/2024
-  siconos::graphs::InteractionsGraph::VIterator vi, viend;
-  auto DSG0 = simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
-
-  for (std::tie(vi, viend) = indexSet.vertices(); vi != viend; ++vi) {
-    auto& inter = *indexSet.bundle(*vi);
-    auto& nslaw = *inter.nonSmoothLaw();
-    if (siconos::types::type_value(nslaw) ==
-        siconos::modeling::Type::FremondImpactFrictionNSL) {
-      auto ds1 = indexSet.properties(*vi).source;
-      auto& osi = *DSG0->properties(DSG0->descriptor(ds1)).osi;
-      double theta = (static_cast<siconos::integrators::MoreauJeanOSI&>(osi)).theta();
-      NM_scal(theta, &*_M->numericsMatrix());
-    }
-    break;
+  // Get first vertex in the graph to access to theta value from the integrator ...
+  auto vs = indexSet.vertices().first;
+  auto& inter = *indexSet.bundle(*vs);
+  auto& nslaw = *inter.nonSmoothLaw();
+  if (siconos::types::type_value(nslaw) == siconos::modeling::Type::FremondImpactFrictionNSL) {
+    auto ds1 = indexSet.properties(*vs).source;
+    auto& osi = *DSG0->properties(DSG0->descriptor(ds1)).osi;
+    double theta = (static_cast<siconos::integrators::MoreauJeanOSI&>(osi)).theta();
+    NM_scal(theta, &*_M->numericsMatrix());
   }
 
   DEBUG_EXPR(_M->display(););

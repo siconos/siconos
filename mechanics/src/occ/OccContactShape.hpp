@@ -20,9 +20,9 @@
  */
 #ifndef OccContactShape_hpp
 #define OccContactShape_hpp
+#include <memory>
 #include <string>
 #include <variant>
-#include <memory>
 // Opencascade classes
 class TopoDS_Shape;
 class TopoDS_Edge;

@@ -25,7 +25,7 @@
 #include <TopoDS.hxx>
 siconos::mechanics::occ::OccContactEdge::OccContactEdge(const OccContactShape& shape,
                                                         int index)
-    : OccContactShape(shape), _index(index), _edge(shape.edge(index)) {
+    : OccContactShape(shape), _edge(shape.edge(index)), _index(index) {
   computeUVBounds();
 };
 
@@ -36,8 +36,7 @@ std::shared_ptr<TopoDS_Edge> siconos::mechanics::occ::OccContactEdge::contact() 
 void siconos::mechanics::occ::OccContactEdge::computeUVBounds() {
   TopExp_Explorer exp;
   exp.Init(data(), TopAbs_EDGE);
-  for (unsigned int i = 0; i < _index; ++i, exp.Next())
-    ;
+  for (auto i = 0; i < _index; ++i, exp.Next());
   if (exp.More()) {
     const TopoDS_Edge& edge = TopoDS::Edge(exp.Current());
     BRepAdaptor_Curve SC(edge);

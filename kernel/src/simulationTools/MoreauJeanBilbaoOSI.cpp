@@ -310,7 +310,7 @@ struct siconos::integrators::MoreauJeanBilbaoOSI::_NSLEffectOnFreeOutput
   _NSLEffectOnFreeOutput(siconos::nonsmooth_formulations::OneStepNSProblem* p,
                          siconos::modeling::Interaction& inter,
                          siconos::graphs::InteractionProperties& interProp)
-      : _osnsp(p), _inter(inter), _interProp(interProp){};
+      : _osnsp(p), _inter(inter), _interProp(interProp) {};
 
   void visit(const siconos::modeling::NewtonImpactNSL& nslaw) const override {
     double e;
@@ -444,7 +444,7 @@ void siconos::integrators::MoreauJeanBilbaoOSI::display() const {
         std::cout << "-> nullptr\n";
     }
   }
-  std::cout << "================================" << "\n";
+  std::cout << "================================\n ";
 }
 
 void siconos::integrators::MoreauJeanBilbaoOSI::prepareNewtonIteration(double time) {

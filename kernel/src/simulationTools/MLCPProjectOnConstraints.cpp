@@ -67,7 +67,7 @@ siconos::nonsmooth_formulations::MLCPProjectOnConstraints::MLCPProjectOnConstrai
 }
 
 void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::display() const {
-  std::cout << "======= MLCPProjectOnConstraints of size " << _sizeOutput << " with: " << "\n";
+  std::cout << "======= MLCPProjectOnConstraints of size " << _sizeOutput << " with: \n";
   std::cout << "======= m " << _m << " _n " << _n << "\n";
   LinearOSNS::display();
 }

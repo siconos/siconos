@@ -40,7 +40,7 @@ class CircleCircleR : public CircularR, public std::enable_shared_from_this<Circ
   \param rdisk1 radius
   \param rdisk2 radius
   */
-  CircleCircleR(double rdisk1, double rdisk2) : CircularR(rdisk1, rdisk2){};
+  CircleCircleR(double rdisk1, double rdisk2) : CircularR(rdisk1, rdisk2) {};
 
   /**
      compute distance between 2 disks

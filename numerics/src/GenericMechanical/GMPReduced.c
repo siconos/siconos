@@ -130,7 +130,7 @@ void _GMPReducedGetSizes(GenericMechanicalProblem *pInProblem, int *Me_size, int
 void buildReducedGMP(GenericMechanicalProblem *pInProblem, double *Me, double *Mi, double *Qe,
                      double *Qi, int *Me_Size, int *Mi_Size) {
   assert(pInProblem->M->storageType);
-  //#ifdef TYTYFCRR
+  // #ifdef TYTYFCRR
   SparseBlockStructuredMatrix *m = pInProblem->M->matrix1;
 #ifdef GMP_DEBUG_REDUCED
   FILE *file = fopen("buildReducedGMP_input.txt", "w");
@@ -227,8 +227,8 @@ void buildReducedGMP(GenericMechanicalProblem *pInProblem, double *Me, double *M
 
   curProblem = pInProblem->firstListElem;
   int curBlock = 0;
-  int curPosIq = 0;
-  int curPosEq = 0;
+  // int curPosIq = 0;
+  // int curPosEq = 0;
   double *curQ = pInProblem->q;
   double *curQe = Qe;
   double *curQi = Qi;
@@ -244,14 +244,14 @@ void buildReducedGMP(GenericMechanicalProblem *pInProblem, double *Me, double *M
       case SICONOS_NUMERICS_PROBLEM_EQUALITY: {
         /** copy the current line block in Me*/
         memcpy(curQe, curQ, curSize * sizeof(double));
-        curPosEq += curSize;
+        // curPosEq += curSize;
         curQe += curSize;
         break;
       }
       case SICONOS_NUMERICS_PROBLEM_LCP:
       case SICONOS_NUMERICS_PROBLEM_FC3D: {
         memcpy(curQi, curQ, curSize * sizeof(double));
-        curPosIq += curSize;
+        //        curPosIq += curSize;
         curQi += curSize;
         break;
       }
@@ -292,7 +292,7 @@ void buildReducedGMP(GenericMechanicalProblem *pInProblem, double *Me, double *M
   printf("];\n");
 #endif
   free(newIndexOfCol);
-  //#endif
+  // #endif
 }
 /*
  * The equalities are assamblate in one block.

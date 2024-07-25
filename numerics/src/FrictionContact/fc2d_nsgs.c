@@ -329,7 +329,11 @@ void fc2d_nsgs(FrictionContactProblem *problem, double *z, double *w, int *info,
     dparam[SICONOS_DPARAM_RESIDU] = INFINITY;
     numerics_printf("-- FC2D - NSGS - error: determinant diagonal block in W is zero \n");
     *info = 1;
-    goto free_and_return;
+    diagonal_blocks = fc3d_free_diagonal_blocks(problem, diagonal_blocks);
+    free(diagonal_block_determinant);
+    free(local_problem->q);
+    free(local_problem->M);
+    free(local_problem);
   }
 
   local_problem->M = NM_new();
@@ -496,7 +500,6 @@ void fc2d_nsgs(FrictionContactProblem *problem, double *z, double *w, int *info,
   /* Resulting error */
   dparam[SICONOS_DPARAM_RESIDU] = error;
 
-free_and_return:
   if (freeze_contacts) free(freeze_contacts);
   diagonal_blocks = fc3d_free_diagonal_blocks(problem, diagonal_blocks);
   free(diagonal_block_determinant);

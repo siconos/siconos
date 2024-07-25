@@ -34,7 +34,6 @@ class BlockVector;
 /**
    Matrix (embedded various types of Boost matrices of double)
 
-
    SimpleMatrix is used in the platform to store matrices (mathematical object) of double.
 
    Possible types: Siconos::DENSE (default),
@@ -43,7 +42,6 @@ class BlockVector;
    Siconos::SPARSE_COORDINATE.
 
    \todo: review resize function for Banded, Symetric and Triangular. Error in tests.
-
 
 */
 class SimpleMatrix : public SiconosMatrix {
@@ -541,8 +539,8 @@ class SimpleMatrix : public SiconosMatrix {
    */
   void setCol(unsigned int col, const SiconosVector& vIn) override;
 
-  /** returns the column number index of current matrix, starting from element at position
-   * pos and save it into vOut
+  /** returns the column number index of current matrix, starting from element at position pos
+   *  and save it into vOut
    *
    *  \param index index of required column
    *  \param pos index of the first required element in the column
@@ -551,8 +549,8 @@ class SimpleMatrix : public SiconosMatrix {
   void getSubCol(unsigned int index, unsigned int pos,
                  std::shared_ptr<SiconosVector> vOut) const;
 
-  /** get row number index of current matrix, starting from element at position pos and save
-   * it into vOut
+  /** get row number index of current matrix, starting from element at position pos and save it
+   *  into vOut
    *
    *  \param index index of the required row
    *  \param pos index of the first required element in the row
