@@ -128,7 +128,7 @@ int fc3d_LmgcDriver(double *reaction, double *velocity, double *q, double *mu, d
     fclose(file);
   } else if (outputFile == 2) {
     char fname[256];
-    sprintf(fname, "LMGC_FC3D-i%.5d-%i-%.5d.dat",
+    snprintf(fname, sizeof(fname), "LMGC_FC3D-i%.5d-%i-%.5d.dat",
             numerics_solver_options->iparam[SICONOS_IPARAM_ITER_DONE], nc, fccounter++);
     printf("LMGC_FC3D-i%.5d-%i-%.5d.dat",
            numerics_solver_options->iparam[SICONOS_IPARAM_ITER_DONE], nc, fccounter++);
@@ -140,7 +140,7 @@ int fc3d_LmgcDriver(double *reaction, double *velocity, double *q, double *mu, d
     fccounter++;
     if (fccounter % freq_output == 0) {
       char fname[256];
-      sprintf(fname, "LMGC_FC3D-i%.5d-%i-%.5d.hdf5",
+      snprintf(fname, sizeof(fname), "LMGC_FC3D-i%.5d-%i-%.5d.hdf5",
               numerics_solver_options->iparam[SICONOS_IPARAM_ITER_DONE], (int)nc, fccounter);
       printf("Dump LMGC_FC3D-i%.5d-%i-%.5d.hdf5.\n",
              numerics_solver_options->iparam[SICONOS_IPARAM_ITER_DONE], (int)nc, fccounter);

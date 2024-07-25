@@ -321,7 +321,7 @@ static void acceptLocalReactionFiltered(FrictionContactProblem *localproblem,
     /* printf("step counter value = %i\n", localsolver_options->iparam[19]); */
     char fname[256];
     fccounter++;
-    sprintf(fname, "./local_problem/localproblem_%i_%i.hdf5", contact,
+    snprintf(fname, sizeof(fname), "./local_problem/localproblem_%i_%i.hdf5", contact,
             localsolver_options->iparam[19]);
 
     if (file_exists(fname)) {

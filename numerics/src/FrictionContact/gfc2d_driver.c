@@ -92,7 +92,7 @@ int gfc2d_driver(GlobalFrictionContactProblem* problem, double* reaction, double
 #ifdef DUMP_PROBLEM
   char fname[256];
   int ncc = problem->numberOfContacts;
-  sprintf(fname, "gfc2d_granularflowonwall_%.5d_%.5d.dat", ncc, fccounter++);
+  snprintf(fname, sizeof(fname), "gfc2d_granularflowonwall_%.5d_%.5d.dat", ncc, fccounter++);
   printf("Dump %s file\n", fname);
 
   FILE* foutput = fopen(fname, "w");
