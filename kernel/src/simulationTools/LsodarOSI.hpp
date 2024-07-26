@@ -34,7 +34,6 @@ namespace siconos::integrators {
 
    Many parameters are required as input/output for LSODAR. See the
    documentation of this function in externals/odepack/opkdmain.f to have a full
-
    description of these parameters.
    Most of them are read-only parameters (ie can not be set by user).
 
@@ -60,8 +59,7 @@ class LsodarOSI : public OneStepIntegrator {
   static constexpr double RTOL_DEFAULT = 10 * siconos::internal::MACHINE_PREC;
 
   /** neq, ng, itol, itask, istate, iopt, lrw, liw, jt
-   *  See opkdmain.f and lsodar routine for details on those
-   variables.
+   *  See opkdmain.f and lsodar routine for details on those variables.
    */
   std::vector<int> _intData = {0, 0, 1, 1, 0, 0, 2};
 
@@ -104,16 +102,12 @@ class LsodarOSI : public OneStepIntegrator {
    */
   ~LsodarOSI() noexcept = default;
 
-  /** get vector of int parameters for lsodar
-   *
-   *  \return a vector<int>
-   */
+  /** \return int parameters for lsodar */
   inline const std::vector<int> intData() const { return _intData; }
 
-  /** get _intData[i]
+  /** \return int parameter number i
    *
    *  \param i index number (starting from 0)
-   *  \return an int
    */
   inline int intData(unsigned int i) const { return _intData[i]; }
 
@@ -124,40 +118,22 @@ class LsodarOSI : public OneStepIntegrator {
    */
   inline void setIntData(unsigned int i, int newValue) { _intData[i] = newValue; }
 
-  /** get relative tolerance parameter for lsodar
-   *
-   *  \return a double*
-   */
+  /** \return relative tolerance parameter for lsodar */
   inline const std::vector<double> &getRtol() const { return rtol; }
 
-  /** get absolute tolerance parameter for lsodar
-   *
-   *  \return a double*
-   */
+  /** \return absolute tolerance parameter for lsodar*/
   inline const std::vector<double> &getAtol() const { return atol; }
 
-  /** get the maximum number of steps for one call
-   *
-   *  \return an interger
-   */
+  /** \return the maximum number of steps for one call */
   inline int getMaxNstep() const { return iwork[5]; }
 
-  /** get real work vector parameter for lsodar
-   *
-   *  \return a double*
-   */
+  /** \return real work vector parameter for lsodar */
   inline const std::vector<double> &getRwork() const { return rwork; }
 
-  /** get iwork
-   *
-   *  \return a pointer to int
-   */
+  /** \return iwork */
   inline const std::vector<int> &getIwork() const { return iwork; }
 
-  /** get output of root information
-   *
-   *  \return a pointer to int
-   */
+  /** \return root information */
   inline const std::vector<int> &getJroot() const { return jroot; }
 
   /** set Jt value, Jacobian type indicator. Excerpts from the lsodar
@@ -297,9 +273,7 @@ class LsodarOSI : public OneStepIntegrator {
   void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor &vertex_descr,
                          siconos::nonsmooth_formulations::OneStepNSProblem *osnsp) override;
 
-  /** return the workVector corresponding to the right hand side of the
-   * OneStepNonsmooth problem
-   */
+  /** return the workVector corresponding to the right hand side of the OneStepNonsmooth problem */
   siconos::algebra::SiconosVector &osnsp_rhs(
       siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
       siconos::graphs::InteractionsGraph &indexSet) override {

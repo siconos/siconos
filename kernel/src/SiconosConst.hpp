@@ -16,9 +16,9 @@
  * limitations under the License.
  */
 
-/*! \file SimulationTypeDef.hpp
- * \brief Typedef for simulation-related objects
- */
+/*! \file SiconosConst.hpp
+\brief General constants for Siconos Kernel.
+*/
 
 #ifndef KernelConst_H
 #define KernelConst_H

@@ -31,16 +31,12 @@
 #include "siconos_debug.h"
 
 siconos::nonsmooth_formulations::OSNSMatrixProjectOnConstraints::
-    OSNSMatrixProjectOnConstraints(unsigned int n, unsigned int m,
-                                   NM_types stor)
-    : OSNSMatrix(n, m, stor)
-{
-}
+    OSNSMatrixProjectOnConstraints(unsigned int n, unsigned int m, NM_types stor)
+    : OSNSMatrix(n, m, stor) {}
 
 unsigned
 siconos::nonsmooth_formulations::OSNSMatrixProjectOnConstraints::updateSizeAndPositions(
-    siconos::graphs::InteractionsGraph& indexSet)
-{
+    siconos::graphs::InteractionsGraph& indexSet) {
   // === Description ===
 
   // For a interactionBlock (diagonal or extra diagonal) corresponding to
@@ -76,8 +72,7 @@ siconos::nonsmooth_formulations::OSNSMatrixProjectOnConstraints::updateSizeAndPo
 }
 
 void siconos::nonsmooth_formulations::OSNSMatrixProjectOnConstraints::fillM(
-    siconos::graphs::InteractionsGraph& indexSet, bool update)
-{
+    siconos::graphs::InteractionsGraph& indexSet, bool update) {
   if (update) {
     // Computes _dimRow and interactionBlocksPositions according to indexSet
     _dimColumn = updateSizeAndPositions(indexSet);
@@ -142,8 +137,7 @@ void siconos::nonsmooth_formulations::OSNSMatrixProjectOnConstraints::fillM(
       std::static_pointer_cast<siconos::algebra::SiconosMatrix>(_M1)->setBlock(
           std::max(pos, col), std::min(pos, col), *(indexSet.lower_blockProj[*ei]));
     }
-  }
-  else  // if _storageType == NM_SPARSE_BLOCK
+  } else  // if _storageType == NM_SPARSE_BLOCK
   {
     if (!_M2)
       _M2 = std::make_shared<siconos::simulation::BlockCSRMatrix>(indexSet);
@@ -155,8 +149,7 @@ void siconos::nonsmooth_formulations::OSNSMatrixProjectOnConstraints::fillM(
 
 unsigned int
 siconos::nonsmooth_formulations::OSNSMatrixProjectOnConstraints::computeSizeForProjection(
-    std::shared_ptr<siconos::modeling::Interaction> inter)
-{
+    std::shared_ptr<siconos::modeling::Interaction> inter) {
   DEBUG_BEGIN(
       "siconos::nonsmooth_formulations::OSNSMatrixProjectOnConstraints::"
       "computeSizeForProjection(std::"
@@ -181,16 +174,14 @@ siconos::nonsmooth_formulations::OSNSMatrixProjectOnConstraints::computeSizeForP
                        "computeSizeForProjection : "
                        "NewtonImpact * nslaw and  relationType NewtonEuler. size=1"
                     << std::endl;);
-    }
-    else if (relationType == siconos::modeling::RelationType::Lagrangian) {
+    } else if (relationType == siconos::modeling::RelationType::Lagrangian) {
       size = 1;
       DEBUG_EXPR_WE(
           std::cout << "siconos::nonsmooth_formulations::OSNSMatrixProjectOnConstraints::"
                        "computeSizeForProjection : "
                        "NewtonImpact * nslaw and relationType Lagrangian. size=1"
                     << std::endl;);
-    }
-    else {
+    } else {
       THROW_EXCEPTION(
           "MLCPProjectOnConstraints::computeSizeForProjection. relation is not of the right "
           "type. neither Lagrangian nor NewtonEuler ");

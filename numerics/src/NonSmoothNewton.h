@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef NONSMOOTHNEWTON_H
 #define NONSMOOTHNEWTON_H
 
@@ -23,80 +23,72 @@
 
   Solve \f$ \phi(z) = 0 \f$ using a Newton method.
 
-  The algorithm is alg 4.1 of the paper of Kanzow and Kleinmichel, "A new class of semismooth Newton-type methods
-  for nonlinear complementarity problems", in Computational Optimization and Applications, 11, 227-251 (1998).
+  The algorithm is alg 4.1 of the paper of Kanzow and Kleinmichel, "A new class of semismooth
+  Newton-type methods for nonlinear complementarity problems", in Computational Optimization
+  and Applications, 11, 227-251 (1998).
 
  */
 
-#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
-#include "NumericsFwd.h"  // for SolverOptions
-
+#include "NumericsFwd.h"    // for SolverOptions
+#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 /* Pointer to function that corresponds to the function \f$ \phi \f$ */
 typedef void (*NewtonFunctionPtr)(int, double*, double*, int);
 
-enum NONSMOOTH_NEWTON_SOLVER
-{
-  SICONOS_NONSMOOTH_NEWTON_LSA = 11000
-};
+enum NONSMOOTH_NEWTON_SOLVER { SICONOS_NONSMOOTH_NEWTON_LSA = 11000 };
 
-extern const char* const   SICONOS_NONSMOOTH_NEWTON_LSA_STR ;
-
+extern const char* const SICONOS_NONSMOOTH_NEWTON_LSA_STR;
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-extern "C"
-{
+extern "C" {
 #endif
-  /** Armijo Linesearch
-   *  \param n size of the vector z
-   *  \param z unknown vector
-   *  \param dir search direction
-   *  \param psi_k initial value of the merit function
-   *  \param descentCondition descent condition
-   *  \param phi pointer to function used to compute phi(z)
-   */
-  void linesearch_Armijo(int n, double *z, double* dir, double psi_k,
-                         double descentCondition, NewtonFunctionPtr* phi);
+/** Armijo Linesearch
+ *  \param n size of the vector z
+ *  \param z unknown vector
+ *  \param dir search direction
+ *  \param psi_k initial value of the merit function
+ *  \param descentCondition descent condition
+ *  \param phi pointer to function used to compute phi(z)
+ */
+void linesearch_Armijo(int n, double* z, double* dir, double psi_k, double descentCondition,
+                       NewtonFunctionPtr* phi);
 
+/** Newton solver with line Search
+\param n size of the vector z
+\param z unknown vector, in-out argument
+\param phi pointer to \f$ \phi \f$ function
+\param jacobianPhi pointer to \f$ \nabla_z \phi(z) \f$ function
+\param iparam vector of int parameters:
+ - [0] : max. number of iterations
+ - [1] : number of iterations processed
+\param dparam vector of double parameters:
+ - [0]: tolerance
+ - [1]: error
+\return int 0 if ok
+*/
+int nonSmoothNewton(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctionPtr* jacobianPhi,
+                    SolverOptions* options);
 
-  /** Newton solver with line Search
-  \param n size of the vector z
-  \param z unknown vector, in-out argument
-  \param phi pointer to \f$ \phi \f$ function
-  \param jacobianPhi pointer to \f$ \nabla_z \phi(z) \f$ function
-  \param iparam vector of int parameters:
-   - [0] : max. number of iterations
-   - [1] : number of iterations processed
-  \param dparam vector of double parameters:
-   - [0]: tolerance
-   - [1]: error
-  \return int 0 if ok
-  */
-  int nonSmoothNewton(int n, double* z, NewtonFunctionPtr* phi,
-                      NewtonFunctionPtr* jacobianPhi,
-                      SolverOptions * options);
-
-  /** Newton solver without line Search
-  \param n size of the vector z
-  \param z unknown vector, in-out argument
-  \param phi pointer to \f$ \phi \f$ function
-  \param jacobianPhi pointer to \f$ \nabla_z \phi(z) \f$ function
-  \param iparam vector of int parameters:
-   - [0] : max. number of iterations
-   - [1] : number of iterations processed
-  \param dparam vector of double parameters:
-   - [0]: tolerance
-   - [1]: error
-  \return int 0 if ok
-  */
-  int nonSmoothDirectNewton(int n, double* z, NewtonFunctionPtr* phi,
-                            NewtonFunctionPtr* jacobianPhi,
-                            SolverOptions * options);
-  /** @addtogroup SetSolverOptions
-      @{
-  */
-  void nonSmoothNewton_set_default(SolverOptions* options); 
-  /** @} */
+/** Newton solver without line Search
+\param n size of the vector z
+\param z unknown vector, in-out argument
+\param phi pointer to \f$ \phi \f$ function
+\param jacobianPhi pointer to \f$ \nabla_z \phi(z) \f$ function
+\param iparam vector of int parameters:
+ - [0] : max. number of iterations
+ - [1] : number of iterations processed
+\param dparam vector of double parameters:
+ - [0]: tolerance
+ - [1]: error
+\return int 0 if ok
+*/
+int nonSmoothDirectNewton(int n, double* z, NewtonFunctionPtr* phi,
+                          NewtonFunctionPtr* jacobianPhi, SolverOptions* options);
+/** @addtogroup SetSolverOptions
+    @{
+*/
+void nonSmoothNewton_set_default(SolverOptions* options);
+/** @} */
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

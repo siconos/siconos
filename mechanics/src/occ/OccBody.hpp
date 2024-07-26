@@ -28,11 +28,6 @@
 #include "NewtonEulerDS.hpp"  // Base class
 #include "OccContactShape.hpp"
 
-namespace siconos::algebra {
-class SiconosVector;
-class SiconosMatrix;
-}  // namespace siconos::algebra
-
 // From OpenCASCADE
 class TopoDS_Shape;
 

@@ -26,8 +26,9 @@
 #include "EigenInclude.hpp"  // Must be included before Eigen/Core
 //
 #include <Eigen/Core>
+#include <Eigen/Dense>
 #include <Eigen/SparseCore>  // For Eigen Sparse matrices
-
+#include <Eigen/Geometry>
 #include "CSparseMatrix.h"  // For CSparseMatrix
 #include "SiconosVector.hpp"
 

@@ -35,8 +35,7 @@ void NonSmoothDynamicalSystemTest::setUp() {}
 void NonSmoothDynamicalSystemTest::tearDown() {}
 
 // insertDynamicalSystem
-void NonSmoothDynamicalSystemTest::testinsertDynamicalSystem()
-{
+void NonSmoothDynamicalSystemTest::testinsertDynamicalSystem() {
   auto nsds = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(1., 10.);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(" test ndsn build: ", nsds->currentTime() == 1., true);
 
@@ -48,12 +47,10 @@ void NonSmoothDynamicalSystemTest::testinsertDynamicalSystem()
   try {
     std::shared_ptr<siconos::modeling::DynamicalSystem> dsnull;
     nsds->insertDynamicalSystem(dsnull);
-  }
-  catch (const siconos::exception& e) {
+  } catch (const siconos::exception& e) {
     /*  Pass */
     std::cout << "testinsertDynamicalSystemNull: success!" << std::endl;
-  }
-  catch (const std::exception& e) {
+  } catch (const std::exception& e) {
     std::cout << "testinsertDynamicalSystemNull:" << e.what() << std::endl;
     CPPUNIT_FAIL("testinsertDynamicalSystemNull: unexpected exception ");
   }
@@ -78,8 +75,7 @@ void NonSmoothDynamicalSystemTest::testinsertDynamicalSystem()
 }
 
 // insertInteraction
-void NonSmoothDynamicalSystemTest::testinsertInteraction()
-{
+void NonSmoothDynamicalSystemTest::testinsertInteraction() {
   auto nsds = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(0., 10.);
 
   auto ds = std::make_shared<siconos::modeling::LagrangianDS>(
@@ -108,8 +104,7 @@ void NonSmoothDynamicalSystemTest::testinsertInteraction()
   std::cout << "------- test insertInteraction ok -------" << std::endl;
 }
 
-void NonSmoothDynamicalSystemTest::testremoveDynamicalSystem()
-{
+void NonSmoothDynamicalSystemTest::testremoveDynamicalSystem() {
   auto nsds = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(0., 10.);
 
   auto ds1 = std::make_shared<siconos::modeling::LagrangianDS>(
@@ -180,8 +175,7 @@ void NonSmoothDynamicalSystemTest::testremoveDynamicalSystem()
   std::cout << "------- test removeDynamicalSystem ok -------" << std::endl;
 }
 
-void NonSmoothDynamicalSystemTest::testremoveInteraction()
-{
+void NonSmoothDynamicalSystemTest::testremoveInteraction() {
   auto nsds = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(0., 10.);
 
   auto ds = std::make_shared<siconos::modeling::LagrangianDS>(

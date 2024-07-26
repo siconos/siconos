@@ -17,26 +17,27 @@
  */
 
 #include "SiconosMatrix.hpp"
-#include "BlockMatrix.hpp"           // for BlockMatrix
+
+#include "BlockMatrix.hpp"  // for BlockMatrix
 // #include "NumericsToolsNamespace.h"  // for CSparseMatrix,  NSM_fix_csc
 // #include "SiconosMatrixOp.hpp"       // for matrix operators declaration
-#include "SiconosVector.hpp"         // for SiconosVector
-#include "Tools.hpp"                 // toString
+#include "SiconosVector.hpp"  // for SiconosVector
+#include "Tools.hpp"          // toString
 
 bool siconos::algebra::fillTriplet(SiconosMatrix& m, CSparseMatrix* triplet, size_t row_off,
-                                                  size_t col_off, double tol) {
+                                   size_t col_off, double tol) {
   assert(triplet);
   size_t nrow = m.size(0);
   size_t ncol = m.size(1);
-  
-double* arr = m.data();
-for (size_t j = 0; j < ncol; ++j) {
-    for (size_t i = 0; i < nrow; ++i) {
-    // col-major
 
-    CSparseMatrix_zentry(triplet, i + row_off, j + col_off, arr[i + j * nrow],
-                            std::numeric_limits<double>::epsilon());
+  double* arr = m.data();
+  for (size_t j = 0; j < ncol; ++j) {
+    for (size_t i = 0; i < nrow; ++i) {
+      // col-major
+
+      CSparseMatrix_zentry(triplet, i + row_off, j + col_off, arr[i + j * nrow],
+                           std::numeric_limits<double>::epsilon());
     }
-}
-return true;
+  }
+  return true;
 }

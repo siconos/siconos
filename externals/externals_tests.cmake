@@ -22,7 +22,6 @@ if(WITH_TESTING)
       target_compile_features(odepacktest10 PUBLIC cxx_std_20)
       set_property(TARGET odepacktest10 PROPERTY LINKER_LANGUAGE CXX)
     endif(WITH_CXX)
-    
     begin_tests(hairer/test)
     set(hairertests
       dr_iso

@@ -16,16 +16,15 @@
  * limitations under the License.
  */
 
-#include <stdlib.h>      // for malloc
+#include <stdlib.h>  // for malloc
+
 #include "test_utils.h"  // for data_collection
 
-const char ** data_collection()
-{
+const char **data_collection() {
+  int n_data_1 = 150;
 
-  int n_data_1=150;
-
-  const char ** data_collection_1 = (const char **)malloc(n_data_1*sizeof(const char *));
-  int n_data=0;
+  const char **data_collection_1 = (const char **)malloc(n_data_1 * sizeof(const char *));
+  int n_data = 0;
   data_collection_1[n_data++] = "./data/relay_2x2.dat";
   data_collection_1[n_data++] = "./data/relay_4x4.dat";
   data_collection_1[n_data++] = "./data/relay_simple2.dat";
@@ -37,7 +36,5 @@ const char ** data_collection()
 
   data_collection_1[n_data++] = "---";
 
-
   return data_collection_1;
 }
-

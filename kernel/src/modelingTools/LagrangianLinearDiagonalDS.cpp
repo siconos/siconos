@@ -16,9 +16,10 @@
  * limitations under the License.
  */
 #include "LagrangianLinearDiagonalDS.hpp"
+
+#include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "SiconosException.hpp"
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include <iostream>
@@ -32,9 +33,9 @@ siconos::modeling::LagrangianLinearDiagonalDS::LagrangianLinearDiagonalDS(
     std::shared_ptr<siconos::algebra::SiconosVector> stiffness,
     std::shared_ptr<siconos::algebra::SiconosVector> damping,
     std::shared_ptr<siconos::algebra::SiconosVector> mass)
-    : LagrangianDS(q0, velocity0)
-{
-  _mass = std::make_shared<siconos::algebra::SiconosMatrix>(dimension(), dimension()); // WARNING : use Eigen banded matrix?
+    : LagrangianDS(q0, velocity0) {
+  _mass = std::make_shared<siconos::algebra::SiconosMatrix>(
+      dimension(), dimension());  // WARNING : use Eigen banded matrix?
   for (unsigned int i = 0; i < dimension(); ++i) (*_mass)(i, i) = (*mass)(i);
   _stiffness = stiffness;
   _damping = damping;
@@ -46,8 +47,7 @@ siconos::modeling::LagrangianLinearDiagonalDS::LagrangianLinearDiagonalDS(
     std::shared_ptr<siconos::algebra::SiconosVector> velocity0,
     std::shared_ptr<siconos::algebra::SiconosVector> stiffness,
     std::shared_ptr<siconos::algebra::SiconosVector> damping)
-    : LagrangianDS(q0, velocity0)
-{
+    : LagrangianDS(q0, velocity0) {
   _stiffness = stiffness;
   _damping = damping;
 }
@@ -57,13 +57,11 @@ siconos::modeling::LagrangianLinearDiagonalDS::LagrangianLinearDiagonalDS(
     std::shared_ptr<siconos::algebra::SiconosVector> q0,
     std::shared_ptr<siconos::algebra::SiconosVector> velocity0,
     std::shared_ptr<siconos::algebra::SiconosVector> stiffness)
-    : LagrangianDS(q0, velocity0)
-{
+    : LagrangianDS(q0, velocity0) {
   _stiffness = stiffness;
 }
 
-void siconos::modeling::LagrangianLinearDiagonalDS::initRhs(double time)
-{
+void siconos::modeling::LagrangianLinearDiagonalDS::initRhs(double time) {
   THROW_EXCEPTION(
       "siconos::modeling::LagrangianLinearDiagonalDS::initRhs - not yet implemented for "
       "LagrangianLinearDiagonalDS.");
@@ -71,8 +69,7 @@ void siconos::modeling::LagrangianLinearDiagonalDS::initRhs(double time)
 
 void siconos::modeling::LagrangianLinearDiagonalDS::computeForces(
     double time, std::shared_ptr<siconos::algebra::SiconosVector> q2,
-    std::shared_ptr<siconos::algebra::SiconosVector> v2)
-{
+    std::shared_ptr<siconos::algebra::SiconosVector> v2) {
   DEBUG_PRINT(
       "LagrangianLinearTIDS::computeForces(double time, "
       "std::shared_ptr<siconos::algebra::SiconosVector> q2, "
@@ -80,8 +77,7 @@ void siconos::modeling::LagrangianLinearDiagonalDS::computeForces(
 
   if (!_forces) {
     _forces = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
-  }
-  else
+  } else
     _forces->zero();
 
   if (_fExt) {
@@ -120,8 +116,7 @@ void siconos::modeling::LagrangianLinearDiagonalDS::computeForces(
   // *forces *= -1.;
 }
 
-void siconos::modeling::LagrangianLinearDiagonalDS::display(bool brief) const
-{
+void siconos::modeling::LagrangianLinearDiagonalDS::display(bool brief) const {
   LagrangianDS::display();
   std::cout << "===== Lagrangian Linear Diagonal System display ===== " << std::endl;
   std::cout << "- Mass Matrix M : " << std::endl;

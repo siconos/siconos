@@ -19,12 +19,11 @@
 Include header files required for the FEM toolbox in Siconos
 */
 
-#include  "MeshUtils.hpp"
-#include "Mesh.hpp"
 #include "FENode.hpp"
+#include "FiniteElementLinearTIDS.hpp"
 #include "FiniteElementModel.hpp"
 #include "Material.hpp"
-#include "FiniteElementLinearTIDS.hpp"
+#include "Mesh.hpp"
+#include "MeshUtils.hpp"
 #include "NodeFem1d2DR.hpp"
 #include "NodeFem2d2DR.hpp"
-

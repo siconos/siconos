@@ -1,8 +1,6 @@
 #ifndef MLCP_DIRECT_ENUM_H
 #define MLCP_DIRECT_ENUM_H
 
-
-
 /*
  * who use the direct solver:
  * First, you have to call the mlcp_direct_enum_init().
@@ -13,10 +11,12 @@
  */
 
 #include "NumericsFwd.h"  // for MixedLinearComplementarityProblem, SolverOp...
-int mlcp_direct_enum_getNbIWork(MixedLinearComplementarityProblem* problem, SolverOptions* options);
-int mlcp_direct_enum_getNbDWork(MixedLinearComplementarityProblem* problem, SolverOptions* options);
+int mlcp_direct_enum_getNbIWork(MixedLinearComplementarityProblem* problem,
+                                SolverOptions* options);
+int mlcp_direct_enum_getNbDWork(MixedLinearComplementarityProblem* problem,
+                                SolverOptions* options);
 
 void mlcp_direct_enum_init(MixedLinearComplementarityProblem* problem, SolverOptions* options);
 void mlcp_direct_enum_reset(void);
 
-#endif //MLCP_DIRECT_ENUM_H
+#endif  // MLCP_DIRECT_ENUM_H

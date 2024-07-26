@@ -25,32 +25,25 @@
 #include "Simulation.hpp"
 #include "Topology.hpp"
 
-siconos::nonsmooth_formulations::RollingFrictionContact::RollingFrictionContact(int dimPb,
-                                                                    int numericsSolverId)
-    : RollingFrictionContact(dimPb,
-                             std::shared_ptr<SolverOptions>(
-                                 solver_options_create(numericsSolverId),
-                                 solver_options_delete))
-{
-}
+siconos::nonsmooth_formulations::RollingFrictionContact::RollingFrictionContact(
+    int dimPb, int numericsSolverId)
+    : RollingFrictionContact(
+          dimPb, std::shared_ptr<SolverOptions>(solver_options_create(numericsSolverId),
+                                                solver_options_delete)) {}
 
 siconos::nonsmooth_formulations::RollingFrictionContact::RollingFrictionContact(
     int dimPb, std::shared_ptr<SolverOptions> options)
-    : LinearOSNS(options), _contactProblemDim(dimPb)
-{
+    : LinearOSNS(options), _contactProblemDim(dimPb) {
   if (dimPb == 3 && options->solverId == SICONOS_ROLLING_FRICTION_3D_NSGS) {
-    _numerics_solver_options.reset(solver_options_create(
-                                       SICONOS_ROLLING_FRICTION_2D_NSGS),
+    _numerics_solver_options.reset(solver_options_create(SICONOS_ROLLING_FRICTION_2D_NSGS),
                                    solver_options_delete);
   }
 
   if (dimPb == 5) {
     _rolling_frictionContact_driver = &rolling_fc3d_driver;
-  }
-  else if (dimPb == 3) {
+  } else if (dimPb == 3) {
     _rolling_frictionContact_driver = &rolling_fc2d_driver;
-  }
-  else
+  } else
     THROW_EXCEPTION(
         "Wrong dimension value (only 5 (3D) or 3 (2D) are allowed for RollingFrictionContact "
         "constructor.");
@@ -60,8 +53,7 @@ siconos::nonsmooth_formulations::RollingFrictionContact::RollingFrictionContact(
 }
 
 void siconos::nonsmooth_formulations::RollingFrictionContact::initialize(
-    std::shared_ptr<siconos::simulation::Simulation> sim)
-{
+    std::shared_ptr<siconos::simulation::Simulation> sim) {
   // - Checks memory allocation for main variables (M,q,w,z)
   // - Formalizes the problem if the topology is time-invariant
 
@@ -103,8 +95,7 @@ void siconos::nonsmooth_formulations::RollingFrictionContact::initialize(
   }
 }
 
-void siconos::nonsmooth_formulations::RollingFrictionContact::updateMu()
-{
+void siconos::nonsmooth_formulations::RollingFrictionContact::updateMu() {
   _mu->clear();
   _muR->clear();
   auto indexSet = simulation()->indexSet(indexSetLevel());
@@ -121,8 +112,7 @@ void siconos::nonsmooth_formulations::RollingFrictionContact::updateMu()
 }
 
 std::shared_ptr<RollingFrictionContactProblem>
-siconos::nonsmooth_formulations::RollingFrictionContact::frictionContactProblem()
-{
+siconos::nonsmooth_formulations::RollingFrictionContact::frictionContactProblem() {
   auto numerics_problem = std::make_shared<RollingFrictionContactProblem>();
   numerics_problem->dimension = _contactProblemDim;
   numerics_problem->numberOfContacts = _sizeOutput / _contactProblemDim;
@@ -147,8 +137,7 @@ siconos::nonsmooth_formulations::RollingFrictionContact::frictionContactProblem(
 // }
 
 int siconos::nonsmooth_formulations::RollingFrictionContact::solve(
-    std::shared_ptr<RollingFrictionContactProblem> problem)
-{
+    std::shared_ptr<RollingFrictionContactProblem> problem) {
   if (!problem) {
     problem = frictionContactProblem();
   }
@@ -158,8 +147,7 @@ int siconos::nonsmooth_formulations::RollingFrictionContact::solve(
 }
 
 bool siconos::nonsmooth_formulations::RollingFrictionContact::checkCompatibleNSLaw(
-    siconos::modeling::NonSmoothLaw &nslaw)
-{
+    siconos::modeling::NonSmoothLaw &nslaw) {
   float type_number =
       static_cast<float>(siconos::types::type_value(nslaw)) + 0.1 * nslaw.size();
   _nslawtype.insert(type_number);
@@ -182,8 +170,7 @@ bool siconos::nonsmooth_formulations::RollingFrictionContact::checkCompatibleNSL
   return true;
 }
 
-int siconos::nonsmooth_formulations::RollingFrictionContact::compute(double time)
-{
+int siconos::nonsmooth_formulations::RollingFrictionContact::compute(double time) {
   int info = 0;
   // --- Prepare data for RollingFrictionContact computing ---
   bool cont = preCompute(time);
@@ -212,8 +199,7 @@ int siconos::nonsmooth_formulations::RollingFrictionContact::compute(double time
   return info;
 }
 
-void siconos::nonsmooth_formulations::RollingFrictionContact::display() const
-{
+void siconos::nonsmooth_formulations::RollingFrictionContact::display() const {
   std::cout << "===== " << _contactProblemDim << "D Rolling Friction Contact Problem "
             << std::endl;
   std::cout << "of size " << _sizeOutput << "(ie " << _sizeOutput / _contactProblemDim

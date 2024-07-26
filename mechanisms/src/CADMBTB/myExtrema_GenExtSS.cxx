@@ -37,9 +37,8 @@ siconos::mechanisms::myExtrema_GenExtSS::myExtrema_GenExtSS() {
 //=======================================================================
 
 siconos::mechanisms::myExtrema_GenExtSS::myExtrema_GenExtSS(
-    const Adaptor3d_Surface& S1, const Adaptor3d_Surface& S2,
-    const Standard_Integer NbU, const Standard_Integer NbV,
-    const Standard_Real Tol1, const Standard_Real Tol2)
+    const Adaptor3d_Surface& S1, const Adaptor3d_Surface& S2, const Standard_Integer NbU,
+    const Standard_Integer NbV, const Standard_Real Tol1, const Standard_Real Tol2)
     : myF(S1, S2) {
   Initialize(S2, NbU, NbV, Tol2);
   Perform(S1, Tol1);
@@ -51,12 +50,10 @@ siconos::mechanisms::myExtrema_GenExtSS::myExtrema_GenExtSS(
 //=======================================================================
 
 siconos::mechanisms::myExtrema_GenExtSS::myExtrema_GenExtSS(
-    const Adaptor3d_Surface& S1, const Adaptor3d_Surface& S2,
-    const Standard_Integer NbU, const Standard_Integer NbV,
-    const Standard_Real U1min, const Standard_Real U1sup,
-    const Standard_Real V1min, const Standard_Real V1sup,
-    const Standard_Real U2min, const Standard_Real U2sup,
-    const Standard_Real V2min, const Standard_Real V2sup,
+    const Adaptor3d_Surface& S1, const Adaptor3d_Surface& S2, const Standard_Integer NbU,
+    const Standard_Integer NbV, const Standard_Real U1min, const Standard_Real U1sup,
+    const Standard_Real V1min, const Standard_Real V1sup, const Standard_Real U2min,
+    const Standard_Real U2sup, const Standard_Real V2min, const Standard_Real V2sup,
     const Standard_Real Tol1, const Standard_Real Tol2)
     : myF(S1, S2) {
   Initialize(S2, NbU, NbV, U2min, U2sup, V2min, V2sup, Tol2);
@@ -68,9 +65,10 @@ siconos::mechanisms::myExtrema_GenExtSS::myExtrema_GenExtSS(
 // purpose  :
 //=======================================================================
 
-void siconos::mechanisms::myExtrema_GenExtSS::Initialize(
-    const Adaptor3d_Surface& S2, const Standard_Integer NbU,
-    const Standard_Integer NbV, const Standard_Real Tol2) {
+void siconos::mechanisms::myExtrema_GenExtSS::Initialize(const Adaptor3d_Surface& S2,
+                                                         const Standard_Integer NbU,
+                                                         const Standard_Integer NbV,
+                                                         const Standard_Real Tol2) {
   myu2min = S2.FirstUParameter();
   myu2sup = S2.LastUParameter();
   myv2min = S2.FirstVParameter();
@@ -84,9 +82,8 @@ void siconos::mechanisms::myExtrema_GenExtSS::Initialize(
 //=======================================================================
 
 void siconos::mechanisms::myExtrema_GenExtSS::Initialize(
-    const Adaptor3d_Surface& S2, const Standard_Integer NbU,
-    const Standard_Integer NbV, const Standard_Real U2min,
-    const Standard_Real U2sup, const Standard_Real V2min,
+    const Adaptor3d_Surface& S2, const Standard_Integer NbU, const Standard_Integer NbV,
+    const Standard_Real U2min, const Standard_Real U2sup, const Standard_Real V2min,
     const Standard_Real V2sup, const Standard_Real Tol2) {
   myS2 = (Adaptor3d_Surface*)&S2;
   mypoints1 = new TColgp_HArray2OfPnt(0, NbU + 1, 0, NbV + 1);
@@ -128,8 +125,8 @@ void siconos::mechanisms::myExtrema_GenExtSS::Initialize(
 // purpose  :
 //=======================================================================
 
-void siconos::mechanisms::myExtrema_GenExtSS::Perform(
-    const Adaptor3d_Surface& S1, const Standard_Real Tol1) {
+void siconos::mechanisms::myExtrema_GenExtSS::Perform(const Adaptor3d_Surface& S1,
+                                                      const Standard_Real Tol1) {
   myu1min = S1.FirstUParameter();
   myu1sup = S1.LastUParameter();
   myv1min = S1.FirstVParameter();
@@ -143,9 +140,8 @@ void siconos::mechanisms::myExtrema_GenExtSS::Perform(
 //=======================================================================
 
 void siconos::mechanisms::myExtrema_GenExtSS::Perform(
-    const Adaptor3d_Surface& S1, const Standard_Real U1min,
-    const Standard_Real U1sup, const Standard_Real V1min,
-    const Standard_Real V1sup, const Standard_Real Tol1) {
+    const Adaptor3d_Surface& S1, const Standard_Real U1min, const Standard_Real U1sup,
+    const Standard_Real V1min, const Standard_Real V1sup, const Standard_Real Tol1) {
   myF.Initialize(S1, *myS2);
   myu1min = U1min;
   myu1sup = U1sup;
@@ -211,7 +207,7 @@ void siconos::mechanisms::myExtrema_GenExtSS::Perform(
 
   Standard_Integer N1Umin = 0, N1Vmin = 0, N2Umin = 0, N2Vmin = 0;
   gp_Pnt PP1min, PP2min;
-  Standard_Integer N1Umax = 0, N1Vmax = 0, N2Umax = 0, N2Vmax = 0;
+  //  Standard_Integer N1Umax = 0, N1Vmax = 0, N2Umax = 0, N2Vmax = 0;
   gp_Pnt PP1max, PP2max;
 
   for (NoU1 = 1, U1 = U10; NoU1 <= myusample; NoU1++, U1 += PasU1) {
@@ -232,10 +228,10 @@ void siconos::mechanisms::myExtrema_GenExtSS::Perform(
           }
           if (TheDist > distmax) {
             distmax = TheDist;
-            N1Umax = NoU1;
-            N1Vmax = NoV1;
-            N2Umax = NoU2;
-            N2Vmax = NoV2;
+            // N1Umax = NoU1;
+            // N1Vmax = NoV1;
+            // N2Umax = NoU2;
+            // N2Vmax = NoV2;
             PP1max = P1;
             PP2max = P2;
           }
@@ -266,9 +262,7 @@ void siconos::mechanisms::myExtrema_GenExtSS::Perform(
 // purpose  :
 //=======================================================================
 
-Standard_Boolean siconos::mechanisms::myExtrema_GenExtSS::IsDone() const {
-  return myDone;
-}
+Standard_Boolean siconos::mechanisms::myExtrema_GenExtSS::IsDone() const { return myDone; }
 
 //=======================================================================
 // function : NbExt
@@ -287,8 +281,7 @@ Standard_Integer siconos::mechanisms::myExtrema_GenExtSS::NbExt() const {
 // purpose  :
 //=======================================================================
 
-Standard_Real siconos::mechanisms::myExtrema_GenExtSS::Value(
-    const Standard_Integer N) const {
+Standard_Real siconos::mechanisms::myExtrema_GenExtSS::Value(const Standard_Integer N) const {
   if (!IsDone()) {
     StdFail_NotDone::Raise();
   }
@@ -327,5 +320,5 @@ Extrema_POnSurf siconos::mechanisms::myExtrema_GenExtSS::PointOnS2(
 //=======================================================================
 
 Adaptor3d_Surface* siconos::mechanisms::myExtrema_GenExtSS::Bidon() const {
-  return (Adaptor3d_Surface*) nullptr;
+  return (Adaptor3d_Surface*)nullptr;
 }

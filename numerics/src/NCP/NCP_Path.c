@@ -14,43 +14,37 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #include "NCP_Solvers.h"        // for ncp_path
 #include "NumericsFwd.h"        // for NonlinearComplementarityProblem, Solv...
+#include "SiconosConfig.h"      // for HAVE_PATHFERRIS // IWYU pragma: keep
 #include "sn_error_handling.h"  // for sn_fatal_error, SN_NOT_COMPILED_ERROR
 
-#include "SiconosConfig.h" // for HAVE_PATHFERRIS // IWYU pragma: keep
-
-
 #ifdef HAVE_PATHFERRIS
+#include <assert.h>
+#include <limits.h>
 #include <stdio.h>
 
 #include "NonlinearComplementarityProblem.h"
-#include "SolverOptions.h"
-
-#include <limits.h>
-#include <assert.h>
-
 #include "NumericsMatrix.h"
+#include "SolverOptions.h"
 #include "numerics_verbose.h"
 
 #if defined(__cplusplus)
-extern "C"
-{
+extern "C" {
 #endif
 #include "PATH_SDK/include/MCP_Interface.h"
+#include "PATH_SDK/include/Macros.h"
+#include "PATH_SDK/include/Options.h"
+#include "PATH_SDK/include/Output_Interface.h"
 #include "PATH_SDK/include/Path.h"
 #include "PATH_SDK/include/PathOptions.h"
-#include "PATH_SDK/include/Macros.h"
-#include "PATH_SDK/include/Output_Interface.h"
-#include "PATH_SDK/include/Options.h"
 #if defined(__cplusplus)
 }
 #endif
 
 #include "PathAlgebra.h"
-
 #include "Path_interface.h"
 
 //#define DEBUG_STDOUT
@@ -62,20 +56,19 @@ extern "C"
 #define restrict __restrict
 #endif
 
-static CB_FUNC(void) ncp_PATH_problem_size(void* restrict id, int* restrict n, int* restrict nnz)
-{
-  SN_generic_path_env* env = (SN_generic_path_env*) id;
+static CB_FUNC(void)
+    ncp_PATH_problem_size(void* restrict id, int* restrict n, int* restrict nnz) {
+  SN_generic_path_env* env = (SN_generic_path_env*)id;
   *n = env->n;
   *nnz = env->nnz;
   return;
 }
 
-static CB_FUNC(void) ncp_PATH_bounds(void* restrict id, int n, double* restrict z, double* restrict lb, double* restrict ub)
-{
-  SN_generic_path_env* env = (SN_generic_path_env*) id;
+static CB_FUNC(void) ncp_PATH_bounds(void* restrict id, int n, double* restrict z,
+                                     double* restrict lb, double* restrict ub) {
+  SN_generic_path_env* env = (SN_generic_path_env*)id;
 
-  for(unsigned i = 0; i < (unsigned)n; ++i)
-  {
+  for (unsigned i = 0; i < (unsigned)n; ++i) {
     z[i] = env->z[i];
     lb[i] = 0.;
     ub[i] = 1e20; /* Magic value, see PATH documentation */
@@ -83,26 +76,23 @@ static CB_FUNC(void) ncp_PATH_bounds(void* restrict id, int n, double* restrict 
   return;
 }
 
-static CB_FUNC(int) ncp_PATH_function_eval(void* id, int n, double*z, double *f)
-{
-  NonlinearComplementarityProblem* ncp = (NonlinearComplementarityProblem*)((SN_generic_path_env*) id)->problem;
+static CB_FUNC(int) ncp_PATH_function_eval(void* id, int n, double* z, double* f) {
+  NonlinearComplementarityProblem* ncp =
+      (NonlinearComplementarityProblem*)((SN_generic_path_env*)id)->problem;
 
   ncp->compute_F(ncp->env, n, z, f);
   return 0;
 }
 
-static CB_FUNC(int) ncp_PATH_jacobian_eval(void *id, int n, double *z, int wantf,
-    double *f, int *nnz,
-    int *col_start, int *col_len,
-    int *row, double *data)
-{
+static CB_FUNC(int)
+    ncp_PATH_jacobian_eval(void* id, int n, double* z, int wantf, double* f, int* nnz,
+                           int* col_start, int* col_len, int* row, double* data) {
   int err = 0;
-  SN_generic_path_env* env = (SN_generic_path_env*) id;
+  SN_generic_path_env* env = (SN_generic_path_env*)id;
   NonlinearComplementarityProblem* ncp = (NonlinearComplementarityProblem*)env->problem;
 
-  if(wantf)
-  {
-    //err +=
+  if (wantf) {
+    // err +=
     ncp->compute_F(ncp->env, n, z, f);
   }
 
@@ -115,38 +105,26 @@ static CB_FUNC(int) ncp_PATH_jacobian_eval(void *id, int n, double *z, int wantf
   return err;
 }
 
-
-
-void ncp_path(NonlinearComplementarityProblem* problem, double *z, double* F, int *info, SolverOptions* options)
-{
+void ncp_path(NonlinearComplementarityProblem* problem, double* z, double* F, int* info,
+              SolverOptions* options) {
   assert(problem);
   unsigned n = problem->n;
   assert(n > 0);
-  int nnz = n*n;
+  int nnz = n * n;
 
+  SN_generic_path_env PATH_env = {n, nnz, z, F, NULL, NULL, problem};
 
-  SN_generic_path_env PATH_env =
-  {
-    n,
-    nnz,
-    z,
-    F,
-    NULL,
-    NULL,
-    problem
-  };
-
-
-  MCP_Interface mcp_interface =
-  {
-    &PATH_env,
-    &ncp_PATH_problem_size, &ncp_PATH_bounds,
-    &ncp_PATH_function_eval, &ncp_PATH_jacobian_eval,
-    NULL, /* hessian evaluation */
-    NULL, NULL,
-    NULL, NULL,
-    NULL
-  };
+  MCP_Interface mcp_interface = {&PATH_env,
+                                 &ncp_PATH_problem_size,
+                                 &ncp_PATH_bounds,
+                                 &ncp_PATH_function_eval,
+                                 &ncp_PATH_jacobian_eval,
+                                 NULL, /* hessian evaluation */
+                                 NULL,
+                                 NULL,
+                                 NULL,
+                                 NULL,
+                                 NULL};
 
   SN_path_interface(&mcp_interface, z, F, info, options->dparam, options->iparam);
 
@@ -155,9 +133,10 @@ void ncp_path(NonlinearComplementarityProblem* problem, double *z, double* F, in
 
 #else
 
-void ncp_path(NonlinearComplementarityProblem* problem, double *z, double* F, int *info, SolverOptions* options)
-{
-  sn_fatal_error(SN_NOT_COMPILED_ERROR, "ncp_path :: Path was not configured at compile time!\n");
+void ncp_path(NonlinearComplementarityProblem* problem, double* z, double* F, int* info,
+              SolverOptions* options) {
+  sn_fatal_error(SN_NOT_COMPILED_ERROR,
+                 "ncp_path :: Path was not configured at compile time!\n");
 }
 
 #endif

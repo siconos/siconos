@@ -14,30 +14,30 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #ifndef NCP_CST_H
 #define NCP_CST_H
 
 /*!\file NCP_cst.h
-  \brief Constants to define the list of available NCP solvers. See the solver list \ref ncpSolversList
+  \brief Constants to define the list of available NCP solvers. See the solver list \ref
+  ncpSolversList
 */
 
 /**\enum NCP_SOLVER
-   Each SICONOS_NCP_XXX refers to number of the solver XXX for NCP. See the solver list \ref ncpSolversList
+   Each SICONOS_NCP_XXX refers to number of the solver XXX for NCP. See the solver list \ref
+   ncpSolversList
  */
-enum NCP_SOLVER
-{
+enum NCP_SOLVER {
   SICONOS_NCP_NEWTON_FB_FBLSA = 900,
   SICONOS_NCP_NEWTON_MIN_FBLSA = 901,
   SICONOS_NCP_PATHSEARCH = 902,
   SICONOS_NCP_PATH = 903
 };
 
-
-extern const char* const  SICONOS_NCP_NEWTON_FB_FBLSA_STR;
-extern const char* const  SICONOS_NCP_NEWTON_MIN_FBLSA_STR;
-extern const char* const  SICONOS_NCP_PATHSEARCH_STR;
-extern const char* const  SICONOS_NCP_PATH_STR;
+extern const char* const SICONOS_NCP_NEWTON_FB_FBLSA_STR;
+extern const char* const SICONOS_NCP_NEWTON_MIN_FBLSA_STR;
+extern const char* const SICONOS_NCP_PATHSEARCH_STR;
+extern const char* const SICONOS_NCP_PATH_STR;
 
 #endif

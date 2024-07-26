@@ -21,14 +21,13 @@
 #include "BlockMatrix.hpp"
 #include "BlockVector.hpp"
 #include "SiconosException.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"  // for subprod
-#include "SiconosMatrix.hpp"
 
 void siconos::algebra::subprod(const SiconosMatrix &A, const SiconosVector &x,
-                               SiconosVector &y,
-                               const std::vector<std::size_t> &coord,
+                               SiconosVector &y, const std::vector<std::size_t> &coord,
                                bool init) {
   // To compute subY = subA * subX in an "optimized" way (in comparison with y =
   // prod(A,x) ) or subY += subA*subX if init = false.
@@ -47,8 +46,7 @@ void siconos::algebra::subprod(const SiconosMatrix &A, const SiconosVector &x,
 
   if (rowA != dimY) THROW_EXCEPTION("inconsistent sizes between A and y.");
 
-  if (dimX > x.size() || dimY > y.size() || rowA > A.size(0) ||
-      colA > A.size(1))
+  if (dimX > x.size() || dimY > y.size() || rowA > A.size(0) || colA > A.size(1))
     THROW_EXCEPTION("input index too large.");
 
   if (init) {
@@ -60,10 +58,8 @@ void siconos::algebra::subprod(const SiconosMatrix &A, const SiconosVector &x,
   }
 }
 
-void siconos::algebra::subprod(const SiconosMatrix &A, const BlockVector &x,
-                               SiconosVector &y,
-                               const std::vector<std::size_t> &coord,
-                               bool init) {
+void siconos::algebra::subprod(const SiconosMatrix &A, const BlockVector &x, SiconosVector &y,
+                               const std::vector<std::size_t> &coord, bool init) {
   // Number of the subvector of x that handles element at position coord[4]
   auto firstBlockNum = x.getNumVectorAtPos(coord[4]);
   // Number of the subvector of x that handles element at position coord[5]
@@ -81,8 +77,7 @@ void siconos::algebra::subprod(const SiconosMatrix &A, const BlockVector &x,
   if (firstBlockNum == lastBlockNum) {
     subprod(A, *tmp, y, subCoord, init);
   } else {
-    decltype(firstBlockNum) xPos =
-        0;  // Position in x of the current sub-vector of x
+    decltype(firstBlockNum) xPos = 0;  // Position in x of the current sub-vector of x
     bool firstLoop = true;
     subCoord[3] = coord[2] + subCoord[5] - subCoord[4];
     for (const auto &vec : x) {
@@ -92,8 +87,7 @@ void siconos::algebra::subprod(const SiconosMatrix &A, const BlockVector &x,
           subprod(A, *tmp, y, subCoord, init);
           firstLoop = false;
         } else {
-          subCoord[2] +=
-              subCoord[5] - subCoord[4];  // !! old values for 4 and 5
+          subCoord[2] += subCoord[5] - subCoord[4];  // !! old values for 4 and 5
           subSize = tmp->size();
           subCoord[4] = 0;
           subCoord[5] = std::min(coord[5] - (*xTab)[xPos - 1], subSize);

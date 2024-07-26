@@ -24,7 +24,7 @@
 namespace siconos::mechanisms {
 /**
  * \brief This class implements the time stepping of a multi-bodies system.
- * It inherits from Siconos::TimeStepping.
+ * It inherits from siconos::TimeStepping.
  * It consists in update the CAD word during the simulation.
  */
 class MBTB_TimeStepping : public siconos::simulation::TimeStepping {

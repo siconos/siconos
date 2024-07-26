@@ -14,25 +14,28 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include "Standalone_Path.h"
 #include "NCP_Path.h"
+
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "Standalone_Path.h"
 
 static int fill_structure; /* Do we need to fill in the structure of    */
 /* the Jacobian?                             */
 
-int NCP_Path(int n, double* z, FuncEvalPtr F, JacEvalPtr jacobianF, int* iparam, double* dparam)
-{
+int NCP_Path(int n, double *z, FuncEvalPtr F, JacEvalPtr jacobianF, int *iparam,
+             double *dparam) {
   /* Lower bounds on the variables = 0 for NCP */
-  double *lb  = (double *)malloc(sizeof(double) * n);
+  double *lb = (double *)malloc(sizeof(double) * n);
   /* Upper bounds on the variables = +inf for NCP */
   double *ub = (double *)malloc(sizeof(double) * n);
   /* Function evaluation */
-  double *f = (double *)malloc(sizeof(double) * n);;
+  double *f = (double *)malloc(sizeof(double) * n);
+  ;
   /* Number of nonzeros */
   int nnz = n * n;
   /* Termination status from PATH */
@@ -47,8 +50,7 @@ int NCP_Path(int n, double* z, FuncEvalPtr F, JacEvalPtr jacobianF, int* iparam,
   /* Fill in the lower and upper bounds */
   /**************************************/
 
-  for(j = 0; j < n; j++)
-  {
+  for (j = 0; j < n; j++) {
     lb[j] = 0;
     ub[j] = 1e20;
   }
@@ -75,4 +77,3 @@ int NCP_Path(int n, double* z, FuncEvalPtr F, JacEvalPtr jacobianF, int* iparam,
   free(f);
   return 0;
 }
-

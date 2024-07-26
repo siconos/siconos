@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #ifndef QUARTIC_H
 #define QUARTIC_H
@@ -39,21 +39,19 @@ sum_{k=0:n} p[k] x^(n-k) =0
 Assume p[0]<>0 (overflows otherwise)
 **/
 
-#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-extern "C"
-{
+extern "C" {
 #endif
-  /** Suite of procedures for finding the (complex) roots of the quadratic,
-  \param p Coefficients of the polynomial
-  \param r root of the polynomial r[1][k] real part of the kth root r[2][k] imaginary part.
-  \return always 0
-  */
-  int QUADROOTS(double  p[5], double r[3][5]);
-  int CUBICROOTS(double p[5], double r[3][5]);
-  int BIQUADROOTS(double p[5], double r[3][5]);
-
+/** Suite of procedures for finding the (complex) roots of the quadratic,
+\param p Coefficients of the polynomial
+\param r root of the polynomial r[1][k] real part of the kth root r[2][k] imaginary part.
+\return always 0
+*/
+int QUADROOTS(double p[5], double r[3][5]);
+int CUBICROOTS(double p[5], double r[3][5]);
+int BIQUADROOTS(double p[5], double r[3][5]);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

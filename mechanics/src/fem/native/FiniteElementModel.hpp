@@ -85,7 +85,7 @@ class FiniteElementModel {
       \param ndof dof number
       \param e mesh element
    */
-  FiniteElementModel(std::shared_ptr<Mesh> m) : _mesh(m){};
+  FiniteElementModel(std::shared_ptr<Mesh> m) : _mesh(m) {};
 
   ~FiniteElementModel() noexcept = default;
 

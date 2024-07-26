@@ -18,11 +18,11 @@
 
 #include "myBRepExtrema_ExtFF.hxx"
 
+#include <BRepAdaptor_Surface.hxx>
 #include <BRepClass_FaceClassifier.hxx>
 #include <BRepTools.hxx>
 #include <BRep_Tool.hxx>
 #include <StdFail_NotDone.hxx>
-#include <BRepAdaptor_Surface.hxx>
 
 #include "CADMBTB_API.hpp"  // for getUVBounds
 #include "ace.h"
@@ -38,16 +38,17 @@ siconos::mechanisms::myBRepExtrema_ExtFF::myBRepExtrema_ExtFF() {}
 // function : myBRepExtrema_ExtFF
 // purpose  :
 //=======================================================================
-siconos::mechanisms::myBRepExtrema_ExtFF::myBRepExtrema_ExtFF(
-    const TopoDS_Face& F1, const TopoDS_Face& F2, int id1, int id2) {
+siconos::mechanisms::myBRepExtrema_ExtFF::myBRepExtrema_ExtFF(const TopoDS_Face& F1,
+                                                              const TopoDS_Face& F2, int id1,
+                                                              int id2) {
   _id1 = id1;
   _id2 = id2;
   Initialize(F2);
 
   Perform(F1, F2);
 }
-siconos::mechanisms::myBRepExtrema_ExtFF::myBRepExtrema_ExtFF(
-    const TopoDS_Face& F1, const TopoDS_Face& F2) {
+siconos::mechanisms::myBRepExtrema_ExtFF::myBRepExtrema_ExtFF(const TopoDS_Face& F1,
+                                                              const TopoDS_Face& F2) {
   _id1 = -1;
   _id2 = -1;
   Initialize(F2);
@@ -59,11 +60,10 @@ siconos::mechanisms::myBRepExtrema_ExtFF::myBRepExtrema_ExtFF(
 // purpose  :
 //=======================================================================
 
-void siconos::mechanisms::myBRepExtrema_ExtFF::Initialize(
-    const TopoDS_Face& F2) {
+void siconos::mechanisms::myBRepExtrema_ExtFF::Initialize(const TopoDS_Face& F2) {
   BRepAdaptor_Surface Surf(F2);
   myHS = new BRepAdaptor_Surface(Surf);
-  
+
   Standard_Real Tol = BRep_Tool::Tolerance(F2);
   Standard_Real U1, U2, V1, V2;
   BRepTools::UVBounds(F2, U1, U2, V1, V2);
@@ -96,8 +96,7 @@ void siconos::mechanisms::myBRepExtrema_ExtFF::Perform(const TopoDS_Face& F1,
   Standard_Real Tol1 = BRep_Tool::Tolerance(F1);
   ACE_times[ACE_TIMER_CAD_OK].stop();
   ACE_times[ACE_TIMER_CAD_13].start();
-  printf("siconos::mechanisms::myBRepExtrema_ExtFF::Perform id1=%d, id2=%d\n",
-         _id1, _id2);
+  printf("siconos::mechanisms::myBRepExtrema_ExtFF::Perform id1=%d, id2=%d\n", _id1, _id2);
   if (_id1 >= 0)
     siconos::mechanisms::CADMBTB_getUVBounds(_id1, U1, U2, V1, V2);
   else
@@ -111,7 +110,8 @@ void siconos::mechanisms::myBRepExtrema_ExtFF::Perform(const TopoDS_Face& F1,
   //  exploration des points et classification:
   BRepClass_FaceClassifier classifier;
   gp_Pnt2d Puv;
-  TopAbs_State state1, state2;
+  //  TopAbs_State state1
+  TopAbs_State state2;
   Standard_Real Tol2 = BRep_Tool::Tolerance(F2);
   Extrema_POnSurf P1, P2;
   mynbext = 0;
@@ -131,7 +131,7 @@ void siconos::mechanisms::myBRepExtrema_ExtFF::Perform(const TopoDS_Face& F1,
       classifier.Perform(F1, Puv, Tol1); /*Call UVBounds*/
       ACE_times[ACE_TIMER_CAD_15].stop();
       ACE_times[ACE_TIMER_CAD_OK].start();
-      state1 = classifier.State();
+      //       state1 = classifier.State();
       P2.Parameter(U1, U2);
       Puv.SetCoord(U1, U2);
       classifier.Perform(F2, Puv, Tol2);
@@ -189,8 +189,7 @@ Standard_Integer siconos::mechanisms::myBRepExtrema_ExtFF::NbExt() const {
 // purpose  :
 //=======================================================================
 
-Standard_Real siconos::mechanisms::myBRepExtrema_ExtFF::Value(
-    const Standard_Integer N) const {
+Standard_Real siconos::mechanisms::myBRepExtrema_ExtFF::Value(const Standard_Integer N) const {
   if (!myExtrem.IsDone()) StdFail_NotDone::Raise();
   if ((N < 1) || (N > mynbext)) Standard_OutOfRange::Raise();
   return mydist.Value(N);
@@ -201,8 +200,9 @@ Standard_Real siconos::mechanisms::myBRepExtrema_ExtFF::Value(
 // purpose  :
 //=======================================================================
 
-void siconos::mechanisms::myBRepExtrema_ExtFF::ParameterOnFace1(
-    const Standard_Integer N, Standard_Real& U, Standard_Real& V) const {
+void siconos::mechanisms::myBRepExtrema_ExtFF::ParameterOnFace1(const Standard_Integer N,
+                                                                Standard_Real& U,
+                                                                Standard_Real& V) const {
   if (!myExtrem.IsDone()) StdFail_NotDone::Raise();
   if ((N < 1) || (N > mynbext)) Standard_OutOfRange::Raise();
   myPointsOnS1.Value(N).Parameter(U, V);
@@ -213,8 +213,7 @@ void siconos::mechanisms::myBRepExtrema_ExtFF::ParameterOnFace1(
 // purpose  :
 //=======================================================================
 
-gp_Pnt siconos::mechanisms::myBRepExtrema_ExtFF::PointOnFace1(
-    const Standard_Integer N) const {
+gp_Pnt siconos::mechanisms::myBRepExtrema_ExtFF::PointOnFace1(const Standard_Integer N) const {
   if (!myExtrem.IsDone()) StdFail_NotDone::Raise();
   if ((N < 1) || (N > mynbext)) Standard_OutOfRange::Raise();
   gp_Pnt P = myPointsOnS1.Value(N).Value();
@@ -226,8 +225,9 @@ gp_Pnt siconos::mechanisms::myBRepExtrema_ExtFF::PointOnFace1(
 // purpose  :
 //=======================================================================
 
-void siconos::mechanisms::myBRepExtrema_ExtFF::ParameterOnFace2(
-    const Standard_Integer N, Standard_Real& U, Standard_Real& V) const {
+void siconos::mechanisms::myBRepExtrema_ExtFF::ParameterOnFace2(const Standard_Integer N,
+                                                                Standard_Real& U,
+                                                                Standard_Real& V) const {
   if (!myExtrem.IsDone()) StdFail_NotDone::Raise();
   if ((N < 1) || (N > mynbext)) Standard_OutOfRange::Raise();
   myPointsOnS2.Value(N).Parameter(U, V);
@@ -238,8 +238,7 @@ void siconos::mechanisms::myBRepExtrema_ExtFF::ParameterOnFace2(
 // purpose  :
 //=======================================================================
 
-gp_Pnt siconos::mechanisms::myBRepExtrema_ExtFF::PointOnFace2(
-    const Standard_Integer N) const {
+gp_Pnt siconos::mechanisms::myBRepExtrema_ExtFF::PointOnFace2(const Standard_Integer N) const {
   if (!myExtrem.IsDone()) StdFail_NotDone::Raise();
   if ((N < 1) || (N > mynbext)) Standard_OutOfRange::Raise();
   gp_Pnt P = myPointsOnS2.Value(N).Value();

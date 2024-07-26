@@ -17,11 +17,10 @@
  */
 
 #include "SiconosException.hpp"
-#include "SiconosMatrixOp.hpp"  // for matrix op. declarations
 #include "SiconosMatrix.hpp"
+#include "SiconosMatrixOp.hpp"  // for matrix op. declarations
 
-void siconos::algebra::add(const SiconosMatrix &A, const SiconosMatrix &B,
-                           SiconosMatrix &C) {
+void siconos::algebra::add(const SiconosMatrix &A, const SiconosMatrix &B, SiconosMatrix &C) {
   // To compute C = A + B in an "optimized" way (in comparison with operator +)
 
   // === if C is zero or identity => read-only ===
@@ -43,8 +42,7 @@ void siconos::algebra::add(const SiconosMatrix &A, const SiconosMatrix &B,
   }
 }
 
-void siconos::algebra::sub(const SiconosMatrix &A, const SiconosMatrix &B,
-                           SiconosMatrix &C) {
+void siconos::algebra::sub(const SiconosMatrix &A, const SiconosMatrix &B, SiconosMatrix &C) {
   // To compute C = A - B in an "optimized" way (in comparison with operator +)
 
   if ((A.size(0) != B.size(0)) || (A.size(1) != B.size(1)))

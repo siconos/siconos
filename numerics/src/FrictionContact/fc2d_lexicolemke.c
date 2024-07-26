@@ -14,9 +14,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
-#include <stdio.h>                         // for printf
-#include <stdlib.h>                        // for calloc, free, malloc
+ */
+#include <stdio.h>   // for printf
+#include <stdlib.h>  // for calloc, free, malloc
+
 #include "FrictionContactProblem.h"        // for FrictionContactProblem
 #include "LCP_Solvers.h"                   // for lcp_compute_error
 #include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
@@ -29,35 +30,33 @@
 #include "lcp_cst.h"                       // for SICONOS_LCP_LEMKE
 #include "numerics_verbose.h"              // for verbose
 
-void fc2d_lexicolemke(FrictionContactProblem* problem, double *reaction, double *velocity, int *info, SolverOptions* options)
-{
+void fc2d_lexicolemke(FrictionContactProblem *problem, double *reaction, double *velocity,
+                      int *info, SolverOptions *options) {
   int i;
   // conversion into LCP
-  LinearComplementarityProblem* lcp_problem = (LinearComplementarityProblem*)malloc(sizeof(LinearComplementarityProblem));
+  LinearComplementarityProblem *lcp_problem =
+      (LinearComplementarityProblem *)malloc(sizeof(LinearComplementarityProblem));
 
   fc2d_tolcp(problem, lcp_problem);
   /* frictionContact_display(problem); */
   /* linearComplementarity_display(lcp_problem); */
 
-
-
-  double *zlcp = (double*)calloc(lcp_problem->size, sizeof(double));
-  double *wlcp = (double*)calloc(lcp_problem->size, sizeof(double));
+  double *zlcp = (double *)calloc(lcp_problem->size, sizeof(double));
+  double *wlcp = (double *)calloc(lcp_problem->size, sizeof(double));
 
   // Call the lcp_solver
-  int solver_id_save= options->solverId;
+  int solver_id_save = options->solverId;
   options->solverId = SICONOS_LCP_LEMKE;
   *info = linearComplementarity_driver(lcp_problem, zlcp, wlcp, options);
-  if(options->filterOn > 0)
-    lcp_compute_error(lcp_problem, zlcp, wlcp, options->dparam[SICONOS_DPARAM_TOL], &(options->dparam[SICONOS_DPARAM_RESIDU]));
+  if (options->filterOn > 0)
+    lcp_compute_error(lcp_problem, zlcp, wlcp, options->dparam[SICONOS_DPARAM_TOL],
+                      &(options->dparam[SICONOS_DPARAM_RESIDU]));
 
   /*       printf("\n"); */
   int nc = problem->numberOfContacts;
-  double norm_q = cblas_dnrm2(nc*2, problem->q, 1);
+  double norm_q = cblas_dnrm2(nc * 2, problem->q, 1);
   // Conversion of result
-  for(i = 0; i < nc; i++)
-  {
-
+  for (i = 0; i < nc; i++) {
     /* printf("Contact number = %i\n",i); */
     reaction[2 * i] = zlcp[3 * i];
     reaction[2 * i + 1] = 1.0 / 2.0 * (zlcp[3 * i + 1] - wlcp[3 * i + 2]);
@@ -79,29 +78,28 @@ void fc2d_lexicolemke(FrictionContactProblem* problem, double *reaction, double 
   /*     printf("z[ %i]=%12.10e,\t w[ %i]=%12.10e\n", i, z[i],i, w[i]); */
   /*        } */
 
-
   /*        printf("\n"); */
   double error;
-  *info = fc2d_compute_error(problem, reaction, velocity, options->dparam[SICONOS_DPARAM_TOL], norm_q, &error);
+  *info = fc2d_compute_error(problem, reaction, velocity, options->dparam[SICONOS_DPARAM_TOL],
+                             norm_q, &error);
 
   options->dparam[SICONOS_DPARAM_RESIDU] = error;
 
-  if(error > options->iparam[SICONOS_DPARAM_TOL])
-  {
+  if (error > options->iparam[SICONOS_DPARAM_TOL]) {
+    if (verbose > 0)
+      printf(
+          "--------------- FC2D - LEMKE - No convergence after %i iterations"
+          " residual = %14.7e < %7.3e\n",
+          options->iparam[SICONOS_IPARAM_ITER_DONE], error,
+          options->dparam[SICONOS_DPARAM_TOL]);
 
-    if(verbose > 0)
-      printf("--------------- FC2D - LEMKE - No convergence after %i iterations"
-             " residual = %14.7e < %7.3e\n", options->iparam[SICONOS_IPARAM_ITER_DONE], error,
-             options->dparam[SICONOS_DPARAM_TOL]);
-
-  }
-  else
-  {
-
-    if(verbose > 0)
-      printf("--------------- FC2D - LEMKE - Convergence after %i iterations"
-             " residual = %14.7e < %7.3e\n", options->iparam[SICONOS_IPARAM_ITER_DONE],
-             error, options->dparam[SICONOS_DPARAM_TOL]);
+  } else {
+    if (verbose > 0)
+      printf(
+          "--------------- FC2D - LEMKE - Convergence after %i iterations"
+          " residual = %14.7e < %7.3e\n",
+          options->iparam[SICONOS_IPARAM_ITER_DONE], error,
+          options->dparam[SICONOS_DPARAM_TOL]);
 
     *info = 0;
   }
@@ -111,4 +109,3 @@ void fc2d_lexicolemke(FrictionContactProblem* problem, double *reaction, double 
   free(wlcp);
   freeLinearComplementarityProblem(lcp_problem);
 }
-

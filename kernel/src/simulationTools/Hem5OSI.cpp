@@ -161,8 +161,8 @@ void siconos::integrators::Hem5OSI::updateIntData() {
   }
   if (MODE > 3) {
     THROW_EXCEPTION(
-        "siconos::integrators::Hem5OSI::updateIntData(), MODE >3 Sparse case not implemented "
-        "...");
+        "siconos::integrators::Hem5OSI::updateIntData(), MODE >3 Sparse case not "
+        "implemented...");
   }
 
   // 5 - LWK length of real array rwork
@@ -320,8 +320,7 @@ void siconos::integrators::Hem5OSI::Hem5OSI_impl::fprob(
   if ((ifcn == 5) || (ifcn == 7))  // compute GPP ( Hessian of the constraints)
   {
     // THROW_EXCEPTION("siconos::integrators::Hem5OSI::fprob(), G_qq is not available");
-    std::cout << "siconos::integrators::Hem5OSI::fprob(), G_qq is not available "
-              << "\n";
+    std::cout << "siconos::integrators::Hem5OSI::fprob(), G_qq is not available " << "\n";
   }
 
   if ((ifcn == 3) || (ifcn == 6) ||
@@ -648,10 +647,11 @@ void siconos::integrators::Hem5OSI::integrate(double& tinit, double& tend, doubl
   // C    IPAR(2) = IWK(22) = NBLK (NUMBER OF BLOCK OF AM)
   // C    IPAR(3) = IWK(23) = NPGP (0 IF GP AS THE SAME PATTERN AS PREVIOUS CALL)
   // C    IPAR(4) = IWK(24) = NPFL (0 IF FL AS THE SAME PATTERN AS PREVIOUS CALL)
-  // C    IPAR(5) = IWK(25) = IS (SIZE OF INT WORK SPACE FOR MA28 (MIN
-  // 13*NM)) C    IPAR(6) = IWK(26) = IXS (SIZE OF REAL WORK SPACE FOR MA28 (MIN NM+4*NZA)) C
-  // IPAR(7) = IWK(27) = PREVL C    IPAR(8) = IWK(28) = IO C    IPAR(9) = FLAG TO INDICATE IF
-  // UMDFAC HAS BEEN CALLED AT LEAST ONCE
+  // C    IPAR(5) = IWK(25) = IS (SIZE OF INTEGER WORK SPACE FOR MA28 (MIN 13*NM))
+  // C    IPAR(6) = IWK(26) = IXS (SIZE OF REAL WORK SPACE FOR MA28 (MIN NM+4*NZA))
+  // C    IPAR(7) = IWK(27) = PREVL
+  // C    IPAR(8) = IWK(28) = IO
+  // C    IPAR(9) = FLAG TO INDICATE IF UMDFAC HAS BEEN CALLED AT LEAST ONCE
 
   DEBUG_EXPR(iwork[26] = 2; printf("\n"));
 
@@ -704,27 +704,20 @@ void siconos::integrators::Hem5OSI::integrate(double& tinit, double& tend, doubl
   {
     std::cout << "siconos::integrators::Hem5OSI::integrate(...) failed - idid = " << _idid
               << "\n";
-    std::cout << " -1 means input is not consistent"
-              << "\n";
-    std::cout << " -2 means larger NMAX needed."
-              << "\n";
-    std::cout << " -3 means step size becomes too small."
-              << "\n";
-    std::cout << " -4 means matrix is singular"
-              << "\n";
-    std::cout << " -5 means initial projection: no convergence"
-              << "\n";
+    std::cout << " -1 means input is not consistent" << "\n";
+    std::cout << " -2 means larger NMAX needed." << "\n";
+    std::cout << " -3 means step size becomes too small." << "\n";
+    std::cout << " -4 means matrix is singular" << "\n";
+    std::cout << " -5 means initial projection: no convergence" << "\n";
     THROW_EXCEPTION("siconos::integrators::Hem5OSI::integrate(), integration failed");
   }
 
-  DEBUG_EXPR_WE(std::cout << "HEM5 Statitics : "
-                          << "\n";
-                std::cout << "NSTEP = " << iwork[30] << "\n";
-                std::cout << "NACCPT = " << iwork[31] << "\n";
-                std::cout << "NREJCT = " << iwork[32] << "\n";
-                std::cout << "NFCN = " << iwork[33] << "\n";
-                std::cout << "NDEC = " << iwork[34] << "\n";
-                std::cout << "NSOL = " << iwork[35] << "\n";);
+  DEBUG_EXPR_WE(
+      std::cout << "HEM5 Statitics : " << "\n"; std::cout << "NSTEP = " << iwork[30] << "\n";
+      std::cout << "NACCPT = " << iwork[31] << "\n";
+      std::cout << "NREJCT = " << iwork[32] << "\n";
+      std::cout << "NFCN = " << iwork[33] << "\n"; std::cout << "NDEC = " << iwork[34] << "\n";
+      std::cout << "NSOL = " << iwork[35] << "\n";);
   *_qWork = *_qtmp;
   *_vWork = *_vtmp;
   *_aWork = *_atmp;

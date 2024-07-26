@@ -14,32 +14,30 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #include <stdio.h>
-#include "SiconosConfig.h"
+
 #include "NumericsMatrix.h"
+#include "SiconosConfig.h"
 
 #ifdef HAS_ONE_LP_SOLVER
 #include "vertex_extraction.h"
 
-int main(void)
-{
-  double Hdat[] = {1,  0, -1, 0,
-                   0,  1, 0, -1
-                  };
+int main(void) {
+  double Hdat[] = {1, 0, -1, 0, 0, 1, 0, -1};
 
   NumericsMatrix* H = NM_create_from_data(NM_DENSE, 4, 2, Hdat);
 
   double K[] = {-2, -3, -7, -8};
 
-  polyhedron P = { SICONOS_SET_POLYHEDRON, 4, 0, H, K, NULL, NULL};
+  polyhedron P = {SICONOS_SET_POLYHEDRON, 4, 0, H, K, NULL, NULL};
 
   int basis[11] = {0};
 
   siconos_find_vertex(&P, 2, basis);
 
-  for(unsigned i = 0; i < 11; ++i) printf("%d ", basis[i]);
+  for (unsigned i = 0; i < 11; ++i) printf("%d ", basis[i]);
   printf("\n");
   return 0;
 }

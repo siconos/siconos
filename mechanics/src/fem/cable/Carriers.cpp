@@ -16,8 +16,11 @@
  * limitations under the License.
  */
 #include "Carriers.h"
-
+const int &siconos::fem::cable::Carriers::get_number_of_vehicles() const { return m_n; }
 const double &siconos::fem::cable::Carriers::get_rho() const { return m_rho; }
+const double &siconos::fem::cable::Carriers::up_load() const { return m_up_load; }
+const double &siconos::fem::cable::Carriers::down_load() const { return m_down_load; }
+const double &siconos::fem::cable::Carriers::loaded_mass() const { return m_loaded_mass; }
 
 const double &siconos::fem::cable::Carriers::get_d_inter_vehicules() const { return m_d; }
 

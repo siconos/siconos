@@ -22,16 +22,9 @@
 #ifndef __SiconosVector__
 #define __SiconosVector__
 
-// #include <boost/numeric/ublas/fwd.hpp>
-// #include <boost/numeric/ublas/storage.hpp>
-// #include <boost/numeric/ublas/vector.hpp>
-#include "EigenInclude.hpp"
+#include "EigenInclude.hpp"  // Must be included before Eigen/Core
+//
 #include <Eigen/Core>
-// #include <vector>
-
-// #include "SiconosAlgebraTypes.hpp"   // For UblasType
-// #include "SiconosSerialization.hpp"  // For ACCEPT_SERIALIZATION
-// #include "SiconosVectorIterator.hpp"
 
 namespace siconos::algebra {
 
@@ -74,7 +67,6 @@ namespace siconos::algebra {
 //   }
 // };
 
-
 /**
    Vectors of double. (Interface to various types of Boost-Ublas vectors).
 
@@ -86,7 +78,8 @@ using SiconosVector = Eigen::Matrix<double_t, Eigen::Dynamic, 1, Eigen::ColMajor
 using SiconosVector3 = Eigen::Matrix<double_t, 3, 1, Eigen::ColMajor>;
 
 void concatenateVectors(SiconosVector& target, const SiconosVector& a, const SiconosVector& b);
-std::shared_ptr<SiconosVector> concatenateVectors(const SiconosVector& a, const SiconosVector& b);
+std::shared_ptr<SiconosVector> concatenateVectors(const SiconosVector& a,
+                                                  const SiconosVector& b);
 
 }  // namespace siconos::algebra
 

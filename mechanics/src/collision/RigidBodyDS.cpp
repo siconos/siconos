@@ -27,8 +27,7 @@ siconos::collision::RigidBodyDS::RigidBodyDS(
     std::shared_ptr<siconos::algebra::SiconosVector> velocity, double mass,
     std::shared_ptr<siconos::algebra::SiconosMatrix> inertia)
     : siconos::modeling::NewtonEulerDS{position, velocity, mass, inertia},
-      _contactors(std::make_shared<siconos::collision::SiconosContactorSet>()) {
-}
+      _contactors(std::make_shared<siconos::collision::SiconosContactorSet>()) {}
 
 void siconos::collision::RigidBodyDS::acceptSP(
     std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const {
@@ -39,18 +38,14 @@ void siconos::collision::RigidBodyDS::compute_extrapolated_position(
     double extrapolationCoefficient) {
   // we compute an extrapolation of the position
   if (!_qExtrapolated)
-    _qExtrapolated =
-        std::make_shared<siconos::algebra::SiconosVector>(q()->size());
+    _qExtrapolated = std::make_shared<siconos::algebra::SiconosVector>(q()->size());
 
-  const auto& vold = twistMemory().getSiconosVector(0);
-  auto velocityIncrement =
-      std::make_shared<siconos::algebra::SiconosVector>(_twist->size());
+  auto velocityIncrement = std::make_shared<siconos::algebra::SiconosVector>(_twist->size());
 
   _qExtrapolated->setValue(0, velocityIncrement->getValue(0));
   _qExtrapolated->setValue(1, velocityIncrement->getValue(1));
   _qExtrapolated->setValue(2, velocityIncrement->getValue(2));
-  siconos::geometry::quaternionFromTwistVector(*velocityIncrement,
-                                               *_qExtrapolated);
+  siconos::geometry::quaternionFromTwistVector(*velocityIncrement, *_qExtrapolated);
   const auto& qold = qMemory().getSiconosVector(0);
   siconos::geometry::compositionLawLieGroup(qold, *_qExtrapolated);
 }

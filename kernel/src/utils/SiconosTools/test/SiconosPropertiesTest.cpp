@@ -21,15 +21,14 @@
 CPPUNIT_TEST_SUITE_REGISTRATION(SiconosPropertiesTest);
 
 using G = siconos::graphs::SiconosGraph<std::string, std::string, boost::no_property,
-                                         boost::no_property, boost::no_property>;
+                                        boost::no_property, boost::no_property>;
 
 void SiconosPropertiesTest::setUp() {}
 
 void SiconosPropertiesTest::tearDown() {}
 
 /* TypeOf */
-void SiconosPropertiesTest::t1()
-{
+void SiconosPropertiesTest::t1() {
   auto g = std::make_shared<G>();
 
   auto mv = siconos::graphs::vertexProperties<int>(*g);
@@ -57,8 +56,7 @@ void SiconosPropertiesTest::t1()
   CPPUNIT_ASSERT(mv[v5] == 5);
 }
 
-void SiconosPropertiesTest::t2()
-{
+void SiconosPropertiesTest::t2() {
   auto g = std::make_shared<G>();
 
   auto mv = siconos::graphs::vertexProperties<int>(*g);
@@ -90,8 +88,7 @@ void SiconosPropertiesTest::t2()
   CPPUNIT_ASSERT(mv[vnc] == 33);
 }
 
-void SiconosPropertiesTest::t3()
-{
+void SiconosPropertiesTest::t3() {
   auto g = std::make_shared<G>();
 
   auto mv = siconos::graphs::vertexProperties<int>(*g);

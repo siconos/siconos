@@ -332,56 +332,56 @@ void Contact2dTest::t1() {
   CPPUNIT_ASSERT(1);
 }
 void Contact2dTest::t2() {
-  // try {
-  //   printf("\n==== t2\n");
+  try {
+    printf("\n==== t2\n");
 
-  //   BounceParams params;
-  //   params.trace = true;
-  //   params.dynamic = false;
-  //   params.size = 1.0;
-  //   params.mass = 1.0;
-  //   params.position = 1.0;
-  //   params.timestep = 0.005;
-  //   params.insideMargin = 0.0;
-  //   params.outsideMargin = 0.0;
-  //   params.options->dimension = siconos::collision::bullet::SiconosBulletDimension::TwoD;
+    BounceParams params;
+    params.trace = true;
+    params.dynamic = false;
+    params.size = 1.0;
+    params.mass = 1.0;
+    params.position = 1.0;
+    params.timestep = 0.005;
+    params.insideMargin = 0.0;
+    params.outsideMargin = 0.0;
+    params.options->dimension = siconos::collision::bullet::SiconosBulletDimension::TwoD;
 
-  //   BounceResult r = bounceTest("disk", "box", params);
+    BounceResult r = bounceTest("disk", "box", params);
 
-  //   fprintf(stderr, "\nSize: %g\n", params.size);
-  //   fprintf(stderr, "Final position: %g  (std=%g)\n\n", r.final_position,
-  //           r.final_position_std);
-  // } catch (...) {
-  //   siconos::exception::process();
-  //   CPPUNIT_ASSERT(0);
-  // }
+    fprintf(stderr, "\nSize: %g\n", params.size);
+    fprintf(stderr, "Final position: %g  (std=%g)\n\n", r.final_position,
+            r.final_position_std);
+  } catch (...) {
+    siconos::exception::process();
+    CPPUNIT_ASSERT(0);
+  }
 
   // CPPUNIT_ASSERT(1);
 }
 void Contact2dTest::t3() {
-  // try {
-  //   printf("\n==== t3\n");
+  try {
+    printf("\n==== t3\n");
 
-  //   BounceParams params;
-  //   params.trace = true;
-  //   params.dynamic = false;
-  //   params.size = 1.0;
-  //   params.mass = 1.0;
-  //   params.position = 1.0;
-  //   params.timestep = 0.005;
-  //   params.insideMargin = 0.0;
-  //   params.outsideMargin = 0.0;
-  //   params.options->dimension = siconos::collision::bullet::SiconosBulletDimension::TwoD;
+    BounceParams params;
+    params.trace = true;
+    params.dynamic = false;
+    params.size = 1.0;
+    params.mass = 1.0;
+    params.position = 1.0;
+    params.timestep = 0.005;
+    params.insideMargin = 0.0;
+    params.outsideMargin = 0.0;
+    params.options->dimension = siconos::collision::bullet::SiconosBulletDimension::TwoD;
 
-  //   BounceResult r = bounceTest("ch2d", "box", params);
+    BounceResult r = bounceTest("ch2d", "box", params);
 
-  //   fprintf(stderr, "\nSize: %g\n", params.size);
-  //   fprintf(stderr, "Final position: %g  (std=%g)\n\n", r.final_position,
-  //           r.final_position_std);
-  // } catch (...) {
-  //   siconos::exception::process();
-  //   CPPUNIT_ASSERT(0);
-  // }
+    fprintf(stderr, "\nSize: %g\n", params.size);
+    fprintf(stderr, "Final position: %g  (std=%g)\n\n", r.final_position,
+            r.final_position_std);
+  } catch (...) {
+    siconos::exception::process();
+    CPPUNIT_ASSERT(0);
+  }
 
   // CPPUNIT_ASSERT(1);
 }

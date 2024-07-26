@@ -39,8 +39,7 @@
 
 unsigned int siconos::mechanisms::data::sNumberOfObj = 0;
 TopoDS_Shape siconos::mechanisms::data::sTopoDS[NB_OBJ];
-siconos::mechanisms::data::CADMBTB_Type
-    siconos::mechanisms::data::sTopoDSType[NB_OBJ];
+siconos::mechanisms::data::CADMBTB_Type siconos::mechanisms::data::sTopoDSType[NB_OBJ];
 AIS_Shape* siconos::mechanisms::data::spAISToposDS[NB_OBJ];
 double siconos::mechanisms::data::spAISTrans[NB_OBJ];
 gp_Ax3 siconos::mechanisms::data::sStartTopoDS[NB_OBJ];
@@ -89,8 +88,7 @@ void siconos::mechanisms::CADMBTB_init(unsigned int NumberOfObj,
       /*rz*/ n * (n + 9) / 2 +
       /*because fortran ?*/ 1;
   int sizeI = 2 * n + 1 + 1;
-  data::sWorkD =
-      (double*)calloc(sizeD * data::sNumberOfContacts, sizeof(double));
+  data::sWorkD = (double*)calloc(sizeD * data::sNumberOfContacts, sizeof(double));
   data::sWorkInt = (int*)malloc(sizeI * data::sNumberOfContacts * sizeof(int));
 
   std::filesystem::create_directories("graphic_dump");
@@ -117,8 +115,7 @@ void siconos::mechanisms::CADMBTB_init(unsigned int NumberOfObj,
 void siconos::mechanisms::CADMBTB_initContact(unsigned int idContact) {
   assert((int)idContact < data::sNumberOfContacts &&
          "CADMBTB_initContact contactId out of range");
-  unsigned int idFace1 =
-      data::sNumberOfObj + (2 * idContact - 2 * data::sNumberOfContacts);
+  unsigned int idFace1 = data::sNumberOfObj + (2 * idContact - 2 * data::sNumberOfContacts);
   unsigned int idFace2 =
       data::sNumberOfObj + (2 * idContact + 1 - 2 * data::sNumberOfContacts);
   if (data::sTopoDSType[idFace1] == data::CADMBTB_Type::Edge) {
@@ -127,10 +124,9 @@ void siconos::mechanisms::CADMBTB_initContact(unsigned int idContact) {
     idFace2 = aux;
   }
 
-  std::cout << "CADMBTB_initContact id=" << idContact << ", type1="
-            << siconos::tools::enum_to_string(data::sTopoDSType[idFace1])
-            << ", type2="
-            << siconos::tools::enum_to_string(data::sTopoDSType[idFace2])
+  std::cout << "CADMBTB_initContact id=" << idContact
+            << ", type1=" << siconos::tools::enum_to_string(data::sTopoDSType[idFace1])
+            << ", type2=" << siconos::tools::enum_to_string(data::sTopoDSType[idFace2])
             << "\n";
 
   int n = 4;
@@ -154,7 +150,6 @@ void siconos::mechanisms::CADMBTB_initContact(unsigned int idContact) {
   double* dxim = pInSauceD;
   pInSauceD += n;
   // double  df1 =0;
-  double epsabs = 0;
   double* binf = pInSauceD;
   pInSauceD += n;
   double* bsup = pInSauceD;
@@ -171,8 +166,6 @@ void siconos::mechanisms::CADMBTB_initContact(unsigned int idContact) {
   dxim[1] = 1e-6 * (bsup[1] - binf[1]);
   dxim[2] = 1e-6 * (bsup[2] - binf[2]);
   dxim[3] = 1e-6 * (bsup[3] - binf[3]);
-
-  epsabs = 1e-4;
 
   x[0] = (binf[0] + bsup[0]) * 0.5;
   x[1] = (binf[1] + bsup[1]) * 0.5;
@@ -191,10 +184,8 @@ void siconos::mechanisms::CADMBTB_reset() {
 
 void siconos::mechanisms::CADMBTB_moveModelFromModel(unsigned int idModel1,
                                                      int unsigned idModel2) {
-  assert(data::sNumberOfObj > idModel1 &&
-         "CADMBTB_moveModelFromModel idModel1 out of range");
-  assert(data::sNumberOfObj > idModel2 &&
-         "CADMBTB_moveModelFromModel idModel2 out of range");
+  assert(data::sNumberOfObj > idModel1 && "CADMBTB_moveModelFromModel idModel1 out of range");
+  assert(data::sNumberOfObj > idModel2 && "CADMBTB_moveModelFromModel idModel2 out of range");
   data::sTopoDS[idModel1].Move(data::sTrsfTopoDS[idModel2]);
   /* Move is sufficient, but the following code merge
      the list contains in the TopLoc in an unique item.
@@ -204,10 +195,9 @@ void siconos::mechanisms::CADMBTB_moveModelFromModel(unsigned int idModel1,
   TopLoc_Location aLocWithoutList(T);
   data::sTopoDS[idModel1].Location(aLocWithoutList);
 }
-void siconos::mechanisms::CADMBTB_moveGraphicalModelFromModel(
-    unsigned int idGraphicModel, unsigned int idModel) {
-  if (!data::pAIS_InteractiveContext || !data::spAISToposDS[idGraphicModel])
-    return;
+void siconos::mechanisms::CADMBTB_moveGraphicalModelFromModel(unsigned int idGraphicModel,
+                                                              unsigned int idModel) {
+  if (!data::pAIS_InteractiveContext || !data::spAISToposDS[idGraphicModel]) return;
   assert(data::sNumberOfObj > idGraphicModel &&
          "CADMBTB_moveGraphicModelFromModel idGraphicModel out of range");
   assert(data::sNumberOfObj > idModel &&
@@ -223,18 +213,15 @@ void siconos::mechanisms::CADMBTB_moveGraphicalModelFromModel(
   // Third attempt
 
   const TopLoc_Location& aLoc = data::sTopoDS[idModel].Location();
-  data::pAIS_InteractiveContext->SetLocation(data::spAISToposDS[idGraphicModel],
-                                             aLoc);
+  data::pAIS_InteractiveContext->SetLocation(data::spAISToposDS[idGraphicModel], aLoc);
 
   // data::spAISToposDS1->SetTransformation(&(data::sGeomTrsf1),false,false);
 }
 
-void siconos::mechanisms::CADMBTB_moveObjectFromQ(unsigned int id, double& x,
-                                                  double& y, double& z,
-                                                  double& q1, double& q2,
+void siconos::mechanisms::CADMBTB_moveObjectFromQ(unsigned int id, double& x, double& y,
+                                                  double& z, double& q1, double& q2,
                                                   double& q3, double& q4) {
-  assert(data::sNumberOfObj > id &&
-         "CADMBTB_moveGraphicModelFromModel id out of range");
+  assert(data::sNumberOfObj > id && "CADMBTB_moveGraphicModelFromModel id out of range");
   ::boost::math::quaternion<double> quattrf(q1, q2, q3, q4);
 
   // gp_Trsf aTrsf;
@@ -244,13 +231,11 @@ void siconos::mechanisms::CADMBTB_moveObjectFromQ(unsigned int id, double& x,
   ::boost::math::quaternion<double> quatBuff(0, 0, 0, 0);
   quatBuff = quattrf * quatZ / quattrf;
   //    std::cout<<"Z axis"<<quatBuff<<"\n";
-  gp_Dir axeZ(quatBuff.R_component_2(), quatBuff.R_component_3(),
-              quatBuff.R_component_4());
+  gp_Dir axeZ(quatBuff.R_component_2(), quatBuff.R_component_3(), quatBuff.R_component_4());
 
   quatBuff = quattrf * quatX / quattrf;
   //    std::cout<<"X axis"<<quatBuff<<"\n";
-  gp_Dir axeX(quatBuff.R_component_2(), quatBuff.R_component_3(),
-              quatBuff.R_component_4());
+  gp_Dir axeX(quatBuff.R_component_2(), quatBuff.R_component_3(), quatBuff.R_component_4());
   gp_Ax3 aDestAx3(gp_Pnt(x, y, z), axeZ, axeX);
   // Set transformation
   data::sTrsfTopoDS[id].SetDisplacement(data::sStartTopoDS[id], aDestAx3);
@@ -268,8 +253,7 @@ void siconos::mechanisms::CADMBTB_moveObjectFromQ(unsigned int id, double& x,
   data::sStartTopoDS[id] = aDestAx3;
 }
 
-void siconos::mechanisms::CADMBTB_loadCADFile(unsigned int id,
-                                              const char* fileName) {
+void siconos::mechanisms::CADMBTB_loadCADFile(unsigned int id, const char* fileName) {
   assert(id < data::sNumberOfObj && "CADMBTB_loadCADFile id out of range");
   bool affected = false;
   printf("CADMBTB_loadCADFile id = %d using file %s.\n", id, fileName);
@@ -283,8 +267,8 @@ void siconos::mechanisms::CADMBTB_loadCADFile(unsigned int id,
     int nbr = aReader.NbRootsForTransfer();
     aReader.PrintCheckTransfer(failsonly, IFSelect_ItemsByEntity);
     for (Standard_Integer n = 1; n <= nbr; n++) {
-      bool ok;
-      ok = aReader.TransferRoot(n);
+      // bool ok = 
+      aReader.TransferRoot(n);
       int nbs = aReader.NbShapes();
       printf("importSTEP Solid, nb shapes: %d", nbs);
       if (nbs > 0) {
@@ -320,8 +304,7 @@ void siconos::mechanisms::CADMBTB_loadCADFile(unsigned int id,
           affected = true;
           //		sSManette=shape;
           std::cout << "File " << id << " loaded, type="
-                    << siconos::tools::enum_to_string(data::sTopoDSType[id])
-                    << "\n";
+                    << siconos::tools::enum_to_string(data::sTopoDSType[id]) << "\n";
         }
       }
     }
@@ -380,18 +363,20 @@ void siconos::mechanisms::CADMBTB_updateGraphic() {
     data::sCmpDump++;
   }
 }
-void siconos::mechanisms::CADMBTB_setLocation(unsigned int id, double& x,
-                                              double& y, double& z) {
+void siconos::mechanisms::CADMBTB_setLocation(unsigned int id, double& x, double& y,
+                                              double& z) {
   assert(id < data::sNumberOfObj && "CADMBTB_setLocation id out of range");
   gp_Pnt PtAux2(x, y, z);
   // data::sStartTopoDS[id].
   data::sStartTopoDS[id].SetLocation(PtAux2);
 }
 // #define CADMBTB_PRINT_DIST
-void siconos::mechanisms::CADMBTB_getMinDistance(
-    unsigned int idContact, unsigned int id1, unsigned int id2, double& X1,
-    double& Y1, double& Z1, double& X2, double& Y2, double& Z2, double& nX,
-    double& nY, double& nZ, unsigned int normalFromFace1, double& MinDist) {
+void siconos::mechanisms::CADMBTB_getMinDistance(unsigned int idContact, unsigned int id1,
+                                                 unsigned int id2, double& X1, double& Y1,
+                                                 double& Z1, double& X2, double& Y2,
+                                                 double& Z2, double& nX, double& nY,
+                                                 double& nZ, unsigned int normalFromFace1,
+                                                 double& MinDist) {
   assert(id1 < data::sNumberOfObj && "CADMBTB_getMinDistance id1 out of range");
   assert(id2 < data::sNumberOfObj && "CADMBTB_getMinDistance id2 out of range");
   assert((int)idContact < data::sNumberOfContacts &&
@@ -399,19 +384,16 @@ void siconos::mechanisms::CADMBTB_getMinDistance(
   MinDist = 1.e9;
   if (data::sTopoDSType[id2] == data::CADMBTB_Type::Edge ||
       data::sTopoDSType[id1] == data::CADMBTB_Type::Edge) {
-    _CADMBTB_getMinDistanceFaceEdge_using_n2qn1(idContact, id1, id2, X1, Y1, Z1,
-                                                X2, Y2, Z2, nX, nY, nZ,
-                                                normalFromFace1, MinDist);
+    _CADMBTB_getMinDistanceFaceEdge_using_n2qn1(idContact, id1, id2, X1, Y1, Z1, X2, Y2, Z2,
+                                                nX, nY, nZ, normalFromFace1, MinDist);
   } else {
-    _CADMBTB_getMinDistanceFaceFace_using_n2qn1(idContact, id1, id2, X1, Y1, Z1,
-                                                X2, Y2, Z2, nX, nY, nZ,
-                                                normalFromFace1, MinDist);
+    _CADMBTB_getMinDistanceFaceFace_using_n2qn1(idContact, id1, id2, X1, Y1, Z1, X2, Y2, Z2,
+                                                nX, nY, nZ, normalFromFace1, MinDist);
   }
 
 #ifdef CADMBTB_PRINT_DIST
-  printf(
-      "  CADMBTB_getMinDistance, P1(%e,%e,%e) P2(%e,%e,%e) n(%e,%e,%e): %e  \n",
-      X1, Y1, Z1, X2, Y2, Z2, nX, nY, nZ, MinDist);
+  printf("  CADMBTB_getMinDistance, P1(%e,%e,%e) P2(%e,%e,%e) n(%e,%e,%e): %e  \n", X1, Y1, Z1,
+         X2, Y2, Z2, nX, nY, nZ, MinDist);
 #endif
 }
 void siconos::mechanisms::CADMBTB_computeUVBounds(unsigned int id) {
@@ -421,15 +403,13 @@ void siconos::mechanisms::CADMBTB_computeUVBounds(unsigned int id) {
   if (data::sTopoDSType[id] == data::CADMBTB_Type::Face) {
     Ex1.Init(aShape1, TopAbs_FACE);
     BRepTools::UVBounds(TopoDS::Face(Ex1.Current()), data::sTopoDSBinf[2 * id],
-                        data::sTopoDSBsup[2 * id],
-                        data::sTopoDSBinf[2 * id + 1],
+                        data::sTopoDSBsup[2 * id], data::sTopoDSBinf[2 * id + 1],
                         data::sTopoDSBsup[2 * id + 1]);
     Ex1.Next();
     if (Ex1.More())
-      BRepTools::UVBounds(
-          TopoDS::Face(Ex1.Current()), data::sTopoDSBinf2[2 * id],
-          data::sTopoDSBsup2[2 * id], data::sTopoDSBinf2[2 * id + 1],
-          data::sTopoDSBsup2[2 * id + 1]);
+      BRepTools::UVBounds(TopoDS::Face(Ex1.Current()), data::sTopoDSBinf2[2 * id],
+                          data::sTopoDSBsup2[2 * id], data::sTopoDSBinf2[2 * id + 1],
+                          data::sTopoDSBsup2[2 * id + 1]);
   } else if (data::sTopoDSType[id] == data::CADMBTB_Type::Edge) {
     Ex1.Init(aShape1, TopAbs_EDGE);
     const TopoDS_Edge& edge = TopoDS::Edge(Ex1.Current());
@@ -443,32 +423,29 @@ void siconos::mechanisms::CADMBTB_computeUVBounds(unsigned int id) {
   }
 }
 /*Could be call even if the case of an edge.*/
-void siconos::mechanisms::CADMBTB_getUVBounds(unsigned int id, double& U1,
-                                              double& U2, double& V1,
-                                              double& V2) {
+void siconos::mechanisms::CADMBTB_getUVBounds(unsigned int id, double& U1, double& U2,
+                                              double& V1, double& V2) {
   assert(id < data::sNumberOfObj && "CADMBTB_getUVBounds id out of range");
   U1 = data::sTopoDSBinf[2 * id];
   V1 = data::sTopoDSBinf[2 * id + 1];
   U2 = data::sTopoDSBsup[2 * id];
   V2 = data::sTopoDSBsup[2 * id + 1];
 #ifdef CADMBTB_LOAD_CONTACT
-  printf("CADMBTB_getUVBounds UVBOUNDS idContact1=%d,U1=%e,U2=%e,V1=%e,V2=%e\n",
-         id, U1, U2, V1, V2);
+  printf("CADMBTB_getUVBounds UVBOUNDS idContact1=%d,U1=%e,U2=%e,V1=%e,V2=%e\n", id, U1, U2,
+         V1, V2);
 #endif
 }
 /*Could be call even if the case of an edge.*/
-void siconos::mechanisms::CADMBTB_getUVBounds2(unsigned int id, double& U1,
-                                               double& U2, double& V1,
-                                               double& V2) {
+void siconos::mechanisms::CADMBTB_getUVBounds2(unsigned int id, double& U1, double& U2,
+                                               double& V1, double& V2) {
   assert(id < data::sNumberOfObj && "CADMBTB_getUVBounds id out of range");
   U1 = data::sTopoDSBinf2[2 * id];
   V1 = data::sTopoDSBinf2[2 * id + 1];
   U2 = data::sTopoDSBsup2[2 * id];
   V2 = data::sTopoDSBsup2[2 * id + 1];
 #ifdef CADMBTB_LOAD_CONTACT
-  printf(
-      "CADMBTB_getUVBounds2 UVBOUNDS idContact1=%d,U1=%e,U2=%e,V1=%e,V2=%e\n",
-      id, U1, U2, V1, V2);
+  printf("CADMBTB_getUVBounds2 UVBOUNDS idContact1=%d,U1=%e,U2=%e,V1=%e,V2=%e\n", id, U1, U2,
+         V1, V2);
 #endif
 }
 
@@ -481,14 +458,11 @@ void siconos::mechanisms::CADMBTB_getUVBounds2(unsigned int id, double& U1,
 // #endif
 // }
 
-void siconos::mechanisms::CADMBTB_buildLineArtefactLine(unsigned int id,
-                                                        double* X1, double* Y1,
-                                                        double* Z1, double* X2,
-                                                        double* Y2,
-                                                        double* Z2) {
+void siconos::mechanisms::CADMBTB_buildLineArtefactLine(unsigned int id, double* X1,
+                                                        double* Y1, double* Z1, double* X2,
+                                                        double* Y2, double* Z2) {
   if (!data::pAIS_InteractiveContext) return;
-  assert(id < data::sNumberOfArtefacts &&
-         "CADMBTB_buildArtefactLine id out of range");
+  assert(id < data::sNumberOfArtefacts && "CADMBTB_buildArtefactLine id out of range");
   if (data::sAISArtefacts[id]) {
     data::pAIS_InteractiveContext->Erase(data::sAISArtefacts[id], true);
     data::sAISArtefacts[id] = nullptr;
@@ -522,12 +496,12 @@ void siconos::mechanisms::CADMBTB_buildLineArtefactLine(unsigned int id,
   data::pAIS_InteractiveContext->Display(data::sAISArtefacts[id], false);
 }
 
-void siconos::mechanisms::CADMBTB_buildCylinderArtefactLine(
-    unsigned int id, double* X1, double* Y1, double* Z1, double* X2, double* Y2,
-    double* Z2, double* radius) {
+void siconos::mechanisms::CADMBTB_buildCylinderArtefactLine(unsigned int id, double* X1,
+                                                            double* Y1, double* Z1, double* X2,
+                                                            double* Y2, double* Z2,
+                                                            double* radius) {
   if (!data::pAIS_InteractiveContext) return;
-  assert(id < data::sNumberOfArtefacts &&
-         "CADMBTB_buildArtefactLine id out of range");
+  assert(id < data::sNumberOfArtefacts && "CADMBTB_buildArtefactLine id out of range");
   if (data::sAISArtefacts[id]) {
     data::pAIS_InteractiveContext->Erase(data::sAISArtefacts[id], true);
     data::sAISArtefacts[id] = nullptr;
@@ -540,8 +514,8 @@ void siconos::mechanisms::CADMBTB_buildCylinderArtefactLine(
   gp_Dir V;
   V.SetCoord(-(*X1 - *X2), -(*Y1 - *Y2), -(*Z1 - *Z2));
   gp_Ax2 gpA2(P1, V);
-  double l = sqrt((*X1 - *X2) * (*X1 - *X2) + (*Y1 - *Y2) * (*Y1 - *Y2) +
-                  (*Z1 - *Z2) * (*Z1 - *Z2));
+  double l =
+      sqrt((*X1 - *X2) * (*X1 - *X2) + (*Y1 - *Y2) * (*Y1 - *Y2) + (*Z1 - *Z2) * (*Z1 - *Z2));
   BRepPrim_Cylinder makeCyl(gpA2, *radius, l);
   gp_Ax2 gpA2b(P2, V);
   BRepPrim_Cone makeCone(gpA2b, 5 * (*radius), 0, 0.1 * l);
@@ -566,12 +540,12 @@ void siconos::mechanisms::CADMBTB_buildCylinderArtefactLine(
   data::pAIS_InteractiveContext->Display(data::sAISArtefacts[id], false);
 }
 
-void siconos::mechanisms::CADMBTB_buildOrientedLineArtefactLine(
-    unsigned int id, double* X1, double* Y1, double* Z1, double* X2, double* Y2,
-    double* Z2) {
+void siconos::mechanisms::CADMBTB_buildOrientedLineArtefactLine(unsigned int id, double* X1,
+                                                                double* Y1, double* Z1,
+                                                                double* X2, double* Y2,
+                                                                double* Z2) {
   if (!data::pAIS_InteractiveContext) return;
-  assert(id < data::sNumberOfArtefacts &&
-         "CADMBTB_buildArtefactLine id out of range");
+  assert(id < data::sNumberOfArtefacts && "CADMBTB_buildArtefactLine id out of range");
   if (data::sAISArtefacts[id]) {
     data::pAIS_InteractiveContext->Erase(data::sAISArtefacts[id], true);
     data::sAISArtefacts[id] = nullptr;
@@ -609,8 +583,7 @@ void siconos::mechanisms::CADMBTB_buildOrientedLineArtefactLine(
     BRepBuilderAPI_MakeEdge MakeEdge2(P2, P3);
     B.MakeCompound(compound);
     B.Add(compound, MakeEdge.Edge());
-    if (P2.Distance(P3) > data::sMinLineLength)
-      B.Add(compound, MakeEdge2.Edge());
+    if (P2.Distance(P3) > data::sMinLineLength) B.Add(compound, MakeEdge2.Edge());
 
     data::sAISArtefacts[id] = new AIS_Shape(compound);
     // printf("CADMBTB_buildArtefactLine P1 = %e, %e, %e,

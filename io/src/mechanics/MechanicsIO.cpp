@@ -788,7 +788,6 @@ struct ContactContactWorkVisitor : public siconos::internal::SiconosVisitor {
 /* then specializations : */
 template <>
 void ContactContactWorkVisitor::operator()(const siconos::modeling::NewtonEuler3DR& rel) {
-  auto id = inter->number();
   answer.resize(6);
 }
 
@@ -802,7 +801,7 @@ static void compute_contact_work_and_status(
   auto vn_plus = inter->y(1)->getValue(0);
   auto pn = inter->lambda(1)->getValue(0);
 
-  double vn_average = omega * vn_plus + (1. - omega) * vn_minus;
+  // double vn_average = omega * vn_plus + (1. - omega) * vn_minus;
   auto normal_contact_work = 0.5 * (vn_minus + vn_plus) * pn;
   answer.setValue(1, normal_contact_work);
 
@@ -835,7 +834,7 @@ static void compute_contact_work_and_status(
 
   double norm_pt = sqrt(pt_1 * pt_1 + pt_2 * pt_2);
   double norm_vt_plus = sqrt(vt_1_plus * vt_1_plus + vt_2_plus * vt_2_plus);
-  double norm_vt_minus = sqrt(vt_1_minus * vt_1_minus + vt_2_minus * vt_2_minus);
+  // double norm_vt_minus = sqrt(vt_1_minus * vt_1_minus + vt_2_minus * vt_2_minus);
   if ((pn < tol) and (vn_plus + e * vn_minus > tol))
     answer.setValue(4, 0);  // take-off = 0
   else if ((pn > tol) and (vn_plus + e * vn_minus < tol)) {

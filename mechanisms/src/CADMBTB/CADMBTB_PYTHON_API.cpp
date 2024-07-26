@@ -29,14 +29,12 @@
 
 #include "CADMBTB_DATA.hpp"
 
-AIS_InteractiveContext* siconos::mechanisms::data::pAIS_InteractiveContext =
-    nullptr;
+AIS_InteractiveContext* siconos::mechanisms::data::pAIS_InteractiveContext = nullptr;
 V3d_View* siconos::mechanisms::data::pV3d_View = nullptr;
 int siconos::mechanisms::data::sCmpDump = 0;
 unsigned int siconos::mechanisms::data::sCmpDumpMan = 0;
 
-void siconos::mechanisms::CADMBTB_loadArtefactCADFile(const char* fileName,
-                                                      double trans) {
+void siconos::mechanisms::CADMBTB_loadArtefactCADFile(const char* fileName, double trans) {
   if (!data::pAIS_InteractiveContext) return;
 
   printf("CADMBTB_loadArtefactCADFile using file %s.\n", fileName);
@@ -49,8 +47,8 @@ void siconos::mechanisms::CADMBTB_loadArtefactCADFile(const char* fileName,
     int nbr = aReader.NbRootsForTransfer();
     aReader.PrintCheckTransfer(failsonly, IFSelect_ItemsByEntity);
     for (Standard_Integer n = 1; n <= nbr; n++) {
-      bool ok;
-      ok = aReader.TransferRoot(n);
+      // bool ok =
+      aReader.TransferRoot(n);
       int nbs = aReader.NbShapes();
       printf("importSTEP Solid, nb shapes: %d", nbs);
       if (nbs > 0) {
@@ -65,14 +63,11 @@ void siconos::mechanisms::CADMBTB_loadArtefactCADFile(const char* fileName,
   }
 }
 
-void siconos::mechanisms::CADMBTB_setGraphicContext(
-    AIS_InteractiveContext& aisContext) {
+void siconos::mechanisms::CADMBTB_setGraphicContext(AIS_InteractiveContext& aisContext) {
   data::pAIS_InteractiveContext = &aisContext;
 }
 
-void siconos::mechanisms::CADMBTB_setGraphicView(V3d_View& aView) {
-  data::pV3d_View = &aView;
-}
+void siconos::mechanisms::CADMBTB_setGraphicView(V3d_View& aView) { data::pV3d_View = &aView; }
 void siconos::mechanisms::CADMBTB_disableGraphic() {
   data::pAIS_InteractiveContext = nullptr;
   data::pV3d_View = nullptr;
@@ -80,22 +75,18 @@ void siconos::mechanisms::CADMBTB_disableGraphic() {
 
 void siconos::mechanisms::CADMBTB_setContactDParam(unsigned int IdParam,
                                                    unsigned int idContact,
-                                                   unsigned int idShape,
-                                                   double v) {
-  assert(idContact < data::sNumberOfContacts &&
+                                                   unsigned int idShape, double v) {
+  assert((int)idContact < data::sNumberOfContacts &&
          "CADMBTB_setContactAISdParam contactId out of range");
-  unsigned int idShape1 = data::sNumberOfObj +
-                          (2 * idContact - 2 * data::sNumberOfContacts) +
-                          idShape;
+  unsigned int idShape1 =
+      data::sNumberOfObj + (2 * idContact - 2 * data::sNumberOfContacts) + idShape;
 
   CADMBTB_setShapeDParam(IdParam, idShape1, v);
 }
 
-void siconos::mechanisms::CADMBTB_setShapeDParam(unsigned int IdParam,
-                                                 unsigned int idShape,
+void siconos::mechanisms::CADMBTB_setShapeDParam(unsigned int IdParam, unsigned int idShape,
                                                  double v) {
-  assert(idShape < data::sNumberOfObj &&
-         "CADMBTB_setShapeDParam idShape out of range");
+  assert(idShape < data::sNumberOfObj && "CADMBTB_setShapeDParam idShape out of range");
   switch (IdParam) {
     case 0:
       data::spAISTrans[idShape] = v;
@@ -120,6 +111,4 @@ void siconos::mechanisms::CADMBTB_DumpGraphic() {
     data::sCmpDumpMan++;
   }
 }
-void siconos::mechanisms::CADMBTB_print_dist(unsigned int v) {
-  data::sCADPrintDist = v;
-}
+void siconos::mechanisms::CADMBTB_print_dist(unsigned int v) { data::sCADPrintDist = v; }

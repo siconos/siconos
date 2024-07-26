@@ -93,8 +93,7 @@ siconos::algebra::BlockVector::BlockVector(std::shared_ptr<SiconosVector> v1,
   }
 }
 
-siconos::algebra::BlockVector::BlockVector(unsigned int numberOfBlocks,
-                                           unsigned int dim) {
+siconos::algebra::BlockVector::BlockVector(unsigned int numberOfBlocks, unsigned int dim) {
   _tabIndex = std::make_shared<std::vector<std::size_t>>();
   _tabIndex->reserve(numberOfBlocks);
   _vect.reserve(numberOfBlocks);
@@ -169,8 +168,7 @@ void siconos::algebra::BlockVector::display() const {
 // convert to an ostream
 //=====================
 
-std::ostream& siconos::algebra::operator<<(std::ostream& os,
-                                           const BlockVector& bv) {
+std::ostream& siconos::algebra::operator<<(std::ostream& os, const BlockVector& bv) {
   os << "[" << bv._vect.size() << "](";
   for (auto& it : bv._vect) {
     if (it)
@@ -190,8 +188,7 @@ std::ostream& siconos::algebra::operator<<(std::ostream& os,
 double siconos::algebra::BlockVector::getValue(unsigned int pos) const {
   unsigned int blockNum = 0;
 
-  while (pos >= (*_tabIndex)[blockNum] && blockNum < _tabIndex->size())
-    blockNum++;
+  while (pos >= (*_tabIndex)[blockNum] && blockNum < _tabIndex->size()) blockNum++;
 
   unsigned int relativePos = pos;
 
@@ -203,8 +200,7 @@ double siconos::algebra::BlockVector::getValue(unsigned int pos) const {
 void siconos::algebra::BlockVector::setValue(unsigned int pos, double value) {
   unsigned int blockNum = 0;
 
-  while (pos >= (*_tabIndex)[blockNum] && blockNum < _tabIndex->size())
-    blockNum++;
+  while (pos >= (*_tabIndex)[blockNum] && blockNum < _tabIndex->size()) blockNum++;
 
   unsigned int relativePos = pos;
 
@@ -216,8 +212,7 @@ void siconos::algebra::BlockVector::setValue(unsigned int pos, double value) {
 double& siconos::algebra::BlockVector::operator()(unsigned int pos) {
   unsigned int blockNum = 0;
 
-  while (pos >= (*_tabIndex)[blockNum] && blockNum < _tabIndex->size())
-    blockNum++;
+  while (pos >= (*_tabIndex)[blockNum] && blockNum < _tabIndex->size()) blockNum++;
 
   unsigned int relativePos = pos;
 
@@ -234,15 +229,14 @@ double siconos::algebra::BlockVector::operator()(unsigned int pos) const {
 // Access (get or set) to blocks of elements
 //============================================
 
-void siconos::algebra::BlockVector::setVector(unsigned int pos,
-                                              const SiconosVector& v) {
+void siconos::algebra::BlockVector::setVector(unsigned int pos, const SiconosVector& v) {
   assert(pos < _vect.size() && "insertion out of vector size");
   if (!_vect[pos]) THROW_EXCEPTION("this[pos] == nullptr pointer.");
   *_vect[pos] = v;
 }
 
-void siconos::algebra::BlockVector::setVectorPtr(
-    unsigned int pos, std::shared_ptr<SiconosVector> v) {
+void siconos::algebra::BlockVector::setVectorPtr(unsigned int pos,
+                                                 std::shared_ptr<SiconosVector> v) {
   assert(pos < _vect.size() && "insertion out of vector size");
   _vect[pos] = v;
   _update();
@@ -253,12 +247,10 @@ void siconos::algebra::BlockVector::setAllVect(VectorOfVectors& v) {
   _update();
 }
 
-unsigned int siconos::algebra::BlockVector::getNumVectorAtPos(
-    unsigned int pos) const {
+unsigned int siconos::algebra::BlockVector::getNumVectorAtPos(unsigned int pos) const {
   unsigned int blockNum = 0;
 
-  while (pos >= (*_tabIndex)[blockNum] && blockNum < _tabIndex->size() - 1)
-    blockNum++;
+  while (pos >= (*_tabIndex)[blockNum] && blockNum < _tabIndex->size() - 1) blockNum++;
   return blockNum;
 }
 
@@ -267,9 +259,8 @@ siconos::algebra::BlockVector& siconos::algebra::BlockVector::operator=(
   if (&vIn == this)
     return *this;
   else {
-    if (siconos::algebra::isComparableTo(
-            *this,
-            vIn))  // if vIn and this are "block-consistent"
+    if (siconos::algebra::isComparableTo(*this,
+                                         vIn))  // if vIn and this are "block-consistent"
     {
       auto it2 = vIn.begin();
       for (auto& it1 : _vect) {
@@ -283,13 +274,11 @@ siconos::algebra::BlockVector& siconos::algebra::BlockVector::operator=(
   }
 }
 
-siconos::algebra::BlockVector& siconos::algebra::BlockVector::operator=(
-    const double* data) {
+siconos::algebra::BlockVector& siconos::algebra::BlockVector::operator=(const double* data) {
   unsigned indxPos = 0;
 
   for (auto& vect : _vect) {
-    double* ptr =
-        const_cast<double*>(&data[indxPos]);  // const_cat needed by Eigne::Map
+    double* ptr = const_cast<double*>(&data[indxPos]);  // const_cat needed by Eigne::Map
     *vect = Eigen::Map<SiconosVector>(ptr, vect->size());
     indxPos += vect->size();
   }
@@ -298,8 +287,7 @@ siconos::algebra::BlockVector& siconos::algebra::BlockVector::operator=(
 
 siconos::algebra::BlockVector& siconos::algebra::BlockVector::operator-=(
     const BlockVector& vIn) {
-  if (siconos::algebra::isComparableTo(
-          *this, vIn))  // if vIn and this are "block-consistent"
+  if (siconos::algebra::isComparableTo(*this, vIn))  // if vIn and this are "block-consistent"
   {
     unsigned int i = 0;
     for (auto& it1 : _vect) {
@@ -330,8 +318,7 @@ siconos::algebra::BlockVector& siconos::algebra::BlockVector::operator-=(
 
 siconos::algebra::BlockVector& siconos::algebra::BlockVector::operator+=(
     const BlockVector& vIn) {
-  if (siconos::algebra::isComparableTo(
-          *this, vIn))  // if vIn and this are "block-consistent"
+  if (siconos::algebra::isComparableTo(*this, vIn))  // if vIn and this are "block-consistent"
   {
     unsigned int i = 0;
 
@@ -367,8 +354,7 @@ siconos::algebra::BlockVector& siconos::algebra::BlockVector::operator+=(
   return *this;
 }
 
-void siconos::algebra::BlockVector::insertPtr(
-    std::shared_ptr<SiconosVector> v) {
+void siconos::algebra::BlockVector::insertPtr(std::shared_ptr<SiconosVector> v) {
   if (!v) THROW_EXCEPTION("v is a nullptr vector.");
 
   _sizeV += v->size();
@@ -376,10 +362,8 @@ void siconos::algebra::BlockVector::insertPtr(
   _tabIndex->push_back(_sizeV);
 }
 
-void siconos::algebra::BlockVector::setBlock(const SiconosVector& vIn,
-                                             unsigned int sizeB,
-                                             unsigned int startIn,
-                                             unsigned int startOut) {
+void siconos::algebra::BlockVector::setBlock(const SiconosVector& vIn, unsigned int sizeB,
+                                             unsigned int startIn, unsigned int startOut) {
   // Check dim ...
   unsigned int endOut = startOut + sizeB;
 
@@ -390,8 +374,7 @@ void siconos::algebra::BlockVector::setBlock(const SiconosVector& vIn,
 
   // We look for the block of vOut that include index startOut
   unsigned int blockOutStart = 0;
-  while (startOut >= (*_tabIndex)[blockOutStart] &&
-         blockOutStart < _tabIndex->size())
+  while (startOut >= (*_tabIndex)[blockOutStart] && blockOutStart < _tabIndex->size())
     blockOutStart++;
   // Relative position in the block blockOutStart.
   unsigned int posOut = startOut;
@@ -399,8 +382,7 @@ void siconos::algebra::BlockVector::setBlock(const SiconosVector& vIn,
 
   // We look for the block of vOut that include index endOut
   unsigned int blockOutEnd = blockOutStart;
-  while (endOut > (*_tabIndex)[blockOutEnd] && blockOutEnd < _tabIndex->size())
-    blockOutEnd++;
+  while (endOut > (*_tabIndex)[blockOutEnd] && blockOutEnd < _tabIndex->size()) blockOutEnd++;
 
   // => the block to be set runs from block number blockOutStart to block number
   // blockOutEnd.
@@ -489,24 +471,21 @@ siconos::algebra::BlockVector& siconos::algebra::BlockVector::operator=(
   return *this;
 }
 
-siconos::algebra::BlockVector& siconos::algebra::BlockVector::operator*=(
-    double s) {
+siconos::algebra::BlockVector& siconos::algebra::BlockVector::operator*=(double s) {
   for (auto it = begin(); it != end(); ++it) {
     (**it) *= s;
   }
   return *this;
 }
 
-siconos::algebra::BlockVector& siconos::algebra::BlockVector::operator/=(
-    double s) {
+siconos::algebra::BlockVector& siconos::algebra::BlockVector::operator/=(double s) {
   for (auto it = begin(); it != end(); ++it) {
     (**it) /= s;
   }
   return *this;
 }
 
-bool siconos::algebra::isComparableTo(const BlockVector& v1,
-                                      const BlockVector& v2) {
+bool siconos::algebra::isComparableTo(const BlockVector& v1, const BlockVector& v2) {
   // return:
   //  - true if both are block but with blocks which are facing each other of
   //  the same size.

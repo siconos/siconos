@@ -1,4 +1,5 @@
 #include "fc3d_NaturalMapFABGenerated.h"
+
 #include "funcodegen.h"
 /*@
 requires (0.0 <= rn <= 1.0e+6);
@@ -33,19 +34,9 @@ ensures \is_finite((double) result[17]);
 ensures \is_finite((double) result[18]);
 ensures \is_finite((double) result[19]);
 ensures \is_finite((double) result[20]);*/
-void fc3d_NaturalMapFABGenerated(
-  double rn,
-  double rt1,
-  double rt2,
-  double un,
-  double ut1,
-  double ut2,
-  double mu,
-  double rhon,
-  double rhot1,
-  double rhot2,
-  double *result)
-{
+void fc3d_NaturalMapFABGenerated(double rn, double rt1, double rt2, double un, double ut1,
+                                 double ut2, double mu, double rhon, double rhot1,
+                                 double rhot2, double *result) {
   /*@ assert \is_finite((double) ut1); */
   /*@ assert \is_finite((double) epsilon); */
   /*@ assert \is_finite((double) un); */
@@ -76,9 +67,9 @@ void fc3d_NaturalMapFABGenerated(
   double x126 = 0.;
   double x127 = 0.;
 
-  x1 = rt1*rt1 + rt2*rt2;
+  x1 = rt1 * rt1 + rt2 * rt2;
   /*@ assert x1 >= 0; */
-  x2 = ut1*ut1 + ut2*ut2;
+  x2 = ut1 * ut1 + ut2 * ut2;
   /*@ assert x2 >= 0; */
   x34 = x1 <= epsilon;
   /*@ assert x34 <==> (x1 <= epsilon); */
@@ -141,18 +132,18 @@ void fc3d_NaturalMapFABGenerated(
   int x51 = 0;
   int x52 = 0;
 
-  x10 = mu*ut1;
+  x10 = mu * ut1;
   x11 = rt1 - x10;
-  x12 = x11*x11;
+  x12 = x11 * x11;
   /*@ assert x12 >= 0; */
-  x13 = mu*ut2;
+  x13 = mu * ut2;
   x14 = rt2 - x13;
-  x15 = x14*x14;
+  x15 = x14 * x14;
   /*@ assert x15 >= 0; */
   x16 = x12 + x15;
   x49 = x2 >= epsilon;
   /*@ assert x49 <==> (x2 >= epsilon); */
-  x50 = epsilon*(mu + 1);
+  x50 = epsilon * (mu + 1);
   /*@ assert x50 >= 0; */
   /*@ assert x50 != 0; */
   x51 = x16 <= x50;
@@ -242,630 +233,504 @@ void fc3d_NaturalMapFABGenerated(
   x75 = x16 > x50;
   /*@ assert x75 <==> (x16 > x50); */
 
-  if(x36)
-  {
-    x4 = 2*mu*mu - 2*mu + 1;
-    x6 = mu*rn;
+  if (x36) {
+    x4 = 2 * mu * mu - 2 * mu + 1;
+    x6 = mu * rn;
     /*@ assert x6 >= 0; */
     /*@ assert 2 >= 0; */
     x29 = sqrt(2);
     /*@ assert x29 >= 0; */
     /*@ assert x29 != 0; */
-    x30 = -1.0*un + x6;
+    x30 = -1.0 * un + x6;
     x31 = Heaviside(x30);
-    x32 = mu*x31;
-    x33 = (1.0/2.0)*x29*x32;
+    x32 = mu * x31;
+    x33 = (1.0 / 2.0) * x29 * x32;
     /*@ assert x4 < -epsilon || x4 > epsilon; */
-    x81 = 1.0/x4;
+    x81 = 1.0 / x4;
     x82 = mu - 1;
-    x83 = x82*x82;
+    x83 = x82 * x82;
     /*@ assert x83 >= 0; */
-    x103 = mu*mu;
+    x103 = mu * mu;
     /*@ assert x103 >= 0; */
-    x104 = x31*x81;
-    x125 = -2.0*mu + 2*x103 + 1.0;
+    x104 = x31 * x81;
+    x125 = -2.0 * mu + 2 * x103 + 1.0;
     /*@ assert x125 < -epsilon || x125 > epsilon; */
-    x126 = 1.0/x125;
-    x127 = mu*mu*mu;
+    x126 = 1.0 / x125;
+    x127 = mu * mu * mu;
     /*@ assert x127 >= 0; */
-
   }
-  if(x48)
-  {
-    x6 = mu*rn;
+  if (x48) {
+    x6 = mu * rn;
     x7 = -un;
     /*@ assert 2 >= 0; */
     x29 = sqrt(2);
-    x30 = -1.0*un + x6;
+    x30 = -1.0 * un + x6;
     x37 = sqrt(x1);
     /*@ assert x37 < -epsilon || x37 > epsilon; */
-    x38 = 1.0/x37;
-    x39 = 0.25*mu*x38;
+    x38 = 1.0 / x37;
+    x39 = 0.25 * mu * x38;
     x40 = Heaviside(x30 + x37);
-    x41 = 2*x40;
-    x42 = rt1*x41;
-    x43 = Heaviside(x30 - 1.0*x37);
-    x44 = 2.0*x43;
-    x45 = x29*x37;
-    x46 = x40*x45 + x43*x45;
-    x65 = rt2*x41;
+    x41 = 2 * x40;
+    x42 = rt1 * x41;
+    x43 = Heaviside(x30 - 1.0 * x37);
+    x44 = 2.0 * x43;
+    x45 = x29 * x37;
+    x46 = x40 * x45 + x43 * x45;
+    x65 = rt2 * x41;
     /*@ assert x1 < -epsilon || x1 > epsilon; */
-    x84 = 1.0/((sqrt(x1))*(sqrt(x1))*(sqrt(x1)));
-    x85 = 0.25*mu*x84;
-    x86 = rt2*rt2;
+    x84 = 1.0 / ((sqrt(x1)) * (sqrt(x1)) * (sqrt(x1)));
+    x85 = 0.25 * mu * x84;
+    x86 = rt2 * rt2;
     /*@ assert x86 >= 0; */
     x87 = x6 + x7;
     x88 = Max(0, x37 + x87);
     /*@ assert x88 >= 0; */
-    x89 = 2*x88;
+    x89 = 2 * x88;
     x90 = Max(0, -x37 + x87);
     /*@ assert x90 >= 0; */
-    x91 = 2.0*x90;
-    x92 = rt1*rt1;
+    x91 = 2.0 * x90;
+    x92 = rt1 * rt1;
     /*@ assert x92 >= 0; */
-    x93 = 2*x37*x40;
-    x94 = 2*x37;
-    x95 = x43*x92;
-    x96 = rt1*rt1*rt1;
-    x97 = x40*x86;
-    x98 = x43*x86;
-    x105 = 2.0*x88;
-    x106 = 2*x90;
-    x107 = 2*x37*x43;
-    x108 = x40*x92;
-    x109 = x29*(x108 - x95 + x97 - x98);
-    x128 = rt2*rt2*rt2;
-
+    x93 = 2 * x37 * x40;
+    x94 = 2 * x37;
+    x95 = x43 * x92;
+    x96 = rt1 * rt1 * rt1;
+    x97 = x40 * x86;
+    x98 = x43 * x86;
+    x105 = 2.0 * x88;
+    x106 = 2 * x90;
+    x107 = 2 * x37 * x43;
+    x108 = x40 * x92;
+    x109 = x29 * (x108 - x95 + x97 - x98);
+    x128 = rt2 * rt2 * rt2;
   }
-  if(x52)
-  {
-    x6 = mu*rn;
+  if (x52) {
+    x6 = mu * rn;
     /*@ assert 2 >= 0; */
     x29 = sqrt(2);
-    x30 = -1.0*un + x6;
+    x30 = -1.0 * un + x6;
     x31 = Heaviside(x30);
-    x32 = mu*x31;
-    x33 = (1.0/2.0)*x29*x32;
-
+    x32 = mu * x31;
+    x33 = (1.0 / 2.0) * x29 * x32;
   }
-  if(x54)
-  {
-    x6 = mu*rn;
-    x30 = -1.0*un + x6;
+  if (x54) {
+    x6 = mu * rn;
+    x30 = -1.0 * un + x6;
     x37 = sqrt(x1);
     /*@ assert x37 < -epsilon || x37 > epsilon; */
-    x38 = 1.0/x37;
-    x43 = Heaviside(x30 - 1.0*x37);
-    x53 = mu*x38*x43;
-
+    x38 = 1.0 / x37;
+    x43 = Heaviside(x30 - 1.0 * x37);
+    x53 = mu * x38 * x43;
   }
-  if(x64)
-  {
-    x6 = mu*rn;
+  if (x64) {
+    x6 = mu * rn;
     x7 = -un;
     x8 = sqrt(x2);
-    x9 = -mu*x8 + x6 + x7;
+    x9 = -mu * x8 + x6 + x7;
     /*@ assert x16 >= 0; */
     x17 = sqrt(x16);
     x18 = x17 + x9;
     x19 = Max(0, x18);
     /*@ assert x19 >= 0; */
-    x20 = 0.5*x19;
+    x20 = 0.5 * x19;
     x21 = -x20;
     x22 = -x17 + x9;
     x23 = Max(0, x22);
     /*@ assert x23 >= 0; */
-    x24 = 0.5*x23;
+    x24 = 0.5 * x23;
     x25 = Heaviside(x18);
-    x26 = 0.5*x25;
+    x26 = 0.5 * x25;
     x27 = Heaviside(x22);
-    x28 = 0.5*x27;
+    x28 = 0.5 * x27;
     /*@ assert x8 < -epsilon || x8 > epsilon; */
-    x55 = 1.0/x8;
-    x56 = -x10*x55;
+    x55 = 1.0 / x8;
+    x56 = -x10 * x55;
     /*@ assert x17 < -epsilon || x17 > epsilon; */
-    x57 = 1.0/x17;
-    x58 = mu*x57;
-    x59 = x11*x58;
+    x57 = 1.0 / x17;
+    x58 = mu * x57;
+    x59 = x11 * x58;
     x60 = x56 - x59;
     x61 = x56 + x59;
-    x66 = -x13*x55;
-    x67 = x14*x58;
+    x66 = -x13 * x55;
+    x67 = x14 * x58;
     x68 = x66 - x67;
     x69 = x66 + x67;
-    x72 = 0.5*x25*x57;
-    x73 = x11*x72;
-    x74 = 0.5*x27*x57;
-    x76 = x14*x72;
+    x72 = 0.5 * x25 * x57;
+    x73 = x11 * x72;
+    x74 = 0.5 * x27 * x57;
+    x76 = x14 * x72;
     x78 = -rt1 + x10;
-    x80 = x74*x78;
+    x80 = x74 * x78;
     x99 = -x58;
     /*@ assert x16 < -epsilon || x16 > epsilon; */
-    x100 = 1.0/((sqrt(x16))*(sqrt(x16))*(sqrt(x16)));
-    x101 = mu*x100;
-    x102 = x11*x78;
-    x110 = x11*x14;
-    x111 = -0.5*mu*x100*x110*x19;
-    x112 = x14*x78;
-    x113 = 0.5*mu*x100*x23;
+    x100 = 1.0 / ((sqrt(x16)) * (sqrt(x16)) * (sqrt(x16)));
+    x101 = mu * x100;
+    x102 = x11 * x78;
+    x110 = x11 * x14;
+    x111 = -0.5 * mu * x100 * x110 * x19;
+    x112 = x14 * x78;
+    x113 = 0.5 * mu * x100 * x23;
     x120 = -rt2 + x13;
-    x122 = x11*x120;
-    x124 = x120*x74;
-    x129 = x120*x14;
-
+    x122 = x11 * x120;
+    x124 = x120 * x74;
+    x129 = x120 * x14;
   }
-  if(x51)
-  {
-    x6 = mu*rn;
+  if (x51) {
+    x6 = mu * rn;
     x7 = -un;
     x8 = sqrt(x2);
-    x9 = -mu*x8 + x6 + x7;
+    x9 = -mu * x8 + x6 + x7;
     /*@ assert x16 >= 0; */
     x17 = sqrt(x16);
     x18 = x17 + x9;
     x19 = Max(0, x18);
-    x20 = 0.5*x19;
+    x20 = 0.5 * x19;
     x21 = -x20;
     x22 = -x17 + x9;
     x23 = Max(0, x22);
-    x24 = 0.5*x23;
+    x24 = 0.5 * x23;
     x25 = Heaviside(x18);
-    x26 = 0.5*x25;
+    x26 = 0.5 * x25;
     x27 = Heaviside(x22);
-    x28 = 0.5*x27;
-    x30 = -1.0*un + x6;
+    x28 = 0.5 * x27;
+    x30 = -1.0 * un + x6;
     x37 = sqrt(x1);
-    x43 = Heaviside(x30 - 1.0*x37);
-    x70 = -mu*x26;
-    x71 = mu*x28;
-
+    x43 = Heaviside(x30 - 1.0 * x37);
+    x70 = -mu * x26;
+    x71 = mu * x28;
   }
-  if(x75)
-  {
-    x6 = mu*rn;
+  if (x75) {
+    x6 = mu * rn;
     x7 = -un;
     x8 = sqrt(x2);
-    x9 = -mu*x8 + x6 + x7;
+    x9 = -mu * x8 + x6 + x7;
     /*@ assert x16 >= 0; */
     x17 = sqrt(x16);
     x18 = x17 + x9;
     x19 = Max(0, x18);
-    x20 = 0.5*x19;
+    x20 = 0.5 * x19;
     x21 = -x20;
     x22 = -x17 + x9;
     x23 = Max(0, x22);
-    x24 = 0.5*x23;
+    x24 = 0.5 * x23;
     x25 = Heaviside(x18);
-    x26 = 0.5*x25;
+    x26 = 0.5 * x25;
     x27 = Heaviside(x22);
     /*@ assert x17 < -epsilon || x17 > epsilon; */
-    x57 = 1.0/x17;
-    x58 = mu*x57;
-    x59 = x11*x58;
-    x67 = x14*x58;
-    x72 = 0.5*x25*x57;
-    x73 = x11*x72;
-    x74 = 0.5*x27*x57;
-    x76 = x14*x72;
-    x77 = 0.5*x19*x57;
+    x57 = 1.0 / x17;
+    x58 = mu * x57;
+    x59 = x11 * x58;
+    x67 = x14 * x58;
+    x72 = 0.5 * x25 * x57;
+    x73 = x11 * x72;
+    x74 = 0.5 * x27 * x57;
+    x76 = x14 * x72;
+    x77 = 0.5 * x19 * x57;
     x78 = -rt1 + x10;
-    x79 = 0.5*x23*x57;
-    x80 = x74*x78;
+    x79 = 0.5 * x23 * x57;
+    x80 = x74 * x78;
     /*@ assert x16 < -epsilon || x16 > epsilon; */
-    x100 = 1.0/((sqrt(x16))*(sqrt(x16))*(sqrt(x16)));
-    x102 = x11*x78;
-    x110 = x11*x14;
-    x112 = x14*x78;
-    x114 = 0.5*mu*x27*x57;
-    x115 = 1.0/x16;
-    x116 = 0.5*x115*x25;
-    x117 = 0.5*x115*x27;
+    x100 = 1.0 / ((sqrt(x16)) * (sqrt(x16)) * (sqrt(x16)));
+    x102 = x11 * x78;
+    x110 = x11 * x14;
+    x112 = x14 * x78;
+    x114 = 0.5 * mu * x27 * x57;
+    x115 = 1.0 / x16;
+    x116 = 0.5 * x115 * x25;
+    x117 = 0.5 * x115 * x27;
     x118 = -x57;
-    x119 = x78*x78;
+    x119 = x78 * x78;
     /*@ assert x119 >= 0; */
     x120 = -rt2 + x13;
-    x121 = -x100*x120*x24*x78 - x110*x116;
-    x122 = x11*x120;
-    x123 = 0.5*x100*x19;
-    x124 = x120*x74;
-    x129 = x120*x14;
-    x130 = x120*x120;
+    x121 = -x100 * x120 * x24 * x78 - x110 * x116;
+    x122 = x11 * x120;
+    x123 = 0.5 * x100 * x19;
+    x124 = x120 * x74;
+    x129 = x120 * x14;
+    x130 = x120 * x120;
     /*@ assert x130 >= 0; */
-
   }
-  if(x62)
-  {
-    x6 = mu*rn;
-    x30 = -1.0*un + x6;
+  if (x62) {
+    x6 = mu * rn;
+    x30 = -1.0 * un + x6;
     x37 = sqrt(x1);
-    x43 = Heaviside(x30 - 1.0*x37);
-
+    x43 = Heaviside(x30 - 1.0 * x37);
   }
-  x6 = mu*rn;
+  x6 = mu * rn;
   x7 = -un;
   x8 = sqrt(x2);
-  x9 = -mu*x8 + x6 + x7;
+  x9 = -mu * x8 + x6 + x7;
   /*@ assert x16 >= 0; */
   x17 = sqrt(x16);
   x18 = x17 + x9;
   x19 = Max(0, x18);
-  x20 = 0.5*x19;
+  x20 = 0.5 * x19;
   x21 = -x20;
   x22 = -x17 + x9;
   x23 = Max(0, x22);
-  x24 = 0.5*x23;
+  x24 = 0.5 * x23;
   /*@ assigns result[0]; */
   result[0] = x21 - x24 + x6;
 
-
   /*@ assert x75 || x51; */
-  if(x75)
-  {
+  if (x75) {
     /*@ assigns result[1]; */
-    result[1] = rt1 - x11*x77 - x78*x79;
+    result[1] = rt1 - x11 * x77 - x78 * x79;
 
-  }
-  else if(x51)
-  {
+  } else if (x51) {
     /*@ assigns result[1]; */
     result[1] = rt1;
-
   }
 
-
-  if(x75)
-  {
+  if (x75) {
     /*@ assigns result[2]; */
-    result[2] = rt2 - x120*x79 - x14*x77;
+    result[2] = rt2 - x120 * x79 - x14 * x77;
 
-  }
-  else if(x51)
-  {
+  } else if (x51) {
     /*@ assigns result[2]; */
     result[2] = rt2 + x21 + x24;
-
   }
 
   x25 = Heaviside(x18);
-  x26 = 0.5*x25;
+  x26 = 0.5 * x25;
   x27 = Heaviside(x22);
-  x28 = 0.5*x27;
+  x28 = 0.5 * x27;
   /*@ assigns result[3]; */
   result[3] = x26 + x28;
 
-
-  if(x75)
-  {
+  if (x75) {
     /*@ assigns result[4]; */
     result[4] = x73 + x80;
 
-  }
-  else if(x51)
-  {
+  } else if (x51) {
     /*@ assigns result[4]; */
     result[4] = 0;
     /*@ assert result[4] >= 0; */
   }
 
-
-  if(x75)
-  {
+  if (x75) {
     /*@ assigns result[5]; */
     result[5] = x124 + x76;
 
-  }
-  else if(x51)
-  {
+  } else if (x51) {
     /*@ assigns result[5]; */
     result[5] = x26 - x28;
-
   }
-
 
   /*@ assert x36 || x48 || x52 || x54 || x64; */
-  if(x36)
-  {
+  if (x36) {
     /*@ assigns result[6]; */
     result[6] = x33;
 
-  }
-  else if(x48)
-  {
+  } else if (x48) {
     /*@ assigns result[6]; */
-    result[6] = x39*(-rt1*x44 + x42 + x46);
+    result[6] = x39 * (-rt1 * x44 + x42 + x46);
 
-  }
-  else if(x52)
-  {
+  } else if (x52) {
     /*@ assigns result[6]; */
     result[6] = x33;
 
-  }
-  else if(x54)
-  {
+  } else if (x54) {
     /*@ assigns result[6]; */
-    result[6] = rt1*x53;
+    result[6] = rt1 * x53;
 
-  }
-  else if(x64)
-  {
+  } else if (x64) {
     /*@ assigns result[6]; */
-    result[6] = -x26*x60 - x28*x61;
-
+    result[6] = -x26 * x60 - x28 * x61;
   }
-
 
   /*@ assert x36 || x48 || x62 || x64; */
-  if(x36)
-  {
+  if (x36) {
     /*@ assigns result[7]; */
-    result[7] = 1.0*x32*x81*x83;
+    result[7] = 1.0 * x32 * x81 * x83;
 
-  }
-  else if(x48)
-  {
+  } else if (x48) {
     /*@ assigns result[7]; */
-    result[7] = x85*(x29*(rt1*x97 - rt1*x98 + x40*x96 - x43*x96) + x86*x89 - x86*x91 + x92*x93 + x94*x95);
+    result[7] = x85 * (x29 * (rt1 * x97 - rt1 * x98 + x40 * x96 - x43 * x96) + x86 * x89 -
+                       x86 * x91 + x92 * x93 + x94 * x95);
 
-  }
-  else if(x62)
-  {
+  } else if (x62) {
     /*@ assigns result[7]; */
     result[7] = 0.0;
     /*@ assert result[7] >= 0; */
-  }
-  else if(x64)
-  {
+  } else if (x64) {
     /*@ assigns result[7]; */
-    result[7] = x21*(x101*x12 + x99) - x24*(x101*x102 - x99) - x60*x73 - x61*x80;
-
+    result[7] = x21 * (x101 * x12 + x99) - x24 * (x101 * x102 - x99) - x60 * x73 - x61 * x80;
   }
 
-
-  if(x36)
-  {
+  if (x36) {
     /*@ assigns result[8]; */
-    result[8] = 1.0*x103*x126*x31*x82;
+    result[8] = 1.0 * x103 * x126 * x31 * x82;
 
-  }
-  else if(x48)
-  {
+  } else if (x48) {
     /*@ assigns result[8]; */
-    result[8] = rt2*x85*(-rt1*x105 + rt1*x106 + rt1*x107 + x109 + x37*x42);
+    result[8] = rt2 * x85 * (-rt1 * x105 + rt1 * x106 + rt1 * x107 + x109 + x37 * x42);
 
-  }
-  else if(x62)
-  {
+  } else if (x62) {
     /*@ assigns result[8]; */
     result[8] = 0.0;
     /*@ assert result[8] >= 0; */
-  }
-  else if(x64)
-  {
+  } else if (x64) {
     /*@ assigns result[8]; */
-    result[8] = x111 - x113*x122 - x124*x61 - x60*x76;
-
+    result[8] = x111 - x113 * x122 - x124 * x61 - x60 * x76;
   }
 
-
-  if(x36)
-  {
+  if (x36) {
     /*@ assigns result[9]; */
     result[9] = x33;
 
-  }
-  else if(x48)
-  {
+  } else if (x48) {
     /*@ assigns result[9]; */
-    result[9] = x39*(-rt2*x44 + x46 + x65);
+    result[9] = x39 * (-rt2 * x44 + x46 + x65);
 
-  }
-  else if(x52)
-  {
+  } else if (x52) {
     /*@ assigns result[9]; */
     result[9] = x33;
 
-  }
-  else if(x54)
-  {
+  } else if (x54) {
     /*@ assigns result[9]; */
-    result[9] = rt2*x53;
+    result[9] = rt2 * x53;
 
-  }
-  else if(x64)
-  {
+  } else if (x64) {
     /*@ assigns result[9]; */
-    result[9] = -x26*x68 - x28*x69;
-
+    result[9] = -x26 * x68 - x28 * x69;
   }
 
-
-  if(x36)
-  {
+  if (x36) {
     /*@ assigns result[10]; */
-    result[10] = x103*x104*(mu - 1.0);
+    result[10] = x103 * x104 * (mu - 1.0);
 
-  }
-  else if(x48)
-  {
+  } else if (x48) {
     /*@ assigns result[10]; */
-    result[10] = rt1*x85*(-rt2*x105 + rt2*x106 + rt2*x107 + x109 + x37*x65);
+    result[10] = rt1 * x85 * (-rt2 * x105 + rt2 * x106 + rt2 * x107 + x109 + x37 * x65);
 
-  }
-  else if(x62)
-  {
+  } else if (x62) {
     /*@ assigns result[10]; */
     result[10] = 0.0;
     /*@ assert result[10] >= 0; */
-  }
-  else if(x64)
-  {
+  } else if (x64) {
     /*@ assigns result[10]; */
-    result[10] = x111 - x112*x113 - x68*x73 - x69*x80;
-
+    result[10] = x111 - x112 * x113 - x68 * x73 - x69 * x80;
   }
 
-
-  if(x36)
-  {
+  if (x36) {
     /*@ assigns result[11]; */
-    result[11] = x104*x127;
+    result[11] = x104 * x127;
 
-  }
-  else if(x48)
-  {
+  } else if (x48) {
     /*@ assigns result[11]; */
-    result[11] = x85*(x29*(rt2*x108 - rt2*x95 + x128*x40 - x128*x43) + x86*x93 + x89*x92 - x91*x92 + x94*x98);
+    result[11] = x85 * (x29 * (rt2 * x108 - rt2 * x95 + x128 * x40 - x128 * x43) + x86 * x93 +
+                        x89 * x92 - x91 * x92 + x94 * x98);
 
-  }
-  else if(x62)
-  {
+  } else if (x62) {
     /*@ assigns result[11]; */
-    result[11] = mu*x43;
+    result[11] = mu * x43;
 
-  }
-  else if(x64)
-  {
+  } else if (x64) {
     /*@ assigns result[11]; */
-    result[11] = -x124*x69 + x21*(x101*x15 + x99) - x24*(x101*x129 - x99) - x68*x76;
-
+    result[11] =
+        -x124 * x69 + x21 * (x101 * x15 + x99) - x24 * (x101 * x129 - x99) - x68 * x76;
   }
 
-  x70 = -mu*x26;
-  x71 = mu*x28;
+  x70 = -mu * x26;
+  x71 = mu * x28;
   x82 = mu - 1;
   /*@ assigns result[12]; */
   result[12] = x70 - x71 + x82 + 1;
 
-
-  if(x75)
-  {
+  if (x75) {
     /*@ assigns result[13]; */
-    result[13] = -x114*x78 - x26*x59;
+    result[13] = -x114 * x78 - x26 * x59;
 
-  }
-  else if(x51)
-  {
+  } else if (x51) {
     /*@ assigns result[13]; */
     result[13] = 0;
     /*@ assert result[13] >= 0; */
   }
 
-
-  if(x75)
-  {
+  if (x75) {
     /*@ assigns result[14]; */
-    result[14] = -x114*x120 - x26*x67;
+    result[14] = -x114 * x120 - x26 * x67;
 
-  }
-  else if(x51)
-  {
+  } else if (x51) {
     /*@ assigns result[14]; */
     result[14] = x70 + x71;
-
   }
 
-
   /*@ assert x51 || x75; */
-  if(x51)
-  {
+  if (x51) {
     /*@ assigns result[15]; */
     result[15] = 0.0;
     /*@ assert result[15] >= 0; */
-  }
-  else if(x75)
-  {
+  } else if (x75) {
     /*@ assigns result[15]; */
-    result[15] = x11*x74 - x73;
-
+    result[15] = x11 * x74 - x73;
   }
 
-
-  if(x75)
-  {
+  if (x75) {
     /*@ assigns result[16]; */
-    result[16] = x102*x117 - x116*x12 + x21*(x100*x102 + x57) - x24*(x100*x119 + x118) + 1;
+    result[16] =
+        x102 * x117 - x116 * x12 + x21 * (x100 * x102 + x57) - x24 * (x100 * x119 + x118) + 1;
 
-  }
-  else if(x51)
-  {
+  } else if (x51) {
     /*@ assigns result[16]; */
     result[16] = 1;
     /*@ assert result[16] >= 0; */
     /*@ assert result[16] != 0; */
   }
 
-
-  if(x51)
-  {
+  if (x51) {
     /*@ assigns result[17]; */
     result[17] = 0.0;
     /*@ assert result[17] >= 0; */
-  }
-  else if(x75)
-  {
+  } else if (x75) {
     /*@ assigns result[17]; */
-    result[17] = -x112*x123 + x117*x122 + x121;
-
+    result[17] = -x112 * x123 + x117 * x122 + x121;
   }
 
-
-  if(x51)
-  {
+  if (x51) {
     /*@ assigns result[18]; */
     result[18] = 0.0;
     /*@ assert result[18] >= 0; */
-  }
-  else if(x75)
-  {
+  } else if (x75) {
     /*@ assigns result[18]; */
-    result[18] = x14*x74 - x76;
-
+    result[18] = x14 * x74 - x76;
   }
 
-
-  if(x75)
-  {
+  if (x75) {
     /*@ assigns result[19]; */
-    result[19] = x112*x117 + x121 - x122*x123;
+    result[19] = x112 * x117 + x121 - x122 * x123;
 
-  }
-  else if(x51)
-  {
+  } else if (x51) {
     /*@ assigns result[19]; */
     result[19] = 0;
     /*@ assert result[19] >= 0; */
   }
 
-
-  if(x51)
-  {
+  if (x51) {
     /*@ assigns result[20]; */
-    result[20] = -1.0*x43 + 1.0;
+    result[20] = -1.0 * x43 + 1.0;
 
-  }
-  else if(x75)
-  {
+  } else if (x75) {
     /*@ assigns result[20]; */
-    result[20] = -x116*x15 + x117*x129 + x21*(x100*x129 + x57) - x24*(x100*x130 + x118) + 1;
-
+    result[20] =
+        -x116 * x15 + x117 * x129 + x21 * (x100 * x129 + x57) - x24 * (x100 * x130 + x118) + 1;
   }
 }
 #ifdef __FRAMAC__
-int main()
-{
-  double rn =  Frama_C_double_interval(0.0, 1.0e+6);
-  double rt1 =  Frama_C_double_interval(-1.0e+6, 1.0e+6);
-  double rt2 =  Frama_C_double_interval(-1.0e+6, 1.0e+6);
-  double un =  Frama_C_double_interval(-1.0e+6, 1.0e+6);
-  double ut1 =  Frama_C_double_interval(-1.0e+6, 1.0e+6);
-  double ut2 =  Frama_C_double_interval(-1.0e+6, 1.0e+6);
-  double mu =  Frama_C_double_interval(0.0, 1.0);
-  double rhon =  Frama_C_double_interval(-1.0e+6, 1.0e+6);
-  double rhot1 =  Frama_C_double_interval(-1.0e+6, 1.0e+6);
-  double rhot2 =  Frama_C_double_interval(-1.0e+6, 1.0e+6);
+int main() {
+  double rn = Frama_C_double_interval(0.0, 1.0e+6);
+  double rt1 = Frama_C_double_interval(-1.0e+6, 1.0e+6);
+  double rt2 = Frama_C_double_interval(-1.0e+6, 1.0e+6);
+  double un = Frama_C_double_interval(-1.0e+6, 1.0e+6);
+  double ut1 = Frama_C_double_interval(-1.0e+6, 1.0e+6);
+  double ut2 = Frama_C_double_interval(-1.0e+6, 1.0e+6);
+  double mu = Frama_C_double_interval(0.0, 1.0);
+  double rhon = Frama_C_double_interval(-1.0e+6, 1.0e+6);
+  double rhot1 = Frama_C_double_interval(-1.0e+6, 1.0e+6);
+  double rhot2 = Frama_C_double_interval(-1.0e+6, 1.0e+6);
   double result[21];
   fc3d_NaturalMapFABGenerated(rn, rt1, rt2, un, ut1, ut2, mu, rhon, rhot1, rhot2, result);
-  return(0);
+  return (0);
 }
 #endif

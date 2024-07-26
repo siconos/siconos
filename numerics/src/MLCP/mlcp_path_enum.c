@@ -27,7 +27,9 @@ dim(v)=nn
 **************************************************************************/
 
 #include "mlcp_path_enum.h"
-#include <stdio.h>                              // for printf
+
+#include <stdio.h>  // for printf
+
 #include "MLCP_Solvers.h"                       // for mixedLinearComplement...
 #include "MixedLinearComplementarityProblem.h"  // for mixedLinearComplement...
 #include "SolverOptions.h"                      // for SolverOptions
@@ -36,36 +38,32 @@ dim(v)=nn
 static int sN;
 static int sM;
 
-static int * siWorkEnum = 0;
-static int * siWorkPath = 0;
-static double * sdWorkEnum = 0;
-static double * sdWorkPath = 0;
+static int* siWorkEnum = 0;
+static int* siWorkPath = 0;
+static double* sdWorkEnum = 0;
+static double* sdWorkPath = 0;
 
-int mlcp_path_enum_getNbIWork(MixedLinearComplementarityProblem* problem, SolverOptions* options)
-{
+int mlcp_path_enum_getNbIWork(MixedLinearComplementarityProblem* problem,
+                              SolverOptions* options) {
   return mlcp_enum_getNbIWork(problem, options);
 }
-int mlcp_path_enum_getNbDWork(MixedLinearComplementarityProblem* problem, SolverOptions* options)
-{
+int mlcp_path_enum_getNbDWork(MixedLinearComplementarityProblem* problem,
+                              SolverOptions* options) {
   return mlcp_enum_getNbDWork(problem, options);
 }
 
-
-void mlcp_path_enum_init(MixedLinearComplementarityProblem* problem, SolverOptions* options)
-{
+void mlcp_path_enum_init(MixedLinearComplementarityProblem* problem, SolverOptions* options) {
   sN = problem->n;
   sM = problem->m;
-  int iOffset = 0;/* mlcp_path_getNbIWork(problem,options);*/
-  int dOffset = 0;/*mlcp_path_getNbDWork(problem,options);*/
+  int iOffset = 0; /* mlcp_path_getNbIWork(problem,options);*/
+  int dOffset = 0; /*mlcp_path_getNbDWork(problem,options);*/
   siWorkEnum = options->iWork + iOffset;
   siWorkPath = options->iWork;
   sdWorkEnum = options->dWork + dOffset;
   sdWorkPath = options->dWork;
   /*  mlcp_path_init(problem, options);*/
-
 }
-void mlcp_path_enum_reset()
-{
+void mlcp_path_enum_reset() {
   /*mlcp_path_reset();*/
   siWorkEnum = 0;
   siWorkPath = 0;
@@ -73,10 +71,9 @@ void mlcp_path_enum_reset()
   sdWorkPath = 0;
 }
 
-void mlcp_path_enum(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
-{
-  if(!siWorkEnum)
-  {
+void mlcp_path_enum(MixedLinearComplementarityProblem* problem, double* z, double* w,
+                    int* info, SolverOptions* options) {
+  if (!siWorkEnum) {
     *info = 1;
     printf("MLCP_PATH_ENUM error, call a non initialised method!!!!!!!!!!!!!!!!!!!!!\n");
     return;
@@ -85,8 +82,7 @@ void mlcp_path_enum(MixedLinearComplementarityProblem* problem, double *z, doubl
   //  options->dWork = sdWorkDirect;
   //  options->iWork = siWorkDirect;
   mlcp_path(problem, z, w, info, options);
-  if(*info)
-  {
+  if (*info) {
     printf("MLCP_PATH_ENUM: path failed, call enum\n");
     options->dWork = sdWorkEnum;
     options->iWork = siWorkEnum;
@@ -94,4 +90,3 @@ void mlcp_path_enum(MixedLinearComplementarityProblem* problem, double *z, doubl
     mlcp_enum(problem, z, w, info, options);
   }
 }
-

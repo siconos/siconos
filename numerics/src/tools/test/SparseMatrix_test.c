@@ -1,3 +1,4 @@
+#include <stdio.h>  // for printf, fclose, fopen, FILE, NULL
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
@@ -16,11 +17,9 @@
  * limitations under the License.
  */
 
-#include <stdio.h>   // for printf, fclose, fopen, FILE, NULL
 #include <stdlib.h>  // for malloc
 
-#include "CSparseMatrix.h"
-#include "CSparseMatrix_internal.h"  // for cs_dl_entry, CS_INT, cs_dl_print
+#include "CSparseMatrix.h"  // for cs_dl_entry, CS_INT, cs_dl_print
 #include "NumericsFwd.h"             // for NumericsMatrix, NumericsSparseMatrix
 #include "NumericsMatrix.h"          // for NM_entry, NM_display, NM_create
 #include "NumericsSparseMatrix.h"    // for NumericsSparseMatrix, NSM_TRIPLET
@@ -222,8 +221,7 @@ static int test_CSparseMatrix_alloc(void) {
 static int test_CSparseMatrix_spsolve_unit(CSparseMatrix *M) {
   // cs_print(M, 0);
 
-  CSparseMatrix *b_triplet =
-      cs_spalloc(M->m, M->n, M->n, 1, 1); /* coo format */
+  CSparseMatrix *b_triplet = cs_spalloc(M->m, M->n, M->n, 1, 1); /* coo format */
   for (int i = 0; i < M->n; i++) cs_entry(b_triplet, i, i, 1.0);
 
   CSparseMatrix *B = cs_compress(b_triplet);
@@ -307,8 +305,7 @@ static int test_CSparseMatrix_spsolve(void) {
 
   int size0 = 10;
   int size1 = 10;
-  CSparseMatrix *a_triplet =
-      cs_spalloc(size0, size1, size0, 1, 1); /* coo format */
+  CSparseMatrix *a_triplet = cs_spalloc(size0, size1, size0, 1, 1); /* coo format */
   for (int i = 0; i < size0; i++) {
     for (int j = i; j < size1; j++) {
       cs_entry(a_triplet, i, j, i + j + 1);
@@ -324,8 +321,7 @@ static int test_CSparseMatrix_spsolve(void) {
 static int test_CSparseMatrix_chol_spsolve_unit(CSparseMatrix *M) {
   // cs_print(M, 0);
 
-  CSparseMatrix *b_triplet =
-      cs_spalloc(M->m, M->n, M->n, 1, 1); /* coo format */
+  CSparseMatrix *b_triplet = cs_spalloc(M->m, M->n, M->n, 1, 1); /* coo format */
   for (int i = 0; i < M->n; i++) cs_entry(b_triplet, i, i, 1.0);
 
   CSparseMatrix *B = cs_compress(b_triplet);
@@ -406,8 +402,7 @@ static int test_CSparseMatrix_chol_spsolve(void) {
 
   int size0 = 10;
   int size1 = 10;
-  CSparseMatrix *a_triplet =
-      cs_spalloc(size0, size1, size0, 1, 1); /* coo format */
+  CSparseMatrix *a_triplet = cs_spalloc(size0, size1, size0, 1, 1); /* coo format */
   for (int i = 0; i < size0; i++) {
     for (int j = i; j < size1; j++) {
       cs_entry(a_triplet, i, j, i + j + 1);
@@ -505,8 +500,7 @@ static int test_CSparseMatrix_ldlt_solve(void) {
   printf("ok\n");
   int size0 = 10;
   int size1 = 10;
-  CSparseMatrix *a_triplet =
-      cs_spalloc(size0, size1, size0, 1, 1); /* coo format */
+  CSparseMatrix *a_triplet = cs_spalloc(size0, size1, size0, 1, 1); /* coo format */
   for (int i = 0; i < size0; i++) {
     for (int j = i; j < size1; j++) {
       cs_entry(a_triplet, i, j, i + j + 1);

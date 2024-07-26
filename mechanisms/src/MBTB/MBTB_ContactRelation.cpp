@@ -33,8 +33,7 @@ siconos::mechanisms::MBTB_ContactRelation::MBTB_ContactRelation(
 }
 
 void siconos::mechanisms::MBTB_ContactRelation::computeh(
-    double time, siconos::algebra::BlockVector& q0,
-    siconos::algebra::SiconosVector& y) {
+    double time, const siconos::algebra::BlockVector& q0, siconos::algebra::SiconosVector& y) {
   DEBUG_PRINT(
       "siconos::mechanisms::MBTB_ContactRelation::computeh(double time, "
       "BlockVector& q0, "
@@ -51,18 +50,13 @@ void siconos::mechanisms::MBTB_ContactRelation::computeh(
   // if (_pContact->_curTimeh + 1e-9 < time){
   ACE_times[ACE_TIMER_DIST].start();
   double X1, X2, Y1, Y2, Z1, Z2, nx, ny, nz;
-  CADMBTB_getMinDistance(_pContact->_id, _pContact->_indexCAD1,
-                         _pContact->_indexCAD2, X1, Y1, Z1, X2, Y2, Z2, nx, ny,
-                         nz, _pContact->_normalFromFace1, _pContact->_dist);
+  CADMBTB_getMinDistance(_pContact->_id, _pContact->_indexCAD1, _pContact->_indexCAD2, X1, Y1,
+                         Z1, X2, Y2, Z2, nx, ny, nz, _pContact->_normalFromFace1,
+                         _pContact->_dist);
   if (mbtb::data::sPrintDist) {
-    printf("    Minimal distance computed from CAD and n2qn1 : %lf \n",
-           _pContact->_dist);
-    printf(
-        "    Proximal point 1 computed from CAD :  X1=%lf, Y1=%lf, Z1=%lf \n",
-        X1, Y1, Z1);
-    printf(
-        "    Proximal point 2 computed from CAD :  X2=%lf, Y2=%lf, Z2=%lf \n",
-        X2, Y2, Z2);
+    printf("    Minimal distance computed from CAD and n2qn1 : %lf \n", _pContact->_dist);
+    printf("    Proximal point 1 computed from CAD :  X1=%lf, Y1=%lf, Z1=%lf \n", X1, Y1, Z1);
+    printf("    Proximal point 2 computed from CAD :  X2=%lf, Y2=%lf, Z2=%lf \n", X2, Y2, Z2);
     if (_pContact->_normalFromFace1)
       printf(
           "    Normal vector computed from CAD taken from  Object 1 :  nx=%lf, "
@@ -139,8 +133,8 @@ void siconos::mechanisms::MBTB_ContactRelation::computeh(
     *deltaPC = *_Pc1 - *_Pc2;
     double realdist = (deltaPC->norm2());
     printf("    Distance between contact points =%lf \n", realdist);
-    printf("    Normal vector: nx=%lf, ny=%lf, nz=%lf \n", _Nc->getValue(0),
-           _Nc->getValue(1), _Nc->getValue(2));
+    printf("    Normal vector: nx=%lf, ny=%lf, nz=%lf \n", _Nc->getValue(0), _Nc->getValue(1),
+           _Nc->getValue(2));
   }
   //}
   y.setValue(0, _pContact->_dist);

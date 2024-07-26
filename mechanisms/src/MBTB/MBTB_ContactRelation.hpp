@@ -47,7 +47,7 @@ class MBTB_ContactRelation : public siconos::modeling::NewtonEuler1DR {
    * \param q0 the position
    * \param y the output
    */
-  virtual void computeh(double time, siconos::algebra::BlockVector& q0,
+  virtual void computeh(double time, const siconos::algebra::BlockVector& q0,
                         siconos::algebra::SiconosVector& y);
 
   virtual ~MBTB_ContactRelation() noexcept = default;

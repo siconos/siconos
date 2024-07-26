@@ -23,10 +23,9 @@
 #include "SiconosVector.hpp"
 #include "SiconosVectorIterator.hpp"
 #include "SiconosVectorOp.hpp"
-#include "SiconosMatrix.hpp"
 
-void siconos::algebra::prod(const SiconosMatrix& A, const SiconosVector& x,
-                            BlockVector& y, bool init) {
+void siconos::algebra::prod(const SiconosMatrix& A, const SiconosVector& x, BlockVector& y,
+                            bool init) {
   unsigned int startRow = 0;
   // For Each subvector of y, y[i], private_prod computes y[i] = subA x, subA
   // being a submatrix of A corresponding to y[i] position.
@@ -39,8 +38,8 @@ void siconos::algebra::prod(const SiconosMatrix& A, const SiconosVector& x,
   }
 }
 
-void siconos::algebra::prod(const SiconosMatrix& A, const BlockVector& x,
-                            SiconosVector& y, bool init) {
+void siconos::algebra::prod(const SiconosMatrix& A, const BlockVector& x, SiconosVector& y,
+                            bool init) {
   if (init) y.zero();
   unsigned int startRow = 0;
   unsigned int startCol = 0;
@@ -55,16 +54,14 @@ void siconos::algebra::prod(const SiconosMatrix& A, const BlockVector& x,
   }
 }
 
-void siconos::algebra::prod(const SiconosMatrix& A, const SiconosVector& x,
-                            SiconosVector& y, bool init) {
+void siconos::algebra::prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y,
+                            bool init) {
   // To compute y = A * x in an "optimized" way (in comparison with y =
   // prod(A,x) ) or y += A*x if init = false.
 
-  if (A.size(1) != x.size())
-    THROW_EXCEPTION("inconsistent sizes between A and x.")
+  if (A.size(1) != x.size()) THROW_EXCEPTION("inconsistent sizes between A and x.")
 
-  if (A.size(0) != y.size())
-    THROW_EXCEPTION("inconsistent sizes between A and y.");
+  if (A.size(0) != y.size()) THROW_EXCEPTION("inconsistent sizes between A and y.");
 
   // === First case: y is not a block vector ===
   if (init) {
@@ -87,16 +84,14 @@ void siconos::algebra::prod(const SiconosMatrix& A, const SiconosVector& x,
   }
 }
 
-void siconos::algebra::prod(const SiconosVector& x, const SiconosMatrix& A,
-                            SiconosVector& y, bool init) {
+void siconos::algebra::prod(const SiconosVector& x, const SiconosMatrix& A, SiconosVector& y,
+                            bool init) {
   // To compute y = trans(A) * x in an "optimized" way, if init = true
   // (or y = trans(A) * x + y if init = false
 
-  if (A.size(0) != x.size())
-    THROW_EXCEPTION("inconsistent sizes between A and x.");
+  if (A.size(0) != x.size()) THROW_EXCEPTION("inconsistent sizes between A and x.");
 
-  if (A.size(1) != y.size())
-    THROW_EXCEPTION("inconsistent sizes between A and y.");
+  if (A.size(1) != y.size()) THROW_EXCEPTION("inconsistent sizes between A and y.");
 
   if (init) {
     if (&x != &y)  // if no common memory between x and y.
@@ -118,13 +113,11 @@ void siconos::algebra::prod(const SiconosVector& x, const SiconosMatrix& A,
   }
 }
 
-void siconos::algebra::prod(const SiconosVector& x, const SiconosMatrix& A,
-                            BlockVector& y, bool init) {
-  if (A.size(0) != x.size())
-    THROW_EXCEPTION("inconsistent sizes between A and x.");
+void siconos::algebra::prod(const SiconosVector& x, const SiconosMatrix& A, BlockVector& y,
+                            bool init) {
+  if (A.size(0) != x.size()) THROW_EXCEPTION("inconsistent sizes between A and x.");
 
-  if (A.size(1) != y.size())
-    THROW_EXCEPTION("inconsistent sizes between A and y.");
+  if (A.size(1) != y.size()) THROW_EXCEPTION("inconsistent sizes between A and y.");
 
   unsigned int pos = 0;
   // For Each subvector of y, y[i], computes y[i] = transpose(subA) x, subA
@@ -141,24 +134,22 @@ void siconos::algebra::prod(const SiconosVector& x, const SiconosMatrix& A,
 siconos::algebra::SiconosVector siconos::algebra::prod(const SiconosMatrix& A,
                                                        const SiconosVector& x) {
   // To compute y = A * x
-  if (A.size(1) != x.size())
-    THROW_EXCEPTION("inconsistent sizes between A and x.");
+  if (A.size(1) != x.size()) THROW_EXCEPTION("inconsistent sizes between A and x.");
 
   return A * x;
 }
 
-const siconos::algebra::SiconosMatrix siconos::algebra::prod(
-    const SiconosMatrix& A, const SiconosMatrix& B) {
+const siconos::algebra::SiconosMatrix siconos::algebra::prod(const SiconosMatrix& A,
+                                                             const SiconosMatrix& B) {
   SiconosMatrix C(A.size(0), B.size(1));
   prod(A, B, C);
   return C;
 }
 
-void siconos::algebra::prod(const SiconosMatrix& A, const SiconosMatrix& B,
-                            SiconosMatrix& C, bool init) {
+void siconos::algebra::prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
+                            bool init) {
   // To compute C = A * B
-  if ((A.size(1) != B.size(0)))
-    THROW_EXCEPTION("inconsistent sizes between A and B");
+  if ((A.size(1) != B.size(0))) THROW_EXCEPTION("inconsistent sizes between A and B");
 
   if (A.size(0) != C.size(0) || B.size(1) != C.size(1))
     THROW_EXCEPTION("inconsistent sizes between A and C or B and C.");
@@ -184,17 +175,14 @@ void siconos::algebra::prod(const SiconosMatrix& A, const SiconosMatrix& B,
   }
 }
 
-void siconos::algebra::prod(double a, const SiconosMatrix& A,
-                            const SiconosVector& x, SiconosVector& y,
-                            bool init) {
+void siconos::algebra::prod(double a, const SiconosMatrix& A, const SiconosVector& x,
+                            SiconosVector& y, bool init) {
   // To compute y = a*A * x in an "optimized" way (in comparison with y =
   // prod(A,x) ) or y += a*A*x if init = false.
 
-  if (A.size(1) != x.size())
-    THROW_EXCEPTION("inconsistent sizes between A and x.");
+  if (A.size(1) != x.size()) THROW_EXCEPTION("inconsistent sizes between A and x.");
 
-  if (A.size(0) != y.size())
-    THROW_EXCEPTION("inconsistent sizes between A and y.");
+  if (A.size(0) != y.size()) THROW_EXCEPTION("inconsistent sizes between A and y.");
 
   if (init) {
     if (&x != &y)  // if no common memory between x and y.

@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef SICONOSNUMERICS_H
 #define SICONOSNUMERICS_H
 /*!\file SiconosNumerics.h
@@ -26,5 +26,4 @@
 
 #include "NonSmoothDrivers.h"
 
-#endif // SICONOSNUMERICS_H
-
+#endif  // SICONOSNUMERICS_H

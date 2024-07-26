@@ -31,9 +31,21 @@ class Carriers : public BaseModel {
   Carriers(const Carriers &) = default;
 
   virtual ~Carriers() noexcept = default;
+
+  /** \return the number of vehicles  */
+  const int &get_number_of_vehicles() const;
+  /** \return density  */
   const double &get_rho() const;
+  /** \return distance between two vehicles  */
   const double &get_d_inter_vehicules() const;
+  /** \return distance between first pile and the first vehicule */
   const double &get_d_start() const;
+  /** \return  up load  */
+  const double &up_load() const;
+  /** \return down load  */
+  const double &down_load() const;
+  /** \return mass 100% of one vehicule (kg)  */
+  const double &loaded_mass() const;
 
  private:
   Carriers(Carriers &&) = delete;

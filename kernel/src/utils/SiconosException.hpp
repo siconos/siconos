@@ -16,7 +16,6 @@
  * limitations under the License.
  */
 
-
 /** ! \file SiconosException.hpp
     \brief Tools to deal with exceptions in Siconos.
 
@@ -26,85 +25,85 @@
 #ifndef __SICONOSEXCEPTION_HPP__
 #define __SICONOSEXCEPTION_HPP__
 
-#include <exception>
-#include <boost/throw_exception.hpp>
-#include <boost/exception/diagnostic_information.hpp>
-#include <cstring>
-#include <iostream>
 #include <errno.h>
 
+#include <boost/exception/diagnostic_information.hpp>
+#include <boost/throw_exception.hpp>
+#include <cstring>
+#include <exception>
+#include <iostream>
 
+namespace siconos {
 
-namespace siconos
-{
+// Note FP, todo: according to
+// https://www.boost.org/doc/libs/1_79_0/libs/exception/doc/boost-exception.html we should have
+// a look to leaf
+// https://www.boost.org/doc/libs/1_79_0/libs/leaf/doc/html/index.html#boost_exception
 
-  // Note FP, todo: according to https://www.boost.org/doc/libs/1_79_0/libs/exception/doc/boost-exception.html
-  // we should have a look to leaf https://www.boost.org/doc/libs/1_79_0/libs/leaf/doc/html/index.html#boost_exception
-  
-  /** siconos generic exception
+/** siconos generic exception
 
-      Usage :
+    Usage :
 
-      1/ to throw an exception, use :
-      THROW_EXCEPTION("some message")
-      // or
-      THROW_EXCEPTION()
+    1/ to throw an exception, use :
+    THROW_EXCEPTION("some message")
+    // or
+    THROW_EXCEPTION()
 
-      2/ to catch it :
+    2/ to catch it :
 
-      try{
-      ... // call to functions that may throw exceptions
-      }
-      catch(siconos::exception::Exception& e)
-      {
-      siconos::exception::process(e);
-      }
-      catch(...)
-      {
-      siconos::exception::process();
-      }
-
-      The outputs are :
-      * the file, position in the file (line number) and function name
-      that thrown the exception,
-      * the errno code (0 if unknown),
-      * the corresponding description of errno code (if any),
-      * the message added when the exception has been thrown.
-
-      */
-  class exception : public virtual std::exception, public virtual boost::exception
-  {
-
-  public:
-    // Boost typedef to handle exception extra outputs using << operator.
-    // See https://www.boost.org/doc/libs/1_74_0/libs/exception/doc/error_info.html
-    // About boost exceptions, see https://www.boost.org/doc/libs/1_74_0/libs/exception/doc/error_info.html
-    // About errno handling, see https://en.cppreference.com/w/cpp/error/errno
-    typedef boost::error_info<struct tag_errno_code,int> errno_code;
-    typedef boost::error_info<struct tag_errno_description,const char *> errno_description;
-    typedef boost::error_info<struct message, std::string> extra_message;
-    /** Outputs diagnostic information about unhandled exceptions.
-        Must be called inside a catch section.
-    */
-    static inline void process()
+    try{
+    ... // call to functions that may throw exceptions
+    }
+    catch(siconos::exception::Exception& e)
     {
-      std::cerr << boost::current_exception_diagnostic_information(true) << std::endl;
+    siconos::exception::process(e);
+    }
+    catch(...)
+    {
+    siconos::exception::process();
     }
 
-    /**
-       Outputs diagnostic information about exceptions.
-       Must be called inside a catch section.
+    The outputs are :
+    * the file, position in the file (line number) and function name
+    that thrown the exception,
+    * the errno code (0 if unknown),
+    * the corresponding description of errno code (if any),
+    * the message added when the exception has been thrown.
+
     */
-    static inline void process(siconos::exception& e)
-    {
-      std::cerr << boost::diagnostic_information(e, true) << std::endl;
-    }
+class exception : public virtual std::exception, public virtual boost::exception {
+ public:
+  // Boost typedef to handle exception extra outputs using << operator.
+  // See https://www.boost.org/doc/libs/1_74_0/libs/exception/doc/error_info.html
+  // About boost exceptions, see
+  // https://www.boost.org/doc/libs/1_74_0/libs/exception/doc/error_info.html About errno
+  // handling, see https://en.cppreference.com/w/cpp/error/errno
+  typedef boost::error_info<struct tag_errno_code, int> errno_code;
+  typedef boost::error_info<struct tag_errno_description, const char*> errno_description;
+  typedef boost::error_info<struct message, std::string> extra_message;
+  /** Outputs diagnostic information about unhandled exceptions.
+      Must be called inside a catch section.
+  */
+  static inline void process() {
+    std::cerr << boost::current_exception_diagnostic_information(true) << std::endl;
+  }
 
-  };
+  /**
+     Outputs diagnostic information about exceptions.
+     Must be called inside a catch section.
+  */
+  static inline void process(siconos::exception& e) {
+    std::cerr << boost::diagnostic_information(e, true) << std::endl;
+  }
+};
 
-}//namespace siconos
+}  // namespace siconos
 
 /** Wrap exception throwing inside siconos. */
-#define THROW_EXCEPTION(X) BOOST_THROW_EXCEPTION(siconos::exception() << siconos::exception::extra_message(X) << siconos::exception::errno_code(errno) <<siconos::exception::errno_description(std::strerror(errno)));
+#define THROW_EXCEPTION(X)                                       \
+  BOOST_THROW_EXCEPTION(siconos::exception()                     \
+                        << siconos::exception::extra_message(X)  \
+                        << siconos::exception::errno_code(errno) \
+                        << siconos::exception::errno_description(std::strerror(errno)));
 
 #endif

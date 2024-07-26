@@ -33,19 +33,17 @@ class TopoDS_Edge;
 
 namespace siconos::mechanics::occ {
 
-class OccContactFace;
-class OccContactEdge;
+struct OccContactFace;
+struct OccContactEdge;
 
 namespace cadmbtb {
 
 // Functions required in mechanics APIS (User, Python ...)
 auto distanceFaceFace(std::shared_ptr<OccContactFace> csh1,
-                      std::shared_ptr<OccContactFace> csh2)
-    -> ContactShapeDistance;
+                      std::shared_ptr<OccContactFace> csh2) -> ContactShapeDistance;
 
 auto distanceFaceEdge(std::shared_ptr<OccContactFace> sh1,
-                      std::shared_ptr<OccContactEdge> sh2)
-    -> ContactShapeDistance;
+                      std::shared_ptr<OccContactEdge> sh2) -> ContactShapeDistance;
 
 namespace tools {
 

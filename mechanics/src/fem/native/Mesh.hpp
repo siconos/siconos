@@ -99,7 +99,7 @@ class MElement {
       : _num{num}, _type{type}, _vertices{vertices}, _tags{tags} {};
 
   MElement(size_t num, FiniteElementType type, std::vector<std::shared_ptr<MVertex>> vertices)
-      : MElement(num, type, vertices, {0}){};
+      : MElement(num, type, vertices, {0}) {};
 
   ~MElement() noexcept = default;
 
@@ -153,7 +153,7 @@ class Mesh {
    */
   Mesh(int dim, std::vector<std::shared_ptr<MVertex>> vertices,
        std::vector<std::shared_ptr<MElement>> elements)
-      : Mesh(dim, vertices, elements, {}){};
+      : Mesh(dim, vertices, elements, {}) {};
   ;
 
   /** destructor */

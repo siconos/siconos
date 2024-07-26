@@ -86,11 +86,10 @@ extern "C" inline void hem5(int* NQ, int* NV, int* NU, int* NL, fprobpointer FPR
 namespace optim {
 #if defined(HAS_FORTRAN)
 
-
-  
 /** Computes the minimum of a constrained function
 
-    see https://who.rocq.inria.fr/Jean-Charles.Gilbert/modulopt/optimization-routines/m2qn1/m2qn1.pdf
+    see
+   https://who.rocq.inria.fr/Jean-Charles.Gilbert/modulopt/optimization-routines/m2qn1/m2qn1.pdf
 
     \param[in] n number of variables on which f depends
     \param[in, out] x starting/final point, size n
@@ -99,15 +98,16 @@ namespace optim {
     \param[in], dxmin, vector of size n, used to control precision among other things
     \param[in,out] df1 see paper
     \param[in, out] epsabs convergence criteria
-    \param[in, out] mode control the way the algo is initialized (in) and give details about how it stops (out)
+    \param[in, out] mode control the way the algo is initialized (in) and give details
+     about how it stops (out)
     \param[in] binf constraint on x (lower bound)
     \param[in] bsup constraint on x (upper bound)
     \param[in, out] iz work vector (size = 2n+1)
     \param[in, out] rz work vector (size = 1/2*n*(n+9))
 */
-extern "C" void n2qn1(const int *n, double* x, double* f, double* g, double* dxmin, double* df1,
-                      double* epsabs, int* mode, const double* binf, const double* bsup, int* iz,
-                      double* rz);
+extern "C" void n2qn1(const int* n, double* x, double* f, double* g, double* dxmin,
+                      double* df1, double* epsabs, int* mode, const double* binf,
+                      const double* bsup, int* iz, double* rz);
 
 #else
 extern "C" inline void n2qn1(int* n, double* x, double* f, double* g, double* dxmin,

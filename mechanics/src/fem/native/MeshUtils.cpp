@@ -24,6 +24,7 @@
 #include <iostream>
 #include <sstream>  // stringstream
 #include <string>
+
 #include "FENode.hpp"
 #include "FiniteElementModel.hpp"  // FENode
 #include "Mesh.hpp"                // For MVertex, MElement ...
@@ -91,7 +92,8 @@ std::shared_ptr<siconos::mechanics::fem::Mesh> siconos::mechanics::fem::create2d
           vertices[i + 1 + (j) * (n + 1)], vertices[i + 1 + (j + 1) * (n + 1)],
           vertices[i + (j + 1) * (n + 1)]};
 
-      elements.push_back(std::make_shared<MElement>(element_cnt++, FiniteElementType::T3, vertices_e_2));
+      elements.push_back(
+          std::make_shared<MElement>(element_cnt++, FiniteElementType::T3, vertices_e_2));
     }
   }
   return std::make_shared<Mesh>(2, vertices, elements);
@@ -209,10 +211,11 @@ std::shared_ptr<siconos::mechanics::fem::Mesh> siconos::mechanics::fem::createMe
         int element_number;
         token >> element_number;
         std::stringstream t_type(words[1]);
-	int tempvalue;
+        int tempvalue;
         t_type >> tempvalue;
-        FiniteElementType element_type = (FiniteElementType)tempvalue; // This has to be checked carefully ...
-       
+        FiniteElementType element_type =
+            (FiniteElementType)tempvalue;  // This has to be checked carefully ...
+
         std::stringstream t_nt(words[2]);
         decltype(words.size()) number_of_tags;
         t_nt >> number_of_tags;

@@ -21,20 +21,19 @@ siconos::mechanisms::MBTB_Body::MBTB_Body(
     std::shared_ptr<siconos::algebra::SiconosVector> q0,
     std::shared_ptr<siconos::algebra::SiconosVector> v0, double mass,
     std::shared_ptr<siconos::algebra::SiconosMatrix> I,
-    std::shared_ptr<siconos::algebra::SiconosVector> centerOfMass,
-    const std::string& BodyName, const std::string& CADFile)
+    std::shared_ptr<siconos::algebra::SiconosVector> centerOfMass, const std::string& BodyName,
+    const std::string& CADFile)
     : NewtonEulerDS{q0, v0, mass, I},
+      _centerOfMass{centerOfMass},
       _mBodyName{BodyName},
-      _cadFileName{CADFile},
-      _centerOfMass{centerOfMass} {}
+      _cadFileName{CADFile} {}
 
 siconos::mechanisms::MBTB_Body::MBTB_Body(
     std::shared_ptr<siconos::algebra::SiconosVector> q0,
     std::shared_ptr<siconos::algebra::SiconosVector> v0, double mass,
     std::shared_ptr<siconos::algebra::SiconosMatrix> I,
-    std::shared_ptr<siconos::algebra::SiconosVector> centerOfMass,
-    const std::string& BodyName, const std::string& CADFile,
-    const std::string& pluginLib, const std::string& pluginFct)
+    std::shared_ptr<siconos::algebra::SiconosVector> centerOfMass, const std::string& BodyName,
+    const std::string& CADFile, const std::string& pluginLib, const std::string& pluginFct)
     : MBTB_Body{q0, v0, mass, I, centerOfMass, BodyName, CADFile} {
   setComputeFExtFunction(pluginLib, pluginFct);
 }

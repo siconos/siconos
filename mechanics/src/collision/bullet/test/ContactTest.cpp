@@ -27,7 +27,7 @@
 #include "TimeDiscretisation.hpp"
 #include "TimeStepping.hpp"
 #include "test-utils.hpp"  // BounceResult ...
-                           // 
+                           //
 // Experimental settings for SiconosBulletCollisionManager
 extern double extra_margin;
 extern double breaking_threshold;
@@ -45,7 +45,6 @@ CPPUNIT_TEST_SUITE_REGISTRATION(ContactTest);
 
 void ContactTest::setUp() {}
 void ContactTest::tearDown() {}
-
 
 static BounceResult bounceTest(std::string moving, std::string ground,
                                const BounceParams &params) {

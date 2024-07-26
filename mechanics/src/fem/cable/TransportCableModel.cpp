@@ -23,6 +23,7 @@
 #include <map>
 #include <nlohmann/json.hpp>
 #include <string>
+
 #include "Cable.h"
 
 using json = nlohmann::json;
@@ -84,13 +85,13 @@ const siconos::fem::cable::Carriers &siconos::fem::cable::TransportCableModel::g
   return m_carriers;
 }
 
-const std::vector<siconos::fem::cable::Pile>
-    &siconos::fem::cable::TransportCableModel::get_piles1() const {
+const std::vector<siconos::fem::cable::Pile> &
+siconos::fem::cable::TransportCableModel::get_piles1() const {
   return m_pilesUp;
 }
 
-const std::vector<siconos::fem::cable::Pile>
-    &siconos::fem::cable::TransportCableModel::get_piles2() const {
+const std::vector<siconos::fem::cable::Pile> &
+siconos::fem::cable::TransportCableModel::get_piles2() const {
   return m_pilesDown;
 }
 

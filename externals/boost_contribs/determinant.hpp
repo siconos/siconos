@@ -1,4 +1,4 @@
-/* This file (C) 2008 Maik Beckmann
+/* This file is adapted from (C) 2008 Maik Beckmann
  * https://lists.boost.org/MailArchives/ublas/2008/09/2984.php
  */
 
@@ -12,8 +12,7 @@
 
 namespace siconos::externals::ublas {
 template <class matrix_T>
-double determinant(boost::numeric::ublas::matrix_expression<matrix_T> const& mat_r)
-{
+double determinant(boost::numeric::ublas::matrix_expression<matrix_T> const& mat_r) {
   double det = 1.0;
 
   matrix_T mLu(mat_r());
@@ -27,8 +26,7 @@ double determinant(boost::numeric::ublas::matrix_expression<matrix_T> const& mat
 
       det *= mLu(i, i);
     }
-  }
-  else
+  } else
     det = 0.0;
 
   return det;

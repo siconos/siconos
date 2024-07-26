@@ -3,43 +3,32 @@
  * we don't define _BSD_SOURCE but rather _XOPEN_SOURCE */
 #define _XOPEN_SOURCE 700
 
-#include <stdlib.h>
+#include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
+
 #include "SiconosBlas.h"
 #include "SiconosLapack.h"
-#include <assert.h>
 
 #define TIMER_FFTW_CYCLE
 
-#include "timers_interf.h"
-
 #include "op3x3.h"
-
+#include "timers_interf.h"
 
 #ifdef _WIN32
 #define random rand
 #define srandom srand
 #endif
 
+int main() {
+  double ia[9] = {1., 2., 3., 0., 1., 0., 1., 2., 1.};
 
-int main()
-{
-  double ia[9] = { 1., 2., 3.,
-                   0., 1., 0.,
-                   1., 2., 1.
-                 };
-
-
-  double ib[9] = { 1., 2., 0.,
-                   0., 1., 0.,
-                   0., 2., 1.
-                 };
+  double ib[9] = {1., 2., 0., 0., 1., 0., 0., 2., 1.};
 
   double a[9], b[9], c[9], d[9], x[9];
-  double iv[3] = { .1, .1, .1 };
+  double iv[3] = {.1, .1, .1};
   double v[3];
   double r;
-
 
   DECL_TIMER(t1);
   DECL_TIMER(t2);
@@ -57,7 +46,6 @@ int main()
   cpy3x3(ia, a);
   assert(equal3x3(ia, a));
 
-
   cpy3x3(ib, b);
   assert(equal3x3(ib, b));
 
@@ -66,9 +54,8 @@ int main()
   assert(equal3x3(ia, a));
 
   START_TIMER(t1);
-  for(i = 0; i < 1000000; ++i)
-    cblas_daxpy(9, 1., a, 1, b, 1);
-//    DAXPY(9, 1., a, 1, b, 1);
+  for (i = 0; i < 1000000; ++i) cblas_daxpy(9, 1., a, 1, b, 1);
+  //    DAXPY(9, 1., a, 1, b, 1);
   STOP_TIMER(t1);
   PRINT_ELAPSED(t1);
 
@@ -77,13 +64,11 @@ int main()
   cpy3x3(ia, a);
   cpy3x3(ib, b);
   START_TIMER(t2);
-  for(i = 0; i < 1000000; ++i)
-    add3x3(a, b);
+  for (i = 0; i < 1000000; ++i) add3x3(a, b);
   STOP_TIMER(t2);
   PRINT_ELAPSED(t2);
 
   assert(equal3x3(b, c));
-
 
 #ifdef WITH_TIMERS
   printf("add3x3/DAXPY:%g\n", ELAPSED(t2) / ELAPSED(t1));
@@ -95,11 +80,10 @@ int main()
   cpy3x3(ib, b);
   cpy3x3(ib, c);
   START_TIMER(t3);
-  for(i = 0; i < 1000000; ++i)
-  {
-    //DGEMM(CblasNoTrans, CblasNoTrans, 3, 3, 3, 1, a, 3, b, 3, 1, c, 3);
-    cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, 3, 3, 3, 1.0, a, 3, b, 3, 1.0, c, 3);
-
+  for (i = 0; i < 1000000; ++i) {
+    // DGEMM(CblasNoTrans, CblasNoTrans, 3, 3, 3, 1, a, 3, b, 3, 1, c, 3);
+    cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, 3, 3, 3, 1.0, a, 3, b, 3, 1.0, c,
+                3);
   }
   STOP_TIMER(t3);
   PRINT_ELAPSED(t3);
@@ -107,13 +91,11 @@ int main()
   print3x3(c);
   cpy3x3(c, d);
 
-
   cpy3x3(ia, a);
   cpy3x3(ib, b);
   cpy3x3(ib, c);
   START_TIMER(t4);
-  for(i = 0; i < 1000000; ++i)
-  {
+  for (i = 0; i < 1000000; ++i) {
     mmp3x3(a, b, c);
   }
   STOP_TIMER(t4);
@@ -129,23 +111,17 @@ int main()
 
   print3x3(c);
 
-
-
   cpy3x3(ia, a);
   cpy3x3(ib, b);
   cpy3x3(ib, c);
 
   START_TIMER(t5);
-  for(i = 0; i < 1000000; ++i)
-  {
+  for (i = 0; i < 1000000; ++i) {
     r = det3x3(a);
   }
   STOP_TIMER(t5);
 
   printf("r:%g\n", r);
-
-
-
 
   /*
   a=matrix([[1, 0, 1],
@@ -172,8 +148,7 @@ int main()
   int info = 0;
 
   START_TIMER(t6);
-  for(i = 0; i < 1; ++i)
-  {
+  for (i = 0; i < 1; ++i) {
     cpy3(v, x);
     DGESV(3, 1, a, 3, ipiv, x, 3, &info);
     printf("info is ...%i \n ", info);
@@ -185,14 +160,10 @@ int main()
   print3(x);
   cpy3x3(x, d);
 
-
-
-
   cpy3x3(ia, a);
   cpy3(iv, v);
   START_TIMER(t7);
-  for(i = 0; i < 1; ++i)
-  {
+  for (i = 0; i < 1; ++i) {
     cpy3(v, x);
     info = solv3x3(a, x, v);
     v[0] += 0.0001;
@@ -214,47 +185,38 @@ int main()
   printf("a*x:\n");
   print3(c);
 
-
   sub3(iv, c);
   printf("v - a*x:\n");
   print3(c);
 
   assert(hypot3(c) <= 1e-5);
 
-
 #ifdef WITH_TIMERS
   printf("solv3x3/DGESV:%g\n", ELAPSED(t7) / ELAPSED(t6));
   assert(ELAPSED(t7) < ELAPSED(t6));
 #endif
 
-
   srandom(1);
   double A[9000];
   double* pA = A;
-  for(i = 0; i < 1000; ++i)
-  {
-    for(k = 0; k < 9; k++)
-    {
-      *pA++ = (double) random() / RAND_MAX;
+  for (i = 0; i < 1000; ++i) {
+    for (k = 0; k < 9; k++) {
+      *pA++ = (double)random() / RAND_MAX;
     }
   }
 
   double B[3000];
   double* pB = B;
-  for(i = 0; i < 1000; ++i)
-  {
-    for(k = 0; k < 3; k++)
-    {
-      *pB++ = (double) random() / RAND_MAX;
+  for (i = 0; i < 1000; ++i) {
+    for (k = 0; k < 3; k++) {
+      *pB++ = (double)random() / RAND_MAX;
     }
   }
 
   START_TIMER(t8);
   k = 0;
 
-  for(i = 0; i < 1000; ++i)
-  {
-
+  for (i = 0; i < 1000; ++i) {
     /*
     printf("A:\n");
 
@@ -270,8 +232,7 @@ int main()
 
     DGESV(3, 1, a, 3, ipiv, x, 3, &info);
 
-    if(! info)
-    {
+    if (!info) {
       k++;
 
       /*
@@ -303,9 +264,7 @@ int main()
 #endif
   k = 0;
   START_TIMER(t9);
-  for(i = 0; i < 1000; ++i)
-  {
-
+  for (i = 0; i < 1000; ++i) {
     /*
     printf("A:\n");
 
@@ -339,7 +298,6 @@ int main()
 
       sub3(B + 3 * i, c);
 
-
       /*printf("hypot3(c)=%g\n",hypot3(c));*/
 
       assert(hypot3(c) <= 1e-5);
@@ -355,74 +313,54 @@ int main()
   assert(ELAPSED(t9) < ELAPSED(t8));
 #endif
 
-
   /* test orthoBaseFromVector */
 
   double n[3];
   double t[3];
   double s[3];
 
+  int base[3] = {-1, 0, 1};
 
-  int base[3]={-1,0,1};
-
-  for (int i=0; i < 3; i++)
-    {
-      for (int j=0; j < 3; j++)
-	{
-	  for (int k=0; k < 3; k++)
-	    {
-	      n[0]= base[i];
-	      n[1]= base[j];
-	      n[2] = base[k];
-	      if ((i==1 && j==1) && k==1)
-		{
-		}
-	      else
-		{
-		  info = orthoBaseFromVector(&n[0],&n[1],&n[2],
-					      &t[0],&t[1],&t[2],
-					      &s[0],&s[1],&s[2]);
-		  printf("n : %e %e, %e\n", n[0],n[1],n[2]);
-		  printf("t : %e %e, %e\n", t[0],t[1],t[2]);
-		  printf("t : %e %e, %e\n", s[0],s[1],s[2]);
-		  printf("n.s %e\t", n[0]*s[0]+n[1]*s[1] + n[2]* s[2] );
-		  printf("n.t %e\t", n[0]*t[0]+n[1]*t[1] + n[2]* t[2] );
-		  printf("t.s %e\n", t[0]*s[0]+t[1]*s[1] + t[2]* s[2] );
-		}
-	    }
-	}
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      for (int k = 0; k < 3; k++) {
+        n[0] = base[i];
+        n[1] = base[j];
+        n[2] = base[k];
+        if ((i == 1 && j == 1) && k == 1) {
+        } else {
+          info = orthoBaseFromVector(&n[0], &n[1], &n[2], &t[0], &t[1], &t[2], &s[0], &s[1],
+                                     &s[2]);
+          printf("n : %e %e, %e\n", n[0], n[1], n[2]);
+          printf("t : %e %e, %e\n", t[0], t[1], t[2]);
+          printf("t : %e %e, %e\n", s[0], s[1], s[2]);
+          printf("n.s %e\t", n[0] * s[0] + n[1] * s[1] + n[2] * s[2]);
+          printf("n.t %e\t", n[0] * t[0] + n[1] * t[1] + n[2] * t[2]);
+          printf("t.s %e\n", t[0] * s[0] + t[1] * s[1] + t[2] * s[2]);
+        }
+      }
     }
-  for (int i=0; i < 3; i++)
-    {
-      for (int j=0; j < 3; j++)
-	{
-	  for (int k=0; k < 3; k++)
-	    {
-	      n[0]= base[i];
-	      n[1]= base[j];
-	      n[2] = base[k];
-	      if ((i==1 && j==1) && k==1)
-		{
-		}
-	      else
-		{
-		  info = orthoBaseFromVector_old(&n[0],&n[1],&n[2],
-					      &t[0],&t[1],&t[2],
-					      &s[0],&s[1],&s[2]);
-		  printf("n : %e %e, %e\n", n[0],n[1],n[2]);
-		  printf("t : %e %e, %e\n", t[0],t[1],t[2]);
-		  printf("s : %e %e, %e\n", s[0],s[1],s[2]);
-		  printf("n.s %e\t", n[0]*s[0]+n[1]*s[1] + n[2]* s[2] );
-		  printf("n.t %e\t", n[0]*t[0]+n[1]*t[1] + n[2]* t[2] );
-		  printf("t.s %e\n", t[0]*s[0]+t[1]*s[1] + t[2]* s[2] );
-		}
-	    }
-	}
+  }
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      for (int k = 0; k < 3; k++) {
+        n[0] = base[i];
+        n[1] = base[j];
+        n[2] = base[k];
+        if ((i == 1 && j == 1) && k == 1) {
+        } else {
+          info = orthoBaseFromVector_old(&n[0], &n[1], &n[2], &t[0], &t[1], &t[2], &s[0],
+                                         &s[1], &s[2]);
+          printf("n : %e %e, %e\n", n[0], n[1], n[2]);
+          printf("t : %e %e, %e\n", t[0], t[1], t[2]);
+          printf("s : %e %e, %e\n", s[0], s[1], s[2]);
+          printf("n.s %e\t", n[0] * s[0] + n[1] * s[1] + n[2] * s[2]);
+          printf("n.t %e\t", n[0] * t[0] + n[1] * t[1] + n[2] * t[2]);
+          printf("t.s %e\n", t[0] * s[0] + t[1] * s[1] + t[2] * s[2]);
+        }
+      }
     }
-
-
-
+  }
 
   return 0;
-
 }

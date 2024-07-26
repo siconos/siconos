@@ -79,7 +79,7 @@ endif()
 # --- MA57  ---
 #SET(WITH_MA57 1)
 # - Extra setup for the component -
-if(WITH_MA57)
+if(WITH_MA57) 
   target_sources(externals PRIVATE
     lbl/src/lbl_lib.c
     lbl/src/lbl_mem.c
@@ -95,7 +95,7 @@ if(WITH_MA57)
   # --> todo: write Find metis for cmake
   target_include_directories(externals PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/lbl/include>)
 endif()
-
+ 
 # - Extra setup for the component -
 if(GAMSCAPI_FOUND AND CMAKE_DL_LIBS) # needed by GAMS (?). Here or in numerics ?
   target_link_libraries(externals PRIVATE ${CMAKE_DL_LIBS})

@@ -16,49 +16,45 @@
  * limitations under the License.
  */
 
-#include <stdlib.h>                      // for malloc
+#include <stdlib.h>  // for malloc
+
 #include "Friction_cst.h"                // for SICONOS_FRICTION_3D_NSN_AC_TEST
 #include "NumericsFwd.h"                 // for SolverOptions
 #include "SolverOptions.h"               // for solver_options_create, Solve...
 #include "frictionContact_test_utils.h"  // for build_test_collection
 #include "test_utils.h"                  // for TestCase
 
-TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
-{
-
-  *number_of_tests = 9; //n_data * n_solvers;
-  TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
+TestCase* build_test_collection(int n_data, const char** data_collection,
+                                int* number_of_tests) {
+  *number_of_tests = 9;  // n_data * n_solvers;
+  TestCase* collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
   int solvers[] = {SICONOS_FRICTION_3D_NSN_AC, SICONOS_FRICTION_3D_NSN_AC_TEST,
-                   SICONOS_FRICTION_3D_NSN_FB, SICONOS_FRICTION_3D_NSN_NM
-                  };
+                   SICONOS_FRICTION_3D_NSN_FB, SICONOS_FRICTION_3D_NSN_NM};
   int current = 0;
 
   int d;
 
   // ===== RockPile_tob1.dat =====
-  d= 7;
-  for(int s=0; s<4; ++s)
-  {
+  d = 7;
+  for (int s = 0; s < 4; ++s) {
     collection[current].filename = data_collection[d];
     collection[current].options = solver_options_create(solvers[s]);
     collection[current].options->dparam[SICONOS_DPARAM_TOL] = 5e-2;
     collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000;
     current++;
 #ifdef WITH_MUMPS
-    if (s==2)
-    {
+    if (s == 2) {
       //  test is  unstable with mumps (FC3D_NSN_FB, on ./data/RockPile_tob1.dat)
       collection[current - 1].will_fail = 1;
     }
 
 #endif
-
   }
 
-  collection[0].will_fail= 2; // (FC3D_NSN_AC, on ./data/RockPile_tob1.dat)  is unstable
-  collection[1].will_fail= 1; // (FC3D_NSN_AC_TEST, on ./data/RockPile_tob1.dat)  is expected to fail.
-
+  collection[0].will_fail = 2;  // (FC3D_NSN_AC, on ./data/RockPile_tob1.dat)  is unstable
+  collection[1].will_fail =
+      1;  // (FC3D_NSN_AC_TEST, on ./data/RockPile_tob1.dat)  is expected to fail.
 
   // ===== KaplasTower-i1061-4.hdf5.dat =====
   d = 8;
@@ -67,12 +63,12 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
   collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-5;
   collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
   //#ifdef WITH_UMFPACK
-  collection[current].will_fail = 1; // (FC3D_NSN_AC_TEST, on ./data/KaplasTower-i1061-4.hdf5.dat)  is expected to fail.
+  collection[current].will_fail =
+      1;  // (FC3D_NSN_AC_TEST, on ./data/KaplasTower-i1061-4.hdf5.dat)  is expected to fail.
   //#endif
   current++;
 
-  for(int s=0; s<4; ++s)
-  {
+  for (int s = 0; s < 4; ++s) {
     collection[current].filename = data_collection[d];
     collection[current].options = solver_options_create(solvers[s]);
     collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
@@ -80,10 +76,11 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     current++;
   }
   //#ifdef WITH_UMFPACK
-  collection[5].will_fail = 2; //(FC3D_NSN_AC, on ./data/KaplasTower-i1061-4.hdf5.dat)  is unstable
-  collection[6].will_fail = 1; //(FC3D_NSN_AC_TEST, on ./data/KaplasTower-i1061-4.hdf5.dat)  is expected to fail.
+  collection[5].will_fail =
+      2;  //(FC3D_NSN_AC, on ./data/KaplasTower-i1061-4.hdf5.dat)  is unstable
+  collection[6].will_fail =
+      1;  //(FC3D_NSN_AC_TEST, on ./data/KaplasTower-i1061-4.hdf5.dat)  is expected to fail.
   //#endif
   *number_of_tests = current;
   return collection;
-
 }

@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*!\file gfc3d_Gams.h
   \brief Various structure to work with GAMS
@@ -29,6 +29,5 @@
 typedef struct {
   NumericsMatrix* Mlu; /**< M in LU factored form*/
 } GFC3D_Gams;
-
 
 #endif

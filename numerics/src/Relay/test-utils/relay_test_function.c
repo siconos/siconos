@@ -14,10 +14,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
-#include <math.h>              // for isfinite
-#include <stdio.h>             // for printf, fclose, fopen, FILE
-#include <stdlib.h>            // for calloc, free, malloc
+ */
+#include <math.h>    // for isfinite
+#include <stdio.h>   // for printf, fclose, fopen, FILE
+#include <stdlib.h>  // for calloc, free, malloc
+
 #include "NonSmoothDrivers.h"  // for relay_driver
 #include "NumericsFwd.h"       // for RelayProblem, SolverOptions
 #include "RelayProblem.h"      // for RelayProblem, freeRelay_problem, relay...
@@ -25,12 +26,11 @@
 #include "relay_test_utils.h"  // for relay_test_function
 #include "test_utils.h"        // for TestCase
 
-int relay_test_function(TestCase * current)
-{
-  int i, info = 0 ;
-  RelayProblem* problem = relay_new_from_filename(current->filename);
+int relay_test_function(TestCase *current) {
+  int i, info = 0;
+  RelayProblem *problem = relay_new_from_filename(current->filename);
 
-  FILE * foutput  =  fopen("./relay.verif", "w");
+  FILE *foutput = fopen("./relay.verif", "w");
   info = relay_printInFile(problem, foutput);
   fclose(foutput);
 
@@ -39,24 +39,19 @@ int relay_test_function(TestCase * current)
   current->options->iparam[SICONOS_IPARAM_MAX_ITER] = maxIter;
   current->options->dparam[SICONOS_DPARAM_TOL] = tolerance;
 
-
-  double * z = (double *)calloc(problem->size, sizeof(double));
-  double * w = (double *)calloc(problem->size, sizeof(double));
+  double *z = (double *)calloc(problem->size, sizeof(double));
+  double *w = (double *)calloc(problem->size, sizeof(double));
 
   info = relay_driver(problem, z, w, current->options);
 
-  for(i = 0 ; i < problem->size ; i++)
-  {
+  for (i = 0; i < problem->size; i++) {
     printf("z[%i] = %12.8e\t,w[%i] = %12.8e\n", i, z[i], i, w[i]);
-    info = info == 0 ? !(isfinite(z[i]) && isfinite(w[i])): info;
+    info = info == 0 ? !(isfinite(z[i]) && isfinite(w[i])) : info;
   }
 
-  if(!info)
-  {
+  if (!info) {
     printf("test succeeded\n");
-  }
-  else
-  {
+  } else {
     printf("test unsuccessful\n");
   }
   free(z);
@@ -65,4 +60,3 @@ int relay_test_function(TestCase * current)
 
   return info;
 }
-

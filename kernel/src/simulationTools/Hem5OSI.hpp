@@ -147,14 +147,10 @@ class Hem5OSI : public OneStepIntegrator {
    */
   inline void setIntData(unsigned int i, int newValue) { _intData[i] = newValue; }
 
-  /** get relative tolerance parameter for Hem5
-   *  \return a double*
-   */
+  /** \return relative tolerance parameter for Hem5 */
   inline const std::vector<double>& getRtol() const { return rtol; }
 
-  /** get absolute tolerance parameter for Hem5
-   *  \return a double*
-   */
+  /** \return absolute tolerance parameter for Hem5 */
   inline const std::vector<double>& getAtol() const { return atol; }
 
   /** get the maximum number of steps for one call
@@ -162,14 +158,10 @@ class Hem5OSI : public OneStepIntegrator {
    */
   inline int getMaxNstep() const { return iwork[11]; }
 
-  /** get real work vector parameter for lsodar
-   *  \return a double*
-   */
+  /** \return real work vector parameter for lsodar */
   inline const std::vector<double>& getRwork() const { return rwork; }
 
-  /** get iwork
-   *  \return a pointer to int
-   */
+  /** \return iwork */
   inline const std::vector<int>& getIwork() const { return iwork; }
 
   /** set itol, rtol and atol (tolerance parameters for Hem5)
@@ -274,8 +266,10 @@ class Hem5OSI : public OneStepIntegrator {
   void prepareNewtonIteration(double time) override { assert(0); };
 
   /** integrates the Interaction linked to this integrator, without taking
-   * non-smooth effects into account \param vertex_inter of the interaction
-   * graph \param osnsp pointer to siconos::nonsmooth_formulations::OneStepNSProblem
+   *  non-smooth effects into account
+   *
+   *  \param vertex_inter of the interaction graph
+   *  \param osnsp pointer to siconos::nonsmooth_formulations::OneStepNSProblem
    */
   void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
                          siconos::nonsmooth_formulations::OneStepNSProblem* osnsp) override;

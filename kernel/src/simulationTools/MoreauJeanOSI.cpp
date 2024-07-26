@@ -1863,10 +1863,11 @@ bool siconos::integrators::MoreauJeanOSI::addInteractionInIndexSet(
   double h = _simulation->timeStep();
   double y = (inter->y(i - 1))->getValue(0);  // for i=1 y(i-1) is the position
   double yDot = (inter->y(i))->getValue(0);   // for i=1 y(i) is the velocity
+#ifdef DEBUG_ACTIVATION
   double yDot_k =
       (inter->y_k(i))
           .getValue(0);  // for i=1 y(i) is the velocity et the beginning of the time step
-
+#endif
   double gamma = 1.0 / 2.0;
   if (_useGamma) {
     gamma = _gamma;
@@ -1878,6 +1879,7 @@ bool siconos::integrators::MoreauJeanOSI::addInteractionInIndexSet(
       i, y, yDot, y + gamma * h * yDot, _constraintActivationThreshold);
   y += gamma * h * yDot;
   assert(!std::isnan(y));
+
   if (_activateWithNegativeRelativeVelocity) {
 #ifdef DEBUG_ACTIVATION
     if (fabs(yDot - yDot_k) > 1e-10) {
@@ -1905,7 +1907,6 @@ bool siconos::integrators::MoreauJeanOSI::addInteractionInIndexSet(
                   << " <= " << _constraintActivationThresholdVelocity << std::endl;
       }
     }
-#endif
     DEBUG_EXPR_WE(
         if ((y <= _constraintActivationThreshold) and
             (yDot_k <= _constraintActivationThreshold)) std::cout
@@ -1913,7 +1914,7 @@ bool siconos::integrators::MoreauJeanOSI::addInteractionInIndexSet(
             << " gamma " << gamma << " y=" << y << "<= " << _constraintActivationThreshold
             << " yDot_k =" << yDot_k << "<= " << _constraintActivationThresholdVelocity
             << std::endl;);
-
+#endif
     return ((y <= _constraintActivationThreshold) and
             (yDot <= _constraintActivationThresholdVelocity));
   } else {
@@ -1975,7 +1976,6 @@ siconos::integrators::MoreauJeanOSI::computeWorkForces() {
   for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
     if (!checkOSI(dsi)) continue;
     auto ds = _dynamicalSystemsGraph->bundle(*dsi);
-    auto &ds_work_vectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
 
     auto dsType = siconos::types::type_value(*ds);
     // 3 - Lagrangian Non Linear Systems

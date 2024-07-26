@@ -26,46 +26,36 @@
 #include "mymath_FunctionSetRoot.hxx"
 
 /*----------------------------------------------------------------------------
- Si on note Du1s et Dv1s, les derivees en u1 et v1, les 2 fonctions a annuler
-sont: Si on note Du2s et Dv2s, les derivees en u2 et v2, les 2 fonctions a
-annuler sont:
+ Si on note Du1s et Dv1s, les derivees en u1 et v1, les 2 fonctions a annuler sont:
 
  { F1(u1,v1,u2,v2) = (S1(u1,v1)-S2(u2,v2)).Du1s1(u1,v1) }
  { F2(u1,v1,u2,v2) = (S1(u1,v1)-S2(u2,v2)).Dv1s1(u1,v1) }
  { F3(u1,v1,u2,v2) = (S1(u1,v1)-S2(u2,v2)).Du2s2(u2,v2) }
  { F4(u1,v1,u2,v2) = (S1(u1,v1)-S2(u2,v2)).Dv2s2(u2,v2) }
 
- { du1f1(u1,v1,u2,v2) =
-Du1s1(u1,v1).Du1s1(u1,v1)+(S1(u1,v1)-S2(u2,v2)).Du1u1s1(u1,v1) =
-||Du1s1(u1,v1)||**2      +(S1(u1,v1)-S2(u2,v2)).Du1u1s1(u1,v1) } {
-dv1f1(u1,v1,u2,v2) =
-Dv1s1(u1,v1).Du1s1(u1,v1)+(S1(u1,v1)-S2(u2,v2)).Du1v1s1(u1,v1) } {
-du2f1(u1,v1,u2,v2) = -Du2s2(u2,v2).Du1s1(u1,v1) } { dv2f1(u1,v1,u2,v2) =
--Dv2s2(u2,v2).Du1s1(u1,v1) }
+ { du1f1(u1,v1,u2,v2) = Du1s1(u1,v1).Du1s1(u1,v1)+(S1(u1,v1)-S2(u2,v2)).Du1u1s1(u1,v1)
+                      = ||Du1s1(u1,v1)||**2      +(S1(u1,v1)-S2(u2,v2)).Du1u1s1(u1,v1) }
+ { dv1f1(u1,v1,u2,v2) = Dv1s1(u1,v1).Du1s1(u1,v1)+(S1(u1,v1)-S2(u2,v2)).Du1v1s1(u1,v1) }
+ { du2f1(u1,v1,u2,v2) = -Du2s2(u2,v2).Du1s1(u1,v1) }
+ { dv2f1(u1,v1,u2,v2) = -Dv2s2(u2,v2).Du1s1(u1,v1) }
 
- { du1f2(u1,v1,u2,v2) =
-Du1s1(u1,v1).Dv1s1(u1,v1)+(S1(u1,v1)-S2(u2,v2)).Du1v1s1(u1,v1) } {
-dv1f2(u1,v1,u2,v2) =
-Dv1s1(u1,v1).Dv1s1(u1,v1)+(S1(u1,v1)-S2(u2,v2)).Dv1v1s1(u1,v1) =
-||Dv1s1(u1,v1)||**2      +(S1(u1,v1)-S2(u2,v2)).Dv1v1s1(u1,v1) } {
-du2f2(u1,v1,u2,v2) = -Du2s2(u2,v2).Dv1s1(u1,v1) } { dv2f2(u1,v1,u2,v2) =
--Dv2s2(u2,v2).Dv1s1(u1,v1) }
+ { du1f2(u1,v1,u2,v2) = Du1s1(u1,v1).Dv1s1(u1,v1)+(S1(u1,v1)-S2(u2,v2)).Du1v1s1(u1,v1) }
+ { dv1f2(u1,v1,u2,v2) = Dv1s1(u1,v1).Dv1s1(u1,v1)+(S1(u1,v1)-S2(u2,v2)).Dv1v1s1(u1,v1)
+                      = ||Dv1s1(u1,v1)||**2      +(S1(u1,v1)-S2(u2,v2)).Dv1v1s1(u1,v1) }
+ { du2f2(u1,v1,u2,v2) = -Du2s2(u2,v2).Dv1s1(u1,v1) }
+ { dv2f2(u1,v1,u2,v2) = -Dv2s2(u2,v2).Dv1s1(u1,v1) }
 
  { du1f3(u1,v1,u2,v2) = Du1s1(u1,v1).Du2s2(u2,v2) }
  { dv1f3(u1,v1,u2,v2) = Dv1s1(u1,v1).Du2s2(u2,v2) }
- { du2f3(u1,v1,u2,v2) =
--Du2s2(u2,v2).Du2s2(u2,v2)+(S1(u1,v1)-S2(u2,v2)).Du2u2s2(u2,v2) =
--||Du2s2(u2,v2)||**2      +(S1(u1,v1)-S2(u2,v2)).Du2u2s2(u2,v2) } {
-dv2f3(u1,v1,u2,v2) =
--Dv2s2(u2,v2).Du2s2(u2,v2)+(S1(u1,v1)-S2(u2,v2)).Dv2u2s2(u2,v2) }
+ { du2f3(u1,v1,u2,v2) = -Du2s2(u2,v2).Du2s2(u2,v2)+(S1(u1,v1)-S2(u2,v2)).Du2u2s2(u2,v2)
+                      = -||Du2s2(u2,v2)||**2      +(S1(u1,v1)-S2(u2,v2)).Du2u2s2(u2,v2) }
+ { dv2f3(u1,v1,u2,v2) = -Dv2s2(u2,v2).Du2s2(u2,v2)+(S1(u1,v1)-S2(u2,v2)).Dv2u2s2(u2,v2) }
 
  { du1f4(u1,v1,u2,v2) = Du1s1(u1,v1).Dv2s2(u2,v2) }
  { dv1f4(u1,v1,u2,v2) = Dv1s1(u1,v1).Dv2s2(u2,v2) }
- { du2f4(u1,v1,u2,v2) =
--Du2s2(u2,v2).Dv2s2(u2,v2)+(S1(u1,v1)-S2(u2,v2)).Du2v2s2(u2,v2) } {
-dv2f4(u1,v1,u2,v2) =
--Dv2s2(u2,v2).Dv2s2(u2,v2)+(S1(u1,v1)-S2(u2,v2)).Dv2v2s2(u2,v2) =
--||Dv2s2(u2,v2)||**2      +(S1(u1,v1)-S2(u2,v2)).Dv2v2s2(u2,v2) }
+ { du2f4(u1,v1,u2,v2) = -Du2s2(u2,v2).Dv2s2(u2,v2)+(S1(u1,v1)-S2(u2,v2)).Du2v2s2(u2,v2) }
+ { dv2f4(u1,v1,u2,v2) = -Dv2s2(u2,v2).Dv2s2(u2,v2)+(S1(u1,v1)-S2(u2,v2)).Dv2v2s2(u2,v2)
+                      = -||Dv2s2(u2,v2)||**2      +(S1(u1,v1)-S2(u2,v2)).Dv2v2s2(u2,v2) }
 
 ----------------------------------------------------------------------------*/
 
@@ -84,8 +74,8 @@ siconos::mechanisms::myExtrema_FuncExtSS::myExtrema_FuncExtSS() {
 // purpose  :
 //=======================================================================
 
-siconos::mechanisms::myExtrema_FuncExtSS::myExtrema_FuncExtSS(
-    const Adaptor3d_Surface& S1, const Adaptor3d_Surface& S2) {
+siconos::mechanisms::myExtrema_FuncExtSS::myExtrema_FuncExtSS(const Adaptor3d_Surface& S1,
+                                                              const Adaptor3d_Surface& S2) {
   myS1 = (Adaptor3d_Surface*)&S1;
   myS2 = (Adaptor3d_Surface*)&S2;
   myS1init = Standard_True;
@@ -97,8 +87,8 @@ siconos::mechanisms::myExtrema_FuncExtSS::myExtrema_FuncExtSS(
 // purpose  :
 //=======================================================================
 
-void siconos::mechanisms::myExtrema_FuncExtSS::Initialize(
-    const Adaptor3d_Surface& S1, const Adaptor3d_Surface& S2) {
+void siconos::mechanisms::myExtrema_FuncExtSS::Initialize(const Adaptor3d_Surface& S1,
+                                                          const Adaptor3d_Surface& S2) {
   myS1 = (Adaptor3d_Surface*)&S1;
   myS2 = (Adaptor3d_Surface*)&S2;
   myS1init = Standard_True;
@@ -113,26 +103,22 @@ void siconos::mechanisms::myExtrema_FuncExtSS::Initialize(
 // purpose  :
 //=======================================================================
 
-Standard_Integer siconos::mechanisms::myExtrema_FuncExtSS::NbVariables() const {
-  return 4;
-}
+Standard_Integer siconos::mechanisms::myExtrema_FuncExtSS::NbVariables() const { return 4; }
 
 //=======================================================================
 // function : NbEquations
 // purpose  :
 //=======================================================================
 
-Standard_Integer siconos::mechanisms::myExtrema_FuncExtSS::NbEquations() const {
-  return 4;
-}
+Standard_Integer siconos::mechanisms::myExtrema_FuncExtSS::NbEquations() const { return 4; }
 
 //=======================================================================
 // function : Value
 // purpose  :
 //=======================================================================
 
-Standard_Boolean siconos::mechanisms::myExtrema_FuncExtSS::Value(
-    const math_Vector& UV, math_Vector& F) {
+Standard_Boolean siconos::mechanisms::myExtrema_FuncExtSS::Value(const math_Vector& UV,
+                                                                 math_Vector& F) {
   ACE_times[ACE_TIMER_CAD_VALUE].start();
   if (!myS1init || !myS2init) Standard_TypeMismatch::Raise();
   myU1 = UV(1);
@@ -159,8 +145,8 @@ Standard_Boolean siconos::mechanisms::myExtrema_FuncExtSS::Value(
 // purpose  :
 //=======================================================================
 
-Standard_Boolean siconos::mechanisms::myExtrema_FuncExtSS::Derivatives(
-    const math_Vector& UV, math_Matrix& Df) {
+Standard_Boolean siconos::mechanisms::myExtrema_FuncExtSS::Derivatives(const math_Vector& UV,
+                                                                       math_Matrix& Df) {
   math_Vector F(1, 4);
   return Values(UV, F, Df);
 }
@@ -170,8 +156,9 @@ Standard_Boolean siconos::mechanisms::myExtrema_FuncExtSS::Derivatives(
 // purpose  :
 //=======================================================================
 
-Standard_Boolean siconos::mechanisms::myExtrema_FuncExtSS::Values(
-    const math_Vector& UV, math_Vector& F, math_Matrix& Df) {
+Standard_Boolean siconos::mechanisms::myExtrema_FuncExtSS::Values(const math_Vector& UV,
+                                                                  math_Vector& F,
+                                                                  math_Matrix& Df) {
   ACE_times[ACE_TIMER_CAD_VALUES].start();
   if (!myS1init || !myS2init) Standard_TypeMismatch::Raise();
   myU1 = UV(1);
@@ -247,8 +234,7 @@ Standard_Integer siconos::mechanisms::myExtrema_FuncExtSS::NbExt() const {
 // purpose  :
 //=======================================================================
 
-Standard_Real siconos::mechanisms::myExtrema_FuncExtSS::Value(
-    const Standard_Integer N) const {
+Standard_Real siconos::mechanisms::myExtrema_FuncExtSS::Value(const Standard_Integer N) const {
   if (!myS1init || !myS2init) Standard_TypeMismatch::Raise();
   return myValue.Value(N);
 }

@@ -25,13 +25,11 @@
 #include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "SiconosMatrix.hpp"
 // #include <boost/numeric/ublas/io.hpp>
 
 bool siconos::algebra::io::read(const std::string &fileName, SiconosVector &m,
                                 const std::ios_base::openmode &mode, int prec,
-                                WriteType inputType,
-                                const std::ios::fmtflags &flags) {
+                                WriteType inputType, const std::ios::fmtflags &flags) {
   // Read and check the file
   std::ifstream infile(fileName, mode);
   std::filesystem::path p1{fileName};
@@ -59,18 +57,16 @@ bool siconos::algebra::io::read(const std::string &fileName, SiconosVector &m,
       infile >> dim;
       if (dim != m.size()) m.resize(dim);
     }
-    copy((std::istream_iterator<double>(infile)),
-         std::istream_iterator<double>(), (m.begin()));
+    copy((std::istream_iterator<double>(infile)), std::istream_iterator<double>(),
+         (m.begin()));
   }
   infile.close();
   return true;
 }
 
-bool siconos::algebra::io::write(const std::string &fileName,
-                                 const SiconosVector &m,
+bool siconos::algebra::io::write(const std::string &fileName, const SiconosVector &m,
                                  const std::ios_base::openmode &mode, int prec,
-                                 const WriteType outputType,
-                                 const std::ios::fmtflags &flags) {
+                                 const WriteType outputType, const std::ios::fmtflags &flags) {
   std::ofstream outfile(fileName, mode);
   outfile.flags(flags);
 
@@ -130,10 +126,8 @@ bool siconos::algebra::io::read(const std::string &filename, SiconosMatrix &m,
   return true;
 }
 
-bool siconos::algebra::io::write(const std::string &filename,
-                                 const SiconosMatrix &m,
-                                 const std::ios_base::openmode &mode,
-                                 WriteType outputType) {
+bool siconos::algebra::io::write(const std::string &filename, const SiconosMatrix &m,
+                                 const std::ios_base::openmode &mode, WriteType outputType) {
   // Open file and various checks
   std::ofstream outfile(filename, mode);
 
@@ -145,8 +139,7 @@ bool siconos::algebra::io::write(const std::string &filename,
   outfile.setf(std::ios::scientific);
   // Writing
 
-  if (outputType == WriteType::python)
-    outfile << m.size(0) << " " << m.size(1) << std::endl;
+  if (outputType == WriteType::python) outfile << m.size(0) << " " << m.size(1) << std::endl;
 
   double tmp;
   for (decltype(m.size(0)) i = 0; i < m.size(0); i++) {
@@ -163,9 +156,9 @@ bool siconos::algebra::io::write(const std::string &filename,
   return true;
 }
 
-double siconos::algebra::io::compareRefFile(
-    const SiconosMatrix &data, std::string filename, double epsilon,
-    std::vector<int> index, const std::ios_base::openmode mode, bool verbose) {
+double siconos::algebra::io::compareRefFile(const SiconosMatrix &data, std::string filename,
+                                            double epsilon, std::vector<int> index,
+                                            const std::ios_base::openmode mode, bool verbose) {
   auto ref = std::make_shared<SiconosMatrix>(0, 0);
   bool compare = false;
   // SiconosMatrix ref{0, 0};
@@ -179,8 +172,7 @@ double siconos::algebra::io::compareRefFile(
   }
   if (!compare) return -1.0;
 
-  if (verbose)
-    std::cout << "Comparison with reference file " << filename << std::endl;
+  if (verbose) std::cout << "Comparison with reference file " << filename << std::endl;
 
   SiconosVector err(data.size(1));
   siconos::algebra::normInfByColumn(data - *ref, err);
@@ -209,8 +201,8 @@ double siconos::algebra::io::compareRefFile(
   return error;
 }
 
-std::shared_ptr<siconos::algebra::SiconosVector>
-siconos::algebra::io::readVectorFromJson(const nlohmann::json &jin) {
+std::shared_ptr<siconos::algebra::SiconosVector> siconos::algebra::io::readVectorFromJson(
+    const nlohmann::json &jin) {
   auto vec = std::make_shared<SiconosVector>(jin.size());
   size_t element_index = 0;
   for (const auto &element : jin) {
