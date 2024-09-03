@@ -26,7 +26,7 @@ def test_vector():
 
 def test_matrix():
     
-    mat = alg.SimpleMatrix(row=3, col=4, storage_type=alg.UblasType.dense)
+    mat = alg.SiconosMatrix(row=3, col=4, storage_type=alg.UblasType.dense)
     print(mat)
 
 if __name__ == '__main__':

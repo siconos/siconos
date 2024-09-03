@@ -25,6 +25,7 @@
 
 #include <memory>
 
+#include "vector_wrapper.h"
 #include "DynamicalSystem.hpp"
 #include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
@@ -182,6 +183,16 @@ class SecondOrderDS : public DynamicalSystem {
    */
   inline std::shared_ptr<siconos::algebra::SiconosVector> p(unsigned int level = 2) const {
     return _p[level];
+  }
+
+  /** get p
+   *
+   *  \param level unsigned int, required level for p, default = 2
+   *  \return pointer on a siconos::algebra::SiconosVector
+   */
+  inline VectorWrapper p_wrapper(unsigned int level)
+  {
+    return VectorWrapper(*(_p[level]));
   }
 
   /** get mass matrix (pointer link)

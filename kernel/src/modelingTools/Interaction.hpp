@@ -31,6 +31,7 @@
 #include "SiconosMatrix.hpp"
 #include "SiconosMatrix.hpp"
 #include "BlockVector.hpp"
+#include "vector_wrapper.h"
 
 #include "SiconosSerialization.hpp"
 
@@ -468,6 +469,17 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
   {
     assert(_lambda[i]);
     return _lambda[i];
+  }
+
+  /** get _lambda[i], derivative number i of input
+   *
+   *  \param i derivative number i of output
+   *  \return pointer on a SiconosVector
+   */
+  inline VectorWrapper lambda_wrapper(const unsigned int i) const
+  {
+    assert(_lambda[i]);
+    return VectorWrapper(*(_lambda[i]));
   }
 
   /** get all the values of the multiplier lambda stored in memory

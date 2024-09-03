@@ -26,6 +26,7 @@
 #include "SiconosVector.hpp"
 #include "OneStepIntegrator.hpp"
 #include "SiconosVisitor.hpp"
+#include "LagrangianLinearTIDS.hpp"
 // namespace siconos::internal {
 
 // class SiconosVisitor;
@@ -555,6 +556,12 @@ class MoreauJeanOSI : public OneStepIntegrator {
   /** Displays the data of the MoreauJeanOSI's integrator
    */
   void display() const override;
+
+  void tonch_mass(std::shared_ptr<siconos::modeling::LagrangianLinearTIDS> ds) {
+    auto m = ds->mass_python();
+    m(2, 2) = 31.;
+  }
+
 };
 }  // namespace siconos::integrators
 #endif  // MoreauJeanOSI_H

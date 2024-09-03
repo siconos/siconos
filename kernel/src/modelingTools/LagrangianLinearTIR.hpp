@@ -22,6 +22,7 @@
 #define LAGRANGIANLINEARRELATION_H
 
 #include "LagrangianR.hpp"
+#include "matrix_wrapper.h"
 
 namespace siconos::modeling {
 /**
@@ -56,6 +57,12 @@ class LagrangianLinearTIR : public LagrangianR {
    *  \param C the matrix C
    */
   LagrangianLinearTIR(std::shared_ptr<siconos::algebra::SiconosMatrix> C);
+
+  /** create the Relation from a set of data
+   *
+   *  \param C the matrix C
+   */
+  LagrangianLinearTIR(MatrixWrapper C);
 
   /** create the Relation from a set of data
    *

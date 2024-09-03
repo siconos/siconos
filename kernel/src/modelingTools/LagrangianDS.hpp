@@ -23,6 +23,7 @@
 #ifndef LAGRANGIANDS_H
 #define LAGRANGIANDS_H
 
+#include "vector_wrapper.h"
 #include "DynamicalSystem.hpp"
 #include "PluginTypes.hpp"  // for siconos::plugins::FPtr6, ...
 #include "SecondOrderDS.hpp"
@@ -420,6 +421,12 @@ class LagrangianDS : public SecondOrderDS {
    */
   inline std::shared_ptr<siconos::algebra::SiconosVector> q() const override { return _q[0]; }
 
+  /** generalized coordinates of the system (vector of size dimension())
+   *
+   *  \return pointer on a siconos::algebra::SiconosVector
+   */
+  inline VectorWrapper q_wrapper() { return VectorWrapper(*(_q[0])); }
+
   /** set value of generalized coordinates vector (copy)
    *
    *  \param newValue
@@ -450,6 +457,15 @@ class LagrangianDS : public SecondOrderDS {
    */
   inline std::shared_ptr<siconos::algebra::SiconosVector> velocity() const override {
     return _q[1];
+  }
+
+  /** get velocity vector (pointer link)
+   *
+   *  \return pointer on a siconos::algebra::SiconosVector
+   */
+  inline VectorWrapper velocity_wrapper()
+  {
+    return VectorWrapper(*(_q[0]));
   }
 
   /** set velocity vector (copy)
@@ -519,6 +535,10 @@ class LagrangianDS : public SecondOrderDS {
   inline void setFExtPtr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) {
     _fExt = newPtr;
     _hasConstantFExt = true;
+  }
+
+  inline void setFExtPtr(VectorWrapper newVect) {
+    setFExtPtr(newVect.get_shared_ptr());
   }
 
   /** get  \f$ F_{gyr} \f$ , (pointer link)
