@@ -36,13 +36,13 @@ namespace siconos
  * \param s a Simulation
  * \param filename with extension : .xml, .bin (binary archive)
  */
-void save(SP::Simulation s, const std::string& filename);
+void save(std::shared_ptr<siconos::simulation::Simulation> s, const std::string& filename);
 
 /** load a Siconos Model with the full simulation state from file
  * \param filename
  * \return a Simulation
  */
-SP::Simulation load(const std::string& filename);
+std::shared_ptr<siconos::simulation::Simulation> load(const std::string& filename);
 
 }
 

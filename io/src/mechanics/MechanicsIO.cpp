@@ -764,7 +764,7 @@ std::shared_ptr<siconos::algebra::SimpleMatrix> siconos::io::MechanicsIO::contac
     DEBUG_EXPR(result->display(););
     return result;
   }
-  DEBUG_END("SP::SimpleMatrix MechanicsIO::contactInfo");
+  DEBUG_END(" MechanicsIO::contactInfo");
 
   return nullptr;
 }
@@ -971,7 +971,7 @@ std::shared_ptr<siconos::algebra::SimpleMatrix> siconos::io::MechanicsIO::contac
     DEBUG_EXPR(result->display(););
     return result;
   }
-  DEBUG_END("SP::SimpleMatrix MechanicsIO::contactContactWork");
+  DEBUG_END("MechanicsIO::contactContactWork");
 
   // result->display();
   return nullptr;

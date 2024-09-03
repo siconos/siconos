@@ -76,12 +76,12 @@ code-block:: c++
 
   // Assume a NonSmoothDynamicalSystem nsds and
   // a TimeDiscretisation td ...
-  SP::EventDriven s(new EventDriven(nsds, td));
+  auto s = std::make_shared<siconos::simulation::EventDriven>(nsds, td);
 
   // ...
   
   // We get the events manager
-  SP::EventsManager eventsManager = s->eventsManager();
+  auto eventsManager = s->eventsManager();
   
   // while there are some events ...
   while(eventsManager->hasNextEvent())

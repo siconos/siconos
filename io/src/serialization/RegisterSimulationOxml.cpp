@@ -29,7 +29,7 @@
 
 #include <boost/archive/xml_oarchive.hpp>
 
-void RegisterSimulationOxml(std::ofstream& ofs, SP::Simulation& sim)
+void RegisterSimulationOxml(std::ofstream& ofs, std::shared_ptr<siconos::simulation::Simulation>& sim)
 {
   boost::archive::xml_oarchive ar(ofs);
   siconos_io_register_Numerics(ar);

@@ -158,7 +158,7 @@ void siconos::mechanisms::MBTB_ContactRelation::computeh(
 //     _jachq->setValue(0,8,_pContact->_nY);
 //     _jachq->setValue(0,9,_pContact->_nZ);
 //   }
-//   SP::BlockVector BlockX
+//   auto BlockX
 //   =boost::static_pointer_cast<BlockVector>((data[q0])); for (int
 //   iDS=0;iDS<2;iDS++){
 //     if (_pContact->_indexBody2==-1 && iDS ==1)

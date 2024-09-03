@@ -159,43 +159,6 @@ void KernelTest::t3() {
   CPPUNIT_ASSERT((so->iSize == sor->iSize));
 }
 
-// void KernelTest::t4()
-// {
-//   auto m = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3));
-//   auto v = std::make_shared<siconos::algebra::SiconosVector>(3));
-//   auto q = std::make_shared<siconos::algebra::SiconosVector>(3));
-
-//   m->eye();
-
-//   auto ds1= std::make_shared<siconos::modeling::LagrangianDS>(q, v, m));
-//   auto ds2= std::make_shared<siconos::modeling::LagrangianDS>(q, v, m));
-
-//   SP::DynamicalSystemsSet dsset(new DynamicalSystemsSet());
-
-//   dsset->insert(ds1);
-//   dsset->insert(ds2);
-
-//   std::ofstream ofs("t4.xml");
-//   {
-//     boost::archive::xml_oarchive oa(ofs);
-//     oa.register_type(static_cast<SimpleMatrix*>(nullptr));
-//     oa.register_type(static_cast<siconos::algebra::SiconosVector*>(nullptr));
-//     oa.register_type(static_cast<siconos::modeling::LagrangianDS*>(nullptr));
-//     oa << NVP(dsset);
-//   }
-
-//   SP::DynamicalSystemsSet dssetfromfile(new DynamicalSystemsSet());
-
-//   std::ifstream ifs("t4.xml");
-//   {
-//     boost::archive::xml_iarchive ia(ifs);
-//     ia.register_type(static_cast<siconos::algebra::SimpleMatrix*>(nullptr));
-//     ia.register_type(static_cast<siconos::algebra::SiconosVector*>(nullptr));
-//     ia.register_type(static_cast<siconos::modeling::LagrangianDS*>(nullptr));
-//     ia >> NVP(dssetfromfile);
-//   }
-
-// }
 
 #include "SiconosRestart.hpp"
 

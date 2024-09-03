@@ -37,7 +37,7 @@ void siconos::mechanisms::MBTB_FC3DContactRelation::computeh(
     double time, const siconos::algebra::BlockVector& q0,
     siconos::algebra::SiconosVector& y) {
   //  DSIterator itDS=_pContact->interaction()->dynamicalSystemsBegin();
-  //  SP::DynamicalSystem aux = *itDS;
+  //  auto aux = *itDS;
   // if(mbtb::data::sPrintDist)
   //  {
   //    printf("siconos::mechanisms::MBTB_FC3DContactRelation::computeh Start
@@ -155,7 +155,7 @@ void siconos::mechanisms::MBTB_FC3DContactRelation::computeh(
   y.setValue(0, _pContact->_dist);
   DEBUG_EXPR(y.display(););
 
-  // SP::NewtonEulerR ner
+  // auto ner
   // =(boost::static_pointer_cast<NewtonEulerR>(interaction()->relation()));
   // ner->yProj()->setValue(0,_pContact->_dist);
   //  _Pc1->setValue(0,0.5*(_pContact->_X1+_pContact->_X2));

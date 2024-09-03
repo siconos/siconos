@@ -34,7 +34,7 @@
 %ignore operator *(SiconosMatrix const &,double);
 %ignore operator /(SiconosVector const &,double);
 %ignore operator /(SiconosMatrix const &,double);
-%ignore operator +(SP::SimpleMatrix const,SP::SimpleMatrix const);
+%ignore operator +(std::shared_ptr<siconos::algebra::SimpleMatrix> const, std::shared_ptr<siconos::algebra::SimpleMatrix> const);
 %ignore operator +(SiconosMatrix const &,SiconosMatrix const &);
 %ignore operator +(SiconosVector const &,SiconosVector const &);
 %ignore operator -(SiconosVector const &,SiconosVector const &);

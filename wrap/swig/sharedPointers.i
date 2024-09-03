@@ -32,46 +32,46 @@ namespace STD {
 
 // fix some problems passing ref and null shared_ptr to directors
 %define FIX_DIRECTOR_SHARED_PTR_TYPEMAPS(SP,TYPE)
-%typemap(directorout) (SP::TYPE) (void * swig_argp, int swig_res = 0) %{
+%typemap(directorout) (std::shared_ptr<TYPE>) (void * swig_argp, int swig_res = 0) %{
   if ($input==Py_None) {
     $result = $ltype();
   } else {
-    swig_res = SWIG_ConvertPtr($input, &swig_argp, $descriptor(SP::TYPE*), %convertptr_flags);
+    swig_res = SWIG_ConvertPtr($input, &swig_argp, $descriptor(std::shared_ptr<Type>*), %convertptr_flags);
     if (!SWIG_IsOK(swig_res)) {
       %dirout_fail(swig_res,"$type");
     }
     $result = *(%reinterpret_cast(swig_argp, $&ltype));
   }
 %}
-%typemap(directorin) (SP::TYPE) () %{
-  $input = $1 ? SWIG_NewPointerObj(%as_voidptr(&$1), $descriptor(SP::TYPE *), 0) : SWIG_Py_Void();
+%typemap(directorin) (std::shared_ptr<Type>) () %{
+  $input = $1 ? SWIG_NewPointerObj(%as_voidptr(&$1), $descriptor(std::shared_ptr<Type> *), 0) : SWIG_Py_Void();
 %}
-%typemap(directorin) (SP::TYPE &) () %{
-  $input = $1 ? SWIG_NewPointerObj(%as_voidptr(&$1), $descriptor(SP::TYPE *), 0) : SWIG_Py_Void();
+%typemap(directorin) (std::shared_ptr<Type> &) () %{
+  $input = $1 ? SWIG_NewPointerObj(%as_voidptr(&$1), $descriptor(std::shared_ptr<Type> *), 0) : SWIG_Py_Void();
 %}
-%typemap(directorin) (const SP::TYPE &) () %{
-  $input = $1 ? SWIG_NewPointerObj(%as_voidptr(&$1), $descriptor(SP::TYPE *), 0) : SWIG_Py_Void();
+%typemap(directorin) (const std::shared_ptr<Type> &) () %{
+  $input = $1 ? SWIG_NewPointerObj(%as_voidptr(&$1), $descriptor(std::shared_ptr<Type> *), 0) : SWIG_Py_Void();
 %}
-%typemap(directorin) (SP::TYPE *) () %{
-  $input = ($1 && *$1) ? SWIG_NewPointerObj(%as_voidptr($1), $descriptor(SP::TYPE *), 0) : SWIG_Py_Void();
+%typemap(directorin) (std::shared_ptr<Type> *) () %{
+  $input = ($1 && *$1) ? SWIG_NewPointerObj(%as_voidptr($1), $descriptor(std::shared_ptr<Type> *), 0) : SWIG_Py_Void();
 %}
-%typemap(directorin) (SP::TYPE *&) () %{
-  $input = ($1 && *$1) ? SWIG_NewPointerObj(%as_voidptr($1), $descriptor(SP::TYPE *), 0) : SWIG_Py_Void();
+%typemap(directorin) (std::shared_ptr<Type> *&) () %{
+  $input = ($1 && *$1) ? SWIG_NewPointerObj(%as_voidptr($1), $descriptor(std::shared_ptr<Type> *), 0) : SWIG_Py_Void();
 %}
-%typemap(directorin) (const SP::TYPE *&) () %{
-  $input = ($1 && *$1) ? SWIG_NewPointerObj(%as_voidptr($1), $descriptor(SP::TYPE *), 0) : SWIG_Py_Void();
+%typemap(directorin) (const std::shared_ptr<Type> *&) () %{
+  $input = ($1 && *$1) ? SWIG_NewPointerObj(%as_voidptr($1), $descriptor(std::shared_ptr<Type> *), 0) : SWIG_Py_Void();
 %}
 %enddef
 
 // fix director shared pointer check if arg is a ref
 %define FIX_DIRECTOR_TYPEMAPS(TYPE)
 %typemap(directorin) (TYPE&) () %{
-  SP::TYPE $input_sp = createSPtr##TYPE($1);
-  $input = SWIG_NewPointerObj(%as_voidptr(&$input_sp), $descriptor(SP::TYPE *), 0);
+  auto $input_sp = createSPtr##TYPE($1);
+  $input = SWIG_NewPointerObj(%as_voidptr(&$input_sp), $descriptor(std::shared_ptr<Type> *), 0);
 %}
 %typemap(directorin) (const TYPE&) () %{
   SPC::TYPE $input_sp = createSPtrConst##TYPE($1);
-  $input = SWIG_NewPointerObj(%as_voidptr(&$input_sp), $descriptor(SPC::TYPE *), 0);
+  $input = SWIG_NewPointerObj(%as_voidptr(&$input_sp), $descriptor(std::shared_ptr<const Type> *), 0);
 %}
 FIX_DIRECTOR_SHARED_PTR_TYPEMAPS(SP,TYPE)
 FIX_DIRECTOR_SHARED_PTR_TYPEMAPS(SPC,TYPE)

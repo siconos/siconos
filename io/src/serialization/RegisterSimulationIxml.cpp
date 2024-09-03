@@ -51,7 +51,7 @@ void basic_text_iprimitive<std::istream>::load<double>(double& t)
 }
 } // close namespaces
 
-void RegisterSimulationIxml(std::ifstream& ifs, SP::Simulation& sim)
+void RegisterSimulationIxml(std::ifstream& ifs, std::shared_ptr<siconos::simulation::Simulation>& sim)
 {
   boost::archive::xml_iarchive ar(ifs);
   siconos_io_register_Numerics(ar);

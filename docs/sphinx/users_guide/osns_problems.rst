@@ -30,8 +30,8 @@ Knowing all values at the beginning of the time step :math:`[t_i,t_{i+1}]`,
 
 ::
    
-   SP::TimeStepping s(new TimeStepping(myModel));  
-   SP::TimeDiscretisation t(new TimeDiscretisation(timeStep,s));
+   auto s = std::make_shared<siconos::simulation::TimeStepping>(myModel);  
+   auto t = std::make_shared<siconos::simulation::TimeDiscretisation>(timeStep,s);
 
    s->initialize();
 
@@ -68,7 +68,7 @@ Change this behavior is possible by defining a specific function of the form::
   //
   // your inputFile.cpp
   //
-  void myF(int info, SP::Simulation s)
+  void myF(int info, std::shared_ptr<siconos::simulation::Simulation> s)
   {
   // do what you need ...
   }
@@ -77,7 +77,7 @@ Change this behavior is possible by defining a specific function of the form::
   {
   // 
   // ...
-  SP::TimeStepping your_simulation = ...
+  auto your_simulation = ...
   your_simulation->setCheckSolverFunction(&myF);
 
 Then after each call to your_simulation->computeOneStepNS(...), the function myF will be called.
