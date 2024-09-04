@@ -37,13 +37,6 @@ siconos::modeling::LagrangianLinearTIR::LagrangianLinearTIR(
   _jachq = C;
 }
 
-// Minimum data (C as pointer) constructor
-siconos::modeling::LagrangianLinearTIR::LagrangianLinearTIR(
-    MatrixWrapper C)
-    : LagrangianR(RelationSubType::LinearTIR) {
-  _jachq = C.get_shared_ptr();
-}
-
 // Constructor from a complete set of data
 siconos::modeling::LagrangianLinearTIR::LagrangianLinearTIR(
     std::shared_ptr<siconos::algebra::SiconosMatrix> C,

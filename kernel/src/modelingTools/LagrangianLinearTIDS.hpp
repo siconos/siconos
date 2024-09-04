@@ -21,8 +21,6 @@
 #define LAGRANGIANTIDS_H
 
 #include "LagrangianDS.hpp"
-#include "matrix_wrapper.h"
-#include "vector_wrapper.h"
 #include "SiconosPointers.hpp"
 
 namespace siconos::modeling {
@@ -145,13 +143,7 @@ class LagrangianLinearTIDS : public LagrangianDS {
                        std::shared_ptr<siconos::algebra::SiconosVector> v0,
                        std::shared_ptr<Matrix> M)
       : LagrangianDS(q0, v0, M){};
-
-  // LagrangianLinearTIDS(VectorWrapper q0,
-  //                      VectorWrapper v0,
-  //                      MatrixWrapper m)
-  //     : LagrangianLinearTIDS{q0.get_shared_ptr(), v0.get_shared_ptr(), m.get_shared_ptr()}{};
       
-
 /** constructor from initial state and mass matrix only. Leads to \f$ M\dot v
    *  = F_{ext}(t,z) + p \f$ .
    *
