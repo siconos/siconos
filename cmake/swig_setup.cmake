@@ -5,14 +5,14 @@ if(NOT WITH_PYTHON_WRAPPER)
   return()
 endif()
 
-if(WITH_DOXY2SWIG)
-  find_package(SWIG 4.0 REQUIRED)
-else()
-  find_package(SWIG 4.0)
-  if(NOT SWIG_FOUND)
-    find_package(SWIG 3.0 REQUIRED) # 4 is better but 3.0 is enough when swig -doxygen is not required.
-  endif()
-endif()
+#if(WITH_DOXY2SWIG)
+find_package(SWIG 4.2 REQUIRED)
+#else()
+#  find_package(SWIG 4.0)
+#  if(NOT SWIG_FOUND)
+#    find_package(SWIG 3.0 REQUIRED) # 4 is better but 3.0 is enough when swig -doxygen is not required.
+#  endif()
+#endif()
 include(${SWIG_USE_FILE})
  
 #  ----------- swig -----------
@@ -32,9 +32,6 @@ if(SYSTEM_ARCHITECTURE)
   list(APPEND CMAKE_SWIG_FLAGS "-D__${SYSTEM_ARCHITECTURE}__")
 endif()
 message(STATUS "SYSTEM ARCHITECTURE: ${CMAKE_SWIG_FLAGS}")
-
-# Generate code with Python 3 specific features and syntax
-list(APPEND CMAKE_SWIG_FLAGS "-py3")
 
 # Turn on wrapping of protected members for director classes 
 list(APPEND CMAKE_SWIG_FLAGS "-dirprot")

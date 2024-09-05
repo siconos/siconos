@@ -25,8 +25,7 @@
 
 #include "OneStepIntegrator.hpp"
 #include "SiconosConst.hpp"  // MACHINE_PREC
-#include "SiconosFortran.h" // for siconos::hairer
-
+#include "SiconosFortran.h"  // for siconos::hairer
 
 namespace siconos::integrators {
 
@@ -110,8 +109,9 @@ class Hem5OSI : public OneStepIntegrator {
                double* G, double* GQ, double* F, double* GQQ, double* GT, double* FL,
                double* QDOT, double* UDOT, double* AM);
     void solout(int* MODE, int* NSTEP, int* NQ, int* NV, int* NU, int* NL, int* LDG, int* LDF,
-                int* LDA, int* LRDO, int* LIDO, siconos::hairer::fprobpointer FPROB, double* q,
-                double* v, double* u, double* DOWK, int* IDOWK);
+                int* LDA, int* LRDO, int* LIDO, siconos::fortran::hairer::fprobpointer FPROB,
+                double* q, double* v, double* u, double* DOWK, int* IDOWK);
+
     Hem5OSI_impl(std::shared_ptr<siconos::integrators::Hem5OSI> h) : hem5osi(h) {}
   };
 
@@ -147,14 +147,10 @@ class Hem5OSI : public OneStepIntegrator {
    */
   inline void setIntData(unsigned int i, int newValue) { _intData[i] = newValue; }
 
-  /** get relative tolerance parameter for Hem5
-   *  \return a double*
-   */
+  /** \return relative tolerance parameter for Hem5 */
   inline const std::vector<double>& getRtol() const { return rtol; }
 
-  /** get absolute tolerance parameter for Hem5
-   *  \return a double*
-   */
+  /** \return absolute tolerance parameter for Hem5 */
   inline const std::vector<double>& getAtol() const { return atol; }
 
   /** get the maximum number of steps for one call
@@ -162,14 +158,10 @@ class Hem5OSI : public OneStepIntegrator {
    */
   inline int getMaxNstep() const { return iwork[11]; }
 
-  /** get real work vector parameter for lsodar
-   *  \return a double*
-   */
+  /** \return real work vector parameter for lsodar */
   inline const std::vector<double>& getRwork() const { return rwork; }
 
-  /** get iwork
-   *  \return a pointer to int
-   */
+  /** \return iwork */
   inline const std::vector<int>& getIwork() const { return iwork; }
 
   /** set itol, rtol and atol (tolerance parameters for Hem5)
@@ -274,8 +266,10 @@ class Hem5OSI : public OneStepIntegrator {
   void prepareNewtonIteration(double time) override { assert(0); };
 
   /** integrates the Interaction linked to this integrator, without taking
-   * non-smooth effects into account \param vertex_inter of the interaction
-   * graph \param osnsp pointer to siconos::nonsmooth_formulations::OneStepNSProblem
+   *  non-smooth effects into account
+   *
+   *  \param vertex_inter of the interaction graph
+   *  \param osnsp pointer to siconos::nonsmooth_formulations::OneStepNSProblem
    */
   void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor& vertex_inter,
                          siconos::nonsmooth_formulations::OneStepNSProblem* osnsp) override;

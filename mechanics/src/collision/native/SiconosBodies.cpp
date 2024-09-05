@@ -21,8 +21,7 @@
 #include "SiconosException.hpp"
 #include "Simulation.hpp"
 
-void siconos::collision::native::SiconosBodies::compute()
-{
+void siconos::collision::native::SiconosBodies::compute() {
   try {
     _sim->advanceToEvent();
     _sim->processEvents();

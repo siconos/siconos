@@ -42,7 +42,7 @@ if(WITH_FORTRAN)
   #target_compile_options(externals_fortran PRIVATE "-fallow-argument-mismatch")
   # --- ql0001 ---
   #if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/optim_misc/ql0001/ql0001.f")
-  target_sources(externals_fortran PRIVATE optim_misc/ql0001/ql0001.f)
+  target_sources(externals_fortran PRIVATE optim_misc/ql0001/ql0001.f optim_misc/qnb.f)
   set(HAVE_QL0001 TRUE CACHE INTERNAL "True if ql0001 is available in externals.")
 
 
@@ -79,7 +79,7 @@ endif()
 # --- MA57  ---
 #SET(WITH_MA57 1)
 # - Extra setup for the component -
-if(WITH_MA57)
+if(WITH_MA57) 
   target_sources(externals PRIVATE
     lbl/src/lbl_lib.c
     lbl/src/lbl_mem.c
@@ -95,7 +95,7 @@ if(WITH_MA57)
   # --> todo: write Find metis for cmake
   target_include_directories(externals PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/lbl/include>)
 endif()
-
+ 
 # - Extra setup for the component -
 if(GAMSCAPI_FOUND AND CMAKE_DL_LIBS) # needed by GAMS (?). Here or in numerics ?
   target_link_libraries(externals PRIVATE ${CMAKE_DL_LIBS})
@@ -122,8 +122,8 @@ siconos_component_install_setup(externals NODOC)
 install(FILES tools/SiconosFortran.h DESTINATION include/siconos)
 
 # - Optional OCE Renderer setup (install only) -
-if(WITH_OCE)
-  include(oce_renderer)
+if(WITH_OpenCASCADE)
+  include(occ_renderer)
 endif()
 
 if(WITH_SERIALIZATION AND INSTALL_EXTERNAL_HEADERS AND NOT WITH_SYSTEM_BOOST_SERIALIZATION)

@@ -19,7 +19,7 @@
 /*! \file SiconosProperties.hpp
 
   \brief Exterior properties to vertices or edges of a SiconosGraph
-  can be attach with Siconos::Properties. These properties are
+  can be attach with siconos::Properties. These properties are
   referenced with vertices or edges indices. update_vertices_indices()
   or update_edges_indices() must have been done after any vertices or
   edges insertion or deletion.
@@ -240,11 +240,11 @@ class Properties {
   typedef void serializable;
 
   /* Note: compilation with clang fail on this. And friend
-   * Siconos::siconos_io is not recognized anyway (attributes are public)
+   * siconos::siconos_io is not recognized anyway (attributes are public)
 
   protected:
     template<typename Archive>
-    friend void Siconos::siconos_io(Archive&, Properties<T,G,IndexMap>&, const unsigned int);
+    friend void siconos::siconos_io(Archive&, Properties<T,G,IndexMap>&, const unsigned int);
     friend class boost::serialization::access;
   */
 };
@@ -263,7 +263,7 @@ class VertexProperties : public Properties<T, G, typename G::VIndexAccess> {
   /*
   protected:
     template<typename Archive>
-    friend void Siconos::siconos_io(Archive&, VertexProperties<T,G>&, const unsigned int);
+    friend void siconos::siconos_io(Archive&, VertexProperties<T,G>&, const unsigned int);
     friend class boost::serialization::access;
   */
 };
@@ -306,7 +306,7 @@ class EdgeProperties : public Properties<T, G, typename G::EIndexAccess> {
   /*
   protected:
     template<typename Archive>
-    friend void Siconos::siconos_io(Archive&, EdgeProperties<T,G>&, const unsigned int);
+    friend void siconos::siconos_io(Archive&, EdgeProperties<T,G>&, const unsigned int);
     friend class boost::serialization::access;
   */
 };

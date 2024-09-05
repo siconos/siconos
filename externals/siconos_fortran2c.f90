@@ -25,7 +25,7 @@ module siconos_fortran2c
   implicit none
   private
 
-  public :: dlsodar2c, ql00012c, hem52c
+  public :: dlsodar2c, ql00012c, hem52c, n2qn12c
   
 contains
     
@@ -56,6 +56,30 @@ contains
     call DLSODAR(F_F, NEQ, Y, T, TOUT, ITOL, RTOL, ATOL, ITASK, ISTATE, IOPT, RWORK, LRW, IWORK, LIW, F_JAC, JT, F_G, NG, JROOT)
     
   endsubroutine dlsodar2c
+  
+  subroutine n2qn12c (n, x, f, g, dxmin, df1, epsabs,mode, binf, bsup, iz, rz) bind(c, name="n2qn1")
+    !! Note FP: since there are no comments in qnb.f, which is a full F77 file, it's quite hard to guess properly all the intent/types. This probably needs to
+    !! be reviewed and check properly.
+    integer(c_int), intent(in) :: n
+    real(c_double), intent(inout) :: x(n)
+    real(c_double), intent(inout) :: f
+    real(c_double), intent(inout) :: g(n)
+    real(c_double), intent(inout) :: dxmin(n)
+    real(c_double), intent(inout) :: df1
+    real(c_double), intent(inout) :: epsabs
+    integer(c_int), intent(inout) :: mode
+    real(c_double), intent(in) :: binf(n), bsup(n)
+    integer(c_int), intent(inout), target :: iz(29)
+    real(c_double), intent(inout) :: rz(45)
+
+    integer :: imp = 3!!0
+    integer :: io = 16
+    integer :: iter = 500
+    logical :: reverse = .true.
+    integer :: nsim = 3*500
+    call n2qn1(n, x, f, g, dxmin, df1, epsabs, imp, io, mode, iter, nsim, binf, bsup, iz, rz, reverse)
+
+  end subroutine n2qn12c
 
   subroutine ql00012c(m,me,mmax,n,nmax,mnn,c,d,a,b,xl,xu,x,u,iout,ifail,iprint,war,lwar,iwar,liwar,eps) bind(c, name="ql0001")
 
@@ -93,6 +117,7 @@ contains
     call hem5(NQ,NV,NU,NL,F_FPROB,T,Q,V,U,A,RLAM,TEND,H,RTOL,ATOL,ITOL,F_SOLOUT,IOUT,WK,LWK,IWK,LIWK,IDID)
     
   end subroutine hem52c
+
 
   
 end module

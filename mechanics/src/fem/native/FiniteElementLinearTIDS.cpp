@@ -31,8 +31,7 @@
 #include "siconos_debug.h"
 
 siconos::mechanics::fem::FiniteElementLinearTIDS::FiniteElementLinearTIDS(
-    std::shared_ptr<Mesh> mesh,
-    std::map<unsigned int, std::shared_ptr<Material>> materials,
+    std::shared_ptr<Mesh> mesh, std::map<unsigned int, std::shared_ptr<Material>> materials,
     siconos::algebra::UblasType storageType)
     : LagrangianLinearTIDS::LagrangianLinearTIDS(),
       _mesh(mesh),
@@ -66,16 +65,14 @@ siconos::mechanics::fem::FiniteElementLinearTIDS::FiniteElementLinearTIDS(
   _n = 2 * _ndof;
 
   if (!_mass) {
-    _mass = std::make_shared<siconos::algebra::SimpleMatrix>(_ndof, _ndof,
-                                                             _storageType);
+    _mass = std::make_shared<siconos::algebra::SimpleMatrix>(_ndof, _ndof, _storageType);
     _mass->setIsSymmetric(true);
     _mass->setIsPositiveDefinite(true);
   }
   _FEModel->computeMassMatrix(_mass, _materials);
 
   if (!_K) {
-    _K = std::make_shared<siconos::algebra::SimpleMatrix>(_ndof, _ndof,
-                                                          _storageType);
+    _K = std::make_shared<siconos::algebra::SimpleMatrix>(_ndof, _ndof, _storageType);
     _K->setIsSymmetric(true);
     _K->setIsPositiveDefinite(true);
   }
@@ -83,7 +80,7 @@ siconos::mechanics::fem::FiniteElementLinearTIDS::FiniteElementLinearTIDS(
 
   // if(!_C)
   // {
-  //   _C.reset(new SimpleMatrix(_ndof, _ndof, _storageType));
+  //   _C = std::make_shared<siconos::algebra::SimpleMatrix>(_ndof, _ndof, _storageType);
   // }
   // _C->zero();
 
@@ -93,26 +90,21 @@ siconos::mechanics::fem::FiniteElementLinearTIDS::FiniteElementLinearTIDS(
       "std::shared_ptr<Material> material\n");
 }
 
-void siconos::mechanics::fem::FiniteElementLinearTIDS::
-    applyDirichletBoundaryConditions(
-        int physical_entity_tag,
-        std::shared_ptr<std::vector<int>> node_dof_index) {
+void siconos::mechanics::fem::FiniteElementLinearTIDS::applyDirichletBoundaryConditions(
+    int physical_entity_tag, std::shared_ptr<std::vector<int>> node_dof_index) {
   if (!_boundaryConditions)
-    _boundaryConditions =
-        std::make_shared<siconos::modeling::BoundaryCondition>(
-            siconos::modeling::BoundaryCondition::Indices{});
+    _boundaryConditions = std::make_shared<siconos::modeling::BoundaryCondition>(
+        siconos::modeling::BoundaryCondition::Indices{});
 
-  _FEModel->applyDirichletBoundaryConditions(
-      physical_entity_tag, node_dof_index, _boundaryConditions);
+  _FEModel->applyDirichletBoundaryConditions(physical_entity_tag, node_dof_index,
+                                             _boundaryConditions);
 
-  _reactionToBoundaryConditions =
-      std::make_shared<siconos::algebra::SiconosVector>(
-          _boundaryConditions->velocityIndices().size());
+  _reactionToBoundaryConditions = std::make_shared<siconos::algebra::SiconosVector>(
+      _boundaryConditions->velocityIndices().size());
 };
 
 void siconos::mechanics::fem::FiniteElementLinearTIDS::applyNodalForces(
-    int physical_entity_tag,
-    std::shared_ptr<siconos::algebra::SiconosVector> nodal_forces) {
+    int physical_entity_tag, std::shared_ptr<siconos::algebra::SiconosVector> nodal_forces) {
   if (!_fExt) {
     _fExt = std::make_shared<siconos::algebra::SiconosVector>(dimension());
   }
@@ -120,16 +112,13 @@ void siconos::mechanics::fem::FiniteElementLinearTIDS::applyNodalForces(
   _FEModel->applyNodalForces(physical_entity_tag, nodal_forces, _fExt);
 };
 
-double
-siconos::mechanics::fem::FiniteElementLinearTIDS::elasticPotentialEnergy()
-    const {
+double siconos::mechanics::fem::FiniteElementLinearTIDS::elasticPotentialEnergy() const {
   auto tmp = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
   siconos::algebra::prod(*_K, *q(), *tmp, true);
   return 0.5 * siconos::algebra::inner_prod(*q(), *tmp);
 }
 
-void siconos::mechanics::fem::FiniteElementLinearTIDS::display(
-    bool brief) const {
+void siconos::mechanics::fem::FiniteElementLinearTIDS::display(bool brief) const {
   std::cout << "===== FiniteElementLinearTIDS display ===== " << std::endl;
   LagrangianLinearTIDS::display();
   _FEModel->display(brief);

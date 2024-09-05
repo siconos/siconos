@@ -40,9 +40,8 @@ class TimeSteppingD1Minus : public Simulation {
   // TimeSteppingD1Minus() = default;
 
  protected:
-  /** initialisation specific to TimeSteppingD1Minus for
-   * siconos::nonsmooth_formulations::OneStepNSProblem */
-  void initOSNS() override;
+  /** initialisation specific to TimeSteppingD1Minus for OneStepNSProblem */
+  void initializeOneStepNSProblem() override;
 
  public:
   /** constructor with the time-discretisation
@@ -55,9 +54,6 @@ class TimeSteppingD1Minus : public Simulation {
 
   /** destructor */
   ~TimeSteppingD1Minus() noexcept = default;
-
-  /** Overload Simulation::initialize */
-  void initialize() override;
 
   /** updateIndexSet using current y and lambda values of interactions
    *  \param i the  number of the set to be updated

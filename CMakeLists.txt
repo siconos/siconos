@@ -116,8 +116,6 @@ if(HAVE_SICONOS_KERNEL AND NOT WITH_CXX)
   message(FATAL_ERROR "You can not build kernel component without C++. Please set WITH_CXX=ON.")
 endif()
   
-
-
 # Get last component in the list;
 # It might be usefull to set some dependencies in targets.
 list(GET COMPONENTS -1 last_component)

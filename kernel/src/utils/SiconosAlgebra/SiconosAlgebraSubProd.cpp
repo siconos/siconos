@@ -26,6 +26,7 @@
 #include <boost/numeric/ublas/triangular.hpp>
 #include <boost/numeric/ublas/vector_proxy.hpp>
 #include <boost/numeric/ublas/vector_sparse.hpp>
+
 #include "BlockMatrix.hpp"
 #include "BlockVector.hpp"
 #include "SiconosException.hpp"

@@ -1,4 +1,4 @@
-#!/usr/bin/env @PYTHON_EXECUTABLE@
+#!/usr/bin/env @Python_EXECUTABLE@
 import os
 import sys
 import atexit
@@ -221,7 +221,7 @@ if with_io:
     with MechanicsHdf5Runner(simulation = mbtb.MBTB_simulation(),
                  nsds=mbtb.MBTB_nsds()) as io:
         def _run(nsteps):
-            fp = mbtb._MBTB_open('simu.txt', 'a')
+            fp = mbtb._MBTB_open('simu.txt')
             currentTimerCmp = mbtb.cvar.sTimerCmp
             for i in range(nsteps):
                 mbtb.cvar.sTimerCmp += 1
@@ -235,7 +235,7 @@ if with_io:
                 io.output_solver_infos()
                 if mbtb.cvar.sTimerCmp % mbtb.cvar.sFreqOutput == 0:
                     mbtb._MBTB_printStep(fp)
-            mbtb._MBTB_close(fp)
+            fp.close()
             mbtb.ACE_PRINT_TIME()
 
         def STEP(event=None):

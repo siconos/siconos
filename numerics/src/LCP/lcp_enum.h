@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file lcp_enum.h
  * \brief functions for solving LCP using enumeration */
@@ -22,18 +22,17 @@
 #ifndef LCP_ENUM_H
 #define LCP_ENUM_H
 
-#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
-#include "NumericsFwd.h"  // for LinearComplementarityProblem, SolverOptions
+#include "NumericsFwd.h"    // for LinearComplementarityProblem, SolverOptions
+#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-extern "C"
-{
+extern "C" {
 #endif
-  int lcp_enum_getNbIWork(LinearComplementarityProblem* problem, SolverOptions* options);
-  int lcp_enum_getNbDWork(LinearComplementarityProblem* problem, SolverOptions* options);
+int lcp_enum_getNbIWork(LinearComplementarityProblem* problem, SolverOptions* options);
+int lcp_enum_getNbDWork(LinearComplementarityProblem* problem, SolverOptions* options);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 
-#endif //LCP_ENUM_H
+#endif  // LCP_ENUM_H

@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*!\file vertex_extraction.h
  * \brief interface to various LP solvers
@@ -23,19 +23,18 @@
 #ifndef vertex_extraction_h
 #define vertex_extraction_h
 
-#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 #include "SiconosLapack.h"  // for lapack_int
 #include "SiconosSets.h"    // for polyhedron
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-extern "C"
-{
+extern "C" {
 #endif
 
-  void siconos_find_vertex(const polyhedron* P, unsigned size, lapack_int* basis);
+void siconos_find_vertex(const polyhedron* P, unsigned size, lapack_int* basis);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 
-#endif 
+#endif

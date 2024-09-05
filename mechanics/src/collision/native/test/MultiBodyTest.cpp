@@ -83,27 +83,23 @@ class Disks : public siconos::collision::native::SiconosBodies,
 };
 
 /* do nothing if solver does not converge */
-void localCheckSolverOuput(int info, siconos::simulation::Simulation*)
-{
+void localCheckSolverOuput(int info, siconos::simulation::Simulation*) {
   if (info) exit(1);
 }
 
 double A(double t) { return 0.; }
 double B(double t) { return 1.; }
-double C(double t)
-{
+double C(double t) {
   return 0.0;  // 1.1*cos(32.*M_PI*t) ;
 }
 double DA(double t) { return 0.; }
 double DB(double t) { return 0.; }
-double DC(double t)
-{
+double DC(double t) {
   return 0.0;  //-1.1*32.*M_PI*sin(32.*M_PI*t) ;
 }
 
 // ================= Creation of the model =======================
-void Disks::init(std::string disks_input)
-{
+void Disks::init(std::string disks_input) {
   // User-defined main parameters
 
   double t0 = 0;  // initial computation time
@@ -231,14 +227,12 @@ void Disks::init(std::string disks_input)
 
     // -- OneStepNsProblem --
     auto osnspb = std::make_shared<siconos::nonsmooth_formulations::FrictionContact>(2);
-    osnspb->numericsSolverOptions()->iparam[SICONOS_IPARAM_MAX_ITER] =
-        100;  // Max number of
+    osnspb->numericsSolverOptions()->iparam[SICONOS_IPARAM_MAX_ITER] = 100;  // Max number of
     // iterations
     // osnspb_->numericsSolverOptions()->iparam[SICONOS_IPARAM_ITER_DONE] = 20; // compute
     // error
     // iterations
-    osnspb->numericsSolverOptions()->dparam[SICONOS_DPARAM_TOL] =
-        1e-3;  // Tolerance
+    osnspb->numericsSolverOptions()->dparam[SICONOS_DPARAM_TOL] = 1e-3;  // Tolerance
 
     osnspb->setMaxSize(6 * ((3 * Ll * Ll + 3 * Ll) / 2 - Ll));
     osnspb->setMStorageType(NM_SPARSE_BLOCK);  // Sparse storage
@@ -285,8 +279,7 @@ void MultiBodyTest::setUp() {}
 void MultiBodyTest::tearDown() {}
 
 // multiples disks
-void MultiBodyTest::t1()
-{
+void MultiBodyTest::t1() {
   auto disks = std::make_shared<Disks>();
   disks->init("disks.dat");
 
@@ -301,8 +294,7 @@ void MultiBodyTest::t1()
 }
 
 // one disk without interaction at the beginning
-void MultiBodyTest::t2()
-{
+void MultiBodyTest::t2() {
   auto disks = std::make_shared<Disks>();
   disks->init("disks-nointer.dat");
 

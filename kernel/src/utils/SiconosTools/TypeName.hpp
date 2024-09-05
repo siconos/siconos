@@ -41,6 +41,7 @@ class FirstOrderLinearTIDS;
 class LagrangianLinearTIDS;
 class LagrangianLinearDiagonalDS;
 class SolidLinearTIDS;
+class FremondImpactFrictionNSL;
 class RelayNSL;
 class NormalConeNSL;
 class NewtonImpactRollingFrictionNSL;
@@ -65,6 +66,7 @@ enum class Type {
   NormalConeNSL,
   NewtonImpactRollingFrictionNSL,
   NewtonImpactNSL,
+  FremondImpactFrictionNSL,
   NewtonImpactFrictionNSL,
   MultipleImpactNSL,
   MixedComplementarityConditionNSL,
@@ -85,24 +87,19 @@ struct FindType {
   // experimental::Type::C; }
 
   // DS
-  auto visit(const siconos::modeling::FirstOrderNonLinearDS&) const
-  {
+  auto visit(const siconos::modeling::FirstOrderNonLinearDS&) const {
     return siconos::modeling::Type::FirstOrderNonLinearDS;
   };
-  auto visit(const siconos::modeling::NewtonEulerDS&) const
-  {
+  auto visit(const siconos::modeling::NewtonEulerDS&) const {
     return siconos::modeling::Type::NewtonEulerDS;
   };
-  auto visit(const siconos::modeling::LagrangianDS&) const
-  {
+  auto visit(const siconos::modeling::LagrangianDS&) const {
     return siconos::modeling::Type::LagrangianDS;
   };
-  auto visit(const siconos::modeling::LagrangianLinearTIDS&) const
-  {
+  auto visit(const siconos::modeling::LagrangianLinearTIDS&) const {
     return siconos::modeling::Type::LagrangianLinearTIDS;
   };
-  auto visit(const siconos::modeling::LagrangianLinearDiagonalDS&) const
-  {
+  auto visit(const siconos::modeling::LagrangianLinearDiagonalDS&) const {
     return siconos::modeling::Type::LagrangianLinearDiagonalDS;
   };
   auto visit(const siconos::mechanics::fem::SolidLinearTIDS&) const
@@ -110,40 +107,34 @@ struct FindType {
     return siconos::modeling::Type::SolidLinearTIDS;
   };
   // NSlaws
-  auto visit(const siconos::modeling::RelayNSL&) const
-  {
+  auto visit(const siconos::modeling::RelayNSL&) const {
     return siconos::modeling::Type::RelayNSL;
   };
-  auto visit(const siconos::modeling::NormalConeNSL&) const
-  {
+  auto visit(const siconos::modeling::NormalConeNSL&) const {
     return siconos::modeling::Type::NormalConeNSL;
   };
-  auto visit(const siconos::modeling::NewtonImpactRollingFrictionNSL&) const
-  {
+  auto visit(const siconos::modeling::NewtonImpactRollingFrictionNSL&) const {
     return siconos::modeling::Type::NewtonImpactRollingFrictionNSL;
   };
-  auto visit(const siconos::modeling::NewtonImpactNSL&) const
-  {
+  auto visit(const siconos::modeling::NewtonImpactNSL&) const {
     return siconos::modeling::Type::NewtonImpactNSL;
   };
-  auto visit(const siconos::modeling::NewtonImpactFrictionNSL&) const
-  {
+  auto visit(const siconos::modeling::NewtonImpactFrictionNSL&) const {
     return siconos::modeling::Type::NewtonImpactFrictionNSL;
   };
-  auto visit(const siconos::modeling::MultipleImpactNSL&) const
-  {
+  auto visit(const siconos::modeling::MultipleImpactNSL&) const {
     return siconos::modeling::Type::MultipleImpactNSL;
   };
-  auto visit(const siconos::modeling::MixedComplementarityConditionNSL&) const
-  {
+  auto visit(const siconos::modeling::MixedComplementarityConditionNSL&) const {
     return siconos::modeling::Type::MixedComplementarityConditionNSL;
   };
-  auto visit(const siconos::modeling::EqualityConditionNSL&) const
-  {
+  auto visit(const siconos::modeling::EqualityConditionNSL&) const {
     return siconos::modeling::Type::EqualityConditionNSL;
   };
-  auto visit(const siconos::modeling::ComplementarityConditionNSL&) const
-  {
+  auto visit(const siconos::modeling::FremondImpactFrictionNSL&) const {
+    return siconos::modeling::Type::FremondImpactFrictionNSL;
+  };
+  auto visit(const siconos::modeling::ComplementarityConditionNSL&) const {
     return siconos::modeling::Type::ComplementarityConditionNSL;
   };
 };
@@ -153,14 +144,12 @@ struct FindType {
 static FindType find;
 
 template <typename C>
-inline auto type_value(const C& c)
-{
+inline auto type_value(const C& c) {
   return c.acceptType(find);
 }
 
 template <typename T>
-constexpr auto str(const T& X)
-{
+constexpr auto str(const T& X) {
   switch (X) {
     case T::FirstOrderNonLinearDS:
       return "siconos::modeling::FirstOrderNonLinearDS";
@@ -182,6 +171,9 @@ constexpr auto str(const T& X)
       break;
   case T::RelayNSL:
       return "siconos::modeling::RelayNSL";
+      break;
+    case T::FremondImpactFrictionNSL:
+      return "siconos::modeling::FremondImpactFrictionNSL";
       break;
     case T::NormalConeNSL:
       return "siconos::modeling::NormalConeNSL";
@@ -214,8 +206,7 @@ constexpr auto str(const T& X)
 }
 
 template <class C>
-std::string type_name(const C& c)
-{
+std::string type_name(const C& c) {
   return str(type_value(c));
 }
 

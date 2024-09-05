@@ -30,7 +30,6 @@
 
 namespace siconos::fem::cable {
 
-
 class TransportCableModel {
  public:
   TransportCableModel() = default;

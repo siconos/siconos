@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #ifndef MIN_MERIT
 #define MIN_MERIT
@@ -30,8 +30,8 @@
   \f}
 */
 
-#include "NumericsFwd.h"  // for NumericsMatrix
-#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"    // for NumericsMatrix
+#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 #ifdef __cplusplus
 #undef restrict
@@ -39,28 +39,28 @@
 #endif
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-extern "C"
-{
+extern "C" {
 #endif
 
-  /** Compute \f$\mathbf{F}_{\mathrm{min}}(z)\f$, possibly in the mixed case
-   * \param n1 number of equality constraints
-   * \param n2 size of the complementary variables
-   * \param[in] z input vector
-   * \param[in] F value of F
-   * \param[out] Fmin returned vector
-   */
-  void F_min(int n1, int n2, double* restrict z, double* restrict F, double* restrict Fmin);
+/** Compute \f$\mathbf{F}_{\mathrm{min}}(z)\f$, possibly in the mixed case
+ * \param n1 number of equality constraints
+ * \param n2 size of the complementary variables
+ * \param[in] z input vector
+ * \param[in] F value of F
+ * \param[out] Fmin returned vector
+ */
+void F_min(int n1, int n2, double* restrict z, double* restrict F, double* restrict Fmin);
 
-  /** Compute an element of Jac F_min
-   * \param n1 number of equality constraints
-   * \param n2 size of the complementarity variables
-   * \param[in] z input vector
-   * \param[in] F value of F
-   * \param[in] nabla_F value of nabla_F
-   * \param[out] H returned vector
-   */
-  void Jac_F_min(int n1, int n2, double* restrict z, double* restrict F, NumericsMatrix* nabla_F, NumericsMatrix* H);
+/** Compute an element of Jac F_min
+ * \param n1 number of equality constraints
+ * \param n2 size of the complementarity variables
+ * \param[in] z input vector
+ * \param[in] F value of F
+ * \param[in] nabla_F value of nabla_F
+ * \param[out] H returned vector
+ */
+void Jac_F_min(int n1, int n2, double* restrict z, double* restrict F, NumericsMatrix* nabla_F,
+               NumericsMatrix* H);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

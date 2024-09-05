@@ -14,27 +14,26 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef RELAY_TEST_UTILS_H
 #define RELAY_TEST_UTILS_H
 
-#include "SiconosConfig.h" // for BUILD_AS_CPP
 #include <stdio.h>
 #include <stdlib.h>
-#include "relay_cst.h"
-#include "test_utils.h" // for TestCase
+
+#include "SiconosConfig.h"  // for BUILD_AS_CPP
 #include "SolverOptions.h"
+#include "relay_cst.h"
+#include "test_utils.h"  // for TestCase
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-extern "C"
-{
+extern "C" {
 #endif
-  void relay_fillParamWithRespectToSolver(SolverOptions *options, char * solvername, RelayProblem* problem);
-  int relay_test_function(TestCase*);
+void relay_fillParamWithRespectToSolver(SolverOptions* options, char* solvername,
+                                        RelayProblem* problem);
+int relay_test_function(TestCase*);
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 
 #endif
-
-

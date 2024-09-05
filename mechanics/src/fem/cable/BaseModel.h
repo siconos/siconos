@@ -32,7 +32,6 @@ using ojson = nlohmann::ordered_json;
 namespace siconos::fem::cable {
 
 class BaseModel {
-
  public:
   // Rule of 5
   BaseModel() = default;

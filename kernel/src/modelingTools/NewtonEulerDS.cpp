@@ -154,7 +154,7 @@ siconos::modeling::NewtonEulerDS::NewtonEulerDS(
     std::shared_ptr<siconos::algebra::SiconosVector> Q0,
     std::shared_ptr<siconos::algebra::SiconosVector> Twist0, double mass,
     std::shared_ptr<siconos::algebra::SiconosMatrix> inertialMatrix)
-    : NewtonEulerDS()
+    : NewtonEulerDS{}
 
 {
   DEBUG_BEGIN(
@@ -1035,9 +1035,6 @@ void siconos::modeling::NewtonEulerDS::computeJacobianMGyrtwist(double time) {
 
 void siconos::modeling::NewtonEulerDS::display(bool brief) const {
   std::cout << "=====> NewtonEuler System display (number: " << _number << ")." << std::endl;
-  std::cout << "- _ndof : " << _ndof << std::endl;
-  std::cout << "- _qDim : " << _qDim << std::endl;
-  std::cout << "- _n : " << _n << std::endl;
   std::cout << "- q " << std::endl;
   if (_q)
     _q->display();

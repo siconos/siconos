@@ -14,9 +14,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
-#include <stdio.h>                               // for printf, NULL
-#include <stdlib.h>                              // for free, malloc
+ */
+#include <stdio.h>   // for printf, NULL
+#include <stdlib.h>  // for free, malloc
+
 #include "ConvexQP.h"                            // for ConvexQP
 #include "ConvexQP_Solvers.h"                    // for convexQP_ProjectedGr...
 #include "ConvexQP_cst.h"                        // for SICONOS_CONVEXQP_PG
@@ -29,16 +30,16 @@
 #include "fc3d_compute_error.h"                  // for fc3d_Tresca_compute_...
 #include "numerics_verbose.h"                    // for verbose
 
-void fc3d_ConvexQP_ProjectedGradient_Cylinder(FrictionContactProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
-{
+void fc3d_ConvexQP_ProjectedGradient_Cylinder(FrictionContactProblem *problem,
+                                              double *reaction, double *velocity, int *info,
+                                              SolverOptions *options) {
   /* Number of contacts */
   int nc = problem->numberOfContacts;
   /* Dimension of the problem */
   int n = 3 * nc;
 
-
   ConvexQP *cqp = (ConvexQP *)malloc(sizeof(ConvexQP));
-  cqp->size=n;
+  cqp->size = n;
   cqp->M = problem->M;
   cqp->q = problem->q;
   cqp->A = NULL; /* The A matrix is the identity and b is equal to zero */
@@ -46,16 +47,17 @@ void fc3d_ConvexQP_ProjectedGradient_Cylinder(FrictionContactProblem* problem, d
 
   cqp->ProjectionOnC = &Projection_ConvexQP_FC3D_Cylinder;
 
-  double error=1e24;
+  double error = 1e24;
 
-  FrictionContactProblem_as_ConvexQP *fc3d_as_cqp= (FrictionContactProblem_as_ConvexQP*)malloc(sizeof(FrictionContactProblem_as_ConvexQP));
-  cqp->env = fc3d_as_cqp ;
+  FrictionContactProblem_as_ConvexQP *fc3d_as_cqp =
+      (FrictionContactProblem_as_ConvexQP *)malloc(sizeof(FrictionContactProblem_as_ConvexQP));
+  cqp->env = fc3d_as_cqp;
   cqp->size = n;
 
   /*set the norm of the ConvexQP to the norm of problem->q  */
-  double norm_q = cblas_dnrm2(nc*3, problem->q, 1);
-  cqp->normConvexQP= norm_q;
-  cqp->istheNormConvexQPset=1;
+  double norm_q = cblas_dnrm2(nc * 3, problem->q, 1);
+  cqp->normConvexQP = norm_q;
+  cqp->istheNormConvexQPset = 1;
 
   fc3d_as_cqp->cqp = cqp;
   fc3d_as_cqp->fc3d = problem;
@@ -66,28 +68,30 @@ void fc3d_ConvexQP_ProjectedGradient_Cylinder(FrictionContactProblem* problem, d
   // Warning : a new solver options is required here, because dWork
   // is used in convexQP_compute_error_reduced, ProjectionOnC ...
   //
-  SolverOptions * cqpsolver_options = solver_options_create(SICONOS_CONVEXQP_PG);
+  SolverOptions *cqpsolver_options = solver_options_create(SICONOS_CONVEXQP_PG);
   cqpsolver_options->dparam[SICONOS_DPARAM_TOL] = options->dparam[SICONOS_DPARAM_TOL];
-  cqpsolver_options->iparam[SICONOS_IPARAM_MAX_ITER] = options->iparam[SICONOS_IPARAM_MAX_ITER];
-  //cqpsolver_options->dWork =  options->dWork;
+  cqpsolver_options->iparam[SICONOS_IPARAM_MAX_ITER] =
+      options->iparam[SICONOS_IPARAM_MAX_ITER];
+  // cqpsolver_options->dWork =  options->dWork;
   convexQP_ProjectedGradient(cqp, reaction, velocity, info, cqpsolver_options);
-  //options->solverId = SICONOS_FRICTION_3D_CONVEXQP_PG_CYLINDER;
+  // options->solverId = SICONOS_FRICTION_3D_CONVEXQP_PG_CYLINDER;
 
   /* **** Criterium convergence **** */
   // Warning: the function below uses options->dWork
-  fc3d_Tresca_compute_error(problem, reaction, velocity, options->dparam[SICONOS_DPARAM_TOL], options, norm_q, &error);
+  fc3d_Tresca_compute_error(problem, reaction, velocity, options->dparam[SICONOS_DPARAM_TOL],
+                            options, norm_q, &error);
 
   /* for (i =0; i< n ; i++) */
   /* { */
-  /*   printf("reaction[%i]=%f\t",i,reaction[i]);    printf("velocity[%i]=F[%i]=%f\n",i,i,velocity[i]); */
+  /*   printf("reaction[%i]=%f\t",i,reaction[i]);
+   * printf("velocity[%i]=F[%i]=%f\n",i,i,velocity[i]); */
   /* } */
-  if(verbose > 0)
-  {
-    printf("--------------- FC3D - ConvexQP Fixed Point Projection (ConvexQP_FPP) - #Iteration %i Final Residual = %14.7e\n", options->iparam[SICONOS_IPARAM_ITER_DONE], options->dparam[SICONOS_DPARAM_RESIDU]);
+  if (verbose > 0) {
+    printf(
+        "--------------- FC3D - ConvexQP Fixed Point Projection (ConvexQP_FPP) - #Iteration "
+        "%i Final Residual = %14.7e\n",
+        options->iparam[SICONOS_IPARAM_ITER_DONE], options->dparam[SICONOS_DPARAM_RESIDU]);
   }
   free(cqp);
   free(fc3d_as_cqp);
-
-
-
 }

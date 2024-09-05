@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef TIMERS_INTERF_H
 #define TIMERS_INTERF_H
 
@@ -37,14 +37,9 @@
 #endif
 
 #ifdef WITH_TIMERS
-#if(                               \
-  !defined(TIMER_CLOCK_GETTIME) && \
-  !defined(TIMER_ATL_WALLTIME) &&  \
-  !defined(TIMER_ATL_CPUTIME) &&   \
-  !defined(TIMER_CLOCK) &&         \
-  !defined(TIMER_FFTW_CYCLE) &&    \
-  !defined(TIMER_OMP_WTIME) && \
-  !defined(TIMER_SYSTIMES))
+#if (!defined(TIMER_CLOCK_GETTIME) && !defined(TIMER_ATL_WALLTIME) &&                      \
+     !defined(TIMER_ATL_CPUTIME) && !defined(TIMER_CLOCK) && !defined(TIMER_FFTW_CYCLE) && \
+     !defined(TIMER_OMP_WTIME) && !defined(TIMER_SYSTIMES))
 /* the default timer */
 #ifdef HAVE_TIME_H
 #define TIMER_CLOCK_GETTIME 1
@@ -72,55 +67,40 @@
 #endif
 #endif
 
-
-
-
 #ifdef HAVE_TIME_H
 
-static inline double elapsed_clock_gettime(struct timespec* t1, struct timespec* t2)
-{
+static inline double elapsed_clock_gettime(struct timespec* t1, struct timespec* t2) {
   long tdelta;
   tdelta = t2->tv_nsec - t1->tv_nsec;
   if (tdelta < 0) tdelta += 1000000000;
   return ((double)tdelta) * 1e-9;
 }
 
-#define DECL_TIMER_CLOCK_GETTIME(T)                                     \
-  struct timespec __timer__##T##1[1];                                   \
-  struct timespec __timer__##T##2[1];
-#define START_TIMER_CLOCK_GETTIME(T)                      \
-  clock_gettime(CLOCK_PROCESS_CPUTIME_ID,__timer__##T##1)
-#define STOP_TIMER_CLOCK_GETTIME(T)                       \
-  clock_gettime(CLOCK_PROCESS_CPUTIME_ID,__timer__##T##2)
-#define ELAPSED_CLOCK_GETTIME(T)                                    \
-  elapsed_clock_gettime(__timer__##T##1,__timer__##T##2)
+#define DECL_TIMER_CLOCK_GETTIME(T)    \
+  struct timespec __timer__##T##1 [1]; \
+  struct timespec __timer__##T##2 [1];
+#define START_TIMER_CLOCK_GETTIME(T) clock_gettime(CLOCK_PROCESS_CPUTIME_ID, __timer__##T##1)
+#define STOP_TIMER_CLOCK_GETTIME(T) clock_gettime(CLOCK_PROCESS_CPUTIME_ID, __timer__##T##2)
+#define ELAPSED_CLOCK_GETTIME(T) elapsed_clock_gettime(__timer__##T##1, __timer__##T##2)
 
 #define TIMER_TICK_CLOCK_GETTIME double
 #endif
 
 #ifdef HAVE_OMP_GET_WTIME
 #include <omp.h>
-#define DECL_TIMER_OMP_WALLTIME(T)               \
-  double __timer__##T##1,__timer__##T##2
-#define START_TIMER_OMP_WALLTIME(T)             \
-  __timer__##T##1 = omp_get_wtime()
-#define STOP_TIMER_OMP_WALLTIME(T)              \
-  __timer__##T##2 = omp_get_wtime()
-#define ELAPSED_OMP_WALLTIME(T)                 \
-  __timer__##T##2-__timer__##T##1
+#define DECL_TIMER_OMP_WALLTIME(T) double __timer__##T##1, __timer__##T##2
+#define START_TIMER_OMP_WALLTIME(T) __timer__##T##1 = omp_get_wtime()
+#define STOP_TIMER_OMP_WALLTIME(T) __timer__##T##2 = omp_get_wtime()
+#define ELAPSED_OMP_WALLTIME(T) __timer__##T##2 - __timer__##T##1
 #define TIMER_TICK_OMP_WALLTIME double
 
 #endif
 
 #ifdef HAVE_TIME_H
-#define DECL_TIMER_CLOCK(T)                           \
-  clock_t __timer__##T##1,__timer__##T##2
-#define START_TIMER_CLOCK(T)                    \
-  __timer__##T##1 = clock()
-#define STOP_TIMER_CLOCK(T)                     \
-  __timer__##T##2 = clock()
-#define ELAPSED_CLOCK(T)                            \
-  ((__timer__##T##2-__timer__##T##1)*1e-6)
+#define DECL_TIMER_CLOCK(T) clock_t __timer__##T##1, __timer__##T##2
+#define START_TIMER_CLOCK(T) __timer__##T##1 = clock()
+#define STOP_TIMER_CLOCK(T) __timer__##T##2 = clock()
+#define ELAPSED_CLOCK(T) ((__timer__##T##2 - __timer__##T##1) * 1e-6)
 #define TIMER_TICK_CLOCK clock_t
 #endif
 
@@ -128,27 +108,25 @@ static inline double elapsed_clock_gettime(struct timespec* t1, struct timespec*
 
 #define asm __asm
 #include "fftw_cycle.h"
-#define DECL_TIMER_FFTW_CYCLE(T)                              \
-  ticks __timer__##T##1, __timer__##T##2; double __timer__##T##total MAYBE_UNUSED =0.
-#define START_TIMER_FFTW_CYCLE(T)               \
-  __timer__##T##1 = getticks()
-#define STOP_TIMER_FFTW_CYCLE(T)                \
-  __timer__##T##2 = getticks()
-#define ELAPSED_FFTW_CYCLE(T)                                           \
-  ({__timer__##T##total+=elapsed(__timer__##T##2,__timer__##T##1); __timer__##T##total ;})
+#define DECL_TIMER_FFTW_CYCLE(T)          \
+  ticks __timer__##T##1, __timer__##T##2; \
+  double __timer__##T##total MAYBE_UNUSED = 0.
+#define START_TIMER_FFTW_CYCLE(T) __timer__##T##1 = getticks()
+#define STOP_TIMER_FFTW_CYCLE(T) __timer__##T##2 = getticks()
+#define ELAPSED_FFTW_CYCLE(T)                                         \
+  ({                                                                  \
+    __timer__##T##total += elapsed(__timer__##T##2, __timer__##T##1); \
+    __timer__##T##total;                                              \
+  })
 #define TIMER_TICK_FFTW_CYCLE double
 
 #endif
 
 #ifdef HAVE_SYSTIMES_H
-#define DECL_TIMER_SYSTIMES(T)                               \
-  struct tms __timer__##T##1[1], __timer__##T##2[1]
-#define START_TIMER_SYSTIMES(T)                \
-  times(__timer__##T##1)
-#define STOP_TIMER_SYSTIMES(T)                 \
-  times(__timer__##T##2)
-#define ELAPSED_SYSTIMES(T)                                        \
-  (double) (__timer__##T##2->tms_utime - __timer__##T##1->tms_utime)
+#define DECL_TIMER_SYSTIMES(T) struct tms __timer__##T##1 [1], __timer__##T##2 [1]
+#define START_TIMER_SYSTIMES(T) times(__timer__##T##1)
+#define STOP_TIMER_SYSTIMES(T) times(__timer__##T##2)
+#define ELAPSED_SYSTIMES(T) (double)(__timer__##T##2->tms_utime - __timer__##T##1->tms_utime)
 #define TIMER_TICK_SYSTIMES clock_t
 
 #endif
@@ -214,14 +192,23 @@ static inline double elapsed_clock_gettime(struct timespec* t1, struct timespec*
 #endif
 
 #if defined(TIMER_TICK)
-#define DECL_TIMER_TICK(X) TIMER_TICK X=0
-#define GET_ELAPSED(TIMER,X) do {X += ELAPSED(TIMER);} while(0)
+#define DECL_TIMER_TICK(X) TIMER_TICK X = 0
+#define GET_ELAPSED(TIMER, X) \
+  do {                        \
+    X += ELAPSED(TIMER);      \
+  } while (0)
 #include <stdio.h>
-#define PRINT_ELAPSED(TIMER) do {printf("%s %s:%g\n",TIMER_NAME,#TIMER,(double) ELAPSED(TIMER));} while(0)
-#define PRINT_TIMER_TICK(X) do {printf("%s %s:%g\n",TIMER_NAME,#X,(double) X);} while(0)
+#define PRINT_ELAPSED(TIMER)                                          \
+  do {                                                                \
+    printf("%s %s:%g\n", TIMER_NAME, #TIMER, (double)ELAPSED(TIMER)); \
+  } while (0)
+#define PRINT_TIMER_TICK(X)                          \
+  do {                                               \
+    printf("%s %s:%g\n", TIMER_NAME, #X, (double)X); \
+  } while (0)
 #else
 #define DECL_TIMER_TICK(X)
-#define GET_ELAPSED(TIMER,X)
+#define GET_ELAPSED(TIMER, X)
 #define PRINT_ELAPSED(X)
 #endif
 

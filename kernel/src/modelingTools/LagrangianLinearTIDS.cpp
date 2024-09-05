@@ -36,25 +36,26 @@ siconos::modeling::LagrangianLinearTIDS::LagrangianLinearTIDS(
     std::shared_ptr<siconos::algebra::SiconosMatrix> newK,
     std::shared_ptr<siconos::algebra::SiconosMatrix> newC)
     : LagrangianDS(newQ0, newVelocity0, newMass) {
-  assert(
-      (newK->size(0) == _ndof && newK->size(1) == _ndof) &&
-      "LagrangianLinearTIDS - constructor from data, inconsistent size between K and _ndof");
+  assert((newK->size(0) == _ndof && newK->size(1) == _ndof) &&
+         "LagrangianLinearTIDS - constructor from data, inconsistent size "
+         "between K and _ndof");
 
   assert((newC->size(0) == _ndof && newC->size(1) == _ndof) &&
-         "LagrangianLinearTIDS - constructor from data, inconsistent size between C and ndof");
+         "LagrangianLinearTIDS - constructor from data, inconsistent size "
+         "between C and ndof");
 
   _K = newK;
   _C = newC;
 }
 
 void siconos::modeling::LagrangianLinearTIDS::initRhs(double time) {
-
   LagrangianDS::initRhs(time);
 
   // jacobianRhsx
   if (_K) {
     //  bloc10 of jacobianX is solution of Mass*Bloc10 = K
     if (!_rhsMatrices[jacobianXBloc10_])
+      // We assume the stiffness matrix is constant
       _rhsMatrices[jacobianXBloc10_] =
           std::make_shared<siconos::algebra::SimpleMatrix>(-1 * *_K);
     _inverseMass->Solve(*_rhsMatrices[jacobianXBloc10_]);
@@ -64,6 +65,7 @@ void siconos::modeling::LagrangianLinearTIDS::initRhs(double time) {
   if (_C) {
     //  bloc11 of jacobianX is solution of Mass*Bloc11 = C
     if (!_rhsMatrices[jacobianXBloc11_])
+      // We assume the damping matrix is constant
       _rhsMatrices[jacobianXBloc11_] =
           std::make_shared<siconos::algebra::SimpleMatrix>(-1 * *_C);
     _inverseMass->Solve(*_rhsMatrices[jacobianXBloc11_]);
@@ -72,14 +74,15 @@ void siconos::modeling::LagrangianLinearTIDS::initRhs(double time) {
 
   if (_C || _K)
     _jacxRhs = std::make_shared<siconos::algebra::BlockMatrix>(
-        _rhsMatrices[zeroMatrix_], _rhsMatrices[idMatrix_], _rhsMatrices[jacobianXBloc10_],
-        _rhsMatrices[jacobianXBloc11_]);
+        _rhsMatrices[zeroMatrix_], _rhsMatrices[idMatrix_],
+        _rhsMatrices[jacobianXBloc10_], _rhsMatrices[jacobianXBloc11_]);
 }
 
 void siconos::modeling::LagrangianLinearTIDS::setK(
     const siconos::algebra::SiconosMatrix& newValue) {
   if (newValue.size(0) != _ndof || newValue.size(1) != _ndof)
-    THROW_EXCEPTION("LagrangianLinearTIDS - setK: inconsistent input matrix size ");
+    THROW_EXCEPTION(
+        "LagrangianLinearTIDS - setK: inconsistent input matrix size ");
 
   if (!_K)
     _K = std::make_shared<siconos::algebra::SimpleMatrix>(newValue);
@@ -90,14 +93,16 @@ void siconos::modeling::LagrangianLinearTIDS::setK(
 void siconos::modeling::LagrangianLinearTIDS::setKPtr(
     std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr) {
   if (newPtr->size(0) != _ndof || newPtr->size(1) != _ndof)
-    THROW_EXCEPTION("LagrangianLinearTIDS - setKPtr: inconsistent input matrix size ");
+    THROW_EXCEPTION(
+        "LagrangianLinearTIDS - setKPtr: inconsistent input matrix size ");
   _K = newPtr;
 }
 
 void siconos::modeling::LagrangianLinearTIDS::setC(
     const siconos::algebra::SiconosMatrix& newValue) {
   if (newValue.size(0) != _ndof || newValue.size(1) != _ndof)
-    THROW_EXCEPTION("LagrangianLinearTIDS - setC: inconsistent input matrix size ");
+    THROW_EXCEPTION(
+        "LagrangianLinearTIDS - setC: inconsistent input matrix size ");
 
   if (!_C)
     _C = std::make_shared<siconos::algebra::SimpleMatrix>(newValue);
@@ -108,14 +113,16 @@ void siconos::modeling::LagrangianLinearTIDS::setC(
 void siconos::modeling::LagrangianLinearTIDS::setCPtr(
     std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr) {
   if (newPtr->size(0) != _ndof || newPtr->size(1) != _ndof)
-    THROW_EXCEPTION("LagrangianLinearTIDS - setCPtr: inconsistent input matrix size ");
+    THROW_EXCEPTION(
+        "LagrangianLinearTIDS - setCPtr: inconsistent input matrix size ");
 
   _C = newPtr;
 }
 
 void siconos::modeling::LagrangianLinearTIDS::display(bool brief) const {
   LagrangianDS::display();
-  std::cout << "===== Lagrangian Linear Time Invariant System display ===== " << std::endl;
+  std::cout << "===== Lagrangian Linear Time Invariant System display ===== "
+            << std::endl;
   std::cout << "- Mass Matrix M : " << std::endl;
   if (_mass)
     _mass->display();
@@ -131,7 +138,8 @@ void siconos::modeling::LagrangianLinearTIDS::display(bool brief) const {
     _C->display();
   else
     std::cout << "-> nullptr" << std::endl;
-  std::cout << "=========================================================== " << std::endl;
+  std::cout << "=========================================================== "
+            << std::endl;
 }
 
 void siconos::modeling::LagrangianLinearTIDS::computeForces(

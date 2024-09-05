@@ -76,8 +76,8 @@ namespace siconos::modeling {
 class DynamicalSystem {
  public:
   /** List of indices used to save tmp work vectors
-   * The last value is the size of the present list, so you HAVE to leave it at the end
-   * position.
+   * The last value is the size of the present list, so you HAVE to leave it at
+   * the end position.
    */
   enum class DSWorkVectorId {
     local_buffer,
@@ -114,7 +114,8 @@ class DynamicalSystem {
 
   /** state of the system,
    *  \f$  x \in R^{n} \f$ - With _x[0]= \f$ x \f$ , _x[1]= \f$ \dot{x} \f$ . */
-  std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> _x = {nullptr, nullptr};
+  std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> _x = {nullptr,
+                                                                      nullptr};
 
   /** jacobian according to x of the right-hand side (\f$ rhs = \dot x =
       f(x,t) + r \f$) */
@@ -206,8 +207,7 @@ class DynamicalSystem {
    *
    *  \return the previous value of number
    */
-  inline size_t setNumber(size_t new_number)
-  {
+  inline size_t setNumber(size_t new_number) {
     size_t old_n = _number;
     _number = new_number;
     return old_n;
@@ -224,7 +224,9 @@ class DynamicalSystem {
   virtual inline unsigned int dimension() const { return _n; };
 
   /** returns a pointer to the initial state vector */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> x0() const { return _x0; };
+  inline std::shared_ptr<siconos::algebra::SiconosVector> x0() const {
+    return _x0;
+  };
 
   /** set initial state (copy)
    *
@@ -242,13 +244,17 @@ class DynamicalSystem {
    *
    *  \return std::shared_ptr<siconos::algebra::SiconosVector>
    */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> x() const { return _x[0]; }
+  inline std::shared_ptr<siconos::algebra::SiconosVector> x() const {
+    return _x[0];
+  }
 
   /** get a copy of the current state vector \f$ x \f$
    *
    *  \return siconos::algebra::SiconosVector
    */
-  inline const siconos::algebra::SiconosVector &getx() const { return *(_x[0]); }
+  inline const siconos::algebra::SiconosVector &getx() const {
+    return *(_x[0]);
+  }
 
   /** set content of current state vector \f$ x \f$
    *
@@ -266,7 +272,9 @@ class DynamicalSystem {
    *
    *  \return std::shared_ptr<siconos::algebra::SiconosVector>
    */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> r() const { return _r; }
+  inline std::shared_ptr<siconos::algebra::SiconosVector> r() const {
+    return _r;
+  }
 
   /** set r vector (input due to nonsmooth behavior) content (copy)
    *
@@ -284,7 +292,9 @@ class DynamicalSystem {
    *
    *  \return std::shared_ptr<siconos::algebra::SiconosVector>
    */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> rhs() const { return _x[1]; }
+  inline std::shared_ptr<siconos::algebra::SiconosVector> rhs() const {
+    return _x[1];
+  }
 
   /** get a copy of the right-hand side vector, (i.e. \f$ \dot x \f$)
    *
@@ -302,14 +312,14 @@ class DynamicalSystem {
    *
    *  \param newPtr std::shared_ptr<siconos::algebra::SiconosVector>
    */
-  virtual void setRhsPtr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr);
+  virtual void setRhsPtr(
+      std::shared_ptr<siconos::algebra::SiconosVector> newPtr);
 
   /** returns a pointer to \f$ \nabla_x rhs()\f$
    *
    *  \return std::shared_ptr<siconos::algebra::SiconosMatrix>
    */
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianRhsx() const
-  {
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianRhsx() const {
     return _jacxRhs;
   }
 
@@ -323,13 +333,16 @@ class DynamicalSystem {
    *
    *  \param newPtr std::shared_ptr<siconos::algebra::SiconosMatrix>
    */
-  void setJacobianRhsxPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr);
+  void setJacobianRhsxPtr(
+      std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr);
 
   /** returns a pointer to \f$ z \f$, the vector of algebraic parameters.
    *
    *  \return std::shared_ptr<siconos::algebra::SiconosVector>
    */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> z() const { return _z; }
+  inline std::shared_ptr<siconos::algebra::SiconosVector> z() const {
+    return _z;
+  }
 
   /** get a copy of \f$ z \f$, the vector of algebraic parameters.
    *
@@ -360,7 +373,9 @@ class DynamicalSystem {
    *
    *  \return a const reference to the SiconosMemory object
    */
-  inline const siconos::algebra::SiconosMemory &xMemory() const { return _xMemory; }
+  inline const siconos::algebra::SiconosMemory &xMemory() const {
+    return _xMemory;
+  }
 
   /** returns the number of step saved in memory for state vector
    *
@@ -374,15 +389,15 @@ class DynamicalSystem {
    */
   inline void setStepsInMemory(unsigned int steps) { _stepsInMemory = steps; }
 
-  /** initialize the SiconosMemory objects: reserve memory for i vectors in memory and reset
-   * all to zero.
+  /** initialize the SiconosMemory objects: reserve memory for i vectors in
+   * memory and reset all to zero.
    *
    *  \param steps the size of the SiconosMemory (i)
    */
   virtual void initMemory(unsigned int steps);
 
-  /** push the current values of x and r in memory (index 0 of memory is the last inserted
-   * vector) xMemory and rMemory,
+  /** push the current values of x and r in memory (index 0 of memory is the
+   * last inserted vector) xMemory and rMemory,
    */
   virtual void swapInMemory() = 0;
 
@@ -396,8 +411,7 @@ class DynamicalSystem {
    *
    *  \return the previous value of count
    */
-  static inline size_t resetCount(size_t new_count = 0)
-  {
+  static inline size_t resetCount(size_t new_count = 0) {
     size_t old_count = __count;
     __count = new_count;
     return old_count;
@@ -415,7 +429,8 @@ class DynamicalSystem {
   virtual void display(bool brief = true) const = 0;
 
   // visitors stuff.
-  virtual void acceptSP(std::shared_ptr<siconos::internal::SiconosVisitor>) const = 0;
+  virtual void acceptSP(
+      std::shared_ptr<siconos::internal::SiconosVisitor>) const = 0;
   virtual Type acceptType(siconos::types::FindType &ft) const = 0;
 };
 }  // namespace siconos::modeling

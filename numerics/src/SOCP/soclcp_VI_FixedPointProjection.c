@@ -14,10 +14,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
-#include <stdio.h>                                              // for printf
-#include <stdlib.h>                                             // for free
+#include <stdio.h>   // for printf
+#include <stdlib.h>  // for free
+
 #include "NumericsFwd.h"                                        // for Varia...
 #include "SOCLCP_Solvers.h"                                     // for soclc...
 #include "SecondOrderConeLinearComplementarityProblem.h"        // for Secon...
@@ -29,26 +30,29 @@
 #include "numerics_verbose.h"                                   // for verbose
 #include "soclcp_compute_error.h"                               // for soclc...
 
-void soclcp_VI_FixedPointProjection(SecondOrderConeLinearComplementarityProblem* problem, double *reaction, double *velocity, int* info, SolverOptions* options)
-{
+void soclcp_VI_FixedPointProjection(SecondOrderConeLinearComplementarityProblem *problem,
+                                    double *reaction, double *velocity, int *info,
+                                    SolverOptions *options) {
   /* Dimension of the problem */
   int n = problem->n;
 
   VariationalInequality *vi = (VariationalInequality *)malloc(sizeof(VariationalInequality));
 
-  //vi.self = &vi;
+  // vi.self = &vi;
   vi->F = &Function_VI_SOCLCP;
   vi->ProjectionOnX = &Projection_VI_SOCLCP;
 
-  double error=1e24;
+  double error = 1e24;
 
-  SecondOrderConeLinearComplementarityProblem_as_VI *soclcp_as_vi= (SecondOrderConeLinearComplementarityProblem_as_VI*)malloc(sizeof(SecondOrderConeLinearComplementarityProblem_as_VI));
-  vi->env =soclcp_as_vi ;
-  vi->size =  n;
+  SecondOrderConeLinearComplementarityProblem_as_VI *soclcp_as_vi =
+      (SecondOrderConeLinearComplementarityProblem_as_VI *)malloc(
+          sizeof(SecondOrderConeLinearComplementarityProblem_as_VI));
+  vi->env = soclcp_as_vi;
+  vi->size = n;
 
   /*set the norm of the VI to the norm of problem->q  */
-  vi->normVI= cblas_dnrm2(n, problem->q, 1);
-  vi->istheNormVIset=1;
+  vi->normVI = cblas_dnrm2(n, problem->q, 1);
+  vi->istheNormVIset = 1;
 
   soclcp_as_vi->vi = vi;
   soclcp_as_vi->soclcp = problem;
@@ -61,14 +65,15 @@ void soclcp_VI_FixedPointProjection(SecondOrderConeLinearComplementarityProblem*
 
   /* for (i =0; i< n ; i++) */
   /* { */
-  /*   printf("reaction[%i]=%f\t",i,reaction[i]);    printf("velocity[%i]=F[%i]=%f\n",i,i,velocity[i]); */
+  /*   printf("reaction[%i]=%f\t",i,reaction[i]);
+   * printf("velocity[%i]=F[%i]=%f\n",i,i,velocity[i]); */
   /* } */
 
-  if(verbose > 0)
-  {
-    printf("---------------SOCLCP - VI Fixed Point Projection (VI_FPP) - #Iteration %i Final Residual = %14.7e\n",
-           options->iparam[SICONOS_IPARAM_MAX_ITER], options->dparam[SICONOS_DPARAM_RESIDU]);
-
+  if (verbose > 0) {
+    printf(
+        "---------------SOCLCP - VI Fixed Point Projection (VI_FPP) - #Iteration %i Final "
+        "Residual = %14.7e\n",
+        options->iparam[SICONOS_IPARAM_MAX_ITER], options->dparam[SICONOS_DPARAM_RESIDU]);
   }
   free(vi);
   free(soclcp_as_vi);

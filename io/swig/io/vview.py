@@ -15,6 +15,7 @@ import vtk
 from vtk.util.vtkAlgorithm import VTKPythonAlgorithmBase
 from vtk.numpy_interface import dataset_adapter as dsa
 
+from vtkmodules.vtkRenderingCore import vtkTextActor
 import h5py
 
 # Exports from this module
@@ -978,13 +979,19 @@ class IOReader(VTKPythonAlgorithmBase):
         self.velo_data = self._ivelo_data[self._id_t_m, :]
 
         static_id_t = max(0, numpy.searchsorted(self._static_times, t, side='right') - 1)
-        if static_id_t < len(self._static_indices)-1:
-            self._static_id_t_m = list(range(self._static_indices[static_id_t],
-                                             self._static_indices[static_id_t+1]))
-        else:
-            self._static_id_t_m = [self._static_indices[static_id_t]]
 
-        self.pos_static_data = self._ispos_data[self._static_id_t_m, :]
+        if len(self._static_indices) >0:
+            if static_id_t < len(self._static_indices)-1:
+                self._static_id_t_m = list(range(self._static_indices[static_id_t],
+                                                 self._static_indices[static_id_t+1]))
+            else:
+                self._static_id_t_m = [self._static_indices[static_id_t]]
+        else:
+            self._static_id_t_m = None
+        if self._static_id_t_m:
+            self.pos_static_data = self._ispos_data[self._static_id_t_m, :]
+        else:
+            self.pos_static_data = None
 
         vtk_pos_data = dsa.numpyTovtkDataArray(self.pos_data)
         vtk_pos_data.SetName('pos_data')
@@ -1671,7 +1678,7 @@ class VView(object):
                 with io_tmpfile(
                         debug=True,
                         suffix='.{0}'.format(shape_type),
-                        contents=str(self.io.shapes()[shape_name][:][0])) as tmpf:
+                        contents=(self.io.shapes()[shape_name][:][0]).decode("utf-8")) as tmpf:
                     shape = occ_load_file(tmpf[1])
 
                     # whole shape
@@ -2165,7 +2172,10 @@ class VView(object):
         # here the numpy vectorization is used with a column vector and a
         # scalar for the time arg
         self.set_visibility_v = numpy.vectorize(self.set_dynamic_instance_visibility)
-        self.set_visibility_static_v = numpy.vectorize(self.set_static_instance_visibility)
+        if self.static_actors:
+            self.set_visibility_static_v = numpy.vectorize(self.set_static_instance_visibility)
+        else:
+            self.set_visibility_static_v = None
 
         def set_velocity(instance, v0, v1, v2, v3, v4, v5):
             if instance in cc:
@@ -2258,7 +2268,8 @@ class VView(object):
         self.set_visibility_v(list(self.dynamic_actors.keys()), time)
 
     def set_static_actors_visibility(self, time):
-        self.set_visibility_static_v(list(self.static_actors.keys()), time)
+        if self.set_visibility_static_v:
+            self.set_visibility_static_v(list(self.static_actors.keys()), time)
 
     # callback maker for scale manipulation
     def make_scale_observer(self, glyphs):
@@ -2635,6 +2646,29 @@ class VView(object):
         self.widget.SetEnabled(True)
         self.widget.InteractiveOn()
 
+    def setup_siconos_text(self):
+        self.print_verbose_level(1,'setup_siconos_text')
+        # Create a text actor.
+        txt = vtkTextActor()
+        txt.SetInput('Siconos')
+        txtprop = txt.GetTextProperty()
+        txtprop.SetFontFamilyToArial()
+        txtprop.BoldOn()
+        txtprop.SetFontSize(88)
+        txtprop.ShadowOn()
+        txtprop.SetShadowOffset(4, 4)
+        background_color = self.config.get('background_color', [.0,.0,.0])
+        reverse_background_color =numpy.ones(3) - background_color
+
+        txtprop.SetColor(*reverse_background_color)
+        txt.SetDisplayPosition(20, 30)
+
+        # Assign actor to the renderer.
+        self.renderer.AddActor(txt)
+        #self._renderer.SetBackground(colors.GetColor3d('DarkGreen'))
+
+
+
     # this should be extracted from the VView class
     def export(self):
         self.print_verbose('export start')
@@ -2983,6 +3017,7 @@ class VView(object):
         if self.opts.with_charts:
             self.setup_charts()
         self.setup_axes()
+        self.setup_siconos_text()
 
         self.gui_initialized = True
 

@@ -23,7 +23,7 @@
 #ifndef RigidBodyDS_h
 #define RigidBodyDS_h
 
-#include <NewtonEulerDS.hpp>
+#include "NewtonEulerDS.hpp"
 
 namespace siconos::collision {
 class SiconosContactorSet;
@@ -44,10 +44,13 @@ class RigidBodyDS : public siconos::modeling::NewtonEulerDS,
    *  collide. See also NewtonEulerJointR::_allowSelfCollide */
   bool _allowSelfCollide = true;
 
+  std::shared_ptr<siconos::algebra::SiconosVector> _qExtrapolated{nullptr};
+
  public:
-  RigidBodyDS(std::shared_ptr<siconos::algebra::SiconosVector> position,
-              std::shared_ptr<siconos::algebra::SiconosVector> velocity, double mass,
-              std::shared_ptr<siconos::algebra::SiconosMatrix> inertia = nullptr);
+  RigidBodyDS(
+      std::shared_ptr<siconos::algebra::SiconosVector> position,
+      std::shared_ptr<siconos::algebra::SiconosVector> velocity, double mass,
+      std::shared_ptr<siconos::algebra::SiconosMatrix> inertia = nullptr);
 
   virtual ~RigidBodyDS() noexcept = default;
 
@@ -71,18 +74,26 @@ class RigidBodyDS : public siconos::modeling::NewtonEulerDS,
   /** Provide a set of contactors to the body.
    *
    *  \param c A std::shared_ptr<SiconosContactorSet> */
-  void setContactors(std::shared_ptr<siconos::collision::SiconosContactorSet> c) {
+  void setContactors(
+      std::shared_ptr<siconos::collision::SiconosContactorSet> c) {
     _contactors = c;
   }
 
   /** Make the base position of the contactors equal to the DS q vector.
    *
    *  \return a std::shared_ptr<siconos::algebra::SiconosVector> */
-  virtual std::shared_ptr<siconos::algebra::SiconosVector> base_position() { return q(); }
+  virtual std::shared_ptr<siconos::algebra::SiconosVector> base_position() {
+    return q();
+  }
 
-  void acceptSP(std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const override;
+  virtual std::shared_ptr<siconos::algebra::SiconosVector>
+  base_extrapolated_position() {
+    return _qExtrapolated;
+  };
+  virtual void compute_extrapolated_position(double extrapolationCoefficient);
 
-  //  ACCEPT_BASE_VISITORS(NewtonEulerDS);
+  void acceptSP(std::shared_ptr<siconos::internal::SiconosVisitor> tourist)
+      const override;
 };
 }  // namespace siconos::collision
 #endif /* RigidBodyDS_h */

@@ -377,7 +377,7 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
   /** Complete initialisation of the Simulation (OneStepIntegrators,
       siconos::nonsmooth_formulations::OneStepNSProblem, TImediscretisation).
   */
-  virtual void initialize() = 0;
+  virtual void initialize();
 
   /** Initialize a single Interaction for this Simulation, used for dynamic
    *  topology updates. */
@@ -447,7 +447,7 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
 
   /** initialisation for siconos::nonsmooth_formulations::OneStepNSProblem.
    */
-  virtual void initOSNS() = 0;
+  virtual void initializeOneStepNSProblem() = 0;
 
   /** step from current event to next event of EventsManager
    */

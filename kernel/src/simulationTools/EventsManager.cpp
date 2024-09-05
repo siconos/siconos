@@ -260,7 +260,7 @@ unsigned int siconos::simulation::EventsManager::insertEv(std::shared_ptr<Event>
       break;
     } else {
       mpz_abs(abs_delta_time, delta_time);
-      //Let us check if the new time is not too close to the time of the current event
+      // Let us check if the new time is not too close to the time of the current event
       if (mpz_cmp_ui(abs_delta_time, _GapLimit2Events) <= 0)  // the two are too close
       {
         // reschedule new_event at the same time as the one of the current event

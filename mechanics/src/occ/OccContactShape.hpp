@@ -14,146 +14,133 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /** \file OccContactShape.hpp
     \brief OpenCascade contact shape
  */
 #ifndef OccContactShape_hpp
 #define OccContactShape_hpp
-
-#include "MechanicsFwd.hpp"
-
-#include "SiconosFwd.hpp"
-#include "SiconosVisitor.hpp"
+#include <memory>
 #include <string>
+#include <variant>
+// Opencascade classes
+class TopoDS_Shape;
+class TopoDS_Edge;
+class TopoDS_Face;
 
-struct OccContactShape
-{
+namespace siconos::mechanics::occ {
+
+struct OccContactEdge;
+struct OccContactFace;
+
+using OccContactShapeV =
+    std::variant<std::shared_ptr<OccContactEdge>, std::shared_ptr<OccContactFace>>;
+
+struct OccContactShape {
+  // === Members ===
+
+  /** Computed UV bounds.
+   * @{
+   */
+  double bsup1[2] = {0., 0.};
+  double binf1[2] = {0., 0.};
+  double bsup2[2] = {0., 0.};
+  double binf2[2] = {0., 0.};
+  /**
+   * @}
+   */
+
+  /** Contact group. */
+  unsigned int contactGroup{0};
+
+  std::shared_ptr<TopoDS_Shape> _shape{nullptr};
+
+  unsigned int _id{0};
+
+  /** Known contacts  */
+  enum class ContactTypeValue { Face, Edge, Unknown };
+
+  // === Methods ===
 
   /** Default constructor.
    */
-  OccContactShape();
+  OccContactShape() = delete;  // should we consider a default empty shape?
+
+  /** Copy constructor */
+  OccContactShape(const OccContactShape& shape) = default;
+
+  // Rule of five
+  OccContactShape(OccContactShape&& shape) = default;
+  OccContactShape& operator=(OccContactShape&&) = delete;
+  OccContactShape& operator=(const OccContactShape&) = delete;
 
   /** Constructor from OpenCascade object.
    *
-   *  \param shape
+   *  \param shape a TopoDS_Shape
    */
-  OccContactShape(TopoDS_Shape& shape)
-    : _shape(createSPtrTopoDS_Shape(shape))
-  {};
+  OccContactShape(TopoDS_Shape& shape);
 
   /** Constructor from const OpenCascade object : remove constness.
    *
-   *  \param shape
+   *  \param shape a const TopoDS_Shape
    */
-  OccContactShape(const TopoDS_Shape& shape)
-    : _shape(createSPtrTopoDS_Shape(const_cast<TopoDS_Shape&>(shape)))
-  {};
+  OccContactShape(const TopoDS_Shape& shape);
 
-  /** Constructor from OccContactShape
-   *
-   *  \param shape : an OccContactShape
-   */
-  OccContactShape(const OccContactShape& shape)
-    : _shape(shape.shape()) {};
+  /** Destructor */
+  virtual ~OccContactShape() noexcept = default;
 
-  /** Destructor.
+  /** Return shared pointer to OpenCascade data
    */
-  virtual ~OccContactShape() {};
+  std::shared_ptr<TopoDS_Shape> shape() const { return _shape; };
 
-  /** Return shared pointer on OpenCascade data
-   */
-  SP::TopoDS_Shape shape() const { return this->_shape;};
+  /** Return reference to OpenCascade data */
+  TopoDS_Shape& data() const { return *_shape; };
 
-  /** Return reference on OpenCascade data.
-   */
-  TopoDS_Shape& data() const { return *this->_shape;};
+  /** Set OpenCascade data from a shared pointer */
+  void setShape(std::shared_ptr<TopoDS_Shape> shape);
 
-  /** Set OpenCascade data from a shared pointer.
-   */
-  void setShape(SP::TopoDS_Shape shape)
-  {
-    this->_shape = shape;
-    this->computeUVBounds();
-  }
+  /** Set OpenCascade data */
+  void setData(TopoDS_Shape& data);
 
-  /** Set OpenCascade data.
-   */
-  void setData(TopoDS_Shape& data)
-  {
-    this->_shape = createSPtrTopoDS_Shape(data);
-    this->computeUVBounds();
-  }
-
-  /** Known contacts.
-   */
-  enum ContactTypeValue { Face, Edge, Unknown };
-
-  /** Get the contact type.
-   */
+  /** \return the contact type.  */
   ContactTypeValue contactType() const;
 
-  /**
-     Get a face from its index.
-     
-     \param index : the index of the face.
-  */
-  SPC::TopoDS_Face face(unsigned int index) const;
-
-  /**
-     Get an edge from its index.
-     
-     \param index : the index of the face.
-  */
-  SPC::TopoDS_Edge edge(unsigned int index) const;
+  /** Compute and store UV bounds of the shape.
+   */
+  virtual void computeUVBounds();
 
   /** Export the contact shape into a string.
    */
   std::string exportBRepToString() const;
 
   /** Import the contact shape from a string.
-   * 
+   *
    *  \param brepstr : the string containing the whole brep.
    */
   void importBRepFromString(const std::string& brepstr);
 
-  /** Compute and store UV bounds of the shape.
-   */
-  virtual void computeUVBounds();
+  /**
+     \return a face from its index.
 
+     \param index : the index of the face.
+  */
+  std::shared_ptr<TopoDS_Face> face(unsigned int index) const;
 
-  /** Set id.
-   * 
+  /**
+     \return  an edge from its index.
+
+     \param index : the index of the face.
+  */
+  std::shared_ptr<TopoDS_Edge> edge(unsigned int index) const;
+
+  /** Set a new id for the Shape
+   *
    * \param id the new id
    */
-  void setId(unsigned int id) { this->_id = id; }
+  void setId(unsigned int id) { _id = id; }
 
-  /** Get id.
-   * 
-   *  \return an unsigned int
-   */
-  unsigned int id() { return this->_id; }
-
-  /** Computed UV bounds.
-   * @{
-   */
-  double bsup1[2];
-  double binf1[2];
-  double bsup2[2];
-  double binf2[2];
-  /**
-   * @}
-   */
-
-  /** Contact group. */
-  unsigned int contactGroup;
-
-  SP::TopoDS_Shape _shape;
-
-  unsigned int _id;
-
-  VIRTUAL_ACCEPT_VISITORS(OccContactShape);
-
+  /** \return the id of the shape*/
+  unsigned int id() { return _id; }
 };
-
+}  // namespace siconos::mechanics::occ
 #endif

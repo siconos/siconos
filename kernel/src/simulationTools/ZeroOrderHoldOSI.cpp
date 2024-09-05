@@ -323,7 +323,7 @@ struct siconos::integrators::ZeroOrderHoldOSI::_NSLEffectOnFreeOutput
   _NSLEffectOnFreeOutput(siconos::nonsmooth_formulations::OneStepNSProblem* p,
                          std::shared_ptr<siconos::modeling::Interaction> inter,
                          siconos::graphs::InteractionProperties& interProp)
-      : _osnsp(p), _inter(inter), _interProp(interProp){};
+      : _osnsp(p), _inter(inter), _interProp(interProp) {};
 
   void visit(const siconos::modeling::NewtonImpactNSL& nslaw) const override {
     double e;
@@ -573,11 +573,9 @@ void siconos::integrators::ZeroOrderHoldOSI::display() const {
   for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
     if (!checkOSI(dsi)) continue;
     auto ds = _dynamicalSystemsGraph->bundle(*dsi);
-    std::cout << "--> Phi of dynamical system number "
-              << ": " << std::endl;
+    std::cout << "--> Phi of dynamical system number: \n";
     Ad(ds).display();
-    std::cout << "--> Psi of dynamical system number "
-              << ": " << std::endl;
+    std::cout << "--> Psi of dynamical system number: \n";
     Bd(ds).display();
   }
   std::cout << "================================" << std::endl;

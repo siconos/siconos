@@ -124,6 +124,7 @@ class NewtonEulerDS : public SecondOrderDS {
   siconos::algebra::SiconosMemory _forcesMemory;
   siconos::algebra::SiconosMemory _dotqMemory;
 
+  
   /** Inertial matrix
    */
   std::shared_ptr<siconos::algebra::SiconosMatrix> _I{nullptr};
@@ -301,7 +302,6 @@ class NewtonEulerDS : public SecondOrderDS {
    *  protected member.*/
   std::vector<std::shared_ptr<siconos::algebra::SimpleMatrix>> _rhsMatrices = {
       nullptr, nullptr, nullptr, nullptr};
-  ;
 
   /** Default constructor
    */

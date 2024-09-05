@@ -2,7 +2,6 @@ include(tools4tests)
 
 if(WITH_TESTING)
   add_custom_target(numerics-tests echo "Start numerics tests")
-
   begin_tests(src/tools/test)
 
   new_test(SOURCES test_op3x3.c DEPS externals)

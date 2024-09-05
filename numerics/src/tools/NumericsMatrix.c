@@ -25,7 +25,7 @@
 #include <stdlib.h>  // for exit, malloc, free, EXIT_FAILURE
 #include <string.h>  // for memcpy, memset
 
-#include "CSparseMatrix_internal.h"  // for CSparseMatrix, CS_INT, cs_dl_sp...
+#include "CSparseMatrix.h"  // for CSparseMatrix, CS_INT, cs_dl_sp...
 #include "NM_MPI.h"                  // for NM_MPI_copy
 #include "NM_MUMPS.h"                // for NM_MUMPS_copy
 #include "NM_conversions.h"          // for NM_csc_to_csr, NM_csc_to_triplet
@@ -2698,8 +2698,28 @@ CSparseMatrix* NM_csc(NumericsMatrix* A) {
     switch (A->matrix2->origin) {
       case NSM_TRIPLET:
       case NSM_UNKNOWN: {
+#ifdef WITH_UMFPACK
+        // Fix issue https://github.com/siconos/siconos/issues/496
+        CSparseMatrix* Atri = NM_triplet(A);
+
+        NM_csc_alloc(A, Atri->nz);
+
+        CSparseMatrix* Acsc = A->matrix2->csc;
+
+        assert(Acsc);
+
+        CS_INT status =
+            UMFPACK_FN(triplet_to_col)(Atri->m, Atri->n, Atri->nz, Atri->i, Atri->p, Atri->x,
+                                       Acsc->p, Acsc->i, Acsc->x, NULL);
+
+        if (status) {
+          numerics_error("NM_csc", "umfpack_*_triplet_to_col: cannot get csc from triplet");
+          return NULL;
+        }
+#else
         /*  triplet -> csc with allocation */
         A->matrix2->csc = cs_compress(NM_triplet(A));
+#endif
         NSM_set_version(A->matrix2, NSM_CSC, NSM_version(A->matrix2, NSM_TRIPLET));
         break;
       }

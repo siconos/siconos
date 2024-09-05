@@ -14,21 +14,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #ifdef _MSC_VER
 
-extern "C" double __cdecl __powidf2(double a, int b)
-{
+extern "C" double __cdecl __powidf2(double a, int b) {
   const int recip = b < 0;
   double r = 1;
-  while(1)
-  {
-    if(b & 1)
-      r *= a;
+  while (1) {
+    if (b & 1) r *= a;
     b /= 2;
-    if(b == 0)
-      break;
+    if (b == 0) break;
     a *= a;
   }
   return recip ? 1 / r : r;

@@ -27,10 +27,10 @@
 #include "Interaction.hpp"
 #include "NonSmoothLaw.hpp"
 #include "OneStepNSProblem.hpp"
+#include "SiconosMatrixOp.hpp"        // for scal
 #include "SiconosMatrixVectorOp.hpp"  // for prod and subprod
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"  // for scal
-#include "SiconosMatrixOp.hpp"  // for scal
 #include "SimpleMatrix.hpp"
 #include "Simulation.hpp"
 #include "Topology.hpp"
@@ -599,7 +599,6 @@ double siconos::integrators::EulerMoreauOSI::computeResidu() {
         DEBUG_EXPR(folds->x()->display());
       } else  // FirstOrderNonLinearDS
       {
-        DEBUG_PRINT("dsType == Type::FirstOrderNonLinearDS\n");
         DEBUG_EXPR(fonlds->f()->display(););
         if (fonlds->f()) {
           coef = -h * (1 - _theta);

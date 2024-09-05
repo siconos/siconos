@@ -14,46 +14,44 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #include "rolling_fc3d_local_problem_tools.h"
 #ifndef __cplusplus
-#include <stdbool.h>                        // for false
+#include <stdbool.h>  // for false
 #endif
-#include <stdlib.h>                         // for malloc, NULL
+#include <stdlib.h>  // for malloc, NULL
+
 #include "NumericsMatrix.h"                 // for NM_create_from_data, Nume...
 #include "RollingFrictionContactProblem.h"  // for RollingFrictionContactPro...
 
-void rolling_fc3d_local_problem_compute_q(RollingFrictionContactProblem * problem, RollingFrictionContactProblem * localproblem, double *reaction, int contact)
-{
-
-  double *qLocal = localproblem->q;
+void rolling_fc3d_local_problem_compute_q(RollingFrictionContactProblem* problem,
+                                          RollingFrictionContactProblem* localproblem,
+                                          double* reaction, int contact) {
+  double* qLocal = localproblem->q;
   int n = 5 * problem->numberOfContacts;
-
 
   int in = 5 * contact, it = in + 1, is = it + 1, iv = is + 1, iw = iv + 1;
 
-
   /* qLocal computation*/
   qLocal[0] = problem->q[in];
-  qLocal[1] =  problem->q[it];
-  qLocal[2] =  problem->q[is];
-  qLocal[3] =  problem->q[iv];
-  qLocal[4] =  problem->q[iw];
+  qLocal[1] = problem->q[it];
+  qLocal[2] = problem->q[is];
+  qLocal[3] = problem->q[iv];
+  qLocal[4] = problem->q[iw];
 
-  //NM_row_prod_no_diag3(n, contact, 3*contact, problem->M, reaction, qLocal, false);
-  NM_row_prod_no_diag(n, 5, contact, 5*contact, problem->M, reaction, qLocal, NULL, false);
-
+  // NM_row_prod_no_diag3(n, contact, 3*contact, problem->M, reaction, qLocal, false);
+  NM_row_prod_no_diag(n, 5, contact, 5 * contact, problem->M, reaction, qLocal, NULL, false);
 }
 
-void rolling_fc3d_local_problem_fill_M(RollingFrictionContactProblem * problem, RollingFrictionContactProblem * localproblem, int contact)
-{
+void rolling_fc3d_local_problem_fill_M(RollingFrictionContactProblem* problem,
+                                       RollingFrictionContactProblem* localproblem,
+                                       int contact) {
   NM_extract_diag_block5(problem->M, contact, &localproblem->M->matrix0);
 }
 
-
-RollingFrictionContactProblem* rolling_fc3d_local_problem_allocate(RollingFrictionContactProblem* problem)
-{
+RollingFrictionContactProblem* rolling_fc3d_local_problem_allocate(
+    RollingFrictionContactProblem* problem) {
   /* Connect local solver and local problem*/
   RollingFrictionContactProblem* localproblem = rollingFrictionContactProblem_new();
   localproblem->numberOfContacts = 1;
@@ -62,25 +60,21 @@ RollingFrictionContactProblem* rolling_fc3d_local_problem_allocate(RollingFricti
   localproblem->mu = (double*)malloc(sizeof(double));
   localproblem->mu_r = (double*)malloc(sizeof(double));
 
-  if(problem->M->storageType != NM_SPARSE_BLOCK)
+  if (problem->M->storageType != NM_SPARSE_BLOCK) {
+    localproblem->M = NM_create_from_data(NM_DENSE, 5, 5, malloc(25 * sizeof(double)));
+  } else /* NM_SPARSE_BLOCK */
   {
-    localproblem->M = NM_create_from_data(NM_DENSE, 5, 5,
-                                          malloc(25 * sizeof(double)));
-  }
-  else /* NM_SPARSE_BLOCK */
-  {
-    localproblem->M = NM_create_from_data(NM_DENSE, 5, 5, NULL); /* V.A. 14/11/2016 What is the interest of this line */
+    localproblem->M = NM_create_from_data(
+        NM_DENSE, 5, 5, NULL); /* V.A. 14/11/2016 What is the interest of this line */
   }
   return localproblem;
 }
 
-
 void rolling_fc3d_local_problem_free(RollingFrictionContactProblem* localproblem,
-                                     RollingFrictionContactProblem* problem)
-{
-  if(problem->M->storageType == NM_SPARSE_BLOCK)
-  {
-    /* we release the pointer to avoid deallocation of the diagonal blocks of the original matrix of the problem*/
+                                     RollingFrictionContactProblem* problem) {
+  if (problem->M->storageType == NM_SPARSE_BLOCK) {
+    /* we release the pointer to avoid deallocation of the diagonal blocks of the original
+     * matrix of the problem*/
     localproblem->M->matrix0 = NULL;
   }
   rollingFrictionContactProblem_free(localproblem);

@@ -109,8 +109,9 @@ class MoreauJeanGOSI : public MoreauJeanOSI {
    *  \param inter the interaction (for y_k)
    *  \param osnsp the non-smooth integrator
    */
-  void NonSmoothLawContributionToOutput(std::shared_ptr<siconos::modeling::Interaction> inter,
-                                        siconos::nonsmooth_formulations::OneStepNSProblem &osnsp);
+  void NonSmoothLawContributionToOutput(
+      std::shared_ptr<siconos::modeling::Interaction> inter,
+      siconos::nonsmooth_formulations::OneStepNSProblem &osnsp);
 
   /** Displays the data of the MoreauJeanGOSI's integrator
    */

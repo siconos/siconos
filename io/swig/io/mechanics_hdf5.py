@@ -73,7 +73,7 @@ def tmpfile(suffix='', prefix='siconos_io', contents=None,
     """
     A context manager for a named temporary file.
     """
-    (_, tfilename) = tempfile.mkstemp(suffix=suffix, prefix=prefix)
+    (_fid, tfilename) = tempfile.mkstemp(suffix=suffix, prefix=prefix)
     fid = open(tfilename, 'w')
     if contents is not None:
         fid.write(contents)
@@ -97,6 +97,7 @@ def tmpfile(suffix='', prefix='siconos_io', contents=None,
 
     yield r
     fid.close()
+    os.close(_fid)
     if not debug:
         os.remove(tfilename)
 
@@ -253,9 +254,9 @@ def compute_inertia_and_center_of_mass(shapes, io=None):
     inertia
     inertia_matrix
     """
-    from OCC.GProp import GProp_GProps
-    from OCC.BRepGProp import brepgprop_VolumeProperties
-    from OCC.gp import gp_Ax1, gp_Dir
+    from OCC.Core.GProp import GProp_GProps
+    from OCC.Core.BRepGProp import brepgprop_VolumeProperties
+    from OCC.Core.gp import gp_Ax1, gp_Dir
     from siconos.mechanics import occ
 
     system = GProp_GProps()
@@ -330,10 +331,10 @@ def occ_topo_list(shape):
     :return: a list of edges and faces
     """
 
-    from OCC.TopAbs import TopAbs_FACE
-    from OCC.TopAbs import TopAbs_EDGE
-    from OCC.TopExp import TopExp_Explorer
-    from OCC.TopoDS import topods_Face, topods_Edge
+    from OCC.Core.TopAbs import TopAbs_FACE
+    from OCC.Core.TopAbs import TopAbs_EDGE
+    from OCC.Core.TopExp import TopExp_Explorer
+    from OCC.Core.TopoDS import topods_Face, topods_Edge
 
 
     topExp = TopExp_Explorer()
@@ -364,11 +365,11 @@ def occ_load_file(filename):
     :return: a topods_shape
     """
 
-    from OCC.STEPControl import STEPControl_Reader
-    from OCC.IGESControl import IGESControl_Reader
-    from OCC.BRep import BRep_Builder
-    from OCC.TopoDS import TopoDS_Compound
-    from OCC.IFSelect import IFSelect_RetDone, IFSelect_ItemsByEntity
+    from OCC.Core.STEPControl import STEPControl_Reader
+    from OCC.Core.IGESControl import IGESControl_Reader
+    from OCC.Core.BRep import BRep_Builder
+    from OCC.Core.TopoDS import TopoDS_Compound
+    from OCC.Core.IFSelect import IFSelect_RetDone, IFSelect_ItemsByEntity
 
     reader_switch = {'stp': STEPControl_Reader,
                      'step': STEPControl_Reader,
@@ -399,15 +400,35 @@ def occ_load_file(filename):
 
     return comp
 
+import os
+import shutil
+import subprocess
+
+
+def get_open_fds() -> int:
+    """Get the number of open file descriptors for the current process."""
+    lsof_path = shutil.which("lsof")
+    if lsof_path is None:
+        raise NotImplementedError("Didn't handle unavailable lsof.")
+    raw_procs = subprocess.check_output(
+        [lsof_path, "-w", "-Ff", "-p", str(os.getpid())]
+    )
+    def filter_fds(lsof_entry: str) -> bool:
+        return lsof_entry.startswith("f") and lsof_entry[1:].isdigit()
+
+    fds = list(filter(filter_fds, raw_procs.decode().split(os.linesep)))
+
+    return len(fds)
 
 def topods_shape_reader(shape, deflection=0.001):
 
-    from OCC.StlAPI import StlAPI_Writer
-    from OCC.BRepMesh import BRepMesh_IncrementalMesh
+    from OCC.Core.StlAPI import StlAPI_Writer
+    from OCC.Core.BRepMesh import BRepMesh_IncrementalMesh
 
     import vtk
 
     stl_writer = StlAPI_Writer()
+    reader = vtk.vtkSTLReader()
 
     with tmpfile(suffix='.stl') as tmpf:
         mesh = BRepMesh_IncrementalMesh(shape, deflection)
@@ -417,17 +438,17 @@ def topods_shape_reader(shape, deflection=0.001):
         stl_writer.Write(shape, tmpf[1])
         tmpf[0].flush()
 
-        reader = vtk.vtkSTLReader()
+
         reader.SetFileName(tmpf[1])
         reader.Update()
 
-        return reader
+    return reader
 
 
 def brep_reader(brep_string, indx):
 
-    from OCC.StlAPI import StlAPI_Writer
-    from OCC.BRepTools import BRepTools_ShapeSet
+    from OCC.Core.StlAPI import StlAPI_Writer
+    from OCC.Core.BRepTools import BRepTools_ShapeSet
     import vtk
 
     shape_set = BRepTools_ShapeSet()
@@ -495,6 +516,7 @@ class MechanicsHdf5(object):
         self._cf_data = None
         self._cf_info = None
         self._cf_work = None
+        self._enery_work = None
         self._domain_data = None
         self._solv_data = None
         self._run_options = None
@@ -604,6 +626,19 @@ class MechanicsHdf5(object):
         except Exception as e:
             self.print_io_mechanics('Warning -  cf_work in the hdf5 file')
             self.print_io_mechanics('        -  group(self._cf_work, log ) : ', e)
+        try:
+            self._energy_work = data(self._data, 'energy_work', 8,
+                                    use_compression=self._use_compression)
+
+            if self._mode == 'w':
+                self._energy_work.attrs['info'] = '[0] : time,\n [1] : kinetic energy,\n'
+                self._energy_work.attrs['info'] += ' [2] : force work, \n'
+                self._energy_work.attrs['info'] += ' [3] : normal contact work,\n [4] : tangent contact work,\n'
+                self._energy_work.attrs['info'] += ' [5] : friction dissipation,\n [6,7] only negative part '
+        except Exception as e:
+            self.print_io_mechanics('Warning -  cf_work in the hdf5 file')
+            self.print_io_mechanics('        -  group(self._cf_work, log ) : ', e)
+
 
         if self._should_output_domains or 'domain' in self._data:
             self._domain_data = data(self._data, 'domain', 3,
@@ -619,7 +654,7 @@ class MechanicsHdf5(object):
             self.print_io_mechanics('Warning -  _data siconos_mechanics_run_options in the hdf5 file')
             self.print_io_mechanics('        -  data(self._data, siconos_mechanics_run_options, ...) : ', e)
 
-        
+
         # self._run_options_data = data(self._data, 'siconos_mechanics_run_options', 1,
         #                               use_compression=self._use_compression)
 
@@ -894,7 +929,7 @@ class MechanicsHdf5(object):
 
         if name not in self._ref:
 
-            from OCC.STEPControl import STEPControl_Writer, STEPControl_AsIs
+            from OCC.Core.STEPControl import STEPControl_Writer, STEPControl_AsIs
 
             # step format is used for the storage.
             step_writer = STEPControl_Writer()
@@ -1253,6 +1288,32 @@ class MechanicsHdf5(object):
         nslaw.attrs['e'] = e
         nslaw.attrs['gid1'] = collision_group1
         nslaw.attrs['gid2'] = collision_group2
+        
+    def add_Fremond_impact_friction_nsl(self, name, mu, e=0, collision_group1=0,
+                                       collision_group2=0):
+        """
+        Add a nonsmooth law for contact between 2 groups.
+        Only NewtonImpactFrictionNSL are supported.
+        name is an user identifiant and must be unique,
+        mu is the coefficient of friction,
+        e is the coefficient of restitution on the contact normal,
+        gid1 and gid2 define the group identifiants.
+
+        """
+        if name not in self._nslaws_data:
+            nslaw = self._nslaws_data.create_dataset(name, (0,))
+            nslaw.attrs['type'] = 'FremondImpactFrictionNSL'
+        else:
+            nslaw=self._nslaws_data[name]
+            if nslaw.attrs['type'] != 'FremondImpactFrictionNSL':
+                self.print_verbose('[warning] a nslaw is already existing with the same name ', name ,' but not the same type')
+
+        nslaw.attrs['mu'] = mu
+        nslaw.attrs['e'] = e
+        nslaw.attrs['gid1'] = collision_group1
+        nslaw.attrs['gid2'] = collision_group2
+
+
 
     def add_Newton_impact_friction_nsl(self, name, mu, e=0, collision_group1=0,
                                        collision_group2=0):

@@ -13,9 +13,7 @@ include(swig_python_tools)
 
 
 list(APPEND deps $<BUILD_INTERFACE:externals> numerics)
-if(WITH_SYSTEM_SUITESPARSE)
-  list(APPEND SWIG_NUMERICS_DEPS $<BUILD_INTERFACE:SuiteSparse::CXSparse>)
-endif()
+list(APPEND SWIG_NUMERICS_DEPS $<BUILD_INTERFACE:SuiteSparse::CXSparse>)
 
 
 # -- mpi4py -- 
@@ -54,12 +52,8 @@ if(WITH_TESTING)
   endif()
   
   include(tools4tests)
-  if(WITH_SYSTEM_SUITESPARSE)
-    set(suitesparse SuiteSparse::CXSparse)
-  else()
-    set(suitesparse)
-  endif()
-
+  set(suitesparse SuiteSparse::CXSparse)
+  
   build_python_tests(
     DEPS "${COMPONENT};${suitesparse}" # some plugins in tests need to be linked with numerics
     EXCLUDE ${python_excluded_tests}

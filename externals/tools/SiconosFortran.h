@@ -35,9 +35,9 @@ typedef void (*jacopointer)(int*, double*, double*, int*, int*, double*, int*);
 
 #if defined(HAS_FORTRAN)
 extern "C" void lsodar(fpointer, int* NEQ, double* Y, double* T, double* TOUT, int* ITOL,
-                       double* RTOL, double* ATOL, int* ISTATE,
-                       double* RWORK, int* LRW, int* IWORK, int* LIW, jacopointer C_JAC,
-                       int* JT, gpointer C_G, int* NG, int* JROOT);
+                       double* RTOL, double* ATOL, int* ISTATE, double* RWORK, int* LRW,
+                       int* IWORK, int* LIW, jacopointer C_JAC, int* JT, gpointer C_G, int* NG,
+                       int* JROOT);
 
 #else
 extern "C" inline void lsodar(fpointer, int* NEQ, double* Y, double* T, double* TOUT,
@@ -50,7 +50,8 @@ extern "C" inline void lsodar(fpointer, int* NEQ, double* Y, double* T, double* 
 
 }  // namespace siconos::netlib
 
-namespace siconos::hairer {
+namespace siconos::fortran {
+namespace hairer {
 
 typedef void (*fprobpointer)(int* IFCN, int* NQ, int* NV, int* NU, int* NL, int* LDG, int* LDF,
                              int* LDA, int* NBLK, int* NMRC, int* NPGP, int* NPFL, int* INDGR,
@@ -80,6 +81,42 @@ extern "C" inline void hem5(int* NQ, int* NV, int* NU, int* NL, fprobpointer FPR
 }
 
 #endif
-}  // namespace siconos::hairer
+}  // namespace hairer
 
+namespace optim {
+#if defined(HAS_FORTRAN)
+
+/** Computes the minimum of a constrained function
+
+    see
+   https://who.rocq.inria.fr/Jean-Charles.Gilbert/modulopt/optimization-routines/m2qn1/m2qn1.pdf
+
+    \param[in] n number of variables on which f depends
+    \param[in, out] x starting/final point, size n
+    \param[in, out] function value at x
+    \param[in, out] g gradient of, evaluated at x
+    \param[in], dxmin, vector of size n, used to control precision among other things
+    \param[in,out] df1 see paper
+    \param[in, out] epsabs convergence criteria
+    \param[in, out] mode control the way the algo is initialized (in) and give details
+     about how it stops (out)
+    \param[in] binf constraint on x (lower bound)
+    \param[in] bsup constraint on x (upper bound)
+    \param[in, out] iz work vector (size = 2n+1)
+    \param[in, out] rz work vector (size = 1/2*n*(n+9))
+*/
+extern "C" void n2qn1(const int* n, double* x, double* f, double* g, double* dxmin,
+                      double* df1, double* epsabs, int* mode, const double* binf,
+                      const double* bsup, int* iz, double* rz);
+
+#else
+extern "C" inline void n2qn1(int* n, double* x, double* f, double* g, double* dxmin,
+                             double* df1, double* epsabs, int* mode, const double* binf,
+                             const double* bsup, int* iz, double* rz) {
+  printf("Siconos Fortran API is off. This function (n2qn1) has no effects.\n");
+}
+#endif
+
+}  // namespace optim
+}  // namespace siconos::fortran
 #endif

@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #ifndef VI_NEWTON_H
 #define VI_NEWTON_H
@@ -23,8 +23,8 @@
  * \brief Functions for solving VI using Newton method
  */
 
-#include "SiconosConfig.h"
 #include "NumericsMatrix.h"
+#include "SiconosConfig.h"
 
 #if defined(__cplusplus)
 #undef restrict
@@ -32,14 +32,15 @@
 #endif
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-extern "C"
-{
+extern "C" {
 #endif
 
-  void VI_compute_F(void* data_opaque, double* x, double* F);
-  void VI_compute_error_box(void* data_opaque, double* x, double* F, double* Jac_F_merit, double tol, double* err);
-  void VI_compute_F_box_Qi(void* data_opaque, double* x, double* F, double* Fbox);
-  void VI_compute_H_box_Qi(void* data_opaque, double* x, double* F, double* workV1, double* workV2, NumericsMatrix* H);
+void VI_compute_F(void* data_opaque, double* x, double* F);
+void VI_compute_error_box(void* data_opaque, double* x, double* F, double* Jac_F_merit,
+                          double tol, double* err);
+void VI_compute_F_box_Qi(void* data_opaque, double* x, double* F, double* Fbox);
+void VI_compute_H_box_Qi(void* data_opaque, double* x, double* F, double* workV1,
+                         double* workV2, NumericsMatrix* H);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

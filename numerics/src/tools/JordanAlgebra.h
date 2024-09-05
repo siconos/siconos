@@ -61,8 +61,7 @@ NumericsMatrix* Quad_repr(const double* const vec, const unsigned int vecSize,
                           const size_t varsCount);
 
 void NesterovToddVector(const double* const vec1, const double* const vec2,
-                        const unsigned int vecSize, const size_t varsCount,
-                        double* out);
+                        const unsigned int vecSize, const size_t varsCount, double* out);
 
 /** Create the Arrow representation matrix from vector.
  * \param vecSize the length of the vector.
@@ -78,28 +77,27 @@ double* JA_iden(const unsigned int vecSize, const size_t varsCount);
  * \param varsCount is the count of variables (subvectors) in x and y.
  * \param out is the result vector of the Jordan product.
  */
-void JA_prod(const double* const vec1, const double* const vec2,
-             const unsigned int vecSize, const int varsCount, double* out);
+void JA_prod(const double* const vec1, const double* const vec2, const unsigned int vecSize,
+             const int varsCount, double* out);
 
 /** Returns the eigenvalues of each element in the vector.
  * \param vec is the pointer to the vector data.
  * \param vecSize is the length of the vector.
  * \param varsCount is the count of variables (subvectors) in vec.
- * \param out is the result vector of eigenvalues
- * (out\in\mathbb{R}^{2*varsCount})..
+ * \param out is the result vector of eigenvalues (out\in\mathbb{R}^{2*varsCount})..
  */
-void JA_eigenvals(const double* const vec, const unsigned int vecSize,
-                  const size_t varsCount, double* out);
+void JA_eigenvals(const double* const vec, const unsigned int vecSize, const size_t varsCount,
+                  double* out);
 
 /** Returns the eigenvectors of each element in the vector.
  * \param vec is the pointer to the vector data.
  * \param vecSize is the length of the vector.
  * \param varsCount is the count of variables (subvectors) in vec.
- * \param out is the result matrix of eigenvactors
- * (out\in\mathbb{R}^{vecSize\times 2*varsCount}).
+ * \param out is the result matrix of eigenvactors (out\in\mathbb{R}^{vecSize\times
+ * 2*varsCount}).
  */
-void JA_eigenvecs(const double* const vec, const unsigned int vecSize,
-                  const size_t varsCount, double** out);
+void JA_eigenvecs(const double* const vec, const unsigned int vecSize, const size_t varsCount,
+                  double** out);
 
 /** Compute element by element square root
  * \param vec is the vector
@@ -107,8 +105,8 @@ void JA_eigenvecs(const double* const vec, const unsigned int vecSize,
  * \param varsCount is the count of variables (subvectors) in vec.
  * \param out is the sqrt vector
  */
-void JA_sqrt(const double* const vec, const unsigned int vecSize,
-             const size_t varsCount, double* out);
+void JA_sqrt(const double* const vec, const unsigned int vecSize, const size_t varsCount,
+             double* out);
 
 /** Compute element by element inverse of square root
  * \param vec is the vector
@@ -116,8 +114,8 @@ void JA_sqrt(const double* const vec, const unsigned int vecSize,
  * \param varsCount is the count of variables (subvectors) in vec.
  * \param out is the inverse of sqrt vector
  */
-void JA_sqrt_inv(const double* const vec, const unsigned int vecSize,
-                 const size_t varsCount, double* out);
+void JA_sqrt_inv(const double* const vec, const unsigned int vecSize, const size_t varsCount,
+                 double* out);
 
 /** Compute element by element the square of the vector
  * \param vec is the vector
@@ -125,8 +123,8 @@ void JA_sqrt_inv(const double* const vec, const unsigned int vecSize,
  * \param varsCount is the count of variables (subvectors) in vec.
  * \param out is the square of the vector
  */
-void JA_power2(const double* const vec, const unsigned int vecSize,
-               const size_t varsCount, double* out);
+void JA_power2(const double* const vec, const unsigned int vecSize, const size_t varsCount,
+               double* out);
 
 /** Compute element by element the inverse of the vector
  * \param vec is the vector
@@ -134,8 +132,8 @@ void JA_power2(const double* const vec, const unsigned int vecSize,
  * \param varsCount is the count of variables (subvectors) in vec.
  * \param out is the inverse of the vector
  */
-void JA_inv(const double* const vec, const unsigned int vecSize,
-            const size_t varsCount, double* out);
+void JA_inv(const double* const vec, const unsigned int vecSize, const size_t varsCount,
+            double* out);
 
 /** Compute element by element square root
  * \param vec is the vector
@@ -143,8 +141,8 @@ void JA_inv(const double* const vec, const unsigned int vecSize,
  * \param varsCount is the count of variables (subvectors) in vec.
  * \param out is the vector of determinants
  */
-void JA_det(const double* const vec, const unsigned int vecSize,
-            const size_t varsCount, double* out);
+void JA_det(const double* const vec, const unsigned int vecSize, const size_t varsCount,
+            double* out);
 
 /*
   \return the 2-norm of a vector - uses long double - based on blas_dnrm2
@@ -154,75 +152,67 @@ void JA_det(const double* const vec, const unsigned int vecSize,
 float_type dnrm2l(const unsigned int n, const double* x);
 
 /*
-  \return the square of 2-norm of a vector - uses long double - based on
-   blas_dnrm2
-  \param n size of the vector \param x the input vector
+  \return the square of 2-norm of a vector - uses long double - based on blas_dnrm2
+  \param n size of the vector
+  \param x the input vector
 */
 float_type dnrm2sqrl(const unsigned int n, const double* x);
 
-/* \return the product Q_sqrt(x)*y */
-void Qx05y(const double* const x, const double* const y,
-           const unsigned int vecSize, const size_t varsCount, double* out);
-
-/* PA: Return the product Q_inv_sqrt(x)*y */
-void Qx50y(const double* const x, const double* const y,
-           const unsigned int vecSize, const size_t varsCount, double* out);
-
-/* PA: Jordan algebra, returns inv(x) */
-void Jinv(const double* const x, const unsigned int vecSize,
-          const size_t varsCount, double* out);
-
-/* PA: Return J_sqrt(x) */
-void Jsqrt(const double* const x, const unsigned int vecSize,
+/* PA: Return the product Q_sqrt(x)*y */
+void Qx05y(const double* const x, const double* const y, const unsigned int vecSize,
            const size_t varsCount, double* out);
 
+/* PA: Return the product Q_inv_sqrt(x)*y */
+void Qx50y(const double* const x, const double* const y, const unsigned int vecSize,
+           const size_t varsCount, double* out);
+
+/* PA: Jordan algebra, returns inv(x) */
+void Jinv(const double* const x, const unsigned int vecSize, const size_t varsCount,
+          double* out);
+
+/* PA: Return J_sqrt(x) */
+void Jsqrt(const double* const x, const unsigned int vecSize, const size_t varsCount,
+           double* out);
+
 /* PA: Return J_sqrtinv(x) */
-void Jsqrtinv(const double* const x, const unsigned int vecSize,
-              const size_t varsCount, double* out);
+void Jsqrtinv(const double* const x, const unsigned int vecSize, const size_t varsCount,
+              double* out);
 
 /* PA: Return the Nesterov-Todd vector */
 void Nesterov_Todd_vector(short T, const double* const x, const double* const y,
-                          const unsigned int vecSize, const size_t varsCount,
-                          double* p);
+                          const unsigned int vecSize, const size_t varsCount, double* p);
 
 /* PA: Return the Nesterov-Todd vector by means of the second formula */
 void Nesterov_Todd_vector_b(const double* const x, const double* const y,
-                            const unsigned int vecSize, const size_t varsCount,
-                            double* p);
+                            const unsigned int vecSize, const size_t varsCount, double* p);
 
 /* Computation of Qx*y by means of the formula 2*(x'*y)*x - det(x)*R*y */
-void Qxy(const double* const x, const double* const y,
-         const unsigned int vecSize, const size_t varsCount, double* z);
+void Qxy(const double* const x, const double* const y, const unsigned int vecSize,
+         const size_t varsCount, double* z);
 
-/* Returns the product Q_{p}*z where p is the NT vector related to the pair
- * (x,y) */
+/* Returns the product Q_{p}*z where p is the NT vector related to the pair (x,y) */
 void QNTpz(const double* const x, const double* const y, const double* const z,
            const unsigned int vecSize, const size_t varsCount, double* out);
 
-/* Returns the product Q_{p^{-1}}*z where p is the NT vector related to the pair
- * (x,y) */
-void QNTpinvz(const double* const x, const double* const y,
-              const double* const z, const unsigned int vecSize,
-              const size_t varsCount, double* out);
+/* Returns the product Q_{p^{-1}}*z where p is the NT vector related to the pair (x,y) */
+void QNTpinvz(const double* const x, const double* const y, const double* const z,
+              const unsigned int vecSize, const size_t varsCount, double* out);
 
-/* Returns the product Q_{p^{-2}}*z where p is the NT vector related to the pair
- * (x,y) */
-void QNTpinv2z(const double* const x, const double* const y,
-               const double* const z, const unsigned int vecSize,
-               const size_t varsCount, double* out);
+/* Returns the product Q_{p^{-2}}*z where p is the NT vector related to the pair (x,y) */
+void QNTpinv2z(const double* const x, const double* const y, const double* const z,
+               const unsigned int vecSize, const size_t varsCount, double* out);
 
-/* returns the Jordan product x^{-1} o y by using the formula x^{-1} =
- * R*x/det(x), where R is the reflection matrix */
-void Jxinvprody(const double* const x, const double* const y,
-                const unsigned int vecSize, const size_t varsCount,
-                double* out);
+/* returns the Jordan product x^{-1} o y by using the formula x^{-1} = R*x/det(x), where R is
+ * the reflection matrix */
+void Jxinvprody(const double* const x, const double* const y, const unsigned int vecSize,
+                const size_t varsCount, double* out);
 
 /* returns the quadratic representation of a vector vec */
 NumericsMatrix* QRmat(const double* const vec, const unsigned int vecSize,
                       const size_t varsCount);
 
-/* Returns a long double as the square root of determinant of a vector related
- * to the Jordan product */
+/* Returns a long double as the square root of determinant of a vector related to the Jordan
+ * product */
 float_type ld_gammal(const double* const x, const size_t dimension);
 
 float_type dnrm2l(const unsigned int n, const double* x);
@@ -232,8 +222,8 @@ float_type dnrm2l(const unsigned int n, const double* x);
    Solving semidefinite-linear programs using SDPT3
    by Tutuncu, Toh and Todd, Math.Prog 2003, pp. 195-196
 */
-NumericsMatrix* NTmat(const double* const x, const double* const z,
-                      const unsigned int vecSize, const size_t varsCount);
+NumericsMatrix* NTmat(const double* const x, const double* const z, const unsigned int vecSize,
+                      const size_t varsCount);
 
 /*
    Returns the inverse of NT matrix by performing computation as in

@@ -1,19 +1,34 @@
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2024 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "OccUtils.hpp"
-#include "OccContactFace.hpp"
-#include "OccContactEdge.hpp"
-#include "SiconosVector.hpp"
-#include <TopoDS.hxx>
-#include <gp_Dir.hxx>
-#include <gp_Quaternion.hxx>
+
 #include <BRepExtrema_DistShapeShape.hxx>
-
 #include <cadmbtb.hpp>
+#include <gp_Quaternion.hxx>
 
+#include "ContactShapeDistance.hpp"
+#include "OccContactEdge.hpp"
+#include "OccContactFace.hpp"
+#include "SiconosException.hpp"
 
-void occ_move(TopoDS_Shape& shape, const siconos::algebra::SiconosVector& q)
-{
-  const gp_Vec translat = gp_Vec(q(0), q(1), q(2));
-  const gp_Quaternion rota = gp_Quaternion(q(4), q(5), q(6), q(3));
+void siconos::mechanics::occ::occ_move(TopoDS_Shape& shape, const std::array<double, 7>& q) {
+  const gp_Vec translat{q[0], q[1], q[2]};
+  const gp_Quaternion rota{q[4], q[5], q[6], q[3]};
 
   gp_Trsf transfo;
   transfo.SetRotation(rota);
@@ -23,110 +38,76 @@ void occ_move(TopoDS_Shape& shape, const siconos::algebra::SiconosVector& q)
   shape.Location(TopLoc_Location(transfo));
 }
 
-void occ_distanceFaceFace(const OccContactFace& csh1,
-                          const OccContactFace& csh2,
-                          Standard_Real& X1, Standard_Real& Y1, Standard_Real& Z1,
-                          Standard_Real& X2, Standard_Real& Y2, Standard_Real& Z2,
-                          Standard_Real& nX, Standard_Real& nY, Standard_Real& nZ,
-                          Standard_Real& MinDist)
-{
+auto siconos::mechanics::occ::occ_distanceFaceFace(std::shared_ptr<OccContactFace> csh1,
+                                                   std::shared_ptr<OccContactFace> csh2)
+    -> ContactShapeDistance {
   // need the 2 sp pointers to keep memory
-  SPC::TopoDS_Face pface1 = csh1.contact();
-  SPC::TopoDS_Face pface2 = csh2.contact();
+  auto face1 = csh1->contact();
+  auto face2 = csh2->contact();
 
-  const TopoDS_Face& face1 = *pface1;
-  const TopoDS_Face& face2 = *pface2;
+  BRepExtrema_DistShapeShape measure{*face1, *face2};
+  auto isDone = measure.Perform();
+  ContactShapeDistance dist{};
 
-  BRepExtrema_DistShapeShape measure;
-  measure.LoadS1(face1);
-  measure.LoadS2(face2);
-  measure.Perform();
-
-  if(measure.IsDone())
-  {
+  if (isDone) {
     /* we look for the first solution on a face */
-    int nb_solutions = measure.NbSolution();
-    for(Standard_Integer i=1; i<= nb_solutions; ++i)
-    {
-      if(measure.SupportTypeShape2(i) == BRepExtrema_IsInFace)
-      {
-        const gp_Pnt& p1 = measure.PointOnShape1(i);
-        const gp_Pnt& p2 = measure.PointOnShape2(i);
+    auto nb_solutions =
+        measure.NbSolution();  // the number of solutions satisfying the minimum distance
+    for (Standard_Integer i = 1; i <= nb_solutions; ++i) {
+      if (measure.SupportTypeShape2(i) == BRepExtrema_IsInFace) {
+        // if the i-th solution on the second shape is inside a face
+
+        dist.point1 = measure.PointOnShape1(i);
+        dist.point2 = measure.PointOnShape2(i);
 
         Standard_Real u, v;
 
         measure.ParOnFaceS2(i, u, v);
-        gp_Dir normal = cadmbtb_FaceNormal(face2, u, v);
-        normal.Coord(nX,nY,nZ);
-        X1 = p1.X();
-        X2 = p2.X();
-        Y1 = p1.Y();
-        Y2 = p2.Y();
-        Z1 = p1.Z();
-        Z2 = p2.Z();
-        if(((X1-X2)*nX+(Y1-Y2)*nY+(Z1-Z2)*nZ)<0)
-        {
-          normal.Reverse();
-        }
-        normal.Coord(nX,nY,nZ);
-        MinDist = measure.Value();
+        dist.normal = cadmbtb::tools::FaceNormal(*face2, u, v);
+        /**check orientation of normal from face 2**/
+        dist.orientates();
+        dist.value = measure.Value();
         break;
       }
     }
-  }
-  else
+  } else
     THROW_EXCEPTION("occ distance: BRepExtrema_DistShapeShape failed");
+
+  return dist;  // RVO, no copy
 }
-void occ_distanceFaceEdge(const OccContactFace& csh1,
-                          const OccContactEdge& csh2,
-                          Standard_Real& X1, Standard_Real& Y1, Standard_Real& Z1,
-                          Standard_Real& X2, Standard_Real& Y2, Standard_Real& Z2,
-                          Standard_Real& nX, Standard_Real& nY, Standard_Real& nZ,
-                          Standard_Real& MinDist)
-{
+
+auto siconos::mechanics::occ::occ_distanceFaceEdge(std::shared_ptr<OccContactFace> csh1,
+                                                   std::shared_ptr<OccContactEdge> csh2)
+    -> ContactShapeDistance {
   // need the 2 sp pointers to keep memory
-  SPC::TopoDS_Face pface1 = csh1.contact();
-  SPC::TopoDS_Edge pedge2 = csh2.contact();
+  auto face = csh1->contact();
+  auto edge = csh2->contact();
 
-  const TopoDS_Face& face1 = *pface1;
-  const TopoDS_Edge& edge2 = *pedge2;
+  ContactShapeDistance dist{};
+  BRepExtrema_DistShapeShape measure{*face, *edge};
+  auto isDone = measure.Perform();
 
-  BRepExtrema_DistShapeShape measure;
-  measure.LoadS1(face1);
-  measure.LoadS2(edge2);
-  measure.Perform();
-
-  if(measure.IsDone())
-  {
-    int nb_solutions = measure.NbSolution();
-    for(Standard_Integer i=1; i<= nb_solutions; ++i)
-    {
+  if (isDone) {
+    // the number of solutions satisfying the minimum distance
+    auto nb_solutions = measure.NbSolution();
+    for (Standard_Integer i = 1; i <= nb_solutions; ++i) {
       /* we look for the first solution on a face */
-      if(measure.SupportTypeShape1(i) == BRepExtrema_IsInFace)
-      {
-        const gp_Pnt& p1 = measure.PointOnShape1(i);
-        const gp_Pnt& p2 = measure.PointOnShape2(i);
+      if (measure.SupportTypeShape1(i) == BRepExtrema_IsInFace) {
+        dist.point1 = measure.PointOnShape1(i);
+        dist.point2 = measure.PointOnShape2(i);
 
         Standard_Real u, v;
 
         measure.ParOnFaceS1(1, u, v);
-        gp_Dir normal = cadmbtb_FaceNormal(face1, u, v);
-        normal.Coord(nX,nY,nZ);
-        X1 = p1.X();
-        X2 = p2.X();
-        Y1 = p1.Y();
-        Y2 = p2.Y();
-        Z1 = p1.Z();
-        Z2 = p2.Z();
-        if(((X1-X2)*nX+(Y1-Y2)*nY+(Z1-Z2)*nZ)>0)
-          normal.Reverse();
-        normal.Coord(nX,nY,nZ);
-        MinDist = measure.Value();
+        dist.normal = cadmbtb::tools::FaceNormal(*face, u, v);
+        dist.orientates();
+        dist.value = measure.Value();
         break;
       }
     }
     // what to do now if MinDist is not changed ?
-  }
-  else
+  } else
     THROW_EXCEPTION("occ distance: BRepExtrema_DistShapeShape failed");
+
+  return dist;  // RVO, no copy
 }

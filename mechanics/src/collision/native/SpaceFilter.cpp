@@ -1000,7 +1000,7 @@ void siconos::collision::native::SpaceFilter::updateInteractions(
   for (std::tie(vi, viend) = DSG0->vertices(); vi != viend; ++vi) {
     DSG0->bundle(*vi)->acceptSP(findInteractions);
   }
-  // model()->simulation()->initOSNS();
+  // model()->simulation()->initializeOneStepNSProblem();
 }
 
 bool siconos::collision::native::SpaceFilter::haveNeighbours(

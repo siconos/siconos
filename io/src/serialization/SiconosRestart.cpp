@@ -26,7 +26,7 @@
 #include "RegisterSimulation.hpp"
 
 
-namespace Siconos
+namespace siconos
 {
 
 void save(SP::Simulation s, const std::string& filename)
@@ -79,7 +79,7 @@ SP::Simulation load(const std::string& filename)
 #else
 #include "SiconosRestart.hpp"
 #include <SiconosException.hpp>
-namespace Siconos
+namespace siconos
 {
 
 void save(SP::Simulation s, const std::string& filename)

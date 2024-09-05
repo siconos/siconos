@@ -21,12 +21,17 @@
 #include "D1MinusLinearOSI.hpp"
 #include "DynamicalSystem.hpp"
 #include "EulerMoreauOSI.hpp"
+#include "FremondImpactFrictionNSL.hpp"  // For the nslaw visitor
 #include "Interaction.hpp"
+#include "LagrangianCompliantLinearTIR.hpp"
+#include "LagrangianLinearDiagonalDS.hpp"
 #include "LsodarOSI.hpp"
 #include "MoreauJeanBilbaoOSI.hpp"
 #include "MoreauJeanOSI.hpp"
 #include "NewMarkAlphaOSI.hpp"
 #include "NonSmoothLaw.hpp"
+#include "NumericsMatrix.h"  // NM_scal
+#include "OSNSMatrix.hpp"
 #include "OneStepIntegrator.hpp"
 #include "Relation.hpp"
 #include "SchatzmanPaoliOSI.hpp"
@@ -40,25 +45,10 @@
 #include "Simulation.hpp"
 #include "Topology.hpp"
 #include "ZeroOrderHoldOSI.hpp"
-// #include "NewtonEulerR.hpp"
-// #include "FirstOrderLinearR.hpp"
-// #include "FirstOrderLinearTIR.hpp"
-#include "LagrangianCompliantLinearTIR.hpp"
-#include "LagrangianLinearDiagonalDS.hpp"
-// #include "NewtonImpactNSL.hpp"
-// #include "MultipleImpactNSL.hpp"
-// #include "NewtonImpactFrictionNSL.hpp"
-// #include "NonSmoothDynamicalSystem.hpp"
-// #include "LagrangianRheonomousR.hpp"
-// #include "LagrangianScleronomousR.hpp"
-// #include "LagrangianLinearTIDS.hpp"
-// #include "NewtonEulerDS.hpp"
+// #include "LagrangianCompliantLinearTIR.hpp"
+// #include "LagrangianLinearDiagonalDS.hpp"
 #include "OSNSMatrix.hpp"
 #include "../../mechanics/src/fem/native/SolidLinearTIDS.hpp"
-
-
-// #include "Tools.hpp"
-// #include <chrono>
 
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -430,7 +420,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
   // loop over the DS connected to the interaction.
   bool endl = false;
   unsigned int pos = pos1;
-  for (std::shared_ptr<siconos::modeling::DynamicalSystem> ds = ds1; !endl; ds = ds2) {
+  for (auto ds = ds1; !endl; ds = ds2) {
     assert(ds == ds1 || ds == ds2);
     endl = (ds == ds2);
 
@@ -450,8 +440,6 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
     // Computing depends on relation type -> move this in Interaction method?
 
     if (relationType == siconos::modeling::RelationType::FirstOrder) {
-      ////// TODO : BACK WHEN NAMESPACE OK
-
       rightInteractionBlock = inter->getRightInteractionBlockForDS(pos, sizeDS, nslawSize);
 
       if (osiType == siconos::integrators::IntegratorType::EULERMOREAUOSI) {
@@ -810,28 +798,28 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeq(double time) {
 }
 
 void siconos::nonsmooth_formulations::LinearOSNS::computeM() {
+  auto& indexSet = *simulation()->indexSet(indexSetLevel());
+  auto DSG0 = simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
   if (_assemblyType == LinearOSNSAssemblyType::REDUCED_BLOCK) {
-    auto& indexSet = *simulation()->indexSet(indexSetLevel());
     // Computes new _interactionBlocks if required
     updateInteractionBlocks();
     //    _M->fill(indexSet);
     _M->fillM(indexSet, !_hasBeenUpdated);
+
   } else if (_assemblyType == LinearOSNSAssemblyType::REDUCED_DIRECT) {
-    auto& indexSet = *simulation()->indexSet(indexSetLevel());
-    auto& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
 #ifdef WITH_TIMER
     std::chrono::time_point<std::chrono::system_clock> start, end, end_old;
     start = std::chrono::system_clock::now();
 #endif
     // fill _Winverse
-    _W_inverse->fillWinverse(DSG0);
+    _W_inverse->fillWinverse(*DSG0);
 #ifdef WITH_TIMER
     end = std::chrono::system_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
     std::cout << "\nLinearOSNS: fill W inverse " << elapsed << " ms" << std::endl;
 #endif
     // fill H
-    _H->fillHtrans(DSG0, indexSet);
+    _H->fillHtrans(*DSG0, indexSet);
 #ifdef WITH_TIMER
     end_old = end;
     end = std::chrono::system_clock::now();
@@ -840,6 +828,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeM() {
 #endif
     // ComputeM
     _M->computeM(_W_inverse->numericsMatrix(), _H->numericsMatrix());
+
 #ifdef WITH_TIMER
     end_old = end;
     end = std::chrono::system_clock::now();
@@ -850,11 +839,25 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeM() {
     THROW_EXCEPTION(
         "siconos::nonsmooth_formulations::LinearOSNS::computeM unknown _assemblyTYPE");
 
+  // ugly hack for FremondImpactFrictionNSL. VA 12/02/2024
+  // Get first vertex in the graph to access to theta value from the integrator ...
+  auto vs = indexSet.vertices().first;
+  auto& inter = *indexSet.bundle(*vs);
+  auto& nslaw = *inter.nonSmoothLaw();
+  if (siconos::types::type_value(nslaw) == siconos::modeling::Type::FremondImpactFrictionNSL) {
+    auto ds1 = indexSet.properties(*vs).source;
+    auto& osi = *DSG0->properties(DSG0->descriptor(ds1)).osi;
+    double theta = (static_cast<siconos::integrators::MoreauJeanOSI&>(osi)).theta();
+    NM_scal(theta, &*_M->numericsMatrix());
+  }
+
   DEBUG_EXPR(_M->display(););
   // NumericsMatrix *   M_NM = _M->numericsMatrix().get();
   // if (M_NM )
   //   NM_display(M_NM);
-
+  // NumericsMatrix * M = &*_M->numericsMatrix();
+  // CSparseMatrix * A = NM_csc(M);
+  // CSparseMatrix_print(A, 0);
   // getchar();
 }
 

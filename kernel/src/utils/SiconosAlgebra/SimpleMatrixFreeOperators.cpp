@@ -21,7 +21,7 @@
 #include "SiconosMatrixOp.hpp"  // For matrix operators declaration
 #include "SimpleMatrix.hpp"
 // #define DEBUG_MESSAGES
-//#include <boost/numeric/bindings/ublas/matrix.hpp>
+// #include <boost/numeric/bindings/ublas/matrix.hpp>
 #include <boost/numeric/ublas/banded.hpp>
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include <boost/numeric/ublas/symmetric.hpp>

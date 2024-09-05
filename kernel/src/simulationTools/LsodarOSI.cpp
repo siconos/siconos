@@ -48,26 +48,26 @@ int siconos::integrators::LsodarOSI::count_NFE = 0;
 
 namespace {  // Anonymous, local scope only
 
-// global object and wrapping functions -> required for function plug-in and call in fortran
-// routine.
+// global object and wrapping functions -> required for function plug-in and
+// call in fortran routine.
 std::shared_ptr<siconos::integrators::LsodarOSI> global_object{nullptr};
 
-// This first function must have the same signature as argument F (arg 1) in DLSODAR (see
-// opkdmain.f in Numerics)
-// function to compute the righ-hand side of xdot = f(x,t) + Tu
+// This first function must have the same signature as argument F (arg 1) in
+// DLSODAR (see opkdmain.f in Numerics) function to compute the righ-hand side
+// of xdot = f(x,t) + Tu
 extern "C" void LsodarOSI_f_wrapper(int* sizeOfX, double* time, double* x, double* xdot) {
   return global_object->f(sizeOfX, time, x, xdot);
 }
 
-// Function to wrap g: same signature as argument G (arg 18) in DLSODAR (see opkdmain.f in
-// Numerics)
+// Function to wrap g: same signature as argument G (arg 18) in DLSODAR (see
+// opkdmain.f in Numerics)
 extern "C" void LsodarOSI_g_wrapper(int* nEq, double* time, double* x, int* ng, double* gOut) {
   return global_object->g(nEq, time, x, ng, gOut);
 }
 
-// Function to wrap jacobianf: same signature as argument JAC (arg 16) in DLSODAR (see
-// opkdmain.f in Numerics)
-// function to compute the Jacobian/x of the rhs.
+// Function to wrap jacobianf: same signature as argument JAC (arg 16) in
+// DLSODAR (see opkdmain.f in Numerics) function to compute the Jacobian/x of
+// the rhs.
 extern "C" void LsodarOSI_jacobianf_wrapper(int* sizeOfX, double* time, double* x, int* ml,
                                             int* mu, double* jacob, int* nrowpd) {
   return global_object->jacobianfx(sizeOfX, time, x, ml, mu, jacob, nrowpd);
@@ -78,8 +78,10 @@ siconos::integrators::LsodarOSI::LsodarOSI()
     : OneStepIntegrator(IntegratorType::LSODAROSI, 1, 0, 2, 1, 2) {
 #if !defined(HAS_FORTRAN)
   THROW_EXCEPTION(
-      "siconos::integrators::LsodarOSI: the fortran interface is not active. You can not "
-      "create and use Lsodar Solver. Try to configure and reinstall siconos with "
+      "siconos::integrators::LsodarOSI: the fortran interface is not active. "
+      "You can not "
+      "create and use Lsodar Solver. Try to configure and reinstall siconos "
+      "with "
       "WITH_FORTRAN=ON");
 
 #endif
@@ -118,9 +120,9 @@ void siconos::integrators::LsodarOSI::setMaxNstep(int maxNumberSteps) {
 }
 
 void siconos::integrators::LsodarOSI::setTol(int newItol, double newRtol, double newAtol) {
-  _intData[2] = newItol;    // itol
-  rtol[0] = newRtol;  // rtol
-  atol[0] = newRtol;  // atol
+  _intData[2] = newItol;  // itol
+  rtol[0] = newRtol;      // rtol
+  atol[0] = newRtol;      // atol
 }
 
 void siconos::integrators::LsodarOSI::setMaxOrder(int maxorderNonStiff, int maxorderStiff) {
@@ -130,7 +132,8 @@ void siconos::integrators::LsodarOSI::setMaxOrder(int maxorderNonStiff, int maxo
 
 void siconos::integrators::LsodarOSI::updateData() {
   // Used to update some data (iwork ...) when _intData is modified.
-  // Warning: it only checks sizes and possibly reallocate memory, but no values are set.
+  // Warning: it only checks sizes and possibly reallocate memory, but no values
+  // are set.
 
   iwork.resize(_intData[5], 0);
 
@@ -153,13 +156,15 @@ void siconos::integrators::LsodarOSI::updateData() {
 
 void siconos::integrators::LsodarOSI::fillXWork(int* sizeOfX, double* x) {
   assert((unsigned int)(*sizeOfX) == _xWork->size() &&
-         "siconos::integrators::LsodarOSI::fillXWork xWork and sizeOfX have different sizes");
+         "siconos::integrators::LsodarOSI::fillXWork xWork and sizeOfX have "
+         "different sizes");
   (*_xWork) = x;
 }
 
 void siconos::integrators::LsodarOSI::computeRhs(double t) {
   DEBUG_BEGIN(
-      "siconos::integrators::LsodarOSI::computeRhs(double t, DynamicalSystemsGraph& DSG0)\n")
+      "siconos::integrators::LsodarOSI::computeRhs(double t, "
+      "DynamicalSystemsGraph& DSG0)\n")
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
   for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
     if (!checkOSI(dsi)) continue;
@@ -172,7 +177,8 @@ void siconos::integrators::LsodarOSI::computeRhs(double t) {
     auto& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
     if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
       auto& free = *workVectors[siconos::integrators::LsodarOSI::FREE];
-      // we assume that inverseMass and forces are updated after call of ds->computeRhs(t);
+      // we assume that inverseMass and forces are updated after call of
+      // ds->computeRhs(t);
       free = *lds->forces();
       if (lds->inverseMass()) lds->inverseMass()->Solve(free);
       DEBUG_EXPR(free.display(););
@@ -183,7 +189,8 @@ void siconos::integrators::LsodarOSI::computeRhs(double t) {
     }
   }
   DEBUG_END(
-      "siconos::integrators::LsodarOSI::computeRhs(double t, DynamicalSystemsGraph& DSG0)\n")
+      "siconos::integrators::LsodarOSI::computeRhs(double t, "
+      "DynamicalSystemsGraph& DSG0)\n")
 }
 
 void siconos::integrators::LsodarOSI::computeJacobianRhs(
@@ -309,14 +316,17 @@ void siconos::integrators::LsodarOSI::initializeWorkVectorsForInteraction(
     _levelMinForInput = 1;
     _levelMaxForInput = 2;
     THROW_EXCEPTION(
-        "siconos::integrators::LsodarOSI::initializeWorkVectorsForInteraction  not yet "
+        "siconos::integrators::LsodarOSI::initializeWorkVectorsForInteraction  "
+        "not yet "
         "implemented for nonsmooth law of type NewtonImpactFrictionNSL");
   } else
     THROW_EXCEPTION(
-        "siconos::integrators::LsodarOSI::initializeWorkVectorsForInteraction not yet "
+        "siconos::integrators::LsodarOSI::initializeWorkVectorsForInteraction "
+        "not yet "
         "implemented  for this type of nonsmoothlaw");
 
-  // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
+  // Check if interations levels (i.e. y and lambda sizes) are compliant with
+  // the current osi.
   _check_and_update_interaction_levels(inter);
   // Initialize/allocate memory buffers in interaction.
   inter.initializeMemory(_steps);
@@ -325,8 +335,10 @@ void siconos::integrators::LsodarOSI::initializeWorkVectorsForInteraction(
 
   if (!(checkOSI(DSG.descriptor(ds1)) && checkOSI(DSG.descriptor(ds2)))) {
     THROW_EXCEPTION(
-        "siconos::integrators::LsodarOSI::initializeWorkVectorsForInteraction. The "
-        "implementation is not correct for two different OSI for one interaction");
+        "siconos::integrators::LsodarOSI::initializeWorkVectorsForInteraction. "
+        "The "
+        "implementation is not correct for two different OSI for one "
+        "interaction");
   }
 
   auto& workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
@@ -345,7 +357,8 @@ void siconos::integrators::LsodarOSI::initializeWorkVectorsForInteraction(
   }
   // else if (relationType == NewtonEuler)
   // {
-  //   inter_work_block[::xfree] = std::make_shared<siconos::algebra::BlockVector>();
+  //   inter_work_block[::xfree] =
+  //   std::make_shared<siconos::algebra::BlockVector>();
   //   inter_work_block[::xfree]->insertPtr(workVds1[siconos::integrators::LsodarOSI::FREE]);
   // }
 
@@ -372,11 +385,13 @@ void siconos::integrators::LsodarOSI::initialize() {
   //  initialize xWork with x values of the dynamical systems present in the set.
 
   // siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
-  // for(std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi)
+  // for(std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi !=
+  // dsend; ++dsi)
   //   {
   //     if(!checkOSI(dsi)) continue;
   //     std::shared_ptr<siconos::modeling::DynamicalSystem> ds =
-  //     _dynamicalSystemsGraph->bundle(*dsi); initializeWorkVectorsForDS(m, m.t0(),ds);
+  //     _dynamicalSystemsGraph->bundle(*dsi); initializeWorkVectorsForDS(m,
+  //     m.t0(),ds);
   //     //ds->resetToInitialState();
   //     //ds->swapInMemory();
   //   }
@@ -386,7 +401,8 @@ void siconos::integrators::LsodarOSI::initialize() {
   // for (std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui)
   //   {
   //     auto& inter = *indexSet0->bundle(*ui);
-  //     initializeWorkVectorsForInteraction(m.t0(), inter, indexSet0->properties(*ui),
+  //     initializeWorkVectorsForInteraction(m.t0(), inter,
+  //     indexSet0->properties(*ui),
   //     *_dynamicalSystemsGraph);
   //   }
 
@@ -401,8 +417,8 @@ void siconos::integrators::LsodarOSI::initialize() {
   // _intData[2] = 1 if ATOL is a scalar, else 2 (ATOL array)
 
   // 4 - Istate
-  _intData[3] = 1;  // istate, an index used for input and output to specify the state of the
-                    // calculation.
+  _intData[3] = 1;  // istate, an index used for input and output to specify the
+                    // state of the calculation.
   // On input:
   //                 1: first call for the problem (initializations will be done).
   //                 2: means this is not the first call, and the calculation is to continue
@@ -419,12 +435,13 @@ void siconos::integrators::LsodarOSI::initialize() {
   //                 <0: error. See table below, in integrate function output message.
 
   // 7 - JT, Jacobian type indicator
-  //_intData[6] = 2;  // jt, Jacobian type indicator.
+  _intData[6] = 1;  // jt, Jacobian type indicator.
   //           1 means a user-supplied full (NEQ by NEQ) Jacobian.
-  //           2 means an internally generated (difference quotient) full Jacobian (using NEQ
-  //           extra calls to f per df/dx value). 4 means a user-supplied banded Jacobian. 5
-  //           means an internally generated banded Jacobian (using ML+MU+1 extra calls to f
-  //           per df/dx evaluation).
+  //           2 means an internally generated (difference quotient) full
+  //           Jacobian (using NEQ extra calls to f per df/dx value). 4 means a
+  //           user-supplied banded Jacobian. 5 means an internally generated
+  //           banded Jacobian (using ML+MU+1 extra calls to f per df/dx
+  //           evaluation).
 
   // set the optional input flags of LSODAROSI to 0
   // LSODAROSI will take the default values
@@ -448,7 +465,8 @@ void siconos::integrators::LsodarOSI::initialize() {
 void siconos::integrators::LsodarOSI::integrate(double& tinit, double& tend, double& tout,
                                                 int& istate) {
   DEBUG_BEGIN(
-      "siconos::integrators::LsodarOSI::integrate(double& tinit, double& tend, double& tout, "
+      "siconos::integrators::LsodarOSI::integrate(double& tinit, double& tend, "
+      "double& tout, "
       "int& istate) with \n");
   DEBUG_PRINTF("tinit = %f, tend= %f, tout = %f, istate = %i\n", tinit, tend, tout, istate);
 
@@ -459,8 +477,9 @@ void siconos::integrators::LsodarOSI::integrate(double& tinit, double& tend, dou
   // === Pointers to function ===
   //  --> definition and initialisation thanks to wrapper:
   global_object = std::static_pointer_cast<LsodarOSI>(
-      shared_from_this());  // Warning: global object must be initialized to current one before
-                            // pointers to function initialisation.
+      shared_from_this());  // Warning: global object must be initialized to
+                            // current one before pointers to function
+                            // initialisation.
 
   // === LSODAR CALL ===
   DEBUG_EXPR(_xWork->display(););
@@ -474,10 +493,9 @@ void siconos::integrators::LsodarOSI::integrate(double& tinit, double& tend, dou
   // call LSODAR to integrate dynamical equation
   siconos::netlib::lsodar(&LsodarOSI_f_wrapper, &(_intData[0]), _xtmp->getArray(), &tinit_DR,
                           &tend_DR, &(_intData[2]), &rtol.front(), &atol.front(),
-                          &(_intData[3]), &rwork.front(),
-			  &(_intData[4]), &iwork.front(), &(_intData[5]),
-                          &LsodarOSI_jacobianf_wrapper, &(_intData[6]), &LsodarOSI_g_wrapper,
-                          &(_intData[1]), &jroot.front());
+                          &(_intData[3]), &rwork.front(), &(_intData[4]), &iwork.front(),
+                          &(_intData[5]), &LsodarOSI_jacobianf_wrapper, &(_intData[6]),
+                          &LsodarOSI_g_wrapper, &(_intData[1]), &jroot.front());
 
   // jroot: jroot[i] = 1 if g(i) has a root at t, else jroot[i] = 0.
 
@@ -485,17 +503,21 @@ void siconos::integrators::LsodarOSI::integrate(double& tinit, double& tend, dou
   if (_intData[3] < 0)  // if istate < 0 => LSODAROSI failed
   {
     std::cout << "Lsodar::integrate(...) failed - Istate = " << _intData[3] << std::endl;
-    std::cout << " -1 means excess work done on this call (perhaps wrong JT, or so small "
-                 "tolerance (ATOL and RTOL), or small maximum number of steps for one call "
+    std::cout << " -1 means excess work done on this call (perhaps wrong JT, or so "
+                 "small "
+                 "tolerance (ATOL and RTOL), or small maximum number of steps for "
+                 "one call "
                  "(MXSTEP)). You should increase ATOL or RTOL or increase the MXSTEP"
               << std::endl;
     std::cout << " -2 means excess accuracy requested (tolerances too small)." << std::endl;
     std::cout << " -3 means illegal input detected (see printed message)." << std::endl;
     std::cout << " -4 means repeated error test failures (check all inputs)." << std::endl;
-    std::cout << " -5 means repeated convergence failures (perhaps bad Jacobian supplied or "
+    std::cout << " -5 means repeated convergence failures (perhaps bad "
+                 "Jacobian supplied or "
                  "wrong choice of JT or tolerances)."
               << std::endl;
-    std::cout << " -6 means error weight became zero during problem. (Solution component i "
+    std::cout << " -6 means error weight became zero during problem. (Solution "
+                 "component i "
                  "vanished, and ATOL or ATOL(i) = 0.)"
               << std::endl;
     std::cout << " -7 means work space insufficient to finish (see messages)." << std::endl;
@@ -517,9 +539,7 @@ void siconos::integrators::LsodarOSI::integrate(double& tinit, double& tend, dou
   count_NST = iwork[10];
   count_NFE = iwork[11];
   //  tinit = tinit_DR;
-  DEBUG_END(
-      "siconos::integrators::LsodarOSI::integrate(double& tinit, double& tend, double& tout, "
-      "int& istate)\n");
+  DEBUG_END("LsodarOSI::integrate(double& tinit, double& tend, double& tout, int& istate)\n");
 }
 
 void siconos::integrators::LsodarOSI::updateState(const unsigned int level) {
@@ -544,7 +564,8 @@ void siconos::integrators::LsodarOSI::updateState(const unsigned int level) {
     }
   } else
     THROW_EXCEPTION(
-        "siconos::integrators::LsodarOSI::updateState(index), index is out of range. Index "
+        "siconos::integrators::LsodarOSI::updateState(index), index is out of "
+        "range. Index "
         "= " +
         std::to_string(level));
 }
@@ -617,13 +638,13 @@ void siconos::integrators::LsodarOSI::computeFreeOutput(
 
   std::shared_ptr<siconos::algebra::BlockVector> Xfree;
 
-  // All of these values should be stored in the node corrseponding to the Interactionwhen a
-  // LsodarOSI scheme is used.
+  // All of these values should be stored in the node corrseponding to the
+  // Interactionwhen a LsodarOSI scheme is used.
 
   /* V.A. 10/10/2010
-   * Following the type of OSNS  we need to retrieve the velocity or the acceleration
-   * This tricks is not very nice but for the moment the OSNS do not known if
-   * it is in accelaration of not
+   * Following the type of OSNS  we need to retrieve the velocity or the
+   * acceleration This tricks is not very nice but for the moment the OSNS do
+   * not known if it is in accelaration of not
    */
 
   // auto  allOSNS  = _simulation->oneStepNSProblems();
@@ -641,7 +662,8 @@ void siconos::integrators::LsodarOSI::computeFreeOutput(
     //       Xfree->display();
   } else if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_IMPACT]).get() == osnsp) {
     Xfree = DSlink[siconos::modeling::LagrangianR::q1];
-    //        std::cout << "Computeqblock Xfree (Velocity)========" << std::endl;
+    //        std::cout << "Computeqblock Xfree (Velocity)========" <<
+    //        std::endl;
     //       Xfree->display();
   } else
     THROW_EXCEPTION(" computeqBlock for Event Event-driven is wrong ");
@@ -673,7 +695,8 @@ void siconos::integrators::LsodarOSI::computeFreeOutput(
     if (relationSubType == siconos::modeling::RelationSubType::RheonomousR) {
       if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp) {
         THROW_EXCEPTION(
-            "siconos::integrators::LsodarOSI::computeFreeOutput not yet implemented for LCP "
+            "siconos::integrators::LsodarOSI::computeFreeOutput not yet "
+            "implemented for LCP "
             "at acceleration level with LagrangianRheonomousR");
       } else if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp) {
         std::static_pointer_cast<siconos::modeling::LagrangianRheonomousR>(inter->relation())
@@ -687,7 +710,8 @@ void siconos::integrators::LsodarOSI::computeFreeOutput(
             osnsp_rhs, xcoord, false);  // y += hDot
       } else
         THROW_EXCEPTION(
-            "siconos::integrators::LsodarOSI::computeFreeOutput not implemented for "
+            "siconos::integrators::LsodarOSI::computeFreeOutput not "
+            "implemented for "
             "SICONOS_OSNSP ");
     }
     // For the relation of type LagrangianScleronomousR
@@ -705,7 +729,8 @@ void siconos::integrators::LsodarOSI::computeFreeOutput(
     }
   } else
     THROW_EXCEPTION(
-        "siconos::integrators::LsodarOSI::computeFreeOutput not yet implemented for Relation "
+        "siconos::integrators::LsodarOSI::computeFreeOutput not yet "
+        "implemented for Relation "
         "of type " +
         std::to_string(
             static_cast<std::underlying_type<siconos::modeling::RelationType>::type>(
@@ -727,7 +752,7 @@ void siconos::integrators::LsodarOSI::display() const {
   std::cout << "Number of constraints: " << _intData[1] << "\n";
   std::cout << "itol, istate, lrw, liw, jt: (for details on what are these "
                "variables see opkdmain.f)\n";
-  std::cout << _intData[2] << ", " << _intData[3]
-            << ", " << _intData[4] << ", " << _intData[5] << ", " << _intData[6] << "\n";
+  std::cout << _intData[2] << ", " << _intData[3] << ", " << _intData[4] << ", " << _intData[5]
+            << ", " << _intData[6] << "\n";
   std::cout << "====================================\n";
 }

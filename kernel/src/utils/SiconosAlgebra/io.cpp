@@ -250,11 +250,11 @@ double siconos::algebra::io::compareRefFile(const SimpleMatrix &data, std::strin
 std::shared_ptr<siconos::algebra::SiconosVector> siconos::algebra::io::readVectorFromJson(
     const nlohmann::json &jin) {
   std::vector<double> vec;
-  for (auto v : jin)
-    for (auto v : jin)
-      if (v.is_array())
-        for (auto vv : v) vec.push_back(vv);
-      else
-        vec.push_back(v);
+  for (auto v : jin) {
+    if (v.is_array())
+      for (auto vv : v) vec.push_back(vv);
+    else
+      vec.push_back(v);
+  }
   return std::make_shared<SiconosVector>(vec);
 }

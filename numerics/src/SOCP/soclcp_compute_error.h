@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #ifndef SOCLCP_compute_error_H
 #define SOCLCP_compute_error_H
@@ -23,12 +23,11 @@
   \brief functions related to error computation for SOCLCP
 
 */
-#include "NumericsFwd.h"  // for SecondOrderConeLinearComplementarityProblem
-#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"    // for SecondOrderConeLinearComplementarityProblem
+#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-extern "C"
-{
+extern "C" {
 #endif
 
 /** Error computation for SOCLCP problem
@@ -40,7 +39,8 @@ extern "C"
     \param[in,out] error value
     \return 0 if ok
  */
-int soclcp_compute_error(SecondOrderConeLinearComplementarityProblem* problem, double *z , double *w, double tolerance, SolverOptions * options, double * error);
+int soclcp_compute_error(SecondOrderConeLinearComplementarityProblem *problem, double *z,
+                         double *w, double tolerance, SolverOptions *options, double *error);
 
 /** Error computation for one SOCLCP problem
     \param z vector
@@ -48,10 +48,10 @@ int soclcp_compute_error(SecondOrderConeLinearComplementarityProblem* problem, d
     \param dim dimension of the cone
     \param mu coeficient of friction
     \param[in,out] error value
-    \param worktmp 
+    \param worktmp
  */
-  void soclcp_unitary_compute_and_add_error(double z[3] , double w[3], unsigned int dim, double mu, double * error,
-    double * worktmp);
+void soclcp_unitary_compute_and_add_error(double z[3], double w[3], unsigned int dim,
+                                          double mu, double *error, double *worktmp);
 
 /** Error computation for SOCLCP problem
     \param problem the structure which defines the SOCLCP
@@ -62,9 +62,8 @@ int soclcp_compute_error(SecondOrderConeLinearComplementarityProblem* problem, d
     \param[in,out] error value
     \return 0 if ok
  */
-int soclcp_compute_error_v(SecondOrderConeLinearComplementarityProblem* problem, double *z , double *w, double tolerance, SolverOptions * options, double * error);
-
-
+int soclcp_compute_error_v(SecondOrderConeLinearComplementarityProblem *problem, double *z,
+                           double *w, double tolerance, SolverOptions *options, double *error);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

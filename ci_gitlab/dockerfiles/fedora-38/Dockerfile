@@ -17,11 +17,11 @@ RUN dnf --setopt=deltarpm=false install -y \
         openblas-devel \
         lapack-devel \
         suitesparse-devel \
-        swig \
 	libglvnd-glx \
         git-core \
         bullet-devel \
 	libXrender-devel \
+	eigen3-devel \
 	&& dnf clean all
 RUN useradd -ms /bin/bash siconos-user
 
