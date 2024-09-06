@@ -46,44 +46,6 @@ initial_velocity_np = np.array([0, 0, 0], dtype=np.float64, order='F')
 mass_np = np.eye(10000, dtype=np.float64, order='F')
 mass_np[...] = 2. / 5 * r * r
 
-a = 2
-
-# A = np.array([1., 2., 3.])
-# initial_position_vc = MyVectorClass(A)
-
-
-# initial_position_ec = MyEigenClass()
-# A = np.array([4., 5., 6.])
-# initial_position_ec.contents = A
-
-# A[0] = 21.
-
-# initial_position_vc.print_v()
-
-
-
-
-# initial_position_ew = MyEigenWrapper(initial_position_ec)
-# initial_position_ew.print_vector()
-# initial_position_ew.change_vector()
-# initial_position_ew.print_vector()
-# print(A)
-# A[1] = 19.
-# print(initial_position_ec.contents)
-
-
-# initial_position_eigen = VectorWrapper(initial_position_np)
-# initial_position_eigen.get_vector()
-# initial_velocity_eigen = VectorWrapper(initial_velocity_np)
-# mass_eigen = MatrixWrapper(mass_np)
-
-# initial_position_eigen_vec = initial_position_eigen.get_vector()
-# initial_position_eigen.print_vector()
-# initial_position_eigen.get_vector()
-
-
-# the dynamical system
-# ball = LagrangianLinearTIDS(initial_position_eigen, initial_velocity_eigen, mass_eigen)
 
 ball = LagrangianLinearTIDS(initial_position_np, initial_velocity_np, mass_np)
 

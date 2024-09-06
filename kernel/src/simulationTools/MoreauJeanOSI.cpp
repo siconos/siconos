@@ -400,8 +400,8 @@ void siconos::integrators::MoreauJeanOSI::initializeIterationMatrixW(
             ndof, ndof);  // WARNING : Use bandmatrix instead ?
     auto &W = *_dynamicalSystemsGraph->properties(dsv).W;
 
-    if (lldds.mass())
-      W = *lldds.mass();
+    if (lldds.mass_diag())
+      W = (*lldds.mass_diag()).asDiagonal();
     else
       W.eye();
 

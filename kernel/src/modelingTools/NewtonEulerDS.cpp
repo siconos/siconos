@@ -135,8 +135,9 @@ siconos::modeling::NewtonEulerDS::NewtonEulerDS() : SecondOrderDS(13, 6) {
   _p.resize(3);
   _p[1] = std::make_shared<siconos::algebra::SiconosVector>(_ndof);  // Needed in NewtonEulerR
 
-  _mass = std::make_shared<Matrix>(_ndof, _ndof);
-  _mass->zero();
+  _mass_data = std::make_unique<std::vector<double>>(_ndof*_ndof);
+  _mass = std::make_shared<MapType>(_mass_data->data(), _ndof, _ndof);
+  _mass->setZero();
   _T = std::make_shared<Matrix>(_qDim, _ndof);
 
   _I = std::make_shared<Matrix>(3, 3);

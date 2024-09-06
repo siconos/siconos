@@ -40,16 +40,16 @@ PYBIND11_MODULE(modeling, m)
   py::class_<siconos::modeling::LagrangianLinearTIDS, std::shared_ptr<siconos::modeling::LagrangianLinearTIDS>, siconos::modeling::SecondOrderDS>(m, "LagrangianLinearTIDS")
       .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>&,
                     Eigen::Ref<siconos::algebra::SiconosVector>&,
-                    Eigen::Ref<siconos::algebra::SiconosMatrix>&>())
+                    Eigen::Ref<siconos::algebra::SiconosMatrix>&>());
       // .def("setFExtPtr", static_cast<void (siconos::modeling::LagrangianLinearTIDS::*)(VectorWrapper)>(&siconos::modeling::LagrangianLinearTIDS::setFExtPtr))
       // .def("q_wrapper", &siconos::modeling::LagrangianDS::q_wrapper)
       // .def("velocity_wrapper", &siconos::modeling::LagrangianDS::velocity_wrapper)
-      .def("mass_python", &siconos::modeling::LagrangianLinearTIDS::mass_python, py::return_value_policy::reference_internal)
-      .def("__repr__", [](const siconos::modeling::LagrangianLinearTIDS &a) {
-        std::cout << "COUCOU     " <<  (*(a._massMap))(2, 2) << std::endl;
-        return "\n";
-      })
-      .def("mass2", &siconos::modeling::LagrangianLinearTIDS::mass2, py::return_value_policy::reference_internal);
+      // .def("mass_python", &siconos::modeling::LagrangianLinearTIDS::mass_python, py::return_value_policy::reference_internal)
+      // .def("__repr__", [](const siconos::modeling::LagrangianLinearTIDS &a) {
+      //   std::cout << "COUCOU     " <<  (*(a._massMap))(2, 2) << std::endl;
+      //   return "\n";
+      // })
+      // .def("mass2", &siconos::modeling::LagrangianLinearTIDS::mass2, py::return_value_policy::reference_internal);
 
   py::class_<siconos::modeling::NewtonImpactNSL, std::shared_ptr<siconos::modeling::NewtonImpactNSL>>(m, "NewtonImpactNSL")
       .def(py::init<double>());

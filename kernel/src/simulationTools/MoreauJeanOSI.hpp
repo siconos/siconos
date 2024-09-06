@@ -557,10 +557,11 @@ class MoreauJeanOSI : public OneStepIntegrator {
    */
   void display() const override;
 
-  void tonch_mass(std::shared_ptr<siconos::modeling::LagrangianLinearTIDS> ds) {
-    auto m = ds->mass_python();
-    m(2, 2) = 31.;
-  }
+  // TODOSAM : handle this demo function
+  // void tonch_mass(std::shared_ptr<siconos::modeling::LagrangianLinearTIDS> ds) {
+  //   auto m = ds->mass_python();
+  //   m(2, 2) = 31.;
+  // }
 
 };
 }  // namespace siconos::integrators

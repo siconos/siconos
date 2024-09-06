@@ -105,10 +105,14 @@ class FiniteElementModel {
   void AssembleElementaryMatrix(std::shared_ptr<siconos::algebra::SiconosMatrix> M,
                                 siconos::algebra::SiconosMatrix& Me, FElement& fe);
 
+  /* Assembly method for elemetary matrix */
+  void AssembleElementaryMatrix(std::shared_ptr<siconos::algebra::MapType> M,
+                                siconos::algebra::SiconosMatrix& Me, FElement& fe);
+
   /** compute Mass Matrix
    * should be computeMass of LagrangianDS ?
    **/
-  void computeMassMatrix(std::shared_ptr<siconos::algebra::SiconosMatrix>,
+  void computeMassMatrix(std::shared_ptr<siconos::algebra::MapType>,
                          std::map<unsigned int, std::shared_ptr<Material>>& mat);
 
   /** compute elementary Mass Matrix

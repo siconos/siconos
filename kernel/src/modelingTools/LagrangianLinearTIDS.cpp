@@ -32,7 +32,7 @@
 siconos::modeling::LagrangianLinearTIDS::LagrangianLinearTIDS(
     std::shared_ptr<siconos::algebra::SiconosVector> newQ0,
     std::shared_ptr<siconos::algebra::SiconosVector> newVelocity0,
-    std::shared_ptr<Matrix> newMass,
+    std::shared_ptr<siconos::algebra::SiconosMatrix> newMass,
     std::shared_ptr<Matrix> newK,
     std::shared_ptr<Matrix> newC)
     : LagrangianDS(newQ0, newVelocity0, newMass) {

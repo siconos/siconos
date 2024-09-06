@@ -113,6 +113,7 @@ class BoundaryCondition;
 class SecondOrderDS : public DynamicalSystem {
  public:
   using Matrix = siconos::algebra::SiconosMatrix;
+  using MapType = siconos::algebra::MapType;
   // using Matrix = siconos::algebra::SiconosSparseMatrix;
 
  protected:
@@ -124,7 +125,10 @@ class SecondOrderDS : public DynamicalSystem {
   unsigned int _ndof{0};
 
   /** mass of the system */
-  std::shared_ptr<Matrix> _mass{nullptr};
+  std::shared_ptr<MapType> _mass{nullptr};
+
+  /** mass data pointer */
+  std::unique_ptr<std::vector<double>> _mass_data{nullptr};
 
   /** true if the  mass matrix is constant */
   bool _hasConstantMass = false;
@@ -188,7 +192,7 @@ class SecondOrderDS : public DynamicalSystem {
    *
    *  \return std::shared_ptr<Matrix>
    */
-  inline std::shared_ptr<Matrix> mass() const { return _mass; }
+  inline std::shared_ptr<MapType> mass() const { return _mass; }
 
   /** get (pointer) inverse or LU-factorization of the mass,
    *  used for LU-forward-backward computation
@@ -201,7 +205,7 @@ class SecondOrderDS : public DynamicalSystem {
    *
    *  \param newPtr a plugged matrix SP
    */
-  void setMassPtr(std::shared_ptr<Matrix> newPtr);
+  void setMassPtr(std::shared_ptr<MapType> newPtr);
 
   /** set the value of the right-hand side, \f$ \dot x \f$
    *

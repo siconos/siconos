@@ -150,6 +150,34 @@ unsigned int siconos::mechanics::fem::FiniteElementModel::init() {
 }
 
 void siconos::mechanics::fem::FiniteElementModel::AssembleElementaryMatrix(
+    std::shared_ptr<siconos::algebra::MapType> M, siconos::algebra::SiconosMatrix &Me,
+    FElement &fe) {
+  int node1_cnt = 0;
+  for (auto &node1 : fe.nodes()) {
+    auto &dofIndex1 = *node1->dofIndex();
+    int node2_cnt = 0;
+    for (auto &node2 : fe.nodes()) {
+      auto &dofIndex2 = *node2->dofIndex();
+      for (std::size_t i = 0; i < dofIndex1.size(); i++) {
+        for (std::size_t j = 0; j < dofIndex2.size(); j++) {
+          // DEBUG_PRINTF("i = %i\t j=%i,  Me.getValue(i,j) = %e\n",
+          // i+node1_cnt*dofIndex1.size(), j+node2_cnt*dofIndex2.size(),
+          // Me.getValue(i,j));
+
+          M->setValue(
+              dofIndex1[i], dofIndex2[j],
+              Me.getValue(i + node1_cnt * dofIndex1.size(), j + node2_cnt * dofIndex2.size()) +
+                  M->getValue(dofIndex1[i], dofIndex2[j]));
+        }
+      }
+      node2_cnt++;
+    }
+    node1_cnt++;
+  }
+  // DEBUG_EXPR(M->display());
+}
+
+void siconos::mechanics::fem::FiniteElementModel::AssembleElementaryMatrix(
     std::shared_ptr<siconos::algebra::SiconosMatrix> M, siconos::algebra::SiconosMatrix &Me,
     FElement &fe) {
   int node1_cnt = 0;
@@ -302,13 +330,13 @@ void siconos::mechanics::fem::FiniteElementModel::computeElementaryMassMatrix(
 }
 
 void siconos::mechanics::fem::FiniteElementModel::computeMassMatrix(
-    std::shared_ptr<siconos::algebra::SiconosMatrix> M,
+    std::shared_ptr<siconos::algebra::MapType> M,
     std::map<unsigned int, std::shared_ptr<Material>> &mat) {
   DEBUG_BEGIN(
       "siconos::mechanics::fem::FiniteElementModel::computeMassMatrix(std::"
       "shared_ptr<siconos:"
       ":algebra::SiconosMatrix> M, double massDensity )\n");
-  M->zero();
+  M->setZero();
 
   /* loop over the elements */
   for (auto &fe : elements()) {

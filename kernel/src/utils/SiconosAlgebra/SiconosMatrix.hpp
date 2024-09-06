@@ -51,6 +51,7 @@ namespace siconos::algebra {
 
 */
 using MapType = Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor>>;
+using MapVectorType = Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, 1, Eigen::ColMajor>>;
 using SiconosMatrix = Eigen::Matrix<double_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor>;
 
 /** Sparse matrix storage */

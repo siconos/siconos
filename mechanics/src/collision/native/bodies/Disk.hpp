@@ -33,7 +33,6 @@ class Disk : public CircularDS, public std::enable_shared_from_this<Disk> {
  private:
   ACCEPT_SERIALIZATION(Disk);
 
-  void MassSetup();
 
  public:
   /** Constructor

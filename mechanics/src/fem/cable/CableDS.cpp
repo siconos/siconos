@@ -23,7 +23,7 @@
 
 siconos::fem::cable::CableDS::CableDS(
     std::shared_ptr<siconos::algebra::SiconosVector> q0,
-    std::shared_ptr<siconos::algebra::SiconosVector> velocity0, std::shared_ptr<Matrix> mass,
+    std::shared_ptr<siconos::algebra::SiconosVector> velocity0, std::shared_ptr<siconos::algebra::SiconosMatrix> mass,
     double a_EA, double a_elem_length, ExternalForcesFunction fext)
     : LagrangianDS(q0, velocity0, mass), computefext_{fext}, _EA{a_EA}, _l_e{a_elem_length} {
   std::cout << " BUlD CABLE DS \n";

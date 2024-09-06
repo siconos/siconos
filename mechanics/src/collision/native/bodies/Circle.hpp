@@ -32,8 +32,7 @@ namespace siconos::collision::native::bodies {
 class Circle : public CircularDS, public std::enable_shared_from_this<Circle> {
  private:
   ACCEPT_SERIALIZATION(Circle);
-
-  void MassSetup();
+  
 
  public:
   /** Constructor

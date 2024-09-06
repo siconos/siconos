@@ -84,6 +84,36 @@ void siconos::algebra::prod(const SiconosMatrix& A, const SiconosVector& x, Sico
   }
 }
 
+void siconos::algebra::prod(const MapType& A, const SiconosVector& x, SiconosVector& y,
+                            bool init) {
+  // To compute y = A * x in an "optimized" way (in comparison with y =
+  // prod(A,x) ) or y += A*x if init = false.
+
+  if (A.cols() != x.size()) THROW_EXCEPTION("inconsistent sizes between A and x.")
+
+  if (A.rows() != y.size()) THROW_EXCEPTION("inconsistent sizes between A and y.");
+
+  // === First case: y is not a block vector ===
+  if (init) {
+    if (&x != &y)  // if no common memory between x and y.
+    {
+      y.noalias() = A * x;
+    } else  // if x and y are the same object => alias
+    {
+      y = A * x;
+    }
+  } else  // += case
+  {
+    if (&x != &y)  // if no common memory between x and y.
+    {
+      y.noalias() += A * x;
+    } else  // if x and y are the same object => alias
+    {
+      y += A * x;
+    }
+  }
+}
+
 void siconos::algebra::prod(const SiconosVector& x, const SiconosMatrix& A, SiconosVector& y,
                             bool init) {
   // To compute y = trans(A) * x in an "optimized" way, if init = true

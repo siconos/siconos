@@ -16,20 +16,12 @@
  * limitations under the License.
  */
 
-#include "Circle.hpp"
+/*! \file MapBaseAddons.hpp
 
-#include "SiconosVector.hpp"
-#include "SiconosMatrix.hpp"
+   Eigen MapBase class extensions.æ
 
+   See https://eigen.tuxfamily.org/dox/TopicCustomizing_Plugins.html
 
-siconos::collision::native::bodies::Circle::Circle(
-    double r, double m, std::shared_ptr<siconos::algebra::SiconosVector> qinit,
-    std::shared_ptr<siconos::algebra::SiconosVector> vinit)
-    : CircularDS(r, m, qinit, vinit)
-{
-  _mass_data = std::make_unique<std::vector<double>>(_ndof*_ndof);
-  _mass = std::make_shared<MapType>(_mass_data->data(), _ndof, _ndof);
-  _mass->setZero();
-  (*_mass)(0, 0) = (*_mass)(1, 1) = massValue;
-  (*_mass)(2, 2) = massValue * radius * radius;
-}
+*/
+
+void display() const { std::cout << *this << std::endl; }

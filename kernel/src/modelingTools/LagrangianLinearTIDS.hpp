@@ -118,7 +118,6 @@ class LagrangianLinearTIDS : public LagrangianDS {
   LagrangianLinearTIDS() = default;
 
  public:
-  std::shared_ptr<siconos::algebra::MapType> _massMap {nullptr};
   /** constructor from initial state and all matrix operators.
    *
    *  \param q0 initial coordinates
@@ -129,7 +128,7 @@ class LagrangianLinearTIDS : public LagrangianDS {
    */
   LagrangianLinearTIDS(std::shared_ptr<siconos::algebra::SiconosVector> q0,
                        std::shared_ptr<siconos::algebra::SiconosVector> v0,
-                       std::shared_ptr<Matrix> M, std::shared_ptr<Matrix> K,
+                       std::shared_ptr<siconos::algebra::SiconosMatrix> M, std::shared_ptr<Matrix> K,
                        std::shared_ptr<Matrix> C);
 
   /** constructor from initial state and mass matrix only. Leads to \f$ M\dot v
@@ -141,7 +140,7 @@ class LagrangianLinearTIDS : public LagrangianDS {
    */
   LagrangianLinearTIDS(std::shared_ptr<siconos::algebra::SiconosVector> q0,
                        std::shared_ptr<siconos::algebra::SiconosVector> v0,
-                       std::shared_ptr<Matrix> M)
+                       std::shared_ptr<siconos::algebra::SiconosMatrix> M)
       : LagrangianDS(q0, v0, M){};
       
 /** constructor from initial state and mass matrix only. Leads to \f$ M\dot v
@@ -156,10 +155,10 @@ class LagrangianLinearTIDS : public LagrangianDS {
                        Eigen::Ref<siconos::algebra::SiconosMatrix> &M)
       : LagrangianDS(){
         // using MapType = Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor>>;
-        this->_massMap = std::make_shared<siconos::algebra::MapType>(M.data(), M.rows(), M.cols());
+        _mass = std::make_shared<siconos::algebra::MapType>(M.data(), M.rows(), M.cols());
 
         // Here there is copy, test purpose
-        _mass = std::make_shared<siconos::algebra::SiconosMatrix>(M);
+        // _mass = std::make_shared<siconos::algebra::SiconosMatrix>(M);
         // Solution qui marche (need to template DS with mass matrix size)
         // Eigen::Map<Eigen::Matrix<double, Rows, Cols>> tmp(NULL);
         // new (&(tmp)) Eigen::Map<Eigen::Matrix<double, Rows, Cols>>(M.data(), M.rows(), M.cols());
@@ -169,14 +168,6 @@ class LagrangianLinearTIDS : public LagrangianDS {
         // }
         // tmp.display();
       };
-
-  siconos::algebra::MapType& mass_python() {
-    return *_massMap;
-  }
-
-  siconos::algebra::SiconosMatrix& mass2() {
-    return *_mass;
-  }
 
   /** destructor */
   ~LagrangianLinearTIDS() noexcept = default;

@@ -65,7 +65,7 @@ siconos::mechanics::fem::FiniteElementLinearTIDS::FiniteElementLinearTIDS(
   _n = 2 * _ndof;
 
   if (!_mass) {
-    _mass = std::make_shared<Matrix>(_ndof, _ndof);
+    _mass = std::make_shared<MapType>(nullptr, _ndof, _ndof); // TODOSAM : handle mass creation
     // _mass->setIsSymmetric(true);
     // _mass->setIsPositiveDefinite(true);
   }

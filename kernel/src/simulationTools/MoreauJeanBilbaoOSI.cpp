@@ -204,7 +204,7 @@ void siconos::integrators::MoreauJeanBilbaoOSI::_initialize_iteration_matrix(
     auto& iteration_matrix = *_dynamicalSystemsGraph->properties(dsv).W;
     auto omega2 = lldds->stiffness();
     auto damp = lldds->damping();
-    auto mass = lldds->mass();
+    auto mass = lldds->mass_diag();
 
     double one_minus_theta, dt_sigma_star;
     auto time_step = _simulation->timeStep();

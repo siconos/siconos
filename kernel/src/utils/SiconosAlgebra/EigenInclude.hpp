@@ -39,4 +39,7 @@
 // filename of plugin for extending the Matrix class.
 #define EIGEN_MATRIX_PLUGIN "MatrixAddons.hpp"
 
+// filename of plugin for extending the MapBase class.
+#define EIGEN_MAPBASE_PLUGIN "MapBaseAddons.hpp"
+
 #endif

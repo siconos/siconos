@@ -55,10 +55,13 @@ class LagrangianLinearDiagonalDS : public LagrangianDS {
   ACCEPT_SERIALIZATION(LagrangianLinearDiagonalDS);
 
   /** stiffness matrix */
-  std::shared_ptr<siconos::algebra::SiconosVector> _stiffness{nullptr};
+  std::shared_ptr<siconos::algebra::MapVectorType> _stiffness{nullptr};
 
   /** damping matrix */
-  std::shared_ptr<siconos::algebra::SiconosVector> _damping{nullptr};
+  std::shared_ptr<siconos::algebra::MapVectorType> _damping{nullptr};
+
+  /** mass matrix */
+  std::shared_ptr<siconos::algebra::MapVectorType> _mass_diag{nullptr};
 
   /** mass density */
   double _mu{0.};
@@ -111,7 +114,7 @@ class LagrangianLinearDiagonalDS : public LagrangianDS {
    *
    *  \return pointer on a siconos::algebra::SiconosVector
    */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> stiffness() const
+  inline std::shared_ptr<siconos::algebra::MapVectorType> stiffness() const
   {
     return _stiffness;
   }
@@ -120,7 +123,13 @@ class LagrangianLinearDiagonalDS : public LagrangianDS {
    *
    *  \return pointer on a siconos::algebra::SiconosVector
    */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> damping() const { return _damping; }
+  inline std::shared_ptr<siconos::algebra::MapVectorType> damping() const { return _damping; }
+
+  /** get mass matrix (diagonal only, pointer link)
+   *
+   *  \return pointer on a siconos::algebra::SiconosVector
+   */
+  inline std::shared_ptr<siconos::algebra::MapVectorType> mass_diag() const { return _mass_diag; }
 
   /** allocate (if needed)  and compute rhs and its jacobian.
    *

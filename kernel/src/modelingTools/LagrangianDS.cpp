@@ -60,14 +60,18 @@ siconos::modeling::LagrangianDS::LagrangianDS(
 siconos::modeling::LagrangianDS::LagrangianDS(
     std::shared_ptr<siconos::algebra::SiconosVector> q0,
     std::shared_ptr<siconos::algebra::SiconosVector> v0,
-    std::shared_ptr<Matrix> newMass)
+    std::shared_ptr<siconos::algebra::SiconosMatrix> newMass)
     : LagrangianDS(q0, v0) {
-  _mass = newMass;
+  int rows = _mass->rows();
+  int cols = _mass->cols();
+  _mass->~Map(); // destruct old Map
+  _mass = std::make_shared<MapType>(newMass->data(), rows, cols);
 }
 
 void siconos::modeling::LagrangianDS::allocateMass() {
   if (!_mass) {
-    _mass = std::make_shared<Matrix>(_ndof, _ndof);
+    _mass_data = std::make_unique<std::vector<double>>(_ndof*_ndof);
+    _mass = std::make_shared<MapType>(_mass_data->data(), _ndof, _ndof);
     _mass->setZero();
   }
 }
@@ -722,13 +726,19 @@ void siconos::modeling::LagrangianDS::allocateFInt() {
 void siconos::modeling::LagrangianDS::setComputeMassFunction(const std::string& pluginPath,
                                                              const std::string& functionName) {
   _pluginMass->setComputeFunction(pluginPath, functionName);
-  if (!_mass) _mass = std::make_shared<Matrix>(_ndof, _ndof);
+  if (!_mass) {
+    _mass_data = std::make_unique<std::vector<double>>(_ndof*_ndof);
+    _mass = std::make_shared<MapType>(_mass_data->data(), _ndof, _ndof);
+  } 
   _hasConstantMass = false;
 }
 
 void siconos::modeling::LagrangianDS::setComputeMassFunction(siconos::plugins::FPtr7 fct) {
   _pluginMass->setComputeFunction((void*)fct);
-  if (!_mass) _mass = std::make_shared<Matrix>(_ndof, _ndof);
+  if (!_mass) {
+    _mass_data = std::make_unique<std::vector<double>>(_ndof*_ndof);
+    _mass = std::make_shared<MapType>(_mass_data->data(), _ndof, _ndof);
+  }
   _hasConstantMass = false;
 }
 

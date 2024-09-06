@@ -67,7 +67,7 @@ PYBIND11_MODULE(integrators, m)
       .def(py::init<double, double>(), py::arg("theta") = 0.5,
            py::arg("gamma") = std::numeric_limits<double>::quiet_NaN())
       
-      .def("tonche_mass", &siconos::integrators::MoreauJeanOSI::tonch_mass)
+      // .def("tonche_mass", &siconos::integrators::MoreauJeanOSI::tonch_mass) 
       
       .def("__repr__", [](const siconos::integrators::MoreauJeanOSI &a) {
         a.display();

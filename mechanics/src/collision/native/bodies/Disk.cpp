@@ -21,19 +21,17 @@
 #include "SiconosVector.hpp"
 #include "SiconosMatrix.hpp"
 
-void siconos::collision::native::bodies::Disk::MassSetup()
-{
-  _mass = std::make_shared<siconos::algebra::SiconosMatrix>(_ndof, _ndof);
-  //  mass->resize(ndof,ndof);
-  _mass->zero();
-  (*_mass)(0, 0) = (*_mass)(1, 1) = massValue;
-  (*_mass)(2, 2) = massValue * radius * radius / 2.;
-}
 
 siconos::collision::native::bodies::Disk::Disk(
     double r, double m, std::shared_ptr<siconos::algebra::SiconosVector> qinit,
     std::shared_ptr<siconos::algebra::SiconosVector> vinit)
     : CircularDS(r, m, qinit, vinit)
 {
-  MassSetup();
+
+  _mass_data = std::make_unique<std::vector<double>>(_ndof*_ndof);
+  _mass = std::make_shared<MapType>(_mass_data->data(), _ndof, _ndof);
+  //  mass->resize(ndof,ndof);
+  _mass->setZero();
+  (*_mass)(0, 0) = (*_mass)(1, 1) = massValue;
+  (*_mass)(2, 2) = massValue * radius * radius / 2.;
 }

@@ -312,7 +312,7 @@ class LagrangianDS : public SecondOrderDS {
    */
   LagrangianDS(std::shared_ptr<siconos::algebra::SiconosVector> position,
                std::shared_ptr<siconos::algebra::SiconosVector> velocity,
-               std::shared_ptr<Matrix> mass);
+               std::shared_ptr<siconos::algebra::SiconosMatrix> mass);
 
   /** constructor from initial state, velocity and mass
    *

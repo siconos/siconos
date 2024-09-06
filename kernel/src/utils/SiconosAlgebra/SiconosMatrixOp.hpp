@@ -205,6 +205,18 @@ std::ostream& operator<<(std::ostream& os, const BlockMatrix& sm);
 void setBlock(const SiconosMatrix& MIn, std::shared_ptr<SiconosMatrix> MOut,
               const std::vector<std::size_t>& dim, const std::vector<std::size_t>& start);
 
+/** Copy a subBlock of MIn into a sub-block of MOut - Dim and positions of the sub-block are
+ *  given in dim and start.
+ *  \param MIn a SPC::SiconosMatrix \param[in,out] MOut a std::shared_ptr<SiconosMatrix>
+ *  \param dim an Index, dim[0], dim[1]: number of rows and columns of the sub-block
+ *  \param start an Index, start[0], start[1]: position (row, column) of the first
+ *  element of the sub-block in MIn start[2], start[3]: position (row, column) of the first
+ *  element of the sub-block in MOut.
+ */
+void setBlock(const SiconosMatrix& MIn, std::shared_ptr<MapType> MOut,
+              const std::vector<std::size_t>& dim, const std::vector<std::size_t>& start);
+
+
 /** test if two matrices have the same number of blocks with
     blocks of the same dimension when at the same position
     \param v1 first matrix to compare with

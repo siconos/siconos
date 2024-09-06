@@ -39,7 +39,7 @@ void siconos::modeling::SecondOrderDS::setBoundaryConditions(
 };
 
 void siconos::modeling::SecondOrderDS::setMassPtr(
-    std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr) {
+    std::shared_ptr<siconos::algebra::MapType> newPtr) {
   _mass = newPtr;
   _hasConstantMass = true;
 }

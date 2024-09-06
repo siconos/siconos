@@ -34,11 +34,10 @@ siconos::modeling::LagrangianLinearDiagonalDS::LagrangianLinearDiagonalDS(
     std::shared_ptr<siconos::algebra::SiconosVector> damping,
     std::shared_ptr<siconos::algebra::SiconosVector> mass)
     : LagrangianDS(q0, velocity0) {
-  _mass = std::make_shared<siconos::algebra::SiconosMatrix>(
-      dimension(), dimension());  // WARNING : use Eigen banded matrix?
-  for (unsigned int i = 0; i < dimension(); ++i) (*_mass)(i, i) = (*mass)(i);
-  _stiffness = stiffness;
-  _damping = damping;
+  _mass_diag = std::make_shared<siconos::algebra::MapVectorType>( mass->data(),
+      dimension());
+  _stiffness = std::make_shared<siconos::algebra::MapVectorType>(stiffness->data(), dimension());
+  _damping = std::make_shared<siconos::algebra::MapVectorType>(damping->data(), dimension());
 }
 
 // --- Constructor for the complete system with identity mass matrix
@@ -48,8 +47,8 @@ siconos::modeling::LagrangianLinearDiagonalDS::LagrangianLinearDiagonalDS(
     std::shared_ptr<siconos::algebra::SiconosVector> stiffness,
     std::shared_ptr<siconos::algebra::SiconosVector> damping)
     : LagrangianDS(q0, velocity0) {
-  _stiffness = stiffness;
-  _damping = damping;
+  _stiffness = std::make_shared<siconos::algebra::MapVectorType>(stiffness->data(), dimension());
+  _damping = std::make_shared<siconos::algebra::MapVectorType>(damping->data(), dimension());
 }
 
 // --- Constructor for the undamped system with identity mass matrix
@@ -58,7 +57,7 @@ siconos::modeling::LagrangianLinearDiagonalDS::LagrangianLinearDiagonalDS(
     std::shared_ptr<siconos::algebra::SiconosVector> velocity0,
     std::shared_ptr<siconos::algebra::SiconosVector> stiffness)
     : LagrangianDS(q0, velocity0) {
-  _stiffness = stiffness;
+  _stiffness = std::make_shared<siconos::algebra::MapVectorType>(stiffness->data(), dimension());
 }
 
 void siconos::modeling::LagrangianLinearDiagonalDS::initRhs(double time) {

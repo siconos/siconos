@@ -45,6 +45,7 @@ SiconosMatrix outer_prod(const SiconosVector&, const SiconosVector&);
   \param init a bool (default = true)
   */
 void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool init = true);
+void prod(const MapType& A, const SiconosVector& x, SiconosVector& y, bool init = true);
 
 void prod(const SiconosMatrix& A, const BlockVector& x, SiconosVector& y, bool init = true);
 
