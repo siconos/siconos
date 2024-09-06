@@ -22,8 +22,8 @@
 #include "FirstOrderLinearTIDS.hpp"
 #include "LinearSensor.hpp"
 #include "PID.hpp"
-#include "SiconosVector.hpp"
 #include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 #include "io.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
@@ -73,19 +73,18 @@ void PIDTest::testPIDZOH() {
   simZOH->addActuator(_PIDcontroller, _h);
   simZOH->initialize();
   simZOH->run();
-  auto& data = *simZOH->data();
+  auto data = simZOH->data();
   siconos::algebra::io::write("PIDZOH.dat", data, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  siconos::algebra::SiconosMatrix dataRef(data);
-  dataRef.zero();
+  siconos::algebra::SiconosMatrix dataRef(data->rows(), data->cols());
   siconos::algebra::io::read("PID.ref", dataRef);
 
-  auto diff = data - dataRef;
+  dataRef -= *data;
   // std::cout << diff << std::endl;
-  std::cout << "------- Integration done, error = " << diff.normInf() << " -------"
-            << std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testPIDZOH : ", (diff).normInf() < _tol, true);
+  auto error = dataRef.normInf();
+  std::cout << "------- Integration done, error = " << error << " -------\n";
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testPIDZOH : ", error < _tol, true);
 }
 
 void PIDTest::testPIDLsodar() {

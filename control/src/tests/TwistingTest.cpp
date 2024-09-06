@@ -25,8 +25,8 @@
 #include "ExplicitTwisting.hpp"
 #include "LinearSensor.hpp"
 #include "RegularTwisting.hpp"
-#include "SiconosVector.hpp"
 #include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 #include "Twisting.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
@@ -143,31 +143,21 @@ void TwistingTest::test_Twisting_ZOH() {
   simZOH->addActuator(_itw, _h);
   simZOH->initialize();
   simZOH->run();
-  auto& data = *simZOH->data();
-  siconos::algebra::io::write("itw_ZOH.dat", data, siconos::algebra::io::ASCII_OUT,
+  auto data = simZOH->data();
+  siconos::algebra::io::write("itw_ZOH.dat", *data, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  siconos::algebra::SiconosMatrix dataRef(data);
-  dataRef.zero();
+  siconos::algebra::SiconosMatrix dataRef(data->rows(), data->cols());
   siconos::algebra::io::read("itw2.ref", dataRef);
-  // it is a bad idea to compare solutions to an AVI that does not admit a unique solution
-  siconos::algebra::SiconosVector lambda1{data.size(0)};
-  siconos::algebra::SiconosVector lambda2{data.size(0)};
-  data.getCol(3, lambda1);
-  data.getCol(4, lambda2);
-  axpy(_beta, lambda2, lambda1);
-  siconos::algebra::SiconosVector lambda1Ref{data.size(0)};
-  siconos::algebra::SiconosVector lambda2Ref{data.size(0)};
-  dataRef.getCol(3, lambda1Ref);
-  dataRef.getCol(4, lambda2Ref);
-  axpy(_beta, lambda2Ref, lambda1Ref);
-  data.setCol(3, lambda1);
-  dataRef.setCol(3, lambda1Ref);
-  data.resize(data.size(0), 4);
-  dataRef.resize(data.size(0), 4);
-  std::cout << "------- Integration done, error = " << (data - dataRef).normInf() << " -------"
+  // it is a bad idea to compare solutions to an AVI that does not admit a unique
+  // solution
+  data->col(3) = _beta * data->col(2) + data->col(1);
+  dataRef.col(3) = _beta * dataRef.col(2) + dataRef.col(1);
+  dataRef -= *data;
+
+  std::cout << "------- Integration done, error = " << dataRef.normInf() << " -------"
             << std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_itw_ZOH : ", (data - dataRef).normInf() < _tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_itw_ZOH : ", dataRef.normInf() < _tol, true);
 }
 
 void TwistingTest::test_Twisting_Lsodar() {
@@ -179,32 +169,19 @@ void TwistingTest::test_Twisting_Lsodar() {
   simLsodar->addActuator(_itw, _h);
   simLsodar->initialize();
   simLsodar->run();
-  auto& data = *simLsodar->data();
-  siconos::algebra::io::write("itw_Lsodar.dat", data, siconos::algebra::io::ASCII_OUT,
+  auto data = simLsodar->data();
+  siconos::algebra::io::write("itw_Lsodar.dat", *data, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  siconos::algebra::SiconosMatrix dataRef(data);
-  dataRef.zero();
+  siconos::algebra::SiconosMatrix dataRef(data->rows(), data->cols());
   siconos::algebra::io::read("itw2.ref", dataRef);
   // it is a bad idea to compare solutions to an AVI that does not admit a unique
   // solution
-  siconos::algebra::SiconosVector lambda1{data.size(0)};
-  siconos::algebra::SiconosVector lambda2{data.size(0)};
-  data.getCol(3, lambda1);
-  data.getCol(4, lambda2);
-  axpy(_beta, lambda2, lambda1);
-  siconos::algebra::SiconosVector lambda1Ref{data.size(0)};
-  siconos::algebra::SiconosVector lambda2Ref{data.size(0)};
-  dataRef.getCol(3, lambda1Ref);
-  dataRef.getCol(4, lambda2Ref);
-  axpy(_beta, lambda2Ref, lambda1Ref);
-  data.setCol(3, lambda1);
-  dataRef.setCol(3, lambda1Ref);
-  data.resize(data.size(0), 4);
-  dataRef.resize(data.size(0), 4);
-  std::cout << "------- Integration done, error = " << (data - dataRef).normInf() << " -------"
-            << std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_itw_Lsodar : ", (data - dataRef).normInf() < _tol, true);
+  data->col(3) = _beta * data->col(2) + data->col(1);
+  dataRef.col(3) = _beta * dataRef.col(2) + dataRef.col(1);
+  dataRef -= *data;
+  std::cout << "------- Integration done, error = " << dataRef.normInf() << " -------\n";
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_itw_Lsodar : ", dataRef.normInf() < _tol, true);
 }
 
 void TwistingTest::test_RegularTwisting_ZOH() {
@@ -216,33 +193,19 @@ void TwistingTest::test_RegularTwisting_ZOH() {
   simZOH->addActuator(_reg_itw, _h);
   simZOH->initialize();
   simZOH->run();
-  auto& data = *simZOH->data();
-  siconos::algebra::io::write("reg_itw_ZOH.dat", data, siconos::algebra::io::ASCII_OUT,
+  auto data = simZOH->data();
+  siconos::algebra::io::write("reg_itw_ZOH.dat", *data, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  siconos::algebra::SiconosMatrix dataRef(data);
-  dataRef.zero();
+  siconos::algebra::SiconosMatrix dataRef(data->rows(), data->cols());
   siconos::algebra::io::read("reg_itw.ref", dataRef);
   // it is a bad idea to compare solutions to an AVI that does not admit a
   // unique solution
-  siconos::algebra::SiconosVector lambda1{data.size(0)};
-  siconos::algebra::SiconosVector lambda2{data.size(0)};
-  data.getCol(3, lambda1);
-  data.getCol(4, lambda2);
-  axpy(_beta, lambda2, lambda1);
-  siconos::algebra::SiconosVector lambda1Ref{data.size(0)};
-  siconos::algebra::SiconosVector lambda2Ref{data.size(0)};
-  dataRef.getCol(3, lambda1Ref);
-  dataRef.getCol(4, lambda2Ref);
-  axpy(_beta, lambda2Ref, lambda1Ref);
-  data.setCol(3, lambda1);
-  dataRef.setCol(3, lambda1Ref);
-  data.resize(data.size(0), 4);
-  dataRef.resize(data.size(0), 4);
-  std::cout << "------- Integration done, error = " << (data - dataRef).normInf() << " -------"
-            << std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_RegularTwistingZOH : ", (data - dataRef).normInf() < _tol,
-                               true);
+  data->col(3) = _beta * data->col(2) + data->col(1);
+  dataRef.col(3) = _beta * dataRef.col(2) + dataRef.col(1);
+  dataRef -= *data;
+  std::cout << "------- Integration done, error = " << dataRef.normInf() << " -------\n";
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_RegularTwistingZOH : ", dataRef.normInf() < _tol, true);
 }
 
 void TwistingTest::test_RegularTwisting_Lsodar() {
@@ -254,32 +217,19 @@ void TwistingTest::test_RegularTwisting_Lsodar() {
   simLsodar->addActuator(_reg_itw, _h);
   simLsodar->initialize();
   simLsodar->run();
-  auto& data = *simLsodar->data();
-  siconos::algebra::io::write("reg_itw_Lsodar..dat", data, siconos::algebra::io::ASCII_OUT,
+  auto data = simLsodar->data();
+  siconos::algebra::io::write("reg_itw_Lsodar..dat", *data, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  siconos::algebra::SiconosMatrix dataRef(data);
-  dataRef.zero();
+  siconos::algebra::SiconosMatrix dataRef(data->rows(), data->cols());
   siconos::algebra::io::read("reg_itw.ref", dataRef);
-  // it is a bad idea to compare solutions to an AVI that does not
-  // admit a unique solution
-  siconos::algebra::SiconosVector lambda1{data.size(0)};
-  siconos::algebra::SiconosVector lambda2{data.size(0)};
-  data.getCol(3, lambda1);
-  data.getCol(4, lambda2);
-  axpy(_beta, lambda2, lambda1);
-  siconos::algebra::SiconosVector lambda1Ref{data.size(0)};
-  siconos::algebra::SiconosVector lambda2Ref{data.size(0)};
-  dataRef.getCol(3, lambda1Ref);
-  dataRef.getCol(4, lambda2Ref);
-  axpy(_beta, lambda2Ref, lambda1Ref);
-  data.setCol(3, lambda1);
-  dataRef.setCol(3, lambda1Ref);
-  data.resize(data.size(0), 4);
-  dataRef.resize(data.size(0), 4);
-  std::cout << "------- Integration done, error = " << (data - dataRef).normInf() << " -------"
-            << std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "test_RegularTwistingLsodar : ", (data - dataRef).normInf() < 5e-9, true);
+  // it is a bad idea to compare solutions to an AVI that does not admit a unique
+  // solution
+  data->col(3) = _beta * data->col(2) + data->col(1);
+  dataRef.col(3) = _beta * dataRef.col(2) + dataRef.col(1);
+  dataRef -= *data;
+  std::cout << "------- Integration done, error = " << dataRef.normInf() << " -------\n";
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_RegularTwistingLsodar : ", dataRef.normInf() < 5e-9,
+                               true);
 }
 #endif
