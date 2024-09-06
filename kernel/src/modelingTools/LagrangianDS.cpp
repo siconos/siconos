@@ -62,10 +62,7 @@ siconos::modeling::LagrangianDS::LagrangianDS(
     std::shared_ptr<siconos::algebra::SiconosVector> v0,
     std::shared_ptr<siconos::algebra::SiconosMatrix> newMass)
     : LagrangianDS(q0, v0) {
-  int rows = _mass->rows();
-  int cols = _mass->cols();
-  _mass->~Map(); // destruct old Map
-  _mass = std::make_shared<MapType>(newMass->data(), rows, cols);
+  _mass = std::make_shared<MapType>(newMass->data(), _ndof, _ndof);
 }
 
 void siconos::modeling::LagrangianDS::allocateMass() {
