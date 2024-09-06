@@ -74,7 +74,7 @@ void PIDTest::testPIDZOH() {
   simZOH->initialize();
   simZOH->run();
   auto data = simZOH->data();
-  siconos::algebra::io::write("PIDZOH.dat", data, siconos::algebra::io::ASCII_OUT,
+  siconos::algebra::io::write("PIDZOH.dat", *data, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
   siconos::algebra::SiconosMatrix dataRef(data->rows(), data->cols());
