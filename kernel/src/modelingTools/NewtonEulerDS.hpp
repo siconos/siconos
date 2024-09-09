@@ -95,7 +95,8 @@ class NewtonEulerDS : public SecondOrderDS {
   std::shared_ptr<siconos::algebra::SiconosVector> _twist{nullptr};
 
   /** Initial twist */
-  std::shared_ptr<siconos::algebra::SiconosVector> _twist0{nullptr};
+  std::shared_ptr<siconos::algebra::MapVectorType> _twist0{nullptr};
+  std::unique_ptr<std::vector<double>> twist0_internal_storage{nullptr};
 
   /** _q contains the representation of the system
    *   In the current implementation, we have
@@ -437,9 +438,9 @@ class NewtonEulerDS : public SecondOrderDS {
     return _twist;
   }
 
-  inline std::shared_ptr<siconos::algebra::SiconosVector> twist0() const { return _twist0; }
+  inline std::shared_ptr<siconos::algebra::MapVectorType> twist0() const { return _twist0; }
 
-  inline std::shared_ptr<siconos::algebra::SiconosVector> velocity0() const override {
+  inline std::shared_ptr<siconos::algebra::MapVectorType> velocity0() const override {
     return _twist0;
   }
   /** set  velocity (copy)

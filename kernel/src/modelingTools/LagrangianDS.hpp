@@ -125,7 +125,8 @@ class LagrangianDS : public SecondOrderDS {
                                                                       nullptr};
 
   /** initial velocity of the system */
-  std::shared_ptr<siconos::algebra::SiconosVector> _velocity0{nullptr};
+  std::shared_ptr<siconos::algebra::MapVectorType> _velocity0{nullptr};
+  std::unique_ptr<std::vector<double>> velocity0_internal_storage{nullptr};
 
   /** memory of previous coordinates of the system */
   siconos::algebra::SiconosMemory _qMemory;
@@ -149,7 +150,7 @@ class LagrangianDS : public SecondOrderDS {
   std::shared_ptr<Matrix> _jacobianFIntqDot{nullptr};
 
   /** external forces applied to the system */
-  std::shared_ptr<siconos::algebra::SiconosVector> _fExt{nullptr};
+  std::shared_ptr<siconos::algebra::MapVectorType> _fExt{nullptr};
 
   /** boolean if _fext is constant (set thanks to setFExtPtr for instance)
    * false by default */
@@ -304,6 +305,14 @@ class LagrangianDS : public SecondOrderDS {
   LagrangianDS(std::shared_ptr<siconos::algebra::SiconosVector> position,
                std::shared_ptr<siconos::algebra::SiconosVector> velocity);
 
+  /** constructor from initial state and velocity
+   *
+   *  \param position initial coordinates
+   *  \param velocity initial velocity
+   */
+  LagrangianDS(Eigen::Ref<siconos::algebra::SiconosVector>& position,
+               Eigen::Ref<siconos::algebra::SiconosVector>& velocity);
+
   /** constructor from initial state, velocity and mass
    *
    *  \param position initial coordinates
@@ -420,6 +429,12 @@ class LagrangianDS : public SecondOrderDS {
    */
   inline std::shared_ptr<siconos::algebra::SiconosVector> q() const override { return _q[0]; }
 
+  /** generalized coordinates of the system (vector of size dimension())
+   *
+   *  \return pointer on a siconos::algebra::SiconosVector
+   */
+  inline siconos::algebra::SiconosVector& q_python() const { return *(_q[0]); }
+
   /** set value of generalized coordinates vector (copy)
    *
    *  \param newValue
@@ -452,6 +467,14 @@ class LagrangianDS : public SecondOrderDS {
     return _q[1];
   }
 
+  /** get velocity vector
+   *
+   *  \return pointer on a siconos::algebra::SiconosVector
+   */
+  inline siconos::algebra::SiconosVector& velocity_python() const {
+    return *(_q[1]);
+  }
+
   /** set velocity vector (copy)
    *
    *  \param newValue
@@ -468,7 +491,7 @@ class LagrangianDS : public SecondOrderDS {
    *
    *  \return pointer on a siconos::algebra::SiconosVector
    */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> velocity0() const override {
+  inline std::shared_ptr<siconos::algebra::MapVectorType> velocity0() const override {
     return _velocity0;
   }
 
@@ -510,14 +533,24 @@ class LagrangianDS : public SecondOrderDS {
    *
    *  \return pointer on a plugged vector
    */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> fExt() const { return _fExt; }
+  inline std::shared_ptr<siconos::algebra::MapVectorType> fExt() const { return _fExt; }
 
   /** set  \f$ F_{ext} \f$ , (pointer link)
    *
    *  \param newPtr a SP to a Simple vector
    */
   inline void setFExtPtr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) {
-    _fExt = newPtr;
+    _fExt = std::make_shared<siconos::algebra::MapVectorType>(newPtr->data(), _ndof);
+    _hasConstantFExt = true;
+  }
+
+  /** set  \f$ F_{ext} \f$
+   *
+   *  \param newPtr a SP to a Simple vector
+   */
+  inline void setFExt(Eigen::Ref<siconos::algebra::SiconosVector>& newFext) {
+    // TODOSAM : need to delete old data if exists ? (supposed to be provided by user)
+    _fExt = std::make_shared<siconos::algebra::MapVectorType>(newFext.data(), newFext.size());
     _hasConstantFExt = true;
   }
 
@@ -544,7 +577,6 @@ class LagrangianDS : public SecondOrderDS {
   void allocateJacobianFIntq();
   void allocateJacobianFIntqDot();
   void allocateFInt();
-  void allocateFExt();
 
   /** \return \f$ \nabla_{q}F_{int} \f$ , (pointer link) */
   inline void setJacobianFIntqPtr(std::shared_ptr<Matrix> newPtr) { _jacobianFIntq = newPtr; }

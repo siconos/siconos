@@ -153,20 +153,8 @@ class LagrangianLinearTIDS : public LagrangianDS {
   LagrangianLinearTIDS(Eigen::Ref<siconos::algebra::SiconosVector> &q0,
                        Eigen::Ref<siconos::algebra::SiconosVector> &v0,
                        Eigen::Ref<siconos::algebra::SiconosMatrix> &M)
-      : LagrangianDS(){
-        // using MapType = Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor>>;
+      : LagrangianDS(q0, v0){
         _mass = std::make_shared<siconos::algebra::MapType>(M.data(), M.rows(), M.cols());
-
-        // Here there is copy, test purpose
-        // _mass = std::make_shared<siconos::algebra::SiconosMatrix>(M);
-        // Solution qui marche (need to template DS with mass matrix size)
-        // Eigen::Map<Eigen::Matrix<double, Rows, Cols>> tmp(NULL);
-        // new (&(tmp)) Eigen::Map<Eigen::Matrix<double, Rows, Cols>>(M.data(), M.rows(), M.cols());
-        // for (int i = 0; i < tmp.cols(); i++)
-        // {
-        //   tmp(0, i) = 403.;
-        // }
-        // tmp.display();
       };
 
   /** destructor */

@@ -128,7 +128,7 @@ class SecondOrderDS : public DynamicalSystem {
   std::shared_ptr<MapType> _mass{nullptr};
 
   /** mass data pointer */
-  std::unique_ptr<std::vector<double>> _mass_data{nullptr};
+  std::unique_ptr<std::vector<double>> mass_internal_storage_{nullptr};
 
   /** true if the  mass matrix is constant */
   bool _hasConstantMass = false;
@@ -152,7 +152,8 @@ class SecondOrderDS : public DynamicalSystem {
                                                                       nullptr};
 
   /** Initial position */
-  std::shared_ptr<siconos::algebra::SiconosVector> _q0{nullptr};
+  std::shared_ptr<siconos::algebra::MapVectorType> _q0{nullptr};
+  std::unique_ptr<std::vector<double>> q0_internal_storage_{nullptr};
 
   /** Boundary condition applied to a dynamical system*/
   std::shared_ptr<siconos::modeling::BoundaryCondition> _boundaryConditions{nullptr};
@@ -186,6 +187,15 @@ class SecondOrderDS : public DynamicalSystem {
    */
   inline std::shared_ptr<siconos::algebra::SiconosVector> p(unsigned int level = 2) const {
     return _p[level];
+  }
+
+  /** get p
+   *
+   *  \param level unsigned int, required level for p, default = 2
+   *  \return a siconos::algebra::SiconosVector
+   */
+  inline siconos::algebra::SiconosVector& p_python(unsigned int level = 2) const {
+    return *(_p[level]);
   }
 
   /** get mass matrix (pointer link)
@@ -279,7 +289,7 @@ class SecondOrderDS : public DynamicalSystem {
    *
    *  \return pointer on a siconos::algebra::SiconosVector
    */
-  std::shared_ptr<siconos::algebra::SiconosVector> q0() const { return _q0; }
+  std::shared_ptr<siconos::algebra::MapVectorType> q0() const { return _q0; }
 
   /** set initial state (copy)
    *
@@ -315,7 +325,7 @@ class SecondOrderDS : public DynamicalSystem {
    *
    *  \return pointer on a siconos::algebra::SiconosVector
    */
-  virtual std::shared_ptr<siconos::algebra::SiconosVector> velocity0() const = 0;
+  virtual std::shared_ptr<siconos::algebra::MapVectorType> velocity0() const = 0;
 
   /** set initial velocity (copy)
    *

@@ -43,8 +43,29 @@ siconos::modeling::LagrangianDS::LagrangianDS(
   assert(_ndof > 0 && "lagrangian dynamical system dimension should be greater than 0.");
 
   // Set initial conditions
-  _q0 = q0;
-  _velocity0 = v0;
+  _q0 = std::make_shared<siconos::algebra::MapVectorType>(q0->data(), _ndof);
+  _velocity0 = std::make_shared<siconos::algebra::MapVectorType>(v0->data(), _ndof);
+
+  // -- Memory allocation for vector and matrix members --
+  _q[0] = std::make_shared<siconos::algebra::SiconosVector>(*_q0);
+  _q[1] = std::make_shared<siconos::algebra::SiconosVector>(*_velocity0);
+
+  /** \todo lazy Memory allocation */
+  _p[1] = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
+  _p[1]->setZero();
+  _zeroPlugin();
+}
+
+// Build from initial state only
+siconos::modeling::LagrangianDS::LagrangianDS(
+    Eigen::Ref<siconos::algebra::SiconosVector>& q0,
+    Eigen::Ref<siconos::algebra::SiconosVector>& v0)
+    : SecondOrderDS(2 * q0.size(), v0.size()), _hasConstantFExt(true) {
+  assert(_ndof > 0 && "lagrangian dynamical system dimension should be greater than 0.");
+
+  // Set initial conditions
+  _q0 = std::make_shared<siconos::algebra::MapVectorType>(q0.data(), _ndof);
+  _velocity0 = std::make_shared<siconos::algebra::MapVectorType>(v0.data(), _ndof);
 
   // -- Memory allocation for vector and matrix members --
   _q[0] = std::make_shared<siconos::algebra::SiconosVector>(*_q0);
@@ -67,8 +88,8 @@ siconos::modeling::LagrangianDS::LagrangianDS(
 
 void siconos::modeling::LagrangianDS::allocateMass() {
   if (!_mass) {
-    _mass_data = std::make_unique<std::vector<double>>(_ndof*_ndof);
-    _mass = std::make_shared<MapType>(_mass_data->data(), _ndof, _ndof);
+    mass_internal_storage_ = std::make_unique<std::vector<double>>(_ndof*_ndof);
+    _mass = std::make_shared<MapType>(mass_internal_storage_->data(), _ndof, _ndof);
     _mass->setZero();
   }
 }
@@ -271,17 +292,22 @@ void siconos::modeling::LagrangianDS::setQ0(const siconos::algebra::SiconosVecto
   if (newValue.size() != _ndof)
     THROW_EXCEPTION("LagrangianDS - setQ0: inconsistent input vector size ");
 
-  if (!_q0)
-    _q0 = std::make_shared<siconos::algebra::SiconosVector>(newValue);
+  if (!q0_internal_storage_){
+    q0_internal_storage_ = std::make_unique<std::vector<double>>(newValue.data(), newValue.data() + newValue.size());
+    _q0 = std::make_shared<siconos::algebra::MapVectorType>(q0_internal_storage_->data(), _ndof);
+  }
   else
-    *_q0 = newValue;
+  // if internal storage already exists, Map should also exist
+    assert(_q0);
+    std::copy(newValue.data(), newValue.data() + newValue.size(), q0_internal_storage_->begin());
 }
 
 void siconos::modeling::LagrangianDS::setQ0Ptr(
     std::shared_ptr<siconos::algebra::SiconosVector> newPtr) {
   if (newPtr->size() != _ndof)
     THROW_EXCEPTION("LagrangianDS - setQ0Ptr: inconsistent input vector size ");
-  _q0 = newPtr;
+  q0_internal_storage_ = nullptr;
+  _q0 = std::make_shared<siconos::algebra::MapVectorType>(newPtr->data(), newPtr->size());
 }
 
 void siconos::modeling::LagrangianDS::setVelocity0(
@@ -289,10 +315,12 @@ void siconos::modeling::LagrangianDS::setVelocity0(
   if (newValue.size() != _ndof)
     THROW_EXCEPTION("LagrangianDS - setVelocity0: inconsistent input vector size ");
 
-  if (!_velocity0)
-    _velocity0 = std::make_shared<siconos::algebra::SiconosVector>(newValue);
+  if (!velocity0_internal_storage) {
+    velocity0_internal_storage = std::make_unique<std::vector<double>>(newValue.data(), newValue.data() + newValue.size());
+    _velocity0 = std::make_shared<siconos::algebra::MapVectorType>(velocity0_internal_storage->data(), newValue.size());
+  }
   else
-    *_velocity0 = newValue;
+    std::copy(newValue.data(), newValue.data() + newValue.size(), velocity0_internal_storage->begin());
 }
 
 void siconos::modeling::LagrangianDS::setVelocity(
@@ -317,7 +345,8 @@ void siconos::modeling::LagrangianDS::setVelocity0Ptr(
     std::shared_ptr<siconos::algebra::SiconosVector> newPtr) {
   if (newPtr->size() != _ndof)
     THROW_EXCEPTION("LagrangianDS - setVelocity0Ptr: inconsistent input vector size ");
-  _velocity0 = newPtr;
+  velocity0_internal_storage = nullptr;
+  _velocity0 = std::make_shared<siconos::algebra::MapVectorType>(newPtr->data(), newPtr->size());
 }
 
 void siconos::modeling::LagrangianDS::computeMass() {
@@ -713,9 +742,6 @@ void siconos::modeling::LagrangianDS::computePostImpactVelocity() {
   *_q[1] += tmp;  // v+ = v- + p
   DEBUG_BEGIN("siconos::modeling::LagrangianDS::computePostImpactV() END \n");
 }
-void siconos::modeling::LagrangianDS::allocateFExt() {
-  if (!_fExt) _fExt = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
-}
 void siconos::modeling::LagrangianDS::allocateFInt() {
   if (!_fInt) _fInt = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
 }
@@ -724,8 +750,8 @@ void siconos::modeling::LagrangianDS::setComputeMassFunction(const std::string& 
                                                              const std::string& functionName) {
   _pluginMass->setComputeFunction(pluginPath, functionName);
   if (!_mass) {
-    _mass_data = std::make_unique<std::vector<double>>(_ndof*_ndof);
-    _mass = std::make_shared<MapType>(_mass_data->data(), _ndof, _ndof);
+    mass_internal_storage_ = std::make_unique<std::vector<double>>(_ndof*_ndof);
+    _mass = std::make_shared<MapType>(mass_internal_storage_->data(), _ndof, _ndof);
   } 
   _hasConstantMass = false;
 }
@@ -733,8 +759,8 @@ void siconos::modeling::LagrangianDS::setComputeMassFunction(const std::string& 
 void siconos::modeling::LagrangianDS::setComputeMassFunction(siconos::plugins::FPtr7 fct) {
   _pluginMass->setComputeFunction((void*)fct);
   if (!_mass) {
-    _mass_data = std::make_unique<std::vector<double>>(_ndof*_ndof);
-    _mass = std::make_shared<MapType>(_mass_data->data(), _ndof, _ndof);
+    mass_internal_storage_ = std::make_unique<std::vector<double>>(_ndof*_ndof);
+    _mass = std::make_shared<MapType>(mass_internal_storage_->data(), _ndof, _ndof);
   }
   _hasConstantMass = false;
 }
@@ -755,7 +781,9 @@ void siconos::modeling::LagrangianDS::setComputeFIntFunction(siconos::plugins::F
 void siconos::modeling::LagrangianDS::setComputeFExtFunction(const std::string& pluginPath,
                                                              const std::string& functionName) {
   _pluginFExt->setComputeFunction(pluginPath, functionName);
-  if (!_fExt) _fExt = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
+  //TODOSAM : next line is commented because FExt is supposed to be provided by user, so memory mapping exists
+  // if (!_fExt) _fExt = std::make_shared<siconos::algebra::MapVectorType>(_ndof);
+  assert(_fExt && "setComputeFExtFunction : _FExt storage is supposed to be provided by user");
   _hasConstantFExt = false;
 }
 
@@ -766,8 +794,10 @@ void siconos::modeling::LagrangianDS::setComputeFExtFunction(const std::string& 
 void siconos::modeling::LagrangianDS::setComputeFExtFunction(
     siconos::plugins::VectorFunctionOfTime fct) {
   _pluginFExt->setComputeFunction((void*)fct);
-  if (!_fExt) _fExt = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
+  // TODOSAM : next line is commented because FExt is provided by user, so no internal storage needed
+  // if (!_fExt) _fExt = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
   //   computeFExtPtr = fct ;
+  assert(_fExt && "setComputeFExtFunction : _FExt storage is supposed to be provided by user");
   _hasConstantFExt = false;
 }
 

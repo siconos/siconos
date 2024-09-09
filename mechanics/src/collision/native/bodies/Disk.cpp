@@ -28,8 +28,8 @@ siconos::collision::native::bodies::Disk::Disk(
     : CircularDS(r, m, qinit, vinit)
 {
 
-  _mass_data = std::make_unique<std::vector<double>>(_ndof*_ndof);
-  _mass = std::make_shared<MapType>(_mass_data->data(), _ndof, _ndof);
+  mass_internal_storage_ = std::make_unique<std::vector<double>>(_ndof*_ndof);
+  _mass = std::make_shared<MapType>(mass_internal_storage_->data(), _ndof, _ndof);
   //  mass->resize(ndof,ndof);
   _mass->setZero();
   (*_mass)(0, 0) = (*_mass)(1, 1) = massValue;

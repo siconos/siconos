@@ -49,11 +49,13 @@ siconos::mechanics::fem::FiniteElementLinearTIDS::FiniteElementLinearTIDS(
 
   _FEModel = std::make_shared<FiniteElementModel>(mesh);
   _ndof = _FEModel->init();
-
-  _q0 = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
-  _q0->zero();
-  _velocity0 = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
-  _velocity0->zero();
+  // TODOSAM : do we need to allocate internal storage first (for velocity0 and q0)? I think so.
+  if (!q0_internal_storage_) q0_internal_storage_ = std::make_unique<std::vector<double>>(_ndof);
+  _q0 = std::make_shared<siconos::algebra::MapVectorType>(q0_internal_storage_->data(), _ndof);
+  _q0->setZero();
+  if (!velocity0_internal_storage) velocity0_internal_storage = std::make_unique<std::vector<double>>(_ndof);
+  _velocity0 = std::make_shared<siconos::algebra::MapVectorType>(velocity0_internal_storage->data(), _ndof);
+  _velocity0->setZero();
 
   // -- Memory allocation for vector and matrix members --
   _q[0] = std::make_shared<siconos::algebra::SiconosVector>(*_q0);
@@ -65,7 +67,8 @@ siconos::mechanics::fem::FiniteElementLinearTIDS::FiniteElementLinearTIDS(
   _n = 2 * _ndof;
 
   if (!_mass) {
-    _mass = std::make_shared<MapType>(nullptr, _ndof, _ndof); // TODOSAM : handle mass creation
+    mass_internal_storage_ = std::make_unique<std::vector<double>>(_ndof*_ndof);
+    _mass = std::make_shared<MapType>(mass_internal_storage_->data(), _ndof, _ndof);
     // _mass->setIsSymmetric(true);
     // _mass->setIsPositiveDefinite(true);
   }
@@ -107,7 +110,7 @@ void siconos::mechanics::fem::FiniteElementLinearTIDS::applyDirichletBoundaryCon
 void siconos::mechanics::fem::FiniteElementLinearTIDS::applyNodalForces(
     int physical_entity_tag, std::shared_ptr<siconos::algebra::SiconosVector> nodal_forces) {
   if (!_fExt) {
-    _fExt = std::make_shared<siconos::algebra::SiconosVector>(dimension());
+    _fExt = std::make_shared<siconos::algebra::MapVectorType>(nullptr, dimension()); // TODOSAM : what to do here ?
   }
 
   _FEModel->applyNodalForces(physical_entity_tag, nodal_forces, _fExt);

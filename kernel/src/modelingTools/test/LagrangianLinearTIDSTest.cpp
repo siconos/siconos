@@ -74,9 +74,9 @@ void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS1() {
   // Type::LagrangianLinearTIDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ", ds->dimension() == 3,
                                true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ", ds->q0() == q0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ", ds->q0()->data() == q0->data(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildLagrangianLinearTIDS1 : ", ds->velocity0() == velocity0, true);
+      "testBuildLagrangianLinearTIDS1 : ", ds->velocity0()->data() == velocity0->data(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ", *(ds->q()) == *q0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testBuildLagrangianLinearTIDS1 : ", *(ds->velocity()) == *velocity0, true);
@@ -190,9 +190,9 @@ void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS2() {
   // Type::LagrangianLinearTIDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2 : ", ds->dimension() == 3,
                                true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2 : ", ds->q0() == q0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2 : ", ds->q0()->data() == q0->data(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildLagrangianLinearTIDS2 : ", ds->velocity0() == velocity0, true);
+      "testBuildLagrangianLinearTIDS2 : ", ds->velocity0()->data() == velocity0->data(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2 : ", *(ds->q()) == *q0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testBuildLagrangianLinearTIDS2 : ", *(ds->velocity()) == *velocity0, true);

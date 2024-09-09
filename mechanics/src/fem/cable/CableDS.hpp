@@ -52,7 +52,7 @@ class CableDS : public siconos::modeling::LagrangianDS {
  protected:
   // Proto for functions used to compute external forces
   using ExternalForcesFunction =
-      std::function<void(double, std::shared_ptr<siconos::algebra::SiconosVector>)>;
+      std::function<void(double, std::shared_ptr<siconos::algebra::MapVectorType>)>;
 
   ExternalForcesFunction computefext_{nullptr};
 

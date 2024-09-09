@@ -205,5 +205,6 @@ void siconos::algebra::axpy_prod(const SiconosMatrix &A, const SiconosMatrix &B,
   if (init == true) {
     C.setZero();
   }
+  // TODOSAM : handle aliasing
   C += A * B;
 }

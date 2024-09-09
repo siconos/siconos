@@ -60,6 +60,12 @@ class LagrangianLinearTIR : public LagrangianR {
   /** create the Relation from a set of data
    *
    *  \param C the matrix C
+   */
+  LagrangianLinearTIR(Eigen::Ref<siconos::algebra::SiconosMatrix>& C);
+
+  /** create the Relation from a set of data
+   *
+   *  \param C the matrix C
    *  \param F the matrix F
    *  \param e the vector e
    */

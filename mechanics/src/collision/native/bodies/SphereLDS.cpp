@@ -46,8 +46,8 @@ siconos::collision::native::bodies::SphereLDS::SphereLDS(
   assert(qinit->size() == _ndof);
   assert(vinit->size() == _ndof);
 
-  _mass_data = std::make_unique<std::vector<double>>(_ndof*_ndof);
-  _mass = std::make_shared<siconos::algebra::MapType>(_mass_data->data(), _ndof, _ndof);
+  mass_internal_storage_ = std::make_unique<std::vector<double>>(_ndof*_ndof);
+  _mass = std::make_shared<siconos::algebra::MapType>(mass_internal_storage_->data(), _ndof, _ndof);
   _mass->setZero();
   I = massValue * radius * radius * 2. / 5.;
   (*_mass)(0, 0) = (*_mass)(1, 1) = (*_mass)(2, 2) = massValue;

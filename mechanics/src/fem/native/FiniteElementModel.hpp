@@ -151,7 +151,7 @@ class FiniteElementModel {
    **/
   void applyNodalForces(int physical_entity_tag,
                         std::shared_ptr<siconos::algebra::SiconosVector> nodal_forces,
-                        std::shared_ptr<siconos::algebra::SiconosVector> forces);
+                        std::shared_ptr<siconos::algebra::MapVectorType> forces);
   /** get the list of possible contacting nodes for a given tag on element.
    **/
   std::shared_ptr<std::list<std::shared_ptr<FENode>>> contactingNodes(int contact_entity_tag);

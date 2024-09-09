@@ -1561,7 +1561,7 @@ void siconos::integrators::MoreauJeanOSI::integrate(double &tinit, double &tend,
         siconos::algebra::prod(-h, *K, qold, v, false);  // v += -h*K*qi
       }
 
-      std::shared_ptr<siconos::algebra::SiconosVector> Fext = d->fExt();
+      std::shared_ptr<siconos::algebra::MapVectorType> Fext = d->fExt();
       if (Fext) {
         // computes Fext(ti)
         d->computeFExt(tinit);

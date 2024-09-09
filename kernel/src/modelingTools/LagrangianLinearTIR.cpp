@@ -37,6 +37,13 @@ siconos::modeling::LagrangianLinearTIR::LagrangianLinearTIR(
   _jachq = C;
 }
 
+// Minimum data (C as Eigen reference) constructor
+siconos::modeling::LagrangianLinearTIR::LagrangianLinearTIR(
+    Eigen::Ref<siconos::algebra::SiconosMatrix>& C)
+    : LagrangianR(RelationSubType::LinearTIR) {
+  _jachq = std::make_shared<siconos::algebra::SiconosMatrix>(C); // TODOSAM : here we copy data and we shouldn't !!! Do we need to change _jachq type ?
+}
+
 // Constructor from a complete set of data
 siconos::modeling::LagrangianLinearTIR::LagrangianLinearTIR(
     std::shared_ptr<siconos::algebra::SiconosMatrix> C,
