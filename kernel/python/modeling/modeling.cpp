@@ -32,25 +32,23 @@ PYBIND11_MODULE(modeling, m)
 
   py::class_<siconos::modeling::DynamicalSystem, std::shared_ptr<siconos::modeling::DynamicalSystem>>(m, "DynamicalSystem");
 
-  py::class_<siconos::modeling::SecondOrderDS, std::shared_ptr<siconos::modeling::SecondOrderDS>, siconos::modeling::DynamicalSystem>(m, "SecondOrderDS");
-        // .def("p_wrapper", &siconos::modeling::SecondOrderDS::p_wrapper);
+  py::class_<siconos::modeling::SecondOrderDS, std::shared_ptr<siconos::modeling::SecondOrderDS>, siconos::modeling::DynamicalSystem>(m, "SecondOrderDS")
+        .def("p", &siconos::modeling::SecondOrderDS::p_python, py::return_value_policy::reference_internal);
 
   py::class_<siconos::modeling::LagrangianDS, std::shared_ptr<siconos::modeling::LagrangianDS>, siconos::modeling::SecondOrderDS>(m, "LagrangianDS");
 
   py::class_<siconos::modeling::LagrangianLinearTIDS, std::shared_ptr<siconos::modeling::LagrangianLinearTIDS>, siconos::modeling::SecondOrderDS>(m, "LagrangianLinearTIDS")
       .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>&,
                     Eigen::Ref<siconos::algebra::SiconosVector>&,
-                    Eigen::Ref<siconos::algebra::SiconosMatrix>&>());
-      // .def("setFExtPtr", static_cast<void (siconos::modeling::LagrangianLinearTIDS::*)(VectorWrapper)>(&siconos::modeling::LagrangianLinearTIDS::setFExtPtr))
-      // .def("q_wrapper", &siconos::modeling::LagrangianDS::q_wrapper)
-      // .def("velocity_wrapper", &siconos::modeling::LagrangianDS::velocity_wrapper)
-      // .def("mass_python", &siconos::modeling::LagrangianLinearTIDS::mass_python, py::return_value_policy::reference_internal)
-      // .def("__repr__", [](const siconos::modeling::LagrangianLinearTIDS &a) {
-      //   std::cout << "COUCOU     " <<  (*(a._massMap))(2, 2) << std::endl;
-      //   return "\n";
-      // })
-      // .def("mass2", &siconos::modeling::LagrangianLinearTIDS::mass2, py::return_value_policy::reference_internal);
-
+                    Eigen::Ref<siconos::algebra::SiconosMatrix>&>())
+      .def("setFExt", static_cast<void (siconos::modeling::LagrangianLinearTIDS::*)(Eigen::Ref<siconos::algebra::SiconosVector>&)>(&siconos::modeling::LagrangianLinearTIDS::setFExt))
+      .def("q", &siconos::modeling::LagrangianDS::q_python, py::return_value_policy::reference_internal)
+      .def("velocity", &siconos::modeling::LagrangianDS::velocity_python, py::return_value_policy::reference_internal)
+      .def("__repr__", [](const siconos::modeling::LagrangianLinearTIDS &a) {
+          (a.display());
+        return "\n";
+      });
+      
   py::class_<siconos::modeling::NewtonImpactNSL, std::shared_ptr<siconos::modeling::NewtonImpactNSL>>(m, "NewtonImpactNSL")
       .def(py::init<double>());
 
@@ -59,7 +57,7 @@ PYBIND11_MODULE(modeling, m)
   //                   siconos::modeling::RelationSubType>());
 
   py::class_<siconos::modeling::LagrangianLinearTIR, std::shared_ptr<siconos::modeling::LagrangianLinearTIR>, siconos::modeling::Relation>(m, "LagrangianLinearTIR")
-      // .def(py::init<MatrixWrapper>())
+      .def(py::init<Eigen::Ref<siconos::algebra::SiconosMatrix>&>())
       .def("display", &siconos::modeling::LagrangianLinearTIR::display)
       .def("__repr__", [](const siconos::modeling::LagrangianLinearTIR &a) {
         a.display();
@@ -68,8 +66,8 @@ PYBIND11_MODULE(modeling, m)
 
   py::class_<siconos::modeling::Interaction, std::shared_ptr<siconos::modeling::Interaction>>(m, "Interaction")
       .def(py::init<std::shared_ptr<siconos::modeling::NewtonImpactNSL>,
-                    std::shared_ptr<siconos::modeling::Relation>>());
-      // .def("lambda_wrapper", &siconos::modeling::Interaction::lambda_wrapper);
+                    std::shared_ptr<siconos::modeling::Relation>>())
+      .def("lambda_python", &siconos::modeling::Interaction::lambda_python, py::return_value_policy::reference_internal);
 
   py::class_<siconos::modeling::NonSmoothDynamicalSystem, std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem>>(m, "NonSmoothDynamicalSystem")
       .def(py::init<double,
