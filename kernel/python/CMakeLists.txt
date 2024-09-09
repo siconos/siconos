@@ -25,11 +25,18 @@ pybind11_add_module(nonsmooth_formulations
 
 target_link_libraries(nonsmooth_formulations PUBLIC kernel numerics)
 
+pybind11_add_module(io
+  ${CMAKE_CURRENT_SOURCE_DIR}/io/io.cpp
+)
+
+target_link_libraries(io PUBLIC kernel numerics)
+
 install(TARGETS
   modeling
   integrators
   simulation
   nonsmooth_formulations
+  io
   COMPONENT python
   LIBRARY DESTINATION "${SICONOS_PYTHON_INSTALL_DIR}/siconos/"
   )
