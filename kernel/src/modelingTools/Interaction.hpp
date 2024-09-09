@@ -470,6 +470,17 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
     return _lambda[i];
   }
 
+  /** get _lambda[i], derivative number i of input
+   *
+   *  \param i derivative number i of output
+   *  \return pointer on a SiconosVector
+   */
+  inline siconos::algebra::SiconosVector& lambda_python(const unsigned int i) const
+  {
+    assert(_lambda[i]);
+    return *(_lambda[i]);
+  }
+
   /** get all the values of the multiplier lambda stored in memory
    *
    *  \param level
