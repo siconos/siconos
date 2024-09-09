@@ -384,6 +384,7 @@ void siconos::modeling::NewtonEulerDS::setQ0Ptr(
   q0_internal_storage_ = nullptr;
   _q0 = std::make_shared<siconos::algebra::MapVectorType>(newPtr->data(), newPtr->size());
 }
+
 void siconos::modeling::NewtonEulerDS::setVelocity(
     const siconos::algebra::SiconosVector& newValue) {
   if (newValue.size() != _ndof)
