@@ -21,12 +21,12 @@
 
 import numpy as np
 from numpy.linalg import norm
-from siconos.algebra import MatrixWrapper, VectorWrapper, MyVectorClass, MyVectorWrapper, MyEigenClass, MyEigenWrapper
 from siconos.modeling import LagrangianLinearTIDS, NewtonImpactNSL,\
     LagrangianLinearTIR, Interaction, NonSmoothDynamicalSystem
 from siconos.integrators import MoreauJeanOSI
 from siconos.simulation import TimeDiscretisation, TimeStepping
 from siconos.nonsmooth_formulations import LCP
+from siconos.io import readMatrixFromFile
 
 
 t0 = 0.       # start time
@@ -43,179 +43,146 @@ theta = 0.5  # theta scheme
 #
 initial_position_np = np.array([1, 0, 0], dtype=np.float64, order='F')
 initial_velocity_np = np.array([0, 0, 0], dtype=np.float64, order='F')
-mass_np = np.eye(10000, dtype=np.float64, order='F')
-mass_np[...] = 2. / 5 * r * r
+mass_np = np.eye(3, dtype=np.float64, order='F')
+mass_np[2, 2] = 2. / 5 * r * r
 
 
 ball = LagrangianLinearTIDS(initial_position_np, initial_velocity_np, mass_np)
 
-a = 3
-# mass_np = ball.mass_python()
-mass_np[2, 2] = 27.
 print(ball)
-# print(ball.mass_python()[2,2])
 
-# a = 1
+
 
 # # set external forces
-# weight_np = np.array([-m * g, 0, 0], dtype=np.float64, order='F')
-# weight_eigen = VectorWrapper(weight_np)
-# ball.setFExtPtr(weight_eigen)
+weight_np = np.array([-m * g, 0, 0], dtype=np.float64, order='F')
+ball.setFExt(weight_np)
 
-# #
-# # Interactions
-# #
+#
+# Interactions
+#
 
-# # ball-floor
-# H_np = np.array([[1, 0, 0]], dtype=np.float64, order='F')
-# H_eigen = MatrixWrapper(H_np)
+# ball-floor
+H_np = np.array([[1, 0, 0]], dtype=np.float64, order='F')
 
-# nslaw = NewtonImpactNSL(e)
-# relation = LagrangianLinearTIR(H_eigen)
-# inter = Interaction(nslaw, relation)
-# # print(relation)
+nslaw = NewtonImpactNSL(e)
+relation = LagrangianLinearTIR(H_np)
+inter = Interaction(nslaw, relation)
+print(relation)
 
-# #
-# # Model
-# #
-# bouncingBall = NonSmoothDynamicalSystem(t0, T)
+#
+# Model
+#
+bouncingBall = NonSmoothDynamicalSystem(t0, T)
 
 # # add the dynamical system to the non smooth dynamical system
-# bouncingBall.insertDynamicalSystem(ball)
+bouncingBall.insertDynamicalSystem(ball)
 
 # # link the interaction and the dynamical system
-# bouncingBall.link(inter, ball)
+bouncingBall.link(inter, ball)
 
-# # print(bouncingBall)
+print(bouncingBall)
 
 # # Simulation
 
 # (1) OneStepIntegrators
-# print(" =====")
-
 OSI = MoreauJeanOSI(theta)
-OSI.tonche_mass(ball)
-print(ball)
-print(" =====")
-# OSI.tonche_mass(ball)
-print(mass_np[2, 2])
+
+# (2) Time discretisation --
+t = TimeDiscretisation(t0, h)
+
+# (3) one step non smooth problem
+osnspb = LCP()
+
+# (4) Simulation setup with (1) (2) (3)
+s = TimeStepping(bouncingBall,t, OSI, osnspb)
+
+print(OSI)
+
+# end of model definition
+
+#
+# computation
+#
 
 
-      
-mm = ball.mass2()
+# the number of time steps
+N = int((T - t0) / h)
 
-print("dsldksldslds", mm[2,2])
+# Get the values to be plotted
+# ->saved in a matrix dataPlot
 
-a = 4
-
-
-mm[3,4] = 127
-
-print(ball.mass2()[3,4])
+dataPlot = np.zeros((N+1, 5))
 
 
-# # (2) Time discretisation --
-# t = TimeDiscretisation(t0, h)
+# numpy pointers on dense Siconos vectors
 
-# # (3) one step non smooth problem
-# osnspb = LCP()
-
-# # (4) Simulation setup with (1) (2) (3)
-# s = TimeStepping(bouncingBall,t, OSI, osnspb)
-
-# # print(OSI)
-
-# # end of model definition
-
-# #
-# # computation
-# #
-
-
-# # the number of time steps
-# N = int((T - t0) / h)
-
-# # Get the values to be plotted
-# # ->saved in a matrix dataPlot
-
-# dataPlot = np.zeros((N+1, 5))
-
-
-# # numpy pointers on dense Siconos vectors
-
-# q = ball.q_wrapper().get_vector()
-# v = ball.velocity_wrapper().get_vector()
-# p = ball.p_wrapper(1).get_vector()
-# lambda_ = inter.lambda_wrapper(1).get_vector()
+q = ball.q()
+v = ball.velocity()
+p = ball.p(1)
+lambda_p = inter.lambda_python(1)
 
 
 
-# # initial data
+# initial data
 
-# dataPlot[0, 0] = t0
-# dataPlot[0, 1] = q[0]
-# dataPlot[0, 2] = v[0]
-# dataPlot[0, 3] = p[0]
-# dataPlot[0, 4] = lambda_[0]
+dataPlot[0, 0] = t0
+dataPlot[0, 1] = q[0]
+dataPlot[0, 2] = v[0]
+dataPlot[0, 3] = p[0]
+dataPlot[0, 4] = lambda_p[0]
 
-# k = 1
+k = 1
 
-# # time loop
-# while s.hasNextEvent():
-#     s.computeOneStep()
+# time loop
+while s.hasNextEvent():
+    s.computeOneStep()
 
-#     # q = ball.q_wrapper().get_vector()
-#     # v = ball.velocity_wrapper().get_vector()
-#     # p = ball.p_wrapper(1).get_vector()
-#     # lambda_ = inter.lambda_wrapper(1).get_vector()
+    dataPlot[k, 0] = s.nextTime()
+    dataPlot[k, 1] = q[0]
+    dataPlot[k, 2] = v[0]
+    dataPlot[k, 3] = p[0]
+    dataPlot[k, 4] = lambda_p[0]
 
-#     # print(id(q))
+    k += 1
+    s.nextStep()
 
-#     dataPlot[k, 0] = s.nextTime()
-#     dataPlot[k, 1] = q[0]
-#     dataPlot[k, 2] = v[0]
-#     dataPlot[k, 3] = p[0]
-#     dataPlot[k, 4] = lambda_[0]
+#
+# comparison with the reference file
+#
+ref = readMatrixFromFile("kernel/swig/tests/data/BouncingBallTS.ref")
 
-#     k += 1
-#     s.nextStep()
+error = norm(dataPlot - ref)
+if ((error) > 1e-12):
+    print("Warning. The result is rather different from the reference file.")
+print("error : " +  str(error))
 
-# #
-# # comparison with the reference file
-# #
-# # ref = getMatrix(SimpleMatrix("BouncingBallTS.ref"))
+#
+# plots
+#
+import matplotlib,os
+havedisplay = "DISPLAY" in os.environ
+if not havedisplay:
+    matplotlib.use('Agg')
 
-# # if (norm(dataPlot - ref) > 1e-12):
-# #     print("Warning. The result is rather different from the reference file.")
+import matplotlib.pyplot as plt
+plt.subplot(411)
+plt.title('position')
+plt.plot(dataPlot[:, 0], dataPlot[:, 1])
+plt.grid()
+plt.subplot(412)
+plt.title('velocity')
+plt.plot(dataPlot[:, 0], dataPlot[:, 2])
+plt.grid()
+plt.subplot(413)
+plt.plot(dataPlot[:, 0], dataPlot[:, 3])
+plt.title('reaction')
+plt.grid()
+plt.subplot(414)
+plt.plot(dataPlot[:, 0], dataPlot[:, 4])
+plt.title('lambda')
+plt.grid()
 
-
-# #
-# # plots
-# #
-# import matplotlib,os
-# havedisplay = "DISPLAY" in os.environ
-# if not havedisplay:
-#     matplotlib.use('Agg')
-
-# import matplotlib.pyplot as plt
-# plt.subplot(411)
-# plt.title('position')
-# plt.plot(dataPlot[:, 0], dataPlot[:, 1])
-# plt.grid()
-# plt.subplot(412)
-# plt.title('velocity')
-# plt.plot(dataPlot[:, 0], dataPlot[:, 2])
-# plt.grid()
-# plt.subplot(413)
-# plt.plot(dataPlot[:, 0], dataPlot[:, 3])
-# plt.title('reaction')
-# plt.grid()
-# plt.subplot(414)
-# plt.plot(dataPlot[:, 0], dataPlot[:, 4])
-# plt.title('lambda')
-# plt.grid()
-
-# if havedisplay:
-#     plt.show()
-# # else:
-#     # plt.savefig("bbts.png")
+if havedisplay:
+    plt.show()
+# else:
+    # plt.savefig("bbts.png")
