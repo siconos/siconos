@@ -27,7 +27,7 @@
 namespace py = pybind11;
 
 
-PYBIND11_MODULE(io, m)
+PYBIND11_MODULE(input, m)
 {
     m.doc() = "Siconos nonsmooth io module";
 

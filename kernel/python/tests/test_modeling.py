@@ -27,23 +27,14 @@ tol = np.finfo(np.double).eps
 
 def test_LagrangianLinearTIDS():
     size = 10
-    q0 = alg.SiconosVector(size=size, storage_type=alg.UblasType.dense)
-    v0 = alg.SiconosVector(size=size, storage_type=alg.UblasType.dense)
-    mass = alg.SimpleMatrix(row=size, col=size, storage_type=alg.UblasType.dense)
-    # With numpy array
+    q0 = np.zeros(size, dtype=np.float64)
+    v0 = np.zeros_like(q0)
+    mass = np.zeros((size,size), dtype=np.float64)
     ball = mod.LagrangianLinearTIDS(q, v0, mass);
-    mg = alg.SiconosVector(size=size)
-    mgn = np.array(mg, copy=False)
-    mgn[...] = 10.1
-    ball.fext = mg
+    mg = np.zeros_like(q0)
+    mg[...] = 10.1
+    ball.setConstantFext(mg)
     ball.computeForces(3., q0, v0)
-    print(q.data)
-    alg.numpy_to_vec(q)
-    # assert np.allclose(ball.q(), q, rtol=tol, atol=tol)
-    # assert np.allclose(ball.velocity(), v, rtol=tol, atol=tol)
-    # assert np.allclose(ball.mass(), mass, rtol=tol, atol=tol)
-    # ball.setFExtPtr(weight)
-    # assert np.allclose(ball.fExt(), weight, rtol=tol, atol=tol)
 
 
 def test_NewtonImpactNSL():
