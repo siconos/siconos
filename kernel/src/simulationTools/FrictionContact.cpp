@@ -120,7 +120,7 @@ siconos::nonsmooth_formulations::FrictionContact::frictionContactProblem() {
 //   numerics_problem->dimension = _contactProblemDim;
 //   numerics_problem->numberOfContacts = _sizeOutput / _contactProblemDim;
 //   numerics_problem->M = &*_M->numericsMatrix();
-//   numerics_problem->q = &*_q->getArray();
+//   numerics_problem->q = &*_q->data();
 //   numerics_problem->mu = _mu->data();
 //   return numerics_problem;
 // }

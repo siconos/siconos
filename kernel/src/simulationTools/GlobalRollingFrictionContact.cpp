@@ -86,8 +86,8 @@ std::shared_ptr<GlobalRollingFrictionContactProblem> siconos::nonsmooth_formulat
 //   GlobalRollingFrictionContactProblem* numerics_problem = &_numerics_problem;
 //   numerics_problem->M = &*_W->numericsMatrix();
 //   numerics_problem->H = &*_H->numericsMatrix();
-//   numerics_problem->q = _q->getArray();
-//   numerics_problem->b = _b->getArray();
+//   numerics_problem->q = _q->data();
+//   numerics_problem->b = _b->data();
 //   numerics_problem->numberOfContacts = _sizeOutput / _contactProblemDim;
 //   numerics_problem->mu = _mu->data();
 //   numerics_problem->mu_r = _mu_r->data();

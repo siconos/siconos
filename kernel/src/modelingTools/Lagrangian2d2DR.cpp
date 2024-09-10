@@ -204,16 +204,16 @@ void siconos::modeling::Lagrangian2d2DR::display() const {
 //       // direct prod to save time
 //       //siconos::algebra::prod(*_jachq, *DSlink[LagrangianR::q1], y);
 
-//       double * A = &*_jachq->getArray();
+//       double * A = &*_jachq->data();
 //       std::shared_ptr<siconos::algebra::BlockVector> v = DSlink[LagrangianR::q1];
-//       double *  v_ds_1 = v->vector(0)->getArray();
+//       double *  v_ds_1 = v->vector(0)->data();
 
 //       y(0)= A[0]* v_ds_1[0] + A[2]* v_ds_1[1]  + A[4]* v_ds_1[2];
 //       y(1)= A[1]* v_ds_1[0] + A[3]* v_ds_1[1]  + A[5]* v_ds_1[2];
 
 //       if (v ->numberOfBlocks() >1 )
 //       {
-//         double *  v_ds_2 = v->vector(1)->getArray();
+//         double *  v_ds_2 = v->vector(1)->data();
 //         y(0) += A[6]* v_ds_2[0] + A[8]* v_ds_2[1]  + A[10]* v_ds_2[2];
 //         y(1) += A[7]* v_ds_2[0] + A[9]* v_ds_2[1]  + A[11]* v_ds_2[2];
 
@@ -260,7 +260,7 @@ void siconos::modeling::Lagrangian2d2DR::display() const {
 //   // data[name] += trans(G) * lambda
 //   //siconos::algebra::prod(lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
 
-//   double * A = &*_jachq->getArray();
+//   double * A = &*_jachq->data();
 //   std::shared_ptr<siconos::algebra::BlockVector> v = DSlink[LagrangianR::q1];
 //   int v_size= v->size();
 //   for (unsigned int i =0; i < 2; i++)

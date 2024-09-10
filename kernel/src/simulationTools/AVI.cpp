@@ -57,8 +57,8 @@
 //     _numerics_problem->poly->id = SICONOS_SET_POLYHEDRON;
 //     _numerics_problem->poly->size_ineq = K.size();
 //     _numerics_problem->poly->size_eq = 0;
-//     _numerics_problem->poly->H = H.getArray();
-//     _numerics_problem->poly->K = K.getArray();
+//     _numerics_problem->poly->H = H.data();
+//     _numerics_problem->poly->K = K.data();
 //     _numerics_problem->poly->Heq = nullptr;
 //     _numerics_problem->poly->Keq = nullptr;
 //   }
