@@ -12,14 +12,14 @@ Rules:
 
 * define a control manager linked to an EXISTING model::
 
-    SP::ControlManager cm(new ControlManager(myModel));
+    auto cm = std::make_shared<siconos::control::ControlManager>(myModel);
 
 * add Sensors and Actuators to this manager::
 
-    SP::TimeDiscretisation t1(t0,h);	
-    SP::Sensor s1 = cm->addSensor(typeS1,t1);
-    SP::TimeDiscretisation t2(t0,h);	
-    SP::Actuator a1 = cm->addActuator(typeA1,t2);
+    auto t1 = std::make_shared<siconos::simulation::TimeDiscretisation>(t0,h);	
+    auto s1 = cm->addSensor(typeS1,t1);
+    auto t2 = std::make_shared<siconos::simulation::TimeDiscretisation>(t0,h);	
+    auto a1 = cm->addActuator(typeA1,t2);
     // ... 
 
 typeS1 and typeA1 are integers which represent the type of the Sensor/Actuator. See corresponding

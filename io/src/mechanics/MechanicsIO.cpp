@@ -766,7 +766,7 @@ std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::conta
     DEBUG_EXPR(result->display(););
     return result;
   }
-  DEBUG_END("SP::SiconosMatrix MechanicsIO::contactInfo");
+  DEBUG_END(" MechanicsIO::contactInfo");
 
   return nullptr;
 }
@@ -973,7 +973,7 @@ std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::conta
     DEBUG_EXPR(result->display(););
     return result;
   }
-  DEBUG_END("SP::SiconosMatrix MechanicsIO::contactContactWork");
+  DEBUG_END("MechanicsIO::contactContactWork");
 
   // result->display();
   return nullptr;

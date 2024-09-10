@@ -29,7 +29,7 @@
 
 #include <boost/archive/binary_iarchive.hpp>
 
-void RegisterSimulationIbin(std::ifstream& ifs, SP::Simulation& sim)
+void RegisterSimulationIbin(std::ifstream& ifs, std::shared_ptr<siconos::simulation::Simulation>& sim)
 {
   boost::archive::binary_iarchive ar(ifs);
   siconos_io_register_Numerics(ar);

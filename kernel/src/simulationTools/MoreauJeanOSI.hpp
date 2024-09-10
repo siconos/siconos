@@ -548,8 +548,7 @@ class MoreauJeanOSI : public OneStepIntegrator {
    */
   void updateState(const unsigned int level) override;
 
-  /** Compute the matrix of work of forces by ds
-     \return SP::Siconosmatrix
+  /** \return the  work of forces by ds
    */
   std::shared_ptr<siconos::algebra::SiconosMatrix> computeWorkForces();
 

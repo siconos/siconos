@@ -182,7 +182,7 @@ PY_FULL_REGISTER(OccSpaceFilter, Mechanics);
   #include <BRepAdaptor_Surface.hxx>
 
   /* fix: use generated dynamic casting instead! */
-  SP::OccBody cast_OccBody(std::shared_ptr<siconos::modeling::DynamicalSystem> ds)
+  std::shared_ptr<siconos::mechanics::occ::OccBody> cast_OccBody(std::shared_ptr<siconos::modeling::DynamicalSystem> ds)
   {
     return std::dynamic_pointer_cast<OccBody>(ds);
   };

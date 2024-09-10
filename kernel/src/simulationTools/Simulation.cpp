@@ -225,7 +225,7 @@ void siconos::simulation::Simulation::applyNSDSChangelogForDS() {
     }
     // else if(change.typeOfChange == NonSmoothDynamicalSystem::addInteraction)
     // {
-    //   SP::Interaction inter = change.i;
+    //   auto inter = change.i;
     //   initializeInteraction(getTk(), inter);
     //   interactionInitialized = true;
     // }
@@ -280,14 +280,14 @@ void siconos::simulation::Simulation::initializeNSDSChangelog() {
     DEBUG_EXPR(change.display());
     // if(change.typeOfChange == NonSmoothDynamicalSystem::addDynamicalSystem)
     // {
-    //   SP::DynamicalSystem ds = change.ds;
+    //   auto ds = change.ds;
     //   if(!DSG->properties(DSG->descriptor(ds)).osi)
     //   {
     //     if(_allOSI->size() == 0)
     //       THROW_EXCEPTION
     //       ("Simulation::initialize - there is no osi in this Simulation !!");
     //     DEBUG_PRINTF("_allOSI->size() = %lu\n", _allOSI->size());
-    //     SP::OneStepIntegrator osi_default = *_allOSI->begin();
+    //     auto osi_default = *_allOSI->begin();
     //     _nsds->topology()->setOSI(ds, osi_default);
     //     if(_allOSI->size() > 1)
     //     {

@@ -262,7 +262,7 @@ class ControlManager {
    *  \param td the std::shared_ptr<siconos::simulation::TimeDiscretisation> of the Observer
    *  \param sensor the ControlSensor feeding the Observer
    *  \param xHat0 the initial guess for the state
-   *  \return a SP::ACtuator to the added Observer
+   *  \return the added Observer
    */
   std::shared_ptr<Observer> addObserver(
       ObserverType name, std::shared_ptr<siconos::simulation::TimeDiscretisation> td,

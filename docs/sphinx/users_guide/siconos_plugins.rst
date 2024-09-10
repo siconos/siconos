@@ -65,7 +65,7 @@ Then cpp input file looks like::
   double mu , lambda;
   // ... give mu and lambda the required values
   // ... declare and built your dynamical system
-  SP::DynamicalSystem lds(new LagrangianDS(...));
+  auto lds = std::make_shared<siconos::modeling::LagrangianDS>(...);
   // Link with the plug-in function
   lds->setComputeFExtFunction("myPlugin.so", "myFExt");
 
@@ -81,8 +81,8 @@ Then cpp input file looks like::
   // this won't affect param values inside the dynamical system. 
   //
   //=== Second way, with setZPtr function (pointer link) ===
-  // declare and built a pointer to SimpleVector of size 2
-  SP::SimpleVector myZPtr(new SimpleVector(2));
+  //:SimpleVector declare and built a pointer to SimpleVector of size 2
+  auto myZPtr = std::make_shared<siconos::algebra::SimpleVector>(2);
   (*myZPtr)(0) = mu;
   (*myZPtr)(1) = lambda;
 

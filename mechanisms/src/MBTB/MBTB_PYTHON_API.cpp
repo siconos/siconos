@@ -341,7 +341,7 @@ void siconos::mechanisms::MBTB_BodyBuild(
   }
   // set boundary condition
   if (pluginBoundaryConditionFct.length() > 1) {
-    // SP::IndexInt bdindex(new IndexInt(1));
+    // auto bdindex(new IndexInt(1));
     //(*bdindex)[0] = 4;
     DEBUG_PRINT("################################################################\n");
 

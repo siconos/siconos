@@ -66,6 +66,7 @@ string(TIMESTAMP BUILD_TIMESTAMP)
 # --> look for python framework when all other possibilities failed.
 include(FindPythonModule)
 set(CMAKE_FIND_FRAMEWORK LAST)
+
 if(WITH_PYTHON_WRAPPER)
   find_package(Python COMPONENTS Development Interpreter NumPy REQUIRED)
 elseif(WITH_PYB11_WRAPPER)

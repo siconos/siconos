@@ -29,7 +29,7 @@
 
 #include <boost/archive/binary_oarchive.hpp>
 
-void RegisterSimulationObin(std::ofstream& ofs, SP::Simulation& sim)
+void RegisterSimulationObin(std::ofstream& ofs, std::shared_ptr<siconos::simulation::Simulation>& sim)
 {
   boost::archive::binary_oarchive ar(ofs);
   siconos_io_register_Numerics(ar);

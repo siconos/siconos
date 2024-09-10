@@ -169,9 +169,9 @@ REF_PTR(TYPE);
 //  // %typemap(directorin) (TYPE&) ()
 //  // swig issue shared pointer check in wrappers even if arg is a ref
 //  {
-//    SP::TYPE myptemp(createSPtr##TYPE($1));
+//    std::shared_ptr<TYPE> myptemp(createSPtr##TYPE($1));
 //    $input = SWIG_NewPointerObj(SWIG_as_voidptr(&myptemp),
-//                                $descriptor(SP::TYPE *), 0);
+//                                $descriptor(std::shared_ptr<TYPE>  *), 0);
 //  }
 //%}
 //
@@ -180,9 +180,9 @@ REF_PTR(TYPE);
 //  // %typemap(directorout) (TYPE&) ()
 //  // swig issue shared pointer check in wrappers even if arg is a ref
 //  {
-//    SP::TYPE myptemp(createSPtr##TYPE($1));
+//    std::shared_ptr<TYPE>  myptemp(createSPtr##TYPE($1));
 //    $result = SWIG_NewPointerObj(SWIG_as_voidptr(&myptemp),
-//                                 $descriptor(SP::TYPE *), 0);
+//                                 $descriptor(std::shared_ptr<TYPE>  *), 0);
 //  }
 //%}
 //
@@ -356,7 +356,7 @@ static inline void fillBasePyarray(PyObject* pyarray, SharedPointerKeeper* saved
   if (SWIG_IsNewObj(res)) { delete ptr; };
   if (!state)
   {
-    int swig_res = SWIG_ConvertPtr($input, (void **) (&ptr), $descriptor(SP::TYPE *), 0);
+    int swig_res = SWIG_ConvertPtr($input, (void **) (&ptr), $descriptor(std::shared_ptr<TYPE> *), 0);
     state = SWIG_CheckState(swig_res);
     if (SWIG_IsNewObj(swig_res)) { delete ptr; };
   }
@@ -379,7 +379,7 @@ static inline void fillBasePyarray(PyObject* pyarray, SharedPointerKeeper* saved
   }
   if (!state)
   {
-    int swig_res = SWIG_ConvertPtr($input, (void **) (&ptr), $descriptor(SP::TYPE *), 0);
+    int swig_res = SWIG_ConvertPtr($input, (void **) (&ptr), $descriptor(std::shared_ptr<TYPE> *), 0);
     state = SWIG_CheckState(swig_res);
     if (SWIG_IsNewObj(swig_res)) { delete ptr; };
   }
@@ -420,7 +420,7 @@ struct IsDense : public Question<bool>
     return larray;
   }
 
-  PyObject * SP_SiconosVector_to_numpy(SP::SiconosVector v)
+  PyObject * SP_SiconosVector_to_numpy(std::shared_ptr<siconos::algebra::SiconosVector> v)
   {
     npy_intp this_vector_dim[1];
     this_vector_dim[0] = v->size();
@@ -430,10 +430,10 @@ struct IsDense : public Question<bool>
     return lresult;
   }
 
-  SP::SiconosVector SP_SiconosVector_from_numpy(PyObject* vec, PyArrayObject** array_p, int* is_new_object)
+  std::shared_ptr<siconos::algebra::SiconosVector> SP_SiconosVector_from_numpy(PyObject* vec, PyArrayObject** array_p, int* is_new_object)
   {
     if (vec==Py_None)
-      return SP::SiconosVector();
+      return std::shared_ptr<siconos::algebra::SiconosVector>();
 
     PyArrayObject* array = obj_to_array_fortran_allow_conversion(vec, NPY_DOUBLE, is_new_object);
 
@@ -451,8 +451,8 @@ struct IsDense : public Question<bool>
       return std::shared_ptr<SiconosVector>();
     }
 
-    SP::SiconosVector tmp;
-    tmp.reset(new SiconosVector(array_size(array,0)));
+    auto tmp =  std::make_shared<siconos::algebra::SiconosVector>(array_size(array,0));
+
     // copy : with SiconosVector based on resizable std::vector there is
     // no other way
     memcpy(tmp->getArray(),array_data(array),array_size(array,0)*sizeof(double));
@@ -462,7 +462,7 @@ struct IsDense : public Question<bool>
     return tmp;
   }
 
-  SP::SiconosVector SP_SiconosVector_in(PyObject* vec, PyArrayObject** array_p, int* is_new_object)
+  std::shared_ptr<siconos::algebra::SiconosVector> SP_SiconosVector_in(PyObject* vec, PyArrayObject** array_p, int* is_new_object)
   {
     void *argp1=0;
     int res1=0;
@@ -492,7 +492,7 @@ struct IsDense : public Question<bool>
     }
   }
 
-  SiconosVector* SiconosVector_in(PyObject* vec, PyArrayObject** array_p, int* is_new_object, std::vector<SP::SiconosVector>& keeper)
+  SiconosVector* SiconosVector_in(PyObject* vec, PyArrayObject** array_p, int* is_new_object, std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>& keeper)
   {
     void *argp1=0;
     int res0=0;
@@ -521,13 +521,13 @@ struct IsDense : public Question<bool>
     }
     else
     {
-      SP::SiconosVector tmp = SP_SiconosVector_from_numpy(vec, array_p, is_new_object);
+      auto tmp = SP_SiconosVector_from_numpy(vec, array_p, is_new_object);
       keeper.push_back(tmp);
       return tmp.get();
     }
   }
 
-  PyObject * SP_SiconosVector_directorin(SP::SiconosVector v)
+  PyObject * SP_SiconosVector_directorin(std::shared_ptr<siconos::algebra::SiconosVector> v)
   {
     if(v)
     {
@@ -538,7 +538,7 @@ struct IsDense : public Question<bool>
       else
       {
         // not a dense vector : no conversion
-        return SWIG_NewPointerObj(SWIG_as_voidptr(&v), $descriptor(SP::SiconosVector *),  0 );
+        return SWIG_NewPointerObj(SWIG_as_voidptr(&v), $descriptor(std::shared_ptr<siconos::algebra::SiconosVector> *),  0 );
       }
     }
     else
@@ -548,13 +548,13 @@ struct IsDense : public Question<bool>
     }
   }
 
-  PyObject * SP_SiconosVector_out(SP::SiconosVector result, bool l_upcall)
+  PyObject * SP_SiconosVector_out(std::shared_ptr<siconos::algebra::SiconosVector> result, bool l_upcall)
   {
     // call from director?
     if (l_upcall)
     {
       // result from C++ method, return the pointer
-      return SWIG_NewPointerObj(SWIG_as_voidptr(&result), $descriptor(SP::SiconosVector *),  0 );
+      return SWIG_NewPointerObj(SWIG_as_voidptr(&result), $descriptor(std::shared_ptr<siconos::algebra::SiconosVector> *),  0 );
     }
     // call from python : return numpy from SiconosVector
     else
@@ -573,13 +573,13 @@ struct IsDense : public Question<bool>
     }
   }
 
-  SP::SiconosVector SiconosVector_from_python(PyObject* obj)
+  std::shared_ptr<siconos::algebra::SiconosVector> SiconosVector_from_python(PyObject* obj)
   {
     void * swig_argp = NULL;
-    SP::SiconosVector c_result;
+    std::shared_ptr<siconos::algebra::SiconosVector> c_result;
 
-    // try a conversion from SP::SiconosVector
-    int swig_res = SWIG_ConvertPtr(obj, &swig_argp, $descriptor(SP::SiconosVector *),  0  | 0);
+    // try a conversion from std::shared_ptr<siconos::algebra::SiconosVector>
+    int swig_res = SWIG_ConvertPtr(obj, &swig_argp, $descriptor(std::shared_ptr<siconos::algebra::SiconosVector> *),  0  | 0);
 
     if (!SWIG_IsOK(swig_res))
     {
@@ -591,8 +591,8 @@ struct IsDense : public Question<bool>
     }
     else if (swig_argp)
     {
-      c_result = *(reinterpret_cast< SP::SiconosVector * >(swig_argp));
-      if (SWIG_IsNewObj(swig_res)) delete reinterpret_cast< SP::SiconosVector * >(swig_argp);
+      c_result = *(reinterpret_cast< std::shared_ptr<siconos::algebra::SiconosVector> * >(swig_argp));
+      if (SWIG_IsNewObj(swig_res)) delete reinterpret_cast< std::shared_ptr<siconos::algebra::SiconosVector> * >(swig_argp);
     }
     return c_result;
   }
@@ -613,7 +613,7 @@ struct IsDense : public Question<bool>
   }
 
 
-  PyObject * SP_BlockVector_to_numpy(SP::BlockVector v)
+  PyObject * SP_BlockVector_to_numpy(std::shared_ptr<siconos::algebra::BlockVector> v)
   {
     return SP_SiconosVector_to_numpy(v->toSiconosVector());
   }
@@ -660,7 +660,7 @@ struct IsDense : public Question<bool>
     }
   }
 
-  PyObject* SiconosMatrix_to_numpy(SP::SimpleMatrix m)
+  PyObject* SiconosMatrix_to_numpy(std::shared_ptr<siconos::algebra::SimpleMatrix> m)
   {
     if (m && m->size(0) > 0 && m->size(1) > 0)
     {
@@ -677,7 +677,7 @@ struct IsDense : public Question<bool>
       else
       {
         // not a dense matrix : no conversion
-        return SWIG_NewPointerObj(SWIG_as_voidptr(&m), $descriptor(SP::SimpleMatrix *),  0 );
+        return SWIG_NewPointerObj(SWIG_as_voidptr(&m), $descriptor(std::shared_ptr<siconos::algebra::SimpleMatrix> *),  0 );
       }
     }
     else
@@ -687,7 +687,7 @@ struct IsDense : public Question<bool>
     }
   }
 
-  PyObject* SiconosMatrix_to_numpy(SP::SiconosMatrix m)
+  PyObject* SiconosMatrix_to_numpy(std::shared_ptr<siconos::algebra::SiconosMatrix> m)
   {
     if (m && m->size(0) > 0 && m->size(1) > 0)
     {
@@ -704,7 +704,7 @@ struct IsDense : public Question<bool>
       else
       {
         // not a dense matrix : no conversion
-        return SWIG_NewPointerObj(SWIG_as_voidptr(&m), $descriptor(SP::SiconosMatrix *),  0 );
+        return SWIG_NewPointerObj(SWIG_as_voidptr(&m), $descriptor(std::shared_ptr<siconos::algebra::SiconosMatrix> *),  0 );
       }
     }
     else
@@ -714,12 +714,12 @@ struct IsDense : public Question<bool>
     }
   }
 
-  PyObject* SiconosMatrix_to_numpy(SP::SimpleMatrix m, bool l_upcall)
+  PyObject* SiconosMatrix_to_numpy(std::shared_ptr<siconos::algebra::SimpleMatrix> m, bool l_upcall)
   {
     if (l_upcall)
     {
       // result from C++ method, return the pointer
-      return SWIG_NewPointerObj(SWIG_as_voidptr(&m), $descriptor(SP::SimpleMatrix *),  0 );
+      return SWIG_NewPointerObj(SWIG_as_voidptr(&m), $descriptor(std::shared_ptr<siconos::algebra::SimpleMatrix> *),  0 );
     }
     // call from python : return numpy from SiconosMatrix
     else
@@ -728,12 +728,12 @@ struct IsDense : public Question<bool>
     }
   }
 
-  PyObject* SiconosMatrix_to_numpy(SP::SiconosMatrix m, bool l_upcall)
+  PyObject* SiconosMatrix_to_numpy(std::shared_ptr<siconos::algebra::SiconosMatrix> m, bool l_upcall)
   {
     if (l_upcall)
     {
       // result from C++ method, return the pointer
-      return SWIG_NewPointerObj(SWIG_as_voidptr(&m), $descriptor(SP::SiconosMatrix *),  0 );
+      return SWIG_NewPointerObj(SWIG_as_voidptr(&m), $descriptor(std::shared_ptr<siconos::algebra::SiconosMatrix> *),  0 );
     }
     // call from python : return numpy from SiconosMatrix
     else
@@ -742,10 +742,10 @@ struct IsDense : public Question<bool>
     }
   }
 
-  SP::SimpleMatrix SimpleMatrix_from_numpy(PyObject* obj, PyArrayObject** array_p, int* is_new_object)
+  std::shared_ptr<siconos::algebra::SimpleMatrix> SimpleMatrix_from_numpy(PyObject* obj, PyArrayObject** array_p, int* is_new_object)
   {
     // if (obj==Py_None)
-    //   return SP::SimpleMatrix();
+    //   return std::shared_ptr<siconos::algebra::SimpleMatrix>();
 
     PyArrayObject* array = obj_to_array_fortran_allow_conversion(obj, NPY_DOUBLE, is_new_object);
     if (!array)
@@ -763,7 +763,7 @@ struct IsDense : public Question<bool>
       return std::shared_ptr<SimpleMatrix>();
     }
 
-    SP::SimpleMatrix result = SP::SimpleMatrix(new SimpleMatrix(array_size(array,0), array_size(array,1)));
+  auto result = std::shared_ptr<siconos::algebra::SimpleMatrix>(new SimpleMatrix(array_size(array,0), array_size(array,1)));
     // copy this is due to SimpleMatrix based on resizable std::vector
     memcpy(result->getArray(), array_data(array), array_size(array,0)*array_size(array,1)*sizeof(double));
     // for cleanup
@@ -771,65 +771,65 @@ struct IsDense : public Question<bool>
     return result;
   }
 
-  SP::SimpleMatrix SimpleMatrix_from_python(PyObject* obj, PyArrayObject** array_p, int* is_new_object)
+  std::shared_ptr<siconos::algebra::SimpleMatrix> SimpleMatrix_from_python(PyObject* obj, PyArrayObject** array_p, int* is_new_object)
   {
     void * swig_argp;
-    SP::SimpleMatrix c_result;
-    int swig_res = SWIG_ConvertPtr(obj, &swig_argp, $descriptor(SP::SimpleMatrix *),  0  | 0);
+    std::shared_ptr<siconos::algebra::SimpleMatrix> c_result;
+    int swig_res = SWIG_ConvertPtr(obj, &swig_argp, $descriptor(std::shared_ptr<siconos::algebra::SimpleMatrix> *),  0  | 0);
 
     if (!SWIG_IsOK(swig_res))
     {
       // try a conversion from numpy
       c_result = SimpleMatrix_from_numpy(obj, array_p, is_new_object);
-      //if (!c_result) { return SP::SimpleMatrix(); }
+      //if (!c_result) { return std::shared_ptr<siconos::algebra::SimpleMatrix>(); }
     }
     else if (swig_argp)
     {
-      c_result = *(reinterpret_cast< SP::SimpleMatrix * >(swig_argp));
-      if (SWIG_IsNewObj(swig_res)) delete reinterpret_cast< SP::SimpleMatrix * >(swig_argp);
+      c_result = *(reinterpret_cast< std::shared_ptr<siconos::algebra::SimpleMatrix> * >(swig_argp));
+      if (SWIG_IsNewObj(swig_res)) delete reinterpret_cast< std::shared_ptr<siconos::algebra::SimpleMatrix> * >(swig_argp);
     }
     return c_result;
   }
 
-   SP::SiconosMatrix SiconosMatrix_from_python(PyObject* obj, PyArrayObject** array_p, int* is_new_object)
+   std::shared_ptr<siconos::algebra::SiconosMatrix> SiconosMatrix_from_python(PyObject* obj, PyArrayObject** array_p, int* is_new_object)
   {
     void * swig_argp;
-    SP::SiconosMatrix c_result;
-    int swig_res = SWIG_ConvertPtr(obj, &swig_argp, $descriptor(SP::SiconosMatrix *),  0  | 0);
+    std::shared_ptr<siconos::algebra::SiconosMatrix> c_result;
+    int swig_res = SWIG_ConvertPtr(obj, &swig_argp, $descriptor(std::shared_ptr<siconos::algebra::SiconosMatrix> *),  0  | 0);
 
     if (!SWIG_IsOK(swig_res))
     {
       c_result = SimpleMatrix_from_numpy(obj, array_p, is_new_object);
-      if (!c_result) { return SP::SiconosMatrix(); }
+      if (!c_result) { return std::shared_ptr<siconos::algebra::SiconosMatrix>(); }
     }
     else if (swig_argp)
     {
-      c_result = *(reinterpret_cast< SP::SiconosMatrix * >(swig_argp));
-      if (SWIG_IsNewObj(swig_res)) delete reinterpret_cast< SP::SiconosMatrix * >(swig_argp);
+      c_result = *(reinterpret_cast< std::shared_ptr<siconos::algebra::SiconosMatrix> * >(swig_argp));
+      if (SWIG_IsNewObj(swig_res)) delete reinterpret_cast< std::shared_ptr<siconos::algebra::SiconosMatrix> * >(swig_argp);
     }
     return c_result;
   }
 
-  bool SiconosMatrix_from_python(PyObject* obj, PyArrayObject** array_p, int* is_new_object, SiconosMatrix** c_result, std::vector<SP::SiconosMatrix>& keeper)
+  bool SiconosMatrix_from_python(PyObject* obj, PyArrayObject** array_p, int* is_new_object, SiconosMatrix** c_result, std::vector<std::shared_ptr<siconos::algebra::SiconosMatrix>>& keeper)
   {
     void * swig_argp;
     int swig_res = SWIG_ConvertPtr(obj, &swig_argp, $descriptor(SiconosMatrix *),  0  | 0);
 
     if (!SWIG_IsOK(swig_res))
     {
-      swig_res = SWIG_ConvertPtr(obj, &swig_argp, $descriptor(SP::SiconosMatrix *),  0  | 0);
+      swig_res = SWIG_ConvertPtr(obj, &swig_argp, $descriptor(std::shared_ptr<siconos::algebra::SiconosMatrix> *),  0  | 0);
 
       if (!SWIG_IsOK(swig_res))
       {
-        SP::SiconosMatrix tmp = SimpleMatrix_from_numpy(obj, array_p, is_new_object);
+        auto tmp = SimpleMatrix_from_numpy(obj, array_p, is_new_object);
         if (!tmp) { return false; }
         keeper.push_back(tmp);
         *c_result = tmp.get();
       }
       else if (swig_argp)
       {
-        *c_result = (reinterpret_cast< SP::SiconosMatrix * >(swig_argp))->get();
-        if (SWIG_IsNewObj(swig_res)) delete reinterpret_cast< SP::SiconosMatrix * >(swig_argp);
+        *c_result = (reinterpret_cast< std::shared_ptr<siconos::algebra::SiconosMatrix> * >(swig_argp))->get();
+        if (SWIG_IsNewObj(swig_res)) delete reinterpret_cast< std::shared_ptr<siconos::algebra::SiconosMatrix> * >(swig_argp);
       }
     }
     else if (swig_argp)
@@ -840,26 +840,26 @@ struct IsDense : public Question<bool>
     return true;
   }
 
- bool SiconosMatrix_from_python(PyObject* obj, PyArrayObject** array_p, int* is_new_object, SimpleMatrix** c_result, std::vector<SP::SimpleMatrix>& keeper)
+ bool SiconosMatrix_from_python(PyObject* obj, PyArrayObject** array_p, int* is_new_object, SimpleMatrix** c_result, std::vector<std::shared_ptr<siconos::algebra::SimpleMatrix>>& keeper)
   {
     void * swig_argp;
     int swig_res = SWIG_ConvertPtr(obj, &swig_argp, $descriptor(SimpleMatrix *),  0  | 0);
 
     if (!SWIG_IsOK(swig_res))
     {
-      swig_res = SWIG_ConvertPtr(obj, &swig_argp, $descriptor(SP::SimpleMatrix *),  0  | 0);
+      swig_res = SWIG_ConvertPtr(obj, &swig_argp, $descriptor(std::shared_ptr<siconos::algebra::SimpleMatrix> *),  0  | 0);
 
       if (!SWIG_IsOK(swig_res))
       {
-        SP::SimpleMatrix tmp = SimpleMatrix_from_numpy(obj, array_p, is_new_object);
+       auto tmp = SimpleMatrix_from_numpy(obj, array_p, is_new_object);
         if (!tmp) { return false; }
         keeper.push_back(tmp);
         *c_result = tmp.get();
       }
       else if (swig_argp)
       {
-        *c_result = (reinterpret_cast< SP::SimpleMatrix * >(swig_argp))->get();
-        if (SWIG_IsNewObj(swig_res)) delete reinterpret_cast< SP::SimpleMatrix * >(swig_argp);
+        *c_result = (reinterpret_cast< std::shared_ptr<siconos::algebra::SimpleMatrix> * >(swig_argp))->get();
+        if (SWIG_IsNewObj(swig_res)) delete reinterpret_cast< std::shared_ptr<siconos::algebra::SimpleMatrix> * >(swig_argp);
       }
     }
     else if (swig_argp)
@@ -880,7 +880,7 @@ struct IsDense : public Question<bool>
 
 %typemap(in,fragment="SiconosVector")
   const SiconosVector &
-  (PyArrayObject* array=NULL, int is_new_object = 0, std::vector<SP::SiconosVector> keeper)
+  (PyArrayObject* array=NULL, int is_new_object = 0, std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> keeper)
 {
   // %typemap(in,fragment="NumPy_Fragments")
   // %TYPE (PyArrayObject* array=NULL, int
@@ -889,10 +889,10 @@ struct IsDense : public Question<bool>
   if (!$1)
   {
     void * swig_argp;
-    int swig_res = SWIG_ConvertPtr($input, &swig_argp, $descriptor(SP::SiconosVector *), 0);
+    int swig_res = SWIG_ConvertPtr($input, &swig_argp, $descriptor(std::shared_ptr<siconos::algebra::SiconosVector> *), 0);
     if (SWIG_IsOK(swig_res) && swig_argp)
     {
-      $1 = (%reinterpret_cast(swig_argp, SP::SiconosVector *))->get();
+      $1 = (%reinterpret_cast(swig_argp, std::shared_ptr<siconos::algebra::SiconosVector> *))->get();
       if (!$1) { SWIG_exception_fail(SWIG_ValueError, "expected vector"); }
     }
     else { SWIG_exception_fail(SWIG_ValueError, "expected vector"); }
@@ -900,7 +900,7 @@ struct IsDense : public Question<bool>
 }
 
 %typemap(in,fragment="SiconosVector") SiconosVector &
-(PyArrayObject* array=NULL, int is_new_object = 0, std::vector<SP::SiconosVector> keeper)
+(PyArrayObject* array=NULL, int is_new_object = 0, std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> keeper)
 {
   // %typemap(in,fragment="NumPy_Fragments")
   // %TYPE (PyArrayObject* array=NULL, int
@@ -909,10 +909,10 @@ struct IsDense : public Question<bool>
   if (!$1)
   {
     void * swig_argp;
-    int swig_res = SWIG_ConvertPtr($input, &swig_argp, $descriptor(SP::SiconosVector *), 0);
+    int swig_res = SWIG_ConvertPtr($input, &swig_argp, $descriptor(std::shared_ptr<siconos::algebra::SiconosVector> *), 0);
     if (SWIG_IsOK(swig_res) && swig_argp)
     {
-      $1 = (%reinterpret_cast(swig_argp, SP::SiconosVector *))->get();
+      $1 = (%reinterpret_cast(swig_argp, std::shared_ptr<siconos::algebra::SiconosVector> *))->get();
       if (!$1) { SWIG_exception_fail(SWIG_ValueError, "expected vector"); }
     }
     else { SWIG_exception_fail(SWIG_ValueError, "expected vector"); }
@@ -948,7 +948,7 @@ struct IsDense : public Question<bool>
   $result = SP_SiconosVector_out($1, l_upcall);
 }
 
-// director output : PyObject -> SP::SiconosVector
+// director output : PyObject -> std::shared_ptr<siconos::algebra::SiconosVector>
 %typemap(directorout, fragment="SiconosVector") std::shared_ptr<SiconosVector> ()
 {
   // %typemap(directorout, fragment="SiconosVector") std::shared_ptr<SiconosVector> ()
@@ -1021,7 +1021,7 @@ struct IsDense : public Question<bool>
 //        !require_native(array) || !require_fortran(array)) throw Swig::DirectorMethodException();
 //
 //
-//    SP::SimpleMatrix tmp;
+//    std::shared_ptr<siconos::algebra::SimpleMatrix> tmp;
 //    tmp.reset(new SimpleMatrix(array_size(array,0), array_size(array,1)));
 //    // copy this is due to SimpleMatrix based on resizable std::vector
 //    memcpy(&*tmp->getArray(),array_data(array),array_size(array,0)*array_size(array,1)*sizeof(double));
@@ -1034,9 +1034,9 @@ struct IsDense : public Question<bool>
 //  }
 //  else
 //  {
-//    c_result = *(reinterpret_cast< SP::SiconosMatrix * >(swig_argp));
-//    if (SWIG_IsNewObj(swig_res)) delete reinterpret_cast< SP::SiconosMatrix * >(swig_argp);
-//    return (SP::SiconosMatrix) c_result;
+//    c_result = *(reinterpret_cast< std::shared_ptr<siconos::algebra::SiconosMatrix> * >(swig_argp));
+//    if (SWIG_IsNewObj(swig_res)) delete reinterpret_cast< std::shared_ptr<siconos::algebra::SiconosMatrix> * >(swig_argp);
+//    return (std::shared_ptr<siconos::algebra::SiconosMatrix>) c_result;
 //  }
 //}
 //
@@ -1045,7 +1045,7 @@ struct IsDense : public Question<bool>
 //{
 //  // %typemap(directorin) (VectorOfSMatrices&) ()
 //  // swig issue shared pointer check in wrappers even if arg is a ref
-//  SP::VectorOfSMatrices myptemp(createSPtrVectorOfSMatrices($1));
+//  std::shared_ptr<VectorOfSMatrices> myptemp(createSPtrVectorOfSMatrices($1));
 //  $input = SWIG_NewPointerObj(SWIG_as_voidptr(&myptemp),
 //                              SWIGTYPE_p_std__vectorT_std__shared_ptrT_SimpleMatrix_t_std__allocatorT_std__shared_ptrT_SimpleMatrix_t_t_t, 0);
 //}
@@ -1062,22 +1062,22 @@ struct IsDense : public Question<bool>
   void *argp1=0;
   int res1=0;
   int newmem = 0;
-  SP::TYPE tempshared1 ;
-  SP::TYPE *smartarg1 = 0 ;
+  std::shared_ptr<TYPE> tempshared1 ;
+  std::shared_ptr<TYPE> *smartarg1 = 0 ;
 
    // try a conversion from a SiconosMatrix
-  res1 = SWIG_ConvertPtrAndOwn($input, &argp1, $descriptor(SP::TYPE *), 0 |  0 , &newmem);
+  res1 = SWIG_ConvertPtrAndOwn($input, &argp1, $descriptor(std::shared_ptr<TYPE> *), 0 |  0 , &newmem);
   if (SWIG_IsOK(res1) && argp1)
   {
     if (newmem & SWIG_CAST_NEW_MEMORY)
     {
       // taken from generated code
-      tempshared1 = *reinterpret_cast< SP::TYPE * >(argp1);
-      delete reinterpret_cast< SP::TYPE * >(argp1);
+      tempshared1 = *reinterpret_cast< std::shared_ptr<TYPE> * >(argp1);
+      delete reinterpret_cast< std::shared_ptr<TYPE> * >(argp1);
       $1 = tempshared1;
     }
     else {
-      smartarg1 = reinterpret_cast< SP::TYPE * >(argp1);
+      smartarg1 = reinterpret_cast< std::shared_ptr<TYPE> * >(argp1);
       $1 = *smartarg1;
     }
   }
@@ -1090,16 +1090,16 @@ struct IsDense : public Question<bool>
 
 %typemap(in, fragment="SiconosMatrix")
   const TYPE &
-  (PyArrayObject* array = NULL, int is_new_object = 0, std::vector<SP::TYPE> keeper)
+  (PyArrayObject* array = NULL, int is_new_object = 0, std::vector<std::shared_ptr<TYPE>> keeper)
 {
    bool ok = SiconosMatrix_from_python($input, &array, &is_new_object, &$1, keeper);
    if (!ok)
    {
      void* swig_argp=0;
-     int swig_res = SWIG_ConvertPtr($input, &swig_argp, $descriptor(SP::TYPE *), 0);
+     int swig_res = SWIG_ConvertPtr($input, &swig_argp, $descriptor(std::shared_ptr<TYPE> *), 0);
      if (SWIG_IsOK(swig_res) && swig_argp)
      {
-       $1 = (%reinterpret_cast(swig_argp, SP::TYPE *))->get();
+       $1 = (%reinterpret_cast(swig_argp, std::shared_ptr<TYPE> *))->get();
      }
      else { SWIG_exception_fail(SWIG_ValueError, "expected matrix"); }
    }
@@ -1108,16 +1108,16 @@ struct IsDense : public Question<bool>
 
 %typemap(in, fragment="SiconosMatrix")
   TYPE&
-  (PyArrayObject* array = NULL, int is_new_object = 0, std::vector<SP::TYPE> keeper)
+  (PyArrayObject* array = NULL, int is_new_object = 0, std::vector<std::shared_ptr<TYPE>> keeper)
 {
    bool ok = SiconosMatrix_from_python($input, &array, &is_new_object, &$1, keeper);
    if (!ok)
    {
      void* swig_argp=0;
-     int swig_res = SWIG_ConvertPtr($input, &swig_argp, $descriptor(SP::TYPE *), 0);
+     int swig_res = SWIG_ConvertPtr($input, &swig_argp, $descriptor(std::shared_ptr<TYPE> *), 0);
      if (SWIG_IsOK(swig_res) && swig_argp)
      {
-       $1 = (%reinterpret_cast(swig_argp, SP::TYPE *))->get();
+       $1 = (%reinterpret_cast(swig_argp, std::shared_ptr<TYPE> *))->get();
      }
      else { SWIG_exception_fail(SWIG_ValueError, "expected matrix"); }
    }
@@ -1156,7 +1156,7 @@ struct IsDense : public Question<bool>
   $input = SiconosMatrix_to_numpy($1_name);
  }
 
-// director output : PyObject -> SP::SiconosMatrix
+// director output : PyObject -> std::shared_ptr<siconos::algebra::SiconosMatrix>
 %typemap(directorout, fragment="SiconosMatrix") std::shared_ptr<TYPE> ()
 {
   // %typemap(directorout, fragment="NumPy_Fragments") std::shared_ptr<SiconosMatrix> ()
@@ -1172,14 +1172,14 @@ struct IsDense : public Question<bool>
   DEBUG_PRINTF("is_new_object_dout = %i \n", is_new_object_dout);
   DEBUG_EXPR_WE(std::cout << "c_result : " << c_result << std::endl;);
   DEBUG_PRINTF(" c_result.get() : %p, c_result.use_count() = %li  \n" , c_result.get(),c_result.use_count()   );
-  DEBUG_EXPR_WE(if ((SP::SiconosMatrix) c_result)
+  DEBUG_EXPR_WE(if ((std::shared_ptr<siconos::algebra::SiconosMatrix>) c_result)
   {
-    ((SP::SiconosMatrix) c_result)->display();
+    ((std::shared_ptr<siconos::algebra::SiconosMatrix>) c_result)->display();
     c_result.get()->display();
   }
   else
   {
-    std::cout << "(SP::SiconosMatrix) c_result " << NULL << std::endl;
+    std::cout << "(std::shared_ptr<siconos::algebra::SiconosMatrix>) c_result " << NULL << std::endl;
   });
 //  if (!c_result) throw Swig::DirectorMethodException();
   DEBUG_END("%typemap(directorout, fragment= NumPy_Fragments ) std::shared_ptr<SiconosMatrix> ()\n");
@@ -1347,82 +1347,82 @@ TYPECHECK_REF(SimpleMatrix);
 TYPEMAP_MATRIX(SiconosMatrix);
 TYPEMAP_MATRIX(SimpleMatrix);
 
-%apply (std::shared_ptr<SiconosVector>) { (SP::SiconosVector) };
+%apply (std::shared_ptr<SiconosVector>) { (std::shared_ptr<siconos::algebra::SiconosVector>) };
 //%apply (SiconosVector &) { (const SiconosVector &) };
 
-%apply (std::shared_ptr<SiconosMatrix>) { (SP::SiconosMatrix) };
-%apply (std::shared_ptr<SimpleMatrix>) { (SP::SimpleMatrix) };
+%apply (std::shared_ptr<SiconosMatrix>) { (std::shared_ptr<siconos::algebra::SiconosMatrix>) };
+%apply (std::shared_ptr<SimpleMatrix>) { (std::shared_ptr<siconos::algebra::SimpleMatrix>) };
 
 //%apply (SiconosMatrix &) { (SiconosMatrix const &) };
 //%apply (SimpleMatrix &) { (SimpleMatrix const &) };
 //%apply (SiconosMatrix &) { (const SiconosMatrix &) };
 //%apply (SimpleMatrix &) { (const SimpleMatrix &) };
 
-%apply (std::shared_ptr<std::vector<unsigned int> >) { (SP::UnsignedIntVector) };
+%apply (std::shared_ptr<std::vector<unsigned int> >) { (std::shared_ptr<std::vector<unsigned int>>) };
 
 // cast to get the right class in Python
 
 %define %_factory_dispatch_SP(TYPE)
 if (!dcast) {
-  SP::TYPE dobj = std::dynamic_pointer_cast<TYPE>(ds);
+  auto dobj = std::dynamic_pointer_cast<TYPE>(ds);
   if (dobj) {
     dcast = 1;
-    SP::TYPE *dobjp = new SP::TYPE(dobj);
-    *_tmpobj = SWIG_NewPointerObj(%as_voidptr(dobjp),$descriptor(SP::TYPE *), SWIG_POINTER_OWN);
+    auto *dobjp = new std::shared_ptr<TYPE>(dobj);
+    *_tmpobj = SWIG_NewPointerObj(%as_voidptr(dobjp),$descriptor(std::shared_ptr<TYPE> *), SWIG_POINTER_OWN);
   }
 }%enddef
 
 %define %convert_sp_ds(mds, resultobj)
   int dcast = 0;
-  SP::DynamicalSystem ds = mds;
+  auto ds = mds;
   PyObject** _tmpobj = &resultobj;
   %formacro(%_factory_dispatch_SP, FirstOrderLinearTIDS, FirstOrderLinearDS, FirstOrderNonLinearDS)
   %formacro(%_factory_dispatch_SP, LagrangianLinearTIDS, LagrangianDS, SecondOrderDS)
   %formacro(%_factory_dispatch_SP, NewtonEulerDS, SecondOrderDS)
   if (!dcast) {
-    SP::DynamicalSystem *pds = new SP::DynamicalSystem(ds);
-    resultobj = SWIG_NewPointerObj(%as_voidptr(pds), $descriptor(SP::DynamicalSystem *), SWIG_POINTER_OWN);
+    auto *pds = new std::shared_ptr<siconos::modeling::DynamicalSystem>(ds);
+    resultobj = SWIG_NewPointerObj(%as_voidptr(pds), $descriptor(std::shared_ptr<siconos::modeling::DynamicalSystem> *), SWIG_POINTER_OWN);
   }
 %enddef
 
 // from factory.swg, but with dynamic_pointer_cast instead of dynamic_cast
 %define %_factory_dispatch_SP_output(TYPE)
 if (!dcast) {
-  SP::TYPE dobj = std::dynamic_pointer_cast<TYPE>($1);
+  auto dobj = std::dynamic_pointer_cast<TYPE>($1);
   if (dobj) {
     dcast = 1;
-    SP::TYPE *dobjp = new SP::TYPE(dobj);
-    %set_output(SWIG_NewPointerObj(%as_voidptr(dobjp),$descriptor(SP::TYPE *), SWIG_POINTER_OWN));
+    auto *dobjp = new std::shared_ptr<TYPE>(dobj);
+    %set_output(SWIG_NewPointerObj(%as_voidptr(dobjp),$descriptor(std::shared_ptr<TYPE> *), SWIG_POINTER_OWN));
   }
 }%enddef
 
-%typemap(out) SP::DynamicalSystem
+%typemap(out) std::shared_ptr<siconos::modeling::DynamicalSystem>
 {
   int dcast = 0;
   %formacro(%_factory_dispatch_SP_output, FirstOrderLinearTIDS, FirstOrderLinearDS, FirstOrderNonLinearDS)
   %formacro(%_factory_dispatch_SP_output, LagrangianLinearTIDS, LagrangianDS, SecondOrderDS)
   %formacro(%_factory_dispatch_SP_output, NewtonEulerDS, SecondOrderDS)
   if (!dcast) {
-    %set_output(SWIG_NewPointerObj(%as_voidptr(&$1),$descriptor(SP::DynamicalSystem *), $owner | %newpointer_flags));
+    %set_output(SWIG_NewPointerObj(%as_voidptr(&$1),$descriptor(std::shared_ptr<siconos::modeling::DynamicalSystem> *), $owner | %newpointer_flags));
   }
 }
 
-%typemap(out) SP::Simulation
+%typemap(out) std::shared_ptr<siconos::simulation::Simulation>
 {
    int dcast = 0;
    %formacro(%_factory_dispatch_SP_output, TimeSteppingCombinedProjection, TimeSteppingDirectProjection, TimeStepping, TimeSteppingD1Minus, EventDriven)
    if (!dcast) {
-      %set_output(SWIG_NewPointerObj(%as_voidptr(&$1),$descriptor(SP::Type *), $owner | %newpointer_flags));
+      %set_output(SWIG_NewPointerObj(%as_voidptr(&$1),$descriptor(std::shared_ptr<TYPE> *), $owner | %newpointer_flags));
    }
 }
 
-%typemap(out) SP::Relation
+%typemap(out) std::shared_ptr<siconos::modeling::Relation>
 {
    int dcast = 0;
    %formacro(%_factory_dispatch_SP_output, FirstOrderLinearTIR, FirstOrderLinearR, FirstOrderType1R, FirstOrderType2R, FirstOrderNonLinearR, FirstOrderR)
    %formacro(%_factory_dispatch_SP_output, LagrangianLinearTIR, LagrangianCompliantR, LagrangianRheonomousR, LagrangianScleronomousR, LagrangianR)
    %formacro(%_factory_dispatch_SP_output, NewtonEuler3DR, NewtonEuler1DR, NewtonEulerR)
    if (!dcast) {
-      %set_output(SWIG_NewPointerObj(%as_voidptr(&$1),$descriptor(SP::Type *), $owner | %newpointer_flags));
+      %set_output(SWIG_NewPointerObj(%as_voidptr(&$1),$descriptor(std::shared_ptr<TYPE> *), $owner | %newpointer_flags));
    }
 }

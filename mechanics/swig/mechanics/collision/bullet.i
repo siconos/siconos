@@ -209,7 +209,7 @@ PY_REGISTER_WITHOUT_PICKLE(Bullet5DR, Mechanics);
 
 %inline
 {
-  SP::BulletR cast_BulletR(SP::Relation rel)
+  std::shared_ptr<siconos::collision::bullet::BulletR> cast_BulletR(shared_ptr<siconos::modeling::Relation> rel)
   {
     return std::dynamic_pointer_cast<BulletR>(rel);
   };

@@ -77,7 +77,7 @@ balls have the same mass, :math:`m = 1`, and the same radius, :math:`R=0.1`::
   // -------------------------
   
   // mass matrix, set to identity
-  SP::SiconosMatrix Mass = new SimpleMatrix(nDof,nDof);
+  auto Mass = std::make_shared<siconos::algebra::SimpleMatrix>(nDof,nDof);
   Mass->eye();
   (*Mass)(2,2) = 3.0/5*R*R;
   

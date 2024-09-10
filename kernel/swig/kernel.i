@@ -132,7 +132,7 @@ Example of usage:
 %include SiconosAlgebra.i
 
 
-// 2. try to hide SP::Type on python side
+// 2. try to hide std::sharedPtr<Type> on python side
 
 
 // boost namespace (can be fixed with a correct import)
@@ -314,17 +314,17 @@ KERNEL_REGISTRATION()
    * wrapper fail on this, the numpy vector points on a deleted
    * memory!*/
 
-  const SP::SiconosVector getVector(SP::SiconosVector v)
+  const std::shared_ptr<siconos::algebra::SiconosVector> getVector(std::shared_ptr<siconos::algebra::SiconosVector> v)
   {
     return v;
   };
 
-  const SP::SiconosMatrix getMatrix(SP::SiconosMatrix v)
+  const std::shared_ptr<siconos::algebra::SiconosMatrix> getMatrix(std::shared_ptr<siconos::algebra::SiconosMatrix> v)
   {
     return v;
   };
 
-  const SP::BlockVector getVector(SP::BlockVector v)
+  const std::shared_ptr<siconos::algebra::BlockVector> getVector(std::shared_ptr<siconos::algebra::BlockVector> v)
   {
     return v;
   };
@@ -335,46 +335,46 @@ KERNEL_REGISTRATION()
     return v;
   };
 
-  SP::NewtonImpactFrictionNSL cast_NewtonImpactFrictionNSL(SP::NonSmoothLaw nslaw)
+  std::shared_ptr<siconos::modeling::NewtonImpactFrictionNSL> cast_NewtonImpactFrictionNSL(std::shared_ptr<siconos::modeling::NonSmoothLaw> nslaw)
   {
     return std::dynamic_pointer_cast<NewtonImpactFrictionNSL>(nslaw);
   }
   
-  SP::FremondImpactFrictionNSL cast_FremondImpactFrictionNSL(SP::NonSmoothLaw nslaw)
+  std::shared_ptr<siconos::modeling::FremondImpactFrictionNSL> cast_FremondImpactFrictionNSL(std::shared_ptr<siconos::modeling::NonSmoothLaw> nslaw)
   {
     return std::dynamic_pointer_cast<FremondImpactFrictionNSL>(nslaw);
   }
 
-  SP::RelayNSL cast_RelayNSL(SP::NonSmoothLaw nslaw)
+  std::shared_ptr<siconos::modeling::RelayNSL> cast_RelayNSL(std::shared_ptr<siconos::modeling::NonSmoothLaw> nslaw)
   {
     return std::dynamic_pointer_cast<RelayNSL>(nslaw);
   }
 
-  SP::NewtonImpactNSL cast_NewtonImpactNSL(SP::NonSmoothLaw nslaw)
+  std::shared_ptr<siconos::modeling::NewtonImpactNSL> cast_NewtonImpactNSL(std::shared_ptr<siconos::modeling::NonSmoothLaw> nslaw)
   {
     return std::dynamic_pointer_cast<NewtonImpactNSL>(nslaw);
   }
 
-  SP::NewtonEulerDS cast_NewtonEulerDS(SP::DynamicalSystem ds)
+  std::shared_ptr<siconos::modeling::NewtonEulerDS> cast_NewtonEulerDS(std::shared_ptr<siconos::modeling::DynamicalSystem> ds)
   {
     return std::dynamic_pointer_cast<NewtonEulerDS>(ds);
   }
 
-  SP::LagrangianDS cast_LagrangianDS(SP::DynamicalSystem ds)
+  std::shared_ptr<siconos::modeling::LagrangianDS> cast_LagrangianDS(std::shared_ptr<siconos::modeling::DynamicalSystem> ds)
   {
     return std::dynamic_pointer_cast<LagrangianDS>(ds);
   }
 
-  SP::NewtonEuler1DR cast_NewtonEuler1DR(SP::Relation r)
+  std::shared_ptr<siconos::modeling::NewtonEuler1DR> cast_NewtonEuler1DR(std::shared_ptr<siconos::modeling::Relation> r)
   {
     return std::dynamic_pointer_cast<NewtonEuler1DR>(r);
   }
-  SP::NewtonEulerR cast_NewtonEulerR(SP::Relation r)
+  std::shared_ptr<siconos::modeling::NewtonEulerR> cast_NewtonEulerR(std::shared_ptr<siconos::modeling::Relation> r)
   {
     return std::dynamic_pointer_cast<NewtonEulerR>(r);
   }
 
-  SP::FrictionContact cast_FrictionContact(SP::OneStepNSProblem osnpb)
+  std::shared_ptr<siconos::nonsmooth_formulations::FrictionContact> cast_FrictionContact(std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem> osnpb)
   {
     return std::dynamic_pointer_cast<FrictionContact>(osnpb);
   }
