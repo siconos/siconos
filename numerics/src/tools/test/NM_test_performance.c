@@ -163,8 +163,8 @@ int main(int argc, char *argv[])
   int number_of_prod =1000;
 
 
-  NumericsMatrix * A_sbm = NM_new_from_filename("./data/matrix_sbm.dat");
-  test_NM_row_prod_no_diag3(A_sbm,number_of_prod);
+  /* NumericsMatrix * A_sbm = NM_new_from_filename("./data/matrix_sbm.dat"); */
+  /* test_NM_row_prod_no_diag3(A_sbm,number_of_prod); */
 
   NumericsMatrix * A_sparse = NM_new_from_filename("./data/matrix_sparse.dat");
   //NM_display(A_sparse);
@@ -172,36 +172,36 @@ int main(int argc, char *argv[])
 
 
 
-  NumericsMatrix * A_sparse_csc = NM_new_from_filename("./data/matrix_sparse.dat");
-  A_sparse_csc->matrix2->csc = NM_csc(A_sparse_csc);
-  A_sparse_csc->matrix2->origin = NSM_CSC;
-  //NM_display(A_sparse_csc);
-  test_NM_row_prod_no_diag3(A_sparse_csc,number_of_prod);
+  /* NumericsMatrix * A_sparse_csc = NM_new_from_filename("./data/matrix_sparse.dat"); */
+  /* A_sparse_csc->matrix2->csc = NM_csc(A_sparse_csc); */
+  /* A_sparse_csc->matrix2->origin = NSM_CSC; */
+  /* //NM_display(A_sparse_csc); */
+  /* test_NM_row_prod_no_diag3(A_sparse_csc,number_of_prod); */
 
 
-  NumericsMatrix * A_sparse_remove = NM_new_from_filename("./data/matrix_sparse.dat");
+  /* NumericsMatrix * A_sparse_remove = NM_new_from_filename("./data/matrix_sparse.dat"); */
 
-  CSparseMatrix * a_remove = NSM_remove_diagonal_blocks(A_sparse_remove, 3);
+  /* CSparseMatrix * a_remove = NSM_remove_diagonal_blocks(A_sparse_remove, 3); */
 
-  NM_clearSparseStorage(A_sparse_remove);
-  A_sparse_remove->matrix2->triplet= a_remove;
-  A_sparse_remove->matrix2->origin = NSM_TRIPLET;
+  /* NM_clearSparseStorage(A_sparse_remove); */
+  /* A_sparse_remove->matrix2->triplet= a_remove; */
+  /* A_sparse_remove->matrix2->origin = NSM_TRIPLET; */
 
-  //NM_display(A_sparse_remove);
+  /* //NM_display(A_sparse_remove); */
 
-  test_NM_row_prod_no_diag3(A_sparse_remove,number_of_prod);
+  /* test_NM_row_prod_no_diag3(A_sparse_remove,number_of_prod); */
 
 
 
-  printf("\n A sparse remove nnz =%li \n", NM_nnz(A_sparse_remove) );
-  printf("A sparse nnz =%li \n", NM_nnz(A_sparse) );
-  printf("SBM nnz =%li \n", NM_nnz(A_sbm) );
+  /* printf("\n A sparse remove nnz =%li \n", NM_nnz(A_sparse_remove) ); */
+  /* printf("A sparse nnz =%li \n", NM_nnz(A_sparse) ); */
+  /* printf("SBM nnz =%li \n", NM_nnz(A_sbm) ); */
 
-  printf("Estimation of number of mul operation\n");
-  printf("sparse = %li\n", NM_nnz(A_sparse)*number_of_prod  );
-  printf("sparse remove = %li\n", NM_nnz(A_sparse_remove)*number_of_prod  );
+  /* printf("Estimation of number of mul operation\n"); */
+  /* printf("sparse = %li\n", NM_nnz(A_sparse)*number_of_prod  ); */
+  /* printf("sparse remove = %li\n", NM_nnz(A_sparse_remove)*number_of_prod  ); */
 
-  printf("sbm = %li\n", (NM_nnz(A_sbm) - (A_sbm->size0/3)*9) *number_of_prod );
+  /* printf("sbm = %li\n", (NM_nnz(A_sbm) - (A_sbm->size0/3)*9) *number_of_prod ); */
 
   /* test_NM_prod_mv_3x3(A_sbm,number_of_prod); */
   /* test_NM_prod_mv_3x3(A_sparse,number_of_prod); */
