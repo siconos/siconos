@@ -365,25 +365,6 @@ void siconos::modeling::NewtonEulerDS::setQPtr(
     THROW_EXCEPTION("NewtonEulerDS - setQPtr: inconsistent input vector size ");
   _q = newPtr;
 }
-void siconos::modeling::NewtonEulerDS::setQ0(const siconos::algebra::SiconosVector& newValue) {
-  if (newValue.size() != _qDim)
-    THROW_EXCEPTION("NewtonEulerDS - setQ0: inconsistent input vector size ");
-
-  if (!q0_internal_storage_) {
-    q0_internal_storage_ = std::make_unique<std::vector<double>>(newValue.data(), newValue.data() + newValue.size());
-    _q0 = std::make_shared<siconos::algebra::MapVectorType>(q0_internal_storage_->data(), newValue.size());
-  }
-  else
-    *_q0 = newValue;
-}
-
-void siconos::modeling::NewtonEulerDS::setQ0Ptr(
-    std::shared_ptr<siconos::algebra::SiconosVector> newPtr) {
-  if (newPtr->size() != _qDim)
-    THROW_EXCEPTION("NewtonEulerDS - setQ0Ptr: inconsistent input vector size ");
-  q0_internal_storage_ = nullptr;
-  _q0 = std::make_shared<siconos::algebra::MapVectorType>(newPtr->data(), newPtr->size());
-}
 
 void siconos::modeling::NewtonEulerDS::setVelocity(
     const siconos::algebra::SiconosVector& newValue) {
@@ -408,27 +389,6 @@ void siconos::modeling::NewtonEulerDS::setVelocityPtr(
   if (newPtr->size() != _ndof)
     THROW_EXCEPTION("NewtonEulerDS - setVelocityPtr: inconsistent input vector size ");
   _twist = newPtr;
-}
-
-void siconos::modeling::NewtonEulerDS::setVelocity0(
-    const siconos::algebra::SiconosVector& newValue) {
-  if (newValue.size() != _ndof)
-    THROW_EXCEPTION("NewtonEulerDS - setVelocity0: inconsistent input vector size ");
-
-  if (!twist0_internal_storage) {
-    twist0_internal_storage = std::make_unique<std::vector<double>>(newValue.data(), newValue.data() + newValue.size());
-    _twist0 = std::make_shared<siconos::algebra::MapVectorType>(twist0_internal_storage->data(), newValue.size());
-  }
-  else
-    std::copy(newValue.data(), newValue.data() + newValue.size(), twist0_internal_storage->begin());
-}
-
-void siconos::modeling::NewtonEulerDS::setVelocity0Ptr(
-    std::shared_ptr<siconos::algebra::SiconosVector> newPtr) {
-  if (newPtr->size() != _ndof)
-    THROW_EXCEPTION("NewtonEulerDS - setVelocity0Ptr: inconsistent input vector size ");
-  twist0_internal_storage = nullptr;
-  _twist0 = std::make_shared<siconos::algebra::MapVectorType>(newPtr->data(), newPtr->size());
 }
 
 void siconos::modeling::NewtonEulerDS::resetToInitialState() {

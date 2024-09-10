@@ -288,41 +288,6 @@ void siconos::modeling::LagrangianDS::setQPtr(
   _q[0] = newPtr;
 }
 
-void siconos::modeling::LagrangianDS::setQ0(const siconos::algebra::SiconosVector& newValue) {
-  if (newValue.size() != _ndof)
-    THROW_EXCEPTION("LagrangianDS - setQ0: inconsistent input vector size ");
-
-  if (!q0_internal_storage_){
-    q0_internal_storage_ = std::make_unique<std::vector<double>>(newValue.data(), newValue.data() + newValue.size());
-    _q0 = std::make_shared<siconos::algebra::MapVectorType>(q0_internal_storage_->data(), _ndof);
-  }
-  else
-  // if internal storage already exists, Map should also exist
-    assert(_q0);
-    std::copy(newValue.data(), newValue.data() + newValue.size(), q0_internal_storage_->begin());
-}
-
-void siconos::modeling::LagrangianDS::setQ0Ptr(
-    std::shared_ptr<siconos::algebra::SiconosVector> newPtr) {
-  if (newPtr->size() != _ndof)
-    THROW_EXCEPTION("LagrangianDS - setQ0Ptr: inconsistent input vector size ");
-  q0_internal_storage_ = nullptr;
-  _q0 = std::make_shared<siconos::algebra::MapVectorType>(newPtr->data(), newPtr->size());
-}
-
-void siconos::modeling::LagrangianDS::setVelocity0(
-    const siconos::algebra::SiconosVector& newValue) {
-  if (newValue.size() != _ndof)
-    THROW_EXCEPTION("LagrangianDS - setVelocity0: inconsistent input vector size ");
-
-  if (!velocity0_internal_storage) {
-    velocity0_internal_storage = std::make_unique<std::vector<double>>(newValue.data(), newValue.data() + newValue.size());
-    _velocity0 = std::make_shared<siconos::algebra::MapVectorType>(velocity0_internal_storage->data(), newValue.size());
-  }
-  else
-    std::copy(newValue.data(), newValue.data() + newValue.size(), velocity0_internal_storage->begin());
-}
-
 void siconos::modeling::LagrangianDS::setVelocity(
     const siconos::algebra::SiconosVector& newValue) {
   if (newValue.size() != _ndof)
@@ -339,14 +304,6 @@ void siconos::modeling::LagrangianDS::setVelocityPtr(
   if (newPtr->size() != _ndof)
     THROW_EXCEPTION("LagrangianDS - setVelocityPtr: inconsistent input vector size ");
   _q[1] = newPtr;
-}
-
-void siconos::modeling::LagrangianDS::setVelocity0Ptr(
-    std::shared_ptr<siconos::algebra::SiconosVector> newPtr) {
-  if (newPtr->size() != _ndof)
-    THROW_EXCEPTION("LagrangianDS - setVelocity0Ptr: inconsistent input vector size ");
-  velocity0_internal_storage = nullptr;
-  _velocity0 = std::make_shared<siconos::algebra::MapVectorType>(newPtr->data(), newPtr->size());
 }
 
 void siconos::modeling::LagrangianDS::computeMass() {
@@ -781,9 +738,8 @@ void siconos::modeling::LagrangianDS::setComputeFIntFunction(siconos::plugins::F
 void siconos::modeling::LagrangianDS::setComputeFExtFunction(const std::string& pluginPath,
                                                              const std::string& functionName) {
   _pluginFExt->setComputeFunction(pluginPath, functionName);
-  //TODOSAM : next line is commented because FExt is supposed to be provided by user, so memory mapping exists
-  // if (!_fExt) _fExt = std::make_shared<siconos::algebra::MapVectorType>(_ndof);
-  assert(_fExt && "setComputeFExtFunction : _FExt storage is supposed to be provided by user");
+  if(!fExt_internal_storage) fExt_internal_storage = std::make_unique<std::vector<double>>(_ndof);
+  _fExt = std::make_shared<siconos::algebra::MapVectorType>(fExt_internal_storage->data(), _ndof);
   _hasConstantFExt = false;
 }
 
@@ -793,11 +749,9 @@ void siconos::modeling::LagrangianDS::setComputeFExtFunction(const std::string& 
  */
 void siconos::modeling::LagrangianDS::setComputeFExtFunction(
     siconos::plugins::VectorFunctionOfTime fct) {
+  if(!fExt_internal_storage) fExt_internal_storage = std::make_unique<std::vector<double>>(_ndof);
+  _fExt = std::make_shared<siconos::algebra::MapVectorType>(fExt_internal_storage->data(), _ndof);
   _pluginFExt->setComputeFunction((void*)fct);
-  // TODOSAM : next line is commented because FExt is provided by user, so no internal storage needed
-  // if (!_fExt) _fExt = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
-  //   computeFExtPtr = fct ;
-  assert(_fExt && "setComputeFExtFunction : _FExt storage is supposed to be provided by user");
   _hasConstantFExt = false;
 }
 

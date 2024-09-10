@@ -41,7 +41,7 @@ siconos::modeling::LagrangianLinearTIR::LagrangianLinearTIR(
 siconos::modeling::LagrangianLinearTIR::LagrangianLinearTIR(
     Eigen::Ref<siconos::algebra::SiconosMatrix>& C)
     : LagrangianR(RelationSubType::LinearTIR) {
-  _jachq = std::make_shared<siconos::algebra::SiconosMatrix>(C); // TODOSAM : here we copy data and we shouldn't !!! Do we need to change _jachq type ?
+  _jachq = std::make_shared<siconos::algebra::SiconosMatrix>(C); // TODOSAM : here we copy data and we shouldn't !!! Do we need to change _jachq type ? --> YES
 }
 
 // Constructor from a complete set of data

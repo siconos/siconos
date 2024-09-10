@@ -160,7 +160,6 @@ double siconos::integrators::NewMarkAlphaOSI::computeResidu() {
       auto q = d->q();
       auto v = d->velocity();
       auto a = d->acceleration();
-      std::shared_ptr<siconos::algebra::MapVectorType> F{nullptr}; // TODOSAM : change F type to avoid copy
       // get the reaction force p
       auto p = d->p(2);
       // Compute free residual
@@ -175,10 +174,10 @@ double siconos::integrators::NewMarkAlphaOSI::computeResidu() {
         // We need to add F_int = Cv + Kq to freeR
         auto K = ltids->K();
         auto C = ltids->C();
-        // TODOSAM : here we copy data, because pointers haven't same type. Change
-        F = std::make_shared<siconos::algebra::MapVectorType>(ltids->fExt()->data(), ltids->fExt()->size()); // TODOSAM : create F pointing towards _forces attribut of the DS
+        auto F = ltids->fExt();
         if (F) {
           ltids->computeFExt(t);
+          residuFree -= *F;  // freeR = _workspace[freeresidu] - F
         }
         if (K) siconos::algebra::prod(*K, *q, residuFree, false);  // f = M*a + C*v + K*q
         if (C) siconos::algebra::prod(*C, *v, residuFree, false);  // freeR = M*a + C*v
@@ -186,13 +185,13 @@ double siconos::integrators::NewMarkAlphaOSI::computeResidu() {
       {
         // Update mass matrix
         d->computeMass();
-        F = std::make_shared<siconos::algebra::MapVectorType>(d->forces()->data(), d->forces()->size()); // TODOSAM : create F pointing towards _wrench attribut of the DS
-        if (F)
+        auto F = d->forces();
+        if (F) {
           // Compute F = F_ext - F_int - F_Gyr
           d->computeForces(t, d->q(), d->velocity());
+          residuFree -= *F;  // freeR = _workspace[freeresidu] - F
+        }
       }
-
-      residuFree -= *F;  // freeR = _workspace[freeresidu] - F
       // Compute residual
       _residu =
           std::make_shared<siconos::algebra::SiconosVector>(residuFree);  // _residu = freeR

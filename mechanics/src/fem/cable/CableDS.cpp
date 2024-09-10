@@ -54,7 +54,8 @@ siconos::fem::cable::CableDS::CableDS(
 
   if (fext) {
     _hasConstantFExt = false;  // Indeed, this is the default for SecondOrderDS
-    //_fExt = std::make_shared<siconos::algebra::SiconosVector>(_ndof); // TODOSAM : _fext storage is supposed to be provided by user 
+    fExt_internal_storage = std::make_unique<std::vector<double>>(_ndof);
+    _fExt = std::make_shared<siconos::algebra::MapVectorType>(fExt_internal_storage->data(), _ndof);
   } else
     _hasConstantFExt = true;
   // In that case _fExt = nullptr

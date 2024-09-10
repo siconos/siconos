@@ -151,6 +151,7 @@ class LagrangianDS : public SecondOrderDS {
 
   /** external forces applied to the system */
   std::shared_ptr<siconos::algebra::MapVectorType> _fExt{nullptr};
+  std::unique_ptr<std::vector<double>> fExt_internal_storage{nullptr};
 
   /** boolean if _fext is constant (set thanks to setFExtPtr for instance)
    * false by default */
@@ -447,18 +448,6 @@ class LagrangianDS : public SecondOrderDS {
    */
   void setQPtr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) override;
 
-  /** set initial state (copy)
-   *
-   *  \param newValue
-   */
-  void setQ0(const siconos::algebra::SiconosVector &newValue) override;
-
-  /** set initial state (pointer link)
-   *
-   *  \param newPtr
-   */
-  void setQ0Ptr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) override;
-
   /** get velocity vector (pointer link)
    *
    *  \return pointer on a siconos::algebra::SiconosVector
@@ -494,18 +483,6 @@ class LagrangianDS : public SecondOrderDS {
   inline std::shared_ptr<siconos::algebra::MapVectorType> velocity0() const override {
     return _velocity0;
   }
-
-  /** set initial velocity (copy)
-   *
-   *  \param newValue
-   */
-  void setVelocity0(const siconos::algebra::SiconosVector &newValue) override;
-
-  /** set initial velocity (pointer link)
-   *
-   *  \param newPtr
-   */
-  void setVelocity0Ptr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) override;
 
   /** get acceleration (pointer link)
    *
@@ -546,10 +523,10 @@ class LagrangianDS : public SecondOrderDS {
 
   /** set  \f$ F_{ext} \f$
    *
-   *  \param newPtr a SP to a Simple vector
+   *  \param newFext external forces vector
    */
-  inline void setFExt(Eigen::Ref<siconos::algebra::SiconosVector>& newFext) {
-    // TODOSAM : need to delete old data if exists ? (supposed to be provided by user)
+  inline void setConstantFExt(Eigen::Ref<siconos::algebra::SiconosVector>& newFext) {
+    fExt_internal_storage = nullptr;
     _fExt = std::make_shared<siconos::algebra::MapVectorType>(newFext.data(), newFext.size());
     _hasConstantFExt = true;
   }

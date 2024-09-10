@@ -408,18 +408,6 @@ class NewtonEulerDS : public SecondOrderDS {
    */
   void setQPtr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) override;
 
-  /** set initial state (copy)
-   *
-   *  \param newValue
-   */
-  void setQ0(const siconos::algebra::SiconosVector &newValue) override;
-
-  /** set initial state (pointer link)
-   *
-   *  \param newPtr
-   */
-  void setQ0Ptr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) override;
-
   // -- twist --
 
   /** get twist
@@ -454,18 +442,6 @@ class NewtonEulerDS : public SecondOrderDS {
    *  \param newPtr
    */
   void setVelocityPtr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) override;
-
-  /** set initial velocity (copy)
-   *
-   *  \param newValue
-   */
-  void setVelocity0(const siconos::algebra::SiconosVector &newValue) override;
-
-  /** set initial velocity (pointer link)
-   *
-   *  \param newPtr
-   */
-  void setVelocity0Ptr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) override;
 
   /** get acceleration (pointer link)
    *

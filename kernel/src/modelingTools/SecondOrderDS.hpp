@@ -204,6 +204,14 @@ class SecondOrderDS : public DynamicalSystem {
    */
   inline std::shared_ptr<MapType> mass() const { return _mass; }
 
+  /** get mass matrix (reference)
+   *
+   *  \return std::shared_ptr<Matrix>
+   */
+  inline MapType& mass_python() const { 
+    return *_mass;
+  }
+
   /** get (pointer) inverse or LU-factorization of the mass,
    *  used for LU-forward-backward computation
    *
@@ -291,18 +299,6 @@ class SecondOrderDS : public DynamicalSystem {
    */
   std::shared_ptr<siconos::algebra::MapVectorType> q0() const { return _q0; }
 
-  /** set initial state (copy)
-   *
-   *  \param newValue
-   */
-  virtual void setQ0(const siconos::algebra::SiconosVector &newValue) = 0;
-
-  /** set initial state (pointer link)
-   *
-   *  \param newPtr
-   */
-  virtual void setQ0Ptr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) = 0;
-
   /** get velocity vector (pointer link)
    *
    *  \return pointer on a siconos::algebra::SiconosVector
@@ -326,18 +322,6 @@ class SecondOrderDS : public DynamicalSystem {
    *  \return pointer on a siconos::algebra::SiconosVector
    */
   virtual std::shared_ptr<siconos::algebra::MapVectorType> velocity0() const = 0;
-
-  /** set initial velocity (copy)
-   *
-   *  \param newValue
-   */
-  virtual void setVelocity0(const siconos::algebra::SiconosVector &newValue) = 0;
-
-  /** set initial velocity (pointer link)
-   *
-   *  \param newPtr
-   */
-  virtual void setVelocity0Ptr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) = 0;
 
   /** get acceleration (pointer link)
    *

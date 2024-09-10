@@ -40,14 +40,20 @@ PYBIND11_MODULE(modeling, m)
   py::class_<siconos::modeling::LagrangianLinearTIDS, std::shared_ptr<siconos::modeling::LagrangianLinearTIDS>, siconos::modeling::SecondOrderDS>(m, "LagrangianLinearTIDS")
       .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>&,
                     Eigen::Ref<siconos::algebra::SiconosVector>&,
-                    Eigen::Ref<siconos::algebra::SiconosMatrix>&>())
-      .def("setFExt", static_cast<void (siconos::modeling::LagrangianLinearTIDS::*)(Eigen::Ref<siconos::algebra::SiconosVector>&)>(&siconos::modeling::LagrangianLinearTIDS::setFExt))
+                    Eigen::Ref<siconos::algebra::SiconosMatrix>&>(),
+                    py::keep_alive<1, 2>(), // keep python object (np array arguments) memory alive as long as object is referenced
+                    py::keep_alive<1, 3>(),
+                    py::keep_alive<1, 4>(),
+                    py::arg("q0"), py::arg("v0"), py::arg("M"))
+      .def("setConstantFExt", static_cast<void (siconos::modeling::LagrangianLinearTIDS::*)(Eigen::Ref<siconos::algebra::SiconosVector>&)>(&siconos::modeling::LagrangianLinearTIDS::setConstantFExt),
+          py::keep_alive<1, 2>())
       .def("q", &siconos::modeling::LagrangianDS::q_python, py::return_value_policy::reference_internal)
       .def("velocity", &siconos::modeling::LagrangianDS::velocity_python, py::return_value_policy::reference_internal)
-      .def("__repr__", [](const siconos::modeling::LagrangianLinearTIDS &a) {
-          (a.display());
-        return "\n";
-      });
+      .def_property_readonly("mass", &siconos::modeling::LagrangianDS::mass_python);
+      // .def("__repr__", [](const siconos::modeling::LagrangianLinearTIDS &a) {
+      //     (a.display());
+      //   return "\n";
+      // });
       
   py::class_<siconos::modeling::NewtonImpactNSL, std::shared_ptr<siconos::modeling::NewtonImpactNSL>>(m, "NewtonImpactNSL")
       .def(py::init<double>());

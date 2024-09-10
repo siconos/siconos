@@ -110,9 +110,11 @@ void siconos::mechanics::fem::FiniteElementLinearTIDS::applyDirichletBoundaryCon
 void siconos::mechanics::fem::FiniteElementLinearTIDS::applyNodalForces(
     int physical_entity_tag, std::shared_ptr<siconos::algebra::SiconosVector> nodal_forces) {
   if (!_fExt) {
-    _fExt = std::make_shared<siconos::algebra::MapVectorType>(nullptr, dimension()); // TODOSAM : what to do here ?
+    if(!fExt_internal_storage) {
+      fExt_internal_storage = std::make_unique<std::vector<double>>(_ndof);
+    }
+    _fExt = std::make_shared<siconos::algebra::MapVectorType>(fExt_internal_storage->data(), _ndof); // TODOSAM : what to do here ?
   }
-
   _FEModel->applyNodalForces(physical_entity_tag, nodal_forces, _fExt);
 };
 

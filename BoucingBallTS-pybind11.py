@@ -28,7 +28,6 @@ from siconos.simulation import TimeDiscretisation, TimeStepping
 from siconos.nonsmooth_formulations import LCP
 from siconos.io import readMatrixFromFile
 
-
 t0 = 0.       # start time
 T = 10.       # end time
 h = 0.005    # time step
@@ -38,24 +37,51 @@ m = 1.        # ball mass
 e = 0.9      # restitution coeficient
 theta = 0.5  # theta scheme
 
-#
-# dynamical system
-#
-initial_position_np = np.array([1, 0, 0], dtype=np.float64, order='F')
-initial_velocity_np = np.array([0, 0, 0], dtype=np.float64, order='F')
-mass_np = np.eye(3, dtype=np.float64, order='F')
-mass_np[2, 2] = 2. / 5 * r * r
+ndof = 3
 
 
-ball = LagrangianLinearTIDS(initial_position_np, initial_velocity_np, mass_np)
+def create_ds():
+    #
+    # dynamical system
+    #
+    initial_position_np = np.array([1, 0, 0], dtype=np.float64, order='F')
+    initial_velocity_np = np.array([0, 0, 0], dtype=np.float64, order='F')
+    # initial_position_np = np.zeros(ndof, dtype=np.float64, order='F')
+    # initial_velocity_np = np.zeros(ndof, dtype=np.float64, order='F')
+    mass_np = np.eye(ndof, dtype=np.float64, order='F')
+    mass_np[2, 2] = 2. / 5 * r * r
 
-print(ball)
+
+    ball = LagrangianLinearTIDS(initial_position_np, initial_velocity_np, mass_np)
+
+    # # set external forces
+    weight_np = np.array([-m * g, 0, 0], dtype=np.float64, order='F')
+    ball.setConstantFExt(weight_np)
+    return ball
 
 
 
-# # set external forces
-weight_np = np.array([-m * g, 0, 0], dtype=np.float64, order='F')
-ball.setFExt(weight_np)
+# #
+# # dynamical system
+# #
+# initial_position_np = np.array([1, 0, 0], dtype=np.float64, order='F')
+# initial_velocity_np = np.array([0, 0, 0], dtype=np.float64, order='F')
+# mass_np = np.eye(3, dtype=np.float64, order='F')
+# mass_np[2, 2] = 2. / 5 * r * r
+
+
+# ball = LagrangianLinearTIDS(initial_position_np, initial_velocity_np, mass_np)
+
+# print(ball)
+
+
+
+# # # set external forces
+# weight_np = np.array([-m * g, 0, 0], dtype=np.float64, order='F')
+# ball.setFExt(weight_np)
+
+
+ball = create_ds()
 
 #
 # Interactions
