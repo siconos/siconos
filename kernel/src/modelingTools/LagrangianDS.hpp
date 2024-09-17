@@ -23,6 +23,8 @@
 #ifndef LAGRANGIANDS_H
 #define LAGRANGIANDS_H
 
+#include <span>
+
 #include "DynamicalSystem.hpp"
 #include "PluginTypes.hpp"  // for siconos::plugins::FPtr6, ...
 #include "SecondOrderDS.hpp"
@@ -120,6 +122,8 @@ class LagrangianDS : public SecondOrderDS {
  protected:
   ACCEPT_SERIALIZATION(LagrangianDS);
 
+  using ExternalForcesFunction = std::function<void(double, std::span<double>)>;
+
   /** state of the system. See details on top of page. */
   std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> _q = {nullptr, nullptr,
                                                                       nullptr};
@@ -152,6 +156,9 @@ class LagrangianDS : public SecondOrderDS {
   /** external forces applied to the system */
   std::shared_ptr<siconos::algebra::MapVectorType> _fExt{nullptr};
   std::unique_ptr<std::vector<double>> fExt_internal_storage{nullptr};
+
+  /** function wrapper used to compute external forces */
+  ExternalForcesFunction computefext_{nullptr};
 
   /** boolean if _fext is constant (set thanks to setFExtPtr for instance)
    * false by default */
@@ -311,8 +318,8 @@ class LagrangianDS : public SecondOrderDS {
    *  \param position initial coordinates
    *  \param velocity initial velocity
    */
-  LagrangianDS(Eigen::Ref<siconos::algebra::SiconosVector>& position,
-               Eigen::Ref<siconos::algebra::SiconosVector>& velocity);
+  LagrangianDS(Eigen::Ref<siconos::algebra::SiconosVector> &position,
+               Eigen::Ref<siconos::algebra::SiconosVector> &velocity);
 
   /** constructor from initial state, velocity and mass
    *
@@ -434,7 +441,7 @@ class LagrangianDS : public SecondOrderDS {
    *
    *  \return pointer on a siconos::algebra::SiconosVector
    */
-  inline siconos::algebra::SiconosVector& q_python() const { return *(_q[0]); }
+  inline siconos::algebra::SiconosVector &q_python() const { return *(_q[0]); }
 
   /** set value of generalized coordinates vector (copy)
    *
@@ -460,9 +467,7 @@ class LagrangianDS : public SecondOrderDS {
    *
    *  \return pointer on a siconos::algebra::SiconosVector
    */
-  inline siconos::algebra::SiconosVector& velocity_python() const {
-    return *(_q[1]);
-  }
+  inline siconos::algebra::SiconosVector &velocity_python() const { return *(_q[1]); }
 
   /** set velocity vector (copy)
    *
@@ -525,7 +530,7 @@ class LagrangianDS : public SecondOrderDS {
    *
    *  \param newFext external forces vector
    */
-  inline void setConstantFExt(Eigen::Ref<siconos::algebra::SiconosVector>& newFext) {
+  inline void setConstantFExt(Eigen::Ref<siconos::algebra::SiconosVector> &newFext) {
     fExt_internal_storage = nullptr;
     _fExt = std::make_shared<siconos::algebra::MapVectorType>(newFext.data(), newFext.size());
     _hasConstantFExt = true;
@@ -679,6 +684,8 @@ class LagrangianDS : public SecondOrderDS {
    *  \param fct a pointer on the plugin function
    */
   void setComputeFExtFunction(siconos::plugins::VectorFunctionOfTime fct);
+
+  void setComputeFExtFunction(ExternalForcesFunction fext_func);
 
   /** allow to set a specified function to compute the inertia
    *

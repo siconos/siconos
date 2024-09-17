@@ -24,4 +24,4 @@
 
 */
 
-void display() const { std::cout << *this << std::endl; }
+void display() const { std::cout << *this << "\n";}
