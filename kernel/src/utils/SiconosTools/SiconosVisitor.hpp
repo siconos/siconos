@@ -75,6 +75,8 @@ class NewtonImpactRollingFrictionNSL;
 class NormalConeNSL;
 class RelayNSL;
 class FremondImpactFrictionNSL;
+class MohrCoulombPlasticityNSL;
+
 
 // DS
 class FirstOrderNonLinearDS;
@@ -131,7 +133,9 @@ struct SiconosVisitor {
   virtual void visit(const siconos::modeling::FremondImpactFrictionNSL &nslaw) const {
     THROW_EXCEPTION("you must define a visit function in a derived class of SiconosVisitor");
   };
-
+  virtual void visit(const siconos::modeling::MohrCoulombPlasticityNSL &nslaw) const {
+    THROW_EXCEPTION("you must define a visit function in a derived class of SiconosVisitor");
+  };
   // Dynamical Systems
   virtual void visit(const siconos::modeling::LagrangianDS &ds) const {
     THROW_EXCEPTION("you must define a visit function in a derived class of SiconosVisitor");
