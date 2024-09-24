@@ -50,12 +50,6 @@ namespace siconos::fem::cable {
 */
 class CableDS : public siconos::modeling::LagrangianDS {
  protected:
-  // Proto for functions used to compute external forces
-  using ExternalForcesFunction =
-      std::function<void(double, std::shared_ptr<siconos::algebra::MapVectorType>)>;
-
-  ExternalForcesFunction computefext_{nullptr};
-
   double _EA{1};
   double _l_e{1};
 
@@ -73,10 +67,10 @@ class CableDS : public siconos::modeling::LagrangianDS {
   CableDS &operator=(CableDS &&) = delete;
 
  public:
-  CableDS(std::shared_ptr<siconos::algebra::SiconosVector> q0,
-          std::shared_ptr<siconos::algebra::SiconosVector> velocity0,
-          std::shared_ptr<siconos::algebra::SiconosMatrix> mass, double a_EA,
-          double a_elem_length, ExternalForcesFunction fext = nullptr);
+  CableDS(Eigen::Ref<siconos::algebra::SiconosVector> q0,
+          Eigen::Ref<siconos::algebra::SiconosVector> velocity0,
+          Eigen::Ref<siconos::algebra::SiconosMatrix> mass, double a_EA,
+          double a_elem_length);
 
   ~CableDS() noexcept = default;
 
@@ -93,9 +87,6 @@ class CableDS : public siconos::modeling::LagrangianDS {
 
   // \f$ \nabla_v F \f$
   void computeJacobianvForces(double time) override;
-
-  //
-  void computeFExt(double time) override;
 
   void tangentStiffnessMatrix(std::shared_ptr<siconos::algebra::SiconosVector> q);
   void dampingMatrix();

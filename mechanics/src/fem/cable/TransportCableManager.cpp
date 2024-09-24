@@ -126,10 +126,13 @@ void siconos::fem::cable::TransportCableManager::computeDS(double a_tolContact, 
   compute_external_load(m_results.elem_length, rho);
 
   // create dynamics model
-  auto cable = std::make_shared<CableDS>(m_results.q0, m_results.v0, m_results.mass,
-                                         m_model.get_cable().get_EA(), m_results.elem_length);
+  auto cable =
+      std::make_shared<CableDS>(Eigen::Ref<siconos::algebra::SiconosVector>(*m_results.q0),
+                                Eigen::Ref<siconos::algebra::SiconosVector>(*m_results.v0),
+                                Eigen::Ref<siconos::algebra::SiconosMatrix>(*m_results.mass),
+                                m_model.get_cable().get_EA(), m_results.elem_length);
 
-  cable->setFExtPtr(m_results.b);
+  cable->setConstantFext(Eigen::Ref<siconos::algebra::SiconosVector>(*m_results.b));
 
   // contact conditions
   auto collisions =

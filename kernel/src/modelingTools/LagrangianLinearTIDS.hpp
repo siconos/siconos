@@ -115,22 +115,9 @@ class LagrangianLinearTIDS : public LagrangianDS {
   std::shared_ptr<Matrix> _C{nullptr};
 
   /** default constructor */
-  LagrangianLinearTIDS() = default;
+  LagrangianLinearTIDS() = default; // Used in FiniteElementLinearTIDS
 
  public:
-  /** constructor from initial state and all matrix operators.
-   *
-   *  \param q0 initial coordinates
-   *  \param v0 initial velocity
-   *  \param M mass matrix
-   *  \param K stiffness matrix
-   *  \param C damping matrix
-   */
-  LagrangianLinearTIDS(std::shared_ptr<siconos::algebra::SiconosVector> q0,
-                       std::shared_ptr<siconos::algebra::SiconosVector> v0,
-                       std::shared_ptr<siconos::algebra::SiconosMatrix> M, std::shared_ptr<Matrix> K,
-                       std::shared_ptr<Matrix> C);
-
   /** constructor from initial state and mass matrix only. Leads to \f$ M\dot v
    *  = F_{ext}(t,z) + p \f$ .
    *
@@ -138,25 +125,9 @@ class LagrangianLinearTIDS : public LagrangianDS {
    *  \param v0 initial velocity
    *  \param M mass matrix
    */
-  LagrangianLinearTIDS(std::shared_ptr<siconos::algebra::SiconosVector> q0,
-                       std::shared_ptr<siconos::algebra::SiconosVector> v0,
-                       std::shared_ptr<siconos::algebra::SiconosMatrix> M)
-      : LagrangianDS(q0, v0, M){};
-      
-/** constructor from initial state and mass matrix only. Leads to \f$ M\dot v
-   *  = F_{ext}(t,z) + p \f$ .
-   *
-   *  \param q0 initial coordinates
-   *  \param v0 initial velocity
-   *  \param M mass matrix
-   */
-  LagrangianLinearTIDS(Eigen::Ref<siconos::algebra::SiconosVector> &q0,
-                       Eigen::Ref<siconos::algebra::SiconosVector> &v0,
-                       Eigen::Ref<siconos::algebra::SiconosMatrix> &M)
-      : LagrangianDS(q0, v0){
-        _mass = std::make_shared<siconos::algebra::MapType>(M.data(), M.rows(), M.cols());
-      };
-
+  LagrangianLinearTIDS(Eigen::Ref<siconos::algebra::SiconosVector> q0,
+                       Eigen::Ref<siconos::algebra::SiconosVector> v0,
+                       Eigen::Ref<siconos::algebra::SiconosMatrix> M);
   /** destructor */
   ~LagrangianLinearTIDS() noexcept = default;
 

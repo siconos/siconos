@@ -23,9 +23,9 @@
 #include "SiconosVisitor.hpp"
 
 siconos::collision::RigidBodyDS::RigidBodyDS(
-    std::shared_ptr<siconos::algebra::SiconosVector> position,
-    std::shared_ptr<siconos::algebra::SiconosVector> velocity, double mass,
-    std::shared_ptr<siconos::algebra::SiconosMatrix> inertia)
+    Eigen::Ref<siconos::algebra::SiconosVector> position,
+    Eigen::Ref<siconos::algebra::SiconosVector> velocity, double mass,
+    Eigen::Ref<siconos::algebra::SiconosMatrix> inertia)
     : siconos::modeling::NewtonEulerDS{position, velocity, mass, inertia},
       _contactors(std::make_shared<siconos::collision::SiconosContactorSet>()) {}
 
@@ -46,6 +46,6 @@ void siconos::collision::RigidBodyDS::compute_extrapolated_position(
   _qExtrapolated->setValue(1, velocityIncrement->getValue(1));
   _qExtrapolated->setValue(2, velocityIncrement->getValue(2));
   siconos::geometry::quaternionFromTwistVector(*velocityIncrement, *_qExtrapolated);
-  const auto& qold = qMemory().getSiconosVector(0);
+  const auto &qold = qMemory().getSiconosVector(0);
   siconos::geometry::compositionLawLieGroup(qold, *_qExtrapolated);
 }

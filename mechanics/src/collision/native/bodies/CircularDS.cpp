@@ -25,17 +25,18 @@ siconos::collision::native::bodies::CircularDS::CircularDS(
     std::shared_ptr<siconos::algebra::SiconosVector> vinit)
     : siconos::modeling::LagrangianDS{qinit, vinit}, radius{r}, massValue{m}
 {
-  _ndof = 3;
+  ndof_ = 3;
+  // Nothing is done regarding the mass matrix ...
 }
 
 double siconos::collision::native::bodies::CircularDS::getQ(unsigned int pos)
 {
-  assert(pos < _ndof);
+  assert(pos < ndof_);
   return (*_q[0])(pos);
 };
 
 double siconos::collision::native::bodies::CircularDS::getVelocity(unsigned int pos)
 {
-  assert(pos < _ndof);
+  assert(pos < ndof_);
   return (*_q[1])(pos);
 };

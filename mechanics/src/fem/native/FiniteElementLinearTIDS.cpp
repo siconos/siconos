@@ -48,34 +48,39 @@ siconos::mechanics::fem::FiniteElementLinearTIDS::FiniteElementLinearTIDS(
   // - build ds from ndof or q0, v0
 
   _FEModel = std::make_shared<FiniteElementModel>(mesh);
-  _ndof = _FEModel->init();
-  // TODOSAM : do we need to allocate internal storage first (for velocity0 and q0)? I think so.
-  if (!q0_internal_storage_) q0_internal_storage_ = std::make_unique<std::vector<double>>(_ndof);
-  _q0 = std::make_shared<siconos::algebra::MapVectorType>(q0_internal_storage_->data(), _ndof);
+  ndof_ = _FEModel->init();
+
+  q0_internal_storage_ = std::make_unique<std::vector<double>>(ndof_);
+  _q0 = std::make_shared<siconos::algebra::MapVectorType>(q0_internal_storage_->data(), ndof_);
   _q0->setZero();
-  if (!velocity0_internal_storage) velocity0_internal_storage = std::make_unique<std::vector<double>>(_ndof);
-  _velocity0 = std::make_shared<siconos::algebra::MapVectorType>(velocity0_internal_storage->data(), _ndof);
+  velocity0_internal_storage = std::make_unique<std::vector<double>>(ndof_);
+  _velocity0 = std::make_shared<siconos::algebra::MapVectorType>(
+      velocity0_internal_storage->data(), ndof_);
   _velocity0->setZero();
 
   // -- Memory allocation for vector and matrix members --
   _q[0] = std::make_shared<siconos::algebra::SiconosVector>(*_q0);
   _q[1] = std::make_shared<siconos::algebra::SiconosVector>(*_velocity0);
 
-  _p[1] = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
+  _p[1] = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
 
   _zeroPlugin();
-  _n = 2 * _ndof;
+  _n = 2 * ndof_;
 
-  if (!_mass) {
-    mass_internal_storage_ = std::make_unique<std::vector<double>>(_ndof*_ndof);
-    _mass = std::make_shared<MapType>(mass_internal_storage_->data(), _ndof, _ndof);
-    // _mass->setIsSymmetric(true);
-    // _mass->setIsPositiveDefinite(true);
-  }
-  _FEModel->computeMassMatrix(_mass, _materials);
+  // Mass ...
+  // Deal with 'plugged' mass later
+  hasConstantMass_ = true;
+  hasMass_ = true;
+  computemass_ = nullptr;
+  mass_internal_storage_ = std::make_unique<std::vector<double>>(ndof_ * ndof_);
+  mass_view_ = std::make_shared<MapType>(mass_internal_storage_->data(), ndof_, ndof_);
+  // _mass->setIsSymmetric(true);
+  // _mass->setIsPositiveDefinite(true);
+
+  _FEModel->computeMassMatrix(mass_view_, _materials);
 
   if (!_K) {
-    _K = std::make_shared<Matrix>(_ndof, _ndof);
+    _K = std::make_shared<Matrix>(ndof_, ndof_);
     // _K->setIsSymmetric(true);
     // _K->setIsPositiveDefinite(true);
   }
@@ -83,7 +88,7 @@ siconos::mechanics::fem::FiniteElementLinearTIDS::FiniteElementLinearTIDS(
 
   // if(!_C)
   // {
-  //   _C = std::make_shared<siconos::algebra::SiconosMatrix>(_ndof, _ndof,
+  //   _C = std::make_shared<siconos::algebra::SiconosMatrix>(ndof_, ndof_,
   //   _storageType);
   // }
   // _C->zero();
@@ -109,17 +114,18 @@ void siconos::mechanics::fem::FiniteElementLinearTIDS::applyDirichletBoundaryCon
 
 void siconos::mechanics::fem::FiniteElementLinearTIDS::applyNodalForces(
     int physical_entity_tag, std::shared_ptr<siconos::algebra::SiconosVector> nodal_forces) {
-  if (!_fExt) {
-    if(!fExt_internal_storage) {
-      fExt_internal_storage = std::make_unique<std::vector<double>>(_ndof);
+  if (!fext_view_) {
+    if (!fext_internal_storage_) {
+      fext_internal_storage_ = std::make_unique<std::vector<double>>(ndof_);
     }
-    _fExt = std::make_shared<siconos::algebra::MapVectorType>(fExt_internal_storage->data(), _ndof); // TODOSAM : what to do here ?
+    fext_view_ = std::make_shared<siconos::algebra::MapVectorType>(
+        fext_internal_storage_->data(), ndof_);  // TODOSAM : what to do here ?
   }
-  _FEModel->applyNodalForces(physical_entity_tag, nodal_forces, _fExt);
+  _FEModel->applyNodalForces(physical_entity_tag, nodal_forces, fext_view_);
 };
 
 double siconos::mechanics::fem::FiniteElementLinearTIDS::elasticPotentialEnergy() const {
-  auto tmp = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
+  auto tmp = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
   siconos::algebra::prod(*_K, *q(), *tmp, true);
   return 0.5 * siconos::algebra::inner_prod(*q(), *tmp);
 }

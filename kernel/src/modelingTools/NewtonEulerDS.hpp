@@ -47,7 +47,7 @@ void computeExtForceAtPos(std::shared_ptr<siconos::algebra::SiconosVector> q,
                           std::shared_ptr<siconos::algebra::SiconosVector> force,
                           bool forceAbsRef,
                           std::shared_ptr<siconos::algebra::SiconosVector> pos, bool posAbsRef,
-                          std::shared_ptr<siconos::algebra::SiconosVector> fExt,
+                          Eigen::Ref<siconos::algebra::MapVectorType> fExt,
                           std::shared_ptr<siconos::algebra::SiconosVector> mExt,
                           bool accumulate);
 
@@ -83,6 +83,11 @@ void computeExtForceAtPos(std::shared_ptr<siconos::algebra::SiconosVector> q,
 
 */
 class NewtonEulerDS : public SecondOrderDS {
+ public:
+  /** external forces plugin type */
+  using ExternalForcesFunction =
+      std::function<void(double, Eigen::Ref<siconos::algebra::MapVectorType>)>;
+
  protected:
   ACCEPT_SERIALIZATION(NewtonEulerDS);
 
@@ -108,8 +113,8 @@ class NewtonEulerDS : public SecondOrderDS {
    */
   std::shared_ptr<siconos::algebra::SiconosVector> _q{nullptr};
 
-  /** Dimension of _q, is not necessary equal to _ndof. In our case, _qDim = 7
-   * and  _ndof =6*/
+  /** Dimension of _q, is not necessary equal to ndof_. In our case, _qDim = 7
+   * and  ndof_ =6*/
   unsigned int _qDim{7};
 
   /** The time derivative of  \f$ q \f$ ,  \f$ \dot q \f$ */
@@ -124,11 +129,6 @@ class NewtonEulerDS : public SecondOrderDS {
   siconos::algebra::SiconosMemory _qMemory;
   siconos::algebra::SiconosMemory _forcesMemory;
   siconos::algebra::SiconosMemory _dotqMemory;
-
-  
-  /** Inertial matrix
-   */
-  std::shared_ptr<Matrix> _I{nullptr};
 
   /** Scalar mass of the system
    */
@@ -145,12 +145,20 @@ class NewtonEulerDS : public SecondOrderDS {
    */
   std::shared_ptr<Matrix> _Tdot{nullptr};
 
-  /** external forces of the system */
-  std::shared_ptr<siconos::algebra::SiconosVector> _fExt{nullptr};
+  /** external forces applied to the system */
+  std::shared_ptr<siconos::algebra::MapVectorType> fext_view_{nullptr};
 
-  /** boolean if _fext is constant (set thanks to setFExtPtr for instance)
-   * false by default */
-  bool _hasConstantFExt{false};
+  /** internal (optional) storage used for external forces */
+  std::unique_ptr<std::vector<double>> fext_internal_storage_{nullptr};
+
+  /** function wrapper used to compute external forces */
+  ExternalForcesFunction computefext_{nullptr};
+
+  /** True if external forces are required (set) and constant */
+  bool hasConstantFext_{false};
+
+  /** True if external forces are reqyired/set */
+  bool hasFext_{false};
 
   /** internal forces of the system */
   std::shared_ptr<siconos::algebra::SiconosVector> _fInt{nullptr};
@@ -218,9 +226,6 @@ class NewtonEulerDS : public SecondOrderDS {
 
   /** value of the step in finite difference */
   double _epsilonFD{sqrt(std::numeric_limits<double>::epsilon())};
-
-  /** Plugin to compute strength of external forces */
-  std::shared_ptr<siconos::plugins::PluggedObject> _pluginFExt{nullptr};
 
   /** Plugin to compute the external moment expressed in the inertial frame  */
   std::shared_ptr<siconos::plugins::PluggedObject> _pluginMExt{nullptr};
@@ -301,12 +306,7 @@ class NewtonEulerDS : public SecondOrderDS {
    *  from of NewtonEulerDS system values (jacobianXBloc10, jacobianXBloc11,
    *  zeroMatrix, idMatrix) No get-set functions at the time. Only used as a
    *  protected member.*/
-  std::vector<std::shared_ptr<Matrix>> _rhsMatrices = {
-      nullptr, nullptr, nullptr, nullptr};
-
-  /** Default constructor
-   */
-  NewtonEulerDS();
+  std::vector<std::shared_ptr<Matrix>> _rhsMatrices = {nullptr, nullptr, nullptr, nullptr};
 
   /** build all _plugin... PluggedObject */
   void _zeroPlugin() override;
@@ -321,9 +321,9 @@ class NewtonEulerDS : public SecondOrderDS {
    *  \param mass the mass
    *  \param inertia the inertia matrix
    */
-  NewtonEulerDS(std::shared_ptr<siconos::algebra::SiconosVector> position,
-                std::shared_ptr<siconos::algebra::SiconosVector> twist, double mass,
-                std::shared_ptr<Matrix> inertia);
+  NewtonEulerDS(Eigen::Ref<siconos::algebra::SiconosVector> position,
+                Eigen::Ref<siconos::algebra::SiconosVector> twist, double mass,
+                Eigen::Ref<siconos::algebra::SiconosMatrix> inertia);
 
   /** destructor */
   virtual ~NewtonEulerDS() noexcept = default;
@@ -376,9 +376,7 @@ class NewtonEulerDS : public SecondOrderDS {
   // -- Jacobian Forces w.r.t q --
 
   /** \return the jacobian matrix of forces, with respect to q */
-  inline std::shared_ptr<Matrix> jacobianqForces() const override {
-    return _jacobianWrenchq;
-  }
+  inline std::shared_ptr<Matrix> jacobianqForces() const override { return _jacobianWrenchq; }
 
   /** \return the jacobian matrix  of forces with respect to velocity */
   inline std::shared_ptr<Matrix> jacobianvForces() const override {
@@ -451,16 +449,6 @@ class NewtonEulerDS : public SecondOrderDS {
     return _acceleration;
   };
 
-  /** default function to compute the mass
-   */
-  void computeMass() override{};
-
-  /** function to compute the mass
-   *
-   *  \param position value used to evaluate the mass matrix
-   */
-  void computeMass(std::shared_ptr<siconos::algebra::SiconosVector> position) override{};
-
   /** Get the linear velocity in the absolute (inertial) or relative
    *  (body) frame of reference.
    *
@@ -512,25 +500,17 @@ class NewtonEulerDS : public SecondOrderDS {
   /** Modify the scalar mass */
   void setScalarMass(double mass) {
     _scalarMass = mass;
-    updateMassMatrix();
+    (*mass_view_)(0, 0) = _scalarMass;
+    (*mass_view_)(1, 1) = _scalarMass;
+    (*mass_view_)(2, 2) = _scalarMass;
   };
 
-  /** \return the inertia matrix
-   */
-  std::shared_ptr<Matrix> inertia() { return _I; };
+  /** \return the inertia matrix */
+  Eigen::Ref<siconos::algebra::MapType> inertia_view() const {
+    return mass_view_->block(3, 3, 3, 3);
+  };
 
-  /**
-    Modify the inertia matrix (pointer link)
-
-    \param newInertia the new inertia matrix
-  */
-  void setInertia(std::shared_ptr<Matrix> newInertia) {
-    _I = newInertia;
-    updateMassMatrix();
-  }
-
-  /**
-    Modify the inertia matrix.
+  /** Modify the inertia matrix.
 
     \param ix x component
     \param iy y component
@@ -538,24 +518,36 @@ class NewtonEulerDS : public SecondOrderDS {
   */
   void setInertia(double ix, double iy, double iz);
 
-  /** to be called after scalar mass or inertia matrix have changed */
-  void updateMassMatrix();
+  // /** to be called after scalar mass or inertia matrix have changed */
+  // void updateMassMatrix();
 
   // -- Fext --
-  /** get fExt
-   *
-   *  \return pointer on a plugged vector
-   */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> fExt() const { return _fExt; }
+  /** \return  \f$ F_{ext}(t) \f$ , (pointer link) */
+  inline std::shared_ptr<siconos::algebra::MapVectorType> fExt() const { return fext_view_; }
 
-  /** set fExt to pointer newPtr
+  /** \return  \f$ F_{ext}(t) \f$  (view onto memory) */
+  inline siconos::algebra::MapVectorType &fext_view() const { return *fext_view_; }
+
+  /** set a constant external forces vector
    *
-   *  \param   newPtr a SP to a Simple vector
+   *  \param newFext external forces vector
    */
-  inline void setFExtPtr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) {
-    _fExt = newPtr;
-    _hasConstantFExt = true;
-  }
+  void setConstantFext(Eigen::Ref<siconos::algebra::SiconosVector> newFext);
+
+  /** True if external forces are taken into account */
+  bool hasExternalForces() const { return hasFext_; }
+
+  /** set a user-defined function to compute external forces
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputeFextFunction(ExternalForcesFunction fext_func);
+
+  /** Update external forces values
+   *
+   *  \param time the current time
+   */
+  void computeFext(double time);
 
   /** get mExt
    *
@@ -651,8 +643,10 @@ class NewtonEulerDS : public SecondOrderDS {
   /**
       Update the content of the lu factorization of the mass of the system,
       if required.
+
+      \param time current time
   */
-  void update_inverse_mass() override;
+  void update_inverse_mass(double time = 0.) override;
 
   inline void setComputeJacobianFIntqByFD(bool value) { _computeJacobianFIntqByFD = value; }
   inline void setComputeJacobianFIntvByFD(bool value) {
@@ -663,25 +657,12 @@ class NewtonEulerDS : public SecondOrderDS {
     _computeJacobianMInttwistByFD = value;
   }
 
-  /** allow to set a specified function to compute _fExt
-   *
-   *  \param pluginPath the complete path to the plugin
-   *  \param functionName the name of the function to use in this plugin
-   */
-  void setComputeFExtFunction(const std::string &pluginPath, const std::string &functionName);
-
   /** allow to set a specified function to compute _mExt
    *
    *  \param pluginPath the complete path to the plugin
    *  \param functionName the name of the function to use in this plugin
    */
   void setComputeMExtFunction(const std::string &pluginPath, const std::string &functionName);
-
-  /** set a specified function to compute _fExt
-   *
-   *  \param fct a pointer on the plugin function
-   */
-  void setComputeFExtFunction(FExt_NE fct);
 
   /** set a specified function to compute _mExt
    *
@@ -774,19 +755,6 @@ class NewtonEulerDS : public SecondOrderDS {
    */
   void setComputeJacobianMIntvFunction(FInt_NE fct);
 
-  /** function to compute the external forces
-   *
-   *  \param time the current time
-   */
-  virtual void computeFExt(double time);
-
-  /** default function to compute the external forces
-   *
-   *  \param time the current time
-   *  \param fExt the computed external force (in-out param)
-   */
-  virtual void computeFExt(double time, std::shared_ptr<siconos::algebra::SiconosVector> fExt);
-
   /** function to compute the external moments
    *  The external moments are expressed by default in the body frame, since the
    *  Euler equation for Omega is written in the body--fixed frame. Nevertheless,
@@ -804,8 +772,8 @@ class NewtonEulerDS : public SecondOrderDS {
 
   /** Adds a force/torque impulse to a body's FExt and MExt vectors in
    *  either absolute (inertial) or relative (body) frame.  Modifies
-   *  contents of _fExt and _mExt! Therefore these must have been set
-   *  as constant vectors using setFExtPtr and setMExtPtr prior to
+   *  contents of fext_view_ and _mExt! Therefore these must have been set
+   *  as constant vectors using setConstantFext and setMExtPtr prior to
    *  calling this function.  Adjustments to _mExt will take into
    *  account the value of _isMextExpressedInInertialFrame.
    *
@@ -878,11 +846,7 @@ class NewtonEulerDS : public SecondOrderDS {
    *
    *  \param time  the current time
    */
-  void updatePlugins(double time) override{};
-
-  /** Allocate memory for forces and its jacobian.
-   */
-  void init_forces() override;
+  void updatePlugins(double time) override {};
 
   /** Default function to compute forces
    *
@@ -911,21 +875,14 @@ class NewtonEulerDS : public SecondOrderDS {
    */
   void computeJacobianvForces(double time) override;
 
-  /** function to compute gyroscopic forces with some specific values for q and
-   *  twist (ie not those of the current state).
-   *
-   *  \param twist std::shared_ptr<siconos::algebra::SiconosVector>: pointers on  twist vector
+  /** Computes gyroscopic forces
+   *  \param[in] imat inertia matrix
+   *  \param[in] twist pointer to twist vector
+   *  \param[in,out] mGyr gyroscopic forces
    */
-  virtual void computeMGyr(std::shared_ptr<siconos::algebra::SiconosVector> twist);
-
-  /** function to compute gyroscopic forces with some specific values for q and
-   *  twist (ie not those of the current state).
-   *
-   *  \param twist pointer to twist vector
-   *  \param mGyr pointer to gyroscopic forces
-   */
-  virtual void computeMGyr(std::shared_ptr<siconos::algebra::SiconosVector> twist,
-                           std::shared_ptr<siconos::algebra::SiconosVector> mGyr);
+  virtual void computeMGyr(Eigen::Ref<siconos::algebra::SiconosMatrix> imat,
+                           Eigen::Ref<siconos::algebra::SiconosVector> twist,
+                           Eigen::Ref<siconos::algebra::SiconosVector> mGyr);
 
   /** Default function to compute the jacobian following q of mGyr
    *

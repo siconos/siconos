@@ -28,7 +28,7 @@ def test_LagrangianLinearTIDS():
     assert np.allclose(ball.q(), q, rtol=tol, atol=tol)
     assert np.allclose(ball.velocity(), v, rtol=tol, atol=tol)
     assert np.allclose(ball.mass(), mass, rtol=tol, atol=tol)
-    ball.setFExtPtr(weight)
+    ball.setConstantFExt(weight)
     assert np.allclose(ball.fExt(), weight, rtol=tol, atol=tol)
 
 

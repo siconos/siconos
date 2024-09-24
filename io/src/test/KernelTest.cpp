@@ -197,9 +197,10 @@ void KernelTest::t5() {
   auto ball = std::make_shared<siconos::modeling::LagrangianLinearTIDS>(q0, v0, Mass);
 
   // -- Set external forces (weight) --
-  auto weight = std::make_shared<siconos::algebra::SiconosVector>(nDof);
-  (*weight)(0) = -m * g;
-  ball->setFExtPtr(weight);
+  siconos::algebra::SiconosVector weight{nDof};
+  weight.setZero();
+  weight(0) = -m * g;
+  ball->setConstantFExt(weight);
 
   // --------------------
   // --- Interactions ---
@@ -349,7 +350,7 @@ void KernelTest::t6() {
 void KernelTest::t7() {
   std::shared_ptr < siconos::modeling::DynamicalSystem ds1, ds2;
 
-  // Must be size=1, cannot deserialize a LagrangianDS with _ndof==0
+  // Must be size=1, cannot deserialize a LagrangianDS with ndof_==0
   auto q = std::make_shared<siconos::algebra::SiconosVector>(1);
   auto v = std::make_shared<siconos::algebra::SiconosVector>(1);
 

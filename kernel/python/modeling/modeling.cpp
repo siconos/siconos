@@ -18,8 +18,12 @@
 
 #include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
+// #include <pybind11/stl.h>  // Pour permettre la conversion entre std::vector et les objets
+// Python comme les listes
 
+#include <functional>
 #include <memory>
+#include <span>
 
 #include "dynamical_systems_wrapper.h"
 
@@ -38,36 +42,53 @@ PYBIND11_MODULE(modeling, m) {
              std::shared_ptr<siconos::modeling::SecondOrderDS>,
              siconos::modeling::DynamicalSystem>(m, "SecondOrderDS")
       .def("p", &siconos::modeling::SecondOrderDS::p_python,
-           py::return_value_policy::reference_internal);
+           py::return_value_policy::reference_internal)
+      .def_property_readonly("mass", &siconos::modeling::SecondOrderDS::mass_view);
 
   py::class_<siconos::modeling::LagrangianDS, std::shared_ptr<siconos::modeling::LagrangianDS>,
-             siconos::modeling::SecondOrderDS>(m, "LagrangianDS");
+             siconos::modeling::SecondOrderDS>(m, "LagrangianDS")
 
-  py::class_<siconos::modeling::LagrangianLinearTIDS,
-             std::shared_ptr<siconos::modeling::LagrangianLinearTIDS>,
-             siconos::modeling::SecondOrderDS>(m, "LagrangianLinearTIDS")
-      .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector> &,
-                    Eigen::Ref<siconos::algebra::SiconosVector> &,
-                    Eigen::Ref<siconos::algebra::SiconosMatrix> &>(),
-           py::keep_alive<1, 2>(),  // keep python object (np array arguments) memory alive as
-                                    // long as object is referenced
-           py::keep_alive<1, 3>(), py::keep_alive<1, 4>(), py::arg("q0"), py::arg("v0"),
-           py::arg("M"))
-      .def("setConstantFExt",
-           static_cast<void (siconos::modeling::LagrangianLinearTIDS::*)(
-               Eigen::Ref<siconos::algebra::SiconosVector> &)>(
-               &siconos::modeling::LagrangianLinearTIDS::setConstantFExt),
-           py::keep_alive<1, 2>())
-      .def("setComputeFExtFunction",
-           static_cast<void (siconos::modeling::LagrangianLinearTIDS::*)(
-               const std::string &pluginPath, const std::string &functionName)>(
-               &siconos::modeling::LagrangianLinearTIDS::setComputeFExtFunction))
+      .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>,
+                    Eigen::Ref<siconos::algebra::SiconosVector>>(),
+           py::keep_alive<1, 2>(),  // keep python object (np array arguments) memory alive
+                                    // as long as object is referenced
+           py::keep_alive<1, 3>(), py::arg("q0"), py::arg("v0"))
 
       .def("q", &siconos::modeling::LagrangianDS::q_python,
            py::return_value_policy::reference_internal)
       .def("velocity", &siconos::modeling::LagrangianDS::velocity_python,
            py::return_value_policy::reference_internal)
-      .def_property_readonly("mass", &siconos::modeling::LagrangianDS::mass_python);
+
+      .def("setConstantFext", &siconos::modeling::LagrangianDS::setConstantFext,
+           py::keep_alive<1, 2>(), "To define a constant external forces vector")
+
+      .def(
+          "setComputeFextFunction",
+          [](siconos::modeling::LagrangianDS &self, py::function f) {
+            // Catch Python function and create a complient std::function
+            self.setComputeFextFunction(
+                [f](double val, Eigen::Ref<siconos::algebra::MapVectorType> result) {
+                  f(val, result);  // Call python func with a memory view ...
+                });
+          },
+          "How to compute external forces")
+
+      .def("computeFext", &siconos::modeling::LagrangianDS::computeFext,
+           "compute external forces")
+
+      .def("fext", &siconos::modeling::LagrangianDS::fext_view,
+           "current values of external forces");
+
+  py::class_<siconos::modeling::LagrangianLinearTIDS,
+             std::shared_ptr<siconos::modeling::LagrangianLinearTIDS>,
+             siconos::modeling::LagrangianDS>(m, "LagrangianLinearTIDS")
+      .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>,
+                    Eigen::Ref<siconos::algebra::SiconosVector>,
+                    Eigen::Ref<siconos::algebra::SiconosMatrix>>(),
+           py::keep_alive<1, 2>(),  // keep python object (np array arguments) memory alive
+                                    // as long as object is referenced
+           py::keep_alive<1, 3>(), py::keep_alive<1, 4>(), py::arg("q0"), py::arg("v0"),
+           py::arg("M"));
   // .def("__repr__", [](const siconos::modeling::LagrangianLinearTIDS &a) {
   //     (a.display());
   //   return "\n";

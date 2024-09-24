@@ -173,7 +173,7 @@ mass = eye(3)  # mass matrix
 mass[2, 2] = 2. / 5 * r * r
 ball = LagrangianLinearTIDS(x, v, mass)
 weight = [-m * g, 0, 0] 
-ball.setFExtPtr(weight) #set external forces
+ball.setConstantFExt(weight) #set external forces
 # Interaction ball-floor
 H = [[1, 0, 0]]
 nslaw = NewtonImpactNSL(e)

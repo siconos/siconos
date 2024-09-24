@@ -25,10 +25,10 @@
 #include "OneStepNSProblem.hpp"
 #include "SiconosConst.hpp"  // For MACHINE_PREC
 #include "SiconosException.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixOp.hpp"        // scal
 #include "SiconosMatrixVectorOp.hpp"  // mat-vec prod
 #include "SiconosVector.hpp"
-#include "SiconosMatrix.hpp"
 #include "Simulation.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -108,7 +108,7 @@ void siconos::integrators::NewMarkAlphaOSI::computeW(
     {
       K = lds->jacobianqForces();  // jacobian according to q
       C = lds->jacobianvForces();  // jacobian according to velocity
-      lds->computeMass(lds->q());
+      lds->computeMass(*lds->q(), _simulation->startingTime());
     }
 
     // Compute W = (beta_prime/h^2)*M - (gamma_prime/h)*C - K
@@ -176,7 +176,7 @@ double siconos::integrators::NewMarkAlphaOSI::computeResidu() {
         auto C = ltids->C();
         auto F = ltids->fExt();
         if (F) {
-          ltids->computeFExt(t);
+          ltids->computeFext(t);
           residuFree -= *F;  // freeR = _workspace[freeresidu] - F
         }
         if (K) siconos::algebra::prod(*K, *q, residuFree, false);  // f = M*a + C*v + K*q
@@ -184,7 +184,7 @@ double siconos::integrators::NewMarkAlphaOSI::computeResidu() {
       } else                                                       // LagrangianDS
       {
         // Update mass matrix
-        d->computeMass();
+        d->computeMass(*d->q(), t);
         auto F = d->forces();
         if (F) {
           // Compute F = F_ext - F_int - F_Gyr
@@ -236,8 +236,8 @@ void siconos::integrators::NewMarkAlphaOSI::computeFreeState() {
     // -- Convert the DS into a Lagrangian one.
     if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
       qfree = residuFree;
-      siconos::algebra::solveInPlace(*W, qfree); //_qfree = (W^-1)*R_free
-      qfree *= -1.0;    //_qfree = -(W^-1)*R_free
+      siconos::algebra::solveInPlace(*W, qfree);  //_qfree = (W^-1)*R_free
+      qfree *= -1.0;                              //_qfree = -(W^-1)*R_free
       //
       DEBUG_EXPR(qfree.display(););
     } else {
@@ -420,7 +420,7 @@ void siconos::integrators::NewMarkAlphaOSI::initializeWorkVectorsForDS(
     workMatrices.resize(siconos::integrators::NewMarkAlphaOSI::MAT_WORK_LENGTH);
     workMatrices[siconos::integrators::NewMarkAlphaOSI::DENSE_OUTPUT_COEFFICIENTS] =
         std::make_shared<siconos::algebra::SiconosMatrix>(ds->dimension(),
-                                                         (getOrderDenseOutput() + 1));
+                                                          (getOrderDenseOutput() + 1));
 
     //*(lds->workspace(DynamicalSystem::acce_like)) = *(lds->acceleration());
     // ds->allocateWorkVector(DynamicalSystem::acce_like, ds->dimension()); // allocate memory

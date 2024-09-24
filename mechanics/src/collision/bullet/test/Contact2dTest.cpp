@@ -13,9 +13,9 @@
 #include "SiconosBulletCollisionManager.hpp"
 #include "SiconosCollisionManager.hpp"
 #include "SiconosContactor.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosShape.hpp"
 #include "SiconosVector.hpp"
-#include "SiconosMatrix.hpp"
 #include "StaticBody.hpp"
 #include "TimeDiscretisation.hpp"
 #include "TimeStepping.hpp"
@@ -74,19 +74,13 @@ static BounceResult bounceTest(std::string moving, std::string ground,
   // -- Model --
   auto nsds = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(t0, T);
 
-  auto q0 = std::make_shared<siconos::algebra::SiconosVector>(3);
-  auto v0 = std::make_shared<siconos::algebra::SiconosVector>(3);
-  q0->zero();
-  v0->zero();
-  (*q0)(1) = position_init;
-  (*v0)(1) = velocity_init;
 
-  auto q1 = std::make_shared<siconos::algebra::SiconosVector>(3);
-  auto v1 = std::make_shared<siconos::algebra::SiconosVector>(3);
-  q1->zero();
-  (*q1)(1) = 1.0;
-  v1->zero();
-
+  siconos::algebra::SiconosVector q0{7};
+  siconos::algebra::SiconosVector v0{6};
+  q0.setZero();
+  v0.setZero();
+  q0(1) = position_init;
+  v0(1) = velocity_init;
   /////////
 
   // Bodies
@@ -97,11 +91,10 @@ static BounceResult bounceTest(std::string moving, std::string ground,
 
   // Set up a Siconos Mechanics environment:
   // A RigidBody2dDS with a contactor consisting of a single disk.
-
-  auto mass = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
-  mass->setValue(0, 0, params.mass);
-  mass->setValue(1, 1, params.mass);
-  mass->setValue(2, 2, params.mass);
+  siconos::algebra::SiconosMatrix mass{3,3};
+  mass(0, 0) = params.mass;
+  mass(1, 1) = params.mass;
+  mass(2, 2) = params.mass;
   auto body = std::make_shared<siconos::collision::RigidBody2dDS>(q0, v0, mass);
   auto contactors = std::make_shared<siconos::collision::SiconosContactorSet>();
   std::shared_ptr<siconos::collision::SiconosDisk> disk;
@@ -170,10 +163,10 @@ static BounceResult bounceTest(std::string moving, std::string ground,
   /////////
 
   // -- Set external forces (weight) --
-  auto FExt = std::make_shared<siconos::algebra::SiconosVector>(3);
-  FExt->zero();
-  FExt->setValue(1, -g * params.mass);
-  body->setFExtPtr(FExt);
+  siconos::algebra::SiconosVector FExt{3};
+  FExt.setZero();
+  FExt(1) = -params.mass * g;
+  body->setConstantFext(FExt);
 
   // -- Add the dynamical systems into the non smooth dynamical system
   nsds->insertDynamicalSystem(body);

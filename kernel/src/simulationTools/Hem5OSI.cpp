@@ -27,12 +27,12 @@
 #include "NewtonImpactNSL.hpp"
 #include "OneStepNSProblem.hpp"
 #include "SiconosException.hpp"
-#include "SiconosFortran.h"           // for Fortran to C api, fprobpointer ...
+#include "SiconosFortran.h"  // for Fortran to C api, fprobpointer ...
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixVectorOp.hpp"  // for prod and subprod
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"  // for subscal
 #include "SiconosVisitor.hpp"
-#include "SiconosMatrix.hpp"
 #include "Simulation.hpp"
 #include "Tools.hpp"  // enum_to_string
 #include "Topology.hpp"
@@ -249,8 +249,8 @@ void siconos::integrators::Hem5OSI::Hem5OSI_impl::fprob(
     for (auto vi : *dsGraph) {
       auto ds = dsGraph->bundle(vi);
       if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
-        if (lds->mass()) {
-          lds->computeMass();
+        if (lds->hasMass()) {
+          lds->computeMass(*lds->q(), t);
           for (auto ii = pos; ii < ((unsigned int)(*NV) + pos); ii++) {
             for (auto jj = pos; jj < ((unsigned int)(*NV) + pos); jj++) {
               AM[ii + jj * (int)(*NV)] = lds->mass()->getValue(ii, jj);
@@ -783,7 +783,7 @@ struct siconos::integrators::Hem5OSI::_NSLEffectOnFreeOutput
   _NSLEffectOnFreeOutput(siconos::nonsmooth_formulations::OneStepNSProblem* p,
                          std::shared_ptr<siconos::modeling::Interaction> inter,
                          siconos::graphs::InteractionProperties& interProp)
-      : _osnsp(p), _inter(inter), _interProp(interProp){};
+      : _osnsp(p), _inter(inter), _interProp(interProp) {};
 
   void visit(const siconos::modeling::NewtonImpactNSL& nslaw) const override {
     double e;

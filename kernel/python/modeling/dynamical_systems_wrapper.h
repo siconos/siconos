@@ -1,6 +1,7 @@
 #ifndef DYNAMICAL_SYSTEMS_WRAPPER
 #define DYNAMICAL_SYSTEMS_WRAPPER
 
+#include "LagrangianDS.hpp"
 #include "LagrangianLinearTIDS.hpp"
 #include "NewtonImpactNSL.hpp"
 #include "LagrangianLinearTIR.hpp"

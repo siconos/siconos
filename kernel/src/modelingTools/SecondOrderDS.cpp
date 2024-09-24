@@ -18,8 +18,8 @@
 #include "SecondOrderDS.hpp"
 
 #include "BoundaryCondition.hpp"
-#include "SiconosVector.hpp"
 #include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -38,8 +38,44 @@ void siconos::modeling::SecondOrderDS::setBoundaryConditions(
       std::make_shared<siconos::algebra::SiconosVector>(_boundaryConditions->size());
 };
 
-void siconos::modeling::SecondOrderDS::setMassPtr(
-    std::shared_ptr<siconos::algebra::MapType> newPtr) {
-  _mass = newPtr;
-  _hasConstantMass = true;
+void siconos::modeling::SecondOrderDS::setConstantMass(
+    Eigen::Ref<siconos::algebra::SiconosMatrix> newValue) {
+  /**  Must:
+
+   - create the Map (view onto memory handled by newValue) for mass
+   - set the corresponding booleans
+   - reset internal storage (should already be null but who knows ...)
+   */
+
+  mass_internal_storage_ = nullptr;
+
+  mass_view_ = std::make_shared<siconos::algebra::MapType>(newValue.data(), ndof_, ndof_);
+  hasMass_ = true;
+  hasConstantMass_ = true;
+  computemass_ = nullptr;
+}
+
+void siconos::modeling::SecondOrderDS::setComputeMassFunction(MassFunction new_func) {
+  // Ensure that memory is properly allocated for mass_
+  if (!mass_internal_storage_) {
+    mass_internal_storage_ = std::make_unique<std::vector<double>>(ndof_ * ndof_);
+  }
+  mass_view_ = std::make_shared<siconos::algebra::MapType>(mass_internal_storage_->data(),
+                                                           ndof_, ndof_);
+  mass_view_->setZero();
+  hasMass_ = true;
+  hasConstantMass_ = false;
+  computemass_ = new_func;
+}
+
+void siconos::modeling::SecondOrderDS::computeMass(
+    Eigen::Ref<siconos::algebra::SiconosVector> position, double time) {
+  if (computemass_) {
+    // in that case, internal_storage must have been allocated by
+    // setCompute... call
+    // std::span<double> sppos(position.data(), ndof_);
+    // std::span<double> spmat(mass_internal_storage_->data(),
+    //                         mass_internal_storage_->size());
+    computemass_(position, time, *mass_view_);
+  }
 }

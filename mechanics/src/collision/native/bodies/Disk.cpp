@@ -18,20 +18,21 @@
 
 #include "Disk.hpp"
 
-#include "SiconosVector.hpp"
 #include "SiconosMatrix.hpp"
-
+#include "SiconosVector.hpp"
 
 siconos::collision::native::bodies::Disk::Disk(
     double r, double m, std::shared_ptr<siconos::algebra::SiconosVector> qinit,
     std::shared_ptr<siconos::algebra::SiconosVector> vinit)
-    : CircularDS(r, m, qinit, vinit)
-{
+    : CircularDS(r, m, qinit, vinit) {
+    mass_internal_storage_ = std::make_unique<std::vector<double>>(ndof_ * ndof_);
+  mass_view_ = std::make_shared<MapType>(mass_internal_storage_->data(), ndof_, ndof_);
+  hasConstantMass_ = true;
+  hasMass_ = true;
+  computemass_ = nullptr;
 
-  mass_internal_storage_ = std::make_unique<std::vector<double>>(_ndof*_ndof);
-  _mass = std::make_shared<MapType>(mass_internal_storage_->data(), _ndof, _ndof);
   //  mass->resize(ndof,ndof);
-  _mass->setZero();
-  (*_mass)(0, 0) = (*_mass)(1, 1) = massValue;
-  (*_mass)(2, 2) = massValue * radius * radius / 2.;
+  mass_view_->setZero();
+  (*mass_view_)(0, 0) = (*mass_view_)(1, 1) = massValue;
+  (*mass_view_)(2, 2) = massValue * radius * radius / 2.;
 }

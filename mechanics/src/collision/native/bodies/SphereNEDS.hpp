@@ -36,9 +36,9 @@ class SphereNEDS : public siconos::modeling::NewtonEulerDS,
   double radius{0.};
 
  public:
-  SphereNEDS(double, double, std::shared_ptr<siconos::algebra::SiconosMatrix>,
-             std::shared_ptr<siconos::algebra::SiconosVector>,
-             std::shared_ptr<siconos::algebra::SiconosVector>);
+  SphereNEDS(double r, double m, Eigen::Ref<siconos::algebra::SiconosMatrix>& inertia,
+             Eigen::Ref<siconos::algebra::SiconosVector>& qinit,
+             Eigen::Ref<siconos::algebra::SiconosVector>& vinit);
 
   ~SphereNEDS() noexcept = default;
 

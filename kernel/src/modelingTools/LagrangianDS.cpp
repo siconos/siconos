@@ -39,78 +39,76 @@
 siconos::modeling::LagrangianDS::LagrangianDS(
     std::shared_ptr<siconos::algebra::SiconosVector> q0,
     std::shared_ptr<siconos::algebra::SiconosVector> v0)
-    : SecondOrderDS(2 * q0->size(), v0->size()), _hasConstantFExt(true) {
-  assert(_ndof > 0 && "lagrangian dynamical system dimension should be greater than 0.");
+    : SecondOrderDS(2 * q0->size(), v0->size()) {
+  assert(ndof_ > 0 && "lagrangian dynamical system dimension should be greater than 0.");
 
   // Set initial conditions
-  _q0 = std::make_shared<siconos::algebra::MapVectorType>(q0->data(), _ndof);
-  _velocity0 = std::make_shared<siconos::algebra::MapVectorType>(v0->data(), _ndof);
+  _q0 = std::make_shared<siconos::algebra::MapVectorType>(q0->data(), ndof_);
+  _velocity0 = std::make_shared<siconos::algebra::MapVectorType>(v0->data(), ndof_);
 
   // -- Memory allocation for vector and matrix members --
   _q[0] = std::make_shared<siconos::algebra::SiconosVector>(*_q0);
   _q[1] = std::make_shared<siconos::algebra::SiconosVector>(*_velocity0);
 
   /** \todo lazy Memory allocation */
-  _p[1] = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
+  _p[1] = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
   _p[1]->setZero();
   _zeroPlugin();
 }
 
 // Build from initial state only
-siconos::modeling::LagrangianDS::LagrangianDS(Eigen::Ref<siconos::algebra::SiconosVector>& q0,
-                                              Eigen::Ref<siconos::algebra::SiconosVector>& v0)
-    : SecondOrderDS(2 * q0.size(), v0.size()), _hasConstantFExt(true) {
-  assert(_ndof > 0 && "lagrangian dynamical system dimension should be greater than 0.");
+siconos::modeling::LagrangianDS::LagrangianDS(Eigen::Ref<siconos::algebra::SiconosVector> q0,
+                                              Eigen::Ref<siconos::algebra::SiconosVector> v0)
+    : SecondOrderDS(2 * q0.size(), v0.size()) {
+  assert(ndof_ > 0 && "lagrangian dynamical system dimension should be greater than 0.");
 
   // Set initial conditions
-  _q0 = std::make_shared<siconos::algebra::MapVectorType>(q0.data(), _ndof);
-  _velocity0 = std::make_shared<siconos::algebra::MapVectorType>(v0.data(), _ndof);
+  _q0 = std::make_shared<siconos::algebra::MapVectorType>(q0.data(), ndof_);
+  _velocity0 = std::make_shared<siconos::algebra::MapVectorType>(v0.data(), ndof_);
 
   // -- Memory allocation for vector and matrix members --
   _q[0] = std::make_shared<siconos::algebra::SiconosVector>(*_q0);
   _q[1] = std::make_shared<siconos::algebra::SiconosVector>(*_velocity0);
 
   /** \todo lazy Memory allocation */
-  _p[1] = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
+  _p[1] = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
   _p[1]->setZero();
   _zeroPlugin();
 }
 
-// From initial state and constant mass matrix, \f$ M\ddot q = p \f$
-siconos::modeling::LagrangianDS::LagrangianDS(
-    std::shared_ptr<siconos::algebra::SiconosVector> q0,
-    std::shared_ptr<siconos::algebra::SiconosVector> v0,
-    std::shared_ptr<siconos::algebra::SiconosMatrix> newMass)
-    : LagrangianDS(q0, v0) {
-  _mass = std::make_shared<MapType>(newMass->data(), _ndof, _ndof);
-}
+// // From initial state and constant mass matrix, \f$ M\ddot q = p \f$
+// siconos::modeling::LagrangianDS::LagrangianDS(
+//     std::shared_ptr<siconos::algebra::SiconosVector> q0,
+//     std::shared_ptr<siconos::algebra::SiconosVector> v0,
+//     std::shared_ptr<siconos::algebra::SiconosMatrix> newMass)
+//     : LagrangianDS(q0, v0) {
+//   mass_view_ = std::make_shared<MapType>(newMass->data(), ndof_, ndof_);
+// }
 
-void siconos::modeling::LagrangianDS::allocateMass() {
-  if (!_mass) {
-    mass_internal_storage_ = std::make_unique<std::vector<double>>(_ndof * _ndof);
-    _mass = std::make_shared<MapType>(mass_internal_storage_->data(), _ndof, _ndof);
-    _mass->setZero();
-  }
-}
+// void siconos::modeling::LagrangianDS::allocateMass() {
+//   if (!mass_view_) {
+//     mass_internal_storage_ = std::make_unique<std::vector<double>>(ndof_ * ndof_);
+//     mass_view_ = std::make_shared<MapType>(mass_internal_storage_->data(), ndof_, ndof_);
+//     mass_view_->setZero();
+//   }
+// }
 
-// From a set of data - Mass loaded from a plugin
-// This constructor leads to the minimum Lagrangian System form: \f$ M(q)\ddot q
-// = p \f$
-siconos::modeling::LagrangianDS::LagrangianDS(
-    std::shared_ptr<siconos::algebra::SiconosVector> q0,
-    std::shared_ptr<siconos::algebra::SiconosVector> v0, const std::string& massName)
-    : LagrangianDS(q0, v0) {
-  _hasConstantMass = false;
-  // Mass
-  allocateMass();
-  setComputeMassFunction(siconos::plugins::getPluginName(massName),
-                         siconos::plugins::getPluginFunctionName(massName));
-}
+// // From a set of data - Mass loaded from a plugin
+// // This constructor leads to the minimum Lagrangian System form: \f$ M(q)\ddot q
+// // = p \f$
+// siconos::modeling::LagrangianDS::LagrangianDS(
+//     std::shared_ptr<siconos::algebra::SiconosVector> q0,
+//     std::shared_ptr<siconos::algebra::SiconosVector> v0, const std::string& massName)
+//     : LagrangianDS(q0, v0) {
+//   _hasConstantMass = false;
+//   // Mass
+//   allocateMass();
+//   setComputeMassFunction(siconos::plugins::getPluginName(massName),
+//                          siconos::plugins::getPluginFunctionName(massName));
+// }
 
 void siconos::modeling::LagrangianDS::_zeroPlugin() {
-  _pluginMass = std::make_shared<siconos::plugins::PluggedObject>();
   _pluginFInt = std::make_shared<siconos::plugins::PluggedObject>();
-  _pluginFExt = std::make_shared<siconos::plugins::PluggedObject>();
   _pluginFGyr = std::make_shared<siconos::plugins::PluggedObject>();
   _pluginJacqFInt = std::make_shared<siconos::plugins::PluggedObject>();
   _pluginJacqDotFInt = std::make_shared<siconos::plugins::PluggedObject>();
@@ -120,7 +118,7 @@ void siconos::modeling::LagrangianDS::_zeroPlugin() {
 
 void siconos::modeling::LagrangianDS::initializeNonSmoothInput(unsigned int level) {
   if (!_p[level]) {
-    _p[level] = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
+    _p[level] = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
     _p[level]->setZero();
   }
 }
@@ -143,20 +141,20 @@ void siconos::modeling::LagrangianDS::resetToInitialState() {
 
 void siconos::modeling::LagrangianDS::init_generalized_coordinates(unsigned int level) {
   assert(level > 1);
-  if (!_q[level]) _q[level] = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
+  if (!_q[level]) _q[level] = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
 }
 
 void siconos::modeling::LagrangianDS::init_inverse_mass() {
-  if (_mass && !_inverseMass) {
-    computeMass();
-    _inverseMass = std::make_shared<Matrix>(*_mass);
+  if (mass_view_ && !_inverseMass) {
+    computeMass(*_q[0], 0.);
+    _inverseMass = std::make_shared<siconos::algebra::SiconosMatrix>(*mass_view_);
   }
 }
 
-void siconos::modeling::LagrangianDS::update_inverse_mass() {
-  if (_mass && _inverseMass && !_hasConstantMass) {
-    computeMass();
-    *_inverseMass = *_mass;
+void siconos::modeling::LagrangianDS::update_inverse_mass(double time) {
+  if (mass_view_ && _inverseMass && !hasConstantMass_) {
+    computeMass(*_q[0], time);
+    *_inverseMass = *mass_view_;
   }
 }
 
@@ -164,20 +162,20 @@ void siconos::modeling::LagrangianDS::init_forces() {
   // Allocate memory for forces and its jacobians.void
   // siconos::modeling::LagrangianDS::init_forces() Needed only for integrators
   // with first-order formulation.
-  if (_fInt || _fExt || _fGyr) {
-    if (!_forces) _forces = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
+  if (_fInt || fext_view_ || _fGyr) {
+    if (!_forces) _forces = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
   }
 
   if (_fInt || _fGyr) {
-    if (!_jacobianqForces) _jacobianqForces = std::make_shared<Matrix>(_ndof, _ndof);
-    if (!_jacobianqDotForces) _jacobianqDotForces = std::make_shared<Matrix>(_ndof, _ndof);
+    if (!_jacobianqForces) _jacobianqForces = std::make_shared<Matrix>(ndof_, ndof_);
+    if (!_jacobianqDotForces) _jacobianqDotForces = std::make_shared<Matrix>(ndof_, ndof_);
   }
 }
 
 void siconos::modeling::LagrangianDS::initRhs(double time) {
   DEBUG_BEGIN("siconos::modeling::LagrangianDS::initRhs(double time)\n");
   // dim
-  _n = 2 * _ndof;
+  _n = 2 * ndof_;
 
   // All links between DS and LagrangianDS class members are pointer links,
   // which means that no useless memory is allocated when connection is
@@ -196,7 +194,7 @@ void siconos::modeling::LagrangianDS::initRhs(double time) {
   _x[0] = algebra::concatenateVectors(*_q[0], *_q[1]);
 
   if (!_q[2]) {
-    _q[2] = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
+    _q[2] = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
     _q[2]->setZero();
   }
 
@@ -208,7 +206,7 @@ void siconos::modeling::LagrangianDS::initRhs(double time) {
   _rhsMatrices.resize(numberOfRhsMatrices_);
 
   if (!_p[2]) {
-    _p[2] = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
+    _p[2] = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
     _p[2]->setZero();
   }
 
@@ -236,11 +234,11 @@ void siconos::modeling::LagrangianDS::initRhs(double time) {
   }
 
   if (!_rhsMatrices[zeroMatrix_]) {
-    _rhsMatrices[zeroMatrix_] = std::make_shared<Matrix>(_ndof, _ndof);
+    _rhsMatrices[zeroMatrix_] = std::make_shared<Matrix>(ndof_, ndof_);
     _rhsMatrices[zeroMatrix_]->zero();
   }
   if (!_rhsMatrices[idMatrix_]) {
-    _rhsMatrices[idMatrix_] = std::make_shared<Matrix>(_ndof, _ndof);
+    _rhsMatrices[idMatrix_] = std::make_shared<Matrix>(ndof_, ndof_);
     _rhsMatrices[idMatrix_]->setIdentity();
   }
   if (flag1 && flag2)
@@ -266,7 +264,7 @@ void siconos::modeling::LagrangianDS::initRhs(double time) {
 // --- GETTERS/SETTERS ---
 
 void siconos::modeling::LagrangianDS::setQ(const siconos::algebra::SiconosVector& newValue) {
-  if (newValue.size() != _ndof)
+  if (newValue.size() != ndof_)
     THROW_EXCEPTION("LagrangianDS - setQ: inconsistent input vector size ");
 
   if (!_q[0])
@@ -277,14 +275,14 @@ void siconos::modeling::LagrangianDS::setQ(const siconos::algebra::SiconosVector
 
 void siconos::modeling::LagrangianDS::setQPtr(
     std::shared_ptr<siconos::algebra::SiconosVector> newPtr) {
-  if (newPtr->size() != _ndof)
+  if (newPtr->size() != ndof_)
     THROW_EXCEPTION("LagrangianDS - setQPtr: inconsistent input vector size ");
   _q[0] = newPtr;
 }
 
 void siconos::modeling::LagrangianDS::setVelocity(
     const siconos::algebra::SiconosVector& newValue) {
-  if (newValue.size() != _ndof)
+  if (newValue.size() != ndof_)
     THROW_EXCEPTION("LagrangianDS - setVelocity: inconsistent input vector size ");
 
   if (!_q[1])
@@ -295,50 +293,66 @@ void siconos::modeling::LagrangianDS::setVelocity(
 
 void siconos::modeling::LagrangianDS::setVelocityPtr(
     std::shared_ptr<siconos::algebra::SiconosVector> newPtr) {
-  if (newPtr->size() != _ndof)
+  if (newPtr->size() != ndof_)
     THROW_EXCEPTION("LagrangianDS - setVelocityPtr: inconsistent input vector size ");
   _q[1] = newPtr;
 }
 
-void siconos::modeling::LagrangianDS::computeMass() {
-  DEBUG_BEGIN("siconos::modeling::LagrangianDS::computeMass()\n");
-  DEBUG_EXPR(_q[0]->display());
-  computeMass(_q[0]);
-  DEBUG_EXPR(_mass->display());
-  DEBUG_END("siconos::modeling::LagrangianDS::computeMass()\n");
+void siconos::modeling::LagrangianDS::setConstantFext(
+    Eigen::Ref<siconos::algebra::SiconosVector> newValue) {
+  /**  Must:
+
+   - create the Map (view onto memory handled by newValue) for Fext_
+   - set the corresponding booleans
+   - reset internal storage (should already be null but who knows ...)
+   */
+
+  fext_internal_storage_ = nullptr;
+
+  fext_view_ =
+      std::make_shared<siconos::algebra::MapVectorType>(newValue.data(), newValue.size());
+  hasFext_ = true;
+  hasConstantFext_ = true;
+  computefext_ = nullptr;
 }
 
-void siconos::modeling::LagrangianDS::computeMass(
-    std::shared_ptr<siconos::algebra::SiconosVector> position) {
-  if (_mass && !_hasConstantMass && _pluginMass->fPtr) {
-    ((siconos::plugins::FPtr7)_pluginMass->fPtr)(_ndof, &(*position)(0), &(*_mass)(0, 0),
-                                                 _z->size(), &(*_z)(0));
-    // _mass->resetFactorizationFlags();
+void siconos::modeling::LagrangianDS::setComputeFextFunction(
+    ExternalForcesFunction fext_func) {
+  // Ensure that memory is properly allocated for fext_
+  if (!fext_internal_storage_) {
+    fext_internal_storage_ = std::make_unique<std::vector<double>>(ndof_);
   }
+  fext_view_ =
+      std::make_shared<siconos::algebra::MapVectorType>(fext_internal_storage_->data(), ndof_);
+
+  hasFext_ = true;
+  hasConstantFext_ = false;
+  computefext_ = fext_func;
+}
+
+void siconos::modeling::LagrangianDS::computeFext(double time) {
+  if (computefext_)
+    // in that case, internal_storage must have been allocated by
+    // setCompute... call
+    computefext_(time, *fext_view_);
 }
 
 void siconos::modeling::LagrangianDS::computeFInt(double time) {
   if (_fInt && _pluginFInt->fPtr)
-    ((siconos::plugins::FPtr6)_pluginFInt->fPtr)(time, _ndof, &(*_q[0])(0), &(*_q[1])(0),
+    ((siconos::plugins::FPtr6)_pluginFInt->fPtr)(time, ndof_, &(*_q[0])(0), &(*_q[1])(0),
                                                  &(*_fInt)(0), _z->size(), &(*_z)(0));
 }
 void siconos::modeling::LagrangianDS::computeFInt(
     double time, std::shared_ptr<siconos::algebra::SiconosVector> position,
     std::shared_ptr<siconos::algebra::SiconosVector> velocity) {
   if (_fInt && _pluginFInt->fPtr)
-    ((siconos::plugins::FPtr6)_pluginFInt->fPtr)(time, _ndof, &(*position)(0), &(*velocity)(0),
+    ((siconos::plugins::FPtr6)_pluginFInt->fPtr)(time, ndof_, &(*position)(0), &(*velocity)(0),
                                                  &(*_fInt)(0), _z->size(), &(*_z)(0));
-}
-
-void siconos::modeling::LagrangianDS::computeFExt(double time) {
-  if (computefext_)  // in that case, fExt_internal_storage must have been allocated by
-                     // setComputeFext call
-    computefext_(time, *fExt_internal_storage);
 }
 
 void siconos::modeling::LagrangianDS::computeFGyr() {
   if (_fGyr && _pluginFGyr->fPtr)
-    ((siconos::plugins::FPtr5)_pluginFGyr->fPtr)(_ndof, &(*_q[0])(0), &(*_q[1])(0),
+    ((siconos::plugins::FPtr5)_pluginFGyr->fPtr)(ndof_, &(*_q[0])(0), &(*_q[1])(0),
                                                  &(*_fGyr)(0), _z->size(), &(*_z)(0));
 }
 
@@ -346,7 +360,7 @@ void siconos::modeling::LagrangianDS::computeFGyr(
     std::shared_ptr<siconos::algebra::SiconosVector> position,
     std::shared_ptr<siconos::algebra::SiconosVector> velocity) {
   if (_fGyr && _pluginFGyr->fPtr)
-    ((siconos::plugins::FPtr5)_pluginFGyr->fPtr)(_ndof, &(*position)(0), &(*velocity)(0),
+    ((siconos::plugins::FPtr5)_pluginFGyr->fPtr)(ndof_, &(*position)(0), &(*velocity)(0),
                                                  &(*_fGyr)(0), _z->size(), &(*_z)(0));
 }
 
@@ -355,7 +369,7 @@ void siconos::modeling::LagrangianDS::computeJacobianFIntq(double time) {
   DEBUG_EXPR(_q[0]->display());
   DEBUG_EXPR(_q[1]->display());
   if (_jacobianFIntq && _pluginJacqFInt->fPtr)
-    ((siconos::plugins::FPtr6)_pluginJacqFInt->fPtr)(time, _ndof, &(*_q[0])(0), &(*_q[1])(0),
+    ((siconos::plugins::FPtr6)_pluginJacqFInt->fPtr)(time, ndof_, &(*_q[0])(0), &(*_q[1])(0),
                                                      &(*_jacobianFIntq)(0, 0), _z->size(),
                                                      &(*_z)(0));
   DEBUG_EXPR(if (_jacobianFIntq) _jacobianFIntq->display(););
@@ -368,7 +382,7 @@ void siconos::modeling::LagrangianDS::computeJacobianFIntqDot(double time) {
   DEBUG_EXPR(_z->display());
   if (_jacobianFIntqDot && _pluginJacqDotFInt->fPtr)
     ((siconos::plugins::FPtr6)_pluginJacqDotFInt->fPtr)(
-        time, _ndof, &(*_q[0])(0), &(*_q[1])(0), &(*_jacobianFIntqDot)(0, 0), _z->size(),
+        time, ndof_, &(*_q[0])(0), &(*_q[1])(0), &(*_jacobianFIntqDot)(0, 0), _z->size(),
         &(*_z)(0));
   DEBUG_EXPR(if (_jacobianFIntqDot) _jacobianFIntqDot->display(););
   DEBUG_END("siconos::modeling::LagrangianDS::computeJacobianFIntqDot()\n");
@@ -381,7 +395,7 @@ void siconos::modeling::LagrangianDS::computeJacobianFIntq(
   DEBUG_EXPR(position->display());
   DEBUG_EXPR(velocity->display());
   if (_jacobianFIntq && _pluginJacqFInt->fPtr)
-    ((siconos::plugins::FPtr6)_pluginJacqFInt->fPtr)(time, _ndof, &(*position)(0),
+    ((siconos::plugins::FPtr6)_pluginJacqFInt->fPtr)(time, ndof_, &(*position)(0),
                                                      &(*velocity)(0), &(*_jacobianFIntq)(0, 0),
                                                      _z->size(), &(*_z)(0));
   DEBUG_EXPR(if (_jacobianFIntq) _jacobianFIntq->display(););
@@ -392,26 +406,26 @@ void siconos::modeling::LagrangianDS::computeJacobianFIntqDot(
     std::shared_ptr<siconos::algebra::SiconosVector> velocity) {
   if (_jacobianFIntqDot && _pluginJacqDotFInt->fPtr)
     ((siconos::plugins::FPtr6)_pluginJacqDotFInt->fPtr)(
-        time, _ndof, &(*position)(0), &(*velocity)(0), &(*_jacobianFIntqDot)(0, 0), _z->size(),
+        time, ndof_, &(*position)(0), &(*velocity)(0), &(*_jacobianFIntqDot)(0, 0), _z->size(),
         &(*_z)(0));
 }
 
 void siconos::modeling::LagrangianDS::computeJacobianFGyrq() {
   if (_pluginJacqFGyr->fPtr)
     ((siconos::plugins::FPtr5)_pluginJacqFGyr->fPtr)(
-        _ndof, &(*_q[0])(0), &(*_q[1])(0), &(*_jacobianFGyrq)(0, 0), _z->size(), &(*_z)(0));
+        ndof_, &(*_q[0])(0), &(*_q[1])(0), &(*_jacobianFGyrq)(0, 0), _z->size(), &(*_z)(0));
 }
 void siconos::modeling::LagrangianDS::computeJacobianFGyrqDot() {
   if (_jacobianFGyrqDot && _pluginJacqDotFGyr->fPtr)
     ((siconos::plugins::FPtr5)_pluginJacqDotFGyr->fPtr)(
-        _ndof, &(*_q[0])(0), &(*_q[1])(0), &(*_jacobianFGyrqDot)(0, 0), _z->size(), &(*_z)(0));
+        ndof_, &(*_q[0])(0), &(*_q[1])(0), &(*_jacobianFGyrqDot)(0, 0), _z->size(), &(*_z)(0));
 }
 
 void siconos::modeling::LagrangianDS::computeJacobianFGyrq(
     std::shared_ptr<siconos::algebra::SiconosVector> position,
     std::shared_ptr<siconos::algebra::SiconosVector> velocity) {
   if (_jacobianFGyrq && _pluginJacqFGyr->fPtr)
-    ((siconos::plugins::FPtr5)_pluginJacqFGyr->fPtr)(_ndof, &(*position)(0), &(*velocity)(0),
+    ((siconos::plugins::FPtr5)_pluginJacqFGyr->fPtr)(ndof_, &(*position)(0), &(*velocity)(0),
                                                      &(*_jacobianFGyrq)(0, 0), _z->size(),
                                                      &(*_z)(0));
 }
@@ -421,7 +435,7 @@ void siconos::modeling::LagrangianDS::computeJacobianFGyrqDot(
     std::shared_ptr<siconos::algebra::SiconosVector> velocity) {
   if (_jacobianFGyrqDot && _pluginJacqDotFGyr->fPtr)
     ((siconos::plugins::FPtr5)_pluginJacqDotFGyr->fPtr)(
-        _ndof, &(*position)(0), &(*velocity)(0), &(*_jacobianFGyrqDot)(0, 0), _z->size(),
+        ndof_, &(*position)(0), &(*velocity)(0), &(*_jacobianFGyrqDot)(0, 0), _z->size(),
         &(*_z)(0));
 }
 
@@ -442,30 +456,28 @@ void siconos::modeling::LagrangianDS::computeRhs(double time) {
   // -- Case 2: mass is not constant, we copy it into _inverseMass
   // Then we proceed with PLUForwardBackward.
   // mass and inv(mass) computation
-  if (_mass && !_hasConstantMass)  // if it is necessary to re-compute mass,
-                                   // FInt ..., ie if they have not been
-                                   // compiled during the present time step
+  if (hasMass_ && !hasConstantMass_)  // if it is necessary to re-compute mass,
+                                      // FInt ..., ie if they have not been
+                                      // compiled during the present time step
   {
-    computeMass();
-    *_inverseMass = *_mass;
+    computeMass(*_q[0], 0.);
+    *_inverseMass = *mass_view_;
   }
 
   //  if(mass->isPlugged()) : mass may be not plugged in LagrangianDS children
   if (_inverseMass) algebra::solveInPlace(*_inverseMass, *_q[2]);
 
   _x[1]->setBlock(0, *_q[1]);
-  _x[1]->setBlock(_ndof, *_q[2]);
+  _x[1]->setBlock(ndof_, *_q[2]);
   DEBUG_END("siconos::modeling::LagrangianDS::computeRhs(double time)");
 }
 
 void siconos::modeling::LagrangianDS::computeJacobianRhsx(double time) {
-  if (!_hasConstantMass) computeMass();
-
-  //  if(mass->isPlugged()) : mass may b not plugged in LagrangianDS children
+  computeMass(*_q[0], time);
 
   if (_jacobianqForces || _jacobianqDotForces) {
-    if (!_hasConstantMass)  // else inverseMass is already uptodate
-      *_inverseMass = *_mass;
+    if (!hasConstantMass_)  // else inverseMass is already uptodate
+      *_inverseMass = *mass_view_;
   }
 
   if (_jacobianqForces) {
@@ -490,14 +502,14 @@ void siconos::modeling::LagrangianDS::computeForces(
     double time, std::shared_ptr<siconos::algebra::SiconosVector> position,
     std::shared_ptr<siconos::algebra::SiconosVector> velocity) {
   if (!_forces) {
-    _forces = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
+    _forces = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
     _forces->setZero();
   } else
     _forces->zero();
 
   // 1 - Computes the required function
   computeFInt(time, position, velocity);
-  computeFExt(time);
+  computeFext(time);
   computeFGyr(position, velocity);
 
   // seems ok.
@@ -509,7 +521,7 @@ void siconos::modeling::LagrangianDS::computeForces(
 
   if (_fInt) *_forces -= *_fInt;
 
-  if (_fExt) *_forces += *_fExt;
+  if (fext_view_) *_forces += *fext_view_;
 
   if (_fGyr) *_forces -= *_fGyr;
   // }
@@ -558,7 +570,7 @@ void siconos::modeling::LagrangianDS::computeJacobianvForces(double time) {
 
 void siconos::modeling::LagrangianDS::display(bool brief) const {
   std::cout << "=====> Lagrangian System display (number: " << _number << ")." << std::endl;
-  std::cout << "- _ndof : " << _ndof << std::endl;
+  std::cout << "- ndof_ : " << ndof_ << std::endl;
   std::cout << "- q " << std::endl;
   if (_q[0])
     _q[0]->display();
@@ -599,8 +611,8 @@ void siconos::modeling::LagrangianDS::display(bool brief) const {
 
   if (!brief) {
     std::cout << "- Mass " << std::endl;
-    if (_mass)
-      _mass->display();
+    if (mass_view_)
+      mass_view_->display();
     else
       std::cout << "-> nullptr" << std::endl;
 
@@ -645,14 +657,14 @@ void siconos::modeling::LagrangianDS::initMemory(unsigned int steps) {
   if (steps == 0)
     std::cout << "Warning : LagragianDS::initMemory with size equal to zero" << std::endl;
   else {
-    _qMemory.setMemorySize(steps, _ndof);
-    _velocityMemory.setMemorySize(steps, _ndof);
-    _forcesMemory.setMemorySize(steps, _ndof);
+    _qMemory.setMemorySize(steps, ndof_);
+    _velocityMemory.setMemorySize(steps, ndof_);
+    _forcesMemory.setMemorySize(steps, ndof_);
     _pMemory.resize(3);
 
     // TODO : initMemory in graph + f(OSI/level)
     for (unsigned int level = 0; level < 3; ++level) {
-      if (_pMemory[level].size() == 0) _pMemory[level].setMemorySize(steps, _ndof);
+      if (_pMemory[level].size() == 0) _pMemory[level].setMemorySize(steps, ndof_);
     }
 
     // swapInMemory();
@@ -693,26 +705,7 @@ void siconos::modeling::LagrangianDS::computePostImpactVelocity() {
   DEBUG_BEGIN("siconos::modeling::LagrangianDS::computePostImpactV() END \n");
 }
 void siconos::modeling::LagrangianDS::allocateFInt() {
-  if (!_fInt) _fInt = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
-}
-
-void siconos::modeling::LagrangianDS::setComputeMassFunction(const std::string& pluginPath,
-                                                             const std::string& functionName) {
-  _pluginMass->setComputeFunction(pluginPath, functionName);
-  if (!_mass) {
-    mass_internal_storage_ = std::make_unique<std::vector<double>>(_ndof * _ndof);
-    _mass = std::make_shared<MapType>(mass_internal_storage_->data(), _ndof, _ndof);
-  }
-  _hasConstantMass = false;
-}
-
-void siconos::modeling::LagrangianDS::setComputeMassFunction(siconos::plugins::FPtr7 fct) {
-  _pluginMass->setComputeFunction((void*)fct);
-  if (!_mass) {
-    mass_internal_storage_ = std::make_unique<std::vector<double>>(_ndof * _ndof);
-    _mass = std::make_shared<MapType>(mass_internal_storage_->data(), _ndof, _ndof);
-  }
-  _hasConstantMass = false;
+  if (!_fInt) _fInt = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
 }
 
 void siconos::modeling::LagrangianDS::setComputeFIntFunction(const std::string& pluginPath,
@@ -728,58 +721,14 @@ void siconos::modeling::LagrangianDS::setComputeFIntFunction(siconos::plugins::F
   //    computeFIntPtr = fct;
 }
 
-void siconos::modeling::LagrangianDS::setComputeFExtFunction(const std::string& pluginPath,
-                                                             const std::string& functionName) {
-  _pluginFExt->setComputeFunction(pluginPath, functionName);
-  if (!fExt_internal_storage)
-    fExt_internal_storage = std::make_unique<std::vector<double>>(_ndof);
-  _fExt =
-      std::make_shared<siconos::algebra::MapVectorType>(fExt_internal_storage->data(), _ndof);
-  _hasConstantFExt = false;
-}
-
-void siconos::modeling::LagrangianDS::setComputeFExtFunction(
-    ExternalForcesFunction fext_func) {
-  // Ensure that memory is properly allocated for fext
-  if (!fExt_internal_storage) {
-    fExt_internal_storage = std::make_unique<std::vector<double>>(_ndof);
-  }
-  _fExt =
-      std::make_shared<siconos::algebra::MapVectorType>(fExt_internal_storage->data(), _ndof);
-
-  _hasConstantFExt = false;
-  computefext_ = fext_func;
-}
-
-/** set a specified function to compute fExt
- *
- *  \param fct a pointer on the plugin function
- */
-void siconos::modeling::LagrangianDS::setComputeFExtFunction(
-    siconos::plugins::VectorFunctionOfTime fct) {
-  if (!fExt_internal_storage)
-    fExt_internal_storage = std::make_unique<std::vector<double>>(_ndof);
-  _fExt =
-      std::make_shared<siconos::algebra::MapVectorType>(fExt_internal_storage->data(), _ndof);
-  _pluginFExt->setComputeFunction((void*)fct);
-  _hasConstantFExt = false;
-}
-
-void siconos::modeling::LagrangianDS::setComputeFGyrFunction(const std::string& pluginPath,
-                                                             const std::string& functionName) {
-  _pluginFGyr->setComputeFunction(pluginPath, functionName);
-  if (!_fGyr) _fGyr = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
-  init_forces();
-}
-
 void siconos::modeling::LagrangianDS::setComputeFGyrFunction(siconos::plugins::FPtr5 fct) {
   _pluginFGyr->setComputeFunction((void*)fct);
-  if (!_fGyr) _fGyr = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
+  if (!_fGyr) _fGyr = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
   init_forces();
 }
 
 void siconos::modeling::LagrangianDS::allocateJacobianFIntq() {
-  if (!_jacobianFIntq) _jacobianFIntq = std::make_shared<Matrix>(_ndof, _ndof);
+  if (!_jacobianFIntq) _jacobianFIntq = std::make_shared<Matrix>(ndof_, ndof_);
 }
 
 void siconos::modeling::LagrangianDS::setComputeJacobianFIntqFunction(
@@ -790,7 +739,7 @@ void siconos::modeling::LagrangianDS::setComputeJacobianFIntqFunction(
 }
 
 void siconos::modeling::LagrangianDS::allocateJacobianFIntqDot() {
-  if (!_jacobianFIntqDot) _jacobianFIntqDot = std::make_shared<Matrix>(_ndof, _ndof);
+  if (!_jacobianFIntqDot) _jacobianFIntqDot = std::make_shared<Matrix>(ndof_, ndof_);
 }
 
 void siconos::modeling::LagrangianDS::setComputeJacobianFIntqDotFunction(
@@ -817,28 +766,28 @@ void siconos::modeling::LagrangianDS::setComputeJacobianFIntqDotFunction(
 void siconos::modeling::LagrangianDS::setComputeJacobianFGyrqFunction(
     const std::string& pluginPath, const std::string& functionName) {
   _pluginJacqFGyr->setComputeFunction(pluginPath, functionName);
-  if (!_jacobianFGyrq) _jacobianFGyrq = std::make_shared<Matrix>(_ndof, _ndof);
+  if (!_jacobianFGyrq) _jacobianFGyrq = std::make_shared<Matrix>(ndof_, ndof_);
   init_forces();
 }
 
 void siconos::modeling::LagrangianDS::setComputeJacobianFGyrqDotFunction(
     const std::string& pluginPath, const std::string& functionName) {
   _pluginJacqDotFGyr->setComputeFunction(pluginPath, functionName);
-  if (!_jacobianFGyrqDot) _jacobianFGyrqDot = std::make_shared<Matrix>(_ndof, _ndof);
+  if (!_jacobianFGyrqDot) _jacobianFGyrqDot = std::make_shared<Matrix>(ndof_, ndof_);
   init_forces();
 }
 
 void siconos::modeling::LagrangianDS::setComputeJacobianFGyrqFunction(
     siconos::plugins::FPtr5 fct) {
   _pluginJacqFGyr->setComputeFunction((void*)fct);
-  if (!_jacobianFGyrq) _jacobianFGyrq = std::make_shared<Matrix>(_ndof, _ndof);
+  if (!_jacobianFGyrq) _jacobianFGyrq = std::make_shared<Matrix>(ndof_, ndof_);
   init_forces();
 }
 
 void siconos::modeling::LagrangianDS::setComputeJacobianFGyrqDotFunction(
     siconos::plugins::FPtr5 fct) {
   _pluginJacqDotFGyr->setComputeFunction((void*)fct);
-  if (!_jacobianFGyrqDot) _jacobianFGyrqDot = std::make_shared<Matrix>(_ndof, _ndof);
+  if (!_jacobianFGyrqDot) _jacobianFGyrqDot = std::make_shared<Matrix>(ndof_, ndof_);
 }
 
 double siconos::modeling::LagrangianDS::computeKineticEnergy() {
@@ -848,7 +797,7 @@ double siconos::modeling::LagrangianDS::computeKineticEnergy() {
   DEBUG_EXPR(velo->display());
 
   auto tmp = std::make_shared<siconos::algebra::SiconosVector>(*velo);
-  if (_mass) siconos::algebra::prod(*_mass, *velo, *tmp, true);
+  if (mass_view_) siconos::algebra::prod(*mass_view_, *velo, *tmp, true);
 
   double K = 0.5 * siconos::algebra::inner_prod(*tmp, *velo);
 

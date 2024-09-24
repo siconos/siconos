@@ -66,9 +66,9 @@ class OccBody : public siconos::modeling::NewtonEulerDS {
       \param mass the mass.
       \param inertia the inertia matrix.
   */
-  OccBody(std::shared_ptr<siconos::algebra::SiconosVector> position,
-          std::shared_ptr<siconos::algebra::SiconosVector> velocity, double mass,
-          std::shared_ptr<siconos::algebra::SiconosMatrix> inertia);
+  OccBody(Eigen::Ref<siconos::algebra::SiconosVector> position,
+          Eigen::Ref<siconos::algebra::SiconosVector> velocity, double mass,
+          Eigen::Ref<siconos::algebra::SiconosMatrix> inertia);
 
   /** Association of a contact shape.
 

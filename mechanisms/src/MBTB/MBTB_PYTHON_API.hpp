@@ -40,7 +40,6 @@
 
 namespace siconos::modeling {
 class NonSmoothDynamicalSystem;
-
 }
 
 namespace siconos::simulation {
@@ -48,6 +47,10 @@ class Simulation;
 }
 
 namespace siconos::mechanisms {
+ using ExternalForcesFunction =
+      std::function<void(double, Eigen::Ref<siconos::algebra::MapVectorType>)>;
+
+
 /**  To initialize the MBTB library (no yet dynamical memory).
 
      \param [in] NumOfBodies : unsigned int NumOfBodies, the number of bodies.
@@ -108,7 +111,7 @@ void MBTB_BodyBuild(
     std::shared_ptr<siconos::algebra::SiconosVector> initPos,
     std::shared_ptr<siconos::algebra::SiconosVector> initCenterMass,
     std::shared_ptr<siconos::algebra::SiconosMatrix> inertialMatrix,
-    const std::string& pluginFextLib, const std::string& pluginFextFct,
+    const ExternalForcesFunction& fext_func,
     const std::string& pluginMextLib, const std::string& pluginMextFct,
     const std::string& pluginFintLib, const std::string& pluginFintFct,
     const std::string& pluginMintLib, const std::string& pluginMintFct,

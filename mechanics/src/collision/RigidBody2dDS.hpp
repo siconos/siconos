@@ -47,13 +47,13 @@ class RigidBody2dDS : public siconos::modeling::LagrangianLinearTIDS,
   bool _allowSelfCollide{true};
 
  public:
-  RigidBody2dDS(std::shared_ptr<siconos::algebra::SiconosVector> position,
-                std::shared_ptr<siconos::algebra::SiconosVector> velocity,
-                std::shared_ptr<siconos::algebra::SiconosMatrix> mass);
+  RigidBody2dDS(Eigen::Ref<siconos::algebra::SiconosVector> position,
+                Eigen::Ref<siconos::algebra::SiconosVector> velocity,
+                Eigen::Ref<siconos::algebra::SiconosMatrix> mass);
 
-  RigidBody2dDS(std::shared_ptr<siconos::algebra::SiconosVector> position,
-                std::shared_ptr<siconos::algebra::SiconosVector> velocity, double mass,
-                double inertia);
+  // RigidBody2dDS(Eigen::Ref<siconos::algebra::SiconosVector> &position,
+  //               Eigen::Ref<siconos::algebra::SiconosVector> &velocity, double mass,
+  //               double inertia);
 
   virtual ~RigidBody2dDS() noexcept = default;
 

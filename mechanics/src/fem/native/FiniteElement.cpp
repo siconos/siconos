@@ -27,7 +27,7 @@
 
 siconos::mechanics::fem::FElement::FElement(FiniteElementType type, unsigned int ndof,
                                             std::shared_ptr<MElement> e)
-    : _num(e->num()), _type(type), _ndof(ndof), _mElement(e) {}
+    : _num(e->num()), _type(type), ndof_(ndof), _mElement(e) {}
 
 int siconos::mechanics::fem::FElement::order() {
   switch (_type) {
@@ -136,7 +136,7 @@ void siconos::mechanics::fem::FElement::shapeFunctionIso3D(double ksi, double et
 void siconos::mechanics::fem::FElement::display() {
   std::cout << " - FElement - number: " << _num
             << "            - type: " << siconos::tools::enum_to_string(_type)
-            << "            - ndof: " << _ndof
+            << "            - ndof: " << ndof_
             << "            - number of nodes: " << _nodes.size();
   std::cout << std::endl;
   for (std::shared_ptr<FENode> n : _nodes) {

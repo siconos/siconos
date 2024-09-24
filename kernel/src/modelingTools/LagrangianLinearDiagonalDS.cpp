@@ -34,9 +34,9 @@ siconos::modeling::LagrangianLinearDiagonalDS::LagrangianLinearDiagonalDS(
     std::shared_ptr<siconos::algebra::SiconosVector> damping,
     std::shared_ptr<siconos::algebra::SiconosVector> mass)
     : LagrangianDS(q0, velocity0) {
-  _mass_diag = std::make_shared<siconos::algebra::MapVectorType>( mass->data(),
-      dimension());
-  _stiffness = std::make_shared<siconos::algebra::MapVectorType>(stiffness->data(), dimension());
+  _mass_diag = std::make_shared<siconos::algebra::MapVectorType>(mass->data(), dimension());
+  _stiffness =
+      std::make_shared<siconos::algebra::MapVectorType>(stiffness->data(), dimension());
   _damping = std::make_shared<siconos::algebra::MapVectorType>(damping->data(), dimension());
 }
 
@@ -47,7 +47,8 @@ siconos::modeling::LagrangianLinearDiagonalDS::LagrangianLinearDiagonalDS(
     std::shared_ptr<siconos::algebra::SiconosVector> stiffness,
     std::shared_ptr<siconos::algebra::SiconosVector> damping)
     : LagrangianDS(q0, velocity0) {
-  _stiffness = std::make_shared<siconos::algebra::MapVectorType>(stiffness->data(), dimension());
+  _stiffness =
+      std::make_shared<siconos::algebra::MapVectorType>(stiffness->data(), dimension());
   _damping = std::make_shared<siconos::algebra::MapVectorType>(damping->data(), dimension());
 }
 
@@ -57,7 +58,8 @@ siconos::modeling::LagrangianLinearDiagonalDS::LagrangianLinearDiagonalDS(
     std::shared_ptr<siconos::algebra::SiconosVector> velocity0,
     std::shared_ptr<siconos::algebra::SiconosVector> stiffness)
     : LagrangianDS(q0, velocity0) {
-  _stiffness = std::make_shared<siconos::algebra::MapVectorType>(stiffness->data(), dimension());
+  _stiffness =
+      std::make_shared<siconos::algebra::MapVectorType>(stiffness->data(), dimension());
 }
 
 void siconos::modeling::LagrangianLinearDiagonalDS::initRhs(double time) {
@@ -75,19 +77,19 @@ void siconos::modeling::LagrangianLinearDiagonalDS::computeForces(
       "std::shared_ptr<siconos::algebra::SiconosVector> v2) \n");
 
   if (!_forces) {
-    _forces = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
+    _forces = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
   } else
     _forces->zero();
 
-  if (_fExt) {
-    computeFExt(time);
-    *_forces += *_fExt;
+  if (fext_view_) {
+    computeFext(time);
+    *_forces += *fext_view_;
   }
 
   if (_stiffness)
-    for (decltype(_ndof) i = 0; i < _ndof; ++i) (*_forces)(i) -= (*_stiffness)(i) * (*q2)(i);
+    for (decltype(ndof_) i = 0; i < ndof_; ++i) (*_forces)(i) -= (*_stiffness)(i) * (*q2)(i);
   if (_damping)
-    for (decltype(_ndof) i = 0; i < _ndof; ++i) (*_forces)(i) -= (*_damping)(i) * (*v2)(i);
+    for (decltype(ndof_) i = 0; i < ndof_; ++i) (*_forces)(i) -= (*_damping)(i) * (*v2)(i);
 
   // if (_stiffness)
   // {
@@ -117,21 +119,21 @@ void siconos::modeling::LagrangianLinearDiagonalDS::computeForces(
 
 void siconos::modeling::LagrangianLinearDiagonalDS::display(bool brief) const {
   LagrangianDS::display();
-  std::cout << "===== Lagrangian Linear Diagonal System display ===== " << std::endl;
-  std::cout << "- Mass Matrix M : " << std::endl;
-  if (_mass)
-    _mass->display();
+  std::cout << "===== Lagrangian Linear Diagonal System display ===== \n ";
+  std::cout << "- Mass Matrix M : \n";
+  if (mass_view_)
+    std::cout << *mass_view_ << "\n";
   else
-    std::cout << "-> nullptr" << std::endl;
-  std::cout << "- Stiffness Matrix K : " << std::endl;
+    std::cout << "-> nullptr \n";
+  std::cout << "- Stiffness Matrix K : \n";
   if (_stiffness)
     _stiffness->display();
   else
-    std::cout << "-> nullptr" << std::endl;
-  std::cout << "- Viscosity Matrix C : " << std::endl;
+    std::cout << "-> nullptr\n";
+  std::cout << "- Viscosity Matrix C : \n";
   if (_damping)
     _damping->display();
   else
-    std::cout << "-> nullptr" << std::endl;
-  std::cout << "=========================================================== " << std::endl;
+    std::cout << "-> nullptr\n";
+  std::cout << "=========================================================== \n";
 }

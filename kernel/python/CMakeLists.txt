@@ -1,5 +1,11 @@
 set(kernel_root_dir ${CMAKE_SOURCE_DIR}/kernel/src)
 
+pybind11_add_module(pb11_template
+  ${CMAKE_CURRENT_SOURCE_DIR}/pb11_template.cpp
+)
+
+target_link_libraries(pb11_template PUBLIC kernel numerics)
+
 pybind11_add_module(modeling 
   ${CMAKE_CURRENT_SOURCE_DIR}/modeling/modeling.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/modeling/dynamical_systems_wrapper.cpp
@@ -32,6 +38,7 @@ pybind11_add_module(input
 target_link_libraries(input PUBLIC kernel numerics)
 
 install(TARGETS
+  pb11_template
   modeling
   integrators
   simulation

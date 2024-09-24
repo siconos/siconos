@@ -51,12 +51,6 @@ class SphereLDS : public siconos::modeling::LagrangianDS,
 
   inline double getRadius() const { return radius; };
 
-  void computeMass() override;
-  void computeMass(std::shared_ptr<siconos::algebra::SiconosVector>) override
-  {
-    THROW_EXCEPTION("SphereLDS::computeMass(vector) - not implemented");
-  }
-
   void computeFGyr(std::shared_ptr<siconos::algebra::SiconosVector>,
                    std::shared_ptr<siconos::algebra::SiconosVector>) override;
 

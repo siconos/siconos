@@ -357,7 +357,7 @@ void siconos::integrators::MoreauJeanOSI::initializeIterationMatrixW(
     auto &d = static_cast<siconos::modeling::LagrangianDS &>(*ds);
     // Memory allocation for W property of the grap
     if (d.mass()) {
-      d.computeMass(d.q());
+      d.computeMass(*d.q(), time);
       _dynamicalSystemsGraph->properties(dsv).W =
           std::make_shared<siconos::algebra::SiconosMatrix>(*d.mass());  //*W = *d->mass();
     } else {
@@ -583,7 +583,7 @@ void siconos::integrators::MoreauJeanOSI::computeW(double t,
   } else if (dsType == siconos::modeling::Type::LagrangianDS) {
     auto &d = static_cast<siconos::modeling::LagrangianDS &>(ds);
     if (d.mass()) {
-      d.computeMass();
+      d.computeMass(*d.q());
       W = *d.mass();
     } else
       W.eye();
@@ -803,7 +803,7 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
       residuFree = v;
       siconos::algebra::sub(residuFree, vold, residuFree);
       if (d.mass()) {
-        d.computeMass(d.q());
+        d.computeMass(*d.q());
         siconos::algebra::prod(*(d.mass()), residuFree,
                                residuFree);  // residuFree = M(v - vold)
       }
@@ -898,14 +898,14 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
 
       if (d.fExt()) {
         // computes Fext(ti)
-        d.computeFExt(told);
+        d.computeFext(told);
         coeff = -h * (1 - _theta);
-        siconos::algebra::scal(coeff, *(d.fExt()), residuFree,
+        siconos::algebra::scal(coeff, d.fext_view(), residuFree,
                                false);  // vfree -= h*(1-_theta) * fext(ti)
         // computes Fext(ti+1)
-        d.computeFExt(t);
+        d.computeFext(t);
         coeff = -h * _theta;
-        siconos::algebra::scal(coeff, *(d.fExt()), residuFree,
+        siconos::algebra::scal(coeff, d.fext_view(), residuFree,
                                false);  // vfree -= h*_theta * fext(ti+1)
       }
 
@@ -937,12 +937,12 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
       //       if (Fext)
       //       {
       //         // computes Fext(ti)
-      //         d.computeFExt(told);
+      //         d.computeFext(told);
       //         coeff = -h*(1-_theta);
       //         siconos::algebra::scal(coeff, *Fext, *realresiduFree, false);
       //         // vfree -= h*(1-_theta) * fext(ti)
       //         // computes Fext(ti+1)
-      //         d.computeFExt(t);
+      //         d.computeFext(t);
       //         coeff = -h*_theta;
       //         siconos::algebra::scal(coeff, *Fext, *realresiduFree, false);
       //         // vfree -= h*_theta * fext(ti+1)
@@ -998,14 +998,14 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
 
       if (d.fExt()) {
         // computes Fext(ti)
-        d.computeFExt(told);
+        d.computeFext(told);
         coeff = -h * (1 - _theta);
-        siconos::algebra::scal(coeff, *(d.fExt()), residuFree,
+        siconos::algebra::scal(coeff, d.fext_view(), residuFree,
                                false);  // vfree -= h*(1-_theta) * fext(ti)
         // computes Fext(ti+1)
-        d.computeFExt(t);
+        d.computeFext(t);
         coeff = -h * _theta;
-        siconos::algebra::scal(coeff, *(d.fExt()), residuFree,
+        siconos::algebra::scal(coeff, d.fext_view(), residuFree,
                                false);  // vfree -= h*_theta * fext(ti+1)
       }
 
@@ -1561,17 +1561,19 @@ void siconos::integrators::MoreauJeanOSI::integrate(double &tinit, double &tend,
         siconos::algebra::prod(-h, *K, qold, v, false);  // v += -h*K*qi
       }
 
-      std::shared_ptr<siconos::algebra::MapVectorType> Fext = d->fExt();
-      if (Fext) {
+      // std::shared_ptr<siconos::algebra::MapVectorType> Fext = d->fExt();
+      auto Fext = d->fext_view();
+
+      if (d->hasExternalForces()) {
         // computes Fext(ti)
-        d->computeFExt(tinit);
+        d->computeFext(tinit);
         coeff = h * (1 - _theta);
-        siconos::algebra::scal(coeff, *Fext, v,
+        siconos::algebra::scal(coeff, Fext, v,
                                false);  // v += h*(1-theta) * fext(ti)
         // computes Fext(ti+1)
-        d->computeFExt(tout);
+        d->computeFext(tout);
         coeff = h * _theta;
-        siconos::algebra::scal(coeff, *Fext, v,
+        siconos::algebra::scal(coeff, Fext, v,
                                false);  // v += h*theta * fext(ti+1)
       }
       // -> Solve WX = v and set v = X

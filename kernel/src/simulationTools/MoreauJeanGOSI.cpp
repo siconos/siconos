@@ -223,11 +223,11 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
       auto Fext = d->fExt();
       if (Fext) {
         // computes Fext(ti)
-        d->computeFExt(told);
+        d->computeFext(told);
         coeff = h * (1 - _theta);
         siconos::algebra::scal(coeff, *(d->fExt()), free_rhs, false);  // free_rhs += h*(1-_theta) * fext(ti)
         // computes Fext(ti+1)
-        d->computeFExt(t);
+        d->computeFext(t);
         coeff = h * _theta;
         siconos::algebra::scal(coeff, *(d->fExt()), free_rhs, false);  // free_rhs += h*_theta * fext(ti+1)
       }

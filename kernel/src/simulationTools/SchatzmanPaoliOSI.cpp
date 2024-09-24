@@ -392,12 +392,12 @@ double siconos::integrators::SchatzmanPaoliOSI::computeResidu() {
       auto Fext = d->fExt();
       if (Fext) {
         // computes Fext(ti)
-        d->computeFExt(told);
+        d->computeFext(told);
         coeff = -h * h * (1 - _theta);
         siconos::algebra::scal(coeff, *Fext, residuFree,
                                false);  // residufree -= h^2*(1-_theta) * fext(ti)
         // computes Fext(ti+1)
-        d->computeFExt(t);
+        d->computeFext(t);
         coeff = -h * h * _theta;
         siconos::algebra::scal(coeff, *Fext, residuFree,
                                false);  // residufree -= h^2*_theta * fext(ti+1)

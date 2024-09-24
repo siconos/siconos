@@ -265,15 +265,14 @@ void siconos::mechanisms::MBTB_BodyBuild(
     std::shared_ptr<siconos::algebra::SiconosVector> initPos,
     std::shared_ptr<siconos::algebra::SiconosVector> modelCenterMass,
     std::shared_ptr<siconos::algebra::SiconosMatrix> inertialMatrix,
-    const std::string& pluginFextLib, const std::string& pluginFextFct,
-    const std::string& pluginMextLib, const std::string& pluginMextFct,
-    const std::string& pluginFintLib, const std::string& pluginFintFct,
-    const std::string& pluginMintLib, const std::string& pluginMintFct,
-    const std::string& pluginFintJacqLib, const std::string& pluginFintJacqFct,
-    const std::string& pluginMintJacqLib, const std::string& pluginMintJacqFct,
-    const std::string& pluginFintJacvLib, const std::string& pluginFintJacvFct,
-    const std::string& pluginMintJacvLib, const std::string& pluginMintJacvFct,
-    const std::string& pluginBoundaryConditionLib,
+    const ExternalForcesFunction& fext_func, const std::string& pluginMextLib,
+    const std::string& pluginMextFct, const std::string& pluginFintLib,
+    const std::string& pluginFintFct, const std::string& pluginMintLib,
+    const std::string& pluginMintFct, const std::string& pluginFintJacqLib,
+    const std::string& pluginFintJacqFct, const std::string& pluginMintJacqLib,
+    const std::string& pluginMintJacqFct, const std::string& pluginFintJacvLib,
+    const std::string& pluginFintJacvFct, const std::string& pluginMintJacvLib,
+    const std::string& pluginMintJacvFct, const std::string& pluginBoundaryConditionLib,
     const std::string& pluginBoundaryConditionFct,
     const siconos::modeling::BoundaryCondition::Indices& boundaryConditionIndex) {
   assert(mbtb::data::sNbOfBodies > numDS && "MBTB_BodyBuild numDS out of range.");
@@ -285,15 +284,17 @@ void siconos::mechanisms::MBTB_BodyBuild(
   auto v10 = std::make_shared<siconos::algebra::SiconosVector>(nDim);
   mbtb::internal::MBTB_BodyBuildComputeInitPosition(numDS, mass, initPos, modelCenterMass,
                                                     inertialMatrix, q10, v10);
-  MBTB_Body* p =
-      new MBTB_Body(q10, v10, mass, inertialMatrix, modelCenterMass, BodyName, BodyName);
+  MBTB_Body* p = new MBTB_Body(Eigen::Ref<siconos::algebra::SiconosVector>(*q10),
+                               Eigen::Ref<siconos::algebra::SiconosVector>(*v10), mass,
+                               Eigen::Ref<siconos::algebra::SiconosMatrix>(*inertialMatrix),
+                               Eigen::Ref<siconos::algebra::SiconosVector>(*modelCenterMass),
+                               BodyName, BodyName);
 
   // We fix a ds number just to be able to use postprocessing based on hdf5 file
   p->setNumber(numDS + 1);
   // set external forces plugin
-  if (pluginFextFct.length() > 1) {
-    p->setComputeFExtFunction(pluginFextLib, pluginFextFct);
-  }
+  p->setComputeFextFunction(fext_func);
+
   if (pluginMextFct.length() > 1) {
     p->setComputeMExtFunction(pluginMextLib, pluginMextFct);
   }

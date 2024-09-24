@@ -27,9 +27,9 @@
 #include "SiconosVector.hpp"
 
 siconos::mechanics::occ::OccBody::OccBody(
-    std::shared_ptr<siconos::algebra::SiconosVector> position,
-    std::shared_ptr<siconos::algebra::SiconosVector> velocity, double mass,
-    std::shared_ptr<siconos::algebra::SiconosMatrix> inertia)
+    Eigen::Ref<siconos::algebra::SiconosVector> position,
+    Eigen::Ref<siconos::algebra::SiconosVector> velocity, double mass,
+    Eigen::Ref<siconos::algebra::SiconosMatrix> inertia)
     : NewtonEulerDS(position, velocity, mass, inertia),
       _contactShapes(std::make_shared<ContactShape_vector>()),
       _shapes(std::make_shared<TopoDS_Shape_vector>()) {}

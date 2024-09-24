@@ -249,7 +249,7 @@ void siconos::geometry::computeRotationMatrixTransposed(
 }
 
 double siconos::geometry::axisAngleFromQuaternion(double q0, double q1, double q2, double q3,
-                                                  siconos::algebra::SiconosVector &axis) {
+                                                  Eigen::Ref<siconos::algebra::SiconosVector> &axis) {
   DEBUG_BEGIN(
       "axisAngleFromQuaternion(double q0, double q1, double q2, double q3, "
       "std::shared_ptr<siconos::algebra::SiconosVector> axis )\n");
@@ -271,8 +271,8 @@ double siconos::geometry::axisAngleFromQuaternion(double q0, double q1, double q
   return angle;
 }
 
-double siconos::geometry::axisAngleFromConfiguration(siconos::algebra::SiconosVector &q,
-                                                     siconos::algebra::SiconosVector &axis) {
+double siconos::geometry::axisAngleFromConfiguration(const Eigen::Ref<siconos::algebra::SiconosVector>& q,
+                                                      Eigen::Ref<siconos::algebra::SiconosVector> axis) {
   double angle = siconos::geometry::axisAngleFromQuaternion(q(3), q(4), q(5), q(6), axis);
   return angle;
 }

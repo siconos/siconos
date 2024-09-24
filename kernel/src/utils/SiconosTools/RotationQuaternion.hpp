@@ -38,13 +38,13 @@ namespace siconos::geometry {
 /* For a given quaternion q, compute the angle/axis representation
  */
 double axisAngleFromQuaternion(double q0, double q1, double q2, double q3,
-                               siconos::algebra::SiconosVector &axis);
+                               Eigen::Ref<siconos::algebra::SiconosVector> &axis);
 
 /* For a given configuration vector q composed of a position and a quaternion,
  * compute the angle/axis representation
  */
-double axisAngleFromConfiguration(siconos::algebra::SiconosVector &q,
-                                  siconos::algebra::SiconosVector &axis);
+double axisAngleFromConfiguration(const Eigen::Ref<siconos::algebra::SiconosVector> &q,
+                                  Eigen::Ref<siconos::algebra::SiconosVector> axis);
 
 /* For a given quaternion, compute the rotation vector representation
  */

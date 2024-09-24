@@ -26,8 +26,8 @@
 #include "NonSmoothDynamicalSystem.hpp"
 #include "NumericsSolversNamespace.h"  // for SolverOptions tools
 #include "SiconosBodies.hpp"
-#include "SiconosVector.hpp"
 #include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 #include "SpaceFilter.hpp"
 #include "TimeDiscretisation.hpp"
 #include "TimeStepping.hpp"
@@ -127,7 +127,8 @@ void Disks::init(std::string disks_input) {
 
     std::cout << "====> nsds loading ..." << std::endl << std::endl;
 
-    _plans = std::make_shared<siconos::algebra::SiconosMatrix>(siconos::algebra::readMatrixFromFile("plans.dat"));
+    _plans = std::make_shared<siconos::algebra::SiconosMatrix>(
+        siconos::algebra::readMatrixFromFile("plans.dat"));
     if (_plans->size(0) == 0) {
       /* default plans */
       double A1 = P1A;
@@ -181,7 +182,8 @@ void Disks::init(std::string disks_input) {
         (*_moving_plans)(0,4) = &DB;
         (*_moving_plans)(0,5) = &DC;*/
 
-    auto Disks = std::make_shared<siconos::algebra::SiconosMatrix>(siconos::algebra::readMatrixFromFile(disks_input));
+    auto Disks = std::make_shared<siconos::algebra::SiconosMatrix>(
+        siconos::algebra::readMatrixFromFile(disks_input));
 
     // -- OneStepIntegrators --
     auto osi = std::make_shared<siconos::integrators::MoreauJeanOSI>(theta);
@@ -207,10 +209,10 @@ void Disks::init(std::string disks_input) {
         body = std::make_shared<Circle>(-R, m, qTmp, vTmp);
 
       // -- Set external forces (weight) --
-      auto FExt = std::make_shared<siconos::algebra::SiconosVector>(NDOF);
-      FExt->zero();
-      FExt->setValue(1, -m * g);
-      body->setFExtPtr(FExt);
+      siconos::algebra::SiconosVector FExt{NDOF};
+      FExt.setZero();
+      FExt(1) = -m * g;
+      body->setConstantFext(FExt);
 
       // add the dynamical system in the non smooth dynamical system
       nsds->insertDynamicalSystem(body);

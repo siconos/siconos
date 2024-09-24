@@ -51,8 +51,9 @@ class LagrangianDSTest : public CppUnit::TestFixture {
 
   // Members
 
-  std::shared_ptr<siconos::algebra::SiconosVector> q0, velocity0, u0;
-  std::shared_ptr<siconos::algebra::SiconosMatrix> mass;
+  siconos::algebra::SiconosVector3 q0, velocity0;
+
+  siconos::algebra::SiconosMatrix mass{3, 3};
 
  public:
   void setUp();

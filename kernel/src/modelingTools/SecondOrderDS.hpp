@@ -114,7 +114,10 @@ class SecondOrderDS : public DynamicalSystem {
  public:
   using Matrix = siconos::algebra::SiconosMatrix;
   using MapType = siconos::algebra::MapType;
-  // using Matrix = siconos::algebra::SiconosSparseMatrix;
+
+  /** Mass operator plugin type */
+  using MassFunction = std::function<void(Eigen::Ref<siconos::algebra::MapVectorType>,
+                                          double time, Eigen::Ref<siconos::algebra::MapType>)>;
 
  protected:
   ACCEPT_SERIALIZATION(SecondOrderDS);
@@ -122,16 +125,22 @@ class SecondOrderDS : public DynamicalSystem {
   // -- MEMBERS --
 
   /** number of degrees of freedom of the system */
-  unsigned int _ndof{0};
+  unsigned int ndof_{0};
 
-  /** mass of the system */
-  std::shared_ptr<MapType> _mass{nullptr};
+  /** mass matrix of the system (as a view onto memory)*/
+  std::shared_ptr<siconos::algebra::MapType> mass_view_{nullptr};
 
-  /** mass data pointer */
+  /** internal storage (optional) for the mass matrix */
   std::unique_ptr<std::vector<double>> mass_internal_storage_{nullptr};
 
-  /** true if the  mass matrix is constant */
-  bool _hasConstantMass = false;
+  /** function wrapper used to compute mass */
+  MassFunction computemass_{nullptr};
+
+  /** true if mass is required/set and constant */
+  bool hasConstantMass_{false};
+
+  /** True if mass is required */
+  bool hasMass_{false};
 
   /** inverse or factorization of the mass of the system */
   std::shared_ptr<Matrix> _inverseMass{nullptr};
@@ -174,7 +183,7 @@ class SecondOrderDS : public DynamicalSystem {
    *  \param dimension size of the system (n)
    */
   SecondOrderDS(unsigned int dimension, unsigned int ndof)
-      : DynamicalSystem(dimension), _ndof(ndof), _hasConstantMass(true){};
+      : DynamicalSystem(dimension), ndof_(ndof) {};
 
  public:
   /** destructor */
@@ -194,23 +203,38 @@ class SecondOrderDS : public DynamicalSystem {
    *  \param level unsigned int, required level for p, default = 2
    *  \return a siconos::algebra::SiconosVector
    */
-  inline siconos::algebra::SiconosVector& p_python(unsigned int level = 2) const {
+  inline siconos::algebra::SiconosVector &p_python(unsigned int level = 2) const {
     return *(_p[level]);
   }
 
-  /** get mass matrix (pointer link)
-   *
-   *  \return std::shared_ptr<Matrix>
-   */
-  inline std::shared_ptr<MapType> mass() const { return _mass; }
+  /*  \return the mass matrix operator (pointer link) */
+  inline std::shared_ptr<siconos::algebra::MapType> mass() const { return mass_view_; }
 
-  /** get mass matrix (reference)
+  /** \return mass matrix operator (view onto memory) */
+  inline siconos::algebra::MapType &mass_view() const { return *mass_view_; }
+
+  /** Set a constant mass matrix for the system
    *
-   *  \return std::shared_ptr<Matrix>
+   *  \param newValue mass matrix
+   *
    */
-  inline MapType& mass_python() const { 
-    return *_mass;
-  }
+  void setConstantMass(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+
+  /** \return True if the mass matrix has been set (i.e. different from identity) */
+  bool hasMass() const { return hasMass_; }
+
+  /** set a user-defined function to compute the mass matrix
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputeMassFunction(MassFunction fext_func);
+
+  /** to compute the mass matrix operator \f$ M(t, q) \f$
+   *
+   *  \param position q vector
+   *  \param time the current time
+   */
+  void computeMass(Eigen::Ref<siconos::algebra::SiconosVector> position, double time = 0.);
 
   /** get (pointer) inverse or LU-factorization of the mass,
    *  used for LU-forward-backward computation
@@ -218,12 +242,6 @@ class SecondOrderDS : public DynamicalSystem {
    *  \return pointer std::shared_ptr<Matrix>
    */
   inline std::shared_ptr<Matrix> inverseMass() const { return _inverseMass; }
-
-  /** set mass to pointer newPtr
-   *
-   *  \param newPtr a plugged matrix SP
-   */
-  void setMassPtr(std::shared_ptr<MapType> newPtr);
 
   /** set the value of the right-hand side, \f$ \dot x \f$
    *
@@ -273,7 +291,7 @@ class SecondOrderDS : public DynamicalSystem {
    *
    *  \return an unsigned int.
    */
-  inline unsigned int dimension() const override { return _ndof; }
+  inline unsigned int dimension() const override { return ndof_; }
 
   /** generalized coordinates of the system (vector of size dimension())
    *
@@ -367,16 +385,6 @@ class SecondOrderDS : public DynamicalSystem {
    */
   void initMemory(unsigned int size) override = 0;
 
-  /** default function to compute the mass
-   */
-  virtual void computeMass() = 0;
-
-  /** function to compute the mass
-   *
-   *  \param position value used to evaluate the mass matrix
-   */
-  virtual void computeMass(std::shared_ptr<siconos::algebra::SiconosVector> position) = 0;
-
   /** set Boundary Conditions
    *
    *  \param newbd BoundaryConditions
@@ -419,14 +427,10 @@ class SecondOrderDS : public DynamicalSystem {
   /**
       Update the content of the lu factorization of the mass of the system,
       if required.
+
+      \param current time
   */
-  virtual void update_inverse_mass() = 0;
-
-  /** Allocate memory for forces and its jacobian.
-   */
-  virtual void init_forces() = 0;
-
-  //  ACCEPT_STD_VISITORS();
+  virtual void update_inverse_mass(double time = 0.) = 0;
 };
 }  // namespace siconos::modeling
 

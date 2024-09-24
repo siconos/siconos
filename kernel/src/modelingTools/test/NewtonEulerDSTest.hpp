@@ -48,10 +48,9 @@ private:
   // void testcomputeDS();
 
   // Members
-
-  std::shared_ptr<siconos::algebra::SiconosVector> q0{nullptr}, q01{nullptr},  velocity0{nullptr}, u0{nullptr};
-  double mass;
-  std::shared_ptr<siconos::algebra::SiconosMatrix> inertia{nullptr};
+ siconos::algebra::SiconosVector q0{7}, q01{7}, velocity0{6};
+ siconos::algebra::SiconosMatrix inertia{3, 3};
+ double mass{10.};
 
 public:
   void setUp();

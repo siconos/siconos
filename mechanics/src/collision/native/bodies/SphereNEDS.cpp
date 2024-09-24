@@ -23,25 +23,22 @@
 #include "SiconosVector.hpp"
 
 siconos::collision::native::bodies::SphereNEDS::SphereNEDS(
-    double r, double m, std::shared_ptr<siconos::algebra::SiconosMatrix> I,
-    std::shared_ptr<siconos::algebra::SiconosVector> qinit,
-    std::shared_ptr<siconos::algebra::SiconosVector> vinit)
-  : siconos::modeling::NewtonEulerDS{qinit, vinit, m, I}, radius{r}
-{
-  // note : _ndof = 3 in NewtonEuleurDS ? (=> _ndof = 6 ?)
+    double r, double m, Eigen::Ref<siconos::algebra::SiconosMatrix>& inertia,
+    Eigen::Ref<siconos::algebra::SiconosVector>& qinit,
+    Eigen::Ref<siconos::algebra::SiconosVector>& vinit)
+    : siconos::modeling::NewtonEulerDS{qinit, vinit, m, inertia}, radius{r} {
+  // note : ndof_ = 3 in NewtonEuleurDS ? (=> ndof_ = 6 ?)
 
-  assert(qinit->size() == _qDim);
-  assert(vinit->size() == 6);  // == _ndof
+  assert(qinit.size() == _qDim);
+  assert(vinit.size() == 6);  // == ndof_
 }
 
-double siconos::collision::native::bodies::SphereNEDS::getQ(unsigned int pos)
-{
+double siconos::collision::native::bodies::SphereNEDS::getQ(unsigned int pos) {
   assert(pos < 7);
   return (_q->getValue(pos));
 };
 
-double siconos::collision::native::bodies::SphereNEDS::getVelocity(unsigned int pos)
-{
+double siconos::collision::native::bodies::SphereNEDS::getVelocity(unsigned int pos) {
   assert(pos < 6);
   return (_twist->getValue(pos));
 };

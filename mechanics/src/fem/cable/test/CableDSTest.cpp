@@ -160,24 +160,24 @@ void CableDSTest::testComputeBouncingBall() {
 
   cout << "====> Model loading ..." << endl;
 
-  auto Mass = std::make_shared<siconos::algebra::SiconosMatrix>(nDof, nDof);
-  (*Mass)(0, 0) = m;
-  (*Mass)(1, 1) = m;
-  (*Mass)(2, 2) = 2. / 5 * m * R * R;
+  siconos::algebra::SiconosMatrix Mass{nDof, nDof};
+  Mass(0, 0) = m;
+  Mass(1, 1) = m;
+  Mass(2, 2) = 2. / 5 * m * R * R;
 
   // -- Initial positions and velocities --
-  auto q0 = std::make_shared<siconos::algebra::SiconosVector>(nDof);
-  auto v0 = std::make_shared<siconos::algebra::SiconosVector>(nDof);
-  (*q0)(0) = position_init;
-  (*v0)(0) = velocity_init;
+  siconos::algebra::SiconosVector q0{nDof};
+  siconos::algebra::SiconosVector v0{nDof};
+  q0(0) = position_init;
+  v0(0) = velocity_init;
 
   // -- The dynamical system --
   auto ball = std::make_shared<siconos::modeling::LagrangianLinearTIDS>(q0, v0, Mass);
 
   // -- Set external forces (weight) --
-  auto weight = std::make_shared<siconos::algebra::SiconosVector>(nDof);
-  (*weight)(0) = -m * g;
-  ball->setFExtPtr(weight);
+  siconos::algebra::SiconosVector weight{nDof};
+  weight(0) = -m * g;
+  ball->setConstantFext(weight);
 
   // --------------------
   // --- Interactions ---
@@ -305,7 +305,7 @@ void CableDSTest::testVariableFext()
   // myforces); auto fext = cable->fExt(); CPPUNIT_ASSERT_EQUAL_MESSAGE(" testVFext 1: ", fext
   // != nullptr, true);
 
-  // cable->computeFExt(3.);
+  // cable->computeFext(3.);
   // for (auto val : *fext)
   //   CPPUNIT_ASSERT_EQUAL_MESSAGE(" testVFext 2: ", val == cos(3.), true);
 

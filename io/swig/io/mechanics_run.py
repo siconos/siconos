@@ -1030,7 +1030,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             weight = [0, 0, - scalar_mass * g]
         elif self._dimension == 2:
             weight = [0, - scalar_mass * g, 0.]
-        body.setFExtPtr(weight)
+        body.setConstantFExt(weight)
 
     def import_nonsmooth_law(self, name):
         if self._interman is not None:
@@ -1306,7 +1306,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 fext = self._input[name].get('allow_self_collide',
                                              None)
                 if fext is not None:
-                    body.setFextPtr(fext)
+                    body.setConstantFExt(fext)
 
 
                 self_collide = self._input[name].get('allow_self_collide',

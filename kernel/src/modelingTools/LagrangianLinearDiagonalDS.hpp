@@ -109,13 +109,11 @@ class LagrangianLinearDiagonalDS : public LagrangianDS {
   /* destructor */
   ~LagrangianLinearDiagonalDS() noexcept = default;
 
-
   /** get stiffness matrix (diagonal only, pointer link)
    *
    *  \return pointer on a siconos::algebra::SiconosVector
    */
-  inline std::shared_ptr<siconos::algebra::MapVectorType> stiffness() const
-  {
+  inline std::shared_ptr<siconos::algebra::MapVectorType> stiffness() const {
     return _stiffness;
   }
 
@@ -129,7 +127,9 @@ class LagrangianLinearDiagonalDS : public LagrangianDS {
    *
    *  \return pointer on a siconos::algebra::SiconosVector
    */
-  inline std::shared_ptr<siconos::algebra::MapVectorType> mass_diag() const { return _mass_diag; }
+  inline std::shared_ptr<siconos::algebra::MapVectorType> mass_diag() const {
+    return _mass_diag;
+  }
 
   /** allocate (if needed)  and compute rhs and its jacobian.
    *
