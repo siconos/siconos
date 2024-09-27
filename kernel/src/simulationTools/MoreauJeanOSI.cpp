@@ -27,6 +27,7 @@
 #include "LagrangianLinearDiagonalDS.hpp"
 #include "LagrangianLinearTIDS.hpp"
 #include "LagrangianRheonomousR.hpp"
+#include "MohrCoulombPlasticityNSL.hpp"
 #include "NewtonEulerDS.hpp"
 #include "NewtonImpactFrictionNSL.hpp"         // for nslaw visitor
 #include "NewtonImpactNSL.hpp"                 // for nslaw visitor
@@ -128,6 +129,18 @@ void siconos::integrators::MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(
       osnsp_rhs(2) += nslaw.et() * _inter.y_k(_osnsp.inputOutputLevel())(2);
     }
   }
+}
+
+void siconos::integrators::MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(
+    const siconos::modeling::MohrCoulombPlasticityNSL &nslaw) const {
+
+  auto &osnsp_rhs = *(*_interProp.workVectors)[siconos::integrators::MoreauJeanOSI::OSNSP_RHS];
+
+          // The normal part is multiplied depends on en
+  if (nslaw.c() > 0.0) {
+    osnsp_rhs(0) += nslaw.c();
+  }
+
 }
 
 // --- constructor from a set of data ---
@@ -1756,6 +1769,7 @@ void siconos::integrators::MoreauJeanOSI::computeFreeOutput(
   // 3 - add part due to NonSmoothLaw
   if (inter.relation()->getType() == siconos::modeling::RelationType::Lagrangian ||
       inter.relation()->getType() == siconos::modeling::RelationType::NewtonEuler) {
+    std::cout << "in compute freeOutput from OSI, call nslEffectOnFreeOutput " << std::endl;
     _NSLEffectOnFreeOutput nslEffectOnFreeOutput(*osnsp, inter,
                                                  indexSet.properties(vertex_inter), _theta);
     inter.nonSmoothLaw()->accept(nslEffectOnFreeOutput);
@@ -2409,7 +2423,8 @@ bool siconos::integrators::MoreauJeanOSI::addInteractionInIndexSet(
     DEBUG_EXPR_WE(if (y <= _constraintActivationThreshold) std::cout
                       << "MoreauJeanOSI::addInteractionInIndexSet ACTIVATE." << y
                       << "<= " << _constraintActivationThreshold << std::endl;);
-    return (y <= _constraintActivationThreshold);
+    // return (y <= _constraintActivationThreshold);
+    return true;
   }
 }
 

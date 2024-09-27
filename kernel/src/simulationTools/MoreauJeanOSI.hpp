@@ -204,6 +204,8 @@ class MoreauJeanOSI : public OneStepIntegrator {
     void visit(
         const siconos::modeling::MixedComplementarityConditionNSL &nslaw) const override{};
     void visit(const siconos::modeling::ComplementarityConditionNSL &nslaw) const override{};
+    void visit(const siconos::modeling::MohrCoulombPlasticityNSL &nslaw) const override;
+
   };
 
  public:

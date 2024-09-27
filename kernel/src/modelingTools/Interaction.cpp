@@ -243,6 +243,22 @@ struct siconos::modeling::Interaction::SetLevels : public siconos::internal::Sic
           "nslaw ");
     }
   }
+
+  void visit(const MohrCoulombPlasticityNSL& nslaw) const override {
+    RelationType relationType = interaction_->relation()->getType();
+    if (relationType == RelationType::Lagrangian ||
+        relationType == RelationType::NewtonEuler) {
+      interaction_->setLowerLevelForOutput(0);
+      interaction_->setUpperLevelForOutput(0);
+
+      interaction_->setLowerLevelForInput(0);
+      interaction_->setUpperLevelForInput(0);
+    } else {
+      THROW_EXCEPTION(
+          "siconos::modeling::Interaction::SetLevels::visit - unknown relation type for the "
+          "nslaw ");
+    }
+  }
 };
 
 void siconos::modeling::Interaction::reset() {
