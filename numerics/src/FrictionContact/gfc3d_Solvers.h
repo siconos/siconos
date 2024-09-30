@@ -87,8 +87,6 @@ extern "C"
 
   void gfc3d_admm_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  SolverOptions* options);
 
-  void gfc3d_ipm_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  SolverOptions* options);
-
   void gfc3d_ipm_snm_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int* info,  SolverOptions* options);
 
   void  gfc3d_nonsmooth_Newton_AlartCurnier_wr(GlobalFrictionContactProblem* problem, double *reaction , double *velocity, double* globalVelocity, int *info, SolverOptions* options);
@@ -248,8 +246,8 @@ extern "C"
 
   /* This routine is a short version of gfc3d_IPM. It allows to solve the convex model with fixed barrier parameter and s parameter.
    * Param s will be updated (s = || u_bar ||) according to different strategies.
-   * SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S_AFTER_SOLVING_LS: after solving the system with a desired tolerance
-   * SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S_AT_EACH_ITE: at each iteration
+   * SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S_EXTERNAL: after solving the system with a desired tolerance
+   * SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S_INTERNAL: at each iteration
    * Currently, gfc3d_IPM_fixed solves the optimaltily system under format 2X2_QPH (more detail in the paper/documentation)
    * 03 inputs reaction, velocity, globalVelocity must be assigned values before
    */

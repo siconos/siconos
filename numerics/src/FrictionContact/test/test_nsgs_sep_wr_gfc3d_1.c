@@ -34,8 +34,8 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
   {
     collection[current].filename = data_collection[d];
     collection[current].options = solver_options_create(SICONOS_GLOBAL_FRICTION_3D_NSGS_SEP_WR);
-    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-3;
-    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10;
+    collection[current].options->dparam[SICONOS_DPARAM_TOL] = 1e-10;
+    collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 10000;
     current++;
   }
 

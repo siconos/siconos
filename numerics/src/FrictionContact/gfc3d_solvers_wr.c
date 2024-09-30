@@ -362,33 +362,3 @@ void gfc3d_ipm_snm_wr(GlobalFrictionContactProblem* problem, double *reaction, d
   }
 }
 
-void gfc3d_ipm_wr(GlobalFrictionContactProblem* problem, double *reaction, double *velocity, double* globalVelocity, int *info, SolverOptions* options)
-{
-  // verbose = 1;
-  NumericsMatrix *H = problem->H;
-  // We compute only if the local problem has contacts
-  DEBUG_PRINTF("Number of contacts = %i \n", H->size1/3);
-  if(H->size1 > 0)
-  {
-    // Reformulation
-    numerics_printf_verbose(1,"Reformulation info a reduced problem onto local variables ... this make take a while");
-    FrictionContactProblem* localproblem = globalFrictionContact_reformulation_FrictionContact(problem);
-    DEBUG_EXPR(frictionContact_display(localproblem););
-
-    if(verbose)
-    {
-      printf("Call to the fc3d solver ...\n");
-    }
-    fc3d_IPM(localproblem, reaction, velocity, info, options);
-    globalFrictionContact_computeGlobalVelocity(problem, reaction, globalVelocity);
-
-    frictionContactProblem_free(localproblem);
-  }
-  else
-  {
-    globalFrictionContact_computeGlobalVelocity(problem, reaction, globalVelocity);
-    *info = 0 ;
-  }
-}
-
-
