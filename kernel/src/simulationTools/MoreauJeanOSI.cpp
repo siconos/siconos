@@ -343,34 +343,31 @@ void siconos::integrators::MoreauJeanOSI::initializeIterationMatrix(
   // Linear Lagrangian time-invariant sytems, where W is constant must be computed only once
   else if (auto ltids =
                std::dynamic_pointer_cast<siconos::modeling::LagrangianLinearTIDS>(ds)) {
-    if (dsType == siconos::modeling::Type::LagrangianLinearTIDS) {
-      if (ltids->hasMass())
-        *iterationMat = lldds->massMatrix();
-      else
-        iterationMat->eye();
+    if (ltids->hasMass())
+      *iterationMat = ltids->mass();
+    else
+      iterationMat->eye();
 
-      if (ltids->hasDampingMatrix()) *iterationMat += htheta * ltids->dampingMatrix();
-      if (ltids->hasStiffnessMatrix()) *iterationMat += h2theta2 * ltids->stiffnessMatrix();
-      if (ltids->boundaryConditions())
-        _initializeIterationMatrixBoundaryConditions(*ltids, dsv);
-      // LU factorization
-      _dynamicalSystemsGraph->properties(dsv).LUW =
-          std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(*iterationMat);
-    }
-    // General Lagrangian DS
-    else if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
-      siconos::integrators::moreau_jean::computeIterationMatrix_Lagrangian(
-          time, _simulation->timeStep(), _theta, *lds, *iterationMat,
-          _dynamicalSystemsGraph->properties(dsv).LUW);
-      if (lds->boundaryConditions()) _initializeIterationMatrixBoundaryConditions(*lds, dsv);
-    }
+    if (ltids->hasDampingMatrix()) *iterationMat += htheta * ltids->dampingMatrix();
+    if (ltids->hasStiffnessMatrix()) *iterationMat += h2theta2 * ltids->stiffnessMatrix();
+    if (ltids->boundaryConditions()) _initializeIterationMatrixBoundaryConditions(*ltids, dsv);
+    // LU factorization
+    _dynamicalSystemsGraph->properties(dsv).LUW =
+        std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(*iterationMat);
+  }
+  // General Lagrangian DS
+  else if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+    siconos::integrators::moreau_jean::computeIterationMatrix_Lagrangian(
+        time, _simulation->timeStep(), _theta, *lds, *iterationMat,
+        _dynamicalSystemsGraph->properties(dsv).LUW);
+    if (lds->boundaryConditions()) _initializeIterationMatrixBoundaryConditions(*lds, dsv);
+  }
 
-    else if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
-      siconos::integrators::moreau_jean::computeIterationMatrix_NewtonEuler(
-          time, _simulation->timeStep(), _theta, *neds, *iterationMat,
-          _dynamicalSystemsGraph->properties(dsv).LUW);
-      if (lds->boundaryConditions()) _initializeIterationMatrixBoundaryConditions(*neds, dsv);
-    }
+  else if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
+    siconos::integrators::moreau_jean::computeIterationMatrix_NewtonEuler(
+        time, _simulation->timeStep(), _theta, *neds, *iterationMat,
+        _dynamicalSystemsGraph->properties(dsv).LUW);
+    if (neds->boundaryConditions()) _initializeIterationMatrixBoundaryConditions(*neds, dsv);
   } else
     THROW_EXCEPTION(
         "siconos::integrators::MoreauJeanOSI::initializeIterationMatrix - not "
