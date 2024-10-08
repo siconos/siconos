@@ -31,7 +31,7 @@ namespace siconos::modeling {
  */
 class MohrCoulombPlasticityNSL : public NonSmoothLaw {
  private:
-  ACCEPT_SERIALIZATION(NewtonImpactFrictionNSL);
+  ACCEPT_SERIALIZATION(MohrCoulombPlasticityNSL);
 
   /** The Newton coefficient of restitution
    */
@@ -103,4 +103,4 @@ class MohrCoulombPlasticityNSL : public NonSmoothLaw {
   Type acceptType(types::FindType& ft) const override { return ft.visit(*this); }
 };
 }  // namespace siconos::modeling
-#endif  // NewtonImpactFrictionNSL_H
+#endif  // MOHRCOULOMBPLASTICITYNSLAW_H

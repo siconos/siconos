@@ -46,6 +46,7 @@
 #include "SimpleMatrix.hpp"
 // include "SimulationGraphs.hpp"
 #include "FremondImpactFrictionNSL.hpp"
+#include "MohrCoulombPlasticityNSL.hpp"
 #include "Relation.hpp"
 #include "SiconosMatrixOp.hpp"  // For setBlock
 #include "SiconosVector.hpp"

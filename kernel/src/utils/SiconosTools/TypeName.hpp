@@ -204,6 +204,10 @@ constexpr auto str(const T& X) {
     case T::ComplementarityConditionNSL:
       return "siconos::modeling::ComplementarityConditionNSL";
       break;
+    case T::MohrCoulombPlasticityNSL:
+      return "siconos::modeling::MohrCoulombPlasticityNSL";
+      break;
+
     default:
       assert(0);
       return "unknown";

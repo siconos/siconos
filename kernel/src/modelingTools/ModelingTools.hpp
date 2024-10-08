@@ -31,6 +31,7 @@ Include files related to modeling part of Siconos.
 #include "NormalConeNSL.hpp"
 #include "NewtonImpactRollingFrictionNSL.hpp"
 #include "FremondImpactFrictionNSL.hpp"
+#include "MohrCoulombPlasticityNSL.hpp"
 
 #include "Interaction.hpp"
 

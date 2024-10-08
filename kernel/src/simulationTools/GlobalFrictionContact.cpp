@@ -142,7 +142,7 @@ bool siconos::nonsmooth_formulations::GlobalFrictionContact::checkCompatibleNSLa
       static_cast<float>(siconos::types::type_value(nslaw)) + 0.1 * nslaw.size();
   _nslawtype.insert(type_number);
 
-  if (siconos::types::type_value(nslaw) != siconos::modeling::Type::NewtonImpactFrictionNSL) {
+  if ((siconos::types::type_value(nslaw) != siconos::modeling::Type::NewtonImpactFrictionNSL) || (siconos::types::type_value(nslaw) != siconos::modeling::Type::MohrCoulombPlasticityNSL)) {
     THROW_EXCEPTION(
         "\nsiconos::nonsmooth_formulations::GlobalFrictionContact::checkCompatibleNSLaw -  \n\
                       The chosen nonsmooth law is not compatible with FrictionalContact one step nonsmooth problem. \n\
@@ -252,7 +252,6 @@ bool siconos::nonsmooth_formulations::GlobalFrictionContact::preCompute(double t
 
     // fill _q
     if (_q->size() != _sizeGlobalOutput) _q->resize(_sizeGlobalOutput);
-
     size_t offset = 0;
     siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
     for (std::tie(dsi, dsend) = DSG0.vertices(); dsi != dsend; ++dsi) {
@@ -317,14 +316,15 @@ bool siconos::nonsmooth_formulations::GlobalFrictionContact::preCompute(double t
 
     // fill _b
     if (_b->size() != _sizeOutput) _b->resize(_sizeOutput);
-
     siconos::graphs::InteractionsGraph::VIterator ui, uiend;
     for (std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui) {
       auto inter = indexSet.bundle(*ui);
 
       assert(siconos::types::type_value(*(inter->nonSmoothLaw())) ==
              siconos::modeling::Type::NewtonImpactFrictionNSL);
-      _mu->push_back(std::static_pointer_cast<siconos::modeling::NewtonImpactFrictionNSL>(
+      if(siconos::types::type_value(*(inter->nonSmoothLaw())) ==
+          siconos::modeling::Type::NewtonImpactFrictionNSL)
+          _mu->push_back(std::static_pointer_cast<siconos::modeling::NewtonImpactFrictionNSL>(
                          inter->nonSmoothLaw())
                          ->mu());  // curious !!
 
@@ -577,7 +577,10 @@ void siconos::nonsmooth_formulations::GlobalFrictionContact::updateMu() {
   auto indexSet = simulation()->indexSet(indexSetLevel());
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   for (std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui) {
-    _mu->push_back(std::static_pointer_cast<siconos::modeling::NewtonImpactFrictionNSL>(
+    auto inter = indexSet->bundle(*ui);
+    if (siconos::types::type_value(*(inter->nonSmoothLaw())) ==
+        siconos::modeling::Type::NewtonImpactFrictionNSL)
+        _mu->push_back(std::static_pointer_cast<siconos::modeling::NewtonImpactFrictionNSL>(
                        indexSet->bundle(*ui)->nonSmoothLaw())
                        ->mu());
   }
