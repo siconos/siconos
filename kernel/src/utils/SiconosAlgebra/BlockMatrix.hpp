@@ -24,11 +24,12 @@
 #ifndef BLOCKMATRIX_H
 #define BLOCKMATRIX_H
 
-#include "SiconosMatrix.hpp"
-#include "SiconosVector.hpp"
-#include "SiconosSerialization.hpp"
-#include "SiconosException.hpp"
 #include <memory>
+
+#include "SiconosException.hpp"
+#include "SiconosMatrix.hpp"
+#include "SiconosSerialization.hpp"
+#include "SiconosVector.hpp"
 
 namespace siconos::algebra {
 
@@ -47,8 +48,8 @@ class BlockMatrix {
  private:
   ACCEPT_SERIALIZATION(BlockMatrix);
 
-  using BlocksMatrix =
-      Eigen::Matrix<std::shared_ptr<SiconosMatrix>, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor>;
+  using BlocksMatrix = Eigen::Matrix<std::shared_ptr<SiconosMatrix>, Eigen::Dynamic,
+                                     Eigen::Dynamic, Eigen::ColMajor>;
 
   /** A container of pointers to SiconosMatrix
    */
@@ -75,7 +76,6 @@ class BlockMatrix {
   BlockMatrix() = default;
 
  public:
-
   /** no-copy constructor
    *  \param m a SiconosMatrix
    */
@@ -181,7 +181,6 @@ class BlockMatrix {
    */
   double operator()(unsigned int i, unsigned int j) const;
 
-
   /** return the element matrix[i,j]
    *  \param i an unsigned int
    *  \param j an unsigned int
@@ -218,18 +217,12 @@ class BlockMatrix {
   /** get the vector tabRow
    *  \return a pointer to vector of int
    */
-  inline const std::shared_ptr<std::vector<std::size_t>> tabRow() const
-  {
-    return _tabRow;
-  };
+  inline const std::shared_ptr<std::vector<std::size_t>> tabRow() const { return _tabRow; };
 
   /** get the vector tabCol
    *  \return a pointer to vector of int
    */
-  inline const std::shared_ptr<std::vector<std::size_t>> tabCol() const
-  {
-    return _tabCol;
-  };
+  inline const std::shared_ptr<std::vector<std::size_t>> tabCol() const { return _tabCol; };
 
   /** get block at position row-col
    *  \param row unsigned int
@@ -243,23 +236,24 @@ class BlockMatrix {
    *  \param col unsigned int
    *  \return std::shared_ptr<SiconosMatrix> the requested block
    */
-  std::shared_ptr<const SiconosMatrix> block(unsigned int row = 0,
-                                             unsigned int col = 0) const;
+  std::shared_ptr<const SiconosMatrix> block(unsigned int row = 0, unsigned int col = 0) const;
 
   /** convert BlockMatrix to SiconosMatrix
    *  \return SiconosMatrix the converted matrix
    */
   std::shared_ptr<siconos::algebra::SiconosMatrix> toSiconosMatrix() const;
 
-  /** 
-   * 
-  */
-  void copyBlock(unsigned int i, unsigned int j, std::shared_ptr<siconos::algebra::SiconosMatrix>);
+  /**
+   *
+   */
+  void copyBlock(unsigned int i, unsigned int j,
+                 std::shared_ptr<siconos::algebra::SiconosMatrix>);
 
-  /** Set new block pointer 
-   * 
-  */
-  void setBlock(unsigned int i, unsigned int j, std::shared_ptr<siconos::algebra::SiconosMatrix>);
+  /** Set new block pointer
+   *
+   */
+  void setBlock(unsigned int i, unsigned int j,
+                std::shared_ptr<siconos::algebra::SiconosMatrix>);
 
   // /** get row index of current matrix and save it in  v
   //  *  \param r index of required line
@@ -323,8 +317,7 @@ class BlockMatrix {
   //  */
   // BlockMatrix &operator-=(const SiconosMatrix &m);
 
-  void updateNumericsMatrix()
-  {
+  void updateNumericsMatrix() {
     THROW_EXCEPTION("BlockMatrix::updateNumericsMatrix(), not implemented fro BlockMatrix");
   };
 
@@ -355,7 +348,7 @@ class BlockMatrix {
   void PLUForwardBackwardInPlace(SiconosVector &B);
   void Solve(SiconosVector &B);
 
-  //ACCEPT_STD_VISITORS();
+  // ACCEPT_STD_VISITORS();
 
   // friend class SiconosMatrix;
   friend void scal(double, const SiconosMatrix &, SiconosMatrix &, bool);

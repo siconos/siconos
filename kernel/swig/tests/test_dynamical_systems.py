@@ -167,12 +167,12 @@ def test_lagrangian_tids():
     fref = -np.dot(stiffness, q)
     fref -= np.dot(damping, v)
     time = 0.3
-    ds.computeForces(time, q, v)
-    assert np.allclose(fref, ds.forces())
-    ds.computeJacobianqForces(time)
-    assert np.allclose(stiffness, ds.jacobianqForces())
-    ds.computeJacobianvForces(time)
-    assert np.allclose(damping, ds.jacobianvForces())
+    ds.computeTotalForces(v, q, time)
+    assert np.allclose(fref, ds.totalForces())
+    ds.computeJacobianTotalForcesOver_q(time)
+    assert np.allclose(stiffness, ds.jacobianTotalForcesOver_q())
+    ds.computeJacobianTotalForcesOver_velocity(time)
+    assert np.allclose(damping, ds.jacobianTotalForcesOver_velocity())
 
 
 if __name__ == "__main__":

@@ -48,61 +48,7 @@ extern "C" DLLEXPORT void computeM(double time, unsigned int sizeOfX, double* x,
   M[4] = 2 * time;
   M[8] = 3 * time;
 }
-// ===== Lagrangian DS  =====
 
-extern "C" DLLEXPORT void computeFInt(double time, unsigned int sizeOfq, double* q,
-                                      double* velocity, double* fInt, unsigned int sizeZ,
-                                      double* z);
-extern "C" DLLEXPORT void computeFInt(double time, unsigned int sizeOfq, double* q,
-                                      double* velocity, double* fInt, unsigned int sizeZ,
-                                      double* z) {
-  for (unsigned int i = 0; i < sizeOfq; ++i) fInt[i] = i * q[i];
-}
-
-extern "C" DLLEXPORT void computeFGyr(unsigned int sizeOfq, double* q, double* velocity,
-                                      double* FGyr, unsigned int sizeOfZ, double* z);
-extern "C" DLLEXPORT void computeFGyr(unsigned int sizeOfq, double* q, double* velocity,
-                                      double* FGyr, unsigned int sizeOfZ, double* z) {
-  for (unsigned int i = 0; i < sizeOfq; ++i) FGyr[i] = i * q[i];
-}
-
-extern "C" DLLEXPORT void computeJacobianFIntq(double time, unsigned int sizeOfq, double* q,
-                                               double* velocity, double* jacob,
-                                               unsigned int sizeOfZ, double* z);
-extern "C" DLLEXPORT void computeJacobianFIntq(double time, unsigned int sizeOfq, double* q,
-                                               double* velocity, double* jacob,
-                                               unsigned int sizeOfZ, double* z) {
-  for (unsigned int i = 0; i < (sizeOfq * sizeOfq); ++i) jacob[i] = i * q[0];
-}
-
-extern "C" DLLEXPORT void computeJacobianFintVelocity(double time, unsigned int sizeOfq,
-                                                      double* q, double* velocity,
-                                                      double* jacob, unsigned int sizeOfZ,
-                                                      double* z);
-extern "C" DLLEXPORT void computeJacobianFintVelocity(double time, unsigned int sizeOfq,
-                                                      double* q, double* velocity,
-                                                      double* jacob, unsigned int sizeOfZ,
-                                                      double* z) {
-  for (unsigned int i = 0; i < (sizeOfq * sizeOfq); ++i) jacob[i] = i * q[0];
-}
-
-extern "C" DLLEXPORT void computeJacobianFGyrq(unsigned int sizeOfq, double* q,
-                                               double* velocity, double* jacob,
-                                               unsigned int sizeOfZ, double* z);
-extern "C" DLLEXPORT void computeJacobianFGyrq(unsigned int sizeOfq, double* q,
-                                               double* velocity, double* jacob,
-                                               unsigned int sizeOfZ, double* z) {
-  for (unsigned int i = 0; i < (sizeOfq * sizeOfq); ++i) jacob[i] = i * q[0];
-}
-
-extern "C" DLLEXPORT void computeJacobianFGyrVelocity(unsigned int sizeOfq, double* q,
-                                                      double* velocity, double* jacob,
-                                                      unsigned int sizeOfZ, double* z);
-extern "C" DLLEXPORT void computeJacobianFGyrVelocity(unsigned int sizeOfq, double* q,
-                                                      double* velocity, double* jacob,
-                                                      unsigned int sizeOfZ, double* z) {
-  for (unsigned int i = 0; i < (sizeOfq * sizeOfq); ++i) jacob[i] = i * q[0];
-}
 
 //==================  FirstOrderLinearDS ==================
 

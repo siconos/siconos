@@ -38,12 +38,6 @@ namespace siconos::internal {
 struct SiconosVisitor;
 }
 
-namespace siconos::algebra {
-
-// class SiconosVector;
-// class SiconosMatrix;
-}  // namespace siconos::algebra
-
 namespace siconos::modeling {
 
 /**
@@ -156,7 +150,7 @@ class DynamicalSystem {
 
   /** Initialize all PluggedObject whether they are used or not.
    */
-  virtual void _zeroPlugin() = 0;
+  virtual void _zeroPlugin(){};
 
  public:
   /** destructor */
@@ -293,18 +287,6 @@ class DynamicalSystem {
    */
   inline siconos::algebra::SiconosVector &getRhs() const { return *(_x[1]); }
 
-  /** set the value of the right-hand side, \f$ \dot x \f$
-   *
-   *  \param newValue siconos::algebra::SiconosVector
-   */
-  virtual void setRhs(const siconos::algebra::SiconosVector &newValue);
-
-  /** set right-hand side, \f$ \dot x \f$ (pointer link)
-   *
-   *  \param newPtr std::shared_ptr<siconos::algebra::SiconosVector>
-   */
-  virtual void setRhsPtr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr);
-
   /** returns a pointer to \f$ \nabla_x rhs()\f$
    *
    *  \return std::shared_ptr<siconos::algebra::SiconosMatrix>
@@ -390,7 +372,7 @@ class DynamicalSystem {
    *
    *  \param time  the current time
    */
-  virtual void updatePlugins(double time) = 0;
+  virtual void updatePlugins(double time) {};
 
   /** reset the global DynamicSystem counter (for ids)
    *

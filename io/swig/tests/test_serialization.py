@@ -67,7 +67,7 @@ def test_serialization4(datafile):
 
     # set external forces
     weight = array([-m * g, 0, 0])
-    ball.setConstantFExt(weight)
+    ball.setConstantFext(weight)
 
     #
     # Interactions

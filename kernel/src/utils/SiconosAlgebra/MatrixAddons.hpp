@@ -23,6 +23,3 @@
    See https://eigen.tuxfamily.org/dox/TopicCustomizing_Plugins.html
 
 */
-
-// LU decomposition
-std::shared_ptr<FullPivLU<Matrix>> lu_siconos = nullptr;

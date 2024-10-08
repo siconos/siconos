@@ -26,7 +26,7 @@
 
 #include "BlockVector.hpp"
 #include "NewtonEulerDS.hpp"
-#include "RotationQuaternion.hpp"  // for changeFrameBodyToAbs
+#include "RotationQuaternion.hpp"  // for rewriteVectorFromBodyToAbsoluteFrame
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"  // for scal
 #include "SiconosMatrix.hpp"
@@ -1062,5 +1062,5 @@ void siconos::joints::CylindricalJointR::_normalDoF(siconos::algebra::SiconosVec
   // We assume that _axis0 is normalized.
   ans = *_axis0;
 
-  if (absoluteRef) siconos::geometry::changeFrameBodyToAbs(*q0.getAllVect()[0], ans);
+  if (absoluteRef) siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(*q0.getAllVect()[0], ans);
 }

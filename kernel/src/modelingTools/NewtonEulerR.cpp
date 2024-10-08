@@ -26,12 +26,12 @@
 #include "Interaction.hpp"
 #include "NewtonEulerDS.hpp"  // computeT ...
 #include "PluggedObject.hpp"
-#include "PluginTypes.hpp"            // FPtr2 ...
+#include "PluginTypes.hpp"  // FPtr2 ...
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixOp.hpp"        // setblock
 #include "SiconosMatrixVectorOp.hpp"  // mat-vec prod
 #include "SiconosVector.hpp"
 #include "SiconosVisitor.hpp"
-#include "SiconosMatrix.hpp"
 // #define DEBUG_BEGIN_END_ONLY
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -250,7 +250,7 @@ void siconos::modeling::NewtonEulerR::computeJachqT(
     dimIndex[1] = 7;
     siconos::algebra::setBlock(*_jachq, auxBloc, dimIndex, startIndex);
 
-    computeT(q, _T);
+    siconos::modeling::newton_euler::computeT(*q, *_T);
 
     DEBUG_EXPR(q->display(););
     DEBUG_EXPR(_T->display());
@@ -366,12 +366,11 @@ void siconos::modeling::NewtonEulerR::computeSecondOrderTimeDerivativeTerms(
 
     NewtonEulerDS& d = *std::static_pointer_cast<NewtonEulerDS>(ds);
     d.computeTdot();
-    auto& Tdot = *d.Tdot();
 
     DEBUG_EXPR(d.display());
-    DEBUG_EXPR((d.Tdot())->display());
+    DEBUG_EXPR(std::cout << d.Tdot "\n";)
 
-    siconos::algebra::prod(*auxBloc, Tdot, *auxBloc2);
+    siconos::algebra::prod(*auxBloc, d.Tdot(), *auxBloc2);
 
     startIndex[0] = 0;
     startIndex[1] = 0;
@@ -387,7 +386,9 @@ void siconos::modeling::NewtonEulerR::computeSecondOrderTimeDerivativeTerms(
   }
 
   // compute the product of jachqTdot and v
-  siconos::algebra::SiconosVector workVelocity = *(*DSlink[siconos::modeling::NewtonEulerR::velocity]).toSiconosVector(); // TODO : is this correct?
+  siconos::algebra::SiconosVector workVelocity =
+      *(*DSlink[siconos::modeling::NewtonEulerR::velocity])
+           .toSiconosVector();  // TODO : is this correct?
   DEBUG_EXPR(workVelocity.display(););
   siconos::algebra::prod(*jachqTdot, workVelocity, *_secondOrderTimeDerivativeTerms, false);
   DEBUG_EXPR(_secondOrderTimeDerivativeTerms->display());

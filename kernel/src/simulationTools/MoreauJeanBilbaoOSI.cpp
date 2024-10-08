@@ -24,11 +24,11 @@
 #include "NewtonImpactNSL.hpp"
 #include "OneStepNSProblem.hpp"
 #include "Relation.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixVectorOp.hpp"  // for subprod
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"  // for subscal
 #include "SiconosVisitor.hpp"
-#include "SiconosMatrix.hpp"
 #include "Simulation.hpp"
 // #define DEBUG_MESSAGES
 // #define DEBUG_STDOUT
@@ -63,7 +63,7 @@ void siconos::integrators::MoreauJeanBilbaoOSI::initializeWorkVectorsForDS(
     // ds-dependent)
     _initialize_iteration_matrix(ds);
     // Update dynamical system components (for memory swap).
-    lldds->computeForces(t, lldds->q(), lldds->velocity());
+    lldds->computeTotalForces(lldds->velocity_read(), lldds->q_read(), t);
     lldds->swapInMemory();
   } else
     THROW_EXCEPTION(
@@ -180,7 +180,7 @@ void siconos::integrators::MoreauJeanBilbaoOSI::_initialize_iteration_matrix(
   //
   // W = mass + time_step**2/2(I - Theta)Stiffness + time_step * Sigma*
   const auto& dsv = _dynamicalSystemsGraph->descriptor(ds);
-  if (_dynamicalSystemsGraph->properties(dsv).W)
+  if (_dynamicalSystemsGraph->properties(dsv).iterationMatrix)
     THROW_EXCEPTION(
         "siconos::integrators::MoreauJeanBilbaoOSI::_initialize_iteration_"
         "matrix(ds) - W has "
@@ -192,8 +192,9 @@ void siconos::integrators::MoreauJeanBilbaoOSI::_initialize_iteration_matrix(
     auto ndof = lldds->dimension();
     // Allocate work buffers for:
     // - Iteration matrix
-    _dynamicalSystemsGraph->properties(dsv).W =
-        std::make_shared<siconos::algebra::SiconosMatrix>(ndof, ndof); // WARNING : Use bandmatrix instead ?
+    _dynamicalSystemsGraph->properties(dsv).iterationMatrix =
+        std::make_shared<siconos::algebra::SiconosMatrix>(
+            ndof, ndof);  // WARNING : Use bandmatrix instead ?
 
     // - I - theta
     // ds_work_vectors[siconos::integrators::MoreauJeanBilbaoOSI::ONE_MINUS_THETA]
@@ -201,10 +202,10 @@ void siconos::integrators::MoreauJeanBilbaoOSI::_initialize_iteration_matrix(
     // - dt * sigma*
     // ds_work_vectors[siconos::integrators::MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR]
     // = std::make_shared<siconos::algebra::SiconosVector>(ndof));
-    auto& iteration_matrix = *_dynamicalSystemsGraph->properties(dsv).W;
-    auto omega2 = lldds->stiffness();
-    auto damp = lldds->damping();
-    auto mass = lldds->mass_diag();
+    auto& iteration_matrix = *_dynamicalSystemsGraph->properties(dsv).iterationMatrix;
+    auto omega2 = lldds->stiffnessMatrix();
+    auto damp = lldds->dampingMatrix();
+    auto mass = lldds->massMatrix();
 
     double one_minus_theta, dt_sigma_star;
     auto time_step = _simulation->timeStep();
@@ -216,9 +217,9 @@ void siconos::integrators::MoreauJeanBilbaoOSI::_initialize_iteration_matrix(
       massk = 1.;
       sigmak = 0.;
       omega2k = 0.;
-      if (mass) massk = (*mass)(k, k);
-      if (damp) sigmak = 0.5 * (*damp)(k);
-      if (omega2) omega2k = (*omega2)(k);
+      if (lldds->hasMassMatrix()) massk = mass(k, k);
+      if (lldds->hasDampingMatrix()) sigmak = 0.5 * damp(k);
+      if (lldds->hasStiffnessMatrix()) omega2k = omega2(k);
       compute_parameters(time_step, omega2k, sigmak, one_minus_theta, dt_sigma_star);
       iteration_matrix(k, k) =
           one / (massk + coeff * one_minus_theta * omega2k + dt_sigma_star);
@@ -278,10 +279,10 @@ void siconos::integrators::MoreauJeanBilbaoOSI::computeFreeState() {
     const auto& q_i = lldds.qMemory().getSiconosVector(0);
     DEBUG_EXPR(q_i.display(););
     DEBUG_EXPR(v_i.display(););
-    const auto& stiffness = *lldds.stiffness();
+    auto stiffness = lldds.stiffnessMatrix();
     // Get iteration matrix
     const auto& dsv = _dynamicalSystemsGraph->descriptor(ds);
-    auto& inv_iteration_matrix = *_dynamicalSystemsGraph->properties(dsv).W;
+    auto& inv_iteration_matrix = *_dynamicalSystemsGraph->properties(dsv).iterationMatrix;
     DEBUG_EXPR(inv_iteration_matrix.display(););
     // Get 2.*dt*sigma^*
     auto& two_dt_sigma_star =
@@ -309,7 +310,7 @@ struct siconos::integrators::MoreauJeanBilbaoOSI::_NSLEffectOnFreeOutput
   _NSLEffectOnFreeOutput(siconos::nonsmooth_formulations::OneStepNSProblem* p,
                          siconos::modeling::Interaction& inter,
                          siconos::graphs::InteractionProperties& interProp)
-      : _osnsp(p), _inter(inter), _interProp(interProp) {};
+      : _osnsp(p), _inter(inter), _interProp(interProp){};
 
   void visit(const siconos::modeling::NewtonImpactNSL& nslaw) const override {
     double e;
@@ -397,7 +398,7 @@ void siconos::integrators::MoreauJeanBilbaoOSI::updateState(const unsigned int) 
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
   for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
     if (!checkOSI(dsi)) continue;
-    auto& inv_iteration_matrix = *_dynamicalSystemsGraph->properties(*dsi).W;
+    auto& inv_iteration_matrix = *_dynamicalSystemsGraph->properties(*dsi).iterationMatrix;
     // get dynamical system and work vector
     auto& lldds = static_cast<siconos::modeling::LagrangianLinearDiagonalDS&>(
         *_dynamicalSystemsGraph->bundle(*dsi));
@@ -437,8 +438,8 @@ void siconos::integrators::MoreauJeanBilbaoOSI::display() const {
 
       std::cout << "--------------------------------\n";
       std::cout << "--> W of dynamical system number " << ds->number() << ": \n";
-      if (_dynamicalSystemsGraph->properties(*dsi).W)
-        _dynamicalSystemsGraph->properties(*dsi).W->display();
+      if (_dynamicalSystemsGraph->properties(*dsi).iterationMatrix)
+        _dynamicalSystemsGraph->properties(*dsi).iterationMatrix->display();
       else
         std::cout << "-> nullptr\n";
     }

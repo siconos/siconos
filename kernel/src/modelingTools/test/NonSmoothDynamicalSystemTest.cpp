@@ -20,8 +20,8 @@
 #include "Interaction.hpp"
 #include "LagrangianLinearTIR.hpp"
 #include "NewtonImpactNSL.hpp"
-#include "SiconosVector.hpp"
 #include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 #include "Topology.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
@@ -39,9 +39,9 @@ void NonSmoothDynamicalSystemTest::testinsertDynamicalSystem() {
   auto nsds = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(1., 10.);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(" test ndsn build: ", nsds->currentTime() == 1., true);
 
-  auto ds = std::make_shared<siconos::modeling::LagrangianDS>(
-      std::make_shared<siconos::algebra::SiconosVector>(3),
-      std::make_shared<siconos::algebra::SiconosVector>(3));
+  siconos::algebra::SiconosVector3 q0, v0;
+
+  auto ds = std::make_shared<siconos::modeling::LagrangianDS>(q0, v0);
   ds->setNumber(23);
 
   try {
@@ -77,10 +77,9 @@ void NonSmoothDynamicalSystemTest::testinsertDynamicalSystem() {
 // insertInteraction
 void NonSmoothDynamicalSystemTest::testinsertInteraction() {
   auto nsds = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(0., 10.);
+  siconos::algebra::SiconosVector3 q0, v0;
 
-  auto ds = std::make_shared<siconos::modeling::LagrangianDS>(
-      std::make_shared<siconos::algebra::SiconosVector>(3),
-      std::make_shared<siconos::algebra::SiconosVector>(3));
+  auto ds = std::make_shared<siconos::modeling::LagrangianDS>(q0, v0);
   ds->setNumber(23);
 
   nsds->insertDynamicalSystem(ds);
@@ -106,15 +105,13 @@ void NonSmoothDynamicalSystemTest::testinsertInteraction() {
 
 void NonSmoothDynamicalSystemTest::testremoveDynamicalSystem() {
   auto nsds = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(0., 10.);
+  siconos::algebra::SiconosVector3 q0, v0;
 
-  auto ds1 = std::make_shared<siconos::modeling::LagrangianDS>(
-      std::make_shared<siconos::algebra::SiconosVector>(3),
-      std::make_shared<siconos::algebra::SiconosVector>(3));
+  auto ds1 = std::make_shared<siconos::modeling::LagrangianDS>(q0, v0);
 
   ds1->setNumber(23);
-  auto ds2 = std::make_shared<siconos::modeling::LagrangianDS>(
-      std::make_shared<siconos::algebra::SiconosVector>(3),
-      std::make_shared<siconos::algebra::SiconosVector>(3));
+  auto ds2 = std::make_shared<siconos::modeling::LagrangianDS>(q0, v0);
+
   ds2->setNumber(32);
 
   nsds->insertDynamicalSystem(ds1);
@@ -177,10 +174,9 @@ void NonSmoothDynamicalSystemTest::testremoveDynamicalSystem() {
 
 void NonSmoothDynamicalSystemTest::testremoveInteraction() {
   auto nsds = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(0., 10.);
+  siconos::algebra::SiconosVector3 q0, v0;
 
-  auto ds = std::make_shared<siconos::modeling::LagrangianDS>(
-      std::make_shared<siconos::algebra::SiconosVector>(3),
-      std::make_shared<siconos::algebra::SiconosVector>(3));
+  auto ds = std::make_shared<siconos::modeling::LagrangianDS>(q0, v0);
   ds->setNumber(23);
 
   nsds->insertDynamicalSystem(ds);

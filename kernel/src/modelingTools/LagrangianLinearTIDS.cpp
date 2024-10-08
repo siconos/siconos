@@ -44,102 +44,83 @@ void siconos::modeling::LagrangianLinearTIDS::initRhs(double time) {
   LagrangianDS::initRhs(time);
 
   // jacobianRhsx
-  if (_K) {
+  if (stiffnessMatrix_view_) {
     //  bloc10 of jacobianX is solution of Mass*Bloc10 = K
-    if (!_rhsMatrices[jacobianXBloc10_])
+    if (!rhsMatrices_[jacobianXBloc10_])
       // We assume the stiffness matrix is constant
-      _rhsMatrices[jacobianXBloc10_] =
-          std::make_shared<siconos::algebra::SiconosMatrix>(-1 * *_K);
-    algebra::solveInPlace(*_inverseMass, *_rhsMatrices[jacobianXBloc10_]);
+      rhsMatrices_[jacobianXBloc10_] =
+          std::make_shared<siconos::algebra::SiconosMatrix>(-1 * *stiffnessMatrix_view_);
+    LUMass_->solve(*rhsMatrices_[jacobianXBloc10_]);
   } else
-    _rhsMatrices[jacobianXBloc10_] = _rhsMatrices[zeroMatrix_];
+    rhsMatrices_[jacobianXBloc10_] = rhsMatrices_[zeroMatrix_];
 
-  if (_C) {
+  if (dampingMatrix_view_) {
     //  bloc11 of jacobianX is solution of Mass*Bloc11 = C
-    if (!_rhsMatrices[jacobianXBloc11_])
+    if (!rhsMatrices_[jacobianXBloc11_])
       // We assume the damping matrix is constant
-      _rhsMatrices[jacobianXBloc11_] =
-          std::make_shared<siconos::algebra::SiconosMatrix>(-1 * *_C);
-    algebra::solveInPlace(*_inverseMass, *_rhsMatrices[jacobianXBloc11_]);
+      rhsMatrices_[jacobianXBloc11_] =
+          std::make_shared<siconos::algebra::SiconosMatrix>(-1 * *dampingMatrix_view_);
+    LUMass_->solve(*rhsMatrices_[jacobianXBloc11_]);
   } else
-    _rhsMatrices[jacobianXBloc11_] = _rhsMatrices[zeroMatrix_];
+    rhsMatrices_[jacobianXBloc11_] = rhsMatrices_[zeroMatrix_];
 
-  if (_C || _K)
+  if (dampingMatrix_view_ || stiffnessMatrix_view_)
     _jacxRhs = std::make_shared<siconos::algebra::BlockMatrix>(
-        _rhsMatrices[zeroMatrix_], _rhsMatrices[idMatrix_], _rhsMatrices[jacobianXBloc10_],
-        _rhsMatrices[jacobianXBloc11_]);
+        rhsMatrices_[zeroMatrix_], rhsMatrices_[idMatrix_], rhsMatrices_[jacobianXBloc10_],
+        rhsMatrices_[jacobianXBloc11_]);
 }
 
-void siconos::modeling::LagrangianLinearTIDS::setK(const Matrix &newValue) {
-  if (newValue.size(0) != ndof_ || newValue.size(1) != ndof_)
-    THROW_EXCEPTION("LagrangianLinearTIDS - setK: inconsistent input matrix size ");
-
-  if (!_K)
-    _K = std::make_shared<Matrix>(newValue);
-  else
-    *_K = newValue;
+void siconos::modeling::LagrangianLinearTIDS::setStiffnessMatrix(
+    Eigen::Ref<siconos::algebra::SiconosMatrix> newValue) {
+  assert(newValue.rows() == newValue.cols() == ndof_);
+  stiffnessMatrix_view_ = std::make_shared<siconos::algebra::MapType>(
+      newValue.data(), newValue.rows(), newValue.cols());
+  hasFint_ = true;
 }
 
-void siconos::modeling::LagrangianLinearTIDS::setKPtr(std::shared_ptr<Matrix> newPtr) {
-  if (newPtr->size(0) != ndof_ || newPtr->size(1) != ndof_)
-    THROW_EXCEPTION("LagrangianLinearTIDS - setKPtr: inconsistent input matrix size ");
-  _K = newPtr;
-}
-
-void siconos::modeling::LagrangianLinearTIDS::setC(const Matrix &newValue) {
-  if (newValue.size(0) != ndof_ || newValue.size(1) != ndof_)
-    THROW_EXCEPTION("LagrangianLinearTIDS - setC: inconsistent input matrix size ");
-
-  if (!_C)
-    _C = std::make_shared<Matrix>(newValue);
-  else
-    *_C = newValue;
-}
-
-void siconos::modeling::LagrangianLinearTIDS::setCPtr(std::shared_ptr<Matrix> newPtr) {
-  if (newPtr->size(0) != ndof_ || newPtr->size(1) != ndof_)
-    THROW_EXCEPTION("LagrangianLinearTIDS - setCPtr: inconsistent input matrix size ");
-
-  _C = newPtr;
+void siconos::modeling::LagrangianLinearTIDS::setDampingMatrix(
+    Eigen::Ref<siconos::algebra::SiconosMatrix> newValue) {
+  assert(newValue.rows() == newValue.cols() == ndof_);
+  dampingMatrix_view_ = std::make_shared<siconos::algebra::MapType>(
+      newValue.data(), newValue.rows(), newValue.cols());
+  hasFint_ = true;
 }
 
 void siconos::modeling::LagrangianLinearTIDS::display(bool brief) const {
-  LagrangianDS::display();
+  LagrangianDS::display(brief);
   std::cout << "===== Lagrangian Linear Time Invariant System display ===== " << std::endl;
-  std::cout << "- Mass Matrix M : " << std::endl;
-  if (mass_view_)
-    std::cout << *mass_view_ << "\n";
-  else
-    std::cout << "-> nullptr" << std::endl;
+
   std::cout << "- Stiffness Matrix K : " << std::endl;
-  if (_K)
-    _K->display();
+  if (stiffnessMatrix_view_)
+    std::cout << *stiffnessMatrix_view_ << "\n";
   else
     std::cout << "-> nullptr" << std::endl;
   std::cout << "- Viscosity Matrix C : " << std::endl;
-  if (_C)
-    _C->display();
+  if (dampingMatrix_view_)
+    std::cout << *dampingMatrix_view_ << "\n";
   else
     std::cout << "-> nullptr" << std::endl;
   std::cout << "=========================================================== " << std::endl;
 }
 
-void siconos::modeling::LagrangianLinearTIDS::computeForces(
-    double time, std::shared_ptr<siconos::algebra::SiconosVector> q2,
-    std::shared_ptr<siconos::algebra::SiconosVector> v2) {
-  DEBUG_PRINT(
-      "siconos::modeling::LagrangianLinearTIDS::computeForces(double time, "
-      "std::shared_ptr<siconos::algebra::SiconosVector> q2, "
-      "std::shared_ptr<siconos::algebra::SiconosVector> v2) \n");
-  if (!_forces) {
-    _forces = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
+void siconos::modeling::LagrangianLinearTIDS::computeTotalForces(
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& velocity,
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& q, double time) {
+  DEBUG_PRINT("siconos::modeling::LagrangianLinearTIDS::computeTotalForces(v,q,t) \n");
+  if (hasFint_ or hasFext_) {  // hasFint_ = true if K or C
+    if (!totalForces_) {
+      totalForces_ = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
+      totalForces_->setZero();
+    } else
+      totalForces_->zero();
   } else
-    _forces->zero();
+    return;
 
   if (fext_view_) {
     computeFext(time);
-    *_forces += *fext_view_;
+    *totalForces_ += *fext_view_;
   }
-  if (_K) *_forces -= siconos::algebra::prod(*_K, *q2);
-  if (_C) *_forces -= siconos::algebra::prod(*_C, *v2);
+
+  if (stiffnessMatrix_view_) *totalForces_ -= *stiffnessMatrix_view_ * q;
+  if (dampingMatrix_view_) *totalForces_ -= *dampingMatrix_view_ * velocity;
 }

@@ -34,7 +34,7 @@ def test_LagrangianLinearTIDS():
     mg = np.zeros_like(q0)
     mg[...] = 10.1
     ball.setConstantFext(mg)
-    ball.computeForces(3., q0, v0)
+    ball.computeTotalForces(v0, q0, 3.)
 
 
 def test_NewtonImpactNSL():

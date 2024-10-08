@@ -23,16 +23,13 @@
 #ifndef SimulationGraphs_H
 #define SimulationGraphs_H
 
-#include "SiconosMatrix.hpp"
-#include "SiconosVector.hpp"
-#include "SiconosMatrix.hpp"
 #include "BlockVector.hpp"
 #include "SiconosGraph.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosProperties.hpp"
+#include "SiconosVector.hpp"
 
-namespace siconos::algebra {
-
-}  // namespace siconos::algebra
+namespace siconos::algebra {}  // namespace siconos::algebra
 
 namespace siconos::plugins {
 class PluggedObject;
@@ -137,11 +134,14 @@ struct DynamicalSystemProperties {
       nullptr}; /**< Mostly for Lagrangian system.*/
   std::shared_ptr<siconos::integrators::OneStepIntegrator> osi{
       nullptr}; /**< Integrator used for the given DynamicalSystem */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> W{nullptr}; /**< Matrix for integration */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> WBoundaryConditions{
+  std::shared_ptr<siconos::algebra::SiconosMatrix> iterationMatrix{
+      nullptr}; /**< Matrix for integration */
+  std::shared_ptr<siconos::algebra::SiconosMatrix> iterationMatrixBoundaryConditions{
       nullptr}; /**< Matrix for integration of boundary conditions*/
-  std::shared_ptr<siconos::algebra::SiconosMatrix> Winverse{
-      nullptr};                      /**< Matrix for integration */
+  std::shared_ptr<siconos::algebra::SiconosMatrix> iterationMatrixInverse{
+      nullptr}; /**< Matrix for integration */
+  std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>> LUW{
+      nullptr};                      /**< LU factorisation of W */
   unsigned int absolute_position{0}; /**< Absolute position of the ds variables in the unknown
                                      vector in osnsp*/
   //  std::shared_ptr<siconos::algebra::SiconosMemory> _xMemory            /**< old value of x,
@@ -234,8 +234,9 @@ struct DynamicalSystemsGraph : public _DynamicalSystemsGraph {
 struct InteractionsGraph : public _InteractionsGraph {
   /** optional properties : memory is allocated only on first access */
   INSTALL_GRAPH_PROPERTIES(
-      Interactions, ((siconos::graphs::Vertex, std::shared_ptr<siconos::algebra::SiconosMatrix>,
-                      blockProj))  // ProjectOnConstraint
+      Interactions,
+      ((siconos::graphs::Vertex, std::shared_ptr<siconos::algebra::SiconosMatrix>,
+        blockProj))  // ProjectOnConstraint
       ((siconos::graphs::Edge, std::shared_ptr<siconos::algebra::SiconosMatrix>,
         upper_blockProj))  // idem
       ((siconos::graphs::Edge, std::shared_ptr<siconos::algebra::SiconosMatrix>,

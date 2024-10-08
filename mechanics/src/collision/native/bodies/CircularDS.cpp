@@ -21,22 +21,19 @@
 #include "SiconosVector.hpp"
 
 siconos::collision::native::bodies::CircularDS::CircularDS(
-    double r, double m, std::shared_ptr<siconos::algebra::SiconosVector> qinit,
-    std::shared_ptr<siconos::algebra::SiconosVector> vinit)
-    : siconos::modeling::LagrangianDS{qinit, vinit}, radius{r}, massValue{m}
-{
+    double r, double m, Eigen::Ref<siconos::algebra::SiconosVector> qinit,
+    Eigen::Ref<siconos::algebra::SiconosVector> vinit)
+    : siconos::modeling::LagrangianDS{qinit, vinit}, radius_{r}, massValue_{m} {
   ndof_ = 3;
   // Nothing is done regarding the mass matrix ...
 }
 
-double siconos::collision::native::bodies::CircularDS::getQ(unsigned int pos)
-{
+double siconos::collision::native::bodies::CircularDS::getQ(unsigned int pos) {
   assert(pos < ndof_);
-  return (*_q[0])(pos);
+  return (*state_q_[0])(pos);
 };
 
-double siconos::collision::native::bodies::CircularDS::getVelocity(unsigned int pos)
-{
+double siconos::collision::native::bodies::CircularDS::getVelocity(unsigned int pos) {
   assert(pos < ndof_);
-  return (*_q[1])(pos);
+  return (*state_q_[1])(pos);
 };

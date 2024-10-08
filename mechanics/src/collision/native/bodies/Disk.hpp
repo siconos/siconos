@@ -33,18 +33,16 @@ class Disk : public CircularDS, public std::enable_shared_from_this<Disk> {
  private:
   ACCEPT_SERIALIZATION(Disk);
 
-
  public:
-  /** Constructor
+  /** constructor from initial state and velocity
    *
-   *  \param radius
-   *  \param mass
-   *  \param position vector
-   *  \param velocity vector
+   *  \param R radius
+   *  \param m mass
+   *  \param position initial coordinates
+   *  \param velocity initial velocity
    */
-
-  Disk(double radius, double mass, std::shared_ptr<siconos::algebra::SiconosVector> position,
-       std::shared_ptr<siconos::algebra::SiconosVector> velocity);
+  Disk(double radius, double mass, Eigen::Ref<siconos::algebra::SiconosVector> position,
+       Eigen::Ref<siconos::algebra::SiconosVector> velocity);
 
   /** destructor
    */

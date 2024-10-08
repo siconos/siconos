@@ -114,8 +114,8 @@ Example of usage:
 %ignore swap;
 
 %warnfilter(509) quaternionRotate;
-%warnfilter(509) changeFrameAbsToBody;
-%warnfilter(509) changeFrameBodyToAbs;
+%warnfilter(509) rewriteVectorFromAbsoluteToBodyFrame;
+%warnfilter(509) rewriteVectorFromBodyToAbsoluteFrame;
 %warnfilter(325) Change;
 %warnfilter(325) ChangeLogIter;
 

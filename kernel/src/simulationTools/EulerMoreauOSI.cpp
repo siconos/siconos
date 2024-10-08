@@ -27,11 +27,11 @@
 #include "Interaction.hpp"
 #include "NonSmoothLaw.hpp"
 #include "OneStepNSProblem.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixOp.hpp"        // for scal
 #include "SiconosMatrixVectorOp.hpp"  // for prod and subprod
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"  // for scal
-#include "SiconosMatrix.hpp"
 #include "Simulation.hpp"
 #include "Topology.hpp"
 // #define DEBUG_NOCOLOR
@@ -51,42 +51,14 @@ siconos::integrators::EulerMoreauOSI::EulerMoreauOSI(double theta, double gamma)
       _gamma{gamma},
       _useGamma{true} {}
 
-const siconos::algebra::SiconosMatrix siconos::integrators::EulerMoreauOSI::getW(
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
-  assert(ds && "siconos::integrators::EulerMoreauOSI::getW(ds): ds == nullptr.");
-  assert(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W &&
-         "siconos::integrators::EulerMoreauOSI::getW(ds): W[ds] == nullptr.");
-  return *(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds))
-               .W);  // Copy !!
-}
-
-std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::integrators::EulerMoreauOSI::W(
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
-  assert(ds && "siconos::integrators::EulerMoreauOSI::W(ds): ds == nullptr.");
-  return _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W;
-}
-
-const siconos::algebra::SiconosMatrix
-siconos::integrators::EulerMoreauOSI::getWBoundaryConditions(
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
-  assert(ds &&
-         "siconos::integrators::EulerMoreauOSI::getWBoundaryConditions(ds): ds == nullptr.");
-  //    return *(WBoundaryConditionsMap[0]);
-  assert(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds))
-             .WBoundaryConditions &&
-         "siconos::integrators::EulerMoreauOSI::getWBoundaryConditions(ds): "
-         "WBoundaryConditions[ds] == nullptr.");
-  return *(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds))
-               .WBoundaryConditions);  // Copy !!
-}
-
 std::shared_ptr<siconos::algebra::SiconosMatrix>
-siconos::integrators::EulerMoreauOSI::WBoundaryConditions(
+siconos::integrators::EulerMoreauOSI::IterationMatrixBoundaryConditions(
     std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
   assert(ds &&
-         "siconos::integrators::EulerMoreauOSI::WBoundaryConditions(ds): ds == nullptr.");
+         "siconos::integrators::EulerMoreauOSI::IterationMatrixBoundaryConditions(ds): ds == "
+         "nullptr.");
   return _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds))
-      .WBoundaryConditions;
+      .iterationMatrixBoundaryConditions;
 }
 
 void siconos::integrators::EulerMoreauOSI::initializeWorkVectorsForDS(
@@ -99,7 +71,7 @@ void siconos::integrators::EulerMoreauOSI::initializeWorkVectorsForDS(
   assert(fods);
 
   // Compute W (iteration matrix)
-  initializeIterationMatrixW(t, ds);
+  initializeIterationMatrix(t, ds);
 
   // buffers allocation (into the graph)
   ds_work_vectors[siconos::integrators::EulerMoreauOSI::RESIDU] =
@@ -272,161 +244,175 @@ void siconos::integrators::EulerMoreauOSI::initializeWorkVectorsForInteraction(
   }
 }
 
-void siconos::integrators::EulerMoreauOSI::initializeIterationMatrixW(
+void siconos::integrators::EulerMoreauOSI::initializeIterationMatrix(
     double time, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
   // This function:
   // - allocate memory for the matrix W
   // - update its content for the current (initial) state of the dynamical system, depending on
   // its type.
-
-  if (!ds)
-    THROW_EXCEPTION(
-        "siconos::integrators::EulerMoreauOSI::initializeIterationMatrixW(t,ds) - ds == "
-        "nullptr");
-
+  assert(ds);
   if (!(checkOSI(_dynamicalSystemsGraph->descriptor(ds))))
     THROW_EXCEPTION(
-        "siconos::integrators::EulerMoreauOSI::initializeIterationMatrixW(t,ds) - ds does not "
+        "siconos::integrators::EulerMoreauOSI::initializeIterationMatrix(t,ds) - ds does not "
         "belong to the OSI.");
 
   const auto& dsv = _dynamicalSystemsGraph->descriptor(ds);
 
-  if (_dynamicalSystemsGraph->properties(dsv).W)
-    THROW_EXCEPTION(
-        "siconos::integrators::EulerMoreauOSI::initializeIterationMatrixW(t,ds) - W(ds) is "
-        "already in the map and has been initialized.");
+  assert(!_dynamicalSystemsGraph->properties(dsv).iterationMatrix);
 
-  unsigned int sizeW = ds->dimension();  // n for first order systems, ndof for lagrangian.
+  double timeStep = _simulation->timeStep();
+
   // Memory allocation for W
-  double h = _simulation->timeStep();
+  _dynamicalSystemsGraph->properties(dsv).iterationMatrix =
+      std::make_shared<siconos::algebra::SiconosMatrix>(ds->dimension(), ds->dimension());
 
-  // 1 - All 'First order' systems
-  if (auto d = std::dynamic_pointer_cast<siconos::modeling::FirstOrderNonLinearDS>(ds)) {
+  // Linear time-invariant system: W constant
+  if (auto fods = std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearTIDS>(ds)) {
+    if (fods->M())
+      *_dynamicalSystemsGraph->properties(dsv).iterationMatrix = *fods->M();
+    else
+      _dynamicalSystemsGraph->properties(dsv).iterationMatrix->setIdentity();
+
+    if (fods->A())
+      *_dynamicalSystemsGraph->properties(dsv).iterationMatrix -=
+          _simulation->timeStep() * _theta * *fods->A();
+
+    //  if (_useGamma)
+    {
+      siconos::graphs::DynamicalSystemsGraph::OEIterator oei, oeiend;
+      std::shared_ptr<siconos::algebra::SiconosMatrix> K;
+      std::shared_ptr<siconos::modeling::Interaction> inter;
+      for (std::tie(oei, oeiend) = _dynamicalSystemsGraph->out_edges(dsv); oei != oeiend;
+           ++oei) {
+        inter = _dynamicalSystemsGraph->bundle(*oei);
+        auto& relationMat = inter->relationMatrices();
+        //      ivd = indexSet.descriptor(inter);
+        auto& rel = static_cast<siconos::modeling::FirstOrderR&>(*inter->relation());
+        K = rel.K();
+        if (!K) K = relationMat[siconos::modeling::FirstOrderR::mat_K];
+        if (K) {
+          *_dynamicalSystemsGraph->properties(dsv).iterationMatrix -=
+              _simulation->timeStep() * _gamma * *K;
+        }
+      }
+    }
+
+    // LU Factorisation
+    _dynamicalSystemsGraph->properties(dsv).LUW =
+        std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(
+            *_dynamicalSystemsGraph->properties(dsv).iterationMatrix);
+
+  }
+  // In all other cases, we use computeIterationMatrix
+  else if (auto d = std::dynamic_pointer_cast<siconos::modeling::FirstOrderNonLinearDS>(ds)) {
     // W =  M - h*_theta* [jacobian_x f(t,x,z)]
+    computeIterationMatrix(time, *ds, dsv,
+                           *_dynamicalSystemsGraph->properties(dsv).iterationMatrix);
 
-    // Memory allocation for W property of the graph
-    if (d->M())  // W = M
-    {
-      d->computeM(time);
-      _dynamicalSystemsGraph->properties(dsv).W =
-          std::make_shared<siconos::algebra::SiconosMatrix>(*d->M());
-    } else  // W = I
-    {
-      _dynamicalSystemsGraph->properties(dsv).W =
-          std::make_shared<siconos::algebra::SiconosMatrix>(sizeW, sizeW);
-      _dynamicalSystemsGraph->properties(dsv).W->eye();
-    }
-
-    auto W = _dynamicalSystemsGraph->properties(dsv).W;
-    // Add -h*_theta*jacobian_XF to W
-    if (d->jacobianfx()) {
-      d->computeJacobianfx(time, ds->x());
-      siconos::algebra::scal(-h * _theta, *d->jacobianfx(), *W, false);
-    }
   } else
     THROW_EXCEPTION(
-        "siconos::integrators::EulerMoreauOSI::initializeIterationMatrixW implemented only "
+        "siconos::integrators::EulerMoreauOSI::initializeIterationMatrix implemented only "
         "for FirstOrderNonLinearDS (and heirs)\n");
-
-  // Remark: W is not LU-factorized nor inversed here.
-  // Function PLUForwardBackward will do that if required.
 }
 
-void siconos::integrators::EulerMoreauOSI::initializeIterationMatrixWBoundaryConditions(
+void siconos::integrators::EulerMoreauOSI::initializeIterationMatrixBoundaryConditions(
     std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
   // This function:
-  // - allocate memory for a matrix WBoundaryConditions
-  // - insert this matrix into WBoundaryConditionsMap with ds as a key
+  // - allocate memory for a matrix IterationMatrixBoundaryConditions
+  // - insert this matrix into IterationMatrixBoundaryConditionsMap with ds as a key
 
   if (!ds)
     THROW_EXCEPTION(
-        "siconos::integrators::EulerMoreauOSI::initializeIterationMatrixWBoundaryConditions(t,"
+        "siconos::integrators::EulerMoreauOSI::initializeIterationMatrixBoundaryConditions("
+        "t,"
         "ds) - ds == nullptr");
 
   if (!(checkOSI(_dynamicalSystemsGraph->descriptor(ds))))
     THROW_EXCEPTION(
-        "siconos::integrators::EulerMoreauOSI::initializeIterationMatrixW(t,ds) - ds does not "
+        "siconos::integrators::EulerMoreauOSI::initializeIterationMatrix(t,ds) - ds does "
+        "not "
         "belong to the OSI.");
 
   THROW_EXCEPTION(
-      "siconos::integrators::EulerMoreauOSI::initializeIterationMatrixWBoundaryConditions - "
+      "siconos::integrators::EulerMoreauOSI::initializeIterationMatrixBoundaryConditions - "
       "not yet implemented.");
 }
 
-void siconos::integrators::EulerMoreauOSI::computeWBoundaryConditions(
+void siconos::integrators::EulerMoreauOSI::computeIterationMatrixBoundaryConditions(
     std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
-  // Compute WBoundaryConditions matrix of the Dynamical System ds, at
+  // Compute IterationMatrixBoundaryConditions matrix of the Dynamical System ds, at
   // time t and for the current ds state.
 
-  // When this function is called, WBoundaryConditionsMap[ds] is
+  // When this function is called, IterationMatrixBoundaryConditionsMap[ds] is
   // supposed to exist and not to be null Memory allocation has been
-  // done during initializeIterationMatrixWBoundaryConditions.
+  // done during initializeIterationMatrixBoundaryConditions.
 
   assert(ds &&
-         "siconos::integrators::EulerMoreauOSI::computeWBoundaryConditions(t,ds) - ds == "
+         "siconos::integrators::EulerMoreauOSI::computeIterationMatrixBoundaryConditions(t,ds)"
+         " - ds == "
          "nullptr");
 
   // unsigned int dsN = ds->number();
   THROW_EXCEPTION(
-      "siconos::integrators::EulerMoreauOSI::computeWBoundaryConditions - not yet "
+      "siconos::integrators::EulerMoreauOSI::computeIterationMatrixBoundaryConditions - not "
+      "yet "
       "implemented.");
 }
 
-void siconos::integrators::EulerMoreauOSI::computeW(
+void siconos::integrators::EulerMoreauOSI::computeIterationMatrix(
     double time, siconos::modeling::DynamicalSystem& ds,
-    siconos::graphs::DynamicalSystemsGraph::VDescriptor& dsv,
-    siconos::algebra::SiconosMatrix& W) {
-  DEBUG_BEGIN("siconos::integrators::EulerMoreauOSI::computeW(...)\n");
+    const siconos::graphs::DynamicalSystemsGraph::VDescriptor& dsv,
+    siconos::algebra::SiconosMatrix& iterationMatrix) {
+  DEBUG_BEGIN("siconos::integrators::EulerMoreauOSI::computeIterationMatrix(...)\n");
   // Compute W matrix of the Dynamical System ds, at time t and for the current ds state.
 
-  // When this function is called, W is supposed to exist and not to be null
-  // Memory allocation has been done during initializeIterationMatrixW.
+  // When this function is called, we assume that memory has been allocated for iterationMatrix
+  // (call to initializeIterationMatrix)
 
   auto h = _simulation->timeStep();
 
-  // 1 - First order linear systems
-  if (auto fods = dynamic_cast<siconos::modeling::FirstOrderLinearDS*>(&ds)) {
-    if (not dynamic_cast<siconos::modeling::FirstOrderLinearTIDS*>(&ds)) {
-      fods->computeA(time);
+  // 1 - First order linear systems, W constant, nothing to be done
+  if (dynamic_cast<siconos::modeling::FirstOrderLinearTIDS*>(&ds))
+    return;
+
+  else if (auto fods = dynamic_cast<siconos::modeling::FirstOrderLinearDS*>(&ds)) {
+    if (fods->M()) {
       fods->computeM(time);
+      iterationMatrix = *fods->M();
+    } else
+      iterationMatrix.setIdentity();
+
+    if (fods->A()) {
+      fods->computeA(time);
+      iterationMatrix -= h * _theta * *fods->A();
     }
-
-    if (fods->M())
-      W = *fods->M();
-    else
-      W.eye();
-
-    if (fods->A()) siconos::algebra::scal(-h * _theta, *fods->A(), W, false);
   }
   // 2 - First order non linear systems
-  else if (auto d = dynamic_cast<siconos::modeling::FirstOrderNonLinearDS*>(&ds)) {
+  else if (auto fonds = dynamic_cast<siconos::modeling::FirstOrderNonLinearDS*>(&ds)) {
     // W =  M - h*_theta* [jacobian_x f(t,x,z)]
     // Copy M or I if M is Null into W
-    if (d->M()) {
-      d->computeM(time);
-      W = *d->M();
+    if (fonds->M()) {
+      fonds->computeM(time);
+      iterationMatrix = *fonds->M();
     } else
-      W.eye();
+      iterationMatrix.eye();
 
-    if (d->jacobianfx()) {
-      d->computeJacobianfx(time, d->x());
+    if (fonds->jacobianfx()) {
+      fonds->computeJacobianfx(time, fonds->x());
       // Add -h*_theta*jacobianfx to W
-      siconos::algebra::scal(-h * _theta, *d->jacobianfx(), W, false);
+      iterationMatrix -= h * _theta * *fonds->jacobianfx();
     }
 
     DEBUG_EXPR(W.display(););
   } else
     THROW_EXCEPTION(
-        "siconos::integrators::EulerMoreauOSI::computeW - only implemented for first order "
+        "siconos::integrators::EulerMoreauOSI::computeIterationMatrix - only implemented for "
+        "first order "
         "dynamical systems");
 
   //  if (_useGamma)
   {
-    //    InteractionsGraph& indexSet =
-    //    *_simulation->nonSmoothDynamicalSystem()->topology()->indexSet(0);
-
     siconos::graphs::DynamicalSystemsGraph::OEIterator oei, oeiend;
-    //    siconos::graphs::InteractionsGraph::VDescriptor ivd;
     std::shared_ptr<siconos::algebra::SiconosMatrix> K;
     std::shared_ptr<siconos::modeling::Interaction> inter;
     for (std::tie(oei, oeiend) = _dynamicalSystemsGraph->out_edges(dsv); oei != oeiend;
@@ -438,14 +424,17 @@ void siconos::integrators::EulerMoreauOSI::computeW(
       K = rel.K();
       if (!K) K = relationMat[siconos::modeling::FirstOrderR::mat_K];
       if (K) {
-        siconos::algebra::scal(-h * _gamma, *K, W, false);
+        iterationMatrix -= h * _gamma * *K;
       }
     }
   }
-  // Remark: W is not LU-factorized here.
-  // Function PLUForwardBackward will do that if required.
+  // LU Factorisation
+  _dynamicalSystemsGraph->properties(dsv).LUW =
+      std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(
+          *_dynamicalSystemsGraph->properties(dsv).iterationMatrix);
+
   DEBUG_EXPR(W.display());
-  DEBUG_END("siconos::integrators::EulerMoreauOSI::computeW(...)\n");
+  DEBUG_END("siconos::integrators::EulerMoreauOSI::computeIterationMatrix(...)\n");
 }
 
 void siconos::integrators::EulerMoreauOSI::computeKhat(
@@ -465,8 +454,8 @@ void siconos::integrators::EulerMoreauOSI::computeKhat(
 double siconos::integrators::EulerMoreauOSI::computeResidu() {
   DEBUG_BEGIN("siconos::integrators::EulerMoreauOSI::computeResidu()\n");
   // This function is used to compute the residu for each "EulerMoreauOSI-discretized"
-  // dynamical system. It then computes the norm of each of them and finally return the maximum
-  // value for those norms.
+  // dynamical system. It then computes the norm of each of them and finally return the
+  // maximum value for those norms.
   //
   // The state values used are those saved in the DS, ie the last computed ones.
   //  $\mathcal R(x,r) = x - x_{k} -h\theta f( x , t_{k+1}) - h(1-\theta)f(x_k,t_k) - h r$
@@ -540,8 +529,8 @@ double siconos::integrators::EulerMoreauOSI::computeResidu() {
     else if (auto fonlds =
                  std::dynamic_pointer_cast<siconos::modeling::FirstOrderNonLinearDS>(ds)) {
       // ResiduFree = M(x_k,i+1 - x_i) - h*theta*f(t,x_k,i+1) - h*(1-theta)*f(ti,xi)
-      //  $\mathcal R(x,r) = M(x - x_{k}) -h\theta f( x , t_{k+1}) - h(1-\theta)f(x_k,t_k) - h
-      //  r$
+      //  $\mathcal R(x,r) = M(x - x_{k}) -h\theta f( x , t_{k+1}) - h(1-\theta)f(x_k,t_k) -
+      //  h r$
       //  $\mathcal R_{free}(x,r) = M(x - x_{k}) -h\theta f( x , t_{k+1}) -
       //  h(1-\theta)f(x_k,t_k) $
 
@@ -675,8 +664,7 @@ void siconos::integrators::EulerMoreauOSI::computeFreeState() {
 
     auto& ds_work_vectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
 
-    auto& W = *_dynamicalSystemsGraph->properties(*dsi)
-                   .W;  // Its W EulerMoreauOSI matrix of iteration.
+    auto& W = *_dynamicalSystemsGraph->properties(*dsi).iterationMatrix;
 
     // 1 - First Order Non Linear Systems
     if (auto d = std::dynamic_pointer_cast<siconos::modeling::FirstOrderNonLinearDS>(ds)) {
@@ -707,7 +695,7 @@ void siconos::integrators::EulerMoreauOSI::computeFreeState() {
 
       // At this point xfree = (ResiduFree - h(1-gamma)*rold)
       // -> Solve WX = xfree and set xfree = X
-      siconos::algebra::solveInPlace(W, xfree);
+      _dynamicalSystemsGraph->properties(*dsi).LUW->solve(xfree);
 
       // at this point, xfree = W^{-1} (ResiduFree - h(1-gamma)*rold)
       // -> compute real xfree = x - W^{-1} (ResiduFree - h(1-gamma)*rold)
@@ -729,8 +717,8 @@ void siconos::integrators::EulerMoreauOSI::computeFreeState() {
 
       // -> Solve WX = g(x, \lambda, t_{k+1}) - B_{k+1}^{\alpha} \lambda - K_{k+1}^{\alpha} x
       // and set xPartialNS = X
-      siconos::algebra::solveInPlace(W, xPartialNS);
-      siconos::algebra::scal(h, xPartialNS, xPartialNS);
+      _dynamicalSystemsGraph->properties(*dsi).LUW->solve(xPartialNS);
+      xPartialNS *= h;
 
       // compute real xPartialNS = xfree + ...
       xPartialNS += xfree;
@@ -751,7 +739,8 @@ void siconos::integrators::EulerMoreauOSI::computeFreeState() {
       if (_useGammaForRelation) {
         if (not(std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(ds))) {
           THROW_EXCEPTION(
-              "siconos::integrators::EulerMoreauOSI::computeFreeState - _useGammaForRelation "
+              "siconos::integrators::EulerMoreauOSI::computeFreeState - "
+              "_useGammaForRelation "
               "== true is only implemented for FirstOrderLinearDS or FirstOrderLinearTIDS");
         }
         deltaxForRelation = xfree;
@@ -783,8 +772,8 @@ void siconos::integrators::EulerMoreauOSI::prepareNewtonIteration(double time) {
     if (!checkOSI(dsi)) continue;
     auto ds = _dynamicalSystemsGraph->bundle(*dsi);
     auto dsv = _dynamicalSystemsGraph->descriptor(ds);
-    auto W = _dynamicalSystemsGraph->properties(*dsi).W;
-    computeW(time, *ds, dsv, *W);
+    auto W = _dynamicalSystemsGraph->properties(*dsi).iterationMatrix;
+    computeIterationMatrix(time, *ds, dsv, *W);
   }
 
   if (!_explicitJacobiansOfRelation) {
@@ -842,7 +831,8 @@ void siconos::integrators::EulerMoreauOSI::prepareNewtonIteration(double time) {
 /// @cond
 
 // Visitor is not required for EulerMoreauOSI ?
-// struct siconos::integrators::EulerMoreauOSI::_NSLEffectOnFreeOutput : public SiconosVisitor
+// struct siconos::integrators::EulerMoreauOSI::_NSLEffectOnFreeOutput : public
+// SiconosVisitor
 // {
 //   using SiconosVisitor::visit;
 
@@ -1073,7 +1063,7 @@ void siconos::integrators::EulerMoreauOSI::updateState(const unsigned int) {
     // Get the DS type
     auto& ds_work_vectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
 
-    auto& W = *_dynamicalSystemsGraph->properties(*dsi).W;
+    auto& W = *_dynamicalSystemsGraph->properties(*dsi).iterationMatrix;
 
     if (auto d = std::dynamic_pointer_cast<siconos::modeling::FirstOrderNonLinearDS>(ds)) {
       auto& x = *ds->x();
@@ -1100,7 +1090,7 @@ void siconos::integrators::EulerMoreauOSI::updateState(const unsigned int) {
         siconos::algebra::scal(h, *d->r(), x);  // x = h*r
       }
 
-      siconos::algebra::solveInPlace(W, x); // x = h* W^{-1} *r
+      _dynamicalSystemsGraph->properties(*dsi).LUW->solve(x);  // x = h* W^{-1} *r
 
       x += *ds_work_vectors[siconos::integrators::EulerMoreauOSI::FREE];  // x+=xfree
 
@@ -1134,8 +1124,8 @@ void siconos::integrators::EulerMoreauOSI::display() const {
     std::cout << "--------------------------------\n";
     std::cout << "--> W of dynamical system number " << ds->number() << ": "
               << "\n";
-    if (_dynamicalSystemsGraph->properties(*dsi).W)
-      _dynamicalSystemsGraph->properties(*dsi).W->display();
+    if (_dynamicalSystemsGraph->properties(*dsi).iterationMatrix)
+      _dynamicalSystemsGraph->properties(*dsi).iterationMatrix->display();
     else
       std::cout << "-> nullptr\n";
     std::cout << "--> and corresponding theta is: " << _theta << "\n";
@@ -1430,7 +1420,8 @@ double siconos::integrators::EulerMoreauOSI::computeResiduInput(
     auto& residuR = *inter_work[siconos::integrators::EulerMoreauOSI::VEC_RESIDU_R];
     // Residu_r = r_alpha_k+1 - g_alpha;
     residuR = *(DSlink[siconos::modeling::FirstOrderR::r]->toSiconosVector());
-    residuR -= *inter_work_block[siconos::integrators::EulerMoreauOSI::G_ALPHA]->toSiconosVector();
+    residuR -=
+        *inter_work_block[siconos::integrators::EulerMoreauOSI::G_ALPHA]->toSiconosVector();
     DEBUG_EXPR(residuR.display(););
     residu = std::max(residu, residuR.norm2());
   }

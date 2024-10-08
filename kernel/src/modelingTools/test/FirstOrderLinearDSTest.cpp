@@ -56,7 +56,7 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS0() {
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS0 : ", ds->n() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS0 : ", ds->x0() == x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS0 : ", ds->M() == nullptr, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS0 : ", ds->invM() == nullptr, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS0 : ", ds->LU_M() == nullptr, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS0 : ", ds->b() == nullptr, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS0 : ", ds->A() == nullptr, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS0 : ", ds->f() == nullptr, true);
@@ -96,7 +96,7 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS1() {
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", ds->n() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", ds->x0() == x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", ds->M() == nullptr, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", ds->invM() == nullptr, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", ds->LU_M() == nullptr, true);
 
   auto x01 = std::make_shared<siconos::algebra::SiconosVector>(3);
   (*x01)(0) = 0.;

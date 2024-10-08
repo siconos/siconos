@@ -195,12 +195,10 @@ void Disks::init(std::string disks_input) {
     for (unsigned int i = 0; i < Disks->size(0); i++) {
       R = Disks->getValue(i, 2);
       m = Disks->getValue(i, 3);
-
-      auto qTmp = std::make_shared<siconos::algebra::SiconosVector>(NDOF);
-      auto vTmp = std::make_shared<siconos::algebra::SiconosVector>(NDOF);
-      vTmp->zero();
-      (*qTmp)(0) = (*Disks)(i, 0);
-      (*qTmp)(1) = (*Disks)(i, 1);
+      siconos::algebra::SiconosVector qTmp{NDOF}, vTmp{NDOF};
+      vTmp.setZero();
+      qTmp(0) = (*Disks)(i, 0);
+      qTmp(1) = (*Disks)(i, 1);
 
       std::shared_ptr<siconos::modeling::LagrangianDS> body{nullptr};
       if (R > 0)

@@ -22,7 +22,7 @@
 
 #include "NewtonEulerDS.hpp"
 #include "NewtonEulerJointR.hpp"
-#include "RotationQuaternion.hpp"  // For changeFrameBodyToAbs
+#include "RotationQuaternion.hpp"  // For rewriteVectorFromBodyToAbsoluteFrame
 #include "SiconosVectorOp.hpp"     // For cross_product
 #include "SimpleMatrix.hpp"
 #include "op3x3.h"  // For orthoBaseFromVector
@@ -66,7 +66,7 @@ void siconos::mechanisms::MBTB_JointR::computeEquivalentForces() {
   ML_G.setValue(2, Blambda->getValue(5));
   auto spML_G_abs = std::make_shared<siconos::algebra::SiconosVector>(3);
   *spML_G_abs = ML_G;
-  siconos::geometry::changeFrameBodyToAbs(*_ds1->q(), *spML_G_abs);
+  siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(*_ds1->q(), *spML_G_abs);
   ML_G_abs = *spML_G_abs;
 #ifdef MBTB_JOINTR_DEBUG
   printf("siconos::mechanisms::MBTB_JointR::computeEquivalentForces Blambda\n");
@@ -190,7 +190,8 @@ void siconos::mechanisms::MBTB_JointR::computeEquivalentForces() {
 
   /*Solve the system.*/
   try {
-    algebra::solveInPlace(*_M, *_F);
+    auto luM = std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(*_M);
+    luM->solve(*_F);
 #ifdef MBTB_JOINTR_DEBUG
     printf(
         "siconos::mechanisms::MBTB_JointR::computeEquivalentForces Forces "

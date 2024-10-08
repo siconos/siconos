@@ -236,9 +236,7 @@ void siconos::integrators::Hem5OSI::Hem5OSI_impl::fprob(
   // fill in xWork vector (ie all the x of the ds of this osi) with x
   hem5osi->fillqWork(NQ, q);
   hem5osi->fillvWork(NV, v);
-
   double t = *time;
-
   auto dsGraph = hem5osi->_dynamicalSystemsGraph;
 
   int ifcn = (int)(*IFCN);
@@ -250,10 +248,10 @@ void siconos::integrators::Hem5OSI::Hem5OSI_impl::fprob(
       auto ds = dsGraph->bundle(vi);
       if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
         if (lds->hasMass()) {
-          lds->computeMass(*lds->q(), t);
+          lds->computeMass(*lds->q());
           for (auto ii = pos; ii < ((unsigned int)(*NV) + pos); ii++) {
             for (auto jj = pos; jj < ((unsigned int)(*NV) + pos); jj++) {
-              AM[ii + jj * (int)(*NV)] = lds->mass()->getValue(ii, jj);
+              AM[ii + jj * (int)(*NV)] = lds->mass()(ii, jj);
             }
           }
         } else {
@@ -283,7 +281,7 @@ void siconos::integrators::Hem5OSI::Hem5OSI_impl::fprob(
       if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
         hem5osi->fillqWork(NQ, q);
         hem5osi->fillvWork(NV, v);
-        lds->computeForces((double)*time, lds->q(), lds->velocity());
+        lds->computeTotalForces(*lds->velocity(), *lds->q(), (double)*time);
       } else {
         THROW_EXCEPTION(
             "siconos::integrators::Hem5OSI::fprob(), Only integration of Lagrangian DS is "
@@ -320,7 +318,8 @@ void siconos::integrators::Hem5OSI::Hem5OSI_impl::fprob(
   if ((ifcn == 5) || (ifcn == 7))  // compute GPP ( Hessian of the constraints)
   {
     // THROW_EXCEPTION("siconos::integrators::Hem5OSI::fprob(), G_qq is not available");
-    std::cout << "siconos::integrators::Hem5OSI::fprob(), G_qq is not available " << "\n";
+    std::cout << "siconos::integrators::Hem5OSI::fprob(), G_qq is not available "
+              << "\n";
   }
 
   if ((ifcn == 3) || (ifcn == 6) ||
@@ -399,12 +398,12 @@ void siconos::integrators::Hem5OSI::initializeWorkVectorsForDS(
   if (!_forcesWork) _forcesWork = std::make_shared<siconos::algebra::BlockVector>();
 
   if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
-    lds->init_inverse_mass();  // invMass required to update post-impact velocity
+    lds->init_lu_mass();  // invMass required to update post-impact velocity
 
     _qWork->insertPtr(lds->q());
     _vWork->insertPtr(lds->velocity());
     _aWork->insertPtr(lds->acceleration());
-    _forcesWork->insertPtr(lds->forces());
+    _forcesWork->insertPtr(lds->totalForcesPtr());
     ds_work_vectors.resize(siconos::integrators::Hem5OSI::WORK_LENGTH);
     ds_work_vectors[siconos::integrators::Hem5OSI::FREE] =
         std::make_shared<siconos::algebra::SiconosVector>(lds->dimension());
@@ -704,20 +703,27 @@ void siconos::integrators::Hem5OSI::integrate(double& tinit, double& tend, doubl
   {
     std::cout << "siconos::integrators::Hem5OSI::integrate(...) failed - idid = " << _idid
               << "\n";
-    std::cout << " -1 means input is not consistent" << "\n";
-    std::cout << " -2 means larger NMAX needed." << "\n";
-    std::cout << " -3 means step size becomes too small." << "\n";
-    std::cout << " -4 means matrix is singular" << "\n";
-    std::cout << " -5 means initial projection: no convergence" << "\n";
+    std::cout << " -1 means input is not consistent"
+              << "\n";
+    std::cout << " -2 means larger NMAX needed."
+              << "\n";
+    std::cout << " -3 means step size becomes too small."
+              << "\n";
+    std::cout << " -4 means matrix is singular"
+              << "\n";
+    std::cout << " -5 means initial projection: no convergence"
+              << "\n";
     THROW_EXCEPTION("siconos::integrators::Hem5OSI::integrate(), integration failed");
   }
 
-  DEBUG_EXPR_WE(
-      std::cout << "HEM5 Statitics : " << "\n"; std::cout << "NSTEP = " << iwork[30] << "\n";
-      std::cout << "NACCPT = " << iwork[31] << "\n";
-      std::cout << "NREJCT = " << iwork[32] << "\n";
-      std::cout << "NFCN = " << iwork[33] << "\n"; std::cout << "NDEC = " << iwork[34] << "\n";
-      std::cout << "NSOL = " << iwork[35] << "\n";);
+  DEBUG_EXPR_WE(std::cout << "HEM5 Statitics : "
+                          << "\n";
+                std::cout << "NSTEP = " << iwork[30] << "\n";
+                std::cout << "NACCPT = " << iwork[31] << "\n";
+                std::cout << "NREJCT = " << iwork[32] << "\n";
+                std::cout << "NFCN = " << iwork[33] << "\n";
+                std::cout << "NDEC = " << iwork[34] << "\n";
+                std::cout << "NSOL = " << iwork[35] << "\n";);
   *_qWork = *_qtmp;
   *_vWork = *_vtmp;
   *_aWork = *_atmp;
@@ -783,7 +789,7 @@ struct siconos::integrators::Hem5OSI::_NSLEffectOnFreeOutput
   _NSLEffectOnFreeOutput(siconos::nonsmooth_formulations::OneStepNSProblem* p,
                          std::shared_ptr<siconos::modeling::Interaction> inter,
                          siconos::graphs::InteractionProperties& interProp)
-      : _osnsp(p), _inter(inter), _interProp(interProp) {};
+      : _osnsp(p), _inter(inter), _interProp(interProp){};
 
   void visit(const siconos::modeling::NewtonImpactNSL& nslaw) const override {
     double e;

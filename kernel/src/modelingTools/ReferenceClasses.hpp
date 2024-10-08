@@ -32,6 +32,29 @@
 #include "SiconosVector.hpp"
 
 namespace siconos::internal::devel_model {
+
+// A list of std::function types
+// Types that may be used to 'plug' an external function (lambda ...)
+// to a local method, used to compute attributes at runtime.
+
+// Naming convention:
+// FunctionXYZ_M: a function(x,y,z) which returns a matrix (V for vector)
+// e.g for wrench(twist, q, t) in NewtonEulerDS : FunctionVQT_V
+// Use:
+//   - const Eigen::Ref<Map> & for [in] params
+//   - Eigen::Ref<Map> for [in,out]
+using FunctionT_V = std::function<void(double, Eigen::Ref<siconos::algebra::MapVectorType>)>;
+using FunctionVQT_V = std::function<void(const Eigen::Ref<siconos::algebra::MapVectorType> &,
+                                         const Eigen::Ref<siconos::algebra::MapVectorType> &,
+                                         double, Eigen::Ref<siconos::algebra::MapVectorType>)>;
+
+// Extras, test purpose
+using FunctionSpanT_V = std::function<void(double, std::span<double>)>;
+using FunctionVT_M = std::function<void(Eigen::Ref<siconos::algebra::MapVectorType>, double,
+                                        Eigen::Ref<siconos::algebra::MapType>)>;
+// using FunctionVT_M =
+//     std::function<void(double, std::span<double>, std::span<double>)>;
+
 /**
 
  Description of the class (aim, ...)
@@ -47,85 +70,77 @@ Questions, remarks:
 
 */
 class ClassA {
- public:
-  // A list of std::function types
-  // Types that may be used to 'plug' an external function (lambda ...)
-  // to a local method, used to compute attributes at runtime.
-  using ExternalFunctionType =
-      std::function<void(double, Eigen::Ref<siconos::algebra::MapVectorType>)>;
-  using ExternalFunctionSpanType = std::function<void(double, std::span<double>)>;
-  using ExternalFunctionTypeMatrix =
-      std::function<void(Eigen::Ref<siconos::algebra::MapVectorType>, double,
-                         Eigen::Ref<siconos::algebra::MapType>)>;
-  // using ExternalFunctionTypeMatrix =
-  //     std::function<void(double, std::span<double>, std::span<double>)>;
-
  protected:
   /** something which can be used to compute the size of all vectors, matrices attribute
    *  like number of degrees of freedom in a DS
    */
   siconos::algebra::SiconosVector::Index ndof_{0};
 
-  /** A vector type attribute, that can be set by user
-   *  - always required --> must be provided by all constructors
-   *  - memory always allocated
-   *  - can be accessed (--> read with a getter)
-   *
-   *  Example : q0 in LagrangianDS
-   *
-   *  better to copy? Keep map?
-   */
-  std::shared_ptr<siconos::algebra::MapVectorType> vectorName1_view_{nullptr};
+  // Attribute representing a variable of the problem
 
-  std::unique_ptr<std::vector<double>> vectorName1_view_internal_storage{nullptr};
+  //   - must/can be read-write accessible
+  //   - memory handled by the class (for the moment. Later, external "pool"?)
+  //   example: q for SecondOrderDS, twist for NewtonEuler ...
+  //
+  //  -> shared_ptr to SiconosVector
+  //  -> a getter/setter returning a shared_ptr (--> write access)
+  //     a Map would probably be enough, but because of DSlink
+  //     in OSI, we keep shared_ptr for the time being
+  //  -> a read-only getter (ConstMap)
+  std::shared_ptr<siconos::algebra::SiconosVector> var_{nullptr};
 
-  /** A vector type attribute, internal, can not be set by user
-   *  - always required --> must be properly set by all constructors.
-   *  - memory always allocated
-   *  - can be accessed (--> read with a getter)
-   *
-   *  Example : q in LagrangianDS
-   */
-  std::shared_ptr<siconos::algebra::SiconosVector> vectorName3_{nullptr};
+  // Attribute representing a 'parameter' or operator of the system
+  //  - memory might be externally handled (shared)
+  //  - can not be modified after construction
+  //  example: q0, v0 for LagrangianDS
+  //
+  //  -> attributes: a shared_ptr to a Map AND an internal_storage (unique_ptr)
+  //  -> must be set by constructor
+  //  -> has a read-only getter (ConstMap)
 
-  /** A vector type attribute
-   *  - optional -> need a "setXXX" function
-   *  - no memory allocated by default
-   *  - may be set by external user (set ...) or with a plugin
-   *
-   *  Example : fext in LagrangianDS
-   *
-   *  Just a Map (view) to some storage :
-   *    - internal if required but not provided by user
-   *       -> see setComputeVectorName2Function
-   *       -> need internal_storage
-   *
-   *    - 'external' if required and provided by user
-   *       -> see setVectorName2
-   *       -> no internal storage, memory handled outside of this class
-   *
-   * Is it really necessary to keep a shared pointer ?
-   *
-   */
-  std::shared_ptr<siconos::algebra::MapVectorType> vectorName2_view_{nullptr};
+  /** a vector type attribute */
+  std::shared_ptr<siconos::algebra::MapVectorType> vector1_view_{nullptr};
 
-  /**  Internal storage for vectorName2
-   *   Not nullptr only if setComputeVectorName2Function has been called
-   *
-   */
-  std::unique_ptr<std::vector<double>> vectorName2_internal_storage_{nullptr};
+  std::unique_ptr<std::vector<double>> vector1_internal_storage_{nullptr};
 
-  /** function wrapper used to compute vectorName2
-   *
-   *  Should we set it to lambda function returning nothing ? To nullptr ?
-   */
-  ExternalFunctionType computevectorName2_{nullptr};
+  // Attribute representing a 'parameter' or operator of the system
+  //  - memory might be externally handled (shared)
+  //  - can be modified after construction: either with a constant input (matrix or vector)
+  //    or with a used-defined function
+  //  - can be accessed (read-only)
+  //  example: mass, fext for LagrangianDS
+  //
+  //  -> attributes:
+  //    - a shared_ptr to a Map and a unique_ptr to std::vector as internal_storage.
+  //      internal_storage allocated only if a pluggin is used
+  //    - bool hasConstantXXX_ and hasXXX_ + hasXXX() method
+  //    - a std::function to be plugged
+  //  -> not set by constructor
+  //  -> a setConstantXX() function and a setComputeXXFunction
+  //  -> a read-only getter (ConstMap)
+  //  -> a computeXX() function
+  /** A vector type attribute */
+  std::shared_ptr<siconos::algebra::MapVectorType> vector2_view_{nullptr};
+  std::unique_ptr<std::vector<double>> vector2_internal_storage_{nullptr};
+  bool hasConstantVector2_{false};
+  bool hasVector2_{false};
+  FunctionT_V computevector2_{nullptr};
 
-  /** True if vectorName2 is required and constant */
-  bool hasConstantVectorName2_{false};
+  // Attribute representing a 'parameter' or operator of the system
+  //  - internal use only (can not be/need not to be accessed)
+  //  - no memory
+  //  - can be computed with a user defined function
+  //  example: fint for NewtonEulerDS
+  //
+  //  -> attributes:
+  //    - bool hasXXX_ + hasXXX() method
+  //    - a std::function to be plugged
+  //  -> a setComputeXXFunction
+  /** true if vector3 is taken into account in the model */
+  bool hasVector3_{false};
 
-  /** True if vectorName2 is required */
-  bool hasVectorName2_{false};
+  /** A function to compute vector3 */
+  FunctionT_V computeVector3_{nullptr};
 
   /* The same but with a span in the computeXX function.
 
@@ -143,11 +158,11 @@ class ClassA {
    *
    *  Should we set it to lambda function returning nothing ? To nullptr ?
    */
-  ExternalFunctionSpanType computevectorNameSpan_{nullptr};
-  /** True if vectorName2 is required and constant */
+  FunctionSpanT_V computevectorNameSpan_{nullptr};
+  /** True if vector2 is required and constant */
   bool hasConstantVectorNameSpan_{false};
 
-  /** True if vectorName2 is required */
+  /** True if vector2 is required */
   bool hasVectorNameSpan_{false};
 
   /* The same but without a shared pointer
@@ -170,12 +185,12 @@ class ClassA {
    *
    *  Should we set it to lambda function returning nothing ? To nullptr ?
    */
-  ExternalFunctionType computevectorNameDirect_{nullptr};
+  FunctionT_V computevectorNameDirect_{nullptr};
 
-  /** True if vectorName2 is required and constant */
+  /** True if vector2 is required and constant */
   bool hasConstantVectorNameDirect_{false};
 
-  /** True if vectorName2 is required */
+  /** True if vector2 is required */
   bool hasVectorNameDirect_{false};
 
   /** A matrix type attribute
@@ -185,22 +200,22 @@ class ClassA {
    *  Example : mass in Lagrangian system
    */
   /** mass of the system */
-  std::shared_ptr<siconos::algebra::MapType> matrixName_view_{nullptr};
+  std::shared_ptr<siconos::algebra::MapType> matrix1_view_{nullptr};
 
   /** mass internal storage */
-  std::unique_ptr<std::vector<double>> matrixName_internal_storage_{nullptr};
+  std::unique_ptr<std::vector<double>> matrix1_internal_storage_{nullptr};
 
-  /** function wrapper used to compute matrixName
+  /** function wrapper used to compute matrix1
    *
    *  Should we set it to lambda function returning nothing ? To nullptr ?
    */
-  ExternalFunctionTypeMatrix computematrixName_{nullptr};
+  FunctionVT_M computematrix1_{nullptr};
 
-  /** true if matrixName is constant */
-  bool hasConstantMatrixName_{false};
+  /** true if matrix1 is constant */
+  bool hasConstantMatrix1_{false};
 
-  /** True if matrixName is required */
-  bool hasMatrixName_{false};
+  /** True if matrix1 is required */
+  bool hasMatrix1_{false};
 
   // Rule of five
   // Adapt it to each class case
@@ -216,89 +231,68 @@ class ClassA {
   // Rule 1: all required attributes must be properly set after constructor call
   // Rule 2: all attributes must have a defaul value (set with attr declaration)
   // Rule 3: constructors only with parameters for the required attributes.
-  // Other attributes (e.g. vectorName2) should be set with setFunctions
+  // Other attributes (e.g. vector2) should be set with setFunctions
   // Ok ?
 
-  /** constructor with all required parameters
+  /** constructor ...
    *
-   *  \param param1 decription used to set vectorName1
+   *  \param param1 decription used to set vector1
    */
   ClassA(Eigen::Ref<siconos::algebra::SiconosVector> param1);
-
-  // ClassA(const Eigen::Map<siconos::algebra::SiconosVector>& param1);
-
 
   /** destructor */
   virtual ~ClassA() noexcept = default;
 
-  /** \return describe what is returned (e.g. generalized coordinates, do not say 'returns q')
-   */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> vectorName3() const {
-    return vectorName3_;
+  // ------ var -------
+
+  /** \return a read-only view on the generalized coordinates vector (size=dimension()) */
+  inline const siconos::algebra::ConstMapVectorType var_read() const {
+    return siconos::algebra::ConstMapVectorType(var_->data(), var_->size());
   }
 
-  /** \return describe what is returned (e.g. generalized coordinates, do not say 'returns a
-   * pointer q')
-   */
-  inline siconos::algebra::SiconosVector &vectorName3_python() const {
-    return *(vectorName3_);
+  /** \return the generalized coordinates of the system (pointer link) */
+  inline std::shared_ptr<siconos::algebra::SiconosVector> var() const { return var_; }
+
+  // ----- vector1 ------
+  /** \return a read-only view on ... */
+  inline const siconos::algebra::ConstMapVectorType vector1() const {
+    return siconos::algebra::ConstMapVectorType(vector1_view_->data(), vector1_view_->size());
   }
 
-  // We do not provide setters for vectorName3-like variables. Should we?
-
-  // Getters for attributes like vectorName1_
-
-  /*    \return describe what is returned
-   */
-  inline std::shared_ptr<siconos::algebra::MapVectorType> vectorName1() const {
-    return vectorName1_view_;
+  // ----- vector2 ------
+  /** \return  a read-only view on ... */
+  inline const auto vector2() const {
+    return siconos::algebra::ConstMapVectorType(vector2_view_->data(), vector2_view_->size());
   }
 
-  // Getters / Setters for attributes like vectorName2
-
-  // Getters :
-  // - standard (shared ptr) as it was formerly done in C++
-  // - Map, as it must be done to be handled properly by pybind11
-  // Should we keep both of them ? Don't know for the moment ...
-  // Name convention: _view (or something else? _Map?) for the Map case
-
-  // Setters: we keep only the Map signature (not the set(std::shared...)
-
-  /** \return describe ...
-   */
-  inline std::shared_ptr<siconos::algebra::MapVectorType> vectorName2() const {
-    return vectorName2_view_;
-  }
-
-  /** \return describe ...
-   */
-  inline siconos::algebra::MapVectorType &vectorName2_view() const {
-    return *vectorName2_view_;
-  }
-
-  /** describe ... e.g. set a constant external forces vector for the system.
+  /** set a constant...
    *
-   *  \param newValue external forces vector
-   *
-   *  Should we warn there that the memory is handled by newValue and that any change on
-   * newValue impact vectorName2?
+   *  \param newVector2 ...
    */
-  void setConstantVectorName2(Eigen::Ref<siconos::algebra::SiconosVector> newValue);
+  void setConstantVector2(Eigen::Ref<siconos::algebra::SiconosVector> newVector2);
 
-  /** describe ... e.g. \return True if external forces are taken into account in the system */
-  bool hasVectorName2() const { return hasVectorName2_; }
+  /** True if ... taken into account */
+  bool hasVector2() const { return hasVector2_; }
+
+  /** set a user-defined function to ...
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputeVector2Function(const FunctionT_V &fct);
+
+  /** Update ...
+   *
+   *  \param time ...
+   */
+  void computeVector2(double time);
+
+  // ----- vector3 ------
 
   /** set a user-defined function to compute ...
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeVectorName2Function(ExternalFunctionType fext_func);
-
-  /** default function to compute ...
-   *
-   *  \param time the current time
-   */
-  void computeVectorName2(double time);
+  void setComputeVector3Function(const FunctionVQT_V &fct);
 
   inline std::shared_ptr<siconos::algebra::MapVectorType> vectorNameSpan() const {
     return vectorNameSpan_view_;
@@ -326,7 +320,7 @@ class ClassA {
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeVectorNameSpanFunction(ExternalFunctionSpanType fext_func);
+  void setComputeVectorNameSpanFunction(const FunctionSpanT_V &fext_func);
 
   /** default function to compute ...
    *
@@ -356,7 +350,7 @@ class ClassA {
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeVectorNameDirectFunction(ExternalFunctionType fext_func);
+  void setComputeVectorNameDirectFunction(const FunctionT_V &fext_func);
 
   /** default function to compute ...
    *
@@ -364,40 +358,38 @@ class ClassA {
    */
   void computeVectorNameDirect(double time);
 
-  // Getters / Setters for attributes like matrixName
+  // Getters / Setters for attributes like matrix1
   // Setters: we keep only the Map signature (not the set(std::shared...)
 
-  /*  \return the ... operator ... describe ... */
-  inline std::shared_ptr<siconos::algebra::MapType> matrixName() const {
-    return matrixName_view_;
+  /*  \return a read-only view on ... */
+  inline const auto matrix1() const {
+    return siconos::algebra::ConstMapType(matrix1_view_->data(), matrix1_view_->rows(),
+                                          matrix1_view_->cols());
   }
-
-  /** \return describe ... */
-  inline siconos::algebra::MapType &matrixName_view() const { return *matrixName_view_; }
 
   /** describe ... e.g. set a constant external forces vector for the system.
    *
    *  \param newValue external forces vector
    *
    *  Should we warn there that the memory is handled by newValue and that any change on
-   * newValue impact matrixName?
+   * newValue impact matrix1?
    */
-  void setConstantMatrixName(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+  void setConstantMatrix1(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
 
   /** describe ... e.g. \return True if external forces are taken into account in the system */
-  bool hasMatrixName() const { return hasMatrixName_; }
+  bool hasMatrix1() const { return hasMatrix1_; }
 
   /** set a user-defined function to compute ...
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeMatrixNameFunction(ExternalFunctionTypeMatrix fext_func);
+  void setComputeMatrix1Function(const FunctionVT_M &fext_func);
 
   /** default function to compute ...
    *
    *  \param time the current time
    */
-  void computeMatrixName(double time, Eigen::Ref<siconos::algebra::SiconosVector> position);
+  void computeMatrix1(Eigen::Ref<siconos::algebra::SiconosVector> position, double time);
 
   /** print the data of the dynamical system on the standard output
    */

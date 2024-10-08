@@ -56,7 +56,7 @@ def create_ds():
 
     # # set external forces
     weight_np = np.array([-m * g, 0, 0], dtype=np.float64, order='F')
-    ball.setConstantFExt(weight_np)
+    ball.setConstantFext(weight_np)
     return ball
 
 

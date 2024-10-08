@@ -16,13 +16,12 @@
  * limitations under the License.
  */
 
-#include "EigenInclude.hpp"
 #include "CommonSMC.hpp"
-#include "SiconosVector.hpp"
-#include "SiconosMatrix.hpp"
+
 #include <Eigen/LU>
 
 #include "ControlSensor.hpp"
+#include "EigenInclude.hpp"
 #include "EulerMoreauOSI.hpp"
 #include "FirstOrderLinearR.hpp"
 #include "FirstOrderLinearTIDS.hpp"
@@ -37,8 +36,10 @@
 #include "Relay.hpp"
 #include "RelayNSL.hpp"
 #include "SiconosAlgebraTools.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixOp.hpp"
 #include "SiconosMatrixVectorOp.hpp"
+#include "SiconosVector.hpp"
 #include "TimeDiscretisation.hpp"
 #include "TimeStepping.hpp"
 #include "Topology.hpp"
@@ -64,14 +65,14 @@ void siconos::control::CommonSMC::initialize(
   } else {
     if (_Csurface && !_u)
       _u = std::make_shared<siconos::algebra::SiconosVector>(_Csurface->size(0));
-      _u->setZero();
+    _u->setZero();
 
     Actuator::initialize(nsds, s);
   }
   // We can only work with FirstOrderNonLinearDS, FirstOrderLinearDS and FirstOrderLinearTIDS
   // We can use the Visitor mighty power to check if we have the right type
   auto DS = _sensor->getDS();
-  // create the DS for the controller 
+  // create the DS for the controller
   // if the DS we use is different from the DS we are controlling
   // when we want for instant to see how well the controller behaves
   // if the plant model is not exact, we can use the setSimulatedDS
@@ -188,13 +189,14 @@ void siconos::control::CommonSMC::initialize(
 
   _interactionSMC = std::make_shared<siconos::modeling::Interaction>(_nsLawSMC, _relationSMC);
 
-  if (std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearTIDS>(DS) || std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(DS))
+  if (std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearTIDS>(DS) ||
+      std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(DS))
     _integratorSMC = std::make_shared<siconos::integrators::ZeroOrderHoldOSI>();
-  else if(std::dynamic_pointer_cast<siconos::modeling::FirstOrderNonLinearDS>(DS))
+  else if (std::dynamic_pointer_cast<siconos::modeling::FirstOrderNonLinearDS>(DS))
     _integratorSMC = std::make_shared<siconos::integrators::EulerMoreauOSI>(_thetaSMC);
   else
     THROW_EXCEPTION("LinearSMC is only  implemented for FirstOrderNonLinearDS");
-  
+
   _nsdsSMC->insertDynamicalSystem(_DS_SMC);
   _nsdsSMC->setName(_DS_SMC, "plant_SMC");
   _nsdsSMC->link(_interactionSMC, _DS_SMC);
@@ -251,10 +253,8 @@ void siconos::control::CommonSMC::computeUeq() {
   auto tmpM1 = std::make_shared<siconos::algebra::SiconosMatrix>(_Csurface->size(0), n);
   auto tmpN = std::make_shared<siconos::algebra::SiconosMatrix>(n, n);
   auto quasiProjB_A = std::make_shared<siconos::algebra::SiconosMatrix>(_invCB->size(0), n);
-  auto tmpW = std::make_shared<siconos::algebra::SiconosMatrix>(n, n);
-  tmpW->zero();
+
   auto xTk = std::make_shared<siconos::algebra::SiconosVector>(_sensor->y());
-  tmpW->eye();
   siconos::algebra::prod(*_Csurface, *LinearDS_SMC.A(), *tmpM1);
   // compute (CB)^{-1}CA
   siconos::algebra::prod(*_invCB, *tmpM1, *quasiProjB_A);
@@ -269,13 +269,17 @@ void siconos::control::CommonSMC::computeUeq() {
   // tmpN = B^{*}(CB)^{-1}CA
   siconos::algebra::prod(zoh.Bd(_DS_SMC), *quasiProjB_A, *tmpN, true);
   // W = I + \theta B^{*})CB)^{-1}CA
-  siconos::algebra::scal(_thetaSMC, *tmpN, *tmpW, false);
+  siconos::algebra::SiconosMatrix tmpW = siconos::algebra::SiconosMatrix::Identity(n, n);
+  tmpW += _thetaSMC * *tmpN;
+
   // compute e^{Ah}x_k
   siconos::algebra::prod(zoh.Ad(_DS_SMC), *xTk, *xTk);
   // xTk = (e^{Ah}-(1-\theta)\Psi_k\Pi_B A)x_k
   siconos::algebra::prod(_thetaSMC - 1, *tmpN, _sensor->y(), *xTk, false);
   // compute the solution x_{k+1} of the system W*x_{k+1} = x_k
-  siconos::algebra::solveInPlace(*tmpW, *xTk);
+  Eigen::FullPivLU<siconos::algebra::SiconosMatrix> luW(tmpW);
+  luW.solve(*xTk);
+
   // add the contribution from the implicit part to ueq
   siconos::algebra::prod(-_thetaSMC, *quasiProjB_A, *xTk, *_ueq, false);
   DEBUG_END("void siconos::control::CommonSMC::computeUeq()\n");

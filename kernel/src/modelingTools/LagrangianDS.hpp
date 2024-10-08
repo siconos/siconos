@@ -29,41 +29,87 @@
 #include "PluginTypes.hpp"  // for siconos::plugins::FPtr6, ...
 #include "SecondOrderDS.hpp"
 namespace siconos::modeling {
+
+////////// Free functions //////////
+
+namespace lagrangian {
+/** Mass operator plugin type, matrix = f(q) */
+using FunctionQ_V =
+    std::function<void(const Eigen::Ref<const siconos::algebra::SiconosVector> &,
+                       Eigen::Ref<siconos::algebra::MapType>)>;
+
+/** external forces plugin type */
+using FunctionT_V = std::function<void(double, Eigen::Ref<siconos::algebra::MapVectorType>)>;
+
+/** fonction proto, matrix = f(v,q,t)*/
+using FunctionVQT_M = std::function<void(const Eigen::Ref<siconos::algebra::MapVectorType> &,
+                                         const Eigen::Ref<siconos::algebra::MapVectorType> &,
+                                         double, Eigen::Ref<siconos::algebra::MapType>)>;
+
+/** fonction proto, matrix = f(v,q) */
+using FunctionVQ_M = std::function<void(const Eigen::Ref<siconos::algebra::MapVectorType> &,
+                                        const Eigen::Ref<siconos::algebra::MapVectorType> &,
+                                        Eigen::Ref<siconos::algebra::MapType>)>;
+
+/** fonction proto, vector = f(v,q,t) */
+// using FunctionVQT_V =
+//     std::function<void(const Eigen::Ref<siconos::algebra::ConstMapVectorType> &,
+//                        const Eigen::Ref<siconos::algebra::ConstMapVectorType> &, double,
+//                        Eigen::Ref<siconos::algebra::MapVectorType>)>;
+using FunctionVQT_V =
+    std::function<void(const Eigen::Ref<const siconos::algebra::SiconosVector> &,
+                       const Eigen::Ref<const siconos::algebra::SiconosVector> &, double,
+                       Eigen::Ref<siconos::algebra::MapVectorType>)>;
+
+/** fonction proto, vector = f(v,q,t) */
+using FunctionVQ_V =
+    std::function<void(const Eigen::Ref<const siconos::algebra::SiconosVector> &,
+                       const Eigen::Ref<const siconos::algebra::SiconosVector> &,
+                       Eigen::Ref<siconos::algebra::MapVectorType>)>;
+
+}  // namespace lagrangian
+
 /**
-   Lagrangian non linear dynamical systems -  \f$ M(q,z) \dot v = F(v, q, t, z) + p \f$
+   Lagrangian non linear dynamical systems -  \f$ M(q) \dot v = F_{total}(v, q, t) + p \f$
 
    This class defines and computes a generic ndof-dimensional Lagrangian Non Linear Dynamical
    System of the form :
 
    \f[
-     M(q,z) \dot v + F_{gyr}(v, q, z) + F_{int}(v , q , t, z) = F_{ext}(t, z) + p \\
+     M(q) \dot v + F_{gyr}(v, q) + F_{int}(v , q , t) = F_{ext}(t) + p \\
      \dot q = v
    \f]
 
    where
 
    -  \f$ q \in R^{ndof} \f$ is the set of the generalized coordinates,
+
    - \f$ \dot q =v \in R^{ndof} \f$ the velocity, i. e. the time derivative of the generalized
    coordinates (Lagrangian systems).
+
    - \f$ \ddot q =\\dot v \in R^{ndof} \f$ the acceleration, i. e. the second time derivative
    of the generalized coordinates.
+
    - \f$ p \in R^{ndof} \f$ the reaction forces due to the Non Smooth Interaction.
+
    - \f$ M(q) \in R^{ndof \times ndof} \f$ is the inertia term (access : mass() method).
-   - \f$ F_{gyr}(\dot q, q) \in R^{ndof} \f$ is the non linear inertia term (access fGyr()
+
+   - \f$ F_{gyr}(\dot q, q) \in R^{ndof} \f$ is the non linear inertia term
    method).
-   - \f$ F_{int}(\dot q , q , t) \in R^{ndof} \f$ are the internal forces (access fInt()
+
+   - \f$ F_{int}(\dot q , q , t) \in R^{ndof} \f$ are the internal forces
    method).
-   - \f$ F_{ext}(t) \in R^{ndof} \f$ are the external forces (access fExt() method).
-   - \f$ z \in R^{zSize} \f$  is a vector of arbitrary algebraic variables, some sort of
-   discrete state.
 
-   The equation of motion is also shortly denoted as  \f$ M(q,z) \dot v = F(v,q, t, z) + p \f$
+   - \f$ F_{ext}(t) \in R^{ndof} \f$ are the external forces
 
-   where  \f$ F(v, q, t, z) \in R^{ndof} \f$ collects the total forces acting on
-   the system, that is \f$ F(v, q, t, z) =  F_{ext}(t, z) -  F_{gyr}(v, q, z) + F_{int}(v, q ,
-   t, z) \f$
+   The equation of motion is also shortly denoted as  \f$ M(q) \dot v = F_{total}(v,q, t) + p
+   \f$
 
-   This vector is saved and may be accessed using forces() method.
+   where  \f$ F_{total}(v, q, t) \in R^{ndof} \f$ collects the total forces acting on
+   the system, that is \f$ F_{total}(v, q, t) =  F_{ext}(t) -  F_{gyr}(v, q) - F_{int}(v, q, t)
+   \f$
+
+   This vector is saved and may be accessed using totalForces() method.
 
    q[i] is the derivative number i of q.
    Thus: q[0]=\f$ q \f$, global coordinates, q[1]= \f$  \dot q \f$ , velocity,
@@ -72,10 +118,10 @@ namespace siconos::modeling {
    The following operators (and their jacobians) can be plugged, in the usual
    way (see User Guide, 'User-defined plugins')
 
-   -  \f$ M(q) \f$  (computeMass(q, t))
-   -  \f$ F_{gyr}(v, q, z) \f$  (computeFGyr())
-   -  \f$ F_{int}(v , q , t, z) \f$  (computeFInt())
-   -  \f$ F_{ext}(t, z) \f$  (computeFext())
+   -  \f$ M(q) \f$  (computeMass(q))
+   -  \f$ F_{gyr}(v, q) \f$  (computeFgyr())
+   -  \f$ F_{int}(v , q , t) \f$  (computeFint())
+   -  \f$ F_{ext}(t) \f$  (computeFext())
 
    If required (e.g. for Event-Driven like simulation), formulation as a
    first-order system is also available, and writes:
@@ -88,7 +134,7 @@ namespace siconos::modeling {
 
       \dot x = \left[\begin{array}{c}
       \dot q\\
-      \ddot q = M^{-1}(q)\left[F(v, q , t, z) + p \right]\\
+      \ddot q = M^{-1}(q)\left[F_{total}(v, q , t) + p \right]\\
       \end{array}\right]
 
    \f]   \endrst
@@ -98,9 +144,8 @@ namespace siconos::modeling {
    \f[
        \nabla_{x}rhs(x,t) = \left[\begin{array}{cc}
        0  & I \\
-       \nabla_{q}(M^{-1}(q)F(v, q , t, z)) &  \nabla_{\dot q}(M^{-1}(q)F(v, q ,
-       t, z)) \\ \end{array}\right]
-   \f]
+       \nabla_{q}(M^{-1}(q)F_{total}(v, q , t)) &  \nabla_{\dot q}(M^{-1}(q)F_{total}(v, q ,t))
+   \\ \end{array}\right] \f]
 
    with the input due to the non smooth law:
 
@@ -119,42 +164,76 @@ namespace siconos::modeling {
 
 */
 class LagrangianDS : public SecondOrderDS {
- public:
-  /** external forces plugin type */
-  using ExternalForcesFunction =
-      std::function<void(double, Eigen::Ref<siconos::algebra::MapVectorType>)>;
-
  protected:
   ACCEPT_SERIALIZATION(LagrangianDS);
 
   /** state of the system. See details on top of page. */
-  std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> _q = {nullptr, nullptr,
-                                                                      nullptr};
+  std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> state_q_ = {nullptr, nullptr,
+                                                                            nullptr};
 
   /** initial velocity of the system */
-  std::shared_ptr<siconos::algebra::MapVectorType> _velocity0{nullptr};
+  std::shared_ptr<siconos::algebra::MapVectorType> velocity0_view_{nullptr};
   std::unique_ptr<std::vector<double>> velocity0_internal_storage{nullptr};
 
   /** memory of previous coordinates of the system */
-  siconos::algebra::SiconosMemory _qMemory;
+  siconos::algebra::SiconosMemory qMemory_;
 
   /** memory of previous velocities of the system */
-  siconos::algebra::SiconosMemory _velocityMemory;
+  siconos::algebra::SiconosMemory velocityMemory_;
 
-  /** internal forces applied to  the system */
-  std::shared_ptr<siconos::algebra::SiconosVector> _fInt{nullptr};
+  /** mass matrix of the system (as a view onto memory)*/
+  std::shared_ptr<siconos::algebra::MapType> mass_view_{nullptr};
 
-  // Should we use this enum to clarify notations in LagrangianDS?
-  // enum LagrangianDSJacobianId {Jacobian_FInt_wrt_q, Jacobian_FInt_wrt_qDot,
-  //                              Jacobian_FGyr_wrt_q, Jacobian_FGyr_wrt_qdot,
-  //                              Jacobian_Force_wrt_q,
-  //                              Jacobian_Forces_wrt_qDot, numberOfJacobians};
+  /** internal storage (optional) for the mass matrix */
+  std::unique_ptr<std::vector<double>> mass_internal_storage_{nullptr};
 
-  /** jacobian_q FInt*/
-  std::shared_ptr<Matrix> _jacobianFIntq{nullptr};
+  /** function wrapper used to compute mass */
+  siconos::modeling::lagrangian::FunctionQ_V computemass_{nullptr};
 
-  /** jacobian_{qDot} FInt*/
-  std::shared_ptr<Matrix> _jacobianFIntqDot{nullptr};
+  /** true if mass is required/set and constant */
+  bool hasConstantMass_{false};
+
+  /** True if mass is required */
+  bool hasMass_{false};
+
+  /** internal forces (\f$ F_{int}(v , q , t) \f$) applied to the system */
+  std::shared_ptr<siconos::algebra::SiconosVector> fint_{nullptr};
+
+  /** function wrapper used to compute internal forces */
+  siconos::modeling::lagrangian::FunctionVQT_V computefint_{nullptr};
+
+  /** True if internal forces are  taken into account */
+  bool hasFint_{false};
+
+  /** jacobianFintOver_q matrix (as a view onto memory)*/
+  std::shared_ptr<siconos::algebra::MapType> jacobianFintOver_q_view_{nullptr};
+
+  /** internal storage (optional) for the jacobianFintOver_q matrix */
+  std::unique_ptr<std::vector<double>> jacobianFintOver_q_internal_storage_{nullptr};
+
+  /** function wrapper used to compute jacobianFintOver_q */
+  siconos::modeling::lagrangian::FunctionVQT_M computejacobianFintOver_q_{nullptr};
+
+  /** true if jacobianFintOver_q is required/set and constant */
+  bool hasConstantJacobianFintOver_q_{false};
+
+  /** True if jacobianFintOver_q is required */
+  bool hasJacobianFintOver_q_{false};
+
+  /** jacobianFintOver_velocity matrix (as a view onto memory)*/
+  std::shared_ptr<siconos::algebra::MapType> jacobianFintOver_velocity_view_{nullptr};
+
+  /** internal storage (optional) for the jacobianFintOver_velocity matrix */
+  std::unique_ptr<std::vector<double>> jacobianFintOver_velocity_internal_storage_{nullptr};
+
+  /** function wrapper used to compute jacobianFintOver_velocity */
+  siconos::modeling::lagrangian::FunctionVQT_M computejacobianFintOver_velocity_{nullptr};
+
+  /** true if jacobianFintOver_velocity is required/set and constant */
+  bool hasConstantJacobianFintOver_velocity_{false};
+
+  /** True if jacobianFintOver_velocity is required */
+  bool hasJacobianFintOver_velocity_{false};
 
   /** external forces applied to the system */
   std::shared_ptr<siconos::algebra::MapVectorType> fext_view_{nullptr};
@@ -163,36 +242,69 @@ class LagrangianDS : public SecondOrderDS {
   std::unique_ptr<std::vector<double>> fext_internal_storage_{nullptr};
 
   /** function wrapper used to compute external forces */
-  ExternalForcesFunction computefext_{nullptr};
+  siconos::modeling::lagrangian::FunctionT_V computefext_{nullptr};
 
-  /** True if external forces are required (set) and constant */
+  /** True if external forces are taken into account and constant */
   bool hasConstantFext_{false};
 
-  /** True if external forces are reqyired/set */
+  /** True if external forces are taken into account */
   bool hasFext_{false};
 
-  /** non-linear inertia term of the system */
-  std::shared_ptr<siconos::algebra::SiconosVector> _fGyr{nullptr};
+  /** non-linear inertia term (\f$ F_{gyr}(v, q) \f$ ) applied to the system */
+  std::shared_ptr<siconos::algebra::SiconosVector> fgyr_{nullptr};
 
-  /** jacobian_q FGyrq*/
-  std::shared_ptr<Matrix> _jacobianFGyrq;
-  /** jacobian_{qDot} FGyrq*/
-  std::shared_ptr<Matrix> _jacobianFGyrqDot;
+  /** function wrapper used to compute non-linear inertia term */
+  siconos::modeling::lagrangian::FunctionVQ_V computefgyr_{nullptr};
+
+  /** True if non-linear inertia terms are  taken into account */
+  bool hasFgyr_{false};
+
+  /** jacobianFgyrOver_q matrix (as a view onto memory)*/
+  std::shared_ptr<siconos::algebra::MapType> jacobianFgyrOver_q_view_{nullptr};
+
+  /** internal storage (optional) for the jacobianFgyrOver_q matrix */
+  std::unique_ptr<std::vector<double>> jacobianFgyrOver_q_internal_storage_{nullptr};
+
+  /** function wrapper used to compute jacobianFgyrOver_q */
+  siconos::modeling::lagrangian::FunctionVQ_M computejacobianFgyrOver_q_{nullptr};
+
+  /** true if jacobianFgyrOver_q is required/set and constant */
+  bool hasConstantJacobianFgyrOver_q_{false};
+
+  /** True if jacobianFgyrOver_q is required */
+  bool hasJacobianFgyrOver_q_{false};
+
+  /** jacobianFgyrOver_velocity matrix (as a view onto memory)*/
+  std::shared_ptr<siconos::algebra::MapType> jacobianFgyrOver_velocity_view_{nullptr};
+
+  /** internal storage (optional) for the jacobianFgyrOver_velocity matrix */
+  std::unique_ptr<std::vector<double>> jacobianFgyrOver_velocity_internal_storage_{nullptr};
+
+  /** function wrapper used to compute jacobianFgyrOver_velocity */
+  siconos::modeling::lagrangian::FunctionVQ_M computejacobianFgyrOver_velocity_{nullptr};
+
+  /** true if jacobianFgyrOver_velocity is required/set and constant */
+  bool hasConstantJacobianFgyrOver_velocity_{false};
+
+  /** True if jacobianFgyrOver_velocity is required */
+  bool hasJacobianFgyrOver_velocity_{false};
 
   /** forces(q[0],q[1],t)= fExt - fInt -FGyr */
-  std::shared_ptr<siconos::algebra::SiconosVector> _forces{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> totalForces_{nullptr};
 
   /** jacobian_q forces*/
-  std::shared_ptr<Matrix> _jacobianqForces{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianTotalForcesOver_q_{nullptr};
 
-  /** jacobian_{qDot} forces*/
-  std::shared_ptr<Matrix> _jacobianqDotForces{nullptr};
+  /** jacobian_{velocity} forces*/
+  std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianTotalForcesOver_velocity_{nullptr};
+
+  bool hasJacobianTotalForces_{false};
 
   /** memory of previous forces of the system */
-  siconos::algebra::SiconosMemory _forcesMemory;
+  siconos::algebra::SiconosMemory totalForcesMemory_;
 
   /** memory of previous generalized forces due to constraints */
-  std::vector<siconos::algebra::SiconosMemory> _pMemory;
+  std::vector<siconos::algebra::SiconosMemory> pMemory_;
 
   // Internal constant, used to easily identify the different blocs in the rhs
   static constexpr auto jacobianXBloc10_ = 0;
@@ -205,98 +317,20 @@ class LagrangianDS : public SecondOrderDS {
    * from of LagrangianDS system values (jacobianXBloc10, jacobianXBloc11,
    * zeroMatrix, idMatrix) No get-set functions at the time. Only used as a
    * protected member.*/
-  std::vector<std::shared_ptr<Matrix>> _rhsMatrices = {nullptr, nullptr, nullptr, nullptr};
-
-  // pointers to functions member to compute plug-in functions
-
-  /** LagrangianDS plug-in to compute internal forces  \f$ F_{int}(t,q,\dot q)
-   *\f$
-   *  - id = "fInt"
-   *!
-   *  \param time : current time
-   *  \param sizeOfq : size of vector q
-   *  \param q : pointer to the first element of q
-   *  \param velocity : pointer to the first element of velocity
-   *  \param[in,out] fInt : pointer to the first element of fInt
-   *  \param  size of vector z
-   *  \param[in,out] z : a vector of user-defined parameters
-   */
-  std::shared_ptr<siconos::plugins::PluggedObject> _pluginFInt{nullptr};
-
-  /** LagrangianDS plug-in to compute  \f$ FGyr(\dot q, q) \f$ , id = "FGyr"
-   *  \param sizeOfq : size of vector q
-   *  \param q : pointer to the first element of q
-   *  \param velocity : pointer to the first element of velocity
-   *  \param[in,out] FGyr : pointer to the first element of FGyr
-   *  \param  size of vector z
-   *  \param[in,out] z  : a vector of user-defined parameters
-   */
-  std::shared_ptr<siconos::plugins::PluggedObject> _pluginFGyr{nullptr};
-
-  /** LagrangianDS plug-in to compute  \f$ \nabla_qF_{Int}(\dot q, q, t) \f$ ,
-   * id = "jacobianFIntq"
-   *
-   *  \param time : current time
-   *  \param sizeOfq : size of vector q
-   *  \param q : pointer to the first element of q
-   *  \param velocity : pointer to the first element of velocity
-   *  \param[in,out] jacob : pointer to the first element of the jacobian
-   *  \param  size of vector z
-   *  \param[in,out] z  : a vector of user-defined parameters
-   */
-  std::shared_ptr<siconos::plugins::PluggedObject> _pluginJacqFInt{nullptr};
-
-  /** LagrangianDS plug-in to compute  \f$ \nabla_{\dot q}F_{Int}(\dot q, q,
-   *  t) \f$ , id = "jacobianFIntqDot"
-   *
-   *  \param time : current time
-   *  \param sizeOfq : size of vector q
-   *  \param q : pointer to the first element of q
-   *  \param velocity : pointer to the first element of velocity
-   *  \param[in,out] jacob : pointer to the first element of the jacobian
-   *  \param  size of vector z
-   *  \param[in,out] z  : a vector of user-defined parameters
-   */
-  std::shared_ptr<siconos::plugins::PluggedObject> _pluginJacqDotFInt{nullptr};
-
-  /** LagrangianDS plug-in to compute  \f$ \nabla_qFGyr(\dot q, q) \f$ , id =
-   *  "jacobianFGyrq"
-   *
-   *  \param sizeOfq : size of vector q
-   *  \param q : pointer to the first element of q
-   *  \param velocity : pointer to the first element of velocity
-   *  \param[in,out] jacob : pointer to the first element of the jacobian
-   *  \param  size of vector z
-   *  \param[in,out] z  : a vector of user-defined parameters
-   */
-  std::shared_ptr<siconos::plugins::PluggedObject> _pluginJacqFGyr{nullptr};
-
-  /** LagrangianDS plug-in to compute  \f$ \nabla_{\dot q}FGyr(\dot q, q) \f$ ,
-   * id = "jacobianFGyrqDot"
-   *
-   *  \param sizeOfq : size of vector q
-   *  \param q : pointer to the first element of q
-   *  \param velocity : pointer to the first element of velocity
-   *  \param[in,out] jacob : pointer to the first element of the jacobian
-   *  \param  size of vector z
-   *  \param[in,out] z  : a vector of user-defined parameters
-   */
-  std::shared_ptr<siconos::plugins::PluggedObject> _pluginJacqDotFGyr{nullptr};
-
-  /** build all _plugin... PluggedObject */
-  void _zeroPlugin() override;
+  std::vector<std::shared_ptr<siconos::algebra::SiconosMatrix>> rhsMatrices_ = {
+      nullptr, nullptr, nullptr, nullptr};
 
   /** Default constructor */
   LagrangianDS() = default;
 
  public:
-  /** constructor from initial state and velocity
-   *
-   *  \param position initial coordinates
-   *  \param velocity initial velocity
-   */
-  LagrangianDS(std::shared_ptr<siconos::algebra::SiconosVector> position,
-               std::shared_ptr<siconos::algebra::SiconosVector> velocity);
+  // /** constructor from initial state and velocity
+  //  *
+  //  *  \param position initial coordinates
+  //  *  \param velocity initial velocity
+  //  */
+  // LagrangianDS(std::shared_ptr<siconos::algebra::SiconosVector> position,
+  //              std::shared_ptr<siconos::algebra::SiconosVector> velocity);
 
   /** constructor from initial state and velocity
    *
@@ -305,26 +339,6 @@ class LagrangianDS : public SecondOrderDS {
    */
   LagrangianDS(Eigen::Ref<siconos::algebra::SiconosVector> position,
                Eigen::Ref<siconos::algebra::SiconosVector> velocity);
-
-  // /** constructor from initial state, velocity and mass
-  //  *
-  //  *  \param position initial coordinates
-  //  *  \param velocity initial velocity
-  //  *  \param mass mass matrix
-  //  */
-  // LagrangianDS(std::shared_ptr<siconos::algebra::SiconosVector> position,
-  //              std::shared_ptr<siconos::algebra::SiconosVector> velocity,
-  //              std::shared_ptr<siconos::algebra::SiconosMatrix> mass);
-
-  // /** constructor from initial state, velocity and mass
-  //  *
-  //  *  \param position initial coordinates
-  //  *  \param velocity initial velocity
-  //  *  \param plugin name of the plugin used to compute the mass matrix
-  //  */
-  // LagrangianDS(std::shared_ptr<siconos::algebra::SiconosVector> position,
-  //              std::shared_ptr<siconos::algebra::SiconosVector> velocity,
-  //              const std::string &plugin);
 
   /** destructor */
   virtual ~LagrangianDS() noexcept = default;
@@ -365,142 +379,297 @@ class LagrangianDS : public SecondOrderDS {
    */
   void resetNonSmoothPart(unsigned int level) override;
 
-  /** set the value of the right-hand side, \f$ \dot x \f$
+  /** Compute  \f$ F_{total}(v,q,t) \f$
    *
-   *  \param newValue siconos::algebra::SiconosVector
-   */
-  void setRhs(const siconos::algebra::SiconosVector &newValue) override {
-    THROW_EXCEPTION("LagrangianDS - setRhs call is forbidden for 2nd order systems.");
-  }
-
-  /** set right-hand side, \f$ \dot x \f$ (pointer link)
-   *
-   *  \param newPtr std::shared_ptr<siconos::algebra::SiconosVector>
-   */
-  void setRhsPtr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) override {
-    THROW_EXCEPTION("LagrangianDS - setRhsPtr call is forbidden for 2nd order systems.");
-  }
-
-  // /* function to compute  \f$ F(v,q,t,z) \f$  for the current state
-  // *
-  // *  \param time the current time
-  //*/
-  // virtual void computeForces(double time);
-
-  /** Compute  \f$ F(v,q,t,z) \f$
-   *
-   *  \param time the current time
-   *  \param q std::shared_ptr<siconos::algebra::SiconosVector>: pointers on q
-   *  \param velocity std::shared_ptr<siconos::algebra::SiconosVector>: pointers
-   * on velocity
-   */
-  void computeForces(double time, std::shared_ptr<siconos::algebra::SiconosVector> q,
-                     std::shared_ptr<siconos::algebra::SiconosVector> velocity) override;
-
-  /** Compute  \f$ \nabla_qF(v,q,t,z) \f$  for current  \f$ q,v \f$
-   *  Default function to compute forces
-   *
+   *  \param velocity vector
+   *  \param q state
    *  \param time the current time
    */
-  void computeJacobianqForces(double time) override;
+  virtual void computeTotalForces(
+      const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
+      const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time);
 
-  /** Compute  \f$ \nabla_{\dot q}F(v,q,t,z) \f$  for current  \f$ q,v \f$
+  /** Compute  \f$ \nabla_qF_{total}(v,q,t) \f$
    *
+   *  \param velocity vector
+   *  \param q state
    *  \param time the current time
    */
-  virtual void computeJacobianqDotForces(double time) { computeJacobianvForces(time); };
+  virtual void computeJacobianTotalForcesOver_q(
+      const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
+      const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time);
 
-  /** Compute  \f$ \nabla_{\dot q}F(v,q,t,z) \f$  for current  \f$ q,v \f$
+  /** Compute  \f$ \nabla_{\dot q}F_{total}(v,q,t) \f$
    *
+   *  \param velocity vector
+   *  \param q state
    *  \param time the current time
    */
-  void computeJacobianvForces(double time) override;
+  virtual void computeJacobianTotalForcesOver_velocity(
+      const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
+      const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time);
 
-  /** generalized coordinates of the system (vector of size dimension())
-   *
-   *  \return pointer on a siconos::algebra::SiconosVector
-   */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> q() const override { return _q[0]; }
-
-  /** generalized coordinates of the system (vector of size dimension())
-   *
-   *  \return pointer on a siconos::algebra::SiconosVector
-   */
-  inline siconos::algebra::SiconosVector &q_python() const { return *(_q[0]); }
-
-  /** set value of generalized coordinates vector (copy)
-   *
-   *  \param newValue
-   */
-  void setQ(const siconos::algebra::SiconosVector &newValue) override;
-
-  /** set value of generalized coordinates vector (pointer link)
-   *
-   *  \param newPtr
-   */
-  void setQPtr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) override;
-
-  /** get velocity vector (pointer link)
-   *
-   *  \return pointer on a siconos::algebra::SiconosVector
-   */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> velocity() const override {
-    return _q[1];
+  /** \return a read-only view on the generalized coordinates vector (size=dimension()) */
+  inline const siconos::algebra::ConstMapVectorType q_read() const override {
+    return siconos::algebra::ConstMapVectorType(state_q_[0]->data(), state_q_[0]->size());
   }
 
-  /** get velocity vector
-   *
-   *  \return pointer on a siconos::algebra::SiconosVector
-   */
-  inline siconos::algebra::SiconosVector &velocity_python() const { return *(_q[1]); }
+  /** \return the generalized coordinates of the system (pointer link) */
+  std::shared_ptr<siconos::algebra::SiconosVector> q() const override { return state_q_[0]; }
 
-  /** set velocity vector (copy)
-   *
-   *  \param newValue
-   */
-  void setVelocity(const siconos::algebra::SiconosVector &newValue) override;
+  // /** generalized coordinates of the system (vector of size dimension())
+  //  *
+  //  *  \return pointer on a siconos::algebra::SiconosVector
+  //  */
+  inline siconos::algebra::SiconosVector &q_python() const { return *(state_q_[0]); }
 
-  /** set velocity vector (pointer link)
-   *
-   *  \param newPtr
-   */
-  void setVelocityPtr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) override;
-
-  /** get initial velocity (pointer)
-   *
-   *  \return pointer on a siconos::algebra::SiconosVector
-   */
-  inline std::shared_ptr<siconos::algebra::MapVectorType> velocity0() const override {
-    return _velocity0;
+  /** \return  a read-only view on velocity vector */
+  inline const auto velocity_read() const {
+    return siconos::algebra::ConstMapVectorType(state_q_[1]->data(), state_q_[1]->size());
   }
 
-  /** get acceleration (pointer link)
-   *
-   *  \return pointer on a siconos::algebra::SiconosVector
-   */
+  /** \return the velocity vector (pointer link) */
+  std::shared_ptr<siconos::algebra::SiconosVector> velocity() const override {
+    return state_q_[1];
+  }
+
+  // /** \return  a read-only view on velocity vector */
+  inline siconos::algebra::SiconosVector &velocity_python() const { return *(state_q_[1]); }
+
+  /** \return a read-only view on the initial velocity vector */
+  inline const siconos::algebra::ConstMapVectorType velocity0() const {
+    return siconos::algebra::ConstMapVectorType(velocity0_view_->data(),
+                                                velocity0_view_->size());
+  }
+
+  /** \return a read-only view on acceleration vector */
+  inline const siconos::algebra::ConstMapVectorType acceleration_read() const override {
+    return siconos::algebra::ConstMapVectorType(state_q_[2]->data(), state_q_[2]->size());
+  }
+
+  /** \return the acceleration vector (pointer link) */
   std::shared_ptr<siconos::algebra::SiconosVector> acceleration() const override {
-    return _q[2];
-  };
-
-  /** get \$F_{int}\$ (pointer link)
-   *
-   *  \return pointer on a plugged vector
-   */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> fInt() const { return _fInt; }
-
-  /** set  \$F_{int}\$ (pointer link)
-   *
-   *  \param newPtr a SP to plugged vector
-   */
-  inline void setFIntPtr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) {
-    _fInt = newPtr;
+    return state_q_[2];
   }
 
-  /** \return  \f$ F_{ext}(t) \f$ , (pointer link) */
-  inline std::shared_ptr<siconos::algebra::MapVectorType> fExt() const { return fext_view_; }
+  /*  \return a read-only view on the mass matrix */
+  inline const auto mass() const {
+    return siconos::algebra::ConstMapType(mass_view_->data(), mass_view_->rows(),
+                                          mass_view_->cols());
+  }
 
-  /** \return  \f$ F_{ext}(t) \f$  (view onto memory) */
-  inline siconos::algebra::MapVectorType &fext_view() const { return *fext_view_; }
+  // /** \return mass matrix operator (view onto memory) */
+  // inline siconos::algebra::MapType &mass_view() const { return *mass_view_; }
+
+  /** Set a constant mass matrix for the system
+   *
+   *  \param newValue mass matrix
+   *
+   */
+  void setConstantMass(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+
+  /** \return True if the mass matrix has been set (i.e. different from identity) */
+  bool hasMass() const { return hasMass_; }
+
+  /** set a user-defined function to compute the mass matrix
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputeMassFunction(const siconos::modeling::lagrangian::FunctionQ_V &fext_func);
+
+  /** to compute the mass matrix operator \f$ M(q) \f$
+   *
+   *  \param position q vector
+   */
+  virtual void computeMass(const Eigen::Ref<const siconos::algebra::SiconosVector> &position);
+
+  /** \return  a read-only view on \f$ F_{int}(\dot q, q, t) \f$  */
+  inline const auto fint() const {
+    return siconos::algebra::ConstMapVectorType(fint_->data(), fint_->size());
+  }
+
+  /** True if internal forces are taken into account */
+  bool hasInternalForces() const { return hasFint_; }
+
+  /** set a user-defined function to compute \f$ F_{int}(\dot q, q, t) \f$
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputeFintFunction(const siconos::modeling::lagrangian::FunctionVQT_V &fct);
+
+  /** Update \f$ F_{int}(\dot q, q, t) \f$
+   *  \param velocity \f$ \dot q \f$ vector
+   *  \param position q vector
+   *  \param time the current time
+   */
+  void computeFint(const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
+                   const Eigen::Ref<const siconos::algebra::SiconosVector> &position,
+                   double time);
+
+  /** \return a read-only view on \f$ \nabla_qF_{int} \f$ matrix */
+  inline const auto jacobianFintOver_q_view() const {
+    return siconos::algebra::ConstMapType(jacobianFintOver_q_view_->data(),
+                                          jacobianFintOver_q_view_->rows(),
+                                          jacobianFintOver_q_view_->cols());
+  }
+
+  /** Set a constant \f$ \nabla_qF_{int} \f$
+   *
+   *  \param newValue jacobianFintOver_q matrix
+   *
+   */
+  void setConstantJacobianFintOver_q(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+
+  /** \return True if  \f$ \nabla_qF_{int} \f$ matrix has been set */
+  bool hasJacobianFintOver_q() const { return hasJacobianFintOver_q_; }
+
+  /** set a user-defined function to compute \f$ \nabla_qF_{int}(\dot q, q, t) \f$
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputeJacobianFintOver_qFunction(
+      const siconos::modeling::lagrangian::FunctionVQT_M &fct);
+
+  /** to compute  \f$ \nabla_qF_{int}(\dot q, q, t) \f$
+   *  \param velocity \f$ \dot q \f$ vector
+   *  \param position q vector
+   *  \param time the current time
+   */
+  void computeJacobianFintOver_q(const Eigen::Ref<siconos::algebra::SiconosVector> &velocity,
+                                 const Eigen::Ref<siconos::algebra::SiconosVector> &position,
+                                 double time);
+
+  /** \return \f$ \nabla_{\dot q}F_{int} \f$ (view onto memory) */
+  inline const auto jacobianFintOver_velocity_view() const {
+    return siconos::algebra::ConstMapType(jacobianFintOver_velocity_view_->data(),
+                                          jacobianFintOver_velocity_view_->rows(),
+                                          jacobianFintOver_velocity_view_->cols());
+  }
+
+  /** Set a constant \f$ \nabla_{\dot q}F_{int} \f$ matrix for the system
+   *
+   *  \param newValue \f$ \nabla_{\dot q}F_{int} \f$ matrix
+   *
+   */
+  void setConstantJacobianFintOver_velocity(
+      Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+
+  /** \return True if \f$ \nabla_{\dot q}F_{int} \f$ matrix has been set
+  bool hasJacobianFintOver_velocity() const { return hasJacobianFintOver_velocity_; }
+
+  /** set a user-defined function to compute \f$ \nabla_{\dot q}F_{int} \f$
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputeJacobianFintOver_velocityFunction(
+      const siconos::modeling::lagrangian::FunctionVQT_M &fct);
+
+  /** to compute \f$ \nabla_{\dot q}F_{int} \f$
+   *
+   *  \param velocity \f$ \dot q \f$ vector
+   *  \param position q vector
+   *  \param time the current time
+   */
+  void computeJacobianFintOver_velocity(
+      const Eigen::Ref<siconos::algebra::SiconosVector> &velocity,
+      const Eigen::Ref<siconos::algebra::SiconosVector> &position, double time);
+
+  /** \return  a read-only view on \f$ F_{gyr}(\dot q, q) \f$ */
+  inline const auto fgyr() const {
+    return siconos::algebra::ConstMapVectorType(fgyr_->data(), fgyr_->size());
+  }
+
+  /** set a constant \f$ F_{gyr}\f$ vector
+   *
+   *  \param newFgyr gyroscopic forces vector
+   */
+  void setConstantFgyr(Eigen::Ref<siconos::algebra::SiconosVector> newFgyr);
+
+  /** True if gyroscopic forces are taken into account */
+  bool hasGyroscopicForces() const { return hasFgyr_; }
+
+  /** set a user-defined function to compute \f$ F_{gyr}(\dot q, q) \f$
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputeFgyrFunction(const siconos::modeling::lagrangian::FunctionVQ_V &fct);
+
+  /** Update \f$ F_{gyr}(\dot q, q) \f$
+   *  \param velocity \f$ \dot q \f$ vector
+   *  \param position q vector
+   */
+  void computeFgyr(const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
+                   const Eigen::Ref<const siconos::algebra::SiconosVector> &position);
+
+  /** \return  \f$ \nabla_qF_{gyr} \f$ matrix (view onto memory) */
+  inline const auto jacobianFgyrOver_q_view() const {
+    return siconos::algebra::ConstMapType(jacobianFgyrOver_q_view_->data(),
+                                          jacobianFgyrOver_q_view_->rows(),
+                                          jacobianFgyrOver_q_view_->cols());
+  }
+
+  /** Set a constant \f$ \nabla_qF_{gyr} \f$
+   *
+   *  \param newValue jacobianFgyrOver_q matrix
+   *
+   */
+  void setConstantJacobianFgyrOver_q(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+
+  /** \return True if  \f$ \nabla_qF_{gyr} \f$ matrix has been set */
+  bool hasJacobianFgyrOver_q() const { return hasJacobianFgyrOver_q_; }
+
+  /** set a user-defined function to compute \f$ \nabla_qF_{gyr}(\dot q, q) \f$
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputeJacobianFgyrOver_qFunction(
+      const siconos::modeling::lagrangian::FunctionVQ_M &fct);
+
+  /** to compute  \f$ \nabla_qF_{gyr}(\dot q, q, t) \f$
+   *  \param velocity \f$ \dot q \f$ vector
+   *  \param position q vector
+   */
+  void computeJacobianFgyrOver_q(const Eigen::Ref<siconos::algebra::SiconosVector> &velocity,
+                                 const Eigen::Ref<siconos::algebra::SiconosVector> &position);
+
+  /** \return \f$ \nabla_{\dot q}F_{gyr} \f$ (view onto memory) */
+  inline const auto jacobianFgyrOver_velocity_view() const {
+    return siconos::algebra::ConstMapType(jacobianFgyrOver_velocity_view_->data(),
+                                          jacobianFgyrOver_velocity_view_->rows(),
+                                          jacobianFgyrOver_velocity_view_->cols());
+  }
+
+  /** Set a constant \f$ \nabla_{\dot q}F_{gyr} \f$ matrix for the system
+   *
+   *  \param newValue \f$ \nabla_{\dot q}F_{gyr} \f$ matrix
+   *
+   */
+  void setConstantJacobianFgyrOver_velocity(
+      Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+
+  /** \return True if \f$ \nabla_{\dot q}F_{gyr} \f$ matrix has been set */
+  bool hasJacobianFgyrOver_velocity() const { return hasJacobianFgyrOver_velocity_; }
+
+  /** set a user-defined function to compute \f$ \nabla_{\dot q}F_{gyr} \f$
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputeJacobianFgyrOver_velocityFunction(
+      const siconos::modeling::lagrangian::FunctionVQ_M &fct);
+
+  /** to compute \f$ \nabla_{\dot q}F_{gyr} \f$
+   *
+   *  \param velocity \f$ \dot q \f$ vector
+   *  \param position q vector
+   */
+  void computeJacobianFgyrOver_velocity(
+      const Eigen::Ref<siconos::algebra::SiconosVector> &velocity,
+      const Eigen::Ref<siconos::algebra::SiconosVector> &position);
+
+  /** \return  a read-only view on \f$ F_{ext}(t) \f$ */
+  inline const auto fext() const {
+    return siconos::algebra::ConstMapVectorType(fext_view_->data(), fext_view_->size());
+  }
 
   /** set a constant external forces vector
    *
@@ -515,7 +684,7 @@ class LagrangianDS : public SecondOrderDS {
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeFextFunction(ExternalForcesFunction fext_func);
+  void setComputeFextFunction(const siconos::modeling::lagrangian::FunctionT_V &fct);
 
   /** Update external forces values
    *
@@ -523,98 +692,52 @@ class LagrangianDS : public SecondOrderDS {
    */
   void computeFext(double time);
 
-  /** get  \f$ F_{gyr} \f$ , (pointer link)
-   *
-   *  \return pointer on a plugged vector
-   */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> fGyr() const { return _fGyr; }
-
-  /** set  \f$ F_{gyr} \f$ , (pointer link)
-   *
-   *  \param newPtr a SP to plugged vector
-   */
-  inline void setFGyrPtr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) {
-    _fGyr = newPtr;
+  /**  \return  a read-only view on \f$  F_{total}(v,q,t) \f$ */
+  inline const auto totalForces() const {
+    return siconos::algebra::ConstMapVectorType(totalForces_->data(), totalForces_->size());
   }
 
-  /** \return  \f$ \nabla_qF_{int} \f$ , (pointer link) */
-  inline std::shared_ptr<Matrix> jacobianFIntq() const { return _jacobianFIntq; }
+  // FP: A pointer version, required only for hem5OSI - TO BE REVIEWED
+  /**  \return  \f$  F_{total}(v,q,t) (pointer link)\f$ */
+  inline auto totalForcesPtr() const { return totalForces_; }
 
-  /** \return \f$ \nabla_{\dot q}F_{int} \f$ , (pointer link) */
-  inline std::shared_ptr<Matrix> jacobianFIntqDot() const { return _jacobianFIntqDot; }
+  /** \return True if total forces are defined */
+  bool hasTotalForces() const { return totalForces_ != nullptr; }
 
-  void allocateJacobianFIntq();
-  void allocateJacobianFIntqDot();
-  void allocateFInt();
+  /** \return True if the jacobians of total forces are defined */
+  bool hasJacobianTotalForces() const { return hasJacobianTotalForces_; }
 
-  /** \return \f$ \nabla_{q}F_{int} \f$ , (pointer link) */
-  inline void setJacobianFIntqPtr(std::shared_ptr<Matrix> newPtr) { _jacobianFIntq = newPtr; }
-
-  /** \return \f$ \nabla_{\dot q}F_{int} \f$ , (pointer link) */
-  inline void setJacobianFIntqDotPtr(std::shared_ptr<Matrix> newPtr) {
-    _jacobianFIntqDot = newPtr;
+  /** \return a read-only view on \f$  \nabla_qF_{total}(v,q,t) \f$ */
+  inline virtual const siconos::algebra::ConstMapType jacobianTotalForcesOver_q() const {
+    return siconos::algebra::ConstMapType(jacobianTotalForcesOver_q_->data(),
+                                          jacobianTotalForcesOver_q_->rows(),
+                                          jacobianTotalForcesOver_q_->cols());
   }
 
-  /** \return \f$ \nabla_{q}F_{gyr} \f$ , (pointer link) */
-  inline std::shared_ptr<Matrix> jacobianFGyrq() const { return _jacobianFGyrq; }
-
-  /** \return \f$ \nabla_{\dot q}F_{gyr} \f$ , (pointer link) */
-  inline std::shared_ptr<Matrix> jacobianFGyrqDot() const { return _jacobianFGyrqDot; }
-
-  /** \return \f$ \nabla_{q}F_{gyr} \f$ , (pointer link) */
-  inline void setJacobianFGyrqPtr(std::shared_ptr<Matrix> newPtr) { _jacobianFGyrq = newPtr; }
-
-  /** \return \f$ \nabla_{\dot q}F_{gyr} \f$ , (pointer link) */
-  inline void setJacobianFGyrqDotPtr(std::shared_ptr<Matrix> newPtr) {
-    _jacobianFGyrqDot = newPtr;
+  /** \return a read-only view on \f$ \nabla_{\dot q}F_{total}(v,q,t) \f$ */
+  inline virtual const siconos::algebra::ConstMapType jacobianTotalForcesOver_velocity()
+      const {
+    return siconos::algebra::ConstMapType(jacobianTotalForcesOver_velocity_->data(),
+                                          jacobianTotalForcesOver_velocity_->rows(),
+                                          jacobianTotalForcesOver_velocity_->cols());
   }
 
-  /**  \return  \f$  F(v,q,t,z) \f$  (pointer  link) */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> forces() const override {
-    return _forces;
-  }
+  /** \return last saved (memory) values of the state vector*/
+  inline const siconos::algebra::SiconosMemory &qMemory() override { return qMemory_; }
 
-  /** \return \f$  \nabla_qF(v,q,t,z) \f$  (pointer  link)   */
-  virtual inline std::shared_ptr<Matrix> jacobianqForces() const override {
-    return _jacobianqForces;
-  }
+  /** \return last saved (memory) values of the velocity vector*/
+  inline const siconos::algebra::SiconosMemory &velocityMemory() { return velocityMemory_; }
 
-  /** \return \f$ \nabla_{\dot q}F(v,q,t,z) \f$  (pointer  link)  */
-  inline std::shared_ptr<Matrix> jacobianvForces() const override {
-    return _jacobianqDotForces;
-  }
-
-  /** get all the values of the state vector q stored in memory.
-   *  note: not const due to SchatzmanPaoliOSI::initializeWorkVectorsForDS
-   *
-   *  \return a memory
-   */
-  inline const siconos::algebra::SiconosMemory &qMemory() override { return _qMemory; }
-
-  /** get all the values of the state vector velocity stored in memory.
-   *  note: not const due to SchatzmanPaoliOSI::initializeWorkVectorsForDS
-   *
-   *  \return a memory
-   */
-  inline const siconos::algebra::SiconosMemory &velocityMemory() override {
-    return _velocityMemory;
-  }
-
-  /** get all the values of the state vector p stored in memory
-   *
-   *  \param level
-   *  \return a memory
+  /** \return last saved (memory) values of p[level] vector
+   * \param level required index for p
    */
   inline const siconos::algebra::SiconosMemory &pMemory(unsigned int level) {
-    return _pMemory[level];
+    return pMemory_[level];
   }
 
-  /** get forces in memory buff
-   *
-   *  \return pointer on a siconos::algebra::SiconosMemory
-   */
+  /** \return last saved (memory) values of the total forces vector*/
   inline const siconos::algebra::SiconosMemory &forcesMemory() override {
-    return _forcesMemory;
+    return totalForcesMemory_;
   }
 
   /** initialize the siconos::algebra::SiconosMemory objects with a positive
@@ -629,195 +752,6 @@ class LagrangianDS : public SecondOrderDS {
    *  \todo Modify the function swapIn Memory with the new Object Memory
    */
   void swapInMemory() override;
-
-  /** allow to set a specified function to compute FInt
-   *
-   *  \param pluginPath std::string : the complete path to the plugin
-   *  \param functionName std::string : the name of the function to use in this
-   *  plugin
-   */
-  void setComputeFIntFunction(const std::string &pluginPath, const std::string &functionName);
-
-  /** set a specified function to compute fInt
-   *
-   *  \param fct a pointer on the plugin function
-   */
-  void setComputeFIntFunction(siconos::plugins::FPtr6 fct);
-
-  /** set a user-defined function to compute the external forces
-   *
-   *  \param fct the user-defined function (std::function, lambda ...)
-   */
-  void setComputeFExtFunction(ExternalForcesFunction fext_func);
-
-  /** allow to set a specified function to compute the inertia
-   *
-   *  \param pluginPath std::string : the complete path to the plugin
-   *  \param functionName std::string : the name of the function to use in this
-   * plugin
-   */
-  void setComputeFGyrFunction(const std::string &pluginPath, const std::string &functionName);
-
-  /** set a specified function to compute FGyr
-   *
-   *  \param fct a pointer on the plugin function
-   */
-  void setComputeFGyrFunction(siconos::plugins::FPtr5 fct);
-
-  /** allow to set a specified function to compute the jacobian w.r.t q of the
-   *  internal forces
-   *
-   *  \param pluginPath std::string : the complete path to the plugin
-   *  \param functionName std::string : the name of the function to use in this
-   * plugin
-   */
-  void setComputeJacobianFIntqFunction(const std::string &pluginPath,
-                                       const std::string &functionName);
-  /** allow to set a specified function to compute the jacobian
-   *  of the internal forces w.r.t. q
-   *
-   *  \param pluginPath std::string : the complete path to the plugin
-   *  \param functionName std::string : the name of the function to use in this
-   * plugin
-   */
-  void setComputeJacobianFIntqDotFunction(const std::string &pluginPath,
-                                          const std::string &functionName);
-
-  /** set a specified function to compute jacobian following q of the FInt
-   *
-   *  \param fct a pointer on the plugin function
-   */
-  void setComputeJacobianFIntqFunction(siconos::plugins::FPtr6 fct);
-  /** set a specified function to compute jacobian following qDot of the FInt
-   *
-   *  \param fct a pointer on the plugin function
-   */
-  void setComputeJacobianFIntqDotFunction(siconos::plugins::FPtr6 fct);
-
-  /** allow to set a specified function to compute the jacobian w.r.t q of the
-   *  the external forces
-   *
-   *  \param pluginPath std::string : the complete path to the plugin
-   *  \param functionName std::string : the name of the function to use in this
-   * plugin
-   */
-  void setComputeJacobianFGyrqFunction(const std::string &pluginPath,
-                                       const std::string &functionName);
-
-  /** allow to set a specified function to compute the jacobian w.r.t qDot of
-   *  the the external strength
-   *
-   *  \param pluginPath std::string : the complete path to the plugin
-   *  \param functionName std::string : the name of the function to use in this
-   * plugin
-   */
-  void setComputeJacobianFGyrqDotFunction(const std::string &pluginPath,
-                                          const std::string &functionName);
-
-  /** set a specified function to compute the jacobian following q of FGyr
-   *
-   *  \param fct a pointer on the plugin function
-   */
-  void setComputeJacobianFGyrqFunction(siconos::plugins::FPtr5 fct);
-  /** set a specified function to compute the jacobian following qDot of FGyr
-   *
-   *  \param fct a pointer on the plugin function
-   */
-  void setComputeJacobianFGyrqDotFunction(siconos::plugins::FPtr5 fct);
-
-  /** default function to compute the internal strengths
-   *
-   *  \param time the current time
-   */
-  virtual void computeFInt(double time);
-
-  /** function to compute the internal strengths
-   *  with some specific values for position and velocity (ie not those of the
-   *  current state).
-   *
-   *  \param time the current time,
-   *  \param position value used to evaluate the internal forces
-   *  \param velocity value used to evaluate the internal forces
-   */
-  virtual void computeFInt(double time,
-                           std::shared_ptr<siconos::algebra::SiconosVector> position,
-                           std::shared_ptr<siconos::algebra::SiconosVector> velocity);
-
-  /** default function to compute the inertia
-   */
-  virtual void computeFGyr();
-
-  /** function to compute the inertia
-   *  with some specific values for q and velocity (ie not those of the current
-   * state).
-   *
-   *  \param position value used to evaluate the inertia forces
-   *  \param velocity value used to evaluate the inertia forces
-   */
-  virtual void computeFGyr(std::shared_ptr<siconos::algebra::SiconosVector> position,
-                           std::shared_ptr<siconos::algebra::SiconosVector> velocity);
-
-  /** To compute the jacobian w.r.t q of the internal forces
-   *
-   *  \param time the current time
-   */
-  virtual void computeJacobianFIntq(double time);
-  /** To compute the jacobian w.r.t qDot of the internal forces
-   *
-   *  \param time the current time
-   */
-  virtual void computeJacobianFIntqDot(double time);
-
-  /** To compute the jacobian w.r.t q of the internal forces
-   *
-   *  \param time the current time
-   *  \param position value used to evaluate the jacobian
-   *  \param velocity value used to evaluate the jacobian
-   */
-  virtual void computeJacobianFIntq(double time,
-                                    std::shared_ptr<siconos::algebra::SiconosVector> position,
-                                    std::shared_ptr<siconos::algebra::SiconosVector> velocity);
-
-  /** To compute the jacobian w.r.t. qDot of the internal forces
-   *
-   *  \param time the current time
-   *  \param position value used to evaluate the jacobian
-   *  \param velocity value used to evaluate the jacobian
-   */
-  virtual void computeJacobianFIntqDot(
-      double time, std::shared_ptr<siconos::algebra::SiconosVector> position,
-      std::shared_ptr<siconos::algebra::SiconosVector> velocity);
-
-  /** function to compute the jacobian w.r.t. q of the inertia forces
-   */
-  virtual void computeJacobianFGyrq();
-
-  /** function to compute the jacobian w.r.t. qDot of the inertia forces
-   */
-  virtual void computeJacobianFGyrqDot();
-
-  /** function to compute the jacobian w.r.t. q of the inertia forces
-   *
-   *  \param position value used to evaluate the jacobian
-   *  \param velocity value used to evaluate the jacobian
-   */
-  virtual void computeJacobianFGyrq(std::shared_ptr<siconos::algebra::SiconosVector> position,
-                                    std::shared_ptr<siconos::algebra::SiconosVector> velocity);
-
-  /** function to compute the jacobian w.r.t. qDot of the inertia forces
-   *
-   *  \param position value used to evaluate the jacobian
-   *  \param velocity value used to evaluate the jacobian
-   */
-  virtual void computeJacobianFGyrqDot(
-      std::shared_ptr<siconos::algebra::SiconosVector> position,
-      std::shared_ptr<siconos::algebra::SiconosVector> velocity);
-
-  /** default function to update the plugins functions using a new time:
-   *
-   *  \param time  the current time
-   */
-  void updatePlugins(double time) override {};
 
   /** To compute the kinetic energy */
   double computeKineticEnergy();
@@ -838,25 +772,18 @@ class LagrangianDS : public SecondOrderDS {
 
      \param level the required level
    */
-  void init_generalized_coordinates(unsigned int level);
+  void initMemoryForGeneralizedCoordinates(unsigned int level);
 
   /**
-     Allocate memory for the lu factorization of the mass of the system.
+     Allocate memory and lu-factorize the mass of the system.
      Useful for some integrators with system inversion involving the mass
   */
-  void init_inverse_mass() override;
+  void init_lu_mass() override;
 
   /**
      Update the content of the lu factorization of the mass of the system,
-     if required.
-
-     \param time current time
-  */
-  void update_inverse_mass(double time = 0.) override;
-
-  /** Allocate memory for forces and its jacobian.
-   */
-  void init_forces();
+     if required. */
+  void update_lu_mass();
 
   // visitors hook
   void acceptSP(std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const override;

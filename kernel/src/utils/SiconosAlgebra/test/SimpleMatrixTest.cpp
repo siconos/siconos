@@ -157,7 +157,6 @@ void SimpleMatrixTest::tearDown() {}
 
 //______________________________________________________________________________
 
-
 void SimpleMatrixTest::testNormInf() {
   std::cout << "--> Test: normInf." << std::endl;
   double n = SicM->normInf();
@@ -241,8 +240,6 @@ void SimpleMatrixTest::testSetBlock2() {
 
   std::cout << "-->  setBlock2 test ended with success." << std::endl;
 }
-
-
 
 void SimpleMatrixTest::testOperators6Bis() {
   std::cout << "--> Test: operator6Bis." << std::endl;
@@ -786,7 +783,6 @@ void SimpleMatrixTest::testOperators9() {
   std::cout << "-->  test operators9 ended with success." << std::endl;
 }
 
-
 void SimpleMatrixTest::testProd()  // y = A*x
 {
   std::cout << "--> Test: ublas::prod. mat-vect" << std::endl;
@@ -1288,308 +1284,308 @@ void SimpleMatrixTest::testProd6()  // y += trans(A)*x
 //   << "-->  test gemm ended with success." <<std::endl;
 // }
 
-//void SimpleMatrixTest::testFromAndFillCSC() {
-  //   std::cout << "Start SimpleMatrixTest::testFromAndFillCSC() " << std::endl;
+// void SimpleMatrixTest::testFromAndFillCSC() {
+//    std::cout << "Start SimpleMatrixTest::testFromAndFillCSC() " << std::endl;
 
-  //   auto Sparse4 = std::make_shared<SiconosMatrix>(*SP4);
-  //   Sparse4->updateNumericsMatrix();
-  //   auto NM = Sparse4->numericsMatrix();
-  //   NM_display(NM);
-  //   //  auto NM_1 = NM_create(4,4, NM_SPARSE);
+//   auto Sparse4 = std::make_shared<SiconosMatrix>(*SP4);
+//   Sparse4->updateNumericsMatrix();
+//   auto NM = Sparse4->numericsMatrix();
+//   NM_display(NM);
+//   //  auto NM_1 = NM_create(4,4, NM_SPARSE);
 
-  //   auto Sparse1 = std::make_shared<SiconosMatrix>(4, 4,
-  //   siconos::algebra::UblasType::SPARSE); Sparse1->fromCSC(NM_csc(NM));
-  //   Sparse1->displayExpert();
+//   auto Sparse1 = std::make_shared<SiconosMatrix>(4, 4,
+//   siconos::algebra::UblasType::SPARSE); Sparse1->fromCSC(NM_csc(NM));
+//   Sparse1->displayExpert();
 
-  //   auto NM_1 = NM_create(NM_SPARSE, 4, 4);
-  //   NM_1->matrix2->origin = NSM_CSC;
-  //   NM_csc_alloc(NM_1, Sparse4->nnz());
-  //   Sparse4->fillCSC(NM_csc(NM_1));
-  //   // NM_display(NM_1);  --> Note FP : fails when exiting the function ... To
-  //   // be investigating
-  //   // ...
-  //   NM_1 = NM_free(NM_1);
-  //   std::cout << "End SimpleMatrixTest::testFromAndFillCSC() " << std::endl;
-  // }
+//   auto NM_1 = NM_create(NM_SPARSE, 4, 4);
+//   NM_1->matrix2->origin = NSM_CSC;
+//   NM_csc_alloc(NM_1, Sparse4->nnz());
+//   Sparse4->fillCSC(NM_csc(NM_1));
+//   // NM_display(NM_1);  --> Note FP : fails when exiting the function ... To
+//   // be investigating
+//   // ...
+//   NM_1 = NM_free(NM_1);
+//   std::cout << "End SimpleMatrixTest::testFromAndFillCSC() " << std::endl;
+// }
 
-  // void SimpleMatrixTest::testPLUFactorizationInPlace() {
-  //   std::cout << "--> Test: PLUFactorizationInPlace." << std::endl;
+// void SimpleMatrixTest::testPLUFactorizationInPlace() {
+//   std::cout << "--> Test: PLUFactorizationInPlace." << std::endl;
 
-  //   auto Dense = std::make_shared<SiconosMatrix>(*D);
-  //   Dense->display();
-  //   Dense->PLUFactorizationInPlace();
-  //   Dense->display();
-  //   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testPLUFactorizationInPlace: ",  < tol, true);
+//   auto Dense = std::make_shared<SiconosMatrix>(*D);
+//   Dense->display();
+//   Dense->PLUFactorizationInPlace();
+//   Dense->display();
+//   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testPLUFactorizationInPlace: ",  < tol, true);
 
-  //   auto Sparse = std::make_shared<SiconosMatrix>(4, 4,
-  //   siconos::algebra::UblasType::SPARSE); Sparse->eye(); Sparse->display();
-  //   Sparse->PLUFactorizationInPlace();
-  //   Sparse->display();
+//   auto Sparse = std::make_shared<SiconosMatrix>(4, 4,
+//   siconos::algebra::UblasType::SPARSE); Sparse->eye(); Sparse->display();
+//   Sparse->PLUFactorizationInPlace();
+//   Sparse->display();
 
-  //   auto Sparse2 = std::make_shared<SiconosMatrix>(*SP4);
-  //   DEBUG_EXPR(Sparse2->display(););
-  //   Sparse2->PLUFactorizationInPlace();
-  //   DEBUG_EXPR(Sparse2->display(););
+//   auto Sparse2 = std::make_shared<SiconosMatrix>(*SP4);
+//   DEBUG_EXPR(Sparse2->display(););
+//   Sparse2->PLUFactorizationInPlace();
+//   DEBUG_EXPR(Sparse2->display(););
 
-  //   std::cout << "-->  test PLUFactorizationInPlace ended with success." << std::endl;
-  // }
+//   std::cout << "-->  test PLUFactorizationInPlace ended with success." << std::endl;
+// }
 
-  // void SimpleMatrixTest::testFactorize() {
-  //   std::cout << "--> Test: Factorize (LU)." << std::endl;
+// void SimpleMatrixTest::testFactorize() {
+//   std::cout << "--> Test: Factorize (LU)." << std::endl;
 
-  //   auto Dense = std::make_shared<SiconosMatrix>(*D);
-  //   Dense->display();
-  //   Dense->Factorize();
-  //   Dense->display();
-  //   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testFactorize: ",  < tol, true);
+//   auto Dense = std::make_shared<SiconosMatrix>(*D);
+//   Dense->display();
+//   Dense->Factorize();
+//   Dense->display();
+//   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testFactorize: ",  < tol, true);
 
-  //   auto Sparse = std::make_shared<SiconosMatrix>(4, 4,
-  //   siconos::algebra::UblasType::SPARSE); Sparse->eye(); Sparse->display();
-  //   Sparse->Factorize();
+//   auto Sparse = std::make_shared<SiconosMatrix>(4, 4,
+//   siconos::algebra::UblasType::SPARSE); Sparse->eye(); Sparse->display();
+//   Sparse->Factorize();
 
-  //   Sparse = std::make_shared<SiconosMatrix>(*SP3);
-  //   Sparse->display();
-  //   Sparse->displayExpert();
-  //   Sparse->Factorize();
-  //   Sparse->display();
+//   Sparse = std::make_shared<SiconosMatrix>(*SP3);
+//   Sparse->display();
+//   Sparse->displayExpert();
+//   Sparse->Factorize();
+//   Sparse->display();
 
-  //   // Other types than SPARSE are not working since fillCSC is not implemented.
-  //   // std::cout << "--> Test: Factorize -- Triangle" <<std::endl;
-  //   // auto Triangle = std::make_shared<SiconosMatrix>(*T2);
-  //   // Triangle->display();
-  //   // Triangle->displayExpert();
-  //   // Triangle->Factorize();
-  //   // Triangle->display();
+//   // Other types than SPARSE are not working since fillCSC is not implemented.
+//   // std::cout << "--> Test: Factorize -- Triangle" <<std::endl;
+//   // auto Triangle = std::make_shared<SiconosMatrix>(*T2);
+//   // Triangle->display();
+//   // Triangle->displayExpert();
+//   // Triangle->Factorize();
+//   // Triangle->display();
 
-  //   /* A last column full of zero caused memory corruption in cs_lusol
-  //      since ublas does not fill the last entry correctly*/
-  //   // Sparse = std::make_shared<SiconosMatrix>(*SP2);
-  //   // Sparse->display();
-  //   // Sparse->displayExpert();
-  //   // Sparse->PLUFactorizationInPlace();
-  //   // Sparse->display();
+//   /* A last column full of zero caused memory corruption in cs_lusol
+//      since ublas does not fill the last entry correctly*/
+//   // Sparse = std::make_shared<SiconosMatrix>(*SP2);
+//   // Sparse->display();
+//   // Sparse->displayExpert();
+//   // Sparse->PLUFactorizationInPlace();
+//   // Sparse->display();
 
-  //   std::cout << "--> Test: Factorize (Cholesky)." << std::endl;
+//   std::cout << "--> Test: Factorize (Cholesky)." << std::endl;
 
-  //   Dense = std::make_shared<SiconosMatrix>(*D);
-  //   /* conpute DD^T */
-  //   auto DenseT = std::make_shared<SiconosMatrix>(*Dense);
-  //   DenseT->trans();
-  //   auto DDT = std::make_shared<SiconosMatrix>(Dense->size(0), Dense->size(1));
-  //   siconos::algebra::prod(*Dense, *DenseT, *DDT);
-  //   DDT->display();
-  //   DDT->setIsSymmetric(true);
-  //   DDT->setIsPositiveDefinite(true);
-  //   DDT->Factorize();
+//   Dense = std::make_shared<SiconosMatrix>(*D);
+//   /* conpute DD^T */
+//   auto DenseT = std::make_shared<SiconosMatrix>(*Dense);
+//   DenseT->trans();
+//   auto DDT = std::make_shared<SiconosMatrix>(Dense->size(0), Dense->size(1));
+//   siconos::algebra::prod(*Dense, *DenseT, *DDT);
+//   DDT->display();
+//   DDT->setIsSymmetric(true);
+//   DDT->setIsPositiveDefinite(true);
+//   DDT->Factorize();
 
-  //   DDT->display();
-  //   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testFactorize: ",  < tol, true);
+//   DDT->display();
+//   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testFactorize: ",  < tol, true);
 
-  // std::cout << "-->  test Factorize ended with success." << std::endl;
+// std::cout << "-->  test Factorize ended with success." << std::endl;
 // }
 // void SimpleMatrixTest::testSolve() {
 //   std::cout << "\n--> Test: Solve. Dense. LU." << std::endl;
 
-  // Test sparse matrix identity
+// Test sparse matrix identity
 
-  // auto Sparse = std::make_shared<SiconosMatrix>(4, 4, siconos::algebra::UblasType::SPARSE);
-  // auto Sparse_backup =
-  //     std::make_shared<SiconosMatrix>(4, 4, siconos::algebra::UblasType::SPARSE);
-  // b = std::make_shared<siconos::algebra::SiconosVector>(Sparse->size(0));
-  // for (int i = 0; i < Sparse->size(0); i++) {
-  //   (*b)(i) = 1.0;
-  // }
-  // backup = std::make_shared<siconos::algebra::SiconosVector>(*b);
-  // Sparse_backup->eye();
-  // Sparse->eye();
-  // Sparse->Solve(*b);
-  // b->display();
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE(
-  //     "testSolve: ", (siconos::algebra::prod(*Sparse_backup, *b) - *backup).norm2() < tol,
-  //     true);
+// auto Sparse = std::make_shared<SiconosMatrix>(4, 4, siconos::algebra::UblasType::SPARSE);
+// auto Sparse_backup =
+//     std::make_shared<SiconosMatrix>(4, 4, siconos::algebra::UblasType::SPARSE);
+// b = std::make_shared<siconos::algebra::SiconosVector>(Sparse->size(0));
+// for (int i = 0; i < Sparse->size(0); i++) {
+//   (*b)(i) = 1.0;
+// }
+// backup = std::make_shared<siconos::algebra::SiconosVector>(*b);
+// Sparse_backup->eye();
+// Sparse->eye();
+// Sparse->Solve(*b);
+// b->display();
+// CPPUNIT_ASSERT_EQUAL_MESSAGE(
+//     "testSolve: ", (siconos::algebra::prod(*Sparse_backup, *b) - *backup).norm2() < tol,
+//     true);
 
-  // // test sparse matrix 3x3
-  // Sparse = std::make_shared<SiconosMatrix>(*SP3);
-  // b = std::make_shared<siconos::algebra::SiconosVector>(Sparse->size(0));
-  // for (int i = 0; i < Sparse->size(0); i++) {
-  //   (*b)(i) = 1.0;
-  // }
-  // backup = std::make_shared<siconos::algebra::SiconosVector>(*b);
-  // Sparse->Solve(*b);
-  // b->display();
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE(
-  //     "testSolve: ", (siconos::algebra::prod(*Sparse, *b) - *backup).norm2() < tol, true);
+// // test sparse matrix 3x3
+// Sparse = std::make_shared<SiconosMatrix>(*SP3);
+// b = std::make_shared<siconos::algebra::SiconosVector>(Sparse->size(0));
+// for (int i = 0; i < Sparse->size(0); i++) {
+//   (*b)(i) = 1.0;
+// }
+// backup = std::make_shared<siconos::algebra::SiconosVector>(*b);
+// Sparse->Solve(*b);
+// b->display();
+// CPPUNIT_ASSERT_EQUAL_MESSAGE(
+//     "testSolve: ", (siconos::algebra::prod(*Sparse, *b) - *backup).norm2() < tol, true);
 
-  // // Solve again with another r.h.s.
-  // b = std::make_shared<siconos::algebra::SiconosVector>(Sparse->size(0));
-  // for (int i = 0; i < Sparse->size(0); i++) {
-  //   (*b)(i) = 2.0;
-  // }
-  // backup = std::make_shared<siconos::algebra::SiconosVector>(*b);
-  // Sparse->Solve(*b);
-  // b->display();
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE(
-  //     "testSolve: ", (siconos::algebra::prod(*Sparse, *b) - *backup).norm2() < tol, true);
+// // Solve again with another r.h.s.
+// b = std::make_shared<siconos::algebra::SiconosVector>(Sparse->size(0));
+// for (int i = 0; i < Sparse->size(0); i++) {
+//   (*b)(i) = 2.0;
+// }
+// backup = std::make_shared<siconos::algebra::SiconosVector>(*b);
+// Sparse->Solve(*b);
+// b->display();
+// CPPUNIT_ASSERT_EQUAL_MESSAGE(
+//     "testSolve: ", (siconos::algebra::prod(*Sparse, *b) - *backup).norm2() < tol, true);
 
-  // // test sparse matrix 4x4 SP4
+// // test sparse matrix 4x4 SP4
 
-  // Sparse = std::make_shared<SiconosMatrix>(*SP4);
-  // b = std::make_shared<siconos::algebra::SiconosVector>(Sparse->size(0));
-  // for (int i = 0; i < Sparse->size(0); i++) {
-  //   (*b)(i) = 1.0;
-  // }
-  // backup = std::make_shared<siconos::algebra::SiconosVector>(*b);
-  // Sparse->Solve(*b);
-  // b->display();
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE(
-  //     "testSolve: ", (siconos::algebra::prod(*Sparse, *b) - *backup).norm2() < tol, true);
+// Sparse = std::make_shared<SiconosMatrix>(*SP4);
+// b = std::make_shared<siconos::algebra::SiconosVector>(Sparse->size(0));
+// for (int i = 0; i < Sparse->size(0); i++) {
+//   (*b)(i) = 1.0;
+// }
+// backup = std::make_shared<siconos::algebra::SiconosVector>(*b);
+// Sparse->Solve(*b);
+// b->display();
+// CPPUNIT_ASSERT_EQUAL_MESSAGE(
+//     "testSolve: ", (siconos::algebra::prod(*Sparse, *b) - *backup).norm2() < tol, true);
 
-  // std::cout << "\n\n--> Test: Solve. Sparse. LU.  Sparse rhs" << std::endl;
+// std::cout << "\n\n--> Test: Solve. Sparse. LU.  Sparse rhs" << std::endl;
 
-  // // test sparse matrix 3x3 sparse RhS. trivial solution (Id)
-  // Sparse = std::make_shared<SiconosMatrix>(*SP3);
-  // auto Sparse_rhs = std::make_shared<SiconosMatrix>(*SP3);
-  // Sparse->Solve(*Sparse_rhs);
-  // // std::cout << "Sparse_rhs :" << std::endl;
-  // // Sparse_rhs->display();
-  // // std::cout << "Sparse :" << std::endl;
-  // // Sparse->display();
-  // // std::cout << "A A^{-1}" << std::endl;
-  // // (siconos::algebra::prod(*Sparse,*Sparse_rhs)).display();
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE(
-  //     "testSolve: ", (siconos::algebra::prod(*Sparse, *Sparse_rhs) - *Sparse).normInf() <
-  //     tol, true);
+// // test sparse matrix 3x3 sparse RhS. trivial solution (Id)
+// Sparse = std::make_shared<SiconosMatrix>(*SP3);
+// auto Sparse_rhs = std::make_shared<SiconosMatrix>(*SP3);
+// Sparse->Solve(*Sparse_rhs);
+// // std::cout << "Sparse_rhs :" << std::endl;
+// // Sparse_rhs->display();
+// // std::cout << "Sparse :" << std::endl;
+// // Sparse->display();
+// // std::cout << "A A^{-1}" << std::endl;
+// // (siconos::algebra::prod(*Sparse,*Sparse_rhs)).display();
+// CPPUNIT_ASSERT_EQUAL_MESSAGE(
+//     "testSolve: ", (siconos::algebra::prod(*Sparse, *Sparse_rhs) - *Sparse).normInf() <
+//     tol, true);
 
-  // // test sparse matrix 3x3 sparse RhS. inverse
-  // Sparse = std::make_shared<SiconosMatrix>(*SP3);
-  // Sparse_rhs = std::make_shared<SiconosMatrix>(3, 3);
-  // Sparse_rhs->eye();
-  // Sparse->Solve(*Sparse_rhs);
-  // auto Id = std::make_shared<SiconosMatrix>(3, 3);
-  // Id->eye();
+// // test sparse matrix 3x3 sparse RhS. inverse
+// Sparse = std::make_shared<SiconosMatrix>(*SP3);
+// Sparse_rhs = std::make_shared<SiconosMatrix>(3, 3);
+// Sparse_rhs->eye();
+// Sparse->Solve(*Sparse_rhs);
+// auto Id = std::make_shared<SiconosMatrix>(3, 3);
+// Id->eye();
 
-  // // Sparse_rhs->display();
-  // // std::cout << "A A^{-1}" << std::endl;
+// // Sparse_rhs->display();
+// // std::cout << "A A^{-1}" << std::endl;
 
-  // // (siconos::algebra::prod(*Sparse,*Sparse_rhs)).display();
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE(
-  //     "testSolve: ", (siconos::algebra::prod(*Sparse, *Sparse_rhs) - *Id).normInf() < tol,
-  //     true);
+// // (siconos::algebra::prod(*Sparse,*Sparse_rhs)).display();
+// CPPUNIT_ASSERT_EQUAL_MESSAGE(
+//     "testSolve: ", (siconos::algebra::prod(*Sparse, *Sparse_rhs) - *Id).normInf() < tol,
+//     true);
 
-  // std::cout << "\n\n--> Test: Solve. Sparse. Cholesky." << std::endl;
+// std::cout << "\n\n--> Test: Solve. Sparse. Cholesky." << std::endl;
 
-  // // Test sparse matrix identity
-  // Sparse = std::make_shared<SiconosMatrix>(4, 4, siconos::algebra::UblasType::SPARSE);
-  // Sparse_backup = std::make_shared<SiconosMatrix>(4, 4,
-  // siconos::algebra::UblasType::SPARSE); b =
-  // std::make_shared<siconos::algebra::SiconosVector>(Sparse->size(0)); for (int i = 0; i <
-  // Sparse->size(0); i++) {
-  //   (*b)(i) = 1.0;
-  // }
-  // backup = std::make_shared<siconos::algebra::SiconosVector>(*b);
-  // Sparse_backup->eye();
-  // Sparse->eye();
-  // Sparse->setIsSymmetric(true);
-  // Sparse->setIsPositiveDefinite(true);
-  // Sparse->Solve(*b);
-  // b->display();
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE(
-  //     "testSolve: ", (siconos::algebra::prod(*Sparse_backup, *b) - *backup).norm2() < tol,
-  //     true);
+// // Test sparse matrix identity
+// Sparse = std::make_shared<SiconosMatrix>(4, 4, siconos::algebra::UblasType::SPARSE);
+// Sparse_backup = std::make_shared<SiconosMatrix>(4, 4,
+// siconos::algebra::UblasType::SPARSE); b =
+// std::make_shared<siconos::algebra::SiconosVector>(Sparse->size(0)); for (int i = 0; i <
+// Sparse->size(0); i++) {
+//   (*b)(i) = 1.0;
+// }
+// backup = std::make_shared<siconos::algebra::SiconosVector>(*b);
+// Sparse_backup->eye();
+// Sparse->eye();
+// Sparse->setIsSymmetric(true);
+// Sparse->setIsPositiveDefinite(true);
+// Sparse->Solve(*b);
+// b->display();
+// CPPUNIT_ASSERT_EQUAL_MESSAGE(
+//     "testSolve: ", (siconos::algebra::prod(*Sparse_backup, *b) - *backup).norm2() < tol,
+//     true);
 
-  // // test sparse matrix 3x3
-  // Sparse = std::make_shared<SiconosMatrix>(*SP3);
-  // b = std::make_shared<siconos::algebra::SiconosVector>(Sparse->size(0));
-  // for (int i = 0; i < Sparse->size(0); i++) {
-  //   (*b)(i) = 1.0;
-  // }
-  // backup = std::make_shared<siconos::algebra::SiconosVector>(*b);
-  // auto SparseT = std::make_shared<SiconosMatrix>(*SP3);
-  // SparseT->trans();
-  // auto SST = std::make_shared<SiconosMatrix>(Sparse->size(0), Sparse->size(1),
-  //                                           siconos::algebra::UblasType::SPARSE);
-  // siconos::algebra::prod(*Sparse, *SparseT, *SST);
-  // SST->setIsSymmetric(true);
-  // SST->setIsPositiveDefinite(true);
-  // SST->Solve(*b);
-  // b->display();
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE(
-  //     "testSolve: ", (siconos::algebra::prod(*SST, *b) - *backup).norm2() < tol, true);
+// // test sparse matrix 3x3
+// Sparse = std::make_shared<SiconosMatrix>(*SP3);
+// b = std::make_shared<siconos::algebra::SiconosVector>(Sparse->size(0));
+// for (int i = 0; i < Sparse->size(0); i++) {
+//   (*b)(i) = 1.0;
+// }
+// backup = std::make_shared<siconos::algebra::SiconosVector>(*b);
+// auto SparseT = std::make_shared<SiconosMatrix>(*SP3);
+// SparseT->trans();
+// auto SST = std::make_shared<SiconosMatrix>(Sparse->size(0), Sparse->size(1),
+//                                           siconos::algebra::UblasType::SPARSE);
+// siconos::algebra::prod(*Sparse, *SparseT, *SST);
+// SST->setIsSymmetric(true);
+// SST->setIsPositiveDefinite(true);
+// SST->Solve(*b);
+// b->display();
+// CPPUNIT_ASSERT_EQUAL_MESSAGE(
+//     "testSolve: ", (siconos::algebra::prod(*SST, *b) - *backup).norm2() < tol, true);
 
-  // // Solve again with another r.h.s.
-  // b = std::make_shared<siconos::algebra::SiconosVector>(Sparse->size(0));
-  // for (int i = 0; i < Sparse->size(0); i++) {
-  //   (*b)(i) = 2.0;
-  // }
-  // backup = std::make_shared<siconos::algebra::SiconosVector>(*b);
-  // SST->Solve(*b);
-  // b->display();
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE(
-  //     "testSolve: ", (siconos::algebra::prod(*SST, *b) - *backup).norm2() < tol, true);
+// // Solve again with another r.h.s.
+// b = std::make_shared<siconos::algebra::SiconosVector>(Sparse->size(0));
+// for (int i = 0; i < Sparse->size(0); i++) {
+//   (*b)(i) = 2.0;
+// }
+// backup = std::make_shared<siconos::algebra::SiconosVector>(*b);
+// SST->Solve(*b);
+// b->display();
+// CPPUNIT_ASSERT_EQUAL_MESSAGE(
+//     "testSolve: ", (siconos::algebra::prod(*SST, *b) - *backup).norm2() < tol, true);
 
-  // // test sparse matrix 4x4 SP4
-  // Sparse = std::make_shared<SiconosMatrix>(*SP4);
-  // b = std::make_shared<siconos::algebra::SiconosVector>(Sparse->size(0));
-  // for (int i = 0; i < Sparse->size(0); i++) {
-  //   (*b)(i) = 1.0;
-  // }
-  // backup = std::make_shared<siconos::algebra::SiconosVector>(*b);
-  // SparseT = std::make_shared<SiconosMatrix>(*SP4);
-  // SparseT->trans();
-  // SST = std::make_shared<SiconosMatrix>(Sparse->size(0), Sparse->size(1),
-  //                                      siconos::algebra::UblasType::SPARSE);
-  // siconos::algebra::prod(*Sparse, *SparseT, *SST);
-  // SST->setIsSymmetric(true);
-  // SST->setIsPositiveDefinite(true);
-  // SST->Solve(*b);
-  // b->display();
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE(
-  //     "testSolve: ", (siconos::algebra::prod(*SST, *b) - *backup).norm2() < tol, true);
+// // test sparse matrix 4x4 SP4
+// Sparse = std::make_shared<SiconosMatrix>(*SP4);
+// b = std::make_shared<siconos::algebra::SiconosVector>(Sparse->size(0));
+// for (int i = 0; i < Sparse->size(0); i++) {
+//   (*b)(i) = 1.0;
+// }
+// backup = std::make_shared<siconos::algebra::SiconosVector>(*b);
+// SparseT = std::make_shared<SiconosMatrix>(*SP4);
+// SparseT->trans();
+// SST = std::make_shared<SiconosMatrix>(Sparse->size(0), Sparse->size(1),
+//                                      siconos::algebra::UblasType::SPARSE);
+// siconos::algebra::prod(*Sparse, *SparseT, *SST);
+// SST->setIsSymmetric(true);
+// SST->setIsPositiveDefinite(true);
+// SST->Solve(*b);
+// b->display();
+// CPPUNIT_ASSERT_EQUAL_MESSAGE(
+//     "testSolve: ", (siconos::algebra::prod(*SST, *b) - *backup).norm2() < tol, true);
 
-  // std::cout << "\n\n--> Test: Solve. Sparse. Cholesky.  Sparse rhs" << std::endl;
+// std::cout << "\n\n--> Test: Solve. Sparse. Cholesky.  Sparse rhs" << std::endl;
 
-  // // test sparse matrix 3x3 sparse RhS. trivial solution (Id)
-  // Sparse = std::make_shared<SiconosMatrix>(*SP3);
-  // SparseT = std::make_shared<SiconosMatrix>(*SP3);
-  // SparseT->trans();
-  // SST = std::make_shared<SiconosMatrix>(Sparse->size(0), Sparse->size(1),
-  //                                      siconos::algebra::UblasType::SPARSE);
-  // siconos::algebra::prod(*Sparse, *SparseT, *SST);
-  // Sparse_rhs = std::make_shared<SiconosMatrix>(*SST);
-  // // std::cout << "SST" << std::endl;
-  // // SST->display();
-  // SST->setIsSymmetric(true);
-  // SST->setIsPositiveDefinite(true);
-  // SST->Solve(*Sparse_rhs);
-  // // Sparse_rhs->display();
-  // // std::cout << "A A^{-1}" << std::endl;
-  // // (siconos::algebra::prod(*SST,*Sparse_rhs)).display();
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE(
-  //     "testSolve: ", (siconos::algebra::prod(*SST, *Sparse_rhs) - *SST).normInf() < tol,
-  //     true);
+// // test sparse matrix 3x3 sparse RhS. trivial solution (Id)
+// Sparse = std::make_shared<SiconosMatrix>(*SP3);
+// SparseT = std::make_shared<SiconosMatrix>(*SP3);
+// SparseT->trans();
+// SST = std::make_shared<SiconosMatrix>(Sparse->size(0), Sparse->size(1),
+//                                      siconos::algebra::UblasType::SPARSE);
+// siconos::algebra::prod(*Sparse, *SparseT, *SST);
+// Sparse_rhs = std::make_shared<SiconosMatrix>(*SST);
+// // std::cout << "SST" << std::endl;
+// // SST->display();
+// SST->setIsSymmetric(true);
+// SST->setIsPositiveDefinite(true);
+// SST->Solve(*Sparse_rhs);
+// // Sparse_rhs->display();
+// // std::cout << "A A^{-1}" << std::endl;
+// // (siconos::algebra::prod(*SST,*Sparse_rhs)).display();
+// CPPUNIT_ASSERT_EQUAL_MESSAGE(
+//     "testSolve: ", (siconos::algebra::prod(*SST, *Sparse_rhs) - *SST).normInf() < tol,
+//     true);
 
-  // // test sparse matrix 3x3 sparse RhS. inverse
-  // SST = std::make_shared<SiconosMatrix>(Sparse->size(0), Sparse->size(1),
-  //                                      siconos::algebra::UblasType::SPARSE);
-  // siconos::algebra::prod(*Sparse, *SparseT, *SST);
-  // Sparse_rhs = std::make_shared<SiconosMatrix>(3, 3, siconos::algebra::UblasType::SPARSE);
-  // Sparse_rhs->eye();
-  // // std::cout << "SST" << std::endl;
-  // // SST->display();
-  // SST->setIsSymmetric(true);
-  // SST->setIsPositiveDefinite(true);
-  // SST->Solve(*Sparse_rhs);
-  // // Sparse_rhs->display();
+// // test sparse matrix 3x3 sparse RhS. inverse
+// SST = std::make_shared<SiconosMatrix>(Sparse->size(0), Sparse->size(1),
+//                                      siconos::algebra::UblasType::SPARSE);
+// siconos::algebra::prod(*Sparse, *SparseT, *SST);
+// Sparse_rhs = std::make_shared<SiconosMatrix>(3, 3, siconos::algebra::UblasType::SPARSE);
+// Sparse_rhs->eye();
+// // std::cout << "SST" << std::endl;
+// // SST->display();
+// SST->setIsSymmetric(true);
+// SST->setIsPositiveDefinite(true);
+// SST->Solve(*Sparse_rhs);
+// // Sparse_rhs->display();
 
-  // // Sparse_rhs->display();
-  // // std::cout << "A A^{-1}" << std::endl;
+// // Sparse_rhs->display();
+// // std::cout << "A A^{-1}" << std::endl;
 
-  // // (siconos::algebra::prod(*SST,*Sparse_rhs)).display();
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE(
-  //     "testSolve: ", (siconos::algebra::prod(*SST, *Sparse_rhs) - *Id).normInf() < tol,
-  //     true);
+// // (siconos::algebra::prod(*SST,*Sparse_rhs)).display();
+// CPPUNIT_ASSERT_EQUAL_MESSAGE(
+//     "testSolve: ", (siconos::algebra::prod(*SST, *Sparse_rhs) - *Id).normInf() < tol,
+//     true);
 
-  // std::cout << "-->  test Solve ended with success." << std::endl;
+// std::cout << "-->  test Solve ended with success." << std::endl;
 //}
 
 void SimpleMatrixTest::End() {

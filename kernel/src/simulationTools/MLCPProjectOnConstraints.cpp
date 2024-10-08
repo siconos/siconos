@@ -27,10 +27,10 @@
 #include "NumericsSolversNamespace.h"  // solver_options stuff
 #include "OSNSMatrixProjectOnConstraints.hpp"
 #include "Relation.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixOp.hpp"  // mat prod
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"  // for setBlock
-#include "SiconosMatrix.hpp"
 #include "Simulation.hpp"
 #include "Tools.hpp"  // enum_to_string
 // #define DEBUG_NOCOLOR
@@ -488,8 +488,8 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::
 
       if (_useMassNormalization) {
         auto centralInteractionBlock = getOSIMatrix(osi1, ds);
-        siconos::algebra::solveInPlace(*centralInteractionBlock, *work);
-        siconos::algebra::prod(*leftInteractionBlock, *work, *currentInteractionBlock, false);
+        centralInteractionBlock->solve(*work);
+        *currentInteractionBlock += *leftInteractionBlock * *work;
         //      gemm(CblasNoTrans,CblasNoTrans,1.0,*leftInteractionBlock,*work,1.0,*currentInteractionBlock);
       } else {
         siconos::algebra::prod(*leftInteractionBlock, *work, *currentInteractionBlock, false);
@@ -508,7 +508,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::
 #ifdef MLCPPROJ_WITH_CT
       auto sizeDS = neds->dimension();
       auto T = neds->T();
-      auto workT = std::make_shared<siconos::algebra::SiconosMatrix>(*T);
+      auto workT = std::make_shared<siconos::algebra::SiconosMatrix>(T);
       workT->trans();
       auto workT2 = std::make_shared<siconos::algebra::SiconosMatrix>(6, 6);
       siconos::algebra::prod(*workT, *T, *workT2, true);
@@ -717,7 +717,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::computeInteracti
     inter1->getLeftInteractionBlockForDS(pos1, leftInteractionBlock);
     auto neds = (std::static_pointer_cast<NewtonEulerDS>(ds));
     auto T = neds->T();
-    auto workT = std::make_shared<siconos::algebra::SiconosMatrix>(*T);
+    auto workT = std::make_shared<siconos::algebra::SiconosMatrix>(T);
     workT->trans();
     auto workT2 = std::make_shared<siconos::algebra::SiconosMatrix>(6, 6);
     siconos::algebra::prod(*workT, *T, *workT2, true);
@@ -788,13 +788,11 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::computeInteracti
     rightInteractionBlock->transposeInPlace();
 
     if (_useMassNormalization) {
-      siconos::algebra::solveInPlace(*centralInteractionBlock, *rightInteractionBlock);
+      centralInteractionBlock->solve(*rightInteractionBlock);
       //*currentInteractionBlock +=  *leftInteractionBlock ** work;
-      siconos::algebra::prod(*leftInteractionBlock, *rightInteractionBlock,
-                             *currentInteractionBlock, false);
+      *currentInteractionBlock += *leftInteractionBlock * *rightInteractionBlock;
     } else {
-      siconos::algebra::prod(*leftInteractionBlock, *rightInteractionBlock,
-                             *currentInteractionBlock, false);
+      *currentInteractionBlock += *leftInteractionBlock * *rightInteractionBlock;
     }
 #ifdef MLCPPROJ_DEBUG
     std::cout << "siconos::nonsmooth_formulations::MLCPProjectOnConstraints::"

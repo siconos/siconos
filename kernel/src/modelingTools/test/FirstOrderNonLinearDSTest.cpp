@@ -17,10 +17,10 @@
  */
 #include "FirstOrderNonLinearDSTest.hpp"
 
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixOp.hpp"
 #include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
-#include "SiconosMatrix.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
   if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -34,9 +34,11 @@ void FirstOrderNonLinearDSTest::setUp() {
   (*x0)(0) = 1;
   (*x0)(1) = 2;
   (*x0)(2) = 3;
-  
-  J0 = std::make_shared<siconos::algebra::SiconosMatrix>(siconos::algebra::readMatrixFromFile("matJ0.dat"));
-  M = std::make_shared<siconos::algebra::SiconosMatrix>(siconos::algebra::readMatrixFromFile("matM.dat"));
+
+  J0 = std::make_shared<siconos::algebra::SiconosMatrix>(
+      siconos::algebra::readMatrixFromFile("matJ0.dat"));
+  M = std::make_shared<siconos::algebra::SiconosMatrix>(
+      siconos::algebra::readMatrixFromFile("matM.dat"));
 }
 
 void FirstOrderNonLinearDSTest::tearDown() {}
@@ -54,7 +56,7 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS1() {
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testBuildFirstOrderNonLinearDS1 : ", ds->jacobianfx() == nullptr, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", ds->M() == nullptr, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", ds->invM() == nullptr,
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", ds->LU_M() == nullptr,
                                true);
   double time = 1.5;
 
@@ -128,7 +130,7 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS2() {
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testBuildFirstOrderNonLinearDS2 : ", ds->jacobianfx() == nullptr, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", ds->M() == nullptr, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", ds->invM() == nullptr,
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", ds->LU_M() == nullptr,
                                true);
   siconos::algebra::SiconosVector zero(3);
   zero.setZero();
@@ -168,7 +170,7 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS3() {
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testBuildFirstOrderNonLinearDS3 : ", *(ds->jacobianfx()) == *J0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3 : ", ds->M() == nullptr, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3 : ", ds->invM() == nullptr,
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3 : ", ds->LU_M() == nullptr,
                                true);
 
   ds->initRhs(time);

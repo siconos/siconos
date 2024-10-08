@@ -718,8 +718,7 @@ siconos::modeling::Interaction::getLeftInteractionBlockForDS(unsigned int pos, u
         std::to_string(
             static_cast<std::underlying_type<RelationSubType>::type>(relationType)));
 
-  auto InteractionBlock =
-      std::make_shared<siconos::algebra::SiconosMatrix>(size, sizeDS);
+  auto InteractionBlock = std::make_shared<siconos::algebra::SiconosMatrix>(size, sizeDS);
 
   // copy sub-interactionBlock of originalMatrix into InteractionBlock
   // dim of the sub-interactionBlock

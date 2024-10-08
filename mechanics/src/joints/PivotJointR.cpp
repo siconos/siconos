@@ -643,5 +643,5 @@ void siconos::joints::PivotJointR::_normalDoF(siconos::algebra::SiconosVector& a
   // We assume that A is normalized.
   ans = *_A;
 
-  if (absoluteRef) siconos::geometry::changeFrameBodyToAbs(*q0.getAllVect()[0], ans);
+  if (absoluteRef) siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(*q0.getAllVect()[0], ans);
 }

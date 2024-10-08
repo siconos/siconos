@@ -41,9 +41,8 @@ PYBIND11_MODULE(modeling, m) {
   py::class_<siconos::modeling::SecondOrderDS,
              std::shared_ptr<siconos::modeling::SecondOrderDS>,
              siconos::modeling::DynamicalSystem>(m, "SecondOrderDS")
-      .def("p", &siconos::modeling::SecondOrderDS::p_python,
-           py::return_value_policy::reference_internal)
-      .def_property_readonly("mass", &siconos::modeling::SecondOrderDS::mass_view);
+      .def("p", &siconos::modeling::SecondOrderDS::p_read,
+           py::return_value_policy::reference_internal);
 
   py::class_<siconos::modeling::LagrangianDS, std::shared_ptr<siconos::modeling::LagrangianDS>,
              siconos::modeling::SecondOrderDS>(m, "LagrangianDS")
@@ -76,8 +75,28 @@ PYBIND11_MODULE(modeling, m) {
       .def("computeFext", &siconos::modeling::LagrangianDS::computeFext,
            "compute external forces")
 
-      .def("fext", &siconos::modeling::LagrangianDS::fext_view,
-           "current values of external forces");
+      .def("fext", &siconos::modeling::LagrangianDS::fext, "current values of external forces")
+
+      .def(
+          "setComputeFintFunction",
+          [](siconos::modeling::LagrangianDS &self, py::function f) {
+            // Catch Python function and create a complient std::function
+            self.setComputeFintFunction(
+                [f](const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
+                    const Eigen::Ref<const siconos::algebra::SiconosVector> &position,
+                    double time, Eigen::Ref<siconos::algebra::MapVectorType> result) {
+                  f(velocity, position, time,
+                    result);  // Call python func with a memory view ...
+                });
+          },
+
+          "How to compute internal forces")
+      .def("computeFint", &siconos::modeling::LagrangianDS::computeFint,
+           "compute internal forces")
+      .def_property_readonly("fint", &siconos::modeling::LagrangianDS::fint,
+                             "internal forces current values")
+      //      .def_property_readonly("mass", &siconos::modeling::SecondOrderDS::mass);
+      .def("mass", &siconos::modeling::LagrangianDS::mass, "mass matrix");
 
   py::class_<siconos::modeling::LagrangianLinearTIDS,
              std::shared_ptr<siconos::modeling::LagrangianLinearTIDS>,

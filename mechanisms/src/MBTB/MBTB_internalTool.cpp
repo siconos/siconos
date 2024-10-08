@@ -281,8 +281,8 @@ void siconos::mechanisms::mbtb::internal::MBTB_displayStep() {
       //    (mbtb::data::sDS[numDS]->M())->display();
       //    (mbtb::data::sDS[numDS]->twist())->display();
       siconos::algebra::SiconosVector res(6);
-      siconos::algebra::prod(*(mbtb::data::sDS[numDS]->mass()),
-                             *(mbtb::data::sDS[numDS]->twist()), res);
+      res =
+          mbtb::data::sDS[numDS]->totalInertiaMatrix() * mbtb::data::sDS[numDS]->twist_read();
       double ec = 0.0;
       for (int i = 0; i < 6; i++)
         ec += res.getValue(i) * mbtb::data::sDS[numDS]->twist()->getValue(i);
@@ -318,8 +318,8 @@ void siconos::mechanisms::mbtb::internal::MBTB_displayStep() {
       printf("\n");
 
       printf("Moments in Joint %i in absolute frame \n", numJ);
-      siconos::geometry::changeFrameBodyToAbs(*mbtb::data::sJointRelations[numJ]->_ds1->q(),
-                                              *vaux);
+      siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(
+          *mbtb::data::sJointRelations[numJ]->_ds1->q(), *vaux);
       for (int ii = 0; ii < 3; ii++) {
         printf("%e", vaux->getValue(ii));
         printf("\t");
@@ -355,7 +355,7 @@ void siconos::mechanisms::mbtb::internal::MBTB_displayStep() {
                        mbtb::data::sContacts[numC]->relation()->contactForce()->getValue(ii));
       }
       /*convert momentum in abs frame*/
-      siconos::geometry::changeFrameBodyToAbs(
+      siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(
           *mbtb::data::sDS[mbtb::data::sContacts[numC]->indexBody1()]->q(), *vaux);
       printf("\n");
       printf("Moments of contact forces in contact  %i in absolute frame \n", numC);
@@ -422,8 +422,7 @@ void siconos::mechanisms::mbtb::internal::MBTB_printStep(std::ofstream& myfile) 
     }
 
     siconos::algebra::SiconosVector res(6);
-    siconos::algebra::prod(*(mbtb::data::sDS[numDS]->mass()),
-                           *(mbtb::data::sDS[numDS]->twist()), res);
+    res = mbtb::data::sDS[numDS]->totalInertiaMatrix() * mbtb::data::sDS[numDS]->twist_read();
     double ec = 0.0;
     for (int i = 0; i < 6; i++)
       ec += res.getValue(i) * mbtb::data::sDS[numDS]->twist()->getValue(i);
@@ -440,8 +439,8 @@ void siconos::mechanisms::mbtb::internal::MBTB_printStep(std::ofstream& myfile) 
                      mbtb::data::sJointRelations[numJ]->_jointR->contactForce()->getValue(ii));
     }
     /*convert momentum in abs frame*/
-    siconos::geometry::changeFrameBodyToAbs(*mbtb::data::sJointRelations[numJ]->_ds1->q(),
-                                            *vaux);
+    siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(
+        *mbtb::data::sJointRelations[numJ]->_ds1->q(), *vaux);
     for (int ii = 0; ii < 3; ii++) {
       myfile << vaux->getValue(ii) << "\t";
     }
@@ -467,7 +466,7 @@ void siconos::mechanisms::mbtb::internal::MBTB_printStep(std::ofstream& myfile) 
                      mbtb::data::sContacts[numC]->relation()->contactForce()->getValue(ii));
     }
     /*convert momentum in abs frame*/
-    siconos::geometry::changeFrameBodyToAbs(
+    siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(
         *mbtb::data::sDS[mbtb::data::sContacts[numC]->indexBody1()]->q(), *vaux);
     for (int ii = 0; ii < 3; ii++) {
       myfile << vaux->getValue(ii) << "\t";

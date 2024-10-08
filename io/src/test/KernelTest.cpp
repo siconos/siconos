@@ -48,8 +48,9 @@ void KernelTest::tearDown() {};
 
 void KernelTest::t0() {
   auto q = std::make_shared<siconos::algebra::SiconosVector>(3);
-  auto q0 = std::make_shared<siconos::algebra::SiconosVector>(3);
 
+  siconos::algebra::SiconosVector q0{3};
+  q0.setZero();
   (*q)(0) = 1.0;
   (*q)(1) = 2.0;
   (*q)(2) = 2.0;
@@ -188,19 +189,21 @@ void KernelTest::t5() {
   (*Mass)(2, 2) = 3. / 5 * m * R * R;
 
   // -- Initial positions and velocities --
-  auto q0 = std::make_shared<siconos::algebra::SiconosVector>(nDof);
-  auto v0 = std::make_shared<siconos::algebra::SiconosVector>(nDof);
-  (*q0)(0) = position_init;
-  (*v0)(0) = velocity_init;
+  siconos::algebra::SiconosVector q0{nDof};
+  siconos::algebra::SiconosVector v0{nDof};
+  q0.setZero();
+  v0.setZero();
+  q0(0) = position_init;
+  v0(0) = velocity_init;
 
   // -- The dynamical system --
-  auto ball = std::make_shared<siconos::modeling::LagrangianLinearTIDS>(q0, v0, Mass);
+  auto ball = std::make_shared<siconos::modeling::LagrangianLinearTIDS>(q0, v0, mass);
 
   // -- Set external forces (weight) --
   siconos::algebra::SiconosVector weight{nDof};
   weight.setZero();
   weight(0) = -m * g;
-  ball->setConstantFExt(weight);
+  ball->setConstantFext(weight);
 
   // --------------------
   // --- Interactions ---

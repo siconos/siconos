@@ -39,27 +39,26 @@ PYBIND11_MODULE(pb11_template, m) {
       .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector> &>(),
            py::keep_alive<1, 2>(),  // keep python object (np array arguments) memory alive
                                     // as long as object is referenced
-           py::arg("vectorName1"))
+           py::arg("vector1"))
 
-      .def("setConstantVectorName2",
-           &siconos::internal::devel_model::ClassA::setConstantVectorName2,
+      .def("setConstantVector2", &siconos::internal::devel_model::ClassA::setConstantVector2,
            py::keep_alive<1, 2>())
 
       .def(
-          "setComputeVectorName2Function",
+          "setComputeVector2Function",
           [](siconos::internal::devel_model::ClassA &self, py::function f) {
             // Catch Python function and create a complient std::function
-            self.setComputeVectorName2Function(
+            self.setComputeVector2Function(
                 [f](double val, Eigen::Ref<siconos::algebra::MapVectorType> result) {
                   f(val, result);  // Call python func with a memory view ...
                 });
           },
           "How to compute external forces")
 
-      .def("computeVectorName2", &siconos::internal::devel_model::ClassA::computeVectorName2,
+      .def("computeVector2", &siconos::internal::devel_model::ClassA::computeVector2,
            "compute external forces")
 
-      .def("vectorName2", &siconos::internal::devel_model::ClassA::vectorName2_view,
+      .def("vector2", &siconos::internal::devel_model::ClassA::vector2,
            "current value of external forces")
 
       .def("setConstantVectorNameDirect",
@@ -108,28 +107,26 @@ PYBIND11_MODULE(pb11_template, m) {
       .def("vectorNameSpan", &siconos::internal::devel_model::ClassA::vectorNameSpan_view,
            "current value of external forces")
 
-      .def("vectorName3", &siconos::internal::devel_model::ClassA::vectorName3_python,
+      .def("var", &siconos::internal::devel_model::ClassA::var_read,
            py::return_value_policy::reference_internal)
 
-      .def("setConstantMatrixName",
-           &siconos::internal::devel_model::ClassA::setConstantMatrixName,
+      .def("setConstantMatrix1", &siconos::internal::devel_model::ClassA::setConstantMatrix1,
            py::keep_alive<1, 2>())
 
       .def(
-          "setComputeMatrixNameFunction",
+          "setComputeMatrix1Function",
           [](siconos::internal::devel_model::ClassA &self, py::function f) {
             // Catch Python function and create a complient std::function
-            self.setComputeMatrixNameFunction(
-                [f](Eigen::Ref<siconos::algebra::MapVectorType> pos, double val,
-                    Eigen::Ref<siconos::algebra::MapType> result) {
-                  f(val, pos, result);  // Call python func with a memory view ...
-                });
+            self.setComputeMatrix1Function([f](Eigen::Ref<siconos::algebra::MapVectorType> pos,
+                                               double val,
+                                               Eigen::Ref<siconos::algebra::MapType> result) {
+              f(val, pos, result);  // Call python func with a memory view ...
+            });
           },
           "How to compute xxx matrix operator")
 
-      .def("computeMatrixName", &siconos::internal::devel_model::ClassA::computeMatrixName,
+      .def("computeMatrix1", &siconos::internal::devel_model::ClassA::computeMatrix1,
            "compute mass matrix")
 
-      .def_property_readonly("matrixName",
-                             &siconos::internal::devel_model::ClassA::matrixName_view);
+      .def_property_readonly("matrix1", &siconos::internal::devel_model::ClassA::matrix1);
 }

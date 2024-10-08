@@ -179,8 +179,11 @@ void siconos::integrators::LsodarOSI::computeRhs(double t) {
       auto& free = *workVectors[siconos::integrators::LsodarOSI::FREE];
       // we assume that inverseMass and forces are updated after call of
       // ds->computeRhs(t);
-      free = *lds->forces();
-      if (lds->inverseMass()) siconos::algebra::solveInPlace(*(lds->inverseMass()), free);
+      free = lds->totalForces();
+      if (lds->LUMass()) {
+        // lds->update_lu_mass();
+        lds->LUMass()->solve(free);
+      }
       DEBUG_EXPR(free.display(););
     }
     if (_extraAdditionalTerms) {
@@ -431,9 +434,9 @@ void siconos::integrators::LsodarOSI::initialize() {
   // On output:
   //                 1: means nothing was done; TOUT = t and ISTATE = 1 on input.
   //                 2: means the integration was performed successfully, and no roots were
-  //                 found. 3: means the integration was successful, and one or more roots were
-  //                 found before satisfying the stop condition specified by ITASK. See JROOT.
-  //                 <0: error. See table below, in integrate function output message.
+  //                 found. 3: means the integration was successful, and one or more roots
+  //                 were found before satisfying the stop condition specified by ITASK. See
+  //                 JROOT. <0: error. See table below, in integrate function output message.
 
   // 7 - JT, Jacobian type indicator
   _intData[6] = 1;  // jt, Jacobian type indicator.
@@ -582,7 +585,7 @@ struct siconos::integrators::LsodarOSI::_NSLEffectOnFreeOutput
   _NSLEffectOnFreeOutput(siconos::nonsmooth_formulations::OneStepNSProblem& p,
                          std::shared_ptr<siconos::modeling::Interaction> inter,
                          siconos::graphs::InteractionProperties& interProp)
-      : _osnsp(p), _inter(inter), _interProp(interProp) {};
+      : _osnsp(p), _inter(inter), _interProp(interProp){};
 
   _NSLEffectOnFreeOutput(const _NSLEffectOnFreeOutput&) = delete;
   _NSLEffectOnFreeOutput(const _NSLEffectOnFreeOutput&&) = delete;

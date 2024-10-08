@@ -14,22 +14,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef __LagrangianLinearTIDSTest__
 #define __LagrangianLinearTIDSTest__
 
 #include <cppunit/TestCase.h>
 #include <cppunit/extensions/HelperMacros.h>
+
 #include "LagrangianLinearTIDS.hpp"
 #include "SiconosException.hpp"
 
-class LagrangianLinearTIDSTest : public CppUnit::TestFixture
-{
-
-private:
-  
+class LagrangianLinearTIDSTest : public CppUnit::TestFixture {
+ private:
   ACCEPT_SERIALIZATION(LagrangianLinearTIDSTest);
-
 
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(LagrangianLinearTIDSTest);
@@ -47,17 +44,13 @@ private:
 
   // Members
 
-  std::shared_ptr<siconos::algebra::SiconosVector> q0, velocity0;
-  std::shared_ptr<siconos::algebra::SiconosMatrix> mass, K, C, rhsK, rhsC, minus_inv_M;
+  siconos::algebra::SiconosVector3 q0, velocity0;
+  siconos::algebra::SiconosMatrix mass{3, 3}, minus_inv_M{3,3};
+  siconos::algebra::SiconosMatrix K{3, 3}, C{3, 3}, rhsK{3,3}, rhsC{3,3};
 
-public:
+ public:
   void setUp();
   void tearDown();
-
 };
 
 #endif
-
-
-
-

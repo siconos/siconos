@@ -75,8 +75,8 @@ static BounceResult bounceTest(std::string moving, std::string ground,
   auto nsds = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(t0, T);
 
 
-  siconos::algebra::SiconosVector q0{7};
-  siconos::algebra::SiconosVector v0{6};
+  siconos::algebra::SiconosVector q0{3};
+  siconos::algebra::SiconosVector v0{3};
   q0.setZero();
   v0.setZero();
   q0(1) = position_init;

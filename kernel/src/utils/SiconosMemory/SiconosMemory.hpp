@@ -26,9 +26,9 @@
 
 #include <memory>
 #include <vector>
-#include "SiconosVector.hpp"
 
 #include "SiconosSerialization.hpp"  // For ACCEPT_SERIALIZATION
+#include "SiconosVector.hpp"
 #include "SiconosVector.hpp"  // Required because of inheritance. Works without this with gnu compilers, but not with clang (?)
 
 namespace siconos::algebra {

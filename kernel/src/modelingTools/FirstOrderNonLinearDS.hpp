@@ -23,11 +23,10 @@
 #ifndef FIRSTORDERNONLINEARDS_H
 #define FIRSTORDERNONLINEARDS_H
 
-#include "SiconosMatrix.hpp"
-#include "SiconosMatrix.hpp"
-#include "SiconosVector.hpp"
-#include "SiconosMemory.hpp"
 #include "DynamicalSystem.hpp"
+#include "SiconosMatrix.hpp"
+#include "SiconosMemory.hpp"
+#include "SiconosVector.hpp"
 
 namespace siconos::algebra {
 
@@ -135,7 +134,9 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
   /**
       Copy of M Matrix, LU-factorized, used to solve systems like Mx = b with LU-factorization.
       (Warning: may not exist, used if we need to avoid factorization in place of M) */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _invM{nullptr};
+  std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>> LU_M_{nullptr};
+
+  bool hasLU_M_{false};
 
   /** default constructor */
   FirstOrderNonLinearDS() = default;
@@ -219,11 +220,11 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
    */
   inline void setMPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newM) { _M = newM; }
 
-  /** get the inverse of LU fact. of M operator (pointer link)
-   *
-   *  \return pointer to a SiconosMatrix
-   */
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> invM() const { return _invM; }
+  /** \return LU-factorization of the M matrix (pointer link) */
+  inline auto LU_M() const { return LU_M_; }
+
+  /** \return True if LU factorization of M is available */
+  bool hasLU_M() const { return hasLU_M_; }
 
   /** returns f(x,t,z) (pointer link)
    */
@@ -239,8 +240,7 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
    *
    *  \return std::shared_ptr<siconos::algebra::SiconosMatrix>
    */
-  virtual std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianfx() const
-  {
+  virtual std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianfx() const {
     return _jacobianfx;
   }
 
@@ -248,8 +248,7 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
    *
    *  \param newPtr the new value
    */
-  inline void setJacobianfxPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr)
-  {
+  inline void setJacobianfxPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr) {
     _jacobianfx = newPtr;
   }
 
@@ -359,8 +358,7 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
    *
    *  \return a std::shared_ptr<siconos::plugins::PluggedObject>
    */
-  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginF() const
-  {
+  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginF() const {
     return _pluginf;
   };
 
@@ -368,8 +366,7 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
    *
    *  \return a std::shared_ptr<siconos::plugins::PluggedObject>
    */
-  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginJacxf() const
-  {
+  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginJacxf() const {
     return _pluginJacxf;
   };
 
@@ -377,8 +374,7 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
    *
    *  \return a std::shared_ptr<siconos::plugins::PluggedObject>
    */
-  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginM() const
-  {
+  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginM() const {
     return _pluginM;
   };
 

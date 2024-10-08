@@ -134,32 +134,6 @@ void siconos::modeling::DynamicalSystem::setXPtr(std::shared_ptr<siconos::algebr
   _x[0] = newPtr;
 }
 
-void siconos::modeling::DynamicalSystem::setRhs(const siconos::algebra::SiconosVector &newValue)
-{
-  // Warning: this only sets the value of x[1]
-
-  // check dimensions ...
-  if (newValue.size() != _n)
-    THROW_EXCEPTION("siconos::modeling::DynamicalSystem::setRhs - inconsistent sizes between rhs input and "
-                    "system dimension.");
-
-  if (!_x[1])
-    _x[1] = std::make_shared<siconos::algebra::SiconosVector>(newValue);
-  else
-    *(_x[1]) = newValue;
-}
-
-void siconos::modeling::DynamicalSystem::setRhsPtr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr)
-{
-  // Warning: this only sets the pointer (*x)[1]
-
-  // check dimensions ...
-  if (newPtr->size() != _n)
-    THROW_EXCEPTION("siconos::modeling::DynamicalSystem::setRhsPtr - inconsistent sizes between rhs input and "
-                    "system dimension.");
-
-  _x[1] = newPtr;
-}
 void siconos::modeling::DynamicalSystem::setR(const siconos::algebra::SiconosVector &newValue)
 {
   // check dimensions ...

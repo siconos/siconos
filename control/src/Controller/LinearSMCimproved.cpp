@@ -22,11 +22,11 @@
 
 #include "ControlSensor.hpp"
 #include "FirstOrderLinearDS.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixOp.hpp"
 #include "SiconosMatrixVectorOp.hpp"
-#include "SiconosVectorOp.hpp"
 #include "SiconosVector.hpp"
-#include "SiconosMatrix.hpp"
+#include "SiconosVectorOp.hpp"
 #include "TimeStepping.hpp"
 #include "ZeroOrderHoldOSI.hpp"
 
@@ -50,10 +50,10 @@ void siconos::control::LinearSMCimproved::initialize(
 }
 
 void siconos::control::LinearSMCimproved::predictionPerturbation(
-    const siconos::algebra::SiconosVector& xTk, siconos::algebra::SiconosMatrix& CBstar) {
+    const siconos::algebra::SiconosVector& xTk,
+    const Eigen::FullPivLU<siconos::algebra::SiconosMatrix>& LUCBstar) {
   if (_us->normInf() < _alpha) {
     if (_inDisceteTimeSlidingPhase) {
-      auto& up = *_up;
       if (_measuredPert->full()) {
         if (_measuredPert->size() > 1) {
           _measuredPert->rotate(_measuredPert->end() - 1);
@@ -95,14 +95,14 @@ void siconos::control::LinearSMCimproved::predictionPerturbation(
       }
 
       // Compute the control to counteract the perturbation
-      up = predictedPertC;
-      up *= -1;
-      siconos::algebra::solveInPlace(CBstar, up);
+      *_up = predictedPertC;
+      *_up *= -1;
+      LUCBstar.solve(*_up);
 
       // project onto feasible set
-      double norm = up.norm2();
+      double norm = _up->norm2();
       if (norm > _ubPerturbation) {
-        up *= _ubPerturbation / norm;
+        *_up *= _ubPerturbation / norm;
         predictedPertC *= _ubPerturbation / norm;
       }
     } else
@@ -116,8 +116,6 @@ void siconos::control::LinearSMCimproved::predictionPerturbation(
 void siconos::control::LinearSMCimproved::actuate() {
   auto sDim = _u->size();
   auto tmpM1 = std::make_shared<siconos::algebra::SiconosMatrix>(*_Csurface);
-  auto CBstar = std::make_shared<siconos::algebra::SiconosMatrix>(sDim, sDim);
-  CBstar->zero();
   auto xTk = std::make_shared<siconos::algebra::SiconosVector>(_sensor->y());
 
   auto& zoh =
@@ -128,12 +126,14 @@ void siconos::control::LinearSMCimproved::actuate() {
   siconos::algebra::prod(*_Csurface, zoh.Ad(_DS_SMC), *tmpM1);
   *tmpM1 *= -1.0;
   *tmpM1 += *_Csurface;
-  siconos::algebra::prod(*_Csurface, zoh.Bd(_DS_SMC), *CBstar);
+  siconos::algebra::SiconosMatrix CBstar{sDim, sDim};
+  CBstar = *_Csurface * zoh.Bd(_DS_SMC);
+
   // compute C(I-e^{Ah})x_k
   siconos::algebra::prod(*tmpM1, *xTk, *_ueq);
   // compute the solution u^eq of the system CB^{*}u^eq = C(I-e^{Ah})x_k
-  siconos::algebra::solveInPlace(*CBstar, *_ueq);
-
+  Eigen::FullPivLU<siconos::algebra::SiconosMatrix> luCBstar(CBstar);
+  luCBstar.solve(*_ueq);
   *(_DS_SMC->x()) = *xTk;
   siconos::algebra::prod(
       *_B, *_ueq,
@@ -149,7 +149,7 @@ void siconos::control::LinearSMCimproved::actuate() {
 
   // prediction of the perturbation
   if (_predictionPerturbation) {
-    predictionPerturbation(*xTk, *CBstar);
+    predictionPerturbation(*xTk, luCBstar);
     *_u += *_up;
   }
 

@@ -20,18 +20,21 @@
 #include <iostream>
 #include <memory>
 
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
-#include "SiconosMatrix.hpp"
 
 void siconos::modeling::FirstOrderLinearTIDS::initRhs(double time) {
-  if (_M && !_invM) _invM = std::make_shared<siconos::algebra::SiconosMatrix>(*_M);
-
+  if (_M && !LU_M_) {
+    LU_M_ = std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(*_M);
+    hasLU_M_ = true;
+  }
   computeRhs(time);
 
   if (!_jacxRhs)  // if not allocated with a set or anything else
   {
-    if (_A && !_M)  // if M is not defined, then A = _jacxRhs, no memory allocation for that one.
+    if (_A &&
+        !_M)  // if M is not defined, then A = _jacxRhs, no memory allocation for that one.
     {
       //////// jacxRhs = _A; /// WARNING FP CONSTRUCTOR IS MISSING
       _jacxRhs = std::make_shared<siconos::algebra::BlockMatrix>(_A);
@@ -40,7 +43,7 @@ void siconos::modeling::FirstOrderLinearTIDS::initRhs(double time) {
     else if (_A && _M) {
       _jacxRhs = std::make_shared<siconos::algebra::BlockMatrix>(*_A);  // Copy A into _jacxRhs
       // Solve M_jacxRhs = A
-      algebra::solveInPlace(*_invM, *(_jacxRhs->block(0, 0)));
+      LU_M_->solve(*(_jacxRhs->block(0, 0)));
     }
     // else no allocation, jacobian is equal to 0.
   }
@@ -55,10 +58,8 @@ void siconos::modeling::FirstOrderLinearTIDS::computeRhs(double time) {
   if (_b) *_x[1] += *_b;
 
   if (_M) {
-    // allocate invM at the first call of the present function
-    if (!_invM) _invM = std::make_shared<siconos::algebra::SiconosMatrix>(*_M);
-    // _invM->Solve(*_x[1]);
-    algebra::solveInPlace(*_invM, *(_x[1]));
+    // LU_M_ must have been created by init_rhs
+    LU_M_->solve(*(_x[1]));
   }
 }
 

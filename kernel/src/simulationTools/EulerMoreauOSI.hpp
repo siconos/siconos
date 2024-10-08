@@ -96,7 +96,7 @@ namespace siconos::integrators {
 
     Each DynamicalSystem is associated to a SiconosMatrix, named "W", which is
     the "iteration" matrix. W matrices are initialized and computed in
-    initializeIterationMatrixW and computeW. Depending on the DS type, they may
+    initializeIterationMatrix and computeIterationMatrix. Depending on the DS type, they may
     depend on time t and DS state x.
 
     For first order systems, the implementation uses _r for storing the
@@ -189,42 +189,15 @@ class EulerMoreauOSI : public OneStepIntegrator {
    */
   virtual ~EulerMoreauOSI() noexcept = default;
 
-  /** get the value of W corresponding to DynamicalSystem ds
+  // -- IterationMatrixBoundaryConditions --
+
+  /** get IterationMatrixBoundaryConditions corresponding to DynamicalSystem ds
    *
    *  \param ds a pointer to DynamicalSystem, optional, default =
-   *  nullptr. get W[0] in that case
-   *  \return SiconosMatrix
-   */
-  const siconos::algebra::SiconosMatrix getW(
-      std::shared_ptr<siconos::modeling::DynamicalSystem> ds = nullptr);
-
-  /** get W corresponding to DynamicalSystem ds
-   *
-   *  \param ds a pointer to DynamicalSystem
+   *  nullptr. get IterationMatrixBoundaryConditions[0] in that case
    *  \return pointer to a SiconosMatrix
    */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> W(
-      std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
-
-  // -- WBoundaryConditions --
-
-  /** get the value of WBoundaryConditions corresponding to DynamicalSystem ds
-   *
-   *  \param ds a pointer to DynamicalSystem, optional, default =
-   *  nullptr. get WBoundaryConditions[0] in that case
-   *  \return SiconosMatrix
-   */
-  const siconos::algebra::SiconosMatrix getWBoundaryConditions(
-      std::shared_ptr<siconos::modeling::DynamicalSystem> ds =
-          std::shared_ptr<siconos::modeling::DynamicalSystem>());
-
-  /** get WBoundaryConditions corresponding to DynamicalSystem ds
-   *
-   *  \param ds a pointer to DynamicalSystem, optional, default =
-   *  nullptr. get WBoundaryConditions[0] in that case
-   *  \return pointer to a SiconosMatrix
-   */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> WBoundaryConditions(
+  std::shared_ptr<siconos::algebra::SiconosMatrix> IterationMatrixBoundaryConditions(
       std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
   // -- theta --
@@ -326,8 +299,8 @@ class EulerMoreauOSI : public OneStepIntegrator {
    *  \param time the time (double)
    *  \param ds a pointer to DynamicalSystem
    */
-  void initializeIterationMatrixW(double time,
-                                  std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
+  void initializeIterationMatrix(double time,
+                                 std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
   /** compute W EulerMoreauOSI matrix at time t
    *
@@ -336,25 +309,25 @@ class EulerMoreauOSI : public OneStepIntegrator {
    *  \param dsv a descriptor of the ds on the graph (redundant to avoid invocation)
    *  \param W the matrix to compute
    */
-  void computeW(double time, siconos::modeling::DynamicalSystem &ds,
-                siconos::graphs::DynamicalSystemsGraph::VDescriptor &dsv,
+  void computeIterationMatrix(double time, siconos::modeling::DynamicalSystem &ds,
+                const siconos::graphs::DynamicalSystemsGraph::VDescriptor &dsv,
                 siconos::algebra::SiconosMatrix &W);
 
   void computeKhat(siconos::modeling::Interaction &inter, siconos::algebra::SiconosMatrix &m,
                    std::vector<std::shared_ptr<siconos::algebra::SiconosMatrix>> &workM,
                    double h) const;
 
-  /** compute WBoundaryConditionsMap[ds] EulerMoreauOSI matrix at time t
+  /** compute IterationMatrixBoundaryConditionsMap[ds] EulerMoreauOSI matrix at time t
    *
    *  \param ds a pointer to DynamicalSystem
    */
-  void computeWBoundaryConditions(std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
+  void computeIterationMatrixBoundaryConditions(std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
-  /** initialize iteration matrix WBoundaryConditionsMap[ds] EulerMoreauOSI
+  /** initialize iteration matrix IterationMatrixBoundaryConditionsMap[ds] EulerMoreauOSI
    *
    *  \param ds a pointer to DynamicalSystem
    */
-  void initializeIterationMatrixWBoundaryConditions(
+  void initializeIterationMatrixBoundaryConditions(
       std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
   /** Computes the residuFree and residu of all the DynamicalSystems

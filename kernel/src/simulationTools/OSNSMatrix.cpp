@@ -27,8 +27,8 @@
 #include "NonSmoothLaw.hpp"
 #include "NumericsToolsNamespace.h"  // For NumericsMatrix
 #include "SecondOrderDS.hpp"
-#include "SiconosVector.hpp"
 #include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -58,7 +58,7 @@ siconos::nonsmooth_formulations::OSNSMatrix::OSNSMatrix(unsigned int n, NM_types
     }
     default: {
       _triplet_nzmax = _dimRow; /* at least a non zero element per row */
-    }  // do nothing here
+    }                           // do nothing here
   }
 
   DEBUG_END("siconos:simulation::OSNSMatrix::OSNSMatrix(unsigned int n, int stor) \n");
@@ -335,7 +335,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillW(
         siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
         for (std::tie(dsi, dsend) = DSG.vertices(); dsi != dsend; ++dsi) {
           auto ds = DSG.bundle(*dsi);
-          auto W = DSG.properties(*dsi).W.get();
+          auto W = DSG.properties(*dsi).iterationMatrix.get();
           pos = DSG.properties(*dsi).absolute_position;
           siconos::algebra::fillTriplet(*W, Mtriplet, pos, pos);
           DEBUG_PRINTF("pos = %u \n", pos);
@@ -389,25 +389,28 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillWinverse(
         // Loop over the DS for filling M
         siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
         for (std::tie(dsi, dsend) = DSG.vertices(); dsi != dsend; ++dsi) {
-          std::shared_ptr<siconos::algebra::SiconosMatrix> Winverse;
+          std::shared_ptr<siconos::algebra::SiconosMatrix> iterationMatrixInverse;
 
           auto osi = DSG.properties(*dsi).osi;
           std::shared_ptr<siconos::modeling::DynamicalSystem> ds = DSG.bundle(*dsi);
           auto sods = std::static_pointer_cast<siconos::modeling::SecondOrderDS>(ds);
 
-          if (auto mosi = dynamic_pointer_cast<siconos::integrators::MoreauJeanGOSI>(osi)) {
-            Winverse = mosi->Winverse(sods, true);
-          } else if (auto mosi =
-                         dynamic_pointer_cast<siconos::integrators::MoreauJeanOSI>(osi)) {
-            Winverse = mosi->Winverse(sods);
+          // if (auto mosi = dynamic_pointer_cast<siconos::integrators::MoreauJeanGOSI>(osi)) {
+          //   iterationMatrixInverse = mosi->iterationMatrixInverse(sods, true);
+          //} else
+          if (auto mosi = dynamic_pointer_cast<siconos::integrators::MoreauJeanOSI>(osi)) {
+            auto iterationMatrixInverse =
+                mosi->iterationMatrixInverse(sods, *mosi->LUiterationMatrix(ds));
+
+            pos = DSG.properties(*dsi).absolute_position;
+            siconos::algebra::fillTriplet(*iterationMatrixInverse, Mtriplet, pos, pos);
+            DEBUG_PRINTF("pos = %u \n", pos);
+
           } else
             THROW_EXCEPTION(
                 "siconos:simulation::OSNSMatrix::fillWinverse not yet implemented for this "
                 "type of OSI  ");
 
-          pos = DSG.properties(*dsi).absolute_position;
-          siconos::algebra::fillTriplet(*Winverse, Mtriplet, pos, pos);
-          DEBUG_PRINTF("pos = %u \n", pos);
           // W->display();
         }
 

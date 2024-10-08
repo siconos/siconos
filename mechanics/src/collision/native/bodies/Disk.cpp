@@ -12,7 +12,7 @@
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
+//  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 
@@ -22,17 +22,18 @@
 #include "SiconosVector.hpp"
 
 siconos::collision::native::bodies::Disk::Disk(
-    double r, double m, std::shared_ptr<siconos::algebra::SiconosVector> qinit,
-    std::shared_ptr<siconos::algebra::SiconosVector> vinit)
+    double r, double m, Eigen::Ref<siconos::algebra::SiconosVector> qinit,
+    Eigen::Ref<siconos::algebra::SiconosVector> vinit)
     : CircularDS(r, m, qinit, vinit) {
-    mass_internal_storage_ = std::make_unique<std::vector<double>>(ndof_ * ndof_);
-  mass_view_ = std::make_shared<MapType>(mass_internal_storage_->data(), ndof_, ndof_);
+  mass_internal_storage_ = std::make_unique<std::vector<double>>(ndof_ * ndof_);
+  mass_view_ = std::make_shared<siconos::algebra::MapType>(mass_internal_storage_->data(),
+                                                           ndof_, ndof_);
   hasConstantMass_ = true;
   hasMass_ = true;
   computemass_ = nullptr;
 
   //  mass->resize(ndof,ndof);
   mass_view_->setZero();
-  (*mass_view_)(0, 0) = (*mass_view_)(1, 1) = massValue;
-  (*mass_view_)(2, 2) = massValue * radius * radius / 2.;
+  (*mass_view_)(0, 0) = (*mass_view_)(1, 1) = massValue_;
+  (*mass_view_)(2, 2) = massValue_ * radius_ * radius_ / 2.;
 }
