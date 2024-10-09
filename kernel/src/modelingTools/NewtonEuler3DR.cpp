@@ -100,7 +100,7 @@ void siconos::modeling::NewtonEuler3DR::FC3DcomputeJachqTFromContacts(
 
   // 3 - Construction of the lever arm matrix in  the absolute frame
 
-  _NPG1->zero();
+  _NPG1->setZero();
   (*_NPG1)(0, 0) = 0;
   (*_NPG1)(0, 1) = -(G1z - Pz);
   (*_NPG1)(0, 2) = (G1y - Py);
@@ -152,14 +152,14 @@ void siconos::modeling::NewtonEuler3DR::FC3DcomputeJachqTFromContacts(
   //   std::shared_ptr<siconos::algebra::SiconosVector> v =
   //   std::make_shared<siconos::algebra::SiconosVector>(3));
   //   std::shared_ptr<siconos::algebra::SiconosVector> vRes =
-  //   std::make_shared<siconos::algebra::SiconosVector>(6)); v->zero(); v->setValue(0, 1);
+  //   std::make_shared<siconos::algebra::SiconosVector>(6)); v->setZero(); v->setValue(0, 1);
   //   siconos::algebra::prod(*jaux, *v, *vRes, true);
   //   vRes->display();
-  //   v->zero();
+  //   v->setZero();
   //   v->setValue(1, 1);
   //   siconos::algebra::prod(*jaux, *v, *vRes, true);
   //   vRes->display();
-  //   v->zero();
+  //   v->setZero();
   //   v->setValue(2, 1);
   //   siconos::algebra::prod(*jaux, *v, *vRes, true);
   //   vRes->display();
@@ -209,7 +209,7 @@ void siconos::modeling::NewtonEuler3DR::FC3DcomputeJachqTFromContacts(
   _rotationAbsoluteToContactFrame->setValue(1, 2, *(pt + 2));
   _rotationAbsoluteToContactFrame->setValue(2, 2, *(pt + 5));
 
-  _NPG1->zero();
+  _NPG1->setZero();
 
   (*_NPG1)(0, 0) = 0;
   (*_NPG1)(0, 1) = -(G1z - Pz);
@@ -221,7 +221,7 @@ void siconos::modeling::NewtonEuler3DR::FC3DcomputeJachqTFromContacts(
   (*_NPG1)(2, 1) = (G1x - Px);
   (*_NPG1)(2, 2) = 0;
 
-  _NPG2->zero();
+  _NPG2->setZero();
 
   (*_NPG2)(0, 0) = 0;
   (*_NPG2)(0, 1) = -(G2z - Pz);

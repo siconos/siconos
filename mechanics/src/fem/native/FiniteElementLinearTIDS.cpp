@@ -94,7 +94,7 @@ siconos::mechanics::fem::FiniteElementLinearTIDS::FiniteElementLinearTIDS(
   //   _C = std::make_shared<siconos::algebra::SiconosMatrix>(ndof_, ndof_,
   //   _storageType);
   // }
-  // _C->zero();
+  // _C->setZero();
 
   DEBUG_END(
       "FiniteElementLinearTIDS::FiniteElementLinearTIDS(std::shared_ptr<Mesh> "

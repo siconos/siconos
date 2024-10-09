@@ -97,7 +97,7 @@ void siconos::control::LinearSMCimproved::predictionPerturbation(
       // Compute the control to counteract the perturbation
       *_up = predictedPertC;
       *_up *= -1;
-      LUCBstar.solve(*_up);
+      *_up = LUCBstar.solve(*_up);
 
       // project onto feasible set
       double norm = _up->norm2();
@@ -109,7 +109,7 @@ void siconos::control::LinearSMCimproved::predictionPerturbation(
       _inDisceteTimeSlidingPhase = true;
   } else if (_inDisceteTimeSlidingPhase) {
     _inDisceteTimeSlidingPhase = false;
-    _up->zero();
+    _up->setZero();
   }
 }
 
@@ -133,7 +133,7 @@ void siconos::control::LinearSMCimproved::actuate() {
   siconos::algebra::prod(*tmpM1, *xTk, *_ueq);
   // compute the solution u^eq of the system CB^{*}u^eq = C(I-e^{Ah})x_k
   Eigen::FullPivLU<siconos::algebra::SiconosMatrix> luCBstar(CBstar);
-  luCBstar.solve(*_ueq);
+  *_ueq = luCBstar.solve(*_ueq);
   *(_DS_SMC->x()) = *xTk;
   siconos::algebra::prod(
       *_B, *_ueq,

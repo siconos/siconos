@@ -22,9 +22,8 @@
 #include "BlockVector.hpp"
 #include "Interaction.hpp"
 #include "PluggedObject.hpp"
-#include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
-#include "SiconosVector.hpp"
 #include "SiconosMatrix.hpp"
+#include "SiconosMatrixVectorOp.hpp"  // for matrixVector_prod_toBlock
 
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -230,17 +229,17 @@ void siconos::modeling::FirstOrderLinearR::computeh(
     siconos::algebra::SiconosVector &y) {
   if (_C) {
     computeC(time, z, *_C);
-    siconos::algebra::prod(*_C, x, y, true);
+    siconos::algebra::matrixBlockVector_prod(*_C, x, y, true);
   } else
     y.setZero();
 
   if (_D) {
     computeD(time, z, *_D);
-    siconos::algebra::prod(*_D, lambda, y, false);
+    y += *_D * lambda;
   }
   if (_F) {
     computeF(time, z, *_F);
-    siconos::algebra::prod(*_F, z, y, false);
+    siconos::algebra::matrixBlockVector_prod(*_F, z, y, false);
   }
   if (_e) {
     computee(time, z, *_e);
@@ -262,7 +261,7 @@ void siconos::modeling::FirstOrderLinearR::computeg(
     double time, const siconos::algebra::SiconosVector &lambda,
     siconos::algebra::BlockVector &z, siconos::algebra::BlockVector &r) {
   computeB(time, z, *_B);
-  siconos::algebra::prod(*_B, lambda, r, false);
+  r += *_B * lambda;
 }
 
 void siconos::modeling::FirstOrderLinearR::computeInput(double time, Interaction &inter,

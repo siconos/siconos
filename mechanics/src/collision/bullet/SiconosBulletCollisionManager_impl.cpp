@@ -250,7 +250,7 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::u
   if (record->contactor->offset) {
     o = *record->contactor->offset;
   } else {
-    o.zero();
+    o.setZero();
     o(3) = 1.0;
   }
 
@@ -803,7 +803,7 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::u
   auto mnz = btheight->_min_height, mxz = btheight->_max_height;
   auto z_offset = (mxz - mnz) / 2 + mnz - height->insideMargin();
   siconos::algebra::SiconosVector o(7);
-  o.zero();
+  o.setZero();
   o(2) = z_offset;
   o(3) = 1;
 
@@ -812,7 +812,7 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::u
     t = offsetTransform(*record->contactor->offset, o);
   } else {
     siconos::algebra::SiconosVector offset(7);
-    offset.zero();
+    offset.setZero();
     offset(3) = 1.0;
     t = offsetTransform(offset, o);
   }
@@ -831,7 +831,7 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::u
   if (record->base)
     q = *record->base;
   else {
-    q.zero();
+    q.setZero();
     q(3) = 1;
   }
   t = offsetTransform(q, o);
@@ -1276,7 +1276,7 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
       q(6) = sin(angle / 2.);
     }
   } else {
-    q.zero();
+    q.setZero();
     q(3) = 1;
   }
   DEBUG_PRINT("Position of the shape given to bullet:")

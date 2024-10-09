@@ -51,7 +51,7 @@ void PIDTest::setUp() {
 void PIDTest::init() {
   _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(_x0, _A);
   auto C = std::make_shared<siconos::algebra::SiconosMatrix>(1, 2);
-  C->zero();
+  C->setZero();
   (*C)(0, 0) = 1;
   _sensor = std::make_shared<siconos::control::LinearSensor>(_DS, C);
   auto B = std::make_shared<siconos::algebra::SiconosMatrix>(2, 1);
@@ -100,7 +100,7 @@ void PIDTest::testPIDLsodar() {
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
   siconos::algebra::SiconosMatrix dataRef(data);
-  dataRef.zero();
+  dataRef.setZero();
   siconos::algebra::io::read("PID.ref", dataRef);
   auto diff = data - dataRef;
   std::cout << "------- Integration done, error = " << diff.normInf() << " -------"

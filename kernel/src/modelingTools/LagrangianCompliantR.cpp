@@ -25,9 +25,9 @@
 #include "PluggedObject.hpp"
 #include "PluginTypes.hpp"
 #include "SiconosException.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
-#include "SiconosMatrix.hpp"
 
 siconos::modeling::LagrangianCompliantR::LagrangianCompliantR(
     const std::string& pluginh, const std::string& pluginJacobianhq,
@@ -64,8 +64,9 @@ void siconos::modeling::LagrangianCompliantR::computeh(
   if (_pluginh->fPtr) {
     auto qp = q0.toSiconosVector();
     auto zp = z.toSiconosVector();
-    ((siconos::plugins::FPtr2)(_pluginh->fPtr))(
-        qp->size(), &(*qp)(0), y.size(), const_cast<double*>(lambda.data()), &(y)(0), zp->size(), &(*zp)(0));
+    ((siconos::plugins::FPtr2)(_pluginh->fPtr))(qp->size(), &(*qp)(0), y.size(),
+                                                const_cast<double*>(lambda.data()), &(y)(0),
+                                                zp->size(), &(*zp)(0));
     z = *zp;
   }
 }
@@ -77,8 +78,8 @@ void siconos::modeling::LagrangianCompliantR::computeJachq(
     auto qp = q0.toSiconosVector();
     auto zp = z.toSiconosVector();
     ((siconos::plugins::FPtr2)(_pluginJachq->fPtr))(qp->size(), &(*qp)(0), lambda.size(),
-                                                    const_cast<double*>(lambda.data()), &(*_jachq)(0, 0),
-                                                    zp->size(), &(*zp)(0));
+                                                    const_cast<double*>(lambda.data()),
+                                                    &(*_jachq)(0, 0), zp->size(), &(*zp)(0));
     z = *zp;
   }
 }
@@ -90,8 +91,8 @@ void siconos::modeling::LagrangianCompliantR::computeJachlambda(
     auto qp = q0.toSiconosVector();
     auto zp = z.toSiconosVector();
     ((siconos::plugins::FPtr2)_pluginJachlambda->fPtr)(
-        qp->size(), &(*qp)(0), lambda.size(), const_cast<double*>(lambda.data()), &(*_jachlambda)(0, 0),
-        zp->size(), &(*zp)(0));
+        qp->size(), &(*qp)(0), lambda.size(), const_cast<double*>(lambda.data()),
+        &(*_jachlambda)(0, 0), zp->size(), &(*zp)(0));
     z = *zp;
   }
 }
@@ -110,11 +111,12 @@ void siconos::modeling::LagrangianCompliantR::computeOutput(double time, Interac
     computeJachlambda(time, *DSlink[LagrangianR::q0], lambda, *DSlink[LagrangianR::z]);
     if (derivativeNumber == 1) {
       // y = Jach[0] q1 + Jach[1] lambda
-      siconos::algebra::prod(*_jachq, *DSlink[LagrangianR::q1], y);
-      siconos::algebra::prod(*_jachlambda, lambda, y, false);
+      siconos::algebra::matrixBlockVector_prod(*_jachq, *DSlink[LagrangianR::q1], y);
+      y += *_jachlambda * lambda;
     } else if (derivativeNumber == 2)
-      siconos::algebra::prod(*_jachq, *DSlink[LagrangianR::q2],
-                             y);  // Approx: y[2] = Jach[0]q[2], other terms are neglected ...
+      siconos::algebra::matrixBlockVector_prod(
+          *_jachq, *DSlink[LagrangianR::q2],
+          y);  // Approx: y[2] = Jach[0]q[2], other terms are neglected ...
     else
       THROW_EXCEPTION(
           "siconos::modeling::LagrangianCompliantR::computeOutput, index out of range or not "
@@ -130,7 +132,8 @@ void siconos::modeling::LagrangianCompliantR::computeInput(double time, Interact
   auto& DSlink = inter.linkToDSVariables();
   computeJachq(time, *DSlink[LagrangianR::q0], lambda, *DSlink[LagrangianR::z]);
   // data[name] += trans(G) * lambda
-  siconos::algebra::prod(lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
+  siconos::algebra::transposeMatrixVector_prod_toBlock(
+      lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
 }
 
 void siconos::modeling::LagrangianCompliantR::computeJach(double time, Interaction& inter) {

@@ -81,7 +81,7 @@ void FirstOrderLinearTIRTest::testSetCPtr()
   std::cout << "--> Test: setCPtr." << std::endl;
   std::shared_ptr<siconos::algebra::SiconosMatrix> tmp =
       std::make_shared<siconos::algebra::SiconosMatrix>(*C);
-  tmp->zero();
+  tmp->setZero();
   auto folr = std::make_shared<siconos::modeling::FirstOrderLinearTIR>(tmp, B);
   folr->setCPtr(C);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetCPtr : ", folr->C() == C, true);
@@ -132,7 +132,7 @@ void FirstOrderLinearTIRTest::testSetBPtr()
   std::cout << "--> Test: setBPtr." << std::endl;
   std::shared_ptr<siconos::algebra::SiconosMatrix> tmp =
       std::make_shared<siconos::algebra::SiconosMatrix>(*B);
-  tmp->zero();
+  tmp->setZero();
   auto folr = std::make_shared<siconos::modeling::FirstOrderLinearTIR>(C, tmp);
   folr->setBPtr(B);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetBPtr: ", folr->B() == B, true);

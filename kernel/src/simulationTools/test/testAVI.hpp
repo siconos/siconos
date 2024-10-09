@@ -49,12 +49,12 @@ class AVITest : public CppUnit::TestFixture {
   void init();
   void testAVI();
 
-  unsigned int _n;
-  double _h;
-  double _t0;
-  double _T;
-  double _tol;
-  double _theta;
+  unsigned int _n{2};
+  double _h{0.1};
+  double _t0{0.};
+  double _T{10.};
+  double _tol{1.e-12};
+  double _theta{0.5};
   std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> _nsds{nullptr};
   std::shared_ptr<siconos::simulation::TimeStepping> _sim{nullptr};
   std::shared_ptr<siconos::modeling::FirstOrderLinearTIDS> _DS{nullptr};
@@ -65,7 +65,7 @@ class AVITest : public CppUnit::TestFixture {
   std::shared_ptr<siconos::algebra::SiconosVector> _x0{nullptr};
 
  public:
-  AVITest() : _n(2), _h(0.1), _t0(0.0), _T(10.0), _tol(1e-12), _theta(0.5) {}
+  AVITest() = default;
   void setUp();
   void tearDown();
 };

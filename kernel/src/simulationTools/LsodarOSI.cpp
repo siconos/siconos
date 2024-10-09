@@ -32,10 +32,9 @@
 #include "SiconosException.hpp"
 #include "SiconosFortran.h"  // for lsodar
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixVectorOp.hpp"  // mat-vec prod
+#include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
-#include "SiconosVectorOp.hpp"  // For subscal
-#include "SiconosVisitor.hpp"   // for NSLEffectOnFreeOutput visitor
+#include "SiconosVisitor.hpp"  // for NSLEffectOnFreeOutput visitor
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -182,7 +181,7 @@ void siconos::integrators::LsodarOSI::computeRhs(double t) {
       free = lds->totalForces();
       if (lds->LUMass()) {
         // lds->update_lu_mass();
-        lds->LUMass()->solve(free);
+        free = lds->LUMass()->solve(free);
       }
       DEBUG_EXPR(free.display(););
     }
@@ -595,14 +594,8 @@ struct siconos::integrators::LsodarOSI::_NSLEffectOnFreeOutput
   void visit(const siconos::modeling::NewtonImpactNSL& nslaw) const override {
     double e;
     e = nslaw.e();
-    std::vector<size_t> subCoord(4);
-    subCoord[0] = 0;
-    subCoord[1] = _inter->nonSmoothLaw()->size();
-    subCoord[2] = 0;
-    subCoord[3] = subCoord[1];
     auto& osnsp_rhs = *(*_interProp.workVectors)[siconos::integrators::LsodarOSI::OSNSP_RHS];
-    siconos::algebra::subscal(e, _inter->y_k(_osnsp.inputOutputLevel()), osnsp_rhs, subCoord,
-                              false);  // q = q + e * q
+    osnsp_rhs += e * _inter->y_k(_osnsp.inputOutputLevel());
   }
 
   // visit function added by Son (9/11/2010)
@@ -627,13 +620,6 @@ void siconos::integrators::LsodarOSI::computeFreeOutput(
 
   unsigned int relativePosition = 0;
   auto mainInteraction = inter;
-  std::vector<size_t> coord(8);
-  coord[0] = relativePosition;
-  coord[1] = relativePosition + sizeY;
-  coord[2] = 0;
-  coord[4] = 0;
-  coord[6] = 0;
-  coord[7] = sizeY;
   std::shared_ptr<siconos::algebra::SiconosMatrix> C;
   //   std::shared_ptr<siconos::algebra::SiconosMatrix>  D;
   //   std::shared_ptr<siconos::algebra::SiconosMatrix>  F;
@@ -676,25 +662,12 @@ void siconos::integrators::LsodarOSI::computeFreeOutput(
     C = mainInteraction->relation()->C();
     if (C) {
       assert(Xfree);
-
-      coord[3] = C->size(1);
-      coord[5] = C->size(1);
-
-      siconos::algebra::subprod(*C, *Xfree, osnsp_rhs, coord, true);
+      siconos::algebra::matrixBlockVector_prod(*C, *Xfree, osnsp_rhs, true);
     }
 
     auto ID = std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeY);
-    ID->eye();
+    ID->setIdentity();
 
-    std::vector<size_t> xcoord(8);
-    xcoord[0] = 0;
-    xcoord[1] = sizeY;
-    xcoord[2] = 0;
-    xcoord[3] = sizeY;
-    xcoord[4] = 0;
-    xcoord[5] = sizeY;
-    xcoord[6] = 0;
-    xcoord[7] = sizeY;
     // For the relation of type LagrangianRheonomousR
     if (relationSubType == siconos::modeling::RelationSubType::RheonomousR) {
       if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp) {
@@ -706,12 +679,10 @@ void siconos::integrators::LsodarOSI::computeFreeOutput(
         std::static_pointer_cast<siconos::modeling::LagrangianRheonomousR>(inter->relation())
             ->computehDot(simulation()->getTkp1(), *DSlink[siconos::modeling::LagrangianR::q0],
                           *DSlink[siconos::modeling::LagrangianR::z]);
-        siconos::algebra::subprod(
-            *ID,
-            *(std::static_pointer_cast<siconos::modeling::LagrangianRheonomousR>(
-                  inter->relation())
-                  ->hDot()),
-            osnsp_rhs, xcoord, false);  // y += hDot
+        auto hDot = std::static_pointer_cast<siconos::modeling::LagrangianRheonomousR>(
+                        inter->relation())
+                        ->hDot();
+        osnsp_rhs += *ID * *hDot;
       } else
         THROW_EXCEPTION(
             "siconos::integrators::LsodarOSI::computeFreeOutput not "
@@ -723,12 +694,11 @@ void siconos::integrators::LsodarOSI::computeFreeOutput(
       if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp) {
         std::static_pointer_cast<siconos::modeling::LagrangianScleronomousR>(inter->relation())
             ->computedotjacqhXqdot(simulation()->getTkp1(), *inter);
-        siconos::algebra::subprod(
-            *ID,
-            *(std::static_pointer_cast<siconos::modeling::LagrangianScleronomousR>(
-                  inter->relation())
-                  ->dotjacqhXqdot()),
-            osnsp_rhs, xcoord, false);  // y += NonLinearPart
+        auto dotjacqhXqdot =
+            std::static_pointer_cast<siconos::modeling::LagrangianScleronomousR>(
+                inter->relation())
+                ->dotjacqhXqdot();
+        osnsp_rhs += *ID * *dotjacqhXqdot;
       }
     }
   } else

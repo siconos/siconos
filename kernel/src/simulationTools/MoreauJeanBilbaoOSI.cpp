@@ -27,7 +27,6 @@
 #include "SiconosMatrix.hpp"
 #include "SiconosMatrixVectorOp.hpp"  // for subprod
 #include "SiconosVector.hpp"
-#include "SiconosVectorOp.hpp"  // for subscal
 #include "SiconosVisitor.hpp"
 #include "Simulation.hpp"
 // #define DEBUG_MESSAGES
@@ -313,14 +312,10 @@ struct siconos::integrators::MoreauJeanBilbaoOSI::_NSLEffectOnFreeOutput
       : _osnsp(p), _inter(inter), _interProp(interProp){};
 
   void visit(const siconos::modeling::NewtonImpactNSL& nslaw) const override {
-    double e;
-    e = nslaw.e();
-    auto sizeY = _inter.nonSmoothLaw()->size();
-    std::vector<std::size_t> subCoord{0, sizeY, 0, sizeY};
+    auto e = nslaw.e();
     auto& osnsp_rhs =
         *(*_interProp.workVectors)[siconos::integrators::MoreauJeanBilbaoOSI::OSNSP_RHS];
-    siconos::algebra::subscal(e, _inter.y_k(_osnsp->inputOutputLevel()), osnsp_rhs, subCoord,
-                              false);
+    osnsp_rhs += e * _inter.y_k(_osnsp->inputOutputLevel());
   }
 };
 
@@ -344,7 +339,6 @@ void siconos::integrators::MoreauJeanBilbaoOSI::computeFreeOutput(
   //   only Lagrangian Linear Relations are allowed.");
 
   auto sizeY = inter.nonSmoothLaw()->size();
-  std::vector<std::size_t> coord{0, sizeY, 0, 0, 0, 0, 0, sizeY};
   // buffer used to save output
   auto& x_free = *inter_work_block[siconos::integrators::MoreauJeanBilbaoOSI::xfree];
   auto& osnsp_rhs = *(*indexSet.properties(vertex_inter)
@@ -352,10 +346,7 @@ void siconos::integrators::MoreauJeanBilbaoOSI::computeFreeOutput(
 
   if (inter.relation()->C()) {
     auto& C = *inter.relation()->C();
-    coord[3] = C.size(1);
-    coord[5] = C.size(1);
-    // osnsp_rhs[coord] = C.x_free
-    siconos::algebra::subprod(C, x_free, osnsp_rhs, coord, true);
+    siconos::algebra::matrixBlockVector_prod(C, x_free, osnsp_rhs, true);
   }
   _NSLEffectOnFreeOutput nslEffectOnFreeOutput{osnsp, inter,
                                                indexSet.properties(vertex_inter)};
@@ -378,13 +369,11 @@ void siconos::integrators::MoreauJeanBilbaoOSI::updatePosition(
   // get dynamical system
   auto& d = static_cast<siconos::modeling::LagrangianLinearDiagonalDS&>(ds);
   // Compute q
-  auto& v = *d.velocity();
-  auto& q = *d.q();
   //  -> get positions at the beginning of the time step
   const auto& qold = d.qMemory().getSiconosVector(0);
   // update positions
-  siconos::algebra::scal(time_step, v, q, true);
-  q += qold;
+  *d.q() = time_step * d.velocity_read();
+  *d.q() += qold;
   DEBUG_EXPR(q.display(););
 }
 

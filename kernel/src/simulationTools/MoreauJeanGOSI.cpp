@@ -187,7 +187,7 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
       auto& residu = *ds_work_vectors[siconos::integrators::MoreauJeanGOSI::RESIDU_FREE];
       auto& free_rhs = *ds_work_vectors[siconos::integrators::MoreauJeanGOSI::FREE];
       // --- ResiduFree computation Equation (1) ---
-      residu.zero();
+      residu.setZero();
       auto& iterationMatrix = *_dynamicalSystemsGraph->properties(*dsi).iterationMatrix;
 
       const auto& vold = lltids->velocityMemory().getSiconosVector(0);  // vi
@@ -247,7 +247,7 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
       // -- Convert the DS into a Lagrangian one.
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      // residu.zero();
+      // residu.setZero();
 
       auto& iterationMatrix = *_dynamicalSystemsGraph->properties(*dsi).iterationMatrix;
       const auto& vold = lltids->velocityMemory().getSiconosVector(0);  // vi
@@ -384,7 +384,7 @@ void siconos::integrators::MoreauJeanGOSI::NonSmoothLawContributionToOutput(
     struct MoreauJeanOSI::_NSLEffectOnFreeOutput nslEffectOnFreeOutput =
         _NSLEffectOnFreeOutput(osnsp, *inter, indexSet.properties(ivd), _theta);
     auto& osnsp_rhs = *(*indexSet.properties(ivd).workVectors)[MoreauJeanOSI::OSNSP_RHS];
-    osnsp_rhs.zero();
+    osnsp_rhs.setZero();
     inter->nonSmoothLaw()->accept(nslEffectOnFreeOutput);
   }
 }

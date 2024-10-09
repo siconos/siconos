@@ -22,11 +22,11 @@
 #include "BlockVector.hpp"
 #include "Interaction.hpp"
 #include "PluggedObject.hpp"
-#include "PluggedObject.hpp"          // getPluginFunctionname ...
-#include "PluginTypes.hpp"            // FPtr4 ...
+#include "PluggedObject.hpp"  // getPluginFunctionname ...
+#include "PluginTypes.hpp"    // FPtr4 ...
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
-#include "SiconosMatrix.hpp"
 
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -125,12 +125,13 @@ void siconos::modeling::LagrangianRheonomousR::computeOutput(double time, Intera
       computehDot(time, *DSlink[LagrangianR::q0], *DSlink[LagrangianR::z]);
       assert(_jachq);
       // Computation of the partial derivative w.r.t q of h(q,t) : \nabla_q h(q,t) \dot q
-      siconos::algebra::prod(*_jachq, *DSlink[LagrangianR::q1], y);
+      siconos::algebra::matrixBlockVector_prod(*_jachq, *DSlink[LagrangianR::q1], y);
       // Sum of the terms
       y += *_hDot;
     } else if (derivativeNumber == 2) {
       assert(_jachq);
-      siconos::algebra::prod(*_jachq, *DSlink[LagrangianR::q2], y);  // Approx:,  ...
+      siconos::algebra::matrixBlockVector_prod(*_jachq, *DSlink[LagrangianR::q2],
+                                               y);  // Approx:,  ...
       // \warning : the computation of y[2] (in event-driven
       // simulation for instance) is approximated by y[2] =
       // Jach[0]q[2]. For the moment, other terms are neglected
@@ -150,7 +151,8 @@ void siconos::modeling::LagrangianRheonomousR::computeInput(double time, Interac
   // get lambda of the concerned interaction
   auto& lambda = *inter.lambda(level);
   // data[name] += trans(G) * lambda
-  siconos::algebra::prod(lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
+  siconos::algebra::transposeMatrixVector_prod_toBlock(
+      lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
 }
 
 void siconos::modeling::LagrangianRheonomousR::computeJach(double time, Interaction& inter) {

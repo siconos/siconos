@@ -137,7 +137,7 @@ class BlockMatrix {
 
   /** set an identity matrix
    */
-  void eye();
+  void setIdentity();
 
   /** get the number of rows or columns of the matrix
    *  \param index 0 for rows, 1 for columns
@@ -255,68 +255,6 @@ class BlockMatrix {
   void setBlock(unsigned int i, unsigned int j,
                 std::shared_ptr<siconos::algebra::SiconosMatrix>);
 
-  // /** get row index of current matrix and save it in  v
-  //  *  \param r index of required line
-  //  *  \param[out] v a vector
-  //  */
-  // void getRow(unsigned int r, SiconosVector &v) const;
-
-  // /** set line row of the current matrix with vector v
-  //  *  \param r index of required line
-  //  *  \param v a vector
-  //  */
-  // void setRow(unsigned int r, const SiconosVector &v);
-
-  // /** get column index of current matrix and save it into vOut
-  //  *  \param c index of required column
-  //  *  \param[out] v a vector
-  //  */
-  // void getCol(unsigned int c, SiconosVector &v) const;
-
-  // /** set column col of the current matrix with vector
-  //  *  \param c index of required column
-  //  *  \param v a vector
-  //  */
-  // void setCol(unsigned int c, const SiconosVector &v);
-
-  // /** add a part of the input matrix (starting from (i,j) pos) to the current matrix
-  //  *  \param i an unsigned int i (in-out)
-  //  *  \param j an unsigned int j (in-out)
-  //  *  \param m a SiconosMatrix (in-out)
-  //  */
-  // void addSimple(unsigned int &i, unsigned int &j, const SiconosMatrix &m);
-
-  // /** subtract a part of the input matrix (starting from (i,j) pos) to the current matrix
-  //  *  \param i an unsigned int i (in-out)
-  //  *  \param j an unsigned int j (in-out)
-  //  *  \param m a SiconosMatrix (in-out)
-  //  */
-  // void subSimple(unsigned int &i, unsigned int &j, const SiconosMatrix &m);
-
-  // /** assignment
-  //  * \param m the matrix to be copied
-  //  * \return  BlockMatrix&
-  //  */
-  // BlockMatrix &operator=(const SiconosMatrix &m);
-
-  // /** assignment
-  //  *  \param m the matrix to be copied
-  //  * \return  BlockMatrix&
-  //  */
-  // BlockMatrix &operator=(const BlockMatrix &m);
-
-  // /** operator +=
-  //  *  \param m the matrix to add
-  //  * \return  BlockMatrix&
-  //  */
-  // BlockMatrix &operator+=(const SiconosMatrix &m);
-
-  // /**operator -=
-  //  *  \param m the matrix to subtract
-  //  * \return  BlockMatrix&
-  //  */
-  // BlockMatrix &operator-=(const SiconosMatrix &m);
-
   void updateNumericsMatrix() {
     THROW_EXCEPTION("BlockMatrix::updateNumericsMatrix(), not implemented fro BlockMatrix");
   };
@@ -351,7 +289,6 @@ class BlockMatrix {
   // ACCEPT_STD_VISITORS();
 
   // friend class SiconosMatrix;
-  friend void scal(double, const SiconosMatrix &, SiconosMatrix &, bool);
   friend SiconosMatrix &operator*=(SiconosMatrix &m, const double &s);
   friend SiconosMatrix &operator/=(SiconosMatrix &m, const double &s);
 

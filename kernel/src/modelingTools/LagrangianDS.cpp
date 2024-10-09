@@ -27,7 +27,6 @@
 #include "SiconosMatrix.hpp"
 #include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
-#include "SiconosVectorOp.hpp"  // for inner_prod
 #include "SiconosVisitor.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -136,7 +135,7 @@ void siconos::modeling::LagrangianDS::initMemoryForGeneralizedCoordinates(unsign
 }
 
 void siconos::modeling::LagrangianDS::init_lu_mass() {
-  if (mass_view_ && !LUMass_) {
+  if (mass_view_) {
     computeMass(*state_q_[0]);
     // LU factorization
     LUMass_ = std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(*mass_view_);
@@ -145,7 +144,7 @@ void siconos::modeling::LagrangianDS::init_lu_mass() {
 }
 
 void siconos::modeling::LagrangianDS::update_lu_mass() {
-  if (mass_view_ && LUMass_ && !hasConstantMass_) {
+  if (mass_view_ && !hasConstantMass_) {
     computeMass(*state_q_[0]);
     LUMass_ = std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(*mass_view_);
   }
@@ -168,7 +167,7 @@ void siconos::modeling::LagrangianDS::initRhs(double time) {
   // if the system is involved in more than one interaction. So, we must check
   // if p2 and q2 already exist to be sure that DSlink won't be lost.
 
-  _x0 = algebra::concatenateVectors(*q0_view_, *velocity0_view_);
+  _x0 = algebra::concatenateVectors(*q0_view_, *velocity0_view_);  // COPY!
 
   _x[0] = algebra::concatenateVectors(*state_q_[0], *state_q_[1]);
 
@@ -177,12 +176,10 @@ void siconos::modeling::LagrangianDS::initRhs(double time) {
     state_q_[2]->setZero();
   }
 
-  _x[1] = algebra::concatenateVectors(*state_q_[1], *state_q_[2]);
+  _x[1] = algebra::concatenateVectors(*state_q_[1], *state_q_[2]);  // COPY!
 
   // Everything concerning rhs and its jacobian is handled in initRhs and
   // computeXXX related functions.
-
-  rhsMatrices_.resize(numberOfRhsMatrices_);
 
   if (!p_[2]) {
     p_[2] = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
@@ -214,7 +211,7 @@ void siconos::modeling::LagrangianDS::initRhs(double time) {
 
     rhsMatrices_[jacobianXBloc10_] =
         std::make_shared<siconos::algebra::SiconosMatrix>(*jacobianTotalForcesOver_q_);
-    LUMass_->solve(*rhsMatrices_[jacobianXBloc10_]);
+    *rhsMatrices_[jacobianXBloc10_] = LUMass_->solve(*rhsMatrices_[jacobianXBloc10_]);
     flag1 = true;
   }
 
@@ -223,14 +220,14 @@ void siconos::modeling::LagrangianDS::initRhs(double time) {
     computeJacobianTotalForcesOver_velocity(*state_q_[1], *state_q_[0], time);
     rhsMatrices_[jacobianXBloc11_] =
         std::make_shared<siconos::algebra::SiconosMatrix>(*jacobianTotalForcesOver_velocity_);
-    LUMass_->solve(*rhsMatrices_[jacobianXBloc11_]);
+    *rhsMatrices_[jacobianXBloc11_] = LUMass_->solve(*rhsMatrices_[jacobianXBloc11_]);
     flag2 = true;
   }
 
   if (!rhsMatrices_[zeroMatrix_]) {
     rhsMatrices_[zeroMatrix_] =
         std::make_shared<siconos::algebra::SiconosMatrix>(ndof_, ndof_);
-    rhsMatrices_[zeroMatrix_]->zero();
+    rhsMatrices_[zeroMatrix_]->setZero();
   }
   if (!rhsMatrices_[idMatrix_]) {
     rhsMatrices_[idMatrix_] = std::make_shared<siconos::algebra::SiconosMatrix>(ndof_, ndof_);
@@ -544,9 +541,10 @@ void siconos::modeling::LagrangianDS::computeRhs(double time) {
   // if(totalForces_)
   //   {
   computeTotalForces(*state_q_[1], *state_q_[0], time);
-  *state_q_[2] += *totalForces_;
-  DEBUG_EXPR(std::cout << *totalForces_ << "\n";);
-  // #  }
+  if (totalForces_) {
+    *state_q_[2] += *totalForces_;
+    DEBUG_EXPR(std::cout << *totalForces_ << "\n";);
+  }
 
   // Computes q[2] = inv(mass)*(fL+p) by solving Mq[2]=fL+p.
   // -- Case 1: if mass is constant, then a copy of imass is LU-factorized
@@ -557,10 +555,10 @@ void siconos::modeling::LagrangianDS::computeRhs(double time) {
   update_lu_mass();
 
   //  if(mass->isPlugged()) : mass may be not plugged in LagrangianDS children
-  if (LUMass_) LUMass_->solve(*state_q_[2]);
+  if (LUMass_) *state_q_[2] = LUMass_->solve(*state_q_[2]);
 
-  _x[1]->setBlock(0, *state_q_[1]);
-  _x[1]->setBlock(ndof_, *state_q_[2]);
+  _x[1]->head(ndof_) = *state_q_[1];
+  _x[1]->tail(ndof_) = *state_q_[2];
   DEBUG_END("siconos::modeling::LagrangianDS::computeRhs(double time)");
 }
 
@@ -578,14 +576,14 @@ void siconos::modeling::LagrangianDS::computeJacobianRhsx(double time) {
     std::shared_ptr<siconos::algebra::SiconosMatrix> bloc10 = _jacxRhs->block(1, 0);
     computeJacobianTotalForcesOver_q(*state_q_[1], *state_q_[0], time);
     *bloc10 = *jacobianTotalForcesOver_q_;
-    LUMass_->solve(*bloc10);
+    *bloc10 = LUMass_->solve(*bloc10);
   }
 
   if (jacobianTotalForcesOver_velocity_) {
     std::shared_ptr<siconos::algebra::SiconosMatrix> bloc11 = _jacxRhs->block(1, 1);
     computeJacobianTotalForcesOver_velocity(*state_q_[1], *state_q_[0], time);
     *bloc11 = *jacobianTotalForcesOver_velocity_;
-    LUMass_->solve(*bloc11);
+    *bloc11 = LUMass_->solve(*bloc11);
   }
 }
 
@@ -597,7 +595,7 @@ void siconos::modeling::LagrangianDS::computeTotalForces(
       totalForces_ = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
       totalForces_->setZero();
     } else
-      totalForces_->zero();
+      totalForces_->setZero();
   } else
     return;
 
@@ -745,14 +743,14 @@ void siconos::modeling::LagrangianDS::swapInMemory() {
 }
 
 void siconos::modeling::LagrangianDS::resetAllNonSmoothParts() {
-  if (p_[0]) p_[0]->zero();
-  if (p_[1]) p_[1]->zero();
-  if (p_[2]) p_[2]->zero();
+  if (p_[0]) p_[0]->setZero();
+  if (p_[1]) p_[1]->setZero();
+  if (p_[2]) p_[2]->setZero();
 }
 
 void siconos::modeling::LagrangianDS::resetNonSmoothPart(unsigned int level) {
   if (level < siconos::internal::LEVELMAX)
-    if (p_[level]) p_[level]->zero();
+    if (p_[level]) p_[level]->setZero();
 }
 
 void siconos::modeling::LagrangianDS::computePostImpactVelocity() {
@@ -760,8 +758,8 @@ void siconos::modeling::LagrangianDS::computePostImpactVelocity() {
   // We solve M(v+ - v-) = p - The result is saved in(place of) p[1].
   DEBUG_BEGIN("siconos::modeling::LagrangianDS::computePostImpactV()\n");
   siconos::algebra::SiconosVector tmp(*p_[1]);
-  if (LUMass_) LUMass_->solve(tmp);  // we assume mass/lumass are uptodate?
-  *state_q_[1] += tmp;               // v+ = v- + p
+  if (LUMass_) tmp = LUMass_->solve(tmp);  // we assume mass/lumass are uptodate?
+  *state_q_[1] += tmp;                     // v+ = v- + p
   DEBUG_BEGIN("siconos::modeling::LagrangianDS::computePostImpactV() END \n");
 }
 

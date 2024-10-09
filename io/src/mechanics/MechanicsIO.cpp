@@ -522,7 +522,7 @@ std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::domai
       inspector->inter = graph.bundle(*vi);
       graph.bundle(*vi)->relation()->accept(inspector);
       const auto& data = inspector->answer;
-      if (data.size() == 2) result->setRow(current_row, data);
+      if (data.size() == 2) result->row(current_row) = data;
     }
     return result;
   }
@@ -542,7 +542,7 @@ siconos::io::MechanicsIO::visitAllVerticesForVector(const G& graph) const {
     graph.bundle(*vi)->acceptSP(getter);
     const auto& data = *getter->result;
     result->resize(current_row + 1, data.size());
-    result->setRow(current_row, data);
+    result->row(current_row) = data;
   }
   return result;
 }
@@ -629,7 +629,7 @@ std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::conta
         if (result->size(1) != data.size()) {
           result->resize(graph.vertices_number(), data.size());
         }
-        result->setRow(current_row++, data);
+        result->row(current_row++) = data;
         data_size += 2;
       }
     }
@@ -760,7 +760,7 @@ std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::conta
       if (result->size(1) != data.size()) {
         result->resize(graph.vertices_number(), data.size());
       }
-      result->setRow(current_row++, data);
+      result->row(current_row++) = data;
     }
     result->resize(current_row, data_size);
     DEBUG_EXPR(result->display(););
@@ -967,7 +967,7 @@ std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::conta
       if (result->size(1) != data.size()) {
         result->resize(graph.vertices_number(), data.size());
       }
-      result->setRow(current_row++, data);
+      result->row(current_row++) = data;
     }
     result->resize(current_row, data_size);
     DEBUG_EXPR(result->display(););

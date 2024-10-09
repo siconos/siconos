@@ -212,7 +212,7 @@ void siconos::mechanics::fem::FiniteElementModel::computeElementaryMassMatrix(
       "computeElementaryMassMatrix(siconos::"
       "algebra::SiconosMatrix& Me, FElement& fe, double massDensity )\n");
 
-  Me.zero();
+  Me.setZero();
 
   auto &nodes = fe.nodes();
   int nnodes = nodes.size();
@@ -361,7 +361,7 @@ void siconos::mechanics::fem::FiniteElementModel::computeElementaryStiffnessMatr
       "computeElementaryStiffnessMatrix_direct("
       "siconos::algebra::SiconosMatrix& Ke, FElement& fe, Material& mat  )\n");
 
-  Ke.zero();
+  Ke.setZero();
 
   // Compute element determinant
   int ndof = fe.ndof();
@@ -565,7 +565,7 @@ void siconos::mechanics::fem::FiniteElementModel::computeElementaryStiffnessMatr
       "computeElementaryStiffnessMatrix(siconos::"
       "algebra::SiconosMatrix& Ke, FElement& fe, Material& mat  )\n");
 
-  Ke.zero();
+  Ke.setZero();
   // Compute element determinant
   int ndof = fe.ndof();
   auto &nodes = fe.nodes();
@@ -629,7 +629,7 @@ void siconos::mechanics::fem::FiniteElementModel::computeElementaryStiffnessMatr
       // Construct the B matrix (its form is consistent with the choice of the
       // representation of strain)
       auto B = std::make_shared<siconos::algebra::SiconosMatrix>(3, ndof);
-      B->zero();
+      B->setZero();
       for (int n = 0; n < nnodes; n++) {
         B->setValue(0, 2 * n, Nx[n]);
         B->setValue(1, 2 * n, 0.0);
@@ -702,7 +702,7 @@ void siconos::mechanics::fem::FiniteElementModel::computeElementaryStiffnessMatr
       /* Construct the B matrix (its form is consistent with the choice
        * of the representation of strain) */
       auto B = std::make_shared<siconos::algebra::SiconosMatrix>(6, ndof);
-      B->zero();
+      B->setZero();
       for (int n = 0; n < nnodes; n++) {
         B->setValue(0, 3 * n, Nx[n]);
         B->setValue(1, 3 * n, 0.0);

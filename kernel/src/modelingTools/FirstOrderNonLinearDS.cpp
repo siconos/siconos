@@ -242,7 +242,7 @@ void siconos::modeling::FirstOrderNonLinearDS::computeRhs(double time) {
     computeM(time);
     // allocate invM at the first call of the present function
     LU_M_ = std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(*_M);
-    LU_M_->solve(*(_x[1]));
+    *(_x[1]) = LU_M_->solve(*(_x[1]));
   }
 }
 
@@ -263,7 +263,7 @@ void siconos::modeling::FirstOrderNonLinearDS::computeJacobianRhsx(double time) 
 
     computeM(time);
     LU_M_ = std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(*_M);
-    LU_M_->solve(*(_jacxRhs->block(0, 0)));
+    *(_jacxRhs->block(0, 0)) = LU_M_->solve(*(_jacxRhs->block(0, 0)));
   }
   // else jacobianRhsx = jacobianfx, pointers equality set in initRhs
 }
@@ -296,7 +296,7 @@ void siconos::modeling::FirstOrderNonLinearDS::resetAllNonSmoothParts() { _r->se
 void siconos::modeling::FirstOrderNonLinearDS::resetNonSmoothPart(unsigned int level) {
   // V.A. 28/05/2012:  for the moment various level are not used for First Order systems
   // assert(0);
-  _r->zero();
+  _r->setZero();
 }
 
 void siconos::modeling::FirstOrderNonLinearDS::acceptSP(

@@ -35,11 +35,7 @@ class SimpleMatrixTest : public CppUnit::TestFixture {
   CPPUNIT_TEST(testNormInf);
   CPPUNIT_TEST(testSetBlock);
   CPPUNIT_TEST(testSetBlock2);
-  CPPUNIT_TEST(testOperators6Bis);
-  CPPUNIT_TEST(testOperators8_5);
-  CPPUNIT_TEST(testOperators8_6);
   CPPUNIT_TEST(testOperators9);
-  CPPUNIT_TEST(testProd);
   CPPUNIT_TEST(testProdBis);
   CPPUNIT_TEST(testProd4);
   CPPUNIT_TEST(testProd5);
@@ -54,11 +50,7 @@ class SimpleMatrixTest : public CppUnit::TestFixture {
   void testNormInf();
   void testSetBlock();
   void testSetBlock2();
-  void testOperators6Bis();
-  void testOperators8_5();
-  void testOperators8_6();
   void testOperators9();
-  void testProd();
   void testProdBis();
   void testProdTer();
   void testProd4();

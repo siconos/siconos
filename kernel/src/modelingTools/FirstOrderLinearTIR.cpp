@@ -18,12 +18,13 @@
 #include "FirstOrderLinearTIR.hpp"
 
 #include <iostream>
+
 #include "BlockVector.hpp"
 #include "Interaction.hpp"
 #include "SiconosException.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
-#include "SiconosMatrix.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -112,15 +113,15 @@ void siconos::modeling::FirstOrderLinearTIR::computeh(
     const siconos::algebra::BlockVector &x, const siconos::algebra::SiconosVector &lambda,
     siconos::algebra::BlockVector &z, siconos::algebra::SiconosVector &y) {
   // if (_C) C must be allocated. Checksize is there to ensure it.
-  siconos::algebra::prod(*_C, x, y, true);
+  siconos::algebra::matrixBlockVector_prod(*_C, x, y, true);
   // else
-  //   y.zero();
+  //   y.setZero();
 
   if (_D) siconos::algebra::prod(*_D, lambda, y, false);
 
   if (_e) y += *_e;
 
-  if (_F) siconos::algebra::prod(*_F, z, y, false);
+  if (_F) siconos::algebra::matrixBlockVector_prod(*_F, z, y, false);
 }
 
 void siconos::modeling::FirstOrderLinearTIR::computeOutput(double time, Interaction &inter,
@@ -134,7 +135,7 @@ void siconos::modeling::FirstOrderLinearTIR::computeOutput(double time, Interact
 
 void siconos::modeling::FirstOrderLinearTIR::computeg(
     const siconos::algebra::SiconosVector &lambda, siconos::algebra::BlockVector &r) {
-  siconos::algebra::prod(*_B, lambda, r, false);
+  siconos::algebra::matrixVector_prod_toBlock(*_B, lambda, r, false);
 }
 
 void siconos::modeling::FirstOrderLinearTIR::computeInput(double time, Interaction &inter,

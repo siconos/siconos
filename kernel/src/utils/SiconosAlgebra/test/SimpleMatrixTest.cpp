@@ -66,72 +66,6 @@ void SimpleMatrixTest::setUp() {
   for (unsigned i = 0; i < D.rows(); ++i)
     for (unsigned j = 0; j < D.cols(); ++j) D(i, j) = 3 * i + j;
 
-  // // Triang
-  // T = std::make_shared<siconos::algebra::TriangMat>(3, 3);
-  // for (unsigned i = 0; i < T->size1(); ++i)
-  //   for (unsigned j = i; j < T->size2(); ++j) (*T)(i, j) = 3 * i + j;
-  // T2 = std::make_shared<siconos::algebra::TriangMat>(4, 4);
-  // for (unsigned i = 0; i < T2->size1(); ++i)
-  //   for (unsigned j = i; j < T2->size2(); ++j) (*T2)(i, j) = 3 * i + j;
-
-  // // Sym
-  // S = std::make_shared<siconos::algebra::SymMat>(3, 3);
-  // for (unsigned i = 0; i < S->size1(); ++i)
-  //   for (unsigned j = i; j < S->size2(); ++j) (*S)(i, j) = 3 * i + j;
-  // S2 = std::make_shared<siconos::algebra::SymMat>(4, 4);
-  // for (unsigned i = 0; i < S2->size1(); ++i)
-  //   for (unsigned j = i; j < S2->size2(); ++j) (*S2)(i, j) = 3 * i + j;
-
-  // // Sparse
-  // SP = std::make_shared<siconos::algebra::SparseMat>(4, 4);
-  // for (unsigned i = 0; i < SP->size1(); ++i)
-  //   for (unsigned j = 0; j < SP->size2(); ++j) (*SP)(i, j) = 3 * i + j;
-
-  // SP2 = std::make_shared<siconos::algebra::SparseMat>(4, 4);
-  // for (unsigned i = 0; i < SP2->size1(); ++i)
-  //   for (unsigned j = 0; j < SP->size2() - 1; ++j)
-  //     if (i != j) (*SP2)(i, j) = 3 * i + j;
-
-  // SP3 = std::make_shared<siconos::algebra::SparseMat>(3, 3);
-
-  // (*SP3)(0, 0) = 1.0;
-  // (*SP3)(0, 2) = 2.0;
-  // (*SP3)(1, 2) = 3.0;
-  // (*SP3)(2, 0) = 4.0;
-  // (*SP3)(2, 1) = 5.0;
-  // (*SP3)(2, 2) = 5.0;
-
-  // SP4 = std::make_shared<siconos::algebra::SparseMat>(3, 3);
-  // (*SP4)(0, 0) = 1.0;
-  // (*SP4)(0, 2) = 4.0;
-  // (*SP4)(1, 1) = 1.0;
-  // (*SP4)(1, 2) = 5.0;
-  // (*SP4)(2, 0) = 4.0;
-  // (*SP4)(2, 1) = 5.0;
-  // (*SP4)(2, 2) = 77.0;
-
-  // Sparse Coordinate
-  // SP_coor = std::make_shared<siconos::algebra::SparseCoordinateMat>(4, 4);
-  // for (unsigned i = 0; i < SP->size1(); ++i)
-  //   for (unsigned j = 0; j < SP->size2(); ++j) (*SP_coor)(i, j) = 3 * i + j;
-
-  // // Banded
-  // Band = std::make_shared<siconos::algebra::BandedMat>(4, 4, 1, 1);
-  // for (signed i = 0; i < signed(Band->size1()); ++i)
-  //   for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(Band->size2())); ++j)
-  //     (*Band)(i, j) = 3 * i + j;
-  // Band2 = std::make_shared<siconos::algebra::BandedMat>(4, 3, 1, 1);
-  // for (signed i = 0; i < signed(Band2->size1()); ++i)
-  //   for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(Band2->size2())); ++j)
-  //     (*Band2)(i, j) = 3 * i + j;
-
-  // // Zero
-  // Z = std::make_shared<siconos::algebra::ZeroMat>(3, 3);
-  // Z2 = std::make_shared<siconos::algebra::ZeroMat>(4, 4);
-  // // Identity
-  // I = std::make_shared<siconos::algebra::IdentityMat>(3, 3);
-  // I2 = std::make_shared<siconos::algebra::IdentityMat>(4, 4);
-
   // BlockMat
   size = 10;
   size2 = 10;
@@ -191,7 +125,7 @@ void SimpleMatrixTest::testSetBlock() {
                                    true);
 
   // Copy of a sub-block of a Simple into a Block
-  Cb->zero();
+  Cb->setZero();
   siconos::algebra::setBlock(*MIn, Cb, subDim, subPos);
 
   for (unsigned int i = subPos[2]; i < subPos[2] + subDim[0]; ++i)
@@ -239,444 +173,6 @@ void SimpleMatrixTest::testSetBlock2() {
   //         "testSetBlock2: ", fabs((*MOut)(i, j) - (*MInB)(i - 2, j - 3)) < tol, true);
 
   std::cout << "-->  setBlock2 test ended with success." << std::endl;
-}
-
-void SimpleMatrixTest::testOperators6Bis() {
-  std::cout << "--> Test: operator6Bis." << std::endl;
-
-  // ============= C = A + B =============
-
-  // Dense = Dense + Dense
-  C->zero();
-  siconos::algebra::add(*A, *B, *C);
-  for (unsigned int i = 0; i < C->size(0); ++i)
-    for (unsigned int j = 0; j < C->size(1); ++j)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE(
-          "testOperators6Bis: ", fabs((*C)(i, j) - (*A)(i, j) - (*B)(i, j)) < tol, true);
-
-  C->zero();
-  // Dense = Dense + Block
-  siconos::algebra::add(*A, *Ab, *C);
-  for (unsigned int i = 0; i < C->size(0); ++i)
-    for (unsigned int j = 0; j < C->size(1); ++j)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE(
-          "testOperators6Bis: ", fabs((*C)(i, j) - (*A)(i, j) - (*Ab)(i, j)) < tol, true);
-
-  C->zero();
-  // Dense = Block + Dense
-  siconos::algebra::add(*Ab, *A, *C);
-  for (unsigned int i = 0; i < C->size(0); ++i)
-    for (unsigned int j = 0; j < C->size(1); ++j)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE(
-          "testOperators6Bis: ", fabs((*C)(i, j) - (*A)(i, j) - (*Ab)(i, j)) < tol, true);
-
-  C->zero();
-
-  // Dense = Block + Block
-  siconos::algebra::add(*Ab, *Ab, *C);
-  for (unsigned int i = 0; i < C->size(0); ++i)
-    for (unsigned int j = 0; j < C->size(1); ++j)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE(
-          "testOperators6Bis: ", fabs((*C)(i, j) - (*Ab)(i, j) - (*Ab)(i, j)) < tol, true);
-
-  C->zero();
-
-  // Block = Dense + Dense
-  Cb->zero();
-  siconos::algebra::add(*A, *B, *Cb);
-  for (unsigned int i = 0; i < Cb->size(0); ++i)
-    for (unsigned int j = 0; j < Cb->size(1); ++j)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE(
-          "testOperators6Bis: ", fabs((*Cb)(i, j) - (*A)(i, j) - (*B)(i, j)) < tol, true);
-
-  // Block = Dense + Block
-
-  Cb->zero();
-  siconos::algebra::add(*A, *Ab, *Cb);
-  for (unsigned int i = 0; i < Cb->size(0); ++i)
-    for (unsigned int j = 0; j < Cb->size(1); ++j)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE(
-          "testOperators6Bis: ", fabs((*Cb)(i, j) - (*A)(i, j) - (*Ab)(i, j)) < tol, true);
-
-  // Block = Block + Dense
-
-  Cb->zero();
-  siconos::algebra::add(*Ab, *A, *Cb);
-  for (unsigned int i = 0; i < Cb->size(0); ++i)
-    for (unsigned int j = 0; j < Cb->size(1); ++j)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE(
-          "testOperators6Bis: ", fabs((*Cb)(i, j) - (*Ab)(i, j) - (*A)(i, j)) < tol, true);
-
-  // Block = Block + Block
-
-  Cb->zero();
-  siconos::algebra::add(*Ab, *Bb, *Cb);
-  for (unsigned int i = 0; i < Cb->size(0); ++i)
-    for (unsigned int j = 0; j < Cb->size(1); ++j)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE(
-          "testOperators6Bis: ", fabs((*Cb)(i, j) - (*Ab)(i, j) - (*Bb)(i, j)) < tol, true);
-  Cb->zero();
-
-  // ============= C = A - B =============
-
-  // Dense = Dense - Dense
-  C->zero();
-  siconos::algebra::sub(*A, *B, *C);
-  for (unsigned int i = 0; i < C->size(0); ++i)
-    for (unsigned int j = 0; j < C->size(1); ++j)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE(
-          "testOperators6Bis: ", fabs((*C)(i, j) - (*A)(i, j) + (*B)(i, j)) < tol, true);
-
-  C->zero();
-  // Dense = Dense - Block
-  siconos::algebra::sub(*A, *Ab, *C);
-  for (unsigned int i = 0; i < C->size(0); ++i)
-    for (unsigned int j = 0; j < C->size(1); ++j)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE(
-          "testOperators6Bis: ", fabs((*C)(i, j) - (*A)(i, j) + (*Ab)(i, j)) < tol, true);
-
-  C->zero();
-  // Dense = Block - Dense
-  siconos::algebra::sub(*Ab, *A, *C);
-  for (unsigned int i = 0; i < C->size(0); ++i)
-    for (unsigned int j = 0; j < C->size(1); ++j)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE(
-          "testOperators6Bis: ", fabs((*C)(i, j) + (*A)(i, j) - (*Ab)(i, j)) < tol, true);
-
-  C->zero();
-
-  // Dense = Block - Block
-  siconos::algebra::sub(*Ab, *Bb, *C);
-  for (unsigned int i = 0; i < C->size(0); ++i)
-    for (unsigned int j = 0; j < C->size(1); ++j)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE(
-          "testOperators6Bis: ", fabs((*C)(i, j) - (*Ab)(i, j) + (*Bb)(i, j)) < tol, true);
-
-  C->zero();
-
-  // Block = Dense - Dense
-  Cb->zero();
-  siconos::algebra::sub(*A, *B, *Cb);
-  for (unsigned int i = 0; i < Cb->size(0); ++i)
-    for (unsigned int j = 0; j < Cb->size(1); ++j)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE(
-          "testOperators6Bis: ", fabs((*Cb)(i, j) - (*A)(i, j) + (*B)(i, j)) < tol, true);
-
-  // Block = Dense - Block
-
-  Cb->zero();
-  siconos::algebra::sub(*A, *Ab, *Cb);
-  for (unsigned int i = 0; i < Cb->size(0); ++i)
-    for (unsigned int j = 0; j < Cb->size(1); ++j)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE(
-          "testOperators6Bis: ", fabs((*Cb)(i, j) - (*A)(i, j) + (*Ab)(i, j)) < tol, true);
-
-  // Block = Block - Dense
-
-  Cb->zero();
-  siconos::algebra::sub(*Ab, *A, *Cb);
-  for (unsigned int i = 0; i < Cb->size(0); ++i)
-    for (unsigned int j = 0; j < Cb->size(1); ++j)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE(
-          "testOperators6Bis: ", fabs((*Cb)(i, j) - (*Ab)(i, j) + (*A)(i, j)) < tol, true);
-
-  // Block = Block - Block
-
-  Cb->zero();
-  siconos::algebra::sub(*Ab, *Bb, *Cb);
-  for (unsigned int i = 0; i < Cb->size(0); ++i)
-    for (unsigned int j = 0; j < Cb->size(1); ++j)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE(
-          "testOperators6Bis: ", fabs((*Cb)(i, j) - (*Ab)(i, j) + (*Bb)(i, j)) < tol, true);
-  Cb->zero();
-  std::cout << "-->  test operators6Bis ended with success." << std::endl;
-}
-void SimpleMatrixTest::testOperators8_5() {
-  // == Test siconos::algebra::subprod ==
-
-  std::cout << "--> Test: operator8_5." << std::endl;
-  std::vector<std::size_t> coord(8);
-  auto x1 = std::make_shared<siconos::algebra::SiconosVector>(2);
-  auto x2 = std::make_shared<siconos::algebra::SiconosVector>(3);
-  auto x3 = std::make_shared<siconos::algebra::SiconosVector>(5);
-  auto y = std::make_shared<siconos::algebra::SiconosVector>(size);
-  auto x = std::make_shared<siconos::algebra::BlockVector>();
-  auto v = std::make_shared<siconos::algebra::SiconosVector>(size);
-  x->insertPtr(x1);
-  x->insertPtr(x2);
-  x->insertPtr(x3);
-  for (unsigned int i = 0; i < size; ++i) {
-    (*x)(i) = (double)i + 3;
-    (*v)(i) = (double)i + 3;
-  }
-
-  // v == x but x is a 3-blocks vector.
-
-  // Simple = Simple * Simple, all dense
-  // siconos::algebra::subprod but with full matrix/vectors
-  coord[0] = 0;
-  coord[1] = size;
-  coord[2] = 0;
-  coord[3] = size;
-  coord[4] = 0;
-  coord[5] = size;
-  coord[6] = 0;
-  coord[7] = size;
-  siconos::algebra::subprod(*A, *v, *y, coord, true);
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE(
-  //     "testOperators8_5: ",
-  //     (*y - (siconos::algebra::prod(*A, *v))).normInf() < tol, true); // TODO
-
-  // Simple = Simple * Block, all dense
-  // siconos::algebra::subprod but with full matrix/vectors
-  //  siconos::algebra::subprod(*A,*x,*y, coord, true);
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", norm_inf(*y->dense()-
-  //  ublas::prod(*A->dense(),*v->dense()))<tol, true);
-
-  coord[0] = 0;
-  coord[1] = 2;
-  coord[2] = 1;
-  coord[3] = 3;
-  coord[4] = 3;
-  coord[5] = 5;
-  coord[6] = 2;
-  coord[7] = 4;
-  y->zero();
-  // Simple = Simple * Simple, all dense
-  siconos::algebra::subprod(*A, *v, *y, coord, true);
-  double res = (*A)(0, 1) * (*v)(3) + (*A)(0, 2) * (*v)(4);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs(res - (*y)(2)) < tol, true);
-  res = (*A)(1, 1) * (*v)(3) + (*A)(1, 2) * (*v)(4);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs(res - (*y)(3)) < tol, true);
-  for (unsigned int i = 0; i < size; ++i) {
-    if (i != 2 && i != 3)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs((*y)(i)) < tol, true);
-  }
-  y->zero();
-  // Simple = Simple * Block, all dense
-  //  siconos::algebra::subprod(*A,*x,*y, coord, true);
-  //  res = (*A)(0,1)*(*x)(3) + (*A)(0,2)*(*x)(4);
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs(res-(*y)(2))<tol, true);
-  //  res = (*A)(1,1)*(*x)(3) + (*A)(1,2)*(*x)(4);
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs(res-(*y)(3))<tol, true);
-  //  for (unsigned int i=0; i<size; ++i)
-  //  {
-  //    if (i!=2 && i!=3)
-  //      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs((*y)(i))<tol, true);
-  //  }
-  //   // Others ...
-  // Triang
-
-  // auto A2 = std::make_shared<SiconosMatrix>(10, 10,
-  // siconos::algebra::UblasType::TRIANGULAR); for (unsigned i = 0; i < A2->size(0); ++i)
-  //   for (unsigned j = i; j < A2->size(1); ++j) (*A2)(i, j) = 3 * i + j;
-
-  // siconos::algebra::subprod(*A2, *v, *y, coord, true);
-  // res = (*A2)(0, 1) * (*v)(3) + (*A2)(0, 2) * (*v)(4);
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs(res - (*y)(2)) < tol, true);
-  // res = (*A2)(1, 1) * (*v)(3) + (*A2)(1, 2) * (*v)(4);
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs(res - (*y)(3)) < tol, true);
-  // for (unsigned int i = 0; i < size; ++i) {
-  //   if (i != 2 && i != 3)
-  //     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs((*y)(i)) < tol, true);
-  // }
-  // // Sym
-  // A2 = std::make_shared<SiconosMatrix>(10, 10, siconos::algebra::UblasType::SYMMETRIC);
-  // for (unsigned i = 0; i < A2->size(0); ++i)
-  //   for (unsigned j = i; j < A2->size(1); ++j) (*A2)(i, j) = 3 * i + j;
-
-  // siconos::algebra::subprod(*A2, *v, *y, coord, true);
-  // res = (*A2)(0, 1) * (*v)(3) + (*A2)(0, 2) * (*v)(4);
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs(res - (*y)(2)) < tol, true);
-  // res = (*A2)(1, 1) * (*v)(3) + (*A2)(1, 2) * (*v)(4);
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs(res - (*y)(3)) < tol, true);
-  // for (unsigned int i = 0; i < size; ++i) {
-  //   if (i != 2 && i != 3)
-  //     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs((*y)(i)) < tol, true);
-  // }
-
-  // // Sparse
-  // A2 = std::make_shared<SiconosMatrix>(10, 10, siconos::algebra::UblasType::SPARSE);
-  // for (unsigned i = 0; i < A2->size(0); ++i)
-  //   for (unsigned j = i; j < A2->size(1); ++j) A2->setValue(i, j, 3 * i + j);
-
-  // siconos::algebra::subprod(*A2, *v, *y, coord, true);
-  // res = (*A2)(0, 1) * (*v)(3) + (*A2)(0, 2) * (*v)(4);
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs(res - (*y)(2)) < tol, true);
-  // res = (*A2)(1, 1) * (*v)(3) + (*A2)(1, 2) * (*v)(4);
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs(res - (*y)(3)) < tol, true);
-  // for (unsigned int i = 0; i < size; ++i) {
-  //   if (i != 2 && i != 3)
-  //     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs((*y)(i)) < tol, true);
-  // }
-
-  // // Banded
-  // A2 = std::make_shared<SiconosMatrix>(10, 10, siconos::algebra::UblasType::BANDED);
-  // for (signed i = 0; i < signed(A2->size(0)); ++i)
-  //   for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(A2->size(1))); ++j)
-  //     (*A2)(i, j) = 3 * i + j;
-  // siconos::algebra::subprod(*A2, *v, *y, coord, true);
-  // res = (*A2)(0, 1) * (*v)(3);
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs(res - (*y)(2)) < tol, true);
-  // res = (*A2)(1, 1) * (*v)(3) + (*A2)(1, 2) * (*v)(4);
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs(res - (*y)(3)) < tol, true);
-  // for (unsigned int i = 0; i < size; ++i) {
-  //   if (i != 2 && i != 3)
-  //     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_5: ", fabs((*y)(i)) < tol, true);
-  // }
-
-  std::cout << "-->  test operators8_5 ended with success." << std::endl;
-}
-
-void SimpleMatrixTest::testOperators8_6() {
-  // == Test siconos::algebra::subprod, with += ==
-
-  std::cout << "--> Test: operator8_6." << std::endl;
-  std::vector<std::size_t> coord(8);
-  auto x1 = std::make_shared<siconos::algebra::SiconosVector>(2);
-  auto x2 = std::make_shared<siconos::algebra::SiconosVector>(3);
-  auto x3 = std::make_shared<siconos::algebra::SiconosVector>(5);
-  auto y = std::make_shared<siconos::algebra::SiconosVector>(size);
-  auto x = std::make_shared<siconos::algebra::BlockVector>();
-  auto v = std::make_shared<siconos::algebra::SiconosVector>(size);
-  x->insertPtr(x1);
-  x->insertPtr(x2);
-  x->insertPtr(x3);
-  for (unsigned int i = 0; i < size; ++i) {
-    (*x)(i) = (double)i + 3;
-    (*v)(i) = (double)i + 3;
-  }
-
-  // v == x but x is a 3-blocks vector.
-
-  *y = *v;
-
-  // Simple = Simple * Simple, all dense
-  // siconos::algebra::subprod but with full matrix/vectors
-  coord[0] = 0;
-  coord[1] = size;
-  coord[2] = 0;
-  coord[3] = size;
-  coord[4] = 0;
-  coord[5] = size;
-  coord[6] = 0;
-  coord[7] = size;
-  siconos::algebra::subprod(*A, *v, *y, coord, false);
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE(
-  //     "testOperators8_6: ",
-  //     (*y - siconos::algebra::prod(*A, *v) - *v).normInf() < tol, true); // TODO
-
-  // Simple = Simple * Block, all dense
-  // siconos::algebra::subprod but with full matrix/vectors
-  *y = *v;
-  //  siconos::algebra::subprod(*A,*x,*y, coord, false);
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", norm_inf(*y->dense()-
-  //  ublas::prod(*A->dense(),*v->dense())- *v->dense())<tol, true);
-
-  coord[0] = 0;
-  coord[1] = 2;
-  coord[2] = 1;
-  coord[3] = 3;
-  coord[4] = 3;
-  coord[5] = 5;
-  coord[6] = 2;
-  coord[7] = 4;
-
-  // Simple = Simple * Simple, all dense
-  *y = *v;
-  siconos::algebra::subprod(*A, *v, *y, coord, false);
-  double res = (*A)(0, 1) * (*v)(3) + (*A)(0, 2) * (*v)(4) + (*v)(2);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs(res - (*y)(2)) < tol, true);
-  res = (*A)(1, 1) * (*v)(3) + (*A)(1, 2) * (*v)(4) + (*v)(3);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs(res - (*y)(3)) < tol, true);
-  for (unsigned int i = 0; i < size; ++i) {
-    if (i != 2 && i != 3)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs((*y)(i) - (*v)(i)) < tol, true);
-  }
-  *y = *v;
-  // Simple = Simple * Block, all dense
-  //  siconos::algebra::subprod(*A,*x,*y, coord, false);
-  //  res = (*A)(0,1)*(*x)(3) + (*A)(0,2)*(*x)(4) + (*v)(2);
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs(res-(*y)(2))<tol, true);
-  //  res = (*A)(1,1)*(*x)(3) + (*A)(1,2)*(*x)(4) + (*v)(3);
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs(res-(*y)(3))<tol, true);
-  //  for (unsigned int i=0; i<size; ++i)
-  //  {
-  //    if (i!=2 && i!=3)
-  //      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs((*y)(i)-(*v)(i))<tol, true);
-  //  }
-
-  //   // Others ...
-  // Triang
-
-  // auto A2 = std::make_shared<SiconosMatrix>(10, 10,
-  // siconos::algebra::UblasType::TRIANGULAR); for (unsigned i = 0; i < A2->size(0); ++i)
-  //   for (unsigned j = i; j < A2->size(1); ++j) (*A2)(i, j) = 3 * i + j;
-
-  // *y = *v;
-  // siconos::algebra::subprod(*A2, *v, *y, coord, false);
-  // res = (*A2)(0, 1) * (*v)(3) + (*A2)(0, 2) * (*v)(4) + (*v)(2);
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs(res - (*y)(2)) < tol, true);
-  // res = (*A2)(1, 1) * (*v)(3) + (*A2)(1, 2) * (*v)(4) + (*v)(3);
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs(res - (*y)(3)) < tol, true);
-  // for (unsigned int i = 0; i < size; ++i) {
-  //   if (i != 2 && i != 3)
-  //     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs((*y)(i) - (*v)(i)) < tol,
-  //     true);
-  // }
-
-  // // Sym
-  // A2 = std::make_shared<SiconosMatrix>(10, 10, siconos::algebra::UblasType::SYMMETRIC);
-  // for (unsigned i = 0; i < A2->size(0); ++i)
-  //   for (unsigned j = i; j < A2->size(1); ++j) (*A2)(i, j) = 3 * i + j;
-
-  // *y = *v;
-  // siconos::algebra::subprod(*A2, *v, *y, coord, false);
-  // res = (*A2)(0, 1) * (*v)(3) + (*A2)(0, 2) * (*v)(4) + (*v)(2);
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs(res - (*y)(2)) < tol, true);
-  // res = (*A2)(1, 1) * (*v)(3) + (*A2)(1, 2) * (*v)(4) + (*v)(3);
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs(res - (*y)(3)) < tol, true);
-  // for (unsigned int i = 0; i < size; ++i) {
-  //   if (i != 2 && i != 3)
-  //     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs((*y)(i) - (*v)(i)) < tol,
-  //     true);
-  // }
-
-  // // Sparse
-  // A2 = std::make_shared<SiconosMatrix>(10, 10, siconos::algebra::UblasType::SPARSE);
-  // for (unsigned i = 0; i < A2->size(0); ++i)
-  //   for (unsigned j = i; j < A2->size(1); ++j) A2->setValue(i, j, 3 * i + j);
-
-  // *y = *v;
-  // siconos::algebra::subprod(*A2, *v, *y, coord, false);
-  // res = (*A2)(0, 1) * (*v)(3) + (*A2)(0, 2) * (*v)(4) + (*v)(2);
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs(res - (*y)(2)) < tol, true);
-  // res = (*A2)(1, 1) * (*v)(3) + (*A2)(1, 2) * (*v)(4) + (*v)(3);
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs(res - (*y)(3)) < tol, true);
-  // for (unsigned int i = 0; i < size; ++i) {
-  //   if (i != 2 && i != 3)
-  //     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs((*y)(i) - (*v)(i)) < tol,
-  //     true);
-  // }
-
-  // // Banded
-  // A2 = std::make_shared<SiconosMatrix>(10, 10, siconos::algebra::UblasType::BANDED);
-  // for (signed i = 0; i < signed(A2->size(0)); ++i)
-  //   for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(A2->size(1))); ++j)
-  //     (*A2)(i, j) = 3 * i + j;
-  // *y = *v;
-  // siconos::algebra::subprod(*A2, *v, *y, coord, false);
-  // res = (*A2)(0, 1) * (*v)(3) + (*v)(2);
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs(res - (*y)(2)) < tol, true);
-  // res = (*A2)(1, 1) * (*v)(3) + (*A2)(1, 2) * (*v)(4) + (*v)(3);
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs(res - (*y)(3)) < tol, true);
-  // for (unsigned int i = 0; i < size; ++i) {
-  //   if (i != 2 && i != 3)
-  //     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators8_6: ", fabs((*y)(i) - (*v)(i)) < tol,
-  //     true);
-  // }
-
-  std::cout << "-->  test operators8_6 ended with success." << std::endl;
 }
 
 void SimpleMatrixTest::testOperators9() {
@@ -783,134 +279,6 @@ void SimpleMatrixTest::testOperators9() {
   std::cout << "-->  test operators9 ended with success." << std::endl;
 }
 
-void SimpleMatrixTest::testProd()  // y = A*x
-{
-  std::cout << "--> Test: ublas::prod. mat-vect" << std::endl;
-
-  auto y = std::make_shared<siconos::algebra::SiconosVector>(size);
-  auto x = std::make_shared<siconos::algebra::SiconosVector>(size);
-  x->setConstant(4.3);
-  auto x1 = std::make_shared<siconos::algebra::SiconosVector>(size - 2);
-  x1->setConstant(2.3);
-  auto x2 = std::make_shared<siconos::algebra::SiconosVector>(2);
-  x2->setConstant(3.1);
-
-  auto xB = std::make_shared<siconos::algebra::BlockVector>(x1, x2);
-  auto yB = std::make_shared<siconos::algebra::BlockVector>(*xB);
-  yB->zero();
-
-  // Matrix - vector ublas::product
-
-  // Simple = Simple * Simple
-  *y = siconos::algebra::prod(*A, *x);
-  double sum;
-  for (unsigned int i = 0; i < size; ++i) {
-    sum = 0;
-    for (unsigned int j = 0; j < A->size(1); ++j) sum += (*A)(i, j) * (*x)(j);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd: ", fabs((*y)(i)-sum) < tol, true);
-  }
-  // Simple = Simple * Block
-  //  *y = siconos::algebra::prod(*A , *xB);
-  //  for (unsigned int i = 0; i< size; ++i)
-  //  {
-  //    sum = 0;
-  //    for (unsigned int j=0; j< A->size(1); ++j)
-  //      sum += (*A)(i,j)*(*xB)(j);
-  //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd: ", fabs((*y)(i) - sum)< tol, true);
-  //  }
-
-  // Block = Simple * Simple
-  *yB = siconos::algebra::prod(*A, *x);
-  for (unsigned int i = 0; i < size; ++i) {
-    sum = 0;
-
-    for (unsigned int j = 0; j < A->size(1); ++j) sum += (*A)(i, j) * (*x)(j);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd: ", fabs((*yB)(i)-sum) < tol, true);
-  }
-
-  // Block = Simple * Block
-  //  *yB = siconos::algebra::prod(*A ,*xB);
-  //  for (unsigned int i = 0; i< size; ++i)
-  //  {
-  //    sum = 0;
-  //    for (unsigned int j=0; j< A->size(1); ++j)
-  //      sum += (*A)(i,j)*(*xB)(j);
-  //    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd: ", fabs((*yB)(i) - sum)< tol, true);
-  //  }
-
-  // Others or old stuff ...
-
-  // auto tmp2 = std::make_shared<SiconosMatrix>(*T);
-  // auto tmp3 = std::make_shared<SiconosMatrix>(*S);
-  // auto tmp4 = std::make_shared<SiconosMatrix>(*SP);
-  // auto tmp5 = std::make_shared<SiconosMatrix>(*Band2);
-  // auto v = std::make_shared<siconos::algebra::SiconosVector>(3);
-  // (*v)(0) = 1;
-  // (*v)(1) = 2;
-  // (*v)(2) = 3;
-  // auto vv = std::make_shared<siconos::algebra::SiconosVector>(4);
-  // (*vv)(0) = 1;
-  // (*vv)(1) = 2;
-  // (*vv)(2) = 3;
-  // auto sv = std::make_shared<siconos::algebra::SparseVect>(3);
-  // (*sv)(0) = 4;
-  // (*sv)(1) = 5;
-  // (*sv)(2) = 6;
-  // auto sv2 = std::make_shared<siconos::algebra::SparseVect>(4);
-  // (*sv2)(0) = 4;
-  // (*sv2)(1) = 5;
-  // (*sv2)(2) = 6;
-  // auto w = std::make_shared<siconos::algebra::SiconosVector>(*sv);
-  // auto ww = std::make_shared<siconos::algebra::SiconosVector>(*sv2);
-  // auto res = std::make_shared<siconos::algebra::SiconosVector>(4);
-  // auto res2 = std::make_shared<siconos::algebra::SiconosVector>(3);
-
-  // // Triang * ...
-  // *res2 = siconos::algebra::prod(*tmp2, *v);
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE(
-  //     "testProd: ",
-  //     ublas::norm_2(*res2->dense() - ublas::prod(tmp2->getTriang(), *v->dense())) < tol,
-  //     true);
-  // *res2 = siconos::algebra::prod(*tmp2, *w);
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE(
-  //     "testProd: ",
-  //     ublas::norm_2(*res2->dense() - ublas::prod(tmp2->getTriang(), *w->sparse())) < tol,
-  //     true);
-  // //   Sym * ...
-  // *res2 = siconos::algebra::prod(*tmp3, *v);
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE(
-  //     "testProd: ",
-  //     ublas::norm_2(*res2->dense() - ublas::prod(tmp3->getSym(), *v->dense())) < tol, true);
-  // *res2 = siconos::algebra::prod(*tmp3, *w);
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE(
-  //     "testProd: ",
-  //     ublas::norm_2(*res2->dense() - ublas::prod(tmp3->getSym(), *w->sparse())) < tol,
-  //     true);
-  // // Sparse * ...
-  // *res = siconos::algebra::prod(*tmp4, *vv);
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE(
-  //     "testProd: ",
-  //     ublas::norm_2(*res->dense() - ublas::prod(tmp4->getSparse(), *vv->dense())) < tol,
-  //     true);
-  // *res = siconos::algebra::prod(*tmp4, *ww);
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE(
-  //     "testProd: ",
-  //     ublas::norm_2(*res->dense() - ublas::prod(tmp4->getSparse(), *ww->sparse())) < tol,
-  //     true);
-  // // Triang * ...
-  // *res = siconos::algebra::prod(*tmp5, *v);
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE(
-  //     "testProd: ",
-  //     ublas::norm_2(*res->dense() - ublas::prod(tmp5->getBanded(), *v->dense())) < tol,
-  //     true);
-  // *res = siconos::algebra::prod(*tmp5, *w);
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE(
-  //     "testProd: ",
-  //     ublas::norm_2(*res->dense() - ublas::prod(tmp5->getBanded(), *w->sparse())) < tol,
-  //     true);
-  std::cout << "-->  test ublas::prod ended with success." << std::endl;
-}
-
 void SimpleMatrixTest::testProdBis() {
   std::cout << "--> Test: ublas::prod. mat-vect (bis)" << std::endl;
 
@@ -924,7 +292,7 @@ void SimpleMatrixTest::testProdBis() {
 
   auto xB = std::make_shared<siconos::algebra::BlockVector>(x1, x2);
   auto yB = std::make_shared<siconos::algebra::BlockVector>(*xB);
-  yB->zero();
+  yB->setZero();
 
   // Matrix - vector ublas::product
 
@@ -937,7 +305,7 @@ void SimpleMatrixTest::testProdBis() {
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdBis: ", fabs((*y)(i)-sum) < tol, true);
   }
   // Simple = Simple * Block
-  siconos::algebra::prod(*A, *xB, *y);
+  siconos::algebra::matrixBlockVector_prod(*A, *xB, *y);
   for (unsigned int i = 0; i < size; ++i) {
     sum = 0;
     for (unsigned int j = 0; j < A->size(1); ++j) sum += (*A)(i, j) * (*xB)(j);
@@ -945,93 +313,12 @@ void SimpleMatrixTest::testProdBis() {
   }
 
   // Block = Simple * Simple
-  siconos::algebra::prod(*A, *x, *yB);
+  siconos::algebra::matrixVector_prod_toBlock(*A, *x, *yB);
   for (unsigned int i = 0; i < size; ++i) {
     sum = 0;
     for (unsigned int j = 0; j < A->size(1); ++j) sum += (*A)(i, j) * (*x)(j);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdBis: ", fabs((*yB)(i)-sum) < tol, true);
   }
-
-  // Block = Simple * Block
-  //  siconos::algebra::prod(*A ,*xB,*yB);
-  //  for (unsigned int i = 0; i< size; ++i)
-  //  {
-  //    sum = 0;
-  //    for (unsigned int j=0; j< A->size(1); ++j)
-  //      sum += (*A)(i,j)*(*xB)(j);
-  //    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdBis: ", fabs((*yB)(i) - sum)< tol, true);
-  //  }
-  //
-  // Others or old stuff ...
-
-  // auto tmp2 = std::make_shared<SiconosMatrix>(*T);
-  // auto tmp3 = std::make_shared<SiconosMatrix>(*S);
-  // auto tmp4 = std::make_shared<SiconosMatrix>(*SP);
-  // auto tmp5 = std::make_shared<SiconosMatrix>(*Band2);
-  // auto v = std::make_shared<siconos::algebra::SiconosVector>(3);
-  // (*v)(0) = 1;
-  // (*v)(1) = 2;
-  // (*v)(2) = 3;
-  // auto vv = std::make_shared<siconos::algebra::SiconosVector>(4);
-  // (*vv)(0) = 1;
-  // (*vv)(1) = 2;
-  // (*vv)(2) = 3;
-  // auto sv = std::make_shared<siconos::algebra::SparseVect>(3);
-  // (*sv)(0) = 4;
-  // (*sv)(1) = 5;
-  // (*sv)(2) = 6;
-  // auto sv2 = std::make_shared<siconos::algebra::SparseVect>(4);
-  // (*sv2)(0) = 4;
-  // (*sv2)(1) = 5;
-  // (*sv2)(2) = 6;
-  // auto w = std::make_shared<siconos::algebra::SiconosVector>(*sv);
-  // auto ww = std::make_shared<siconos::algebra::SiconosVector>(*sv2);
-  // auto res = std::make_shared<siconos::algebra::SiconosVector>(4);
-  // auto res2 = std::make_shared<siconos::algebra::SiconosVector>(3);
-
-  // // Triang * ...
-  // siconos::algebra::prod(*tmp2, *v, *res2);
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE(
-  //     "testProdBis: ",
-  //     ublas::norm_2(*res2->dense() - ublas::prod(tmp2->getTriang(), *v->dense())) < tol,
-  //     true);
-  // siconos::algebra::prod(*tmp2, *w, *res2);
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE(
-  //     "testProdBis: ",
-  //     ublas::norm_2(*res2->dense() - ublas::prod(tmp2->getTriang(), *w->sparse())) < tol,
-  //     true);
-  // //   Sym * ...
-  // siconos::algebra::prod(*tmp3, *v, *res2);
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE(
-  //     "testProdBis: ",
-  //     ublas::norm_2(*res2->dense() - ublas::prod(tmp3->getSym(), *v->dense())) < tol, true);
-  // siconos::algebra::prod(*tmp3, *w, *res2);
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE(
-  //     "testProdBis: ",
-  //     ublas::norm_2(*res2->dense() - ublas::prod(tmp3->getSym(), *w->sparse())) < tol,
-  //     true);
-  // // Sparse * ...
-  // siconos::algebra::prod(*tmp4, *vv, *res);
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE(
-  //     "testProdBis: ",
-  //     ublas::norm_2(*res->dense() - ublas::prod(tmp4->getSparse(), *vv->dense())) < tol,
-  //     true);
-  // siconos::algebra::prod(*tmp4, *ww, *res);
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE(
-  //     "testProdBis: ",
-  //     ublas::norm_2(*res->dense() - ublas::prod(tmp4->getSparse(), *ww->sparse())) < tol,
-  //     true);
-  // // Banded * ...
-  // siconos::algebra::prod(*tmp5, *v, *res);
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE(
-  //     "testProdBis: ",
-  //     ublas::norm_2(*res->dense() - ublas::prod(tmp5->getBanded(), *v->dense())) < tol,
-  //     true);
-  // siconos::algebra::prod(*tmp5, *w, *res);
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE(
-  //     "testProdBis: ",
-  //     ublas::norm_2(*res->dense() - ublas::prod(tmp5->getBanded(), *w->sparse())) < tol,
-  //     true);
   std::cout << "-->  test ublas::prodBis ended with success." << std::endl;
 }
 void SimpleMatrixTest::testProd4()  // y += A*x
@@ -1048,12 +335,12 @@ void SimpleMatrixTest::testProd4()  // y += A*x
 
   auto xB = std::make_shared<siconos::algebra::BlockVector>(x1, x2);
   auto yB = std::make_shared<siconos::algebra::BlockVector>(*xB);
-  yB->zero();
+  yB->setZero();
 
   // Matrix - vector ublas::product
 
   // Simple = Simple * Simple
-  y->zero();
+  y->setZero();
   siconos::algebra::prod(*A, *x, *y, false);
   siconos::algebra::prod(*A, *x, *y, false);
   double sum;
@@ -1063,9 +350,9 @@ void SimpleMatrixTest::testProd4()  // y += A*x
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd4: ", fabs((*y)(i)-sum) < tol, true);
   }
   // Simple = Simple * Block
-  y->zero();
-  siconos::algebra::prod(*A, *xB, *y, false);
-  siconos::algebra::prod(*A, *xB, *y, false);
+  y->setZero();
+  siconos::algebra::matrixBlockVector_prod(*A, *xB, *y, false);
+  siconos::algebra::matrixBlockVector_prod(*A, *xB, *y, false);
   for (unsigned int i = 0; i < size; ++i) {
     sum = 0;
     for (unsigned int j = 0; j < A->size(1); ++j) sum += 2 * (*A)(i, j) * (*xB)(j);
@@ -1073,9 +360,9 @@ void SimpleMatrixTest::testProd4()  // y += A*x
   }
 
   // Block = Simple * Simple
-  yB->zero();
-  siconos::algebra::prod(*A, *x, *yB, false);
-  siconos::algebra::prod(*A, *x, *yB, false);
+  yB->setZero();
+  siconos::algebra::matrixVector_prod_toBlock(*A, *x, *yB, false);
+  siconos::algebra::matrixVector_prod_toBlock(*A, *x, *yB, false);
   for (unsigned int i = 0; i < size; ++i) {
     sum = 0;
     for (unsigned int j = 0; j < A->size(1); ++j) sum += 2 * (*A)(i, j) * (*x)(j);
@@ -1083,7 +370,7 @@ void SimpleMatrixTest::testProd4()  // y += A*x
   }
 
   // Block = Simple * Block
-  yB->zero();
+  yB->setZero();
   //  siconos::algebra::prod(*A ,*xB,*yB,false);
   //  siconos::algebra::prod(*A ,*xB,*yB,false);
   //  for (unsigned int i = 0; i< size; ++i)
@@ -1110,12 +397,12 @@ void SimpleMatrixTest::testProd5()  // y += a*A*x
 
   auto xB = std::make_shared<siconos::algebra::BlockVector>(x1, x2);
   auto yB = std::make_shared<siconos::algebra::BlockVector>(*xB);
-  yB->zero();
+  yB->setZero();
 
   // Matrix - vector ublas::product
   double a = 3.0;
   // Simple = Simple * Simple
-  y->zero();
+  y->setZero();
   siconos::algebra::prod(a, *A, *x, *y, false);
   siconos::algebra::prod(a, *A, *x, *y, false);
   double sum;
@@ -1125,7 +412,7 @@ void SimpleMatrixTest::testProd5()  // y += a*A*x
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd5: ", fabs((*y)(i)-sum) < tol, true);
   }
   // Simple = Simple * Block
-  y->zero();
+  y->setZero();
   //  siconos::algebra::prod(a,*A ,*xB,*y,false);
   //  siconos::algebra::prod(a,*A ,*xB,*y,false);
   //  for (unsigned int i = 0; i< size; ++i)
@@ -1137,7 +424,7 @@ void SimpleMatrixTest::testProd5()  // y += a*A*x
   //  }
 
   // Block = Simple * Simple
-  yB->zero();
+  yB->setZero();
   //  siconos::algebra::prod(a,*A ,*x,*yB,false);
   //  siconos::algebra::prod(a,*A ,*x,*yB,false);
   //  for (unsigned int i = 0; i< size; ++i)
@@ -1149,7 +436,7 @@ void SimpleMatrixTest::testProd5()  // y += a*A*x
   //  }
   //
   // Block = Simple * Block
-  yB->zero();
+  yB->setZero();
   //  siconos::algebra::prod(a,*A ,*xB,*yB,false);
   //  siconos::algebra::prod(a,*A ,*xB,*yB,false);
   //  for (unsigned int i = 0; i< size; ++i)
@@ -1176,16 +463,16 @@ void SimpleMatrixTest::testProd6()  // y += trans(A)*x
 
   auto xB = std::make_shared<siconos::algebra::BlockVector>(x1, x2);
   auto yB = std::make_shared<siconos::algebra::BlockVector>(*xB);
-  yB->zero();
+  yB->setZero();
 
   auto tmp = std::make_shared<SiconosMatrix>(*A);
   tmp->transposeInPlace();
   // Matrix - vector ublas::product
 
   // Simple = Simple * Simple
-  y->zero();
-  siconos::algebra::prod(*x, *A, *y);
-  siconos::algebra::prod(*x, *A, *y, false);
+  y->setZero();
+  siconos::algebra::transposeMatrixVector_prod(*x, *A, *y);
+  siconos::algebra::transposeMatrixVector_prod(*x, *A, *y, false);
   double sum;
   for (unsigned int i = 0; i < size; ++i) {
     sum = 0;
@@ -1193,7 +480,7 @@ void SimpleMatrixTest::testProd6()  // y += trans(A)*x
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd6: ", fabs((*y)(i)-sum) < tol, true);
   }
   // Simple = Simple * Block
-  y->zero();
+  y->setZero();
   //  siconos::algebra::prod(*xB,*A,*y);
   //  siconos::algebra::prod(*xB,*A,*y,false);
   //
@@ -1206,9 +493,9 @@ void SimpleMatrixTest::testProd6()  // y += trans(A)*x
   //  }
 
   // Block = Simple * Simple
-  yB->zero();
-  siconos::algebra::prod(*x, *A, *yB);
-  siconos::algebra::prod(*x, *A, *yB, false);
+  yB->setZero();
+  siconos::algebra::transposeMatrixVector_prod_toBlock(*x, *A, *yB);
+  siconos::algebra::transposeMatrixVector_prod_toBlock(*x, *A, *yB, false);
   for (unsigned int i = 0; i < size; ++i) {
     sum = 0;
     for (unsigned int j = 0; j < A->size(1); ++j) sum += 2 * (*tmp)(i, j) * (*x)(j);
@@ -1216,7 +503,7 @@ void SimpleMatrixTest::testProd6()  // y += trans(A)*x
   }
 
   // Block = Simple * Block
-  yB->zero();
+  yB->setZero();
   //  siconos::algebra::prod(*xB,*A ,*yB);
   //  siconos::algebra::prod(*xB,*A ,*yB,false);
   //  for (unsigned int i = 0; i< size; ++i)
@@ -1228,365 +515,6 @@ void SimpleMatrixTest::testProd6()  // y += trans(A)*x
   //  }
   std::cout << "-->  test ublas::prod6 ended with success." << std::endl;
 }
-
-// void SimpleMatrixTest::testGemv()
-// {
-//   std::cout << "--> Test: gemv" <<std::endl;
-
-//   auto y= std::make_shared<siconos::algebra::SiconosVector>(size, 1.0);
-//   auto x= std::make_shared<siconos::algebra::SiconosVector>(size, 4.3);
-
-//   auto backUp= std::make_shared<siconos::algebra::SiconosVector>(*y);
-
-//   double a = 2.3;
-//   double b = 1.5;
-//   double sum;
-//   gemv(a, *A, *x, b, *y);
-
-//   for (unsigned int i = 0; i < size; ++i)
-//   {
-//     sum = b * (*backUp)(i);
-//     for (unsigned int j = 0; j < A->size(1); ++j)
-//       sum += a * (*A)(i, j) * (*x)(j) ;
-//     CPPUNIT_ASSERT_EQUAL_MESSAGE("testgemv: ", fabs((*y)(i) - sum) < tol, true);
-//   }
-
-//   *y = *backUp;
-//   gemvtranspose(a, *A, *x, b, *y);
-//   for (unsigned int i = 0; i < size; ++i)
-//   {
-//     sum = b * (*backUp)(i);
-//     for (unsigned int j = 0; j < A->size(0); ++j)
-//       sum += a * (*A)(j, i) * (*x)(j);
-//     CPPUNIT_ASSERT_EQUAL_MESSAGE("testgemv (trans): ", fabs((*y)(i) - sum) < tol, true);
-//   }
-//   std::cout << "-->  test gemv ended with success." <<std::endl;
-// }
-
-// void SimpleMatrixTest::testGemm()
-// {
-//   std::cout << "--> Test: gemm." <<std::endl;
-
-//   double a = 2.3;
-//   double b = 1.5;
-//   *C = *A;
-//   auto backUp = std::make_shared<SiconosMatrix>(*C);
-
-//   gemm(a, *A, *B, b, *C);
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGemm: ", norm_inf(*C->dense() - a *
-//   ublas::prod(*A->dense(), *B->dense()) - b**backUp->dense()) < tol, true);
-
-//   *C = *backUp;
-//   gemmtranspose(a, *A, *B, b, *C);
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGemm (trans): ", norm_inf(*C->dense() - a *
-//   siconos::algebra::prod(trans(*A->dense()), trans(*B->dense())) - b**backUp->dense()) <
-//   tol, true); std::cout
-//   << "-->  test gemm ended with success." <<std::endl;
-// }
-
-// void SimpleMatrixTest::testFromAndFillCSC() {
-//    std::cout << "Start SimpleMatrixTest::testFromAndFillCSC() " << std::endl;
-
-//   auto Sparse4 = std::make_shared<SiconosMatrix>(*SP4);
-//   Sparse4->updateNumericsMatrix();
-//   auto NM = Sparse4->numericsMatrix();
-//   NM_display(NM);
-//   //  auto NM_1 = NM_create(4,4, NM_SPARSE);
-
-//   auto Sparse1 = std::make_shared<SiconosMatrix>(4, 4,
-//   siconos::algebra::UblasType::SPARSE); Sparse1->fromCSC(NM_csc(NM));
-//   Sparse1->displayExpert();
-
-//   auto NM_1 = NM_create(NM_SPARSE, 4, 4);
-//   NM_1->matrix2->origin = NSM_CSC;
-//   NM_csc_alloc(NM_1, Sparse4->nnz());
-//   Sparse4->fillCSC(NM_csc(NM_1));
-//   // NM_display(NM_1);  --> Note FP : fails when exiting the function ... To
-//   // be investigating
-//   // ...
-//   NM_1 = NM_free(NM_1);
-//   std::cout << "End SimpleMatrixTest::testFromAndFillCSC() " << std::endl;
-// }
-
-// void SimpleMatrixTest::testPLUFactorizationInPlace() {
-//   std::cout << "--> Test: PLUFactorizationInPlace." << std::endl;
-
-//   auto Dense = std::make_shared<SiconosMatrix>(*D);
-//   Dense->display();
-//   Dense->PLUFactorizationInPlace();
-//   Dense->display();
-//   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testPLUFactorizationInPlace: ",  < tol, true);
-
-//   auto Sparse = std::make_shared<SiconosMatrix>(4, 4,
-//   siconos::algebra::UblasType::SPARSE); Sparse->eye(); Sparse->display();
-//   Sparse->PLUFactorizationInPlace();
-//   Sparse->display();
-
-//   auto Sparse2 = std::make_shared<SiconosMatrix>(*SP4);
-//   DEBUG_EXPR(Sparse2->display(););
-//   Sparse2->PLUFactorizationInPlace();
-//   DEBUG_EXPR(Sparse2->display(););
-
-//   std::cout << "-->  test PLUFactorizationInPlace ended with success." << std::endl;
-// }
-
-// void SimpleMatrixTest::testFactorize() {
-//   std::cout << "--> Test: Factorize (LU)." << std::endl;
-
-//   auto Dense = std::make_shared<SiconosMatrix>(*D);
-//   Dense->display();
-//   Dense->Factorize();
-//   Dense->display();
-//   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testFactorize: ",  < tol, true);
-
-//   auto Sparse = std::make_shared<SiconosMatrix>(4, 4,
-//   siconos::algebra::UblasType::SPARSE); Sparse->eye(); Sparse->display();
-//   Sparse->Factorize();
-
-//   Sparse = std::make_shared<SiconosMatrix>(*SP3);
-//   Sparse->display();
-//   Sparse->displayExpert();
-//   Sparse->Factorize();
-//   Sparse->display();
-
-//   // Other types than SPARSE are not working since fillCSC is not implemented.
-//   // std::cout << "--> Test: Factorize -- Triangle" <<std::endl;
-//   // auto Triangle = std::make_shared<SiconosMatrix>(*T2);
-//   // Triangle->display();
-//   // Triangle->displayExpert();
-//   // Triangle->Factorize();
-//   // Triangle->display();
-
-//   /* A last column full of zero caused memory corruption in cs_lusol
-//      since ublas does not fill the last entry correctly*/
-//   // Sparse = std::make_shared<SiconosMatrix>(*SP2);
-//   // Sparse->display();
-//   // Sparse->displayExpert();
-//   // Sparse->PLUFactorizationInPlace();
-//   // Sparse->display();
-
-//   std::cout << "--> Test: Factorize (Cholesky)." << std::endl;
-
-//   Dense = std::make_shared<SiconosMatrix>(*D);
-//   /* conpute DD^T */
-//   auto DenseT = std::make_shared<SiconosMatrix>(*Dense);
-//   DenseT->trans();
-//   auto DDT = std::make_shared<SiconosMatrix>(Dense->size(0), Dense->size(1));
-//   siconos::algebra::prod(*Dense, *DenseT, *DDT);
-//   DDT->display();
-//   DDT->setIsSymmetric(true);
-//   DDT->setIsPositiveDefinite(true);
-//   DDT->Factorize();
-
-//   DDT->display();
-//   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testFactorize: ",  < tol, true);
-
-// std::cout << "-->  test Factorize ended with success." << std::endl;
-// }
-// void SimpleMatrixTest::testSolve() {
-//   std::cout << "\n--> Test: Solve. Dense. LU." << std::endl;
-
-// Test sparse matrix identity
-
-// auto Sparse = std::make_shared<SiconosMatrix>(4, 4, siconos::algebra::UblasType::SPARSE);
-// auto Sparse_backup =
-//     std::make_shared<SiconosMatrix>(4, 4, siconos::algebra::UblasType::SPARSE);
-// b = std::make_shared<siconos::algebra::SiconosVector>(Sparse->size(0));
-// for (int i = 0; i < Sparse->size(0); i++) {
-//   (*b)(i) = 1.0;
-// }
-// backup = std::make_shared<siconos::algebra::SiconosVector>(*b);
-// Sparse_backup->eye();
-// Sparse->eye();
-// Sparse->Solve(*b);
-// b->display();
-// CPPUNIT_ASSERT_EQUAL_MESSAGE(
-//     "testSolve: ", (siconos::algebra::prod(*Sparse_backup, *b) - *backup).norm2() < tol,
-//     true);
-
-// // test sparse matrix 3x3
-// Sparse = std::make_shared<SiconosMatrix>(*SP3);
-// b = std::make_shared<siconos::algebra::SiconosVector>(Sparse->size(0));
-// for (int i = 0; i < Sparse->size(0); i++) {
-//   (*b)(i) = 1.0;
-// }
-// backup = std::make_shared<siconos::algebra::SiconosVector>(*b);
-// Sparse->Solve(*b);
-// b->display();
-// CPPUNIT_ASSERT_EQUAL_MESSAGE(
-//     "testSolve: ", (siconos::algebra::prod(*Sparse, *b) - *backup).norm2() < tol, true);
-
-// // Solve again with another r.h.s.
-// b = std::make_shared<siconos::algebra::SiconosVector>(Sparse->size(0));
-// for (int i = 0; i < Sparse->size(0); i++) {
-//   (*b)(i) = 2.0;
-// }
-// backup = std::make_shared<siconos::algebra::SiconosVector>(*b);
-// Sparse->Solve(*b);
-// b->display();
-// CPPUNIT_ASSERT_EQUAL_MESSAGE(
-//     "testSolve: ", (siconos::algebra::prod(*Sparse, *b) - *backup).norm2() < tol, true);
-
-// // test sparse matrix 4x4 SP4
-
-// Sparse = std::make_shared<SiconosMatrix>(*SP4);
-// b = std::make_shared<siconos::algebra::SiconosVector>(Sparse->size(0));
-// for (int i = 0; i < Sparse->size(0); i++) {
-//   (*b)(i) = 1.0;
-// }
-// backup = std::make_shared<siconos::algebra::SiconosVector>(*b);
-// Sparse->Solve(*b);
-// b->display();
-// CPPUNIT_ASSERT_EQUAL_MESSAGE(
-//     "testSolve: ", (siconos::algebra::prod(*Sparse, *b) - *backup).norm2() < tol, true);
-
-// std::cout << "\n\n--> Test: Solve. Sparse. LU.  Sparse rhs" << std::endl;
-
-// // test sparse matrix 3x3 sparse RhS. trivial solution (Id)
-// Sparse = std::make_shared<SiconosMatrix>(*SP3);
-// auto Sparse_rhs = std::make_shared<SiconosMatrix>(*SP3);
-// Sparse->Solve(*Sparse_rhs);
-// // std::cout << "Sparse_rhs :" << std::endl;
-// // Sparse_rhs->display();
-// // std::cout << "Sparse :" << std::endl;
-// // Sparse->display();
-// // std::cout << "A A^{-1}" << std::endl;
-// // (siconos::algebra::prod(*Sparse,*Sparse_rhs)).display();
-// CPPUNIT_ASSERT_EQUAL_MESSAGE(
-//     "testSolve: ", (siconos::algebra::prod(*Sparse, *Sparse_rhs) - *Sparse).normInf() <
-//     tol, true);
-
-// // test sparse matrix 3x3 sparse RhS. inverse
-// Sparse = std::make_shared<SiconosMatrix>(*SP3);
-// Sparse_rhs = std::make_shared<SiconosMatrix>(3, 3);
-// Sparse_rhs->eye();
-// Sparse->Solve(*Sparse_rhs);
-// auto Id = std::make_shared<SiconosMatrix>(3, 3);
-// Id->eye();
-
-// // Sparse_rhs->display();
-// // std::cout << "A A^{-1}" << std::endl;
-
-// // (siconos::algebra::prod(*Sparse,*Sparse_rhs)).display();
-// CPPUNIT_ASSERT_EQUAL_MESSAGE(
-//     "testSolve: ", (siconos::algebra::prod(*Sparse, *Sparse_rhs) - *Id).normInf() < tol,
-//     true);
-
-// std::cout << "\n\n--> Test: Solve. Sparse. Cholesky." << std::endl;
-
-// // Test sparse matrix identity
-// Sparse = std::make_shared<SiconosMatrix>(4, 4, siconos::algebra::UblasType::SPARSE);
-// Sparse_backup = std::make_shared<SiconosMatrix>(4, 4,
-// siconos::algebra::UblasType::SPARSE); b =
-// std::make_shared<siconos::algebra::SiconosVector>(Sparse->size(0)); for (int i = 0; i <
-// Sparse->size(0); i++) {
-//   (*b)(i) = 1.0;
-// }
-// backup = std::make_shared<siconos::algebra::SiconosVector>(*b);
-// Sparse_backup->eye();
-// Sparse->eye();
-// Sparse->setIsSymmetric(true);
-// Sparse->setIsPositiveDefinite(true);
-// Sparse->Solve(*b);
-// b->display();
-// CPPUNIT_ASSERT_EQUAL_MESSAGE(
-//     "testSolve: ", (siconos::algebra::prod(*Sparse_backup, *b) - *backup).norm2() < tol,
-//     true);
-
-// // test sparse matrix 3x3
-// Sparse = std::make_shared<SiconosMatrix>(*SP3);
-// b = std::make_shared<siconos::algebra::SiconosVector>(Sparse->size(0));
-// for (int i = 0; i < Sparse->size(0); i++) {
-//   (*b)(i) = 1.0;
-// }
-// backup = std::make_shared<siconos::algebra::SiconosVector>(*b);
-// auto SparseT = std::make_shared<SiconosMatrix>(*SP3);
-// SparseT->trans();
-// auto SST = std::make_shared<SiconosMatrix>(Sparse->size(0), Sparse->size(1),
-//                                           siconos::algebra::UblasType::SPARSE);
-// siconos::algebra::prod(*Sparse, *SparseT, *SST);
-// SST->setIsSymmetric(true);
-// SST->setIsPositiveDefinite(true);
-// SST->Solve(*b);
-// b->display();
-// CPPUNIT_ASSERT_EQUAL_MESSAGE(
-//     "testSolve: ", (siconos::algebra::prod(*SST, *b) - *backup).norm2() < tol, true);
-
-// // Solve again with another r.h.s.
-// b = std::make_shared<siconos::algebra::SiconosVector>(Sparse->size(0));
-// for (int i = 0; i < Sparse->size(0); i++) {
-//   (*b)(i) = 2.0;
-// }
-// backup = std::make_shared<siconos::algebra::SiconosVector>(*b);
-// SST->Solve(*b);
-// b->display();
-// CPPUNIT_ASSERT_EQUAL_MESSAGE(
-//     "testSolve: ", (siconos::algebra::prod(*SST, *b) - *backup).norm2() < tol, true);
-
-// // test sparse matrix 4x4 SP4
-// Sparse = std::make_shared<SiconosMatrix>(*SP4);
-// b = std::make_shared<siconos::algebra::SiconosVector>(Sparse->size(0));
-// for (int i = 0; i < Sparse->size(0); i++) {
-//   (*b)(i) = 1.0;
-// }
-// backup = std::make_shared<siconos::algebra::SiconosVector>(*b);
-// SparseT = std::make_shared<SiconosMatrix>(*SP4);
-// SparseT->trans();
-// SST = std::make_shared<SiconosMatrix>(Sparse->size(0), Sparse->size(1),
-//                                      siconos::algebra::UblasType::SPARSE);
-// siconos::algebra::prod(*Sparse, *SparseT, *SST);
-// SST->setIsSymmetric(true);
-// SST->setIsPositiveDefinite(true);
-// SST->Solve(*b);
-// b->display();
-// CPPUNIT_ASSERT_EQUAL_MESSAGE(
-//     "testSolve: ", (siconos::algebra::prod(*SST, *b) - *backup).norm2() < tol, true);
-
-// std::cout << "\n\n--> Test: Solve. Sparse. Cholesky.  Sparse rhs" << std::endl;
-
-// // test sparse matrix 3x3 sparse RhS. trivial solution (Id)
-// Sparse = std::make_shared<SiconosMatrix>(*SP3);
-// SparseT = std::make_shared<SiconosMatrix>(*SP3);
-// SparseT->trans();
-// SST = std::make_shared<SiconosMatrix>(Sparse->size(0), Sparse->size(1),
-//                                      siconos::algebra::UblasType::SPARSE);
-// siconos::algebra::prod(*Sparse, *SparseT, *SST);
-// Sparse_rhs = std::make_shared<SiconosMatrix>(*SST);
-// // std::cout << "SST" << std::endl;
-// // SST->display();
-// SST->setIsSymmetric(true);
-// SST->setIsPositiveDefinite(true);
-// SST->Solve(*Sparse_rhs);
-// // Sparse_rhs->display();
-// // std::cout << "A A^{-1}" << std::endl;
-// // (siconos::algebra::prod(*SST,*Sparse_rhs)).display();
-// CPPUNIT_ASSERT_EQUAL_MESSAGE(
-//     "testSolve: ", (siconos::algebra::prod(*SST, *Sparse_rhs) - *SST).normInf() < tol,
-//     true);
-
-// // test sparse matrix 3x3 sparse RhS. inverse
-// SST = std::make_shared<SiconosMatrix>(Sparse->size(0), Sparse->size(1),
-//                                      siconos::algebra::UblasType::SPARSE);
-// siconos::algebra::prod(*Sparse, *SparseT, *SST);
-// Sparse_rhs = std::make_shared<SiconosMatrix>(3, 3, siconos::algebra::UblasType::SPARSE);
-// Sparse_rhs->eye();
-// // std::cout << "SST" << std::endl;
-// // SST->display();
-// SST->setIsSymmetric(true);
-// SST->setIsPositiveDefinite(true);
-// SST->Solve(*Sparse_rhs);
-// // Sparse_rhs->display();
-
-// // Sparse_rhs->display();
-// // std::cout << "A A^{-1}" << std::endl;
-
-// // (siconos::algebra::prod(*SST,*Sparse_rhs)).display();
-// CPPUNIT_ASSERT_EQUAL_MESSAGE(
-//     "testSolve: ", (siconos::algebra::prod(*SST, *Sparse_rhs) - *Id).normInf() < tol,
-//     true);
-
-// std::cout << "-->  test Solve ended with success." << std::endl;
-//}
 
 void SimpleMatrixTest::End() {
   std::cout << "======================================" << std::endl;

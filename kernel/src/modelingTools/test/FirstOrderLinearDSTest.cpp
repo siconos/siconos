@@ -19,10 +19,10 @@
 
 #include <limits>
 
-#include "SiconosMatrixVectorOp.hpp"
-#include "SiconosMatrixOp.hpp"
-#include "SiconosVector.hpp"
 #include "SiconosMatrix.hpp"
+#include "SiconosMatrixOp.hpp"
+#include "SiconosMatrixVectorOp.hpp"
+#include "SiconosVector.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
   if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -41,7 +41,8 @@ void FirstOrderLinearDSTest::setUp() {
   (*b0)(1) = 5;
   (*b0)(2) = 6;
 
-  A0 = std::make_shared<siconos::algebra::SiconosMatrix>(siconos::algebra::readMatrixFromFile("matA0.dat"));
+  A0 = std::make_shared<siconos::algebra::SiconosMatrix>(
+      siconos::algebra::readMatrixFromFile("matA0.dat"));
 }
 void FirstOrderLinearDSTest::tearDown() {}
 
@@ -80,7 +81,8 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS0() {
   Mref(1, 1) = 2. * time;
   Mref(2, 2) = 3. * time;
   std::cout << "MLMLMQLSQML " << std::numeric_limits<double>::epsilon() << std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", ds->M()->isApprox(Mref), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", ds->M()->isApprox(Mref),
+                               true);
   std::cout << "--> Constructor 0 test ended with success." << std::endl;
 }
 
@@ -119,7 +121,8 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS1() {
   Mref(0, 0) = 1. * time;
   Mref(1, 1) = 2. * time;
   Mref(2, 2) = 3. * time;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", ds->M()->isApprox(Mref), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", ds->M()->isApprox(Mref),
+                               true);
   ds->initRhs(time);
   siconos::algebra::SiconosMatrix invM(3, 3);
   invM.setZero();
@@ -127,11 +130,12 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS1() {
   invM(1, 1) = 1. / (2. * time);
   invM(2, 2) = 1. / (3. * time);
   siconos::algebra::SiconosVector tmp(3);
-  tmp = (time * *x01 + 2. * siconos::algebra::prod(*A0, *x0));
-  siconos::algebra::prod(invM, tmp, tmp);
-  siconos::algebra::prod(invM, 2 * *A0, Mref);
+  tmp = (time * *x01 + 2. * (*A0 * *x0));
+  tmp = invM * tmp;
+  Mref = invM * 2. * *A0;
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", ds->rhs()->isApprox(tmp), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", ds->rhs()->isApprox(tmp),
+                               true);
   // CPPUNIT_ASSERT_EQUAL_MESSAGE(
   //     "testBuildFirstOrderLinearDS1 : ", *(ds->jacobianRhsx()) == Mref, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", *(ds->b()) == time * *x01,

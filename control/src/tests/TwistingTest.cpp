@@ -49,7 +49,7 @@ void TwistingTest::setUp() {
 
   _C = std::make_shared<siconos::algebra::SiconosMatrix>(2, 2);
   _C->setZero();
-  _C->eye();
+  _C->setIdentity();
 
   _B = std::make_shared<siconos::algebra::SiconosMatrix>(2, 1);
   (*_B)(1, 0) = 1.0;
@@ -67,7 +67,7 @@ void TwistingTest::initTwisting() {
   _sensor = std::make_shared<siconos::control::LinearSensor>(_DS, _C);
   _itw = std::make_shared<siconos::control::Twisting>(_sensor, 300., _beta, _h);
   auto eye = std::make_shared<siconos::algebra::SiconosMatrix>(2, 2);
-  eye->eye();
+  eye->setIdentity();
   _itw->setCsurface(eye);
 }
 
@@ -76,7 +76,7 @@ void TwistingTest::initRegularTwisting() {
   _sensor = std::make_shared<siconos::control::LinearSensor>(_DS, _C);
   _reg_itw = std::make_shared<siconos::control::RegularTwisting>(_sensor, 300., _beta);
   auto eye = std::make_shared<siconos::algebra::SiconosMatrix>(2, 2);
-  eye->eye();
+  eye->setIdentity();
   _reg_itw->setCsurface(eye);
 }
 #endif
@@ -86,7 +86,7 @@ void TwistingTest::initExplicitTwisting() {
   _sensor = std::make_shared<siconos::control::LinearSensor>(_DS, _C);
   _expl_tw = std::make_shared<siconos::control::ExplicitTwisting>(_sensor, 300., _beta);
   auto eye = std::make_shared<siconos::algebra::SiconosMatrix>(2, 2);
-  eye->eye();
+  eye->setIdentity();
   _expl_tw->setCsurface(eye);
 }
 

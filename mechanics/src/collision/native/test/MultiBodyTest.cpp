@@ -139,7 +139,7 @@ void Disks::init(std::string disks_input) {
       double C2 = P2C;
 
       _plans = std::make_shared<siconos::algebra::SiconosMatrix>(6, 6);
-      _plans->zero();
+      _plans->setZero();
       (*_plans)(0, 0) = 0;
       (*_plans)(0, 1) = 1;
       (*_plans)(0, 2) = -GROUND;

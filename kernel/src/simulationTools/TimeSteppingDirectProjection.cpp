@@ -81,7 +81,7 @@ void siconos::simulation::TimeSteppingDirectProjection::nextStep() {
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   for (std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui) {
     auto inter = indexSet->bundle(*ui);
-    inter->lambda(0)->zero();
+    inter->lambda(0)->setZero();
   }
 }
 
@@ -154,7 +154,7 @@ void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() {
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   for (std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui) {
     auto inter = indexSet->bundle(*ui);
-    inter->lambda(0)->zero();
+    inter->lambda(0)->setZero();
   }
   _nsds->updateInput(nextTime(), 0);
 
@@ -183,7 +183,7 @@ void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() {
     siconos::graphs::InteractionsGraph::VIterator ui, uiend;
     for (std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui) {
       auto inter = indexSet->bundle(*ui);
-      inter->lambda(0)->zero();
+      inter->lambda(0)->setZero();
     }
     _nsds->updateInput(nextTime(), 0);
     info = 0;

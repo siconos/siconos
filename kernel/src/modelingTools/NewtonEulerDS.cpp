@@ -26,7 +26,6 @@
 #include "SiconosMatrixOp.hpp"        // setBlock
 #include "SiconosMatrixVectorOp.hpp"  // mat-vec prod
 #include "SiconosVector.hpp"
-#include "SiconosVectorOp.hpp"  // inner_prod, setBlock
 #include "SiconosVisitor.hpp"
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -133,7 +132,6 @@ void siconos::modeling::NewtonEulerDS::initRhs(double time) {
 
   // Everything concerning rhs and its jacobian is handled in initRhs and computeXXX
   // related functions.
-  rhsMatrices_.resize(numberOfRhsMatrices_);
 
   if (!p_[2]) p_[2] = std::make_shared<siconos::algebra::SiconosVector>(6);
 
@@ -153,7 +151,7 @@ void siconos::modeling::NewtonEulerDS::initRhs(double time) {
 
     rhsMatrices_[jacobianXBloc10_] =
         std::make_shared<siconos::algebra::SiconosMatrix>(*jacobianWrenchOver_q_);
-    LUMass_->solve(*rhsMatrices_[jacobianXBloc10_]);
+    *rhsMatrices_[jacobianXBloc10_] = LUMass_->solve(*rhsMatrices_[jacobianXBloc10_]);
 
     flag1 = true;
   }
@@ -163,7 +161,7 @@ void siconos::modeling::NewtonEulerDS::initRhs(double time) {
     computeJacobianWrenchOver_twist(*twist_, *state_q_, time);
     rhsMatrices_[jacobianXBloc11_] =
         std::make_shared<siconos::algebra::SiconosMatrix>(*jacobianWrenchOver_twist_);
-    LUMass_->solve(*rhsMatrices_[jacobianXBloc11_]);
+    *rhsMatrices_[jacobianXBloc11_] = LUMass_->solve(*rhsMatrices_[jacobianXBloc11_]);
 
     flag2 = true;
   }
@@ -221,14 +219,14 @@ void siconos::modeling::NewtonEulerDS::computeRhs(double time) {
   *acceleration_ += *wrench_;
   DEBUG_EXPR(wrench_->display(););
 
-  if (LUMass_) LUMass_->solve(*acceleration_);
+  if (LUMass_) *acceleration_ = LUMass_->solve(*acceleration_);
 
   // Compute dotq_
   siconos::modeling::newton_euler::computeT(*state_q_, *T_);
   siconos::algebra::prod(*T_, *twist_, *dotq_, true);
 
-  _x[1]->setBlock(0, *dotq_);
-  _x[1]->setBlock(qDim_, *acceleration_);
+  _x[1]->head(qDim_) = *dotq_;
+  _x[1]->tail(qDim_) = *acceleration_;
 }
 
 void siconos::modeling::NewtonEulerDS::computeJacobianRhsx(double time) {
@@ -236,13 +234,13 @@ void siconos::modeling::NewtonEulerDS::computeJacobianRhsx(double time) {
     auto bloc10 = _jacxRhs->block(1, 0);
     computeJacobianWrenchOver_q(*twist_, *state_q_, time);
     *bloc10 = *jacobianWrenchOver_q_;
-    LUMass_->solve(*bloc10);
+    *bloc10 = LUMass_->solve(*bloc10);
   }
   if (jacobianWrenchOver_twist_) {
     auto bloc11 = _jacxRhs->block(1, 1);
     computeJacobianWrenchOver_twist(*twist_, *state_q_, time);
     *bloc11 = *jacobianWrenchOver_twist_;
-    LUMass_->solve(*bloc11);
+    *bloc11 = LUMass_->solve(*bloc11);
   }
 }
 
@@ -588,12 +586,12 @@ void siconos::modeling::NewtonEulerDS::swapInMemory() {
 
 void siconos::modeling::NewtonEulerDS::resetAllNonSmoothParts() {
   if (p_[1])
-    p_[1]->zero();
+    p_[1]->setZero();
   else
     p_[1] = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
 }
 void siconos::modeling::NewtonEulerDS::resetNonSmoothPart(unsigned int level) {
-  if (p_[level]) p_[level]->zero();
+  if (p_[level]) p_[level]->setZero();
 }
 
 void siconos::modeling::NewtonEulerDS::computeT(

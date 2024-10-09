@@ -43,7 +43,7 @@ void siconos::modeling::FirstOrderLinearTIDS::initRhs(double time) {
     else if (_A && _M) {
       _jacxRhs = std::make_shared<siconos::algebra::BlockMatrix>(*_A);  // Copy A into _jacxRhs
       // Solve M_jacxRhs = A
-      LU_M_->solve(*(_jacxRhs->block(0, 0)));
+      *(_jacxRhs->block(0, 0)) = LU_M_->solve(*(_jacxRhs->block(0, 0)));
     }
     // else no allocation, jacobian is equal to 0.
   }
@@ -59,7 +59,7 @@ void siconos::modeling::FirstOrderLinearTIDS::computeRhs(double time) {
 
   if (_M) {
     // LU_M_ must have been created by init_rhs
-    LU_M_->solve(*(_x[1]));
+    *(_x[1]) = LU_M_->solve(*(_x[1]));
   }
 }
 

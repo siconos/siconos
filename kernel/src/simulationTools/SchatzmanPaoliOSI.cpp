@@ -27,10 +27,8 @@
 #include "NewtonImpactNSL.hpp"
 #include "OneStepNSProblem.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixOp.hpp"        // for scal
-#include "SiconosMatrixVectorOp.hpp"  // for mat-vecprod
+#include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
-#include "SiconosVectorOp.hpp"  // for subscal
 #include "SiconosVisitor.hpp"
 #include "Simulation.hpp"
 #include "Tools.hpp"
@@ -384,7 +382,7 @@ void siconos::integrators::SchatzmanPaoliOSI::computeFreeState() {
 
       // Velocity free and residu. vFree = RESfree (pointer equality !!).
       qfree = residuFree;
-      _dynamicalSystemsGraph->properties(*dsi).LUW->solve(qfree);
+      qfree = _dynamicalSystemsGraph->properties(*dsi).LUW->solve(qfree);
       qfree *= -1.0;
       qfree += d->qMemory().getSiconosVector(0);
     } else
@@ -419,10 +417,7 @@ struct siconos::integrators::SchatzmanPaoliOSI::_NSLEffectOnFreeOutput
       : _osnsp(p), _inter(inter), _interProp(interProp){};
 
   void visit(const siconos::modeling::NewtonImpactNSL& nslaw) const override {
-    double e;
-    e = nslaw.e();
-    auto sizeY = _inter->nonSmoothLaw()->size();
-    std::vector<std::size_t> subCoord{0, sizeY, 0, sizeY};
+    auto e = nslaw.e();
     // Only the normal part is multiplied by e
     const auto& y_k_1(_inter->yMemory(_osnsp->inputOutputLevel()).getSiconosVector(1));
 
@@ -431,7 +426,7 @@ struct siconos::integrators::SchatzmanPaoliOSI::_NSLEffectOnFreeOutput
     ;
     auto& osnsp_rhs =
         *(*_interProp.workVectors)[siconos::integrators::SchatzmanPaoliOSI::OSNSP_RHS];
-    siconos::algebra::subscal(e, y_k_1, osnsp_rhs, subCoord, false);
+    osnsp_rhs += e * y_k_1;
   }
 
   void visit(const siconos::modeling::NewtonImpactFrictionNSL& nslaw) const override {
@@ -472,13 +467,6 @@ void siconos::integrators::SchatzmanPaoliOSI::computeFreeOutput(
 
   unsigned int relativePosition = 0;
 
-  std::vector<std::size_t> coord(8);
-  coord[0] = relativePosition;
-  coord[1] = relativePosition + sizeY;
-  coord[2] = 0;
-  coord[4] = 0;
-  coord[6] = 0;
-  coord[7] = sizeY;
   std::shared_ptr<siconos::algebra::SiconosMatrix> C;
   std::shared_ptr<siconos::algebra::SiconosMatrix> D;
   std::shared_ptr<siconos::algebra::SiconosMatrix> F;
@@ -507,17 +495,15 @@ void siconos::integrators::SchatzmanPaoliOSI::computeFreeOutput(
     if (C) {
       assert(Xfree);
 
-      coord[3] = C->size(1);
-      coord[5] = C->size(1);
       // creates a POINTER link between workX[ds] (xfree) and the
       // corresponding interactionBlock in each Interactionfor each ds of the
       // current Interaction.
 
       if (_useGammaForRelation) {
         assert(deltax);
-        siconos::algebra::subprod(*C, *deltax, osnsp_rhs, coord, true);
+        siconos::algebra::matrixBlockVector_prod(*C, *deltax, osnsp_rhs, true);
       } else {
-        siconos::algebra::subprod(*C, *Xfree, osnsp_rhs, coord, true);
+        siconos::algebra::matrixBlockVector_prod(*C, *Xfree, osnsp_rhs, true);
       }
     }
     auto ltir = std::static_pointer_cast<siconos::modeling::LagrangianLinearTIR>(
@@ -579,7 +565,7 @@ void siconos::integrators::SchatzmanPaoliOSI::updateState(const unsigned int) {
       // To compute q, we solve W(q - qfree) = p
       if (d->p(_levelMaxForInput)) {
         *d->q() = d->p_read(_levelMaxForInput);  // q = p
-        _dynamicalSystemsGraph->properties(*dsi).LUW->solve(*d->q());
+        *d->q() = _dynamicalSystemsGraph->properties(*dsi).LUW->solve(*d->q());
 
       } else
         d->q()->setZero();
@@ -612,7 +598,7 @@ void siconos::integrators::SchatzmanPaoliOSI::updateState(const unsigned int) {
       //   {
       //     _IterationMatrixBoundaryConditionsMap[ds]->getCol(bc,*columntmp);
       //     /*\warning we assume that W is symmetric in the Lagrangian case*/
-      //     double value = - siconos::algebra::inner_prod(*columntmp, *v);
+      //     double value = - columntmp->dot(*v);
       //     value += (d->p(level))->getValue(itindex);
       //     /* \warning the computation of reactionToBoundaryConditions take into
       //        account the contact impulse but not the external and internal forces.

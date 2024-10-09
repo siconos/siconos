@@ -120,7 +120,7 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
     for (vnext = ui; ui != uiend; ui = vnext) {
       ++vnext;
       auto inter1 = indexSet1->bundle(*ui);
-      inter1->lambda(1)->zero();
+      inter1->lambda(1)->setZero();
       indexSet1->eraseProperties(*ui);
       siconos::graphs::InteractionsGraph::OEIterator oei, oeiend;
       for (std::tie(oei, oeiend) = indexSet1->out_edges(*ui); oei != oeiend; ++oei) {
@@ -269,7 +269,7 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
     auto indexSet = _nsds->topology()->indexSet(0);
     for (std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui) {
       auto inter = indexSet->bundle(*ui);
-      inter->lambda(0)->zero();
+      inter->lambda(0)->setZero();
     }
     _nsds->updateInput(nextTime(), 0);
 
@@ -312,7 +312,7 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
       siconos::graphs::InteractionsGraph::VIterator ui, uiend;
       for (std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui) {
         auto inter = indexSet->bundle(*ui);
-        inter->lambda(0)->zero();
+        inter->lambda(0)->setZero();
       }
       _nsds->updateInput(nextTime(), 0);
     }
@@ -349,7 +349,7 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
       siconos::graphs::InteractionsGraph::VIterator ui, uiend;
       for (std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui) {
         auto inter = indexSet->bundle(*ui);
-        inter->lambda(0)->zero();
+        inter->lambda(0)->setZero();
       }
 
       info = 0;

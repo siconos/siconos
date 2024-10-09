@@ -41,38 +41,74 @@ siconos::modeling::LagrangianLinearTIDS::LagrangianLinearTIDS(
 };
 
 void siconos::modeling::LagrangianLinearTIDS::initRhs(double time) {
-  LagrangianDS::initRhs(time);
+  // dim
+  _n = 2 * ndof_;
+  // WARNING : this function is supposed to be called
+  // by the OneStepIntegrator, and maybe several times for the same DS
+  // if the system is involved in more than one interaction. So, we must check
+  // if p2 and q2 already exist to be sure that DSlink won't be lost.
 
+  _x0 = algebra::concatenateVectors(*q0_view_, *velocity0_view_);  // COPY!
+
+  _x[0] = algebra::concatenateVectors(*state_q_[0], *state_q_[1]);  // COPY!
+
+  if (!state_q_[2]) {
+    state_q_[2] = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
+    state_q_[2]->setZero();
+  }
+
+  _x[1] = algebra::concatenateVectors(*state_q_[1], *state_q_[2]);  // COPY!
+
+  // Everything concerning rhs and its jacobian is handled in initRhs and
+  // computeXXX related functions.
+
+  if (!p_[2]) {
+    p_[2] = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
+    p_[2]->setZero();
+  }
+
+  init_lu_mass();
+  computeRhs(time);
+
+  if (!rhsMatrices_[zeroMatrix_]) {
+    rhsMatrices_[zeroMatrix_] =
+        std::make_shared<siconos::algebra::SiconosMatrix>(ndof_, ndof_);
+    rhsMatrices_[zeroMatrix_]->setZero();
+  }
+  if (!rhsMatrices_[idMatrix_]) {
+    rhsMatrices_[idMatrix_] = std::make_shared<siconos::algebra::SiconosMatrix>(ndof_, ndof_);
+    rhsMatrices_[idMatrix_]->setIdentity();
+  }
   // jacobianRhsx
   if (stiffnessMatrix_view_) {
-    //  bloc10 of jacobianX is solution of Mass*Bloc10 = K
+    //  bloc10 of jacobianX is solution of Mass*Bloc10 = -K
     if (!rhsMatrices_[jacobianXBloc10_])
       // We assume the stiffness matrix is constant
       rhsMatrices_[jacobianXBloc10_] =
           std::make_shared<siconos::algebra::SiconosMatrix>(-1 * *stiffnessMatrix_view_);
-    LUMass_->solve(*rhsMatrices_[jacobianXBloc10_]);
+    *rhsMatrices_[jacobianXBloc10_] = LUMass_->solve(*rhsMatrices_[jacobianXBloc10_]);
   } else
     rhsMatrices_[jacobianXBloc10_] = rhsMatrices_[zeroMatrix_];
 
   if (dampingMatrix_view_) {
-    //  bloc11 of jacobianX is solution of Mass*Bloc11 = C
+    //  bloc11 of jacobianX is solution of Mass*Bloc11 = -C
     if (!rhsMatrices_[jacobianXBloc11_])
       // We assume the damping matrix is constant
       rhsMatrices_[jacobianXBloc11_] =
           std::make_shared<siconos::algebra::SiconosMatrix>(-1 * *dampingMatrix_view_);
-    LUMass_->solve(*rhsMatrices_[jacobianXBloc11_]);
+    *rhsMatrices_[jacobianXBloc11_] = LUMass_->solve(*rhsMatrices_[jacobianXBloc11_]);
   } else
     rhsMatrices_[jacobianXBloc11_] = rhsMatrices_[zeroMatrix_];
 
-  if (dampingMatrix_view_ || stiffnessMatrix_view_)
-    _jacxRhs = std::make_shared<siconos::algebra::BlockMatrix>(
-        rhsMatrices_[zeroMatrix_], rhsMatrices_[idMatrix_], rhsMatrices_[jacobianXBloc10_],
-        rhsMatrices_[jacobianXBloc11_]);
+  _jacxRhs = std::make_shared<siconos::algebra::BlockMatrix>(
+      rhsMatrices_[zeroMatrix_], rhsMatrices_[idMatrix_], rhsMatrices_[jacobianXBloc10_],
+      rhsMatrices_[jacobianXBloc11_]);
 }
 
 void siconos::modeling::LagrangianLinearTIDS::setStiffnessMatrix(
     Eigen::Ref<siconos::algebra::SiconosMatrix> newValue) {
-  assert(newValue.rows() == newValue.cols() == ndof_);
+  assert(newValue.rows() == newValue.cols());
+  assert(newValue.rows() == ndof_);
   stiffnessMatrix_view_ = std::make_shared<siconos::algebra::MapType>(
       newValue.data(), newValue.rows(), newValue.cols());
   hasFint_ = true;
@@ -80,7 +116,9 @@ void siconos::modeling::LagrangianLinearTIDS::setStiffnessMatrix(
 
 void siconos::modeling::LagrangianLinearTIDS::setDampingMatrix(
     Eigen::Ref<siconos::algebra::SiconosMatrix> newValue) {
-  assert(newValue.rows() == newValue.cols() == ndof_);
+  assert(newValue.rows() == newValue.cols());
+  assert(newValue.rows() == ndof_);
+
   dampingMatrix_view_ = std::make_shared<siconos::algebra::MapType>(
       newValue.data(), newValue.rows(), newValue.cols());
   hasFint_ = true;
@@ -112,7 +150,7 @@ void siconos::modeling::LagrangianLinearTIDS::computeTotalForces(
       totalForces_ = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
       totalForces_->setZero();
     } else
-      totalForces_->zero();
+      totalForces_->setZero();
   } else
     return;
 

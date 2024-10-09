@@ -273,14 +273,13 @@ class NewtonEulerDS : public SecondOrderDS {
   static constexpr auto jacobianXBloc11_ = 3;
   static constexpr auto zeroMatrix_ = 4;
   static constexpr auto zeroMatrixqDim_ = 5;
-  static constexpr auto numberOfRhsMatrices_ = 6;
 
   /** A container of matrices to save matrices that are involed in first order
    *  from of NewtonEulerDS system values (jacobianXBloc10, jacobianXBloc11,
    *  zeroMatrix, idMatrix) No get-set functions at the time. Only used as a
    *  protected member.*/
   std::vector<std::shared_ptr<siconos::algebra::SiconosMatrix>> rhsMatrices_ = {
-      nullptr, nullptr, nullptr, nullptr};
+      nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
 
  public:
   // === CONSTRUCTORS - DESTRUCTOR ===

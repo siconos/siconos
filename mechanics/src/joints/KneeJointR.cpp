@@ -362,7 +362,7 @@ void siconos::joints::KneeJointR::computeJachq(
       "siconos::joints::KneeJointR::computeJachq(double time, siconos::modeling::Interaction& "
       "inter,  std::shared_ptr<siconos::algebra::BlockVector> q0) \n");
 
-  _jachq->zero();
+  _jachq->setZero();
   auto q1 = (q0->getAllVect())[0];
 
   double X1 = q1->getValue(0);
@@ -518,7 +518,7 @@ void siconos::joints::KneeJointR::computeDotJachq(
       "siconos::joints::KneeJointR::computeDotJachq(double time, "
       "std::shared_ptr<siconos::algebra::SiconosVector> qdot1, "
       "std::shared_ptr<siconos::algebra::SiconosVector> qdot2) \n");
-  _dotjachq->zero();
+  _dotjachq->setZero();
 
   double Xdot1 = qdot1->getValue(0);
   double Ydot1 = qdot1->getValue(1);

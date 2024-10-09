@@ -29,9 +29,8 @@
 #include "SiconosException.hpp"
 #include "SiconosFortran.h"  // for Fortran to C api, fprobpointer ...
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixVectorOp.hpp"  // for prod and subprod
+#include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
-#include "SiconosVectorOp.hpp"  // for subscal
 #include "SiconosVisitor.hpp"
 #include "Simulation.hpp"
 #include "Tools.hpp"  // enum_to_string
@@ -794,11 +793,8 @@ struct siconos::integrators::Hem5OSI::_NSLEffectOnFreeOutput
   void visit(const siconos::modeling::NewtonImpactNSL& nslaw) const override {
     double e;
     e = nslaw.e();
-    std::vector<std::size_t> subCoord = {0, _inter->nonSmoothLaw()->size(), 0,
-                                         _inter->nonSmoothLaw()->size()};
     auto& osnsp_rhs = *(*_interProp.workVectors)[siconos::integrators::Hem5OSI::OSNSP_RHS];
-    siconos::algebra::subscal(e, _inter->y_k(_osnsp->inputOutputLevel()), osnsp_rhs, subCoord,
-                              false);  // q = q + e * q
+    osnsp_rhs += e * _inter->y_k(_osnsp->inputOutputLevel());
   }
 
   // visit function added by Son (9/11/2010)
@@ -820,7 +816,6 @@ void siconos::integrators::Hem5OSI::computeFreeOutput(
   auto sizeY = inter->nonSmoothLaw()->size();
 
   auto mainInteraction = inter;
-  std::vector<std::size_t> coord = {0, sizeY, 0, 0, 0, 0, 0, sizeY};
   std::shared_ptr<siconos::algebra::SiconosMatrix> C{nullptr};
   //   std::shared_ptr<siconos::algebra::SiconosMatrix>  D;
   //   std::shared_ptr<siconos::algebra::SiconosMatrix>  F;
@@ -857,17 +852,12 @@ void siconos::integrators::Hem5OSI::computeFreeOutput(
     C = mainInteraction->relation()->C();
     if (C) {
       assert(Xfree);
-
-      coord[3] = C->size(1);
-      coord[5] = C->size(1);
-
-      siconos::algebra::subprod(*C, *Xfree, osnsp_rhs, coord, true);
+      siconos::algebra::matrixBlockVector_prod(*C, *Xfree, osnsp_rhs, true);
     }
 
     auto ID = std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeY);
-    ID->eye();
+    ID->setIdentity();
 
-    std::vector<std::size_t> xcoord = {0, sizeY, 0, sizeY, 0, sizeY, 0, sizeY};
     // For the relation of type LagrangianRheonomousR
     if (relationSubType == siconos::modeling::RelationSubType::RheonomousR) {
       if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp) {
@@ -878,12 +868,11 @@ void siconos::integrators::Hem5OSI::computeFreeOutput(
         std::static_pointer_cast<siconos::modeling::LagrangianRheonomousR>(inter->relation())
             ->computehDot(simulation()->getTkp1(), *DSlink[siconos::modeling::LagrangianR::q0],
                           *DSlink[siconos::modeling::LagrangianR::z]);
-        siconos::algebra::subprod(
-            *ID,
-            *(std::static_pointer_cast<siconos::modeling::LagrangianRheonomousR>(
-                  inter->relation())
-                  ->hDot()),
-            osnsp_rhs, xcoord, false);  // y += hDot
+
+        auto hDot = std::static_pointer_cast<siconos::modeling::LagrangianRheonomousR>(
+                        inter->relation())
+                        ->hDot();
+        osnsp_rhs += *ID * *hDot;
       } else
         THROW_EXCEPTION(
             "siconos::integrators::Hem5OSI::computeFreeOutput not implemented for "
@@ -894,12 +883,12 @@ void siconos::integrators::Hem5OSI::computeFreeOutput(
       if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp) {
         std::static_pointer_cast<siconos::modeling::LagrangianScleronomousR>(inter->relation())
             ->computedotjacqhXqdot(simulation()->getTkp1(), *inter);
-        siconos::algebra::subprod(
-            *ID,
-            *(std::static_pointer_cast<siconos::modeling::LagrangianScleronomousR>(
-                  inter->relation())
-                  ->dotjacqhXqdot()),
-            osnsp_rhs, xcoord, false);  // y += NonLinearPart
+
+        auto dotjacqhXqdot =
+            std::static_pointer_cast<siconos::modeling::LagrangianScleronomousR>(
+                inter->relation())
+                ->dotjacqhXqdot();
+        osnsp_rhs += *ID * *dotjacqhXqdot;
       }
     }
   } else

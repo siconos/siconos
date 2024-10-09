@@ -27,9 +27,9 @@
 #include "BlockVector.hpp"
 #include "NewtonEulerDS.hpp"
 #include "RotationQuaternion.hpp"  // for rewriteVectorFromBodyToAbsoluteFrame
+#include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"  // for scal
-#include "SiconosMatrix.hpp"
 
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -102,9 +102,9 @@ void siconos::joints::CylindricalJointR::setBasePositions(
     std::shared_ptr<siconos::algebra::SiconosVector> q1,
     std::shared_ptr<siconos::algebra::SiconosVector> q2) {
   // in the two-DS case, _P is unused.
-  _G1P0->zero();
+  _G1P0->setZero();
   *_G1P0 = *_points[0];
-  _axis0->zero();
+  _axis0->setZero();
   *_axis0 = *_axes[0];
 
   if (_absoluteRef) {
@@ -115,7 +115,7 @@ void siconos::joints::CylindricalJointR::setBasePositions(
 
   computeV1V2FromAxis();
   auto q2i = std::make_shared<siconos::algebra::SiconosVector>(7);
-  q2i->zero();
+  q2i->setZero();
   q2i->setValue(3, 1);
 
   if (q2) *q2i = *q2;
@@ -176,29 +176,28 @@ void siconos::joints::CylindricalJointR::setBasePositions(
 }
 
 void siconos::joints::CylindricalJointR::computeV1V2FromAxis() {
-  _V1 = std::make_shared<siconos::algebra::SiconosVector>(3);
-  _V2 = std::make_shared<siconos::algebra::SiconosVector>(3);
-  _V1->zero();
-  _V2->zero();
+  siconos::algebra::SiconosVector3 _V1, _V2;
+  _V1.setZero();
+  _V2.setZero();
   // build _V1
   if (_axis0->getValue(0) > _axis0->getValue(1))
     if (_axis0->getValue(0) > _axis0->getValue(2)) {
-      _V1->setValue(1, -_axis0->getValue(0));
-      _V1->setValue(0, _axis0->getValue(1));
+      _V1(1) = -_axis0->getValue(0);
+      _V1(0) = _axis0->getValue(1);
     } else {
-      _V1->setValue(1, -_axis0->getValue(2));
-      _V1->setValue(2, _axis0->getValue(1));
+      _V1(1) = -_axis0->getValue(2);
+      _V1(2) = _axis0->getValue(1);
     }
   else if (_axis0->getValue(2) > _axis0->getValue(1)) {
-    _V1->setValue(1, -_axis0->getValue(2));
-    _V1->setValue(2, _axis0->getValue(1));
+    _V1(1) = -_axis0->getValue(2);
+    _V1(2) = _axis0->getValue(1);
   } else {
-    _V1->setValue(1, -_axis0->getValue(0));
-    _V1->setValue(0, _axis0->getValue(1));
+    _V1(1) = -_axis0->getValue(0);
+    _V1(0) = _axis0->getValue(1);
   }
-  double aux = 1 / _V1->norm2();
-  siconos::algebra::scal(aux, *_V1, *_V1);
-  siconos::algebra::cross_product(*_axis0, *_V1, *_V2);
+  double aux = 1. / _V1.norm2();
+  _V1 *= aux;
+  _V2 = _axis0->head<3>().cross(_V1);
 }
 
 void siconos::joints::CylindricalJointR::computeJachq(
@@ -1062,5 +1061,6 @@ void siconos::joints::CylindricalJointR::_normalDoF(siconos::algebra::SiconosVec
   // We assume that _axis0 is normalized.
   ans = *_axis0;
 
-  if (absoluteRef) siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(*q0.getAllVect()[0], ans);
+  if (absoluteRef)
+    siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(*q0.getAllVect()[0], ans);
 }

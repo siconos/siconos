@@ -150,7 +150,7 @@ void siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks(
 
       if (!initialized[indexSet->index(ed1)]) {
         initialized[indexSet->index(ed1)] = true;
-        currentInteractionBlock->zero();
+        currentInteractionBlock->setZero();
       }
       if (!isLinear || !_hasBeenUpdated) {
         { computeInteractionBlock(*ei); }
@@ -282,7 +282,7 @@ void siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks(
 
         if (!initialized[currentInteractionBlock]) {
           initialized[currentInteractionBlock] = true;
-          currentInteractionBlock->zero();
+          currentInteractionBlock->setZero();
         }
 
         if (!isLinear || !_hasBeenUpdated) {

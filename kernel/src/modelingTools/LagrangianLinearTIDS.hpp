@@ -169,30 +169,6 @@ class LagrangianLinearTIDS : public LagrangianDS {
                           const Eigen::Ref<const siconos::algebra::SiconosVector> &q,
                           double time) override;
 
-  /** Compute  \f$ \nabla_qF_{total}(v,q,t) \f$. Nothing done for this kind of system.
-   *
-   *  \param velocity vector
-   *  \param q state
-   *  \param time the current time
-   */
-  virtual void computeJacobianTotalForcesOver_q(
-      const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
-      const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time) override {
-    THROW_EXCEPTION("LLTIDS, missing implementation ...");
-  };
-
-  /** Compute  \f$ \nabla_{\dot q}F_{total}(v,q,t) \f$. Nothing done for this kind of system.
-   *
-   *  \param velocity vector
-   *  \param q state
-   *  \param time the current time
-   */
-  virtual void computeJacobianTotalForcesOver_velocity(
-      const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
-      const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time) override {
-    THROW_EXCEPTION("LLTIDS, missing implementation ...");
-  };
-
   /** \return true if the Dynamical system is linear.
    */
   bool isLinear() override { return true; }

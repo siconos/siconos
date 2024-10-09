@@ -22,9 +22,8 @@
 #include "BlockVector.hpp"
 #include "Interaction.hpp"
 #include "SiconosException.hpp"
-#include "SiconosVector.hpp"
-#include "SiconosVectorOp.hpp"  // inner_prod
 #include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -51,7 +50,7 @@ double siconos::modeling::Lagrangian2d2DR::distance() const {
   DEBUG_EXPR(_Pc2->display(););
   DEBUG_EXPR(dpc.display(););
   DEBUG_END("siconos::modeling::Lagrangian2d2DR::distance(...)\n")
-  return dpc.norm2() * (siconos::algebra::inner_prod(*_Nc, dpc) >= 0 ? -1 : 1);
+  return dpc.norm2() * (_Nc->dot(dpc) >= 0 ? -1 : 1);
 }
 
 void siconos::modeling::Lagrangian2d2DR::computeh(const siconos::algebra::BlockVector& q,

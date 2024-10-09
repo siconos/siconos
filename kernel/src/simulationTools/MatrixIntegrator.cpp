@@ -74,7 +74,7 @@ siconos::simulation::MatrixIntegrator::MatrixIntegrator(
 
   if (_E) {
     _mat = std::make_shared<siconos::algebra::SiconosMatrix>(*E);
-    _mat->zero();
+    _mat->setZero();
   }
 }
 
@@ -117,7 +117,7 @@ void siconos::simulation::MatrixIntegrator::integrate() {
   }
   unsigned int p = _mat->size(1);
   for (unsigned int i = 0; i < p; i++) {
-    x0.zero();
+    x0.setZero();
     if (_E)
       *Ecol = _E->col(i);
     else if (_plugin)
@@ -130,7 +130,7 @@ void siconos::simulation::MatrixIntegrator::integrate() {
     _DS->resetToInitialState();
     _sim->setIstate(1);
     _sim->advanceToEvent();
-    _mat->setCol(i, x);
+    _mat->col(i) = x;
   }
 
   _sim->processEvents();

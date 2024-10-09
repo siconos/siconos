@@ -19,9 +19,9 @@
 
 #include "DynamicalSystem.hpp"
 #include "SiconosException.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixVectorOp.hpp"  // mat-vec prod
 #include "SiconosVector.hpp"
-#include "SiconosMatrix.hpp"
 siconos::control::LinearSensor::LinearSensor(
     std::shared_ptr<siconos::modeling::DynamicalSystem> ds)
     : ControlSensor(SensorType::Linear, ds) {}
@@ -65,11 +65,12 @@ void siconos::control::LinearSensor::initialize(
   _storedY = std::make_shared<siconos::algebra::SiconosVector>(rowC);
   //  (_data[_eSensor])["StoredY"] = storedY;
   // set the dimension of the output
-  *_storedY = siconos::algebra::prod(*_matC, *_DSx);
+  *_storedY = *_matC * *_DSx;
 }
 
 void siconos::control::LinearSensor::capture() {
-  *_storedY = siconos::algebra::prod(*_matC, *_DSx);
+  *_storedY = *_matC * *_DSx;
+
   // untested
   if (_matD)
     //    *_storedY += siconos::algebra::prod(*_matD, *_DS->z());

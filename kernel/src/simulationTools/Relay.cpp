@@ -129,11 +129,11 @@ int siconos::nonsmooth_formulations::Relay::compute(double time)
   // cout << " _sizeOutput =" <<_sizeOutput <<std::endl;
   if (_lb->size() != _sizeOutput) {
     _lb->resize(_sizeOutput, false);
-    _lb->zero();
+    _lb->setZero();
   }
   if (_ub->size() != _sizeOutput) {
     _ub->resize(_sizeOutput, false);
-    _ub->zero();
+    _ub->setZero();
   }
 
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;

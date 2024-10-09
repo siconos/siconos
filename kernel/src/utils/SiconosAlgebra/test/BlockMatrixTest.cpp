@@ -210,7 +210,7 @@ void BlockMatrixTest::testConstructor4()  // Constructor from 4 std::shared_ptr<
 void BlockMatrixTest::testNormInf() {
   std::cout << "--> Test: normInf." << std::endl;
   auto test = std::make_shared<BlockMatrix>(m, 2, 3);
-  test->zero();
+  test->setZero();
   double n = 12;
   (*test)(4, 3) = n;
   (*test)(2, 1) = n - 3;
@@ -221,13 +221,13 @@ void BlockMatrixTest::testNormInf() {
 void BlockMatrixTest::testZero() {
   std::cout << "--> Test: zero." << std::endl;
   auto A = std::make_shared<siconos::algebra::SiconosMatrix>(2, 2);
-  A->eye();
+  A->setIdentity();
   auto H = std::make_shared<siconos::algebra::SiconosMatrix>(2, 4);
-  H->eye();
+  H->setIdentity();
   auto I = std::make_shared<siconos::algebra::SiconosMatrix>(5, 2);
-  I->eye();
+  I->setIdentity();
   auto J = std::make_shared<siconos::algebra::SiconosMatrix>(5, 4);
-  J->eye();
+  J->setIdentity();
 
   std::vector<std::shared_ptr<siconos::algebra::SiconosMatrix>> v(4);
   v[0] = A;
@@ -235,7 +235,7 @@ void BlockMatrixTest::testZero() {
   v[2] = I;
   v[3] = J;
   auto test = std::make_shared<BlockMatrix>(v, 2, 2);
-  test->zero();
+  test->setZero();
   unsigned int n1 = test->size(0);
   unsigned int n2 = test->size(1);
   for (unsigned int i = 0; i < n1; ++i)
@@ -270,7 +270,7 @@ void BlockMatrixTest::testEye() {
   v[2] = I;
   v[3] = J;
   auto test = std::make_shared<BlockMatrix>(v, 2, 2);
-  test->eye();
+  test->setIdentity();
   unsigned int n1 = test->size(0);
   unsigned int n2 = test->size(1);
   for (unsigned int i = 0; i < n1; ++i)
@@ -362,7 +362,7 @@ void BlockMatrixTest::testAssignment() {
           "testAssignment: ", fabs((*test)(i, j) - (*ref)(i, j)) < tol, true);
 
   // Block = Block
-  test->zero();
+  test->setZero();
   auto ref2 = std::make_shared<BlockMatrix>(m, 2, 3);
   *test = *ref2;
   for (unsigned int i = 0; i < size0; ++i)

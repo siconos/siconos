@@ -128,7 +128,7 @@ void FirstOrderLinearRTest::testBuildFirstOrderLinearR5()
 //   //   std::cout << "--> Test: setCPtr." <<std::endl;
 //   //   FirstOrderLinearR::SP_PluggedMatrix tmp=
 //   std::make_shared<siconos::modeling::FirstOrderLinearR>::PluggedMatrix(*C));
-//   //   tmp->zero();
+//   //   tmp->setZero();
 //   //   auto folr= std::make_shared<siconos::modeling::FirstOrderLinearR>(*tmp,*B);
 //   //   folr->setCPtr(Cp);
 //   //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetCPtr : ", folr->getC()==*Cp, true);
@@ -203,7 +203,7 @@ void FirstOrderLinearRTest::testBuildFirstOrderLinearR5()
 //   //   std::cout << "--> Test: setBPtr." <<std::endl;
 //   //   FirstOrderLinearR::SP_PluggedMatrix tmp=
 //   std::make_shared<siconos::modeling::FirstOrderLinearR>::PluggedMatrix(*B);
-//   //   tmp->zero();
+//   //   tmp->setZero();
 //   //   auto folr= std::make_shared<siconos::modeling::FirstOrderLinearR>(*C,*tmp));
 //   //   folr->setBPtr(Bp);
 //   //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetBPtr : ", folr->getB()==*Bp, true);

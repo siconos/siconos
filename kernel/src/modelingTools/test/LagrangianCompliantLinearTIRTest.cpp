@@ -92,10 +92,10 @@ void LagrangianCompliantLinearTIRTest::testSetCPtr()
   std::cout << "--> Test: setCPtr." << std::endl;
   std::shared_ptr<siconos::algebra::SiconosMatrix> tmpC =
       std::make_shared<siconos::algebra::SiconosMatrix>(*C);
-  tmpC->zero();
+  tmpC->setZero();
   std::shared_ptr<siconos::algebra::SiconosMatrix> tmpD =
       std::make_shared<siconos::algebra::SiconosMatrix>(*D);
-  tmpD->zero();
+  tmpD->setZero();
   auto folr = std::make_shared<siconos::modeling::LagrangianCompliantLinearTIR>(tmpC, tmpD);
   folr->setCPtr(C);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetCPtr : ", folr->C() == C, true);
@@ -110,7 +110,7 @@ void LagrangianCompliantLinearTIRTest::testSetDPtr()
   std::cout << "--> Test: setDPtr." << std::endl;
   std::shared_ptr<siconos::algebra::SiconosMatrix> tmp =
       std::make_shared<siconos::algebra::SiconosMatrix>(*D);
-  tmp->zero();
+  tmp->setZero();
   auto folr = std::make_shared<siconos::modeling::LagrangianCompliantLinearTIR>(C, tmp);
   folr->setDPtr(D);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetDPtr: ", folr->D() == D, true);

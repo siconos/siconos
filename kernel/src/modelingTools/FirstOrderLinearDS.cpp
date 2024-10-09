@@ -189,7 +189,7 @@ void siconos::modeling::FirstOrderLinearDS::computeRhs(double time) {
     // allocate invM at the first call of the present function
     LU_M_ = std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(*_M);
     hasLU_M_ = true;
-    LU_M_->solve(*(_x[1]));
+    *(_x[1]) = LU_M_->solve(*(_x[1]));
   }
 }
 
@@ -201,7 +201,7 @@ void siconos::modeling::FirstOrderLinearDS::computeJacobianRhsx(double time) {
       _jacxRhs->copyBlock(0, 0, _A);
       LU_M_ = std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(*_M);
       hasLU_M_ = true;
-      LU_M_->solve(*(_jacxRhs->block(0, 0)));
+      *(_jacxRhs->block(0, 0)) = LU_M_->solve(*(_jacxRhs->block(0, 0)));
     }
   }
   // else 0

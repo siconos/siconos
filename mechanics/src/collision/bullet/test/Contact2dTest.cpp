@@ -134,7 +134,7 @@ static BounceResult bounceTest(std::string moving, std::string ground,
     floordisk->setInsideMargin(params.insideMargin);
     floordisk->setOutsideMargin(params.outsideMargin);
     auto pos = std::make_shared<siconos::algebra::SiconosVector>(7);
-    pos->zero();
+    pos->setZero();
     (*pos)(1) = -2.0;  //-params.size/2;
 
     (*pos)(3) = 1.0;  // unit quaternion

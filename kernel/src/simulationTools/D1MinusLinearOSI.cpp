@@ -29,7 +29,6 @@
 #include "SiconosMatrix.hpp"
 #include "SiconosMatrixVectorOp.hpp"  // mat-vec prod
 #include "SiconosVector.hpp"
-#include "SiconosVectorOp.hpp"  // for subscal
 #include "SiconosVisitor.hpp"
 #include "Simulation.hpp"
 #include "Tools.hpp"  // For enum_to_string
@@ -52,7 +51,7 @@ void siconos::integrators::D1MinusLinearOSI::_NSLEffectOnFreeOutput::visit(
   std::vector<std::size_t> subCoord = {0, nsl_size, 0, nsl_size};
   siconos::algebra::SiconosVector& osnsp_rhs =
       *(*_interProp.workVectors)[siconos::integrators::D1MinusLinearOSI::OSNSP_RHS];
-  siconos::algebra::subscal(e, osnsp_rhs, osnsp_rhs, subCoord, false);
+  osnsp_rhs += e * osnsp_rhs;
 }
 
 siconos::integrators::D1MinusLinearOSI::D1MinusLinearOSI(Type type)
@@ -400,7 +399,7 @@ void siconos::integrators::D1MinusLinearOSI::updateState(const unsigned int) {
         /* Compute the velocity jump due to the impulse */
         if (d->hasLUMass()) {
           d->update_lu_mass();
-          d->LUMass()->solve(dummy);
+          dummy = d->LUMass()->solve(dummy);
         }
         /* Add the velocity jump to the free velocity */
         *v += dummy;
@@ -416,7 +415,7 @@ void siconos::integrators::D1MinusLinearOSI::updateState(const unsigned int) {
         // Update the velocity
         auto dummy = *d->p(1);  // copy
         if (d->hasLUMass()) {
-          d->LUMass()->solve(dummy);
+          dummy = d->LUMass()->solve(dummy);
         }
         *d->twist() += dummy;  // add free velocity
         // update \f$ \dot q \f$

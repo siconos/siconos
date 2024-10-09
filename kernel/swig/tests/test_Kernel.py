@@ -92,7 +92,7 @@ def test_getMatrix():
 
 def test_matrix_bracket_operator():
     M = sk.SimpleMatrix(10, 10)
-    M.zero()
+    M.setZero()
     M_nparray = np.zeros((10, 10))
     print(M_nparray)
 

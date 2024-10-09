@@ -106,8 +106,8 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS1() {
   invM(2, 2) = 1. / (3. * time);
   siconos::algebra::SiconosVector tmp(3);
   tmp.setZero();
-  siconos::algebra::prod(invM, *x0, tmp);
-  siconos::algebra::prod(invM, *J0, Mref);
+  tmp = invM * *x0;
+  Mref = invM * *J0;
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testBuildFirstOrderNonLinearDS1 : ", *(ds->rhs()) == time * tmp, true);
   ds->jacobianRhsx()->display();

@@ -133,7 +133,7 @@ void siconos::control::CommonSMC::initialize(
                                                          _pluginJachxName);
       if (_pluginJachlambdaName.empty() && !_D) {
         _D = std::make_shared<siconos::algebra::SiconosMatrix>(sDim, sDim);
-        _D->zero();
+        _D->setZero();
       }
       siconos::modeling::FirstOrderRHelpers::JachlambdaSetter(*_relationSMC, _D,
                                                               _pluginJachlambdaName);
@@ -278,7 +278,7 @@ void siconos::control::CommonSMC::computeUeq() {
   siconos::algebra::prod(_thetaSMC - 1, *tmpN, _sensor->y(), *xTk, false);
   // compute the solution x_{k+1} of the system W*x_{k+1} = x_k
   Eigen::FullPivLU<siconos::algebra::SiconosMatrix> luW(tmpW);
-  luW.solve(*xTk);
+  *xTk = luW.solve(*xTk);
 
   // add the contribution from the implicit part to ueq
   siconos::algebra::prod(-_thetaSMC, *quasiProjB_A, *xTk, *_ueq, false);

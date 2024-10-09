@@ -25,7 +25,6 @@
 #include <iostream>
 #include <vector>
 
-#include "SiconosAlgebraTools.hpp"  // for isComparableTo
 #include "SiconosException.hpp"
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"  // for isComparableTo ...
@@ -135,8 +134,8 @@ void siconos::algebra::BlockVector::_update() {
 //   _vect.end();
 // }
 
-void siconos::algebra::BlockVector::zero() {
-  for (auto& it : _vect) it->zero();
+void siconos::algebra::BlockVector::setZero() {
+  for (auto& it : _vect) it->setZero();
 }
 
 void siconos::algebra::BlockVector::fill(double value) {
@@ -427,20 +426,18 @@ void siconos::algebra::BlockVector::setBlock(const SiconosVector& vIn, unsigned 
   }
 }
 
-double siconos::algebra::BlockVector::norm2() const {
+double siconos::algebra::BlockVector::norm() const {
   double d = 0;
-  for (auto& it : _vect) {
-    assert(it);
-    d += pow(it->norm2(), 2);
+  for (auto& v : _vect) {
+    d += v->squaredNorm();
   }
-  return sqrt(d);
+  return std::sqrt(d);
 }
 
 double siconos::algebra::BlockVector::normInf() const {
   double d = 0;
-  for (auto& it : _vect) {
-    assert(it);
-    d = fmax(it->normInf(), d);  // WARNING : CORRECT ?
+  for (auto& v : _vect) {
+    d = std::max(v->lpNorm<Eigen::Infinity>(), d);
   }
   return d;
 }

@@ -132,7 +132,7 @@ void siconos::simulation::EventDriven::updateIndexSet(unsigned int i) {
       {
         if (fabs(y) > tolerance_) {
           indexSet1->remove_vertex(inter);  // remove the Interaction from IndexSet[1]
-          inter->lambda(1)->zero();         // reset the lambda[1] to zero
+          inter->lambda(1)->setZero();         // reset the lambda[1] to zero
         }
       }
     } else if (i == 2)  // IndexSet[2]
@@ -150,7 +150,7 @@ void siconos::simulation::EventDriven::updateIndexSet(unsigned int i) {
         {
           if (fabs(y) > tolerance_) {
             indexSet2->remove_vertex(inter);  // remove the Interaction from IndexSet[1]
-            inter->lambda(2)->zero();         // reset the lambda[i] to zero
+            inter->lambda(2)->setZero();         // reset the lambda[i] to zero
           }
         }
       } else  // Interaction is not in the indexSet[1]
@@ -158,7 +158,7 @@ void siconos::simulation::EventDriven::updateIndexSet(unsigned int i) {
         if (indexSet2->is_vertex(inter))  // Interaction is in the indexSet[2]
         {
           indexSet2->remove_vertex(inter);  // remove the Interaction from IndexSet[2]
-          inter->lambda(2)->zero();         // reset the lambda[i] to zero
+          inter->lambda(2)->setZero();         // reset the lambda[i] to zero
         }
       }
     } else {
@@ -904,7 +904,7 @@ void siconos::simulation::EventDriven::predictionNewtonIteration() {
     inter.computeOutput(t,
                         0);   // compute y[0] for the interaction at the end time
                               // with the state predicted for Dynamical Systems
-    inter.lambda(2)->zero();  // reset lambda[2] to zero
+    inter.lambda(2)->setZero();  // reset lambda[2] to zero
   }
 }
 

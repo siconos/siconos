@@ -364,12 +364,12 @@ void siconos::modeling::Interaction::initializeMemory(unsigned int steps) {
 
 void siconos::modeling::Interaction::resetAllLambda() {
   for (unsigned int i = _lowerLevelForInput; i < _upperLevelForInput + 1; i++) {
-    if (_lambda[i]) _lambda[i]->zero();
+    if (_lambda[i]) _lambda[i]->setZero();
   }
 }
 
 void siconos::modeling::Interaction::resetLambda(unsigned int level) {
-  if (_lambda[level]) _lambda[level]->zero();
+  if (_lambda[level]) _lambda[level]->setZero();
 }
 
 // It could be interesting to make Interaction a pure virtual class and to derive 3
@@ -865,7 +865,7 @@ void siconos::modeling::Interaction::getExtraInteractionBlock(
             static_cast<std::underlying_type<RelationSubType>::type>(relationType)));
 
   if (!D) {
-    InteractionBlock->zero();
+    InteractionBlock->setZero();
     return;  // ie no extra interactionBlock
   }
 

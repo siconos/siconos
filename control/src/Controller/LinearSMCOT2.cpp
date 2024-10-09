@@ -23,11 +23,11 @@
 #include "FirstOrderLinearTIDS.hpp"
 #include "LsodarOSI.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixOp.hpp"
 #include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"
-#include "SiconosMatrix.hpp"
 #include "TimeDiscretisation.hpp"
 
 siconos::control::LinearSMCOT2::LinearSMCOT2(std::shared_ptr<ControlSensor> sensor)
@@ -77,7 +77,7 @@ void siconos::control::LinearSMCOT2::initialize(
 
   _indx = 0;
   //  _Phi= std::make_shared<SiconosMatrix(_nDim, _nDim));
-  //  _Phi->eye();
+  //  _Phi->setIdentity();
   //  _Xold= std::make_shared<siconos::algebra::SiconosVector>(_nDim));
   //  *_Xold = *(_sensor->y());
   auto _t0 = nsds.t0();
@@ -134,7 +134,8 @@ void siconos::control::LinearSMCOT2::actuate() {
   auto CS = std::make_shared<siconos::algebra::SiconosVector>(_B->size(0));
   *CS = _Csurface->row(0);
   _coeff = -1 / (CS->vector_sum() * hCurrent);
-  double uEq = siconos::algebra::inner_prod(*CS, _coeff * (*_XPhi + *_X - *_Xhat));
+
+  double uEq = CS->dot(_coeff * (*_XPhi + *_X - *_Xhat));
   double uEqP;
   // We need to project
   // TODO this should work in more than 1D

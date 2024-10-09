@@ -57,13 +57,13 @@ void ZOHTest::testMatrixExp0() {
   std::cout << "===========================================" << std::endl;
   std::cout << "------- Compute matrix exponential of the identity matrix -------"
             << std::endl;
-  _A->eye();
+  _A->setIdentity();
   init();
   _sim->computeOneStep();
   _sim->nextStep();
   auto tmpM = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
   tmpM->setZero();
-  tmpM->eye();
+  tmpM->setIdentity();
   *tmpM = (*tmpM) * exp(_h);
   const auto& Phi = _ZOH->Ad(_DS);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp0 : ", Phi.size(0) == _n, true);
@@ -81,14 +81,14 @@ void ZOHTest::testMatrixExp1() {
   std::cout << "===========================================" << std::endl;
   std::cout << "------- Compute matrix exponential of a upper triangular matrix -------"
             << std::endl;
-  _A->zero();
+  _A->setZero();
   (*_A)(0, 1) = 1;
   init();
   _sim->computeOneStep();
   _sim->nextStep();
   auto tmpM = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
   tmpM->setZero();
-  tmpM->eye();
+  tmpM->setIdentity();
   (*tmpM)(0, 1) = _h;
   const auto& Phi = _ZOH->Ad(_DS);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp1 : ", Phi.size(0) == _n, true);
@@ -105,10 +105,10 @@ void ZOHTest::testMatrixIntegration1() {
   std::cout << " ===== ZOH tests start ... ===== " << std::endl;
   std::cout << "===========================================" << std::endl;
   std::cout << "------- Integrate an oscillator -------" << std::endl;
-  _A->zero();
+  _A->setZero();
   (*_A)(0, 1) = 1;
   (*_A)(1, 0) = -1;
-  _x0->zero();
+  _x0->setZero();
   (*_x0)(0) = 1;
   init();
   siconos::algebra::SiconosMatrix dataPlot((unsigned)ceil((_T - _t0) / _h) + 10, 3);
@@ -134,7 +134,7 @@ void ZOHTest::testMatrixIntegration1() {
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
   siconos::algebra::SiconosMatrix dataPlotRef(dataPlot);
-  dataPlotRef.zero();
+  dataPlotRef.setZero();
   // magic line to compute the following:
   //  python -c "import numpy as np; t = np.linspace(0, 9.9, 100);
   //  np.savetxt('testMatrixIntegration1.ref', np.transpose([t, np.cos(t), -np.sin(t)]))" &&
@@ -152,14 +152,14 @@ void ZOHTest::testMatrixIntegration2() {
   std::cout << " ===== ZOH tests start ... ===== " << std::endl;
   std::cout << "===========================================" << std::endl;
   std::cout << "------- Integrate x \\in -sgn(x)  -------" << std::endl;
-  _A->zero();
-  _x0->zero();
+  _A->setZero();
+  _x0->setZero();
   (*_x0)(0) = 1;
   (*_x0)(1) = -1;
   auto B = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
   auto C = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
-  B->eye();
-  C->eye();
+  B->setIdentity();
+  C->setIdentity();
   auto rel = std::make_shared<siconos::modeling::FirstOrderLinearTIR>(C, B);
   auto D = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
   D->setZero();
@@ -205,7 +205,7 @@ void ZOHTest::testMatrixIntegration2() {
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
   siconos::algebra::SiconosMatrix dataPlotRef(dataPlot);
-  dataPlotRef.zero();
+  dataPlotRef.setZero();
   siconos::algebra::io::read("testMatrixIntegration2.ref", dataPlotRef);
   siconos::algebra::SiconosMatrix diff = dataPlot - dataPlotRef;
   std::cout << "------- Integration Ok, error = " << diff.normInf()
@@ -220,9 +220,9 @@ void ZOHTest::testMatrixIntegration3() {
   std::cout << "===========================================" << std::endl;
   std::cout << "------- Integrate Orlov's controller  -------" << std::endl;
   _h = .001;
-  _A->zero();
+  _A->setZero();
   (*_A)(0, 1) = 1;
-  _x0->zero();
+  _x0->setZero();
   (*_x0)(0) = 1;
   (*_x0)(1) = 1;
   auto B = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
@@ -230,7 +230,7 @@ void ZOHTest::testMatrixIntegration3() {
   auto C = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
   (*B)(1, 0) = 2;
   (*B)(1, 1) = 1;
-  C->eye();
+  C->setIdentity();
   auto rel = std::make_shared<siconos::modeling::FirstOrderLinearTIR>(C, B);
   auto D = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
   D->setZero();
@@ -282,7 +282,7 @@ void ZOHTest::testMatrixIntegration3() {
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
   siconos::algebra::SiconosMatrix dataPlotRef(dataPlot);
-  dataPlotRef.zero();
+  dataPlotRef.setZero();
   siconos::algebra::io::read("testMatrixIntegration3.ref", dataPlotRef);
   siconos::algebra::SiconosMatrix diff = dataPlot - dataPlotRef;
   std::cout << "------- Integration Ok, error = " << diff.normInf()
@@ -297,9 +297,9 @@ void ZOHTest::testMatrixIntegration4() {
   std::cout << "===========================================" << std::endl;
   std::cout << "------- Integrate Orlov's controller  -------" << std::endl;
   _h = .001;
-  _A->zero();
+  _A->setZero();
   (*_A)(0, 1) = 1;
-  _x0->zero();
+  _x0->setZero();
   (*_x0)(0) = 1;
   (*_x0)(1) = 1;
   auto B = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
@@ -307,7 +307,7 @@ void ZOHTest::testMatrixIntegration4() {
   auto C = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
   (*B)(1, 0) = 2;
   (*B)(1, 1) = 1;
-  C->eye();
+  C->setIdentity();
   auto rel = std::make_shared<siconos::modeling::FirstOrderLinearTIR>(C, B);
   auto D = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
   D->setZero();
@@ -359,7 +359,7 @@ void ZOHTest::testMatrixIntegration4() {
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
   siconos::algebra::SiconosMatrix dataPlotRef(dataPlot);
-  dataPlotRef.zero();
+  dataPlotRef.setZero();
   siconos::algebra::io::read("testMatrixIntegration4.ref", dataPlotRef);
   siconos::algebra::SiconosMatrix diff = dataPlot - dataPlotRef;
   std::cout << "------- Integration Ok, error = " << diff.normInf()

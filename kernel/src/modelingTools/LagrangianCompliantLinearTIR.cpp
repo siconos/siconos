@@ -22,9 +22,9 @@
 #include "BlockVector.hpp"
 #include "Interaction.hpp"
 #include "SiconosException.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
-#include "SiconosMatrix.hpp"
 
 // Minimum data (C as pointer) constructor
 siconos::modeling::LagrangianCompliantLinearTIR::LagrangianCompliantLinearTIR(
@@ -95,7 +95,8 @@ void siconos::modeling::LagrangianCompliantLinearTIR::computeInput(double time,
   auto& lambda = *inter.lambda(level);
   auto& DSlink = inter.linkToDSVariables();
   // computation of p = Ht lambda
-  siconos::algebra::prod(lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
+  siconos::algebra::transposeMatrixVector_prod_toBlock(
+      lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
 }
 void siconos::modeling::LagrangianCompliantLinearTIR::computeOutput(
     double time, Interaction& inter, unsigned int derivativeNumber) {
@@ -104,12 +105,14 @@ void siconos::modeling::LagrangianCompliantLinearTIR::computeOutput(
   auto& lambda = *inter.lambda(derivativeNumber);
   auto& DSlink = inter.linkToDSVariables();
 
-  siconos::algebra::prod(*_jachq, *DSlink[LagrangianR::q0 + derivativeNumber], y);
+  siconos::algebra::matrixBlockVector_prod(*_jachq,
+                                           *DSlink[LagrangianR::q0 + derivativeNumber], y);
+  y += *_jachlambda * lambda;
   siconos::algebra::prod(*_jachlambda, lambda, y, false);
 
   if (derivativeNumber == 0) {
     if (_e) y += *_e;
-    if (_F) siconos::algebra::prod(*_F, *DSlink[LagrangianR::z], y, false);
+    if (_F) siconos::algebra::matrixBlockVector_prod(*_F, *DSlink[LagrangianR::z], y, false);
   }
 }
 

@@ -23,11 +23,10 @@
 #include "BlockVector.hpp"
 #include "Interaction.hpp"
 #include "RotationQuaternion.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixOp.hpp"        // for mat prod
 #include "SiconosMatrixVectorOp.hpp"  // for mat-vec prod
 #include "SiconosVector.hpp"
-#include "SiconosVectorOp.hpp"  // for inner_prod
-#include "SiconosMatrix.hpp"
 
 // #define NERI_DEBUG
 
@@ -75,7 +74,7 @@ void siconos::modeling::NewtonEuler1DR::NIcomputeJachqTFromContacts(
   _rotationAbsoluteToContactFrame->setValue(0, 1, Ny);
   _rotationAbsoluteToContactFrame->setValue(0, 2, Nz);
 
-  _NPG1->zero();
+  _NPG1->setZero();
 
   (*_NPG1)(0, 0) = 0;
   (*_NPG1)(0, 1) = -(G1z - Pz);
@@ -120,7 +119,7 @@ void siconos::modeling::NewtonEuler1DR::NIcomputeJachqTFromContacts(
   _rotationAbsoluteToContactFrame->setValue(0, 1, Ny);
   _rotationAbsoluteToContactFrame->setValue(0, 2, Nz);
 
-  _NPG1->zero();
+  _NPG1->setZero();
 
   (*_NPG1)(0, 0) = 0;
   (*_NPG1)(0, 1) = -(G1z - Pz);
@@ -145,7 +144,7 @@ void siconos::modeling::NewtonEuler1DR::NIcomputeJachqTFromContacts(
   double G2y = q2->getValue(1);
   double G2z = q2->getValue(2);
 
-  _NPG2->zero();
+  _NPG2->setZero();
   (*_NPG2)(0, 0) = 0;
   (*_NPG2)(0, 1) = -(G2z - Pz);
   (*_NPG2)(0, 2) = (G2y - Py);
@@ -283,7 +282,7 @@ void siconos::modeling::NewtonEuler1DR::computeJachqT(
 
 double siconos::modeling::NewtonEuler1DR::distance() const {
   siconos::algebra::SiconosVector dpc(*_Pc2 - *_Pc1);
-  return dpc.norm2() * (siconos::algebra::inner_prod(*_Nc, dpc) >= 0 ? -1 : 1);
+  return dpc.norm2() * (_Nc->dot(dpc) >= 0 ? -1 : 1);
 }
 
 void siconos::modeling::NewtonEuler1DR::computehFromRelativeContactPoints(

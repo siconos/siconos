@@ -30,10 +30,9 @@
 #include "NewtonImpactFrictionNSL.hpp"
 #include "NewtonImpactNSL.hpp"
 #include "OneStepNSProblem.hpp"
-#include "SiconosMatrixVectorOp.hpp"  // for mat-vec prod
-#include "SiconosVector.hpp"
-#include "SiconosVectorOp.hpp"  // for subscal
 #include "SiconosMatrix.hpp"
+#include "SiconosMatrixVectorOp.hpp"
+#include "SiconosVector.hpp"
 #include "Simulation.hpp"
 #include "Topology.hpp"
 
@@ -81,7 +80,7 @@ void siconos::integrators::ZeroOrderHoldOSI::initializeWorkVectorsForDS(
 
   if ((static_cast<const siconos::modeling::FirstOrderLinearDS&>(*ds)).b()) {
     auto E = std::make_shared<siconos::algebra::SiconosMatrix>(ds->n(), ds->n());
-    E->eye();
+    E->setIdentity();
     DSG0.AdInt.insert(dsgVD, std::make_shared<siconos::simulation::MatrixIntegrator>(
                                  *ds, *_simulation->nonSmoothDynamicalSystem(),
                                  _simulation->eventsManager()->timeDiscretisation(), E));
@@ -274,12 +273,11 @@ void siconos::integrators::ZeroOrderHoldOSI::computeFreeState() {
       auto& xfree = *ds_work_vectors[siconos::integrators::ZeroOrderHoldOSI::FREE];
       DEBUG_EXPR(xfree.display(););
 
-      siconos::algebra::prod(DSG0.Ad.at(dsgVD)->mat(), *d->x(), xfree);  // xfree = Ad*xold
+      xfree = DSG0.Ad.at(dsgVD)->mat() * *d->x();  // xfree = Ad*xold
       DEBUG_EXPR(xfree.display(););
       if (d->b()) {
         assert(DSG0.AdInt.hasKey(dsgVD));
-        siconos::algebra::prod(DSG0.AdInt.at(dsgVD)->mat(), *d->b(), xfree,
-                               false);  // xfree += AdInt*b
+        xfree += DSG0.AdInt.at(dsgVD)->mat() * *d->b();  // xfree += AdInt*b
         DEBUG_EXPR(xfree.display(););
       }
 
@@ -323,17 +321,13 @@ struct siconos::integrators::ZeroOrderHoldOSI::_NSLEffectOnFreeOutput
   _NSLEffectOnFreeOutput(siconos::nonsmooth_formulations::OneStepNSProblem* p,
                          std::shared_ptr<siconos::modeling::Interaction> inter,
                          siconos::graphs::InteractionProperties& interProp)
-      : _osnsp(p), _inter(inter), _interProp(interProp) {};
+      : _osnsp(p), _inter(inter), _interProp(interProp){};
 
   void visit(const siconos::modeling::NewtonImpactNSL& nslaw) const override {
-    double e;
-    e = nslaw.e();
-    auto sizeY = _inter->nonSmoothLaw()->size();
-    std::vector<std::size_t> subCoord = {0, sizeY, 0, sizeY};
+    auto e = nslaw.e();
     siconos::algebra::SiconosVector& osnsp_rhs =
         *(*_interProp.workVectors)[siconos::integrators::ZeroOrderHoldOSI::OSNSP_RHS];
-    siconos::algebra::subscal(e, _inter->y_k(_osnsp->inputOutputLevel()), osnsp_rhs, subCoord,
-                              false);
+    osnsp_rhs += e * _inter->y_k(_osnsp->inputOutputLevel());
   }
 
   void visit(const siconos::modeling::NewtonImpactFrictionNSL& nslaw) const override {
@@ -368,9 +362,6 @@ void siconos::integrators::ZeroOrderHoldOSI::computeFreeOutput(
   auto relationSubType = inter->relation()->getSubType();
 
   auto sizeY = inter->nonSmoothLaw()->size();
-
-  std::vector<std::size_t> coord = {0, sizeY, 0, 0, 0, 0, 0, sizeY};
-
   auto deltax = inter_work_block[siconos::integrators::ZeroOrderHoldOSI::DELTA_X];
 
   auto& osnsp_rhs = *(*indexSet->properties(vertex_inter)
@@ -397,16 +388,11 @@ void siconos::integrators::ZeroOrderHoldOSI::computeFreeOutput(
       assert(lambda);
 
       if (D) {
-        coord[3] = D->size(1);
-        coord[5] = D->size(1);
-        siconos::algebra::subprod(*D, *lambda, osnsp_rhs, coord, true);
-
+        osnsp_rhs = *D * *lambda;
         osnsp_rhs *= -1.0;
       }
       if (C) {
-        coord[3] = C->size(1);
-        coord[5] = C->size(1);
-        siconos::algebra::subprod(*C, *deltax, osnsp_rhs, coord, false);
+        siconos::algebra::matrixBlockVector_prod(*C, *deltax, osnsp_rhs, false);
       }
 
       if (_useGammaForRelation) {
@@ -426,17 +412,14 @@ void siconos::integrators::ZeroOrderHoldOSI::computeFreeOutput(
       if (C) {
         assert(Xfree);
         assert(deltax);
-
-        coord[3] = C->size(1);
-        coord[5] = C->size(1);
         // creates a POINTER link between workX[ds] (xfree) and the
         // corresponding interactionBlock in each Interactionfor each ds of the
         // current Interaction.
 
         if (_useGammaForRelation) {
-          siconos::algebra::subprod(*C, *deltax, osnsp_rhs, coord, true);
+          siconos::algebra::matrixBlockVector_prod(*C, *deltax, osnsp_rhs, true);
         } else {
-          siconos::algebra::subprod(*C, *Xfree, osnsp_rhs, coord, true);
+          siconos::algebra::matrixBlockVector_prod(*C, *Xfree, osnsp_rhs, true);
         }
       }
 
@@ -458,10 +441,8 @@ void siconos::integrators::ZeroOrderHoldOSI::computeFreeOutput(
         if (e) osnsp_rhs += *e;
 
         if (F) {
-          coord[3] = F->size(1);
-          coord[5] = F->size(1);
-          siconos::algebra::subprod(*F, *DSlink[siconos::modeling::FirstOrderR::z], osnsp_rhs,
-                                    coord, false);
+          siconos::algebra::matrixBlockVector_prod(
+              *F, *DSlink[siconos::modeling::FirstOrderR::z], osnsp_rhs, false);
         }
       }
     }
@@ -513,7 +494,7 @@ void siconos::integrators::ZeroOrderHoldOSI::updateState(const unsigned int leve
           if (!Bd.isConst()) {
             Bd.integrate();
           }
-          siconos::algebra::prod(Bd.mat(), *interC->lambda(0), x, false);  // x += Bd*\lambda
+          x += Bd.mat() * *interC->lambda(0);  // x += Bd*\lambda
         }
       }
       DEBUG_EXPR(ds->display(););

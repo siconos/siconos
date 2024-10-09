@@ -84,8 +84,6 @@ void normInfByColumn(const SiconosMatrix &m, SiconosVector &v);
 
 bool checkSymmetry(SiconosMatrix &m, double tol);
 
-void solveByLeastSquares(SiconosMatrix &A, SiconosVector &B);
-void solveByLeastSquares(SiconosMatrix &A, SiconosMatrix &B);
 siconos::algebra::SiconosMatrix readMatrixFromFile(const std::string &filename,
                                                    bool ascii = true);
 

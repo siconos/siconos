@@ -38,8 +38,6 @@ inline Index size() const { return this->rows() * this->cols(); }
 
 void display() const { std::cout << *this << std::endl; }
 
-inline void zero() { this->setZero(); }
-
 inline Scalar norm2() { return this->norm(); }
 
 // inline Scalar normInf() {

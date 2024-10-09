@@ -198,10 +198,10 @@ bool siconos::nonsmooth_formulations::GlobalRollingFrictionContact::preCompute(d
 
         if (std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
           auto& vfree = *ds_work_vectors[siconos::integrators::MoreauJeanGOSI::FREE];
-          siconos::algebra::setBlock(vfree, _q, dss, 0, offset);
+          _q->segment(offset, dss) = vfree;
         } else if (std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
           auto& vfree = *ds_work_vectors[siconos::integrators::MoreauJeanGOSI::FREE];
-          siconos::algebra::setBlock(vfree, _q, dss, 0, offset);
+          _q->segment(offset, dss) = vfree;
         }
       } else {
         THROW_EXCEPTION(
@@ -258,23 +258,23 @@ bool siconos::nonsmooth_formulations::GlobalRollingFrictionContact::preCompute(d
                                .workVectors)[siconos::integrators::MoreauJeanGOSI::OSNSP_RHS];
       auto pos = indexSet.properties(*ui).absolute_position;
       auto sizeY = inter->dimension();
-      siconos::algebra::setBlock(osnsp_rhs, _b, sizeY, 0, pos);
+      _b->segment(pos, sizeY) = osnsp_rhs;
     }
     DEBUG_EXPR(_b->display(););
     // Checks z and w sizes and reset if necessary
     if (_z->size() != _sizeOutput) {
       _z->resize(_sizeOutput, false);
-      _z->zero();
+      _z->setZero();
     }
 
     if (_w->size() != _sizeOutput) {
       _w->resize(_sizeOutput);
-      _w->zero();
+      _w->setZero();
     }
 
     if (_globalVelocities->size() != _sizeGlobalOutput) {
       _globalVelocities->resize(_sizeGlobalOutput);
-      _globalVelocities->zero();
+      _globalVelocities->setZero();
     }
   }
   DEBUG_END(
@@ -306,8 +306,8 @@ int siconos::nonsmooth_formulations::GlobalRollingFrictionContact::solve(
   if (!problem) {
     problem = globalRollingFrictionContactProblem();
   }
-  return (*_g_rolling_driver)(&*problem, _z->data(), _w->data(),
-                              _globalVelocities->data(), &*_numerics_solver_options);
+  return (*_g_rolling_driver)(&*problem, _z->data(), _w->data(), _globalVelocities->data(),
+                              &*_numerics_solver_options);
 }
 
 void siconos::nonsmooth_formulations::GlobalRollingFrictionContact::updateMur() {

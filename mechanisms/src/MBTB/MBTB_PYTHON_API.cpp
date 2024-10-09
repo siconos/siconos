@@ -199,8 +199,8 @@ void MBTB_BodyBuildComputeInitPosition(
   // unsigned int nDim = 6;
   // auto q10(new SiconosVector(qDim));
   // auto v10(new SiconosVector(nDim));
-  q10->zero();
-  v10->zero();
+  q10->setZero();
+  v10->setZero();
 
   /*From the siconos point of view, the dynamic equation are written at the
    * center of gravity.*/
@@ -240,7 +240,7 @@ void MBTB_BodyBuildComputeInitPosition(
 
   // //In current version I = Id3
   // sI[numDS] = std::make_shared<siconos::algebra::SiconosMatrix>(3,3));
-  // sI[numDS]->zero();
+  // sI[numDS]->setZero();
   // //sI[numDS]->setValue(0,0,sMass[numDS]);sI[numDS]->setValue(1,1,sMass[numDS]);sI[numDS]->setValue(2,2,sMass[numDS]);
   // sI[numDS]->setValue(0,0,sMassMatrix[9*numDS+0]*sMassMatrixScale[numDS]);
   // sI[numDS]->setValue(1,0,sMassMatrix[9*numDS+1]*sMassMatrixScale[numDS]);
@@ -426,7 +426,7 @@ void siconos::mechanisms::MBTB_JointBuild(
   lNbEq = mbtb::data::sJointRelations[numJ]->_jointR->numberOfConstraints();
 
   auto lH = std::make_shared<siconos::algebra::SiconosMatrix>(lNbEq, nbDS * qDim);
-  lH->zero();
+  lH->setZero();
   auto lNSL = std::make_shared<siconos::modeling::EqualityConditionNSL>(lNbEq);
 
   mbtb::data::sJointRelations[numJ]->_jointR->setJachq(lH);

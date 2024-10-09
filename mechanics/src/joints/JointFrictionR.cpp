@@ -66,7 +66,7 @@ void siconos::joints::JointFrictionR::computeh(double time,
                                                const siconos::algebra::BlockVector& q0,
                                                siconos::algebra::SiconosVector& y) {
   // Velocity-level constraint, no position-level h
-  y.zero();
+  y.setZero();
 }
 
 void siconos::joints::JointFrictionR::computeJachq(

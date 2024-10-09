@@ -26,8 +26,7 @@
 #include "SiconosConst.hpp"  // For MACHINE_PREC
 #include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixOp.hpp"        // scal
-#include "SiconosMatrixVectorOp.hpp"  // mat-vec prod
+#include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
 #include "Simulation.hpp"
 // #define DEBUG_NOCOLOR
@@ -255,8 +254,9 @@ void siconos::integrators::NewMarkAlphaOSI::computeFreeState() {
     if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
       qfree = residuFree;
       //  assume that iterationMatrix and LU are uptodate
-      _dynamicalSystemsGraph->properties(*dsi).LUW->solve(qfree);  //_qfree = (W^-1)*R_free
-      qfree *= -1.0;                                               //_qfree = -(W^-1)*R_free
+      qfree =
+          _dynamicalSystemsGraph->properties(*dsi).LUW->solve(qfree);  //_qfree = (W^-1)*R_free
+      qfree *= -1.0;  //_qfree = -(W^-1)*R_free
       //
       DEBUG_EXPR(qfree.display(););
     } else {
@@ -327,35 +327,17 @@ void siconos::integrators::NewMarkAlphaOSI::computeFreeOutput(
                   << std::endl;
         std::cout << "osnsp" << osnsp << std::endl;);
     if (relationSubType == siconos::modeling::RelationSubType::ScleronomousR) {
-      std::vector<std::size_t> coord(8);
-      coord[0] = 0;
-      coord[1] = sizeY;
-      coord[2] = 0;
-      coord[3] = C->size(1);
-      coord[4] = 0;
-      coord[5] = C->size(1);
-      coord[6] = 0;
-      coord[7] = sizeY;
       if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_ACC]).get() ==
           osnsp)  // LCP at acceleration level
       {
-        siconos::algebra::subprod(*C, *q_free, osnsp_rhs, coord, true);
+        siconos::algebra::matrixBlockVector_prod(*C, *q_free, osnsp_rhs, true);
         auto ID = std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeY);
-        ID->eye();
-        std::vector<std::size_t> xcoord(8);
-        xcoord[0] = 0;
-        xcoord[1] = sizeY;
-        xcoord[2] = 0;
-        xcoord[3] = sizeY;
-        xcoord[4] = 0;
-        xcoord[5] = sizeY;
-        xcoord[6] = 0;
-        xcoord[7] = sizeY;
+        ID->setIdentity();
         auto _SclerR = std::static_pointer_cast<siconos::modeling::LagrangianScleronomousR>(
             inter->relation());
         _SclerR->computedotjacqhXqdot(t, *inter);
-        siconos::algebra::subprod(*ID, *(_SclerR->dotjacqhXqdot()), osnsp_rhs, xcoord,
-                                  false);  // y += NonLinearPart
+        osnsp_rhs += *ID * *(_SclerR->dotjacqhXqdot());
+        // y += NonLinearPart
       } else if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_POS]).get() ==
                  osnsp)  // LCP at position level
       {
@@ -367,7 +349,7 @@ void siconos::integrators::NewMarkAlphaOSI::computeFreeOutput(
           inter->computeOutput(t, 0);  // Update output of level 0
           osnsp_rhs = *(inter->y(0));  // g_{n,k}
         }
-        siconos::algebra::subprod(*C, *q_free, osnsp_rhs, coord, false);
+        siconos::algebra::matrixBlockVector_prod(*C, *q_free, osnsp_rhs, false);
       } else if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_IMPACT]).get() ==
                  osnsp)  // output at the velocity level y_{n,k} = (h/gamma_prime)*dotg_{n,k}
       {
@@ -375,7 +357,7 @@ void siconos::integrators::NewMarkAlphaOSI::computeFreeOutput(
         auto gamma_prime = _gamma / _beta;
         inter->computeOutput(t, 1);                        // Update output of level 1
         osnsp_rhs = (h / gamma_prime) * (*(inter->y(1)));  //(h/gamma_prime)*dotg_{n,k}
-        siconos::algebra::subprod(*C, *q_free, osnsp_rhs, coord, false);
+        siconos::algebra::matrixBlockVector_prod(*C, *q_free, osnsp_rhs, false);
       } else {
         osnsp->display();
         THROW_EXCEPTION(
@@ -675,7 +657,7 @@ void siconos::integrators::NewMarkAlphaOSI::correction() {
       siconos::algebra::SiconosVector delta_q{*_p - residuFree};
       // copy (p_{n+1,k+1} - r_{n+1,k}) to delta_q
 
-      _dynamicalSystemsGraph->properties(*dsi).LUW->solve(delta_q);
+      delta_q = _dynamicalSystemsGraph->properties(*dsi).LUW->solve(delta_q);
 
       // Correction q_{n+1,k+1}, dotq_{n+1,k+1}, ddotq_{n+1,k+1}
       *(d->q()) += delta_q;  // q_{n+1,k+1} = q_{n+1,k} + delta_q
@@ -771,33 +753,33 @@ void siconos::integrators::NewMarkAlphaOSI::computeCoefsDenseOutput(
     }
     // a0 = q_n
     (*_vec) = q_n;
-    _CoeffsDense->setCol(0, (*_vec));
+    _CoeffsDense->col(0) = (*_vec);
     DEBUG_EXPR(std::cout << "a0: "; _vec->display(););
     // a1 = h*dotq_n
     (*_vec) = h * dotq_n;
-    _CoeffsDense->setCol(1, (*_vec));
+    _CoeffsDense->col(1) = (*_vec);
     DEBUG_EXPR(std::cout << "a1: "; _vec->display(););
     // a2 = 0.5*h^2*ddotq_n
     (*_vec) = (0.5 * h * h) * ddotq_n;
-    _CoeffsDense->setCol(2, (*_vec));
+    _CoeffsDense->col(2) = (*_vec);
     DEBUG_EXPR(std::cout << "a2: "; _vec->display(););
     // a3 = -10*q_n - 6*h*dotq_n - 1.5*h^2*ddotq_n + 10*q_{n+1} - 4*h*dotq_{n+1} +
     // 0.5*h^2*ddotq_{n+1}
     (*_vec) = (-10.0) * q_n - (6.0 * h) * dotq_n - (1.5 * h * h) * ddotq_n + 10.0 * q_np1 -
               (4.0 * h) * dotq_np1 + (0.5 * h * h) * ddotq_np1;
-    _CoeffsDense->setCol(3, (*_vec));
+    _CoeffsDense->col(3) = (*_vec);
     DEBUG_EXPR(std::cout << "a3: "; _vec->display(););
     // a4 = 15*q_n + 8*h*dotq_n + 1.5*h^2*ddotq_n - 15*q_{n+1} + 7*h*dotq_{n+1} -
     // h^2*ddotq_{n+1}
     (*_vec) = 15.0 * q_n + (8.0 * h) * dotq_n + (1.5 * h * h) * ddotq_n - 15.0 * q_np1 +
               (7.0 * h) * dotq_np1 - h * h * ddotq_np1;
-    _CoeffsDense->setCol(4, (*_vec));
+    _CoeffsDense->col(4) = (*_vec);
     DEBUG_EXPR(std::cout << "a4: "; _vec->display(););
     // a5 = -6*q_n - 3*h*dotq_n - 0.5*h^2*ddotq_n + 6*q_{n+1} - 3*h*dotq_{n+1} +
     // 0.5*h^2*ddotq_{n+1}
     (*_vec) = (-6.0) * q_n - (3.0 * h) * dotq_n - (0.5 * h * h) * ddotq_n + 6.0 * q_np1 -
               (3.0 * h) * dotq_np1 + (0.5 * h * h) * ddotq_np1;
-    _CoeffsDense->setCol(5, (*_vec));
+    _CoeffsDense->col(5) = (*_vec);
     DEBUG_EXPR(std::cout << "a5: "; _vec->display(););
     //
 #ifdef DEBUG_NEWMARK

@@ -27,9 +27,9 @@
 #include "BlockVector.hpp"
 #include "NewtonEulerDS.hpp"
 #include "RotationQuaternion.hpp"  // for rewriteVectorFromBodyToAbsoluteFrame
+#include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"  // for scal
-#include "SiconosMatrix.hpp"
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"
@@ -75,9 +75,7 @@ siconos::joints::PrismaticJointR::PrismaticJointR(
     : PrismaticJointR{} {
   setAbsolute(absoluteRef);
   setAxis(0, axis);
-  if (d1)
-    setBasePositions(d1->q(),
-                     d2 ? d2->q() : nullptr);
+  if (d1) setBasePositions(d1->q(), d2 ? d2->q() : nullptr);
 }
 
 void siconos::joints::PrismaticJointR::displayInitialPosition() {
@@ -107,7 +105,7 @@ void siconos::joints::PrismaticJointR::setBasePositions(
   }
 
   auto q2i = std::make_shared<siconos::algebra::SiconosVector>(7);
-  q2i->zero();
+  q2i->setZero();
   q2i->setValue(3, 1);
 
   if (q2) *q2i = *q2;
@@ -138,35 +136,34 @@ void siconos::joints::PrismaticJointR::setBasePositions(
 }
 
 void siconos::joints::PrismaticJointR::computeV1V2FromAxis() {
-  _V1 = std::make_shared<siconos::algebra::SiconosVector>(3);
-  _V2 = std::make_shared<siconos::algebra::SiconosVector>(3);
-  _V1->zero();
-  _V2->zero();
+  siconos::algebra::SiconosVector3 _V1, _V2;
+  _V1.setZero();
+  _V2.setZero();
   // build _V1
   if (_axis0->getValue(0) > _axis0->getValue(1))
     if (_axis0->getValue(0) > _axis0->getValue(2)) {
-      _V1->setValue(1, -_axis0->getValue(0));
-      _V1->setValue(0, _axis0->getValue(1));
+      _V1(1) = -_axis0->getValue(0);
+      _V1(0) = _axis0->getValue(1);
     } else {
-      _V1->setValue(1, -_axis0->getValue(2));
-      _V1->setValue(2, _axis0->getValue(1));
+      _V1(1) = -_axis0->getValue(2);
+      _V1(2) = _axis0->getValue(1);
     }
   else if (_axis0->getValue(2) > _axis0->getValue(1)) {
-    _V1->setValue(1, -_axis0->getValue(2));
-    _V1->setValue(2, _axis0->getValue(1));
+    _V1(1) = -_axis0->getValue(2);
+    _V1(2) = _axis0->getValue(1);
   } else {
-    _V1->setValue(1, -_axis0->getValue(0));
-    _V1->setValue(0, _axis0->getValue(1));
+    _V1(1) = -_axis0->getValue(0);
+    _V1(0) = _axis0->getValue(1);
   }
-  double aux = 1 / _V1->norm2();
-  siconos::algebra::scal(aux, *_V1, *_V1);
-  siconos::algebra::cross_product(*_axis0, *_V1, *_V2);
-  _V1x = _V1->getValue(0);
-  _V1y = _V1->getValue(1);
-  _V1z = _V1->getValue(2);
-  _V2x = _V2->getValue(0);
-  _V2y = _V2->getValue(1);
-  _V2z = _V2->getValue(2);
+  double aux = 1. / _V1.norm2();
+  _V1 *= aux;
+  _V2 = _axis0->head<3>().cross(_V1);
+  _V1x = _V1(0);
+  _V1y = _V1(1);
+  _V1z = _V1(2);
+  _V2x = _V2(0);
+  _V2y = _V2(1);
+  _V2z = _V2(2);
 }
 
 void siconos::joints::PrismaticJointR::computeJachq(
@@ -176,7 +173,7 @@ void siconos::joints::PrismaticJointR::computeJachq(
       "siconos::joints::PrismaticJointR::computeJachq(double time, Interaction& inter, "
       "std::shared_ptr<siconos::algebra::BlockVector> q0 ) \n");
 
-  _jachq->zero();
+  _jachq->setZero();
   auto q1 = (q0->getAllVect())[0];
   double X1 = q1->getValue(0);
   double Y1 = q1->getValue(1);
@@ -787,5 +784,6 @@ void siconos::joints::PrismaticJointR::_normalDoF(siconos::algebra::SiconosVecto
   // We assume that a is normalized.
   ans = *_axis0;
 
-  if (absoluteRef) siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(*q0.getAllVect()[0], ans);
+  if (absoluteRef)
+    siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(*q0.getAllVect()[0], ans);
 }

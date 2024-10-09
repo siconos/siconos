@@ -156,7 +156,7 @@ siconos::collision::bullet::SiconosBulletCollisionManager::addStaticBody(
   if (!position) {
     // Default at center
     position = std::make_shared<siconos::algebra::SiconosVector>(7);
-    position->zero();
+    position->setZero();
     (*position)(3) = 1.0;  // we give a unit identity quarternion
   }
 

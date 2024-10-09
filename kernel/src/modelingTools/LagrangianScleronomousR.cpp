@@ -23,11 +23,11 @@
 #include "BlockVector.hpp"
 #include "Interaction.hpp"
 #include "PluggedObject.hpp"
-#include "PluggedObject.hpp"          // getPluginFunctionname ...
-#include "PluginTypes.hpp"            // FPtr2 ...
+#include "PluggedObject.hpp"  // getPluginFunctionname ...
+#include "PluginTypes.hpp"    // FPtr2 ...
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
-#include "SiconosMatrix.hpp"
 
 // #define DEBUG_MESSAGES
 // #define DEBUG_STDOUT
@@ -130,7 +130,8 @@ void siconos::modeling::LagrangianScleronomousR::computedotjacqhXqdot(double tim
   computeDotJachq(*DSlink[LagrangianR::q0], *DSlink[LagrangianR::z], *DSlink[LagrangianR::q1]);
   _dotjacqhXqdot = std::make_shared<siconos::algebra::SiconosVector>(_dotjachq->size(0));
   DEBUG_EXPR(_dotjachq->display(););
-  siconos::algebra::prod(*_dotjachq, *DSlink[LagrangianR::q1], *_dotjacqhXqdot);
+  siconos::algebra::matrixBlockVector_prod(*_dotjachq, *DSlink[LagrangianR::q1],
+                                           *_dotjacqhXqdot);
   DEBUG_PRINT("siconos::modeling::LagrangianScleronomousR::computeNonLinearH2dot ends");
 }
 
@@ -150,10 +151,10 @@ void siconos::modeling::LagrangianScleronomousR::computeOutput(double time, Inte
 
     if (derivativeNumber == 1) {
       assert(_jachq);
-      siconos::algebra::prod(*_jachq, *DSlink[LagrangianR::q1], y);
+      siconos::algebra::matrixBlockVector_prod(*_jachq, *DSlink[LagrangianR::q1], y);
     } else if (derivativeNumber == 2) {
       assert(_jachq);
-      siconos::algebra::prod(*_jachq, *DSlink[LagrangianR::q2], y);
+      siconos::algebra::matrixBlockVector_prod(*_jachq, *DSlink[LagrangianR::q2], y);
       if (!_dotjachq) {
         auto sizeY = inter.dimension();
         auto sizeDS = inter.getSizeOfDS();
@@ -161,7 +162,7 @@ void siconos::modeling::LagrangianScleronomousR::computeOutput(double time, Inte
       }
       computeDotJachq(*DSlink[LagrangianR::q0], *DSlink[LagrangianR::z],
                       *DSlink[LagrangianR::q1]);
-      siconos::algebra::prod(*_dotjachq, *DSlink[LagrangianR::q1], y, false);
+      siconos::algebra::matrixBlockVector_prod(*_dotjachq, *DSlink[LagrangianR::q1], y, false);
     } else
       THROW_EXCEPTION(
           "siconos::modeling::LagrangianScleronomousR::computeOutput(double time, "
@@ -184,7 +185,8 @@ void siconos::modeling::LagrangianScleronomousR::computeInput(double time, Inter
   DEBUG_EXPR(lambda.display(););
   DEBUG_EXPR(_jachq->display(););
   // data[name] += trans(G) * lambda
-  siconos::algebra::prod(lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
+  siconos::algebra::transposeMatrixVector_prod_toBlock(
+      lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
   DEBUG_EXPR(DSlink[LagrangianR::p0 + level]->display(););
   DEBUG_END(
       "void siconos::modeling::LagrangianScleronomousR::computeInput(double time, "

@@ -453,7 +453,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
         // centralInteractionBlock contains a lu-factorized matrix and we solve
         // centralInteractionBlock * X = rightInteractionBlock with PLU
         auto centralInteractionBlock = getOSIMatrix(osi, ds);
-        centralInteractionBlock->solve(*rightInteractionBlock);
+        *rightInteractionBlock = centralInteractionBlock->solve(*rightInteractionBlock);
         auto& workMInter = *indexSet->properties(vd).workMatrices;
         static_cast<siconos::integrators::EulerMoreauOSI&>(osi).computeKhat(
             *inter, *rightInteractionBlock, workMInter, h);
@@ -477,8 +477,8 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
         for (const auto itindex : bc->velocityIndices()) {
           // (nslawSize,sizeDS));
           auto coltmp = std::make_shared<siconos::algebra::SiconosVector>(nslawSize);
-          coltmp->zero();
-          leftInteractionBlock->setCol(itindex, *coltmp);
+          coltmp->setZero();
+          leftInteractionBlock->col(itindex) = *coltmp;
         }
       }
 
@@ -509,7 +509,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
         auto work = std::make_shared<siconos::algebra::SiconosMatrix>(*leftInteractionBlock);
         work->transposeInPlace();
         auto centralInteractionBlock = getOSIMatrix(osi, ds);
-        centralInteractionBlock->solve(*work);
+        *work = centralInteractionBlock->solve(*work);
         //*currentInteractionBlock +=  *leftInteractionBlock ** work;
         DEBUG_EXPR(work->display(););
         *currentInteractionBlock += *leftInteractionBlock * *work;
@@ -636,7 +636,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock(
   // ==== First Order Relations - Specific treatment for diagonal
   // _interactionBlocks ===
   assert(inter1 != inter2);
-  //  currentInteractionBlock->zero();
+  //  currentInteractionBlock->setZero();
 
   // loop over the common DS
   auto sizeDS = ds->dimension();
@@ -652,7 +652,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock(
     // centralInteractionBlock contains a lu-factorized matrix and we solve
     // centralInteractionBlock * X = rightInteractionBlock with PLU
     auto centralInteractionBlock = getOSIMatrix(osi, ds);
-    centralInteractionBlock->solve(*rightInteractionBlock);
+    *rightInteractionBlock = centralInteractionBlock->solve(*rightInteractionBlock);
     //      integration of r with theta method removed
     //      *currentInteractionBlock += h *Theta[*itDS]* *leftInteractionBlock *
     //      (*rightInteractionBlock); //left = C, right = W.B
@@ -674,8 +674,8 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock(
         // (nslawSize,sizeDS));
         std::shared_ptr<siconos::algebra::SiconosVector> coltmp =
             std::make_shared<siconos::algebra::SiconosVector>(nslawSize1);
-        coltmp->zero();
-        leftInteractionBlock->setCol(itindex, *coltmp);
+        coltmp->setZero();
+        leftInteractionBlock->col(itindex) = *coltmp;
       }
     }
 
@@ -706,7 +706,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock(
       // size checking inside the getBlock function, a
       // getRight call will fail.
       auto centralInteractionBlock = getOSIMatrix(osi, ds);
-      centralInteractionBlock->solve(*rightInteractionBlock);
+      *rightInteractionBlock = centralInteractionBlock->solve(*rightInteractionBlock);
       //*currentInteractionBlock +=  *leftInteractionBlock ** work;
       *currentInteractionBlock += *leftInteractionBlock * *rightInteractionBlock;
     }
@@ -739,7 +739,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeqBlock(
 
   osi1.computeFreeOutput(vertex_inter, this);
   auto& osnsp_rhs = osi1.osnsp_rhs(vertex_inter, *indexSet);
-  siconos::algebra::setBlock(osnsp_rhs, _q, sizeY, 0, pos);
+  _q->segment(pos, sizeY) = osnsp_rhs;
 
   DEBUG_EXPR(_q->display());
   DEBUG_END(
@@ -751,7 +751,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeqBlock(
 void siconos::nonsmooth_formulations::LinearOSNS::computeq(double time) {
   DEBUG_BEGIN("void siconos::nonsmooth_formulations::LinearOSNS::computeq(double time)\n");
   if (_q->size() != _sizeOutput) _q->resize(_sizeOutput);
-  _q->zero();
+  _q->setZero();
 
   // === Get index set from Simulation ===
   auto indexSet = simulation()->indexSet(indexSetLevel());
@@ -883,12 +883,12 @@ bool siconos::nonsmooth_formulations::LinearOSNS::preCompute(double time) {
 
     if (_z->size() != _sizeOutput) {
       _z->resize(_sizeOutput, Eigen::NoChange);
-      _z->zero();
+      _z->setZero();
     }
 
     if (_w->size() != _sizeOutput) {
       _w->resize(_sizeOutput);
-      _w->zero();
+      _w->setZero();
     }
 
     // Reset _w and _z with previous values of y and lambda
@@ -910,13 +910,13 @@ bool siconos::nonsmooth_formulations::LinearOSNS::preCompute(double time) {
         const auto& lambda_k = inter.lambda_k(inputOutputLevel());
 
         if (_sizeOutput >= yOutput_k.size() + pos) {
-          siconos::algebra::setBlock(yOutput_k, _w, yOutput_k.size(), 0, pos);
-          siconos::algebra::setBlock(lambda_k, _z, lambda_k.size(), 0, pos);
+          _w->segment(pos, yOutput_k.size()) = yOutput_k;
+          _z->segment(pos, lambda_k.size()) = lambda_k;
         }
       }
     } else {
-      _w->zero();
-      _z->zero();
+      _w->setZero();
+      _z->setZero();
     }
   }
   // else
@@ -969,9 +969,9 @@ void siconos::nonsmooth_formulations::LinearOSNS::postCompute() {
     lambda = inter.lambda(inputOutputLevel());
     // Copy _w/_z values, starting from index pos into y/lambda.
 
-    // siconos::algebra::setBlock(*_w, y, y->size(), pos, 0);// Warning: yEquivalent is
+    // Warning: yEquivalent is
     //  saved in y !!
-    siconos::algebra::setBlock(*_z, lambda, lambda->size(), pos, 0);
+    *lambda = _z->segment(pos, lambda->size());
     DEBUG_EXPR(lambda->display(););
   }
   DEBUG_END("void siconos::nonsmooth_formulations::LinearOSNS::postCompute()\n");

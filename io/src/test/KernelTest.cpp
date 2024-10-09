@@ -24,11 +24,6 @@
 #include "MechanicsIO.hpp"
 #endif
 
-#include <boost/numeric/bindings/ublas/matrix.hpp>
-#include <boost/numeric/bindings/ublas/matrix_sparse.hpp>
-#include <boost/numeric/bindings/ublas/vector.hpp>
-#include <boost/numeric/bindings/ublas/vector_sparse.hpp>
-
 #include "KernelTest.hpp"
 #include "SiconosKernel.hpp"
 
@@ -44,7 +39,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION(KernelTest);
 
 void KernelTest::setUp() { BBxml = "BouncingBall1.xml"; }
 
-void KernelTest::tearDown() {};
+void KernelTest::tearDown(){};
 
 void KernelTest::t0() {
   auto q = std::make_shared<siconos::algebra::SiconosVector>(3);
@@ -76,7 +71,7 @@ void KernelTest::t1() {
   auto m1 = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
   auto m2 = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
 
-  m1->eye();
+  m1->setIdentity();
   (*m1)(1, 0) = 3.0;
   (*m1)(2, 1) = -7;
 
@@ -105,7 +100,7 @@ void KernelTest::t2() {
   auto v = std::make_shared<siconos::algebra::SiconosVector>(3);
   auto q = std::make_shared<siconos::algebra::SiconosVector>(3);
 
-  m->eye();
+  m->setIdentity();
 
   auto ds1 = std::make_shared<siconos::modeling::LagrangianDS>(q, v, m);
   auto ds2 = std::make_shared<siconos::modeling::LagrangianDS>(q, v, m);
@@ -329,7 +324,7 @@ void KernelTest::t6() {
     ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
     // Comparison with a reference file
     siconos::algebra::SiconosMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
+    dataPlotRef.setZero();
     ioMatrix::read("result.ref", "ascii", dataPlotRef);
 
     if ((dataPlot - dataPlotRef).normInf() > 1e-12) {

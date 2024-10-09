@@ -311,7 +311,6 @@ class LagrangianDS : public SecondOrderDS {
   static constexpr auto jacobianXBloc11_ = 1;
   static constexpr auto zeroMatrix_ = 2;
   static constexpr auto idMatrix_ = 3;
-  static constexpr auto numberOfRhsMatrices_ = 4;
 
   /** A container of matrices to save matrices that are involed in first order
    * from of LagrangianDS system values (jacobianXBloc10, jacobianXBloc11,
