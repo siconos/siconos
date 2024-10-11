@@ -28,6 +28,7 @@
 #include <optional>
 #include <span>
 
+#include "FunctionTypes.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 
@@ -42,15 +43,18 @@ namespace siconos::internal::devel_model {
 // e.g for wrench(twist, q, t) in NewtonEulerDS : FunctionVQT_V
 // Use:
 //   - const Eigen::Ref<Map> & for [in] params
-//   - Eigen::Ref<Map> for [in,out]
-using FunctionT_V = std::function<void(double, Eigen::Ref<siconos::algebra::MapVectorType>)>;
-using FunctionVQT_V = std::function<void(const Eigen::Ref<siconos::algebra::MapVectorType> &,
-                                         const Eigen::Ref<siconos::algebra::MapVectorType> &,
-                                         double, Eigen::Ref<siconos::algebra::MapVectorType>)>;
+// //   - Eigen::Ref<Map> for [in,out]
+// using siconos::modeling::func_prototypes::FunctionT_V =
+//     std::function<void(double, Eigen::Ref<siconos::algebra::MapVectorType>)>;
+// using FunctionVQT_V = std::function<void(const Eigen::Ref<siconos::algebra::MapVectorType>
+// &,
+//                                          const Eigen::Ref<siconos::algebra::MapVectorType>
+//                                          &, double,
+//                                          Eigen::Ref<siconos::algebra::MapVectorType>)>;
 
-// Extras, test purpose
+// // Extras, test purpose
 using FunctionSpanT_V = std::function<void(double, std::span<double>)>;
-using FunctionVT_M = std::function<void(Eigen::Ref<siconos::algebra::MapVectorType>, double,
+using FunctionVS_M = std::function<void(Eigen::Ref<siconos::algebra::MapVectorType>, double,
                                         Eigen::Ref<siconos::algebra::MapType>)>;
 // using FunctionVT_M =
 //     std::function<void(double, std::span<double>, std::span<double>)>;
@@ -124,7 +128,7 @@ class ClassA {
   std::unique_ptr<std::vector<double>> vector2_internal_storage_{nullptr};
   bool hasConstantVector2_{false};
   bool hasVector2_{false};
-  FunctionT_V computevector2_{nullptr};
+  siconos::modeling::func_prototypes::FunctionS_V computevector2_{nullptr};
 
   // Attribute representing a 'parameter' or operator of the system
   //  - internal use only (can not be/need not to be accessed)
@@ -140,7 +144,7 @@ class ClassA {
   bool hasVector3_{false};
 
   /** A function to compute vector3 */
-  FunctionT_V computeVector3_{nullptr};
+  siconos::modeling::func_prototypes::FunctionS_V computeVector3_{nullptr};
 
   /* The same but with a span in the computeXX function.
 
@@ -185,7 +189,7 @@ class ClassA {
    *
    *  Should we set it to lambda function returning nothing ? To nullptr ?
    */
-  FunctionT_V computevectorNameDirect_{nullptr};
+  siconos::modeling::func_prototypes::FunctionS_V computevectorNameDirect_{nullptr};
 
   /** True if vector2 is required and constant */
   bool hasConstantVectorNameDirect_{false};
@@ -209,7 +213,7 @@ class ClassA {
    *
    *  Should we set it to lambda function returning nothing ? To nullptr ?
    */
-  FunctionVT_M computematrix1_{nullptr};
+  FunctionVS_M computematrix1_{nullptr};
 
   /** true if matrix1 is constant */
   bool hasConstantMatrix1_{false};
@@ -278,7 +282,7 @@ class ClassA {
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeVector2Function(const FunctionT_V &fct);
+  void setComputeVector2Function(const siconos::modeling::func_prototypes::FunctionS_V &fct);
 
   /** Update ...
    *
@@ -292,7 +296,7 @@ class ClassA {
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeVector3Function(const FunctionVQT_V &fct);
+  void setComputeVector3Function(const siconos::modeling::func_prototypes::FunctionVVS_V &fct);
 
   inline std::shared_ptr<siconos::algebra::MapVectorType> vectorNameSpan() const {
     return vectorNameSpan_view_;
@@ -350,7 +354,8 @@ class ClassA {
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeVectorNameDirectFunction(const FunctionT_V &fext_func);
+  void setComputeVectorNameDirectFunction(
+      const siconos::modeling::func_prototypes::FunctionS_V &fext_func);
 
   /** default function to compute ...
    *
@@ -383,7 +388,7 @@ class ClassA {
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeMatrix1Function(const FunctionVT_M &fext_func);
+  void setComputeMatrix1Function(const FunctionVS_M &fext_func);
 
   /** default function to compute ...
    *

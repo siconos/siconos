@@ -18,21 +18,23 @@
 
 #include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
+
+// #include <functional>
+// #include <memory>
+// #include <span>
+
+#include "LagrangianDS.hpp"
+#include "LagrangianLinearTIDS.hpp"
+#include "NewtonEulerDS.hpp"
+
 // #include <pybind11/stl.h>  // Pour permettre la conversion entre std::vector et les objets
 // Python comme les listes
-
-#include <functional>
-#include <memory>
-#include <span>
-
-#include "dynamical_systems_wrapper.h"
 
 namespace py = pybind11;
 
 PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
 
-PYBIND11_MODULE(modeling, m) {
-  // Optional docstring
+void wrap_dynamical_systems(py::module_ &m) {
   m.doc() = "Siconos modeling library";
 
   py::class_<siconos::modeling::DynamicalSystem,
@@ -41,7 +43,7 @@ PYBIND11_MODULE(modeling, m) {
   py::class_<siconos::modeling::SecondOrderDS,
              std::shared_ptr<siconos::modeling::SecondOrderDS>,
              siconos::modeling::DynamicalSystem>(m, "SecondOrderDS")
-      .def("p", &siconos::modeling::SecondOrderDS::p_read,
+      .def("p", &siconos::modeling::SecondOrderDS::p_python,
            py::return_value_policy::reference_internal);
 
   py::class_<siconos::modeling::LagrangianDS, std::shared_ptr<siconos::modeling::LagrangianDS>,
@@ -95,8 +97,63 @@ PYBIND11_MODULE(modeling, m) {
            "compute internal forces")
       .def_property_readonly("fint", &siconos::modeling::LagrangianDS::fint,
                              "internal forces current values")
-      //      .def_property_readonly("mass", &siconos::modeling::SecondOrderDS::mass);
-      .def("mass", &siconos::modeling::LagrangianDS::mass, "mass matrix");
+
+      .def(
+          "setComputeFgyrFunction",
+          [](siconos::modeling::LagrangianDS &self, py::function f) {
+            // Catch Python function and create a complient std::function
+            self.setComputeFgyrFunction(
+                [f](const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
+                    const Eigen::Ref<const siconos::algebra::SiconosVector> &position,
+                    Eigen::Ref<siconos::algebra::MapVectorType> result) {
+                  f(velocity, position,
+                    result);  // Call python func with a memory view ...
+                });
+          },
+
+          "How to compute gyroscopic forces")
+      .def("computeFgyr", &siconos::modeling::LagrangianDS::computeFgyr,
+           "compute gyroscopic forces")
+      .def_property_readonly("fgyr", &siconos::modeling::LagrangianDS::fgyr,
+                             "gyroscopic forces current values")
+
+      .def("computeTotalForces", &siconos::modeling::LagrangianDS::computeTotalForces,
+           "compute total forces")
+      .def_property_readonly("totalForces", &siconos::modeling::LagrangianDS::totalForces,
+                             "internal forces current values")
+      .def("computeJacobianTotalForcesOver_q",
+           &siconos::modeling::LagrangianDS::computeJacobianTotalForcesOver_q,
+           "compute total forces")
+      .def_property_readonly("jacobianTotalForcesOver_q",
+                             &siconos::modeling::LagrangianDS::jacobianTotalForcesOver_q,
+                             "jacobian of the internal forces over q")
+      .def("computeJacobianTotalForcesOver_velocity",
+           &siconos::modeling::LagrangianDS::computeJacobianTotalForcesOver_velocity,
+           "compute total forces")
+      .def_property_readonly(
+          "jacobianTotalForcesOver_velocity",
+          &siconos::modeling::LagrangianDS::jacobianTotalForcesOver_velocity,
+          "jacobian of the internal forces over velocity")
+
+      .def("setConstantMass", &siconos::modeling::LagrangianDS::setConstantMass,
+           py::keep_alive<1, 2>(), "To define a constant mass matrix")
+
+      .def(
+          "setComputeMassFunction",
+          [](siconos::modeling::LagrangianDS &self, py::function f) {
+            // Catch Python function and create a complient std::function
+            self.setComputeMassFunction(
+                [f](const Eigen::Ref<const siconos::algebra::SiconosVector> &q,
+                    Eigen::Ref<siconos::algebra::MapType> result) {
+                  f(q, result);  // Call python func with a memory view ...
+                });
+          },
+          "How to compute mass matrix")
+
+      .def("computeMass", &siconos::modeling::LagrangianDS::computeMass,
+           "compute total forces")
+
+      .def_property_readonly("mass", &siconos::modeling::LagrangianDS::mass, "mass matrix");
 
   py::class_<siconos::modeling::LagrangianLinearTIDS,
              std::shared_ptr<siconos::modeling::LagrangianLinearTIDS>,
@@ -112,46 +169,4 @@ PYBIND11_MODULE(modeling, m) {
   //     (a.display());
   //   return "\n";
   // });
-
-  py::class_<siconos::modeling::NewtonImpactNSL,
-             std::shared_ptr<siconos::modeling::NewtonImpactNSL>>(m, "NewtonImpactNSL")
-      .def(py::init<double>());
-
-  py::class_<siconos::modeling::Relation, std::shared_ptr<siconos::modeling::Relation>>(
-      m, "Relation");
-  //     .def(py::init<siconos::modeling::RelationSubType,
-  //                   siconos::modeling::RelationSubType>());
-
-  py::class_<siconos::modeling::LagrangianLinearTIR,
-             std::shared_ptr<siconos::modeling::LagrangianLinearTIR>,
-             siconos::modeling::Relation>(m, "LagrangianLinearTIR")
-      .def(py::init<Eigen::Ref<siconos::algebra::SiconosMatrix> &>())
-      .def("display", &siconos::modeling::LagrangianLinearTIR::display)
-      .def("__repr__", [](const siconos::modeling::LagrangianLinearTIR &a) {
-        a.display();
-        return "\n";
-      });
-
-  py::class_<siconos::modeling::Interaction, std::shared_ptr<siconos::modeling::Interaction>>(
-      m, "Interaction")
-      .def(py::init<std::shared_ptr<siconos::modeling::NewtonImpactNSL>,
-                    std::shared_ptr<siconos::modeling::Relation>>())
-      .def("lambda_python", &siconos::modeling::Interaction::lambda_python,
-           py::return_value_policy::reference_internal);
-
-  py::class_<siconos::modeling::NonSmoothDynamicalSystem,
-             std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem>>(
-      m, "NonSmoothDynamicalSystem")
-      .def(py::init<double, double>())
-      .def("insertDynamicalSystem",
-           &siconos::modeling::NonSmoothDynamicalSystem::insertDynamicalSystem)
-
-      .def("link", &siconos::modeling::NonSmoothDynamicalSystem::link,
-           "link an interaction to two dynamical systems", py::arg("inter"), py::arg("ds1"),
-           py::arg("ds2") = std::shared_ptr<siconos::modeling::DynamicalSystem>())
-
-      .def("__repr__", [](const siconos::modeling::NonSmoothDynamicalSystem &a) {
-        a.display();
-        return "\n";
-      });
 }

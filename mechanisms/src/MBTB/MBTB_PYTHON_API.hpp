@@ -34,6 +34,7 @@
 #include <string>
 
 #include "BoundaryCondition.hpp"
+#include "FunctionTypes.hpp"
 #include "MBTB_DATA.hpp"  // for JointsType enum
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
@@ -47,7 +48,6 @@ class Simulation;
 }
 
 namespace siconos::mechanisms {
-using FunctionT_V = std::function<void(double, Eigen::Ref<siconos::algebra::MapVectorType>)>;
 
 /**  To initialize the MBTB library (no yet dynamical memory).
 
@@ -109,14 +109,14 @@ void MBTB_BodyBuild(
     std::shared_ptr<siconos::algebra::SiconosVector> initPos,
     std::shared_ptr<siconos::algebra::SiconosVector> modelCenterMass,
     std::shared_ptr<siconos::algebra::SiconosMatrix> inertialMatrix,
-    // const siconos::modeling::newton_euler::FunctionT_V& fext_func,
-    // const siconos::modeling::newton_euler::FunctionT_V& mext_func,
-    // const siconos::modeling::newton_euler::FunctionVQT_V& fint_func,
-    // const siconos::modeling::newton_euler::FunctionVQT_V& mint_func,
-    // const siconos::modeling::newton_euler::FunctionVQT_V& jacobianfint_qfunc,
-    // const siconos::modeling::newton_euler::FunctionVQT_V& jacobianfint_twistfunc,
-    // const siconos::modeling::newton_euler::FunctionVQT_V& jacobianmint_qfunc,
-    // const siconos::modeling::newton_euler::FunctionVQT_V& jacobianmint_twistfunc,
+    // const siconos::modeling::func_prototypes::FunctionS_V& fext_func,
+    // const siconos::modeling::func_prototypes::FunctionS_V& mext_func,
+    // const siconos::modeling::func_prototypes::FunctionVVS_V& fint_func,
+    // const siconos::modeling::func_prototypes::FunctionVVS_V& mint_func,
+    // const siconos::modeling::func_prototypes::FunctionVVS_V& jacobianfint_qfunc,
+    // const siconos::modeling::func_prototypes::FunctionVVS_V& jacobianfint_twistfunc,
+    // const siconos::modeling::func_prototypes::FunctionVVS_V& jacobianmint_qfunc,
+    // const siconos::modeling::func_prototypes::FunctionVVS_V& jacobianmint_twistfunc,
     const std::string& pluginBoundaryConditionLib,
     const std::string& pluginBoundaryConditionFct,
     const siconos::modeling::BoundaryCondition::Indices& boundaryConditionIndex);

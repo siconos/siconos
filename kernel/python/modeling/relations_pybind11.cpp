@@ -16,35 +16,23 @@
  * limitations under the License.
  */
 
-#include <pybind11/numpy.h>
+#include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
 
 #include "LagrangianLinearTIR.hpp"
-#include "SiconosMatrix.hpp"
-#include "SiconosVector.hpp"
-
 namespace py = pybind11;
 
-void init_relations(py::module &m) {
-  // Relation base class
-  py::class_<siconos::modeling::Relation,
-             std::shared_ptr<siconos::modeling::Relation>>(m, "Relation");
+PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
 
-  // LagrangianR
-  py::class_<siconos::modeling::LagrangianR, siconos::modeling::Relation,
-             std::shared_ptr<siconos::modeling::LagrangianR>>(m, "LagrangianR");
+void wrap_relations(py::module_ &m) {
+  py::class_<siconos::modeling::Relation, std::shared_ptr<siconos::modeling::Relation>>(
+      m, "Relation");
 
-  // LagrangianLinearTIR
   py::class_<siconos::modeling::LagrangianLinearTIR,
-             siconos::modeling::LagrangianR,
-             std::shared_ptr<siconos::modeling::LagrangianLinearTIR>>(
-      m, "LagrangianLinearTIR", py::buffer_protocol())
-      // LLTIR(C,e)
-      .def(py::init<std::shared_ptr<siconos::algebra::SiconosMatrix>,
-                    std::shared_ptr<siconos::algebra::SiconosVector>>(),
-           py::arg("C").none(false), py::arg("e").none(false))
-
+             std::shared_ptr<siconos::modeling::LagrangianLinearTIR>,
+             siconos::modeling::Relation>(m, "LagrangianLinearTIR")
+      .def(py::init<Eigen::Ref<siconos::algebra::SiconosMatrix> &>())
+      .def("display", &siconos::modeling::LagrangianLinearTIR::display)
       .def("__repr__", [](const siconos::modeling::LagrangianLinearTIR &a) {
         a.display();
         return "\n";

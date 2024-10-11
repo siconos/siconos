@@ -51,7 +51,7 @@ void siconos::internal::devel_model::ClassA::setConstantVector2(
 }
 
 void siconos::internal::devel_model::ClassA::setComputeVector2Function(
-    const FunctionT_V& new_func) {
+    const siconos::modeling::func_prototypes::FunctionS_V& new_func) {
   // Ensure that memory is properly allocated for vector2_
   if (!vector2_internal_storage_) {
     vector2_internal_storage_ = std::make_unique<std::vector<double>>(ndof_);
@@ -135,7 +135,7 @@ void siconos::internal::devel_model::ClassA::setConstantVectorNameDirect(
 }
 
 void siconos::internal::devel_model::ClassA::setComputeVectorNameDirectFunction(
-    const FunctionT_V& new_func) {
+    const siconos::modeling::func_prototypes::FunctionS_V& new_func) {
   // Ensure that memory is properly allocated for vectorNameDirect_
   if (!vectorNameDirect_internal_storage_) {
     vectorNameDirect_internal_storage_ = std::make_unique<std::vector<double>>(ndof_);
@@ -174,7 +174,7 @@ void siconos::internal::devel_model::ClassA::setConstantMatrix1(
 }
 
 void siconos::internal::devel_model::ClassA::setComputeMatrix1Function(
-    const FunctionVT_M& new_func) {
+    const FunctionVS_M& new_func) {
   // Ensure that memory is properly allocated for matrix1_
   if (!matrix1_internal_storage_) {
     matrix1_internal_storage_ = std::make_unique<std::vector<double>>(ndof_ * ndof_);

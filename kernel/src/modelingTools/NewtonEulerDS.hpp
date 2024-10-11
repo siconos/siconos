@@ -27,44 +27,10 @@
 #include <limits>
 
 #include "DynamicalSystem.hpp"
+#include "FunctionTypes.hpp"
 #include "SecondOrderDS.hpp"
 
 namespace siconos::modeling {
-
-namespace newton_euler {
-/** external forces plugin type vector = f(time) */
-using FunctionT_V = std::function<void(double, Eigen::Ref<siconos::algebra::MapVectorType>)>;
-
-/** fonction proto, vector = f(v,q,t) */
-// using FunctionVQT_V = std::function<void(const Eigen::Ref<const
-// siconos::algebra::ConstMapVectorType> &,
-//                                          const Eigen::Ref<const
-//                                          siconos::algebra::ConstMapVectorType> &, double,
-//                                          Eigen::Ref<siconos::algebra::MapVectorType>)>;
-
-using FunctionVQT_V =
-    std::function<void(const Eigen::Ref<const siconos::algebra::SiconosVector> &,
-                       const Eigen::Ref<const siconos::algebra::SiconosVector> &, double,
-                       Eigen::Ref<siconos::algebra::MapVectorType>)>;
-
-/** fonction proto, vector = f(twist) */
-using FunctionV_V =
-    std::function<void(const Eigen::Ref<const siconos::algebra::SiconosVector> &,
-                       Eigen::Ref<siconos::algebra::MapVectorType>)>;
-
-/** fonction proto, matrix = f(twist,q,t) */
-using FunctionVQT_M =
-    std::function<void(const Eigen::Ref<const siconos::algebra::SiconosVector> &,
-                       const Eigen::Ref<const siconos::algebra::SiconosVector> &, double,
-                       Eigen::Ref<siconos::algebra::MapType>)>;
-
-/** fonction proto, vector = f(mat, twist), e.g. for mgyr */
-using FunctionPV_V =
-    std::function<void(const Eigen::Ref<const siconos::algebra::SiconosMatrix> &,
-                       const Eigen::Ref<const siconos::algebra::SiconosVector> &,
-                       Eigen::Ref<siconos::algebra::MapType>)>;
-
-}  // namespace newton_euler
 
 /**
     NewtonEuler non linear dynamical systems
@@ -163,7 +129,7 @@ class NewtonEulerDS : public SecondOrderDS {
 
       \f$ \dot q = T(q) v \∏
    */
-  std::unique_ptr<siconos::algebra::SiconosMatrix> totalInertiaMatrix_{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> totalInertiaMatrix_{nullptr};
 
   /** \f[ T(q) = \left[\begin{array}{cc} I_{3x3}  & 0 \\
                0 &  \phi(p) \end{array}\right] \f]
@@ -192,8 +158,14 @@ class NewtonEulerDS : public SecondOrderDS {
   std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianWrenchOver_q_{nullptr};
   bool hasJacobianWrenchOver_q_{false};
 
+  /** external forces applied to the system
+   This map is used only when fext is set as a constant external provided memory.
+   In any other cases 'fext' is appended to wrench_.
+   */
+  std::shared_ptr<siconos::algebra::MapVectorType> fext_view_{nullptr};
+
   /** function wrapper used to compute external forces \f$f_{ext}(t)\f$ */
-  newton_euler::FunctionT_V computefext_{nullptr};
+  func_prototypes::FunctionS_V computefext_{nullptr};
 
   /** True if external forces are taken into account and constant */
   bool hasConstantFext_{false};
@@ -201,23 +173,20 @@ class NewtonEulerDS : public SecondOrderDS {
   /** True if external forces are taken into account */
   bool hasFext_{false};
 
-  /** external forces storage. Used only if hasConstantFext_ is true */
-  std::unique_ptr<siconos::algebra::SiconosVector> fext_{nullptr};
-
   /** function wrapper used to compute internal forces \f$f_{int}(twist, q, t)\f$ */
-  newton_euler::FunctionVQT_V computefint_{nullptr};
+  func_prototypes::FunctionVVS_V computefint_{nullptr};
 
   /** True if internal forces are  taken into account */
   bool hasFint_{false};
 
   /** function wrapper used to compute \f$\nabla_{twist}(f_{int}) */
-  newton_euler::FunctionVQT_M computejacobianFintOver_twist_{nullptr};
+  func_prototypes::FunctionVVS_M computejacobianFintOver_twist_{nullptr};
 
   /** True if jacobian of fint over twist is required */
   bool hasJacobianFintOver_twist_{false};
 
   /** function wrapper used to compute \f$\nabla_q(f_{int}) */
-  newton_euler::FunctionVQT_M computejacobianFintOver_q_{nullptr};
+  func_prototypes::FunctionVVS_M computejacobianFintOver_q_{nullptr};
 
   /** True if jacobian of fint over q is required */
   bool hasJacobianFintOver_q_{false};
@@ -228,8 +197,14 @@ class NewtonEulerDS : public SecondOrderDS {
   /** True to compute \f$\nabla_{twist}(f_{int}) with forward finite differences */
   bool computeJacobianFintOver_twist_byFD_{true};
 
+  /** external forces applied to the system
+   This map is used only when mext is set as a constant external provided memory.
+   In any other cases 'mext' is appended to wrench_.
+   */
+  std::shared_ptr<siconos::algebra::MapVectorType> mext_view_{nullptr};
+
   /** function wrapper used to compute external moment \f$m_{ext}(t)\f$ */
-  newton_euler::FunctionT_V computemext_{nullptr};
+  func_prototypes::FunctionS_V computemext_{nullptr};
 
   /** True if internal forces are taken into account and constant */
   bool hasConstantMext_{false};
@@ -249,16 +224,16 @@ class NewtonEulerDS : public SecondOrderDS {
   // Note FP: no used-defined functions for mgyr
 
   /** function wrapper used to compute internal torques \f$m_{int}(twist, q, t)\f$ */
-  newton_euler::FunctionVQT_V computemint_{nullptr};
+  func_prototypes::FunctionVVS_V computemint_{nullptr};
 
   /** True if internal torques are  taken into account */
   bool hasMint_{false};
 
   /** function wrapper used to compute \f$\nabla_{twist}(m_{int}) */
-  newton_euler::FunctionVQT_M computejacobianMintOver_twist_{nullptr};
+  func_prototypes::FunctionVVS_M computejacobianMintOver_twist_{nullptr};
 
   /** function wrapper used to compute \f$\nabla_q(m_{int}) */
-  newton_euler::FunctionVQT_M computejacobianMintOver_q_{nullptr};
+  func_prototypes::FunctionVVS_M computejacobianMintOver_q_{nullptr};
 
   /** True to compute \f$\nabla_q(m_{int}) with forward finite differences */
   bool computeJacobianMintOver_q_byFD_{true};
@@ -440,11 +415,6 @@ class NewtonEulerDS : public SecondOrderDS {
                                      totalInertiaMatrix_->cols());
   }
 
-  /** \return the inertia matrix */
-  Eigen::Ref<siconos::algebra::MapType> inertia_view() const {
-    return totalInertiaMatrix_->block<3, 3>(3, 3);
-  };
-
   /** Modify the inertia matrix.
 
     \param ix x component
@@ -533,7 +503,7 @@ class NewtonEulerDS : public SecondOrderDS {
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeFextFunction(const newton_euler::FunctionT_V &fct);
+  void setComputeFextFunction(const func_prototypes::FunctionS_V &fct);
 
   /** set a constant external moment vector
    *
@@ -548,43 +518,43 @@ class NewtonEulerDS : public SecondOrderDS {
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeMextFunction(const newton_euler::FunctionT_V &fct);
+  void setComputeMextFunction(const func_prototypes::FunctionS_V &fct);
 
   /** set a user-defined function to compute \f$ f_{int}(twist, q, t) \f$
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeFintFunction(const newton_euler::FunctionVQT_V &fct);
+  void setComputeFintFunction(const func_prototypes::FunctionVVS_V &fct);
 
   /** set a user-defined function to compute \f$ \nabla_q f_{int}(twist, q, t) \f$
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeJacobianFintOver_qFunction(const newton_euler::FunctionVQT_M &fct);
+  void setComputeJacobianFintOver_qFunction(const func_prototypes::FunctionVVS_M &fct);
 
   /** set a user-defined function to compute \f$ \nabla_{twist} f_{int}(twist, q, t) \f$
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeJacobianFintOver_twistFunction(const newton_euler::FunctionVQT_M &fct);
+  void setComputeJacobianFintOver_twistFunction(const func_prototypes::FunctionVVS_M &fct);
 
   /** set a user-defined function to compute \f$ m_{int}(twist, q, t) \f$
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeMintFunction(const newton_euler::FunctionVQT_V &fct);
+  void setComputeMintFunction(const func_prototypes::FunctionVVS_V &fct);
 
   /** set a user-defined function to compute \f$ \nabla_q m_{int}(twist, q, t) \f$
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeJacobianMintOver_qFunction(const newton_euler::FunctionVQT_M &fct);
+  void setComputeJacobianMintOver_qFunction(const func_prototypes::FunctionVVS_M &fct);
 
   /** set a user-defined function to compute \f$ \nabla_{twist} m_{int}(twist, q, t) \f$
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeJacobianMintOver_twistFunction(const newton_euler::FunctionVQT_M &fct);
+  void setComputeJacobianMintOver_twistFunction(const func_prototypes::FunctionVVS_M &fct);
 
   /** if true, use finite-differences to compute \f$ \nabla_q f_{int}(twist, q, t) \f$  */
   void setComputeJacobianFintOver_q_byFD(bool value);
@@ -698,7 +668,7 @@ void computeT(const Eigen::Ref<const siconos::algebra::SiconosVector> &q,
  *  \param[in] pos
  *  \param[in] posAbsRef If true, pos is in inertial frame, otherwise it is in body frame.
  *  \param[in,out] result resulting momemt
- *  \param[in] accumulate if true, fext += result, else fext is reinitialized
+ *  \param[in] accumulate if true, mext += result, else mext is reinitialized
  */
 void computeMextForceAtPos(const Eigen::Ref<siconos::algebra::SiconosVector> &q,
                            bool isMextExpressedInInertialFrame,
@@ -746,7 +716,7 @@ void computeJacobianMGyrOver_twist(
 void computeJacobianMGyrOver_twist_byFD(
     const Eigen::Ref<const siconos::algebra::SiconosVector> &twist, double epsilonFD,
     const Eigen::Ref<const siconos::algebra::SiconosMatrix> &inertia,
-    const siconos::modeling::newton_euler::FunctionPV_V &computeMgyr,
+    const siconos::modeling::func_prototypes::FunctionMV_V &computeMgyr,
     Eigen::Ref<siconos::algebra::SiconosMatrix> result);
 
 /** Compute \f$ \nabla_{twist} f(twist, q, time) \f$ by forward finite difference
@@ -761,7 +731,7 @@ void computeJacobianMGyrOver_twist_byFD(
 void computeJacobianFOver_twist_byFD(
     const Eigen::Ref<const siconos::algebra::SiconosVector> &twist,
     const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time, double epsilonFD,
-    const siconos::modeling::newton_euler::FunctionVQT_V &computeMint,
+    const siconos::modeling::func_prototypes::FunctionVVS_V &computeMint,
     Eigen::Ref<siconos::algebra::SiconosMatrix> result);
 
 /** Compute \f$ \nabla_{q} f(twist, q, time) \f$ by forward finite difference
@@ -776,7 +746,7 @@ void computeJacobianFOver_twist_byFD(
 void computeJacobianFOver_q_byFD(
     const Eigen::Ref<const siconos::algebra::SiconosVector> &twist,
     const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time, double epsilonFD,
-    const siconos::modeling::newton_euler::FunctionVQT_V &computeMint,
+    const siconos::modeling::func_prototypes::FunctionVVS_V &computeMint,
     Eigen::Ref<siconos::algebra::SiconosMatrix> result);
 
 /** Compute \f$\nabla_q(m_{ext})\f$, required when mext is expressed in the inertial frame.
@@ -788,7 +758,7 @@ void computeJacobianFOver_q_byFD(
  */
 void computeJacobianMExtqExpressedInInertialFrame(
     const Eigen::Ref<siconos::algebra::SiconosVector> &q, double time,
-    const siconos::modeling::newton_euler::FunctionT_V &computeMext,
+    const siconos::modeling::func_prototypes::FunctionS_V &computeMext,
     bool isMextExpressedInInertialFrame, Eigen::Ref<siconos::algebra::SiconosMatrix> result);
 
 /** Compute \f$\nabla_q(m_{ext})\f$, required when mext is expressed in the inertial frame.
@@ -802,8 +772,8 @@ void computeJacobianMExtqExpressedInInertialFrame(
  */
 void computeJacobianMExtqExpressedInInertialFrameByFD(
     const Eigen::Ref<siconos::algebra::SiconosVector> &q, double time,
-    const FunctionT_V &computeMext, bool isMextExpressedInInertialFrame, double epsilonFD,
-    Eigen::Ref<siconos::algebra::SiconosMatrix> result);
+    const func_prototypes::FunctionS_V &computeMext, bool isMextExpressedInInertialFrame,
+    double epsilonFD, Eigen::Ref<siconos::algebra::SiconosMatrix> result);
 
 /** function to compute gyroscopic forces
  *

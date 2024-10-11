@@ -23,51 +23,11 @@
 #ifndef LAGRANGIANDS_H
 #define LAGRANGIANDS_H
 
-#include <span>
-
 #include "DynamicalSystem.hpp"
-#include "PluginTypes.hpp"  // for siconos::plugins::FPtr6, ...
+#include "FunctionTypes.hpp"
 #include "SecondOrderDS.hpp"
+
 namespace siconos::modeling {
-
-////////// Free functions //////////
-
-namespace lagrangian {
-/** Mass operator plugin type, matrix = f(q) */
-using FunctionQ_V =
-    std::function<void(const Eigen::Ref<const siconos::algebra::SiconosVector> &,
-                       Eigen::Ref<siconos::algebra::MapType>)>;
-
-/** external forces plugin type */
-using FunctionT_V = std::function<void(double, Eigen::Ref<siconos::algebra::MapVectorType>)>;
-
-/** fonction proto, matrix = f(v,q,t)*/
-using FunctionVQT_M = std::function<void(const Eigen::Ref<siconos::algebra::MapVectorType> &,
-                                         const Eigen::Ref<siconos::algebra::MapVectorType> &,
-                                         double, Eigen::Ref<siconos::algebra::MapType>)>;
-
-/** fonction proto, matrix = f(v,q) */
-using FunctionVQ_M = std::function<void(const Eigen::Ref<siconos::algebra::MapVectorType> &,
-                                        const Eigen::Ref<siconos::algebra::MapVectorType> &,
-                                        Eigen::Ref<siconos::algebra::MapType>)>;
-
-/** fonction proto, vector = f(v,q,t) */
-// using FunctionVQT_V =
-//     std::function<void(const Eigen::Ref<siconos::algebra::ConstMapVectorType> &,
-//                        const Eigen::Ref<siconos::algebra::ConstMapVectorType> &, double,
-//                        Eigen::Ref<siconos::algebra::MapVectorType>)>;
-using FunctionVQT_V =
-    std::function<void(const Eigen::Ref<const siconos::algebra::SiconosVector> &,
-                       const Eigen::Ref<const siconos::algebra::SiconosVector> &, double,
-                       Eigen::Ref<siconos::algebra::MapVectorType>)>;
-
-/** fonction proto, vector = f(v,q,t) */
-using FunctionVQ_V =
-    std::function<void(const Eigen::Ref<const siconos::algebra::SiconosVector> &,
-                       const Eigen::Ref<const siconos::algebra::SiconosVector> &,
-                       Eigen::Ref<siconos::algebra::MapVectorType>)>;
-
-}  // namespace lagrangian
 
 /**
    Lagrangian non linear dynamical systems -  \f$ M(q) \dot v = F_{total}(v, q, t) + p \f$
@@ -188,7 +148,7 @@ class LagrangianDS : public SecondOrderDS {
   std::unique_ptr<std::vector<double>> mass_internal_storage_{nullptr};
 
   /** function wrapper used to compute mass */
-  siconos::modeling::lagrangian::FunctionQ_V computemass_{nullptr};
+  siconos::modeling::func_prototypes::FunctionV_V computemass_{nullptr};
 
   /** true if mass is required/set and constant */
   bool hasConstantMass_{false};
@@ -200,7 +160,7 @@ class LagrangianDS : public SecondOrderDS {
   std::shared_ptr<siconos::algebra::SiconosVector> fint_{nullptr};
 
   /** function wrapper used to compute internal forces */
-  siconos::modeling::lagrangian::FunctionVQT_V computefint_{nullptr};
+  siconos::modeling::func_prototypes::FunctionVVS_V computefint_{nullptr};
 
   /** True if internal forces are  taken into account */
   bool hasFint_{false};
@@ -212,7 +172,7 @@ class LagrangianDS : public SecondOrderDS {
   std::unique_ptr<std::vector<double>> jacobianFintOver_q_internal_storage_{nullptr};
 
   /** function wrapper used to compute jacobianFintOver_q */
-  siconos::modeling::lagrangian::FunctionVQT_M computejacobianFintOver_q_{nullptr};
+  siconos::modeling::func_prototypes::FunctionVVS_M computejacobianFintOver_q_{nullptr};
 
   /** true if jacobianFintOver_q is required/set and constant */
   bool hasConstantJacobianFintOver_q_{false};
@@ -227,7 +187,7 @@ class LagrangianDS : public SecondOrderDS {
   std::unique_ptr<std::vector<double>> jacobianFintOver_velocity_internal_storage_{nullptr};
 
   /** function wrapper used to compute jacobianFintOver_velocity */
-  siconos::modeling::lagrangian::FunctionVQT_M computejacobianFintOver_velocity_{nullptr};
+  siconos::modeling::func_prototypes::FunctionVVS_M computejacobianFintOver_velocity_{nullptr};
 
   /** true if jacobianFintOver_velocity is required/set and constant */
   bool hasConstantJacobianFintOver_velocity_{false};
@@ -242,7 +202,7 @@ class LagrangianDS : public SecondOrderDS {
   std::unique_ptr<std::vector<double>> fext_internal_storage_{nullptr};
 
   /** function wrapper used to compute external forces */
-  siconos::modeling::lagrangian::FunctionT_V computefext_{nullptr};
+  siconos::modeling::func_prototypes::FunctionS_V computefext_{nullptr};
 
   /** True if external forces are taken into account and constant */
   bool hasConstantFext_{false};
@@ -254,7 +214,7 @@ class LagrangianDS : public SecondOrderDS {
   std::shared_ptr<siconos::algebra::SiconosVector> fgyr_{nullptr};
 
   /** function wrapper used to compute non-linear inertia term */
-  siconos::modeling::lagrangian::FunctionVQ_V computefgyr_{nullptr};
+  siconos::modeling::func_prototypes::FunctionVV_V computefgyr_{nullptr};
 
   /** True if non-linear inertia terms are  taken into account */
   bool hasFgyr_{false};
@@ -266,7 +226,7 @@ class LagrangianDS : public SecondOrderDS {
   std::unique_ptr<std::vector<double>> jacobianFgyrOver_q_internal_storage_{nullptr};
 
   /** function wrapper used to compute jacobianFgyrOver_q */
-  siconos::modeling::lagrangian::FunctionVQ_M computejacobianFgyrOver_q_{nullptr};
+  siconos::modeling::func_prototypes::FunctionVV_M computejacobianFgyrOver_q_{nullptr};
 
   /** true if jacobianFgyrOver_q is required/set and constant */
   bool hasConstantJacobianFgyrOver_q_{false};
@@ -281,7 +241,7 @@ class LagrangianDS : public SecondOrderDS {
   std::unique_ptr<std::vector<double>> jacobianFgyrOver_velocity_internal_storage_{nullptr};
 
   /** function wrapper used to compute jacobianFgyrOver_velocity */
-  siconos::modeling::lagrangian::FunctionVQ_M computejacobianFgyrOver_velocity_{nullptr};
+  siconos::modeling::func_prototypes::FunctionVV_M computejacobianFgyrOver_velocity_{nullptr};
 
   /** true if jacobianFgyrOver_velocity is required/set and constant */
   bool hasConstantJacobianFgyrOver_velocity_{false};
@@ -474,7 +434,8 @@ class LagrangianDS : public SecondOrderDS {
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeMassFunction(const siconos::modeling::lagrangian::FunctionQ_V &fext_func);
+  void setComputeMassFunction(
+      const siconos::modeling::func_prototypes::FunctionV_V &fext_func);
 
   /** to compute the mass matrix operator \f$ M(q) \f$
    *
@@ -494,16 +455,18 @@ class LagrangianDS : public SecondOrderDS {
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeFintFunction(const siconos::modeling::lagrangian::FunctionVQT_V &fct);
+  void setComputeFintFunction(const siconos::modeling::func_prototypes::FunctionVVS_V &fct);
 
   /** Update \f$ F_{int}(\dot q, q, t) \f$
    *  \param velocity \f$ \dot q \f$ vector
    *  \param position q vector
    *  \param time the current time
    */
-  void computeFint(const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
-                   const Eigen::Ref<const siconos::algebra::SiconosVector> &position,
-                   double time);
+  // void computeFint(const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
+  //                  const Eigen::Ref<const siconos::algebra::SiconosVector> &position,
+  //                  double time);
+  void computeFint(const siconos::algebra::SiconosVector &velocity,
+                   const siconos::algebra::SiconosVector &position, double time);
 
   /** \return a read-only view on \f$ \nabla_qF_{int} \f$ matrix */
   inline const auto jacobianFintOver_q_view() const {
@@ -527,7 +490,7 @@ class LagrangianDS : public SecondOrderDS {
    *  \param fct the user-defined function (std::function, lambda ...)
    */
   void setComputeJacobianFintOver_qFunction(
-      const siconos::modeling::lagrangian::FunctionVQT_M &fct);
+      const siconos::modeling::func_prototypes::FunctionVVS_M &fct);
 
   /** to compute  \f$ \nabla_qF_{int}(\dot q, q, t) \f$
    *  \param velocity \f$ \dot q \f$ vector
@@ -561,7 +524,7 @@ class LagrangianDS : public SecondOrderDS {
    *  \param fct the user-defined function (std::function, lambda ...)
    */
   void setComputeJacobianFintOver_velocityFunction(
-      const siconos::modeling::lagrangian::FunctionVQT_M &fct);
+      const siconos::modeling::func_prototypes::FunctionVVS_M &fct);
 
   /** to compute \f$ \nabla_{\dot q}F_{int} \f$
    *
@@ -591,7 +554,7 @@ class LagrangianDS : public SecondOrderDS {
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeFgyrFunction(const siconos::modeling::lagrangian::FunctionVQ_V &fct);
+  void setComputeFgyrFunction(const siconos::modeling::func_prototypes::FunctionVV_V &fct);
 
   /** Update \f$ F_{gyr}(\dot q, q) \f$
    *  \param velocity \f$ \dot q \f$ vector
@@ -622,7 +585,7 @@ class LagrangianDS : public SecondOrderDS {
    *  \param fct the user-defined function (std::function, lambda ...)
    */
   void setComputeJacobianFgyrOver_qFunction(
-      const siconos::modeling::lagrangian::FunctionVQ_M &fct);
+      const siconos::modeling::func_prototypes::FunctionVV_M &fct);
 
   /** to compute  \f$ \nabla_qF_{gyr}(\dot q, q, t) \f$
    *  \param velocity \f$ \dot q \f$ vector
@@ -654,7 +617,7 @@ class LagrangianDS : public SecondOrderDS {
    *  \param fct the user-defined function (std::function, lambda ...)
    */
   void setComputeJacobianFgyrOver_velocityFunction(
-      const siconos::modeling::lagrangian::FunctionVQ_M &fct);
+      const siconos::modeling::func_prototypes::FunctionVV_M &fct);
 
   /** to compute \f$ \nabla_{\dot q}F_{gyr} \f$
    *
@@ -683,7 +646,7 @@ class LagrangianDS : public SecondOrderDS {
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeFextFunction(const siconos::modeling::lagrangian::FunctionT_V &fct);
+  void setComputeFextFunction(const siconos::modeling::func_prototypes::FunctionS_V &fct);
 
   /** Update external forces values
    *

@@ -15,46 +15,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __LagrangianDSTest__
-#define __LagrangianDSTest__
+#ifndef __QuaternionTest__
+#define __QuaternionTest__
 
 #include <cppunit/extensions/HelperMacros.h>
 
-#include "LagrangianDS.hpp"
+#include "RotationQuaternion.hpp"
 #include "SiconosException.hpp"
 
-// namespace siconos::algebra {
-// class SiconosVector;
-// class SiconosMatrix;
-// }  // namespace siconos::algebra
-
-class LagrangianDSTest : public CppUnit::TestFixture {
+class QuaternionTest : public CppUnit::TestFixture {
  private:
-  ACCEPT_SERIALIZATION(LagrangianDSTest);
+  ACCEPT_SERIALIZATION(QuaternionTest);
 
   // Name of the tests suite
-  CPPUNIT_TEST_SUITE(LagrangianDSTest);
+  CPPUNIT_TEST_SUITE(QuaternionTest);
 
   // tests to be done ...
-
-  CPPUNIT_TEST(testBuildLagrangianDS1);
-  CPPUNIT_TEST(testBuildLagrangianDS2);
-  CPPUNIT_TEST(testBuildLagrangianDS3);
+  CPPUNIT_TEST(testQuaternion);
+  CPPUNIT_TEST(testQuaternionMatrix);
   CPPUNIT_TEST_SUITE_END();
 
-  // \todo exception test
-
-  void testBuildLagrangianDS1();
-  void testBuildLagrangianDS2();
-  void testBuildLagrangianDS3();
-  // void testcomputeDS();
+  void testQuaternion();
+  void testQuaternionMatrix();
 
   // Members
-
-  siconos::algebra::SiconosVector3 q0, velocity0;
-
-  siconos::algebra::SiconosMatrix mass{3, 3};
-
  public:
   void setUp();
   void tearDown();
