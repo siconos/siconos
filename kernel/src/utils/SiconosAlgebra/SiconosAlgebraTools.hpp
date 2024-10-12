@@ -63,7 +63,7 @@ template <typename M, typename T = typename M::value_type>
 void randomize(M &m, T min = 0., T max = 100.) {
   // using value_type = typename M::value_type;
   for (auto it = m.begin1(); it != m.end1(); ++it)
-    generate(it.begin(), it.end(), RndIntGen<T>(min, max));
+    std::generate(it.begin(), it.end(), RndIntGen<T>(min, max));
 }
 
 }  // namespace internal
