@@ -109,7 +109,7 @@ void siconos::integrators::NewMarkAlphaOSI::initializeIterationMatrix(
 void siconos::integrators::NewMarkAlphaOSI::computeIterationMatrix(
     std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
     siconos::algebra::SiconosMatrix& iterationMatrix,
-    std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>> luw) {
+    std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>& luw) {
   // We assume that the iteration matrix is properly allocated (call to
   // initializeIterationMatrix)
 

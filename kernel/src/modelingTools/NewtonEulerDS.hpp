@@ -152,11 +152,9 @@ class NewtonEulerDS : public SecondOrderDS {
 
   /** \nabla_{twist} wrench(twist, q, t) */
   std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianWrenchOver_twist_{nullptr};
-  bool hasJacobianWrenchOver_twist_{false};
 
   /** \nabla_{q} wrench(twist, q, t) */
   std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianWrenchOver_q_{nullptr};
-  bool hasJacobianWrenchOver_q_{false};
 
   /** external forces applied to the system
    This map is used only when fext is set as a constant external provided memory.
@@ -571,10 +569,10 @@ class NewtonEulerDS : public SecondOrderDS {
   void setComputeJacobianMintOver_twist_byFD(bool value);
 
   /** True if \nabla_{twist}wrench(v,q,t) is defined */
-  bool hasJacobianWrenchOver_twist() const { return hasJacobianWrenchOver_twist_; }
+  bool hasJacobianWrenchOver_twist() const { return jacobianWrenchOver_twist_ != nullptr; }
 
   /** True if \nabla_{q}wrench(v,q,t) is defined */
-  bool hasJacobianWrenchOver_q() const { return hasJacobianWrenchOver_q_; }
+  bool hasJacobianWrenchOver_q() const { return jacobianWrenchOver_q_ != nullptr; }
 
   /**
       compute wrench(twist, q, t) =

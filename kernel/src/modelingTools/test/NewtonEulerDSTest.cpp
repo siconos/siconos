@@ -137,6 +137,11 @@ void NewtonEulerDSTest::testBuildNewtonEulerDS1() {
          const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time,
          Eigen::Ref<siconos::algebra::MapType> result) {});
 
+
+  neds.computeWrench(twist, q, time);
+  neds.computeJacobianWrenchOver_twist(twist, q, time);
+  neds.computeJacobianWrenchOver_q(twist, q, time);
+
   std::cout << "--> Constructor test ended with success." << std::endl;
 }
 // constructor from data

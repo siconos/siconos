@@ -174,7 +174,7 @@ class NewMarkAlphaOSI : public OneStepIntegrator {
   void computeIterationMatrix(
       std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
       siconos::algebra::SiconosMatrix &W,
-      std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>> luw);
+      std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>> &luw);
 
   /** compute the residual of dynamical equation
    *\return double: maximum residu over all DSs

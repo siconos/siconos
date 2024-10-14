@@ -167,7 +167,6 @@ void siconos::simulation::Simulation::initializeOSIAssociations() {
   }
 
   // 2 - we set the osi of DS that has been defined through associate(ds,osi)
-  std::list<std::shared_ptr<siconos::modeling::DynamicalSystem>>::iterator itlist;
   for (auto& osi_it : _OSIDSmap) {
     DEBUG_PRINT(
         "- 2 - we set the osi of DS that has been defined through "

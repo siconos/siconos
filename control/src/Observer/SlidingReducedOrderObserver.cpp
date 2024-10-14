@@ -135,19 +135,18 @@ void siconos::control::SlidingReducedOrderObserver::process() {
     _pass = true;
     // update the estimate using the first value of y, such that C\hat{x}_0 = y_0
     const auto& y = _sensor->y();
-    _e->setZero();
-    siconos::algebra::prod(*_C, *_xHat, *_e);
+    *_e = *_C * *_xHat;
     *_e -= y;
 
-    siconos::algebra::SiconosVector tmpV{_DS->n()};
+    siconos::algebra::SiconosVector tmpV{_e->size()};
     siconos::algebra::SiconosMatrix tmpC{*_C};
     for (decltype(_e->size()) i = 0; i < _e->size(); ++i) tmpV(i) = (*_e)(i);
 
     Eigen::BDCSVD<siconos::algebra::SiconosMatrix> svd(
         tmpC, Eigen::ComputeThinU | Eigen::ComputeThinV);
-    tmpV = svd.solve(tmpV);
-    *(_xHat) -= tmpV;
-    *(_DS->x()) -= tmpV;
+    auto result = svd.solve(tmpV);
+    *(_xHat) -= result;
+    *(_DS->x()) -= result;
     _DS->initMemory(1);
     _DS->swapInMemory();
     DEBUG_EXPR(_DS->display(););

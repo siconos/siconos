@@ -405,16 +405,16 @@ void siconos::modeling::NewtonEulerDS::computeWrench(
       computemext_(time, buffer);
       if (isMextExpressedInInertialFrame_) {
         siconos::geometry::rewriteVectorFromAbsoluteToBodyFrame(q, buffer);
-
         wrench_->tail(3) += buffer;
-      } else  // if (hasConstantMext_)
-        wrench_->tail(3) += *mext_view_;
+      }
+    } else  // if (hasConstantMext_)
+      wrench_->tail(3) += *mext_view_;
 
-      // wrench[3:6] += mext
-    }
+    // wrench[3:6] += mext
   }
+
   if (hasMgyr_) {
-    siconos::modeling::newton_euler::computeMgyr(twist, totalInertiaMatrix(), buffer);
+    siconos::modeling::newton_euler::computeMgyr(twist, *totalInertiaMatrix_, buffer);
     wrench_->tail(3) -= buffer;
   }
   if (hasMint_) {
@@ -436,7 +436,7 @@ void siconos::modeling::NewtonEulerDS::computeJacobianWrenchOver_q(
   jacobianWrenchOver_q_->setZero();
 
   siconos::algebra::SiconosMatrix matrix_buffer{
-      3, 6};  // TMP. TODO: external setup for this memory
+      3, 7};  // TMP. TODO: external setup for this memory
   matrix_buffer.setZero();
 
   // Jacobian fint ?
@@ -510,7 +510,7 @@ void siconos::modeling::NewtonEulerDS::computeJacobianWrenchOver_twist(
 
   if (hasMgyr_) {
     // siconos::modeling::newton_euler::computeJacobianMGyrOver_twist_byFD(...);
-    siconos::modeling::newton_euler::computeJacobianMGyrOver_twist(twist, *totalInertiaMatrix_,
+    siconos::modeling::newton_euler::computeJacobianMGyrOver_twist(twist, totalInertiaMatrix(),
                                                                    matrix_buffer);
     jacobianWrenchOver_twist_->bottomRows(3) -= matrix_buffer;
   }
@@ -768,7 +768,7 @@ void siconos::modeling::newton_euler::computeJacobianMGyrOver_twist(
   for (int i = 0; i < 3; i++) {
     ei.setZero();
     ei(i) = 1.0;
-    iei = inertia * ei;
+    iei = inertia.block<3, 3>(3, 3) * ei;
     result.col(i + 3) = ei.cross(omega) + omega.cross(iei);
   }
   // Check if Jacobian is valid. Warning to the transpose operation in

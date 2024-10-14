@@ -525,7 +525,7 @@ namespace moreau_jean {
 void computeIterationMatrix_Lagrangian(
     double time, double h, double theta, siconos::modeling::LagrangianDS &ds,
     Eigen::Ref<siconos::algebra::SiconosMatrix> W,
-    std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>> LUW);
+    std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>& LUW);
 
 /** compute Moreau-Jean W iteration matrix for Newton-Euler systems
  *
@@ -539,7 +539,7 @@ void computeIterationMatrix_Lagrangian(
 void computeIterationMatrix_NewtonEuler(
     double time, double h, double theta, siconos::modeling::NewtonEulerDS &ds,
     Eigen::Ref<siconos::algebra::SiconosMatrix> W,
-    std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>> LUW);
+    std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>& LUW);
 
 /** Update the state vector of a given dynamical system
  *  \param time_step current time step

@@ -176,7 +176,7 @@ void siconos::modeling::NewtonEulerR::computeInput(double time, Interaction& int
 
   if (level == 1) /* \warning : we assume that ContactForce is given by lambda[level] */
   {
-    *_contactForce = lambda * *_jachqT;
+    siconos::algebra::transposeMatrixVector_prod(lambda, *_jachqT, *_contactForce, true);
 
     DEBUG_PRINT("siconos::modeling::NewtonEulerR::computeInput contact force :\n");
     DEBUG_EXPR(_contactForce->display(););

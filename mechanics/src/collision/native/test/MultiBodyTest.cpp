@@ -68,10 +68,6 @@ constexpr auto MAX_RADIUS = std::numeric_limits<double>::infinity();
 // Disk Plan relation
 using DiskPlanR = siconos::collision::native::bodies::DiskPlanR;
 
-// Objects
-using Disk = siconos::collision::native::bodies::Disk;
-using Circle = siconos::collision::native::bodies::Circle;
-
 // Interaction manager
 using ContactManager = siconos::collision::native::SpaceFilter;
 
@@ -200,11 +196,12 @@ void Disks::init(std::string disks_input) {
       qTmp(0) = (*Disks)(i, 0);
       qTmp(1) = (*Disks)(i, 1);
 
-      std::shared_ptr<siconos::modeling::LagrangianDS> body{nullptr};
+      std::shared_ptr<siconos::collision::native::bodies::CircularDS> body{nullptr};
       if (R > 0)
-        body = std::make_shared<Disk>(R, m, qTmp, vTmp);
+        auto body =
+            std::make_shared<siconos::collision::native::bodies::Disk>(R, m, qTmp, vTmp);
       else
-        body = std::make_shared<Circle>(-R, m, qTmp, vTmp);
+        body = std::make_shared<siconos::collision::native::bodies::Circle>(-R, m, qTmp, vTmp);
 
       // -- Set external forces (weight) --
       siconos::algebra::SiconosVector FExt{NDOF};

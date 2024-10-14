@@ -847,7 +847,8 @@ void siconos::integrators::MoreauJeanOSI::computeFreeState() {
   // This function computes "free" states of the DS belonging to this
   // Integrator. "Free" means without taking non-smooth effects into account.
 
-  double t = _simulation->nextTime();  // End of the time step
+  double nextTime = _simulation->nextTime();  // End of the time step
+  double timeStep = _simulation->timeStep();
 
   // Operators computed at told have index i, and (i+1) at t.
 
@@ -915,7 +916,7 @@ void siconos::integrators::MoreauJeanOSI::computeFreeState() {
       // -- Update W --
       // Note: during computeIterationMatrix, mass and jacobians of forces will be computed/
       moreau_jean::computeIterationMatrix_Lagrangian(
-          t, _simulation->timeStep(), _theta, *lds, *iterationMatrix,
+          nextTime, timeStep, _theta, *lds, *iterationMatrix,
           _dynamicalSystemsGraph->properties(*dsi).LUW);
       if (lds->boundaryConditions()) {
         _computeIterationMatrixBoundaryConditions(
@@ -933,7 +934,7 @@ void siconos::integrators::MoreauJeanOSI::computeFreeState() {
       // -- Update W --
       // Note: during computeIterationMatrix, mass and jacobians of forces will be computed/
       moreau_jean::computeIterationMatrix_NewtonEuler(
-          t, _simulation->timeStep(), _theta, *neds, *iterationMatrix,
+          nextTime, timeStep, _theta, *neds, *iterationMatrix,
           _dynamicalSystemsGraph->properties(*dsi).LUW);
       if (neds->boundaryConditions()) {
         _computeIterationMatrixBoundaryConditions(
@@ -1593,7 +1594,7 @@ void siconos::integrators::MoreauJeanOSI::display() const {
 void siconos::integrators::moreau_jean::computeIterationMatrix_Lagrangian(
     double time, double time_step, double theta, siconos::modeling::LagrangianDS &lds,
     Eigen::Ref<siconos::algebra::SiconosMatrix> iterationMatrix,
-    std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>> luw) {
+    std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>& luw) {
   // Compute W matrix of the Dynamical System ds, at time t and for the current
   // ds state.
   DEBUG_BEGIN("siconos::integrators::MoreauJeanOSI::computeIterationMatrix\n");
@@ -1620,7 +1621,7 @@ void siconos::integrators::moreau_jean::computeIterationMatrix_Lagrangian(
 void siconos::integrators::moreau_jean::computeIterationMatrix_NewtonEuler(
     double time, double time_step, double theta, siconos::modeling::NewtonEulerDS &neds,
     Eigen::Ref<siconos::algebra::SiconosMatrix> iterationMatrix,
-    std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>> luw) {
+    std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>& luw) {
   // Compute W matrix of the Dynamical System ds, at time t and for the current
   // ds state.
   iterationMatrix = neds.totalInertiaMatrix();
@@ -1634,10 +1635,10 @@ void siconos::integrators::moreau_jean::computeIterationMatrix_NewtonEuler(
 
     iterationMatrix -= coeff * coeff * (neds.jacobianWrenchOver_q() * neds.T());
     //*W -= h*h*_theta*_theta**K;
-
-    // LU Factorize the iteration matrix
-    luw = std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(iterationMatrix);
   }
+
+  // LU Factorize the iteration matrix
+  luw = std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(iterationMatrix);
 }
 
 void siconos::integrators::moreau_jean::updatePosition(
