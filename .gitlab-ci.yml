@@ -193,6 +193,7 @@ mambalab:configure:
      OPENBLAS_NUM_THREADS: 1
      IMAGE_NAME: $SICONOS_REGISTRY/sources/mambaenv
      CDASH_SUBMIT: 1
+     BLA_VENDOR: OpenBLAS
   extends:
     - .siconos-configure
     - .devel-rules
