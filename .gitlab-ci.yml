@@ -12,7 +12,7 @@ debian-bookworm:docker-build:
     RESULT_NAME: $SICONOS_REGISTRY/sources/debian-bookworm
   extends: .docker-build
 
-fedora38:docker-build:
+fedora-38:docker-build:
   variables:
     IMAGE_NAME: fedora-38
     SICONOS_DOCKER_TARGET: siconos-base-python
@@ -26,11 +26,11 @@ ubuntu22.04:docker-build:
     RESULT_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
   extends: .docker-build
 
-ubuntu23.04:docker-build:
+ubuntu24.04:docker-build:
   variables:
-    IMAGE_NAME: ubuntu23.04
+    IMAGE_NAME: ubuntu24.04
     SICONOS_DOCKER_TARGET: siconos-base-python
-    RESULT_NAME: $SICONOS_REGISTRY/sources/ubuntu23.04
+    RESULT_NAME: $SICONOS_REGISTRY/sources/ubuntu24.04
   extends: .docker-build
 
   
@@ -51,6 +51,15 @@ opencascade:docker-build:
     SICONOS_DOCKER_TARGET: mamba-occenv
   extends: .docker-build
   when: manual
+
+opensuse-tumbleweed:docker-build:
+  variables:
+    IMAGE_NAME: opensuse-tumbleweed
+    SICONOS_DOCKER_TARGET: siconos-base-python
+    RESULT_NAME: $SICONOS_REGISTRY/sources/opensuse-tumbleweed
+  extends: .docker-build
+  when: manual
+
 
 # A specific image, that may be used to install siconos,
 # get examples and provide some notebooks to
@@ -87,35 +96,35 @@ mambaenv:docker-build:
 # -- Jobs that will always be executed (rule .devel-rules) --
 
 # ------ ubuntu 22, debug setup -------
-ubuntu23.04-debug:configure:
+ubuntu24.04-debug:configure:
   variables:
-    IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu23.04
+    IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu24.04
     CDASH_SUBMIT: 1
     CONF_FILE: $SICONOS_CMAKE_CONF_PATH/siconos_devmode.cmake
   extends:
     - .siconos-configure
     - .devel-rules
   needs:
-    - job: ubuntu23.04:docker-build
+    - job: ubuntu24.04:docker-build
       optional: true
 
-ubuntu23.04-debug:build:
+ubuntu24.04-debug:build:
   variables:
-      IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu23.04
+      IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu24.04
       CDASH_SUBMIT: 1
   extends:
     - .siconos-build
     - .devel-rules
-  needs: ["ubuntu23.04-debug:configure"]
+  needs: ["ubuntu24.04-debug:configure"]
 
-ubuntu23.04-debug:test:
+ubuntu24.04-debug:test:
     variables:
-      IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu23.04
+      IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu24.04
       CDASH_SUBMIT: 1
     extends:
       - .siconos-test
       - .devel-rules
-    needs: ["ubuntu23.04-debug:build"]
+    needs: ["ubuntu24.04-debug:build"]
 
 # ------ ubuntu 22, debug setup -------
 # ubuntu22.04-debug:configure:
@@ -310,7 +319,7 @@ fedora-38:configure:
   extends:
     - .siconos-configure
   needs:
-    - job: fedora38:docker-build
+    - job: fedora-38:docker-build
       optional: true
 
 fedora-38:build:
@@ -329,6 +338,36 @@ fedora-38:test:
     - .siconos-test
     needs: ["fedora-38:build"]
 
+# --- opensuse-tumbleweed default setup ---
+# Only manual activation when required to test user configs.
+opensuse-tumbleweed:configure:
+  variables:
+     IMAGE_NAME: $SICONOS_REGISTRY/sources/opensuse-tumbleweed
+     CDASH_SUBMIT: 1
+  extends:
+    - .siconos-configure
+  needs:
+    - job: opensuse-tumbleweed:docker-build
+      optional: true
+  when: manual
+
+opensuse-tumbleweed:build:
+  variables:
+    IMAGE_NAME: $SICONOS_REGISTRY/sources/opensuse-tumbleweed
+    CDASH_SUBMIT: 1
+  extends:
+    - .siconos-build
+  needs: ["opensuse-tumbleweed:configure"]
+  when: manual
+
+opensuse-tumbleweed:test:
+    variables:
+      IMAGE_NAME: $SICONOS_REGISTRY/sources/opensuse-tumbleweed
+      CDASH_SUBMIT: 1
+    extends:
+    - .siconos-test
+    needs: ["opensuse-tumbleweed:build"]
+    when: manual
 
 # --- Jobs to install siconos and produce a Docker image "Siconos ready" ---
 
