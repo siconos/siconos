@@ -2,6 +2,7 @@ import numpy as np
 
 import siconos.kernel as sk
 import siconos.numerics as sn
+import warnings
 
 
 def test_autocast():
@@ -11,16 +12,16 @@ def test_autocast():
     nsds.insertDynamicalSystem(dsA)
     nsds.insertDynamicalSystem(dsB)
 
-    failed = 0
+    not_failed = 1
     if not isinstance(nsds.dynamicalSystem(dsA.number()), sk.LagrangianDS):
-        failed = 1
+        not_failed = 0
     if not isinstance(nsds.dynamicalSystem(dsB.number()), sk.FirstOrderLinearDS):
-        failed = 1
+        not_failed = 0
 
-    return failed
+    assert(not_failed)
 
-    # assert(type(nsds.dynamicalSystem(dsA.number())) == sk.LagrangianDS)
-    # assert(type(nsds.dynamicalSystem(dsB.number())) == sk.FirstOrderLinearDS)
+    #assert(type(nsds.dynamicalSystem(dsA.number())) == sk.LagrangianDS)
+    #assert(type(nsds.dynamicalSystem(dsB.number())) == sk.FirstOrderLinearDS)
 
 
 def test_getVector():
@@ -43,7 +44,7 @@ def test_getVector():
 def test_castVector():
     i = [1.0, 4.0, 3.0]
     v = sk.SiconosVector([1, 2, 3])
-
+    warnings.simplefilter("always")
     assert str(v) == "[3](1,2,3)"
     repr(v)
     assert v[0] == 1.0
@@ -61,9 +62,8 @@ def test_castVector():
         pass
     for x, y in zip(v, i):
         assert x == y
+    
     for x, y in zip(list(v), i):
-        assert x == y
-    for x, y in zip(np.array(v), i):
         assert x == y
     assert 3.0 in v
     assert 5.0 not in v

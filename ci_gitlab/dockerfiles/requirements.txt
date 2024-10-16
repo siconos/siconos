@@ -9,5 +9,5 @@ wheel
 vtk
 packaging
 bullet
-pyhull
 swig
+setuptools
