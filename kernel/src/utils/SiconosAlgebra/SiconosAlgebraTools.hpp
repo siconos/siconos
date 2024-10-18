@@ -21,10 +21,11 @@
 */
 #ifndef SICONOSALGEBRATOOLS_H
 #define SICONOSALGEBRATOOLS_H
-#include <boost/numeric/ublas/io.hpp>
-#include <boost/numeric/ublas/lu.hpp>
-#include <boost/numeric/ublas/matrix.hpp>
+#include <algorithm>
 #include <random>
+class SiconosMatrix;
+class BlockVector;
+
 namespace siconos::algebra {
 
 /** Matrix inversion routine.
@@ -75,10 +76,10 @@ struct RndIntGen {
 /** Random init of a boost ublas matrix
  */
 template <typename M, typename T = typename M::value_type>
-void randomize(M &m, T min = 0., T max = 100.) {
+void randomize(M& m, T min = 0., T max = 100.) {
   // using value_type = typename M::value_type;
   for (auto it = m.begin1(); it != m.end1(); ++it)
-    generate(it.begin(), it.end(), RndIntGen<T>(min, max));
+    std::generate(it.begin(), it.end(), RndIntGen<T>(min, max));
 }
 
 }  // namespace internal
