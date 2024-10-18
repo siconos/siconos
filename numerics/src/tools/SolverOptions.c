@@ -359,6 +359,7 @@ SolverOptions* solver_options_create(int solverId) {
       break;
     }
     case SICONOS_LCP_PGS:
+    case SICONOS_LCP_PGS_PARALLEL:
     case SICONOS_RELAY_PGS: {
       options = solver_options_initialize(solverId, 10000, 1e-6, 0);
       break;

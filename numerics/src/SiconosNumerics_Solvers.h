@@ -33,6 +33,7 @@ See functions in SolverOptions.h
   SICONOS_SOLVER_MACRO(SICONOS_LCP_LEMKE);                                                  \
   SICONOS_SOLVER_MACRO(SICONOS_LCP_NSGS_SBM);                                               \
   SICONOS_SOLVER_MACRO(SICONOS_LCP_PGS);                                                    \
+  SICONOS_SOLVER_MACRO(SICONOS_LCP_PGS_PARALLEL);                                           \
   SICONOS_SOLVER_MACRO(SICONOS_LCP_CPG);                                                    \
   SICONOS_SOLVER_MACRO(SICONOS_LCP_LATIN);                                                  \
   SICONOS_SOLVER_MACRO(SICONOS_LCP_LATIN_W);                                                \

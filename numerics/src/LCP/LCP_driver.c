@@ -56,6 +56,7 @@ const char* const SICONOS_LCP_PIVOT_LUMOD_STR =
     "Pivot based method with BLU updates using LUMOD";
 const char* const SICONOS_LCP_GAMS_STR = "Using GAMS solvers";
 const char* const SICONOS_LCP_CONVEXQP_PG_STR = "Convex QP Projected Gradient";
+const char* const SICONOS_LCP_PGS_PARALLEL_STR = "Parallel PGS";
 
 static int lcp_driver_SparseBlockMatrix(LinearComplementarityProblem* problem, double* z,
                                         double* w, SolverOptions* options);
@@ -218,6 +219,12 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double* z, dou
        OUT: iter, error */
     case SICONOS_LCP_PGS:
       lcp_pgs(problem, z, w, &info, options);
+      break;
+    /****** Parallel PGS Solver ******/
+    /* IN: itermax, tolerance
+       OUT: iter, error */
+    case SICONOS_LCP_PGS_PARALLEL:
+      lcp_pgs_parallel(problem, z, w, &info, options);
       break;
     /****** CPG Solver ******/
     /* IN: itermax, tolerance

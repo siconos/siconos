@@ -5900,3 +5900,91 @@ int NM_Linear_solver_finalize(NumericsMatrix* Ao) {
   NM_version_sync(A);
   return info;
 }
+
+void NM_block_prod(int start_i, int start_j, int size_i, int size_j, NumericsMatrix* A, const double *x, double *y, int init) {
+  
+  // NM_row_prod(size_j, size_i, start_i + (A->size0) * start_j, A, &x[start_j], y, init);
+  
+  assert(A);
+  assert(x);
+  assert(y);
+
+  int sizeX = size_j;
+  int sizeY = size_i;
+
+  // assert(A->size0 >= sizeY); // size0  = number of lines
+  // assert(A->size1 == sizeX); // size1 = number of columns
+
+  NM_types storage = A->storageType;
+
+  if (storage == NM_DENSE) {
+    int incx = A->size0, incy = 1;
+    double* mat = A->matrix0;
+    if (init == 0)
+    {
+      for (int row = 0; row < sizeY; row++)
+        y[row] += cblas_ddot(sizeX, &mat[start_i + row + incx * start_j], incx, &x[start_j], incy);
+    } else {
+      for (int row = 0; row < sizeY; row++)
+        y[row] = cblas_ddot(sizeX, &mat[start_i + row + incx * start_j], incx, &x[start_j], incy);
+    }
+
+  }
+  /*
+  else if (storage == NM_SPARSE_BLOCK)
+    SBM_row_prod(sizeX, sizeY, currentRowNumber, A->matrix1, x, y, init);
+  */
+  else {
+    fprintf(stderr,
+            "Numerics, NumericsMatrix, product matrix - vector NM_row_prod(A,x,y) failed, "
+            "unknown storage type for A.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  NM_version_sync(A);
+}
+
+void NM_block_prod_no_diag(int start_i, int size_i, NumericsMatrix* A, double *x, double *y, double* xsave, int init) {
+  assert(A);
+  assert(x);
+  assert(y);
+
+  int sizeX = size_i;
+  int sizeY = size_i;
+
+  // assert(A->size0 >= sizeY); // size0  = number of lines
+  // assert(A->size1 == sizeX); // size1 = number of columns
+
+  NM_types storage = A->storageType;
+
+  if (storage == NM_DENSE) {
+    int incx = A->size0, incy = 1;
+    double* mat = A->matrix0;
+    if (init == 0) 
+    {
+      for (int row = 0; row < sizeY; row++)
+      {
+        *xsave = x[start_i + row];
+        x[start_i + row] = 0.;
+        y[row] += cblas_ddot(sizeX, &mat[start_i + row + incx * start_i], incx, &x[start_i], incy);
+        x[start_i + row] = *xsave;
+      }
+        
+    } else {
+      for (int row = 0; row < sizeY; row++)
+      {
+        *xsave = x[start_i + row];
+        x[start_i + row] = 0.;
+        y[row] = cblas_ddot(sizeX, &mat[start_i + row + incx * start_i], incx, &x[start_i], incy);
+        x[start_i + row] = *xsave;
+      }
+    }
+  }
+  else {
+    fprintf(stderr,
+            "Numerics, NumericsMatrix, product matrix - vector NM_row_prod(A,x,y) failed, "
+            "unknown storage type for A.\n");
+    exit(EXIT_FAILURE);
+  }
+  NM_version_sync(A);
+}
