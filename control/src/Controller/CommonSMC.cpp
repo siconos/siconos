@@ -35,7 +35,6 @@
 #include "NumericsSolversNamespace.h"
 #include "Relay.hpp"
 #include "RelayNSL.hpp"
-#include "SiconosAlgebraTools.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosMatrixOp.hpp"
 #include "SiconosMatrixVectorOp.hpp"
@@ -226,12 +225,11 @@ void siconos::control::CommonSMC::initialize(
   _ueq->setZero();
 
   if (_Csurface) {
-    auto tmpM =
+    siconos::algebra::SiconosMatrix tmpM{_Csurface->size(0), _B->size(1)};
+    _invCB =
         std::make_shared<siconos::algebra::SiconosMatrix>(_Csurface->size(0), _B->size(1));
-    _invCB = std::make_shared<siconos::algebra::SiconosMatrix>(*tmpM);
-    siconos::algebra::prod(*_Csurface, *_B, *tmpM);
-    // siconos::algebra::InvertMatrix(*tmpM->dense(), *_invCB->dense());
-    *_invCB = tmpM->inverse();
+    tmpM = *_Csurface * *_B;
+    *_invCB = tmpM.inverse();
   }
   DEBUG_END(
       "siconos::control::CommonSMC::initialize(const "
