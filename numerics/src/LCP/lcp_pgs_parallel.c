@@ -62,16 +62,10 @@ void lcp_pgs_parallel(LinearComplementarityProblem *problem, double *z, double *
   int *start_indexes = NULL;
   /* Count the number of diagonal blocks computed (shared between threads)*/
   int counter = 0;
-  /* Error */
-  double err = 1.;
-  /* Number of threads available */
-  int g;
-  /* Error factor */
-  double light_error_factor = 1.;
-
-  /* Initialize variables */
-  g = omp_get_max_threads();
-  // printf("Number of threads available: %d\n", g);
+  /* Precise error (not light error) */
+  double err = 0.;
+  /* Number of OpenMP threads available */
+  int g = omp_get_max_threads();
 
   /* Blocks will have size (n / g) or (n / g + 1) */
   block_sizes = (int *)malloc(g * sizeof(int));
@@ -89,117 +83,156 @@ void lcp_pgs_parallel(LinearComplementarityProblem *problem, double *z, double *
     start_indexes[i] = start_indexes[i - 1] + block_sizes[i - 1];
   }
 
-  // Flag to stop when convergence achieved
+  /* 2-norm of q, to normalize error */
+  double norm_q = cblas_dnrm2(n, problem->q, 1); 
+  if (fabs(norm_q) <= DBL_EPSILON) norm_q = 1.;
+
+  /* Flag to stop when convergence is achieved */
   int flag = 1;
 
-  // Start solving
-#pragma omp parallel shared(counter, err, flag, block_sizes, start_indexes, M, diag, tol, z, light_error_factor)
+  /* Start solving */
+#pragma omp parallel default(none) shared(g, itermax, counter, err, flag, block_sizes, start_indexes, M, diag, tol, q, norm_q, w, z)
   {
-    // Get thread num
-    int i_g = omp_get_thread_num();
+    /* Thread number */
+    int rank = omp_get_thread_num();
+    /* Local block size (nb. of rows) */
+    int size_i = block_sizes[rank];
+    /* Line at which all blocks will start */
+    int start_i = start_indexes[rank];
 
-    int m_i = block_sizes[i_g];  // Local block size (nb. of rows)
-    int m_j;  // Local block size (nb. of columns)
+    /* We need two arrays to store the sums,
+    in order to compute the precise error efficiently.    
+    */
 
-    int start_i = start_indexes[i_g]; // Line at which all blocks will start
+    /* Array to store sums, for blocks above the diagonal */
+    double *t_right = NULL;
+    t_right = (double *)malloc(size_i * sizeof(double));
+    /* Array to store sums, for blocks below the diagonal */
+    double *t_left = NULL;
+    t_left = (double *)malloc(size_i * sizeof(double));
 
-    /* Local array to store Gauss-Seidel sums */
-    double *t = NULL;
-    t = (double *)malloc(m_i * sizeof(double));
+    /* Flag for last thread:
+    when the last thread checks that err < tol,
+    it needs to do one last iteration to synchronize
+    with the other threads, so we need a specific flag for it
+    */
+    int flag_last_thread = 0; /* For all other threads, we don't need this flag */
+    if (rank == g - 1) flag_last_thread = 1; /* Only last rhead needs it */
 
-    /* To store zi and compute error */
+    /* Initialize left sums to 0 */
+    for (int i = 0; i < size_i; i++) {
+      t_left[i] = 0.;
+    }
+
+    /* To store z_i when diagonal block */
     double zsave = 0.;
 
-    /* Number of diagonal blocks computed by current thread */
+    /* Number of iterations of current thread */
     int iter = 0;
 
     /* Main loop */
-    while ((iter < itermax) && (flag)) {
-      /* Initialize sums with q */
-      cblas_dcopy(m_i, q + start_i, 1, t, 1);
+    while ((iter < itermax) && (flag || flag_last_thread)) {
+      /* Initialize right sums with q */
+      cblas_dcopy(size_i, q + start_i, 1, t_right, 1);
 
       /* Blocks after diagonal blocks */
-      for (int j_g = i_g + 1; j_g < g; j_g++) {
+      for (int j_g = rank + 1; j_g < g; j_g++) {
         /* Wait for diagonal block to be computed */
         while (counter <= (iter - 1) * g + j_g) {
         }
 
-        m_j = block_sizes[j_g];
-        NM_block_prod(start_i, start_indexes[j_g], m_i, m_j, M, z, t, 0);
+        NM_block_prod(start_i, start_indexes[j_g], size_i, block_sizes[j_g], M, z, t_right, 0);
+      }
+
+      /* Start computing w_{iter} */
+      for (int i = start_i; i < start_i + size_i; i++) {
+        w[i] = t_left[i - start_i] + z[i] / diag[i];
+      }
+
+      /* Initialize left sums to 0 */
+      for (int i = 0; i < size_i; i++) {
+        t_left[i] = 0.;
       }
 
       /* Blocks before diagonal blocks */
-      for (int j_g = 0; j_g < i_g; j_g++) {
+      for (int j_g = 0; j_g < rank; j_g++) {
         /* Wait for diagonal block to be computed */
         while (counter <= iter * g + j_g) {
         }
 
-        m_j = block_sizes[j_g];
-        NM_block_prod(start_i, start_indexes[j_g], m_i, m_j, M, z, t, 0);
+        NM_block_prod(start_i, start_indexes[j_g], size_i, block_sizes[j_g], M, z, t_left, 0);
       }
 
       /* Reset error when first group is back */
-      if (i_g == 0)
+      if (rank == 0) {
         err = 0.;
-
-      /* Diagonal block */
-      NM_block_prod_no_diag(start_i, m_i, M, z, t, &zsave, 0);
-
-      /* Update z */
-      for (int i = start_i; i < start_i + m_i; i++) {
-
-        zsave = z[i];
-
-        z[i] = - t[i - start_i] * diag[i];
-
-        /* Local solver */
-        if (z[i] < 0.)
-          z[i] = 0.;
-
-        /* Update light error */
-        err += fabs(z[i] - zsave);
       }
 
-      /* Last group: z_{k+1} is fully computed 
+      /* Diagonal block */
+      NM_block_prod_no_diag(start_i, size_i, M, z, t_right, &zsave, 0);
+
+      if (flag == 0) {
+        /* Last update of w and error, without 
+        updating z so that w = Mz + q when we exit the while loop */
+        for (int i = start_i; i < start_i + size_i; i++) {
+          w[i] += t_right[i - start_i];
+          err += pow(z[i] - fmax(0, (z[i] - w[i])), 2);
+        }
+      }
+      else {
+        /* Update z, w, and error */
+        for (int i = start_i; i < start_i + size_i; i++) {
+
+          /* Finish computing w_{iter} */
+          w[i] += t_right[i - start_i];
+
+          /* Update error between z_{iter} and w_{iter} */
+          err += pow(z[i] - fmax(0, (z[i] - w[i])), 2);
+
+          /* Compute z_{iter + 1} */
+          z[i] = - (t_right[i - start_i] + t_left[i - start_i]) * diag[i];
+
+          /* Local solver */
+          if (z[i] < 0.) 
+            z[i] = 0.;
+        }
+      }
+
+      /* Last thread: z_{iter+1} is fully computed 
       check if error is good */
-      if ((i_g == g - 1) && (light_error_factor * err < tol)) {
-        /* Compute precise error */
-        lcp_compute_error(problem, z, w, tol, &err);
-        if (err < tol)
-          flag = 0;
-        else
-          light_error_factor *= 1e3;
-      }  
+      if (rank == g - 1) {
+        err = sqrt(err);
+        err /= norm_q; /* Normalize error by norm of q */
+        /* If flag is 0, the last thread already did its last iteration
+        so we can update the second flag to stop this thread */
+        if (flag == 0) flag_last_thread = 0;
+        else if (err < tol) flag = 0; /* Set flag to 0 to stop all threads */
+      }   
 
       iter += 1;
 
-#pragma omp atomic update
+      #pragma omp atomic update
       counter += 1;
     }
 
-    free(t);   
+    free(t_right);
+    free(t_left);
   }
+
 /* End of parallel section */
 
-  /* Compute precise error */
-  lcp_compute_error(problem, z, w, tol, &err);
-
-  /* Number of iterations = (counter + 1) / g because:
-  Threads nb 0 to g - 2 increase counter "iter" times
-  Thread nb g - 1 increases counter "iter - 1" times
-  */
-  options->iparam[SICONOS_IPARAM_ITER_DONE] = (counter + 1) / g;
+  options->iparam[SICONOS_IPARAM_ITER_DONE] = counter / g;
   options->dparam[SICONOS_DPARAM_RESIDU] = err;
 
   if (err > tol) {
     if (verbose > 0) {
-      printf("Siconos/Numerics: lcp_pgs: No convergence of PGS after %d iterations\n", (counter + 1) / g);
+      printf("Siconos/Numerics: lcp_pgs: No convergence of PGS after %d iterations\n", options->iparam[SICONOS_IPARAM_ITER_DONE]);
       printf("The residue is : %g \n", err);
     }
     *info = 1;
   } else {
     if (verbose > 0) {
-      printf("Siconos/Numerics: lcp_pgs: Convergence of PGS after %d iterations\n", (counter + 1) / g);
+      printf("Siconos/Numerics: lcp_pgs: Convergence of PGS after %d iterations\n", options->iparam[SICONOS_IPARAM_ITER_DONE]);
       printf("The residue is : %g \n", err);
     }
     *info = 0;
