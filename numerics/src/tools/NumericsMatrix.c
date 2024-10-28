@@ -5928,7 +5928,32 @@ void NM_block_prod(int start_i, int start_j, int size_i, int size_j, NumericsMat
       for (int row = 0; row < sizeY; row++)
         y[row] = cblas_ddot(sizeX, &mat[start_i + row + incx * start_j], incx, &x[start_j], incy);
     }
+  }
+  else if (storage == NM_SPARSE) {
+    if (init) {
+      for (int row = 0; row < sizeY; row++) {
+        y[row] = 0.;
+      } 
+    }
 
+    CSparseMatrix* M;
+    if (A->matrix2->origin == NSM_CSR) {
+      M = NM_csr(A);
+    } else {
+      M = NM_csc_trans(A);
+    }
+
+    CS_INT* Mp = M->p;
+    CS_INT* Mi = M->i;
+    double* Mx = M->x;
+
+    for (int row = 0; row < sizeY; row++) {
+      for (CS_INT p = Mp[start_i + row]; p < Mp[start_i + row + 1]; ++p) {
+        if ((start_j <= Mi[p]) && (Mi[p] < start_j + size_j)) {
+          y[row] += Mx[p] * x[Mi[p]];
+        }
+      }
+    }
   }
   /*
   else if (storage == NM_SPARSE_BLOCK)
@@ -5977,6 +6002,32 @@ void NM_block_prod_no_diag(int start_i, int size_i, NumericsMatrix* A, double *x
         x[start_i + row] = 0.;
         y[row] = cblas_ddot(sizeX, &mat[start_i + row + incx * start_i], incx, &x[start_i], incy);
         x[start_i + row] = *xsave;
+      }
+    }
+  }
+  else if (storage == NM_SPARSE) {
+    if (init) {
+      for (int row = 0; row < sizeY; row++) {
+        y[row] = 0.;
+      } 
+    }
+
+    CSparseMatrix* M;
+    if (A->matrix2->origin == NSM_CSR) {
+      M = NM_csr(A);
+    } else {
+      M = NM_csc_trans(A);
+    }
+
+    CS_INT* Mp = M->p;
+    CS_INT* Mi = M->i;
+    double* Mx = M->x;
+
+    for (int row = 0; row < sizeY; row++) {
+      for (CS_INT p = Mp[start_i + row]; p < Mp[start_i + row + 1]; ++p) {
+        if ((start_i <= Mi[p]) && (Mi[p] < start_i + size_i)) {
+          if (start_i + row != Mi[p]) y[row] += Mx[p] * x[Mi[p]];
+        }
       }
     }
   }
