@@ -30,8 +30,8 @@ static auto add = [](auto&& data) constexpr -> decltype(auto) {
       ground::for_each(
           ground::range<memory_size<A, all_keeps_t>()>,
           [&data, &index](auto step) {
-            auto&& storage =
-                memory(step, ground::get<A>(static_cast<data_t&&>(data)));
+            auto&& storage = memory(
+                step, ground::get<A>(static_cast<data_t&&>(data).store()));
 
             using storage_t = std::decay_t<decltype(storage)>;
 

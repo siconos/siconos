@@ -8,7 +8,7 @@
 
 namespace siconos::storage {
 
-  using namespace pattern;
+using namespace pattern;
 
 template <match::item T, typename R>
 struct index {
@@ -69,7 +69,8 @@ struct handle : index<T, R>, T::template interface<handle<T, R, D>> {
                   "attached storage not found");
 
     using attached_storage_t = std::decay_t<decltype(tpl[0_c])>;
-    return memory(step, ground::get<attached_storage_t>(data()))[this->get()];
+    return memory(
+        step, ground::get<attached_storage_t>(data().store()))[this->get()];
   }
 
   // not convenient, it needs to specify template keyword:

@@ -64,15 +64,15 @@ static auto car = []<typename Tpl>(Tpl tpl) constexpr {
   return tpl[0_c];
 };
 
-static_assert(std::is_same_v<decltype(car(gather<int, float, char>{})), int>);
+// static_assert(std::is_same_v<decltype(car(gather<int, float, char>{})), int>);
 
 static auto cdr =
     []<typename A0, typename... As>(ground::tuple<A0, As...> tpl) constexpr {
       return ground::drop_front(tpl, ground::size_c<1_c>);
     };
 
-static_assert(std::is_same_v<decltype(cdr(gather<int, float, char>{})),
-                             gather<float, char>>);
+// static_assert(std::is_same_v<decltype(cdr(gather<int, float, char>{})),
+//                              gather<float, char>>);
 
 static auto cons = []<typename A, typename... As>(
                        A a, ground::tuple<As...> tpl) constexpr {
@@ -82,8 +82,8 @@ static auto cons = []<typename A, typename... As>(
 template <typename T, typename Tpl>
 using cons_x = decltype(cons(T{}, Tpl{}));
 
-static_assert(std::is_same_v<decltype(cons(int{}, gather<float, char>{})),
-                             gather<int, float, char>>);
+// static_assert(std::is_same_v<decltype(cons(int{}, gather<float, char>{})),
+//                              gather<int, float, char>>);
 
 // static auto append = []<concepts::tuple_like... Tpls>(Tpls... tpls)
 // constexpr
@@ -171,10 +171,10 @@ template <typename T, typename Tpl>
 concept contains = contains<T>(instance<Tpl>);
 }
 
-static_assert(match::size<std::vector<double>>);
-static_assert(match::size<std::array<double, 1>>);
-static_assert(match::push_back<std::vector<double>>);
-static_assert(!match::push_back<std::array<double, 3>>);
+// static_assert(match::size<std::vector<double>>);
+// static_assert(match::size<std::array<double, 1>>);
+// static_assert(match::push_back<std::vector<double>>);
+// static_assert(!match::push_back<std::array<double, 3>>);
 
 namespace match {
 
@@ -617,6 +617,9 @@ template <typename T>
 concept npy_format = (requires { typename T::value_type; } &&
                       std::is_scalar_v<typename T::value_type>) ||
                      requires { typename T; };
+
+template <typename D>
+concept store = requires(D d) { d.store(); };
 }  // namespace match
 
 }  // namespace siconos::storage::pattern

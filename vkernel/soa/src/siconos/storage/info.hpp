@@ -1,37 +1,25 @@
 #pragma once
 
 #include "siconos/storage/ground/ground.hpp"
+#include "siconos/storage/pattern/pattern.hpp"
 
 namespace siconos::storage {
 
+namespace match = pattern::match;
 // the storage info key
 struct info {};
 
-// pre-map cases
-template <typename... Pairs>
-auto get_info(ground::tuple<Pairs...>&& data)
+template <typename D>
+auto get_info(D&& data)
 {
-  return ground::second(ground::at(
-      static_cast<ground::tuple<Pairs...>&&>(data), ground::size_c<0>));
-}
-
-template <typename... Pairs>
-auto get_info(const ground::tuple<Pairs...>& data)
-{
-  return ground::second(ground::at(data, ground::size_c<0>));
-}
-
-// template <typename... Pairs>
-// auto get_info(ground::tuple<Pairs...>& data)
-// {
-//   return ground::second(ground::at(data, ground::size_c<0>));
-// }
-
-// database case
-template <typename... Pairs>
-auto get_info(ground::database<Pairs...>&& data)
-{
-  return ground::get<info>(static_cast<ground::database<Pairs...>&&>(data));
+  if constexpr (match::store<std::decay_t<D>>) {
+    // database case
+    return ground::get<info>(data.store());
+  }
+  else {
+    // pre-map case
+    return ground::second(ground::at(data, ground::size_c<0>));
+  }
 }
 
 template <typename D>

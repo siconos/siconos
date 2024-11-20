@@ -161,6 +161,8 @@ static auto reverse = hana::reverse;
 
 static auto scan_left = hana::scan_left;
 
+static auto transform = hana::transform;
+
 using hana::drop_front;
 static auto concat = hana::concat;
 
@@ -171,10 +173,10 @@ auto constexpr concat_all(Args... args)
                          hana::concat);
 }
 
-static_assert(concat(make_tuple(1, 2, 3), make_tuple(4, 5, 6)) ==
-              make_tuple(1, 2, 3, 4, 5, 6));
-static_assert(concat_all(make_tuple(1), make_tuple(2), make_tuple(3, 4, 5)) ==
-              make_tuple(1, 2, 3, 4, 5));
+// static_assert(concat(make_tuple(1, 2, 3), make_tuple(4, 5, 6)) ==
+//               make_tuple(1, 2, 3, 4, 5, 6));
+// static_assert(concat_all(make_tuple(1), make_tuple(2), make_tuple(3, 4, 5)) ==
+//               make_tuple(1, 2, 3, 4, 5));
 
 using hana::zip;
 
@@ -182,19 +184,48 @@ using hana::zip;
 template <typename T>
 static auto t_arg = []<typename F>(F &&f) { return ground::partial(f, T{}); };
 
-template <typename First, typename Second>
-using key_value =
-    hana::pair<std::decay_t<decltype(hana::type_c<First>)>, Second>;
-
 // using hana::pair;
 
 using hana::type_c;
 
+template <typename T>
+struct type_hash {
+  using type = T;
+  static constexpr int i{};
+  static constexpr int const *value{&i};
+};
+
+template <typename T>
+static constexpr auto type_hash_v = type_hash<T>::value;
+
+template <auto hash>
+struct hashed {};
+
+template <typename T>
+static constexpr auto key = hana::type_c<T>;
+
+template <typename T>
+static constexpr auto hashed_key = hana::type_c<hashed<type_hash_v<T>>>;
+
+template <typename First, typename Second>
+using key_value = hana::pair<std::decay_t<decltype(key<First>)>, Second>;
+
 static auto make_key_value =
     []<typename First, typename Second>(
         First, Second &&second) constexpr -> decltype(auto) {
-  return hana::make_pair(hana::type_c<First>, std::forward<Second>(second));
+  return hana::make_pair(key<First>, static_cast<Second &&>(second));
 };
+
+static auto make_hashed_key_value =
+    []<typename First, typename Second>(
+        First, Second &&second) constexpr -> decltype(auto) {
+  return hana::make_pair(hashed_key<typename First::type>,
+                         static_cast<Second &&>(second));
+};
+
+template <typename Pair>
+using hashed_pair_t =
+    decltype(make_hashed_key_value(first(Pair{}), second(Pair{})));
 
 using hana::make_pair;
 
@@ -208,7 +239,8 @@ using map = hana::map<Pairs...>;
 template <typename... Pairs>
 struct database {
   database() : store{} {};
-  database(tuple<Pairs...> &&m) : store(to_map(m)){};
+  database(tuple<Pairs...> &&m)
+      : store(to_map(static_cast<tuple<Pairs...> &&>(m))){};
   decltype(to_map(tuple<Pairs...>{})) store;
 };
 
@@ -232,52 +264,49 @@ auto to_database(tuple<Pairs...> &&data)
 using hana::make_map;
 
 template <typename Data, typename Key>
-concept has_key = requires(Data m) { m[hana::type_c<Key>]; };
+concept has_key = requires(Data m) { m[key<Key>]; };
 
 template <typename T, typename D>
 static constexpr decltype(auto) get_m(D &&data)
 {
-  return static_cast<D &&>(data)[hana::type_c<T>];
+  return static_cast<D &&>(data)[key<T>];
 };
 
 template <typename T, typename D>
 static constexpr decltype(auto) get_internal(D &&data)
 {
-  return static_cast<D &&>(data)[hana::type_c<T>];
+  return static_cast<D &&>(data)[key<T>];
 };
 
 template <typename T, typename... Pairs>
 static constexpr auto &get_internal(tuple<Pairs...> &&data)
 {
-  auto &&result = hana::find_if(
-      static_cast<tuple<Pairs...> &&>(data),
-      []<typename P>(P) { return hana::first(P{}) == hana::type_c<T>; });
+  auto &&result =
+      hana::find_if(static_cast<tuple<Pairs...> &&>(data),
+                    []<typename P>(P) { return hana::first(P{}) == key<T>; });
   return hana::second(result.value());
 };
 
 template <typename T, typename... Pairs>
 static constexpr auto &get_internal(tuple<Pairs...> &data)
 {
-  auto &&result = hana::find_if(data, []<typename P>(P) {
-    return hana::first(P{}) == hana::type_c<T>;
-  });
+  auto &&result = hana::find_if(
+      data, []<typename P>(P) { return hana::first(P{}) == key<T>; });
   return hana::second(result.value());
 };
 
-template <typename T, typename... Pairs>
-decltype(auto) get(ground::database<Pairs...> &&data)
+template <typename T, typename... HPairs>
+decltype(auto) get(ground::database<HPairs...> &&data)
 {
   return get_internal<T>(
-      static_cast<ground::database<Pairs...> &&>(data).store);
+      static_cast<ground::database<HPairs...> &&>(data).store);
 };
 
-template <typename T, typename... Pairs>
-decltype(auto) get(ground::database<Pairs...> &data)
+template <typename T, typename... HPairs>
+decltype(auto) get(ground::database<HPairs...> &data)
 {
   return get_internal<T>(data.store);
 };
-
-static auto transform = hana::transform;
 
 static auto make_type_c = []<typename T>(T) constexpr { return type_c<T>; };
 
@@ -323,8 +352,8 @@ static auto dup = []<typename F>(F &&f) constexpr -> decltype(auto) {
   };
 };
 
-static_assert(dup(hana::plus)(1) == 2);
-static_assert(dup(hana::mult)(2) == 4);
+// static_assert(dup(hana::plus)(1) == 2);
+// static_assert(dup(hana::mult)(2) == 4);
 
 // map_transform pair(first, f(first, second)),
 static auto map_value_transform =

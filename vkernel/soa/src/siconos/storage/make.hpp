@@ -8,6 +8,9 @@
 #include "siconos/storage/traits/traits.hpp"
 
 namespace siconos::storage {
+
+namespace match = siconos::storage::pattern::match;
+
 template <match::item Item, typename Wrappers, typename Storage>
 static constexpr auto apply_wrapper(Storage storage)
 {
@@ -117,66 +120,74 @@ static constexpr auto attribute_storage_transform =
 };
 
 template <typename Env, match::item... Items>
-static auto make = []() constexpr -> decltype(auto) {
-  using item_storage_t = item_storage<Env, Items...>;
-  using info_t = typename item_storage_t::iinfo;
-  auto base_storage = typename item_storage_t::type{};
-  return ground::to_database(attribute_storage_transform(
-      item_storage_transform<info_t>(
-          attribute_storage_transform(
-              base_storage,
-              // attribute level for base storage specifications
-              []<match::attribute Attribute, typename Storage>(
-                  Attribute, Storage& s) -> decltype(auto) {
-                // if attribute is derived from one of diagonal
-                // specifications, etc.
-                return typename traits::config<typename info_t::env>::
-                    template convert<decltype(refine_recursively_attribute(
-                        base_storage, Attribute{}))>::type{};
-              }),
-          // item level: collection depends on item property
-          []<match::item Item, match::attribute Attr>(Item item, Attr attr,
-                                                      auto s) {
-            using storage_t = std::decay_t<decltype(s)>;
+struct make {
+  static constexpr decltype(auto) internal_build()
+  {
+    using item_storage_t = item_storage<Env, Items...>;
+    using info_t = typename item_storage_t::iinfo;
+    auto base_storage = typename item_storage_t::type{};
+    return ground::to_database(attribute_storage_transform(
+        item_storage_transform<info_t>(
+            attribute_storage_transform(
+                base_storage,
+                // attribute level for base storage specifications
+                []<match::attribute Attribute, typename Storage>(
+                    Attribute, Storage& s) -> decltype(auto) {
+                  // if attribute is derived from one of diagonal
+                  // specifications, etc.
+                  return typename traits::config<typename info_t::env>::
+                      template convert<decltype(refine_recursively_attribute(
+                          base_storage, Attribute{}))>::type{};
+                }),
+            // item level: collection depends on item property
+            []<match::item Item, match::attribute Attr>(Item item, Attr attr,
+                                                        auto s) {
+              using storage_t = std::decay_t<decltype(s)>;
 
-            if constexpr (match::wrap<Item>) {
-              return ground::key_value<
-                  Attr,
-                  typename traits::config<Env>::template convert<
-                      typename Item::template wrapper<storage_t>>::type>{};
-            }
-            else {
-              // look for wrap specified in properties
-              using all_wrappers_t =
-                  decltype(pre_map_all_properties_as<property::wrapped>(
-                      base_storage));
-
-              using storage_wrapped =
-                  decltype(apply_wrapper<Item, all_wrappers_t>(s));
-
-              if constexpr (!std::is_same_v<storage_wrapped, storage_t>) {
-                using storage_wrapped_and_converted =
-                    typename traits::config<typename info_t::env>::
-                        template convert<storage_wrapped>::type;
-
-                return ground::key_value<Attr,
-                                         storage_wrapped_and_converted>{};
-              }
-              else {
+              if constexpr (match::wrap<Item>) {
                 return ground::key_value<
                     Attr,
-                    typename Env::template default_storage<storage_t>>{};
+                    typename traits::config<Env>::template convert<
+                        typename Item::template wrapper<storage_t>>::type>{};
               }
-            }
-          }),
-      // attribute level: memory depends on keeps
-      []<match::attribute Attribute>(Attribute attr, auto s) {
-        using storage_t = std::decay_t<decltype(s)>;
+              else {
+                // look for wrap specified in properties
+                using all_wrappers_t =
+                    decltype(pre_map_all_properties_as<property::wrapped>(
+                        base_storage));
 
-        using all_keeps_t =
-            decltype(pre_map_all_properties_as<property::keep>(base_storage));
-        return memory_t<storage_t, memory_size<Attribute, all_keeps_t>()>{};
-      }));
+                using storage_wrapped =
+                    decltype(apply_wrapper<Item, all_wrappers_t>(s));
+
+                if constexpr (!std::is_same_v<storage_wrapped, storage_t>) {
+                  using storage_wrapped_and_converted =
+                      typename traits::config<typename info_t::env>::
+                          template convert<storage_wrapped>::type;
+
+                  return ground::key_value<Attr,
+                                           storage_wrapped_and_converted>{};
+                }
+                else {
+                  return ground::key_value<
+                      Attr,
+                      typename Env::template default_storage<storage_t>>{};
+                }
+              }
+            }),
+        // attribute level: memory depends on keeps
+        []<match::attribute Attribute>(Attribute attr, auto s) {
+          using storage_t = std::decay_t<decltype(s)>;
+
+          using all_keeps_t =
+              decltype(pre_map_all_properties_as<property::keep>(
+                  base_storage));
+          return memory_t<storage_t, memory_size<Attribute, all_keeps_t>()>{};
+        }));
+  };
+  decltype(internal_build()) _store;
+
+  make() : _store(internal_build()){};
+
+  decltype(internal_build())& store() { return _store; }
 };
-
 }  // namespace siconos::storage

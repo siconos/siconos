@@ -14,18 +14,19 @@ static auto get = ground::overload(
     // get<Attr>(data, step, handle)
     []<match::handle_attribute<A> Handle, typename Data>(
         Data&& data, auto step, Handle&& handle) constexpr -> decltype(auto) {
-      return memory(step,
-                    ground::get<A>(static_cast<Data&&>(data)))[handle.get()];
+      return memory(
+          step,
+          ground::get<A>(static_cast<Data&&>(data).store()))[handle.get()];
     },
     // get<Attr>(data, step, handle)
     []<match::handle_attribute<A> Handle, typename Data>(
         Data& data, auto step, Handle& handle) constexpr -> decltype(auto) {
-      return memory(step, ground::get<A>(data))[handle.get()];
+      return memory(step, ground::get<A>(data).store())[handle.get()];
     },
     // get<Attr>(data, handle)
     []<match::handle_attribute<A> Handle, typename Data>(
         Data& data, Handle& handle) constexpr -> decltype(auto) {
-      return memory(0, ground::get<A>(data))[handle.get()];
+      return memory(0, ground::get<A>(data).store())[handle.get()];
     }  // ,
        // // get<Attached_storage>(data, step, h)
        // []<match::handle_attached_storage<A> Handle, typename Data>(
@@ -107,19 +108,19 @@ template <string_literal S>
 static auto attr = []<typename H>(H h, typename H::indice step =
                                            0) constexpr -> decltype(auto) {
   using attr_n = attr_t<typename H::type, S>;
-  return memory(step, ground::get<attr_n>(h.data()))[h.get()];
+  return memory(step, ground::get<attr_n>(h.data().store()))[h.get()];
 };
 
 template <match::attribute T>
 static constexpr decltype(auto) attr_memory(auto& data)
 {
-  return ground::get<T>(data);
+  return ground::get<T>(data.store());
 };
 
 template <match::item I, string_literal S>
 static constexpr decltype(auto) attr_memory(auto& data)
 {
-  return ground::get<attr_t<I, S>>(data);
+  return ground::get<attr_t<I, S>>(data.store());
 };
 
 template <string_literal S>
@@ -145,7 +146,7 @@ static auto prop_memory = [](auto& data) constexpr -> decltype(auto) {
                 "attached storage not found");
 
   using attached_storage_t = std::decay_t<decltype(tpl[0_c])>;
-  return ground::get<attached_storage_t>(data);
+  return ground::get<attached_storage_t>(data.store());
 };
 
 template <match::attribute T>
