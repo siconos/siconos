@@ -31,11 +31,11 @@ static auto remove = [](auto& data, auto& h) {
 
   if constexpr (ground::size(attrs) > ground::size_c<0>) {
     ground::for_each(attrs, [&data, &h]<match::attribute A>(A) {
-      return ground::for_each(ground::range<memory_size<A, all_keeps_t>()>,
-                              [&data, &h](indice step) {
-                                move_back(h.get(),
-                                          memory(step, ground::get<A>(data)));
-                              });
+      return ground::for_each(
+          ground::range<memory_size<A, all_keeps_t>()>,
+          [&data, &h](indice step) {
+            move_back(h.get(), memory(step, ground::get<A>(data.store())));
+          });
     });
   }
 };

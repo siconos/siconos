@@ -238,6 +238,7 @@ using map = hana::map<Pairs...>;
 // The Hana map database takes a longer time to compile!
 template <typename... Pairs>
 struct database {
+  using database_t = void;
   database() : store{} {};
   database(tuple<Pairs...> &&m)
       : store(to_map(static_cast<tuple<Pairs...> &&>(m))){};

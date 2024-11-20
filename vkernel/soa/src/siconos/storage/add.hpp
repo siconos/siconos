@@ -4,6 +4,7 @@
 #include "siconos/storage/info.hpp"
 #include "siconos/storage/pattern/base.hpp"
 #include "siconos/storage/properties.hpp"
+#include "siconos/storage/memory.hpp"
 
 namespace siconos::storage {
 

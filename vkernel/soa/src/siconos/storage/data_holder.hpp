@@ -2,7 +2,7 @@
 
 #include "siconos/storage/info.hpp"
 #include "siconos/storage/some/some.hpp"
-
+#include "siconos/storage/get.hpp"
 
 namespace siconos::storage {
 

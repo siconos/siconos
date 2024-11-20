@@ -4,6 +4,7 @@
 #include <memory>
 #include <tuple>
 #include <type_traits>
+
 #include "siconos/storage/ground/ground.hpp"
 
 namespace siconos::storage::pattern {
@@ -18,8 +19,8 @@ using nth_t = std::decay_t<decltype(tpl{}[ground::size_c<N>])>;
 template <typename... Args>
 using gather = ground::tuple<Args...>;
 
-//template <typename T, typename Tpl>
-//using cons_t = std::decay_t<decltype(std::tuple_cat<std::tuple<T>, Tpl>)>;
+// template <typename T, typename Tpl>
+// using cons_t = std::decay_t<decltype(std::tuple_cat<std::tuple<T>, Tpl>)>;
 
 // https://ctrpeach.io/posts/cpp20-string-literal-template-parameters/
 // https://stackoverflow.com/questions/62266052/c20-string-literal-template-argument-working-example
@@ -53,15 +54,13 @@ struct text {
 
 struct any_symbol {};
 template <string_literal Symbol>
-struct symbol : text<Symbol>, any_symbol {
-};
+struct symbol : text<Symbol>, any_symbol {};
 
 template <string_literal Symbol>
 constexpr auto symb = symbol<Symbol>{};
 
 template <string_literal Symbol>
-struct name : text<Symbol> {
-};
+struct name : text<Symbol> {};
 
 template <size_t N>
 constexpr auto make_string_literal(const string_literal<N>& a)
@@ -77,8 +76,7 @@ consteval auto make_symbol(const string_literal<N>& a)
 };
 
 template <string_literal Descr>
-struct description : text<Descr> {
-};
+struct description : text<Descr> {};
 
 namespace match {
 template <typename T>
@@ -124,16 +122,12 @@ concept polymorphic_type = requires { typename T::polymorphic; };
 
 template <typename T>
 concept size = requires(T a) {
-  {
-    std::size(a)
-  };
+  { std::size(a) };
 };
 
 template <typename T>
 concept push_back = requires(T a) {
-  {
-    a.push_back(typename T::value_type{})
-  };
+  { a.push_back(typename T::value_type{}) };
 };
 
 template <typename T, typename I>
@@ -142,6 +136,9 @@ concept handle = std::derived_from<typename T::type, I> &&
 
 template <typename T>
 concept wrap = item<T> && requires { typename T::wrap_t; };
+
+template <typename T>
+concept database = requires { typename T::database_t; };
 
 }  // namespace match
 }  // namespace siconos::storage::pattern

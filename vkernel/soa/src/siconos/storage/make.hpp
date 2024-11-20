@@ -6,6 +6,7 @@
 #include "siconos/storage/pattern/pattern.hpp"
 #include "siconos/storage/some/some.hpp"
 #include "siconos/storage/traits/traits.hpp"
+#include "siconos/storage/memory.hpp"
 
 namespace siconos::storage {
 

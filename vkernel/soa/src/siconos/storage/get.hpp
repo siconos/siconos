@@ -12,70 +12,22 @@ using namespace pattern;
 template <typename A>
 static auto get = ground::overload(
     // get<Attr>(data, step, handle)
-    []<match::handle_attribute<A> Handle, typename Data>(
+    []<match::handle_attribute<A> Handle, match::store Data>(
         Data&& data, auto step, Handle&& handle) constexpr -> decltype(auto) {
       return memory(
           step,
           ground::get<A>(static_cast<Data&&>(data).store()))[handle.get()];
     },
     // get<Attr>(data, step, handle)
-    []<match::handle_attribute<A> Handle, typename Data>(
+    []<match::handle_attribute<A> Handle, match::store Data>(
         Data& data, auto step, Handle& handle) constexpr -> decltype(auto) {
-      return memory(step, ground::get<A>(data).store())[handle.get()];
+      return memory(step, ground::get<A>(data.store()))[handle.get()];
     },
     // get<Attr>(data, handle)
-    []<match::handle_attribute<A> Handle, typename Data>(
+    []<match::handle_attribute<A> Handle, match::store Data>(
         Data& data, Handle& handle) constexpr -> decltype(auto) {
-      return memory(0, ground::get<A>(data).store())[handle.get()];
-    }  // ,
-       // // get<Attached_storage>(data, step, h)
-       // []<match::handle_attached_storage<A> Handle, typename Data>(
-       //     Data& data, auto step, Handle& handle) constexpr ->
-       //     decltype(auto)
-       //     {
-       //   using item_t = typename Handle::type;
-       //   using info_t = std::decay_t<decltype(ground::get<info>(data))>;
-       //   constexpr auto tpl = ground::filter(
-       //       typename info_t::all_properties_t{},
-       //       ground::is_a_model<[]<typename T>() consteval {
-       //         return (match::attached_storage<T, item_t> &&
-       //         match::tag<T, A>);
-       //       }>);
-
-    //   //      static_assert (std::tuple_size_v<decltype(tpl)> >= 1,
-    //   "attached
-    //   //      storage not found");
-    //   using attached_storage_t =
-    //   std::decay_t<decltype(std::get<0>(tpl))>; return memory(step,
-    //                 ground::get<attached_storage_t>(data))[handle.get()];
-    // },
-    // // get<Attached_storage>(data,h)
-    // []<match::handle_attached_storage<A> Handle, typename Data>(
-    //   Data& data, Handle& handle) constexpr -> decltype(auto) {
-    //   using item_t = typename Handle::type;
-    //   using info_t = std::decay_t<decltype(ground::get<info>(data))>;
-
-    //   constexpr auto tpl = ground::filter(
-    //       typename info_t::all_properties_t{},
-    //       ground::is_a_model<[]<typename T>() consteval {
-    //         return (match::attached_storage<T, item_t> &&
-    //         match::tag<T, A>);
-    //       }>);
-    //   //      constexpr auto tpl = filter<hold<decltype([]<typename
-    //   T>(T) {
-    //   //        return (match::attached_storage<T, item_t> &&
-    //   match::tag<T,
-    //   //        A>);
-    //   //      })>>(typename info_t::all_properties_t{});
-
-    //   //      static_assert (std::tuple_size_v<decltype(tpl)> >= 1,
-    //   "attached
-    //   //      storage not found");
-    //   using attached_storage_t =
-    //   std::decay_t<decltype(std::get<0>(tpl))>; return memory(0,
-    //   ground::get<attached_storage_t>(data))[handle.get()];
-    // }
-);
+      return memory(0, ground::get<A>(data.store()))[handle.get()];
+    });
 
 template <typename T>
 struct access {
