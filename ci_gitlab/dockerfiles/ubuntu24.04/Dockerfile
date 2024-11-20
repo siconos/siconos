@@ -1,4 +1,4 @@
-FROM ubuntu:23.04 AS siconos-base
+FROM ubuntu:24.04 AS siconos-base
 ENV TZ=Europe/Paris
 ENV DEBIAN_FRONTEND=noninteractive
 RUN  apt update && apt upgrade -y && apt install --no-install-recommends -y -qq \
@@ -23,7 +23,7 @@ RUN  apt update && apt upgrade -y && apt install --no-install-recommends -y -qq 
 	vim \
 	bzip2 \
 	wget \
-	libboost1.81-all-dev\
+	libboost-all-dev\
 	nlohmann-json3-dev \
 	libgl-dev \
 	libgl1 \

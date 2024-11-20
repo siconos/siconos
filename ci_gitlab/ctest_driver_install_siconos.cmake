@@ -149,7 +149,7 @@ endif()
 # - Test -
 if(${CTEST_MODE} STREQUAL "test" OR ${CTEST_MODE} STREQUAL "all")
   # -- Tests --
-  
+  set(CTEST_OUTPUT_ON_FAILURE ON)
   if(${CTEST_MODE} STREQUAL "test")
     ctest_start(APPEND)
   endif()

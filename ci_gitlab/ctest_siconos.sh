@@ -53,9 +53,20 @@ CDASH_SUBMIT="${CDASH_SUBMIT=:=1}"
 if [ $BUILD_MODE != "configure" ] && [ $BUILD_MODE != "all" ] && test -f "$BUILD_DIR/options.env"; then
     export CONF_FILE="$(cat $BUILD_DIR/options.env)"
 fi
-echo "${BUILD_MODE} and ${CONF_FILE}"
 
-ctest -S ${CI_PROJECT_DIR}/ci_gitlab/ctest_driver_install_siconos.cmake -Dmodel=$CTEST_BUILD_MODEL -DALLOW_PARALLEL_BUILD=$PARALLEL_BUILD -DCDASH_SUBMIT=$CDASH_SUBMIT -VV -DCTEST_MODE=$BUILD_MODE -DUSER_OPTIONS_FILE=$CONF_FILE --output-junit test_results.xml -DCTEST_BINARY_DIRECTORY=$BUILD_DIR -DCTEST_SOURCE_DIRECTORY=$CI_PROJECT_DIR
+ctest -S ${CI_PROJECT_DIR}/ci_gitlab/ctest_driver_install_siconos.cmake \
+     -Dmodel=$CTEST_BUILD_MODEL -DALLOW_PARALLEL_BUILD=$PARALLEL_BUILD -DCDASH_SUBMIT=$CDASH_SUBMIT \
+     -DCTEST_MODE=$BUILD_MODE -DUSER_OPTIONS_FILE=$CONF_FILE --output-junit test_results.xml \
+     -DCTEST_BINARY_DIRECTORY=$BUILD_DIR -DCTEST_SOURCE_DIRECTORY=$CI_PROJECT_DIR \
+    --output-log $BUILD_DIR/siconos-ctest-$BUILD_MODE.log -VV
+
+
+echo "\n\n============= CTEST Conf ==============\n"
+echo "- Ctest mode: ${BUILD_MODE}"
+echo "- Options file: ${CONF_FILE}"
+echo "- Log file: siconos-ctest-$BUILD_MODE.log"
+echo "\n\n=======================================\n"
+
 
 # Save conf name in a file that can be used in next CI step. This is useful to ensure the same site/build name for CDash between jobs.
 echo $CONF_FILE > $BUILD_DIR/options.env # keep the name of options file for next stages

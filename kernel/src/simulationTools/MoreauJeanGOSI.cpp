@@ -322,7 +322,7 @@ double MoreauJeanGOSI::computeResidu()
 
       SP::SiconosMatrix C = d->C();
       if(C)
-        prod(h, *C, vold, free_rhs, false); // free_rhs += h*C*vi
+        prod(-h, *C, vold, free_rhs, false); // free_rhs -= h*C*vi
 
       SP::SiconosMatrix K = d->K();
       if(K)
