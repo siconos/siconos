@@ -177,6 +177,14 @@ if(NOT DEFINED SICONOS_INT64)
   endif()
 endif()
 
+option(WITH_PETSC "Use PetSC" OFF)
+if(WITH_PETSC)
+  include(PetscSetup)
+  target_link_libraries(numerics PRIVATE PkgConfig::PETSC)
+  target_link_libraries(numerics PRIVATE MPI::MPI_C)
+endif()
+
+
 #   Note : the CSparse data structures are referred to in
 #   kernel, but the functions are only called from numerics, so it is
 #   not a link-time dependency for kernel.

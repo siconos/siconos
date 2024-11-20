@@ -7,7 +7,7 @@ static char help[] = "Color a matrix, returning set sizes and indices. \n\n";
 */
 
 #include "graph_tools_petsc.h"
-void color_graph_petsc(int n, double *M, int *n_colors, int **set_sizes, int ***set_indices) {
+int color_graph_petsc(int n, double *M, int *n_colors, int **set_sizes, int ***set_indices) {
     Mat A;
     PetscScalar val;
     PetscReal dtol = 1.e-16;
@@ -122,4 +122,5 @@ void color_graph_petsc(int n, double *M, int *n_colors, int **set_sizes, int ***
     PetscCall(PetscFinalize());
 
     return 0;
+
 }

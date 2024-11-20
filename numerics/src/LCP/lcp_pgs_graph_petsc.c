@@ -18,7 +18,7 @@
 
 #include "graph_tools_petsc.h"
 
-void lcp_pgs_graph(LinearComplementarityProblem *problem, double *z, double *w, int *info,
+void lcp_pgs_graph_petsc(LinearComplementarityProblem *problem, double *z, double *w, int *info,
                       SolverOptions *options) {  
   NumericsMatrix *M = problem->M;
   double *q = problem->q;

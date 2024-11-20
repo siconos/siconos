@@ -9,6 +9,6 @@
 #include <unistd.h>
 #include <omp.h>
 
-void color_graph_petsc(int n, double *M, int *n_colors, int **set_sizes, int ***set_indices);
+int color_graph_petsc(int n, double *M, int *n_colors, int **set_sizes, int ***set_indices);
 
 #endif
