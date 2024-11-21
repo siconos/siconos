@@ -150,19 +150,19 @@ def test_LagrangianScleronomousR_setJachqPtr():
 
     r = Rel()
     j = np.array([[1, 2, 3], [4, 5, 6]])
-    r.setJachqPtr(j)
+    r.setConstantJacobianhOver_q(j)
     # C is transposed()
-    r.C()
+    r.jacobianhOver_q()
 
-    assert np.max(r.C() - np.array([[1, 2, 3], [4, 5, 6]])) == 0.0
-    assert np.max(r.C() - np.array([[0, 2, 3], [4, 5, 6]])) == 1.0
+    assert np.max(r.jacobianhOver_q() - np.array([[1, 2, 3], [4, 5, 6]])) == 0.0
+    assert np.max(r.jacobianhOver_q() - np.array([[0, 2, 3], [4, 5, 6]])) == 1.0
 
-    r.setJachqPtr(r.C())
+    r.setConstantJacobianhOver_q(r.jacobianhOver_q())
 
-    r.C()
+    r.jacobianhOver_q()
 
-    assert np.max(r.C() - np.array([[1, 2, 3], [4, 5, 6]])) == 0.0
-    assert np.max(r.C() - np.array([[0, 2, 3], [4, 5, 6]])) == 1.0
+    assert np.max(r.jacobianhOver_q() - np.array([[1, 2, 3], [4, 5, 6]])) == 0.0
+    assert np.max(r.jacobianhOver_q() - np.array([[0, 2, 3], [4, 5, 6]])) == 1.0
 
 
 def test_SolverOption():

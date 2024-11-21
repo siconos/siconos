@@ -435,7 +435,7 @@ class LagrangianDS : public SecondOrderDS {
    *  \param fct the user-defined function (std::function, lambda ...)
    */
   void setComputeMassFunction(
-      const siconos::modeling::func_prototypes::FunctionV_V &fext_func);
+      const siconos::modeling::func_prototypes::FunctionV_V &fct);
 
   /** to compute the mass matrix operator \f$ M(q) \f$
    *
@@ -462,11 +462,9 @@ class LagrangianDS : public SecondOrderDS {
    *  \param position q vector
    *  \param time the current time
    */
-  // void computeFint(const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
-  //                  const Eigen::Ref<const siconos::algebra::SiconosVector> &position,
-  //                  double time);
-  void computeFint(const siconos::algebra::SiconosVector &velocity,
-                   const siconos::algebra::SiconosVector &position, double time);
+  void computeFint(const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
+                   const Eigen::Ref<const siconos::algebra::SiconosVector> &position,
+                   double time);
 
   /** \return a read-only view on \f$ \nabla_qF_{int} \f$ matrix */
   inline const auto jacobianFintOver_q_view() const {

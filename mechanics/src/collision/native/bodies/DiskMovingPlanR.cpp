@@ -77,7 +77,7 @@ void siconos::collision::native::bodies::DiskMovingPlanR::computeh(
   y(0) = distance(q_0, q_1, _r);
 }
 
-void siconos::collision::native::bodies::DiskMovingPlanR::computeJachq(
+void siconos::collision::native::bodies::DiskMovingPlanR::computeJacobianhOver_q(
     double time, const siconos::algebra::BlockVector& q, siconos::algebra::BlockVector& z)
 {
   init(time);
@@ -88,15 +88,15 @@ void siconos::collision::native::bodies::DiskMovingPlanR::computeJachq(
   double D1 = _A * x + _B * y + _C;
   double signD1 = copysign(1, D1);
 
-  _jachq->setValue(0, 0, _A * signD1 / _sqrA2pB2);
-  _jachq->setValue(1, 0, -_B * signD1 / _sqrA2pB2);
-  _jachq->setValue(0, 1, _B * signD1 / _sqrA2pB2);
-  _jachq->setValue(1, 1, _A * signD1 / _sqrA2pB2);
-  _jachq->setValue(0, 2, 0);
-  _jachq->setValue(1, 2, -_r);
+  jacobianhOver_q_->setValue(0, 0, _A * signD1 / _sqrA2pB2);
+  jacobianhOver_q_->setValue(1, 0, -_B * signD1 / _sqrA2pB2);
+  jacobianhOver_q_->setValue(0, 1, _B * signD1 / _sqrA2pB2);
+  jacobianhOver_q_->setValue(1, 1, _A * signD1 / _sqrA2pB2);
+  jacobianhOver_q_->setValue(0, 2, 0);
+  jacobianhOver_q_->setValue(1, 2, -_r);
 }
 
-void siconos::collision::native::bodies::DiskMovingPlanR::computehDot(
+void siconos::collision::native::bodies::DiskMovingPlanR::computehdot(
     double time, const siconos::algebra::BlockVector& q, siconos::algebra::BlockVector& z)
 {
   init(time);
@@ -106,7 +106,7 @@ void siconos::collision::native::bodies::DiskMovingPlanR::computehDot(
 
   double D1 = _A * x + _B * y + _C;
   double signD1 = copysign(1, D1);
-  (*_hDot)(0) = (-_AADot - _BBDot) * fabs(D1) / _cubsqrA2pB2 +
+  (*hdot_)(0) = (-_AADot - _BBDot) * fabs(D1) / _cubsqrA2pB2 +
                 (_ADot * x + _BDot * y + _CDot) * signD1 / _sqrA2pB2;
 }
 

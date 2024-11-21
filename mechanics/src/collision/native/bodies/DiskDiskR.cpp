@@ -47,10 +47,10 @@ void siconos::collision::native::bodies::DiskDiskR::computeh(const siconos::alge
   y(0) = distance(q_0, q_1, _r1, q_3, q_4, _r2);
 }
 
-void siconos::collision::native::bodies::DiskDiskR::computeJachq(const siconos::algebra::BlockVector& q,
+void siconos::collision::native::bodies::DiskDiskR::computeJacobianhOver_q(const siconos::algebra::BlockVector& q,
                                                 siconos::algebra::BlockVector& z)
 {
-  assert(_jachq);
+  assert(jacobianhOver_q_);
 
   double x1 = q(0);
   double y1 = q(1);
@@ -75,16 +75,16 @@ void siconos::collision::native::bodies::DiskDiskR::computeJachq(const siconos::
   [d     d         d   d      ]
   */
 
-  _jachq->setValue(0, 0, -dxsd);
-  _jachq->setValue(1, 0, dysd);
-  _jachq->setValue(0, 1, -dysd);
-  _jachq->setValue(1, 1, -dxsd);
-  _jachq->setValue(0, 2, 0.);
-  _jachq->setValue(1, 2, -_r1);
-  _jachq->setValue(0, 3, dxsd);
-  _jachq->setValue(1, 3, -dysd);
-  _jachq->setValue(0, 4, dysd);
-  _jachq->setValue(1, 4, dxsd);
-  _jachq->setValue(0, 5, 0.);
-  _jachq->setValue(1, 5, -_r2);
+  jacobianhOver_q_->setValue(0, 0, -dxsd);
+  jacobianhOver_q_->setValue(1, 0, dysd);
+  jacobianhOver_q_->setValue(0, 1, -dysd);
+  jacobianhOver_q_->setValue(1, 1, -dxsd);
+  jacobianhOver_q_->setValue(0, 2, 0.);
+  jacobianhOver_q_->setValue(1, 2, -_r1);
+  jacobianhOver_q_->setValue(0, 3, dxsd);
+  jacobianhOver_q_->setValue(1, 3, -dysd);
+  jacobianhOver_q_->setValue(0, 4, dysd);
+  jacobianhOver_q_->setValue(1, 4, dxsd);
+  jacobianhOver_q_->setValue(0, 5, 0.);
+  jacobianhOver_q_->setValue(1, 5, -_r2);
 }

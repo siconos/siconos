@@ -15,42 +15,35 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License
-*/
+ */
 /*! \file ModelingTools.hpp
 Include files related to modeling part of Siconos.
 
 */
 
-#include "EqualityConditionNSL.hpp"
+#include "BoundaryCondition.hpp"
 #include "ComplementarityConditionNSL.hpp"
-#include "MixedComplementarityConditionNSL.hpp"
-#include "RelayNSL.hpp"
-#include "NewtonImpactNSL.hpp"
-#include "MultipleImpactNSL.hpp"
-#include "NewtonImpactFrictionNSL.hpp"
-#include "NormalConeNSL.hpp"
-#include "NewtonImpactRollingFrictionNSL.hpp"
-#include "FremondImpactFrictionNSL.hpp"
-
-#include "Interaction.hpp"
-
-#include "RelationType.hpp"
-#include "FirstOrderType1R.hpp"
-#include "FirstOrderType2R.hpp"
-
-#include "LagrangianLinearTIDS.hpp"
-#include "LagrangianLinearDiagonalDS.hpp"
+#include "EqualityConditionNSL.hpp"
 #include "FirstOrderLinearTIDS.hpp"
-#include "NewtonEulerDS.hpp"
-#include "NewtonEulerR.hpp"
+#include "FirstOrderType1R.hpp"
+#include "FixedBC.hpp"
+#include "FremondImpactFrictionNSL.hpp"
+#include "HarmonicBC.hpp"
+#include "Interaction.hpp"
+#include "LagrangianLinearDiagonalDS.hpp"
+#include "LagrangianLinearTIDS.hpp"
+#include "LinearComplementaritySystemsNSDS.hpp"
+#include "MixedComplementarityConditionNSL.hpp"
+#include "MultipleImpactNSL.hpp"
 #include "NewtonEuler1DR.hpp"
 #include "NewtonEuler3DR.hpp"
 #include "NewtonEuler5DR.hpp"
-
-#include "BoundaryCondition.hpp"
-#include "HarmonicBC.hpp"
-#include "FixedBC.hpp"
-
+#include "NewtonEulerDS.hpp"
+#include "NewtonEulerR.hpp"
+#include "NewtonImpactFrictionNSL.hpp"
+#include "NewtonImpactNSL.hpp"
+#include "NewtonImpactRollingFrictionNSL.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
-#include "LinearComplementaritySystemsNSDS.hpp"
-
+#include "NormalConeNSL.hpp"
+#include "RelationType.hpp"
+#include "RelayNSL.hpp"

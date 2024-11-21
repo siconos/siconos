@@ -25,208 +25,138 @@
 
 namespace siconos::modeling {
 /**
-    Scleronomic Lagrangian (Non Linear) Relations
+  Scleronomic Lagrangian (Non Linear) Relations
+
+  This class provides tools to describe Lagrangian (2nd order) non linear relations, with:
 
     \f[
-    y = h(q,z)
+    y = h(q)
     \f]
 
     \f[
-    \dot y = \nabla^\top_q h(q,z) \dot q
+    \dot y = \nabla^\top_q h(q) \dot q
     \f]
 
     or more generally
 
     \f[
-     \dot y = H(q,z) \dot q
+     \dot y = H(q) \dot q
     \f]
 
     and by duality
 
     \f[
-    p = \nabla_q h(q,z)\lambda
+    p = \nabla_q h(q)\lambda
     \f]
 
     or more generally
 
     \f[
-    p = H^\top(q,z)\lambda
+    p = H^\top(q)\lambda
     \f]
 
     with
 
     \f[
-    H^\top(q,z) = \nabla_q h(q,z)
+    H^\top(q) = \nabla_q h(q)
     \f]
 
-    is the pure Lagrangian setting.
+    The following operators can be set by user-defined functions:
 
-    y (or its discrete approximation) is stored in y[0]
-    \f$ \dot y \f$ (or its discrete approximation) is  stored in y[1]
-    higher level y[i] can be used for storing higher levels of derivatives.
+    - \f$ h(q) \f$
+    - \f$ \nabla_q h(q) \f$
 
-    Jacobians and h are connected to plug-in functions.
-
-    The plugin function to compute h(q,z) needs the following parameters:
-
-    --> sizeQ: size of q = sum of the sizes of all the DynamicalSystems involved
-    in the interaction
-
-    --> q : pointer to the first element of q
-
-    --> sizeY : size of vector y (ie of the interaction)
-
-    --> [in,out] y : pointer to the first element of y
-
-    --> sizeZ : size of vector z
-
-    --> [in,out] z: pointer to z vector(s) from DS.
-
-    Its signature must be "void plugin(unsigned int, double*, unsigned int,
-    double*, unsigned int, double*)"
-
-    The plugin function to compute G0(q,z),
-    gradient of h according to q, needs the following parameters:
-
-    --> sizeQ: size of q = sum of the sizes of all the DynamicalSystems involved in
-    the interaction
-
-    --> q : pointer to the first element of q
-
-    --> sizeY : size of vector y (ie of the intercation)
-
-    --> [in,out] H : pointer to the first element of H (sizeY X sizeDS matrix)
-
-    --> sizeZ : size of vector z
-
-    -->[in,out] z: pointer to z vector(s) from DS.
-
-    Its signature must be "void plugin(unsigned int, double*, unsigned int,
-    double*, unsigned int, double*)"
-
- */
+   */
 class LagrangianScleronomousR : public LagrangianR {
  protected:
   ACCEPT_SERIALIZATION(LagrangianScleronomousR);
 
-  /* LagrangianScleronomousR plug-in to compute G0(q,z), gradient of h
-   *  according to q
-   *
-   *  @param sizeQ size of q = sum of the sizes of all the DynamicalSystems
-   *  involved in the interaction
-   *  @param q  pointer to the first element of q
-   *  @param sizeY  size of vector y (ie of the intercation)
-   *  @param[in,out] G0 : pointer to the first element of G0 (sizeY X sizeDS
-   *  matrix)
-   *  @param sizeZ size of vector z
-   *  @param[in,out] z: pointer to z vector(s) from DS.
+  /** function wrapper used to compute \f$ h(q) \f$ */
+  siconos::modeling::func_prototypes::FunctionBV_V computeh_{nullptr};
+
+  /** function wrapper used to compute  \f$ \nabla^\top_q h(q) \f$ */
+  siconos::modeling::func_prototypes::FunctionBV_M computejacobianhOver_q_{nullptr};
+
+  /** \f$ \frac{\partial}{\partial t}(\nabla^T_{q} h(q)) \f$
+   *  This value is useful to compute the second-order
+   *  derivative of the constraints with respect to time.
    */
+  std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianhOver_q_dot_{nullptr};
 
-  /** Plugin object for the time--derivative of Jacobian i.e.
-   *  \f$ \frac{d}{dt} \nabla^T_{q} h(t,q,\dot q,\ldots). \f$
-   * stored in _dotjachq
+  /** function wrapper used to compute \f$ \frac{\partial}{\partial t}(\nabla^T_{q} h(q)) \f$
    */
-  std::shared_ptr<siconos::plugins::PluggedObject> _plugindotjacqh{nullptr};
+  siconos::modeling::func_prototypes::FunctionBVBV_M computejacobianhOver_q_dot_{nullptr};
 
-  /** Product of the time--derivative of Jacobian with the velocity qdot */
-  std::shared_ptr<siconos::algebra::SiconosVector> _dotjacqhXqdot{nullptr};
+  /** True if  \f$ \frac{\partial}{\partial t}(\nabla^T_{q} h(q)) \f$ is taken into account */
+  bool hasJacobianhOver_q_dot_{false};
 
-  /** reset all plugins */
-  void _zeroPlugin() override;
-
-  /** basic constructor */
-  LagrangianScleronomousR() : LagrangianR(RelationSubType::ScleronomousR) { _zeroPlugin(); }
+  /** \f$ \frac{\partial}{\partial t}(\nabla^T_{q} h(q)).\dot q\f$ */
+  std::shared_ptr<siconos::algebra::SiconosVector> jacobianhOver_q_dot_X_qdot_{nullptr};
 
  public:
-  /** constructor from a set of data
-   *
-   *  \param pluginh the name of the plugin to compute h(q,z).
-   *  The signature  of the plugged function must be:
-   *  "void pluginH(unsigned int, double*, unsigned int, double*, unsigned int,
-   *  double*)"
-   *  \param pluginJacobianhq the name of the plugin to compute
-   *  jacobian h according to q. The signature  of the plugged function must
-   *  be: "void pluginG0(unsigned int, double*, unsigned int, double*, unsigned
-   *  int, double*)"
-   *
-   */
-  LagrangianScleronomousR(const std::string &pluginh, const std::string &pluginJacobianhq);
+  /** basic constructor */
+  LagrangianScleronomousR() : LagrangianR(RelationSubType::ScleronomousR) {}
 
-  /** constructor from a set of data used for EventDriven Scheme
-   *
-   *  \param pluginh the name of the plugin to compute h(q,z).
-   *  The signature  of the plugged function must be:
-   *  "void pluginH(unsigned int, double*, unsigned int, double*, unsigned int,
-   *  double*)"
-   *  \param pluginJacobianhq the name of the plugin to compute
-   *  jacobian h according to q. The signature  of the plugged function must
-   *  be: "void pluginG0(unsigned int, double*, unsigned int, double*, unsigned
-   *  int, double*)"
-   *  \param pluginDotJacobianhq the name of the plugin to compute
-   *  the derivative of H Jacobian with respect to time The signature of the
-   *  plugged function must be: "void pluginS0(unsigned int, double*,unsigned
-   *  int, double*, unsigned int, double*, unsigned int, double*)"
-   *
-   */
-  LagrangianScleronomousR(const std::string &pluginh, const std::string &pluginJacobianhq,
-                          const std::string &pluginDotJacobianhq);
-
-  /** destructor
-   */
+  /** destructor */
   virtual ~LagrangianScleronomousR() noexcept = default;
 
   void initialize(Interaction &inter) override;
 
-  /** check sizes of the relation specific operators.
+  /** set a user-defined function to compute \f$ h(q) \f$  \f$
    *
-   *  \param inter an Interaction using this relation
+   *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void checkSize(Interaction &inter) override;
-
-  /** \return the product of  the time--derivative of Jacobian with the velocity
-   * qdot */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> dotjacqhXqdot() {
-    return _dotjacqhXqdot;
-  };
+  void setComputehFunction(const siconos::modeling::func_prototypes::FunctionBV_V &fct);
 
   /**
-      to compute the output y = h(q,z) of the Relation
+    to compute the output y = h(q) of the Relation
 
-      \param q coordinates of the dynamical systems involved in the relation
-      \param z user defined parameters (optional)
-      \param y the resulting vector
+    \param q coordinates of the dynamical systems involved in the relation
+    \param y the resulting vector
   */
   virtual void computeh(const siconos::algebra::BlockVector &q,
-                        siconos::algebra::BlockVector &z, siconos::algebra::SiconosVector &y);
+                        Eigen::Ref<siconos::algebra::SiconosVector> y);
 
-  /**
-      to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
+  /** set a user-defined function to compute \f$ \nabla^\top_q h(q) \f$ \f$
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputeJacobianhOver_qFunction(
+      const siconos::modeling::func_prototypes::FunctionBV_M &fct);
 
-      \param q coordinates of the dynamical systems involved in the relation
-      \param z user defined parameters (optional)
-  */
-  virtual void computeJachq(const siconos::algebra::BlockVector &q,
-                            siconos::algebra::BlockVector &z);
+  /** Computes \f$ \nabla^\top_q h(q) \f$
+   * \param q coordinates of the dynamical systems involved in the relation
+   */
+  virtual void computeJacobianhOver_q(const siconos::algebra::BlockVector &q);
 
-  /**
-     to compute the time derivative of the Jacobian. Result in _dotjachq
-     (access: dotjachq())
+  /** set a user-defined function to compute
+   *  \f$ \frac{\partial}{\partial t}(\nabla^T_{q} h(q))\f$
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputejacobianhOver_q_dotFunction(
+      const siconos::modeling::func_prototypes::FunctionBVBV_M &fct);
 
-     \param q coordinates of the dynamical systems involved in the relation
-     \param z user defined parameters (optional)
-     \param time derivatives of q
-  */
-  virtual void computeDotJachq(const siconos::algebra::BlockVector &q,
-                               siconos::algebra::BlockVector &z,
-                               const siconos::algebra::BlockVector &qDot);
+  /** Update \f$ \frac{\partial}{\partial t}(\nabla^T_{q} h(q))\f$
+   *  \param q 'list' of state vectors (for all ds involved in the interaction)
+   *  \param qdot 'list' of state vectors (for all ds involved in the interaction)
+   */
+  void computejacobianhOver_q_dot(const siconos::algebra::BlockVector &q,
+                                  const siconos::algebra::BlockVector &qdot);
 
-  /** to compute the product of  the time--derivative of Jacobian with the
-   *  velocity qdot
+  /** \return a read-only view on \f$ \frac{\partial}{\partial t}(\nabla^T_{q} h(q)).\dot q\f$
+   * vector */
+  inline const auto jacobianhOver_q_dot_X_qdot() const {
+    return siconos::algebra::ConstMapVectorType(jacobianhOver_q_dot_X_qdot_->data(),
+                                                jacobianhOver_q_dot_X_qdot_->size());
+  }
+
+  /** to compute \f$ \frac{\partial}{\partial t}(\nabla^T_{q} h(q)).\dot q\f$
    *
    *  \param time double, current time
    *  \param inter interaction
    */
-  void computedotjacqhXqdot(double time, Interaction &inter);
+  void computeJacobianhOver_q_dot_X_qdot(double time, Interaction &inter);
 
   /** compute all the H Jacobian
    *
@@ -235,14 +165,6 @@ class LagrangianScleronomousR : public LagrangianR {
    *  \param interProp
    */
   void computeJach(double time, Interaction &inter) override;
-
-  /** compute all the G Jacobian
-   *
-   *  \param time double, current time
-   *  \param inter interaction that owns the relation
-   *  \param interProp
-   */
-  void computeJacg(double time, Interaction &inter) override {}
 
   /** to compute output
    *

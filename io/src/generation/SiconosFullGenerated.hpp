@@ -182,13 +182,12 @@ SICONOS_IO_REGISTER_WITH_BASES(NormalConeNSL,(NonSmoothLaw),
 SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerR,(Relation),
   (_T)
   (_contactForce)
-  (_dotjachq)
+  (jacobianhOver_q_dot_)
   (_e)
   (_jacglambda)
-  (_jachlambda)
-  (_jachq)
-  (_jachqDot)
-  (_jachqT)
+  (jacobianhOver_lambda_)
+  (jacobianhOver_q_)
+  (jacobianhOver_q_T)
   (_plugindotjacqh)
   (_secondOrderTimeDerivativeTerms))
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianCompliantLinearTIR,(LagrangianR),
@@ -239,7 +238,7 @@ SICONOS_IO_REGISTER(Relation,
   (_relationType)
   (_subType))
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianRheonomousR,(LagrangianR),
-  (_hDot)
+  (hdot_)
   (_pluginhDot))
 SICONOS_IO_REGISTER_WITH_BASES(FirstOrderNonLinearR,(FirstOrderR),
 )
@@ -266,10 +265,8 @@ SICONOS_IO_REGISTER(Interaction,
   (_yOld)
   (_y_k))
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianR,(Relation),
-  (_dotjachq)
-  (_jachlambda)
-  (_jachq)
-  (_jachqDot)
+  (jacobianhOver_q_dot_)
+  (jacobianhOver_q_)
   (_pluginJachq))
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianLinearDiagonalDS,(LagrangianDS),
   (dampingMatrix_)
@@ -802,7 +799,7 @@ SICONOS_IO_REGISTER_WITH_BASES(JointFrictionR,(NewtonEulerR),
   (_axis)
   (_axisMax)
   (_axisMin)
-  (_jachqTmp)
+  (jacobianhOver_q_Tmp)
   (_joint))
 SICONOS_IO_REGISTER_WITH_BASES(SiconosCollisionManager,(InteractionManager),
 )
@@ -815,7 +812,7 @@ SICONOS_IO_REGISTER_WITH_BASES(JointStopR,(NewtonEulerR),
   (_axisMax)
   (_axisMin)
   (_dir)
-  (_jachqTmp)
+  (jacobianhOver_q_Tmp)
   (_joint)
   (_pos))
 SICONOS_IO_REGISTER_WITH_BASES(CouplerJointR,(NewtonEulerJointR),

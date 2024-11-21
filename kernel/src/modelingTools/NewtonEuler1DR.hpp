@@ -55,7 +55,7 @@ class NewtonEuler1DR : public NewtonEulerR {
   /** _Nc must be calculated relative to q2 */
   std::shared_ptr<siconos::algebra::SiconosVector> _relNc{nullptr};
 
-  /** Rotation matrix converting the absolute coordinate to the contact frame
+  /** Rotation matrix converting the absolute coordinate to the contact frame^
    *  coordinate. This matrix contains the unit vector(s)of the contact frame in
    *  row.
    */
@@ -113,7 +113,7 @@ class NewtonEuler1DR : public NewtonEulerR {
    */
   virtual ~NewtonEuler1DR() noexcept = default;
 
-  void computeJachq(double time, Interaction &inter,
+  void computeJacobianhOver_q(double time, Interaction &inter,
                     std::shared_ptr<siconos::algebra::BlockVector> q0) override;
 
   void initialize(Interaction &inter) override;
@@ -125,7 +125,7 @@ class NewtonEuler1DR : public NewtonEulerR {
    *  \param inter interaction that owns the relation
    *  \param q0 the block vector to the dynamical system position
    */
-  void computeJachqT(Interaction &inter,
+  void computeHMatrix_prod_T(Interaction &inter,
                      std::shared_ptr<siconos::algebra::BlockVector> q0) override;
 
   /**

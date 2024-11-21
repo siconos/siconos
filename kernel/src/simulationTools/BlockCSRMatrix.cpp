@@ -203,13 +203,13 @@ void siconos::simulation::BlockCSRMatrix::fillH(siconos::graphs::InteractionsGra
     (*_blockCSR)(std::min(pos, col), std::max(pos, col)) =
         std::static_pointer_cast<siconos::modeling::NewtonEulerR>(
             indexSet.bundle(*vi)->relation())
-            ->jachqT()
+            ->H_prod_T()
             ->data();
 
     (*_blockCSR)(std::max(pos, col), std::min(pos, col)) =
         std::static_pointer_cast<siconos::modeling::NewtonEulerR>(
             indexSet.bundle(*vi)->relation())
-            ->jachqT()
+            ->H_prod_T()
             ->data();
   }
 

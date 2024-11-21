@@ -55,12 +55,12 @@ class SphereLDSSphereLDSR : public siconos::modeling::LagrangianScleronomousR,
                 siconos::algebra::SiconosVector& y) override;
 
   /**
-     to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
+     to compute the jacobian of h(...). Set attribute jacobianhOver_q_ (access: jacqhq())
 
      \param q coordinates of the dynamical systems involved in the relation
      \param z user defined parameters (optional)
   */
-  void computeJachq(const siconos::algebra::BlockVector& q,
+  void computeJacobianhOver_q(const siconos::algebra::BlockVector& q,
                     siconos::algebra::BlockVector& z) override;
 };
 }  // namespace siconos::collision::native::bodies

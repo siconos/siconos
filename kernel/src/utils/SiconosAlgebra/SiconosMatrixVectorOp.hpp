@@ -44,6 +44,9 @@ void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool
 void matrixBlockVector_prod(const SiconosMatrix& A, const BlockVector& x, SiconosVector& y,
                             bool init = true);
 
+void matrixBlockVector_prod(const SiconosMatrix& A, const BlockVector& x,
+                            Eigen::Ref<SiconosVector> y, bool init = true);
+
 // NO NEED TO BE FRIEND
 /** computes y = A*x or y += A*x if init = false
   \param A a SiconosMatrix

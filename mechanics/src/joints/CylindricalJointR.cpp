@@ -200,7 +200,7 @@ void siconos::joints::CylindricalJointR::computeV1V2FromAxis() {
   _V2 = _axis0->head<3>().cross(_V1);
 }
 
-void siconos::joints::CylindricalJointR::computeJachq(
+void siconos::joints::CylindricalJointR::computeJacobianhOver_q(
     double time, siconos::modeling::Interaction& inter,
     std::shared_ptr<siconos::algebra::BlockVector> q0) {
   auto q1 = (q0->getAllVect())[0];
@@ -437,94 +437,94 @@ void siconos::joints::CylindricalJointR::Jd1d2(double X1, double Y1, double Z1, 
       2 * _V2->getValue(0) * q13 + 2 * _V2->getValue(1) * q10 - 2 * _V2->getValue(2) * q11;
   const double x72 =
       2 * _V2->getValue(0) * q10 - 2 * _V2->getValue(1) * q13 + 2 * _V2->getValue(2) * q12;
-  _jachq->setValue(0, 0, -x1 + x3 - x5 - x7);
-  _jachq->setValue(0, 1, -x10 - x11 + x8 - x9);
-  _jachq->setValue(0, 2, x12 - x13 - x14 - x15);
-  _jachq->setValue(0, 3,
+  jacobianhOver_q_->setValue(0, 0, -x1 + x3 - x5 - x7);
+  jacobianhOver_q_->setValue(0, 1, -x10 - x11 + x8 - x9);
+  jacobianhOver_q_->setValue(0, 2, x12 - x13 - x14 - x15);
+  jacobianhOver_q_->setValue(0, 3,
                    -2 * x16 * x17 - 2 * x18 * x19 - 2 * x2 * x29 - 2 * x20 * x21 -
                        2 * x27 * x4 - 2 * x28 * x6);
-  _jachq->setValue(0, 4,
+  jacobianhOver_q_->setValue(0, 4,
                    -2 * x0 * x27 - 2 * x17 * x22 + 2 * x18 * x21 - 2 * x19 * x20 -
                        2 * x2 * x28 + 2 * x29 * x6);
-  _jachq->setValue(0, 5,
+  jacobianhOver_q_->setValue(0, 5,
                    -2 * x0 * x29 + 2 * x16 * x19 - 2 * x17 * x18 - 2 * x21 * x22 -
                        2 * x27 * x6 + 2 * x28 * x4);
-  _jachq->setValue(0, 6,
+  jacobianhOver_q_->setValue(0, 6,
                    -2 * x0 * x28 - 2 * x16 * x21 + 2 * x17 * x20 - 2 * x19 * x22 +
                        2 * x2 * x27 - 2 * x29 * x4);
-  _jachq->setValue(0, 7, x17);
-  _jachq->setValue(0, 8, x21);
-  _jachq->setValue(0, 9, x19);
-  _jachq->setValue(0, 10, 2 * x17 * x25 + 2 * x19 * x26 + 2 * x21 * x24);
-  _jachq->setValue(0, 11, 2 * x17 * x23 + 2 * x19 * x24 - 2 * x21 * x26);
-  _jachq->setValue(0, 12, 2 * x17 * x26 - 2 * x19 * x25 + 2 * x21 * x23);
-  _jachq->setValue(0, 13, -2 * x17 * x24 + 2 * x19 * x23 + 2 * x21 * x25);
-  _jachq->setValue(1, 0, -x31 + x33 - x35 - x37);
-  _jachq->setValue(1, 1, x38 - x39 - x40 - x41);
-  _jachq->setValue(1, 2, x42 - x43 - x44 - x45);
-  _jachq->setValue(1, 3,
+  jacobianhOver_q_->setValue(0, 7, x17);
+  jacobianhOver_q_->setValue(0, 8, x21);
+  jacobianhOver_q_->setValue(0, 9, x19);
+  jacobianhOver_q_->setValue(0, 10, 2 * x17 * x25 + 2 * x19 * x26 + 2 * x21 * x24);
+  jacobianhOver_q_->setValue(0, 11, 2 * x17 * x23 + 2 * x19 * x24 - 2 * x21 * x26);
+  jacobianhOver_q_->setValue(0, 12, 2 * x17 * x26 - 2 * x19 * x25 + 2 * x21 * x23);
+  jacobianhOver_q_->setValue(0, 13, -2 * x17 * x24 + 2 * x19 * x23 + 2 * x21 * x25);
+  jacobianhOver_q_->setValue(1, 0, -x31 + x33 - x35 - x37);
+  jacobianhOver_q_->setValue(1, 1, x38 - x39 - x40 - x41);
+  jacobianhOver_q_->setValue(1, 2, x42 - x43 - x44 - x45);
+  jacobianhOver_q_->setValue(1, 3,
                    -2 * x16 * x46 - 2 * x18 * x47 - 2 * x20 * x48 - 2 * x27 * x34 -
                        2 * x28 * x36 - 2 * x29 * x32);
-  _jachq->setValue(1, 4,
+  jacobianhOver_q_->setValue(1, 4,
                    2 * x18 * x48 - 2 * x20 * x47 - 2 * x22 * x46 - 2 * x27 * x30 -
                        2 * x28 * x32 + 2 * x29 * x36);
-  _jachq->setValue(1, 5,
+  jacobianhOver_q_->setValue(1, 5,
                    2 * x16 * x47 - 2 * x18 * x46 - 2 * x22 * x48 - 2 * x27 * x36 +
                        2 * x28 * x34 - 2 * x29 * x30);
-  _jachq->setValue(1, 6,
+  jacobianhOver_q_->setValue(1, 6,
                    -2 * x16 * x48 + 2 * x20 * x46 - 2 * x22 * x47 + 2 * x27 * x32 -
                        2 * x28 * x30 - 2 * x29 * x34);
-  _jachq->setValue(1, 7, x46);
-  _jachq->setValue(1, 8, x48);
-  _jachq->setValue(1, 9, x47);
-  _jachq->setValue(1, 10, 2 * x24 * x48 + 2 * x25 * x46 + 2 * x26 * x47);
-  _jachq->setValue(1, 11, 2 * x23 * x46 + 2 * x24 * x47 - 2 * x26 * x48);
-  _jachq->setValue(1, 12, 2 * x23 * x48 - 2 * x25 * x47 + 2 * x26 * x46);
-  _jachq->setValue(1, 13, 2 * x23 * x47 - 2 * x24 * x46 + 2 * x25 * x48);
+  jacobianhOver_q_->setValue(1, 7, x46);
+  jacobianhOver_q_->setValue(1, 8, x48);
+  jacobianhOver_q_->setValue(1, 9, x47);
+  jacobianhOver_q_->setValue(1, 10, 2 * x24 * x48 + 2 * x25 * x46 + 2 * x26 * x47);
+  jacobianhOver_q_->setValue(1, 11, 2 * x23 * x46 + 2 * x24 * x47 - 2 * x26 * x48);
+  jacobianhOver_q_->setValue(1, 12, 2 * x23 * x48 - 2 * x25 * x47 + 2 * x26 * x46);
+  jacobianhOver_q_->setValue(1, 13, 2 * x23 * x47 - 2 * x24 * x46 + 2 * x25 * x48);
 
   /* Orientation constraints (H3, H4, H5)
    */
-  _jachq->setValue(2, 0, 0);
-  _jachq->setValue(2, 1, 0);
-  _jachq->setValue(2, 2, 0);
-  _jachq->setValue(
+  jacobianhOver_q_->setValue(2, 0, 0);
+  jacobianhOver_q_->setValue(2, 1, 0);
+  jacobianhOver_q_->setValue(2, 2, 0);
+  jacobianhOver_q_->setValue(
       2, 3, -x17 * x51 - x19 * x53 - x2 * x56 - x21 * x52 - x4 * x54 + x49 * x50 - x55 * x6);
-  _jachq->setValue(
+  jacobianhOver_q_->setValue(
       2, 4,
       -x17 * x49 - x19 * x52 + x21 * x53 - x50 * x51 + x57 * x58 - x59 * x60 + x61 * x62);
-  _jachq->setValue(
+  jacobianhOver_q_->setValue(
       2, 5,
       -x17 * x53 + x19 * x51 - x21 * x49 - x50 * x52 + x57 * x60 + x58 * x59 - x62 * x63);
-  _jachq->setValue(
+  jacobianhOver_q_->setValue(
       2, 6, x17 * x52 - x19 * x49 - x21 * x51 - x50 * x53 + x57 * x62 - x58 * x61 + x60 * x63);
-  _jachq->setValue(2, 7, 0);
-  _jachq->setValue(2, 8, 0);
-  _jachq->setValue(2, 9, 0);
-  _jachq->setValue(2, 10, x17 * x65 + x19 * x67 + x21 * x66 - x50 * x64);
-  _jachq->setValue(2, 11, -x17 * x64 + x19 * x66 - x21 * x67 - x50 * x65);
-  _jachq->setValue(2, 12, x17 * x67 - x19 * x65 - x21 * x64 - x50 * x66);
-  _jachq->setValue(2, 13, -x17 * x66 - x19 * x64 + x21 * x65 - x50 * x67);
-  _jachq->setValue(3, 0, 0);
-  _jachq->setValue(3, 1, 0);
-  _jachq->setValue(3, 2, 0);
-  _jachq->setValue(
+  jacobianhOver_q_->setValue(2, 7, 0);
+  jacobianhOver_q_->setValue(2, 8, 0);
+  jacobianhOver_q_->setValue(2, 9, 0);
+  jacobianhOver_q_->setValue(2, 10, x17 * x65 + x19 * x67 + x21 * x66 - x50 * x64);
+  jacobianhOver_q_->setValue(2, 11, -x17 * x64 + x19 * x66 - x21 * x67 - x50 * x65);
+  jacobianhOver_q_->setValue(2, 12, x17 * x67 - x19 * x65 - x21 * x64 - x50 * x66);
+  jacobianhOver_q_->setValue(2, 13, -x17 * x66 - x19 * x64 + x21 * x65 - x50 * x67);
+  jacobianhOver_q_->setValue(3, 0, 0);
+  jacobianhOver_q_->setValue(3, 1, 0);
+  jacobianhOver_q_->setValue(3, 2, 0);
+  jacobianhOver_q_->setValue(
       3, 3,
       -x32 * x56 - x34 * x54 - x36 * x55 - x46 * x51 - x47 * x53 - x48 * x52 + x49 * x68);
-  _jachq->setValue(
+  jacobianhOver_q_->setValue(
       3, 4,
       -x46 * x49 - x47 * x52 + x48 * x53 - x51 * x68 + x58 * x69 - x60 * x70 + x62 * x71);
-  _jachq->setValue(
+  jacobianhOver_q_->setValue(
       3, 5,
       -x46 * x53 + x47 * x51 - x48 * x49 - x52 * x68 + x58 * x70 + x60 * x69 - x62 * x72);
-  _jachq->setValue(
+  jacobianhOver_q_->setValue(
       3, 6, x46 * x52 - x47 * x49 - x48 * x51 - x53 * x68 - x58 * x71 + x60 * x72 + x62 * x69);
-  _jachq->setValue(3, 7, 0);
-  _jachq->setValue(3, 8, 0);
-  _jachq->setValue(3, 9, 0);
-  _jachq->setValue(3, 10, x46 * x65 + x47 * x67 + x48 * x66 - x64 * x68);
-  _jachq->setValue(3, 11, -x46 * x64 + x47 * x66 - x48 * x67 - x65 * x68);
-  _jachq->setValue(3, 12, x46 * x67 - x47 * x65 - x48 * x64 - x66 * x68);
-  _jachq->setValue(3, 13, -x46 * x66 - x47 * x64 + x48 * x65 - x67 * x68);
+  jacobianhOver_q_->setValue(3, 7, 0);
+  jacobianhOver_q_->setValue(3, 8, 0);
+  jacobianhOver_q_->setValue(3, 9, 0);
+  jacobianhOver_q_->setValue(3, 10, x46 * x65 + x47 * x67 + x48 * x66 - x64 * x68);
+  jacobianhOver_q_->setValue(3, 11, -x46 * x64 + x47 * x66 - x48 * x67 - x65 * x68);
+  jacobianhOver_q_->setValue(3, 12, x46 * x67 - x47 * x65 - x48 * x64 - x66 * x68);
+  jacobianhOver_q_->setValue(3, 13, -x46 * x66 - x47 * x64 + x48 * x65 - x67 * x68);
 }
 
 void siconos::joints::CylindricalJointR::Jd1(double X1, double Y1, double Z1, double q10,
@@ -617,67 +617,67 @@ void siconos::joints::CylindricalJointR::Jd1(double X1, double Y1, double Z1, do
   const double x56 = -q10 * x26 + q11 * x30 + q12 * x28 + q13 * x32;
   const double x57 =
       2 * _V2->getValue(0) * q11 + 2 * _V2->getValue(1) * q12 + 2 * _V2->getValue(2) * q13;
-  _jachq->setValue(0, 0, -x1 + x3 - x5 - x7);
-  _jachq->setValue(0, 1, -x10 - x11 + x8 - x9);
-  _jachq->setValue(0, 2, x12 - x13 - x14 - x15);
-  _jachq->setValue(0, 3,
+  jacobianhOver_q_->setValue(0, 0, -x1 + x3 - x5 - x7);
+  jacobianhOver_q_->setValue(0, 1, -x10 - x11 + x8 - x9);
+  jacobianhOver_q_->setValue(0, 2, x12 - x13 - x14 - x15);
+  jacobianhOver_q_->setValue(0, 3,
                    -2 * x16 * x17 - 2 * x18 * x19 - 2 * x2 * x25 - 2 * x20 * x21 -
                        2 * x23 * x4 - 2 * x24 * x6);
-  _jachq->setValue(0, 4,
+  jacobianhOver_q_->setValue(0, 4,
                    -2 * x0 * x23 - 2 * x17 * x22 + 2 * x18 * x21 - 2 * x19 * x20 -
                        2 * x2 * x24 + 2 * x25 * x6);
-  _jachq->setValue(0, 5,
+  jacobianhOver_q_->setValue(0, 5,
                    -2 * x0 * x25 + 2 * x16 * x19 - 2 * x17 * x18 - 2 * x21 * x22 -
                        2 * x23 * x6 + 2 * x24 * x4);
-  _jachq->setValue(0, 6,
+  jacobianhOver_q_->setValue(0, 6,
                    -2 * x0 * x24 - 2 * x16 * x21 + 2 * x17 * x20 - 2 * x19 * x22 +
                        2 * x2 * x23 - 2 * x25 * x4);
-  _jachq->setValue(1, 0, -x27 + x29 - x31 - x33);
-  _jachq->setValue(1, 1, x34 - x35 - x36 - x37);
-  _jachq->setValue(1, 2, x38 - x39 - x40 - x41);
-  _jachq->setValue(1, 3,
+  jacobianhOver_q_->setValue(1, 0, -x27 + x29 - x31 - x33);
+  jacobianhOver_q_->setValue(1, 1, x34 - x35 - x36 - x37);
+  jacobianhOver_q_->setValue(1, 2, x38 - x39 - x40 - x41);
+  jacobianhOver_q_->setValue(1, 3,
                    -2 * x16 * x42 - 2 * x18 * x43 - 2 * x20 * x44 - 2 * x23 * x30 -
                        2 * x24 * x32 - 2 * x25 * x28);
-  _jachq->setValue(1, 4,
+  jacobianhOver_q_->setValue(1, 4,
                    2 * x18 * x44 - 2 * x20 * x43 - 2 * x22 * x42 - 2 * x23 * x26 -
                        2 * x24 * x28 + 2 * x25 * x32);
-  _jachq->setValue(1, 5,
+  jacobianhOver_q_->setValue(1, 5,
                    2 * x16 * x43 - 2 * x18 * x42 - 2 * x22 * x44 - 2 * x23 * x32 +
                        2 * x24 * x30 - 2 * x25 * x26);
-  _jachq->setValue(1, 6,
+  jacobianhOver_q_->setValue(1, 6,
                    -2 * x16 * x44 + 2 * x20 * x42 - 2 * x22 * x43 + 2 * x23 * x28 -
                        2 * x24 * x26 - 2 * x25 * x30);
 
   /* Orientation constraints (H3, H4, H5)
    */
-  _jachq->setValue(2, 0, 0);
-  _jachq->setValue(2, 1, 0);
-  _jachq->setValue(2, 2, 0);
-  _jachq->setValue(2, 3,
+  jacobianhOver_q_->setValue(2, 0, 0);
+  jacobianhOver_q_->setValue(2, 1, 0);
+  jacobianhOver_q_->setValue(2, 2, 0);
+  jacobianhOver_q_->setValue(2, 3,
                    -_cq2q101 * x51 - _cq2q102 * x17 - _cq2q103 * x21 - _cq2q104 * x19 +
                        x45 * x46 + x47 * x48 + x49 * x50);
-  _jachq->setValue(2, 4,
+  jacobianhOver_q_->setValue(2, 4,
                    _cq2q101 * x17 - _cq2q102 * x51 - _cq2q103 * x19 + _cq2q104 * x21 +
                        x46 * x52 - x47 * x50 + x48 * x49);
-  _jachq->setValue(2, 5,
+  jacobianhOver_q_->setValue(2, 5,
                    _cq2q101 * x21 + _cq2q102 * x19 - _cq2q103 * x51 - _cq2q104 * x17 -
                        x45 * x48 + x46 * x47 + x50 * x52);
-  _jachq->setValue(2, 6,
+  jacobianhOver_q_->setValue(2, 6,
                    _cq2q101 * x19 - _cq2q102 * x21 + _cq2q103 * x17 - _cq2q104 * x51 +
                        x45 * x50 - x46 * x49 + x48 * x52);
-  _jachq->setValue(3, 0, 0);
-  _jachq->setValue(3, 1, 0);
-  _jachq->setValue(3, 2, 0);
-  _jachq->setValue(3, 3,
+  jacobianhOver_q_->setValue(3, 0, 0);
+  jacobianhOver_q_->setValue(3, 1, 0);
+  jacobianhOver_q_->setValue(3, 2, 0);
+  jacobianhOver_q_->setValue(3, 3,
                    -_cq2q101 * x56 - _cq2q102 * x42 - _cq2q103 * x44 - _cq2q104 * x43 +
                        x46 * x53 + x48 * x54 + x50 * x55);
-  _jachq->setValue(3, 4,
+  jacobianhOver_q_->setValue(3, 4,
                    _cq2q101 * x42 - _cq2q102 * x56 - _cq2q103 * x43 + _cq2q104 * x44 +
                        x46 * x57 + x48 * x55 - x50 * x54);
-  _jachq->setValue(3, 5,
+  jacobianhOver_q_->setValue(3, 5,
                    _cq2q101 * x44 + _cq2q102 * x43 - _cq2q103 * x56 - _cq2q104 * x42 +
                        x46 * x54 - x48 * x53 + x50 * x57);
-  _jachq->setValue(3, 6,
+  jacobianhOver_q_->setValue(3, 6,
                    _cq2q101 * x43 - _cq2q102 * x44 + _cq2q103 * x42 - _cq2q104 * x56 -
                        x46 * x55 + x48 * x57 + x50 * x53);
 }

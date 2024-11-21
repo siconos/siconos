@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file RelationType.hpp
   \brief enum of the available types and subtypes for relations,
@@ -28,17 +28,16 @@ Include files related to the different types of relations
 #ifndef RelationType_hpp
 #define RelationType_hpp
 
-#include "FirstOrderNonLinearR.hpp"
-#include "FirstOrderType1R.hpp"
-#include "FirstOrderType2R.hpp"
 #include "FirstOrderLinearR.hpp"
 #include "FirstOrderLinearTIR.hpp"
-#include "LagrangianLinearTIR.hpp"
-#include "LagrangianScleronomousR.hpp"
-#include "LagrangianRheonomousR.hpp"
-#include "LagrangianCompliantR.hpp"
-#include "LagrangianCompliantLinearTIR.hpp"
+#include "FirstOrderNonLinearR.hpp"
+#include "FirstOrderType1R.hpp"
 #include "Lagrangian2d1DR.hpp"
 #include "Lagrangian2d2DR.hpp"
 #include "Lagrangian2d3DR.hpp"
+#include "LagrangianCompliantLinearTIR.hpp"
+#include "LagrangianCompliantR.hpp"
+#include "LagrangianLinearTIR.hpp"
+#include "LagrangianRheonomousR.hpp"
+#include "LagrangianScleronomousR.hpp"
 #endif

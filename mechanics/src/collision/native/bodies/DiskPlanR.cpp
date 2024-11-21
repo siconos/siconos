@@ -181,7 +181,7 @@ Jach(q) =  [                                                ]
 
 */
 
-void siconos::collision::native::bodies::DiskPlanR::computeJachq(
+void siconos::collision::native::bodies::DiskPlanR::computeJacobianhOver_q(
     const siconos::algebra::BlockVector& q, siconos::algebra::BlockVector& z)
 {
   double x = q(0);
@@ -190,12 +190,12 @@ void siconos::collision::native::bodies::DiskPlanR::computeJachq(
   double D1 = A * x + B * y + C;
   double signD1 = copysign(1, D1);
 
-  _jachq->setValue(0, 0, A * signD1 / sqrA2pB2);
-  _jachq->setValue(1, 0, -B * signD1 / sqrA2pB2);
-  _jachq->setValue(0, 1, B * signD1 / sqrA2pB2);
-  _jachq->setValue(1, 1, A * signD1 / sqrA2pB2);
-  _jachq->setValue(0, 2, 0);
-  _jachq->setValue(1, 2, -r);
+  jacobianhOver_q_->setValue(0, 0, A * signD1 / sqrA2pB2);
+  jacobianhOver_q_->setValue(1, 0, -B * signD1 / sqrA2pB2);
+  jacobianhOver_q_->setValue(0, 1, B * signD1 / sqrA2pB2);
+  jacobianhOver_q_->setValue(1, 1, A * signD1 / sqrA2pB2);
+  jacobianhOver_q_->setValue(0, 2, 0);
+  jacobianhOver_q_->setValue(1, 2, -r);
 }
 
 bool siconos::collision::native::bodies::DiskPlanR::equal(double pA, double pB, double pC,

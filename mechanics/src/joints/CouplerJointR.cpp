@@ -210,7 +210,7 @@ void siconos::joints::CouplerJointR::computeh(double time,
   y(0) = y2(0) - y1(0) * _ratio + _offset;
 }
 
-void siconos::joints::CouplerJointR::computeJachq(
+void siconos::joints::CouplerJointR::computeJacobianhOver_q(
     double time, siconos::modeling::Interaction& inter,
     std::shared_ptr<siconos::algebra::BlockVector> q0) {
   auto jachq1 = std::make_shared<siconos::algebra::SiconosMatrix>(1, q0->size());
@@ -230,8 +230,8 @@ void siconos::joints::CouplerJointR::computeJachq(
 
   // Constraint is the linear relation between them
   for (unsigned int i = 0; i < 1; i++)
-    for (unsigned int j = 0; j < _jachq->size(1); j++)
-      _jachq->setValue(i, j, jachq2->getValue(i, j) - jachq1->getValue(i, j) * _ratio);
+    for (unsigned int j = 0; j < jacobianhOver_q_->size(1); j++)
+      jacobianhOver_q_->setValue(i, j, jachq2->getValue(i, j) - jachq1->getValue(i, j) * _ratio);
 }
 
 void siconos::joints::CouplerJointR::_normalDoF(siconos::algebra::SiconosVector& ans,
@@ -272,7 +272,7 @@ void siconos::joints::CouplerJointR::computeJachqDoF(
     std::shared_ptr<siconos::algebra::BlockVector> q0, siconos::algebra::SiconosMatrix& jachq,
     unsigned int axis) {
   // The Jacobian of the DoF of the constraint is the same as the
-  // Jacobian of the constraint itself. (Same as computeJachq(), but
+  // Jacobian of the constraint itself. (Same as computeJacobianhOver_q(), but
   // don't store result in member object.)
   assert(axis == 0);
 
@@ -290,6 +290,6 @@ void siconos::joints::CouplerJointR::computeJachqDoF(
 
   // Constraint is the linear relation between them
   for (unsigned int i = 0; i < 1; i++)
-    for (unsigned int j = 0; j < _jachq->size(1); j++)
+    for (unsigned int j = 0; j < jacobianhOver_q_->size(1); j++)
       jachq.setValue(i, j, jachq2->getValue(i, j) - jachq1->getValue(i, j) * _ratio);
 }

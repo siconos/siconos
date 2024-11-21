@@ -40,7 +40,7 @@ namespace siconos::modeling {
     \f[
     \left\{\begin{array}{rcl}
     M \dot twist =  wrench(twist, q, t) \\
-    \dot q &=& T(q) [ v, \Omega] \\
+    \dot q &=& T(q) [ v_G, \Omega] \\
     \dot R &=& R \tilde \Omega,\quad R^{-1}=R^T,\quad  \det(R)=1 .
     \end{array}\right.
     \f]
@@ -307,11 +307,7 @@ class NewtonEulerDS : public SecondOrderDS {
    */
   void resetNonSmoothPart(unsigned int level) override;
 
-  // -- forces --
-  /** \return a read-only view onto the wrench vector
-   *
-   *  \return pointer on a siconos::algebra::SiconosVector
-   */
+  /** \return a read-only view onto the wrench vector */
   inline const auto wrench() const {
     return siconos::algebra::ConstMapVectorType(wrench_->data(), wrench_->size());
   }

@@ -59,13 +59,13 @@ class LinearComplementaritySystemsNSDS : public NonSmoothDynamicalSystem {
    *  \param T final time
    */
   LinearComplementaritySystemsNSDS(double t0, double T,
-                                   std::shared_ptr<siconos::algebra::SiconosVector> x0,
-                                   std::shared_ptr<siconos::algebra::SiconosMatrix> A,
-                                   std::shared_ptr<siconos::algebra::SiconosMatrix> B,
-                                   std::shared_ptr<siconos::algebra::SiconosMatrix> C,
-                                   std::shared_ptr<siconos::algebra::SiconosMatrix> D,
-                                   std::shared_ptr<siconos::algebra::SiconosVector> a,
-                                   std::shared_ptr<siconos::algebra::SiconosVector> b);
+                                   Eigen::Ref<siconos::algebra::SiconosVector>x0,
+                                   Eigen::Ref<siconos::algebra::SiconosMatrix> A,
+                                   Eigen::Ref<siconos::algebra::SiconosMatrix> B,
+                                   Eigen::Ref<siconos::algebra::SiconosMatrix> C,
+                                   Eigen::Ref<siconos::algebra::SiconosMatrix> D,
+                                   Eigen::Ref<siconos::algebra::SiconosVector> b,
+                                   Eigen::Ref<siconos::algebra::SiconosVector> e);
 
   /** destructor
    */

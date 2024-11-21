@@ -26,6 +26,7 @@
 
 #include <functional>
 
+#include "BlockVector.hpp"
 #include "SiconosMatrix.hpp"
 
 namespace siconos::modeling {
@@ -70,6 +71,37 @@ using FunctionVV_V =
                        const Eigen::Ref<const siconos::algebra::SiconosVector> &,
                        Eigen::Ref<siconos::algebra::MapVectorType>)>;
 
+/** fonction proto to compute f(block vector,t, result_vector) */
+using FunctionBVS_V = std::function<void(const siconos::algebra::BlockVector &, double,
+                                         Eigen::Ref<siconos::algebra::MapVectorType>)>;
+
+/** fonction proto to compute f(block vector, result_vector) */
+using FunctionBV_V = std::function<void(const siconos::algebra::BlockVector &,
+                                        Eigen::Ref<siconos::algebra::MapVectorType>)>;
+
+/** fonction proto to compute f(block vector, vector, result_vector) */
+using FunctionBVV_V =
+    std::function<void(const siconos::algebra::BlockVector &,
+                       const Eigen::Ref<const siconos::algebra::SiconosVector> &,
+                       Eigen::Ref<siconos::algebra::MapVectorType>)>;
+
+/** fonction proto to compute f(block vector,t, vector, result_vector) */
+using FunctionBVSV_V =
+    std::function<void(const siconos::algebra::BlockVector &, double,
+                       const Eigen::Ref<const siconos::algebra::SiconosVector> &,
+                       Eigen::Ref<siconos::algebra::MapVectorType>)>;
+
+/** fonction proto to compute f(block vector,t, vector, result_blockvector) */
+using FunctionBVSV_BV =
+    std::function<void(const siconos::algebra::BlockVector &, double,
+                       const Eigen::Ref<const siconos::algebra::SiconosVector> &,
+                       siconos::algebra::BlockVector &)>;
+
+/** fonction proto to compute f(vector, result_blockvector) */
+using FunctionV_BV =
+    std::function<void(const Eigen::Ref<const siconos::algebra::SiconosVector> &,
+                       siconos::algebra::BlockVector &)>;
+
 /** fonction proto to compute f(vector,vector,t, result_matrix) */
 using FunctionVVS_M =
     std::function<void(const Eigen::Ref<const siconos::algebra::SiconosVector> &,
@@ -87,6 +119,40 @@ using FunctionMV_V =
     std::function<void(const Eigen::Ref<const siconos::algebra::SiconosMatrix> &,
                        const Eigen::Ref<const siconos::algebra::SiconosVector> &,
                        Eigen::Ref<siconos::algebra::MapType>)>;
+
+/** fonction proto to compute f(t, result_matrix) */
+using FunctionS_M = std::function<void(double, Eigen::Ref<siconos::algebra::MapType>)>;
+
+/** fonction proto to compute f(vector, result_matrix) */
+using FunctionV_M =
+    std::function<void(const Eigen::Ref<const siconos::algebra::SiconosVector> &,
+                       Eigen::Ref<siconos::algebra::MapType>)>;
+
+/** fonction proto to compute f(block vector, t, result_matrix) */
+using FunctionBVS_M = std::function<void(const siconos::algebra::BlockVector &, double,
+                                         Eigen::Ref<siconos::algebra::MapType>)>;
+
+/** fonction proto to compute f(block vector, result_matrix) */
+using FunctionBV_M = std::function<void(const siconos::algebra::BlockVector &,
+                                        Eigen::Ref<siconos::algebra::MapType>)>;
+
+/** fonction proto to compute f(block vector, vector, result_matrix) */
+using FunctionBVV_M =
+    std::function<void(const siconos::algebra::BlockVector &,
+                       const Eigen::Ref<const siconos::algebra::SiconosVector> &,
+                       Eigen::Ref<siconos::algebra::MapType>)>;
+
+/** fonction proto to compute f(block vector, block vector, result_matrix) */
+using FunctionBVBV_M = std::function<void(const siconos::algebra::BlockVector &,
+                                          const siconos::algebra::BlockVector &,
+                                          Eigen::Ref<siconos::algebra::MapType>)>;
+
+/** fonction proto to compute f(block vector, t, vector, result_matrix) */
+using FunctionBVSV_M =
+    std::function<void(const siconos::algebra::BlockVector &, double,
+                       const Eigen::Ref<const siconos::algebra::SiconosVector> &,
+                       Eigen::Ref<siconos::algebra::MapType>)>;
+
 }  // namespace func_prototypes
 }  // namespace siconos::modeling
 

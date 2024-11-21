@@ -344,8 +344,8 @@ void siconos::integrators::MoreauJeanBilbaoOSI::computeFreeOutput(
   auto& osnsp_rhs = *(*indexSet.properties(vertex_inter)
                            .workVectors)[siconos::integrators::MoreauJeanBilbaoOSI::OSNSP_RHS];
 
-  if (inter.relation()->C()) {
-    auto& C = *inter.relation()->C();
+  if (inter.relation()->jacobianhOver_q()) {
+    auto& C = *inter.relation()->jacobianhOver_q();
     siconos::algebra::matrixBlockVector_prod(C, x_free, osnsp_rhs, true);
   }
   _NSLEffectOnFreeOutput nslEffectOnFreeOutput{osnsp, inter,

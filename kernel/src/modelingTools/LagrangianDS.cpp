@@ -252,17 +252,9 @@ void siconos::modeling::LagrangianDS::setComputeFintFunction(
   computefint_ = fint_func;
 }
 
-// void siconos::modeling::LagrangianDS::computeFint(
-//     const Eigen::Ref<const siconos::algebra::SiconosVector>& velocity,
-//     const Eigen::Ref<const siconos::algebra::SiconosVector>& position, double time) {
-//   if (computefint_)
-//     // in that case, internal_storage must have been allocated by
-//     // setCompute... call
-//     computefint_(velocity, position, time, *fint_);
-// }
 void siconos::modeling::LagrangianDS::computeFint(
-    const siconos::algebra::SiconosVector& velocity,
-    const siconos::algebra::SiconosVector& position, double time) {
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& velocity,
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& position, double time) {
   if (computefint_)
     // in that case, internal_storage must have been allocated by
     // setCompute... call

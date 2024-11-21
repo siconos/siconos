@@ -307,7 +307,7 @@ void siconos::integrators::NewMarkAlphaOSI::computeFreeOutput(
   assert(inter->relation() &&
          "In siconos::integrators::NewMarkAlphaOSI::computeFreeOutput, relation associated "
          "with the interaction does not exist.");
-  auto C = inter->relation()->C();
+  auto C = inter->relation()->jacobianhOver_state();
   assert(C &&
          "In siconos::integrators::NewMarkAlphaOSI::computeFreeOutput: Jacobian matrix does "
          "not exist");
@@ -336,7 +336,7 @@ void siconos::integrators::NewMarkAlphaOSI::computeFreeOutput(
         auto _SclerR = std::static_pointer_cast<siconos::modeling::LagrangianScleronomousR>(
             inter->relation());
         _SclerR->computedotjacqhXqdot(t, *inter);
-        osnsp_rhs += *ID * *(_SclerR->dotjacqhXqdot());
+        osnsp_rhs += *ID * *(_SclerR->jacobianhOver_q_dot_X_qdot());
         // y += NonLinearPart
       } else if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_POS]).get() ==
                  osnsp)  // LCP at position level

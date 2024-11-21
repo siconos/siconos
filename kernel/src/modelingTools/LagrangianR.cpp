@@ -22,36 +22,15 @@
 
 #include <iostream>
 
-#include "PluggedObject.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVisitor.hpp"
 
-void siconos::modeling::LagrangianR::_zeroPlugin()
-{
-  Relation::_zeroPlugin();
-  _pluginJachq = std::make_shared<siconos::plugins::PluggedObject>();
-}
-
-void siconos::modeling::LagrangianR::display() const
-{
+void siconos::modeling::LagrangianR::display() const {
   Relation::display();
-  std::cout << " _jachq :"
-            << "\n";
-  if (_jachq) _jachq->display();
-  std::cout << " _jachqDot :"
-            << "\n";
-  if (_jachqDot) _jachqDot->display();
-  std::cout << " _jachlambda :"
-            << "\n";
-  if (_jachlambda)
-    _jachlambda->display();
-  else
-    std::cout << " nullptr :"
-              << "\n";
+  std::cout << " jacobianhOver_q_ :\n" << jacobianhOver_q_view_ << "\n";
 }
 
 void siconos::modeling::LagrangianR::accept(
-    std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const
-{
+    std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const {
   tourist->visit(*this);
 }

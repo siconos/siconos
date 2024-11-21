@@ -32,13 +32,13 @@
 
 void siconos::mechanics::fem::NodeFem2d2DR::initialize(modeling::Interaction& inter) {
   auto qSize = inter.getSizeOfDS();
-  _jachq = std::make_shared<siconos::algebra::SiconosMatrix>(2, qSize);
+  jacobianhOver_q_ = std::make_shared<siconos::algebra::SiconosMatrix>(2, qSize);
 }
 
-void siconos::mechanics::fem::NodeFem2d2DR::computeJachq(
+void siconos::mechanics::fem::NodeFem2d2DR::computeJacobianhOver_q(
     const siconos::algebra::BlockVector& q, siconos::algebra::BlockVector& z) {
   DEBUG_BEGIN(
-      "NodeFem2d2DR::computeJachq(const siconos::algebra::BlockVector& q, "
+      "NodeFem2d2DR::computeJacobianhOver_q(const siconos::algebra::BlockVector& q, "
       "siconos::algebra::BlockVector& z \n");
 
   double Nx = _Normal->getValue(0);
@@ -53,19 +53,19 @@ void siconos::mechanics::fem::NodeFem2d2DR::computeJachq(
   DEBUG_PRINTF("N_x = %4.2e,\t N_y = %4.2e\n", Nx, Ny);
   DEBUG_PRINTF("T_x = %4.2e,\t T_y = %4.2e\n", Tx, Ty);
 
-  _jachq->setValue(0, (*_node->dofIndex())[0], Nx);
-  _jachq->setValue(0, (*_node->dofIndex())[1], Ny);
+  jacobianhOver_q_->setValue(0, (*_node->dofIndex())[0], Nx);
+  jacobianhOver_q_->setValue(0, (*_node->dofIndex())[1], Ny);
 
-  _jachq->setValue(1, (*_node->dofIndex())[0], Tx);
-  _jachq->setValue(1, (*_node->dofIndex())[1], Ty);
+  jacobianhOver_q_->setValue(1, (*_node->dofIndex())[0], Tx);
+  jacobianhOver_q_->setValue(1, (*_node->dofIndex())[1], Ty);
 
   if (q.size() == 6) {
     DEBUG_PRINT("take into account second ds\n");
     THROW_EXCEPTION("NodeFem2d2DR is not implemented for cable/cable contact");
   }
-  // DEBUG_EXPR(_jachq->display(););
+  // DEBUG_EXPR(jacobianhOver_q_->display(););
   DEBUG_END(
-      "NodeFem2d2DR::computeJachq(const siconos::algebra::BlockVector& q, "
+      "NodeFem2d2DR::computeJacobianhOver_q(const siconos::algebra::BlockVector& q, "
       "siconos::algebra::BlockVector& z) \n");
 }
 

@@ -642,7 +642,7 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitVeloci
   if (relationType == siconos::modeling::RelationType::Lagrangian) {
     // in osnsp_rhs the linear part of velocity or acceleration relation will be saved
     C = std::static_pointer_cast<siconos::modeling::LagrangianR>(mainInteraction->relation())
-            ->C();
+            ->jacobianhOver_q();
 
     DEBUG_EXPR(C->display(););
 
@@ -674,7 +674,7 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitVeloci
   else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
     auto CT =
         std::static_pointer_cast<siconos::modeling::NewtonEulerR>(mainInteraction->relation())
-            ->jachqT();
+            ->H_prod_T();
     DEBUG_EXPR(CT->display());
     if (CT) {
       assert(Xfree);

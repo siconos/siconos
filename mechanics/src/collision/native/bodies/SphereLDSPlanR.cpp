@@ -72,7 +72,7 @@ void siconos::collision::native::bodies::SphereLDSPlanR::computeh(
 
 void normalize(std::shared_ptr<siconos::algebra::SiconosVector>, unsigned int);
 
-void siconos::collision::native::bodies::SphereLDSPlanR::computeJachq(
+void siconos::collision::native::bodies::SphereLDSPlanR::computeJacobianhOver_q(
     const siconos::algebra::BlockVector& q, siconos::algebra::BlockVector& z)
 {
   double theta = q(3);
@@ -83,22 +83,22 @@ void siconos::collision::native::bodies::SphereLDSPlanR::computeJachq(
   double cphi = cos(phi);
   double sphi = sin(phi);
 
-  _jachq->setValue(0, 0, n1);
-  _jachq->setValue(1, 0, u1);
-  _jachq->setValue(2, 0, v1);
-  _jachq->setValue(0, 1, n2);
-  _jachq->setValue(1, 1, u2);
-  _jachq->setValue(2, 1, v2);
-  _jachq->setValue(0, 2, n3);
-  _jachq->setValue(1, 2, u3);
-  _jachq->setValue(2, 2, v3);
-  _jachq->setValue(0, 3, 0);
-  _jachq->setValue(1, 3, -rv1 * cphi - rv2 * sphi);
-  _jachq->setValue(2, 3, ru1 * cphi + ru2 * sphi);
-  _jachq->setValue(0, 4, 0);
-  _jachq->setValue(1, 4, -rv3);
-  _jachq->setValue(2, 4, ru3);
-  _jachq->setValue(0, 5, 0);
-  _jachq->setValue(1, 5, -rv3 * cthe + rv2 * cphi * sthe - rv1 * sphi * sthe);
-  _jachq->setValue(2, 5, ru3 * cthe + ru1 * sphi * sthe - ru2 * cphi * sthe);
+  jacobianhOver_q_->setValue(0, 0, n1);
+  jacobianhOver_q_->setValue(1, 0, u1);
+  jacobianhOver_q_->setValue(2, 0, v1);
+  jacobianhOver_q_->setValue(0, 1, n2);
+  jacobianhOver_q_->setValue(1, 1, u2);
+  jacobianhOver_q_->setValue(2, 1, v2);
+  jacobianhOver_q_->setValue(0, 2, n3);
+  jacobianhOver_q_->setValue(1, 2, u3);
+  jacobianhOver_q_->setValue(2, 2, v3);
+  jacobianhOver_q_->setValue(0, 3, 0);
+  jacobianhOver_q_->setValue(1, 3, -rv1 * cphi - rv2 * sphi);
+  jacobianhOver_q_->setValue(2, 3, ru1 * cphi + ru2 * sphi);
+  jacobianhOver_q_->setValue(0, 4, 0);
+  jacobianhOver_q_->setValue(1, 4, -rv3);
+  jacobianhOver_q_->setValue(2, 4, ru3);
+  jacobianhOver_q_->setValue(0, 5, 0);
+  jacobianhOver_q_->setValue(1, 5, -rv3 * cthe + rv2 * cphi * sthe - rv1 * sphi * sthe);
+  jacobianhOver_q_->setValue(2, 5, ru3 * cthe + ru1 * sphi * sthe - ru2 * cphi * sthe);
 }

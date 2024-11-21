@@ -912,7 +912,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::postComputeLagra
   printf(
       "siconos::nonsmooth_formulations::MLCPProjectOnConstraints::postComputeLagrangian "
       "lr->jachq \n");
-  lr->jachq()->display();
+  lr->jacobianhOver_q()->display();
   printf(
       "siconos::nonsmooth_formulations::MLCPProjectOnConstraints::postComputeLagrangianR q "
       "before "
@@ -946,7 +946,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::postComputeLagra
   auto nslawsize = inter->nonSmoothLaw()->size();
   auto aBuff = std::make_shared<siconos::algebra::SiconosVector>(nslawsize);
   *aBuff = _z->segment(pos, sizeY);
-  auto J = lr->jachq();
+  auto J = lr->jacobianhOver_q();
   auto aux = std::make_shared<siconos::algebra::SiconosMatrix>(*J);
   aux->trans();
   // std::shared_ptr<siconos::algebra::SiconosVector> tmp =
@@ -964,7 +964,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::postComputeLagra
   // // \warning aBuff should normally be in lambda[0]
   // // The update of the position in DS should be made
   // //  in MoreauJeanOSI::upateState or ProjectedMoreauJeanOSI::updateState
-  // auto J=lr->jachq();
+  // auto J=lr->jacobianhOver_q();
   // auto aux = std::make_shared<siconos::algebra::SiconosMatrix>(*J));
   // aux->trans();
 

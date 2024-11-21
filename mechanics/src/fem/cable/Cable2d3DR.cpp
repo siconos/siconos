@@ -31,7 +31,7 @@
 
 void siconos::fem::cable::Cable2d3DR::initialize(siconos::modeling::Interaction& inter) {
   auto qSize = inter.getSizeOfDS();
-  _jachq = std::make_shared<siconos::algebra::SiconosMatrix>(2, qSize);
+  jacobianhOver_q_ = std::make_shared<siconos::algebra::SiconosMatrix>(2, qSize);
 }
 
 void siconos::fem::cable::Cable2d3DR::computeh(const siconos::algebra::BlockVector& q,
@@ -50,10 +50,10 @@ void siconos::fem::cable::Cable2d3DR::computeh(const siconos::algebra::BlockVect
   DEBUG_END("Cable2d3DR::computeh(...)\n")
 }
 
-void siconos::fem::cable::Cable2d3DR::computeJachq(const siconos::algebra::BlockVector& q,
+void siconos::fem::cable::Cable2d3DR::computeJacobianhOver_q(const siconos::algebra::BlockVector& q,
                                                    siconos::algebra::BlockVector& z) {
   DEBUG_BEGIN(
-      "Cable2d3DR::computeJachq(const siconos::algebra::BlockVector& q, "
+      "Cable2d3DR::computeJacobianhOver_q(const siconos::algebra::BlockVector& q, "
       "siconos::algebra::BlockVector& z \n");
 
   double Nx = _Normal->getValue(0);
@@ -67,21 +67,21 @@ void siconos::fem::cable::Cable2d3DR::computeJachq(const siconos::algebra::Block
   DEBUG_PRINTF("N_x = %4.2e,\t N_y = %4.2e,\t N_z= %4.2e\n", Nx, Ny, Nz);
   DEBUG_PRINTF("T_x = %4.2e,\t T_y = %4.2e,\t T_z= %4.2e\n", Tx, Ty, Tz);
 
-  _jachq->setValue(0, _node_dof_index, Nx);
-  _jachq->setValue(0, _node_dof_index + 1, Ny);
-  _jachq->setValue(0, _node_dof_index + 2, Nz);
+  jacobianhOver_q_->setValue(0, _node_dof_index, Nx);
+  jacobianhOver_q_->setValue(0, _node_dof_index + 1, Ny);
+  jacobianhOver_q_->setValue(0, _node_dof_index + 2, Nz);
 
-  _jachq->setValue(1, _node_dof_index, Tx);
-  _jachq->setValue(1, _node_dof_index + 1, Ty);
-  _jachq->setValue(1, _node_dof_index + 2, Tz);
+  jacobianhOver_q_->setValue(1, _node_dof_index, Tx);
+  jacobianhOver_q_->setValue(1, _node_dof_index + 1, Ty);
+  jacobianhOver_q_->setValue(1, _node_dof_index + 2, Tz);
 
   if (q.size() == 6) {
     DEBUG_PRINT("take into account second ds\n");
     THROW_EXCEPTION("Cable2d3DR is not implemented for cable/cable contact");
   }
-  DEBUG_EXPR(_jachq->display(););
+  DEBUG_EXPR(jacobianhOver_q_->display(););
   DEBUG_END(
-      "Cable2d3DR::computeJachq(const siconos::algebra::BlockVector& q, "
+      "Cable2d3DR::computeJacobianhOver_q(const siconos::algebra::BlockVector& q, "
       "siconos::algebra::BlockVector& z) \n");
 }
 

@@ -125,12 +125,12 @@ class NodeFem2d2DR : public modeling::LagrangianScleronomousR {
                 siconos::algebra::SiconosVector &y) override;
 
   /**
-     to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
+     to compute the jacobian of h(...). Set attribute jacobianhOver_q_ (access: jacqhq())
 
      \param q coordinates of the dynamical systems involved in the relation
      \param z user defined parameters (optional)
   */
-  void computeJachq(const siconos::algebra::BlockVector &q,
+  void computeJacobianhOver_q(const siconos::algebra::BlockVector &q,
                     siconos::algebra::BlockVector &z) override;
 
   /** Return the distance between pc1 and pc, with sign according to normal */

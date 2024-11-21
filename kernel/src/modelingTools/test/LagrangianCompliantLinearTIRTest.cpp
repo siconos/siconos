@@ -147,7 +147,7 @@ void LagrangianCompliantLinearTIRTest::testGetJacPtr()
   auto folr = std::make_shared<siconos::modeling::LagrangianCompliantLinearTIR>(C, D);
   folr->setDPtr(D);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetJachq: ", folr->jachq() == C, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetJachlambda: ", folr->jachlambda() == D, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetJachlambda: ", folr->jacobianhOver_lambda() == D, true);
 
   std::cout << "--> setBPtr test ended with success." << std::endl;
 }

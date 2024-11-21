@@ -30,99 +30,106 @@
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
-// Minimum data (C, B as pointers) constructor
-siconos::modeling::FirstOrderLinearTIR::FirstOrderLinearTIR(
-    std::shared_ptr<siconos::algebra::SiconosMatrix> C,
-    std::shared_ptr<siconos::algebra::SiconosMatrix> B)
-    : FirstOrderR(RelationSubType::LinearTIR) {
-  _C = C;
-  _B = B;
-}
-
-// Constructor from a complete set of data
-siconos::modeling::FirstOrderLinearTIR::FirstOrderLinearTIR(
-    std::shared_ptr<siconos::algebra::SiconosMatrix> C,
-    std::shared_ptr<siconos::algebra::SiconosMatrix> D,
-    std::shared_ptr<siconos::algebra::SiconosMatrix> F,
-    std::shared_ptr<siconos::algebra::SiconosVector> e,
-    std::shared_ptr<siconos::algebra::SiconosMatrix> B)
-    : FirstOrderR(RelationSubType::LinearTIR) {
-  _C = C;
-  _B = B;
-  _D = D;
-  _F = F;
-  _e = e;
-}
-
 void siconos::modeling::FirstOrderLinearTIR::initialize(Interaction &inter) {
   DEBUG_PRINT("siconos::modeling::FirstOrderLinearTIR::initialize(Interaction & inter)\n");
 
   FirstOrderR::initialize(inter);  // ?
 
-  if (!_C)
-    THROW_EXCEPTION(
-        "siconos::modeling::FirstOrderLinearTIR::initialize() C is null and is a required "
-        "input.");
-  if (!_B)
-    THROW_EXCEPTION(
-        "siconos::modeling::FirstOrderLinearTIR::initialize() B is null and is a required "
-        "input.");
+  // if C (or B, D, e)  is constant (following a call to setConstantC)
+  // then
+  // - no need to allocate internal storage
+  // - map/view is already 'connected' to some external memory
 
+  // Shouldn't we allow C==null or B==null?
+  assert(jacobianhOver_state_view_);   // "C is null and is a required  ")
+  assert(jacobiangOver_lambda_view_);  // "B is null and is a required  ")
   checkSize(inter);
 }
 
 void siconos::modeling::FirstOrderLinearTIR::checkSize(Interaction &inter) {
-  DEBUG_PRINT("siconos::modeling::FirstOrderLinearTIR::checkSize(Interaction & inter)\n");
-  DEBUG_PRINTF("_C->size(0) = %i,\t inter.dimension() = %i\n ", _C->size(0),
-               inter.dimension());
-  DEBUG_PRINTF("_C->size(1) = %i,\t inter.getSizeOfDS() = %i\n ", _C->size(1),
-               inter.getSizeOfDS());
+  // get inter and ds sizes
+  auto sizeY = inter.dimension();
+  auto sizeX = inter.getSizeOfDS();
 
-  assert(
-      (_C->size(0) == inter.dimension() && _C->size(1) == inter.getSizeOfDS()) &&
-      "siconos::modeling::FirstOrderLinearTIR::initialize , inconsistent size between C and "
-      "Interaction sizes.");
+  if (jacobianhOver_state_view_) {
+    assert(jacobianhOver_state_view_->rows() == sizeY);
+    assert(jacobianhOver_state_view_->cols() == sizeX);
+  }
+  if (jacobiangOver_lambda_view_) {
+    assert(jacobiangOver_lambda_view_->rows() == sizeX);
+    assert(jacobiangOver_lambda_view_->cols() == sizeY);
+  }
+  if (jacobianhOver_lambda_view_) {
+    assert(jacobianhOver_lambda_view_->rows() == sizeY);
+    assert(jacobianhOver_lambda_view_->cols() == sizeY);
+  }
+  if (eVector_view_) {
+    assert(eVector_view_->size() == sizeY);
+  }
+}
+void siconos::modeling::FirstOrderLinearTIR::setConstantB(
+    Eigen::Ref<siconos::algebra::SiconosMatrix> newValue) {
+  /**  Warning: we can't check if newValue size is compliant with
+   * the current relation/interaction. This will be done during
+   * initialize / checkSize call!
+   */
 
-  assert(
-      (_B->size(1) == inter.dimension() && _B->size(0) == inter.getSizeOfDS()) &&
-      "siconos::modeling::FirstOrderLinearTIR::initialize , inconsistent size between B and "
-      "interaction sizes.");
+  jacobiangOver_lambda_internal_storage_ = nullptr;
 
-  // C and B are the minimum inputs. The others may remain null.
-
-  if (_D)
-    assert(
-        (_D->size(0) == inter.dimension() && _D->size(1) == inter.dimension()) &&
-        "siconos::modeling::FirstOrderLinearTIR::initialize , inconsistent size between D and "
-        "interaction sizes");
-
-  DEBUG_EXPR(if (_F) _F->display(); (inter.linkToDSVariables())[FirstOrderR::z]->display(););
-
-  if (_F)
-    assert(((_F->size(0) == inter.dimension()) &&
-            (_F->size(1) == (inter.linkToDSVariables())[FirstOrderR::z]->size())) &&
-           "siconos::modeling::FirstOrderLinearTIR::initialize , inconsistent size between F "
-           "and z.");
-  if (_e)
-    assert(_e->size() == inter.dimension() &&
-           "siconos::modeling::FirstOrderLinearTIR::initialize , inconsistent size between C "
-           "and e.");
+  jacobiangOver_lambda_view_ = std::make_shared<siconos::algebra::MapType>(
+      newValue.data(), newValue.rows(), newValue.cols());
+  hasConstantJacobiangOver_lambda_ = true;
 }
 
-void siconos::modeling::FirstOrderLinearTIR::computeh(
-    const siconos::algebra::BlockVector &x, const siconos::algebra::SiconosVector &lambda,
-    siconos::algebra::BlockVector &z, siconos::algebra::SiconosVector &y) {
-  // if (_C) C must be allocated. Checksize is there to ensure it.
-  siconos::algebra::matrixBlockVector_prod(*_C, x, y, true);
-  // else
-  //   y.setZero();
+void siconos::modeling::FirstOrderLinearTIR::setConstantC(
+    Eigen::Ref<siconos::algebra::SiconosMatrix> newValue) {
+  /**  Warning: we can't check if newValue size is compliant with
+   * the current relation/interaction. This will be done during
+   * initialize / checkSize call!
+   */
 
-  if (_D) siconos::algebra::prod(*_D, lambda, y, false);
+  jacobianhOver_state_internal_storage_ = nullptr;
 
-  if (_e) y += *_e;
-
-  if (_F) siconos::algebra::matrixBlockVector_prod(*_F, z, y, false);
+  jacobianhOver_state_view_ = std::make_shared<siconos::algebra::MapType>(
+      newValue.data(), newValue.rows(), newValue.cols());
+  hasConstantJacobianhOver_state_ = true;
 }
+
+void siconos::modeling::FirstOrderLinearTIR::setConstantD(
+    Eigen::Ref<siconos::algebra::SiconosMatrix> newValue) {
+  /**  Warning: we can't check if newValue size is compliant with
+   * the current relation/interaction. This will be done during
+   * initialize / checkSize call!
+   */
+
+  jacobianhOver_lambda_internal_storage_ = nullptr;
+
+  jacobianhOver_lambda_view_ = std::make_shared<siconos::algebra::MapType>(
+      newValue.data(), newValue.rows(), newValue.cols());
+  hasConstantJacobianhOver_lambda_ = true;
+}
+
+void siconos::modeling::FirstOrderLinearTIR::setConstanteVector(
+    Eigen::Ref<siconos::algebra::SiconosVector> newValue) {
+  eVector_view_ =
+      std::make_shared<siconos::algebra::MapVectorType>(newValue.data(), newValue.size());
+  haseVector_ = true;
+}
+
+// void siconos::modeling::FirstOrderLinearTIR::computeh(
+//     const siconos::algebra::BlockVector &x, const siconos::algebra::SiconosVector &lambda,
+//     siconos::algebra::BlockVector &z, siconos::algebra::SiconosVector &y) {
+//   // if (_C) C must be allocated. Checksize is there to ensure it.
+//   siconos::algebra::matrixBlockVector_prod(*_C, x, y, true);
+//   // else
+//   //   y.setZero();
+
+//   if (_D) siconos::algebra::prod(*_D, lambda, y, false);
+
+//   if (_e) y += *_e;
+
+//   if (_F) siconos::algebra::matrixBlockVector_prod(*_F, z, y, false);
+// }
 
 void siconos::modeling::FirstOrderLinearTIR::computeOutput(double time, Interaction &inter,
                                                            unsigned int level) {
@@ -130,13 +137,22 @@ void siconos::modeling::FirstOrderLinearTIR::computeOutput(double time, Interact
   siconos::algebra::SiconosVector &y = *inter.y(level);
   siconos::algebra::SiconosVector &lambda = *inter.lambda(level);
   auto &DSlink = inter.linkToDSVariables();
-  computeh(*DSlink[FirstOrderR::x], lambda, *DSlink[FirstOrderR::z], y);
+  if (jacobianhOver_state_view_) {
+    siconos::algebra::matrixBlockVector_prod(*jacobianhOver_state_view_, x, y, true);
+  } else
+    y.setZero();
+
+  if (jacobianhOver_lambda_view_) {
+    y += *jacobianhOver_lambda_view_ * lambda;
+  }
+
+  if (eVector_view_) y += *eVector_view_;
 }
 
-void siconos::modeling::FirstOrderLinearTIR::computeg(
-    const siconos::algebra::SiconosVector &lambda, siconos::algebra::BlockVector &r) {
-  siconos::algebra::matrixVector_prod_toBlock(*_B, lambda, r, false);
-}
+// void siconos::modeling::FirstOrderLinearTIR::computeg(
+//     const siconos::algebra::SiconosVector &lambda, siconos::algebra::BlockVector &r) {
+//   siconos::algebra::matrixVector_prod_toBlock(*_B, lambda, r, false);
+// }
 
 void siconos::modeling::FirstOrderLinearTIR::computeInput(double time, Interaction &inter,
                                                           unsigned int level) {
@@ -146,7 +162,10 @@ void siconos::modeling::FirstOrderLinearTIR::computeInput(double time, Interacti
   auto &DSlink = inter.linkToDSVariables();
   DEBUG_EXPR(inter.lambda(level)->display(););
   DEBUG_EXPR(DSlink[FirstOrderR::r]->display(););
-  computeg(*inter.lambda(level), *DSlink[FirstOrderR::r]);
+  if (jacobiangOver_lambda_view_) {
+    auto &DSlink = inter.linkToDSVariables();
+    *DSlink[FirstOrderR::r] += *jacobiangOver_lambda_view_ * *inter.lambda(0);
+  }
   DEBUG_END(
       "siconos::modeling::FirstOrderLinearTIR::computeInput(double time, Interaction& "
       "inter, unsigned int level)\n")
@@ -154,31 +173,28 @@ void siconos::modeling::FirstOrderLinearTIR::computeInput(double time, Interacti
 
 void siconos::modeling::FirstOrderLinearTIR::display() const {
   std::cout << " ===== Linear Time Invariant relation display =====\n";
-  std::cout << "| C\n";
-  if (_C)
-    _C->display();
+  std::cout << "| C \n";
+  if (jacobianhOver_state_view_)
+    std::cout << jacobianhOver_state_view_ << "\n";
   else
     std::cout << "->nullptr\n";
-  std::cout << "| D "
-            << "\n";
-  if (_D)
-    _D->display();
+
+  std::cout << "| D\n";
+  if (jacobianhOver_lambda_view_)
+    std::cout << jacobianhOver_lambda_view_ << "\n";
   else
     std::cout << "->nullptr\n";
-  std::cout << "| F \n";
-  if (_F)
-    _F->display();
-  else
-    std::cout << "->nullptr\n";
+
   std::cout << "| e\n";
-  if (_e)
-    _e->display();
+  if (eVector_view_)
+    std::cout << eVector_view_ << "\n";
   else
     std::cout << "->nullptr\n";
-  std::cout << "| B\n";
-  if (_B)
-    _B->display();
+
+  std::cout << "| B \n";
+  if (jacobiangOver_lambda_view_)
+    std::cout << jacobiangOver_lambda_view_ << "\n";
   else
     std::cout << "->nullptr\n";
-  std::cout << " ==================================================\n";
+  std::cout << " ================================================== \n";
 }

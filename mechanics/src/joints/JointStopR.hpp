@@ -43,7 +43,7 @@ class JointStopR : public siconos::modeling::NewtonEulerR {
   std::shared_ptr<siconos::algebra::SiconosVector> _dir{nullptr};
 
   unsigned int _axisMin{0}, _axisMax{0};
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _jachqTmp{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianhOver_q_Tmp{nullptr};
 
  public:
   /** Initialize a joint stop for a common case: a single axis with a
@@ -84,7 +84,7 @@ class JointStopR : public siconos::modeling::NewtonEulerR {
   virtual void computeh(double time, const siconos::algebra::BlockVector& q0,
                         siconos::algebra::SiconosVector& y) override;
 
-  virtual void computeJachq(double time, siconos::modeling::Interaction& inter,
+  virtual void computeJacobianhOver_q(double time, siconos::modeling::Interaction& inter,
                             std::shared_ptr<siconos::algebra::BlockVector> q0) override;
 
   virtual unsigned int numberOfConstraints();

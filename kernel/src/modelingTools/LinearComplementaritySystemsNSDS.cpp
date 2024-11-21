@@ -20,9 +20,9 @@
 #include "ComplementarityConditionNSL.hpp"
 #include "FirstOrderLinearTIDS.hpp"
 #include "FirstOrderLinearTIR.hpp"
-#include "SiconosVector.hpp"
-#include "SiconosMatrix.hpp"
 #include "Interaction.hpp"
+#include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 
 // #define DEBUG_NOCOLOR
 // #define DEBUG_MESSAGES
@@ -31,31 +31,24 @@
 
 //  constructor
 siconos::modeling::LinearComplementaritySystemsNSDS::LinearComplementaritySystemsNSDS(
-    double t0, double T, std::shared_ptr<siconos::algebra::SiconosVector> x0,
-    std::shared_ptr<siconos::algebra::SiconosMatrix> A,
-    std::shared_ptr<siconos::algebra::SiconosMatrix> B,
-    std::shared_ptr<siconos::algebra::SiconosMatrix> C,
-    std::shared_ptr<siconos::algebra::SiconosMatrix> D,
-    std::shared_ptr<siconos::algebra::SiconosVector> a,
-    std::shared_ptr<siconos::algebra::SiconosVector> b)
-    : NonSmoothDynamicalSystem(t0, T)
-{
+    double t0, double T, Eigen::Ref<siconos::algebra::SiconosVector> x0,
+    Eigen::Ref<siconos::algebra::SiconosMatrix> A,
+    Eigen::Ref<siconos::algebra::SiconosMatrix> B,
+    Eigen::Ref<siconos::algebra::SiconosMatrix> C,
+    Eigen::Ref<siconos::algebra::SiconosMatrix> D,
+    Eigen::Ref<siconos::algebra::SiconosVector> b,
+    Eigen::Ref<siconos::algebra::SiconosVector> e)
+    : NonSmoothDynamicalSystem(t0, T) {
   _ds = std::make_shared<FirstOrderLinearTIDS>(x0, A);
-  if (a) {
-    _ds->setbPtr(a);
-  }
-  insertDynamicalSystem(_ds);
+  _ds->setbPtr(b);
 
   _relation = std::make_shared<FirstOrderLinearTIR>(C, B);
 
-  // todo: check sizes
-  if (D) {
-    _relation->setDPtr(D);
-  }
-  if (b) {
-    _relation->setePtr(b);
-  }
-  _nslaw = std::make_shared<ComplementarityConditionNSL>(C->size(0));
+  // todo: check sizes --> done during rel->initialize()
+  _relation->setConstantD(D);
+  _relation->setConstanteVector(e);
+
+  _nslaw = std::make_shared<ComplementarityConditionNSL>(C.rows());
   _interaction = std::make_shared<Interaction>(_nslaw, _relation);
 
   link(_interaction, _ds);

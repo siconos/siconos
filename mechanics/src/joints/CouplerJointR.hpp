@@ -91,7 +91,7 @@ class CouplerJointR : public NewtonEulerJointR {
   virtual void computeh(double time, const siconos::algebra::BlockVector& q0,
                         siconos::algebra::SiconosVector& y) override;
 
-  virtual void computeJachq(double time, siconos::modeling::Interaction& inter,
+  virtual void computeJacobianhOver_q(double time, siconos::modeling::Interaction& inter,
                             std::shared_ptr<siconos::algebra::BlockVector> q0) override;
 
   /* Return the joint DoF index assigned to the first DoF. */

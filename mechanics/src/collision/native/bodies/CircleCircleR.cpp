@@ -43,7 +43,7 @@ void siconos::collision::native::bodies::CircleCircleR::computeh(
   y(0) = distance(q_0, q_1, _r1, q_3, q_4, _r2);
 }
 
-void siconos::collision::native::bodies::CircleCircleR::computeJachq(
+void siconos::collision::native::bodies::CircleCircleR::computeJacobianhOver_q(
     const siconos::algebra::BlockVector& q, siconos::algebra::BlockVector& z)
 {
   double x1 = q(0);
@@ -59,16 +59,16 @@ void siconos::collision::native::bodies::CircleCircleR::computeJachq(
   double dxsd = dx / d;
   double dysd = dy / d;
 
-  _jachq->setValue(0, 0, dxsd);
-  _jachq->setValue(1, 0, -dysd);
-  _jachq->setValue(0, 1, dysd);
-  _jachq->setValue(1, 1, dxsd);
-  _jachq->setValue(0, 2, 0.);
-  _jachq->setValue(1, 2, -_r1);
-  _jachq->setValue(0, 3, -dxsd);
-  _jachq->setValue(1, 3, dysd);
-  _jachq->setValue(0, 4, -dysd);
-  _jachq->setValue(1, 4, -dxsd);
-  _jachq->setValue(0, 5, 0.);
-  _jachq->setValue(1, 5, -_r2);
+  jacobianhOver_q_->setValue(0, 0, dxsd);
+  jacobianhOver_q_->setValue(1, 0, -dysd);
+  jacobianhOver_q_->setValue(0, 1, dysd);
+  jacobianhOver_q_->setValue(1, 1, dxsd);
+  jacobianhOver_q_->setValue(0, 2, 0.);
+  jacobianhOver_q_->setValue(1, 2, -_r1);
+  jacobianhOver_q_->setValue(0, 3, -dxsd);
+  jacobianhOver_q_->setValue(1, 3, dysd);
+  jacobianhOver_q_->setValue(0, 4, -dysd);
+  jacobianhOver_q_->setValue(1, 4, -dxsd);
+  jacobianhOver_q_->setValue(0, 5, 0.);
+  jacobianhOver_q_->setValue(1, 5, -_r2);
 }

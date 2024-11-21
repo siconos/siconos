@@ -64,29 +64,53 @@ class FirstOrderR : public Relation {
    *
    *  \param newType the type of the relation
    */
-  FirstOrderR(RelationSubType newType) : Relation(RelationType::FirstOrder, newType){};
+  FirstOrderR(RelationSubType newType) : Relation(RelationType::FirstOrder, newType) {};
 
   /* The following matrices are used if the relation is linear w.r.t to some
    * variables. If the matrices are allocated, the computation of the Jacobian
    * is not done.
    */
 
-  /** A matrix to store the constant Jacobian of h(t, X, lambda, Z) w.r.t X */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _C{nullptr};
-
-  /** A matrix to store the constant Jacobian of h(t, X, lambda, Z) w.r.t lambda
+  /** The Jacobian of the constraints with respect to the generalized coordinates \f$ x\f$
+   *  i.e. \f$ \nabla_x h(x,t,\lambda) \f$
    */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _D{nullptr};
+  std::shared_ptr<siconos::algebra::MapType> jacobianhOver_state_view_{nullptr};
 
-  /** A matrix to store the constant Jacobian of h(t, X, lambda, Z) w.r.t Z */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _F{nullptr};
+  /** internal (optional) storage used for \f$ \nabla_x h(x,t,\lambda) \f$ */
+  std::unique_ptr<std::vector<double>> jacobianhOver_state_internal_storage_{nullptr};
 
-  /** A matrix to store the constant Jacobian of g(t, X, lambda, Z) w.r.t lambda
+  /** True if \f$ \nabla_x h(x,t,\lambda) \f$ is a constant matrix */
+  bool hasConstantJacobianhOver_state_{false};
+
+  /** The Jacobian of the constraints with respect to the generalized coordinates \f$
+   * \lambda\f$ i.e. \f$ \nabla_{\lambda} h(x,t,\lambda) \f$
    */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _B{nullptr};
+  std::shared_ptr<siconos::algebra::MapType> jacobianhOver_lambda_view_{nullptr};
 
-  /** A matrix to store the constant Jacobian of g(t, X, lambda, Z) w.r.t X */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _K{nullptr};
+  /** internal (optional) storage used for\f$ \nabla_{\lambda} h(x,t,\lambda) \f$*/
+  std::unique_ptr<std::vector<double>> jacobianhOver_lambda_internal_storage_{nullptr};
+
+  /** True if \f$ \nabla_{\lambda} h(x,t,\lambda) \f$ is a constant matrix */
+  bool hasConstantJacobianhOver_lambda_{false};
+
+  /** \f$ \nabla_x g(x,t,\lambda) \f$
+   */
+  std::shared_ptr<siconos::algebra::MapType> jacobiangOver_state_view_{nullptr};
+
+  /** internal (optional) storage used for \f$ \nabla_x g(x,t,\lambda) \f$ */
+  std::unique_ptr<std::vector<double>> jacobiangOver_state_internal_storage_{nullptr};
+
+  /** True if \f$ \nabla_x g(x,t,\lambda) \f$ is a constant matrix */
+  bool hasConstantJacobiangOver_state_{false};
+
+  /** \f$ \nabla_{\lambda} g(x,t,\lambda) \f$ */
+  std::shared_ptr<siconos::algebra::MapType> jacobiangOver_lambda_view_{nullptr};
+
+  /** internal (optional) storage used for\f$ \nabla_{\lambda} g(x,t,\lambda) \f$*/
+  std::unique_ptr<std::vector<double>> jacobiangOver_lambda_internal_storage_{nullptr};
+
+  /** True if \f$ \nabla_{\lambda} g(x,t,\lambda) \f$ is a constant matrix */
+  bool hasConstantJacobiangOver_lambda_{false};
 
  public:
   /** destructor
@@ -99,66 +123,46 @@ class FirstOrderR : public Relation {
    */
   void initialize(Interaction &inter) override;
 
-  /** set C to pointer newC
-   *
-   *  \param newC the C matrix
-   */
-  inline void setCPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newC) { _C = newC; }
+  /** True if \f$ \nabla_x h(x,t,\lambda) \f$ is taken into account */
+  bool hasJacobianhOver_state() const { return jacobianhOver_state_view_ != nullptr; }
 
-  /** set B to pointer newB
-   *
-   *  \param newB the B matrix
-   */
-  inline void setBPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newB) { _B = newB; }
+  /** True if \f$ \nabla_x h(x,t,\lambda) \f$ is taken into account */
+  bool hasJacobianhOver_lambda() const { return jacobianhOver_lambda_view_ != nullptr; }
 
-  /** set D to pointer newPtr
-   *
-   *  \param newD the D matrix
-   */
-  inline void setDPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newD) { _D = newD; }
+  /** True if \f$ \nabla_x h(x,t,\lambda) \f$ is taken into account */
+  bool hasJacobiangOver_state() const { return jacobiangOver_state_view_ != nullptr; }
 
-  /** set F to pointer newPtr
-   *
-   *  \param newF the F matrix
-   */
-  inline void setFPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newF) { _F = newF; }
+  /** True if \f$ \nabla_x h(x,t,\lambda) \f$ is taken into account */
+  bool hasJacobiangOver_lambda() const { return jacobiangOver_lambda_view_ != nullptr; }
 
-  /** get C
-   *
-   *  \return C matrix
-   */
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> C() const override { return _C; }
-  // Note FP: final would be better than override but swig cannot handle it.
+  /** \return a read-only view on \f$ \nabla_x h(x,t,\lambda) \f$ matrix */
+  inline const siconos::algebra::ConstMapType jacobianhOver_state() const override {
+    return siconos::algebra::ConstMapType(jacobianhOver_state_view_->data(),
+                                          jacobianhOver_state_view_->rows(),
+                                          jacobianhOver_state_view_->cols());
+  }
 
-  /** get H
-   *
-   *  \return C matrix
-   */
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> H() const override { return _C; }
+  /** \return a read-only view on \f$ \nabla_{\lambda} h(x,t,\lambda) \f$ matrix */
+  inline const auto jacobianhOver_lambda() const {
+    return siconos::algebra::ConstMapType(jacobianhOver_lambda_view_->data(),
+                                          jacobianhOver_lambda_view_->rows(),
+                                          jacobianhOver_lambda_view_->cols());
+  }
 
-  /** get D
-   *
-   *  \return D matrix
-   */
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> D() const { return _D; }
+  /** \return a read-only view on \f$ \nabla_x g(x,t,\lambda) \f$ matrix */
+  inline const auto jacobiangOver_state() const {
+    return siconos::algebra::ConstMapType(jacobiangOver_state_view_->data(),
+                                          jacobiangOver_state_view_->rows(),
+                                          jacobiangOver_state_view_->cols());
+  }
 
-  /** get F
-   *
-   *  \return F matrix
-   */
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> F() const { return _F; }
+  /** \return a read-only view on \f$ \nabla_{\lambda} g(x,t,\lambda) \f$ matrix */
+  inline const auto jacobiangOver_lambda() const {
+    return siconos::algebra::ConstMapType(jacobiangOver_lambda_view_->data(),
+                                          jacobiangOver_lambda_view_->rows(),
+                                          jacobiangOver_lambda_view_->cols());
+  }
 
-  /** get B
-   *
-   *  \return B matrix
-   */
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> B() const { return _B; }
-
-  /** get K
-   *
-   *  \return K matrix
-   */
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> K() const { return _K; }
   // Visitors stuff
   void accept(std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const override;
 };

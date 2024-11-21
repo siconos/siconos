@@ -130,7 +130,7 @@ class PrismaticJointR : public NewtonEulerJointR {
                                siconos::algebra::SiconosMatrix& jachq,
                                unsigned int axis) override;
 
-  virtual void computeJachq(double time, siconos::modeling::Interaction& inter,
+  virtual void computeJacobianhOver_q(double time, siconos::modeling::Interaction& inter,
                             std::shared_ptr<siconos::algebra::BlockVector> q0) override;
 
   /**

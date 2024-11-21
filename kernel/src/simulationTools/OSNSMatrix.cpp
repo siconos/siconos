@@ -58,7 +58,7 @@ siconos::nonsmooth_formulations::OSNSMatrix::OSNSMatrix(unsigned int n, NM_types
     }
     default: {
       _triplet_nzmax = _dimRow; /* at least a non zero element per row */
-    }                           // do nothing here
+    }  // do nothing here
   }
 
   DEBUG_END("siconos:simulation::OSNSMatrix::OSNSMatrix(unsigned int n, int stor) \n");
@@ -487,16 +487,11 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillHtrans(
         auto Htriplet = NM_triplet(&H_NM);
 
         unsigned int pos = 0, abs_pos_ds = 0;
-        std::shared_ptr<siconos::algebra::SiconosMatrix> leftInteractionBlock;
 
         siconos::graphs::InteractionsGraph::VIterator ui, uiend;
         for (std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui) {
           auto& inter = *indexSet.bundle(*ui);
           size_t sizeY = inter.dimension();
-          leftInteractionBlock = inter.getLeftInteractionBlock();
-
-          double* array = &*leftInteractionBlock->data();
-          // double * array_with_bc= nullptr;
 
           auto ds1 = indexSet.properties(*ui).source;
           auto ds2 = indexSet.properties(*ui).target;
@@ -543,8 +538,10 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillHtrans(
             }
 
             abs_pos_ds = DSG.properties(DSG.descriptor(ds)).absolute_position;
+            auto leftInteractionBlock = inter.getLeftInteractionBlock();
+            const double* raw_array = leftInteractionBlock.data();
             CSparseMatrix_block_dense_zentry(Htriplet, pos, abs_pos_ds,
-                                             array + posBlock * sizeY, sizeY, sizeDS,
+                                             raw_array + posBlock * sizeY, sizeY, sizeDS,
                                              DBL_EPSILON);
           }
         }

@@ -70,18 +70,18 @@ class DiskMovingPlanR : public siconos::modeling::LagrangianRheonomousR,
                 siconos::algebra::BlockVector& z, siconos::algebra::SiconosVector& y) override;
 
   /**
-     to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
+     to compute the jacobian of h(...). Set attribute jacobianhOver_q_ (access: jacqhq())
 
      \param time current time value
      \param q coordinates of the dynamical systems involved in the relation
      \param z user defined parameters (optional)
   */
-  void computeJachq(double time, const siconos::algebra::BlockVector& q,
+  void computeJacobianhOver_q(double time, const siconos::algebra::BlockVector& q,
                     siconos::algebra::BlockVector& z) override;
 
   /**
-     to compute the time-derivative of the output y = h(t,q,z), saved in attribute _hDot
-     (access: hDot())
+     to compute the time-derivative of the output y = h(t,q,z), saved in attribute hdot_
+     (access: hdot())
 
      \param time current time value
      \param q coordinates of the dynamical systems involved in the relation

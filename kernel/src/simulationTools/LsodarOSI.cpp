@@ -659,7 +659,7 @@ void siconos::integrators::LsodarOSI::computeFreeOutput(
     THROW_EXCEPTION(" computeqBlock for Event Event-driven is wrong ");
 
   if (relationType == siconos::modeling::RelationType::Lagrangian) {
-    C = mainInteraction->relation()->C();
+    C = mainInteraction->relation()->jacobianhOver_q();
     if (C) {
       assert(Xfree);
       siconos::algebra::matrixBlockVector_prod(*C, *Xfree, osnsp_rhs, true);
@@ -681,7 +681,7 @@ void siconos::integrators::LsodarOSI::computeFreeOutput(
                           *DSlink[siconos::modeling::LagrangianR::z]);
         auto hDot = std::static_pointer_cast<siconos::modeling::LagrangianRheonomousR>(
                         inter->relation())
-                        ->hDot();
+                        ->hdot();
         osnsp_rhs += *ID * *hDot;
       } else
         THROW_EXCEPTION(
@@ -697,7 +697,7 @@ void siconos::integrators::LsodarOSI::computeFreeOutput(
         auto dotjacqhXqdot =
             std::static_pointer_cast<siconos::modeling::LagrangianScleronomousR>(
                 inter->relation())
-                ->dotjacqhXqdot();
+                ->jacobianhOver_q_dot_X_qdot();
         osnsp_rhs += *ID * *dotjacqhXqdot;
       }
     }

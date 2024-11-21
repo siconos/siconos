@@ -121,7 +121,7 @@ class CylindricalJointR : public NewtonEulerJointR {
 
   int twistCount() { return _twistCount; }
 
-  virtual void computeJachq(double time, siconos::modeling::Interaction& inter,
+  virtual void computeJacobianhOver_q(double time, siconos::modeling::Interaction& inter,
                             std::shared_ptr<siconos::algebra::BlockVector> q0) override;
 
   /**

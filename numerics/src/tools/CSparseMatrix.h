@@ -276,7 +276,7 @@ CS_INT CSparseMatrix_zentry(CSparseMatrix* T, CS_INT i, CS_INT j, double x, doub
 
 /* add a block (col-major dense) to triplet matrix only if value is not (nearly) null */
 CS_INT CSparseMatrix_block_dense_zentry(CSparseMatrix* T, CS_INT row_off, CS_INT col_off,
-                                        double* x, CS_INT row_size, CS_INT col_size,
+                                        const double* x, CS_INT row_size, CS_INT col_size,
                                         double threshold);
 
 /** Add an entry to a symmetric triplet matrix only if the absolute value is

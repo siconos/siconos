@@ -206,6 +206,8 @@ class FirstOrderLinearDS : public FirstOrderNonLinearDS {
     _hasConstantB = true;
   }
 
+  
+
   /** set b vector (copy)
    *
    *  \param b a siconos::algebra::SiconosVector

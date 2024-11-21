@@ -24,7 +24,6 @@
 #include "FirstOrderLinearR.hpp"
 #include "FirstOrderLinearTIR.hpp"
 #include "FirstOrderR.hpp"
-#include "FirstOrderType2R.hpp"
 #include "Interaction.hpp"
 #include "MatrixIntegrator.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
@@ -321,7 +320,7 @@ struct siconos::integrators::ZeroOrderHoldOSI::_NSLEffectOnFreeOutput
   _NSLEffectOnFreeOutput(siconos::nonsmooth_formulations::OneStepNSProblem* p,
                          std::shared_ptr<siconos::modeling::Interaction> inter,
                          siconos::graphs::InteractionProperties& interProp)
-      : _osnsp(p), _inter(inter), _interProp(interProp){};
+      : _osnsp(p), _inter(inter), _interProp(interProp) {};
 
   void visit(const siconos::modeling::NewtonImpactNSL& nslaw) const override {
     auto e = nslaw.e();
@@ -377,22 +376,25 @@ void siconos::integrators::ZeroOrderHoldOSI::computeFreeOutput(
   assert(inter);
   assert(rel);
 
+  assert(relationType == siconos::modeling::RelationType::FirstOrder);
+  auto forel = std::static_pointer_cast<siconos::modeling::FirstOrderR>(rel);
+
   //  if (!IG0.properties(IG0.descriptor(inter)).forControl) // the integration is not for
   //  control
   {
-    if (relationType == siconos::modeling::RelationType::FirstOrder &&
-        relationSubType == siconos::modeling::RelationSubType::Type2R) {
+    if (relationSubType == siconos::modeling::RelationSubType::Type2R) {
       auto lambda = inter->lambda(0);
-      auto C = rel->C();
-      auto D = std::static_pointer_cast<siconos::modeling::FirstOrderType2R>(rel)->D();
       assert(lambda);
 
-      if (D) {
-        osnsp_rhs = *D * *lambda;
+      if (forel->hasJacobianhOver_lambda()) {
+        auto D = std::static_pointer_cast<siconos::modeling::FirstOrderR>(rel)
+                     ->jacobianhOver_lambda();
+        osnsp_rhs = D * *lambda;
         osnsp_rhs *= -1.0;
       }
-      if (C) {
-        siconos::algebra::matrixBlockVector_prod(*C, *deltax, osnsp_rhs, false);
+      if (forel->hasJacobianhOver_state()) {
+        auto C = rel->jacobianhOver_state();
+        siconos::algebra::matrixBlockVector_prod(C, *deltax, osnsp_rhs, false);
       }
 
       if (_useGammaForRelation) {
@@ -407,9 +409,8 @@ void siconos::integrators::ZeroOrderHoldOSI::computeFreeOutput(
     }
 
     else {
-      auto C = rel->C();
-
-      if (C) {
+      if (forel->hasJacobianhOver_state()) {
+        auto C = forel->jacobianhOver_state();
         assert(Xfree);
         assert(deltax);
         // creates a POINTER link between workX[ds] (xfree) and the
@@ -423,26 +424,23 @@ void siconos::integrators::ZeroOrderHoldOSI::computeFreeOutput(
         }
       }
 
-      if (relationType == siconos::modeling::RelationType::FirstOrder &&
-          (relationSubType == siconos::modeling::RelationSubType::LinearTIR ||
-           relationSubType == siconos::modeling::RelationSubType::LinearR)) {
-        // In the first order linear case it may be required to add e + FZ to q.
-        // q = HXfree + e + FZ
-        std::shared_ptr<siconos::algebra::SiconosVector> e;
-        std::shared_ptr<siconos::algebra::SiconosMatrix> F;
+      if (relationSubType == siconos::modeling::RelationSubType::LinearTIR ||
+          relationSubType == siconos::modeling::RelationSubType::LinearR) {
+        // In the first order linear case it may be required to add e to q.
+        // q = HXfree + e
+
         if (relationSubType == siconos::modeling::RelationSubType::LinearTIR) {
-          e = std::static_pointer_cast<siconos::modeling::FirstOrderLinearTIR>(rel)->e();
-          F = std::static_pointer_cast<siconos::modeling::FirstOrderLinearTIR>(rel)->F();
+          auto linrel = std::static_pointer_cast<siconos::modeling::FirstOrderLinearTIR>(rel);
+          if (linrel->haseVector()) {
+            auto e = linrel->eVector();
+            osnsp_rhs += e;
+          }
         } else {
-          e = std::static_pointer_cast<siconos::modeling::FirstOrderLinearR>(rel)->e();
-          F = std::static_pointer_cast<siconos::modeling::FirstOrderLinearR>(rel)->F();
-        }
-
-        if (e) osnsp_rhs += *e;
-
-        if (F) {
-          siconos::algebra::matrixBlockVector_prod(
-              *F, *DSlink[siconos::modeling::FirstOrderR::z], osnsp_rhs, false);
+          auto linrel = std::static_pointer_cast<siconos::modeling::FirstOrderLinearR>(rel);
+          if (linrel->haseVector()) {
+            auto e = linrel->eVector();
+            osnsp_rhs += e;
+          }
         }
       }
     }

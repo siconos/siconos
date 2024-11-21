@@ -28,64 +28,45 @@
 
 // Minimum data (C as pointer) constructor
 siconos::modeling::LagrangianCompliantLinearTIR::LagrangianCompliantLinearTIR(
-    std::shared_ptr<siconos::algebra::SiconosMatrix> C,
-    std::shared_ptr<siconos::algebra::SiconosMatrix> D)
+    Eigen::Ref<siconos::algebra::SiconosMatrix> newC,
+    Eigen::Ref<siconos::algebra::SiconosMatrix> newD)
     : LagrangianR(RelationSubType::CompliantLinearTIR) {
-  _jachq = C;
-  _jachlambda = D;
-}
+  jacobianhOver_q_view_ =  // C
+      std::make_shared<siconos::algebra::MapType>(newC.data(), newC.rows(), newC.cols());
 
-// Constructor from a complete set of data
-siconos::modeling::LagrangianCompliantLinearTIR::LagrangianCompliantLinearTIR(
-    std::shared_ptr<siconos::algebra::SiconosMatrix> C,
-    std::shared_ptr<siconos::algebra::SiconosMatrix> D,
-    std::shared_ptr<siconos::algebra::SiconosMatrix> F,
-    std::shared_ptr<siconos::algebra::SiconosVector> e)
-    : LagrangianR(RelationSubType::CompliantLinearTIR) {
-  _jachq = C;
-  _jachlambda = D;
-  _F = F;
-  _e = e;
-}
-
-// Minimum data (C, e as pointers) constructor
-siconos::modeling::LagrangianCompliantLinearTIR::LagrangianCompliantLinearTIR(
-    std::shared_ptr<siconos::algebra::SiconosMatrix> C,
-    std::shared_ptr<siconos::algebra::SiconosMatrix> D,
-    std::shared_ptr<siconos::algebra::SiconosVector> e)
-    : LagrangianR(RelationSubType::CompliantLinearTIR) {
-  _jachq = C;
-  _jachlambda = D;
-  _e = e;
+  DMatrix_view_ =
+      std::make_shared<siconos::algebra::MapType>(newD.data(), newD.rows(), newD.cols());
 }
 
 void siconos::modeling::LagrangianCompliantLinearTIR::initialize(Interaction& inter) {
   checkSize(inter);
 }
+
 void siconos::modeling::LagrangianCompliantLinearTIR::checkSize(Interaction& inter) {
   auto sizeY = inter.dimension();
   auto& DSlink = inter.linkToDSVariables();
 
-  if (!(_jachq) || _jachq->size(1) != inter.getSizeOfDS() || _jachq->size(0) != sizeY)
+  if (!(jacobianhOver_q_view_) || jacobianhOver_q_view_->cols() != inter.getSizeOfDS() ||
+      jacobianhOver_q_view_->rows() != sizeY)
     THROW_EXCEPTION(
         "siconos::modeling::LagrangianCompliantLinearTIR::checkSize inconsistent sizes "
         "between H matrix and the interaction.");
 
-  if ((_jachlambda) && (_jachlambda->size(0) != sizeY || _jachlambda->size(1) != sizeY))
+  if ((DMatrix_view_) && (DMatrix_view_->rows() != sizeY || DMatrix_view_->cols() != sizeY))
     THROW_EXCEPTION(
         "siconos::modeling::LagrangianCompliantLinearTIR::checkSize inconsistent sizes "
         "between D matrix and the interaction.");
 
-  if ((_e) && _e->size() != sizeY)
+  if ((eVector_view_) && eVector_view_->size() != sizeY)
     THROW_EXCEPTION(
         "siconos::modeling::LagrangianCompliantLinearTIR::checkSize inconsistent sizes "
         "between e vector and the dimension of the interaction.");
+}
 
-  auto sizeZ = DSlink[LagrangianR::z]->size();
-  if ((_F) && (_F->size(0) != sizeZ || _F->size(1) != sizeZ))
-    THROW_EXCEPTION(
-        "siconos::modeling::LagrangianCompliantLinearTIR::checkSize inconsistent sizes "
-        "between F matrix and the interaction.");
+void siconos::modeling::LagrangianCompliantLinearTIR::seteVector(
+    Eigen::Ref<siconos::algebra::SiconosVector> newValue) {
+  eVector_view_ =
+      std::make_shared<siconos::algebra::MapVectorType>(newValue.data(), newValue.size());
 }
 
 void siconos::modeling::LagrangianCompliantLinearTIR::computeInput(double time,
@@ -96,7 +77,7 @@ void siconos::modeling::LagrangianCompliantLinearTIR::computeInput(double time,
   auto& DSlink = inter.linkToDSVariables();
   // computation of p = Ht lambda
   siconos::algebra::transposeMatrixVector_prod_toBlock(
-      lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
+      lambda, *jacobianhOver_q_view_, *DSlink[LagrangianR::p0 + level], false);
 }
 void siconos::modeling::LagrangianCompliantLinearTIR::computeOutput(
     double time, Interaction& inter, unsigned int derivativeNumber) {
@@ -105,39 +86,25 @@ void siconos::modeling::LagrangianCompliantLinearTIR::computeOutput(
   auto& lambda = *inter.lambda(derivativeNumber);
   auto& DSlink = inter.linkToDSVariables();
 
-  siconos::algebra::matrixBlockVector_prod(*_jachq,
+  siconos::algebra::matrixBlockVector_prod(*jacobianhOver_q_view_,
                                            *DSlink[LagrangianR::q0 + derivativeNumber], y);
-  y += *_jachlambda * lambda;
-  siconos::algebra::prod(*_jachlambda, lambda, y, false);
+  y += *DMatrix_view_ * lambda;
+  siconos::algebra::prod(*DMatrix_view_, lambda, y, false);
 
   if (derivativeNumber == 0) {
-    if (_e) y += *_e;
-    if (_F) siconos::algebra::matrixBlockVector_prod(*_F, *DSlink[LagrangianR::z], y, false);
+    if (eVector_view_) y += *eVector_view_;
   }
 }
 
 void siconos::modeling::LagrangianCompliantLinearTIR::display() const {
   LagrangianR::display();
   std::cout << "===== Lagrangian Linear Relation display ===== " << std::endl;
-  std::cout << " C: " << std::endl;
-  if (_jachq)
-    _jachq->display();
-  else
-    std::cout << " -> nullptr " << std::endl;
+  std::cout << " C: \n" << jacobianhOver_q_view_ << "\n";
   std::cout << " e: " << std::endl;
-  if (_e)
-    _e->display();
+  if (eVector_view_)
+    std::cout << eVector_view_ << "\n";
   else
     std::cout << " -> nullptr " << std::endl;
-  std::cout << " D: " << std::endl;
-  if (_jachlambda)
-    _jachlambda->display();
-  else
-    std::cout << " -> nullptr " << std::endl;
-  std::cout << " F: " << std::endl;
-  if (_F)
-    _F->display();
-  else
-    std::cout << " -> nullptr " << std::endl;
+  std::cout << " D: \n" << DMatrix_view_ << "\n";
   std::cout << "===================================== " << std::endl;
 }

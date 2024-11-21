@@ -25,53 +25,53 @@
 
 namespace siconos::modeling {
 /**
-   Lagrangian Compliant Relation: Scleronomous, Non-Holonomic
-   (function of lambda)
+    Lagrangian Compliant Relation: Scleronomous, Non-Holonomic
 
-   \f$
-   Y[0] = y = h(q,\lambda(t),z)
-   \f$
+    This class provides tools to describe Lagrangian (2nd order) non linear relations, with:
 
-   \f$
-   Y[1] = \dot y = G0(q,\lambda(t),z)\dot q + G1((q,\lambda(t),z)\dot\lambda(t)
-   \f$
+    \f$
+    y = h(q,\lambda(t))
+    \f$
 
-   \f$
-   p = G0^t(q,\lambda(t),z)\lambda(t)
-   \f$
+    \f$
+    \dot y = G0(q,\lambda(t))\dot q + G1((q,\lambda(t))\dot\lambda(t)
+    \f$
 
-   with
-   \f$
-   G0(q,\lambda(t),z) = \nabla_q h(q,\lambda(t),z)
-   \f$
+    \f$
+    p = G0^t(q,\lambda(t))\lambda(t)
+    \f$
 
-   \f$
-   G1(q,\lambda(t),z) = \nabla_{\lambda}h(q,\lambda(t),z)
-   \f$
+    with
+    \f$
+    G0(q,\lambda(t)) = \nabla_q h(q,\lambda(t))
+    \f$
 
-   h, G0 and G1 are connected to user-defined functions.
+    \f$
+    G1(q,\lambda(t)) = \nabla_{\lambda}h(q,\lambda(t))
+    \f$
+
+    The following operators can be set by user-defined functions:
+
+    - \f$ h(q, \lambda) \f$
+    - \f$ G0(q, \lambda) \f$
+    - \f$ G1(q, \lambda) \f$
 
 */
 class LagrangianCompliantR : public LagrangianR {
  protected:
+  /** function wrapper used to compute \f$ h(q, \lambda) \f$ */
+  siconos::modeling::func_prototypes::FunctionBVV_V computeh_{nullptr};
+
+  /** function wrapper used to compute  \f$ G_0=\nabla^\top_q h(q, \lambda) \f$ */
+  siconos::modeling::func_prototypes::FunctionBVV_M computejacobianhOver_q_{nullptr};
+
+  /** jacobian matrix \f$G_1 = \nabla^\top_{\lambda}h(q, \lambda) \f$  */
+  std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianhOver_lambda_{nullptr};
+
+  /** function wrapper used to compute  \f$ G_1=\nabla^\top_{\lambda} h(q, \lambda) \f$ */
+  siconos::modeling::func_prototypes::FunctionBVV_M computejacobianhOver_lambda_{nullptr};
+
   ACCEPT_SERIALIZATION(LagrangianCompliantR);
-
-  /** LagrangianR plug-in to compute h(q,lambda,z)
-   *
-   * \param sizeDS : sum of the sizes of all the DynamicalSystems involved in
-   * the interaction
-   * \param q : pointer to the first element of q
-   * \param sizeY : size of vector y (ie of lambda and of the interaction)
-   * \param lambda : pointer to lambda of the interaction
-   * \param[in,out] y : pointer to the first element of y
-   * \param sizeZ : size of vector z.
-   * \param[in,out] z : a vector of user-defined parameters
-   */
-  std::shared_ptr<siconos::plugins::PluggedObject> _pluginJachlambda{nullptr};
-
-  /** default constructor
-   */
-  LagrangianCompliantR() : LagrangianR(RelationSubType::CompliantR){};
 
   /** initialize G matrices or components specific to derived classes
    *
@@ -79,67 +79,66 @@ class LagrangianCompliantR : public LagrangianR {
    */
   void initialize(Interaction &inter) override;
 
-  /** check sizes of the relation specific operators.
-   *
-   *  \param inter an Interaction using this relation
-   */
-  void checkSize(Interaction &inter) override;
-
-  void _zeroPlugin() override;
-
  public:
-  /** constructor from a set of data
-   *
-   *  \param pluginh the name of the plugin to compute h
-   *  \param pluginJacobianhq the name of the plugin to compute the gradient of
-   *  h w.r.t q
-   *  \param pluginJacobianhlambda the name of the plugin to compute
-   *  the gradient of h w.r.t  \f$ \lambda \f$
-   */
-  LagrangianCompliantR(const std::string &pluginh, const std::string &pluginJacobianhq,
-                       const std::string &pluginJacobianhlambda);
+  /** default constructor */
+  LagrangianCompliantR() : LagrangianR(RelationSubType::CompliantR) {};
 
-  /** destructor
-   */
+  /** destructor */
   virtual ~LagrangianCompliantR() noexcept = default;
 
-  /**
-      to compute the output y = h(q,z) of the Relation
-
-      \param time current time value
-      \param q coordinates of the dynamical systems involved in the relation
-      \param lambda interaction  \f$ \lambda \f$  vector
-      \param z user defined parameters (optional)
-      \param y the resulting vector
-  */
-  virtual void computeh(double time, const siconos::algebra::BlockVector &q,
-                        const siconos::algebra::SiconosVector &lambda,
-                        siconos::algebra::BlockVector &z, siconos::algebra::SiconosVector &y);
+  /** set a user-defined function to compute \f$ h(q, \lambda) \f$  \f$
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputehFunction(const siconos::modeling::func_prototypes::FunctionBVV_V &fct);
 
   /**
-      to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
+    to compute the output y = h(q, \lambda) of the Relation
 
-      \param time current time value
-      \param q coordinates of the dynamical systems involved in the relation
-      \param lambda interaction  \f$ \lambda \f$  vector
-      \param z user defined parameters (optional)
+    \param q coordinates of the dynamical systems involved in the relation
+    \param lambda interaction  \f$ \lambda \f$  vector
+    \param y the resulting vector
   */
-  virtual void computeJachq(double time, const siconos::algebra::BlockVector &q,
-                            const siconos::algebra::SiconosVector &lambda,
-                            siconos::algebra::BlockVector &z);
+  virtual void computeh(const siconos::algebra::BlockVector &q,
+                        const Eigen::Ref<const siconos::algebra::SiconosVector> &lambda,
+                        Eigen::Ref<siconos::algebra::SiconosVector> y);
 
-  /**
-      compute the jacobian of h w.r.t.  \f$ \lambda \f$ . Set attribute _jachlambda
-      (access: jacqhlambda())
+  /** set a user-defined function to compute \f$ \nabla^\top_q h(q, \lambda) \f$ \f$
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputeJacobianhOver_qFunction(
+      const siconos::modeling::func_prototypes::FunctionBVV_M &fct);
 
-      \param time current time value
-      \param q coordinates of the dynamical systems involved in the relation
-      \param lambda interaction \f$ \lambda \f$  vector
-      \param z user defined parameters
-  */
-  virtual void computeJachlambda(double time, const siconos::algebra::BlockVector &q0,
-                                 const siconos::algebra::SiconosVector &lambda,
-                                 siconos::algebra::BlockVector &z);
+  /** Computes \f$ \nabla^\top_q h(q, \lambda) \f$
+   *  \param q coordinates of the dynamical systems involved in the relation
+   *  \param lambda interaction  \f$ \lambda \f$  vector
+   */
+  virtual void computeJacobianhOver_q(
+      const siconos::algebra::BlockVector &q,
+      const Eigen::Ref<const siconos::algebra::SiconosVector> &lambda);
+
+  /** set a user-defined function to compute \f$ \nabla^\top_{\lambda} h(q, \lambda) \f$ \f$
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputeJacobianhOver_lambdaFunction(
+      const siconos::modeling::func_prototypes::FunctionBVV_M &fct);
+
+  /** Computes \f$ \nabla^\top_{\lambda} h(q, \lambda) \f$
+   *  \param q coordinates of the dynamical systems involved in the relation
+   *  \param lambda interaction  \f$ \lambda \f$  vector
+   */
+  virtual void computeJacobianhOver_lambda(
+      const siconos::algebra::BlockVector &q,
+      const Eigen::Ref<const siconos::algebra::SiconosVector> &lambda);
+
+  /*  \return a read-only view on the matrix \f$ \nabla^\top_{\lambda}h(q,\lambda) \f$*/
+  inline const auto jacobianhOver_lambda() const {
+    return siconos::algebra::ConstMapType(jacobianhOver_lambda_->data(),
+                                          jacobianhOver_lambda_->rows(),
+                                          jacobianhOver_lambda_->cols());
+  }
 
   /** to compute output
    *
@@ -159,9 +158,6 @@ class LagrangianCompliantR : public LagrangianR {
 
   /** compute all the H Jacobian */
   void computeJach(double time, Interaction &inter) override;
-
-  /** compute all the G Jacobian */
-  void computeJacg(double time, Interaction &inter) override {}
 };
 }  // namespace siconos::modeling
 

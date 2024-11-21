@@ -1030,8 +1030,8 @@ void siconos::integrators::MoreauJeanOSI::computeFreeOutput(
   assert(Xfree);
   DEBUG_EXPR(Xfree->display(););
 
-  // 1 - product H Xfree
-  auto &H = *inter.relation()->H();
+  // 1 - product H Xfree{}
+  auto &H = *inter.relation()->jacobianhOver_q();
   siconos::algebra::matrixBlockVector_prod(H, *Xfree, osnsp_rhs, true);
 
   // 2 -  compute additional terms for ScleronomousR and CompliantLinearTIR
@@ -1045,23 +1045,12 @@ void siconos::integrators::MoreauJeanOSI::computeFreeOutput(
       (relationSubType != siconos::modeling::RelationSubType::ScleronomousR)) {
     auto sizeY = inter.nonSmoothLaw()->size();
 
-    // Index _selected_coordinates(8);
-    _selected_coordinates[0] = 0;
-    _selected_coordinates[1] = sizeY;
-    _selected_coordinates[2] = 0;
-    _selected_coordinates[3] = sizeY;
-    _selected_coordinates[4] = 0;
-    _selected_coordinates[5] = sizeY;
-    _selected_coordinates[6] = 0;
-    _selected_coordinates[7] = sizeY;
-
     auto &DSlink = inter.linkToDSVariables();
     // For the relation of type LagrangianRheonomousR
     if (relationSubType == siconos::modeling::RelationSubType::RheonomousR) {
       if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp) {
         std::static_pointer_cast<siconos::modeling::LagrangianRheonomousR>(inter.relation())
-            ->computehDot(simulation()->getTkp1(), *DSlink[siconos::modeling::LagrangianR::q0],
-                          *DSlink[siconos::modeling::LagrangianR::z]);
+            ->computehdot(*DSlink[siconos::modeling::LagrangianR::q0],simulation()->getTkp1());
         siconos::algebra::SiconosMatrix ID =
             siconos::algebra::SiconosMatrix::Identity(sizeY, sizeY);
 
@@ -1069,7 +1058,7 @@ void siconos::integrators::MoreauJeanOSI::computeFreeOutput(
         // y += hDot
         auto hDot = (std::static_pointer_cast<siconos::modeling::LagrangianRheonomousR>(
                          inter.relation())
-                         ->hDot());
+                         ->hdot());
         osnsp_rhs += ID * *hDot;
 
       } else
@@ -1594,7 +1583,7 @@ void siconos::integrators::MoreauJeanOSI::display() const {
 void siconos::integrators::moreau_jean::computeIterationMatrix_Lagrangian(
     double time, double time_step, double theta, siconos::modeling::LagrangianDS &lds,
     Eigen::Ref<siconos::algebra::SiconosMatrix> iterationMatrix,
-    std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>& luw) {
+    std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>> &luw) {
   // Compute W matrix of the Dynamical System ds, at time t and for the current
   // ds state.
   DEBUG_BEGIN("siconos::integrators::MoreauJeanOSI::computeIterationMatrix\n");
@@ -1621,7 +1610,7 @@ void siconos::integrators::moreau_jean::computeIterationMatrix_Lagrangian(
 void siconos::integrators::moreau_jean::computeIterationMatrix_NewtonEuler(
     double time, double time_step, double theta, siconos::modeling::NewtonEulerDS &neds,
     Eigen::Ref<siconos::algebra::SiconosMatrix> iterationMatrix,
-    std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>& luw) {
+    std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>> &luw) {
   // Compute W matrix of the Dynamical System ds, at time t and for the current
   // ds state.
   iterationMatrix = neds.totalInertiaMatrix();

@@ -157,170 +157,170 @@ void siconos::joints::PivotJointR::Jd1d2(double X1, double Y1, double Z1, double
                                          double q22, double q23) {
   KneeJointR::Jd1d2(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23);
 
-  _jachq->setValue(3, 0, 0);
-  _jachq->setValue(3, 1, 0);
-  _jachq->setValue(3, 2, 0);
+  jacobianhOver_q_->setValue(3, 0, 0);
+  jacobianhOver_q_->setValue(3, 1, 0);
+  jacobianhOver_q_->setValue(3, 2, 0);
 
   // sympy expression: [AscalA1.diff(x) for x in q1]
-  _jachq->setValue(
+  jacobianhOver_q_->setValue(
       3, 3,
       _A1x * (-_cq2q101 * q21 - _cq2q102 * q20 + _cq2q103 * q23 - _cq2q104 * q22) +
           _A1y * (-_cq2q101 * q22 - _cq2q102 * q23 - _cq2q103 * q20 + _cq2q104 * q21) +
           _A1z * (-_cq2q101 * q23 + _cq2q102 * q22 - _cq2q103 * q21 - _cq2q104 * q20));
-  _jachq->setValue(
+  jacobianhOver_q_->setValue(
       3, 4,
       _A1x * (_cq2q101 * q20 - _cq2q102 * q21 - _cq2q103 * q22 - _cq2q104 * q23) +
           _A1y * (-_cq2q101 * q23 + _cq2q102 * q22 - _cq2q103 * q21 - _cq2q104 * q20) +
           _A1z * (_cq2q101 * q22 + _cq2q102 * q23 + _cq2q103 * q20 - _cq2q104 * q21));
-  _jachq->setValue(
+  jacobianhOver_q_->setValue(
       3, 5,
       _A1x * (_cq2q101 * q23 - _cq2q102 * q22 + _cq2q103 * q21 + _cq2q104 * q20) +
           _A1y * (_cq2q101 * q20 - _cq2q102 * q21 - _cq2q103 * q22 - _cq2q104 * q23) +
           _A1z * (-_cq2q101 * q21 - _cq2q102 * q20 + _cq2q103 * q23 - _cq2q104 * q22));
-  _jachq->setValue(
+  jacobianhOver_q_->setValue(
       3, 6,
       _A1x * (-_cq2q101 * q22 - _cq2q102 * q23 - _cq2q103 * q20 + _cq2q104 * q21) +
           _A1y * (_cq2q101 * q21 + _cq2q102 * q20 - _cq2q103 * q23 + _cq2q104 * q22) +
           _A1z * (_cq2q101 * q20 - _cq2q102 * q21 - _cq2q103 * q22 - _cq2q104 * q23));
 
-  _jachq->setValue(3, 7, 0);
-  _jachq->setValue(3, 8, 0);
-  _jachq->setValue(3, 9, 0);
+  jacobianhOver_q_->setValue(3, 7, 0);
+  jacobianhOver_q_->setValue(3, 8, 0);
+  jacobianhOver_q_->setValue(3, 9, 0);
 
   // sympy expression: [AscalA1.diff(x) for x in q2]
-  _jachq->setValue(
+  jacobianhOver_q_->setValue(
       3, 10,
       _A1x * (_cq2q101 * q11 - _cq2q102 * q10 - _cq2q103 * q13 + _cq2q104 * q12) +
           _A1y * (_cq2q101 * q12 + _cq2q102 * q13 - _cq2q103 * q10 - _cq2q104 * q11) +
           _A1z * (_cq2q101 * q13 - _cq2q102 * q12 + _cq2q103 * q11 - _cq2q104 * q10));
-  _jachq->setValue(
+  jacobianhOver_q_->setValue(
       3, 11,
       _A1x * (-_cq2q101 * q10 - _cq2q102 * q11 + _cq2q103 * q12 + _cq2q104 * q13) +
           _A1y * (_cq2q101 * q13 - _cq2q102 * q12 - _cq2q103 * q11 + _cq2q104 * q10) +
           _A1z * (-_cq2q101 * q12 - _cq2q102 * q13 - _cq2q103 * q10 - _cq2q104 * q11));
-  _jachq->setValue(
+  jacobianhOver_q_->setValue(
       3, 12,
       _A1x * (-_cq2q101 * q13 - _cq2q102 * q12 - _cq2q103 * q11 - _cq2q104 * q10) +
           _A1y * (-_cq2q101 * q10 + _cq2q102 * q11 - _cq2q103 * q12 + _cq2q104 * q13) +
           _A1z * (_cq2q101 * q11 + _cq2q102 * q10 - _cq2q103 * q13 - _cq2q104 * q12));
-  _jachq->setValue(
+  jacobianhOver_q_->setValue(
       3, 13,
       _A1x * (_cq2q101 * q12 - _cq2q102 * q13 + _cq2q103 * q10 - _cq2q104 * q11) +
           _A1y * (-_cq2q101 * q11 - _cq2q102 * q10 - _cq2q103 * q13 - _cq2q104 * q12) +
           _A1z * (-_cq2q101 * q10 + _cq2q102 * q11 + _cq2q103 * q12 - _cq2q104 * q13));
 
-  _jachq->setValue(4, 0, 0);
-  _jachq->setValue(4, 1, 0);
-  _jachq->setValue(4, 2, 0);
+  jacobianhOver_q_->setValue(4, 0, 0);
+  jacobianhOver_q_->setValue(4, 1, 0);
+  jacobianhOver_q_->setValue(4, 2, 0);
 
   // sympy expression: [AscalA2.diff(x) for x in q1]
-  _jachq->setValue(
+  jacobianhOver_q_->setValue(
       4, 3,
       _A2x * (-_cq2q101 * q21 - _cq2q102 * q20 + _cq2q103 * q23 - _cq2q104 * q22) +
           _A2y * (-_cq2q101 * q22 - _cq2q102 * q23 - _cq2q103 * q20 + _cq2q104 * q21) +
           _A2z * (-_cq2q101 * q23 + _cq2q102 * q22 - _cq2q103 * q21 - _cq2q104 * q20));
-  _jachq->setValue(
+  jacobianhOver_q_->setValue(
       4, 4,
       _A2x * (_cq2q101 * q20 - _cq2q102 * q21 - _cq2q103 * q22 - _cq2q104 * q23) +
           _A2y * (-_cq2q101 * q23 + _cq2q102 * q22 - _cq2q103 * q21 - _cq2q104 * q20) +
           _A2z * (_cq2q101 * q22 + _cq2q102 * q23 + _cq2q103 * q20 - _cq2q104 * q21));
-  _jachq->setValue(
+  jacobianhOver_q_->setValue(
       4, 5,
       _A2x * (_cq2q101 * q23 - _cq2q102 * q22 + _cq2q103 * q21 + _cq2q104 * q20) +
           _A2y * (_cq2q101 * q20 - _cq2q102 * q21 - _cq2q103 * q22 - _cq2q104 * q23) +
           _A2z * (-_cq2q101 * q21 - _cq2q102 * q20 + _cq2q103 * q23 - _cq2q104 * q22));
-  _jachq->setValue(
+  jacobianhOver_q_->setValue(
       4, 6,
       _A2x * (-_cq2q101 * q22 - _cq2q102 * q23 - _cq2q103 * q20 + _cq2q104 * q21) +
           _A2y * (_cq2q101 * q21 + _cq2q102 * q20 - _cq2q103 * q23 + _cq2q104 * q22) +
           _A2z * (_cq2q101 * q20 - _cq2q102 * q21 - _cq2q103 * q22 - _cq2q104 * q23));
 
-  _jachq->setValue(4, 7, 0);
-  _jachq->setValue(4, 8, 0);
-  _jachq->setValue(4, 9, 0);
+  jacobianhOver_q_->setValue(4, 7, 0);
+  jacobianhOver_q_->setValue(4, 8, 0);
+  jacobianhOver_q_->setValue(4, 9, 0);
 
   // sympy expression: [AscalA2.diff(x) for x in q1]
-  _jachq->setValue(
+  jacobianhOver_q_->setValue(
       4, 10,
       _A2x * (_cq2q101 * q11 - _cq2q102 * q10 - _cq2q103 * q13 + _cq2q104 * q12) +
           _A2y * (_cq2q101 * q12 + _cq2q102 * q13 - _cq2q103 * q10 - _cq2q104 * q11) +
           _A2z * (_cq2q101 * q13 - _cq2q102 * q12 + _cq2q103 * q11 - _cq2q104 * q10));
-  _jachq->setValue(
+  jacobianhOver_q_->setValue(
       4, 11,
       _A2x * (-_cq2q101 * q10 - _cq2q102 * q11 + _cq2q103 * q12 + _cq2q104 * q13) +
           _A2y * (_cq2q101 * q13 - _cq2q102 * q12 - _cq2q103 * q11 + _cq2q104 * q10) +
           _A2z * (-_cq2q101 * q12 - _cq2q102 * q13 - _cq2q103 * q10 - _cq2q104 * q11));
-  _jachq->setValue(
+  jacobianhOver_q_->setValue(
       4, 12,
       _A2x * (-_cq2q101 * q13 - _cq2q102 * q12 - _cq2q103 * q11 - _cq2q104 * q10) +
           _A2y * (-_cq2q101 * q10 + _cq2q102 * q11 - _cq2q103 * q12 + _cq2q104 * q13) +
           _A2z * (_cq2q101 * q11 + _cq2q102 * q10 - _cq2q103 * q13 - _cq2q104 * q12));
-  _jachq->setValue(
+  jacobianhOver_q_->setValue(
       4, 13,
       _A2x * (_cq2q101 * q12 - _cq2q102 * q13 + _cq2q103 * q10 - _cq2q104 * q11) +
           _A2y * (-_cq2q101 * q11 - _cq2q102 * q10 - _cq2q103 * q13 - _cq2q104 * q12) +
           _A2z * (-_cq2q101 * q10 + _cq2q102 * q11 + _cq2q103 * q12 - _cq2q104 * q13));
 
   /*proj_with_q
-  for (unsigned int ii=0; ii <_jachq->size(0); ii++)
-    for (unsigned int jj=0; jj <_jachq->size(1); jj++)
-  _jachqProj->setValue(ii,jj,_jachq->getValue(ii,jj));
+  for (unsigned int ii=0; ii <jacobianhOver_q_->size(0); ii++)
+    for (unsigned int jj=0; jj <jacobianhOver_q_->size(1); jj++)
+  jacobianhOver_q_Proj->setValue(ii,jj,jacobianhOver_q_->getValue(ii,jj));
 
-  _jachqProj->setValue(5,0,0);
-  _jachqProj->setValue(5,1,0);
-  _jachqProj->setValue(5,2,0);
-  _jachqProj->setValue(5,3,2.0*q10);
-  _jachqProj->setValue(5,4,2.0*q11);
-  _jachqProj->setValue(5,5,2.0*q12);
-  _jachqProj->setValue(5,6,2.0*q13);
-  _jachqProj->setValue(6,0+7,0);
-  _jachqProj->setValue(6,1+7,0);
-  _jachqProj->setValue(6,2+7,0);
-  _jachqProj->setValue(6,3+7,2.0*q20);
-  _jachqProj->setValue(6,4+7,2.0*q21);
-  _jachqProj->setValue(6,5+7,2.0*q22);
-  _jachqProj->setValue(6,6+7,2.0*q23);
+  jacobianhOver_q_Proj->setValue(5,0,0);
+  jacobianhOver_q_Proj->setValue(5,1,0);
+  jacobianhOver_q_Proj->setValue(5,2,0);
+  jacobianhOver_q_Proj->setValue(5,3,2.0*q10);
+  jacobianhOver_q_Proj->setValue(5,4,2.0*q11);
+  jacobianhOver_q_Proj->setValue(5,5,2.0*q12);
+  jacobianhOver_q_Proj->setValue(5,6,2.0*q13);
+  jacobianhOver_q_Proj->setValue(6,0+7,0);
+  jacobianhOver_q_Proj->setValue(6,1+7,0);
+  jacobianhOver_q_Proj->setValue(6,2+7,0);
+  jacobianhOver_q_Proj->setValue(6,3+7,2.0*q20);
+  jacobianhOver_q_Proj->setValue(6,4+7,2.0*q21);
+  jacobianhOver_q_Proj->setValue(6,5+7,2.0*q22);
+  jacobianhOver_q_Proj->setValue(6,6+7,2.0*q23);
   */
 
-  //_jachq->display();
+  //jacobianhOver_q_->display();
 }
 
 void siconos::joints::PivotJointR::Jd1(double X1, double Y1, double Z1, double q10, double q11,
                                        double q12, double q13) {
   KneeJointR::Jd1(X1, Y1, Z1, q10, q11, q12, q13);
 
-  _jachq->setValue(3, 0, 0);
-  _jachq->setValue(3, 1, 0);
-  _jachq->setValue(3, 2, 0);
+  jacobianhOver_q_->setValue(3, 0, 0);
+  jacobianhOver_q_->setValue(3, 1, 0);
+  jacobianhOver_q_->setValue(3, 2, 0);
 
   // sympy expression: [AscalA1.diff(x) for x in q1]
-  _jachq->setValue(3, 3, _A1x * (-_cq2q102) + _A1y * (-_cq2q103) + _A1z * (-_cq2q104));
-  _jachq->setValue(3, 4, _A1x * (_cq2q101) + _A1y * (-_cq2q104) + _A1z * (_cq2q103));
-  _jachq->setValue(3, 5, _A1x * (_cq2q104) + _A1y * (_cq2q101) + _A1z * (-_cq2q102));
-  _jachq->setValue(3, 6, _A1x * (-_cq2q103) + _A1y * (_cq2q102) + _A1z * (_cq2q101));
+  jacobianhOver_q_->setValue(3, 3, _A1x * (-_cq2q102) + _A1y * (-_cq2q103) + _A1z * (-_cq2q104));
+  jacobianhOver_q_->setValue(3, 4, _A1x * (_cq2q101) + _A1y * (-_cq2q104) + _A1z * (_cq2q103));
+  jacobianhOver_q_->setValue(3, 5, _A1x * (_cq2q104) + _A1y * (_cq2q101) + _A1z * (-_cq2q102));
+  jacobianhOver_q_->setValue(3, 6, _A1x * (-_cq2q103) + _A1y * (_cq2q102) + _A1z * (_cq2q101));
 
-  _jachq->setValue(4, 0, 0);
-  _jachq->setValue(4, 1, 0);
-  _jachq->setValue(4, 2, 0);
+  jacobianhOver_q_->setValue(4, 0, 0);
+  jacobianhOver_q_->setValue(4, 1, 0);
+  jacobianhOver_q_->setValue(4, 2, 0);
 
   // sympy expression: [AscalA2.diff(x) for x in q1]
-  _jachq->setValue(4, 3, _A2x * (-_cq2q102) + _A2y * (-_cq2q103) + _A2z * (-_cq2q104));
-  _jachq->setValue(4, 4, _A2x * (_cq2q101) + _A2y * (-_cq2q104) + _A2z * (_cq2q103));
-  _jachq->setValue(4, 5, _A2x * (_cq2q104) + _A2y * (_cq2q101) + _A2z * (-_cq2q102));
-  _jachq->setValue(4, 6, _A2x * (-_cq2q103) + _A2y * (_cq2q102) + _A2z * (_cq2q101));
+  jacobianhOver_q_->setValue(4, 3, _A2x * (-_cq2q102) + _A2y * (-_cq2q103) + _A2z * (-_cq2q104));
+  jacobianhOver_q_->setValue(4, 4, _A2x * (_cq2q101) + _A2y * (-_cq2q104) + _A2z * (_cq2q103));
+  jacobianhOver_q_->setValue(4, 5, _A2x * (_cq2q104) + _A2y * (_cq2q101) + _A2z * (-_cq2q102));
+  jacobianhOver_q_->setValue(4, 6, _A2x * (-_cq2q103) + _A2y * (_cq2q102) + _A2z * (_cq2q101));
 
   /*proj_with_q
-      for (unsigned int ii=0; ii <_jachq->size(0); ii++)
-        for (unsigned int jj=0; jj <_jachq->size(1); jj++)
-    _jachqProj->setValue(ii,jj,_jachq->getValue(ii,jj));
+      for (unsigned int ii=0; ii <jacobianhOver_q_->size(0); ii++)
+        for (unsigned int jj=0; jj <jacobianhOver_q_->size(1); jj++)
+    jacobianhOver_q_Proj->setValue(ii,jj,jacobianhOver_q_->getValue(ii,jj));
 
-      _jachqProj->setValue(5,0,0);
-      _jachqProj->setValue(5,1,0);
-      _jachqProj->setValue(5,2,0);
-      _jachqProj->setValue(5,3,2.0*q10);
-      _jachqProj->setValue(5,4,2.0*q11);
-      _jachqProj->setValue(5,5,2.0*q12);
-      _jachqProj->setValue(5,6,2.0*q13);
+      jacobianhOver_q_Proj->setValue(5,0,0);
+      jacobianhOver_q_Proj->setValue(5,1,0);
+      jacobianhOver_q_Proj->setValue(5,2,0);
+      jacobianhOver_q_Proj->setValue(5,3,2.0*q10);
+      jacobianhOver_q_Proj->setValue(5,4,2.0*q11);
+      jacobianhOver_q_Proj->setValue(5,5,2.0*q12);
+      jacobianhOver_q_Proj->setValue(5,6,2.0*q13);
   */
 }
 

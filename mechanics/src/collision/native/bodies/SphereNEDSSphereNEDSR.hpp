@@ -55,7 +55,7 @@ class SphereNEDSSphereNEDSR : public siconos::modeling::NewtonEuler3DR,
   void computeh(double time, const siconos::algebra::BlockVector &q0,
                 siconos::algebra::SiconosVector &y) override;
 
-  // void computeJachq(double);
+  // void computeJacobianhOver_q(double);
 };
 }  // namespace siconos::collision::native::bodies
 #endif /* SphereNEDSSphereNEDSR_h */

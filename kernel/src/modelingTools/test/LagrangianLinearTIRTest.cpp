@@ -104,7 +104,7 @@ void LagrangianLinearTIRTest::testSetCPtr()
       std::make_shared<siconos::algebra::SiconosMatrix>(*C);
   tmp->setZero();
   auto folr = std::make_shared<siconos::modeling::LagrangianLinearTIR>(tmp);
-  folr->setCPtr(C);
+  folr->setCMatrix(C);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetCPtr : ", folr->C() == C, true);
   std::cout << "--> setCPtr test ended with success." << std::endl;
 }

@@ -496,9 +496,9 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
             *currentInteractionBlock *=
                 (static_cast<siconos::integrators::MoreauJeanOSI&>(osi)).theta();
             *currentInteractionBlock +=
-                *std::static_pointer_cast<siconos::modeling::LagrangianCompliantLinearTIR>(
-                     inter->relation())
-                     ->D() /
+                std::static_pointer_cast<siconos::modeling::LagrangianCompliantLinearTIR>(
+                    inter->relation())
+                    ->DMatrix() /
                 simulation()->timeStep();
           }
         }
@@ -522,9 +522,9 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
             *currentInteractionBlock *=
                 (static_cast<siconos::integrators::MoreauJeanOSI&>(osi)).theta();
             *currentInteractionBlock +=
-                *std::static_pointer_cast<siconos::modeling::LagrangianCompliantLinearTIR>(
-                     inter->relation())
-                     ->D() /
+                std::static_pointer_cast<siconos::modeling::LagrangianCompliantLinearTIR>(
+                    inter->relation())
+                    ->DMatrix() /
                 simulation()->timeStep();
           }
         }

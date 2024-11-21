@@ -140,7 +140,7 @@ void siconos::io::ContactPointVisitor::operator()(
 
   auto id = inter->number();
   auto mu = siconos::internal::ask<ForMu>(*inter->nonSmoothLaw());
-  const auto& jachqT = *rel.jachqT();
+  const auto& jachqT = *rel.H_prod_T();
   siconos::algebra::SiconosVector cf(jachqT.size(1));
   siconos::algebra::prod(*inter->lambda(1), jachqT, cf, true);
   answer.resize(23);
@@ -183,7 +183,7 @@ void siconos::io::ContactPointVisitor::operator()(
 
   auto id = inter->number();
   auto mu = siconos::internal::ask<ForMu>(*inter->nonSmoothLaw());
-  const auto& jachqT = *rel.jachqT();
+  const auto& jachqT = *rel.H_prod_T();
   siconos::algebra::SiconosVector cf(jachqT.size(1));
   siconos::algebra::prod(*inter->lambda(1), jachqT, cf, true);
   answer.resize(23);
@@ -238,7 +238,7 @@ void siconos::io::ContactPointVisitor::operator()(
 
   auto id = inter->number();
   auto mu = siconos::internal::ask<ForMu>(*inter->nonSmoothLaw());
-  const auto& jachq = *rel.jachq();
+  const auto& jachq = *rel.jacobianhOver_q();
   siconos::algebra::SiconosVector cf(jachq.size(1));
   siconos::algebra::prod(*inter->lambda(1), jachq, cf, true);
 
@@ -305,7 +305,7 @@ void siconos::io::ContactPointVisitor::operator()(
   }
   auto id = inter->number();
   auto mu = siconos::internal::ask<ForMu>(*inter->nonSmoothLaw());
-  const auto& jachq = *rel.jachq();
+  const auto& jachq = *rel.jacobianhOver_q();
   siconos::algebra::SiconosVector cf(jachq.size(1));
   siconos::algebra::prod(*inter->lambda(1), jachq, cf, true);
 
@@ -362,7 +362,7 @@ void siconos::io::ContactPointVisitor::operator()(
 
   auto id = inter->number();
   auto mu = siconos::internal::ask<ForMu>(*inter->nonSmoothLaw());
-  const auto& jachq = *rel.jachq();
+  const auto& jachq = *rel.jacobianhOver_q();
   siconos::algebra::SiconosVector cf(jachq.size(1));
   siconos::algebra::prod(*inter->lambda(1), jachq, cf, true);
 
@@ -404,7 +404,7 @@ void siconos::io::ContactPointVisitor::operator()(
 
   auto id = inter->number();
   auto mu = siconos::internal::ask<ForMu>(*inter->nonSmoothLaw());
-  const auto& jachq = *rel.jachq();
+  const auto& jachq = *rel.jacobianhOver_q();
   siconos::algebra::SiconosVector cf(jachq.size(1));
   siconos::algebra::prod(*inter->lambda(1), jachq, cf, true);
 
@@ -446,7 +446,7 @@ void siconos::io::ContactPointVisitor::operator()(
 
   auto id = inter->number();
   auto mu = siconos::internal::ask<ForMu>(*inter->nonSmoothLaw());
-  const auto& jachq = *rel.jachq();
+  const auto& jachq = *rel.jacobianhOver_q();
   siconos::algebra::SiconosVector cf(jachq.size(1));
   siconos::algebra::prod(*inter->lambda(1), jachq, cf, true);
 

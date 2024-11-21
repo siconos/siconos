@@ -63,7 +63,7 @@ namespace siconos::collision::native::bodies {
   void computeh(double time, const siconos::algebra::BlockVector &q0,
                 siconos::algebra::SiconosVector &y) override;
 
-  // void computeJachq(double);
+  // void computeJacobianhOver_q(double);
 
   bool equal(double _A, double _B, double _C, double _D, double _r) const
   {

@@ -30,22 +30,26 @@
 #include "siconos_debug.h"
 
 void siconos::modeling::Lagrangian2d3DR::initialize(Interaction& inter) {
-  // proj_with_q  _jachqProj =
-  // std::make_shared<siconos::algebra::SiconosMatrix>(_jachq->size(0),_jachq->size(1)));
+  // proj_with_q  jacobianhOver_q_Proj =
+  // std::make_shared<siconos::algebra::SiconosMatrix>(jacobianhOver_q_->size(0),jacobianhOver_q_->size(1)));
 
   if ((inter.getSizeOfDS() != 3) and (inter.getSizeOfDS() != 6)) {
     THROW_EXCEPTION(
         "siconos::modeling::Lagrangian2d3DR::initialize(Interaction& inter). The size of ds "
-        "must of size 3");
+        "must of size 3 or 6");
   }
-  unsigned int qSize = 3 * (inter.getSizeOfDS() / 3);
-  _jachq = std::make_shared<siconos::algebra::SiconosMatrix>(3, qSize);
+  auto qSize = 3 * (inter.getSizeOfDS() / 3);
+  if (!jacobianhOver_q_internal_storage_) {
+    jacobianhOver_q_internal_storage_ = std::make_unique<std::vector<double>>(3 * qSize);
+  }
+  jacobianhOver_q_view_ = std::make_shared<siconos::algebra::MapType>(
+      jacobianhOver_q_internal_storage_->data(), 3, qSize);
 }
 
-void siconos::modeling::Lagrangian2d3DR::computeJachq(const siconos::algebra::BlockVector& q,
-                                                      siconos::algebra::BlockVector& z) {
+void siconos::modeling::Lagrangian2d3DR::computeJacobianhOver_q(
+    const siconos::algebra::BlockVector& q) {
   DEBUG_BEGIN(
-      "siconos::modeling::Lagrangian2d3DR::computeJachq(Interaction& inter, "
+      "siconos::modeling::Lagrangian2d3DR::computeJacobianhOver_q(Interaction& inter, "
       "siconos::algebra::BlockVector q0 \n");
 
   double Nx = _Nc->getValue(0);
@@ -64,17 +68,17 @@ void siconos::modeling::Lagrangian2d3DR::computeJachq(const siconos::algebra::Bl
   DEBUG_PRINTF("N_x = %4.2e,\t N_ y = %4.2e\n", Nx, Ny);
   DEBUG_PRINTF("lever_arm_x = %4.2e,\t lever_arm_ y = %4.2e\n", lever_arm_x, lever_arm_y);
 
-  _jachq->setValue(0, 0, Nx);
-  _jachq->setValue(0, 1, Ny);
-  _jachq->setValue(0, 2, lever_arm_x * Ny - lever_arm_y * Nx);
+  jacobianhOver_q_view_->setValue(0, 0, Nx);
+  jacobianhOver_q_view_->setValue(0, 1, Ny);
+  jacobianhOver_q_view_->setValue(0, 2, lever_arm_x * Ny - lever_arm_y * Nx);
 
-  _jachq->setValue(1, 0, Tx);
-  _jachq->setValue(1, 1, Ty);
-  _jachq->setValue(1, 2, lever_arm_x * Ty - lever_arm_y * Tx);
+  jacobianhOver_q_view_->setValue(1, 0, Tx);
+  jacobianhOver_q_view_->setValue(1, 1, Ty);
+  jacobianhOver_q_view_->setValue(1, 2, lever_arm_x * Ty - lever_arm_y * Tx);
 
-  _jachq->setValue(2, 0, 0.0);
-  _jachq->setValue(2, 1, 0.0);
-  _jachq->setValue(2, 2, 1.0);
+  jacobianhOver_q_view_->setValue(2, 0, 0.0);
+  jacobianhOver_q_view_->setValue(2, 1, 0.0);
+  jacobianhOver_q_view_->setValue(2, 2, 1.0);
 
   if (q.size() == 6) {
     DEBUG_PRINT("take into account second ds\n");
@@ -83,21 +87,21 @@ void siconos::modeling::Lagrangian2d3DR::computeJachq(const siconos::algebra::Bl
     lever_arm_x = Px - G2x;
     lever_arm_y = Py - G2y;
 
-    _jachq->setValue(0, 3, -Nx);
-    _jachq->setValue(0, 4, -Ny);
-    _jachq->setValue(0, 5, lever_arm_y * Nx - lever_arm_x * Ny);
+    jacobianhOver_q_view_->setValue(0, 3, -Nx);
+    jacobianhOver_q_view_->setValue(0, 4, -Ny);
+    jacobianhOver_q_view_->setValue(0, 5, lever_arm_y * Nx - lever_arm_x * Ny);
 
-    _jachq->setValue(1, 3, -Tx);
-    _jachq->setValue(1, 4, -Ty);
-    _jachq->setValue(1, 5, lever_arm_y * Tx - lever_arm_x * Ty);
+    jacobianhOver_q_view_->setValue(1, 3, -Tx);
+    jacobianhOver_q_view_->setValue(1, 4, -Ty);
+    jacobianhOver_q_view_->setValue(1, 5, lever_arm_y * Tx - lever_arm_x * Ty);
 
-    _jachq->setValue(2, 3, 0.0);
-    _jachq->setValue(2, 4, 0.0);
-    _jachq->setValue(2, 5, -1.0);
+    jacobianhOver_q_view_->setValue(2, 3, 0.0);
+    jacobianhOver_q_view_->setValue(2, 4, 0.0);
+    jacobianhOver_q_view_->setValue(2, 5, -1.0);
   }
-  DEBUG_EXPR(_jachq->display(););
+  DEBUG_EXPR(std::cout << jacobianhOver_q_view_ << "\n";);
   DEBUG_END(
-      "siconos::modeling::Lagrangian2d3DR::computeJachq(Interaction& inter, "
+      "siconos::modeling::Lagrangian2d3DR::computeJacobianhOver_q(Interaction& inter, "
       "siconos::algebra::BlockVector q0) \n");
 }
 
@@ -111,9 +115,8 @@ double siconos::modeling::Lagrangian2d3DR::distance() const {
   return dpc.norm2() * (_Nc->dot(dpc) >= 0 ? -1 : 1);
 }
 
-void siconos::modeling::Lagrangian2d3DR::computeh(const siconos::algebra::BlockVector& q,
-                                                  siconos::algebra::BlockVector& z,
-                                                  siconos::algebra::SiconosVector& y) {
+void siconos::modeling::Lagrangian2d3DR::computeh(
+    const siconos::algebra::BlockVector& q, Eigen::Ref<siconos::algebra::SiconosVector> y) {
   DEBUG_BEGIN("siconos::modeling::Lagrangian2d3DR::computeh(...)\n");
   DEBUG_EXPR(q.display());
 
@@ -121,7 +124,7 @@ void siconos::modeling::Lagrangian2d3DR::computeh(const siconos::algebra::BlockV
   DEBUG_EXPR(_Pc2->display(););
   DEBUG_EXPR(_Nc->display(););
 
-  LagrangianScleronomousR::computeh(q, z, y);
+  LagrangianScleronomousR::computeh(q, y);
   y.setValue(0, distance());
   DEBUG_EXPR(y.display(););
   DEBUG_EXPR(display(););

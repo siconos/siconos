@@ -80,8 +80,7 @@ class Lagrangian2d2DR : public LagrangianScleronomousR {
       : LagrangianScleronomousR(),
         _Pc1{std::make_shared<siconos::algebra::SiconosVector>(2)},
         _Pc2{std::make_shared<siconos::algebra::SiconosVector>(2)},
-        _Nc{std::make_shared<siconos::algebra::SiconosVector>(2)}
-  {
+        _Nc{std::make_shared<siconos::algebra::SiconosVector>(2)} {
     /*_ds1=nullptr;_ds2=nullptr;*/
   }
 
@@ -96,15 +95,14 @@ class Lagrangian2d2DR : public LagrangianScleronomousR {
      \param z user defined parameters (optional)
      \param y the resulting vector
  */
-  void computeh(const siconos::algebra::BlockVector &q, siconos::algebra::BlockVector &z,
-                siconos::algebra::SiconosVector &y) override;
+  void computeh(const siconos::algebra::BlockVector &q,
+                Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
-  /** to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
+  /** to compute the jacobian of h(...). Set attribute jacobianhOver_q_ (access: jacqhq())
       \param q coordinates of the dynamical systems involved in the relation
       \param z user defined parameters (optional)
   */
-  void computeJachq(const siconos::algebra::BlockVector &q,
-                    siconos::algebra::BlockVector &z) override;
+  void computeJacobianhOver_q(const siconos::algebra::BlockVector &q) override;
 
   // virtual void computeOutput(double time, Interaction& inter,  unsigned int
   // derivativeNumber);

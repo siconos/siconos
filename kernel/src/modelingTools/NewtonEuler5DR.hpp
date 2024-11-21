@@ -57,7 +57,7 @@ class NewtonEuler5DR : public NewtonEuler1DR {
    *  \param inter interaction that owns the relation
    *  \param q0  the block vector to the dynamical system position
    */
-  void computeJachqT(Interaction &inter,
+  void computeHMatrix_prod_T(Interaction &inter,
                      std::shared_ptr<siconos::algebra::BlockVector> q0) override;
 };
 }  // namespace siconos::modeling

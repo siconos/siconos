@@ -788,7 +788,7 @@ struct siconos::integrators::Hem5OSI::_NSLEffectOnFreeOutput
   _NSLEffectOnFreeOutput(siconos::nonsmooth_formulations::OneStepNSProblem* p,
                          std::shared_ptr<siconos::modeling::Interaction> inter,
                          siconos::graphs::InteractionProperties& interProp)
-      : _osnsp(p), _inter(inter), _interProp(interProp){};
+      : _osnsp(p), _inter(inter), _interProp(interProp) {};
 
   void visit(const siconos::modeling::NewtonImpactNSL& nslaw) const override {
     double e;
@@ -849,7 +849,7 @@ void siconos::integrators::Hem5OSI::computeFreeOutput(
     THROW_EXCEPTION(" computeqBlock for Event Event-driven is wrong ");
 
   if (relationType == siconos::modeling::RelationType::Lagrangian) {
-    C = mainInteraction->relation()->C();
+    C = mainInteraction->relation()->jacobianhOver_q();
     if (C) {
       assert(Xfree);
       siconos::algebra::matrixBlockVector_prod(*C, *Xfree, osnsp_rhs, true);
@@ -866,12 +866,12 @@ void siconos::integrators::Hem5OSI::computeFreeOutput(
             "acceleration level with LagrangianRheonomousR");
       } else if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp) {
         std::static_pointer_cast<siconos::modeling::LagrangianRheonomousR>(inter->relation())
-            ->computehDot(simulation()->getTkp1(), *DSlink[siconos::modeling::LagrangianR::q0],
-                          *DSlink[siconos::modeling::LagrangianR::z]);
+            ->computehdot(*DSlink[siconos::modeling::LagrangianR::q0],
+                          simulation()->getTkp1());
 
         auto hDot = std::static_pointer_cast<siconos::modeling::LagrangianRheonomousR>(
                         inter->relation())
-                        ->hDot();
+                        ->hdot();
         osnsp_rhs += *ID * *hDot;
       } else
         THROW_EXCEPTION(
@@ -887,7 +887,7 @@ void siconos::integrators::Hem5OSI::computeFreeOutput(
         auto dotjacqhXqdot =
             std::static_pointer_cast<siconos::modeling::LagrangianScleronomousR>(
                 inter->relation())
-                ->dotjacqhXqdot();
+                ->jacobianhOver_q_dot_X_qdot();
         osnsp_rhs += *ID * *dotjacqhXqdot;
       }
     }

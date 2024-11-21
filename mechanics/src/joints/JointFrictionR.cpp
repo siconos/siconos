@@ -69,26 +69,26 @@ void siconos::joints::JointFrictionR::computeh(double time,
   y.setZero();
 }
 
-void siconos::joints::JointFrictionR::computeJachq(
+void siconos::joints::JointFrictionR::computeJacobianhOver_q(
     double time, siconos::modeling::Interaction& inter,
     std::shared_ptr<siconos::algebra::BlockVector> q0) {
   unsigned int n = _axisMax - _axisMin + 1;
   assert(n == 1);  // For now, multi-axis support TODO
 
-  if (!_jachqTmp || !(_jachqTmp->size(1) == q0->size() && _jachqTmp->size(0) == n)) {
-    _jachqTmp = std::make_shared<siconos::algebra::SiconosMatrix>(n, q0->size());
+  if (!jacobianhOver_q_Tmp || !(jacobianhOver_q_Tmp->size(1) == q0->size() && jacobianhOver_q_Tmp->size(0) == n)) {
+    jacobianhOver_q_Tmp = std::make_shared<siconos::algebra::SiconosMatrix>(n, q0->size());
   }
 
   // Compute the jacobian for the required range of axes
-  _joint->computeJachqDoF(time, inter, q0, *_jachqTmp, _axisMin);
+  _joint->computeJachqDoF(time, inter, q0, *jacobianhOver_q_Tmp, _axisMin);
 
   // Copy indicated axes into the friction jacobian, negative and positive sides
   // NOTE trying ==1 using Relay, maybe don't need LCP formulation
-  assert(_jachq->size(0) == 1);
+  assert(jacobianhOver_q_->size(0) == 1);
   for (unsigned int i = 0; i < 1; i++)
-    for (unsigned int j = 0; j < _jachq->size(1); j++) {
-      _jachq->setValue(i, j,
-                       _jachqTmp->getValue((*_axis)[i] - _axisMin, j) * (i == 1 ? 1 : -1));
+    for (unsigned int j = 0; j < jacobianhOver_q_->size(1); j++) {
+      jacobianhOver_q_->setValue(i, j,
+                       jacobianhOver_q_Tmp->getValue((*_axis)[i] - _axisMin, j) * (i == 1 ? 1 : -1));
     }
 }
 

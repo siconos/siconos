@@ -55,6 +55,21 @@ void siconos::algebra::matrixBlockVector_prod(const SiconosMatrix& A, const Bloc
   }
 }
 
+void siconos::algebra::matrixBlockVector_prod(const SiconosMatrix& A, const BlockVector& x,
+                                              Eigen::Ref<SiconosVector> y, bool init) {
+  if (init) y.setZero();
+  unsigned int startRow = 0;
+  unsigned int startCol = 0;
+  // In private_addprod, the sum of all blocks of x, x[i], is computed: y =
+  // Sum_i (subA x[i]), with subA a submatrix of A, starting from position
+  // startRow in rows and startCol in columns. private_prod takes also into
+  // account the fact that each block of x can also be a block.
+  for (auto& it : x) {
+    y += A.block(startRow, startCol, y.size(), it->size()) * *it;
+    startCol += it->size();
+  }
+}
+
 void siconos::algebra::prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y,
                             bool init) {
   // To compute y = A * x in an "optimized" way (in comparison with y =

@@ -40,12 +40,12 @@
 void siconos::joints::KneeJointR::initialize(siconos::modeling::Interaction& inter) {
   NewtonEulerR::initialize(inter);
 
-  if (!_dotjachq) {
+  if (!jacobianhOver_q_dot_) {
     auto sizeY = inter.dimension();
     auto xSize = inter.getSizeOfDS();
     auto qSize = 7 * (xSize / 6);
 
-    _dotjachq = std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, qSize);
+    jacobianhOver_q_dot_ = std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, qSize);
   }
 }
 
@@ -213,62 +213,62 @@ void siconos::joints::KneeJointR::Jd1d2(double X1, double Y1, double Z1, double 
     dfr1[6] = dfr0[4];
     dfr1[3] = -_G1P0z;
     dfr1[0] = dfr1[3];
-    _jachq->setValue(0, 0, 1.0);
-    _jachq->setValue(0, 1, 0.0);
-    _jachq->setValue(0, 2, 0.0);
+    jacobianhOver_q_->setValue(0, 0, 1.0);
+    jacobianhOver_q_->setValue(0, 1, 0.0);
+    jacobianhOver_q_->setValue(0, 2, 0.0);
     t11 = df[5];
-    _jachq->setValue(0, 3, df[6] * q12 + t11 * q13 + 2.0 * q10 * _G1P0x);
-    _jachq->setValue(0, 4, dfr0[16] * q13 + dfr1[17] * q12 + 2.0 * q11 * _G1P0x);
-    _jachq->setValue(0, 5, df[6] * q10 + dfr1[17] * q11 + 2.0 * df[2] * q12);
-    _jachq->setValue(0, 6, dfr0[16] * q11 + t11 * q10 + 2.0 * df[2] * q13);
-    _jachq->setValue(0, 7, -1.0);
-    _jachq->setValue(0, 8, 0.0);
-    _jachq->setValue(0, 9, 0.0);
+    jacobianhOver_q_->setValue(0, 3, df[6] * q12 + t11 * q13 + 2.0 * q10 * _G1P0x);
+    jacobianhOver_q_->setValue(0, 4, dfr0[16] * q13 + dfr1[17] * q12 + 2.0 * q11 * _G1P0x);
+    jacobianhOver_q_->setValue(0, 5, df[6] * q10 + dfr1[17] * q11 + 2.0 * df[2] * q12);
+    jacobianhOver_q_->setValue(0, 6, dfr0[16] * q11 + t11 * q10 + 2.0 * df[2] * q13);
+    jacobianhOver_q_->setValue(0, 7, -1.0);
+    jacobianhOver_q_->setValue(0, 8, 0.0);
+    jacobianhOver_q_->setValue(0, 9, 0.0);
     t41 = df[13];
-    _jachq->setValue(0, 10, df[14] * q22 + t41 * q23 + 2.0 * df[8] * q20);
-    _jachq->setValue(0, 11, dfr0[18] * q23 + dfr1[19] * q22 + 2.0 * df[8] * q21);
-    _jachq->setValue(0, 12, df[14] * q20 + dfr1[19] * q21 + 2.0 * q22 * _G2P0x);
-    _jachq->setValue(0, 13, dfr0[18] * q21 + t41 * q20 + 2.0 * q23 * _G2P0x);
-    _jachq->setValue(1, 0, 0.0);
-    _jachq->setValue(1, 1, 1.0);
-    _jachq->setValue(1, 2, 0.0);
+    jacobianhOver_q_->setValue(0, 10, df[14] * q22 + t41 * q23 + 2.0 * df[8] * q20);
+    jacobianhOver_q_->setValue(0, 11, dfr0[18] * q23 + dfr1[19] * q22 + 2.0 * df[8] * q21);
+    jacobianhOver_q_->setValue(0, 12, df[14] * q20 + dfr1[19] * q21 + 2.0 * q22 * _G2P0x);
+    jacobianhOver_q_->setValue(0, 13, dfr0[18] * q21 + t41 * q20 + 2.0 * q23 * _G2P0x);
+    jacobianhOver_q_->setValue(1, 0, 0.0);
+    jacobianhOver_q_->setValue(1, 1, 1.0);
+    jacobianhOver_q_->setValue(1, 2, 0.0);
     t60 = dfr0[17];
-    _jachq->setValue(1, 3, t60 * q11 + dfr0[4] * q13 + 2.0 * q10 * _G1P0y);
-    _jachq->setValue(1, 4, t60 * q10 + dfr1[6] * q12 + 2.0 * dfr0[0] * q11);
+    jacobianhOver_q_->setValue(1, 3, t60 * q11 + dfr0[4] * q13 + 2.0 * q10 * _G1P0y);
+    jacobianhOver_q_->setValue(1, 4, t60 * q10 + dfr1[6] * q12 + 2.0 * dfr0[0] * q11);
     t70 = dfr0[16];
-    _jachq->setValue(1, 5, t70 * q13 + dfr1[6] * q11 + 2.0 * q12 * _G1P0y);
-    _jachq->setValue(1, 6, t70 * q12 + dfr0[4] * q10 + 2.0 * dfr0[0] * q13);
-    _jachq->setValue(1, 7, 0.0);
-    _jachq->setValue(1, 8, -1.0);
-    _jachq->setValue(1, 9, 0.0);
+    jacobianhOver_q_->setValue(1, 5, t70 * q13 + dfr1[6] * q11 + 2.0 * q12 * _G1P0y);
+    jacobianhOver_q_->setValue(1, 6, t70 * q12 + dfr0[4] * q10 + 2.0 * dfr0[0] * q13);
+    jacobianhOver_q_->setValue(1, 7, 0.0);
+    jacobianhOver_q_->setValue(1, 8, -1.0);
+    jacobianhOver_q_->setValue(1, 9, 0.0);
     t79 = dfr0[19];
-    _jachq->setValue(1, 10, t79 * q21 + dfr0[12] * q23 + 2.0 * dfr0[9] * q20);
-    _jachq->setValue(1, 11, t79 * q20 + dfr1[14] * q22 + 2.0 * q21 * _G2P0y);
+    jacobianhOver_q_->setValue(1, 10, t79 * q21 + dfr0[12] * q23 + 2.0 * dfr0[9] * q20);
+    jacobianhOver_q_->setValue(1, 11, t79 * q20 + dfr1[14] * q22 + 2.0 * q21 * _G2P0y);
     t89 = dfr0[18];
-    _jachq->setValue(1, 12, t89 * q23 + dfr1[14] * q21 + 2.0 * dfr0[9] * q22);
-    _jachq->setValue(1, 13, t89 * q22 + dfr0[12] * q20 + 2.0 * q23 * _G2P0y);
-    _jachq->setValue(2, 0, 0.0);
-    _jachq->setValue(2, 1, 0.0);
-    _jachq->setValue(2, 2, 1.0);
+    jacobianhOver_q_->setValue(1, 12, t89 * q23 + dfr1[14] * q21 + 2.0 * dfr0[9] * q22);
+    jacobianhOver_q_->setValue(1, 13, t89 * q22 + dfr0[12] * q20 + 2.0 * q23 * _G2P0y);
+    jacobianhOver_q_->setValue(2, 0, 0.0);
+    jacobianhOver_q_->setValue(2, 1, 0.0);
+    jacobianhOver_q_->setValue(2, 2, 1.0);
     t99 = dfr1[7];
-    _jachq->setValue(2, 3, dfr1[16] * q11 + t99 * q12 + 2.0 * q10 * _G1P0z);
+    jacobianhOver_q_->setValue(2, 3, dfr1[16] * q11 + t99 * q12 + 2.0 * q10 * _G1P0z);
     t104 = dfr1[6];
-    _jachq->setValue(2, 4, dfr1[16] * q10 + t104 * q13 + 2.0 * dfr1[0] * q11);
+    jacobianhOver_q_->setValue(2, 4, dfr1[16] * q10 + t104 * q13 + 2.0 * dfr1[0] * q11);
     t109 = dfr1[16];
-    _jachq->setValue(2, 5, t109 * q13 + t99 * q10 + 2.0 * dfr1[0] * q12);
-    _jachq->setValue(2, 6, t109 * q12 + t104 * q11 + 2.0 * q13 * _G1P0z);
-    _jachq->setValue(2, 7, 0.0);
-    _jachq->setValue(2, 8, 0.0);
-    _jachq->setValue(2, 9, -1.0);
+    jacobianhOver_q_->setValue(2, 5, t109 * q13 + t99 * q10 + 2.0 * dfr1[0] * q12);
+    jacobianhOver_q_->setValue(2, 6, t109 * q12 + t104 * q11 + 2.0 * q13 * _G1P0z);
+    jacobianhOver_q_->setValue(2, 7, 0.0);
+    jacobianhOver_q_->setValue(2, 8, 0.0);
+    jacobianhOver_q_->setValue(2, 9, -1.0);
     t119 = dfr1[15];
-    _jachq->setValue(2, 10, dfr1[18] * q21 + t119 * q22 + 2.0 * dfr1[9] * q20);
+    jacobianhOver_q_->setValue(2, 10, dfr1[18] * q21 + t119 * q22 + 2.0 * dfr1[9] * q20);
     t125 = dfr1[14];
-    _jachq->setValue(2, 11, dfr1[18] * q20 + t125 * q23 + 2.0 * q21 * _G2P0z);
+    jacobianhOver_q_->setValue(2, 11, dfr1[18] * q20 + t125 * q23 + 2.0 * q21 * _G2P0z);
     t129 = dfr1[18];
-    _jachq->setValue(2, 12, t129 * q23 + t119 * q20 + 2.0 * q22 * _G2P0z);
-    _jachq->setValue(2, 13, t129 * q22 + t125 * q21 + 2.0 * dfr1[9] * q23);
+    jacobianhOver_q_->setValue(2, 12, t129 * q23 + t119 * q20 + 2.0 * q22 * _G2P0z);
+    jacobianhOver_q_->setValue(2, 13, t129 * q22 + t125 * q21 + 2.0 * dfr1[9] * q23);
   }
-  //_jachq->display();
+  //jacobianhOver_q_->display();
 }
 
 void siconos::joints::KneeJointR::Jd1(double X1, double Y1, double Z1, double q10, double q11,
@@ -325,44 +325,44 @@ void siconos::joints::KneeJointR::Jd1(double X1, double Y1, double Z1, double q1
     dfr1[6] = dfr0[4];
     dfr1[3] = -_G1P0z;
     dfr1[0] = dfr1[3];
-    _jachq->setValue(0, 0, 1.0);
-    _jachq->setValue(0, 1, 0.0);
-    _jachq->setValue(0, 2, 0.0);
+    jacobianhOver_q_->setValue(0, 0, 1.0);
+    jacobianhOver_q_->setValue(0, 1, 0.0);
+    jacobianhOver_q_->setValue(0, 2, 0.0);
     t11 = df[5];
-    _jachq->setValue(0, 3, df[6] * q12 + t11 * q13 + 2.0 * q10 * _G1P0x);
-    _jachq->setValue(0, 4, dfr0[16] * q13 + dfr1[17] * q12 + 2.0 * q11 * _G1P0x);
-    _jachq->setValue(0, 5, df[6] * q10 + dfr1[17] * q11 + 2.0 * df[2] * q12);
-    _jachq->setValue(0, 6, dfr0[16] * q11 + t11 * q10 + 2.0 * df[2] * q13);
-    _jachq->setValue(1, 0, 0.0);
-    _jachq->setValue(1, 1, 1.0);
-    _jachq->setValue(1, 2, 0.0);
+    jacobianhOver_q_->setValue(0, 3, df[6] * q12 + t11 * q13 + 2.0 * q10 * _G1P0x);
+    jacobianhOver_q_->setValue(0, 4, dfr0[16] * q13 + dfr1[17] * q12 + 2.0 * q11 * _G1P0x);
+    jacobianhOver_q_->setValue(0, 5, df[6] * q10 + dfr1[17] * q11 + 2.0 * df[2] * q12);
+    jacobianhOver_q_->setValue(0, 6, dfr0[16] * q11 + t11 * q10 + 2.0 * df[2] * q13);
+    jacobianhOver_q_->setValue(1, 0, 0.0);
+    jacobianhOver_q_->setValue(1, 1, 1.0);
+    jacobianhOver_q_->setValue(1, 2, 0.0);
     t60 = dfr0[17];
-    _jachq->setValue(1, 3, t60 * q11 + dfr0[4] * q13 + 2.0 * q10 * _G1P0y);
-    _jachq->setValue(1, 4, t60 * q10 + dfr1[6] * q12 + 2.0 * dfr0[0] * q11);
+    jacobianhOver_q_->setValue(1, 3, t60 * q11 + dfr0[4] * q13 + 2.0 * q10 * _G1P0y);
+    jacobianhOver_q_->setValue(1, 4, t60 * q10 + dfr1[6] * q12 + 2.0 * dfr0[0] * q11);
     t70 = dfr0[16];
-    _jachq->setValue(1, 5, t70 * q13 + dfr1[6] * q11 + 2.0 * q12 * _G1P0y);
-    _jachq->setValue(1, 6, t70 * q12 + dfr0[4] * q10 + 2.0 * dfr0[0] * q13);
-    _jachq->setValue(2, 0, 0.0);
-    _jachq->setValue(2, 1, 0.0);
-    _jachq->setValue(2, 2, 1.0);
+    jacobianhOver_q_->setValue(1, 5, t70 * q13 + dfr1[6] * q11 + 2.0 * q12 * _G1P0y);
+    jacobianhOver_q_->setValue(1, 6, t70 * q12 + dfr0[4] * q10 + 2.0 * dfr0[0] * q13);
+    jacobianhOver_q_->setValue(2, 0, 0.0);
+    jacobianhOver_q_->setValue(2, 1, 0.0);
+    jacobianhOver_q_->setValue(2, 2, 1.0);
     t99 = dfr1[7];
-    _jachq->setValue(2, 3, dfr1[16] * q11 + t99 * q12 + 2.0 * q10 * _G1P0z);
+    jacobianhOver_q_->setValue(2, 3, dfr1[16] * q11 + t99 * q12 + 2.0 * q10 * _G1P0z);
     t104 = dfr1[6];
-    _jachq->setValue(2, 4, dfr1[16] * q10 + t104 * q13 + 2.0 * dfr1[0] * q11);
+    jacobianhOver_q_->setValue(2, 4, dfr1[16] * q10 + t104 * q13 + 2.0 * dfr1[0] * q11);
     t109 = dfr1[16];
-    _jachq->setValue(2, 5, t109 * q13 + t99 * q10 + 2.0 * dfr1[0] * q12);
-    _jachq->setValue(2, 6, t109 * q12 + t104 * q11 + 2.0 * q13 * _G1P0z);
+    jacobianhOver_q_->setValue(2, 5, t109 * q13 + t99 * q10 + 2.0 * dfr1[0] * q12);
+    jacobianhOver_q_->setValue(2, 6, t109 * q12 + t104 * q11 + 2.0 * q13 * _G1P0z);
   }
 }
 
-void siconos::joints::KneeJointR::computeJachq(
+void siconos::joints::KneeJointR::computeJacobianhOver_q(
     double time, siconos::modeling::Interaction& inter,
     std::shared_ptr<siconos::algebra::BlockVector> q0) {
   DEBUG_BEGIN(
-      "siconos::joints::KneeJointR::computeJachq(double time, siconos::modeling::Interaction& "
+      "siconos::joints::KneeJointR::computeJacobianhOver_q(double time, siconos::modeling::Interaction& "
       "inter,  std::shared_ptr<siconos::algebra::BlockVector> q0) \n");
 
-  _jachq->setZero();
+  jacobianhOver_q_->setZero();
   auto q1 = (q0->getAllVect())[0];
 
   double X1 = q1->getValue(0);
@@ -393,7 +393,7 @@ void siconos::joints::KneeJointR::computeJachq(
   } else
     Jd1(X1, Y1, Z1, q10, q11, q12, q13);
   DEBUG_END(
-      "siconos::joints::KneeJointR::computeJachq(double time, siconos::modeling::Interaction& "
+      "siconos::joints::KneeJointR::computeJacobianhOver_q(double time, siconos::modeling::Interaction& "
       "inter,  std::shared_ptr<siconos::algebra::BlockVector> q0 ) \n");
 }
 
@@ -411,29 +411,29 @@ void siconos::joints::KneeJointR::DotJd1(double Xdot1, double Ydot1, double Zdot
   // double t21 = -_G2P0x*qdot21-_G2P0y*qdot22-_G2P0z*qdot23;
   // double t25 = -_G2P0z*qdot20+_G2P0x*qdot22-_G2P0y*qdot21;
   // double t29 = _G2P0y*qdot20-_G2P0z*qdot21+_G2P0x*qdot23;
-  _dotjachq->setValue(0, 0, 0.0);
-  _dotjachq->setValue(0, 1, 0.0);
-  _dotjachq->setValue(0, 2, 0.0);
-  _dotjachq->setValue(0, 3, 2.0 * t4);
-  _dotjachq->setValue(0, 4, 2.0 * t8);
-  _dotjachq->setValue(0, 5, 2.0 * t11);
-  _dotjachq->setValue(0, 6, 2.0 * t13);
+  jacobianhOver_q_dot_->setValue(0, 0, 0.0);
+  jacobianhOver_q_dot_->setValue(0, 1, 0.0);
+  jacobianhOver_q_dot_->setValue(0, 2, 0.0);
+  jacobianhOver_q_dot_->setValue(0, 3, 2.0 * t4);
+  jacobianhOver_q_dot_->setValue(0, 4, 2.0 * t8);
+  jacobianhOver_q_dot_->setValue(0, 5, 2.0 * t11);
+  jacobianhOver_q_dot_->setValue(0, 6, 2.0 * t13);
 
-  _dotjachq->setValue(1, 0, 0.0);
-  _dotjachq->setValue(1, 1, 0.0);
-  _dotjachq->setValue(1, 2, 0.0);
-  _dotjachq->setValue(1, 3, -2.0 * t13);
-  _dotjachq->setValue(1, 4, -2.0 * t11);
-  _dotjachq->setValue(1, 5, 2.0 * t8);
-  _dotjachq->setValue(1, 6, 2.0 * t4);
+  jacobianhOver_q_dot_->setValue(1, 0, 0.0);
+  jacobianhOver_q_dot_->setValue(1, 1, 0.0);
+  jacobianhOver_q_dot_->setValue(1, 2, 0.0);
+  jacobianhOver_q_dot_->setValue(1, 3, -2.0 * t13);
+  jacobianhOver_q_dot_->setValue(1, 4, -2.0 * t11);
+  jacobianhOver_q_dot_->setValue(1, 5, 2.0 * t8);
+  jacobianhOver_q_dot_->setValue(1, 6, 2.0 * t4);
 
-  _dotjachq->setValue(2, 0, 0.0);
-  _dotjachq->setValue(2, 1, 0.0);
-  _dotjachq->setValue(2, 2, 0.0);
-  _dotjachq->setValue(2, 3, 2.0 * t11);
-  _dotjachq->setValue(2, 4, -2.0 * t13);
-  _dotjachq->setValue(2, 5, -2.0 * t4);
-  _dotjachq->setValue(2, 6, 2.0 * t8);
+  jacobianhOver_q_dot_->setValue(2, 0, 0.0);
+  jacobianhOver_q_dot_->setValue(2, 1, 0.0);
+  jacobianhOver_q_dot_->setValue(2, 2, 0.0);
+  jacobianhOver_q_dot_->setValue(2, 3, 2.0 * t11);
+  jacobianhOver_q_dot_->setValue(2, 4, -2.0 * t13);
+  jacobianhOver_q_dot_->setValue(2, 5, -2.0 * t4);
+  jacobianhOver_q_dot_->setValue(2, 6, 2.0 * t8);
 }
 
 void siconos::joints::KneeJointR::DotJd1d2(double Xdot1, double Ydot1, double Zdot1,
@@ -452,48 +452,48 @@ void siconos::joints::KneeJointR::DotJd1d2(double Xdot1, double Ydot1, double Zd
   double t21 = -_G2P0x * qdot21 - _G2P0y * qdot22 - _G2P0z * qdot23;
   double t25 = -_G2P0z * qdot20 + _G2P0x * qdot22 - _G2P0y * qdot21;
   double t29 = _G2P0y * qdot20 - _G2P0z * qdot21 + _G2P0x * qdot23;
-  _dotjachq->setValue(0, 0, 0.0);
-  _dotjachq->setValue(0, 1, 0.0);
-  _dotjachq->setValue(0, 2, 0.0);
-  _dotjachq->setValue(0, 3, 2.0 * t4);
-  _dotjachq->setValue(0, 4, 2.0 * t8);
-  _dotjachq->setValue(0, 5, 2.0 * t11);
-  _dotjachq->setValue(0, 6, 2.0 * t13);
-  _dotjachq->setValue(0, 7, 0.0);
-  _dotjachq->setValue(0, 8, 0.0);
-  _dotjachq->setValue(0, 9, 0.0);
-  _dotjachq->setValue(0, 10, 2.0 * t17);
-  _dotjachq->setValue(0, 11, 2.0 * t21);
-  _dotjachq->setValue(0, 12, 2.0 * t25);
-  _dotjachq->setValue(0, 13, 2.0 * t29);
-  _dotjachq->setValue(1, 0, 0.0);
-  _dotjachq->setValue(1, 1, 0.0);
-  _dotjachq->setValue(1, 2, 0.0);
-  _dotjachq->setValue(1, 3, -2.0 * t13);
-  _dotjachq->setValue(1, 4, -2.0 * t11);
-  _dotjachq->setValue(1, 5, 2.0 * t8);
-  _dotjachq->setValue(1, 6, 2.0 * t4);
-  _dotjachq->setValue(1, 7, 0.0);
-  _dotjachq->setValue(1, 8, 0.0);
-  _dotjachq->setValue(1, 9, 0.0);
-  _dotjachq->setValue(1, 10, -2.0 * t29);
-  _dotjachq->setValue(1, 11, -2.0 * t25);
-  _dotjachq->setValue(1, 12, 2.0 * t21);
-  _dotjachq->setValue(1, 13, 2.0 * t17);
-  _dotjachq->setValue(2, 0, 0.0);
-  _dotjachq->setValue(2, 1, 0.0);
-  _dotjachq->setValue(2, 2, 0.0);
-  _dotjachq->setValue(2, 3, 2.0 * t11);
-  _dotjachq->setValue(2, 4, -2.0 * t13);
-  _dotjachq->setValue(2, 5, -2.0 * t4);
-  _dotjachq->setValue(2, 6, 2.0 * t8);
-  _dotjachq->setValue(2, 7, 0.0);
-  _dotjachq->setValue(2, 8, 0.0);
-  _dotjachq->setValue(2, 9, 0.0);
-  _dotjachq->setValue(2, 10, 2.0 * t25);
-  _dotjachq->setValue(2, 11, -2.0 * t29);
-  _dotjachq->setValue(2, 12, -2.0 * t17);
-  _dotjachq->setValue(2, 13, 2.0 * t21);
+  jacobianhOver_q_dot_->setValue(0, 0, 0.0);
+  jacobianhOver_q_dot_->setValue(0, 1, 0.0);
+  jacobianhOver_q_dot_->setValue(0, 2, 0.0);
+  jacobianhOver_q_dot_->setValue(0, 3, 2.0 * t4);
+  jacobianhOver_q_dot_->setValue(0, 4, 2.0 * t8);
+  jacobianhOver_q_dot_->setValue(0, 5, 2.0 * t11);
+  jacobianhOver_q_dot_->setValue(0, 6, 2.0 * t13);
+  jacobianhOver_q_dot_->setValue(0, 7, 0.0);
+  jacobianhOver_q_dot_->setValue(0, 8, 0.0);
+  jacobianhOver_q_dot_->setValue(0, 9, 0.0);
+  jacobianhOver_q_dot_->setValue(0, 10, 2.0 * t17);
+  jacobianhOver_q_dot_->setValue(0, 11, 2.0 * t21);
+  jacobianhOver_q_dot_->setValue(0, 12, 2.0 * t25);
+  jacobianhOver_q_dot_->setValue(0, 13, 2.0 * t29);
+  jacobianhOver_q_dot_->setValue(1, 0, 0.0);
+  jacobianhOver_q_dot_->setValue(1, 1, 0.0);
+  jacobianhOver_q_dot_->setValue(1, 2, 0.0);
+  jacobianhOver_q_dot_->setValue(1, 3, -2.0 * t13);
+  jacobianhOver_q_dot_->setValue(1, 4, -2.0 * t11);
+  jacobianhOver_q_dot_->setValue(1, 5, 2.0 * t8);
+  jacobianhOver_q_dot_->setValue(1, 6, 2.0 * t4);
+  jacobianhOver_q_dot_->setValue(1, 7, 0.0);
+  jacobianhOver_q_dot_->setValue(1, 8, 0.0);
+  jacobianhOver_q_dot_->setValue(1, 9, 0.0);
+  jacobianhOver_q_dot_->setValue(1, 10, -2.0 * t29);
+  jacobianhOver_q_dot_->setValue(1, 11, -2.0 * t25);
+  jacobianhOver_q_dot_->setValue(1, 12, 2.0 * t21);
+  jacobianhOver_q_dot_->setValue(1, 13, 2.0 * t17);
+  jacobianhOver_q_dot_->setValue(2, 0, 0.0);
+  jacobianhOver_q_dot_->setValue(2, 1, 0.0);
+  jacobianhOver_q_dot_->setValue(2, 2, 0.0);
+  jacobianhOver_q_dot_->setValue(2, 3, 2.0 * t11);
+  jacobianhOver_q_dot_->setValue(2, 4, -2.0 * t13);
+  jacobianhOver_q_dot_->setValue(2, 5, -2.0 * t4);
+  jacobianhOver_q_dot_->setValue(2, 6, 2.0 * t8);
+  jacobianhOver_q_dot_->setValue(2, 7, 0.0);
+  jacobianhOver_q_dot_->setValue(2, 8, 0.0);
+  jacobianhOver_q_dot_->setValue(2, 9, 0.0);
+  jacobianhOver_q_dot_->setValue(2, 10, 2.0 * t25);
+  jacobianhOver_q_dot_->setValue(2, 11, -2.0 * t29);
+  jacobianhOver_q_dot_->setValue(2, 12, -2.0 * t17);
+  jacobianhOver_q_dot_->setValue(2, 13, 2.0 * t21);
 }
 void siconos::joints::KneeJointR::computeDotJachq(
     double time, const siconos::algebra::BlockVector& workQ,
@@ -518,7 +518,7 @@ void siconos::joints::KneeJointR::computeDotJachq(
       "siconos::joints::KneeJointR::computeDotJachq(double time, "
       "std::shared_ptr<siconos::algebra::SiconosVector> qdot1, "
       "std::shared_ptr<siconos::algebra::SiconosVector> qdot2) \n");
-  _dotjachq->setZero();
+  jacobianhOver_q_dot_->setZero();
 
   double Xdot1 = qdot1->getValue(0);
   double Ydot1 = qdot1->getValue(1);

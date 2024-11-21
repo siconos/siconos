@@ -64,7 +64,7 @@ struct siconos::modeling::Interaction::SetLevels : public siconos::internal::Sic
 
   Interaction* interaction_{nullptr};
 
-  SetLevels(Interaction* inter) : interaction_(inter){};
+  SetLevels(Interaction* inter) : interaction_(inter) {};
 
   void visit(const ComplementarityConditionNSL& nslaw) const override {
     auto relationType = interaction_->relation()->getType();
@@ -665,84 +665,66 @@ void siconos::modeling::Interaction::computeInput(double time, unsigned int leve
   DEBUG_END("siconos::modeling::Interaction::computeInput(...)\n");
 }
 
-std::shared_ptr<siconos::algebra::SiconosMatrix>
-siconos::modeling::Interaction::getLeftInteractionBlock() const {
+const siconos::algebra::ConstMapType siconos::modeling::Interaction::getLeftInteractionBlock()
+    const {
   auto relationType = relation()->getType();
 
   if (relationType == RelationType::Lagrangian) {
-    std::shared_ptr<LagrangianR> r = std::static_pointer_cast<LagrangianR>(relation());
-    return r->jachq();
+    auto r = std::static_pointer_cast<LagrangianR>(relation());
+    return r->jacobianhOver_q();
   } else if (relationType == RelationType::NewtonEuler) {
-    std::shared_ptr<NewtonEulerR> r = std::static_pointer_cast<NewtonEulerR>(relation());
-    return r->jachqT();
+    auto r = std::static_pointer_cast<NewtonEulerR>(relation());
+    return r->H_prod_T();
   } else if (relationType == RelationType::FirstOrder) {
-    std::shared_ptr<siconos::algebra::SiconosMatrix> CMat =
-        std::static_pointer_cast<FirstOrderR>(relation())->C();
-    auto relationSubType = relation()->getSubType();
-    if (CMat)
-      return CMat;
-    else if (relationSubType != RelationSubType::LinearTIR)
-      return _relationMatrices[FirstOrderR::mat_C];
+    auto forel = std::dynamic_pointer_cast<FirstOrderR>(relation());
+    return forel->jacobianhOver_state();
+  } else {
+    THROW_EXCEPTION(
+        "siconos::modeling::Interaction::getLeftInteractionBlock, not yet implemented for "
+        "relations of type " +
+        std::to_string(static_cast<std::underlying_type<RelationType>::type>(relationType)));
   }
-  THROW_EXCEPTION(
-      "siconos::modeling::Interaction::getLeftInteractionBlock, not yet implemented for "
-      "relations of type " +
-      std::to_string(static_cast<std::underlying_type<RelationType>::type>(relationType)));
-
-  return std::shared_ptr<siconos::algebra::SiconosMatrix>();
 }
 
 std::shared_ptr<siconos::algebra::SiconosMatrix>
-siconos::modeling::Interaction::getLeftInteractionBlockForDS(unsigned int pos, unsigned size,
-                                                             unsigned int sizeDS) const {
-  std::shared_ptr<siconos::algebra::SiconosMatrix> originalMatrix;
+siconos::modeling::Interaction::getLeftInteractionBlockForDS(unsigned int pos,
+                                                             unsigned nslaw_size,
+                                                             unsigned int ds_size) const {
+  auto interactionBlock =
+      std::make_shared<siconos::algebra::SiconosMatrix>(nslaw_size, ds_size);
+
   auto relationType = relation()->getType();
   if (relationType == RelationType::FirstOrder) {
-    std::shared_ptr<siconos::algebra::SiconosMatrix> CMat =
-        std::static_pointer_cast<FirstOrderR>(relation())->C();
-    auto relationSubType = relation()->getSubType();
-    if (CMat)
-      originalMatrix = CMat;
-    else if (relationSubType != RelationSubType::LinearTIR)
-      originalMatrix = _relationMatrices[FirstOrderR::mat_C];
+    auto forel = std::dynamic_pointer_cast<FirstOrderR>(relation());
+    if (forel->hasJacobianhOver_state()) {
+      auto originalMatrix = forel->jacobianhOver_state();
+      *interactionBlock = originalMatrix.block(0, pos, nslaw_size, ds_size);
+    } else  // this should not happen? All first-order rel are supposed to have a
+            // jacobianhOver_state
+      interactionBlock->setZero();
   } else if (relationType == RelationType::Lagrangian) {
-    std::shared_ptr<LagrangianR> r = std::static_pointer_cast<LagrangianR>(relation());
-    originalMatrix = r->jachq();
+    auto lagr = std::dynamic_pointer_cast<LagrangianR>(relation());
+    auto originalMatrix = lagr->jacobianhOver_q();
+    *interactionBlock = originalMatrix.block(0, pos, nslaw_size, ds_size);
+
   } else if (relationType == RelationType::NewtonEuler) {
-    std::shared_ptr<NewtonEulerR> r = std::static_pointer_cast<NewtonEulerR>(relation());
-    originalMatrix = r->jachqT();
+    auto newtonr = std::dynamic_pointer_cast<NewtonEulerR>(relation());
+    auto originalMatrix = newtonr->H_prod_T();
+    *interactionBlock = originalMatrix.block(0, pos, nslaw_size, ds_size);
   } else
     THROW_EXCEPTION(
         "siconos::modeling::Interaction::getLeftInteractionBlockForDS, not yet implemented "
         "for relations of type " +
         std::to_string(
             static_cast<std::underlying_type<RelationSubType>::type>(relationType)));
-
-  auto InteractionBlock = std::make_shared<siconos::algebra::SiconosMatrix>(size, sizeDS);
-
-  // copy sub-interactionBlock of originalMatrix into InteractionBlock
-  // dim of the sub-interactionBlock
-  std::vector<std::size_t> subDim(2);
-  subDim[0] = InteractionBlock->size(0);
-  subDim[1] = InteractionBlock->size(1);
-  // Position (row,col) of first element to be read in originalMatrix
-  // and of first element to be set in InteractionBlock
-  std::vector<std::size_t> subPos(4);
-  subPos[0] = 0;  //_relativePosition;
-  subPos[1] = pos;
-  subPos[2] = 0;
-  subPos[3] = 0;
-  siconos::algebra::setBlock(*originalMatrix, InteractionBlock, subDim, subPos);
-  return InteractionBlock;
+  return interactionBlock;
 }
 
 void siconos::modeling::Interaction::getLeftInteractionBlockForDSProjectOnConstraints(
     unsigned int pos,
-    std::shared_ptr<siconos::algebra::SiconosMatrix> InteractionBlock) const {
+    std::shared_ptr<siconos::algebra::SiconosMatrix> interactionBlock) const {
   DEBUG_PRINT(
-      "siconos::modeling::Interaction::getLeftInteractionBlockForDSProjectOnConstraints("
-      "unsigned int pos, std::shared_ptr<siconos::algebra::SiconosMatrix> InteractionBlock) "
-      "\n");
+      "siconos::modeling::Interaction::getLeftInteractionBlockForDSProjectOnConstraints()\n");
   DEBUG_PRINTF("pos = %i\n", pos);
 
   if (pos == 6) pos = pos + 1;
@@ -753,124 +735,67 @@ void siconos::modeling::Interaction::getLeftInteractionBlockForDSProjectOnConstr
   //   ds is not from NewtonEulerDS.");
 
   auto relationType = relation()->getType();
-  if (relationType != RelationType::NewtonEuler)
-    THROW_EXCEPTION(
-        "siconos::modeling::Interaction::getLeftInteractionBlockForDSForProject- relation is "
-        "not from NewtonEulerR.");
+  assert(relationType == RelationType::NewtonEuler);
 
-  std::shared_ptr<siconos::algebra::SiconosMatrix> originalMatrix;
   std::shared_ptr<NewtonEulerR> r = std::static_pointer_cast<NewtonEulerR>(relation());
   // proj_with_q originalMatrix = r->jachqProj();
-  originalMatrix = r->jachq();
+  auto originalMatrix = r->HMatrix();
 
   // copy sub-interactionBlock of originalMatrix into InteractionBlock
-  // dim of the sub-interactionBlock
-  std::vector<std::size_t> subDim(2);
-  subDim[0] = InteractionBlock->size(0);
-  subDim[1] = InteractionBlock->size(1);
-  // Position (row,col) of first element to be read in originalMatrix
-  // and of first element to be set in InteractionBlock
-  std::vector<std::size_t> subPos(4);
-  subPos[0] = 0;  //_relativePosition;
-  subPos[1] = pos;
-  subPos[2] = 0;
-  subPos[3] = 0;
-  siconos::algebra::setBlock(*originalMatrix, InteractionBlock, subDim, subPos);
+  *interactionBlock =
+      originalMatrix.block(0, pos, interactionBlock->size(0), interactionBlock->size(1));
 }
 
 std::shared_ptr<siconos::algebra::SiconosMatrix>
 siconos::modeling::Interaction::getRightInteractionBlockForDS(unsigned int pos,
-                                                              unsigned int sizeDS,
-                                                              unsigned int size) const {
-  std::shared_ptr<siconos::algebra::SiconosMatrix>
-      originalMatrix;  // Complete matrix, Relation member.
+                                                              unsigned int ds_size,
+                                                              unsigned int nslaw_size) const {
+  auto interactionBlock =
+      std::make_shared<siconos::algebra::SiconosMatrix>(ds_size, nslaw_size);
+
   auto relationType = relation()->getType();
-  auto relationSubType = relation()->getSubType();
 
   if (relationType == RelationType::FirstOrder) {
-    std::shared_ptr<siconos::algebra::SiconosMatrix> BMat =
-        std::static_pointer_cast<FirstOrderR>(relation())->B();
-    if (BMat)
-      originalMatrix = BMat;
-    else if (relationSubType != RelationSubType::LinearTIR)
-      originalMatrix = _relationMatrices[FirstOrderR::mat_B];
-    else
-      THROW_EXCEPTION(
-          "siconos::modeling::Interaction::getRightInteractionBlockForDS, FirstOrderLinearTIR "
-          "relation but no B matrix found!");
-  } else if (relationType == RelationType::Lagrangian ||
-             relationType == RelationType::NewtonEuler) {
+    auto forel = std::dynamic_pointer_cast<FirstOrderR>(relation());
+    assert(forel->hasJacobiangOver_lambda());
+    auto originalMatrix = forel->jacobiangOver_lambda();
+    *interactionBlock =
+        originalMatrix.block(pos, 0, interactionBlock->size(0), interactionBlock->size(1));
+  } else  // (relationType == RelationType::Lagrangian ||
+          //  relationType == RelationType::NewtonEuler) {
     THROW_EXCEPTION(
-        "siconos::modeling::Interaction::getRightInteractionBlockForDS, call not permit " +
+        "siconos::modeling::Interaction::getRightInteractionBlockForDS, unauthorized call "
+        "for " +
         std::to_string(static_cast<std::underlying_type<RelationType>::type>(relationType)));
-  } else
-    THROW_EXCEPTION(
-        "siconos::modeling::Interaction::getRightInteractionBlockForDS, not yet implemented "
-        "for relations of type " +
-        std::to_string(
-            static_cast<std::underlying_type<RelationSubType>::type>(relationType)));
-
-  std::shared_ptr<siconos::algebra::SiconosMatrix> InteractionBlock =
-      std::make_shared<siconos::algebra::SiconosMatrix>(sizeDS, size);
-
-  if (!originalMatrix)
-    THROW_EXCEPTION(
-        "siconos::modeling::Interaction::getRightInteractionBlockForDS(DS, InteractionBlock, "
-        "...): the right interactionBlock is a nullptr pointer (miss matrix B or H or "
-        "gradients ...in relation ?)");
-
-  // copy sub-interactionBlock of originalMatrix into InteractionBlock
-  // dim of the sub-interactionBlock
-  std::vector<std::size_t> subDim(2);
-  subDim[0] = InteractionBlock->size(0);
-  subDim[1] = InteractionBlock->size(1);
-  // Position (row,col) of first element to be read in originalMatrix
-  // and of first element to be set in InteractionBlock
-  std::vector<std::size_t> subPos(4);
-  subPos[0] = pos;
-  subPos[1] = 0;  //_relativePosition;
-  subPos[2] = 0;
-  subPos[3] = 0;
-  siconos::algebra::setBlock(*originalMatrix, InteractionBlock, subDim, subPos);
-  return InteractionBlock;
+  return interactionBlock;
 }
 
 void siconos::modeling::Interaction::getExtraInteractionBlock(
-    std::shared_ptr<siconos::algebra::SiconosMatrix> InteractionBlock) const {
+    std::shared_ptr<siconos::algebra::SiconosMatrix> interactionBlock) const {
   // !!! Warning: we suppose that D is interactionBlock diagonal, ie that
   // there is no coupling between Interaction through D !!!  Any
   // coupling between relations through D must be taken into account
   // thanks to the nslaw (by "increasing" its dimension).
 
-  RelationType relationType = relation()->getType();
-  auto relationSubType = relation()->getSubType();
-  std::shared_ptr<siconos::algebra::SiconosMatrix> D;
+  auto relationType = relation()->getType();
 
   if (relationType == RelationType::FirstOrder) {
-    std::shared_ptr<siconos::algebra::SiconosMatrix> DMat =
-        std::static_pointer_cast<FirstOrderR>(relation())->D();
-    if (DMat)
-      D = DMat;
-    else if (relationSubType != RelationSubType::LinearTIR)
-      D = _relationMatrices[FirstOrderR::mat_D];
-  } else if (relationType == RelationType::Lagrangian) {
-    D = std::static_pointer_cast<LagrangianR>(relation())->jachlambda();
-  } else if (relationType == RelationType::NewtonEuler) {
-    D = std::static_pointer_cast<NewtonEulerR>(relation())->jachlambda();
+    auto forel = std::static_pointer_cast<FirstOrderR>(relation());
+    if (forel->hasJacobianhOver_lambda()) {
+      auto originalMatrix = forel->jacobianhOver_lambda();
+      *interactionBlock = originalMatrix; // copy!
+    } else
+      interactionBlock->setZero();
   } else
-    THROW_EXCEPTION(
-        "siconos::modeling::Interaction::getExtraInteractionBlockForDS, not yet implemented "
-        "for relations of type " +
-        std::to_string(
-            static_cast<std::underlying_type<RelationSubType>::type>(relationType)));
+    interactionBlock->setZero();
 
-  if (!D) {
-    InteractionBlock->setZero();
-    return;  // ie no extra interactionBlock
-  }
-
-  *InteractionBlock = *D;
+  // THROW_EXCEPTION(
+  //     "siconos::modeling::Interaction::getExtraInteractionBlock, not yet implemented "
+  //     "for relations of type " +
+  //     std::to_string(
+  //         static_cast<std::underlying_type<RelationSubType>::type>(relationType)));
 }
+
 void siconos::modeling::Interaction::display(bool brief) const {
   std::cout << "======= Interaction display number " << _number << " =======\n";
 
