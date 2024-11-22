@@ -60,12 +60,12 @@ void lcp_pgs_graph_petsc(LinearComplementarityProblem *problem, double *z, doubl
   double time;
 
   /* Graph coloring */
-  int n_colors = 0;
-  int *partition_size = NULL;
-  int **partitions = NULL;
+  long int n_colors = 0;
+  size_t *partition_size = NULL;
+  size_t **partitions = NULL;
   
   time = omp_get_wtime();
-  color_graph_petsc(n, M->matrix0, &n_colors, &partition_size, &partitions);  
+  color_graph_petsc(n, M, &n_colors, &partition_size, &partitions);  
   time = omp_get_wtime() - time;
   printf("Time to color graph: %fs\n", time);
 
@@ -74,9 +74,7 @@ void lcp_pgs_graph_petsc(LinearComplementarityProblem *problem, double *z, doubl
     printf(" %d ", colors[i]);
   }
   printf("]\n"); */
-
-  printf("n_colors = %d\n", n_colors);
-
+  
   /* Solver variables */
   int iter = 0;
   double err = 1.;

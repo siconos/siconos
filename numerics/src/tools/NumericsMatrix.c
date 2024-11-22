@@ -5901,7 +5901,7 @@ int NM_Linear_solver_finalize(NumericsMatrix* Ao) {
   return info;
 }
 
-void NM_block_prod(int start_i, int start_j, int size_i, int size_j, NumericsMatrix* A, const double *x, double *y, int init) {
+void NM_block_prod(int start_i, int start_j, int size_i, int size_j, NumericsMatrix* A, CSparseMatrix* M, const double *x, double *y, int init) {
   
   // NM_row_prod(size_j, size_i, start_i + (A->size0) * start_j, A, &x[start_j], y, init);
   
@@ -5915,61 +5915,54 @@ void NM_block_prod(int start_i, int start_j, int size_i, int size_j, NumericsMat
   // assert(A->size0 >= sizeY); // size0  = number of lines
   // assert(A->size1 == sizeX); // size1 = number of columns
 
-  NM_types storage = A->storageType;
-
-  if (storage == NM_DENSE) {
-    int incx = A->size0, incy = 1;
-    double* mat = A->matrix0;
-    if (init == 0)
-    {
-      for (int row = 0; row < sizeY; row++)
-        y[row] += cblas_ddot(sizeX, &mat[start_i + row + incx * start_j], incx, &x[start_j], incy);
-    } else {
-      for (int row = 0; row < sizeY; row++)
-        y[row] = cblas_ddot(sizeX, &mat[start_i + row + incx * start_j], incx, &x[start_j], incy);
+  switch (A->storageType) {
+    case NM_DENSE: {
+      int incx = A->size0, incy = 1;
+      double* mat = A->matrix0;
+      if (init == 0)
+      {
+        for (int row = 0; row < sizeY; row++)
+          y[row] += cblas_ddot(sizeX, &mat[start_i + row + incx * start_j], incx, &x[start_j], incy);
+      } else {
+        for (int row = 0; row < sizeY; row++)
+          y[row] = cblas_ddot(sizeX, &mat[start_i + row + incx * start_j], incx, &x[start_j], incy);
+      }
+      break;
     }
-  }
-  else if (storage == NM_SPARSE) {
-    if (init) {
+    case NM_SPARSE: {
+      if (init) {
+        for (int row = 0; row < sizeY; row++) {
+          y[row] = 0.;
+        } 
+      }
+
+      CS_INT* Mp = M->p;
+      CS_INT* Mi = M->i;
+      double* Mx = M->x;
+
       for (int row = 0; row < sizeY; row++) {
-        y[row] = 0.;
-      } 
-    }
-
-    CSparseMatrix* M;
-    if (A->matrix2->origin == NSM_CSR) {
-      M = NM_csr(A);
-    } else {
-      M = NM_csc_trans(A);
-    }
-
-    CS_INT* Mp = M->p;
-    CS_INT* Mi = M->i;
-    double* Mx = M->x;
-
-    for (int row = 0; row < sizeY; row++) {
-      for (CS_INT p = Mp[start_i + row]; p < Mp[start_i + row + 1]; ++p) {
-        if ((start_j <= Mi[p]) && (Mi[p] < start_j + size_j)) {
-          y[row] += Mx[p] * x[Mi[p]];
+        for (CS_INT p = Mp[start_i + row]; p < Mp[start_i + row + 1]; ++p) {
+          if ((start_j <= Mi[p]) && (Mi[p] < start_j + size_j)) {
+            y[row] += Mx[p] * x[Mi[p]];
+          }
         }
       }
+      break;
     }
-  }
-  /*
-  else if (storage == NM_SPARSE_BLOCK)
-    SBM_row_prod(sizeX, sizeY, currentRowNumber, A->matrix1, x, y, init);
-  */
-  else {
-    fprintf(stderr,
-            "Numerics, NumericsMatrix, product matrix - vector NM_row_prod(A,x,y) failed, "
-            "unknown storage type for A.\n");
-    exit(EXIT_FAILURE);
+    case NM_SPARSE_BLOCK: {
+      fprintf(stderr, "NM_row_prod_no_diag3 :: NM_SPARSE_BLOCK not implemented %d", A->storageType);
+      exit(EXIT_FAILURE);
+    }
+    default: {
+      fprintf(stderr, "NM_row_prod_no_diag3 :: unknown matrix storage %d", A->storageType);
+      exit(EXIT_FAILURE);
+    }
   }
 
   NM_version_sync(A);
 }
 
-void NM_block_prod_no_diag(int start_i, int size_i, NumericsMatrix* A, double *x, double *y, double* xsave, int init) {
+void NM_block_prod_no_diag(int start_i, int size_i, NumericsMatrix* A, CSparseMatrix* M, double *x, double *y, double* xsave, int init) {
   assert(A);
   assert(x);
   assert(y);
@@ -5982,60 +5975,57 @@ void NM_block_prod_no_diag(int start_i, int size_i, NumericsMatrix* A, double *x
 
   NM_types storage = A->storageType;
 
-  if (storage == NM_DENSE) {
-    int incx = A->size0, incy = 1;
-    double* mat = A->matrix0;
-    if (init == 0) 
-    {
-      for (int row = 0; row < sizeY; row++)
-      {
-        *xsave = x[start_i + row];
-        x[start_i + row] = 0.;
-        y[row] += cblas_ddot(sizeX, &mat[start_i + row + incx * start_i], incx, &x[start_i], incy);
-        x[start_i + row] = *xsave;
-      }
-        
-    } else {
-      for (int row = 0; row < sizeY; row++)
-      {
-        *xsave = x[start_i + row];
-        x[start_i + row] = 0.;
-        y[row] = cblas_ddot(sizeX, &mat[start_i + row + incx * start_i], incx, &x[start_i], incy);
-        x[start_i + row] = *xsave;
-      }
-    }
-  }
-  else if (storage == NM_SPARSE) {
-    if (init) {
-      for (int row = 0; row < sizeY; row++) {
-        y[row] = 0.;
+  switch (A->storageType) {
+    case NM_DENSE: {
+      int incx = A->size0, incy = 1;
+      double* mat = A->matrix0;
+      if (init == 0) {
+        for (int row = 0; row < sizeY; row++) {
+          *xsave = x[start_i + row];
+          x[start_i + row] = 0.;
+          y[row] += cblas_ddot(sizeX, &mat[start_i + row + incx * start_i], incx, &x[start_i], incy);
+          x[start_i + row] = *xsave;
+        }
       } 
-    }
-
-    CSparseMatrix* M;
-    if (A->matrix2->origin == NSM_CSR) {
-      M = NM_csr(A);
-    } else {
-      M = NM_csc_trans(A);
-    }
-
-    CS_INT* Mp = M->p;
-    CS_INT* Mi = M->i;
-    double* Mx = M->x;
-
-    for (int row = 0; row < sizeY; row++) {
-      for (CS_INT p = Mp[start_i + row]; p < Mp[start_i + row + 1]; ++p) {
-        if ((start_i <= Mi[p]) && (Mi[p] < start_i + size_i)) {
-          if (start_i + row != Mi[p]) y[row] += Mx[p] * x[Mi[p]];
+      else {
+        for (int row = 0; row < sizeY; row++) {
+          *xsave = x[start_i + row];
+          x[start_i + row] = 0.;
+          y[row] = cblas_ddot(sizeX, &mat[start_i + row + incx * start_i], incx, &x[start_i], incy);
+          x[start_i + row] = *xsave;
         }
       }
+      break;
+    }
+    case NM_SPARSE: {
+      if (init) {
+        for (int row = 0; row < sizeY; row++) {
+          y[row] = 0.;
+        } 
+      }
+
+      CS_INT* Mp = M->p;
+      CS_INT* Mi = M->i;
+      double* Mx = M->x;
+
+      for (int row = 0; row < sizeY; row++) {
+        for (CS_INT p = Mp[start_i + row]; p < Mp[start_i + row + 1]; ++p) {
+          if ((start_i <= Mi[p]) && (Mi[p] < start_i + size_i)) {
+            if (start_i + row != Mi[p]) y[row] += Mx[p] * x[Mi[p]];
+          }
+        }
+      }
+      break;
+    }
+    case NM_SPARSE_BLOCK: {
+      fprintf(stderr, "NM_row_prod_no_diag3 :: NM_SPARSE_BLOCK not implemented %d", A->storageType);
+      exit(EXIT_FAILURE);
+    }
+    default: {
+      fprintf(stderr, "NM_row_prod_no_diag3 :: unknown matrix storage %d", A->storageType);
+      exit(EXIT_FAILURE);
     }
   }
-  else {
-    fprintf(stderr,
-            "Numerics, NumericsMatrix, product matrix - vector NM_row_prod(A,x,y) failed, "
-            "unknown storage type for A.\n");
-    exit(EXIT_FAILURE);
-  }
+
   NM_version_sync(A);
 }

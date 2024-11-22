@@ -1,4 +1,4 @@
-static char help[] = "Color a matrix, returning set sizes and indices. \n\n";
+// static char help[] = "Color a matrix, returning set sizes and indices. \n\n";
 
 /*
     Example:
@@ -7,31 +7,120 @@ static char help[] = "Color a matrix, returning set sizes and indices. \n\n";
 */
 
 #include "graph_tools_petsc.h"
-int color_graph_petsc(int n, double *M, int *n_colors, int **set_sizes, int ***set_indices) {
+int color_graph_petsc(int n, NumericsMatrix *M, long int *n_colors, size_t **set_sizes, size_t ***set_indices) {
     Mat A;
-    PetscScalar val;
-    PetscReal dtol = 1.e-16;
     PetscLogDouble time_start, time_end;
 
+    PetscCall(PetscTime(&time_start));
     PetscFunctionBeginUser;
-    PetscCall(PetscInitialize(NULL, NULL, NULL, help));
+    PetscCall(PetscInitializeNoArguments());
+    // PetscCall(PetscInitialize(NULL, NULL, NULL, help));
+    PetscCall(PetscTime(&time_end));
+    PetscCall(PetscPrintf(PETSC_COMM_WORLD, "Time to initialize petsc: %f\n", time_end - time_start));
 
-    // Create PETSC sparse matrix
-    PetscCall(MatCreate(PETSC_COMM_WORLD, &A));
-    PetscCall(MatSetType(A, MATAIJ)); // CSR format
-    PetscCall(MatSetSizes(A, n, n, PETSC_DECIDE, PETSC_DECIDE));
+    PetscCall(PetscTime(&time_start));
+    switch (M->storageType) {
+        case NM_DENSE: {
+            // TRY THIS IT MAY BE FASTER TO CREATE SEQ AND CONVERT
+            PetscCall(PetscPrintf(PETSC_COMM_WORLD, "DENSE\n"));
+            PetscCall(MatCreateSeqDense(PETSC_COMM_SELF, n, n, M->matrix0, &A));
+            PetscCall(MatConvert(A, MATSEQAIJ, MAT_INPLACE_MATRIX, &A));
+            // MatCreateSeqDense does not work because coloring requires 
+            /* PetscCall(MatCreate(PETSC_COMM_WORLD, &A));
+            PetscCall(MatSetType(A, MATAIJ)); // CSR format
+            PetscCall(MatSetSizes(A, n, n, PETSC_DECIDE, PETSC_DECIDE));
 
-    // Fill PETSC sparse matrix
-    PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
-    for (int row = 0; row < n; row++) {
-        for (int col = 0; col < n; col++) {
-            val = PetscAbsScalar(M[row + n * col]);
-            if (val > dtol) {
-                PetscCall(MatSetValue(A, row, col, val, INSERT_VALUES));
+            // Fill PETSC sparse matrix
+            double *dense = M->matrix0;
+            for (int row = 0; row < n; row++) {
+                for (int col = 0; col < n; col++) {
+                    val = PetscAbsScalar(dense[row + n * col]);
+                    if (val > dtol) {
+                        PetscCall(MatSetValue(A, row, col, val, INSERT_VALUES));
+                    }
+                }
+            } */
+            PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
+            PetscCall(MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY));
+            break;
+        }
+        case NM_SPARSE: {
+            PetscCall(PetscPrintf(PETSC_COMM_WORLD, "SPARSE\n"));
+
+            /* I copied this from Numericsmatrix.c function NM_row_prod_no_diag1x1 */
+            CSparseMatrix* sparse;
+            if (M->matrix2->origin == NSM_CSR) {
+                sparse = NM_csr(M);
+            } else {
+                sparse = NM_csc_trans(M);
             }
+
+            int64_t* Mp = sparse->p;
+            int64_t* Mi = sparse->i;
+            double* Mx = sparse->x;
+
+
+           /*  for (int i = 0; i < sparse->nzmax; i++) {
+                PetscCall(PetscPrintf(PETSC_COMM_WORLD, "Mi[%d] = %ld\n", i, Mi[i]));
+            } */
+
+            PetscCall(MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, n, n, Mp, Mi, Mx, &A));
+            PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
+            PetscCall(MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY));
+            break;
+        }
+        case NM_SPARSE_BLOCK: {
+            fprintf(stderr, "color_graph_petsc :: matrix storage not supported yet %d", M->storageType);
+            exit(EXIT_FAILURE);
+        }
+        default: {
+            fprintf(stderr, "color_graph_petsc :: unknown matrix storage %d", M->storageType);
+            exit(EXIT_FAILURE);
         }
     }
+    PetscCall(PetscTime(&time_end));
+    PetscCall(PetscPrintf(PETSC_COMM_WORLD, "Time to build matrix: %f\n", time_end - time_start));
+    
+
+    // Create PETSC sparse matrix
+    /* PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
+    switch (M->storageType) {
+        case NM_DENSE: {
+            // PetscCall(MatCreateSeqDense(PETSC_COMM_WORLD, n, n, M->matrix0, &A));
+            PetscCall(PetscPrintf(PETSC_COMM_WORLD, "Creating PETSC matrix...\n"));
+            PetscCall(MatCreate(PETSC_COMM_WORLD, &A));
+            MatSetType(A, MATAIJ);
+            MatSetSizes(A, n, n, PETSC_DECIDE, PETSC_DECIDE);
+            double* dense = M->matrix0;
+            for (int row = 0; row < n; row++) {
+                for (int col = 0; col < n; col++) {
+                    val = PetscAbsScalar(dense[row + n * col]);
+                    if (val > dtol) {
+                        PetscCall(MatSetValue(A, row, col, val, INSERT_VALUES));
+                    }
+                }
+            }
+            PetscCall(PetscPrintf(PETSC_COMM_WORLD, "...PETSC matrix created.\n"));
+        }
+        case NM_SPARSE: {
+            fprintf(stderr, "color_graph_petsc :: storage type not supported yet %d", M->storageType);
+            exit(EXIT_FAILURE);
+            // PetscCall(MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, n, n, ))
+
+        }
+        case NM_SPARSE_BLOCK: {
+            fprintf(stderr, "color_graph_petsc :: storage type not supported yet %d", M->storageType);
+            exit(EXIT_FAILURE);
+        }
+        default: {
+            fprintf(stderr, "color_graph_petsc :: unknown matrix storage %d", M->storageType);
+            exit(EXIT_FAILURE);
+    }
+    }
     PetscCall(MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY));
+ */
+
+
 
     // Possible to fill the sparse matrix faster ?
     // The line below stores zero entries because M is stored as dense.
@@ -62,18 +151,22 @@ int color_graph_petsc(int n, double *M, int *n_colors, int **set_sizes, int ***s
     /* Get index sets for each color */
     PetscInt nn;
     IS *is;
-    int *size = NULL; // Array of sizes of each color set
-    int **indexes = NULL; // Array of pointers to index sets
+    size_t *size = NULL; // Array of sizes of each color set
+    size_t **indexes = NULL; // Array of pointers to index sets
     const PetscInt *idxin = NULL;
     PetscCall(ISColoringGetIS(iscoloring, PETSC_USE_POINTER, &nn, &is)); // Get index sets
-    PetscCall(PetscPrintf(PETSC_COMM_WORLD, "n_colors = %d\n", nn));
+    PetscCall(PetscPrintf(PETSC_COMM_WORLD, "n_colors = %ld\n", nn));
 
-    size = (int *)malloc(nn * sizeof(int));
-    indexes = (int **)malloc(nn * sizeof(int *));
+    PetscInt size_petsc;
 
-    for (int i = 0; i < nn; i++) {
-        PetscCall(ISGetLocalSize(is[i], &size[i])); // conversion PetscInt to int ?
-        indexes[i] = (int *)malloc(size[i] * sizeof(int)); // allocate indexes
+    size = (size_t *)malloc((size_t)nn * sizeof(size_t));
+    indexes = (size_t **)malloc((size_t)nn * sizeof(size_t *));
+
+    for (int i = 0; i < (int)nn; i++) {
+        PetscCall(ISGetLocalSize(is[i], &size_petsc));
+        size[i] = (size_t)size_petsc;
+        // PetscCall(ISGetLocalSize(is[i], &size[i])); // This gave me a conversion warning
+        indexes[i] = (size_t *)malloc(size[i] * sizeof(size_t)); // allocate indexes
         PetscCall(ISGetIndices(is[i], &idxin)); // Get indices for i-th color
 
         /*
@@ -83,8 +176,8 @@ int color_graph_petsc(int n, double *M, int *n_colors, int **set_sizes, int ***s
 
         I COULD ONLY USE POINTERS IF I WROTE BOTH COLORING AND COMPUTING IN PETSC???
         */
-        for (int j = 0; j < size[i]; j++) {
-            indexes[i][j] = idxin[j];
+        for (int j = 0; j < (int)size[i]; j++) {
+            indexes[i][j] = (size_t)idxin[j];
         }
 
         PetscCall(ISRestoreIndices(is[i], &idxin));

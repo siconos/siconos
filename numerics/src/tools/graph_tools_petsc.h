@@ -8,7 +8,8 @@
 #include <time.h>
 #include <unistd.h>
 #include <omp.h>
+#include "NumericsMatrix.h" 
 
-int color_graph_petsc(int n, double *M, int *n_colors, int **set_sizes, int ***set_indices);
+int color_graph_petsc(int n, NumericsMatrix *M, long int *n_colors, size_t **set_sizes, size_t ***set_indices);
 
 #endif

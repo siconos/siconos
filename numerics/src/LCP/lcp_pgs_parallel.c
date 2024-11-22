@@ -87,11 +87,21 @@ void lcp_pgs_parallel(LinearComplementarityProblem *problem, double *z, double *
   double norm_q = cblas_dnrm2(n, problem->q, 1); 
   if (fabs(norm_q) <= DBL_EPSILON) norm_q = 1.;
 
+  CSparseMatrix* S = NULL;
+  if (M->storageType == NM_SPARSE) {
+    if (M->matrix2->origin == NSM_CSR) {
+      S = NM_csr(M);
+    } 
+    else {
+      S = NM_csc_trans(M);
+    }
+  }
+
   /* Flag to stop when convergence is achieved */
   int flag = 1;
 
   /* Start solving */
-#pragma omp parallel default(none) shared(g, itermax, counter, err, flag, block_sizes, start_indexes, M, diag, tol, q, norm_q, w, z)
+#pragma omp parallel default(none) shared(g, itermax, counter, err, flag, block_sizes, start_indexes, M, S, diag, tol, q, norm_q, w, z)
   {
     /* Thread number */
     int rank = omp_get_thread_num();
@@ -141,7 +151,7 @@ void lcp_pgs_parallel(LinearComplementarityProblem *problem, double *z, double *
         while (counter <= (iter - 1) * g + j_g) {
         }
 
-        NM_block_prod(start_i, start_indexes[j_g], size_i, block_sizes[j_g], M, z, t_right, 0);
+        NM_block_prod(start_i, start_indexes[j_g], size_i, block_sizes[j_g], M, S, z, t_right, 0);
       }
 
       /* Start computing w_{iter} */
@@ -160,7 +170,7 @@ void lcp_pgs_parallel(LinearComplementarityProblem *problem, double *z, double *
         while (counter <= iter * g + j_g) {
         }
 
-        NM_block_prod(start_i, start_indexes[j_g], size_i, block_sizes[j_g], M, z, t_left, 0);
+        NM_block_prod(start_i, start_indexes[j_g], size_i, block_sizes[j_g], M, S, z, t_left, 0);
       }
 
       /* Reset error when first group is back */
@@ -169,7 +179,7 @@ void lcp_pgs_parallel(LinearComplementarityProblem *problem, double *z, double *
       }
 
       /* Diagonal block */
-      NM_block_prod_no_diag(start_i, size_i, M, z, t_right, &zsave, 0);
+      NM_block_prod_no_diag(start_i, size_i, M, S, z, t_right, &zsave, 0);
 
       if (flag == 0) {
         /* Last update of w and error, without 

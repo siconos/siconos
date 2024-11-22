@@ -1136,7 +1136,7 @@ int NM_isnan(NumericsMatrix* M);
    \param[in,out] y the resulting vector
    \param[in] init = 0 for y += Ax, =1 for y = Ax
 */
-void NM_block_prod(int start_i, int start_j, int size_i, int size_j, NumericsMatrix* A, const double *x, double *y, int init);
+void NM_block_prod(int start_i, int start_j, int size_i, int size_j, NumericsMatrix* A, CSparseMatrix* M, const double *x, double *y, int init);
 
 /**
    Block of a Matrix - vector product y = blockA*x or y += blockA*x, blockA being a submatrix of A
@@ -1151,7 +1151,7 @@ void NM_block_prod(int start_i, int start_j, int size_i, int size_j, NumericsMat
    \param[in,out] y the resulting vector
    \param[in] init = 0 for y += Ax, =1 for y = Ax
 */
-void NM_block_prod_no_diag(int start_i, int size_i, NumericsMatrix* A, double *x, double *y, double* xsave, int init);
+void NM_block_prod_no_diag(int start_i, int size_i, NumericsMatrix* A, CSparseMatrix* M, double *x, double *y, double* xsave, int init);
 
 #ifdef WITH_OPENSSL
 /** Compute sha1 hash of matrix values. Matrices of differents size and same
