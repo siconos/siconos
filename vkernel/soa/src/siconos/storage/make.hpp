@@ -185,10 +185,13 @@ struct make {
           return memory_t<storage_t, memory_size<Attribute, all_keeps_t>()>{};
         }));
   };
-  decltype(internal_build()) _store;
 
-  make() : _store(internal_build()){};
+  struct store_t : decltype(internal_build()) {};
 
-  decltype(internal_build())& store() { return _store; }
+  store_t _store;
+
+  make() : _store(store_t()){};
+
+  store_t& store() { return _store; }
 };
 }  // namespace siconos::storage

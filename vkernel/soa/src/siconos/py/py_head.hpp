@@ -60,56 +60,64 @@ namespace siconos::python::disks {
 
 namespace config = siconos::config::disks;
 
-static auto imake_storage()
-{
-  return storage::make<
-      standard_environment<config::params>, config::simulation,
-      config::interaction_manager, config::io, config::segment_shape,
-      config::disk_shape,
-      storage::with_properties<
-          storage::wrapped<config::disk, some::unbounded_collection>,
-          storage::wrapped<config::diskdisk_r, some::unbounded_collection>,
-          storage::wrapped<config::disksegment_r, some::unbounded_collection>,
-          storage::wrapped<config::diskfdisk_r, some::unbounded_collection>,
-          storage::wrapped<config::pointl, some::unbounded_collection>,
-          storage::wrapped<config::pointd, some::unbounded_collection>,
-          storage::wrapped<config::pointtds, some::unbounded_collection>,
-          storage::wrapped<config::interaction, some::unbounded_collection>,
-          storage::wrapped<config::segment_shape, some::unbounded_collection>,
-          storage::wrapped<config::disk_shape, some::unbounded_collection>,
-          storage::wrapped<config::translated_disk_shape,
-                           some::unbounded_collection>,
-          storage::attached<config::disk, storage::pattern::symbol<"shape">,
-                            storage::some::item_ref<config::disk_shape>>,
-          storage::time_invariant<
-              storage::pattern::attr_t<config::disk, "fext">>,
-          storage::diagonal<
-              storage::pattern::attr_t<config::disk, "mass_matrix">>,
-          storage::unbounded_diagonal<
-              storage::pattern::attr_t<config::osi, "mass_matrix_assembled">>,
-          storage::bind<config::disk, "disk">,
-          storage::bind<config::nslaw, "nslaw">,
-          storage::bind<config::diskdisk_r, "diskdisk_r">,
-          storage::bind<config::diskfdisk_r, "diskfdisk_r">,
-          storage::bind<config::disksegment_r, "disksegment_r">,
-          storage::bind<config::neighborhood, "neighborhood">,
-          storage::bind<config::space_filter, "space_filter">,
-          storage::bind<config::segment_shape, "segment_shape">,
-          storage::bind<config::disk_shape, "disk_shape">,
-          storage::bind<config::translated_disk_shape,
-                        "translated_disk_shape">,
-          storage::bind<config::interaction_manager, "interaction_manager">,
-          storage::bind<config::interaction, "interaction">,
-          storage::bind<config::osnspb, "osnspb">,
-          storage::bind<config::solver_options, "solver_options">,
-          storage::bind<config::osi, "osi">,
-          storage::bind<config::td, "time_discretization">,
-          storage::bind<config::topo, "topology">,
-          storage::bind<config::simulation, "simulation">,
-          storage::bind<config::osnspb, "osnspb">,
-          storage::bind<config::fc2d, "fc2d">,
-          storage::bind<config::io, "io">>>();
-}
+struct maker
+    : storage::make<
+          standard_environment<config::params>, config::simulation,
+          config::interaction_manager, config::io, config::segment_shape,
+          config::disk_shape,
+          storage::with_properties<
+              storage::wrapped<config::disk, some::unbounded_collection>,
+              storage::wrapped<config::diskdisk_r,
+                               some::unbounded_collection>,
+              storage::wrapped<config::disksegment_r,
+                               some::unbounded_collection>,
+              storage::wrapped<config::diskfdisk_r,
+                               some::unbounded_collection>,
+              storage::wrapped<config::pointl, some::unbounded_collection>,
+              storage::wrapped<config::pointd, some::unbounded_collection>,
+              storage::wrapped<config::pointtds, some::unbounded_collection>,
+              storage::wrapped<config::interaction,
+                               some::unbounded_collection>,
+              storage::wrapped<config::segment_shape,
+                               some::unbounded_collection>,
+              storage::wrapped<config::disk_shape,
+                               some::unbounded_collection>,
+              storage::wrapped<config::translated_disk_shape,
+                               some::unbounded_collection>,
+              storage::attached<config::disk,
+                                storage::pattern::symbol<"shape">,
+                                storage::some::item_ref<config::disk_shape>>,
+              storage::time_invariant<
+                  storage::pattern::attr_t<config::disk, "fext">>,
+              storage::diagonal<
+                  storage::pattern::attr_t<config::disk, "mass_matrix">>,
+              storage::unbounded_diagonal<storage::pattern::attr_t<
+                  config::osi, "mass_matrix_assembled">>,
+              storage::bind<config::disk, "disk">,
+              storage::bind<config::nslaw, "nslaw">,
+              storage::bind<config::diskdisk_r, "diskdisk_r">,
+              storage::bind<config::diskfdisk_r, "diskfdisk_r">,
+              storage::bind<config::disksegment_r, "disksegment_r">,
+              storage::bind<config::neighborhood, "neighborhood">,
+              storage::bind<config::space_filter, "space_filter">,
+              storage::bind<config::segment_shape, "segment_shape">,
+              storage::bind<config::disk_shape, "disk_shape">,
+              storage::bind<config::translated_disk_shape,
+                            "translated_disk_shape">,
+              storage::bind<config::interaction_manager,
+                            "interaction_manager">,
+              storage::bind<config::interaction, "interaction">,
+              storage::bind<config::osnspb, "osnspb">,
+              storage::bind<config::solver_options, "solver_options">,
+              storage::bind<config::osi, "osi">,
+              storage::bind<config::td, "time_discretization">,
+              storage::bind<config::topo, "topology">,
+              storage::bind<config::simulation, "simulation">,
+              storage::bind<config::osnspb, "osnspb">,
+              storage::bind<config::fc2d, "fc2d">,
+              storage::bind<config::io, "io">>> {};
+
+static auto imake_storage() { return maker(); }
 
 static auto idata = imake_storage();
 
