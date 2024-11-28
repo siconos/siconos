@@ -47,13 +47,14 @@ class MBTB_FC3DContactRelation : public siconos::modeling::NewtonEuler3DR {
    */
   MBTB_FC3DContactRelation(std::shared_ptr<MBTB_Contact> pContact);
 
-  /** This function has to compute the distance between the objects.
-   * \param time the given  time
-   * \param q0 the position
-   * \param y the output
-   */
-  virtual void computeh(double time, const siconos::algebra::BlockVector& q0,
-                        siconos::algebra::SiconosVector& y) override;
+  /**
+      to compute the output y = h(q) of the Relation
+
+      \param[in] q generalized coordinates vector of the concerned dynamical systems
+      \param[in,out] y the resulting vector
+  */
+  void computeh(const siconos::algebra::BlockVector& q,
+                Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
   virtual ~MBTB_FC3DContactRelation() noexcept = default;
 };

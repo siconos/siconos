@@ -47,7 +47,7 @@ The aim of this class is to provide some members and functions for all dynamical
 
 Each system is identified thanks to a number and the current state of the system is saved as a vector :func:`DynamicalSystem::x`, with x[0]= :math:`x` and x[1]= :math:`\dot x`.
 
-All the functions and their gradients ( :math:`g, rhs, \nabla_x g` ...) can be accessed with functions like :func:`DynamicalSystem::jacobianRhsx` for :math:`\nabla_{x} rhs(x, t, z)`. Check the reference for a complete list of the members and methods.
+All the functions and their gradients ( :math:`g, rhs, \nabla_x g` ...) can be accessed with functions like :func:`DynamicalSystem::jacobianRhsOver_x` for :math:`\nabla_{x} rhs(x, t, z)`. Check the reference for a complete list of the members and methods.
 
 The common rules for all members are, 'name' being the required variable:
 
@@ -95,7 +95,7 @@ The following functions are (and must) be present in any class derived from Dyna
 
 * :func:`DynamicalSystem::icomputeRhs()`
 
-* :func:`DynamicalSystem::computeJacobianRhsx()`
+* :func:`DynamicalSystem::computeJacobianRhsOver_x()`
   
 * :func:`DynamicalSystem::initializeNonSmoothInput()`
 

@@ -101,7 +101,7 @@ void siconos::modeling::LagrangianDS::update_lu_mass() {
 void siconos::modeling::LagrangianDS::initRhs(double time) {
   DEBUG_BEGIN("siconos::modeling::LagrangianDS::initRhs(double time)\n");
   // dim
-  _n = 2 * ndof_;
+  x_size_ = 2 * ndof_;
 
   // All links between DS and LagrangianDS class members are pointer links,
   // which means that no useless memory is allocated when connection is
@@ -115,16 +115,21 @@ void siconos::modeling::LagrangianDS::initRhs(double time) {
   // if the system is involved in more than one interaction. So, we must check
   // if p2 and q2 already exist to be sure that DSlink won't be lost.
 
-  _x0 = algebra::concatenateVectors(*q0_view_, *velocity0_view_);  // COPY!
+  x0_internal_storage_ = std::make_unique<std::vector<double>>(x_size_);
+  x0_view_ = std::make_shared<siconos::algebra::MapVectorType>(x0_internal_storage_->data(),
+                                                               x0_internal_storage_->size());
+  x0_view_->head(ndof_) = *q0_view_;  // COPY !
+  x0_view_->tail(ndof_) = *velocity0_view_;
 
-  _x[0] = algebra::concatenateVectors(*state_q_[0], *state_q_[1]);
+  state_x_[0] = std::make_shared<siconos::algebra::SiconosVector>(x_size_);
+  *(state_x_[0]) << *state_q_[0], *state_q_[1];
 
   if (!state_q_[2]) {
     state_q_[2] = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
     state_q_[2]->setZero();
   }
-
-  _x[1] = algebra::concatenateVectors(*state_q_[1], *state_q_[2]);  // COPY!
+  state_x_[1] = std::make_shared<siconos::algebra::SiconosVector>(x_size_);
+  *(state_x_[1]) << *state_q_[1], *state_q_[2];
 
   // Everything concerning rhs and its jacobian is handled in initRhs and
   // computeXXX related functions.
@@ -182,19 +187,19 @@ void siconos::modeling::LagrangianDS::initRhs(double time) {
     rhsMatrices_[idMatrix_]->setIdentity();
   }
   if (flag1 && flag2)
-    _jacxRhs = std::make_shared<siconos::algebra::BlockMatrix>(
+    jacobianRhsOver_x_ = std::make_shared<siconos::algebra::BlockMatrix>(
         rhsMatrices_[zeroMatrix_], rhsMatrices_[idMatrix_], rhsMatrices_[jacobianXBloc10_],
         rhsMatrices_[jacobianXBloc11_]);
   else if (flag1)  // flag2 = false
-    _jacxRhs = std::make_shared<siconos::algebra::BlockMatrix>(
+    jacobianRhsOver_x_ = std::make_shared<siconos::algebra::BlockMatrix>(
         rhsMatrices_[zeroMatrix_], rhsMatrices_[idMatrix_], rhsMatrices_[jacobianXBloc10_],
         rhsMatrices_[zeroMatrix_]);
   else if (flag2)  // flag1 = false
-    _jacxRhs = std::make_shared<siconos::algebra::BlockMatrix>(
+    jacobianRhsOver_x_ = std::make_shared<siconos::algebra::BlockMatrix>(
         rhsMatrices_[zeroMatrix_], rhsMatrices_[idMatrix_], rhsMatrices_[zeroMatrix_],
         rhsMatrices_[jacobianXBloc11_]);
   else
-    _jacxRhs = std::make_shared<siconos::algebra::BlockMatrix>(
+    jacobianRhsOver_x_ = std::make_shared<siconos::algebra::BlockMatrix>(
         rhsMatrices_[zeroMatrix_], rhsMatrices_[idMatrix_], rhsMatrices_[zeroMatrix_],
         rhsMatrices_[zeroMatrix_]);
   DEBUG_EXPR(display(););
@@ -220,7 +225,7 @@ void siconos::modeling::LagrangianDS::setConstantMass(
   computemass_ = nullptr;
 }
 void siconos::modeling::LagrangianDS::setComputeMassFunction(
-    const siconos::modeling::func_prototypes::FunctionV_V& new_func) {
+    const siconos::modeling::func_prototypes::FunctionV_M& new_func) {
   // Ensure that memory is properly allocated for mass_
   if (!mass_internal_storage_) {
     mass_internal_storage_ = std::make_unique<std::vector<double>>(ndof_ * ndof_);
@@ -505,12 +510,12 @@ void siconos::modeling::LagrangianDS::computeRhs(double time) {
   //  if(mass->isPlugged()) : mass may be not plugged in LagrangianDS children
   if (LUMass_) *state_q_[2] = LUMass_->solve(*state_q_[2]);
 
-  _x[1]->head(ndof_) = *state_q_[1];
-  _x[1]->tail(ndof_) = *state_q_[2];
+  state_x_[1]->head(ndof_) = *state_q_[1];
+  state_x_[1]->tail(ndof_) = *state_q_[2];
   DEBUG_END("siconos::modeling::LagrangianDS::computeRhs(double time)");
 }
 
-void siconos::modeling::LagrangianDS::computeJacobianRhsx(double time) {
+void siconos::modeling::LagrangianDS::computeJacobianRhsOver_x(double time) {
   computeMass(*state_q_[0]);
 
   if (jacobianTotalForcesOver_q_ || jacobianTotalForcesOver_velocity_) {
@@ -521,14 +526,14 @@ void siconos::modeling::LagrangianDS::computeJacobianRhsx(double time) {
     /** \warning the Jacobian of the inverse of the mass matrix
      * w.r.t q is not taken into account */
 
-    std::shared_ptr<siconos::algebra::SiconosMatrix> bloc10 = _jacxRhs->block(1, 0);
+    std::shared_ptr<siconos::algebra::SiconosMatrix> bloc10 = jacobianRhsOver_x_->block(1, 0);
     computeJacobianTotalForcesOver_q(*state_q_[1], *state_q_[0], time);
     *bloc10 = *jacobianTotalForcesOver_q_;
     *bloc10 = LUMass_->solve(*bloc10);
   }
 
   if (jacobianTotalForcesOver_velocity_) {
-    std::shared_ptr<siconos::algebra::SiconosMatrix> bloc11 = _jacxRhs->block(1, 1);
+    std::shared_ptr<siconos::algebra::SiconosMatrix> bloc11 = jacobianRhsOver_x_->block(1, 1);
     computeJacobianTotalForcesOver_velocity(*state_q_[1], *state_q_[0], time);
     *bloc11 = *jacobianTotalForcesOver_velocity_;
     *bloc11 = LUMass_->solve(*bloc11);
@@ -600,7 +605,7 @@ void siconos::modeling::LagrangianDS::computeJacobianTotalForcesOver_velocity(
 }
 
 void siconos::modeling::LagrangianDS::display(bool brief) const {
-  std::cout << "=====> Lagrangian System display (number: " << _number << ").\n";
+  std::cout << "=====> Lagrangian System display (number: " << number_ << ").\n";
   std::cout << "- ndof_ : " << ndof_ << "\n";
   std::cout << "- q " << *state_q_[0] << "\n";
   std::cout << "- q0 " << *q0_view_ << "\n";
@@ -687,7 +692,7 @@ void siconos::modeling::LagrangianDS::swapInMemory() {
   pMemory_[0].swap(p_[0]);
   pMemory_[1].swap(p_[1]);
   pMemory_[2].swap(p_[2]);
-  _xMemory.swap(_x[0]);
+  xMemory_.swap(state_x_[0]);
 }
 
 void siconos::modeling::LagrangianDS::resetAllNonSmoothParts() {

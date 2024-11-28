@@ -135,15 +135,6 @@ class NewtonEulerJointR : public siconos::modeling::NewtonEulerR {
       std::shared_ptr<siconos::algebra::SiconosVector> q1,
       std::shared_ptr<siconos::algebra::SiconosVector> q2 = nullptr) = 0;
 
-  /** Compute the vector of linear and angular positions of the free axes */
-  virtual void computehDoF(double time, const siconos::algebra::BlockVector& q0,
-                           siconos::algebra::SiconosVector& y, unsigned int axis = 0) {}
-
-  /** Compute the jacobian of linear and angular DoF with respect to some q */
-  virtual void computeJachqDoF(double time, siconos::modeling::Interaction& inter,
-                               std::shared_ptr<siconos::algebra::BlockVector> q0,
-                               siconos::algebra::SiconosMatrix& jachq, unsigned int axis = 0) {}
-
   /** Project a vector onto the given 0-indexed free axis. Useful for
    *  calculating velocities in the axis, or for calculating
    *  axis-aligned forces applied to connected bodies.  If axis is of
@@ -210,6 +201,16 @@ class NewtonEulerJointR : public siconos::modeling::NewtonEulerR {
    */
   virtual DofType typeOfDoF(unsigned int axis) = 0;
 
+  /** Compute the vector of linear and angular positions of the free axes */
+  virtual void computehDoF(const siconos::algebra::BlockVector& q0,
+                           Eigen::Ref<siconos::algebra::SiconosVector> y,
+                           unsigned int axis = 0) {}
+
+  /** Compute the jacobian of linear and angular DoF with respect to some q */
+  virtual void computeJachqDoF(siconos::modeling::Interaction& inter,
+                               const siconos::algebra::BlockVector& q0,
+                               Eigen::Ref<siconos::algebra::SiconosMatrix> jachq,
+                               unsigned int axis = 0) {}
 };
 }  // namespace siconos::joints
 #endif  // NewtonEulerJointRELATION_H

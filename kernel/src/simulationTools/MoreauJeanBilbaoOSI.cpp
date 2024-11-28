@@ -21,9 +21,9 @@
 #include "BoundaryCondition.hpp"
 #include "Interaction.hpp"
 #include "LagrangianLinearDiagonalDS.hpp"
+#include "LagrangianR.hpp"
 #include "NewtonImpactNSL.hpp"
 #include "OneStepNSProblem.hpp"
-#include "Relation.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosMatrixVectorOp.hpp"  // for subprod
 #include "SiconosVector.hpp"
@@ -309,7 +309,7 @@ struct siconos::integrators::MoreauJeanBilbaoOSI::_NSLEffectOnFreeOutput
   _NSLEffectOnFreeOutput(siconos::nonsmooth_formulations::OneStepNSProblem* p,
                          siconos::modeling::Interaction& inter,
                          siconos::graphs::InteractionProperties& interProp)
-      : _osnsp(p), _inter(inter), _interProp(interProp){};
+      : _osnsp(p), _inter(inter), _interProp(interProp) {};
 
   void visit(const siconos::modeling::NewtonImpactNSL& nslaw) const override {
     auto e = nslaw.e();
@@ -344,10 +344,11 @@ void siconos::integrators::MoreauJeanBilbaoOSI::computeFreeOutput(
   auto& osnsp_rhs = *(*indexSet.properties(vertex_inter)
                            .workVectors)[siconos::integrators::MoreauJeanBilbaoOSI::OSNSP_RHS];
 
-  if (inter.relation()->jacobianhOver_q()) {
-    auto& C = *inter.relation()->jacobianhOver_q();
-    siconos::algebra::matrixBlockVector_prod(C, x_free, osnsp_rhs, true);
-  }
+  auto lagr = std::dynamic_pointer_cast<siconos::modeling::LagrangianR>(inter.relation());
+  assert(lagr && "MoreauJeanBilbaoOSI only implemented for Lagrangian systems.");
+
+  auto H = lagr->jacobianhOver_q();
+  siconos::algebra::matrixBlockVector_prod(H, x_free, osnsp_rhs, true);
   _NSLEffectOnFreeOutput nslEffectOnFreeOutput{osnsp, inter,
                                                indexSet.properties(vertex_inter)};
   inter.nonSmoothLaw()->accept(nslEffectOnFreeOutput);

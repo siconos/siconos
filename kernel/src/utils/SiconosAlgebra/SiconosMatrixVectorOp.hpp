@@ -36,7 +36,7 @@ namespace siconos::algebra {
   \param A a SiconosMatrix
   \param x a SiconosVector
   \param[in,out] y a SiconosVector
-  \param init a bool (default = true)
+  \param init true to initialize y vector to zero (else we use y += ...)
   */
 void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool init = true);
 // void prod(const MapType& A, const SiconosVector& x, SiconosVector& y, bool init = true);

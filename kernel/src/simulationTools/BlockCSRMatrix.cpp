@@ -141,7 +141,8 @@ void siconos::simulation::BlockCSRMatrix::fillW(siconos::graphs::InteractionsGra
         involvedDS[indexSet.bundle(*ei)] = true;
         _blockCSR->resize(_nr, _nr, false);
 
-        (*_blockCSR)(_nr - 1, _nr - 1) = neds->totalInertiaMatrixNotCONST().data(); // TODOFP CHECK THIS ...
+        (*_blockCSR)(_nr - 1, _nr - 1) =
+            neds->totalInertiaMatrixNotCONST().data();  // TODOFP CHECK THIS ...
       }
     } else {
       THROW_EXCEPTION("siconos::simulation::BlockCSRMatrix::fillW only for Newton EulerDS");
@@ -199,18 +200,13 @@ void siconos::simulation::BlockCSRMatrix::fillH(siconos::graphs::InteractionsGra
         }
       }
     }
-
+    auto rel = std::static_pointer_cast<siconos::modeling::NewtonEulerR>(
+        indexSet.bundle(*vi)->relation());
     (*_blockCSR)(std::min(pos, col), std::max(pos, col)) =
-        std::static_pointer_cast<siconos::modeling::NewtonEulerR>(
-            indexSet.bundle(*vi)->relation())
-            ->H_prod_T()
-            ->data();
+        const_cast<double*>(rel->jacobianhOver_q_prod_T().data());
 
     (*_blockCSR)(std::max(pos, col), std::min(pos, col)) =
-        std::static_pointer_cast<siconos::modeling::NewtonEulerR>(
-            indexSet.bundle(*vi)->relation())
-            ->H_prod_T()
-            ->data();
+        const_cast<double*>(rel->jacobianhOver_q_prod_T().data());
   }
 
   _diagsize0->resize(involvedDS.size());

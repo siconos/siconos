@@ -71,17 +71,17 @@ void LagrangianDSTest::testBuildLagrangianDS1() {
   siconos::algebra::concatenateVectors(x0, q0, velocity0);
   siconos::algebra::SiconosVector zero = siconos::algebra::SiconosVector::Zero(3);
   siconos::algebra::concatenateVectors(rhs0, velocity0, zero);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 1 - 8: ", ds->n() == 2 * 3, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 1 - 9: ", *(ds->x0()) == x0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 1 - 8: ", ds->x_size() == 2 * 3, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 1 - 9: ", ds->x0() == x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 1 - 10: ", *(ds->rhs()) == rhs0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "test - Constr 1 - 11: ", ds->jacobianRhsx()->block(0, 0)->isZero(), true);
+      "test - Constr 1 - 11: ", ds->jacobianRhsOver_x()->block(0, 0)->isZero(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "test - Constr 1 - 12: ", ds->jacobianRhsx()->block(0, 1)->isIdentity(), true);
+      "test - Constr 1 - 12: ", ds->jacobianRhsOver_x()->block(0, 1)->isIdentity(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "test - Constr 1 - 13: ", ds->jacobianRhsx()->block(1, 0)->isZero(), true);
+      "test - Constr 1 - 13: ", ds->jacobianRhsOver_x()->block(1, 0)->isZero(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "test - Constr 1 - 14: ", ds->jacobianRhsx()->block(1, 1)->isZero(), true);
+      "test - Constr 1 - 14: ", ds->jacobianRhsOver_x()->block(1, 1)->isZero(), true);
 
   std::cout << "--> Constructor 1 test ended with success." << std::endl;
 }
@@ -166,23 +166,23 @@ void LagrangianDSTest::testBuildLagrangianDS2() {
   siconos::algebra::SiconosVector3 ref0;
   ref0 = mass.inverse() * refforces;
   siconos::algebra::concatenateVectors(rhs0, velocity0, ref0);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 2: ", ds->n() == 2 * 3, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 2: ", *(ds->x0()) == x0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 2: ", ds->x_size() == 2 * 3, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 2: ", ds->x0() == x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 2: ", *(ds->rhs()) == rhs0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 2: ", ds->jacobianRhsx()->block(0, 0)->isZero(),
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 2: ", ds->jacobianRhsOver_x()->block(0, 0)->isZero(),
                                true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "test - Constr 2: ", ds->jacobianRhsx()->block(0, 1)->isIdentity(), true);
+      "test - Constr 2: ", ds->jacobianRhsOver_x()->block(0, 1)->isIdentity(), true);
   siconos::algebra::SiconosMatrix33 refj2;
   refjac.setConstant(-1);
 
   refj2 = mass.inverse() * refjac;
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "test - Constr 2: ", ds->jacobianRhsx()->block(1, 0)->isApprox(refj2), true);
+      "test - Constr 2: ", ds->jacobianRhsOver_x()->block(1, 0)->isApprox(refj2), true);
   refjac.setConstant(-2);
   refj2 = mass.inverse() * refjac;
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "test - Constr 2: ", ds->jacobianRhsx()->block(1, 1)->isApprox(refj2), true);
+      "test - Constr 2: ", ds->jacobianRhsOver_x()->block(1, 1)->isApprox(refj2), true);
 
   std::cout << "--> Constructor 2 test ended with success." << std::endl;
 }

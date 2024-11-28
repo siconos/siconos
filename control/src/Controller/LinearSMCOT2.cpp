@@ -20,7 +20,7 @@
 
 #include "ControlSensor.hpp"
 #include "EventDriven.hpp"
-#include "FirstOrderLinearTIDS.hpp"
+#include "FirstOrderLinearDS.hpp"
 #include "LsodarOSI.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "SiconosMatrix.hpp"
@@ -83,14 +83,8 @@ void siconos::control::LinearSMCOT2::initialize(
   auto _t0 = nsds.t0();
   auto _T = nsds.finalT() + _tdPhi->timeStep(0);
 
-  //  _XPhi= std::make_shared<siconos::algebra::SiconosVector>(_nDim));
-  //  (*_XPhi) = _DS->getX0();
-  //  _DSPhi->setXPtr(_XPhi);
   _XPhi = _DSPhi->x();
 
-  //  _Xhat= std::make_shared<siconos::algebra::SiconosVector>(_nDim));
-  //  *_Xhat = _DS->getX0();
-  // _DSPred->setXPtr(_Xhat);
   _Xhat = _DSPred->x();
   auto dummyb = std::make_shared<siconos::algebra::SiconosVector>(_B->size(0), 0);
   _DSPred->setbPtr(dummyb);

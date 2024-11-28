@@ -139,6 +139,6 @@ void siconos::control::LuenbergerObserver::process() {
 
     // update the current measured value
     *_y = y;
-    *_xHat = _DS->getx();
+    *_xHat = _DS->x_read(); // Copy
   }
 }

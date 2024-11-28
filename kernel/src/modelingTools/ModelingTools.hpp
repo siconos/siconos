@@ -24,7 +24,7 @@ Include files related to modeling part of Siconos.
 #include "BoundaryCondition.hpp"
 #include "ComplementarityConditionNSL.hpp"
 #include "EqualityConditionNSL.hpp"
-#include "FirstOrderLinearTIDS.hpp"
+#include "FirstOrderLinearDS.hpp"
 #include "FirstOrderType1R.hpp"
 #include "FixedBC.hpp"
 #include "FremondImpactFrictionNSL.hpp"

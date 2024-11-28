@@ -23,7 +23,7 @@
 
 #include "AVI.hpp"
 #include "EulerMoreauOSI.hpp"
-#include "FirstOrderLinearTIDS.hpp"
+#include "FirstOrderLinearDS.hpp"
 #include "FirstOrderLinearTIR.hpp"
 #include "Interaction.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
@@ -57,7 +57,7 @@ class AVITest : public CppUnit::TestFixture {
   double _theta{0.5};
   std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> _nsds{nullptr};
   std::shared_ptr<siconos::simulation::TimeStepping> _sim{nullptr};
-  std::shared_ptr<siconos::modeling::FirstOrderLinearTIDS> _DS{nullptr};
+  std::shared_ptr<siconos::modeling::FirstOrderLinearDS> _DS{nullptr};
   std::shared_ptr<siconos::simulation::TimeDiscretisation> _TD{nullptr};
   std::shared_ptr<siconos::integrators::OneStepIntegrator> _osi{nullptr};
   std::shared_ptr<siconos::algebra::SiconosMatrix> _A{nullptr};

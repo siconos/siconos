@@ -47,7 +47,7 @@ void siconos::control::LinearSensor::initialize(
   // What happen here if we have more than one DS ?
   // This may be unlikely to happen.
   //  _DS = _model->nonSmoothDynamicalSystem()->dynamicalSystemNumber(0);
-  if (colC != _DS->n()) {
+  if (colC != _DS->dimension()) {
     THROW_EXCEPTION(
         " LinearSensor::initialize - The number of column of the C matrix must be equal to "
         "the length of x");
@@ -72,10 +72,7 @@ void siconos::control::LinearSensor::capture() {
   *_storedY = *_matC * *_DSx;
 
   // untested
-  if (_matD)
-    //    *_storedY += siconos::algebra::prod(*_matD, *_DS->z());
-    //  _dataPlot->setSubRow(_k, 1, _storedY);
-    _k++;
+  if (_matD) _k++;
 
   if (_delay > 0) {
     _bufferY.push_back(_storedY);

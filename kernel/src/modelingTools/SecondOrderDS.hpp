@@ -104,7 +104,7 @@ class BoundaryCondition;
     In that case, use the following methods:
     - initRhs() to allocate/initialize memory for these new operators,
     - rhs() to get the rhs vector
-    - computeRhs(), computeJacobianRhsx() ..., to update the content of rhs, its
+    - computeRhs(), computeJacobianRhsOver_x() ..., to update the content of rhs, its
     jacobians ...
 
 */

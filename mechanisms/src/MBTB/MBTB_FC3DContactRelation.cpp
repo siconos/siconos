@@ -34,8 +34,7 @@ siconos::mechanisms::MBTB_FC3DContactRelation::MBTB_FC3DContactRelation(
 
 /*This function has to compute the distance between the objects*/
 void siconos::mechanisms::MBTB_FC3DContactRelation::computeh(
-    double time, const siconos::algebra::BlockVector& q0,
-    siconos::algebra::SiconosVector& y) {
+    const siconos::algebra::BlockVector& q, Eigen::Ref<siconos::algebra::SiconosVector> y) {
   //  DSIterator itDS=_pContact->interaction()->dynamicalSystemsBegin();
   //  auto aux = *itDS;
   // if(mbtb::data::sPrintDist)
@@ -50,9 +49,7 @@ void siconos::mechanisms::MBTB_FC3DContactRelation::computeh(
 
   //  }
 
-  DEBUG_PRINT(
-      "siconos::mechanisms::MBTB_FC3DContactRelation::computeh(double time, "
-      "BlockVector& q0, SiconosVector& y )\n");
+  DEBUG_PRINT("siconos::mechanisms::MBTB_FC3DContactRelation::computeh()\n");
   DEBUG_EXPR(_pContact->interaction()->y(0)->display(););
   DEBUG_EXPR(y.display(););
   // auto y = _pContact->interaction()->y(0);
@@ -60,19 +57,14 @@ void siconos::mechanisms::MBTB_FC3DContactRelation::computeh(
   // if (_pContact->_curTimeh + 1e-9 < time){
   ACE_times[ACE_TIMER_DIST].start();
   double X1, X2, Y1, Y2, Z1, Z2, n1x, n1y, n1z;
-  CADMBTB_getMinDistance(
-      _pContact->_id, _pContact->_indexCAD1, _pContact->_indexCAD2, X1, Y1, Z1,
-      X2, Y2, Z2, n1x, n1y, n1z, _pContact->_normalFromFace1, _pContact->_dist);
+  CADMBTB_getMinDistance(_pContact->_id, _pContact->_indexCAD1, _pContact->_indexCAD2, X1, Y1,
+                         Z1, X2, Y2, Z2, n1x, n1y, n1z, _pContact->_normalFromFace1,
+                         _pContact->_dist);
 
   if (mbtb::data::sPrintDist) {
-    printf("    Minimal distance computed from CAD and n2qn1 : %lf \n",
-           _pContact->_dist);
-    printf(
-        "    Proximal point 1 computed from CAD :  X1=%lf, Y1=%lf, Z1=%lf \n",
-        X1, Y1, Z1);
-    printf(
-        "    Proximal point 2 computed from CAD :  X2=%lf, Y2=%lf, Z2=%lf \n",
-        X2, Y2, Z2);
+    printf("    Minimal distance computed from CAD and n2qn1 : %lf \n", _pContact->_dist);
+    printf("    Proximal point 1 computed from CAD :  X1=%lf, Y1=%lf, Z1=%lf \n", X1, Y1, Z1);
+    printf("    Proximal point 2 computed from CAD :  X2=%lf, Y2=%lf, Z2=%lf \n", X2, Y2, Z2);
     if (_pContact->_normalFromFace1)
       printf(
           "    Normal vector computed from CAD taken from  Object 1 :  nx=%lf, "
@@ -110,9 +102,8 @@ void siconos::mechanisms::MBTB_FC3DContactRelation::computeh(
       printf(
           "    OffSet is substracted from contact point PC2 : newPC1 =  PC2 - "
           "Offset.n ");
-      printf("    point PC2 : X2=%lf,Y2=%lf,Z2=%lf",
-             X2 - _pContact->_Offset * n1x, Y2 - _pContact->_Offset * n1y,
-             Z2 - _pContact->_Offset * n1z);
+      printf("    point PC2 : X2=%lf,Y2=%lf,Z2=%lf", X2 - _pContact->_Offset * n1x,
+             Y2 - _pContact->_Offset * n1y, Z2 - _pContact->_Offset * n1z);
       printf("    OffSet %lf\n", _pContact->_Offset);
     }
   }
@@ -127,11 +118,11 @@ void siconos::mechanisms::MBTB_FC3DContactRelation::computeh(
 
   ACE_times[ACE_TIMER_DIST].stop();
   _pContact->_dist -= _pContact->_Offset;
-  _pContact->_curTimeh = time;
+  // _pContact->_curTimeh = time; // Do we really need this?
 
   if (mbtb::data::sPrintDist) {
-    std::cout << "MBTB_FC3DContactRelation compute h of "
-              << _pContact->_ContactName << ": " << _pContact->_dist << "\n";
+    std::cout << "MBTB_FC3DContactRelation compute h of " << _pContact->_ContactName << ": "
+              << _pContact->_dist << "\n";
 
     printf(
         "MBTB_FC3DContactRelation compute h the normal rentrante : nx=%lf, "

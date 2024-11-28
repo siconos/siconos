@@ -28,6 +28,7 @@
 #include "LagrangianLinearTIDS.hpp"
 #include "LagrangianRheonomousR.hpp"
 #include "NewtonEulerDS.hpp"
+#include "NewtonEulerR.hpp"
 #include "NewtonImpactFrictionNSL.hpp"         // for nslaw visitor
 #include "NewtonImpactNSL.hpp"                 // for nslaw visitor
 #include "NewtonImpactRollingFrictionNSL.hpp"  // for nslaw visitor
@@ -1020,95 +1021,91 @@ void siconos::integrators::MoreauJeanOSI::computeFreeOutput(
   assert(indexSet.bundle(vertex_inter));
 
   auto &inter = *indexSet.bundle(vertex_inter);
+
+  assert(inter.relation());
+  auto relationType = inter.relation()->getType();
+  assert(!(inter.relation()->getType() == siconos::modeling::RelationType::FirstOrder) &&
+         "You can not use MoreauJeanOSI with first-order type relations");
+
   auto &inter_work_block = *indexSet.properties(vertex_inter).workBlockVectors;
 
   auto &osnsp_rhs = *(*indexSet.properties(vertex_inter)
                            .workVectors)[siconos::integrators::MoreauJeanOSI::OSNSP_RHS];
 
-  std::shared_ptr<siconos::algebra::BlockVector> Xfree =
-      inter_work_block[siconos::integrators::MoreauJeanOSI::xfree];
-  assert(Xfree);
-  DEBUG_EXPR(Xfree->display(););
+  auto xfree = inter_work_block[siconos::integrators::MoreauJeanOSI::xfree];
+  assert(xfree);
 
   // 1 - product H Xfree{}
-  auto &H = *inter.relation()->jacobianhOver_q();
-  siconos::algebra::matrixBlockVector_prod(H, *Xfree, osnsp_rhs, true);
+  if (relationType == siconos::modeling::RelationType::Lagrangian) {
+    auto H = std::dynamic_pointer_cast<siconos::modeling::LagrangianR>(inter.relation())
+                 ->jacobianhOver_q();
+    siconos::algebra::matrixBlockVector_prod(H, *xfree, osnsp_rhs, true);
+  } else if (relationType == siconos::modeling::RelationType::Lagrangian) {
+    auto H = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerR>(inter.relation())
+                 ->jacobianhOver_q_prod_T();
+    siconos::algebra::matrixBlockVector_prod(H, *xfree, osnsp_rhs, true);
+  }
+  
+  auto relationSubType = inter.relation()->getSubType();
 
   // 2 -  compute additional terms for ScleronomousR and CompliantLinearTIR
 
   // Get relation and non smooth law types
-  assert(inter.relation());
-  auto relationType = inter.relation()->getType();
-  auto relationSubType = inter.relation()->getSubType();
 
   if ((relationType == siconos::modeling::RelationType::Lagrangian) &&
       (relationSubType != siconos::modeling::RelationSubType::ScleronomousR)) {
     auto sizeY = inter.nonSmoothLaw()->size();
-
     auto &DSlink = inter.linkToDSVariables();
+
     // For the relation of type LagrangianRheonomousR
     if (relationSubType == siconos::modeling::RelationSubType::RheonomousR) {
-      if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp) {
-        std::static_pointer_cast<siconos::modeling::LagrangianRheonomousR>(inter.relation())
-            ->computehdot(*DSlink[siconos::modeling::LagrangianR::q0],simulation()->getTkp1());
-        siconos::algebra::SiconosMatrix ID =
-            siconos::algebra::SiconosMatrix::Identity(sizeY, sizeY);
+      assert(((*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp);
 
-        // This should be optimized -- vacary
-        // y += hDot
-        auto hDot = (std::static_pointer_cast<siconos::modeling::LagrangianRheonomousR>(
-                         inter.relation())
-                         ->hdot());
-        osnsp_rhs += ID * *hDot;
+      auto rheoR =
+          std::static_pointer_cast<siconos::modeling::LagrangianRheonomousR>(inter.relation());
+      rheoR->computehdot(*DSlink[siconos::modeling::LagrangianR::q0], simulation()->getTkp1());
 
-      } else
-        THROW_EXCEPTION(
-            "siconos::integrators::MoreauJeanOSI::computeFreeOutput not yet "
-            "implemented for "
-            "SICONOS_OSNSP ");
+      // siconos::algebra::SiconosMatrix ID =
+      //     siconos::algebra::SiconosMatrix::Identity(sizeY, sizeY);
+      // This should be optimized -- vacary
+      // y += hDot
+      // auto hDot = rheoR->hdot();
+      // osnsp_rhs += ID * hDot;
+      osnsp_rhs += rheoR->hdot();
     }
     if (relationSubType == siconos::modeling::RelationSubType::CompliantLinearTIR) {
-      if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp) {
-        auto &C = *inter.relation()->C();
-        double h = _simulation->timeStep();
-        osnsp_rhs *= h * _theta;
+      assert(((*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp);
+      auto compR = std::static_pointer_cast<siconos::modeling::LagrangianCompliantLinearTIR>(
+          inter.relation());
 
-        /* we have to check that the value are at the beginnning of the time
-         * step */
-        // + C q_k
-        siconos::algebra::matrixBlockVector_prod(
-            C, *DSlink[siconos::modeling::LagrangianR::q0], osnsp_rhs, false);
+      auto C = compR->CMatrix();
+      double h = _simulation->timeStep();
+      osnsp_rhs *= h * _theta;
 
-        // + h(1-_theta)v_k
+      /* we have to check that the value are at the beginnning of the time
+       * step */
+      // + C q_k
+      siconos::algebra::matrixBlockVector_prod(C, *DSlink[siconos::modeling::LagrangianR::q0],
+                                               osnsp_rhs, false);
 
-        *DSlink[siconos::modeling::LagrangianR::q1] *= (1 - _theta) * h;
-        siconos::algebra::matrixBlockVector_prod(
-            C, *DSlink[siconos::modeling::LagrangianR::q1], osnsp_rhs, false);
+      // + h(1-_theta)v_k
 
-        if (std::static_pointer_cast<siconos::modeling::LagrangianCompliantLinearTIR>(
-                inter.relation())
-                ->e()) {
-          auto &e = *std::static_pointer_cast<siconos::modeling::LagrangianCompliantLinearTIR>(
-                         inter.relation())
-                         ->e();
-          osnsp_rhs += e;
-        }
-      } else
-        THROW_EXCEPTION(
-            "siconos::integrators::MoreauJeanOSI::computeFreeOutput not yet "
-            "implemented for "
-            "SICONOS_OSNSP ");
+      *DSlink[siconos::modeling::LagrangianR::q1] *= (1 - _theta) * h;
+      siconos::algebra::matrixBlockVector_prod(C, *DSlink[siconos::modeling::LagrangianR::q1],
+                                               osnsp_rhs, false);
+
+      if (compR->haseVector()) {
+        osnsp_rhs += compR->eVector();
+      }
     }
     DEBUG_EXPR(osnsp_rhs.display(););
   }
 
   // 3 - add part due to NonSmoothLaw
-  if (inter.relation()->getType() == siconos::modeling::RelationType::Lagrangian ||
-      inter.relation()->getType() == siconos::modeling::RelationType::NewtonEuler) {
-    _NSLEffectOnFreeOutput nslEffectOnFreeOutput(*osnsp, inter,
-                                                 indexSet.properties(vertex_inter), _theta);
-    inter.nonSmoothLaw()->accept(nslEffectOnFreeOutput);
-  }
+  _NSLEffectOnFreeOutput nslEffectOnFreeOutput(*osnsp, inter,
+                                               indexSet.properties(vertex_inter), _theta);
+  inter.nonSmoothLaw()->accept(nslEffectOnFreeOutput);
+
   DEBUG_EXPR(osnsp_rhs.display(););
 
   DEBUG_END(
@@ -1268,7 +1265,7 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
       moreau_jean::updatePosition(_simulation->timeStep(), _theta, ds);
 
       if (baux) {
-        double ds_norm_ref = 1. + ds.x0()->norm2();  // Should we save this in the graph?
+        double ds_norm_ref = 1. + ds.x0().norm();  // Should we save this in the graph?
         local_buffer -= d.q_read();
         double aux = (local_buffer.norm2()) / ds_norm_ref;
         if (aux > RelativeTol) _simulation->setRelativeConvergenceCriterionHeld(false);

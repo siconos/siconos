@@ -15,15 +15,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "FirstOrderType1R.hpp"
+#include "FirstOrderType2R.hpp"
 
 #include "BlockVector.hpp"
+#include "FirstOrderR.hpp"
 #include "Interaction.hpp"
 #include "PluggedObject.hpp"
+#include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 
-void siconos::modeling::FirstOrderType1R::initialize(Interaction& inter) {
+// #define DEBUG_NOCOLOR
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
+#include "siconos_debug.h"
+
+void siconos::modeling::FirstOrderType2R::initialize(Interaction& inter) {
   FirstOrderR::initialize(inter);
 
   auto sizeY = inter.dimension();
@@ -46,6 +53,17 @@ void siconos::modeling::FirstOrderType1R::initialize(Interaction& inter) {
   // - no need to allocate internal storage
   // - map/view is already 'connected' to some external memory
 
+  if (computejacobianhOver_lambda_) {
+    if (!jacobianhOver_lambda_internal_storage_) {
+      jacobianhOver_lambda_internal_storage_ =
+          std::make_unique<std::vector<double>>(sizeY * sizeY);
+    }
+    jacobianhOver_lambda_view_ = std::make_shared<siconos::algebra::MapType>(
+        jacobianhOver_lambda_internal_storage_->data(), sizeY, sizeY);
+    //   relationMat[FirstOrderR::mat_D] =
+    // std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeY);
+  }
+
   if (computejacobiangOver_lambda_) {
     if (!jacobiangOver_lambda_internal_storage_) {
       jacobiangOver_lambda_internal_storage_ =
@@ -59,7 +77,7 @@ void siconos::modeling::FirstOrderType1R::initialize(Interaction& inter) {
   checkSize(inter);
 }
 
-void siconos::modeling::FirstOrderType1R::checkSize(Interaction& inter) {
+void siconos::modeling::FirstOrderType2R::checkSize(Interaction& inter) {
   auto& DSlink = inter.linkToDSVariables();
 
   // get inter and ds sizes
@@ -77,31 +95,36 @@ void siconos::modeling::FirstOrderType1R::checkSize(Interaction& inter) {
     assert(jacobiangOver_lambda_view_->rows() == sizeX);
     assert(jacobiangOver_lambda_view_->cols() == sizeY);
   }
+  if (jacobianhOver_lambda_view_) {
+    assert(jacobianhOver_lambda_view_->rows() == sizeY);
+    assert(jacobianhOver_lambda_view_->cols() == sizeY);
+  }
 }
 
-void siconos::modeling::FirstOrderType1R::setComputehFunction(
-    const siconos::modeling::func_prototypes::FunctionBV_V& h_func) {
+void siconos::modeling::FirstOrderType2R::setComputehFunction(
+    const siconos::modeling::func_prototypes::FunctionBVV_V& h_func) {
   computeh_ = h_func;
 }
 
-void siconos::modeling::FirstOrderType1R::computeh(
+void siconos::modeling::FirstOrderType2R::computeh(
     const siconos::algebra::BlockVector& state,
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& lambda,
     Eigen::Ref<siconos::algebra::SiconosVector> y) {
-  if (computeh_) computeh_(state, y);
+  if (computeh_) computeh_(state, lambda, y);
 }
 
-void siconos::modeling::FirstOrderType1R::setComputegFunction(
+void siconos::modeling::FirstOrderType2R::setComputegFunction(
     const siconos::modeling::func_prototypes::FunctionV_BV& g_func) {
   computeg_ = g_func;
 }
 
-void siconos::modeling::FirstOrderType1R::computeg(
+void siconos::modeling::FirstOrderType2R::computeg(
     const Eigen::Ref<const siconos::algebra::SiconosVector>& lambda,
     siconos::algebra::BlockVector& result) {
   if (computeg_) computeg_(lambda, result);
 }
 
-void siconos::modeling::FirstOrderType1R::setConstantJacobianhOver_state(
+void siconos::modeling::FirstOrderType2R::setConstantJacobianhOver_state(
     Eigen::Ref<siconos::algebra::SiconosMatrix> newValue) {
   /**  Warning: we can't check if newValue size is compliant with
    * the current relation/interaction. This will be done during
@@ -116,18 +139,46 @@ void siconos::modeling::FirstOrderType1R::setConstantJacobianhOver_state(
   computejacobianhOver_state_ = nullptr;
 }
 
-void siconos::modeling::FirstOrderType1R::setComputeJacobianhOver_stateFunction(
-    const siconos::modeling::func_prototypes::FunctionBV_M& func) {
+void siconos::modeling::FirstOrderType2R::setComputeJacobianhOver_stateFunction(
+    const siconos::modeling::func_prototypes::FunctionBVV_M& func) {
   computejacobianhOver_state_ = func;
 }
 
-void siconos::modeling::FirstOrderType1R::computeJacobianhOver_state(
-    const siconos::algebra::BlockVector& state) {
+void siconos::modeling::FirstOrderType2R::computeJacobianhOver_state(
+    const siconos::algebra::BlockVector& state,
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& lambda) {
   if (computejacobianhOver_state_)
-    computejacobianhOver_state_(state, *jacobianhOver_state_view_);
+    computejacobianhOver_state_(state, lambda, *jacobianhOver_state_view_);
 }
 
-void siconos::modeling::FirstOrderType1R::setConstantJacobiangOver_lambda(
+void siconos::modeling::FirstOrderType2R::setConstantJacobianhOver_lambda(
+    Eigen::Ref<siconos::algebra::SiconosMatrix> newValue) {
+  /**  Warning: we can't check if newValue size is compliant with
+   * the current relation/interaction. This will be done during
+   * initialize / checkSize call!
+   */
+
+  jacobianhOver_lambda_internal_storage_ = nullptr;
+
+  jacobianhOver_lambda_view_ = std::make_shared<siconos::algebra::MapType>(
+      newValue.data(), newValue.rows(), newValue.cols());
+  hasConstantJacobianhOver_lambda_ = true;
+  computejacobianhOver_lambda_ = nullptr;
+}
+
+void siconos::modeling::FirstOrderType2R::setComputeJacobianhOver_lambdaFunction(
+    const siconos::modeling::func_prototypes::FunctionBVV_M& func) {
+  computejacobianhOver_lambda_ = func;
+}
+
+void siconos::modeling::FirstOrderType2R::computeJacobianhOver_lambda(
+    const siconos::algebra::BlockVector& state,
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& lambda) {
+  if (computejacobianhOver_lambda_)
+    computejacobianhOver_lambda_(state, lambda, *jacobianhOver_lambda_view_);
+}
+
+void siconos::modeling::FirstOrderType2R::setConstantJacobiangOver_lambda(
     Eigen::Ref<siconos::algebra::SiconosMatrix> newValue) {
   /**  Warning: we can't check if newValue size is compliant with
    * the current relation/interaction. This will be done during
@@ -142,26 +193,27 @@ void siconos::modeling::FirstOrderType1R::setConstantJacobiangOver_lambda(
   computejacobiangOver_lambda_ = nullptr;
 }
 
-void siconos::modeling::FirstOrderType1R::setComputeJacobiangOver_lambdaFunction(
+void siconos::modeling::FirstOrderType2R::setComputeJacobiangOver_lambdaFunction(
     const siconos::modeling::func_prototypes::FunctionV_M& func) {
   hasConstantJacobiangOver_lambda_ = false;
   computejacobiangOver_lambda_ = func;
 }
 
-void siconos::modeling::FirstOrderType1R::computeJacobiangOver_lambda(
+void siconos::modeling::FirstOrderType2R::computeJacobiangOver_lambda(
     const Eigen::Ref<const siconos::algebra::SiconosVector>& lambda) {
   if (computejacobiangOver_lambda_)
     computejacobiangOver_lambda_(lambda, *jacobiangOver_lambda_view_);
 }
 
-void siconos::modeling::FirstOrderType1R::computeOutput(double time, Interaction& inter,
+void siconos::modeling::FirstOrderType2R::computeOutput(double time, Interaction& inter,
                                                         unsigned int level) {
   siconos::algebra::SiconosVector& y = *inter.y(0);
+  siconos::algebra::SiconosVector& lambda = *inter.lambda(level);
   auto& DSlink = inter.linkToDSVariables();
-  computeh_(*DSlink[FirstOrderR::x], y);
+  computeh(*DSlink[FirstOrderR::x], lambda, y);
 }
 
-void siconos::modeling::FirstOrderType1R::computeInput(double time, Interaction& inter,
+void siconos::modeling::FirstOrderType2R::computeInput(double time, Interaction& inter,
                                                        unsigned int level) {
   auto lambda = inter.lambda(level);
 
@@ -169,17 +221,23 @@ void siconos::modeling::FirstOrderType1R::computeInput(double time, Interaction&
   computeg_(*lambda, *DSlink[FirstOrderR::r]);
 }
 
-void siconos::modeling::FirstOrderType1R::computeJach(double time, Interaction& inter) {
-  if (!hasConstantJacobianhOver_state_) {
-    auto& DSlink = inter.linkToDSVariables();
-    if (computejacobianhOver_state_)
-      computejacobianhOver_state_(*DSlink[FirstOrderR::x], *jacobianhOver_state_view_);
-  }
+void siconos::modeling::FirstOrderType2R::computeJach(double time, Interaction& inter) {
+  DEBUG_BEGIN("siconos::modeling::FirstOrderType2R::computeJach\n");
+  auto& DSlink = inter.linkToDSVariables();
+  if (computejacobianhOver_state_)
+    computejacobianhOver_state_(*DSlink[FirstOrderR::x], *inter.lambda(0),
+                                *jacobianhOver_state_view_);
+  if (computejacobianhOver_lambda_)
+    computejacobianhOver_lambda_(*DSlink[FirstOrderR::x], *inter.lambda(0),
+                                 *jacobianhOver_state_view_);
+  DEBUG_END("siconos::modeling::FirstOrderType2R::computeJach\n");
 }
 
-void siconos::modeling::FirstOrderType1R::computeJacg(double time, Interaction& inter) {
+void siconos::modeling::FirstOrderType2R::computeJacg(double time, Interaction& inter) {
+  DEBUG_BEGIN("siconos::modeling::FirstOrderType2R::computeJacg\n");
   if (!hasConstantJacobiangOver_lambda_) {
     auto& DSlink = inter.linkToDSVariables();
     computejacobiangOver_lambda_(*inter.lambda(0), *jacobiangOver_lambda_view_);
   }
+  DEBUG_END("siconos::modeling::FirstOrderType2R::computeJacg\n");
 }

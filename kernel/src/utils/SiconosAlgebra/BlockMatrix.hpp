@@ -81,10 +81,13 @@ class BlockMatrix {
    */
   BlockMatrix(std::shared_ptr<SiconosMatrix> m);
 
-  /** copy constructor
-   *  \param m a SiconosMatrix
-   */
-  BlockMatrix(const SiconosMatrix &m);
+  /** Build from eigen view (shared-memory !) */
+  BlockMatrix(Eigen::Ref<siconos::algebra::SiconosMatrix> input);
+
+  // /** copy constructor
+  //  *  \param m a SiconosMatrix
+  //  */
+  // BlockMatrix(const SiconosMatrix &m);
 
   /** copy constructor
    *  \param m a BlockMatrix

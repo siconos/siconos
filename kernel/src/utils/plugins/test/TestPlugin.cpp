@@ -49,7 +49,6 @@ extern "C" DLLEXPORT void computeM(double time, unsigned int sizeOfX, double* x,
   M[8] = 3 * time;
 }
 
-
 //==================  FirstOrderLinearDS ==================
 
 extern "C" DLLEXPORT void computeb(double time, unsigned int sizeOfB, double* b,
@@ -114,49 +113,6 @@ extern "C" DLLEXPORT void hCompl(unsigned int, double*, unsigned int, double*, d
   printf("Call of the function 'hCompl' of the test plugin.\n");
 }
 
-extern "C" DLLEXPORT void G0Compl(unsigned int, double*, unsigned int, double*, double*,
-                                  unsigned int, double*);
-extern "C" DLLEXPORT void G0Compl(unsigned int, double*, unsigned int, double*, double*,
-                                  unsigned int, double*) {
-  printf("Call of the function 'G0Compl' of the test plugin.\n");
-}
-
-extern "C" DLLEXPORT void G1Compl(unsigned int, double*, unsigned int, double*, double*,
-                                  unsigned int, double*);
-extern "C" DLLEXPORT void G1Compl(unsigned int, double*, unsigned int, double*, double*,
-                                  unsigned int, double*) {
-  printf("Call of the function 'G1Compl' of the test plugin.\n");
-}
-
-// ========== FirstOrderType1R ==========
-
-extern "C" DLLEXPORT void hT1(unsigned int, double*, unsigned int, double*, unsigned int,
-                              double*);
-extern "C" DLLEXPORT void hT1(unsigned int, double*, unsigned int, double*, unsigned int,
-                              double*) {
-  printf("Warning: call of the function 'hT1' of the test plugin.\n");
-}
-
-extern "C" DLLEXPORT void gT1(unsigned int, double*, unsigned int, double*, unsigned int,
-                              double*);
-extern "C" DLLEXPORT void gT1(unsigned int, double*, unsigned int, double*, unsigned int,
-                              double*) {
-  printf("Warning: call of the function 'gT1' of the test plugin.\n");
-}
-
-extern "C" DLLEXPORT void Jh0T1(unsigned int, double*, unsigned int, double*, unsigned int,
-                                double*);
-extern "C" DLLEXPORT void Jh0T1(unsigned int, double*, unsigned int, double*, unsigned int,
-                                double*) {
-  printf("Warning: call of the function 'Jh0T1' of the test plugin.\n");
-}
-
-extern "C" DLLEXPORT void Jg0T1(unsigned int, double*, unsigned int, double*, unsigned int,
-                                double*);
-extern "C" DLLEXPORT void Jg0T1(unsigned int, double*, unsigned int, double*, unsigned int,
-                                double*) {
-  printf("Warning: call of the function 'Jg0T1' of the test plugin.\n");
-}
 
 //==================  FirstOrderLinearR ==================
 

@@ -414,7 +414,7 @@ struct siconos::integrators::SchatzmanPaoliOSI::_NSLEffectOnFreeOutput
   _NSLEffectOnFreeOutput(siconos::nonsmooth_formulations::OneStepNSProblem* p,
                          std::shared_ptr<siconos::modeling::Interaction> inter,
                          siconos::graphs::InteractionProperties& interProp)
-      : _osnsp(p), _inter(inter), _interProp(interProp){};
+      : _osnsp(p), _inter(inter), _interProp(interProp) {};
 
   void visit(const siconos::modeling::NewtonImpactNSL& nslaw) const override {
     auto e = nslaw.e();
@@ -467,9 +467,6 @@ void siconos::integrators::SchatzmanPaoliOSI::computeFreeOutput(
 
   unsigned int relativePosition = 0;
 
-  std::shared_ptr<siconos::algebra::SiconosMatrix> C;
-  std::shared_ptr<siconos::algebra::SiconosMatrix> D;
-  std::shared_ptr<siconos::algebra::SiconosMatrix> F;
   std::shared_ptr<siconos::algebra::BlockVector> deltax;
   auto& osnsp_rhs = *(*indexSet->properties(vertex_inter)
                            .workVectors)[siconos::integrators::SchatzmanPaoliOSI::OSNSP_RHS];
@@ -489,28 +486,25 @@ void siconos::integrators::SchatzmanPaoliOSI::computeFreeOutput(
           "siconos::integrators::SchatzmanPaoliOSI::computeFreeOutput not yet implemented "
           "for "
           "siconos::simulation::SICONOS_OSNSP ");
-
-    C = mainInteraction->relation()->C();
-
-    if (C) {
-      assert(Xfree);
-
-      // creates a POINTER link between workX[ds] (xfree) and the
-      // corresponding interactionBlock in each Interactionfor each ds of the
-      // current Interaction.
-
-      if (_useGammaForRelation) {
-        assert(deltax);
-        siconos::algebra::matrixBlockVector_prod(*C, *deltax, osnsp_rhs, true);
-      } else {
-        siconos::algebra::matrixBlockVector_prod(*C, *Xfree, osnsp_rhs, true);
-      }
-    }
     auto ltir = std::static_pointer_cast<siconos::modeling::LagrangianLinearTIR>(
         mainInteraction->relation());
-    e = ltir->e();
-    if (e) {
-      osnsp_rhs += *e;
+    auto C = ltir->CMatrix();
+
+    assert(Xfree);
+
+    // creates a POINTER link between workX[ds] (xfree) and the
+    // corresponding interactionBlock in each Interactionfor each ds of the
+    // current Interaction.
+
+    if (_useGammaForRelation) {
+      assert(deltax);  // FP: this is always false ...
+      siconos::algebra::matrixBlockVector_prod(C, *deltax, osnsp_rhs, true);
+    } else {
+      siconos::algebra::matrixBlockVector_prod(C, *Xfree, osnsp_rhs, true);
+    }
+
+    if (ltir->haseVector()) {
+      osnsp_rhs += ltir->eVector();
     }
   } else
     THROW_EXCEPTION(
@@ -608,7 +602,7 @@ void siconos::integrators::SchatzmanPaoliOSI::updateState(const unsigned int) {
       //   }
 
       if (baux) {
-        double ds_norm_ref = 1. + ds->x0()->norm2();  // Should we save this in the graph?
+        double ds_norm_ref = 1. + ds->x0().norm();  // Should we save this in the graph?
         *ds_work_vectors[siconos::integrators::SchatzmanPaoliOSI::LOCAL_BUFFER] -= d->q_read();
         auto aux =
             (ds_work_vectors[siconos::integrators::SchatzmanPaoliOSI::LOCAL_BUFFER]->norm2()) /

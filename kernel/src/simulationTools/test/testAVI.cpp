@@ -38,7 +38,7 @@ void AVITest::setUp() {
 }
 
 void AVITest::init() {
-  _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(_x0, _A, _b);
+  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, *_A, *_b);
   _TD = std::make_shared<siconos::simulation::TimeDiscretisation>(_t0, _h);
   _nsds = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(_t0, _T);
   _osi = std::make_shared<siconos::integrators::EulerMoreauOSI>(_theta);
@@ -69,7 +69,7 @@ void AVITest::testAVI() {
   (*B)(1, 0) = G;
   (*B)(1, 1) = G * beta;
   C->setIdentity();
-  auto rel = std::make_shared<siconos::modeling::FirstOrderLinearTIR>(C, B);
+  auto rel = std::make_shared<siconos::modeling::FirstOrderLinearTIR>(*C, *B);
   // H-K representation: the feasible set is given by all the element λ such that Hλ ≥ K
   auto H = std::make_shared<siconos::algebra::SiconosMatrix>(4, 2);
   (*H)(0, 0) = 1.0;
@@ -84,7 +84,7 @@ void AVITest::testAVI() {
   (*K)(2) = -1.0;
   (*K)(3) = -1.0;
   auto nslaw = std::make_shared<siconos::modeling::NormalConeNSL>(_n, H, K);
-  _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(_x0, _A, _b);
+  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, *_A, *_b);
   _TD = std::make_shared<siconos::simulation::TimeDiscretisation>(_t0, _h);
   _nsds = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(_t0, _T);
   auto inter = std::make_shared<siconos::modeling::Interaction>(nslaw, rel);

@@ -27,7 +27,7 @@
 
 namespace siconos::collision::native::bodies {
 
-  class SphereLDSPlanR : public siconos::modeling::LagrangianScleronomousR,
+class SphereLDSPlanR : public siconos::modeling::LagrangianScleronomousR,
                        public std::enable_shared_from_this<SphereLDSPlanR> {
  private:
   ACCEPT_SERIALIZATION(SphereLDSPlanR);
@@ -53,25 +53,20 @@ namespace siconos::collision::native::bodies {
   double distance(double, double, double, double);
 
   /**
-     to compute the output y = h(q,z) of the Relation
+   to compute the output y = h(q) of the Relation
 
-     \param q coordinates of the dynamical systems involved in the relation
-     \param z user defined parameters (optional)
-     \param y the resulting vector
-  */
-  void computeh(const siconos::algebra::BlockVector& q, siconos::algebra::BlockVector& z,
-                siconos::algebra::SiconosVector& y) override;
+   \param q coordinates of the dynamical systems involved in the relation
+   \param y the resulting vector
+ */
+  void computeh(const siconos::algebra::BlockVector& q,
+                Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
-  /**
-     to compute the jacobian of h(...). Set attribute jacobianhOver_q_ (access: jacqhq())
+  /** Computes \f$ \nabla^\top_q h(q) \f$
+   * \param q coordinates of the dynamical systems involved in the relation
+   */
+  void computeJacobianhOver_q(const siconos::algebra::BlockVector& q) override;
 
-     \param q coordinates of the dynamical systems involved in the relation
-     \param z user defined parameters (optional)
-  */
-  void computeJacobianhOver_q(const siconos::algebra::BlockVector& q, siconos::algebra::BlockVector& z) override;
-
-  bool equal(double _A, double _B, double _C, double _D, double _r) const
-  {
+  bool equal(double _A, double _B, double _C, double _D, double _r) const {
     return (A == _A && B == _B && C == _C && D == _D && r == _r);
   }
 };

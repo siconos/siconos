@@ -18,9 +18,11 @@
 #include "NewMarkAlphaOSI.hpp"
 
 #include "BlockVector.hpp"
+#include "FirstOrderR.hpp"
 #include "Interaction.hpp"
 #include "LagrangianLinearTIDS.hpp"
 #include "LagrangianScleronomousR.hpp"
+#include "NewtonEulerR.hpp"
 #include "NonSmoothLaw.hpp"
 #include "OneStepNSProblem.hpp"
 #include "SiconosConst.hpp"  // For MACHINE_PREC
@@ -307,10 +309,6 @@ void siconos::integrators::NewMarkAlphaOSI::computeFreeOutput(
   assert(inter->relation() &&
          "In siconos::integrators::NewMarkAlphaOSI::computeFreeOutput, relation associated "
          "with the interaction does not exist.");
-  auto C = inter->relation()->jacobianhOver_state();
-  assert(C &&
-         "In siconos::integrators::NewMarkAlphaOSI::computeFreeOutput: Jacobian matrix does "
-         "not exist");
   if (relationType == siconos::modeling::RelationType::Lagrangian) {
     if (relationSubType == siconos::modeling::RelationSubType::RheonomousR) {
       THROW_EXCEPTION(
@@ -327,16 +325,18 @@ void siconos::integrators::NewMarkAlphaOSI::computeFreeOutput(
                   << std::endl;
         std::cout << "osnsp" << osnsp << std::endl;);
     if (relationSubType == siconos::modeling::RelationSubType::ScleronomousR) {
+      auto _SclerR = std::static_pointer_cast<siconos::modeling::LagrangianScleronomousR>(
+          inter->relation());
+      auto C = _SclerR->jacobianhOver_q();
+
       if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_ACC]).get() ==
           osnsp)  // LCP at acceleration level
       {
-        siconos::algebra::matrixBlockVector_prod(*C, *q_free, osnsp_rhs, true);
+        siconos::algebra::matrixBlockVector_prod(C, *q_free, osnsp_rhs, true);
         auto ID = std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeY);
         ID->setIdentity();
-        auto _SclerR = std::static_pointer_cast<siconos::modeling::LagrangianScleronomousR>(
-            inter->relation());
-        _SclerR->computedotjacqhXqdot(t, *inter);
-        osnsp_rhs += *ID * *(_SclerR->jacobianhOver_q_dot_X_qdot());
+        _SclerR->computeJacobianhOver_q_dot_X_qdot(t, *inter);
+        osnsp_rhs += *ID * _SclerR->jacobianhOver_q_dot_X_qdot();
         // y += NonLinearPart
       } else if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_POS]).get() ==
                  osnsp)  // LCP at position level
@@ -349,7 +349,7 @@ void siconos::integrators::NewMarkAlphaOSI::computeFreeOutput(
           inter->computeOutput(t, 0);  // Update output of level 0
           osnsp_rhs = *(inter->y(0));  // g_{n,k}
         }
-        siconos::algebra::matrixBlockVector_prod(*C, *q_free, osnsp_rhs, false);
+        siconos::algebra::matrixBlockVector_prod(C, *q_free, osnsp_rhs, false);
       } else if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_IMPACT]).get() ==
                  osnsp)  // output at the velocity level y_{n,k} = (h/gamma_prime)*dotg_{n,k}
       {
@@ -357,7 +357,20 @@ void siconos::integrators::NewMarkAlphaOSI::computeFreeOutput(
         auto gamma_prime = _gamma / _beta;
         inter->computeOutput(t, 1);                        // Update output of level 1
         osnsp_rhs = (h / gamma_prime) * (*(inter->y(1)));  //(h/gamma_prime)*dotg_{n,k}
-        siconos::algebra::matrixBlockVector_prod(*C, *q_free, osnsp_rhs, false);
+        if (auto forel =
+                std::dynamic_pointer_cast<siconos::modeling::FirstOrderR>(inter->relation())) {
+          auto C = forel->jacobianhOver_state();
+          siconos::algebra::matrixBlockVector_prod(C, *q_free, osnsp_rhs, false);
+        } else if (auto lagr = std::dynamic_pointer_cast<siconos::modeling::LagrangianR>(
+                       inter->relation())) {
+          auto C = lagr->jacobianhOver_q();
+          siconos::algebra::matrixBlockVector_prod(C, *q_free, osnsp_rhs, false);
+        } else if (auto ner = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerR>(
+                       inter->relation())) {
+          auto C = ner->jacobianhOver_q_prod_T();
+          siconos::algebra::matrixBlockVector_prod(C, *q_free, osnsp_rhs, false);
+        }
+
       } else {
         osnsp->display();
         THROW_EXCEPTION(

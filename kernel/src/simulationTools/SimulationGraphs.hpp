@@ -144,7 +144,7 @@ struct DynamicalSystemProperties {
       nullptr};                      /**< LU factorisation of W */
   unsigned int absolute_position{0}; /**< Absolute position of the ds variables in the unknown
                                      vector in osnsp*/
-  //  std::shared_ptr<siconos::algebra::SiconosMemory> _xMemory            /**< old value of x,
+  //  std::shared_ptr<siconos::algebra::SiconosMemory> xMemory_            /**< old value of x,
   //  TBD */
 
   ACCEPT_SERIALIZATION(DynamicalSystemProperties);

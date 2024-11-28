@@ -34,21 +34,13 @@ class FirstOrderLinearDSTest : public CppUnit::TestFixture {
 
   CPPUNIT_TEST(testBuildFirstOrderLinearDS0);
   CPPUNIT_TEST(testBuildFirstOrderLinearDS1);
-  //  CPPUNIT_TEST(testSetA);
-  CPPUNIT_TEST(testSetAPtr);
-  //  CPPUNIT_TEST(testSetB);
-  CPPUNIT_TEST(testSetBPtr);
-
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
 
   void testBuildFirstOrderLinearDS0();
   void testBuildFirstOrderLinearDS1();
-  //  void testSetA();
-  void testSetAPtr();
-  //  void testSetB();
-  void testSetBPtr();
+
   // Members
 
   std::shared_ptr<siconos::algebra::SiconosVector> x0{nullptr};

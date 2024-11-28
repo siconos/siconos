@@ -55,6 +55,19 @@ class KneeJointR : public NewtonEulerJointR {
   double _G2P0y{0.};
   double _G2P0z{0.};
 
+  /** compute the jacobian of h w.r.t. q
+   *
+   *  \param time current time
+   *  \param inter the interaction using this relation
+   *  \param q0  q states vectors of the related the dynamical systems
+   */
+  virtual void computeJacobianhOver_q_(double time, siconos::modeling::Interaction& inter,
+                                       const siconos::algebra::BlockVector& q0) override;
+
+  void computeJacobianhOver_q_dot_internal_(
+      std::shared_ptr<siconos::algebra::SiconosVector> qdot1,
+      std::shared_ptr<siconos::algebra::SiconosVector> qdot2);
+
  public:
   /** Empty constructor. The relation may be initialized later by
    *  setPoint, setAbsolute, and setBasePositions. */
@@ -121,26 +134,21 @@ class KneeJointR : public NewtonEulerJointR {
       return DofType::INVALID;
   };
 
-  virtual void computeJacobianhOver_q(double time, siconos::modeling::Interaction& inter,
-                            std::shared_ptr<siconos::algebra::BlockVector> q0) override;
-
   /**
-     to compute the output y = h(t,q,z) of the Relation
+      to compute the output y = h(q) of the Relation
 
-     \param time current time value
-     \param q coordinates of the dynamical systems involved in the relation
-     \param y the resulting vector
+      \param[in] q generalized coordinates vector of the concerned dynamical systems
+      \param[in,out] y the resulting vector
   */
-  virtual void computeh(double time, const siconos::algebra::BlockVector& q0,
-                        siconos::algebra::SiconosVector& y) override;
+  void computeh(const siconos::algebra::BlockVector& q,
+                Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
-  virtual void computeDotJachq(double time, const siconos::algebra::BlockVector& workQ,
-                               siconos::algebra::BlockVector& workZ,
-                               const siconos::algebra::BlockVector& workQdot) override;
-
-  virtual void computeDotJachq(
-      double time, std::shared_ptr<siconos::algebra::SiconosVector> qdot1,
-      std::shared_ptr<siconos::algebra::SiconosVector> qdot2 = nullptr);
+  /** Update \f$ \frac{\partial}{\partial t}(\nabla^T_{q} h(q))\f$
+   *  \param q 'list' of state vectors (for all ds involved in the interaction)
+   *  \param qdot 'list' of state vectors (for all ds involved in the interaction)
+   */
+  void computeJacobianhOver_q_dot(const siconos::algebra::BlockVector& q,
+                                  const siconos::algebra::BlockVector& qdot) override;
 
   std::shared_ptr<siconos::algebra::SiconosVector> P() { return _P0; }
 

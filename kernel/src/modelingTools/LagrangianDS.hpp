@@ -119,7 +119,7 @@ namespace siconos::modeling {
    In that case, use the following methods:
    - initRhs() to allocate/initialize memory for these new operators,
    - rhs() to get the rhs vector
-   - computeRhs(), computeJacobianRhsx() ..., to update the content of rhs, its
+   - computeRhs(), computeJacobianRhsOver_x() ..., to update the content of rhs, its
    jacobians ...
 
 */
@@ -148,7 +148,7 @@ class LagrangianDS : public SecondOrderDS {
   std::unique_ptr<std::vector<double>> mass_internal_storage_{nullptr};
 
   /** function wrapper used to compute mass */
-  siconos::modeling::func_prototypes::FunctionV_V computemass_{nullptr};
+  siconos::modeling::func_prototypes::FunctionV_M computemass_{nullptr};
 
   /** true if mass is required/set and constant */
   bool hasConstantMass_{false};
@@ -327,7 +327,7 @@ class LagrangianDS : public SecondOrderDS {
    *
    *  \param time of interest
    */
-  void computeJacobianRhsx(double time) override;
+  void computeJacobianRhsOver_x(double time) override;
 
   /** reset non-smooth part of the rhs (i.e. p), for all 'levels' */
   void resetAllNonSmoothParts() override;
@@ -434,8 +434,7 @@ class LagrangianDS : public SecondOrderDS {
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeMassFunction(
-      const siconos::modeling::func_prototypes::FunctionV_V &fct);
+  void setComputeMassFunction(const siconos::modeling::func_prototypes::FunctionV_M &fct);
 
   /** to compute the mass matrix operator \f$ M(q) \f$
    *

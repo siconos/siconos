@@ -59,14 +59,14 @@ class OccR : public siconos::modeling::NewtonEuler3DR {
   OccR& operator=(OccR&&) = delete;
   ~OccR() noexcept = default;
 
-  /** Compute h.
-   *
-   *  \param time : the time.
-   *  \param q0 : the state vector.
-   *  \param y : output vector.
-   */
-  void computeh(double time, const siconos::algebra::BlockVector& q0,
-                siconos::algebra::SiconosVector& y);
+  /**
+     to compute the output y = h(q) of the Relation
+
+     \param[in] q generalized coordinates vector of the dynamical systems (at most 2) involved
+    in the relation \param[in,out] y the resulting vector
+ */
+  void computeh(const siconos::algebra::BlockVector& q,
+                Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
   /** Set offset1, offset from first contact.
    *

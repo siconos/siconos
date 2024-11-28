@@ -26,7 +26,10 @@
 #include "SiconosVisitor.hpp"
 
 void siconos::modeling::LagrangianR::display() const {
-  Relation::display();
+  std::cout << "=====> Relation of type "
+            << static_cast<std::underlying_type<RelationType>::type>(_relationType)
+            << " and subtype "
+            << static_cast<std::underlying_type<RelationSubType>::type>(_subType) << "\n";
   std::cout << " jacobianhOver_q_ :\n" << jacobianhOver_q_view_ << "\n";
 }
 

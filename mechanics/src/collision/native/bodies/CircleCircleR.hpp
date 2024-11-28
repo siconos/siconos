@@ -56,23 +56,18 @@ class CircleCircleR : public CircularR, public std::enable_shared_from_this<Circ
   double distance(double x1, double y1, double r1, double x2, double y2, double r2) override;
 
   /**
-     to compute the output y = h(q,z) of the Relation
+    to compute the output y = h(q) of the Relation
 
-     \param q coordinates of the dynamical systems involved in the relation
-     \param z user defined parameters (optional)
-     \param y the resulting vector
+    \param q coordinates of the dynamical systems involved in the relation
+    \param y the resulting vector
   */
-  void computeh(const siconos::algebra::BlockVector& q, siconos::algebra::BlockVector& z,
-                siconos::algebra::SiconosVector& y) override;
+  void computeh(const siconos::algebra::BlockVector& q,
+                Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
-  /**
-     to compute the jacobian of h(...). Set attribute jacobianhOver_q_ (access: jacqhq())
-
-     \param q coordinates of the dynamical systems involved in the relation
-     \param z user defined parameters (optional)
-  */
-  void computeJacobianhOver_q(const siconos::algebra::BlockVector& q,
-                    siconos::algebra::BlockVector& z) override;
+  /** Computes \f$ \nabla^\top_q h(q) \f$
+   * \param q coordinates of the dynamical systems involved in the relation
+   */
+  void computeJacobianhOver_q(const siconos::algebra::BlockVector& q) override;
 };
 }  // namespace siconos::collision::native::bodies
 #endif /* CircleCircleR_h */

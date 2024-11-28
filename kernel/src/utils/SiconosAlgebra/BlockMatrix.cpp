@@ -42,21 +42,38 @@ siconos::algebra::BlockMatrix::BlockMatrix(std::shared_ptr<SiconosMatrix> m) {
   _tabCol->push_back(_dimCol);
 }
 
-siconos::algebra::BlockMatrix::BlockMatrix(const SiconosMatrix &m) {
+siconos::algebra::BlockMatrix::BlockMatrix(Eigen::Ref<siconos::algebra::SiconosMatrix> input) {
+  // Initialize _mat
+  _mat = std::make_shared<BlocksMatrix>(1, 1);
   _tabRow = std::make_shared<std::vector<std::size_t>>();
   _tabCol = std::make_shared<std::vector<std::size_t>>();
-
   _tabRow->reserve(1);
   _tabCol->reserve(1);
-  // _mat construction
-  _mat = std::make_shared<BlocksMatrix>(1, 1);
-  _mat->setValue(0, 0, std::make_shared<SiconosMatrix>(m));
 
-  _dimRow = m.size(0);
-  _dimCol = m.size(1);
+  // Set block with memory shared (eigen map) with input matrix m
+  (*_mat)(0, 0) = std::make_shared<siconos::algebra::SiconosMatrix>(
+      Eigen::Map<SiconosMatrix>(input.data(), input.rows(), input.cols()));
+  _dimRow = input.rows();
   _tabRow->push_back(_dimRow);
+  _dimCol = input.cols();
   _tabCol->push_back(_dimCol);
 }
+
+// siconos::algebra::BlockMatrix::BlockMatrix(const SiconosMatrix &m) {
+//   _tabRow = std::make_shared<std::vector<std::size_t>>();
+//   _tabCol = std::make_shared<std::vector<std::size_t>>();
+
+//   _tabRow->reserve(1);
+//   _tabCol->reserve(1);
+//   // _mat construction
+//   _mat = std::make_shared<BlocksMatrix>(1, 1);
+//   _mat->setValue(0, 0, std::make_shared<SiconosMatrix>(m));
+
+//   _dimRow = m.size(0);
+//   _dimCol = m.size(1);
+//   _tabRow->push_back(_dimRow);
+//   _tabCol->push_back(_dimCol);
+// }
 
 siconos::algebra::BlockMatrix::BlockMatrix(const BlockMatrix &m) {
   unsigned int nbRows = m.numberOfBlocks(0);

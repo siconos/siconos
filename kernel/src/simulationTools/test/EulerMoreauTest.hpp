@@ -21,7 +21,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 #include "EulerMoreauOSI.hpp"
-#include "FirstOrderLinearTIDS.hpp"
+#include "FirstOrderLinearDS.hpp"
 #include "FirstOrderLinearTIR.hpp"
 #include "Interaction.hpp"
 #include "NonSmoothDynamicalSystem.hpp"

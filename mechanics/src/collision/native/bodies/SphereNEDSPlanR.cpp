@@ -25,8 +25,7 @@
 
 siconos::collision::native::bodies::SphereNEDSPlanR::SphereNEDSPlanR::SphereNEDSPlanR(
     double r, double A, double B, double C, double D)
-  : siconos::modeling::NewtonEuler3DR{}, r{r}, A{A}, B{B}, C{C}, D{D}
-{
+    : siconos::modeling::NewtonEuler3DR{}, r{r}, A{A}, B{B}, C{C}, D{D} {
   nN = sqrt(A * A + B * B + C * C);
 
   n1 = A / nN;
@@ -35,17 +34,15 @@ siconos::collision::native::bodies::SphereNEDSPlanR::SphereNEDSPlanR::SphereNEDS
 }
 
 double siconos::collision::native::bodies::SphereNEDSPlanR::SphereNEDSPlanR::distance(
-    double x, double y, double z, double rad)
-{
+    double x, double y, double z, double rad) {
   return (fabs(A * x + B * y + C * z + D) / nN - rad);
 }
 
 void siconos::collision::native::bodies::SphereNEDSPlanR::SphereNEDSPlanR::computeh(
-    double time, const siconos::algebra::BlockVector& q0, siconos::algebra::SiconosVector& y)
-{
-  double q_0 = q0(0);
-  double q_1 = q0(1);
-  double q_2 = q0(2);
+    const siconos::algebra::BlockVector &q, Eigen::Ref<siconos::algebra::SiconosVector> y) {
+  double q_0 = q(0);
+  double q_1 = q(1);
+  double q_2 = q(2);
 
   y.setValue(0, distance(q_0, q_1, q_2, r));
   _Pc1->setValue(0, q_0 - r * n1);

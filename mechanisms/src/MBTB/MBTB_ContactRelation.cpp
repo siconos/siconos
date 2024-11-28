@@ -33,7 +33,7 @@ siconos::mechanisms::MBTB_ContactRelation::MBTB_ContactRelation(
 }
 
 void siconos::mechanisms::MBTB_ContactRelation::computeh(
-    double time, const siconos::algebra::BlockVector& q0, siconos::algebra::SiconosVector& y) {
+    const siconos::algebra::BlockVector& q, Eigen::Ref<siconos::algebra::SiconosVector> y) {
   DEBUG_PRINT(
       "siconos::mechanisms::MBTB_ContactRelation::computeh(double time, "
       "BlockVector& q0, "
@@ -120,7 +120,7 @@ void siconos::mechanisms::MBTB_ContactRelation::computeh(
   else
     _pContact->_dist += _pContact->offset();
 
-  _pContact->_curTimeh = time;
+  // _pContact->_curTimeh = time; Do we need this?
 
   // y->setValue(0,_pContact->_dist);
   if (mbtb::data::sPrintDist) {

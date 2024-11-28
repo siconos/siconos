@@ -235,6 +235,7 @@ class FirstOrderLinearR : public FirstOrderR {
   // Jacobians: required to fullfill base abstract class API but do nothing.
   // Note FP: final would be better than override but swig cannot handle it.
   void computeJach(double time, Interaction &inter) override {};
+
 };
 }  // namespace siconos::modeling
 

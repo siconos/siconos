@@ -31,42 +31,40 @@
 #include "siconos_debug.h"
 
 void siconos::mechanics::fem::NodeFem2d2DR::initialize(modeling::Interaction& inter) {
-  auto qSize = inter.getSizeOfDS();
-  jacobianhOver_q_ = std::make_shared<siconos::algebra::SiconosMatrix>(2, qSize);
-}
+  setComputeJacobianhOver_qFunction([this](const siconos::algebra::BlockVector& q,
+                                           Eigen::Ref<siconos::algebra::MapType> result) {
+    DEBUG_BEGIN(
+        "NodeFem2d2DR::computeJacobianhOver_q(const siconos::algebra::BlockVector& q, "
+        "siconos::algebra::BlockVector& z \n");
 
-void siconos::mechanics::fem::NodeFem2d2DR::computeJacobianhOver_q(
-    const siconos::algebra::BlockVector& q, siconos::algebra::BlockVector& z) {
-  DEBUG_BEGIN(
-      "NodeFem2d2DR::computeJacobianhOver_q(const siconos::algebra::BlockVector& q, "
-      "siconos::algebra::BlockVector& z \n");
+    double Nx = _Normal->getValue(0);
+    double Ny = _Normal->getValue(1);
 
-  double Nx = _Normal->getValue(0);
-  double Ny = _Normal->getValue(1);
+    double Tx = _Tangent->getValue(0);
+    double Ty = _Tangent->getValue(1);
 
-  double Tx = _Tangent->getValue(0);
-  double Ty = _Tangent->getValue(1);
+    // double Px = _Pc1->getValue(0);
+    // double Py = _Pc1->getValue(1);
 
-  // double Px = _Pc1->getValue(0);
-  // double Py = _Pc1->getValue(1);
+    DEBUG_PRINTF("N_x = %4.2e,\t N_y = %4.2e\n", Nx, Ny);
+    DEBUG_PRINTF("T_x = %4.2e,\t T_y = %4.2e\n", Tx, Ty);
 
-  DEBUG_PRINTF("N_x = %4.2e,\t N_y = %4.2e\n", Nx, Ny);
-  DEBUG_PRINTF("T_x = %4.2e,\t T_y = %4.2e\n", Tx, Ty);
+    result.setValue(0, (*_node->dofIndex())[0], Nx);
+    result.setValue(0, (*_node->dofIndex())[1], Ny);
 
-  jacobianhOver_q_->setValue(0, (*_node->dofIndex())[0], Nx);
-  jacobianhOver_q_->setValue(0, (*_node->dofIndex())[1], Ny);
+    result.setValue(1, (*_node->dofIndex())[0], Tx);
+    result.setValue(1, (*_node->dofIndex())[1], Ty);
 
-  jacobianhOver_q_->setValue(1, (*_node->dofIndex())[0], Tx);
-  jacobianhOver_q_->setValue(1, (*_node->dofIndex())[1], Ty);
-
-  if (q.size() == 6) {
-    DEBUG_PRINT("take into account second ds\n");
-    THROW_EXCEPTION("NodeFem2d2DR is not implemented for cable/cable contact");
-  }
-  // DEBUG_EXPR(jacobianhOver_q_->display(););
-  DEBUG_END(
-      "NodeFem2d2DR::computeJacobianhOver_q(const siconos::algebra::BlockVector& q, "
-      "siconos::algebra::BlockVector& z) \n");
+    if (q.size() == 6) {
+      DEBUG_PRINT("take into account second ds\n");
+      THROW_EXCEPTION("NodeFem2d2DR is not implemented for cable/cable contact");
+    }
+    // DEBUG_EXPR(jacobianhOver_q_->display(););
+    DEBUG_END(
+        "NodeFem2d2DR::computeJacobianhOver_q(const siconos::algebra::BlockVector& q, "
+        "siconos::algebra::BlockVector& z) \n");
+  });
+  LagrangianScleronomousR::initialize(inter);
 }
 
 double siconos::mechanics::fem::NodeFem2d2DR::distance() const {
@@ -79,12 +77,11 @@ double siconos::mechanics::fem::NodeFem2d2DR::distance() const {
   return dpc.norm2() * (_Normal->dot(dpc) >= 0 ? -1 : 1);
 }
 
-void siconos::mechanics::fem::NodeFem2d2DR::computeh(const siconos::algebra::BlockVector& q,
-                                                     siconos::algebra::BlockVector& z,
-                                                     siconos::algebra::SiconosVector& y) {
+void siconos::mechanics::fem::NodeFem2d2DR::computeh(
+    const siconos::algebra::BlockVector& q, Eigen::Ref<siconos::algebra::SiconosVector> y) {
   DEBUG_BEGIN("NodeFem2d2DR::computeh(...)\n");
 
-  LagrangianScleronomousR::computeh(q, z, y);
+  LagrangianScleronomousR::computeh(q, y);
   auto& displacement = *((q.getAllVect())[0]);
   _Pc1->setValue(0, displacement((*_node->dofIndex())[0]) + _node->x());
   _Pc1->setValue(1, displacement((*_node->dofIndex())[1]) + _node->y());

@@ -90,8 +90,9 @@ void NonSmoothDynamicalSystemTest::testinsertInteraction() {
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       " testinsertInteractionC: ", nsds->dynamicalSystem(23)->number() == 23, true);
 
-  auto r = std::make_shared<siconos::modeling::LagrangianLinearTIR>(
-      std::make_shared<siconos::algebra::SiconosMatrix>(1, 3));
+  siconos::algebra::SiconosMatrix Cmat{1, 3};
+  Cmat.setConstant(1);
+  auto r = std::make_shared<siconos::modeling::LagrangianLinearTIR>(Cmat);
   auto nsl = std::make_shared<siconos::modeling::NewtonImpactNSL>(0.0);
   auto inter = std::make_shared<siconos::modeling::Interaction>(nsl, r);
 
@@ -123,10 +124,12 @@ void NonSmoothDynamicalSystemTest::testremoveDynamicalSystem() {
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       " testremoveDynamicalSystemC: ", nsds->dynamicalSystem(23)->number() == 23, true);
 
-  auto r1 = std::make_shared<siconos::modeling::LagrangianLinearTIR>(
-      std::make_shared<siconos::algebra::SiconosMatrix>(1, 3));
-  auto r2 = std::make_shared<siconos::modeling::LagrangianLinearTIR>(
-      std::make_shared<siconos::algebra::SiconosMatrix>(1, 6));
+  siconos::algebra::SiconosMatrix Cmat{1, 3};
+  Cmat.setConstant(1);
+  siconos::algebra::SiconosMatrix Cmat2{1, 6};
+  Cmat2.setConstant(1);
+  auto r1 = std::make_shared<siconos::modeling::LagrangianLinearTIR>(Cmat);
+  auto r2 = std::make_shared<siconos::modeling::LagrangianLinearTIR>(Cmat2);
   auto nsl = std::make_shared<siconos::modeling::NewtonImpactNSL>(0.0);
   auto inter1 = std::make_shared<siconos::modeling::Interaction>(nsl, r1);
   auto inter2 = std::make_shared<siconos::modeling::Interaction>(nsl, r1);
@@ -186,9 +189,10 @@ void NonSmoothDynamicalSystemTest::testremoveInteraction() {
       " testremoveInteractionB: ", nsds->getNumberOfInteractions() == 0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       " testremoveInteractionC: ", nsds->dynamicalSystem(23)->number() == 23, true);
+  siconos::algebra::SiconosMatrix Cmat{1, 3};
+  Cmat.setConstant(1);
 
-  auto r = std::make_shared<siconos::modeling::LagrangianLinearTIR>(
-      std::make_shared<siconos::algebra::SiconosMatrix>(1, 3));
+  auto r = std::make_shared<siconos::modeling::LagrangianLinearTIR>(Cmat);
   auto nsl = std::make_shared<siconos::modeling::NewtonImpactNSL>(0.0);
   auto inter = std::make_shared<siconos::modeling::Interaction>(nsl, r);
 

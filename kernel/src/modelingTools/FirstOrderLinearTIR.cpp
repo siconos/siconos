@@ -30,6 +30,14 @@
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
+siconos::modeling::FirstOrderLinearTIR::FirstOrderLinearTIR(
+    Eigen::Ref<siconos::algebra::SiconosMatrix> C,
+    Eigen::Ref<siconos::algebra::SiconosMatrix> B)
+    : FirstOrderLinearTIR() {
+  setConstantC(C);
+  setConstantB(B);
+}
+
 void siconos::modeling::FirstOrderLinearTIR::initialize(Interaction &inter) {
   DEBUG_PRINT("siconos::modeling::FirstOrderLinearTIR::initialize(Interaction & inter)\n");
 

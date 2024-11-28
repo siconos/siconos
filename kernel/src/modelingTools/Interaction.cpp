@@ -33,7 +33,6 @@
 #include "FirstOrderR.hpp"
 #include "LagrangianDS.hpp"
 #include "LagrangianR.hpp"
-// #include "FirstOrderLinearTIR.hpp"
 #include "NewtonEulerDS.hpp"
 #include "NewtonEulerR.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
@@ -380,7 +379,6 @@ void siconos::modeling::Interaction::__initDataFirstOrder(
   DSlink.resize(FirstOrderR::DSlinkSize);
   DSlink[FirstOrderR::x] = std::make_shared<siconos::algebra::BlockVector>();
   DSlink[FirstOrderR::r] = std::make_shared<siconos::algebra::BlockVector>();
-  DSlink[FirstOrderR::z] = std::make_shared<siconos::algebra::BlockVector>();
   auto relationSubType = _relation->getSubType();
 
   if (relationSubType != RelationSubType::LinearTIR) {
@@ -398,7 +396,6 @@ void siconos::modeling::Interaction::__initDSDataFirstOrder(
   FirstOrderNonLinearDS& lds = static_cast<FirstOrderNonLinearDS&>(ds);
   DSlink[FirstOrderR::x]->insertPtr(lds.x());
   DSlink[FirstOrderR::r]->insertPtr(lds.r());
-  DSlink[FirstOrderR::z]->insertPtr(lds.z());
 }
 
 void siconos::modeling::Interaction::__initDataLagrangian(
@@ -441,11 +438,6 @@ void siconos::modeling::Interaction::__initDSDataLagrangian(
     DSlink[LagrangianR::q2]->insertPtr(lds.acceleration());
   }
 
-  if (lds.z()) {
-    if (!DSlink[LagrangianR::z])
-      DSlink[LagrangianR::z] = std::make_shared<siconos::algebra::BlockVector>();
-    DSlink[LagrangianR::z]->insertPtr(lds.z());
-  }
   for (unsigned int k = 0; k < 3; k++) {
     if (lds.p(k)) {
       if (!DSlink[LagrangianR::p0 + k])
@@ -470,7 +462,6 @@ void siconos::modeling::Interaction::__initDataNewtonEuler(
   DSlink[NewtonEulerR::dotq] = std::make_shared<siconos::algebra::BlockVector>();  // qdot
   //  data[NewtonEulerR::q2] = std::make_shared<siconos::algebra::BlockVector>(); //
   //  acceleration
-  DSlink[NewtonEulerR::z] = std::make_shared<siconos::algebra::BlockVector>();  // z vector
   DSlink[NewtonEulerR::p0] = std::make_shared<siconos::algebra::BlockVector>();
   DSlink[NewtonEulerR::p1] = std::make_shared<siconos::algebra::BlockVector>();
   DSlink[NewtonEulerR::p2] = std::make_shared<siconos::algebra::BlockVector>();
@@ -503,7 +494,6 @@ void siconos::modeling::Interaction::__initDSDataNewtonEuler(
   if (neds.p(1)) DSlink[NewtonEulerR::p1]->insertPtr(neds.p(1));
   if (neds.p(2)) DSlink[NewtonEulerR::p2]->insertPtr(neds.p(2));
 
-  DSlink[NewtonEulerR::z]->insertPtr(neds.z());
   DEBUG_END(
       "siconos::modeling::Interaction::initDSDataNewtonEuler(DynamicalSystem& ds, "
       "std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink)\n");
@@ -674,7 +664,7 @@ const siconos::algebra::ConstMapType siconos::modeling::Interaction::getLeftInte
     return r->jacobianhOver_q();
   } else if (relationType == RelationType::NewtonEuler) {
     auto r = std::static_pointer_cast<NewtonEulerR>(relation());
-    return r->H_prod_T();
+    return r->jacobianhOver_q_prod_T();
   } else if (relationType == RelationType::FirstOrder) {
     auto forel = std::dynamic_pointer_cast<FirstOrderR>(relation());
     return forel->jacobianhOver_state();
@@ -709,7 +699,7 @@ siconos::modeling::Interaction::getLeftInteractionBlockForDS(unsigned int pos,
 
   } else if (relationType == RelationType::NewtonEuler) {
     auto newtonr = std::dynamic_pointer_cast<NewtonEulerR>(relation());
-    auto originalMatrix = newtonr->H_prod_T();
+    auto originalMatrix = newtonr->jacobianhOver_q_prod_T();
     *interactionBlock = originalMatrix.block(0, pos, nslaw_size, ds_size);
   } else
     THROW_EXCEPTION(
@@ -739,7 +729,7 @@ void siconos::modeling::Interaction::getLeftInteractionBlockForDSProjectOnConstr
 
   std::shared_ptr<NewtonEulerR> r = std::static_pointer_cast<NewtonEulerR>(relation());
   // proj_with_q originalMatrix = r->jachqProj();
-  auto originalMatrix = r->HMatrix();
+  auto originalMatrix = r->jacobianhOver_q();
 
   // copy sub-interactionBlock of originalMatrix into InteractionBlock
   *interactionBlock =
@@ -783,7 +773,7 @@ void siconos::modeling::Interaction::getExtraInteractionBlock(
     auto forel = std::static_pointer_cast<FirstOrderR>(relation());
     if (forel->hasJacobianhOver_lambda()) {
       auto originalMatrix = forel->jacobianhOver_lambda();
-      *interactionBlock = originalMatrix; // copy!
+      *interactionBlock = originalMatrix;  // copy!
     } else
       interactionBlock->setZero();
   } else

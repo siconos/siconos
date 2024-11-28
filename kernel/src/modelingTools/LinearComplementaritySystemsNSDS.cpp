@@ -18,7 +18,7 @@
 #include "LinearComplementaritySystemsNSDS.hpp"
 
 #include "ComplementarityConditionNSL.hpp"
-#include "FirstOrderLinearTIDS.hpp"
+#include "FirstOrderLinearDS.hpp"
 #include "FirstOrderLinearTIR.hpp"
 #include "Interaction.hpp"
 #include "SiconosMatrix.hpp"
@@ -39,9 +39,7 @@ siconos::modeling::LinearComplementaritySystemsNSDS::LinearComplementaritySystem
     Eigen::Ref<siconos::algebra::SiconosVector> b,
     Eigen::Ref<siconos::algebra::SiconosVector> e)
     : NonSmoothDynamicalSystem(t0, T) {
-  _ds = std::make_shared<FirstOrderLinearTIDS>(x0, A);
-  _ds->setbPtr(b);
-
+  _ds = std::make_shared<FirstOrderLinearDS>(x0, A, b);
   _relation = std::make_shared<FirstOrderLinearTIR>(C, B);
 
   // todo: check sizes --> done during rel->initialize()

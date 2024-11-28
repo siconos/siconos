@@ -21,8 +21,9 @@
 #ifndef JointFrictionRELATION_H
 #define JointFrictionRELATION_H
 
-#include "NewtonEulerR.hpp"
 #include <vector>
+
+#include "NewtonEulerR.hpp"
 
 namespace siconos::joints {
 
@@ -42,6 +43,15 @@ class JointFrictionR : public siconos::modeling::NewtonEulerR {
   unsigned int _axisMin{0}, _axisMax{0};
   std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianhOver_q_Tmp{nullptr};
 
+  /** compute the jacobian of h w.r.t. q
+   *
+   *  \param time current time
+   *  \param inter the interaction using this relation
+   *  \param q0  q states vectors of the related the dynamical systems
+   */
+  virtual void computeJacobianhOver_q_(double time, siconos::modeling::Interaction& inter,
+                                       const siconos::algebra::BlockVector& q0) override;
+
  public:
   /** Initialize a joint friction for a common case: a single axis with a
    *  single friction, either positive or negative. For use with
@@ -56,17 +66,13 @@ class JointFrictionR : public siconos::modeling::NewtonEulerR {
   virtual ~JointFrictionR() noexcept = default;
 
   /**
-     to compute the output y = h(t,q,z) of the Relation
+     to compute the output y = h(q) of the Relation
 
-     \param time current time value
-     \param q coordinates of the dynamical systems involved in the relation
-     \param y the resulting vector
-  */
-  virtual void computeh(double time, const siconos::algebra::BlockVector& q0,
-                        siconos::algebra::SiconosVector& y) override;
-
-  virtual void computeJacobianhOver_q(double time, siconos::modeling::Interaction& inter,
-                            std::shared_ptr<siconos::algebra::BlockVector> q0) override;
+     \param[in] q generalized coordinates vector of the dynamical systems (at most 2) involved
+    in the relation \param[in,out] y the resulting vector
+ */
+  void computeh(const siconos::algebra::BlockVector& q,
+                Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
   virtual unsigned int numberOfConstraints();
 

@@ -87,23 +87,18 @@ class DiskPlanR : public siconos::modeling::LagrangianScleronomousR,
   double getWidth() const { return width; };
 
   /**
-     to compute the output y = h(t,q,z) of the Relation
+   to compute the output y = h(q) of the Relation
 
-     \param q coordinates of the dynamical systems involved in the relation
-     \param z user defined parameters (optional)
-     \param y the resulting vector
-  */
-  void computeh(const siconos::algebra::BlockVector& q, siconos::algebra::BlockVector& z,
-                siconos::algebra::SiconosVector& y) override;
+   \param q coordinates of the dynamical systems involved in the relation
+   \param y the resulting vector
+ */
+  void computeh(const siconos::algebra::BlockVector& q,
+                Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
-  /**
-     to compute the jacobian of h(...). Set attribute jacobianhOver_q_ (access: jacqhq())
-
-     \param q coordinates of the dynamical systems involved in the relation
-     \param z user defined parameters (optional)
-  */
-  void computeJacobianhOver_q(const siconos::algebra::BlockVector& q,
-                    siconos::algebra::BlockVector& z) override;
+  /** Computes \f$ \nabla^\top_q h(q) \f$
+   * \param q coordinates of the dynamical systems involved in the relation
+   */
+  void computeJacobianhOver_q(const siconos::algebra::BlockVector& q) override;
 
   bool equal(double, double, double, double) const;
 

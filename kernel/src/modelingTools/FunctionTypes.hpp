@@ -52,9 +52,17 @@ namespace func_prototypes {
 //  without non expected copies or temps values.
 
 /** fonction proto to compute f(vector,vector,t, result_vector) */
+using FunctionS_S = std::function<double(double)>;
+
+/** fonction proto to compute double = f(double) */
 using FunctionVVS_V =
     std::function<void(const Eigen::Ref<const siconos::algebra::SiconosVector> &,
                        const Eigen::Ref<const siconos::algebra::SiconosVector> &, double,
+                       Eigen::Ref<siconos::algebra::MapVectorType>)>;
+
+/** fonction proto to compute f(vector,t, result_vector) */
+using FunctionVS_V =
+    std::function<void(const Eigen::Ref<const siconos::algebra::SiconosVector> &, double,
                        Eigen::Ref<siconos::algebra::MapVectorType>)>;
 
 /** fonction proto to compute f(vector, result_vector) */
@@ -101,6 +109,11 @@ using FunctionBVSV_BV =
 using FunctionV_BV =
     std::function<void(const Eigen::Ref<const siconos::algebra::SiconosVector> &,
                        siconos::algebra::BlockVector &)>;
+
+/** fonction proto to compute f(vector,t, result_matrix) */
+using FunctionVS_M =
+    std::function<void(const Eigen::Ref<const siconos::algebra::SiconosVector> &, double,
+                       Eigen::Ref<siconos::algebra::MapType>)>;
 
 /** fonction proto to compute f(vector,vector,t, result_matrix) */
 using FunctionVVS_M =

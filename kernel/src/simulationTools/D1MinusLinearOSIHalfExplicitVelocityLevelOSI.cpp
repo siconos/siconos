@@ -640,16 +640,15 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitVeloci
 
   // only Lagrangian Systems
   if (relationType == siconos::modeling::RelationType::Lagrangian) {
+    auto lagr =
+        std::static_pointer_cast<siconos::modeling::LagrangianR>(mainInteraction->relation());
     // in osnsp_rhs the linear part of velocity or acceleration relation will be saved
-    C = std::static_pointer_cast<siconos::modeling::LagrangianR>(mainInteraction->relation())
-            ->jacobianhOver_q();
+    auto C = lagr->jacobianhOver_q();
 
     DEBUG_EXPR(C->display(););
+    assert(Xfree);
+    siconos::algebra::matrixBlockVector_prod(C, *Xfree, osnsp_rhs, true);
 
-    if (C) {
-      assert(Xfree);
-      siconos::algebra::matrixBlockVector_prod(*C, *Xfree, osnsp_rhs, true);
-    }
     DEBUG_EXPR(osnsp_rhs.display(););
     /*  explicit time dependence -> partial time derivative has to be added */
     if (relationSubType == siconos::modeling::RelationSubType::RheonomousR) {
@@ -672,18 +671,16 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitVeloci
   }
   /*Newton-Euler */
   else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
-    auto CT =
-        std::static_pointer_cast<siconos::modeling::NewtonEulerR>(mainInteraction->relation())
-            ->H_prod_T();
+    auto ner =
+        std::static_pointer_cast<siconos::modeling::NewtonEulerR>(mainInteraction->relation());
+    auto CT = ner->jacobianhOver_q_prod_T();
     DEBUG_EXPR(CT->display());
-    if (CT) {
-      assert(Xfree);
-      // creates a POINTER link between workX[ds] (xfree) and the
-      // corresponding interactionBlock in each Interaction for each ds of the
-      // current Interaction.
-      // XXX Big quirks !!! -- xhub
-      siconos::algebra::matrixBlockVector_prod(*CT, *Xfree, osnsp_rhs, true);
-    }
+    assert(Xfree);
+    // creates a POINTER link between workX[ds] (xfree) and the
+    // corresponding interactionBlock in each Interaction for each ds of the
+    // current Interaction.
+    // XXX Big quirks !!! -- xhub
+    siconos::algebra::matrixBlockVector_prod(CT, *Xfree, osnsp_rhs, true);
 
     /* add the contribution due to the coefficient of restitution*/
     if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp) {

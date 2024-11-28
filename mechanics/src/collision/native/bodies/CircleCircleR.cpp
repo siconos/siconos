@@ -21,20 +21,17 @@
 #include <cmath>
 
 #include "BlockVector.hpp"
-#include "SiconosVector.hpp"
 #include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 
 double siconos::collision::native::bodies::CircleCircleR::distance(double x1, double y1,
                                                                    double r1, double x2,
-                                                                   double y2, double r2)
-{
+                                                                   double y2, double r2) {
   return (fabs(r1 - r2) - hypot(x1 - x2, y1 - y2));
 }
 
 void siconos::collision::native::bodies::CircleCircleR::computeh(
-    const siconos::algebra::BlockVector& q, siconos::algebra::BlockVector& z,
-    siconos::algebra::SiconosVector& y)
-{
+    const siconos::algebra::BlockVector& q, Eigen::Ref<siconos::algebra::SiconosVector> y) {
   double q_0 = q(0);
   double q_1 = q(1);
   double q_3 = q(3);
@@ -44,8 +41,7 @@ void siconos::collision::native::bodies::CircleCircleR::computeh(
 }
 
 void siconos::collision::native::bodies::CircleCircleR::computeJacobianhOver_q(
-    const siconos::algebra::BlockVector& q, siconos::algebra::BlockVector& z)
-{
+    const siconos::algebra::BlockVector& q) {
   double x1 = q(0);
   double y1 = q(1);
   double x2 = q(3);
@@ -59,16 +55,16 @@ void siconos::collision::native::bodies::CircleCircleR::computeJacobianhOver_q(
   double dxsd = dx / d;
   double dysd = dy / d;
 
-  jacobianhOver_q_->setValue(0, 0, dxsd);
-  jacobianhOver_q_->setValue(1, 0, -dysd);
-  jacobianhOver_q_->setValue(0, 1, dysd);
-  jacobianhOver_q_->setValue(1, 1, dxsd);
-  jacobianhOver_q_->setValue(0, 2, 0.);
-  jacobianhOver_q_->setValue(1, 2, -_r1);
-  jacobianhOver_q_->setValue(0, 3, -dxsd);
-  jacobianhOver_q_->setValue(1, 3, dysd);
-  jacobianhOver_q_->setValue(0, 4, -dysd);
-  jacobianhOver_q_->setValue(1, 4, -dxsd);
-  jacobianhOver_q_->setValue(0, 5, 0.);
-  jacobianhOver_q_->setValue(1, 5, -_r2);
+  jacobianhOver_q_view_->setValue(0, 0, dxsd);
+  jacobianhOver_q_view_->setValue(1, 0, -dysd);
+  jacobianhOver_q_view_->setValue(0, 1, dysd);
+  jacobianhOver_q_view_->setValue(1, 1, dxsd);
+  jacobianhOver_q_view_->setValue(0, 2, 0.);
+  jacobianhOver_q_view_->setValue(1, 2, -_r1);
+  jacobianhOver_q_view_->setValue(0, 3, -dxsd);
+  jacobianhOver_q_view_->setValue(1, 3, dysd);
+  jacobianhOver_q_view_->setValue(0, 4, -dysd);
+  jacobianhOver_q_view_->setValue(1, 4, -dxsd);
+  jacobianhOver_q_view_->setValue(0, 5, 0.);
+  jacobianhOver_q_view_->setValue(1, 5, -_r2);
 }

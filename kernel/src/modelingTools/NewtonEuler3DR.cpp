@@ -22,9 +22,9 @@
 #include "Interaction.hpp"
 #include "RotationQuaternion.hpp"  // siconos::geometry::computeRotationMatrix
 #include "SiconosException.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixOp.hpp"  // For mat prod
 #include "SiconosVector.hpp"
-#include "SiconosMatrix.hpp"
 #include "op3x3.h"  // numerics: orthobasefromvector
 
 // #define DEBUG_NOCOLOR
@@ -38,15 +38,25 @@ See devNotes.pdf for details. A detailed documentation is available in DevNotes.
 velocities'
 */
 void siconos::modeling::NewtonEuler3DR::initialize(Interaction& inter) {
-  NewtonEuler1DR::initialize(inter);
   unsigned int qSize = 7 * (inter.getSizeOfDS() / 6);
   /*keep only the distance.*/
-  jacobianhOver_q_ = std::make_shared<siconos::algebra::SiconosMatrix>(3, qSize);
 
+  jacobianhOver_q_internal_storage_ = std::make_unique<std::vector<double>>(3 * qSize);
+  jacobianhOver_q_view_ = std::make_shared<siconos::algebra::MapType>(
+      jacobianhOver_q_internal_storage_->data(), 3, qSize);
+
+  NewtonEulerR::initialize(inter);
+
+  /* VA 12/04/2016 All of what follows should be put in WorkM*/
   _rotationAbsoluteToContactFrame = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
+  _rotationBodyToAbsoluteFrame = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
+  _AUX1 = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
   _AUX2 = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
+  _NPG1 = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
+  _NPG2 = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
   //  _isContact=1;
 }
+
 void siconos::modeling::NewtonEuler3DR::FC3DcomputeJachqTFromContacts(
     std::shared_ptr<siconos::algebra::SiconosVector> q1) {
   DEBUG_BEGIN(
@@ -139,11 +149,12 @@ void siconos::modeling::NewtonEuler3DR::FC3DcomputeJachqTFromContacts(
 
   for (unsigned int ii = 0; ii < 3; ii++)
     for (unsigned int jj = 0; jj < 3; jj++)
-      jacobianhOver_q_T->setValue(ii, jj, _rotationAbsoluteToContactFrame->getValue(ii, jj));
+      jacobianhOver_q_prod_T_->setValue(ii, jj,
+                                        _rotationAbsoluteToContactFrame->getValue(ii, jj));
 
   for (unsigned int ii = 0; ii < 3; ii++)
     for (unsigned int jj = 3; jj < 6; jj++)
-      jacobianhOver_q_T->setValue(ii, jj, _AUX2->getValue(ii, jj - 3));
+      jacobianhOver_q_prod_T_->setValue(ii, jj, _AUX2->getValue(ii, jj - 3));
 
   DEBUG_EXPR(jacobianhOver_q_T->display(););
   // DEBUG_EXPR_WE(
@@ -239,11 +250,12 @@ void siconos::modeling::NewtonEuler3DR::FC3DcomputeJachqTFromContacts(
 
   for (unsigned int ii = 0; ii < 3; ii++)
     for (unsigned int jj = 0; jj < 3; jj++)
-      jacobianhOver_q_T->setValue(ii, jj, _rotationAbsoluteToContactFrame->getValue(ii, jj));
+      jacobianhOver_q_prod_T_->setValue(ii, jj,
+                                        _rotationAbsoluteToContactFrame->getValue(ii, jj));
 
   for (unsigned int ii = 0; ii < 3; ii++)
     for (unsigned int jj = 3; jj < 6; jj++)
-      jacobianhOver_q_T->setValue(ii, jj, _AUX2->getValue(ii, jj - 3));
+      jacobianhOver_q_prod_T_->setValue(ii, jj, _AUX2->getValue(ii, jj - 3));
 
   siconos::geometry::computeRotationMatrix(*q2, *_rotationBodyToAbsoluteFrame);
   siconos::algebra::prod(*_NPG2, *_rotationBodyToAbsoluteFrame, *_AUX1, true);
@@ -251,17 +263,18 @@ void siconos::modeling::NewtonEuler3DR::FC3DcomputeJachqTFromContacts(
 
   for (unsigned int ii = 0; ii < 3; ii++)
     for (unsigned int jj = 0; jj < 3; jj++)
-      jacobianhOver_q_T->setValue(ii, jj + 6, -_rotationAbsoluteToContactFrame->getValue(ii, jj));
+      jacobianhOver_q_prod_T_->setValue(ii, jj + 6,
+                                        -_rotationAbsoluteToContactFrame->getValue(ii, jj));
 
   for (unsigned int ii = 0; ii < 3; ii++)
     for (unsigned int jj = 3; jj < 6; jj++)
-      jacobianhOver_q_T->setValue(ii, jj + 6, -_AUX2->getValue(ii, jj - 3));
+      jacobianhOver_q_prod_T_->setValue(ii, jj + 6, -_AUX2->getValue(ii, jj - 3));
 }
 
-void siconos::modeling::NewtonEuler3DR::computeHMatrix_prod_T(
+void siconos::modeling::NewtonEuler3DR::computeJacobianhOver_q_prod_T(
     Interaction& inter, std::shared_ptr<siconos::algebra::BlockVector> q0) {
   DEBUG_BEGIN(
-      "siconos::modeling::NewtonEuler3DR::computeHMatrix_prod_T(Interaction& inter,  "
+      "siconos::modeling::NewtonEuler3DR::computeJacobianhOver_q_prod_T(Interaction& inter,  "
       "std::shared_ptr<siconos::algebra::BlockVector> q0)\n");
   if (q0->numberOfBlocks() > 1) {
     FC3DcomputeJachqTFromContacts((q0->getAllVect())[0], (q0->getAllVect())[1]);
@@ -269,6 +282,6 @@ void siconos::modeling::NewtonEuler3DR::computeHMatrix_prod_T(
     FC3DcomputeJachqTFromContacts((q0->getAllVect())[0]);
   }
   DEBUG_END(
-      "siconos::modeling::NewtonEuler3DR::computeHMatrix_prod_T(Interaction& inter,  "
+      "siconos::modeling::NewtonEuler3DR::computeJacobianhOver_q_prod_T(Interaction& inter,  "
       "std::shared_ptr<siconos::algebra::BlockVector> q0)\n");
 }

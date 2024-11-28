@@ -14,21 +14,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef __LagrangianLinearTIRTest__
 #define __LagrangianLinearTIRTest__
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "NonSmoothDynamicalSystem.hpp"
+
 #include "LagrangianLinearTIR.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
 
-class LagrangianLinearTIRTest : public CppUnit::TestFixture
-{
-
-private:
-  
+class LagrangianLinearTIRTest : public CppUnit::TestFixture {
+ private:
   ACCEPT_SERIALIZATION(LagrangianLinearTIRTest);
-
 
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(LagrangianLinearTIRTest);
@@ -36,44 +33,20 @@ private:
   // tests to be done ...
 
   CPPUNIT_TEST(testBuildLagrangianLinearTIR1);
-  CPPUNIT_TEST(testBuildLagrangianLinearTIR2);
-  CPPUNIT_TEST(testBuildLagrangianLinearTIR3);
-  CPPUNIT_TEST(testBuildLagrangianLinearTIR4);
-  //  CPPUNIT_TEST(testBuildLagrangianLinearTIR5);
-  //  CPPUNIT_TEST(testBuildLagrangianLinearTIR6);
-  CPPUNIT_TEST(testSetCPtr);
-  CPPUNIT_TEST(testSetFPtr);
-  CPPUNIT_TEST(testSetEPtr);
-  CPPUNIT_TEST(testGetJacPtr);
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
 
-  void testBuildLagrangianLinearTIR0();
   void testBuildLagrangianLinearTIR1();
-  void testBuildLagrangianLinearTIR2();
-  void testBuildLagrangianLinearTIR3();
-  void testBuildLagrangianLinearTIR4();
-
-  void testSetCPtr();
-  void testSetFPtr();
-  void testSetEPtr();
-  void testGetJacPtr();
 
   // Members
 
-  std::shared_ptr<siconos::algebra::SiconosMatrix> C, B, F;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> C;
   std::shared_ptr<siconos::algebra::SiconosVector> e;
-  std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds;
 
-public:
+ public:
   void setUp();
   void tearDown();
-
 };
 
 #endif
-
-
-
-

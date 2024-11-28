@@ -31,12 +31,17 @@
 #include "siconos_debug.h"
 
 void siconos::mechanics::fem::NodeFem1d2DR::initialize(modeling::Interaction& inter) {
-  auto qSize = inter.getSizeOfDS();
-  jacobianhOver_q_ = std::make_shared<siconos::algebra::SiconosMatrix>(1, qSize);
+  auto sizeDS = inter.getSizeOfDS();
+
+  if (!jacobianhOver_q_internal_storage_) {
+    jacobianhOver_q_internal_storage_ = std::make_unique<std::vector<double>>(1 * sizeDS);
+  }
+  jacobianhOver_q_view_ = std::make_shared<siconos::algebra::MapType>(
+      jacobianhOver_q_internal_storage_->data(), 1, sizeDS);
 }
 
 void siconos::mechanics::fem::NodeFem1d2DR::computeJacobianhOver_q(
-    const siconos::algebra::BlockVector& q, siconos::algebra::BlockVector& z) {
+    const siconos::algebra::BlockVector& q) {
   DEBUG_BEGIN(
       "NodeFem1d2DR::computeJacobianhOver_q(const siconos::algebra::BlockVector& q, "
       "siconos::algebra::BlockVector& z \n");
@@ -46,8 +51,8 @@ void siconos::mechanics::fem::NodeFem1d2DR::computeJacobianhOver_q(
 
   DEBUG_PRINTF("N_x = %4.2e,\t N_y = %4.2e\n", Nx, Ny);
 
-  jacobianhOver_q_->setValue(0, (*_node->dofIndex())[0], Nx);
-  jacobianhOver_q_->setValue(0, (*_node->dofIndex())[1], Ny);
+  jacobianhOver_q_view_->setValue(0, (*_node->dofIndex())[0], Nx);
+  jacobianhOver_q_view_->setValue(0, (*_node->dofIndex())[1], Ny);
 
   if (q.size() == 6) {
     DEBUG_PRINT("take into account second ds\n");
@@ -69,12 +74,11 @@ double siconos::mechanics::fem::NodeFem1d2DR::distance() const {
   return dpc.norm2() * (_Normal->dot(dpc) >= 0 ? -1 : 1);
 }
 
-void siconos::mechanics::fem::NodeFem1d2DR::computeh(const siconos::algebra::BlockVector& q,
-                                                     siconos::algebra::BlockVector& z,
-                                                     siconos::algebra::SiconosVector& y) {
+void siconos::mechanics::fem::NodeFem1d2DR::computeh(
+    const siconos::algebra::BlockVector& q, Eigen::Ref<siconos::algebra::SiconosVector> y) {
   DEBUG_BEGIN("NodeFem1d2DR::computeh(...)\n");
 
-  LagrangianScleronomousR::computeh(q, z, y);
+  LagrangianScleronomousR::computeh(q, y);
   siconos::algebra::SiconosVector& displacement = *((q.getAllVect())[0]);
   _Pc1->setValue(0, displacement((*_node->dofIndex())[0]) + _node->x());
   _Pc1->setValue(1, displacement((*_node->dofIndex())[1]) + _node->y());

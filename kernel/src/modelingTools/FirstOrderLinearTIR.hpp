@@ -62,8 +62,16 @@ class FirstOrderLinearTIR : public FirstOrderR {
   void checkSize(Interaction &inter) override;
 
  public:
-  /** minimal and only constuctor. Use setXXX functions to fix B,C, D ... */
+  /** minimal constuctor. Use setXXX functions to fix B,C, D ... */
   FirstOrderLinearTIR() : FirstOrderR(RelationSubType::LinearTIR) {};
+
+  /** Build a time-invariant coeff. linear relation
+   *
+   *  \param C matrix coeff C
+   *  \param B matrix coeff B
+   */
+  FirstOrderLinearTIR(Eigen::Ref<siconos::algebra::SiconosMatrix> C,
+                      Eigen::Ref<siconos::algebra::SiconosMatrix> B);
 
   /** destructor */
   virtual ~FirstOrderLinearTIR() noexcept = default;

@@ -104,7 +104,7 @@ class LagrangianRheonomousR : public LagrangianR {
    *  \param position 'list' of state vectors (for all ds involved in the interaction)
    *  \param time the current time
    */
-  void computehdot(const siconos::algebra::BlockVector &position, double time);
+  virtual void computehdot(const siconos::algebra::BlockVector &position, double time);
 
   /** set a user-defined function to compute \f$ h(q,t) \f$  \f$
    *

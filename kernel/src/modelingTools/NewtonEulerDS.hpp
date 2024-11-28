@@ -296,7 +296,7 @@ class NewtonEulerDS : public SecondOrderDS {
    *
    *  \param time of interest
    */
-  void computeJacobianRhsx(double time) override;
+  void computeJacobianRhsOver_x(double time) override;
 
   /** reset non-smooth part of the rhs (i.e. p), for all 'levels' */
   void resetAllNonSmoothParts() override;

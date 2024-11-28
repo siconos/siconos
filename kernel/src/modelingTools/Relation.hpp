@@ -181,13 +181,6 @@ class Relation {
    */
   virtual void computeInput(double time, Interaction &inter, unsigned int level = 0) = 0;
 
-  /** \return a read-only view on \f$ \nabla^\top_{state} h(\ldots) \f$ matrix
-   *  generic function: state being x for first order, q for Lagrangian and NewtonEuler
-   */
-  virtual const siconos::algebra::ConstMapType jacobianhOver_state() const = 0;
-
-  virtual std::shared_ptr<siconos::algebra::SiconosMatrix> H() const = 0;
-
   /** \return true if the relation is linear */
   virtual bool isLinear() { return false; }
 
@@ -195,7 +188,7 @@ class Relation {
   virtual bool requireResidu() { return false; }
 
   /** main relation members display */
-  virtual void display() const;
+  virtual void display() const = 0;
 
   virtual void accept(std::shared_ptr<siconos::internal::SiconosVisitor>) const = 0;
 };

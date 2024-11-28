@@ -77,12 +77,13 @@ void siconos::integrators::ZeroOrderHoldOSI::initializeWorkVectorsForDS(
         "siconos::integrators::ZeroOrderHoldOSI::initialize - Ad MatrixIntegrator is already "
         "initialized for ds the DS");
 
-  if ((static_cast<const siconos::modeling::FirstOrderLinearDS&>(*ds)).b()) {
-    auto E = std::make_shared<siconos::algebra::SiconosMatrix>(ds->n(), ds->n());
+  if ((static_cast<const siconos::modeling::FirstOrderLinearDS&>(*ds)).hasbVector()) {
+    auto E =
+        std::make_shared<siconos::algebra::SiconosMatrix>(ds->dimension(), ds->dimension());
     E->setIdentity();
     DSG0.AdInt.insert(dsgVD, std::make_shared<siconos::simulation::MatrixIntegrator>(
                                  *ds, *_simulation->nonSmoothDynamicalSystem(),
-                                 _simulation->eventsManager()->timeDiscretisation(), E));
+                                 _simulation->eventsManager()->timeDiscretisation(), *E));
     if (DSG0.AdInt.at(dsgVD)->isConst()) DSG0.AdInt.at(dsgVD)->integrate();
   }
 
@@ -107,16 +108,18 @@ void siconos::integrators::ZeroOrderHoldOSI::initializeWorkVectorsForDS(
 
       if (indxIter == 0) {
         indxIter++;
-        if (!relR.getPluginJacLg()->isPlugged()) {
+        if (relR.hasConstantJacobiangOver_lambda()) {
           DSG0.Bd[dsgVD] = std::make_shared<siconos::simulation::MatrixIntegrator>(
               *ds, *_simulation->nonSmoothDynamicalSystem(),
-              _simulation->eventsManager()->timeDiscretisation(), relR.B());
+              _simulation->eventsManager()->timeDiscretisation(), relR.jacobiangOver_lambda());
           if (DSG0.Bd.at(dsgVD)->isConst()) DSG0.Bd.at(dsgVD)->integrate();
-        } else {
-          DSG0.Bd[dsgVD] = std::make_shared<siconos::simulation::MatrixIntegrator>(
-              *ds, *_simulation->nonSmoothDynamicalSystem(),
-              _simulation->eventsManager()->timeDiscretisation(), relR.getPluging(),
-              inter.dimension());
+        } else {  // user defined function for jacobiangOver_lambda
+          THROW_EXCEPTION(
+              "siconos::integrators::ZeroOrderHoldOSI::initialize - Case not implemented");
+          // DSG0.Bd[dsgVD] = std::make_shared<siconos::simulation::MatrixIntegrator>(
+          //     *ds, *_simulation->nonSmoothDynamicalSystem(),
+          //     _simulation->eventsManager()->timeDiscretisation(), relR.getPluging(),
+          //     inter.dimension());
         }
       } else {
         //        THROW_EXCEPTION("siconos::integrators::ZeroOrderHoldOSI::initialize - DS
@@ -267,16 +270,17 @@ void siconos::integrators::ZeroOrderHoldOSI::computeFreeState() {
     if (auto d = std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(ds)) {
       // Check whether we have to recompute things
       if (!DSG0.Ad.at(dsgVD)->isConst()) DSG0.Ad.at(dsgVD)->integrate();
-      if (d->b() && !DSG0.AdInt.at(dsgVD)->isConst()) DSG0.AdInt.at(dsgVD)->integrate();
+      if (d->hasbVector() && !DSG0.AdInt.at(dsgVD)->isConst())
+        DSG0.AdInt.at(dsgVD)->integrate();
 
       auto& xfree = *ds_work_vectors[siconos::integrators::ZeroOrderHoldOSI::FREE];
       DEBUG_EXPR(xfree.display(););
 
       xfree = DSG0.Ad.at(dsgVD)->mat() * *d->x();  // xfree = Ad*xold
       DEBUG_EXPR(xfree.display(););
-      if (d->b()) {
+      if (d->hasbVector()) {
         assert(DSG0.AdInt.hasKey(dsgVD));
-        xfree += DSG0.AdInt.at(dsgVD)->mat() * *d->b();  // xfree += AdInt*b
+        xfree += DSG0.AdInt.at(dsgVD)->mat() * d->bVector();  // xfree += AdInt*b
         DEBUG_EXPR(xfree.display(););
       }
 
@@ -393,7 +397,7 @@ void siconos::integrators::ZeroOrderHoldOSI::computeFreeOutput(
         osnsp_rhs *= -1.0;
       }
       if (forel->hasJacobianhOver_state()) {
-        auto C = rel->jacobianhOver_state();
+        auto C = forel->jacobianhOver_state();
         siconos::algebra::matrixBlockVector_prod(C, *deltax, osnsp_rhs, false);
       }
 
@@ -418,9 +422,9 @@ void siconos::integrators::ZeroOrderHoldOSI::computeFreeOutput(
         // current Interaction.
 
         if (_useGammaForRelation) {
-          siconos::algebra::matrixBlockVector_prod(*C, *deltax, osnsp_rhs, true);
+          siconos::algebra::matrixBlockVector_prod(C, *deltax, osnsp_rhs, true);
         } else {
-          siconos::algebra::matrixBlockVector_prod(*C, *Xfree, osnsp_rhs, true);
+          siconos::algebra::matrixBlockVector_prod(C, *Xfree, osnsp_rhs, true);
         }
       }
 

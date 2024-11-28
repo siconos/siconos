@@ -440,7 +440,7 @@ void siconos::integrators::MoreauJeanGOSI::updateState(const unsigned int) {
 
       moreau_jean::updatePosition(_simulation->timeStep(), _theta, *lds);
       if (baux) {
-        double ds_norm_ref = 1. + lds->x0()->norm2();  // Should we save this in the graph?
+        double ds_norm_ref = 1. + lds->x0().norm();  // Should we save this in the graph?
         local_buffer -= lds->q_read();
         double aux = (local_buffer.norm2()) / ds_norm_ref;
         if (aux > RelativeTol) _simulation->setRelativeConvergenceCriterionHeld(false);

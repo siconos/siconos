@@ -94,6 +94,15 @@ class NewtonEuler1DR : public NewtonEulerR {
    */
   void setnc(std::shared_ptr<siconos::algebra::SiconosVector> nnc) { _Nc = nnc; };
 
+  /** compute the jacobian of h w.r.t. q
+   *
+   *  \param time current time
+   *  \param inter the interaction using this relation
+   *  \param q0  q states vectors of the related the dynamical systems
+   */
+  virtual void computeJacobianhOver_q_(double time, siconos::modeling::Interaction &inter,
+                                       const siconos::algebra::BlockVector &q0) override;
+
  private:
   void NIcomputeJachqTFromContacts(std::shared_ptr<siconos::algebra::SiconosVector> q1);
   void NIcomputeJachqTFromContacts(std::shared_ptr<siconos::algebra::SiconosVector> q1,
@@ -113,9 +122,6 @@ class NewtonEuler1DR : public NewtonEulerR {
    */
   virtual ~NewtonEuler1DR() noexcept = default;
 
-  void computeJacobianhOver_q(double time, Interaction &inter,
-                    std::shared_ptr<siconos::algebra::BlockVector> q0) override;
-
   void initialize(Interaction &inter) override;
 
   /** Default implementation consists in multiplying jachq and T (see
@@ -125,8 +131,8 @@ class NewtonEuler1DR : public NewtonEulerR {
    *  \param inter interaction that owns the relation
    *  \param q0 the block vector to the dynamical system position
    */
-  void computeHMatrix_prod_T(Interaction &inter,
-                     std::shared_ptr<siconos::algebra::BlockVector> q0) override;
+  void computeJacobianhOver_q_prod_T(
+      Interaction &inter, std::shared_ptr<siconos::algebra::BlockVector> q0) override;
 
   /**
       to compute the output y = h(t,q,z) of the Relation

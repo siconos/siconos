@@ -33,7 +33,7 @@ class DynamicalSystem;
    NewtonEuler (Non Linear) Relation (generic interface), with
 
    \f[
-        y &=& H(t,q) + e \\
+        y &=& H(q,t) + e \\
         \dot y &=&  \nabla^\top_q h(q,t)\dot q + \frac{\partial }{\partial t}h(q,t) \\
    \f]
 
@@ -41,9 +41,16 @@ class DynamicalSystem;
 
   The following operators can be set by user-defined functions:
 
-   - \f$ \dot h(q,t) \f$
+   - \f$ \frac{\partial }{\partial t}\nabla^\top_q h(q,t) \f$
 
-*/
+  Storage is used for:
+
+    - \f$ \nabla^\top_q h(q,t) \f$
+    - \f$ \frac{\partial }{\partial t}\nabla^\top_q h(q,t) \f$
+    - e
+    - \f$ \nabla^\top_q h(q,t) . T\f$
+
+ */
 
 class NewtonEulerR : public Relation {
  public:
@@ -54,24 +61,31 @@ class NewtonEulerR : public Relation {
   ACCEPT_SERIALIZATION(NewtonEulerR);
 
   /** The Jacobian of the constraints with respect to the generalized coordinates   \f$ q \f$
-   *  i.e.  \f$ \nabla^\top_q h(t,q,\dot q,\ldots) \f$
+   *  i.e.  \f$ \nabla^\top_q h(t,q \f$
    */
-  std::shared_ptr<siconos::algebra::MapType> HMatrix_view_{nullptr};
-  // Rq: no need for internal storage. HMatrix is set with setHMatrix and is only
+  std::shared_ptr<siconos::algebra::MapType> jacobianhOver_q_view_{nullptr};
+
+  /** internal (optional) storage used for \f$ \nabla^\top_q h(t,q) \f$ */
+  std::unique_ptr<std::vector<double>> jacobianhOver_q_internal_storage_{nullptr};
+
+  /** True if \f$ \nabla^\top_q h(t,q,\dot q,\ldots) \f$ is a constant matrix */
+  bool hasConstantJacobianhOver_q_{false};
+
+  // Rq: no need for internal storage. jacobianhOver_q is set with setHMatrix and is only
   // a view to some external storage.
 
   /** \f$ \frac{\partial}{\partial t}(\nabla^T_{q} h(t,q,\dot q,\ldots)) \f$
    *  This value is useful to compute the second-order
    *  derivative of the constraints with respect to time.
    */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> HMatrix_dot_{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianhOver_q_dot_{nullptr};
 
   /** function wrapper used to compute \f$ \frac{\partial}{\partial t}(\nabla^T_{q} h(q)) \f$
    */
-  siconos::modeling::func_prototypes::FunctionBVBV_M computeHMatrix_dot_{nullptr};
+  siconos::modeling::func_prototypes::FunctionBVBV_M computejacobianhOver_q_dot_{nullptr};
 
   /** True if  \f$ \frac{\partial}{\partial t}(\nabla^T_{q} h(q)) \f$ is taken into account */
-  bool hasHMatrix_dot_{false};
+  bool hasjacobianhOver_q_dot_{false};
 
   /** e */  // Used for the projection formulation
   std::shared_ptr<siconos::algebra::MapVectorType> eVector_view_{nullptr};
@@ -83,10 +97,10 @@ class NewtonEulerR : public Relation {
   std::shared_ptr<siconos::algebra::SiconosVector> contactForce_{nullptr};
 
   /** Internal storage/buffer used to save H.T product.
-     In the case of the bilateral constrains, it is HMatrix_._T.
+     In the case of the bilateral constrains, it is jacobianhOver_q_._T.
      In the case of a local frame, HMatrix_T is built from the geometrical
      datas(local frame, point of contact).*/
-  std::shared_ptr<siconos::algebra::SiconosMatrix> HMatrix_prod_T_{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianhOver_q_prod_T_{nullptr};
 
   /** buffer to save \f[ T(q) = \left[\begin{array}{cc} I_{3x3}  & 0 \\
                0 &  \phi(p) \end{array}\right] \f]
@@ -100,6 +114,15 @@ class NewtonEulerR : public Relation {
    *
    */
   std::shared_ptr<siconos::algebra::SiconosVector> secondOrderTimeDerivativeTerms_{nullptr};
+
+  /** compute the jacobian of h w.r.t. q
+   *
+   *  \param time current time
+   *  \param inter the interaction using this relation
+   *  \param q0  q states vectors of the related the dynamical systems
+   */
+  virtual void computeJacobianhOver_q_(double time, Interaction &inter,
+                                       const siconos::algebra::BlockVector &q0) {}
 
  public:
   /** Default and only constructor */
@@ -121,9 +144,10 @@ class NewtonEulerR : public Relation {
   virtual void checkSize(Interaction &inter) override;
 
   /** \return a read-only view on \f$ H(q, \ldots) \f$ matrix */
-  inline const auto HMatrix() const {
-    return siconos::algebra::ConstMapType(HMatrix_view_->data(), HMatrix_view_->rows(),
-                                          HMatrix_view_->cols());
+  inline const auto jacobianhOver_q() const {
+    return siconos::algebra::ConstMapType(jacobianhOver_q_view_->data(),
+                                          jacobianhOver_q_view_->rows(),
+                                          jacobianhOver_q_view_->cols());
   }
 
   /** Set a constant \f$ H(q, \ldots) \f$ matrix for the system (warning: shared memory)
@@ -131,7 +155,7 @@ class NewtonEulerR : public Relation {
    *  \param newValue H matrix
    *
    */
-  void setConstantHMatrix(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+  void setConstantJacobianhOver_q(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
 
   /** \return  a read-only view on e(t) */
   inline const auto eVector() const {
@@ -147,26 +171,27 @@ class NewtonEulerR : public Relation {
   /** True if e(t) is taken into account */
   bool haseVector() const { return haseVector_; }
 
- /** \return a read-only view on \f$ H(q, \ldots).T \f$ matrix */
-  inline const auto H_prod_T() const {
-    return siconos::algebra::ConstMapType(HMatrix_prod_T_->data(), HMatrix_prod_T_->rows(),
-                                          HMatrix_prod_T_->cols());
+  /** \return a read-only view on \f$ H(q, \ldots).T \f$ matrix */
+  inline const auto jacobianhOver_q_prod_T() const {
+    return siconos::algebra::ConstMapType(jacobianhOver_q_prod_T_->data(),
+                                          jacobianhOver_q_prod_T_->rows(),
+                                          jacobianhOver_q_prod_T_->cols());
   }
+
   /** set a user-defined function to compute
    *  \f$ \frac{\partial}{\partial t}(\nabla^T_{q} h(q))\f$
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeHMatrix_dotFunction(
+  void setComputeJacobianhOver_q_dotFunction(
       const siconos::modeling::func_prototypes::FunctionBVBV_M &fct);
 
   /** Update \f$ \frac{\partial}{\partial t}(\nabla^T_{q} h(q))\f$
    *  \param q 'list' of state vectors (for all ds involved in the interaction)
    *  \param qdot 'list' of state vectors (for all ds involved in the interaction)
    */
-  void computeHMatrix_dot(const siconos::algebra::BlockVector &q,
-                          const siconos::algebra::BlockVector &qdot);
-                        
+  virtual void computeJacobianhOver_q_dot(const siconos::algebra::BlockVector &q,
+                                          const siconos::algebra::BlockVector &qdot);
 
   /** \return  a read-only view on additional  terms of the second order time derivative of y
    *  \f$ \nabla_q h(q) \dot T v + \frac{d}{dt}(\nabla_q h(q) ) T v \f$
@@ -199,8 +224,8 @@ class NewtonEulerR : public Relation {
   /**
       to compute the output y = h(q) of the Relation
 
-      \param[in] q generalized coordinates vector of the dynamical systems (at most 2) involved
-     in the relation \param[in,out] y the resulting vector
+      \param[in] q generalized coordinates vector of the concerned dynamical systems
+      \param[in,out] y the resulting vector
   */
   virtual void computeh(const siconos::algebra::BlockVector &q,
                         Eigen::Ref<siconos::algebra::SiconosVector> y);
@@ -213,8 +238,8 @@ class NewtonEulerR : public Relation {
    *  \param inter interaction that owns the relation
    *  \param q0  the block vector to the dynamical system position
    */
-  virtual void computeHMatrix_prod_T(Interaction &inter,
-                                     std::shared_ptr<siconos::algebra::BlockVector> q0);
+  virtual void computeJacobianhOver_q_prod_T(
+      Interaction &inter, std::shared_ptr<siconos::algebra::BlockVector> q0);
 
   /** compute all the jacobian of h
    *

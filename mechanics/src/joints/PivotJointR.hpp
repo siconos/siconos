@@ -97,38 +97,27 @@ class PivotJointR : public KneeJointR {
    *  \param q2 An optional siconos::algebra::SiconosVector of size 7 indicating
    *  translation and orientation; if null, the inertial
    *  frame will be considered as the second base. */
-  virtual void setBasePositions(std::shared_ptr<siconos::algebra::SiconosVector> q1,
-                                std::shared_ptr<siconos::algebra::SiconosVector> q2 = nullptr) override;
+  virtual void setBasePositions(
+      std::shared_ptr<siconos::algebra::SiconosVector> q1,
+      std::shared_ptr<siconos::algebra::SiconosVector> q2 = nullptr) override;
 
   virtual ~PivotJointR() noexcept = default;
 
   std::shared_ptr<siconos::algebra::SiconosVector> A() { return _A; }
 
   /**
-     to compute the output y = h(t,q,z) of the Relation
+     to compute the output y = h(q) of the Relation
 
-     \param time current time value
-     \param q coordinates of the dynamical systems involved in the relation
-     \param y the resulting vector
-  */
-  virtual void computeh(double time, const siconos::algebra::BlockVector& q0,
-                        siconos::algebra::SiconosVector& y) override;
-
-  /** Compute the vector of linear and angular positions of the free axes */
-  virtual void computehDoF(double time, const siconos::algebra::BlockVector& q0,
-                           siconos::algebra::SiconosVector& y, unsigned int axis) override;
-
-  /** Compute the jacobian of linear and angular DoF with respect to some q */
-  virtual void computeJachqDoF(double time, siconos::modeling::Interaction& inter,
-                               std::shared_ptr<siconos::algebra::BlockVector> q0,
-                               siconos::algebra::SiconosMatrix& jachq,
-                               unsigned int axis) override;
-
+     \param[in] q generalized coordinates vector of the dynamical systems (at most 2) involved
+    in the relation \param[in,out] y the resulting vector
+ */
+  void computeh(const siconos::algebra::BlockVector& q,
+                Eigen::Ref<siconos::algebra::SiconosVector> y) override;
   /**
-     Get the number of constraints defined in the joint
+       Get the number of constraints defined in the joint
 
-     \return the number of constraints
-   */
+       \return the number of constraints
+     */
   virtual unsigned int numberOfConstraints() override { return 5; }
 
   /**
@@ -149,6 +138,16 @@ class PivotJointR : public KneeJointR {
     else
       return DofType::INVALID;
   };
+  /** Compute the vector of linear and angular positions of the free axes */
+  virtual void computehDoF(const siconos::algebra::BlockVector& q0,
+                           Eigen::Ref<siconos::algebra::SiconosVector> y,
+                           unsigned int axis = 0) override;
+
+  /** Compute the jacobian of linear and angular DoF with respect to some q */
+  virtual void computeJachqDoF(siconos::modeling::Interaction& inter,
+                               const siconos::algebra::BlockVector& q0,
+                               Eigen::Ref<siconos::algebra::SiconosMatrix> jachq,
+                               unsigned int axis = 0) override;
 };
 }  // namespace siconos::joints
 #endif  // PivotJointRELATION_H

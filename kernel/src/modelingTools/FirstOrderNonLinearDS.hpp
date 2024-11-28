@@ -45,19 +45,14 @@ namespace siconos::modeling {
 
     \f[
 
-    M \dot x = f(x,t,z) + r, \quad x(t_0) = x_0
+    M \dot x = f(x,t) + r, \quad x(t_0) = x_0
     \f]
     where
 
     - \f$ x \in R^{n} \f$ is the state.
-    - \f$ M \in R^{n\times n} \f$  a "mass matrix"
-    - \f$ r \in R^{n} \f$  the input due to the Non Smooth Interaction.
-    - \f$ z \in R^{zSize} \f$  is a vector of arbitrary algebraic
-    variables, some sort of discret state.  For example, z may be used
-    to set some perturbation parameters, to control the system (z
-    set by actuators) and so on.
-
-    - \f$ f : R^{n} \times R  \mapsto  R^{n} \f$  the vector field.
+    - \f$ M \in R^{n\times n} \f$
+    - \f$ r \in R^{n} \f$  is the input due to the Non Smooth Interaction.
+    - \f$ f : R^{n} \times R  \mapsto  R^{n} \f$  a vector field.
 
     By default, the DynamicalSystem is considered to be an Initial Value Problem (IVP)
     and the initial conditions are given by
@@ -68,17 +63,17 @@ namespace siconos::modeling {
 
     To define a Boundary Value Problem, a pointer on a BoundaryCondition must be set.
 
-    The right-hand side and its jacobian (from base class) are defined as
+    The right-hand side and its jacobian are defined as
 
     \f[
-    rhs &=& \dot x =  M^{-1}(f(x,t,z)+ r) \\
-    jacobianRhsx &=& \nabla_x rhs(x,t,z) = M^{-1}\nabla_x f(x,t,z)
+    rhs &=& \dot x =  M^{-1}(f(x,t)+ r) \\
+    jacobianRhsOver_x &=& \nabla_x rhs(x,t) = M^{-1}\nabla_x f(x,t)
     \f]
 
-    The following operators can be plugged, in the usual way (see User Guide)
+    The following operators can set by user-defined functions (lambda ...)
 
-    -  \f$ f(x,t,z) \f$
-    -  \f$ \nabla_x f(x,t,z) \f$
+    -  \f$ f(x,t) \f$
+    -  \f$ \nabla_x f(x,t) \f$
     -  \f$ M(t) \f$
 
  */
@@ -91,45 +86,59 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
  protected:
   ACCEPT_SERIALIZATION(FirstOrderNonLinearDS);
 
-  /** Matrix coefficient of \f$ \dot x \f$ */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _M{nullptr};
+  /** M matrix of the system (as a view onto memory)*/
+  std::shared_ptr<siconos::algebra::MapType> MMatrix_view_{nullptr};
 
-  /** value of f(x,t,z) */
-  std::shared_ptr<siconos::algebra::SiconosVector> _f{nullptr};
+  /** internal storage (optional) for the MMatrix matrix */
+  std::unique_ptr<std::vector<double>> MMatrix_internal_storage_{nullptr};
 
-  /** to store f(x_k,t_k,z_k)*/
-  std::shared_ptr<siconos::algebra::SiconosVector> _fold{nullptr};
+  /** function wrapper used to compute MMatrix */
+  siconos::modeling::func_prototypes::FunctionS_M computeMMatrix_{nullptr};
 
-  /** Gradient of \f$ f(x,t,z) \f$ with respect to \f$ x \f$ */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _jacobianfx{nullptr};
+  /** true if MMatrix is required/set and constant */
+  bool hasConstantMMatrix_{false};
 
-  /** DynamicalSystem plug-in to compute f(x,t,z)
-   *
-   *  \param current time
-   *  \param size of the vector _x
-   *  \param[in,out] pointer to the first element of the vector _x
-   *  \param[in,out] the pointer to the first element of the vector _f
-   *  \param the size of the vector _z
-   *  \param a vector of parameters _z
-   */
-  std::shared_ptr<siconos::plugins::PluggedObject> _pluginf{nullptr};
+  /** True if MMatrix is required */
+  bool hasMMatrix_{false};
 
-  /** DynamicalSystem plug-in to compute the gradient of f(x,t,z) with respect to the state:
-   * \f$ \nabla_x f: (x,t,z) \in R^{n} \times R  \mapsto  R^{n \times n} \f$
-   *
-   *  \param time current time
-   *  \param sizeOfX size of vector x
-   *  \param x pointer to the first element of x
-   *  \param[in,out] jacob pointer to the first element of jacobianfx matrix
-   *  \param  the size of the vector z
-   *  \param[in,out]  a vector of parameters, z
-   */
-  std::shared_ptr<siconos::plugins::PluggedObject> _pluginJacxf{nullptr};
+  /** external forces applied to the system */
+  std::shared_ptr<siconos::algebra::MapVectorType> fVector_view_{nullptr};
 
-  std::shared_ptr<siconos::plugins::PluggedObject> _pluginM{nullptr};
+  /** internal (optional) storage used for external forces */
+  std::unique_ptr<std::vector<double>> fVector_internal_storage_{nullptr};
+
+  /** function wrapper used to compute external forces */
+  siconos::modeling::func_prototypes::FunctionVS_V computefVector_{nullptr};
+
+  /** True if external forces are taken into account and constant */
+  bool hasConstantfVector_{false};
+
+  /** True if external forces are taken into account */
+  bool hasfVector_{false};
+
+  /** \f$ \nabla_x f(x,t) \f$ (as a view onto memory)*/
+  std::shared_ptr<siconos::algebra::MapType> jacobianfOver_x_view_{nullptr};
+
+  /** internal storage (optional) for \f$ \nabla_x f(x,t) \f$ matrix */
+  std::unique_ptr<std::vector<double>> jacobianfOver_x_internal_storage_{nullptr};
+
+  /** function wrapper used to compute \f$ \nabla_x f(x,t) \f$ */
+  siconos::modeling::func_prototypes::FunctionVS_M computejacobianfOver_x_{nullptr};
+
+  /** true if \f$ \nabla_x f(x,t) \f$ is required/set and constant */
+  bool hasConstantJacobianfOver_x_{false};
+
+  /** True if \f$ \nabla_x f(x,t) \f$ is required */
+  bool hasJacobianfOver_x_{false};
+
+  /** A buffer to store f at previous time step \f$ (f(x_k,t_k) \f$) */
+  std::shared_ptr<siconos::algebra::SiconosVector> fbuffer_{nullptr};
+
+  /** Gradient of \f$ f(x,t) \f$ with respect to \f$ x \f$ */
+  std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianfOver_x_{nullptr};
 
   /**  the previous r vectors */
-  siconos::algebra::SiconosMemory _rMemory;
+  siconos::algebra::SiconosMemory rMemory_;
 
   /**
       Copy of M Matrix, LU-factorized, used to solve systems like Mx = b with LU-factorization.
@@ -138,32 +147,19 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
 
   bool hasLU_M_{false};
 
-  /** default constructor */
-  FirstOrderNonLinearDS() = default;
+  /** True if ALL components (f, \f$ \nablaf\f$, ...) are time independant or not used. Any
+   * call to setCompute... turns this to false */
+  bool isTimeInvariant_{true};
 
-  /** Reset the PluggedObjects */
-  void _zeroPlugin() override;
+  ///** default constructor */
+  // FirstOrderNonLinearDS() = default;
 
  public:
-  // ===== CONSTRUCTORS =====
-
   /** constructor from initial state, leads to \f$ \dot x = r \f$
    *
    *  \param newX0 initial state
-   *
-   *  \warning you need to set explicitely the plugin for f and its jacobian if needed (e.g. if
-   *  used with an EventDriven scheme)
    */
-  FirstOrderNonLinearDS(std::shared_ptr<siconos::algebra::SiconosVector> newX0);
-
-  /** constructor from initial state and f (plugins),  \f$ \dot x = f(x, t, z) + r \f$
-   *
-   *  \param newX0 initial state
-   *  \param fPlugin name of the plugin function to be used for f(x,t,z)
-   *  \param jacobianfxPlugin name of the plugin to be used for the jacobian of f(x,t,z)
-   */
-  FirstOrderNonLinearDS(std::shared_ptr<siconos::algebra::SiconosVector> newX0,
-                        const std::string &fPlugin, const std::string &jacobianfxPlugin);
+  FirstOrderNonLinearDS(Eigen::Ref<siconos::algebra::SiconosVector> x0);
 
   /** Copy constructor
    *
@@ -186,8 +182,116 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
    */
   void initializeNonSmoothInput(unsigned int level) override;
 
+  /*  \return a read-only view on the matrix M(t) */
+  inline const auto MMatrix() const {
+    return siconos::algebra::ConstMapType(MMatrix_view_->data(), MMatrix_view_->rows(),
+                                          MMatrix_view_->cols());
+  }
+
+  /** Set a constant matrix M for the system
+   *
+   *  \param newValue MMatrix matrix
+   */
+  void setConstantMMatrix(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+
+  /** \return True if matrix M(t) has been set (i.e. different from identity) */
+  bool hasMMatrix() const { return hasMMatrix_; }
+
+  /** set a user-defined function to compute the matrix M(t)
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputeMMatrixFunction(const siconos::modeling::func_prototypes::FunctionS_M &fct);
+
+  /** to compute the matrix M(t)
+   *
+   *  \param time current time value
+   */
+  virtual void computeMMatrix(double time);
+
+  /** \return  a read-only view on f(x,t)  */
+  inline const auto fVector() const {
+    return siconos::algebra::ConstMapVectorType(fVector_view_->data(), fVector_view_->size());
+  }
+
+  /** \return  a read-only view on fbuffer (value of f(x,t) at previous time step)  */
+  inline const auto fold() const {
+    return siconos::algebra::ConstMapVectorType(fbuffer_->data(), fbuffer_->size());
+  }
+
+  /** set a constant f(x,t)  vector
+   *
+   *  \param newv f(x,t) vector
+   */
+  void setConstantfVector(Eigen::Ref<siconos::algebra::SiconosVector> newv);
+
+  /** True if f(x,t) is taken into account */
+  bool hasfVector() const { return hasfVector_; }
+
+  /** set a user-defined function to compute f(x,t)
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputefVectorFunction(const siconos::modeling::func_prototypes::FunctionVS_V &fct);
+
+  /** Update  f(x,t)
+   *
+   * \param state state vector
+   *  \param time the current time
+   */
+  void computefVector(const Eigen::Ref<siconos::algebra::SiconosVector> &state, double time);
+
+  /** \return a read-only view on \f$ \nabla_xf(x,t) \f$ matrix */
+  inline const auto jacobianfOver_x() const {
+    return siconos::algebra::ConstMapType(jacobianfOver_x_view_->data(),
+                                          jacobianfOver_x_view_->rows(),
+                                          jacobianfOver_x_view_->cols());
+  }
+
+  /** Set a constant \f$ \nabla_xf(x,t) \f$ matrix
+   *
+   *  \param newValue jacobianfOver_x matrix
+   *
+   */
+  void setConstantJacobianfOver_x(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+
+  /** \return True if \f$ \nabla_xf(x,t) \f$ matrix has been set */
+  bool hasJacobianfOver_x() const { return hasJacobianfOver_x_; }
+
+  /** set a user-defined function to compute \f$ \nabla_xf(x,t) \f$
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputeJacobianfOver_xFunction(
+      const siconos::modeling::func_prototypes::FunctionVS_M &fct);
+
+  /** to compute  \f$ \nabla_xf(x,t) \f$
+   *  \param state x vector
+   *  \param time the current time
+   */
+  void computeJacobianfOver_x(const Eigen::Ref<siconos::algebra::SiconosVector> &state,
+                              double time);
+
   /** reset the state to the initial state */
   void resetToInitialState() override;
+
+  /** Change initial state (x0)
+   * \param newX0 the new initial state
+   *  warning: shared memory (eigen view) between newX0 and x0 attribute
+   */
+  void resetInitialState(Eigen::Ref<siconos::algebra::SiconosVector> newX0);
+
+  /** Reset initial state (x0) components to a constant given value
+   * \param val input value such that x0(i) = val
+   * warning: reset also state to x0.
+   */
+  void resetInitialStateToValue(double val);
+
+  /** \return a shared pointer to the initial state.
+   *  This should be used with care (or not used at all ...)
+   *  since the returned object will share memory with the internal value of x0 ...
+   */
+  auto x0_ptr() { return x0_view_; }
+  // FP:  Used only in MatrixIntegrator for ZOH and friends. This should be avoided.
 
   /** update right-hand side for the current state
    *
@@ -199,7 +303,7 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
    *
    *  \param time of interest
    */
-  void computeJacobianRhsx(double time) override;
+  void computeJacobianRhsOver_x(double time) override;
 
   /** reset non-smooth part of the rhs (i.e. r), for all 'levels' */
   virtual void resetAllNonSmoothParts() override;
@@ -210,56 +314,17 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
    */
   virtual void resetNonSmoothPart(unsigned int level) override;
 
-  /** returns a pointer to M, matrix coeff. on left-hand side
-   */
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> M() const { return _M; }
-
-  /** set M, matrix coeff of left-hand side (pointer link)
-   *
-   *  \param newM the new M matrix
-   */
-  inline void setMPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newM) { _M = newM; }
-
   /** \return LU-factorization of the M matrix (pointer link) */
   inline auto LU_M() const { return LU_M_; }
 
   /** \return True if LU factorization of M is available */
   bool hasLU_M() const { return hasLU_M_; }
 
-  /** returns f(x,t,z) (pointer link)
-   */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> f() const { return _f; }
-
-  /** set f(x,t,z) (pointer link)
-   *
-   *  \param newPtr a std::shared_ptr<siconos::algebra::SiconosVector>
-   */
-  inline void setFPtr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) { _f = newPtr; }
-
-  /** get jacobian of f(x,t,z) with respect to x (pointer link)
-   *
-   *  \return std::shared_ptr<siconos::algebra::SiconosMatrix>
-   */
-  virtual std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianfx() const {
-    return _jacobianfx;
-  }
-
-  /** set jacobian of f(x,t,z) with respect to x (pointer link)
-   *
-   *  \param newPtr the new value
-   */
-  inline void setJacobianfxPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr) {
-    _jacobianfx = newPtr;
-  }
-
   /** get all the values of the state vector r stored in memory
    *
    *  \return a memory vector
    */
-  inline const siconos::algebra::SiconosMemory &rMemory() const { return _rMemory; }
-
-  /** returns previous value of rhs -->OSI Related!!*/
-  inline std::shared_ptr<siconos::algebra::SiconosVector> fold() const { return _fold; }
+  inline const siconos::algebra::SiconosMemory &rMemory() const { return rMemory_; }
 
   /**
      initialize the SiconosMemory objects: reserve memory for i
@@ -281,106 +346,13 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
   */
   virtual void updatePlugins(double time) override;
 
-  // --- setters for functions to compute plugins ---
-
-  /** to set a specified function to compute M
-   *
-   *  \param pluginPath the complete path to the plugin
-   *  \param functionName function name to use in this library
-   */
-  void setComputeMFunction(const std::string &pluginPath, const std::string &functionName);
-
-  /** set a specified function to compute M
-   *
-   *  \param fct a pointer on the plugin function
-   */
-  void setComputeMFunction(siconos::plugins::FPtr1 fct);
-
-  /** to set a specified function to compute f(x,t)
-   *
-   *  \param pluginPath the complete path to the plugin
-   *  \param functionName the function name to use in this library
-   */
-  void setComputeFFunction(const std::string &pluginPath, const std::string &functionName);
-
-  /** set a specified function to compute the vector f
-   *
-   *  \param fct a pointer on the plugin function
-   */
-  void setComputeFFunction(siconos::plugins::FPtr1 fct);
-
-  /** to set a specified function to compute jacobianfx
-   *
-   *  \param pluginPath the complete path to the plugin
-   *  \param functionName function name to use in this library
-   */
-  void setComputeJacobianfxFunction(const std::string &pluginPath,
-                                    const std::string &functionName);
-
-  /** set a specified function to compute jacobianfx
-   *
-   *  \param fct a pointer on the plugin function
-   */
-  void setComputeJacobianfxFunction(siconos::plugins::FPtr1 fct);
-
-  // --- compute plugin functions ---
-
-  /** Default function to compute  \f$  M: (x,t) \f$
-   *
-   *  \param time time instant used in the computations
-   */
-  void computeM(double time);
-
-  /** Default function to compute \f$ f: (x,t) \f$
-   *
-   *  \param time time instant used in the computations
-   */
-  // virtual void computef(double time);
-
-  /** function to compute \f$ f: (x,t) \f$
-   *
-   *  \param time time instant used in the computations
-   *  \param state x value
-   */
-  virtual void computef(double time, std::shared_ptr<siconos::algebra::SiconosVector> state);
-
-  /** Default function to compute  \f$  \nabla_x f: (x,t) \in R^{n}
-   *  \times R \mapsto R^{n \times n} \f$ with x different from
-   *  current saved state.
-   *
-   *  \param time instant used in the computations
-   *  \param state a siconos::algebra::SiconosVector to store the resuting value
-   */
-  virtual void computeJacobianfx(double time,
-                                 std::shared_ptr<siconos::algebra::SiconosVector> state);
-
-  /** Get _pluginf
-   *
-   *  \return a std::shared_ptr<siconos::plugins::PluggedObject>
-   */
-  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginF() const {
-    return _pluginf;
-  };
-
-  /** Get _pluginJacxf
-   *
-   *  \return a std::shared_ptr<siconos::plugins::PluggedObject>
-   */
-  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginJacxf() const {
-    return _pluginJacxf;
-  };
-
-  /** Get _pluginM
-   *
-   *  \return a std::shared_ptr<siconos::plugins::PluggedObject>
-   */
-  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginM() const {
-    return _pluginM;
-  };
-
   /** print the data of the dynamical system on the standard output
    */
   void display(bool brief = true) const override;
+
+  /** \return True if ALL components (f, \f$ \nablaf\f$, ...) are time independant or not used.
+   * Any call to setCompute... turns this to false */
+  auto isTimeInvariant() const { return isTimeInvariant_; }
 
   // visitors hook
   void acceptSP(std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const override;

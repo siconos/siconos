@@ -49,7 +49,7 @@ class LagrangianLinearTIR : public LagrangianR {
   // /** Default constructor */
   // LagrangianLinearTIR() : LagrangianR(RelationSubType::LinearTIR) {};
 
-  /** Minimal constructor
+  /** Build a relation with only C matrix defined. Use set.. if e is required.
    *
    *  \param C the matrix C
    */

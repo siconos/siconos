@@ -83,7 +83,6 @@ void SimpleMatrixTest::setUp() {
   m7 = std::make_shared<SiconosMatrix>(2, size2 - 2);
   m8 = std::make_shared<SiconosMatrix>(2, 2);
   Ab = (std::make_shared<siconos::algebra::BlockMatrix>(m1, m2, m3, m4))->toSiconosMatrix();
-  Bb = (std::make_shared<siconos::algebra::BlockMatrix>(3 * *Ab)->toSiconosMatrix());
   Cb = std::make_shared<siconos::algebra::BlockMatrix>(m5, m6, m7, m8)->toSiconosMatrix();
 }
 

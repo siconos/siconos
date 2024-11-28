@@ -112,23 +112,18 @@ class Cable2d3DR : public siconos::modeling::LagrangianScleronomousR {
   void initialize(siconos::modeling::Interaction &inter) override;
 
   /**
-     to compute the output y = h(q,z) of the Relation
+   to compute the output y = h(q) of the Relation
 
-     \param q coordinates of the dynamical systems involved in the relation
-     \param z user defined parameters (optional)
-     \param y the resulting vector
-  */
-  void computeh(const siconos::algebra::BlockVector &q, siconos::algebra::BlockVector &z,
-                siconos::algebra::SiconosVector &y) override;
+   \param q coordinates of the dynamical systems involved in the relation
+   \param y the resulting vector
+ */
+  void computeh(const siconos::algebra::BlockVector &q,
+                Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
-  /**
-     to compute the jacobian of h(...). Set attribute jacobianhOver_q_ (access: jacqhq())
-
-     \param q coordinates of the dynamical systems involved in the relation
-     \param z user defined parameters (optional)
-  */
-  void computeJacobianhOver_q(const siconos::algebra::BlockVector &q,
-                    siconos::algebra::BlockVector &z) override;
+  /** Computes \f$ \nabla^\top_q h(q) \f$
+   * \param q coordinates of the dynamical systems involved in the relation
+   */
+  void computeJacobianhOver_q(const siconos::algebra::BlockVector &q) override;
 
   /** Return the distance between pc1 and pc, with sign according to normal */
   double distance() const;

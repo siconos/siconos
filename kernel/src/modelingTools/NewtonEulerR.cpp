@@ -45,22 +45,22 @@ void siconos::modeling::NewtonEulerR::initialize(Interaction& inter) {
   unsigned int qSize = inter.getSizeOfDS();  // sum of considered DS sizes
   unsigned int Hcols = 7 * (qSize / 6);      // 7 * number of DS in the interaction
 
-  // setHMatrix is the only way to set HMatrix. So if it's required, storage
+  // setHMatrix is the only way to set jacobianhOver_q. So if it's required, storage
   // is already allocated at this point.
 
-  assert(HMatrix_view_);  // No relation without H ...
+  assert(jacobianhOver_q_view_);  // No relation without H ...
 
-  // HMatrix_dot is optional. Allocation only if a user-defined function has been set.
-  if (computeHMatrix_dot_) {
-    // True only if setComputeHMatrix_dotFunction has been called
+  // JacobianhOver_q_dot is optional. Allocation only if a user-defined function has been set.
+  if (computejacobianhOver_q_dot_) {
+    // True only if setComputeJacobianhOver_q_dotFunction has been called
     // Ensure that memory is properly allocated for H_dot
-    if (!HMatrix_dot_) {
-      HMatrix_dot_ = std::make_shared<siconos::algebra::SiconosMatrix>(ySize, Hcols);
+    if (!jacobianhOver_q_dot_) {
+      jacobianhOver_q_dot_ = std::make_shared<siconos::algebra::SiconosMatrix>(ySize, Hcols);
     }
   }
 
-  if (!HMatrix_prod_T_)
-    HMatrix_prod_T_ = std::make_shared<siconos::algebra::SiconosMatrix>(ySize, qSize);
+  if (!jacobianhOver_q_prod_T_)
+    jacobianhOver_q_prod_T_ = std::make_shared<siconos::algebra::SiconosMatrix>(ySize, qSize);
 
   // Allocate internal buffer, used to save T(q)
   if (!T_buffer_) {
@@ -88,53 +88,53 @@ void siconos::modeling::NewtonEulerR::checkSize(Interaction& inter) {
   unsigned int qSize = inter.getSizeOfDS();  // sum of considered DS sizes
   unsigned int Hcols = 7 * (qSize / 6);      // 7 * number of DS in the interaction
 
-  if (HMatrix_view_) {
-    assert(HMatrix_view_->rows() == ySize);
-    assert(HMatrix_view_->cols() == Hcols);
+  if (jacobianhOver_q_view_) {
+    assert(jacobianhOver_q_view_->rows() == ySize);
+    assert(jacobianhOver_q_view_->cols() == Hcols);
   }
 
-  if (HMatrix_dot_) {
-    assert(HMatrix_dot_->rows() == ySize);
-    assert(HMatrix_dot_->cols() == Hcols);
+  if (jacobianhOver_q_dot_) {
+    assert(jacobianhOver_q_dot_->rows() == ySize);
+    assert(jacobianhOver_q_dot_->cols() == Hcols);
   }
 
-  if (haseVector) assert(eVector_view_->size() == ySize);
+  if (haseVector_) assert(eVector_view_->size() == ySize);
 
-  if (HMatrix_prod_T_) {
-    assert(HMatrix_prod_T_->rows() == ySize);
-    assert(HMatrix_prod_T_->cols() == qSize);
+  if (jacobianhOver_q_prod_T_) {
+    assert(jacobianhOver_q_prod_T_->rows() == ySize);
+    assert(jacobianhOver_q_prod_T_->cols() == qSize);
   }
 }
 
-void siconos::modeling::NewtonEulerR::setConstantHMatrix(
+void siconos::modeling::NewtonEulerR::setConstantJacobianhOver_q(
     Eigen::Ref<siconos::algebra::SiconosMatrix> newValue) {
   // Warning: mat. dims are not checked since we have no clue here regarding the size of the
   // Interaction.
 
-  HMatrix_view_ = std::make_shared<siconos::algebra::MapType>(newValue.data(), newValue.rows(),
-                                                              newValue.cols());
+  jacobianhOver_q_view_ = std::make_shared<siconos::algebra::MapType>(
+      newValue.data(), newValue.rows(), newValue.cols());
 }
 
-void siconos::modeling::NewtonEulerR::setComputeHMatrix_dotFunction(
+void siconos::modeling::NewtonEulerR::setComputeJacobianhOver_q_dotFunction(
     const siconos::modeling::func_prototypes::FunctionBVBV_M& func) {
   // Ensure that memory is properly allocated for hmatrix_
-  hasHMatrix_dot_ = true;
-  computeHMatrix_dot_ = func;
+  hasjacobianhOver_q_dot_ = true;
+  computejacobianhOver_q_dot_ = func;
 }
 
-void siconos::modeling::NewtonEulerR::computeHMatrix_dot(
+void siconos::modeling::NewtonEulerR::computeJacobianhOver_q_dot(
     const siconos::algebra::BlockVector& q, const siconos::algebra::BlockVector& qdot) {
-  if (computeHMatrix_dot_) {
+  if (computejacobianhOver_q_dot_) {
     // in that case, internal_storage must have been allocated by
     // setCompute... call
-    assert(HMatrix_dot_);
-    computeHMatrix_dot_(q, qdot, *HMatrix_dot_);
+    assert(jacobianhOver_q_dot_);
+    computejacobianhOver_q_dot_(q, qdot, *jacobianhOver_q_dot_);
   }
 }
 
 void siconos::modeling::NewtonEulerR::computeh(const siconos::algebra::BlockVector& q,
                                                Eigen::Ref<siconos::algebra::SiconosVector> y) {
-  siconos::algebra::matrixBlockVector_prod(*HMatrix_view_, q, y, true);
+  siconos::algebra::matrixBlockVector_prod(*jacobianhOver_q_view_, q, y, true);
   if (haseVector_) y += *eVector_view_;
 }
 
@@ -154,16 +154,16 @@ void siconos::modeling::NewtonEulerR::computeOutput(double time, Interaction& in
      * We decide finally not to update the Jacobian there. To be discussed
      */
     // computeJacobianhOver_q(time, inter, DSlink[siconos::modeling::NewtonEulerR::q0]);
-    // computeHMatrix_prod_T(inter, DSlink[siconos::modeling::NewtonEulerR::q0]);
+    // computeJacobianhOver_q_prod_T(inter, DSlink[siconos::modeling::NewtonEulerR::q0]);
 
     if (derivativeNumber == 1) {
-      assert(HMatrix_prod_T_);
+      assert(jacobianhOver_q_prod_T_);
       assert(DSlink[siconos::modeling::NewtonEulerR::velocity]);
-      DEBUG_EXPR(HMatrix_prod_T_->display(););
+      DEBUG_EXPR(jacobianhOver_q_prod_T_->display(););
       DEBUG_EXPR((*DSlink[siconos::modeling::NewtonEulerR::velocity]).display(););
 
       siconos::algebra::matrixBlockVector_prod(
-          *HMatrix_prod_T_, *DSlink[siconos::modeling::NewtonEulerR::velocity], y);
+          *jacobianhOver_q_prod_T_, *DSlink[siconos::modeling::NewtonEulerR::velocity], y);
 
       DEBUG_EXPR(y.display(););
     } else if (derivativeNumber == 2) {
@@ -195,18 +195,20 @@ void siconos::modeling::NewtonEulerR::computeInput(double time, Interaction& int
   if (level == 1 ||
       level == 2) /* \warning : we assume that ContactForce is given by lambda[level] */
   {
-    siconos::algebra::transposeMatrixVector_prod(lambda, *HMatrix_prod_T_, *contactForce_,
-                                                 true);
+    siconos::algebra::transposeMatrixVector_prod(lambda, *jacobianhOver_q_prod_T_,
+                                                 *contactForce_, true);
     DEBUG_EXPR(contactForce_->display(););
 
     siconos::algebra::transposeMatrixVector_prod_toBlock(
-        lambda, *HMatrix_prod_T_, *DSlink[siconos::modeling::NewtonEulerR::p0 + level], false);
+        lambda, *jacobianhOver_q_prod_T_, *DSlink[siconos::modeling::NewtonEulerR::p0 + level],
+        false);
 
-    DEBUG_EXPR(HMatrix_prod_T_->display(););
+    DEBUG_EXPR(jacobianhOver_q_prod_T_->display(););
     DEBUG_EXPR(DSlink[siconos::modeling::NewtonEulerR::p0 + level]->display(););
   } else if (level == 0) {
     siconos::algebra::transposeMatrixVector_prod_toBlock(
-        lambda, *HMatrix_view_, *DSlink[siconos::modeling::NewtonEulerR::p0 + level], false);
+        lambda, *jacobianhOver_q_view_, *DSlink[siconos::modeling::NewtonEulerR::p0 + level],
+        false);
   } else
     THROW_EXCEPTION(
         "siconos::modeling::NewtonEulerR::computeInput(double time, Interaction& inter, "
@@ -216,9 +218,9 @@ void siconos::modeling::NewtonEulerR::computeInput(double time, Interaction& int
   DEBUG_END("siconos::modeling::NewtonEulerR::computeInput(...)\n");
 }
 
-void siconos::modeling::NewtonEulerR::computeHMatrix_prod_T(
+void siconos::modeling::NewtonEulerR::computeJacobianhOver_q_prod_T(
     Interaction& inter, std::shared_ptr<siconos::algebra::BlockVector> q) {
-  DEBUG_BEGIN("siconos::modeling::NewtonEulerR::computeHMatrix_prod_T(...) \n");
+  DEBUG_BEGIN("siconos::modeling::NewtonEulerR::computeJacobianhOver_q_prod_T(...) \n");
   DEBUG_PRINTF("with inter =  %p\n", &inter);
   DEBUG_EXPR(inter.display());
 
@@ -230,13 +232,27 @@ void siconos::modeling::NewtonEulerR::computeHMatrix_prod_T(
 
   // H.T(q), first DS
   siconos::modeling::newton_euler::computeT(*q->vector(0), *T_buffer_);
-  HMatrix_prod_T_->leftCols(6) = HMatrix_view_->leftCols(7) * *T_buffer_;
+  jacobianhOver_q_prod_T_->leftCols(6) = jacobianhOver_q_view_->leftCols(7) * *T_buffer_;
   // H.T(q), second DS if it exists
   if (inter.has2Bodies()) {
     siconos::modeling::newton_euler::computeT(*q->vector(1), *T_buffer_);
-    HMatrix_prod_T_->rightCols(6) = HMatrix_view_->rightCols(7) * *T_buffer_;
+    jacobianhOver_q_prod_T_->rightCols(6) = jacobianhOver_q_view_->rightCols(7) * *T_buffer_;
   }
-  DEBUG_END("siconos::modeling::NewtonEulerR::computeHMatrix_prod_T(...) \n");
+  DEBUG_END("siconos::modeling::NewtonEulerR::computeJacobianhOver_q_prod_T(...) \n");
+}
+
+void siconos::modeling::NewtonEulerR::computeJach(double time, Interaction& inter) {
+  DEBUG_BEGIN("NewtonEulerR::computeJachq(double time, Interaction& inter, ...) \n");
+  DEBUG_PRINTF("with time =  %f\n", time);
+  DEBUG_PRINTF("with inter =  %p\n", &inter);
+
+  auto& DSlink = inter.linkToDSVariables();
+
+  computeJacobianhOver_q_prod_T(inter, DSlink[NewtonEulerR::q0]);
+
+  // computeJachqDot(time, inter); // This is not needed here
+  // computeDotJachq(time, inter);
+  DEBUG_END("NewtonEulerR::computeJachq(double time, Interaction& inter, ...) \n");
 }
 
 void siconos::modeling::NewtonEulerR::computeSecondOrderTimeDerivativeTerms(
@@ -250,17 +266,18 @@ void siconos::modeling::NewtonEulerR::computeSecondOrderTimeDerivativeTerms(
   // and the product of the time derivative of the Jacobian with dotq
   // we assume that dotq is up to date !
   DEBUG_EXPR(DSlink[siconos::modeling::NewtonEulerR::dotq]->display();)
-  assert(computeHMatrix_dot_);
-  computeHMatrix_dot_(*DSlink[siconos::modeling::NewtonEulerR::q0],
-                      *DSlink[siconos::modeling::NewtonEulerR::dotq], *HMatrix_dot_);
+  assert(computejacobianhOver_q_dot_);
+  computejacobianhOver_q_dot_(*DSlink[siconos::modeling::NewtonEulerR::q0],
+                              *DSlink[siconos::modeling::NewtonEulerR::dotq],
+                              *jacobianhOver_q_dot_);
 
-  if (!secondOrderTimeDerivativeTerms)
+  if (!secondOrderTimeDerivativeTerms_)
     secondOrderTimeDerivativeTerms_ =
-        std::make_shared<siconos::algebra::SiconosVector>(HMatrix_dot_->size(0));
+        std::make_shared<siconos::algebra::SiconosVector>(jacobianhOver_q_dot_->size(0));
 
-  DEBUG_EXPR(HMatrix_dot_->display(););
+  DEBUG_EXPR(jacobianhOver_q_dot_->display(););
 
-  siconos::algebra::matrixBlockVector_prod(*HMatrix_dot_,
+  siconos::algebra::matrixBlockVector_prod(*jacobianhOver_q_dot_,
                                            *DSlink[siconos::modeling::NewtonEulerR::dotq],
                                            *secondOrderTimeDerivativeTerms_, true);
 
@@ -277,19 +294,20 @@ void siconos::modeling::NewtonEulerR::computeSecondOrderTimeDerivativeTerms(
   std::vector<std::size_t> startIndex(4);
 
   // Temp buffer to save H.Tdot
-  siconos::algebra::SiconosMatrix H_prod_Tdot{ySize, qSize};
+  siconos::algebra::SiconosMatrix jacobianhOver_q_prod_Tdot{ySize, qSize};
   auto neds = std::dynamic_pointer_cast<NewtonEulerDS>(ds1);
   neds->computeTdot();
   // H.Tdot(q)
-  H_prod_Tdot.leftCols(6) = HMatrix_view_->leftCols(7) * neds->Tdot();
+  jacobianhOver_q_prod_Tdot.leftCols(6) = jacobianhOver_q_view_->leftCols(7) * neds->Tdot();
   if (ds2) {  // For second ds, if it exists
     neds = std::dynamic_pointer_cast<NewtonEulerDS>(ds2);
     neds->computeTdot();
-    H_prod_Tdot.rightCols(6) = HMatrix_view_->rightCols(7) * neds->Tdot();
+    jacobianhOver_q_prod_Tdot.rightCols(6) =
+        jacobianhOver_q_view_->rightCols(7) * neds->Tdot();
   }
 
   // compute the product of jachqTdot and v
-  siconos::algebra::matrixBlockVector_prod(H_prod_Tdot,
+  siconos::algebra::matrixBlockVector_prod(jacobianhOver_q_prod_Tdot,
                                            *DSlink[siconos::modeling::NewtonEulerR::velocity],
                                            *secondOrderTimeDerivativeTerms_, false);
 

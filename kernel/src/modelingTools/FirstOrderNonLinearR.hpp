@@ -225,32 +225,6 @@ class FirstOrderNonLinearR : public FirstOrderR {
 
   void computeJach(double time, Interaction &inter) override;
 
-  /** default function to compute \f$ B = \nabla_{\lambda}g \f$
-   *
-   *  \param time current time
-   *  \param x       current state variables
-   *  \param lambda  current nonsmooth variables
-   *  \param z       current auxiliary variables
-   *  \param[out] B  jacobian matrix
-   */
-  virtual void computeJacglambda(double time, const siconos::algebra::BlockVector &x,
-                                 const siconos::algebra::SiconosVector &lambda,
-                                 siconos::algebra::BlockVector &z,
-                                 siconos::algebra::SiconosMatrix &B);
-
-  /** default function to compute \f$ K = \nabla_{\lambda}g \f$
-   *
-   *  \param time    current time
-   *  \param x       current state variables
-   *  \param lambda  current nonsmooth variables
-   *  \param z       current auxiliary variables
-   *  \param[out] K  jacobian matrix
-   */
-  virtual void computeJacgx(double time, const siconos::algebra::BlockVector &x,
-                            const siconos::algebra::SiconosVector &lambda,
-                            siconos::algebra::BlockVector &z,
-                            siconos::algebra::SiconosMatrix &K);
-
   void computeJacg(double time, Interaction &inter) override;
 
   /** default function to compute y, using the data from the Interaction and DS

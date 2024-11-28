@@ -104,18 +104,19 @@ void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS1() {
   siconos::algebra::SiconosMatrix i0(3, 3);
   i0.setZero();
   i0(0, 0) = i0(1, 1) = i0(2, 2) = 1.;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ", ds->n() == 2 * 3, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ", *(ds->x0()) == x0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ", ds->x_size() == 2 * 3,
+                               true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ", ds->x0() == x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ", *(ds->rhs()) == rhs0,
                                true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildLagrangianLinearTIDS1 : ", *(ds->jacobianRhsx()->block(0, 0)) == m0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildLagrangianLinearTIDS1 : ", *(ds->jacobianRhsx()->block(0, 1)) == i0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildLagrangianLinearTIDS1 : ", *(ds->jacobianRhsx()->block(1, 0)) == rhsK, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildLagrangianLinearTIDS1 : ", *(ds->jacobianRhsx()->block(1, 1)) == rhsC, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ",
+                               *(ds->jacobianRhsOver_x()->block(0, 0)) == m0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ",
+                               *(ds->jacobianRhsOver_x()->block(0, 1)) == i0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ",
+                               *(ds->jacobianRhsOver_x()->block(1, 0)) == rhsK, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ",
+                               *(ds->jacobianRhsOver_x()->block(1, 1)) == rhsC, true);
   siconos::algebra::SiconosVector f0(3);
   f0 = K * q0 + C * velocity0;
   auto external_forces = [](double time, Eigen::Ref<siconos::algebra::MapVectorType> result) {
@@ -140,17 +141,17 @@ void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS1() {
   f0 = minus_inv_M * f0;
   siconos::algebra::SiconosVector rhs1;
   siconos::algebra::concatenateVectors(rhs1, velocity0, f0);
-  ds->computeJacobianRhsx(time);
+  ds->computeJacobianRhsOver_x(time);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ", *(ds->rhs()) == rhs1,
                                true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildLagrangianLinearTIDS1 : ", *(ds->jacobianRhsx()->block(0, 0)) == m0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildLagrangianLinearTIDS1 : ", *(ds->jacobianRhsx()->block(0, 1)) == i0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildLagrangianLinearTIDS1 : ", *(ds->jacobianRhsx()->block(1, 0)) == rhsK, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildLagrangianLinearTIDS1 : ", *(ds->jacobianRhsx()->block(1, 1)) == rhsC, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ",
+                               *(ds->jacobianRhsOver_x()->block(0, 0)) == m0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ",
+                               *(ds->jacobianRhsOver_x()->block(0, 1)) == i0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ",
+                               *(ds->jacobianRhsOver_x()->block(1, 0)) == rhsK, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ",
+                               *(ds->jacobianRhsOver_x()->block(1, 1)) == rhsC, true);
   std::cout << "--> Constructor 1 test ended with success." << std::endl;
 }
 
@@ -194,18 +195,19 @@ void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS2() {
   siconos::algebra::SiconosMatrix i0(3, 3);
   i0.setZero();
   i0(0, 0) = i0(1, 1) = i0(2, 2) = 1.;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2 : ", ds->n() == 2 * 3, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2 : ", *(ds->x0()) == x0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2 : ", ds->x_size() == 2 * 3,
+                               true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2 : ", ds->x0() == x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2 : ", ds->rhs()->isApprox(rhs0),
                                true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildLagrangianLinearTIDS2 : ", *(ds->jacobianRhsx()->block(0, 0)) == m0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildLagrangianLinearTIDS2 : ", *(ds->jacobianRhsx()->block(0, 1)) == i0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildLagrangianLinearTIDS2 : ", *(ds->jacobianRhsx()->block(1, 0)) == m0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildLagrangianLinearTIDS2 : ", *(ds->jacobianRhsx()->block(1, 1)) == m0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2 : ",
+                               *(ds->jacobianRhsOver_x()->block(0, 0)) == m0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2 : ",
+                               *(ds->jacobianRhsOver_x()->block(0, 1)) == i0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2 : ",
+                               *(ds->jacobianRhsOver_x()->block(1, 0)) == m0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2 : ",
+                               *(ds->jacobianRhsOver_x()->block(1, 1)) == m0, true);
   auto external_forces = [](double time, Eigen::Ref<siconos::algebra::MapVectorType> result) {
     auto count = 0;
     for (auto& v : result) v = count++ * time;

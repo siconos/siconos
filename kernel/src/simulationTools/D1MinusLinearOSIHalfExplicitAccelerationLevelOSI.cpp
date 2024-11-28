@@ -632,13 +632,15 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitAccele
   // only Lagrangian Systems
   if (relationType == siconos::modeling::RelationType::Lagrangian) {
     // in osnsp_rhs the linear part of velocity or acceleration relation will be saved
-    C = std::static_pointer_cast<siconos::modeling::LagrangianR>(mainInteraction->relation())
-            ->jacobianhOver_q();
+    auto rel =
+        std::static_pointer_cast<siconos::modeling::LagrangianR>(mainInteraction->relation());
 
-    if (C) {
-      assert(Xfree);
-      siconos::algebra::matrixBlockVector_prod(*C, *Xfree, osnsp_rhs, true);
-    }
+    assert(Xfree);
+    auto C =
+        std::static_pointer_cast<siconos::modeling::LagrangianR>(mainInteraction->relation())
+            ->jacobianhOver_q();
+    siconos::algebra::matrixBlockVector_prod(C, *Xfree, osnsp_rhs, true);
+
     DEBUG_EXPR(osnsp_rhs.display(););
 
     // in osnsp_rhs corrections have to be added
@@ -676,29 +678,24 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitAccele
             "siconos::integrators::D1MinusLinearOSI::computeFreeOutput. acceleration term "
             "involving Hessian matrix of Relation\n");
         DEBUG_EXPR(osnsp_rhs.display(););
-        std::static_pointer_cast<siconos::modeling::LagrangianScleronomousR>(inter->relation())
-            ->computedotjacqhXqdot(simulation()->getTkp1(), *inter);
-        auto dotjacqhXqdot =
-            *(std::static_pointer_cast<siconos::modeling::LagrangianScleronomousR>(
-                  inter->relation())
-                  ->jacobianhOver_q_dot_X_qdot());
-        osnsp_rhs += *ID * dotjacqhXqdot;
+        auto scler = std::static_pointer_cast<siconos::modeling::LagrangianScleronomousR>(
+            inter->relation());
+        scler->computeJacobianhOver_q_dot_X_qdot(simulation()->getTkp1(), *inter);
+        osnsp_rhs += *ID * scler->jacobianhOver_q_dot_X_qdot();
       }
       DEBUG_EXPR(osnsp_rhs.display(););
     }
   } else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
-    auto CT =
-        std::static_pointer_cast<siconos::modeling::NewtonEulerR>(mainInteraction->relation())
-            ->H_prod_T();
+    auto ner =
+        std::static_pointer_cast<siconos::modeling::NewtonEulerR>(mainInteraction->relation());
+    auto CT = ner->jacobianhOver_q_prod_T();
     DEBUG_EXPR(CT->display());
-    if (CT) {
-      assert(Xfree);
-      // creates a POINTER link between workX[ds] (xfree) and the
-      // corresponding interactionBlock in each Interaction for each ds of the
-      // current Interaction.
-      // XXX Big quirks !!! -- xhub
-      siconos::algebra::matrixBlockVector_prod(*CT, *Xfree, osnsp_rhs, true);
-    }
+    assert(Xfree);
+    // creates a POINTER link between workX[ds] (xfree) and the
+    // corresponding interactionBlock in each Interaction for each ds of the
+    // current Interaction.
+    // XXX Big quirks !!! -- xhub
+    siconos::algebra::matrixBlockVector_prod(CT, *Xfree, osnsp_rhs, true);
 
     if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]).get() == osnsp) {
       // in osnsp_rhs corrections have to be added
@@ -718,16 +715,10 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitAccele
       auto ds1 = indexSet->properties(vertex_inter).source;
       auto ds2 = indexSet->properties(vertex_inter).target;
 
-      auto rel = std::static_pointer_cast<siconos::modeling::NewtonEulerR>(inter->relation());
-      rel->computeSecondOrderTimeDerivativeTerms(simulation()->getTkp1(), *inter, ds1, ds2);
+      ner->computeSecondOrderTimeDerivativeTerms(simulation()->getTkp1(), *inter, ds1, ds2);
 
-      DEBUG_EXPR((std::static_pointer_cast<siconos::modeling::NewtonEulerR>(inter->relation())
-                      ->secondOrderTimeDerivativeTerms())
-                     ->display());
-      auto secondOrderTimeDerivativeTerms =
-          (std::static_pointer_cast<siconos::modeling::NewtonEulerR>(inter->relation())
-               ->secondOrderTimeDerivativeTerms());
-      osnsp_rhs += *ID * *secondOrderTimeDerivativeTerms;
+      DEBUG_EXPR(ner->secondOrderTimeDerivativeTerms()->display());
+      osnsp_rhs += *ID * ner->secondOrderTimeDerivativeTerms();
 
       DEBUG_EXPR(osnsp_rhs.display(););
     }

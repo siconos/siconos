@@ -153,10 +153,9 @@ class EulerMoreauOSI : public OneStepIntegrator {
 
   enum EulerMoreauOSI_interaction_workVector_id {
     OSNSP_RHS,
-    VEC_X,
+    WORK_DS,
     H_ALPHA,
     VEC_RESIDU_Y,
-    VEC_RESIDU_R,
     YOLD,
     LAMBDAOLD,
     WORK_INTERACTION_LENGTH
@@ -170,7 +169,7 @@ class EulerMoreauOSI : public OneStepIntegrator {
     BLOCK_WORK_LENGTH
   };
 
-  enum EulerMoreauOSI_interaction_workMat_id { MAT_KHAT, MAT_KTILDE, MAT_WORK_LENGTH };
+  enum EulerMoreauOSI_interaction_workMat_id { MAT_KHAT, MAT_WORK_LENGTH };
 
   /** constructor from theta value only
    *

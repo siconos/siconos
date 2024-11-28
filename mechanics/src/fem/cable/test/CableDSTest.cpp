@@ -192,7 +192,7 @@ void CableDSTest::testComputeBouncingBall() {
   (*H)(0, 0) = 1.0;
 
   auto nslaw = std::make_shared<siconos::modeling::NewtonImpactNSL>(e);
-  auto relation = std::make_shared<siconos::modeling::LagrangianLinearTIR>(H);
+  auto relation = std::make_shared<siconos::modeling::LagrangianLinearTIR>(*H);
 
   auto inter = std::make_shared<siconos::modeling::Interaction>(nslaw, relation);
 

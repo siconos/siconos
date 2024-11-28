@@ -67,7 +67,7 @@ class SimpleMatrixTest : public CppUnit::TestFixture {
   unsigned int size, size2;
   std::shared_ptr<siconos::algebra::SiconosMatrix> SicM, m1, m2, m3, m4, m5, m6, m7, m8, C, Cb,
       Cb2;
-  std::shared_ptr<const siconos::algebra::SiconosMatrix> A, B, Ab, Bb;
+  std::shared_ptr<const siconos::algebra::SiconosMatrix> A, B, Ab;
   std::shared_ptr<siconos::algebra::SiconosMatrix> SimM;
   std::string fic1, fic2;
   std::shared_ptr<siconos::algebra::SiconosVector> vect1, vect2, vect3, vect_sparse_1;

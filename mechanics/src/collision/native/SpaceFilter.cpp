@@ -12,8 +12,8 @@
 #include "DynamicalSystem.hpp"
 #include "ExternalBody.hpp"
 #include "Interaction.hpp"
-#include "SiconosVector.hpp"
 #include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 #include "Simulation.hpp"
 #include "SimulationGraphs.hpp"
 #include "SpaceFilter_impl.hpp"
@@ -60,7 +60,7 @@ siconos::collision::native::SpaceFilter::SpaceFilter(
       _hash_table(std::make_shared<SpaceHash>()),
       diskdisk_relations(std::make_shared<DiskDiskRDeclaredPool>()),
       diskplan_relations(std::make_shared<DiskPlanRDeclaredPool>()),
-      circlecircle_relations(std::make_shared<CircleCircleRDeclaredPool>()){};
+      circlecircle_relations(std::make_shared<CircleCircleRDeclaredPool>()) {};
 
 siconos::collision::native::SpaceFilter::SpaceFilter(
     unsigned int bboxfactor, unsigned int cellsize,
@@ -73,7 +73,7 @@ struct siconos::collision::native::SpaceFilter::_BodyHash
  public:
   siconos::simulation::Simulation& sim;
   SpaceFilter& parent;
-  _BodyHash(siconos::simulation::Simulation& s, SpaceFilter& p) : sim(s), parent(p){};
+  _BodyHash(siconos::simulation::Simulation& s, SpaceFilter& p) : sim(s), parent(p) {};
 
   using siconos::collision::native::BodiesVisitor::visit;
 
@@ -181,7 +181,7 @@ struct siconos::collision::native::SpaceFilter::_CircularFilter
   _CircularFilter(std::shared_ptr<siconos::simulation::Simulation> s,
                   std::shared_ptr<siconos::collision::native::SpaceFilter> parent,
                   std::shared_ptr<siconos::collision::native::bodies::CircularDS> ds1)
-      : sim(s), parent(parent), ds1(ds1){};
+      : sim(s), parent(parent), ds1(ds1) {};
 
   void visit_circular(std::shared_ptr<siconos::collision::native::bodies::CircularDS> ds2) {
     std::shared_ptr<siconos::collision::native::bodies::CircularR> rel;
@@ -299,7 +299,7 @@ struct siconos::collision::native::SpaceFilter::_SphereLDSFilter
   _SphereLDSFilter(std::shared_ptr<siconos::simulation::Simulation> _sim,
                    std::shared_ptr<siconos::collision::native::SpaceFilter> p,
                    std::shared_ptr<siconos::collision::native::bodies::SphereLDS> s)
-      : sim(_sim), parent(p), ds1(s){};
+      : sim(_sim), parent(p), ds1(s) {};
 
   void visit(std::shared_ptr<siconos::collision::native::bodies::SphereLDS> ds2) override {
     auto DSG0(sim->nonSmoothDynamicalSystem()->topology()->dSG(0));
@@ -376,7 +376,7 @@ struct siconos::collision::native::SpaceFilter::_SphereNEDSFilter
   _SphereNEDSFilter(std::shared_ptr<siconos::simulation::Simulation> _sim,
                     std::shared_ptr<siconos::collision::native::SpaceFilter> p,
                     std::shared_ptr<siconos::collision::native::bodies::SphereNEDS> s)
-      : sim(_sim), parent(p), ds1(s){};
+      : sim(_sim), parent(p), ds1(s) {};
 
   void visit(std::shared_ptr<siconos::collision::native::bodies::SphereNEDS> ds2) override {
     auto DSG0 = sim->nonSmoothDynamicalSystem()->topology()->dSG(0);
@@ -464,7 +464,7 @@ struct siconos::collision::native::SpaceFilter::_IsSameDiskPlanR
         xCenter(xCenter),
         yCenter(yCenter),
         width(width),
-        flag(false){};
+        flag(false) {};
 
   void visit(const siconos::collision::native::bodies::DiskDiskR&) override { flag = false; };
 
@@ -488,13 +488,14 @@ struct siconos::collision::native::SpaceFilter::_IsSameDiskMovingPlanR
   using siconos::collision::native::BodiesVisitor::visit;
 
   std::shared_ptr<siconos::collision::native::SpaceFilter> parent;
-  siconos::plugins::FTime AF, BF, CF;
+  siconos::modeling::func_prototypes::FunctionS_S AF, BF, CF;
   double r;
   bool flag;
   _IsSameDiskMovingPlanR(std::shared_ptr<siconos::collision::native::SpaceFilter> p,
-                         siconos::plugins::FTime AF, siconos::plugins::FTime BF,
-                         siconos::plugins::FTime CF, double r)
-      : parent(p), AF(AF), BF(BF), CF(CF), r(r), flag(false){};
+                         const siconos::modeling::func_prototypes::FunctionS_S& AF,
+                         const siconos::modeling::func_prototypes::FunctionS_S& BF,
+                         const siconos::modeling::func_prototypes::FunctionS_S& CF, double r)
+      : parent(p), AF(AF), BF(BF), CF(CF), r(r), flag(false) {};
 
   void visit(const siconos::collision::native::bodies::DiskDiskR&) override { flag = false; };
 
@@ -521,7 +522,7 @@ struct siconos::collision::native::SpaceFilter::_IsSameSpherePlanR
   bool flag;
   _IsSameSpherePlanR(std::shared_ptr<siconos::collision::native::SpaceFilter> p, double A,
                      double B, double C, double D, double r)
-      : parent(p), A(A), B(B), C(C), D(D), r(r), flag(false){};
+      : parent(p), A(A), B(B), C(C), D(D), r(r), flag(false) {};
 
   void visit(const siconos::collision::native::bodies::SphereLDSSphereLDSR&) override {
     flag = false;
@@ -616,9 +617,14 @@ void siconos::collision::native::SpaceFilter::_MovingPlanCircularFilter(
 
   // all DS must be in DS graph
   assert(DSG0->bundle(DSG0->descriptor(ds)) == ds);
-  auto relp = std::make_shared<siconos::collision::native::bodies::DiskMovingPlanR>(
-      (*_moving_plans)(i, 0), (*_moving_plans)(i, 1), (*_moving_plans)(i, 2),
-      (*_moving_plans)(i, 3), (*_moving_plans)(i, 4), (*_moving_plans)(i, 5), r);
+  auto relp = std::make_shared<siconos::collision::native::bodies::DiskMovingPlanR>(r);
+
+  relp->setComputeAFunction((*_moving_plans)(i, 0));
+  relp->setComputeBFunction((*_moving_plans)(i, 1));
+  relp->setComputeCFunction((*_moving_plans)(i, 2));
+  relp->setComputeAdotFunction((*_moving_plans)(i, 3));
+  relp->setComputeBdotFunction((*_moving_plans)(i, 4));
+  relp->setComputeCdotFunction((*_moving_plans)(i, 5));
 
   relp->init(time);
 
@@ -822,7 +828,7 @@ struct siconos::collision::native::SpaceFilter::_FindInteractions
 
   _FindInteractions(std::shared_ptr<siconos::simulation::Simulation> s,
                     std::shared_ptr<siconos::collision::native::SpaceFilter> p, double time)
-      : sim(s), parent(p), time(time){};
+      : sim(s), parent(p), time(time) {};
 
   void visit_circular(std::shared_ptr<siconos::collision::native::bodies::CircularDS> ds1) {
     assert(parent->_plans->size(0) > 0);
@@ -1018,7 +1024,7 @@ struct siconos::collision::native::SpaceFilter::_DiskDistance
   double r;
   double result;
 
-  _DiskDistance(double x, double y, double r) : x(x), y(y), r(r){};
+  _DiskDistance(double x, double y, double r) : x(x), y(y), r(r) {};
 
   void visit(std::shared_ptr<siconos::collision::native::bodies::Disk> d) override {
     double xd = d->q()->getValue(0);

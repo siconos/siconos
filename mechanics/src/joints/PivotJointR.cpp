@@ -27,8 +27,8 @@
 
 #include "BlockVector.hpp"
 #include "NewtonEulerDS.hpp"
-#include "SiconosVector.hpp"
 #include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 #include "op3x3.h"  // for orthoBaseFromVector
 // #include <iostream>
 
@@ -157,170 +157,178 @@ void siconos::joints::PivotJointR::Jd1d2(double X1, double Y1, double Z1, double
                                          double q22, double q23) {
   KneeJointR::Jd1d2(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23);
 
-  jacobianhOver_q_->setValue(3, 0, 0);
-  jacobianhOver_q_->setValue(3, 1, 0);
-  jacobianhOver_q_->setValue(3, 2, 0);
+  jacobianhOver_q_view_->setValue(3, 0, 0);
+  jacobianhOver_q_view_->setValue(3, 1, 0);
+  jacobianhOver_q_view_->setValue(3, 2, 0);
 
   // sympy expression: [AscalA1.diff(x) for x in q1]
-  jacobianhOver_q_->setValue(
+  jacobianhOver_q_view_->setValue(
       3, 3,
       _A1x * (-_cq2q101 * q21 - _cq2q102 * q20 + _cq2q103 * q23 - _cq2q104 * q22) +
           _A1y * (-_cq2q101 * q22 - _cq2q102 * q23 - _cq2q103 * q20 + _cq2q104 * q21) +
           _A1z * (-_cq2q101 * q23 + _cq2q102 * q22 - _cq2q103 * q21 - _cq2q104 * q20));
-  jacobianhOver_q_->setValue(
+  jacobianhOver_q_view_->setValue(
       3, 4,
       _A1x * (_cq2q101 * q20 - _cq2q102 * q21 - _cq2q103 * q22 - _cq2q104 * q23) +
           _A1y * (-_cq2q101 * q23 + _cq2q102 * q22 - _cq2q103 * q21 - _cq2q104 * q20) +
           _A1z * (_cq2q101 * q22 + _cq2q102 * q23 + _cq2q103 * q20 - _cq2q104 * q21));
-  jacobianhOver_q_->setValue(
+  jacobianhOver_q_view_->setValue(
       3, 5,
       _A1x * (_cq2q101 * q23 - _cq2q102 * q22 + _cq2q103 * q21 + _cq2q104 * q20) +
           _A1y * (_cq2q101 * q20 - _cq2q102 * q21 - _cq2q103 * q22 - _cq2q104 * q23) +
           _A1z * (-_cq2q101 * q21 - _cq2q102 * q20 + _cq2q103 * q23 - _cq2q104 * q22));
-  jacobianhOver_q_->setValue(
+  jacobianhOver_q_view_->setValue(
       3, 6,
       _A1x * (-_cq2q101 * q22 - _cq2q102 * q23 - _cq2q103 * q20 + _cq2q104 * q21) +
           _A1y * (_cq2q101 * q21 + _cq2q102 * q20 - _cq2q103 * q23 + _cq2q104 * q22) +
           _A1z * (_cq2q101 * q20 - _cq2q102 * q21 - _cq2q103 * q22 - _cq2q104 * q23));
 
-  jacobianhOver_q_->setValue(3, 7, 0);
-  jacobianhOver_q_->setValue(3, 8, 0);
-  jacobianhOver_q_->setValue(3, 9, 0);
+  jacobianhOver_q_view_->setValue(3, 7, 0);
+  jacobianhOver_q_view_->setValue(3, 8, 0);
+  jacobianhOver_q_view_->setValue(3, 9, 0);
 
   // sympy expression: [AscalA1.diff(x) for x in q2]
-  jacobianhOver_q_->setValue(
+  jacobianhOver_q_view_->setValue(
       3, 10,
       _A1x * (_cq2q101 * q11 - _cq2q102 * q10 - _cq2q103 * q13 + _cq2q104 * q12) +
           _A1y * (_cq2q101 * q12 + _cq2q102 * q13 - _cq2q103 * q10 - _cq2q104 * q11) +
           _A1z * (_cq2q101 * q13 - _cq2q102 * q12 + _cq2q103 * q11 - _cq2q104 * q10));
-  jacobianhOver_q_->setValue(
+  jacobianhOver_q_view_->setValue(
       3, 11,
       _A1x * (-_cq2q101 * q10 - _cq2q102 * q11 + _cq2q103 * q12 + _cq2q104 * q13) +
           _A1y * (_cq2q101 * q13 - _cq2q102 * q12 - _cq2q103 * q11 + _cq2q104 * q10) +
           _A1z * (-_cq2q101 * q12 - _cq2q102 * q13 - _cq2q103 * q10 - _cq2q104 * q11));
-  jacobianhOver_q_->setValue(
+  jacobianhOver_q_view_->setValue(
       3, 12,
       _A1x * (-_cq2q101 * q13 - _cq2q102 * q12 - _cq2q103 * q11 - _cq2q104 * q10) +
           _A1y * (-_cq2q101 * q10 + _cq2q102 * q11 - _cq2q103 * q12 + _cq2q104 * q13) +
           _A1z * (_cq2q101 * q11 + _cq2q102 * q10 - _cq2q103 * q13 - _cq2q104 * q12));
-  jacobianhOver_q_->setValue(
+  jacobianhOver_q_view_->setValue(
       3, 13,
       _A1x * (_cq2q101 * q12 - _cq2q102 * q13 + _cq2q103 * q10 - _cq2q104 * q11) +
           _A1y * (-_cq2q101 * q11 - _cq2q102 * q10 - _cq2q103 * q13 - _cq2q104 * q12) +
           _A1z * (-_cq2q101 * q10 + _cq2q102 * q11 + _cq2q103 * q12 - _cq2q104 * q13));
 
-  jacobianhOver_q_->setValue(4, 0, 0);
-  jacobianhOver_q_->setValue(4, 1, 0);
-  jacobianhOver_q_->setValue(4, 2, 0);
+  jacobianhOver_q_view_->setValue(4, 0, 0);
+  jacobianhOver_q_view_->setValue(4, 1, 0);
+  jacobianhOver_q_view_->setValue(4, 2, 0);
 
   // sympy expression: [AscalA2.diff(x) for x in q1]
-  jacobianhOver_q_->setValue(
+  jacobianhOver_q_view_->setValue(
       4, 3,
       _A2x * (-_cq2q101 * q21 - _cq2q102 * q20 + _cq2q103 * q23 - _cq2q104 * q22) +
           _A2y * (-_cq2q101 * q22 - _cq2q102 * q23 - _cq2q103 * q20 + _cq2q104 * q21) +
           _A2z * (-_cq2q101 * q23 + _cq2q102 * q22 - _cq2q103 * q21 - _cq2q104 * q20));
-  jacobianhOver_q_->setValue(
+  jacobianhOver_q_view_->setValue(
       4, 4,
       _A2x * (_cq2q101 * q20 - _cq2q102 * q21 - _cq2q103 * q22 - _cq2q104 * q23) +
           _A2y * (-_cq2q101 * q23 + _cq2q102 * q22 - _cq2q103 * q21 - _cq2q104 * q20) +
           _A2z * (_cq2q101 * q22 + _cq2q102 * q23 + _cq2q103 * q20 - _cq2q104 * q21));
-  jacobianhOver_q_->setValue(
+  jacobianhOver_q_view_->setValue(
       4, 5,
       _A2x * (_cq2q101 * q23 - _cq2q102 * q22 + _cq2q103 * q21 + _cq2q104 * q20) +
           _A2y * (_cq2q101 * q20 - _cq2q102 * q21 - _cq2q103 * q22 - _cq2q104 * q23) +
           _A2z * (-_cq2q101 * q21 - _cq2q102 * q20 + _cq2q103 * q23 - _cq2q104 * q22));
-  jacobianhOver_q_->setValue(
+  jacobianhOver_q_view_->setValue(
       4, 6,
       _A2x * (-_cq2q101 * q22 - _cq2q102 * q23 - _cq2q103 * q20 + _cq2q104 * q21) +
           _A2y * (_cq2q101 * q21 + _cq2q102 * q20 - _cq2q103 * q23 + _cq2q104 * q22) +
           _A2z * (_cq2q101 * q20 - _cq2q102 * q21 - _cq2q103 * q22 - _cq2q104 * q23));
 
-  jacobianhOver_q_->setValue(4, 7, 0);
-  jacobianhOver_q_->setValue(4, 8, 0);
-  jacobianhOver_q_->setValue(4, 9, 0);
+  jacobianhOver_q_view_->setValue(4, 7, 0);
+  jacobianhOver_q_view_->setValue(4, 8, 0);
+  jacobianhOver_q_view_->setValue(4, 9, 0);
 
   // sympy expression: [AscalA2.diff(x) for x in q1]
-  jacobianhOver_q_->setValue(
+  jacobianhOver_q_view_->setValue(
       4, 10,
       _A2x * (_cq2q101 * q11 - _cq2q102 * q10 - _cq2q103 * q13 + _cq2q104 * q12) +
           _A2y * (_cq2q101 * q12 + _cq2q102 * q13 - _cq2q103 * q10 - _cq2q104 * q11) +
           _A2z * (_cq2q101 * q13 - _cq2q102 * q12 + _cq2q103 * q11 - _cq2q104 * q10));
-  jacobianhOver_q_->setValue(
+  jacobianhOver_q_view_->setValue(
       4, 11,
       _A2x * (-_cq2q101 * q10 - _cq2q102 * q11 + _cq2q103 * q12 + _cq2q104 * q13) +
           _A2y * (_cq2q101 * q13 - _cq2q102 * q12 - _cq2q103 * q11 + _cq2q104 * q10) +
           _A2z * (-_cq2q101 * q12 - _cq2q102 * q13 - _cq2q103 * q10 - _cq2q104 * q11));
-  jacobianhOver_q_->setValue(
+  jacobianhOver_q_view_->setValue(
       4, 12,
       _A2x * (-_cq2q101 * q13 - _cq2q102 * q12 - _cq2q103 * q11 - _cq2q104 * q10) +
           _A2y * (-_cq2q101 * q10 + _cq2q102 * q11 - _cq2q103 * q12 + _cq2q104 * q13) +
           _A2z * (_cq2q101 * q11 + _cq2q102 * q10 - _cq2q103 * q13 - _cq2q104 * q12));
-  jacobianhOver_q_->setValue(
+  jacobianhOver_q_view_->setValue(
       4, 13,
       _A2x * (_cq2q101 * q12 - _cq2q102 * q13 + _cq2q103 * q10 - _cq2q104 * q11) +
           _A2y * (-_cq2q101 * q11 - _cq2q102 * q10 - _cq2q103 * q13 - _cq2q104 * q12) +
           _A2z * (-_cq2q101 * q10 + _cq2q102 * q11 + _cq2q103 * q12 - _cq2q104 * q13));
 
   /*proj_with_q
-  for (unsigned int ii=0; ii <jacobianhOver_q_->size(0); ii++)
-    for (unsigned int jj=0; jj <jacobianhOver_q_->size(1); jj++)
-  jacobianhOver_q_Proj->setValue(ii,jj,jacobianhOver_q_->getValue(ii,jj));
+  for (unsigned int ii=0; ii <jacobianhOver_q_view_->size(0); ii++)
+    for (unsigned int jj=0; jj <jacobianhOver_q_view_->size(1); jj++)
+  jacobianhOver_q_view_Proj->setValue(ii,jj,jacobianhOver_q_view_->getValue(ii,jj));
 
-  jacobianhOver_q_Proj->setValue(5,0,0);
-  jacobianhOver_q_Proj->setValue(5,1,0);
-  jacobianhOver_q_Proj->setValue(5,2,0);
-  jacobianhOver_q_Proj->setValue(5,3,2.0*q10);
-  jacobianhOver_q_Proj->setValue(5,4,2.0*q11);
-  jacobianhOver_q_Proj->setValue(5,5,2.0*q12);
-  jacobianhOver_q_Proj->setValue(5,6,2.0*q13);
-  jacobianhOver_q_Proj->setValue(6,0+7,0);
-  jacobianhOver_q_Proj->setValue(6,1+7,0);
-  jacobianhOver_q_Proj->setValue(6,2+7,0);
-  jacobianhOver_q_Proj->setValue(6,3+7,2.0*q20);
-  jacobianhOver_q_Proj->setValue(6,4+7,2.0*q21);
-  jacobianhOver_q_Proj->setValue(6,5+7,2.0*q22);
-  jacobianhOver_q_Proj->setValue(6,6+7,2.0*q23);
+  jacobianhOver_q_view_Proj->setValue(5,0,0);
+  jacobianhOver_q_view_Proj->setValue(5,1,0);
+  jacobianhOver_q_view_Proj->setValue(5,2,0);
+  jacobianhOver_q_view_Proj->setValue(5,3,2.0*q10);
+  jacobianhOver_q_view_Proj->setValue(5,4,2.0*q11);
+  jacobianhOver_q_view_Proj->setValue(5,5,2.0*q12);
+  jacobianhOver_q_view_Proj->setValue(5,6,2.0*q13);
+  jacobianhOver_q_view_Proj->setValue(6,0+7,0);
+  jacobianhOver_q_view_Proj->setValue(6,1+7,0);
+  jacobianhOver_q_view_Proj->setValue(6,2+7,0);
+  jacobianhOver_q_view_Proj->setValue(6,3+7,2.0*q20);
+  jacobianhOver_q_view_Proj->setValue(6,4+7,2.0*q21);
+  jacobianhOver_q_view_Proj->setValue(6,5+7,2.0*q22);
+  jacobianhOver_q_view_Proj->setValue(6,6+7,2.0*q23);
   */
 
-  //jacobianhOver_q_->display();
+  // jacobianhOver_q_view_->display();
 }
 
 void siconos::joints::PivotJointR::Jd1(double X1, double Y1, double Z1, double q10, double q11,
                                        double q12, double q13) {
   KneeJointR::Jd1(X1, Y1, Z1, q10, q11, q12, q13);
 
-  jacobianhOver_q_->setValue(3, 0, 0);
-  jacobianhOver_q_->setValue(3, 1, 0);
-  jacobianhOver_q_->setValue(3, 2, 0);
+  jacobianhOver_q_view_->setValue(3, 0, 0);
+  jacobianhOver_q_view_->setValue(3, 1, 0);
+  jacobianhOver_q_view_->setValue(3, 2, 0);
 
   // sympy expression: [AscalA1.diff(x) for x in q1]
-  jacobianhOver_q_->setValue(3, 3, _A1x * (-_cq2q102) + _A1y * (-_cq2q103) + _A1z * (-_cq2q104));
-  jacobianhOver_q_->setValue(3, 4, _A1x * (_cq2q101) + _A1y * (-_cq2q104) + _A1z * (_cq2q103));
-  jacobianhOver_q_->setValue(3, 5, _A1x * (_cq2q104) + _A1y * (_cq2q101) + _A1z * (-_cq2q102));
-  jacobianhOver_q_->setValue(3, 6, _A1x * (-_cq2q103) + _A1y * (_cq2q102) + _A1z * (_cq2q101));
+  jacobianhOver_q_view_->setValue(
+      3, 3, _A1x * (-_cq2q102) + _A1y * (-_cq2q103) + _A1z * (-_cq2q104));
+  jacobianhOver_q_view_->setValue(3, 4,
+                                  _A1x * (_cq2q101) + _A1y * (-_cq2q104) + _A1z * (_cq2q103));
+  jacobianhOver_q_view_->setValue(3, 5,
+                                  _A1x * (_cq2q104) + _A1y * (_cq2q101) + _A1z * (-_cq2q102));
+  jacobianhOver_q_view_->setValue(3, 6,
+                                  _A1x * (-_cq2q103) + _A1y * (_cq2q102) + _A1z * (_cq2q101));
 
-  jacobianhOver_q_->setValue(4, 0, 0);
-  jacobianhOver_q_->setValue(4, 1, 0);
-  jacobianhOver_q_->setValue(4, 2, 0);
+  jacobianhOver_q_view_->setValue(4, 0, 0);
+  jacobianhOver_q_view_->setValue(4, 1, 0);
+  jacobianhOver_q_view_->setValue(4, 2, 0);
 
   // sympy expression: [AscalA2.diff(x) for x in q1]
-  jacobianhOver_q_->setValue(4, 3, _A2x * (-_cq2q102) + _A2y * (-_cq2q103) + _A2z * (-_cq2q104));
-  jacobianhOver_q_->setValue(4, 4, _A2x * (_cq2q101) + _A2y * (-_cq2q104) + _A2z * (_cq2q103));
-  jacobianhOver_q_->setValue(4, 5, _A2x * (_cq2q104) + _A2y * (_cq2q101) + _A2z * (-_cq2q102));
-  jacobianhOver_q_->setValue(4, 6, _A2x * (-_cq2q103) + _A2y * (_cq2q102) + _A2z * (_cq2q101));
+  jacobianhOver_q_view_->setValue(
+      4, 3, _A2x * (-_cq2q102) + _A2y * (-_cq2q103) + _A2z * (-_cq2q104));
+  jacobianhOver_q_view_->setValue(4, 4,
+                                  _A2x * (_cq2q101) + _A2y * (-_cq2q104) + _A2z * (_cq2q103));
+  jacobianhOver_q_view_->setValue(4, 5,
+                                  _A2x * (_cq2q104) + _A2y * (_cq2q101) + _A2z * (-_cq2q102));
+  jacobianhOver_q_view_->setValue(4, 6,
+                                  _A2x * (-_cq2q103) + _A2y * (_cq2q102) + _A2z * (_cq2q101));
 
   /*proj_with_q
-      for (unsigned int ii=0; ii <jacobianhOver_q_->size(0); ii++)
-        for (unsigned int jj=0; jj <jacobianhOver_q_->size(1); jj++)
-    jacobianhOver_q_Proj->setValue(ii,jj,jacobianhOver_q_->getValue(ii,jj));
+      for (unsigned int ii=0; ii <jacobianhOver_q_view_->size(0); ii++)
+        for (unsigned int jj=0; jj <jacobianhOver_q_view_->size(1); jj++)
+    jacobianhOver_q_view_Proj->setValue(ii,jj,jacobianhOver_q_view_->getValue(ii,jj));
 
-      jacobianhOver_q_Proj->setValue(5,0,0);
-      jacobianhOver_q_Proj->setValue(5,1,0);
-      jacobianhOver_q_Proj->setValue(5,2,0);
-      jacobianhOver_q_Proj->setValue(5,3,2.0*q10);
-      jacobianhOver_q_Proj->setValue(5,4,2.0*q11);
-      jacobianhOver_q_Proj->setValue(5,5,2.0*q12);
-      jacobianhOver_q_Proj->setValue(5,6,2.0*q13);
+      jacobianhOver_q_view_Proj->setValue(5,0,0);
+      jacobianhOver_q_view_Proj->setValue(5,1,0);
+      jacobianhOver_q_view_Proj->setValue(5,2,0);
+      jacobianhOver_q_view_Proj->setValue(5,3,2.0*q10);
+      jacobianhOver_q_view_Proj->setValue(5,4,2.0*q11);
+      jacobianhOver_q_view_Proj->setValue(5,5,2.0*q12);
+      jacobianhOver_q_view_Proj->setValue(5,6,2.0*q13);
   */
 }
 
@@ -394,10 +402,9 @@ double siconos::joints::PivotJointR::AscalA(double rot2to1x, double rot2to1y,
   return _A->getValue(0) * rot2to1x + _A->getValue(1) * rot2to1y + _A->getValue(2) * rot2to1z;
 }
 
-void siconos::joints::PivotJointR::computeh(double time,
-                                            const siconos::algebra::BlockVector& q0,
-                                            siconos::algebra::SiconosVector& y) {
-  KneeJointR::computeh(time, q0, y);
+void siconos::joints::PivotJointR::computeh(const siconos::algebra::BlockVector& q0,
+                                            Eigen::Ref<siconos::algebra::SiconosVector> y) {
+  KneeJointR::computeh(q0, y);
 
   double q10 = q0.getValue(3);
   double q11 = q0.getValue(4);
@@ -422,10 +429,9 @@ void siconos::joints::PivotJointR::computeh(double time,
 }
 
 /** Compute the vector of linear and angular positions of the free axes */
-void siconos::joints::PivotJointR::computehDoF(double time,
-                                               const siconos::algebra::BlockVector& q0,
-                                               siconos::algebra::SiconosVector& y,
-                                               unsigned int axis) {
+void siconos::joints::PivotJointR::computehDoF(const siconos::algebra::BlockVector& q0,
+                                                Eigen::Ref<siconos::algebra::SiconosVector> y,
+                                                unsigned int axis) {
   // Normally we fill y starting at axis up to the number of columns,
   // but in this case there is only one, so just don't do anything if
   // it doesn't match.
@@ -474,15 +480,14 @@ void siconos::joints::PivotJointR::computehDoF(double time,
 
 /** Compute the jacobian of linear and angular DoF with respect to some q */
 void siconos::joints::PivotJointR::computeJachqDoF(
-    double time, siconos::modeling::Interaction& inter,
-    std::shared_ptr<siconos::algebra::BlockVector> q0, siconos::algebra::SiconosMatrix& jachq,
-    unsigned int axis) {
+    siconos::modeling::Interaction& inter, const siconos::algebra::BlockVector& q0,
+    Eigen::Ref<siconos::algebra::SiconosMatrix> jachq, unsigned int axis) {
   // Normally we fill jachq starting at axis up to the number of rows,
   // but in this case there is only one, so just don't do anything if
   // it doesn't match.
   if (axis != 0) return;
 
-  auto q1 = (q0->getAllVect())[0];
+  auto q1 = (q0.getAllVect())[0];
   double q10 = q1->getValue(3);
   double q11 = q1->getValue(4);
   double q12 = q1->getValue(5);
@@ -493,8 +498,8 @@ void siconos::joints::PivotJointR::computeJachqDoF(
   double q22 = 0;
   double q23 = 0;
 
-  if (q0->numberOfBlocks() > 1) {
-    auto q2 = (q0->getAllVect())[1];
+  if (q0.numberOfBlocks() > 1) {
+    auto q2 = (q0.getAllVect())[1];
     q20 = q2->getValue(3);
     q21 = q2->getValue(4);
     q22 = q2->getValue(5);
@@ -598,7 +603,7 @@ void siconos::joints::PivotJointR::computeJachqDoF(
                  x22 * (_A->getValue(0) * x9 + _A->getValue(1) * x25 + _A->getValue(2) * x18) +
                      x23 * x26);
 
-  if (q0->numberOfBlocks() < 2) return;
+  if (q0.numberOfBlocks() < 2) return;
 
   jachq.setValue(0, 7, 0);
   jachq.setValue(0, 8, 0);
@@ -643,5 +648,6 @@ void siconos::joints::PivotJointR::_normalDoF(siconos::algebra::SiconosVector& a
   // We assume that A is normalized.
   ans = *_A;
 
-  if (absoluteRef) siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(*q0.getAllVect()[0], ans);
+  if (absoluteRef)
+    siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(*q0.getAllVect()[0], ans);
 }

@@ -199,7 +199,7 @@ SICONOS_IO_REGISTER(siconos::modeling::NonSmoothDynamicalSystem::Change,
   (typeOfChange))
 SICONOS_IO_REGISTER_WITH_BASES(FirstOrderLinearR,(FirstOrderR),
   (_e))
-SICONOS_IO_REGISTER_WITH_BASES(FirstOrderLinearTIDS,(FirstOrderLinearDS),
+SICONOS_IO_REGISTER_WITH_BASES(FirstOrderLinearDS,(FirstOrderLinearDS),
 )
 SICONOS_IO_REGISTER_WITH_BASES(FirstOrderType2R,(FirstOrderR),
 )
@@ -209,7 +209,7 @@ SICONOS_IO_REGISTER_WITH_BASES(FirstOrderLinearDS,(FirstOrderNonLinearDS),
   (_A)
   (_b)
   (_hasConstantA)
-  (_hasConstantB)
+  (hasConstantbVector_)
   (_pluginA)
   (_pluginb))
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianCompliantR,(LagrangianR),
@@ -277,21 +277,21 @@ SICONOS_IO_REGISTER_WITH_BASES(FirstOrderNonLinearDS,(DynamicalSystem),
   (_f)
   (_fold)
   (LU_M_)
-  (_jacobianfx)
+  (jacobianfVectorOver_x_)
   (_pluginJacxf)
   (_pluginM)
   (_pluginf)
-  (_rMemory))
+  (rMemory_))
 SICONOS_IO_REGISTER(DynamicalSystem,
   (__count)
-  (_jacxRhs)
+  (jacobianRhsOver_x_)
   (_n)
   (_number)
   (_r)
-  (_stepsInMemory)
+  (stepsInMemory_)
   (_x)
-  (_x0)
-  (_xMemory)
+  (x0_view_)
+  (xMemory_)
   (_z))
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianScleronomousR,(LagrangianR),
   (_dotjacqhXqdot)
@@ -1106,7 +1106,6 @@ void siconos_io_register_generated_Kernel(Archive& ar)
   ar.register_type(static_cast<LagrangianCompliantLinearTIR*>(nullptr));
   ar.register_type(static_cast<siconos::modeling::NonSmoothDynamicalSystem::Change*>(nullptr));
   ar.register_type(static_cast<FirstOrderLinearR*>(nullptr));
-  ar.register_type(static_cast<FirstOrderLinearTIDS*>(nullptr));
   ar.register_type(static_cast<FirstOrderType2R*>(nullptr));
   ar.register_type(static_cast<FirstOrderType1R*>(nullptr));
   ar.register_type(static_cast<FirstOrderLinearDS*>(nullptr));

@@ -66,7 +66,7 @@ siconos::mechanics::fem::FiniteElementLinearTIDS::FiniteElementLinearTIDS(
   p_[1] = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
   p_[1]->setZero();
   //   _zeroPlugin();
-  _n = 2 * ndof_;
+  x_size_ = 2 * ndof_;
 
   // Mass ...
   // Deal with 'plugged' mass later

@@ -31,12 +31,16 @@
 
 void siconos::fem::cable::Cable2d3DR::initialize(siconos::modeling::Interaction& inter) {
   auto qSize = inter.getSizeOfDS();
-  jacobianhOver_q_ = std::make_shared<siconos::algebra::SiconosMatrix>(2, qSize);
+
+  if (!jacobianhOver_q_internal_storage_) {
+    jacobianhOver_q_internal_storage_ = std::make_unique<std::vector<double>>(2 * qSize);
+  }
+  jacobianhOver_q_view_ = std::make_shared<siconos::algebra::MapType>(
+      jacobianhOver_q_internal_storage_->data(), 2, qSize);
 }
 
 void siconos::fem::cable::Cable2d3DR::computeh(const siconos::algebra::BlockVector& q,
-                                               siconos::algebra::BlockVector& z,
-                                               siconos::algebra::SiconosVector& y) {
+                                               Eigen::Ref<siconos::algebra::SiconosVector> y) {
   DEBUG_BEGIN("Cable2d3DR::computeh(...)\n");
 
   // LagrangianScleronomousR::computeh(q, z, y);
@@ -50,8 +54,8 @@ void siconos::fem::cable::Cable2d3DR::computeh(const siconos::algebra::BlockVect
   DEBUG_END("Cable2d3DR::computeh(...)\n")
 }
 
-void siconos::fem::cable::Cable2d3DR::computeJacobianhOver_q(const siconos::algebra::BlockVector& q,
-                                                   siconos::algebra::BlockVector& z) {
+void siconos::fem::cable::Cable2d3DR::computeJacobianhOver_q(
+    const siconos::algebra::BlockVector& q) {
   DEBUG_BEGIN(
       "Cable2d3DR::computeJacobianhOver_q(const siconos::algebra::BlockVector& q, "
       "siconos::algebra::BlockVector& z \n");
@@ -67,19 +71,19 @@ void siconos::fem::cable::Cable2d3DR::computeJacobianhOver_q(const siconos::alge
   DEBUG_PRINTF("N_x = %4.2e,\t N_y = %4.2e,\t N_z= %4.2e\n", Nx, Ny, Nz);
   DEBUG_PRINTF("T_x = %4.2e,\t T_y = %4.2e,\t T_z= %4.2e\n", Tx, Ty, Tz);
 
-  jacobianhOver_q_->setValue(0, _node_dof_index, Nx);
-  jacobianhOver_q_->setValue(0, _node_dof_index + 1, Ny);
-  jacobianhOver_q_->setValue(0, _node_dof_index + 2, Nz);
+  jacobianhOver_q_view_->setValue(0, _node_dof_index, Nx);
+  jacobianhOver_q_view_->setValue(0, _node_dof_index + 1, Ny);
+  jacobianhOver_q_view_->setValue(0, _node_dof_index + 2, Nz);
 
-  jacobianhOver_q_->setValue(1, _node_dof_index, Tx);
-  jacobianhOver_q_->setValue(1, _node_dof_index + 1, Ty);
-  jacobianhOver_q_->setValue(1, _node_dof_index + 2, Tz);
+  jacobianhOver_q_view_->setValue(1, _node_dof_index, Tx);
+  jacobianhOver_q_view_->setValue(1, _node_dof_index + 1, Ty);
+  jacobianhOver_q_view_->setValue(1, _node_dof_index + 2, Tz);
 
   if (q.size() == 6) {
     DEBUG_PRINT("take into account second ds\n");
     THROW_EXCEPTION("Cable2d3DR is not implemented for cable/cable contact");
   }
-  DEBUG_EXPR(jacobianhOver_q_->display(););
+
   DEBUG_END(
       "Cable2d3DR::computeJacobianhOver_q(const siconos::algebra::BlockVector& q, "
       "siconos::algebra::BlockVector& z) \n");

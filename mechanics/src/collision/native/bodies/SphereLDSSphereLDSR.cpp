@@ -20,26 +20,22 @@
 
 #include <cmath>
 
-#include "SiconosException.hpp"
 #include "BlockVector.hpp"
-#include "SiconosVector.hpp"
+#include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 #include "op3x3.h"
 
 siconos::collision::native::bodies::SphereLDSSphereLDSR::SphereLDSSphereLDSR(double r,
                                                                              double rr)
-    : siconos::modeling::LagrangianScleronomousR{}
-{
+    : siconos::modeling::LagrangianScleronomousR{} {
   r1 = r;
   r2 = rr;
   r1pr2 = r1 + r2;
 }
 
-double siconos::collision::native::bodies::SphereLDSSphereLDSR::distance(double x1, double y1,
-                                                                         double z1, double r1,
-                                                                         double x2, double y2,
-                                                                         double z2, double r2)
-{
+double siconos::collision::native::bodies::SphereLDSSphereLDSR::distance(
+    double x1, double y1, double z1, double r1, double x2, double y2, double z2, double r2) {
   double dx = x1 - x2;
   double dy = y1 - y2;
   double dz = z1 - z2;
@@ -48,16 +44,13 @@ double siconos::collision::native::bodies::SphereLDSSphereLDSR::distance(double 
 }
 
 void siconos::collision::native::bodies::SphereLDSSphereLDSR::computeh(
-    const siconos::algebra::BlockVector& q, siconos::algebra::BlockVector& z,
-    siconos::algebra::SiconosVector& y)
-{
+    const siconos::algebra::BlockVector& q, Eigen::Ref<siconos::algebra::SiconosVector> y) {
   y.setValue(0, distance(q(0), q(1), q(2), r1, q(6), q(7), q(8), r2));
   y.setValue(1, 0.);
 };
 
 void siconos::collision::native::bodies::SphereLDSSphereLDSR::computeJacobianhOver_q(
-    const siconos::algebra::BlockVector& q, siconos::algebra::BlockVector& z)
-{
+    const siconos::algebra::BlockVector& q) {
   double A, B, C;
   /* u ^ v  = n */
   double u1, u2, u3, v1, v2, v3, n1, n2, n3;
@@ -84,7 +77,7 @@ void siconos::collision::native::bodies::SphereLDSSphereLDSR::computeJacobianhOv
   n2 = B;
   n3 = C;
 
-  if (orthoBaseFromVector(&n1, &n2, &n3, &u1, &u2, &u3, &v1, &v2, &v3)) // siconos::numerics
+  if (orthoBaseFromVector(&n1, &n2, &n3, &u1, &u2, &u3, &v1, &v2, &v3))  // siconos::numerics
     THROW_EXCEPTION(
         "siconos::collision::native::bodies::SphereLDSSphereLDSR::computeJachq. Problem in "
         "calling "
@@ -172,40 +165,40 @@ void siconos::collision::native::bodies::SphereLDSSphereLDSR::computeJacobianhOv
   double x79 = x51 + x56;
   double x80 = x58 + x65;
   double x81 = x53 + x64;
-  jacobianhOver_q_->setValue(0, 0, n1);
-  jacobianhOver_q_->setValue(0, 1, n2);
-  jacobianhOver_q_->setValue(0, 2, n3);
-  jacobianhOver_q_->setValue(0, 3, 0);
-  jacobianhOver_q_->setValue(0, 4, 0);
-  jacobianhOver_q_->setValue(0, 5, 0);
-  jacobianhOver_q_->setValue(0, 6, x62);
-  jacobianhOver_q_->setValue(0, 7, x70);
-  jacobianhOver_q_->setValue(0, 8, x60);
-  jacobianhOver_q_->setValue(0, 9, 0);
-  jacobianhOver_q_->setValue(0, 10, 0);
-  jacobianhOver_q_->setValue(0, 11, 0);
-  jacobianhOver_q_->setValue(1, 0, u1);
-  jacobianhOver_q_->setValue(1, 1, u2);
-  jacobianhOver_q_->setValue(1, 2, u3);
-  jacobianhOver_q_->setValue(1, 3, x80);
-  jacobianhOver_q_->setValue(1, 4, x2);
-  jacobianhOver_q_->setValue(1, 5, x79 - x52);
-  jacobianhOver_q_->setValue(1, 6, x61);
-  jacobianhOver_q_->setValue(1, 7, x57);
-  jacobianhOver_q_->setValue(1, 8, x67);
-  jacobianhOver_q_->setValue(1, 9, x78);
-  jacobianhOver_q_->setValue(1, 10, x14);
-  jacobianhOver_q_->setValue(1, 11, x74 - x54);
-  jacobianhOver_q_->setValue(2, 0, v1);
-  jacobianhOver_q_->setValue(2, 1, v2);
-  jacobianhOver_q_->setValue(2, 2, v3);
-  jacobianhOver_q_->setValue(2, 3, x76);
-  jacobianhOver_q_->setValue(2, 4, x27);
-  jacobianhOver_q_->setValue(2, 5, x75 - x50);
-  jacobianhOver_q_->setValue(2, 6, v1);
-  jacobianhOver_q_->setValue(2, 7, v2);
-  jacobianhOver_q_->setValue(2, 8, v3);
-  jacobianhOver_q_->setValue(2, 9, x77);
-  jacobianhOver_q_->setValue(2, 10, x37);
-  jacobianhOver_q_->setValue(2, 11, x81 - x55);
+  jacobianhOver_q_view_->setValue(0, 0, n1);
+  jacobianhOver_q_view_->setValue(0, 1, n2);
+  jacobianhOver_q_view_->setValue(0, 2, n3);
+  jacobianhOver_q_view_->setValue(0, 3, 0);
+  jacobianhOver_q_view_->setValue(0, 4, 0);
+  jacobianhOver_q_view_->setValue(0, 5, 0);
+  jacobianhOver_q_view_->setValue(0, 6, x62);
+  jacobianhOver_q_view_->setValue(0, 7, x70);
+  jacobianhOver_q_view_->setValue(0, 8, x60);
+  jacobianhOver_q_view_->setValue(0, 9, 0);
+  jacobianhOver_q_view_->setValue(0, 10, 0);
+  jacobianhOver_q_view_->setValue(0, 11, 0);
+  jacobianhOver_q_view_->setValue(1, 0, u1);
+  jacobianhOver_q_view_->setValue(1, 1, u2);
+  jacobianhOver_q_view_->setValue(1, 2, u3);
+  jacobianhOver_q_view_->setValue(1, 3, x80);
+  jacobianhOver_q_view_->setValue(1, 4, x2);
+  jacobianhOver_q_view_->setValue(1, 5, x79 - x52);
+  jacobianhOver_q_view_->setValue(1, 6, x61);
+  jacobianhOver_q_view_->setValue(1, 7, x57);
+  jacobianhOver_q_view_->setValue(1, 8, x67);
+  jacobianhOver_q_view_->setValue(1, 9, x78);
+  jacobianhOver_q_view_->setValue(1, 10, x14);
+  jacobianhOver_q_view_->setValue(1, 11, x74 - x54);
+  jacobianhOver_q_view_->setValue(2, 0, v1);
+  jacobianhOver_q_view_->setValue(2, 1, v2);
+  jacobianhOver_q_view_->setValue(2, 2, v3);
+  jacobianhOver_q_view_->setValue(2, 3, x76);
+  jacobianhOver_q_view_->setValue(2, 4, x27);
+  jacobianhOver_q_view_->setValue(2, 5, x75 - x50);
+  jacobianhOver_q_view_->setValue(2, 6, v1);
+  jacobianhOver_q_view_->setValue(2, 7, v2);
+  jacobianhOver_q_view_->setValue(2, 8, v3);
+  jacobianhOver_q_view_->setValue(2, 9, x77);
+  jacobianhOver_q_view_->setValue(2, 10, x37);
+  jacobianhOver_q_view_->setValue(2, 11, x81 - x55);
 };

@@ -42,22 +42,28 @@ siconos::modeling::LagrangianLinearTIDS::LagrangianLinearTIDS(
 
 void siconos::modeling::LagrangianLinearTIDS::initRhs(double time) {
   // dim
-  _n = 2 * ndof_;
+  x_size_ = 2 * ndof_;
   // WARNING : this function is supposed to be called
   // by the OneStepIntegrator, and maybe several times for the same DS
   // if the system is involved in more than one interaction. So, we must check
   // if p2 and q2 already exist to be sure that DSlink won't be lost.
 
-  _x0 = algebra::concatenateVectors(*q0_view_, *velocity0_view_);  // COPY!
+  x0_internal_storage_ = std::make_unique<std::vector<double>>(x_size_);
+  x0_view_ = std::make_shared<siconos::algebra::MapVectorType>(x0_internal_storage_->data(),
+                                                               x0_internal_storage_->size());
+  x0_view_->head(ndof_) = *q0_view_;  // COPY !
+  x0_view_->tail(ndof_) = *velocity0_view_;
 
-  _x[0] = algebra::concatenateVectors(*state_q_[0], *state_q_[1]);  // COPY!
+  state_x_[0] = std::make_shared<siconos::algebra::SiconosVector>(x_size_);
+  *(state_x_[0]) << *state_q_[0], *state_q_[1];
 
   if (!state_q_[2]) {
     state_q_[2] = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
     state_q_[2]->setZero();
   }
 
-  _x[1] = algebra::concatenateVectors(*state_q_[1], *state_q_[2]);  // COPY!
+  state_x_[1] = std::make_shared<siconos::algebra::SiconosVector>(x_size_);
+  *(state_x_[1]) << *state_q_[1], *state_q_[2];
 
   // Everything concerning rhs and its jacobian is handled in initRhs and
   // computeXXX related functions.
@@ -79,7 +85,7 @@ void siconos::modeling::LagrangianLinearTIDS::initRhs(double time) {
     rhsMatrices_[idMatrix_] = std::make_shared<siconos::algebra::SiconosMatrix>(ndof_, ndof_);
     rhsMatrices_[idMatrix_]->setIdentity();
   }
-  // jacobianRhsx
+  // jacobianRhsOver_x_
   if (stiffnessMatrix_view_) {
     //  bloc10 of jacobianX is solution of Mass*Bloc10 = -K
     if (!rhsMatrices_[jacobianXBloc10_])
@@ -100,7 +106,7 @@ void siconos::modeling::LagrangianLinearTIDS::initRhs(double time) {
   } else
     rhsMatrices_[jacobianXBloc11_] = rhsMatrices_[zeroMatrix_];
 
-  _jacxRhs = std::make_shared<siconos::algebra::BlockMatrix>(
+  jacobianRhsOver_x_ = std::make_shared<siconos::algebra::BlockMatrix>(
       rhsMatrices_[zeroMatrix_], rhsMatrices_[idMatrix_], rhsMatrices_[jacobianXBloc10_],
       rhsMatrices_[jacobianXBloc11_]);
 }

@@ -80,7 +80,7 @@ class LagrangianCompliantR : public LagrangianR {
   void initialize(Interaction &inter) override;
 
  public:
-  /** default constructor */
+  /** default and only constructor */
   LagrangianCompliantR() : LagrangianR(RelationSubType::CompliantR) {};
 
   /** destructor */

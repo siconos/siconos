@@ -170,7 +170,7 @@ void siconos::integrators::LsodarOSI::computeRhs(double t) {
     auto ds = _dynamicalSystemsGraph->bundle(*dsi);
     // compute standard rhs stored in the dynamical system
     ds->computeRhs(t);
-    DEBUG_EXPR(ds->getRhs().display(););
+    DEBUG_EXPR(std::cout << ds->rhs() << "\n";);
     /* This next line is a good protection  */
     assert(_dynamicalSystemsGraph->properties(*dsi).workVectors);
     auto& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
@@ -187,7 +187,7 @@ void siconos::integrators::LsodarOSI::computeRhs(double t) {
     }
     if (_extraAdditionalTerms) {
       auto dsgVD = _dynamicalSystemsGraph->descriptor(ds);
-      _extraAdditionalTerms->addSmoothTerms(*_dynamicalSystemsGraph, dsgVD, t, ds->getRhs());
+      _extraAdditionalTerms->addSmoothTerms(*_dynamicalSystemsGraph, dsgVD, t, *ds->rhs());
     }
   }
   DEBUG_END(
@@ -201,11 +201,11 @@ void siconos::integrators::LsodarOSI::computeJacobianRhs(
   for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
     if (!checkOSI(dsi)) continue;
     auto ds = _dynamicalSystemsGraph->bundle(*dsi);
-    ds->computeJacobianRhsx(t);
+    ds->computeJacobianRhsOver_x(t);
     if (_extraAdditionalTerms) {
       auto dsgVD = DSG0.descriptor(ds);
       _extraAdditionalTerms->addJacobianRhsContribution(
-          DSG0, dsgVD, t, *(ds->jacobianRhsx()->toSiconosMatrix()));
+          DSG0, dsgVD, t, *(ds->jacobianRhsOver_x()->toSiconosMatrix()));
     }
   }
 }
@@ -584,7 +584,7 @@ struct siconos::integrators::LsodarOSI::_NSLEffectOnFreeOutput
   _NSLEffectOnFreeOutput(siconos::nonsmooth_formulations::OneStepNSProblem& p,
                          std::shared_ptr<siconos::modeling::Interaction> inter,
                          siconos::graphs::InteractionProperties& interProp)
-      : _osnsp(p), _inter(inter), _interProp(interProp){};
+      : _osnsp(p), _inter(inter), _interProp(interProp) {};
 
   _NSLEffectOnFreeOutput(const _NSLEffectOnFreeOutput&) = delete;
   _NSLEffectOnFreeOutput(const _NSLEffectOnFreeOutput&&) = delete;
@@ -659,11 +659,10 @@ void siconos::integrators::LsodarOSI::computeFreeOutput(
     THROW_EXCEPTION(" computeqBlock for Event Event-driven is wrong ");
 
   if (relationType == siconos::modeling::RelationType::Lagrangian) {
-    C = mainInteraction->relation()->jacobianhOver_q();
-    if (C) {
-      assert(Xfree);
-      siconos::algebra::matrixBlockVector_prod(*C, *Xfree, osnsp_rhs, true);
-    }
+    auto lagr = std::static_pointer_cast<siconos::modeling::LagrangianR>(inter->relation());
+    auto C = lagr->jacobianhOver_q();
+    assert(Xfree);
+    siconos::algebra::matrixBlockVector_prod(C, *Xfree, osnsp_rhs, true);
 
     auto ID = std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeY);
     ID->setIdentity();
@@ -676,13 +675,12 @@ void siconos::integrators::LsodarOSI::computeFreeOutput(
             "implemented for LCP "
             "at acceleration level with LagrangianRheonomousR");
       } else if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp) {
-        std::static_pointer_cast<siconos::modeling::LagrangianRheonomousR>(inter->relation())
-            ->computehDot(simulation()->getTkp1(), *DSlink[siconos::modeling::LagrangianR::q0],
-                          *DSlink[siconos::modeling::LagrangianR::z]);
-        auto hDot = std::static_pointer_cast<siconos::modeling::LagrangianRheonomousR>(
-                        inter->relation())
-                        ->hdot();
-        osnsp_rhs += *ID * *hDot;
+        auto rheoR = std::static_pointer_cast<siconos::modeling::LagrangianRheonomousR>(
+            inter->relation());
+
+        rheoR->computehdot(*DSlink[siconos::modeling::LagrangianR::q0],
+                           simulation()->getTkp1());
+        osnsp_rhs += *ID * rheoR->hdot();
       } else
         THROW_EXCEPTION(
             "siconos::integrators::LsodarOSI::computeFreeOutput not "
@@ -692,13 +690,10 @@ void siconos::integrators::LsodarOSI::computeFreeOutput(
     // For the relation of type LagrangianScleronomousR
     if (relationSubType == siconos::modeling::RelationSubType::ScleronomousR) {
       if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp) {
-        std::static_pointer_cast<siconos::modeling::LagrangianScleronomousR>(inter->relation())
-            ->computedotjacqhXqdot(simulation()->getTkp1(), *inter);
-        auto dotjacqhXqdot =
-            std::static_pointer_cast<siconos::modeling::LagrangianScleronomousR>(
-                inter->relation())
-                ->jacobianhOver_q_dot_X_qdot();
-        osnsp_rhs += *ID * *dotjacqhXqdot;
+        auto scleR = std::static_pointer_cast<siconos::modeling::LagrangianScleronomousR>(
+            inter->relation());
+        scleR->computeJacobianhOver_q_dot_X_qdot(simulation()->getTkp1(), *inter);
+        osnsp_rhs += *ID * scleR->jacobianhOver_q_dot_X_qdot();
       }
     }
   } else

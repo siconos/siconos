@@ -123,20 +123,23 @@ class FirstOrderR : public Relation {
    */
   void initialize(Interaction &inter) override;
 
-  /** True if \f$ \nabla_x h(x,t,\lambda) \f$ is taken into account */
+  /** \return True if \f$ \nabla_x h(x,t,\lambda) \f$ is taken into account */
   bool hasJacobianhOver_state() const { return jacobianhOver_state_view_ != nullptr; }
 
-  /** True if \f$ \nabla_x h(x,t,\lambda) \f$ is taken into account */
+  /** \return True if \f$ \nabla_x h(x,t,\lambda) \f$ is taken into account */
   bool hasJacobianhOver_lambda() const { return jacobianhOver_lambda_view_ != nullptr; }
 
-  /** True if \f$ \nabla_x h(x,t,\lambda) \f$ is taken into account */
+  /** \return True if \f$ \nabla_x h(x,t,\lambda) \f$ is taken into account */
   bool hasJacobiangOver_state() const { return jacobiangOver_state_view_ != nullptr; }
 
-  /** True if \f$ \nabla_x h(x,t,\lambda) \f$ is taken into account */
+  /** \return True if \f$ \nabla_x h(x,t,\lambda) \f$ is taken into account */
   bool hasJacobiangOver_lambda() const { return jacobiangOver_lambda_view_ != nullptr; }
 
+  /** \return True if \f$ \nabla_x h(x,t,\lambda) \f$ is taken into account */
+  bool hasConstantJacobiangOver_lambda() const { return hasConstantJacobiangOver_lambda_; }
+
   /** \return a read-only view on \f$ \nabla_x h(x,t,\lambda) \f$ matrix */
-  inline const siconos::algebra::ConstMapType jacobianhOver_state() const override {
+  inline const siconos::algebra::ConstMapType jacobianhOver_state() const {
     return siconos::algebra::ConstMapType(jacobianhOver_state_view_->data(),
                                           jacobianhOver_state_view_->rows(),
                                           jacobianhOver_state_view_->cols());
