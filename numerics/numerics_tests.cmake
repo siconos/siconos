@@ -73,6 +73,17 @@ if(WITH_TESTING)
     DRIVER lcp_test_collection.c.in FORMULATION lcp COLLECTION TEST_LCP_COLLECTION_5
     EXTRA_SOURCES data_collection_5.c)
 
+
+  # LCP with Petsc / MPI tests
+  begin_tests(src/LCP/test DEPS "PkgConfig::PETSC;MPI::MPI_C")
+
+  new_tests_collection(
+    DRIVER lcp_test_collection_mpi.c.in FORMULATION lcp COLLECTION TEST_LCP_MPI_COLLECTION_1
+    EXTRA_SOURCES data_collection_1.c)
+  new_tests_collection(
+    DRIVER lcp_test_collection_mpi.c.in FORMULATION lcp COLLECTION TEST_LCP_MPI_COLLECTION_2
+    EXTRA_SOURCES data_collection_2.c)
+
   # ----------- Relay solvers tests -----------
   # Start tests for Relay dir.
   begin_tests(src/Relay/test)

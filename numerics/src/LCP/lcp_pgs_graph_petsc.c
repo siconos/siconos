@@ -20,6 +20,10 @@
 
 void lcp_pgs_graph_petsc(LinearComplementarityProblem *problem, double *z, double *w, int *info,
                       SolverOptions *options) {  
+  
+  // double total_time, time;
+  // total_time = omp_get_wtime();
+
   NumericsMatrix *M = problem->M;
   double *q = problem->q;
 
@@ -38,36 +42,22 @@ void lcp_pgs_graph_petsc(LinearComplementarityProblem *problem, double *z, doubl
   options->iparam[SICONOS_IPARAM_ITER_DONE] = 0;
   options->dparam[SICONOS_DPARAM_RESIDU] = 0.0;
 
+  // time = omp_get_wtime();
   /* Preparation of the diagonal of the inverse matrix */
   double *diag = (double *)malloc(n * sizeof(double));
-  double diag_i = 0.0;
-  for (int i = 0; i < n; ++i) {
-    diag_i = NM_get_value(M, i, i);
-    if (fabs(diag_i) < DBL_EPSILON) {
-      if (verbose > 0) {
-        printf("Numerics::lcp_pgs, error: vanishing diagonal term \n");
-        printf(" The problem cannot be solved with this method \n");
-      }
-
-      *info = 2;
-      free(diag);
-      return;
-    } else
-      diag[i] = 1.0 / diag_i;
-  }
-
-  /* Time */
-  double time;
+  NM_get_diag(n, info, M, diag);
+  // time = omp_get_wtime() - time;
+  // printf("Time to prepare diagonal: %fs\n", time);
 
   /* Graph coloring */
   long int n_colors = 0;
   size_t *partition_size = NULL;
   size_t **partitions = NULL;
   
-  time = omp_get_wtime();
+  // time = omp_get_wtime();
   color_graph_petsc(n, M, &n_colors, &partition_size, &partitions);  
-  time = omp_get_wtime() - time;
-  printf("Time to color graph: %fs\n", time);
+  // time = omp_get_wtime() - time;
+  // printf("Time to color graph: %fs\n", time);
 
   /* printf("colors = [");
   for (int i = 0; i < n; i++) {
@@ -82,7 +72,7 @@ void lcp_pgs_graph_petsc(LinearComplementarityProblem *problem, double *z, doubl
   double zi;
   int i;
 
-  time = omp_get_wtime();
+  // time = omp_get_wtime();
 
   /* Start solving */
   while ((iter < itermax) && (err > tol)) {
@@ -136,12 +126,15 @@ void lcp_pgs_graph_petsc(LinearComplementarityProblem *problem, double *z, doubl
     *info = 0;
   }
 
-  time = omp_get_wtime() - time;
-  printf("Time to solve: %fs\n", time);
+  // time = omp_get_wtime() - time;
+  // printf("Time to solve: %fs\n", time);
 
   free(partition_size);
   for (int i = 0; i < n_colors; i++) free(partitions[i]);
   free(partitions);
   free(diag);
+
+  // total_time = omp_get_wtime() - total_time;
+  // printf("Total time: %fs\n", total_time);
 
 }

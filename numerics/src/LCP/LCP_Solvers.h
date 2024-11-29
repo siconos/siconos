@@ -144,8 +144,9 @@ void lcp_pgs_graph(LinearComplementarityProblem* problem, double* z, double* w, 
                    SolverOptions* options);
 
 
-/** lcp_pgs_parallel (Parallel Projected Gauss-Seidel ) is a parallel implementation of the basic
- Projected Gauss-Seidel solver for LCP.
+/** lcp_pgs_graph_petsc is a parallel implementation of the basic
+ Projected Gauss-Seidel solver for LCP which uses graph coloring
+ trhough petsc.
  
  See 10.1109/HPCC.2009.51 
  *

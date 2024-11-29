@@ -51,7 +51,8 @@ enum LCP_SOLVER {
   SICONOS_LCP_PIVOT_LUMOD = 220,
   SICONOS_LCP_GAMS = 221,
   SICONOS_LCP_CONVEXQP_PG = 222,
-  SICONOS_LCP_PGS_PARALLEL = 223
+  SICONOS_LCP_PGS_PARALLEL = 223,
+  SICONOS_LCP_PGS_GRAPH = 224
 };
 
 enum SICONOS_LCP_IPARAM {
@@ -119,4 +120,5 @@ extern const char* const SICONOS_LCP_PIVOT_LUMOD_STR;
 extern const char* const SICONOS_LCP_GAMS_STR;
 extern const char* const SICONOS_LCP_CONVEXQP_PG_STR;
 extern const char* const SICONOS_LCP_PGS_PARALLEL_STR;
+extern const char* const SICONOS_LCP_PGS_GRAPH_STR;
 #endif

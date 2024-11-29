@@ -9,23 +9,18 @@
 #include "graph_tools_petsc.h"
 int color_graph_petsc(int n, NumericsMatrix *M, long int *n_colors, size_t **set_sizes, size_t ***set_indices) {
     Mat A;
-    PetscLogDouble time_start, time_end;
+    // PetscLogDouble time_start, time_end;
 
-    PetscCall(PetscTime(&time_start));
     PetscFunctionBeginUser;
-    PetscCall(PetscInitializeNoArguments());
-    // PetscCall(PetscInitialize(NULL, NULL, NULL, help));
-    PetscCall(PetscTime(&time_end));
-    PetscCall(PetscPrintf(PETSC_COMM_WORLD, "Time to initialize petsc: %f\n", time_end - time_start));
 
-    PetscCall(PetscTime(&time_start));
+    // PetscCall(PetscTime(&time_start));
     switch (M->storageType) {
         case NM_DENSE: {
-            // TRY THIS IT MAY BE FASTER TO CREATE SEQ AND CONVERT
-            PetscCall(PetscPrintf(PETSC_COMM_WORLD, "DENSE\n"));
+            // PetscCall(PetscPrintf(PETSC_COMM_WORLD, "DENSE\n"));
             PetscCall(MatCreateSeqDense(PETSC_COMM_SELF, n, n, M->matrix0, &A));
+            // MatCreateSeqDense does not work because coloring requires MATSEQAIJ matrix
             PetscCall(MatConvert(A, MATSEQAIJ, MAT_INPLACE_MATRIX, &A));
-            // MatCreateSeqDense does not work because coloring requires 
+
             /* PetscCall(MatCreate(PETSC_COMM_WORLD, &A));
             PetscCall(MatSetType(A, MATAIJ)); // CSR format
             PetscCall(MatSetSizes(A, n, n, PETSC_DECIDE, PETSC_DECIDE));
@@ -45,7 +40,7 @@ int color_graph_petsc(int n, NumericsMatrix *M, long int *n_colors, size_t **set
             break;
         }
         case NM_SPARSE: {
-            PetscCall(PetscPrintf(PETSC_COMM_WORLD, "SPARSE\n"));
+            // PetscCall(PetscPrintf(PETSC_COMM_WORLD, "SPARSE\n"));
 
             /* I copied this from Numericsmatrix.c function NM_row_prod_no_diag1x1 */
             CSparseMatrix* sparse;
@@ -58,11 +53,6 @@ int color_graph_petsc(int n, NumericsMatrix *M, long int *n_colors, size_t **set
             int64_t* Mp = sparse->p;
             int64_t* Mi = sparse->i;
             double* Mx = sparse->x;
-
-
-           /*  for (int i = 0; i < sparse->nzmax; i++) {
-                PetscCall(PetscPrintf(PETSC_COMM_WORLD, "Mi[%d] = %ld\n", i, Mi[i]));
-            } */
 
             PetscCall(MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, n, n, Mp, Mi, Mx, &A));
             PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
@@ -78,8 +68,8 @@ int color_graph_petsc(int n, NumericsMatrix *M, long int *n_colors, size_t **set
             exit(EXIT_FAILURE);
         }
     }
-    PetscCall(PetscTime(&time_end));
-    PetscCall(PetscPrintf(PETSC_COMM_WORLD, "Time to build matrix: %f\n", time_end - time_start));
+    // PetscCall(PetscTime(&time_end));
+    // PetscCall(PetscPrintf(PETSC_COMM_WORLD, "Time to build matrix: %f\n", time_end - time_start));
     
 
     // Create PETSC sparse matrix
@@ -120,20 +110,13 @@ int color_graph_petsc(int n, NumericsMatrix *M, long int *n_colors, size_t **set
     PetscCall(MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY));
  */
 
-
-
-    // Possible to fill the sparse matrix faster ?
-    // The line below stores zero entries because M is stored as dense.
-    // If M is stored as sparse we could use it
-    // PetscCall(MatSetValues(A, n, idx, n, idx, val, INSERT_VALUES));
-
     /* View matrix to check
     PetscCall(MatView(A, PETSC_VIEWER_STDOUT_WORLD)); */
 
     /*          *
      * COLORING *
      *          */
-    PetscCall(PetscTime(&time_start));
+    // PetscCall(PetscTime(&time_start));
     MatColoring mc;
     ISColoring iscoloring;
 
@@ -155,7 +138,7 @@ int color_graph_petsc(int n, NumericsMatrix *M, long int *n_colors, size_t **set
     size_t **indexes = NULL; // Array of pointers to index sets
     const PetscInt *idxin = NULL;
     PetscCall(ISColoringGetIS(iscoloring, PETSC_USE_POINTER, &nn, &is)); // Get index sets
-    PetscCall(PetscPrintf(PETSC_COMM_WORLD, "n_colors = %ld\n", nn));
+    // PetscCall(PetscPrintf(PETSC_COMM_WORLD, "n_colors = %ld\n", nn));
 
     PetscInt size_petsc;
 
@@ -209,10 +192,10 @@ int color_graph_petsc(int n, NumericsMatrix *M, long int *n_colors, size_t **set
     *set_sizes = size;
     *set_indices = indexes;
 
-    PetscCall(PetscTime(&time_end));
-    PetscCall(PetscPrintf(PETSC_COMM_WORLD, "Time to color: %f\n", time_end - time_start));
+    // PetscCall(PetscTime(&time_end));
+    // PetscCall(PetscPrintf(PETSC_COMM_WORLD, "Time to color: %f\n", time_end - time_start));
 
-    PetscCall(PetscFinalize());
+    // PetscCall(PetscFinalize());
 
     return 0;
 

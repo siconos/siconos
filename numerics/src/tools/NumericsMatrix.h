@@ -1132,11 +1132,12 @@ int NM_isnan(NumericsMatrix* M);
    \param[in] size_i number of rows in the block
    \param[in] size_j number of columns in the block
    \param[in] A the matrix to be multiplied
+   \param[in] M the sparse matrix computed from A, if needed
    \param[in] x the vector to be multiplied
    \param[in,out] y the resulting vector
    \param[in] init = 0 for y += Ax, =1 for y = Ax
 */
-void NM_block_prod(int start_i, int start_j, int size_i, int size_j, NumericsMatrix* A, CSparseMatrix* M, const double *x, double *y, int init);
+void NM_block_prod(int start_i, int start_j, int size_i, int size_j, NumericsMatrix* A, const double *x, double *y, int init);
 
 /**
    Block of a Matrix - vector product y = blockA*x or y += blockA*x, blockA being a submatrix of A
@@ -1147,11 +1148,22 @@ void NM_block_prod(int start_i, int start_j, int size_i, int size_j, NumericsMat
    \param[in] size_i number of rows in the block
    \param[in] size_j number of columns in the block
    \param[in] A the matrix to be multiplied
+   \param[in] M the sparse matrix computed from A, if needed
    \param[in] x the vector to be multiplied
    \param[in,out] y the resulting vector
    \param[in] init = 0 for y += Ax, =1 for y = Ax
 */
-void NM_block_prod_no_diag(int start_i, int size_i, NumericsMatrix* A, CSparseMatrix* M, double *x, double *y, double* xsave, int init);
+void NM_block_prod_no_diag(int start_i, int size_i, NumericsMatrix* A, double *x, double *y, double* xsave, int init);
+
+/**
+   Get diagonal of a matrix.
+
+   \param[in] n number of lines / columns
+   \param[in] info info
+   \param[in] A the matrix 
+   \param[in, out] diag array to store the diagonal
+*/
+void NM_get_diag(int n, int *info, NumericsMatrix *M, double *diag);
 
 #ifdef WITH_OPENSSL
 /** Compute sha1 hash of matrix values. Matrices of differents size and same
