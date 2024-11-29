@@ -44,9 +44,9 @@ siconos::modeling::FirstOrderLinearDS::FirstOrderLinearDS(const FirstOrderLinear
     : FirstOrderNonLinearDS(ds) {
   if (ds.bVector_view_) {
     bVector_internal_storage_ =
-        std::make_unique<std::vector<double>>(*ds.bVector_internal_storage_);
+        std::make_unique<std::vector<double>>(ds.bVector_view_->size());
     bVector_view_ = std::make_shared<siconos::algebra::MapVectorType>(
-        bVector_internal_storage_->data(), bVector_internal_storage_->size());
+        ds.bVector_view_->data(), ds.bVector_view_->size());
     if (ds.computebVector_) {
       computebVector_ = ds.computebVector_;
     } else
@@ -131,7 +131,7 @@ void siconos::modeling::FirstOrderLinearDS::computeRhs(double time) {
 
   *state_x_[1] = *rVector_;  // Warning: r update is done in Interactions/Relations
 
-  if (jacobianfOver_x_view_) {
+  if (jacobianfOver_x_view_) {  // if A
     if (computeA_) computeA_(time, *jacobianfOver_x_view_);
     *(state_x_[1]) += *jacobianfOver_x_view_ * *(state_x_[0]);
   }
@@ -157,21 +157,22 @@ void siconos::modeling::FirstOrderLinearDS::computeRhs(double time) {
 }
 
 void siconos::modeling::FirstOrderLinearDS::computeJacobianRhsOver_x(double time) {
-  if (isTimeInvariant_) return;
-
+  if (isTimeInvariant_ && !isFirstCall_) return;
+  isFirstCall_ = false;
   if (jacobianfOver_x_view_) {
     if (computeA_) computeA_(time, *jacobianfOver_x_view_);
     if (MMatrix_view_) {
-      if (computeMMatrix_) {
-        computeMMatrix_(time, *MMatrix_view_);
-        hasLU_M_ = false;  // LUM needs to be updated.
-      }
       if (hasConstantJacobianfOver_x_)  // else memory is shared between jacobianRhsOver_x_
                                         // and jacobianfOver_x_view_
         *jacobianRhsOver_x_->block(0, 0) = *jacobianfOver_x_view_;
 
+      if (computeMMatrix_) {
+        computeMMatrix_(time, *MMatrix_view_);
+        hasLU_M_ = false;  // LUM needs to be updated.
+      }
       if (!hasLU_M_) {
-        std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(*MMatrix_view_);
+        LU_M_ = std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(
+            *MMatrix_view_);
         hasLU_M_ = true;
       }
       *(jacobianRhsOver_x_->block(0, 0)) = LU_M_->solve(*(jacobianRhsOver_x_->block(0, 0)));

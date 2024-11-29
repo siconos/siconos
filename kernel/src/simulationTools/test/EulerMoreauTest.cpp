@@ -56,7 +56,9 @@ void EulerMoreauTest::testCstGradTIDS() {
   std::cout << "===========================================" << std::endl;
   std::cout << " ===== EulerMoreau tests start ... ===== " << std::endl;
   std::cout << "===========================================" << std::endl;
-  std::cout << "------- Integrate a TIL system with constant gradients -------" << std::endl;
+  std::cout << "------- Integrate a time-invariant coeff and linear system with constant "
+               "gradients -------"
+            << std::endl;
   _b->setValue(0, -1.);
   _x0->setValue(0, 5.);
   _x0->setValue(1, 10);
@@ -69,24 +71,37 @@ void EulerMoreauTest::testCstGradTIDS() {
     _sim->computeOneStep();
     _sim->nextStep();
   }
-
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testCstGradTIDS : ", fabs(_DS->x()->getValue(0) + 5.) < _tol,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testCstGradTIDS : ", fabs(_DS->x()->getValue(1) - 10.) < _tol,
-                               true);
-  std::cout << std::endl << std::endl;
+  siconos::algebra::SiconosVector xref{2};
+  xref << 2., 10.;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testCstGradDS : ", (*_DS->x() - xref).norm() < 1e-6, true);
 }
 
 void EulerMoreauTest::testCstGradDS() {
   std::cout << "===========================================" << std::endl;
   std::cout << " ===== EulerMoreau tests start ... ===== " << std::endl;
   std::cout << "===========================================" << std::endl;
-  std::cout << "------- Integrate a L system with constant gradients -------" << std::endl;
-  _b->setValue(0, -1.);
-  _x0->setValue(0, 5.);
-  _x0->setValue(1, 10);
+  std::cout << "------- Integrate a linear system with constant gradients -------"
+            << std::endl;
 
-  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, *_A, *_b);
+  *_x0 << 5, 10;
+
+  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0);
+  auto folds = std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(_DS);
+  folds->setComputeAFunction(
+      [](double time, Eigen::Ref<siconos::algebra::MapType> result) { result.setZero(); });
+
+  folds->setComputebVectorFunction(
+      [](double time, Eigen::Ref<siconos::algebra::MapVectorType> result) {
+        result(0) = time;         //-1.;
+        result(1) = time * time;  // 0.;
+      });
+
+  folds->setComputeMMatrixFunction(
+      [](double time, Eigen::Ref<siconos::algebra::MapType> result) {
+        result.setZero();
+        result(0, 0) = 1;
+        result(1, 1) = 1;
+      });
 
   init(false);
 
@@ -95,10 +110,9 @@ void EulerMoreauTest::testCstGradDS() {
     _sim->nextStep();
   }
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testCstGradDS : ", fabs(_DS->x()->getValue(0) + 5.) < _tol,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testCstGradDS : ", fabs(_DS->x()->getValue(1) - 10.) < _tol,
-                               true);
+  siconos::algebra::SiconosVector xref{2};
+  xref << 9.5, 19;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testCstGradDS : ", (*_DS->x() - xref).norm() < 1e-6, true);
   std::cout << std::endl << std::endl;
 }
 
@@ -106,36 +120,43 @@ void EulerMoreauTest::testCstGradNLDS() {
   std::cout << "===========================================" << std::endl;
   std::cout << " ===== EulerMoreau tests start ... ===== " << std::endl;
   std::cout << "===========================================" << std::endl;
-  std::cout << "------- Integrate a NL system with constant gradients -------" << std::endl;
+  std::cout << "------- Integrate a nonlinear system with constant gradients -------"
+            << std::endl;
   _b->setValue(0, -1.);
-  _x0->setValue(0, 5.);
-  _x0->setValue(1, 10);
-
-  _DS = std::make_shared<siconos::modeling::FirstOrderNonLinearDS>(*_x0);
+  siconos::algebra::SiconosVector x0{2};
+  x0 << 5, 10;
+  _DS = std::make_shared<siconos::modeling::FirstOrderNonLinearDS>(x0);
 
   auto& DSNL = static_cast<siconos::modeling::FirstOrderNonLinearDS&>(*_DS);
 
   DSNL.setComputefVectorFunction([](const Eigen::Ref<const siconos::algebra::SiconosVector>& x,
                                     double time,
                                     Eigen::Ref<siconos::algebra::MapVectorType> result) {
-    result(0) = -1.;
-    result(1) = 0.;
+    result(0) = x(1);
+    result(1) = -x(0);
   });
 
   DSNL.setComputeJacobianfOver_xFunction(
       [](const Eigen::Ref<const siconos::algebra::SiconosVector>& x, double time,
-         Eigen::Ref<siconos::algebra::MapType> result) { result.setZero(); });
+         Eigen::Ref<siconos::algebra::MapType> result) {
+        result(0, 1) = 1.;
+        result(1, 0) = -1;
+      });
 
+  DSNL.setComputeMMatrixFunction(
+      [](double time, Eigen::Ref<siconos::algebra::MapType> result) {
+        result.setZero();
+        result(0, 0) = 1.;
+        result(1, 1) = 1.;
+      });
   init(false);
-
   while (_sim->hasNextEvent()) {
     _sim->computeOneStep();
     _sim->nextStep();
   }
-
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testCstGradNLDS : ", fabs(_DS->x()->getValue(0) + 5.) < _tol,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testCstGradNLDS : ", fabs(_DS->x()->getValue(1) - 10.) < _tol,
-                               true);
+  siconos::algebra::SiconosVector xref{2};
+  xref(0) = x0(0) * std::cos(_T) + x0(1) * std::sin(_T);
+  xref(1) = -x0(0) * std::sin(_T) + x0(1) * std::cos(_T);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testCstGradDS : ", (*_DS->x() - xref).norm() < 1e-5, true);
   std::cout << std::endl << std::endl;
 }

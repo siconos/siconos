@@ -31,7 +31,7 @@ void siconos::collision::ContactR::computeh(const siconos::algebra::BlockVector&
   DEBUG_BEGIN("siconos::collision::ContactR::computeh(...)\n");
 
   // Update contact points and distance if necessary
-  NewtonEuler3DR::computeh(q0, y);
+  NewtonEuler3DR::computeh(q, y);
 
   y.setValue(0, distance());
 

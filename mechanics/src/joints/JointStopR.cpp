@@ -95,7 +95,7 @@ void siconos::joints::JointStopR::computeh(const siconos::algebra::BlockVector& 
   bool case_onestop = y.size() == 1;
   bool case_posneg = y.size() == 2 && (*_axis)[0] == (*_axis)[1];
   if (case_onestop || case_posneg) {
-    _joint->computehDoF(q0, y, (*_axis)[0]);
+    _joint->computehDoF(q, y, (*_axis)[0]);
 
     y.setValue(0, (y.getValue(0) - _pos->getValue(0)) * _dir->getValue(0));
     if (case_posneg) y.setValue(1, (y.getValue(0) - _pos->getValue(1)) * _dir->getValue(1));
@@ -104,7 +104,7 @@ void siconos::joints::JointStopR::computeh(const siconos::algebra::BlockVector& 
 
   // Get h for each relevant axis
   siconos::algebra::SiconosVector tmp_y(_axisMax - _axisMin + 1);
-  _joint->computehDoF(q0, tmp_y, _axisMin);
+  _joint->computehDoF(q, tmp_y, _axisMin);
 
   // Copy and scale each stop for its axis/position/direction
   for (unsigned int i = 0; i < y.size(); i++) {

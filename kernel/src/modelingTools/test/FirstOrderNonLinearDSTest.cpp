@@ -110,8 +110,8 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS2() {
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", ds->LU_M() == nullptr,
                                true);
   double time = 1.5;
-  ds->update(time);
   ds->initRhs(time);
+  ds->update(time);
   std::cout << "--> Constructor 2 test ended with success." << std::endl;
 }
 
@@ -128,12 +128,6 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS3() {
                                true);
   double time = 1.5;
 
-  siconos::algebra::SiconosMatrix zero_mat = siconos::algebra::SiconosMatrix::Zero(3, 3);
-  siconos::algebra::SiconosVector zero_vec = siconos::algebra::SiconosVector::Zero(3);
-
-  siconos::algebra::SiconosMatrix ref_mat = siconos::algebra::SiconosMatrix::Random(3, 3);
-  siconos::algebra::SiconosVector ref_vec = siconos::algebra::SiconosVector::Random(3);
-
   // Set user-defined functions for all operators
 
   // f(x,t) = t.x
@@ -144,18 +138,15 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS3() {
   ds->setComputeJacobianfOver_xFunction(
       [](const Eigen::Ref<const siconos::algebra::SiconosVector> &x, double time,
          Eigen::Ref<siconos::algebra::MapType> result) {
-        for (auto i = 0; i < 3; i++) {
-          for (auto j = 0; i < 3; i++) result(i, j) = i + j + 1;
-        }
+        result << 1, 4, 7, 2, 5, 8, 3, 6, 9;
       });
 
-  ds->setComputeMMatrixFunction(
-      [](double time, Eigen::Ref<siconos::algebra::MapVectorType> result) {
-        result.setZero();
-        result(0, 0) = time;
-        result(1, 1) = 2. * time;
-        result(2, 2) = 3. * time;
-      });
+  ds->setComputeMMatrixFunction([](double time, Eigen::Ref<siconos::algebra::MapType> result) {
+    result.setZero();
+    result(0, 0) = time;
+    result(1, 1) = 2. * time;
+    result(2, 2) = 3. * time;
+  });
 
   time = 2.;
 
@@ -177,15 +168,16 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS3() {
                                true);
 
   // Rhs ...
-  ds->initRhs(time);
-  auto LU_M_ = std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(ref_mat);
-  auto ref_rhs = LU_M_->solve(ds->fVector());
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3 : ", *ds->rhs() == ref_rhs,
-                               true);
+  ds->initRhs(time);     // compute rhs and its jacobian
+  auto LUM = Mref.lu();  // Eigen::FullPivLU<siconos::algebra::SiconosMatrix>(Mref);
+  auto ref_rhs = LUM.solve(ds->fVector()).eval();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "testBuildFirstOrderNonLinearDS3 : ", (*ds->rhs() - ref_rhs).norm() < 1e-15, true);
 
   auto b00 = ds->jacobianRhsOver_x()->block(0, 0);
-  auto ref_block = LU_M_->solve(ds->jacobianfOver_x());
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3 : ", *b00 == ref_block, true);
+  auto ref_block = LUM.solve(ds->jacobianfOver_x()).eval();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "testBuildFirstOrderNonLinearDS3 : ", (*b00 - ref_block).norm() < 1e-15, true);
 
   // Last call to check if everything is ok when we repeat compute... functions
   ds->update(2. * time);

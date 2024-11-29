@@ -151,6 +151,9 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
    * call to setCompute... turns this to false */
   bool isTimeInvariant_{true};
 
+  /** flag to handle rhs init at first call for linear systems*/
+  bool isFirstCall_{true};
+
   ///** default constructor */
   // FirstOrderNonLinearDS() = default;
 

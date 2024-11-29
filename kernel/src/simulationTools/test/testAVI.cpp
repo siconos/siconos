@@ -134,7 +134,9 @@ void AVITest::testAVI() {
   if (maxErr > _tol) {
     dataPlot.display();
     siconos::algebra::SiconosMatrix diff = dataPlot - dataPlotRef;
+    std::cout << "------- diff \n";
     diff.display();
   }
+
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAVI : ", maxErr < _tol, true);
 }

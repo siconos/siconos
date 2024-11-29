@@ -262,46 +262,47 @@ void siconos::integrators::EulerMoreauOSI::initializeIterationMatrix(
       std::make_shared<siconos::algebra::SiconosMatrix>(ds->dimension(), ds->dimension());
 
   auto iterationMat = _dynamicalSystemsGraph->properties(dsv).iterationMatrix;
+  auto fods = std::dynamic_pointer_cast<siconos::modeling::FirstOrderNonLinearDS>(ds);
+  assert(fods &&
+         "EulerMoreauOSI::initializeIterationMatrix implemented only for first order ds");
+
   // Linear time-invariant system: W constant
-  if (auto fods = std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(ds)) {
-    if (fods->isTimeInvariant()) {
-      if (fods->hasMMatrix())
-        *iterationMat = fods->MMatrix();
-      else
-        iterationMat->setIdentity();
+  // if (auto fods = std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(ds)) {
+  if (fods->isTimeInvariant()) {
+    auto foltids = std::static_pointer_cast<siconos::modeling::FirstOrderLinearDS>(ds);
+    if (fods->hasMMatrix())
+      *iterationMat = fods->MMatrix();
+    else
+      iterationMat->setIdentity();
 
-      if (fods->hasA()) *iterationMat -= _simulation->timeStep() * _theta * fods->A();
+    if (foltids->hasA()) *iterationMat -= _simulation->timeStep() * _theta * foltids->A();
 
-      //  if (_useGamma)
-      {
-        siconos::graphs::DynamicalSystemsGraph::OEIterator oei, oeiend;
-        for (std::tie(oei, oeiend) = _dynamicalSystemsGraph->out_edges(dsv); oei != oeiend;
-             ++oei) {
-          auto inter = _dynamicalSystemsGraph->bundle(*oei);
-          auto& relationMat = inter->relationMatrices();
-          //      ivd = indexSet.descriptor(inter);
-          auto& rel = static_cast<siconos::modeling::FirstOrderR&>(*inter->relation());
-          if (rel.hasJacobiangOver_state()) {
-            auto K = rel.jacobiangOver_state();
-            *iterationMat -= _simulation->timeStep() * _gamma * K;
-          }
+    //  if (_useGamma)
+    {
+      siconos::graphs::DynamicalSystemsGraph::OEIterator oei, oeiend;
+      for (std::tie(oei, oeiend) = _dynamicalSystemsGraph->out_edges(dsv); oei != oeiend;
+           ++oei) {
+        auto inter = _dynamicalSystemsGraph->bundle(*oei);
+        auto& relationMat = inter->relationMatrices();
+        //      ivd = indexSet.descriptor(inter);
+        auto& rel = static_cast<siconos::modeling::FirstOrderR&>(*inter->relation());
+        if (rel.hasJacobiangOver_state()) {
+          auto K = rel.jacobiangOver_state();
+          *iterationMat -= _simulation->timeStep() * _gamma * K;
         }
       }
-      // LU Factorisation
-      _dynamicalSystemsGraph->properties(dsv).LUW =
-          std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(*iterationMat);
     }
+    // LU Factorisation
+    _dynamicalSystemsGraph->properties(dsv).LUW =
+        std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(*iterationMat);
   }
+  //}
   // In all other cases, we use computeIterationMatrix
-  else if (auto d = std::dynamic_pointer_cast<siconos::modeling::FirstOrderNonLinearDS>(ds)) {
+  else
+    // if  (auto d = std::dynamic_pointer_cast<siconos::modeling::FirstOrderNonLinearDS>(ds)) {
     // W =  M - h*_theta* [jacobian_x f(t,x,z)]
     computeIterationMatrix(time, *ds, dsv,
                            *_dynamicalSystemsGraph->properties(dsv).iterationMatrix);
-
-  } else
-    THROW_EXCEPTION(
-        "siconos::integrators::EulerMoreauOSI::initializeIterationMatrix implemented only "
-        "for FirstOrderNonLinearDS (and heirs)\n");
 }
 
 void siconos::integrators::EulerMoreauOSI::initializeIterationMatrixBoundaryConditions(
@@ -359,50 +360,45 @@ void siconos::integrators::EulerMoreauOSI::computeIterationMatrix(
   // (call to initializeIterationMatrix)
 
   auto h = _simulation->timeStep();
-  if (auto fods = dynamic_cast<siconos::modeling::FirstOrderNonLinearDS*>(&ds)) {
-    // 1 - First order linear and time-invariant coeff systems, W constant, nothing to be done
-    if (fods->isTimeInvariant()) return;
+  auto fods = dynamic_cast<siconos::modeling::FirstOrderNonLinearDS*>(&ds);
+  // No need to check if the system is first-order. This must have been done during init.
 
-    // W =  M - h*_theta* [jacobian_x f(t,x,z)]
-    // Copy M or I if M is Null into W
+  // 1 - First order linear and time-invariant coeff systems, W constant, nothing to be done
+  if (fods->isTimeInvariant()) return;
 
-    if (fods->hasMMatrix()) {
-      fods->computeMMatrix(time);
-      iterationMatrix = fods->MMatrix();
-    } else
-      iterationMatrix.setIdentity();
+  // W =  M - h*_theta* [jacobian_x f(t,x,z)]
+  // Copy M or I if M is Null into W
 
-    // 2 - First order linear systems with coeff depending on time, update A matrix
-    if (auto folds = dynamic_cast<siconos::modeling::FirstOrderLinearDS*>(&ds)) {
-      if (folds->hasA()) {
-        folds->computeA(time);
-        iterationMatrix -= h * _theta * folds->A();
-      }
+  if (fods->hasMMatrix()) {
+    fods->computeMMatrix(time);
+    iterationMatrix = fods->MMatrix();
+  } else
+    iterationMatrix.setIdentity();
+
+  // 2 - First order linear systems with coeff depending on time, update A matrix
+  if (auto folds = dynamic_cast<siconos::modeling::FirstOrderLinearDS*>(&ds)) {
+    if (folds->hasA()) {
+      folds->computeA(time);
+      iterationMatrix -= h * _theta * folds->A();
     }
-    // 3 - // nonlinear general case
-    else if (fods->hasJacobianfOver_x()) {
+  }
+  // 3 - // nonlinear general case
+  else {
+    if (fods->hasJacobianfOver_x()) {
       fods->computeJacobianfOver_x(*fods->x(), time);
       // Add -h*_theta*jacobianfx to W
       iterationMatrix -= h * _theta * fods->jacobianfOver_x();
     }
-    DEBUG_EXPR(W.display(););
-  } else
-    THROW_EXCEPTION(
-        "siconos::integrators::EulerMoreauOSI::computeIterationMatrix - only implemented "
-        "for "
-        "first order "
-        "dynamical systems");
+  }
+
+  DEBUG_EXPR(W.display(););
 
   //  if (_useGamma)
   {
     siconos::graphs::DynamicalSystemsGraph::OEIterator oei, oeiend;
-    std::shared_ptr<siconos::algebra::SiconosMatrix> K;
-    std::shared_ptr<siconos::modeling::Interaction> inter;
     for (std::tie(oei, oeiend) = _dynamicalSystemsGraph->out_edges(dsv); oei != oeiend;
          ++oei) {
-      inter = _dynamicalSystemsGraph->bundle(*oei);
-      auto& relationMat = inter->relationMatrices();
-      //      ivd = indexSet.descriptor(inter);
+      auto inter = _dynamicalSystemsGraph->bundle(*oei);
       auto& rel = static_cast<siconos::modeling::FirstOrderR&>(*inter->relation());
       if (rel.hasJacobiangOver_state()) {
         iterationMatrix -= h * _gamma * rel.jacobiangOver_state();
@@ -411,8 +407,7 @@ void siconos::integrators::EulerMoreauOSI::computeIterationMatrix(
   }
   // LU Factorisation
   _dynamicalSystemsGraph->properties(dsv).LUW =
-      std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(
-          *_dynamicalSystemsGraph->properties(dsv).iterationMatrix);
+      std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(iterationMatrix);
 
   DEBUG_EXPR(W.display());
   DEBUG_END("siconos::integrators::EulerMoreauOSI::computeIterationMatrix(...)\n");
@@ -522,7 +517,7 @@ double siconos::integrators::EulerMoreauOSI::computeResidu() {
         //  Not required, we have fold
         residuFree -= h_one_minus_theta * fods->fold();
         fods->computefVector(*fods->x(), time);
-        residuFree += htheta * fods->fVector();
+        residuFree -= htheta * fods->fVector();
       }
     }
 
@@ -571,12 +566,10 @@ void siconos::integrators::EulerMoreauOSI::computeFreeState() {
   // Iteration through the set of Dynamical Systems.
   //
 
-  std::shared_ptr<siconos::modeling::DynamicalSystem> ds;  // Current Dynamical System.
-
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
   for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
     if (!checkOSI(dsi)) continue;
-    ds = _dynamicalSystemsGraph->bundle(*dsi);
+    auto ds = _dynamicalSystemsGraph->bundle(*dsi);
 
     // XXX TMP hack -- xhub
     // we have to iterate over the edges of the DSG0 -> the following won't be necessary
@@ -586,95 +579,93 @@ void siconos::integrators::EulerMoreauOSI::computeFreeState() {
 
     auto& W = *_dynamicalSystemsGraph->properties(*dsi).iterationMatrix;
 
-    // 1 - First Order Non Linear Systems
-    if (auto d = std::dynamic_pointer_cast<siconos::modeling::FirstOrderNonLinearDS>(ds)) {
-      // xfree =  x - W^{-1} (ResiduFree - h(1-gamma)*rold)
-      // with ResiduFree = = M(x - x_k) - h*theta*f(t_{k+1}, x) - h*(1-theta)*f(t_k, x_k)
+    // No need to check if the DS is a first order: it must have been done during init steps.
+    auto d = std::static_pointer_cast<siconos::modeling::FirstOrderNonLinearDS>(ds);
 
-      // to be updated at current time: W, f
-      // fold is f at t_k
-      // not time dependant: M
-      // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      //    std::shared_ptr<siconos::algebra::SiconosVector> xold =
-      //    d->xMemory()->getSiconosVector(0); // xi
+    // xfree =  x - W^{-1} (ResiduFree - h(1-gamma)*rold)
+    // with ResiduFree = = M(x - x_k) - h*theta*f(t_{k+1}, x) - h*(1-theta)*f(t_k, x_k)
 
-      auto& x = *d->x();  // x = x_k or x = x_{k+1}^{\alpha}
-      // xfree gets ResiduFree at first
-      auto& xfree = *ds_work_vectors[siconos::integrators::EulerMoreauOSI::FREE];
-      xfree = *ds_work_vectors[siconos::integrators::EulerMoreauOSI::RESIDU_FREE];
+    // to be updated at current time: W, f
+    // fold is f at t_k
+    // not time dependant: M
+    // Get state i (previous time step) from Memories -> var. indexed with "Old"
+    //    std::shared_ptr<siconos::algebra::SiconosVector> xold =
+    //    d->xMemory()->getSiconosVector(0); // xi
 
-      DEBUG_PRINT(
-          "siconos::integrators::EulerMoreauOSI::computeFreeState xfree <- residuFree\n");
-      DEBUG_EXPR(xfree.display());
+    auto& x = *d->x();  // x = x_k or x = x_{k+1}^{\alpha}
+    // xfree gets ResiduFree at first
+    auto& xfree = *ds_work_vectors[siconos::integrators::EulerMoreauOSI::FREE];
+    xfree = *ds_work_vectors[siconos::integrators::EulerMoreauOSI::RESIDU_FREE];
 
-      if (_useGamma) {
-        const auto& rold = d->rMemory().getSiconosVector(0);
-        xfree -= h * (1 - _gamma) * rold;  //  xfree += -h(1-gamma)*rold
+    DEBUG_PRINT(
+        "siconos::integrators::EulerMoreauOSI::computeFreeState xfree <- residuFree\n");
+    DEBUG_EXPR(xfree.display());
+
+    if (_useGamma) {
+      const auto& rold = d->rMemory().getSiconosVector(0);
+      xfree -= h * (1 - _gamma) * rold;  //  xfree += -h(1-gamma)*rold
+    }
+
+    // At this point xfree = (ResiduFree - h(1-gamma)*rold)
+    // -> Solve WX = xfree and set xfree = X
+    // LUW must be uptodate in the graph (update during computeIterationMatrix call)
+    xfree = _dynamicalSystemsGraph->properties(*dsi).LUW->solve(xfree);
+
+    // at this point, xfree = W^{-1} (ResiduFree - h(1-gamma)*rold)
+    // -> compute real xfree = x - W^{-1} (ResiduFree - h(1-gamma)*rold)
+    xfree *= -1.0;
+    xfree += x;
+
+    DEBUG_EXPR(xfree.display());
+
+    // now the crazy intermediate variables
+    // xPartialNS was updated before this fonction call
+    // It constains either 0 (first Newton iterate)
+    // or g(x, \lambda, t_{k+1}) - B_{k+1}^{\alpha} \lambda - K_{k+1}^{\alpha} x
+    auto& xPartialNS =
+        *ds_work_vectors[siconos::integrators::EulerMoreauOSI::X_PARTIAL_NS_FOR_RELATION];
+    DEBUG_PRINT(
+        "siconos::integrators::EulerMoreauOSI::computeFreeState xPartialNS from "
+        "Interaction\n");
+    DEBUG_EXPR(xPartialNS.display());
+
+    // -> Solve WX = g(x, \lambda, t_{k+1}) - B_{k+1}^{\alpha} \lambda - K_{k+1}^{\alpha} x
+    // and set xPartialNS = X
+    xPartialNS = _dynamicalSystemsGraph->properties(*dsi).LUW->solve(xPartialNS);
+    xPartialNS *= h;
+
+    // compute real xPartialNS = xfree + ...
+    xPartialNS += xfree;
+    DEBUG_PRINT(
+        "siconos::integrators::EulerMoreauOSI::computeFreeState xPartialNS real value\n");
+    DEBUG_EXPR(xPartialNS.display());
+
+    // deltaxForRelation = (\widetilde{K}_{k+1}^{\alpha})^{-1} xPartialNS - x
+    auto& deltaxForRelation =
+        *ds_work_vectors[siconos::integrators::EulerMoreauOSI::DELTA_X_FOR_RELATION];
+    deltaxForRelation = xPartialNS;
+
+    deltaxForRelation -= x;
+
+    DEBUG_EXPR(deltaxForRelation.display());
+
+    // have a look at the end of the DevNotes for this part
+    if (_useGammaForRelation) {
+      if (not(std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(ds))) {
+        THROW_EXCEPTION(
+            "siconos::integrators::EulerMoreauOSI::computeFreeState - "
+            "_useGammaForRelation "
+            "== true is only implemented for FirstOrderLinearDS");
       }
+      deltaxForRelation = _gamma * xfree;
+      const auto& xold = d->xMemory().getSiconosVector(0);
+      deltaxForRelation += (1. - _gamma) * xold;
+    }
 
-      // At this point xfree = (ResiduFree - h(1-gamma)*rold)
-      // -> Solve WX = xfree and set xfree = X
-      xfree = _dynamicalSystemsGraph->properties(*dsi).LUW->solve(xfree);
-
-      // at this point, xfree = W^{-1} (ResiduFree - h(1-gamma)*rold)
-      // -> compute real xfree = x - W^{-1} (ResiduFree - h(1-gamma)*rold)
-      xfree *= -1.0;
-      xfree += x;
-
-      DEBUG_EXPR(xfree.display());
-
-      // now the crazy intermediate variables
-      // xPartialNS was updated before this fonction call
-      // It constains either 0 (first Newton iterate)
-      // or g(x, \lambda, t_{k+1}) - B_{k+1}^{\alpha} \lambda - K_{k+1}^{\alpha} x
-      auto& xPartialNS =
-          *ds_work_vectors[siconos::integrators::EulerMoreauOSI::X_PARTIAL_NS_FOR_RELATION];
-      DEBUG_PRINT(
-          "siconos::integrators::EulerMoreauOSI::computeFreeState xPartialNS from "
-          "Interaction\n");
-      DEBUG_EXPR(xPartialNS.display());
-
-      // -> Solve WX = g(x, \lambda, t_{k+1}) - B_{k+1}^{\alpha} \lambda - K_{k+1}^{\alpha} x
-      // and set xPartialNS = X
-      xPartialNS = _dynamicalSystemsGraph->properties(*dsi).LUW->solve(xPartialNS);
-      xPartialNS *= h;
-
-      // compute real xPartialNS = xfree + ...
-      xPartialNS += xfree;
-      DEBUG_PRINT(
-          "siconos::integrators::EulerMoreauOSI::computeFreeState xPartialNS real value\n");
-      DEBUG_EXPR(xPartialNS.display());
-
-      // deltaxForRelation = (\widetilde{K}_{k+1}^{\alpha})^{-1} xPartialNS - x
-      auto& deltaxForRelation =
-          *ds_work_vectors[siconos::integrators::EulerMoreauOSI::DELTA_X_FOR_RELATION];
-      deltaxForRelation = xPartialNS;
-
-      deltaxForRelation -= x;
-
-      DEBUG_EXPR(deltaxForRelation.display());
-
-      // have a look at the end of the DevNotes for this part
-      if (_useGammaForRelation) {
-        if (not(std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(ds))) {
-          THROW_EXCEPTION(
-              "siconos::integrators::EulerMoreauOSI::computeFreeState - "
-              "_useGammaForRelation "
-              "== true is only implemented for FirstOrderLinearDS");
-        }
-        deltaxForRelation = _gamma * xfree;
-        const auto& xold = d->xMemory().getSiconosVector(0);
-        deltaxForRelation += (1. - _gamma) * xold;
-      }
-
-      // some output
-      DEBUG_EXPR(xfree.display(););
-      DEBUG_EXPR(xPartialNS.display(););
-      DEBUG_EXPR(deltaxForRelation.display(););
-    } else
-      THROW_EXCEPTION(
-          "siconos::integrators::EulerMoreauOSI::computeFreeState - implemented only for "
-          "FirstOrder dynamical systems.");
+    // some output
+    DEBUG_EXPR(xfree.display(););
+    DEBUG_EXPR(xPartialNS.display(););
+    DEBUG_EXPR(deltaxForRelation.display(););
   }
   DEBUG_END("siconos::integrators::EulerMoreauOSI::computeFreeState()\n");
 }
@@ -941,50 +932,44 @@ void siconos::integrators::EulerMoreauOSI::updateState(const unsigned int) {
     // Get the DS type
     auto& ds_work_vectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
 
-    if (auto d = std::dynamic_pointer_cast<siconos::modeling::FirstOrderNonLinearDS>(ds)) {
-      auto& x = *ds->x();
-      DEBUG_PRINT("siconos::integrators::EulerMoreauOSI::updateState Old value of x\n");
-      DEBUG_EXPR(x.display());
-      DEBUG_PRINT("siconos::integrators::EulerMoreauOSI::updateState residu value\n");
-      DEBUG_EXPR(d->r()->display());
+    auto fods = std::static_pointer_cast<siconos::modeling::FirstOrderNonLinearDS>(ds);
+    auto& x = *ds->x();
+    DEBUG_PRINT("siconos::integrators::EulerMoreauOSI::updateState Old value of x\n");
+    DEBUG_EXPR(x.display());
+    DEBUG_PRINT("siconos::integrators::EulerMoreauOSI::updateState residu value\n");
+    DEBUG_EXPR(d->r()->display());
 
-      // TODO ???
-      bool baux =
-          (useRCC &&
-           (not std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(ds)) &&
-           _simulation->relativeConvergenceCriterionHeld());
+    // TODO ???
+    bool baux = (useRCC &&
+                 (not std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(ds)) &&
+                 _simulation->relativeConvergenceCriterionHeld());
 
-      //    std::shared_ptr<siconos::algebra::SiconosVector> xFree = d->xFree();
+    //    std::shared_ptr<siconos::algebra::SiconosVector> xFree = d->xFree();
 
-      // Save value of q in local_buffer for relative convergence computation
-      if (baux) *ds_work_vectors[siconos::integrators::EulerMoreauOSI::LOCAL_BUFFER] = x;
+    // Save value of q in local_buffer for relative convergence computation
+    if (baux) *ds_work_vectors[siconos::integrators::EulerMoreauOSI::LOCAL_BUFFER] = x;
 
-      if (_useGamma) {
-        // XXX UseGamma broken ? -- xhub
-        x = h * _gamma * *d->r();  // x = gamma*h*r
-      } else {
-        x = h * *d->r();
-      }
+    if (_useGamma) {
+      // XXX UseGamma broken ? -- xhub
+      x = h * _gamma * *fods->r();  // x = gamma*h*r
+    } else {
+      x = h * *fods->r();
+    }
 
-      x = _dynamicalSystemsGraph->properties(*dsi).LUW->solve(x);  // x = h* W^{-1} *r
+    x = _dynamicalSystemsGraph->properties(*dsi).LUW->solve(x);  // x = h* W^{-1} *r
 
-      x += *ds_work_vectors[siconos::integrators::EulerMoreauOSI::FREE];  // x+=xfree
+    x += *ds_work_vectors[siconos::integrators::EulerMoreauOSI::FREE];  // x+=xfree
 
-      if (baux) {
-        auto ds_norm_ref = 1. + d->x0().norm();  // Should we save this in the graph?
-        *ds_work_vectors[siconos::integrators::EulerMoreauOSI::LOCAL_BUFFER] -= x;
-        auto aux =
-            (ds_work_vectors[siconos::integrators::EulerMoreauOSI::LOCAL_BUFFER]->norm2()) /
-            (ds_norm_ref);
-        if (aux > RelativeTol) _simulation->setRelativeConvergenceCriterionHeld(false);
-      }
-      DEBUG_PRINT("siconos::integrators::EulerMoreauOSI::updateState New value of x\n");
-      DEBUG_EXPR(x.display());
-    } else
-      THROW_EXCEPTION(
-          "siconos::integrators::EulerMoreauOSI::updateState - Only implemented for "
-          "first "
-          "order dynamical systems.");
+    if (baux) {
+      auto ds_norm_ref = 1. + fods->x0().norm();  // Should we save this in the graph?
+      *ds_work_vectors[siconos::integrators::EulerMoreauOSI::LOCAL_BUFFER] -= x;
+      auto aux =
+          (ds_work_vectors[siconos::integrators::EulerMoreauOSI::LOCAL_BUFFER]->norm2()) /
+          (ds_norm_ref);
+      if (aux > RelativeTol) _simulation->setRelativeConvergenceCriterionHeld(false);
+    }
+    DEBUG_PRINT("siconos::integrators::EulerMoreauOSI::updateState New value of x\n");
+    DEBUG_EXPR(x.display());
   }
 }
 

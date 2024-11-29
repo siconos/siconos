@@ -100,15 +100,17 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS0() {
 
   // Rhs stuff
   ds->initRhs(time);  // Call computeRhs and computeJacobianRhsOver_x
-  auto LU_M_ = std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(Mref);
+  auto LUM = Mref.lu();
   auto tmp = *A0 * *x0 + *b0;
-  auto ref_rhs = LU_M_->solve(tmp);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", *ds->rhs() == ref_rhs,
-                               true);
+  auto ref_rhs = LUM.solve(tmp).eval();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "testBuildFirstOrderNonLinearDS1 : ", (*ds->rhs() - ref_rhs).norm() < 1e-15, true);
 
   auto b00 = ds->jacobianRhsOver_x()->block(0, 0);
-  auto ref_block = LU_M_->solve(*A0);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", *b00 == ref_block, true);
+  auto ref_block = LUM.solve(*A0).eval();
+
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "testBuildFirstOrderNonLinearDS1 : ", (*b00 - ref_block).norm() < 1e-15, true);
 
   std::cout << "--> Constructor 0 test ended with success." << std::endl;
 }
@@ -172,14 +174,15 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS1() {
 
   // Rhs ...
   ds->initRhs(time);
-  auto LU_M_ = std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(Mref);
-  auto ref_rhs = LU_M_->solve(ds->A() * *x0 + ds->bVector());
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3 : ", *ds->rhs() == ref_rhs,
-                               true);
+  auto LUM = Mref.lu();
+  auto ref_rhs = LUM.solve(ds->A() * *x0 + ds->bVector()).eval();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "testBuildFirstOrderNonLinearDS3 : ", (*ds->rhs() - ref_rhs).norm() < 1e-15, true);
 
   auto b00 = ds->jacobianRhsOver_x()->block(0, 0);
-  auto ref_block = LU_M_->solve(ds->A());
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3 : ", *b00 == ref_block, true);
+  auto ref_block = LUM.solve(ds->A()).eval();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "testBuildFirstOrderNonLinearDS3 : ", (*b00 - ref_block).norm() < 1e-15, true);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS0 : ", ds->isTimeInvariant(),
                                false);

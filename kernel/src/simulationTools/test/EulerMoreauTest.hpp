@@ -52,11 +52,11 @@ class EulerMoreauTest : public CppUnit::TestFixture {
   void testCstGradNLDS();
   // Members
 
-  unsigned int _n;
-  double _h;
-  double _t0;
-  double _T;
-  double _tol;
+  unsigned int _n{2};
+  double _h{0.001};
+  double _t0{0.};
+  double _T{3.};
+  double _tol{1.e-6};
   std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> _model{nullptr};
   std::shared_ptr<siconos::simulation::TimeStepping> _sim{nullptr};
   std::shared_ptr<siconos::modeling::DynamicalSystem> _DS{nullptr};
@@ -67,7 +67,7 @@ class EulerMoreauTest : public CppUnit::TestFixture {
   std::shared_ptr<siconos::algebra::SiconosVector> _x0{nullptr};
 
  public:
-  EulerMoreauTest() : _n(2), _h(0.1), _t0(0.0), _T(10.0), _tol(1e-12) {}
+  EulerMoreauTest() = default;
   void setUp();
   void tearDown();
 };

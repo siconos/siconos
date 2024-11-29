@@ -28,7 +28,7 @@ void siconos::collision::Contact5DR::computeh(const siconos::algebra::BlockVecto
   DEBUG_BEGIN("Contact5DR::computeh(...)\n");
 
   // Update contact points and distance if necessary
-  NewtonEulerR::computeh(q0, y);
+  NewtonEulerR::computeh(q, y);
 
   y.setValue(0, distance());
 
