@@ -93,11 +93,11 @@ endif()
 
 # target_compile_definitions(kernel PRIVATE BOOST_UBLAS_SHALLOW_ARRAY_ADAPTOR)
 #if(WITH_JSON OR WITH_JSON_INSTALL)
-  include(json_nlohmann_setup)
+#  include(json_nlohmann_setup)
   # Do not use implicit conversion from a json file
   # This is a recommandation from nlohmann doc.
-  target_compile_definitions(kernel PUBLIC JSON_ImplicitConversions=OFF)
-  target_link_libraries(kernel PUBLIC nlohmann_json::nlohmann_json)
+#  target_compile_definitions(kernel PUBLIC JSON_ImplicitConversions=OFF)
+#  target_link_libraries(kernel PUBLIC nlohmann_json::nlohmann_json)
 #endif()
 
 # Eigen
