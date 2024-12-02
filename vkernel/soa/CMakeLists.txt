@@ -1,8 +1,10 @@
-cmake_minimum_required(VERSION 3.2)
-project(
-  ${SKBUILD_PROJECT_NAME}
-  VERSION ${SKBUILD_PROJECT_VERSION}
-  LANGUAGES CXX C)
+#cmake_minimum_required(VERSION 3.2)
+#project(
+#  ${SKBUILD_PROJECT_NAME}
+#  VERSION ${SKBUILD_PROJECT_VERSION}
+#  LANGUAGES CXX C)
+
+set(SOA_CMAKE_SOURCE_DIR ${CMAKE_SOURCE_DIR}/vkernel/soa)
 
 set(CMAKE_CUDA_FLAGS "-ccbin=${CMAKE_CXX_COMPILER} -allow-unsupported-compiler")
 
@@ -18,12 +20,12 @@ find_package(Eigen3 REQUIRED)
 find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
 find_package(pybind11 CONFIG REQUIRED)
 
-include_directories(${CMAKE_SOURCE_DIR}/src)
+include_directories(${SOA_CMAKE_SOURCE_DIR}/src)
 
 if(WITH_GPU)
-  include_directories(${CMAKE_SOURCE_DIR}/src/cuNSearch)
+  include_directories(${SOA_CMAKE_SOURCE_DIR}/src/cuNSearch)
 else()
-  include_directories(${CMAKE_SOURCE_DIR}/src/CompactNSearch)
+  include_directories(${SOA_CMAKE_SOURCE_DIR}/src/CompactNSearch)
 endif()
 
 link_directories(${CMAKE_BUILD_DIR})
@@ -34,6 +36,7 @@ endif()
 
 set(flags "${flags} -Wall --std=c++20")
 set(fconcepts_diagnostics)
+check_cxx_compiler_flag("-fbracket-depth=300" fbracket_depth)
 check_cxx_compiler_flag("-fconcepts-diagnostics-depth=1" fconcepts_diagnostics)
 check_cxx_compiler_flag("-ftemplate-backtrace-limit=1" ftemplate_backtrace_limit)
 if(fconcepts_diagnostics)
@@ -41,6 +44,9 @@ if(fconcepts_diagnostics)
 endif()
 if(ftemplate_backtrace_limit)
   set(flags "${flags} -ftemplate-backtrace-limit=1")
+endif()
+if(fbracket_depth)
+  set(flags "${flags} -fbracket-depth=300")
 endif()
 
 # check_cxx_compiler_flag("-fprofile-instr-generate" fprofile_instr_generate)

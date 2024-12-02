@@ -48,9 +48,9 @@ while [ $# -gt 0 ]; do
       cat>.siconos-disks-manifest.scm<<EOF
 (specifications->manifest
  '( "siconos-with-vkernel" "benchmark" "$VRUN_GUIX_CXX_TOOLCHAIN" "valgrind"
-    "suitesparse" "eigen" "boost" "fmt" "range-v3"
+    "suitesparse" "eigen" "boost" "fmt" "range-v3" "gfortran-toolchain" "cppunit" "python-pytest"
     "cmake" "ninja" "make" "bash" "coreutils" "which" "python" "python-pip" "python-numpy"
-    "python-scikit-build" "python-setuptools"
+    "python-scikit-build" "python-setuptools" "nlohmann-json"
     "pybind11" "strace" "jupyter" "python-ipykernel" "procps" "gdb" "git" "emacs-next"
     "time" "parallel" "findutils"))
 EOF
@@ -80,9 +80,10 @@ EOF
       [ -f /applis/site/guix-start.sh ] && . /applis/site/guix-start.sh
       pwd=`pwd`
       rm -f $pwd/.siconos-guix-profile
-      #    guix_isolation_args="--container -N --emulate-fhs --share=/tmp --share=$HOME"
-      guix_isolation_args="--pure --preserve=OMP* --preserve=VRUN*"
+      guix_isolation_args="--container -N --emulate-fhs --share=/tmp --share=/scratch --share=$HOME"
+      #guix_isolation_args="--pure --preserve=OMP* --preserve=VRUN*"
       guix_cmd="guix time-machine -C ./.siconos-vrun-channels.scm --"
+      # it seems that we need to pass explicitely the package for transformations
       exec $guix_cmd shell $guix_isolation_args \
            --root=.siconos-guix-profile \
            -m .siconos-disks-manifest.scm \
@@ -190,7 +191,7 @@ EOF
       else
         xex="exec"
       fi
-      . ${mydir}/${venv}/bin/activate
+      [ -f ${mydir}/${venv}/bin/activate ] && . ${mydir}/${venv}/bin/activate
       export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:`pwd`/${venv}/lib/python${python_version}/site-packages/nonos/
       if [ ! -z "$timer" ]; then
         $xex $timer -f "$timer_args" $interp $script $args

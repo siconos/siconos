@@ -205,6 +205,12 @@ if(WITH_PYTHON_WRAPPER)
   add_subdirectory(wrap)
 endif()
 
+
+# vkernel
+add_subdirectory(vkernel)
+
+
+
 # ========= Documentation setup =========
 # Finalize documentation setups.
 # Must be called AFTER each component config.

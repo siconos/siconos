@@ -99,8 +99,9 @@ static_assert(
     std::is_same_v<
         typename std::decay_t<decltype(ground::get<storage::info>(
             storage::make<standard_environment<int>, item0,
-                          storage::with_properties<storage::diagonal<attr_t<
-                              item0, "attr0">>>>()))>::all_properties_t,
+                          storage::with_properties<
+                              storage::diagonal<attr_t<item0, "attr0">>>>()
+                .store()))>::all_properties_t,
         gather<siconos::storage::diagonal<siconos::storage::pattern::paired<
             siconos::item0,
             siconos::storage::pattern::attribute<
@@ -135,8 +136,8 @@ static_assert(
             typename std::decay_t<decltype(ground::get<storage::info>(
                 storage::make<standard_environment<int>, item0,
                               storage::with_properties<storage::attached<
-                                  item0, symbol<"zz">, some::scalar>>>()))>::
-                all_properties_t{},
+                                  item0, symbol<"zz">, some::scalar>>>()
+                    .store()))>::all_properties_t{},
             ground::is_a_model<[]<typename T>() constexpr {
               return match::attached_storage<T, item0>;
             }>)),

@@ -6,6 +6,8 @@
 #include "siconos/storage/properties.hpp"
 #include "siconos/storage/memory.hpp"
 
+#include <assert.h>
+
 namespace siconos::storage {
 
 using namespace siconos::storage::pattern;
