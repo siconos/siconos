@@ -14,262 +14,248 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 // \todo : create a work vector for all tmp vectors used in computeg, computeh ...
 
-#include <cstdio>
-
 #include "NewtonEulerR.hpp"
-#include "SiconosMatrixSetBlock.hpp"
-#include "SiconosAlgebraProd.hpp"
-#include "Interaction.hpp"
-#include "NewtonEulerDS.hpp"
+
+#include <iostream>
 
 #include "BlockVector.hpp"
-#include "SimulationGraphs.hpp"
-
+#include "Interaction.hpp"
+#include "NewtonEulerDS.hpp"  // computeT ...
+#include "PluggedObject.hpp"
+#include "PluginTypes.hpp"            // FPtr2 ...
+#include "SiconosMatrixOp.hpp"        // setblock
+#include "SiconosMatrixVectorOp.hpp"  // mat-vec prod
+#include "SiconosVector.hpp"
+#include "SiconosVisitor.hpp"
+#include "SimpleMatrix.hpp"
 // #define DEBUG_BEGIN_END_ONLY
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
-
 #include "siconos_debug.h"
 
-
-#include <iostream>
-// NewtonEulerR(): Relation(RELATION::NewtonEuler, RELATION::NonLinearR)
-// {
-
-
-// }
-
-void NewtonEulerR::initialize(Interaction& inter)
-{
-
-
-  DEBUG_BEGIN("NewtonEulerR::initialize(Interaction& inter)\n");
+void siconos::modeling::NewtonEulerR::initialize(Interaction& inter) {
+  DEBUG_BEGIN("siconos::modeling::NewtonEulerR::initialize(Interaction& inter)\n");
 
   unsigned int ySize = inter.dimension();
   unsigned int xSize = inter.getSizeOfDS();
   unsigned int qSize = 7 * (xSize / 6);
 
-  if(!_jachq)
-    _jachq.reset(new SimpleMatrix(ySize, qSize));
-  else
-  {
-    if(_jachq->size(0) == 0)
-    {
+  if (!_jachq)
+    _jachq = std::make_shared<siconos::algebra::SimpleMatrix>(ySize, qSize);
+  else {
+    if (_jachq->size(0) == 0) {
       // if the matrix dim are null
       _jachq->resize(ySize, qSize);
-    }
-    else
-    {
+    } else {
       assert((_jachq->size(1) == qSize && _jachq->size(0) == ySize) ||
-             (printf("NewtonEuler::initializeWorkVectorsAndMatrices _jachq->size(1) = %d ,_qsize = %d , _jachq->size(0) = %d ,_ysize =%d \n", _jachq->size(1), qSize, _jachq->size(0), ySize) && false) ||
-             ("NewtonEuler::initializeWorkVectorsAndMatrices inconsistent sizes between _jachq matrix and the interaction." && false));
+             (printf("NewtonEuler::initializeWorkVectorsAndMatrices _jachq->size(1) = %d "
+                     ",_qsize = %d , _jachq->size(0) = %d ,_ysize =%d \n",
+                     _jachq->size(1), qSize, _jachq->size(0), ySize) &&
+              false) ||
+             ("NewtonEuler::initializeWorkVectorsAndMatrices inconsistent sizes between "
+              "_jachq matrix and the interaction." &&
+              false));
     }
   }
 
   DEBUG_EXPR(_jachq->display());
 
-  if(! _jachqT)
-    _jachqT.reset(new SimpleMatrix(ySize, xSize));
+  if (!_jachqT) _jachqT = std::make_shared<siconos::algebra::SimpleMatrix>(ySize, xSize);
 
-  if(! _T)
-  {
-    _T.reset(new SimpleMatrix(7, 6));
+  if (!_T) {
+    _T = std::make_shared<siconos::algebra::SimpleMatrix>(7, 6);
     _T->zero();
     _T->setValue(0, 0, 1.0);
     _T->setValue(1, 1, 1.0);
     _T->setValue(2, 2, 1.0);
   }
   DEBUG_EXPR(_jachqT->display());
-  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-  if(!_contactForce)
-  {
-    _contactForce.reset(new SiconosVector(DSlink[NewtonEulerR::p1]->size()));
+  auto& DSlink = inter.linkToDSVariables();
+  if (!_contactForce) {
+    _contactForce = std::make_shared<siconos::algebra::SiconosVector>(
+        DSlink[siconos::modeling::NewtonEulerR::p1]->size());
     _contactForce->zero();
   }
-  DEBUG_END("NewtonEulerR::initialize(Interaction& inter)\n");
+  DEBUG_END("siconos::modeling::NewtonEulerR::initialize(Interaction& inter)\n");
 }
 
-
-void NewtonEulerR::checkSize(Interaction& inter)
-{
-  assert((_jachq->size(1) == 7 * (inter.getSizeOfDS() / 6) && _jachq->size(0) ==  inter.dimension()) ||
-         (printf("NewtonEuler::initializeWorkVectorsAndMatrices _jachq->size(1) = %d ,_qsize = %d , _jachq->size(0) = %d ,_ysize =%d \n", _jachq->size(1), 7 * (inter.getSizeOfDS() / 6), _jachq->size(0),  inter.dimension()) && false) ||
-         ("NewtonEuler::initializeWorkVectorsAndMatrices inconsistent sizes between _jachq matrix and the interaction." && false));
+void siconos::modeling::NewtonEulerR::checkSize(Interaction& inter) {
+  assert((_jachq->size(1) == 7 * (inter.getSizeOfDS() / 6) &&
+          _jachq->size(0) == inter.dimension()) ||
+         (printf("NewtonEuler::initializeWorkVectorsAndMatrices _jachq->size(1) = %d ,_qsize "
+                 "= %d , _jachq->size(0) = %d ,_ysize =%d \n",
+                 _jachq->size(1), 7 * (inter.getSizeOfDS() / 6), _jachq->size(0),
+                 inter.dimension()) &&
+          false) ||
+         ("NewtonEuler::initializeWorkVectorsAndMatrices inconsistent sizes between _jachq "
+          "matrix and the interaction." &&
+          false));
 }
 
-
-
-void NewtonEulerR::setJachq(SP::SimpleMatrix newJachq)
-{
+void siconos::modeling::NewtonEulerR::setJachq(
+    std::shared_ptr<siconos::algebra::SimpleMatrix> newJachq) {
   _jachq = newJachq;
 }
 
-void NewtonEulerR::setJachqPtr(SP::SimpleMatrix newPtr)
-{
-  _jachq = newPtr ;
+void siconos::modeling::NewtonEulerR::setJachqPtr(
+    std::shared_ptr<siconos::algebra::SimpleMatrix> newPtr) {
+  _jachq = newPtr;
 }
 
-
-
-void NewtonEulerR::computeh(double time, const BlockVector& q0, SiconosVector& y)
-{
-  prod(*_jachq, q0, y, true);
-  if(_e)
-    y += *_e;
+void siconos::modeling::NewtonEulerR::computeh(double time,
+                                               const siconos::algebra::BlockVector& q0,
+                                               siconos::algebra::SiconosVector& y) {
+  siconos::algebra::prod(*_jachq, q0, y, true);
+  if (_e) y += *_e;
 }
 
-
-
-void NewtonEulerR::computeOutput(double time, Interaction& inter, unsigned int derivativeNumber)
-{
-
-  DEBUG_BEGIN("NewtonEulerR::computeOutput(...)\n");
+void siconos::modeling::NewtonEulerR::computeOutput(double time, Interaction& inter,
+                                                    unsigned int derivativeNumber) {
+  DEBUG_BEGIN("siconos::modeling::NewtonEulerR::computeOutput(...)\n");
   DEBUG_PRINTF("with time = %f and derivativeNumber = %i starts\n", time, derivativeNumber);
 
-  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-  SiconosVector& y = *inter.y(derivativeNumber);
-  BlockVector& q = *DSlink[NewtonEulerR::q0];
+  auto& DSlink = inter.linkToDSVariables();
+  auto& y = *inter.y(derivativeNumber);
+  auto& q = *DSlink[siconos::modeling::NewtonEulerR::q0];
 
-
-  if(derivativeNumber == 0)
-  {
+  if (derivativeNumber == 0) {
     computeh(time, q, y);
-  }
-  else
-  {
+  } else {
     /* \warning  V.A. 15/04/2016
      * We decide finally not to update the Jacobian there. To be discussed
      */
-    // computeJachq(time, inter, DSlink[NewtonEulerR::q0]);
-    // computeJachqT(inter, DSlink[NewtonEulerR::q0]);
+    // computeJachq(time, inter, DSlink[siconos::modeling::NewtonEulerR::q0]);
+    // computeJachqT(inter, DSlink[siconos::modeling::NewtonEulerR::q0]);
 
-    if(derivativeNumber == 1)
-    {
+    if (derivativeNumber == 1) {
       assert(_jachqT);
-      assert(DSlink[NewtonEulerR::velocity]);
+      assert(DSlink[siconos::modeling::NewtonEulerR::velocity]);
       DEBUG_EXPR(_jachqT->display(););
-      DEBUG_EXPR((*DSlink[NewtonEulerR::velocity]).display(););
+      DEBUG_EXPR((*DSlink[siconos::modeling::NewtonEulerR::velocity]).display(););
 
-      prod(*_jachqT, *DSlink[NewtonEulerR::velocity], y);
+      siconos::algebra::prod(*_jachqT, *DSlink[siconos::modeling::NewtonEulerR::velocity], y);
 
       DEBUG_EXPR(y.display(););
-    }
-    else if(derivativeNumber == 2)
-    {
-      THROW_EXCEPTION("Warning: we attempt to call NewtonEulerR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber) for derivativeNumber=2");
-    }
-    else
-      THROW_EXCEPTION("NewtonEulerR::computeOutput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int derivativeNumber) derivativeNumber out of range or not yet implemented.");
+    } else if (derivativeNumber == 2) {
+      THROW_EXCEPTION(
+          "Warning: we attempt to call siconos::modeling::NewtonEulerR::computeOutput(double "
+          "time, Interaction& inter, InteractionProperties& interProp, unsigned int "
+          "derivativeNumber) for derivativeNumber=2");
+    } else
+      THROW_EXCEPTION(
+          "siconos::modeling::NewtonEulerR::computeOutput(double time, Interaction& inter, "
+          "InteractionProperties& interProp, unsigned int derivativeNumber) derivativeNumber "
+          "out of range or not yet implemented.");
   }
-  DEBUG_END("NewtonEulerR::computeOutput(...)\n");
+  DEBUG_END("siconos::modeling::NewtonEulerR::computeOutput(...)\n");
 }
-
-
 
 /** to compute p
-*  \param double : current time
-*  \Param unsigned int: "derivative" order of lambda used to compute input
-*/
-void NewtonEulerR::computeInput(double time, Interaction& inter, unsigned int level)
-{
-
-  DEBUG_BEGIN("NewtonEulerR::computeInput(...)\n")
+ *  \param double : current time
+ *  \Param unsigned int: "derivative" order of lambda used to compute input
+ */
+void siconos::modeling::NewtonEulerR::computeInput(double time, Interaction& inter,
+                                                   unsigned int level) {
+  DEBUG_BEGIN("siconos::modeling::NewtonEulerR::computeInput(...)\n")
   DEBUG_PRINTF("with time = %f and level = %i starts\n", time, level);
-  DEBUG_EXPR(printf("interaction %p\n",&inter););
+  DEBUG_EXPR(printf("interaction %p\n", &inter););
   DEBUG_EXPR(inter.display(););
-  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-
+  auto& DSlink = inter.linkToDSVariables();
 
   // get lambda of the concerned interaction
-  SiconosVector& lambda = *inter.lambda(level);
+  auto& lambda = *inter.lambda(level);
 
   DEBUG_EXPR(lambda.display(););
-  DEBUG_EXPR(DSlink[NewtonEulerR::p0 + level]->display(););
+  DEBUG_EXPR(DSlink[siconos::modeling::NewtonEulerR::p0 + level]->display(););
 
-  if(level == 1)  /* \warning : we assume that ContactForce is given by lambda[level] */
+  if (level == 1) /* \warning : we assume that ContactForce is given by lambda[level] */
   {
+    siconos::algebra::prod(lambda, *_jachqT, *_contactForce, true);
 
-    prod(lambda, *_jachqT, *_contactForce, true);
-
-    DEBUG_PRINT("NewtonEulerR::computeInput contact force :\n");
+    DEBUG_PRINT("siconos::modeling::NewtonEulerR::computeInput contact force :\n");
     DEBUG_EXPR(_contactForce->display(););
 
     /*data is a pointer of memory associated to a dynamical system*/
     /** false because it consists in doing a sum*/
-    prod(lambda, *_jachqT, *DSlink[NewtonEulerR::p0 + level], false);
+    siconos::algebra::prod(lambda, *_jachqT,
+                           *DSlink[siconos::modeling::NewtonEulerR::p0 + level], false);
 
     DEBUG_EXPR(_jachqT->display(););
-    DEBUG_EXPR(DSlink[NewtonEulerR::p0 + level]->display(););
-    // DEBUG_EXPR(SP::SiconosVector buffer(new SiconosVector(DSlink[NewtonEulerR::p0 + level]->size()));
-    //            prod(lambda, *_jachqT, *buffer, true);
+    DEBUG_EXPR(DSlink[siconos::modeling::NewtonEulerR::p0 + level]->display(););
+    // DEBUG_EXPR(std::shared_ptr<siconos::algebra::SiconosVector> buffer =
+    // std::make_shared<siconos::algebra::SiconosVector>(DSlink[siconos::modeling::NewtonEulerR::p0
+    // + level]->size()));
+    //            siconos::algebra::prod(lambda, *_jachqT, *buffer, true);
     //            std::cout << "added part to p" << buffer <<  std::endl;
     //            buffer->display(););
-
   }
 
-  else if(level == 2)  /* \warning : we assume that ContactForce is given by lambda[level] */
+  else if (level == 2) /* \warning : we assume that ContactForce is given by lambda[level] */
   {
-
-    prod(lambda, *_jachqT, *_contactForce, true);
+    siconos::algebra::prod(lambda, *_jachqT, *_contactForce, true);
     DEBUG_EXPR(_contactForce->display(););
 
     /*data is a pointer of memory associated to a dynamical system*/
     /** false because it consists in doing a sum*/
-    assert(DSlink[NewtonEulerR::p0 + level]);
-    prod(lambda, *_jachqT, *DSlink[NewtonEulerR::p0 + level], false);
+    assert(DSlink[siconos::modeling::NewtonEulerR::p0 + level]);
+    siconos::algebra::prod(lambda, *_jachqT,
+                           *DSlink[siconos::modeling::NewtonEulerR::p0 + level], false);
 
     DEBUG_EXPR(_jachqT->display(););
-    DEBUG_EXPR(DSlink[NewtonEulerR::p0 + level]->display(););
-    DEBUG_EXPR(SP::SiconosVector buffer(new SiconosVector(DSlink[NewtonEulerR::p0 + level]->size()));
-               prod(lambda, *_jachqT, *buffer, true);
-               std::cout << "added part to p   " << buffer <<  std::endl;
-               buffer->display(););
-  }
-  else if(level == 0)
-  {
-    prod(lambda, *_jachq, *DSlink[NewtonEulerR::p0 + level], false);
-  }
-  else
-    THROW_EXCEPTION("NewtonEulerR::computeInput(double time, Interaction& inter, InteractionProperties& interProp, unsigned int level)  not yet implemented for level > 1");
-  DEBUG_END("NewtonEulerR::computeInput(...)\n");
+    DEBUG_EXPR(DSlink[siconos::modeling::NewtonEulerR::p0 + level]->display(););
+    DEBUG_EXPR(auto buffer = std::make_shared<siconos::algebra::SiconosVector>(
+                   DSlink[siconos::modeling::NewtonEulerR::p0 + level]->size());
+               siconos::algebra::prod(lambda, *_jachqT, *buffer, true);
+               std::cout << "added part to p   " << buffer << std::endl; buffer->display(););
+  } else if (level == 0) {
+    siconos::algebra::prod(lambda, *_jachq,
+                           *DSlink[siconos::modeling::NewtonEulerR::p0 + level], false);
+  } else
+    THROW_EXCEPTION(
+        "siconos::modeling::NewtonEulerR::computeInput(double time, Interaction& inter, "
+        "InteractionProperties& interProp, unsigned int level)  not yet implemented for level "
+        "> 1");
+  DEBUG_END("siconos::modeling::NewtonEulerR::computeInput(...)\n");
 }
-/*It computes _jachqT=_jachq*T. Uploaded in the case of an unilateral constraint (NewtonEuler3DR and NewtonEuler1DR)*/
+/*It computes _jachqT=_jachq*T. Uploaded in the case of an unilateral constraint
+ * (NewtonEuler3DR and NewtonEuler1DR)*/
 
-void NewtonEulerR::computeJachqT(Interaction& inter, SP::BlockVector q0)
-{
-  DEBUG_BEGIN("NewtonEulerR::computeJachqT(Interaction& inter, SP::BlockVector q0) \n");
-  DEBUG_PRINTF("with inter =  %p\n",&inter);
+void siconos::modeling::NewtonEulerR::computeJachqT(
+    Interaction& inter, std::shared_ptr<siconos::algebra::BlockVector> q0) {
+  DEBUG_BEGIN(
+      "siconos::modeling::NewtonEulerR::computeJachqT(Interaction& inter, "
+      "std::shared_ptr<siconos::algebra::BlockVector> q0) \n");
+  DEBUG_PRINTF("with inter =  %p\n", &inter);
   DEBUG_EXPR(inter.display());
 
   unsigned int k = 0;
-  unsigned int ySize = inter.dimension();
-  SP::SimpleMatrix auxBloc(new SimpleMatrix(ySize, 7));
-  SP::SimpleMatrix auxBloc2(new SimpleMatrix(ySize, 6));
-  Index dimIndex(2);
-  Index startIndex(4);
+  auto ySize = inter.dimension();
+  auto auxBloc = std::make_shared<siconos::algebra::SimpleMatrix>(ySize, 7);
+  auto auxBloc2 = std::make_shared<siconos::algebra::SimpleMatrix>(ySize, 6);
+  std::vector<std::size_t> dimIndex(2);
+  std::vector<std::size_t> startIndex(4);
 
-  for(unsigned int i =0 ; i < q0->numberOfBlocks()  ; i++)
-  {
-    SP::SiconosVector q = (q0->getAllVect())[i];
+  for (unsigned int i = 0; i < q0->numberOfBlocks(); i++) {
+    auto q = (q0->getAllVect())[i];
     startIndex[0] = 0;
     startIndex[1] = 7 * k / 6;
     startIndex[2] = 0;
     startIndex[3] = 0;
     dimIndex[0] = ySize;
     dimIndex[1] = 7;
-    setBlock(_jachq, auxBloc, dimIndex, startIndex);
+    siconos::algebra::setBlock(*_jachq, auxBloc, dimIndex, startIndex);
 
-    computeT(q,_T);
+    computeT(q, _T);
 
     DEBUG_EXPR(q->display(););
     DEBUG_EXPR(_T->display());
 
-    prod(*auxBloc, *_T, *auxBloc2);
+    siconos::algebra::prod(*auxBloc, *_T, *auxBloc2);
 
     startIndex[0] = 0;
     startIndex[1] = 0;
@@ -278,86 +264,96 @@ void NewtonEulerR::computeJachqT(Interaction& inter, SP::BlockVector q0)
     dimIndex[0] = ySize;
     dimIndex[1] = 6;
 
-    setBlock(auxBloc2, _jachqT, dimIndex, startIndex);
+    siconos::algebra::setBlock(*auxBloc2, _jachqT, dimIndex, startIndex);
     DEBUG_EXPR(_jachqT->display());
 
     k += 6;
   }
-  DEBUG_END("NewtonEulerR::computeJachqT(Interaction& inter, SP::BlockVector q0) \n");
+  DEBUG_END(
+      "siconos::modeling::NewtonEulerR::computeJachqT(Interaction& inter, "
+      "std::shared_ptr<siconos::algebra::BlockVector> q0) \n");
 }
 
-void NewtonEulerR::computeJach(double time, Interaction& inter)
-{
-  DEBUG_BEGIN("NewtonEulerR::computeJachq(double time, Interaction& inter, ...) \n");
-  DEBUG_PRINTF("with time =  %f\n",time);
-  DEBUG_PRINTF("with inter =  %p\n",&inter);
+void siconos::modeling::NewtonEulerR::computeJach(double time, Interaction& inter) {
+  DEBUG_BEGIN(
+      "siconos::modeling::NewtonEulerR::computeJachq(double time, Interaction& inter, ...) "
+      "\n");
+  DEBUG_PRINTF("with time =  %f\n", time);
+  DEBUG_PRINTF("with inter =  %p\n", &inter);
 
-  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
+  auto& DSlink = inter.linkToDSVariables();
 
-  computeJachq(time, inter, DSlink[NewtonEulerR::q0]);
-  computeJachqT(inter, DSlink[NewtonEulerR::q0]);
+  computeJachq(time, inter, DSlink[siconos::modeling::NewtonEulerR::q0]);
+  computeJachqT(inter, DSlink[siconos::modeling::NewtonEulerR::q0]);
 
-  //computeJachqDot(time, inter); // This is not needed here
-  //computeDotJachq(time, inter);
+  // computeJachqDot(time, inter); // This is not needed here
+  // computeDotJachq(time, inter);
   computeJachlambda(time, inter);
-  DEBUG_END("NewtonEulerR::computeJachq(double time, Interaction& inter, ...) \n");
+  DEBUG_END(
+      "siconos::modeling::NewtonEulerR::computeJachq(double time, Interaction& inter, ...) "
+      "\n");
 }
 
-void NewtonEulerR::computeDotJachq(double time, const BlockVector& workQ, BlockVector& workZ, const BlockVector& workQdot)
-{
-  if(_dotjachq && _plugindotjacqh->fPtr)
-  {
+void siconos::modeling::NewtonEulerR::computeDotJachq(
+    double time, const siconos::algebra::BlockVector& workQ,
+    siconos::algebra::BlockVector& workZ, const siconos::algebra::BlockVector& workQdot) {
+  if (_dotjachq && _plugindotjacqh->fPtr) {
     auto zp = workZ.prepareVectorForPlugin();
     auto qp = workQ.prepareVectorForPlugin();
     auto qdotp = workQdot.prepareVectorForPlugin();
-    ((FPtr2)(_plugindotjacqh->fPtr))(workQ.size(), qp->getArray(), workQdot.size(), qdotp->getArray(), &(*_dotjachq)(0, 0), zp->size(), &(*zp)(0));
+    ((siconos::plugins::FPtr2)(_plugindotjacqh->fPtr))(
+        workQ.size(), qp->getArray(), workQdot.size(), qdotp->getArray(), &(*_dotjachq)(0, 0),
+        zp->size(), &(*zp)(0));
     workZ = *zp;
   }
 }
 
-void  NewtonEulerR::computeSecondOrderTimeDerivativeTerms(double time, Interaction& inter, VectorOfBlockVectors& DSlink, SP::DynamicalSystem ds1, SP::DynamicalSystem ds2)
-{
-  DEBUG_PRINT("NewtonEulerR::computeSecondOrderTimeDerivativeTerms starts\n");
+void siconos::modeling::NewtonEulerR::computeSecondOrderTimeDerivativeTerms(
+    double time, Interaction& inter, std::shared_ptr<DynamicalSystem> ds1,
+    std::shared_ptr<DynamicalSystem> ds2) {
+  DEBUG_PRINT(
+      "siconos::modeling::NewtonEulerR::computeSecondOrderTimeDerivativeTerms starts\n");
 
+  auto& DSlink = inter.linkToDSVariables();
   // Compute the time derivative of the Jacobian
-  if(!_dotjachq)  // lazy initialization
+  if (!_dotjachq)  // lazy initialization
   {
-    unsigned int sizeY = inter.dimension();
-    unsigned int xSize = inter.getSizeOfDS();
-    unsigned int qSize = 7 * (xSize / 6);
+    auto sizeY = inter.dimension();
+    auto xSize = inter.getSizeOfDS();
+    auto qSize = 7 * (xSize / 6);
 
-    _dotjachq.reset(new SimpleMatrix(sizeY, qSize));
+    _dotjachq = std::make_shared<siconos::algebra::SimpleMatrix>(sizeY, qSize);
   }
   // Compute the product of the time derivative of the Jacobian with dotq
   // we assume that dotq is up to date !
-  DEBUG_EXPR(DSlink[NewtonEulerR::dotq]->display(););
-  computeDotJachq(time,
-                  *DSlink[NewtonEulerR::q0],
-                  *DSlink[NewtonEulerR::z],
-                  *DSlink[NewtonEulerR::dotq]);
+  DEBUG_EXPR(DSlink[siconos::modeling::NewtonEulerR::dotq]->display(););
+  computeDotJachq(time, *DSlink[siconos::modeling::NewtonEulerR::q0],
+                  *DSlink[siconos::modeling::NewtonEulerR::z],
+                  *DSlink[siconos::modeling::NewtonEulerR::dotq]);
 
-  _secondOrderTimeDerivativeTerms.reset(new SiconosVector(_dotjachq->size(0)));
+  _secondOrderTimeDerivativeTerms =
+      std::make_shared<siconos::algebra::SiconosVector>(_dotjachq->size(0));
 
   DEBUG_EXPR(_dotjachq->display(););
 
-  prod(*_dotjachq, *DSlink[NewtonEulerR::dotq], *_secondOrderTimeDerivativeTerms, true);
+  siconos::algebra::prod(*_dotjachq, *DSlink[siconos::modeling::NewtonEulerR::dotq],
+                         *_secondOrderTimeDerivativeTerms, true);
 
   DEBUG_EXPR(_secondOrderTimeDerivativeTerms->display());
 
   // Compute the product of jachq and Tdot --> jachqTdot
 
   unsigned int k = 0;
-  unsigned int ySize = inter.dimension();
-  unsigned int xSize = inter.getSizeOfDS();
-  SP::SimpleMatrix auxBloc(new SimpleMatrix(ySize, 7));
-  SP::SimpleMatrix auxBloc2(new SimpleMatrix(ySize, 6));
-  Index dimIndex(2);
-  Index startIndex(4);
+  auto ySize = inter.dimension();
+  auto xSize = inter.getSizeOfDS();
+  auto auxBloc = std::make_shared<siconos::algebra::SimpleMatrix>(ySize, 7);
+  auto auxBloc2 = std::make_shared<siconos::algebra::SimpleMatrix>(ySize, 6);
+  std::vector<std::size_t> dimIndex(2);
+  std::vector<std::size_t> startIndex(4);
 
-  SP::SimpleMatrix jachqTdot(new SimpleMatrix(ySize, xSize));
+  auto jachqTdot = std::make_shared<siconos::algebra::SimpleMatrix>(ySize, xSize);
   bool endl = false;
-  for(SP::DynamicalSystem ds = ds1; !endl; ds = ds2)
-  {
+  for (auto ds = ds1; !endl; ds = ds2) {
     endl = (ds == ds2);
 
     startIndex[0] = 0;
@@ -366,16 +362,16 @@ void  NewtonEulerR::computeSecondOrderTimeDerivativeTerms(double time, Interacti
     startIndex[3] = 0;
     dimIndex[0] = ySize;
     dimIndex[1] = 7;
-    setBlock(_jachq, auxBloc, dimIndex, startIndex);
+    siconos::algebra::setBlock(*_jachq, auxBloc, dimIndex, startIndex);
 
-    NewtonEulerDS& d = *std::static_pointer_cast<NewtonEulerDS> (ds);
+    NewtonEulerDS& d = *std::static_pointer_cast<NewtonEulerDS>(ds);
     d.computeTdot();
-    SimpleMatrix& Tdot = *d.Tdot();
+    auto& Tdot = *d.Tdot();
 
     DEBUG_EXPR(d.display());
     DEBUG_EXPR((d.Tdot())->display());
 
-    prod(*auxBloc, Tdot, *auxBloc2);
+    siconos::algebra::prod(*auxBloc, Tdot, *auxBloc2);
 
     startIndex[0] = 0;
     startIndex[1] = 0;
@@ -384,16 +380,22 @@ void  NewtonEulerR::computeSecondOrderTimeDerivativeTerms(double time, Interacti
     dimIndex[0] = ySize;
     dimIndex[1] = 6;
 
-    setBlock(auxBloc2, jachqTdot, dimIndex, startIndex);
+    siconos::algebra::setBlock(*auxBloc2, jachqTdot, dimIndex, startIndex);
     DEBUG_EXPR(jachqTdot->display());
 
     k += ds->dimension();
   }
 
   // compute the product of jachqTdot and v
-  SiconosVector workVelocity(*DSlink[NewtonEulerR::velocity]);
+  siconos::algebra::SiconosVector workVelocity(
+      *DSlink[siconos::modeling::NewtonEulerR::velocity]);
   DEBUG_EXPR(workVelocity.display(););
-  prod(*jachqTdot, workVelocity, *_secondOrderTimeDerivativeTerms, false);
+  siconos::algebra::prod(*jachqTdot, workVelocity, *_secondOrderTimeDerivativeTerms, false);
   DEBUG_EXPR(_secondOrderTimeDerivativeTerms->display());
-  DEBUG_PRINT("NewtonEulerR::computeSecondOrderTimeDerivativeTerms ends\n");
+  DEBUG_PRINT("siconos::modeling::NewtonEulerR::computeSecondOrderTimeDerivativeTerms ends\n");
+}
+
+void siconos::modeling::NewtonEulerR::accept(
+    std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const {
+  tourist->visit(*this);
 }

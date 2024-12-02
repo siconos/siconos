@@ -23,6 +23,7 @@
 
 #include "OneStepIntegrator.hpp"
 
+namespace siconos::integrators {
 /**
     One Step time Integrator for First Order Dynamical Systems.
 
@@ -115,37 +116,31 @@
  */
 
 class EulerMoreauOSI : public OneStepIntegrator {
-protected:
+ protected:
   ACCEPT_SERIALIZATION(EulerMoreauOSI);
 
   /** Stl map that associates a theta parameter for the integration
    *  scheme to each DynamicalSystem of the OSI */
-  double _theta;
+  double _theta{0.};
 
   /** A gamma parameter for the integration scheme to each DynamicalSystem of
    *  the OSI This parameter is used to apply a theta-method to the input $r$
    */
-  double _gamma;
+  double _gamma{1.};
 
   /** a boolean to know if the parameter must be used or not
    */
-  bool _useGamma;
+  bool _useGamma{false};
 
   /** a boolean to know if the parameter must be used or not
    */
-  bool _useGammaForRelation;
+  bool _useGammaForRelation{false};
 
   /** nslaw effects
    */
   struct _NSLEffectOnFreeOutput;
 
-  friend struct _NSLEffectOnFreeOutput;
-
-  /** Default constructor
-   */
-  EulerMoreauOSI(){};
-
-public:
+ public:
   enum EulerMoreauOSI_ds_workVector_id {
     RESIDU,
     RESIDU_FREE,
@@ -175,11 +170,7 @@ public:
     BLOCK_WORK_LENGTH
   };
 
-  enum EulerMoreauOSI_interaction_workMat_id {
-    MAT_KHAT,
-    MAT_KTILDE,
-    MAT_WORK_LENGTH
-  };
+  enum EulerMoreauOSI_interaction_workMat_id { MAT_KHAT, MAT_KTILDE, MAT_WORK_LENGTH };
 
   /** constructor from theta value only
    *
@@ -196,9 +187,7 @@ public:
 
   /** destructor
    */
-  virtual ~EulerMoreauOSI(){};
-
-  // --- GETTERS/SETTERS ---
+  virtual ~EulerMoreauOSI() noexcept = default;
 
   /** get the value of W corresponding to DynamicalSystem ds
    *
@@ -206,14 +195,16 @@ public:
    *  nullptr. get W[0] in that case
    *  \return SimpleMatrix
    */
-  const SimpleMatrix getW(SP::DynamicalSystem ds = SP::DynamicalSystem());
+  const siconos::algebra::SimpleMatrix getW(
+      std::shared_ptr<siconos::modeling::DynamicalSystem> ds = nullptr);
 
   /** get W corresponding to DynamicalSystem ds
    *
    *  \param ds a pointer to DynamicalSystem
    *  \return pointer to a SiconosMatrix
    */
-  SP::SimpleMatrix W(SP::DynamicalSystem ds);
+  std::shared_ptr<siconos::algebra::SimpleMatrix> W(
+      std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
   // -- WBoundaryConditions --
 
@@ -223,8 +214,9 @@ public:
    *  nullptr. get WBoundaryConditions[0] in that case
    *  \return SimpleMatrix
    */
-  const SimpleMatrix
-  getWBoundaryConditions(SP::DynamicalSystem ds = SP::DynamicalSystem());
+  const siconos::algebra::SimpleMatrix getWBoundaryConditions(
+      std::shared_ptr<siconos::modeling::DynamicalSystem> ds =
+          std::shared_ptr<siconos::modeling::DynamicalSystem>());
 
   /** get WBoundaryConditions corresponding to DynamicalSystem ds
    *
@@ -232,7 +224,8 @@ public:
    *  nullptr. get WBoundaryConditions[0] in that case
    *  \return pointer to a SiconosMatrix
    */
-  SP::SiconosMatrix WBoundaryConditions(SP::DynamicalSystem ds);
+  std::shared_ptr<siconos::algebra::SiconosMatrix> WBoundaryConditions(
+      std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
   // -- theta --
 
@@ -260,8 +253,7 @@ public:
    *
    *  \param newGamma a double
    */
-  inline void setGamma(double newGamma)
-  {
+  inline void setGamma(double newGamma) {
     _gamma = newGamma;
     _useGamma = true;
   };
@@ -290,11 +282,9 @@ public:
    *
    *  \param newUseGammaForRelation a bool
    */
-  inline void setUseGammaForRelation(bool newUseGammaForRelation)
-  {
+  inline void setUseGammaForRelation(bool newUseGammaForRelation) {
     _useGammaForRelation = newUseGammaForRelation;
-    if (_useGammaForRelation)
-      _useGamma = false;
+    if (_useGammaForRelation) _useGamma = false;
   };
 
   // --- OTHER FUNCTIONS ---
@@ -311,7 +301,8 @@ public:
    *  \param t time of initialization
    *  \param ds the dynamical system
    */
-  void initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds) override;
+  void initializeWorkVectorsForDS(
+      double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) override;
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi
@@ -320,22 +311,23 @@ public:
    *  \param interProp the properties on the graph
    *  \param DSG the dynamical systems graph
    */
-  void initializeWorkVectorsForInteraction(Interaction &inter,
-                                           InteractionProperties &interProp,
-                                           DynamicalSystemsGraph &DSG) override;
+  void initializeWorkVectorsForInteraction(
+      siconos::modeling::Interaction &inter, siconos::graphs::InteractionProperties &interProp,
+      siconos::graphs::DynamicalSystemsGraph &DSG) override;
 
   /** get the number of index sets required for the simulation
    *
    *  \return unsigned int
    */
-  unsigned int numberOfIndexSets() const override { return 1; } ;
+  unsigned int numberOfIndexSets() const override { return 1; };
 
   /** initialize iteration matrix W EulerMoreauOSI matrix at time t
    *
    *  \param time the time (double)
    *  \param ds a pointer to DynamicalSystem
    */
-  void initializeIterationMatrixW(double time, SP::DynamicalSystem ds);
+  void initializeIterationMatrixW(double time,
+                                  std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
   /** compute W EulerMoreauOSI matrix at time t
    *
@@ -344,23 +336,26 @@ public:
    *  \param dsv a descriptor of the ds on the graph (redundant to avoid invocation)
    *  \param W the matrix to compute
    */
-  void computeW(double time, DynamicalSystem &ds,
-                DynamicalSystemsGraph::VDescriptor &dsv, SiconosMatrix &W);
+  void computeW(double time, siconos::modeling::DynamicalSystem &ds,
+                siconos::graphs::DynamicalSystemsGraph::VDescriptor &dsv,
+                siconos::algebra::SiconosMatrix &W);
 
-  void computeKhat(Interaction &inter, SiconosMatrix &m,
-                   VectorOfSMatrices &workM, double h) const;
+  void computeKhat(siconos::modeling::Interaction &inter, siconos::algebra::SiconosMatrix &m,
+                   std::vector<std::shared_ptr<siconos::algebra::SimpleMatrix>> &workM,
+                   double h) const;
 
   /** compute WBoundaryConditionsMap[ds] EulerMoreauOSI matrix at time t
    *
    *  \param ds a pointer to DynamicalSystem
    */
-  void computeWBoundaryConditions(SP::DynamicalSystem ds);
+  void computeWBoundaryConditions(std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
   /** initialize iteration matrix WBoundaryConditionsMap[ds] EulerMoreauOSI
    *
    *  \param ds a pointer to DynamicalSystem
    */
-  void initializeIterationMatrixWBoundaryConditions(SP::DynamicalSystem ds);
+  void initializeIterationMatrixWBoundaryConditions(
+      std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
   /** Computes the residuFree and residu of all the DynamicalSystems
    *
@@ -395,26 +390,27 @@ public:
    */
   void updateInput(double time, unsigned int level) override;
 
-  double computeResiduOutput(double time,
-                             SP::InteractionsGraph indexSet) override;
+  double computeResiduOutput(
+      double time, std::shared_ptr<siconos::graphs::InteractionsGraph> indexSet) override;
 
-  double computeResiduInput(double time,
-                            SP::InteractionsGraph indexSet) override;
+  double computeResiduInput(
+      double time, std::shared_ptr<siconos::graphs::InteractionsGraph> indexSet) override;
 
   /** integrates the Interaction linked to this integrator, without taking
    *  non-smooth effects into account
    *
    *  \param vertex_inter of the interaction graph
-   *  \param osnsp pointer to OneStepNSProblem
+   *  \param osnsp pointer to siconos::nonsmooth_formulations::OneStepNSProblem
    */
-  void computeFreeOutput(InteractionsGraph::VDescriptor &vertex_inter,
-                         OneStepNSProblem *osnsp) override;
+  void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
+                         siconos::nonsmooth_formulations::OneStepNSProblem *osnsp) override;
 
-
-  /** return the workVector corresponding to the right hand side of the OneStepNonsmooth problem
+  /** return the workVector corresponding to the right hand side of the OneStepNonsmooth
+   * problem
    */
-  SiconosVector& osnsp_rhs(InteractionsGraph::VDescriptor& vertex_inter,   InteractionsGraph& indexSet) override
-  {
+  siconos::algebra::SiconosVector &osnsp_rhs(
+      siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
+      siconos::graphs::InteractionsGraph &indexSet) override {
     return *(*indexSet.properties(vertex_inter).workVectors)[EulerMoreauOSI::OSNSP_RHS];
   };
 
@@ -433,8 +429,7 @@ public:
    *  \param tout real end time
    *  \param useless flag (for EulerMoreauOSI, used in LsodarOSI)
    */
-  void integrate(double &tinit, double &tend, double &tout,
-                 int &useless) override;
+  void integrate(double &tinit, double &tend, double &tout, int &useless) override;
 
   /** updates the state of the Dynamical Systems
    *
@@ -444,9 +439,7 @@ public:
 
   /** Displays the data of the EulerMoreauOSI's integrator
    */
-  void display() override;
-
-  ACCEPT_STD_VISITORS();
+  void display() const override;
 };
-
-#endif // EulerMoreauOSI_H
+}  // namespace siconos::integrators
+#endif  // EulerMoreauOSI_H

@@ -14,47 +14,34 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #include "TimeDiscretisationEvent.hpp"
-#include "EventFactory.hpp"
 #include "Simulation.hpp"
 #include "TimeDiscretisation.hpp"
-#include "NonSmoothDynamicalSystem.hpp"
-using namespace EventFactory;
 
-// Default constructor
-TimeDiscretisationEvent::TimeDiscretisationEvent(): Event(0.0, TD_EVENT)
-{}
-
-TimeDiscretisationEvent::TimeDiscretisationEvent(double time, int notUsed): Event(time, TD_EVENT)
-{}
-
-TimeDiscretisationEvent::~TimeDiscretisationEvent()
-{}
-
-void TimeDiscretisationEvent::process(Simulation& simulation)
+void siconos::simulation::TimeDiscretisationEvent::process(Simulation& simulation)
 {
   // Update y[i] values in Interactions with new DS states.
-  //simulation->updateOutput(0, 1);
+  // simulation->updateOutput(0, 1);
   // Save state(s) in Memories (DS and Interactions, through OSI and OSNS).
+  if (noSaveInMemory_) return;
 
   simulation.nonSmoothDynamicalSystem()->swapInMemory();  // To save pre-impact values
-  simulation.nonSmoothDynamicalSystem()->pushInteractionsInMemory();  // To save pre-impact values
-
+  simulation.nonSmoothDynamicalSystem()
+      ->pushInteractionsInMemory();  // To save pre-impact values
 }
 
-void TimeDiscretisationEvent::update(unsigned int k)
+void siconos::simulation::TimeDiscretisationEvent::update(unsigned int k)
 {
-  assert(k > _k && "TimeDiscretisationEvent::update - next step has to be greater than the current one");
-  if(_td)  // if no TimeDiscretisation, then do nothing
+  assert(k > _k &&
+         "TimeDiscretisationEvent::update - next step has to be greater than the current one");
+  if (_td)  // if no TimeDiscretisation, then do nothing
   {
-    if(_td->hGmp())
-      incrementTime(k-_k);
+    if (_td->hGmp())
+      incrementTime(k - _k);
     else
       setTime(_td->getTk(k));
 
     _k = k;
   }
 }
-
-AUTO_REGISTER_EVENT(TD_EVENT, TimeDiscretisationEvent)

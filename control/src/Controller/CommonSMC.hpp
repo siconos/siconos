@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file CommonSMC.hpp
   General interface to define a sliding mode actuator
@@ -24,24 +24,41 @@
 #define CommonSMC_H
 
 #include "Actuator.hpp"
-#include "SiconosAlgebraTypeDef.hpp"
-#include "SiconosFwd.hpp"
+#include "relay_cst.h"  // contains only enum. Ok.
 
-#include <relay_cst.h>
+namespace siconos::modeling {
 
-class CommonSMC : public Actuator
-{
-private:
+class FirstOrderR;
+class Interaction;
+class FirstOrderNonLinearDS;
+class NonSmoothLaw;
+}  // namespace siconos::modeling
+
+namespace siconos::integrators {
+class OneStepIntegrator;
+}
+
+namespace siconos::nonsmooth_formulations {
+class LinearOSNS;
+}  // namespace siconos::simulation
+
+namespace siconos::simulation {
+class TimeStepping;
+class EventsManager;
+
+}  // namespace siconos::simulation
+namespace siconos::control {
+
+class CommonSMC : public Actuator {
+ private:
   ACCEPT_SERIALIZATION(CommonSMC);
 
-protected:
-  /* default constructor */
-  CommonSMC() {};
-
+ protected:
   /** index for saving data */
-  unsigned int _indx;
+  unsigned int _indx{0};
 
-  /** name of the plugin to add a term to the sliding variable; useful when doing trajectory tracking */
+  /** name of the plugin to add a term to the sliding variable; useful when doing trajectory
+   * tracking */
   std::string _plugineName;
 
   /** name of the plugin to compute \f$ y = h(x, ...) \f$ for the nonlinear case*/
@@ -56,71 +73,72 @@ protected:
   /** name of the plugin to compute \f$ \nabla_\lambda g \f$ for the nonlinear case*/
   std::string _pluginJacglambdaName;
 
-  /** the vector defining the linear contribution of the state to the sliding variable  ( \f$ \sigma = Cx \f$ ) */
-  SP::SimpleMatrix _Csurface;
+  /** the vector defining the linear contribution of the state to the sliding variable  ( \f$
+   * \sigma = Cx \f$ ) */
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _Csurface{nullptr};
 
   /** matrix describing the influence of \f$ lambda \f$  on \f$ \sigma \f$ */
-  SP::SimpleMatrix _D;
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _D{nullptr};
 
   /** scalar multiplying Sign; \f$ u^s = - \alpha Sign \f$ */
-  double _alpha;
+  double _alpha{1.};
 
   /** the Relation for the Controller */
-  SP::FirstOrderR _relationSMC;
+  std::shared_ptr<siconos::modeling::FirstOrderR> _relationSMC{nullptr};
 
   /** Interaction for the control */
-  SP::Interaction _interactionSMC;
+  std::shared_ptr<siconos::modeling::Interaction> _interactionSMC{nullptr};
 
   /** easy access to lambda */
-  SP::SiconosVector _lambda;
+  std::shared_ptr<siconos::algebra::SiconosVector> _lambda{nullptr};
 
   /** Relay solver type */
-  int _numericsSolverId;
+  int _numericsSolverId{SICONOS_RELAY_AVI_CAOFERRIS};
 
   /** Numerical precision expected for the Relay solver */
-  double _precision;
+  double _precision{1e-8};
 
   /** the nsds for the controller */
-  SP::NonSmoothDynamicalSystem _nsdsSMC;
+  std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> _nsdsSMC{nullptr};
 
-  /** the DynamicalSystem for the controller */
-  SP::FirstOrderNonLinearDS _DS_SMC; // XXX replace this by FirstOrderDS
+  /** the DynamicalSystem for the controller */  // XXX replace this by FirstOrderDS
+  std::shared_ptr<siconos::modeling::FirstOrderNonLinearDS> _DS_SMC{nullptr};
 
   /** the TimeDiscretisation for the controller */
-  SP::TimeDiscretisation _td;
+  std::shared_ptr<siconos::simulation::TimeDiscretisation> _td{nullptr};
 
   /** Simulation for the controller */
-  SP::TimeStepping _simulationSMC;
+  std::shared_ptr<siconos::simulation::TimeStepping> _simulationSMC{nullptr};
 
   /** Integrator for the controller */
-  SP::OneStepIntegrator _integratorSMC;
+  std::shared_ptr<siconos::integrators::OneStepIntegrator> _integratorSMC{nullptr};
 
   /** Theta for the controller */
-  double _thetaSMC;
+  double _thetaSMC{0.5};
 
   /** OneStepNsProblem for the controller */
-  SP::LinearOSNS _OSNSPB_SMC;
+  std::shared_ptr<siconos::nonsmooth_formulations::LinearOSNS> _OSNSPB_SMC{nullptr};
 
-  /** SP::EventsManager of the SMC Simulation */
-  SP::EventsManager _eventsManager;
+  /** std::shared_ptr<siconos::simulation::EventsManager> of the SMC Simulation */
+  std::shared_ptr<siconos::simulation::EventsManager> _eventsManager{nullptr};
 
-  /** SP::NonSmoothLaw for computing the control law */
-  SP::NonSmoothLaw _nsLawSMC;
+  /** std::shared_ptr<siconos::modeling::NonSmoothLaw> for computing the control law */
+  std::shared_ptr<siconos::modeling::NonSmoothLaw> _nsLawSMC{nullptr};
 
   /** inverse of CB */
-  SP::SimpleMatrix _invCB;
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _invCB{nullptr};
 
   /** Store  \f$ u^{eq} \f$  */
-  SP::SiconosVector _ueq;
+  std::shared_ptr<siconos::algebra::SiconosVector> _ueq{nullptr};
 
   /** Store  \f$ u^s \f$  */
-  SP::SiconosVector _us;
+  std::shared_ptr<siconos::algebra::SiconosVector> _us{nullptr};
 
   /** Do not use the state-continuous equivaluent control  \f$  u^{eq} \f$ */
-  bool _noUeq;
+  bool _noUeq{false};
 
   /** If true perform the computation of the residus in the Newton loop if needed */
-  bool _computeResidus;
+  bool _computeResidus{true};
 
   /** Compute the equivalent part of the control  \f$  u^{eq} \f$.
    *  The method used here is to discretize the continuous-time
@@ -128,16 +146,15 @@ protected:
    */
   void computeUeq();
 
-public:
-
+ public:
   /** General constructor
    *
    *  \param type the type of the SMC Actuator
    *  \param sensor the ControlSensor feeding the Actuator
    */
-  CommonSMC(unsigned int type, SP::ControlSensor sensor): Actuator(type, sensor),
-    _indx(0), _alpha(1.0), _numericsSolverId(SICONOS_RELAY_AVI_CAOFERRIS), _precision(1e-8),
-    _thetaSMC(0.5), _noUeq(false), _computeResidus(true) {}
+  CommonSMC(ActuatorType type, std::shared_ptr<ControlSensor> sensor) : Actuator(type, sensor)
+  {
+  }
 
   /** Constructor for dynamics affine in control
    *
@@ -146,13 +163,15 @@ public:
    *  \param B the matrix multiplying the control input
    *  \param D the saturation matrix (optional)
    */
-  CommonSMC(unsigned int type, SP::ControlSensor sensor, SP::SimpleMatrix B, SP::SimpleMatrix D = std::shared_ptr<SimpleMatrix>()):
-    Actuator(type, sensor, B), _indx(0), _D(D), _alpha(1.0), _numericsSolverId(SICONOS_RELAY_AVI_CAOFERRIS),
-    _precision(1e-8), _thetaSMC(0.5), _noUeq(false), _computeResidus(true) {}
-
+  CommonSMC(ActuatorType type, std::shared_ptr<ControlSensor> sensor,
+            std::shared_ptr<siconos::algebra::SimpleMatrix> B,
+            std::shared_ptr<siconos::algebra::SimpleMatrix> D = nullptr)
+      : Actuator(type, sensor, B), _D(D)
+  {
+  }
 
   /** Compute the new control law at each event
-  */
+   */
   virtual void actuate() = 0;
 
   /** Initialization
@@ -160,8 +179,8 @@ public:
    *  \param nsds current nonsmooth dynamical system
    *  \param s current simulation setup
    */
-  virtual void initialize(const NonSmoothDynamicalSystem& nsds, const Simulation& s);
-
+  virtual void initialize(const siconos::modeling::NonSmoothDynamicalSystem& nsds,
+                          const siconos::simulation::Simulation& s);
 
   void sete(const std::string& plugin);
   void seth(const std::string& plugin);
@@ -173,15 +192,17 @@ public:
 
   /** Set Csurface
    *
-   *  \param Csurface a SP::SimpleMatrix containing the new value for _Csurface
+   *  \param Csurface a std::shared_ptr<siconos::algebra::SimpleMatrix> containing the new
+   * value for _Csurface
    */
-  void setCsurface(SP::SimpleMatrix Csurface);
+  void setCsurface(std::shared_ptr<siconos::algebra::SimpleMatrix> Csurface);
 
   /** Set _D to pointer newPtr
    *
-   *  \param newSat a SP::SimpleMatrix containing the new value for _D
+   *  \param newSat a std::shared_ptr<siconos::algebra::SimpleMatrix> containing the new value
+   * for _D
    */
-  void setSaturationMatrix(SP::SimpleMatrix newSat);
+  void setSaturationMatrix(std::shared_ptr<siconos::algebra::SimpleMatrix> newSat);
 
   /** Set _alpha
    *
@@ -193,93 +214,66 @@ public:
    *
    *  \return a pointer to _lambda
    */
-  inline SP::SiconosVector lambda() const
-  {
-    return _lambda;
-  };
+  inline std::shared_ptr<siconos::algebra::SiconosVector> lambda() const { return _lambda; };
 
   /** Set the solver
    *
    *  \param numericsSolverId the solver for the relay
    */
-  inline void setSolver(const int numericsSolverId)
-  {
-    _numericsSolverId = numericsSolverId;
-  };
+  inline void setSolver(const int numericsSolverId) { _numericsSolverId = numericsSolverId; };
 
   /** Set the precision
    *
    *  \param newPrecision a double
    */
-  inline void setPrecision(double newPrecision)
-  {
-    _precision = newPrecision;
-  };
+  inline void setPrecision(double newPrecision) { _precision = newPrecision; };
 
   /** Get the OneStepNSProblem problem associated with the controller. This is useful to
    *  gain access to the data given to the solver in Numerics
    *
    *  \return a reference to the LinearOSNS problem
    */
-  inline const LinearOSNS& relay()
-  {
-    return * _OSNSPB_SMC;
-  };
+  inline const siconos::nonsmooth_formulations::LinearOSNS& relay() { return *_OSNSPB_SMC; };
 
-  /** get \f$ u^{eq} \f$ 
+  /** get \f$ u^{eq} \f$
    *
    *  \return a reference to _ueq
    */
-  inline SiconosVector& ueq()
-  {
-    return *_ueq;
-  };
+  inline siconos::algebra::SiconosVector& ueq() { return *_ueq; };
 
-  /** get  \f$ u^{s} \f$ 
+  /** get  \f$ u^{s} \f$
    *
    *  \return a reference to _us
    */
 
-  inline SiconosVector& us()
-  {
-    return *_us;
-  };
+  inline siconos::algebra::SiconosVector& us() { return *_us; };
 
   /** Set _theta, used in some discretization method for \f$ u^{eq} \f$
    *
    *  \param newTheta the new value for _thetaSMC
    */
 
-  inline void setTheta(double newTheta)
-  {
-    _thetaSMC = newTheta;
-  };
+  inline void setTheta(double newTheta) { _thetaSMC = newTheta; };
 
   /** Disable (or enable) the use of the state-continuous control \f$ u^{eq} \f$
    *
    *  \param b disable the use of Ueq if true
    */
-  inline void noUeq(bool b)
-  {
-    _noUeq = b;
-  };
+  inline void noUeq(bool b) { _noUeq = b; };
 
   /** Disable (or enable) the computation of the residus on the Newton loop.
    *  This has an incidence only if the Relation is nonlinear
    *
    *  \param b disable the computation of the residus
    */
-  inline void setComputeResidus(bool b)
-  {
-    _computeResidus = b;
-  };
+  inline void setComputeResidus(bool b) { _computeResidus = b; };
 
   /** This is derived in child classes if they need to copy the TimeDiscretisation
    *  associated with this Sensor
    *
    *  \param td the TimeDiscretisation for this Sensor
-  */
-  virtual void setTimeDiscretisation(const TimeDiscretisation& td);
+   */
+  virtual void setTimeDiscretisation(const siconos::simulation::TimeDiscretisation& td);
 
   /** Set the DynamicalSystem used to compute the control law.
    *  This is useful when we have a Nonlinear problem and we need to compute
@@ -288,7 +282,8 @@ public:
    *
    *  \param ds the DynamicalSystem to be used in the Controller
    */
-  void setDS(SP::FirstOrderNonLinearDS ds) // XXX replace this by FirstOrderDS
+  void setDS(std::shared_ptr<siconos::modeling::FirstOrderNonLinearDS>
+                 ds)  // XXX replace this by FirstOrderDS
   {
     _DS_SMC = ds;
   };
@@ -297,13 +292,17 @@ public:
    *
    *  \return the NSDS used in the SMC
    */
-  virtual SP::NonSmoothDynamicalSystem getInternalNSDS() const { return _nsdsSMC; };
+  virtual std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> getInternalNSDS() const
+  {
+    return _nsdsSMC;
+  };
 
   /** get the Integrator used in the SMC
    *
    *  \return the Integrator used in the SMC
    */
-  OneStepIntegrator& getInternalOSI() const { return *_integratorSMC; };
-
+  siconos::integrators::OneStepIntegrator& getInternalOSI() const { return *_integratorSMC; };
 };
+
+}  // namespace siconos::control
 #endif

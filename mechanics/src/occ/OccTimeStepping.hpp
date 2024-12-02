@@ -18,19 +18,22 @@
 #ifndef OccTimeStepping_hpp
 #define OccTimeStepping_hpp
 
-#include "MechanicsFwd.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
+#include "TimeStepping.hpp"
 
-#include <TimeStepping.hpp>
+namespace siconos::modeling {
+class NonSmoothDynamicalSystem;
+}
 
-class OccTimeStepping : public TimeStepping
-{
+namespace siconos::mechanics::occ {
+class OccTimeStepping : public siconos::simulation::TimeStepping {
 
 public:
-
-  OccTimeStepping(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td) : TimeStepping(nsds,td) {};
+  OccTimeStepping(std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
+                  std::shared_ptr<siconos::simulation::TimeDiscretisation> td)
+      : TimeStepping(nsds, td){};
 
   virtual void updateWorldFromDS();
-
 };
-
+}  // namespace siconos::mechanics::occ
 #endif

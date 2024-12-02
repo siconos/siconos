@@ -14,11 +14,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #include "FirstOrderR.hpp"
 
-void FirstOrderR::initialize(Interaction& inter)
+#include "Interaction.hpp"
+#include "SiconosVisitor.hpp"
+
+void siconos::modeling::FirstOrderR::initialize(Interaction& inter)
 {
   inter.relationMatrices().resize(FirstOrderR::relationMatricesSize);
   inter.relationVectors().resize(FirstOrderR::relationVectorsSize);
+}
+
+void siconos::modeling::FirstOrderR::accept(
+    std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const
+{
+  tourist->visit(*this);
 }

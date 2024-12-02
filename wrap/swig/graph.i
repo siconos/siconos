@@ -8,17 +8,17 @@
 
 //%include <SimulationGraphs.hpp>
 
-%extend Siconos::Properties
+%extend siconos::Properties
 {
-  Siconos::Properties::reference __getitem__(const Siconos::Properties::key_type& v)
+  siconos::Properties::reference __getitem__(const siconos::Properties::key_type& v)
   {
     return (*self[v]);
   };
 };
 
-%extend Siconos::SubProperties
+%extend siconos::SubProperties
 {
-  Siconos::SubProperties::reference __getitem__(const Siconos::SubProperties::key_type& v)
+  siconos::SubProperties::reference __getitem__(const siconos::SubProperties::key_type& v)
   {
     return (*self[v]);
   };
@@ -41,8 +41,8 @@ struct InteractionsGraph{};
     size_t i = 0;
     for (boost::tie(ui,uiend) = $self->vertices(); ui != uiend; ++ui, ++i)
     {
-      SP::Interaction * nptr = new SP::Interaction($self->bundle(*ui));
-      resultobj = SWIG_NewPointerObj(%as_voidptr(nptr), $descriptor(SP::Interaction *), SWIG_POINTER_OWN);
+      auto * nptr = new std::shared<siconos::modeling::Interaction>($self->bundle(*ui));
+      resultobj = SWIG_NewPointerObj(%as_voidptr(nptr), $descriptor(std::shared_ptr<siconos::modeling::Interaction> *), SWIG_POINTER_OWN);
       PyTuple_SetItem(py_tuple, i, resultobj);
     };
     return py_tuple;
@@ -82,8 +82,8 @@ struct DynamicalSystemsGraph{};
     size_t i = 0;
     for (boost::tie(ui,uiend) = $self->edges(); ui != uiend; ++ui, ++i)
     {
-      SP::Interaction * nptr = new SP::Interaction($self->bundle(*ui));
-      resultobj = SWIG_NewPointerObj(%as_voidptr(nptr), $descriptor(SP::Interaction *), SWIG_POINTER_OWN);
+      auto * nptr = new std::shared_ptr<siconos::modeling::Interaction>($self->bundle(*ui);
+      resultobj = SWIG_NewPointerObj(%as_voidptr(nptr), $descriptor(std::shared_ptr<siconos::modeling::Interaction> *), SWIG_POINTER_OWN);
       PyTuple_SetItem(py_tuple, i, resultobj);
     };
     return py_tuple;
@@ -106,7 +106,7 @@ struct DynamicalSystemsGraph{};
 
 }
 
-%typemap(out) (std::vector<SP::DynamicalSystem>)
+%typemap(out) (std::vector<std::shared_ptr<siconos::modeling::DynamicalSystem>)
 {
   PyObject* py_tuple = PyTuple_New($1.size());
   if (!py_tuple) SWIG_fail;
@@ -121,7 +121,7 @@ struct DynamicalSystemsGraph{};
   $result = py_tuple;
 }
 
-%typemap(out) (std::vector<SP::Interaction>)
+%typemap(out) (std::vector<std::shared_ptr<siconos::modeling::Interaction>>)
 {
   PyObject* py_tuple = PyTuple_New($1.size());
   if (!py_tuple) SWIG_fail;
@@ -129,8 +129,8 @@ struct DynamicalSystemsGraph{};
 
   for (size_t i = 0; i < $1.size(); ++i)
   {
-    SP::Interaction * nptr = new SP::Interaction($1.at(i));
-    tmpobj = SWIG_NewPointerObj(%as_voidptr(nptr), $descriptor(SP::Interaction *), SWIG_POINTER_OWN);
+   auto * nptr = new std::shared_ptr<siconos::modeling::Interaction>($1.at(i));
+    tmpobj = SWIG_NewPointerObj(%as_voidptr(nptr), $descriptor(std::shared_ptr<siconos::modeling::Interaction> *), SWIG_POINTER_OWN);
     PyTuple_SetItem(py_tuple, i, tmpobj);
   }
 

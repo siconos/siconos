@@ -23,9 +23,8 @@
 #define SCHATZMANPAOLIOSI_H
 
 #include "OneStepIntegrator.hpp"
-#include "SimpleMatrix.hpp"
 
-const unsigned int SCHATZMANPAOLISTEPSINMEMORY = 2;
+namespace siconos::integrators {
 
 /**
    SchatzmanPaoliOSI Time-Integrator for Dynamical Systems
@@ -54,52 +53,40 @@ const unsigned int SCHATZMANPAOLISTEPSINMEMORY = 2;
 
 */
 class SchatzmanPaoliOSI : public OneStepIntegrator {
-public:
-  enum SchatzmanPaoliOSI_ds_workVector_id {
-    RESIDU_FREE,
-    FREE,
-    LOCAL_BUFFER,
-    WORK_LENGTH
-  };
+ public:
+  enum SchatzmanPaoliOSI_ds_workVector_id { RESIDU_FREE, FREE, LOCAL_BUFFER, WORK_LENGTH };
 
-  enum SchatzmanPaoliOSI_interaction_workVector_id {
-    OSNSP_RHS,
-    WORK_INTERACTION_LENGTH
-  };
+  enum SchatzmanPaoliOSI_interaction_workVector_id { OSNSP_RHS, WORK_INTERACTION_LENGTH };
 
   enum SchatzmanPaoliOSI_workBlockVector_id { xfree, BLOCK_WORK_LENGTH };
 
-protected:
+  static constexpr unsigned int SCHATZMANPAOLISTEPSINMEMORY = 2;
 
+ protected:
   ACCEPT_SERIALIZATION(SchatzmanPaoliOSI);
 
   /** Stl map that associates a theta parameter for the integration
    *  scheme to each DynamicalSystem of the OSI */
-  double _theta;
+  double _theta{0.};
 
   /** A gamma parameter for the integration scheme to each DynamicalSystem of
    * the OSI This parameter is used to apply a theta-method to the input $r$
    */
-  double _gamma;
+  double _gamma{1.};
 
   /** a boolean to known is the parameter must be used or not
    */
-  bool _useGamma;
+  bool _useGamma{false};
 
   /** a boolean to known is the parameter must be used or not
    */
-  bool _useGammaForRelation;
+  bool _useGammaForRelation{false};
 
   /** nslaw effects
    */
   struct _NSLEffectOnFreeOutput;
-  friend struct _NSLEffectOnFreeOutput;
 
-  /** Default constructor
-   */
-  SchatzmanPaoliOSI(){};
-
-public:
+ public:
   /** constructor from theta value only
    *
    *  \param theta value for all these DS.
@@ -115,17 +102,7 @@ public:
 
   /** destructor
    */
-  virtual ~SchatzmanPaoliOSI(){};
-
-  // --- GETTERS/SETTERS ---
-
-  /** get the value of W corresponding to DynamicalSystem ds
-   *
-   *  \param ds a pointer to DynamicalSystem, optional, default =
-   *  nullptr. get W[0] in that case
-   *  \return SimpleMatrix
-   */
-  const SimpleMatrix getW(SP::DynamicalSystem ds = SP::DynamicalSystem());
+  virtual ~SchatzmanPaoliOSI() noexcept = default;
 
   /** get W corresponding to DynamicalSystem ds
    *
@@ -133,32 +110,24 @@ public:
    *  nullptr. get W[0] in that case
    *  \return pointer to a SiconosMatrix
    */
-  SP::SimpleMatrix W(SP::DynamicalSystem ds);
+  std::shared_ptr<siconos::algebra::SimpleMatrix> W(
+      std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
   /** set the value of W[ds] to newValue
    *
    *  \param newValue SiconosMatrix
    *  \param ds  a pointer to DynamicalSystem,
    */
-  void setW(const SiconosMatrix &newValue, SP::DynamicalSystem ds);
+  void setW(const siconos::algebra::SiconosMatrix &newValue,
+            std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
   /** set W[ds] to pointer newPtr
    *
-   *  \param newPtr SP::SiconosMatrix
+   *  \param newPtr std::shared_ptr<siconos::algebra::SiconosMatrix>
    *  \param ds a pointer to DynamicalSystem
    */
-  void setWPtr(SP::SimpleMatrix newPtr, SP::DynamicalSystem ds);
-
-  // -- WBoundaryConditions --
-
-  /** get the value of WBoundaryConditions corresponding to DynamicalSystem ds
-   *
-   *  \param ds a pointer to DynamicalSystem, optional, default =
-   *  nullptr. get WBoundaryConditions[0] in that case
-   *  \return SimpleMatrix
-   */
-  const SimpleMatrix
-  getWBoundaryConditions(SP::DynamicalSystem ds = SP::DynamicalSystem());
+  void setWPtr(std::shared_ptr<siconos::algebra::SimpleMatrix> newPtr,
+               std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
   /** get WBoundaryConditions corresponding to DynamicalSystem ds
    *
@@ -166,7 +135,8 @@ public:
    *  nullptr. get WBoundaryConditions[0] in that case
    * \return pointer to a SiconosMatrix
    */
-  SP::SiconosMatrix WBoundaryConditions(SP::DynamicalSystem ds);
+  std::shared_ptr<siconos::algebra::SiconosMatrix> WBoundaryConditions(
+      std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
   // -- theta --
 
@@ -194,8 +164,7 @@ public:
    *
    *  \param newGamma a double
    */
-  inline void setGamma(double newGamma)
-  {
+  inline void setGamma(double newGamma) {
     _gamma = newGamma;
     _useGamma = true;
   };
@@ -224,11 +193,9 @@ public:
    *
    *  \param newUseGammaForRelation a bool
    */
-  inline void setUseGammaForRelation(bool newUseGammaForRelation)
-  {
+  inline void setUseGammaForRelation(bool newUseGammaForRelation) {
     _useGammaForRelation = newUseGammaForRelation;
-    if (_useGammaForRelation)
-      _useGamma = false;
+    if (_useGammaForRelation) _useGamma = false;
   };
 
   // --- OTHER FUNCTIONS ---
@@ -239,7 +206,8 @@ public:
    *  \param t time of initialization
    *  \param ds the dynamical system
    */
-  void initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds) override;
+  void initializeWorkVectorsForDS(
+      double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) override;
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi
@@ -248,9 +216,9 @@ public:
    *  \param interProp the properties on the graph
    *  \param DSG the dynamical systems graph
    */
-  void initializeWorkVectorsForInteraction(Interaction &inter,
-                                           InteractionProperties &interProp,
-                                           DynamicalSystemsGraph &DSG) override;
+  void initializeWorkVectorsForInteraction(
+      siconos::modeling::Interaction &inter, siconos::graphs::InteractionProperties &interProp,
+      siconos::graphs::DynamicalSystemsGraph &DSG) override;
 
   /** get the number of index sets required for the simulation
    *
@@ -262,7 +230,8 @@ public:
    *  \param time (double)
    *  \param ds a pointer to DynamicalSystem
    */
-  void initializeIterationMatrixW(double time, SP::DynamicalSystem ds);
+  void initializeIterationMatrixW(double time,
+                                  std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
   /** compute W SchatzmanPaoliOSI matrix at time t
    *
@@ -270,15 +239,16 @@ public:
    *  \param ds a pointer to DynamicalSystem
    *  \param W the matrix to compute
    */
-  void computeW(double time, SP::DynamicalSystem ds, SiconosMatrix &W);
+  void computeW(double time, std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
+                siconos::algebra::SiconosMatrix &W);
 
   /** compute WBoundaryConditionsMap[ds] SchatzmanPaoliOSI matrix at time t
    *
    *  \param ds a pointer to DynamicalSystem
    *  \param WBoundaryConditions write the result in WBoundaryConditions
    */
-  void computeWBoundaryConditions(SP::DynamicalSystem ds,
-                                  SiconosMatrix &WBoundaryConditions);
+  void computeWBoundaryConditions(std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
+                                  siconos::algebra::SiconosMatrix &WBoundaryConditions);
 
   /** initialize iteration matrix WBoundaryConditionsMap[ds] SchatzmanPaoliOSI
    *
@@ -287,7 +257,8 @@ public:
    *  invocation)
    */
   void initializeIterationMatrixWBoundaryConditions(
-      SP::DynamicalSystem ds, const DynamicalSystemsGraph::VDescriptor &dsv);
+      std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
+      const siconos::graphs::DynamicalSystemsGraph::VDescriptor &dsv);
 
   /** return the maximum of all norms for the "SchatzmanPaoliOSI-discretized"
    *  residus of DS \return a double
@@ -301,15 +272,17 @@ public:
 
   /** integrates the Interaction linked to this integrator, without taking
    *  non-smooth effects into account \param vertex_inter of the interaction
-   *  graph \param osnsp pointer to OneStepNSProblem
+   *  graph \param osnsp pointer to siconos::nonsmooth_formulations::OneStepNSProblem
    */
-  void computeFreeOutput(InteractionsGraph::VDescriptor &vertex_inter,
-                         OneStepNSProblem *osnsp) override;
+  void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
+                         siconos::nonsmooth_formulations::OneStepNSProblem *osnsp) override;
 
-  /** return the workVector corresponding to the right hand side of the OneStepNonsmooth problem
+  /** return the workVector corresponding to the right hand side of the OneStepNonsmooth
+   * problem
    */
-  SiconosVector& osnsp_rhs(InteractionsGraph::VDescriptor& vertex_inter, InteractionsGraph& indexSet) override
-  {
+  siconos::algebra::SiconosVector &osnsp_rhs(
+      siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
+      siconos::graphs::InteractionsGraph &indexSet) override {
     return *(*indexSet.properties(vertex_inter).workVectors)[SchatzmanPaoliOSI::OSNSP_RHS];
   };
 
@@ -331,9 +304,7 @@ public:
 
   /** Displays the data of the SchatzmanPaoliOSI's integrator
    */
-  void display() override;
-
-  ACCEPT_STD_VISITORS();
+  void display() const override;
 };
-
-#endif // SCHATZMANPAOLIOSI_H
+}  // namespace siconos::integrators
+#endif  // SCHATZMANPAOLIOSI_H

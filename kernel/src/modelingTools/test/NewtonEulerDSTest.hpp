@@ -49,9 +49,9 @@ private:
 
   // Members
 
-  SP::SiconosVector q0, q01,  velocity0, u0;
+  std::shared_ptr<siconos::algebra::SiconosVector> q0{nullptr}, q01{nullptr},  velocity0{nullptr}, u0{nullptr};
   double mass;
-  SP::SiconosMatrix inertia;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> inertia{nullptr};
 
 public:
   void setUp();

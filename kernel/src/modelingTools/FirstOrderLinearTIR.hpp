@@ -23,26 +23,25 @@
 
 #include "FirstOrderR.hpp"
 
-/** 
+namespace siconos::modeling {
+/**
     Linear Time Invariant Relation, derived from class FirstOrderR
 
     Linear Relation for First Order Dynamical Systems with time-independant
     operators
-    
+
     \f[
-    y &=& Cx(t) + Fz + D\lambda + e \\      
-    R &=& B\lambda 
+    y &=& Cx(t) + Fz + D\lambda + e \\
+    R &=& B\lambda
     \f]
-    
+
 */
 class FirstOrderLinearTIR : public FirstOrderR {
-
-protected:
-
+ protected:
   ACCEPT_SERIALIZATION(FirstOrderLinearTIR);
 
   /** e operator (constant vector) */
-  SP::SiconosVector _e{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> _e{nullptr};
 
   /** initialize the relation (check sizes, memory allocation ...)
    *
@@ -56,13 +55,14 @@ protected:
    */
   void checkSize(Interaction &inter) override;
 
-public:
+ public:
   /** create the Relation from a set of data
    *
    *  \param C the matrix C
    *  \param B the matrix B
    */
-  FirstOrderLinearTIR(SP::SimpleMatrix C, SP::SimpleMatrix B);
+  FirstOrderLinearTIR(std::shared_ptr<siconos::algebra::SimpleMatrix> C,
+                      std::shared_ptr<siconos::algebra::SimpleMatrix> B);
 
   /** create the Relation from a set of data
    *
@@ -72,9 +72,11 @@ public:
    *  \param e the e matrix
    *  \param B the B matrix
    */
-  FirstOrderLinearTIR(SP::SimpleMatrix C, SP::SimpleMatrix D,
-                      SP::SimpleMatrix F, SP::SiconosVector e,
-                      SP::SimpleMatrix B);
+  FirstOrderLinearTIR(std::shared_ptr<siconos::algebra::SimpleMatrix> C,
+                      std::shared_ptr<siconos::algebra::SimpleMatrix> D,
+                      std::shared_ptr<siconos::algebra::SimpleMatrix> F,
+                      std::shared_ptr<siconos::algebra::SiconosVector> e,
+                      std::shared_ptr<siconos::algebra::SimpleMatrix> B);
 
   /** destructor
    */
@@ -87,15 +89,17 @@ public:
    *  \param z
    *  \param y the resulting vector
    */
-  void computeh(const BlockVector &x, const SiconosVector &lambda, BlockVector &z,
-                SiconosVector &y);
+  void computeh(const siconos::algebra::BlockVector &x,
+                const siconos::algebra::SiconosVector &lambda,
+                siconos::algebra::BlockVector &z, siconos::algebra::SiconosVector &y);
 
   /** default function to compute g = Blambda
    *
    *  \param lambda
    *  \param r non-smooth input
    */
-  void computeg(const SiconosVector &lambda, BlockVector &r);
+  void computeg(const siconos::algebra::SiconosVector &lambda,
+                siconos::algebra::BlockVector &r);
 
   /** default function to compute y
    *
@@ -103,8 +107,7 @@ public:
    *  \param inter Interaction using this Relation
    *  \param level
    */
-  void computeOutput(double time, Interaction &inter,
-                     unsigned int level = 0) override;
+  void computeOutput(double time, Interaction &inter, unsigned int level = 0) override;
 
   /** default function to compute r
    *
@@ -112,8 +115,7 @@ public:
    *  \param inter Interaction using this Relation
    *  \param level
    */
-  void computeInput(double time, Interaction &inter,
-                    unsigned int level = 0) override;
+  void computeInput(double time, Interaction &inter, unsigned int level = 0) override;
 
   /** print the data to the screen
    */
@@ -123,13 +125,19 @@ public:
    *
    *  \param  newe the new value of e
    */
-  inline void setePtr(SP::SiconosVector newe) { _e = newe; }
+  inline void setePtr(std::shared_ptr<siconos::algebra::SiconosVector> newe)
+  {
+    _e = newe;
+  }
 
   /** get e
    *
    *  \return e matrix
    */
-  inline SP::SiconosVector e() const { return _e; }
+  inline std::shared_ptr<siconos::algebra::SiconosVector> e() const
+  {
+    return _e;
+  }
 
   /** determine if the Relation is linear
    *
@@ -141,10 +149,7 @@ public:
   // Note FP: final would be better than override but swig cannot handle it.
   void computeJach(double time, Interaction &inter) override{};
   void computeJacg(double time, Interaction &inter) override{};
-
-  ACCEPT_STD_VISITORS();
 };
-
-TYPEDEF_SPTR(FirstOrderLinearTIR)
+}  // namespace siconos::modeling
 
 #endif

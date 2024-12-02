@@ -23,10 +23,11 @@
 
 #include "TimeStepping.hpp"
 
+namespace siconos::simulation {
 /**
    Time-Stepping scheme with a direct projection onto the constraint
    thanks to the GGL augmentation of the system
-   
+
    For details, have a look on
    Projected event-capturing time-stepping schemes for nonsmooth mechanical
    systems with unilateral contact and Coulomb's friction Vincent Acary Computer
@@ -34,47 +35,47 @@
    224-250
 */
 class TimeSteppingDirectProjection : public TimeStepping {
-protected:
+ protected:
   ACCEPT_SERIALIZATION(TimeSteppingDirectProjection);
 
   /** level of IndexSet on which we project (default =1 (activated contact))
    */
-  unsigned int _indexSetLevelForProjection;
+  unsigned int _indexSetLevelForProjection{1};
 
   /** Number of iteration of projection
    */
-  unsigned int _nbProjectionIteration;
+  unsigned int _nbProjectionIteration{0};
 
   /** tolerance for the violation of the equality
    *  constraints at the  position level.
    */
-  double _constraintTol;
+  double _constraintTol{1.e-08};
 
   /** tolerance for the violation of the unilateral
    *  constraints at the  position level.
    */
-  double _constraintTolUnilateral;
+  double _constraintTolUnilateral{1.e-08};
 
   /** maximum violation for the violation of the unilateral
    *  constraints at the  position level.
    */
-  double _maxViolationUnilateral;
+  double _maxViolationUnilateral{0.};
 
   /** maximum violation for the violation of the equality
    *  constraints at the  position level.
    */
-  double _maxViolationEquality;
+  double _maxViolationEquality{0.};
 
   /** Default maximum number of projection iteration*/
-  unsigned int _projectionMaxIteration;
+  unsigned int _projectionMaxIteration{10};
 
   /** disabled or enabled projection (Debug Projection) */
-  unsigned int _doProj;
-  unsigned int _doOnlyProj;
+  bool _doProj{true};
+  bool _doOnlyProj{false};
 
-public:
+ public:
   /** Constructor with the time-discretisation.
-   * 
+   *
    *  \param nsds the nsds that we want to simulate
    *  \param td a pointer to a timeDiscretisation (linked to the model
    *  that owns this simulation)
@@ -83,22 +84,21 @@ public:
    *  formulation \param osnspb_pos a one step non smooth problem for the
    *  position formulation \param _level
    */
-  TimeSteppingDirectProjection(SP::NonSmoothDynamicalSystem nsds,
-                               SP::TimeDiscretisation td,
-                               SP::OneStepIntegrator osi,
-                               SP::OneStepNSProblem osnspb_velo,
-                               SP::OneStepNSProblem osnspb_pos,
-                               unsigned int _level = 1);
+  TimeSteppingDirectProjection(
+      std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
+      std::shared_ptr<TimeDiscretisation> td,
+      std::shared_ptr<siconos::integrators::OneStepIntegrator> osi,
+      std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem> osnspb_velo,
+      std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem> osnspb_pos,
+      unsigned int _level = 1);
 
   void initializeOneStepNSProblem() override;
 
-  /** default constructor
-   */
-  TimeSteppingDirectProjection(){};
+  // /** default constructor
+  //  */
+  // TimeSteppingDirectProjection() = default;
 
   virtual ~TimeSteppingDirectProjection() noexcept = default;
-
-  void updateWorldFromDS() override {}
 
   /** \return the Number of iteration of projection
    */
@@ -106,22 +106,16 @@ public:
 
   inline void setConstraintTol(double v) { _constraintTol = v; }
 
-  inline void setConstraintTolUnilateral(double v)
-  {
-    _constraintTolUnilateral = v;
-  }
+  inline void setConstraintTolUnilateral(double v) { _constraintTolUnilateral = v; }
 
   inline double maxViolationUnilateral() { return _maxViolationUnilateral; }
 
   inline double maxViolationEquality() { return _maxViolationEquality; }
 
-  inline void setProjectionMaxIteration(unsigned int v)
-  {
-    _projectionMaxIteration = v;
-  }
+  inline void setProjectionMaxIteration(unsigned int v) { _projectionMaxIteration = v; }
 
-  inline void setDoProj(unsigned int v) { _doProj = v; }
-  inline void setDoOnlyProj(unsigned int v) { _doOnlyProj = v; }
+  inline void setDoProj(bool v) { _doProj = v; }
+  inline void setDoOnlyProj(bool v) { _doOnlyProj = v; }
 
   void advanceToEvent() override;
 
@@ -130,10 +124,7 @@ public:
   void computeCriteria(bool *runningProjection);
 
   void newtonSolve(double criterion, unsigned int maxStep) override;
-
-  ACCEPT_STD_VISITORS();
 };
+}  // namespace siconos::simulation
 
-DEFINE_SPTR(TimeSteppingDirectProjection)
-
-#endif // TIMESTEPPINGDIRECTPROJECTION_H
+#endif  // TIMESTEPPINGDIRECTPROJECTION_H

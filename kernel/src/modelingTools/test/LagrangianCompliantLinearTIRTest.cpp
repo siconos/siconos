@@ -14,74 +14,92 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #include "LagrangianCompliantLinearTIRTest.hpp"
 
+#include "PluggedObject.hpp"
+#include "SiconosVector.hpp"
+#include "SimpleMatrix.hpp"
 
-#define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
-            if ((alpha) == (omega)) CPPUNIT_FAIL(message);
+#define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
+  if ((alpha) == (omega)) CPPUNIT_FAIL(message);
 
 // test suite registration
 CPPUNIT_TEST_SUITE_REGISTRATION(LagrangianCompliantLinearTIRTest);
 
-
 void LagrangianCompliantLinearTIRTest::setUp()
 {
-  C.reset(new SimpleMatrix("matC.dat", true));
-  D.reset(new SimpleMatrix("matD.dat", true));
-  F.reset(new SimpleMatrix("matF.dat", true));
-  e.reset(new SiconosVector(1));
+  C = std::make_shared<siconos::algebra::SimpleMatrix>("matC.dat", true);
+  D = std::make_shared<siconos::algebra::SimpleMatrix>("matD.dat", true);
+  F = std::make_shared<siconos::algebra::SimpleMatrix>("matF.dat", true);
+  e = std::make_shared<siconos::algebra::SiconosVector>(1);
   (*e)(0) = 0.1;
 }
 
-void LagrangianCompliantLinearTIRTest::tearDown()
-{}
+void LagrangianCompliantLinearTIRTest::tearDown() {}
 
 // data constructor (1)
 void LagrangianCompliantLinearTIRTest::testBuildLagrangianCompliantLinearTIR1()
 {
-  std::cout << "--> Test: constructor 1." <<std::endl;
-  SP::LagrangianCompliantLinearTIR folr(new LagrangianCompliantLinearTIR(C, D));
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantLinearTIR1a : ", folr->C() == C, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantLinearTIR1c : ", folr->getType() == RELATION::Lagrangian, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantLinearTIR1d : ", folr->getSubType() == RELATION::CompliantLinearTIR, true);
-  std::cout << "--> Constructor 1 test ended with success." <<std::endl;
+  std::cout << "--> Test: constructor 1." << std::endl;
+  auto folr = std::make_shared<siconos::modeling::LagrangianCompliantLinearTIR>(C, D);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantLinearTIR1a : ", folr->C() == C,
+                               true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantLinearTIR1c : ",
+                               folr->getType() == siconos::modeling::RelationType::Lagrangian,
+                               true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "testBuildLagrangianCompliantLinearTIR1d : ",
+      folr->getSubType() == siconos::modeling::RelationSubType::CompliantLinearTIR, true);
+  std::cout << "--> Constructor 1 test ended with success." << std::endl;
 }
 
 // data constructor (5)
 void LagrangianCompliantLinearTIRTest::testBuildLagrangianCompliantLinearTIR2()
 {
-  std::cout << "--> Test: constructor 2." <<std::endl;
-  SP::LagrangianCompliantLinearTIR folr(new LagrangianCompliantLinearTIR(C, D, F, e));
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantLinearTIR2f : ", folr->getType() == RELATION::Lagrangian, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantLinearTIR2g : ", folr->getSubType() == RELATION::CompliantLinearTIR, true);
-  std::cout << "--> Constructor 2 test ended with success." <<std::endl;
+  std::cout << "--> Test: constructor 2." << std::endl;
+  auto folr = std::make_shared<siconos::modeling::LagrangianCompliantLinearTIR>(C, D, F, e);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantLinearTIR2f : ",
+                               folr->getType() == siconos::modeling::RelationType::Lagrangian,
+                               true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "testBuildLagrangianCompliantLinearTIR2g : ",
+      folr->getSubType() == siconos::modeling::RelationSubType::CompliantLinearTIR, true);
+  std::cout << "--> Constructor 2 test ended with success." << std::endl;
 }
 
 // data constructor (5)
 void LagrangianCompliantLinearTIRTest::testBuildLagrangianCompliantLinearTIR3()
 {
-  std::cout << "--> Test: constructor 3." <<std::endl;
-  SP::LagrangianCompliantLinearTIR folr(new LagrangianCompliantLinearTIR(C, D, e));
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantLinearTIR3a : ", folr->C() == C, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantLinearTIR3d : ", folr->e() == e, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantLinearTIR3f : ", folr->getType() == RELATION::Lagrangian, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantLinearTIR3g : ", folr->getSubType() == RELATION::CompliantLinearTIR, true);
-  std::cout << "--> Constructor 3 test ended with success." <<std::endl;
+  std::cout << "--> Test: constructor 3." << std::endl;
+  auto folr = std::make_shared<siconos::modeling::LagrangianCompliantLinearTIR>(C, D, e);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantLinearTIR3a : ", folr->C() == C,
+                               true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantLinearTIR3d : ", folr->e() == e,
+                               true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantLinearTIR3f : ",
+                               folr->getType() == siconos::modeling::RelationType::Lagrangian,
+                               true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "testBuildLagrangianCompliantLinearTIR3g : ",
+      folr->getSubType() == siconos::modeling::RelationSubType::CompliantLinearTIR, true);
+  std::cout << "--> Constructor 3 test ended with success." << std::endl;
 }
 
 // setCPtr
 void LagrangianCompliantLinearTIRTest::testSetCPtr()
 {
-  std::cout << "--> Test: setCPtr." <<std::endl;
-  SP::SimpleMatrix tmpC(new SimpleMatrix(*C));
+  std::cout << "--> Test: setCPtr." << std::endl;
+  std::shared_ptr<siconos::algebra::SimpleMatrix> tmpC =
+      std::make_shared<siconos::algebra::SimpleMatrix>(*C);
   tmpC->zero();
-  SP::SimpleMatrix tmpD(new SimpleMatrix(*D));
+  std::shared_ptr<siconos::algebra::SimpleMatrix> tmpD =
+      std::make_shared<siconos::algebra::SimpleMatrix>(*D);
   tmpD->zero();
-  SP::LagrangianCompliantLinearTIR folr(new LagrangianCompliantLinearTIR(tmpC, tmpD));
+  auto folr = std::make_shared<siconos::modeling::LagrangianCompliantLinearTIR>(tmpC, tmpD);
   folr->setCPtr(C);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetCPtr : ", folr->C() == C, true);
-  std::cout << "--> setCPtr test ended with success." <<std::endl;
+  std::cout << "--> setCPtr test ended with success." << std::endl;
 }
 
 // set D
@@ -89,13 +107,14 @@ void LagrangianCompliantLinearTIRTest::testSetCPtr()
 // setDPtr
 void LagrangianCompliantLinearTIRTest::testSetDPtr()
 {
-  std::cout << "--> Test: setDPtr." <<std::endl;
-  SP::SimpleMatrix tmp(new SimpleMatrix(*D));
+  std::cout << "--> Test: setDPtr." << std::endl;
+  std::shared_ptr<siconos::algebra::SimpleMatrix> tmp =
+      std::make_shared<siconos::algebra::SimpleMatrix>(*D);
   tmp->zero();
-  SP::LagrangianCompliantLinearTIR folr(new LagrangianCompliantLinearTIR(C, tmp));
+  auto folr = std::make_shared<siconos::modeling::LagrangianCompliantLinearTIR>(C, tmp);
   folr->setDPtr(D);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetDPtr: ", folr->D() == D, true);
-  std::cout << "--> setDPtr test ended with success." <<std::endl;
+  std::cout << "--> setDPtr test ended with success." << std::endl;
 }
 
 // set F
@@ -103,11 +122,11 @@ void LagrangianCompliantLinearTIRTest::testSetDPtr()
 // setFPtr
 void LagrangianCompliantLinearTIRTest::testSetFPtr()
 {
-  std::cout << "--> Test: setFPtr." <<std::endl;
-  SP::LagrangianCompliantLinearTIR folr(new LagrangianCompliantLinearTIR(C, D));
+  std::cout << "--> Test: setFPtr." << std::endl;
+  auto folr = std::make_shared<siconos::modeling::LagrangianCompliantLinearTIR>(C, D);
   folr->setFPtr(F);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetFPtr: ", folr->F() == F, true);
-  std::cout << "--> setFPtr test ended with success." <<std::endl;
+  std::cout << "--> setFPtr test ended with success." << std::endl;
 }
 
 // set E
@@ -115,29 +134,27 @@ void LagrangianCompliantLinearTIRTest::testSetFPtr()
 // setEPtr
 void LagrangianCompliantLinearTIRTest::testSetEPtr()
 {
-  std::cout << "--> Test: setEPtr." <<std::endl;
-  SP::LagrangianCompliantLinearTIR folr(new LagrangianCompliantLinearTIR(C, D));
+  std::cout << "--> Test: setEPtr." << std::endl;
+  auto folr = std::make_shared<siconos::modeling::LagrangianCompliantLinearTIR>(C, D);
   folr->setEPtr(e);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetEPtr: ", folr->e() == e, true);
-  std::cout << "--> setEPtr test ended with success." <<std::endl;
+  std::cout << "--> setEPtr test ended with success." << std::endl;
 }
-
-
 
 void LagrangianCompliantLinearTIRTest::testGetJacPtr()
 {
-  std::cout << "--> Test: jac." <<std::endl;
-  SP::LagrangianCompliantLinearTIR folr(new LagrangianCompliantLinearTIR(C, D));
+  std::cout << "--> Test: jac." << std::endl;
+  auto folr = std::make_shared<siconos::modeling::LagrangianCompliantLinearTIR>(C, D);
   folr->setDPtr(D);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetJachq: ", folr->jachq() == C, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetJachlambda: ", folr->jachlambda() == D, true);
 
-  std::cout << "--> setBPtr test ended with success." <<std::endl;
+  std::cout << "--> setBPtr test ended with success." << std::endl;
 }
 
 void LagrangianCompliantLinearTIRTest::End()
 {
-  std::cout << "===========================================" <<std::endl;
-  std::cout << " ===== End of LagrangianCompliantLinearTIR Tests ===== " <<std::endl;
-  std::cout << "=========================================== " <<std::endl;
+  std::cout << "===========================================" << std::endl;
+  std::cout << " ===== End of LagrangianCompliantLinearTIR Tests ===== " << std::endl;
+  std::cout << "=========================================== " << std::endl;
 }

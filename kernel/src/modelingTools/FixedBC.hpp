@@ -14,32 +14,30 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef FIXEDBC_HPP
 #define FIXEDBC_HPP
 
-
 #include "BoundaryCondition.hpp"
 
+namespace siconos::modeling {
 /** This class models a simple fixed boundary conditions for
  *  prescribing the velocities in a Dynamical System. A simple
  *  boundary condition is considered to fix a component \f$ j \f$ of
- *  the velocity vector, i.e., \f$ v_j(t) = 0 \f$ 
+ *  the velocity vector, i.e., \f$ v_j(t) = 0 \f$
  *
  */
-class FixedBC : public  BoundaryCondition
-{
-public:
-
+class FixedBC : public BoundaryCondition {
+ public:
   /** Basic constructor
    *
    *  \param newVelocityIndices the indices of the velocity subjected to prescribed velocities
    */
 
-  FixedBC(SP::UnsignedIntVector newVelocityIndices) ;
+  FixedBC(Indices&& newVelocityIndices) : BoundaryCondition(std::move(newVelocityIndices)){};
 
   /** destructor */
-  virtual ~FixedBC();
+  virtual ~FixedBC() noexcept = default;
 
   /** default function to compute the precribed velocities
    *
@@ -47,14 +45,9 @@ public:
    */
   virtual void computePrescribedVelocity(double time);
 
-protected:
-  
+ protected:
   ACCEPT_SERIALIZATION(FixedBC);
-
-  /** protected default constructor */
-  FixedBC(): BoundaryCondition() {};
-
 };
+}  // namespace siconos::modeling
 
-TYPEDEF_SPTR(FixedBC)
-#endif // FIXEDBC_HPP
+#endif  // FIXEDBC_HPP

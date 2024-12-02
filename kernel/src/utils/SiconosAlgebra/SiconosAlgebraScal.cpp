@@ -14,204 +14,169 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
-#include <boost/numeric/ublas/matrix_proxy.hpp>
-#include <boost/numeric/ublas/triangular.hpp>
-#include <boost/numeric/ublas/symmetric.hpp>
+#include <assert.h>
+
 #include <boost/numeric/ublas/banded.hpp>
+#include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/numeric/ublas/matrix_sparse.hpp>
-#include "SimpleMatrixFriends.hpp"
-#include "SiconosMatrix.hpp"
-#include "SimpleMatrix.hpp"
+#include <boost/numeric/ublas/symmetric.hpp>
+#include <boost/numeric/ublas/triangular.hpp>
+
 #include "BlockMatrix.hpp"
-#include "BlockMatrixIterators.hpp"
-#include "SiconosAlgebraTools.hpp" // for isComparableTo
+#include "SiconosAlgebraTools.hpp"  // for isComparableTo
+#include "SiconosAlgebraTypes.hpp"  // UblasType
 #include "SiconosException.hpp"
+#include "SiconosMatrix.hpp"
+#include "SiconosMatrixOp.hpp"  // For isComparableto
+#include "SimpleMatrix.hpp"
 
-using Siconos::Algebra::isComparableTo;
-
-void scal(double a, const SiconosMatrix& A, SiconosMatrix& B, bool init)
-{
+void siconos::algebra::scal(double a, const SiconosMatrix &A, SiconosMatrix &B, bool init) {
   // To compute B = a * A (init = true) or B += a*A (init = false).
   assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
-  if(!B.isBlock())
-    B.resetFactorizationFlags();
+  if (!B.isBlock()) B.resetFactorizationFlags();
 
-  if(&A == &B)
-  {
-    if(init) B *= a;
-    else B *= (1.0 + a);
-  }
-  else
-  {
-    Siconos::UBLAS_TYPE numA = A.num();
-    Siconos::UBLAS_TYPE numB = B.num();
+  if (&A == &B) {
+    if (init)
+      B *= a;
+    else
+      B *= (1.0 + a);
+  } else {
+    auto numA = A.num();
+    auto numB = B.num();
 
-    if(numB == Siconos::ZERO || numB == Siconos::IDENTITY)  // B = 0 or identity.
+    if (numB == UblasType::ZERO || numB == UblasType::IDENTITY)  // B = 0 or identity.
       THROW_EXCEPTION("forbidden for B being a zero or identity matrix.");
 
-    if(numA == Siconos::ZERO)
-    {
-      if(init) B.zero();  // else nothing
-    }
-    else if(numA == Siconos::IDENTITY)
-    {
-      if(init)
-      {
+    if (numA == UblasType::ZERO) {
+      if (init) B.zero();  // else nothing
+    } else if (numA == UblasType::IDENTITY) {
+      if (init) {
         B.eye();
         B *= a;
-      }
-      else
-      {
+      } else {
         // Assuming B is square ...
-        for(unsigned int i = 0; i < B.size(0); ++i)
-          B(i, i) += a;
+        for (unsigned int i = 0; i < B.size(0); ++i) B(i, i) += a;
       }
-    }
-    else
-    {
-      if(numA == numB)  // if A and B are of the same type ...
+    } else {
+      if (numA == numB)  // if A and B are of the same type ...
       {
-        switch(numA)
-        {
-
-        case Siconos::BLOCK: // A and B are block
-          if(isComparableTo(A, B))
-          {
-            const BlockMatrix& Aref = static_cast<const BlockMatrix&>(A);
-            BlockMatrix& Bref = static_cast<BlockMatrix&>(B);
-            BlocksIterator1 itB1;
-            BlocksIterator2 itB2;
-            ConstBlocksIterator1 itA1 = Aref._mat->begin1();
-            ConstBlocksIterator2 itA2;
-            for(itB1 = Bref._mat->begin1(); itB1 != Bref._mat->end1(); ++itB1)
-            {
-              itA2 = itA1.begin();
-              for(itB2 = itB1.begin(); itB2 != itB1.end(); ++itB2)
-              {
-                scal(a, **itA2++, **itB2, init);
+        switch (numA) {
+          case UblasType::BLOCK:  // A and B are block
+            if (isComparableTo(A, B)) {
+              const BlockMatrix &Aref = static_cast<const BlockMatrix &>(A);
+              BlockMatrix &Bref = static_cast<BlockMatrix &>(B);
+              auto itA1 = Aref._mat->begin1();
+              for (auto itB1 = Bref._mat->begin1(); itB1 != Bref._mat->end1(); ++itB1) {
+                auto itA2 = itA1.begin();
+                for (auto itB2 = itB1.begin(); itB2 != itB1.end(); ++itB2) {
+                  scal(a, **itA2++, **itB2, init);
+                }
+                itA1++;
               }
-              itA1++;
-            }
-          }
-          else // if A and B are not "block-consistent"
-          {
-            if(init)
+            } else  // if A and B are not "block-consistent"
             {
-              for(unsigned int i = 0; i < A.size(0); ++i)
-                for(unsigned int j = 0; j < A.size(1); ++j)
-                  B(i, j) = a * A(i, j);
+              if (init) {
+                for (unsigned int i = 0; i < A.size(0); ++i)
+                  for (unsigned int j = 0; j < A.size(1); ++j) B(i, j) = a * A(i, j);
+              } else {
+                for (unsigned int i = 0; i < A.size(0); ++i)
+                  for (unsigned int j = 0; j < A.size(1); ++j) B(i, j) += a * A(i, j);
+              }
             }
-            else
-            {
-              for(unsigned int i = 0; i < A.size(0); ++i)
-                for(unsigned int j = 0; j < A.size(1); ++j)
-                  B(i, j) += a * A(i, j);
-            }
-          }
-          break;
+            break;
 
-        case Siconos::DENSE: // if both are dense
-          if(init)
-            noalias(*B.dense()) = a ** A.dense();
-          else
-            noalias(*B.dense()) += a ** A.dense();
-          break;
-        case Siconos::TRIANGULAR:
-          if(init)
-            noalias(*B.triang()) = a ** A.triang();
-          else
-            noalias(*B.triang()) += a ** A.triang();
-          break;
-        case Siconos::SYMMETRIC:
-          if(init)
-            noalias(*B.sym()) = a ** A.sym();
-          else
-            noalias(*B.sym()) += a ** A.sym();
-          break;
-        case Siconos::SPARSE:
-          if(init)
-            noalias(*B.sparse()) = a ** A.sparse();
-          else
-            noalias(*B.sparse()) += a ** A.sparse();
-          break;
-        case Siconos::BANDED:
-          if(init)
-            noalias(*B.banded()) = a ** A.banded();
-          else
-            noalias(*B.banded()) += a ** A.banded();
-          break;
-        default:
-          THROW_EXCEPTION("Not implemented for A/B type.");
+          case UblasType::DENSE:  // if both are dense
+            if (init)
+              noalias(*B.dense()) = a * *A.dense();
+            else
+              noalias(*B.dense()) += a * *A.dense();
+            break;
+          case UblasType::TRIANGULAR:
+            if (init)
+              noalias(*B.triang()) = a * *A.triang();
+            else
+              noalias(*B.triang()) += a * *A.triang();
+            break;
+          case UblasType::SYMMETRIC:
+            if (init)
+              noalias(*B.sym()) = a * *A.sym();
+            else
+              noalias(*B.sym()) += a * *A.sym();
+            break;
+          case UblasType::SPARSE:
+            if (init)
+              noalias(*B.sparse()) = a * *A.sparse();
+            else
+              noalias(*B.sparse()) += a * *A.sparse();
+            break;
+          case UblasType::BANDED:
+            if (init)
+              noalias(*B.banded()) = a * *A.banded();
+            else
+              noalias(*B.banded()) += a * *A.banded();
+            break;
+          default:
+            THROW_EXCEPTION("Not implemented for A/B type.");
         }
-      }
-      else // if A and B are of different types.
+      } else  // if A and B are of different types.
       {
-        if(numA == Siconos::BLOCK || numB == Siconos::BLOCK)  // if A or B is block
+        if (numA == UblasType::BLOCK || numB == UblasType::BLOCK)  // if A or B is block
         {
-          if(init)
-          {
+          if (init) {
             B = A;
             B *= a;
-          }
-          else
-          {
+          } else {
             SimpleMatrix tmp(A);
             tmp *= a;
-            B += tmp; // bof bof ...
+            B += tmp;  // bof bof ...
           }
-        }
-        else
-        {
-          if(numB != Siconos::DENSE)
+        } else {
+          if (numB != UblasType::DENSE)
             THROW_EXCEPTION("Inconsistent types between A and B (must be dense?)");
 
-          if(init)
-          {
-            switch(numA)
-            {
-            case Siconos::DENSE:
-              noalias(*B.dense()) = a ** A.dense();
-              break;
-            case Siconos::TRIANGULAR:
-              noalias(*B.dense()) = a ** A.triang();
-              break;
-            case Siconos::SYMMETRIC:
-              noalias(*B.dense()) = a ** A.sym();
-              break;
-            case Siconos::SPARSE:
-              noalias(*B.dense()) = a ** A.sparse();
-              break;
-            case Siconos::BANDED:
-              noalias(*B.dense()) = a ** A.banded();
-              break;
-            default:
-              THROW_EXCEPTION("Not implemented for A type.");
+          if (init) {
+            switch (numA) {
+              case UblasType::DENSE:
+                noalias(*B.dense()) = a * *A.dense();
+                break;
+              case UblasType::TRIANGULAR:
+                noalias(*B.dense()) = a * *A.triang();
+                break;
+              case UblasType::SYMMETRIC:
+                noalias(*B.dense()) = a * *A.sym();
+                break;
+              case UblasType::SPARSE:
+                noalias(*B.dense()) = a * *A.sparse();
+                break;
+              case UblasType::BANDED:
+                noalias(*B.dense()) = a * *A.banded();
+                break;
+              default:
+                THROW_EXCEPTION("Not implemented for A type.");
             }
-          }
-          else
+          } else
 
           {
-            switch(numA)
-            {
-            case Siconos::DENSE:
-              noalias(*B.dense()) += a ** A.dense();
-              break;
-            case Siconos::TRIANGULAR:
-              noalias(*B.dense()) += a ** A.triang();
-              break;
-            case Siconos::SYMMETRIC:
-              noalias(*B.dense()) += a ** A.sym();
-              break;
-            case Siconos::SPARSE:
-              noalias(*B.dense()) += a ** A.sparse();
-              break;
-            case Siconos::BANDED:
-              noalias(*B.dense()) += a ** A.banded();
-              break;
-            default:
-              THROW_EXCEPTION("Not implemented for A type.");
+            switch (numA) {
+              case UblasType::DENSE:
+                noalias(*B.dense()) += a * *A.dense();
+                break;
+              case UblasType::TRIANGULAR:
+                noalias(*B.dense()) += a * *A.triang();
+                break;
+              case UblasType::SYMMETRIC:
+                noalias(*B.dense()) += a * *A.sym();
+                break;
+              case UblasType::SPARSE:
+                noalias(*B.dense()) += a * *A.sparse();
+                break;
+              case UblasType::BANDED:
+                noalias(*B.dense()) += a * *A.banded();
+                break;
+              default:
+                THROW_EXCEPTION("Not implemented for A type.");
             }
           }
         }

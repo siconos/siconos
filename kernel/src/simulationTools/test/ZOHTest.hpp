@@ -14,29 +14,25 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef __ZOHTest__
 #define __ZOHTest__
 
 #include <cppunit/extensions/HelperMacros.h>
+
 #include "FirstOrderLinearTIDS.hpp"
-#include "ZeroOrderHoldOSI.hpp"
-#include "TimeStepping.hpp"
-#include "TimeDiscretisation.hpp"
-#include "ioMatrix.hpp"
 #include "FirstOrderLinearTIR.hpp"
-#include "RelayNSL.hpp"
 #include "Interaction.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "Relay.hpp"
+#include "RelayNSL.hpp"
+#include "TimeDiscretisation.hpp"
+#include "TimeStepping.hpp"
+#include "ZeroOrderHoldOSI.hpp"
 
-class ZOHTest : public CppUnit::TestFixture
-{
-
-private:
-  
+class ZOHTest : public CppUnit::TestFixture {
+ private:
   ACCEPT_SERIALIZATION(ZOHTest);
-
 
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(ZOHTest);
@@ -62,31 +58,24 @@ private:
   void testMatrixIntegration4();
   // Members
 
-  unsigned int _n;
-  double _h;
-  double _t0;
-  double _T;
-  double _tol;
-  SP::NonSmoothDynamicalSystem _model;
-  SP::TimeStepping _sim;
-  SP::FirstOrderLinearDS _DS;
-  SP::TimeDiscretisation _TD;
-  SP::ZeroOrderHoldOSI _ZOH;
-  SP::SiconosMatrix _A;
-  SP::SiconosVector _b;
-  SP::SiconosVector _x0;
+  unsigned int _n{2};
+  double _h{0.1};
+  double _t0{0.};
+  double _T{10.};
+  double _tol{1.e-12};
+  std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> _model{nullptr};
+  std::shared_ptr<siconos::simulation::TimeStepping> _sim{nullptr};
+  std::shared_ptr<siconos::modeling::FirstOrderLinearDS> _DS{nullptr};
+  std::shared_ptr<siconos::simulation::TimeDiscretisation> _TD{nullptr};
+  std::shared_ptr<siconos::integrators::ZeroOrderHoldOSI> _ZOH;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _A{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> _b{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> _x0{nullptr};
 
-
-public:
-
-  ZOHTest(): _n(2), _h(0.1), _t0(0.0), _T(10.0), _tol(1e-12) {}
+ public:
+  ZOHTest() = default;
   void setUp();
   void tearDown();
-
 };
 
 #endif
-
-
-
-

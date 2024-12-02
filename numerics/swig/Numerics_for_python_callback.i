@@ -59,13 +59,13 @@ static void  my_call_to_callback_NablaFmcp (int size, double *z, double *nablaF)
     if (array_size(result,0) != size || array_size(result,1) != size )
     {
       char message[240];
-      sprintf(message, "Wrong size for  the return value of callback function. Expected size is %i x %i", size,size);
+      snprintf(message, sizeof(message), "Wrong size for  the return value of callback function. Expected size is %i x %i", size,size);
       PyErr_SetString(PyExc_RuntimeError,message);
     }
     else if (array_numdims(result) != 2)
     {
       char message[240];
-      sprintf(message, "Wrong dimension for  the return value of callback function. Expected dimension is 2");
+      snprintf(message, sizeof(message), "Wrong dimension for  the return value of callback function. Expected dimension is 2");
       PyErr_SetString(PyExc_RuntimeError,message);
     }
     else
@@ -154,13 +154,13 @@ static void  my_call_to_callback_Fmcp (int size, double *z, double *F)
     if (array_size(result,0) != size)
     {
       char message[240];
-      sprintf(message, "Wrong size for  the return value of callback function. Expected size is %i", size);
+      snprintf(message, sizeof(message), "Wrong size for  the return value of callback function. Expected size is %i", size);
       PyErr_SetString(PyExc_RuntimeError,message);
     }
     else if (array_numdims(result) != 1)
     {
       char message[240];
-      sprintf(message, "Wrong dimension for  the return value of callback function. Expected dimension is 1");
+      snprintf(message, sizeof(message), "Wrong dimension for  the return value of callback function. Expected dimension is 1");
       PyErr_SetString(PyExc_RuntimeError,message);
     }
     else

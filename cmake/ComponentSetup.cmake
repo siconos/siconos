@@ -11,12 +11,10 @@ include(SiconosTools)
 # The following variables must be properly set before any call to this function
 # - <COMPONENT>_DIRS : list of directories (path relative to CMAKE_SOURCE_DIR)
 #    that contain source files.
-# - <COMPONENT>_EXCLUDE_SRCS : list of files to exclude from build process
-#   for this component.
 #
 # This function:
 #   creates a target <component> from all sources files in <component>_DIRS
-#   excluding files from <component>_EXCLUDE_SRCS
+#   excluding files listed after the keyword EXCLUDE.
 #
 function(create_siconos_component COMPONENT)
 
@@ -27,7 +25,7 @@ function(create_siconos_component COMPONENT)
 
   # --> Scan source directories and return a list of files
   # to be compiled.
-  get_sources(${COMPONENT} DIRS ${${COMPONENT}_DIRS} EXCLUDE ${${COMPONENT}_EXCLUDE_SRCS})
+  get_sources(${COMPONENT} DIRS ${${COMPONENT}_DIRS} EXCLUDE ${component_EXCLUDE})
   
   # Create the library
   if(BUILD_SHARED_LIBS)
@@ -98,9 +96,6 @@ endfunction()
 # - <COMPONENT>_EXCLUDE_DOXY : list of directories to exclude from doc
 #   for this component.
 #
-# This function:
-#   creates a target <component> from all sources files in <component>_DIRS
-#   excluding files from <component>_EXCLUDE_SRCS
 #
 function(configure_component_documentation COMPONENT)
 
@@ -127,12 +122,12 @@ endfunction()
 # siconos_component_install_setup(<COMPONENT>)
 #
 #
-# This function 
-#   creates a target <component> from all sources files in <component>_DIRS
-#   excluding files from <component>_EXCLUDE_SRCS
 #
 function(siconos_component_install_setup COMPONENT)
   
+  set(options NODOC)
+  cmake_parse_arguments(component_install "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+
   # libraries
   install(TARGETS ${COMPONENT}
     EXPORT siconosTargets
@@ -174,10 +169,10 @@ function(siconos_component_install_setup COMPONENT)
       $<INSTALL_INTERFACE:include/siconos/${COMPONENT}>)
 
   endif()
-
   # prepare documentation
-  configure_component_documentation(${COMPONENT} HEADERS ${_all_headers})
-
+  if(NOT component_install_NODOC)
+    configure_component_documentation(${COMPONENT} HEADERS ${_all_headers})
+  endif()
   # Set installed_targets list (for siconos-config.cmake file)
   list(APPEND installed_targets ${COMPONENT})
   list(REMOVE_DUPLICATES installed_targets)

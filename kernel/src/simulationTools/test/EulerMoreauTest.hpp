@@ -14,29 +14,25 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef __EulerMoreauTest__
 #define __EulerMoreauTest__
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "FirstOrderLinearTIDS.hpp"
+
 #include "EulerMoreauOSI.hpp"
-#include "TimeStepping.hpp"
-#include "TimeDiscretisation.hpp"
-#include "ioMatrix.hpp"
+#include "FirstOrderLinearTIDS.hpp"
 #include "FirstOrderLinearTIR.hpp"
-#include "RelayNSL.hpp"
 #include "Interaction.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "Relay.hpp"
+#include "RelayNSL.hpp"
+#include "TimeDiscretisation.hpp"
+#include "TimeStepping.hpp"
 
-class EulerMoreauTest : public CppUnit::TestFixture
-{
-
-private:
-  
+class EulerMoreauTest : public CppUnit::TestFixture {
+ private:
   ACCEPT_SERIALIZATION(EulerMoreauTest);
-
 
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(EulerMoreauTest);
@@ -61,26 +57,19 @@ private:
   double _t0;
   double _T;
   double _tol;
-  SP::NonSmoothDynamicalSystem _model;
-  SP::TimeStepping _sim;
-  SP::DynamicalSystem _DS;
-  SP::TimeDiscretisation _TD;
-  SP::EulerMoreauOSI _EulerMoreau;
-  SP::SiconosMatrix _A;
-  SP::SiconosVector _b;
-  SP::SiconosVector _x0;
+  std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> _model{nullptr};
+  std::shared_ptr<siconos::simulation::TimeStepping> _sim{nullptr};
+  std::shared_ptr<siconos::modeling::DynamicalSystem> _DS{nullptr};
+  std::shared_ptr<siconos::simulation::TimeDiscretisation> _TD{nullptr};
+  std::shared_ptr<siconos::integrators::EulerMoreauOSI> _EulerMoreau{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _A{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> _b{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> _x0{nullptr};
 
-
-public:
-
-  EulerMoreauTest(): _n(2), _h(0.1), _t0(0.0), _T(10.0), _tol(1e-12) {}
+ public:
+  EulerMoreauTest() : _n(2), _h(0.1), _t0(0.0), _T(10.0), _tol(1e-12) {}
   void setUp();
   void tearDown();
-
 };
 
 #endif
-
-
-
-

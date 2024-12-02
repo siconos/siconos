@@ -7,8 +7,8 @@
 #include <math.h>
 #endif
 
-#include <float.h>
 #include <assert.h>
+#include <float.h>
 
 #ifndef epsilon
 /* C++ does not have hexadecimal floating-point support. C++17 may have it ... */
@@ -22,7 +22,7 @@
 
 /*@ lemma one: \forall real mu; 2*mu*mu - 2*mu + 1 >= 0.5; */
 
-#define Sign(x) ((double)(x>0) - (double)(x<0))
+#define Sign(x) ((double)(x > 0) - (double)(x < 0))
 #define Max fmax
 #define Abs(x) (x < 0 ? -x : x)
 #define Heaviside(x) (x < 0 ? 0 : ((x > 0) ? 1 : 0.))
@@ -48,8 +48,6 @@ extern double sqrt(double x);
     ensures \result >= y;
  */
 extern double fmax(double x, double y);
-
-
 
 #ifdef __FRAMAC__
 #include <__fc_builtin.h>

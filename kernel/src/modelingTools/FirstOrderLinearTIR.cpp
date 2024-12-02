@@ -16,32 +16,36 @@
  * limitations under the License.
  */
 #include "FirstOrderLinearTIR.hpp"
+
+#include <iostream>
 #include "BlockVector.hpp"
 #include "Interaction.hpp"
-#include "SiconosAlgebraProd.hpp" // for matrix-vector prod
+#include "SiconosException.hpp"
+#include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
+#include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
-#include "SimulationGraphs.hpp"
-#include <iostream>
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
-using namespace RELATION;
-
 // Minimum data (C, B as pointers) constructor
-FirstOrderLinearTIR::FirstOrderLinearTIR(SP::SimpleMatrix C, SP::SimpleMatrix B)
-    : FirstOrderR(LinearTIR) {
+siconos::modeling::FirstOrderLinearTIR::FirstOrderLinearTIR(
+    std::shared_ptr<siconos::algebra::SimpleMatrix> C,
+    std::shared_ptr<siconos::algebra::SimpleMatrix> B)
+    : FirstOrderR(RelationSubType::LinearTIR) {
   _C = C;
   _B = B;
 }
 
 // Constructor from a complete set of data
-FirstOrderLinearTIR::FirstOrderLinearTIR(SP::SimpleMatrix C, SP::SimpleMatrix D,
-                                         SP::SimpleMatrix F,
-                                         SP::SiconosVector e,
-                                         SP::SimpleMatrix B)
-    : FirstOrderR(LinearTIR) {
+siconos::modeling::FirstOrderLinearTIR::FirstOrderLinearTIR(
+    std::shared_ptr<siconos::algebra::SimpleMatrix> C,
+    std::shared_ptr<siconos::algebra::SimpleMatrix> D,
+    std::shared_ptr<siconos::algebra::SimpleMatrix> F,
+    std::shared_ptr<siconos::algebra::SiconosVector> e,
+    std::shared_ptr<siconos::algebra::SimpleMatrix> B)
+    : FirstOrderR(RelationSubType::LinearTIR) {
   _C = C;
   _B = B;
   _D = D;
@@ -49,105 +53,105 @@ FirstOrderLinearTIR::FirstOrderLinearTIR(SP::SimpleMatrix C, SP::SimpleMatrix D,
   _e = e;
 }
 
-void FirstOrderLinearTIR::initialize(Interaction &inter) {
-  DEBUG_PRINT("FirstOrderLinearTIR::initialize(Interaction & inter)\n");
+void siconos::modeling::FirstOrderLinearTIR::initialize(Interaction &inter) {
+  DEBUG_PRINT("siconos::modeling::FirstOrderLinearTIR::initialize(Interaction & inter)\n");
 
-  FirstOrderR::initialize(inter); // ?
+  FirstOrderR::initialize(inter);  // ?
 
   if (!_C)
     THROW_EXCEPTION(
-        "FirstOrderLinearTIR::initialize() C is null and is a required input.");
+        "siconos::modeling::FirstOrderLinearTIR::initialize() C is null and is a required "
+        "input.");
   if (!_B)
     THROW_EXCEPTION(
-        "FirstOrderLinearTIR::initialize() B is null and is a required input.");
+        "siconos::modeling::FirstOrderLinearTIR::initialize() B is null and is a required "
+        "input.");
 
   checkSize(inter);
 }
 
-void FirstOrderLinearTIR::checkSize(Interaction &inter) {
-  DEBUG_PRINT("FirstOrderLinearTIR::checkSize(Interaction & inter)\n");
+void siconos::modeling::FirstOrderLinearTIR::checkSize(Interaction &inter) {
+  DEBUG_PRINT("siconos::modeling::FirstOrderLinearTIR::checkSize(Interaction & inter)\n");
   DEBUG_PRINTF("_C->size(0) = %i,\t inter.dimension() = %i\n ", _C->size(0),
                inter.dimension());
   DEBUG_PRINTF("_C->size(1) = %i,\t inter.getSizeOfDS() = %i\n ", _C->size(1),
                inter.getSizeOfDS());
 
-  assert((_C->size(0) == inter.dimension() &&
-          _C->size(1) == inter.getSizeOfDS()) &&
-         "FirstOrderLinearTIR::initialize , inconsistent size between C and "
-         "Interaction sizes.");
+  assert(
+      (_C->size(0) == inter.dimension() && _C->size(1) == inter.getSizeOfDS()) &&
+      "siconos::modeling::FirstOrderLinearTIR::initialize , inconsistent size between C and "
+      "Interaction sizes.");
 
-  assert((_B->size(1) == inter.dimension() &&
-          _B->size(0) == inter.getSizeOfDS()) &&
-         "FirstOrderLinearTIR::initialize , inconsistent size between B and "
-         "interaction sizes.");
+  assert(
+      (_B->size(1) == inter.dimension() && _B->size(0) == inter.getSizeOfDS()) &&
+      "siconos::modeling::FirstOrderLinearTIR::initialize , inconsistent size between B and "
+      "interaction sizes.");
 
   // C and B are the minimum inputs. The others may remain null.
 
   if (_D)
-    assert((_D->size(0) == inter.dimension() &&
-            _D->size(1) == inter.dimension()) &&
-           "FirstOrderLinearTIR::initialize , inconsistent size between D and "
-           "interaction sizes");
+    assert(
+        (_D->size(0) == inter.dimension() && _D->size(1) == inter.dimension()) &&
+        "siconos::modeling::FirstOrderLinearTIR::initialize , inconsistent size between D and "
+        "interaction sizes");
 
-  DEBUG_EXPR(if (_F) _F->display();
-             (inter.linkToDSVariables())[FirstOrderR::z]->display(););
+  DEBUG_EXPR(if (_F) _F->display(); (inter.linkToDSVariables())[FirstOrderR::z]->display(););
 
   if (_F)
-    assert(
-        ((_F->size(0) == inter.dimension()) &&
-         (_F->size(1) ==
-          (inter.linkToDSVariables())[FirstOrderR::z]->size())) &&
-        "FirstOrderLinearTIR::initialize , inconsistent size between F and z.");
+    assert(((_F->size(0) == inter.dimension()) &&
+            (_F->size(1) == (inter.linkToDSVariables())[FirstOrderR::z]->size())) &&
+           "siconos::modeling::FirstOrderLinearTIR::initialize , inconsistent size between F "
+           "and z.");
   if (_e)
-    assert(
-        _e->size() == inter.dimension() &&
-        "FirstOrderLinearTIR::initialize , inconsistent size between C and e.");
+    assert(_e->size() == inter.dimension() &&
+           "siconos::modeling::FirstOrderLinearTIR::initialize , inconsistent size between C "
+           "and e.");
 }
 
-void FirstOrderLinearTIR::computeh(const BlockVector &x, const SiconosVector &lambda,
-                                   BlockVector &z, SiconosVector &y) {
-
+void siconos::modeling::FirstOrderLinearTIR::computeh(
+    const siconos::algebra::BlockVector &x, const siconos::algebra::SiconosVector &lambda,
+    siconos::algebra::BlockVector &z, siconos::algebra::SiconosVector &y) {
   // if (_C) C must be allocated. Checksize is there to ensure it.
-  prod(*_C, x, y, true);
+  siconos::algebra::prod(*_C, x, y, true);
   // else
   //   y.zero();
 
-  if (_D)
-    prod(*_D, lambda, y, false);
+  if (_D) siconos::algebra::prod(*_D, lambda, y, false);
 
-  if (_e)
-    y += *_e;
+  if (_e) y += *_e;
 
-  if (_F)
-    prod(*_F, z, y, false);
+  if (_F) siconos::algebra::prod(*_F, z, y, false);
 }
 
-void FirstOrderLinearTIR::computeOutput(double time, Interaction &inter,
-                                        unsigned int level) {
+void siconos::modeling::FirstOrderLinearTIR::computeOutput(double time, Interaction &inter,
+                                                           unsigned int level) {
   // We get y and lambda of the interaction (pointers)
-  SiconosVector &y = *inter.y(level);
-  SiconosVector &lambda = *inter.lambda(level);
+  siconos::algebra::SiconosVector &y = *inter.y(level);
+  siconos::algebra::SiconosVector &lambda = *inter.lambda(level);
   auto &DSlink = inter.linkToDSVariables();
   computeh(*DSlink[FirstOrderR::x], lambda, *DSlink[FirstOrderR::z], y);
 }
 
-void FirstOrderLinearTIR::computeg(const SiconosVector &lambda, BlockVector &r) {
-  prod(*_B, lambda, r, false);
+void siconos::modeling::FirstOrderLinearTIR::computeg(
+    const siconos::algebra::SiconosVector &lambda, siconos::algebra::BlockVector &r) {
+  siconos::algebra::prod(*_B, lambda, r, false);
 }
 
-void FirstOrderLinearTIR::computeInput(double time, Interaction &inter,
-                                       unsigned int level) {
-  DEBUG_BEGIN("FirstOrderLinearTIR::computeInput(double time, Interaction& "
-              "inter, unsigned int level)\n")
+void siconos::modeling::FirstOrderLinearTIR::computeInput(double time, Interaction &inter,
+                                                          unsigned int level) {
+  DEBUG_BEGIN(
+      "siconos::modeling::FirstOrderLinearTIR::computeInput(double time, Interaction& "
+      "inter, unsigned int level)\n")
   auto &DSlink = inter.linkToDSVariables();
   DEBUG_EXPR(inter.lambda(level)->display(););
   DEBUG_EXPR(DSlink[FirstOrderR::r]->display(););
   computeg(*inter.lambda(level), *DSlink[FirstOrderR::r]);
-  DEBUG_END("FirstOrderLinearTIR::computeInput(double time, Interaction& "
-            "inter, unsigned int level)\n")
+  DEBUG_END(
+      "siconos::modeling::FirstOrderLinearTIR::computeInput(double time, Interaction& "
+      "inter, unsigned int level)\n")
 }
 
-void FirstOrderLinearTIR::display() const {
+void siconos::modeling::FirstOrderLinearTIR::display() const {
   std::cout << " ===== Linear Time Invariant relation display =====\n";
   std::cout << "| C\n";
   if (_C)

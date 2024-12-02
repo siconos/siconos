@@ -34,7 +34,6 @@ cmake_dependent_option(WITH_DOXYGEN_WARNINGS "Explore doxygen warnings if doc is
 option(WITH_MA57 "Compilation with the MA57 solver (License HSL)" OFF)
 option(WITH_FREECAD "Use FreeCAD" OFF)
 option(WITH_RENDERER "Install OCC renderer" OFF)
-option(WITH_SYSTEM_SUITESPARSE "Use SuiteSparse installed on the system instead of built-in CXSparse library" ON)
 option(WITH_XML "Enable xml files i/o" OFF)
 
 

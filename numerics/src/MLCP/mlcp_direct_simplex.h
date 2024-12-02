@@ -1,8 +1,6 @@
 #ifndef MLCP_DIRECT_SIMPLEX_H
 #define MLCP_DIRECT_SIMPLEX_H
 
-
-
 /*
  * who use the direct solver:
  * First, you have to call the mlcp_direct_simplex_init().
@@ -12,12 +10,14 @@
  *
  */
 
-
 #include "NumericsFwd.h"  // for MixedLinearComplementarityProblem, SolverOp...
-int mlcp_direct_simplex_getNbIWork(MixedLinearComplementarityProblem* problem, SolverOptions* options);
-int mlcp_direct_simplex_getNbDWork(MixedLinearComplementarityProblem* problem, SolverOptions* options);
+int mlcp_direct_simplex_getNbIWork(MixedLinearComplementarityProblem* problem,
+                                   SolverOptions* options);
+int mlcp_direct_simplex_getNbDWork(MixedLinearComplementarityProblem* problem,
+                                   SolverOptions* options);
 
-void mlcp_direct_simplex_init(MixedLinearComplementarityProblem* problem, SolverOptions* options);
+void mlcp_direct_simplex_init(MixedLinearComplementarityProblem* problem,
+                              SolverOptions* options);
 void mlcp_direct_simplex_reset(void);
 
-#endif //MLCP_DIRECT_SIMPLEX_H
+#endif  // MLCP_DIRECT_SIMPLEX_H

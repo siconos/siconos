@@ -419,10 +419,10 @@ npy_intp array_size(PyArrayObject *a, int i) { return PyArray_DIM((PyArrayObject
     {
       for (i = 0; i < n-1; i++)
       {
-        sprintf(s, "%d, ", exact_dimensions[i]);
+        snprintf(s, sizeof(s), "%d, ", exact_dimensions[i]);
         strcat(dims_str,s);
       }
-      sprintf(s, " or %d", exact_dimensions[n-1]);
+      snprintf(s, sizeof(s), " or %d", exact_dimensions[n-1]);
       strcat(dims_str,s);
       PyErr_Format(PyExc_TypeError,
                    "Array must have %s dimensions.  Given array has %d dimensions",
@@ -459,11 +459,11 @@ npy_intp array_size(PyArrayObject *a, int i) { return PyArray_DIM((PyArrayObject
       {
         if (size[i] == -1)
         {
-          sprintf(s, "*,");
+          snprintf(s, sizeof(s), "*,");
         }
         else
         {
-          sprintf(s, "%ld,", (long int)size[i]);
+          snprintf(s, sizeof(s), "%ld,", (long int)size[i]);
         }
         strcat(desired_dims,s);
       }
@@ -471,7 +471,7 @@ npy_intp array_size(PyArrayObject *a, int i) { return PyArray_DIM((PyArrayObject
       desired_dims[len-1] = ']';
       for (i = 0; i < n; i++)
       {
-        sprintf(s, "%ld,", (long int)array_size(ary,i));
+        snprintf(s, sizeof(s), "%ld,", (long int)array_size(ary,i));
         strcat(actual_dims,s);
       }
       len = strlen(actual_dims);

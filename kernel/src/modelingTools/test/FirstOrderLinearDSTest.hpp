@@ -14,21 +14,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef __FirstOrderLinearDSTest__
 #define __FirstOrderLinearDSTest__
 
 #include <cppunit/extensions/HelperMacros.h>
+
 #include "FirstOrderLinearDS.hpp"
 #include "SiconosException.hpp"
 
-class FirstOrderLinearDSTest : public CppUnit::TestFixture
-{
-
-private:
-  
+class FirstOrderLinearDSTest : public CppUnit::TestFixture {
+ private:
   ACCEPT_SERIALIZATION(FirstOrderLinearDSTest);
-
 
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(FirstOrderLinearDSTest);
@@ -54,17 +51,13 @@ private:
   void testSetBPtr();
   // Members
 
-  SP::SiconosVector x0;
-  SP::SiconosVector b0;
-  SP::SiconosMatrix A0;
-public:
+  std::shared_ptr<siconos::algebra::SiconosVector> x0{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> b0{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> A0{nullptr};
+
+ public:
   void setUp();
   void tearDown();
-
 };
 
 #endif
-
-
-
-

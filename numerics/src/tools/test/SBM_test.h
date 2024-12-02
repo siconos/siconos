@@ -14,12 +14,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*
   Tests functions for SBM structure
 */
-
 
 int SBM_add_test_all(void);
 
@@ -35,7 +34,6 @@ int gemm_square_triplet(void);
 int gemm_square_csc(void);
 int gemm_square_triplet_into_csc(void);
 int gemm_rectangle_triplet(void);
-
 
 int SBM_gemm_without_allocation_all(void);
 

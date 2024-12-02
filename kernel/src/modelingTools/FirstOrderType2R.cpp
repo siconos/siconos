@@ -14,147 +14,176 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #include "FirstOrderType2R.hpp"
-#include "Interaction.hpp"
-#include "FirstOrderNonLinearDS.hpp"
 
 #include "BlockVector.hpp"
-#include "SimulationGraphs.hpp"
+#include "FirstOrderR.hpp"
+#include "Interaction.hpp"
+#include "PluggedObject.hpp"
+#include "SiconosException.hpp"
+#include "SiconosVector.hpp"
+#include "SimpleMatrix.hpp"
 
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
-FirstOrderType2R::FirstOrderType2R(const std::string& pluginh, const std::string& pluging):
-  FirstOrderR(RELATION::Type2R)
+siconos::modeling::FirstOrderType2R::FirstOrderType2R(const std::string& pluginh,
+                                                      const std::string& pluging)
+    : FirstOrderR(RelationSubType::Type2R)
 {
   // Size vector of pointers to functions.
   // Connect input and output to plug-in
-  setComputehFunction(SSLH::getPluginName(pluginh), SSLH::getPluginFunctionName(pluginh));
-  setComputegFunction(SSLH::getPluginName(pluging), SSLH::getPluginFunctionName(pluging));
+  setComputehFunction(siconos::plugins::getPluginName(pluginh),
+                      siconos::plugins::getPluginFunctionName(pluginh));
+  setComputegFunction(siconos::plugins::getPluginName(pluging),
+                      siconos::plugins::getPluginFunctionName(pluging));
   // The jacobians are not set, and thus considered as null matrices at this point.
 }
 
-FirstOrderType2R::FirstOrderType2R(const std::string& pluginh, const std::string& pluging, const std::string& pluginJacobianhx, const std::string& pluginJacobianglambda):
-  FirstOrderR(RELATION::Type2R)
+siconos::modeling::FirstOrderType2R::FirstOrderType2R(const std::string& pluginh,
+                                                      const std::string& pluging,
+                                                      const std::string& pluginJacobianhx,
+                                                      const std::string& pluginJacobianglambda)
+    : FirstOrderR(RelationSubType::Type2R)
 {
   // Size vector of pointers to functions.
   // Connect input and output to plug-in
-  setComputehFunction(SSLH::getPluginName(pluginh), SSLH::getPluginFunctionName(pluginh));
-  setComputegFunction(SSLH::getPluginName(pluging), SSLH::getPluginFunctionName(pluging));
+  setComputehFunction(siconos::plugins::getPluginName(pluginh),
+                      siconos::plugins::getPluginFunctionName(pluginh));
+  setComputegFunction(siconos::plugins::getPluginName(pluging),
+                      siconos::plugins::getPluginFunctionName(pluging));
 
-  setComputeJachxFunction(SSLH::getPluginName(pluginJacobianhx), SSLH::getPluginFunctionName(pluginJacobianhx));
-  setComputeJacglambdaFunction(SSLH::getPluginName(pluginJacobianglambda), SSLH::getPluginFunctionName(pluginJacobianglambda));
+  setComputeJachxFunction(siconos::plugins::getPluginName(pluginJacobianhx),
+                          siconos::plugins::getPluginFunctionName(pluginJacobianhx));
+  setComputeJacglambdaFunction(siconos::plugins::getPluginName(pluginJacobianglambda),
+                               siconos::plugins::getPluginFunctionName(pluginJacobianglambda));
 }
 
-
-void FirstOrderType2R::initialize(Interaction& inter)
+void siconos::modeling::FirstOrderType2R::initialize(Interaction& inter)
 {
   FirstOrderR::initialize(inter);
 
-  unsigned int sizeY = inter.dimension();
-  unsigned int sizeDS = inter.getSizeOfDS();
-  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-  unsigned int sizeZ = DSlink[FirstOrderR::z]->size();
-  VectorOfSMatrices& relationMat = inter.relationMatrices();
+  auto sizeY = inter.dimension();
+  auto sizeDS = inter.getSizeOfDS();
+  auto& DSlink = inter.linkToDSVariables();
+  auto sizeZ = DSlink[FirstOrderR::z]->size();
+  auto& relationMat = inter.relationMatrices();
 
+  if (!_C)
+    relationMat[FirstOrderR::mat_C] =
+        std::make_shared<siconos::algebra::SimpleMatrix>(sizeY, sizeDS);
+  if (!_D)
+    relationMat[FirstOrderR::mat_D] =
+        std::make_shared<siconos::algebra::SimpleMatrix>(sizeY, sizeY);
+  if (!_F)
+    relationMat[FirstOrderR::mat_F] =
+        std::make_shared<siconos::algebra::SimpleMatrix>(sizeY, sizeZ);
+  if (!_B)
+    relationMat[FirstOrderR::mat_B] =
+        std::make_shared<siconos::algebra::SimpleMatrix>(sizeDS, sizeY);
+  if (!_K)
+    relationMat[FirstOrderR::mat_K] =
+        std::make_shared<siconos::algebra::SimpleMatrix>(sizeDS, sizeDS);
 
-  if(!_C)
-    relationMat[FirstOrderR::mat_C] = std::make_shared<SimpleMatrix>(sizeY, sizeDS);
-  if(!_D)
-    relationMat[FirstOrderR::mat_D] = std::make_shared<SimpleMatrix>(sizeY, sizeY);
-  if(!_F)
-    relationMat[FirstOrderR::mat_F] = std::make_shared<SimpleMatrix>(sizeY, sizeZ);
-  if(!_B)
-    relationMat[FirstOrderR::mat_B] = std::make_shared<SimpleMatrix>(sizeDS, sizeY);
-  if(!_K)
-    relationMat[FirstOrderR::mat_K] = std::make_shared<SimpleMatrix>(sizeDS, sizeDS);
-
-//  if (!_jacgx)
-//  {
-//    relationMat[FirstOrderR::mat_K].reset(new SimpleMatrix(sizeDS, sizeDS));
+  //  if (!_jacgx)
+  //  {
+  //    relationMat[FirstOrderR::mat_K] =
+  //    std::make_shared<siconos::algebra::siconos::algebra::SimpleMatrix>(sizeDS, sizeDS));
   // TODO add this back to workV of the DS -> needed for X partial NS
-//  }
+  //  }
 }
 
-void FirstOrderType2R::computeh(double time, const BlockVector& x, const SiconosVector& lambda, SiconosVector& y)
+void siconos::modeling::FirstOrderType2R::computeh(
+    double time, const siconos::algebra::BlockVector& x,
+    const siconos::algebra::SiconosVector& lambda, siconos::algebra::SiconosVector& y)
 {
   auto xp = x.prepareVectorForPlugin();
-  ((Type2PtrH)(_pluginh->fPtr))(xp->size(), xp->getArray(), lambda.size(), lambda.getArray(), y.size(), y.getArray());
+  ((Type2PtrH)(_pluginh->fPtr))(xp->size(), xp->getArray(), lambda.size(), lambda.getArray(),
+                                y.size(), y.getArray());
 }
 
-void FirstOrderType2R::computeg(double time, const SiconosVector& lambda, BlockVector& r)
+void siconos::modeling::FirstOrderType2R::computeg(
+    double time, const siconos::algebra::SiconosVector& lambda,
+    siconos::algebra::BlockVector& r)
 {
   auto rp = r.prepareVectorForPlugin();
   ((Type2PtrG)(_pluging->fPtr))(lambda.size(), lambda.getArray(), rp->size(), rp->getArray());
   r = *rp;
 }
 
-void FirstOrderType2R::computeOutput(double time, Interaction& inter, unsigned int level)
+void siconos::modeling::FirstOrderType2R::computeOutput(double time, Interaction& inter,
+                                                        unsigned int level)
 {
-  DEBUG_BEGIN("FirstOrderType2R::computeOutput \n");
+  DEBUG_BEGIN("siconos::modeling::FirstOrderType2R::computeOutput \n");
   auto& DSlink = inter.linkToDSVariables();
-  BlockVector& x = *DSlink[FirstOrderR::x];
+  siconos::algebra::BlockVector& x = *DSlink[FirstOrderR::x];
   // copy into Siconos continuous memory vector
-  SiconosVector& y = *inter.y(level);
-  SiconosVector& lambda = *inter.lambda(level);
+  siconos::algebra::SiconosVector& y = *inter.y(level);
+  siconos::algebra::SiconosVector& lambda = *inter.lambda(level);
   computeh(time, x, lambda, y);
   DEBUG_EXPR(y.display());
-  DEBUG_END("FirstOrderType2R::computeOutput \n");
+  DEBUG_END("siconos::modeling::FirstOrderType2R::computeOutput \n");
 }
 
-void FirstOrderType2R::computeInput(double time, Interaction& inter, unsigned int level)
+void siconos::modeling::FirstOrderType2R::computeInput(double time, Interaction& inter,
+                                                       unsigned int level)
 {
-  DEBUG_BEGIN("FirstOrderType2R::computeInput \n");
+  DEBUG_BEGIN("siconos::modeling::FirstOrderType2R::computeInput \n");
   auto& DSlink = inter.linkToDSVariables();
   // copy into Siconos continuous memory vector
-  SiconosVector& lambda = *inter.lambda(level);
+  siconos::algebra::SiconosVector& lambda = *inter.lambda(level);
   computeg(time, lambda, *DSlink[FirstOrderR::r]);
   DEBUG_EXPR(DSlink[FirstOrderR::r]->display());
-  DEBUG_END("FirstOrderType2R::computeInput \n");
+  DEBUG_END("siconos::modeling::FirstOrderType2R::computeInput \n");
 }
 
-void FirstOrderType2R::computeJachlambda(double time, const BlockVector& x, const SiconosVector& lambda, SimpleMatrix& D)
+void siconos::modeling::FirstOrderType2R::computeJachlambda(
+    double time, const siconos::algebra::BlockVector& x,
+    const siconos::algebra::SiconosVector& lambda, siconos::algebra::SimpleMatrix& D)
 {
-  THROW_EXCEPTION("FirstOrderType2R::computeJachlambda must be overload.");
+  THROW_EXCEPTION("siconos::modeling::FirstOrderType2R::computeJachlambda must be overload.");
 }
-void FirstOrderType2R::computeJachx(double time, const BlockVector& x, const SiconosVector& lambda, SimpleMatrix& C)
+void siconos::modeling::FirstOrderType2R::computeJachx(
+    double time, const siconos::algebra::BlockVector& x,
+    const siconos::algebra::SiconosVector& lambda, siconos::algebra::SimpleMatrix& C)
 {
-  THROW_EXCEPTION("FirstOrderType2R::computeJachx must be overload.");
+  THROW_EXCEPTION("siconos::modeling::FirstOrderType2R::computeJachx must be overload.");
   // Note FP: so this class should be virtual, isn't it?
 }
 
-void FirstOrderType2R::computeJach(double time, Interaction& inter)
+void siconos::modeling::FirstOrderType2R::computeJach(double time, Interaction& inter)
 {
-  DEBUG_BEGIN("FirstOrderType2R::computeJach\n");
-  VectorOfBlockVectors& DSlink = inter.linkToDSVariables();
-  VectorOfSMatrices& relationMat = inter.relationMatrices();
+  DEBUG_BEGIN("siconos::modeling::FirstOrderType2R::computeJach\n");
+  auto& DSlink = inter.linkToDSVariables();
+  auto& relationMat = inter.relationMatrices();
 
-  if(!_C)
-  {
-    computeJachx(time, *DSlink[FirstOrderR::x], *inter.lambda(0), *relationMat[FirstOrderR::mat_C]);
+  if (!_C) {
+    computeJachx(time, *DSlink[FirstOrderR::x], *inter.lambda(0),
+                 *relationMat[FirstOrderR::mat_C]);
   }
-  if(!_D)
-  {
-    computeJachlambda(time, *DSlink[FirstOrderR::x], *inter.lambda(0), *relationMat[FirstOrderR::mat_D]);
+  if (!_D) {
+    computeJachlambda(time, *DSlink[FirstOrderR::x], *inter.lambda(0),
+                      *relationMat[FirstOrderR::mat_D]);
   }
-  DEBUG_END("FirstOrderType2R::computeJach\n");
+  DEBUG_END("siconos::modeling::FirstOrderType2R::computeJach\n");
 }
 
-void FirstOrderType2R::computeJacglambda(double time, const SiconosVector& lambda, SimpleMatrix& B)
+void siconos::modeling::FirstOrderType2R::computeJacglambda(
+    double time, const siconos::algebra::SiconosVector& lambda,
+    siconos::algebra::SimpleMatrix& B)
 {
-  THROW_EXCEPTION("FirstOrderType2R::computeJacglambda must be overload.");
+  THROW_EXCEPTION("siconos::modeling::FirstOrderType2R::computeJacglambda must be overload.");
 }
 
-void FirstOrderType2R::computeJacg(double time, Interaction& inter)
+void siconos::modeling::FirstOrderType2R::computeJacg(double time, Interaction& inter)
 {
-  DEBUG_BEGIN("FirstOrderType2R::computeJacg\n");
-  if(!_B)
-  {
-    VectorOfSMatrices& relationMat = inter.relationMatrices();
+  DEBUG_BEGIN("siconos::modeling::FirstOrderType2R::computeJacg\n");
+  if (!_B) {
+    auto& relationMat = inter.relationMatrices();
     computeJacglambda(time, *inter.lambda(0), *relationMat[FirstOrderR::mat_B]);
   }
-  DEBUG_END("FirstOrderType2R::computeJacg\n");
+  DEBUG_END("siconos::modeling::FirstOrderType2R::computeJacg\n");
 }

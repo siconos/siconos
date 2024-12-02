@@ -182,15 +182,15 @@ PY_FULL_REGISTER(OccSpaceFilter, Mechanics);
   #include <BRepAdaptor_Surface.hxx>
 
   /* fix: use generated dynamic casting instead! */
-  SP::OccBody cast_OccBody(SP::DynamicalSystem ds)
+  std::shared_ptr<siconos::mechanics::occ::OccBody> cast_OccBody(std::shared_ptr<siconos::modeling::DynamicalSystem> ds)
   {
     return std::dynamic_pointer_cast<OccBody>(ds);
   };
 
-  SP::SiconosVector facePoint(const TopoDS_Face &face,
+  std::shared_ptr<siconos::algebra::SiconosVector> facePoint(const TopoDS_Face &face,
                               double u, double v)
   {
-    SP::SiconosVector presult(new SiconosVector(3));
+    auto presult(new siconos::algebra::SiconosVector(3));
     SiconosVector& result = *presult;
 
     BRepAdaptor_Surface SF(face);

@@ -105,7 +105,7 @@ SICONOS_IO_REGISTER(NSLawMatrix,
 )
 SICONOS_IO_REGISTER_WITH_BASES(EqualityConditionNSL,(NonSmoothLaw),
 )
-SICONOS_IO_REGISTER_WITH_BASES(NewtonImpactFrictionNSL,(NonSmoothLaw),
+SICONOS_IO_REGISTER_WITH_BASES(siconos::modeling::NewtonImpactFrictionNSL,(NonSmoothLaw),
   (_en)
   (_et)
   (_mu))
@@ -113,11 +113,11 @@ SICONOS_IO_REGISTER_WITH_BASES(MixedComplementarityConditionNSL,(NonSmoothLaw),
   (_equalitySize))
 SICONOS_IO_REGISTER(PluggedObject,
   (_pluginName))
-SICONOS_IO_REGISTER_WITH_BASES(NewtonEuler3DR,(NewtonEuler1DR),
+SICONOS_IO_REGISTER_WITH_BASES(siconos::modeling::NewtonEuler3DR,(NewtonEuler1DR),
 )
 SICONOS_IO_REGISTER_WITH_BASES(FirstOrderLinearTIR,(FirstOrderR),
   (_e))
-SICONOS_IO_REGISTER(NonSmoothDynamicalSystem,
+SICONOS_IO_REGISTER(siconos::modeling::NonSmoothDynamicalSystem,
   (_BVP)
   (_T)
   (_author)
@@ -134,7 +134,7 @@ SICONOS_IO_REGISTER(BoundaryCondition,
   (_prescribedVelocity)
   (_prescribedVelocityOld)
   (_velocityIndices))
-SICONOS_IO_REGISTER_WITH_BASES(NewtonImpactNSL,(NonSmoothLaw),
+SICONOS_IO_REGISTER_WITH_BASES(siconos::modeling::NewtonImpactNSL,(NonSmoothLaw),
   (_e))
 SICONOS_IO_REGISTER_WITH_BASES(NewtonEuler1DR,(NewtonEulerR),
   (_AUX1)
@@ -171,7 +171,7 @@ SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerR,(Relation),
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianCompliantLinearTIR,(LagrangianR),
   (_F)
   (_e))
-SICONOS_IO_REGISTER(NonSmoothDynamicalSystem::Change,
+SICONOS_IO_REGISTER(siconos::modeling::NonSmoothDynamicalSystem::Change,
   (ds)
   (i)
   (typeOfChange))
@@ -527,7 +527,7 @@ SICONOS_IO_REGISTER_WITH_BASES(TimeStepping,(Simulation),
   (_newtonTolerance)
   (_newtonUpdateInteractionsPerIteration)
   (_resetAllLambda)
-  (_warnOnNonConvergence))
+  (_newtonWarningOnNonConvergence))
 SICONOS_IO_REGISTER(OneStepIntegrator,
   (_dynamicalSystemsGraph)
   (_explicitJacobiansOfRelation)
@@ -643,20 +643,20 @@ void siconos_io_register_generated_Kernel(Archive& ar)
   ar.register_type(static_cast<HarmonicBC*>(nullptr));
   ar.register_type(static_cast<NSLawMatrix*>(nullptr));
   ar.register_type(static_cast<EqualityConditionNSL*>(nullptr));
-  ar.register_type(static_cast<NewtonImpactFrictionNSL*>(nullptr));
+  ar.register_type(static_cast<siconos::modeling::NewtonImpactFrictionNSL*>(nullptr));
   ar.register_type(static_cast<MixedComplementarityConditionNSL*>(nullptr));
   ar.register_type(static_cast<PluggedObject*>(nullptr));
-  ar.register_type(static_cast<NewtonEuler3DR*>(nullptr));
+  ar.register_type(static_cast<siconos::modeling::NewtonEuler3DR*>(nullptr));
   ar.register_type(static_cast<FirstOrderLinearTIR*>(nullptr));
-  ar.register_type(static_cast<NonSmoothDynamicalSystem*>(nullptr));
+  ar.register_type(static_cast<siconos::modeling::NonSmoothDynamicalSystem*>(nullptr));
   ar.register_type(static_cast<BoundaryCondition*>(nullptr));
-  ar.register_type(static_cast<NewtonImpactNSL*>(nullptr));
+  ar.register_type(static_cast<siconos::modeling::NewtonImpactNSL*>(nullptr));
   ar.register_type(static_cast<NewtonEuler1DR*>(nullptr));
   ar.register_type(static_cast<LagrangianLinearTIR*>(nullptr));
   ar.register_type(static_cast<NormalConeNSL*>(nullptr));
   ar.register_type(static_cast<NewtonEulerR*>(nullptr));
   ar.register_type(static_cast<LagrangianCompliantLinearTIR*>(nullptr));
-  ar.register_type(static_cast<NonSmoothDynamicalSystem::Change*>(nullptr));
+  ar.register_type(static_cast<siconos::modeling::NonSmoothDynamicalSystem::Change*>(nullptr));
   ar.register_type(static_cast<FirstOrderLinearR*>(nullptr));
   ar.register_type(static_cast<FirstOrderLinearTIDS*>(nullptr));
   ar.register_type(static_cast<FirstOrderType2R*>(nullptr));

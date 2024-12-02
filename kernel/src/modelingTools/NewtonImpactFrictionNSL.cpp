@@ -14,28 +14,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #include "NewtonImpactFrictionNSL.hpp"
-
+#include "SiconosException.hpp"
 #include <iostream>
 
-// Default (private)
-NewtonImpactFrictionNSL::NewtonImpactFrictionNSL():
-  NonSmoothLaw(), _en(0.0), _et(0.0), _mu(0.0)
-{}
-
-NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(unsigned int size):
-  NonSmoothLaw(size), _en(0.0), _et(0.0), _mu(0.0)
-{}
-
-NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(double newEn, double newEt, double newMu, unsigned int newSize):
-  NonSmoothLaw(newSize), _en(newEn), _et(newEt), _mu(newMu)
-{}
-
-NewtonImpactFrictionNSL::~NewtonImpactFrictionNSL()
-{}
-
-bool NewtonImpactFrictionNSL::isVerified() const
+bool siconos::modeling::NewtonImpactFrictionNSL::isVerified() const
 {
   bool res = false;
   // to do
@@ -43,11 +27,11 @@ bool NewtonImpactFrictionNSL::isVerified() const
   return res;
 }
 
-void NewtonImpactFrictionNSL::display() const
+void siconos::modeling::NewtonImpactFrictionNSL::display() const
 {
-  std::cout << "=== Newton impact-friction non-smooth law data display ===" <<std::endl;
-  std::cout << " Normal Newton coefficient of restitution: " << _en <<std::endl;
-  std::cout << " Tangential Newton coefficient of restitution: " << _et <<std::endl;
-  std::cout << "Friction coefficient: " << _mu <<std::endl;
-  std::cout << "==========================================================" <<std::endl;
+  std::cout << "=== Newton impact-friction non-smooth law data display ===" << std::endl;
+  std::cout << " Normal Newton coefficient of restitution: " << _en << std::endl;
+  std::cout << " Tangential Newton coefficient of restitution: " << _et << std::endl;
+  std::cout << "Friction coefficient: " << _mu << std::endl;
+  std::cout << "==========================================================" << std::endl;
 }

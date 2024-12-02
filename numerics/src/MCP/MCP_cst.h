@@ -14,13 +14,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #ifndef MCP_CST_H
 #define MCP_CST_H
 /*!\file MCP_cst.h
   \brief Constants to define the list of available MCP solvers.
-  
+
   \rst
   See the detailed documentation in :ref:`mcp_solvers`
   \endrst
@@ -30,8 +30,7 @@
 
    Each SICONOS_MCP_XXX refers to number of the solver XXX for MCP.
  */
-enum MCP_SOLVER
-{
+enum MCP_SOLVER {
 
   SICONOS_MCP_NEWTON_FB_FBLSA = 700,
   SICONOS_MCP_NEWTON_MIN_FBLSA = 701,
@@ -39,7 +38,6 @@ enum MCP_SOLVER
   /* old interface for MCP */
   SICONOS_MCP_OLD_FB = 710,
 };
-
 
 extern const char* const SICONOS_MCP_OLD_FB_STR;
 extern const char* const SICONOS_MCP_NEWTON_FB_FBLSA_STR;

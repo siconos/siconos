@@ -23,7 +23,9 @@
 
 #include "NonSmoothLaw.hpp"
 
-/** 
+namespace siconos::modeling {
+
+/**
     Relay NonSmoothLaw
 
     This class formalizes the Relay nonsmooth law  i.e.
@@ -31,20 +33,20 @@
     \f[
     -y \in \mathcal{N}_{[lb,ub]}(\lambda),
     \f]
-    
+
     where \f$ lb \f$ is the lower bound and   \f$ ub \f$ is the upper bound of the
     Relay law.
-    
+
     In this default case, the lower bound is set to \f$ lb=-1 \f$ and the upper bound
     ub is set to \f$ ub=1 \f$. We get  the well-known form of the RelayNSL as the
     multivalued sign function, i.e.
-    
+
     \f[
-    y \in -\mathcal{N}_{[-1,1]}(\lambda) \Longleftrightarrow \lambda \in -\mbox{sgn} (y)  
+    y \in -\mathcal{N}_{[-1,1]}(\lambda) \Longleftrightarrow \lambda \in -\mbox{sgn} (y)
     \f]
 
     where the multi-valued sign function is defined as
-    
+
     \f[
 
     \mbox{sgn} (y) =
@@ -60,21 +62,20 @@
 
 */
 class RelayNSL : public NonSmoothLaw {
-
-private:
+ private:
   ACCEPT_SERIALIZATION(RelayNSL);
 
   /** represent the lower bound of the Relay */
-  double _lb;
+  double _lb{-1.};
 
   /** represent the upper bound of the Relay*/
-  double _ub;
+  double _ub{1.};
 
   /** default constructor
    */
-  RelayNSL();
+  RelayNSL() = default;
 
-public:
+ public:
   /** constructor with the value of the RelayNSL attributes
    *
    *  \param size size of the NonSmoothLaw
@@ -83,7 +84,7 @@ public:
    */
   RelayNSL(unsigned int size, double lb = -1.0, double ub = 1.0);
 
-  ~RelayNSL();
+  ~RelayNSL() noexcept = default;
 
   /** check the ns law to see if it is verified
    *
@@ -119,7 +120,12 @@ public:
    */
   void display() const override;
 
-  ACCEPT_STD_VISITORS();
+  // visitors hook
+  void accept(siconos::internal::SiconosVisitor& tourist) const override
+  {
+    tourist.visit(*this);
+  }
+  Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
 };
-
-#endif // RELAYNSLAW_H
+}  // namespace siconos::modeling
+#endif  // RELAYNSLAW_H

@@ -25,11 +25,14 @@
 #define D1MINUSLINEAR_H
 
 #ifdef DEBUG_D1MINUSLINEAR
-//#define DEBUG_MESSAGES
+// #define DEBUG_MESSAGES
 #endif
 
 #include "OneStepIntegrator.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosException.hpp"
+#include "SiconosVisitor.hpp"
+
+namespace siconos::integrators {
 
 /** Time-Integrator for Dynamical Systems
  *
@@ -67,7 +70,7 @@
  * for the closed contact with vanishing relative velocity (the number of the
  index set depends on the type of D1minulinear)
  * The result, stored in lambda(2) and p(2) is computed by solving
- *       (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]
+ *       (*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]
  * at different specific time
  *
  * The impact equation are solved at the velocity level as in MoreauJeanOSI
@@ -86,12 +89,12 @@
  * relative velocity (indexSet2)
  *
  * The problem, solved for  lambda(2) and p(2)
- (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]
+ (*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]
  * is solved at time told for \f$\lambda^+_{k}\f$ and time t for
  \f$\lambda^-_{k+1}\f$
  *
  * The problem, solved for  lambda(1) and p(1)
- (*allOSNS)[SICONOS_OSNSP_TS_VELOCITY + 1]
+ (*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY + 1]
  * is solved at time t for \f$Lambda_{k+1}\f$.
  *
  * We use four index sets to compute the multipliers:
@@ -123,93 +126,68 @@
  *
  *
  */
-
-const double DEFAULT_TOL_D1MINUS = 1e-8;
-
 class D1MinusLinearOSI : public OneStepIntegrator {
-public:
-protected:
-  /** nslaw effects */
-  struct _NSLEffectOnFreeOutput : public SiconosVisitor {
-
-    using SiconosVisitor::visit;
-
-    OneStepNSProblem *_osnsp;
-    SP::Interaction _inter;
-    InteractionProperties &_interProp;
-    _NSLEffectOnFreeOutput(OneStepNSProblem *p, SP::Interaction inter,
-                           InteractionProperties &interProp)
-        : _osnsp(p), _inter(inter), _interProp(interProp){};
-
-    void visit(const NewtonImpactNSL &nslaw);
-    void visit(const EqualityConditionNSL &nslaw) { ; }
-  };
-
-  // friend struct _NSLEffectOnFreeOutput;
-  bool _isThereImpactInTheTimeStep;
-  unsigned int _typeOfD1MinusLinearOSI;
-
-public:
-  /** Switching variable for various versions of D1MinusLinear
-   */
-  enum ListOfTypeOfD1MinusLinearOSI {
+ public:
+  enum class Type {
     halfexplicit_acceleration_level,
     halfexplicit_acceleration_level_full,
-    explicit_velocity_level,
+    // explicit_velocity_level,
     halfexplicit_velocity_level,
-    numberOfTypeOfD1MinusLinearOSI
   };
 
-  enum D1MinusLinearOSI_ds_workVector_id {
-    RESIDU_FREE,
-    FREE,
-    FREE_TDG,
-    WORK_LENGTH
+ protected:
+  /** nslaw effects */
+
+  // visitor stuff to handle properly nslaw effects.
+  struct _NSLEffectOnFreeOutput : public siconos::internal::SiconosVisitor {
+    using siconos::internal::SiconosVisitor::visit;
+
+    siconos::nonsmooth_formulations::OneStepNSProblem *_osnsp{nullptr};
+    std::shared_ptr<siconos::modeling::Interaction> _inter{nullptr};
+    siconos::graphs::InteractionProperties &_interProp;
+
+    _NSLEffectOnFreeOutput(siconos::nonsmooth_formulations::OneStepNSProblem *p,
+                           std::shared_ptr<siconos::modeling::Interaction> inter,
+                           siconos::graphs::InteractionProperties &interProp);
+
+    void visit(const siconos::modeling::NewtonImpactNSL &nslaw) const override;
   };
 
-  enum D1MinusLinearOSI_interaction_workVector_id {
-    OSNSP_RHS,
-    WORK_INTERACTION_LENGTH
-  };
+  bool _isThereImpactInTheTimeStep{false};
+  Type _typeOfD1MinusLinearOSI{Type::halfexplicit_acceleration_level};
+
+  static constexpr double DEFAULT_TOL_D1MINUS = 1e-8;
+
+ public:
+  /** Switching variable for various versions of D1MinusLinear
+   */
+
+  enum D1MinusLinearOSI_ds_workVector_id { RESIDU_FREE, FREE, FREE_TDG, WORK_LENGTH };
+
+  enum D1MinusLinearOSI_interaction_workVector_id { OSNSP_RHS, WORK_INTERACTION_LENGTH };
 
   enum D1MinusLinearOSI_workBlockVector_id { xfree, BLOCK_WORK_LENGTH };
-
-  /** basic constructor
-   */
-  D1MinusLinearOSI();
 
   /** Constructor with type of D1MinusLinear
    * \param type unsigned int that specifies the type of D1MinusLinear
    * D1MinusLinearOSI::halfexplicit_acceleration_level,
    * D1MinusLinearOSI::halfexplicit_acceleration_level_full,
-   * D1MinusLinearOSI::explicit_velocity_level,
    * D1MinusLinearOSI::halfexplicit_velocity_level,
    * D1MinusLinearOSI::numberOfTypeOfD1MinusLinearOSI
    */
-  D1MinusLinearOSI(unsigned int type);
+  D1MinusLinearOSI(Type type);
 
   /** destructor */
-  virtual ~D1MinusLinearOSI(){};
-
-  /** Set the type of the D1MinusLinear
-   * \param type  the type to set
-   * D1MinusLinearOSI::halfexplicit_acceleration_level,
-   * D1MinusLinearOSI::halfexplicit_acceleration_level_full,
-   * D1MinusLinearOSI::explicit_velocity_level,
-   * D1MinusLinearOSI::halfexplicit_velocity_level,
-   * D1MinusLinearOSI::numberOfTypeOfD1MinusLinearOSI
-   */
-  void setTypeOfD1MinusLinearOSI(unsigned int type);
+  virtual ~D1MinusLinearOSI() noexcept = default;
 
   /** get the type of the D1MinusLinear
    * \return unsigned int type  the type to set
    * D1MinusLinearOSI::halfexplicit_acceleration_level,
    * D1MinusLinearOSI::halfexplicit_acceleration_level_full,
-   * D1MinusLinearOSI::explicit_velocity_level,
    * D1MinusLinearOSI::halfexplicit_velocity_level,
    * D1MinusLinearOSI::numberOfTypeOfD1MinusLinearOSI
    */
-  unsigned int typeOfD1MinusLinearOSI() { return _typeOfD1MinusLinearOSI; };
+  Type typeOfD1MinusLinearOSI() { return _typeOfD1MinusLinearOSI; };
 
   /** get the number of index sets required for the simulation
    * \return unsigned int
@@ -226,7 +204,8 @@ public:
    * \param t time of initialization
    * \param ds the dynamical system
    */
-  void initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds) override;
+  void initializeWorkVectorsForDS(
+      double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) override;
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi
@@ -234,9 +213,9 @@ public:
    * \param interProp the properties on the graph
    * \param DSG the dynamical systems graph
    */
-  void initializeWorkVectorsForInteraction(Interaction &inter,
-                                           InteractionProperties &interProp,
-                                           DynamicalSystemsGraph &DSG) override;
+  void initializeWorkVectorsForInteraction(
+      siconos::modeling::Interaction &inter, siconos::graphs::InteractionProperties &interProp,
+      siconos::graphs::DynamicalSystemsGraph &DSG) override;
 
   /** return the maximum of all norms for the residus of DS
    *  \post{ds->residuFree will be calculated, ds->q() contains new position,
@@ -256,13 +235,6 @@ public:
    * ds->q() contains new position, ds->velocity contains predicted velocity}
    *  \return double
    */
-  virtual double computeResiduHalfExplicitAccelerationLevelFull();
-
-  /** return the maximum of all norms for the residus of DS for the type
-   * explicit_acceleration_level_full \post{ds->residuFree will be calculated,
-   * ds->q() contains new position, ds->velocity contains predicted velocity}
-   *  \return double
-   */
   virtual double computeResiduHalfExplicitVelocityLevel();
 
   /** integrates the Dynamical System linked to this integrator without taking
@@ -273,39 +245,43 @@ public:
 
   /** integrates the Interaction linked to this integrator, without taking
    * non-smooth effects into account \param vertex_inter of the interaction
-   * graph \param osnsp pointer to OneStepNSProblem
+   * graph \param osnsp pointer to siconos::nonsmooth_formulations::OneStepNSProblem
    */
-  void computeFreeOutput(InteractionsGraph::VDescriptor &vertex_inter,
-                         OneStepNSProblem *osnsp) override;
+  void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
+                         siconos::nonsmooth_formulations::OneStepNSProblem *osnsp) override;
 
-  /** return the workVector corresponding to the right hand side of the OneStepNonsmooth problem
+  /** return the workVector corresponding to the right hand side of the OneStepNonsmooth
+   * problem
    */
-  SiconosVector& osnsp_rhs(InteractionsGraph::VDescriptor& vertex_inter, InteractionsGraph& indexSet) override
-  {
+  siconos::algebra::SiconosVector &osnsp_rhs(
+      siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
+      siconos::graphs::InteractionsGraph &indexSet) override {
     return *(*indexSet.properties(vertex_inter).workVectors)[D1MinusLinearOSI::OSNSP_RHS];
   };
 
   /** integrates the Interaction linked to this integrator, without taking
    * non-smooth effects into account \param vertex_inter of the interaction
-   * graph \param osnsp pointer to OneStepNSProblem
+   * graph \param osnsp pointer to
+   * siconos::simulation::siconos::nonsmooth_formulations::OneStepNSProblem
    */
   virtual void computeFreeOutputHalfExplicitAccelerationLevel(
-      InteractionsGraph::VDescriptor &vertex_inter, OneStepNSProblem *osnsp);
+      siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
+      siconos::nonsmooth_formulations::OneStepNSProblem *osnsp);
 
   /** integrates the Interaction linked to this integrator, without taking
    * non-smooth effects into account \param vertex_inter of the interaction
-   * graph \param osnsp pointer to OneStepNSProblem
+   * graph \param osnsp pointer to siconos::nonsmooth_formulations::OneStepNSProblem
    */
   virtual void computeFreeOutputHalfExplicitVelocityLevel(
-      InteractionsGraph::VDescriptor &vertex_inter, OneStepNSProblem *osnsp);
+      siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
+      siconos::nonsmooth_formulations::OneStepNSProblem *osnsp);
 
   /** integrate the system, between tinit and tend (->iout=true), with possible
    * stop at tout (->iout=false) \param ti initial time \param tf end time
    *  \param t real end time
    *  \param flag useless flag (for D1MinusLinearOSI, used in LsodarOSI)
    */
-  void integrate(double &ti, double &tf, double &t, int &flag) override
-  {
+  void integrate(double &ti, double &tf, double &t, int &flag) override {
     THROW_EXCEPTION("D1MinusLinearOSI::integrate - not implemented!");
   }
 
@@ -321,7 +297,8 @@ public:
    * \param i the index set level
    * \return a boolean if it needs to be added or not
    */
-  bool addInteractionInIndexSet(SP::Interaction inter, unsigned int i) override;
+  bool addInteractionInIndexSet(std::shared_ptr<siconos::modeling::Interaction> inter,
+                                unsigned int i) override;
 
   /** Apply the rule to one Interaction to known if is it should be removed
    * in the IndexSet of level i
@@ -329,7 +306,7 @@ public:
    * \param i the index set level
    * \return a boolean if it needs to be removed or not
    */
-  bool removeInteractionFromIndexSet(SP::Interaction inter,
+  bool removeInteractionFromIndexSet(std::shared_ptr<siconos::modeling::Interaction> inter,
                                      unsigned int i) override;
 
   /** Apply the rule to one Interaction to known if is it should be included
@@ -338,9 +315,8 @@ public:
    * \param i the index set level
    * \return a boolean if it needs to be added or not
    */
-  virtual bool
-  addInteractionInIndexSetHalfExplicitAccelerationLevel(SP::Interaction inter,
-                                                        unsigned int i);
+  virtual bool addInteractionInIndexSetHalfExplicitAccelerationLevel(
+      std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i);
 
   /** Apply the rule to one Interaction to known if is it should be removed
    * in the IndexSet of level i
@@ -349,7 +325,7 @@ public:
    * \return a boolean if it needs to be removed or not
    */
   virtual bool removeInteractionFromIndexSetHalfExplicitAccelerationLevel(
-      SP::Interaction inter, unsigned int i);
+      std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i);
 
   /** Apply the rule to one Interaction to known if is it should be included
    * in the IndexSet of level i
@@ -357,9 +333,8 @@ public:
    * \param i the index set level
    * \return a boolean if it needs to be added or not
    */
-  virtual bool
-  addInteractionInIndexSetHalfExplicitVelocityLevel(SP::Interaction inter,
-                                                    unsigned int i);
+  virtual bool addInteractionInIndexSetHalfExplicitVelocityLevel(
+      std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i);
 
   /** Apply the rule to one Interaction to known if is it should be removed
    * in the IndexSet of level i
@@ -367,26 +342,20 @@ public:
    * \param i the index set level
    * \return a boolean if it needs to be removed or not
    */
-  virtual bool
-  removeInteractionFromIndexSetHalfExplicitVelocityLevel(SP::Interaction inter,
-                                                         unsigned int i);
+  virtual bool removeInteractionFromIndexSetHalfExplicitVelocityLevel(
+      std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i);
 
   /** displays the data of the D1MinusLinearOSI's integrator */
-  void display() override
-  {
+  void display() const override {
     THROW_EXCEPTION("D1MinusLinearOSI::display - not implemented!");
   }
 
   /** preparations for Newton iteration
    *  \param time time
    */
-  void prepareNewtonIteration(double time) override
-  {
-    THROW_EXCEPTION(
-        "D1MinusLinearOSI::prepareNewtonIteration - not implemented!");
+  void prepareNewtonIteration(double time) override {
+    THROW_EXCEPTION("D1MinusLinearOSI::prepareNewtonIteration - not implemented!");
   }
-
-  ACCEPT_STD_VISITORS();
 };
-
-#endif // D1MINUSLINEAR_H
+}  // namespace siconos::integrators
+#endif  // D1MINUSLINEAR_H

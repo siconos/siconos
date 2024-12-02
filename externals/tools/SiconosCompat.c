@@ -14,60 +14,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #ifdef _MSC_VER
 
-// before MSVC 2013
-#if _MSC_VER < 1800
-#include <float.h>
-
-float _sqrtf(float x)
-{
-  return sqrtf(x);
-}
-float _logf(float x)
-{
-  return logf(x);
-}
-
-extern "C" long int lroundf(float x)
-{
-  return (long int)floorl(x + .5);
-}
-
-// Classify floating point number - usually defined in math.h
-extern "C" int __fpclassify(double x)
-{
-  return _fpclass(x);
-}/* This is really bad --xhub */
-
-#ifdef __cplusplus
-namespace std
-{
-int isfinite(double x)
-{
-  return _finite(x);
-}
-}
-
-#endif
-
-#endif /* _MSC_VER < 1800 */
-
-
-
-extern "C" double __cdecl __powidf2(double a, int b)
-{
+extern "C" double __cdecl __powidf2(double a, int b) {
   const int recip = b < 0;
   double r = 1;
-  while(1)
-  {
-    if(b & 1)
-      r *= a;
+  while (1) {
+    if (b & 1) r *= a;
     b /= 2;
-    if(b == 0)
-      break;
+    if (b == 0) break;
     a *= a;
   }
   return recip ? 1 / r : r;

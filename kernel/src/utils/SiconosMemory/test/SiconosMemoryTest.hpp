@@ -18,9 +18,10 @@
 #ifndef __SiconosMemoryTest__
 #define __SiconosMemoryTest__
 
-/* /\* #include "SiconosVector.hpp" *\/ */
 #include "SiconosMemory.hpp"
 #include <cppunit/extensions/HelperMacros.h>
+#include "BlockVector.hpp"
+
 
 class SiconosMemoryTest : public CppUnit::TestFixture
 {
@@ -50,9 +51,9 @@ private:
   void testSwap();
   void End();
 
-  SP::MemoryContainer V1, V2, V3;
-  SP::SiconosVector q1, q2, q3;
-  SP::BlockVector c1, c2;
+  std::shared_ptr<std::vector<siconos::algebra::SiconosVector>> V1, V2, V3;
+  std::shared_ptr<siconos::algebra::SiconosVector> q1, q2, q3;
+  std::shared_ptr<siconos::algebra::BlockVector> c1, c2;
   unsigned int _sizeMem;
 public:
   void setUp();

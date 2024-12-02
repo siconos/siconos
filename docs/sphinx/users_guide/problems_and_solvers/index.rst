@@ -34,9 +34,9 @@ The simplest way to create and use a solver is to select the corresponding id (c
 
    // -- C++ API --
    // use solver id as a parameter for the one-step nonsmooth problem constructor
-   SP::OneStepNSProblem problem(new LCP(SICONOS_LCP_LEMKE));
+   auto problem = std::make_shared<siconos::nonsmooth_formulations::LCP>(SICONOS_LCP_LEMKE);
    // get options :
-   SP::SolverOptions options = problem->numericsSolverOptions() 
+   auto options = problem->numericsSolverOptions() 
 
 
 .. code-block:: python

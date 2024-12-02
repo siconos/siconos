@@ -14,144 +14,136 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #include "Relay.hpp"
-#include <iostream>
-#include <assert.h>
-#include "Tools.hpp"
-#include "Simulation.hpp"
-#include "RelayNSL.hpp"
+
+#include "NumericsSolversNamespace.h"  // solver_options stuff
+#include "SiconosVisitor.hpp"
+
+// #include <iostream>
+// #include <assert.h>
+#include "Interaction.hpp"
 #include "OSNSMatrix.hpp"
+#include "RelayNSL.hpp"
+#include "SiconosVector.hpp"
+#include "Simulation.hpp"
+#include "Tools.hpp"
 
-// --- Numerics headers ---
-#include "NonSmoothDrivers.h"
-#include <Relay_Solvers.h>
+// // --- Numerics headers ---
+// #include "NonSmoothDrivers.h"
+// #include <Relay_Solvers.h>
 
-#include <limits>
+// #include <limits>
 
-using namespace RELATION;
+siconos::nonsmooth_formulations::Relay::Relay(int numericsSolverId)
+    : Relay(std::shared_ptr<SolverOptions>(
+          solver_options_create(numericsSolverId),
+          solver_options_delete))
+{
+}
 
-
-Relay::Relay(int numericsSolverId):
-  Relay(SP::SolverOptions(solver_options_create(numericsSolverId),
-                          solver_options_delete))
-{}
-
-Relay::Relay(SP::SolverOptions options):
-  LinearOSNS(options), _numerics_problem(new RelayProblem)
-{}
-
+siconos::nonsmooth_formulations::Relay::Relay(std::shared_ptr<SolverOptions> options)
+    : LinearOSNS(
+          options)  //,  _numerics_problem(std::make_shared<RelayProblem>())
+{
+}
 
 /* nslaw dispatch on bounds */
 
-struct Relay::_BoundsNSLEffect : public SiconosVisitor
-{
+struct siconos::nonsmooth_formulations::Relay::_BoundsNSLEffect
+    : public siconos::internal::SiconosVisitor {
+  using siconos::internal::SiconosVisitor::visit;
 
-  using SiconosVisitor::visit;
-
-  Relay* _parent;
-  SP::Interaction _inter;
+  Relay* _parent{nullptr};
+  std::shared_ptr<siconos::modeling::Interaction> _inter{nullptr};
   unsigned int _pos;
 
+  _BoundsNSLEffect(Relay* p, std::shared_ptr<siconos::modeling::Interaction> inter,
+                   unsigned int pos)
+      : _parent(p), _inter(inter), _pos(pos){};
 
-  _BoundsNSLEffect(Relay *p, SP::Interaction inter, unsigned int pos) :
-    _parent(p), _inter(inter), _pos(pos) {};
-
-  void visit(const RelayNSL& nslaw)
+  void visit(const siconos::modeling::RelayNSL& nslaw) const override
   {
-
-    for(unsigned i = 0; i <  _inter->nonSmoothLaw()->size(); ++i)
-    {
+    for (unsigned i = 0; i < _inter->nonSmoothLaw()->size(); ++i) {
       (*(_parent->lb()))(_pos + i) = nslaw.lb();
       (*(_parent->ub()))(_pos + i) = nslaw.ub();
     }
   }
 
-  void visit(const ComplementarityConditionNSL& nslaw)
+  void visit(const siconos::modeling::ComplementarityConditionNSL& nslaw) const override
   {
-    for(unsigned i = 0; i <  _inter->nonSmoothLaw()->size(); ++i)
-    {
+    for (unsigned i = 0; i < _inter->nonSmoothLaw()->size(); ++i) {
       (*(_parent->lb()))(_pos + i) = 0.0;
       (*(_parent->ub()))(_pos + i) = std::numeric_limits<double>::infinity();
     }
   }
-
 };
 
-
-void Relay::initialize(SP::Simulation sim)
+void siconos::nonsmooth_formulations::Relay::initialize(
+    std::shared_ptr<siconos::simulation::Simulation> sim)
 {
   LinearOSNS::initialize(sim);
-  //cout << "Relay::initialize" <<std::endl;
-
+  // cout << "siconos::nonsmooth_formulations::Relay::initialize" <<std::endl;
 
   // initialize memory for _lb and _ub
-  if(! _lb)
-    _lb.reset(new SiconosVector(maxSize()));
-  else
-  {
-    if(_lb->size() != maxSize())
-      _lb->resize(maxSize());
+  if (!_lb)
+    _lb = std::make_shared<siconos::algebra::SiconosVector>(maxSize());
+  else {
+    if (_lb->size() != maxSize()) _lb->resize(maxSize());
   }
-  if(! _ub)
-    _ub.reset(new SiconosVector(maxSize()));
-  else
-  {
-    if(_ub->size() != maxSize())
-      _ub->resize(maxSize());
+  if (!_ub)
+    _ub = std::make_shared<siconos::algebra::SiconosVector>(maxSize());
+  else {
+    if (_ub->size() != maxSize()) _ub->resize(maxSize());
   }
 }
-bool Relay::checkCompatibleNSLaw(NonSmoothLaw& nslaw)
+bool siconos::nonsmooth_formulations::Relay::checkCompatibleNSLaw(siconos::modeling::NonSmoothLaw& nslaw)
 {
-  float type_number= (float) (Type::value(nslaw));
+  float type_number = static_cast<float>(siconos::types::type_value(nslaw));
   _nslawtype.insert(type_number);
 
-  if (not (Type::value(nslaw) == Type::ComplementarityConditionNSL ||
-           Type::value(nslaw) == Type::RelayNSL))
-  {
-    THROW_EXCEPTION("\nRelay::checkCompatibleNSLaw -  \n\
+  if (not(siconos::types::type_value(nslaw) ==
+              siconos::modeling::Type::ComplementarityConditionNSL ||
+          siconos::types::type_value(nslaw) == siconos::modeling::Type::RelayNSL)) {
+    THROW_EXCEPTION(
+        "\nsiconos::nonsmooth_formulations::Relay::checkCompatibleNSLaw -  \n\
                       The chosen nonsmooth law is not compatible with Relay one step nonsmooth problem. \n \
-                      Compatible NonSmoothLaw are: ComplementarityConditionNSL or RelayNSL\n");
+                      Compatible siconos::modeling::NonSmoothLaw are: ComplementarityConditionNSL or RelayNSL\n");
     return false;
   }
 
   return true;
 }
 
-
-int Relay::compute(double time)
+int siconos::nonsmooth_formulations::Relay::compute(double time)
 {
   int info = 0;
   // --- Prepare data for Relay computing ---
   bool cont = preCompute(time);
-  if(!cont)
-    return info;
+  if (!cont) return info;
 
   // fill _lb and _ub wiht the value of the NonSmooth Law
 
-  InteractionsGraph& indexSet = *simulation()->indexSet(indexSetLevel());
+  auto& indexSet = *simulation()->indexSet(indexSetLevel());
 
-  //cout << " _sizeOutput =" <<_sizeOutput <<std::endl;
-  if(_lb->size() != _sizeOutput)
-  {
+  // cout << " _sizeOutput =" <<_sizeOutput <<std::endl;
+  if (_lb->size() != _sizeOutput) {
     _lb->resize(_sizeOutput, false);
     _lb->zero();
   }
-  if(_ub->size() != _sizeOutput)
-  {
+  if (_ub->size() != _sizeOutput) {
     _ub->resize(_sizeOutput, false);
     _ub->zero();
   }
 
-  InteractionsGraph::VIterator ui, uiend;
-  for(std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui)
-  {
-    SP::Interaction inter = indexSet.bundle(*ui);
+  siconos::graphs::InteractionsGraph::VIterator ui, uiend;
+  for (std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui) {
+    auto inter = indexSet.bundle(*ui);
 
     // Compute q, this depends on the type of non smooth problem, on
     // the relation type and on the non smooth law
-    unsigned int pos = indexSet.properties(*ui).absolute_position;
-    SP::SiconosVisitor NSLEffect(new _BoundsNSLEffect(this, inter, pos));
+    auto pos = indexSet.properties(*ui).absolute_position;
+    auto NSLEffect = std::make_shared<_BoundsNSLEffect>(this, inter, pos);
     inter->nonSmoothLaw()->accept(*NSLEffect);
   }
 
@@ -162,8 +154,7 @@ int Relay::compute(double time)
   // - the options for the solver (name, max iteration number ...)
   // - the global options for Numerics (verbose mode ...)
 
-  if(_sizeOutput != 0)
-  {
+  if (_sizeOutput != 0) {
     // The Relay in Numerics format
     RelayProblem numerics_problem;
     numerics_problem.M = &*_M->numericsMatrix();
@@ -172,17 +163,16 @@ int Relay::compute(double time)
     numerics_problem.ub = _ub->getArray();
     numerics_problem.size = _sizeOutput;
 
-    //int nbSolvers = 1;
-    // Call Relay Driver
+    // int nbSolvers = 1;
+    //  Call Relay Driver
 
     //      Relay_display(&numerics_problem);
 
     info = relay_driver(&numerics_problem, _z->getArray(), _w->getArray(),
                         &*_numerics_solver_options);
 
-    if(info != 0)
-    {
-      std::cout << "Warning : Problem in Relay resolution" <<std::endl;
+    if (info != 0) {
+      std::cout << "Warning : Problem in Relay resolution" << std::endl;
     }
 
     // --- Recovering of the desired variables from Relay output ---
@@ -192,14 +182,12 @@ int Relay::compute(double time)
   return info;
 }
 
-void Relay::display() const
+void siconos::nonsmooth_formulations::Relay::display() const
 {
-  std::cout << "======= Relay of size " << _sizeOutput << " with: " <<std::endl;
+  std::cout << "======= Relay of size " << _sizeOutput << " with: " << std::endl;
   LinearOSNS::display();
-  std::cout<< "lower bound : (_lb)"<<std::endl;
+  std::cout << "lower bound : (_lb)" << std::endl;
   _lb->display();
-  std::cout<< "upper bound : (_ub)"<<std::endl;
+  std::cout << "upper bound : (_ub)" << std::endl;
   _ub->display();
-
 }
-

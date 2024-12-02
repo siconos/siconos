@@ -25,6 +25,15 @@
 
 #include "DynamicalSystem.hpp"
 
+namespace siconos::algebra {
+
+class SiconosMatrix;
+class SimpleMatrix;
+class SiconosVector;
+class SiconosMemory;
+}  // namespace siconos::algebra
+
+namespace siconos::modeling {
 /**
     General First Order Non Linear Dynamical Systems
 
@@ -71,35 +80,25 @@
 
  */
 class FirstOrderNonLinearDS : public DynamicalSystem {
-
-private:
+ private:
   /** plugin signature */
   typedef void (*FNLDSPtrfct)(double, unsigned int, const double *, double *, unsigned int,
                               double *);
 
-protected:
-  
+ protected:
   ACCEPT_SERIALIZATION(FirstOrderNonLinearDS);
 
-  /**
-     Common code for constructors
-     should be replaced in C++11 by delegating constructors
-
-     \param initial_state vector of initial values for state
-  */
-  void _init(SP::SiconosVector initial_state);
-
   /** Matrix coefficient of \f$ \dot x \f$ */
-  SP::SiconosMatrix _M;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _M{nullptr};
 
   /** value of f(x,t,z) */
-  SP::SiconosVector _f;
+  std::shared_ptr<siconos::algebra::SiconosVector> _f{nullptr};
 
   /** to store f(x_k,t_k,z_k)*/
-  SP::SiconosVector _fold;
+  std::shared_ptr<siconos::algebra::SiconosVector> _fold{nullptr};
 
   /** Gradient of \f$ f(x,t,z) \f$ with respect to \f$ x \f$ */
-  SP::SiconosMatrix _jacobianfx;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _jacobianfx{nullptr};
 
   /** DynamicalSystem plug-in to compute f(x,t,z)
    *
@@ -110,7 +109,7 @@ protected:
    *  \param the size of the vector _z
    *  \param a vector of parameters _z
    */
-  SP::PluggedObject _pluginf;
+  std::shared_ptr<siconos::plugins::PluggedObject> _pluginf{nullptr};
 
   /** DynamicalSystem plug-in to compute the gradient of f(x,t,z) with respect to the state:
    * \f$ \nabla_x f: (x,t,z) \in R^{n} \times R  \mapsto  R^{n \times n} \f$
@@ -122,25 +121,25 @@ protected:
    *  \param  the size of the vector z
    *  \param[in,out]  a vector of parameters, z
    */
-  SP::PluggedObject _pluginJacxf;
+  std::shared_ptr<siconos::plugins::PluggedObject> _pluginJacxf{nullptr};
 
-  SP::PluggedObject _pluginM;
+  std::shared_ptr<siconos::plugins::PluggedObject> _pluginM{nullptr};
 
   /**  the previous r vectors */
-  SiconosMemory _rMemory;
+  siconos::algebra::SiconosMemory _rMemory;
 
   /**
       Copy of M Matrix, LU-factorized, used to solve systems like Mx = b with LU-factorization.
       (Warning: may not exist, used if we need to avoid factorization in place of M) */
-  SP::SiconosMatrix _invM;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _invM{nullptr};
 
   /** default constructor */
-  FirstOrderNonLinearDS() : DynamicalSystem(){};
+  FirstOrderNonLinearDS() = default;
 
   /** Reset the PluggedObjects */
   void _zeroPlugin() override;
 
-public:
+ public:
   // ===== CONSTRUCTORS =====
 
   /** constructor from initial state, leads to \f$ \dot x = r \f$
@@ -150,7 +149,7 @@ public:
    *  \warning you need to set explicitely the plugin for f and its jacobian if needed (e.g. if
    *  used with an EventDriven scheme)
    */
-  FirstOrderNonLinearDS(SP::SiconosVector newX0);
+  FirstOrderNonLinearDS(std::shared_ptr<siconos::algebra::SiconosVector> newX0);
 
   /** constructor from initial state and f (plugins),  \f$ \dot x = f(x, t, z) + r \f$
    *
@@ -158,8 +157,8 @@ public:
    *  \param fPlugin name of the plugin function to be used for f(x,t,z)
    *  \param jacobianfxPlugin name of the plugin to be used for the jacobian of f(x,t,z)
    */
-  FirstOrderNonLinearDS(SP::SiconosVector newX0, const std::string &fPlugin,
-                        const std::string &jacobianfxPlugin);
+  FirstOrderNonLinearDS(std::shared_ptr<siconos::algebra::SiconosVector> newX0,
+                        const std::string &fPlugin, const std::string &jacobianfxPlugin);
 
   /** Copy constructor
    *
@@ -168,7 +167,7 @@ public:
   FirstOrderNonLinearDS(const FirstOrderNonLinearDS &FONLDS);
 
   /** destructor */
-  virtual ~FirstOrderNonLinearDS(){};
+  virtual ~FirstOrderNonLinearDS() noexcept = default;
 
   /** allocate (if needed)  and compute rhs and its jacobian.
    *
@@ -208,57 +207,56 @@ public:
 
   /** returns a pointer to M, matrix coeff. on left-hand side
    */
-  inline SP::SiconosMatrix M() const { return _M; }
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> M() const { return _M; }
 
   /** set M, matrix coeff of left-hand side (pointer link)
    *
    *  \param newM the new M matrix
    */
-  inline void setMPtr(SP::SiconosMatrix newM) { _M = newM; }
-
-  // --- invM ---
-  /** get a copy of the LU factorisation of M operator
-   *
-   *  \return SimpleMatrix
-   */
-  inline const SimpleMatrix getInvM() const { return *_invM; }
+  inline void setMPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newM) { _M = newM; }
 
   /** get the inverse of LU fact. of M operator (pointer link)
    *
    *  \return pointer to a SiconosMatrix
    */
-  inline SP::SiconosMatrix invM() const { return _invM; }
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> invM() const { return _invM; }
 
   /** returns f(x,t,z) (pointer link)
    */
-  inline SP::SiconosVector f() const { return _f; }
+  inline std::shared_ptr<siconos::algebra::SiconosVector> f() const { return _f; }
 
   /** set f(x,t,z) (pointer link)
    *
-   *  \param newPtr a SP::SiconosVector
+   *  \param newPtr a std::shared_ptr<siconos::algebra::SiconosVector>
    */
-  inline void setFPtr(SP::SiconosVector newPtr) { _f = newPtr; }
+  inline void setFPtr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) { _f = newPtr; }
 
   /** get jacobian of f(x,t,z) with respect to x (pointer link)
    *
-   *  \return SP::SiconosMatrix
+   *  \return std::shared_ptr<siconos::algebra::SiconosMatrix>
    */
-  virtual SP::SiconosMatrix jacobianfx() const { return _jacobianfx; }
+  virtual std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianfx() const
+  {
+    return _jacobianfx;
+  }
 
   /** set jacobian of f(x,t,z) with respect to x (pointer link)
    *
    *  \param newPtr the new value
    */
-  inline void setJacobianfxPtr(SP::SiconosMatrix newPtr) { _jacobianfx = newPtr; }
+  inline void setJacobianfxPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr)
+  {
+    _jacobianfx = newPtr;
+  }
 
   /** get all the values of the state vector r stored in memory
    *
    *  \return a memory vector
    */
-  inline const SiconosMemory &rMemory() const { return _rMemory; }
+  inline const siconos::algebra::SiconosMemory &rMemory() const { return _rMemory; }
 
   /** returns previous value of rhs -->OSI Related!!*/
-  inline SP::SiconosVector fold() const { return _fold; }
+  inline std::shared_ptr<siconos::algebra::SiconosVector> fold() const { return _fold; }
 
   /**
      initialize the SiconosMemory objects: reserve memory for i
@@ -293,7 +291,7 @@ public:
    *
    *  \param fct a pointer on the plugin function
    */
-  void setComputeMFunction(FPtr1 fct);
+  void setComputeMFunction(siconos::plugins::FPtr1 fct);
 
   /** to set a specified function to compute f(x,t)
    *
@@ -306,7 +304,7 @@ public:
    *
    *  \param fct a pointer on the plugin function
    */
-  void setComputeFFunction(FPtr1 fct);
+  void setComputeFFunction(siconos::plugins::FPtr1 fct);
 
   /** to set a specified function to compute jacobianfx
    *
@@ -320,7 +318,7 @@ public:
    *
    *  \param fct a pointer on the plugin function
    */
-  void setComputeJacobianfxFunction(FPtr1 fct);
+  void setComputeJacobianfxFunction(siconos::plugins::FPtr1 fct);
 
   // --- compute plugin functions ---
 
@@ -341,40 +339,52 @@ public:
    *  \param time time instant used in the computations
    *  \param state x value
    */
-  virtual void computef(double time, SP::SiconosVector state);
+  virtual void computef(double time, std::shared_ptr<siconos::algebra::SiconosVector> state);
 
   /** Default function to compute  \f$  \nabla_x f: (x,t) \in R^{n}
    *  \times R \mapsto R^{n \times n} \f$ with x different from
    *  current saved state.
    *
    *  \param time instant used in the computations
-   *  \param state a SiconosVector to store the resuting value
+   *  \param state a siconos::algebra::SiconosVector to store the resuting value
    */
-  virtual void computeJacobianfx(double time, SP::SiconosVector state);
+  virtual void computeJacobianfx(double time,
+                                 std::shared_ptr<siconos::algebra::SiconosVector> state);
 
   /** Get _pluginf
    *
-   *  \return a SP::PluggedObject
+   *  \return a std::shared_ptr<siconos::plugins::PluggedObject>
    */
-  inline SP::PluggedObject getPluginF() const { return _pluginf; };
+  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginF() const
+  {
+    return _pluginf;
+  };
 
   /** Get _pluginJacxf
    *
-   *  \return a SP::PluggedObject
+   *  \return a std::shared_ptr<siconos::plugins::PluggedObject>
    */
-  inline SP::PluggedObject getPluginJacxf() const { return _pluginJacxf; };
+  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginJacxf() const
+  {
+    return _pluginJacxf;
+  };
 
   /** Get _pluginM
    *
-   *  \return a SP::PluggedObject
+   *  \return a std::shared_ptr<siconos::plugins::PluggedObject>
    */
-  inline SP::PluggedObject getPluginM() const { return _pluginM; };
+  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginM() const
+  {
+    return _pluginM;
+  };
 
   /** print the data of the dynamical system on the standard output
    */
   void display(bool brief = true) const override;
 
-  ACCEPT_STD_VISITORS();
+  // visitors hook
+  void acceptSP(std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const override;
+  Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
 };
-
+}  // namespace siconos::modeling
 #endif

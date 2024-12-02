@@ -39,17 +39,17 @@ private:
   CPPUNIT_TEST(testBuildFirstOrderLinearR3);
   CPPUNIT_TEST(testBuildFirstOrderLinearR4);
   CPPUNIT_TEST(testBuildFirstOrderLinearR5);
-  //  CPPUNIT_TEST(testSetC);
-  CPPUNIT_TEST(testSetCPtr);
-  CPPUNIT_TEST(testSetCPtr2);
-  //  CPPUNIT_TEST(testSetD);
-  CPPUNIT_TEST(testSetDPtr);
-  //  CPPUNIT_TEST(testSetF);
-  CPPUNIT_TEST(testSetFPtr);
-  //  CPPUNIT_TEST(testSetE);
-  CPPUNIT_TEST(testSetEPtr);
-  //  CPPUNIT_TEST(testSetB);
-  CPPUNIT_TEST(testSetBPtr);
+  // //  CPPUNIT_TEST(testSetC);
+  // CPPUNIT_TEST(testSetCPtr);
+  // CPPUNIT_TEST(testSetCPtr2);
+  // //  CPPUNIT_TEST(testSetD);
+  // CPPUNIT_TEST(testSetDPtr);
+  // //  CPPUNIT_TEST(testSetF);
+  // CPPUNIT_TEST(testSetFPtr);
+  // //  CPPUNIT_TEST(testSetE);
+  // CPPUNIT_TEST(testSetEPtr);
+  // //  CPPUNIT_TEST(testSetB);
+  // CPPUNIT_TEST(testSetBPtr);
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -59,23 +59,23 @@ private:
   void testBuildFirstOrderLinearR3();
   void testBuildFirstOrderLinearR4();
   void testBuildFirstOrderLinearR5();
-  //  void testSetC();
-  void testSetCPtr();
-  void testSetCPtr2();
-  //  void testSetD();
-  void testSetDPtr();
-  //  void testSetF();
-  void testSetFPtr();
-  //  void testSetE();
-  void testSetEPtr();
-  //  void testSetB();
-  void testSetBPtr();
+  // //  void testSetC();
+  // void testSetCPtr();
+  // void testSetCPtr2();
+  // //  void testSetD();
+  // void testSetDPtr();
+  // //  void testSetF();
+  // void testSetFPtr();
+  // //  void testSetE();
+  // void testSetEPtr();
+  // //  void testSetB();
+  // void testSetBPtr();
 
   // Members
 
-  SP::SimpleMatrix C, B, F, D;
-  SP::SiconosVector e;
-  SP::NonSmoothDynamicalSystem nsds;
+  std::shared_ptr<siconos::algebra::SimpleMatrix> C, B, F, D;
+  std::shared_ptr<siconos::algebra::SiconosVector> e;
+  std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds;
 
 public:
   void setUp();

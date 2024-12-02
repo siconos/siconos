@@ -14,30 +14,39 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file StaticBody.hpp
   \brief Definition of an abstract 3D rigid body above NewtonEulerDS
 */
 
-
 #ifndef StaticBody_h
 #define StaticBody_h
 
-// #include <MechanicsFwd.hpp>
-// #include <NewtonEulerDS.hpp>
-// #include <SiconosVisitor.hpp>
-// #include <SiconosContactor.hpp>
+#include <memory>
 
-class StaticBody : public std::enable_shared_from_this<StaticBody>
-{
+namespace siconos::algebra {
+class SiconosVector;
+}
+
+namespace siconos::collision {
+
+class SiconosContactorSet;
+
+class StaticBody : public std::enable_shared_from_this<StaticBody> {
+private:
+  // Rule of five
+  StaticBody(const StaticBody&) =  delete;
+  StaticBody(StaticBody&&) = delete;
+  StaticBody& operator=(const StaticBody&) = delete;
+  StaticBody& operator=(StaticBody&&) = delete;
+
 public:
-
-  StaticBody() {};
-  SP::SiconosContactorSet contactorSet;
-  SP::SiconosVector base;
-  int  number;
-  virtual ~StaticBody() {};
+  StaticBody() = default;
+  std::shared_ptr<SiconosContactorSet> contactorSet{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> base{nullptr};
+  int number{0};
+  virtual ~StaticBody() noexcept = default;
 };
-
+}  // namespace siconos::collision
 #endif /* StaticBody_h */

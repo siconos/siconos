@@ -99,11 +99,11 @@ Write a c++ file, e.g. run.cpp
    int main()
    {
     unsigned int size = 10;
-    SP::SiconosVector x0(new SiconosVector(size));
-    SP::SimpleMatrix A(new SimpleMatrix(size, size));
+    auto x0 = std::make_shared<siconos::algebra::SiconosVector>(size);
+    auto A = std::make_shared<(siconos::algebra::SimpleMatrix>(size, size);
     A->randomize();
 
-    SP::FirstOrderLinearDS ds(new FirstOrderLinearDS(x0, A));
+    auto ds = std::make_shared<siconos::modeling::FirstOrderLinearDS(x0, A);
     ds->display();
    }
 

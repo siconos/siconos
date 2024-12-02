@@ -14,29 +14,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef __LsodarTest__
 #define __LsodarTest__
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "FirstOrderLinearTIDS.hpp"
-#include "LsodarOSI.hpp"
+
 #include "EventDriven.hpp"
-#include "TimeDiscretisation.hpp"
-#include "ioMatrix.hpp"
-#include "FirstOrderLinearTIR.hpp"
-#include "RelayNSL.hpp"
-#include "Interaction.hpp"
+#include "LsodarOSI.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
-#include "Relay.hpp"
+#include "TimeDiscretisation.hpp"
 
-class LsodarTest : public CppUnit::TestFixture
-{
-
-private:
-  
+class LsodarTest : public CppUnit::TestFixture {
+ private:
   ACCEPT_SERIALIZATION(LsodarTest);
-
 
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(LsodarTest);
@@ -61,26 +52,19 @@ private:
   double _t0;
   double _T;
   double _tol;
-  SP::NonSmoothDynamicalSystem _model;
-  SP::EventDriven _sim;
-  SP::DynamicalSystem _DS;
-  SP::TimeDiscretisation _TD;
-  SP::LsodarOSI _Lsodar;
-  SP::SiconosMatrix _A;
-  SP::SiconosVector _b;
-  SP::SiconosVector _x0;
+  std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> _model{nullptr};
+  std::shared_ptr<siconos::simulation::EventDriven> _sim{nullptr};
+  std::shared_ptr<siconos::modeling::DynamicalSystem> _DS{nullptr};
+  std::shared_ptr<siconos::simulation::TimeDiscretisation> _TD{nullptr};
+  std::shared_ptr<siconos::integrators::LsodarOSI> _Lsodar{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _A{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> _b{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> _x0{nullptr};
 
-
-public:
-
-  LsodarTest(): _n(2), _h(0.1), _t0(0.0), _T(10.0), _tol(1e-12) {}
+ public:
+  LsodarTest() : _n(2), _h(0.1), _t0(0.0), _T(10.0), _tol(1e-12) {}
   void setUp();
   void tearDown();
-
 };
 
 #endif
-
-
-
-

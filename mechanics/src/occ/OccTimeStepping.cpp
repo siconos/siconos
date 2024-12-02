@@ -15,57 +15,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-class OccBody;
-
-#include <SiconosVisitables.hpp>
-#undef SICONOS_VISITABLES
-
-#define SICONOS_VISITABLES()                    \
-  KERNEL_CLASSES()                              \
-  REGISTER(OccBody)
-
-
-
 #include "OccTimeStepping.hpp"
+
+#include <memory>
+
+#include "NonSmoothDynamicalSystem.hpp"
 #include "OccBody.hpp"
+#include "SiconosVector.hpp"
+#include "SimulationGraphs.hpp"
 
-#include <NonSmoothDynamicalSystem.hpp>
+// namespace siconos::mechanics::occ::internal {
+// struct UpdateShapes {
+//   template <typename T>
+//   void operator()(const T& ds) {
+//     const_cast<T&>(ds).updateShapes();
+//     const_cast<T&>(ds).updateContactShapes();
+//   }
+// };
+// }  // namespace siconos::mechanics::occ::internal
 
-#include <SiconosVisitor.hpp>
-
-#define VISITOR_CLASSES()                       \
-  REGISTER(OccBody)
-
-#include <VisitorMaker.hpp>
-
-
-
-using namespace Experimental;
-
-struct UpdateShapes : public SiconosVisitor
-{
-  using SiconosVisitor::visit;
-
-  template<typename T>
-  void operator()(const T& ds)
-  {
-    const_cast<T&>(ds).updateShapes();
-    const_cast<T&>(ds).updateContactShapes();
-  }
-};
-
-
-void OccTimeStepping::updateWorldFromDS()
-{
-  DynamicalSystemsGraph& dsg = *_nsds->dynamicalSystems();
-  DynamicalSystemsGraph::VIterator dsi, dsiend;
+void siconos::mechanics::occ::OccTimeStepping::updateWorldFromDS() {
+  auto& dsg = *_nsds->dynamicalSystems();
+  siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsiend;
   std::tie(dsi, dsiend) = dsg.vertices();
 
-  Visitor< Classes < OccBody >, UpdateShapes >::Make up;
-
-  for(; dsi != dsiend; ++dsi)
-  {
-    dsg.bundle(*dsi)->accept(up);
+  for (; dsi != dsiend; ++dsi) {
+    if (auto ds = std::dynamic_pointer_cast<OccBody>(dsg.bundle(*dsi))) {
+      ds->updateShapes();
+      ds->updateContactShapes();
+    }
   }
-
 }

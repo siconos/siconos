@@ -24,31 +24,32 @@
 
 #include "NonSmoothLaw.hpp"
 
+namespace siconos::modeling {
+
 /** Newton Impact-Friction Non Smooth Law
  *
  */
 class NewtonImpactFrictionNSL : public NonSmoothLaw {
-
-private:
+ private:
   ACCEPT_SERIALIZATION(NewtonImpactFrictionNSL);
 
   /** The Newton coefficient of restitution
    */
-  double _en;
-  double _et;
+  double _en{0.};
+  double _et{0.};
   /** friction coefficient */
-  double _mu;
+  double _mu{0.};
 
   /** default constructor
    */
-  NewtonImpactFrictionNSL();
+  NewtonImpactFrictionNSL() = default;
 
-public:
+ public:
   /** basic constructor
    *
    *  \param size size of the ns law
    */
-  NewtonImpactFrictionNSL(unsigned int size);
+  NewtonImpactFrictionNSL(unsigned int size) : NonSmoothLaw(size){};
 
   /** constructor with the value of the NewtonImpactFrictionNSL attributes
    *
@@ -57,10 +58,11 @@ public:
    *  \param mu double : friction coefficient
    *  \param size unsigned int: size of the ns law
    */
-  NewtonImpactFrictionNSL(double en, double et, double mu, unsigned int size);
+  NewtonImpactFrictionNSL(double en, double et, double mu, unsigned int size)
+      : NonSmoothLaw(size), _en(en), _et(et), _mu(mu){};
 
   /** Destructor */
-  ~NewtonImpactFrictionNSL();
+  ~NewtonImpactFrictionNSL() noexcept = default;
 
   /** check the ns law to see if it is verified
    *
@@ -106,7 +108,11 @@ public:
    */
   void display() const override;
 
-  ACCEPT_STD_VISITORS();
+  // visitors hook
+  void accept(siconos::internal::SiconosVisitor& tourist) const override {
+    tourist.visit(*this);
+  }
+  Type acceptType(types::FindType& ft) const override { return ft.visit(*this); }
 };
-DEFINE_SPTR(NewtonImpactFrictionNSL)
-#endif // NewtonImpactFrictionNSL_H
+}  // namespace siconos::modeling
+#endif  // NewtonImpactFrictionNSL_H

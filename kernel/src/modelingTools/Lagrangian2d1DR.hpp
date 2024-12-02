@@ -21,10 +21,9 @@
 #ifndef Lagrangian2d1DR_H
 #define Lagrangian2d1DR_H
 
-#include "LagrangianDS.hpp"
 #include "LagrangianScleronomousR.hpp"
 
-using namespace RELATION;
+namespace siconos::modeling {
 /** Lagrangian2d1DR
  *
  * This class is an interface for a relation with impact.  It
@@ -37,60 +36,59 @@ using namespace RELATION;
  */
 
 class Lagrangian2d1DR : public LagrangianScleronomousR {
-protected:
-
+ protected:
   ACCEPT_SERIALIZATION(Lagrangian2d1DR);
 
   /* Current Contact Points, may be updated within Newton loop based
    * on _relPc1, _relPc2. */
-  SP::SiconosVector _Pc1;
-  SP::SiconosVector _Pc2;
+  std::shared_ptr<siconos::algebra::SiconosVector> _Pc1;
+  std::shared_ptr<siconos::algebra::SiconosVector> _Pc2;
 
   /* Inward Normal at the contact.
    * \todo The meaning of "Inward" has to be explained carefully.
    */
-  SP::SiconosVector _Nc;
+  std::shared_ptr<siconos::algebra::SiconosVector> _Nc;
 
   /* _Nc must be calculated relative to q2 */
-  SP::SiconosVector _relNc;
+  std::shared_ptr<siconos::algebra::SiconosVector> _relNc;
 
   /* Rotation matrix converting the absolute coordinate to the contact frame
    * coordinate. This matrix contains the unit vector(s)of the contact frame in
    * row.
    */
-  SP::SimpleMatrix _RotationAbsToContactFrame;
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _RotationAbsToContactFrame;
 
   /* Matrix converting */
-  SP::SimpleMatrix _rotationMatrixAbsToBody;
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _rotationMatrixAbsToBody;
 
   /* Cross product matrices that correspond the lever arm from
    * contact point to center of mass*/
-  SP::SimpleMatrix _NPG1;
-  SP::SimpleMatrix _NPG2;
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _NPG1;
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _NPG2;
 
   /*buffer matrices*/
-  SP::SimpleMatrix _AUX1;
-  SP::SimpleMatrix _AUX2;
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _AUX1;
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _AUX2;
 
   /** Set the coordinates of first contact point.  Must only be done
    * in a computeh() override.
    * \param npc new coordinates
    */
-  void setpc1(SP::SiconosVector npc) { _Pc1 = npc; };
+  void setpc1(std::shared_ptr<siconos::algebra::SiconosVector> npc) { _Pc1 = npc; };
 
   /** Set the coordinates of second contact point.  Must only be done
    * in a computeh() override.
    * \param npc new coordinates
    */
-  void setpc2(SP::SiconosVector npc) { _Pc2 = npc; };
+  void setpc2(std::shared_ptr<siconos::algebra::SiconosVector> npc) { _Pc2 = npc; };
 
   /** Set the coordinates of inside normal vector at the contact point.
    * Must only be done in a computeh() override.
    * \param nnc new coordinates
    */
-  void setnc(SP::SiconosVector nnc) { _Nc = nnc; };
+  void setnc(std::shared_ptr<siconos::algebra::SiconosVector> nnc) { _Nc = nnc; };
 
-public:
+ public:
   /** V.A. boolean _isOnCOntact ?? Why is it public members ?
    *  seems parametrize the projection algorithm
    *  the projection is done on the surface \f$y=0\f$ or on \f$y \geq 0\f$
@@ -100,8 +98,10 @@ public:
   /** constructorx
    */
   Lagrangian2d1DR()
-      : LagrangianScleronomousR(), _Pc1(new SiconosVector(2)),
-        _Pc2(new SiconosVector(2)), _Nc(new SiconosVector(2))
+      : LagrangianScleronomousR(),
+        _Pc1{std::make_shared<siconos::algebra::SiconosVector>(2)},
+        _Pc2{std::make_shared<siconos::algebra::SiconosVector>(2)},
+        _Nc{std::make_shared<siconos::algebra::SiconosVector>(2)}
   {
     /*_ds1=nullptr;_ds2=nullptr;*/
   }
@@ -117,32 +117,31 @@ public:
       \param z user defined parameters (optional)
       \param y the resulting vector
   */
-  void computeh(const BlockVector &q, BlockVector &z,
-                SiconosVector &y) override;
+  void computeh(const siconos::algebra::BlockVector &q, siconos::algebra::BlockVector &z,
+                siconos::algebra::SiconosVector &y) override;
 
   /** to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
       \param q coordinates of the dynamical systems involved in the relation
       \param z user defined parameters (optional)
   */
-  void computeJachq(const BlockVector &q, BlockVector &z) override;
+  void computeJachq(const siconos::algebra::BlockVector &q,
+                    siconos::algebra::BlockVector &z) override;
 
   /** Return the distance between pc1 and pc, with sign according to normal */
   double distance() const;
 
-  inline SP::SiconosVector pc1() const { return _Pc1; }
-  inline SP::SiconosVector pc2() const { return _Pc2; }
-  inline SP::SiconosVector nc() const { return _Nc; }
+  inline std::shared_ptr<siconos::algebra::SiconosVector> pc1() const { return _Pc1; }
+  inline std::shared_ptr<siconos::algebra::SiconosVector> pc2() const { return _Pc2; }
+  inline std::shared_ptr<siconos::algebra::SiconosVector> nc() const { return _Nc; }
 
-  inline SP::SiconosVector relNc() const { return _relNc; }
+  inline std::shared_ptr<siconos::algebra::SiconosVector> relNc() const { return _relNc; }
 
   /** Set the coordinates of inside normal vector at the contact point in ds2
    * frame. It will be used to compute _Nc during computeh(). \param nnc new
    * coordinates
    */
-  void setRelNc(SP::SiconosVector nnc) { _relNc = nnc; };
+  void setRelNc(std::shared_ptr<siconos::algebra::SiconosVector> nnc) { _relNc = nnc; };
   void display() const override;
-
-  ACCEPT_STD_VISITORS();
 };
-TYPEDEF_SPTR(Lagrangian2d1DR)
-#endif // NEWTONEULERRIMPACT_H
+}  // namespace siconos::modeling
+#endif  // NEWTONEULERRIMPACT_H

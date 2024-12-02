@@ -14,23 +14,26 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #include "Disk.hpp"
 
-void Disk::MassSetup()
+#include "SiconosVector.hpp"
+#include "SimpleMatrix.hpp"
+
+void siconos::collision::native::bodies::Disk::MassSetup()
 {
-  _mass.reset(new SimpleMatrix(_ndof, _ndof));
+  _mass = std::make_shared<siconos::algebra::SimpleMatrix>(_ndof, _ndof);
   //  mass->resize(ndof,ndof);
   _mass->zero();
   (*_mass)(0, 0) = (*_mass)(1, 1) = massValue;
   (*_mass)(2, 2) = massValue * radius * radius / 2.;
 }
 
-Disk::Disk(double r, double m,
-           SP::SiconosVector qinit,
-           SP::SiconosVector vinit)
-  : CircularDS(r, m, qinit, vinit)
+siconos::collision::native::bodies::Disk::Disk(
+    double r, double m, std::shared_ptr<siconos::algebra::SiconosVector> qinit,
+    std::shared_ptr<siconos::algebra::SiconosVector> vinit)
+    : CircularDS(r, m, qinit, vinit)
 {
   MassSetup();
 }

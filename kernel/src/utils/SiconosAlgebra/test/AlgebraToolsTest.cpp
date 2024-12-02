@@ -14,47 +14,43 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
-#include "SiconosConfig.h"
+ */
 #include "AlgebraToolsTest.hpp"
+
+#include "SiconosConfig.h"
+#include "SiconosMatrixOp.hpp"
 #include "SimpleMatrix.hpp"
 
 CPPUNIT_TEST_SUITE_REGISTRATION(AlgebraToolsTest);
 
-//using namespace Siconos::algebra;
+// using namespace Siconos::algebra;
 
+void AlgebraToolsTest::setUp() {
+  std::string fic1 = "matForExp.dat";  // 3X3
 
-void AlgebraToolsTest::setUp()
-{
-  std::string fic1 = "matForExp.dat"; // 3X3
-
-  A.reset(new SimpleMatrix(fic1, true));
+  A = std::make_shared<siconos::algebra::SimpleMatrix>(fic1, true);
 }
 
-void AlgebraToolsTest::tearDown()
-{}
+void AlgebraToolsTest::tearDown() {}
 
 //______________________________________________________________________________
 
-void AlgebraToolsTest::testExpm()
-{
-  std::cout << "====================================" <<std::endl;
-  std::cout << "=== AlgebraTools tests start ...=== " <<std::endl;
-  std::cout << "====================================" <<std::endl;
-  std::cout << "--> Test: expm " <<std::endl;
-  std::string fic2 = "matSolForExp.dat"; // 3X3
-  SP::SimpleMatrix ref(new SimpleMatrix(fic2, true));
-  SP::SimpleMatrix Exp(new SimpleMatrix(3,3));
+void AlgebraToolsTest::testExpm() {
+  std::cout << "====================================" << std::endl;
+  std::cout << "=== AlgebraTools tests start ...=== " << std::endl;
+  std::cout << "====================================" << std::endl;
+  std::cout << "--> Test: expm " << std::endl;
+  std::string fic2 = "matSolForExp.dat";  // 3X3
+  auto ref = std::make_shared<siconos::algebra::SimpleMatrix>(fic2, true);
+  auto Exp = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
 
-  Siconos::algebra::tools::expm(*A, *Exp);
+  siconos::algebra::expm(*A, *Exp);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testExpm : ", (*ref - *Exp).normInf() < 1e-6, true);
-  std::cout << "--> Expm test ended with success." <<std::endl;
+  std::cout << "--> Expm test ended with success." << std::endl;
 }
 
-
-void AlgebraToolsTest::End()
-{
-  std::cout << "======================================" <<std::endl;
-  std::cout << " ===== End of AlgebraTools Tests ===== " <<std::endl;
-  std::cout << "======================================" <<std::endl;
+void AlgebraToolsTest::End() {
+  std::cout << "======================================" << std::endl;
+  std::cout << " ===== End of AlgebraTools Tests ===== " << std::endl;
+  std::cout << "======================================" << std::endl;
 }

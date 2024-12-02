@@ -20,29 +20,22 @@
 
 #include <iostream>
 
-// Default (private)
-RelayNSL::RelayNSL(): NonSmoothLaw(), _lb(-1.0), _ub(1.0)
-{
-}
-
-RelayNSL::RelayNSL(unsigned int size, double lb, double ub):
+siconos::modeling::RelayNSL::RelayNSL(unsigned int size, double lb, double ub):
   NonSmoothLaw(size), _lb(lb), _ub(ub)
 {
   if(ub < lb)
     THROW_EXCEPTION("RelayNSL::RelayNSL(unsigned int size, double lb, double ub). Upper bound ub must be greater than lower bound lb");
 }
 
-RelayNSL::~RelayNSL()
-{}
 
-bool RelayNSL::isVerified(void) const
+bool siconos::modeling::RelayNSL::RelayNSL::isVerified(void) const
 {
   bool res = false;
   // to do
   return res;
 }
 
-void RelayNSL::display() const
+void siconos::modeling::RelayNSL::RelayNSL::display() const
 {
   std::cout << "------------------------------------" <<std::endl;
   std::cout << "____ data of the RelayNSL" <<std::endl;

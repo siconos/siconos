@@ -104,9 +104,9 @@ boundaryCondition = np.array(['prescribedvelocityB1', '', ''])
 """"a boundary condition (given by the plugin)
  is enforced for the first body"""
 
-boundaryConditionIndex = np.array([np.array([4]),
-                                   np.array([]),
-                                   np.array([])])
+boundaryConditionIndex = [np.array([4]),
+                          np.array([]),
+                          np.array([])]
 """"we prescribe the 4th component of the velocity of the first body
 i.e we prescribe a angular velocity around the y-axis."""
 
@@ -125,7 +125,7 @@ jointName = np.array(['Part1_0',
                       'Part1_2'])
 """joints' names"""
 
-jointType = array.array('I', [mbtb.PIVOT_0,
+jointType = array.array('I', [mbtb.JointsType::Pivot0,
                               mbtb.PIVOT_1,
                               mbtb.PIVOT_1])
 """joints' types"""

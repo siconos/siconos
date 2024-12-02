@@ -14,25 +14,23 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef SOCLCP_TEST_FUNCTION_H
 #define SOCLCP_TEST_FUNCTION_H
 
-#include <stdio.h>          // for FILE
+#include <stdio.h>  // for FILE
+
 #include "NumericsFwd.h"    // for SolverOptions
 #include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-extern "C"
-{
+extern "C" {
 #endif
 
-int soclcp_test_function(FILE * f, SolverOptions * options);
+int soclcp_test_function(FILE* f, SolverOptions* options);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 
 #endif
-
-

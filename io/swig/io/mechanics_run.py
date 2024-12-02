@@ -913,7 +913,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             h5 mode (w, r, append), default = 'w'
         interaction_manager: SiconosCollisionManager, optional
             user-defined interaction handler (e.g. from Bullet), default=None
-        nsds: NonSmoothDynamicalSystem, optional
+        nsds: siconos::modeling::NonSmoothDynamicalSystem, optional
             default = None
         simulation: Simulation, optional
             default = None

@@ -14,21 +14,23 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef __LagrangianDSTest__
 #define __LagrangianDSTest__
 
 #include <cppunit/extensions/HelperMacros.h>
+
 #include "LagrangianDS.hpp"
 #include "SiconosException.hpp"
 
-class LagrangianDSTest : public CppUnit::TestFixture
-{
+namespace siconos::algebra {
+class SiconosVector;
+class SiconosMatrix;
+}  // namespace siconos::algebra
 
-private:
-  
+class LagrangianDSTest : public CppUnit::TestFixture {
+ private:
   ACCEPT_SERIALIZATION(LagrangianDSTest);
-
 
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(LagrangianDSTest);
@@ -45,21 +47,16 @@ private:
   void testBuildLagrangianDS1();
   void testBuildLagrangianDS4();
   void testBuildLagrangianDS5();
-  //void testcomputeDS();
+  // void testcomputeDS();
 
   // Members
 
-  SP::SiconosVector q0, velocity0, u0;
-  SP::SiconosMatrix mass;
+  std::shared_ptr<siconos::algebra::SiconosVector> q0, velocity0, u0;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> mass;
 
-public:
+ public:
   void setUp();
   void tearDown();
-
 };
 
 #endif
-
-
-
-

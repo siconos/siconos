@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file
 Time Discretisation Events
 */
@@ -23,41 +23,48 @@ Time Discretisation Events
 
 #include "Event.hpp"
 
+namespace siconos::simulation {
+
 /** Event that corresponds to user-defined time discretisation points
  *
  */
-class TimeDiscretisationEvent : public Event
-{
-
-private:
-  
+class TimeDiscretisationEvent : public Event {
+ private:
   ACCEPT_SERIALIZATION(TimeDiscretisationEvent);
 
-
-  /** Default constructor */
-  TimeDiscretisationEvent();
-
-public:
-
+  /** Turn this on to limit memory print of event (no swap of the nsds during process ...*/
+  bool noSaveInMemory_{false};
+  
+ public:
   /** constructor with time value as a parameter
-  *  \param time starting time (a double)
-  *  \param notUsed unused int
-  */
-  TimeDiscretisationEvent(double time, int notUsed);
+   *  \param time starting time (a double)
+   */
+  TimeDiscretisationEvent(double time) : Event(time, EventType::TD){};
+  ;
 
   /** destructor
-  */
-  ~TimeDiscretisationEvent();
+   */
+  ~TimeDiscretisationEvent() noexcept = default;
 
   /**
-  *  \param simulation the simulation that owns this Event (through the EventsManager)
-  */
+   *  \param simulation the simulation that owns this Event (through the EventsManager)
+   */
   void process(Simulation& simulation);
 
   /** increment the TimeDiscretisation and to change the time of the Event
    * \param k the next index for this event
    */
   void update(unsigned int k);
+
+  /** If called, this event won't save nsds values (state ...) into memory
+      use this at your own risk, many integrators needs previous values
+   *  to integrate properly
+   */
+  void noSaveInMemory() {noSaveInMemory_ = true;};
 };
 
-#endif // TimeDiscretisationEvent_H
+// Register the event into the factory
+static EventRegistration<TimeDiscretisationEvent> reg_TD(EventType::TD);
+
+}  // namespace siconos::simulation
+#endif  // TimeDiscretisationEvent_H

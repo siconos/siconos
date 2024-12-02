@@ -20,35 +20,10 @@
 
 #include <iostream>
 
-// Default (private)
-FremondImpactFrictionNSL::FremondImpactFrictionNSL():
-  NonSmoothLaw(), _en(0.0), _et(0.0), _mu(0.0)
-{}
-
-FremondImpactFrictionNSL::FremondImpactFrictionNSL(unsigned int size):
-  NonSmoothLaw(size), _en(0.0), _et(0.0), _mu(0.0)
-{}
-
-FremondImpactFrictionNSL::FremondImpactFrictionNSL(double newEn, double newEt, double newMu, unsigned int newSize):
-  NonSmoothLaw(newSize), _en(newEn), _et(newEt), _mu(newMu)
-{}
-
-FremondImpactFrictionNSL::~FremondImpactFrictionNSL()
-{}
-
-bool FremondImpactFrictionNSL::isVerified() const
-{
-  bool res = false;
-  // to do
-  THROW_EXCEPTION("FremondImpactFrictionNSL:: isVerified, not yet implemented!");
-  return res;
-}
-
-void FremondImpactFrictionNSL::display() const
-{
-  std::cout << "=== Fremond impact-friction non-smooth law data display ===" <<std::endl;
-  std::cout << " Normal Fremond coefficient of restitution: " << _en <<std::endl;
-  std::cout << " Tangential Fremond coefficient of restitution: " << _et <<std::endl;
-  std::cout << "Friction coefficient: " << _mu <<std::endl;
-  std::cout << "==========================================================" <<std::endl;
+void siconos::modeling::FremondImpactFrictionNSL::display() const {
+  std::cout << "=== Fremond impact-friction non-smooth law data display ===\n";
+  std::cout << " Normal Fremond coefficient of restitution: " << _en << "\n";
+  std::cout << " Tangential Fremond coefficient of restitution: " << _et << "\n";
+  std::cout << "Friction coefficient: " << _mu << "\n";
+  std::cout << "==========================================================\n";
 }

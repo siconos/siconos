@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef FRICTIONCONTACT3D_nonsmooth_Newton_FischerBurmeister_H
 #define FRICTIONCONTACT3D_nonsmooth_Newton_FischerBurmeister_H
 
@@ -36,72 +36,58 @@
 
 
  */
-#include "NumericsFwd.h"  // for SolverOptions, FrictionContactProblem
-#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"    // for SolverOptions, FrictionContactProblem
+#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-extern "C"
-{
+extern "C" {
 #endif
 
-  /** The Fischer Burmeister function signature for a 3x3 block.
-   */
-  typedef void (*FischerBurmeisterFun3x3Ptr)(double* reaction,
-                                             double* velocity,
-                                             double mu,
-                                             double* rho,
-                                             double* F,
-                                             double* A,
-                                             double* B);
+/** The Fischer Burmeister function signature for a 3x3 block.
+ */
+typedef void (*FischerBurmeisterFun3x3Ptr)(double *reaction, double *velocity, double mu,
+                                           double *rho, double *F, double *A, double *B);
 
-  /** Nonsmooth Newton solver based on the Fischer--Burmeister function for the
-   *  local (reduced) frictional contact problem in the dense form
-   *
-   *  \param problem the problem to solve in dense or sparse block form
-   *  \param reaction solution and initial guess for reaction
-   *  \param velocity solution and initial guess for velocity
-   *  \param info returned info
-   *  \param options  the solver options
-   */
-  void fc3d_nonsmooth_Newton_FischerBurmeister(
-    FrictionContactProblem* problem,
-    double *reaction,
-    double *velocity,
-    int *info,
-    SolverOptions *options);
+/** Nonsmooth Newton solver based on the Fischer--Burmeister function for the
+ *  local (reduced) frictional contact problem in the dense form
+ *
+ *  \param problem the problem to solve in dense or sparse block form
+ *  \param reaction solution and initial guess for reaction
+ *  \param velocity solution and initial guess for velocity
+ *  \param info returned info
+ *  \param options  the solver options
+ */
+void fc3d_nonsmooth_Newton_FischerBurmeister(FrictionContactProblem *problem, double *reaction,
+                                             double *velocity, int *info,
+                                             SolverOptions *options);
 
+/**
+    The Fischer & Burmeister function for several contacts.
+    On each contact, the specified Fischer Burmeister function in iparam[9] is called.
 
-  /** 
-      The Fischer & Burmeister function for several contacts.
-      On each contact, the specified Fischer Burmeister function in iparam[9] is called.
-      
-      \param problemSize the number of contacts.
-      \param computeACFun3x3 the block 3x3 Fischer & Burmeister function.
-      \param reaction3D the reactions at each contact (size: 3 x problemSize)
-      \param velocity3D the velocities at each contact (size: 3 x problemSize)
-      \param mu the mu parameter (size : problemSize)
-      \param rho3D the rho parameters (size : 3 x problemSize)
-      \param output_blocklist3 the computed Fischer & Burmeister function (size : 3 x problemSize)
-      \param output_blocklist3x3_1 the computed A part of gradient (size : 9 x problemSize)
-      \param output_blocklist3x3_2 the computed B param of gradient (size : 9 x problemSize)
-  */
-  void fc3d_FischerBurmeisterFunction(
-    unsigned int problemSize,
-    FischerBurmeisterFun3x3Ptr computeACFun3x3,
-    double *reaction3D,
-    double *velocity3D,
-    double *mu,
-    double *rho3D,
-    double *output_blocklist3,
-    double *output_blocklist3x3_1,
-    double *output_blocklist3x3_2);
+    \param problemSize the number of contacts.
+    \param computeACFun3x3 the block 3x3 Fischer & Burmeister function.
+    \param reaction3D the reactions at each contact (size: 3 x problemSize)
+    \param velocity3D the velocities at each contact (size: 3 x problemSize)
+    \param mu the mu parameter (size : problemSize)
+    \param rho3D the rho parameters (size : 3 x problemSize)
+    \param output_blocklist3 the computed Fischer & Burmeister function (size : 3 x
+   problemSize) \param output_blocklist3x3_1 the computed A part of gradient (size : 9 x
+   problemSize) \param output_blocklist3x3_2 the computed B param of gradient (size : 9 x
+   problemSize)
+*/
+void fc3d_FischerBurmeisterFunction(unsigned int problemSize,
+                                    FischerBurmeisterFun3x3Ptr computeACFun3x3,
+                                    double *reaction3D, double *velocity3D, double *mu,
+                                    double *rho3D, double *output_blocklist3,
+                                    double *output_blocklist3x3_1,
+                                    double *output_blocklist3x3_2);
 
- 
-  int fc3d_nonsmooth_Newton_FischerBurmeister_compute_error(
-    FrictionContactProblem* problem,
-    double *z , double *w, double tolerance,
-    SolverOptions * options, double * error);
-
+int fc3d_nonsmooth_Newton_FischerBurmeister_compute_error(FrictionContactProblem *problem,
+                                                          double *z, double *w,
+                                                          double tolerance,
+                                                          SolverOptions *options,
+                                                          double *error);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

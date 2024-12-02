@@ -14,30 +14,28 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #include "LagrangianCompliantRTest.hpp"
+#include "SimpleMatrix.hpp"
 
-
-#define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
-            if ((alpha) == (omega)) CPPUNIT_FAIL(message);
+#define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
+  if ((alpha) == (omega)) CPPUNIT_FAIL(message);
 
 // test suite registration
 CPPUNIT_TEST_SUITE_REGISTRATION(LagrangianCompliantRTest);
 
+void LagrangianCompliantRTest::setUp() {}
 
-void LagrangianCompliantRTest::setUp()
-{}
-
-
-void LagrangianCompliantRTest::tearDown()
-{}
+void LagrangianCompliantRTest::tearDown() {}
 
 // data constructor:
 void LagrangianCompliantRTest::testBuildLagrangianCompliantR0()
 {
-  SP::LagrangianCompliantR R1(new LagrangianCompliantR("TestPlugin:hCompl", "TestPlugin:G0Compl", "TestPlugin:G1Compl"));
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR3a : ", R1->getType() == RELATION::Lagrangian, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR3b : ", R1->getSubType() == RELATION::CompliantR, true);
-  std::cout << " data Constructor LagrangianCompliantR ok" <<std::endl;
+  auto R1 = std::make_shared<siconos::modeling::LagrangianCompliantR>(
+      "TestPlugin:hCompl", "TestPlugin:G0Compl", "TestPlugin:G1Compl");
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "testBuildLagrangianCompliantR3a : ", R1->getType() == siconos::modeling::RelationType::Lagrangian, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantR3b : ",
+                               R1->getSubType() == siconos::modeling::RelationSubType::CompliantR, true);
+  std::cout << " data Constructor LagrangianCompliantR ok" << std::endl;
 }
-

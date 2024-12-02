@@ -10,11 +10,10 @@ Just take care to avoid redundant or conflicting information. See the constructo
 
 Example::
 
-  SP::Model m(new Model(t0)); // only initial time is provided
   double h = ...;
   unsigned int nSteps = ...;
-  SP::TimeDiscretisation td(new TimeDiscretisation(h, nSteps,m));
+  auto td = std::make_shared<siconos::simulation::TimeDiscretisation>(h, nSteps,m);
   // tk and final time will be automatically computed. 
   // 
   // Then a simulation is created and associated to m through td. 
-  SP::Simulation s(new TimeStepping(td));
+  auto s = std::make_shared<siconos::simulation::TimeStepping>(td);

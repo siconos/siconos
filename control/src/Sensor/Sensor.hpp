@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file Sensor.hpp
   \brief General interface to define a sensor
@@ -22,16 +22,35 @@
 
 #ifndef Sensor_H
 #define Sensor_H
+#include <cassert>
+#include <functional>
+#include <map>
+#include <memory>
+#include <string>
 
-#include "SiconosException.hpp"
-#include "SiconosPointers.hpp"
+#include "SiconosSerialization.hpp"
 
-#include "SiconosFwd.hpp"
+namespace siconos::algebra {
+class SiconosVector;
+class SimpleMatrix;
+class SiconosMatrix;
+}  // namespace siconos::algebra
+namespace siconos::modeling {
+class DynamicalSystem;
+class NonSmoothDynamicalSystem;
 
-#include "SiconosAlgebraTypeDef.hpp"
+};  // namespace siconos::modeling
 
-#include "ControlTypeDef.hpp"
-#include "SiconosControlFwd.hpp"
+namespace siconos::simulation {
+class TimeDiscretisation;
+};  // namespace siconos::simulation
+
+namespace siconos::control {
+
+/** Sensor types */
+enum class SensorType {
+  Linear,
+};
 
 /**
    Sensor Base Class
@@ -83,93 +102,75 @@
    "myDS_X" as an id and yourDS->x() as the SiconosVector. For
    myEvent being an Event where you need to save data, you get:
    (data[myEvent])["myDS_X"] =
-   model->nonSmoothDynamicalSystem()->dynamicalSystem()->x()
+   nonSmoothDynamicalSystem()->dynamicalSystem()->x()
 
    See users' manual for details on how to define its own Sensor.
 
  */
-class Sensor
-{
-protected:
-  
+class Sensor {
+ protected:
   ACCEPT_SERIALIZATION(Sensor);
 
   /** type of the Sensor */
-  unsigned int _type;
+  SensorType _type{SensorType::Linear};
 
   /** id of the Sensor */
-  std::string _id;
+  std::string _id{"none"};
 
   /** pointer to the DynamicalSystem we are measuring */
-  SP::DynamicalSystem _DS;
+  std::shared_ptr<siconos::modeling::DynamicalSystem> _DS{nullptr};
 
   /** pointer to the state of the DynamicalSystem */
-  SP::SiconosVector _DSx;
+  std::shared_ptr<siconos::algebra::SiconosVector> _DSx{nullptr};
 
-  /** default constructor
-   */
-  Sensor();
+  // Rule of five
+  Sensor() = delete;
+  Sensor(const Sensor&) = delete;
+  Sensor(Sensor&&) = delete;
+  Sensor& operator=(const Sensor&) = delete;
+  Sensor& operator=(Sensor&&) = delete;
 
-  /** copy constructor
-   * Private => no copy nor pass-by value allowed.
-   */
-  Sensor(const Sensor&);
-
-public:
-
+ public:
   /** Constructor with a TimeDiscretisation.
    *
    *  \param type the type of the Sensor, which corresponds to the class type.
-   *  \param ds the SP::DynamicalSystem we observe.
+   *  \param ds the std::shared_ptr<siconos::modeling::DynamicalSystem> we observe.
    */
-  Sensor(unsigned int type, SP::DynamicalSystem ds);
+  Sensor(SensorType type, std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
   /** destructor
    */
-  virtual ~Sensor();
+  virtual ~Sensor() noexcept = default;
 
   /** set id of the Sensor
    *
    *  \param newId the id of the Sensor
    */
-  inline void setId(const std::string& newId)
-  {
-    _id = newId;
-  };
+  inline void setId(const std::string& newId) { _id = newId; };
 
   /** get id of the Sensor
    *
    *  \return a std::string
    */
-  inline const std::string getId() const
-  {
-    return _id;
-  };
+  inline const std::string getId() const { return _id; };
 
-  /** get the type of the Sensor
+  /**  \return the type of the Sensor
    *
-   *  \return an int
    */
-  inline unsigned int getType() const
-  {
-    return _type;
-  };
+  inline SensorType getType() const { return _type; };
 
   /** get the DynamicalSystem linked to this Sensor
    *
-   *  \return SP::DynamicalSystem
+   *  \return std::shared_ptr<siconos::modeling::DynamicalSystem>
    */
-  inline SP::DynamicalSystem getDS() const
-  {
-    return _DS;
-  };
+  inline std::shared_ptr<siconos::modeling::DynamicalSystem> getDS() const { return _DS; };
 
   /** This is derived in child classes if they need to copy the TimeDiscretisation
    *  associated with this Sensor
    *
    *  \param td the TimeDiscretisation for this Sensor
    */
-  virtual void setTimeDiscretisation(const TimeDiscretisation& td) {};
+  virtual void setTimeDiscretisation(const siconos::simulation::TimeDiscretisation& td){};
 
   /* get all the data saved for this sensor
    *  \return a DataSet
@@ -181,7 +182,7 @@ public:
    *
    *  \param nsds the Model
    */
-  virtual void initialize(const NonSmoothDynamicalSystem& nsds) {};
+  virtual void initialize(const siconos::modeling::NonSmoothDynamicalSystem& nsds){};
 
   /** capture data when the SensorEvent is processed => set data[SensorEvent]=...
    */
@@ -190,6 +191,71 @@ public:
   /** display the data of the Sensor on the standard output
    */
   void display() const;
-
 };
+
+/** A class to handle sensors creation
+
+  Requirements:
+  - the Sensor type must be known and register
+
+  For a XXXXSensor, add in the file describing the XXXXSensor class:
+
+  static siconos::simulation::SensorRegistration<siconos::simulation::XXXSensor>
+ reg(siconos::simulation::SensorType::XXXX);
+
+  See SensorType enum for the available names.
+
+  Usage:
+
+  auto sensor = SensorFactory::instance()->create(time, SensorType::XXXX)
+
+*/
+class SensorFactory {
+  // Signature of Sensor constructor
+  using SensorCreator = std::function<std::shared_ptr<Sensor>(
+      (std::shared_ptr<siconos::modeling::DynamicalSystem>))>;
+
+  /** map to connect sensor type and the function used to create them */
+  std::map<SensorType, SensorCreator> m_factories;
+
+ public:
+  /** Factory function which creates and returns an sensor
+
+      \param  the dynamical system which is observed
+      \param type type of the sensor (must be a SensorType (enum))
+      \return a pointer to sensor
+  */
+  std::shared_ptr<Sensor> create(std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
+                                 SensorType type)
+  {
+    assert(m_factories.contains(type) && "unknown Sensor type");
+    return m_factories[type](ds);
+  }
+
+  /** access to the (singleton) factory instance */
+  static SensorFactory* instance()
+  {
+    static SensorFactory factory;
+    return &factory;
+  }
+
+  void registerCreator(SensorType newtype, SensorCreator caller)
+  {
+    m_factories[newtype] = caller;
+  }
+};
+
+template <class T>
+class SensorRegistration {
+ public:
+  SensorRegistration(SensorType newtype)
+  {
+    SensorFactory::instance()->registerCreator(
+        newtype, [](std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
+          return std::make_shared<T>(ds);
+        });
+  }
+};
+
+}  // namespace siconos::control
 #endif

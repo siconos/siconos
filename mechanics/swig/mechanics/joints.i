@@ -3,7 +3,7 @@
 %module(package="siconos.mechanics", directors="1", allprotected="1") joints
 
 // Ignore some shadowed (redundant for Python) functions
-%ignore JointFrictionR(SP::NewtonEulerJointR, unsigned int);
+%ignore JointFrictionR(std::shared_ptr<siconos::joints::NewtonEulerJointR>, unsigned int);
 
 %include MechanicsBase.i
 
@@ -20,22 +20,22 @@ PY_FULL_REGISTER(JointFrictionR, Mechanics);
 %inline
 %{
   // For converting interaction.relations() to known Relations
-  SP::NewtonEulerJointR cast_NewtonEulerJointR(SP::Relation rel)
+  std::shared_ptr<siconos::joints::NewtonEulerJointR> cast_NewtonEulerJointR(std::shared_ptr<siconos::modeling::Relation> rel)
     { return std::dynamic_pointer_cast<NewtonEulerJointR>(rel); }
-  SP::KneeJointR cast_KneeJointR(SP::Relation rel)
+  std::shared_ptr<siconos::joints::KneeJointR> cast_KneeJointR(std::shared_ptr<siconos::modeling::Relation> rel)
     { return std::dynamic_pointer_cast<KneeJointR>(rel); }
-  SP::PivotJointR cast_PivotJointR(SP::Relation rel)
+  std::shared_ptr<siconos::joints::PivotJointR> cast_PivotJointR(std::shared_ptr<siconos::modeling::Relation> rel)
     { return std::dynamic_pointer_cast<PivotJointR>(rel); }
-  SP::PrismaticJointR cast_PrismaticJointR(SP::Relation rel)
+  std::shared_ptr<siconos::joints::PrismaticJointR> cast_PrismaticJointR(std::shared_ptr<siconos::modeling::Relation> rel)
     { return std::dynamic_pointer_cast<PrismaticJointR>(rel); }
-  SP::FixedJointR cast_FixedJointR(SP::Relation rel)
+  std::shared_ptr<siconos::joints::FixedJointR> cast_FixedJointR(std::shared_ptr<siconos::modeling::Relation> rel)
     { return std::dynamic_pointer_cast<FixedJointR>(rel); }
-  SP::CylindricalJointR cast_CylindricalJointR(SP::Relation rel)
+  std::shared_ptr<siconos::joints::CylindricalJointR> cast_CylindricalJointR(std::shared_ptr<siconos::modeling::Relation> rel)
     { return std::dynamic_pointer_cast<CylindricalJointR>(rel); }
-  SP::CouplerJointR cast_CouplerJointR(SP::Relation rel)
+  std::shared_ptr<siconos::joints::CouplerJointR> cast_CouplerJointR(std::shared_ptr<siconos::modeling::Relation> rel)
     { return std::dynamic_pointer_cast<CouplerJointR>(rel); }
-  SP::JointStopR cast_JointStopR(SP::Relation rel)
+  std::shared_ptr<siconos::joints::JointStopR> cast_JointStopR(std::shared_ptr<siconos::modeling::Relation> rel)
     { return std::dynamic_pointer_cast<JointStopR>(rel); }
-  SP::JointFrictionR cast_JointFrictionR(SP::Relation rel)
+  std::shared_ptr<siconos::joints::JointFrictionR> cast_JointFrictionR(std::shared_ptr<siconos::modeling::Relation> rel)
     { return std::dynamic_pointer_cast<JointFrictionR>(rel); }
 %}

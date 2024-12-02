@@ -8,8 +8,6 @@
 # - COMPONENT component name
 # - <COMPONENT>_DIRS: the list of paths (relative to CMAKE_CURRENT_SOURCE_DIR) that
 #   contain source files
-# - <COMPONENT>_EXCLUDE_SRCS: the list of files, in <COMPONENT>_DIRS, that must be excluded
-#   from build.
 # - <COMPONENT>_INTERFACE_INCLUDE_DIRECTORIES: a list of directories
 #   to populate the interface of the target for include directories at build time
 
@@ -27,6 +25,8 @@ set(${COMPONENT}_DIRS)
 # By default this component has no sources, everything is optional :
 # - serialization/generation part : sources in serialization and generation
 # - mechanicsIO : sources in mechanics 
+
+list(APPEND ${COMPONENT}_DIRS src)
 
 if(HAVE_SICONOS_MECHANICS)
   list(APPEND ${COMPONENT}_DIRS src/mechanics) 
@@ -109,18 +109,6 @@ endif()
 # By default all directories matching "test" are excluded.
 # set(${COMPONENT}_EXCLUDE_DOXY)
 
-# ------ include interface ------
-# What is needed at build time
-# by other targets to compile with current component.
-# 
-# It means that a call to
-#  target_link_libraries(truc PRIVATE io)
-# will imply -I<dirs> with dirs listed in
-# ${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES.
-#
-# If all dirs are required, just set
-# set(${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES ${${COMPONENT}_DIRS})
-# set(${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES ${${COMPONENT}_DIRS})
 
 # ---- Final setup for the library ----
 if(io_DIRS) # the component may be empty if mechanics and serialization are off
@@ -167,20 +155,6 @@ if(io_DIRS) # the component may be empty if mechanics and serialization are off
     target_link_libraries(io PUBLIC mechanisms)
     # This will bring the links with Opencascade, if required ...
   endif()
-
-  # Links with non-Siconos libraries
-  # if(SICONOS_HAS_OpenCASCADE)
-  #   if(HAVE_SICONOS_MECHANICS OR HAVE_SICONOS_MECHANISMS)
-  #     target_link_libraries(io PRIVATE ${OCE_LIBRARIES})
-  #   endif()
-  # endif()
-  
-  # # Links with non-Siconos libraries
-  # if(SICONOS_HAS_OCC)
-  #   if(HAVE_SICONOS_MECHANICS OR HAVE_SICONOS_MECHANISMS)
-  #     target_link_libraries(io PRIVATE ${OpenCASCADE_LIBRARIES})
-  #   endif()
-  # endif()
   
   # --- Search component dependencies ---
   if(WITH_SERIALIZATION)
@@ -197,11 +171,11 @@ if(io_DIRS) # the component may be empty if mechanics and serialization are off
     endif()
   endif()
   
-  if(WITH_VTK)
-    # https://cmake.org/cmake/help/latest/module/FindVTK.html
-    find_package(VTK )
-    target_link_libraries(io PRIVATE vtkIO;vtkCommon;vtkGraphics;vtkRendering)
-  endif()
+  # if(WITH_VTK)
+  #   # https://cmake.org/cmake/help/latest/module/FindVTK.html
+  #   find_package(VTK)
+  #   target_link_libraries(io PRIVATE vtkIO;vtkCommon;vtkGraphics;vtkRendering)
+  # endif()
 
   # --- python bindings ---
   if(WITH_${COMPONENT}_PYTHON_WRAPPER)
@@ -225,9 +199,14 @@ if(io_DIRS) # the component may be empty if mechanics and serialization are off
     endif()
   endif()
   
-  if(HAVE_SICONOS_MECHANICS)
-    list(APPEND ${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES src/mechanics)
-  endif()
+  # if(HAVE_SICONOS_MECHANICS)
+  #   list(APPEND ${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES src/mechanics)
+  # endif()
+
+  set(${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES
+    ${${COMPONENT}_DIRS} # All .hpp are installed
+  )
+
   siconos_component_install_setup(${COMPONENT})
   
   # --- tests ---

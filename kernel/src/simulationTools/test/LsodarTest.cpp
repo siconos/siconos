@@ -17,6 +17,11 @@
 */
 #include "LsodarTest.hpp"
 #include "EventsManager.hpp"
+#include "SimpleMatrix.hpp"
+#include "FirstOrderLinearTIDS.hpp"
+#include "LsodarOSI.hpp"
+#include "SiconosVector.hpp"
+
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
             if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -40,22 +45,22 @@ static void computeA1(double, unsigned int, double*, double* A, unsigned int, do
 
 void LsodarTest::setUp()
 {
-  _A.reset(new SimpleMatrix(_n, _n, 0));
-  _b.reset(new SiconosVector(_n, 0));
-  _x0.reset(new SiconosVector(_n, 0));
+  _A = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n,0);// siconos::algebra::UBlasType::BLOCK);
+  _b = std::make_shared<siconos::algebra::SiconosVector>(_n, 0);
+  _x0 = std::make_shared<siconos::algebra::SiconosVector>(_n, 0);
 }
 
 void LsodarTest::init(bool initDS)
 {
   if(initDS)
   {
-    _DS.reset(new FirstOrderLinearTIDS(_x0, _A, _b));
+    _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(_x0, _A, _b);
   }
 
-  _TD.reset(new TimeDiscretisation(_t0, _h));
-  _model.reset(new NonSmoothDynamicalSystem(_t0, _T));
-  _sim.reset(new EventDriven(_model, _TD, 0));
-  _Lsodar.reset(new LsodarOSI());
+  _TD = std::make_shared<siconos::simulation::TimeDiscretisation>(_t0, _h);
+  _model = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(_t0, _T);
+  _sim = std::make_shared<siconos::simulation::EventDriven>(_model, _TD, 0);
+  _Lsodar = std::make_shared<siconos::integrators::LsodarOSI>();
   _model->insertDynamicalSystem(_DS);
   _sim->associate(_Lsodar, _DS);
   _sim->initialize();
@@ -74,7 +79,7 @@ void LsodarTest::testCstGradTIDS()
   _x0->setValue(0, 5.);
   _x0->setValue(1, 10);
 
-  _DS.reset(new FirstOrderLinearTIDS(_x0, _A, _b));
+  _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(_x0, _A, _b);
 
   init(false);
 
@@ -99,7 +104,7 @@ void LsodarTest::testCstGradDS()
   _x0->setValue(0, 5.);
   _x0->setValue(1, 10);
 
-  _DS.reset(new FirstOrderLinearDS(_x0, _A, _b));
+  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(_x0, _A, _b);
 
   init(false);
 
@@ -124,9 +129,8 @@ void LsodarTest::testCstGradNLDS()
   _x0->setValue(0, 5.);
   _x0->setValue(1, 10);
 
-  _DS.reset(new FirstOrderNonLinearDS(_x0));
-
-  FirstOrderNonLinearDS& DSNL = static_cast<FirstOrderNonLinearDS&>(*_DS);
+  _DS = std::make_shared<siconos::modeling::FirstOrderNonLinearDS>(_x0);
+  auto& DSNL = static_cast<siconos::modeling::FirstOrderNonLinearDS&>(*_DS);
   DSNL.setComputeFFunction(&computef1);
   DSNL.setComputeJacobianfxFunction(&computeA1);
 

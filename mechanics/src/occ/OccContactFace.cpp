@@ -17,31 +17,28 @@
  */
 #include "OccContactFace.hpp"
 
-#include <BRepAdaptor_Surface.hxx>
 #include <BRepTools.hxx>
-#include <BRep_Tool.hxx>
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
 
-#include "ContactShapeDistance.hpp"
-#include "OccUtils.hpp"
-#include "cadmbtb.hpp"
-
-OccContactFace::OccContactFace(const OccContactShape& reference_shape, unsigned int index)
-    : OccContactShape(reference_shape), _index(index), _face(reference_shape.face(index)) {
+siconos::mechanics::occ::OccContactFace::OccContactFace(const OccContactShape& shape,
+                                                        int index)
+    : OccContactShape(shape), _index(index), _face(shape.face(index)) {
   // Note FP: what's the point of copying the input shape rather than just "pointer-link" it?
-  this->computeUVBounds();
+
+  computeUVBounds();
 };
 
-SPC::TopoDS_Face OccContactFace::contact() const { return this->face(this->_index); }
+std::shared_ptr<TopoDS_Face> siconos::mechanics::occ::OccContactFace::contact() const {
+  return face(_index);
+}
 
-void OccContactFace::computeUVBounds() {
-  TopExp_Explorer exp;
-  exp.Init(this->data(), TopAbs_FACE);
-  for (unsigned int i = 0; i < _index; ++i, exp.Next())
+void siconos::mechanics::occ::OccContactFace::computeUVBounds() {
+  TopExp_Explorer exp{data(), TopAbs_FACE};
+  for (auto i = 0; i < _index; ++i, exp.Next())
     ;
   if (exp.More()) {
     const TopoDS_Face& face = TopoDS::Face(exp.Current());
-    BRepTools::UVBounds(face, this->binf1[0], this->bsup1[0], this->binf1[1], this->bsup1[1]);
+    BRepTools::UVBounds(face, binf1[0], bsup1[0], binf1[1], bsup1[1]);
   }
 }

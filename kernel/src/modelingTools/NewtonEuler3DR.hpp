@@ -22,6 +22,9 @@
 #define NEWTONEULERRELATIONFC3D_H
 
 #include "NewtonEuler1DR.hpp"
+
+namespace siconos::modeling {
+
 /**
     This class is an interface for relation with impact and FC3D.
     From NewtonEuler1DR, it inherits to the computation of the jacobian, this
@@ -33,20 +36,16 @@
 
 */
 class NewtonEuler3DR : public NewtonEuler1DR {
-
-private:
+ private:
   ACCEPT_SERIALIZATION(NewtonEuler3DR);
 
-  void FC3DcomputeJachqTFromContacts(SP::SiconosVector q1);
-  void FC3DcomputeJachqTFromContacts(SP::SiconosVector q1, SP::SiconosVector q2);
+  void FC3DcomputeJachqTFromContacts(std::shared_ptr<siconos::algebra::SiconosVector> q1);
+  void FC3DcomputeJachqTFromContacts(std::shared_ptr<siconos::algebra::SiconosVector> q1,
+                                     std::shared_ptr<siconos::algebra::SiconosVector> q2);
 
-protected:
-public:
-  NewtonEuler3DR() : NewtonEuler1DR() {}
-
-  /** destructor
-   */
-  virtual ~NewtonEuler3DR(){};
+ public:
+  /** destructor */
+  virtual ~NewtonEuler3DR() noexcept = default;
 
   /** initialize components specific to derived classes.
    *
@@ -61,10 +60,10 @@ public:
    *  \param inter  interaction that owns the relation
    *  \param q0  the block vector to the dynamical system position
    */
-  void computeJachqT(Interaction &inter, SP::BlockVector q0) override;
+  void computeJachqT(Interaction &inter,
+                     std::shared_ptr<siconos::algebra::BlockVector> q0) override;
 
   void display() const override {}
-
-  ACCEPT_STD_VISITORS();
 };
-#endif // NEWTONEULERRELATIONFC3D_H
+}  // namespace siconos::modeling
+#endif  // NEWTONEULERRELATIONFC3D_H

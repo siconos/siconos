@@ -128,7 +128,7 @@ SICONOS_IO_REGISTER(NSLawMatrix,
 )
 SICONOS_IO_REGISTER_WITH_BASES(EqualityConditionNSL,(NonSmoothLaw),
 )
-SICONOS_IO_REGISTER_WITH_BASES(NewtonImpactFrictionNSL,(NonSmoothLaw),
+SICONOS_IO_REGISTER_WITH_BASES(siconos::modeling::NewtonImpactFrictionNSL,(NonSmoothLaw),
   (_en)
   (_et)
   (_mu))
@@ -136,11 +136,11 @@ SICONOS_IO_REGISTER_WITH_BASES(MixedComplementarityConditionNSL,(NonSmoothLaw),
   (_equalitySize))
 SICONOS_IO_REGISTER(PluggedObject,
   (_pluginName))
-SICONOS_IO_REGISTER_WITH_BASES(NewtonEuler3DR,(NewtonEuler1DR),
+SICONOS_IO_REGISTER_WITH_BASES(siconos::modeling::NewtonEuler3DR,(NewtonEuler1DR),
 )
 SICONOS_IO_REGISTER_WITH_BASES(FirstOrderLinearTIR,(FirstOrderR),
   (_e))
-SICONOS_IO_REGISTER(NonSmoothDynamicalSystem,
+SICONOS_IO_REGISTER(siconos::modeling::NonSmoothDynamicalSystem,
   (_BVP)
   (_T)
   (_author)
@@ -157,7 +157,7 @@ SICONOS_IO_REGISTER(BoundaryCondition,
   (_prescribedVelocity)
   (_prescribedVelocityOld)
   (_velocityIndices))
-SICONOS_IO_REGISTER_WITH_BASES(NewtonImpactNSL,(NonSmoothLaw),
+SICONOS_IO_REGISTER_WITH_BASES(siconos::modeling::NewtonImpactNSL,(NonSmoothLaw),
   (_e))
 SICONOS_IO_REGISTER_WITH_BASES(NewtonEuler1DR,(NewtonEulerR),
   (_AUX1)
@@ -194,7 +194,7 @@ SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerR,(Relation),
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianCompliantLinearTIR,(LagrangianR),
   (_F)
   (_e))
-SICONOS_IO_REGISTER(NonSmoothDynamicalSystem::Change,
+SICONOS_IO_REGISTER(siconos::modeling::NonSmoothDynamicalSystem::Change,
   (ds)
   (i)
   (typeOfChange))
@@ -550,7 +550,7 @@ SICONOS_IO_REGISTER_WITH_BASES(TimeStepping,(Simulation),
   (_newtonTolerance)
   (_newtonUpdateInteractionsPerIteration)
   (_resetAllLambda)
-  (_warnOnNonConvergence))
+  (_newtonWarningOnNonConvergence))
 SICONOS_IO_REGISTER(OneStepIntegrator,
   (_dynamicalSystemsGraph)
   (_explicitJacobiansOfRelation)
@@ -645,7 +645,7 @@ SICONOS_IO_REGISTER_WITH_BASES(EulerMoreauOSI,(OneStepIntegrator),
   (_theta)
   (_useGamma)
   (_useGammaForRelation))
-SICONOS_IO_REGISTER_WITH_BASES(ContactR,(NewtonEuler3DR),
+SICONOS_IO_REGISTER_WITH_BASES(ContactR,(siconos::modeling::NewtonEuler3DR),
   (base)
   (contactor)
   (ds)
@@ -694,7 +694,7 @@ SICONOS_IO_REGISTER_WITH_BASES(SphereLDSSphereLDSR,(LagrangianScleronomousR),
   (r1)
   (r1pr2)
   (r2))
-SICONOS_IO_REGISTER_WITH_BASES(SphereNEDSSphereNEDSR,(NewtonEuler3DR),
+SICONOS_IO_REGISTER_WITH_BASES(SphereNEDSSphereNEDSR,(siconos::modeling::NewtonEuler3DR),
   (r1)
   (r1pr2)
   (r2))
@@ -727,7 +727,7 @@ SICONOS_IO_REGISTER_WITH_BASES(SphereLDS,(LagrangianDS),
   (I)
   (massValue)
   (radius))
-SICONOS_IO_REGISTER_WITH_BASES(SphereNEDSPlanR,(NewtonEuler3DR),
+SICONOS_IO_REGISTER_WITH_BASES(SphereNEDSPlanR,(siconos::modeling::NewtonEuler3DR),
   (A)
   (B)
   (C)
@@ -750,16 +750,16 @@ SICONOS_IO_REGISTER_WITH_BASES(SphereNEDSPlanR,(NewtonEuler3DR),
   (v1)
   (v2)
   (v3))
-SICONOS_IO_REGISTER_WITH_BASES(CircleCircleR,(CircularR),
+SICONOS_IO_REGISTER_WITH_BASES(siconos::collision::native::bodies::CircleCircleR,(CircularR),
 )
 SICONOS_IO_REGISTER_WITH_BASES(CircularR,(LagrangianScleronomousR),
   (_r1)
   (_r2))
 SICONOS_IO_REGISTER_WITH_BASES(Disk,(CircularDS),
 )
-SICONOS_IO_REGISTER_WITH_BASES(DiskDiskR,(CircularR),
+SICONOS_IO_REGISTER_WITH_BASES(siconos::collision::native::bodies::DiskDiskR,(CircularR),
   (r1pr2))
-SICONOS_IO_REGISTER_WITH_BASES(DiskPlanR,(LagrangianScleronomousR),
+SICONOS_IO_REGISTER_WITH_BASES(siconos::collision::native::bodies::DiskPlanR,(LagrangianScleronomousR),
   (A)
   (A2)
   (AB)
@@ -1094,20 +1094,20 @@ void siconos_io_register_generated_Kernel(Archive& ar)
   ar.register_type(static_cast<HarmonicBC*>(nullptr));
   ar.register_type(static_cast<NSLawMatrix*>(nullptr));
   ar.register_type(static_cast<EqualityConditionNSL*>(nullptr));
-  ar.register_type(static_cast<NewtonImpactFrictionNSL*>(nullptr));
+  ar.register_type(static_cast<siconos::modeling::NewtonImpactFrictionNSL*>(nullptr));
   ar.register_type(static_cast<MixedComplementarityConditionNSL*>(nullptr));
   ar.register_type(static_cast<PluggedObject*>(nullptr));
-  ar.register_type(static_cast<NewtonEuler3DR*>(nullptr));
+  ar.register_type(static_cast<siconos::modeling::NewtonEuler3DR*>(nullptr));
   ar.register_type(static_cast<FirstOrderLinearTIR*>(nullptr));
-  ar.register_type(static_cast<NonSmoothDynamicalSystem*>(nullptr));
+  ar.register_type(static_cast<siconos::modeling::NonSmoothDynamicalSystem*>(nullptr));
   ar.register_type(static_cast<BoundaryCondition*>(nullptr));
-  ar.register_type(static_cast<NewtonImpactNSL*>(nullptr));
+  ar.register_type(static_cast<siconos::modeling::NewtonImpactNSL*>(nullptr));
   ar.register_type(static_cast<NewtonEuler1DR*>(nullptr));
   ar.register_type(static_cast<LagrangianLinearTIR*>(nullptr));
   ar.register_type(static_cast<NormalConeNSL*>(nullptr));
   ar.register_type(static_cast<NewtonEulerR*>(nullptr));
   ar.register_type(static_cast<LagrangianCompliantLinearTIR*>(nullptr));
-  ar.register_type(static_cast<NonSmoothDynamicalSystem::Change*>(nullptr));
+  ar.register_type(static_cast<siconos::modeling::NonSmoothDynamicalSystem::Change*>(nullptr));
   ar.register_type(static_cast<FirstOrderLinearR*>(nullptr));
   ar.register_type(static_cast<FirstOrderLinearTIDS*>(nullptr));
   ar.register_type(static_cast<FirstOrderType2R*>(nullptr));
@@ -1170,11 +1170,11 @@ void siconos_io_register_generated_Mechanics(Archive& ar)
   ar.register_type(static_cast<KneeJointR*>(nullptr));
   ar.register_type(static_cast<SphereLDS*>(nullptr));
   ar.register_type(static_cast<SphereNEDSPlanR*>(nullptr));
-  ar.register_type(static_cast<CircleCircleR*>(nullptr));
+  ar.register_type(static_cast<siconos::collision::native::bodies::CircleCircleR*>(nullptr));
   ar.register_type(static_cast<CircularR*>(nullptr));
   ar.register_type(static_cast<Disk*>(nullptr));
-  ar.register_type(static_cast<DiskDiskR*>(nullptr));
-  ar.register_type(static_cast<DiskPlanR*>(nullptr));
+  ar.register_type(static_cast<siconos::collision::native::bodies::DiskDiskR*>(nullptr));
+  ar.register_type(static_cast<siconos::collision::native::bodies::DiskPlanR*>(nullptr));
   ar.register_type(static_cast<SiconosCollisionQueryResult*>(nullptr));
   ar.register_type(static_cast<SphereNEDS*>(nullptr));
   ar.register_type(static_cast<RigidBodyDS*>(nullptr));

@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file Relay.hpp
   \brief Linear Complementarity Problem formulation and solving
 */
@@ -23,10 +23,11 @@
 #define Relay_H
 
 #include "LinearOSNS.hpp"
+#include "relay_cst.h"  // contains only enum. Ok.
+struct RelayProblem;
+struct SolverOptions;
 
-#include <relay_cst.h>
-#include <RelayProblem.h>
-TYPEDEF_SPTR(RelayProblem)
+namespace siconos::nonsmooth_formulations {
 
 /**
    Formalization and Resolution of a Linear Complementarity Problem (Relay)
@@ -43,37 +44,26 @@ TYPEDEF_SPTR(RelayProblem)
    where
    - \f$ w \in R^{n} \f$  and \f$ z \in R^{n} \f$ are the unknowns,
    - \f$ M \in R^{n \times n } \f$  and \f$ q \in R^{n} \f$
-   
+
    \todo : add "recover" function to start from old values of z and w.
    \todo : review this introduction ...
 */
-class Relay : public LinearOSNS
-{
-
-protected:
-  
+class Relay : public LinearOSNS {
+ protected:
   ACCEPT_SERIALIZATION(Relay);
 
-
   /** contains the vector lb (lower bounds) of a Relay system */
-  SP::SiconosVector _lb;
+  std::shared_ptr<siconos::algebra::SiconosVector> _lb{nullptr};
 
   /** contains the vector ub (upper bounds) of a Relay system */
-  SP::SiconosVector _ub;
+  std::shared_ptr<siconos::algebra::SiconosVector> _ub{nullptr};
 
-  /** contains the numerics proble for Relay system */
-  SP::RelayProblem _numerics_problem;
-
-  /** nslaw effects : visitors experimentation
-   */
+  // /** contains the numerics proble for Relay system */
+  // std::shared_ptr < RelayProblem _numerics_problem{nullptr};
 
   struct _BoundsNSLEffect;
-  friend struct _BoundsNSLEffect;
 
-
-
-public:
-
+ public:
   /** constructor from numerics solver id
    *
    *  \param numericsSolverId id of numerics solver, default =  SICONOS_RELAY_AVI_CAOFERRIS
@@ -84,70 +74,37 @@ public:
    *
    *  \param options the options set
    */
-  Relay(SP::SolverOptions options);
+  Relay(std::shared_ptr<SolverOptions> options);
 
   /** destructor
    */
-  ~Relay(){};
-
-  // --- lb ---
-  /** get the value of lb, the   lower bounds of the Relay system
-   *
-   *  \return the vector of lower bounds
-   */
-  inline const SiconosVector& getLb() const
-  {
-    return *_lb;
-  }
+  ~Relay() noexcept = default;
 
   /** get lb, the lower bounds of the Relay system
    *
    *  \return the vector of lower bounds
    */
-  inline SP::SiconosVector lb() const
-  {
-    return _lb;
-  }
+  inline std::shared_ptr<siconos::algebra::SiconosVector> lb() const { return _lb; }
 
   /** set lb to pointer newPtr
    *
    *  \param newLb new lower bound
    */
-  inline void setLb(SP::SiconosVector newLb)
-  {
-    _lb = newLb;
-  }
-
-
-  // --- ub ---
-  /** get the value of ub, the  upper bounds of the Relay system
-   *
-   *  \return the vector of upper bounds
-   */
-  inline const SiconosVector& getUb() const
-  {
-    return *_ub;
-  }
+  inline void setLb(std::shared_ptr<siconos::algebra::SiconosVector> newLb) { _lb = newLb; }
 
   /** get lb, the lower bounds of the Relay system
    *
    *  \return the vector of upper bounds
    */
-  inline SP::SiconosVector ub() const
-  {
-    return _ub;
-  }
+  inline std::shared_ptr<siconos::algebra::SiconosVector> ub() const { return _ub; }
 
   /** set ub to pointer newPtr
    *
    *  \param newUb new upper bound
    */
-  inline void setUb(SP::SiconosVector newUb)
-  {
-    _ub = newUb;
-  }
+  inline void setUb(std::shared_ptr<siconos::algebra::SiconosVector> newUb) { _ub = newUb; }
 
-  void initialize(SP::Simulation sim);
+  void initialize(std::shared_ptr<siconos::simulation::Simulation> sim);
 
   /** Compute the unknown z and w and update the Interaction (y and lambda )
    *
@@ -157,13 +114,12 @@ public:
   int compute(double time);
 
   /** Check the compatibility fol the nslaw with the targeted OSNSP */
-  bool checkCompatibleNSLaw(NonSmoothLaw& nslaw);
-
+  bool checkCompatibleNSLaw(siconos::modeling::NonSmoothLaw& nslaw);
 
   /** print the data to the screen
    */
   void display() const;
-
 };
+}  // namespace siconos::nonsmooth_formulations
 
-#endif // Relay_H
+#endif  // Relay_H

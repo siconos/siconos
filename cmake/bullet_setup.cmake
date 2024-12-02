@@ -104,9 +104,10 @@ elseif(WITH_BULLET OR Bullet_ROOT)
   find_package(Bullet CONFIG REQUIRED)
   include(${Bullet_CONFIG})
 
-  
-  if(BULLET_VERSION_STRING VERSION_LESS 3.05)
-    set(BULLET_FOUND FALSE)
+  if(NOT WIN32)
+    if(BULLET_VERSION_STRING VERSION_LESS 3.05)
+      set(BULLET_FOUND FALSE)
+    endif()
   endif()
 
   if(NOT BULLET_FOUND)
@@ -118,8 +119,9 @@ elseif(WITH_BULLET OR Bullet_ROOT)
 
     - run cmake for siconos with -DBULLET_INSTALL=ON. Bullet will then be installed in ${CMAKE_INSTALL_PREFIX} and Siconos configured to run with Bullet.")
   endif()
-
-  get_filename_component(BULLET_INCLUDE_DIRS  ${BULLET_INCLUDE_DIRS} ABSOLUTE BASE_DIR ${BULLET_ROOT_DIR})
+  if(NOT WIN32)
+    get_filename_component(BULLET_INCLUDE_DIRS  ${BULLET_INCLUDE_DIRS} ABSOLUTE BASE_DIR ${BULLET_ROOT_DIR})
+  endif()
   set_bullet_target()
   message(STATUS "Found bullet-physics version ${BULLET_VERSION_STRING} in ${BULLET_ROOT_DIR}")
 

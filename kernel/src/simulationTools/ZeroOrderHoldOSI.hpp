@@ -24,10 +24,8 @@
 #define ZEROORDERHOLD_H
 
 #include "OneStepIntegrator.hpp"
-#include "SimpleMatrix.hpp"
 
-const unsigned int ZOHSTEPSINMEMORY = 1;
-
+namespace siconos::integrators {
 /**
    ZeroOrderHoldOSI Time-Integrator for Dynamical Systems
 
@@ -45,17 +43,18 @@ const unsigned int ZOHSTEPSINMEMORY = 1;
 
 */
 class ZeroOrderHoldOSI : public OneStepIntegrator {
-protected:
+ protected:
   ACCEPT_SERIALIZATION(ZeroOrderHoldOSI);
+
+  static constexpr unsigned int ZOHSTEPSINMEMORY = 1;
 
   /** nslaw effects */
   struct _NSLEffectOnFreeOutput;
-  friend struct _NSLEffectOnFreeOutput;
 
   /** Unused for now */
-  bool _useGammaForRelation;
+  bool _useGammaForRelation{false};
 
-public:
+ public:
   enum ZeroOrderHoldOSI_ds_workVector_id {
     RESIDU_FREE,
     FREE,
@@ -69,11 +68,7 @@ public:
     WORK_INTERACTION_LENGTH
   };
 
-  enum ZeroOrderHoldOSI_interaction_workBlockVector_id {
-    xfree,
-    DELTA_X,
-    BLOCK_WORK_LENGTH
-  };
+  enum ZeroOrderHoldOSI_interaction_workBlockVector_id { xfree, DELTA_X, BLOCK_WORK_LENGTH };
 
   /** basic constructor
    */
@@ -81,23 +76,23 @@ public:
 
   /** destructor
    */
-  virtual ~ZeroOrderHoldOSI(){};
-
-  // --- GETTERS/SETTERS ---
+  virtual ~ZeroOrderHoldOSI() noexcept = default;
 
   /** get \f$ \Phi \f$ corresponding to DynamicalSystem ds
    *
    *  \param ds the DynamicalSystem
    *  \return pointer to a SiconosMatrix
    */
-  const SiconosMatrix &Ad(SP::DynamicalSystem ds);
+  const siconos::algebra::SiconosMatrix &Ad(
+      std::shared_ptr<siconos::modeling::DynamicalSystem> ds) const;
 
   /** get \f$ B_d \f$ corresponding to DynamicalSystem ds
    *
    *  \param ds the DynamicalSystem
    *  \return pointer to a SiconosMatrix
    */
-  const SiconosMatrix &Bd(SP::DynamicalSystem ds);
+  const siconos::algebra::SiconosMatrix &Bd(
+      std::shared_ptr<siconos::modeling::DynamicalSystem> ds) const;
 
   // --- OTHER FUNCTIONS ---
 
@@ -110,7 +105,8 @@ public:
    *  \param t time of initialization
    *  \param ds the dynamical system
    */
-  void initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds) override;
+  void initializeWorkVectorsForDS(
+      double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) override;
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi
@@ -119,9 +115,9 @@ public:
    *  \param interProp the properties on the graph
    *  \param DSG the dynamical systems graph
    */
-  void initializeWorkVectorsForInteraction(Interaction &inter,
-                                           InteractionProperties &interProp,
-                                           DynamicalSystemsGraph &DSG) override;
+  void initializeWorkVectorsForInteraction(
+      siconos::modeling::Interaction &inter, siconos::graphs::InteractionProperties &interProp,
+      siconos::graphs::DynamicalSystemsGraph &DSG) override;
 
   /** get the number of index sets required for the simulation
    *
@@ -145,15 +141,17 @@ public:
       the nslaw
 
       \param vertex_inter of the interaction graph
-      \param osnsp a pointer to the OneStepNSProblem
+      \param osnsp a pointer to the siconos::nonsmooth_formulations::OneStepNSProblem
    */
-  void computeFreeOutput(InteractionsGraph::VDescriptor &vertex_inter,
-                         OneStepNSProblem *osnsp) override;
+  void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
+                         siconos::nonsmooth_formulations::OneStepNSProblem *osnsp) override;
 
-  /** return the workVector corresponding to the right hand side of the OneStepNonsmooth problem
+  /** return the workVector corresponding to the right hand side of the OneStepNonsmooth
+   * problem
    */
-  SiconosVector& osnsp_rhs(InteractionsGraph::VDescriptor& vertex_inter, InteractionsGraph& indexSet) override
-  {
+  siconos::algebra::SiconosVector &osnsp_rhs(
+      siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
+      siconos::graphs::InteractionsGraph &indexSet) override {
     return *(*indexSet.properties(vertex_inter).workVectors)[ZeroOrderHoldOSI::OSNSP_RHS];
   };
 
@@ -164,7 +162,8 @@ public:
    *  \param i the level of the IndexSet
    *  \return true if y<=0
    */
-  bool addInteractionInIndexSet(SP::Interaction inter, unsigned int i) override;
+  bool addInteractionInIndexSet(std::shared_ptr<siconos::modeling::Interaction> inter,
+                                unsigned int i) override;
 
   /** Apply the rule to one Interaction to known if is it should be removed
    *  in the IndexSet of level i
@@ -173,7 +172,7 @@ public:
    *  \param i the level of the IndexSet
    *  \return true if y>0
    */
-  bool removeInteractionFromIndexSet(SP::Interaction inter,
+  bool removeInteractionFromIndexSet(std::shared_ptr<siconos::modeling::Interaction> inter,
                                      unsigned int i) override;
 
   /** Unused
@@ -190,8 +189,7 @@ public:
    *  \param tout real end time
    *  \param notUsed useless flag (for ZeroOrderHoldOSI, used in LsodarOSI)
    */
-  void integrate(double &tinit, double &tend, double &tout,
-                 int &notUsed) override;
+  void integrate(double &tinit, double &tend, double &tout, int &notUsed) override;
 
   /** updates the state of the Dynamical Systems
    *
@@ -201,11 +199,9 @@ public:
 
   /** Displays the data of the ZeroOrderHoldOSI's integrator
    */
-  void display() override;
+  void display() const override;
 
-  void updateMatrices(SP::DynamicalSystem ds);
-
-  ACCEPT_STD_VISITORS();
+  void updateMatrices(std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 };
-
-#endif // ZEROORDERHOLD_H
+}  // namespace siconos::integrators
+#endif  // ZEROORDERHOLD_H

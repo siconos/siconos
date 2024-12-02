@@ -23,29 +23,26 @@
 #include <SiconosException.hpp>
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
-#include <limits>
-
-#include "ContactShapeDistance.hpp"
-#include "cadmbtb.hpp"
-
-OccContactEdge::OccContactEdge(const OccContactShape& shape, unsigned int index)
-    : OccContactShape(shape), _index(index), _edge(shape.edge(index)) {
-  this->computeUVBounds();
+siconos::mechanics::occ::OccContactEdge::OccContactEdge(const OccContactShape& shape,
+                                                        int index)
+    : OccContactShape(shape), _edge(shape.edge(index)), _index(index) {
+  computeUVBounds();
 };
 
-const SPC::TopoDS_Edge OccContactEdge::contact() const { return this->edge(this->_index); }
+std::shared_ptr<TopoDS_Edge> siconos::mechanics::occ::OccContactEdge::contact() const {
+  return edge(_index);
+}
 
-void OccContactEdge::computeUVBounds() {
+void siconos::mechanics::occ::OccContactEdge::computeUVBounds() {
   TopExp_Explorer exp;
-  exp.Init(this->data(), TopAbs_EDGE);
-  for (unsigned int i = 0; i < _index; ++i, exp.Next())
-    ;
+  exp.Init(data(), TopAbs_EDGE);
+  for (auto i = 0; i < _index; ++i, exp.Next());
   if (exp.More()) {
     const TopoDS_Edge& edge = TopoDS::Edge(exp.Current());
     BRepAdaptor_Curve SC(edge);
-    this->binf1[0] = SC.FirstParameter();
-    this->bsup1[0] = SC.LastParameter();
-    this->binf1[1] = 0.;
-    this->bsup1[1] = 0.;
+    binf1[0] = SC.FirstParameter();
+    bsup1[0] = SC.LastParameter();
+    binf1[1] = 0.;
+    bsup1[1] = 0.;
   }
 }

@@ -42,7 +42,7 @@
 %include SiconosMatrix.hpp
 %include SimpleMatrix.hpp
 %include SiconosVector.hpp
-%include SiconosVectorIterator.hpp
+ // %include SiconosVectorIterator.hpp
 %include BlockVector.hpp
 
 %extend SiconosMatrix{

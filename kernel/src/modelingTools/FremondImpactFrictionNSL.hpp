@@ -24,31 +24,32 @@
 
 #include "NonSmoothLaw.hpp"
 
+namespace siconos::modeling {
+
 /** Fremond Impact-Friction Non Smooth Law
  *
  */
 class FremondImpactFrictionNSL : public NonSmoothLaw {
-
-private:
+ private:
   ACCEPT_SERIALIZATION(FremondImpactFrictionNSL);
 
   /** The Fremond coefficient of restitution
    */
-  double _en;
-  double _et;
+  double _en{0.};
+  double _et{0.};
   /** friction coefficient */
-  double _mu;
+  double _mu{0.};
 
   /** default constructor
    */
-  FremondImpactFrictionNSL();
+  FremondImpactFrictionNSL() = default;
 
-public:
+ public:
   /** basic constructor
    *
    *  \param size size of the ns law
    */
-  FremondImpactFrictionNSL(unsigned int size);
+  FremondImpactFrictionNSL(unsigned int size) : NonSmoothLaw(size){};
 
   /** constructor with the value of the FremondImpactFrictionNSL attributes
    *
@@ -57,16 +58,11 @@ public:
    *  \param mu double : friction coefficient
    *  \param size unsigned int: size of the ns law
    */
-  FremondImpactFrictionNSL(double en, double et, double mu, unsigned int size);
+  FremondImpactFrictionNSL(double en, double et, double mu, unsigned int size)
+      : NonSmoothLaw(size), _en(en), _et(et), _mu(mu){};
 
   /** Destructor */
-  ~FremondImpactFrictionNSL();
-
-  /** check the ns law to see if it is verified
-   *
-   *  \return a boolean value whioch determines if the NS Law is verified
-   */
-  bool isVerified(void) const override;
+  ~FremondImpactFrictionNSL() noexcept = default;
 
   // GETTERS/SETTERS
 
@@ -106,7 +102,12 @@ public:
    */
   void display() const override;
 
-  ACCEPT_STD_VISITORS();
+  // visitors hook
+  void accept(siconos::internal::SiconosVisitor& tourist) const override {
+    tourist.visit(*this);
+  }
+
+  Type acceptType(types::FindType& ft) const override { return ft.visit(*this); }
 };
-DEFINE_SPTR(FremondImpactFrictionNSL)
-#endif // FremondImpactFrictionNSL_H
+}  // namespace siconos::modeling
+#endif  // FremondImpactFrictionNSL_H

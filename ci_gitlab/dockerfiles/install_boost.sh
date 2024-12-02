@@ -16,3 +16,4 @@ mkdir -p $CI_PROJECT_DIR/deps
 cd $CI_PROJECT_DIR/deps
 wget https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.bz2
 tar -jxvf boost_1_81_0.tar.bz2
+cd boost_1_81_0 && ./bootstrap.sh && ./b2 install

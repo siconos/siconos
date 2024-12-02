@@ -55,9 +55,9 @@ freqUpdate = 1    # frequency update of the view windows
 freqOutput = 1    # frequency update of data output
 dumpGraphic = 0   # if 1 dump graphic file
 
-drawMode = mbtb.MBTB_ARTEFACT_REACTION + mbtb.MBTB_ARTEFACT_NORMAL \
-    + mbtb.MBTB_ARTEFACT_P1P2
-#drawMode = mbtb.MBTB_ARTEFACT_P1P2
+drawMode = mbtb.MBTBConst.ArtefactReaction + mbtb.MBTBConst.ArtefactNormal \
+    + mbtb.MBTBConst.ArtefactP1P2
+#drawMode = mbtb.MBTBConst.ArtefactP1P2
 
 #Default simulation parameters
 

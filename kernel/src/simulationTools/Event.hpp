@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file Event.hpp
   General interface for Events
 */
@@ -22,48 +22,64 @@
 #ifndef Event_H
 #define Event_H
 
-#include <cmath>
+// #include <cmath>
 #include <gmp.h>
-#include <cstddef>
-#include "SiconosConst.hpp"
-#include "SimulationTypeDef.hpp"
-#include "SiconosPointers.hpp"
+
+#include <cassert>
+#include <cmath>  // rint
+#include <functional>
+#include <map>
+#include <memory>
+
 #include "SiconosSerialization.hpp"
 
 // As always, MSVC miss C99
-#if defined(_MSC_VER) && _MSC_VER < 1800
-extern "C" double rint(double x);
-#endif
+// #if defined(_MSC_VER) && _MSC_VER < 1800
+// extern "C" double rint(double x);
+// #endif
 
-// tick default value
-// it has to be greater than DBL_EPSILON ...
-const double DEFAULT_TICK = 1e-16;
+namespace siconos::simulation {
 
-/** 
-    Abstract class that represents generic time events.
-    
-    This base class simply records the time at which the event will take place. A pure virtual function named process
-    will be invoked to execute the event.
-    The time is represented with a mpz_t, from gmp library. See http://gmplib.org.
-    
-    Derived classes:
-    - TimeDiscretisationEvent: events that corresponds to user-defined time-discretisation points
-    - NonSmoothEvent: specific events, detected during simulation, when constraints are violated (thanks to roots-finding algorithm)
-    - SensorEvent: event dedicated to data capture through user-defined sensors.
- 
-    Existing types of events:
-    0 -> undef
-    1 -> TimeDiscretisation
-    2 -> NonSmooth
-    3 -> Sensor
-    4 -> Observer
-    5 -> Actuator
+class TimeDiscretisation;
+class Simulation;
+
+/** To set the 'id' (type) of events */
+enum class EventType {
+  // Warning FP: when two events have the same time, their type (EventType)
+  // is used to decide which one will be the first in the events vector.
+  // The smallest the type, the earlier the event.
+  /** Time discretisation event */
+  TD = 1,
+  /** Nonsmooth event */
+  NS = 2,
+  /** Sensor (control toolbox) */
+  Sensor,
+  /** Observer (control toolbox) */
+  Observer,
+  /** Actuator (control toolbox) */
+  Actuator,
+  /** User defined: extra ids to allow users to define their own events */
+  UserDefined1,
+  UserDefined2
+};
+
+/**
+  Abstract class that represents generic time events.
+
+  This base class simply records the time at which the event will take place. A pure virtual
+ function named process will be invoked to execute the event. The time is represented with a
+ mpz_t, from gmp library. See http://gmplib.org.
+
+  Derived classes:
+  - TimeDiscretisationEvent: events that corresponds to user-defined time-discretisation
+ points
+  - NonSmoothEvent: specific events, detected during simulation, when constraints are
+ violated (thanks to roots-finding algorithm)
+  - SensorEvent: event dedicated to data capture through user-defined sensors.
 */
 
-class Event
-{
-protected:
-  
+class Event {
+ protected:
   ACCEPT_SERIALIZATION(Event);
 
   /** Date of the present event,
@@ -74,65 +90,62 @@ protected:
   mpz_t _tickIncrement;
 
   /** Id or type of the Event */
-  int _type;
+  EventType _type{EventType::TD};
 
   /** Date of the present event,
    *  represented with a double */
-  double _dTime;
+  double _dTime{0.};
 
-  /** confidence interval used to convert double time value to mpz_t
-   */
+  /** confidence interval used to convert double time value to mpz_t */
   static double _tick;
 
-  /** has one Event object been instanciated. Use to detect in setTick potentially dangerous cases*/
+  /** True if at least one Event object has already been instanciated.
+      Used to detect potentially dangerous cases in setTick
+  */
   static bool _eventCreated;
 
   /** index for the current Event*/
-  unsigned int _k;
+  unsigned int _k{0};
 
   /** TimeDiscretisation for the Event (unused only in the NonSmoothEvent) */
-  SP::TimeDiscretisation _td;
+  std::shared_ptr<TimeDiscretisation> _td{nullptr};
 
   /** For automatic rescheduling */
-  bool _reschedule;
+  bool _reschedule{false};
 
-  /** Default constructor */
-  Event(): _type(0), _dTime(0.0), _k(0), _reschedule(false)
-  {
-    mpz_init(_timeOfEvent);
-    mpz_init(_tickIncrement);
-  };
+  // /** Default constructor */
+  // Event()
+  // {
+  //   // what is the default values of timeOfEvent and tickIncrement (mpz_t default) ?
+  //   mpz_init(_timeOfEvent);
+  //   mpz_init(_tickIncrement);
+  // };
 
-    /** copy constructor ; private => no copy nor pass-by-value.
-   */
-  // Event(const Event&); pb python link
+  // Rule of five
+  Event() = delete;
+  Event(const Event&) = delete;
+  Event(Event&&) = delete;
+  Event& operator=(const Event&) = delete;
+  Event& operator=(Event&&) = delete;
 
-  /** assignment operator private => no assign allowed
-   */
-//  Event& operator = (const Event&);
-
-public:
-
+ public:
   /** constructor with time value and type as input
    *
    *  \param time the starting type (a double)
    *  \param newType the Event type (an int)
    *  \param reschedule set this to true if the event has to be rescheduled
    */
-  Event(double time, int newType = 0, bool reschedule = false);
+  Event(double time, EventType newType, bool reschedule = false);
 
   /** destructor
    */
-  virtual ~Event();
+  virtual ~Event() noexcept;
 
   /** get tick value
    *
    *  \return a double
    */
-  inline double getTick() const
-  {
-    return _tick;
-  };
+  inline double getTick() const { return _tick; };
 
   /** set tick value
    *
@@ -144,54 +157,38 @@ public:
    *
    *  \return a mpz_t
    */
-  inline const mpz_t * getTimeOfEvent() const
-  {
-    return &_timeOfEvent ;
-  };
+  inline const mpz_t* getTimeOfEvent() const { return &_timeOfEvent; };
 
   /** get the time of the present event (double format)
    *
    *  \return a double
    */
-  inline double getDoubleTimeOfEvent() const
-  {
-    return _dTime;
-  }
+  inline double getDoubleTimeOfEvent() const { return _dTime; }
 
-  inline void incrementTime(unsigned int step = 1)
-  {
+  inline void incrementTime(unsigned int step = 1) {
     for (unsigned int i = 0; i < step; i++)
       mpz_add(_timeOfEvent, _timeOfEvent, _tickIncrement);
-    _dTime = mpz_get_d(_timeOfEvent)*_tick;
+    _dTime = mpz_get_d(_timeOfEvent) * _tick;
   }
 
   /** set the time of the present event (double format)
    *
    *  \param time the new time
    */
-  inline void setTime(double time)
-  {
+  inline void setTime(double time) {
     _dTime = time;
     mpz_set_d(_timeOfEvent, rint(_dTime / _tick));
   };
 
-  /** get a type of the present event
-   *
-   *  \return an std::string
+  /** \return the type (enum, either TD or NS) of the event
    */
-  inline int getType() const
-  {
-    return _type ;
-  };
+  inline auto getType() const { return _type; };
 
-  /** set a new type for the present Event
+  /** set the type (enum, either TD or NS) of the event
    *
    *  \param newType the new Event type
    */
-  inline void setType(int newType)
-  {
-    _type = newType;
-  };
+  inline void setType(EventType newType) { _type = newType; };
 
   /** Set the current step k
    *
@@ -203,17 +200,17 @@ public:
    *
    *  \param td a TimeDiscretisation for this Event
    */
-  void setTimeDiscretisation(SP::TimeDiscretisation td);
+  void setTimeDiscretisation(std::shared_ptr<TimeDiscretisation> td);
 
   /** Get the TimeDiscretisation
    *
    *  \return the TimeDiscretisation used in this Event
    */
-  inline SP::TimeDiscretisation getTimeDiscretisation() const { return _td; };
+  inline std::shared_ptr<TimeDiscretisation> timeDiscretisation() const { return _td; };
 
   /** display Event data
    */
-  void display() const ;
+  void display() const;
 
   /** virtual function which actions depends on event type
    *
@@ -223,7 +220,7 @@ public:
 
   /** virtual function which actions depends on event type.
    *  The generic implementation present in this object is to increment the
-   *  TimeDiscretisation and to chamge the time of the current Event 
+   *  TimeDiscretisation and to chamge the time of the current Event
    *
    *  \param k meaning depends on the type of event. See derived class.
    */
@@ -231,4 +228,62 @@ public:
 
   inline bool reschedule() const { return _reschedule; };
 };
-#endif // Event_H
+
+/** A class to handle events creation
+
+  Requirements:
+  - the Event type must be known and register
+
+  For a XXXXEvent, add in the file describing the XXXXEvent class:
+
+  static siconos::simulation::EventRegistration<siconos::simulation::XXXEvent>
+ reg(siconos::simulation::EventType::XXXX);
+
+  See EventType enum for the available names.
+
+  Usage:
+
+  auto event = EventFactory::instance()->create(time, EventType::XXXX)
+
+*/
+class EventFactory {
+  // Signature of Event constructor
+  using EventCreator = std::function<std::shared_ptr<Event>(double)>;
+
+  /** map to connect event type and the function used to create them */
+  std::map<EventType, EventCreator> m_factories;
+
+ public:
+  /** Factory function which creates and returns an event
+
+      \param time instant time of the event
+      \param type type of the event (must be a EventType (enum))
+      \return a pointer to event
+  */
+  std::shared_ptr<Event> create(double time, EventType type) {
+    assert(m_factories.contains(type) && "unknown Event type");
+    return m_factories[type](time);
+  }
+
+  /** access to the (singleton) factory instance */
+  static EventFactory* instance() {
+    static EventFactory factory;
+    return &factory;
+  }
+
+  void registerCreator(EventType newtype, EventCreator caller) {
+    m_factories[newtype] = caller;
+  }
+};
+
+template <class T>
+class EventRegistration {
+ public:
+  EventRegistration(EventType newtype) {
+    EventFactory::instance()->registerCreator(newtype,
+                                              [](double a) { return std::make_shared<T>(a); });
+  }
+};
+
+}  // namespace siconos::simulation
+#endif  // Event_H

@@ -14,49 +14,45 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file
  Non-Smooth Events
 */
 #ifndef NONSMOOTHEVENT_H
 #define NONSMOOTHEVENT_H
 
-/** Events due to non smooth behavior (contact occurence...)
- *
- * Those events are detected during Simulation process (integration of the smooth part with a roots-finding algorithm)
- * and scheduled into the EventsManager.
- *
- */
-
 #include "Event.hpp"
 
-class NonSmoothEvent : public Event
-{
+namespace siconos::simulation {
 
-private:
-  
+/** Events due to non smooth behavior (contact occurence...)
+ *
+ * Those events are detected during Simulation process (integration of the smooth part with a
+ * roots-finding algorithm) and scheduled into the EventsManager.
+ *
+ */
+class NonSmoothEvent : public Event {
+ private:
   ACCEPT_SERIALIZATION(NonSmoothEvent);
 
-
-  /** Default constructor */
-  NonSmoothEvent();
-
-public:
-
+ public:
   /** constructor with time value as a parameter
-  *  \param time the time of the first event (a double)
-  *  \param notUsed unused parameter (an int)
-  */
-  NonSmoothEvent(double time, int notUsed);
+   *  \param time the time of the first event (a double)
+   */
+  NonSmoothEvent(double time) : Event(time, EventType::NS){};
 
   /** destructor
-  */
-  ~NonSmoothEvent();
+   */
+  ~NonSmoothEvent() noexcept = default;
 
   /** OSNS solving and IndexSets updating
-  *  \param simulation the simulation that owns this Event (through the EventsManager)
-  */
+   *  \param simulation the simulation that owns this Event (through the EventsManager)
+   */
   void process(Simulation& simulation);
 };
 
-#endif // NonSmoothEvent_H
+// Register the event into the factory
+static EventRegistration<NonSmoothEvent> reg_NS(EventType::NS);
+
+}  // namespace siconos::simulation
+#endif  // NonSmoothEvent_H

@@ -22,15 +22,19 @@
 #ifndef MLCP_H
 #define MLCP_H
 
+#include <mlcp_cst.h>  // contains only enum. Ok.
+
 #include "LinearOSNS.hpp"
 
-#include <mlcp_cst.h>
+struct MixedLinearComplementarityProblem;
+struct SolverOptions;
 
-#define MLCP_NB_BLOCKS_MAX 200
-/** 
+namespace siconos::nonsmooth_formulations {
+
+/**
     Formalization and Resolution of a Mixed Linear Complementarity Problem
     (MLCP)
-    
+
     This class is devoted to the formalization and the resolution of the
     Mixed Linear Complementarity Problem (MLCP) defined by :
 
@@ -50,17 +54,17 @@
     - \f$ B \in R^{m \times m } \f$
     - \f$ C \in R^{n \times m } \f$
     - \f$ D \in R^{m \times n } \f$
-    
+
     The MLCP main components are:
     - a problem (variables A,B,C,D,a,b and size of the problem), which directly
     corresponds to the MixedLinearComplementarityProblem structure of Numerics
     - the unknowns u,v and z
-    
+
 */
 class MLCP : public LinearOSNS {
-protected:
-
+ protected:
   ACCEPT_SERIALIZATION(MLCP);
+  static constexpr int MLCP_NB_BLOCKS_MAX = 200;
 
   /** n is the number of equality */
   int _n = 0;
@@ -71,9 +75,9 @@ protected:
   int _curBlock = 0;
 
   /** The MLCP instance */
-  SP::MixedLinearComplementarityProblem _numerics_problem;
+  std::shared_ptr<MixedLinearComplementarityProblem> _numerics_problem{nullptr};
 
-public:
+ public:
   /** constructor from data
    *
    *  \param numericsSolverId id of Numerics solver
@@ -85,21 +89,22 @@ public:
    *
    *  \param options the options set
    */
-  MLCP(SP::SolverOptions options);
+  MLCP(std::shared_ptr<SolverOptions> options);
 
   /** destructor
    */
-  virtual ~MLCP() { reset(); };
+  virtual ~MLCP() noexcept;
 
-  /** 
+  /**
       compute equalities/inequalities sizes and set corresponding values in
       numerics problem
-      
+
       \param inter1 Interaction used to get a non-smooth law and the constraints
       sizes.
       \param inter2 another interaction, not used indeed (?)
   */
-  virtual void computeOptions(SP::Interaction inter1, SP::Interaction inter2);
+  virtual void computeOptions(std::shared_ptr<siconos::modeling::Interaction> inter1,
+                              std::shared_ptr<siconos::modeling::Interaction> inter2);
 
   /** Update blocks used to compute M matrix.
    */
@@ -114,33 +119,28 @@ public:
   // --- numerics MLCP ---
   /** get the pointer on the Numerics MLCP,
    *
-   *  \return SP::MixedLinearComplementarityProblem
+   *  \return std::shared_ptr<MixedLinearComplementarityProblem
    */
-  inline SP::MixedLinearComplementarityProblem getNumericsMLCP()
-  {
+  inline std::shared_ptr<MixedLinearComplementarityProblem> getNumericsMLCP() {
     return _numerics_problem;
   }
-
-  /** Reninitialize numerics driver.
-   */
-  virtual void reset();
 
   /** compute extra-diagonal interactionBlock-matrix
    *
    *  \param ed an edge descriptor
    */
-  void
-  computeInteractionBlock(const InteractionsGraph::EDescriptor &ed) override;
+  void computeInteractionBlock(
+      const siconos::graphs::InteractionsGraph::EDescriptor &ed) override;
 
   /** compute diagonal Interaction block
    *
    *  \param vd a vertex descriptor
    */
   void computeDiagonalInteractionBlock(
-      const InteractionsGraph::VDescriptor &vd) override;
+      const siconos::graphs::InteractionsGraph::VDescriptor &vd) override;
 
   /** Compute the unknown z and w and update the Interaction (y and lambda )
-   * 
+   *
    *  \param time current time
    *  \return int, information about the solver convergence.
    */
@@ -148,7 +148,7 @@ public:
 
   /**
      Call numerics solver.
-     
+
      \return int information about the solver convergence
      (output from numerics driver, mixedlinearComplementarity_driver, check
      numerics doc. for details).
@@ -160,9 +160,7 @@ public:
   void display() const override;
 
   /** Check the compatibility fol the nslaw with the targeted OSNSP */
-  bool checkCompatibleNSLaw(NonSmoothLaw &nslaw) override;
-
-  ACCEPT_STD_VISITORS();
+  bool checkCompatibleNSLaw(siconos::modeling::NonSmoothLaw &nslaw) override;
 };
-
-#endif // MLCP_H
+}  // namespace siconos::nonsmooth_formulations
+#endif  // MLCP_H

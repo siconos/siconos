@@ -67,7 +67,7 @@ For instance, if you want to use the internal forces operators in Lagrangian sys
 First case::
 
   // we suppose that ds is an existing pointer to a LagrangianDS
-  SP::SiconosMatrix myF(new SimpleVector(3));
+  auto myF = std::make_shared<siconos::algebra::SimpleVector>(3);
   // fill my G in ...		
   ds->setFInt(*myF); // copy myF values into fInt
   // OR

@@ -22,6 +22,9 @@
 #define FirstOrderLinearR_H
 
 #include "FirstOrderR.hpp"
+
+namespace siconos::modeling {
+
 /** Pointer to function used for plug-in for matrix-type operators (C,F etc) */
 typedef void (*FOMatPtr1)(double, unsigned int, unsigned int, double *, unsigned int,
                           double *);
@@ -49,13 +52,11 @@ typedef void (*FOVecPtr)(double, unsigned int, double *, unsigned int, double *)
 
 */
 class FirstOrderLinearR : public FirstOrderR {
-
-protected:
-  
+ protected:
   ACCEPT_SERIALIZATION(FirstOrderLinearR);
 
   /** e operator (time dependant) */
-  SP::SiconosVector _e{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> _e{nullptr};
 
   /** initialize the relation (check sizes, memory allocation in workV and workM ...)
    *
@@ -69,13 +70,13 @@ protected:
    */
   void checkSize(Interaction &inter) override;
 
-public:
+ public:
   /** default constructor
    */
-  FirstOrderLinearR() : FirstOrderR(RELATION::LinearR){};
-  
+  FirstOrderLinearR() : FirstOrderR(RelationSubType::LinearR){};
+
   /** Constructor with C and B plugin names
-   *   
+   *
    *  \param Cname the plugin name for computing the C matrix
    *  \param Bname the plugin name for computing the B matrix
    */
@@ -98,7 +99,8 @@ public:
    *  \param C the C matrix
    *  \param B the B matrix
    */
-  FirstOrderLinearR(SP::SimpleMatrix C, SP::SimpleMatrix B);
+  FirstOrderLinearR(std::shared_ptr<siconos::algebra::SimpleMatrix> C,
+                    std::shared_ptr<siconos::algebra::SimpleMatrix> B);
 
   /** create the Relation from a set of data
    *
@@ -108,8 +110,11 @@ public:
    *  \param e the e matrix
    *  \param B the B matrix
    */
-  FirstOrderLinearR(SP::SimpleMatrix C, SP::SimpleMatrix D, SP::SimpleMatrix F,
-                    SP::SiconosVector e, SP::SimpleMatrix B);
+  FirstOrderLinearR(std::shared_ptr<siconos::algebra::SimpleMatrix> C,
+                    std::shared_ptr<siconos::algebra::SimpleMatrix> D,
+                    std::shared_ptr<siconos::algebra::SimpleMatrix> F,
+                    std::shared_ptr<siconos::algebra::SiconosVector> e,
+                    std::shared_ptr<siconos::algebra::SimpleMatrix> B);
 
   /** destructor
    */
@@ -150,7 +155,8 @@ public:
    *  \param z the auxiliary input vector
    *  \param C the C matrix
    */
-  virtual void computeC(double time, BlockVector &z, SimpleMatrix &C);
+  virtual void computeC(double time, siconos::algebra::BlockVector &z,
+                        siconos::algebra::SimpleMatrix &C);
 
   /** Function to compute the matrix D
    *
@@ -158,7 +164,8 @@ public:
    *  \param z the auxiliary input vector
    *  \param D the D matrix
    */
-  virtual void computeD(double time, BlockVector &z, SimpleMatrix &D);
+  virtual void computeD(double time, siconos::algebra::BlockVector &z,
+                        siconos::algebra::SimpleMatrix &D);
 
   /** Function to compute the matrix F
    *
@@ -166,7 +173,8 @@ public:
    *  \param z the auxiliary input vector
    *  \param F the F matrix
    */
-  virtual void computeF(double time, BlockVector &z, SimpleMatrix &F);
+  virtual void computeF(double time, siconos::algebra::BlockVector &z,
+                        siconos::algebra::SimpleMatrix &F);
 
   /** Function to compute the vector e
    *
@@ -174,7 +182,8 @@ public:
    *  \param z the auxiliary input vector
    *  \param e the e vector
    */
-  virtual void computee(double time, BlockVector &z, SiconosVector &e);
+  virtual void computee(double time, siconos::algebra::BlockVector &z,
+                        siconos::algebra::SiconosVector &e);
 
   /** Function to compute the matrix B
    *
@@ -182,7 +191,8 @@ public:
    *  \param z the auxiliary input vector
    *  \param B the B matrix
    */
-  virtual void computeB(double time, BlockVector &z, SimpleMatrix &B);
+  virtual void computeB(double time, siconos::algebra::BlockVector &z,
+                        siconos::algebra::SimpleMatrix &B);
 
   /**
      to compute the output y = h(t,x,...) of the Relation
@@ -193,8 +203,9 @@ public:
      \param z user defined parameters (optional)
      \param y the resulting vector
   */
-  virtual void computeh(double time, const BlockVector &x, const SiconosVector &lambda,
-                        BlockVector &z, SiconosVector &y);
+  virtual void computeh(double time, const siconos::algebra::BlockVector &x,
+                        const siconos::algebra::SiconosVector &lambda,
+                        siconos::algebra::BlockVector &z, siconos::algebra::SiconosVector &y);
 
   /**
      to compute the nonsmooth input r = g(t,x,...) of the Relation
@@ -204,8 +215,8 @@ public:
      \param z user defined parameters (optional)
      \param r the resulting vector
   */
-  virtual void computeg(double time, const SiconosVector &lambda, BlockVector &z,
-                        BlockVector &r);
+  virtual void computeg(double time, const siconos::algebra::SiconosVector &lambda,
+                        siconos::algebra::BlockVector &z, siconos::algebra::BlockVector &r);
 
   /** default function to compute y
    *
@@ -231,13 +242,19 @@ public:
    *
    *  \param  newe the new value of e
    */
-  inline void setePtr(SP::SiconosVector newe) { _e = newe; }
+  inline void setePtr(std::shared_ptr<siconos::algebra::SiconosVector> newe)
+  {
+    _e = newe;
+  }
 
   /** get e
    *
    *  \return e matrix
    */
-  inline SP::SiconosVector e() const { return _e; }
+  inline std::shared_ptr<siconos::algebra::SiconosVector> e() const
+  {
+    return _e;
+  }
 
   /** determines if the Relation is linear
    *
@@ -249,10 +266,7 @@ public:
   // Note FP: final would be better than override but swig cannot handle it.
   void computeJach(double time, Interaction &inter) override{};
   void computeJacg(double time, Interaction &inter) override{};
-
-  ACCEPT_STD_VISITORS();
 };
-
-TYPEDEF_SPTR(FirstOrderLinearR)
+}  // namespace siconos::modeling
 
 #endif

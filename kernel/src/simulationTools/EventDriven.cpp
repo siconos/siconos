@@ -14,99 +14,86 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
-
+ */
 #include "EventDriven.hpp"
-#include "LsodarOSI.hpp"
-#include "LCP.hpp"
-#include "Interaction.hpp"
-#include "EventsManager.hpp"
-#include "NonSmoothDynamicalSystem.hpp"
-#include "Topology.hpp"
-#include "DynamicalSystem.hpp"
-#include "LagrangianDS.hpp"
-#include "EventFactory.hpp"
+
 #include "BlockMatrix.hpp"
+#include "EventsManager.hpp"
+#include "FirstOrderNonLinearDS.hpp"
+#include "Interaction.hpp"
+#include "LagrangianDS.hpp"
+#include "LsodarOSI.hpp"
 #include "NewMarkAlphaOSI.hpp"
-#include "Relation.hpp"
 #include "NonSmoothLaw.hpp"
-#include "NewtonEulerR.hpp"
+#include "OneStepNSProblem.hpp"
+#include "Relation.hpp"
+#include "SiconosConfig.h"  // for HAS_FORTRAN
+#include "SiconosException.hpp"
+#include "SiconosVector.hpp"
+#include "SimpleMatrix.hpp"
+#include "Topology.hpp"
 
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
-using namespace std;
-using namespace RELATION;
-
-#define DEFAULT_TOL_ED 1000 * DEFAULT_TOLERANCE
-
 /** defaut constructor
- *  \param a pointer to a timeDiscretisation (linked to the model that owns this simulation)
+ *  \param a pointer to a timeDiscretisation (linked to the model that owns this
+ * simulation)
  */
-EventDriven::EventDriven(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td): Simulation(nsds, td), _istate(1), _isNewtonConverge(false)
-{
-  _numberOfOneStepNSproblems = 2;
+siconos::simulation::EventDriven::EventDriven(
+    std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
+    std::shared_ptr<TimeDiscretisation> td)
+    : Simulation{nsds, td} {
   (*_allNSProblems).resize(_numberOfOneStepNSproblems);
-  _newtonTolerance = DEFAULT_TOL_ED;
-  _newtonMaxIteration = 50;
-  _newtonNbIterations = 0;
-  _newtonResiduDSMax = 0.0;
-  _newtonResiduYMax = 0.0;
-  _localizeEventMaxIter = 100;
 }
 
-EventDriven::EventDriven(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td, int nb): Simulation(nsds, td), _istate(1), _isNewtonConverge(false)
-{
+siconos::simulation::EventDriven::EventDriven(
+    std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
+    std::shared_ptr<TimeDiscretisation> td, int nb)
+    : Simulation{nsds, td}, _numberOfOneStepNSproblems{0} {
   (*_allNSProblems).resize(nb);
-  _numberOfOneStepNSproblems = 0;
-  _newtonTolerance = DEFAULT_TOL_ED;
-  _newtonMaxIteration = 50;
-  _newtonNbIterations = 0;
-  _newtonResiduDSMax = 0.0;
-  _newtonResiduYMax = 0.0;
-  _localizeEventMaxIter = 100;
 }
 
-double EventDriven::_TOL_ED = DEFAULT_TOL_ED;
-
-
-
-
-void EventDriven::insertIntegrator(SP::OneStepIntegrator osi)
-{
+void siconos::simulation::EventDriven::insertIntegrator(
+    std::shared_ptr<siconos::integrators::OneStepIntegrator> osi) {
   Simulation::insertIntegrator(osi);
-  // Determine the number of OneStepNSproblems depending on the OneStepIntegrator type
-  OSI::TYPES  osiType = osi->getType();
-  if(osiType == OSI::NEWMARKALPHAOSI)  // EventDrivent asscociated with NewMarkAlpha
+  // Determine the number of OneStepNSproblems depending on the
+  // OneStepIntegrator type
+  auto osiType = osi->getType();
+  if (osiType ==
+      siconos::integrators::IntegratorType::NEWMARKALPHAOSI)  // EventDrivent asscociated with
+                                                              // NewMarkAlpha
   {
     _numberOfOneStepNSproblems = 3;
-    if(_allNSProblems->size() != 3)
-    {
+    if (_allNSProblems->size() != 3) {
       (*_allNSProblems).resize(_numberOfOneStepNSproblems);
     }
   }
 }
 
-void EventDriven::updateIndexSet(unsigned int i)
-{
-  DEBUG_BEGIN("EventDriven::updateIndexSet(unsigned int i)\n");
-  DEBUG_PRINTF("with i = %i\n",i);
+void siconos::simulation::EventDriven::updateIndexSet(unsigned int i) {
+  DEBUG_BEGIN("siconos::simulation::EventDriven::updateIndexSet(unsigned int i)\n");
+  DEBUG_PRINTF("with i = %i\n", i);
   assert(_nsds);
   assert(_nsds->topology());
-  SP::Topology topo = _nsds->topology();
+  auto topo = _nsds->topology();
 
   assert(i < topo->indexSetsSize() &&
-         "EventDriven::updateIndexSet(i), indexSets[i] does not exist.");
-  // IndexSets[0] must not be updated in simulation, since it belongs to Topology.
-  assert(i > 0  &&
-         "EventDriven::updateIndexSet(i=0), indexSets[0] cannot be updated.");
+         "siconos::simulation::EventDriven::updateIndexSet(i), indexSets[i] "
+         "does not exist.");
+  // IndexSets[0] must not be updated in simulation, since it belongs to
+  // Topology.
+  assert(i > 0 &&
+         "siconos::simulation::EventDriven::updateIndexSet(i=0), indexSets[0] "
+         "cannot be "
+         "updated.");
 
   // For all Interactions in indexSet[i-1], compute y[i-1] and
   // update the indexSet[i].
-  SP::InteractionsGraph indexSet1 = topo->indexSet(1);
-  SP::InteractionsGraph indexSet2 = topo->indexSet(2);
+  auto indexSet1 = topo->indexSet(1);
+  auto indexSet2 = topo->indexSet(2);
   assert(_indexSet0);
   assert(indexSet1);
   assert(indexSet2);
@@ -115,237 +102,241 @@ void EventDriven::updateIndexSet(unsigned int i)
   DEBUG_PRINTF("update IndexSets start : indexSet1 size : %ld\n", indexSet1->size());
   DEBUG_PRINTF("update IndexSets start : indexSet2 size : %ld\n", indexSet2->size());
 
-  InteractionsGraph::VIterator uibegin, uipend, uip;
+  siconos::graphs::InteractionsGraph::VIterator uibegin, uipend, uip;
   std::tie(uibegin, uipend) = _indexSet0->vertices();
   // loop over all vertices of the indexSet[i-1]
-  for(uip = uibegin; uip != uipend; ++uip)
-  {
-    SP::Interaction inter = _indexSet0->bundle(*uip);
-    if(i == 1)  // IndexSet[1]
+  for (uip = uibegin; uip != uipend; ++uip) {
+    auto inter = _indexSet0->bundle(*uip);
+    if (i == 1)  // IndexSet[1]
     {
       // if indexSet[1]=>getYRef(0): output y
       // if indexSet[2]=>getYRef(1): output ydot
-      double y = (*inter->y(0))(0) ; // output to define the IndexSets at this Interaction
-      if(y < -_TOL_ED)  // y[0] < 0
+      auto y = (*inter->y(0))(0);  // output to define the IndexSets at this Interaction
+      if (y < -tolerance_)         // y[0] < 0
       {
         inter->display();
-        cout << "y = " << y << " < -_TOL_ED =  "   << -_TOL_ED  <<endl;
-        THROW_EXCEPTION("EventDriven::updateIndexSet, output of level 0 must be positive!!! ");
+        std::cout << "y = " << y << " < -tolerance_ =  " << -tolerance_ << "\n";
+        THROW_EXCEPTION(
+            "siconos::simulation::EventDriven::updateIndexSet, output of level "
+            "0 must be "
+            "positive!!! ");
       }
       // 1 - If the Interaction is not yet in the set
-      if(!indexSet1->is_vertex(inter))  // Interaction is not yet in the indexSet[i]
+      if (!indexSet1->is_vertex(inter))  // Interaction is not yet in the indexSet[i]
       {
-        if(fabs(y) <= _TOL_ED)
-        {
+        if (fabs(y) <= tolerance_) {
           // vertex and edges insertions
           indexSet1->copy_vertex(inter, *_indexSet0);
         }
-      }
-      else // if the Interaction was already in the set
+      } else  // if the Interaction was already in the set
       {
-        if(fabs(y) > _TOL_ED)
-        {
-          indexSet1->remove_vertex(inter); // remove the Interaction from IndexSet[1]
-          inter->lambda(1)->zero(); // reset the lambda[1] to zero
+        if (fabs(y) > tolerance_) {
+          indexSet1->remove_vertex(inter);  // remove the Interaction from IndexSet[1]
+          inter->lambda(1)->zero();         // reset the lambda[1] to zero
         }
       }
-    }
-    else if(i == 2)  // IndexSet[2]
+    } else if (i == 2)  // IndexSet[2]
     {
-      if(indexSet1->is_vertex(inter))  // Interaction is in the indexSet[1]
+      if (indexSet1->is_vertex(inter))  // Interaction is in the indexSet[1]
       {
-        double y = (*inter->y(1))(0); // output of level 1 at this Interaction
-        if(!indexSet2->is_vertex(inter))  // Interaction is not yet in the indexSet[2]
+        auto y = (*inter->y(1))(0);        // output of level 1 at this Interaction
+        if (!indexSet2->is_vertex(inter))  // Interaction is not yet in the indexSet[2]
         {
-          if(fabs(y) <= _TOL_ED)
-          {
+          if (fabs(y) <= tolerance_) {
             // vertex and edges insertions
             indexSet2->copy_vertex(inter, *_indexSet0);
           }
-        }
-        else // if the Interaction was already in the set
+        } else  // if the Interaction was already in the set
         {
-          if(fabs(y) > _TOL_ED)
-          {
-            indexSet2->remove_vertex(inter); // remove the Interaction from IndexSet[1]
-            inter->lambda(2)->zero(); // reset the lambda[i] to zero
+          if (fabs(y) > tolerance_) {
+            indexSet2->remove_vertex(inter);  // remove the Interaction from IndexSet[1]
+            inter->lambda(2)->zero();         // reset the lambda[i] to zero
           }
         }
-      }
-      else // Interaction is not in the indexSet[1]
+      } else  // Interaction is not in the indexSet[1]
       {
-        if(indexSet2->is_vertex(inter))  // Interaction is in the indexSet[2]
+        if (indexSet2->is_vertex(inter))  // Interaction is in the indexSet[2]
         {
-          indexSet2->remove_vertex(inter); // remove the Interaction from IndexSet[2]
-          inter->lambda(2)->zero(); // reset the lambda[i] to zero
+          indexSet2->remove_vertex(inter);  // remove the Interaction from IndexSet[2]
+          inter->lambda(2)->zero();         // reset the lambda[i] to zero
         }
       }
-    }
-    else
-    {
-      THROW_EXCEPTION("EventDriven::updateIndexSet, IndexSet[i > 2] doesn't exist");
+    } else {
+      THROW_EXCEPTION(
+          "siconos::simulation::EventDriven::updateIndexSet, IndexSet[i > 2] "
+          "doesn't exist");
     }
   }
 
   DEBUG_PRINTF("update indexSets end : _indexSet0 size : %ld\n", _indexSet0->size());
   DEBUG_PRINTF("update IndexSets end : indexSet1 size : %ld\n", indexSet1->size());
   DEBUG_PRINTF("update IndexSets end : indexSet2 size : %ld\n", indexSet2->size());
-  DEBUG_END("EventDriven::updateIndexSet(unsigned int i)\n");
+  DEBUG_END("siconos::simulation::EventDriven::updateIndexSet(unsigned int i)\n");
 }
 
-void EventDriven::updateIndexSetsWithDoubleCondition()
-{
-
+void siconos::simulation::EventDriven::updateIndexSetsWithDoubleCondition() {
   assert(_nsds);
   assert(_nsds->topology());
 
   // for all Interactions in indexSet[i-1], compute y[i-1] and
   // update the indexSet[i]
 
-  SP::Topology topo = _nsds->topology();
+  auto topo = _nsds->topology();
 
-  SP::InteractionsGraph indexSet2 = topo->indexSet(2);
+  auto indexSet2 = topo->indexSet(2);
 
-  InteractionsGraph::VIterator ui, uiend, vnext;
+  siconos::graphs::InteractionsGraph::VIterator ui, uiend, vnext;
   std::tie(ui, uiend) = indexSet2->vertices();
 
-  for(vnext = ui; ui != uiend; ui = vnext)
-  {
+  for (vnext = ui; ui != uiend; ui = vnext) {
     ++vnext;
 
-    SP::Interaction inter = indexSet2->bundle(*ui);
-    double gamma = (*inter->y(2))(0);
-    double F     = (*inter->lambda(2))(0);
+    auto inter = indexSet2->bundle(*ui);
+    auto gamma = (*inter->y(2))(0);
+    auto F = (*inter->lambda(2))(0);
     DEBUG_PRINTF("ED 1 update with double condition%f\n", F);
     DEBUG_PRINTF("ED 2 update with double condition %f\n", gamma);
-    DEBUG_PRINTF("ED 3 update with double condition%f\n", _TOL_ED);
+    DEBUG_PRINTF("ED 3 update with double condition%f\n", tolerance_);
 
-
-    if(fabs(F) < _TOL_ED)
+    if (fabs(F) < tolerance_)
       indexSet2->remove_vertex(inter);
-    else if((gamma < -_TOL_ED) || (F < -_TOL_ED))
-    {
-      THROW_EXCEPTION("EventDriven::updateIndexSetsWithDoubleCondition(), output[2] and lambda[2] for Interaction of indexSet[2] must be nonnegative.");
-    }
-    else if(((fabs(gamma) > _TOL_ED) && (fabs(F) > _TOL_ED)))
-    {
-      THROW_EXCEPTION("EventDriven::updateIndexSetsWithDoubleCondition(), something is wrong for the LCP resolution.");
-    }
-    else
-    {};
-    DEBUG_PRINTF("End update with double condition %f\n", _TOL_ED);
+    else if ((gamma < -tolerance_) || (F < -tolerance_)) {
+      THROW_EXCEPTION(
+          "siconos::simulation::EventDriven::"
+          "updateIndexSetsWithDoubleCondition(), output[2] "
+          "and lambda[2] for Interaction of indexSet[2] must be nonnegative.");
+    } else if (((fabs(gamma) > tolerance_) && (fabs(F) > tolerance_))) {
+      THROW_EXCEPTION(
+          "siconos::simulation::EventDriven::"
+          "updateIndexSetsWithDoubleCondition(), something "
+          "is wrong for the LCP resolution.");
+    } else {
+    };
+    DEBUG_PRINTF("End update with double condition %f\n", tolerance_);
   }
 }
-
-void EventDriven::initializeOneStepNSProblem()
-{
-  DEBUG_BEGIN("EventDriven::initializeOneStepNSProblem()\n");
+void siconos::simulation::EventDriven::initializeOneStepNSProblem() {
+  DEBUG_BEGIN("siconos::simulation::EventDriven::initializeOneStepNSProblem()\n");
   assert(_nsds);
   assert(_nsds->topology());
   // for all Interactions in indexSet[i-1], compute y[i-1] and
   // update the indexSet[i]
   // Note that interactions set may be empty.
-  InteractionsGraph::VIterator ui, uiend;
-  SP::Topology topo = _nsds->topology();
+  siconos::graphs::InteractionsGraph::VIterator ui, uiend;
+  auto topo = _nsds->topology();
 
   // === update all index sets ===
-  //updateIndexSets();
+  // updateIndexSets();
   initOSIRhs();
 
-  if(!_allNSProblems->empty())  // ie if at least a non smooth problem has been built.
+  if (!_allNSProblems->empty())  // ie if at least a non smooth problem has been built.
   {
-    OSI::TYPES  osiType = (*_allOSI->begin())->getType();
-    if(osiType == OSI::LSODAROSI || osiType == OSI::HEM5OSI)  //EventDriven associated with LsodarOSI OSI
+    auto osiType = (*_allOSI->begin())->getType();
+    if (osiType == siconos::integrators::IntegratorType::LSODAROSI ||
+        osiType == siconos::integrators::IntegratorType::HEM5OSI)  // EventDriven
+                                                                   // associated with
+                                                                   // LsodarOSI OSI
     {
-    }
-    else if(osiType == OSI::NEWMARKALPHAOSI)  // EventDriven associated with NewMarkAlpha
+    } else if (osiType ==
+               siconos::integrators::IntegratorType::NEWMARKALPHAOSI)  // EventDriven
+                                                                       // associated with
+                                                                       // NewMarkAlpha
     {
-      if(_allNSProblems->size() != 3)
-        THROW_EXCEPTION
-        (" EventDriven::initialize, \n an EventDriven simulation associated with NewMarkAlphaOSI must have three non smooth problems.\n Here, there are "
-         + std::to_string(_allNSProblems->size()));
+      if (_allNSProblems->size() != 3)
+        THROW_EXCEPTION(
+            " siconos::simulation::EventDriven::initialize, \n an EventDriven "
+            "simulation "
+            "associated with NewMarkAlphaOSI must have three non smooth "
+            "problems.\n Here, "
+            "there are " +
+            std::to_string(_allNSProblems->size()));
       // Initialize OSNSP at position level
-      (*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_POS]->setInputOutputLevel(2);
-      (*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_POS]->setIndexSetLevel(2);
-      (*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_POS]->initialize(shared_from_this());
-    }
-    else
-    {
-      THROW_EXCEPTION(" EventDriven::initialize, OSI not yet implemented.");
+      (*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_POS]->setInputOutputLevel(
+          2);
+      (*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_POS]->setIndexSetLevel(2);
+      (*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_POS]->initialize(
+          shared_from_this());
+    } else {
+      THROW_EXCEPTION(
+          " siconos::simulation::EventDriven::initialize, OSI not yet "
+          "implemented.");
     }
 
-    if(!((*_allNSProblems)[SICONOS_OSNSP_ED_IMPACT])) /* ie if the impact problem does not
-                                                        *  exist */
-      THROW_EXCEPTION
-      ("EventDriven::initialize, an EventDriven simulation must have an 'impact' non smooth problem.");
+    if (!((*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_ED_IMPACT])) /* ie if the impact
+                                                                             * problem does not
+                                                                             *  exist */
+      THROW_EXCEPTION(
+          "siconos::simulation::EventDriven::initialize, an EventDriven "
+          "simulation must have "
+          "an 'impact' non smooth problem.");
 
-    if(!((*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC])) /* ie if the acceleration-level problem
-                                                            * does not exist */
-      THROW_EXCEPTION
-      ("EventDriven::initialize, an EventDriven simulation must have an 'acceleration' non smooth problem.");
+    if (!((*_allNSProblems)
+              [siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_ACC])) /* ie if the
+                                                                    * acceleration-level
+                                                                    * problem does
+                                                                    * not exist */
+      THROW_EXCEPTION(
+          "siconos::simulation::EventDriven::initialize, an EventDriven "
+          "simulation must have "
+          "an 'acceleration' non smooth problem.");
 
     // Initialize OSNSP for impact problem and at the acceleration level
     // WARNING: only for Lagrangian systems - To be reviewed for other ones.
-    (*_allNSProblems)[SICONOS_OSNSP_ED_IMPACT]->setInputOutputLevel(1);
-    (*_allNSProblems)[SICONOS_OSNSP_ED_IMPACT]->setIndexSetLevel(1);
-    (*_allNSProblems)[SICONOS_OSNSP_ED_IMPACT]->initialize(shared_from_this());
+    (*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_ED_IMPACT]->setInputOutputLevel(1);
+    (*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_ED_IMPACT]->setIndexSetLevel(1);
+    (*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_ED_IMPACT]->initialize(
+        shared_from_this());
 
-    (*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->setInputOutputLevel(2);
-    (*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->setIndexSetLevel(2);
-    (*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->initialize(shared_from_this());
+    (*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_ACC]->setInputOutputLevel(
+        2);
+    (*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_ACC]->setIndexSetLevel(2);
+    (*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_ACC]->initialize(
+        shared_from_this());
     //
     // // Detect NonSmoothEvent at the beginning of the simulation
     // if(topo->indexSetsSize() > 1)
     // {
-    //   SP::InteractionsGraph indexSet1 = _nsds->topology()->indexSet(1);
-    //   if(indexSet1->size() != 0)  // There is one non-smooth event to be added
+    //   auto indexSet1 = _nsds->topology()->indexSet(1);
+    //   if(indexSet1->size() != 0)  // There is one non-smooth event to be
+    //   added
     //   {
     //     DEBUG_PRINT("Schedule an event at starting time\n");
-    //     _eventsManager->scheduleNonSmoothEvent(*this, _eventsManager->startingTime(), false);
+    //     _eventsManager->scheduleNonSmoothEvent(*this,
+    //     _eventsManager->startingTime(), false);
     //   };
     // }
   }
   DEBUG_END("EventDriven::initializeOneStepNSProblem()\n");
 }
 
-void EventDriven::initOSIs()
-{
+void siconos::simulation::EventDriven::initOSIs() {}
 
-}
-
-void EventDriven::initOSIRhs()
-{
-  DEBUG_BEGIN("void EventDriven::initOSIRhs()\n")
+void siconos::simulation::EventDriven::initOSIRhs() {
+  DEBUG_BEGIN("void siconos::simulation::EventDriven::initOSIRhs()\n")
   // === initialization for OneStepIntegrators ===
-  OSI::TYPES  osiType = (*_allOSI->begin())->getType();
-  for(OSIIterator itosi = _allOSI->begin();  itosi != _allOSI->end(); ++itosi)
-  {
-    //Check whether OSIs used are of the same type
-    if((*itosi)->getType() != osiType)
-      THROW_EXCEPTION("OSIs used must be of the same type");
+  auto osiType = (*_allOSI->begin())->getType();
+  for (auto itosi : *_allOSI) {
+    // Check whether OSIs used are of the same type
+    if ((itosi)->getType() != osiType) THROW_EXCEPTION("OSIs used must be of the same type");
 
     // perform the initialization
-    DynamicalSystemsGraph::VIterator dsi, dsend;
-    SP::DynamicalSystemsGraph osiDSGraph = (*itosi)->dynamicalSystemsGraph();
-    for(std::tie(dsi, dsend) = osiDSGraph->vertices(); dsi != dsend; ++dsi)
-    {
-      if(!(*itosi)->checkOSI(dsi)) continue;
+    siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
+    auto osiDSGraph = (itosi)->dynamicalSystemsGraph();
+    for (std::tie(dsi, dsend) = osiDSGraph->vertices(); dsi != dsend; ++dsi) {
+      if (!itosi->checkOSI(dsi)) continue;
 
-      SP::DynamicalSystem ds = osiDSGraph->bundle(*dsi);
+      auto ds = osiDSGraph->bundle(*dsi);
       // Initialize right-hand side
       ds->initRhs(startingTime());
-      //DEBUG_EXPR(ds->display());
+      // DEBUG_EXPR(ds->display());
     }
   }
-  DEBUG_END("void EventDriven::initOSIRhs()\n")
+  DEBUG_END("void siconos::simulation::EventDriven::initOSIRhs()\n")
 }
 
-void EventDriven::firstInitialize()
-{
-  if(!_isInitialized)
-  {
+void siconos::simulation::EventDriven::firstInitialize() {
+  if (!_isInitialized) {
     DEBUG_PRINT(" - 6 - First initialization of the simulation\n");
-
 
     _T = _nsds->finalT();
 
@@ -359,7 +350,7 @@ void EventDriven::firstInitialize()
     // OSI, OSNS ...
     // _eventsManager->preUpdate(*this);
 
-    _tend =  _eventsManager->nextTime();
+    _tend = _eventsManager->nextTime();
 
     // End of initialize:
 
@@ -370,13 +361,12 @@ void EventDriven::firstInitialize()
     //  - event after _tinit.
     //  - currentEvent of the simu. corresponds to _tinit and nextEvent
     //  - to _tend.
-    
-    SP::Topology topo = _nsds->topology();
+
+    auto topo = _nsds->topology();
     // Detect NonSmoothEvent at the beginning of the simulation
-    if(topo->indexSetsSize() > 1)
-    {
-      SP::InteractionsGraph indexSet1 = _nsds->topology()->indexSet(1);
-      if(indexSet1->size() != 0)  // There is one non-smooth event to be added
+    if (topo->indexSetsSize() > 1) {
+      auto indexSet1 = _nsds->topology()->indexSet(1);
+      if (indexSet1->size() != 0)  // There is one non-smooth event to be added
       {
         DEBUG_PRINT("Schedule an event at starting time\n");
         _eventsManager->scheduleNonSmoothEvent(*this, _eventsManager->startingTime(), false);
@@ -387,56 +377,56 @@ void EventDriven::firstInitialize()
   }
 }
 
-void EventDriven::initialize()
-{
-  DEBUG_BEGIN("void EventDriven::initialize()\n");
+void siconos::simulation::EventDriven::initialize() {
+  DEBUG_BEGIN("void siconos::simulation::EventDriven::initialize()\n");
 
   // Initialization for Simulation
   _indexSet0 = _nsds->topology()->indexSet(0);
   _DSG0 = _nsds->topology()->dSG(0);
 
   Simulation::initialize();
+
   // Initialization for all OneStepIntegrators
-  //initOSIs();
+  // initOSIs();
   initOSIRhs();
-  DEBUG_END("void EventDriven::initialize()\n")
+  DEBUG_END("void siconos::simulation::EventDriven::initialize()\n")
 }
 
-void EventDriven::computef(OneStepIntegrator& osi, integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)
-{
-
-
-  DEBUG_BEGIN("EventDriven::computef(OneStepIntegrator& osi, integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)\n");
+void siconos::simulation::EventDriven::computef(siconos::integrators::OneStepIntegrator& osi,
+                                                int* sizeOfX, double* time, double* x,
+                                                double* xdot) {
+  DEBUG_BEGIN(
+      "siconos::simulation::EventDriven::computef(OneStepIntegrator& osi, "
+      "int * sizeOfX, "
+      "double * time, double * x, "
+      "double * xdot)\n");
   // computeF is supposed to fill xdot in, using the definition of the
   // dynamical systems belonging to the osi
 
   // Check osi type: only lsodar is allowed.
-  assert(osi.getType() == OSI::LSODAROSI);
+  assert(osi.getType() == siconos::integrators::IntegratorType::LSODAROSI);
 
-  LsodarOSI& lsodar = static_cast<LsodarOSI&>(osi);
+  auto& lsodar = static_cast<siconos::integrators::LsodarOSI&>(osi);
   // fill in xWork vector (ie all the x of the ds of this osi) with x
   lsodar.fillXWork(sizeOfX, x);
 
   double t = *time;
   // Update Jacobian matrices at all interactions
-  InteractionsGraph::VIterator ui, uiend;
-  for(std::tie(ui, uiend) = _indexSet0->vertices(); ui != uiend; ++ui)
-  {
-    Interaction& inter = *_indexSet0->bundle(*ui);
+  siconos::graphs::InteractionsGraph::VIterator ui, uiend;
+  for (std::tie(ui, uiend) = _indexSet0->vertices(); ui != uiend; ++ui) {
+    auto& inter = *_indexSet0->bundle(*ui);
     inter.relation()->computeJach(t, inter);
   }
 
   // solve a LCP at "acceleration" level if required
-  if(!_allNSProblems->empty())
-  {
-    if(((*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->hasInteractions()))
-    {
+  if (!_allNSProblems->empty()) {
+    if (((*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->hasInteractions())) {
       // Update the state of the DS
       (*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->compute(t);
-      _nsds->updateInput(t,2); // Necessary to compute DS state below
+      _nsds->updateInput(t, 2);  // Necessary to compute DS state below
     }
     // Compute the right-hand side ( xdot = f + r in DS) for all the
-    //ds, with the new value of input.  lsodar->computeRhs(t);
+    // ds, with the new value of input.  lsodar->computeRhs(t);
   }
 
   // update the DS of the OSI.
@@ -447,42 +437,36 @@ void EventDriven::computef(OneStepIntegrator& osi, integer * sizeOfX, doublereal
   // Get the required value, ie xdot for output.
   unsigned pos = 0;
 
-  DynamicalSystemsGraph::VIterator dsi, dsend;
-  SP::DynamicalSystemsGraph osiDSGraph = lsodar.dynamicalSystemsGraph();
-  for(std::tie(dsi, dsend) = osiDSGraph->vertices(); dsi != dsend; ++dsi)
-  {
-    if(!(lsodar.checkOSI(dsi))) continue;
+  siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
+  auto osiDSGraph = lsodar.dynamicalSystemsGraph();
+  for (std::tie(dsi, dsend) = osiDSGraph->vertices(); dsi != dsend; ++dsi) {
+    if (!(lsodar.checkOSI(dsi))) continue;
 
-    DynamicalSystem& ds = *(osiDSGraph->bundle(*dsi));
-    Type::Siconos dsType = Type::value(ds);
-    if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
-    {
-      LagrangianDS& LDS = static_cast<LagrangianDS&>(ds);
-      SiconosVector& qDotTmp = *LDS.velocity();
-      SiconosVector& qDotDotTmp = *LDS.acceleration();
+    auto ds = osiDSGraph->bundle(*dsi);
+    if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+      auto& qDotTmp = *lds->velocity();
+      auto& qDotDotTmp = *lds->acceleration();
       pos += qDotTmp.copyData(&xdot[pos]);
       pos += qDotDotTmp.copyData(&xdot[pos]);
-    }
-    else
-    {
-      SiconosVector& xtmp2 = ds.getRhs(); // Pointer link !
-      //DEBUG_EXPR(xtmp2.display(););
+    } else {
+      auto& xtmp2 = ds->getRhs();  // Pointer link !
+      // DEBUG_EXPR(xtmp2.display(););
       pos += xtmp2.copyData(&xdot[pos]);
     }
   }
-  DEBUG_END("EventDriven::computef(OneStepIntegrator& osi, integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)\n");
-
+  DEBUG_END(
+      "siconos::simulation::EventDriven::computef(OneStepIntegrator& osi, "
+      "int * sizeOfX, "
+      "double * time, double * x, "
+      "double * xdot)\n");
 }
 
-void EventDriven::computeJacobianfx(OneStepIntegrator& osi,
-                                    integer *sizeOfX,
-                                    doublereal *time,
-                                    doublereal *x,
-                                    doublereal *jacob)
-{
-  assert(osi.getType() == OSI::LSODAROSI);
+void siconos::simulation::EventDriven::computeJacobianfx(
+    siconos::integrators::OneStepIntegrator& osi, int* sizeOfX, double* time, double* x,
+    double* jacob) {
+  assert(osi.getType() == siconos::integrators::IntegratorType::LSODAROSI);
 
-  LsodarOSI& lsodar = static_cast<LsodarOSI&>(osi);
+  auto& lsodar = static_cast<siconos::integrators::LsodarOSI&>(osi);
 
   // Remark A: according to DLSODAR doc, each call to jacobian is
   // preceded by a call to f with the same arguments NEQ, T, and Y.
@@ -503,65 +487,57 @@ void EventDriven::computeJacobianfx(OneStepIntegrator& osi,
 
   unsigned int i = 0;
   unsigned pos = 0;
-  DynamicalSystemsGraph::VIterator dsi, dsend;
-  SP::DynamicalSystemsGraph osiDSGraph = lsodar.dynamicalSystemsGraph();
-  for(std::tie(dsi, dsend) = osiDSGraph->vertices(); dsi != dsend; ++dsi)
-  {
-    if(!(lsodar.checkOSI(dsi))) continue;
+  siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
+  auto osiDSGraph = lsodar.dynamicalSystemsGraph();
+  for (std::tie(dsi, dsend) = osiDSGraph->vertices(); dsi != dsend; ++dsi) {
+    if (!(lsodar.checkOSI(dsi))) continue;
 
-    DynamicalSystem& ds = *(osiDSGraph->bundle(*dsi));
-    Type::Siconos dsType = Type::value(ds);
-    if(dsType == Type::LagrangianDS || dsType == Type::LagrangianLinearTIDS)
-    {
-      LagrangianDS& lds = static_cast<LagrangianDS&>(ds);
-      BlockMatrix& jacotmp = static_cast<BlockMatrix&>(*lds.jacobianRhsx());
-      for(unsigned int j = 0; j < lds.n(); ++j)
-      {
-        for(unsigned int k = 0; k < lds.dimension(); ++k)
-          jacob[i++] = jacotmp(k, j);
+    auto ds = osiDSGraph->bundle(*dsi);
+    if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+      auto jacotmp =
+          std::dynamic_pointer_cast<siconos::algebra::BlockMatrix>(lds->jacobianRhsx());
+      for (decltype(lds->n()) j = 0; j < lds->n(); ++j) {
+        for (decltype(lds->dimension()) k = 0; k < lds->dimension(); ++k)
+          jacob[i++] = jacotmp->getValue(k, j);
       }
-    }
-    else if(dsType == Type::FirstOrderNonLinearDS || dsType == Type::FirstOrderLinearDS
-            || dsType == Type::FirstOrderLinearTIDS)
-    {
-      SimpleMatrix& jacotmp = static_cast<SimpleMatrix&>(*(ds.jacobianRhsx())); // Pointer link !
-      pos += jacotmp.copyData(&jacob[pos]);
-    }
-    else
-    {
-      THROW_EXCEPTION("EventDriven::computeJacobianfx, type of DynamicalSystem not yet supported.");
+    } else if (auto lds =
+                   std::dynamic_pointer_cast<siconos::modeling::FirstOrderNonLinearDS>(ds)) {
+      auto jacotmp =
+          std::static_pointer_cast<siconos::algebra::SimpleMatrix>(ds->jacobianRhsx());
+      pos += jacotmp->copyData(&jacob[pos]);
+    } else {
+      THROW_EXCEPTION(
+          "siconos::simulation::EventDriven::computeJacobianfx, type of "
+          "DynamicalSystem not "
+          "yet supported.");
     }
   }
 }
 
-unsigned int EventDriven::computeSizeOfg()
-{
+unsigned int siconos::simulation::EventDriven::computeSizeOfg() {
   return (_indexSet0->size());
 }
 
-
-void EventDriven::computeg(SP::OneStepIntegrator osi,
-                           integer * sizeOfX, doublereal* time,
-                           doublereal* x, integer * ng,
-                           doublereal * gOut)
-{
+void siconos::simulation::EventDriven::computeg(
+    std::shared_ptr<siconos::integrators::OneStepIntegrator> osi, int* sizeOfX, double* time,
+    double* x, int* ng, double* gOut) {
   assert(_nsds);
   assert(_nsds->topology());
-  InteractionsGraph::VIterator ui, uiend;
-  SP::Topology topo = _nsds->topology();
-  SP::InteractionsGraph indexSet2 = topo->indexSet(2);
-  unsigned int nsLawSize, k = 0 ;
-  SP::SiconosVector y, ydot, yddot, lambda;
-  SP::LsodarOSI lsodar = std::static_pointer_cast<LsodarOSI>(osi);
-  // Solve LCP at acceleration level to calculate the lambda[2] at Interaction of indexSet[2]
+  siconos::graphs::InteractionsGraph::VIterator ui, uiend;
+  auto topo = _nsds->topology();
+  auto indexSet2 = topo->indexSet(2);
+  unsigned int nsLawSize, k = 0;
+  std::shared_ptr<siconos::algebra::SiconosVector> y, ydot, yddot, lambda;
+  auto lsodar = std::static_pointer_cast<siconos::integrators::LsodarOSI>(osi);
+  // Solve LCP at acceleration level to calculate the lambda[2] at Interaction
+  // of indexSet[2]
   lsodar->fillXWork(sizeOfX, x);
   //
   double t = *time;
-  if(!_allNSProblems->empty())
-  {
-    if(((*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->hasInteractions()))
-    {
-      (*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->compute(t);
+  if (!_allNSProblems->empty()) {
+    if (((*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_ACC]
+             ->hasInteractions())) {
+      (*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_ACC]->compute(t);
     }
   };
   /*
@@ -570,161 +546,131 @@ void EventDriven::computeg(SP::OneStepIntegrator osi,
      free(xdottmp);
      */
   // Update the output from level 0 to level 1
-  _nsds->updateOutput(t,0);
-  _nsds->updateOutput(t,1);
-  _nsds->updateOutput(t,2);
+  _nsds->updateOutput(t, 0);
+  _nsds->updateOutput(t, 1);
+  _nsds->updateOutput(t, 2);
   //
-  for(std::tie(ui, uiend) = _indexSet0->vertices(); ui != uiend; ++ui)
-  {
-    SP::Interaction inter = _indexSet0->bundle(*ui);
+  for (std::tie(ui, uiend) = _indexSet0->vertices(); ui != uiend; ++ui) {
+    auto inter = _indexSet0->bundle(*ui);
     nsLawSize = inter->nonSmoothLaw()->size();
-    y = inter->y(0);   // output y at this Interaction
-    ydot = inter->y(1); // output of level 1 at this Interaction
+    y = inter->y(0);     // output y at this Interaction
+    ydot = inter->y(1);  // output of level 1 at this Interaction
     yddot = inter->y(2);
-    lambda = inter->lambda(2); // input of level 2 at this Interaction
-    if(!(indexSet2->is_vertex(inter)))  // if Interaction is not in the indexSet[2]
+    lambda = inter->lambda(2);           // input of level 2 at this Interaction
+    if (!(indexSet2->is_vertex(inter)))  // if Interaction is not in the indexSet[2]
     {
-      for(unsigned int i = 0; i < nsLawSize; ++i)
-      {
-        if((*y)(i) > _TOL_ED)
-        {
+      for (decltype(nsLawSize) i = 0; i < nsLawSize; ++i) {
+        if ((*y)(i) > tolerance_) {
           gOut[k] = (*y)(i);
-        }
-        else
-        {
-          if((*ydot)(i) > -_TOL_ED)
-          {
-            gOut[k] = 100 * _TOL_ED;
-          }
-          else
-          {
+        } else {
+          if ((*ydot)(i) > -tolerance_) {
+            gOut[k] = 100 * tolerance_;
+          } else {
             gOut[k] = (*y)(i);
           }
         }
         k++;
       }
-    }
-    else // If Interaction is in the indexSet[2]
+    } else  // If Interaction is in the indexSet[2]
     {
-      for(unsigned int i = 0; i < nsLawSize; ++i)
-      {
-        if((*lambda)(i) > _TOL_ED)
-        {
-          gOut[k] = (*lambda)(i); // g = lambda[2]
-        }
-        else
-        {
-          if((*yddot)(i) > _TOL_ED)
-          {
+      for (decltype(nsLawSize) i = 0; i < nsLawSize; ++i) {
+        if ((*lambda)(i) > tolerance_) {
+          gOut[k] = (*lambda)(i);  // g = lambda[2]
+        } else {
+          if ((*yddot)(i) > tolerance_) {
             gOut[k] = (*lambda)(i);
-          }
-          else
-          {
-            gOut[k] = 100 * _TOL_ED;
+          } else {
+            gOut[k] = 100 * tolerance_;
           }
         }
         k++;
       }
     }
-
   }
 }
-void EventDriven::updateImpactState()
-{
-  OSIIterator itOSI;
+void siconos::simulation::EventDriven::updateImpactState() {
   // Compute input = R(lambda[1])
-  _nsds->updateInput(nextTime(),1);
+  _nsds->updateInput(nextTime(), 1);
 
   // Compute post-impact velocity
-  for(itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
-    (*itOSI)->updateState(1);
+  for (auto itOSI : *_allOSI) itOSI->updateState(1);
 }
 
-void EventDriven::updateSmoothState()
-{
+void siconos::simulation::EventDriven::updateSmoothState() {
   // Update input of level 2
-  _nsds->updateInput(nextTime(),2); // Note FP : Probably already up to date? (previous call of updateInput in simu)
-  OSIIterator itOSI;
+  _nsds->updateInput(nextTime(),
+                     2);  // Note FP : Probably already up to date? (previous
+                          // call of updateInput in simu)
   // Compute acceleration
-  for(itOSI = _allOSI->begin(); itOSI != _allOSI->end() ; ++itOSI)
-    (*itOSI)->updateState(2);
+  for (auto itOSI : *_allOSI) itOSI->updateState(2);
 }
 
-void EventDriven::updateState(unsigned int levelInput)
-{
+void siconos::simulation::EventDriven::updateState(unsigned int levelInput) {
   assert(levelInput <= 2);
-  if(levelInput == 1)
-  {
+  if (levelInput == 1) {
     updateImpactState();
-  }
-  else
-  {
+  } else {
     updateSmoothState();
   }
 }
 
-void EventDriven::updateOutput(unsigned int levelInput)
-{
+void siconos::simulation::EventDriven::updateOutput(unsigned int levelInput) {
   // Update output (y)
-  _nsds->updateOutput(nextTime(),levelInput);
+  _nsds->updateOutput(nextTime(), levelInput);
   // Warning: index sets are not updated in this function !!
 }
 
-void EventDriven::advanceToEvent()
-{
-  DEBUG_BEGIN("EventDriven::advanceToEvent()\n");
+void siconos::simulation::EventDriven::advanceToEvent() {
+  DEBUG_BEGIN("siconos::simulation::EventDriven::advanceToEvent()\n");
 
   initialize();
-
 
   // Update interactions if a manager was provided
   updateInteractions();
 
   _tinit = _eventsManager->startingTime();
-  _tend =  _eventsManager->nextTime();
+  _tend = _eventsManager->nextTime();
   _tout = _tend;
 
   DEBUG_PRINTF("_tinit = %g, _tend = %g \n", _tinit, _tend);
 
   bool isNewEventOccur = false;  // set to true if a new event occur during integration
-  OSI::TYPES  osiType = (*_allOSI->begin())->getType(); // Type of OSIs
+  auto osiType = (*_allOSI->begin())->getType();  // Type of OSIs
   double _minConstraint = 0.0;
 
   // Initialize lambdas of all interactions.
-  InteractionsGraph::VIterator ui, uiend, vnext;
+  siconos::graphs::InteractionsGraph::VIterator ui, uiend, vnext;
   std::tie(ui, uiend) = _indexSet0->vertices();
-  for(vnext = ui; ui != uiend; ui = vnext)
-  {
+  for (vnext = ui; ui != uiend; ui = vnext) {
     ++vnext;
     _indexSet0->bundle(*ui)->resetAllLambda();
   }
 
-  if(osiType == OSI::NEWMARKALPHAOSI)
-  {
+  if (osiType == siconos::integrators::IntegratorType::NEWMARKALPHAOSI) {
     // if the time to next event if too small, we skip the integration
     // it may happen if a first event is of time nonsmooth at the initial time
     // with _tout= _tend
-    if(fabs(_tend-_tinit) >= 10 * MACHINE_PREC)
-    {
+    if (fabs(_tend - _tinit) >= 10 * siconos::internal::MACHINE_PREC) {
       newtonSolve(_newtonTolerance, _newtonMaxIteration);
-    }
-    else
-    {
-      SP::InteractionsGraph indexSet2 = _nsds->topology()->indexSet(2);
-      if(indexSet2->size() != 0)  // if indexSet2 is not empty, solve LCP to determine contact forces
+    } else {
+      auto indexSet2 = _nsds->topology()->indexSet(2);
+      if (indexSet2->size() != 0)  // if indexSet2 is not empty, solve LCP to
+                                   // determine contact forces
       {
-        int  info = computeOneStepNSProblem(SICONOS_OSNSP_ED_SMOOTH_POS);
-        if(info != 0)
-        {
-          cout << "Warning!!!In EventDriven::newtonSolve: LCP solver may fail" <<endl;
+        int info = computeOneStepNSProblem(siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_POS);
+        if (info != 0) {
+          std::cout << "Warning!!!In siconos::simulation::EventDriven::newtonSolve: "
+                       "LCP solver may "
+                       "fail"
+                    << "\n";
         }
       }
       updateInput(2);
     }
     // Update after Newton iteration
     // Update input of level 2 >>> has already been done in newtonSolve
-    // Update state of all Dynamicall Systems >>>  has already been done in newtonSolve
-    // Update outputs of levels 0, 1, 2
+    // Update state of all Dynamicall Systems >>>  has already been done in
+    // newtonSolve Update outputs of levels 0, 1, 2
     updateOutput(0);
     updateOutput(1);
     updateOutput(2);
@@ -732,31 +678,34 @@ void EventDriven::advanceToEvent()
     _minConstraint = detectEvents();
     //
 #ifdef DEBUG_MESSAGES
-    cout << "========== EventDriven::advanceToEvent =============" <<endl;
-    cout.precision(15);
-    cout << "Istate: " << _istate <<endl;
-    cout << "Maximum value of constraint functions: " << _minConstraint <<endl;
+    std::cout << "========== siconos::simulation::EventDriven::advanceToEvent "
+                 "============="
+              << "\n";
+    std::cout.precision(15);
+    std::cout << "Istate: " << _istate << "\n";
+    std::cout << "Maximum value of constraint functions: " << _minConstraint << "\n";
 #endif
     //
-    if(_istate != 2)  //some events occur
+    if (_istate != 2)  // some events occur
     {
-      cout << "In EventDriven::advanceToEvent, some events are detected!!!" <<endl;
-      if(std::abs(_minConstraint) < _TOL_ED)  // events occur at the end of the integration step
+      std::cout << "In siconos::simulation::EventDriven::advanceToEvent, some "
+                   "events are detected!!!"
+                << "\n";
+      if (std::abs(_minConstraint) <
+          tolerance_)  // events occur at the end of the integration step
       {
         isNewEventOccur = true;
-      }
-      else // events need to be localized
+      } else  // events need to be localized
       {
         isNewEventOccur = true;
         LocalizeFirstEvent();
       }
       // add new event to the list to be handled
-      cout << "A new event occurs at time: " << _tout <<endl;
+      std::cout << "A new event occurs at time: " << _tout << "\n";
       _eventsManager->scheduleNonSmoothEvent(*this, _tout);
     }
-  }
-  else if(osiType == OSI::LSODAROSI || osiType == OSI::HEM5OSI)
-  {
+  } else if (osiType == siconos::integrators::IntegratorType::LSODAROSI ||
+             osiType == siconos::integrators::IntegratorType::HEM5OSI) {
     // WARNING: this is supposed to work for only one OSI, including all
     // the DS.  To be reviewed for multiple OSI case (if it has sense?).
 
@@ -774,123 +723,109 @@ void EventDriven::advanceToEvent()
     //  }
     // _tout = _tend;
     // call integrate method for each OSI, between _tinit and _tend.
-    OSIIterator it;
-    for(it = _allOSI->begin(); it != _allOSI->end(); ++it)
-    {
-      (*it)->resetAllNonSmoothParts();
+    for (auto it : *_allOSI) {
+      it->resetAllNonSmoothParts();
 
       //====================================================================================
-      //     cout << " Start of LsodarOSI integration" << endl;
-      (*it)->integrate(_tinit, _tend, _tout, _istate); // integrate must
+      //     std::cout << " Start of LsodarOSI integration" << "\n";
+      it->integrate(_tinit, _tend, _tout, _istate);  // integrate must
 
-      //  cout << " End of LsodarOSI integration" << endl;
-      // SP::LsodarOSI lsodar = std::static_pointer_cast<LsodarOSI>(*it);
-      // SA::integer iwork = lsodar->getIwork();
-      // SA::doublereal rwork = lsodar->getRwork();
-      //  cout << "Number of steps used: " << iwork[10] <<endl;
-      //  cout << "Method order last used: " << iwork[13] <<endl;
-      //  cout << "Step size last used: " << rwork[10] <<endl;
+      //  std::cout << " End of LsodarOSI integration" << "\n";
+      // std::shared_ptr<siconos::integrators::LsodarOSI> lsodar =
+      // std::static_pointer_cast<LsodarOSI>(it);
+      // auto iwork = lsodar->getIwork();
+      // auto rwork = lsodar->getRwork();
+      //  std::cout << "Number of steps used: " << iwork[10] <<"\n";
+      //  std::cout << "Method order last used: " << iwork[13] <<"\n";
+      //  std::cout << "Step size last used: " << rwork[10] <<"\n";
       // return a flag (_istate) telling if _tend has been  reached or not.
       //====================================================================================
 
-      if(_printStat)
-      {
-        statOut << " =================> Results after advanceToEvent <================= " <<endl;
-        statOut << " Starting time: " << _tinit <<endl;
-        statOut << " _istate " << _istate <<endl;
+      if (_printStat) {
+        statOut << " =================> Results after advanceToEvent "
+                   "<================= "
+                << "\n";
+        statOut << " Starting time: " << _tinit << "\n";
+        statOut << " _istate " << _istate << "\n";
       }
-      if(_istate == 3)  // ie if _tout is not equal to _tend: one or more roots have been found.
+      if (_istate == 3)  // ie if _tout is not equal to _tend: one or more roots
+                         // have been found.
       {
         DEBUG_PRINTF("An event has been found at time = %g", _tout);
         isNewEventOccur = true;
         // Add an event into the events manager list
         _eventsManager->scheduleNonSmoothEvent(*this, _tout);
-        if(_printStat)
-          statOut << " -----------> New non-smooth event at time " << _tout <<endl;
+        if (_printStat)
+          statOut << " -----------> New non-smooth event at time " << _tout << "\n";
       }
-      // if(_printStat)
-      //   {
-      //     SP::LsodarOSI lsodar = std::static_pointer_cast<LsodarOSI>(*it);
-      //     statOut << "Results at time " << _tout << ":" <<endl;
-      //     SA::integer iwork = lsodar->getIwork();
-      //     SA::doublereal Rwork = lsodar->getRwork();
-      //     statOut << "Number of steps: " << iwork[10] << ", number of f evaluations: " << iwork[11] << ", number of jacobianF eval.: " << iwork[12] << "." <<endl;
-      //   }
     }
     // Set model time to _tout
-    //update output[0], output[1], output[2]
+    // update output[0], output[1], output[2]
     updateOutput(0);
     updateOutput(1);
     updateOutput(2);
-    //update lambda[2], input[2] and indexSet[2] with double consitions for the case there is no new event added during time integration, otherwise, this
-    // update is done when the new event is processed
-    if(!isNewEventOccur)
-    {
-      if(!_allNSProblems->empty())
-      {
+    // update lambda[2], input[2] and indexSet[2] with double consitions for the
+    // case there is no new event added during time integration, otherwise, this
+    //  update is done when the new event is processed
+    if (!isNewEventOccur) {
+      if (!_allNSProblems->empty()) {
         // Solve LCP at acceleration level
-        if(((*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->hasInteractions()))
-        {
-          SP::InteractionsGraph indexSet2 = _nsds->topology()->indexSet(2);
-          if(indexSet2->size() != 0)
-          {
+        if (((*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->hasInteractions())) {
+          auto indexSet2 = _nsds->topology()->indexSet(2);
+          if (indexSet2->size() != 0) {
             (*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->compute(_tout);
-            _nsds->updateInput(_tout,2);
+            _nsds->updateInput(_tout, 2);
             // update indexSet[2] with double condition
-            //updateIndexSetsWithDoubleCondition();
+            // updateIndexSetsWithDoubleCondition();
           }
         }
       }
     }
+  } else {
+    THROW_EXCEPTION(
+        "In siconos::simulation::EventDriven::advanceToEvent, this type of "
+        "OneStepIntegrator "
+        "does not exist for Event-Driven scheme!!!");
   }
-  else
-  {
-    THROW_EXCEPTION("In EventDriven::advanceToEvent, this type of OneStepIntegrator does not exist for Event-Driven scheme!!!");
-  }
-  DEBUG_END("EventDriven::advanceToEvent()\n");
+  DEBUG_END("siconos::simulation::EventDriven::advanceToEvent()\n");
 }
 
-
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-double EventDriven::computeResiduConstraints()
-{
+double siconos::simulation::EventDriven::computeResiduConstraints() {
   // Make sure that the state of all Dynamical Systems was updated
-  double t = nextTime(); // time at the end of the step
-  SP::InteractionsGraph indexSet2 = _nsds->topology()->indexSet(2);
+  double t = nextTime();  // time at the end of the step
+  auto indexSet2 = _nsds->topology()->indexSet(2);
   double _y;
   // Loop over all interactions of indexSet2
-  InteractionsGraph::VIterator ui, uiend;
+  siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   double _maxResiduGap = 0.0;
-  for(OSIIterator itosi = _allOSI->begin(); itosi != _allOSI->end(); ++itosi)
-  {
-    if((*itosi)->getType() == OSI::NEWMARKALPHAOSI)
-    {
-      SP::NewMarkAlphaOSI osi_NewMark = std::static_pointer_cast<NewMarkAlphaOSI>(*itosi);
+  for (auto itosi : *_allOSI) {
+    if (itosi->getType() == siconos::integrators::IntegratorType::NEWMARKALPHAOSI) {
+      auto osi_NewMark =
+          std::static_pointer_cast<siconos::integrators::NewMarkAlphaOSI>(itosi);
       bool _flag = osi_NewMark->getFlagVelocityLevel();
-      for(std::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui)
-      {
-        Interaction& inter = *indexSet2->bundle(*ui);
-        if(!_flag)  // constraints at the position level
+      for (std::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui) {
+        auto& inter = *indexSet2->bundle(*ui);
+        if (!_flag)  // constraints at the position level
         {
-          inter.computeOutput(t, 0); // compute y[0] for the interaction at the end time
+          inter.computeOutput(t, 0);  // compute y[0] for the interaction at the end time
           _y = (*inter.y(0))(0);
-        }
-        else // constraints at the velocity level
+        } else  // constraints at the velocity level
         {
-          inter.computeOutput(t, 1); // compute y[1] for the interaction at the end time
+          inter.computeOutput(t, 1);  // compute y[1] for the interaction at the end time
           _y = (*inter.y(1))(0);
         }
 
-        if(_maxResiduGap < abs(_y))
-        {
+        if (_maxResiduGap < abs(_y)) {
           _maxResiduGap = abs(_y);
         }
         DEBUG_PRINTF("Constraint residu: =  %e \n", _y);
       }
-    }
-    else
-    {
-      THROW_EXCEPTION("In EventDriven::predictionNewtonIteration, the current OSI must be NewMarkAlpha scheme!!!");
+    } else {
+      THROW_EXCEPTION(
+          "In siconos::simulation::EventDriven::predictionNewtonIteration, the "
+          "current OSI "
+          "must be NewMarkAlpha scheme!!!");
     }
   }
 
@@ -898,118 +833,114 @@ double EventDriven::computeResiduConstraints()
   return _maxResiduGap;
 }
 
-
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-void EventDriven::prepareNewtonIteration()
-{
-  DEBUG_BEGIN("EventDriven::prepareNewtonIteration()\n");
+void siconos::simulation::EventDriven::prepareNewtonIteration() {
+  DEBUG_BEGIN("siconos::simulation::EventDriven::prepareNewtonIteration()\n");
   // At this stage, we do
   // (1) compute iteration matrix W for all DSs belonging to all OSIs
-  // (2) compute free residu for all DSs belonging to all OSIs and get maximum residu
-  // (3) compute free state for all DSs belonging to all OSIs
-  // (4) compute maximum gap residu over all interactions of indexSet 2
+  // (2) compute free residu for all DSs belonging to all OSIs and get maximum
+  // residu (3) compute free state for all DSs belonging to all OSIs (4) compute
+  // maximum gap residu over all interactions of indexSet 2
   _newtonResiduDSMax = 0.0;
   _newtonResiduYMax = 0.0;
   double _maxResidu;
   // Update input of level 2
-  _nsds->updateInput(nextTime(),2);
+  _nsds->updateInput(nextTime(), 2);
   // Loop over all OSIs
-  OSI::TYPES  osiType;
-  for(OSIIterator itosi = _allOSI->begin(); itosi != _allOSI->end(); ++itosi)
-  {
-    osiType = (*itosi)->getType();
-    if(osiType != OSI::NEWMARKALPHAOSI)
-    {
-      THROW_EXCEPTION("In EventDriven::prepareNewtonIteration, the current OSI is not NewMarkAlpha scheme!!!");
+
+  for (auto itosi : *_allOSI) {
+    auto osiType = itosi->getType();
+    if (osiType != siconos::integrators::IntegratorType::NEWMARKALPHAOSI) {
+      THROW_EXCEPTION(
+          "In siconos::simulation::EventDriven::prepareNewtonIteration, the "
+          "current OSI is "
+          "not NewMarkAlpha scheme!!!");
     }
     // Compute iteration matrix W
-    (*itosi)->prepareNewtonIteration(nextTime()); // preparation for each OSI
+    itosi->prepareNewtonIteration(nextTime());  // preparation for each OSI
     // Compute free residus, maximum residu
-    _maxResidu = (*itosi)->computeResidu();
-    if(_newtonResiduDSMax < _maxResidu)
-    {
+    _maxResidu = itosi->computeResidu();
+    if (_newtonResiduDSMax < _maxResidu) {
       _newtonResiduDSMax = _maxResidu;
     }
     // Compute free state
-    (*itosi)->computeFreeState();
+    itosi->computeFreeState();
   }
   // Compute maximum gap residu
   _newtonResiduYMax = computeResiduConstraints();
-  DEBUG_END("EventDriven::prepareNewtonIteration()\n");
+  DEBUG_END("siconos::simulation::EventDriven::prepareNewtonIteration()\n");
 }
 
-
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-bool EventDriven::newtonCheckConvergence(double _tol)
-{
+bool siconos::simulation::EventDriven::newtonCheckConvergence(double _tol) {
   bool checkConvergence = true;
-  if((_newtonResiduDSMax > _tol) || (_newtonResiduYMax > _tol))
-  {
+  if ((_newtonResiduDSMax > _tol) || (_newtonResiduYMax > _tol)) {
     checkConvergence = false;
   }
   return checkConvergence;
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-void EventDriven::predictionNewtonIteration()
-{
+void siconos::simulation::EventDriven::predictionNewtonIteration() {
   // Prediction of the state for all Dynamical Systems before Newton iteration
-  for(OSIIterator itosi = _allOSI->begin(); itosi != _allOSI->end(); ++itosi)
-  {
-    if((*itosi)->getType() == OSI::NEWMARKALPHAOSI)
-    {
-      SP::NewMarkAlphaOSI osi_NewMark = std::static_pointer_cast<NewMarkAlphaOSI>(*itosi);
+  for (auto itosi : *_allOSI) {
+    if (itosi->getType() == siconos::integrators::IntegratorType::NEWMARKALPHAOSI) {
+      auto osi_NewMark =
+          std::static_pointer_cast<siconos::integrators::NewMarkAlphaOSI>(itosi);
       osi_NewMark->prediction();
-    }
-    else
-    {
-      THROW_EXCEPTION("In EventDriven::predictionNewtonIteration, the current OSI must be NewMarkAlpha scheme!!!");
+    } else {
+      THROW_EXCEPTION(
+          "In siconos::simulation::EventDriven::predictionNewtonIteration, the "
+          "current OSI "
+          "must be NewMarkAlpha scheme!!!");
     }
   }
-  // Prediction of the output and lambda for all Interactions before Newton iteration
-  double t = nextTime(); // time at the end of the step
+  // Prediction of the output and lambda for all Interactions before Newton
+  // iteration
+  double t = nextTime();  // time at the end of the step
   // Loop over all interactions
-  InteractionsGraph::VIterator ui, uiend;
-  for(std::tie(ui, uiend) = _indexSet0->vertices(); ui != uiend; ++ui)
-  {
-    Interaction& inter = *_indexSet0->bundle(*ui);
-    inter.computeOutput(t, 0); // compute y[0] for the interaction at the end time with the state predicted for Dynamical Systems
-    inter.lambda(2)->zero(); // reset lambda[2] to zero
+  siconos::graphs::InteractionsGraph::VIterator ui, uiend;
+  for (std::tie(ui, uiend) = _indexSet0->vertices(); ui != uiend; ++ui) {
+    auto& inter = *_indexSet0->bundle(*ui);
+    inter.computeOutput(t,
+                        0);   // compute y[0] for the interaction at the end time
+                              // with the state predicted for Dynamical Systems
+    inter.lambda(2)->zero();  // reset lambda[2] to zero
   }
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-void EventDriven::correctionNewtonIteration()
-{
-  //Update the input of level 2 for all Dynamical Systems after each iteration
-  _nsds->updateInput(nextTime(),2);
+void siconos::simulation::EventDriven::correctionNewtonIteration() {
+  // Update the input of level 2 for all Dynamical Systems after each iteration
+  _nsds->updateInput(nextTime(), 2);
   // Correction
-  for(OSIIterator itosi = _allOSI->begin(); itosi != _allOSI->end(); ++itosi)
-  {
-    if((*itosi)->getType() == OSI::NEWMARKALPHAOSI)
-    {
-      SP::NewMarkAlphaOSI osi_NewMark = std::static_pointer_cast<NewMarkAlphaOSI>(*itosi);
+  for (auto itosi : *_allOSI) {
+    if (itosi->getType() == siconos::integrators::IntegratorType::NEWMARKALPHAOSI) {
+      auto osi_NewMark =
+          std::static_pointer_cast<siconos::integrators::NewMarkAlphaOSI>(itosi);
       osi_NewMark->correction();
-    }
-    else
-    {
-      THROW_EXCEPTION("In EventDriven::correctionNewtonIteration, the current OSI must be NewMarkAlpha scheme!!!");
+    } else {
+      THROW_EXCEPTION(
+          "In siconos::simulation::EventDriven::correctionNewtonIteration, the "
+          "current OSI "
+          "must be NewMarkAlpha scheme!!!");
     }
   }
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-void EventDriven::newtonSolve(double criterion, unsigned int maxStep)
-{
-  DEBUG_BEGIN("EventDriven::newtonSolve(double criterion, unsigned int maxStep)\n");
+void siconos::simulation::EventDriven::newtonSolve(double criterion, unsigned int maxStep) {
+  DEBUG_BEGIN(
+      "siconos::simulation::EventDriven::newtonSolve(double criterion, "
+      "unsigned int "
+      "maxStep)\n");
   _isNewtonConverge = false;
-  _newtonNbIterations = 0; // number of Newton iterations
+  _newtonNbIterations = 0;  // number of Newton iterations
   int info = 0;
-  _istate = 1; // beginning of time integration
+  _istate = 1;  // beginning of time integration
   // Prediction
   predictionNewtonIteration();
-  while(1 != 0)
-  {
+  while (1 != 0) {
     _newtonNbIterations++;
     // Prepare for iteration
     prepareNewtonIteration();
@@ -1017,149 +948,143 @@ void EventDriven::newtonSolve(double criterion, unsigned int maxStep)
     _isNewtonConverge = newtonCheckConvergence(_newtonTolerance);
     //
 
-    DEBUG_PRINTF("Iteration:  %i \n",_newtonNbIterations);
-    DEBUG_PRINTF("Convergence:  %s \n",(_isNewtonConverge)?"true":"false");
+    DEBUG_PRINTF("Iteration:  %i \n", _newtonNbIterations);
+    DEBUG_PRINTF("Convergence:  %s \n", (_isNewtonConverge) ? "true" : "false");
 
     //
-    if(_isNewtonConverge)
-    {
+    if (_isNewtonConverge) {
       break;
     }
-    if(_newtonNbIterations >  maxStep)
-    {
-      cout << "Warning!!!In EventDriven::newtonSolve: Number of iterations is greater than the maximum value " << maxStep <<endl;
+    if (_newtonNbIterations > maxStep) {
+      std::cout << "Warning!!!In "
+                   "siconos::simulation::EventDriven::newtonSolve: Number of "
+                   "iterations is greater than the maximum value "
+                << maxStep << "\n";
     }
     // If no convergence, proceed iteration
-    SP::InteractionsGraph indexSet2 = _nsds->topology()->indexSet(2);
-    if(indexSet2->size() != 0)  // if indexSet2 is not empty, solve LCP to determine contact forces
+    auto indexSet2 = _nsds->topology()->indexSet(2);
+    if (indexSet2->size() !=
+        0)  // if indexSet2 is not empty, solve LCP to determine contact forces
     {
       info = computeOneStepNSProblem(SICONOS_OSNSP_ED_SMOOTH_POS);
-      if(info != 0)
-      {
-        cout << "Warning!!!In EventDriven::newtonSolve: LCP solver may fail" <<endl;
+      if (info != 0) {
+        std::cout << "Warning!!!In siconos::simulation::EventDriven::newtonSolve: "
+                     "LCP solver may "
+                     "fail"
+                  << "\n";
       }
     }
     // Correction of the state of all Dynamical Systems
     correctionNewtonIteration();
   }
-  DEBUG_END("EventDriven::newtonSolve(double criterion, unsigned int maxStep)\n");
+  DEBUG_END(
+      "siconos::simulation::EventDriven::newtonSolve(double criterion, "
+      "unsigned int "
+      "maxStep)\n");
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-double EventDriven::detectEvents(bool updateIstate)
-{
-  DEBUG_BEGIN("double EventDriven::detectEvents(bool updateIstate)\n")
-  double _minResiduOutput = 0.0; // maximum of g_i with i running over all activated or deactivated contacts
-  // Loop over all interactions to detect whether some constraints are activated or deactivated
+double siconos::simulation::EventDriven::detectEvents(bool updateIstate) {
+  DEBUG_BEGIN(
+      "double siconos::simulation::EventDriven::detectEvents(bool "
+      "updateIstate)\n")
+  double _minResiduOutput = 0.0;  // maximum of g_i with i running over all
+                                  // activated or deactivated contacts
+  // Loop over all interactions to detect whether some constraints are activated
+  // or deactivated
   bool _IsContactClosed = false;
   bool _IsContactOpened = false;
   bool _IsFirstTime = true;
-  InteractionsGraph::VIterator ui, uiend;
-  SP::SiconosVector y, ydot, lambda;
-  SP::Topology topo = _nsds->topology();
-  SP::InteractionsGraph indexSet2 = topo->indexSet(2);
-  for(std::tie(ui, uiend) = _indexSet0->vertices(); ui != uiend; ++ui)
-  {
-    SP::Interaction inter = _indexSet0->bundle(*ui);
-    double nsLawSize = inter->nonSmoothLaw()->size();
-    if(nsLawSize != 1)
-    {
-      THROW_EXCEPTION("In EventDriven::detectEvents, the interaction size > 1 has not been implemented yet!!!");
+  siconos::graphs::InteractionsGraph::VIterator ui, uiend;
+  std::shared_ptr<siconos::algebra::SiconosVector> y, ydot, lambda;
+  auto topo = _nsds->topology();
+  auto indexSet2 = topo->indexSet(2);
+  for (std::tie(ui, uiend) = _indexSet0->vertices(); ui != uiend; ++ui) {
+    auto inter = _indexSet0->bundle(*ui);
+    auto nsLawSize = inter->nonSmoothLaw()->size();
+    if (nsLawSize != 1) {
+      THROW_EXCEPTION(
+          "In siconos::simulation::EventDriven::detectEvents, the interaction "
+          "size > 1 has "
+          "not been implemented yet!!!");
     }
-    y = inter->y(0);   // output y at this Interaction
-    ydot = inter->y(1); // output of level 1 at this Interaction
-    lambda = inter->lambda(2); // input of level 2 at this Interaction
-    if(!(indexSet2->is_vertex(inter)))  // if Interaction is not in the indexSet[2]
+    y = inter->y(0);                     // output y at this Interaction
+    ydot = inter->y(1);                  // output of level 1 at this Interaction
+    lambda = inter->lambda(2);           // input of level 2 at this Interaction
+    if (!(indexSet2->is_vertex(inter)))  // if Interaction is not in the indexSet[2]
     {
-      if((*y)(0) < _TOL_ED)  // gap at the current interaction <= 0
+      if ((*y)(0) < tolerance_)  // gap at the current interaction <= 0
       {
         _IsContactClosed = true;
       }
 
-      if(_IsFirstTime)
-      {
+      if (_IsFirstTime) {
         _minResiduOutput = (*y)(0);
         _IsFirstTime = false;
-      }
-      else
-      {
-        if(_minResiduOutput > (*y)(0))
-        {
+      } else {
+        if (_minResiduOutput > (*y)(0)) {
           _minResiduOutput = (*y)(0);
         }
       }
-    }
-    else // If interaction is in the indexSet[2]
+    } else  // If interaction is in the indexSet[2]
     {
-      if((*lambda)(0) < _TOL_ED)  // normal force at the current interaction <= 0
+      if ((*lambda)(0) < tolerance_)  // normal force at the current interaction <= 0
       {
         _IsContactOpened = true;
       }
 
-      if(_IsFirstTime)
-      {
+      if (_IsFirstTime) {
         _minResiduOutput = (*lambda)(0);
         _IsFirstTime = false;
-      }
-      else
-      {
-        if(_minResiduOutput > (*lambda)(0))
-        {
+      } else {
+        if (_minResiduOutput > (*lambda)(0)) {
           _minResiduOutput = (*lambda)(0);
         }
       }
     }
     //
-    DEBUG_EXPR_WE(
-      cout.precision(15);
-      cout << "Contact number: " << inter->number() <<endl;
-      cout << "Contact gap: " << (*y)(0) <<endl;
-      cout << "Contact force: " << (*lambda)(0) <<endl;
-      cout << "Is contact is closed: " << _IsContactClosed <<endl;
-      cout << "Is contact is opened: " << _IsContactOpened <<endl;
-    );
+    DEBUG_EXPR_WE(std::cout.precision(15);
+                  std::cout << "Contact number: " << inter->number() << "\n";
+                  std::cout << "Contact gap: " << (*y)(0) << "\n";
+                  std::cout << "Contact force: " << (*lambda)(0) << "\n";
+                  std::cout << "Is contact is closed: " << _IsContactClosed << "\n";
+                  std::cout << "Is contact is opened: " << _IsContactOpened << "\n";);
     //
   }
   //
-  if(updateIstate)
-  {
-    if((!_IsContactClosed) && (!_IsContactOpened))
-    {
-      _istate = 2; //no event is detected
-    }
-    else if((_IsContactClosed) && (!_IsContactOpened))
-    {
-      _istate = 3; // Only some contacts are closed
-    }
-    else if((!_IsContactClosed) && (_IsContactOpened))
-    {
-      _istate = 4; // Only some contacts are opened
-    }
-    else
-    {
-      _istate = 5; // Some contacts are closed AND some contacts are opened
+  if (updateIstate) {
+    if ((!_IsContactClosed) && (!_IsContactOpened)) {
+      _istate = 2;  // no event is detected
+    } else if ((_IsContactClosed) && (!_IsContactOpened)) {
+      _istate = 3;  // Only some contacts are closed
+    } else if ((!_IsContactClosed) && (_IsContactOpened)) {
+      _istate = 4;  // Only some contacts are opened
+    } else {
+      _istate = 5;  // Some contacts are closed AND some contacts are opened
     }
   }
   //
-  DEBUG_END("double EventDriven::detectEvents(bool updateIstate)\n")
-  return  _minResiduOutput;
+  DEBUG_END(
+      "double siconos::simulation::EventDriven::detectEvents(bool "
+      "updateIstate)\n")
+  return _minResiduOutput;
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-void EventDriven::LocalizeFirstEvent()
-{
-  // We localize the first event occuring during the integration step when the flag _istate = 3 or 4
-  // Compute the coefficients of the dense output polynomial for all DSs
-  for(OSIIterator itosi = _allOSI->begin(); itosi != _allOSI->end(); ++itosi)
-  {
-    if((*itosi)->getType() == OSI::NEWMARKALPHAOSI)
-    {
-      SP::NewMarkAlphaOSI osi_NewMark = std::static_pointer_cast<NewMarkAlphaOSI>(*itosi);
+void siconos::simulation::EventDriven::LocalizeFirstEvent() {
+  // We localize the first event occuring during the integration step when the
+  // flag _istate = 3 or 4 Compute the coefficients of the dense output
+  // polynomial for all DSs
+  for (auto itosi : *_allOSI) {
+    if (itosi->getType() == siconos::integrators::IntegratorType::NEWMARKALPHAOSI) {
+      auto osi_NewMark =
+          std::static_pointer_cast<siconos::integrators::NewMarkAlphaOSI>(itosi);
       osi_NewMark->prepareEventLocalization();
-    }
-    else
-    {
-      THROW_EXCEPTION("In EventDriven::LocalizeFirstEvent, the current OSI must be NewMarkAlpha scheme!!!");
+    } else {
+      THROW_EXCEPTION(
+          "In siconos::simulation::EventDriven::LocalizeFirstEvent, the "
+          "current OSI must be "
+          "NewMarkAlpha scheme!!!");
     }
   }
   //
@@ -1169,53 +1094,54 @@ void EventDriven::LocalizeFirstEvent()
   bool found = false;
   bool _IsupdateIstate = false;
   unsigned int _numIter = 0;
-  while(!found)
-  {
+  while (!found) {
     _numIter++;
-    double t_i = (t_b + t_a) / 2.0; // mid-time of the current interval
+    double t_i = (t_b + t_a) / 2.0;  // mid-time of the current interval
     // set t_i as the current time
     // Generate dense output for all DSs at the time t_i
-    for(OSIIterator itosi = _allOSI->begin(); itosi != _allOSI->end(); ++itosi)
-    {
-      if((*itosi)->getType() == OSI::NEWMARKALPHAOSI)
-      {
-        SP::NewMarkAlphaOSI osi_NewMark = std::static_pointer_cast<NewMarkAlphaOSI>(*itosi);
+    for (auto itosi : *_allOSI) {
+      if (itosi->getType() == siconos::integrators::IntegratorType::NEWMARKALPHAOSI) {
+        auto osi_NewMark =
+            std::static_pointer_cast<siconos::integrators::NewMarkAlphaOSI>(itosi);
         osi_NewMark->DenseOutputallDSs(t_i);
       }
     }
-    // If _istate = 3 or 5, i.e. some contacts are closed, we need to compute y[0] for all interactions
-    if((_istate == 3) || (_istate == 5))  // some contacts are closed
+    // If _istate = 3 or 5, i.e. some contacts are closed, we need to compute
+    // y[0] for all interactions
+    if ((_istate == 3) || (_istate == 5))  // some contacts are closed
     {
-      _nsds->updateOutput(t_i,0);
+      _nsds->updateOutput(t_i, 0);
     }
-    // If _istate = 4 or 5, i.e. some contacts are detached, we need to solve LCP at the acceleration level to compute contact forces
-    if((_istate == 4) || (_istate == 5))  // some contacts are opened
+    // If _istate = 4 or 5, i.e. some contacts are detached, we need to solve
+    // LCP at the acceleration level to compute contact forces
+    if ((_istate == 4) || (_istate == 5))  // some contacts are opened
     {
-      if(!_allNSProblems->empty())
-      {
+      if (!_allNSProblems->empty()) {
         (*_allNSProblems)[SICONOS_OSNSP_ED_SMOOTH_ACC]->compute(t_i);
       }
     }
     // Check whether or not some events occur in the interval [t_a, t_i]
     _minConstraint = detectEvents(_IsupdateIstate);
-    if(std::abs(_minConstraint) < _TOL_ED)  // first event is found
+    if (std::abs(_minConstraint) < tolerance_)  // first event is found
     {
       _tout = t_i;
       found = true;
     }
-    // if some events are detected in the interval [t_a, t_i] (if _istate != 2), set t_b = t_i
-    if(_minConstraint < -_TOL_ED)
-    {
+    // if some events are detected in the interval [t_a, t_i] (if _istate != 2),
+    // set t_b = t_i
+    if (_minConstraint < -tolerance_) {
       t_b = t_i;
-    }
-    else // if no event is detected in [t_a, t_i], then we have to detect events in the interval [t_i, t_b]
+    } else  // if no event is detected in [t_a, t_i], then we have to detect
+            // events in the interval [t_i, t_b]
     {
       t_a = t_i;
     }
     //
-    if(_numIter > _localizeEventMaxIter)
-    {
-      THROW_EXCEPTION("In EventDriven::LocalizeFirstEvent, the numbner of iterations performed is too large!!!");
+    if (_numIter > _localizeEventMaxIter) {
+      THROW_EXCEPTION(
+          "In siconos::simulation::EventDriven::LocalizeFirstEvent, the "
+          "numbner of iterations "
+          "performed is too large!!!");
     }
   }
 }

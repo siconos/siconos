@@ -14,23 +14,22 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef __TwistingTest__
 #define __TwistingTest__
 
+#include <SiconosConfig.h>
 #include <cppunit/extensions/HelperMacros.h>
-#include "SiconosFwd.hpp"
-#include "SiconosControlFwd.hpp"
+#include "LinearSMC.hpp"
+#include "LinearSensor.hpp"
+#include "RegularTwisting.hpp"
+#include "ExplicitTwisting.hpp"
+
 #include <FirstOrderLinearTIDS.hpp>
 
-#include <SiconosConfig.h>
-
-class TwistingTest : public CppUnit::TestFixture
-{
-
-private:
+class TwistingTest : public CppUnit::TestFixture {
+ private:
   ACCEPT_SERIALIZATION(TwistingTest);
-
 
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(TwistingTest);
@@ -70,32 +69,25 @@ private:
   double _tol;
   double _beta;
   double _xFinal;
-  SP::FirstOrderLinearTIDS _DS;
-  SP::SiconosMatrix _A;
-  SP::SimpleMatrix _B;
-  SP::SimpleMatrix _C;
-  SP::SimpleMatrix _Csurface;
-  SP::SiconosVector _b;
-  SP::SiconosVector _x0;
-  SP::SiconosVector _K;
-  SP::LinearSensor _sensor;
+  std::shared_ptr<siconos::modeling::FirstOrderLinearTIDS> _DS;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _A;
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _B;
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _C;
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _Csurface;
+  std::shared_ptr<siconos::algebra::SiconosVector> _b;
+  std::shared_ptr<siconos::algebra::SiconosVector> _x0;
+  std::shared_ptr<siconos::algebra::SiconosVector> _K;
+  std::shared_ptr<siconos::control::LinearSensor> _sensor;
 #ifdef HAS_EXTREME_POINT_ALGO
-  SP::Twisting _itw;
-  SP::RegularTwisting _reg_itw;
+  std::shared_ptr<siconos::control::Twisting> _itw;
+  std::shared_ptr<siconos::control::RegularTwisting> _reg_itw;
 #endif
-  SP::ExplicitTwisting _expl_tw;
+  std::shared_ptr<siconos::control::ExplicitTwisting> _expl_tw;
 
-
-public:
-
-  TwistingTest(): _n(2), _h(0.05), _t0(0.0), _T(100.0), _tol(7.5e-11), _beta(0.2) {}
+ public:
+  TwistingTest() : _n(2), _h(0.05), _t0(0.0), _T(100.0), _tol(7.5e-11), _beta(0.2) {}
   void setUp();
   void tearDown();
-
 };
 
 #endif
-
-
-
-

@@ -14,22 +14,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file
   Primal Fricton-Contact Non-Smooth Problem
 */
 #ifndef GlobalFrictionContact_H
 #define GlobalFrictionContact_H
 
+#include "Friction_cst.h"  // contains only enum. Ok.
 #include "LinearOSNS.hpp"
-#include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
-#include "GlobalFrictionContactProblem.h"
-#include "Friction_cst.h"
 
-/** Pointer to function of the type used for drivers for GlobalFrictionContact problems in Numerics */
-typedef int (*GFC3D_Driver)(GlobalFrictionContactProblem*, double*, double*, double*, SolverOptions*);
-TYPEDEF_SPTR(GlobalFrictionContactProblem)
+struct GlobalFrictionContactProblem;
+struct SolverOptions;
+
+namespace siconos::nonsmooth_formulations {
 
 /**
    Formalization and Resolution of a Friction-Contact Problem
@@ -43,8 +41,9 @@ TYPEDEF_SPTR(GlobalFrictionContactProblem)
    globalVelocities = H^T velocity + tildeGlobalVelocities
    \f]
 
-   and \f$ globalVelocities, reaction \f$ belongs to the Coulomb friction law with unilateral contact.
-   
+   and \f$ globalVelocities, reaction \f$ belongs to the Coulomb friction law with unilateral
+   contact.
+
    With:
    - \f$ velocity \in R^{n} \f$  and \f$ reaction \in R^{n} \f$ the unknowns,
    - \f$ M \in R^{n \times n } \f$  and \f$ q \in R^{n} \f$
@@ -52,35 +51,41 @@ TYPEDEF_SPTR(GlobalFrictionContactProblem)
    - \f$ tildeGlobalVelocities \in R^{m} \f$ is the modified local velocity (\f$ e U_{N,k} \f$)
    - \f$ M \in R^{n \times n } \f$  and \f$ q \in R^{n} \f$
    - \f$ H \in R^{n \times m } \f$
-   
-   The dimension of the problem (2D or 3D) is given by the variable contactProblemDim and the right
-   Numerics driver will be called according to this value.
-   
+
+   The dimension of the problem (2D or 3D) is given by the variable contactProblemDim and the
+   right Numerics driver will be called according to this value.
+
    \b Construction:
-   - Constructor from data (inputs = Simulations*, id, SP::NonSmoothSolver) - The solver is optional.
-   Main functions:
-   
+   - Constructor from data (inputs = Simulations*, id, shared_ptr<NonSmoothSolver>) - The
+   solver is optional. Main functions:
+
    \b Main functions:
-   - formalization of the problem: computes M,q using the set of "active" Interactions from the simulation and
-   the interactionBlock-matrices saved in the field interactionBlocks.
+   - formalization of the problem: computes M,q using the set of "active" Interactions from the
+   simulation and the interactionBlock-matrices saved in the field interactionBlocks.
    Functions: initialize(), computeInteractionBlock(), preCompute()
-   - solving of the GlobalFrictionContact problem: function compute(), used to call solvers from Numerics through
-   the frictionContact2D_driver() or frictionContact3D_driver() interface of Numerics.
-   - post-treatment of data: set values of y/lambda variables of the active Interaction (ie Interactions) using
-   ouput results from the solver (velocity,reaction); function postCompute().
+   - solving of the GlobalFrictionContact problem: function compute(), used to call solvers
+   from Numerics through the frictionContact2D_driver() or frictionContact3D_driver() interface
+   of Numerics.
+   - post-treatment of data: set values of y/lambda variables of the active Interaction (ie
+   Interactions) using ouput results from the solver (velocity,reaction); function
+   postCompute().
 
-   For details regarding the available options, see Nonsmooth problems formulations and available solvers in users' guide.
-   
-   
+   For details regarding the available options, see Nonsmooth problems formulations and
+   available solvers in users' guide.
+
+
 */
-class GlobalFrictionContact : public LinearOSNS
-{
-protected:
-  /** default constructor */
-  GlobalFrictionContact() = default;
+class GlobalFrictionContact : public LinearOSNS {
+ protected:
+  // /** default constructor */
+  // GlobalFrictionContact() = default;
 
-protected:
-  
+  /** Pointer to function of the type used for drivers for GlobalFrictionContact problems in
+   * Numerics */
+  typedef int (*GFC3D_Driver)(GlobalFrictionContactProblem*, double*, double*, double*,
+                              SolverOptions*);
+
+ protected:
   ACCEPT_SERIALIZATION(GlobalFrictionContact);
 
   /** Type (dimension) of the contact problem (2D or 3D) */
@@ -90,22 +95,21 @@ protected:
   size_t _sizeGlobalOutput = 0;
 
   /** contains the vector globalVelocities of a GlobalFrictionContact system */
-  SP::SiconosVector _globalVelocities;
+  std::shared_ptr<siconos::algebra::SiconosVector> _globalVelocities{nullptr};
 
   /** contains the impact contributions */
-  SP::SiconosVector _b;
+  std::shared_ptr<siconos::algebra::SiconosVector> _b{nullptr};
 
   /** friction coefficients */
-  SP::MuStorage _mu;
+  std::shared_ptr<std::vector<double>> _mu{nullptr};
 
   /** Pointer to the function used to call the Numerics driver to solve the problem */
   GFC3D_Driver _gfc_driver;
 
-  GlobalFrictionContactProblem _numerics_problem;
-public:
-
+  // GlobalFrictionContactProblem _numerics_problem;
+ public:
   /** constructor (solver id and dimension)
-   *   
+   *
    *  \param dimPb dimension (2D or 3D) of the friction-contact problem
    *  \param numericsSolverId id of the solver to be used, optional,
    *  default : SICONOS_GLOBAL_FRICTION_3D_NSGS
@@ -116,38 +120,29 @@ public:
    *
    *  \param options the options set
    */
-  GlobalFrictionContact(int dimPb, SP::SolverOptions options);
+  GlobalFrictionContact(int dimPb, std::shared_ptr<SolverOptions> options);
 
   /** destructor
    */
-  virtual ~GlobalFrictionContact(){};
-
-  // GETTERS/SETTERS
+  virtual ~GlobalFrictionContact() noexcept = default;
 
   /** get the type of GlobalFrictionContact problem (2D or 3D)
    *
    *  \return an int (2 or 3)
    */
-  inline int getGlobalFrictionContactDim() const
-  {
-    return _contactProblemDim;
-  }
+  inline int getGlobalFrictionContactDim() const { return _contactProblemDim; }
 
   /** get dimension of the problem
    *
    *  \return an unsigned ing
    */
-  inline size_t getGlobalSizeOutput() const
-  {
-    return _sizeGlobalOutput;
-  }
+  inline size_t getGlobalSizeOutput() const { return _sizeGlobalOutput; }
 
   /** get globalVelocities
    *
-   *  \return pointer on a SiconosVector
+   *  \return pointer on a siconos::algebra::SiconosVector
    */
-  inline SP::SiconosVector globalVelocities() const
-  {
+  inline std::shared_ptr<siconos::algebra::SiconosVector> globalVelocities() const {
     return _globalVelocities;
   }
 
@@ -155,33 +150,23 @@ public:
    *
    *  \param newPtr the new vector
    */
-  inline void setGlobalVelocities(SP::SiconosVector newPtr)
-  {
+  inline void setGlobalVelocities(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) {
     _globalVelocities = newPtr;
   }
-
-
 
   /** get a pointer to mu, the list of the friction coefficients
    *
    *  \return pointer on a std::vector<double>
    */
-  inline SP::MuStorage mu() const
-  {
-    return _mu;
-  }
+  inline std::shared_ptr<std::vector<double>> mu() const { return _mu; }
 
   /** get the value of the component number i of mu, the vector of the friction coefficients
    *
    *  \return the friction coefficient for the ith contact
    */
-  inline double getMu(unsigned int i) const
-  {
-    return (*_mu)[i];
-  }
+  inline double getMu(unsigned int i) const { return (*_mu)[i]; }
 
   // --- Others functions ---
-
 
   /** Memory allocation or resizing for z,w,q,b, globalVelocities */
   void initVectorsMemory();
@@ -190,22 +175,22 @@ public:
    *
    *  \param sim the simulation, owner of this OSNSPB
    */
-  virtual void initialize(SP::Simulation sim);
+  virtual void initialize(std::shared_ptr<siconos::simulation::Simulation> sim);
 
   /** \return the friction contact problem from Numerics
    */
-  SP::GlobalFrictionContactProblem globalFrictionContactProblem();
+  std::shared_ptr<GlobalFrictionContactProblem> globalFrictionContactProblem();
 
-  /** \return the friction contact problem from Numerics (raw ptr, do not free)
-   */
-  GlobalFrictionContactProblem *globalFrictionContactProblemPtr();
+  // /** \return the friction contact problem from Numerics (raw ptr, do not free)
+  //  */
+  // GlobalFrictionContactProblem* globalFrictionContactProblemPtr();
 
   /** solve a friction contact problem
    *
    *  \param problem the friction contact problem
    *  \return info solver information result
    */
-  int solve(SP::GlobalFrictionContactProblem problem = SP::GlobalFrictionContactProblem());
+  int solve(std::shared_ptr<GlobalFrictionContactProblem> problem = nullptr);
 
   /** Construction of the problem
    *
@@ -224,14 +209,14 @@ public:
    */
   virtual void postCompute();
 
-
-   /* Check the compatibility fol the nslaw with the targeted OSNSP */
-  bool checkCompatibleNSLaw(NonSmoothLaw& nslaw);
+  /* Check the compatibility fol the nslaw with the targeted OSNSP */
+  bool checkCompatibleNSLaw(siconos::modeling::NonSmoothLaw& nslaw);
 
   void updateMu();
 
   /** print the data to the screen */
   void display() const;
 };
+}  // namespace siconos::nonsmooth_formulations
 
-#endif // GlobalFrictionContact_H
+#endif  // GlobalFrictionContact_H

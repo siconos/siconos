@@ -22,89 +22,99 @@
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Edge.hxx>
-#include <TopoDS_Face.hxx>
-#include <gp_Ax3.hxx>
-#include <gp_Lin.hxx>
-#include <gp_Vec.hxx>
-#include <limits>
-
-#include "SiconosException.hpp"
-
-// #define DEBUG_MESSAGES 1
 #include <boost/math/quaternion.hpp>
 
+#include "SiconosException.hpp"
+#include "SiconosPointers.hpp"  // For createSPtr
+// #define DEBUG_MESSAGES 1
 #include "siconos_debug.h"
 
-OccContactShape::OccContactShape() : _shape(new TopoDS_Shape()) {}
+siconos::mechanics::occ::OccContactShape::OccContactShape(TopoDS_Shape& shape)
+    : _shape{siconos::pointers::createSPtr(shape)} {};
 
-OccContactShape::ContactTypeValue OccContactShape::contactType() const {
-  switch (this->_shape->ShapeType()) {
+siconos::mechanics::occ::OccContactShape::OccContactShape(const TopoDS_Shape& shape)
+    : _shape{siconos::pointers::createSPtr(const_cast<TopoDS_Shape&>(shape))} {};
+
+void siconos::mechanics::occ::OccContactShape::setShape(std::shared_ptr<TopoDS_Shape> shape) {
+  _shape = shape;
+  computeUVBounds();
+}
+
+void siconos::mechanics::occ::OccContactShape::setData(TopoDS_Shape& data) {
+  _shape = siconos::pointers::createSPtr(data);
+  computeUVBounds();
+}
+
+siconos::mechanics::occ::OccContactShape::ContactTypeValue
+siconos::mechanics::occ::OccContactShape::contactType() const {
+  switch (_shape->ShapeType()) {
     case TopAbs_EDGE: {
-      return OccContactShape::Edge;
+      return ContactTypeValue::Edge;
     }
     case TopAbs_FACE: {
-      return OccContactShape::Face;
+      return ContactTypeValue::Face;
     }
     default:
-      return OccContactShape::Unknown;
+      return ContactTypeValue::Unknown;
   };
 };
 
-void OccContactShape::computeUVBounds() {
+void siconos::mechanics::occ::OccContactShape::computeUVBounds() {
   THROW_EXCEPTION(
-      "OccContactShape::computeUVBounds() : cannot compute UV bounds for this contact shape");
+      "siconos::mechanics::occ::OccContactShape::computeUVBounds() : cannot compute UV bounds "
+      "for this "
+      "contact shape");
 }
 
-std::string OccContactShape::exportBRepToString() const {
+std::string siconos::mechanics::occ::OccContactShape::exportBRepToString() const {
   std::stringstream out;
 
-  BRepTools::Write(this->data(), out);
+  BRepTools::Write(data(), out);
 
   return out.str();
 }
 
-void OccContactShape::importBRepFromString(const std::string& brepstr) {
+void siconos::mechanics::occ::OccContactShape::importBRepFromString(
+    const std::string& brepstr) {
   std::stringstream in;
   BRep_Builder brep_builder;
 
   in << brepstr;
 
-  BRepTools::Read(this->data(), in, brep_builder);
+  BRepTools::Read(data(), in, brep_builder);
 
-  this->computeUVBounds();
+  computeUVBounds();
 }
 
-#include <SiconosVector.hpp>
+std::shared_ptr<TopoDS_Face> siconos::mechanics::occ::OccContactShape::face(
+    unsigned int index) const {
+  auto return_value = std::make_shared<TopoDS_Face>();
 
-SPC::TopoDS_Face OccContactShape::face(unsigned int index) const {
-  SP::TopoDS_Face return_value(new TopoDS_Face());
-
-  TopExp_Explorer exp;
-  exp.Init(this->data(), TopAbs_FACE);
+  TopExp_Explorer exp{data(), TopAbs_FACE};
   for (unsigned int i = 0; i < index; ++i, exp.Next())
     ;
   if (exp.More()) {
     // taking a ref fail!
     *return_value = TopoDS::Face(exp.Current());
   } else {
-    THROW_EXCEPTION("OccContactShape::face failed");
+    THROW_EXCEPTION("siconos::mechanics::occ::OccContactShape::face failed");
   }
 
   return return_value;
 }
 
-SPC::TopoDS_Edge OccContactShape::edge(unsigned int index) const {
-  SP::TopoDS_Edge return_value(new TopoDS_Edge());
+std::shared_ptr<TopoDS_Edge> siconos::mechanics::occ::OccContactShape::edge(
+    unsigned int index) const {
+  auto return_value = std::make_shared<TopoDS_Edge>();
 
-  TopExp_Explorer exp;
-  exp.Init(this->data(), TopAbs_EDGE);
+  TopExp_Explorer exp{data(), TopAbs_EDGE};
   for (unsigned int i = 0; i < index; ++i, exp.Next())
     ;
   if (exp.More()) {
     // taking a ref fail!
     *return_value = TopoDS::Edge(exp.Current());
   } else {
-    THROW_EXCEPTION("OccContactShape::edge failed");
+    THROW_EXCEPTION("siconos::mechanics::occ::OccContactShape::edge failed");
   }
 
   return return_value;

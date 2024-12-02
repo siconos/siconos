@@ -14,17 +14,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
-#include "SimulationGraphs.hpp"
 #include "ControlZOHAdditionalTerms.hpp"
-#include "SiconosAlgebraProd.hpp"
-#include "SiconosVector.hpp"
-#include "Topology.hpp"
-#include "MatrixIntegrator.hpp"
-#include "SimpleMatrix.hpp"
 
-//#define DEBUG_WHERE_MESSAGES
+#include "MatrixIntegrator.hpp"
+#include "SiconosMatrixVectorOp.hpp"
+#include "SiconosVector.hpp"
+// #define DEBUG_WHERE_MESSAGES
 
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -32,68 +29,67 @@
 
 #include "siconos_debug.h"
 
-void ControlZOHAdditionalTerms::init(DynamicalSystemsGraph& DSG0,
-                                     const NonSmoothDynamicalSystem & nsds,
-                                     const TimeDiscretisation & td)
-{
-  DEBUG_BEGIN("void ControlZOHAdditionalTerms::init(...)\n")
-  DynamicalSystemsGraph::VIterator dsvi, dsvdend;
-  for(std::tie(dsvi, dsvdend) = DSG0.vertices(); dsvi != dsvdend; ++dsvi)
-  {
-    DynamicalSystem& ds = *DSG0.bundle(*dsvi);
-    if(DSG0.B.hasKey(*dsvi))
-    {
-      DSG0.Bd[*dsvi].reset(new MatrixIntegrator(ds, nsds, td, DSG0.B[*dsvi]));
-      if(DSG0.Bd.at(*dsvi)->isConst())
-        DSG0.Bd.at(*dsvi)->integrate();
+void siconos::control::ControlZOHAdditionalTerms::init(
+    siconos::graphs::DynamicalSystemsGraph& DSG0,
+    const siconos::modeling::NonSmoothDynamicalSystem& nsds,
+    std::shared_ptr<siconos::simulation::TimeDiscretisation> td) {
+  DEBUG_BEGIN("void siconos::control::ControlZOHAdditionalTerms::init(...)\n")
+  siconos::graphs::DynamicalSystemsGraph::VIterator dsvi, dsvdend;
+  for (std::tie(dsvi, dsvdend) = DSG0.vertices(); dsvi != dsvdend; ++dsvi) {
+    auto& ds = *DSG0.bundle(*dsvi);
+    if (DSG0.B.hasKey(*dsvi)) {
+      DSG0.Bd[*dsvi] =
+          std::make_shared<siconos::simulation::MatrixIntegrator>(ds, nsds, td, DSG0.B[*dsvi]);
+      if (DSG0.Bd.at(*dsvi)->isConst()) DSG0.Bd.at(*dsvi)->integrate();
     }
-    if(DSG0.L.hasKey(*dsvi))
-    {
-      DSG0.Ld[*dsvi].reset(new MatrixIntegrator(ds, nsds, td, DSG0.L[*dsvi]));
-      if(DSG0.Ld.at(*dsvi)->isConst())
-        DSG0.Ld.at(*dsvi)->integrate();
+    if (DSG0.L.hasKey(*dsvi)) {
+      DSG0.Ld[*dsvi] =
+          std::make_shared<siconos::simulation::MatrixIntegrator>(ds, nsds, td, DSG0.L[*dsvi]);
+      if (DSG0.Ld.at(*dsvi)->isConst()) DSG0.Ld.at(*dsvi)->integrate();
     }
-    if(DSG0.pluginB.hasKey(*dsvi))
-      DSG0.Bd[*dsvi].reset(new MatrixIntegrator(ds, nsds, td, DSG0.pluginB[*dsvi], DSG0.u[*dsvi]->size()));
-    if(DSG0.pluginL.hasKey(*dsvi))
-      DSG0.Ld[*dsvi].reset(new MatrixIntegrator(ds, nsds, td, DSG0.pluginL[*dsvi], DSG0.e[*dsvi]->size()));
+    if (DSG0.pluginB.hasKey(*dsvi))
+      DSG0.Bd[*dsvi] = std::make_shared<siconos::simulation::MatrixIntegrator>(
+          ds, nsds, td, DSG0.pluginB[*dsvi], DSG0.u[*dsvi]->size());
+    if (DSG0.pluginL.hasKey(*dsvi))
+      DSG0.Ld[*dsvi] = std::make_shared<siconos::simulation::MatrixIntegrator>(
+          ds, nsds, td, DSG0.pluginL[*dsvi], DSG0.e[*dsvi]->size());
   }
-  DEBUG_END("void ControlZOHAdditionalTerms::init(...)\n")
+  DEBUG_END("void siconos::control::ControlZOHAdditionalTerms::init(...)\n")
 }
 
-void ControlZOHAdditionalTerms::addSmoothTerms(DynamicalSystemsGraph& DSG0,
-    const DynamicalSystemsGraph::VDescriptor& dsgVD,
-    const double h, SiconosVector& xfree)
-{
-  DEBUG_BEGIN("void ControlZOHAdditionalTerms::addSmoothTerms(...)\n")
+void siconos::control::ControlZOHAdditionalTerms::addSmoothTerms(
+    siconos::graphs::DynamicalSystemsGraph& DSG0,
+    const siconos::graphs::DynamicalSystemsGraph::VDescriptor& dsgVD, const double h,
+    siconos::algebra::SiconosVector& xfree) {
+  DEBUG_BEGIN("void siconos::control::ControlZOHAdditionalTerms::addSmoothTerms(...)\n")
   // check whether we have a system with a control input
-  if(DSG0.u.hasKey(dsgVD))
-  {
+  if (DSG0.u.hasKey(dsgVD)) {
     DEBUG_PRINT("a system has a control input\n");
     assert(DSG0.Bd.hasKey(dsgVD));
-    if(!DSG0.Bd.at(dsgVD)->isConst())
-    {
+    if (!DSG0.Bd.at(dsgVD)->isConst()) {
       DSG0.Bd.at(dsgVD)->integrate();
     }
     DEBUG_EXPR(DSG0.Bd.at(dsgVD)->mat().display());
     DEBUG_EXPR(xfree.display());
     DEBUG_EXPR((*DSG0.u.at(dsgVD)).display());
-    prod(DSG0.Bd.at(dsgVD)->mat(), *DSG0.u.at(dsgVD), xfree, false); // xfree += Bd*u
+    siconos::algebra::prod(DSG0.Bd.at(dsgVD)->mat(), *DSG0.u.at(dsgVD), xfree,
+                           false);  // xfree += Bd*u
   }
   // check whether the DynamicalSystem is an Observer
-  if(DSG0.e.hasKey(dsgVD))
-  {
+  if (DSG0.e.hasKey(dsgVD)) {
     assert(DSG0.Ld.hasKey(dsgVD));
-    if(!DSG0.Ld.at(dsgVD)->isConst())
-    {
+    if (!DSG0.Ld.at(dsgVD)->isConst()) {
       DSG0.Ld.at(dsgVD)->integrate();
     }
-    prod(DSG0.Ld.at(dsgVD)->mat(), *DSG0.e.at(dsgVD), xfree, false); // xfree += -Ld*e
+    siconos::algebra::prod(DSG0.Ld.at(dsgVD)->mat(), *DSG0.e.at(dsgVD), xfree,
+                           false);  // xfree += -Ld*e
   }
-  DEBUG_END("void ControlZOHAdditionalTerms::addSmoothTerms(...)\n");
+  DEBUG_END("void siconos::control::ControlZOHAdditionalTerms::addSmoothTerms(...)\n");
 }
 
-void ControlZOHAdditionalTerms::addJacobianRhsContribution(DynamicalSystemsGraph& DSG0, const DynamicalSystemsGraph::VDescriptor& dsgVD, const double h, SiconosMatrix& jacRhs)
-{
+void siconos::control::ControlZOHAdditionalTerms::addJacobianRhsContribution(
+    siconos::graphs::DynamicalSystemsGraph& DSG0,
+    const siconos::graphs::DynamicalSystemsGraph::VDescriptor& dsgVD, const double h,
+    siconos::algebra::SiconosMatrix& jacRhs) {
   // nothing to be done here
 }

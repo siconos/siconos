@@ -21,27 +21,23 @@
 #ifndef MoreauJeanGOSI_H
 #define MoreauJeanGOSI_H
 
-#include "MoreauJeanOSI.hpp"
-#include "OneStepNSProblem.hpp"
-
 #include <limits>
 
-/** 
+#include "MoreauJeanOSI.hpp"
+
+namespace siconos::integrators {
+
+/**
     A global version of the MoreauJeanOSI integrator
 */
 
 class MoreauJeanGOSI : public MoreauJeanOSI {
-protected:
+ protected:
   ACCEPT_SERIALIZATION(MoreauJeanGOSI);
 
-public:
+ public:
   // Warning: enum could be mixed up with those of MoreauJeanOSI
-  enum MoreauJeanGOSI_ds_workVector_id {
-    RESIDU_FREE,
-    FREE,
-    LOCAL_BUFFER,
-    WORK_LENGTH
-  };
+  enum MoreauJeanGOSI_ds_workVector_id { RESIDU_FREE, FREE, LOCAL_BUFFER, WORK_LENGTH };
 
   // enum MoreauJeanGOSI_interaction_workVector_id{OSNSP_RHS,
   // WORK_INTERACTION_LENGTH};
@@ -52,15 +48,11 @@ public:
    *  \param gamma value for all linked DS (default = NaN and gamma is not
    *  used).
    */
-  MoreauJeanGOSI(double theta = 0.5,
-                 double gamma = std::numeric_limits<double>::quiet_NaN())
+  MoreauJeanGOSI(double theta = 0.5, double gamma = std::numeric_limits<double>::quiet_NaN())
       : MoreauJeanOSI(theta, gamma){};
 
-  /** destructor
-   */
-  virtual ~MoreauJeanGOSI(){};
-
-  // --- OTHER FUNCTIONS ---
+  /** destructor */
+  virtual ~MoreauJeanGOSI() noexcept = default;
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one dynamical system on the graph and needed by the osi
@@ -68,7 +60,8 @@ public:
    *  \param t time of initialization
    *  \param ds the dynamical system
    */
-  void initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds) override;
+  void initializeWorkVectorsForDS(
+      double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) override;
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi
@@ -77,9 +70,9 @@ public:
    *  \param interProp the properties on the graph
    *  \param DSG the dynamical systems graph
    */
-  void initializeWorkVectorsForInteraction(Interaction &inter,
-                                           InteractionProperties &interProp,
-                                           DynamicalSystemsGraph &DSG) override;
+  void initializeWorkVectorsForInteraction(
+      siconos::modeling::Interaction &inter, siconos::graphs::InteractionProperties &interProp,
+      siconos::graphs::DynamicalSystemsGraph &DSG) override;
 
   /** \return the maximum of all norms for the "MoreauJeanGOSI-discretized" residus of DS
    */
@@ -98,8 +91,7 @@ public:
    *  \param tout the real end time
    *  \param notUsed useless flag (for MoreauJeanGOSI, used in LsodarOSI)
    */
-  void integrate(double &tinit, double &tend, double &tout,
-                 int &notUsed) override;
+  void integrate(double &tinit, double &tend, double &tout, int &notUsed) override;
 
   /** update the state of the dynamical systems
    *
@@ -112,14 +104,13 @@ public:
    *  \param inter the interaction (for y_k)
    *  \param osnsp the non-smooth integrator
    */
-  void NonSmoothLawContributionToOutput(SP::Interaction inter,
-                                        OneStepNSProblem &osnsp);
+  void NonSmoothLawContributionToOutput(
+      std::shared_ptr<siconos::modeling::Interaction> inter,
+      siconos::nonsmooth_formulations::OneStepNSProblem &osnsp);
 
   /** Displays the data of the MoreauJeanGOSI's integrator
    */
-  void display() override;
-
-  ACCEPT_STD_VISITORS();
+  void display() const override;
 };
-
-#endif // MoreauJeanGOSI_H
+}  // namespace siconos::integrators
+#endif  // MoreauJeanGOSI_H

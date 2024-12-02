@@ -14,76 +14,61 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file SphereLDS.hpp
   \brief Definition of a 3D sphere as a LagrangianDS (with Euler
          Angles)
 */
 
-
 #ifndef SphereLDS_h
 #define SphereLDS_h
 
-#include "MechanicsFwd.hpp"
 #include "LagrangianDS.hpp"
 
-class SphereLDS : public LagrangianDS, public std::enable_shared_from_this<SphereLDS>
-{
-protected:
+namespace siconos::collision::native::bodies {
 
+class SphereLDS : public siconos::modeling::LagrangianDS,
+                  public std::enable_shared_from_this<SphereLDS> {
+ protected:
   ACCEPT_SERIALIZATION(SphereLDS);
 
-  double radius;
-  double massValue;
-  double I;
+  double radius{0.};
+  double massValue{0.};
+  double I{0.};
 
-  SphereLDS() {};
+ public:
+  SphereLDS(double, double, std::shared_ptr<siconos::algebra::SiconosVector>,
+            std::shared_ptr<siconos::algebra::SiconosVector>);
 
-public:
+  ~SphereLDS() noexcept = default;
 
-  SphereLDS(double, double, SP::SiconosVector, SP::SiconosVector);
+  double getQ(unsigned int pos);
 
-  ~SphereLDS();
+  double getVelocity(unsigned int pos);
 
-  inline double getQ(unsigned int pos)
-  {
-    assert(pos < _ndof);
-    return (*_q[0])(pos);
-  };
-  inline double getVelocity(unsigned int pos)
-  {
-    assert(pos < _ndof);
-    return (*_q[1])(pos);
-  };
+  inline double getMassValue() const { return massValue; };
 
-  inline double getMassValue() const
-  {
-    return massValue;
-  };
+  inline double getRadius() const { return radius; };
 
-  inline double getRadius() const
-  {
-    return radius;
-  };
-
-  void computeMass();
-  void computeMass(SP::SiconosVector)
+  void computeMass() override;
+  void computeMass(std::shared_ptr<siconos::algebra::SiconosVector>) override
   {
     THROW_EXCEPTION("SphereLDS::computeMass(vector) - not implemented");
   }
 
-  void computeFGyr(SP::SiconosVector, SP::SiconosVector);
+  void computeFGyr(std::shared_ptr<siconos::algebra::SiconosVector>,
+                   std::shared_ptr<siconos::algebra::SiconosVector>) override;
 
-  void computeFGyr();
+  void computeFGyr() override;
 
-  void computeJacobianFGyrq();
-  void computeJacobianFGyrqDot();
+  void computeJacobianFGyrq() override;
+  void computeJacobianFGyrqDot() override;
 
-  void computeJacobianFGyrq(SP::SiconosVector, SP::SiconosVector);
-  void computeJacobianFGyrqDot(SP::SiconosVector, SP::SiconosVector);
-
-  ACCEPT_BASE_VISITORS(LagrangianDS);
-
+  void computeJacobianFGyrq(std::shared_ptr<siconos::algebra::SiconosVector>,
+                            std::shared_ptr<siconos::algebra::SiconosVector>) override;
+  void computeJacobianFGyrqDot(std::shared_ptr<siconos::algebra::SiconosVector>,
+                               std::shared_ptr<siconos::algebra::SiconosVector>) override;
 };
+}  // namespace siconos::collision::native::bodies
 #endif /* SphereLDS_h */

@@ -66,8 +66,11 @@ string(TIMESTAMP BUILD_TIMESTAMP)
 # --> look for python framework when all other possibilities failed.
 include(FindPythonModule)
 set(CMAKE_FIND_FRAMEWORK LAST)
+
 if(WITH_PYTHON_WRAPPER)
   find_package(Python COMPONENTS Development Interpreter NumPy REQUIRED)
+elseif(WITH_PYB11_WRAPPER)
+  include(pybind11_setup)
 else()
   find_package(Python COMPONENTS Interpreter REQUIRED)
 endif()
@@ -149,7 +152,7 @@ endif()
 
 #-- -- - Required dependencies(whatever Siconos components are) -- -- -
 #-- Python bindings --
-if(WITH_PYTHON_WRAPPER)
+if(WITH_PYTHON_WRAPPER OR WITH_PYB11_WRAPPER)
 
   # Name of the generated Python package
   set(SICONOS_PYTHON_PACKAGE siconos CACHE INTERNAL "Name of the Siconos python package.")
@@ -157,12 +160,17 @@ if(WITH_PYTHON_WRAPPER)
   # Set path for siconos-python installation (SICONOS_PYTHON_INSTALL_DIR)
   # and get pip install options (PIP_INSTALL_OPTIONS).
 
-  # -- swig stuff --
-  include(swig_setup)
-  
+  if(WITH_PYTHON_WRAPPER)
+    set(PYSRC_DIR wrap)
+    # -- swig stuff --
+    include(swig_setup)
+  elseif(WITH_PYB11_WRAPPER)
+    set(PYSRC_DIR python)
+  endif()
+
   #== == == Create(and setup) build / install target == == ==
   add_custom_target(python-install
-    COMMAND ${Python_EXECUTABLE} -m pip install -U ${CMAKE_BINARY_DIR}/wrap ${PIP_INSTALL_OPTIONS} -v 
+    COMMAND ${Python_EXECUTABLE} -m pip install -U ${CMAKE_BINARY_DIR}/${PYSRC_DIR} ${PIP_INSTALL_OPTIONS} -v 
     VERBATIM USES_TERMINAL
     COMMAND_EXPAND_LISTS
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} COMMENT "build/install siconos python package")
@@ -185,19 +193,17 @@ if(WITH_CXX)
   #From boost 1.71, something is wrong in cmake and boost support for multithread
   #https: // gitlab.kitware.com/cmake/cmake/issues/19714
   #set(Boost_USE_MULTITHREADED ON)
-  set(Boost_NO_BOOST_CMAKE 1)
-  set(boost_min_version 1.71)
-#Set the list of required boost components
+#  set(Boost_NO_BOOST_CMAKE 1)
+  set(boost_min_version 1.75) # This is the minimum for c++20 compatibility of ublas.
+  # Set the list of required boost components
   if(WITH_SERIALIZATION)
     list(APPEND boost_required_components serialization filesystem)
   endif()
   if(boost_required_components)
     set(boost_opts COMPONENTS ${boost_required_components})
   endif()
-
 #Search boost...
-  find_package(Boost ${boost_min_version} ${boost_opts} REQUIRED)
-
+  find_package(Boost ${boost_min_version} ${boost_opts} REQUIRED CONFIG)
   if(WITH_SERIALIZATION)
     set(WITH_SYSTEM_BOOST_SERIALIZATION ON CACHE INTERNAL "Siconos uses boost serialization lib.")
   endif()
@@ -250,7 +256,7 @@ if(WITH_TESTING)
     #File used as main driver for cppunit tests
     set(SIMPLE_TEST_MAIN ${CMAKE_SOURCE_DIR}/kernel/tests-common/TestMain.cpp CACHE INTERNAL "")
   endif()
-  if(WITH_PYTHON_WRAPPER)
+  if(WITH_PYTHON_WRAPPER OR WITH_PYB11_WRAPPER)
     find_python_module(pytest REQUIRED)
     if(WITH_AGGRESSIVE_PYTHON_TESTS)
       set(pytest_opt "-s -v -pep8" CACHE INTERNAL "extra options for py.test")

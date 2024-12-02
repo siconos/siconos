@@ -1,6 +1,0 @@
-
-//// Siconos: This little preamble is needed for cs_convert.c to
-//// compile when BUILD_AS_CPP=TRUE.
-#include "SiconosConfig.h"
-#ifndef BUILD_AS_CPP
-//// End preamble

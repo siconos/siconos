@@ -14,15 +14,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #ifndef SiconosBlas_H
 #define SiconosBlas_H
 #include "SiconosConfig.h"
 
 #if defined(__cplusplus)
-extern "C"
-{
+extern "C" {
 #endif
 
 // tells include-what-you-use to keep this file
@@ -50,22 +49,18 @@ extern "C"
 #define restrict __restrict
 #endif
 
-
-static inline double* NMD_row_rmajor(double* restrict mat, unsigned ncols, unsigned rindx)
-{
-  return &mat[rindx*ncols];
+static inline double* NMD_row_rmajor(double* restrict mat, unsigned ncols, unsigned rindx) {
+  return &mat[rindx * ncols];
 }
 
-static inline void NMD_copycol_rmajor(int nrows, double* col, double* restrict mat, int ncols, unsigned cindx)
-{
+static inline void NMD_copycol_rmajor(int nrows, double* col, double* restrict mat, int ncols,
+                                      unsigned cindx) {
   cblas_dcopy(nrows, col, 1, &mat[cindx], ncols);
 }
 
-static inline void NMD_dense_gemv(int nrows, int ncols, double alpha, double* restrict mat, double* restrict y, double beta, double* restrict x)
-{
+static inline void NMD_dense_gemv(int nrows, int ncols, double alpha, double* restrict mat,
+                                  double* restrict y, double beta, double* restrict x) {
   cblas_dgemv(CblasColMajor, CblasTrans, ncols, nrows, alpha, mat, ncols, y, 1, beta, x, 1);
 }
 
-#endif // SiconosBlas_H
-
-
+#endif  // SiconosBlas_H

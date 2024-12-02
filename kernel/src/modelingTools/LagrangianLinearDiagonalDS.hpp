@@ -22,49 +22,51 @@
 
 #include "LagrangianDS.hpp"
 
-/** 
+namespace siconos::modeling {
+/**
 
-    Lagrangian Linear Systems with time invariant and diagonal coefficients -  \f$ M\dot v + Cv + Kq = F_{ext}(t,z) + p \f$
+    Lagrangian Linear Systems with time invariant and diagonal coefficients -  \f$ M\dot v + Cv
+   + Kq = F_{ext}(t,z) + p \f$
 
 
     where
-    
-    -  \f$ q \in R^{ndof} \f$ is the set of the generalized coordinates,
-    - \f$ \dot q = v \in R^{ndof} \f$  the velocity, i. e. the time derivative of the  generalized coordinates.
-    - \f$ \ddot q  \in R^{ndof} \f$  the acceleration, i. e. the second time derivative of the  generalized coordinates.
-    - \f$ p  \in R^{ndof} \f$  the forces due to the nonsmooth interaction. In the particular case of a nonsmooth evolution,
-    the variable p contains the impulse and not the force.
-    -  \f$ M \in  R^{ndof \times ndof} \f$ is the mass matrix (access : mass() method).
-    -  \f$ K \in  R^{ndof \times ndof} \f$ is the stiffness matrix (access : stiffness() method).
-    -  \f$ C \in  R^{ndof \times ndof} \f$ is the viscosity matrix (access : damping() method).
-    -  \f$ z \in R^{zSize} \f$ is a vector of arbitrary algebraic variables, some sort of discret state.
 
-    Remind that the specificity of this class is that all matrices are diagonal (and hence only diagonal coefficients are saved in memory).
-    
+    -  \f$ q \in R^{ndof} \f$ is the set of the generalized coordinates,
+    - \f$ \dot q = v \in R^{ndof} \f$  the velocity, i. e. the time derivative of the
+   generalized coordinates.
+    - \f$ \ddot q  \in R^{ndof} \f$  the acceleration, i. e. the second time derivative of the
+   generalized coordinates.
+    - \f$ p  \in R^{ndof} \f$  the forces due to the nonsmooth interaction. In the particular
+   case of a nonsmooth evolution, the variable p contains the impulse and not the force.
+    -  \f$ M \in  R^{ndof \times ndof} \f$ is the mass matrix (access : mass() method).
+    -  \f$ K \in  R^{ndof \times ndof} \f$ is the stiffness matrix (access : stiffness()
+   method).
+    -  \f$ C \in  R^{ndof \times ndof} \f$ is the viscosity matrix (access : damping() method).
+    -  \f$ z \in R^{zSize} \f$ is a vector of arbitrary algebraic variables, some sort of
+   discret state.
+
+    Remind that the specificity of this class is that all matrices are diagonal (and hence only
+   diagonal coefficients are saved in memory).
+
     For details about dynamical systems in Siconos, please read user's guide.
 */
-class LagrangianLinearDiagonalDS : public LagrangianDS
-{
-
-protected:
-
-  
+class LagrangianLinearDiagonalDS : public LagrangianDS {
+ protected:
   ACCEPT_SERIALIZATION(LagrangianLinearDiagonalDS);
 
   /** stiffness matrix */
-  SP::SiconosVector _stiffness;
+  std::shared_ptr<siconos::algebra::SiconosVector> _stiffness{nullptr};
 
   /** damping matrix */
-  SP::SiconosVector _damping;
+  std::shared_ptr<siconos::algebra::SiconosVector> _damping{nullptr};
 
   /** mass density */
-  double _mu;
+  double _mu{0.};
 
   /** default constructor */
-  LagrangianLinearDiagonalDS():LagrangianDS() {};
+  LagrangianLinearDiagonalDS() = default;
 
-public:
-
+ public:
   /** constructor from initial state and all operators.
    *
    *  \param q0 initial coordinates
@@ -73,7 +75,11 @@ public:
    *  \param damping diagonal of the damping matrix
    *  \param mass diagonal of the mass matrix
    */
-  LagrangianLinearDiagonalDS(SP::SiconosVector q0, SP::SiconosVector v0, SP::SiconosVector stiffness, SP::SiconosVector damping, SP::SiconosVector mass);
+  LagrangianLinearDiagonalDS(std::shared_ptr<siconos::algebra::SiconosVector> q0,
+                             std::shared_ptr<siconos::algebra::SiconosVector> v0,
+                             std::shared_ptr<siconos::algebra::SiconosVector> stiffness,
+                             std::shared_ptr<siconos::algebra::SiconosVector> damping,
+                             std::shared_ptr<siconos::algebra::SiconosVector> mass);
 
   /** constructor for complete system with identity mass matrix
    *
@@ -82,7 +88,10 @@ public:
    *  \param stiffness diagonal of the stiffness matrix
    *  \param damping diagonal of the damping matrix
    */
-  LagrangianLinearDiagonalDS(SP::SiconosVector q0, SP::SiconosVector v0, SP::SiconosVector stiffness, SP::SiconosVector damping);
+  LagrangianLinearDiagonalDS(std::shared_ptr<siconos::algebra::SiconosVector> q0,
+                             std::shared_ptr<siconos::algebra::SiconosVector> v0,
+                             std::shared_ptr<siconos::algebra::SiconosVector> stiffness,
+                             std::shared_ptr<siconos::algebra::SiconosVector> damping);
 
   /** constructor for undamped system and identity mass matrix
    *
@@ -90,46 +99,28 @@ public:
    *  \param v0 initial velocity
    *  \param stiffness diagonal of the stiffness matrix
    */
-  LagrangianLinearDiagonalDS(SP::SiconosVector q0, SP::SiconosVector v0, SP::SiconosVector stiffness);
+  LagrangianLinearDiagonalDS(std::shared_ptr<siconos::algebra::SiconosVector> q0,
+                             std::shared_ptr<siconos::algebra::SiconosVector> v0,
+                             std::shared_ptr<siconos::algebra::SiconosVector> stiffness);
 
   /* destructor */
-  ~LagrangianLinearDiagonalDS(){};
+  ~LagrangianLinearDiagonalDS() noexcept = default;
 
-  /** get a copy of the stiffness matrix (diagonal only)
-   *
-   *  \return SiconosVector
-   */
-  inline const SiconosVector get_stiffness() const
-  {
-    return *_stiffness;
-  }
 
   /** get stiffness matrix (diagonal only, pointer link)
    *
-   *  \return pointer on a SiconosVector
+   *  \return pointer on a siconos::algebra::SiconosVector
    */
-  inline SP::SiconosVector stiffness() const
+  inline std::shared_ptr<siconos::algebra::SiconosVector> stiffness() const
   {
     return _stiffness;
   }
 
-  /** get a copy of the damping matrix (diagonal only)
-   *
-   *  \return SiconosVector
-   */
-  inline const SiconosVector get_damping() const
-  {
-    return *_damping;
-  }
-
   /** get damping matrix (diagonal only, pointer link)
    *
-   *  \return pointer on a SiconosVector
+   *  \return pointer on a siconos::algebra::SiconosVector
    */
-  inline SP::SiconosVector damping() const
-  {
-    return _damping;
-  }
+  inline std::shared_ptr<siconos::algebra::SiconosVector> damping() const { return _damping; }
 
   /** allocate (if needed)  and compute rhs and its jacobian.
    *
@@ -143,19 +134,17 @@ public:
    *  \param q generalized coordinates
    *  \param velocity time derivative of the  generalized coordinates
    */
-  void computeForces(double time, SP::SiconosVector q, SP::SiconosVector velocity) override;
+  void computeForces(double time, std::shared_ptr<siconos::algebra::SiconosVector> q,
+                     std::shared_ptr<siconos::algebra::SiconosVector> velocity) override;
 
   /**\return true if the Dynamical system is linear. */
-  bool isLinear() override
-  {
-    return true;
-  }
+  bool isLinear() override { return true; }
 
   /** print the data of the dynamical system on the standard output
    */
   void display(bool brief = true) const override;
 
-  ACCEPT_STD_VISITORS();
-
+  Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
 };
-#endif // LAGRANGIANLINEARDIAGONALDS_H
+}  // namespace siconos::modeling
+#endif  // LAGRANGIANLINEARDIAGONALDS_H

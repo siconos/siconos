@@ -14,170 +14,197 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #include "NonSmoothDynamicalSystemTest.hpp"
+
+#include "Interaction.hpp"
 #include "LagrangianLinearTIR.hpp"
 #include "NewtonImpactNSL.hpp"
+#include "SiconosVector.hpp"
+#include "SimpleMatrix.hpp"
+#include "Topology.hpp"
 
-#define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
-            if ((alpha) == (omega)) CPPUNIT_FAIL(message);
+#define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
+  if ((alpha) == (omega)) CPPUNIT_FAIL(message);
 
 // test suite registration
 CPPUNIT_TEST_SUITE_REGISTRATION(NonSmoothDynamicalSystemTest);
 
+void NonSmoothDynamicalSystemTest::setUp() {}
 
-void NonSmoothDynamicalSystemTest::setUp()
-{}
-
-
-void NonSmoothDynamicalSystemTest::tearDown()
-{}
-
+void NonSmoothDynamicalSystemTest::tearDown() {}
 
 // insertDynamicalSystem
-void NonSmoothDynamicalSystemTest::testinsertDynamicalSystem()
-{
-  SP::NonSmoothDynamicalSystem  nsds(new NonSmoothDynamicalSystem(1., 10.));
+void NonSmoothDynamicalSystemTest::testinsertDynamicalSystem() {
+  auto nsds = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(1., 10.);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(" test ndsn build: ", nsds->currentTime() == 1., true);
 
-  SP::DynamicalSystem ds(new LagrangianDS(std::make_shared<SiconosVector>(3),
-                                          std::make_shared<SiconosVector>(3)));
+  auto ds = std::make_shared<siconos::modeling::LagrangianDS>(
+      std::make_shared<siconos::algebra::SiconosVector>(3),
+      std::make_shared<siconos::algebra::SiconosVector>(3));
   ds->setNumber(23);
 
-  try
-  {
-    SP::DynamicalSystem dsnull;
+  try {
+    std::shared_ptr<siconos::modeling::DynamicalSystem> dsnull;
     nsds->insertDynamicalSystem(dsnull);
-  }
-  catch(const Siconos::exception& e)
-  {
+  } catch (const siconos::exception& e) {
     /*  Pass */
     std::cout << "testinsertDynamicalSystemNull: success!" << std::endl;
-  }
-  catch(const std::exception& e)
-  {
+  } catch (const std::exception& e) {
     std::cout << "testinsertDynamicalSystemNull:" << e.what() << std::endl;
     CPPUNIT_FAIL("testinsertDynamicalSystemNull: unexpected exception ");
   }
 
   nsds->insertDynamicalSystem(ds);
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testinsertDynamicalSystemA: ", nsds->getNumberOfDS() == 1, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testinsertDynamicalSystemB: ", nsds->getNumberOfInteractions() == 0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testinsertDynamicalSystemC: ", nsds->dynamicalSystem(23)->number() == 23, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testinsertDynamicalSystemD: ", nsds->topology()->hasDynamicalSystem(ds) == true, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testinsertDynamicalSystemA: ", nsds->getNumberOfDS() == 1,
+                               true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      " testinsertDynamicalSystemB: ", nsds->getNumberOfInteractions() == 0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      " testinsertDynamicalSystemC: ", nsds->dynamicalSystem(23)->number() == 23, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      " testinsertDynamicalSystemD: ", nsds->topology()->hasDynamicalSystem(ds) == true, true);
 
   // Try again : must be ignored
   nsds->insertDynamicalSystem(ds);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testinsertDynamicalSystemE: ", nsds->getNumberOfDS() == 1, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testinsertDynamicalSystemE: ", nsds->getNumberOfDS() == 1,
+                               true);
 
-  std::cout << "------- test insertDynamicalSystem ok -------" <<std::endl;
+  std::cout << "------- test insertDynamicalSystem ok -------" << std::endl;
 }
 
 // insertInteraction
-void NonSmoothDynamicalSystemTest::testinsertInteraction()
-{
-  SP::NonSmoothDynamicalSystem  nsds(new NonSmoothDynamicalSystem(0., 10.));
+void NonSmoothDynamicalSystemTest::testinsertInteraction() {
+  auto nsds = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(0., 10.);
 
-  SP::DynamicalSystem ds(new LagrangianDS(std::make_shared<SiconosVector>(3),
-                                          std::make_shared<SiconosVector>(3)));
+  auto ds = std::make_shared<siconos::modeling::LagrangianDS>(
+      std::make_shared<siconos::algebra::SiconosVector>(3),
+      std::make_shared<siconos::algebra::SiconosVector>(3));
   ds->setNumber(23);
 
   nsds->insertDynamicalSystem(ds);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE(" testinsertInteractionA: ", nsds->getNumberOfDS() == 1, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testinsertInteractionB: ", nsds->getNumberOfInteractions() == 0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testinsertInteractionC: ", nsds->dynamicalSystem(23)->number() == 23, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      " testinsertInteractionB: ", nsds->getNumberOfInteractions() == 0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      " testinsertInteractionC: ", nsds->dynamicalSystem(23)->number() == 23, true);
 
-  SP::Relation r(new LagrangianLinearTIR(std::make_shared<SimpleMatrix>(1,3)));
-  SP::NonSmoothLaw nsl(new NewtonImpactNSL(0.0));
-  SP::Interaction inter(new Interaction(nsl, r));
+  auto r = std::make_shared<siconos::modeling::LagrangianLinearTIR>(
+      std::make_shared<siconos::algebra::SimpleMatrix>(1, 3));
+  auto nsl = std::make_shared<siconos::modeling::NewtonImpactNSL>(0.0);
+  auto inter = std::make_shared<siconos::modeling::Interaction>(nsl, r);
+
   nsds->link(inter, ds);
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testinsertInteractionD: ", nsds->getNumberOfInteractions() == 1, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      " testinsertInteractionD: ", nsds->getNumberOfInteractions() == 1, true);
 
-  std::cout << "------- test insertInteraction ok -------" <<std::endl;
+  std::cout << "------- test insertInteraction ok -------" << std::endl;
 }
 
+void NonSmoothDynamicalSystemTest::testremoveDynamicalSystem() {
+  auto nsds = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(0., 10.);
 
-void NonSmoothDynamicalSystemTest::testremoveDynamicalSystem()
-{
-  SP::NonSmoothDynamicalSystem  nsds(new NonSmoothDynamicalSystem(0., 10.));
+  auto ds1 = std::make_shared<siconos::modeling::LagrangianDS>(
+      std::make_shared<siconos::algebra::SiconosVector>(3),
+      std::make_shared<siconos::algebra::SiconosVector>(3));
 
-  SP::DynamicalSystem ds1(new LagrangianDS(std::make_shared<SiconosVector>(3),
-                          std::make_shared<SiconosVector>(3)));
   ds1->setNumber(23);
-  SP::DynamicalSystem ds2(new LagrangianDS(std::make_shared<SiconosVector>(3),
-                          std::make_shared<SiconosVector>(3)));
+  auto ds2 = std::make_shared<siconos::modeling::LagrangianDS>(
+      std::make_shared<siconos::algebra::SiconosVector>(3),
+      std::make_shared<siconos::algebra::SiconosVector>(3));
   ds2->setNumber(32);
 
   nsds->insertDynamicalSystem(ds1);
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testremoveDynamicalSystemA: ", nsds->getNumberOfDS() == 1, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testremoveDynamicalSystemB: ", nsds->getNumberOfInteractions() == 0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testremoveDynamicalSystemC: ", nsds->dynamicalSystem(23)->number() == 23, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testremoveDynamicalSystemA: ", nsds->getNumberOfDS() == 1,
+                               true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      " testremoveDynamicalSystemB: ", nsds->getNumberOfInteractions() == 0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      " testremoveDynamicalSystemC: ", nsds->dynamicalSystem(23)->number() == 23, true);
 
-  SP::Relation r1(new LagrangianLinearTIR(std::make_shared<SimpleMatrix>(1,3)));
-  SP::Relation r2(new LagrangianLinearTIR(std::make_shared<SimpleMatrix>(1,6)));
-  SP::NonSmoothLaw nsl(new NewtonImpactNSL(0.0));
-  SP::Interaction inter1(new Interaction(nsl, r1));
-  SP::Interaction inter2(new Interaction(nsl, r1));
-  SP::Interaction inter3(new Interaction(nsl, r2));
+  auto r1 = std::make_shared<siconos::modeling::LagrangianLinearTIR>(
+      std::make_shared<siconos::algebra::SimpleMatrix>(1, 3));
+  auto r2 = std::make_shared<siconos::modeling::LagrangianLinearTIR>(
+      std::make_shared<siconos::algebra::SimpleMatrix>(1, 6));
+  auto nsl = std::make_shared<siconos::modeling::NewtonImpactNSL>(0.0);
+  auto inter1 = std::make_shared<siconos::modeling::Interaction>(nsl, r1);
+  auto inter2 = std::make_shared<siconos::modeling::Interaction>(nsl, r1);
+  auto inter3 = std::make_shared<siconos::modeling::Interaction>(nsl, r2);
   nsds->link(inter1, ds1);
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testremoveDynamicalSystemD: ", nsds->getNumberOfInteractions() == 1, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      " testremoveDynamicalSystemD: ", nsds->getNumberOfInteractions() == 1, true);
 
   nsds->removeDynamicalSystem(ds1);
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testremoveDynamicalSystemE: ", nsds->getNumberOfDS() == 0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testremoveDynamicalSystemF: ", nsds->getNumberOfInteractions() == 0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testremoveDynamicalSystemE: ", nsds->getNumberOfDS() == 0,
+                               true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      " testremoveDynamicalSystemF: ", nsds->getNumberOfInteractions() == 0, true);
 
   nsds->insertDynamicalSystem(ds1);
   nsds->insertDynamicalSystem(ds2);
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testremoveDynamicalSystemG: ", nsds->getNumberOfDS() == 2, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testremoveDynamicalSystemH: ", nsds->getNumberOfInteractions() == 0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testremoveDynamicalSystemI: ", nsds->dynamicalSystem(23)->number() == 23, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testremoveDynamicalSystemI: ", nsds->dynamicalSystem(32)->number() == 32, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testremoveDynamicalSystemG: ", nsds->getNumberOfDS() == 2,
+                               true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      " testremoveDynamicalSystemH: ", nsds->getNumberOfInteractions() == 0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      " testremoveDynamicalSystemI: ", nsds->dynamicalSystem(23)->number() == 23, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      " testremoveDynamicalSystemI: ", nsds->dynamicalSystem(32)->number() == 32, true);
 
   nsds->link(inter1, ds1);
   nsds->link(inter2, ds2);
   nsds->link(inter3, ds1, ds2);
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testremoveDynamicalSystemJ: ", nsds->getNumberOfInteractions() == 3, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      " testremoveDynamicalSystemJ: ", nsds->getNumberOfInteractions() == 3, true);
 
   nsds->removeDynamicalSystem(ds1);
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testremoveDynamicalSystemK: ", nsds->getNumberOfDS() == 1, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testremoveDynamicalSystemL: ", nsds->getNumberOfInteractions() == 1, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testremoveDynamicalSystemK: ", nsds->getNumberOfDS() == 1,
+                               true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      " testremoveDynamicalSystemL: ", nsds->getNumberOfInteractions() == 1, true);
 
-  std::cout << "------- test removeDynamicalSystem ok -------" <<std::endl;
+  std::cout << "------- test removeDynamicalSystem ok -------" << std::endl;
 }
 
-void NonSmoothDynamicalSystemTest::testremoveInteraction()
-{
-  SP::NonSmoothDynamicalSystem  nsds(new NonSmoothDynamicalSystem(0., 10.));
+void NonSmoothDynamicalSystemTest::testremoveInteraction() {
+  auto nsds = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(0., 10.);
 
-  SP::DynamicalSystem ds(new LagrangianDS(std::make_shared<SiconosVector>(3),
-                                          std::make_shared<SiconosVector>(3)));
+  auto ds = std::make_shared<siconos::modeling::LagrangianDS>(
+      std::make_shared<siconos::algebra::SiconosVector>(3),
+      std::make_shared<siconos::algebra::SiconosVector>(3));
   ds->setNumber(23);
 
   nsds->insertDynamicalSystem(ds);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE(" testremoveInteractionA: ", nsds->getNumberOfDS() == 1, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testremoveInteractionB: ", nsds->getNumberOfInteractions() == 0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testremoveInteractionC: ", nsds->dynamicalSystem(23)->number() == 23, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      " testremoveInteractionB: ", nsds->getNumberOfInteractions() == 0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      " testremoveInteractionC: ", nsds->dynamicalSystem(23)->number() == 23, true);
 
-  SP::Relation r(new LagrangianLinearTIR(std::make_shared<SimpleMatrix>(1,3)));
-  SP::NonSmoothLaw nsl(new NewtonImpactNSL(0.0));
-  SP::Interaction inter(new Interaction(nsl, r));
+  auto r = std::make_shared<siconos::modeling::LagrangianLinearTIR>(
+      std::make_shared<siconos::algebra::SimpleMatrix>(1, 3));
+  auto nsl = std::make_shared<siconos::modeling::NewtonImpactNSL>(0.0);
+  auto inter = std::make_shared<siconos::modeling::Interaction>(nsl, r);
+
   nsds->link(inter, ds);
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testremoveInteractionD: ", nsds->getNumberOfInteractions() == 1, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      " testremoveInteractionD: ", nsds->getNumberOfInteractions() == 1, true);
 
   nsds->removeInteraction(inter);
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testremoveInteractionE: ", nsds->getNumberOfInteractions() == 0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      " testremoveInteractionE: ", nsds->getNumberOfInteractions() == 0, true);
 
-  std::cout << "------- test removeInteraction ok -------" <<std::endl;
+  std::cout << "------- test removeInteraction ok -------" << std::endl;
 }

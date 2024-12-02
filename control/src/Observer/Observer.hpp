@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file Observer.hpp
   \brief General interface to define an Observer
@@ -23,137 +23,158 @@
 #ifndef Observer_H
 #define Observer_H
 
-#include <string>
+#include <cassert>
+#include <functional>
+#include <map>
+#include <memory>
 #include <set>
-#include "SiconosException.hpp"
-#include "SiconosPointers.hpp"
+#include <string>
 
-#include "SiconosFwd.hpp"
+#include "SiconosSerialization.hpp"
 
-#include "SiconosAlgebraTypeDef.hpp"
-#include "ControlTypeDef.hpp"
-#include "SiconosControlFwd.hpp"
+namespace siconos::algebra {
+class SiconosVector;
+class SimpleMatrix;
+}  // namespace siconos::algebra
+namespace siconos::modeling {
+class DynamicalSystem;
+class NonSmoothDynamicalSystem;
+
+};  // namespace siconos::modeling
+
+namespace siconos::integrators {
+class OneStepIntegrator;
+}
+namespace siconos::simulation {
+class TimeDiscretisation;
+class TimeStepping;
+class Simulation;
+
+};  // namespace siconos::simulation
+
+namespace siconos::control {
+
+class ControlSensor;
+
+/** Observer types */
+enum class ObserverType {
+  Luenberger,
+  SlidingReducedOrder,
+};
 
 /**
-   Observers Base Class
+ Observers Base Class
 
-   Abstract class, interface to user-defined observers.
-   
-   An Observer is dedicated to estimate the state of a DynamicalSystem given
-   its dynamics, inputs and a initial estimate of the state.
+ Abstract class, interface to user-defined observers.
+
+ An Observer is dedicated to estimate the state of a DynamicalSystem given
+ its dynamics, inputs and a initial estimate of the state.
 */
 
-class Observer
-{
-protected:
-  
+class Observer {
+ protected:
   ACCEPT_SERIALIZATION(Observer);
 
   /** type of the Observer */
-  int _type;
+  ObserverType _type{ObserverType::Luenberger};
 
   /** the DynamicalSystem used in the Observer */
-  SP::DynamicalSystem _DS;
+  std::shared_ptr<siconos::modeling::DynamicalSystem> _DS{nullptr};
 
   /** The TimeDiscretisation */
-  SP::TimeDiscretisation _td;
+  std::shared_ptr<siconos::simulation::TimeDiscretisation> _td{nullptr};
 
   /** the sensor that feed the observer */
-  SP::ControlSensor _sensor;
+  std::shared_ptr<ControlSensor> _sensor{nullptr};
 
   /** estimated state */
-  SP::SiconosVector _xHat;
+  std::shared_ptr<siconos::algebra::SiconosVector> _xHat{nullptr};
 
   /** The error \f$e=\hat{y}-y\f$ */
-  SP::SiconosVector _e;
+  std::shared_ptr<siconos::algebra::SiconosVector> _e{nullptr};
 
   /** The measurements from the sensor */
-  SP::SiconosVector _y;
+  std::shared_ptr<siconos::algebra::SiconosVector> _y{nullptr};
 
   /** id of the Observer */
-  std::string _id;
+  std::string _id{"none"};
 
   // /** Model for integration */
-  // SP::Model _model;
-
-  // /** Model for integration */
-  SP::NonSmoothDynamicalSystem _nsds;
+  std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> _nsds{nullptr};
 
   /** Simulation for integration */
-  SP::TimeStepping _simulation;
+  std::shared_ptr<siconos::simulation::TimeStepping> _simulation{nullptr};
 
   /** Integration for integration */
-  SP::OneStepIntegrator _integrator;
+  std::shared_ptr<siconos::integrators::OneStepIntegrator> _integrator{nullptr};
 
-  /** default constructor
-   */
-  Observer();
+  // Rule of five
+  Observer() = delete;
+  Observer(const Observer&) = delete;
+  Observer(Observer&&) = delete;
+  Observer& operator=(const Observer&) = delete;
+  Observer& operator=(Observer&&) = delete;
 
-public:
-
+ public:
   /** Constructor with a TimeDiscretisation.
    *
    *  \param type the type of the Observer, which corresponds to the class type
-   *  \param sensor the SP::Sensor to get the measurements
+   *  \param sensor the std::shared_ptr<Sensor> to get the measurements
    *  \param xHat0 the initial guess for the state
    *  \param newId the id of the Observer
    */
-  Observer(unsigned int type, SP::ControlSensor sensor, const SiconosVector& xHat0, const std::string& newId = "none");
+  Observer(ObserverType type, std::shared_ptr<ControlSensor> sensor,
+           const siconos::algebra::SiconosVector& xHat0, const std::string& newId = "none");
 
   /** Constructor with a TimeDiscretisation.
    *
    *  \param type the type of the Observer, which corresponds to the class type.
-   *  \param sensor the SP::Sensor to get the measurements
+   *  \param sensor the std::shared_ptr<Sensor> to get the measurements
    *  \param xHat0 the initial guess for the state
-   *  \param ds the SP::DynamicalSystem used as a model for the real DynamicalSystem
-   *  \param newId the id of the Observer
-   */ 
-  Observer(unsigned int type, SP::ControlSensor sensor, const SiconosVector& xHat0, SP::DynamicalSystem ds, const std::string& newId = "none");
+   *  \param ds the std::shared_ptr<siconos::modeling::DynamicalSystem> used as a model for the
+   * real DynamicalSystem \param newId the id of the Observer
+   */
+  Observer(ObserverType type, std::shared_ptr<ControlSensor> sensor,
+           const siconos::algebra::SiconosVector& xHat0,
+           std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
+           const std::string& newId = "none");
 
   /** destructor
    */
-  virtual ~Observer();
+  virtual ~Observer() noexcept = default;
 
   /** set id of the Observer
    *
    *  \param newId the new id.
    */
-  inline void setId(const std::string& newId)
-  {
-    _id = newId;
-  };
+  inline void setId(const std::string& newId) { _id = newId; };
 
   /** get id of the Observer
    *
    *  \return a string
    */
-  inline const std::string getId() const
-  {
-    return _id;
-  };
+  inline const std::string getId() const { return _id; };
 
   /** get the type of the Observer (ie class name)
    *
    *  \return an integer
    */
-  inline int getType() const
-  {
-    return _type;
-  };
+  inline ObserverType getType() const { return _type; };
 
   /** This is derived in child classes if they need to copy the TimeDiscretisation
    *  associated with this Sensor
    *
-  *  \param td the TimeDiscretisation for this Sensor
-  */
-  virtual void setTimeDiscretisation(const TimeDiscretisation& td);
+   *  \param td the TimeDiscretisation for this Sensor
+   */
+  virtual void setTimeDiscretisation(const siconos::simulation::TimeDiscretisation& td);
 
   /** initialize observer data.
    *
    *  \param nsds current nonsmooth dynamical system
    *  \param s current simulation setup
    */
-  virtual void initialize(const NonSmoothDynamicalSystem& nsds, const Simulation& s);
+  virtual void initialize(const siconos::modeling::NonSmoothDynamicalSystem& nsds,
+                          const siconos::simulation::Simulation& s);
 
   /** capture data when the ObserverEvent is processed
    */
@@ -167,31 +188,92 @@ public:
    *
    *  \return a pointer to e
    */
-  inline SP::SiconosVector e()
-  {
-    return _e;
-  }
+  inline std::shared_ptr<siconos::algebra::SiconosVector> e() { return _e; }
 
   /** \return the estimated state
    */
-  inline SP::SiconosVector xHat()
-  {
-    return _xHat;
-  }
+  inline std::shared_ptr<siconos::algebra::SiconosVector> xHat() { return _xHat; }
 
   /** Set the DynamicalSystem used in the Observer
    *
    *  \param ds the DynamicalSystem used in the Observer
    */
-  inline void setDS(SP::DynamicalSystem ds)
-  {
-    _DS = ds;
-  }
+  inline void setDS(std::shared_ptr<siconos::modeling::DynamicalSystem> ds) { _DS = ds; }
 
   /** \return the Model used in the Observer
    */
-  virtual SP::NonSmoothDynamicalSystem getInternalNSDS() const { return _nsds; };
-
+  virtual std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> getInternalNSDS() const
+  {
+    return _nsds;
+  };
 };
 
+/** A class to handle observers creation
+
+  Requirements:
+  - the Observer type must be known and register
+
+  For a XXXXObserver, add in the file describing the XXXXObserver class:
+
+  static siconos::simulation::ObserverRegistration<siconos::simulation::XXXObserver>
+ reg(siconos::simulation::ObserverType::XXXX);
+
+  See ObserverType enum for the available names.
+
+  Usage:
+
+  auto observer = ObserverFactory::instance()->create(time, ObserverType::XXXX)
+
+*/
+class ObserverFactory {
+  // Signature of Observer constructor
+  using ObserverCreator = std::function<std::shared_ptr<Observer>(
+      (std::shared_ptr<ControlSensor>, const siconos::algebra::SiconosVector&))>;
+
+  /** map to connect observer type and the function used to create them */
+  std::map<ObserverType, ObserverCreator> m_factories;
+
+ public:
+  /** Factory function which creates and returns an observer
+
+   *  \param sensor the std::shared_ptr<Sensor> to get the measurements
+   *  \param xHat0 the initial guess for the state
+      \param type type of the observer (must be a ObserverType (enum))
+      \return a pointer to observer
+  */
+  std::shared_ptr<Observer> create(std::shared_ptr<ControlSensor> sensor,
+                                   const siconos::algebra::SiconosVector& xHat0,
+                                   ObserverType type)
+  {
+    assert(m_factories.contains(type) && "unknown Observer type");
+    return m_factories[type](sensor, xHat0);
+  }
+
+  /** access to the (singleton) factory instance */
+  static ObserverFactory* instance()
+  {
+    static ObserverFactory factory;
+    return &factory;
+  }
+
+  void registerCreator(ObserverType newtype, ObserverCreator caller)
+  {
+    m_factories[newtype] = caller;
+  }
+};
+
+template <class T>
+class ObserverRegistration {
+ public:
+  ObserverRegistration(ObserverType newtype)
+  {
+    ObserverFactory::instance()->registerCreator(
+        newtype, [](std::shared_ptr<ControlSensor> sensor,
+                    const siconos::algebra::SiconosVector& xHat0) {
+          return std::make_shared<T>(sensor, xHat0);
+        });
+  }
+};
+
+}  // namespace siconos::control
 #endif

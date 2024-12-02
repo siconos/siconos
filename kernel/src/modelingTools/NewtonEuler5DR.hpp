@@ -22,23 +22,23 @@
 #define NEWTONEULERRELATIONRFC3D_H
 
 #include "NewtonEuler1DR.hpp"
+
+namespace siconos::modeling {
 /**
    This class is an interface for relation with impact and RFC3D.
-   
+
 */
 
 class NewtonEuler5DR : public NewtonEuler1DR {
+ private:
+  ACCEPT_SERIALIZATION(NewtonEuler5DR);
 
-private:
-  ACCEPT_SERIALIZATION(NewtonEuler3DR);
+  void RFC3DcomputeJachqTFromContacts(std::shared_ptr<siconos::algebra::SiconosVector> q1);
+  void RFC3DcomputeJachqTFromContacts(std::shared_ptr<siconos::algebra::SiconosVector> q1,
+                                      std::shared_ptr<siconos::algebra::SiconosVector> q2);
 
-  void RFC3DcomputeJachqTFromContacts(SP::SiconosVector q1);
-  void RFC3DcomputeJachqTFromContacts(SP::SiconosVector q1,
-                                      SP::SiconosVector q2);
-
-protected:
-public:
-  NewtonEuler5DR() : NewtonEuler1DR() {}
+ protected:
+ public:
 
   /** destructor
    */
@@ -53,12 +53,12 @@ public:
   /** Default implementation consists in multiplying jachq and T (see
    *  NewtonEulerR::computeJachqT) but here we compute the operator from the the
    *  contact point locations and the local frame at contact
-   * 
+   *
    *  \param inter interaction that owns the relation
    *  \param q0  the block vector to the dynamical system position
    */
-  void computeJachqT(Interaction &inter, SP::BlockVector q0) override;
-
-  ACCEPT_STD_VISITORS();
+  void computeJachqT(Interaction &inter,
+                     std::shared_ptr<siconos::algebra::BlockVector> q0) override;
 };
-#endif // NEWTONEULERRELATIONRFC3D_H
+}  // namespace siconos::modeling
+#endif  // NEWTONEULERRELATIONRFC3D_H

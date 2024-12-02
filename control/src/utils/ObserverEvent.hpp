@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file ObserverEvent.hpp
   Observer Events
 */
@@ -22,60 +22,62 @@
 #define ObserverEvent_H
 
 #include "Event.hpp"
-#include "SiconosControlFwd.hpp"
-#include "ControlTypeDef.hpp"
+namespace siconos::control {
+class Observer;
 
 /** Events when the observer updates the state estimate
  *
  *
  */
-class ObserverEvent : public Event
-{
-
-private:
-  
+class ObserverEvent : public siconos::simulation::Event {
+ private:
   ACCEPT_SERIALIZATION(ObserverEvent);
 
+  using EventType = siconos::simulation::EventType;
 
   /** The observer linked to the present event */
-  SP::Observer _observer;
+  std::shared_ptr<Observer> _observer{nullptr};
 
-  /** Default constructor */
-  ObserverEvent(): Event(0.0, OBSERVER_EVENT, true) {};
+  // /** Default constructor */
+  // ObserverEvent(): Event(0.0, EventType::Observer, true) {};
 
-public:
-
+ public:
   /** constructor with time value as a parameter
    *  \param time the starting time of the Event
-   *  \param name the type of the Event
    */
-  ObserverEvent(double time, int name): Event(time, name, true) {};
+  ObserverEvent(double time) : Event(time, EventType::Observer, true){};
 
   /** destructor
    */
-  ~ObserverEvent() {};
+  ~ObserverEvent() noexcept = default;
 
   /** get the Observer linked to this Event
-   *  \return a SP::Observer to the Observer
+   *  \return a std::shared_ptr<Observer> to the Observer
    */
-  inline SP::Observer observer() const
-  {
-    return _observer;
-  };
+  inline std::shared_ptr<Observer> observer() const { return _observer; };
 
   /** set the Observer linked to this Event
-   *  \param newObserver the SP::Observer
+   *  \param newObserver the std::shared_ptr<Observer>
    */
-  void setObserverPtr(SP::Observer newObserver)
+  void setObserverPtr(std::shared_ptr<Observer> newObserver)
   {
     _observer = newObserver;
   };
 
   /** Call the capture method of the linked Observer
-   *  \param sim a SP::Simulation (ignored).
+   *  \param sim a std::shared_ptr<siconos::simulation::Simulation> (ignored).
    */
-  void process(Simulation& sim);
-
+  void process(siconos::simulation::Simulation& sim);
 };
 
-#endif // ObserverEvent_H
+
+}  // namespace siconos::control
+
+namespace siconos::simulation{
+// Register the event into the factory
+  static EventRegistration<siconos::control::ObserverEvent> reg_OB(EventType::Observer);
+
+
+}
+
+#endif  // ObserverEvent_H

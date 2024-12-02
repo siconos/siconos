@@ -6,9 +6,9 @@
 
 // => we need swig iterators for bgl iterators
 
-std::vector<SP::DynamicalSystem> dynamicalSystems(SP::DynamicalSystemsGraph dsg)
+std::vector<std::shared_ptr<siconos::modeling::DynamicalSystem>> dynamicalSystems(std::shared_ptr<siconos::graphs::DynamicalSystemGraph> dsg)
 {
-  std::vector<SP::DynamicalSystem> r = std::vector<SP::DynamicalSystem>();
+  std::vector<std::shared_ptr<siconos::modeling::DynamicalSystem>> r = std::vector<std::shared_ptr<siconos::modeling::DynamicalSystem>>();
   DynamicalSystemsGraph::VIterator vi, viend;
   for (boost::tie(vi, viend) = dsg->vertices(); vi != viend; ++vi)
   {
@@ -17,9 +17,9 @@ std::vector<SP::DynamicalSystem> dynamicalSystems(SP::DynamicalSystemsGraph dsg)
   return r;
 };
 
-std::vector<SP::Interaction> interactions(SP::InteractionsGraph dsg)
+std::vector<std::shared_ptr<siconos::modeling::Interaction>> interactions(std::shared_ptr<siconos::graphs::InteractionsGraph> dsg)
 {
-  std::vector<SP::Interaction> r = std::vector<SP::Interaction>();
+  std::vector<std::shared_ptr<siconos::modeling::Interaction>> r = std::vector<std::shared_ptr<siconos::modeling::Interaction>>();
   InteractionsGraph::VIterator vi, viend;
   for (boost::tie(vi, viend) = dsg->vertices(); vi != viend; ++vi)
   {
@@ -28,23 +28,23 @@ std::vector<SP::Interaction> interactions(SP::InteractionsGraph dsg)
   return r;
 };
 
-std::vector<SP::DynamicalSystem> dynamicalSystemsVector()
+std::vector<std::shared_ptr<siconos::modeling::DynamicalSystem>> dynamicalSystemsVector()
 {
-  return std::vector<SP::DynamicalSystem>();
+  return std::vector<std::shared_ptr<siconos::modeling::DynamicalSystem>>();
 }
 
-std::vector<std::pair<SP::DynamicalSystem, SP::DynamicalSystem> >
-graphLayout(SP::DynamicalSystemsGraph dsg)
+std::vector<std::pair<std::shared_ptr<siconos::modeling::DynamicalSystem>, std::shared_ptr<siconos::modeling::DynamicalSystem>> >
+graphLayout(std::shared_ptr<siconos::graphs::DynamicalSystemGraph> dsg)
 {
 
-  std::vector<std::pair<SP::DynamicalSystem, SP::DynamicalSystem> > r =
-    std::vector<std::pair<SP::DynamicalSystem, SP::DynamicalSystem> >();
+  std::vector<std::pair<std::shared_ptr<siconos::modeling::DynamicalSystem>, std::shared_ptr<siconos::modeling::DynamicalSystem>> > r =
+    std::vector<std::pair<std::shared_ptr<siconos::modeling::DynamicalSystem>, std::shared_ptr<siconos::modeling::DynamicalSystem>> >();
 
   DynamicalSystemsGraph::EIterator ei, eiend;
 
   for (boost::tie(ei, eiend) = dsg->edges(); ei != eiend; ++ei)
   {
-    std::pair<SP::DynamicalSystem, SP::DynamicalSystem>
+    std::pair<std::shared_ptr<siconos::modeling::DynamicalSystem>, std::shared_ptr<siconos::modeling::DynamicalSystem>>
     p(dsg->bundle(dsg->source(*ei)),
       dsg->bundle(dsg->target(*ei)));
     r.push_back(p);
@@ -53,7 +53,7 @@ graphLayout(SP::DynamicalSystemsGraph dsg)
 };
 
 std::vector<std::pair<unsigned int, unsigned int> >
-graphLayoutInt(SP::DynamicalSystemsGraph dsg)
+graphLayoutInt(std::shared_ptr<siconos::graphs::DynamicalSystemGraph> dsg)
 {
 
   std::vector<std::pair<unsigned int, unsigned int> > r =
@@ -75,8 +75,8 @@ graphLayoutInt(SP::DynamicalSystemsGraph dsg)
 struct graphAccess  
 {
   std::shared_ptr<_InteractionsGraph> graph;
-  std::vector<SP::Interaction> vertices;
-  std::vector<SP::DynamicalSystem> edges;
+  std::vector<std::shared_ptr<siconos::modeling::Interaction>> vertices;
+  std::vector<std::shared_ptr<siconos::modeling::DynamicalSystem>> edges;
   
   void update()
   {
@@ -104,8 +104,8 @@ struct graphAccess
   
   ~graphAccess()
   {
-    std::vector<SP::Interaction>().swap(vertices);
-    std::vector<SP::DynamicalSystem>().swap(edges);
+    std::vector<std::shared_ptr<siconos::modeling::Interaction>>().swap(vertices);
+    std::vector<std::shared_ptr<siconos::modeling::DynamicalSystem>>().swap(edges);
   }
   
 };

@@ -14,15 +14,28 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #include "CircularDS.hpp"
 
-CircularDS::CircularDS(double r, double m,
-                       SP::SiconosVector qinit,
-                       SP::SiconosVector vinit)
-  : LagrangianDS(qinit, vinit),
-    radius(r), massValue(m)
+#include "SiconosVector.hpp"
+
+siconos::collision::native::bodies::CircularDS::CircularDS(
+    double r, double m, std::shared_ptr<siconos::algebra::SiconosVector> qinit,
+    std::shared_ptr<siconos::algebra::SiconosVector> vinit)
+    : siconos::modeling::LagrangianDS{qinit, vinit}, radius{r}, massValue{m}
 {
   _ndof = 3;
 }
+
+double siconos::collision::native::bodies::CircularDS::getQ(unsigned int pos)
+{
+  assert(pos < _ndof);
+  return (*_q[0])(pos);
+};
+
+double siconos::collision::native::bodies::CircularDS::getVelocity(unsigned int pos)
+{
+  assert(pos < _ndof);
+  return (*_q[1])(pos);
+};

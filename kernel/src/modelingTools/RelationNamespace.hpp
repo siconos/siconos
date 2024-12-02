@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file RelationNamespace.hpp
   \brief Namespace related to relations
 */
@@ -23,41 +23,9 @@
 #define RELATIONNAMESPACE_HPP
 
 /** Namespace for types related to relations */
-namespace RELATION
-{
-/** List of possible Relations types*/
-  enum TYPES
-  {
-    /** First Order */
-    FirstOrder,
-    /** Lagrangian */
-    Lagrangian,
-    /** Lagrangian */
-    NewtonEuler
-  };
+namespace siconos::modeling {
+  
 
-/** List of possible Relations subtypes*/
-  enum SUBTYPES
-  {
-    /** non linear */
-    NonLinearR,
-    /** linear */
-    LinearR,
-    /** Linear and time invariant */
-    LinearTIR,
-    /** Scleronomous (lagrangian only) */
-    ScleronomousR,
-    /** Rheonomous (lagrangian only) */
-    RheonomousR,
-    /** Compliant (lagrangian only) */
-    CompliantR,
-    /** CompliantLinearTIR (lagrangian only) */
-    CompliantLinearTIR,
-    /** */
-    Type1R,
-    /** */
-    Type2R
-  };
-}
+}  // namespace siconos::modeling
 
 #endif

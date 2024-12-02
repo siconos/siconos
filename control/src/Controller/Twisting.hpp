@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file Twisting.hpp
   \brief twisting algorithm with a modification
@@ -24,34 +24,30 @@
 #define Twisting_H
 
 #include "CommonSMC.hpp"
-
+namespace siconos::control {
 
 /** Modified Twisting Controller with an implicit discretization
  *
  *  This is the twisting controller that gives the best result
  */
-class Twisting : public CommonSMC
-{
-private:
+class Twisting : public CommonSMC {
+ private:
   ACCEPT_SERIALIZATION(Twisting);
 
-protected:
-  /** default constructor */
-  Twisting() {};
-
-public:
+ public:
   /** Constructor for the ActuatorFactory
    *
    *  \param sensor the ControlSensor feeding the Actuator
    */
-  Twisting(SP::ControlSensor sensor): CommonSMC(TWISTING, sensor) {};
+  Twisting(std::shared_ptr<ControlSensor> sensor)
+      : CommonSMC(ActuatorType::Twisting, sensor){};
 
   /** Constructor for a nonlinear system.
    *
    *  \param sensor the ControlSensor feeding the Actuator
    *  \param hControl sampling period
    */
-  Twisting(SP::ControlSensor sensor, double hControl);
+  Twisting(std::shared_ptr<ControlSensor> sensor, double hControl);
 
   /** Constructor for the linear case
    *
@@ -60,11 +56,11 @@ public:
    *  \param beta twisting parameter
    *  \param hControl sampling period
    */
-  Twisting(SP::ControlSensor sensor, double gain, double beta, double hControl);
+  Twisting(std::shared_ptr<ControlSensor> sensor, double gain, double beta, double hControl);
 
   /** destructor
    */
-  virtual ~Twisting();
+  virtual ~Twisting() noexcept = default;
 
   /** Compute the new control law at each event
    *  Here we are using the following formula:
@@ -77,6 +73,11 @@ public:
    */
   virtual void setNSdata(double hControl);
 
-  virtual void initialize(const NonSmoothDynamicalSystem & nsds, const Simulation& s);
+  virtual void initialize(const siconos::modeling::NonSmoothDynamicalSystem& nsds,
+                          const siconos::simulation::Simulation& s);
 };
+// Register the observer into the factory
+static ActuatorRegistration<Twisting> reg_AT(ActuatorType::Twisting);
+
+}  // namespace siconos::control
 #endif

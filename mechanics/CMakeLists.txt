@@ -8,8 +8,6 @@
 # - COMPONENT component name
 # - <COMPONENT>_DIRS: the list of paths (relative to CMAKE_CURRENT_SOURCE_DIR) that
 #   contain source files
-# - <COMPONENT>_EXCLUDE_SRCS: the list of files, in <COMPONENT>_DIRS, that must be excluded
-#   from build.
 # - <COMPONENT>_INTERFACE_INCLUDE_DIRECTORIES: a list of directories
 #   to populate the interface of the target for include directories at build time
 
@@ -35,6 +33,9 @@ set(${COMPONENT}_DIRS
   src/collision/native
   src/collision/native/bodies
   src/joints
+  src/fem
+  src/fem/native
+  src/fem/cable
   )
 
 # Then, optional parts ---
@@ -78,14 +79,6 @@ target_link_libraries(mechanics PUBLIC
   externals # for boost/numerics/bindings
   numerics  # for debug.h ...
   kernel)
-
-# Links with non-Siconos libraries
-# dependency upon boost because of line 140 in SiconosPointers.hpp
-# --> need boost::shared_array for HEM5 and lsodar.
-# This should be reviewed (?)
-
-target_include_directories(mechanics PRIVATE ${Boost_INCLUDE_DIRS})
-
 
 # Bullet setup
 # Different options are available. Check BulletSetup.cmake file

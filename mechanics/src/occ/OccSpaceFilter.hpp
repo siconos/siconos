@@ -20,11 +20,11 @@
 
 #include "SpaceFilter.hpp"
 
-class OccSpaceFilter : public SpaceFilter {
+namespace siconos::mechanics::occ {
+class OccSpaceFilter : public siconos::collision::native::SpaceFilter {
  public:
-  OccSpaceFilter() : SpaceFilter(){};
-
-  virtual void updateInteractions(SP::Simulation){};
+  // Do we need a default constructor ?
+  virtual void updateInteractions(std::shared_ptr<siconos::simulation::Simulation>){};
 };
-
+}  // namespace siconos::mechanics::occ
 #endif

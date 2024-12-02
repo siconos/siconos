@@ -14,5 +14,3 @@ ENV JUPYTER_PORT=8888
 ENV JUPYTER_ENABLE_LAB yes
 EXPOSE $JUPYTER_PORT
 ENTRYPOINT ["siconosenv/bin/jupyter", "lab","--ip=0.0.0.0","--allow-root", "--no-browser"]
-
-

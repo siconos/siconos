@@ -14,23 +14,22 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef __SMCTest__
 #define __SMCTest__
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "SiconosFwd.hpp"
-#include "SiconosControlFwd.hpp"
-#include <FirstOrderLinearTIDS.hpp>
 
-#include <SiconosConfig.h>
+#include "ExplicitLinearSMC.hpp"
+#include "FirstOrderLinearTIDS.hpp"
+#include "LinearSMC.hpp"
+#include "LinearSensor.hpp"
+#include "SiconosConfig.h"
+#include "Twisting.hpp"
 
-class SMCTest : public CppUnit::TestFixture
-{
-
-private:
+class SMCTest : public CppUnit::TestFixture {
+ private:
   ACCEPT_SERIALIZATION(SMCTest);
-
 
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(SMCTest);
@@ -69,32 +68,25 @@ private:
   double _tol;
   double _beta;
   double _xFinal;
-  SP::FirstOrderLinearTIDS _DS;
-  SP::SiconosMatrix _A;
-  SP::SimpleMatrix _B;
-  SP::SimpleMatrix _C;
-  SP::SimpleMatrix _Csurface;
-  SP::SiconosVector _b;
-  SP::SiconosVector _x0;
-  SP::SiconosVector _K;
-  SP::LinearSensor _sensor;
-  SP::LinearSMC _iSMC;
-  SP::ExplicitLinearSMC _eSMC;
+  std::shared_ptr<siconos::modeling::FirstOrderLinearTIDS> _DS;
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _A;
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _B;
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _C;
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _Csurface;
+  std::shared_ptr<siconos::algebra::SiconosVector> _b;
+  std::shared_ptr<siconos::algebra::SiconosVector> _x0;
+  std::shared_ptr<siconos::algebra::SiconosVector> _K;
+  std::shared_ptr<siconos::control::LinearSensor> _sensor;
+  std::shared_ptr<siconos::control::LinearSMC> _iSMC;
+  std::shared_ptr<siconos::control::ExplicitLinearSMC> _eSMC;
 #ifdef HAS_EXTREME_POINT_ALGO
-  SP::Twisting _itw;
+  std::shared_ptr<siconos::control::Twisting> _itw;
 #endif
 
-
-public:
-
-  SMCTest(): _n(2), _h(0.05), _t0(0.0), _T(100.0), _tol(7.5e-11), _beta(0.1) {}
+ public:
+  SMCTest() : _n(2), _h(0.05), _t0(0.0), _T(100.0), _tol(7.5e-11), _beta(0.1) {}
   void setUp();
   void tearDown();
-
 };
 
 #endif
-
-
-
-

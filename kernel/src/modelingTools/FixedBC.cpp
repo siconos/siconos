@@ -18,25 +18,18 @@
 
 #include "FixedBC.hpp"
 #include "BoundaryCondition.hpp"
-
+#include "SiconosVector.hpp"
 
 //#define DEBUG_MESSAGES
 //#define DEBUG_STDOUT
 #include "siconos_debug.h"
 
-FixedBC::FixedBC(SP::UnsignedIntVector newVelocityIndices) :
-  BoundaryCondition(newVelocityIndices)
-{
-};
 
-FixedBC::~FixedBC()
-{
-}
-void FixedBC::computePrescribedVelocity(double time)
+void siconos::modeling::FixedBC::computePrescribedVelocity(double time)
 {
   DEBUG_BEGIN("FixedBC::computePrescribedVelocity(double time)\n");
-  if(!_prescribedVelocity) _prescribedVelocity.reset(new SiconosVector((unsigned int)_velocityIndices->size()));
-  for(unsigned int k = 0 ; k < _velocityIndices->size(); k++)
+  if(!_prescribedVelocity) _prescribedVelocity = std::make_shared<siconos::algebra::SiconosVector>(_velocityIndices.size());
+  for(unsigned int k = 0 ; k < _velocityIndices.size(); k++)
   {
     _prescribedVelocity->setValue(k,0.0);
     DEBUG_PRINTF("_prescribedVelocity[%i] at time  %e = %e \n",k, time,_prescribedVelocity->getValue(k));

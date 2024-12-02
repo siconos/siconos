@@ -20,47 +20,45 @@ typedef struct {
   PyObject* env_compute_projection_on_set;
 } functions_env_python_with_proj;
 
+static void call_py_compute_nabla_Fvi(void* env, int n, double* z, NumericsMatrix* nabla_F);
+static void call_py_compute_Fvi(void* env, int n, double* z, double* F);
 
-static void call_py_compute_nabla_Fvi(void *env, int n, double* z, NumericsMatrix* nabla_F);
-static void call_py_compute_Fvi(void *env, int n, double* z, double* F);
+static void call_py_compute_nabla_Fncp(void* env, int n, double* z, NumericsMatrix* nabla_F);
+static void call_py_compute_Fncp(void* env, int n, double* z, double* F);
 
-static void call_py_compute_nabla_Fncp(void *env, int n, double* z, NumericsMatrix* nabla_F);
-static void call_py_compute_Fncp(void *env, int n, double* z, double* F);
+static void call_py_compute_nabla_Fmcp(void* env, int n, double* z,
+                                       NumericsMatrix* nabla_Fmcp);
+static void call_py_compute_Fmcp(void* env, int n, double* z, double* Fmcp);
 
-static void call_py_compute_nabla_Fmcp(void *env, int n, double* z, NumericsMatrix* nabla_Fmcp);
-static void call_py_compute_Fmcp(void *env, int n, double* z, double* Fmcp);
-
-#define PY_CALL_METHOD_OR_FUNCTION(ENV_STRUCT, METHOD_NAME, FIELD_FUNCTION, OUTPUT, ...) \
-PyObject* py_out = NULL;\
-switch (((env_target_lang*) ENV_STRUCT)->id)\
-{\
-  case ENV_IS_PYTHON_CLASS:\
-  {\
-    py_out = PyObject_CallMethodObjArgs(((class_env_python*) ENV_STRUCT)->class_object, SWIG_Python_str_FromChar((char *)METHOD_NAME), __VA_ARGS__, OUTPUT, NULL);\
-    break;\
-  }\
-  case ENV_IS_PYTHON_FUNCTIONS:\
-  {\
-    py_out = PyObject_CallFunctionObjArgs(((functions_env_python*) ENV_STRUCT)->FIELD_FUNCTION, __VA_ARGS__, OUTPUT, NULL);\
-    break;\
-  }\
-  default:\
-  {\
-    PyErr_SetString(PyExc_TypeError, "Unknown environment type");\
-  }\
-}\
-if (!py_out)\
-{\
-  PyErr_PrintEx(0);\
-}\
-Py_XDECREF(py_out);
+#define PY_CALL_METHOD_OR_FUNCTION(ENV_STRUCT, METHOD_NAME, FIELD_FUNCTION, OUTPUT, ...)   \
+  PyObject* py_out = NULL;                                                                 \
+  switch (((env_target_lang*)ENV_STRUCT)->id) {                                            \
+    case ENV_IS_PYTHON_CLASS: {                                                            \
+      py_out = PyObject_CallMethodObjArgs(((class_env_python*)ENV_STRUCT)->class_object,   \
+                                          SWIG_Python_str_FromChar((char*)METHOD_NAME),    \
+                                          __VA_ARGS__, OUTPUT, NULL);                      \
+      break;                                                                               \
+    }                                                                                      \
+    case ENV_IS_PYTHON_FUNCTIONS: {                                                        \
+      py_out = PyObject_CallFunctionObjArgs(                                               \
+          ((functions_env_python*)ENV_STRUCT)->FIELD_FUNCTION, __VA_ARGS__, OUTPUT, NULL); \
+      break;                                                                               \
+    }                                                                                      \
+    default: {                                                                             \
+      PyErr_SetString(PyExc_TypeError, "Unknown environment type");                        \
+    }                                                                                      \
+  }                                                                                        \
+  if (!py_out) {                                                                           \
+    PyErr_PrintEx(0);                                                                      \
+  }                                                                                        \
+  Py_XDECREF(py_out);
 
 //////////////////////////////////////////////////////////////////////////////
 // START copy from npy_3kcompat.h
 // We copy those things since
 //   - there is no guarantee that those functions are going to remain around
 //   - MSVC chokes if we include npy_3kcompat.h and I don't want to investigate
-// 
+//
 // --xhub
 //////////////////////////////////////////////////////////////////////////////
 
@@ -119,18 +117,14 @@ Py_XDECREF(py_out);
 
 #endif /* NPY_PY3K */
 
-
-static inline void
-PyUnicode_ConcatAndDel(PyObject **left, PyObject *right)
-{
-    PyObject *newobj;
-    newobj = PyUnicode_Concat(*left, right);
-    Py_DECREF(*left);
-    Py_DECREF(right);
-    *left = newobj;
+static inline void PyUnicode_ConcatAndDel(PyObject** left, PyObject* right) {
+  PyObject* newobj;
+  newobj = PyUnicode_Concat(*left, right);
+  Py_DECREF(*left);
+  Py_DECREF(right);
+  *left = newobj;
 }
 
 //////////////////////////////////////////////////////////////////////////////
 // END copy from npy_3kcompat.h
 //////////////////////////////////////////////////////////////////////////////
-

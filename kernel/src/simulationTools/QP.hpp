@@ -14,120 +14,74 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file
  */
 #ifndef QP_H
 #define QP_H
 
 #include "OneStepNSProblem.hpp"
-#include "SimpleMatrix.hpp"
-#include "SiconosVector.hpp"
 
+namespace siconos::nonsmooth_formulations {
 
 /** Quadratic Problem
  *
  */
-class QP : public OneStepNSProblem
-{
-private:
-  
+class QP : public OneStepNSProblem {
+ private:
   ACCEPT_SERIALIZATION(QP);
 
-
   /** contains the Q matrix of a QP problem */
-  SP::SiconosMatrix _Q;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _Q{nullptr};
 
   /** contains the p vector of a QP problem */
-  SP::SiconosVector _p;
+  std::shared_ptr<siconos::algebra::SiconosVector> _p{nullptr};
 
   //  /** contains the data of the QP, according to siconos/numerics */
   //  QPStructure QPMethod;
 
-public:
-
+ public:
   /* default constructor */
   QP() = default;
 
   /** Destructor */
-  ~QP(){};
-
-  // --- GETTERS/SETTERS ---
-
-  // --- Q ---
-  /** get the value of Q
-   *
-   *  \return SimpleMatrix
-   */
-  inline const SimpleMatrix getQ() const
-  {
-    return *_Q;
-  }
+  ~QP() noexcept = default;
 
   /** get Q
    *
    *  \return pointer on a SiconosMatrix
    */
-  inline SP::SiconosMatrix q() const
-  {
-    return _Q;
-  }
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> q() const { return _Q; }
 
   /** set the value of Q to newValue
    *
-   *  \param newValue SiconosMatrix 
+   *  \param newValue SiconosMatrix
    */
-  inline void setQ(const SiconosMatrix& newValue)
-  {
-    *_Q = newValue;
-  }
+  void setQ(const siconos::algebra::SiconosMatrix& newValue);
 
   /** set Q to pointer newPtr
    *
    *  \param newPtr the new matrix
    */
-  inline void setQPtr(SP::SiconosMatrix newPtr)
-  {
-    _Q = newPtr;
-  }
-
-  // --- P ---
-  /** get the value of p, the initial state of the DynamicalSystem
-   *
-   *  \return SiconosVector
-   *  \warning: SiconosVector is an abstract class => can not be an lvalue => return SiconosVector
-   */
-  inline const SiconosVector getP() const
-  {
-    return *_p;
-  }
+  inline void setQPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr) { _Q = newPtr; }
 
   /** get p, the initial state of the DynamicalSystem
    *
-   *  \return pointer on a SiconosVector
+   *  \return pointer on a siconos::algebra::SiconosVector
    */
-  inline SP::SiconosVector p() const
-  {
-    return _p;
-  }
+  inline std::shared_ptr<siconos::algebra::SiconosVector> p() const { return _p; }
 
   /** set the value of p to newValue
    *
-   *  \param newValue SiconosVector 
+   *  \param newValue siconos::algebra::SiconosVector
    */
-  inline void setP(const SiconosVector& newValue)
-  {
-    *_p = newValue;
-  }
+  void setP(const siconos::algebra::SiconosVector& newValue);
 
   /** set p to pointer newPtr
    *
-   *  \param newPtr SiconosVector * 
+   *  \param newPtr siconos::algebra::SiconosVector *
    */
-  inline void setPPtr(SP::SiconosVector newPtr)
-  {
-    _p = newPtr;
-  }
+  inline void setPPtr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) { _p = newPtr; }
 
   // --- OTHER FUNCTIONS ---
 
@@ -143,12 +97,12 @@ public:
   void display() const;
 
   /* pure virtual in OneStepNSProblem.hpp */
-  void computeInteractionBlock(const InteractionsGraph::EDescriptor&)
+  void computeInteractionBlock(const siconos::graphs::InteractionsGraph::EDescriptor&)
   {
     assert(false);
   }
 
-  void computeDiagonalInteractionBlock(const InteractionsGraph::VDescriptor&)
+  void computeDiagonalInteractionBlock(const siconos::graphs::InteractionsGraph::VDescriptor&)
   {
     assert(false);
   }
@@ -159,11 +113,8 @@ public:
     return false;
   }
 
-  void postCompute()
-  {
-    assert(false);
-  }
-
+  void postCompute() { assert(false); }
 };
+}  // namespace siconos::nonsmooth_formulations
 
-#endif // QP_H
+#endif  // QP_H

@@ -19,10 +19,6 @@
 
 #include <BRepPrimAPI_MakeSphere.hxx>
 #include <BRepTools.hxx>
-#include <Geometer.hpp>
-#include <OccBody.hpp>
-#include <SiconosVector.hpp>
-#include <SimpleMatrix.hpp>
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Shape.hxx>
@@ -31,16 +27,17 @@
 #include <gp_Quaternion.hxx>
 #include <gp_XYZ.hxx>
 #include <iostream>
+#include <numbers>  // pi
 
 #include "ContactPoint.hpp"
 #include "ContactShapeDistance.hpp"
 #include "Geometer.hpp"
-#include "MechanicsFwd.hpp"
 #include "OccBody.hpp"
 #include "OccContactEdge.hpp"
 #include "OccContactFace.hpp"
 #include "OccContactShape.hpp"
-#include "WhichGeometer.hpp"
+#include "SiconosVector.hpp"
+#include "SimpleMatrix.hpp"
 
 CPPUNIT_TEST_SUITE_REGISTRATION(OccTest);
 
@@ -51,9 +48,9 @@ void OccTest::tearDown() {}
 void OccTest::exportBRepAsString() {
   BRepPrimAPI_MakeSphere mksphere(1.0);
 
-  OccContactShape sphere(mksphere.Shape());
+  siconos::mechanics::occ::OccContactShape sphere(mksphere.Shape());
 
-  std::string s1 = sphere.exportBRepToString();
+  auto s1 = sphere.exportBRepToString();
 
   std::stringstream out;
 
@@ -66,9 +63,10 @@ void OccTest::computeUVBounds() {
   TopExp_Explorer exp;
   BRepPrimAPI_MakeSphere mksphere(1.0);
 
-  OccContactShape sphere_shape = OccContactShape(mksphere.Shape());
+  siconos::mechanics::occ::OccContactShape sphere_shape =
+      siconos::mechanics::occ::OccContactShape{mksphere.Shape()};
 
-  OccContactFace sphere_face(sphere_shape, 0);
+  siconos::mechanics::occ::OccContactFace sphere_face(sphere_shape, 0);
 
   sphere_face.computeUVBounds();
 
@@ -89,18 +87,20 @@ void OccTest::move() {
 
   exp.Init(mksphere.Shape(), TopAbs_SHELL);
 
-  TopoDS_Shell shell = TopoDS::Shell(exp.Current().Composed(mksphere.Shape().Orientation()));
+  TopoDS_Shell shell =
+      TopoDS::Shell(exp.Current().Composed(mksphere.Shape().Orientation()));
 
   exp.Init(shell, TopAbs_FACE);
 
   TopoDS_Face face = TopoDS::Face(exp.Current().Composed(shell.Orientation()));
 
-  OccContactShape sphere(mksphere.Shape());
-  OccContactFace sphere_contact(sphere, 0);
+  siconos::mechanics::occ::OccContactShape sphere(mksphere.Shape());
+  siconos::mechanics::occ::OccContactShapeV sphere_contact{
+      std::make_shared<siconos::mechanics::occ::OccContactFace>(sphere, 0)};
 
-  SP::SiconosVector position(new SiconosVector(7));
-  SP::SiconosVector velocity(new SiconosVector(6));
-  SP::SimpleMatrix inertia(new SimpleMatrix(3, 3));
+  auto position = std::make_shared<siconos::algebra::SiconosVector>(7);
+  auto velocity = std::make_shared<siconos::algebra::SiconosVector>(6);
+  auto inertia = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
   position->zero();
   (*position)(0) = 1.;
   (*position)(1) = 2.;
@@ -115,42 +115,56 @@ void OccTest::move() {
   velocity->zero();
   inertia->eye();
 
-  SP::OccBody body(new OccBody(position, velocity, 1, inertia));
+  auto body = std::make_shared<siconos::mechanics::occ::OccBody>(
+      position, velocity, 1, inertia);
 
-  body->addContactShape(createSPtrOccContactShape(sphere_contact));
+  body->addContactShape(sphere_contact);
 
-  gp_XYZ translat = body->contactShape(0).data().Location().Transformation().TranslationPart();
+  auto data = [](const auto& obj) { return obj->data(); };
 
-  std::cout << translat.X() << "," << translat.Y() << "," << translat.Z() << std::endl;
+  gp_XYZ translat = std::visit(data, body->contactShape(0))
+                        .Location()
+                        .Transformation()
+                        .TranslationPart();
+
+  std::cout << translat.X() << "," << translat.Y() << "," << translat.Z()
+            << std::endl;
 
   CPPUNIT_ASSERT(translat.X() == 1.);
   CPPUNIT_ASSERT(translat.Y() == 2.);
   CPPUNIT_ASSERT(translat.Z() == 3.);
 
-  gp_Quaternion rotat = body->contactShape(0).data().Location().Transformation().GetRotation();
+  gp_Quaternion rotat = std::visit(data, body->contactShape(0))
+                            .Location()
+                            .Transformation()
+                            .GetRotation();
 
   CPPUNIT_ASSERT(std::abs(rotat.X() - 0.44543540318737401) < 1e-9);
   CPPUNIT_ASSERT(std::abs(rotat.Y() - 0.53452248382484879) < 1e-9);
   CPPUNIT_ASSERT(std::abs(rotat.Z() - 0.62360956446232352) < 1e-9);
   CPPUNIT_ASSERT(std::abs(rotat.W() - 0.35634832254989918) < 1e-9);
 }
+
 #ifdef HAS_FORTRAN
 void OccTest::distance() {
-  const double pi = boost::math::constants::pi<double>();
+  std::cout << "Start distance computation test \n";
+  constexpr auto pi = std::numbers::pi;
 
-  BRepPrimAPI_MakeSphere mksphere1(1, pi);
-  BRepPrimAPI_MakeSphere mksphere2(1, pi);
+  BRepPrimAPI_MakeSphere mksphere1{1, pi};
+  BRepPrimAPI_MakeSphere mksphere2{1, pi};
 
-  OccContactShape sphere1(mksphere1.Shape());
-  OccContactShape sphere2(mksphere2.Shape());
+  siconos::mechanics::occ::OccContactShape sphere1{mksphere1.Shape()};
+  siconos::mechanics::occ::OccContactShape sphere2{mksphere2.Shape()};
 
-  OccContactFace sphere1_contact(sphere1, 0);
-  OccContactFace sphere2_contact(sphere2, 0);
+  siconos::mechanics::occ::OccContactShapeV sphere1_contact{
+      std::make_shared<siconos::mechanics::occ::OccContactFace>(sphere1, 0)};
+  siconos::mechanics::occ::OccContactShapeV sphere2_contact{
+      std::make_shared<siconos::mechanics::occ::OccContactFace>(sphere2, 0)};
 
-  SP::SiconosVector position1(new SiconosVector(7));
-  SP::SiconosVector position2(new SiconosVector(7));
-  SP::SiconosVector velocity(new SiconosVector(6));
-  SP::SimpleMatrix inertia(new SimpleMatrix(3, 3));
+  auto position1 = std::make_shared<siconos::algebra::SiconosVector>(7);
+  auto position2 = std::make_shared<siconos::algebra::SiconosVector>(7);
+  auto velocity = std::make_shared<siconos::algebra::SiconosVector>(6);
+  auto inertia = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
   position1->zero();
   (*position1)(0) = 0.;
   (*position1)(1) = 0.;
@@ -169,45 +183,59 @@ void OccTest::distance() {
   velocity->zero();
   inertia->eye();
 
-  SP::OccBody body1(new OccBody(position1, velocity, 1, inertia));
-  SP::OccBody body2(new OccBody(position2, velocity, 1, inertia));
+  auto body1 = std::make_shared<siconos::mechanics::occ::OccBody>(
+      position1, velocity, 1, inertia);
+  auto body2 = std::make_shared<siconos::mechanics::occ::OccBody>(
+      position2, velocity, 1, inertia);
+  body1->addContactShape(sphere1_contact);
+  body2->addContactShape(sphere2_contact);
 
-  body1->addContactShape(createSPtrOccContactShape(sphere1_contact));
-  body2->addContactShape(createSPtrOccContactShape(sphere2_contact));
+  auto binf0 = [](const auto& obj) { return obj->binf1[0]; };
+  auto bsup0 = [](const auto& obj) { return obj->bsup1[0]; };
+  auto binf1 = [](const auto& obj) { return obj->binf1[1]; };
+  auto bsup1 = [](const auto& obj) { return obj->bsup1[1]; };
 
-  std::cout << "umin1:" << body1->contactShape(0).binf1[0] << std::endl;
-  std::cout << "umax1:" << body1->contactShape(0).bsup1[0] << std::endl;
-  std::cout << "vmin1:" << body1->contactShape(0).binf1[1] << std::endl;
-  std::cout << "vmax1:" << body1->contactShape(0).bsup1[1] << std::endl;
+  std::cout << "umin1:" << std::visit(binf0, body1->contactShape(0)) << "\n";
+  std::cout << "umax1:" << std::visit(bsup0, body1->contactShape(0)) << "\n";
+  std::cout << "vmin1:" << std::visit(binf1, body1->contactShape(0)) << "\n";
+  std::cout << "vmax1:" << std::visit(bsup1, body1->contactShape(0)) << "\n";
+  std::cout << "umin2:" << std::visit(binf0, body2->contactShape(0)) << "\n";
+  std::cout << "umax2:" << std::visit(bsup0, body2->contactShape(0)) << "\n";
+  std::cout << "vmin2:" << std::visit(binf1, body2->contactShape(0)) << "\n";
+  std::cout << "vmax2:" << std::visit(bsup1, body2->contactShape(0)) << "\n";
 
-  std::cout << "umin2:" << body2->contactShape(0).binf1[0] << std::endl;
-  std::cout << "umax2:" << body2->contactShape(0).bsup1[0] << std::endl;
-  std::cout << "vmin2:" << body2->contactShape(0).binf1[1] << std::endl;
-  std::cout << "vmax2:" << body2->contactShape(0).bsup1[1] << std::endl;
+  auto data = [](const auto& obj) { return obj->data(); };
 
-  gp_XYZ translat1 =
-      body1->contactShape(0).data().Location().Transformation().TranslationPart();
+  gp_XYZ translat1 = std::visit(data, body1->contactShape(0))
+                         .Location()
+                         .Transformation()
+                         .TranslationPart();
 
-  std::cout << translat1.X() << "," << translat1.Y() << "," << translat1.Z() << std::endl;
+  std::cout << "t1 " << translat1.X() << "," << translat1.Y() << ","
+            << translat1.Z() << "\n";
 
-  gp_XYZ translat2 =
-      body2->contactShape(0).data().Location().Transformation().TranslationPart();
+  gp_XYZ translat2 = std::visit(data, body2->contactShape(0))
+                         .Location()
+                         .Transformation()
+                         .TranslationPart();
 
-  std::cout << translat2.X() << "," << translat2.Y() << "," << translat2.Z() << std::endl;
+  std::cout << "t2 " << translat2.X() << "," << translat2.Y() << ","
+            << translat2.Z() << "\n";
 
-  SP::Geometer geometer = ask<WhichGeometer<CadmbtbDistanceType> >(body1->contactShape(0));
+  auto dist = std::visit(siconos::mechanics::occ::Geometer<
+                             siconos::mechanics::occ::CadmbtbDistanceType>{},
+                         body1->contactShape(0), body2->contactShape(0));
 
-  body2->contactShape(0).accept(*geometer);
+  std::cout << dist.value << "\n";
 
-  ContactShapeDistance& dist = geometer->answer;
+  std::cout << dist.point1.X() << "," << dist.point1.Y() << ","
+            << dist.point1.Z() << "\n";
 
-  std::cout << dist.value << std::endl;
+  std::cout << dist.point2.X() << "," << dist.point2.Y() << ","
+            << dist.point2.Z() << "\n";
 
-  std::cout << dist.x1 << "," << dist.y1 << "," << dist.z1 << std::endl;
-
-  std::cout << dist.x2 << "," << dist.y2 << "," << dist.z2 << std::endl;
-
-  std::cout << dist.nx << "," << dist.ny << "," << dist.nz << std::endl;
+  std::cout << dist.normal.X() << "," << dist.normal.Y() << ","
+            << dist.normal.Z() << "\n";
 
   CPPUNIT_ASSERT(std::abs(dist.value - 1.0) < 1e-9);
 }

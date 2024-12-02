@@ -23,12 +23,13 @@
 
 #include "NonSmoothLaw.hpp"
 
+namespace siconos::modeling {
 /**
    Newton impact Non Smooth Law
-   
+
    This class formalizes the Newton Impact law together with a complementarity
    condition. i.e.
-   
+
    \f[
    \left\{\begin{array}{l}
    y \geq 0, \lambda \geq 0, y^{T} \lambda=0\				\
@@ -36,36 +37,35 @@
    0, \quad  \lambda \geq 0, (\dot y(t^{+}) - e \dot y(t^{-}))^{T} \lambda=0
    \end{array}\right.
    \f]
-   
-   
+
+
    nsLawSize is equal to 1.
 
 */
 class NewtonImpactNSL : public NonSmoothLaw {
-
-private:
+ private:
   ACCEPT_SERIALIZATION(NewtonImpactNSL);
 
   /** The Newton normal coefficient of restitution  */
-  double _e;
+  double _e{0.};
 
-public:
   /** default constructor
    */
-  NewtonImpactNSL();
+  NewtonImpactNSL() = delete;
 
+ public:
   /** constructor with the value of the NewtonImpactNSL attributes
    *
    *  \param e the value of the coefficient of restitution
    */
-  NewtonImpactNSL(double e);
+  NewtonImpactNSL(double e) : NonSmoothLaw(1), _e(e){};
 
   /** Apply multiple-axis impact */
-  NewtonImpactNSL(unsigned int size, double e);
+  NewtonImpactNSL(unsigned int size, double e) : NonSmoothLaw(size), _e(e){};
 
   /** destructor
    */
-  ~NewtonImpactNSL();
+  ~NewtonImpactNSL() noexcept = default;
 
   /** check the ns law to see if it is verified
    *
@@ -87,9 +87,13 @@ public:
    */
   void display() const override;
 
-  ACCEPT_STD_VISITORS();
+  // visitors hook
+  void accept(siconos::internal::SiconosVisitor& tourist) const override
+  {
+    tourist.visit(*this);
+  }
+  Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
 };
+}  // namespace siconos::modeling
 
-DEFINE_SPTR(NewtonImpactNSL)
-
-#endif // NewtonImpactNSL_H
+#endif  // NewtonImpactNSL_H

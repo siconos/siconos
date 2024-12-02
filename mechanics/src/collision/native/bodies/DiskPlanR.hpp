@@ -14,8 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
-
+ */
 
 /** \file DiskPlanR.hpp
  */
@@ -23,26 +22,23 @@
 #ifndef DiskPlanR_h
 #define DiskPlanR_h
 
-#include "MechanicsFwd.hpp"
 #include "LagrangianScleronomousR.hpp"
 
+namespace siconos::collision::native::bodies {
 /**
-   disk - plan relation - Inherits from LagrangianScleronomousR
+ disk - plan relation - Inherits from LagrangianScleronomousR
 */
-class DiskPlanR : public LagrangianScleronomousR, public std::enable_shared_from_this<DiskPlanR>
-{
-private:
-
+class DiskPlanR : public siconos::modeling::LagrangianScleronomousR,
+                  public std::enable_shared_from_this<DiskPlanR> {
+ private:
   ACCEPT_SERIALIZATION(DiskPlanR);
 
-  double r, A, B, C, sqrA2pB2,
-    AC, B2, A2, AB, BC, xCenter, yCenter, width, halfWidth, x1, x2, y1, y2;
-  bool finite;
+  double r{0.}, A{0.}, B{0.}, C{0.}, sqrA2pB2{0.}, AC{0.}, B2{0.}, A2{0.}, AB{0.}, BC{0.},
+      xCenter{0.}, yCenter{0.}, width{0.}, halfWidth{0.}, x1{0.}, x2{0.}, y1{0.}, y2{0.};
 
-  void init(double, double, double, double, double, double, double);
+  bool finite{false};
 
-public:
-
+ public:
   /** Infinite Plan
    *
    *  \param r disk radius
@@ -62,11 +58,11 @@ public:
    *  \param yCenter
    *  \param width
    */
-  DiskPlanR(double disk, double A, double B, double C,
-            double xCenter, double yCenter, double width);
+  DiskPlanR(double disk, double A, double B, double C, double xCenter, double yCenter,
+            double width);
 
   /** Finite Plan
-  */
+   */
   DiskPlanR(double, double, double, double, double);
 
   ~DiskPlanR() noexcept = default;
@@ -74,63 +70,40 @@ public:
   /* distance between disk and plan */
   double distance(double x, double y, double r) const;
 
-  double getRadius() const
-  {
-    return r;
-  };
+  double getRadius() const { return r; };
 
-  double getA() const
-  {
-    return A;
-  };
+  double getA() const { return A; };
 
-  double getB() const
-  {
-    return B;
-  };
+  double getB() const { return B; };
 
-  double getC() const
-  {
-    return C;
-  };
+  double getC() const { return C; };
 
-  double gethypotAB() const
-  {
-    return sqrA2pB2;
-  };
+  double gethypotAB() const { return sqrA2pB2; };
 
-  double getXCenter() const
-  {
-    return xCenter;
-  };
+  double getXCenter() const { return xCenter; };
 
-  double getYCenter() const
-  {
-    return yCenter;
-  };
+  double getYCenter() const { return yCenter; };
 
-  double getWidth() const
-  {
-    return width;
-  };
+  double getWidth() const { return width; };
 
-  using LagrangianScleronomousR::computeh;
   /**
      to compute the output y = h(t,q,z) of the Relation
-     
+
      \param q coordinates of the dynamical systems involved in the relation
      \param z user defined parameters (optional)
      \param y the resulting vector
   */
-  void computeh(const BlockVector& q, BlockVector& z, SiconosVector& y);
+  void computeh(const siconos::algebra::BlockVector& q, siconos::algebra::BlockVector& z,
+                siconos::algebra::SiconosVector& y) override;
 
   /**
      to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
-     
+
      \param q coordinates of the dynamical systems involved in the relation
      \param z user defined parameters (optional)
   */
-  void computeJachq(const BlockVector& q, BlockVector& z);
+  void computeJachq(const siconos::algebra::BlockVector& q,
+                    siconos::algebra::BlockVector& z) override;
 
   bool equal(double, double, double, double) const;
 
@@ -138,13 +111,7 @@ public:
 
   bool equal(const DiskPlanR&) const;
 
-  bool isFinite() const
-  {
-    return finite;
-  };
-
-  ACCEPT_VISITORS();
-
+  bool isFinite() const { return finite; };
 };
+}  // namespace siconos::collision::native::bodies
 #endif /* DiskPlanR */
-

@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file OneStepIntegratorTypes.hpp
   \brief enum of the available types for one-step time integrators.
@@ -23,20 +23,17 @@
 #ifndef OSITYPES_HPP
 #define OSITYPES_HPP
 
-/** Namespace for one-step integrators. */
-namespace OSI
-{
-
+/** Namespace which contains tools and classes related to one-step integrators . */
+namespace siconos::integrators {
 /** List of OneStepIntegrator types/ids */
-enum TYPES
-{
+enum class IntegratorType {
   /** Euler-Moreau scheme*/
   EULERMOREAUOSI,
   /** Moreau-Jean scheme */
   MOREAUJEANOSI,
   /** ?? */
   MOREAUJEANGOSI,
-  /** LSodar (ode solver with rootfinding process) */
+  /** Lsodar (ode solver with rootfinding process) */
   LSODAROSI,
   /** odepack HEM5 (Hairer) solver */
   HEM5OSI,
@@ -56,5 +53,5 @@ enum TYPES
   MOREAUJEANBILBAOOSI
 };
 
-}
+}  // namespace siconos::integrators
 #endif

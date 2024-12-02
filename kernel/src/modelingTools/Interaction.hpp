@@ -14,25 +14,38 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file Interaction.hpp
   \brief Interaction class and related typedef
 */
 
-
 #ifndef INTERACTION_H
 #define INTERACTION_H
 
-#include "RelationNamespace.hpp"
-#include "SiconosPointers.hpp"
-#include "SiconosVector.hpp"
-#include "SiconosMemory.hpp"
-#include "SiconosAlgebraTypeDef.hpp"
+#include <assert.h>
+
+#include <memory>
 #include <vector>
 
-/** 
-    Description of a non-smooth interaction.    
+#include "SiconosSerialization.hpp"
+
+namespace siconos::algebra {
+class SiconosMemory;
+class SiconosVector;
+class SiconosMatrix;
+class SimpleMatrix;
+class BlockVector;
+}  // namespace siconos::algebra
+
+namespace siconos::modeling {
+
+class NonSmoothLaw;
+class Relation;
+class DynamicalSystem;
+
+/**
+    Description of a non-smooth interaction.
     The object Interaction is used to defined a "link" between one or two DynamicalSystem,
     like unilateral constraints and some nonsmooth law (e.g. complementarity).
 
@@ -45,23 +58,21 @@
 
     - one and only one Relation (access: relation()) per Interaction
     - one and only one NonSmoothLaw (access: nonSmoothLaw()) per Interaction
-    - dimension() is the size of the interaction and so the size of vectors y, lambda 
+    - dimension() is the size of the interaction and so the size of vectors y, lambda
     and their derivatives.
     - output: y(i), to get derivative i of y
     - input: lambda(i), to get derivative i of lambda
 
  */
-class Interaction : public std::enable_shared_from_this<Interaction >
-{
-private:
-  
+class Interaction : public std::enable_shared_from_this<Interaction> {
+ private:
   ACCEPT_SERIALIZATION(Interaction);
 
   /* internal counter used to set interaction number */
-  static size_t __count;
+  static size_t count_;
 
   /** Interaction id */
-  size_t _number;
+  size_t _number{0};
 
   /** Minimum required 'level' for output y
    *  y will be initialized from
@@ -70,9 +81,9 @@ private:
   unsigned int _lowerLevelForOutput = 0;
 
   /** Maximum required 'level' for output y
-    *  y will be initialized from
-    *  y[_lowerLevelForOutput] to y[_upperLevelForOutput]
-    */
+   *  y will be initialized from
+   *  y[_lowerLevelForOutput] to y[_upperLevelForOutput]
+   */
   unsigned int _upperLevelForOutput = 0;
 
   /** Minimum required 'level' for input lambda
@@ -104,34 +115,35 @@ private:
    * vector of output derivatives
    * y[0] is y, y[1] is yDot and so on
    */
-  VectorOfVectors _y;
+  std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> _y = {};
 
   /** memory of previous coordinates of the system */
-  VectorOfMemories _yMemory;
+  std::vector<siconos::algebra::SiconosMemory> _yMemory;
 
   /** result of the computeInput function */
-  VectorOfVectors _lambda;
+  std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> _lambda = {};
 
   /** memory of previous coordinates of the system */
-  VectorOfMemories _lambdaMemory;
+  std::vector<siconos::algebra::SiconosMemory> _lambdaMemory;
 
   /** the Non-smooth Law of the interaction*/
-  SP::NonSmoothLaw _nslaw;
+  std::shared_ptr<NonSmoothLaw> _nslaw{nullptr};
 
   /** the type of Relation of the interaction */
-  SP::Relation _relation;
+  std::shared_ptr<Relation> _relation{nullptr};
 
   /** pointer links to DS variables needed for computation,
    *  mostly used in Relations (computeOutput and computeInput)
    * and OneStepIntegrator classes. */
-  VectorOfBlockVectors _linkToDSVariables;
+  std::vector<std::shared_ptr<siconos::algebra::BlockVector>> _linkToDSVariables= {};
 
-  VectorOfSMatrices _relationMatrices;
+  std::vector<std::shared_ptr<siconos::algebra::SimpleMatrix>> _relationMatrices= {};
 
-  VectorOfVectors _relationVectors;
+  std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> _relationVectors= {};
 
-  struct _setLevels;
-  friend struct Interaction::_setLevels;
+  // internal struct used to handle visitors process to set Interaction levels
+  // depending on the nslaw and the relation.
+  struct SetLevels;
 
   // === PRIVATE FUNCTIONS ===
 
@@ -139,29 +151,32 @@ private:
   Interaction(const Interaction& inter) = delete;
   Interaction& operator=(const Interaction&) = delete;
 
-protected:
-  Interaction() {} /* for serialization only */
+ protected:
+  Interaction() = default; /* for serialization only */
 
-private:
-
+ private:
   /*! @name DSlink graph property management */
   //@{
 
   /**
      update DSlink property content with dynamical systems members, FirstOrder relations case.
-     
+
      \param DSlink the container of the link to DynamicalSystem attributes
      \param ds1 first ds linked to this Interaction
      \param ds2 second ds linked to this Interaction. ds1 == ds2 is allowed.
   */
-  void __initDataFirstOrder(VectorOfBlockVectors& DSlink, DynamicalSystem& ds1, DynamicalSystem& ds2);
+  void __initDataFirstOrder(
+      std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink,
+      DynamicalSystem& ds1, DynamicalSystem& ds2);
 
   /** Initialize the link with the DynamicalSystem, FirstOrderDS variant
    *
    * \param ds a DynamicalSystem concerned by this Interaction
    *  \param DSlink the container of the link to DynamicalSystem attributes
    */
-  void __initDSDataFirstOrder(DynamicalSystem& ds, VectorOfBlockVectors& DSlink);
+  void __initDSDataFirstOrder(
+      DynamicalSystem& ds,
+      std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink);
 
   /**
      update DSlink property content with dynamical systems members, Lagrangian relations case.
@@ -169,45 +184,52 @@ private:
      \param ds1 first ds linked to this Interaction
      \param ds2 second ds linked to this Interaction. ds1 == ds2 is allowed.
   */
-  void __initDataLagrangian(VectorOfBlockVectors& DSlink, DynamicalSystem& ds1, DynamicalSystem& ds2);
+  void __initDataLagrangian(
+      std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink,
+      DynamicalSystem& ds1, DynamicalSystem& ds2);
 
   /** Initialize the link with the DynamicalSystem, LagrangianDS variant
    *
    *  \param ds a DynamicalSystem concerned by this Interaction
    *  \param DSlink the container of the link to DynamicalSystem attributes
    */
-  void __initDSDataLagrangian(DynamicalSystem& ds, VectorOfBlockVectors& DSlink);
+  void __initDSDataLagrangian(
+      DynamicalSystem& ds,
+      std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink);
 
   /**
      update DSlink property content with dynamical systems members, NewtonEuler relations case.
-     
+
      \param DSlink the container of the link to DynamicalSystem attributes
      \param ds1 first ds linked to this Interaction
      \param ds2 second ds linked to this Interaction. ds1 == ds2 is allowed.
   */
-  void __initDataNewtonEuler(VectorOfBlockVectors& DSlink, DynamicalSystem& ds1, DynamicalSystem& ds2);
+  void __initDataNewtonEuler(
+      std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink,
+      DynamicalSystem& ds1, DynamicalSystem& ds2);
 
   /** Initialize the link with the DynamicalSystem, NewtonEulerDS variant
    *
    *  \param ds a DynamicalSystem concerned by this Interaction
    *  \param DSlink the container of the link to DynamicalSystem attributes
    */
-  void __initDSDataNewtonEuler(DynamicalSystem& ds, VectorOfBlockVectors& DSlink);
+  void __initDSDataNewtonEuler(
+      DynamicalSystem& ds,
+      std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink);
   ///@}
 
-public:
-
+ public:
   /**
      Interaction constructor
-     
+
      \param NSL pointer object describing the nonsmooth law;
      the interaction size if infered from the size of this law.
      \param rel a pointer object describing the functions used to compute the constraints
   */
-  Interaction(SP::NonSmoothLaw NSL, SP::Relation rel);
+  Interaction(std::shared_ptr<NonSmoothLaw> NSL, std::shared_ptr<Relation> rel);
 
   /** destructor  */
-  ~Interaction() {};
+  ~Interaction() noexcept = default;
 
   /**
      Update interactions attributes.
@@ -215,28 +237,30 @@ public:
   */
   void reset();
 
-  /** 
+  /**
       set the links to the DynamicalSystem(s) and allocate the required workspaces
-      
+
       \param interProp the InteractionProperties of this Interaction
       \param ds1 first ds linked to this Interaction (i.e IG->vertex.source)
       \param workV1 work vectors of ds1
-      \param ds2 second ds linked to this Interaction (i.e IG->vertex.target) ds1 == ds2 is allowed.
-      \param workV2 work vectors of ds2
+      \param ds2 second ds linked to this Interaction (i.e IG->vertex.target) ds1 == ds2 is
+     allowed. \param workV2 work vectors of ds2
    */
-  //void setDSLinkAndWorkspace(InteractionProperties& interProp, DynamicalSystem& ds1, VectorOfVectors& workV1, DynamicalSystem& ds2, VectorOfVectors& workV2);
+  // void setDSLinkAndWorkspace(InteractionProperties& interProp, DynamicalSystem& ds1,
+  // std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>& workV1, DynamicalSystem&
+  // ds2, std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>& workV2);
 
-  /** 
+  /**
       set the links  between the interaction and the DynamicalSystem(s) members.
-      
+
       \param ds1 first ds linked to this Interaction (i.e IG->vertex.source)
-      \param ds2 second ds linked to this Interaction (i.e IG->vertex.target) ds1 == ds2 is allowed
+      \param ds2 second ds linked to this Interaction (i.e IG->vertex.target) ds1 == ds2 is
+     allowed
   */
-  void initializeLinkToDsVariables(DynamicalSystem& ds1,
-                                   DynamicalSystem& ds2);
+  void initializeLinkToDsVariables(DynamicalSystem& ds1, DynamicalSystem& ds2);
 
   /** set all lambda to zero */
-  void resetAllLambda() ;
+  void resetAllLambda();
 
   /** set lambda to zero for a given level
    *
@@ -253,10 +277,7 @@ public:
 
   // === GETTERS/SETTERS ===
   /** \return the id of the interaction */
-  inline size_t number() const
-  {
-    return _number;
-  }
+  inline size_t number() const { return _number; }
 
   /** Set the lower level for output y.
    *
@@ -278,23 +299,17 @@ public:
 
   /**
      Get the lower level for output y.
-     
+
      \return an unsigned int.
    */
-  inline unsigned int lowerLevelForOutput()
-  {
-    return _lowerLevelForOutput;
-  };
+  inline unsigned int lowerLevelForOutput() { return _lowerLevelForOutput; };
 
   /**
      Get the upper level for output y.
-     
+
      \return an unsigned int.
    */
-  inline unsigned int  upperLevelForOutput()
-  {
-    return _upperLevelForOutput;
-  };
+  inline unsigned int upperLevelForOutput() { return _upperLevelForOutput; };
 
   /** Set the lower level for input Lambda.
    *
@@ -314,55 +329,42 @@ public:
     _upperLevelForInput = newVal;
   };
 
-
   /**
      Get the lower level for input Lambda.
-     
+
      \return an unsigned int.
   */
-  inline unsigned int lowerLevelForInput()
-  {
-    return _lowerLevelForInput ;
-  };
-  
+  inline unsigned int lowerLevelForInput() { return _lowerLevelForInput; };
+
   /**
      Get the upper level for input Lambda.
-     
+
      \return an unsigned int.
   */
-  inline unsigned int upperLevelForInput()
-  {
-    return _upperLevelForInput;
-  };
-  
+  inline unsigned int upperLevelForInput() { return _upperLevelForInput; };
+
   /** returns dimension (i.e. nslaw size == y and lambda size) */
-  inline unsigned int dimension() const
-  {
-    return _interactionSize;
-  }
-  
+  inline unsigned int dimension() const { return _interactionSize; }
+
   /** \return the sum of DS sizes, for DS involved in interaction */
-  inline unsigned int getSizeOfDS() const
-  {
-    return _sizeOfDS;
-  }
+  inline unsigned int getSizeOfDS() const { return _sizeOfDS; }
 
   /**
      Set the number of dynamical systems concerned by
      this interaction. Warning FP: this function is supposed
      to be called only during topology->link(inter, ds1, ds2) call.
-     
+
      \param val : true if two ds, else false
    */
-  void setHas2Bodies(bool val) {_has2Bodies = val;}
+  void setHas2Bodies(bool val) { _has2Bodies = val; }
 
   /**
      Check the number of dynamical systems concerned by
      this interaction.
-     
+
      \return bool : true if two ds, else false
    */
-  bool has2Bodies() const {return _has2Bodies;}
+  bool has2Bodies() const { return _has2Bodies; }
 
   // -- y --
 
@@ -371,28 +373,23 @@ public:
    *  \param i : the derivative number
    *  \return BlockVector
    */
-  inline const SiconosVector getCopyOfy(const unsigned int i) const
-  {
-    assert(_y[i] && "_y[i]");
-    return *(_y[i]);
-  }
+  const siconos::algebra::SiconosVector getCopyOfy(const unsigned int i) const;
 
   /** get vector of output derivatives
    *
-   *  \return a VectorOfVectors
+   *  \return a std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>
    */
-  inline const VectorOfVectors y() const
+  inline const std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> y() const
   {
     return _y;
   }
-
 
   /** get y[i], derivative number i of output
    *
    *  \param i derivative number i of output
    *  \return pointer on a SiconosVector
    */
-  inline SP::SiconosVector y(const unsigned int i) const
+  inline std::shared_ptr<siconos::algebra::SiconosVector> y(const unsigned int i) const
   {
     assert(_y[i]);
     return _y[i];
@@ -400,60 +397,53 @@ public:
 
   /** set the output vector y to newVector with copy of the y[i] (ie
    *  memory allocation)
-   *  
-   *  \param v VectorOfVectors
+   *
+   *  \param v std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>
    */
-  void setY(const VectorOfVectors& v);
+  void setY(const std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>& v);
 
   /** set the output vector y to newVector with direct pointer
    *  equality for the y[i]
    *
-   *  \param v VectorOfVectors
+   *  \param v std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>
    */
-  void setYPtr(const VectorOfVectors& v);
+  void setYPtr(const std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>& v);
 
   /** set y[i] to newValue
    *
    *  \param i derivative number i of output
    *  \param v a SiconosVector and an unsigned int
    */
-  void setY(const unsigned int i, const SiconosVector& v);
+  void setY(const unsigned int i, const siconos::algebra::SiconosVector& v);
 
   /** set y[i] to pointer newPtr
    *
    *  \param i derivative number i of output
-   *  \param v a SP::SiconosVector  and an unsigned int
+   *  \param v a std::shared_ptr<siconos::algebra::SiconosVector>  and an unsigned int
    */
-  void setYPtr(const unsigned int i, SP::SiconosVector v);
-
+  void setYPtr(const unsigned int i, std::shared_ptr<siconos::algebra::SiconosVector> v);
 
   /** get all the values of the output y stored in memory
    *
    *  \param level
    *  \return a memory
    */
-  inline SiconosMemory& yMemory(unsigned int level)
-  {
-    return _yMemory[level];
-  }
+  siconos::algebra::SiconosMemory& yMemory(unsigned int level);
+
   /** get the last value of the  output y stored in memory
    *
    *  \param level
    *  \return a SiconosVector reference
    */
-  inline const SiconosVector& y_k(const unsigned int i) const
-  {
-    return _yMemory[i].getSiconosVector(0);
-  }
-
+  const siconos::algebra::SiconosVector& y_k(const unsigned int i) const;
 
   // -- _lambda --
 
   /** get vector of input derivatives
    *
-   *  \return a VectorOfVectors
+   *  \return a std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>
    */
-  inline const VectorOfVectors getLambda() const
+  inline const std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> getLambda() const
   {
     return _lambda;
   }
@@ -463,18 +453,14 @@ public:
    *  \param i derivative number i of output
    *  \return SiconosVector
    */
-  inline const SiconosVector getLambda(const unsigned int i) const
-  {
-    assert(_lambda[i]);
-    return *(_lambda[i]);
-  }
+  const siconos::algebra::SiconosVector getLambda(const unsigned int i) const;
 
   /** get _lambda[i], derivative number i of input
    *
    *  \param i derivative number i of output
    *  \return pointer on a SiconosVector
    */
-  inline SP::SiconosVector lambda(const unsigned int i) const
+  inline std::shared_ptr<siconos::algebra::SiconosVector> lambda(const unsigned int i) const
   {
     assert(_lambda[i]);
     return _lambda[i];
@@ -485,78 +471,65 @@ public:
    *  \param level
    *  \return a memory
    */
-  inline SiconosMemory& lambdaMemory(unsigned int level)
-  {
-    return _lambdaMemory[level];
-  }
+  siconos::algebra::SiconosMemory& lambdaMemory(unsigned int level);
 
   /** get the last value of the multiplier lambda stored in memory
    *
    *  \param level
    *  \return a SiconosVector reference
    */
-  inline const SiconosVector& lambda_k(const unsigned int i) const
-  {
-    return _lambdaMemory[i].getSiconosVector(0);
-  }
+  const siconos::algebra::SiconosVector& lambda_k(const unsigned int i) const;
 
   /** set the input vector _lambda to newVector
    *
-   *  \param v VectorOfVectors
+   *  \param v std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>
    */
-  void setLambda(const VectorOfVectors& v);
+  void setLambda(const std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>& v);
 
   /** set vector _lambda to newVector with direct pointer equality for the _lambda[i]
    *
-   *  \param v VectorOfVectors
+   *  \param v std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>
    */
-  void setLambdaPtr(const VectorOfVectors& v);
+  void setLambdaPtr(const std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>& v);
 
   /** set _lambda[i] to newValue
    *
    *  \param i derivative number i of output
    *  \param newValue a SiconosVector
    */
-  void setLambda(const unsigned int i, const SiconosVector& newValue);
+  void setLambda(const unsigned int i, const siconos::algebra::SiconosVector& newValue);
 
   /** set _lambda[i] to pointer newPtr
    *
    *  \param i derivative number i of output
-   *  \param newPtr a SP::SiconosVector
+   *  \param newPtr a std::shared_ptr<siconos::algebra::SiconosVector>
    */
-  void setLambdaPtr(const unsigned int i, SP::SiconosVector newPtr);
-
+  void setLambdaPtr(const unsigned int i,
+                    std::shared_ptr<siconos::algebra::SiconosVector> newPtr);
 
   /** get the Relation of this Interaction
    *
    *  \return a pointer on this Relation
    */
-  inline SP::Relation relation() const
-  {
-    return _relation;
-  }
+  inline std::shared_ptr<Relation> relation() const { return _relation; }
 
   /** get the NonSmoothLaw of this Interaction
    *
    *  \return a pointer on this NonSmoothLaw
    */
-  inline SP::NonSmoothLaw nonSmoothLaw() const
-  {
-    return _nslaw;
-  }
+  inline std::shared_ptr<NonSmoothLaw> nonSmoothLaw() const { return _nslaw; }
 
-
-  inline VectorOfBlockVectors & linkToDSVariables()
+  inline std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& linkToDSVariables()
   {
     return _linkToDSVariables;
   };
 
-  inline VectorOfVectors & relationVectors()
+  inline std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>& relationVectors()
   {
     return _relationVectors;
   };
 
-  inline VectorOfSMatrices & relationMatrices()
+  inline std::vector<std::shared_ptr<siconos::algebra::SimpleMatrix>>& relationMatrices()
   {
     return _relationMatrices;
   };
@@ -564,31 +537,29 @@ public:
   // --- OTHER FUNCTIONS ---
 
   /** set interaction 'ds-dimension', i.e. sum of all sizes of the dynamical systems linked
-   *  by the current interaction. This must be done by topology during call to link(inter, ds, ...).
+   *  by the current interaction. This must be done by topology during call to link(inter, ds,
+   * ...).
    *
    *  \param s1 int sum of ds sizes
    */
-  inline void setDSSizes(unsigned int s1)
-  {
-    _sizeOfDS = s1;
-  }
+  inline void setDSSizes(unsigned int s1) { _sizeOfDS = s1; }
 
   /** Must be call to fill the memory. (after convergence of the Newton iterations)
    */
   void swapInMemory();
 
   /** print the data to the screen
-  */
+   */
   void display(bool brief = true) const;
 
   /** reset the global Interaction counter (for ids)
    *
    *  \return the previous value of count
    */
-  static inline size_t resetCount(size_t new_count=0)
+  static inline size_t resetCount(size_t new_count = 0)
   {
-    size_t old_count = __count;
-    __count = new_count;
+    size_t old_count = count_;
+    count_ = new_count;
     return old_count;
   };
 
@@ -598,7 +569,7 @@ public:
    *  \param derivativeNumber number of the derivative to compute, optional, default = 0
    */
   void computeOutput(double time, unsigned int derivativeNumber = 0);
-  
+
   /** Compute input r of all Dynamical Systems involved in the present
    *  Interaction.
    *
@@ -606,51 +577,61 @@ public:
    *  \param level order of _lambda used to compute input.
    */
   void computeInput(double time, unsigned int level = 0);
-  
-  /** gets the matrix used in interactionBlock computation, (left * W * right), depends on the relation type (ex, LinearTIR, left = C, right = B)..
+
+  /** gets the matrix used in interactionBlock computation, (left * W * right), depends on the
+   * relation type (ex, LinearTIR, left = C, right = B)..
    *
-   *  \return InteractionBlock a pointer to SiconosMatrix (in-out parameter): the resulting interactionBlock matrix
+   *  \return InteractionBlock a pointer to SiconosMatrix (in-out parameter): the resulting
+   * interactionBlock matrix
    */
-  SP::SiconosMatrix getLeftInteractionBlock() const;
-  
+  std::shared_ptr<siconos::algebra::SiconosMatrix> getLeftInteractionBlock() const;
+
   /** gets the matrix used in interactionBlock computation
 
    *  (left * W * right), depends on the relation type (ex, LinearTIR, left = C, right = B).
    *   We get only the part corresponding to one ds.
    *
-   *  \param pos int, relative position of the beginning of the required block in relation matrix.
+   *  \param pos int, relative position of the beginning of the required block in relation
+   matrix.
    *  \param size int, size(0) of the block
    *  \param sizeDS int, size(1) of the block
-   *  \return InteractionBlock a pointer to SiconosMatrix (in-out parameter): the resulting interactionBlock matrix
+   *  \return InteractionBlock a pointer to SiconosMatrix (in-out parameter): the resulting
+   interactionBlock matrix
    */
-  SP::SiconosMatrix getLeftInteractionBlockForDS(unsigned int pos, unsigned int size,  unsigned int sizeDS) const;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> getLeftInteractionBlockForDS(
+      unsigned int pos, unsigned int size, unsigned int sizeDS) const;
 
-  /** gets the matrix used in interactionBlock computation. Used only for the formulation projecting on the constraints.
-   *  We get only the part corresponding to ds.
+  /** gets the matrix used in interactionBlock computation. Used only for the formulation
+   * projecting on the constraints. We get only the part corresponding to ds.
    *
-   *  \param pos int, relative position of the beginning of the required block in relation matrix.
-   *  \param InteractionBlock a pointer to SiconosMatrix (in-out parameter): the resulting interactionBlock matrix
+   *  \param pos int, relative position of the beginning of the required block in relation
+   * matrix. \param InteractionBlock a pointer to SiconosMatrix (in-out parameter): the
+   * resulting interactionBlock matrix
    */
-  void getLeftInteractionBlockForDSProjectOnConstraints(unsigned int pos, SP::SiconosMatrix InteractionBlock) const;
+  void getLeftInteractionBlockForDSProjectOnConstraints(
+      unsigned int pos,
+      std::shared_ptr<siconos::algebra::SiconosMatrix> InteractionBlock) const;
 
   /** gets the matrix used in interactionBlock computation
    *
    *  (left * W * rigth), depends on the relation type (ex, LinearTIR, left = C, right = B).
    *  We get only the part corresponding to ds.
    *
-   *  \param pos int, relative position of the beginning of the required block in relation matrix.
-   *  \param sizeDS int, size(0) of the block
-   *  \param size int, size(1) of the block
-   *  \return InteractionBlock a pointer to SiconosMatrix (in-out parameter): the resulting interactionBlock matrix
+   *  \param pos int, relative position of the beginning of the required block in relation
+   * matrix. \param sizeDS int, size(0) of the block \param size int, size(1) of the block
+   *  \return InteractionBlock a pointer to SiconosMatrix (in-out parameter): the resulting
+   * interactionBlock matrix
    */
-  SP::SiconosMatrix  getRightInteractionBlockForDS(unsigned int pos, unsigned int sizeDS, unsigned size) const;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> getRightInteractionBlockForDS(
+      unsigned int pos, unsigned int sizeDS, unsigned size) const;
 
-  /** gets extra interactionBlock corresponding to the present Interaction 
+  /** gets extra interactionBlock corresponding to the present Interaction
    *
-   *  \param[in,out] InteractionBlock SP::SiconosMatrix
+   *  \param[in,out] InteractionBlock std::shared_ptr<siconos::algebra::SiconosMatrix>
    */
-  void getExtraInteractionBlock(SP::SiconosMatrix InteractionBlock) const;
-
+  void getExtraInteractionBlock(
+      std::shared_ptr<siconos::algebra::SiconosMatrix> InteractionBlock) const;
 };
+}  // namespace siconos::modeling
 
-#endif // INTERACTION_H
+#endif  // INTERACTION_H

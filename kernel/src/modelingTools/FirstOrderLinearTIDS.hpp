@@ -23,50 +23,50 @@
 
 #include "FirstOrderLinearDS.hpp"
 
+namespace siconos::modeling {
 /**
-   
+
    First order linear and time-invariant coeff systems -  \f$ M \dot x = Ax(t)+
    b
    + r, x(t_0)=x_0 \f$ .
-   
+
    This class represents first order linear systems of the form:
-   
+
    \f[
    M\dot x(t) = A x(t) + b + r,
    x(t_0)=x_0
    \f]
-   
+
    where
    -  \f$ x \in R^{n} \f$ is the state,
    -  \f$ r \in R^{n} \f$  the input due to the Non Smooth Interaction.
    -  \f$ M \in R^{n\times n} \f$ is a constant invertible matrix
    -  \f$ A \in R^{n\times n} \f$
    -  \f$ b \in R^{n} \f$
-   
+
    No plugged operators for this class.
-   
+
 **/
 
 class FirstOrderLinearTIDS : public FirstOrderLinearDS {
-private:
-
+ private:
   ACCEPT_SERIALIZATION(FirstOrderLinearTIDS);
 
   /** default constructor
    */
-  FirstOrderLinearTIDS()
-  {
+  FirstOrderLinearTIDS() {
     _hasConstantA = true;
     _hasConstantB = true;
   };
 
-public:
+ public:
   /** initial state and constant A matrix
    *
    *  \param x0 the initial state vector
    *  \param A the A matrix
    */
-  FirstOrderLinearTIDS(SP::SiconosVector x0, SP::SiconosMatrix A)
+  FirstOrderLinearTIDS(std::shared_ptr<siconos::algebra::SiconosVector> x0,
+                       std::shared_ptr<siconos::algebra::SiconosMatrix> A)
       : FirstOrderLinearDS(x0, A){};
 
   /** initial state, constant A matrix, constant b vector
@@ -75,19 +75,19 @@ public:
    *  \param A matrix
    *  \param b vector
    */
-  FirstOrderLinearTIDS(SP::SiconosVector x0, SP::SiconosMatrix A,
-                       SP::SiconosVector b)
+  FirstOrderLinearTIDS(std::shared_ptr<siconos::algebra::SiconosVector> x0,
+                       std::shared_ptr<siconos::algebra::SiconosMatrix> A,
+                       std::shared_ptr<siconos::algebra::SiconosVector> b)
       : FirstOrderLinearDS(x0, A, b){};
 
   /** Copy constructor
    *
    *  \param FOLTIDS the FirstOrderLinearTIDS to copy
    */
-  FirstOrderLinearTIDS(const FirstOrderLinearTIDS &FOLTIDS)
-      : FirstOrderLinearDS(FOLTIDS){};
+  FirstOrderLinearTIDS(const FirstOrderLinearTIDS &FOLTIDS) : FirstOrderLinearDS(FOLTIDS){};
 
   /** destructor */
-  ~FirstOrderLinearTIDS(){};
+  ~FirstOrderLinearTIDS() noexcept = default;
 
   /** Initialization function for the rhs and its jacobian.
    *
@@ -100,26 +100,25 @@ public:
    *  \param time current time
    */
   void computeRhs(double time) override;
-  
+
   /** Default function to jacobian of the right-hand side term according to x
    *
    *  \param time current time
    */
   void computeJacobianRhsx(double time) override;
-  ;
 
   /** data display on screen
    */
   void display(bool brief = true) const override;
-  ;
-  
+
   /** Dumb function, there is no plugin here
    *
    *  \param time unused
    */
   void updatePlugins(double time) override{};
 
-  ACCEPT_STD_VISITORS();
+  // ACCEPT_STD_VISITORS();
 };
+}  // namespace siconos::modeling
 
-#endif // LINEARTIDS_H
+#endif  // LINEARTIDS_H

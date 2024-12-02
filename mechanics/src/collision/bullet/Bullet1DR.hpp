@@ -19,31 +19,32 @@
 #ifndef Bullet1DR_hpp
 #define Bullet1DR_hpp
 
-#include "BulletSiconosFwd.hpp"
+#include "BulletDeclarations.h"
+#include "NewtonEuler1DR.hpp"
 
-#include <NewtonEuler1DR.hpp>
+namespace siconos::collision::bullet {
 
-class Bullet1DR : public NewtonEuler1DR {
-private:
-
+class Bullet1DR : public siconos::modeling::NewtonEuler1DR {
+ private:
   ACCEPT_SERIALIZATION(Bullet1DR);
 
-  SP::btManifoldPoint _contactPoints;
+  std::shared_ptr<btManifoldPoint> _contactPoints{nullptr};
 
-public:
-  Bullet1DR(SP::btManifoldPoint);
+ public:
+  Bullet1DR(std::shared_ptr<btManifoldPoint>);
+  virtual ~Bullet1DR() noexcept = default;
 
-  SP::btManifoldPoint contactPoint() const { return _contactPoints; };
+  std::shared_ptr<btManifoldPoint> contactPoint() const { return _contactPoints; };
 
   /**
      to compute the output y = h(t,q,z) of the Relation
-     
+
      \param time current time value
      \param q coordinates of the dynamical systems involved in the relation
      \param y the resulting vector
   */
-  void computeh(double time, const BlockVector &q, SiconosVector &y) override;
-
-  ACCEPT_STD_VISITORS();
+  void computeh(double time, const siconos::algebra::BlockVector &q,
+                siconos::algebra::SiconosVector &y) override;
 };
+}  // namespace siconos::collision::bullet
 #endif

@@ -23,42 +23,43 @@
 
 #include "FirstOrderNonLinearDS.hpp"
 
+namespace siconos::modeling {
+
 /**
    First Order Linear Systems - \f$ M(t) \dot x = A(t)x(t)+ b(t) + r, \quad
    x(t_0)=x_0 \f$.
 
    This class represents first order linear systems of the form:
-   
+
    \f[
    M(t) \dot x = A(t)x(t)+ b(t) + r,
    x(t_0)=x_0
    \f]
    where
-   
+
    - \f$ x \in R^{n}  \f$ is the state,
    - \f$ r \in R^{n} \f$  the input due to the Non Smooth Interaction.
    - \f$ M \in R^{n\times n} \f$ is an invertible matrix
    - \f$ A \in R^{n\times n} \f$
    - \f$ b \in R^{n} \f$
-   
-   
+
+
    The following operators can be plugged, in the usual way (see User Guide)
-   
+
    - \f$ A(t) \f$
    - \f$ b(t) \f$
    - \f$ M(t) \f$
-   
+
 */
 class FirstOrderLinearDS : public FirstOrderNonLinearDS {
-protected:
-  
+ protected:
   ACCEPT_SERIALIZATION(FirstOrderLinearDS);
 
   /** matrix specific to the FirstOrderLinearDS \f$ A \in R^{n \times n}  \f$*/
-  SP::SiconosMatrix _A;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _A{nullptr};
 
   /** vector specific to the FirstOrderLinearDS */
-  SP::SiconosVector _b;
+  std::shared_ptr<siconos::algebra::SiconosVector> _b{nullptr};
 
   /** FirstOrderLinearDS plug-in to compute A(t,z), id = "A"
    *
@@ -68,7 +69,7 @@ protected:
    *  \param size of vector z
    *  \param[in,out] z a vector of user-defined parameters
    */
-  SP::PluggedObject _pluginA;
+  std::shared_ptr<siconos::plugins::PluggedObject> _pluginA{nullptr};
 
   /** FirstOrderLinearDS plug-in to compute b(t,z), id = "b"
    *
@@ -78,27 +79,28 @@ protected:
    *  \param size of vector z
    *  \param[in,out] param  : a vector of user-defined parameters
    */
-  SP::PluggedObject _pluginb;
+  std::shared_ptr<siconos::plugins::PluggedObject> _pluginb{nullptr};
 
   /** boolean if _A is constant (set thanks to setBPtr for instance)
    * false by default */
-  bool _hasConstantA;
+  bool _hasConstantA{false};
 
   /** boolean if _b is constant (set thanks to setBPtr for instance)
    * false by default */
-  bool _hasConstantB;
+  bool _hasConstantB{false};
 
   /** default constructor
    */
-  FirstOrderLinearDS() : FirstOrderNonLinearDS(){};
+  FirstOrderLinearDS() = default;
 
   /** Reset all the plugins */
   void _zeroPlugin() override;
 
-public:
+ public:
   /** plugin signature */
-  typedef void (*LDSPtrFunction)(double, unsigned int, double *, unsigned int,
-                                 double *);
+  typedef void (*LDSPtrFunction)(double, unsigned int, double *, unsigned int, double *);
+  typedef void (*computeAfct)(double, unsigned int, unsigned int, double *, unsigned int,
+                              double *);
 
   /** constructor from initial state and plugins
    *
@@ -106,21 +108,22 @@ public:
    *  \param APlugin plugin for A
    *  \param bPlugin plugin for b
    */
-  FirstOrderLinearDS(SP::SiconosVector newX0, const std::string &APlugin,
-                     const std::string &bPlugin);
+  FirstOrderLinearDS(std::shared_ptr<siconos::algebra::SiconosVector> newX0,
+                     const std::string &APlugin, const std::string &bPlugin);
 
   /** constructor from initial state and plugin for A
    *
    *  \param newX0 the initial state of this DynamicalSystem
    *  \param newA matrix A
    */
-  FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatrix newA);
+  FirstOrderLinearDS(std::shared_ptr<siconos::algebra::SiconosVector> newX0,
+                     std::shared_ptr<siconos::algebra::SiconosMatrix> newA);
 
   /** constructor from initial state
    *
    *  \param newX0 the initial state of this DynamicalSystem
    */
-  FirstOrderLinearDS(SP::SiconosVector newX0);
+  FirstOrderLinearDS(std::shared_ptr<siconos::algebra::SiconosVector> newX0);
 
   /** constructor from a initial state and constant matrices
    *
@@ -128,8 +131,9 @@ public:
    *  \param newA matrix A
    *  \param newB b
    */
-  FirstOrderLinearDS(SP::SiconosVector newX0, SP::SiconosMatrix newA,
-                     SP::SiconosVector newB);
+  FirstOrderLinearDS(std::shared_ptr<siconos::algebra::SiconosVector> newX0,
+                     std::shared_ptr<siconos::algebra::SiconosMatrix> newA,
+                     std::shared_ptr<siconos::algebra::SiconosVector> newB);
 
   /** Copy constructor
    *
@@ -138,7 +142,7 @@ public:
   FirstOrderLinearDS(const FirstOrderLinearDS &FOLDS);
 
   /** destructor */
-  virtual ~FirstOrderLinearDS(){};
+  virtual ~FirstOrderLinearDS() noexcept = default;
 
   /** Initialization function for the rhs and its jacobian.
    *
@@ -158,24 +162,23 @@ public:
    */
   void computeJacobianRhsx(double time) override;
 
-
   /** get the matrix \f$ A \f$
    *
    *  \return pointer (SP) on a matrix
    */
-  inline SP::SiconosMatrix A() const { return _A; }
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> A() const { return _A; }
 
   /** get jacobian of f(x,t,z) with respect to x (pointer link)
    *
-   *  \return SP::SiconosMatrix
+   *  \return std::shared_ptr<siconos::algebra::SiconosMatrix>
    */
-  SP::SiconosMatrix jacobianfx() const override{ return _A; };
+  std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianfx() const override { return _A; };
 
   /** set A to pointer newPtr
    *
    *  \param newA the new A matrix
    */
-  inline void setAPtr(SP::SiconosMatrix newA)
+  inline void setAPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newA)
   {
     _A = newA;
     _hasConstantA = true;
@@ -185,19 +188,19 @@ public:
    *
    *  \param newA the new A matrix
    **/
-  void setA(const SiconosMatrix &newA);
+  void setA(const siconos::algebra::SiconosMatrix &newA);
 
   /** get b vector (pointer link)
    *
-   *  \return a SP::SiconosVector
+   *  \return a std::shared_ptr<siconos::algebra::SiconosVector>
    */
-  inline SP::SiconosVector b() const { return _b; }
+  inline std::shared_ptr<siconos::algebra::SiconosVector> b() const { return _b; }
 
   /** set b vector (pointer link)
    *
-   *  \param b a SiconosVector
+   *  \param b a siconos::algebra::SiconosVector
    */
-  inline void setbPtr(SP::SiconosVector b)
+  inline void setbPtr(std::shared_ptr<siconos::algebra::SiconosVector> b)
   {
     _b = b;
     _hasConstantB = true;
@@ -205,18 +208,18 @@ public:
 
   /** set b vector (copy)
    *
-   *  \param b a SiconosVector
+   *  \param b a siconos::algebra::SiconosVector
    */
-  void setb(const SiconosVector &b);
+  void setb(const siconos::algebra::SiconosVector &b);
 
   inline bool hasConstantA() const { return _hasConstantA; }
 
   inline bool hasConstantB() const { return _hasConstantB; }
   // --- plugins related functions
 
-  /** 
+  /**
       Call all plugged-function to initialize plugged-object values
-      
+
       \param time value
   */
   void updatePlugins(double time) override;
@@ -227,8 +230,7 @@ public:
    *  \param pluginPath the complete path to the plugin
    *  \param functionName the function name to use in this plugin
    */
-  void setComputeAFunction(const std::string &pluginPath,
-                           const std::string &functionName);
+  void setComputeAFunction(const std::string &pluginPath, const std::string &functionName);
 
   /** set a specified function to compute the matrix A
    *
@@ -241,8 +243,7 @@ public:
    *  \param pluginPath the complete path to the plugin file
    *  \param functionName the function name to use in this plugin
    */
-  void setComputebFunction(const std::string &pluginPath,
-                           const std::string &functionName);
+  void setComputebFunction(const std::string &pluginPath, const std::string &functionName);
 
   /** set a specified function to compute the vector b
    *
@@ -254,7 +255,7 @@ public:
   /**
      default function to compute matrix A => same action as
      computeJacobianfx
-     
+
      \param time time instant used to compute A
   */
   virtual void computeA(double time);
@@ -269,19 +270,25 @@ public:
    *
    *  \return the plugin for A
    */
-  inline SP::PluggedObject getPluginA() const { return _pluginA; };
+  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginA() const
+  {
+    return _pluginA;
+  };
 
   /** Get _pluginb
    *
    *  \return the plugin for b
    */
-  inline SP::PluggedObject getPluginB() const { return _pluginb; };
+  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginB() const
+  {
+    return _pluginb;
+  };
 
   /** Set _pluginA
    *
    *  \param newPluginA the new plugin
    */
-  inline void setPluginA(SP::PluggedObject newPluginA)
+  inline void setPluginA(std::shared_ptr<siconos::plugins::PluggedObject> newPluginA)
   {
     _pluginA = newPluginA;
   };
@@ -290,7 +297,7 @@ public:
    *
    *  \param newPluginB the new plugin
    */
-  inline void setPluginB(SP::PluggedObject newPluginB)
+  inline void setPluginB(std::shared_ptr<siconos::plugins::PluggedObject> newPluginB)
   {
     _pluginb = newPluginB;
   };
@@ -305,7 +312,7 @@ public:
    */
   bool isLinear() override { return true; }
 
-  ACCEPT_STD_VISITORS();
+  // ACCEPT_STD_VISITORS();
 };
-
-#endif // FirstOrderLinearDS_H
+}  // namespace siconos::modeling
+#endif  // FirstOrderLinearDS_H

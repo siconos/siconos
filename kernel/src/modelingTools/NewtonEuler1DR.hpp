@@ -21,9 +21,9 @@
 #ifndef NEWTONEULERIMPACT_H
 #define NEWTONEULERIMPACT_H
 
-#include "NewtonEulerDS.hpp"
 #include "NewtonEulerR.hpp"
 
+namespace siconos::modeling {
 /**
    This class is an interface for a relation with impact.  It
    implements the computation of the jacoboian of h from the points of
@@ -34,93 +34,87 @@
 
 */
 class NewtonEuler1DR : public NewtonEulerR {
-protected:
+ protected:
   ACCEPT_SERIALIZATION(NewtonEuler1DR);
 
   /** Current Contact Points, may be updated within Newton loop based
    * on _relPc1, _relPc2. */
-  SP::SiconosVector _Pc1;
-  SP::SiconosVector _Pc2;
+  std::shared_ptr<siconos::algebra::SiconosVector> _Pc1{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> _Pc2{nullptr};
 
   /** Contact Points in coordinates relative to attached DS->q.  Set
    * these if _Pc1/_Pc2 are not calculated within the Newton loop. */
-  SP::SiconosVector _relPc1;
-  SP::SiconosVector _relPc2;
+  std::shared_ptr<siconos::algebra::SiconosVector> _relPc1{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> _relPc2{nullptr};
 
   /** Inward Normal at the contact.
    *  \todo The meaning of "Inward" has to be explained carefully.
    */
-  SP::SiconosVector _Nc;
+  std::shared_ptr<siconos::algebra::SiconosVector> _Nc{nullptr};
 
   /** _Nc must be calculated relative to q2 */
-  SP::SiconosVector _relNc;
+  std::shared_ptr<siconos::algebra::SiconosVector> _relNc{nullptr};
 
   /** Rotation matrix converting the absolute coordinate to the contact frame
    *  coordinate. This matrix contains the unit vector(s)of the contact frame in
    *  row.
    */
-  SP::SimpleMatrix _rotationAbsoluteToContactFrame;
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _rotationAbsoluteToContactFrame{nullptr};
 
   /** Matrix converting */
-  SP::SimpleMatrix _rotationBodyToAbsoluteFrame;
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _rotationBodyToAbsoluteFrame{nullptr};
 
   /** Cross product matrices that correspond the lever arm from
    *  contact point to center of mass*/
-  SP::SimpleMatrix _NPG1;
-  SP::SimpleMatrix _NPG2;
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _NPG1{nullptr};
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _NPG2{nullptr};
 
   /*buffer matrices*/
-  SP::SimpleMatrix _AUX1;
-  SP::SimpleMatrix _AUX2;
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _AUX1{nullptr};
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _AUX2{nullptr};
 
   /** Set the coordinates of first contact point.  Must only be done
    *  in a computeh() override.
    *
    *  \param npc new coordinates
    */
-  void setpc1(SP::SiconosVector npc) { _Pc1 = npc; };
+  void setpc1(std::shared_ptr<siconos::algebra::SiconosVector> npc) { _Pc1 = npc; };
 
   /** Set the coordinates of second contact point.  Must only be done
    *  in a computeh() override.
    *
    *  \param npc new coordinates
    */
-  void setpc2(SP::SiconosVector npc) { _Pc2 = npc; };
+  void setpc2(std::shared_ptr<siconos::algebra::SiconosVector> npc) { _Pc2 = npc; };
 
   /** Set the coordinates of inside normal vector at the contact point.
    *  Must only be done in a computeh() override.
    *
    *  \param nnc new coordinates
    */
-  void setnc(SP::SiconosVector nnc) { _Nc = nnc; };
+  void setnc(std::shared_ptr<siconos::algebra::SiconosVector> nnc) { _Nc = nnc; };
 
-private:
-  void NIcomputeJachqTFromContacts(SP::SiconosVector q1);
-  void NIcomputeJachqTFromContacts(SP::SiconosVector q1, SP::SiconosVector q2);
+ private:
+  void NIcomputeJachqTFromContacts(std::shared_ptr<siconos::algebra::SiconosVector> q1);
+  void NIcomputeJachqTFromContacts(std::shared_ptr<siconos::algebra::SiconosVector> q1,
+                                   std::shared_ptr<siconos::algebra::SiconosVector> q2);
 
-public:
+ public:
   /** V.A. boolean _isOnCOntact ?? Why is it public members ?
    *  seems parametrize the projection algorithm
    *  the projection is done on the surface  \f$ y=0 \f$  or on  \f$ y \geq 0 \f$
    */
   bool _isOnContact = false;
 
-  /** constructor
-   */
-  NewtonEuler1DR()
-      : NewtonEulerR(), _Pc1(new SiconosVector(3)), _Pc2(new SiconosVector(3)),
-        _relPc1(new SiconosVector(3)), _relPc2(new SiconosVector(3)),
-        _Nc(new SiconosVector(3)), _relNc(new SiconosVector(3))
-  {
-    /*_ds1=nullptr;_ds2=nullptr;*/
-  }
+  /** constructor */
+  NewtonEuler1DR();
 
   /** destructor
    */
-  virtual ~NewtonEuler1DR(){};
+  virtual ~NewtonEuler1DR() noexcept = default;
 
   void computeJachq(double time, Interaction &inter,
-                            SP::BlockVector q0) override;
+                    std::shared_ptr<siconos::algebra::BlockVector> q0) override;
 
   void initialize(Interaction &inter) override;
 
@@ -131,16 +125,8 @@ public:
    *  \param inter interaction that owns the relation
    *  \param q0 the block vector to the dynamical system position
    */
-  void computeJachqT(Interaction &inter, SP::BlockVector q0) override;
-
-  /**
-      to compute the output y = h(t,q,z) of the Relation
-
-      \param time current time value
-      \param q coordinates of the dynamical systems involved in the relation
-      \param y the resulting vector
-  */
-  void computeh(double time, const BlockVector &q0, SiconosVector &y) override;
+  void computeJachqT(Interaction &inter,
+                     std::shared_ptr<siconos::algebra::BlockVector> q0) override;
 
   /**
       to compute the output y = h(t,q,z) of the Relation
@@ -149,41 +135,41 @@ public:
       \param q coordinates of the dynamical systems involved in the relation
       \param y the resulting vector
    */
-  void computehFromRelativeContactPoints(double time, const BlockVector &q0, SiconosVector &y);
+  void computehFromRelativeContactPoints(double time, const siconos::algebra::BlockVector &q0,
+                                         siconos::algebra::SiconosVector &y);
 
   /** Return the distance between pc1 and pc, with sign according to normal */
   double distance() const;
 
-  inline SP::SiconosVector pc1() const { return _Pc1; }
-  inline SP::SiconosVector pc2() const { return _Pc2; }
-  inline SP::SiconosVector nc() const { return _Nc; }
+  inline std::shared_ptr<siconos::algebra::SiconosVector> pc1() const { return _Pc1; }
+  inline std::shared_ptr<siconos::algebra::SiconosVector> pc2() const { return _Pc2; }
+  inline std::shared_ptr<siconos::algebra::SiconosVector> nc() const { return _Nc; }
 
-  inline SP::SiconosVector relPc1() const { return _relPc1; }
-  inline SP::SiconosVector relPc2() const { return _relPc2; }
-  inline SP::SiconosVector relNc() const { return _relNc; }
+  inline std::shared_ptr<siconos::algebra::SiconosVector> relPc1() const { return _relPc1; }
+  inline std::shared_ptr<siconos::algebra::SiconosVector> relPc2() const { return _relPc2; }
+  inline std::shared_ptr<siconos::algebra::SiconosVector> relNc() const { return _relNc; }
 
   /** Set the coordinates of first contact point in ds1 frame.
    *  It will be used to compute _Pc1 during computeh().
    *
    *  \param npc new coordinates
    */
-  void setRelPc1(SP::SiconosVector npc) { _relPc1 = npc; };
+  void setRelPc1(std::shared_ptr<siconos::algebra::SiconosVector> npc) { _relPc1 = npc; };
 
   /** Set the coordinates of second contact point in ds2 frame
    *  It will be used to compute _Pc2 during computeh().
    *
    *  \param npc new coordinates
    */
-  void setRelPc2(SP::SiconosVector npc) { _relPc2 = npc; };
+  void setRelPc2(std::shared_ptr<siconos::algebra::SiconosVector> npc) { _relPc2 = npc; };
 
   /** Set the coordinates of inside normal vector at the contact point in ds2
    *  frame. It will be used to compute _Nc during computeh().
    *
    *  \param nnc new coordinates
    */
-  void setRelNc(SP::SiconosVector nnc) { _relNc = nnc; };
-  void display() const  override{}
-
-  ACCEPT_STD_VISITORS();
+  void setRelNc(std::shared_ptr<siconos::algebra::SiconosVector> nnc) { _relNc = nnc; };
+  void display() const override {}
 };
-#endif // NEWTONEULERRIMPACT_H
+}  // namespace siconos::modeling
+#endif

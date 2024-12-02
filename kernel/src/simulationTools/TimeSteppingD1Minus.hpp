@@ -25,34 +25,35 @@
 
 #include "Simulation.hpp"
 
+namespace siconos::simulation {
+
 /** TimeSteppingD1Minus Timestepping Strategy
  *
  *  see Schindler/Acary : Timestepping Schemes for Nonsmooth Dynamics Based
  *  on Discontinuous Galerkin Methods: Definition and Outlook
  */
 class TimeSteppingD1Minus : public Simulation {
-private:
-
+ private:
   ACCEPT_SERIALIZATION(TimeSteppingD1Minus);
 
-  /** default constructor */
-  TimeSteppingD1Minus() {}
+  // /** default constructor */
+  // TimeSteppingD1Minus() = default;
 
-protected:
+ protected:
   /** initialisation specific to TimeSteppingD1Minus for OneStepNSProblem */
   void initializeOneStepNSProblem() override;
 
-public:
+ public:
   /** constructor with the time-discretisation
    * \param nsds the current nonsmooth dynamical system
    * \param td pointer to a TimeDiscretisation
    * \param nb number of non smooth problem
    */
-  TimeSteppingD1Minus(SP::NonSmoothDynamicalSystem nsds,
-                      SP::TimeDiscretisation td, int nb);
+  TimeSteppingD1Minus(std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
+                      std::shared_ptr<TimeDiscretisation> td, int nb);
 
   /** destructor */
-  ~TimeSteppingD1Minus();
+  ~TimeSteppingD1Minus() noexcept = default;
 
   /** updateIndexSet using current y and lambda values of interactions
    *  \param i the  number of the set to be updated
@@ -73,10 +74,7 @@ public:
 
   /** integrate DynamicalSystems taking not into account non-smooth part */
   void computeFreeState();
-
-  ACCEPT_STD_VISITORS();
 };
+}  // namespace siconos::simulation
 
-DEFINE_SPTR(TimeSteppingD1Minus)
-
-#endif // TIMESTEPPINGD1MINUS_H
+#endif  // TIMESTEPPINGD1MINUS_H

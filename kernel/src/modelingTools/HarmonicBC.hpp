@@ -14,23 +14,25 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef HARMONICBC_HPP
 #define HARMONICBC_HPP
 
-
 #include "BoundaryCondition.hpp"
 
+namespace siconos::algebra {
+class SiconosVector;
+}
+
+namespace siconos::modeling {
 /**\brief This class models a simple harmonic boundary conditions for
  *   prescribing the velocities in a Dynamical System. A simple
  *   boundary condition is considered to fix a component \f$ j \f$ of
  *   the velocity vector, i.e., \f$ v_j(t) = a +  b cos( \omega t+ \phi) \f$.
  *
  */
-class HarmonicBC : public  BoundaryCondition
-{
-public:
-
+class HarmonicBC : public BoundaryCondition {
+ public:
   /** Constructor
    * \param newVelocityIndices the indices of the velocity subjected to prescribed velocities
    * \param a constant value for additive term of the prescribed velocity
@@ -38,17 +40,16 @@ public:
    * \param omega frequency
    * \param phi phase
    */
-  HarmonicBC(SP::UnsignedIntVector newVelocityIndices,
-             double a, double b,
-             double omega, double phi) ;
+  HarmonicBC(Indices&& newVelocityIndices, double a, double b, double omega, double phi)
+    : BoundaryCondition(std::move(newVelocityIndices)), _a(a), _b(b), _omega(omega), _phi(phi){};
 
-  HarmonicBC(SP::UnsignedIntVector newVelocityIndices,
-             SP::SiconosVector a, SP::SiconosVector b,
-             SP::SiconosVector omega, SP::SiconosVector phi);
-
+  HarmonicBC(Indices&& newVelocityIndices, std::shared_ptr<siconos::algebra::SiconosVector> a,
+             std::shared_ptr<siconos::algebra::SiconosVector> b,
+             std::shared_ptr<siconos::algebra::SiconosVector> omega,
+             std::shared_ptr<siconos::algebra::SiconosVector> phi);
 
   /** destructor */
-  virtual ~HarmonicBC();
+  virtual ~HarmonicBC() noexcept = default;
 
   /** default function to compute the precribed velocities
    *
@@ -56,36 +57,32 @@ public:
    */
   virtual void computePrescribedVelocity(double time);
 
-protected:
-  
+ protected:
   ACCEPT_SERIALIZATION(HarmonicBC);
 
-  /** protected default constructor */
-  HarmonicBC(): BoundaryCondition() {};
+  /** Constant additive term of the prescribed velocity  */
+  double _a = 0.;
+  /** Constant multiplicative term of the prescribed velocity  */
+  double _b = 0;
+  ;
+  /** Constant frequency  */
+  double _omega = 0;
+  ;
+  /** Constant phase  */
+  double _phi = 0;
+  ;
 
   /** Constant additive term of the prescribed velocity  */
-  double _a;
+  std::shared_ptr<siconos::algebra::SiconosVector> _aV{nullptr};
   /** Constant multiplicative term of the prescribed velocity  */
-  double _b;
+  std::shared_ptr<siconos::algebra::SiconosVector> _bV{nullptr};
   /** Constant frequency  */
-  double _omega;
+  std::shared_ptr<siconos::algebra::SiconosVector> _omegaV{nullptr};
   /** Constant phase  */
-  double _phi;
-
-  /** Constant additive term of the prescribed velocity  */
-  SP::SiconosVector _aV;
-  /** Constant multiplicative term of the prescribed velocity  */
-  SP::SiconosVector _bV;
-  /** Constant frequency  */
-  SP::SiconosVector _omegaV;
-  /** Constant phase  */
-  SP::SiconosVector _phiV;
-
-  
+  std::shared_ptr<siconos::algebra::SiconosVector> _phiV{nullptr};
 
   //   /*Link to the precribed DynamicalSystem*/
-  //   SP::DynamicalSystem _DS;
+  //   std::shared_ptr<DynamicalSystem> _DS;
 };
-
-TYPEDEF_SPTR(HarmonicBC)
-#endif // HARMONICBC_HPP
+}  // namespace siconos::modeling
+#endif  // HARMONICBC_HPP

@@ -35,9 +35,9 @@ void LagrangianScleronomousRTest::tearDown()
 // data constructor:
 void LagrangianScleronomousRTest::testBuildLagrangianScleronomousR2()
 {
-  SP::LagrangianScleronomousR R1(new LagrangianScleronomousR("TestPlugin:hSclero", "TestPlugin:G0Sclero"));
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR3a : ", R1->getType() == RELATION::Lagrangian, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR3b : ", R1->getSubType() == RELATION::ScleronomousR, true);
+  auto R1 = std::make_shared<siconos::modeling::LagrangianScleronomousR>("TestPlugin:hSclero", "TestPlugin:G0Sclero");
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR3a : ", R1->getType() == siconos::modeling::RelationType::Lagrangian, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR3b : ", R1->getSubType() == siconos::modeling::RelationSubType::ScleronomousR, true);
   std::cout << " data Constructor LagrangianScleronomousR ok" <<std::endl;
 }
 

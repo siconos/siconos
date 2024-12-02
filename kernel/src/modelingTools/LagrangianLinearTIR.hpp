@@ -23,40 +23,39 @@
 
 #include "LagrangianR.hpp"
 
-/** 
+namespace siconos::modeling {
+/**
     Lagrangian Linear Relation.
 
     Lagrangian Relation with:
-    
-    \f$ y= Cq + e + Fz \f$ 
-    
+
+    \f$ y= Cq + e + Fz \f$
+
     \f$ p = C^t \lambda \f$
-    
+
     C is the only required input to built a LagrangianLinearTIR.
-    
+
 */
 class LagrangianLinearTIR : public LagrangianR {
-
-protected:
-
+ protected:
   ACCEPT_SERIALIZATION(LagrangianLinearTIR);
 
   /** F matrix, coefficient of z */
-  SP::SimpleMatrix _F;
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _F;
 
   /** e*/
-  SP::SiconosVector _e;
+  std::shared_ptr<siconos::algebra::SiconosVector> _e;
 
-public:
+ public:
   /** Default constructor
    */
-  LagrangianLinearTIR() : LagrangianR(RELATION::LinearTIR){};
+  LagrangianLinearTIR() : LagrangianR(RelationSubType::LinearTIR){};
 
   /** create the Relation from a set of data
    *
    *  \param C the matrix C
    */
-  LagrangianLinearTIR(SP::SimpleMatrix C);
+  LagrangianLinearTIR(std::shared_ptr<siconos::algebra::SimpleMatrix> C);
 
   /** create the Relation from a set of data
    *
@@ -64,15 +63,17 @@ public:
    *  \param F the matrix F
    *  \param e the vector e
    */
-  LagrangianLinearTIR(SP::SimpleMatrix C, SP::SimpleMatrix F,
-                      SP::SiconosVector e);
+  LagrangianLinearTIR(std::shared_ptr<siconos::algebra::SimpleMatrix> C,
+                      std::shared_ptr<siconos::algebra::SimpleMatrix> F,
+                      std::shared_ptr<siconos::algebra::SiconosVector> e);
 
   /** create the Relation from a set of data
    *
    *  \param C the matrix C
    *  \param e the vector e
    */
-  LagrangianLinearTIR(SP::SimpleMatrix C, SP::SiconosVector e);
+  LagrangianLinearTIR(std::shared_ptr<siconos::algebra::SimpleMatrix> C,
+                      std::shared_ptr<siconos::algebra::SiconosVector> e);
 
   /** destructor
    */
@@ -101,8 +102,7 @@ public:
    *  \param inter the Interaction we want to update
    *  \param level the derivative of lambda we want to compute
    */
-  void computeInput(double time, Interaction &inter,
-                    unsigned int level = 0) override;
+  void computeInput(double time, Interaction &inter, unsigned int level = 0) override;
 
   /** compute all the H Jacobian
    *
@@ -125,52 +125,55 @@ public:
   // -- C --
   /** \return pointer on a plugged matrix
    */
-  inline SP::SimpleMatrix C() const override
-  {
-    return _jachq;
-  }
+  inline std::shared_ptr<siconos::algebra::SimpleMatrix> C() const override { return _jachq; }
 
   /** set C to pointer newPtr
    *
    *  \param newPtr a SP to plugged matrix
    */
-  inline void setCPtr(SP::SimpleMatrix newPtr) { _jachq = newPtr; }
+  inline void setCPtr(std::shared_ptr<siconos::algebra::SimpleMatrix> newPtr)
+  {
+    _jachq = newPtr;
+  }
 
   // -- D --
 
   /** \return pointer on a plugged matrix
    */
-  inline SP::SimpleMatrix D() const { return _jachlambda; }
+  inline std::shared_ptr<siconos::algebra::SimpleMatrix> D() const { return _jachlambda; }
 
   /** set D to pointer newPtr
    *
    *  \param newPtr a SP to plugged matrix
    */
-  inline void setDPtr(SP::SimpleMatrix newPtr) { _jachlambda = newPtr; }
+  inline void setDPtr(std::shared_ptr<siconos::algebra::SimpleMatrix> newPtr)
+  {
+    _jachlambda = newPtr;
+  }
 
   // -- F --
 
   /** \return pointer on a plugged matrix
    */
-  inline SP::SimpleMatrix F() const { return _F; }
+  inline std::shared_ptr<siconos::algebra::SimpleMatrix> F() const { return _F; }
 
   /** set F to pointer newPtr
    *
    *  \param newPtr a SP to plugged matrix
    */
-  inline void setFPtr(SP::SimpleMatrix newPtr) { _F = newPtr; }
+  inline void setFPtr(std::shared_ptr<siconos::algebra::SimpleMatrix> newPtr) { _F = newPtr; }
 
   // -- e --
 
   /** \return pointer on a plugged vector
    */
-  inline SP::SiconosVector e() const { return _e; }
+  inline std::shared_ptr<siconos::algebra::SiconosVector> e() const { return _e; }
 
   /** set e to pointer newPtr
    *
    *  \param newPtr a SP to plugged vector
    */
-  inline void setEPtr(SP::SiconosVector newPtr) { _e = newPtr; }
+  inline void setEPtr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) { _e = newPtr; }
 
   /** print the data to the screen
    */
@@ -179,13 +182,11 @@ public:
   /** \return true if the relation is linear.
    */
 
-  bool isLinear() override // final would be better but swig does not like it
+  bool isLinear() override  // final would be better but swig does not like it
   {
     return true;
   }
-  ACCEPT_STD_VISITORS();
 };
 
-TYPEDEF_SPTR(LagrangianLinearTIR)
-
+}  // namespace siconos::modeling
 #endif

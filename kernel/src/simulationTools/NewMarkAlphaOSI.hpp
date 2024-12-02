@@ -23,6 +23,8 @@
 
 #include "OneStepIntegrator.hpp"
 
+namespace siconos::integrators {
+
 /**  NewMarkAlpha Scheme Time-Integrator for Dynamical Systems
  *
  *
@@ -37,27 +39,25 @@
  * computeW.
  */
 class NewMarkAlphaOSI : public OneStepIntegrator {
-protected:
-
+ protected:
   ACCEPT_SERIALIZATION(NewMarkAlphaOSI);
   /** Parameters of the numerical scheme:  beta, gamma, alpha_m, alpha_f */
-  double _beta, _gamma, _alpha_m, _alpha_f;
+
+  double _alpha_m{0.};
+  double _alpha_f{0.};
+  double _gamma{0.};
+  double _beta{0.};
 
   /** Order of the polynomial for dense output*/
-  unsigned int _orderDenseOutput;
+  unsigned int _orderDenseOutput{5};
 
   /** Indicator whether or not constraints at the velocity level are handled
    * _IsVelocityLevel = true: constraints at the velocity level are handled
    * _IsVelocityLevel = false: constraints at the position are handled
    */
-  bool _IsVelocityLevel;
+  bool _IsVelocityLevel{false};
 
-  /**
-   * Default constructor
-   */
-  NewMarkAlphaOSI(){};
-
-public:
+ public:
   enum NewMarkAlphaOSI_ds_workVector_id {
     RESIDU_FREE,
     FREE,
@@ -66,17 +66,11 @@ public:
     WORK_LENGTH
   };
 
-  enum NewMarkAlphaOSI_interaction_workVector_id {
-    OSNSP_RHS,
-    WORK_INTERACTION_LENGTH
-  };
+  enum NewMarkAlphaOSI_interaction_workVector_id { OSNSP_RHS, WORK_INTERACTION_LENGTH };
 
   enum NewMarkAlphaOSI_workBlockVector_id { xfree, BLOCK_WORK_LENGTH };
 
-  enum NewMarkAlphaOSI_interaction_workMat_id {
-    DENSE_OUTPUT_COEFFICIENTS,
-    MAT_WORK_LENGTH
-  };
+  enum NewMarkAlphaOSI_interaction_workMat_id { DENSE_OUTPUT_COEFFICIENTS, MAT_WORK_LENGTH };
 
   /** constructor with only parameters beta, gamma, alpha_m, alpha_f
    * \param beta double
@@ -85,8 +79,7 @@ public:
    * \param alpha_f double
    * \param flag true of working at velocity level
    */
-  NewMarkAlphaOSI(double beta, double gamma, double alpha_m, double alpha_f,
-                  bool flag);
+  NewMarkAlphaOSI(double beta, double gamma, double alpha_m, double alpha_f, bool flag);
 
   /** constructor with only the parameter rho_infty
    * \param rho_infty double
@@ -96,7 +89,7 @@ public:
 
   /** destructor
    */
-  virtual ~NewMarkAlphaOSI(){};
+  virtual ~NewMarkAlphaOSI() noexcept = default;
 
   // --- GETTERS/SETTERS ---
 
@@ -126,8 +119,7 @@ public:
    * of rho_infty \param rho_infty double : value of rho_infty
    */
 
-  inline void setParametersFromRho_infty(double rho_infty)
-  {
+  inline void setParametersFromRho_infty(double rho_infty) {
     _alpha_m = (2 * rho_infty - 1) / (rho_infty + 1);
     _alpha_f = rho_infty / (rho_infty + 1);
     _gamma = 0.5 + _alpha_f - _alpha_m;
@@ -169,28 +161,24 @@ public:
    */
   inline bool getFlagVelocityLevel() { return _IsVelocityLevel; }
 
-  /** get matrix W
-   * \param ds SP::DynamicalSystem DynamicalSystem concerned
-   * \return  SimpleMatrix
-   */
-  const SimpleMatrix getW(SP::DynamicalSystem ds);
-
   /** get pointer to the maxtrix W
-   * \param ds SP::DynamicalSystem DynamicalSystem concerned
-   * \return  SP::SimpleMatrix
+   * \param ds std::shared_ptr<siconos::modeling::DynamicalSystem> DynamicalSystem concerned
+   * \return  std::shared_ptr<siconos::algebra::SimpleMatrix>
    */
-  SP::SimpleMatrix W(SP::DynamicalSystem ds);
+  std::shared_ptr<siconos::algebra::SimpleMatrix> W(
+      std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
   /** initialize W matrix
    *  \param ds a pointer to DynamicalSystem
    */
-  void initializeIterationMatrixW(SP::DynamicalSystem ds);
+  void initializeIterationMatrixW(std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
   /** compute W matrix
    *  \param ds a pointer to DynamicalSystem
    *  \param W the result in W
    */
-  void computeW(SP::DynamicalSystem ds, SiconosMatrix &W);
+  void computeW(std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
+                siconos::algebra::SiconosMatrix &W);
 
   /** compute the residual of dynamical equation
    *\return double: maximum residu over all DSs
@@ -204,13 +192,15 @@ public:
    * non-smooth effects into account \param vertex_inter of the interaction
    * graph \param osnsp pointer to OneStepNSProblem
    */
-  void computeFreeOutput(InteractionsGraph::VDescriptor &vertex_inter,
-                         OneStepNSProblem *osnsp) override;
+  void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
+                         siconos::nonsmooth_formulations::OneStepNSProblem *osnsp) override;
 
-  /** return the workVector corresponding to the right hand side of the OneStepNonsmooth problem
+  /** return the workVector corresponding to the right hand side of the OneStepNonsmooth
+   * problem
    */
-  SiconosVector& osnsp_rhs(InteractionsGraph::VDescriptor& vertex_inter,   InteractionsGraph& indexSet) override
-  {
+  siconos::algebra::SiconosVector &osnsp_rhs(
+      siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
+      siconos::graphs::InteractionsGraph &indexSet) override {
     return *(*indexSet.properties(vertex_inter).workVectors)[NewMarkAlphaOSI::OSNSP_RHS];
   };
 
@@ -222,7 +212,8 @@ public:
    * \param t time of initialization
    * \param ds the dynamical system
    */
-  void initializeWorkVectorsForDS(double t, SP::DynamicalSystem ds) override;
+  void initializeWorkVectorsForDS(
+      double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) override;
 
   /** initialization of the work vectors and matrices (properties) related to
    *  one interaction on the graph and needed by the osi
@@ -230,9 +221,9 @@ public:
    * \param interProp the properties on the graph
    * \param DSG the dynamical systems graph
    */
-  void initializeWorkVectorsForInteraction(Interaction &inter,
-                                           InteractionProperties &interProp,
-                                           DynamicalSystemsGraph &DSG) override;
+  void initializeWorkVectorsForInteraction(
+      siconos::modeling::Interaction &inter, siconos::graphs::InteractionProperties &interProp,
+      siconos::graphs::DynamicalSystemsGraph &DSG) override;
 
   /** get the number of index sets required for the simulation
    * \return unsigned int
@@ -266,9 +257,9 @@ public:
   void updateState(const unsigned int level) override;
 
   /** Compute coefficients of the polynomial of the dense output for a given DS
-   *  \param ds SP::DynamicalSystem, ds concerned
+   *  \param ds std::shared_ptr<siconos::modeling::DynamicalSystem>, ds concerned
    */
-  void computeCoefsDenseOutput(SP::DynamicalSystem ds);
+  void computeCoefsDenseOutput(std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
   /** prepare for Event localization*/
   void prepareEventLocalization();
@@ -280,9 +271,7 @@ public:
 
   /** Displays the data of the NewMarkAlpha's integrator
    */
-  void display() override;
-
-  ACCEPT_STD_VISITORS();
+  void display() const override;
 };
-
-#endif // NEWMARKALPHAOSI_H
+}  // namespace siconos::integrators
+#endif  // NEWMARKALPHAOSI_H

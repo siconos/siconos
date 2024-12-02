@@ -16,18 +16,18 @@
  * limitations under the License.
  */
 
-#include <stdlib.h>                      // for malloc
+#include <stdlib.h>  // for malloc
+
 #include "Friction_cst.h"                // for SICONOS_FRICTION_3D_PROX
 #include "NumericsFwd.h"                 // for SolverOptions
 #include "SolverOptions.h"               // for solver_options_create, Solve...
 #include "frictionContact_test_utils.h"  // for build_test_collection
 #include "test_utils.h"                  // for TestCase
 
-TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
-{
-
-  *number_of_tests = 3; //n_data * n_solvers;
-  TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
+TestCase* build_test_collection(int n_data, const char** data_collection,
+                                int* number_of_tests) {
+  *number_of_tests = 3;  // n_data * n_solvers;
+  TestCase* collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
   int current = 0;
   int d;
@@ -61,8 +61,6 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
   collection[current].options->iparam[SICONOS_IPARAM_MAX_ITER] = 1000000;
   current++;
 
-
   *number_of_tests = current;
   return collection;
-
 }

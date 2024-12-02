@@ -15,7 +15,7 @@ class SiconosCollisionQueryResult;
 %template(VectorOfSPSiconosCollisionQueryResult) std::vector< std::shared_ptr<SiconosCollisionQueryResult> >;
 
 // Ignore some shadowed (redundant for Python) functions
-%ignore SiconosShape::setDimensions(SP::SiconosVector dim);
+%ignore SiconosShape::setDimensions(std::shared_ptr<siconos::algebra::SiconosVector> dim);
 
 PY_REGISTER_WITHOUT_HEADER(SiconosSphere, Mechanics);
 PY_REGISTER_WITHOUT_HEADER(SiconosPlane, Mechanics);
@@ -48,19 +48,19 @@ PY_FULL_REGISTER(BodyShapeRecord, Mechanics);
 
 %inline
 {
-  SP::ContactR cast_ContactR(SP::Relation rel)
+  std::shared_ptr<siconos::collision::ContactR> cast_ContactR(std::shared_ptr<siconos::modeling::Relation> rel)
   {
     return std::dynamic_pointer_cast<ContactR>(rel);
   };
-  SP::Contact2dR cast_Contact2dR(SP::Relation rel)
+  std::shared_ptr<siconos::collision::Contact2dR> cast_Contact2dR(std::shared_ptr<siconos::modeling::Relation> rel)
   {
     return std::dynamic_pointer_cast<Contact2dR>(rel);
   };
-  SP::Contact2d3DR cast_Contact2d3DR(SP::Relation rel)
+  std::shared_ptr<siconos::collision::Contact2d3DR> cast_Contact2d3DR(std::shared_ptr<siconos::modeling::Relation> rel)
   {
     return std::dynamic_pointer_cast<Contact2d3DR>(rel);
   };
-  SP::Contact5DR cast_Contact5DR(SP::Relation rel)
+  std::shared_ptr<siconos::collision::Contact5DR> cast_Contact5DR(std::shared_ptr<siconos::modeling::Relation> rel)
   {
     return std::dynamic_pointer_cast<Contact5DR>(rel);
   };

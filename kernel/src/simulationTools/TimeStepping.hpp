@@ -23,6 +23,8 @@
 
 #include "Simulation.hpp"
 
+namespace siconos::simulation {
+
 /** type of function used to post-treat output info from solver. */
 typedef void (*CheckSolverFPtr)(int, Simulation *);
 
@@ -39,99 +41,102 @@ typedef void (*CheckSolverFPtr)(int, Simulation *);
  *
  */
 
-#define SICONOS_TS_LINEAR 1
-#define SICONOS_TS_LINEAR_IMPLICIT 2
-#define SICONOS_TS_NONLINEAR 3
-#define SICONOS_TS_NONLINEAR_FULL 4
+/** Enum to define the type of time stepping scheme. */
+enum class TimeSteppingType {
+  // to force a single iteration of the Newton Solver
+  LINEAR,
+  // idem
+  LINEAR_IMPLICIT,
+  // will perform the newton iterations up to convergence
+  NONLINEAR,
+  NONLINEAR_FULL
+};
 
 class TimeStepping : public Simulation {
-protected:
+ protected:
   ACCEPT_SERIALIZATION(TimeStepping);
 
   /** Default Newton tolerance used in call of run() of ComputeOneStep() */
-  double _newtonTolerance;
-  
+  double _newtonTolerance{1e-6};
+
   /** Default maximum number of Newton iteration*/
-  unsigned int _newtonMaxIteration;
+  unsigned int _newtonMaxIteration{50};
 
   /** Number of steps performed in the Newton Loop */
-  unsigned int _newtonNbIterations;
+  unsigned int _newtonNbIterations{0};
 
   /** Cumulative number of steps performed in the Newton Loops */
-  unsigned int _newtonCumulativeNbIterations;
+  unsigned int _newtonCumulativeNbIterations{0};
 
-  /** unsigned int  _newtonOptions
-   *  option in the Newon iteration
-   *  SICONOS_TS_LINEAR or SICONOS_TS_LINEAR_IMPLICIT SICONOS_TS_NONLINEAR will
-   *  force a single iteration of the Newton Solver SICONOS_TS_NONLINEAR
-   *  (default) will perform the newton iteration up to convergence
+  /** option to update Newton iterations number
+   *  LINEAR or LINEAR_IMPLICIT will force a single iteration of the Newton
+   * Solver. NONLINEAR (default) will perform the Newton iterations up to
+   * convergence
    */
-  unsigned int _newtonOptions;
+  TimeSteppingType _newtonOptions{TimeSteppingType::NONLINEAR};
 
   /** Maximum Residual for the Dynamical system */
-  double _newtonResiduDSMax;
+  double _newtonResiduDSMax{0.};
 
   /** Maximum Residual for the output of the relation */
-  double _newtonResiduYMax;
+  double _newtonResiduYMax{0.};
 
   /** Maximum Residual for the input of the relation */
-  double _newtonResiduRMax;
+  double _newtonResiduRMax{0.};
 
   /** boolean variable to know whether the ResiduY has to be computed or not
    *  if true, the ResiduY is computed and the convergence is checked
    */
-  bool _computeResiduY;
+  bool _computeResiduY{false};
 
   /** boolean variable to know whether the ResiduR has to be computed or not
    *  if true, the ResiduR is computed and the convergence is checked
    */
-  bool _computeResiduR;
+  bool _computeResiduR{false};
 
   /** boolean variable to know whether Newton iterations converge or not
    */
-  bool _isNewtonConverge;
+  bool _isNewtonConverge{false};
 
   /** boolean variable indicating whether interactions should be
    *  updated within the Newton loop.
    */
-  bool _newtonUpdateInteractionsPerIteration;
+  bool _newtonUpdateInteractionsPerIteration{false};
 
   /** boolean variable to display Newton info
    */
-  bool _displayNewtonConvergence;
+  bool _displayNewtonConvergence{false};
 
   /** boolean variable to display warning on non-convergence
    */
-  bool _newtonWarningOnNonConvergence;
+  bool _newtonWarningOnNonConvergence{true};
 
   /** boolean variable to display warning if osnspb is not correcltys olved
    */
-  bool _warningNonsmoothSolver;
+  bool _warningNonsmoothSolver{true};
 
   /** boolean variable to resetAllLamda at each step (default true)
    */
-  bool _resetAllLambda;
+  bool _resetAllLambda{true};
 
   /** boolean variable to skip  updateOutput at the end of the step (default
    *  false)
    */
-  bool _skip_last_updateOutput;
+  bool _skip_last_updateOutput{false};
 
   /** boolean variable to skip  updateInput at the end of the step (default
    *  false) useful for Global integrators that do not need to compute input in
    *  the linear case
    */
-  bool _skip_last_updateInput;
+  bool _skip_last_updateInput{false};
 
   /** boolean variable to skip  resetLambdas (default false)
    */
-  bool _skip_resetLambdas;
+  bool _skip_resetLambdas{false};
 
   /** Default Constructor
    */
-  TimeStepping()
-      : _computeResiduY(false), _computeResiduR(false),
-        _isNewtonConverge(false){};
+  TimeStepping() = default;
 
   /** newton algorithm
    *
@@ -140,7 +145,7 @@ protected:
    */
   virtual void newtonSolve(double criterion, unsigned int maxStep);
 
-public:
+ public:
   /** initialisation specific to TimeStepping for OneStepNSProblem.
    */
   void initializeOneStepNSProblem() override;
@@ -152,8 +157,12 @@ public:
    *  \param osi one step integrator (default none)
    *  \param osnspb one step non smooth problem (default none)
    */
-  TimeStepping(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td,
-               SP::OneStepIntegrator osi, SP::OneStepNSProblem osnspb);
+  TimeStepping(
+      std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
+      std::shared_ptr<TimeDiscretisation> td,
+      std::shared_ptr<siconos::integrators::OneStepIntegrator> osi,
+      std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem>
+          osnspb);
 
   /** Constructor with the time-discretisation.
    *
@@ -161,34 +170,41 @@ public:
    *  \param td pointer to a timeDiscretisation used in the integration
    *  \param nb number of non smooth problem
    */
-  TimeStepping(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation td,
-               int nb = 0);
+  TimeStepping(
+      std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
+      std::shared_ptr<TimeDiscretisation> td, int nb = 0);
 
   /** insert an Integrator into the simulation list of integrators
    *
    *  \param osi the OneStepIntegrator to add
    */
-  void insertIntegrator(SP::OneStepIntegrator osi) override;
+  void insertIntegrator(
+      std::shared_ptr<siconos::integrators::OneStepIntegrator> osi) override;
 
   /** Destructor.
    */
   virtual ~TimeStepping() noexcept = default;
 
-  /** update indexSets[i] of the topology, using current y and lambda values of Interactions
+  /** update indexSets[i] of the topology, using current y and lambda values of
+   * Interactions
    *
    *  \param i the number of the set to be updated
    */
   void updateIndexSet(unsigned int i) override;
 
   // /** Used by the updateIndexSet function in order to deactivate
-  // SP::Interaction.
+  // std::shared_ptr<siconos::modeling::Interaction>.
   //  */
-  // virtual bool predictorDeactivate(SP::Interaction inter, unsigned int i);
+  // virtual bool
+  // predictorDeactivate(std::shared_ptr<siconos::modeling::Interaction> inter,
+  // unsigned int i);
 
   // /** Used by the updateIndexSet function in order to activate
-  // SP::Interaction.
+  // std::shared_ptr<siconos::modeling::Interaction>.
   //  */
-  // virtual bool predictorActivate(SP::Interaction inter, unsigned int i);
+  // virtual bool
+  // predictorActivate(std::shared_ptr<siconos::modeling::Interaction> inter,
+  // unsigned int i);
 
   /** increment model current time according to User TimeDiscretisation and call
    *  SaveInMemory. */
@@ -220,8 +236,7 @@ public:
    *
    *  \return  the cumulative number of steps performed by the Newton algorithm
    */
-  unsigned int getNewtonCumulativeNbIterations()
-  {
+  unsigned int getNewtonCumulativeNbIterations() {
     return _newtonCumulativeNbIterations;
   }
 
@@ -261,27 +276,28 @@ public:
   bool isNewtonConverge() { return _isNewtonConverge; };
 
   bool displayNewtonConvergence() { return _displayNewtonConvergence; };
-  void setDisplayNewtonConvergence(bool newval)
-  {
+  void setDisplayNewtonConvergence(bool newval) {
     _displayNewtonConvergence = newval;
   };
 
-  void setNewtonWarningOnNonConvergence(bool newval) { _newtonWarningOnNonConvergence = newval; };
-  bool newtonWarningOnNonConvergence() { return _newtonWarningOnNonConvergence; };
+  void setNewtonWarningOnNonConvergence(bool newval) {
+    _newtonWarningOnNonConvergence = newval;
+  };
+  bool newtonWarningOnNonConvergence() {
+    return _newtonWarningOnNonConvergence;
+  };
 
-  void setWarningNonsmoothSolver(bool newval) {  _warningNonsmoothSolver=newval;};
-  bool warningNonsmoothSolver() {  return _warningNonsmoothSolver;};
-  
+  void setWarningNonsmoothSolver(bool newval) {
+    _warningNonsmoothSolver = newval;
+  };
+  bool warningNonsmoothSolver() { return _warningNonsmoothSolver; };
 
-
-  
   void displayNewtonConvergenceAtTheEnd(int info, unsigned int maxStep);
   void displayNewtonConvergenceInTheLoop();
 
   void setResetAllLambda(bool newval) { _resetAllLambda = newval; };
 
-  void setSkipLastUpdateOutput(bool newval)
-  {
+  void setSkipLastUpdateOutput(bool newval) {
     _skip_last_updateOutput = newval;
   };
   bool skipLastUpdateOutput() { return _skip_last_updateOutput; };
@@ -330,8 +346,7 @@ public:
    *
    *  \param maxStep maximum number of Newton solver iterations
    */
-  void setNewtonMaxIteration(unsigned int maxStep)
-  {
+  void setNewtonMaxIteration(unsigned int maxStep) {
     _newtonMaxIteration = maxStep;
   };
 
@@ -345,14 +360,13 @@ public:
    *
    *  \param v Newton solver options
    */
-  void setNewtonOptions(unsigned int v) { _newtonOptions = v; };
+  void setNewtonOptions(TimeSteppingType v) { _newtonOptions = v; };
 
   /** get the NewtonOptions
    *
-   *  \return Newton solver options - SICONOS_TS_LINEAR 1,
-   *  SICONOS_TS_LINEAR_IMPLICIT 2, SICONOS_TS_NONLINEAR 3
+   *  \return Newton solver options (a TimeSteppingType enum)
    */
-  unsigned int newtonOptions() { return _newtonOptions; };
+  TimeSteppingType newtonOptions() { return _newtonOptions; };
 
   /** accessor to _newtonResiduDSMax
    *
@@ -371,8 +385,6 @@ public:
    *  \return _newtonResiduRMax
    */
   double newtonResiduRMax() { return _newtonResiduRMax; };
-
-  ACCEPT_STD_VISITORS();
 };
-
-#endif // TimeStepping_H
+}  // namespace siconos::simulation
+#endif  // TimeStepping_H

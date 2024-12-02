@@ -14,38 +14,30 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #include "SiconosPropertiesTest.hpp"
 
 // test suite registration
 CPPUNIT_TEST_SUITE_REGISTRATION(SiconosPropertiesTest);
 
+using G = siconos::graphs::SiconosGraph<std::string, std::string, boost::no_property,
+                                        boost::no_property, boost::no_property>;
 
-void SiconosPropertiesTest::setUp()
-{
-}
+void SiconosPropertiesTest::setUp() {}
 
-void SiconosPropertiesTest::tearDown()
-{
-}
+void SiconosPropertiesTest::tearDown() {}
 
 /* TypeOf */
-void SiconosPropertiesTest::t1()
-{
+void SiconosPropertiesTest::t1() {
+  auto g = std::make_shared<G>();
 
-  typedef SiconosGraph < std::string, std::string,
-          boost::no_property, boost::no_property, boost::no_property > G;
+  auto mv = siconos::graphs::vertexProperties<int>(*g);
 
-  std::shared_ptr<G> g(new G());
-
-
-  Siconos::VertexProperties<int, G> mv = Siconos::vertexProperties<int>(*g);
-
-  G::VDescriptor v1 = g->add_vertex("A");
-  G::VDescriptor v2 = g->add_vertex("B");
-  G::VDescriptor v3 = g->add_vertex("C");
-  G::VDescriptor v4 = g->add_vertex("D");
-  G::VDescriptor v5 = g->add_vertex("E");
+  auto v1 = g->add_vertex("A");
+  auto v2 = g->add_vertex("B");
+  auto v3 = g->add_vertex("C");
+  auto v4 = g->add_vertex("D");
+  auto v5 = g->add_vertex("E");
 
   g->update_vertices_indices();
 
@@ -62,26 +54,18 @@ void SiconosPropertiesTest::t1()
   CPPUNIT_ASSERT(mv[v2] == 2);
   CPPUNIT_ASSERT(mv[v4] == 4);
   CPPUNIT_ASSERT(mv[v5] == 5);
-
-
 }
 
-void SiconosPropertiesTest::t2()
-{
+void SiconosPropertiesTest::t2() {
+  auto g = std::make_shared<G>();
 
-  typedef SiconosGraph < std::string, std::string,
-          boost::no_property, boost::no_property, boost::no_property > G;
+  auto mv = siconos::graphs::vertexProperties<int>(*g);
 
-  std::shared_ptr<G> g(new G());
-
-
-  Siconos::VertexProperties<int, G> mv = Siconos::vertexProperties<int>(*g);
-
-  G::VDescriptor v1 = g->add_vertex("A");
-  G::VDescriptor v2 = g->add_vertex("B");
-  G::VDescriptor v3 = g->add_vertex("C");
-  G::VDescriptor v4 = g->add_vertex("D");
-  G::VDescriptor v5 = g->add_vertex("E");
+  auto v1 = g->add_vertex("A");
+  auto v2 = g->add_vertex("B");
+  auto v3 = g->add_vertex("C");
+  auto v4 = g->add_vertex("D");
+  auto v5 = g->add_vertex("E");
 
   g->update_vertices_indices();
 
@@ -92,7 +76,7 @@ void SiconosPropertiesTest::t2()
   mv[v5] = 5;
 
   g->remove_vertex("C");
-  G::VDescriptor vnc = g->add_vertex("new C");
+  auto vnc = g->add_vertex("new C");
   g->update_vertices_indices();
 
   mv[vnc] = 33;
@@ -102,24 +86,18 @@ void SiconosPropertiesTest::t2()
   CPPUNIT_ASSERT(mv[v4] == 4);
   CPPUNIT_ASSERT(mv[v5] == 5);
   CPPUNIT_ASSERT(mv[vnc] == 33);
-
 }
 
-void SiconosPropertiesTest::t3()
-{
-  typedef SiconosGraph < std::string, std::string,
-          boost::no_property, boost::no_property, boost::no_property > G;
+void SiconosPropertiesTest::t3() {
+  auto g = std::make_shared<G>();
 
-  std::shared_ptr<G> g(new G());
+  auto mv = siconos::graphs::vertexProperties<int>(*g);
 
-
-  Siconos::VertexProperties<int, G> mv = Siconos::vertexProperties<int>(*g);
-
-  G::VDescriptor v1 = g->add_vertex("A");
-  G::VDescriptor v2 = g->add_vertex("B");
-  G::VDescriptor v3 = g->add_vertex("C");
-  G::VDescriptor v4 = g->add_vertex("D");
-  G::VDescriptor v5 = g->add_vertex("E");
+  auto v1 = g->add_vertex("A");
+  auto v2 = g->add_vertex("B");
+  auto v3 = g->add_vertex("C");
+  auto v4 = g->add_vertex("D");
+  auto v5 = g->add_vertex("E");
 
   g->update_vertices_indices();
 
@@ -134,12 +112,11 @@ void SiconosPropertiesTest::t3()
   g->remove_vertex("C");
   g->remove_vertex("D");
 
-  G::VDescriptor vf = g->add_vertex("F");
+  auto vf = g->add_vertex("F");
   g->update_vertices_indices();
 
   mv[vf] = 333;
 
   CPPUNIT_ASSERT(mv[v5] == 5);
   CPPUNIT_ASSERT(mv[vf] == 333);
-
 }

@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file InteractionManager.hpp
   \brief Definition of a class that manages dynamic interactions.
@@ -23,20 +23,36 @@
 #ifndef InteractionManager_h
 #define InteractionManager_h
 
-#include "Interaction.hpp"
-#include "DynamicalSystem.hpp"
-#include "SiconosVisitor.hpp"
-#include "NSLawMatrix.hpp"
+#include <memory>
 
-class InteractionManager
-{
-public:
-  InteractionManager() : _nslaws(1) {}
-  virtual ~InteractionManager() {}
+#include "NSLawMatrix.hpp"
+#include "SiconosSerialization.hpp"
+
+namespace siconos::modeling {
+class NonSmoothLaw;
+class NSLawMatrix;
+}  // namespace siconos::modeling
+
+namespace siconos::simulation {
+
+class Simulation;
+
+  class InteractionManager : public std::enable_shared_from_this<InteractionManager>{
+  InteractionManager(const InteractionManager&) = delete;
+  InteractionManager(InteractionManager&&) = delete;
+  InteractionManager operator=(const InteractionManager&&) = delete;
+  InteractionManager operator=(InteractionManager&&) = delete;
+
+ public:
+  InteractionManager() = default;
+
+  virtual ~InteractionManager() noexcept = default;
 
   /** Called by Simulation after updating positions prior to starting
    * the Newton loop. */
-  virtual void updateInteractions(SP::Simulation simulation) {}
+  virtual void updateInteractions(std::shared_ptr<siconos::simulation::Simulation> simulation)
+  {
+  }
 
   /** Specify a non-smooth law to use for a given combination of
    *  interaction groups.
@@ -44,30 +60,26 @@ public:
    * \param group1 id of the fisrt group of interactions
    * \param group2  id of the second group of interactions
    */
-  virtual void insertNonSmoothLaw(SP::NonSmoothLaw nslaw,
-                                  unsigned long int group1,
-                                  unsigned long int group2);
+  virtual void insertNonSmoothLaw(std::shared_ptr<siconos::modeling::NonSmoothLaw> nslaw,
+                                  unsigned long int group1, unsigned long int group2);
 
   /** Retrieve a non-smooth law to use for a given combination of
    *  interaction groups.
-   * \return nsl a SP::NonSmoothLaw
+   * \return nsl a std::shared_ptr<siconos::modeling::NonSmoothLaw>
    * \param group1 first group
    * \param group2 second group */
-  virtual SP::NonSmoothLaw nonSmoothLaw(unsigned long int group1,
-                                        unsigned long int group2);
+  virtual std::shared_ptr<siconos::modeling::NonSmoothLaw> nonSmoothLaw(
+      unsigned long int group1, unsigned long int group2);
 
-protected:
-
+ protected:
   /** nslaws */
-  NSLawMatrix _nslaws;
+  siconos::modeling::NSLawMatrix _nslaws{1};
 
   friend class Simulation;
   friend class TimeStepping;
   friend class EventDriven;
 
   ACCEPT_SERIALIZATION(InteractionManager);
-  VIRTUAL_ACCEPT_VISITORS(InteractionManager);
-
 };
-
+}  // namespace siconos::simulation
 #endif /* InteractionManager_h */

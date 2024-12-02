@@ -14,74 +14,81 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #include "LagrangianLinearDiagonalDS.hpp"
-#include "BlockMatrix.hpp"
+
+#include "SiconosException.hpp"
+#include "SiconosVector.hpp"
+#include "SimpleMatrix.hpp"
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
-#include "siconos_debug.h"
-
 #include <iostream>
 
+#include "siconos_debug.h"
+
 // --- Constructor for the complete system
-LagrangianLinearDiagonalDS::LagrangianLinearDiagonalDS(SP::SiconosVector q0, SP::SiconosVector velocity0,
-    SP::SiconosVector stiffness, SP::SiconosVector damping,
-    SP::SiconosVector mass):
-  LagrangianDS(q0, velocity0)
-{
-  _mass.reset(new SimpleMatrix(dimension(), dimension(), Siconos::BANDED, 0, 0));
-  for(unsigned int i = 0; i<dimension(); ++i)
-    (*_mass)(i, i) = (*mass)(i);
+siconos::modeling::LagrangianLinearDiagonalDS::LagrangianLinearDiagonalDS(
+    std::shared_ptr<siconos::algebra::SiconosVector> q0,
+    std::shared_ptr<siconos::algebra::SiconosVector> velocity0,
+    std::shared_ptr<siconos::algebra::SiconosVector> stiffness,
+    std::shared_ptr<siconos::algebra::SiconosVector> damping,
+    std::shared_ptr<siconos::algebra::SiconosVector> mass)
+    : LagrangianDS(q0, velocity0) {
+  _mass = std::make_shared<siconos::algebra::SimpleMatrix>(
+      dimension(), dimension(), siconos::algebra::UblasType::BANDED, 0, 0);
+  for (unsigned int i = 0; i < dimension(); ++i) (*_mass)(i, i) = (*mass)(i);
   _stiffness = stiffness;
   _damping = damping;
 }
 
 // --- Constructor for the complete system with identity mass matrix
-LagrangianLinearDiagonalDS::LagrangianLinearDiagonalDS(SP::SiconosVector q0, SP::SiconosVector velocity0,
-    SP::SiconosVector stiffness, SP::SiconosVector damping):
-  LagrangianDS(q0, velocity0)
-{
+siconos::modeling::LagrangianLinearDiagonalDS::LagrangianLinearDiagonalDS(
+    std::shared_ptr<siconos::algebra::SiconosVector> q0,
+    std::shared_ptr<siconos::algebra::SiconosVector> velocity0,
+    std::shared_ptr<siconos::algebra::SiconosVector> stiffness,
+    std::shared_ptr<siconos::algebra::SiconosVector> damping)
+    : LagrangianDS(q0, velocity0) {
   _stiffness = stiffness;
   _damping = damping;
 }
 
 // --- Constructor for the undamped system with identity mass matrix
-LagrangianLinearDiagonalDS::LagrangianLinearDiagonalDS(SP::SiconosVector q0, SP::SiconosVector velocity0,
-    SP::SiconosVector stiffness):
-  LagrangianDS(q0, velocity0)
-{
+siconos::modeling::LagrangianLinearDiagonalDS::LagrangianLinearDiagonalDS(
+    std::shared_ptr<siconos::algebra::SiconosVector> q0,
+    std::shared_ptr<siconos::algebra::SiconosVector> velocity0,
+    std::shared_ptr<siconos::algebra::SiconosVector> stiffness)
+    : LagrangianDS(q0, velocity0) {
   _stiffness = stiffness;
 }
 
-void LagrangianLinearDiagonalDS::initRhs(double time)
-{
-  THROW_EXCEPTION("LagrangianLinearDiagonalDS::initRhs - not yet implemented for LagrangianLinearDiagonalDS.");
-
+void siconos::modeling::LagrangianLinearDiagonalDS::initRhs(double time) {
+  THROW_EXCEPTION(
+      "siconos::modeling::LagrangianLinearDiagonalDS::initRhs - not yet implemented for "
+      "LagrangianLinearDiagonalDS.");
 }
 
-void LagrangianLinearDiagonalDS::computeForces(double time, SP::SiconosVector q2, SP::SiconosVector v2)
-{
-  DEBUG_PRINT("LagrangianLinearTIDS::computeForces(double time, SP::SiconosVector q2, SP::SiconosVector v2) \n");
+void siconos::modeling::LagrangianLinearDiagonalDS::computeForces(
+    double time, std::shared_ptr<siconos::algebra::SiconosVector> q2,
+    std::shared_ptr<siconos::algebra::SiconosVector> v2) {
+  DEBUG_PRINT(
+      "LagrangianLinearTIDS::computeForces(double time, "
+      "std::shared_ptr<siconos::algebra::SiconosVector> q2, "
+      "std::shared_ptr<siconos::algebra::SiconosVector> v2) \n");
 
-  if(!_forces)
-  {
-    _forces.reset(new SiconosVector(_ndof));
-  }
-  else
+  if (!_forces) {
+    _forces = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
+  } else
     _forces->zero();
 
-  if(_fExt)
-  {
+  if (_fExt) {
     computeFExt(time);
     *_forces += *_fExt;
   }
 
-  if(_stiffness)
-    for(unsigned int i=0; i<_ndof; ++i)
-      (*_forces)(i) -= (*_stiffness)(i) * (*q2)(i);
-  if(_damping)
-    for(unsigned int i=0; i<_ndof; ++i)
-      (*_forces)(i) -= (*_damping)(i) * (*v2)(i);
+  if (_stiffness)
+    for (decltype(_ndof) i = 0; i < _ndof; ++i) (*_forces)(i) -= (*_stiffness)(i) * (*q2)(i);
+  if (_damping)
+    for (decltype(_ndof) i = 0; i < _ndof; ++i) (*_forces)(i) -= (*_damping)(i) * (*v2)(i);
 
   // if (_stiffness)
   // {
@@ -109,20 +116,23 @@ void LagrangianLinearDiagonalDS::computeForces(double time, SP::SiconosVector q2
   // *forces *= -1.;
 }
 
-
-void LagrangianLinearDiagonalDS::display(bool brief) const
-{
+void siconos::modeling::LagrangianLinearDiagonalDS::display(bool brief) const {
   LagrangianDS::display();
-  std::cout << "===== Lagrangian Linear Diagonal System display ===== " <<std::endl;
-  std::cout << "- Mass Matrix M : " <<std::endl;
-  if(_mass) _mass->display();
-  else std::cout << "-> nullptr" <<std::endl;
-  std::cout << "- Stiffness Matrix K : " <<std::endl;
-  if(_stiffness) _stiffness->display();
-  else std::cout << "-> nullptr" <<std::endl;
-  std::cout << "- Viscosity Matrix C : " <<std::endl;
-  if(_damping) _damping->display();
-  else std::cout << "-> nullptr" <<std::endl;
-  std::cout << "=========================================================== " <<std::endl;
+  std::cout << "===== Lagrangian Linear Diagonal System display ===== " << std::endl;
+  std::cout << "- Mass Matrix M : " << std::endl;
+  if (_mass)
+    _mass->display();
+  else
+    std::cout << "-> nullptr" << std::endl;
+  std::cout << "- Stiffness Matrix K : " << std::endl;
+  if (_stiffness)
+    _stiffness->display();
+  else
+    std::cout << "-> nullptr" << std::endl;
+  std::cout << "- Viscosity Matrix C : " << std::endl;
+  if (_damping)
+    _damping->display();
+  else
+    std::cout << "-> nullptr" << std::endl;
+  std::cout << "=========================================================== " << std::endl;
 }
-

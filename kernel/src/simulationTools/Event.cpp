@@ -14,48 +14,45 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #include "Event.hpp"
-#include "TimeDiscretisation.hpp"
-#include "SiconosException.hpp"
-#include <cmath>
+
 #include <iostream>
 
+#include "SiconosConst.hpp"
+#include "TimeDiscretisation.hpp"
 
-double Event::_tick = DEFAULT_TICK;
-bool Event::_eventCreated = false;
+bool siconos::simulation::Event::_eventCreated = false;
 
-Event::Event(double time, int newType, bool reschedule):
-  _type(newType), _dTime(time), _k(0), _reschedule(reschedule)
-{
+double siconos::simulation::Event::_tick = siconos::internal::DEFAULT_TICK;
+
+siconos::simulation::Event::Event(double time, EventType newType, bool reschedule)
+    : _type(newType), _dTime(time), _reschedule(reschedule) {
   // Initialize and set timeOfEvent.
   mpz_init_set_d(_timeOfEvent, rint(time / _tick));
   mpz_init_set_d(_tickIncrement, 0);
   _eventCreated = true;
 }
 
-Event::~Event()
-{
+siconos::simulation::Event::~Event() noexcept {
   mpz_clear(_timeOfEvent);
   mpz_clear(_tickIncrement);
 }
 
-void Event::update(unsigned int k)
-{
-  if(_td)  // if no TimeDiscretisation then do nothing
+void siconos::simulation::Event::update(unsigned int k) {
+  if (_td)  // if no TimeDiscretisation then do nothing
   {
     _k++;
-    if(_td->hGmp())
+    if (_td->hGmp())
       incrementTime();
     else
       setTime(_td->getTk(_k));
   }
 }
-void Event::setTimeDiscretisation(SP::TimeDiscretisation td)
-{
+void siconos::simulation::Event::setTimeDiscretisation(
+    std::shared_ptr<TimeDiscretisation> td) {
   _td = td;
-  if(_td->hGmp())
-  {
+  if (_td->hGmp()) {
     mpf_t tmp;
     mpf_init_set_d(tmp, _tick);
     mpf_div(tmp, *_td->currentTimeStep(), tmp);
@@ -64,22 +61,21 @@ void Event::setTimeDiscretisation(SP::TimeDiscretisation td)
   }
 }
 
-void Event::setTick(double newTick)
-{
-  if(_eventCreated)
-  {
-    std::cout << "Warning: you change tick value for EventsManager -> a new initialization of the object is required. " << std::endl;
+void siconos::simulation::Event::setTick(double newTick) {
+  if (_eventCreated) {
+    std::cout << "Warning: you change tick value for EventsManager -> a new initialization of "
+                 "the object is required. "
+              << std::endl;
   }
   _tick = newTick;
 }
 
-
-void Event::display() const
-{
-  std::cout << "===== Event data display =====" <<std::endl;
-  std::cout << " - Type: " << _type <<std::endl;
+void siconos::simulation::Event::display() const {
+  std::cout << "===== Event data display =====" << std::endl;
+  std::cout << " - Type: " << static_cast<std::underlying_type<EventType>::type>(_type)
+            << "\n";
   std::cout << " - time (mpz_t format, double format): (";
   mpz_out_str(stdout, 10, _timeOfEvent);
-  std::cout << ", " << _dTime << ")" <<std::endl;
-  std::cout << "===== End of Event display =====" <<std::endl;
+  std::cout << ", " << _dTime << ")\n";
+  std::cout << "===== End of Event display =====\n";
 }

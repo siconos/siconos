@@ -17,14 +17,8 @@
 */
 #include "SensorEvent.hpp"
 #include "Sensor.hpp"
-#include "EventFactory.hpp"
-#include "TimeDiscretisation.hpp"
 
-using namespace EventFactory;
-
-void SensorEvent::process(Simulation& sim)
+void siconos::control::SensorEvent::process(siconos::simulation::Simulation& sim)
 {
   _sensor->capture();
 }
-
-AUTO_REGISTER_EVENT(SENSOR_EVENT, SensorEvent)

@@ -14,19 +14,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef __EigenProblemsTest__
 #define __EigenProblemsTest__
 
 #include <cppunit/extensions/HelperMacros.h>
+
 #include "SimpleMatrix.hpp"
-#include "EigenProblems.hpp"
 
-class EigenProblemsTest : public CppUnit::TestFixture
-{
-
-private:
-
+class EigenProblemsTest : public CppUnit::TestFixture {
+ private:
   ACCEPT_SERIALIZATION(EigenProblemsTest);
 
   // test suite
@@ -47,12 +44,11 @@ private:
   void End();
 
   unsigned int size;
-  SP::SiconosMatrix A, Aref;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> A, Aref, Asym;
 
-public:
+ public:
   void setUp();
   void tearDown();
-
 };
 
 #endif
