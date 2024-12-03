@@ -18,7 +18,7 @@
 
 #include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
-
+#include "FirstOrderLinearTIR.hpp"
 #include "LagrangianLinearTIR.hpp"
 namespace py = pybind11;
 

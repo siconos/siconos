@@ -23,6 +23,7 @@
 // #include <memory>
 // #include <span>
 
+#include "FirstOrderLinearDS.hpp"
 #include "LagrangianDS.hpp"
 #include "LagrangianLinearTIDS.hpp"
 #include "NewtonEulerDS.hpp"

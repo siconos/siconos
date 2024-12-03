@@ -20,7 +20,6 @@
 
 #include "ControlSensor.hpp"
 #include "ControlZOHAdditionalTerms.hpp"
-#include "FirstOrderLinearTIDS.hpp"
 #include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
 #include "SiconosMatrix.hpp"
