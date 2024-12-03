@@ -631,7 +631,7 @@ void siconos::integrators::LsodarOSI::computeFreeOutput(
   coord[4] = 0;
   coord[6] = 0;
   coord[7] = sizeY;
-  std::shared_ptr<siconos::algebra::SiconosMatrix> C;
+  std::shared_ptr<siconos::algebra::MapType> C;
   //   std::shared_ptr<siconos::algebra::SiconosMatrix>  D;
   //   std::shared_ptr<siconos::algebra::SiconosMatrix>  F;
   auto& osnsp_rhs = *(*indexSet->properties(vertex_inter)
@@ -674,8 +674,8 @@ void siconos::integrators::LsodarOSI::computeFreeOutput(
     if (C) {
       assert(Xfree);
 
-      coord[3] = C->size(1);
-      coord[5] = C->size(1);
+      coord[3] = C->cols();
+      coord[5] = C->cols();
 
       siconos::algebra::subprod(*C, *Xfree, osnsp_rhs, coord, true);
     }

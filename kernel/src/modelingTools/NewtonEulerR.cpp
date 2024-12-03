@@ -45,17 +45,19 @@ void siconos::modeling::NewtonEulerR::initialize(Interaction& inter) {
   unsigned int xSize = inter.getSizeOfDS();
   unsigned int qSize = 7 * (xSize / 6);
 
-  if (!_jachq)
-    _jachq = std::make_shared<siconos::algebra::SiconosMatrix>(ySize, qSize);
+  if (!_jachq) {
+    jachq_internal_storage = std::make_unique<std::vector<double>>(ySize * qSize);
+    _jachq = std::make_shared<siconos::algebra::MapType>(jachq_internal_storage->data(), ySize, qSize);
+  }
   else {
-    if (_jachq->size(0) == 0) {
+    if (_jachq->rows() == 0) {
       // if the matrix dim are null
       _jachq->resize(ySize, qSize);
     } else {
-      assert((_jachq->size(1) == qSize && _jachq->size(0) == ySize) ||
-             (printf("NewtonEuler::initializeWorkVectorsAndMatrices _jachq->size(1) = %ld "
-                     ",_qsize = %d , _jachq->size(0) = %ld ,_ysize =%d \n",
-                     _jachq->size(1), qSize, _jachq->size(0), ySize) &&
+      assert((_jachq->cols() == qSize && _jachq->rows() == ySize) ||
+             (printf("NewtonEuler::initializeWorkVectorsAndMatrices _jachq->cols() = %ld "
+                     ",_qsize = %d , _jachq->rows() = %ld ,_ysize =%d \n",
+                     _jachq->cols(), qSize, _jachq->rows(), ySize) &&
               false) ||
              ("NewtonEuler::initializeWorkVectorsAndMatrices inconsistent sizes between "
               "_jachq matrix and the interaction." &&
@@ -85,11 +87,11 @@ void siconos::modeling::NewtonEulerR::initialize(Interaction& inter) {
 }
 
 void siconos::modeling::NewtonEulerR::checkSize(Interaction& inter) {
-  assert((_jachq->size(1) == 7 * (inter.getSizeOfDS() / 6) &&
-          _jachq->size(0) == inter.dimension()) ||
-         (printf("NewtonEuler::initializeWorkVectorsAndMatrices _jachq->size(1) = %ld ,_qsize "
-                 "= %d , _jachq->size(0) = %ld ,_ysize =%d \n",
-                 _jachq->size(1), 7 * (inter.getSizeOfDS() / 6), _jachq->size(0),
+  assert((_jachq->cols() == 7 * (inter.getSizeOfDS() / 6) &&
+          _jachq->rows() == inter.dimension()) ||
+         (printf("NewtonEuler::initializeWorkVectorsAndMatrices _jachq->cols() = %ld ,_qsize "
+                 "= %d , _jachq->rows() = %ld ,_ysize =%d \n",
+                 _jachq->cols(), 7 * (inter.getSizeOfDS() / 6), _jachq->rows(),
                  inter.dimension()) &&
           false) ||
          ("NewtonEuler::initializeWorkVectorsAndMatrices inconsistent sizes between _jachq "
@@ -99,12 +101,14 @@ void siconos::modeling::NewtonEulerR::checkSize(Interaction& inter) {
 
 void siconos::modeling::NewtonEulerR::setJachq(
     std::shared_ptr<siconos::algebra::SiconosMatrix> newJachq) {
-  _jachq = newJachq;
+  jachq_internal_storage = nullptr;
+  _jachq = std::make_shared<siconos::algebra::MapType>(newJachq->data(), newJachq->rows(), newJachq->cols()); // TODOSAM : this function make the same as setJachqPtr
 }
 
 void siconos::modeling::NewtonEulerR::setJachqPtr(
     std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr) {
-  _jachq = newPtr;
+  jachq_internal_storage = nullptr;
+  _jachq = std::make_shared<siconos::algebra::MapType>(newPtr->data(), newPtr->rows(), newPtr->cols());
 }
 
 void siconos::modeling::NewtonEulerR::computeh(double time,

@@ -84,9 +84,9 @@ void siconos::joints::JointFrictionR::computeJachq(
 
   // Copy indicated axes into the friction jacobian, negative and positive sides
   // NOTE trying ==1 using Relay, maybe don't need LCP formulation
-  assert(_jachq->size(0) == 1);
+  assert(_jachq->rows() == 1);
   for (unsigned int i = 0; i < 1; i++)
-    for (unsigned int j = 0; j < _jachq->size(1); j++) {
+    for (unsigned int j = 0; j < _jachq->cols(); j++) {
       _jachq->setValue(i, j,
                        _jachqTmp->getValue((*_axis)[i] - _axisMin, j) * (i == 1 ? 1 : -1));
     }

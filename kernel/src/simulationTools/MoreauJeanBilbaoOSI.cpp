@@ -351,8 +351,8 @@ void siconos::integrators::MoreauJeanBilbaoOSI::computeFreeOutput(
 
   if (inter.relation()->C()) {
     auto& C = *inter.relation()->C();
-    coord[3] = C.size(1);
-    coord[5] = C.size(1);
+    coord[3] = C.cols();
+    coord[5] = C.cols();
     // osnsp_rhs[coord] = C.x_free
     siconos::algebra::subprod(C, x_free, osnsp_rhs, coord, true);
   }

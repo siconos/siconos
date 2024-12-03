@@ -230,7 +230,7 @@ void siconos::joints::CouplerJointR::computeJachq(
 
   // Constraint is the linear relation between them
   for (unsigned int i = 0; i < 1; i++)
-    for (unsigned int j = 0; j < _jachq->size(1); j++)
+    for (unsigned int j = 0; j < _jachq->cols(); j++)
       _jachq->setValue(i, j, jachq2->getValue(i, j) - jachq1->getValue(i, j) * _ratio);
 }
 
@@ -290,6 +290,6 @@ void siconos::joints::CouplerJointR::computeJachqDoF(
 
   // Constraint is the linear relation between them
   for (unsigned int i = 0; i < 1; i++)
-    for (unsigned int j = 0; j < _jachq->size(1); j++)
+    for (unsigned int j = 0; j < _jachq->cols(); j++)
       jachq.setValue(i, j, jachq2->getValue(i, j) - jachq1->getValue(i, j) * _ratio);
 }

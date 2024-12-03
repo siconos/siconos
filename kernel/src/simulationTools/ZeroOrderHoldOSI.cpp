@@ -404,8 +404,8 @@ void siconos::integrators::ZeroOrderHoldOSI::computeFreeOutput(
         osnsp_rhs *= -1.0;
       }
       if (C) {
-        coord[3] = C->size(1);
-        coord[5] = C->size(1);
+        coord[3] = C->cols();
+        coord[5] = C->cols();
         siconos::algebra::subprod(*C, *deltax, osnsp_rhs, coord, false);
       }
 
@@ -427,8 +427,8 @@ void siconos::integrators::ZeroOrderHoldOSI::computeFreeOutput(
         assert(Xfree);
         assert(deltax);
 
-        coord[3] = C->size(1);
-        coord[5] = C->size(1);
+        coord[3] = C->cols();
+        coord[5] = C->cols();
         // creates a POINTER link between workX[ds] (xfree) and the
         // corresponding interactionBlock in each Interactionfor each ds of the
         // current Interaction.

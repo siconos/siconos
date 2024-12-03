@@ -41,7 +41,7 @@ void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR1()
 {
   std::cout << "--> Test: constructor 1." << std::endl;
   auto folr = std::make_shared<siconos::modeling::LagrangianLinearTIR>(C);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR1a : ", folr->C() == C, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR1a : ", folr->C()->data() == C->data(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR1c : ",
                                folr->getType() == siconos::modeling::RelationType::Lagrangian,
                                true);
@@ -70,7 +70,7 @@ void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR3()
 {
   std::cout << "--> Test: constructor 3." << std::endl;
   auto folr = std::make_shared<siconos::modeling::LagrangianLinearTIR>(C, e);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR3a : ", folr->C() == C, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR3a : ", folr->C()->data() == C->data(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR3d : ", folr->e() == e, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR3f : ",
                                folr->getType() == siconos::modeling::RelationType::Lagrangian,
@@ -105,7 +105,7 @@ void LagrangianLinearTIRTest::testSetCPtr()
   tmp->zero();
   auto folr = std::make_shared<siconos::modeling::LagrangianLinearTIR>(tmp);
   folr->setCPtr(C);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetCPtr : ", folr->C() == C, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetCPtr : ", folr->C()->data() == C->data(), true);
   std::cout << "--> setCPtr test ended with success." << std::endl;
 }
 
@@ -135,7 +135,7 @@ void LagrangianLinearTIRTest::testGetJacPtr()
 {
   std::cout << "--> Test: jac." << std::endl;
   auto folr = std::make_shared<siconos::modeling::LagrangianLinearTIR>(C);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetJachq: ", folr->jachq() == C, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetJachq: ", folr->jachq()->data() == C->data(), true);
 
   std::cout << "--> testGetJacPtr test ended with success." << std::endl;
 }

@@ -134,7 +134,9 @@ class LagrangianCompliantLinearTIR : public LagrangianR {
    */
   inline void setCPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr)
   {
-    _jachq = newPtr;
+    // TODOSAM : deallocate internal storage
+    jachq_internal_storage = nullptr;
+    _jachq = std::make_shared<siconos::algebra::MapType>(newPtr->data(), newPtr->rows(), newPtr->cols());
   }
 
   // -- D --
@@ -142,14 +144,16 @@ class LagrangianCompliantLinearTIR : public LagrangianR {
   /** get D
    *  \return pointer on a plugged matrix
    */
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> D() const { return _jachlambda; }
+  inline std::shared_ptr<siconos::algebra::MapType> D() const { return _jachlambda; }
 
   /** set D to pointer newPtr
    * \param newPtr a SP to plugged matrix
    */
   inline void setDPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr)
   {
-    _jachlambda = newPtr;
+    // TODOSAM : deallocate internal storage
+    jachlambda_internal_storage = nullptr;
+    _jachlambda = std::make_shared<siconos::algebra::MapType>(newPtr->data(), newPtr->rows(), newPtr->cols());
   }
 
   // -- F --

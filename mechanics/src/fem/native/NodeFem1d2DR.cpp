@@ -33,7 +33,8 @@
 
 void siconos::mechanics::fem::NodeFem1d2DR::initialize(modeling::Interaction& inter) {
   auto qSize = inter.getSizeOfDS();
-  _jachq = std::make_shared<siconos::algebra::SiconosMatrix>(1, qSize);
+  jachq_internal_storage = std::make_unique<std::vector<double>>(qSize);
+  _jachq = std::make_shared<siconos::algebra::MapType>(jachq_internal_storage->data(), 1, qSize);
 }
 
 void siconos::mechanics::fem::NodeFem1d2DR::computeJachq(

@@ -815,7 +815,7 @@ void siconos::integrators::Hem5OSI::computeFreeOutput(
 
   auto mainInteraction = inter;
   std::vector<std::size_t> coord = {0, sizeY, 0, 0, 0, 0, 0, sizeY};
-  std::shared_ptr<siconos::algebra::SiconosMatrix> C{nullptr};
+  std::shared_ptr<siconos::algebra::MapType> C{nullptr};
   //   std::shared_ptr<siconos::algebra::SiconosMatrix>  D;
   //   std::shared_ptr<siconos::algebra::SiconosMatrix>  F;
   auto& osnsp_rhs = *(*indexSet->properties(vertex_inter)
@@ -852,8 +852,8 @@ void siconos::integrators::Hem5OSI::computeFreeOutput(
     if (C) {
       assert(Xfree);
 
-      coord[3] = C->size(1);
-      coord[5] = C->size(1);
+      coord[3] = C->cols();
+      coord[5] = C->cols();
 
       siconos::algebra::subprod(*C, *Xfree, osnsp_rhs, coord, true);
     }

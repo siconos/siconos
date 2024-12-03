@@ -31,8 +31,8 @@ siconos::modeling::LagrangianCompliantLinearTIR::LagrangianCompliantLinearTIR(
     std::shared_ptr<siconos::algebra::SiconosMatrix> C,
     std::shared_ptr<siconos::algebra::SiconosMatrix> D)
     : LagrangianR(RelationSubType::CompliantLinearTIR) {
-  _jachq = C;
-  _jachlambda = D;
+  _jachq = std::make_shared<siconos::algebra::MapType>(C->data(), C->rows(), C->cols());
+  _jachlambda = std::make_shared<siconos::algebra::MapType>(D->data(), D->rows(), D->cols());
 }
 
 // Constructor from a complete set of data
@@ -42,8 +42,8 @@ siconos::modeling::LagrangianCompliantLinearTIR::LagrangianCompliantLinearTIR(
     std::shared_ptr<siconos::algebra::SiconosMatrix> F,
     std::shared_ptr<siconos::algebra::SiconosVector> e)
     : LagrangianR(RelationSubType::CompliantLinearTIR) {
-  _jachq = C;
-  _jachlambda = D;
+  _jachq = std::make_shared<siconos::algebra::MapType>(C->data(), C->rows(), C->cols());
+  _jachlambda = std::make_shared<siconos::algebra::MapType>(D->data(), D->rows(), D->cols());
   _F = F;
   _e = e;
 }
@@ -54,8 +54,8 @@ siconos::modeling::LagrangianCompliantLinearTIR::LagrangianCompliantLinearTIR(
     std::shared_ptr<siconos::algebra::SiconosMatrix> D,
     std::shared_ptr<siconos::algebra::SiconosVector> e)
     : LagrangianR(RelationSubType::CompliantLinearTIR) {
-  _jachq = C;
-  _jachlambda = D;
+  _jachq = std::make_shared<siconos::algebra::MapType>(C->data(), C->rows(), C->cols());
+  _jachlambda = std::make_shared<siconos::algebra::MapType>(D->data(), D->rows(), D->cols());
   _e = e;
 }
 
@@ -66,12 +66,12 @@ void siconos::modeling::LagrangianCompliantLinearTIR::checkSize(Interaction& int
   auto sizeY = inter.dimension();
   auto& DSlink = inter.linkToDSVariables();
 
-  if (!(_jachq) || _jachq->size(1) != inter.getSizeOfDS() || _jachq->size(0) != sizeY)
+  if (!(_jachq) || _jachq->cols() != inter.getSizeOfDS() || _jachq->rows() != sizeY)
     THROW_EXCEPTION(
         "siconos::modeling::LagrangianCompliantLinearTIR::checkSize inconsistent sizes "
         "between H matrix and the interaction.");
 
-  if ((_jachlambda) && (_jachlambda->size(0) != sizeY || _jachlambda->size(1) != sizeY))
+  if ((_jachlambda) && (_jachlambda->rows() != sizeY || _jachlambda->cols() != sizeY))
     THROW_EXCEPTION(
         "siconos::modeling::LagrangianCompliantLinearTIR::checkSize inconsistent sizes "
         "between D matrix and the interaction.");

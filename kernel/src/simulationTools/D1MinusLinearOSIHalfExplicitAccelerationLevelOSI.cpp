@@ -636,7 +636,7 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitAccele
 
   std::vector<std::size_t> coord = {0, sizeY, 0, 0, 0, 0, 0, sizeY};
   // Jacobian of Relation with respect to degree of freedom
-  std::shared_ptr<siconos::algebra::SiconosMatrix> C{nullptr};
+  std::shared_ptr<siconos::algebra::MapType> C{nullptr};
 
   std::shared_ptr<siconos::algebra::BlockVector> Xfree{nullptr};  // free degree of freedom
 
@@ -691,8 +691,8 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitAccele
 
     if (C) {
       assert(Xfree);
-      coord[3] = C->size(1);
-      coord[5] = C->size(1);
+      coord[3] = C->cols();
+      coord[5] = C->cols();
       siconos::algebra::subprod(*C, *Xfree, osnsp_rhs, coord, true);
     }
     DEBUG_EXPR(osnsp_rhs.display(););

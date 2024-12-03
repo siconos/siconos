@@ -239,7 +239,7 @@ void siconos::io::ContactPointVisitor::operator()(
   auto id = inter->number();
   auto mu = siconos::internal::ask<ForMu>(*inter->nonSmoothLaw());
   const auto& jachq = *rel.jachq();
-  siconos::algebra::SiconosVector cf(jachq.size(1));
+  siconos::algebra::SiconosVector cf(jachq.cols());
   siconos::algebra::prod(*inter->lambda(1), jachq, cf, true);
 
   answer.resize(16);
@@ -306,7 +306,7 @@ void siconos::io::ContactPointVisitor::operator()(
   auto id = inter->number();
   auto mu = siconos::internal::ask<ForMu>(*inter->nonSmoothLaw());
   const auto& jachq = *rel.jachq();
-  siconos::algebra::SiconosVector cf(jachq.size(1));
+  siconos::algebra::SiconosVector cf(jachq.cols());
   siconos::algebra::prod(*inter->lambda(1), jachq, cf, true);
 
   answer.resize(16);
@@ -363,7 +363,7 @@ void siconos::io::ContactPointVisitor::operator()(
   auto id = inter->number();
   auto mu = siconos::internal::ask<ForMu>(*inter->nonSmoothLaw());
   const auto& jachq = *rel.jachq();
-  siconos::algebra::SiconosVector cf(jachq.size(1));
+  siconos::algebra::SiconosVector cf(jachq.cols());
   siconos::algebra::prod(*inter->lambda(1), jachq, cf, true);
 
   answer.resize(16);
@@ -405,7 +405,7 @@ void siconos::io::ContactPointVisitor::operator()(
   auto id = inter->number();
   auto mu = siconos::internal::ask<ForMu>(*inter->nonSmoothLaw());
   const auto& jachq = *rel.jachq();
-  siconos::algebra::SiconosVector cf(jachq.size(1));
+  siconos::algebra::SiconosVector cf(jachq.cols());
   siconos::algebra::prod(*inter->lambda(1), jachq, cf, true);
 
   answer.resize(16);
@@ -447,7 +447,7 @@ void siconos::io::ContactPointVisitor::operator()(
   auto id = inter->number();
   auto mu = siconos::internal::ask<ForMu>(*inter->nonSmoothLaw());
   const auto& jachq = *rel.jachq();
-  siconos::algebra::SiconosVector cf(jachq.size(1));
+  siconos::algebra::SiconosVector cf(jachq.cols());
   siconos::algebra::prod(*inter->lambda(1), jachq, cf, true);
 
   answer.resize(16);

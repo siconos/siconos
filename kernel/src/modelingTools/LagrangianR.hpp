@@ -73,12 +73,14 @@ class LagrangianR : public Relation {
   ACCEPT_SERIALIZATION(LagrangianR);
 
   /** Jacobian matrices of  \f$ y = h(t,q,\dot q,\ldots) \f$  */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _jachlambda{nullptr};
+  std::shared_ptr<siconos::algebra::MapType> _jachlambda{nullptr};
+  std::unique_ptr<std::vector<double>> jachlambda_internal_storage{nullptr};
 
   /** The Jacobian of the constraints with respect to the generalized coodinates   \f$ q \f$
    *  i.e.  \f$ \nabla^\top_q h(t,q,\dot q,\ldots) \f$
    */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _jachq{nullptr};
+  std::shared_ptr<siconos::algebra::MapType> _jachq{nullptr};
+  std::unique_ptr<std::vector<double>> jachq_internal_storage{nullptr};
 
   /**The Jacobian of the constraints with respect to the generalized velocities   \f$ \dot q
    * \f$ i.e.  \f$ \nabla^\top_{\dot q} h(t,q,\dot q,\ldots) \f$
@@ -120,14 +122,14 @@ class LagrangianR : public Relation {
    *
    *  \return a pointer on a SiconosMatrix
    */
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> jachq() const { return _jachq; }
+  inline std::shared_ptr<siconos::algebra::MapType> jachq() const { return _jachq; }
   inline std::shared_ptr<siconos::algebra::SiconosMatrix> jachqDot() const {
     return _jachqDot;
   }
   inline std::shared_ptr<siconos::algebra::SiconosMatrix> dotJachq() const {
     return _dotjachq;
   }
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> jachlambda() const {
+  inline std::shared_ptr<siconos::algebra::MapType> jachlambda() const {
     return _jachlambda;
   }
 
@@ -136,12 +138,13 @@ class LagrangianR : public Relation {
    *  \param newPtr the new matrix
    */
   inline void setJachqPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr) {
-    _jachq = newPtr;
+    jachq_internal_storage = nullptr;
+    _jachq = std::make_shared<siconos::algebra::MapType>(newPtr->data(), newPtr->rows(), newPtr->cols());
   }
 
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> C() const override { return _jachq; }
+  inline std::shared_ptr<siconos::algebra::MapType> C() const override { return _jachq; }
 
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> H() const override { return _jachq; }
+  inline std::shared_ptr<siconos::algebra::MapType> H() const override { return _jachq; }  
 
   /** main relation members display
    */

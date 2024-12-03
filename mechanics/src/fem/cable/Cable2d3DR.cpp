@@ -32,7 +32,8 @@
 
 void siconos::fem::cable::Cable2d3DR::initialize(siconos::modeling::Interaction& inter) {
   auto qSize = inter.getSizeOfDS();
-  _jachq = std::make_shared<siconos::algebra::SiconosMatrix>(2, qSize);
+  jachq_internal_storage = std::make_unique<std::vector<double>>(2 * qSize);
+  _jachq = std::make_shared<siconos::algebra::MapType>(jachq_internal_storage->data(), 2, qSize);
 }
 
 void siconos::fem::cable::Cable2d3DR::computeh(const siconos::algebra::BlockVector& q,

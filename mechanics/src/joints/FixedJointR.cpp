@@ -158,7 +158,7 @@ void siconos::joints::FixedJointR::computeh(double time,
 void siconos::joints::FixedJointR::computeJachq(
     double time, siconos::modeling::Interaction& inter,
     std::shared_ptr<siconos::algebra::BlockVector> q0) {
-  _jachq->zero();
+  _jachq->setZero();
 
   auto q1 = (q0->getAllVect())[0];
   double X1 = q1->getValue(0);

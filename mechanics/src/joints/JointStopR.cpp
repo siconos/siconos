@@ -126,8 +126,8 @@ void siconos::joints::JointStopR::computeJachq(
   _joint->computeJachqDoF(time, inter, q0, *_jachqTmp, _axisMin);
 
   // Copy indicated axes into the stop jacobian, possibly flipped for negative stops
-  for (unsigned int i = 0; i < _jachq->size(0); i++)
-    for (unsigned int j = 0; j < _jachq->size(1); j++)
+  for (unsigned int i = 0; i < _jachq->rows(); i++)
+    for (unsigned int j = 0; j < _jachq->cols(); j++)
       _jachq->setValue(i, j,
                        _jachqTmp->getValue((*_axis)[i] - _axisMin, j) * _dir->getValue(i));
 }

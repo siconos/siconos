@@ -283,9 +283,9 @@ class Relation {
    */
   virtual void computeInput(double time, Interaction &inter, unsigned int level = 0) = 0;
 
-  virtual std::shared_ptr<siconos::algebra::SiconosMatrix> C() const = 0;
+  virtual std::shared_ptr<siconos::algebra::MapType> C() const = 0;
 
-  virtual std::shared_ptr<siconos::algebra::SiconosMatrix> H() const = 0;
+  virtual std::shared_ptr<siconos::algebra::MapType> H() const = 0;
 
   /**
      return true if the relation is linear.

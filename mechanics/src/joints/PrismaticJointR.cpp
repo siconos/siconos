@@ -176,7 +176,7 @@ void siconos::joints::PrismaticJointR::computeJachq(
       "siconos::joints::PrismaticJointR::computeJachq(double time, Interaction& inter, "
       "std::shared_ptr<siconos::algebra::BlockVector> q0 ) \n");
 
-  _jachq->zero();
+  _jachq->setZero();
   auto q1 = (q0->getAllVect())[0];
   double X1 = q1->getValue(0);
   double Y1 = q1->getValue(1);

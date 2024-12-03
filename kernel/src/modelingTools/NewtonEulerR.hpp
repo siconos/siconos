@@ -59,7 +59,9 @@ class NewtonEulerR : public Relation {
   /** The Jacobian of the constraints with respect to the generalized coodinates
    *  \f$ q \f$  i.e. \f[\nabla^T_q h(t,q,\dot q,\ldots)\f]
    */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _jachq{nullptr};
+  std::shared_ptr<siconos::algebra::MapType> _jachq{nullptr};
+  std::unique_ptr<std::vector<double>> jachq_internal_storage{nullptr};
+
 
   /** The Jacobian of the constraints with respect to the generalized velocities
    *  \f$ \dot q \f$  i.e. \f[\nabla^T_{\dot q} h(t,q,\dot q,\ldots)\f]
@@ -114,7 +116,7 @@ class NewtonEulerR : public Relation {
    *
    *  \return a pointer on a SiconosMatrix
    */
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> jachq() const { return _jachq; }
+  inline std::shared_ptr<siconos::algebra::MapType> jachq() const { return _jachq; }
 
   // proj_with_q  inline std::shared_ptr<siconos::algebra::SiconosMatrix> jachqProj() const {
   // return _jachqProj;
@@ -149,7 +151,9 @@ class NewtonEulerR : public Relation {
   {
     _jachqT = newJachqT;
   }
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> H() const override { return _jachqT; }
+  inline std::shared_ptr<siconos::algebra::MapType> H() const override {
+    return std::make_shared<siconos::algebra::MapType>(_jachqT->data(), _jachqT->rows(), _jachqT->cols()); // TODOSAM : not returning the pointer but a map
+  }
 
   /** set Jach[index] to pointer newPtr (pointer link)
    *
@@ -312,7 +316,9 @@ class NewtonEulerR : public Relation {
    *  The matrix C in the linear case, else it returns Jacobian of the output
    *  with respect to x.
    */
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> C() const override { return _jachq; }
+  inline std::shared_ptr<siconos::algebra::MapType> C() const override {
+    return _jachq;
+  }
   /** return a SP on the D matrix.
    *  The matrix D in the linear case, else it returns Jacobian of the output
    *  with respect to lambda.

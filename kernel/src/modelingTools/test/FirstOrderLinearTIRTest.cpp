@@ -43,8 +43,8 @@ void FirstOrderLinearTIRTest::testBuildFirstOrderLinearTIR1()
 {
   std::cout << "--> Test: constructor 1." << std::endl;
   auto folr = std::make_shared<siconos::modeling::FirstOrderLinearTIR>(C, B);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR1a : ", folr->C() == C, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR1b : ", folr->B() == B, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR1a : ", folr->C()->data() == C->data(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR1b : ", folr->B()->data() == B->data(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR1c : ",
                                folr->getType() == siconos::modeling::RelationType::FirstOrder,
                                true);
@@ -59,11 +59,11 @@ void FirstOrderLinearTIRTest::testBuildFirstOrderLinearTIR2()
 {
   std::cout << "--> Test: constructor 2." << std::endl;
   auto folr = std::make_shared<siconos::modeling::FirstOrderLinearTIR>(C, D, F, e, B);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR2a : ", folr->C() == C, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR2a : ", folr->C()->data() == C->data(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR2b : ", folr->D() == D, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR2c : ", folr->F() == F, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR2d : ", folr->e() == e, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR2e : ", folr->B() == B, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR2e : ", folr->B()->data() == B->data(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR2f : ",
                                folr->getType() == siconos::modeling::RelationType::FirstOrder,
                                true);
@@ -84,7 +84,7 @@ void FirstOrderLinearTIRTest::testSetCPtr()
   tmp->zero();
   auto folr = std::make_shared<siconos::modeling::FirstOrderLinearTIR>(tmp, B);
   folr->setCPtr(C);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetCPtr : ", folr->C() == C, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetCPtr : ", folr->C()->data() == C->data(), true);
   std::cout << "--> setCPtr test ended with success." << std::endl;
 }
 
@@ -135,7 +135,7 @@ void FirstOrderLinearTIRTest::testSetBPtr()
   tmp->zero();
   auto folr = std::make_shared<siconos::modeling::FirstOrderLinearTIR>(C, tmp);
   folr->setBPtr(B);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetBPtr: ", folr->B() == B, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetBPtr: ", folr->B()->data() == B->data(), true);
   std::cout << "--> setBPtr test ended with success." << std::endl;
 }
 
@@ -144,9 +144,9 @@ void FirstOrderLinearTIRTest::testGetJacPtr()
   std::cout << "--> Test: jac." << std::endl;
   auto folr = std::make_shared<siconos::modeling::FirstOrderLinearTIR>(C, B);
   folr->setDPtr(D);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetJach: ", folr->C() == C, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetJach: ", folr->C()->data() == C->data(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetJach: ", folr->D() == D, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetJach: ", folr->B() == B, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetJach: ", folr->B()->data() == B->data(), true);
 
   std::cout << "--> setBPtr test ended with success." << std::endl;
 }

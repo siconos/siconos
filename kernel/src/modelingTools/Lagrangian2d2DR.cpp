@@ -41,7 +41,9 @@ void siconos::modeling::Lagrangian2d2DR::initialize(Interaction& inter) {
         "must of size 3");
   }
   unsigned int qSize = 3 * (inter.getSizeOfDS() / 3);
-  _jachq = std::make_shared<siconos::algebra::SiconosMatrix>(2, qSize);
+  // TODOSAM : init internal memory
+  jachq_internal_storage = std::make_unique<std::vector<double>>(2 * qSize);
+  _jachq = std::make_shared<siconos::algebra::MapType>(jachq_internal_storage->data(), 2, qSize);
 }
 
 double siconos::modeling::Lagrangian2d2DR::distance() const {

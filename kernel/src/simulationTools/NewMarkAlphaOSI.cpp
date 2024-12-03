@@ -311,9 +311,9 @@ void siconos::integrators::NewMarkAlphaOSI::computeFreeOutput(
       coord[0] = 0;
       coord[1] = sizeY;
       coord[2] = 0;
-      coord[3] = C->size(1);
+      coord[3] = C->cols();
       coord[4] = 0;
-      coord[5] = C->size(1);
+      coord[5] = C->cols();
       coord[6] = 0;
       coord[7] = sizeY;
       if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_ACC]).get() ==

@@ -397,7 +397,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
   // Block to be set in OSNS Matrix, corresponding to
   // the current interaction
   auto currentInteractionBlock = indexSet->properties(vd).block;
-  std::shared_ptr<siconos::algebra::SiconosMatrix> leftInteractionBlock, rightInteractionBlock;
+  std::shared_ptr<siconos::algebra::MapType> leftInteractionBlock, rightInteractionBlock;
 
   auto relationType = inter->relation()->getType();
   auto relationSubType = inter->relation()->getSubType();
@@ -622,7 +622,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock(
     currentInteractionBlock = indexSet->properties(ed).lower_block;
   }
 
-  std::shared_ptr<siconos::algebra::SiconosMatrix> leftInteractionBlock, rightInteractionBlock;
+  std::shared_ptr<siconos::algebra::MapType> leftInteractionBlock, rightInteractionBlock;
 
   auto h = simulation()->currentTimeStep();
 
@@ -688,20 +688,20 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock(
     if (osiType == siconos::integrators::IntegratorType::MOREAUJEANBILBAOOSI ||
         dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS) {
       // Rightinteractionblock used first as buffer to save left * W-1
-      rightInteractionBlock =
-          std::make_shared<siconos::algebra::SiconosMatrix>(nslawSize2, sizeDS);
+      auto tmp =
+          std::make_shared<siconos::algebra::SiconosMatrix>(nslawSize2, sizeDS); // TODOSAM : check that this is an temp result
       // auto work(new SiconosMatrix(*leftInteractionBlock));
       //  Get inverse of the iteration matrix
       auto& inv_iteration_matrix = *getOSIMatrix(osi, ds);
       // remind that W contains the inverse of the iteration matrix
       siconos::algebra::axpy_prod(*leftInteractionBlock, inv_iteration_matrix,
-                                  *rightInteractionBlock, true);
+                                  *tmp, true);
       // Then save block corresponding to the 'right' interaction into leftInteractionBlock
       leftInteractionBlock = inter2->getLeftInteractionBlockForDS(pos2, nslawSize1, sizeDS);
       leftInteractionBlock->transposeInPlace();
       // and compute LW-1R == rightInteractionBlock * leftInteractionBlock into
       // currentInteractionBlock
-      siconos::algebra::prod(*rightInteractionBlock, *leftInteractionBlock,
+      siconos::algebra::prod(*tmp, *leftInteractionBlock,
                              *currentInteractionBlock, false);
     } else {
       // inter1 != inter2

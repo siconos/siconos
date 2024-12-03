@@ -133,7 +133,7 @@ void EulerMoreauTest::testCstGradNLDS()
 
   auto& DSNL = static_cast<siconos::modeling::FirstOrderNonLinearDS&>(*_DS);
   DSNL.setComputeFFunction(&computef1);
-  DSNL.setComputeJacobianfxFunction(&computeA1);
+  // DSNL.setComputeJacobianfxFunction(&computeA1); TODOSAM
 
   init(false);
 

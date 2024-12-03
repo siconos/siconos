@@ -52,7 +52,21 @@ siconos::modeling::FirstOrderLinearDS::FirstOrderLinearDS(
         "FirstOrderLinearDS - constructor(number,x0,A): inconsistent "
         "dimensions "
         "with problem size for input matrix A");
-  _A = newA;
+  _A = std::make_shared<siconos::algebra::MapType>(newA->data(), newA->rows(), newA->cols());
+}
+
+// From a minimum set of data, A from a given matrix
+siconos::modeling::FirstOrderLinearDS::FirstOrderLinearDS(
+    Eigen::Ref<siconos::algebra::SiconosVector>& newX0,
+    Eigen::Ref<siconos::algebra::SiconosMatrix>& newA)
+    : FirstOrderNonLinearDS(newX0), _hasConstantA(true) {
+  _zeroPlugin();
+  if ((newA.rows() != _n) || (newA.cols() != _n))
+    THROW_EXCEPTION(
+        "FirstOrderLinearDS - constructor(number,x0,A): inconsistent "
+        "dimensions "
+        "with problem size for input matrix A");
+  _A = std::make_shared<siconos::algebra::MapType>(newA.data(), newA.rows(), newA.cols());
 }
 
 siconos::modeling::FirstOrderLinearDS::FirstOrderLinearDS(
@@ -81,7 +95,7 @@ siconos::modeling::FirstOrderLinearDS::FirstOrderLinearDS(
         "with "
         "problem size for input vector b ");
 
-  _A = newA;
+  _A = std::make_shared<siconos::algebra::MapType>(newA->data(), newA->rows(), newA->cols());
   _b = newB;
 }
 
@@ -91,7 +105,7 @@ siconos::modeling::FirstOrderLinearDS::FirstOrderLinearDS(
     : FirstOrderNonLinearDS(FOLDS) {
   _zeroPlugin();
   if (FOLDS.A())
-    _A = std::make_shared<siconos::algebra::SiconosMatrix>(*(FOLDS.A()));
+    _A = std::make_shared<siconos::algebra::MapType>(FOLDS.A()->data(), FOLDS.A()->rows(), FOLDS.A()->cols());
   if (FOLDS.b())
     _b = std::make_shared<siconos::algebra::SiconosVector>(*(FOLDS.b()));
 
@@ -133,14 +147,20 @@ void siconos::modeling::FirstOrderLinearDS::updatePlugins(double time) {
 
 void siconos::modeling::FirstOrderLinearDS::setComputeAFunction(
     const std::string &pluginPath, const std::string &functionName) {
-  if (!_A) _A = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
+  if (!A_internal_storage) {
+    A_internal_storage = std::make_unique<std::vector<double>>(_n * _n);
+  }
+  _A = std::make_shared<siconos::algebra::MapType>(A_internal_storage->data(), _n, _n);
   _pluginA->setComputeFunction(pluginPath, functionName);
   _hasConstantA = false;
 }
 
 void siconos::modeling::FirstOrderLinearDS::setComputeAFunction(
     LDSPtrFunction fct) {
-  if (!_A) _A = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
+  if (!A_internal_storage) {
+    A_internal_storage = std::make_unique<std::vector<double>>(_n * _n);
+  }
+  _A = std::make_shared<siconos::algebra::MapType>(A_internal_storage->data(), _n, _n);
   _pluginA->setComputeFunction((void *)fct);
   _hasConstantA = false;
 }
@@ -274,10 +294,10 @@ void siconos::modeling::FirstOrderLinearDS::_zeroPlugin() {
 
 void siconos::modeling::FirstOrderLinearDS::setA(
     const siconos::algebra::SiconosMatrix &newA) {
-  if (_A)
-    *_A = newA;
-  else
-    _A = std::make_shared<siconos::algebra::SiconosMatrix>(newA);
+  if (!A_internal_storage) {
+    A_internal_storage = std::make_unique<std::vector<double>>(newA.data(), newA.data() + newA.size());
+  }
+  _A = std::make_shared<siconos::algebra::MapType>(A_internal_storage->data(), newA.rows(), newA.cols());
   _hasConstantA = true;
 }
 

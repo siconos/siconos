@@ -54,8 +54,10 @@ siconos::modeling::DynamicalSystem::DynamicalSystem(const DynamicalSystem &ds)
     :  _n(ds.n()), _stepsInMemory(ds.stepsInMemory())
 {
   // The following data should always be initialize
-  if (ds.x0())
-    _x0 = std::make_shared<siconos::algebra::SiconosVector>(*(ds.x0()));
+  if (ds.x0()) {
+    x0_internal_storage = std::make_unique<std::vector<double>>(ds.x0()->data(), ds.x0()->data() + ds.x0()->size());
+    _x0 = std::make_shared<siconos::algebra::MapVectorType>(x0_internal_storage->data(), ds.x0()->size());
+  }
   if (ds.r())
     _r = std::make_shared<siconos::algebra::SiconosVector>(*(ds.r()));
   _x.resize(2);
@@ -89,12 +91,10 @@ void siconos::modeling::DynamicalSystem::setX0(const siconos::algebra::SiconosVe
   if (newValue.size() != _n)
     THROW_EXCEPTION(
         "siconos::modeling::DynamicalSystem::setX0 - inconsistent sizes between x0 input and system dimension.");
-  if (_x0)
-    *_x0 = newValue;
-
-  else {
-    _x0 = std::make_shared<siconos::algebra::SiconosVector>(newValue);
+  if (!x0_internal_storage) {
+    x0_internal_storage = std::make_unique<std::vector<double>>(newValue.data(), newValue.data() + newValue.size());
   }
+  _x0 = std::make_shared<siconos::algebra::MapVectorType>(x0_internal_storage->data(), _n);
 }
 
 void siconos::modeling::DynamicalSystem::setX0Ptr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr)
@@ -103,7 +103,8 @@ void siconos::modeling::DynamicalSystem::setX0Ptr(std::shared_ptr<siconos::algeb
   if (newPtr->size() != _n)
     THROW_EXCEPTION("siconos::modeling::DynamicalSystem::setX0Ptr - inconsistent sizes between x0 input and "
                     "system dimension.");
-  _x0 = newPtr;
+  x0_internal_storage = nullptr;
+  _x0 = std::make_shared<siconos::algebra::MapVectorType>(newPtr->data(), _n);
 }
 
 void siconos::modeling::DynamicalSystem::setX(const siconos::algebra::SiconosVector &newValue)

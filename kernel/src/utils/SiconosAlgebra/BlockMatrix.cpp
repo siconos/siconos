@@ -44,6 +44,23 @@ siconos::algebra::BlockMatrix::BlockMatrix(std::shared_ptr<SiconosMatrix> m) {
   _tabCol->push_back(_dimCol);
 }
 
+siconos::algebra::BlockMatrix::BlockMatrix(std::shared_ptr<MapType> m) {
+  _mat = std::make_shared<BlocksMatrix>(1, 1);
+
+  _tabRow = std::make_shared<std::vector<std::size_t>>();
+  _tabCol = std::make_shared<std::vector<std::size_t>>();
+  _tabRow->reserve(1);
+  _tabCol->reserve(1);
+
+  m->display();
+  (*_mat)(0, 0) = std::make_shared<siconos::algebra::SiconosMatrix>();
+  *((*_mat)(0, 0)) = *m; // TODOSAM : copy here, should not
+  _dimRow = m->rows();
+  _tabRow->push_back(_dimRow);
+  _dimCol = m->cols();
+  _tabCol->push_back(_dimCol);
+}
+
 siconos::algebra::BlockMatrix::BlockMatrix(const SiconosMatrix &m) {
   _tabRow = std::make_shared<std::vector<std::size_t>>();
   _tabCol = std::make_shared<std::vector<std::size_t>>();
@@ -817,6 +834,12 @@ std::shared_ptr<const siconos::algebra::SiconosMatrix> siconos::algebra::BlockMa
 
 void siconos::algebra::BlockMatrix::copyBlock(
     unsigned int i, unsigned int j, std::shared_ptr<siconos::algebra::SiconosMatrix> m) {
+  (*_mat)(i, j)->resize(m->rows(), m->cols());
+  *((*_mat)(i, j)) = *m;
+}
+
+void siconos::algebra::BlockMatrix::copyBlock(
+    unsigned int i, unsigned int j, std::shared_ptr<siconos::algebra::MapType> m) {
   (*_mat)(i, j)->resize(m->rows(), m->cols());
   *((*_mat)(i, j)) = *m;
 }

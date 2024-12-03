@@ -173,7 +173,8 @@ void siconos::modeling::NewtonEuler1DR::initialize(Interaction& inter) {
   // proj_with_q  _jachqProj =
   // std::make_shared<siconos::algebra::SiconosMatrix>(_jachq->size(0),_jachq->size(1)));
   auto qSize = 7 * (inter.getSizeOfDS() / 6);
-  _jachq = std::make_shared<siconos::algebra::SiconosMatrix>(1, qSize);
+  jachq_internal_storage = std::make_unique<std::vector<double>>(qSize);
+  _jachq = std::make_shared<siconos::algebra::MapType>(jachq_internal_storage->data(), 1, qSize);
 
   /* VA 12/04/2016 All of what follows should be put in WorkM*/
   _rotationAbsoluteToContactFrame = std::make_shared<siconos::algebra::SiconosMatrix>(1, 3);

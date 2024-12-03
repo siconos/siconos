@@ -320,7 +320,7 @@ void siconos::integrators::EulerMoreauOSI::initializeIterationMatrixW(
     auto W = _dynamicalSystemsGraph->properties(dsv).W;
     // Add -h*_theta*jacobian_XF to W
     if (d->jacobianfx()) {
-      d->computeJacobianfx(time, ds->x());
+      d->computeJacobianfx(time, *(ds->x()));
       siconos::algebra::scal(-h * _theta, *d->jacobianfx(), *W, false);
     }
   } else
@@ -409,7 +409,7 @@ void siconos::integrators::EulerMoreauOSI::computeW(
       W.eye();
 
     if (d->jacobianfx()) {
-      d->computeJacobianfx(time, d->x());
+      d->computeJacobianfx(time, *(d->x()));
       // Add -h*_theta*jacobianfx to W
       siconos::algebra::scal(-h * _theta, *d->jacobianfx(), W, false);
     }
@@ -449,7 +449,7 @@ void siconos::integrators::EulerMoreauOSI::computeW(
 }
 
 void siconos::integrators::EulerMoreauOSI::computeKhat(
-    siconos::modeling::Interaction& inter, siconos::algebra::SiconosMatrix& m,
+    siconos::modeling::Interaction& inter, siconos::algebra::MapType& m,
     std::vector<std::shared_ptr<siconos::algebra::SiconosMatrix>>& workM, double h) const {
   auto relationType = inter.relation()->getType();
   if ((relationType == siconos::modeling::RelationType::FirstOrder) &&
@@ -882,7 +882,7 @@ void siconos::integrators::EulerMoreauOSI::computeFreeOutput(
   auto sizeY = static_cast<std::size_t>(inter->nonSmoothLaw()->size());
 
   std::vector<std::size_t> coord = {0, sizeY, 0, 0, 0, 0, 0, sizeY};
-  std::shared_ptr<siconos::algebra::SiconosMatrix> C{nullptr};
+  std::shared_ptr<siconos::algebra::MapType> C{nullptr};
   std::shared_ptr<siconos::algebra::SiconosMatrix> D{nullptr};
   std::shared_ptr<siconos::algebra::SiconosMatrix> F{nullptr};
   std::shared_ptr<siconos::algebra::BlockVector> deltax{nullptr};
@@ -914,7 +914,7 @@ void siconos::integrators::EulerMoreauOSI::computeFreeOutput(
     auto& rel =
         *std::static_pointer_cast<siconos::modeling::FirstOrderR>(mainInteraction->relation());
     C = rel.C();
-    if (!C) C = relationMat[siconos::modeling::FirstOrderR::mat_C];
+    if (!C) C = std::make_shared<siconos::algebra::MapType>(relationMat[siconos::modeling::FirstOrderR::mat_C]->data(), relationMat[siconos::modeling::FirstOrderR::mat_C]->rows(), relationMat[siconos::modeling::FirstOrderR::mat_C]->cols());
     D = rel.D();
     if (!D) D = relationMat[siconos::modeling::FirstOrderR::mat_D];
 
@@ -929,8 +929,8 @@ void siconos::integrators::EulerMoreauOSI::computeFreeOutput(
     }
 
     if (C) {
-      coord[3] = C->size(1);
-      coord[5] = C->size(1);
+      coord[3] = C->cols();
+      coord[5] = C->cols();
       siconos::algebra::subprod(*C, *deltax, osnsp_rhs, coord, false);
     }
 
@@ -952,7 +952,7 @@ void siconos::integrators::EulerMoreauOSI::computeFreeOutput(
     auto& rel = *std::static_pointer_cast<siconos::modeling::FirstOrderType1R>(
         mainInteraction->relation());
     C = rel.C();
-    if (!C) C = relationMat[siconos::modeling::FirstOrderR::mat_C];
+    if (!C) C = std::make_shared<siconos::algebra::MapType>(relationMat[siconos::modeling::FirstOrderR::mat_C]->data(), relationMat[siconos::modeling::FirstOrderR::mat_C]->rows(), relationMat[siconos::modeling::FirstOrderR::mat_C]->cols());
     F = rel.F();
     if (!F) F = relationMat[siconos::modeling::FirstOrderR::mat_F];
     assert(Xfree);
@@ -965,8 +965,8 @@ void siconos::integrators::EulerMoreauOSI::computeFreeOutput(
                                 coord, true);
     }
     if (C) {
-      coord[3] = C->size(1);
-      coord[5] = C->size(1);
+      coord[3] = C->cols();
+      coord[5] = C->cols();
       siconos::algebra::subprod(*C, *Xfree, osnsp_rhs, coord, false);
     }
 
@@ -983,14 +983,14 @@ void siconos::integrators::EulerMoreauOSI::computeFreeOutput(
   {
     DEBUG_PRINT("relationType == siconos::modeling::RelationType::FirstOrder\n");
     C = mainInteraction->relation()->C();
-    if (!C) C = relationMat[siconos::modeling::FirstOrderR::mat_C];
+    if (!C) C =std::make_shared<siconos::algebra::MapType>(relationMat[siconos::modeling::FirstOrderR::mat_C]->data(), relationMat[siconos::modeling::FirstOrderR::mat_C]->rows(), relationMat[siconos::modeling::FirstOrderR::mat_C]->cols());
 
     if (C) {
       assert(Xfree);
       assert(deltax);
 
-      coord[3] = C->size(1);
-      coord[5] = C->size(1);
+      coord[3] = C->cols();
+      coord[5] = C->cols();
 
       if (_useGammaForRelation) {
         siconos::algebra::subprod(*C, *deltax, osnsp_rhs, coord, true);

@@ -34,14 +34,14 @@
 siconos::modeling::LagrangianLinearTIR::LagrangianLinearTIR(
     std::shared_ptr<siconos::algebra::SiconosMatrix> C)
     : LagrangianR(RelationSubType::LinearTIR) {
-  _jachq = C;
+  _jachq = std::make_shared<siconos::algebra::MapType>(C->data(), C->rows(), C->cols());
 }
 
 // Minimum data (C as Eigen reference) constructor
 siconos::modeling::LagrangianLinearTIR::LagrangianLinearTIR(
     Eigen::Ref<siconos::algebra::SiconosMatrix>& C)
     : LagrangianR(RelationSubType::LinearTIR) {
-  _jachq = std::make_shared<siconos::algebra::SiconosMatrix>(C); // TODOSAM : here we copy data and we shouldn't !!! Do we need to change _jachq type ? --> YES
+  _jachq = std::make_shared<siconos::algebra::MapType>(C.data(), C.rows(), C.cols());
 }
 
 // Constructor from a complete set of data
@@ -50,7 +50,7 @@ siconos::modeling::LagrangianLinearTIR::LagrangianLinearTIR(
     std::shared_ptr<siconos::algebra::SiconosMatrix> F,
     std::shared_ptr<siconos::algebra::SiconosVector> e)
     : LagrangianR(RelationSubType::LinearTIR) {
-  _jachq = C;
+  _jachq = std::make_shared<siconos::algebra::MapType>(C->data(), C->rows(), C->cols());
   _F = F;
   _e = e;
 }
@@ -60,15 +60,15 @@ siconos::modeling::LagrangianLinearTIR::LagrangianLinearTIR(
     std::shared_ptr<siconos::algebra::SiconosMatrix> C,
     std::shared_ptr<siconos::algebra::SiconosVector> e)
     : LagrangianR(RelationSubType::LinearTIR) {
-  _jachq = C;
+  _jachq = std::make_shared<siconos::algebra::MapType>(C->data(), C->rows(), C->cols());
   _e = e;
 }
 
 void siconos::modeling::LagrangianLinearTIR::checkSize(Interaction& inter) {
   auto sizeY = inter.dimension();
   auto& DSlink = inter.linkToDSVariables();
-  if (!(_jachq) || _jachq->size(1) != inter.getSizeOfDS() ||
-      _jachq->size(0) != sizeY)
+  if (!(_jachq) || _jachq->cols() != inter.getSizeOfDS() ||
+      _jachq->rows() != sizeY)
     THROW_EXCEPTION(
         "siconos::modeling::LagrangianLinearTIR::checkSize inconsistent sizes "
         "between H "

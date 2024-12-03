@@ -246,7 +246,7 @@ void siconos::control::CommonSMC::computeUeq() {
          "subpsace of the state");
   auto& LinearDS_SMC =
       *std::static_pointer_cast<siconos::modeling::FirstOrderLinearDS>(_DS_SMC);
-  auto n = LinearDS_SMC.A()->size(1);
+  auto n = LinearDS_SMC.A()->cols();
   // equivalent part, explicit contribution
   auto tmpM1 = std::make_shared<siconos::algebra::SiconosMatrix>(_Csurface->size(0), n);
   auto tmpN = std::make_shared<siconos::algebra::SiconosMatrix>(n, n);

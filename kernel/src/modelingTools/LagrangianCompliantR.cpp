@@ -51,10 +51,18 @@ void siconos::modeling::LagrangianCompliantR::_zeroPlugin() {
 void siconos::modeling::LagrangianCompliantR::initialize(Interaction& inter) {
   auto sizeY = inter.dimension();
 
-  if (!_jachlambda)
-    _jachlambda = std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeY);
+  // TODOSAM : what to do here if exists but size not good ? Just assert ?
+  if (!_jachlambda) {
+    // TODOSAM init internal storage
+    jachlambda_internal_storage = std::make_unique<std::vector<double>>(sizeY * sizeY);
+    _jachlambda = std::make_shared<siconos::algebra::MapType>(jachlambda_internal_storage->data(), sizeY, sizeY);
+  }
   else
-    _jachlambda->resize(sizeY, sizeY);
+    assert(
+          (_jachlambda->rows() == sizeY && _jachlambda->cols() == sizeY) &&
+          "siconos::modeling::FirstOrderLinearR::initialize , inconsistent size between C and "
+          "Interaction.");
+    // _jachlambda->resize(sizeY, sizeY); // TODOSAM : verboten
 }
 void siconos::modeling::LagrangianCompliantR::checkSize(Interaction& inter) {}
 void siconos::modeling::LagrangianCompliantR::computeh(

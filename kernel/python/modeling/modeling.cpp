@@ -38,15 +38,24 @@ PYBIND11_MODULE(modeling, m) {
   py::class_<siconos::modeling::DynamicalSystem,
              std::shared_ptr<siconos::modeling::DynamicalSystem>>(m, "DynamicalSystem");
 
-  py::class_<siconos::modeling::SecondOrderDS,
-             std::shared_ptr<siconos::modeling::SecondOrderDS>,
-             siconos::modeling::DynamicalSystem>(m, "SecondOrderDS")
+  py::class_<siconos::modeling::FirstOrderNonLinearDS, siconos::modeling::DynamicalSystem,
+             std::shared_ptr<siconos::modeling::FirstOrderNonLinearDS>>(
+      m, "FirstOrderNonLinearDS");
+
+  py::class_<siconos::modeling::FirstOrderLinearDS, siconos::modeling::FirstOrderNonLinearDS,
+             std::shared_ptr<siconos::modeling::FirstOrderLinearDS>>(m, "FirstOrderLinearDS")
+      .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector> &,
+                    Eigen::Ref<siconos::algebra::SiconosMatrix> &>(),
+           py::keep_alive<1, 2>(), py::keep_alive<1, 3>(), py::arg("x0"), py::arg("A"));
+
+  py::class_<siconos::modeling::SecondOrderDS, siconos::modeling::DynamicalSystem,
+             std::shared_ptr<siconos::modeling::SecondOrderDS>>(m, "SecondOrderDS")
       .def("p", &siconos::modeling::SecondOrderDS::p_python,
            py::return_value_policy::reference_internal)
       .def_property_readonly("mass", &siconos::modeling::SecondOrderDS::mass_view);
 
-  py::class_<siconos::modeling::LagrangianDS, std::shared_ptr<siconos::modeling::LagrangianDS>,
-             siconos::modeling::SecondOrderDS>(m, "LagrangianDS")
+  py::class_<siconos::modeling::LagrangianDS, siconos::modeling::SecondOrderDS,
+             std::shared_ptr<siconos::modeling::LagrangianDS>>(m, "LagrangianDS")
 
       .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>,
                     Eigen::Ref<siconos::algebra::SiconosVector>>(),
@@ -79,9 +88,9 @@ PYBIND11_MODULE(modeling, m) {
       .def("fext", &siconos::modeling::LagrangianDS::fext_view,
            "current values of external forces");
 
-  py::class_<siconos::modeling::LagrangianLinearTIDS,
-             std::shared_ptr<siconos::modeling::LagrangianLinearTIDS>,
-             siconos::modeling::LagrangianDS>(m, "LagrangianLinearTIDS")
+  py::class_<siconos::modeling::LagrangianLinearTIDS, siconos::modeling::SecondOrderDS,
+             std::shared_ptr<siconos::modeling::LagrangianLinearTIDS>>(m,
+                                                                       "LagrangianLinearTIDS")
       .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>,
                     Eigen::Ref<siconos::algebra::SiconosVector>,
                     Eigen::Ref<siconos::algebra::SiconosMatrix>>(),
@@ -103,9 +112,17 @@ PYBIND11_MODULE(modeling, m) {
   //     .def(py::init<siconos::modeling::RelationSubType,
   //                   siconos::modeling::RelationSubType>());
 
-  py::class_<siconos::modeling::LagrangianLinearTIR,
-             std::shared_ptr<siconos::modeling::LagrangianLinearTIR>,
-             siconos::modeling::Relation>(m, "LagrangianLinearTIR")
+  // FirstOrderR
+  py::class_<siconos::modeling::FirstOrderR, siconos::modeling::Relation,
+             std::shared_ptr<siconos::modeling::FirstOrderR>>(m, "FirstOrderR");
+
+  // FirstOrderLinearTIR
+  py::class_<siconos::modeling::FirstOrderLinearTIR, siconos::modeling::FirstOrderR,
+             std::shared_ptr<siconos::modeling::FirstOrderLinearTIR>>(m,
+                                                                      "FirstOrderLinearTIR");
+
+  py::class_<siconos::modeling::LagrangianLinearTIR, siconos::modeling::Relation,
+             std::shared_ptr<siconos::modeling::LagrangianLinearTIR>>(m, "LagrangianLinearTIR")
       .def(py::init<Eigen::Ref<siconos::algebra::SiconosMatrix> &>())
       .def("display", &siconos::modeling::LagrangianLinearTIR::display)
       .def("__repr__", [](const siconos::modeling::LagrangianLinearTIR &a) {

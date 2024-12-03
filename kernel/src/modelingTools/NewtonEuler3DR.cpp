@@ -41,7 +41,9 @@ void siconos::modeling::NewtonEuler3DR::initialize(Interaction& inter) {
   NewtonEuler1DR::initialize(inter);
   unsigned int qSize = 7 * (inter.getSizeOfDS() / 6);
   /*keep only the distance.*/
-  _jachq = std::make_shared<siconos::algebra::SiconosMatrix>(3, qSize);
+  // TODOSAM : allocate internal storage
+  jachq_internal_storage = std::make_unique<std::vector<double>>(3 * qSize);
+  _jachq = std::make_shared<siconos::algebra::MapType>(jachq_internal_storage->data(), 3, qSize);
 
   _rotationAbsoluteToContactFrame = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
   _AUX2 = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);

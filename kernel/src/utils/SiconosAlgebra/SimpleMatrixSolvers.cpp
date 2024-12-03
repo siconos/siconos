@@ -64,6 +64,22 @@ void siconos::algebra::solveInPlace(SiconosMatrix &A, SiconosMatrix &B) {
   // std::cout << "A  apres" << std::endl << A << std::endl;
 }
 
+void siconos::algebra::solveInPlace(SiconosMatrix &A, MapType &B) {
+  assert(A.rows() == B.rows());
+  // std::cout << "A " << std::endl << A << std::endl;
+
+  if (A.lu_siconos == nullptr) {
+    A.lu_siconos.reset(new Eigen::FullPivLU<SiconosMatrix>(A));
+    // A.isFactorized = true;
+    B = A.lu_siconos->solve(B);  // TODO : avoid temp copy
+    // std::cout << "solve results " << std::endl << tmp << std::endl;
+  } else {
+    SiconosMatrix tmp = A.lu().solve(B);
+    B = A.lu_siconos->solve(B);
+  }
+  // std::cout << "A  apres" << std::endl << A << std::endl;
+}
+
 void siconos::algebra::solveByLeastSquares(SiconosMatrix &A, SiconosMatrix &B) {
   int info = 0;
   // #ifdef USE_OPTIMAL_WORKSPACE

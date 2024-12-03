@@ -241,7 +241,10 @@ void siconos::modeling::NewtonEulerDS::initRhs(double time) {
   // dim
   _n = _qDim + 6;
 
-  _x0 = std::make_shared<siconos::algebra::SiconosVector>(_q0->size() + _twist0->size());
+  if (!x0_internal_storage) {
+    x0_internal_storage = std::make_unique<std::vector<double>>(_q0->size() + _twist0->size());
+    _x0 = std::make_shared<siconos::algebra::MapVectorType>(x0_internal_storage->data(), x0_internal_storage->size());
+  }
   *_x0 << *_q0, *_twist0;
 
   _x[0] = std::make_shared<siconos::algebra::SiconosVector>(_q->size() + _twist->size());

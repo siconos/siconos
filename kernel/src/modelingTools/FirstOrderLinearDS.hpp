@@ -56,7 +56,8 @@ class FirstOrderLinearDS : public FirstOrderNonLinearDS {
   ACCEPT_SERIALIZATION(FirstOrderLinearDS);
 
   /** matrix specific to the FirstOrderLinearDS \f$ A \in R^{n \times n}  \f$*/
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _A{nullptr};
+  std::shared_ptr<siconos::algebra::MapType> _A{nullptr};
+  std::unique_ptr<std::vector<double>> A_internal_storage{nullptr};
 
   /** vector specific to the FirstOrderLinearDS */
   std::shared_ptr<siconos::algebra::SiconosVector> _b{nullptr};
@@ -119,6 +120,14 @@ class FirstOrderLinearDS : public FirstOrderNonLinearDS {
   FirstOrderLinearDS(std::shared_ptr<siconos::algebra::SiconosVector> newX0,
                      std::shared_ptr<siconos::algebra::SiconosMatrix> newA);
 
+  /** constructor from initial state and plugin for A
+   *
+   *  \param newX0 the initial state of this DynamicalSystem
+   *  \param newA matrix A
+   */
+  FirstOrderLinearDS(Eigen::Ref<siconos::algebra::SiconosVector>& newX0,
+                     Eigen::Ref<siconos::algebra::SiconosMatrix>& newA);
+
   /** constructor from initial state
    *
    *  \param newX0 the initial state of this DynamicalSystem
@@ -166,13 +175,13 @@ class FirstOrderLinearDS : public FirstOrderNonLinearDS {
    *
    *  \return pointer (SP) on a matrix
    */
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> A() const { return _A; }
+  inline std::shared_ptr<siconos::algebra::MapType> A() const { return _A; }
 
   /** get jacobian of f(x,t,z) with respect to x (pointer link)
    *
    *  \return std::shared_ptr<siconos::algebra::SiconosMatrix>
    */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianfx() const override { return _A; };
+  inline std::shared_ptr<siconos::algebra::MapType> jacobianfx() const override { return _A; };
 
   /** set A to pointer newPtr
    *
@@ -180,7 +189,8 @@ class FirstOrderLinearDS : public FirstOrderNonLinearDS {
    */
   inline void setAPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newA)
   {
-    _A = newA;
+    // _A = newA;
+    _A = std::make_shared<siconos::algebra::MapType>(newA->data(), newA->rows(), newA->cols());
     _hasConstantA = true;
   }
 

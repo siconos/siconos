@@ -54,7 +54,7 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS0() {
   //     "testBuildFirstOrderLinearDS0 : ", Type::value(*ds) == Type::FirstOrderLinearDS,
   //     true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS0 : ", ds->n() == 3, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS0 : ", ds->x0() == x0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS0 : ", ds->x0()->data() == x0->data(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS0 : ", ds->M() == nullptr, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS0 : ", ds->invM() == nullptr, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS0 : ", ds->b() == nullptr, true);
@@ -94,7 +94,7 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS1() {
   //     "testBuildFirstOrderLinearDS1 : ", Type::value(*ds) == Type::FirstOrderLinearDS,
   //     true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", ds->n() == 3, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", ds->x0() == x0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", ds->x0()->data() == x0->data(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", ds->M() == nullptr, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", ds->invM() == nullptr, true);
 
@@ -107,7 +107,9 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS1() {
   ds->computeb(time);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", *(ds->b()) == time * *x01,
                                true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", *(ds->A()) == 2. * *A0,
+  A0->display();
+  ds->A()->display();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", *(ds->A()) == 2. * (*A0),
                                true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", ds->f() == nullptr, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
@@ -146,7 +148,7 @@ void FirstOrderLinearDSTest::testSetAPtr() {
   std::cout << "--> Test: setAPtr." << std::endl;
   auto ds1 = std::make_shared<siconos::modeling::FirstOrderLinearDS>(x0);
   ds1->setAPtr(A0);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetAPtr : ", ds1->A() == A0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetAPtr : ", ds1->A()->data() == A0->data(), true);
   std::cout << "--> setAPtr test ended with success." << std::endl;
 }
 

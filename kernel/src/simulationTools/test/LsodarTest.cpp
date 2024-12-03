@@ -135,7 +135,7 @@ void LsodarTest::testCstGradNLDS()
   _DS = std::make_shared<siconos::modeling::FirstOrderNonLinearDS>(_x0);
   auto& DSNL = static_cast<siconos::modeling::FirstOrderNonLinearDS&>(*_DS);
   DSNL.setComputeFFunction(&computef1);
-  DSNL.setComputeJacobianfxFunction(&computeA1);
+  // DSNL.setComputeJacobianfxFunction(&computeA1); // TODOSAM
 
   init(false);
 

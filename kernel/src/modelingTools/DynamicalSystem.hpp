@@ -104,7 +104,8 @@ class DynamicalSystem {
   unsigned int _n{0};
 
   /** initial state of the system */
-  std::shared_ptr<siconos::algebra::SiconosVector> _x0{nullptr};
+  std::shared_ptr<siconos::algebra::MapVectorType> _x0{nullptr};
+  std::unique_ptr<std::vector<double>> x0_internal_storage{nullptr};
 
   /** the input vector due to the non-smooth law \f$ r \in R^{n} \f$
    * (multiplier, force, ...)
@@ -225,7 +226,7 @@ class DynamicalSystem {
   virtual inline unsigned int dimension() const { return _n; };
 
   /** returns a pointer to the initial state vector */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> x0() const { return _x0; };
+  inline std::shared_ptr<siconos::algebra::MapVectorType> x0() const { return _x0; };
 
   /** set initial state (copy)
    *

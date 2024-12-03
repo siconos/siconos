@@ -76,6 +76,7 @@ bool checkSymmetry(SiconosMatrix &m, double tol);
 
 void solveInPlace(SiconosMatrix &A, SiconosVector &B);
 void solveInPlace(SiconosMatrix &A, SiconosMatrix &B);
+void solveInPlace(SiconosMatrix &A, MapType &B);
 void solveByLeastSquares(SiconosMatrix &A, SiconosVector &B);
 void solveByLeastSquares(SiconosMatrix &A, SiconosMatrix &B);
 siconos::algebra::SiconosMatrix readMatrixFromFile(const std::string &filename,

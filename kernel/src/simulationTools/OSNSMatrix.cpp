@@ -484,7 +484,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillHtrans(
         auto Htriplet = NM_triplet(&H_NM);
 
         unsigned int pos = 0, abs_pos_ds = 0;
-        std::shared_ptr<siconos::algebra::SiconosMatrix> leftInteractionBlock;
+        std::shared_ptr<siconos::algebra::MapType> leftInteractionBlock;
 
         siconos::graphs::InteractionsGraph::VIterator ui, uiend;
         for (std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui) {

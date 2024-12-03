@@ -131,7 +131,7 @@ class LagrangianLinearTIR : public LagrangianR {
   // -- C --
   /** \return pointer on a plugged matrix
    */
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> C() const override { return _jachq; }
+  inline std::shared_ptr<siconos::algebra::MapType> C() const override { return _jachq; }
 
   /** set C to pointer newPtr
    *
@@ -139,14 +139,16 @@ class LagrangianLinearTIR : public LagrangianR {
    */
   inline void setCPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr)
   {
-    _jachq = newPtr;
+    // TODOSAM : deallocate interal storage
+    jachq_internal_storage = nullptr;
+    _jachq = std::make_shared<siconos::algebra::MapType>(newPtr->data(), newPtr->rows(), newPtr->cols());
   }
 
   // -- D --
 
   /** \return pointer on a plugged matrix
    */
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> D() const { return _jachlambda; }
+  inline std::shared_ptr<siconos::algebra::MapType> D() const { return _jachlambda; }
 
   /** set D to pointer newPtr
    *
@@ -154,7 +156,9 @@ class LagrangianLinearTIR : public LagrangianR {
    */
   inline void setDPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr)
   {
-    _jachlambda = newPtr;
+    // TODOSAM : deallocate interal storage
+    jachlambda_internal_storage = nullptr;
+    _jachlambda = std::make_shared<siconos::algebra::MapType>(newPtr->data(), newPtr->rows(), newPtr->cols());
   }
 
   // -- F --

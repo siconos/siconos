@@ -90,8 +90,8 @@ void FirstOrderLinearRTest::testBuildFirstOrderLinearR4()
 {
   std::cout << "--> Test: constructor 4." << std::endl;
   auto folr = std::make_shared<siconos::modeling::FirstOrderLinearR>(C, B);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR4a : ", folr->C() == C, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR4b : ", folr->B() == B, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR4a : ", folr->C()->data() == C->data(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR4b : ", folr->B()->data() == B->data(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR4c : ",
                                folr->getType() == siconos::modeling::RelationType::FirstOrder,
                                true);
@@ -106,11 +106,11 @@ void FirstOrderLinearRTest::testBuildFirstOrderLinearR5()
 {
   std::cout << "--> Test: constructor 5." << std::endl;
   auto folr = std::make_shared<siconos::modeling::FirstOrderLinearR>(C, D, F, e, B);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR5a : ", folr->C() == C, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR5a : ", folr->C()->data() == C->data(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR5b : ", folr->D() == D, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR5c : ", folr->F() == F, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR5d : ", folr->e() == e, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR5e : ", folr->B() == B, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR5e : ", folr->B()->data() == B->data(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearR5f : ",
                                folr->getType() == siconos::modeling::RelationType::FirstOrder,
                                true);

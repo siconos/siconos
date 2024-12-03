@@ -64,8 +64,8 @@ siconos::modeling::FirstOrderLinearR::FirstOrderLinearR(
     std::shared_ptr<siconos::algebra::SiconosMatrix> C,
     std::shared_ptr<siconos::algebra::SiconosMatrix> B)
     : FirstOrderR(RelationSubType::LinearR) {
-  _C = C;
-  _B = B;
+  _C = std::make_shared<siconos::algebra::MapType>(C->data(), C->rows(), C->cols());
+  _B = std::make_shared<siconos::algebra::MapType>(B->data(), B->rows(), B->cols());
 }
 
 // // Constructor from a complete set of data
@@ -76,8 +76,8 @@ siconos::modeling::FirstOrderLinearR::FirstOrderLinearR(
     std::shared_ptr<siconos::algebra::SiconosVector> E,
     std::shared_ptr<siconos::algebra::SiconosMatrix> B)
     : FirstOrderR(RelationSubType::LinearR) {
-  _C = C;
-  _B = B;
+  _C = std::make_shared<siconos::algebra::MapType>(C->data(), C->rows(), C->cols());
+  _B = std::make_shared<siconos::algebra::MapType>(B->data(), B->rows(), B->cols());
   _D = D;
   _F = F;
   _e = E;
@@ -125,57 +125,54 @@ void siconos::modeling::FirstOrderLinearR::checkSize(Interaction &inter) {
   // Reference: interaction.
 
   if (_C) {
-    if (_C->size(0) == 0)
-      _C->resize(sizeX, sizeY);
-    else
-      assert(
-          (_C->size(0) == sizeY && _C->size(1) == sizeX) &&
-          "siconos::modeling::FirstOrderLinearR::initialize , inconsistent size between C and "
-          "Interaction.");
+    assert(
+        (_C->rows() == sizeY && _C->cols() == sizeX) &&
+        "siconos::modeling::FirstOrderLinearR::initialize , inconsistent size between C and "
+        "Interaction.");
   }
   if (_B) {
-    if (_B->size(0) == 0)
-      _B->resize(sizeY, sizeX);
-    else
-      assert(
-          (_B->size(1) == sizeY && _B->size(0) == sizeX) &&
-          "siconos::modeling::FirstOrderLinearR::initialize , inconsistent size between B and "
-          "interaction.");
+    assert(
+        (_B->cols() == sizeY && _B->rows() == sizeX) &&
+        "siconos::modeling::FirstOrderLinearR::initialize , inconsistent size between B and "
+        "interaction.");
   }
 
   if (_D) {
-    if (_D->size(0) == 0)
-      _D->resize(sizeY, sizeY);
-    else
-      assert((_D->size(0) == sizeY || _D->size(1) == sizeY) &&
-             "siconos::modeling::FirstOrderLinearR::initialize , inconsistent size between C "
-             "and D.");
+    assert((_D->size(0) == sizeY || _D->size(1) == sizeY) &&
+            "siconos::modeling::FirstOrderLinearR::initialize , inconsistent size between C "
+            "and D.");
   }
 
   if (_F) {
-    if (_F->size(0) == 0)
-      _F->resize(sizeY, sizeZ);
-    else
-      assert(((_F->size(0) == sizeY) && (_F->size(1) == sizeZ)) &&
-             "siconos::modeling::FirstOrderLinearR::initialize , inconsistent size between C "
-             "and F.");
-  }
+    assert(((_F->size(0) == sizeY) && (_F->size(1) == sizeZ)) &&
+            "siconos::modeling::FirstOrderLinearR::initialize , inconsistent size between C "
+            "and F.");
+}
 
   if (_e) {
-    if (_e->size() == 0)
-      _e->resize(sizeY);
-    else
-      assert(_e->size() == sizeY &&
-             "siconos::modeling::FirstOrderLinearR::initialize , inconsistent size between C "
-             "and e.");
+    assert(_e->size() == sizeY &&
+            "siconos::modeling::FirstOrderLinearR::initialize , inconsistent size between C "
+            "and e.");
   }
 }
+
 void siconos::modeling::FirstOrderLinearR::computeC(double time,
                                                     siconos::algebra::BlockVector &z,
                                                     siconos::algebra::SiconosMatrix &C) {
   if (_pluginJachx->fPtr) {
     auto zp = z.toSiconosVector();
     ((FOMatPtr1)(_pluginJachx->fPtr))(time, C.size(0), C.size(1), &(C)(0, 0), zp->size(),
+                                      &(*zp)(0));
+    z = *zp;
+  }
+}
+
+void siconos::modeling::FirstOrderLinearR::computeC(double time,
+                                                    siconos::algebra::BlockVector &z,
+                                                    siconos::algebra::MapType &C) {
+  if (_pluginJachx->fPtr) {
+    auto zp = z.toSiconosVector();
+    ((FOMatPtr1)(_pluginJachx->fPtr))(time, C.rows(), C.cols(), &(C)(0, 0), zp->size(),
                                       &(*zp)(0));
     z = *zp;
   }
@@ -219,6 +216,17 @@ void siconos::modeling::FirstOrderLinearR::computeB(double time,
   if (_pluginJacglambda->fPtr) {
     auto zp = z.toSiconosVector();
     ((FOMatPtr1)_pluginJacglambda->fPtr)(time, B.size(0), B.size(1), &(B)(0, 0), zp->size(),
+                                         &(*zp)(0));
+    z = *zp;
+  }
+}
+
+void siconos::modeling::FirstOrderLinearR::computeB(double time,
+                                                    siconos::algebra::BlockVector &z,
+                                                    siconos::algebra::MapType &B) {
+  if (_pluginJacglambda->fPtr) {
+    auto zp = z.toSiconosVector();
+    ((FOMatPtr1)_pluginJacglambda->fPtr)(time, B.rows(), B.cols(), &(B)(0, 0), zp->size(),
                                          &(*zp)(0));
     z = *zp;
   }

@@ -54,7 +54,9 @@ void siconos::modeling::LagrangianRheonomousR::initialize(Interaction& inter) {
   if (!_jachq) {
     unsigned int sizeY = inter.dimension();
     unsigned int sizeDS = inter.getSizeOfDS();
-    _jachq = std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeDS);
+    // TODOSAM : init internal memory
+    jachq_internal_storage = std::make_unique<std::vector<double>>(sizeY * sizeDS);
+    _jachq = std::make_shared<siconos::algebra::MapType>(jachq_internal_storage->data(), sizeY, sizeDS);
   }
 }
 
@@ -103,7 +105,7 @@ void siconos::modeling::LagrangianRheonomousR::computeJachq(
     auto qp = q.toSiconosVector();
     auto zp = z.toSiconosVector();
     ((siconos::plugins::FPtr4)(_pluginJachq->fPtr))(
-        qp->size(), &(*qp)(0), time, _jachq->size(0), &(*_jachq)(0, 0), zp->size(), &(*zp)(0));
+        qp->size(), &(*qp)(0), time, _jachq->rows(), &(*_jachq)(0, 0), zp->size(), &(*zp)(0));
     z = *zp;
   }
 }

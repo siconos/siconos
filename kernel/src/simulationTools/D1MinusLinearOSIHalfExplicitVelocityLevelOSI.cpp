@@ -633,7 +633,7 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitVeloci
   auto sizeY = inter->nonSmoothLaw()->size();  // related NSL
 
   std::vector<std::size_t> coord = {0, sizeY, 0, 0, 0, 0, 0, sizeY};
-  std::shared_ptr<siconos::algebra::SiconosMatrix>
+  std::shared_ptr<siconos::algebra::MapType>
       C;  // Jacobian of Relation with respect to degree of freedom
   std::shared_ptr<siconos::algebra::BlockVector> Xfree;  // free degree of freedom
   auto& osnsp_rhs = *(*indexSet->properties(vertex_inter)
@@ -690,8 +690,8 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitVeloci
 
     if (C) {
       assert(Xfree);
-      coord[3] = C->size(1);
-      coord[5] = C->size(1);
+      coord[3] = C->cols();
+      coord[5] = C->cols();
       siconos::algebra::subprod(*C, *Xfree, osnsp_rhs, coord, true);
     }
     DEBUG_EXPR(osnsp_rhs.display(););

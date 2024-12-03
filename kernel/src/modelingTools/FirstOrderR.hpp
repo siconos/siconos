@@ -72,7 +72,7 @@ class FirstOrderR : public Relation {
    */
 
   /** A matrix to store the constant Jacobian of h(t, X, lambda, Z) w.r.t X */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _C{nullptr};
+  std::shared_ptr<siconos::algebra::MapType> _C{nullptr};
 
   /** A matrix to store the constant Jacobian of h(t, X, lambda, Z) w.r.t lambda
    */
@@ -83,7 +83,7 @@ class FirstOrderR : public Relation {
 
   /** A matrix to store the constant Jacobian of g(t, X, lambda, Z) w.r.t lambda
    */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _B{nullptr};
+  std::shared_ptr<siconos::algebra::MapType> _B{nullptr};
 
   /** A matrix to store the constant Jacobian of g(t, X, lambda, Z) w.r.t X */
   std::shared_ptr<siconos::algebra::SiconosMatrix> _K{nullptr};
@@ -103,13 +103,17 @@ class FirstOrderR : public Relation {
    *
    *  \param newC the C matrix
    */
-  inline void setCPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newC) { _C = newC; }
+  inline void setCPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newC) {
+    _C = std::make_shared<siconos::algebra::MapType>(newC->data(), newC->rows(), newC->cols());
+  }
 
   /** set B to pointer newB
    *
    *  \param newB the B matrix
    */
-  inline void setBPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newB) { _B = newB; }
+  inline void setBPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newB) {
+    _B = std::make_shared<siconos::algebra::MapType>(newB->data(), newB->rows(), newB->cols());
+  }
 
   /** set D to pointer newPtr
    *
@@ -127,14 +131,14 @@ class FirstOrderR : public Relation {
    *
    *  \return C matrix
    */
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> C() const override { return _C; }
+  inline std::shared_ptr<siconos::algebra::MapType> C() const override { return _C; }
   // Note FP: final would be better than override but swig cannot handle it.
 
   /** get H
    *
    *  \return C matrix
    */
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> H() const override { return _C; }
+  inline std::shared_ptr<siconos::algebra::MapType> H() const override { return _C; }
 
   /** get D
    *
@@ -152,7 +156,7 @@ class FirstOrderR : public Relation {
    *
    *  \return B matrix
    */
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> B() const { return _B; }
+  inline std::shared_ptr<siconos::algebra::MapType> B() const { return _B; }
 
   /** get K
    *

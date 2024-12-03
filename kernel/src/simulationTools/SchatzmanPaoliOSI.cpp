@@ -578,7 +578,7 @@ void siconos::integrators::SchatzmanPaoliOSI::computeFreeOutput(
   coord[4] = 0;
   coord[6] = 0;
   coord[7] = sizeY;
-  std::shared_ptr<siconos::algebra::SiconosMatrix> C;
+  std::shared_ptr<siconos::algebra::MapType> C;
   std::shared_ptr<siconos::algebra::SiconosMatrix> D;
   std::shared_ptr<siconos::algebra::SiconosMatrix> F;
   std::shared_ptr<siconos::algebra::BlockVector> deltax;
@@ -606,8 +606,8 @@ void siconos::integrators::SchatzmanPaoliOSI::computeFreeOutput(
     if (C) {
       assert(Xfree);
 
-      coord[3] = C->size(1);
-      coord[5] = C->size(1);
+      coord[3] = C->cols();
+      coord[5] = C->cols();
       // creates a POINTER link between workX[ds] (xfree) and the
       // corresponding interactionBlock in each Interactionfor each ds of the
       // current Interaction.

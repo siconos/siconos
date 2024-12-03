@@ -35,6 +35,14 @@ void init_relations(py::module &m) {
   py::class_<siconos::modeling::LagrangianR, siconos::modeling::Relation,
              std::shared_ptr<siconos::modeling::LagrangianR>>(m, "LagrangianR");
 
+  // FirstOrderR
+  py::class_<siconos::modeling::FirstOrderR, siconos::modeling::Relation,
+             std::shared_ptr<siconos::modeling::FirstOrderR>>(m, "FirstOrderR");
+  
+  // FirstOrderLinearTIR
+  py::class_<siconos::modeling::FirstOrderLinearTIR, siconos::modeling::FirstOrderR,
+             std::shard_ptr<siconos::modeling::FirstOrderLinearTIR>>(m, "FirstOrderLinearTIR");
+
   // LagrangianLinearTIR
   py::class_<siconos::modeling::LagrangianLinearTIR,
              siconos::modeling::LagrangianR,

@@ -20,9 +20,9 @@
 
 #include "PluggedObject.hpp"  // for getPluginName ...
 #include "PluginTypes.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "SiconosVisitor.hpp"
-#include "SiconosMatrix.hpp"
 // #define DEBUG_MESSAGES
 // #define DEBUG_STDOUT
 #include <iostream>
@@ -33,8 +33,7 @@
 // From a minimum set of data
 siconos::modeling::FirstOrderNonLinearDS::FirstOrderNonLinearDS(
     std::shared_ptr<siconos::algebra::SiconosVector> initial_state)
-    : DynamicalSystem(initial_state->size())
-{
+    : DynamicalSystem(initial_state->size()) {
   DEBUG_PRINT("internal _init from FirstOrderNonLinearDS\n");
 
   // Memory allocation only for required parts of the DS:
@@ -42,7 +41,8 @@ siconos::modeling::FirstOrderNonLinearDS::FirstOrderNonLinearDS(
   // allocated with 'set'-like methods.
   assert(_n > 0 && "dynamical system dimension should be greater than 0.");
   // Set initial conditions
-  _x0 = initial_state;
+  _x0 = std::make_shared<siconos::algebra::MapVectorType>(initial_state->data(),
+                                                          initial_state->size());
 
   // == Current state ==
   // x is composed of two blocks of size n, x[0] = \f$ x \f$ and x[1]=\f$ \dot x \f$.
@@ -60,33 +60,64 @@ siconos::modeling::FirstOrderNonLinearDS::FirstOrderNonLinearDS(
 
 // From a minimum set of data
 siconos::modeling::FirstOrderNonLinearDS::FirstOrderNonLinearDS(
-    std::shared_ptr<siconos::algebra::SiconosVector> initial_state, const std::string &fPlugin,
-    const std::string &jacobianfxPlugin)
-    : FirstOrderNonLinearDS(initial_state)
-{
-  // == f and its jacobian ==
-  // Allocation and link with the plug-in
-  setComputeFFunction(siconos::plugins::getPluginName(fPlugin),
-                      siconos::plugins::getPluginFunctionName(fPlugin));
-  setComputeJacobianfxFunction(siconos::plugins::getPluginName(jacobianfxPlugin),
-                               siconos::plugins::getPluginFunctionName(jacobianfxPlugin));
-  // dot x  = f(x, z , t) + r
+    Eigen::Ref<siconos::algebra::SiconosVector> &initial_state)
+    : DynamicalSystem(initial_state.size()) {
+  DEBUG_PRINT("internal _init from FirstOrderNonLinearDS\n");
+
+  // Memory allocation only for required parts of the DS:
+  // state (initial and current). All other operators are optional and
+  // allocated with 'set'-like methods.
+  assert(_n > 0 && "dynamical system dimension should be greater than 0.");
+  // Set initial conditions
+  _x0 = std::make_shared<siconos::algebra::MapVectorType>(initial_state.data(),
+                                                          initial_state.size());
+
+  // == Current state ==
+  // x is composed of two blocks of size n, x[0] = \f$ x \f$ and x[1]=\f$ \dot x \f$.
+  // x[0] initialized with x0.
+  // _x.resize(2); done in base class constructor.
+  _x[0] = std::make_shared<siconos::algebra::SiconosVector>(*_x0);
+  _x[1] = std::make_shared<siconos::algebra::SiconosVector>(_n);
+  _x[1]->setZero();
+  _r = std::make_shared<siconos::algebra::SiconosVector>(
+      _n);  // FP: move this to initializeNonSmoothInput?
+  _r->setZero();
+  _zeroPlugin();
+  // dot x = r
 }
+
+// From a minimum set of data
+// siconos::modeling::FirstOrderNonLinearDS::FirstOrderNonLinearDS(
+//     std::shared_ptr<siconos::algebra::SiconosVector> initial_state, const std::string
+//     &fPlugin, const std::string &jacobianfxPlugin) : FirstOrderNonLinearDS(initial_state) {
+//   // == f and its jacobian ==
+//   // Allocation and link with the plug-in
+//   setComputeFFunction(siconos::plugins::getPluginName(fPlugin),
+//                       siconos::plugins::getPluginFunctionName(fPlugin));
+//   setComputeJacobianfxFunction(siconos::plugins::getPluginName(jacobianfxPlugin),
+//                                siconos::plugins::getPluginFunctionName(jacobianfxPlugin));
+//   // dot x  = f(x, z , t) + r
+// }
 
 // Copy constructor
 siconos::modeling::FirstOrderNonLinearDS::FirstOrderNonLinearDS(
     const FirstOrderNonLinearDS &FONLDS)
-    : DynamicalSystem(FONLDS)
-{
+    : DynamicalSystem(FONLDS) {
   if (FONLDS.M()) _M = std::make_shared<siconos::algebra::SiconosMatrix>(*(FONLDS.M()));
   if (FONLDS.f()) _f = std::make_shared<siconos::algebra::SiconosVector>(*(FONLDS.f()));
-  if (FONLDS.jacobianfx())
-    _jacobianfx = std::make_shared<siconos::algebra::SiconosMatrix>(*(FONLDS.jacobianfx()));
+  if (FONLDS.hasConstantJacobianfx_) {
+    // internal storage
+    jacobianfx_internal_storage_ =
+        std::make_unique<std::vector<double>>(FONLDS.jacobianfx()->size());
+    jacobianfx_view_ = std::make_shared<siconos::algebra::MapType>(
+        jacobianfx_internal_storage_->data(), FONLDS.jacobianfx()->rows(),
+        FONLDS.jacobianfx()->cols());
+  } else {
+    // ?
+  }
+  // TODOSAM : handle copy constructor case
   if (FONLDS.getPluginF())
     _pluginf = std::make_shared<siconos::plugins::PluggedObject>(*(FONLDS.getPluginF()));
-  if (FONLDS.getPluginJacxf())
-    _pluginJacxf =
-        std::make_shared<siconos::plugins::PluggedObject>(*(FONLDS.getPluginJacxf()));
   if (FONLDS.getPluginM())
     _pluginM = std::make_shared<siconos::plugins::PluggedObject>(*(FONLDS.getPluginM()));
   if (FONLDS.invM())
@@ -98,24 +129,21 @@ siconos::modeling::FirstOrderNonLinearDS::FirstOrderNonLinearDS(
   _rMemory = FONLDS.rMemory();
 }
 
-void siconos::modeling::FirstOrderNonLinearDS::_zeroPlugin()
-{
+void siconos::modeling::FirstOrderNonLinearDS::_zeroPlugin() {
   _pluginf = std::make_shared<siconos::plugins::PluggedObject>();
-  _pluginJacxf = std::make_shared<siconos::plugins::PluggedObject>();
   _pluginM = std::make_shared<siconos::plugins::PluggedObject>();
 }
 
-void siconos::modeling::FirstOrderNonLinearDS::initRhs(double time)
-{
+void siconos::modeling::FirstOrderNonLinearDS::initRhs(double time) {
   computeRhs(time);
 
   // !! jacxRhs must always be allocated (we must check this?)!!
   if (!_jacxRhs)  // if not allocated with a set or anything else
   {
-    if (_jacobianfx && !_M)  // if M is not defined, then jacobianfx = jacobianRhsx, no memory
-                             // allocation for that one.
-      _jacxRhs = std::make_shared<siconos::algebra::BlockMatrix>(_jacobianfx);
-    else { //  if (_jacobianfx && _M) or if(!jacobianRhsx)
+    if (hasJacobianfx() && !_M)  // if M is not defined, then jacobianfx = jacobianRhsx, no
+                                 // memory allocation for that one.
+      _jacxRhs = std::make_shared<siconos::algebra::BlockMatrix>(jacobianfx_view_);
+    else {  //  if (_jacobianfx && _M) or if(!jacobianRhsx)
       auto tmp = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
       tmp->setZero();
       _jacxRhs = std::make_shared<siconos::algebra::BlockMatrix>(*tmp);
@@ -125,17 +153,15 @@ void siconos::modeling::FirstOrderNonLinearDS::initRhs(double time)
   computeJacobianRhsx(time);
 }
 
-void siconos::modeling::FirstOrderNonLinearDS::updatePlugins(double time)
-{
+void siconos::modeling::FirstOrderNonLinearDS::updatePlugins(double time) {
   if (_M) computeM(time);
   if (_f) {
     computef(time, _x[0]);
-    computeJacobianfx(time, _x[0]);
+    computeJacobianfx(time, *(_x[0]));
   }
 }
 
-void siconos::modeling::FirstOrderNonLinearDS::initializeNonSmoothInput(unsigned int level)
-{
+void siconos::modeling::FirstOrderNonLinearDS::initializeNonSmoothInput(unsigned int level) {
   /**\warning V.A. _r should be initialized here and not in  the constructor
    * The level should also be used if we need more that one _r
    */
@@ -146,8 +172,7 @@ void siconos::modeling::FirstOrderNonLinearDS::resetToInitialState() { *(_x[0]) 
 
 // ===== MEMORY MANAGEMENT FUNCTIONS =====
 
-void siconos::modeling::FirstOrderNonLinearDS::initMemory(unsigned int steps)
-{
+void siconos::modeling::FirstOrderNonLinearDS::initMemory(unsigned int steps) {
   DynamicalSystem::initMemory(steps);
 
   if (_f && !_fold) _fold = std::make_shared<siconos::algebra::SiconosVector>(_n);
@@ -160,8 +185,7 @@ void siconos::modeling::FirstOrderNonLinearDS::initMemory(unsigned int steps)
     _rMemory.setMemorySize(steps, _n);
 }
 
-void siconos::modeling::FirstOrderNonLinearDS::swapInMemory()
-{
+void siconos::modeling::FirstOrderNonLinearDS::swapInMemory() {
   DEBUG_BEGIN("void siconos::modeling::FirstOrderNonLinearDS::swapInMemory()\n");
   _xMemory.swap(*_x[0]);
   _rMemory.swap(*_r);
@@ -176,50 +200,76 @@ void siconos::modeling::FirstOrderNonLinearDS::swapInMemory()
 // ===== COMPUTE PLUGINS FUNCTIONS =====
 
 void siconos::modeling::FirstOrderNonLinearDS::setComputeMFunction(
-    const std::string &pluginPath, const std::string &functionName)
-{
+    const std::string &pluginPath, const std::string &functionName) {
   if (!_M) _M = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
 
   _pluginM->setComputeFunction(pluginPath, functionName);
 }
 
-void siconos::modeling::FirstOrderNonLinearDS::setComputeMFunction(siconos::plugins::FPtr1 fct)
-{
+void siconos::modeling::FirstOrderNonLinearDS::setComputeMFunction(
+    siconos::plugins::FPtr1 fct) {
   if (!_M) _M = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
 
   _pluginM->setComputeFunction((void *)fct);
 }
 
 void siconos::modeling::FirstOrderNonLinearDS::setComputeFFunction(
-    const std::string &pluginPath, const std::string &functionName)
-{
+    const std::string &pluginPath, const std::string &functionName) {
   if (!_f) _f = std::make_shared<siconos::algebra::SiconosVector>(_n);
 
   _pluginf->setComputeFunction(pluginPath, functionName);
 }
 
-void siconos::modeling::FirstOrderNonLinearDS::setComputeFFunction(siconos::plugins::FPtr1 fct)
-{
+void siconos::modeling::FirstOrderNonLinearDS::setComputeFFunction(
+    siconos::plugins::FPtr1 fct) {
   if (!_f) _f = std::make_shared<siconos::algebra::SiconosVector>(_n);
   _pluginf->setComputeFunction((void *)fct);
 }
 
-void siconos::modeling::FirstOrderNonLinearDS::setComputeJacobianfxFunction(
-    const std::string &pluginPath, const std::string &functionName)
-{
-  if (!_jacobianfx) _jacobianfx = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
-  _pluginJacxf->setComputeFunction(pluginPath, functionName);
+void siconos::modeling::FirstOrderNonLinearDS::setConstantJacobianfx(
+    Eigen::Ref<siconos::algebra::SiconosMatrix> newValue) {
+  /**  Must:
+
+   - create the Map (view onto memory handled by newValue) for jacobianfx
+   - set the corresponding booleans
+   - reset internal storage (should already be null but who knows ...)
+   */
+
+  jacobianfx_internal_storage_ = nullptr;
+
+  jacobianfx_view_ = std::make_shared<siconos::algebra::MapType>(newValue.data(), _n, _n);
+  hasJacobianfx_ = true;
+  hasConstantJacobianfx_ = true;
+  computejacobianfx_ = nullptr;
 }
 
 void siconos::modeling::FirstOrderNonLinearDS::setComputeJacobianfxFunction(
-    siconos::plugins::FPtr1 fct)
-{
-  if (!_jacobianfx) _jacobianfx = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
-  _pluginJacxf->setComputeFunction((void *)fct);
+    const FunctionVS_M &new_func) {
+  // Ensure that memory is properly allocated for jacobianfx_
+  if (!jacobianfx_internal_storage_) {
+    jacobianfx_internal_storage_ = std::make_unique<std::vector<double>>(_n * _n);
+  }
+  jacobianfx_view_ = std::make_shared<siconos::algebra::MapType>(
+      jacobianfx_internal_storage_->data(), _n, _n);
+
+  hasJacobianfx_ = true;
+  hasConstantJacobianfx_ = false;
+  computejacobianfx_ = new_func;
 }
 
-void siconos::modeling::FirstOrderNonLinearDS::computeM(double time)
-{
+void siconos::modeling::FirstOrderNonLinearDS::computeJacobianfx(
+    double time, Eigen::Ref<siconos::algebra::SiconosVector> position) {
+  if (computejacobianfx_) {
+    // in that case, internal_storage must have been allocated by
+    // setCompute... call
+    // std::span<double> sppos(position.data(), _n);
+    // std::span<double> spmat(jacobianfx_internal_storage_->data(),
+    //                         jacobianfx_internal_storage_->size());
+    computejacobianfx_(position, time, *jacobianfx_view_);
+  }
+}
+
+void siconos::modeling::FirstOrderNonLinearDS::computeM(double time) {
   if (_pluginM->fPtr && _M) {
     ((FNLDSPtrfct)_pluginM->fPtr)(time, _n, &((*(_x[0]))(0)), &(*_M)(0, 0), _z->size(),
                                   &(*_z)(0));
@@ -227,22 +277,12 @@ void siconos::modeling::FirstOrderNonLinearDS::computeM(double time)
 }
 
 void siconos::modeling::FirstOrderNonLinearDS::computef(
-    double time, std::shared_ptr<siconos::algebra::SiconosVector> state)
-{
+    double time, std::shared_ptr<siconos::algebra::SiconosVector> state) {
   if (_f && _pluginf->fPtr)
     ((FNLDSPtrfct)_pluginf->fPtr)(time, _n, &(*state)(0), &(*_f)(0), _z->size(), &(*_z)(0));
 }
 
-void siconos::modeling::FirstOrderNonLinearDS::computeJacobianfx(
-    double time, std::shared_ptr<siconos::algebra::SiconosVector> state)
-{
-  if (_jacobianfx && _pluginJacxf->fPtr)
-    ((FNLDSPtrfct)_pluginJacxf->fPtr)(time, _n, state->data(), &(*_jacobianfx)(0, 0),
-                                      _z->size(), _z->data());
-}
-
-void siconos::modeling::FirstOrderNonLinearDS::computeRhs(double time)
-{
+void siconos::modeling::FirstOrderNonLinearDS::computeRhs(double time) {
   // second argument is useless at the time - Used in derived classes
 
   // compute rhs = M-1*( f + r ).
@@ -265,8 +305,7 @@ void siconos::modeling::FirstOrderNonLinearDS::computeRhs(double time)
   }
 }
 
-void siconos::modeling::FirstOrderNonLinearDS::computeJacobianRhsx(double time)
-{
+void siconos::modeling::FirstOrderNonLinearDS::computeJacobianRhsx(double time) {
   // second argument is useless at the time - Used in derived classes
 
   // compute jacobian of rhs according to x, = M-1(jacobianfx + jacobianX(T.u))
@@ -274,11 +313,11 @@ void siconos::modeling::FirstOrderNonLinearDS::computeJacobianRhsx(double time)
   // assert(!_pluginJacxf->fPtr &&
   // "siconos::modeling::FirstOrderNonLinearDS::computeJacobianRhsx: there is no plugin to
   // compute the jacobian of f");
-
-  computeJacobianfx(time, _x[0]);
+  // THROW_EXCEPTION("TODOSAM : it sucks");
+  computeJacobianfx(time, *(_x[0]));
   // solve M*jacobianXRhS = jacobianfx
-  if (_M && _jacobianfx) {
-    (_jacxRhs->copyBlock(0, 0, _jacobianfx));
+  if (_M && hasJacobianfx_) {
+    (_jacxRhs->copyBlock(0, 0, jacobianfx_view_));
     // copy _M into _invM for LU-factorisation, at the first call of this function.
 
     computeM(time);
@@ -294,8 +333,7 @@ void siconos::modeling::FirstOrderNonLinearDS::computeJacobianRhsx(double time)
 
 // ===== MISCELLANEOUS ====
 
-void siconos::modeling::FirstOrderNonLinearDS::display(bool brief) const
-{
+void siconos::modeling::FirstOrderNonLinearDS::display(bool brief) const {
   std::cout << " =====> First Order Non Linear DS (number: " << _number << ")." << std::endl;
   std::cout << "- n (size) : " << _n << std::endl;
   std::cout << "- x " << std::endl;
@@ -318,15 +356,13 @@ void siconos::modeling::FirstOrderNonLinearDS::display(bool brief) const
 
 void siconos::modeling::FirstOrderNonLinearDS::resetAllNonSmoothParts() { _r->setZero(); }
 
-void siconos::modeling::FirstOrderNonLinearDS::resetNonSmoothPart(unsigned int level)
-{
+void siconos::modeling::FirstOrderNonLinearDS::resetNonSmoothPart(unsigned int level) {
   // V.A. 28/05/2012:  for the moment various level are not used for First Order systems
   // assert(0);
   _r->zero();
 }
 
 void siconos::modeling::FirstOrderNonLinearDS::acceptSP(
-    std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const
-{
+    std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const {
   tourist->visit(*this);
 }

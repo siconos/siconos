@@ -158,6 +158,15 @@ class FirstOrderLinearR : public FirstOrderR {
   virtual void computeC(double time, siconos::algebra::BlockVector &z,
                         siconos::algebra::SiconosMatrix &C);
 
+  /** Function to compute the matrix C
+   *
+   *  \param time the current time
+   *  \param z the auxiliary input vector
+   *  \param C the C matrix
+   */
+  virtual void computeC(double time, siconos::algebra::BlockVector &z,
+                        siconos::algebra::MapType &C);
+
   /** Function to compute the matrix D
    *
    *  \param time the current time
@@ -193,6 +202,15 @@ class FirstOrderLinearR : public FirstOrderR {
    */
   virtual void computeB(double time, siconos::algebra::BlockVector &z,
                         siconos::algebra::SiconosMatrix &B);
+
+  /** Function to compute the matrix B
+   *
+   *  \param time the current time
+   *  \param z the auxiliary input vector
+   *  \param B the B matrix
+   */
+  virtual void computeB(double time, siconos::algebra::BlockVector &z,
+                        siconos::algebra::MapType &B);
 
   /**
      to compute the output y = h(t,x,...) of the Relation

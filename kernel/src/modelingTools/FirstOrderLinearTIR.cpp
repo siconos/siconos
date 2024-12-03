@@ -34,8 +34,8 @@ siconos::modeling::FirstOrderLinearTIR::FirstOrderLinearTIR(
     std::shared_ptr<siconos::algebra::SiconosMatrix> C,
     std::shared_ptr<siconos::algebra::SiconosMatrix> B)
     : FirstOrderR(RelationSubType::LinearTIR) {
-  _C = C;
-  _B = B;
+  _C = std::make_shared<siconos::algebra::MapType>(C->data(), C->rows(), C->cols());
+  _B = std::make_shared<siconos::algebra::MapType>(B->data(), B->rows(), B->cols());
 }
 
 // Constructor from a complete set of data
@@ -46,8 +46,8 @@ siconos::modeling::FirstOrderLinearTIR::FirstOrderLinearTIR(
     std::shared_ptr<siconos::algebra::SiconosVector> e,
     std::shared_ptr<siconos::algebra::SiconosMatrix> B)
     : FirstOrderR(RelationSubType::LinearTIR) {
-  _C = C;
-  _B = B;
+  _C = std::make_shared<siconos::algebra::MapType>(C->data(), C->rows(), C->cols());
+  _B = std::make_shared<siconos::algebra::MapType>(B->data(), B->rows(), B->cols());
   _D = D;
   _F = F;
   _e = e;
@@ -78,12 +78,12 @@ void siconos::modeling::FirstOrderLinearTIR::checkSize(Interaction &inter) {
                inter.getSizeOfDS());
 
   assert(
-      (_C->size(0) == inter.dimension() && _C->size(1) == inter.getSizeOfDS()) &&
+      (_C->rows() == inter.dimension() && _C->cols() == inter.getSizeOfDS()) &&
       "siconos::modeling::FirstOrderLinearTIR::initialize , inconsistent size between C and "
       "Interaction sizes.");
 
   assert(
-      (_B->size(1) == inter.dimension() && _B->size(0) == inter.getSizeOfDS()) &&
+      (_B->cols() == inter.dimension() && _B->rows() == inter.getSizeOfDS()) &&
       "siconos::modeling::FirstOrderLinearTIR::initialize , inconsistent size between B and "
       "interaction sizes.");
 

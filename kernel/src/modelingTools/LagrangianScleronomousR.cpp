@@ -73,7 +73,9 @@ void siconos::modeling::LagrangianScleronomousR::initialize(Interaction& inter) 
   if (!_jachq) {
     unsigned int sizeY = inter.dimension();
     unsigned int sizeDS = inter.getSizeOfDS();
-    _jachq = std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeDS);
+    // TODOSAM : initialize jachq internal memory
+    jachq_internal_storage = std::make_unique<std::vector<double>>(sizeY * sizeDS);
+    _jachq = std::make_shared<siconos::algebra::MapType>(jachq_internal_storage->data(), sizeY, sizeDS);
   }
 }
 
@@ -102,7 +104,7 @@ void siconos::modeling::LagrangianScleronomousR::computeJachq(
     auto qp = q.toSiconosVector();
     auto zp = z.toSiconosVector();
     // get vector lambda of the current interaction
-    ((siconos::plugins::FPtr3)(_pluginJachq->fPtr))(qp->size(), &(*qp)(0), _jachq->size(0),
+    ((siconos::plugins::FPtr3)(_pluginJachq->fPtr))(qp->size(), &(*qp)(0), _jachq->rows(),
                                                     &(*_jachq)(0, 0), zp->size(), &(*zp)(0));
     z = *zp;
   }

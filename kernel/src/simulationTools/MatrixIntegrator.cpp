@@ -38,7 +38,47 @@ siconos::simulation::MatrixIntegrator::MatrixIntegrator(
     const siconos::modeling::DynamicalSystem& ds,
     const siconos::modeling::NonSmoothDynamicalSystem& nsds,
     std::shared_ptr<TimeDiscretisation> td, std::shared_ptr<siconos::algebra::SiconosMatrix> E)
-    : _E(E) {
+    : MatrixIntegrator{ds, nsds, td} {
+  _E = std::make_shared<siconos::algebra::MapType>(E->data(), E->rows(), E->cols());
+
+  if (_E) {
+    _mat = std::make_shared<siconos::algebra::SiconosMatrix>(*E);
+    _mat->zero();
+  }
+}
+
+siconos::simulation::MatrixIntegrator::MatrixIntegrator(
+    const siconos::modeling::DynamicalSystem& ds,
+    const siconos::modeling::NonSmoothDynamicalSystem& nsds,
+    std::shared_ptr<TimeDiscretisation> td, std::shared_ptr<siconos::algebra::MapType> E)
+    : MatrixIntegrator{ds, nsds, td}{
+
+  if (_E) {
+    _mat = std::make_shared<siconos::algebra::SiconosMatrix>(*E);
+    _mat->zero();
+  }
+}
+
+siconos::simulation::MatrixIntegrator::MatrixIntegrator(
+    const siconos::modeling::DynamicalSystem& ds,
+    const siconos::modeling::NonSmoothDynamicalSystem& nsds,
+    std::shared_ptr<TimeDiscretisation> td,
+    std::shared_ptr<siconos::plugins::PluggedObject> plugin, const unsigned int p)
+    : MatrixIntegrator{ds, nsds, td} {
+  _plugin = plugin;
+  _isConst = false;
+  auto n = ds.n();
+  _mat = std::make_shared<siconos::algebra::SiconosMatrix>(n, p);
+  _mat->setZero();
+  _spo = std::make_shared<siconos::plugins::SubPluggedObject>(*_plugin, n, p);
+  std::static_pointer_cast<siconos::modeling::FirstOrderLinearDS>(_DS)->setPluginB(_spo);
+}
+
+siconos::simulation::MatrixIntegrator::MatrixIntegrator(
+    const siconos::modeling::DynamicalSystem& ds,
+    const siconos::modeling::NonSmoothDynamicalSystem& nsds,
+    std::shared_ptr<TimeDiscretisation> td) {
+  
   // Copy td
   auto tmp = std::make_shared<siconos::simulation::TimeDiscretisation>(*td);
   _TD = std::make_shared<siconos::simulation::TimeDiscretisation>(*td);
@@ -72,32 +112,6 @@ siconos::simulation::MatrixIntegrator::MatrixIntegrator(
   // change tolerance
   _OSI->setTol(1, 10 * siconos::internal::MACHINE_PREC, 5 * siconos::internal::MACHINE_PREC);
 
-  if (_E) {
-    _mat = std::make_shared<siconos::algebra::SiconosMatrix>(*E);
-    _mat->zero();
-  }
-}
-
-siconos::simulation::MatrixIntegrator::MatrixIntegrator(
-    const siconos::modeling::DynamicalSystem& ds,
-    const siconos::modeling::NonSmoothDynamicalSystem& nsds,
-    std::shared_ptr<TimeDiscretisation> td,
-    std::shared_ptr<siconos::plugins::PluggedObject> plugin, const unsigned int p)
-    : MatrixIntegrator{ds, nsds, td, nullptr} {
-  _plugin = plugin;
-  _isConst = false;
-  auto n = ds.n();
-  _mat = std::make_shared<siconos::algebra::SiconosMatrix>(n, p);
-  _mat->setZero();
-  _spo = std::make_shared<siconos::plugins::SubPluggedObject>(*_plugin, n, p);
-  std::static_pointer_cast<siconos::modeling::FirstOrderLinearDS>(_DS)->setPluginB(_spo);
-}
-
-siconos::simulation::MatrixIntegrator::MatrixIntegrator(
-    const siconos::modeling::DynamicalSystem& ds,
-    const siconos::modeling::NonSmoothDynamicalSystem& nsds,
-    std::shared_ptr<TimeDiscretisation> td)
-    : MatrixIntegrator{ds, nsds, td, nullptr} {
   unsigned int n = ds.n();
   _mat = std::make_shared<siconos::algebra::SiconosMatrix>(n, n);
   _mat->setZero();
@@ -117,7 +131,7 @@ void siconos::simulation::MatrixIntegrator::integrate() {
   }
   unsigned int p = _mat->size(1);
   for (unsigned int i = 0; i < p; i++) {
-    x0.zero();
+    x0.setZero();
     if (_E)
       *Ecol = _E->col(i);
     else if (_plugin)

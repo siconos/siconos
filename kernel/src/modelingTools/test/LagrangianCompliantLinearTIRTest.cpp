@@ -43,7 +43,7 @@ void LagrangianCompliantLinearTIRTest::testBuildLagrangianCompliantLinearTIR1()
 {
   std::cout << "--> Test: constructor 1." << std::endl;
   auto folr = std::make_shared<siconos::modeling::LagrangianCompliantLinearTIR>(C, D);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantLinearTIR1a : ", folr->C() == C,
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantLinearTIR1a : ", folr->C()->data() == C->data(),
                                true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantLinearTIR1c : ",
                                folr->getType() == siconos::modeling::RelationType::Lagrangian,
@@ -73,7 +73,7 @@ void LagrangianCompliantLinearTIRTest::testBuildLagrangianCompliantLinearTIR3()
 {
   std::cout << "--> Test: constructor 3." << std::endl;
   auto folr = std::make_shared<siconos::modeling::LagrangianCompliantLinearTIR>(C, D, e);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantLinearTIR3a : ", folr->C() == C,
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantLinearTIR3a : ", folr->C()->data() == C->data(),
                                true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianCompliantLinearTIR3d : ", folr->e() == e,
                                true);
@@ -98,7 +98,7 @@ void LagrangianCompliantLinearTIRTest::testSetCPtr()
   tmpD->zero();
   auto folr = std::make_shared<siconos::modeling::LagrangianCompliantLinearTIR>(tmpC, tmpD);
   folr->setCPtr(C);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetCPtr : ", folr->C() == C, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetCPtr : ", folr->C()->data() == C->data(), true);
   std::cout << "--> setCPtr test ended with success." << std::endl;
 }
 
@@ -113,7 +113,7 @@ void LagrangianCompliantLinearTIRTest::testSetDPtr()
   tmp->zero();
   auto folr = std::make_shared<siconos::modeling::LagrangianCompliantLinearTIR>(C, tmp);
   folr->setDPtr(D);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetDPtr: ", folr->D() == D, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetDPtr: ", folr->D()->data() == D->data(), true);
   std::cout << "--> setDPtr test ended with success." << std::endl;
 }
 
@@ -146,8 +146,8 @@ void LagrangianCompliantLinearTIRTest::testGetJacPtr()
   std::cout << "--> Test: jac." << std::endl;
   auto folr = std::make_shared<siconos::modeling::LagrangianCompliantLinearTIR>(C, D);
   folr->setDPtr(D);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetJachq: ", folr->jachq() == C, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetJachlambda: ", folr->jachlambda() == D, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetJachq: ", folr->jachq()->data() == C->data(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetJachlambda: ", folr->jachlambda()->data() == D->data(), true);
 
   std::cout << "--> setBPtr test ended with success." << std::endl;
 }

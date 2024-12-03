@@ -81,6 +81,13 @@ class BlockMatrix {
    */
   BlockMatrix(std::shared_ptr<SiconosMatrix> m);
 
+
+  /** no-copy constructor
+   *  \param m a MapMatrix
+   */
+  BlockMatrix(std::shared_ptr<MapType> m);
+
+
   /** copy constructor
    *  \param m a SiconosMatrix
    */
@@ -255,6 +262,7 @@ class BlockMatrix {
    * 
   */
   void copyBlock(unsigned int i, unsigned int j, std::shared_ptr<siconos::algebra::SiconosMatrix>);
+  void copyBlock(unsigned int i, unsigned int j, std::shared_ptr<siconos::algebra::MapType>);
 
   /** Set new block pointer 
    * 

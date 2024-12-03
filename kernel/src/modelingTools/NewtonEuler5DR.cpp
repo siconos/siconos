@@ -43,7 +43,8 @@ void siconos::modeling::NewtonEuler5DR::initialize(Interaction& inter) {
   NewtonEuler1DR::initialize(inter);
   unsigned int qSize = 7 * (inter.getSizeOfDS() / 6);
   /*keep only the distance.*/
-  _jachq = std::make_shared<siconos::algebra::SiconosMatrix>(5, qSize);
+  jachq_internal_storage = std::make_unique<std::vector<double>>(5 * qSize);
+  _jachq = std::make_shared<siconos::algebra::MapType>(jachq_internal_storage->data(), 5, qSize);
 
   _rotationAbsoluteToContactFrame = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
   _AUX2 = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);

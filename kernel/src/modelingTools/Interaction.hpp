@@ -599,7 +599,7 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
    *  \return InteractionBlock a pointer to SiconosMatrix (in-out parameter): the resulting
    * interactionBlock matrix
    */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> getLeftInteractionBlock() const;
+  std::shared_ptr<siconos::algebra::MapType> getLeftInteractionBlock() const;
 
   /** gets the matrix used in interactionBlock computation
 
@@ -613,7 +613,7 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
    *  \return InteractionBlock a pointer to SiconosMatrix (in-out parameter): the resulting
    interactionBlock matrix
    */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> getLeftInteractionBlockForDS(
+  std::shared_ptr<siconos::algebra::MapType> getLeftInteractionBlockForDS(
       unsigned int pos, unsigned int size, unsigned int sizeDS) const;
 
   /** gets the matrix used in interactionBlock computation. Used only for the formulation
@@ -637,7 +637,7 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
    *  \return InteractionBlock a pointer to SiconosMatrix (in-out parameter): the resulting
    * interactionBlock matrix
    */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> getRightInteractionBlockForDS(
+  std::shared_ptr<siconos::algebra::MapType> getRightInteractionBlockForDS(
       unsigned int pos, unsigned int sizeDS, unsigned size) const;
 
   /** gets extra interactionBlock corresponding to the present Interaction

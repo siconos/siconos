@@ -23,11 +23,10 @@
 #ifndef FIRSTORDERNONLINEARDS_H
 #define FIRSTORDERNONLINEARDS_H
 
-#include "SiconosMatrix.hpp"
-#include "SiconosMatrix.hpp"
-#include "SiconosVector.hpp"
-#include "SiconosMemory.hpp"
 #include "DynamicalSystem.hpp"
+#include "SiconosMatrix.hpp"
+#include "SiconosMemory.hpp"
+#include "SiconosVector.hpp"
 
 namespace siconos::algebra {
 
@@ -84,6 +83,12 @@ namespace siconos::modeling {
 
  */
 class FirstOrderNonLinearDS : public DynamicalSystem {
+ public:
+  using FunctionVS_M =
+      std::function<void(const Eigen::Ref<const siconos::algebra::SiconosVector> &,
+                         double,
+                         Eigen::Ref<siconos::algebra::MapType>)>;
+
  private:
   /** plugin signature */
   typedef void (*FNLDSPtrfct)(double, unsigned int, const double *, double *, unsigned int,
@@ -101,8 +106,20 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
   /** to store f(x_k,t_k,z_k)*/
   std::shared_ptr<siconos::algebra::SiconosVector> _fold{nullptr};
 
-  /** Gradient of \f$ f(x,t,z) \f$ with respect to \f$ x \f$ */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _jacobianfx{nullptr};
+  /** view of \f$  \nabla_x f: (x,t) \f$ */
+  std::shared_ptr<siconos::algebra::MapType> jacobianfx_view_{nullptr};
+
+  /** internal storage for the jacobian view*/
+  std::unique_ptr<std::vector<double>> jacobianfx_internal_storage_{nullptr};
+
+  /** function wrapper used to compute jacobianfx */
+  FunctionVS_M computejacobianfx_{nullptr};
+
+  /** true if jacobianfx is constant */
+  bool hasConstantJacobianfx_{false};
+
+  /** True if jacobianfx is required */
+  bool hasJacobianfx_{false};
 
   /** DynamicalSystem plug-in to compute f(x,t,z)
    *
@@ -114,18 +131,6 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
    *  \param a vector of parameters _z
    */
   std::shared_ptr<siconos::plugins::PluggedObject> _pluginf{nullptr};
-
-  /** DynamicalSystem plug-in to compute the gradient of f(x,t,z) with respect to the state:
-   * \f$ \nabla_x f: (x,t,z) \in R^{n} \times R  \mapsto  R^{n \times n} \f$
-   *
-   *  \param time current time
-   *  \param sizeOfX size of vector x
-   *  \param x pointer to the first element of x
-   *  \param[in,out] jacob pointer to the first element of jacobianfx matrix
-   *  \param  the size of the vector z
-   *  \param[in,out]  a vector of parameters, z
-   */
-  std::shared_ptr<siconos::plugins::PluggedObject> _pluginJacxf{nullptr};
 
   std::shared_ptr<siconos::plugins::PluggedObject> _pluginM{nullptr};
 
@@ -155,14 +160,23 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
    */
   FirstOrderNonLinearDS(std::shared_ptr<siconos::algebra::SiconosVector> newX0);
 
-  /** constructor from initial state and f (plugins),  \f$ \dot x = f(x, t, z) + r \f$
+  /** constructor from initial state, leads to \f$ \dot x = r \f$
    *
    *  \param newX0 initial state
-   *  \param fPlugin name of the plugin function to be used for f(x,t,z)
-   *  \param jacobianfxPlugin name of the plugin to be used for the jacobian of f(x,t,z)
+   *
+   *  \warning you need to set explicitely the plugin for f and its jacobian if needed (e.g. if
+   *  used with an EventDriven scheme)
    */
-  FirstOrderNonLinearDS(std::shared_ptr<siconos::algebra::SiconosVector> newX0,
-                        const std::string &fPlugin, const std::string &jacobianfxPlugin);
+  FirstOrderNonLinearDS(Eigen::Ref<siconos::algebra::SiconosVector> &newX0);
+
+  // /** constructor from initial state and f (plugins),  \f$ \dot x = f(x, t, z) + r \f$
+  //  *
+  //  *  \param newX0 initial state
+  //  *  \param fPlugin name of the plugin function to be used for f(x,t,z)
+  //  *  \param jacobianfxPlugin name of the plugin to be used for the jacobian of f(x,t,z)
+  //  */
+  // FirstOrderNonLinearDS(std::shared_ptr<siconos::algebra::SiconosVector> newX0,
+  //                       const std::string &fPlugin, const std::string &jacobianfxPlugin);
 
   /** Copy constructor
    *
@@ -235,23 +249,44 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
    */
   inline void setFPtr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) { _f = newPtr; }
 
-  /** get jacobian of f(x,t,z) with respect to x (pointer link)
-   *
-   *  \return std::shared_ptr<siconos::algebra::SiconosMatrix>
-   */
-  virtual std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianfx() const
-  {
-    return _jacobianfx;
+  /*  \return \f$  \nabla_x f: (x,t) \in R^{n} \times R \mapsto R^{n \times n} \f$ */
+  inline virtual std::shared_ptr<siconos::algebra::MapType> jacobianfx() const {
+    return jacobianfx_view_;
   }
 
-  /** set jacobian of f(x,t,z) with respect to x (pointer link)
+  /** \return a view onto \f$  \nabla_x f: (x,t) \f$  */
+  inline siconos::algebra::MapType &jacobianfx_view() const { return *jacobianfx_view_; }
+
+  /** set  \f$  \nabla_x f: (x,t) \f$ as a constant matrix.
    *
-   *  \param newPtr the new value
+   *  \param newValue new jacobian matrix
+   *
    */
-  inline void setJacobianfxPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr)
-  {
-    _jacobianfx = newPtr;
-  }
+  void setConstantJacobianfx(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+
+  /** \return True if jacobian matrix is taken into account in the system */
+  bool hasJacobianfx() const { return hasJacobianfx_; }
+
+  /** set a user-defined function to compute \f$  \nabla_x f: (x,t) \f$
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputeJacobianfxFunction(const FunctionVS_M& fext_func);
+
+  /** default function to compute \f$  \nabla_x f: (x,t) \f$
+   *
+   *  \param time the current time
+   *  \param position the current state vector
+   */
+  void computeJacobianfx(double time, Eigen::Ref<siconos::algebra::SiconosVector> position);
+
+  /** Default function to compute  \f$  \nabla_x f: (x,t) \in R^{n}
+   *  \times R \mapsto R^{n \times n} \f$ with x different from
+   *  current saved state.
+   *
+   *  \param time instant used in the computations
+   *  \param state a siconos::algebra::SiconosVector to store the resuting value
+   */
 
   /** get all the values of the state vector r stored in memory
    *
@@ -310,20 +345,6 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
    */
   void setComputeFFunction(siconos::plugins::FPtr1 fct);
 
-  /** to set a specified function to compute jacobianfx
-   *
-   *  \param pluginPath the complete path to the plugin
-   *  \param functionName function name to use in this library
-   */
-  void setComputeJacobianfxFunction(const std::string &pluginPath,
-                                    const std::string &functionName);
-
-  /** set a specified function to compute jacobianfx
-   *
-   *  \param fct a pointer on the plugin function
-   */
-  void setComputeJacobianfxFunction(siconos::plugins::FPtr1 fct);
-
   // --- compute plugin functions ---
 
   /** Default function to compute  \f$  M: (x,t) \f$
@@ -345,40 +366,19 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
    */
   virtual void computef(double time, std::shared_ptr<siconos::algebra::SiconosVector> state);
 
-  /** Default function to compute  \f$  \nabla_x f: (x,t) \in R^{n}
-   *  \times R \mapsto R^{n \times n} \f$ with x different from
-   *  current saved state.
-   *
-   *  \param time instant used in the computations
-   *  \param state a siconos::algebra::SiconosVector to store the resuting value
-   */
-  virtual void computeJacobianfx(double time,
-                                 std::shared_ptr<siconos::algebra::SiconosVector> state);
-
   /** Get _pluginf
    *
    *  \return a std::shared_ptr<siconos::plugins::PluggedObject>
    */
-  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginF() const
-  {
+  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginF() const {
     return _pluginf;
-  };
-
-  /** Get _pluginJacxf
-   *
-   *  \return a std::shared_ptr<siconos::plugins::PluggedObject>
-   */
-  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginJacxf() const
-  {
-    return _pluginJacxf;
   };
 
   /** Get _pluginM
    *
    *  \return a std::shared_ptr<siconos::plugins::PluggedObject>
    */
-  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginM() const
-  {
+  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginM() const {
     return _pluginM;
   };
 

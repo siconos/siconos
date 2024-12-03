@@ -189,7 +189,11 @@ void siconos::modeling::LagrangianDS::initRhs(double time) {
   // if the system is involved in more than one interaction. So, we must check
   // if p2 and q2 already exist to be sure that DSlink won't be lost.
 
-  _x0 = algebra::concatenateVectors(*_q0, *_velocity0);
+  if (!x0_internal_storage) {
+    x0_internal_storage = std::make_unique<std::vector<double>>(_q0->size() + _velocity0->size());
+    _x0 = std::make_shared<siconos::algebra::MapVectorType>(x0_internal_storage->data(), x0_internal_storage->size());
+  }
+  *_x0 << *_q0, *_velocity0; // TODOSAM: copy here
 
   _x[0] = algebra::concatenateVectors(*_q[0], *_q[1]);
 
