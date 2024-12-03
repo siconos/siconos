@@ -26,10 +26,10 @@
 
 #include "BlockVector.hpp"
 #include "NewtonEulerDS.hpp"
-#include "RotationQuaternion.hpp"  // for changeFrameBodyToAbs
+#include "RotationQuaternion.hpp"  // for rewriteVectorFromBodyToAbsoluteFrame
+#include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"  // for scal
-#include "SiconosMatrix.hpp"
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"
@@ -75,9 +75,7 @@ siconos::joints::PrismaticJointR::PrismaticJointR(
     : PrismaticJointR{} {
   setAbsolute(absoluteRef);
   setAxis(0, axis);
-  if (d1)
-    setBasePositions(d1->q(),
-                     d2 ? d2->q() : nullptr);
+  if (d1) setBasePositions(d1->q(), d2 ? d2->q() : nullptr);
 }
 
 void siconos::joints::PrismaticJointR::displayInitialPosition() {
@@ -107,7 +105,7 @@ void siconos::joints::PrismaticJointR::setBasePositions(
   }
 
   auto q2i = std::make_shared<siconos::algebra::SiconosVector>(7);
-  q2i->zero();
+  q2i->setZero();
   q2i->setValue(3, 1);
 
   if (q2) *q2i = *q2;
@@ -138,46 +136,46 @@ void siconos::joints::PrismaticJointR::setBasePositions(
 }
 
 void siconos::joints::PrismaticJointR::computeV1V2FromAxis() {
-  _V1 = std::make_shared<siconos::algebra::SiconosVector>(3);
-  _V2 = std::make_shared<siconos::algebra::SiconosVector>(3);
-  _V1->zero();
-  _V2->zero();
+  siconos::algebra::SiconosVector3 _V1, _V2;
+  _V1.setZero();
+  _V2.setZero();
   // build _V1
   if (_axis0->getValue(0) > _axis0->getValue(1))
     if (_axis0->getValue(0) > _axis0->getValue(2)) {
-      _V1->setValue(1, -_axis0->getValue(0));
-      _V1->setValue(0, _axis0->getValue(1));
+      _V1(1) = -_axis0->getValue(0);
+      _V1(0) = _axis0->getValue(1);
     } else {
-      _V1->setValue(1, -_axis0->getValue(2));
-      _V1->setValue(2, _axis0->getValue(1));
+      _V1(1) = -_axis0->getValue(2);
+      _V1(2) = _axis0->getValue(1);
     }
   else if (_axis0->getValue(2) > _axis0->getValue(1)) {
-    _V1->setValue(1, -_axis0->getValue(2));
-    _V1->setValue(2, _axis0->getValue(1));
+    _V1(1) = -_axis0->getValue(2);
+    _V1(2) = _axis0->getValue(1);
   } else {
-    _V1->setValue(1, -_axis0->getValue(0));
-    _V1->setValue(0, _axis0->getValue(1));
+    _V1(1) = -_axis0->getValue(0);
+    _V1(0) = _axis0->getValue(1);
   }
-  double aux = 1 / _V1->norm2();
-  siconos::algebra::scal(aux, *_V1, *_V1);
-  siconos::algebra::cross_product(*_axis0, *_V1, *_V2);
-  _V1x = _V1->getValue(0);
-  _V1y = _V1->getValue(1);
-  _V1z = _V1->getValue(2);
-  _V2x = _V2->getValue(0);
-  _V2y = _V2->getValue(1);
-  _V2z = _V2->getValue(2);
+  double aux = 1. / _V1.norm2();
+  _V1 *= aux;
+  _V2 = _axis0->head<3>().cross(_V1);
+  _V1x = _V1(0);
+  _V1y = _V1(1);
+  _V1z = _V1(2);
+  _V2x = _V2(0);
+  _V2y = _V2(1);
+  _V2z = _V2(2);
 }
 
-void siconos::joints::PrismaticJointR::computeJachq(
+void siconos::joints::PrismaticJointR::computeJacobianhOver_q_(
     double time, siconos::modeling::Interaction& inter,
-    std::shared_ptr<siconos::algebra::BlockVector> q0) {
+    const siconos::algebra::BlockVector& q0) {
   DEBUG_PRINT(
-      "siconos::joints::PrismaticJointR::computeJachq(double time, Interaction& inter, "
+      "siconos::joints::PrismaticJointR::computeJacobianhOver_q(double time, Interaction& "
+      "inter, "
       "std::shared_ptr<siconos::algebra::BlockVector> q0 ) \n");
 
-  _jachq->setZero();
-  auto q1 = (q0->getAllVect())[0];
+  jacobianhOver_q_view_->setZero();
+  auto q1 = (q0.getAllVect())[0];
   double X1 = q1->getValue(0);
   double Y1 = q1->getValue(1);
   double Z1 = q1->getValue(2);
@@ -186,8 +184,8 @@ void siconos::joints::PrismaticJointR::computeJachq(
   double q12 = q1->getValue(5);
   double q13 = q1->getValue(6);
 
-  if (q0->numberOfBlocks() > 1) {
-    auto q2 = (q0->getAllVect())[1];
+  if (q0.numberOfBlocks() > 1) {
+    auto q2 = (q0.getAllVect())[1];
     double X2 = q2->getValue(0);
     double Y2 = q2->getValue(1);
     double Z2 = q2->getValue(2);
@@ -200,13 +198,13 @@ void siconos::joints::PrismaticJointR::computeJachq(
     Jd1(X1, Y1, Z1, q10, q11, q12, q13);
 
   DEBUG_END(
-      "siconos::joints::PrismaticJointR::computeJachq(double time, Interaction& inter, "
+      "siconos::joints::PrismaticJointR::computeJacobianhOver_q(double time, Interaction& "
+      "inter, "
       "std::shared_ptr<siconos::algebra::BlockVector> q0 ) \n");
 }
 
-void siconos::joints::PrismaticJointR::computeh(double time,
-                                                const siconos::algebra::BlockVector& q0,
-                                                siconos::algebra::SiconosVector& y) {
+void siconos::joints::PrismaticJointR::computeh(
+    const siconos::algebra::BlockVector& q0, Eigen::Ref<siconos::algebra::SiconosVector> y) {
   DEBUG_PRINT(
       "siconos::joints::PrismaticJointR::computeh(double time, siconos::algebra::BlockVector& "
       "q0, siconos::algebra::SiconosVector& y) \n");
@@ -361,159 +359,193 @@ void siconos::joints::PrismaticJointR::Jd1d2(double X1, double Y1, double Z1, do
 
   /* Prismatic constraints (H1, H2)
    */
-  _jachq->setValue(0, 0,
-                   _V1x * (-pow(q10, 2) - pow(q11, 2) + pow(q12, 2) + pow(q13, 2)) +
-                       _V1y * (2 * q10 * q13 - 2 * q11 * q12) +
-                       _V1z * (-2 * q10 * q12 - 2 * q11 * q13));
-  _jachq->setValue(0, 1,
-                   _V1x * (-2 * q10 * q13 - 2 * q11 * q12) +
-                       _V1y * (-pow(q10, 2) + pow(q11, 2) - pow(q12, 2) + pow(q13, 2)) +
-                       _V1z * (2 * q10 * q11 - 2 * q12 * q13));
-  _jachq->setValue(0, 2,
-                   _V1x * (2 * q10 * q12 - 2 * q11 * q13) +
-                       _V1y * (-2 * q10 * q11 - 2 * q12 * q13) +
-                       _V1z * (-pow(q10, 2) + pow(q11, 2) + pow(q12, 2) - pow(q13, 2)));
-  _jachq->setValue(
+  jacobianhOver_q_view_->setValue(
+      0, 0,
+      _V1x * (-pow(q10, 2) - pow(q11, 2) + pow(q12, 2) + pow(q13, 2)) +
+          _V1y * (2 * q10 * q13 - 2 * q11 * q12) + _V1z * (-2 * q10 * q12 - 2 * q11 * q13));
+  jacobianhOver_q_view_->setValue(
+      0, 1,
+      _V1x * (-2 * q10 * q13 - 2 * q11 * q12) +
+          _V1y * (-pow(q10, 2) + pow(q11, 2) - pow(q12, 2) + pow(q13, 2)) +
+          _V1z * (2 * q10 * q11 - 2 * q12 * q13));
+  jacobianhOver_q_view_->setValue(
+      0, 2,
+      _V1x * (2 * q10 * q12 - 2 * q11 * q13) + _V1y * (-2 * q10 * q11 - 2 * q12 * q13) +
+          _V1z * (-pow(q10, 2) + pow(q11, 2) + pow(q12, 2) - pow(q13, 2)));
+  jacobianhOver_q_view_->setValue(
       0, 3,
       _V1x * (2 * q10 * (-X1 + X2) - 2 * q12 * (-Z1 + Z2) + 2 * q13 * (-Y1 + Y2)) +
           _V1y * (2 * q10 * (-Y1 + Y2) + 2 * q11 * (-Z1 + Z2) - 2 * q13 * (-X1 + X2)) +
           _V1z * (2 * q10 * (-Z1 + Z2) - 2 * q11 * (-Y1 + Y2) + 2 * q12 * (-X1 + X2)));
-  _jachq->setValue(0, 4,
-                   _V1x * (q11 * (-X1 + X2) - q11 * (X1 - X2) + q12 * (-Y1 + Y2) -
-                           q12 * (Y1 - Y2) + 2 * q13 * (-Z1 + Z2)) +
-                       _V1y * (2 * q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q11 * (Y1 - Y2) +
-                               q12 * (-X1 + X2) - q12 * (X1 - X2)) +
-                       _V1z * (-q10 * (-Y1 + Y2) + q10 * (Y1 - Y2) - 2 * q11 * (-Z1 + Z2) +
-                               q13 * (-X1 + X2) - q13 * (X1 - X2)));
-  _jachq->setValue(0, 5,
-                   _V1x * (-q10 * (-Z1 + Z2) + q10 * (Z1 - Z2) + q11 * (-Y1 + Y2) -
-                           q11 * (Y1 - Y2) - 2 * q12 * (-X1 + X2)) +
-                       _V1y * (2 * q11 * (-X1 + X2) + q12 * (-Y1 + Y2) - q12 * (Y1 - Y2) +
-                               q13 * (-Z1 + Z2) - q13 * (Z1 - Z2)) +
-                       _V1z * (2 * q10 * (-X1 + X2) - q12 * (-Z1 + Z2) + q12 * (Z1 - Z2) +
-                               q13 * (-Y1 + Y2) - q13 * (Y1 - Y2)));
-  _jachq->setValue(0, 6,
-                   _V1x * (2 * q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q11 * (Z1 - Z2) -
-                           q13 * (-X1 + X2) + q13 * (X1 - X2)) +
-                       _V1y * (-q10 * (-X1 + X2) + q10 * (X1 - X2) + q12 * (-Z1 + Z2) -
-                               q12 * (Z1 - Z2) - 2 * q13 * (-Y1 + Y2)) +
-                       _V1z * (q11 * (-X1 + X2) - q11 * (X1 - X2) + 2 * q12 * (-Y1 + Y2) +
-                               q13 * (-Z1 + Z2) - q13 * (Z1 - Z2)));
-  _jachq->setValue(0, 7,
-                   _V1x * (pow(q10, 2) + pow(q11, 2) - pow(q12, 2) - pow(q13, 2)) +
-                       _V1y * (-2 * q10 * q13 + 2 * q11 * q12) +
-                       _V1z * (2 * q10 * q12 + 2 * q11 * q13));
-  _jachq->setValue(0, 8,
-                   _V1x * (2 * q10 * q13 + 2 * q11 * q12) +
-                       _V1y * (pow(q10, 2) - pow(q11, 2) + pow(q12, 2) - pow(q13, 2)) +
-                       _V1z * (-2 * q10 * q11 + 2 * q12 * q13));
-  _jachq->setValue(0, 9,
-                   _V1x * (-2 * q10 * q12 + 2 * q11 * q13) +
-                       _V1y * (2 * q10 * q11 + 2 * q12 * q13) +
-                       _V1z * (pow(q10, 2) - pow(q11, 2) - pow(q12, 2) + pow(q13, 2)));
-  _jachq->setValue(0, 10, 0);
-  _jachq->setValue(0, 11, 0);
-  _jachq->setValue(0, 12, 0);
-  _jachq->setValue(0, 13, 0);
-  _jachq->setValue(1, 0,
-                   _V2x * (-pow(q10, 2) - pow(q11, 2) + pow(q12, 2) + pow(q13, 2)) +
-                       _V2y * (2 * q10 * q13 - 2 * q11 * q12) +
-                       _V2z * (-2 * q10 * q12 - 2 * q11 * q13));
-  _jachq->setValue(1, 1,
-                   _V2x * (-2 * q10 * q13 - 2 * q11 * q12) +
-                       _V2y * (-pow(q10, 2) + pow(q11, 2) - pow(q12, 2) + pow(q13, 2)) +
-                       _V2z * (2 * q10 * q11 - 2 * q12 * q13));
-  _jachq->setValue(1, 2,
-                   _V2x * (2 * q10 * q12 - 2 * q11 * q13) +
-                       _V2y * (-2 * q10 * q11 - 2 * q12 * q13) +
-                       _V2z * (-pow(q10, 2) + pow(q11, 2) + pow(q12, 2) - pow(q13, 2)));
-  _jachq->setValue(
+  jacobianhOver_q_view_->setValue(
+      0, 4,
+      _V1x * (q11 * (-X1 + X2) - q11 * (X1 - X2) + q12 * (-Y1 + Y2) - q12 * (Y1 - Y2) +
+              2 * q13 * (-Z1 + Z2)) +
+          _V1y * (2 * q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q11 * (Y1 - Y2) +
+                  q12 * (-X1 + X2) - q12 * (X1 - X2)) +
+          _V1z * (-q10 * (-Y1 + Y2) + q10 * (Y1 - Y2) - 2 * q11 * (-Z1 + Z2) +
+                  q13 * (-X1 + X2) - q13 * (X1 - X2)));
+  jacobianhOver_q_view_->setValue(
+      0, 5,
+      _V1x * (-q10 * (-Z1 + Z2) + q10 * (Z1 - Z2) + q11 * (-Y1 + Y2) - q11 * (Y1 - Y2) -
+              2 * q12 * (-X1 + X2)) +
+          _V1y * (2 * q11 * (-X1 + X2) + q12 * (-Y1 + Y2) - q12 * (Y1 - Y2) +
+                  q13 * (-Z1 + Z2) - q13 * (Z1 - Z2)) +
+          _V1z * (2 * q10 * (-X1 + X2) - q12 * (-Z1 + Z2) + q12 * (Z1 - Z2) +
+                  q13 * (-Y1 + Y2) - q13 * (Y1 - Y2)));
+  jacobianhOver_q_view_->setValue(
+      0, 6,
+      _V1x * (2 * q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q11 * (Z1 - Z2) - q13 * (-X1 + X2) +
+              q13 * (X1 - X2)) +
+          _V1y * (-q10 * (-X1 + X2) + q10 * (X1 - X2) + q12 * (-Z1 + Z2) - q12 * (Z1 - Z2) -
+                  2 * q13 * (-Y1 + Y2)) +
+          _V1z * (q11 * (-X1 + X2) - q11 * (X1 - X2) + 2 * q12 * (-Y1 + Y2) +
+                  q13 * (-Z1 + Z2) - q13 * (Z1 - Z2)));
+  jacobianhOver_q_view_->setValue(
+      0, 7,
+      _V1x * (pow(q10, 2) + pow(q11, 2) - pow(q12, 2) - pow(q13, 2)) +
+          _V1y * (-2 * q10 * q13 + 2 * q11 * q12) + _V1z * (2 * q10 * q12 + 2 * q11 * q13));
+  jacobianhOver_q_view_->setValue(
+      0, 8,
+      _V1x * (2 * q10 * q13 + 2 * q11 * q12) +
+          _V1y * (pow(q10, 2) - pow(q11, 2) + pow(q12, 2) - pow(q13, 2)) +
+          _V1z * (-2 * q10 * q11 + 2 * q12 * q13));
+  jacobianhOver_q_view_->setValue(
+      0, 9,
+      _V1x * (-2 * q10 * q12 + 2 * q11 * q13) + _V1y * (2 * q10 * q11 + 2 * q12 * q13) +
+          _V1z * (pow(q10, 2) - pow(q11, 2) - pow(q12, 2) + pow(q13, 2)));
+  jacobianhOver_q_view_->setValue(0, 10, 0);
+  jacobianhOver_q_view_->setValue(0, 11, 0);
+  jacobianhOver_q_view_->setValue(0, 12, 0);
+  jacobianhOver_q_view_->setValue(0, 13, 0);
+  jacobianhOver_q_view_->setValue(
+      1, 0,
+      _V2x * (-pow(q10, 2) - pow(q11, 2) + pow(q12, 2) + pow(q13, 2)) +
+          _V2y * (2 * q10 * q13 - 2 * q11 * q12) + _V2z * (-2 * q10 * q12 - 2 * q11 * q13));
+  jacobianhOver_q_view_->setValue(
+      1, 1,
+      _V2x * (-2 * q10 * q13 - 2 * q11 * q12) +
+          _V2y * (-pow(q10, 2) + pow(q11, 2) - pow(q12, 2) + pow(q13, 2)) +
+          _V2z * (2 * q10 * q11 - 2 * q12 * q13));
+  jacobianhOver_q_view_->setValue(
+      1, 2,
+      _V2x * (2 * q10 * q12 - 2 * q11 * q13) + _V2y * (-2 * q10 * q11 - 2 * q12 * q13) +
+          _V2z * (-pow(q10, 2) + pow(q11, 2) + pow(q12, 2) - pow(q13, 2)));
+  jacobianhOver_q_view_->setValue(
       1, 3,
       _V2x * (2 * q10 * (-X1 + X2) - 2 * q12 * (-Z1 + Z2) + 2 * q13 * (-Y1 + Y2)) +
           _V2y * (2 * q10 * (-Y1 + Y2) + 2 * q11 * (-Z1 + Z2) - 2 * q13 * (-X1 + X2)) +
           _V2z * (2 * q10 * (-Z1 + Z2) - 2 * q11 * (-Y1 + Y2) + 2 * q12 * (-X1 + X2)));
-  _jachq->setValue(1, 4,
-                   _V2x * (q11 * (-X1 + X2) - q11 * (X1 - X2) + q12 * (-Y1 + Y2) -
-                           q12 * (Y1 - Y2) + 2 * q13 * (-Z1 + Z2)) +
-                       _V2y * (2 * q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q11 * (Y1 - Y2) +
-                               q12 * (-X1 + X2) - q12 * (X1 - X2)) +
-                       _V2z * (-q10 * (-Y1 + Y2) + q10 * (Y1 - Y2) - 2 * q11 * (-Z1 + Z2) +
-                               q13 * (-X1 + X2) - q13 * (X1 - X2)));
-  _jachq->setValue(1, 5,
-                   _V2x * (-q10 * (-Z1 + Z2) + q10 * (Z1 - Z2) + q11 * (-Y1 + Y2) -
-                           q11 * (Y1 - Y2) - 2 * q12 * (-X1 + X2)) +
-                       _V2y * (2 * q11 * (-X1 + X2) + q12 * (-Y1 + Y2) - q12 * (Y1 - Y2) +
-                               q13 * (-Z1 + Z2) - q13 * (Z1 - Z2)) +
-                       _V2z * (2 * q10 * (-X1 + X2) - q12 * (-Z1 + Z2) + q12 * (Z1 - Z2) +
-                               q13 * (-Y1 + Y2) - q13 * (Y1 - Y2)));
-  _jachq->setValue(1, 6,
-                   _V2x * (2 * q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q11 * (Z1 - Z2) -
-                           q13 * (-X1 + X2) + q13 * (X1 - X2)) +
-                       _V2y * (-q10 * (-X1 + X2) + q10 * (X1 - X2) + q12 * (-Z1 + Z2) -
-                               q12 * (Z1 - Z2) - 2 * q13 * (-Y1 + Y2)) +
-                       _V2z * (q11 * (-X1 + X2) - q11 * (X1 - X2) + 2 * q12 * (-Y1 + Y2) +
-                               q13 * (-Z1 + Z2) - q13 * (Z1 - Z2)));
-  _jachq->setValue(1, 7,
-                   _V2x * (pow(q10, 2) + pow(q11, 2) - pow(q12, 2) - pow(q13, 2)) +
-                       _V2y * (-2 * q10 * q13 + 2 * q11 * q12) +
-                       _V2z * (2 * q10 * q12 + 2 * q11 * q13));
-  _jachq->setValue(1, 8,
-                   _V2x * (2 * q10 * q13 + 2 * q11 * q12) +
-                       _V2y * (pow(q10, 2) - pow(q11, 2) + pow(q12, 2) - pow(q13, 2)) +
-                       _V2z * (-2 * q10 * q11 + 2 * q12 * q13));
-  _jachq->setValue(1, 9,
-                   _V2x * (-2 * q10 * q12 + 2 * q11 * q13) +
-                       _V2y * (2 * q10 * q11 + 2 * q12 * q13) +
-                       _V2z * (pow(q10, 2) - pow(q11, 2) - pow(q12, 2) + pow(q13, 2)));
-  _jachq->setValue(1, 10, 0);
-  _jachq->setValue(1, 11, 0);
-  _jachq->setValue(1, 12, 0);
-  _jachq->setValue(1, 13, 0);
+  jacobianhOver_q_view_->setValue(
+      1, 4,
+      _V2x * (q11 * (-X1 + X2) - q11 * (X1 - X2) + q12 * (-Y1 + Y2) - q12 * (Y1 - Y2) +
+              2 * q13 * (-Z1 + Z2)) +
+          _V2y * (2 * q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q11 * (Y1 - Y2) +
+                  q12 * (-X1 + X2) - q12 * (X1 - X2)) +
+          _V2z * (-q10 * (-Y1 + Y2) + q10 * (Y1 - Y2) - 2 * q11 * (-Z1 + Z2) +
+                  q13 * (-X1 + X2) - q13 * (X1 - X2)));
+  jacobianhOver_q_view_->setValue(
+      1, 5,
+      _V2x * (-q10 * (-Z1 + Z2) + q10 * (Z1 - Z2) + q11 * (-Y1 + Y2) - q11 * (Y1 - Y2) -
+              2 * q12 * (-X1 + X2)) +
+          _V2y * (2 * q11 * (-X1 + X2) + q12 * (-Y1 + Y2) - q12 * (Y1 - Y2) +
+                  q13 * (-Z1 + Z2) - q13 * (Z1 - Z2)) +
+          _V2z * (2 * q10 * (-X1 + X2) - q12 * (-Z1 + Z2) + q12 * (Z1 - Z2) +
+                  q13 * (-Y1 + Y2) - q13 * (Y1 - Y2)));
+  jacobianhOver_q_view_->setValue(
+      1, 6,
+      _V2x * (2 * q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q11 * (Z1 - Z2) - q13 * (-X1 + X2) +
+              q13 * (X1 - X2)) +
+          _V2y * (-q10 * (-X1 + X2) + q10 * (X1 - X2) + q12 * (-Z1 + Z2) - q12 * (Z1 - Z2) -
+                  2 * q13 * (-Y1 + Y2)) +
+          _V2z * (q11 * (-X1 + X2) - q11 * (X1 - X2) + 2 * q12 * (-Y1 + Y2) +
+                  q13 * (-Z1 + Z2) - q13 * (Z1 - Z2)));
+  jacobianhOver_q_view_->setValue(
+      1, 7,
+      _V2x * (pow(q10, 2) + pow(q11, 2) - pow(q12, 2) - pow(q13, 2)) +
+          _V2y * (-2 * q10 * q13 + 2 * q11 * q12) + _V2z * (2 * q10 * q12 + 2 * q11 * q13));
+  jacobianhOver_q_view_->setValue(
+      1, 8,
+      _V2x * (2 * q10 * q13 + 2 * q11 * q12) +
+          _V2y * (pow(q10, 2) - pow(q11, 2) + pow(q12, 2) - pow(q13, 2)) +
+          _V2z * (-2 * q10 * q11 + 2 * q12 * q13));
+  jacobianhOver_q_view_->setValue(
+      1, 9,
+      _V2x * (-2 * q10 * q12 + 2 * q11 * q13) + _V2y * (2 * q10 * q11 + 2 * q12 * q13) +
+          _V2z * (pow(q10, 2) - pow(q11, 2) - pow(q12, 2) + pow(q13, 2)));
+  jacobianhOver_q_view_->setValue(1, 10, 0);
+  jacobianhOver_q_view_->setValue(1, 11, 0);
+  jacobianhOver_q_view_->setValue(1, 12, 0);
+  jacobianhOver_q_view_->setValue(1, 13, 0);
 
   /* Orientation constraints (H3, H4, H5)
    */
-  _jachq->setValue(2, 0, 0.0);
-  _jachq->setValue(2, 1, 0.0);
-  _jachq->setValue(2, 2, 0.0);
-  _jachq->setValue(2, 3, -_cq2q101 * q21 - _cq2q102 * q20 + _cq2q103 * q23 - _cq2q104 * q22);
-  _jachq->setValue(2, 4, _cq2q101 * q20 - _cq2q102 * q21 - _cq2q103 * q22 - _cq2q104 * q23);
-  _jachq->setValue(2, 5, -_cq2q101 * q23 + _cq2q102 * q22 - _cq2q103 * q21 - _cq2q104 * q20);
-  _jachq->setValue(2, 6, _cq2q101 * q22 + _cq2q102 * q23 + _cq2q103 * q20 - _cq2q104 * q21);
-  _jachq->setValue(2, 7, 0.0);
-  _jachq->setValue(2, 8, 0.0);
-  _jachq->setValue(2, 9, 0.0);
-  _jachq->setValue(2, 10, _cq2q101 * q11 - _cq2q102 * q10 + _cq2q103 * q13 - _cq2q104 * q12);
-  _jachq->setValue(2, 11, -_cq2q101 * q10 - _cq2q102 * q11 - _cq2q103 * q12 - _cq2q104 * q13);
-  _jachq->setValue(2, 12, _cq2q101 * q13 + _cq2q102 * q12 - _cq2q103 * q11 - _cq2q104 * q10);
-  _jachq->setValue(2, 13, -_cq2q101 * q12 + _cq2q102 * q13 + _cq2q103 * q10 - _cq2q104 * q11);
-  _jachq->setValue(3, 0, 0.0);
-  _jachq->setValue(3, 1, 0.0);
-  _jachq->setValue(3, 2, 0.0);
-  _jachq->setValue(3, 3, -_cq2q101 * q22 - _cq2q102 * q23 - _cq2q103 * q20 + _cq2q104 * q21);
-  _jachq->setValue(3, 4, _cq2q101 * q23 - _cq2q102 * q22 + _cq2q103 * q21 + _cq2q104 * q20);
-  _jachq->setValue(3, 5, _cq2q101 * q20 - _cq2q102 * q21 - _cq2q103 * q22 - _cq2q104 * q23);
-  _jachq->setValue(3, 6, -_cq2q101 * q21 - _cq2q102 * q20 + _cq2q103 * q23 - _cq2q104 * q22);
-  _jachq->setValue(3, 7, 0.0);
-  _jachq->setValue(3, 8, 0.0);
-  _jachq->setValue(3, 9, 0.0);
-  _jachq->setValue(3, 10, _cq2q101 * q12 - _cq2q102 * q13 - _cq2q103 * q10 + _cq2q104 * q11);
-  _jachq->setValue(3, 11, -_cq2q101 * q13 - _cq2q102 * q12 + _cq2q103 * q11 + _cq2q104 * q10);
-  _jachq->setValue(3, 12, -_cq2q101 * q10 - _cq2q102 * q11 - _cq2q103 * q12 - _cq2q104 * q13);
-  _jachq->setValue(3, 13, _cq2q101 * q11 - _cq2q102 * q10 + _cq2q103 * q13 - _cq2q104 * q12);
-  _jachq->setValue(4, 0, 0.0);
-  _jachq->setValue(4, 1, 0.0);
-  _jachq->setValue(4, 2, 0.0);
-  _jachq->setValue(4, 3, -_cq2q101 * q23 + _cq2q102 * q22 - _cq2q103 * q21 - _cq2q104 * q20);
-  _jachq->setValue(4, 4, -_cq2q101 * q22 - _cq2q102 * q23 - _cq2q103 * q20 + _cq2q104 * q21);
-  _jachq->setValue(4, 5, _cq2q101 * q21 + _cq2q102 * q20 - _cq2q103 * q23 + _cq2q104 * q22);
-  _jachq->setValue(4, 6, _cq2q101 * q20 - _cq2q102 * q21 - _cq2q103 * q22 - _cq2q104 * q23);
-  _jachq->setValue(4, 7, 0.0);
-  _jachq->setValue(4, 8, 0.0);
-  _jachq->setValue(4, 9, 0.0);
-  _jachq->setValue(4, 10, _cq2q101 * q13 + _cq2q102 * q12 - _cq2q103 * q11 - _cq2q104 * q10);
-  _jachq->setValue(4, 11, _cq2q101 * q12 - _cq2q102 * q13 - _cq2q103 * q10 + _cq2q104 * q11);
-  _jachq->setValue(4, 12, -_cq2q101 * q11 + _cq2q102 * q10 - _cq2q103 * q13 + _cq2q104 * q12);
-  _jachq->setValue(4, 13, -_cq2q101 * q10 - _cq2q102 * q11 - _cq2q103 * q12 - _cq2q104 * q13);
+  jacobianhOver_q_view_->setValue(2, 0, 0.0);
+  jacobianhOver_q_view_->setValue(2, 1, 0.0);
+  jacobianhOver_q_view_->setValue(2, 2, 0.0);
+  jacobianhOver_q_view_->setValue(
+      2, 3, -_cq2q101 * q21 - _cq2q102 * q20 + _cq2q103 * q23 - _cq2q104 * q22);
+  jacobianhOver_q_view_->setValue(
+      2, 4, _cq2q101 * q20 - _cq2q102 * q21 - _cq2q103 * q22 - _cq2q104 * q23);
+  jacobianhOver_q_view_->setValue(
+      2, 5, -_cq2q101 * q23 + _cq2q102 * q22 - _cq2q103 * q21 - _cq2q104 * q20);
+  jacobianhOver_q_view_->setValue(
+      2, 6, _cq2q101 * q22 + _cq2q102 * q23 + _cq2q103 * q20 - _cq2q104 * q21);
+  jacobianhOver_q_view_->setValue(2, 7, 0.0);
+  jacobianhOver_q_view_->setValue(2, 8, 0.0);
+  jacobianhOver_q_view_->setValue(2, 9, 0.0);
+  jacobianhOver_q_view_->setValue(
+      2, 10, _cq2q101 * q11 - _cq2q102 * q10 + _cq2q103 * q13 - _cq2q104 * q12);
+  jacobianhOver_q_view_->setValue(
+      2, 11, -_cq2q101 * q10 - _cq2q102 * q11 - _cq2q103 * q12 - _cq2q104 * q13);
+  jacobianhOver_q_view_->setValue(
+      2, 12, _cq2q101 * q13 + _cq2q102 * q12 - _cq2q103 * q11 - _cq2q104 * q10);
+  jacobianhOver_q_view_->setValue(
+      2, 13, -_cq2q101 * q12 + _cq2q102 * q13 + _cq2q103 * q10 - _cq2q104 * q11);
+  jacobianhOver_q_view_->setValue(3, 0, 0.0);
+  jacobianhOver_q_view_->setValue(3, 1, 0.0);
+  jacobianhOver_q_view_->setValue(3, 2, 0.0);
+  jacobianhOver_q_view_->setValue(
+      3, 3, -_cq2q101 * q22 - _cq2q102 * q23 - _cq2q103 * q20 + _cq2q104 * q21);
+  jacobianhOver_q_view_->setValue(
+      3, 4, _cq2q101 * q23 - _cq2q102 * q22 + _cq2q103 * q21 + _cq2q104 * q20);
+  jacobianhOver_q_view_->setValue(
+      3, 5, _cq2q101 * q20 - _cq2q102 * q21 - _cq2q103 * q22 - _cq2q104 * q23);
+  jacobianhOver_q_view_->setValue(
+      3, 6, -_cq2q101 * q21 - _cq2q102 * q20 + _cq2q103 * q23 - _cq2q104 * q22);
+  jacobianhOver_q_view_->setValue(3, 7, 0.0);
+  jacobianhOver_q_view_->setValue(3, 8, 0.0);
+  jacobianhOver_q_view_->setValue(3, 9, 0.0);
+  jacobianhOver_q_view_->setValue(
+      3, 10, _cq2q101 * q12 - _cq2q102 * q13 - _cq2q103 * q10 + _cq2q104 * q11);
+  jacobianhOver_q_view_->setValue(
+      3, 11, -_cq2q101 * q13 - _cq2q102 * q12 + _cq2q103 * q11 + _cq2q104 * q10);
+  jacobianhOver_q_view_->setValue(
+      3, 12, -_cq2q101 * q10 - _cq2q102 * q11 - _cq2q103 * q12 - _cq2q104 * q13);
+  jacobianhOver_q_view_->setValue(
+      3, 13, _cq2q101 * q11 - _cq2q102 * q10 + _cq2q103 * q13 - _cq2q104 * q12);
+  jacobianhOver_q_view_->setValue(4, 0, 0.0);
+  jacobianhOver_q_view_->setValue(4, 1, 0.0);
+  jacobianhOver_q_view_->setValue(4, 2, 0.0);
+  jacobianhOver_q_view_->setValue(
+      4, 3, -_cq2q101 * q23 + _cq2q102 * q22 - _cq2q103 * q21 - _cq2q104 * q20);
+  jacobianhOver_q_view_->setValue(
+      4, 4, -_cq2q101 * q22 - _cq2q102 * q23 - _cq2q103 * q20 + _cq2q104 * q21);
+  jacobianhOver_q_view_->setValue(
+      4, 5, _cq2q101 * q21 + _cq2q102 * q20 - _cq2q103 * q23 + _cq2q104 * q22);
+  jacobianhOver_q_view_->setValue(
+      4, 6, _cq2q101 * q20 - _cq2q102 * q21 - _cq2q103 * q22 - _cq2q104 * q23);
+  jacobianhOver_q_view_->setValue(4, 7, 0.0);
+  jacobianhOver_q_view_->setValue(4, 8, 0.0);
+  jacobianhOver_q_view_->setValue(4, 9, 0.0);
+  jacobianhOver_q_view_->setValue(
+      4, 10, _cq2q101 * q13 + _cq2q102 * q12 - _cq2q103 * q11 - _cq2q104 * q10);
+  jacobianhOver_q_view_->setValue(
+      4, 11, _cq2q101 * q12 - _cq2q102 * q13 - _cq2q103 * q10 + _cq2q104 * q11);
+  jacobianhOver_q_view_->setValue(
+      4, 12, -_cq2q101 * q11 + _cq2q102 * q10 - _cq2q103 * q13 + _cq2q104 * q12);
+  jacobianhOver_q_view_->setValue(
+      4, 13, -_cq2q101 * q10 - _cq2q102 * q11 - _cq2q103 * q12 - _cq2q104 * q13);
 }
 
 void siconos::joints::PrismaticJointR::Jd1(double X1, double Y1, double Z1, double q10,
@@ -529,94 +561,88 @@ void siconos::joints::PrismaticJointR::Jd1(double X1, double Y1, double Z1, doub
 
   /* Prismatic constraints (H1, H2)
    */
-  _jachq->setValue(0, 0,
-                   _V1x * (-pow(q10, 2) - pow(q11, 2) + pow(q12, 2) + pow(q13, 2)) +
-                       _V1y * (2 * q10 * q13 - 2 * q11 * q12) +
-                       _V1z * (-2 * q10 * q12 - 2 * q11 * q13));
-  _jachq->setValue(0, 1,
-                   _V1x * (-2 * q10 * q13 - 2 * q11 * q12) +
-                       _V1y * (-pow(q10, 2) + pow(q11, 2) - pow(q12, 2) + pow(q13, 2)) +
-                       _V1z * (2 * q10 * q11 - 2 * q12 * q13));
-  _jachq->setValue(0, 2,
-                   _V1x * (2 * q10 * q12 - 2 * q11 * q13) +
-                       _V1y * (-2 * q10 * q11 - 2 * q12 * q13) +
-                       _V1z * (-pow(q10, 2) + pow(q11, 2) + pow(q12, 2) - pow(q13, 2)));
-  _jachq->setValue(0, 3,
-                   _V1x * (-2 * X1 * q10 - 2 * Y1 * q13 + 2 * Z1 * q12) +
-                       _V1y * (2 * X1 * q13 - 2 * Y1 * q10 - 2 * Z1 * q11) +
-                       _V1z * (-2 * X1 * q12 + 2 * Y1 * q11 - 2 * Z1 * q10));
-  _jachq->setValue(0, 4,
-                   _V1x * (-2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13) +
-                       _V1y * (-2 * X1 * q12 + 2 * Y1 * q11 - 2 * Z1 * q10) +
-                       _V1z * (-2 * X1 * q13 + 2 * Y1 * q10 + 2 * Z1 * q11));
-  _jachq->setValue(0, 5,
-                   _V1x * (2 * X1 * q12 - 2 * Y1 * q11 + 2 * Z1 * q10) +
-                       _V1y * (-2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13) +
-                       _V1z * (-2 * X1 * q10 - 2 * Y1 * q13 + 2 * Z1 * q12));
-  _jachq->setValue(0, 6,
-                   _V1x * (2 * X1 * q13 - 2 * Y1 * q10 - 2 * Z1 * q11) +
-                       _V1y * (2 * X1 * q10 + 2 * Y1 * q13 - 2 * Z1 * q12) +
-                       _V1z * (-2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13));
-  _jachq->setValue(1, 0,
-                   _V2x * (-pow(q10, 2) - pow(q11, 2) + pow(q12, 2) + pow(q13, 2)) +
-                       _V2y * (2 * q10 * q13 - 2 * q11 * q12) +
-                       _V2z * (-2 * q10 * q12 - 2 * q11 * q13));
-  _jachq->setValue(1, 1,
-                   _V2x * (-2 * q10 * q13 - 2 * q11 * q12) +
-                       _V2y * (-pow(q10, 2) + pow(q11, 2) - pow(q12, 2) + pow(q13, 2)) +
-                       _V2z * (2 * q10 * q11 - 2 * q12 * q13));
-  _jachq->setValue(1, 2,
-                   _V2x * (2 * q10 * q12 - 2 * q11 * q13) +
-                       _V2y * (-2 * q10 * q11 - 2 * q12 * q13) +
-                       _V2z * (-pow(q10, 2) + pow(q11, 2) + pow(q12, 2) - pow(q13, 2)));
-  _jachq->setValue(1, 3,
-                   _V2x * (-2 * X1 * q10 - 2 * Y1 * q13 + 2 * Z1 * q12) +
-                       _V2y * (2 * X1 * q13 - 2 * Y1 * q10 - 2 * Z1 * q11) +
-                       _V2z * (-2 * X1 * q12 + 2 * Y1 * q11 - 2 * Z1 * q10));
-  _jachq->setValue(1, 4,
-                   _V2x * (-2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13) +
-                       _V2y * (-2 * X1 * q12 + 2 * Y1 * q11 - 2 * Z1 * q10) +
-                       _V2z * (-2 * X1 * q13 + 2 * Y1 * q10 + 2 * Z1 * q11));
-  _jachq->setValue(1, 5,
-                   _V2x * (2 * X1 * q12 - 2 * Y1 * q11 + 2 * Z1 * q10) +
-                       _V2y * (-2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13) +
-                       _V2z * (-2 * X1 * q10 - 2 * Y1 * q13 + 2 * Z1 * q12));
-  _jachq->setValue(1, 6,
-                   _V2x * (2 * X1 * q13 - 2 * Y1 * q10 - 2 * Z1 * q11) +
-                       _V2y * (2 * X1 * q10 + 2 * Y1 * q13 - 2 * Z1 * q12) +
-                       _V2z * (-2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13));
+  jacobianhOver_q_view_->setValue(
+      0, 0,
+      _V1x * (-pow(q10, 2) - pow(q11, 2) + pow(q12, 2) + pow(q13, 2)) +
+          _V1y * (2 * q10 * q13 - 2 * q11 * q12) + _V1z * (-2 * q10 * q12 - 2 * q11 * q13));
+  jacobianhOver_q_view_->setValue(
+      0, 1,
+      _V1x * (-2 * q10 * q13 - 2 * q11 * q12) +
+          _V1y * (-pow(q10, 2) + pow(q11, 2) - pow(q12, 2) + pow(q13, 2)) +
+          _V1z * (2 * q10 * q11 - 2 * q12 * q13));
+  jacobianhOver_q_view_->setValue(
+      0, 2,
+      _V1x * (2 * q10 * q12 - 2 * q11 * q13) + _V1y * (-2 * q10 * q11 - 2 * q12 * q13) +
+          _V1z * (-pow(q10, 2) + pow(q11, 2) + pow(q12, 2) - pow(q13, 2)));
+  jacobianhOver_q_view_->setValue(0, 3,
+                                  _V1x * (-2 * X1 * q10 - 2 * Y1 * q13 + 2 * Z1 * q12) +
+                                      _V1y * (2 * X1 * q13 - 2 * Y1 * q10 - 2 * Z1 * q11) +
+                                      _V1z * (-2 * X1 * q12 + 2 * Y1 * q11 - 2 * Z1 * q10));
+  jacobianhOver_q_view_->setValue(0, 4,
+                                  _V1x * (-2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13) +
+                                      _V1y * (-2 * X1 * q12 + 2 * Y1 * q11 - 2 * Z1 * q10) +
+                                      _V1z * (-2 * X1 * q13 + 2 * Y1 * q10 + 2 * Z1 * q11));
+  jacobianhOver_q_view_->setValue(0, 5,
+                                  _V1x * (2 * X1 * q12 - 2 * Y1 * q11 + 2 * Z1 * q10) +
+                                      _V1y * (-2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13) +
+                                      _V1z * (-2 * X1 * q10 - 2 * Y1 * q13 + 2 * Z1 * q12));
+  jacobianhOver_q_view_->setValue(0, 6,
+                                  _V1x * (2 * X1 * q13 - 2 * Y1 * q10 - 2 * Z1 * q11) +
+                                      _V1y * (2 * X1 * q10 + 2 * Y1 * q13 - 2 * Z1 * q12) +
+                                      _V1z * (-2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13));
+  jacobianhOver_q_view_->setValue(
+      1, 0,
+      _V2x * (-pow(q10, 2) - pow(q11, 2) + pow(q12, 2) + pow(q13, 2)) +
+          _V2y * (2 * q10 * q13 - 2 * q11 * q12) + _V2z * (-2 * q10 * q12 - 2 * q11 * q13));
+  jacobianhOver_q_view_->setValue(
+      1, 1,
+      _V2x * (-2 * q10 * q13 - 2 * q11 * q12) +
+          _V2y * (-pow(q10, 2) + pow(q11, 2) - pow(q12, 2) + pow(q13, 2)) +
+          _V2z * (2 * q10 * q11 - 2 * q12 * q13));
+  jacobianhOver_q_view_->setValue(
+      1, 2,
+      _V2x * (2 * q10 * q12 - 2 * q11 * q13) + _V2y * (-2 * q10 * q11 - 2 * q12 * q13) +
+          _V2z * (-pow(q10, 2) + pow(q11, 2) + pow(q12, 2) - pow(q13, 2)));
+  jacobianhOver_q_view_->setValue(1, 3,
+                                  _V2x * (-2 * X1 * q10 - 2 * Y1 * q13 + 2 * Z1 * q12) +
+                                      _V2y * (2 * X1 * q13 - 2 * Y1 * q10 - 2 * Z1 * q11) +
+                                      _V2z * (-2 * X1 * q12 + 2 * Y1 * q11 - 2 * Z1 * q10));
+  jacobianhOver_q_view_->setValue(1, 4,
+                                  _V2x * (-2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13) +
+                                      _V2y * (-2 * X1 * q12 + 2 * Y1 * q11 - 2 * Z1 * q10) +
+                                      _V2z * (-2 * X1 * q13 + 2 * Y1 * q10 + 2 * Z1 * q11));
+  jacobianhOver_q_view_->setValue(1, 5,
+                                  _V2x * (2 * X1 * q12 - 2 * Y1 * q11 + 2 * Z1 * q10) +
+                                      _V2y * (-2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13) +
+                                      _V2z * (-2 * X1 * q10 - 2 * Y1 * q13 + 2 * Z1 * q12));
+  jacobianhOver_q_view_->setValue(1, 6,
+                                  _V2x * (2 * X1 * q13 - 2 * Y1 * q10 - 2 * Z1 * q11) +
+                                      _V2y * (2 * X1 * q10 + 2 * Y1 * q13 - 2 * Z1 * q12) +
+                                      _V2z * (-2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13));
 
   /* Orientation constraints (H3, H4, H5)
    */
-  _jachq->setValue(2, 0, 0);
-  _jachq->setValue(2, 1, 0);
-  _jachq->setValue(2, 2, 0);
-  _jachq->setValue(2, 3, -_cq2q102);
-  _jachq->setValue(2, 4, _cq2q101);
-  _jachq->setValue(2, 5, -_cq2q104);
-  _jachq->setValue(2, 6, _cq2q103);
-  _jachq->setValue(3, 0, 0);
-  _jachq->setValue(3, 1, 0);
-  _jachq->setValue(3, 2, 0);
-  _jachq->setValue(3, 3, -_cq2q103);
-  _jachq->setValue(3, 4, _cq2q104);
-  _jachq->setValue(3, 5, _cq2q101);
-  _jachq->setValue(3, 6, -_cq2q102);
-  _jachq->setValue(4, 0, 0);
-  _jachq->setValue(4, 1, 0);
-  _jachq->setValue(4, 2, 0);
-  _jachq->setValue(4, 3, -_cq2q104);
-  _jachq->setValue(4, 4, -_cq2q103);
-  _jachq->setValue(4, 5, _cq2q102);
-  _jachq->setValue(4, 6, _cq2q101);
-}
-
-void siconos::joints::PrismaticJointR::computeDotJachq(
-    double time, const siconos::algebra::BlockVector& workQ,
-    siconos::algebra::BlockVector& workZ, const siconos::algebra::BlockVector& workQdot) {
-  std::cout
-      << "Warning:  siconos::joints::PrismaticJointR::computeDotJachq(...) not yet implemented"
-      << std::endl;
+  jacobianhOver_q_view_->setValue(2, 0, 0);
+  jacobianhOver_q_view_->setValue(2, 1, 0);
+  jacobianhOver_q_view_->setValue(2, 2, 0);
+  jacobianhOver_q_view_->setValue(2, 3, -_cq2q102);
+  jacobianhOver_q_view_->setValue(2, 4, _cq2q101);
+  jacobianhOver_q_view_->setValue(2, 5, -_cq2q104);
+  jacobianhOver_q_view_->setValue(2, 6, _cq2q103);
+  jacobianhOver_q_view_->setValue(3, 0, 0);
+  jacobianhOver_q_view_->setValue(3, 1, 0);
+  jacobianhOver_q_view_->setValue(3, 2, 0);
+  jacobianhOver_q_view_->setValue(3, 3, -_cq2q103);
+  jacobianhOver_q_view_->setValue(3, 4, _cq2q104);
+  jacobianhOver_q_view_->setValue(3, 5, _cq2q101);
+  jacobianhOver_q_view_->setValue(3, 6, -_cq2q102);
+  jacobianhOver_q_view_->setValue(4, 0, 0);
+  jacobianhOver_q_view_->setValue(4, 1, 0);
+  jacobianhOver_q_view_->setValue(4, 2, 0);
+  jacobianhOver_q_view_->setValue(4, 3, -_cq2q104);
+  jacobianhOver_q_view_->setValue(4, 4, -_cq2q103);
+  jacobianhOver_q_view_->setValue(4, 5, _cq2q102);
+  jacobianhOver_q_view_->setValue(4, 6, _cq2q101);
 }
 
 void siconos::joints::PrismaticJointR::DotJd1d2(double Xdot1, double Ydot1, double Zdot1,
@@ -632,10 +658,9 @@ void siconos::joints::PrismaticJointR::DotJd2(double Xdot1, double Ydot1, double
                                               double qdot23) {}
 
 /** Compute the vector of linear and angular positions of the degrees of freedom */
-void siconos::joints::PrismaticJointR::computehDoF(double time,
-                                                   const siconos::algebra::BlockVector& q0,
-                                                   siconos::algebra::SiconosVector& y,
-                                                   unsigned int axis) {
+void siconos::joints::PrismaticJointR::computehDoF(
+    const siconos::algebra::BlockVector& q0, Eigen::Ref<siconos::algebra::SiconosVector> y,
+    unsigned int axis) {
   // Normally we fill y starting at axis up to the number of columns,
   // but in this case there is only one, so just don't do anything if
   // it doesn't match.
@@ -681,15 +706,14 @@ void siconos::joints::PrismaticJointR::computehDoF(double time,
 
 /** Compute the jacobian of linear and angular DoF with respect to some q */
 void siconos::joints::PrismaticJointR::computeJachqDoF(
-    double time, siconos::modeling::Interaction& inter,
-    std::shared_ptr<siconos::algebra::BlockVector> q0, siconos::algebra::SiconosMatrix& jachq,
-    unsigned int axis) {
+    siconos::modeling::Interaction& inter, const siconos::algebra::BlockVector& q0,
+    Eigen::Ref<siconos::algebra::SiconosMatrix> jachq, unsigned int axis) {
   // Normally we fill jachq starting at axis up to the number of rows,
   // but in this case there is only one, so just don't do anything if
   // it doesn't match.
   if (axis != 0) return;
 
-  auto q1 = (q0->getAllVect())[0];
+  auto q1 = (q0.getAllVect())[0];
   double X1 = q1->getValue(0);
   double Y1 = q1->getValue(1);
   double Z1 = q1->getValue(2);
@@ -701,8 +725,8 @@ void siconos::joints::PrismaticJointR::computeJachqDoF(
   double Y2 = 0;
   double Z2 = 0;
 
-  if (q0->numberOfBlocks() > 1) {
-    auto q2 = (q0->getAllVect())[1];
+  if (q0.numberOfBlocks() > 1) {
+    auto q2 = (q0.getAllVect())[1];
     X2 = q2->getValue(0);
     Y2 = q2->getValue(1);
     Z2 = q2->getValue(2);
@@ -755,7 +779,7 @@ void siconos::joints::PrismaticJointR::computeJachqDoF(
           _axis0->getValue(2) * (q11 * (-X1 + X2) - q11 * (X1 - X2) + 2 * q12 * (-Y1 + Y2) +
                                  q13 * (-Z1 + Z2) - q13 * (Z1 - Z2)));
 
-  if (q0->numberOfBlocks() > 1) {
+  if (q0.numberOfBlocks() > 1) {
     jachq.setValue(
         0, 7,
         _axis0->getValue(0) * (pow(q10, 2) + pow(q11, 2) - pow(q12, 2) - pow(q13, 2)) +
@@ -787,5 +811,6 @@ void siconos::joints::PrismaticJointR::_normalDoF(siconos::algebra::SiconosVecto
   // We assume that a is normalized.
   ans = *_axis0;
 
-  if (absoluteRef) siconos::geometry::changeFrameBodyToAbs(*q0.getAllVect()[0], ans);
+  if (absoluteRef)
+    siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(*q0.getAllVect()[0], ans);
 }

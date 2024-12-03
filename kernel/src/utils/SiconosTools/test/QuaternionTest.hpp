@@ -15,37 +15,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __EigenProblemsTest__
-#define __EigenProblemsTest__
+#ifndef __QuaternionTest__
+#define __QuaternionTest__
 
 #include <cppunit/extensions/HelperMacros.h>
 
-#include "SiconosMatrix.hpp"
+#include "RotationQuaternion.hpp"
+#include "SiconosException.hpp"
 
-class EigenProblemsTest : public CppUnit::TestFixture {
+class QuaternionTest : public CppUnit::TestFixture {
  private:
-  ACCEPT_SERIALIZATION(EigenProblemsTest);
+  ACCEPT_SERIALIZATION(QuaternionTest);
 
-  // test suite
-  CPPUNIT_TEST_SUITE(EigenProblemsTest);
+  // Name of the tests suite
+  CPPUNIT_TEST_SUITE(QuaternionTest);
 
-  CPPUNIT_TEST(testSyev);
-  CPPUNIT_TEST(testGeev1);
-  CPPUNIT_TEST(testGeev2);
-  CPPUNIT_TEST(testGeev3);
-
+  // tests to be done ...
+  CPPUNIT_TEST(testQuaternion);
+  CPPUNIT_TEST(testQuaternionMatrix);
   CPPUNIT_TEST_SUITE_END();
 
-  void testSyev();
-  void testGeev1();
-  void testGeev2();
-  void testGeev3();
+  void testQuaternion();
+  void testQuaternionMatrix();
 
-  void End();
-
-  unsigned int size;
-  std::shared_ptr<siconos::algebra::SiconosMatrix> A, Aref, Asym;
-
+  // Members
  public:
   void setUp();
   void tearDown();

@@ -24,8 +24,8 @@
 
 #include "BlockVector.hpp"
 #include "NewtonEulerDS.hpp"
-#include "SiconosVector.hpp"
 #include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 // #define DEBUG_BEGIN_END_ONLY
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -89,9 +89,8 @@ void siconos::joints::FixedJointR::setBasePositions(
   _G10G20d1z = quatBuff.R_component_4();
 }
 
-void siconos::joints::FixedJointR::computeh(double time,
-                                            const siconos::algebra::BlockVector& q0,
-                                            siconos::algebra::SiconosVector& y) {
+void siconos::joints::FixedJointR::computeh(const siconos::algebra::BlockVector& q0,
+                                            Eigen::Ref<siconos::algebra::SiconosVector> y) {
   double X1 = q0.getValue(0);
   double Y1 = q0.getValue(1);
   double Z1 = q0.getValue(2);
@@ -155,12 +154,12 @@ void siconos::joints::FixedJointR::computeh(double time,
                  q13 * (_cq2q101 * q20 - _cq2q102 * q21 - _cq2q103 * q22 - _cq2q104 * q23));
 }
 
-void siconos::joints::FixedJointR::computeJachq(
+void siconos::joints::FixedJointR::computeJacobianhOver_q_(
     double time, siconos::modeling::Interaction& inter,
-    std::shared_ptr<siconos::algebra::BlockVector> q0) {
-  _jachq->setZero();
+    const siconos::algebra::BlockVector& q0) {
+  jacobianhOver_q_view_->setZero();
 
-  auto q1 = (q0->getAllVect())[0];
+  auto q1 = (q0.getAllVect())[0];
   double X1 = q1->getValue(0);
   double Y1 = q1->getValue(1);
   double Z1 = q1->getValue(2);
@@ -177,8 +176,8 @@ void siconos::joints::FixedJointR::computeJachq(
   double q22 = 0;
   double q23 = 0;
 
-  if (q0->numberOfBlocks() > 1) {
-    auto q2 = (q0->getAllVect())[1];
+  if (q0.numberOfBlocks() > 1) {
+    auto q2 = (q0.getAllVect())[1];
     X2 = q2->getValue(0);
     Y2 = q2->getValue(1);
     Z2 = q2->getValue(2);
@@ -202,108 +201,138 @@ void siconos::joints::FixedJointR::Jd1d2(double X1, double Y1, double Z1, double
    * jachq = [[h.diff(d) for d in dq] for h in H]
    */
 
-  _jachq->setValue(0, 0, -pow(q10, 2) - pow(q11, 2) + pow(q12, 2) + pow(q13, 2));
-  _jachq->setValue(0, 1, -2 * q10 * q13 - 2 * q11 * q12);
-  _jachq->setValue(0, 2, 2 * q10 * q12 - 2 * q11 * q13);
-  _jachq->setValue(0, 3, 2 * q10 * (-X1 + X2) - 2 * q12 * (-Z1 + Z2) + 2 * q13 * (-Y1 + Y2));
-  _jachq->setValue(0, 4,
-                   q11 * (-X1 + X2) - q11 * (X1 - X2) + q12 * (-Y1 + Y2) - q12 * (Y1 - Y2) +
-                       2 * q13 * (-Z1 + Z2));
-  _jachq->setValue(0, 5,
-                   -q10 * (-Z1 + Z2) + q10 * (Z1 - Z2) + q11 * (-Y1 + Y2) - q11 * (Y1 - Y2) -
-                       2 * q12 * (-X1 + X2));
-  _jachq->setValue(0, 6,
-                   2 * q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q11 * (Z1 - Z2) -
-                       q13 * (-X1 + X2) + q13 * (X1 - X2));
-  _jachq->setValue(0, 7, pow(q10, 2) + pow(q11, 2) - pow(q12, 2) - pow(q13, 2));
-  _jachq->setValue(0, 8, 2 * q10 * q13 + 2 * q11 * q12);
-  _jachq->setValue(0, 9, -2 * q10 * q12 + 2 * q11 * q13);
-  _jachq->setValue(0, 10, 0);
-  _jachq->setValue(0, 11, 0);
-  _jachq->setValue(0, 12, 0);
-  _jachq->setValue(0, 13, 0);
-  _jachq->setValue(1, 0, 2 * q10 * q13 - 2 * q11 * q12);
-  _jachq->setValue(1, 1, -pow(q10, 2) + pow(q11, 2) - pow(q12, 2) + pow(q13, 2));
-  _jachq->setValue(1, 2, -2 * q10 * q11 - 2 * q12 * q13);
-  _jachq->setValue(1, 3, 2 * q10 * (-Y1 + Y2) + 2 * q11 * (-Z1 + Z2) - 2 * q13 * (-X1 + X2));
-  _jachq->setValue(1, 4,
-                   2 * q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q11 * (Y1 - Y2) +
-                       q12 * (-X1 + X2) - q12 * (X1 - X2));
-  _jachq->setValue(1, 5,
-                   2 * q11 * (-X1 + X2) + q12 * (-Y1 + Y2) - q12 * (Y1 - Y2) +
-                       q13 * (-Z1 + Z2) - q13 * (Z1 - Z2));
-  _jachq->setValue(1, 6,
-                   -q10 * (-X1 + X2) + q10 * (X1 - X2) + q12 * (-Z1 + Z2) - q12 * (Z1 - Z2) -
-                       2 * q13 * (-Y1 + Y2));
-  _jachq->setValue(1, 7, -2 * q10 * q13 + 2 * q11 * q12);
-  _jachq->setValue(1, 8, pow(q10, 2) - pow(q11, 2) + pow(q12, 2) - pow(q13, 2));
-  _jachq->setValue(1, 9, 2 * q10 * q11 + 2 * q12 * q13);
-  _jachq->setValue(1, 10, 0);
-  _jachq->setValue(1, 11, 0);
-  _jachq->setValue(1, 12, 0);
-  _jachq->setValue(1, 13, 0);
-  _jachq->setValue(2, 0, -2 * q10 * q12 - 2 * q11 * q13);
-  _jachq->setValue(2, 1, 2 * q10 * q11 - 2 * q12 * q13);
-  _jachq->setValue(2, 2, -pow(q10, 2) + pow(q11, 2) + pow(q12, 2) - pow(q13, 2));
-  _jachq->setValue(2, 3, 2 * q10 * (-Z1 + Z2) - 2 * q11 * (-Y1 + Y2) + 2 * q12 * (-X1 + X2));
-  _jachq->setValue(2, 4,
-                   -q10 * (-Y1 + Y2) + q10 * (Y1 - Y2) - 2 * q11 * (-Z1 + Z2) +
-                       q13 * (-X1 + X2) - q13 * (X1 - X2));
-  _jachq->setValue(2, 5,
-                   2 * q10 * (-X1 + X2) - q12 * (-Z1 + Z2) + q12 * (Z1 - Z2) +
-                       q13 * (-Y1 + Y2) - q13 * (Y1 - Y2));
-  _jachq->setValue(2, 6,
-                   q11 * (-X1 + X2) - q11 * (X1 - X2) + 2 * q12 * (-Y1 + Y2) +
-                       q13 * (-Z1 + Z2) - q13 * (Z1 - Z2));
-  _jachq->setValue(2, 7, 2 * q10 * q12 + 2 * q11 * q13);
-  _jachq->setValue(2, 8, -2 * q10 * q11 + 2 * q12 * q13);
-  _jachq->setValue(2, 9, pow(q10, 2) - pow(q11, 2) - pow(q12, 2) + pow(q13, 2));
-  _jachq->setValue(2, 10, 0);
-  _jachq->setValue(2, 11, 0);
-  _jachq->setValue(2, 12, 0);
-  _jachq->setValue(2, 13, 0);
-  _jachq->setValue(3, 0, 0);
-  _jachq->setValue(3, 1, 0);
-  _jachq->setValue(3, 2, 0);
-  _jachq->setValue(3, 3, -_cq2q101 * q21 - _cq2q102 * q20 + _cq2q103 * q23 - _cq2q104 * q22);
-  _jachq->setValue(3, 4, _cq2q101 * q20 - _cq2q102 * q21 - _cq2q103 * q22 - _cq2q104 * q23);
-  _jachq->setValue(3, 5, -_cq2q101 * q23 + _cq2q102 * q22 - _cq2q103 * q21 - _cq2q104 * q20);
-  _jachq->setValue(3, 6, _cq2q101 * q22 + _cq2q102 * q23 + _cq2q103 * q20 - _cq2q104 * q21);
-  _jachq->setValue(3, 7, 0);
-  _jachq->setValue(3, 8, 0);
-  _jachq->setValue(3, 9, 0);
-  _jachq->setValue(3, 10, _cq2q101 * q11 - _cq2q102 * q10 + _cq2q103 * q13 - _cq2q104 * q12);
-  _jachq->setValue(3, 11, -_cq2q101 * q10 - _cq2q102 * q11 - _cq2q103 * q12 - _cq2q104 * q13);
-  _jachq->setValue(3, 12, _cq2q101 * q13 + _cq2q102 * q12 - _cq2q103 * q11 - _cq2q104 * q10);
-  _jachq->setValue(3, 13, -_cq2q101 * q12 + _cq2q102 * q13 + _cq2q103 * q10 - _cq2q104 * q11);
-  _jachq->setValue(4, 0, 0);
-  _jachq->setValue(4, 1, 0);
-  _jachq->setValue(4, 2, 0);
-  _jachq->setValue(4, 3, -_cq2q101 * q22 - _cq2q102 * q23 - _cq2q103 * q20 + _cq2q104 * q21);
-  _jachq->setValue(4, 4, _cq2q101 * q23 - _cq2q102 * q22 + _cq2q103 * q21 + _cq2q104 * q20);
-  _jachq->setValue(4, 5, _cq2q101 * q20 - _cq2q102 * q21 - _cq2q103 * q22 - _cq2q104 * q23);
-  _jachq->setValue(4, 6, -_cq2q101 * q21 - _cq2q102 * q20 + _cq2q103 * q23 - _cq2q104 * q22);
-  _jachq->setValue(4, 7, 0);
-  _jachq->setValue(4, 8, 0);
-  _jachq->setValue(4, 9, 0);
-  _jachq->setValue(4, 10, _cq2q101 * q12 - _cq2q102 * q13 - _cq2q103 * q10 + _cq2q104 * q11);
-  _jachq->setValue(4, 11, -_cq2q101 * q13 - _cq2q102 * q12 + _cq2q103 * q11 + _cq2q104 * q10);
-  _jachq->setValue(4, 12, -_cq2q101 * q10 - _cq2q102 * q11 - _cq2q103 * q12 - _cq2q104 * q13);
-  _jachq->setValue(4, 13, _cq2q101 * q11 - _cq2q102 * q10 + _cq2q103 * q13 - _cq2q104 * q12);
-  _jachq->setValue(5, 0, 0);
-  _jachq->setValue(5, 1, 0);
-  _jachq->setValue(5, 2, 0);
-  _jachq->setValue(5, 3, -_cq2q101 * q23 + _cq2q102 * q22 - _cq2q103 * q21 - _cq2q104 * q20);
-  _jachq->setValue(5, 4, -_cq2q101 * q22 - _cq2q102 * q23 - _cq2q103 * q20 + _cq2q104 * q21);
-  _jachq->setValue(5, 5, _cq2q101 * q21 + _cq2q102 * q20 - _cq2q103 * q23 + _cq2q104 * q22);
-  _jachq->setValue(5, 6, _cq2q101 * q20 - _cq2q102 * q21 - _cq2q103 * q22 - _cq2q104 * q23);
-  _jachq->setValue(5, 7, 0);
-  _jachq->setValue(5, 8, 0);
-  _jachq->setValue(5, 9, 0);
-  _jachq->setValue(5, 10, _cq2q101 * q13 + _cq2q102 * q12 - _cq2q103 * q11 - _cq2q104 * q10);
-  _jachq->setValue(5, 11, _cq2q101 * q12 - _cq2q102 * q13 - _cq2q103 * q10 + _cq2q104 * q11);
-  _jachq->setValue(5, 12, -_cq2q101 * q11 + _cq2q102 * q10 - _cq2q103 * q13 + _cq2q104 * q12);
-  _jachq->setValue(5, 13, -_cq2q101 * q10 - _cq2q102 * q11 - _cq2q103 * q12 - _cq2q104 * q13);
+  jacobianhOver_q_view_->setValue(0, 0,
+                                  -pow(q10, 2) - pow(q11, 2) + pow(q12, 2) + pow(q13, 2));
+  jacobianhOver_q_view_->setValue(0, 1, -2 * q10 * q13 - 2 * q11 * q12);
+  jacobianhOver_q_view_->setValue(0, 2, 2 * q10 * q12 - 2 * q11 * q13);
+  jacobianhOver_q_view_->setValue(
+      0, 3, 2 * q10 * (-X1 + X2) - 2 * q12 * (-Z1 + Z2) + 2 * q13 * (-Y1 + Y2));
+  jacobianhOver_q_view_->setValue(0, 4,
+                                  q11 * (-X1 + X2) - q11 * (X1 - X2) + q12 * (-Y1 + Y2) -
+                                      q12 * (Y1 - Y2) + 2 * q13 * (-Z1 + Z2));
+  jacobianhOver_q_view_->setValue(0, 5,
+                                  -q10 * (-Z1 + Z2) + q10 * (Z1 - Z2) + q11 * (-Y1 + Y2) -
+                                      q11 * (Y1 - Y2) - 2 * q12 * (-X1 + X2));
+  jacobianhOver_q_view_->setValue(0, 6,
+                                  2 * q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q11 * (Z1 - Z2) -
+                                      q13 * (-X1 + X2) + q13 * (X1 - X2));
+  jacobianhOver_q_view_->setValue(0, 7, pow(q10, 2) + pow(q11, 2) - pow(q12, 2) - pow(q13, 2));
+  jacobianhOver_q_view_->setValue(0, 8, 2 * q10 * q13 + 2 * q11 * q12);
+  jacobianhOver_q_view_->setValue(0, 9, -2 * q10 * q12 + 2 * q11 * q13);
+  jacobianhOver_q_view_->setValue(0, 10, 0);
+  jacobianhOver_q_view_->setValue(0, 11, 0);
+  jacobianhOver_q_view_->setValue(0, 12, 0);
+  jacobianhOver_q_view_->setValue(0, 13, 0);
+  jacobianhOver_q_view_->setValue(1, 0, 2 * q10 * q13 - 2 * q11 * q12);
+  jacobianhOver_q_view_->setValue(1, 1,
+                                  -pow(q10, 2) + pow(q11, 2) - pow(q12, 2) + pow(q13, 2));
+  jacobianhOver_q_view_->setValue(1, 2, -2 * q10 * q11 - 2 * q12 * q13);
+  jacobianhOver_q_view_->setValue(
+      1, 3, 2 * q10 * (-Y1 + Y2) + 2 * q11 * (-Z1 + Z2) - 2 * q13 * (-X1 + X2));
+  jacobianhOver_q_view_->setValue(1, 4,
+                                  2 * q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q11 * (Y1 - Y2) +
+                                      q12 * (-X1 + X2) - q12 * (X1 - X2));
+  jacobianhOver_q_view_->setValue(1, 5,
+                                  2 * q11 * (-X1 + X2) + q12 * (-Y1 + Y2) - q12 * (Y1 - Y2) +
+                                      q13 * (-Z1 + Z2) - q13 * (Z1 - Z2));
+  jacobianhOver_q_view_->setValue(1, 6,
+                                  -q10 * (-X1 + X2) + q10 * (X1 - X2) + q12 * (-Z1 + Z2) -
+                                      q12 * (Z1 - Z2) - 2 * q13 * (-Y1 + Y2));
+  jacobianhOver_q_view_->setValue(1, 7, -2 * q10 * q13 + 2 * q11 * q12);
+  jacobianhOver_q_view_->setValue(1, 8, pow(q10, 2) - pow(q11, 2) + pow(q12, 2) - pow(q13, 2));
+  jacobianhOver_q_view_->setValue(1, 9, 2 * q10 * q11 + 2 * q12 * q13);
+  jacobianhOver_q_view_->setValue(1, 10, 0);
+  jacobianhOver_q_view_->setValue(1, 11, 0);
+  jacobianhOver_q_view_->setValue(1, 12, 0);
+  jacobianhOver_q_view_->setValue(1, 13, 0);
+  jacobianhOver_q_view_->setValue(2, 0, -2 * q10 * q12 - 2 * q11 * q13);
+  jacobianhOver_q_view_->setValue(2, 1, 2 * q10 * q11 - 2 * q12 * q13);
+  jacobianhOver_q_view_->setValue(2, 2,
+                                  -pow(q10, 2) + pow(q11, 2) + pow(q12, 2) - pow(q13, 2));
+  jacobianhOver_q_view_->setValue(
+      2, 3, 2 * q10 * (-Z1 + Z2) - 2 * q11 * (-Y1 + Y2) + 2 * q12 * (-X1 + X2));
+  jacobianhOver_q_view_->setValue(2, 4,
+                                  -q10 * (-Y1 + Y2) + q10 * (Y1 - Y2) - 2 * q11 * (-Z1 + Z2) +
+                                      q13 * (-X1 + X2) - q13 * (X1 - X2));
+  jacobianhOver_q_view_->setValue(2, 5,
+                                  2 * q10 * (-X1 + X2) - q12 * (-Z1 + Z2) + q12 * (Z1 - Z2) +
+                                      q13 * (-Y1 + Y2) - q13 * (Y1 - Y2));
+  jacobianhOver_q_view_->setValue(2, 6,
+                                  q11 * (-X1 + X2) - q11 * (X1 - X2) + 2 * q12 * (-Y1 + Y2) +
+                                      q13 * (-Z1 + Z2) - q13 * (Z1 - Z2));
+  jacobianhOver_q_view_->setValue(2, 7, 2 * q10 * q12 + 2 * q11 * q13);
+  jacobianhOver_q_view_->setValue(2, 8, -2 * q10 * q11 + 2 * q12 * q13);
+  jacobianhOver_q_view_->setValue(2, 9, pow(q10, 2) - pow(q11, 2) - pow(q12, 2) + pow(q13, 2));
+  jacobianhOver_q_view_->setValue(2, 10, 0);
+  jacobianhOver_q_view_->setValue(2, 11, 0);
+  jacobianhOver_q_view_->setValue(2, 12, 0);
+  jacobianhOver_q_view_->setValue(2, 13, 0);
+  jacobianhOver_q_view_->setValue(3, 0, 0);
+  jacobianhOver_q_view_->setValue(3, 1, 0);
+  jacobianhOver_q_view_->setValue(3, 2, 0);
+  jacobianhOver_q_view_->setValue(
+      3, 3, -_cq2q101 * q21 - _cq2q102 * q20 + _cq2q103 * q23 - _cq2q104 * q22);
+  jacobianhOver_q_view_->setValue(
+      3, 4, _cq2q101 * q20 - _cq2q102 * q21 - _cq2q103 * q22 - _cq2q104 * q23);
+  jacobianhOver_q_view_->setValue(
+      3, 5, -_cq2q101 * q23 + _cq2q102 * q22 - _cq2q103 * q21 - _cq2q104 * q20);
+  jacobianhOver_q_view_->setValue(
+      3, 6, _cq2q101 * q22 + _cq2q102 * q23 + _cq2q103 * q20 - _cq2q104 * q21);
+  jacobianhOver_q_view_->setValue(3, 7, 0);
+  jacobianhOver_q_view_->setValue(3, 8, 0);
+  jacobianhOver_q_view_->setValue(3, 9, 0);
+  jacobianhOver_q_view_->setValue(
+      3, 10, _cq2q101 * q11 - _cq2q102 * q10 + _cq2q103 * q13 - _cq2q104 * q12);
+  jacobianhOver_q_view_->setValue(
+      3, 11, -_cq2q101 * q10 - _cq2q102 * q11 - _cq2q103 * q12 - _cq2q104 * q13);
+  jacobianhOver_q_view_->setValue(
+      3, 12, _cq2q101 * q13 + _cq2q102 * q12 - _cq2q103 * q11 - _cq2q104 * q10);
+  jacobianhOver_q_view_->setValue(
+      3, 13, -_cq2q101 * q12 + _cq2q102 * q13 + _cq2q103 * q10 - _cq2q104 * q11);
+  jacobianhOver_q_view_->setValue(4, 0, 0);
+  jacobianhOver_q_view_->setValue(4, 1, 0);
+  jacobianhOver_q_view_->setValue(4, 2, 0);
+  jacobianhOver_q_view_->setValue(
+      4, 3, -_cq2q101 * q22 - _cq2q102 * q23 - _cq2q103 * q20 + _cq2q104 * q21);
+  jacobianhOver_q_view_->setValue(
+      4, 4, _cq2q101 * q23 - _cq2q102 * q22 + _cq2q103 * q21 + _cq2q104 * q20);
+  jacobianhOver_q_view_->setValue(
+      4, 5, _cq2q101 * q20 - _cq2q102 * q21 - _cq2q103 * q22 - _cq2q104 * q23);
+  jacobianhOver_q_view_->setValue(
+      4, 6, -_cq2q101 * q21 - _cq2q102 * q20 + _cq2q103 * q23 - _cq2q104 * q22);
+  jacobianhOver_q_view_->setValue(4, 7, 0);
+  jacobianhOver_q_view_->setValue(4, 8, 0);
+  jacobianhOver_q_view_->setValue(4, 9, 0);
+  jacobianhOver_q_view_->setValue(
+      4, 10, _cq2q101 * q12 - _cq2q102 * q13 - _cq2q103 * q10 + _cq2q104 * q11);
+  jacobianhOver_q_view_->setValue(
+      4, 11, -_cq2q101 * q13 - _cq2q102 * q12 + _cq2q103 * q11 + _cq2q104 * q10);
+  jacobianhOver_q_view_->setValue(
+      4, 12, -_cq2q101 * q10 - _cq2q102 * q11 - _cq2q103 * q12 - _cq2q104 * q13);
+  jacobianhOver_q_view_->setValue(
+      4, 13, _cq2q101 * q11 - _cq2q102 * q10 + _cq2q103 * q13 - _cq2q104 * q12);
+  jacobianhOver_q_view_->setValue(5, 0, 0);
+  jacobianhOver_q_view_->setValue(5, 1, 0);
+  jacobianhOver_q_view_->setValue(5, 2, 0);
+  jacobianhOver_q_view_->setValue(
+      5, 3, -_cq2q101 * q23 + _cq2q102 * q22 - _cq2q103 * q21 - _cq2q104 * q20);
+  jacobianhOver_q_view_->setValue(
+      5, 4, -_cq2q101 * q22 - _cq2q102 * q23 - _cq2q103 * q20 + _cq2q104 * q21);
+  jacobianhOver_q_view_->setValue(
+      5, 5, _cq2q101 * q21 + _cq2q102 * q20 - _cq2q103 * q23 + _cq2q104 * q22);
+  jacobianhOver_q_view_->setValue(
+      5, 6, _cq2q101 * q20 - _cq2q102 * q21 - _cq2q103 * q22 - _cq2q104 * q23);
+  jacobianhOver_q_view_->setValue(5, 7, 0);
+  jacobianhOver_q_view_->setValue(5, 8, 0);
+  jacobianhOver_q_view_->setValue(5, 9, 0);
+  jacobianhOver_q_view_->setValue(
+      5, 10, _cq2q101 * q13 + _cq2q102 * q12 - _cq2q103 * q11 - _cq2q104 * q10);
+  jacobianhOver_q_view_->setValue(
+      5, 11, _cq2q101 * q12 - _cq2q102 * q13 - _cq2q103 * q10 + _cq2q104 * q11);
+  jacobianhOver_q_view_->setValue(
+      5, 12, -_cq2q101 * q11 + _cq2q102 * q10 - _cq2q103 * q13 + _cq2q104 * q12);
+  jacobianhOver_q_view_->setValue(
+      5, 13, -_cq2q101 * q10 - _cq2q102 * q11 - _cq2q103 * q12 - _cq2q104 * q13);
 }
 
 void siconos::joints::FixedJointR::Jd1(double X1, double Y1, double Z1, double q10, double q11,
@@ -320,46 +349,49 @@ void siconos::joints::FixedJointR::Jd1(double X1, double Y1, double Z1, double q
    * jachq = [[h.diff(d) for d in dq] for h in H]
    */
 
-  _jachq->setValue(0, 0, -pow(q10, 2) - pow(q11, 2) + pow(q12, 2) + pow(q13, 2));
-  _jachq->setValue(0, 1, -2 * q10 * q13 - 2 * q11 * q12);
-  _jachq->setValue(0, 2, 2 * q10 * q12 - 2 * q11 * q13);
-  _jachq->setValue(0, 3, -2 * X1 * q10 - 2 * Y1 * q13 + 2 * Z1 * q12);
-  _jachq->setValue(0, 4, -2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13);
-  _jachq->setValue(0, 5, 2 * X1 * q12 - 2 * Y1 * q11 + 2 * Z1 * q10);
-  _jachq->setValue(0, 6, 2 * X1 * q13 - 2 * Y1 * q10 - 2 * Z1 * q11);
-  _jachq->setValue(1, 0, 2 * q10 * q13 - 2 * q11 * q12);
-  _jachq->setValue(1, 1, -pow(q10, 2) + pow(q11, 2) - pow(q12, 2) + pow(q13, 2));
-  _jachq->setValue(1, 2, -2 * q10 * q11 - 2 * q12 * q13);
-  _jachq->setValue(1, 3, 2 * X1 * q13 - 2 * Y1 * q10 - 2 * Z1 * q11);
-  _jachq->setValue(1, 4, -2 * X1 * q12 + 2 * Y1 * q11 - 2 * Z1 * q10);
-  _jachq->setValue(1, 5, -2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13);
-  _jachq->setValue(1, 6, 2 * X1 * q10 + 2 * Y1 * q13 - 2 * Z1 * q12);
-  _jachq->setValue(2, 0, -2 * q10 * q12 - 2 * q11 * q13);
-  _jachq->setValue(2, 1, 2 * q10 * q11 - 2 * q12 * q13);
-  _jachq->setValue(2, 2, -pow(q10, 2) + pow(q11, 2) + pow(q12, 2) - pow(q13, 2));
-  _jachq->setValue(2, 3, -2 * X1 * q12 + 2 * Y1 * q11 - 2 * Z1 * q10);
-  _jachq->setValue(2, 4, -2 * X1 * q13 + 2 * Y1 * q10 + 2 * Z1 * q11);
-  _jachq->setValue(2, 5, -2 * X1 * q10 - 2 * Y1 * q13 + 2 * Z1 * q12);
-  _jachq->setValue(2, 6, -2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13);
-  _jachq->setValue(3, 0, 0);
-  _jachq->setValue(3, 1, 0);
-  _jachq->setValue(3, 2, 0);
-  _jachq->setValue(3, 3, -_cq2q102);
-  _jachq->setValue(3, 4, _cq2q101);
-  _jachq->setValue(3, 5, -_cq2q104);
-  _jachq->setValue(3, 6, _cq2q103);
-  _jachq->setValue(4, 0, 0);
-  _jachq->setValue(4, 1, 0);
-  _jachq->setValue(4, 2, 0);
-  _jachq->setValue(4, 3, -_cq2q103);
-  _jachq->setValue(4, 4, _cq2q104);
-  _jachq->setValue(4, 5, _cq2q101);
-  _jachq->setValue(4, 6, -_cq2q102);
-  _jachq->setValue(5, 0, 0);
-  _jachq->setValue(5, 1, 0);
-  _jachq->setValue(5, 2, 0);
-  _jachq->setValue(5, 3, -_cq2q104);
-  _jachq->setValue(5, 4, -_cq2q103);
-  _jachq->setValue(5, 5, _cq2q102);
-  _jachq->setValue(5, 6, _cq2q101);
+  jacobianhOver_q_view_->setValue(0, 0,
+                                  -pow(q10, 2) - pow(q11, 2) + pow(q12, 2) + pow(q13, 2));
+  jacobianhOver_q_view_->setValue(0, 1, -2 * q10 * q13 - 2 * q11 * q12);
+  jacobianhOver_q_view_->setValue(0, 2, 2 * q10 * q12 - 2 * q11 * q13);
+  jacobianhOver_q_view_->setValue(0, 3, -2 * X1 * q10 - 2 * Y1 * q13 + 2 * Z1 * q12);
+  jacobianhOver_q_view_->setValue(0, 4, -2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13);
+  jacobianhOver_q_view_->setValue(0, 5, 2 * X1 * q12 - 2 * Y1 * q11 + 2 * Z1 * q10);
+  jacobianhOver_q_view_->setValue(0, 6, 2 * X1 * q13 - 2 * Y1 * q10 - 2 * Z1 * q11);
+  jacobianhOver_q_view_->setValue(1, 0, 2 * q10 * q13 - 2 * q11 * q12);
+  jacobianhOver_q_view_->setValue(1, 1,
+                                  -pow(q10, 2) + pow(q11, 2) - pow(q12, 2) + pow(q13, 2));
+  jacobianhOver_q_view_->setValue(1, 2, -2 * q10 * q11 - 2 * q12 * q13);
+  jacobianhOver_q_view_->setValue(1, 3, 2 * X1 * q13 - 2 * Y1 * q10 - 2 * Z1 * q11);
+  jacobianhOver_q_view_->setValue(1, 4, -2 * X1 * q12 + 2 * Y1 * q11 - 2 * Z1 * q10);
+  jacobianhOver_q_view_->setValue(1, 5, -2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13);
+  jacobianhOver_q_view_->setValue(1, 6, 2 * X1 * q10 + 2 * Y1 * q13 - 2 * Z1 * q12);
+  jacobianhOver_q_view_->setValue(2, 0, -2 * q10 * q12 - 2 * q11 * q13);
+  jacobianhOver_q_view_->setValue(2, 1, 2 * q10 * q11 - 2 * q12 * q13);
+  jacobianhOver_q_view_->setValue(2, 2,
+                                  -pow(q10, 2) + pow(q11, 2) + pow(q12, 2) - pow(q13, 2));
+  jacobianhOver_q_view_->setValue(2, 3, -2 * X1 * q12 + 2 * Y1 * q11 - 2 * Z1 * q10);
+  jacobianhOver_q_view_->setValue(2, 4, -2 * X1 * q13 + 2 * Y1 * q10 + 2 * Z1 * q11);
+  jacobianhOver_q_view_->setValue(2, 5, -2 * X1 * q10 - 2 * Y1 * q13 + 2 * Z1 * q12);
+  jacobianhOver_q_view_->setValue(2, 6, -2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13);
+  jacobianhOver_q_view_->setValue(3, 0, 0);
+  jacobianhOver_q_view_->setValue(3, 1, 0);
+  jacobianhOver_q_view_->setValue(3, 2, 0);
+  jacobianhOver_q_view_->setValue(3, 3, -_cq2q102);
+  jacobianhOver_q_view_->setValue(3, 4, _cq2q101);
+  jacobianhOver_q_view_->setValue(3, 5, -_cq2q104);
+  jacobianhOver_q_view_->setValue(3, 6, _cq2q103);
+  jacobianhOver_q_view_->setValue(4, 0, 0);
+  jacobianhOver_q_view_->setValue(4, 1, 0);
+  jacobianhOver_q_view_->setValue(4, 2, 0);
+  jacobianhOver_q_view_->setValue(4, 3, -_cq2q103);
+  jacobianhOver_q_view_->setValue(4, 4, _cq2q104);
+  jacobianhOver_q_view_->setValue(4, 5, _cq2q101);
+  jacobianhOver_q_view_->setValue(4, 6, -_cq2q102);
+  jacobianhOver_q_view_->setValue(5, 0, 0);
+  jacobianhOver_q_view_->setValue(5, 1, 0);
+  jacobianhOver_q_view_->setValue(5, 2, 0);
+  jacobianhOver_q_view_->setValue(5, 3, -_cq2q104);
+  jacobianhOver_q_view_->setValue(5, 4, -_cq2q103);
+  jacobianhOver_q_view_->setValue(5, 5, _cq2q102);
+  jacobianhOver_q_view_->setValue(5, 6, _cq2q101);
 }

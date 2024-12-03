@@ -14,21 +14,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef __FirstOrderLinearRTest__
 #define __FirstOrderLinearRTest__
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "NonSmoothDynamicalSystem.hpp"
+
 #include "FirstOrderLinearR.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
 
-class FirstOrderLinearRTest : public CppUnit::TestFixture
-{
-
-private:
-  
+class FirstOrderLinearRTest : public CppUnit::TestFixture {
+ private:
   ACCEPT_SERIALIZATION(FirstOrderLinearRTest);
-
 
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(FirstOrderLinearRTest);
@@ -36,55 +33,23 @@ private:
   // tests to be done ...
 
   CPPUNIT_TEST(testBuildFirstOrderLinearR1);
-  CPPUNIT_TEST(testBuildFirstOrderLinearR3);
-  CPPUNIT_TEST(testBuildFirstOrderLinearR4);
-  CPPUNIT_TEST(testBuildFirstOrderLinearR5);
-  // //  CPPUNIT_TEST(testSetC);
-  // CPPUNIT_TEST(testSetCPtr);
-  // CPPUNIT_TEST(testSetCPtr2);
-  // //  CPPUNIT_TEST(testSetD);
-  // CPPUNIT_TEST(testSetDPtr);
-  // //  CPPUNIT_TEST(testSetF);
-  // CPPUNIT_TEST(testSetFPtr);
-  // //  CPPUNIT_TEST(testSetE);
-  // CPPUNIT_TEST(testSetEPtr);
-  // //  CPPUNIT_TEST(testSetB);
-  // CPPUNIT_TEST(testSetBPtr);
+  CPPUNIT_TEST(testBuildFirstOrderLinearR2);
 
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
 
   void testBuildFirstOrderLinearR1();
-  void testBuildFirstOrderLinearR3();
-  void testBuildFirstOrderLinearR4();
-  void testBuildFirstOrderLinearR5();
-  // //  void testSetC();
-  // void testSetCPtr();
-  // void testSetCPtr2();
-  // //  void testSetD();
-  // void testSetDPtr();
-  // //  void testSetF();
-  // void testSetFPtr();
-  // //  void testSetE();
-  // void testSetEPtr();
-  // //  void testSetB();
-  // void testSetBPtr();
-
+  void testBuildFirstOrderLinearR2();
   // Members
 
-  std::shared_ptr<siconos::algebra::SiconosMatrix> C, B, F, D;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> C, B, D;
   std::shared_ptr<siconos::algebra::SiconosVector> e;
   std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds;
 
-public:
+ public:
   void setUp();
   void tearDown();
-
 };
 
 #endif
-
-
-
-

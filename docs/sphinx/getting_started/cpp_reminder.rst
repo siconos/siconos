@@ -220,7 +220,7 @@ Remark: get/setValue functions are equivalent to "()" operator but mainly useful
    // Set vector or matrix to zero or identity
    x->zero();
    A->zero();
-   A->eye(); 
+   A->setIdentity(); 
 
    // Assignment of vectors or matrices: "A = B" or "x = y"
    // Operator =

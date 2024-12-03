@@ -29,7 +29,7 @@ siconos::collision::SiconosContactor::SiconosContactor(
   // if(!offset)
   // {
   //   offset = std::make_shared<siconos::algebra::SiconosVector>(7);
-  //   offset->zero();
+  //   offset->setZero();
   //   (*offset)(3) = 1.0;
   // }
 

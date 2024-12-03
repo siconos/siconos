@@ -82,6 +82,15 @@ class CylindricalJointR : public NewtonEulerJointR {
                           const siconos::algebra::BlockVector& q0, int axis,
                           bool absoluteRef = true) override;
 
+  /** compute the jacobian of h w.r.t. q
+   *
+   *  \param time current time
+   *  \param inter the interaction using this relation
+   *  \param q0  q states vectors of the related the dynamical systems
+   */
+  virtual void computeJacobianhOver_q_(double time, siconos::modeling::Interaction& inter,
+                                       const siconos::algebra::BlockVector& q0) override;
+
  public:
   /** Empty constructor. The relation may be initialized later by
    *  setPoint, setAbsolute, and setBasePositions. */
@@ -121,28 +130,14 @@ class CylindricalJointR : public NewtonEulerJointR {
 
   int twistCount() { return _twistCount; }
 
-  virtual void computeJachq(double time, siconos::modeling::Interaction& inter,
-                            std::shared_ptr<siconos::algebra::BlockVector> q0) override;
-
   /**
-     to compute the output y = h(t,q,z) of the Relation
+     to compute the output y = h(q) of the Relation
 
-     \param time current time value
-     \param q coordinates of the dynamical systems involved in the relation
-     \param y the resulting vector
-  */
-  virtual void computeh(double time, const siconos::algebra::BlockVector& q0,
-                        siconos::algebra::SiconosVector& y) override;
-
-  /** Compute the vector of linear and angular positions of the free axes */
-  virtual void computehDoF(double time, const siconos::algebra::BlockVector& q0,
-                           siconos::algebra::SiconosVector& y, unsigned int axis) override;
-
-  /** Compute the jacobian of linear and angular DoF with respect to some q */
-  virtual void computeJachqDoF(double time, siconos::modeling::Interaction& inter,
-                               std::shared_ptr<siconos::algebra::BlockVector> q0,
-                               siconos::algebra::SiconosMatrix& jachq,
-                               unsigned int axis) override;
+     \param[in] q generalized coordinates vector of the dynamical systems (at most 2) involved
+    in the relation \param[in,out] y the resulting vector
+ */
+  void computeh(const siconos::algebra::BlockVector& q,
+                Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
   void Jd1d2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13,
              double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);
@@ -176,6 +171,16 @@ class CylindricalJointR : public NewtonEulerJointR {
     else
       return DofType::INVALID;
   }
+  /** Compute the vector of linear and angular positions of the free axes */
+  virtual void computehDoF(const siconos::algebra::BlockVector& q0,
+                            Eigen::Ref<siconos::algebra::SiconosVector> y,
+                            unsigned int axis = 0) override;
+
+  /** Compute the jacobian of linear and angular DoF with respect to some q */
+  virtual void computeJachqDoF(siconos::modeling::Interaction& inter,
+                                const siconos::algebra::BlockVector& q0,
+                                Eigen::Ref<siconos::algebra::SiconosMatrix> jachq,
+                                unsigned int axis = 0) override;
 };
 }  // namespace siconos::joints
 #endif  // CylindricalJointRELATION_H

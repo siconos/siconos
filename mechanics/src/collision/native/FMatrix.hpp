@@ -27,14 +27,14 @@
 #include <boost/numeric/ublas/fwd.hpp>  // boost::numeric fwd
 #include <vector>
 
-#include "PluginTypes.hpp"  // For FTime
+#include "FunctionTypes.hpp"
 
 namespace siconos::collision::native {
 
 /** A matrix of time function */
-using FMatrix =
-    boost::numeric::ublas::matrix<siconos::plugins::FTime, boost::numeric::ublas::column_major,
-                                  std::vector<siconos::plugins::FTime>>;
+using FMatrix = boost::numeric::ublas::matrix<
+    siconos::modeling::func_prototypes::FunctionS_S, boost::numeric::ublas::column_major,
+    std::vector<siconos::modeling::func_prototypes::FunctionS_S>>;
 
 }  // namespace siconos::collision::native
 

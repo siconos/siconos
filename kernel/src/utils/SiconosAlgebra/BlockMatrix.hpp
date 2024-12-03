@@ -24,11 +24,12 @@
 #ifndef BLOCKMATRIX_H
 #define BLOCKMATRIX_H
 
-#include "SiconosMatrix.hpp"
-#include "SiconosVector.hpp"
-#include "SiconosSerialization.hpp"
-#include "SiconosException.hpp"
 #include <memory>
+
+#include "SiconosException.hpp"
+#include "SiconosMatrix.hpp"
+#include "SiconosSerialization.hpp"
+#include "SiconosVector.hpp"
 
 namespace siconos::algebra {
 
@@ -47,8 +48,8 @@ class BlockMatrix {
  private:
   ACCEPT_SERIALIZATION(BlockMatrix);
 
-  using BlocksMatrix =
-      Eigen::Matrix<std::shared_ptr<SiconosMatrix>, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor>;
+  using BlocksMatrix = Eigen::Matrix<std::shared_ptr<SiconosMatrix>, Eigen::Dynamic,
+                                     Eigen::Dynamic, Eigen::ColMajor>;
 
   /** A container of pointers to SiconosMatrix
    */
@@ -75,23 +76,24 @@ class BlockMatrix {
   BlockMatrix() = default;
 
  public:
-
   /** no-copy constructor
    *  \param m a SiconosMatrix
    */
   BlockMatrix(std::shared_ptr<SiconosMatrix> m);
 
-
-  /** no-copy constructor
+  /** copy constructor
    *  \param m a MapMatrix
    */
   BlockMatrix(std::shared_ptr<MapType> m);
+  
 
+  /** Build from eigen view (shared-memory !) */
+  BlockMatrix(Eigen::Ref<siconos::algebra::SiconosMatrix> input);
 
-  /** copy constructor
-   *  \param m a SiconosMatrix
-   */
-  BlockMatrix(const SiconosMatrix &m);
+  // /** copy constructor
+  //  *  \param m a SiconosMatrix
+  //  */
+  // BlockMatrix(const SiconosMatrix &m);
 
   /** copy constructor
    *  \param m a BlockMatrix
@@ -144,7 +146,7 @@ class BlockMatrix {
 
   /** set an identity matrix
    */
-  void eye();
+  void setIdentity();
 
   /** get the number of rows or columns of the matrix
    *  \param index 0 for rows, 1 for columns
@@ -188,7 +190,6 @@ class BlockMatrix {
    */
   double operator()(unsigned int i, unsigned int j) const;
 
-
   /** return the element matrix[i,j]
    *  \param i an unsigned int
    *  \param j an unsigned int
@@ -225,18 +226,12 @@ class BlockMatrix {
   /** get the vector tabRow
    *  \return a pointer to vector of int
    */
-  inline const std::shared_ptr<std::vector<std::size_t>> tabRow() const
-  {
-    return _tabRow;
-  };
+  inline const std::shared_ptr<std::vector<std::size_t>> tabRow() const { return _tabRow; };
 
   /** get the vector tabCol
    *  \return a pointer to vector of int
    */
-  inline const std::shared_ptr<std::vector<std::size_t>> tabCol() const
-  {
-    return _tabCol;
-  };
+  inline const std::shared_ptr<std::vector<std::size_t>> tabCol() const { return _tabCol; };
 
   /** get block at position row-col
    *  \param row unsigned int
@@ -250,89 +245,26 @@ class BlockMatrix {
    *  \param col unsigned int
    *  \return std::shared_ptr<SiconosMatrix> the requested block
    */
-  std::shared_ptr<const SiconosMatrix> block(unsigned int row = 0,
-                                             unsigned int col = 0) const;
+  std::shared_ptr<const SiconosMatrix> block(unsigned int row = 0, unsigned int col = 0) const;
 
   /** convert BlockMatrix to SiconosMatrix
    *  \return SiconosMatrix the converted matrix
    */
   std::shared_ptr<siconos::algebra::SiconosMatrix> toSiconosMatrix() const;
 
-  /** 
-   * 
-  */
-  void copyBlock(unsigned int i, unsigned int j, std::shared_ptr<siconos::algebra::SiconosMatrix>);
-  void copyBlock(unsigned int i, unsigned int j, std::shared_ptr<siconos::algebra::MapType>);
+  /**
+   *
+   */
+  void copyBlock(unsigned int i, unsigned int j,
+                 std::shared_ptr<siconos::algebra::SiconosMatrix>);
 
-  /** Set new block pointer 
-   * 
-  */
-  void setBlock(unsigned int i, unsigned int j, std::shared_ptr<siconos::algebra::SiconosMatrix>);
+  /** Set new block pointer
+   *
+   */
+  void setBlock(unsigned int i, unsigned int j,
+                std::shared_ptr<siconos::algebra::SiconosMatrix>);
 
-  // /** get row index of current matrix and save it in  v
-  //  *  \param r index of required line
-  //  *  \param[out] v a vector
-  //  */
-  // void getRow(unsigned int r, SiconosVector &v) const;
-
-  // /** set line row of the current matrix with vector v
-  //  *  \param r index of required line
-  //  *  \param v a vector
-  //  */
-  // void setRow(unsigned int r, const SiconosVector &v);
-
-  // /** get column index of current matrix and save it into vOut
-  //  *  \param c index of required column
-  //  *  \param[out] v a vector
-  //  */
-  // void getCol(unsigned int c, SiconosVector &v) const;
-
-  // /** set column col of the current matrix with vector
-  //  *  \param c index of required column
-  //  *  \param v a vector
-  //  */
-  // void setCol(unsigned int c, const SiconosVector &v);
-
-  // /** add a part of the input matrix (starting from (i,j) pos) to the current matrix
-  //  *  \param i an unsigned int i (in-out)
-  //  *  \param j an unsigned int j (in-out)
-  //  *  \param m a SiconosMatrix (in-out)
-  //  */
-  // void addSimple(unsigned int &i, unsigned int &j, const SiconosMatrix &m);
-
-  // /** subtract a part of the input matrix (starting from (i,j) pos) to the current matrix
-  //  *  \param i an unsigned int i (in-out)
-  //  *  \param j an unsigned int j (in-out)
-  //  *  \param m a SiconosMatrix (in-out)
-  //  */
-  // void subSimple(unsigned int &i, unsigned int &j, const SiconosMatrix &m);
-
-  // /** assignment
-  //  * \param m the matrix to be copied
-  //  * \return  BlockMatrix&
-  //  */
-  // BlockMatrix &operator=(const SiconosMatrix &m);
-
-  // /** assignment
-  //  *  \param m the matrix to be copied
-  //  * \return  BlockMatrix&
-  //  */
-  // BlockMatrix &operator=(const BlockMatrix &m);
-
-  // /** operator +=
-  //  *  \param m the matrix to add
-  //  * \return  BlockMatrix&
-  //  */
-  // BlockMatrix &operator+=(const SiconosMatrix &m);
-
-  // /**operator -=
-  //  *  \param m the matrix to subtract
-  //  * \return  BlockMatrix&
-  //  */
-  // BlockMatrix &operator-=(const SiconosMatrix &m);
-
-  void updateNumericsMatrix()
-  {
+  void updateNumericsMatrix() {
     THROW_EXCEPTION("BlockMatrix::updateNumericsMatrix(), not implemented fro BlockMatrix");
   };
 
@@ -363,10 +295,9 @@ class BlockMatrix {
   void PLUForwardBackwardInPlace(SiconosVector &B);
   void Solve(SiconosVector &B);
 
-  //ACCEPT_STD_VISITORS();
+  // ACCEPT_STD_VISITORS();
 
   // friend class SiconosMatrix;
-  friend void scal(double, const SiconosMatrix &, SiconosMatrix &, bool);
   friend SiconosMatrix &operator*=(SiconosMatrix &m, const double &s);
   friend SiconosMatrix &operator/=(SiconosMatrix &m, const double &s);
 

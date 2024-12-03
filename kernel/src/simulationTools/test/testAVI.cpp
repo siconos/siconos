@@ -28,8 +28,7 @@
 // test suite registration
 CPPUNIT_TEST_SUITE_REGISTRATION(AVITest);
 
-void AVITest::setUp()
-{
+void AVITest::setUp() {
   _A = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
   _b = std::make_shared<siconos::algebra::SiconosVector>(_n);
   _x0 = std::make_shared<siconos::algebra::SiconosVector>(_n);
@@ -38,9 +37,8 @@ void AVITest::setUp()
   _x0->setZero();
 }
 
-void AVITest::init()
-{
-  _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(_x0, _A, _b);
+void AVITest::init() {
+  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, *_A, *_b);
   _TD = std::make_shared<siconos::simulation::TimeDiscretisation>(_t0, _h);
   _nsds = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(_t0, _T);
   _osi = std::make_shared<siconos::integrators::EulerMoreauOSI>(_theta);
@@ -51,8 +49,7 @@ void AVITest::init()
 
 void AVITest::tearDown() {}
 
-void AVITest::testAVI()
-{
+void AVITest::testAVI() {
   std::cout << "===========================================" << std::endl;
   std::cout << " ===== AVI tests start ... ===== " << std::endl;
   std::cout << "===========================================" << std::endl;
@@ -61,9 +58,9 @@ void AVITest::testAVI()
   _T = 20.0;
   double G = 10.0;
   double beta = .3;
-  _A->zero();
+  _A->setZero();
   (*_A)(0, 1) = 1.0;
-  _x0->zero();
+  _x0->setZero();
   (*_x0)(0) = 10.0;
   (*_x0)(1) = 10.0;
   auto B = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
@@ -71,8 +68,8 @@ void AVITest::testAVI()
   auto C = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
   (*B)(1, 0) = G;
   (*B)(1, 1) = G * beta;
-  C->eye();
-  auto rel = std::make_shared<siconos::modeling::FirstOrderLinearTIR>(C, B);
+  C->setIdentity();
+  auto rel = std::make_shared<siconos::modeling::FirstOrderLinearTIR>(*C, *B);
   // H-K representation: the feasible set is given by all the element λ such that Hλ ≥ K
   auto H = std::make_shared<siconos::algebra::SiconosMatrix>(4, 2);
   (*H)(0, 0) = 1.0;
@@ -87,7 +84,7 @@ void AVITest::testAVI()
   (*K)(2) = -1.0;
   (*K)(3) = -1.0;
   auto nslaw = std::make_shared<siconos::modeling::NormalConeNSL>(_n, H, K);
-  _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(_x0, _A, _b);
+  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, *_A, *_b);
   _TD = std::make_shared<siconos::simulation::TimeDiscretisation>(_t0, _h);
   _nsds = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(_t0, _T);
   auto inter = std::make_shared<siconos::modeling::Interaction>(nslaw, rel);
@@ -124,22 +121,22 @@ void AVITest::testAVI()
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
   siconos::algebra::SiconosMatrix dataPlotRef(dataPlot);
-  dataPlotRef.zero();
+  dataPlotRef.setZero();
   siconos::algebra::io::read("testAVI.ref", dataPlotRef);
-  auto err = std::make_shared<siconos::algebra::SiconosVector>(dataPlot.size(1));
-  siconos::algebra::normInfByColumn(dataPlot - dataPlotRef, *err);
-  err->display();
+  siconos::algebra::SiconosVector err{dataPlot.size(1)};
+  siconos::algebra::normInfByColumn(dataPlot - dataPlotRef, err);
+  err.display();
 
-  double maxErr =
-      err->getValue(0) > err->getValue(1)
-          ? (err->getValue(0) > err->getValue(2) ? err->getValue(0) : err->getValue(2))
-          : (err->getValue(1) > err->getValue(2) ? err->getValue(1) : err->getValue(2));
+  double maxErr = err(0) > err(1) ? (err(0) > err(2) ? err(0) : err(2))
+                                  : (err(1) > err(2) ? err(1) : err(2));
 
   std::cout << "------- Integration Ok, error = " << maxErr << " -------" << std::endl;
   if (maxErr > _tol) {
     dataPlot.display();
     siconos::algebra::SiconosMatrix diff = dataPlot - dataPlotRef;
+    std::cout << "------- diff \n";
     diff.display();
   }
+
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAVI : ", maxErr < _tol, true);
 }

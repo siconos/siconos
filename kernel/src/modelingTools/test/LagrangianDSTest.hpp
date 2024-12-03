@@ -38,15 +38,15 @@ class LagrangianDSTest : public CppUnit::TestFixture {
   // tests to be done ...
 
   CPPUNIT_TEST(testBuildLagrangianDS1);
-  CPPUNIT_TEST(testBuildLagrangianDS4);
-  CPPUNIT_TEST(testBuildLagrangianDS5);
+  CPPUNIT_TEST(testBuildLagrangianDS2);
+  CPPUNIT_TEST(testBuildLagrangianDS3);
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
 
   void testBuildLagrangianDS1();
-  void testBuildLagrangianDS4();
-  void testBuildLagrangianDS5();
+  void testBuildLagrangianDS2();
+  void testBuildLagrangianDS3();
   // void testcomputeDS();
 
   // Members

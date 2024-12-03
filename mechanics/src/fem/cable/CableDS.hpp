@@ -41,7 +41,7 @@ namespace siconos::fem::cable {
   system, that is \f$ F(v, q, t, z) =  F_{ext}(t) -  F_{int}(v, q , t) \f$
 
 
-  This vector is saved and may be accessed using forces() method.
+  This vector is saved and may be accessed using totalForces() method.
 
   Todo: check and update doc and comments.
 
@@ -50,15 +50,15 @@ namespace siconos::fem::cable {
 */
 class CableDS : public siconos::modeling::LagrangianDS {
  protected:
-  double _EA{1};
-  double _l_e{1};
+  double EA_{1};
+  double l_e_{1};
 
   std::shared_ptr<siconos::algebra::SiconosMatrix> TRNp_Np{nullptr};
 
-  void matmult(const std::shared_ptr<siconos::algebra::SiconosVector> &V, size_t a_startIdx,
-               std::shared_ptr<siconos::algebra::SiconosVector> &R);
-  void matmult2(const std::shared_ptr<siconos::algebra::SiconosVector> &V,
-                std::shared_ptr<siconos::algebra::SiconosMatrix> &R);
+  void matmult(const Eigen::Ref<const siconos::algebra::SiconosVector> &V, size_t a_startIdx,
+               Eigen::Ref<siconos::algebra::SiconosVector> R);
+  void matmult2(const Eigen::Ref<const siconos::algebra::SiconosVector> &V,
+                Eigen::Ref<siconos::algebra::SiconosMatrix> R);
 
   CableDS() = delete;
   CableDS(const CableDS &) = delete;
@@ -69,8 +69,7 @@ class CableDS : public siconos::modeling::LagrangianDS {
  public:
   CableDS(Eigen::Ref<siconos::algebra::SiconosVector> q0,
           Eigen::Ref<siconos::algebra::SiconosVector> velocity0,
-          Eigen::Ref<siconos::algebra::SiconosMatrix> mass, double a_EA,
-          double a_elem_length);
+          Eigen::Ref<siconos::algebra::SiconosMatrix> mass, double a_EA, double a_elem_length);
 
   ~CableDS() noexcept = default;
 
@@ -79,16 +78,21 @@ class CableDS : public siconos::modeling::LagrangianDS {
   // This function will be called by the integrator at each time
   // step to update  \f$ F(v, q, t, z) \f$
   // --> takes into account fInt and fext
-  void computeForces(double time, std::shared_ptr<siconos::algebra::SiconosVector> q,
-                     std::shared_ptr<siconos::algebra::SiconosVector> velocity) override;
+  void computeTotalForces(const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
+                          const Eigen::Ref<const siconos::algebra::SiconosVector> &q,
+                          double time) override;
 
   // \f$ \nabla_q F \f$
-  void computeJacobianqForces(double time) override;
+  void computeJacobianTotalForcesOver_q(
+      const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
+      const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time) override;
 
   // \f$ \nabla_v F \f$
-  void computeJacobianvForces(double time) override;
+  void computeJacobianTotalForcesOver_velocity(
+      const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
+      const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time) override;
 
-  void tangentStiffnessMatrix(std::shared_ptr<siconos::algebra::SiconosVector> q);
+  void tangentStiffnessMatrix(const Eigen::Ref<const siconos::algebra::SiconosVector> q);
   void dampingMatrix();
   // + some access op to be added later, if required
 

@@ -24,8 +24,8 @@
 
 #include "BlockVector.hpp"
 #include "NewtonEulerDS.hpp"
-#include "SiconosVector.hpp"
 #include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 // #include <boost/math/quaternion.hpp>
 // #include <cfloat>
 // #include <iostream>
@@ -182,16 +182,15 @@ void siconos::joints::CouplerJointR::setBasePositions(
   siconos::algebra::SiconosVector y1(1), y2(1);
   siconos::algebra::BlockVector q01, q02;
   makeBlockVectors(q1, q2, q01, q02);
-  _joint1->computehDoF(0, q01, y1, _dof1);
-  _joint2->computehDoF(0, q02, y2, _dof2);
+  _joint1->computehDoF(q01, y1, _dof1);
+  _joint2->computehDoF(q02, y2, _dof2);
 
   // Compute initial offset between the DoFs
   _offset = y1(0) * _ratio - y2(0);
 }
 
-void siconos::joints::CouplerJointR::computeh(double time,
-                                              const siconos::algebra::BlockVector& q0,
-                                              siconos::algebra::SiconosVector& y) {
+void siconos::joints::CouplerJointR::computeh(const siconos::algebra::BlockVector& q0,
+                                              Eigen::Ref<siconos::algebra::SiconosVector> y) {
   siconos::algebra::SiconosVector y1(y), y2(y);
 
   // Get current positions of the implicated degrees of freedom
@@ -203,35 +202,36 @@ void siconos::joints::CouplerJointR::computeh(double time,
                        ? const_cast<siconos::algebra::BlockVector&>(q0).vector(1)
                        : nullptr,
                    q01, q02);
-  _joint1->computehDoF(time, q01, y1, _dof1);
-  _joint2->computehDoF(time, q02, y2, _dof2);
+  _joint1->computehDoF(q01, y1, _dof1);
+  _joint2->computehDoF(q02, y2, _dof2);
 
   // Constraint is the linear relation between them
   y(0) = y2(0) - y1(0) * _ratio + _offset;
 }
 
-void siconos::joints::CouplerJointR::computeJachq(
+void siconos::joints::CouplerJointR::computeJacobianhOver_q_(
     double time, siconos::modeling::Interaction& inter,
-    std::shared_ptr<siconos::algebra::BlockVector> q0) {
-  auto jachq1 = std::make_shared<siconos::algebra::SiconosMatrix>(1, q0->size());
-  auto jachq2 = std::make_shared<siconos::algebra::SiconosMatrix>(1, q0->size());
+    const siconos::algebra::BlockVector& q0) {
+  auto jachq1 = std::make_shared<siconos::algebra::SiconosMatrix>(1, q0.size());
+  auto jachq2 = std::make_shared<siconos::algebra::SiconosMatrix>(1, q0.size());
 
   // Get jacobians for the implicated degrees of freedom
   // Compute the jacobian for the required range of axes
   auto q01 = std::make_shared<siconos::algebra::BlockVector>();
   auto q02 = std::make_shared<siconos::algebra::BlockVector>();
-  makeBlockVectors(q0->vector(0),
-                   q0->getAllVect().size() > 1
-                       ? q0->vector(1)
+  makeBlockVectors(std::const_pointer_cast<siconos::algebra::SiconosVector>(q0.vector(0)),
+                   q0.getAllVect().size() > 1
+                       ? std::const_pointer_cast<siconos::algebra::SiconosVector>(q0.vector(1))
                        : std::shared_ptr<siconos::algebra::SiconosVector>(),
                    *q01, *q02);
-  _joint1->computeJachqDoF(time, inter, q01, *jachq1, _dof1);
-  _joint2->computeJachqDoF(time, inter, q02, *jachq2, _dof2);
+  _joint1->computeJachqDoF(inter, *q01, *jachq1, _dof1);
+  _joint2->computeJachqDoF(inter, *q02, *jachq2, _dof2);
 
   // Constraint is the linear relation between them
   for (unsigned int i = 0; i < 1; i++)
-    for (unsigned int j = 0; j < _jachq->cols(); j++)
-      _jachq->setValue(i, j, jachq2->getValue(i, j) - jachq1->getValue(i, j) * _ratio);
+    for (unsigned int j = 0; j < jacobianhOver_q_view_->cols(); j++)
+      jacobianhOver_q_view_->setValue(
+          i, j, jachq2->getValue(i, j) - jachq1->getValue(i, j) * _ratio);
 }
 
 void siconos::joints::CouplerJointR::_normalDoF(siconos::algebra::SiconosVector& ans,
@@ -258,38 +258,39 @@ void siconos::joints::CouplerJointR::_normalDoF(siconos::algebra::SiconosVector&
   */
 }
 
-void siconos::joints::CouplerJointR::computehDoF(double time,
-                                                 const siconos::algebra::BlockVector& q0,
-                                                 siconos::algebra::SiconosVector& y,
+void siconos::joints::CouplerJointR::computehDoF(const siconos::algebra::BlockVector& q0,
+                                                 Eigen::Ref<siconos::algebra::SiconosVector> y,
                                                  unsigned int axis) {
   // The DoF of the constraint is the same as the constraint itself
   assert(axis == 0);
-  this->computeh(time, q0, y);
+  this->computeh(q0, y);
 }
 
 void siconos::joints::CouplerJointR::computeJachqDoF(
-    double time, siconos::modeling::Interaction& inter,
-    std::shared_ptr<siconos::algebra::BlockVector> q0, siconos::algebra::SiconosMatrix& jachq,
-    unsigned int axis) {
+    siconos::modeling::Interaction& inter, const siconos::algebra::BlockVector& q0,
+    Eigen::Ref<siconos::algebra::SiconosMatrix> jachq, unsigned int axis) {
   // The Jacobian of the DoF of the constraint is the same as the
-  // Jacobian of the constraint itself. (Same as computeJachq(), but
+  // Jacobian of the constraint itself. (Same as computeJacobianhOver_q(), but
   // don't store result in member object.)
   assert(axis == 0);
 
-  auto jachq1 = std::make_shared<siconos::algebra::SiconosMatrix>(1, q0->size());
-  auto jachq2 = std::make_shared<siconos::algebra::SiconosMatrix>(1, q0->size());
+  auto jachq1 = std::make_shared<siconos::algebra::SiconosMatrix>(1, q0.size());
+  auto jachq2 = std::make_shared<siconos::algebra::SiconosMatrix>(1, q0.size());
 
   // Get jacobians for the implicated degrees of freedom
   // Compute the jacobian for the required range of axes
   auto q01 = std::make_shared<siconos::algebra::BlockVector>();
   auto q02 = std::make_shared<siconos::algebra::BlockVector>();
-  makeBlockVectors(q0->vector(0), q0->getAllVect().size() > 1 ? q0->vector(1) : nullptr, *q01,
-                   *q02);
-  _joint1->computeJachqDoF(time, inter, q01, *jachq1, _dof1);
-  _joint2->computeJachqDoF(time, inter, q02, *jachq2, _dof2);
+  makeBlockVectors(std::const_pointer_cast<siconos::algebra::SiconosVector>(q0.vector(0)),
+                   q0.getAllVect().size() > 1
+                       ? std::const_pointer_cast<siconos::algebra::SiconosVector>(q0.vector(1))
+                       : nullptr,
+                   *q01, *q02);
+  _joint1->computeJachqDoF(inter, *q01, *jachq1, _dof1);
+  _joint2->computeJachqDoF(inter, *q02, *jachq2, _dof2);
 
   // Constraint is the linear relation between them
   for (unsigned int i = 0; i < 1; i++)
-    for (unsigned int j = 0; j < _jachq->cols(); j++)
+    for (unsigned int j = 0; j < jacobianhOver_q_view_->cols(); j++)
       jachq.setValue(i, j, jachq2->getValue(i, j) - jachq1->getValue(i, j) * _ratio);
 }

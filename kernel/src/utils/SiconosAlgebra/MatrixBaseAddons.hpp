@@ -63,34 +63,6 @@ inline void setBlock(unsigned int row_min, unsigned int col_min,
   this->block(row_min, col_min, m.rows(), m.cols()) = m;
 }
 
-/** set column col of the current matrix with vector v
- *
- *  \param col index column we want to set
- *  \param vIn a SiconosVector containing the new column
- */
-template <typename OtherDerived>
-inline void setCol(Index c, const MatrixBase<OtherDerived>& vIn) {
-  assert(vIn.cols() == 1 && "setCol(r, vIn) : vIn must have only one column.");
-  assert(c < this->cols() && "r is out of range.");
-  assert(vIn.size() == this->rows() && "inconsistent sizes between this and v.");
-
-  this->col(c) = vIn;
-}
-
-/** set row r of the current matrix with vector v
- *
- *  \param r index row we want to set
- *  \param vIn a SiconosVector containing the new row
- */
-template <typename OtherDerived>
-inline void setRow(Index r, const MatrixBase<OtherDerived>& vIn) {
-  assert(vIn.cols() == 1 && "setCol(r, vIn) : vIn must have only one column.");
-  assert(r < this->rows() && "r is out of range.");
-  assert(vIn.size() == this->cols() && "inconsistent sizes between this and v.");
-
-  this->row(r) = vIn;
-}
-
 // Getters
 
 inline Scalar getValue(Index i, Index j) const {
@@ -111,7 +83,5 @@ inline Scalar& getValue(Index i) {
 }
 
 // Misc
-
-inline void eye() { this->setIdentity(); }
 
 inline Scalar normInf() { return this->cwiseAbs().rowwise().sum().maxCoeff(); }

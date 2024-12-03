@@ -35,7 +35,7 @@ siconos::collision::RigidBody2dDS::RigidBody2dDS(
         "siconos::modeling::RigidBody2dDS::RigidBody2dDS(...). The size of position and "
         "velocity must of size 3");
   }
-  _scalarMass = mass.getValue(0, 0);
+  scalarMass_ = mass.getValue(0, 0);
 }
 
 // siconos::collision::RigidBody2dDS::RigidBody2dDS(
@@ -43,7 +43,7 @@ siconos::collision::RigidBody2dDS::RigidBody2dDS(
 //     Eigen::Ref<siconos::algebra::SiconosVector> &velocity, double mass, double inertia)
 //     : LagrangianLinearTIDS(position, velocity,
 //                            std::make_shared<siconos::algebra::SiconosMatrix>(3, 3)),
-//       _scalarMass(mass),
+//       scalarMass_(mass),
 //       _contactors(std::make_shared<siconos::collision::SiconosContactorSet>()) {
 //   _mass->setValue(0, 0, mass);
 //   _mass->setValue(1, 1, mass);

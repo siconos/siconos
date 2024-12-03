@@ -41,7 +41,7 @@ def test_diode_bridge(datafile):
     bridge_ds = FirstOrderLinearDS(init_state, A)
     # interaction
     diode_bridge_relation = FirstOrderLinearTIR(C, B)
-    diode_bridge_relation.setDPtr(D)
+    diode_bridge_relation.setConstantD(D)
 
     nslaw = ComplementarityConditionNSL(4)
     bridge_interaction = Interaction(nslaw, diode_bridge_relation)

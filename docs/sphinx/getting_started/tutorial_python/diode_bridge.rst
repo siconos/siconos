@@ -278,7 +278,7 @@ which inherits from :class:`Relation`. Check :ref:`relations` to find a complete
 
    # set relation type
    relation= sk.FirstOrderLinearTIR(C, B)
-   relation.setDPtr(D)
+   relation.setConstantD(D)
 
    # set nonsmooth law
    nonsmooth_law = sk.ComplementarityConditionNSL(interaction_size)

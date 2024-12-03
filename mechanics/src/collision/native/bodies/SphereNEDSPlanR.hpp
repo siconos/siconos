@@ -28,7 +28,7 @@
 #include "NewtonEuler3DR.hpp"
 
 namespace siconos::collision::native::bodies {
-  class SphereNEDSPlanR : public siconos::modeling::NewtonEuler3DR,
+class SphereNEDSPlanR : public siconos::modeling::NewtonEuler3DR,
                         public std::enable_shared_from_this<SphereNEDSPlanR> {
  private:
   ACCEPT_SERIALIZATION(SphereNEDSPlanR);
@@ -54,19 +54,15 @@ namespace siconos::collision::native::bodies {
   double distance(double, double, double, double);
 
   /**
-     to compute the output y = h(t,q,z) of the Relation
+     to compute the output y = h(q) of the Relation
 
-     \param time current time value
-     \param q coordinates of the dynamical systems involved in the relation
-     \param y the resulting vector
-  */
-  void computeh(double time, const siconos::algebra::BlockVector &q0,
-                siconos::algebra::SiconosVector &y) override;
+     \param[in] q generalized coordinates vector of the dynamical systems (at most 2) involved
+    in the relation \param[in,out] y the resulting vector
+ */
+  void computeh(const siconos::algebra::BlockVector &q,
+                Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
-  // void computeJachq(double);
-
-  bool equal(double _A, double _B, double _C, double _D, double _r) const
-  {
+  bool equal(double _A, double _B, double _C, double _D, double _r) const {
     return (A == _A && B == _B && C == _C && D == _D && r == _r);
   }
 };

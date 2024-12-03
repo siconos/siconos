@@ -24,11 +24,6 @@
 #include "MechanicsIO.hpp"
 #endif
 
-#include <boost/numeric/bindings/ublas/matrix.hpp>
-#include <boost/numeric/bindings/ublas/matrix_sparse.hpp>
-#include <boost/numeric/bindings/ublas/vector.hpp>
-#include <boost/numeric/bindings/ublas/vector_sparse.hpp>
-
 #include "KernelTest.hpp"
 #include "SiconosKernel.hpp"
 
@@ -44,12 +39,13 @@ CPPUNIT_TEST_SUITE_REGISTRATION(KernelTest);
 
 void KernelTest::setUp() { BBxml = "BouncingBall1.xml"; }
 
-void KernelTest::tearDown() {};
+void KernelTest::tearDown(){};
 
 void KernelTest::t0() {
   auto q = std::make_shared<siconos::algebra::SiconosVector>(3);
-  auto q0 = std::make_shared<siconos::algebra::SiconosVector>(3);
 
+  siconos::algebra::SiconosVector q0{3};
+  q0.setZero();
   (*q)(0) = 1.0;
   (*q)(1) = 2.0;
   (*q)(2) = 2.0;
@@ -75,7 +71,7 @@ void KernelTest::t1() {
   auto m1 = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
   auto m2 = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
 
-  m1->eye();
+  m1->setIdentity();
   (*m1)(1, 0) = 3.0;
   (*m1)(2, 1) = -7;
 
@@ -104,7 +100,7 @@ void KernelTest::t2() {
   auto v = std::make_shared<siconos::algebra::SiconosVector>(3);
   auto q = std::make_shared<siconos::algebra::SiconosVector>(3);
 
-  m->eye();
+  m->setIdentity();
 
   auto ds1 = std::make_shared<siconos::modeling::LagrangianDS>(q, v, m);
   auto ds2 = std::make_shared<siconos::modeling::LagrangianDS>(q, v, m);
@@ -188,19 +184,21 @@ void KernelTest::t5() {
   (*Mass)(2, 2) = 3. / 5 * m * R * R;
 
   // -- Initial positions and velocities --
-  auto q0 = std::make_shared<siconos::algebra::SiconosVector>(nDof);
-  auto v0 = std::make_shared<siconos::algebra::SiconosVector>(nDof);
-  (*q0)(0) = position_init;
-  (*v0)(0) = velocity_init;
+  siconos::algebra::SiconosVector q0{nDof};
+  siconos::algebra::SiconosVector v0{nDof};
+  q0.setZero();
+  v0.setZero();
+  q0(0) = position_init;
+  v0(0) = velocity_init;
 
   // -- The dynamical system --
-  auto ball = std::make_shared<siconos::modeling::LagrangianLinearTIDS>(q0, v0, Mass);
+  auto ball = std::make_shared<siconos::modeling::LagrangianLinearTIDS>(q0, v0, mass);
 
   // -- Set external forces (weight) --
   siconos::algebra::SiconosVector weight{nDof};
   weight.setZero();
   weight(0) = -m * g;
-  ball->setConstantFExt(weight);
+  ball->setConstantFext(weight);
 
   // --------------------
   // --- Interactions ---
@@ -215,7 +213,7 @@ void KernelTest::t5() {
   (*H)(0, 0) = 1.0;
 
   auto nslaw = std::make_shared<siconos::modeling::NewtonImpactNSL>(e);
-  auto relation = std::make_shared<siconos::modeling::LagrangianLinearTIR>(H);
+  auto relation = std::make_shared<siconos::modeling::LagrangianLinearTIR>(*H);
 
   auto inter = std::make_shared < Interaction(nslaw, relation);
 
@@ -326,7 +324,7 @@ void KernelTest::t6() {
     ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
     // Comparison with a reference file
     siconos::algebra::SiconosMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
+    dataPlotRef.setZero();
     ioMatrix::read("result.ref", "ascii", dataPlotRef);
 
     if ((dataPlot - dataPlotRef).normInf() > 1e-12) {

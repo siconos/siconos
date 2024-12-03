@@ -26,12 +26,10 @@
 #include "NewtonImpactFrictionNSL.hpp"
 #include "NewtonImpactNSL.hpp"
 #include "OneStepNSProblem.hpp"
-#include "SiconosMatrixOp.hpp"        // for scal
-#include "SiconosMatrixVectorOp.hpp"  // for mat-vecprod
-#include "SiconosVector.hpp"
-#include "SiconosVectorOp.hpp"  // for subscal
-#include "SiconosVisitor.hpp"
 #include "SiconosMatrix.hpp"
+#include "SiconosMatrixVectorOp.hpp"
+#include "SiconosVector.hpp"
+#include "SiconosVisitor.hpp"
 #include "Simulation.hpp"
 #include "Tools.hpp"
 // #define DEBUG_NOCOLOR
@@ -54,20 +52,14 @@ siconos::integrators::SchatzmanPaoliOSI::SchatzmanPaoliOSI(double theta, double 
   _sizeMem = SCHATZMANPAOLISTEPSINMEMORY;
 }
 
-std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::integrators::SchatzmanPaoliOSI::W(
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
-  assert(ds && "siconos::integrators::SchatzmanPaoliOSI::W(ds): ds == nullptr.");
-  return _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W;
-  ;
-}
-
 std::shared_ptr<siconos::algebra::SiconosMatrix>
-siconos::integrators::SchatzmanPaoliOSI::WBoundaryConditions(
+siconos::integrators::SchatzmanPaoliOSI::IterationMatrixBoundaryConditions(
     std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
   assert(ds &&
-         "siconos::integrators::SchatzmanPaoliOSI::WBoundaryConditions(ds): ds == nullptr.");
+         "siconos::integrators::SchatzmanPaoliOSI::IterationMatrixBoundaryConditions(ds): ds "
+         "== nullptr.");
   return _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds))
-      .WBoundaryConditions;
+      .iterationMatrixBoundaryConditions;
 }
 
 void siconos::integrators::SchatzmanPaoliOSI::initializeWorkVectorsForDS(
@@ -91,23 +83,19 @@ void siconos::integrators::SchatzmanPaoliOSI::initializeWorkVectorsForDS(
         std::make_shared<siconos::algebra::SiconosVector>(lltids->dimension());
     ds_work_vectors[siconos::integrators::SchatzmanPaoliOSI::LOCAL_BUFFER] =
         std::make_shared<siconos::algebra::SiconosVector>(lltids->dimension());
-    auto q0 = lltids->q0();
-    auto q = lltids->q();
-    auto v0 = lltids->velocity0();
-    auto velocity = lltids->velocity();
 
     // We first swap the initial value contained in q and v after initialization.
     lltids->swapInMemory();
     // we compute the new state values
     auto h = _simulation->timeStep();
-    *q = *q0 + h * *v0;
+    *lltids->q() = lltids->q0() + h * lltids->velocity0();
 
     //*velocity=*velocity; we do nothing for the velocity
     lltids->swapInMemory();
   }
 
   // W initialization
-  initializeIterationMatrixW(t, ds);
+  initializeIterationMatrix(t, ds);
 
   for (auto k = _levelMinForInput; k < _levelMaxForInput + 1; k++) {
     ds->initializeNonSmoothInput(k);
@@ -195,126 +183,54 @@ void siconos::integrators::SchatzmanPaoliOSI::initializeWorkVectorsForInteractio
   }
 }
 
-void siconos::integrators::SchatzmanPaoliOSI::initializeIterationMatrixW(
+void siconos::integrators::SchatzmanPaoliOSI::initializeIterationMatrix(
     double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
   // This function:
   // - allocate memory for the matrix W
   // - update its content for the current (initial) state of the dynamical system, depending
   // on its type.
 
-  if (!ds)
-    THROW_EXCEPTION(
-        "siconos::integrators::SchatzmanPaoliOSI::initializeIterationMatrixW(t,ds) - ds == "
-        "nullptr");
-
+  assert(ds);
   if (!(checkOSI(_dynamicalSystemsGraph->descriptor(ds))))
     THROW_EXCEPTION(
-        "siconos::integrators::SchatzmanPaoliOSI::initializeIterationMatrixW(t,ds) - ds "
+        "siconos::integrators::SchatzmanPaoliOSI::initializeIterationMatrix(t,ds) - ds "
         "does "
         "not belong to the OSI.");
 
   const auto& dsv = _dynamicalSystemsGraph->descriptor(ds);
-
-  if (_dynamicalSystemsGraph->properties(dsv).W)
-    THROW_EXCEPTION(
-        "siconos::integrators::SchatzmanPaoliOSI::initializeIterationMatrixW(t,ds) - W(ds) "
-        "is "
-        "already in the map and has been initialized.");
+  assert(!_dynamicalSystemsGraph->properties(dsv).iterationMatrix);
 
   // Memory allocation for W
   auto h = _simulation->timeStep();
   auto sizeW = ds->dimension();
-  if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianLinearTIDS>(ds)) {
-    if (d->mass()) {
-      _dynamicalSystemsGraph->properties(dsv).W =
-          std::make_shared<siconos::algebra::SiconosMatrix>(*d->mass());  //*W = *d->mass();
-    } else {
-      _dynamicalSystemsGraph->properties(dsv).W =
-          std::make_shared<siconos::algebra::SiconosMatrix>(sizeW, sizeW);
-      _dynamicalSystemsGraph->properties(dsv).W->eye();
-    }
 
-    auto K = d->K();
-    auto C = d->C();
-    auto W = _dynamicalSystemsGraph->properties(dsv).W;
-    if (C)  // W += 1/2.0*h*_theta *C
-      siconos::algebra::scal(1 / 2.0 * h * _theta, *C, *W, false);
+  // Allocate storage for W in the graph
+  _dynamicalSystemsGraph->properties(dsv).iterationMatrix =
+      std::make_shared<siconos::algebra::SiconosMatrix>(ds->dimension(), ds->dimension());
 
-    if (K)  // W = h*h*_theta*_theta*K
-      siconos::algebra::scal(h * h * _theta * _theta, *K, *W, false);
+  if (auto lltids = std::dynamic_pointer_cast<siconos::modeling::LagrangianLinearTIDS>(ds)) {
+    if (lltids->hasMass())
+      *_dynamicalSystemsGraph->properties(dsv).iterationMatrix = lltids->mass();
+    else
+      _dynamicalSystemsGraph->properties(dsv).iterationMatrix->setIdentity();
 
-    // WBoundaryConditions initialization
-    if (d->boundaryConditions()) initializeIterationMatrixWBoundaryConditions(d, dsv);
-  } else
+    if (lltids->hasDampingMatrix())
+      *_dynamicalSystemsGraph->properties(dsv).iterationMatrix +=
+          1 / 2.0 * h * _theta * lltids->dampingMatrix();
+    if (lltids->hasStiffnessMatrix())
+      *_dynamicalSystemsGraph->properties(dsv).iterationMatrix +=
+          h * h * _theta * _theta * lltids->stiffnessMatrix();
+
+    // LU Factorisation
+    _dynamicalSystemsGraph->properties(dsv).LUW =
+        std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(
+            *_dynamicalSystemsGraph->properties(dsv).iterationMatrix);
+  }
+
+  else
     THROW_EXCEPTION(
-        "siconos::integrators::SchatzmanPaoliOSI::initializeIterationMatrixW - only "
+        "siconos::integrators::SchatzmanPaoliOSI::initializeIterationMatrix - only "
         "implemented for LagrangianLinearTIDS");
-
-  // Remark: W is not LU-factorized nor inversed here.
-  // Function PLUForwardBackward will do that if required.
-}
-
-void siconos::integrators::SchatzmanPaoliOSI::initializeIterationMatrixWBoundaryConditions(
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
-    const siconos::graphs::DynamicalSystemsGraph::VDescriptor& dsv) {
-  // This function:
-  // - allocate memory for a matrix WBoundaryConditions
-  // - insert this matrix into WBoundaryConditionsMap with ds as a key
-
-  if (!ds)
-    THROW_EXCEPTION(
-        "siconos::integrators::SchatzmanPaoliOSI::"
-        "initializeIterationMatrixWBoundaryConditions(t,ds) - ds == nullptr");
-
-  if (!(checkOSI(_dynamicalSystemsGraph->descriptor(ds))))
-    THROW_EXCEPTION(
-        "siconos::integrators::SchatzmanPaoliOSI::"
-        "initializeIterationMatrixWBoundaryConditions(t,ds) - ds does not belong to the "
-        "OSI.");
-
-  THROW_EXCEPTION(
-      "siconos::integrators::SchatzmanPaoliOSI::"
-      "initializeIterationMatrixWBoundaryConditions "
-      "- not yet implemented .")
-}
-
-void siconos::integrators::SchatzmanPaoliOSI::computeWBoundaryConditions(
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
-    siconos::algebra::SiconosMatrix& WBoundaryConditions) {
-  // Compute WBoundaryConditions matrix of the Dynamical System ds, at
-  // time t and for the current ds state.
-
-  // When this function is called, WBoundaryConditionsMap[ds] is
-  // supposed to exist and not to be null Memory allocation has been
-  // done during initializeIterationMatrixWBoundaryConditions.
-
-  assert(ds &&
-         "siconos::integrators::SchatzmanPaoliOSI::computeWBoundaryConditions(t,ds) - ds == "
-         "nullptr");
-
-  THROW_EXCEPTION(
-      "siconos::integrators::SchatzmanPaoliOSI::computeWBoundaryConditions - not yet "
-      "implemented ");
-}
-
-void siconos::integrators::SchatzmanPaoliOSI::computeW(
-    double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
-    siconos::algebra::SiconosMatrix& W) {
-  // Compute W matrix of the Dynamical System ds, at time t and for the current ds state.
-
-  assert(ds && "siconos::integrators::SchatzmanPaoliOSI::computeW(t,ds) - ds == nullptr");
-
-  // double h = _simulation->timeStep();
-
-  if (std::dynamic_pointer_cast<siconos::modeling::LagrangianLinearTIDS>(ds)) {
-    // Nothing: W does not depend on time.
-  } else
-    THROW_EXCEPTION(
-        "siconos::integrators::SchatzmanPaoliOSI::computeW - only implemented for "
-        "LagrangianLinearTIDS.");
-
-  // Remark: W is not LU-factorized here.
-  // Function PLUForwardBackward will do that if required.
 }
 
 double siconos::integrators::SchatzmanPaoliOSI::computeResidu() {
@@ -346,7 +262,7 @@ double siconos::integrators::SchatzmanPaoliOSI::computeResidu() {
     auto& ds_work_vectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
 
     // 1 - Lagrangian Non Linear Systems
-    if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianLinearTIDS>(ds)) {
+    if (auto lltids = std::dynamic_pointer_cast<siconos::modeling::LagrangianLinearTIDS>(ds)) {
       // ResiduFree =  M(-q_{k}+q_{k-1})  + h^2 (K q_k)+  h^2 C (\theta
       // \Frac{q_k-q_{k-1}}{2h}+ (1-\theta) v_k))  (1) This formulae is only valid for the
       // first computation of the residual for q = q_k otherwise the complete formulae must
@@ -354,11 +270,7 @@ double siconos::integrators::SchatzmanPaoliOSI::computeResidu() {
       // q_k)))+  h^2 C (\theta \Frac{q-q_{k-1}}{2h}+ (1-\theta) v_k))  (2) for q != q_k, the
       // formulae (1) is wrong. in the sequel, only the equation (1) is implemented
 
-      DEBUG_EXPR(d->display());
-      // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      const auto& q_k = d->qMemory().getSiconosVector(0);         // q_k
-      const auto& q_k_1 = d->qMemory().getSiconosVector(1);       // q_{k-1}
-      const auto& v_k = d->velocityMemory().getSiconosVector(0);  // v_k
+      DEBUG_EXPR(lltids->display());
 
       // --- ResiduFree computation Equation (1) ---
       auto& residuFree =
@@ -367,40 +279,40 @@ double siconos::integrators::SchatzmanPaoliOSI::computeResidu() {
 
       DEBUG_EXPR(free.display());
       DEBUG_EXPR(residuFree.display());
-      residuFree.zero();
-      double coeff;
-      // -- No need to update W --
 
-      residuFree = q_k_1;
-      siconos::algebra::sub(residuFree, q_k, residuFree);
-      if (d->mass())
-        siconos::algebra::prod(*(d->mass()), residuFree,
-                               residuFree);  // residuFree = M(-q_{k}+q_{k-1})
+      // Get state i (previous time step) from Memories -> var. indexed with "Old"
+      const auto& q_k = lltids->qMemory().getSiconosVector(0);         // q_k
+      const auto& q_k_1 = lltids->qMemory().getSiconosVector(1);       // q_{k-1}
+      const auto& v_k = lltids->velocityMemory().getSiconosVector(0);  // v_k
 
-      auto K = d->K();
-      if (K) {
-        siconos::algebra::prod(h * h, *K, q_k, residuFree, false);  // residuFree += h^2*K*qi
+      // f = M*a + C*v + K*q
+      // freeR = M*a + C*v
+
+      if (lltids->hasMass())
+        residuFree = lltids->mass() * (q_k_1 - q_k);  // residuFree = M(-q_{k}+q_{k-1})
+      else
+        residuFree = q_k_1 - q_k;
+
+      if (lltids->hasExternalForces()) {
+        lltids->computeFext(t);
+        residuFree -= lltids->fext();  // freeR = _workspace[freeresidu] - F
       }
+      if (lltids->hasDampingMatrix()) {
+        // residufree += h^2 C (\theta \Frac{q-q_{k-1}}{2h}+ (1-\theta) v_k))
+        siconos::algebra::SiconosVector buffer =
+            1.0 / (2.0 * h) * _theta * (q_k - q_k_1) + (1.0 - _theta) * v_k;
+        residuFree += h * h * lltids->dampingMatrix() * buffer;
+      }
+      if (lltids->hasStiffnessMatrix())
+        residuFree += h * h * lltids->hasStiffnessMatrix() * q_k;
 
-      auto C = d->C();
-      if (C)
-        siconos::algebra::prod(
-            h * h, *C, (1.0 / (2.0 * h) * _theta * (q_k - q_k_1) + (1.0 - _theta) * v_k),
-            residuFree, false);
-      // residufree += h^2 C (\theta \Frac{q-q_{k-1}}{2h}+ (1-\theta) v_k))
-
-      auto Fext = d->fExt();
-      if (Fext) {
+      if (lltids->hasExternalForces()) {
         // computes Fext(ti)
-        d->computeFext(told);
-        coeff = -h * h * (1 - _theta);
-        siconos::algebra::scal(coeff, *Fext, residuFree,
-                               false);  // residufree -= h^2*(1-_theta) * fext(ti)
+        lltids->computeFext(told);
+        residuFree -= h * h * (1 - _theta) * lltids->fext();
         // computes Fext(ti+1)
-        d->computeFext(t);
-        coeff = -h * h * _theta;
-        siconos::algebra::scal(coeff, *Fext, residuFree,
-                               false);  // residufree -= h^2*_theta * fext(ti+1)
+        lltids->computeFext(t);
+        residuFree -= h * h * _theta * lltids->fext();
       }
 
       DEBUG_EXPR(free.display());
@@ -410,8 +322,8 @@ double siconos::integrators::SchatzmanPaoliOSI::computeResidu() {
       //  LagrangianLinearTIDS residufree :"  << std::endl;
       // residuFree->display();
 
-      free = residuFree;              // copy residuFree in Workfree
-      if (d->p(0)) free -= *d->p(0);  // Compute Residu in Workfree Notation !!
+      free = residuFree;                            // copy residuFree in Workfree
+      if (lltids->p(0)) free -= lltids->p_read(0);  // Compute Residu in Workfree Notation !!
       DEBUG_EXPR(free.display());
       normResidu = 0.0;  // we assume that v = vfree + W^(-1) p
       //     normResidu = realresiduFree.norm2();
@@ -442,17 +354,12 @@ void siconos::integrators::SchatzmanPaoliOSI::computeFreeState() {
 
   // Iteration through the set of Dynamical Systems.
   //
-  // W SchatzmanPaoliOSI matrix of the current DS.
-  std::shared_ptr<siconos::algebra::SiconosMatrix> W;
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
   for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
     if (!checkOSI(dsi)) continue;
 
     auto ds = _dynamicalSystemsGraph->bundle(*dsi);
     auto& ds_work_vectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
-    W = _dynamicalSystemsGraph->properties(*dsi)
-            .W;  // Its W SchatzmanPaoliOSI matrix of iteration.
-
     // 1 - Lagrangian Non Linear Systemsv
     if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
       // IN to be updated at current time: Fext
@@ -467,24 +374,17 @@ void siconos::integrators::SchatzmanPaoliOSI::computeFreeState() {
       // h*(1-theta)*Fext_i
 
       // -- Convert the DS into a Lagrangian one.
-      // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      const auto& qold = d->qMemory().getSiconosVector(0);  // q_k
-      //   auto vold =
-      //   d->velocityMemory()->getSiconosVector(0); //v_k
 
       // --- ResiduFree computation ---
-
-      // vFree pointer is used to compute and save ResiduFree in this first step.
       auto& residuFree =
           *ds_work_vectors[siconos::integrators::SchatzmanPaoliOSI::RESIDU_FREE];
       auto& qfree = *ds_work_vectors[siconos::integrators::SchatzmanPaoliOSI::FREE];
 
       // Velocity free and residu. vFree = RESfree (pointer equality !!).
       qfree = residuFree;
-
-      siconos::algebra::solveInPlace(*W, qfree);
+      qfree = _dynamicalSystemsGraph->properties(*dsi).LUW->solve(qfree);
       qfree *= -1.0;
-      qfree += qold;
+      qfree += d->qMemory().getSiconosVector(0);
     } else
       THROW_EXCEPTION(
           "siconos::integrators::SchatzmanPaoliOSI::computeFreeState - Only implemented for "
@@ -494,11 +394,10 @@ void siconos::integrators::SchatzmanPaoliOSI::computeFreeState() {
 
 void siconos::integrators::SchatzmanPaoliOSI::prepareNewtonIteration(double time) {
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
-  for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
-    if (!checkOSI(dsi)) continue;
-    auto ds = _dynamicalSystemsGraph->bundle(*dsi);
-    computeW(time, ds, *_dynamicalSystemsGraph->properties(*dsi).W);
-  }
+  // for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
+  //   if (!checkOSI(dsi)) continue;
+  //   auto ds = _dynamicalSystemsGraph->bundle(*dsi);
+  // }
   if (!_explicitJacobiansOfRelation) {
     _simulation->nonSmoothDynamicalSystem()->computeInteractionJacobians(time);
   }
@@ -515,13 +414,10 @@ struct siconos::integrators::SchatzmanPaoliOSI::_NSLEffectOnFreeOutput
   _NSLEffectOnFreeOutput(siconos::nonsmooth_formulations::OneStepNSProblem* p,
                          std::shared_ptr<siconos::modeling::Interaction> inter,
                          siconos::graphs::InteractionProperties& interProp)
-      : _osnsp(p), _inter(inter), _interProp(interProp){};
+      : _osnsp(p), _inter(inter), _interProp(interProp) {};
 
   void visit(const siconos::modeling::NewtonImpactNSL& nslaw) const override {
-    double e;
-    e = nslaw.e();
-    auto sizeY = _inter->nonSmoothLaw()->size();
-    std::vector<std::size_t> subCoord{0, sizeY, 0, sizeY};
+    auto e = nslaw.e();
     // Only the normal part is multiplied by e
     const auto& y_k_1(_inter->yMemory(_osnsp->inputOutputLevel()).getSiconosVector(1));
 
@@ -530,7 +426,7 @@ struct siconos::integrators::SchatzmanPaoliOSI::_NSLEffectOnFreeOutput
     ;
     auto& osnsp_rhs =
         *(*_interProp.workVectors)[siconos::integrators::SchatzmanPaoliOSI::OSNSP_RHS];
-    siconos::algebra::subscal(e, y_k_1, osnsp_rhs, subCoord, false);
+    osnsp_rhs += e * y_k_1;
   }
 
   void visit(const siconos::modeling::NewtonImpactFrictionNSL& nslaw) const override {
@@ -571,16 +467,6 @@ void siconos::integrators::SchatzmanPaoliOSI::computeFreeOutput(
 
   unsigned int relativePosition = 0;
 
-  std::vector<std::size_t> coord(8);
-  coord[0] = relativePosition;
-  coord[1] = relativePosition + sizeY;
-  coord[2] = 0;
-  coord[4] = 0;
-  coord[6] = 0;
-  coord[7] = sizeY;
-  std::shared_ptr<siconos::algebra::MapType> C;
-  std::shared_ptr<siconos::algebra::SiconosMatrix> D;
-  std::shared_ptr<siconos::algebra::SiconosMatrix> F;
   std::shared_ptr<siconos::algebra::BlockVector> deltax;
   auto& osnsp_rhs = *(*indexSet->properties(vertex_inter)
                            .workVectors)[siconos::integrators::SchatzmanPaoliOSI::OSNSP_RHS];
@@ -600,30 +486,25 @@ void siconos::integrators::SchatzmanPaoliOSI::computeFreeOutput(
           "siconos::integrators::SchatzmanPaoliOSI::computeFreeOutput not yet implemented "
           "for "
           "siconos::simulation::SICONOS_OSNSP ");
-
-    C = mainInteraction->relation()->C();
-
-    if (C) {
-      assert(Xfree);
-
-      coord[3] = C->cols();
-      coord[5] = C->cols();
-      // creates a POINTER link between workX[ds] (xfree) and the
-      // corresponding interactionBlock in each Interactionfor each ds of the
-      // current Interaction.
-
-      if (_useGammaForRelation) {
-        assert(deltax);
-        siconos::algebra::subprod(*C, *deltax, osnsp_rhs, coord, true);
-      } else {
-        siconos::algebra::subprod(*C, *Xfree, osnsp_rhs, coord, true);
-      }
-    }
     auto ltir = std::static_pointer_cast<siconos::modeling::LagrangianLinearTIR>(
         mainInteraction->relation());
-    e = ltir->e();
-    if (e) {
-      osnsp_rhs += *e;
+    auto C = ltir->CMatrix();
+
+    assert(Xfree);
+
+    // creates a POINTER link between workX[ds] (xfree) and the
+    // corresponding interactionBlock in each Interactionfor each ds of the
+    // current Interaction.
+
+    if (_useGammaForRelation) {
+      assert(deltax);  // FP: this is always false ...
+      siconos::algebra::matrixBlockVector_prod(C, *deltax, osnsp_rhs, true);
+    } else {
+      siconos::algebra::matrixBlockVector_prod(C, *Xfree, osnsp_rhs, true);
+    }
+
+    if (ltir->haseVector()) {
+      osnsp_rhs += ltir->eVector();
     }
   } else
     THROW_EXCEPTION(
@@ -665,31 +546,28 @@ void siconos::integrators::SchatzmanPaoliOSI::updateState(const unsigned int) {
     if (!checkOSI(dsi)) continue;
     auto ds = _dynamicalSystemsGraph->bundle(*dsi);
     auto& ds_work_vectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
-    W = _dynamicalSystemsGraph->properties(*dsi).W;
-
     // 1 - Lagrangian Systems
     if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
       // get dynamical system
       auto& qfree = *ds_work_vectors[siconos::integrators::SchatzmanPaoliOSI::FREE];
 
       //    siconos::algebra::SiconosVector *vfree = d->velocityFree();
-      auto& q = *d->q();
       bool baux =
           ((not(std::dynamic_pointer_cast<siconos::modeling::LagrangianLinearTIDS>(ds))) &&
            useRCC && _simulation->relativeConvergenceCriterionHeld());
 
       // To compute q, we solve W(q - qfree) = p
       if (d->p(_levelMaxForInput)) {
-        q = *d->p(_levelMaxForInput);  // q = p
-        siconos::algebra::solveInPlace(*W, q);
-      } else
-        q.zero();
+        *d->q() = d->p_read(_levelMaxForInput);  // q = p
+        *d->q() = _dynamicalSystemsGraph->properties(*dsi).LUW->solve(*d->q());
 
-      q += qfree;
+      } else
+        d->q()->setZero();
+
+      *d->q() += qfree;
 
       // Computation of the velocity
 
-      auto& v = *d->velocity();
       const auto& q_k_1 = d->qMemory().getSiconosVector(1);  // q_{k-1}
 
       //  std::cout << "siconos::integrators::SchatzmanPaoliOSI::updateState - q_k_1 ="
@@ -699,7 +577,7 @@ void siconos::integrators::SchatzmanPaoliOSI::updateState(const unsigned int) {
       //  <<std::endl;
       // q->display();
 
-      v = 1.0 / (2.0 * h) * (q - q_k_1);
+      *d->velocity() = 1.0 / (2.0 * h) * (d->q_read() - q_k_1);
       //  std::cout << "siconos::integrators::SchatzmanPaoliOSI::updateState - v ="
       //  <<std::endl;
       // v->display();
@@ -712,9 +590,9 @@ void siconos::integrators::SchatzmanPaoliOSI::updateState(const unsigned int) {
       // {
       //   for (const auto itindex : d->boundaryConditions()->velocityIndices()){
       //   {
-      //     _WBoundaryConditionsMap[ds]->getCol(bc,*columntmp);
+      //     _IterationMatrixBoundaryConditionsMap[ds]->getCol(bc,*columntmp);
       //     /*\warning we assume that W is symmetric in the Lagrangian case*/
-      //     double value = - siconos::algebra::inner_prod(*columntmp, *v);
+      //     double value = - columntmp->dot(*v);
       //     value += (d->p(level))->getValue(itindex);
       //     /* \warning the computation of reactionToBoundaryConditions take into
       //        account the contact impulse but not the external and internal forces.
@@ -724,8 +602,8 @@ void siconos::integrators::SchatzmanPaoliOSI::updateState(const unsigned int) {
       //   }
 
       if (baux) {
-        double ds_norm_ref = 1. + ds->x0()->norm2();  // Should we save this in the graph?
-        *ds_work_vectors[siconos::integrators::SchatzmanPaoliOSI::LOCAL_BUFFER] -= q;
+        double ds_norm_ref = 1. + ds->x0().norm();  // Should we save this in the graph?
+        *ds_work_vectors[siconos::integrators::SchatzmanPaoliOSI::LOCAL_BUFFER] -= d->q_read();
         auto aux =
             (ds_work_vectors[siconos::integrators::SchatzmanPaoliOSI::LOCAL_BUFFER]->norm2()) /
             ds_norm_ref;
@@ -814,8 +692,8 @@ void siconos::integrators::SchatzmanPaoliOSI::display() const {
     auto ds = _dynamicalSystemsGraph->bundle(*dsi);
     std::cout << "--------------------------------\n";
     std::cout << "--> W of dynamical system number " << ds->number() << ":\n";
-    if (_dynamicalSystemsGraph->properties(*dsi).W)
-      _dynamicalSystemsGraph->properties(*dsi).W->display();
+    if (_dynamicalSystemsGraph->properties(*dsi).iterationMatrix)
+      _dynamicalSystemsGraph->properties(*dsi).iterationMatrix->display();
     else
       std::cout << "-> nullptr"
                 << "\n";

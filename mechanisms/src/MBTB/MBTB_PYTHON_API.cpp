@@ -199,8 +199,8 @@ void MBTB_BodyBuildComputeInitPosition(
   // unsigned int nDim = 6;
   // auto q10(new SiconosVector(qDim));
   // auto v10(new SiconosVector(nDim));
-  q10->zero();
-  v10->zero();
+  q10->setZero();
+  v10->setZero();
 
   /*From the siconos point of view, the dynamic equation are written at the
    * center of gravity.*/
@@ -240,7 +240,7 @@ void MBTB_BodyBuildComputeInitPosition(
 
   // //In current version I = Id3
   // sI[numDS] = std::make_shared<siconos::algebra::SiconosMatrix>(3,3));
-  // sI[numDS]->zero();
+  // sI[numDS]->setZero();
   // //sI[numDS]->setValue(0,0,sMass[numDS]);sI[numDS]->setValue(1,1,sMass[numDS]);sI[numDS]->setValue(2,2,sMass[numDS]);
   // sI[numDS]->setValue(0,0,sMassMatrix[9*numDS+0]*sMassMatrixScale[numDS]);
   // sI[numDS]->setValue(1,0,sMassMatrix[9*numDS+1]*sMassMatrixScale[numDS]);
@@ -265,14 +265,15 @@ void siconos::mechanisms::MBTB_BodyBuild(
     std::shared_ptr<siconos::algebra::SiconosVector> initPos,
     std::shared_ptr<siconos::algebra::SiconosVector> modelCenterMass,
     std::shared_ptr<siconos::algebra::SiconosMatrix> inertialMatrix,
-    const ExternalForcesFunction& fext_func, const std::string& pluginMextLib,
-    const std::string& pluginMextFct, const std::string& pluginFintLib,
-    const std::string& pluginFintFct, const std::string& pluginMintLib,
-    const std::string& pluginMintFct, const std::string& pluginFintJacqLib,
-    const std::string& pluginFintJacqFct, const std::string& pluginMintJacqLib,
-    const std::string& pluginMintJacqFct, const std::string& pluginFintJacvLib,
-    const std::string& pluginFintJacvFct, const std::string& pluginMintJacvLib,
-    const std::string& pluginMintJacvFct, const std::string& pluginBoundaryConditionLib,
+    // const siconos::modeling::func_prototypes::FunctionS_V& fext_func,
+    // const siconos::modeling::func_prototypes::FunctionS_V& mext_func,
+    // const siconos::modeling::func_prototypes::FunctionVVS_V& fint_func,
+    // const siconos::modeling::func_prototypes::FunctionVVS_V& mint_func,
+    // const siconos::modeling::func_prototypes::FunctionVVS_V& jacobianfint_qfunc,
+    // const siconos::modeling::func_prototypes::FunctionVVS_V& jacobianfint_twistfunc,
+    // const siconos::modeling::func_prototypes::FunctionVVS_V& jacobianmint_qfunc,
+    // const siconos::modeling::func_prototypes::FunctionVVS_V& jacobianmint_twistfunc,
+    const std::string& pluginBoundaryConditionLib,
     const std::string& pluginBoundaryConditionFct,
     const siconos::modeling::BoundaryCondition::Indices& boundaryConditionIndex) {
   assert(mbtb::data::sNbOfBodies > numDS && "MBTB_BodyBuild numDS out of range.");
@@ -293,53 +294,48 @@ void siconos::mechanisms::MBTB_BodyBuild(
   // We fix a ds number just to be able to use postprocessing based on hdf5 file
   p->setNumber(numDS + 1);
   // set external forces plugin
-  p->setComputeFextFunction(fext_func);
+  //   p->setComputeFextFunction(fext_func);
 
-  if (pluginMextFct.length() > 1) {
-    p->setComputeMExtFunction(pluginMextLib, pluginMextFct);
-  }
-  // set internal forces plugin
-  if (pluginFintFct.length() > 1) {
-    p->setComputeFIntFunction(pluginFintLib, pluginFintFct);
+  //   p->setComputeMextFunction(mext_func);
 
-    if (pluginFintJacqFct.length() > 1) {
-      if (pluginFintJacqFct == "FiniteDifference") {
-        std::cout << "setComputeJacobianFIntqByFD(true)" << std::endl;
-        p->setComputeJacobianFIntqByFD(true);
-      } else {
-        p->setComputeJacobianFIntqFunction(pluginFintJacqLib, pluginFintJacqFct);
-      }
-    }
-    if (pluginFintJacvFct.length() > 1) {
-      if (pluginFintJacvFct == "FiniteDifference") {
-        std::cout << "setComputeJacobianFIntvByFD(true)" << std::endl;
-        p->setComputeJacobianFIntvByFD(true);
-      } else {
-        p->setComputeJacobianFIntvFunction(pluginFintJacvLib, pluginFintJacvFct);
-      }
-    }
-  }
+  //   p->setComputeFintFunction(fint_func);
+  //   if (pluginFintJacqFct == "FiniteDifference") {
+  //     std::cout << "setComputeJacobianFintOver_q_byFD(true)" << std::endl;
+  //     p->setComputeJacobianFintOver_q_byFD(true);
+  //   } else {
+  //     p->setComputeJacobianFIntqFunction(pluginFintJacqLib, pluginFintJacqFct);
+  //   }
+  // }
+  // if (pluginFintJacvFct.length() > 1) {
+  //   if (pluginFintJacvFct == "FiniteDifference") {
+  //     std::cout << "setComputeJacobianFintOver_twist_byFD(true)" << std::endl;
+  //     p->setComputeJacobianFintOver_twist_byFD(true);
+  //   } else {
+  //     p->setComputeJacobianFIntvFunction(pluginFintJacvLib, pluginFintJacvFct);
+  //   }
+  // }
+  // }
 
-  if (pluginMintFct.length() > 1) {
-    p->setComputeMIntFunction(pluginMintLib, pluginMintFct);
+  // if (pluginMintFct.length() > 1) {
+  //   p->setComputeMIntFunction(pluginMintLib, pluginMintFct);
 
-    if (pluginMintJacqFct.length() > 1) {
-      if (pluginMintJacqFct == "FiniteDifference") {
-        std::cout << "setComputeJacobianMIntqByFD(true)" << std::endl;
-        p->setComputeJacobianMIntqByFD(true);
-      } else {
-        p->setComputeJacobianMIntqFunction(pluginMintJacqLib, pluginMintJacqFct);
-      }
-    }
-    if (pluginMintJacvFct.length() > 1) {
-      if (pluginMintJacvFct == "FiniteDifference") {
-        std::cout << "setComputeJacobianMIntvByFD(true)" << std::endl;
-        p->setComputeJacobianMIntvByFD(true);
-      } else {
-        p->setComputeJacobianMIntvFunction(pluginMintJacvLib, pluginMintJacvFct);
-      }
-    }
-  }
+  //   if (pluginMintJacqFct.length() > 1) {
+  //     if (pluginMintJacqFct == "FiniteDifference") {
+  //       std::cout << "setComputeJacobianMintOver_q_byFD(true)" << std::endl;
+  //       p->setComputeJacobianMintOver_q_byFD(true);
+  //     } else {
+  //       p->setComputeJacobianMIntqFunction(pluginMintJacqLib, pluginMintJacqFct);
+  //     }
+  //   }
+  //   if (pluginMintJacvFct.length() > 1) {
+  //     if (pluginMintJacvFct == "FiniteDifference") {
+  //       std::cout << "setComputeJacobianMintOver_twist_byFD(true)" << std::endl;
+  //       p->setComputeJacobianMintOver_twist_byFD(true);
+  //     } else {
+  //       p->setComputeJacobianMIntvFunction(pluginMintJacvLib, pluginMintJacvFct);
+  //     }
+  //   }
+  // }
   // set boundary condition
   if (pluginBoundaryConditionFct.length() > 1) {
     // auto bdindex(new IndexInt(1));
@@ -430,7 +426,7 @@ void siconos::mechanisms::MBTB_JointBuild(
   lNbEq = mbtb::data::sJointRelations[numJ]->_jointR->numberOfConstraints();
 
   auto lH = std::make_shared<siconos::algebra::SiconosMatrix>(lNbEq, nbDS * qDim);
-  lH->zero();
+  lH->setZero();
   auto lNSL = std::make_shared<siconos::modeling::EqualityConditionNSL>(lNbEq);
 
   mbtb::data::sJointRelations[numJ]->_jointR->setJachq(lH);
@@ -813,13 +809,13 @@ void siconos::mechanisms::MBTB_BodySetIParam(unsigned int paramId, unsigned int 
                                              int v) {
   printf("MBTB_BodySetIParam not yet implemented\n");
 }
-void siconos::mechanisms::MBTB_BodySetVelocity(
-    unsigned int numDS, std::shared_ptr<siconos::algebra::SiconosVector> aVel) {
-  auto v = mbtb::data::sDS[numDS]->twist();
-  *v = *aVel;
-  auto v0 = mbtb::data::sDS[numDS]->twist0();
-  *v0 = *aVel;
-}
+// void siconos::mechanisms::MBTB_BodySetVelocity(
+//     unsigned int numDS, std::shared_ptr<siconos::algebra::SiconosVector> aVel) {
+//   auto v = mbtb::data::sDS[numDS]->twist();
+//   *v = *aVel;
+//   auto v0 = mbtb::data::sDS[numDS]->twist0();
+//   *v0 = *aVel;
+// }
 void siconos::mechanisms::MBTB_SetDParam(unsigned int paramId, double v) {
   mbtb::data::sDParams[paramId] = v;
 }

@@ -62,7 +62,7 @@ class LinearSMCimproved : public LinearSMC {
    *  \param CBstar matrix  \f$ CB^{*} \f$
    */
   void predictionPerturbation(const siconos::algebra::SiconosVector& xTk,
-                              siconos::algebra::SiconosMatrix& CBstar);
+                              const Eigen::FullPivLU<siconos::algebra::SiconosMatrix>& CBstar);
 
  public:
   /** Constructor
@@ -100,8 +100,7 @@ class LinearSMCimproved : public LinearSMC {
   virtual void actuate();
 
   /** Enable perturbation prediction */
-  void setPerturbationPrediction(double ub = std::numeric_limits<double>::quiet_NaN())
-  {
+  void setPerturbationPrediction(double ub = std::numeric_limits<double>::quiet_NaN()) {
     _ubPerturbation = ub;
     _predictionPerturbation = true;
   }

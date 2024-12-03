@@ -288,14 +288,13 @@ class OneStepNSProblem {
    */
   void setSolverId(int solverId);
 
-  /** get the OSI-related matrices used to compute the current InteractionBlock
-      (Ex: for MoreauJeanOSI, W)
+  /** \return the LU factorization of the OSI-related matrices used to compute the current
+     InteractionBlock
 
-      \param osi the OSI of the concerned dynamical system
+      \param osi the integrator
       \param ds the concerned dynamical system
-      \return the required matrix
   */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> getOSIMatrix(
+  std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>> getOSIMatrix(
       siconos::integrators::OneStepIntegrator& osi,
       std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 };

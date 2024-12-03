@@ -75,8 +75,8 @@ static BounceResult bounceTest(std::string moving, std::string ground,
   auto nsds = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(t0, T);
 
 
-  siconos::algebra::SiconosVector q0{7};
-  siconos::algebra::SiconosVector v0{6};
+  siconos::algebra::SiconosVector q0{3};
+  siconos::algebra::SiconosVector v0{3};
   q0.setZero();
   v0.setZero();
   q0(1) = position_init;
@@ -134,7 +134,7 @@ static BounceResult bounceTest(std::string moving, std::string ground,
     floordisk->setInsideMargin(params.insideMargin);
     floordisk->setOutsideMargin(params.outsideMargin);
     auto pos = std::make_shared<siconos::algebra::SiconosVector>(7);
-    pos->zero();
+    pos->setZero();
     (*pos)(1) = -2.0;  //-params.size/2;
 
     (*pos)(3) = 1.0;  // unit quaternion

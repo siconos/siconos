@@ -47,7 +47,7 @@ void SMCTest::setUp() {
   (*_x0)(1) = 20.0;
 
   _C = std::make_shared<siconos::algebra::SiconosMatrix>(2, 2);
-  _C->eye();
+  _C->setIdentity();
 
   _B = std::make_shared<siconos::algebra::SiconosMatrix>(2, 1);
   (*_B)(1, 0) = 1.0;
@@ -80,7 +80,7 @@ void SMCTest::initTwisting() {
   _sensor = std::make_shared<siconos::control::LinearSensor>(_DS, _C);
   _itw = std::make_shared<siconos::control::Twisting>(_sensor, 300., _beta, _h);
   auto eye = std::make_shared<siconos::algebra::SiconosMatrix>(2, 2);
-  eye->eye();
+  eye->setIdentity();
   _itw->setCsurface(eye);
 }
 #endif

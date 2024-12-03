@@ -26,15 +26,10 @@
 #include <string>
 
 #include "BlockVector.hpp"
+#include "FunctionTypes.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosSerialization.hpp"  // For ACCEPT_SERIALIZATION
 #include "SiconosVector.hpp"
-
-namespace siconos::algebra {
-// class SiconosMatrix;
-// class SiconosVector;
-// class BlockVector;
-}  // namespace siconos::algebra
 
 namespace siconos::plugins {
 class PluggedObject;
@@ -87,9 +82,9 @@ enum class RelationSubType {
    The present class is an interface to all relations and provides
    tools to define and describe them.
 
-   A relation is a link between global variables of the Dynamical
-   Systems and some local ones, named y and lambda; belonging to one
-   and only one Interaction.
+   A relation is a link between global variables of one or two dynamical
+   systems and local variables (e.g. at contact), named y and lambda
+   belonging to an interaction.
 
    All relations are specified by their type (First order or Lagrangian)
    accessed by getType() and their sub-type (linear, scleronomous ...),
@@ -97,49 +92,16 @@ enum class RelationSubType {
 
    A relation provides functions to compute:
 
-   - a function computeOutput() that updates y using dynamical systems global
-   variables,
-   - a function computeInput() that updates non-smooth dynamical systems parts
+   - the "output" (function computeOutput()) to update y using dynamical systems global
+   variables
+
+   - the "input" (function computeInput()) to update the non-smooth dynamical systems parts
    (e.g. r or p) using  \f$ \lambda \f$ .
 
 */
 class Relation {
  protected:
   ACCEPT_SERIALIZATION(Relation);
-
-  /** Plug-in to compute h(...)
-   */
-  std::shared_ptr<siconos::plugins::PluggedObject> _pluginh{nullptr};
-
-  /** Plug-in to compute \f$ \nabla_x h(..) \f$
-   */
-  std::shared_ptr<siconos::plugins::PluggedObject> _pluginJachx{nullptr};
-  /** Plug-in to compute \f$ \nabla_z h(..) \f$
-   */
-  std::shared_ptr<siconos::plugins::PluggedObject> _pluginJachz{nullptr};
-  /** Plug-in to compute \f$ \nabla_{\lambda} h(..) \f$
-   */
-  std::shared_ptr<siconos::plugins::PluggedObject> _pluginJachlambda{nullptr};
-
-  /** Plug-in to compute g(...)
-   */
-  std::shared_ptr<siconos::plugins::PluggedObject> _pluging{nullptr};
-
-  /** Plug-in to compute \f$ \nabla_\lambda g \f$  */
-  std::shared_ptr<siconos::plugins::PluggedObject> _pluginJacglambda{nullptr};
-
-  /** Plug-in to compute \f$ \nabla_x g \f$  */
-  std::shared_ptr<siconos::plugins::PluggedObject> _pluginJacgx{nullptr};
-
-  /** Plug-in to compute f*/
-  std::shared_ptr<siconos::plugins::PluggedObject> _pluginf{nullptr};
-
-  /** Plug-in to compute e*/
-  std::shared_ptr<siconos::plugins::PluggedObject> _plugine{nullptr};
-
-  /** To initialize all the plugin functions with nullptr.
-   */
-  virtual void _zeroPlugin();
 
   /** type of the Relation: FirstOrder or Lagrangian */
   RelationType _relationType;
@@ -153,9 +115,7 @@ class Relation {
    *  \param subtype subtype of the relation
    */
   Relation(RelationType type, RelationSubType subtype)
-      : _relationType(type), _subType(subtype) {
-    _zeroPlugin();
-  };
+      : _relationType(type), _subType(subtype) {};
 
  private:
   // Rule of five ...
@@ -174,70 +134,6 @@ class Relation {
 
   /** \return the subType of the Relation */
   inline RelationSubType getSubType() const { return _subType; }
-
-  /** To set a plug-in function to compute output function h
-   *
-   *  \param pluginPath the complete path to the plugin
-   *  \param functionName the function name to use in this plugin
-   */
-  void setComputehFunction(const std::string &pluginPath, const std::string &functionName);
-
-  /** To set a plug-in function to compute   \f$  \nabla_x h(..) \f$
-   *
-   *  \param pluginPath the complete path to the plugin
-   *  \param functionName the function name to use in this plugin
-   */
-  void setComputeJachxFunction(const std::string &pluginPath, const std::string &functionName);
-
-  /** To set a plug-in function to compute  \f$ \nabla_z h(..) \f$
-   *
-   *  \param pluginPath the complete path to the plugin
-   *  \param functionName the function name to use in this plugin
-   */
-  void setComputeJachzFunction(const std::string &pluginPath, const std::string &functionName);
-
-  /** To set a plug-in function to compute  \f$ \nabla_{\lambda} h(..) \f$
-   *
-   *  \param pluginPath the complete path to the plugin
-   *  \param functionName the function name to use in this plugin
-   */
-  void setComputeJachlambdaFunction(const std::string &pluginPath,
-                                    const std::string &functionName);
-
-  /** To set a plug-in function to compute input function g
-   *
-   *  \param pluginPath the complete path to the plugin
-   *  \param functionName the function name to use in this plugin
-   */
-  void setComputegFunction(const std::string &pluginPath, const std::string &functionName);
-  /** To set a plug-in function to compute input function F
-   *
-   *  \param pluginPath the complete path to the plugin
-   *  \param functionName the function name to use in this plugin
-   */
-  void setComputeFFunction(const std::string &pluginPath, const std::string &functionName);
-
-  /** To set a plug-in function to compute input function E
-   *
-   *  \param pluginPath the complete path to the plugin
-   *  \param functionName the function name to use in this plugin
-   */
-  void setComputeEFunction(const std::string &pluginPath, const std::string &functionName);
-
-  /** To set a plug-in function to compute the jacobian of  \f$ g \f$  w.r.t. x
-   *
-   *  \param pluginPath the complete path to the plugin
-   *  \param functionName the function name to use in this plugin
-   */
-  void setComputeJacgxFunction(const std::string &pluginPath, const std::string &functionName);
-
-  /** To set a plug-in function to compute the jacobian of  \f$ g \f$  w.r.t. \f$ \lambda \f$
-   *
-   *  \param pluginPath the complete path to the plugin
-   *  \param functionName the function name to use in this plugin
-   */
-  void setComputeJacglambdaFunction(const std::string &pluginPath,
-                                    const std::string &functionName);
 
   /** initialize the relation (check sizes, memory allocation ...)
    *
@@ -264,7 +160,9 @@ class Relation {
    *  \param inter the interaction using this relation
    *  \param interProp
    */
-  virtual void computeJacg(double time, Interaction &inter) = 0;
+  virtual void computeJacg(
+      double time,
+      Interaction &inter) { /*Does nothing by default. Reimplement if required*/ };
 
   /** default function to compute y
    *
@@ -283,94 +181,16 @@ class Relation {
    */
   virtual void computeInput(double time, Interaction &inter, unsigned int level = 0) = 0;
 
-  virtual std::shared_ptr<siconos::algebra::MapType> C() const = 0;
-
-  virtual std::shared_ptr<siconos::algebra::MapType> H() const = 0;
-
-  /**
-     return true if the relation is linear.
-
-     \return bool
-   */
+  /** \return true if the relation is linear */
   virtual bool isLinear() { return false; }
 
-  /**
-      return true if the relation requires the computation of residu
-
-      \return true if residu are required, false otherwise
-   */
+  /** \return true if the relation requires the computation of residu */
   virtual bool requireResidu() { return false; }
 
-  /** main relation members display
-   */
-  virtual void display() const;
-
-  /**
-      Get _pluginh
-
-      \return a shared pointer to the plugin
-  */
-  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginh() const {
-    return _pluginh;
-  };
-
-  /**
-      Get _pluginJachx
-
-      \return a shared pointer to the plugin
-   */
-  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginJachx() const {
-    return _pluginJachx;
-  };
-
-  /**
-      Get _pluginJachlambda
-
-      \return a shared pointer to the plugin
-  */
-  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginJachlambda() const {
-    return _pluginJachlambda;
-  };
-
-  /**
-      Get _pluging
-
-      \return a shared pointer to the plugin
-  */
-  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluging() const {
-    return _pluging;
-  };
-
-  /**
-      Get _pluginJacglambda
-
-      \return a shared pointer to the plugin
-  */
-  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginJacLg() const {
-    return _pluginJacglambda;
-  };
-
-  /**
-      Get _pluginf
-
-      \return a shared pointer to the plugin
-  */
-  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginf() const {
-    return _pluginf;
-  };
-
-  /**
-      Get _plugine
-
-      \return a shared pointer to the plugin
-  */
-  inline std::shared_ptr<siconos::plugins::PluggedObject> getPlugine() const {
-    return _plugine;
-  };
+  /** main relation members display */
+  virtual void display() const = 0;
 
   virtual void accept(std::shared_ptr<siconos::internal::SiconosVisitor>) const = 0;
-
-  // VIRTUAL_ACCEPT_VISITORS(Relation);
 };
 }  // namespace siconos::modeling
 

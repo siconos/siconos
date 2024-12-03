@@ -88,7 +88,7 @@ void siconos::nonsmooth_formulations::OSNSMatrixProjectOnConstraints::fillM(
       else {
         if (_M1->size(0) != _dimRow || _M1->size(1) != _dimColumn)
           _M1->resize(_dimRow, _dimColumn);
-        _M1->zero();
+        _M1->setZero();
       }
     }
 

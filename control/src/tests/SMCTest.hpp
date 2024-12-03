@@ -21,7 +21,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 #include "ExplicitLinearSMC.hpp"
-#include "FirstOrderLinearTIDS.hpp"
+#include "FirstOrderLinearDS.hpp"
 #include "LinearSMC.hpp"
 #include "LinearSensor.hpp"
 #include "SiconosConfig.h"
@@ -68,7 +68,7 @@ class SMCTest : public CppUnit::TestFixture {
   double _tol;
   double _beta;
   double _xFinal;
-  std::shared_ptr<siconos::modeling::FirstOrderLinearTIDS> _DS;
+  std::shared_ptr<siconos::modeling::FirstOrderLinearDS> _DS;
   std::shared_ptr<siconos::algebra::SiconosMatrix> _A;
   std::shared_ptr<siconos::algebra::SiconosMatrix> _B;
   std::shared_ptr<siconos::algebra::SiconosMatrix> _C;

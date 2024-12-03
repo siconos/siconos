@@ -35,8 +35,8 @@ namespace siconos::integrators {
  * and the list of concerned dynamical systems. Each DynamicalSystem is
  * associated to a SiconosMatrix named "W"
  *
- * W matrices are initialized and computed in initializeIterationMatrixW and
- * computeW.
+ * W matrices are initialized and computed in initializeIterationMatrix and
+ * computeIterationMatrix.
  */
 class NewMarkAlphaOSI : public OneStepIntegrator {
  protected:
@@ -161,24 +161,20 @@ class NewMarkAlphaOSI : public OneStepIntegrator {
    */
   inline bool getFlagVelocityLevel() { return _IsVelocityLevel; }
 
-  /** get pointer to the maxtrix W
-   * \param ds std::shared_ptr<siconos::modeling::DynamicalSystem> DynamicalSystem concerned
-   * \return  std::shared_ptr<siconos::algebra::SiconosMatrix>
-   */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> W(
-      std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
-
   /** initialize W matrix
    *  \param ds a pointer to DynamicalSystem
    */
-  void initializeIterationMatrixW(std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
+  void initializeIterationMatrix(std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
-  /** compute W matrix
+  /** compute the iteration matrix
    *  \param ds a pointer to DynamicalSystem
-   *  \param W the result in W
+   *  \param[in,out] W the result in
+   *  \param[in,out] LU factorization of W (updated)
    */
-  void computeW(std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
-                siconos::algebra::SiconosMatrix &W);
+  void computeIterationMatrix(
+      std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
+      siconos::algebra::SiconosMatrix &W,
+      std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>> &luw);
 
   /** compute the residual of dynamical equation
    *\return double: maximum residu over all DSs

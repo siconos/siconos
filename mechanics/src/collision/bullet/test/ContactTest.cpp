@@ -226,8 +226,8 @@ static BounceResult bounceTest(std::string moving, std::string ground,
     // Update integrator and solve constraints
     simulation->computeOneStep();
 
-    double vel = (*body->velocity())(2);
-    double pos = (*body->q())(2);
+    double vel = body->twist_read()(2);
+    double pos = body->q_read()(2);
 
     if (params.trace && (k + 1) < steps) {
       printf("pos, %f, %f, %f\n", pos, last_pos - pos, vel);

@@ -25,8 +25,8 @@
 
 #include "BlockVector.hpp"
 #include "NewtonEulerJointR.hpp"
-#include "SiconosVector.hpp"
 #include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 // #define DEBUG_BEGIN_END_ONLY
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -89,14 +89,13 @@ siconos::joints::JointStopR::JointStopR(std::shared_ptr<NewtonEulerJointR> joint
 }
 #endif
 
-void siconos::joints::JointStopR::computeh(double time,
-                                           const siconos::algebra::BlockVector& q0,
-                                           siconos::algebra::SiconosVector& y) {
+void siconos::joints::JointStopR::computeh(const siconos::algebra::BlockVector& q,
+                                           Eigen::Ref<siconos::algebra::SiconosVector> y) {
   // Common cases optimisation
   bool case_onestop = y.size() == 1;
   bool case_posneg = y.size() == 2 && (*_axis)[0] == (*_axis)[1];
   if (case_onestop || case_posneg) {
-    _joint->computehDoF(time, q0, y, (*_axis)[0]);
+    _joint->computehDoF(q, y, (*_axis)[0]);
 
     y.setValue(0, (y.getValue(0) - _pos->getValue(0)) * _dir->getValue(0));
     if (case_posneg) y.setValue(1, (y.getValue(0) - _pos->getValue(1)) * _dir->getValue(1));
@@ -105,7 +104,7 @@ void siconos::joints::JointStopR::computeh(double time,
 
   // Get h for each relevant axis
   siconos::algebra::SiconosVector tmp_y(_axisMax - _axisMin + 1);
-  _joint->computehDoF(time, q0, tmp_y, _axisMin);
+  _joint->computehDoF(q, tmp_y, _axisMin);
 
   // Copy and scale each stop for its axis/position/direction
   for (unsigned int i = 0; i < y.size(); i++) {
@@ -113,23 +112,24 @@ void siconos::joints::JointStopR::computeh(double time,
   }
 }
 
-void siconos::joints::JointStopR::computeJachq(
+void siconos::joints::JointStopR::computeJacobianhOver_q_(
     double time, siconos::modeling::Interaction& inter,
-    std::shared_ptr<siconos::algebra::BlockVector> q0) {
+    const siconos::algebra::BlockVector& q0) {
   unsigned int n = _axisMax - _axisMin + 1;
 
-  if (!_jachqTmp || !(_jachqTmp->size(1) == q0->size() && _jachqTmp->size(0) == n)) {
-    _jachqTmp = std::make_shared<siconos::algebra::SiconosMatrix>(n, q0->size());
+  if (!jacobianhOver_q_Tmp ||
+      !(jacobianhOver_q_Tmp->size(1) == q0.size() && jacobianhOver_q_Tmp->size(0) == n)) {
+    jacobianhOver_q_Tmp = std::make_shared<siconos::algebra::SiconosMatrix>(n, q0.size());
   }
 
   // Compute the jacobian for the required range of axes
-  _joint->computeJachqDoF(time, inter, q0, *_jachqTmp, _axisMin);
+  _joint->computeJachqDoF(inter, q0, *jacobianhOver_q_Tmp, _axisMin);
 
   // Copy indicated axes into the stop jacobian, possibly flipped for negative stops
-  for (unsigned int i = 0; i < _jachq->rows(); i++)
-    for (unsigned int j = 0; j < _jachq->cols(); j++)
-      _jachq->setValue(i, j,
-                       _jachqTmp->getValue((*_axis)[i] - _axisMin, j) * _dir->getValue(i));
+  for (unsigned int i = 0; i < jacobianhOver_q_view_->rows(); i++)
+    for (unsigned int j = 0; j < jacobianhOver_q_view_->cols(); j++)
+      jacobianhOver_q_view_->setValue(
+          i, j, jacobianhOver_q_Tmp->getValue((*_axis)[i] - _axisMin, j) * _dir->getValue(i));
 }
 
 unsigned int siconos::joints::JointStopR::numberOfConstraints() { return _axis->size(); }

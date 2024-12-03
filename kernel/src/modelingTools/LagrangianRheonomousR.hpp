@@ -26,76 +26,58 @@
 namespace siconos::modeling {
 
 /**
-   Lagrangian (Non Linear) Rheonomous Relation
+   Lagrangian (Non Linear) Rheonomous Relations
 
-   This class provides tools to describe non linear relation of the type:
+   This class provides tools to describe Lagrangian (2nd order) non linear relations, with:
 
    \f[
-        y = h(q,t,z) \\
-        \dot y =  \nabla^\top_q(q,t,z)\dot q + \frac{\partial }{\partial t}h(q,t,z) \\
+        y &=& h(q,t) \\
+        \dot y &=&  \nabla^\top_q h(q,t)\dot q + \frac{\partial }{\partial t}h(q,t) \\
    \f]
 
    or more generally
 
    \f[
 
-        \dot y =  H(q,t,z)\dot q + \frac{\partial }{\partial t}h(q,t,z)
+        \dot y =  H(q,t)\dot q + \frac{\partial }{\partial t}h(q,t)
    \f]
 
    and by duality
 
    \f[
 
-        p = H^\top(q,t,z)\lambda
+        p = H^\top(q,t)\lambda
    \f]
 
-   The following operators (and their jacobians) can be plugged, in the usual
-   way (see User Guide, 'User-defined plugins')
+   The following operators can be set by user-defined functions:
 
-   - \f$ h(q,t,z) \f$
-   - \f$ \nabla_q h(q,t,z) \f$
-   - \f$ \dot h(q,t,z) \f$
+   - \f$ h(q,t) \f$
+   - \f$ \nabla_q h(q,t) \f$
+   - \f$ \dot h(q,t) \f$
 
-   The plugin functions must fit with the following signature (siconos::plugins::FPtr4):
-
-   void func(unsigned int qsize, double* q, double time, unsigned int ysize,
-   double* buffer , unsigned int sizez, double* z)
-
-   buffer being either  \f$ y \f$ ,  \f$ \dot h \f$  or  \f$ \nabla_qh \f$ .
 */
 class LagrangianRheonomousR : public LagrangianR {
  protected:
   ACCEPT_SERIALIZATION(LagrangianRheonomousR);
 
-  /** plugged vector used to compute hDot */
-  std::shared_ptr<siconos::algebra::SiconosVector> _hDot{nullptr};
+  /** function wrapper used to compute \f$ h(q,t) \f$ */
+  siconos::modeling::func_prototypes::FunctionBVS_V computeh_{nullptr};
 
-  /** LagrangianRheonomousR plug-in to compute hDot(q,t,z)
-   */
-  std::shared_ptr<siconos::plugins::PluggedObject> _pluginhDot{nullptr};
+  /** function wrapper used to compute  \f$ \nabla^\top_q h(q, t) \f$ */
+  siconos::modeling::func_prototypes::FunctionBVS_M computejacobianhOver_q_{nullptr};
 
-  /** reset all plugins */
-  void _zeroPlugin() override;
+  /** \f$ \frac{\partial }{\partial t}h(q,t) \f$ */
+  std::shared_ptr<siconos::algebra::SiconosVector> hdot_{nullptr};
 
-  /** default constructor
-   */
-  LagrangianRheonomousR() : LagrangianR(RelationSubType::RheonomousR) { _zeroPlugin(); }
+  /** function wrapper used to compute \f$ \frac{\partial }{\partial t}h(q,t) \f$ */
+  siconos::modeling::func_prototypes::FunctionBVS_V computehdot_{nullptr};
+
+  /** True if \f$ \frac{\partial }{\partial t}h(q,t) \f$ is taken into account */
+  bool hashdot_{false};
 
  public:
-  /** constructor from a set of data
-   *
-   *  \param pluginh name of the plugin to compute h.
-   *  Its signature must be "void userPluginH(unsigned int, double*, double,
-   *  unsigned int, double*, unsigned int, double*)"
-   *  \param pluginJacobianhq name of the plugin  to compute jacobian h according to q. Its
-   * signature must be "void userPluginG0(unsigned int, double*, double, unsigned int, double*,
-   *  unsigned int, double*)"
-   *  \param pluginDoth name of the plugin to compute
-   *  hDot. Its signature must be "void userPluginHDot(unsigned int, double*,double, unsigned
-   * int, double*, unsigned int, double*)
-   */
-  LagrangianRheonomousR(const std::string &pluginh, const std::string &pluginJacobianhq,
-                        const std::string &pluginDoth);
+  /** default and only constructor */
+  LagrangianRheonomousR() : LagrangianR(RelationSubType::RheonomousR) {}
 
   /** destructor
    */
@@ -107,63 +89,54 @@ class LagrangianRheonomousR : public LagrangianR {
    */
   void initialize(Interaction &inter) override;
 
-  /** check sizes of the relation specific operators.
-   *
-   *  \param inter an Interaction using this relation
-   */
-  inline void checkSize(Interaction &inter) override{};
+  /** \return  a read-only view on \f$ \frac{\partial }{\partial t}h(q,t) \f$  */
+  inline const auto hdot() const {
+    return siconos::algebra::ConstMapVectorType(hdot_->data(), hdot_->size());
+  }
 
-  // -- hDot --
-
-  /** get a pointer on vector hDot
+  /** set a user-defined function to compute \f$ \frac{\partial }{\partial t}h(q,t) \f$
    *
-   *  \return a smart pointer on a SiconosVector
+   *  \param fct the user-defined function (std::function, lambda ...)
    */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> hDot() const { return _hDot; }
+  void setComputehdotFunction(const siconos::modeling::func_prototypes::FunctionBVS_V &fct);
 
-  /** to set a specified function to compute function hDot
-   *
-   *  \param pluginpath the complete path to the plugin
-   *  \param name the name of the function to use in this plugin
+  /** Update \f$ \frac{\partial }{\partial t}h(q,t) \f$
+   *  \param position 'list' of state vectors (for all ds involved in the interaction)
+   *  \param time the current time
    */
-  void setComputehDotFunction(const std::string &pluginpath, const std::string &name);
+  virtual void computehdot(const siconos::algebra::BlockVector &position, double time);
+
+  /** set a user-defined function to compute \f$ h(q,t) \f$  \f$
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputehFunction(const siconos::modeling::func_prototypes::FunctionBVS_V &fct);
 
   /**
-     to compute the output y = h(t,q,z) of the Relation
+    to compute the output y = h(q, t) of the Relation
 
-     \param time current time value
-     \param q coordinates of the dynamical systems involved in the relation
-     \param z user defined parameters (optional)
-     \param y the resulting vector
+    \param q coordinates of the dynamical systems involved in the relation
+    \param time current time value
+    \param y the resulting vector
   */
-  virtual void computeh(double time, const siconos::algebra::BlockVector &q,
-                        siconos::algebra::BlockVector &z, siconos::algebra::SiconosVector &y);
+  virtual void computeh(const siconos::algebra::BlockVector &q, double time,
+                        Eigen::Ref<siconos::algebra::SiconosVector> y);
 
-  /**
-     to compute the time-derivative of the output y = h(t,q,z), saved in
-     attribute _hDot (access: hDot())
+  /** set a user-defined function to compute \f$ \nabla^\top_q h(q, t) \f$ \f$
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputeJacobianhOver_qFunction(
+      const siconos::modeling::func_prototypes::FunctionBVS_M &fct);
 
-     \param time current time value
-     \param q coordinates of the dynamical systems involved in the relation
-     \param z user defined parameters (optional)
-  */
-  virtual void computehDot(double time, const siconos::algebra::BlockVector &q,
-                           siconos::algebra::BlockVector &z);
-
-  /**
-     to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
-
-     \param time current time value
-     \param q coordinates of the dynamical systems involved in the relation
-     \param z user defined parameters (optional)
-  */
-  virtual void computeJachq(double time, const siconos::algebra::BlockVector &q,
-                            siconos::algebra::BlockVector &z);
+  /** Computes \f$ \nabla^\top_q h(q, t) \f$
+   *  \param q coordinates of the dynamical systems involved in the relation
+   *  \param time current time value
+   */
+  virtual void computeJacobianhOver_q(const siconos::algebra::BlockVector &q, double time);
 
   /** compute all the H Jacobian */
   void computeJach(double time, Interaction &inter) override;
-  /** compute all the G Jacobian */
-  void computeJacg(double time, Interaction &inter) override {}
 
   /** to compute output
    *

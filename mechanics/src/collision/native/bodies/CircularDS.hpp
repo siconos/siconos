@@ -33,12 +33,19 @@ class CircularDS : public siconos::modeling::LagrangianDS {
  protected:
   ACCEPT_SERIALIZATION(CircularDS);
 
-  double radius{0.};
-  double massValue{0.};
+  double radius_{0.};
+  double massValue_{0.};
 
  public:
-  CircularDS(double, double, std::shared_ptr<siconos::algebra::SiconosVector>,
-             std::shared_ptr<siconos::algebra::SiconosVector>);
+  /** constructor from initial state and velocity
+   *
+   *  \param R radius
+   *  \param m mass
+   *  \param position initial coordinates
+   *  \param velocity initial velocity
+   */
+  CircularDS(double, double, Eigen::Ref<siconos::algebra::SiconosVector> position,
+             Eigen::Ref<siconos::algebra::SiconosVector> velocity);
 
   virtual ~CircularDS() noexcept = default;
 
@@ -46,9 +53,9 @@ class CircularDS : public siconos::modeling::LagrangianDS {
 
   double getVelocity(unsigned int pos);
 
-  inline double getMassValue() const { return massValue; };
+  inline double getMassValue() const { return massValue_; };
 
-  inline double getRadius() const { return radius; };
+  inline double getRadius() const { return radius_; };
 };
 }  // namespace siconos::collision::native::bodies
 #endif /* CircularDS_h */

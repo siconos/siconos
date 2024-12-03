@@ -28,18 +28,11 @@ namespace siconos::modeling {
 /**
     Lagrangian Linear Systems with time invariant coefficients -
 
-    \f$ M\dot v + Cv + Kq = F_{ext}(t,z) + p \f$
-
-    The class LagrangianLinearTIDS  allows to define  and compute a generic ndof-dimensional
-   Lagrangian Linear Time Invariant Dynamical System of the form:
-
-    \f[
-    M \ddot q + C \dot q + K q =  F_{ext}(t,z) + p,
-    \f]
+    \f$ M\dot v + Cv + Kq = F_{ext}(t) + p \f$
 
     where
     -  \f$ q \in R^{ndof} \f$ is the set of the generalized coordinates,
-    - \f$ \dot q  \in R^{ndof} \f$  the velocity, i. e. the time derivative of
+    - \f$ v \in R^{ndof} \f$  the velocity, i. e. the time derivative of
     the  generalized coordinates.
     - \f$ \ddot q  \in R^{ndof} \f$  the acceleration, i. e. the second time
     derivative of the  generalized coordinates.
@@ -52,23 +45,21 @@ namespace siconos::modeling {
     method).
     -  \f$ C \in  R^{ndof \times ndof} \f$ is the viscosity matrix (access : C()
     method).
-    -  \f$ z \in R^{zSize} \f$  is a vector of arbitrary algebraic variables,
-   some sort of discret state.
 
-    The equation of motion is also shortly denoted as:
+    The equation of motion is also shortly denoted as (as in LagrangianDS):
 
     \f[
 
-    M(q,z) \dot v = F(v, q, t, z) + p
+    M(q) \dot v = F_{total}(v, q, t) + p
 
     \f]
 
     where
-    -  \f$ F(v, q, t, z) \in R^{ndof} \f$ collects the total forces
+    -  \f$ F_{total}(v, q, t) \in R^{ndof} \f$ collects the total forces
     acting on the system, that is
-    \f$ F(v, q, t, z) =  F_{ext}(t, z) -  Cv - Kq \f$.
+    \f$ F_{total}(v, q, t) =  F_{ext}(t) -  Cv - Kq \f$.
 
-    This vector is saved and may be accessed using forces() method.
+    This vector is saved and may be accessed using totalForces() method.
 
     If required (e.g. for Event-Driven like simulation), reformulation as a
     first-order system is also available, and writes:
@@ -79,9 +70,9 @@ namespace siconos::modeling {
 
     \f[
 
-        rhs(x,t,z) = \left[\begin{array}{c}
+        rhs(x,t) = \left[\begin{array}{c}
         \dot q  \\
-        \ddot q = M^{-1}\left[F_{ext}(t, z) - C \dot q - K q  + p \right] \\
+        \ddot q = M^{-1}\left[F_{ext}(t) - C \dot q - K q  + p \right] \\
         \end{array}\right]
 
     \f]
@@ -109,17 +100,17 @@ class LagrangianLinearTIDS : public LagrangianDS {
   ACCEPT_SERIALIZATION(LagrangianLinearTIDS);
 
   /** stiffness matrix */
-  std::shared_ptr<Matrix> _K{nullptr};
+  std::shared_ptr<siconos::algebra::MapType> stiffnessMatrix_view_{nullptr};
 
   /** damping matrix */
-  std::shared_ptr<Matrix> _C{nullptr};
+  std::shared_ptr<siconos::algebra::MapType> dampingMatrix_view_{nullptr};
 
   /** default constructor */
-  LagrangianLinearTIDS() = default; // Used in FiniteElementLinearTIDS
+  LagrangianLinearTIDS() = default;  // Used in FiniteElementLinearTIDS
 
  public:
   /** constructor from initial state and mass matrix only. Leads to \f$ M\dot v
-   *  = F_{ext}(t,z) + p \f$ .
+   *  = F_{ext}(t) + p \f$ .
    *
    *  \param q0 initial coordinates
    *  \param v0 initial velocity
@@ -137,55 +128,50 @@ class LagrangianLinearTIDS : public LagrangianDS {
    */
   void initRhs(double t) override;
 
-  /** Compute \f$ F(v,q,t,z) \f$
-   *
-   *  \param time the current time
-   *  \param q std::shared_ptr<siconos::algebra::SiconosVector>: pointers on q
-   *  \param velocity std::shared_ptr<siconos::algebra::SiconosVector>: pointers
-   * on velocity
-   */
-  void computeForces(double time, std::shared_ptr<siconos::algebra::SiconosVector> q,
-                     std::shared_ptr<siconos::algebra::SiconosVector> velocity) override;
-
-  /** \return the stiffness matrix (pointer link) */
-  inline std::shared_ptr<Matrix> K() const { return _K; }
-
-  /** set (copy) the value of the stiffness matrix
+  /** set the stiffness matrix. Warning: shared memory with input
    *
    *  \param K new stiffness matrix
    */
-  void setK(const Matrix &K);
+  void setStiffnessMatrix(Eigen::Ref<siconos::algebra::SiconosMatrix> K);
 
-  /** set stiffness matrix (pointer link)
-   *
-   *  \param newPtr pointer to the new Stiffness matrix
-   */
-  void setKPtr(std::shared_ptr<Matrix> newPtr);
-
-  /** \return the damping matrix (pointer link) */
-  inline std::shared_ptr<Matrix> C() const { return _C; }
-
-  /** set (copy) the value of the damping matrix
+  /** set the damping matrix. Warning: shared memory with input
    *
    *  \param C new damping matrix
    */
-  void setC(const Matrix &C);
+  void setDampingMatrix(Eigen::Ref<siconos::algebra::SiconosMatrix> C);
 
-  /** set damping matrix (pointer link)
+  /** \return a read-only view on the stiffness matrix */
+  inline const auto stiffnessMatrix() const {
+    return siconos::algebra::ConstMapType(stiffnessMatrix_view_->data(),
+                                          stiffnessMatrix_view_->rows(),
+                                          stiffnessMatrix_view_->cols());
+  }
+
+  /** True if stiffness matrix is defined */
+  bool hasStiffnessMatrix() const { return stiffnessMatrix_view_ != nullptr; }
+
+  /** True if stiffness matrix is defined */
+  bool hasDampingMatrix() const { return dampingMatrix_view_ != nullptr; }
+
+  /** \return a read-only view on the damping matrix */
+  inline const auto dampingMatrix() const {
+    return siconos::algebra::ConstMapType(
+        dampingMatrix_view_->data(), dampingMatrix_view_->rows(), dampingMatrix_view_->cols());
+  }
+
+  /** Compute  \f$ F_{total}(v,q,t) = -Kq - Cv + f_{ext}(t)\f$
    *
-   *  \param newPtr pointer to the new damping matrix
+   *  \param velocity vector
+   *  \param q state
+   *  \param time the current time
    */
-  void setCPtr(std::shared_ptr<Matrix> newPtr);
-
-  /** \return \f$ \nabla_qF(v,q,t,z) \f$ (pointer  link) */
-  inline std::shared_ptr<Matrix> jacobianqForces() const override { return _K; }
-
-  /** \return \f$ \nabla_{\dot q}F(v,q,t,z) \f$ (pointer  link) */
-  inline std::shared_ptr<Matrix> jacobianvForces() const override { return _C; }
+  void computeTotalForces(const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
+                          const Eigen::Ref<const siconos::algebra::SiconosVector> &q,
+                          double time) override;
 
   /** \return true if the Dynamical system is linear.
    */
-  virtual bool isLinear() override { return true; }
+  bool isLinear() override { return true; }
 
   /** print the data onto the screen
    */

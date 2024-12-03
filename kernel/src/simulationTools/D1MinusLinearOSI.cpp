@@ -26,11 +26,10 @@
 #include "NewtonEulerR.hpp"
 #include "NewtonImpactNSL.hpp"
 #include "OneStepNSProblem.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixVectorOp.hpp"  // mat-vec prod
 #include "SiconosVector.hpp"
-#include "SiconosVectorOp.hpp"  // for subscal
 #include "SiconosVisitor.hpp"
-#include "SiconosMatrix.hpp"
 #include "Simulation.hpp"
 #include "Tools.hpp"  // For enum_to_string
 // #define DEBUG_BEGIN_END_ONLY
@@ -52,7 +51,7 @@ void siconos::integrators::D1MinusLinearOSI::_NSLEffectOnFreeOutput::visit(
   std::vector<std::size_t> subCoord = {0, nsl_size, 0, nsl_size};
   siconos::algebra::SiconosVector& osnsp_rhs =
       *(*_interProp.workVectors)[siconos::integrators::D1MinusLinearOSI::OSNSP_RHS];
-  siconos::algebra::subscal(e, osnsp_rhs, osnsp_rhs, subCoord, false);
+  osnsp_rhs += e * osnsp_rhs;
 }
 
 siconos::integrators::D1MinusLinearOSI::D1MinusLinearOSI(Type type)
@@ -82,8 +81,8 @@ void siconos::integrators::D1MinusLinearOSI::initializeWorkVectorsForDS(
   // Check dynamical system type
 
   if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
-    lds->init_generalized_coordinates(2);  // acceleration is required for the ds
-    lds->init_inverse_mass();              // invMass required to update post-impact velocity
+    lds->initMemoryForGeneralizedCoordinates(2);  // acceleration is required for the ds
+    lds->init_lu_mass();  // invMass required to update post-impact velocity
 
     ds_work_vectors.resize(siconos::integrators::D1MinusLinearOSI::WORK_LENGTH);
     ds_work_vectors[siconos::integrators::D1MinusLinearOSI::RESIDU_FREE] =
@@ -93,12 +92,12 @@ void siconos::integrators::D1MinusLinearOSI::initializeWorkVectorsForDS(
     ds_work_vectors[siconos::integrators::D1MinusLinearOSI::FREE_TDG] =
         std::make_shared<siconos::algebra::SiconosVector>(lds->dimension());
     // Update dynamical system components (for memory swap).
-    lds->computeForces(t, lds->q(), lds->velocity());
+    lds->computeTotalForces(*lds->velocity(), *lds->q(), t);
     lds->swapInMemory();
   }
 
   else if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
-    neds->init_inverse_mass();  // invMass required to update post-impact velocity
+    neds->init_lu_mass();  // invMass required to update post-impact velocity
     ds_work_vectors.resize(siconos::integrators::D1MinusLinearOSI::WORK_LENGTH);
     ds_work_vectors[siconos::integrators::D1MinusLinearOSI::RESIDU_FREE] =
         std::make_shared<siconos::algebra::SiconosVector>(neds->dimension());
@@ -106,8 +105,8 @@ void siconos::integrators::D1MinusLinearOSI::initializeWorkVectorsForDS(
         std::make_shared<siconos::algebra::SiconosVector>(neds->dimension());
     ds_work_vectors[siconos::integrators::D1MinusLinearOSI::FREE_TDG] =
         std::make_shared<siconos::algebra::SiconosVector>(neds->dimension());
-    // Compute a first value of the forces to store it in _forcesMemory
-    neds->computeForces(t, neds->q(), neds->twist());
+    // Compute a first value of the forces to store it in totalForcesMemory
+    neds->computeWrench(*neds->twist(), *neds->q(), t);
     neds->swapInMemory();
   } else {
     THROW_EXCEPTION(
@@ -396,14 +395,14 @@ void siconos::integrators::D1MinusLinearOSI::updateState(const unsigned int) {
       if (d->p(1)) {
         DEBUG_EXPR(d->p(1)->display());
         /* copy the value of the impulse */
-        auto dummy = std::make_shared<siconos::algebra::SiconosVector>(*(d->p(1)));
+        auto dummy = *d->p(1);
         /* Compute the velocity jump due to the impulse */
-        if (d->inverseMass()) {
-          d->update_inverse_mass();
-          siconos::algebra::solveInPlace(*(d->inverseMass()), *dummy);
+        if (d->hasLUMass()) {
+          d->update_lu_mass();
+          dummy = d->LUMass()->solve(dummy);
         }
         /* Add the velocity jump to the free velocity */
-        *v += *dummy;
+        *v += dummy;
       }
 
       DEBUG_PRINT("Position and velocity after update\n");
@@ -412,22 +411,15 @@ void siconos::integrators::D1MinusLinearOSI::updateState(const unsigned int) {
     }
     /*  NewtonEuler Systems */
     else if (auto d = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
-      auto v = d->twist();  // POINTER CONSTRUCTOR : contains new velocity
       if (d->p(1)) {
         // Update the velocity
-        auto dummy = std::make_shared<siconos::algebra::SiconosVector>(
-            *(d->p(1)));  // value = nonsmooth impulse
-        if (d->inverseMass()) {
-          d->update_inverse_mass();
-          siconos::algebra::solveInPlace(*(d->inverseMass()), *dummy);
+        auto dummy = *d->p(1);  // copy
+        if (d->hasLUMass()) {
+          dummy = d->LUMass()->solve(dummy);
         }
-        *v += *dummy;  // add free velocity
-
+        *d->twist() += dummy;  // add free velocity
         // update \f$ \dot q \f$
-        auto T = d->T();
-        auto dotq = d->dotq();
-        siconos::algebra::prod(*T, *v, *dotq, true);
-
+        *d->dotq() = d->T() * *d->twist();
         DEBUG_PRINT("\nRIGHT IMPULSE\n");
         DEBUG_EXPR(d->p(1)->display());
       }

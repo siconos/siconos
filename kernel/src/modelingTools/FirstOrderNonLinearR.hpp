@@ -28,67 +28,58 @@
 namespace siconos::modeling {
 
 /**
-   FirstOrder Non Linear Relation.
-
-   This is the most generic relation for First Order Dynamical Systems, with:
-   \f[
-
-   y &=& h(X,t,\lambda,Z) \\
-   R &=& g(X,t,\lambda,Z)
-   \f]
-
-   where X, Z, and R corresponds to DynamicalSystem variables.
-   If more than 2 DynamicalSystem are involved in the Interaction, then X = [x1
-   x2], Z=[z1 z2] R = [r1 r2].
-
-   \f$ y \f$ and \f$ \lambda \f$ are specific variables of the Interaction (see
-   this class for more details).
-
-   Let us define the following jacobians:
+   First order non linear relations, with:
 
    \f[
 
-      C &=& \nabla_x h\\
-      B &=& \nabla_{\lambda} g\\
-      D &=& \nabla_{\lambda} h\\
-      K &=& \nabla_x g.
+   y &=& h(X,t,\lambda) \\
+   R &=& g(X,t,\lambda)
    \f]
 
-   There are 2 ways to define this relation:
-   - by using the plugin mechanism of calling C functions
-   - by using the inheritance mechanism (of C++ or Python) and overloading
-   methods.
+   where X and R corresponds to DynamicalSystem variables.
+   If 2 DynamicalSystem are involved in the Interaction, then X = [x1
+   x2], R = [r1 r2].
 
-   For the plugins, the following definitions are mandatory:
-   - A function to compute  \f$ h \f$  with signature
-   @code (double time, unsigned x_size, double *x, unsigned size_lambda,
-   double* lambda, double *y, unsigned z_size, double *z) @endcode
-   - A function to compute  \f$ g \f$  with signature
-   @code (double time, unsigned x_size, double *x, unsigned size_lambda,
-   double* lambda, double *r, unsigned z_size, double *z) @endcode
-   *
-   Note that the size of  \f$ y \f$  is the same as \f$ \lambda \f$, and the size
-   of  \f$ R \f$  is the same as  \f$ X \f$ . Thus those are not specified in the plugin
-   function signatures.
+    The following operators can be can be set by user-defined functions:
 
-   For the various jacobians, there are two possibilities:
-   If one is constant, the value may directly be set: for instance, if  \f$ C \f$
-   is constant, then one can use setCPtr to fix the value. A word of cautions:
-   whenever a jacobian matrix is fixed using this call, then the corresponding
-   C++ function (and not plugin) is not called anymore. A small example: if \f$ C \f$
-   is fixed via setCPtr, then computeJachx is never called again.
+    - \f$ h(X, t, \lambda)\f$
+    - \f$ g(X, t, \lambda)\f$
+    - \f$ \nabla_{X} h(X, t, \lambda) \f$
+    - \f$ \nabla_{\lambda} h(X, t, \lambda) \f$
+    - \f$ \nabla_{X} g(X, t, \lambda) \f$
+    - \f$ \nabla_{\lambda} g(X, t, \lambda) \f$
 
-   The other option is to use the plugin mechanism. They all share the same
-   signature:
-   @code (double time, unsigned x_size, double *x, unsigned size_lambda,
-   double* lambda, double *mat, unsigned z_size, double *z) @endcode where mat
-   is the pointer to the array of values for each Jacobian. This implies that
-   only dense matrix are supported.
+    Storage for:
+
+    - h: in y vector from the interaction
+    - g: in r vectors from the dynamical systems
+    - \f$ \nabla_{X} h(X, t, \lambda) \f$ in FirstOrderR base class matrix attribute
+    - \f$ \nabla_{\lambda} h(X, t, \lambda) \f$ in FirstOrderR base class matrix attribute
+    - \f$ \nabla_{X} g(X, t, \lambda) \f$ in FirstOrderR base class matrix attribute
+    - \f$ \nabla_{\lambda} g(X, t, \lambda) \f$ in FirstOrderR base class matrix attribute
 
 */
 class FirstOrderNonLinearR : public FirstOrderR {
  protected:
   ACCEPT_SERIALIZATION(FirstOrderNonLinearR);
+
+  /** function wrapper used to compute \f$ h(x,t,\lambda) \f$ */
+  siconos::modeling::func_prototypes::FunctionBVSV_V computeh_{nullptr};
+
+  /** function wrapper used to compute \f$ h(x,t,\lambda) \f$ */
+  siconos::modeling::func_prototypes::FunctionBVSV_BV computeg_{nullptr};
+
+  /** function wrapper used to compute  \f$ \nabla_x h(x,t,\lambda) \f$ */
+  siconos::modeling::func_prototypes::FunctionBVSV_M computejacobianhOver_state_{nullptr};
+
+  /** function wrapper used to compute  \f$ \nabla_{\lambda} h(x,t,\lambda) \f$ */
+  siconos::modeling::func_prototypes::FunctionBVSV_M computejacobianhOver_lambda_{nullptr};
+
+  /** function wrapper used to compute  \f$ \nabla_x g(x,t,\lambda) \f$ */
+  siconos::modeling::func_prototypes::FunctionBVSV_M computejacobiangOver_state_{nullptr};
+
+  /** function wrapper used to compute  \f$ \nabla_{\lambda} g(x,t,\lambda) \f$ */
+  siconos::modeling::func_prototypes::FunctionBVSV_M computejacobiangOver_lambda_{nullptr};
 
  public:
   /** basic constructor
@@ -110,83 +101,129 @@ class FirstOrderNonLinearR : public FirstOrderR {
    */
   void checkSize(Interaction &inter) override;
 
-  /** default function to compute  \f$ h \f$
+  /** set a user-defined function to compute \f$ h(x,t,\lambda) \f$
    *
-   *  \param time    current time
-   *  \param x       current state variables
-   *  \param lambda  current nonsmooth variables
-   *  \param z       current auxiliary variable
-   *  \param[out] y  output value
+   *  \param fct the user-defined function (std::function, lambda ...)
    */
-  virtual void computeh(double time, const siconos::algebra::BlockVector &x,
-                        const siconos::algebra::SiconosVector &lambda,
-                        siconos::algebra::BlockVector &z, siconos::algebra::SiconosVector &y);
+  void setComputehFunction(const siconos::modeling::func_prototypes::FunctionBVSV_V &fct);
 
-  /** default function to compute  \f$ g \f$
+  /** To compute  \f$ h(x,t,\lambda) \f$
    *
-   *  \param time    current time
-   *  \param x       current state variables
-   *  \param lambda  current nonsmooth variables
-   *  \param z       current auxiliary variable
-   *  \param[out] r  input value
+   *  \param[in] x state vector (for all DS involved in the relation)
+   *  \param[in] time current time
+   *  \param[in] lambda \f$ \lambda\f$ value from interaction
+   *  \param[out] y result, \f$ y\f$ value from interaction
    */
-  virtual void computeg(double time, const siconos::algebra::BlockVector &x,
-                        const siconos::algebra::SiconosVector &lambda,
-                        siconos::algebra::BlockVector &z, siconos::algebra::BlockVector &r);
+  virtual void computeh(const siconos::algebra::BlockVector &state, double time,
+                        const Eigen::Ref<const siconos::algebra::SiconosVector> &lambda,
+                        Eigen::Ref<siconos::algebra::SiconosVector> y);
 
-  /** default function to compute \f$ C = \nabla_x h \f$
+  /** set a user-defined function to compute \f$ g(x,t,\lambda) \f$
    *
-   *  \param time    current time
-   *  \param x       current state variables
-   *  \param lambda  current nonsmooth variables
-   *  \param z       current auxiliary variable
-   *  \param[out] C  jacobian matrix
+   *  \param fct the user-defined function (std::function, lambda ...)
    */
-  virtual void computeJachx(double time, const siconos::algebra::BlockVector &x,
-                            const siconos::algebra::SiconosVector &lambda,
-                            siconos::algebra::BlockVector &z,
-                            siconos::algebra::SiconosMatrix &C);
+  void setComputegFunction(const siconos::modeling::func_prototypes::FunctionBVSV_BV &fct);
 
-  /** default function to compute \f$ D = \nabla_{\lambda} h \f$
+  /** To compute  \f$ g(x,t,\lambda) \f$
    *
-   *  \param time    current time
-   *  \param x       current state variables
-   *  \param lambda  current nonsmooth variables
-   *  \param z       current auxiliary variables
-   *  \param[out] D  jacobian matrix
+   *  \param[in] x state vector (for all DS involved in the relation)
+   *  \param[in] time current time
+   *  \param[in] lambda \f$ \lambda\f$ value from interaction
+   *  \param[out] res result, \f$ r\f$ value (for all DS involved in the relation)
    */
-  virtual void computeJachlambda(double time, const siconos::algebra::BlockVector &x,
-                                 const siconos::algebra::SiconosVector &lambda,
-                                 siconos::algebra::BlockVector &z,
-                                 siconos::algebra::SiconosMatrix &D);
+  virtual void computeg(const siconos::algebra::BlockVector &state, double time,
+                        const Eigen::Ref<const siconos::algebra::SiconosVector> &lambda,
+                        siconos::algebra::BlockVector &res);
+
+  /** Set a constant \f$ \nabla_x h(x, t, \lambda) \f$ matrix for the system
+   *
+   *  \param newValue \f$ \nabla_x h(x, t, \lambda) \f$ matrix
+   *
+   */
+  void setConstantJacobianhOver_state(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+
+  /** set a user-defined function to compute \f$ \nabla_x h(x, t, \lambda) \f$ \f$
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputeJacobianhOver_stateFunction(
+      const siconos::modeling::func_prototypes::FunctionBVSV_M &fct);
+
+  /** Computes \f$ \nabla_x h(x, t, \lambda) \f$
+   *  \param q coordinates of the dynamical systems involved in the relation
+   *  \param time current time value
+   */
+  virtual void computeJacobianhOver_state(
+      const siconos::algebra::BlockVector &state, double time,
+      const Eigen::Ref<const siconos::algebra::SiconosVector> &lambda);
+
+  /** Set a constant \f$ \nabla_{\lambda} h(X, t \lambda) \f$ matrix for the system
+   *
+   *  \param newValue \f$ \nabla_{\lambda} h(X, t, \lambda) \f$ matrix
+   *
+   */
+  void setConstantJacobianhOver_lambda(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+
+  /** set a user-defined function to compute \f$ \nabla_{\lambda} h(x, t, \lambda) \f$ \f$
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputeJacobianhOver_lambdaFunction(
+      const siconos::modeling::func_prototypes::FunctionBVSV_M &fct);
+
+  /** Computes \f$ \nabla_{\lambda} h(x, t, \lambda) \f$
+   *  \param q coordinates of the dynamical systems involved in the relation
+   *  \param time current time value
+   */
+  virtual void computeJacobianhOver_lambda(
+      const siconos::algebra::BlockVector &state, double time,
+      const Eigen::Ref<const siconos::algebra::SiconosVector> &lambda);
+
+  /** Set a constant \f$ \nabla_x g(x, t, \lambda) \f$ matrix for the system
+   *
+   *  \param newValue \f$ \nabla_x g(x, t, \lambda) \f$ matrix
+   *
+   */
+  void setConstantJacobiangOver_state(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+
+  /** set a user-defined function to compute \f$ \nabla_x g(x, t, \lambda) \f$ \f$
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputeJacobiangOver_stateFunction(
+      const siconos::modeling::func_prototypes::FunctionBVSV_M &fct);
+
+  /** Computes \f$ \nabla_x g(x, t, \lambda) \f$
+   *  \param q coordinates of the dynamical systems involved in the relation
+   *  \param time current time value
+   */
+  virtual void computeJacobiangOver_state(
+      const siconos::algebra::BlockVector &state, double time,
+      const Eigen::Ref<const siconos::algebra::SiconosVector> &lambda);
+
+  /** Set a constant \f$ \nabla_{\lambda} g(X, t \lambda) \f$ matrix for the system
+   *
+   *  \param newValue \f$ \nabla_{\lambda} g(X, t, \lambda) \f$ matrix
+   *
+   */
+  void setConstantJacobiangOver_lambda(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+
+  /** set a user-defined function to compute \f$ \nabla_{\lambda} g(x, t, \lambda) \f$ \f$
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputeJacobiangOver_lambdaFunction(
+      const siconos::modeling::func_prototypes::FunctionBVSV_M &fct);
+
+  /** Computes \f$ \nabla_{\lambda} g(x, t, \lambda) \f$
+   *  \param q coordinates of the dynamical systems involved in the relation
+   *  \param time current time value
+   */
+  virtual void computeJacobiangOver_lambda(
+      const siconos::algebra::BlockVector &state, double time,
+      const Eigen::Ref<const siconos::algebra::SiconosVector> &lambda);
 
   void computeJach(double time, Interaction &inter) override;
-
-  /** default function to compute \f$ B = \nabla_{\lambda}g \f$
-   *
-   *  \param time current time
-   *  \param x       current state variables
-   *  \param lambda  current nonsmooth variables
-   *  \param z       current auxiliary variables
-   *  \param[out] B  jacobian matrix
-   */
-  virtual void computeJacglambda(double time, const siconos::algebra::BlockVector &x,
-                                 const siconos::algebra::SiconosVector &lambda,
-                                 siconos::algebra::BlockVector &z,
-                                 siconos::algebra::SiconosMatrix &B);
-
-  /** default function to compute \f$ K = \nabla_{\lambda}g \f$
-   *
-   *  \param time    current time
-   *  \param x       current state variables
-   *  \param lambda  current nonsmooth variables
-   *  \param z       current auxiliary variables
-   *  \param[out] K  jacobian matrix
-   */
-  virtual void computeJacgx(double time, const siconos::algebra::BlockVector &x,
-                            const siconos::algebra::SiconosVector &lambda,
-                            siconos::algebra::BlockVector &z,
-                            siconos::algebra::SiconosMatrix &K);
 
   void computeJacg(double time, Interaction &inter) override;
 
@@ -211,7 +248,6 @@ class FirstOrderNonLinearR : public FirstOrderR {
    *  \return true if residu are required, false otherwise
    */
   bool requireResidu() override { return true; }
-
 };
 
 }  // namespace siconos::modeling

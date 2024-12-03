@@ -25,10 +25,9 @@
 #ifndef __SICONOSEXCEPTION_HPP__
 #define __SICONOSEXCEPTION_HPP__
 
-#include <errno.h>
-
 #include <boost/exception/diagnostic_information.hpp>
 #include <boost/throw_exception.hpp>
+#include <cerrno>
 #include <cstring>
 #include <exception>
 #include <iostream>

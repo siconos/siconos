@@ -122,7 +122,7 @@ void siconos::simulation::TimeSteppingD1Minus::updateIndexSet(unsigned int i) {
       topo->setHasChanged(true);
       if (i <= levelMaxForInput) {
         DEBUG_PRINTF("Reset to zero inter->lambda(%i)", i);
-        inter->lambda(i)->zero();
+        inter->lambda(i)->setZero();
       }
     }
 
@@ -131,7 +131,7 @@ void siconos::simulation::TimeSteppingD1Minus::updateIndexSet(unsigned int i) {
                    (int)i);
       if (i <= levelMaxForInput) {
         DEBUG_EXPR(inter->lambda(i)->display());
-        inter->lambda(i)->zero();
+        inter->lambda(i)->setZero();
       }
     } else {
       DEBUG_PRINTF("The current interaction is in the indexSet(%i)\n", (int)i);

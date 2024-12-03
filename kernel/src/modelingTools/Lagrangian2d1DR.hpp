@@ -41,34 +41,34 @@ class Lagrangian2d1DR : public LagrangianScleronomousR {
 
   /* Current Contact Points, may be updated within Newton loop based
    * on _relPc1, _relPc2. */
-  std::shared_ptr<siconos::algebra::SiconosVector> _Pc1;
-  std::shared_ptr<siconos::algebra::SiconosVector> _Pc2;
+  std::shared_ptr<siconos::algebra::SiconosVector> _Pc1{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> _Pc2{nullptr};
 
   /* Inward Normal at the contact.
    * \todo The meaning of "Inward" has to be explained carefully.
    */
-  std::shared_ptr<siconos::algebra::SiconosVector> _Nc;
+  std::shared_ptr<siconos::algebra::SiconosVector> _Nc{nullptr};
 
   /* _Nc must be calculated relative to q2 */
-  std::shared_ptr<siconos::algebra::SiconosVector> _relNc;
+  std::shared_ptr<siconos::algebra::SiconosVector> _relNc{nullptr};
 
   /* Rotation matrix converting the absolute coordinate to the contact frame
    * coordinate. This matrix contains the unit vector(s)of the contact frame in
    * row.
    */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _RotationAbsToContactFrame;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _RotationAbsToContactFrame{nullptr};
 
   /* Matrix converting */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _rotationMatrixAbsToBody;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _rotationMatrixAbsToBody{nullptr};
 
   /* Cross product matrices that correspond the lever arm from
    * contact point to center of mass*/
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _NPG1;
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _NPG2;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _NPG1{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _NPG2{nullptr};
 
   /*buffer matrices*/
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _AUX1;
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _AUX2;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _AUX1{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _AUX2{nullptr};
 
   /** Set the coordinates of first contact point.  Must only be done
    * in a computeh() override.
@@ -101,8 +101,7 @@ class Lagrangian2d1DR : public LagrangianScleronomousR {
       : LagrangianScleronomousR(),
         _Pc1{std::make_shared<siconos::algebra::SiconosVector>(2)},
         _Pc2{std::make_shared<siconos::algebra::SiconosVector>(2)},
-        _Nc{std::make_shared<siconos::algebra::SiconosVector>(2)}
-  {
+        _Nc{std::make_shared<siconos::algebra::SiconosVector>(2)} {
     /*_ds1=nullptr;_ds2=nullptr;*/
   }
 
@@ -117,15 +116,14 @@ class Lagrangian2d1DR : public LagrangianScleronomousR {
       \param z user defined parameters (optional)
       \param y the resulting vector
   */
-  void computeh(const siconos::algebra::BlockVector &q, siconos::algebra::BlockVector &z,
-                siconos::algebra::SiconosVector &y) override;
+  void computeh(const siconos::algebra::BlockVector &q,
+                Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
-  /** to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
+  /** to compute the jacobian of h(...). Set attribute jacobianhOver_q_ (access: jacqhq())
       \param q coordinates of the dynamical systems involved in the relation
       \param z user defined parameters (optional)
   */
-  void computeJachq(const siconos::algebra::BlockVector &q,
-                    siconos::algebra::BlockVector &z) override;
+  void computeJacobianhOver_q(const siconos::algebra::BlockVector &q) override;
 
   /** Return the distance between pc1 and pc, with sign according to normal */
   double distance() const;

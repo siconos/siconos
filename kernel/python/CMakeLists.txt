@@ -1,41 +1,40 @@
 set(kernel_root_dir ${CMAKE_SOURCE_DIR}/kernel/src)
 
-pybind11_add_module(pb11_template
-  ${CMAKE_CURRENT_SOURCE_DIR}/pb11_template.cpp
+
+create_pybind11_module(
+  MODULE_NAME pb11_template
+  SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/pb11_template.cpp
+  DEPENDENCIES kernel numerics
 )
 
-target_link_libraries(pb11_template PUBLIC kernel numerics)
-
-pybind11_add_module(modeling 
-  ${CMAKE_CURRENT_SOURCE_DIR}/modeling/modeling.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/modeling/dynamical_systems_wrapper.cpp
+create_pybind11_module(
+  MODULE_NAME modeling 
+  SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/modeling/modeling_pybind11.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/modeling/dynamical_systems_pybind11.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/modeling/relations_pybind11.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/modeling/nonsmoothlaws_pybind11.cpp
+  DEPENDENCIES kernel numerics
 )
 
-target_link_libraries(modeling PUBLIC kernel numerics)
-
-pybind11_add_module(integrators 
-  ${CMAKE_CURRENT_SOURCE_DIR}/integrators/integrators.cpp
+create_pybind11_module(MODULE_NAME  integrators 
+SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/integrators/integrators.cpp
+DEPENDENCIES kernel numerics
 )
 
-target_link_libraries(integrators PUBLIC kernel numerics)
-
-pybind11_add_module(simulation
-  ${CMAKE_CURRENT_SOURCE_DIR}/simulation/simulation.cpp
+create_pybind11_module(MODULE_NAME simulation
+SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/simulation/simulation.cpp
+DEPENDENCIES kernel numerics
 )
 
-target_link_libraries(simulation PUBLIC kernel numerics)
-
-pybind11_add_module(nonsmooth_formulations
-  ${CMAKE_CURRENT_SOURCE_DIR}/nonsmooth_formulations/nonsmooth_formulations.cpp
+create_pybind11_module(MODULE_NAME nonsmooth_formulations
+SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/nonsmooth_formulations/nonsmooth_formulations.cpp
+DEPENDENCIES kernel numerics
 )
 
-target_link_libraries(nonsmooth_formulations PUBLIC kernel numerics)
-
-pybind11_add_module(input
-  ${CMAKE_CURRENT_SOURCE_DIR}/io/io.cpp
+create_pybind11_module(MODULE_NAME input
+SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/io/io.cpp
+DEPENDENCIES kernel numerics
 )
-
-target_link_libraries(input PUBLIC kernel numerics)
 
 install(TARGETS
   pb11_template
@@ -47,3 +46,8 @@ install(TARGETS
   COMPONENT python
   LIBRARY DESTINATION "${SICONOS_PYTHON_INSTALL_DIR}/siconos/"
   )
+
+  # --- Tests ---
+if(WITH_TESTING)
+  build_python_tests()
+endif()

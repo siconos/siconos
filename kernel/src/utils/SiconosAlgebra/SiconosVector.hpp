@@ -28,52 +28,6 @@
 
 namespace siconos::algebra {
 
-// struct SiconosVectorIterator;
-// struct SiconosVectorConstIterator;
-// class BlockVector;
-// class SiconosMatrix;
-
-// adaptor to allow construction of a boost vector from memory without
-// copy
-// Source
-// https://stackoverflow.com/questions/1735841/initializing-a-ublas-vector-from-a-c-array
-// Example:
-//
-// using vector_adaptor = boost::numeric::ublas::vector<double,shallow_array_adaptor<double> >;
-// double a[size];
-// vector_adaptor v(shallow_array_adaptor<double>(size, &tab[0]));
-// std::vector w(size)
-// vector_adaptor v2(shallow_array_adaptor<double>(size, w.data()));
-//
-// Experimental: works only if  BOOST_UBLAS_SHALLOW_ARRAY_ADAPTOR is defined (see
-// kernel/CMakeLists.txt)
-// and breaks many things in bindings, ublas ...
-//
-// template <typename T>
-// class shallow_array_adaptor : public boost::numeric::ublas::shallow_array_adaptor<T> {
-//  public:
-//   typedef boost::numeric::ublas::shallow_array_adaptor<T> base_type;
-//   typedef typename base_type::size_type size_type;
-//   typedef typename base_type::pointer pointer;
-
-//   shallow_array_adaptor(size_type n) : base_type(n) {}
-//   shallow_array_adaptor(size_type n, pointer data) : base_type(n, data) {}
-//   shallow_array_adaptor(const shallow_array_adaptor &c) : base_type(c) {}
-
-//   void swap(shallow_array_adaptor &a)
-//   {
-//     if (base_type::begin() != a.begin())
-//       std::swap_ranges(base_type::begin(), base_type::end(), a.begin());
-//   }
-// };
-
-/**
-   Vectors of double. (Interface to various types of Boost-Ublas vectors).
-
-   Two possible types: siconos::algebra::DENSE (default) and Siconos:SPARSE.
-
-*/
-
 using SiconosVector = Eigen::Matrix<double_t, Eigen::Dynamic, 1, Eigen::ColMajor>;
 using SiconosVector3 = Eigen::Matrix<double_t, 3, 1, Eigen::ColMajor>;
 

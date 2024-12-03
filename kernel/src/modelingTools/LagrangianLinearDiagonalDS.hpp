@@ -55,19 +55,16 @@ class LagrangianLinearDiagonalDS : public LagrangianDS {
   ACCEPT_SERIALIZATION(LagrangianLinearDiagonalDS);
 
   /** stiffness matrix */
-  std::shared_ptr<siconos::algebra::MapVectorType> _stiffness{nullptr};
+  std::shared_ptr<siconos::algebra::MapVectorType> stiffnessMatrix_view_{nullptr};
 
   /** damping matrix */
-  std::shared_ptr<siconos::algebra::MapVectorType> _damping{nullptr};
+  std::shared_ptr<siconos::algebra::MapVectorType> dampingMatrix_view_{nullptr};
 
   /** mass matrix */
-  std::shared_ptr<siconos::algebra::MapVectorType> _mass_diag{nullptr};
-
-  /** mass density */
-  double _mu{0.};
+  std::shared_ptr<siconos::algebra::MapVectorType> massMatrix_view_{nullptr};
 
   /** default constructor */
-  LagrangianLinearDiagonalDS() = default;
+  LagrangianLinearDiagonalDS() = delete;
 
  public:
   /** constructor from initial state and all operators.
@@ -75,60 +72,42 @@ class LagrangianLinearDiagonalDS : public LagrangianDS {
    *  \param q0 initial coordinates
    *  \param v0 initial velocity
    *  \param stiffness diagonal of the stiffness matrix
-   *  \param damping diagonal of the damping matrix
-   *  \param mass diagonal of the mass matrix
    */
-  LagrangianLinearDiagonalDS(std::shared_ptr<siconos::algebra::SiconosVector> q0,
-                             std::shared_ptr<siconos::algebra::SiconosVector> v0,
-                             std::shared_ptr<siconos::algebra::SiconosVector> stiffness,
-                             std::shared_ptr<siconos::algebra::SiconosVector> damping,
-                             std::shared_ptr<siconos::algebra::SiconosVector> mass);
-
-  /** constructor for complete system with identity mass matrix
-   *
-   *  \param q0 initial coordinates
-   *  \param v0 initial velocity
-   *  \param stiffness diagonal of the stiffness matrix
-   *  \param damping diagonal of the damping matrix
-   */
-  LagrangianLinearDiagonalDS(std::shared_ptr<siconos::algebra::SiconosVector> q0,
-                             std::shared_ptr<siconos::algebra::SiconosVector> v0,
-                             std::shared_ptr<siconos::algebra::SiconosVector> stiffness,
-                             std::shared_ptr<siconos::algebra::SiconosVector> damping);
-
-  /** constructor for undamped system and identity mass matrix
-   *
-   *  \param q0 initial coordinates
-   *  \param v0 initial velocity
-   *  \param stiffness diagonal of the stiffness matrix
-   */
-  LagrangianLinearDiagonalDS(std::shared_ptr<siconos::algebra::SiconosVector> q0,
-                             std::shared_ptr<siconos::algebra::SiconosVector> v0,
-                             std::shared_ptr<siconos::algebra::SiconosVector> stiffness);
+  LagrangianLinearDiagonalDS(Eigen::Ref<siconos::algebra::SiconosVector> q0,
+                             Eigen::Ref<siconos::algebra::SiconosVector> v0,
+                             Eigen::Ref<siconos::algebra::SiconosVector> stiffness_diag);
 
   /* destructor */
   ~LagrangianLinearDiagonalDS() noexcept = default;
 
-  /** get stiffness matrix (diagonal only, pointer link)
+  /** set the damping matrix. Warning: shared memory with input
    *
-   *  \return pointer on a siconos::algebra::SiconosVector
+   *  \param C diagonal of the damping matrix
    */
-  inline std::shared_ptr<siconos::algebra::MapVectorType> stiffness() const {
-    return _stiffness;
+  void setDampingMatrix(Eigen::Ref<siconos::algebra::SiconosVector> C);
+
+  /** set the mass matrix. Warning: shared memory with input
+   *
+   *  \param M diagonal of the mass matrix
+   */
+  void setMassMatrix(Eigen::Ref<siconos::algebra::SiconosVector> M);
+
+  /** \return a read-only view on the stiffness matrix */
+  inline const auto stiffnessMatrix() const {
+    return siconos::algebra::ConstMapVectorType(stiffnessMatrix_view_->data(),
+                                                stiffnessMatrix_view_->size());
   }
 
-  /** get damping matrix (diagonal only, pointer link)
-   *
-   *  \return pointer on a siconos::algebra::SiconosVector
-   */
-  inline std::shared_ptr<siconos::algebra::MapVectorType> damping() const { return _damping; }
+  /** \return a read-only view on the damping matrix */
+  inline const auto dampingMatrix() const {
+    return siconos::algebra::ConstMapVectorType(dampingMatrix_view_->data(),
+                                                dampingMatrix_view_->size());
+  }
 
-  /** get mass matrix (diagonal only, pointer link)
-   *
-   *  \return pointer on a siconos::algebra::SiconosVector
-   */
-  inline std::shared_ptr<siconos::algebra::MapVectorType> mass_diag() const {
-    return _mass_diag;
+  /** \return a read-only view on the damping matrix */
+  inline const auto massMatrix() const {
+    return siconos::algebra::ConstMapVectorType(massMatrix_view_->data(),
+                                                massMatrix_view_->size());
   }
 
   /** allocate (if needed)  and compute rhs and its jacobian.
@@ -137,14 +116,48 @@ class LagrangianLinearDiagonalDS : public LagrangianDS {
    */
   void initRhs(double t) override;
 
-  /** Compute \f$ F(v,q,t,z) \f$
+  /** Compute  \f$ F_{total}(v,q,t) = -Kq - Cv + f_{ext}(t)\f$
    *
+   *  \param velocity vector
+   *  \param q state
    *  \param time the current time
-   *  \param q generalized coordinates
-   *  \param velocity time derivative of the  generalized coordinates
    */
-  void computeForces(double time, std::shared_ptr<siconos::algebra::SiconosVector> q,
-                     std::shared_ptr<siconos::algebra::SiconosVector> velocity) override;
+  void computeTotalForces(const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
+                          const Eigen::Ref<const siconos::algebra::SiconosVector> &q,
+                          double time) override;
+
+  /** Compute  \f$ \nabla_qF_{total}(v,q,t) \f$. Nothing done for this kind of system.
+   *
+   *  \param velocity vector
+   *  \param q state
+   *  \param time the current time
+   */
+  void computeJacobianTotalForcesOver_q(
+      const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
+      const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time) override {
+    THROW_EXCEPTION("diagonal DS, missing implementation ...");
+  };
+
+  /** Compute  \f$ \nabla_{\dot q}F_{total}(v,q,t) \f$. Nothing done for this kind of system.
+   *
+   *  \param velocity vector
+   *  \param q state
+   *  \param time the current time
+   */
+  void computeJacobianTotalForcesOver_velocity(
+      const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
+      const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time) override {
+    THROW_EXCEPTION("diagonal DS, missing implementation ...");
+  };
+
+  /** True if stiffness matrix is defined */
+  bool hasStiffnessMatrix() const { return stiffnessMatrix_view_ != nullptr; }
+
+  /** True if stiffness matrix is defined */
+  bool hasDampingMatrix() const { return dampingMatrix_view_ != nullptr; }
+
+  /** True if mass matrix is defined */
+  bool hasMassMatrix() const { return massMatrix_view_ != nullptr; }
 
   /**\return true if the Dynamical system is linear. */
   bool isLinear() override { return true; }

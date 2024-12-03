@@ -131,7 +131,7 @@ class BlockVector {
 //   bool isDense() const;
 
   /** sets all the values of the vector to 0.0 */
-  void zero();
+  void setZero();
 
   /** set all values of the vector component to value.
    *
@@ -314,7 +314,7 @@ class BlockVector {
   void insertPtr(std::shared_ptr<SiconosVector> v);
 
   /** \return the Euclidian norm of the vector */
-  double norm2() const;
+  double norm() const;
 
   /** \return the infinite norm of the vector */
   double normInf() const;

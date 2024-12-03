@@ -434,7 +434,7 @@ endmacro()
 # 
 function(add_python_test test_name test_file)
   add_test(${test_name} ${Python_EXECUTABLE} -m pytest "${pytest_opt}" ${DRIVE_LETTER}${test_file})
-  set_tests_properties(${test_name} PROPERTIES WORKING_DIRECTORY ${SICONOS_SWIG_BINARY_DIR}/tests)
+  set_tests_properties(${test_name} PROPERTIES WORKING_DIRECTORY ${SICONOS_PB11_BINARY_DIR}/tests)
   set_tests_properties(${test_name} PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;[^x]failed;ERROR;Assertion")
 endfunction()
 
@@ -471,12 +471,13 @@ endfunction()
 # both DEPS and EXCLUDE are optional.
 #
 function(build_python_tests)
+
   set(multiValueArgs DEPS EXCLUDE)
   cmake_parse_arguments(test "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
   
   # build plugins, if any
-  # Note : all built libraries are saved in SICONOS_SWIG_BINARY_DIR/tests/plugins
+  # Note : all built libraries are saved in SICONOS_PB11_BINARY_DIR/tests/plugins
   if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests/plugins)
     file(GLOB plugfiles ${CMAKE_CURRENT_SOURCE_DIR}/tests/plugins/*.cpp)
     foreach(plug IN LISTS plugfiles)
@@ -491,7 +492,7 @@ function(build_python_tests)
       ${CMAKE_CURRENT_SOURCE_DIR}/tests/data/*)
     foreach(datafile IN LISTS data4tests)
       configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tests/data/${datafile}
-	${SICONOS_SWIG_BINARY_DIR}/tests/data/${datafile} COPYONLY)
+	${SICONOS_PB11_BINARY_DIR}/tests/data/${datafile} COPYONLY)
     endforeach()
   endif()
   if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests/CAD)
@@ -499,7 +500,7 @@ function(build_python_tests)
       ${CMAKE_CURRENT_SOURCE_DIR}/tests/CAD/*)
     foreach(datafile IN LISTS data4tests)
       configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tests/CAD/${datafile}
-	${SICONOS_SWIG_BINARY_DIR}/tests/CAD/${datafile} COPYONLY)
+	${SICONOS_PB11_BINARY_DIR}/tests/CAD/${datafile} COPYONLY)
     endforeach()
   endif()
 
@@ -520,9 +521,9 @@ function(build_python_tests)
       get_filename_component(testname ${file} NAME_WE)
       get_filename_component(exename ${file} NAME)
       # Each file is copied into siconos/tests.
-      configure_file(${file} ${SICONOS_SWIG_BINARY_DIR}/tests COPYONLY)
+      configure_file(${file} ${SICONOS_PB11_BINARY_DIR}/tests COPYONLY)
       set(name "python_${testname}")
-      set(exename ${SICONOS_SWIG_BINARY_DIR}/tests/${exename})
+      set(exename ${SICONOS_PB11_BINARY_DIR}/tests/${exename})
       # set_ldlibpath()
       add_python_test(${name} ${exename})
     endforeach()

@@ -24,23 +24,24 @@
 #include "SiconosVectorIterator.hpp"
 #include "SiconosVectorOp.hpp"
 
-void siconos::algebra::prod(const SiconosMatrix& A, const SiconosVector& x, BlockVector& y,
-                            bool init) {
+void siconos::algebra::matrixVector_prod_toBlock(const SiconosMatrix& A,
+                                                 const SiconosVector& x, BlockVector& y,
+                                                 bool init) {
   unsigned int startRow = 0;
   // For Each subvector of y, y[i], private_prod computes y[i] = subA x, subA
   // being a submatrix of A corresponding to y[i] position.
   //       // private_prod takes into account the fact that x and y[i] may be
   //       block vectors.
   for (auto& it : y) {
-    if (init) it->zero();
+    if (init) it->setZero();
     it->noalias() += A.block(startRow, 0, it->size(), x.size()) * x;
     startRow += it->size();
   }
 }
 
-void siconos::algebra::prod(const SiconosMatrix& A, const BlockVector& x, SiconosVector& y,
-                            bool init) {
-  if (init) y.zero();
+void siconos::algebra::matrixBlockVector_prod(const SiconosMatrix& A, const BlockVector& x,
+                                              SiconosVector& y, bool init) {
+  if (init) y.setZero();
   unsigned int startRow = 0;
   unsigned int startCol = 0;
   // In private_addprod, the sum of all blocks of x, x[i], is computed: y =
@@ -49,6 +50,21 @@ void siconos::algebra::prod(const SiconosMatrix& A, const BlockVector& x, Sicono
   // account the fact that each block of x can also be a block.
   for (auto& it : x) {
     assert(&y != &*it);
+    y += A.block(startRow, startCol, y.size(), it->size()) * *it;
+    startCol += it->size();
+  }
+}
+
+void siconos::algebra::matrixBlockVector_prod(const SiconosMatrix& A, const BlockVector& x,
+                                              Eigen::Ref<SiconosVector> y, bool init) {
+  if (init) y.setZero();
+  unsigned int startRow = 0;
+  unsigned int startCol = 0;
+  // In private_addprod, the sum of all blocks of x, x[i], is computed: y =
+  // Sum_i (subA x[i]), with subA a submatrix of A, starting from position
+  // startRow in rows and startCol in columns. private_prod takes also into
+  // account the fact that each block of x can also be a block.
+  for (auto& it : x) {
     y += A.block(startRow, startCol, y.size(), it->size()) * *it;
     startCol += it->size();
   }
@@ -84,38 +100,39 @@ void siconos::algebra::prod(const SiconosMatrix& A, const SiconosVector& x, Sico
   }
 }
 
-void siconos::algebra::prod(const MapType& A, const SiconosVector& x, SiconosVector& y,
-                            bool init) {
-  // To compute y = A * x in an "optimized" way (in comparison with y =
-  // prod(A,x) ) or y += A*x if init = false.
+// void siconos::algebra::prod(const MapType& A, const SiconosVector& x, SiconosVector& y,
+//                             bool init) {
+//   // To compute y = A * x in an "optimized" way (in comparison with y =
+//   // prod(A,x) ) or y += A*x if init = false.
 
-  if (A.cols() != x.size()) THROW_EXCEPTION("inconsistent sizes between A and x.")
+//   if (A.cols() != x.size()) THROW_EXCEPTION("inconsistent sizes between A and x.")
 
-  if (A.rows() != y.size()) THROW_EXCEPTION("inconsistent sizes between A and y.");
+//   if (A.rows() != y.size()) THROW_EXCEPTION("inconsistent sizes between A and y.");
 
-  // === First case: y is not a block vector ===
-  if (init) {
-    if (&x != &y)  // if no common memory between x and y.
-    {
-      y.noalias() = A * x;
-    } else  // if x and y are the same object => alias
-    {
-      y = A * x;
-    }
-  } else  // += case
-  {
-    if (&x != &y)  // if no common memory between x and y.
-    {
-      y.noalias() += A * x;
-    } else  // if x and y are the same object => alias
-    {
-      y += A * x;
-    }
-  }
-}
+//   // === First case: y is not a block vector ===
+//   if (init) {
+//     if (&x != &y)  // if no common memory between x and y.
+//     {
+//       y.noalias() = A * x;
+//     } else  // if x and y are the same object => alias
+//     {
+//       y = A * x;
+//     }
+//   } else  // += case
+//   {
+//     if (&x != &y)  // if no common memory between x and y.
+//     {
+//       y.noalias() += A * x;
+//     } else  // if x and y are the same object => alias
+//     {
+//       y += A * x;
+//     }
+//   }
+// }
 
-void siconos::algebra::prod(const SiconosVector& x, const SiconosMatrix& A, SiconosVector& y,
-                            bool init) {
+void siconos::algebra::transposeMatrixVector_prod(const SiconosVector& x,
+                                                  const SiconosMatrix& A, SiconosVector& y,
+                                                  bool init) {
   // To compute y = trans(A) * x in an "optimized" way, if init = true
   // (or y = trans(A) * x + y if init = false
 
@@ -143,8 +160,9 @@ void siconos::algebra::prod(const SiconosVector& x, const SiconosMatrix& A, Sico
   }
 }
 
-void siconos::algebra::prod(const SiconosVector& x, const SiconosMatrix& A, BlockVector& y,
-                            bool init) {
+void siconos::algebra::transposeMatrixVector_prod_toBlock(const SiconosVector& x,
+                                                          const SiconosMatrix& A,
+                                                          BlockVector& y, bool init) {
   if (A.size(0) != x.size()) THROW_EXCEPTION("inconsistent sizes between A and x.");
 
   if (A.size(1) != y.size()) THROW_EXCEPTION("inconsistent sizes between A and y.");
@@ -160,21 +178,6 @@ void siconos::algebra::prod(const SiconosVector& x, const SiconosMatrix& A, Bloc
 }
 
 // ========== Products matrix - vector
-
-siconos::algebra::SiconosVector siconos::algebra::prod(const SiconosMatrix& A,
-                                                       const SiconosVector& x) {
-  // To compute y = A * x
-  if (A.size(1) != x.size()) THROW_EXCEPTION("inconsistent sizes between A and x.");
-
-  return A * x;
-}
-
-const siconos::algebra::SiconosMatrix siconos::algebra::prod(const SiconosMatrix& A,
-                                                             const SiconosMatrix& B) {
-  SiconosMatrix C(A.size(0), B.size(1));
-  prod(A, B, C);
-  return C;
-}
 
 void siconos::algebra::prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
                             bool init) {
@@ -240,7 +243,7 @@ void siconos::algebra::taxpy(const SiconosVector& x, const SiconosMatrix& A,
   // Computes y = subA *x (or += if init = false), subA being a sub-matrix of
   // trans(A), between el. of A of index (col) startCol and startCol + sizeY
   if (init)  // y = subA * x , else y += subA * x
-    y->zero();
+    y->setZero();
 
   // we take a submatrix subA of A, starting from row startRow to row
   // (startRow+sizeY) and between columns startCol and (startCol+sizeX). Then

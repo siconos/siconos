@@ -28,7 +28,6 @@
  * transformation was done with
 (tags-query-replace "FONLDS" "Type::FirstOrderNonLinearDS")
 (tags-query-replace "FOLDS" "Type::FirstOrderLinearDS")
-(tags-query-replace "FOLTIDS" "Type::FirstOrderLinearTIDS")
 (tags-query-replace "LNLDS" "Type::LagrangianDS")
 (tags-query-replace "LLTIDS" "Type::LagrangianLinearTIDS")
 (tags-query-replace "NENLDS" "Type::NewtonEulerDS")

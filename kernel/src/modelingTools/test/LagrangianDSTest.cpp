@@ -43,219 +43,245 @@ void LagrangianDSTest::tearDown() {}
 // constructor from initial state only
 void LagrangianDSTest::testBuildLagrangianDS1() {
   std::cout << "--> Test: constructor 1." << std::endl;
-
-  siconos::algebra::SiconosVector zero(3);
-  zero.setZero();
   auto ds = std::make_shared<siconos::modeling::LagrangianDS>(q0, velocity0);
   // CPPUNIT_ASSERT_EQUAL_MESSAGE(
-  //     "testBuildLagrangianDS1 : ", Type::value(*ds) == Type::LagrangianDS, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", ds->dimension() == 3, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", ds->q0()->data() == q0.data(),
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildLagrangianDS1 : ", ds->velocity0()->data() == velocity0.data(), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", ds->mass() == nullptr, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", *(ds->p(1)) == zero, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", ds->p(0) == nullptr, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", ds->p(2) == nullptr, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", ds->forces() == nullptr, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", ds->fInt() == nullptr, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", ds->fExt() == nullptr, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", ds->fExt() == nullptr, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", ds->fGyr() == nullptr, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", ds->inverseMass() == nullptr,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", ds->jacobianFIntq() == nullptr,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", ds->jacobianFIntqDot() == nullptr,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", ds->jacobianFGyrq() == nullptr,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", ds->jacobianFGyrqDot() == nullptr,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", ds->jacobianqForces() == nullptr,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", ds->jacobianvForces() == nullptr,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", ds->computeKineticEnergy() == 38.5,
+  //     "testBuildLagrangianDS1: ", Type::value(*ds) == Type::LagrangianDS, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 1 - 1: ", ds->dimension() == 3, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 1 - 2: ", ds->q0() == q0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 1 - 3: ", ds->velocity0() == velocity0, true);
+
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 1 - 4: ", ds->p_read(1).isZero(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 1 - 5: ", ds->p(0) == nullptr, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 1 - 6: ", ds->p(2) == nullptr, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 1 - 7: ", ds->computeKineticEnergy() == 38.5,
                                true);
 
   double time = 1.;
-  auto m0 = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
-  m0->setZero();
 
-  ds->computeForces(time, ds->q(), ds->velocity());
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", ds->forces()->isApprox(zero),
-                               true);
-  ds->computeJacobianqForces(time);
-  ds->computeJacobianqDotForces(time);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", ds->jacobianqForces() == nullptr,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", ds->jacobianvForces() == nullptr,
-                               true);
+  // Try to compute forces and jacobians, even if not set, just to check
+  // that nothing happens and that no exception is raised
+  ds->computeTotalForces(ds->velocity_read(), ds->q_read(), time);
+  ds->computeJacobianTotalForcesOver_q(ds->velocity_read(), ds->q_read(), time);
+  ds->computeJacobianTotalForcesOver_velocity(ds->velocity_read(), ds->q_read(), time);
 
+  // Init and compute RHS (First-order formulation)
   ds->initRhs(time);
   siconos::algebra::SiconosVector x0;
   siconos::algebra::SiconosVector rhs0;
   siconos::algebra::concatenateVectors(x0, q0, velocity0);
+  siconos::algebra::SiconosVector zero = siconos::algebra::SiconosVector::Zero(3);
   siconos::algebra::concatenateVectors(rhs0, velocity0, zero);
-  siconos::algebra::SiconosMatrix i0(3, 3);
-  i0(0, 0) = i0(1, 1) = i0(2, 2) = 1.;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", ds->n() == 2 * 3, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", *(ds->x0()) == x0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", *(ds->rhs()) == rhs0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 1 - 8: ", ds->x_size() == 2 * 3, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 1 - 9: ", ds->x0() == x0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 1 - 10: ", *(ds->rhs()) == rhs0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildLagrangianDS1 : ", *(ds->jacobianRhsx()->block(0, 0)) == *m0, true);
+      "test - Constr 1 - 11: ", ds->jacobianRhsOver_x()->block(0, 0)->isZero(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildLagrangianDS1 : ", *(ds->jacobianRhsx()->block(0, 1)) == i0, true);
+      "test - Constr 1 - 12: ", ds->jacobianRhsOver_x()->block(0, 1)->isIdentity(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildLagrangianDS1 : ", *(ds->jacobianRhsx()->block(1, 0)) == *m0, true);
+      "test - Constr 1 - 13: ", ds->jacobianRhsOver_x()->block(1, 0)->isZero(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildLagrangianDS1 : ", *(ds->jacobianRhsx()->block(1, 1)) == *m0, true);
+      "test - Constr 1 - 14: ", ds->jacobianRhsOver_x()->block(1, 1)->isZero(), true);
 
   std::cout << "--> Constructor 1 test ended with success." << std::endl;
 }
 
-// constructor from initial state and mass matrix
-void LagrangianDSTest::testBuildLagrangianDS4() {
-  std::cout << "--> Test: constructor 4." << std::endl;
+// A DS with all operators (mass, fext, fint, fgyr)
+void LagrangianDSTest::testBuildLagrangianDS2() {
+  std::cout << "--> Test: constructor 2." << std::endl;
 
-  siconos::algebra::SiconosVector zero(3);
-  zero.setZero();
   auto ds = std::make_shared<siconos::modeling::LagrangianDS>(q0, velocity0);
   ds->setConstantMass(mass);
+
+  siconos::algebra::SiconosVector3 fext;
+  fext << 1, 2, 3;
+  ds->setConstantFext(fext);
+
+  //   siconos::algebra::SiconosVector3 fgyr;
+  //   fgyr << 1, 2, 3;
+  //   ds->setConstantFgyr(fgyr);
+
+  siconos::algebra::SiconosVector3 ref;
+  ref << 1, 2, 3;
+
   // CPPUNIT_ASSERT_EQUAL_MESSAGE(
-  //     "testBuildLagrangianDS4 : ", Type::value(*ds) == Type::LagrangianDS, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4 : ", ds->dimension() == 3, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4 : ", ds->q0()->data() == q0.data(),
+  //     "test - Constr 2: ", Type::value(*ds) == Type::LagrangianDS, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 2: ", ds->dimension() == 3, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 2: ", ds->q0() == q0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 2: ", ds->velocity0() == velocity0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 2: ", ds->mass() == mass, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 2: ", ds->p_read(1).isZero(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 2: ", ds->p(0) == nullptr, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 2: ", ds->p(2) == nullptr, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 2: ", ds->computeKineticEnergy() == 87.0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 2: ", ds->fext().isApprox(ref), true);
+  //  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testBuildLagrangianDS: ", ds->fgyr().isApprox(ref),
+  //  true);
+
+  ds->setComputeFintFunction([](const siconos::algebra::SiconosVector &velocity,
+                                const siconos::algebra::SiconosVector &q, double time,
+                                Eigen::Ref<siconos::algebra::MapVectorType> result) {
+    auto ndof = result.size();
+    for (size_t i = 0; i < ndof; ++i) result[i] = velocity(i) * time + q(i);
+  });
+
+  siconos::algebra::SiconosVector3 q;
+  q << 1, 2, 3;
+  siconos::algebra::SiconosVector3 vel;
+  vel << 4, 5, 6;
+  double time = 2.;
+  ds->computeFint(vel, q, time);
+
+  siconos::algebra::SiconosMatrix33 jacq, jacvel;
+  // set 'random' value for jacobians, whatever fint is, just for tests
+  jacq.setConstant(1.);
+  jacvel.setConstant(2.);
+  ds->setConstantJacobianFintOver_q(jacq);
+  ds->setConstantJacobianFintOver_velocity(jacvel);
+
+  siconos::algebra::SiconosVector3 reffint;
+  reffint << 9, 12, 15;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 2: ", ds->fint().isApprox(reffint), true);
+
+  ds->computeTotalForces(vel, q, time);
+  ds->computeJacobianTotalForcesOver_q(vel, q, time);
+  ds->computeJacobianTotalForcesOver_velocity(vel, q, time);
+
+  siconos::algebra::SiconosMatrix33 refjac;
+  refjac.setConstant(-1);
+  siconos::algebra::SiconosVector3 refforces;
+  refforces = fext - reffint;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 2: ", ds->totalForces().isApprox(refforces),
                                true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildLagrangianDS4 : ", ds->velocity0()->data() == velocity0.data(), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4 : ", *(ds->mass()) == mass, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4 : ", *(ds->p(1)) == zero, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4 : ", ds->p(0) == nullptr, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4 : ", ds->p(2) == nullptr, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4 : ", ds->forces() == nullptr, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4 : ", ds->fInt() == nullptr, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4 : ", ds->fExt() == nullptr, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4 : ", ds->fGyr() == nullptr, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4 : ", ds->inverseMass() == nullptr,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4 : ", ds->jacobianFIntq() == nullptr,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4 : ", ds->jacobianFIntqDot() == nullptr,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4 : ", ds->jacobianFGyrq() == nullptr,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4 : ", ds->jacobianFGyrqDot() == nullptr,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4 : ", ds->jacobianqForces() == nullptr,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4 : ", ds->jacobianvForces() == nullptr,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testBuildLagrangianDS : ", ds->computeKineticEnergy() == 87.0,
-                               true);
+      "test - Constr 2: ", ds->jacobianTotalForcesOver_q().isApprox(refjac), true);
+  refjac.setConstant(-2);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "test - Constr 2: ", ds->jacobianTotalForcesOver_velocity().isApprox(refjac), true);
 
-  double time = 1.;
   ds->initRhs(time);
   siconos::algebra::SiconosVector x0;
   siconos::algebra::SiconosVector rhs0;
   siconos::algebra::concatenateVectors(x0, q0, velocity0);
-  siconos::algebra::concatenateVectors(rhs0, velocity0, zero);
-  auto m0 = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
-  m0->setZero();
-  siconos::algebra::SiconosMatrix i0(3, 3);
-  i0.setZero();
-  i0(0, 0) = i0(1, 1) = i0(2, 2) = 1.;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4 : ", ds->n() == 2 * 3, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4 : ", *(ds->x0()) == x0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4 : ", *(ds->rhs()) == rhs0, true);
+  siconos::algebra::SiconosVector3 ref0;
+  ref0 = mass.inverse() * refforces;
+  siconos::algebra::concatenateVectors(rhs0, velocity0, ref0);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 2: ", ds->x_size() == 2 * 3, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 2: ", ds->x0() == x0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 2: ", *(ds->rhs()) == rhs0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 2: ", ds->jacobianRhsOver_x()->block(0, 0)->isZero(),
+                               true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildLagrangianDS4 : ", *(ds->jacobianRhsx()->block(0, 0)) == *m0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildLagrangianDS4 : ", *(ds->jacobianRhsx()->block(0, 1)) == i0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildLagrangianDS4 : ", *(ds->jacobianRhsx()->block(1, 0)) == *m0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildLagrangianDS4 : ", *(ds->jacobianRhsx()->block(1, 1)) == *m0, true);
+      "test - Constr 2: ", ds->jacobianRhsOver_x()->block(0, 1)->isIdentity(), true);
+  siconos::algebra::SiconosMatrix33 refj2;
+  refjac.setConstant(-1);
 
-  std::cout << "--> Constructor 4 test ended with success." << std::endl;
+  refj2 = mass.inverse() * refjac;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "test - Constr 2: ", ds->jacobianRhsOver_x()->block(1, 0)->isApprox(refj2), true);
+  refjac.setConstant(-2);
+  refj2 = mass.inverse() * refjac;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "test - Constr 2: ", ds->jacobianRhsOver_x()->block(1, 1)->isApprox(refj2), true);
+
+  std::cout << "--> Constructor 2 test ended with success." << std::endl;
 }
 
-// constructor from initial state and plugged mass
-void LagrangianDSTest::testBuildLagrangianDS5() {
-  std::cout << "--> Test: constructor 5." << std::endl;
+// A DS with all operators (mass, fext, fint, fgyr and jacobians) as user-defined functions
+void LagrangianDSTest::testBuildLagrangianDS3() {
+  std::cout << "--> Test: constructor 3." << std::endl;
 
   auto ds = std::make_shared<siconos::modeling::LagrangianDS>(q0, velocity0);
 
-  auto mass_func = [](Eigen::Ref<siconos::algebra::MapVectorType> pos, double time,
+  auto mass_func = [](const Eigen::Ref<const siconos::algebra::SiconosVector> &pos,
                       Eigen::Ref<siconos::algebra::MapType> result) {
     result.setZero();
+    result(0, 0) = 0. * pos(0);  // just to check that pos is callable ...
     result(0, 0) = 1;
     result(1, 1) = 2.;
     result(2, 2) = 3.;
   };
 
   ds->setComputeMassFunction(mass_func);
-  siconos::algebra::SiconosVector zero(3);
-  zero.setZero();
-  auto m0 = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
-  m0->setZero();
 
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE(
-  //     "testBuildLagrangianDS5 : ", Type::value(*ds) == Type::LagrangianDS, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5 : ", ds->dimension() == 3, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5 : ", ds->q0()->data() == q0.data(),
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildLagrangianDS5 : ", ds->velocity0()->data() == velocity0.data(), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5 : ", *(ds->mass()) == *m0, true);
-  ds->computeMass(*ds->q(), 0.);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5 : ", *(ds->mass()) == mass, true);
+  ds->setComputeFextFunction(
+      [](double time, Eigen::Ref<siconos::algebra::MapVectorType> result) {
+        auto i = 0;
+        for (auto &v : result) v = time;
+      });
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5 : ", *(ds->p(1)) == zero, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5 : ", ds->p(0) == nullptr, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5 : ", ds->p(2) == nullptr, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5 : ", ds->forces() == nullptr, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5 : ", ds->fInt() == nullptr, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5 : ", ds->fExt() == nullptr, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5 : ", ds->fGyr() == nullptr, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5 : ", ds->inverseMass() == nullptr,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5 : ", ds->jacobianFIntq() == nullptr,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5 : ", ds->jacobianFIntqDot() == nullptr,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5 : ", ds->jacobianFGyrq() == nullptr,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5 : ", ds->jacobianFGyrqDot() == nullptr,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5 : ", ds->jacobianqForces() == nullptr,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5 : ", ds->jacobianvForces() == nullptr,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5 : ", ds->computeKineticEnergy() == 87.0,
+  ds->setComputeFgyrFunction(
+      [](const Eigen::Ref<const siconos::algebra::SiconosVector> &vel,
+         const Eigen::Ref<const siconos::algebra::SiconosVector> &q,
+         Eigen::Ref<siconos::algebra::MapVectorType> result) { result = vel + q; });
+
+  // set 'random' value for jacobians, whatever fgyr is, just for tests
+  ds->setComputeJacobianFgyrOver_qFunction(
+      [](const Eigen::Ref<const siconos::algebra::SiconosVector> &v,
+         const Eigen::Ref<const siconos::algebra::SiconosVector> &q,
+         Eigen::Ref<siconos::algebra::MapType> result) { result.setConstant(2.); });
+
+  ds->setComputeJacobianFgyrOver_velocityFunction(
+      [](const Eigen::Ref<const siconos::algebra::SiconosVector> &v,
+         const Eigen::Ref<const siconos::algebra::SiconosVector> &q,
+         Eigen::Ref<siconos::algebra::MapType> result) { result.setConstant(3.); });
+
+  ds->setComputeFintFunction([](const Eigen::Ref<const siconos::algebra::SiconosVector> &v,
+                                const Eigen::Ref<const siconos::algebra::SiconosVector> &q,
+                                double time,
+                                Eigen::Ref<siconos::algebra::MapVectorType> result) {
+    result = v + q;
+    result *= time;
+  });
+
+  ds->setComputeJacobianFintOver_qFunction(
+      [](const Eigen::Ref<const siconos::algebra::SiconosVector> &v,
+         const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time,
+         Eigen::Ref<siconos::algebra::MapType> result) { result.setConstant(4.); });
+
+  ds->setComputeJacobianFintOver_velocityFunction(
+      [](const Eigen::Ref<const siconos::algebra::SiconosVector> &v,
+         const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time,
+         Eigen::Ref<siconos::algebra::MapType> result) { result.setConstant(5.); });
+
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 3: ", ds->dimension() == 3, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 3: ", ds->q0() == q0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 3: ", ds->velocity0() == velocity0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 3: ", ds->p_read(1).isZero(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 3: ", ds->p(0) == nullptr, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 3: ", ds->p(2) == nullptr, true);
+
+  siconos::algebra::SiconosVector3 q;
+  q << 1, 2, 3;
+  siconos::algebra::SiconosVector3 vel;
+  vel << 4, 5, 6;
+  double time = 2.;
+
+  ds->computeMass(q);
+
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 3: ", ds->mass() == mass, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 3: ", ds->computeKineticEnergy() == 87.0, true);
+
+  ds->computeTotalForces(vel, q, time);
+  ds->computeJacobianTotalForcesOver_q(vel, q, time);
+  ds->computeJacobianTotalForcesOver_velocity(vel, q, time);
+
+  siconos::algebra::SiconosVector3 refforces;
+  refforces.setConstant(time);
+  refforces -= (time + 1) * (vel + q);
+
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 3: ", ds->totalForces().isApprox(refforces),
                                true);
 
-  double time = 1.;
-  ds->initRhs(time);
-  siconos::algebra::SiconosVector x0;
-  siconos::algebra::SiconosVector rhs0;
-  siconos::algebra::concatenateVectors(x0, q0, velocity0);
-  siconos::algebra::concatenateVectors(rhs0, velocity0, zero);
-  siconos::algebra::SiconosMatrix i0(3, 3);
-  i0(0, 0) = i0(1, 1) = i0(2, 2) = 1.;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5 : ", ds->n() == 2 * 3, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5 : ", *(ds->x0()) == x0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5 : ", *(ds->rhs()) == rhs0, true);
+  siconos::algebra::SiconosMatrix33 jacq, jacvel;
+
+  siconos::algebra::SiconosMatrix33 refjac;
+  refjac.setConstant(-6);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildLagrangianDS5 : ", *(ds->jacobianRhsx()->block(0, 0)) == *m0, true);
+      "test - Constr 2: ", ds->jacobianTotalForcesOver_q().isApprox(refjac), true);
+  refjac.setConstant(-8);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildLagrangianDS5 : ", *(ds->jacobianRhsx()->block(0, 1)) == i0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildLagrangianDS5 : ", *(ds->jacobianRhsx()->block(1, 0)) == *m0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildLagrangianDS5 : ", *(ds->jacobianRhsx()->block(1, 1)) == *m0, true);
+      "test - Constr 2: ", ds->jacobianTotalForcesOver_velocity().isApprox(refjac), true);
 
   std::cout << "--> Constructor 5 test ended with success." << std::endl;
 }

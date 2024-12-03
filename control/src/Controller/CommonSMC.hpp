@@ -24,6 +24,7 @@
 #define CommonSMC_H
 
 #include "Actuator.hpp"
+#include "FunctionTypes.hpp"
 #include "relay_cst.h"  // contains only enum. Ok.
 
 namespace siconos::modeling {
@@ -40,7 +41,7 @@ class OneStepIntegrator;
 
 namespace siconos::nonsmooth_formulations {
 class LinearOSNS;
-}  // namespace siconos::simulation
+}  // namespace siconos::nonsmooth_formulations
 
 namespace siconos::simulation {
 class TimeStepping;
@@ -57,21 +58,29 @@ class CommonSMC : public Actuator {
   /** index for saving data */
   unsigned int _indx{0};
 
-  /** name of the plugin to add a term to the sliding variable; useful when doing trajectory
-   * tracking */
-  std::string _plugineName;
+  /** function wrapper used to compute e(t) in FirstOrderLinearR */
+  siconos::modeling::func_prototypes::FunctionS_V computee_{nullptr};
 
-  /** name of the plugin to compute \f$ y = h(x, ...) \f$ for the nonlinear case*/
-  std::string _pluginhName;
+  /** function wrapper used to compute \f$ h(x,t,\lambda) in relation \f$ */
+  siconos::modeling::func_prototypes::FunctionBVSV_V computeh_{nullptr};
 
-  /** name of the plugin to compute \f$ \nabla_x h \f$ for the nonlinear case*/
-  std::string _pluginJachxName;
+  /** function wrapper used to compute \f$ h(x,t,\lambda)  in relation\f$ */
+  siconos::modeling::func_prototypes::FunctionBVSV_BV computeg_{nullptr};
 
-  /** name of the plugin to compute \f$ \nabla_\lambda h \f$ for the nonlinear case*/
-  std::string _pluginJachlambdaName;
+  /** function wrapper used to compute  \f$ \nabla_x h(x,t,\lambda)  in relation\f$ */
+  siconos::modeling::func_prototypes::FunctionBVSV_M computejacobianhOver_state_{nullptr};
 
-  /** name of the plugin to compute \f$ \nabla_\lambda g \f$ for the nonlinear case*/
-  std::string _pluginJacglambdaName;
+  /** function wrapper used to compute  \f$ \nabla_{\lambda} h(x,t,\lambda)  in relation\f$ */
+  siconos::modeling::func_prototypes::FunctionBVSV_M computejacobianhOver_lambda_{nullptr};
+
+  /** function wrapper used to compute  \f$ \nabla_x g(x,t,\lambda)  in relation\f$ */
+  siconos::modeling::func_prototypes::FunctionBVSV_M computejacobiangOver_state_{nullptr};
+
+  /** function wrapper used to compute  \f$ \nabla_{\lambda} g(x,t,\lambda)  in relation\f$ */
+  siconos::modeling::func_prototypes::FunctionBVSV_M computejacobiangOver_lambda_{nullptr};
+
+  /** true if the relation is linear. This is deduced from the set... functions above */
+  bool isRelationLinear_{true};
 
   /** the vector defining the linear contribution of the state to the sliding variable  ( \f$
    * \sigma = Cx \f$ ) */
@@ -152,9 +161,8 @@ class CommonSMC : public Actuator {
    *  \param type the type of the SMC Actuator
    *  \param sensor the ControlSensor feeding the Actuator
    */
-  CommonSMC(ActuatorType type, std::shared_ptr<ControlSensor> sensor) : Actuator(type, sensor)
-  {
-  }
+  CommonSMC(ActuatorType type, std::shared_ptr<ControlSensor> sensor)
+      : Actuator(type, sensor) {}
 
   /** Constructor for dynamics affine in control
    *
@@ -166,9 +174,7 @@ class CommonSMC : public Actuator {
   CommonSMC(ActuatorType type, std::shared_ptr<ControlSensor> sensor,
             std::shared_ptr<siconos::algebra::SiconosMatrix> B,
             std::shared_ptr<siconos::algebra::SiconosMatrix> D = nullptr)
-      : Actuator(type, sensor, B), _D(D)
-  {
-  }
+      : Actuator(type, sensor, B), _D(D) {}
 
   /** Compute the new control law at each event
    */
@@ -182,13 +188,14 @@ class CommonSMC : public Actuator {
   virtual void initialize(const siconos::modeling::NonSmoothDynamicalSystem& nsds,
                           const siconos::simulation::Simulation& s);
 
-  void sete(const std::string& plugin);
-  void seth(const std::string& plugin);
-  void setJachx(const std::string& plugin);
-  void setJachlambda(const std::string& plugin);
-  void setg(const std::string& plugin);
-  void setJacgx(const std::string& plugin);
-  void setJacglambda(const std::string& plugin);
+  void sete(const siconos::modeling::func_prototypes::FunctionS_V&
+                fct);  // Meaningful only for FirstOrderLinearR
+  void seth(const siconos::modeling::func_prototypes::FunctionBVSV_V& fct);
+  void setJachx(const siconos::modeling::func_prototypes::FunctionBVSV_M& fct);
+  void setJachlambda(const siconos::modeling::func_prototypes::FunctionBVSV_M& fct);
+  void setg(const siconos::modeling::func_prototypes::FunctionBVSV_BV& fct);
+  void setJacgx(const siconos::modeling::func_prototypes::FunctionBVSV_M& fct);
+  void setJacglambda(const siconos::modeling::func_prototypes::FunctionBVSV_M& fct);
 
   /** Set Csurface
    *
@@ -292,8 +299,8 @@ class CommonSMC : public Actuator {
    *
    *  \return the NSDS used in the SMC
    */
-  virtual std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> getInternalNSDS() const
-  {
+  virtual std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> getInternalNSDS()
+      const {
     return _nsdsSMC;
   };
 

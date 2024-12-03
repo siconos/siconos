@@ -21,56 +21,54 @@
 siconos::internal::devel_model::ClassA::ClassA(
     Eigen::Ref<siconos::algebra::SiconosVector> param1)
     : ndof_{param1.size()} {
-  vectorName1_view_ = std::make_shared<siconos::algebra::MapVectorType>(param1.data(), ndof_);
+  vector1_view_ = std::make_shared<siconos::algebra::MapVectorType>(param1.data(), ndof_);
 
   new (&vectorNameDirect_view_) siconos::algebra::MapVectorType(nullptr, 0);
 
-  // Initialize vectorName3 with vectorName1 content
-  vectorName3_ = std::make_shared<siconos::algebra::SiconosVector>(*vectorName1_view_);
+  // Initialize var with vector1 content
+  var_ = std::make_shared<siconos::algebra::SiconosVector>(*vector1_view_);
 
-  (*vectorName3_) *=
-      2.;  // just to be sure that memory is allocated (first touch policy and so on ...)
+  (*var_) *= 2.;  // Test purpose. Just to be sure that memory is allocated (first touch policy
+                  // and so on ...)
 }
 
-
-
-void siconos::internal::devel_model::ClassA::setConstantVectorName2(
+void siconos::internal::devel_model::ClassA::setConstantVector2(
     Eigen::Ref<siconos::algebra::SiconosVector> newValue) {
   /**  Must:
 
-   - create the Map (view onto memory handled by newValue) for vectorName2_
+   - create the Map (view onto memory handled by newValue) for vector2_
    - set the corresponding booleans
    - reset internal storage (should already be null but who knows ...)
    */
 
-  vectorName2_internal_storage_ = nullptr;
+  vector2_internal_storage_ = nullptr;
 
-  vectorName2_view_ =
+  vector2_view_ =
       std::make_shared<siconos::algebra::MapVectorType>(newValue.data(), newValue.size());
-  hasVectorName2_ = true;
-  hasConstantVectorName2_ = true;
-  computevectorName2_ = nullptr;
+  hasVector2_ = true;
+  hasConstantVector2_ = true;
+  computevector2_ = nullptr;
 }
 
-void siconos::internal::devel_model::ClassA::setComputeVectorName2Function(
-    ExternalFunctionType new_func) {
-  // Ensure that memory is properly allocated for vectorName2_
-  if (!vectorName2_internal_storage_) {
-    vectorName2_internal_storage_ = std::make_unique<std::vector<double>>(ndof_);
+void siconos::internal::devel_model::ClassA::setComputeVector2Function(
+    const siconos::modeling::func_prototypes::FunctionS_V& new_func) {
+  // Ensure that memory is properly allocated for vector2_
+  if (!vector2_internal_storage_) {
+    vector2_internal_storage_ = std::make_unique<std::vector<double>>(ndof_);
   }
-  vectorName2_view_ = std::make_shared<siconos::algebra::MapVectorType>(
-      vectorName2_internal_storage_->data(), ndof_);
+  vector2_view_ = std::make_shared<siconos::algebra::MapVectorType>(
+      vector2_internal_storage_->data(), ndof_);
 
-  hasVectorName2_ = true;
-  hasConstantVectorName2_ = false;
-  computevectorName2_ = new_func;
+  hasVector2_ = true;
+  hasConstantVector2_ = false;
+  computevector2_ = new_func;
 }
 
-void siconos::internal::devel_model::ClassA::computeVectorName2(double time) {
-  if (computevectorName2_)
+void siconos::internal::devel_model::ClassA::computeVector2(double time) {
+  if (computevector2_)
     // in that case, internal_storage must have been allocated by
     // setCompute... call
-    computevectorName2_(time, *vectorName2_view_);
+    computevector2_(time, *vector2_view_);
 }
 
 void siconos::internal::devel_model::ClassA::setConstantVectorNameSpan(
@@ -92,7 +90,7 @@ void siconos::internal::devel_model::ClassA::setConstantVectorNameSpan(
 }
 
 void siconos::internal::devel_model::ClassA::setComputeVectorNameSpanFunction(
-    ExternalFunctionSpanType new_func) {
+    const FunctionSpanT_V& new_func) {
   // Ensure that memory is properly allocated for vectorNameSpan_
   if (!vectorNameSpan_internal_storage_) {
     vectorNameSpan_internal_storage_ = std::make_unique<std::vector<double>>(ndof_);
@@ -137,7 +135,7 @@ void siconos::internal::devel_model::ClassA::setConstantVectorNameDirect(
 }
 
 void siconos::internal::devel_model::ClassA::setComputeVectorNameDirectFunction(
-    ExternalFunctionType new_func) {
+    const siconos::modeling::func_prototypes::FunctionS_V& new_func) {
   // Ensure that memory is properly allocated for vectorNameDirect_
   if (!vectorNameDirect_internal_storage_) {
     vectorNameDirect_internal_storage_ = std::make_unique<std::vector<double>>(ndof_);
@@ -158,72 +156,70 @@ void siconos::internal::devel_model::ClassA::computeVectorNameDirect(double time
     computevectorNameDirect_(time, vectorNameDirect_view_.value());
 }
 
-void siconos::internal::devel_model::ClassA::setConstantMatrixName(
+void siconos::internal::devel_model::ClassA::setConstantMatrix1(
     Eigen::Ref<siconos::algebra::SiconosMatrix> newValue) {
   /**  Must:
 
-   - create the Map (view onto memory handled by newValue) for matrixName
+   - create the Map (view onto memory handled by newValue) for matrix1
    - set the corresponding booleans
    - reset internal storage (should already be null but who knows ...)
    */
 
-  matrixName_internal_storage_ = nullptr;
+  matrix1_internal_storage_ = nullptr;
 
-  matrixName_view_ =
-      std::make_shared<siconos::algebra::MapType>(newValue.data(), ndof_, ndof_);
-  hasMatrixName_ = true;
-  hasConstantMatrixName_ = true;
-  computematrixName_ = nullptr;
+  matrix1_view_ = std::make_shared<siconos::algebra::MapType>(newValue.data(), ndof_, ndof_);
+  hasMatrix1_ = true;
+  hasConstantMatrix1_ = true;
+  computematrix1_ = nullptr;
 }
 
-void siconos::internal::devel_model::ClassA::setComputeMatrixNameFunction(
-    ExternalFunctionTypeMatrix new_func) {
-  // Ensure that memory is properly allocated for matrixName_
-  if (!matrixName_internal_storage_) {
-    matrixName_internal_storage_ = std::make_unique<std::vector<double>>(ndof_ * ndof_);
+void siconos::internal::devel_model::ClassA::setComputeMatrix1Function(
+    const FunctionVS_M& new_func) {
+  // Ensure that memory is properly allocated for matrix1_
+  if (!matrix1_internal_storage_) {
+    matrix1_internal_storage_ = std::make_unique<std::vector<double>>(ndof_ * ndof_);
   }
-  matrixName_view_ = std::make_shared<siconos::algebra::MapType>(
-      matrixName_internal_storage_->data(), ndof_, ndof_);
+  matrix1_view_ = std::make_shared<siconos::algebra::MapType>(
+      matrix1_internal_storage_->data(), ndof_, ndof_);
 
-  hasMatrixName_ = true;
-  hasConstantMatrixName_ = false;
-  computematrixName_ = new_func;
+  hasMatrix1_ = true;
+  hasConstantMatrix1_ = false;
+  computematrix1_ = new_func;
 }
 
-void siconos::internal::devel_model::ClassA::computeMatrixName(
-    double time, Eigen::Ref<siconos::algebra::SiconosVector> position) {
-  if (computematrixName_) {
+void siconos::internal::devel_model::ClassA::computeMatrix1(
+    Eigen::Ref<siconos::algebra::SiconosVector> position, double time) {
+  if (computematrix1_) {
     // in that case, internal_storage must have been allocated by
     // setCompute... call
     // std::span<double> sppos(position.data(), ndof_);
-    // std::span<double> spmat(matrixName_internal_storage_->data(),
-    //                         matrixName_internal_storage_->size());
-    computematrixName_(position, time, *matrixName_view_);
+    // std::span<double> spmat(matrix1_internal_storage_->data(),
+    //                         matrix1_internal_storage_->size());
+    computematrix1_(position, time, *matrix1_view_);
   }
 }
 
-// void siconos::internal::devel_model::ClassA::computeMatrixName(
+// void siconos::internal::devel_model::ClassA::computeMatrix1(
 //     double time, Eigen::Ref<siconos::algebra::SiconosVector> position) {
-//   if (computematrixName_) {
+//   if (computematrix1_) {
 //     // in that case, internal_storage must have been allocated by
 //     // setCompute... call
 //     std::span<double> sppos(position.data(), ndof_);
-//     std::span<double> spmat(matrixName_internal_storage_->data(),
-//                             matrixName_internal_storage_->size());
-//     computematrixName_(time, sppos, spmat);
+//     std::span<double> spmat(matrix1_internal_storage_->data(),
+//                             matrix1_internal_storage_->size());
+//     computematrix1_(time, sppos, spmat);
 //   }
 // }
 void siconos::internal::devel_model::ClassA::display(bool brief) {
   std::cout << "----- Class A display -----\n";
-  if (hasVectorName2_) {
-    if (hasConstantVectorName2_)
-      std::cout << "vectorName2 is ON and is constant\n";
+  if (hasVector2_) {
+    if (hasConstantVector2_)
+      std::cout << "vector2 is ON and is constant\n";
     else
-      std::cout << "vectorName2 is ON and is controlled by a plugin\n";
-    vectorName2_view_->display();
+      std::cout << "vector2 is ON and is controlled by a plugin\n" << *vector2_view_ << "\n";
   }
-  vectorName1_view_->display();
-  vectorName3_->display();
+  std::cout << *vector1_view_ << "\n";
+  std::cout << *var_ << "\n";
 
   std::cout << "----- End of Class A display -----\n";
 }

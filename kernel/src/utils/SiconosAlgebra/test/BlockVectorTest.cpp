@@ -227,7 +227,7 @@ void BlockVectorTest::testConstructor5() {
 void BlockVectorTest::testZero() {
   std::cout << "--> Test: zero." << std::endl;
   auto v = std::make_shared<BlockVector>(*ref);
-  v->zero();
+  v->setZero();
   for (unsigned int i = 0; i < v->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testZero : ", (*v)(i) == 0, true);
   std::cout << "--> zero test ended with success." << std::endl;

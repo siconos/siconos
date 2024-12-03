@@ -27,12 +27,11 @@
 
 #include <memory>
 #include <vector>
-#include "SiconosVector.hpp"
-#include "SiconosMatrix.hpp"
-#include "SiconosMatrix.hpp"
-#include "BlockVector.hpp"
 
+#include "BlockVector.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosSerialization.hpp"
+#include "SiconosVector.hpp"
 
 namespace siconos::algebra {
 class SiconosMemory;
@@ -139,11 +138,11 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
   /** pointer links to DS variables needed for computation,
    *  mostly used in Relations (computeOutput and computeInput)
    * and OneStepIntegrator classes. */
-  std::vector<std::shared_ptr<siconos::algebra::BlockVector>> _linkToDSVariables= {};
+  std::vector<std::shared_ptr<siconos::algebra::BlockVector>> _linkToDSVariables = {};
 
-  std::vector<std::shared_ptr<siconos::algebra::SiconosMatrix>> _relationMatrices= {};
+  std::vector<std::shared_ptr<siconos::algebra::SiconosMatrix>> _relationMatrices = {};
 
-  std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> _relationVectors= {};
+  std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> _relationVectors = {};
 
   // internal struct used to handle visitors process to set Interaction levels
   // depending on the nslaw and the relation.
@@ -287,8 +286,7 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
    *
    *  \param newVal : an unsigned int
    */
-  inline void setLowerLevelForOutput(const unsigned int newVal)
-  {
+  inline void setLowerLevelForOutput(const unsigned int newVal) {
     _lowerLevelForOutput = newVal;
   };
 
@@ -296,8 +294,7 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
    *
    *  \param newVal : an unsigned int
    */
-  inline void setUpperLevelForOutput(const unsigned int newVal)
-  {
+  inline void setUpperLevelForOutput(const unsigned int newVal) {
     _upperLevelForOutput = newVal;
   };
 
@@ -319,8 +316,7 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
    *
    *  \param newVal : an unsigned int
    */
-  inline void setLowerLevelForInput(const unsigned int newVal)
-  {
+  inline void setLowerLevelForInput(const unsigned int newVal) {
     _lowerLevelForInput = newVal;
   };
 
@@ -328,8 +324,7 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
    *
    *  \param newVal : an unsigned int.
    */
-  inline void setUpperLevelForInput(const unsigned int newVal)
-  {
+  inline void setUpperLevelForInput(const unsigned int newVal) {
     _upperLevelForInput = newVal;
   };
 
@@ -383,8 +378,7 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
    *
    *  \return a std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>
    */
-  inline const std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> y() const
-  {
+  inline const std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> y() const {
     return _y;
   }
 
@@ -393,8 +387,7 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
    *  \param i derivative number i of output
    *  \return pointer on a SiconosVector
    */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> y(const unsigned int i) const
-  {
+  inline std::shared_ptr<siconos::algebra::SiconosVector> y(const unsigned int i) const {
     assert(_y[i]);
     return _y[i];
   }
@@ -447,8 +440,8 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
    *
    *  \return a std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>
    */
-  inline const std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> getLambda() const
-  {
+  inline const std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> getLambda()
+      const {
     return _lambda;
   }
 
@@ -464,8 +457,7 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
    *  \param i derivative number i of output
    *  \return pointer on a SiconosVector
    */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> lambda(const unsigned int i) const
-  {
+  inline std::shared_ptr<siconos::algebra::SiconosVector> lambda(const unsigned int i) const {
     assert(_lambda[i]);
     return _lambda[i];
   }
@@ -475,8 +467,7 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
    *  \param i derivative number i of output
    *  \return pointer on a SiconosVector
    */
-  inline siconos::algebra::SiconosVector& lambda_python(const unsigned int i) const
-  {
+  inline siconos::algebra::SiconosVector& lambda_python(const unsigned int i) const {
     assert(_lambda[i]);
     return *(_lambda[i]);
   }
@@ -534,18 +525,15 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
    */
   inline std::shared_ptr<NonSmoothLaw> nonSmoothLaw() const { return _nslaw; }
 
-  inline std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& linkToDSVariables()
-  {
+  inline std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& linkToDSVariables() {
     return _linkToDSVariables;
   };
 
-  inline std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>& relationVectors()
-  {
+  inline std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>& relationVectors() {
     return _relationVectors;
   };
 
-  inline std::vector<std::shared_ptr<siconos::algebra::SiconosMatrix>>& relationMatrices()
-  {
+  inline std::vector<std::shared_ptr<siconos::algebra::SiconosMatrix>>& relationMatrices() {
     return _relationMatrices;
   };
 
@@ -571,8 +559,7 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
    *
    *  \return the previous value of count
    */
-  static inline size_t resetCount(size_t new_count = 0)
-  {
+  static inline size_t resetCount(size_t new_count = 0) {
     size_t old_count = count_;
     count_ = new_count;
     return old_count;
@@ -593,13 +580,10 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
    */
   void computeInput(double time, unsigned int level = 0);
 
-  /** gets the matrix used in interactionBlock computation, (left * W * right), depends on the
-   * relation type (ex, LinearTIR, left = C, right = B)..
-   *
-   *  \return InteractionBlock a pointer to SiconosMatrix (in-out parameter): the resulting
-   * interactionBlock matrix
+  /** \return a read-only view on the matrix 'left' that must be used in interactionBlock
+   * computation, (left * W * right). It depends on the relation type.
    */
-  std::shared_ptr<siconos::algebra::MapType> getLeftInteractionBlock() const;
+  const siconos::algebra::ConstMapType getLeftInteractionBlock() const;
 
   /** gets the matrix used in interactionBlock computation
 
@@ -613,7 +597,7 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
    *  \return InteractionBlock a pointer to SiconosMatrix (in-out parameter): the resulting
    interactionBlock matrix
    */
-  std::shared_ptr<siconos::algebra::MapType> getLeftInteractionBlockForDS(
+  std::shared_ptr<siconos::algebra::SiconosMatrix> getLeftInteractionBlockForDS(
       unsigned int pos, unsigned int size, unsigned int sizeDS) const;
 
   /** gets the matrix used in interactionBlock computation. Used only for the formulation
@@ -637,7 +621,7 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
    *  \return InteractionBlock a pointer to SiconosMatrix (in-out parameter): the resulting
    * interactionBlock matrix
    */
-  std::shared_ptr<siconos::algebra::MapType> getRightInteractionBlockForDS(
+  std::shared_ptr<siconos::algebra::SiconosMatrix> getRightInteractionBlockForDS(
       unsigned int pos, unsigned int sizeDS, unsigned size) const;
 
   /** gets extra interactionBlock corresponding to the present Interaction

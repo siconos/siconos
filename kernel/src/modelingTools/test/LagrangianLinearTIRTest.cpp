@@ -17,8 +17,8 @@
  */
 #include "LagrangianLinearTIRTest.hpp"
 
-#include "SiconosVector.hpp"
 #include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
   if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -26,10 +26,9 @@
 // test suite registration
 CPPUNIT_TEST_SUITE_REGISTRATION(LagrangianLinearTIRTest);
 
-void LagrangianLinearTIRTest::setUp()
-{
-  C = std::make_shared<siconos::algebra::SiconosMatrix>(siconos::algebra::readMatrixFromFile("matC.dat"));
-  F = std::make_shared<siconos::algebra::SiconosMatrix>(siconos::algebra::readMatrixFromFile("matF.dat"));
+void LagrangianLinearTIRTest::setUp() {
+  C = std::make_shared<siconos::algebra::SiconosMatrix>(
+      siconos::algebra::readMatrixFromFile("matC.dat"));
   e = std::make_shared<siconos::algebra::SiconosVector>(1);
   (*e)(0) = 0.1;
 }
@@ -37,105 +36,25 @@ void LagrangianLinearTIRTest::setUp()
 void LagrangianLinearTIRTest::tearDown() {}
 
 // data constructor (1)
-void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR1()
-{
+void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR1() {
   std::cout << "--> Test: constructor 1." << std::endl;
-  auto folr = std::make_shared<siconos::modeling::LagrangianLinearTIR>(C);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR1a : ", folr->C()->data() == C->data(), true);
+
+  // Just set constant or user-defined functions operators.
+  // We can not call compute... functions since in relations
+  // everything is properly set (memory) only after a call to initialize
+  // which required an Interaction. See examples in siconos tutorials for reals tests.
+
+  auto folr = std::make_shared<siconos::modeling::LagrangianLinearTIR>(*C);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR1a : ", folr->CMatrix() == *C,
+                               true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR1c : ",
                                folr->getType() == siconos::modeling::RelationType::Lagrangian,
                                true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testBuildLagrangianLinearTIR1d : ",
       folr->getSubType() == siconos::modeling::RelationSubType::LinearTIR, true);
+
+  folr->seteVector(*e);
+
   std::cout << "--> Constructor 1 test ended with success." << std::endl;
-}
-
-// data constructor (5)
-void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR2()
-{
-  std::cout << "--> Test: constructor 2." << std::endl;
-  auto folr = std::make_shared<siconos::modeling::LagrangianLinearTIR>(C, F, e);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR2f : ",
-                               folr->getType() == siconos::modeling::RelationType::Lagrangian,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildLagrangianLinearTIR2g : ",
-      folr->getSubType() == siconos::modeling::RelationSubType::LinearTIR, true);
-  std::cout << "--> Constructor 2 test ended with success." << std::endl;
-}
-
-// data constructor (5)
-void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR3()
-{
-  std::cout << "--> Test: constructor 3." << std::endl;
-  auto folr = std::make_shared<siconos::modeling::LagrangianLinearTIR>(C, e);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR3a : ", folr->C()->data() == C->data(), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR3d : ", folr->e() == e, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR3f : ",
-                               folr->getType() == siconos::modeling::RelationType::Lagrangian,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildLagrangianLinearTIR3g : ",
-      folr->getSubType() == siconos::modeling::RelationSubType::LinearTIR, true);
-  std::cout << "--> Constructor 3 test ended with success." << std::endl;
-}
-
-// data constructor (4)
-void LagrangianLinearTIRTest::testBuildLagrangianLinearTIR4()
-{
-  std::cout << "--> Test: constructor 4." << std::endl;
-  auto folr = std::make_shared<siconos::modeling::LagrangianLinearTIR>(C);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIR4c : ",
-                               folr->getType() == siconos::modeling::RelationType::Lagrangian,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildLagrangianLinearTIR4d : ",
-      folr->getSubType() == siconos::modeling::RelationSubType::LinearTIR, true);
-  std::cout << "--> Constructor 4 test ended with success." << std::endl;
-}
-// set C as a matrix and then plug it
-
-// setCPtr
-void LagrangianLinearTIRTest::testSetCPtr()
-{
-  std::cout << "--> Test: setCPtr." << std::endl;
-  std::shared_ptr<siconos::algebra::SiconosMatrix> tmp =
-      std::make_shared<siconos::algebra::SiconosMatrix>(*C);
-  tmp->zero();
-  auto folr = std::make_shared<siconos::modeling::LagrangianLinearTIR>(tmp);
-  folr->setCPtr(C);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetCPtr : ", folr->C()->data() == C->data(), true);
-  std::cout << "--> setCPtr test ended with success." << std::endl;
-}
-
-// setFPtr
-void LagrangianLinearTIRTest::testSetFPtr()
-{
-  std::cout << "--> Test: setFPtr." << std::endl;
-  auto folr = std::make_shared<siconos::modeling::LagrangianLinearTIR>(C);
-  folr->setFPtr(F);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetFPtr: ", folr->F() == F, true);
-  std::cout << "--> setFPtr test ended with success." << std::endl;
-}
-
-// set E
-
-// setEPtr
-void LagrangianLinearTIRTest::testSetEPtr()
-{
-  std::cout << "--> Test: setEPtr." << std::endl;
-  auto folr = std::make_shared<siconos::modeling::LagrangianLinearTIR>(C);
-  folr->setEPtr(e);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetEPtr: ", folr->e() == e, true);
-  std::cout << "--> setEPtr test ended with success." << std::endl;
-}
-
-void LagrangianLinearTIRTest::testGetJacPtr()
-{
-  std::cout << "--> Test: jac." << std::endl;
-  auto folr = std::make_shared<siconos::modeling::LagrangianLinearTIR>(C);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetJachq: ", folr->jachq()->data() == C->data(), true);
-
-  std::cout << "--> testGetJacPtr test ended with success." << std::endl;
 }

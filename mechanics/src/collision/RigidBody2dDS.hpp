@@ -37,7 +37,7 @@ class RigidBody2dDS : public siconos::modeling::LagrangianLinearTIDS,
   ACCEPT_SERIALIZATION(RigidBody2dDS);
 
   /** a scalar mass in the case of RigidBody2dDS */
-  double _scalarMass{0.};
+  double scalarMass_{0.};
 
   std::shared_ptr<siconos::collision::SiconosContactorSet> _contactors{nullptr};
   bool _useContactorInertia{true};
@@ -57,7 +57,7 @@ class RigidBody2dDS : public siconos::modeling::LagrangianLinearTIDS,
 
   virtual ~RigidBody2dDS() noexcept = default;
 
-  double scalarMass() { return _scalarMass; };
+  double scalarMass() { return scalarMass_; };
 
   void setUseContactorInertia(bool use) { _useContactorInertia = use; }
 

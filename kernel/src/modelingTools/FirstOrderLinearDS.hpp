@@ -50,99 +50,56 @@ namespace siconos::modeling {
    - \f$ b(t) \f$
    - \f$ M(t) \f$
 
+   Storage:
+
+    - \f$ A(t) \f$ in jacobianRhsOver_x (\f$ \nabla_x f(x,t) \f$) of FirstOrderNonLinearDS
+    - \f$ b(t) \f$ local
+    - \f$ M(t) \f$ in MMatrix FirstOrderNonLinearDS
+
+
 */
 class FirstOrderLinearDS : public FirstOrderNonLinearDS {
  protected:
   ACCEPT_SERIALIZATION(FirstOrderLinearDS);
 
-  /** matrix specific to the FirstOrderLinearDS \f$ A \in R^{n \times n}  \f$*/
-  std::shared_ptr<siconos::algebra::MapType> _A{nullptr};
-  std::unique_ptr<std::vector<double>> A_internal_storage{nullptr};
+  /** function wrapper used to compute  A(t) */  // to replace computeJacobianfOver_x_
+  siconos::modeling::func_prototypes::FunctionS_M computeA_{nullptr};
 
-  /** vector specific to the FirstOrderLinearDS */
-  std::shared_ptr<siconos::algebra::SiconosVector> _b{nullptr};
+  /** b(t) operator */
+  std::shared_ptr<siconos::algebra::MapVectorType> bVector_view_{nullptr};
 
-  /** FirstOrderLinearDS plug-in to compute A(t,z), id = "A"
-   *
-   *  \param time : current time
-   *  \param sizeOfA : size of square-matrix A
-   *  \param[in,out] A : pointer to the first element of A
-   *  \param size of vector z
-   *  \param[in,out] z a vector of user-defined parameters
-   */
-  std::shared_ptr<siconos::plugins::PluggedObject> _pluginA{nullptr};
+  /** internal (optional) storage used for b(t) */
+  std::unique_ptr<std::vector<double>> bVector_internal_storage_{nullptr};
 
-  /** FirstOrderLinearDS plug-in to compute b(t,z), id = "b"
-   *
-   *  \param time : current time
-   *  \param sizeOfB : size of vector b
-   *  \param[in,out] b : pointer to the first element of b
-   *  \param size of vector z
-   *  \param[in,out] param  : a vector of user-defined parameters
-   */
-  std::shared_ptr<siconos::plugins::PluggedObject> _pluginb{nullptr};
+  /** function wrapper used to compute b(t) */
+  siconos::modeling::func_prototypes::FunctionS_V computebVector_{nullptr};
 
-  /** boolean if _A is constant (set thanks to setBPtr for instance)
-   * false by default */
-  bool _hasConstantA{false};
+  /** True if b(t) is taken into account and constant */
+  bool hasConstantbVector_{false};
 
-  /** boolean if _b is constant (set thanks to setBPtr for instance)
-   * false by default */
-  bool _hasConstantB{false};
-
-  /** default constructor
-   */
-  FirstOrderLinearDS() = default;
-
-  /** Reset all the plugins */
-  void _zeroPlugin() override;
+  /** True if b(t) is taken into account */
+  bool hasbVector_{false};
+  
+  // /** default constructor */
+  // FirstOrderLinearDS() = default;
 
  public:
-  /** plugin signature */
-  typedef void (*LDSPtrFunction)(double, unsigned int, double *, unsigned int, double *);
-  typedef void (*computeAfct)(double, unsigned int, unsigned int, double *, unsigned int,
-                              double *);
-
-  /** constructor from initial state and plugins
-   *
-   *  \param newX0 the initial state of this DynamicalSystem
-   *  \param APlugin plugin for A
-   *  \param bPlugin plugin for b
-   */
-  FirstOrderLinearDS(std::shared_ptr<siconos::algebra::SiconosVector> newX0,
-                     const std::string &APlugin, const std::string &bPlugin);
-
-  /** constructor from initial state and plugin for A
-   *
-   *  \param newX0 the initial state of this DynamicalSystem
-   *  \param newA matrix A
-   */
-  FirstOrderLinearDS(std::shared_ptr<siconos::algebra::SiconosVector> newX0,
-                     std::shared_ptr<siconos::algebra::SiconosMatrix> newA);
-
-  /** constructor from initial state and plugin for A
-   *
-   *  \param newX0 the initial state of this DynamicalSystem
-   *  \param newA matrix A
-   */
-  FirstOrderLinearDS(Eigen::Ref<siconos::algebra::SiconosVector>& newX0,
-                     Eigen::Ref<siconos::algebra::SiconosMatrix>& newA);
-
   /** constructor from initial state
    *
    *  \param newX0 the initial state of this DynamicalSystem
    */
-  FirstOrderLinearDS(std::shared_ptr<siconos::algebra::SiconosVector> newX0);
+  FirstOrderLinearDS(Eigen::Ref<siconos::algebra::SiconosVector> x0)
+      : FirstOrderNonLinearDS(x0) {};
 
-  /** constructor from a initial state and constant matrices
+  /** Build a time-invariant coeff. linear DS
    *
    *  \param newX0 the initial state of this DynamicalSystem
-   *  \param newA matrix A
-   *  \param newB b
+   *  \param A matrix coeff A (in \f$ M\dot x = Ax+b \f$)
+   *  \param b vector coeff b
    */
-  FirstOrderLinearDS(std::shared_ptr<siconos::algebra::SiconosVector> newX0,
-                     std::shared_ptr<siconos::algebra::SiconosMatrix> newA,
-                     std::shared_ptr<siconos::algebra::SiconosVector> newB);
+  FirstOrderLinearDS(Eigen::Ref<siconos::algebra::SiconosVector> x0,
+                     Eigen::Ref<siconos::algebra::SiconosMatrix> A,
+                     Eigen::Ref<siconos::algebra::SiconosVector> b);
 
   /** Copy constructor
    *
@@ -153,11 +110,54 @@ class FirstOrderLinearDS : public FirstOrderNonLinearDS {
   /** destructor */
   virtual ~FirstOrderLinearDS() noexcept = default;
 
-  /** Initialization function for the rhs and its jacobian.
+  /** \return a read-only view on A(t) matrix */
+  inline const auto A() const { return jacobianfOver_x(); }
+
+  /** \return true if A is taken into account */
+  auto hasA() { return hasJacobianfOver_x_; }
+
+  /** Set a constant A matrix for the system
    *
-   *  \param time time of initialization.
+   *  \param newValue A matrix
+   *
    */
-  void initRhs(double time) override;
+  void setConstantA(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+
+  /** set a user-defined function to compute A(t)
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputeAFunction(const siconos::modeling::func_prototypes::FunctionS_M &fct);
+
+  /** Computes A(t)
+   *  \param time current time value
+   */
+  void computeA(double time);
+
+  /** \return  a read-only view on b(t) */
+  inline const auto bVector() const {
+    return siconos::algebra::ConstMapVectorType(bVector_view_->data(), bVector_view_->size());
+  }
+
+  /** set a constant e vector
+   *
+   *  \param newbVector e vector
+   */
+  void setConstantbVector(Eigen::Ref<siconos::algebra::SiconosVector> newbVector);
+
+  /** True if b(t) is taken into account */
+  bool hasbVector() const { return hasbVector_; }
+
+  /** set a user-defined function to compute external forces
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputebVectorFunction(const siconos::modeling::func_prototypes::FunctionS_V &fct);
+
+  /** Computes b(t)
+   *  \param time current time value
+   */
+  void computeb(double time);
 
   /** update right-hand side for the current state
    *
@@ -169,160 +169,20 @@ class FirstOrderLinearDS : public FirstOrderNonLinearDS {
    *
    *  \param time of interest
    */
-  void computeJacobianRhsx(double time) override;
-
-  /** get the matrix \f$ A \f$
-   *
-   *  \return pointer (SP) on a matrix
-   */
-  inline std::shared_ptr<siconos::algebra::MapType> A() const { return _A; }
-
-  /** get jacobian of f(x,t,z) with respect to x (pointer link)
-   *
-   *  \return std::shared_ptr<siconos::algebra::SiconosMatrix>
-   */
-  inline std::shared_ptr<siconos::algebra::MapType> jacobianfx() const override { return _A; };
-
-  /** set A to pointer newPtr
-   *
-   *  \param newA the new A matrix
-   */
-  inline void setAPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newA)
-  {
-    // _A = newA;
-    _A = std::make_shared<siconos::algebra::MapType>(newA->data(), newA->rows(), newA->cols());
-    _hasConstantA = true;
-  }
-
-  /** set A to a new matrix
-   *
-   *  \param newA the new A matrix
-   **/
-  void setA(const siconos::algebra::SiconosMatrix &newA);
-
-  /** get b vector (pointer link)
-   *
-   *  \return a std::shared_ptr<siconos::algebra::SiconosVector>
-   */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> b() const { return _b; }
-
-  /** set b vector (pointer link)
-   *
-   *  \param b a siconos::algebra::SiconosVector
-   */
-  inline void setbPtr(std::shared_ptr<siconos::algebra::SiconosVector> b)
-  {
-    _b = b;
-    _hasConstantB = true;
-  }
-
-  /** set b vector (copy)
-   *
-   *  \param b a siconos::algebra::SiconosVector
-   */
-  void setb(const siconos::algebra::SiconosVector &b);
-
-  inline bool hasConstantA() const { return _hasConstantA; }
-
-  inline bool hasConstantB() const { return _hasConstantB; }
-  // --- plugins related functions
+  void computeJacobianRhsOver_x(double time) override;
 
   /**
-      Call all plugged-function to initialize plugged-object values
+      Call all user-defined operators to update the DS components
 
       \param time value
   */
   void updatePlugins(double time) override;
 
-  /** set a specified function to compute the matrix A => same action as
-   *  setComputeJacobianfxFunction
-   *
-   *  \param pluginPath the complete path to the plugin
-   *  \param functionName the function name to use in this plugin
-   */
-  void setComputeAFunction(const std::string &pluginPath, const std::string &functionName);
-
-  /** set a specified function to compute the matrix A
-   *
-   *  \param fct a pointer on a function
-   */
-  void setComputeAFunction(LDSPtrFunction fct);
-
-  /** set a specified function to compute the vector b
-   *
-   *  \param pluginPath the complete path to the plugin file
-   *  \param functionName the function name to use in this plugin
-   */
-  void setComputebFunction(const std::string &pluginPath, const std::string &functionName);
-
-  /** set a specified function to compute the vector b
-   *
-   *  \param fct a pointer on a function
-   */
-  void setComputebFunction(LDSPtrFunction fct);
-  void clearComputebFunction();
-
-  /**
-     default function to compute matrix A => same action as
-     computeJacobianfx
-
-     \param time time instant used to compute A
-  */
-  virtual void computeA(double time);
-
-  /** default function to compute vector b
-   *
-   *  \param time time instant used to compute b
-   */
-  virtual void computeb(double time);
-
-  /** Get _pluginA
-   *
-   *  \return the plugin for A
-   */
-  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginA() const
-  {
-    return _pluginA;
-  };
-
-  /** Get _pluginb
-   *
-   *  \return the plugin for b
-   */
-  inline std::shared_ptr<siconos::plugins::PluggedObject> getPluginB() const
-  {
-    return _pluginb;
-  };
-
-  /** Set _pluginA
-   *
-   *  \param newPluginA the new plugin
-   */
-  inline void setPluginA(std::shared_ptr<siconos::plugins::PluggedObject> newPluginA)
-  {
-    _pluginA = newPluginA;
-  };
-
-  /** Set _pluginb
-   *
-   *  \param newPluginB the new plugin
-   */
-  inline void setPluginB(std::shared_ptr<siconos::plugins::PluggedObject> newPluginB)
-  {
-    _pluginb = newPluginB;
-  };
-
-  /** data display on screen
-   */
+  /** data display on screen  */
   void display(bool brief = true) const override;
 
-  /** True if the system is linear.
-   *
-   *  \return a boolean
-   */
+  /** \return always true */
   bool isLinear() override { return true; }
-
-  // ACCEPT_STD_VISITORS();
 };
 }  // namespace siconos::modeling
 #endif  // FirstOrderLinearDS_H

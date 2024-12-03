@@ -27,8 +27,9 @@
 //
 #include <Eigen/Core>
 #include <Eigen/Dense>
-#include <Eigen/SparseCore>  // For Eigen Sparse matrices
 #include <Eigen/Geometry>
+#include <Eigen/SparseCore>  // For Eigen Sparse matrices
+
 #include "CSparseMatrix.h"  // For CSparseMatrix
 #include "SiconosVector.hpp"
 
@@ -50,13 +51,22 @@ namespace siconos::algebra {
    .
 
 */
-using MapType = Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor>>;
-using MapVectorType = Eigen::Map<Eigen::Matrix<double, Eigen::Dynamic, 1, Eigen::ColMajor>>;
 using SiconosMatrix = Eigen::Matrix<double_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor>;
-
+using SiconosMatrix33 = Eigen::Matrix<double_t, 3, 3, Eigen::ColMajor>;
 /** Sparse matrix storage */
 using SiconosSparseMatrix = Eigen::SparseMatrix<double, Eigen::ColMajor, int>;
 using Triplet = Eigen::Triplet<double>;  // Used to fill sparse matrices
+
+// Map types
+
+using MapVectorType = Eigen::Map<SiconosVector>;
+using MapVector3Type = Eigen::Map<SiconosVector3>;
+using ConstMapVectorType = Eigen::Map<const SiconosVector>;
+using ConstMapVector3Type = Eigen::Map<const SiconosVector3>;
+using MapType = Eigen::Map<SiconosMatrix>;
+using ConstMapType = Eigen::Map<const SiconosMatrix>;
+
+using SiconosDiagonalMatrix = Eigen::DiagonalMatrix<double_t, Eigen::Dynamic>;
 
 enum class StorageType { dense, sparse };
 
@@ -74,11 +84,6 @@ void normInfByColumn(const SiconosMatrix &m, SiconosVector &v);
 
 bool checkSymmetry(SiconosMatrix &m, double tol);
 
-void solveInPlace(SiconosMatrix &A, SiconosVector &B);
-void solveInPlace(SiconosMatrix &A, SiconosMatrix &B);
-void solveInPlace(SiconosMatrix &A, MapType &B);
-void solveByLeastSquares(SiconosMatrix &A, SiconosVector &B);
-void solveByLeastSquares(SiconosMatrix &A, SiconosMatrix &B);
 siconos::algebra::SiconosMatrix readMatrixFromFile(const std::string &filename,
                                                    bool ascii = true);
 

@@ -39,6 +39,15 @@ class FixedJointR : public NewtonEulerJointR {
   double _G10G20d1x{0.}, _G10G20d1y{0.}, _G10G20d1z{0.};
   double _cq2q101{0.}, _cq2q102{0.}, _cq2q103{0.}, _cq2q104{0.};
 
+  /** compute the jacobian of h w.r.t. q
+   *
+   *  \param time current time
+   *  \param inter the interaction using this relation
+   *  \param q0  q states vectors of the related the dynamical systems
+   */
+  virtual void computeJacobianhOver_q_(double time, siconos::modeling::Interaction& inter,
+                                       const siconos::algebra::BlockVector& q0) override;
+
  public:
   /** constructor,
    *
@@ -71,20 +80,16 @@ class FixedJointR : public NewtonEulerJointR {
    */
   virtual unsigned int numberOfConstraints() override { return 6; }
 
-  virtual void computeJachq(double time, siconos::modeling::Interaction& inter,
-                            std::shared_ptr<siconos::algebra::BlockVector> q0) override;
-
   /**
-     to compute the output y = h(t,q,z) of the Relation
+     to compute the output y = h(q) of the Relation
 
-     \param time current time value
-     \param q coordinates of the dynamical systems involved in the relation
-     \param y the resulting vector
-  */
-  virtual void computeh(double time, const siconos::algebra::BlockVector& q0,
-                        siconos::algebra::SiconosVector& y) override;
+     \param[in] q generalized coordinates vector of the dynamical systems (at most 2) involved
+    in the relation \param[in,out] y the resulting vector
+ */
+  void computeh(const siconos::algebra::BlockVector& q,
+                Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
-  virtual unsigned int numberOfDoF() override { return 0; }
+   virtual unsigned int numberOfDoF() override { return 0; }
 
   virtual DofType typeOfDoF(unsigned int axis) override { return DofType::INVALID; }
 

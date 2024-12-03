@@ -23,16 +23,14 @@
 
 siconos::collision::native::bodies::SphereNEDSSphereNEDSR::SphereNEDSSphereNEDSR::
     SphereNEDSSphereNEDSR(double r, double rr)
-      : siconos::modeling::NewtonEuler3DR{}
-{
+    : siconos::modeling::NewtonEuler3DR{} {
   r1 = r;
   r2 = rr;
   r1pr2 = r1 + r2;
 }
 
 double siconos::collision::native::bodies::SphereNEDSSphereNEDSR::distance(
-    double x1, double y1, double z1, double r1, double x2, double y2, double z2, double r2)
-{
+    double x1, double y1, double z1, double r1, double x2, double y2, double z2, double r2) {
   double dx = x1 - x2;
   double dy = y1 - y2;
   double dz = z1 - z2;
@@ -41,8 +39,7 @@ double siconos::collision::native::bodies::SphereNEDSSphereNEDSR::distance(
 }
 
 void siconos::collision::native::bodies::SphereNEDSSphereNEDSR::computeh(
-    double time, const siconos::algebra::BlockVector& q0, siconos::algebra::SiconosVector& y)
-{
+    const siconos::algebra::BlockVector &q0, Eigen::Ref<siconos::algebra::SiconosVector> y) {
   double q_0 = q0(0);
   double q_1 = q0(1);
   double q_2 = q0(2);

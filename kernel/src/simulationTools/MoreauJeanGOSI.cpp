@@ -25,10 +25,10 @@
 #include "OneStepNSProblem.hpp"
 #include "Relation.hpp"
 #include "SiconosException.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"
-#include "SiconosMatrix.hpp"
 #include "Simulation.hpp"
 // #define DEBUG_STDOUT
 // #define DEBUG_NOCOLOR
@@ -44,7 +44,7 @@ void siconos::integrators::MoreauJeanGOSI::initializeWorkVectorsForDS(
   // Check dynamical system type
   auto sods = std::static_pointer_cast<siconos::modeling::SecondOrderDS>(ds);
   // Compute W (iteration matrix)
-  initializeIterationMatrixW(t, sods);
+  initializeIterationMatrix(t, sods);
   //  )dsType == Type::LagrangianLinearTIDS || dsType == Type::LagrangianDS)
   if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
     ds_work_vectors.resize(siconos::integrators::MoreauJeanGOSI::WORK_LENGTH);
@@ -55,7 +55,7 @@ void siconos::integrators::MoreauJeanGOSI::initializeWorkVectorsForDS(
     ds_work_vectors[siconos::integrators::MoreauJeanGOSI::LOCAL_BUFFER] =
         std::make_shared<siconos::algebra::SiconosVector>(lds->dimension());
 
-    lds->computeForces(t, lds->q(), lds->velocity());
+    lds->computeTotalForces(lds->velocity_read(), lds->q_read(), t);
     lds->swapInMemory();
   } else if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
     ds_work_vectors.resize(siconos::integrators::MoreauJeanGOSI::WORK_LENGTH);
@@ -64,13 +64,9 @@ void siconos::integrators::MoreauJeanGOSI::initializeWorkVectorsForDS(
     ds_work_vectors[siconos::integrators::MoreauJeanGOSI::FREE] =
         std::make_shared<siconos::algebra::SiconosVector>(neds->dimension());
     // Compute a first value of the dotq  to store it in  _dotqMemory
-    auto T = neds->T();
-    auto dotq = neds->dotq();
-    auto v = neds->twist();
-    siconos::algebra::prod(*T, *v, *dotq, true);
-
-    // Compute a first value of the forces to store it in _forcesMemory
-    neds->computeForces(t, neds->q(), v);
+    *neds->dotq() = neds->T() * neds->twist_read();
+    // Compute a first value of the forces to store it in totalForcesMemory
+    neds->computeWrench(neds->twist_read(), neds->q_read(), t);
     neds->swapInMemory();
   }
 }
@@ -154,7 +150,7 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
 
   auto t = _simulation->nextTime();         // End of the time step
   auto told = _simulation->startingTime();  // Beginning of the time step
-  auto h = t - told;                        // time step length
+  auto time_step = t - told;                // time step length
 
   DEBUG_PRINTF("nextTime %f\n", t);
   DEBUG_PRINTF("startingTime %f\n", told);
@@ -175,7 +171,7 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
     ds = _dynamicalSystemsGraph->bundle(*dsi);
     auto& ds_work_vectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
 
-    if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianLinearTIDS>(ds)) {
+    if (auto lltids = std::dynamic_pointer_cast<siconos::modeling::LagrangianLinearTIDS>(ds)) {
       DEBUG_PRINT(
           "siconos::integrators::MoreauJeanGOSI::computeResidu(), dsType == "
           "Type::LagrangianLinearTIDS\n");
@@ -188,52 +184,43 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
       // for v != vi, the formulae (1) is wrong.
       // in the sequel, only the equation (1) is implemented
 
-      // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      const auto& qold = d->qMemory().getSiconosVector(0);         // qi
-      const auto& vold = d->velocityMemory().getSiconosVector(0);  // vi
-
-      DEBUG_EXPR(qold.display(););
-      DEBUG_EXPR(vold.display(););
-      DEBUG_EXPR(d->q()->display(););
-      DEBUG_EXPR(d->velocity()->display(););
-
       auto& residu = *ds_work_vectors[siconos::integrators::MoreauJeanGOSI::RESIDU_FREE];
       auto& free_rhs = *ds_work_vectors[siconos::integrators::MoreauJeanGOSI::FREE];
       // --- ResiduFree computation Equation (1) ---
-      residu.zero();
-      auto& W = *_dynamicalSystemsGraph->properties(*dsi).W;
-      siconos::algebra::prod(W, vold, free_rhs);
+      residu.setZero();
+      auto& iterationMatrix = *_dynamicalSystemsGraph->properties(*dsi).iterationMatrix;
 
-      double coeff;
+      const auto& vold = lltids->velocityMemory().getSiconosVector(0);  // vi
+      free_rhs = iterationMatrix * vold;
+
       // -- No need to update W --
-
-      auto v = d->velocity();  // v = v_k,i+1
-
-      auto C = d->C();
-      if (C) siconos::algebra::prod(h, *C, vold, free_rhs, false);  // free_rhs += h*C*vi
-
-      auto K = d->K();
-      if (K) {
-        coeff = -h * h * _theta;
-        siconos::algebra::prod(coeff, *K, vold, residu,
-                               false);                          // free_rhs += -h^2*_theta*K*vi
-        siconos::algebra::prod(-h, *K, qold, free_rhs, false);  // free_rhs += -h*K*qi
+      //    auto v = d->velocity();  // v = v_k,i+1
+      // free_rhs += h*C*vi
+      if (lltids->hasDampingMatrix()) free_rhs += time_step * lltids->dampingMatrix() * vold;
+      if (lltids->hasStiffnessMatrix()) {
+        auto coeff = time_step * time_step * _theta;
+        free_rhs -=
+            coeff * lltids->stiffnessMatrix() * vold;  // vfree += time_step^2*_theta*K*vi
+        free_rhs -= time_step * lltids->stiffnessMatrix() *
+                    lltids->qMemory().getSiconosVector(0);  // vfree += time_step*K*qi
       }
 
-      auto Fext = d->fExt();
-      if (Fext) {
+      if (lltids->hasExternalForces()) {
         // computes Fext(ti)
-        d->computeFext(told);
-        coeff = h * (1 - _theta);
-        siconos::algebra::scal(coeff, *(d->fExt()), free_rhs, false);  // free_rhs += h*(1-_theta) * fext(ti)
+        lltids->computeFext(told);
+        auto coeff = time_step * (1 - _theta);
+        // vfree -= time_step*(1-_theta) * fext(ti)
+        free_rhs += coeff * lltids->fext();
         // computes Fext(ti+1)
-        d->computeFext(t);
-        coeff = h * _theta;
-        siconos::algebra::scal(coeff, *(d->fExt()), free_rhs, false);  // free_rhs += h*_theta * fext(ti+1)
+        lltids->computeFext(t);
+        coeff = time_step * _theta;
+        // vfree -= time_step*_theta * fext(ti+1)
+        free_rhs += coeff * lltids->fext();
       }
+
       DEBUG_EXPR(free_rhs.display());
 
-      if (d->boundaryConditions()) {
+      if (lltids->boundaryConditions()) {
         THROW_EXCEPTION(
             "siconos::integrators::MoreauJeanGOSI::computeResidu - boundary conditions not "
             "yet implemented for this type of Dynamical system\n");
@@ -260,56 +247,43 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
       // -- Convert the DS into a Lagrangian one.
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
-      // const auto& qold =
-      // d->qMemory().getsiconos::algebra::SiconosVector(0);
-      const auto& vold = lds->velocityMemory().getSiconosVector(0);
-      auto q = lds->q();
+      // residu.setZero();
 
-      auto v = lds->velocity();  // v = v_k,i+1
-      // residu.zero();
-      DEBUG_EXPR(residu.display());
+      auto& iterationMatrix = *_dynamicalSystemsGraph->properties(*dsi).iterationMatrix;
+      const auto& vold = lltids->velocityMemory().getSiconosVector(0);  // vi
+      free_rhs = iterationMatrix * vold;
 
-      // DEBUG_EXPR(qold.display());
-      DEBUG_EXPR(vold.display());
-      DEBUG_EXPR(q->display());
-      DEBUG_EXPR(v->display());
-      free_rhs.zero();
-      auto& W = *_dynamicalSystemsGraph->properties(*dsi).W;
-      siconos::algebra::prod(W, vold, free_rhs);
-
-      if (lds->forces()) {
+      if (lds->hasTotalForces()) {
         // Cheaper version: get forces(ti,vi,qi) from memory
-        const auto& fold = lds->forcesMemory().getSiconosVector(0);
-        double coef = h * (1 - _theta);
-        siconos::algebra::scal(coef, fold, free_rhs, false);
+        free_rhs += time_step * (1. - _theta) * lds->forcesMemory().getSiconosVector(0);
 
         // Expensive computes forces(ti,vi,qi)
-        // d->computeForces(told, qold, vold);
+        // d->computeTotalForces(vold, qold, told);
         // double coef = -h * (1 - _theta);
         // // residu += coef * fL_i
-        // scal(coef, *d->forces(), *residu, false);
+        // scal(coef, *d->totalForces(), *residu, false);
 
         // computes forces(ti+1, v_k,i+1, q_k,i+1) = forces(t,v,q)
-        lds->computeForces(t, q, v);
-        coef = h * _theta;
-        siconos::algebra::scal(coef, *lds->forces(), free_rhs, false);
+        lds->computeTotalForces(lds->velocity_read(), lds->q_read(), t);
+        free_rhs += time_step * _theta * lds->totalForces();
 
         // or  forces(ti+1, v_k,i+\theta, q(v_k,i+\theta))
         // auto qbasedonv =
         // std::make_shared<siconos::algebra::SiconosVector>(*qold)); *qbasedonv +=  h * ((1
         // -
-        //_theta)* *vold + _theta * *v); d->computeForces(t, qbasedonv, v); coef = -h *
+        //_theta)* *vold + _theta * *v);
+        // d->computeTotalForces(v, qbasedonv, t); coef = -h *
         //_theta;
         // residu += coef * fL_k,i+1
-        // scal(coef, *d->forces(), residu, false);
+        // scal(coef, *d->totalForces(), residu, false);
       }
 
       residu = -1.0 * free_rhs;
-      siconos::algebra::prod(1.0, W, *v, residu, false);
+      residu += iterationMatrix * lds->velocity_read();
 
       DEBUG_EXPR(residu.display());
 
-      if (lds->p(1)) residu -= *lds->p(1);  // Compute Residu in Workfree Notation !!
+      if (lds->p(1)) residu -= lds->p_read(1);  // Compute Residu in Workfree Notation !!
 
       if (lds->boundaryConditions()) {
         THROW_EXCEPTION(
@@ -320,7 +294,7 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
       DEBUG_EXPR(residu.display());
       normResidu = residu.norm2();
       DEBUG_PRINTF("normResidu= %e\n", normResidu);
-    } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
+    } else if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
       DEBUG_PRINT(
           "siconos::integrators::MoreauJeanGOSI::computeResidu(), dsType == "
           "Type::NewtonEulerDS\n");
@@ -333,66 +307,46 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
       auto& free_rhs = *ds_work_vectors[siconos::integrators::MoreauJeanGOSI::FREE];
       // Get the state  (previous time step) from memory vector
       // -> var. indexed with "Old"
-      const auto& vold = d->twistMemory().getSiconosVector(0);
 
-      // Get the current state vector
-      auto q = d->q();
-      auto v = d->twist();  // v = v_k,i+1
-
-      DEBUG_EXPR(vold.display());
-      DEBUG_EXPR(q->display());
-      DEBUG_EXPR(v->display());
-
-      residu.zero();
+      residu.setZero();
       // Get the (constant mass matrix)
       // auto massMatrix = d->mass();
       // siconos::algebra::prod(*massMatrix, (*v - vold), residu, true); // residu = M(v -
       // vold) DEBUG_EXPR(residu.display(););
-      free_rhs.zero();
-      auto& W = *_dynamicalSystemsGraph->properties(*dsi).W;
-      siconos::algebra::prod(W, vold, free_rhs);
 
-      if (d->forces())  // if fL exists
-      {
-        DEBUG_PRINTF("siconos::integrators::MoreauJeanGOSI:: _theta = %e\n", _theta);
-        DEBUG_PRINTF("siconos::integrators::MoreauJeanGOSI:: h = %e\n", h);
+      auto& iterationMatrix = *_dynamicalSystemsGraph->properties(*dsi).iterationMatrix;
+      const auto& vold = neds->twistMemory().getSiconosVector(0);
+      free_rhs = iterationMatrix * vold;
 
-        // Cheaper version: get forces(ti,vi,qi) from memory
-        const auto& fold = d->forcesMemory().getSiconosVector(0);
-        auto coef = h * (1 - _theta);
-        siconos::algebra::scal(coef, fold, free_rhs, false);
+      DEBUG_PRINTF("siconos::integrators::MoreauJeanGOSI:: _theta = %e\n", _theta);
+      DEBUG_PRINTF("siconos::integrators::MoreauJeanGOSI:: h = %e\n", time_step);
 
-        // Expensive version to check ...
-        // d->computeForces(told,qold,vold);
-        // double coef = -h * (1.0 - _theta);
-        // scal(coef, *d->forces(), residu, false);
+      // Cheaper version: get forces(ti,vi,qi) from memory
+      free_rhs += time_step * (1 - _theta) * neds->forcesMemory().getSiconosVector(0);
 
-        DEBUG_PRINT("siconos::integrators::MoreauJeanGOSI:: old forces :\n");
-        DEBUG_EXPR(d->forces()->display(););
-        DEBUG_EXPR(residu.display(););
+      // Expensive version to check ...
+      // d->computeTotalForces(vold,qold,told);
+      // double coef = -h * (1.0 - _theta);
+      // scal(coef, *d->totalForces(), residu, false);
 
-        // computes forces(ti,v,q)
-        d->computeForces(t, q, v);
-        coef = h * _theta;
-        siconos::algebra::scal(coef, *d->forces(), free_rhs, false);
-        DEBUG_PRINT("siconos::integrators::MoreauJeanGOSI:: new forces :\n");
-        DEBUG_EXPR(d->forces()->display(););
-        DEBUG_EXPR(residu.display(););
-      }
+      // computes forces(ti,v,q)
+      neds->computeWrench(neds->twist_read(), neds->q_read(), t);
+      free_rhs += time_step * _theta * neds->wrench();
+      DEBUG_PRINT("siconos::integrators::MoreauJeanGOSI:: new forces :\n");
+      DEBUG_EXPR(d->totalForces()->display(););
+      DEBUG_EXPR(residu.display(););
 
-      if (d->boundaryConditions()) {
+      if (neds->boundaryConditions()) {
         THROW_EXCEPTION(
             "siconos::integrators::MoreauJeanGOSI::computeResidu - boundary conditions not "
             "yet implemented for this type of Dynamical system\n");
       }
 
       residu = -1.0 * free_rhs;
+      residu = iterationMatrix * neds->twist_read();
+      if (neds->p(1)) residu -= neds->p_read(1);
 
-      siconos::algebra::prod(1.0, W, *v, residu, false);
-
-      if (d->p(1)) residu -= *d->p(1);
-
-      if (d->boundaryConditions()) {
+      if (neds->boundaryConditions()) {
         THROW_EXCEPTION(
             "siconos::integrators::MoreauJeanGOSI::computeResidu - boundary conditions not "
             "yet implemented for this type of Dynamical system\n");
@@ -400,7 +354,7 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
 
       DEBUG_PRINT("siconos::integrators::MoreauJeanGOSI::computeResidu :\n");
       DEBUG_EXPR(residu.display(););
-      DEBUG_EXPR(if (d->p(1)) d->p(1)->display(););
+      DEBUG_EXPR(if (neds->p(1)) neds->p(1)->display(););
       DEBUG_EXPR(free_rhs.display(););
 
       normResidu = residu.norm2();
@@ -430,7 +384,7 @@ void siconos::integrators::MoreauJeanGOSI::NonSmoothLawContributionToOutput(
     struct MoreauJeanOSI::_NSLEffectOnFreeOutput nslEffectOnFreeOutput =
         _NSLEffectOnFreeOutput(osnsp, *inter, indexSet.properties(ivd), _theta);
     auto& osnsp_rhs = *(*indexSet.properties(ivd).workVectors)[MoreauJeanOSI::OSNSP_RHS];
-    osnsp_rhs.zero();
+    osnsp_rhs.setZero();
     inter->nonSmoothLaw()->accept(nslEffectOnFreeOutput);
   }
 }
@@ -448,10 +402,11 @@ void siconos::integrators::MoreauJeanGOSI::updateState(const unsigned int) {
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
   for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
     if (!checkOSI(dsi)) continue;
-    auto ds = _dynamicalSystemsGraph->bundle(*dsi);
+
     auto& ds_work_vectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
 
-    if (std::dynamic_pointer_cast<siconos::modeling::LagrangianLinearTIDS>(ds)) {
+    if (auto lltids = std::dynamic_pointer_cast<siconos::modeling::LagrangianLinearTIDS>(
+            _dynamicalSystemsGraph->bundle(*dsi))) {
       // LagrangianDS& d = static_cast<LagrangianDS&>(ds);
       //  bool baux = dsType == Type::LagrangianDS && useRCC &&
       //  _simulation->relativeConvergenceCriterionHeld();
@@ -463,8 +418,7 @@ void siconos::integrators::MoreauJeanGOSI::updateState(const unsigned int) {
       // // Save value of q in stateTmp for future convergence computation
       // if(baux)
       //   local_buffer = q;
-
-      updatePosition(*ds);
+      moreau_jean::updatePosition(_simulation->timeStep(), _theta, *lltids);
 
       // if(baux)
       // {
@@ -474,30 +428,30 @@ void siconos::integrators::MoreauJeanGOSI::updateState(const unsigned int) {
       //   if(aux > RelativeTol)
       //     _simulation->setRelativeConvergenceCriterionHeld(false);
       // }
-    } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+    } else if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(
+                   _dynamicalSystemsGraph->bundle(*dsi))) {
       bool baux = useRCC && _simulation->relativeConvergenceCriterionHeld();
 
-      auto& q = *d->q();
       auto& local_buffer =
           *ds_work_vectors[siconos::integrators::MoreauJeanGOSI::LOCAL_BUFFER];
 
       // Save value of q in stateTmp for future convergence computation
-      if (baux) local_buffer = q;
+      if (baux) local_buffer = lds->q_read();
 
-      updatePosition(*ds);
-
+      moreau_jean::updatePosition(_simulation->timeStep(), _theta, *lds);
       if (baux) {
-        double ds_norm_ref = 1. + ds->x0()->norm2();  // Should we save this in the graph?
-        local_buffer -= q;
+        double ds_norm_ref = 1. + lds->x0().norm();  // Should we save this in the graph?
+        local_buffer -= lds->q_read();
         double aux = (local_buffer.norm2()) / ds_norm_ref;
         if (aux > RelativeTol) _simulation->setRelativeConvergenceCriterionHeld(false);
       }
-    } else if (std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
+    } else if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(
+                   _dynamicalSystemsGraph->bundle(*dsi))) {
       DEBUG_PRINT(
           "siconos::integrators::MoreauJeanGOSI::updateState(const unsigned int ), dsType "
           "== "
           "Type::NewtonEulerDS \n");
-      updatePosition(*ds);
+      moreau_jean::updatePosition(_simulation->timeStep(), _theta, *neds);
     } else
       THROW_EXCEPTION(
           "siconos::integrators::MoreauJeanGOSI::updateState - not yet implemented for this "
@@ -519,8 +473,8 @@ void siconos::integrators::MoreauJeanGOSI::display() const {
       std::cout << "--------------------------------\n";
       std::cout << "--> W of dynamical system number " << ds->number() << ": "
                 << "\n";
-      if (_dynamicalSystemsGraph->properties(*dsi).W)
-        _dynamicalSystemsGraph->properties(*dsi).W->display();
+      if (_dynamicalSystemsGraph->properties(*dsi).iterationMatrix)
+        _dynamicalSystemsGraph->properties(*dsi).iterationMatrix->display();
       else
         std::cout << "-> nullptr"
                   << "\n";

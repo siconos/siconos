@@ -47,23 +47,18 @@ class DiskDiskR : public CircularR, public std::enable_shared_from_this<DiskDisk
   double distance(double, double, double, double, double, double) override;
 
   /**
-     to compute the output y = h(q,z) of the Relation
+    to compute the output y = h(q) of the Relation
 
-     \param q coordinates of the dynamical systems involved in the relation
-     \param z user defined parameters (optional)
-     \param y the resulting vector
+    \param q coordinates of the dynamical systems involved in the relation
+    \param y the resulting vector
   */
-  void computeh(const siconos::algebra::BlockVector& q, siconos::algebra::BlockVector& z,
-                siconos::algebra::SiconosVector& y) override;
+  void computeh(const siconos::algebra::BlockVector& q,
+                Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
-  /**
-     to compute the jacobian of h(...). Set attribute _jachq (access: jacqhq())
-
-     \param q coordinates of the dynamical systems involved in the relation
-     \param z user defined parameters (optional)
-  */
-  void computeJachq(const siconos::algebra::BlockVector& q,
-                    siconos::algebra::BlockVector& z) override;
+  /** Computes \f$ \nabla^\top_q h(q) \f$
+   * \param q coordinates of the dynamical systems involved in the relation
+   */
+  void computeJacobianhOver_q(const siconos::algebra::BlockVector& q) override;
 };
 }  // namespace siconos::collision::native::bodies
 #endif /* DiskDiskR_h */

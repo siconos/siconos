@@ -225,7 +225,7 @@ def test_xml4(datafile):
     # Reaction
     dataPlot[k, 3] = inter.lambda_(1)[0]
     # External Forcing
-    dataPlot[k, 4] = Follower.fExt()[0]
+    dataPlot[k, 4] = Follower.fext()[0]
 
     # State of the Cam
     rpm = 358
@@ -253,7 +253,7 @@ def test_xml4(datafile):
         dataPlot[k, 1] = Follower.q()[0]
         dataPlot[k, 2] = Follower.velocity()[0]
         dataPlot[k, 3] = inter.lambda_(1)[0]
-        dataPlot[k, 4] = Follower.fExt()[0]
+        dataPlot[k, 4] = Follower.fext()[0]
 
         CamEqForce = CamState(
             s.nextTime(), rpm, CamPosition, CamVelocity, CamAcceleration

@@ -34,6 +34,7 @@
 #include <string>
 
 #include "BoundaryCondition.hpp"
+#include "FunctionTypes.hpp"
 #include "MBTB_DATA.hpp"  // for JointsType enum
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
@@ -47,9 +48,6 @@ class Simulation;
 }
 
 namespace siconos::mechanisms {
- using ExternalForcesFunction =
-      std::function<void(double, Eigen::Ref<siconos::algebra::MapVectorType>)>;
-
 
 /**  To initialize the MBTB library (no yet dynamical memory).
 
@@ -109,19 +107,20 @@ void MBTB_BodyLoadCADFile(unsigned int numDS, const std::string& CADFile,
 void MBTB_BodyBuild(
     unsigned int numDS, const std::string& BodyName, double mass,
     std::shared_ptr<siconos::algebra::SiconosVector> initPos,
-    std::shared_ptr<siconos::algebra::SiconosVector> initCenterMass,
+    std::shared_ptr<siconos::algebra::SiconosVector> modelCenterMass,
     std::shared_ptr<siconos::algebra::SiconosMatrix> inertialMatrix,
-    const ExternalForcesFunction& fext_func,
-    const std::string& pluginMextLib, const std::string& pluginMextFct,
-    const std::string& pluginFintLib, const std::string& pluginFintFct,
-    const std::string& pluginMintLib, const std::string& pluginMintFct,
-    const std::string& pluginFintJacqLib, const std::string& pluginFintJacqFct,
-    const std::string& pluginMintJacqLib, const std::string& pluginMintJacqFct,
-    const std::string& pluginFintJacvLib, const std::string& pluginFintJacvFct,
-    const std::string& pluginMintJacvLib, const std::string& pluginMintJacvFct,
+    // const siconos::modeling::func_prototypes::FunctionS_V& fext_func,
+    // const siconos::modeling::func_prototypes::FunctionS_V& mext_func,
+    // const siconos::modeling::func_prototypes::FunctionVVS_V& fint_func,
+    // const siconos::modeling::func_prototypes::FunctionVVS_V& mint_func,
+    // const siconos::modeling::func_prototypes::FunctionVVS_V& jacobianfint_qfunc,
+    // const siconos::modeling::func_prototypes::FunctionVVS_V& jacobianfint_twistfunc,
+    // const siconos::modeling::func_prototypes::FunctionVVS_V& jacobianmint_qfunc,
+    // const siconos::modeling::func_prototypes::FunctionVVS_V& jacobianmint_twistfunc,
     const std::string& pluginBoundaryConditionLib,
     const std::string& pluginBoundaryConditionFct,
     const siconos::modeling::BoundaryCondition::Indices& boundaryConditionIndex);
+
 /** To build a joint.
  *
  *  \param [in] numJ  an identifier
@@ -253,13 +252,13 @@ void MBTB_moveBodyToPosWithSpeed(unsigned int numDS,
                                  std::shared_ptr<siconos::algebra::SiconosVector> aPos,
                                  std::shared_ptr<siconos::algebra::SiconosVector> aVel);
 
-/** Set the velocity.
+// /** Set the velocity.
 
-    \param [in] numDS the id of the ds.
-    \param [in] aVel the targeted velocity.
- */
-void MBTB_BodySetVelocity(unsigned int numDS,
-                          std::shared_ptr<siconos::algebra::SiconosVector> aVel);
+//     \param [in] numDS the id of the ds.
+//     \param [in] aVel the targeted velocity.
+//  */
+// void MBTB_BodySetVelocity(unsigned int numDS,
+//                           std::shared_ptr<siconos::algebra::SiconosVector> aVel);
 
 /** Defines the graphic frequency.
 

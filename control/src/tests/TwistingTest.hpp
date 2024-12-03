@@ -25,7 +25,7 @@
 #include "RegularTwisting.hpp"
 #include "ExplicitTwisting.hpp"
 
-#include <FirstOrderLinearTIDS.hpp>
+#include <FirstOrderLinearDS.hpp>
 
 class TwistingTest : public CppUnit::TestFixture {
  private:
@@ -69,7 +69,7 @@ class TwistingTest : public CppUnit::TestFixture {
   double _tol;
   double _beta;
   double _xFinal;
-  std::shared_ptr<siconos::modeling::FirstOrderLinearTIDS> _DS;
+  std::shared_ptr<siconos::modeling::FirstOrderLinearDS> _DS;
   std::shared_ptr<siconos::algebra::SiconosMatrix> _A;
   std::shared_ptr<siconos::algebra::SiconosMatrix> _B;
   std::shared_ptr<siconos::algebra::SiconosMatrix> _C;

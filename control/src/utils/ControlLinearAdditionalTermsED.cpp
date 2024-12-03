@@ -38,11 +38,11 @@ void siconos::control::ControlLinearAdditionalTermsED::init(
     auto& ds = *DSG0.bundle(*dsvi);
     if (DSG0.pluginU.hasKey(*dsvi)) {
       DSG0.tmpXdot[*dsvi] =
-          std::make_shared<siconos::algebra::SiconosVector>(ds.getx().size());
+          std::make_shared<siconos::algebra::SiconosVector>(ds.dimension());
     }
     if (DSG0.pluginJacgx.hasKey(*dsvi)) {
       DSG0.jacgx[*dsvi] =
-          std::make_shared<siconos::algebra::SiconosMatrix>(ds.getx().size(), ds.getx().size());
+          std::make_shared<siconos::algebra::SiconosMatrix>(ds.dimension(), ds.dimension());
     }
   }
 }
@@ -61,7 +61,7 @@ void siconos::control::ControlLinearAdditionalTermsED::addSmoothTerms(
       auto& u = DSG0.u.getRef(dsgVD);
       auto& tmpXdot = DSG0.tmpXdot.getRef(dsgVD);
       ((AdditionalTermsEDfctU)DSG0.pluginU.getRef(dsgVD).fPtr)(
-          t, xdot.size(), const_cast<double*>(ds.getx().data()), u.size(), u.data(), tmpXdot.data(),
+          t, xdot.size(), const_cast<double*>(ds.x_read().data()), u.size(), u.data(), tmpXdot.data(),
           ds.getz().size(), const_cast<double*>(ds.getz().data()));
       xdot += tmpXdot;  // xdot += g(x, u)
     } else {
@@ -86,7 +86,7 @@ void siconos::control::ControlLinearAdditionalTermsED::addJacobianRhsContributio
     auto& u = DSG0.u.getRef(dsgVD);
     auto& tmpJacgx = DSG0.jacgx.getRef(dsgVD);
     ((AdditionalTermsEDfctU)DSG0.pluginJacgx.getRef(dsgVD).fPtr)(
-        t, ds.getx().size(), const_cast<double*>(ds.getx().data()), u.size(), u.data(), tmpJacgx.data(),
+        t, ds.x_read().size(), const_cast<double*>(ds.x_read().data()), u.size(), u.data(), tmpJacgx.data(),
         ds.getz().size(), const_cast<double*>(ds.getz().data()));
     jacRhs += tmpJacgx;  // JacRhs += \nabla_x g(x, u)
   } else {

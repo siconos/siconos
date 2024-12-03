@@ -23,14 +23,12 @@
 #include "SiconosVector.hpp"
 #include "siconos_debug.h"
 
-void siconos::collision::Contact5DR::computeh(double time,
-                                              const siconos::algebra::BlockVector& q0,
-                                              siconos::algebra::SiconosVector& y)
-{
+void siconos::collision::Contact5DR::computeh(const siconos::algebra::BlockVector& q,
+                                              Eigen::Ref<siconos::algebra::SiconosVector> y) {
   DEBUG_BEGIN("Contact5DR::computeh(...)\n");
 
   // Update contact points and distance if necessary
-  NewtonEuler5DR::computeh(time, q0, y);
+  NewtonEulerR::computeh(q, y);
 
   y.setValue(0, distance());
 
@@ -43,8 +41,7 @@ void siconos::collision::Contact5DR::computeh(double time,
 
 void siconos::collision::Contact5DR::updateContactPoints(
     const siconos::algebra::SiconosVector& pos1, const siconos::algebra::SiconosVector& pos2,
-    const siconos::algebra::SiconosVector& normal)
-{
+    const siconos::algebra::SiconosVector& normal) {
   // Copy relative positions
   *_relPc1 = pos1;
   *_relPc2 = pos2;

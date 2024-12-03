@@ -29,60 +29,33 @@ namespace siconos::modeling {
 
     Lagrangian Relation with:
 
-    \f$ y= Cq + e + Fz \f$
+    \f$ y= Cq + e \f$
 
     \f$ p = C^t \lambda \f$
 
     C is the only required input to built a LagrangianLinearTIR.
+    C storage is \f$ \nabla^\top_q h(q, ...)\f$ from
+    LagrangianR
 
 */
 class LagrangianLinearTIR : public LagrangianR {
  protected:
   ACCEPT_SERIALIZATION(LagrangianLinearTIR);
 
-  /** F matrix, coefficient of z */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _F;
-
   /** e*/
-  std::shared_ptr<siconos::algebra::SiconosVector> _e;
+  std::shared_ptr<siconos::algebra::MapVectorType> eVector_view_{nullptr};
 
  public:
-  /** Default constructor
-   */
-  LagrangianLinearTIR() : LagrangianR(RelationSubType::LinearTIR){};
+  // /** Default constructor */
+  // LagrangianLinearTIR() : LagrangianR(RelationSubType::LinearTIR) {};
 
-  /** create the Relation from a set of data
+  /** Build a relation with only C matrix defined. Use set.. if e is required.
    *
    *  \param C the matrix C
    */
-  LagrangianLinearTIR(std::shared_ptr<siconos::algebra::SiconosMatrix> C);
+  LagrangianLinearTIR(Eigen::Ref<siconos::algebra::SiconosMatrix> C);
 
-  /** create the Relation from a set of data
-   *
-   *  \param C the matrix C
-   */
-  LagrangianLinearTIR(Eigen::Ref<siconos::algebra::SiconosMatrix>& C);
-
-  /** create the Relation from a set of data
-   *
-   *  \param C the matrix C
-   *  \param F the matrix F
-   *  \param e the vector e
-   */
-  LagrangianLinearTIR(std::shared_ptr<siconos::algebra::SiconosMatrix> C,
-                      std::shared_ptr<siconos::algebra::SiconosMatrix> F,
-                      std::shared_ptr<siconos::algebra::SiconosVector> e);
-
-  /** create the Relation from a set of data
-   *
-   *  \param C the matrix C
-   *  \param e the vector e
-   */
-  LagrangianLinearTIR(std::shared_ptr<siconos::algebra::SiconosMatrix> C,
-                      std::shared_ptr<siconos::algebra::SiconosVector> e);
-
-  /** destructor
-   */
+  /** destructor */
   virtual ~LagrangianLinearTIR() noexcept = default;
 
   /** check sizes of the relation specific operators.
@@ -92,6 +65,23 @@ class LagrangianLinearTIR : public LagrangianR {
   void checkSize(Interaction &inter) override;
   ;
 
+  /** \return a read-only view on the C matrix */
+  inline const auto CMatrix() const { return jacobianhOver_q(); }
+
+  /** \return  a read-only view on e vector */
+  inline const auto eVector() const {
+    return siconos::algebra::ConstMapVectorType(eVector_view_->data(), eVector_view_->size());
+  }
+
+  /** True if e is defined */
+  bool haseVector() const { return eVector_view_ != nullptr; }
+
+  /** set a constant e vector. Warning: shared memory with input
+   *
+   *  \param newe e value
+   */
+  void seteVector(Eigen::Ref<siconos::algebra::SiconosVector> newe);
+
   /** default function to compute y
    *
    *  \param time not used
@@ -100,7 +90,6 @@ class LagrangianLinearTIR : public LagrangianR {
    */
   void computeOutput(double time, Interaction &inter,
                      unsigned int derivativeNumber = 0) override;
-  ;
 
   /** default function to compute r
    *
@@ -117,73 +106,6 @@ class LagrangianLinearTIR : public LagrangianR {
    *  \param interProp interaction properties
    */
   void computeJach(double time, Interaction &inter) override {}
-
-  /** compute all the G Jacobian
-   *
-   *  \param time not used
-   *  \param inter the Interaction we want to update
-   *  \param interProp interaction properties
-   */
-  void computeJacg(double time, Interaction &inter) override {}
-
-  // GETTERS/SETTERS
-
-  // -- C --
-  /** \return pointer on a plugged matrix
-   */
-  inline std::shared_ptr<siconos::algebra::MapType> C() const override { return _jachq; }
-
-  /** set C to pointer newPtr
-   *
-   *  \param newPtr a SP to plugged matrix
-   */
-  inline void setCPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr)
-  {
-    // TODOSAM : deallocate interal storage
-    jachq_internal_storage = nullptr;
-    _jachq = std::make_shared<siconos::algebra::MapType>(newPtr->data(), newPtr->rows(), newPtr->cols());
-  }
-
-  // -- D --
-
-  /** \return pointer on a plugged matrix
-   */
-  inline std::shared_ptr<siconos::algebra::MapType> D() const { return _jachlambda; }
-
-  /** set D to pointer newPtr
-   *
-   *  \param newPtr a SP to plugged matrix
-   */
-  inline void setDPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr)
-  {
-    // TODOSAM : deallocate interal storage
-    jachlambda_internal_storage = nullptr;
-    _jachlambda = std::make_shared<siconos::algebra::MapType>(newPtr->data(), newPtr->rows(), newPtr->cols());
-  }
-
-  // -- F --
-
-  /** \return pointer on a plugged matrix
-   */
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> F() const { return _F; }
-
-  /** set F to pointer newPtr
-   *
-   *  \param newPtr a SP to plugged matrix
-   */
-  inline void setFPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> newPtr) { _F = newPtr; }
-
-  // -- e --
-
-  /** \return pointer on a plugged vector
-   */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> e() const { return _e; }
-
-  /** set e to pointer newPtr
-   *
-   *  \param newPtr a SP to plugged vector
-   */
-  inline void setEPtr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) { _e = newPtr; }
 
   /** print the data to the screen
    */

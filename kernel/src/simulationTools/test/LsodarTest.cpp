@@ -14,38 +14,24 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #include "LsodarTest.hpp"
+
 #include "EventsManager.hpp"
-#include "SiconosMatrix.hpp"
-#include "FirstOrderLinearTIDS.hpp"
+#include "FirstOrderLinearDS.hpp"
 #include "LsodarOSI.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 
-
-#define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
-            if ((alpha) == (omega)) CPPUNIT_FAIL(message);
+#define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
+  if ((alpha) == (omega)) CPPUNIT_FAIL(message);
 
 // test suite registration
 CPPUNIT_TEST_SUITE_REGISTRATION(LsodarTest);
 
-static void computef1(double, unsigned int, double*, double* f, unsigned int, double*)
-{
-  f[0] = -1.;
-  f[1] = 0.;
-}
-
-static void computeA1(double, unsigned int, double*, double* A, unsigned int, double*)
-{
-  A[0] = 0.;
-  A[1] = 0.;
-  A[2] = 0.;
-  A[3] = 0.;
-}
-
-void LsodarTest::setUp()
-{
-  _A = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);// siconos::algebra::UBlasType::BLOCK);
+void LsodarTest::setUp() {
+  _A = std::make_shared<siconos::algebra::SiconosMatrix>(
+      _n, _n);  // siconos::algebra::UBlasType::BLOCK);
   _b = std::make_shared<siconos::algebra::SiconosVector>(_n);
   _x0 = std::make_shared<siconos::algebra::SiconosVector>(_n);
   _A->setZero();
@@ -53,11 +39,9 @@ void LsodarTest::setUp()
   _x0->setZero();
 }
 
-void LsodarTest::init(bool initDS)
-{
-  if(initDS)
-  {
-    _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(_x0, _A, _b);
+void LsodarTest::init(bool initDS) {
+  if (initDS) {
+    _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, *_A, *_b);
   }
 
   _TD = std::make_shared<siconos::simulation::TimeDiscretisation>(_t0, _h);
@@ -69,84 +53,91 @@ void LsodarTest::init(bool initDS)
   _sim->initialize();
 }
 
-void LsodarTest::tearDown()
-{}
+void LsodarTest::tearDown() {}
 
-void LsodarTest::testCstGradTIDS()
-{
-  std::cout << "===========================================" <<std::endl;
-  std::cout << " ===== Lsodar tests start ... ===== " <<std::endl;
-  std::cout << "===========================================" <<std::endl;
-  std::cout << "------- Integrate a TIL system with constant gradients -------" <<std::endl;
+void LsodarTest::testCstGradTIDS() {
+  std::cout << "===========================================" << std::endl;
+  std::cout << " ===== Lsodar tests start ... ===== " << std::endl;
+  std::cout << "===========================================" << std::endl;
+  std::cout << "------- Integrate a TIL system with constant gradients -------" << std::endl;
   _b->setValue(0, -1.);
   _x0->setValue(0, 5.);
   _x0->setValue(1, 10);
 
-  _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(_x0, _A, _b);
+  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, *_A, *_b);
 
   init(false);
 
-  while(_sim->hasNextEvent())
-  {
+  while (_sim->hasNextEvent()) {
     _sim->advanceToEvent();
     _sim->processEvents();
   }
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testCstGradTIDS : ", fabs(_DS->x()->getValue(0) +  5.) < _tol, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testCstGradTIDS : ", fabs(_DS->x()->getValue(1) - 10.) < _tol, true);
-  std::cout <<std::endl <<std::endl;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testCstGradTIDS : ", fabs(_DS->x()->getValue(0) + 5.) < _tol,
+                               true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testCstGradTIDS : ", fabs(_DS->x()->getValue(1) - 10.) < _tol,
+                               true);
+  std::cout << std::endl << std::endl;
 }
 
-void LsodarTest::testCstGradDS()
-{
-  std::cout << "===========================================" <<std::endl;
-  std::cout << " ===== Lsodar tests start ... ===== " <<std::endl;
-  std::cout << "===========================================" <<std::endl;
-  std::cout << "------- Integrate a L system with constant gradients -------" <<std::endl;
+void LsodarTest::testCstGradDS() {
+  std::cout << "===========================================" << std::endl;
+  std::cout << " ===== Lsodar tests start ... ===== " << std::endl;
+  std::cout << "===========================================" << std::endl;
+  std::cout << "------- Integrate a L system with constant gradients -------" << std::endl;
   _b->setValue(0, -1.);
   _x0->setValue(0, 5.);
   _x0->setValue(1, 10);
 
-  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(_x0, _A, _b);
+  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, *_A, *_b);
 
   init(false);
 
-  while(_sim->hasNextEvent())
-  {
+  while (_sim->hasNextEvent()) {
     _sim->advanceToEvent();
     _sim->processEvents();
   }
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testCstGradDS : ", fabs(_DS->x()->getValue(0) +  5.) < _tol, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testCstGradDS : ", fabs(_DS->x()->getValue(1) - 10.) < _tol, true);
-  std::cout <<std::endl <<std::endl;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testCstGradDS : ", fabs(_DS->x()->getValue(0) + 5.) < _tol,
+                               true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testCstGradDS : ", fabs(_DS->x()->getValue(1) - 10.) < _tol,
+                               true);
+  std::cout << std::endl << std::endl;
 }
 
-void LsodarTest::testCstGradNLDS()
-{
-  std::cout << "===========================================" <<std::endl;
-  std::cout << " ===== Lsodar tests start ... ===== " <<std::endl;
-  std::cout << "===========================================" <<std::endl;
-  std::cout << "------- Integrate a NL system with constant gradients -------" <<std::endl;
+void LsodarTest::testCstGradNLDS() {
+  std::cout << "===========================================" << std::endl;
+  std::cout << " ===== Lsodar tests start ... ===== " << std::endl;
+  std::cout << "===========================================" << std::endl;
+  std::cout << "------- Integrate a NL system with constant gradients -------" << std::endl;
   _b->setValue(0, -1.);
   _x0->setValue(0, 5.);
   _x0->setValue(1, 10);
 
-  _DS = std::make_shared<siconos::modeling::FirstOrderNonLinearDS>(_x0);
+  _DS = std::make_shared<siconos::modeling::FirstOrderNonLinearDS>(*_x0);
   auto& DSNL = static_cast<siconos::modeling::FirstOrderNonLinearDS&>(*_DS);
-  DSNL.setComputeFFunction(&computef1);
-  // DSNL.setComputeJacobianfxFunction(&computeA1); // TODOSAM
+
+  DSNL.setComputefVectorFunction([](const Eigen::Ref<const siconos::algebra::SiconosVector>& x,
+                                    double time,
+                                    Eigen::Ref<siconos::algebra::MapVectorType> result) {
+    result(0) = -1.;
+    result(1) = 0.;
+  });
+
+  DSNL.setComputeJacobianfOver_xFunction(
+      [](const Eigen::Ref<const siconos::algebra::SiconosVector>& x, double time,
+         Eigen::Ref<siconos::algebra::MapType> result) { result.setZero(); });
 
   init(false);
 
-  while(_sim->hasNextEvent())
-  {
+  while (_sim->hasNextEvent()) {
     _sim->advanceToEvent();
     _sim->processEvents();
   }
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testCstGradNLDS : ", fabs(_DS->x()->getValue(0) +  5.) < _tol, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testCstGradNLDS : ", fabs(_DS->x()->getValue(1) - 10.) < _tol, true);
-  std::cout <<std::endl <<std::endl;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testCstGradNLDS : ", fabs(_DS->x()->getValue(0) + 5.) < _tol,
+                               true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testCstGradNLDS : ", fabs(_DS->x()->getValue(1) - 10.) < _tol,
+                               true);
+  std::cout << std::endl << std::endl;
 }
-

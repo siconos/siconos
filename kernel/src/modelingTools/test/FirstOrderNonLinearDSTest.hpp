@@ -34,14 +34,7 @@ class FirstOrderNonLinearDSTest : public CppUnit::TestFixture {
 
   CPPUNIT_TEST(testBuildFirstOrderNonLinearDS1);
   CPPUNIT_TEST(testBuildFirstOrderNonLinearDS2);
-  // CPPUNIT_TEST(testBuildFirstOrderNonLinearDS3);
-  CPPUNIT_TEST(testSetX0);
-  CPPUNIT_TEST(testSetX0Ptr);
-  CPPUNIT_TEST(testSetx);
-  CPPUNIT_TEST(testSetxPtr);
-  CPPUNIT_TEST(testSetR);
-  CPPUNIT_TEST(testSetRPtr);
-  CPPUNIT_TEST(testSetJacobianfxPtr);
+  CPPUNIT_TEST(testBuildFirstOrderNonLinearDS3);
   CPPUNIT_TEST(testInitMemory);
   CPPUNIT_TEST(testSwap);
 
@@ -51,14 +44,7 @@ class FirstOrderNonLinearDSTest : public CppUnit::TestFixture {
 
   void testBuildFirstOrderNonLinearDS1();
   void testBuildFirstOrderNonLinearDS2();
-  // void testBuildFirstOrderNonLinearDS3();
-  void testSetX0();
-  void testSetX0Ptr();
-  void testSetx();
-  void testSetxPtr();
-  void testSetR();
-  void testSetRPtr();
-  void testSetJacobianfxPtr();
+  void testBuildFirstOrderNonLinearDS3();
   void testInitMemory();
   void testSwap();
 

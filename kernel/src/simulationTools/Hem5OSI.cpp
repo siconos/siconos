@@ -29,9 +29,8 @@
 #include "SiconosException.hpp"
 #include "SiconosFortran.h"  // for Fortran to C api, fprobpointer ...
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixVectorOp.hpp"  // for prod and subprod
+#include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
-#include "SiconosVectorOp.hpp"  // for subscal
 #include "SiconosVisitor.hpp"
 #include "Simulation.hpp"
 #include "Tools.hpp"  // enum_to_string
@@ -217,7 +216,7 @@ void siconos::integrators::Hem5OSI::computeJacobianRhs(double t) {
   for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
     if (!checkOSI(dsi)) continue;
     auto ds = _dynamicalSystemsGraph->bundle(*dsi);
-    ds->computeJacobianRhsx(t);
+    ds->computeJacobianRhsOver_x(t);
   }
 }
 void siconos::integrators::Hem5OSI::Hem5OSI_impl::fprob(
@@ -236,9 +235,7 @@ void siconos::integrators::Hem5OSI::Hem5OSI_impl::fprob(
   // fill in xWork vector (ie all the x of the ds of this osi) with x
   hem5osi->fillqWork(NQ, q);
   hem5osi->fillvWork(NV, v);
-
   double t = *time;
-
   auto dsGraph = hem5osi->_dynamicalSystemsGraph;
 
   int ifcn = (int)(*IFCN);
@@ -250,10 +247,10 @@ void siconos::integrators::Hem5OSI::Hem5OSI_impl::fprob(
       auto ds = dsGraph->bundle(vi);
       if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
         if (lds->hasMass()) {
-          lds->computeMass(*lds->q(), t);
+          lds->computeMass(*lds->q());
           for (auto ii = pos; ii < ((unsigned int)(*NV) + pos); ii++) {
             for (auto jj = pos; jj < ((unsigned int)(*NV) + pos); jj++) {
-              AM[ii + jj * (int)(*NV)] = lds->mass()->getValue(ii, jj);
+              AM[ii + jj * (int)(*NV)] = lds->mass()(ii, jj);
             }
           }
         } else {
@@ -283,7 +280,7 @@ void siconos::integrators::Hem5OSI::Hem5OSI_impl::fprob(
       if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
         hem5osi->fillqWork(NQ, q);
         hem5osi->fillvWork(NV, v);
-        lds->computeForces((double)*time, lds->q(), lds->velocity());
+        lds->computeTotalForces(*lds->velocity(), *lds->q(), (double)*time);
       } else {
         THROW_EXCEPTION(
             "siconos::integrators::Hem5OSI::fprob(), Only integration of Lagrangian DS is "
@@ -320,7 +317,8 @@ void siconos::integrators::Hem5OSI::Hem5OSI_impl::fprob(
   if ((ifcn == 5) || (ifcn == 7))  // compute GPP ( Hessian of the constraints)
   {
     // THROW_EXCEPTION("siconos::integrators::Hem5OSI::fprob(), G_qq is not available");
-    std::cout << "siconos::integrators::Hem5OSI::fprob(), G_qq is not available " << "\n";
+    std::cout << "siconos::integrators::Hem5OSI::fprob(), G_qq is not available "
+              << "\n";
   }
 
   if ((ifcn == 3) || (ifcn == 6) ||
@@ -399,12 +397,12 @@ void siconos::integrators::Hem5OSI::initializeWorkVectorsForDS(
   if (!_forcesWork) _forcesWork = std::make_shared<siconos::algebra::BlockVector>();
 
   if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
-    lds->init_inverse_mass();  // invMass required to update post-impact velocity
+    lds->init_lu_mass();  // invMass required to update post-impact velocity
 
     _qWork->insertPtr(lds->q());
     _vWork->insertPtr(lds->velocity());
     _aWork->insertPtr(lds->acceleration());
-    _forcesWork->insertPtr(lds->forces());
+    _forcesWork->insertPtr(lds->totalForcesPtr());
     ds_work_vectors.resize(siconos::integrators::Hem5OSI::WORK_LENGTH);
     ds_work_vectors[siconos::integrators::Hem5OSI::FREE] =
         std::make_shared<siconos::algebra::SiconosVector>(lds->dimension());
@@ -704,20 +702,27 @@ void siconos::integrators::Hem5OSI::integrate(double& tinit, double& tend, doubl
   {
     std::cout << "siconos::integrators::Hem5OSI::integrate(...) failed - idid = " << _idid
               << "\n";
-    std::cout << " -1 means input is not consistent" << "\n";
-    std::cout << " -2 means larger NMAX needed." << "\n";
-    std::cout << " -3 means step size becomes too small." << "\n";
-    std::cout << " -4 means matrix is singular" << "\n";
-    std::cout << " -5 means initial projection: no convergence" << "\n";
+    std::cout << " -1 means input is not consistent"
+              << "\n";
+    std::cout << " -2 means larger NMAX needed."
+              << "\n";
+    std::cout << " -3 means step size becomes too small."
+              << "\n";
+    std::cout << " -4 means matrix is singular"
+              << "\n";
+    std::cout << " -5 means initial projection: no convergence"
+              << "\n";
     THROW_EXCEPTION("siconos::integrators::Hem5OSI::integrate(), integration failed");
   }
 
-  DEBUG_EXPR_WE(
-      std::cout << "HEM5 Statitics : " << "\n"; std::cout << "NSTEP = " << iwork[30] << "\n";
-      std::cout << "NACCPT = " << iwork[31] << "\n";
-      std::cout << "NREJCT = " << iwork[32] << "\n";
-      std::cout << "NFCN = " << iwork[33] << "\n"; std::cout << "NDEC = " << iwork[34] << "\n";
-      std::cout << "NSOL = " << iwork[35] << "\n";);
+  DEBUG_EXPR_WE(std::cout << "HEM5 Statitics : "
+                          << "\n";
+                std::cout << "NSTEP = " << iwork[30] << "\n";
+                std::cout << "NACCPT = " << iwork[31] << "\n";
+                std::cout << "NREJCT = " << iwork[32] << "\n";
+                std::cout << "NFCN = " << iwork[33] << "\n";
+                std::cout << "NDEC = " << iwork[34] << "\n";
+                std::cout << "NSOL = " << iwork[35] << "\n";);
   *_qWork = *_qtmp;
   *_vWork = *_vtmp;
   *_aWork = *_atmp;
@@ -788,11 +793,8 @@ struct siconos::integrators::Hem5OSI::_NSLEffectOnFreeOutput
   void visit(const siconos::modeling::NewtonImpactNSL& nslaw) const override {
     double e;
     e = nslaw.e();
-    std::vector<std::size_t> subCoord = {0, _inter->nonSmoothLaw()->size(), 0,
-                                         _inter->nonSmoothLaw()->size()};
     auto& osnsp_rhs = *(*_interProp.workVectors)[siconos::integrators::Hem5OSI::OSNSP_RHS];
-    siconos::algebra::subscal(e, _inter->y_k(_osnsp->inputOutputLevel()), osnsp_rhs, subCoord,
-                              false);  // q = q + e * q
+    osnsp_rhs += e * _inter->y_k(_osnsp->inputOutputLevel());
   }
 
   // visit function added by Son (9/11/2010)
@@ -814,8 +816,7 @@ void siconos::integrators::Hem5OSI::computeFreeOutput(
   auto sizeY = inter->nonSmoothLaw()->size();
 
   auto mainInteraction = inter;
-  std::vector<std::size_t> coord = {0, sizeY, 0, 0, 0, 0, 0, sizeY};
-  std::shared_ptr<siconos::algebra::MapType> C{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> C{nullptr};
   //   std::shared_ptr<siconos::algebra::SiconosMatrix>  D;
   //   std::shared_ptr<siconos::algebra::SiconosMatrix>  F;
   auto& osnsp_rhs = *(*indexSet->properties(vertex_inter)
@@ -848,20 +849,15 @@ void siconos::integrators::Hem5OSI::computeFreeOutput(
     THROW_EXCEPTION(" computeqBlock for Event Event-driven is wrong ");
 
   if (relationType == siconos::modeling::RelationType::Lagrangian) {
-    C = mainInteraction->relation()->C();
-    if (C) {
-      assert(Xfree);
-
-      coord[3] = C->cols();
-      coord[5] = C->cols();
-
-      siconos::algebra::subprod(*C, *Xfree, osnsp_rhs, coord, true);
-    }
+    auto lagr =
+        std::dynamic_pointer_cast<siconos::modeling::LagrangianR>(mainInteraction->relation());
+    auto C = lagr->jacobianhOver_q();
+    assert(Xfree);
+    siconos::algebra::matrixBlockVector_prod(C, *Xfree, osnsp_rhs, true);
 
     auto ID = std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeY);
-    ID->eye();
+    ID->setIdentity();
 
-    std::vector<std::size_t> xcoord = {0, sizeY, 0, sizeY, 0, sizeY, 0, sizeY};
     // For the relation of type LagrangianRheonomousR
     if (relationSubType == siconos::modeling::RelationSubType::RheonomousR) {
       if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp) {
@@ -869,15 +865,11 @@ void siconos::integrators::Hem5OSI::computeFreeOutput(
             "siconos::integrators::Hem5OSI::computeFreeOutput not yet implemented for LCP at "
             "acceleration level with LagrangianRheonomousR");
       } else if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp) {
-        std::static_pointer_cast<siconos::modeling::LagrangianRheonomousR>(inter->relation())
-            ->computehDot(simulation()->getTkp1(), *DSlink[siconos::modeling::LagrangianR::q0],
-                          *DSlink[siconos::modeling::LagrangianR::z]);
-        siconos::algebra::subprod(
-            *ID,
-            *(std::static_pointer_cast<siconos::modeling::LagrangianRheonomousR>(
-                  inter->relation())
-                  ->hDot()),
-            osnsp_rhs, xcoord, false);  // y += hDot
+        auto rheoR = std::static_pointer_cast<siconos::modeling::LagrangianRheonomousR>(
+            inter->relation());
+        rheoR->computehdot(*DSlink[siconos::modeling::LagrangianR::q0],
+                           simulation()->getTkp1());
+        auto hDot = osnsp_rhs += *ID * rheoR->hdot();
       } else
         THROW_EXCEPTION(
             "siconos::integrators::Hem5OSI::computeFreeOutput not implemented for "
@@ -886,14 +878,10 @@ void siconos::integrators::Hem5OSI::computeFreeOutput(
     // For the relation of type LagrangianScleronomousR
     if (relationSubType == siconos::modeling::RelationSubType::ScleronomousR) {
       if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp) {
-        std::static_pointer_cast<siconos::modeling::LagrangianScleronomousR>(inter->relation())
-            ->computedotjacqhXqdot(simulation()->getTkp1(), *inter);
-        siconos::algebra::subprod(
-            *ID,
-            *(std::static_pointer_cast<siconos::modeling::LagrangianScleronomousR>(
-                  inter->relation())
-                  ->dotjacqhXqdot()),
-            osnsp_rhs, xcoord, false);  // y += NonLinearPart
+        auto scleR = std::static_pointer_cast<siconos::modeling::LagrangianScleronomousR>(
+            inter->relation());
+        scleR->computeJacobianhOver_q_dot_X_qdot(simulation()->getTkp1(), *inter);
+        osnsp_rhs += *ID * scleR->jacobianhOver_q_dot_X_qdot();
       }
     }
   } else

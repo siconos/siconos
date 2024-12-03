@@ -114,7 +114,6 @@ void siconos::integrators::OneStepIntegrator::OneStepIntegrator::updateAndSwapAl
     inter.swapInMemory();
   }
 
-  
   // Compute a first value for the output
   // VA 10/04/2024 What is the interest of the following line ?
   inter.computeOutput(time, 0);
@@ -161,6 +160,21 @@ void siconos::integrators::OneStepIntegrator::resetNonSmoothPart(unsigned int le
     if (!checkOSI(dsi)) continue;
     _dynamicalSystemsGraph->bundle(*dsi)->resetNonSmoothPart(level);
   }
+}
+
+std::shared_ptr<siconos::algebra::SiconosMatrix>
+siconos::integrators::OneStepIntegrator::iterationMatrix(
+    std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
+  assert(ds && "siconos::integrators::OneStepIntegrator::iterationMatrix(ds): ds == nullptr.");
+  return _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds))
+      .iterationMatrix;
+}
+
+std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>
+siconos::integrators::OneStepIntegrator::LUiterationMatrix(
+    std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
+  assert(ds && "siconos::integrators::OneStepIntegrator::iterationMatrix(ds): ds == nullptr.");
+  return _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).LUW;
 }
 
 void siconos::integrators::OneStepIntegrator::updateOutput(double time, unsigned int level) {

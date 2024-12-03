@@ -33,7 +33,7 @@ siconos::mechanisms::MBTB_ContactRelation::MBTB_ContactRelation(
 }
 
 void siconos::mechanisms::MBTB_ContactRelation::computeh(
-    double time, const siconos::algebra::BlockVector& q0, siconos::algebra::SiconosVector& y) {
+    const siconos::algebra::BlockVector& q, Eigen::Ref<siconos::algebra::SiconosVector> y) {
   DEBUG_PRINT(
       "siconos::mechanisms::MBTB_ContactRelation::computeh(double time, "
       "BlockVector& q0, "
@@ -120,7 +120,7 @@ void siconos::mechanisms::MBTB_ContactRelation::computeh(
   else
     _pContact->_dist += _pContact->offset();
 
-  _pContact->_curTimeh = time;
+  // _pContact->_curTimeh = time; Do we need this?
 
   // y->setValue(0,_pContact->_dist);
   if (mbtb::data::sPrintDist) {
@@ -148,15 +148,15 @@ void siconos::mechanisms::MBTB_ContactRelation::computeh(
 
 /*This function has to compute a Normal, at the extremal point. It is also the
  * direction (P1,P2) between the two extremal points*/
-// void siconos::mechanisms::MBTB_ContactRelation::computeJachq(double time ){
+// void siconos::mechanisms::MBTB_ContactRelation::computeJacobianhOver_q(double time ){
 
-//   _jachq->setValue(0,0,-_pContact->_nX);
-//   _jachq->setValue(0,1,-_pContact->_nY);
-//   _jachq->setValue(0,2,-_pContact->_nZ);
+//   jacobianhOver_q_->setValue(0,0,-_pContact->_nX);
+//   jacobianhOver_q_->setValue(0,1,-_pContact->_nY);
+//   jacobianhOver_q_->setValue(0,2,-_pContact->_nZ);
 //   if (_pContact->_indexBody2!=-1){
-//     _jachq->setValue(0,7,_pContact->_nX);
-//     _jachq->setValue(0,8,_pContact->_nY);
-//     _jachq->setValue(0,9,_pContact->_nZ);
+//     jacobianhOver_q_->setValue(0,7,_pContact->_nX);
+//     jacobianhOver_q_->setValue(0,8,_pContact->_nY);
+//     jacobianhOver_q_->setValue(0,9,_pContact->_nZ);
 //   }
 //   auto BlockX
 //   =boost::static_pointer_cast<BlockVector>((data[q0])); for (int
@@ -187,7 +187,7 @@ void siconos::mechanisms::MBTB_ContactRelation::computeh(
 //     ::boost::math::quaternion<float>    quatBuff;
 //     quatBuff =
 //     quat0*(quatcQ*quatGP*quatQ)*quatcQ+quatQ*(quatcQ*quatGP*quatQ)*quat0;
-//     _jachq->setValue(0,7*iDS+3, sign*(quatBuff.R_component_2()*_pContact->_nX
+//     jacobianhOver_q_->setValue(0,7*iDS+3, sign*(quatBuff.R_component_2()*_pContact->_nX
 //     + quatBuff.R_component_3()*_pContact->_nY +
 //     quatBuff.R_component_4()*_pContact->_nZ)); for (int i=1;i<4;i++){
 //       ::boost::math::quaternion<float>
@@ -198,13 +198,13 @@ void siconos::mechanisms::MBTB_ContactRelation::computeh(
 //       //	       (quatBuff.R_component_2()*sOCCContacts[_indexContact]._nX
 //       + quatBuff.R_component_3()*sOCCContacts[_indexContact]._nY +
 //       quatBuff.R_component_4()*sOCCContacts[_indexContact]._nZ));
-// 	_jachq->setValue(0,7*iDS+3+i,
+// 	jacobianhOver_q_->setValue(0,7*iDS+3+i,
 // sign*(quatBuff.R_component_2()*_pContact->_nX +
 // quatBuff.R_component_3()*_pContact->_nY +
 // quatBuff.R_component_4()*_pContact->_nZ));
 //     }
 //   }
-//   //    printf("computeJachq :");_jachq->display();
+//   //    printf("computeJachq :");jacobianhOver_q_->display();
 //   //    printf("q1dot :
 //   ");sOCCContacts[_indexContact]._DS1->dotq()->display();
 //   //    printf("q2dot :

@@ -27,8 +27,8 @@
 #include "NonSmoothLaw.hpp"
 #include "NumericsToolsNamespace.h"  // For NumericsMatrix
 #include "SecondOrderDS.hpp"
-#include "SiconosVector.hpp"
 #include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -196,7 +196,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillM(
       else {
         if (_M1->size(0) != _dimRow || _M1->size(1) != _dimColumn)
           _M1->resize(_dimRow, _dimColumn);
-        _M1->zero();
+        _M1->setZero();
       }
     }
 
@@ -335,7 +335,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillW(
         siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
         for (std::tie(dsi, dsend) = DSG.vertices(); dsi != dsend; ++dsi) {
           auto ds = DSG.bundle(*dsi);
-          auto W = DSG.properties(*dsi).W.get();
+          auto W = DSG.properties(*dsi).iterationMatrix.get();
           pos = DSG.properties(*dsi).absolute_position;
           siconos::algebra::fillTriplet(*W, Mtriplet, pos, pos);
           DEBUG_PRINTF("pos = %u \n", pos);
@@ -389,25 +389,28 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillWinverse(
         // Loop over the DS for filling M
         siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
         for (std::tie(dsi, dsend) = DSG.vertices(); dsi != dsend; ++dsi) {
-          std::shared_ptr<siconos::algebra::SiconosMatrix> Winverse;
+          std::shared_ptr<siconos::algebra::SiconosMatrix> iterationMatrixInverse;
 
           auto osi = DSG.properties(*dsi).osi;
           std::shared_ptr<siconos::modeling::DynamicalSystem> ds = DSG.bundle(*dsi);
           auto sods = std::static_pointer_cast<siconos::modeling::SecondOrderDS>(ds);
 
-          if (auto mosi = dynamic_pointer_cast<siconos::integrators::MoreauJeanGOSI>(osi)) {
-            Winverse = mosi->Winverse(sods, true);
-          } else if (auto mosi =
-                         dynamic_pointer_cast<siconos::integrators::MoreauJeanOSI>(osi)) {
-            Winverse = mosi->Winverse(sods);
+          // if (auto mosi = dynamic_pointer_cast<siconos::integrators::MoreauJeanGOSI>(osi)) {
+          //   iterationMatrixInverse = mosi->iterationMatrixInverse(sods, true);
+          //} else
+          if (auto mosi = dynamic_pointer_cast<siconos::integrators::MoreauJeanOSI>(osi)) {
+            auto iterationMatrixInverse =
+                mosi->iterationMatrixInverse(sods, *mosi->LUiterationMatrix(ds));
+
+            pos = DSG.properties(*dsi).absolute_position;
+            siconos::algebra::fillTriplet(*iterationMatrixInverse, Mtriplet, pos, pos);
+            DEBUG_PRINTF("pos = %u \n", pos);
+
           } else
             THROW_EXCEPTION(
                 "siconos:simulation::OSNSMatrix::fillWinverse not yet implemented for this "
                 "type of OSI  ");
 
-          pos = DSG.properties(*dsi).absolute_position;
-          siconos::algebra::fillTriplet(*Winverse, Mtriplet, pos, pos);
-          DEBUG_PRINTF("pos = %u \n", pos);
           // W->display();
         }
 
@@ -484,16 +487,11 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillHtrans(
         auto Htriplet = NM_triplet(&H_NM);
 
         unsigned int pos = 0, abs_pos_ds = 0;
-        std::shared_ptr<siconos::algebra::MapType> leftInteractionBlock;
 
         siconos::graphs::InteractionsGraph::VIterator ui, uiend;
         for (std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui) {
           auto& inter = *indexSet.bundle(*ui);
           size_t sizeY = inter.dimension();
-          leftInteractionBlock = inter.getLeftInteractionBlock();
-
-          double* array = &*leftInteractionBlock->data();
-          // double * array_with_bc= nullptr;
 
           auto ds1 = indexSet.properties(*ui).source;
           auto ds2 = indexSet.properties(*ui).target;
@@ -528,7 +526,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillHtrans(
                 //     // (nslawSize,sizeDS));
                 //   //std::shared_ptr<siconos::algebra::SiconosVector> coltmp =
                 //   std::make_shared<siconos::algebra::SiconosVector>(nslawSize));
-                //   //coltmp->zero();
+                //   //coltmp->setZero();
                 //   std::cout <<  "bc indx "<< itindex << std::endl;
                 // }
 
@@ -540,8 +538,10 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillHtrans(
             }
 
             abs_pos_ds = DSG.properties(DSG.descriptor(ds)).absolute_position;
+            auto leftInteractionBlock = inter.getLeftInteractionBlock();
+            const double* raw_array = leftInteractionBlock.data();
             CSparseMatrix_block_dense_zentry(Htriplet, pos, abs_pos_ds,
-                                             array + posBlock * sizeY, sizeY, sizeDS,
+                                             raw_array + posBlock * sizeY, sizeY, sizeDS,
                                              DBL_EPSILON);
           }
         }

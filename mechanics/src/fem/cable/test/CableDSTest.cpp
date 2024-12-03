@@ -160,10 +160,10 @@ void CableDSTest::testComputeBouncingBall() {
 
   cout << "====> Model loading ..." << endl;
 
-  siconos::algebra::SiconosMatrix Mass{nDof, nDof};
-  Mass(0, 0) = m;
-  Mass(1, 1) = m;
-  Mass(2, 2) = 2. / 5 * m * R * R;
+  siconos::algebra::SiconosMatrix mass{nDof, nDof};
+  mass(0, 0) = m;
+  mass(1, 1) = m;
+  mass(2, 2) = 2. / 5 * m * R * R;
 
   // -- Initial positions and velocities --
   siconos::algebra::SiconosVector q0{nDof};
@@ -172,7 +172,7 @@ void CableDSTest::testComputeBouncingBall() {
   v0(0) = velocity_init;
 
   // -- The dynamical system --
-  auto ball = std::make_shared<siconos::modeling::LagrangianLinearTIDS>(q0, v0, Mass);
+  auto ball = std::make_shared<siconos::modeling::LagrangianLinearTIDS>(q0, v0, mass);
 
   // -- Set external forces (weight) --
   siconos::algebra::SiconosVector weight{nDof};
@@ -192,7 +192,7 @@ void CableDSTest::testComputeBouncingBall() {
   (*H)(0, 0) = 1.0;
 
   auto nslaw = std::make_shared<siconos::modeling::NewtonImpactNSL>(e);
-  auto relation = std::make_shared<siconos::modeling::LagrangianLinearTIR>(H);
+  auto relation = std::make_shared<siconos::modeling::LagrangianLinearTIR>(*H);
 
   auto inter = std::make_shared<siconos::modeling::Interaction>(nslaw, relation);
 
@@ -269,7 +269,7 @@ void CableDSTest::testComputeBouncingBall() {
 void CableDSTest::testNoFext() {
   // auto cable = std::make_shared<siconos::mechanics::fem::CableDS>(q0, v0, mass, 14000, 1);
 
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE(" testNoFext: ", cable->fExt() == nullptr, true);
+  // CPPUNIT_ASSERT_EQUAL_MESSAGE(" testNoFext: ", cable->fext() == nullptr, true);
   //  ...
 }
 
@@ -282,8 +282,8 @@ void CableDSTest::testConstantFext() {
 
   // auto cable = std::make_shared<siconos::mechanics::fem::CableDS>(q0, v0, mass, 14000, 1);
   // cable->setFExtPtr(externalForces);
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE(" testCFext 1: ", cable->fExt() != nullptr, true);
-  // auto fext = cable->fExt();
+  // CPPUNIT_ASSERT_EQUAL_MESSAGE(" testCFext 1: ", cable->fext() != nullptr, true);
+  // auto fext = cable->fext();
   // CPPUNIT_ASSERT_EQUAL_MESSAGE(" testCFext 2: ", fext != nullptr, true);
   // for (auto val : *fext) {
   //   CPPUNIT_ASSERT_EQUAL_MESSAGE(" testCFext 3: ", val == 12, true);
@@ -302,7 +302,7 @@ void CableDSTest::testVariableFext()
   // };
 
   // auto cable = std::make_shared<siconos::mechanics::fem::CableDS>(q0, v0, mass, 14000, 1,
-  // myforces); auto fext = cable->fExt(); CPPUNIT_ASSERT_EQUAL_MESSAGE(" testVFext 1: ", fext
+  // myforces); auto fext = cable->fext(); CPPUNIT_ASSERT_EQUAL_MESSAGE(" testVFext 1: ", fext
   // != nullptr, true);
 
   // cable->computeFext(3.);
@@ -313,7 +313,7 @@ void CableDSTest::testVariableFext()
   // auto velocities = cable->velocity();
   // CPPUNIT_ASSERT_EQUAL_MESSAGE(" testVFext 4: ", positions->size() == cable->dimension(),
   //                              true);
-  // cable->computeForces(5., positions, velocities);
+  // cable->computeTotalForces(velocities, positions, 5.);
   // for (auto val : *fext)
   //   CPPUNIT_ASSERT_EQUAL_MESSAGE(" testVFext 5: ", val == cos(5.), true);
 

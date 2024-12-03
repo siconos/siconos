@@ -29,20 +29,18 @@ class Contact5DR : public siconos::modeling::NewtonEuler5DR {
   ACCEPT_SERIALIZATION(Contact5DR);
 
  public:
-
   /* For users that may require extra information about contacts. */
   std::shared_ptr<siconos::collision::BodyShapeRecord> bodyShapeRecordA{nullptr};
   std::shared_ptr<siconos::collision::BodyShapeRecord> bodyShapeRecordB{nullptr};
 
   /**
-     to compute the output y = h(t,q) of the Relation
+       to compute the output y = h(q) of the Relation
 
-     \param time current time value
-     \param q coordinates of the dynamical systems involved in the relation
-     \param y the resulting vector
-  */
-  void computeh(double time, const siconos::algebra::BlockVector& q0,
-                siconos::algebra::SiconosVector& y) override;
+       \param[in] q generalized coordinates vector of the dynamical systems (at most 2)
+     involved in the relation \param[in,out] y the resulting vector
+   */
+  void computeh(const siconos::algebra::BlockVector& q,
+                Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
   /** Update this contact point information.
    *

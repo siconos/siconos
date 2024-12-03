@@ -27,10 +27,10 @@
 #include "NumericsSolversNamespace.h"  // solver_options stuff
 #include "OSNSMatrixProjectOnConstraints.hpp"
 #include "Relation.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixOp.hpp"  // mat prod
 #include "SiconosVector.hpp"
 #include "SiconosVectorOp.hpp"  // for setBlock
-#include "SiconosMatrix.hpp"
 #include "Simulation.hpp"
 #include "Tools.hpp"  // enum_to_string
 // #define DEBUG_NOCOLOR
@@ -269,7 +269,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::updateInteractio
 
         if (!initialized[currentInteractionBlock]) {
           initialized[currentInteractionBlock] = true;
-          currentInteractionBlock->zero();
+          currentInteractionBlock->setZero();
         }
 
         if (!isLinear || !_hasBeenUpdated) {
@@ -449,7 +449,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::
   // simulation type ...  left, right and extra depend on the relation
   // type and the non smooth law.
 
-  currentInteractionBlock->zero();
+  currentInteractionBlock->setZero();
 
   // loop over the common DS
   bool endl = false;
@@ -473,8 +473,8 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::
       {
         for (const auto itindex : lds->boundaryConditions()->velocityIndices()) {
           auto coltmp = std::make_shared<siconos::algebra::SiconosVector>(sizeY);
-          coltmp->zero();
-          leftInteractionBlock->setCol(itindex, *coltmp);
+          coltmp->setZero();
+          leftInteractionBlock->col(itindex) = *coltmp;
         }
       }
       // (inter1 == inter2)
@@ -488,8 +488,8 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::
 
       if (_useMassNormalization) {
         auto centralInteractionBlock = getOSIMatrix(osi1, ds);
-        siconos::algebra::solveInPlace(*centralInteractionBlock, *work);
-        siconos::algebra::prod(*leftInteractionBlock, *work, *currentInteractionBlock, false);
+        *work = centralInteractionBlock->solve(*work);
+        *currentInteractionBlock += *leftInteractionBlock * *work;
         //      gemm(CblasNoTrans,CblasNoTrans,1.0,*leftInteractionBlock,*work,1.0,*currentInteractionBlock);
       } else {
         siconos::algebra::prod(*leftInteractionBlock, *work, *currentInteractionBlock, false);
@@ -508,7 +508,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::
 #ifdef MLCPPROJ_WITH_CT
       auto sizeDS = neds->dimension();
       auto T = neds->T();
-      auto workT = std::make_shared<siconos::algebra::SiconosMatrix>(*T);
+      auto workT = std::make_shared<siconos::algebra::SiconosMatrix>(T);
       workT->trans();
       auto workT2 = std::make_shared<siconos::algebra::SiconosMatrix>(6, 6);
       siconos::algebra::prod(*workT, *T, *workT2, true);
@@ -709,7 +709,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::computeInteracti
   if (relationType1 == siconos::modeling::RelationType::NewtonEuler &&
       relationType2 == siconos::modeling::RelationType::NewtonEuler) {
     assert(inter1 != inter2);
-    currentInteractionBlock->zero();
+    currentInteractionBlock->setZero();
 #ifdef MLCPPROJ_WITH_CT
     auto sizeDS = (std::static_pointer_cast<NewtonEulerDS>(ds))->dimension();
     auto leftInteractionBlock =
@@ -717,7 +717,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::computeInteracti
     inter1->getLeftInteractionBlockForDS(pos1, leftInteractionBlock);
     auto neds = (std::static_pointer_cast<NewtonEulerDS>(ds));
     auto T = neds->T();
-    auto workT = std::make_shared<siconos::algebra::SiconosMatrix>(*T);
+    auto workT = std::make_shared<siconos::algebra::SiconosMatrix>(T);
     workT->trans();
     auto workT2 = std::make_shared<siconos::algebra::SiconosMatrix>(6, 6);
     siconos::algebra::prod(*workT, *T, *workT2, true);
@@ -752,8 +752,8 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::computeInteracti
       {
         for (const auto itindex : d->boundaryConditions()->velocityIndices()) {
           auto coltmp = std::make_shared<siconos::algebra::SiconosVector>(sizeY1);
-          coltmp->zero();
-          leftInteractionBlock->setCol(itindex, *coltmp);
+          coltmp->setZero();
+          leftInteractionBlock->col(itindex) = *coltmp;
         }
       }
     }
@@ -788,13 +788,11 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::computeInteracti
     rightInteractionBlock->transposeInPlace();
 
     if (_useMassNormalization) {
-      siconos::algebra::solveInPlace(*centralInteractionBlock, *rightInteractionBlock);
+      *rightInteractionBlock = centralInteractionBlock->solve(*rightInteractionBlock);
       //*currentInteractionBlock +=  *leftInteractionBlock ** work;
-      siconos::algebra::prod(*leftInteractionBlock, *rightInteractionBlock,
-                             *currentInteractionBlock, false);
+      *currentInteractionBlock += *leftInteractionBlock * *rightInteractionBlock;
     } else {
-      siconos::algebra::prod(*leftInteractionBlock, *rightInteractionBlock,
-                             *currentInteractionBlock, false);
+      *currentInteractionBlock += *leftInteractionBlock * *rightInteractionBlock;
     }
 #ifdef MLCPPROJ_DEBUG
     std::cout << "siconos::nonsmooth_formulations::MLCPProjectOnConstraints::"
@@ -840,7 +838,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::computeqBlock(
 
 void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::computeq(double time) {
   if (_q->size() != _sizeOutput) _q->resize(_sizeOutput);
-  _q->zero();
+  _q->setZero();
 
   // === Get index set from Simulation ===
   auto indexSet = simulation()->indexSet(indexSetLevel());
@@ -914,7 +912,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::postComputeLagra
   printf(
       "siconos::nonsmooth_formulations::MLCPProjectOnConstraints::postComputeLagrangian "
       "lr->jachq \n");
-  lr->jachq()->display();
+  lr->jacobianhOver_q()->display();
   printf(
       "siconos::nonsmooth_formulations::MLCPProjectOnConstraints::postComputeLagrangianR q "
       "before "
@@ -939,8 +937,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::postComputeLagra
           inter);
   // Copy _w/_z values, starting from index pos into y/lambda.
 
-  // setBlock(*_w, y, sizeY, pos, 0);
-  siconos::algebra::setBlock(*_z, lambda, sizeY, pos, 0);
+  *lambda = _z->segment(pos, sizeY);
 
 #ifdef MLCPPROJ_DEBUG
   printf("MLCPP lambda of Interaction is pos =%i :\n", pos);
@@ -948,8 +945,8 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::postComputeLagra
   lambda->display();
   auto nslawsize = inter->nonSmoothLaw()->size();
   auto aBuff = std::make_shared<siconos::algebra::SiconosVector>(nslawsize);
-  siconos::algebra::setBlock(*_z, aBuff, sizeY, pos, 0);
-  auto J = lr->jachq();
+  *aBuff = _z->segment(pos, sizeY);
+  auto J = lr->jacobianhOver_q();
   auto aux = std::make_shared<siconos::algebra::SiconosMatrix>(*J);
   aux->trans();
   // std::shared_ptr<siconos::algebra::SiconosVector> tmp =
@@ -967,7 +964,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::postComputeLagra
   // // \warning aBuff should normally be in lambda[0]
   // // The update of the position in DS should be made
   // //  in MoreauJeanOSI::upateState or ProjectedMoreauJeanOSI::updateState
-  // auto J=lr->jachq();
+  // auto J=lr->jacobianhOver_q();
   // auto aux = std::make_shared<siconos::algebra::SiconosMatrix>(*J));
   // aux->trans();
 
@@ -1035,8 +1032,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::postComputeNewto
           inter);
   // Copy _w/_z values, starting from index pos into y/lambda.
 
-  // siconos::algebra::setBlock(*_w, y, sizeY, pos, 0);
-  siconos::algebra::setBlock(*_z, lambda, sizeY, pos, 0);
+  *lambda = _z->segment(pos, sizeY);
 }
 
 void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::computeOptions(
