@@ -46,7 +46,7 @@ py::array_t<double> get_dparam(SolverOptions &options) {
 }
 
 
-PYBIND11_MODULE(numeriks, m) {
+PYBIND11_MODULE(numerics, m) {
 
     py::class_<SolverOptions, std::shared_ptr<SolverOptions>>(m, "SolverOptions")
         // Membres simples

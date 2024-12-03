@@ -18,15 +18,15 @@
 #
 
 
-pybind11_add_module(numeriks 
-  ${CMAKE_CURRENT_SOURCE_DIR}/numerics/numerics.cpp
+create_pybind11_module(
+  MODULE_NAME pynumerics 
+  SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/numerics/numerics.cpp
+  DEPENDENCIES kernel numerics
 )
-
-target_link_libraries(numeriks PUBLIC kernel numerics)
 
 
 install(TARGETS
-numeriks
+pynumerics
   COMPONENT python
   LIBRARY DESTINATION "${SICONOS_PYTHON_INSTALL_DIR}/siconos/"
   )
