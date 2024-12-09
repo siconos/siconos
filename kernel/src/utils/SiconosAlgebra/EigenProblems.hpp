@@ -25,7 +25,7 @@
 
 #include "SiconosMatrix.hpp"
 
-namespace Siconos {
+namespace siconos {
   namespace eigenproblems {
 
 /** Compute eigenvalues and eigenvectors of a real symmetric matrix A
@@ -53,7 +53,7 @@ namespace Siconos {
              bool withLeft = false, bool withRight = true);
 
   } // namespace eigenproblems
-} // namespace Siconos
+} // namespace siconos
 
 
 #endif

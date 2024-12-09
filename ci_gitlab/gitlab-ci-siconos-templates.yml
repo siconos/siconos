@@ -198,6 +198,8 @@ workflow:
   extends: .siconos-ctest
   variables:
     OPENBLAS_NUM_THREADS: 1
+  script: # less verbosity for tests ...
+    - sh ci_gitlab/ctest_siconos.sh > $BUILD_DIR/siconos-ctest-test.log
   artifacts:
       paths:
         - build/

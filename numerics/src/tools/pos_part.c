@@ -14,21 +14,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #include "NSSTools.h"  // for pos_part
-void pos_part(unsigned n, double* restrict x, double* restrict x_plus)
-{
-
-  for(unsigned i = 0 ; i < n ; ++i)
-  {
-    if(x[i] > 0.0)
-    {
+void pos_part(unsigned n, double* restrict x, double* restrict x_plus) {
+  for (unsigned i = 0; i < n; ++i) {
+    if (x[i] > 0.0) {
       x_plus[i] = x[i];
-    }
-    else
-    {
-      x_plus[i] =  0.0;
+    } else {
+      x_plus[i] = 0.0;
     }
   }
 }

@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*!\file NumericsVerbose.h
  * \brief verbosity related functions (public) */
@@ -25,19 +25,22 @@
 #include "SiconosConfig.h"
 
 /** logging types */
-enum numerics_loggers { NUMERICS_LOG_TO_SCREEN, NUMERICS_LOG_TO_FILE, NUMERICS_EXTERNAL_LOGGER };
+enum numerics_loggers {
+  NUMERICS_LOG_TO_SCREEN,
+  NUMERICS_LOG_TO_FILE,
+  NUMERICS_EXTERNAL_LOGGER
+};
 
-#if defined(__cplusplus) && !defined (BUILD_AS_CPP)
-extern "C"
-{
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
+extern "C" {
 #endif
 
-  /* Set verbose mode in numerics
-     \param newVerboseMode 0 no verbose, 1 verbose.
-  */
-  void numerics_set_verbose(int newVerboseMode);
+/* Set verbose mode in numerics
+   \param newVerboseMode 0 no verbose, 1 verbose.
+*/
+void numerics_set_verbose(int newVerboseMode);
 
-#if defined(__cplusplus) && !defined (BUILD_AS_CPP)
+#if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 

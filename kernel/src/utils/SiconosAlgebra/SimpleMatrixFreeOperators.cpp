@@ -23,7 +23,7 @@
 #include "SiconosAlgebra.hpp"
 #include "SimpleMatrixFriends.hpp" // for operators
 #include "SiconosException.hpp"
-using namespace Siconos;
+using namespace siconos;
 //#define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
@@ -37,7 +37,7 @@ const SimpleMatrix operator * (const SiconosMatrix & A, double a)
 {
   // To compute B = a * A
 
-  Siconos::UBLAS_TYPE numA = A.num();
+  siconos::UBLAS_TYPE numA = A.num();
 
   if(numA == ZERO)  // if A = 0
   {
@@ -49,7 +49,7 @@ const SimpleMatrix operator * (const SiconosMatrix & A, double a)
   {
     return (DenseMat)(a**A.identity());
   }
-  else if(numA == Siconos::BLOCK)  // A block
+  else if(numA == siconos::BLOCK)  // A block
   {
     SimpleMatrix tmp(A); // ... copy ...
     tmp *= a;
@@ -75,7 +75,7 @@ SimpleMatrix operator * (double a, const SiconosMatrix & A)
 {
   // To compute B = a * A
 
-  Siconos::UBLAS_TYPE numA = A.num();
+  siconos::UBLAS_TYPE numA = A.num();
 
   if(numA == ZERO)  // if A = 0
   {
@@ -118,7 +118,7 @@ const SimpleMatrix operator / (const SiconosMatrix & A, double a)
   if(a == 0.0)
      THROW_EXCEPTION("division by zero.");
 
-  Siconos::UBLAS_TYPE numA = A.num();
+  siconos::UBLAS_TYPE numA = A.num();
 
   if(numA == ZERO)  // if A = 0
   {
@@ -181,8 +181,8 @@ const SimpleMatrix operator + (const  SiconosMatrix& A, const  SiconosMatrix& B)
   if((A.size(0) != B.size(0)) || (A.size(1) != B.size(1)))
      THROW_EXCEPTION("inconsistent sizes");
 
-  Siconos::UBLAS_TYPE numA = A.num();
-  Siconos::UBLAS_TYPE numB = B.num();
+  siconos::UBLAS_TYPE numA = A.num();
+  siconos::UBLAS_TYPE numB = B.num();
 
   // == A or B equal to null ==
   if(numA == ZERO)  // A = 0
@@ -358,8 +358,8 @@ const SimpleMatrix operator - (const  SiconosMatrix& A, const  SiconosMatrix& B)
   if((A.size(0) != B.size(0)) || (A.size(1) != B.size(1)))
      THROW_EXCEPTION("inconsistent sizes");
 
-  Siconos::UBLAS_TYPE numA = A.num();
-  Siconos::UBLAS_TYPE numB = B.num();
+  siconos::UBLAS_TYPE numA = A.num();
+  siconos::UBLAS_TYPE numB = B.num();
 
 
   // == B equal to null ==

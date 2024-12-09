@@ -37,7 +37,7 @@
 #include <mlcp_cst.h>
 
 using namespace RELATION;
-using namespace Siconos;
+using namespace siconos;
 //#define MLCPPROJ_DEBUG
 //#define MLCPPROJ_WITH_CT
 void MLCPProjectOnConstraints::initOSNSMatrix()

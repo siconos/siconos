@@ -35,10 +35,10 @@ void setBlock(SPC::SiconosMatrix  input_matrix, SP::SiconosMatrix output_matrix,
   if(input_matrix == output_matrix)  // useless op => nothing to be done.
     return;
 
-  Siconos::UBLAS_TYPE numIn = input_matrix->num();
-  Siconos::UBLAS_TYPE numOut = output_matrix->num();
+  siconos::UBLAS_TYPE numIn = input_matrix->num();
+  siconos::UBLAS_TYPE numOut = output_matrix->num();
 
-  if(numOut == Siconos::ZERO || numOut == Siconos::IDENTITY)  // if output_matrix = 0 or Identity => read-only
+  if(numOut == siconos::ZERO || numOut == siconos::IDENTITY)  // if output_matrix = 0 or Identity => read-only
     THROW_EXCEPTION("output_matrix is read-only (zero or identity matrix?).");
 
   // Check dimension
@@ -66,10 +66,10 @@ void setBlock(SPC::SiconosMatrix  input_matrix, SP::SiconosMatrix output_matrix,
   // Elements from row/col start[i] to row/col (end[i]-1) will be copied.
 
   // If both matrices input_matrix and output_matrix are block, exception.
-  if(numIn == Siconos::BLOCK && numOut == Siconos::BLOCK)
+  if(numIn == siconos::BLOCK && numOut == siconos::BLOCK)
     THROW_EXCEPTION("not yet implemented for input_matrix and output_matrix both BlockMatrix. Try to use setBlock on the sub-matrices?");
 
-  if(numOut == Siconos::BLOCK)  // if output_matrix is a BlockMatrix.
+  if(numOut == siconos::BLOCK)  // if output_matrix is a BlockMatrix.
   {
 
     // Steps:
@@ -206,7 +206,7 @@ void setBlock(SPC::SiconosMatrix  input_matrix, SP::SiconosMatrix output_matrix,
     }
 
   }
-  else if(numIn == Siconos::BLOCK)  // If input_matrix is a BlockMatrix.
+  else if(numIn == siconos::BLOCK)  // If input_matrix is a BlockMatrix.
   {
 
     // Same process as for numOut == 0
@@ -329,78 +329,78 @@ void setBlock(SPC::SiconosMatrix  input_matrix, SP::SiconosMatrix output_matrix,
   }
   else // neither input_matrix nor output_matrix is a BlockMatrix.
   {
-    if(numOut == Siconos::DENSE)
+    if(numOut == siconos::DENSE)
     {
       ublas::matrix_range<DenseMat> out_range(*output_matrix->dense(),
                                               ublas::range(start[2],end[2]),
                                               ublas::range(start[3], end[3]));
-      if(numIn == Siconos::DENSE)
+      if(numIn == siconos::DENSE)
       {
         ublas::matrix_range<DenseMat> in_range(*input_matrix->dense(),
                                                ublas::range(start[0],end[0]),
                                                ublas::range(start[1], end[1]));
         noalias(out_range) = in_range;
       }
-      else if(numIn == Siconos::SYMMETRIC)
+      else if(numIn == siconos::SYMMETRIC)
       {
         ublas::matrix_range<SymMat> in_range(*input_matrix->sym(),
                                              ublas::range(start[0],end[0]),
                                              ublas::range(start[1], end[1]));
         noalias(out_range) = in_range;
       }
-      else if(numIn == Siconos::SPARSE)
+      else if(numIn == siconos::SPARSE)
       {
         ublas::matrix_range<SparseMat> in_range(*input_matrix->sparse(),
                                                 ublas::range(start[0],end[0]),
                                                 ublas::range(start[1], end[1]));
         noalias(out_range) = in_range;
       }
-      else if(numIn == Siconos::IDENTITY)
+      else if(numIn == siconos::IDENTITY)
       {
         ublas::matrix_range<IdentityMat> in_range(*input_matrix->identity(),
                                                   ublas::range(start[0],end[0]),
                                                   ublas::range(start[1], end[1]));
         noalias(out_range) = in_range;
       }
-      else if(numIn == Siconos::ZERO)
+      else if(numIn == siconos::ZERO)
         out_range *= 0.;
       else
         THROW_EXCEPTION("unconsistent types between input_matrix and output_matrix.");
     }
-    else if(numOut == Siconos::SPARSE)
+    else if(numOut == siconos::SPARSE)
     {
       ublas::matrix_range<SparseMat> out_range(*output_matrix->sparse(),
                                                ublas::range(start[2],end[2]),
                                                ublas::range(start[3], end[3]));
-      if(numIn == Siconos::DENSE)
+      if(numIn == siconos::DENSE)
       {
         ublas::matrix_range<DenseMat> in_range(*input_matrix->dense(),
                                                ublas::range(start[0],end[0]),
                                                ublas::range(start[1], end[1]));
         noalias(out_range) = in_range;
       }
-      else if(numIn == Siconos::SYMMETRIC)
+      else if(numIn == siconos::SYMMETRIC)
       {
         ublas::matrix_range<SymMat> in_range(*input_matrix->sym(),
                                              ublas::range(start[0],end[0]),
                                              ublas::range(start[1], end[1]));
         noalias(out_range) = in_range;
       }
-      else if(numIn == Siconos::SPARSE)
+      else if(numIn == siconos::SPARSE)
       {
         ublas::matrix_range<SparseMat> in_range(*input_matrix->sparse(),
                                                 ublas::range(start[0],end[0]),
                                                 ublas::range(start[1], end[1]));
         noalias(out_range) = in_range;
       }
-      else if(numIn == Siconos::IDENTITY)
+      else if(numIn == siconos::IDENTITY)
       {
         ublas::matrix_range<IdentityMat> in_range(*input_matrix->identity(),
                                                   ublas::range(start[0],end[0]),
                                                   ublas::range(start[1], end[1]));
         noalias(out_range) = in_range;
       }
-      else if(numIn == Siconos::ZERO)
+      else if(numIn == siconos::ZERO)
         out_range *= 0.;
       else
         THROW_EXCEPTION("unconsistent types between input_matrix and output_matrix.");

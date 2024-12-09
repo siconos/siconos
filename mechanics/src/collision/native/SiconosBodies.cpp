@@ -32,7 +32,7 @@ void SiconosBodies::compute()
 
   catch(...)
   {
-    Siconos::exception::process();
+    siconos::exception::process();
   }
 }
 

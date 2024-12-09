@@ -1,3 +1,21 @@
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2024 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #ifndef MBTB_CONTACTRELATION
 #define MBTB_CONTACTRELATION
 
@@ -7,7 +25,7 @@
 //! It is a relation dedicated for the simple unilateral (ie: without  Coulomb friction).
 /*!
   Aggregation to the class MBTB_Contact, the member _pContact contains the CAD information.
-  It derivates from Siconos::NewtonEuler1DR. This class does the link between CAD and Siconos.
+  It derivates from siconos::NewtonEuler1DR. This class does the link between CAD and Siconos.
  */
 class MBTB_ContactRelation : public NewtonEuler1DR
 {
@@ -25,7 +43,7 @@ public:
    * \param q0 the position
    * \param y the output
    */
-  virtual void computeh(double time, BlockVector& q0, SiconosVector& y);
+  virtual void computeh(double time, const BlockVector& q0, SiconosVector& y);
   //! Doing nothing.
   virtual ~MBTB_ContactRelation();
 

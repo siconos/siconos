@@ -39,7 +39,7 @@ void SiconosPropertiesTest::t1()
   std::shared_ptr<G> g(new G());
 
 
-  Siconos::VertexProperties<int, G> mv = Siconos::vertexProperties<int>(*g);
+  siconos::VertexProperties<int, G> mv = siconos::vertexProperties<int>(*g);
 
   G::VDescriptor v1 = g->add_vertex("A");
   G::VDescriptor v2 = g->add_vertex("B");
@@ -75,7 +75,7 @@ void SiconosPropertiesTest::t2()
   std::shared_ptr<G> g(new G());
 
 
-  Siconos::VertexProperties<int, G> mv = Siconos::vertexProperties<int>(*g);
+  siconos::VertexProperties<int, G> mv = siconos::vertexProperties<int>(*g);
 
   G::VDescriptor v1 = g->add_vertex("A");
   G::VDescriptor v2 = g->add_vertex("B");
@@ -113,7 +113,7 @@ void SiconosPropertiesTest::t3()
   std::shared_ptr<G> g(new G());
 
 
-  Siconos::VertexProperties<int, G> mv = Siconos::vertexProperties<int>(*g);
+  siconos::VertexProperties<int, G> mv = siconos::vertexProperties<int>(*g);
 
   G::VDescriptor v1 = g->add_vertex("A");
   G::VDescriptor v2 = g->add_vertex("B");

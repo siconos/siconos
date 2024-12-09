@@ -16,23 +16,23 @@
  * limitations under the License.
  */
 
-#include <stdlib.h>                      // for malloc
+#include <stdlib.h>  // for malloc
+
 #include "Friction_cst.h"                // for SICONOS_FRICTION_3D_ADMM_RHO
 #include "NumericsFwd.h"                 // for SolverOptions
 #include "SolverOptions.h"               // for solver_options_create, Solve...
 #include "frictionContact_test_utils.h"  // for build_test_collection
 #include "test_utils.h"                  // for TestCase
 
-TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
-{
-
-  *number_of_tests = 4; //n_data * n_solvers;
-  TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
+TestCase* build_test_collection(int n_data, const char** data_collection,
+                                int* number_of_tests) {
+  *number_of_tests = 4;  // n_data * n_solvers;
+  TestCase* collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
   int current = 0;
 
   {
-    int d = 0; // FC3D_Example1_SBM.dat
+    int d = 0;  // FC3D_Example1_SBM.dat
     // DeSaxce FP, rho  = 2.
     collection[current].filename = data_collection[d];
     collection[current].options = solver_options_create(SICONOS_FRICTION_3D_DSFP);
@@ -45,9 +45,8 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
     current++;
   }
 
-
   {
-    int d = 2; // Confeti-ex13-4contact-Fc3D-SBM.dat
+    int d = 2;  // Confeti-ex13-4contact-Fc3D-SBM.dat
     // DeSaxce FP, rho  = 5e-3, default for others.
     collection[current].filename = data_collection[d];
     collection[current].options = solver_options_create(SICONOS_FRICTION_3D_DSFP);
@@ -71,7 +70,7 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
   }
 
   {
-    int d = 6; // BoxesStack1-i100000-32.hdf5.dat
+    int d = 6;  // BoxesStack1-i100000-32.hdf5.dat
     // DeSaxce FP, rho  = 8e4.
     collection[current].filename = data_collection[d];
     collection[current].options = solver_options_create(SICONOS_FRICTION_3D_DSFP);
@@ -85,5 +84,4 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
   }
   *number_of_tests = current;
   return collection;
-
 }

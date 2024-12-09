@@ -14,23 +14,22 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #include <stdio.h>
 #include <stdlib.h>
+
 #include "NonSmoothDrivers.h"
-#include "soclcp_test_function.h"
+#include "SOCLCP_Solvers.h"
 #include "SOCLCP_cst.h"
 #include "SolverOptions.h"
-#include "SOCLCP_Solvers.h"
+#include "soclcp_test_function.h"
 
-
-int main(void)
-{
-  int info = 0 ;
+int main(void) {
+  int info = 0;
   printf("Test on ./data/Capsules-i122-1617.dat \n");
 
-  FILE * finput  =  fopen("./data/Capsules-i122-1617.dat", "r");
-  SolverOptions * options = (SolverOptions *) malloc(sizeof(SolverOptions));
+  FILE *finput = fopen("./data/Capsules-i122-1617.dat", "r");
+  SolverOptions *options = (SolverOptions *)malloc(sizeof(SolverOptions));
   info = soclcp_setDefaultSolverOptions(options, SICONOS_SOCLCP_VI_EG);
   options->dparam[0] = 1e-07;
   options->iparam[0] = 2000000;

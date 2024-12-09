@@ -14,62 +14,64 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
-#include <assert.h>                             // for assert
-#include <stdio.h>                              // for printf
-#include <stdlib.h>                             // for exit
+#include <assert.h>  // for assert
+#include <stdio.h>   // for printf
+#include <stdlib.h>  // for exit
+
 #include "FischerBurmeister.h"                  // for phi_Mixed_FB
 #include "MLCP_Solvers.h"                       // for mlcp_compute_error
 #include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
 #include "Newton_methods.h"                     // for functions_LSA, init_l...
 #include "NumericsFwd.h"                        // for MixedLinearComplement...
 #include "NumericsMatrix.h"                     // for NumericsMatrix
-#include "SiconosBlas.h"                              // for cblas_dgemv, cblas_dcopy
+#include "SiconosBlas.h"                        // for cblas_dgemv, cblas_dcopy
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
-static void FB_compute_F_mlcp(void* data_opaque, double* z, double* w)
-{
+static void FB_compute_F_mlcp(void* data_opaque, double* z, double* w) {
   // Computation of the new value w = F(z) = Mz + q
   // q --> w
-  MixedLinearComplementarityProblem* problem = (MixedLinearComplementarityProblem *)data_opaque;
+  MixedLinearComplementarityProblem* problem = (MixedLinearComplementarityProblem*)data_opaque;
   assert(problem->M);
   assert(problem->M->matrix0);
   unsigned int n = problem->n;
   unsigned int m = problem->m;
   /* Problem in the form (M,q) */
-  if(problem->isStorageType1)
-  {
+  if (problem->isStorageType1) {
     cblas_dcopy(n, problem->q, 1, w, 1);
     // Mz+q --> w
-    cblas_dgemv(CblasColMajor, CblasNoTrans, n, n, 1.0, problem->M->matrix0, n, z, 1, 1.0, w, 1);
-  }
-  else
-  {
+    cblas_dgemv(CblasColMajor, CblasNoTrans, n, n, 1.0, problem->M->matrix0, n, z, 1, 1.0, w,
+                1);
+  } else {
     /* Links to problem data */
-    double *a = problem->q;
-    double *b = &problem->q[n];
-    double *A = problem->A;
-    double *B = problem->B;
-    double *C = problem->C;
-    double *D = problem->D;
+    double* a = problem->q;
+    double* b = &problem->q[n];
+    double* A = problem->A;
+    double* B = problem->B;
+    double* C = problem->C;
+    double* D = problem->D;
 
     /* Compute "equalities" part, we = Au + Cv + a - Must be equal to 0 */
-    cblas_dcopy(n, a, 1, w, 1);    //  we = w[0..n-1] <-- a
-    cblas_dgemv(CblasColMajor, CblasNoTrans, n, n, 1.0, A, n, z, 1, 1.0, w, 1); // we <-- A*u + we
-    cblas_dgemv(CblasColMajor, CblasNoTrans, n, m, 1.0, C, m, &z[n], 1, 1.0, w, 1); // we <-- C*v + we
+    cblas_dcopy(n, a, 1, w, 1);  //  we = w[0..n-1] <-- a
+    cblas_dgemv(CblasColMajor, CblasNoTrans, n, n, 1.0, A, n, z, 1, 1.0, w,
+                1);  // we <-- A*u + we
+    cblas_dgemv(CblasColMajor, CblasNoTrans, n, m, 1.0, C, m, &z[n], 1, 1.0, w,
+                1);  // we <-- C*v + we
 
     /* Computes part which corresponds to complementarity */
-    double* w_c = &w[n]; // No copy!!
-    cblas_dcopy(m, b, 1, w_c, 1); //  wi = w[n..m] <-- b
-    cblas_dgemv(CblasColMajor, CblasNoTrans, m, n, 1.0, D, n, z, 1, 1.0, w_c, 1); // we <-- D*u + we
-    cblas_dgemv(CblasColMajor, CblasNoTrans, m, m, 1.0, B, m, &z[n], 1, 1.0, w_c, 1); // we <-- B*v + we
+    double* w_c = &w[n];           // No copy!!
+    cblas_dcopy(m, b, 1, w_c, 1);  //  wi = w[n..m] <-- b
+    cblas_dgemv(CblasColMajor, CblasNoTrans, m, n, 1.0, D, n, z, 1, 1.0, w_c,
+                1);  // we <-- D*u + we
+    cblas_dgemv(CblasColMajor, CblasNoTrans, m, m, 1.0, B, m, &z[n], 1, 1.0, w_c,
+                1);  // we <-- B*v + we
   }
 }
 
-static void FB_compute_H_mlcp(void* data_opaque, double* z, double* w, double* workV1, double* workV2, NumericsMatrix* H)
-{
+static void FB_compute_H_mlcp(void* data_opaque, double* z, double* w, double* workV1,
+                              double* workV2, NumericsMatrix* H) {
   printf("MLCP FB_compute_H_mlcp not implemented yet");
   exit(1);
 #if 0
@@ -110,25 +112,24 @@ static void FB_compute_H_mlcp(void* data_opaque, double* z, double* w, double* w
 #endif
 }
 
-void mlcp_mixed_FB(void* data_opaque, double* z, double* F, double* F_FB)
-{
-  phi_Mixed_FB(((MixedLinearComplementarityProblem *)data_opaque)->n, ((MixedLinearComplementarityProblem *)data_opaque)->m, z, F, F_FB);
+void mlcp_mixed_FB(void* data_opaque, double* z, double* F, double* F_FB) {
+  phi_Mixed_FB(((MixedLinearComplementarityProblem*)data_opaque)->n,
+               ((MixedLinearComplementarityProblem*)data_opaque)->m, z, F, F_FB);
 }
 
-void FB_compute_error_mlcp(void* data_opaque, double* z, double* w, double* nabla_theta, double tol, double* err)
-{
-  mlcp_compute_error((MixedLinearComplementarityProblem *)data_opaque, z, w, tol, err);
+void FB_compute_error_mlcp(void* data_opaque, double* z, double* w, double* nabla_theta,
+                           double tol, double* err) {
+  mlcp_compute_error((MixedLinearComplementarityProblem*)data_opaque, z, w, tol, err);
 }
 
-void mlcp_newton_FB(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
-{
+void mlcp_newton_FB(MixedLinearComplementarityProblem* problem, double* z, double* w,
+                    int* info, SolverOptions* options) {
   functions_LSA functions_FBLSA_mlcp;
   init_lsa_functions(&functions_FBLSA_mlcp, &FB_compute_F_mlcp, (compute_F_merit_ptr)&mlcp_FB);
   functions_FBLSA_mlcp.compute_H = &FB_compute_H_mlcp;
   functions_FBLSA_mlcp.compute_error = &FB_compute_error_mlcp;
 
   set_lsa_params_data(options, problem->M);
-  newton_LSA(problem->n + problem->m, z, w, info, (void *)problem, options, &functions_FBLSA_mlcp);
+  newton_LSA(problem->n + problem->m, z, w, info, (void*)problem, options,
+             &functions_FBLSA_mlcp);
 }
-
-

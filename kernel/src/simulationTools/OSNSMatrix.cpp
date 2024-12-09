@@ -26,7 +26,7 @@
 #include "Interaction.hpp"
 #include "DynamicalSystem.hpp"
 #include "NumericsSparseMatrix.h"
-#include "CSparseMatrix_internal.h"
+#include "CSparseMatrix.h"
 #include "OneStepIntegrator.hpp"
 #include "MoreauJeanOSI.hpp"
 #include "MoreauJeanGOSI.hpp"

@@ -23,13 +23,13 @@
 #define _OSNSMULTIPLEIMPACT_
 
 #include "LinearOSNS.hpp"
-#include "SiconosConst.hpp" // for MACHINE_PREC
+#include "SiconosConst.hpp" // for siconos::internal::MACHINE_PREC
 
 #include <string>
 
-#define DEFAULT__tolImpact MACHINE_PREC
-#define DEFAULT_TOL_VEL MACHINE_PREC
-#define DEFAULT_TOL_ENER MACHINE_PREC
+#define DEFAULT__tolImpact siconos::internal::MACHINE_PREC
+#define DEFAULT_TOL_VEL siconos::internal::MACHINE_PREC
+#define DEFAULT_TOL_ENER siconos::internal::MACHINE_PREC
 
 /** Formalization and Resolution of a Multiple Impact Non-Smooth problem.
 

@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #ifndef FC3D2NCP_GLOCKER_H
 #define FC3D2NCP_GLOCKER_H
@@ -39,85 +39,87 @@
   \f$ F_G(reaction_G) = M_G.reaction_G + g(reaction_G) + q_G \f$
   index \f$ G \f$ stands for "Glocker" in all related operators.
 
-  The relations between \$_G\$ operators and input Friction-Contact problem, plus all other details, are given in:
-  Acary, V. and B. Brogliato (2008). Numerical Methods for Nonsmooth Dynamical Systems: Applications
-  in Mechanics and Electronics. Vol. 35 of LNACM. Springer Verlag.
-  Chapter 13, part 4.3 p 420.
+  The relations between \$_G\$ operators and input Friction-Contact problem, plus all other
+  details, are given in: Acary, V. and B. Brogliato (2008). Numerical Methods for Nonsmooth
+  Dynamical Systems: Applications in Mechanics and Electronics. Vol. 35 of LNACM. Springer
+  Verlag. Chapter 13, part 4.3 p 420.
 
 
 
 */
-#include "NumericsFwd.h"  // for FrictionContactProblem, SolverOptions
-#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"    // for FrictionContactProblem, SolverOptions
+#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-extern "C"
-{
+extern "C" {
 #endif
 
-  /** Initialize some parameters required for the formulation as
-     the size of the problem (number of contacts X 3), n
-     the the global matrix M
-     the the global vector q
-     the global vector mu of the friction coefficients (size = n/3)
-     \param problem the global problem
-     \param localproblem the local problem
-  */
-  void NCPGlocker_initialize(FrictionContactProblem* problem, FrictionContactProblem* localproblem);
+/** Initialize some parameters required for the formulation as
+   the size of the problem (number of contacts X 3), n
+   the the global matrix M
+   the the global vector q
+   the global vector mu of the friction coefficients (size = n/3)
+   \param problem the global problem
+   \param localproblem the local problem
+*/
+void NCPGlocker_initialize(FrictionContactProblem* problem,
+                           FrictionContactProblem* localproblem);
 
-  /** Pick the required sub-blocks in q, M ... according to the considered contact and write the
-     operators required for the Glocker formulation
-     \param problem the global problem
-     \param localproblem the local problem
-     \param pos the number of the considered contact (its position in global M)
-     \param options
-  */
-  void NCPGlocker_update(int, FrictionContactProblem* problem, FrictionContactProblem* localproblem,  double* pos, SolverOptions* options);
+/** Pick the required sub-blocks in q, M ... according to the considered contact and write the
+   operators required for the Glocker formulation
+   \param problem the global problem
+   \param localproblem the local problem
+   \param pos the number of the considered contact (its position in global M)
+   \param options
+*/
+void NCPGlocker_update(int, FrictionContactProblem* problem,
+                       FrictionContactProblem* localproblem, double* pos,
+                       SolverOptions* options);
 
-  /** Retrieve global reaction values after solving, from computed "reactionGlocker".
-     \param contactnumber the number of the considered contact
-     \param[in,out] reaction he global reaction (in-out parameter)
-  */
-  void NCPGlocker_post(int contactnumber, double * reaction);
+/** Retrieve global reaction values after solving, from computed "reactionGlocker".
+   \param contactnumber the number of the considered contact
+   \param[in,out] reaction he global reaction (in-out parameter)
+*/
+void NCPGlocker_post(int contactnumber, double* reaction);
 
-  /** To compute F
-     \param[in,out] FOut the resulting FOut (warning: must be null on input)
-     \param up2Date  boolean variable to avoid recomputation of some parameters: true if F or jacobianF has been computed and if
-     the considered local problem has not changed, else false.
-  */
-  void computeFGlocker(double ** FOut, int up2Date);
+/** To compute F
+   \param[in,out] FOut the resulting FOut (warning: must be null on input)
+   \param up2Date  boolean variable to avoid recomputation of some parameters: true if F or
+   jacobianF has been computed and if the considered local problem has not changed, else false.
+*/
+void computeFGlocker(double** FOut, int up2Date);
 
-  /** To compute jacobianF
-     \param[in,out] jacobianFOut the resulting (warning: must be null on input)
-     \param up2Date Boolean variable to avoid recomputation of some parameters: true if F or jacobianF has been computed and if
-     the considered local problem has not changed, else false.
-  */
-  void computeJacobianFGlocker(double ** jacobianFOut, int up2Date);
+/** To compute jacobianF
+   \param[in,out] jacobianFOut the resulting (warning: must be null on input)
+   \param up2Date Boolean variable to avoid recomputation of some parameters: true if F or
+   jacobianF has been computed and if the considered local problem has not changed, else false.
+*/
+void computeJacobianFGlocker(double** jacobianFOut, int up2Date);
 
-  /** compute NCP error for Fischer-Burmeister formulation
-   * \param contact
-   * \param error
-   * \return error ?
-   */
+/** compute NCP error for Fischer-Burmeister formulation
+ * \param contact
+ * \param error
+ * \return error ?
+ */
 
-  double Compute_NCP_error1(int contact, double error);
+double Compute_NCP_error1(int contact, double error);
 
-  /** compute NCP error for Fischer-Burmeister formulation
-   * \param contact
-   * \param error
-   * \return error ?
-   */
-  double Compute_NCP_error2(int contact, double error);
+/** compute NCP error for Fischer-Burmeister formulation
+ * \param contact
+ * \param error
+ * \return error ?
+ */
+double Compute_NCP_error2(int contact, double error);
 
-  /** compute Fixed Point Solution for the NCP formulation
-   * \param contact
-   * \param reactionstep
-   */
+/** compute Fixed Point Solution for the NCP formulation
+ * \param contact
+ * \param reactionstep
+ */
 
-  void compute_Z_GlockerFixedP(int contact, double *reactionstep);
+void compute_Z_GlockerFixedP(int contact, double* reactionstep);
 
-  /** free memory for friction contact to NCP-Glocker */
-  void NCPGlocker_free(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options);
+/** free memory for friction contact to NCP-Glocker */
+void NCPGlocker_free(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

@@ -14,46 +14,36 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef NumericsDataVersion_h
 #define NumericsDataVersion_h
 
+#include <assert.h>
 #include <limits.h>
 #include <stdint.h>
-#include <assert.h>
 
 typedef uint64_t version_t;
 
 /** \struct DataVersioning data */
-typedef struct
-{
+typedef struct {
   version_t number;
 } NumericsDataVersion;
 
-static inline version_t NDV_value(const NumericsDataVersion* v)
-{
-  return v->number;
-}
+static inline version_t NDV_value(const NumericsDataVersion* v) { return v->number; }
 
-static inline void NDV_set_value(NumericsDataVersion* v, version_t value)
-{
+static inline void NDV_set_value(NumericsDataVersion* v, version_t value) {
   v->number = value;
 }
 
-static inline void NDV_reset(NumericsDataVersion* v)
-{
-  v->number = 0;
-}
+static inline void NDV_reset(NumericsDataVersion* v) { v->number = 0; }
 
-static inline void NDV_inc(NumericsDataVersion* v)
-{
-  assert (v->number < UINT64_MAX);
+static inline void NDV_inc(NumericsDataVersion* v) {
+  assert(v->number < UINT64_MAX);
   v->number += 1;
 }
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-extern "C"
-{
+extern "C" {
 #endif
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
@@ -61,5 +51,3 @@ extern "C"
 #endif
 
 #endif
-
-

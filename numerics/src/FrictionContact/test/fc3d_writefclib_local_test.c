@@ -14,65 +14,57 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
-#include <stdio.h>                   // for printf, fopen, fclose, FILE, size_t
-#include <stdlib.h>                  // for malloc, free, abs
-#include <string.h>                  // for strlen, strncpy, strcmp, strncat
+#include <stdio.h>   // for printf, fopen, fclose, FILE, size_t
+#include <stdlib.h>  // for malloc, free, abs
+#include <string.h>  // for strlen, strncpy, strcmp, strncat
+
 #include "FrictionContactProblem.h"  // for frictionContactProblem_free, Fri...
 #include "NumericsFwd.h"             // for FrictionContactProblem
 #include "fclib_interface.h"         // for frictionContact_fclib_read, fric...
 
-static int write_test_fclib(char * filename)
-{
+static int write_test_fclib(char *filename) {
   printf("\n Start of test \n");
   printf("Test on %s\n", filename);
   int info = 0;
   size_t sizeoffilename = strlen(filename);
-  printf("sizeoffilename %ld\n",  sizeoffilename);
-  char  extension[5]; // Don't forget the NUL byte ... --xhub
+  printf("sizeoffilename %ld\n", sizeoffilename);
+  char extension[5];  // Don't forget the NUL byte ... --xhub
   strncpy(extension, &filename[sizeoffilename - sizeof(extension) + 1], sizeof(extension));
-  char * basename;
+  char *basename;
 
-  if(strcmp(extension, ".dat") == 0)
-  {
+  if (strcmp(extension, ".dat") == 0) {
     basename = (char *)malloc((sizeoffilename + 2) * sizeof(char *));
     strcpy(basename, filename);
     strncpy(&basename[sizeoffilename - 5], ".hdf5", 6);
-    printf("basename %s\n",  basename);
+    printf("basename %s\n", basename);
 
-  }
-  else
-  {
+  } else {
     printf("Wrong file name extension %s\n", extension);
     return 0;
   }
 
   /* Remove file if it exists */
-  FILE * foutput = fopen(basename, "w");
+  FILE *foutput = fopen(basename, "w");
   fclose(foutput);
 
-
-  FrictionContactProblem* problem = frictionContact_new_from_filename(filename);
+  FrictionContactProblem *problem = frictionContact_new_from_filename(filename);
   int n = 100;
-  char * title = (char *)malloc(n * sizeof(char *));
+  char *title = (char *)malloc(n * sizeof(char *));
   strncpy(title, "Confeti-ex03-Fc3D-SBM", n);
-  char * description = (char *)malloc(n * sizeof(char *));
+  char *description = (char *)malloc(n * sizeof(char *));
 
   strncpy(description, "Rewriting Siconos Numerics test ", n);
   strncat(description, filename, n - strlen(description) - 1);
   strncat(description, " in FCLIB format", n - strlen(description) - 1);
-  char * mathInfo = (char *)malloc(n * sizeof(char *));
-  strncpy(mathInfo,  "unknown", n);
+  char *mathInfo = (char *)malloc(n * sizeof(char *));
+  strncpy(mathInfo, "unknown", n);
 
-  frictionContact_fclib_write(problem,
-                              title,
-                              description,
-                              mathInfo,
-                              basename,0);
+  frictionContact_fclib_write(problem, title, description, mathInfo, basename, 0);
 
   /* read fclib problem */
-  FrictionContactProblem* problem1 = frictionContact_fclib_read(basename);
+  FrictionContactProblem *problem1 = frictionContact_fclib_read(basename);
 
   info += abs(problem->numberOfContacts - problem1->numberOfContacts);
   info += abs(problem->dimension - problem1->dimension);
@@ -99,12 +91,14 @@ static int write_test_fclib(char * filename)
 
   for(size_t i = 0; i<problem_from_file->M->matrix1->filled1; i++)
   {
-    info += !(problem_from_file->M->matrix1->index1_data[i] == problem1->M->matrix1->index1_data[i]);
+    info += !(problem_from_file->M->matrix1->index1_data[i] ==
+  problem1->M->matrix1->index1_data[i]);
   }
 
   for(size_t i = 0; i<problem_from_file->M->matrix1->filled2; i++)
   {
-    info += !(problem_from_file->M->matrix1->index2_data[i] == problem1->M->matrix1->index2_data[i]);
+    info += !(problem_from_file->M->matrix1->index2_data[i] ==
+  problem1->M->matrix1->index2_data[i]);
     }*/
 
   frictionContactProblem_free(problem);
@@ -117,37 +111,25 @@ static int write_test_fclib(char * filename)
   return info;
 }
 
-int main(int argc, char *argv[])
-{
-  int info=-1;
+int main(int argc, char *argv[]) {
+  int info = -1;
   printf("argc %i\n", argc);
-  if(argc == 1)
-  {
+  if (argc == 1) {
     info = write_test_fclib("./data/Confeti-ex03-Fc3D-SBM.dat");
-  }
-  else if(argc == 2)
-  {
+  } else if (argc == 2) {
     // We assume argv[1] is a filename to open
     FILE *file = fopen(argv[1], "r");
 
     /* fopen returns 0, the NULL pointer, on failure */
-    if(file == 0)
-    {
+    if (file == 0) {
       printf("Could not open file\n");
-    }
-    else
-    {
+    } else {
       info = write_test_fclib(argv[1]);
     }
 
-  }
-  else
-  {
+  } else {
     printf("usage: %s filename", argv[0]);
   }
 
   return info;
 }
-
-
-

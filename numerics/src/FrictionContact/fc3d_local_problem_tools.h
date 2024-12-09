@@ -14,19 +14,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef FRICTIONCONTACT3D_local_problem_tools_H
 #define FRICTIONCONTACT3D_local_problem_tools_H
 
-/*!\file 
+/*!\file
 
  */
-#include "NumericsFwd.h"  // for FrictionContactProblem
-#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"    // for FrictionContactProblem
+#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-extern "C"
-{
+extern "C" {
 #endif
 
 /** pointer to function used to call local solver */
@@ -77,6 +76,7 @@ void fc3d_local_problem_compute_q(FrictionContactProblem *problem,
                                   int contact);
 void fc3d_local_problem_fill_M(FrictionContactProblem *problem,
                                FrictionContactProblem *localproblem, int contact);
+
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

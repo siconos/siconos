@@ -27,7 +27,7 @@
 #include "SimulationGraphs.hpp"
 #include "SimpleMatrix.hpp"
 using namespace RELATION;
-using namespace Siconos;
+using namespace siconos;
 
 
 // #define DEBUG_NOCOLOR

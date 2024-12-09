@@ -26,7 +26,7 @@
 #include <string.h>  // for memcpy, memset
 
 #include "CSparseMatrix.h"
-#include "CSparseMatrix_internal.h"   // for CSparseMatrix, CS_INT, cs_dl_sp...
+#include "CSparseMatrix.h"   // for CSparseMatrix, CS_INT, cs_dl_sp...
 #include "NM_MPI.h"                   // for NM_MPI_copy
 #include "NM_MUMPS.h"                 // for NM_MUMPS_copy
 #include "NM_conversions.h"           // for NM_csc_to_csr, NM_csc_to_triplet
@@ -238,7 +238,17 @@ void NM_version_sync(NumericsMatrix* M) {
             assert(M->matrix2->csr);
             break;
           }
+          case NSM_UNKNOWN:
+          default: {
+            numerics_error("NM_version_sync", "unknown matrix type");
+            break;
+          }
         }
+      } break;
+      case NM_UNKNOWN:
+      default: {
+        numerics_error("NM_version_sync", "unknown matrix type");
+        break;
       }
     }
 #endif
@@ -1308,7 +1318,7 @@ void NM_display(const NumericsMatrix* const m) {
       if (m->matrix2->diag_indx) {
         printf("========== m->matrix2->diag_indx = %p\n", m->matrix2->diag_indx);
         for (int i = 0; i < m->size0; ++i)
-          printf("diag_indices[%i] = %li\t ", i, m->matrix2->diag_indx[i]);
+          printf("diag_indices[%i] = %" PRCS_INT "\t ", i, m->matrix2->diag_indx[i]);
       } else {
         printf("========== m->matrix2->diag_indx --> NULL\n");
       }
@@ -1512,11 +1522,10 @@ NumericsMatrix* NM_new_from_file(FILE* file) {
   void* data = NULL;
 
   CHECK_IO(fscanf(file, "%d", &storageType), &info);
-  CHECK_IO(fscanf(file, SN_SIZE_T_F, &size0), &info);
-  CHECK_IO(fscanf(file, SN_SIZE_T_F, &size1), &info);
-
+  CHECK_IO(fscanf(file, "%zu", &size0), &info);
+  CHECK_IO(fscanf(file, "%zu", &size1), &info);
   if (storageType == NM_DENSE) {
-    CHECK_IO(fscanf(file, SN_SIZE_T_F "\t" SN_SIZE_T_F "\n", &size0, &size1), &info);
+    CHECK_IO(fscanf(file, "%zu\t%zu\n", &size0, &size1), &info);
 
     data = malloc(size1 * size0 * sizeof(double));
     double* data_d = (double*)data;
@@ -2812,23 +2821,23 @@ CSparseMatrix* NM_csc(NumericsMatrix* A) {
       case NSM_TRIPLET:
       case NSM_UNKNOWN: {
 #ifdef WITH_UMFPACK
-       // Fix issue https://github.com/siconos/siconos/issues/496
-       CSparseMatrix* Atri = NM_triplet(A);
+        // Fix issue https://github.com/siconos/siconos/issues/496
+        CSparseMatrix* Atri = NM_triplet(A);
 
-       NM_csc_alloc(A, Atri->nz);
+        NM_csc_alloc(A, Atri->nz);
 
-       CSparseMatrix* Acsc = A->matrix2->csc;
+        CSparseMatrix* Acsc = A->matrix2->csc;
 
-       assert(Acsc);
+        assert(Acsc);
 
-       CS_INT status = UMFPACK_FN(triplet_to_col)(Atri->m, Atri->n, Atri->nz, Atri->i, Atri->p, Atri->x,
-                                                  Acsc->p, Acsc->i, Acsc->x, NULL);
+        CS_INT status =
+            UMFPACK_FN(triplet_to_col)(Atri->m, Atri->n, Atri->nz, Atri->i, Atri->p, Atri->x,
+                                       Acsc->p, Acsc->i, Acsc->x, NULL);
 
-       if(status)
-       {
-            numerics_error("NM_csc", "umfpack_*_triplet_to_col: cannot get csc from triplet");
-            return NULL;
-       }
+        if (status) {
+          numerics_error("NM_csc", "umfpack_*_triplet_to_col: cannot get csc from triplet");
+          return NULL;
+        }
 #else
         /*  triplet -> csc with allocation */
         A->matrix2->csc = cs_compress(NM_triplet(A));
@@ -4435,8 +4444,7 @@ NumericsMatrix* NM_inverse_diagonal_block_matrix(NumericsMatrix* A, unsigned int
   DEBUG_BEGIN("NM_inverse_diagonal_block_matrix(NumericsMatrix* A, int * blocksizes))\n");
   assert(A->size0 == A->size1);
 
-  NumericsMatrix* A_inv;
-
+  NumericsMatrix* A_inv = 0;
   // get internal data (allocation if needed)
   NM_internalData(A);
 
@@ -4449,7 +4457,8 @@ NumericsMatrix* NM_inverse_diagonal_block_matrix(NumericsMatrix* A, unsigned int
 
       lapack_int* ipiv = (lapack_int*)NM_iWork(A_inv, A_inv->size0, sizeof(lapack_int));
       assert(A_inv->matrix1);
-      int info = SBM_inverse_diagonal_block_matrix_in_place(A_inv->matrix1, ipiv);
+      // int info =
+      SBM_inverse_diagonal_block_matrix_in_place(A_inv->matrix1, ipiv);
       NM_internalData(A_inv)->isInversed = true;
       break;
     }
@@ -5369,7 +5378,6 @@ int NM_Cholesky_solve_matrix_rhs(NumericsMatrix* Ao, NumericsMatrix* B) {
 }
 
 int NM_LDLT_factorize(NumericsMatrix* Ao) {
-  /* verbose=2; */
   DEBUG_BEGIN("int NM_LDLT_factorize(NumericsMatrix* Ao) \n");
   lapack_int info = 0;
   assert(Ao->destructible); /* by default Ao->destructible == Ao */
@@ -5515,8 +5523,8 @@ int NM_LDLT_factorize(NumericsMatrix* Ao) {
               }
               NM_MUMPS_set_icntl(A, 24, 1);  // Null pivot row detection
               NM_MUMPS_set_icntl(A, 7, 3);   // Use scotch */
-              NM_MUMPS_set_icntl(
-                  A, 14, 1000);  // percentage increase in the estimated working space */
+              NM_MUMPS_set_icntl(A, 14, 1000);
+              // percentage increase in the estimated working space */
               /* NM_MUMPS_set_cntl(A, 5, 1.e20); // Fixation, recommended value */
             }
 
@@ -5716,10 +5724,10 @@ int NM_LDLT_refine(NumericsMatrix* Ao, double* x, double* b, unsigned int nrhs, 
             LBL_Data* lbl = (LBL_Data*)p->linear_solver_data;
             // Solve.
             for (int irhs = 0; irhs < nrhs; irhs++) {
-              info = LBL_Refine(
-                  lbl, &x[irhs * A->size1], &b[irhs * A->size1], NM_half_triplet(A)->x, tol,
-                  maxitref,
-                  job);  // MA57 is able to accept multiple rhs but the C wrapper lbl not.
+              info = LBL_Refine(lbl, &x[irhs * A->size1], &b[irhs * A->size1],
+                                NM_half_triplet(A)->x, tol, maxitref, job);
+              // MA57 is able to accept multiple rhs
+              // but the C wrapper lbl not.
               if (info) {
                 fprintf(stderr, "NM_LDLT_refine. LBL_Refine error return from Refine: %d\n",
                         info);

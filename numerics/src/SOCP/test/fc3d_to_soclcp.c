@@ -14,40 +14,36 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
-#include <stdio.h>                                        // for fopen, printf
-#include <stdlib.h>                                       // for malloc
+ */
+#include <stdio.h>   // for fopen, printf
+#include <stdlib.h>  // for malloc
+
 #include "FrictionContactProblem.h"                       // for FrictionCon...
 #include "NumericsFwd.h"                                  // for FrictionCon...
 #include "SecondOrderConeLinearComplementarityProblem.h"  // for SecondOrder...
 
-int main(void)
-{
-  int info = 0 ;
+int main(void) {
+  int info = 0;
   printf("Test on ./data/FC3D_Example1_SBM.dat\n");
-  const char * filename = "../../FrictionContact/test/data/Capsules-i122-1617.dat";
+  const char* filename = "../../FrictionContact/test/data/Capsules-i122-1617.dat";
 
   FrictionContactProblem* problem = frictionContact_new_from_filename(filename);
 
+  unsigned int* coneIndex =
+      (unsigned int*)malloc((problem->numberOfContacts + 1) * sizeof(unsigned int));
 
-  unsigned int * coneIndex = (unsigned int *) malloc((problem->numberOfContacts+1)*sizeof(unsigned int));
-
-  for(int i = 0; i < problem->numberOfContacts+1; i++)
-  {
-    coneIndex[i]=i*3;
+  for (int i = 0; i < problem->numberOfContacts + 1; i++) {
+    coneIndex[i] = i * 3;
   }
   int n = coneIndex[problem->numberOfContacts];
-  SecondOrderConeLinearComplementarityProblem* soclcp =  secondOrderConeLinearComplementarityProblem_new
-      (n, problem->numberOfContacts, problem->M, problem->q, coneIndex, problem->mu);
+  SecondOrderConeLinearComplementarityProblem* soclcp =
+      secondOrderConeLinearComplementarityProblem_new(n, problem->numberOfContacts, problem->M,
+                                                      problem->q, coneIndex, problem->mu);
 
-//  secondOrderConeLinearComplementarityProblem_display(soclcp);
+  //  secondOrderConeLinearComplementarityProblem_display(soclcp);
 
-  FILE * foutput  =  fopen("./data/Capsules-i122-1617.dat", "w");
+  FILE* foutput = fopen("./data/Capsules-i122-1617.dat", "w");
   info = secondOrderConeLinearComplementarityProblem_printInFile(soclcp, foutput);
-
-
-
-
 
   /* XXX should look for a better fix --xhub */
   soclcp->M = NULL;
@@ -55,7 +51,6 @@ int main(void)
   soclcp->tau = NULL;
   freeSecondOrderConeLinearComplementarityProblem(soclcp);
   frictionContactProblem_free(problem);
-
 
   printf("\nEnd of test on ./data/FC3D_Example1_SBM.dat\n");
   return info;

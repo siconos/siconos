@@ -14,24 +14,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #include "NSSTools.h"  // for max_part
-void max_part(double* x, double *sol, int n)
+void max_part(double* x, double* sol, int n)
 
 {
-  int     i;
-  double  max;
+  int i;
+  double max;
   max = x[0];
 
-  for(i = 1 ; i < n ; i++)
-  {
-
-    if(max < x[i]) max = x[i] ;
-
+  for (i = 1; i < n; i++) {
+    if (max < x[i]) max = x[i];
   }
 
-
   *sol = max;
-
 }

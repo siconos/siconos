@@ -102,8 +102,8 @@ void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS1()
   prod(*minus_inv_M, acc0, acc0, true);
   SiconosVector rhs0(*velocity0, acc0);
 
-  SP::SiconosMatrix m0(new SimpleMatrix(3,3, Siconos::ZERO));
-  SimpleMatrix i0(3,3); // new SimpleMatrix(3,3));//, Siconos::IDENTITY));
+  SP::SiconosMatrix m0(new SimpleMatrix(3,3, siconos::ZERO));
+  SimpleMatrix i0(3,3); // new SimpleMatrix(3,3));//, siconos::IDENTITY));
   i0(0,0) = i0(1,1) = i0(2,2) = 1.;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ", ds->n() == 2 * 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ", *(ds->x0()) == x0, true);
@@ -177,8 +177,8 @@ void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS2()
   ds->initRhs(time);
   SiconosVector x0(*q0, *velocity0);
   SiconosVector rhs0(*velocity0, zero);
-  SP::SiconosMatrix m0(new SimpleMatrix(3,3, Siconos::ZERO));
-  SimpleMatrix i0(3,3); // new SimpleMatrix(3,3));//, Siconos::IDENTITY));
+  SP::SiconosMatrix m0(new SimpleMatrix(3,3, siconos::ZERO));
+  SimpleMatrix i0(3,3); // new SimpleMatrix(3,3));//, siconos::IDENTITY));
   i0(0,0) = i0(1,1) = i0(2,2) = 1.;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2 : ", ds->n() == 2 * 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2 : ", *(ds->x0()) == x0, true);

@@ -54,32 +54,33 @@ function(begin_tests SOURCE_DIR)
   endforeach()
 
   # If a directory *-utils is found, its content is used
-  # to create/expand the <COMPONENT>-test library.
+  # to create/expand the <COMPONENT>-tests-utils library.
   if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}-utils)
     file(GLOB_RECURSE TEST_UTILS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}-utils/*.[ch])
-    if(NOT TARGET ${COMPONENT}-test) 
+    if(NOT TARGET ${COMPONENT}-tests-utils) 
       # Create the target ...
-      add_library(${COMPONENT}-test SHARED ${TEST_UTILS_SOURCES})
+      add_library(${COMPONENT}-tests-utils SHARED ${TEST_UTILS_SOURCES})
     else()
       # or just append sources if it already exists.
-      target_sources(${COMPONENT}-test PRIVATE ${TEST_UTILS_SOURCES})
+      target_sources(${COMPONENT}-tests-utils PRIVATE ${TEST_UTILS_SOURCES})
     endif()
 
-    # local includes, to build <component>-test only
-    target_include_directories(${COMPONENT}-test PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}-utils)
-    target_link_libraries(${COMPONENT}-test PUBLIC ${COMPONENT})
+    # local includes, to build <component>-tests-utils only
+    target_include_directories(${COMPONENT}-tests-utils PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}-utils)
+    target_link_libraries(${COMPONENT}-tests-utils PUBLIC ${COMPONENT})
     # All include dirs from component are taken into account in ${COMPONENT}-lib (and so propagated to tests)
     foreach(dir IN LISTS ${COMPONENT}_DIRS)
-      target_include_directories(${COMPONENT}-test PRIVATE
+      target_include_directories(${COMPONENT}-tests-utils PRIVATE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${dir}>)
     endforeach()
 
     # Link with extra deps, if any
     foreach(libtarget IN LISTS TEST_DEPS)
-      target_link_libraries(${COMPONENT}-test PUBLIC ${libtarget})
+      target_link_libraries(${COMPONENT}-tests-utils PUBLIC ${libtarget})
     endforeach()
+    add_dependencies(${COMPONENT}-tests ${COMPONENT}-tests-utils)
   else()
-    # If there is no ${COMPONENT}-test but some extra DEPS.
+    # If there is no ${COMPONENT}-tests-utils but some extra DEPS.
     unset(GLOBAL_TEST_DEPS)
     set(GLOBAL_TEST_DEPS ${TEST_DEPS} PARENT_SCOPE)
   endif()
@@ -134,7 +135,7 @@ endmacro()
 # - link (PRIVATE) executable with <COMPONENT> lib
 # - add <COMPONENT> includes to executable (PRIVATE)
 # - link (PRIVATE) executable with all libs in DEPS
-# - link (PRIVATE) executable with <COMPONENT>-test (if it exists)
+# - add executable to  <COMPONENT>-tests dependencies
 # - add a test (ctest) named <name>. If NAME is not set, use name of first source file (without ext).
 # ========================================
 function(new_test)
@@ -224,16 +225,18 @@ function(new_test)
   # ... or with GLOBAL_TEST_DEPS variable. GLOBAL_TEST_DEPS is
   # set during call to begin_test and useful only
   # when some dependencies are required by all tests
-  # and if there is no <component>-test lib.
-  foreach(libtarget IN LISTS GLOBAL_TEST_DEPS) 
+  foreach(libtarget IN LISTS GLOBAL_TEST_DEPS)
     target_link_libraries(${TEST_NAME} PRIVATE ${libtarget})
   endforeach()
 
-  # -- link with (optional) component-test lib.
-  # At the time, only numerics used such a lib.
-  if(TARGET ${COMPONENT}-test)
-    target_link_libraries(${TEST_NAME} PRIVATE ${COMPONENT}-test)
+  # -- add dependency to component-tests
+  if(TARGET ${COMPONENT}-tests)
+    add_dependencies(${COMPONENT}-tests ${TEST_NAME})
   endif()
+  if(TARGET ${COMPONENT}-tests-utils)
+    target_link_libraries(${TEST_NAME} PUBLIC ${COMPONENT}-tests-utils)
+  endif()
+
   if(WITH_CXX)
     set_target_properties(${TEST_NAME} PROPERTIES LINKER_LANGUAGE CXX)
   endif()
@@ -291,7 +294,7 @@ function(set_siconos_test_properties)
   set_tests_properties(${TEST_NAME} PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;ERROR;Assertion")
 
   # env variables (mostly for plugins : the test must be able to find TestPlugin.so if required)
-  set_tests_properties(${TEST_NAME} PROPERTIES ENVIRONMENT "LD_LIBRARY_PATH=${CMAKE_CURRENT_BINARY_DIR};DYLD_LIBRARY_PATH=${CMAKE_CURRENT_BINARY_DIR}")
+  set_tests_properties(${TEST_NAME} PROPERTIES ENVIRONMENT "LD_LIBRARY_PATH=${CMAKE_CURRENT_BINARY_DIR}:$ENV{LD_LIBRARY_PATH};DYLD_LIBRARY_PATH=${CMAKE_CURRENT_BINARY_DIR}")
   
   
 endfunction()
@@ -334,6 +337,7 @@ function(new_tests_collection)
     NAME ${PROBLEM_FORMULATION}_${PROBLEM_COLLECTION}${PROBLEM_SUFFIX}
     HDF5 ${PROBLEM_HDF5}
     )
+  
  
 endfunction()
 

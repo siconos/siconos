@@ -14,25 +14,24 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
-#include "SiconosConfig.h" // for WITH_SUPERLU, SUPERLU_MAJOR_VERSION ... // IWYU pragma: keep
-#include "siconos_debug.h"
+#include "SiconosConfig.h"  // for WITH_SUPERLU, SUPERLU_MAJOR_VERSION ... // IWYU pragma: keep
 #include "numerics_verbose.h"
+#include "siconos_debug.h"
 
 #ifdef WITH_SUPERLU
 
 #include <slu_ddefs.h>
-#include "CSparseMatrix_internal.h"
+
+#include "CSparseMatrix.h"
 #include "NumericsMatrix_internal.h"
 #include "NumericsSparseMatrix.h"
-
 
 /** \struct NM_SuperLU_WS NumericsMatrix_internal.h
  * Structure for holding the data SuperLU needs
  */
-struct NM_SuperLU_WS
-{
+struct NM_SuperLU_WS {
   SuperMatrix* L;
   SuperMatrix* U;
   int_t* perm_r;
@@ -43,34 +42,32 @@ struct NM_SuperLU_WS
 #endif
 };
 
-NM_SuperLU_WS* NM_SuperLU_factorize(NumericsMatrix* A)
-{
+NM_SuperLU_WS* NM_SuperLU_factorize(NumericsMatrix* A) {
   SuperMatrix SA, SAC;
   SuperLUStat_t stat;
-  int_t *etree;
+  int_t* etree;
 
   int status;
 
   NSM_linear_solver_params* params = NSM_linearSolverParams(A);
 
-  if(params->linear_solver_data)
-  {
-    return (NM_SuperLU_WS*) params->linear_solver_data;
+  if (params->linear_solver_data) {
+    return (NM_SuperLU_WS*)params->linear_solver_data;
   }
 
   params->linear_solver_data = calloc(1, sizeof(NM_SuperLU_WS));
-  NM_SuperLU_WS* superlu_ws = (NM_SuperLU_WS*) params->linear_solver_data;
+  NM_SuperLU_WS* superlu_ws = (NM_SuperLU_WS*)params->linear_solver_data;
 
-  if(!superlu_ws->options) superlu_ws->options = (superlu_options_t*)malloc(sizeof(superlu_options_t));
+  if (!superlu_ws->options)
+    superlu_ws->options = (superlu_options_t*)malloc(sizeof(superlu_options_t));
 
 #ifdef SUPERLU_MAJOR_VERSION
-  if(!superlu_ws->Glu) superlu_ws->Glu = (GlobalLU_t*)malloc(sizeof(GlobalLU_t));
+  if (!superlu_ws->Glu) superlu_ws->Glu = (GlobalLU_t*)malloc(sizeof(GlobalLU_t));
 #endif
 
   set_default_options(superlu_ws->options);
 
-  if(verbose > 1)
-    superlu_ws->options->PrintStat = YES;
+  if (verbose > 1) superlu_ws->options->PrintStat = YES;
   /* TODO SuperLU_PIVOT_TOLERANCE, SuperLU_ORDERING, SuperLU_SCALE
    * SuperLU_DROPTOL, SuperLU_STRATEGY, SuperLU_IRSTEP*/
 
@@ -78,28 +75,25 @@ NM_SuperLU_WS* NM_SuperLU_factorize(NumericsMatrix* A)
 
   CSparseMatrix* C = NM_csc(A);
 
-  superlu_ws->L = (SuperMatrix *) SUPERLU_MALLOC(sizeof(SuperMatrix));
-  superlu_ws->U = (SuperMatrix *) SUPERLU_MALLOC(sizeof(SuperMatrix));
-  if(!(superlu_ws->perm_r = intMalloc(C->m))) ABORT("Malloc fails for perm_r[].");
-  if(!(superlu_ws->perm_c = intMalloc(C->n))) ABORT("Malloc fails for perm_c[].");
-  if(!(etree = intMalloc(C->n))) ABORT("Malloc fails for etree[].");
+  superlu_ws->L = (SuperMatrix*)SUPERLU_MALLOC(sizeof(SuperMatrix));
+  superlu_ws->U = (SuperMatrix*)SUPERLU_MALLOC(sizeof(SuperMatrix));
+  if (!(superlu_ws->perm_r = intMalloc(C->m))) ABORT("Malloc fails for perm_r[].");
+  if (!(superlu_ws->perm_c = intMalloc(C->n))) ABORT("Malloc fails for perm_c[].");
+  if (!(etree = intMalloc(C->n))) ABORT("Malloc fails for etree[].");
 
   /* Symbolic part  */
   int_t* indices;
   int_t* pointers;
   size_t nnz = NSM_nnz(C);
 
-  if(sizeof(*C->i) != sizeof(*indices))
-  {
+  if (sizeof(*C->i) != sizeof(*indices)) {
     int_t* iWork = (int_t*)NM_iWork(A, (size_t)(nnz + C->n) + 1, sizeof(int_t));
     indices = iWork;
     pointers = &iWork[nnz];
 
-    for(size_t i = 0; i < nnz  ; ++i) indices[i] = (int_t)C->i[i];
-    for(size_t i = 0; i <= C->n; ++i) pointers[i] = (int_t)C->p[i];
-  }
-  else
-  {
+    for (size_t i = 0; i < nnz; ++i) indices[i] = (int_t)C->i[i];
+    for (size_t i = 0; i <= C->n; ++i) pointers[i] = (int_t)C->p[i];
+  } else {
     indices = (int_t*)C->i;
     pointers = (int_t*)C->p;
   }
@@ -118,13 +112,14 @@ NM_SuperLU_WS* NM_SuperLU_factorize(NumericsMatrix* A)
 
   /* Versions 4.x and earlier do not include a #define'd version numbers  */
 #ifndef SUPERLU_MAJOR_VERSION
-  dgstrf(superlu_ws->options, &SAC, drop_tol, relax, &panel_size, etree, NULL, 0, superlu_ws->perm_c, superlu_ws->perm_r, superlu_ws->L, superlu_ws->U, &stat, &status);
+  dgstrf(superlu_ws->options, &SAC, drop_tol, relax, &panel_size, etree, NULL, 0,
+         superlu_ws->perm_c, superlu_ws->perm_r, superlu_ws->L, superlu_ws->U, &stat, &status);
 #else
-  dgstrf(superlu_ws->options, &SAC, relax, panel_size, etree, NULL, 0, superlu_ws->perm_c, superlu_ws->perm_r, superlu_ws->L, superlu_ws->U, superlu_ws->Glu, &stat, &status);
+  dgstrf(superlu_ws->options, &SAC, relax, panel_size, etree, NULL, 0, superlu_ws->perm_c,
+         superlu_ws->perm_r, superlu_ws->L, superlu_ws->U, superlu_ws->Glu, &stat, &status);
 #endif
 
-  if(status)
-  {
+  if (status) {
     fprintf(stderr, "dgstrf() error returns INFO= %d\n", status);
     return NULL;
   }
@@ -137,8 +132,7 @@ NM_SuperLU_WS* NM_SuperLU_factorize(NumericsMatrix* A)
   return superlu_ws;
 }
 
-int NM_SuperLU_solve(NumericsMatrix* A, double* b, NM_SuperLU_WS* superlu_ws)
-{
+int NM_SuperLU_solve(NumericsMatrix* A, double* b, NM_SuperLU_WS* superlu_ws) {
   SuperMatrix B;
   SuperLUStat_t stat;
 
@@ -150,7 +144,8 @@ int NM_SuperLU_solve(NumericsMatrix* A, double* b, NM_SuperLU_WS* superlu_ws)
 
   StatInit(&stat);
 
-  dgstrs(NOTRANS, superlu_ws->L, superlu_ws->U, superlu_ws->perm_c, superlu_ws->perm_r, &B, &stat, &status);
+  dgstrs(NOTRANS, superlu_ws->L, superlu_ws->U, superlu_ws->perm_c, superlu_ws->perm_r, &B,
+         &stat, &status);
 
   Destroy_SuperMatrix_Store(&B);
   StatFree(&stat);
@@ -158,12 +153,11 @@ int NM_SuperLU_solve(NumericsMatrix* A, double* b, NM_SuperLU_WS* superlu_ws)
   return status;
 }
 
-void NM_SuperLU_free(void* p)
-{
+void NM_SuperLU_free(void* p) {
   assert(p);
-  NSM_linear_solver_params* params = (NSM_linear_solver_params*) p;
+  NSM_linear_solver_params* params = (NSM_linear_solver_params*)p;
   assert(params);
-  NM_SuperLU_WS* superlu_ws = (NM_SuperLU_WS*) params->linear_solver_data;
+  NM_SuperLU_WS* superlu_ws = (NM_SuperLU_WS*)params->linear_solver_data;
   assert(superlu_ws);
 
   SUPERLU_FREE(superlu_ws->perm_r);
@@ -178,15 +172,13 @@ void NM_SuperLU_free(void* p)
   superlu_ws->L = NULL;
   superlu_ws->U = NULL;
 
-  if(superlu_ws->options)
-  {
+  if (superlu_ws->options) {
     free(superlu_ws->options);
     superlu_ws->options = NULL;
   }
 
 #ifdef SUPERLU_MAJOR_VERSION
-  if(superlu_ws->Glu)
-  {
+  if (superlu_ws->Glu) {
     free(superlu_ws->Glu);
     superlu_ws->Glu = NULL;
   }
@@ -194,11 +186,9 @@ void NM_SuperLU_free(void* p)
   /* Here we free superlu_ws ...  */
   free(superlu_ws);
   params->linear_solver_data = NULL;
-
 }
 
-void NM_SuperLU_extra_display(NM_SuperLU_WS* superlu_ws)
-{
+void NM_SuperLU_extra_display(NM_SuperLU_WS* superlu_ws) {
 #if 0
   if(verbose > 2)
   {

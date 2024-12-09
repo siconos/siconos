@@ -28,7 +28,7 @@
 
 /** SICONOS
  */
-namespace Siconos
+namespace siconos
 {
 
 /** save a Siconos Simulation with the full simulation state into a

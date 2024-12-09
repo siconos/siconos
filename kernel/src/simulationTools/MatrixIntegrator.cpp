@@ -95,7 +95,7 @@ void MatrixIntegrator::commonInit(const DynamicalSystem& ds, const NonSmoothDyna
   _sim->associate(_OSI, _DS);
   _sim->setName("Matrix integrator simulation");
   //change tolerance
-  _OSI->setTol(1, 10 * MACHINE_PREC, 5 * MACHINE_PREC);
+  _OSI->setTol(1, 10 * siconos::internal::MACHINE_PREC, 5 * siconos::internal::MACHINE_PREC);
 
 }
 

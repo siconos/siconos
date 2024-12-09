@@ -14,12 +14,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
-#include <assert.h>            // for assert
-#include <float.h>             // for DBL_EPSILON
-#include <math.h>              // for fabs
-#include <stdio.h>             // for printf
-#include <stdlib.h>            // for free, malloc
+ */
+#include <assert.h>  // for assert
+#include <float.h>   // for DBL_EPSILON
+#include <math.h>    // for fabs
+#include <stdio.h>   // for printf
+#include <stdlib.h>  // for free, malloc
+
 #include "NumericsFwd.h"       // for RelayProblem, SolverOptions, NumericsM...
 #include "NumericsMatrix.h"    // for NumericsMatrix
 #include "RelayProblem.h"      // for RelayProblem
@@ -28,13 +29,11 @@
 #include "SolverOptions.h"     // for SolverOptions, SICONOS_DPARAM_RESIDU
 #include "numerics_verbose.h"  // for verbose
 
-void relay_pgs(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options)
-{
-
-
-  double* M = problem->M->matrix0;
-  double* q = problem->q;
-  int n = problem -> size;
+void relay_pgs(RelayProblem *problem, double *z, double *w, int *info,
+               SolverOptions *options) {
+  double *M = problem->M->matrix0;
+  double *q = problem->q;
+  int n = problem->size;
   double *a = problem->lb;
   double *b = problem->ub;
 
@@ -44,23 +43,16 @@ void relay_pgs(RelayProblem* problem, double *z, double *w, int *info, SolverOpt
   assert(a);
   assert(b);
 
-
-
   int itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
   double tol = options->dparam[SICONOS_DPARAM_TOL];
 
-
   int i;
   double zi;
-  double * diag = (double*)malloc(n * sizeof(double));
+  double *diag = (double *)malloc(n * sizeof(double));
 
-
-  for(i = 0 ; i < n ; ++i)
-  {
-    if(fabs(M[i * n + i]) < DBL_EPSILON)
-    {
-      if(verbose > 0)
-      {
+  for (i = 0; i < n; ++i) {
+    if (fabs(M[i * n + i]) < DBL_EPSILON) {
+      if (verbose > 0) {
         printf("Numerics::lcp_pgs, error: vanishing diagonal term \n");
         printf(" The problem cannot be solved with this method \n");
       }
@@ -68,39 +60,37 @@ void relay_pgs(RelayProblem* problem, double *z, double *w, int *info, SolverOpt
       *info = 2;
       free(diag);
       return;
-    }
-    else diag[i] = 1.0 / M[i * n + i];
+    } else
+      diag[i] = 1.0 / M[i * n + i];
   }
 
   /* Iterations*/
   int iter = 0;
-  double err  = 1.;
+  double err = 1.;
   *info = 1;
 
-  while((iter < itermax) && (err > tol))
-  {
-
+  while ((iter < itermax) && (err > tol)) {
     ++iter;
 
     /* Initialization of w with q */
     cblas_dcopy(n, q, 1, w, 1);
 
-    for(i = 0 ; i < n ; ++i)
-    {
+    for (i = 0; i < n; ++i) {
       z[i] = 0.0;
       zi = -(q[i] + cblas_ddot(n, &M[i], n, z, 1)) * diag[i];
       z[i] = zi;
-      if(zi < a[i]) z[i] = a[i];
-      else if(zi > b[i]) z[i] = b[i];
+      if (zi < a[i])
+        z[i] = a[i];
+      else if (zi > b[i])
+        z[i] = b[i];
     }
     /* **** Criterium convergence **** */
     *info = relay_compute_error(problem, z, w, tol, &err);
 
-    if(verbose == 2)
-    {
+    if (verbose == 2) {
       printf(" # i%d -- %g : ", iter, err);
-      for(i = 0 ; i < n ; ++i) printf(" %g", z[i]);
-      for(i = 0 ; i < n ; ++i) printf(" %g", w[i]);
+      for (i = 0; i < n; ++i) printf(" %g", z[i]);
+      for (i = 0; i < n; ++i) printf(" %g", w[i]);
       printf("\n");
     }
   }
@@ -108,29 +98,17 @@ void relay_pgs(RelayProblem* problem, double *z, double *w, int *info, SolverOpt
   options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
   options->dparam[SICONOS_DPARAM_RESIDU] = err;
 
-
-  if(err > tol)
-  {
+  if (err > tol) {
     printf("Siconos/Numerics: relay_pgs: No convergence of PGS after %d iterations\n", iter);
     printf("The residue is : %g \n", err);
     *info = 1;
-  }
-  else
-  {
-    if(verbose > 0)
-    {
+  } else {
+    if (verbose > 0) {
       printf("Siconos/Numerics: relay_pgs: Convergence of PGS after %d iterations\n", iter);
       printf("The residue is : %g \n", err);
     }
     *info = 0;
   }
 
-
-
-
   free(diag);
-
-
-
 }
-

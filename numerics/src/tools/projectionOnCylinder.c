@@ -14,52 +14,37 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
-#include <math.h>
+ */
 #include "projectionOnCylinder.h"
 
-void projectionOnCylinder(double* r, double  R)
-{
+#include <math.h>
 
+void projectionOnCylinder(double* r, double R) {
   double normTsquare = r[1] * r[1] + r[2] * r[2];
 
-  if(r[0] >= 0)
-  {
-    if(normTsquare <= R * R)
-    {
-      return ;
-    }
-    else
-    {
+  if (r[0] >= 0) {
+    if (normTsquare <= R * R) {
+      return;
+    } else {
       normTsquare = sqrt(normTsquare);
       r[1] = R * r[1] / normTsquare;
       r[2] = R * r[2] / normTsquare;
       return;
     }
-  }
-  else
-  {
+  } else {
     r[0] = 0.0;
-    if(0 < normTsquare)
-    {
-
+    if (0 < normTsquare) {
       normTsquare = sqrt(normTsquare);
       r[1] = R * r[1] / normTsquare;
       r[2] = R * r[2] / normTsquare;
       /*    r[1]=0.0; */
       /*    r[2]=0.0; */
       return;
-    }
-    else
-    {
+    } else {
       r[1] = 0.0;
       r[2] = 0.0;
       return;
     }
-
   }
 }
-void projectionOnGeneralCylinder(double* r, double  R, int dim)
-{
-
-}
+void projectionOnGeneralCylinder(double* r, double R, int dim) {}

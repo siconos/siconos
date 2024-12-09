@@ -21,8 +21,8 @@
 /*!\file MixedComplementarityProblem.h
  */
 
-#include "NumericsFwd.h"   // for MixedComplementarityProblem, NumericsMatrix
-#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"    // for MixedComplementarityProblem, NumericsMatrix
+#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 /**
     type for user defined function used to compute Fmcp and its jacobian.
@@ -31,20 +31,19 @@
  */
 typedef void (*ptrFunctionMCP)(int size, double *z, double *F);
 typedef void (*ptrFunctionMCP2)(void *env, int n, double *z, double *F);
-typedef void (*ptrFunctionMCP_nabla)(void *env, int n, double *z,
-                                     NumericsMatrix *F);
+typedef void (*ptrFunctionMCP_nabla)(void *env, int n, double *z, NumericsMatrix *F);
 
 /**
     Structure that contains and defines a MixedComplementarityProblem
 */
 struct MixedComplementarityProblem {
-  int n1;                       /**< number of equalities constraints */
-  int n2;                       /**< size of complementarity variables */
-  ptrFunctionMCP2 compute_Fmcp; /**< pointer to the function used to compute
-                                   \f$ F_{mcp}(z) = (G(z), H(z)) \f$ */
+  int n1;                                  /**< number of equalities constraints */
+  int n2;                                  /**< size of complementarity variables */
+  ptrFunctionMCP2 compute_Fmcp;            /**< pointer to the function used to compute
+                                              \f$ F_{mcp}(z) = (G(z), H(z)) \f$ */
   ptrFunctionMCP_nabla compute_nabla_Fmcp; /**< pointer to the function used to
                                               compute \f$ \nabla_z F_{mcp} \f$ */
-  NumericsMatrix *nabla_Fmcp; /**< storage for \f$ \nabla_z F_{mcp} \f$*/
+  NumericsMatrix *nabla_Fmcp;              /**< storage for \f$ \nabla_z F_{mcp} \f$*/
   void *env; /**< environment for the compute_Fmcp and compute_nabla_Fmcp
                function. When called from Python, it contains an object with
                compute_Fmcp and compute_nabla_Fmcp as methods.
@@ -75,9 +74,9 @@ struct MixedComplementarityProblem {
     and \f$ F \f$ is a non linear function that must be user-defined.
 */
 struct MixedComplementarityProblem_old {
-  int sizeEqualities;         /**< size of equalities \f$ z_e, w_e \f$ size */
-  int sizeInequalities;       /**< size of inequalities \f$ z_i,w_i \f$ size */
-  ptrFunctionMCP computeFmcp; /**< pointer to the function to compute F(z) */
+  int sizeEqualities;              /**< size of equalities \f$ z_e, w_e \f$ size */
+  int sizeInequalities;            /**< size of inequalities \f$ z_i,w_i \f$ size */
+  ptrFunctionMCP computeFmcp;      /**< pointer to the function to compute F(z) */
   ptrFunctionMCP computeNablaFmcp; /** pointer to the function to compute the
                                       jacobian of F(z) */
   /** The value F(z) */
@@ -104,8 +103,7 @@ MixedComplementarityProblem *mixedComplementarityProblem_new(void);
  *
  *  \param problem pointer to a MixedComplementarityProblem_old to delete
  */
-void mixedComplementarityProblem_old_free(
-    MixedComplementarityProblem_old *problem);
+void mixedComplementarityProblem_old_free(MixedComplementarityProblem_old *problem);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

@@ -191,7 +191,7 @@ void MoreauJeanBilbaoOSI::_initialize_iteration_matrix(SP::DynamicalSystem ds) {
   // Allocate work buffers for:
   // - Iteration matrix
   _dynamicalSystemsGraph->properties(dsv).W.reset(
-      new SimpleMatrix(ndof, ndof, Siconos::BANDED, 0, 0));
+      new SimpleMatrix(ndof, ndof, siconos::BANDED, 0, 0));
 
   // - I - theta
   // ds_work_vectors[MoreauJeanBilbaoOSI::ONE_MINUS_THETA].reset(new SiconosVector(ndof));

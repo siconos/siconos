@@ -80,7 +80,7 @@ void LagrangianDSTest::testBuildLagrangianDS1()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", ds->computeKineticEnergy() == 38.5, true);
 
   double time = 1.;
-  SP::SiconosMatrix m0(new SimpleMatrix(3,3, Siconos::ZERO));
+  SP::SiconosMatrix m0(new SimpleMatrix(3,3, siconos::ZERO));
 
   ds->computeForces(time, ds->q(), ds->velocity());
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", *(ds->forces()) == zero, true);
@@ -94,7 +94,7 @@ void LagrangianDSTest::testBuildLagrangianDS1()
   ds->initRhs(time);
   SiconosVector x0(*q0, *velocity0);
   SiconosVector rhs0(*velocity0, zero);
-  SimpleMatrix i0(3,3); // new SimpleMatrix(3,3));//, Siconos::IDENTITY));
+  SimpleMatrix i0(3,3); // new SimpleMatrix(3,3));//, siconos::IDENTITY));
   i0(0,0) = i0(1,1) = i0(2,2) = 1.;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", ds->n() == 2 * 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS1 : ", *(ds->x0()) == x0, true);
@@ -140,8 +140,8 @@ void LagrangianDSTest::testBuildLagrangianDS4()
   ds->initRhs(time);
   SiconosVector x0(*q0, *velocity0);
   SiconosVector rhs0(*velocity0, zero);
-  SP::SiconosMatrix m0(new SimpleMatrix(3,3, Siconos::ZERO));
-  SimpleMatrix i0(3,3); // new SimpleMatrix(3,3));//, Siconos::IDENTITY));
+  SP::SiconosMatrix m0(new SimpleMatrix(3,3, siconos::ZERO));
+  SimpleMatrix i0(3,3); // new SimpleMatrix(3,3));//, siconos::IDENTITY));
   i0(0,0) = i0(1,1) = i0(2,2) = 1.;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4 : ", ds->n() == 2 * 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4 : ", *(ds->x0()) == x0, true);
@@ -162,7 +162,7 @@ void LagrangianDSTest::testBuildLagrangianDS5()
   SP::LagrangianDS ds(new LagrangianDS(q0, velocity0, plugin));
 
   SiconosVector zero(3);
-  SP::SiconosMatrix m0(new SimpleMatrix(3,3, Siconos::ZERO));
+  SP::SiconosMatrix m0(new SimpleMatrix(3,3, siconos::ZERO));
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5 : ", Type::value(*ds) == Type::LagrangianDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5 : ", ds->dimension() == 3, true);
@@ -193,7 +193,7 @@ void LagrangianDSTest::testBuildLagrangianDS5()
   ds->initRhs(time);
   SiconosVector x0(*q0, *velocity0);
   SiconosVector rhs0(*velocity0, zero);
-  SimpleMatrix i0(3,3); // new SimpleMatrix(3,3));//, Siconos::IDENTITY));
+  SimpleMatrix i0(3,3); // new SimpleMatrix(3,3));//, siconos::IDENTITY));
   i0(0,0) = i0(1,1) = i0(2,2) = 1.;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5 : ", ds->n() == 2 * 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5 : ", *(ds->x0()) == x0, true);

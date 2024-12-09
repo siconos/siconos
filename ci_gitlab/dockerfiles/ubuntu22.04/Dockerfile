@@ -2,24 +2,23 @@ FROM ubuntu:22.04 AS siconos-base
 ENV TZ=Europe/Paris
 ENV DEBIAN_FRONTEND=noninteractive
 RUN  apt update && apt upgrade -y && apt install --no-install-recommends -y -qq \
-        cmake \
-        git-core \
-        make \
+    cmake \
+    git-core \
+    make \
 	g++ \
-        gfortran \
-        libgmp-dev \
-	libboost-dev \
-        libopenblas-dev \
-        liblapacke-dev \
-        libcppunit-dev \
+    gfortran \
+    libgmp-dev \
+	#libboost-dev \
+    libopenblas-dev \
+    liblapacke-dev \
+    libcppunit-dev \
 	libhdf5-dev \
 	lp-solve \
-        liblpsolve55-dev \
+    liblpsolve55-dev \
 	libbullet-dev \
 	libbullet-extras-dev \
 	python3-full \
 	libpython3-dev \
-	swig \
 	libxrender1 \
 	valgrind \
 	vim \
@@ -28,8 +27,13 @@ RUN  apt update && apt upgrade -y && apt install --no-install-recommends -y -qq 
 	nlohmann-json3-dev \
 	libgl-dev \
 	libgl1 \
+	libeigen3-dev \
+	libeigen3-doc \
 	&&  apt autoclean -y && apt autoremove -y&& rm -rf /var/lib/apt/lists/*
 RUN useradd -ms /bin/bash siconos-user
+RUN wget https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.bz2 && \
+    tar -jxvf boost_1_81_0.tar.bz2 && \
+    cd boost_1_81_0 && ./bootstrap.sh && ./b2 install
 
 
 FROM siconos-base AS siconos-base-python

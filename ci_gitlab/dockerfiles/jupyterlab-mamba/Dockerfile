@@ -3,7 +3,7 @@
 # in the last step, after build, install, to avoid all the mess
 # with entrypoint and CI.
 #### Mamba setup ### 
-ARG MAMBAIMAGE=mambaorg/micromamba:1.5.8
+ARG MAMBAIMAGE=mambaorg/micromamba
 FROM $MAMBAIMAGE AS mamba-base
 LABEL maintainer="Siconos team <siconos-team@inria.fr>"
 USER root
@@ -13,7 +13,8 @@ RUN apt update  && apt upgrade -y && apt install --no-install-recommends -y -qq 
 	g++ \
         gfortran \
 	libgl-dev  &&  apt autoclean -y && apt autoremove -y&& rm -rf /var/lib/apt/lists/*
-RUN micromamba config prepend channels conda-forge && micromamba self-update
+RUN micromamba config prepend channels conda-forge && micromamba self-update && \
+    micromamba clean --all --yes
 
 
 FROM mamba-base AS mambaenv

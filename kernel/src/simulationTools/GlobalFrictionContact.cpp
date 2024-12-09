@@ -189,7 +189,7 @@ bool GlobalFrictionContact::preCompute(double time)
   // Get topology
   SP::Topology topology = simulation()->nonSmoothDynamicalSystem()->topology();
   DEBUG_PRINTF("indexSetLevel = %i\n", indexSetLevel());
-  if(indexSetLevel() == LEVELMAX)
+  if(indexSetLevel() == siconos::internal::LEVELMAX)
   {
     DEBUG_END("GlobalFrictionContact::preCompute(double time)\n");
     return false;

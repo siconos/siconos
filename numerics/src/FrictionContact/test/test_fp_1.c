@@ -16,7 +16,8 @@
  * limitations under the License.
  */
 
-#include <stdlib.h>                      // for malloc
+#include <stdlib.h>  // for malloc
+
 #include "Friction_cst.h"                // for SICONOS_FRICTION_3D_ACLMFP
 #include "NumericsFwd.h"                 // for SolverOptions
 #include "SOCLCP_cst.h"                  // for SICONOS_SOCLCP_VI_EG, SICONO...
@@ -24,11 +25,10 @@
 #include "frictionContact_test_utils.h"  // for build_test_collection
 #include "test_utils.h"                  // for TestCase
 
-TestCase * build_test_collection(int n_data, const char ** data_collection, int* number_of_tests)
-{
-
-  *number_of_tests = 5; //n_data * n_solvers;
-  TestCase * collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
+TestCase* build_test_collection(int n_data, const char** data_collection,
+                                int* number_of_tests) {
+  *number_of_tests = 5;  // n_data * n_solvers;
+  TestCase* collection = (TestCase*)malloc((*number_of_tests) * sizeof(TestCase));
 
   int current = 0;
 
@@ -93,5 +93,4 @@ TestCase * build_test_collection(int n_data, const char ** data_collection, int*
 
   *number_of_tests = current;
   return collection;
-
 }

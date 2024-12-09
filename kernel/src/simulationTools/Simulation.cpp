@@ -56,7 +56,7 @@ Simulation::Simulation(SP::NonSmoothDynamicalSystem nsds, SP::TimeDiscretisation
       _T(0.0),
       _nsds(nsds),
       _numberOfIndexSets(0),
-      _tolerance(DEFAULT_TOLERANCE),
+      _tolerance(siconos::internal::DEFAULT_TOLERANCE),
       _printStat(false),
       _staticLevels(false),
       _isInitialized(false) {
@@ -84,7 +84,7 @@ Simulation::Simulation(SP::TimeDiscretisation td)
       _tout(0.0),
       _T(0.0),
       _numberOfIndexSets(0),
-      _tolerance(DEFAULT_TOLERANCE),
+      _tolerance(siconos::internal::DEFAULT_TOLERANCE),
       _printStat(false),
       _staticLevels(false),
       _useRelativeConvergenceCriterion(false),
@@ -226,7 +226,6 @@ void Simulation::applyNSDSChangelogForDS() {
 
   NonSmoothDynamicalSystem::ChangeLog::const_iterator& itc = _nsdsChangeLogPosition.it;
 
-  bool interactionInitialized = false;
   itc++;
   while (itc != _nsds->changeLog().end()) {
     DEBUG_PRINT("- 3 - we initialize new  ds and interaction \n");
@@ -375,7 +374,7 @@ void Simulation::initializeIndexSets() {
   SP::Topology topo = _nsds->topology();
   unsigned int indxSize = topo->indexSetsSize();
   assert(_numberOfIndexSets > 0);
-  if ((indxSize == LEVELMAX) || (indxSize < _numberOfIndexSets)) {
+  if ((indxSize == siconos::internal::LEVELMAX) || (indxSize < _numberOfIndexSets)) {
     DEBUG_PRINT("Topology : a different number of indexSets has been found \n");
     DEBUG_PRINT("Topology :  we resize the number of index sets \n");
     topo->indexSetsResize(_numberOfIndexSets);

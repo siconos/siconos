@@ -14,15 +14,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #include "fc3d_local_problem_tools.h"
 #ifndef __cplusplus
-#include <stdbool.h>                 // for false
+#include <stdbool.h>  // for false
 #endif
-#include <stdlib.h>                  // for malloc, NULL
+#include <stdlib.h>  // for malloc, NULL
+
 #include "FrictionContactProblem.h"  // for FrictionContactProblem, friction...
 #include "NumericsMatrix.h"          // for NM_create_from_data, NumericsMatrix
 #include "SparseBlockMatrix.h"
+
 
 struct LocalProblemFunctionToolkit* localProblemFunctionToolkit_new() {
   struct LocalProblemFunctionToolkit * lpft = (struct LocalProblemFunctionToolkit*)malloc(sizeof(struct LocalProblemFunctionToolkit));
@@ -44,19 +46,19 @@ void fc3d_local_problem_compute_q(FrictionContactProblem * problem, FrictionCont
 {
 
   double *qLocal = localproblem->q;
-  int n = 3 * problem->numberOfContacts;
 
+  int n = 3 * problem->numberOfContacts;
 
   int in = 3 * contact, it = in + 1, is = it + 1;
 
   /* qLocal computation*/
   qLocal[0] = problem->q[in];
-  qLocal[1] =  problem->q[it];
-  qLocal[2] =  problem->q[is];
+  qLocal[1] = problem->q[it];
+  qLocal[2] = problem->q[is];
 
-  NM_row_prod_no_diag3(n, contact, 3*contact, problem->M, reaction, qLocal, false);
-
+  NM_row_prod_no_diag3(n, contact, 3 * contact, problem->M, reaction, qLocal, false);
 }
+
 
 void fc3d_local_problem_fill_M(FrictionContactProblem * problem, FrictionContactProblem * localproblem, int contact)
 {
@@ -67,27 +69,24 @@ void fc3d_local_problem_fill_M(FrictionContactProblem * problem, FrictionContact
     }
   else
     NM_extract_diag_block3(problem->M, contact, &localproblem->M->matrix0);
+
 }
 
-
-FrictionContactProblem* fc3d_local_problem_allocate(FrictionContactProblem* problem)
-{
+FrictionContactProblem* fc3d_local_problem_allocate(FrictionContactProblem* problem) {
   /* Connect local solver and local problem*/
   FrictionContactProblem* localproblem =
-    (FrictionContactProblem*)malloc(sizeof(FrictionContactProblem));
+      (FrictionContactProblem*)malloc(sizeof(FrictionContactProblem));
   localproblem->numberOfContacts = 1;
   localproblem->dimension = 3;
   localproblem->q = (double*)malloc(3 * sizeof(double));
   localproblem->mu = (double*)malloc(sizeof(double));
 
-  if(problem->M->storageType != NM_SPARSE_BLOCK)
+  if (problem->M->storageType != NM_SPARSE_BLOCK) {
+    localproblem->M = NM_create_from_data(NM_DENSE, 3, 3, malloc(9 * sizeof(double)));
+  } else /* NM_SPARSE_BLOCK */
   {
-    localproblem->M = NM_create_from_data(NM_DENSE, 3, 3,
-                                          malloc(9 * sizeof(double)));
-  }
-  else /* NM_SPARSE_BLOCK */
-  {
-    localproblem->M = NM_create_from_data(NM_DENSE, 3, 3, NULL); /* V.A. 14/11/2016 What is the interest of this line */
+    localproblem->M = NM_create_from_data(
+        NM_DENSE, 3, 3, NULL); /* V.A. 14/11/2016 What is the interest of this line */
   }
   return localproblem;
 }

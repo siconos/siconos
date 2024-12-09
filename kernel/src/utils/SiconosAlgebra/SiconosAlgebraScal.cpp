@@ -29,7 +29,7 @@
 #include "SiconosAlgebraTools.hpp" // for isComparableTo
 #include "SiconosException.hpp"
 
-using Siconos::Algebra::isComparableTo;
+using siconos::algebra::isComparableTo;
 
 void scal(double a, const SiconosMatrix& A, SiconosMatrix& B, bool init)
 {
@@ -45,17 +45,17 @@ void scal(double a, const SiconosMatrix& A, SiconosMatrix& B, bool init)
   }
   else
   {
-    Siconos::UBLAS_TYPE numA = A.num();
-    Siconos::UBLAS_TYPE numB = B.num();
+    siconos::UBLAS_TYPE numA = A.num();
+    siconos::UBLAS_TYPE numB = B.num();
 
-    if(numB == Siconos::ZERO || numB == Siconos::IDENTITY)  // B = 0 or identity.
+    if(numB == siconos::ZERO || numB == siconos::IDENTITY)  // B = 0 or identity.
       THROW_EXCEPTION("forbidden for B being a zero or identity matrix.");
 
-    if(numA == Siconos::ZERO)
+    if(numA == siconos::ZERO)
     {
       if(init) B.zero();  // else nothing
     }
-    else if(numA == Siconos::IDENTITY)
+    else if(numA == siconos::IDENTITY)
     {
       if(init)
       {
@@ -76,7 +76,7 @@ void scal(double a, const SiconosMatrix& A, SiconosMatrix& B, bool init)
         switch(numA)
         {
 
-        case Siconos::BLOCK: // A and B are block
+        case siconos::BLOCK: // A and B are block
           if(isComparableTo(A, B))
           {
             const BlockMatrix& Aref = static_cast<const BlockMatrix&>(A);
@@ -112,31 +112,31 @@ void scal(double a, const SiconosMatrix& A, SiconosMatrix& B, bool init)
           }
           break;
 
-        case Siconos::DENSE: // if both are dense
+        case siconos::DENSE: // if both are dense
           if(init)
             noalias(*B.dense()) = a ** A.dense();
           else
             noalias(*B.dense()) += a ** A.dense();
           break;
-        case Siconos::TRIANGULAR:
+        case siconos::TRIANGULAR:
           if(init)
             noalias(*B.triang()) = a ** A.triang();
           else
             noalias(*B.triang()) += a ** A.triang();
           break;
-        case Siconos::SYMMETRIC:
+        case siconos::SYMMETRIC:
           if(init)
             noalias(*B.sym()) = a ** A.sym();
           else
             noalias(*B.sym()) += a ** A.sym();
           break;
-        case Siconos::SPARSE:
+        case siconos::SPARSE:
           if(init)
             noalias(*B.sparse()) = a ** A.sparse();
           else
             noalias(*B.sparse()) += a ** A.sparse();
           break;
-        case Siconos::BANDED:
+        case siconos::BANDED:
           if(init)
             noalias(*B.banded()) = a ** A.banded();
           else
@@ -148,7 +148,7 @@ void scal(double a, const SiconosMatrix& A, SiconosMatrix& B, bool init)
       }
       else // if A and B are of different types.
       {
-        if(numA == Siconos::BLOCK || numB == Siconos::BLOCK)  // if A or B is block
+        if(numA == siconos::BLOCK || numB == siconos::BLOCK)  // if A or B is block
         {
           if(init)
           {
@@ -164,26 +164,26 @@ void scal(double a, const SiconosMatrix& A, SiconosMatrix& B, bool init)
         }
         else
         {
-          if(numB != Siconos::DENSE)
+          if(numB != siconos::DENSE)
             THROW_EXCEPTION("Inconsistent types between A and B (must be dense?)");
 
           if(init)
           {
             switch(numA)
             {
-            case Siconos::DENSE:
+            case siconos::DENSE:
               noalias(*B.dense()) = a ** A.dense();
               break;
-            case Siconos::TRIANGULAR:
+            case siconos::TRIANGULAR:
               noalias(*B.dense()) = a ** A.triang();
               break;
-            case Siconos::SYMMETRIC:
+            case siconos::SYMMETRIC:
               noalias(*B.dense()) = a ** A.sym();
               break;
-            case Siconos::SPARSE:
+            case siconos::SPARSE:
               noalias(*B.dense()) = a ** A.sparse();
               break;
-            case Siconos::BANDED:
+            case siconos::BANDED:
               noalias(*B.dense()) = a ** A.banded();
               break;
             default:
@@ -195,19 +195,19 @@ void scal(double a, const SiconosMatrix& A, SiconosMatrix& B, bool init)
           {
             switch(numA)
             {
-            case Siconos::DENSE:
+            case siconos::DENSE:
               noalias(*B.dense()) += a ** A.dense();
               break;
-            case Siconos::TRIANGULAR:
+            case siconos::TRIANGULAR:
               noalias(*B.dense()) += a ** A.triang();
               break;
-            case Siconos::SYMMETRIC:
+            case siconos::SYMMETRIC:
               noalias(*B.dense()) += a ** A.sym();
               break;
-            case Siconos::SPARSE:
+            case siconos::SPARSE:
               noalias(*B.dense()) += a ** A.sparse();
               break;
-            case Siconos::BANDED:
+            case siconos::BANDED:
               noalias(*B.dense()) += a ** A.banded();
               break;
             default:

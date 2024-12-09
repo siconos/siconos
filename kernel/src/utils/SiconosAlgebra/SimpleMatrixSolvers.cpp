@@ -58,7 +58,7 @@ namespace lapack = boost::numeric::bindings::lapack;
 #include <cs.h>
 #endif
 
-using namespace Siconos;
+using namespace siconos;
 
 void SimpleMatrix::PLUFactorizationInPlace()
 {
@@ -67,7 +67,7 @@ void SimpleMatrix::PLUFactorizationInPlace()
     std::cout << "SimpleMatrix::PLUFactorizationInPlace warning: this matrix is already PLUFactorized. " << std::endl;
     return;
   }
-  if (_num == Siconos::DENSE)
+  if (_num == siconos::DENSE)
   {
     if (!_ipiv)
       _ipiv.reset(new VInt(size(0)));
@@ -113,7 +113,7 @@ void SimpleMatrix::PLUInverseInPlace()
 {
   if(!_isPLUFactorized)
     PLUFactorizationInPlace();
-  if(_num != Siconos::DENSE)
+  if(_num != siconos::DENSE)
     THROW_EXCEPTION(" SimpleMatrix::PLUInverseInPlace: only implemented for dense matrices.");
 
 #if defined(HAS_LAPACK_dgetri)
@@ -134,7 +134,7 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B)
     THROW_EXCEPTION("SimpleMatrix PLUForwardBackwardInPlace(B) failed at solving Ax = B. Not yet implemented for a BlockMatrix B.");
   int info = 0;
 
-  if(_num == Siconos::DENSE)
+  if(_num == siconos::DENSE)
   {
     if(!_isPLUFactorized)  // call gesv => LU-factorize+solve
     {
@@ -170,12 +170,12 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B)
       PLUFactorizationInPlace();
     }
     // and then solve
-    if(B.num() == Siconos::DENSE)
+    if(B.num() == siconos::DENSE)
     {
       inplace_solve(*sparse(), *(B.dense()), ublas::lower_tag());
       inplace_solve(ublas::trans(*sparse()), *(B.dense()), ublas::upper_tag());
     }
-    else if(B.num() == Siconos::SPARSE)
+    else if(B.num() == siconos::SPARSE)
     {
       inplace_solve(*sparse(), *(B.sparse()), ublas::lower_tag());
       inplace_solve(ublas::trans(*sparse()), *(B.sparse()), ublas::upper_tag());
@@ -198,7 +198,7 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosVector &B)
   ublas::column(tmpB, 0) = *(B.dense()); // Conversion of vector to matrix. Temporary solution.
   int info;
 
-  if(_num == Siconos::DENSE)
+  if(_num == siconos::DENSE)
   {
     if(!_isPLUFactorized)  // call gesv => LU-factorize+solve
     {

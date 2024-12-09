@@ -12,12 +12,13 @@
 
 #include "NumericsFwd.h"  // for MixedLinearComplementarityProblem, SolverOp...
 
-void mlcp_direct_addConfig(MixedLinearComplementarityProblem* problem, int * zw);
-void mlcp_direct_addConfigFromWSolution(MixedLinearComplementarityProblem* problem, double * wSol);
+void mlcp_direct_addConfig(MixedLinearComplementarityProblem* problem, int* zw);
+void mlcp_direct_addConfigFromWSolution(MixedLinearComplementarityProblem* problem,
+                                        double* wSol);
 void mlcp_direct_init(MixedLinearComplementarityProblem* problem, SolverOptions* options);
 void mlcp_direct_reset(void);
 
 int mlcp_direct_getNbIWork(MixedLinearComplementarityProblem* problem, SolverOptions* options);
 int mlcp_direct_getNbDWork(MixedLinearComplementarityProblem* problem, SolverOptions* options);
-  
-#endif //MLCP_DIRECT_H
+
+#endif  // MLCP_DIRECT_H

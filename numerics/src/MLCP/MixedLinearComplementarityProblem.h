@@ -23,10 +23,10 @@
 
 */
 
-#include "NumericsFwd.h"   // for MixedLinearComplementarityProblem, Numerics...
-#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include <stdio.h>  // for FILE
 
-#include <stdio.h> // for FILE
+#include "NumericsFwd.h"    // for MixedLinearComplementarityProblem, Numerics...
+#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 /** The Structure that contains and defines MLCProblem. Find \f$ (z,w) \f$ such
  *  that:
@@ -105,8 +105,7 @@ extern "C" {
  *
  *  \param problem  pointer to a MixedLinearComplementarityProblem to delete
  */
-void mixedLinearComplementarity_free(
-    MixedLinearComplementarityProblem *problem);
+void mixedLinearComplementarity_free(MixedLinearComplementarityProblem *problem);
 
 /** create empty MLCP
  *
@@ -124,8 +123,8 @@ void mixedLinearComplementarity_display(MixedLinearComplementarityProblem *p);
  *  \param file pointer to a FILE
  *  \return 0 if ok
  */
-int mixedLinearComplementarity_printInFile(
-    MixedLinearComplementarityProblem *problem, FILE *file);
+int mixedLinearComplementarity_printInFile(MixedLinearComplementarityProblem *problem,
+                                           FILE *file);
 
 /** Function to read and create a MixedLinearComplementarityProblem
  *  from a file
@@ -134,8 +133,8 @@ int mixedLinearComplementarity_printInFile(
  *  \param file pointer to a FILE
  *  \return 0 if ok
  */
-int mixedLinearComplementarity_newFromFile(
-    MixedLinearComplementarityProblem *problem, FILE *file);
+int mixedLinearComplementarity_newFromFile(MixedLinearComplementarityProblem *problem,
+                                           FILE *file);
 
 /** Function to read and create a MixedLinearComplementarityProblem
  *  from a file
@@ -144,8 +143,8 @@ int mixedLinearComplementarity_newFromFile(
  *  \param file pointer to a FILE
  *  \return 0 if ok
  */
-int mixedLinearComplementarity_newFromFileOld(
-    MixedLinearComplementarityProblem *problem, FILE *file);
+int mixedLinearComplementarity_newFromFileOld(MixedLinearComplementarityProblem *problem,
+                                              FILE *file);
 
 /** Function to read and create a MixedLinearComplementarityProblem
  *  from a file
@@ -154,8 +153,8 @@ int mixedLinearComplementarity_newFromFileOld(
  *  \param filename that contains the mlcp
  *  \return 0 if ok
  */
-int mixedLinearComplementarity_newFromFilename(
-    MixedLinearComplementarityProblem *problem, const char *filename);
+int mixedLinearComplementarity_newFromFilename(MixedLinearComplementarityProblem *problem,
+                                               const char *filename);
 
 /** Function to create a MLCP with ABCD format from M formatted MLCP
  */

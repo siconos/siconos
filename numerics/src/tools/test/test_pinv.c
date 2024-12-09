@@ -1,30 +1,26 @@
-#include <stdio.h>           // for printf, NULL, fclose, fopen, FILE
-#include <stdlib.h>          // for free, malloc
-#include <string.h>          // for memcpy
+#include <stdio.h>   // for printf, NULL, fclose, fopen, FILE
+#include <stdlib.h>  // for free, malloc
+#include <string.h>  // for memcpy
+
 #include "NumericsFwd.h"     // for NumericsMatrix
 #include "NumericsMatrix.h"  // for NumericsMatrix, NM_clear, NM_new, NM_writ...
 #include "pinv.h"            // for pinv
-int main(void)
-{
+int main(void) {
   int n = 4;
   int m = 5;
   int info = -1;
 
-  double * W = (double*)malloc(n * m * sizeof(double));
-  double * Wpinv = (double*)malloc(n * m * sizeof(double));
-  double * Wpinvtest = (double*)malloc(m * n * sizeof(double));
+  double *W = (double *)malloc(n * m * sizeof(double));
+  double *Wpinv = (double *)malloc(n * m * sizeof(double));
+  double *Wpinvtest = (double *)malloc(m * n * sizeof(double));
 
-  for(int i = 0; i < n; i++)
-  {
-    for(int j = 0; j < m; j++)
-    {
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < m; j++) {
       W[i + j * n] = 0.0;
     }
   }
-  for(int i = 0; i < m; i++)
-  {
-    for(int j = 0; j < n; j++)
-    {
+  for (int i = 0; i < m; i++) {
+    for (int j = 0; j < n; j++) {
       Wpinv[i + j * m] = 0.0;
       Wpinvtest[i + j * m] = 0.0;
     }
@@ -35,32 +31,30 @@ int main(void)
   W[3 + 1 * n] = 4.0;
 
   printf("Original Matrix W\n");
-  for(int i = 0; i < n; i++)
-  {
-    for(int j = 0; j < m; j++)
-    {
-      printf("%8.6e\t", W[i + j * n]) ;
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < m; j++) {
+      printf("%8.6e\t", W[i + j * n]);
     }
     printf("\n");
   }
 
   NumericsMatrix *Wnum = NM_new();
   Wnum->storageType = 0;
-  Wnum-> size0 = n;
-  Wnum-> size1 = m;
+  Wnum->size0 = n;
+  Wnum->size1 = m;
   Wnum->matrix1 = NULL;
   Wnum->matrix2 = NULL;
   Wnum->internalData = NULL;
   Wnum->matrix0 = W;
 
-  FILE * file1 = fopen("dataW.dat", "w");
+  FILE *file1 = fopen("dataW.dat", "w");
   NM_write_in_file_scilab(Wnum, file1);
   fclose(file1);
 
   NumericsMatrix *WnumpInv = NM_new();
   WnumpInv->storageType = 0;
-  WnumpInv-> size0 = n;
-  WnumpInv-> size1 = m;
+  WnumpInv->size0 = n;
+  WnumpInv->size1 = m;
   WnumpInv->matrix1 = NULL;
   WnumpInv->matrix2 = NULL;
   WnumpInv->internalData = NULL;
@@ -70,11 +64,9 @@ int main(void)
   memcpy(Wpinv, W, n * m * sizeof(double));
   pinv(Wpinv, n, m, tol);
   printf("Winvtest\n");
-  for(int i = 0; i < m; i++)
-  {
-    for(int j = 0; j < n; j++)
-    {
-      printf("%8.6e\t", Wpinvtest[i + j * m]) ;
+  for (int i = 0; i < m; i++) {
+    for (int j = 0; j < n; j++) {
+      printf("%8.6e\t", Wpinvtest[i + j * m]);
     }
     printf("\n");
   }
@@ -85,45 +77,37 @@ int main(void)
   Wpinvtest[1 + 3 * m] = 1.0 / 4.0;
 
   printf("Winvtest\n");
-  for(int i = 0; i < m; i++)
-  {
-    for(int j = 0; j < n; j++)
-    {
-      printf("%8.6e\t", Wpinvtest[i + j * m]) ;
+  for (int i = 0; i < m; i++) {
+    for (int j = 0; j < n; j++) {
+      printf("%8.6e\t", Wpinvtest[i + j * m]);
     }
     printf("\n");
   }
   printf("Pseudo inverseWinv\n");
   double err = 0.0;
-  for(int i = 0; i < m; i++)
-  {
-    for(int j = 0; j < n; j++)
-    {
-      printf("%8.6e\t", Wpinv[i + j * m]) ;
-      err += (Wpinv[i + j * m] - Wpinvtest[i + j * m]) * (Wpinv[i + j * m] - Wpinvtest[i + j * m]);
+  for (int i = 0; i < m; i++) {
+    for (int j = 0; j < n; j++) {
+      printf("%8.6e\t", Wpinv[i + j * m]);
+      err += (Wpinv[i + j * m] - Wpinvtest[i + j * m]) *
+             (Wpinv[i + j * m] - Wpinvtest[i + j * m]);
     }
     printf("\n");
   }
 
-  if(err < 1e-16) info = 0 ;
-
+  if (err < 1e-16) info = 0;
 
   printf("--------------------------\n");
   printf("test with transpose matrix\n");
   printf("--------------------------\n");
 
-  for(int i = 0; i < m; i++)
-  {
-    for(int j = 0; j < n; j++)
-    {
+  for (int i = 0; i < m; i++) {
+    for (int j = 0; j < n; j++) {
       W[i + j * m] = W[j + i * n];
     }
   }
   W[4 + 0 * m] = 2.0;
-  for(int i = 0; i < n; i++)
-  {
-    for(int j = 0; j < m; j++)
-    {
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < m; j++) {
       Wpinv[i + j * n] = 0.0;
       Wpinvtest[i + j * n] = 0.0;
     }
@@ -138,36 +122,28 @@ int main(void)
   pinv(Wpinv, m, n, tol);
   printf("Winvtest\n");
 
-  for(int i = 0; i < n; i++)
-  {
-    for(int j = 0; j < m; j++)
-    {
-      printf("%8.6e\t", Wpinvtest[i + j * n]) ;
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < m; j++) {
+      printf("%8.6e\t", Wpinvtest[i + j * n]);
     }
     printf("\n");
   }
   printf("Pseudo inverseWinv\n");
   err = 0.0;
-  for(int i = 0; i < n; i++)
-  {
-    for(int j = 0; j < m; j++)
-    {
-      printf("%8.6e\t", Wpinv[i + j * n]) ;
-      err += (Wpinv[i + j * n] - Wpinvtest[i + j * n]) * (Wpinv[i + j * n] - Wpinvtest[i + j * n]);
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < m; j++) {
+      printf("%8.6e\t", Wpinv[i + j * n]);
+      err += (Wpinv[i + j * n] - Wpinvtest[i + j * n]) *
+             (Wpinv[i + j * n] - Wpinvtest[i + j * n]);
     }
     printf("\n");
   }
 
-  if(err < 1e-16) info = 0 ;
+  if (err < 1e-16) info = 0;
 
-
-  FILE * file2 = fopen("dataWPseudoInverse.dat", "w");
+  FILE *file2 = fopen("dataWPseudoInverse.dat", "w");
   NM_write_in_file_scilab(WnumpInv, file2);
   fclose(file2);
-
-
-
-
 
   free(Wpinvtest);
   NM_clear(Wnum);
@@ -180,12 +156,10 @@ int main(void)
   printf("-----------------------------------\n");
   n = 4;
   m = 4;
-  W = (double*)malloc(n * m * sizeof(double));
-  Wpinv = (double*)malloc(n * m * sizeof(double));
-  for(int i = 0; i < n; i++)
-  {
-    for(int j = 0; j < m; j++)
-    {
+  W = (double *)malloc(n * m * sizeof(double));
+  Wpinv = (double *)malloc(n * m * sizeof(double));
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < m; j++) {
       W[i + j * n] = 0.0;
     }
     W[i + i * n] = 10.0;
@@ -195,11 +169,8 @@ int main(void)
   memcpy(Wpinv, W, n * m * sizeof(double));
   pinv(Wpinv, n, m, tol);
 
-
   free(W);
   free(Wpinv);
 
-
   return info;
-
 }

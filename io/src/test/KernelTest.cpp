@@ -287,9 +287,9 @@ void KernelTest::t5()
 
   // ================================= Computation =================================
 
-  Siconos::save(s, BBxml);
+  siconos::save(s, BBxml);
 
-  SP::Simulation simFromFile = Siconos::load(BBxml);
+  SP::Simulation simFromFile = siconos::load(BBxml);
   SP::NonSmoothDynamicalSystem bouncingBallFromFile =
     simFromFile->nonSmoothDynamicalSystem();
 
@@ -305,7 +305,7 @@ void KernelTest::t5()
 
 void KernelTest::t6()
 {
-  SP::Simulation sim = Siconos::load(BBxml);
+  SP::Simulation sim = siconos::load(BBxml);
 
   try
   {
@@ -390,7 +390,7 @@ void KernelTest::t6()
 
   catch(...)
   {
-    Siconos::exception::process();
+    siconos::exception::process();
     CPPUNIT_ASSERT(false);
   }
 }
@@ -507,7 +507,7 @@ void KernelTest::t9()
   }
   catch(...)
   {
-    Siconos::exception::process();
+    siconos::exception::process();
     CPPUNIT_ASSERT(false);
   }
 }

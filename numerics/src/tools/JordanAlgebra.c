@@ -18,16 +18,15 @@
 
 #include "JordanAlgebra.h"
 
-#include <float.h>  // for DBL_EPSILON, DBL_MAX
+#include <assert.h>
+#include <stdlib.h>  // for exit
 
 #include "NumericsVector.h"
-#include "cblas.h"
+#include "SiconosBlas.h"
 #include "math.h"
 
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"
-typedef long double float_type;
-/* typedef double float_type; */
 #define EPS 1e-40
 
 NumericsMatrix* Arrow_repr(const double* const vec, const unsigned int vecSize,
@@ -437,15 +436,13 @@ void Qx05y(const double* const x, const double* const y, const unsigned int vecS
   size_t j;
   float_type* xb = (float_type*)calloc(dimension - 1, sizeof(float_type));
 
-  for (size_t i = 0; i < dimension - 1; xb[i] = 1 / sqrtl(dimension - 1), i++)
-    ;
+  for (size_t i = 0; i < dimension - 1; xb[i] = 1 / sqrtl(dimension - 1), i++);
 
   for (size_t i = 0; i < varsCount; i++) {
     j = i * dimension;
     nxb = dnrm2l(dimension - 1, x + j + 1);
     if (nxb > 0)
-      for (size_t k = 0; k < dimension - 1; xb[k] = x[j + 1 + k] / nxb, k++)
-        ;
+      for (size_t k = 0; k < dimension - 1; xb[k] = x[j + 1 + k] / nxb, k++);
     l1 = x[j] + nxb;
     l2 = x[j] - nxb;
     // if (l2 <= 0.) {printf("Qx05y. i = %zu: l2 = %3.50Le => l2 = EPS\n", i, l2); l2 = EPS;}
@@ -457,16 +454,14 @@ void Qx05y(const double* const x, const double* const y, const unsigned int vecS
     // different data types
     dx = sqrtl(l1 * l2);
     c1y = y[j];
-    for (size_t k = 0; k < dimension - 1; c1y += xb[k] * y[j + 1 + k], k++)
-      ;
+    for (size_t k = 0; k < dimension - 1; c1y += xb[k] * y[j + 1 + k], k++);
     c2y = 2 * y[j] - c1y;
     fx1 = (l1 * c1y + dx * c2y) / 2;
     fx2 = (dx * c1y + l2 * c2y) / 2;
     out[j] = fx1 + fx2 - dx * y[j];
     //    out[j] = cblas_ddot(dimension, x+j, 1, y+j, 1);
     for (size_t k = 0; k < dimension - 1;
-         out[j + k + 1] = fx1 * xb[k] - fx2 * xb[k] + dx * y[j + k + 1], k++)
-      ;
+         out[j + k + 1] = fx1 * xb[k] - fx2 * xb[k] + dx * y[j + k + 1], k++);
   }
   free(xb);
 }
@@ -479,8 +474,7 @@ void Qx50y(const double* const x, const double* const y, const unsigned int vecS
   size_t j;
   float_type* xb = (float_type*)calloc(dimension - 1, sizeof(float_type));
 
-  for (size_t i = 0; i < dimension - 1; xb[i] = 1 / sqrtl(dimension - 1), i++)
-    ;  // useful ?
+  for (size_t i = 0; i < dimension - 1; xb[i] = 1 / sqrtl(dimension - 1), i++);  // useful ?
 
   for (size_t i = 0; i < varsCount; i++) {
     j = i * dimension;
@@ -492,8 +486,7 @@ void Qx50y(const double* const x, const double* const y, const unsigned int vecS
     /*   } */
 
     if (nxb > 0)
-      for (size_t k = 0; k < dimension - 1; xb[k] = x[j + 1 + k] / nxb, k++)
-        ;
+      for (size_t k = 0; k < dimension - 1; xb[k] = x[j + 1 + k] / nxb, k++);
 
     l1 = x[j] + nxb;
     l2 = x[j] - nxb;
@@ -512,15 +505,13 @@ void Qx50y(const double* const x, const double* const y, const unsigned int vecS
     /*   } */
 
     c1y = y[j];
-    for (size_t k = 0; k < dimension - 1; c1y += xb[k] * y[j + 1 + k], k++)
-      ;
+    for (size_t k = 0; k < dimension - 1; c1y += xb[k] * y[j + 1 + k], k++);
     c2y = 2 * y[j] - c1y;
     fx1 = (c1y / l1 + dx * c2y) / 2;
     fx2 = (dx * c1y + c2y / l2) / 2;
     out[j] = fx1 + fx2 - dx * y[j];
     for (size_t k = 0; k < dimension - 1;
-         out[j + k + 1] = fx1 * xb[k] - fx2 * xb[k] + dx * y[j + k + 1], k++)
-      ;
+         out[j + k + 1] = fx1 * xb[k] - fx2 * xb[k] + dx * y[j + k + 1], k++);
   }
   free(xb);
 }
@@ -544,8 +535,7 @@ void Jinv(const double* const x, const unsigned int vecSize, const size_t varsCo
     // data types
     out[j] = l1 + l2;
     for (size_t k = 1; k < dimension;
-         out[j + k] = l1 * (x[j + k] / normx) - l2 * (x[j + k] / normx), k++)
-      ;
+         out[j + k] = l1 * (x[j + k] / normx) - l2 * (x[j + k] / normx), k++);
   }
 }
 
@@ -571,8 +561,7 @@ void Jsqrt(const double* const x, const unsigned int vecSize, const size_t varsC
     // negative number b/c of different data types
     out[j] = l1 + l2;
     for (size_t k = 1; k < dimension;
-         out[j + k] = l1 * (x[j + k] / normx) - l2 * (x[j + k] / normx), k++)
-      ;
+         out[j + k] = l1 * (x[j + k] / normx) - l2 * (x[j + k] / normx), k++);
   }
 }
 /* Returns J_sqrtinv(x) */
@@ -606,8 +595,7 @@ void Jsqrtinv(const double* const x, const unsigned int vecSize, const size_t va
     /*   } */
     out[j] = l1 + l2;
     for (size_t k = 1; k < dimension;
-         out[j + k] = l1 * (x[j + k] / normx) - l2 * (x[j + k] / normx), k++)
-      ;
+         out[j + k] = l1 * (x[j + k] / normx) - l2 * (x[j + k] / normx), k++);
   }
 }
 
@@ -684,8 +672,7 @@ void Qxy(const double* const x, const double* const y, const unsigned int vecSiz
     nxb = dnrm2l(dimension - 1, x + j + 1);
     dx = (x[j] + nxb) * (x[j] - nxb);
     z[j] = xy * x[j] - dx * y[j];
-    for (size_t k = 1; k < dimension; z[j + k] = xy * x[j + k] + dx * y[j + k], k++)
-      ;
+    for (size_t k = 1; k < dimension; z[j + k] = xy * x[j + k] + dx * y[j + k], k++);
   }
 }
 
@@ -763,13 +750,11 @@ void Jxinvprody(const double* const x, const double* const y, const unsigned int
     // divide by 0 b/c of different data types
 
     tmp = x[j] * y[j];
-    for (size_t k = 1; k < dimension; tmp -= x[j + k] * y[j + k], k++)
-      ;
+    for (size_t k = 1; k < dimension; tmp -= x[j + k] * y[j + k], k++);
     out[j] = tmp / detx;
 
     for (size_t k = 1; k < dimension;
-         out[j + k] = (x[j] * y[j + k] - y[j] * x[j + k]) / detx, k++)
-      ;
+         out[j + k] = (x[j] * y[j + k] - y[j] * x[j + k]) / detx, k++);
   }
 }
 

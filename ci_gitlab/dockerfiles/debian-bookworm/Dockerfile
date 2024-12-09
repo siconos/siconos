@@ -4,14 +4,13 @@ RUN apt update  && apt install  --no-install-recommends -y -qq \
         git-core \
 	cmake \
 	make \
-        libboost-dev \
-        libboost-serialization-dev \
-        libboost-filesystem-dev \
-        libboost-timer-dev \
-        libboost-chrono-dev \
+        #libboost-dev \
+        #libboost-serialization-dev \
+        #libboost-filesystem-dev \
+        #libboost-timer-dev \
+        #libboost-chrono-dev \
         libgmp-dev \
         libhdf5-mpi-dev \
-        swig \
         gcc \
         gfortran \
         g++ \
@@ -31,8 +30,15 @@ RUN apt update  && apt install  --no-install-recommends -y -qq \
 	libxrender1 \
 	libbullet-dev \
 	libbullet-extras-dev \
+	libeigen3-dev \
+	libeigen3-doc \
+	wget \
+        bzip2 \
         vim && apt clean && apt autoremove && rm -rf /var/lib/apt/lists/*
 RUN useradd -ms /bin/bash siconos-user
+RUN wget https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.bz2 && \
+    tar -jxvf boost_1_81_0.tar.bz2 && \
+    cd boost_1_81_0 && ./bootstrap.sh && ./b2 install
 
 FROM siconos-base AS siconos-base-python
 USER siconos-user

@@ -16,21 +16,18 @@
  * limitations under the License.
  */
 
-#include <stdlib.h>      // for malloc
+#include <stdlib.h>  // for malloc
+
 #include "test_utils.h"  // for data_collection
 
-const char ** data_collection()
-{
+const char **data_collection() {
+  int n_data_1 = 150;
 
-  int n_data_1=150;
-
-  const char ** data_collection_1 = malloc(n_data_1*sizeof(const char *));
-  int n_data=0;
+  const char **data_collection_1 = malloc(n_data_1 * sizeof(const char *));
+  int n_data = 0;
   data_collection_1[n_data++] = "./data/spheres-in-a-box-98-i10000-256-10.hdf5";
   /* data_collection_1[n_data++] = "./data/Spheres1mm-ndof-12000-nc-4196-1378.hdf5"; */
   data_collection_1[n_data++] = "---";
 
-
   return data_collection_1;
 }
-

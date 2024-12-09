@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef FRICTIONCONTACTPROBLEM_AS_CONVEXQP_H
 #define FRICTIONCONTACTPROBLEM_AS_CONVEXQP_H
 
@@ -22,30 +22,28 @@
   \brief Definition of a structure to handle with friction-contact (2D or 3D) problems.
 */
 
-#include "NumericsFwd.h"  // for ConvexQP, FrictionContactProblem, SolverOpt...
-#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"    // for ConvexQP, FrictionContactProblem, SolverOpt...
+#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 /** \struct FrictionContactProblem_as_ConvexQP FrictionContactProblem_as_ConvexQP.h
  *
  */
-struct FrictionContactProblem_as_ConvexQP
-{
+struct FrictionContactProblem_as_ConvexQP {
   /* the ConvexQP associated with the FC3D problem */
-  ConvexQP * cqp;
+  ConvexQP *cqp;
   /* the FC3D associated with the ConvexQP  */
-  FrictionContactProblem * fc3d;
+  FrictionContactProblem *fc3d;
   /* the SolverOptions that might be used to pass some numerical parameters */
-  SolverOptions * options;
+  SolverOptions *options;
 };
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-extern "C"
-{
+extern "C" {
 #endif
 
-  void Projection_ConvexQP_FC3D_Cylinder(void *cqpIn, double *x, double *PX);
+void Projection_ConvexQP_FC3D_Cylinder(void *cqpIn, double *x, double *PX);
 
-  void Projection_ConvexQP_FC3D_Disk(void *cqpIn, double *x, double *PX);
+void Projection_ConvexQP_FC3D_Disk(void *cqpIn, double *x, double *PX);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

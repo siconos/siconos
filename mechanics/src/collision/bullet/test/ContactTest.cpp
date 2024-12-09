@@ -374,7 +374,7 @@ void ContactTest::t1()
   }
   catch(...)
   {
-    Siconos::exception::process();
+    siconos::exception::process();
     CPPUNIT_ASSERT(0);
   }
 
@@ -433,7 +433,7 @@ void ContactTest::t2()
   }
   catch(...)
   {
-    Siconos::exception::process();
+    siconos::exception::process();
     CPPUNIT_ASSERT(0);
   }
 
@@ -485,7 +485,7 @@ void ContactTest::t3()
   }
   catch(...)
   {
-    Siconos::exception::process();
+    siconos::exception::process();
     CPPUNIT_ASSERT(0);
   }
 
@@ -521,7 +521,7 @@ void ContactTest::t4()
   }
   catch(...)
   {
-    Siconos::exception::process();
+    siconos::exception::process();
     CPPUNIT_ASSERT(1);
   }
 }

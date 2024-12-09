@@ -47,7 +47,7 @@ private:
   void End();
 
   unsigned int size;
-  SP::SiconosMatrix A, Aref;
+  SP::SiconosMatrix A, Aref, Asym;
 
 public:
   void setUp();

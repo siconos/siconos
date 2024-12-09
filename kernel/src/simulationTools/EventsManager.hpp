@@ -27,8 +27,6 @@
 #include "SiconosFwd.hpp"
 #include "TimeDiscretisation.hpp"
 
-const unsigned long int GAPLIMIT_DEFAULT = 100;
-
 /** set of events, with an ordering based on Event time value (mpz_t) to compare Events */
 typedef std::vector<SP::Event> EventsContainer; // Event are already sorted
 

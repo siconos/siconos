@@ -383,7 +383,7 @@ void Contact2dTest::t1()
   }
   catch(...)
   {
-    Siconos::exception::process();
+    siconos::exception::process();
     CPPUNIT_ASSERT(0);
   }
 
@@ -414,7 +414,7 @@ void Contact2dTest::t2()
   }
   catch(...)
   {
-    Siconos::exception::process();
+    siconos::exception::process();
     CPPUNIT_ASSERT(0);
   }
 
@@ -445,7 +445,7 @@ void Contact2dTest::t3()
   }
   catch(...)
   {
-    Siconos::exception::process();
+    siconos::exception::process();
     CPPUNIT_ASSERT(0);
   }
 

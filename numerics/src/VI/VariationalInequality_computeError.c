@@ -14,27 +14,26 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #include "VariationalInequality_computeError.h"
-#include <assert.h>                 // for assert
-#include <float.h>                  // for DBL_EPSILON
-#include <math.h>                   // for fabs, sqrt
-#include <stdio.h>                  // for printf
-#include <stdlib.h>                 // for calloc
-#include "SiconosBlas.h"                  // for cblas_daxpy, cblas_dnrm2, cblas_d...
+
+#include <assert.h>  // for assert
+#include <float.h>   // for DBL_EPSILON
+#include <math.h>    // for fabs, sqrt
+#include <stdio.h>   // for printf
+#include <stdlib.h>  // for calloc
+
+#include "SiconosBlas.h"            // for cblas_daxpy, cblas_dnrm2, cblas_d...
 #include "SiconosSets.h"            // for box_constraints
 #include "SolverOptions.h"          // for SolverOptions
 #include "VariationalInequality.h"  // for VariationalInequality
-#include "siconos_debug.h"                  // for DEBUG_PRINTF
 #include "numerics_verbose.h"       // for verbose
+#include "siconos_debug.h"          // for DEBUG_PRINTF
 
-int variationalInequality_computeError(
-  VariationalInequality* problem,
-  double *z, double *w, double tolerance,
-  SolverOptions * options, double * error)
-{
-
+int variationalInequality_computeError(VariationalInequality* problem, double* z, double* w,
+                                       double tolerance, SolverOptions* options,
+                                       double* error) {
   assert(problem);
   assert(z);
   assert(w);
@@ -44,97 +43,81 @@ int variationalInequality_computeError(
   int n = problem->size;
 
   *error = 0.;
-  if(!options->dWork)
-  {
-    options->dWork = (double*)calloc(2*n,sizeof(double));
+  if (!options->dWork) {
+    options->dWork = (double*)calloc(2 * n, sizeof(double));
   }
-  double *ztmp =  options->dWork;
-  double *wtmp =  &(options->dWork[n]);
+  double* ztmp = options->dWork;
+  double* wtmp = &(options->dWork[n]);
 
-
-  if(!problem->istheNormVIset)
-  {
-    for(int i=0; i<n; i++)
-    {
-      ztmp[i]=0.0 ;
+  if (!problem->istheNormVIset) {
+    for (int i = 0; i < n; i++) {
+      ztmp[i] = 0.0;
     }
-    problem->F(problem,n,ztmp,w);
-    problem->normVI= cblas_dnrm2(n, w, 1);
+    problem->F(problem, n, ztmp, w);
+    problem->normVI = cblas_dnrm2(n, w, 1);
     DEBUG_PRINTF("problem->normVI = %12.8e\n", problem->normVI);
-    problem->istheNormVIset=1;
+    problem->istheNormVIset = 1;
   }
 
-  double norm_q =problem->normVI;
+  double norm_q = problem->normVI;
   DEBUG_PRINTF("norm_q = %12.8e\n", norm_q);
 
-  problem->F(problem,n,z,w);
+  problem->F(problem, n, z, w);
 
   cblas_dcopy(n, z, 1, ztmp, 1);
-  cblas_daxpy(n, -1.0, w, 1, ztmp, 1) ;
+  cblas_daxpy(n, -1.0, w, 1, ztmp, 1);
 
-  problem->ProjectionOnX(problem,ztmp,wtmp);
+  problem->ProjectionOnX(problem, ztmp, wtmp);
 
-  cblas_daxpy(n, -1.0, z, 1, wtmp, 1) ;
+  cblas_daxpy(n, -1.0, z, 1, wtmp, 1);
   *error = cblas_dnrm2(n, wtmp, incx);
 
   /* Computes error */
-  if(fabs(norm_q) > DBL_EPSILON)
-    *error /= norm_q;
+  if (fabs(norm_q) > DBL_EPSILON) *error /= norm_q;
 
-  DEBUG_PRINTF("error = %e\n",*error);
-  if(*error > tolerance)
-  {
-    if(verbose > 1)
+  DEBUG_PRINTF("error = %e\n", *error);
+  if (*error > tolerance) {
+    if (verbose > 1)
       printf(" Numerics - variationalInequality_compute_error: error = %g > tolerance = %g.\n",
              *error, tolerance);
     return 1;
-  }
-  else
+  } else
     return 0;
 }
 
-int variationalInequality_compute_error_box(
-  VariationalInequality* problem,
-  double* x, double* F, double tolerance, double * error)
-{
+int variationalInequality_compute_error_box(VariationalInequality* problem, double* x,
+                                            double* F, double tolerance, double* error) {
   assert(problem);
   assert(x);
   assert(F);
   assert(error);
   assert(problem->set);
 
-  double* lb = ((box_constraints*) problem->set)->lb;
-  double* ub = ((box_constraints*) problem->set)->ub;
+  double* lb = ((box_constraints*)problem->set)->lb;
+  double* ub = ((box_constraints*)problem->set)->ub;
   double diff;
   double err = 0;
 
   // compute componentwise \Pi_box(x-F(x)) - x
-  for(int i = 0; i < problem->size; ++i)
-  {
+  for (int i = 0; i < problem->size; ++i) {
     diff = x[i] - F[i];
-    if(diff < lb[i])
-    {
+    if (diff < lb[i]) {
       diff = lb[i] - x[i];
-    }
-    else if(diff > ub[i])
-    {
+    } else if (diff > ub[i]) {
       diff = ub[i] - x[i];
+    } else {
+      diff = F[i];  // should be -F, but we square it anyway ...
     }
-    else
-    {
-      diff = F[i]; // should be -F, but we square it anyway ...
-    }
-    err += diff*diff;
+    err += diff * diff;
   }
   error[0] = sqrt(err);
 
-  if(error[0] > tolerance)
-  {
-    if(verbose > 1)
-      printf(" Numerics - variationalInequality_compute_error: error = %g > tolerance = %g.\n", *error, tolerance);
+  if (error[0] > tolerance) {
+    if (verbose > 1)
+      printf(" Numerics - variationalInequality_compute_error: error = %g > tolerance = %g.\n",
+             *error, tolerance);
     return 1;
-  }
-  else
+  } else
     return 0;
 }
 

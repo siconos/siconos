@@ -14,14 +14,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
-#include <float.h>                              // for DBL_EPSILON
+#include <float.h>  // for DBL_EPSILON
 #ifndef __cplusplus
-#include <stdbool.h>                       // for false
+#include <stdbool.h>  // for false
 #endif
-#include <stdio.h>                              // for printf
-#include <stdlib.h>                             // for free, malloc
+#include <stdio.h>   // for printf
+#include <stdlib.h>  // for free, malloc
+
 #include "MLCP_Solvers.h"                       // for mlcp_compute_error
 #include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
 #include "NumericsFwd.h"                        // for SolverOptions, MixedL...
@@ -36,8 +37,8 @@
  * double *w : size n+m
  */
 
-void mlcp_rpsor(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
-{
+void mlcp_rpsor(MixedLinearComplementarityProblem* problem, double* z, double* w, int* info,
+                SolverOptions* options) {
   double* A = problem->A;
   double* B = problem->B;
   double* C = problem->C;
@@ -46,8 +47,8 @@ void mlcp_rpsor(MixedLinearComplementarityProblem* problem, double *z, double *w
   double* b = problem->b;
   int n = problem->n;
   int m = problem->m;
-  double *u = &z[0];
-  double *v = &z[n];
+  double* u = &z[0];
+  double* v = &z[n];
 
   int incy, incAx, incBx;
   int i, iter;
@@ -61,8 +62,8 @@ void mlcp_rpsor(MixedLinearComplementarityProblem* problem, double *z, double *w
   /* Recup input */
 
   itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
-  tol   = options->dparam[SICONOS_DPARAM_TOL];
-  rho   = options->dparam[SICONOS_DPARAM_MLCP_RHO];
+  tol = options->dparam[SICONOS_DPARAM_TOL];
+  rho = options->dparam[SICONOS_DPARAM_MLCP_RHO];
   omega = options->dparam[SICONOS_DPARAM_MLCP_OMEGA];
   printf("omega %f\n", omega);
   printf("rho %f\n", rho);
@@ -77,19 +78,13 @@ void mlcp_rpsor(MixedLinearComplementarityProblem* problem, double *z, double *w
   diagA = (double*)malloc(n * sizeof(double));
   diagB = (double*)malloc(m * sizeof(double));
 
-
-
   incy = 1;
 
   /* Preparation of the diagonal of the inverse matrix */
 
-  for(i = 0 ; i < n ; ++i)
-  {
-    if(A[i * n + i] < -EPSDIAG)
-    {
-
-      if(verbose > 0)
-      {
+  for (i = 0; i < n; ++i) {
+    if (A[i * n + i] < -EPSDIAG) {
+      if (verbose > 0) {
         printf(" Negative diagonal term \n");
         printf(" The local problem cannot be solved \n");
       }
@@ -99,20 +94,13 @@ void mlcp_rpsor(MixedLinearComplementarityProblem* problem, double *z, double *w
       free(diagB);
 
       return;
-    }
-    else
-    {
+    } else {
       diagA[i] = omega / (A[i * n + i] + rho);
-
     }
   }
-  for(i = 0 ; i < m ; ++i)
-  {
-    if(B[i * m + i] < -EPSDIAG)
-    {
-
-      if(verbose > 0)
-      {
+  for (i = 0; i < m; ++i) {
+    if (B[i * m + i] < -EPSDIAG) {
+      if (verbose > 0) {
         printf(" Negative diagonal term \n");
         printf(" The local problem cannot be solved \n");
       }
@@ -122,16 +110,13 @@ void mlcp_rpsor(MixedLinearComplementarityProblem* problem, double *z, double *w
       free(diagB);
 
       return;
-    }
-    else
-    {
+    } else {
       diagB[i] = omega / (B[i * m + i] + rho);
-
     }
-  }  /*start iterations*/
+  } /*start iterations*/
 
   iter = 0;
-  err  = 1.;
+  err = 1.;
 
   incy = 1;
   incAx = n;
@@ -139,64 +124,56 @@ void mlcp_rpsor(MixedLinearComplementarityProblem* problem, double *z, double *w
 
   mlcp_compute_error(problem, z, w, tol, &err);
 
-
-  while((iter < itermax) && (err > tol))
-  {
-
+  while ((iter < itermax) && (err > tol)) {
     ++iter;
     incy = 1;
 
-
-    for(i = 0 ; i < n ; ++i)
-    {
+    for (i = 0; i < n; ++i) {
       uiprev = u[i];
       u[i] = 0.0;
-      //zi = -( q[i] + cblas_ddot( n , &vec[i] , incx , z , incy ))*diag[i];
-      u[i] = -(a[i]   - (rho * uiprev) + cblas_ddot(n, &A[i], incAx, u, incy)   + cblas_ddot(m, &C[i], incAx, v, incy)) * diagA[i];
+      // zi = -( q[i] + cblas_ddot( n , &vec[i] , incx , z , incy ))*diag[i];
+      u[i] = -(a[i] - (rho * uiprev) + cblas_ddot(n, &A[i], incAx, u, incy) +
+               cblas_ddot(m, &C[i], incAx, v, incy)) *
+             diagA[i];
     }
 
-    for(i = 0 ; i < m ; ++i)
-    {
+    for (i = 0; i < m; ++i) {
       viprev = v[i];
       v[i] = 0.0;
-      //zi = -( q[i] + cblas_ddot( n , &vec[i] , incx , z , incy ))*diag[i];
-      vi = -(b[i] - (rho * viprev) + cblas_ddot(n, &D[i], incBx, u, incy)   + cblas_ddot(m, &B[i], incBx, v, incy)) * diagB[i];
-      if(vi < 0) v[i] = 0.0;
-      else v[i] = vi;
+      // zi = -( q[i] + cblas_ddot( n , &vec[i] , incx , z , incy ))*diag[i];
+      vi = -(b[i] - (rho * viprev) + cblas_ddot(n, &D[i], incBx, u, incy) +
+             cblas_ddot(m, &B[i], incBx, v, incy)) *
+           diagB[i];
+      if (vi < 0)
+        v[i] = 0.0;
+      else
+        v[i] = vi;
     }
-
-
 
     /* **** Criterium convergence compliant with filter_result_MLCP **** */
 
     mlcp_compute_error(problem, z, w, tol, &err);
 
-    if(verbose == 2)
-    {
+    if (verbose == 2) {
       printf(" # i%d -- %g : ", iter, err);
-      for(i = 0 ; i < n ; ++i) printf(" %g", u[i]);
-      for(i = 0 ; i < m ; ++i) printf(" %g", v[i]);
-      for(i = 0 ; i < m ; ++i) printf(" %g", w[i]);
+      for (i = 0; i < n; ++i) printf(" %g", u[i]);
+      for (i = 0; i < m; ++i) printf(" %g", v[i]);
+      for (i = 0; i < m; ++i) printf(" %g", w[i]);
       printf("\n");
     }
 
     /* **** ********************* **** */
-
   }
 
   options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
   options->dparam[SICONOS_DPARAM_RESIDU] = err;
 
-  if(err > tol)
-  {
+  if (err > tol) {
     printf("Siconos/Numerics: mlcp_rpsor: No convergence of PGS after %d iterations\n", iter);
     printf("Siconos/Numerics: mlcp_rpsor: The residue is : %g \n", err);
     *info = 1;
-  }
-  else
-  {
-    if(verbose > 0)
-    {
+  } else {
+    if (verbose > 0) {
       printf("Siconos/Numerics: mlcp_rpsor: Convergence of PGS after %d iterations\n", iter);
       printf("Siconos/Numerics: mlcp_rpsor: The residue is : %g \n", err);
     }
@@ -205,13 +182,10 @@ void mlcp_rpsor(MixedLinearComplementarityProblem* problem, double *z, double *w
 
   free(diagA);
   free(diagB);
-
 }
 
-void mlcp_rpsor_set_default(SolverOptions* options)
-{
+void mlcp_rpsor_set_default(SolverOptions* options) {
   options->dparam[SICONOS_DPARAM_MLCP_RHO] = 0.5;
   options->dparam[SICONOS_DPARAM_MLCP_OMEGA] = 2.;
   options->filterOn = false;
 }
-

@@ -29,7 +29,7 @@ LagrangianLinearDiagonalDS::LagrangianLinearDiagonalDS(SP::SiconosVector q0, SP:
     SP::SiconosVector mass):
   LagrangianDS(q0, velocity0)
 {
-  _mass.reset(new SimpleMatrix(dimension(), dimension(), Siconos::BANDED, 0, 0));
+  _mass.reset(new SimpleMatrix(dimension(), dimension(), siconos::BANDED, 0, 0));
   for(unsigned int i = 0; i<dimension(); ++i)
     (*_mass)(i, i) = (*mass)(i);
   _stiffness = stiffness;

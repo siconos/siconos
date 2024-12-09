@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*!\file NumericsFwd.h
  * \brief Forward declaration of numerics structures*/
@@ -22,8 +22,7 @@
 #ifndef NumericsFwd_h
 #define NumericsFwd_h
 
-#define TYPEDEF_STRUCT(X) \
-  typedef struct X X; \
+#define TYPEDEF_STRUCT(X) typedef struct X X;
 
 // Matrices storage
 TYPEDEF_STRUCT(NumericsMatrix)
@@ -36,7 +35,7 @@ TYPEDEF_STRUCT(SparseBlockCoordinateMatrix)
 // Nonsmooth solvers
 TYPEDEF_STRUCT(SolverOptions)
 
-// Nonsmooth problems 
+// Nonsmooth problems
 TYPEDEF_STRUCT(SecondOrderConeLinearComplementarityProblem)
 TYPEDEF_STRUCT(SecondOrderConeLinearComplementarityProblem_as_VI)
 TYPEDEF_STRUCT(RelayProblem)

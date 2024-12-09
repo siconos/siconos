@@ -14,52 +14,50 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
-#include <stdio.h>                  // for printf, NULL
-#include <stdlib.h>                 // for free, malloc, calloc
+#include <stdio.h>   // for printf, NULL
+#include <stdlib.h>  // for free, malloc, calloc
+
 #include "ConvexQP.h"               // for ConvexQP
 #include "ConvexQP_Solvers.h"       // for convexQP_ProjectedGradient, conve...
 #include "ConvexQP_computeError.h"  // for convexQP_compute_error_reduced
 #include "ConvexQP_cst.h"           // for SICONOS_CONVEXQP_PGOC_RHO, SICONO...
 #include "NumericsFwd.h"            // for SolverOptions, ConvexQP, Numerics...
 #include "NumericsMatrix.h"         // for NM_gemv
+#include "SiconosBlas.h"            // for cblas_dcopy, cblas_daxpy, cblas_ddot
 #include "SolverOptions.h"          // for SolverOptions, solver_options_nul...
-#include "siconos_debug.h"                  // for DEBUG_PRINTF
 #include "numerics_verbose.h"       // for numerics_error, verbose, numerics...
-#include "SiconosBlas.h"                  // for cblas_dcopy, cblas_daxpy, cblas_ddot
+#include "siconos_debug.h"          // for DEBUG_PRINTF
 
 //#define VERBOSE_DEBUG
-const char* const   SICONOS_CONVEXQP_PG_STR = "CONVEXQP PG";
+const char* const SICONOS_CONVEXQP_PG_STR = "CONVEXQP PG";
 
-
-void convexQP_ProjectedGradient(ConvexQP* problem, double *z, double *w, int* info, SolverOptions* options)
-{
+void convexQP_ProjectedGradient(ConvexQP* problem, double* z, double* w, int* info,
+                                SolverOptions* options) {
   /* int and double parameters */
   int* iparam = options->iparam;
   double* dparam = options->dparam;
-
-
 
   double* q = problem->q;
   NumericsMatrix* M = problem->M;
   NumericsMatrix* A = problem->A;
 
-  if(!A)
-  {
-    numerics_warning("ConvexQP_ProjectedGradient", "This solver does not support a specific matrix A different from the identity and b=0");
+  if (!A) {
+    numerics_warning("ConvexQP_ProjectedGradient",
+                     "This solver does not support a specific matrix A different from the "
+                     "identity and b=0");
   }
 
   /* Dimension of the problem */
-  int n =  problem->size;
+  int n = problem->size;
 
-  if(!problem->istheNormConvexQPset)
-  {
-    problem->normConvexQP= cblas_dnrm2(n, problem->q, 1);
+  if (!problem->istheNormConvexQPset) {
+    problem->normConvexQP = cblas_dnrm2(n, problem->q, 1);
     DEBUG_PRINTF("problem->norm ConvexQP= %12.8e\n", problem->normConvexQP);
-    problem->istheNormConvexQPset=1;
+    problem->istheNormConvexQPset = 1;
   }
-  double norm_q =problem->normConvexQP;
+  double norm_q = problem->normConvexQP;
   DEBUG_PRINTF("norm_q = %12.8e\n", norm_q);
   /* Maximum number of iterations */
   int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
@@ -67,7 +65,7 @@ void convexQP_ProjectedGradient(ConvexQP* problem, double *z, double *w, int* in
   double tolerance = dparam[SICONOS_DPARAM_TOL];
 
   /*****  Projected Gradient iterations *****/
-  int iter = 0; /* Current iteration number */
+  int iter = 0;      /* Current iteration number */
   double error = 1.; /* Current error */
   int hasNotConverged = 1;
 
@@ -75,43 +73,37 @@ void convexQP_ProjectedGradient(ConvexQP* problem, double *z, double *w, int* in
   double rhomin = 0.0;
   int isVariable = 0;
 
-  if(dparam[SICONOS_CONVEXQP_PGOC_RHO] > 0.0)
-  {
+  if (dparam[SICONOS_CONVEXQP_PGOC_RHO] > 0.0) {
     rho = dparam[SICONOS_CONVEXQP_PGOC_RHO];
-  }
-  else
-  {
+  } else {
     /* Variable step in fixed*/
     isVariable = 1;
-    if(verbose > 0)
-      printf("Variable step (line search) in Projected Gradient iterations\n");
+    if (verbose > 0) printf("Variable step (line search) in Projected Gradient iterations\n");
     rho = -dparam[SICONOS_CONVEXQP_PGOC_RHO];
     rhomin = dparam[SICONOS_CONVEXQP_PGOC_RHOMIN];
   }
 
-  if(rho == 0.0)
-    numerics_error("ConvexQP_ProjectedGradient", "dparam[SICONOS_CONVEXQP_PGOC_RHO] must be nonzero");
+  if (rho == 0.0)
+    numerics_error("ConvexQP_ProjectedGradient",
+                   "dparam[SICONOS_CONVEXQP_PGOC_RHO] must be nonzero");
 
-  double rho_k =rho;
-  double * z_tmp= (double *)malloc(n * sizeof(double));
-  double * z_k;
-  double * direction;
-  double * w_k;
-  if(isVariable)
-  {
-    z_k = (double *)malloc(n * sizeof(double));
-    direction = (double *)malloc(n * sizeof(double));
-    w_k = (double *)malloc(n * sizeof(double));
+  double rho_k = rho;
+  double* z_tmp = (double*)malloc(n * sizeof(double));
+  double* z_k;
+  double* direction;
+  double* w_k;
+  if (isVariable) {
+    z_k = (double*)malloc(n * sizeof(double));
+    direction = (double*)malloc(n * sizeof(double));
+    w_k = (double*)malloc(n * sizeof(double));
   }
   double alpha = 1.0;
   double beta = 1.0;
 
-  if(!isVariable)
-  {
-    double minusrho  = -1.0*rho;
+  if (!isVariable) {
+    double minusrho = -1.0 * rho;
 
-    while((iter < itermax) && (hasNotConverged > 0))
-    {
+    while ((iter < itermax) && (hasNotConverged > 0)) {
       ++iter;
 
       /* q --> w */
@@ -124,43 +116,44 @@ void convexQP_ProjectedGradient(ConvexQP* problem, double *z, double *w, int* in
       cblas_daxpy(n, minusrho, w, 1, z, 1);
 
       cblas_dcopy(n, z, 1, z_tmp, 1);
-      problem->ProjectionOnC(problem,z_tmp,z);
+      problem->ProjectionOnC(problem, z_tmp, z);
 
       /* **** Criterium convergence **** */
       // Warning : options->dWork required in the function below !
       convexQP_compute_error_reduced(problem, z, w, tolerance, options, norm_q, &error);
 
-      if(verbose > 0)
-        printf("--------------- ConvexQP - Projected Gradient (PG) - Iteration %i rho = %14.7e \tError = %14.7e\n", iter, rho, error);
+      if (verbose > 0)
+        printf(
+            "--------------- ConvexQP - Projected Gradient (PG) - Iteration %i rho = %14.7e "
+            "\tError = %14.7e\n",
+            iter, rho, error);
 
-      if(error < tolerance) hasNotConverged = 0;
+      if (error < tolerance) hasNotConverged = 0;
       *info = hasNotConverged;
     }
-  }
-  else
-  {
-
-    double tau = dparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_TAU] ;
-    if((tau <= 0.0) || (tau >= 1.0))
-      numerics_error("fc3d_ProjectedGradientOnCylinder", "dparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_TAU] must in (0,1)");
-
+  } else {
+    double tau = dparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_TAU];
+    if ((tau <= 0.0) || (tau >= 1.0))
+      numerics_error("fc3d_ProjectedGradientOnCylinder",
+                     "dparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_TAU] must in (0,1)");
 
     double mu = dparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_MU];
-    if((mu <= 0.0) || (mu >= 1.0))
-      numerics_error("fc3d_ProjectedGradientOnCylinder", "dparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_MU] must in (0,1)");
+    if ((mu <= 0.0) || (mu >= 1.0))
+      numerics_error("fc3d_ProjectedGradientOnCylinder",
+                     "dparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_MU] must in (0,1)");
 
     int ls_iter_max = iparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_MAX_ITER];
 
     double theta = 0.0;
     double theta_k = 0.0;
-    double correction =0.0;
-    double criterion =1.0;
+    double correction = 0.0;
+    double criterion = 1.0;
 
-    int ls_iter =0;
-    //verbose=2;
+    int ls_iter = 0;
+    // verbose=2;
 
     cblas_dcopy(n, z, 1, z_tmp, 1);
-    problem->ProjectionOnC(problem,z_tmp,z);
+    problem->ProjectionOnC(problem, z_tmp, z);
 
     /* store the old z */
     cblas_dcopy(n, z, 1, z_k, 1);
@@ -175,27 +168,25 @@ void convexQP_ProjectedGradient(ConvexQP* problem, double *z, double *w, int* in
     cblas_dcopy(n, w_k, 1, w, 1);
     /* M z + 2* q --> w */
     cblas_daxpy(n, 1.0, q, 1, w, 1);
-    theta_k = 0.5*cblas_ddot(n, z, 1, w, 1);
+    theta_k = 0.5 * cblas_ddot(n, z, 1, w, 1);
 
-    while((iter < itermax) && (hasNotConverged > 0))
-    {
-      rho =  rho_k;
+    while ((iter < itermax) && (hasNotConverged > 0)) {
+      rho = rho_k;
       ++iter;
 
       /* Armijo line-search */
-      criterion =1.0;
-      ls_iter=0;
-      while((criterion > 0.0) && (ls_iter < ls_iter_max))
-      {
-        if(verbose > 1) printf("ls_iter = %i\t rho = %e\t", ls_iter, rho);
+      criterion = 1.0;
+      ls_iter = 0;
+      while ((criterion > 0.0) && (ls_iter < ls_iter_max)) {
+        if (verbose > 1) printf("ls_iter = %i\t rho = %e\t", ls_iter, rho);
 
         // Compute the new trial reaction
         // r = P_D(r_k - rho v_k)
         cblas_dcopy(n, z_k, 1, z, 1);
-        cblas_daxpy(n, -1.0*rho, w_k, 1, z, 1);
+        cblas_daxpy(n, -1.0 * rho, w_k, 1, z, 1);
 
         cblas_dcopy(n, z, 1, z_tmp, 1);
-        problem->ProjectionOnC(problem,z_tmp,z);
+        problem->ProjectionOnC(problem, z_tmp, z);
 
         //  Compute the new value of the cost function (we use velocity as tmp)
         /* q --> w */
@@ -205,23 +196,23 @@ void convexQP_ProjectedGradient(ConvexQP* problem, double *z, double *w, int* in
         NM_gemv(1.0, M, z, 1.0, w);
 
         /* M r + 2*q --> w */
-        //NM_gemv(1.0, M, z, 2.0, w);
-
+        // NM_gemv(1.0, M, z, 2.0, w);
 
         /* theta = 0.5 R^T M r + r^T q */
-        theta = 0.5*  cblas_ddot(n, w, 1, z, 1);
+        theta = 0.5 * cblas_ddot(n, w, 1, z, 1);
 
         // Compute direction d_k = z - z_k
         cblas_dcopy(n, z, 1, direction, 1);
         cblas_daxpy(n, -1, z_k, 1, direction, 1);
 
         correction = mu * cblas_ddot(n, w_k, 1, direction, 1);
-        criterion =    theta - theta_k - correction;
-        if(verbose > 1) printf("theta = %e\t theta_k = %e\t  correction = %e\t criterion = %e\n", theta, theta_k, correction, criterion);
-        rho = rho*tau;
+        criterion = theta - theta_k - correction;
+        if (verbose > 1)
+          printf("theta = %e\t theta_k = %e\t  correction = %e\t criterion = %e\n", theta,
+                 theta_k, correction, criterion);
+        rho = rho * tau;
         ls_iter++;
-        if(rho < rhomin)
-          break;
+        if (rho < rhomin) break;
       }
       /* store the old z */
       cblas_dcopy(n, z, 1, z_k, 1);
@@ -234,52 +225,54 @@ void convexQP_ProjectedGradient(ConvexQP* problem, double *z, double *w, int* in
       cblas_dcopy(n, w_k, 1, w, 1);
       /* M z + 2* q --> w */
       cblas_daxpy(n, 1.0, q, 1, w, 1);
-      theta_k = 0.5*cblas_ddot(n, z, 1, w, 1);
-      rho  = rho/tau;
+      theta_k = 0.5 * cblas_ddot(n, z, 1, w, 1);
+      rho = rho / tau;
       /* **** Criterium convergence **** */
-      convexQP_compute_error_reduced(problem, z, w, tolerance, options,  norm_q, &error);
+      convexQP_compute_error_reduced(problem, z, w, tolerance, options, norm_q, &error);
 
-      if(verbose > 0)
-        printf("--------------- ConvexQP - Projected Gradient (PG) - Iteration %i rho_k = %10.5e  rho =%10.5e error = %10.5e < %10.5e\n", iter, rho_k, rho, error, tolerance);
-
+      if (verbose > 0)
+        printf(
+            "--------------- ConvexQP - Projected Gradient (PG) - Iteration %i rho_k = %10.5e "
+            " rho =%10.5e error = %10.5e < %10.5e\n",
+            iter, rho_k, rho, error, tolerance);
 
       /* Try to increase rho is the ls_iter succeeds in one iteration */
-      if(ls_iter == 1)
-      {
-        if(verbose > 1)
-          printf("--------------- ConvexQP - Projected Gradient (PG) -  rho_k is increased from %10.5e to %10.5e \n", rho_k, rho_k/tau);
-        rho_k = rho_k/tau;
+      if (ls_iter == 1) {
+        if (verbose > 1)
+          printf(
+              "--------------- ConvexQP - Projected Gradient (PG) -  rho_k is increased from "
+              "%10.5e to %10.5e \n",
+              rho_k, rho_k / tau);
+        rho_k = rho_k / tau;
       }
-      if(error < tolerance) hasNotConverged = 0;
+      if (error < tolerance) hasNotConverged = 0;
       *info = hasNotConverged;
     }
   }
 
+  // verbose=1;
 
-  //verbose=1;
-
-  if(verbose > 0)
-    printf("---------------  ConvexQP - Projected Gradient (PG) - #Iteration %i Final Residual = %14.7e\n", iter, error);
+  if (verbose > 0)
+    printf(
+        "---------------  ConvexQP - Projected Gradient (PG) - #Iteration %i Final Residual = "
+        "%14.7e\n",
+        iter, error);
   dparam[SICONOS_DPARAM_RESIDU] = error;
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;
 
-  if(z_tmp)
-    free(z_tmp);
+  if (z_tmp) free(z_tmp);
   z_tmp = NULL;
-  if(isVariable)
-  {
+  if (isVariable) {
     free(z_k);
     free(direction);
     free(w_k);
   }
 }
 
-
-void convexQP_ProjectedGradient_set_default(SolverOptions* options)
-{
-  options->iparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_MAX_ITER] =20;
+void convexQP_ProjectedGradient_set_default(SolverOptions* options) {
+  options->iparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_MAX_ITER] = 20;
   options->dparam[SICONOS_CONVEXQP_PGOC_RHO] = -1.e-3; /* rho is variable by default */
   options->dparam[SICONOS_CONVEXQP_PGOC_RHOMIN] = 1e-9;
-  options->dparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_MU] =0.9;
-  options->dparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_TAU]  = 2.0/3.0;
+  options->dparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_MU] = 0.9;
+  options->dparam[SICONOS_CONVEXQP_PGOC_LINESEARCH_TAU] = 2.0 / 3.0;
 }

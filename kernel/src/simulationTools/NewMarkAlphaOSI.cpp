@@ -103,7 +103,7 @@ void NewMarkAlphaOSI::computeW(SP::DynamicalSystem ds, SiconosMatrix& W)
   double beta_prime = (1 - _alpha_m) / ((1 - _alpha_f) * _beta);
   double gamma_prime = _gamma / _beta;
   double h = _simulation->nextTime() - _simulation->startingTime(); // step size
-  if(h < 100 * MACHINE_PREC)
+  if(h < 100 * siconos::internal::MACHINE_PREC)
     THROW_EXCEPTION("In NewMarkAlphaOSI::initializeIterationMatrixW(t,ds), time integration is too small");
   // make sure that W is initialized before computing
   Type::Siconos dsType = Type::value(*ds);
@@ -598,7 +598,7 @@ void NewMarkAlphaOSI::prediction()
   DEBUG_BEGIN("NewMarkAlphaOSI::prediction()\n");
   // Step size
   double h = _simulation->nextTime() - _simulation->startingTime();
-  if(h < 100 * MACHINE_PREC)
+  if(h < 100 * siconos::internal::MACHINE_PREC)
     THROW_EXCEPTION("In NewMarkAlphaOSI::prediction, time integration is too small");
   // Loop over all DS
   Type::Siconos dsType ;    // Type of the current DS.

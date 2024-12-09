@@ -557,7 +557,7 @@ void ZeroOrderHoldOSI::updateState(const unsigned int level)
       // 1 - First Order Linear Time Invariant Systems
       // \Phi is already computed
       x = *ds_work_vectors[ZeroOrderHoldOSI::FREE]; // x = xfree = Phi*xold (+ Bd*u ) (+  Ld*e)
-      if(level != LEVELMAX)
+      if(level != siconos::internal::LEVELMAX)
       {
         SP::Interaction interC;
         // we have to find the control interaction

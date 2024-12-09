@@ -76,21 +76,21 @@ void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool
   if(A.size(0) != y.size())
     THROW_EXCEPTION("inconsistent sizes between A and y.");
 
-  Siconos::UBLAS_TYPE numA = A.num();
-  Siconos::UBLAS_TYPE numX = x.num();
-  Siconos::UBLAS_TYPE numY = y.num();
+  siconos::UBLAS_TYPE numA = A.num();
+  siconos::UBLAS_TYPE numX = x.num();
+  siconos::UBLAS_TYPE numY = y.num();
 
-  if(numA == Siconos::BLOCK)
+  if(numA == siconos::BLOCK)
     THROW_EXCEPTION("not yet implemented for block matrices.");
 
-  if(numA == Siconos::ZERO)
+  if(numA == siconos::ZERO)
   {
     if(init)
       y.zero();
     //else nothing
   }
 
-  else if(numA == Siconos::IDENTITY)
+  else if(numA == siconos::IDENTITY)
   {
     if(!init)
       y += x;
@@ -109,72 +109,72 @@ void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool
     {
       if(&x != &y)  // if no common memory between x and y.
       {
-        if(numX == Siconos::DENSE)
+        if(numX == siconos::DENSE)
         {
-          if(numY != Siconos::DENSE)
+          if(numY != siconos::DENSE)
             THROW_EXCEPTION("y (output) must be a dense vector.");
 
           assert(y.dense() != x.dense());
 
-          if(numA == Siconos::DENSE)
+          if(numA == siconos::DENSE)
             noalias(*y.dense()) = ublas::prod(*A.dense(), *x.dense());
-          else if(numA == Siconos::TRIANGULAR)
+          else if(numA == siconos::TRIANGULAR)
             noalias(*y.dense()) = ublas::prod(*A.triang(), *x.dense());
-          else if(numA == Siconos::SYMMETRIC)
+          else if(numA == siconos::SYMMETRIC)
             noalias(*y.dense()) = ublas::prod(*A.sym(), *x.dense());
-          else if(numA == Siconos::SPARSE)
+          else if(numA == siconos::SPARSE)
             noalias(*y.dense()) = ublas::prod(*A.sparse(), *x.dense());
-          else //if(numA==Siconos::BANDED)
+          else //if(numA==siconos::BANDED)
             noalias(*y.dense()) = ublas::prod(*A.banded(), *x.dense());
         }
-        else //if(numX == Siconos::SPARSE)
+        else //if(numX == siconos::SPARSE)
         {
-          if(numY != Siconos::DENSE && numA != Siconos::SPARSE)
+          if(numY != siconos::DENSE && numA != siconos::SPARSE)
             THROW_EXCEPTION(" y (output) must be a dense vector or A a sparse matrix.");
 
-          if(numA == Siconos::DENSE)
+          if(numA == siconos::DENSE)
             noalias(*y.dense()) = ublas::prod(*A.dense(), *x.sparse());
-          else if(numA == Siconos::TRIANGULAR)
+          else if(numA == siconos::TRIANGULAR)
             noalias(*y.dense()) = ublas::prod(*A.triang(), *x.sparse());
-          else if(numA == Siconos::SYMMETRIC)
+          else if(numA == siconos::SYMMETRIC)
             noalias(*y.dense()) = ublas::prod(*A.sym(), *x.sparse());
-          else if(numA == Siconos::SPARSE)
+          else if(numA == siconos::SPARSE)
           {
-            if(numY == Siconos::DENSE)
+            if(numY == siconos::DENSE)
               noalias(*y.dense()) = ublas::prod(*A.sparse(), *x.sparse());
             else
               noalias(*y.sparse()) = ublas::prod(*A.sparse(), *x.sparse());
           }
-          else //if(numA==Siconos::BANDED)
+          else //if(numA==siconos::BANDED)
             noalias(*y.dense()) = ublas::prod(*A.banded(), *x.sparse());
         }
       }
       else // if x and y are the same object => alias
       {
-        if(numX == Siconos::DENSE)
+        if(numX == siconos::DENSE)
         {
-          if(numA == Siconos::DENSE)
+          if(numA == siconos::DENSE)
             *y.dense() = ublas::prod(*A.dense(), *x.dense());
-          else if(numA == Siconos::TRIANGULAR)
+          else if(numA == siconos::TRIANGULAR)
             *y.dense() = ublas::prod(*A.triang(), *x.dense());
-          else if(numA == Siconos::SYMMETRIC)
+          else if(numA == siconos::SYMMETRIC)
             *y.dense() = ublas::prod(*A.sym(), *x.dense());
-          else if(numA == Siconos::SPARSE)
+          else if(numA == siconos::SPARSE)
             *y.dense() = ublas::prod(*A.sparse(), *x.dense());
-          else //if(numA==Siconos::BANDED)
+          else //if(numA==siconos::BANDED)
             *y.dense() = ublas::prod(*A.banded(), *x.dense());
         }
-        else //if(numX == Siconos::SPARSE)
+        else //if(numX == siconos::SPARSE)
         {
-          if(numA == Siconos::DENSE)
+          if(numA == siconos::DENSE)
             *y.sparse() = ublas::prod(*A.dense(), *x.sparse());
-          else if(numA == Siconos::TRIANGULAR)
+          else if(numA == siconos::TRIANGULAR)
             *y.sparse() = ublas::prod(*A.triang(), *x.sparse());
-          else if(numA == Siconos::SYMMETRIC)
+          else if(numA == siconos::SYMMETRIC)
             *y.sparse() = ublas::prod(*A.sym(), *x.sparse());
-          else if(numA == Siconos::SPARSE)
+          else if(numA == siconos::SPARSE)
             *y.sparse() = ublas::prod(*A.sparse(), *x.sparse());
-          else //if(numA==Siconos::BANDED)
+          else //if(numA==siconos::BANDED)
             *y.sparse() = ublas::prod(*A.banded(), *x.sparse());
         }
       }
@@ -183,70 +183,70 @@ void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool
     {
       if(&x != &y)  // if no common memory between x and y.
       {
-        if(numX == Siconos::DENSE)
+        if(numX == siconos::DENSE)
         {
-          if(numY != Siconos::DENSE)
+          if(numY != siconos::DENSE)
             THROW_EXCEPTION("y (output) must be a dense vector.");
 
-          if(numA == Siconos::DENSE)
+          if(numA == siconos::DENSE)
             noalias(*y.dense()) += ublas::prod(*A.dense(), *x.dense());
-          else if(numA == Siconos::TRIANGULAR)
+          else if(numA == siconos::TRIANGULAR)
             noalias(*y.dense()) += ublas::prod(*A.triang(), *x.dense());
-          else if(numA == Siconos::SYMMETRIC)
+          else if(numA == siconos::SYMMETRIC)
             noalias(*y.dense()) += ublas::prod(*A.sym(), *x.dense());
-          else if(numA == Siconos::SPARSE)
+          else if(numA == siconos::SPARSE)
             noalias(*y.dense()) += ublas::prod(*A.sparse(), *x.dense());
-          else //if(numA==Siconos::BANDED)
+          else //if(numA==siconos::BANDED)
             noalias(*y.dense()) += ublas::prod(*A.banded(), *x.dense());
         }
-        else //if(numX == Siconos::SPARSE)
+        else //if(numX == siconos::SPARSE)
         {
-          if(numY != Siconos::DENSE && numA != Siconos::SPARSE)
+          if(numY != siconos::DENSE && numA != siconos::SPARSE)
             THROW_EXCEPTION("y (output) must be a dense vector or A a sparse matrix.");
 
-          if(numA == Siconos::DENSE)
+          if(numA == siconos::DENSE)
             noalias(*y.dense()) += ublas::prod(*A.dense(), *x.sparse());
-          else if(numA == Siconos::TRIANGULAR)
+          else if(numA == siconos::TRIANGULAR)
             noalias(*y.dense()) += ublas::prod(*A.triang(), *x.sparse());
-          else if(numA == Siconos::SYMMETRIC)
+          else if(numA == siconos::SYMMETRIC)
             noalias(*y.dense()) += ublas::prod(*A.sym(), *x.sparse());
-          else if(numA == Siconos::SPARSE)
+          else if(numA == siconos::SPARSE)
           {
-            if(numY == Siconos::DENSE)
+            if(numY == siconos::DENSE)
               noalias(*y.dense()) += ublas::prod(*A.sparse(), *x.sparse());
             else
               noalias(*y.sparse()) += ublas::prod(*A.sparse(), *x.sparse());
           }
-          else //if(numA==Siconos::BANDED)
+          else //if(numA==siconos::BANDED)
             noalias(*y.dense()) += ublas::prod(*A.banded(), *x.sparse());
         }
       }
       else // if x and y are the same object => alias
       {
-        if(numX == Siconos::DENSE)
+        if(numX == siconos::DENSE)
         {
-          if(numA == Siconos::DENSE)
+          if(numA == siconos::DENSE)
             *y.dense() += ublas::prod(*A.dense(), *x.dense());
-          else if(numA == Siconos::TRIANGULAR)
+          else if(numA == siconos::TRIANGULAR)
             *y.dense() += ublas::prod(*A.triang(), *x.dense());
-          else if(numA == Siconos::SYMMETRIC)
+          else if(numA == siconos::SYMMETRIC)
             *y.dense() += ublas::prod(*A.sym(), *x.dense());
-          else if(numA == Siconos::SPARSE)
+          else if(numA == siconos::SPARSE)
             *y.dense() += ublas::prod(*A.sparse(), *x.dense());
-          else //if(numA==Siconos::BANDED)
+          else //if(numA==siconos::BANDED)
             *y.dense() += ublas::prod(*A.banded(), *x.dense());
         }
-        else //if(numX == Siconos::SPARSE)
+        else //if(numX == siconos::SPARSE)
         {
-          if(numA == Siconos::DENSE)
+          if(numA == siconos::DENSE)
             *y.sparse() += ublas::prod(*A.dense(), *x.sparse());
-          else if(numA == Siconos::TRIANGULAR)
+          else if(numA == siconos::TRIANGULAR)
             *y.sparse() += ublas::prod(*A.triang(), *x.sparse());
-          else if(numA == Siconos::SYMMETRIC)
+          else if(numA == siconos::SYMMETRIC)
             *y.sparse() += ublas::prod(*A.sym(), *x.sparse());
-          else if(numA == Siconos::SPARSE)
+          else if(numA == siconos::SPARSE)
             *y.sparse() += ublas::prod(*A.sparse(), *x.sparse());
-          else //if(numA==Siconos::BANDED)
+          else //if(numA==siconos::BANDED)
             *y.sparse() += ublas::prod(*A.banded(), *x.sparse());
         }
       }
@@ -266,21 +266,21 @@ void prod(const SiconosVector& x, const SiconosMatrix& A, SiconosVector& y, bool
   if(A.size(1) != y.size())
     THROW_EXCEPTION("inconsistent sizes between A and y.");
 
-  Siconos::UBLAS_TYPE numA = A.num();
-  Siconos::UBLAS_TYPE numX = x.num();
-  Siconos::UBLAS_TYPE numY = y.num();
+  siconos::UBLAS_TYPE numA = A.num();
+  siconos::UBLAS_TYPE numX = x.num();
+  siconos::UBLAS_TYPE numY = y.num();
 
-  if(numA == Siconos::BLOCK)
+  if(numA == siconos::BLOCK)
     THROW_EXCEPTION("not yet implemented for block matrices.");
 
-  if(numA == Siconos::ZERO)  // A = 0
+  if(numA == siconos::ZERO)  // A = 0
   {
     if(init)
       y.zero();
     // else nothing
   }
 
-  else if(numA == Siconos::IDENTITY)  // A = identity
+  else if(numA == siconos::IDENTITY)  // A = identity
   {
     if(!init)
       y += x;
@@ -299,69 +299,69 @@ void prod(const SiconosVector& x, const SiconosMatrix& A, SiconosVector& y, bool
 
         if(&x != &y)  // if no common memory between x and y.
         {
-          if(numX == Siconos::DENSE)
+          if(numX == siconos::DENSE)
           {
-            if(numY != Siconos::DENSE)
+            if(numY != siconos::DENSE)
               THROW_EXCEPTION("y (output) must be a dense vector.");
 
-            if(numA == Siconos::DENSE)
+            if(numA == siconos::DENSE)
               noalias(*y.dense()) = ublas::prod(trans(*A.dense()), *x.dense());
-            else if(numA == Siconos::TRIANGULAR)
+            else if(numA == siconos::TRIANGULAR)
               noalias(*y.dense()) = ublas::prod(trans(*A.triang()), *x.dense());
-            else if(numA == Siconos::SYMMETRIC)
+            else if(numA == siconos::SYMMETRIC)
               noalias(*y.dense()) = ublas::prod(trans(*A.sym()), *x.dense());
-            else if(numA == Siconos::SPARSE)
+            else if(numA == siconos::SPARSE)
               noalias(*y.dense()) = ublas::prod(trans(*A.sparse()), *x.dense());
-            else //if(numA==Siconos::BANDED)
+            else //if(numA==siconos::BANDED)
               noalias(*y.dense()) = ublas::prod(trans(*A.banded()), *x.dense());
           }
-          else //if(numX == Siconos::SPARSE)
+          else //if(numX == siconos::SPARSE)
           {
-            if(numY != Siconos::DENSE && numA != Siconos::SPARSE)
+            if(numY != siconos::DENSE && numA != siconos::SPARSE)
               THROW_EXCEPTION("y (output) must be a dense vector or A a sparse matrix.");
-            if(numA == Siconos::DENSE)
+            if(numA == siconos::DENSE)
               noalias(*y.dense()) = ublas::prod(trans(*A.dense()), *x.sparse());
-            else if(numA == Siconos::TRIANGULAR)
+            else if(numA == siconos::TRIANGULAR)
               noalias(*y.dense()) = ublas::prod(trans(*A.triang()), *x.sparse());
-            else if(numA == Siconos::SYMMETRIC)
+            else if(numA == siconos::SYMMETRIC)
               noalias(*y.dense()) = ublas::prod(trans(*A.sym()), *x.sparse());
-            else if(numA == Siconos::SPARSE)
+            else if(numA == siconos::SPARSE)
             {
-              if(numY == Siconos::DENSE)
+              if(numY == siconos::DENSE)
                 noalias(*y.dense()) = ublas::prod(trans(*A.sparse()), *x.sparse());
               else
                 noalias(*y.sparse()) = ublas::prod(trans(*A.sparse()), *x.sparse());
             }
-            else //if(numA==Siconos::BANDED)
+            else //if(numA==siconos::BANDED)
               noalias(*y.dense()) = ublas::prod(trans(*A.banded()), *x.sparse());
           }
         }
         else // if x and y are the same object => alias
         {
-          if(numX == Siconos::DENSE)
+          if(numX == siconos::DENSE)
           {
-            if(numA == Siconos::DENSE)
+            if(numA == siconos::DENSE)
               *y.dense() = ublas::prod(trans(*A.dense()), *x.dense());
-            else if(numA == Siconos::TRIANGULAR)
+            else if(numA == siconos::TRIANGULAR)
               *y.dense() = ublas::prod(trans(*A.triang()), *x.dense());
-            else if(numA == Siconos::SYMMETRIC)
+            else if(numA == siconos::SYMMETRIC)
               *y.dense() = ublas::prod(trans(*A.sym()), *x.dense());
-            else if(numA == Siconos::SPARSE)
+            else if(numA == siconos::SPARSE)
               *y.dense() = ublas::prod(trans(*A.sparse()), *x.dense());
-            else //if(numA==Siconos::BANDED)
+            else //if(numA==siconos::BANDED)
               *y.dense() = ublas::prod(trans(*A.banded()), *x.dense());
           }
-          else //if(numX == Siconos::SPARSE)
+          else //if(numX == siconos::SPARSE)
           {
-            if(numA == Siconos::DENSE)
+            if(numA == siconos::DENSE)
               *y.sparse() = ublas::prod(trans(*A.dense()), *x.sparse());
-            else if(numA == Siconos::TRIANGULAR)
+            else if(numA == siconos::TRIANGULAR)
               *y.sparse() = ublas::prod(trans(*A.triang()), *x.sparse());
-            else if(numA == Siconos::SYMMETRIC)
+            else if(numA == siconos::SYMMETRIC)
               *y.sparse() = ublas::prod(trans(*A.sym()), *x.sparse());
-            else if(numA == Siconos::SPARSE)
+            else if(numA == siconos::SPARSE)
               *y.sparse() = ublas::prod(trans(*A.sparse()), *x.sparse());
-            else //if(numA==Siconos::BANDED)
+            else //if(numA==siconos::BANDED)
               *y.sparse() = ublas::prod(trans(*A.banded()), *x.sparse());
           }
         }
@@ -371,70 +371,70 @@ void prod(const SiconosVector& x, const SiconosMatrix& A, SiconosVector& y, bool
 
         if(&x != &y)  // if no common memory between x and y.
         {
-          if(numX == Siconos::DENSE)
+          if(numX == siconos::DENSE)
           {
-            if(numY != Siconos::DENSE)
+            if(numY != siconos::DENSE)
               THROW_EXCEPTION("y (output) must be a dense vector.");
 
-            if(numA == Siconos::DENSE)
+            if(numA == siconos::DENSE)
               noalias(*y.dense()) += ublas::prod(trans(*A.dense()), *x.dense());
-            else if(numA == Siconos::TRIANGULAR)
+            else if(numA == siconos::TRIANGULAR)
               noalias(*y.dense()) += ublas::prod(trans(*A.triang()), *x.dense());
-            else if(numA == Siconos::SYMMETRIC)
+            else if(numA == siconos::SYMMETRIC)
               noalias(*y.dense()) += ublas::prod(trans(*A.sym()), *x.dense());
-            else if(numA == Siconos::SPARSE)
+            else if(numA == siconos::SPARSE)
               noalias(*y.dense()) += ublas::prod(trans(*A.sparse()), *x.dense());
-            else //if(numA==Siconos::BANDED)
+            else //if(numA==siconos::BANDED)
               noalias(*y.dense()) += ublas::prod(trans(*A.banded()), *x.dense());
           }
-          else //if(numX == Siconos::SPARSE)
+          else //if(numX == siconos::SPARSE)
           {
-            if(numY != Siconos::DENSE && numA != Siconos::SPARSE)
+            if(numY != siconos::DENSE && numA != siconos::SPARSE)
               THROW_EXCEPTION("y (output) must be a dense vector or A a sparse matrix.");
 
-            if(numA == Siconos::DENSE)
+            if(numA == siconos::DENSE)
               noalias(*y.dense()) += ublas::prod(trans(*A.dense()), *x.sparse());
-            else if(numA == Siconos::TRIANGULAR)
+            else if(numA == siconos::TRIANGULAR)
               noalias(*y.dense()) += ublas::prod(trans(*A.triang()), *x.sparse());
-            else if(numA == Siconos::SYMMETRIC)
+            else if(numA == siconos::SYMMETRIC)
               noalias(*y.dense()) += ublas::prod(trans(*A.sym()), *x.sparse());
-            else if(numA == Siconos::SPARSE)
+            else if(numA == siconos::SPARSE)
             {
-              if(numY == Siconos::DENSE)
+              if(numY == siconos::DENSE)
                 noalias(*y.dense()) += ublas::prod(trans(*A.sparse()), *x.sparse());
               else
                 noalias(*y.sparse()) += ublas::prod(trans(*A.sparse()), *x.sparse());
             }
-            else //if(numA==Siconos::BANDED)
+            else //if(numA==siconos::BANDED)
               noalias(*y.dense()) += ublas::prod(trans(*A.banded()), *x.sparse());
           }
         }
         else // if x and y are the same object => alias
         {
-          if(numX == Siconos::DENSE)
+          if(numX == siconos::DENSE)
           {
-            if(numA == Siconos::DENSE)
+            if(numA == siconos::DENSE)
               *y.dense() += ublas::prod(trans(*A.dense()), *x.dense());
-            else if(numA == Siconos::TRIANGULAR)
+            else if(numA == siconos::TRIANGULAR)
               *y.dense() += ublas::prod(trans(*A.triang()), *x.dense());
-            else if(numA == Siconos::SYMMETRIC)
+            else if(numA == siconos::SYMMETRIC)
               *y.dense() += ublas::prod(trans(*A.sym()), *x.dense());
-            else if(numA == Siconos::SPARSE)
+            else if(numA == siconos::SPARSE)
               *y.dense() += ublas::prod(trans(*A.sparse()), *x.dense());
-            else //if(numA==Siconos::BANDED)
+            else //if(numA==siconos::BANDED)
               *y.dense() += ublas::prod(trans(*A.banded()), *x.dense());
           }
-          else //if(numX == Siconos::SPARSE)
+          else //if(numX == siconos::SPARSE)
           {
-            if(numA == Siconos::DENSE)
+            if(numA == siconos::DENSE)
               *y.sparse() += ublas::prod(trans(*A.dense()), *x.sparse());
-            else if(numA == Siconos::TRIANGULAR)
+            else if(numA == siconos::TRIANGULAR)
               *y.sparse() += ublas::prod(trans(*A.triang()), *x.sparse());
-            else if(numA == Siconos::SYMMETRIC)
+            else if(numA == siconos::SYMMETRIC)
               *y.sparse() += ublas::prod(trans(*A.sym()), *x.sparse());
-            else if(numA == Siconos::SPARSE)
+            else if(numA == siconos::SPARSE)
               *y.sparse() += ublas::prod(trans(*A.sparse()), *x.sparse());
-            else //if(numA==Siconos::BANDED)
+            else //if(numA==siconos::BANDED)
               *y.sparse() += ublas::prod(trans(*A.banded()), *x.sparse());
           }
         }
@@ -475,44 +475,44 @@ SiconosVector prod(const SiconosMatrix& A, const SiconosVector& x)
   if(A.size(1) != x.size())
     THROW_EXCEPTION("inconsistent sizes between A and x.");
 
-  Siconos::UBLAS_TYPE numA = A.num();
-  Siconos::UBLAS_TYPE numX = x.num();
+  siconos::UBLAS_TYPE numA = A.num();
+  siconos::UBLAS_TYPE numX = x.num();
 
-  if(numA == Siconos::BLOCK)  // if A is block ...
+  if(numA == siconos::BLOCK)  // if A is block ...
     THROW_EXCEPTION("Not implemented for block matrices.");
 
-  if(numA == Siconos::ZERO)  // A = 0
+  if(numA == siconos::ZERO)  // A = 0
     return (DenseVect)(ublas::zero_vector<double>(x.size()));
 
-  else if(numA == Siconos::IDENTITY)  // A = Identity
+  else if(numA == siconos::IDENTITY)  // A = Identity
     return x;
 
   else
   {
-    if(numX == Siconos::DENSE)
+    if(numX == siconos::DENSE)
     {
-      if(numA == Siconos::DENSE)
+      if(numA == siconos::DENSE)
         return (DenseVect)(prod(*A.dense(), *x.dense()));
-      else if(numA == Siconos::TRIANGULAR)
+      else if(numA == siconos::TRIANGULAR)
         return (DenseVect)(prod(*A.triang(), *x.dense()));
-      else if(numA == Siconos::SYMMETRIC)
+      else if(numA == siconos::SYMMETRIC)
         return (DenseVect)(prod(*A.sym(), *x.dense()));
-      else if(numA == Siconos::SPARSE)
+      else if(numA == siconos::SPARSE)
         return (DenseVect)(prod(*A.sparse(), *x.dense()));
-      else // if(numA==Siconos::BANDED)
+      else // if(numA==siconos::BANDED)
         return (DenseVect)(prod(*A.banded(), *x.dense()));
     }
-    else //if(numX == Siconos::SPARSE)
+    else //if(numX == siconos::SPARSE)
     {
-      if(numA == Siconos::DENSE)
+      if(numA == siconos::DENSE)
         return (DenseVect)(prod(*A.dense(), *x.sparse()));
-      else if(numA == Siconos::TRIANGULAR)
+      else if(numA == siconos::TRIANGULAR)
         return (DenseVect)(prod(*A.triang(), *x.sparse()));
-      else if(numA == Siconos::SYMMETRIC)
+      else if(numA == siconos::SYMMETRIC)
         return (DenseVect)(prod(*A.sym(), *x.sparse()));
-      else if(numA == Siconos::SPARSE)
+      else if(numA == siconos::SPARSE)
         return (DenseVect)(prod(*A.sparse(), *x.sparse()));
-      else // if(numA==Siconos::BANDED)
+      else // if(numA==siconos::BANDED)
         return (DenseVect)(prod(*A.banded(), *x.sparse()));
     }
   }
@@ -520,8 +520,8 @@ SiconosVector prod(const SiconosMatrix& A, const SiconosVector& x)
 
 const SimpleMatrix  prod(const SiconosMatrix& A, const SiconosMatrix& B)
 {
-  Siconos::UBLAS_TYPE numA = A.num();
-  Siconos::UBLAS_TYPE numB = B.num();
+  siconos::UBLAS_TYPE numA = A.num();
+  siconos::UBLAS_TYPE numB = B.num();
 
   if (numA == numB)
   {
@@ -550,20 +550,20 @@ void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool
   if(A.size(0) != C.size(0) || B.size(1) != C.size(1))
     THROW_EXCEPTION("inconsistent sizes between A and C or B and C.");
 
-  Siconos::UBLAS_TYPE numA = A.num();
-  Siconos::UBLAS_TYPE numB = B.num();
-  Siconos::UBLAS_TYPE numC = C.num();
+  siconos::UBLAS_TYPE numA = A.num();
+  siconos::UBLAS_TYPE numB = B.num();
+  siconos::UBLAS_TYPE numC = C.num();
 
   // == TODO: implement block product ==
-  if(numA == Siconos::BLOCK || numB == Siconos::BLOCK)
+  if(numA == siconos::BLOCK || numB == siconos::BLOCK)
     THROW_EXCEPTION("not yet implemented for block matrices");
 
   // === if C is zero or identity => read-only ===
-  if(numC == Siconos::ZERO || numC == Siconos::IDENTITY)
+  if(numC == siconos::ZERO || numC == siconos::IDENTITY)
     THROW_EXCEPTION("wrong type for resulting matrix C (read-only: zero or identity).");
 
 
-  if(numA == Siconos::IDENTITY)  // A = identity ...
+  if(numA == siconos::IDENTITY)  // A = identity ...
   {
     if(init)
     {
@@ -574,7 +574,7 @@ void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool
       C += B;
   }
 
-  else if(numB == Siconos::IDENTITY)  // B = identity
+  else if(numB == siconos::IDENTITY)  // B = identity
   {
     if(init)
     {
@@ -585,13 +585,13 @@ void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool
       C += A;
   }
 
-  else if(numA == Siconos::ZERO || numB == Siconos::ZERO)  // if A or B = 0
+  else if(numA == siconos::ZERO || numB == siconos::ZERO)  // if A or B = 0
   {
     if(init)
       C.zero();
     //else nothing
   }
-  else if(numC == Siconos::BLOCK)  // if C is Block - Temp. solution
+  else if(numC == siconos::BLOCK)  // if C is Block - Temp. solution
   {
     SimpleMatrix tmp(C);
     prod(A, B, tmp, init);
@@ -605,33 +605,33 @@ void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool
       {
         switch(numA)
         {
-        case Siconos::DENSE:
-          if(numB == Siconos::DENSE)
+        case siconos::DENSE:
+          if(numB == siconos::DENSE)
           {
             *C.dense()  = prod(*A.dense(), *B.dense());
             //siconosBindings::blas::gemm(1.0, *A.dense(), *B.dense(), 0.0, *C.dense());
           }
-          else if(numB == Siconos::TRIANGULAR)
+          else if(numB == siconos::TRIANGULAR)
             *C.dense()  = prod(*A.dense(), *B.triang());
-          else if(numB == Siconos::SYMMETRIC)
+          else if(numB == siconos::SYMMETRIC)
             *C.dense()  = prod(*A.dense(), *B.sym());
-          else if(numB == Siconos::SPARSE)
+          else if(numB == siconos::SPARSE)
             *C.dense()  = prod(*A.dense(), *B.sparse());
-          else //if(numB==Siconos::BANDED)
+          else //if(numB==siconos::BANDED)
             *C.dense() = prod(*A.dense(), *B.banded());
           break;
-        case Siconos::TRIANGULAR:
-          if(numB != Siconos::TRIANGULAR)
+        case siconos::TRIANGULAR:
+          if(numB != siconos::TRIANGULAR)
             THROW_EXCEPTION("wrong type for B (according to A type).");
           *C.triang() = prod(*A.triang(), *B.triang());
           break;
-        case Siconos::SYMMETRIC:
-          if(numB != Siconos::SYMMETRIC)
+        case siconos::SYMMETRIC:
+          if(numB != siconos::SYMMETRIC)
             THROW_EXCEPTION("wrong type for B (according to A type).");
           *C.sym() = prod(*A.sym(), *B.sym());
           break;
-        case Siconos::SPARSE:
-          if(numB != Siconos::SPARSE)
+        case siconos::SPARSE:
+          if(numB != siconos::SPARSE)
             THROW_EXCEPTION("wrong type for B (according to A type).");
           *C.sparse() = prod(*A.sparse(), *B.sparse());
           break;
@@ -643,30 +643,30 @@ void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool
       {
         switch(numB)
         {
-        case Siconos::DENSE:
-          if(numA == Siconos::DENSE)
+        case siconos::DENSE:
+          if(numA == siconos::DENSE)
             *C.dense() = prod(*A.dense(), *B.dense());
-          else if(numA == Siconos::TRIANGULAR)
+          else if(numA == siconos::TRIANGULAR)
             *C.dense()  = prod(*A.triang(), *B.dense());
-          else if(numA == Siconos::SYMMETRIC)
+          else if(numA == siconos::SYMMETRIC)
             *C.dense()  = prod(*A.sym(), *B.dense());
-          else if(numA == Siconos::SPARSE)
+          else if(numA == siconos::SPARSE)
             *C.dense()  = prod(*A.sparse(), *B.dense());
-          else //if(numB==Siconos::BANDED)
+          else //if(numB==siconos::BANDED)
             *C.dense() = prod(*A.banded(), *B.dense());
           break;
-        case Siconos::TRIANGULAR:
-          if(numA != Siconos::TRIANGULAR)
+        case siconos::TRIANGULAR:
+          if(numA != siconos::TRIANGULAR)
             THROW_EXCEPTION("wrong type for A (according to B type).");
           *C.triang() = prod(*A.triang(), *B.triang());
           break;
-        case Siconos::SYMMETRIC:
-          if(numA != Siconos::SYMMETRIC)
+        case siconos::SYMMETRIC:
+          if(numA != siconos::SYMMETRIC)
             THROW_EXCEPTION("wrong type for A (according to B type).");
           *C.sym() = prod(*A.sym(), *B.sym());
           break;
-        case Siconos::SPARSE:
-          if(numA != Siconos::SPARSE)
+        case siconos::SPARSE:
+          if(numA != siconos::SPARSE)
             THROW_EXCEPTION("wrong type for A (according to B type).");
           *C.sparse() = prod(*A.sparse(), *B.sparse());
           break;
@@ -678,85 +678,85 @@ void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool
       {
         switch(numC)
         {
-        case Siconos::DENSE:
-          if(numB == Siconos::DENSE)
+        case siconos::DENSE:
+          if(numB == siconos::DENSE)
           {
-            if(numA == Siconos::DENSE)
+            if(numA == siconos::DENSE)
               noalias(*C.dense()) = prod(*A.dense(), *B.dense());
-            else if(numA == Siconos::TRIANGULAR)
+            else if(numA == siconos::TRIANGULAR)
               noalias(*C.dense()) = prod(*A.triang(), *B.dense());
-            else if(numA == Siconos::SYMMETRIC)
+            else if(numA == siconos::SYMMETRIC)
               noalias(*C.dense())  = prod(*A.sym(), *B.dense());
-            else if(numA == Siconos::SPARSE)
+            else if(numA == siconos::SPARSE)
               noalias(*C.dense()) = prod(*A.sparse(), *B.dense());
-            else// if(numA==Siconos::BANDED)
+            else// if(numA==siconos::BANDED)
               noalias(*C.dense())  = prod(*A.banded(), *B.dense());
           }
-          else if(numB == Siconos::TRIANGULAR)
+          else if(numB == siconos::TRIANGULAR)
           {
-            if(numA == Siconos::DENSE)
+            if(numA == siconos::DENSE)
               noalias(*C.dense())  = prod(*A.dense(), *B.triang());
-            else if(numA == Siconos::TRIANGULAR)
+            else if(numA == siconos::TRIANGULAR)
               noalias(*C.dense())  = prod(*A.triang(), *B.triang());
-            else if(numA == Siconos::SYMMETRIC)
+            else if(numA == siconos::SYMMETRIC)
               noalias(*C.dense())  = prod(*A.sym(), *B.triang());
-            else if(numA == Siconos::SPARSE)
+            else if(numA == siconos::SPARSE)
               noalias(*C.dense())  = prod(*A.sparse(), *B.triang());
-            else //if(numA==Siconos::BANDED)
+            else //if(numA==siconos::BANDED)
               noalias(*C.dense())  = prod(*A.banded(), *B.triang());
           }
-          else if(numB == Siconos::SYMMETRIC)
+          else if(numB == siconos::SYMMETRIC)
           {
-            if(numA == Siconos::DENSE)
+            if(numA == siconos::DENSE)
               noalias(*C.dense())  = prod(*A.dense(), *B.sym());
-            else if(numA == Siconos::TRIANGULAR)
+            else if(numA == siconos::TRIANGULAR)
               noalias(*C.dense())  = prod(*A.triang(), *B.sym());
-            else if(numA == Siconos::SYMMETRIC)
+            else if(numA == siconos::SYMMETRIC)
               noalias(*C.dense())  = prod(*A.sym(), *B.sym());
-            else if(numA == Siconos::SPARSE)
+            else if(numA == siconos::SPARSE)
               noalias(*C.dense())  = prod(*A.sparse(), *B.sym());
-            else // if (numA == Siconos::BANDED)
+            else // if (numA == siconos::BANDED)
               noalias(*C.dense())  = prod(*A.banded(), *B.sym());
           }
-          else if(numB == Siconos::SPARSE)
+          else if(numB == siconos::SPARSE)
           {
-            if(numA == Siconos::DENSE)
+            if(numA == siconos::DENSE)
               noalias(*C.dense()) = prod(*A.dense(), *B.sparse());
-            else if(numA == Siconos::TRIANGULAR)
+            else if(numA == siconos::TRIANGULAR)
               noalias(*C.dense()) = prod(*A.triang(), *B.sparse());
-            else if(numA == Siconos::SYMMETRIC)
+            else if(numA == siconos::SYMMETRIC)
               noalias(*C.dense()) = prod(*A.sym(), *B.sparse());
-            else if(numA == Siconos::SPARSE)
+            else if(numA == siconos::SPARSE)
               noalias(*C.dense()) = prod(*A.sparse(), *B.sparse());
-            else //if(numA==Siconos::BANDED){
+            else //if(numA==siconos::BANDED){
               noalias(*C.dense()) = prod(*A.banded(), *B.sparse());
           }
-          else //if(numB==Siconos::BANDED)
+          else //if(numB==siconos::BANDED)
           {
-            if(numA == Siconos::DENSE)
+            if(numA == siconos::DENSE)
               noalias(*C.dense()) = prod(*A.dense(), *B.banded());
-            else if(numA == Siconos::TRIANGULAR)
+            else if(numA == siconos::TRIANGULAR)
               noalias(*C.dense()) = prod(*A.triang(), *B.banded());
-            else if(numA == Siconos::SYMMETRIC)
+            else if(numA == siconos::SYMMETRIC)
               noalias(*C.dense()) = prod(*A.sym(), *B.banded());
-            else if(numA == Siconos::SPARSE)
+            else if(numA == siconos::SPARSE)
               noalias(*C.dense()) = prod(*A.sparse(), *B.banded());
-            else //if(numA==Siconos::BANDED)
+            else //if(numA==siconos::BANDED)
               noalias(*C.dense()) = prod(*A.banded(), *B.banded());
           }
           break;
-        case Siconos::TRIANGULAR:
-          if(numA != Siconos::TRIANGULAR || numB != Siconos::TRIANGULAR)
+        case siconos::TRIANGULAR:
+          if(numA != siconos::TRIANGULAR || numB != siconos::TRIANGULAR)
             THROW_EXCEPTION("wrong type for A or B (according to C type).");
           noalias(*C.triang()) = prod(*A.triang(), *B.triang());
           break;
-        case Siconos::SYMMETRIC:
-          if(numA != Siconos::SYMMETRIC || numB != Siconos::SYMMETRIC)
+        case siconos::SYMMETRIC:
+          if(numA != siconos::SYMMETRIC || numB != siconos::SYMMETRIC)
             THROW_EXCEPTION("wrong type for A or B (according to C type).");
           noalias(*C.sym()) = prod(*A.sym(), *B.sym());
           break;
-        case Siconos::SPARSE:
-          if(numA != Siconos::SPARSE || numB != Siconos::SPARSE)
+        case siconos::SPARSE:
+          if(numA != siconos::SPARSE || numB != siconos::SPARSE)
             THROW_EXCEPTION("wrong type for A or B (according to C type).");
           noalias(*C.sparse()) = prod(*A.sparse(), *B.sparse());
           break;
@@ -771,30 +771,30 @@ void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool
       {
         switch(numA)
         {
-        case Siconos::DENSE:
-          if(numB == Siconos::DENSE)
+        case siconos::DENSE:
+          if(numB == siconos::DENSE)
             *C.dense() += prod(*A.dense(), *B.dense());
-          else if(numB == Siconos::TRIANGULAR)
+          else if(numB == siconos::TRIANGULAR)
             *C.dense()  += prod(*A.dense(), *B.triang());
-          else if(numB == Siconos::SYMMETRIC)
+          else if(numB == siconos::SYMMETRIC)
             *C.dense()  += prod(*A.dense(), *B.sym());
-          else if(numB == Siconos::SPARSE)
+          else if(numB == siconos::SPARSE)
             *C.dense()  += prod(*A.dense(), *B.sparse());
-          else //if(numB==Siconos::BANDED)
+          else //if(numB==siconos::BANDED)
             *C.dense() += prod(*A.dense(), *B.banded());
           break;
-        case Siconos::TRIANGULAR:
-          if(numB != Siconos::TRIANGULAR)
+        case siconos::TRIANGULAR:
+          if(numB != siconos::TRIANGULAR)
             THROW_EXCEPTION("wrong type for B (according to A type).");
           *C.triang() += prod(*A.triang(), *B.triang());
           break;
-        case Siconos::SYMMETRIC:
-          if(numB != Siconos::SYMMETRIC)
+        case siconos::SYMMETRIC:
+          if(numB != siconos::SYMMETRIC)
             THROW_EXCEPTION("wrong type for B (according to A type).");
           *C.sym() += prod(*A.sym(), *B.sym());
           break;
-        case Siconos::SPARSE:
-          if(numB != Siconos::SPARSE)
+        case siconos::SPARSE:
+          if(numB != siconos::SPARSE)
             THROW_EXCEPTION("wrong type for B (according to A type).");
           *C.sparse() += prod(*A.sparse(), *B.sparse());
           break;
@@ -806,30 +806,30 @@ void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool
       {
         switch(numB)
         {
-        case Siconos::DENSE:
-          if(numA == Siconos::DENSE)
+        case siconos::DENSE:
+          if(numA == siconos::DENSE)
             *C.dense() += prod(*A.dense(), *B.dense());
-          else if(numA == Siconos::TRIANGULAR)
+          else if(numA == siconos::TRIANGULAR)
             *C.dense()  += prod(*A.triang(), *B.dense());
-          else if(numA == Siconos::SYMMETRIC)
+          else if(numA == siconos::SYMMETRIC)
             *C.dense()  += prod(*A.sym(), *B.dense());
-          else if(numA == Siconos::SPARSE)
+          else if(numA == siconos::SPARSE)
             *C.dense()  += prod(*A.sparse(), *B.dense());
-          else //if(numB==Siconos::BANDED)
+          else //if(numB==siconos::BANDED)
             *C.dense() += prod(*A.banded(), *B.dense());
           break;
-        case Siconos::TRIANGULAR:
-          if(numA != Siconos::TRIANGULAR)
+        case siconos::TRIANGULAR:
+          if(numA != siconos::TRIANGULAR)
             THROW_EXCEPTION("wrong type for A (according to B type).");
           *C.triang() += prod(*A.triang(), *B.triang());
           break;
-        case Siconos::SYMMETRIC:
-          if(numA != Siconos::SYMMETRIC)
+        case siconos::SYMMETRIC:
+          if(numA != siconos::SYMMETRIC)
             THROW_EXCEPTION("wrong type for A (according to B type).");
           *C.sym() += prod(*A.sym(), *B.sym());
           break;
-        case Siconos::SPARSE:
-          if(numA != Siconos::SPARSE)
+        case siconos::SPARSE:
+          if(numA != siconos::SPARSE)
             THROW_EXCEPTION("wrong type for A (according to B type).");
           *C.sparse() += prod(*A.sparse(), *B.sparse());
           break;
@@ -841,85 +841,85 @@ void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool
       {
         switch(numC)
         {
-        case Siconos::DENSE:
-          if(numB == Siconos::DENSE)
+        case siconos::DENSE:
+          if(numB == siconos::DENSE)
           {
-            if(numA == Siconos::DENSE)
+            if(numA == siconos::DENSE)
               noalias(*C.dense()) += prod(*A.dense(), *B.dense());
-            else if(numA == Siconos::TRIANGULAR)
+            else if(numA == siconos::TRIANGULAR)
               noalias(*C.dense()) += prod(*A.triang(), *B.dense());
-            else if(numA == Siconos::SYMMETRIC)
+            else if(numA == siconos::SYMMETRIC)
               noalias(*C.dense())  += prod(*A.sym(), *B.dense());
-            else if(numA == Siconos::SPARSE)
+            else if(numA == siconos::SPARSE)
               noalias(*C.dense()) += prod(*A.sparse(), *B.dense());
-            else// if(numA==Siconos::BANDED)
+            else// if(numA==siconos::BANDED)
               noalias(*C.dense())  += prod(*A.banded(), *B.dense());
           }
-          else if(numB == Siconos::TRIANGULAR)
+          else if(numB == siconos::TRIANGULAR)
           {
-            if(numA == Siconos::DENSE)
+            if(numA == siconos::DENSE)
               noalias(*C.dense())  += prod(*A.dense(), *B.triang());
-            else if(numA == Siconos::TRIANGULAR)
+            else if(numA == siconos::TRIANGULAR)
               noalias(*C.dense())  += prod(*A.triang(), *B.triang());
-            else if(numA == Siconos::SYMMETRIC)
+            else if(numA == siconos::SYMMETRIC)
               noalias(*C.dense())  += prod(*A.sym(), *B.triang());
-            else if(numA == Siconos::SPARSE)
+            else if(numA == siconos::SPARSE)
               noalias(*C.dense())  += prod(*A.sparse(), *B.triang());
-            else //if(numA==Siconos::BANDED)
+            else //if(numA==siconos::BANDED)
               noalias(*C.dense())  += prod(*A.banded(), *B.triang());
           }
-          else if(numB == Siconos::SYMMETRIC)
+          else if(numB == siconos::SYMMETRIC)
           {
-            if(numA == Siconos::DENSE)
+            if(numA == siconos::DENSE)
               noalias(*C.dense())  += prod(*A.dense(), *B.sym());
-            else if(numA == Siconos::TRIANGULAR)
+            else if(numA == siconos::TRIANGULAR)
               noalias(*C.dense())  += prod(*A.triang(), *B.sym());
-            else if(numA == Siconos::SYMMETRIC)
+            else if(numA == siconos::SYMMETRIC)
               noalias(*C.dense())  += prod(*A.sym(), *B.sym());
-            else if(numA == Siconos::SPARSE)
+            else if(numA == siconos::SPARSE)
               noalias(*C.dense())  += prod(*A.sparse(), *B.sym());
             else // if (numA == BANDED)
               noalias(*C.dense())  += prod(*A.banded(), *B.sym());
           }
-          else if(numB == Siconos::SPARSE)
+          else if(numB == siconos::SPARSE)
           {
-            if(numA == Siconos::DENSE)
+            if(numA == siconos::DENSE)
               noalias(*C.dense()) += prod(*A.dense(), *B.sparse());
-            else if(numA == Siconos::TRIANGULAR)
+            else if(numA == siconos::TRIANGULAR)
               noalias(*C.dense()) += prod(*A.triang(), *B.sparse());
-            else if(numA == Siconos::SYMMETRIC)
+            else if(numA == siconos::SYMMETRIC)
               noalias(*C.dense()) += prod(*A.sym(), *B.sparse());
-            else if(numA == Siconos::SPARSE)
+            else if(numA == siconos::SPARSE)
               noalias(*C.dense()) += prod(*A.sparse(), *B.sparse());
-            else //if(numA==Siconos::BANDED){
+            else //if(numA==siconos::BANDED){
               noalias(*C.dense()) += prod(*A.banded(), *B.sparse());
           }
-          else //if(numB==Siconos::BANDED)
+          else //if(numB==siconos::BANDED)
           {
-            if(numA == Siconos::DENSE)
+            if(numA == siconos::DENSE)
               noalias(*C.dense()) += prod(*A.dense(), *B.banded());
-            else if(numA == Siconos::TRIANGULAR)
+            else if(numA == siconos::TRIANGULAR)
               noalias(*C.dense()) += prod(*A.triang(), *B.banded());
-            else if(numA == Siconos::SYMMETRIC)
+            else if(numA == siconos::SYMMETRIC)
               noalias(*C.dense()) += prod(*A.sym(), *B.banded());
-            else if(numA == Siconos::SPARSE)
+            else if(numA == siconos::SPARSE)
               noalias(*C.dense()) += prod(*A.sparse(), *B.banded());
-            else //if(numA==Siconos::BANDED)
+            else //if(numA==siconos::BANDED)
               noalias(*C.dense()) += prod(*A.banded(), *B.banded());
           }
           break;
-        case Siconos::TRIANGULAR:
-          if(numA != Siconos::TRIANGULAR || numB != Siconos::TRIANGULAR)
+        case siconos::TRIANGULAR:
+          if(numA != siconos::TRIANGULAR || numB != siconos::TRIANGULAR)
             THROW_EXCEPTION("wrong type for A or B (according to C type).");
           noalias(*C.triang()) += prod(*A.triang(), *B.triang());
           break;
-        case Siconos::SYMMETRIC:
-          if(numA != Siconos::SYMMETRIC || numB != Siconos::SYMMETRIC)
+        case siconos::SYMMETRIC:
+          if(numA != siconos::SYMMETRIC || numB != siconos::SYMMETRIC)
             THROW_EXCEPTION("wrong type for A or B (according to C type).");
           noalias(*C.sym()) += prod(*A.sym(), *B.sym());
           break;
-        case Siconos::SPARSE:
-          if(numA != Siconos::SPARSE || numB != Siconos::SPARSE)
+        case siconos::SPARSE:
+          if(numA != siconos::SPARSE || numB != siconos::SPARSE)
             THROW_EXCEPTION("wrong type for A or B (according to C type).");
           noalias(*C.sparse()) += prod(*A.sparse(), *B.sparse());
           break;
@@ -945,21 +945,21 @@ void prod(double a, const SiconosMatrix& A, const SiconosVector& x, SiconosVecto
   if(A.size(0) != y.size())
     THROW_EXCEPTION("inconsistent sizes between A and y.");
 
-  Siconos::UBLAS_TYPE numA = A.num();
-  Siconos::UBLAS_TYPE numX = x.num();
-  Siconos::UBLAS_TYPE numY = y.num();
+  siconos::UBLAS_TYPE numA = A.num();
+  siconos::UBLAS_TYPE numX = x.num();
+  siconos::UBLAS_TYPE numY = y.num();
 
-  if(numA == Siconos::BLOCK)  // If A is Block
+  if(numA == siconos::BLOCK)  // If A is Block
     THROW_EXCEPTION("not yet implemented for block matrices.");
 
-  if(numA == Siconos::ZERO)  // A = 0
+  if(numA == siconos::ZERO)  // A = 0
   {
     if(init)
       y.zero();
     //else nothing
   }
 
-  else if(numA == Siconos::IDENTITY)  // A = identity
+  else if(numA == siconos::IDENTITY)  // A = identity
   {
     scal(a, x, y, init);
   }
@@ -974,70 +974,70 @@ void prod(double a, const SiconosMatrix& A, const SiconosVector& x, SiconosVecto
         {
           if(&x != &y)  // if no common memory between x and y.
           {
-            if(numX == Siconos::DENSE)
+            if(numX == siconos::DENSE)
             {
-              if(numY != Siconos::DENSE)
+              if(numY != siconos::DENSE)
                 THROW_EXCEPTION("y (output) must be a dense vector.");
 
-              if(numA == Siconos::DENSE)
+              if(numA == siconos::DENSE)
                 noalias(*y.dense()) = a * ublas::prod(*A.dense(), *x.dense());
-              else if(numA == Siconos::TRIANGULAR)
+              else if(numA == siconos::TRIANGULAR)
                 noalias(*y.dense()) = a * ublas::prod(*A.triang(), *x.dense());
-              else if(numA == Siconos::SYMMETRIC)
+              else if(numA == siconos::SYMMETRIC)
                 noalias(*y.dense()) = a * ublas::prod(*A.sym(), *x.dense());
-              else if(numA == Siconos::SPARSE)
+              else if(numA == siconos::SPARSE)
                 noalias(*y.dense()) = a * ublas::prod(*A.sparse(), *x.dense());
-              else //if(numA==Siconos::BANDED)
+              else //if(numA==siconos::BANDED)
                 noalias(*y.dense()) = a * ublas::prod(*A.banded(), *x.dense());
             }
-            else //if(numX == Siconos::SPARSE)
+            else //if(numX == siconos::SPARSE)
             {
-              if(numY != Siconos::DENSE && numA != Siconos::SPARSE)
+              if(numY != siconos::DENSE && numA != siconos::SPARSE)
                THROW_EXCEPTION("y (output) must be a dense vector or A a sparse matrix.");
 
-              if(numA == Siconos::DENSE)
+              if(numA == siconos::DENSE)
                 noalias(*y.dense()) = a * ublas::prod(*A.dense(), *x.sparse());
-              else if(numA == Siconos::TRIANGULAR)
+              else if(numA == siconos::TRIANGULAR)
                 noalias(*y.dense()) = a * ublas::prod(*A.triang(), *x.sparse());
-              else if(numA == Siconos::SYMMETRIC)
+              else if(numA == siconos::SYMMETRIC)
                 noalias(*y.dense()) = a * ublas::prod(*A.sym(), *x.sparse());
-              else if(numA == Siconos::SPARSE)
+              else if(numA == siconos::SPARSE)
               {
-                if(numY == Siconos::DENSE)
+                if(numY == siconos::DENSE)
                   noalias(*y.dense()) = a * ublas::prod(*A.sparse(), *x.sparse());
                 else
                   noalias(*y.sparse()) = a * ublas::prod(*A.sparse(), *x.sparse());
               }
-              else //if(numA==Siconos::BANDED)
+              else //if(numA==siconos::BANDED)
                 noalias(*y.dense()) = a * ublas::prod(*A.banded(), *x.sparse());
             }
           }
           else // if x and y are the same object => alias
           {
-            if(numX == Siconos::DENSE)
+            if(numX == siconos::DENSE)
             {
-              if(numA == Siconos::DENSE)
+              if(numA == siconos::DENSE)
                 *y.dense() = a * ublas::prod(*A.dense(), *x.dense());
-              else if(numA == Siconos::TRIANGULAR)
+              else if(numA == siconos::TRIANGULAR)
                 *y.dense() = a * ublas::prod(*A.triang(), *x.dense());
-              else if(numA == Siconos::SYMMETRIC)
+              else if(numA == siconos::SYMMETRIC)
                 *y.dense() = a * ublas::prod(*A.sym(), *x.dense());
-              else if(numA == Siconos::SPARSE)
+              else if(numA == siconos::SPARSE)
                 *y.dense() = a * ublas::prod(*A.sparse(), *x.dense());
-              else //if(numA==Siconos::BANDED)
+              else //if(numA==siconos::BANDED)
                 *y.dense() = a * ublas::prod(*A.banded(), *x.dense());
             }
-            else //if(numX == Siconos::SPARSE)
+            else //if(numX == siconos::SPARSE)
             {
-              if(numA == Siconos::DENSE)
+              if(numA == siconos::DENSE)
                 *y.sparse() = a * ublas::prod(*A.dense(), *x.sparse());
-              else if(numA == Siconos::TRIANGULAR)
+              else if(numA == siconos::TRIANGULAR)
                 *y.sparse() = a * ublas::prod(*A.triang(), *x.sparse());
-              else if(numA == Siconos::SYMMETRIC)
+              else if(numA == siconos::SYMMETRIC)
                 *y.sparse() = a * ublas::prod(*A.sym(), *x.sparse());
-              else if(numA == Siconos::SPARSE)
+              else if(numA == siconos::SPARSE)
                 *y.sparse() = a * ublas::prod(*A.sparse(), *x.sparse());
-              else //if(numA==Siconos::BANDED)
+              else //if(numA==siconos::BANDED)
                 *y.sparse() = a * ublas::prod(*A.banded(), *x.sparse());
             }
           }
@@ -1046,70 +1046,70 @@ void prod(double a, const SiconosMatrix& A, const SiconosVector& x, SiconosVecto
         {
           if(&x != &y)  // if no common memory between x and y.
           {
-            if(numX == Siconos::DENSE)
+            if(numX == siconos::DENSE)
             {
-              if(numY != Siconos::DENSE)
+              if(numY != siconos::DENSE)
                THROW_EXCEPTION("y (output) must be a dense vector.");
 
-              if(numA == Siconos::DENSE)
+              if(numA == siconos::DENSE)
                 noalias(*y.dense()) += a * ublas::prod(*A.dense(), *x.dense());
-              else if(numA == Siconos::TRIANGULAR)
+              else if(numA == siconos::TRIANGULAR)
                 noalias(*y.dense()) += a * ublas::prod(*A.triang(), *x.dense());
-              else if(numA == Siconos::SYMMETRIC)
+              else if(numA == siconos::SYMMETRIC)
                 noalias(*y.dense()) += a * ublas::prod(*A.sym(), *x.dense());
-              else if(numA == Siconos::SPARSE)
+              else if(numA == siconos::SPARSE)
                 noalias(*y.dense()) += a * ublas::prod(*A.sparse(), *x.dense());
-              else //if(numA==Siconos::BANDED)
+              else //if(numA==siconos::BANDED)
                 noalias(*y.dense()) += a * ublas::prod(*A.banded(), *x.dense());
             }
-            else //if(numX == Siconos::SPARSE)
+            else //if(numX == siconos::SPARSE)
             {
-              if(numY != Siconos::DENSE && numA != Siconos::SPARSE)
+              if(numY != siconos::DENSE && numA != siconos::SPARSE)
                 THROW_EXCEPTION("y (output) must be a dense vector or A a sparse matrix.");
 
-              if(numA == Siconos::DENSE)
+              if(numA == siconos::DENSE)
                 noalias(*y.dense()) += a * ublas::prod(*A.dense(), *x.sparse());
-              else if(numA == Siconos::TRIANGULAR)
+              else if(numA == siconos::TRIANGULAR)
                 noalias(*y.dense()) += a * ublas::prod(*A.triang(), *x.sparse());
-              else if(numA == Siconos::SYMMETRIC)
+              else if(numA == siconos::SYMMETRIC)
                 noalias(*y.dense()) += a * ublas::prod(*A.sym(), *x.sparse());
-              else if(numA == Siconos::SPARSE)
+              else if(numA == siconos::SPARSE)
               {
-                if(numY == Siconos::DENSE)
+                if(numY == siconos::DENSE)
                   noalias(*y.dense()) += a * ublas::prod(*A.sparse(), *x.sparse());
                 else
                   noalias(*y.sparse()) += a * ublas::prod(*A.sparse(), *x.sparse());
               }
-              else //if(numA==Siconos::BANDED)
+              else //if(numA==siconos::BANDED)
                 noalias(*y.dense()) += a * ublas::prod(*A.banded(), *x.sparse());
             }
           }
           else // if x and y are the same object => alias
           {
-            if(numX == Siconos::DENSE)
+            if(numX == siconos::DENSE)
             {
-              if(numA == Siconos::DENSE)
+              if(numA == siconos::DENSE)
                 *y.dense() += a * ublas::prod(*A.dense(), *x.dense());
-              else if(numA == Siconos::TRIANGULAR)
+              else if(numA == siconos::TRIANGULAR)
                 *y.dense() += a * ublas::prod(*A.triang(), *x.dense());
-              else if(numA == Siconos::SYMMETRIC)
+              else if(numA == siconos::SYMMETRIC)
                 *y.dense() += a * ublas::prod(*A.sym(), *x.dense());
-              else if(numA == Siconos::SPARSE)
+              else if(numA == siconos::SPARSE)
                 *y.dense() += a * ublas::prod(*A.sparse(), *x.dense());
-              else //if(numA==Siconos::BANDED)
+              else //if(numA==siconos::BANDED)
                 *y.dense() += a * ublas::prod(*A.banded(), *x.dense());
             }
-            else //if(numX == Siconos::SPARSE)
+            else //if(numX == siconos::SPARSE)
             {
-              if(numA == Siconos::DENSE)
+              if(numA == siconos::DENSE)
                 *y.sparse() += a * ublas::prod(*A.dense(), *x.sparse());
-              else if(numA == Siconos::TRIANGULAR)
+              else if(numA == siconos::TRIANGULAR)
                 *y.sparse() += a * ublas::prod(*A.triang(), *x.sparse());
-              else if(numA == Siconos::SYMMETRIC)
+              else if(numA == siconos::SYMMETRIC)
                 *y.sparse() += a * ublas::prod(*A.sym(), *x.sparse());
-              else if(numA == Siconos::SPARSE)
+              else if(numA == siconos::SPARSE)
                 *y.sparse() += a * ublas::prod(*A.sparse(), *x.sparse());
-              else //if(numA==Siconos::BANDED)
+              else //if(numA==siconos::BANDED)
                 *y.sparse() += a * ublas::prod(*A.banded(), *x.sparse());
             }
           }
@@ -1131,34 +1131,34 @@ void taxpy(SPC::SiconosVector x, SPC::SiconosMatrix A, unsigned int startRow, un
 
   // we take a submatrix subA of A, starting from row startRow to row (startRow+sizeY) and between columns startCol and (startCol+sizeX).
   // Then computation of y = subA*x + y.
-  Siconos::UBLAS_TYPE numA = A->num();
-  Siconos::UBLAS_TYPE numY = y->num();
-  Siconos::UBLAS_TYPE numX = x->num();
+  siconos::UBLAS_TYPE numA = A->num();
+  siconos::UBLAS_TYPE numY = y->num();
+  siconos::UBLAS_TYPE numX = x->num();
   unsigned int sizeX = x->size();
   unsigned int sizeY = y->size();
 
   if(numX != numY)
     THROW_EXCEPTION("not yet implemented for x and y of different types.");
 
-  if(numY == Siconos::DENSE && numX == Siconos::DENSE)
+  if(numY == siconos::DENSE && numX == siconos::DENSE)
   {
 
     assert(y->dense() != x->dense());
 
-    if(numA == Siconos::DENSE)
+    if(numA == siconos::DENSE)
       noalias(*y->dense()) += prod(ublas::subrange(trans(*A->dense()), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
-    else if(numA == Siconos::TRIANGULAR)
+    else if(numA == siconos::TRIANGULAR)
       noalias(*y->dense()) += prod(ublas::subrange(trans(*A->triang()), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
-    else if(numA == Siconos::SYMMETRIC)
+    else if(numA == siconos::SYMMETRIC)
       noalias(*y->dense()) += prod(ublas::subrange(trans(*A->sym()), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
-    else if(numA == Siconos::SPARSE)
+    else if(numA == siconos::SPARSE)
       noalias(*y->dense()) += prod(ublas::subrange(trans(*A->sparse()), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
-    else //if(numA==Siconos::BANDED)
+    else //if(numA==siconos::BANDED)
       noalias(*y->dense()) += prod(ublas::subrange(trans(*A->banded()), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->dense());
   }
   else // x and y sparse
   {
-    if(numA == Siconos::SPARSE)
+    if(numA == siconos::SPARSE)
       *y->sparse() += prod(ublas::subrange(trans(*A->sparse()), startRow, startRow + sizeY, startCol, startCol + sizeX), *x->sparse());
     else
       THROW_EXCEPTION("not yet implemented for x, y  sparse and A not sparse.");

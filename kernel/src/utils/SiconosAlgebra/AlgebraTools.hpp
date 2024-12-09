@@ -26,7 +26,7 @@
 #include "SiconosFwd.hpp"
 
 
-namespace Siconos {
+namespace siconos {
   namespace algebra {
     namespace tools {
 
@@ -40,7 +40,7 @@ namespace Siconos {
 
     } // namespace tools
   } // namespace algebra
-} // namespace Siconos
+} // namespace siconos
 
 
 #endif

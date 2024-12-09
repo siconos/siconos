@@ -14,37 +14,37 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
-#include <stdio.h>                            // for NULL, fprintf, stderr
-#include <stdlib.h>                           // for exit, EXIT_FAILURE
+#include <stdio.h>   // for NULL, fprintf, stderr
+#include <stdlib.h>  // for exit, EXIT_FAILURE
+
 #include "Friction_cst.h"                     // for SICONOS_FRICTION_3D_NCP...
 #include "NCP_Solvers.h"                      // for ncp_path
 #include "NonlinearComplementarityProblem.h"  // for NonlinearComplementarit...
 #include "NumericsFwd.h"                      // for FrictionContactProblem
+#include "SiconosBlas.h"                      // for cblas_dcopy
 #include "SolverOptions.h"                    // for SolverOptions
 #include "fc3d_2NCP_Glocker.h"                // for computeFGlocker, NCPGlo...
 #include "fc3d_NCPGlockerFixedPoint.h"        // for fc3d_Path_computeError
-#include "SiconosBlas.h"                            // for cblas_dcopy
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
-/* Pointer to function used to update the solver, to formalize the local problem for example. */
+/* Pointer to function used to update the solver, to formalize the local problem for example.
+ */
 typedef void (*UpdateSolverPtr)(int, double*);
-
 
 /* size of a block */
 
 /** writes \f$ F(z) \f$ using Glocker formulation
  */
-void F_GlockerPath(void* env, int sizeF, double* reaction, double* FVector)
-{
+void F_GlockerPath(void* env, int sizeF, double* reaction, double* FVector) {
   /* Glocker formulation */
   int up2Date = 0;
   double* FGlocker = NULL;
   computeFGlocker(&FGlocker, up2Date);
-  /* Note that FGlocker is a static var. in fc3d2NCP_Glocker and thus there is no memory allocation in
-     the present file.
+  /* Note that FGlocker is a static var. in fc3d2NCP_Glocker and thus there is no memory
+     allocation in the present file.
   */
 
   /* TMP COPY: review memory management for FGlocker ...*/
@@ -52,60 +52,50 @@ void F_GlockerPath(void* env, int sizeF, double* reaction, double* FVector)
   FGlocker = NULL;
 }
 
-/** writes \f$ \nabla_z F(z) \f$  using Glocker formulation and the Fischer-Burmeister function.
+/** writes \f$ \nabla_z F(z) \f$  using Glocker formulation and the Fischer-Burmeister
+ * function.
  */
-void jacobianF_GlockerPath(void* env, int sizeF, double* reaction, NumericsMatrix* jacobianFMatrix)
-{
+void jacobianF_GlockerPath(void* env, int sizeF, double* reaction,
+                           NumericsMatrix* jacobianFMatrix) {
   int up2Date = 0;
   /* Glocker formulation */
-  double* FGlocker = NULL, *jacobianFGlocker = NULL;
+  double *FGlocker = NULL, *jacobianFGlocker = NULL;
   computeFGlocker(&FGlocker, up2Date);
   computeJacobianFGlocker(&jacobianFGlocker, up2Date);
-  /* Note that FGlocker and jacobianFGlocker are static var. in fc3d2NCP_Glocker and thus there is no memory allocation in
-   the present file.
+  /* Note that FGlocker and jacobianFGlocker are static var. in fc3d2NCP_Glocker and thus there
+   is no memory allocation in the present file.
   */
 
   FGlocker = NULL;
   jacobianFGlocker = NULL;
 }
 
-
-void fc3d_Path_initialize(FrictionContactProblem* problem, FrictionContactProblem* localproblem, SolverOptions * localsolver_options)
-{
-
+void fc3d_Path_initialize(FrictionContactProblem* problem,
+                          FrictionContactProblem* localproblem,
+                          SolverOptions* localsolver_options) {
   /*
-     Initialize solver (Connect F and its jacobian, set local size ...) according to the chosen formulation.
+     Initialize solver (Connect F and its jacobian, set local size ...) according to the chosen
+     formulation.
   */
 
   /* Glocker formulation */
-  if(localsolver_options->solverId == SICONOS_FRICTION_3D_NCPGlockerFBPATH)
-  {
+  if (localsolver_options->solverId == SICONOS_FRICTION_3D_NCPGlockerFBPATH) {
     NCPGlocker_initialize(problem, localproblem);
-  }
-  else
-  {
+  } else {
     fprintf(stderr, "Numerics, fc3d_Path failed. Unknown formulation type.\n");
     exit(EXIT_FAILURE);
   }
 }
 
-int fc3d_Path_solve(FrictionContactProblem * localproblem, double* reaction, SolverOptions * options)
-{
-
-  NonlinearComplementarityProblem NCP_struct =
-  {
-    5,
-    &F_GlockerPath,
-    &jacobianF_GlockerPath,
-    NULL,
-    NULL
-  };
+int fc3d_Path_solve(FrictionContactProblem* localproblem, double* reaction,
+                    SolverOptions* options) {
+  NonlinearComplementarityProblem NCP_struct = {5, &F_GlockerPath, &jacobianF_GlockerPath,
+                                                NULL, NULL};
 
   double Fvec[5];
   int info;
   ncp_path(&NCP_struct, reaction, Fvec, &info, options);
-  if(info > 0)
-  {
+  if (info > 0) {
     fprintf(stderr, "Numerics, fc3d_Path failed");
     exit(EXIT_FAILURE);
   }
@@ -113,13 +103,11 @@ int fc3d_Path_solve(FrictionContactProblem * localproblem, double* reaction, Sol
   /*   (*postSolver)(contact,reaction); */
 }
 
-void fc3d_Path_free()
-{
 
-}
+void fc3d_Path_free() { }
 
-void fc3d_Path_computeError(int n, double* velocity, double* reaction, double * error)
-{
+
+void fc3d_Path_computeError(int n, double* velocity, double* reaction, double* error) {
   /*   int numberOfContacts = n/3; */
   /*   int sizeGlobal = numberOfContacts*FSize; */
   /*   //  double * FGlobal = (double*)malloc(sizeGlobal*sizeof(*FGlobal));  */
@@ -141,5 +129,4 @@ void fc3d_Path_computeError(int n, double* velocity, double* reaction, double * 
   /*   // (*computeVelocity)(FGlobal); */
 
   /*   free(FGlobal); */
-
 }

@@ -39,7 +39,7 @@
 
    Then the visitor may be used as :
 
-   A_visitable_Siconos_Object->accept(Siconos::Visitor myvisitor)
+   A_visitable_Siconos_Object->accept(siconos::Visitor myvisitor)
 
    SiconosVisitor also define a type visitor object under the
    namespace Type:: and some functions to access type of visitables
@@ -167,7 +167,7 @@ enum Siconos
 };
 }
 
-//namespace Siconos
+//namespace siconos
 //{
 
 

@@ -25,26 +25,27 @@ dim(u)=mm
 dim(v)=nn
 
 **************************************************************************/
-#include "MLCP_Solvers.h"  // for mixedLinearComplementarity_simplex_setDefa...
-#include "NumericsFwd.h"   // for MixedLinearComplementarityProblem, SolverO...
 #include "mlcp_simplex.h"  // for mlcp_simplex_init, mlcp_simplex_reset
-#include "SiconosConfig.h" // for HAVE_MLCPSIMPLEX  // IWYU pragma: keep
+
+#include "MLCP_Solvers.h"   // for mixedLinearComplementarity_simplex_setDefa...
+#include "NumericsFwd.h"    // for MixedLinearComplementarityProblem, SolverO...
+#include "SiconosConfig.h"  // for HAVE_MLCPSIMPLEX  // IWYU pragma: keep
 
 #ifdef HAVE_MLCPSIMPLEX
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "SiconosCompat.h"
-#include <math.h>
 /*import external implementation*/
 #include "external_mlcp_simplex.h"
 
 static int sIsInitialize = 0;
 #endif
 
-void mlcp_simplex_init(MixedLinearComplementarityProblem* problem, SolverOptions* options)
-{
+void mlcp_simplex_init(MixedLinearComplementarityProblem* problem, SolverOptions* options) {
 #ifdef HAVE_MLCPSIMPLEX
   int nn = problem->n;
   int mm = problem->m;
@@ -52,16 +53,15 @@ void mlcp_simplex_init(MixedLinearComplementarityProblem* problem, SolverOptions
   sIsInitialize = 1;
 #endif
 }
-void mlcp_simplex_reset()
-{
+void mlcp_simplex_reset() {
 #ifdef HAVE_MLCPSIMPLEX
   extern_mlcp_simplex_stop();
   sIsInitialize = 0;
 #endif
 }
 
-void mlcp_simplex(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
-{
+void mlcp_simplex(MixedLinearComplementarityProblem* problem, double* z, double* w, int* info,
+                  SolverOptions* options) {
 #ifdef HAVE_MLCPSIMPLEX
   //  double tol ;
   //  double * workingFloat=options->dWork;
@@ -77,12 +77,11 @@ void mlcp_simplex(MixedLinearComplementarityProblem* problem, double *z, double 
   int nn = problem->n;
   int mm = problem->m;
 
-  if(!sIsInitialize)
-    extern_mlcp_simplex_init_with_M(&nn, &mm, problem->M->matrix0);
+  if (!sIsInitialize) extern_mlcp_simplex_init_with_M(&nn, &mm, problem->M->matrix0);
 
-  extern_mlcp_simplex(problem->q, problem->q + nn, z, z + nn, w, info,  options->iparam, options->dparam);
+  extern_mlcp_simplex(problem->q, problem->q + nn, z, z + nn, w, info, options->iparam,
+                      options->dparam);
 
-  if(!sIsInitialize)
-    extern_mlcp_simplex_stop();
+  if (!sIsInitialize) extern_mlcp_simplex_stop();
 #endif
 }

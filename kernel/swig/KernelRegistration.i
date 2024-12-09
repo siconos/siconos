@@ -2,7 +2,6 @@
 // You have to PY_REGISTER base classe before derivated classes
 #undef PY_REGISTER
 #define KERNEL_REGISTRATION()                                           \
-  PY_REGISTER(SiconosMemory, Kernel)                                            \
   PY_REGISTER(NonSmoothLaw, Kernel);                                            \
   PY_REGISTER(NewtonImpactNSL, Kernel);                                         \
   PY_REGISTER(NewtonImpactFrictionNSL, Kernel);                                 \

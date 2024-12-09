@@ -14,29 +14,27 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef LCP_TEST_UTILS_H
 #define LCP_TEST_UTILS_H
 
-#include "SiconosConfig.h" // for BUILD_AS_CPP
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "SiconosConfig.h"  // for BUILD_AS_CPP
 #include "lcp_cst.h"
-#include "test_utils.h" // for TestCase
+#include "test_utils.h"  // for TestCase
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-extern "C"
-{
+extern "C" {
 #endif
-  /** Solve lcp using parameters and reference from a pre-defined TestCase
-      return 1 if the test has succeeded.
-   */
-  int lcp_test_function(TestCase *);
+/** Solve lcp using parameters and reference from a pre-defined TestCase
+    return 1 if the test has succeeded.
+ */
+int lcp_test_function(TestCase *);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
 
 #endif
-
-

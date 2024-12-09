@@ -23,7 +23,7 @@
     {
       PyErr_SetString(PyExc_IndexError, e.what());
     }
-    catch (const Siconos::exception& e)
+    catch (const siconos::exception& e)
     {
       auto strout = boost::diagnostic_information(e, true);
       PyErr_SetString(PyExc_Exception, strout.data());

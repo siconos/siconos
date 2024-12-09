@@ -22,7 +22,7 @@
 #include <iostream>
 
 
-double Event::_tick = DEFAULT_TICK;
+double Event::_tick = siconos::internal::DEFAULT_TICK;
 bool Event::_eventCreated = false;
 
 Event::Event(double time, int newType, bool reschedule):

@@ -52,8 +52,8 @@ if(NOT SuiteSparse_ROOT)
 endif()
 
 # Try to help find_package process (pkg-config ...)
-set_find_package_hints(NAME SuiteSparse MODULE suitesparse)
 
+set_find_package_hints(NAME SuiteSparse MODULE suitesparse)
 
 set(_CXSparse_header cs.h)
 set(_CXSparse_lib cxsparse)
@@ -69,10 +69,10 @@ set(_UMFPACK_lib umfpack)
 
 foreach(_component IN LISTS SuiteSparse_FIND_COMPONENTS)
   find_path(SuiteSparse_${_component}_INCLUDE_DIR NAMES ${_${_component}_header}
-    PATH_SUFFIXES SuiteSparse suitesparse include 
+    PATH_SUFFIXES include/suitesparse SuiteSparse suitesparse include 
     ${_SuiteSparse_INC_SEARCH_OPTS}
     )
-  
+ 
   find_library(SuiteSparse_${_component}_LIBRARY NAMES ${_${_component}_lib}
     ${_SuiteSparse_SEARCH_OPTS}
     PATH_SUFFIXES lib lib64)
