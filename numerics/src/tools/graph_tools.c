@@ -1,309 +1,202 @@
+// static char help[] = "Color a matrix, returning set sizes and indices. \n\n";
+
+/*
+    Example:
+        ./ex16 -f <matrix file> -a_mat_view draw -draw_pause -1
+        ./ex16 -f <matrix file> -a_mat_view ascii::ascii_info
+*/
+
 #include "graph_tools.h"
+int color_graph(int n, NumericsMatrix *M, long int *n_colors, size_t **set_sizes, size_t ***set_indices) {
+    Mat A;
+    // PetscLogDouble time_start, time_end;
 
-void build_graph(int n, double *M, int **all_neighbors, int *degrees, int *s)
-{
-    *s = n + 1; // Shrinking factor = minimal degree in the graph
+    PetscFunctionBeginUser;
 
-    int fill = 0;
+    // PetscCall(PetscTime(&time_start));
+    switch (M->storageType) {
+        case NM_DENSE: {
+            // PetscCall(PetscPrintf(PETSC_COMM_WORLD, "DENSE\n"));
+            PetscCall(MatCreateSeqDense(PETSC_COMM_SELF, n, n, M->matrix0, &A));
+            // MatCreateSeqDense does not work because coloring requires MATSEQAIJ matrix
+            PetscCall(MatConvert(A, MATSEQAIJ, MAT_INPLACE_MATRIX, &A));
 
-    for (int i = 0; i < n; i++)
-    {
-        fill = 0;
-        degrees[i] = 0;
-        for (int j = 0; j < n; j++)
-        {
-            if ((i != j) && ((M[i + n * j] != 0.) || (M[j + n * i] != 0.)))
-                degrees[i] += 1;
-        };
+            /* PetscCall(MatCreate(PETSC_COMM_WORLD, &A));
+            PetscCall(MatSetType(A, MATAIJ)); // CSR format
+            PetscCall(MatSetSizes(A, n, n, PETSC_DECIDE, PETSC_DECIDE));
 
-        all_neighbors[i] = (int *)malloc(degrees[i] * sizeof(int));
+            // Fill PETSC sparse matrix
+            double *dense = M->matrix0;
+            for (int row = 0; row < n; row++) {
+                for (int col = 0; col < n; col++) {
+                    val = PetscAbsScalar(dense[row + n * col]);
+                    if (val > dtol) {
+                        PetscCall(MatSetValue(A, row, col, val, INSERT_VALUES));
+                    }
+                }
+            } */
+            PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
+            PetscCall(MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY));
+            break;
+        }
+        case NM_SPARSE: {
+            // PetscCall(PetscPrintf(PETSC_COMM_WORLD, "SPARSE\n"));
 
-        for (int j = 0; j < n; j++)
-        {
-            if ((i != j) && ((M[i + n * j] != 0.) || (M[j + n * i] != 0.)))
-            {
-                all_neighbors[i][fill] = j;
-                fill += 1;
+            /* I copied this from Numericsmatrix.c function NM_row_prod_no_diag1x1 */
+            CSparseMatrix* sparse;
+            if (M->matrix2->origin == NSM_CSR) {
+                sparse = NM_csr(M);
+            } else {
+                sparse = NM_csc_trans(M);
             }
-                
-        };
 
-        if ((degrees[i] < *s) && degrees[i] > 0)
-            *s = degrees[i];
+            int64_t* Mp = sparse->p;
+            int64_t* Mi = sparse->i;
+            double* Mx = sparse->x;
+
+            PetscCall(MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, n, n, Mp, Mi, Mx, &A));
+            PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
+            PetscCall(MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY));
+            break;
+        }
+        case NM_SPARSE_BLOCK: {
+            fprintf(stderr, "color_graph_petsc :: matrix storage not supported yet %d", M->storageType);
+            exit(EXIT_FAILURE);
+        }
+        default: {
+            fprintf(stderr, "color_graph_petsc :: unknown matrix storage %d", M->storageType);
+            exit(EXIT_FAILURE);
+        }
     }
-}
+    // PetscCall(PetscTime(&time_end));
+    // PetscCall(PetscPrintf(PETSC_COMM_WORLD, "Time to build matrix: %f\n", time_end - time_start));
+    
 
-/* void compute_degrees(int n, double *M, int *degrees, int *s)
-{
-    *s = n + 1; // Shrinking factor = minimal degree in the graph
-    for (int i = 0; i < n; i++)
-    {
-        degrees[i] = 0;
-        for (int j = 0; j < n; j++)
-        {
-            if ((i != j) && ((M[i + n * j] != 0.) || (M[j + n * i] != 0.)))
-                degrees[i] += 1;
-        };
+    // Create PETSC sparse matrix
+    /* PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
+    switch (M->storageType) {
+        case NM_DENSE: {
+            // PetscCall(MatCreateSeqDense(PETSC_COMM_WORLD, n, n, M->matrix0, &A));
+            PetscCall(PetscPrintf(PETSC_COMM_WORLD, "Creating PETSC matrix...\n"));
+            PetscCall(MatCreate(PETSC_COMM_WORLD, &A));
+            MatSetType(A, MATAIJ);
+            MatSetSizes(A, n, n, PETSC_DECIDE, PETSC_DECIDE);
+            double* dense = M->matrix0;
+            for (int row = 0; row < n; row++) {
+                for (int col = 0; col < n; col++) {
+                    val = PetscAbsScalar(dense[row + n * col]);
+                    if (val > dtol) {
+                        PetscCall(MatSetValue(A, row, col, val, INSERT_VALUES));
+                    }
+                }
+            }
+            PetscCall(PetscPrintf(PETSC_COMM_WORLD, "...PETSC matrix created.\n"));
+        }
+        case NM_SPARSE: {
+            fprintf(stderr, "color_graph_petsc :: storage type not supported yet %d", M->storageType);
+            exit(EXIT_FAILURE);
+            // PetscCall(MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, n, n, ))
 
-        if ((degrees[i] < *s) && degrees[i] > 0)
-            *s = degrees[i];
+        }
+        case NM_SPARSE_BLOCK: {
+            fprintf(stderr, "color_graph_petsc :: storage type not supported yet %d", M->storageType);
+            exit(EXIT_FAILURE);
+        }
+        default: {
+            fprintf(stderr, "color_graph_petsc :: unknown matrix storage %d", M->storageType);
+            exit(EXIT_FAILURE);
     }
-}
+    }
+    PetscCall(MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY));
  */
-int choose_color(int *palette, int rank)
-{
-    int choice = 0;
 
-    while (rank > 0)
-    {
-        if (palette[choice] == 1)
-        {
-            rank -= 1;
+    /* View matrix to check
+    PetscCall(MatView(A, PETSC_VIEWER_STDOUT_WORLD)); */
+
+    /*          *
+     * COLORING *
+     *          */
+    // PetscCall(PetscTime(&time_start));
+    MatColoring mc;
+    ISColoring iscoloring;
+
+    PetscCall(MatColoringCreate(A, &mc));
+    PetscCall(MatColoringSetDistance(mc, 1));
+
+    PetscCall(MatColoringSetType(mc, MATCOLORINGJP)); // Coloring algorithm 
+    // PetscCall(MatColoringSetType(mc, MATCOLORINGGREEDY));
+
+    PetscCall(MatColoringSetFromOptions(mc));
+    PetscCall(MatColoringApply(mc, &iscoloring));
+    // PetscCall(MatColoringView(mc, PETSC_VIEWER_STDOUT_WORLD)); // View coloring
+    // PetscCall(ISColoringView(iscoloring, PETSC_VIEWER_STDOUT_WORLD)); // View IScoloring
+
+    /* Get index sets for each color */
+    PetscInt nn;
+    IS *is;
+    size_t *size = NULL; // Array of sizes of each color set
+    size_t **indexes = NULL; // Array of pointers to index sets
+    const PetscInt *idxin = NULL;
+    PetscCall(ISColoringGetIS(iscoloring, PETSC_USE_POINTER, &nn, &is)); // Get index sets
+    // PetscCall(PetscPrintf(PETSC_COMM_WORLD, "n_colors = %ld\n", nn));
+
+    PetscInt size_petsc;
+
+    size = (size_t *)malloc((size_t)nn * sizeof(size_t));
+    indexes = (size_t **)malloc((size_t)nn * sizeof(size_t *));
+
+    for (int i = 0; i < (int)nn; i++) {
+        PetscCall(ISGetLocalSize(is[i], &size_petsc));
+        size[i] = (size_t)size_petsc;
+        // PetscCall(ISGetLocalSize(is[i], &size[i])); // This gave me a conversion warning
+        indexes[i] = (size_t *)malloc(size[i] * sizeof(size_t)); // allocate indexes
+        PetscCall(ISGetIndices(is[i], &idxin)); // Get indices for i-th color
+
+        /*
+        COPYING INDICES IN NEW ARRAY
+        TO USE IT OUTSIDE THIS FUNCTION
+        WITHOUT PETSC
+
+        I COULD ONLY USE POINTERS IF I WROTE BOTH COLORING AND COMPUTING IN PETSC???
+        */
+        for (int j = 0; j < (int)size[i]; j++) {
+            indexes[i][j] = (size_t)idxin[j];
         }
-        choice += 1;
+
+        PetscCall(ISRestoreIndices(is[i], &idxin));
     }
 
-    while (palette[choice] == 0)
+    // Call this because of option PETSC_USE_POINTER (see https://petsc.org/release/manualpages/IS/ISColoringGetIS/)
+    PetscCall(ISColoringRestoreIS(iscoloring, PETSC_USE_POINTER, &is));
+
+    /* for (int i = 0; i < nn; i++)
     {
-        choice += 1;
-    }
-
-    return choice;
-}
-
-int compare_color(int n, int *neighbors, int degree, int *colors, int color)
-{
-    for (int j = 0; j < degree; j++)
-    {
-        if (color == colors[neighbors[j]]) return 0;
-    }
-
-    return 1;
-
-    /* for (int j = 0; j < n; j++)
-    {
-        if ((j != i) && ((M[i + n * j] != 0.) || (M[j + n * i] != 0.)) && (colors[i] == colors[j]))
-            return 0;
-    }
-
-    return 1; */
-}
-
-void remove_color(int n, int *neighbors, int degree, int color, int **palettes, int *palettes_sizes)
-{
-    for (int j = 0; j < degree; j++)
-    {
-        if (palettes[neighbors[j]][color] == 1)
+        PetscCall(PetscPrintf(PETSC_COMM_WORLD, "%d : [", i));
+        for (int j = 0; j < size[i]; j++)
         {
-            palettes[neighbors[j]][color] = 0;
-            palettes_sizes[neighbors[j]] -= 1;
+            PetscCall(PetscPrintf(PETSC_COMM_WORLD, " %d ", indexes[i][j]));
         }
-    }
-
-    /* for (int j = 0; j < n; j++)
-    {
-        if ((j != i) && ((M[i + n * j] != 0.) || (M[j + n * i] != 0.)) && (palettes[j][color] == 1))
-        {
-            palettes[j][color] = 0;
-            palettes_sizes[j] -= 1;
-        }
-    } */
-}
-
-void color_graph(int n, double *M, int *colors, int *n_colors)
-{
-
-    srand(time(0));
-
-    double time;
-
-    int no_progress_streak = 0;
-    int no_progress = 1;
-
-    int s = 0;
-    int *degrees = NULL;
-    int **all_neighbors = NULL;
-    degrees = (int *)malloc(n * sizeof(int));
-    all_neighbors = (int **)malloc(n * sizeof(int *));
-
-    time = omp_get_wtime();
-    build_graph(n, M, all_neighbors, degrees, &s);
-    time = omp_get_wtime() - time;
-    printf("Time to build graph: %fs\n", time);
-    printf("Minimal degree of graph: %d\n", s);
-
-    /* if (s > 2) {
-        printf("s too big, set it to 2");
-        s = 2;
-    } */
-    int *uncolored = NULL;
-    uncolored = (int *)malloc(n * sizeof(int));
-
-    int n_uncolored = n;
-
-    for (int i = 0; i < n; i++)
-    {
-        uncolored[i] = 1;
-    }
-
-    int *palettes_sizes = NULL;
-    palettes_sizes = (int *)malloc(n * sizeof(int));
-
-    int *next_colors = NULL;
-    next_colors = (int *)malloc(n * sizeof(int));
-
-    int **palettes = NULL;
-    palettes = (int **)malloc(n * sizeof(int *));
-
-    for (int i = 0; i < n; i++)
-    {
-        palettes[i] = (int *)malloc((degrees[i] + 1) * sizeof(int));
-        palettes_sizes[i] = 1 + degrees[i] / s;
-        // printf("Vertex [%d]: degree = %d, palette_size = %d\n", i, degrees[i], palettes_sizes[i]);
-        next_colors[i] = degrees[i] / s + 1;
-
-        for (int j = 0; j < degrees[i] + 1; j++)
-        {
-            if (j <= degrees[i] / s)
-                palettes[i][j] = 1;
-            else
-                palettes[i][j] = 0;
-        }
-    }
-
-    // int num_threads = omp_get_max_threads();
-    // int size = n / num_threads;
-
-    // #pragma omp parallel default(none) \
-    shared(size, n, all_neighbors, degrees, n_uncolored, uncolored, no_progress, next_colors, colors, palettes, palettes_sizes, no_progress_streak)
-    // {
-        //int thread_id = omp_get_thread_num();
-
-    time = omp_get_wtime();
-
-    int total_no_progress = 0;
-    int iter = 0;
-
-    while (n_uncolored > 0)
-    {
-        // #pragma omp single
-        no_progress = 1;
-
-        /* Assign random color to each uncolored vertex */
-        // for (int i = thread_id * size; i < (thread_id + 1) * size; i++)
-        // #pragma omp single
-        for (int i = 0; i < n; i++)
-        {
-            if (uncolored[i] == 1)
-            {
-                colors[i] = choose_color(palettes[i], rand() % palettes_sizes[i]);
-            }
-        }
-        // #pragma omp barrier
-        
-        /* Conflict resolution */
-        //for (int i = thread_id * size; i < (thread_id + 1) * size; i++)
-        // #pragma omp single
-        for (int i = 0; i < n; i++)
-        {
-            if (uncolored[i] == 1)
-            {
-                if (compare_color(n, all_neighbors[i], degrees[i], colors, colors[i]) == 1)
-                {
-                    uncolored[i] = 0;
-                    n_uncolored -= 1;
-                    remove_color(n, all_neighbors[i], degrees[i], colors[i], palettes, palettes_sizes);
-                    no_progress = 0; // progress has been made
-                    next_colors[i] = colors[i] + 1; // only useful for n_colors computation
-                }
-            }
-        }
-        // #pragma omp barrier
-
-        /* Feed the hungry */
-        // for (int i = thread_id * size; i < (thread_id + 1) * size; i++)
-        // #pragma omp single
-        for (int i = 0; i < n; i++)
-        {
-            if (uncolored[i] == 1)
-            {
-                if (palettes_sizes[i] == 0)
-                {
-                    palettes[i][next_colors[i]] = 1;
-                    palettes_sizes[i] += 1;
-                    next_colors[i] += 1;
-                }
-            }
-        }
-        // #pragma omp barrier
-
-        // #pragma omp single
-        if (no_progress == 1)
-        {
-            no_progress_streak += 1;
-            total_no_progress += 1;
-            if (no_progress_streak > 5)
-            {
-                int random_vertex = choose_color(uncolored, rand() % n_uncolored); // select random vertex among uncolored
-                palettes[random_vertex][next_colors[random_vertex]] = 1;
-                palettes_sizes[random_vertex] += 1;
-                next_colors[random_vertex] += 1;
-                no_progress_streak = 0;
-            }
-        }
-        // #pragma omp barrier
-        iter += 1;
-    }
-    // }
-    time = omp_get_wtime() - time;
-    printf("Time in while loop: %fs\n", time);
-    printf("Total no progress = %d\n", total_no_progress);
-    printf("Total iterations = %d\n", iter);
-
-    *n_colors = 0; // This only works if the starting palette is smaller than the ending one
-    for (int i = 0; i < n; i++)
-    {
-        if (next_colors[i] > *n_colors)
-        {
-            *n_colors = next_colors[i];
-        }
-    }
-
-    printf("Number of colors: %d\n", *n_colors);
-
-    /* int check = check_coloring(n, all_neighbors, degrees, colors);
-    if (check == 0)
-    {
-        printf("Bad coloring");
-    }
-    else if (check == 1)
-    {
-        printf("Good coloring");
+        PetscCall(PetscPrintf(PETSC_COMM_WORLD, "]\n"));
     } */
 
-    /* Free memory */
-    free(degrees);
-    for (int i = 0; i < n; i++)
-    {
-        free(all_neighbors[i]);
-        free(palettes[i]);
-    }
-    free(all_neighbors);
-    free(palettes);
-    free(uncolored);
-    free(palettes_sizes);
-    free(next_colors);    
-}
+    PetscCall(MatColoringDestroy(&mc));
+    PetscCall(ISColoringDestroy(&iscoloring));
+    PetscCall(MatDestroy(&A));
 
-int check_coloring(int n, int **all_neighbors, int *degrees, int *colors)
-{
-    for (int i = 0; i < n; i++)
+    /* for (int i = 0; i < nn; i++)
     {
-        if (compare_color(n, all_neighbors[i], degrees[i], colors, colors[i]) == 0)
-        {
-            return 0;
-        }
-    }
+        PetscCall(PetscPrintf(PETSC_COMM_WORLD, "size[%d] = %d\n", i, size[i]));
+    } */
 
-    return 1;
+    *n_colors = nn;
+    *set_sizes = size;
+    *set_indices = indexes;
+
+    // PetscCall(PetscTime(&time_end));
+    // PetscCall(PetscPrintf(PETSC_COMM_WORLD, "Time to color: %f\n", time_end - time_start));
+
+    // PetscCall(PetscFinalize());
+
+    return 0;
+
 }

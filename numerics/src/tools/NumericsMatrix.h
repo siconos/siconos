@@ -1156,14 +1156,27 @@ void NM_block_prod(int start_i, int start_j, int size_i, int size_j, NumericsMat
 void NM_block_prod_no_diag(int start_i, int size_i, NumericsMatrix* A, double *x, double *y, double* xsave, int init);
 
 /**
-   Get diagonal of a matrix.
+   Get the inverse of each diagonal element of a matrix.
 
    \param[in] n number of lines / columns
    \param[in] info info
    \param[in] A the matrix 
    \param[in, out] diag array to store the diagonal
 */
-void NM_get_diag(int n, int *info, NumericsMatrix *M, double *diag);
+void NM_get_invdiag(int n, int *info, NumericsMatrix *M, double *diag);
+
+/**
+   Computes row of A times x in two parts: before the diagonal (left) and after (right)
+   \param[in] sizeX dim of the vector x
+   \param[in] block_start block number (only used for SBM)
+   \param[in] row_start position of the first row of A (unused if A is SBM)
+   \param[in] A the matrix to be multiplied
+   \param[in] x the vector to be multiplied
+   \param[in,out] left left part of the sum (before the diagonal)
+   \param[in,out] right right part of the sum (after the diagonal)
+   \param[in] init if True left,right = Ax, else left,right += Ax
+*/
+void NM_row_prod_leftright(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A, double* x, double* left, double *right, bool init);
 
 #ifdef WITH_OPENSSL
 /** Compute sha1 hash of matrix values. Matrices of differents size and same

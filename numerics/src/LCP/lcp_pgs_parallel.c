@@ -40,7 +40,7 @@ void lcp_pgs_parallel(LinearComplementarityProblem *problem, double *z, double *
 
   /* Preparation of the diagonal of the inverse matrix */
   double *diag = (double *)malloc(n * sizeof(double));
-  NM_get_diag(n, info, M, diag);
+  NM_get_invdiag(n, info, M, diag);
   /* double diag_i = 0.0;
   for (int i = 0; i < n; ++i) {
     diag_i = NM_get_value(M, i, i);
@@ -56,6 +56,11 @@ void lcp_pgs_parallel(LinearComplementarityProblem *problem, double *z, double *
     } else
       diag[i] = 1.0 / diag_i;
   } */
+
+  /* Check if diagonal has a zero */
+  if (*info == 2) {
+    return;
+  }
 
   /* Block of coordinates (i_g, j_g) will have size (block_sizes[i_g], block_sizes[j_g]) */
   int *block_sizes = NULL;
@@ -108,6 +113,9 @@ void lcp_pgs_parallel(LinearComplementarityProblem *problem, double *z, double *
 
   /* Flag to stop when convergence is achieved */
   int flag = 1;
+
+  /* DEBUGGING */
+  // double *old_z = (double *)malloc(n * sizeof(double));
 
   /* Start solving */
 #pragma omp parallel default(none) shared(g, itermax, counter, err, flag, block_sizes, start_indexes, M, diag, tol, q, norm_q, w, z)
@@ -196,6 +204,7 @@ void lcp_pgs_parallel(LinearComplementarityProblem *problem, double *z, double *
         for (int i = start_i; i < start_i + size_i; i++) {
           w[i] += t_right[i - start_i];
           err += pow(z[i] - fmax(0, (z[i] - w[i])), 2);
+          // printf("END [%d] %e\n", rank, w[i] - cblas_ddot(n, &(M->matrix0[i]), n, z, 1) - q[i]);
         }
       }
       else {
@@ -220,6 +229,11 @@ void lcp_pgs_parallel(LinearComplementarityProblem *problem, double *z, double *
       /* Last thread: z_{iter+1} is fully computed 
       check if error is good */
       if (rank == g - 1) {
+        /* CHECK IF W_i = Q_i + M_ij Z_j*/
+        /* for (int i = 0; i < n; i++)
+          printf("[%d] %e\n", rank, w[i] - cblas_ddot(n, &(M->matrix0[i]), n, old_z, 1) - q[i]);
+        cblas_dcopy(n, z, 1, old_z, 1); */
+
         err = sqrt(err);
         err /= norm_q; /* Normalize error by norm of q */
         /* If flag is 0, the last thread already did its last iteration

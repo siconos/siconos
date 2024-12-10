@@ -19,7 +19,11 @@
 #include "graph_tools.h"
 
 void lcp_pgs_graph(LinearComplementarityProblem *problem, double *z, double *w, int *info,
-                      SolverOptions *options) {  
+                   SolverOptions *options) {  
+  
+  // double total_time, time;
+  // total_time = omp_get_wtime();
+
   NumericsMatrix *M = problem->M;
   double *q = problem->q;
 
@@ -38,90 +42,44 @@ void lcp_pgs_graph(LinearComplementarityProblem *problem, double *z, double *w, 
   options->iparam[SICONOS_IPARAM_ITER_DONE] = 0;
   options->dparam[SICONOS_DPARAM_RESIDU] = 0.0;
 
+  // time = omp_get_wtime();
   /* Preparation of the diagonal of the inverse matrix */
   double *diag = (double *)malloc(n * sizeof(double));
-  double diag_i = 0.0;
-  for (int i = 0; i < n; ++i) {
-    diag_i = NM_get_value(M, i, i);
-    if (fabs(diag_i) < DBL_EPSILON) {
-      if (verbose > 0) {
-        printf("Numerics::lcp_pgs, error: vanishing diagonal term \n");
-        printf(" The problem cannot be solved with this method \n");
-      }
+  NM_get_invdiag(n, info, M, diag);
+  // time = omp_get_wtime() - time;
+  // printf("Time to prepare diagonal: %fs\n", time);
 
-      *info = 2;
-      free(diag);
-      return;
-    } else
-      diag[i] = 1.0 / diag_i;
+  /* Check if diagonal has a zero */
+  if (*info == 2) {
+    return;
   }
 
-  /* Time */
-  double time;
-
   /* Graph coloring */
-  int n_colors = 0;
-  int *colors = NULL;
-  colors = (int *)malloc(n * sizeof(int));
-  time = omp_get_wtime();
-  color_graph(n, M->matrix0, colors, &n_colors);
-  time = omp_get_wtime() - time;
-  printf("Time to color graph: %fs\n", time);
+  long int n_colors = 0;
+  size_t *partition_size = NULL;
+  size_t **partitions = NULL;
+  
+  color_graph(n, M, &n_colors, &partition_size, &partitions);  
 
   /* printf("colors = [");
   for (int i = 0; i < n; i++) {
     printf(" %d ", colors[i]);
   }
   printf("]\n"); */
-
-  printf("n_colors = %d\n", n_colors);
-
-  /* Compute size of partitions */
-  int *partition_size = NULL;
-  partition_size = (int *)calloc(n_colors, sizeof(int));
-  for (int i = 0; i < n; i++) {
-    partition_size[colors[i]] += 1;
-  }
-
-  /* Create partitions */
-  int **partitions = NULL;
-  partitions = (int **)malloc(n_colors * sizeof(int *));
-  for (int i = 0; i < n_colors; i++) {
-    partitions[i] = (int *)malloc(partition_size[i] * sizeof(int));
-  }
-
-  int *fillers = NULL;
-  fillers = (int *)calloc(n_colors, sizeof(int));
-
-  for (int i = 0; i < n; i++) {
-    partitions[colors[i]][fillers[colors[i]]] = i;
-    fillers[colors[i]] += 1;
-  }
-
-  /* for (int i = 0; i < n_colors; i++) {
-    printf("Partition %d = [", i);
-    for (int j = 0; j < partition_size[i]; j++)
-    {
-      printf(" %d ", partitions[i][j]);
-    }
-    printf("]\n");
-  } */
   
-  /* !!! SOMETIMES THERE ARE EMPTY PARTITIONS !!! */
-  /* !!! (MEANING A COLOR CAN BE UNUSED)      !!! */
-
   /* Solver variables */
   int iter = 0;
   double err = 1.;
 
   double zi;
+  // double left = 0., right = 0.;
   int i;
-
-  time = omp_get_wtime();
+  // double time = 0.;
 
   /* Start solving */
   while ((iter < itermax) && (err > tol)) {
 
+    // time = omp_get_wtime();
     for (int color = 0; color < n_colors; color++) {
 
       #pragma omp parallel for default(none) private(zi, i) shared(q, z, diag, M, n, partitions, partition_size, color)
@@ -129,6 +87,7 @@ void lcp_pgs_graph(LinearComplementarityProblem *problem, double *z, double *w, 
         i = partitions[color][v];
         zi = q[i];
         DEBUG_PRINTF("zi = %e\n", zi);
+        // NM_row_prod_leftright(n, i, i, M, z, &left, &right, false);
         NM_row_prod_no_diag1x1(n, i, i, M, z, &zi, false);
         DEBUG_PRINTF("diag[i] = %e\t zi = %e\n", diag[i], zi);
         zi = -(zi)*diag[i];
@@ -138,10 +97,20 @@ void lcp_pgs_graph(LinearComplementarityProblem *problem, double *z, double *w, 
         else
           z[i] = zi;
 
+        /**
+         * Some threads may modify z while others are using it in 
+         * NM_row_prod_no_diag1x1 but it does not matter as 
+         * each line are independent inside a color
+        */
       }
     }
+    // time = omp_get_wtime() - time;
+    // printf("Time in inner loop = %f\n", time);
 
+    // time = omp_get_wtime();
     lcp_compute_error(problem, z, w, tol, &err);
+    // time = omp_get_wtime() - time;
+    // printf("Time in lcp_compute_error = %f\n", time);
 
     if (verbose == 2) {
       printf(" # i%d -- %g : ", iter, err);
@@ -171,14 +140,15 @@ void lcp_pgs_graph(LinearComplementarityProblem *problem, double *z, double *w, 
     *info = 0;
   }
 
-  time = omp_get_wtime() - time;
-  printf("Time to solve: %fs\n", time);
+  // time = omp_get_wtime() - time;
+  // printf("Time to solve: %fs\n", time);
 
-  free(colors);
   free(partition_size);
   for (int i = 0; i < n_colors; i++) free(partitions[i]);
   free(partitions);
-  free(fillers);
   free(diag);
+
+  // total_time = omp_get_wtime() - total_time;
+  // printf("Total time: %fs\n", total_time);
 
 }

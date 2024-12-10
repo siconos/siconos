@@ -231,7 +231,7 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double* z, dou
     /* IN: itermax, tolerance
        OUT: iter, error */
     case SICONOS_LCP_PGS_GRAPH:
-      lcp_pgs_graph_petsc(problem, z, w, &info, options);
+      lcp_pgs_graph(problem, z, w, &info, options);
       break;
     /****** CPG Solver ******/
     /* IN: itermax, tolerance

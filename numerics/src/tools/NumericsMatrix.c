@@ -6050,12 +6050,12 @@ void NM_block_prod_no_diag(int start_i, int size_i, NumericsMatrix* A, double *x
   NM_version_sync(A);
 }
 
-void NM_get_diag(int n, int *info, NumericsMatrix *M, double *diag) {
+void NM_get_invdiag(int n, int *info, NumericsMatrix *M, double *diag) {
   double diag_i = 0.0;
   switch (M->storageType) {
     case NM_DENSE: {
       for (int i = 0; i < n; ++i) {
-        diag_i = NM_get_value(M, i, i);
+        diag_i = M->matrix0[i + i * M->size0];
         if (fabs(diag_i) < DBL_EPSILON) {
           if (verbose > 0) {
             printf("Numerics::lcp_pgs, error: vanishing diagonal term \n");
@@ -6081,24 +6081,35 @@ void NM_get_diag(int n, int *info, NumericsMatrix *M, double *diag) {
           CS_INT* Mp = M->matrix2->triplet->p;
           double* Mx = M->matrix2->triplet->x;
 
+          /* k counts the number of non-zero diagonal terms 
+            assuming the triplet format has no redundancies */
           int k = 0;
           for (int idx = 0; idx < M->matrix2->triplet->nz; idx++) {
             if (Mi[idx] == Mp[idx]) {
               diag_i = Mx[idx];
               if (fabs(diag_i) < DBL_EPSILON) {
-              if (verbose > 0) {
-                printf("Numerics::lcp_pgs, error: vanishing diagonal term \n");
-                printf(" The problem cannot be solved with this method \n");
-              }
-
-              *info = 2;
-              free(diag);
-              return;
+                if (verbose > 0) {
+                  printf("Numerics::lcp_pgs, error: vanishing diagonal term \n");
+                  printf(" The problem cannot be solved with this method \n");
+                }
+                *info = 2;
+                free(diag);
+                return;
               } else {
-                diag[k] = 1.0 / diag_i;
+                diag[Mi[idx]] = 1.0 / diag_i;
                 k += 1;
               }
             }
+          }
+          /* If the diagonal has not been filled */
+          if (k < n) {
+            if (verbose > 0) {
+              printf("Numerics::lcp_pgs, error: vanishing diagonal term \n");
+              printf(" The problem cannot be solved with this method \n");
+            }
+            *info = 2;
+            free(diag);
+            return;
           }
           break;
         }
@@ -6109,6 +6120,7 @@ void NM_get_diag(int n, int *info, NumericsMatrix *M, double *diag) {
           CS_INT* Mp = M->matrix2->triplet->p;
           double* Mx = M->matrix2->triplet->x;
 
+          /* Same as NSM_TRIPLET */
           int k = 0;
           for (int idx = 0; idx < M->matrix2->triplet->nz; idx++) {
             if (Mi[idx] == Mp[idx]) {
@@ -6123,10 +6135,20 @@ void NM_get_diag(int n, int *info, NumericsMatrix *M, double *diag) {
               free(diag);
               return;
               } else {
-                diag[k] = 1.0 / diag_i;
+                diag[Mi[idx]] = 1.0 / diag_i;
                 k += 1;
               }
             }
+          }
+          /* If the diagonal has not been filled */
+          if (k < n) {
+            if (verbose > 0) {
+              printf("Numerics::lcp_pgs, error: vanishing diagonal term \n");
+              printf(" The problem cannot be solved with this method \n");
+            }
+            *info = 2;
+            free(diag);
+            return;
           }
           break;
         }
@@ -6136,6 +6158,7 @@ void NM_get_diag(int n, int *info, NumericsMatrix *M, double *diag) {
           CS_INT* Mp = M->matrix2->csc->p;
           double* Mx = M->matrix2->csc->x;
 
+          /* Same as NSM_TRIPLET */
           int k = 0;
           for (int j = 0; j < n; j++) {
             for (CS_INT row = Mp[j]; row < Mp[j + 1]; row++) {
@@ -6151,11 +6174,21 @@ void NM_get_diag(int n, int *info, NumericsMatrix *M, double *diag) {
                   free(diag);
                   return;
               } else {
-                diag[k] = 1.0 / diag_i;
+                diag[j] = 1.0 / diag_i;
                 k += 1;
                 }
               }
             }
+          }
+          /* If the diagonal has not been filled */
+          if (k < n) {
+            if (verbose > 0) {
+              printf("Numerics::lcp_pgs, error: vanishing diagonal term \n");
+              printf(" The problem cannot be solved with this method \n");
+            }
+            *info = 2;
+            free(diag);
+            return;
           }
           break;
         }
@@ -6169,4 +6202,73 @@ void NM_get_diag(int n, int *info, NumericsMatrix *M, double *diag) {
     default:
       fprintf(stderr, "NM_get_value ::  unknown matrix storage = %d\n", M->storageType);
   }
+}
+
+void NM_row_prod_leftright(size_t sizeX, int block_start, size_t row_start,
+                           NumericsMatrix* A, double* x, double* left, double *right, bool init) {
+  assert(A);
+  assert(x);
+  assert(left);
+  assert(right);
+  assert((size_t)A->size0 >= 1);
+  assert((size_t)A->size1 == sizeX);
+
+  switch (A->storageType) {
+    case NM_DENSE: {
+      if (init) {
+        left[0] = 0.;
+        right[0] = 0.;
+      }
+      double* M = A->matrix0;
+      assert(M);
+      int incx = sizeX, incy = 1;
+
+      left[0] += cblas_ddot(row_start, &M[row_start], incx, x, incy);
+      right[0] += cblas_ddot(sizeX - row_start - 1, &M[row_start] + incx * (row_start + 1), incx, x, incy);
+      break;
+    }
+    case NM_SPARSE_BLOCK: {
+      /* qLocal += rowMB * x
+       * with rowMB the row of blocks of MGlobal which corresponds
+       * to the current contact
+       */
+
+      /* NOT IMPLEMENTED */
+      // SBM_row_prod_no_diag_1x1(sizeX, 1, block_start, A->matrix1, x, y);
+      break;
+    }
+    case NM_SPARSE: {
+      if (init) {
+        left[0] = 0.;
+        right[0] = 0.;
+      }
+
+      double rin = x[row_start];
+      x[row_start] = 0.;
+
+      CSparseMatrix* M;
+      if (A->matrix2->origin == NSM_CSR) {
+        M = NM_csr(A);
+      } else {
+        M = NM_csc_trans(A);
+      }
+
+      CS_INT* Mp = M->p;
+      CS_INT* Mi = M->i;
+      double* Mx = M->x;
+
+      for (CS_INT p = Mp[row_start]; p < Mp[row_start + 1]; ++p) {
+        if (Mi[p] < row_start) left[0] += Mx[p] * x[Mi[p]];
+        else right[0] += Mx[p] * x[Mi[p]];   
+      }
+      x[row_start] = rin;
+      break;
+    }
+    default: {
+      fprintf(stderr, "NM_row_prod_no_diag3 :: unknown matrix storage %d", A->storageType);
+      exit(EXIT_FAILURE);
+    }
+  }
+
+  NM_version_sync(A);
 }
