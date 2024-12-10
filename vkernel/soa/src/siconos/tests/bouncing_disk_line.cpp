@@ -136,20 +136,17 @@ int main(int argc, char* argv[])
   // fix this for constant fext
   simulation.initialize();
 
-  //  auto out = fmt::output_file("result.dat");
-  std::ofstream cout("result.dat");
+  auto out = fmt::output_file("result.dat");
+  // std::ofstream cout("result.dat");
 
   // https://stackoverflow.com/questions/72767354/how-to-flush-fmt-output-in-debug-mode
-  cout << fmt::format(
-              "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
-              simulation.current_step() * simulation.time_step(),
-              storage::attr<"q">(d1, simulation.current_step())(1),
-              storage::attr<"velocity">(d1, simulation.current_step())(1), 0.,
-              0.)
-       << std::flush;
+  out.print("{:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
+            simulation.current_step() * simulation.time_step(),
+            storage::attr<"q">(d1, simulation.current_step())(1),
+            storage::attr<"velocity">(d1, simulation.current_step())(1), 0.,
+            0.);
 
   while (simulation.has_next_event()) {
-
     auto ninvds = simulation.compute_one_step();
     //    auto q = storage::attr<"q">(d1, simulation.current_step())(1);
     //    auto v = storage::attr<"velocity">(d1,
@@ -167,13 +164,11 @@ int main(int argc, char* argv[])
       lambda = 0;
     }
 
-    cout << fmt::format(
-                "{:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
-                simulation.current_step() * simulation.time_step(),
-                storage::attr<"q">(d1, simulation.current_step())(1),
-                storage::attr<"velocity">(d1, simulation.current_step())(1),
-                p0, lambda)
-         << std::flush;
+    out.print("{:.15e} {:.15e} {:.15e} {:.15e} {:.15e}\n",
+              simulation.current_step() * simulation.time_step(),
+              storage::attr<"q">(d1, simulation.current_step())(1),
+              storage::attr<"velocity">(d1, simulation.current_step())(1), p0,
+              lambda);
   }
   //  io::close(fd);
 }

@@ -130,7 +130,7 @@ int main(int argc, char* argv[])
   // ------------------
   auto simulation = storage::add<config::simulation>(data);
 
-  auto io = storage::add<config::io>(data);
+  // auto io = storage::add<config::io>(data);
 
   simulation.one_step_integrator().theta() = theta;
   simulation.one_step_integrator().constraint_activation_threshold() = 0.;

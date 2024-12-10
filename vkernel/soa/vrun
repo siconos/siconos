@@ -3,11 +3,13 @@
 #OAR -l /nodes=1/cpu=2/core=16,walltime=1:00:00
 ################################################################################
 set -e
+set -x
 mydir=`dirname $0`
-python_version=`python3 -c 'import sys; print(".".join(map(str, sys.version_info[:2])))'`
 time=`which time`
 timer=""
 timer_args=""
+python_version=`python3 -c 'import sys; print(".".join(map(str, sys.version_info[:2])))'`
+python_site_packages_path=`python3 -c 'import os; import sys; print(os.path.join(sys.prefix, "lib", "python" + sys.version[:4], "site-packages"))'`
 venv=${VRUN_VENV:-venv}
 VRUN_GUIX_CXX_TOOLCHAIN=${VRUN_GUIX_CXX_TOOLCHAIN:-clang-toolchain}
 case $VRUN_SETX in 1) set -x;; esac
@@ -45,14 +47,15 @@ while [ $# -gt 0 ]; do
 
     --guix)
       shift
+      set -x
       cat>.siconos-disks-manifest.scm<<EOF
 (specifications->manifest
  '( "siconos-with-vkernel" "benchmark" "$VRUN_GUIX_CXX_TOOLCHAIN" "valgrind"
     "suitesparse" "eigen" "boost" "fmt" "range-v3" "gfortran-toolchain" "cppunit" "python-pytest"
-    "cmake" "ninja" "make" "bash" "coreutils" "which" "python" "python-pip" "python-numpy"
-    "python-scikit-build" "python-setuptools" "nlohmann-json"
+    "cmake" "ninja" "make" "bash" "coreutils" "which" "python" "python-pip" "python-numpy" 
+    "python-scikit-build" "python-setuptools" "nlohmann-json" "python-wheel" "python-pytest"
     "pybind11" "strace" "jupyter" "python-ipykernel" "procps" "gdb" "git" "emacs-next"
-    "time" "parallel" "findutils"))
+    "time" "parallel" "findutils" "nss-certs" "rsync"))
 EOF
 
       cat>.siconos-vrun-channels.scm<<EOF
@@ -80,8 +83,8 @@ EOF
       [ -f /applis/site/guix-start.sh ] && . /applis/site/guix-start.sh
       pwd=`pwd`
       rm -f $pwd/.siconos-guix-profile
-      guix_isolation_args="--container -N --emulate-fhs --share=/tmp --share=/scratch --share=$HOME"
-      #guix_isolation_args="--pure --preserve=OMP* --preserve=VRUN*"
+      #guix_isolation_args="--container -N --emulate-fhs --share=/tmp --share=/scratch --share=$HOME"
+      guix_isolation_args="--pure --preserve=OMP* --preserve=VRUN*"
       guix_cmd="guix time-machine -C ./.siconos-vrun-channels.scm --"
       # it seems that we need to pass explicitely the package for transformations
       exec $guix_cmd shell $guix_isolation_args \
@@ -94,7 +97,11 @@ EOF
       shift
       venv=$1
       export VRUN_VENV=$1
+      python_version=`python3 -c 'import sys; print(".".join(map(str, sys.version_info[:2])))'`
+      [ -f ${venv}/bin/activate ] || python${python_version} -m venv --system-site-packages --clear ${venv}
       shift
+      . ${venv}/bin/activate
+      python_site_packages_path=`python3 -c 'import os; import sys; print(os.path.join(sys.prefix, "lib", "python" + sys.version[:3], "site-packages"))'`
       ;;
 
     --time)
@@ -109,7 +116,36 @@ EOF
       exit 0
       ;;
 
+    --cmake)
+      shift
+      . ${venv}/bin/activate
+      exec $0 cmake -DPython_EXECUTABLE=`which python${python_version}` $@
+      ;;
+
     --install)
+      shift
+      [ -f ${venv}/bin/activate ] || python3 -m venv --system-site-packages --clear ${venv}
+      . ${venv}/bin/activate
+      python_version=`python3 -c 'import sys; print(".".join(map(str, sys.version_info[:2])))'`
+      python_site_packages_path=`python3 -c 'import os; import sys; print(os.path.join(sys.prefix, "lib", "python" + sys.version[:4], "site-packages"))'`
+      export CC=clang
+      export CXX=clang++
+      TMPBUILDIR=`mktemp -d /tmp/vrun-build.XXXX`
+      TMPINSTALLDIR=`mktemp -d /tmp/vrun-install.XXXX`
+      trap "rm -rf ${TMPBUILDIR} ${TMPINSTALLDIR}; exit" INT TERM EXIT
+      cd ${TMPBUILDIR}
+      cmake ${mydir}/../.. -DPython_EXECUTABLE=`which python${python_version}` -DISOLATED_INSTALL=True \
+            -DSICONOS_CUSTOM_INSTALL=${TMPINSTALLDIR} \
+            -DWITH_PYB11_WRAPPER=0 \
+            -DWITH_TESTING=0 \
+            -DWITH_BULLET=0 \
+            -DWITH_FORTRAN=0 \
+            -DCOMPONENTS="externals;numerics;kernel;mechanics"
+      make -j16 install
+      rsync -av ${TMPINSTALLDIR}/lib/python${python_version}/site-packages/nonos/ ${python_site_packages_path}/nonos
+      cd -
+      ;;
+    --pip-install)
       shift
       python3 -m venv --system-site-packages --clear ${venv}
       . ${venv}/bin/activate
@@ -176,6 +212,7 @@ EOF
       ;;
 
     *)
+      set -x
       script=$1
       suffix="${script##*.}"
       case $suffix in py) interp=python3;; *) interp="";; esac
@@ -191,7 +228,9 @@ EOF
       else
         xex="exec"
       fi
-      [ -f ${mydir}/${venv}/bin/activate ] && . ${mydir}/${venv}/bin/activate
+      [ -f ${venv}/bin/activate ] && . ${venv}/bin/activate
+      python_version=`python3 -c 'import sys; print(".".join(map(str, sys.version_info[:2])))'`
+      python_site_packages_path=`python3 -c 'import os; import sys; print(os.path.join(sys.prefix, "lib", "python" + sys.version[:3], "site-packages"))'`
       export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:`pwd`/${venv}/lib/python${python_version}/site-packages/nonos/
       if [ ! -z "$timer" ]; then
         $xex $timer -f "$timer_args" $interp $script $args

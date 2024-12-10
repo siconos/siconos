@@ -79,30 +79,35 @@ python_add_library(_nonos MODULE
 set_target_properties(_nonos PROPERTIES COMPILE_FLAGS "${flags}")
 
 if(WITH_GPU)
-  target_link_libraries(_nonos PRIVATE Eigen3::Eigen Siconos::numerics benchmark pthread fmt cuNSearch pybind11::headers)
+  target_link_libraries(_nonos PRIVATE mechanics Eigen3::Eigen numerics benchmark pthread fmt cuNSearch pybind11::headers)
 else()
-  target_link_libraries(_nonos PRIVATE Eigen3::Eigen Siconos::numerics benchmark pthread fmt CompactNSearch pybind11::headers)
+  target_link_libraries(_nonos PRIVATE mechanics Eigen3::Eigen numerics benchmark pthread fmt CompactNSearch pybind11::headers)
 endif()
 
 
 target_compile_definitions(_nonos PRIVATE VERSION_INFO=${PROJECT_VERSION})
 
-install(TARGETS _nonos DESTINATION nonos)
+install(TARGETS _nonos COMPONENT python DESTINATION ${SICONOS_PYTHON_INSTALL_DIR}/nonos/)
+install(FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/siconos/py/nonos/__init__.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/siconos/py/nonos/bridge.py
+  COMPONENT python
+  DESTINATION ${SICONOS_PYTHON_INSTALL_DIR}/nonos/)
 
 add_subdirectory(src)
 
-# use, i.e. don't skip the full RPATH for the build tree
-set(CMAKE_SKIP_BUILD_RPATH FALSE)
+# # use, i.e. don't skip the full RPATH for the build tree
+# set(CMAKE_SKIP_BUILD_RPATH FALSE)
 
-# when building, don't use the install RPATH already
-# (but later on when installing)
-set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+# # when building, don't use the install RPATH already
+# # (but later on when installing)
+# set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 
-set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+# set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 
-# add the automatically determined parts of the RPATH
-# which point to directories outside the build tree to the install RPATH
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+# # add the automatically determined parts of the RPATH
+# # which point to directories outside the build tree to the install RPATH
+# set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 
 OPTION(BUILD_AS_SHARED_LIBS "Build all the libraries as shared" ON)

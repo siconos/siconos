@@ -5,15 +5,11 @@ import sys
 
 from siconos.mechanics.collision.tools import Contactor
 from siconos.mechanics.collision.bullet import SiconosBulletOptions
-
-from nonos.mechanics_run import MechanicsHdf5Runner
-import nonos
-
+from siconos.io.mechanics_run import MechanicsHdf5Runner, set_backend
 from math import pi
 
 backend = str(sys.argv[1])
-
-nonos.mechanics_run.set_backend(backend)
+set_backend(backend)
 
 disk_radius = 1
 

@@ -40,10 +40,10 @@ extern "C" void lsodar(fpointer, int* NEQ, double* Y, double* T, double* TOUT, i
                        int* JROOT);
 
 #else
-extern "C" inline void lsodar(fpointer, int* NEQ, double* Y, double* T, double* TOUT,
-                              int* ITOL, double* RTOL, double* ATOL, int* ISTATE,
-                              double* RWORK, long* LRW, int* IWORK, int* LIW,
-                              jacopointer C_JAC, int* JT, gpointer C_G, int* NG, int* JROOT) {
+extern "C" inline void lsodar(fpointer, int* NEQ, double* Y, double* T, double* TOUT, int* ITOL,
+                       double* RTOL, double* ATOL, int* ISTATE, double* RWORK, int* LRW,
+                       int* IWORK, int* LIW, jacopointer C_JAC, int* JT, gpointer C_G, int* NG,
+                       int* JROOT) {
   printf("Siconos Fortran API is off. This function (lsodar) has no effects.\n");
 }
 #endif

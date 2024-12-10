@@ -24,19 +24,19 @@ if (BUILD_AS_SHARED_LIBS)
 	if(WIN32)
 		add_definitions(-DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS)
 		set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS YES CACHE BOOL "Export all symbols")
-	endif(WIN32)	
+	endif(WIN32)
 endif (BUILD_AS_SHARED_LIBS)
 
 SET(CMAKE_DEBUG_POSTFIX "_d")
 
-set (HEADER_FILES 
+set (HEADER_FILES
 		include/Config.h
 		include/CompactNSearch.h
 		include/PointSet.h
 		include/DataStructures.h)
 
 if (BUILD_AS_SHARED_LIBS)
-	add_library(CompactNSearch SHARED 
+	add_library(CompactNSearch SHARED
 	    ${HEADER_FILES}
 		src/CompactNSearch.cpp
 )
@@ -59,17 +59,16 @@ install(FILES "include/CompactNSearch" ${HEADER_FILES}
 
 install(TARGETS CompactNSearch
 	RUNTIME DESTINATION bin
-	LIBRARY DESTINATION nonos
-	ARCHIVE DESTINATION nonos)
-	
+	LIBRARY DESTINATION ${SICONOS_PYTHON_INSTALL_DIR}/nonos
+	ARCHIVE DESTINATION ${SICONOS_PYTHON_INSTALL_DIR}/nonos)
+
 OPTION(USE_DOUBLE_PRECISION "Use double precision"	ON)
 if (USE_DOUBLE_PRECISION)
-	add_definitions( -DUSE_DOUBLE)	
-endif (USE_DOUBLE_PRECISION)	
+	add_definitions( -DUSE_DOUBLE)
+endif (USE_DOUBLE_PRECISION)
 
 option(BUILD_DEMO "Build example of how to use this library."
 		ON)
 if(BUILD_DEMO)
 	add_subdirectory(demo)
 endif(BUILD_DEMO)
-

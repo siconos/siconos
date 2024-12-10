@@ -13,7 +13,6 @@
 #include "siconos/algebra/numerics.hpp"
 #include "siconos/storage/pattern/pattern.hpp"
 #include "siconos/storage/storage.hpp"
-#include "siconos/utils/SiconosGraph.hpp"  // modified for std::array
 
 namespace siconos {
 template <typename Params>
@@ -27,10 +26,6 @@ struct standard_environment {
 
   template <typename K, typename V>
   using map = std::map<K, V>;
-
-  template <typename V, typename E>
-  using graph = SiconosGraph<V, E, boost::no_property, boost::no_property,
-                             boost::no_property>;
 
   template <typename... Ts>
   using tuple = std::tuple<Ts...>;
