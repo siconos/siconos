@@ -37,6 +37,7 @@ set(${COMPONENT}_DIRS
   src/MCP
   src/GenericMechanical
   src/VI
+  src/Plasticity
 )
 
 # - Extras, optional -
@@ -80,6 +81,7 @@ set(${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES
   src/MCP
   src/GenericMechanical
   src/VI
+  src/Plasticity	
   )
 
 # ---- Final setup for the library ----

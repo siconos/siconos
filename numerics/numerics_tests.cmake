@@ -352,6 +352,16 @@ if(WITH_TESTING)
     EXTRA_SOURCES data_collection_fc2d_enum.c test_fc2d_enum.c)
 
   #===========================================
+  # Mohr Coulomb platicity
+  #===========================================
+  begin_tests(src/Plasticity/test)
+  new_test(SOURCES mc2d_read_write_test.c)
+  
+
+    
+
+
+  #===========================================
   # Generic mechanical tests
   #===========================================
   begin_tests(src/GenericMechanical/test)
