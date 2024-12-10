@@ -14,10 +14,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
-#include "SiconosConfig.h" // for WITH_FCLIB // IWYU pragma: keep
+ */
 #include "CSparseMatrix.h"
-
+#include "SiconosConfig.h"  // for WITH_FCLIB // IWYU pragma: keep
 
 #ifdef WITH_FCLIB
 #define DEBUG_NOCOLOR
@@ -28,7 +27,7 @@
 #include <stdio.h>   // for NULL, fprintf, stderr
 #include <stdlib.h>  // for malloc, free, exit, EXIT_F...
 
-#include "CSparseMatrix.h"               // for CSparseMatrix, CS_INT, cs_...
+#include "CSparseMatrix.h"                        // for CSparseMatrix, CS_INT, cs_...
 #include "FrictionContactProblem.h"               // for FrictionContactProblem
 #include "GlobalFrictionContactProblem.h"         // for GlobalFrictionContactProblem
 #include "GlobalRollingFrictionContactProblem.h"  // for GlobalRollingFrictionContactProblem
@@ -109,8 +108,7 @@ FrictionContactProblem* from_fclib_local(const fclib_local* fclib_problem) {
 
   return problem;
 }
-FrictionContactProblem* from_fclib_local_sparse(const fclib_local* fclib_problem)
-{
+FrictionContactProblem* from_fclib_local_sparse(const fclib_local* fclib_problem) {
   FrictionContactProblem* problem;
 
   problem = (FrictionContactProblem*)malloc(sizeof(FrictionContactProblem));
@@ -119,57 +117,50 @@ FrictionContactProblem* from_fclib_local_sparse(const fclib_local* fclib_problem
   problem->mu = fclib_problem->mu;
   problem->q = fclib_problem->q;
 
-  problem->numberOfContacts = fclib_problem->W->m / fclib_problem->spacedim; /* cf fclib spec */
+  problem->numberOfContacts =
+      fclib_problem->W->m / fclib_problem->spacedim; /* cf fclib spec */
 
   problem->M = NM_create(NM_SPARSE, fclib_problem->W->m, fclib_problem->W->n);
 
-  CSparseMatrix * W = (CSparseMatrix * ) malloc(sizeof(CSparseMatrix));
+  CSparseMatrix* W = (CSparseMatrix*)malloc(sizeof(CSparseMatrix));
 
-  W->nzmax = (CS_INT) fclib_problem->W->nzmax;
-  W->m = (CS_INT) fclib_problem->W->m;
-  W->n = (CS_INT) fclib_problem->W->n;
-  
-  if(fclib_problem->W->nz == -1)
-  {
+  W->nzmax = (CS_INT)fclib_problem->W->nzmax;
+  W->m = (CS_INT)fclib_problem->W->m;
+  W->n = (CS_INT)fclib_problem->W->n;
+
+  if (fclib_problem->W->nz == -1) {
     /* compressed colums */
-    W->p = (CS_INT*) malloc(sizeof(CS_INT)*(W->n+1));
-    int_to_csi(fclib_problem->W->p, W->p, (unsigned)(W->n+1));
+    W->p = (CS_INT*)malloc(sizeof(CS_INT) * (W->n + 1));
+    int_to_csi(fclib_problem->W->p, W->p, (unsigned)(W->n + 1));
     problem->M->matrix2->csc = W;
-    problem->M->matrix2->origin=NSM_CSC;
-  }
-  else if(fclib_problem->W->nz == -2)
-  {
+    problem->M->matrix2->origin = NSM_CSC;
+  } else if (fclib_problem->W->nz == -2) {
     /* compressed rows */
-    W->p = (CS_INT*) malloc(sizeof(CS_INT)*(W->m+1));
-    int_to_csi(fclib_problem->W->p, W->p, (unsigned)(W->m+1));
+    W->p = (CS_INT*)malloc(sizeof(CS_INT) * (W->m + 1));
+    int_to_csi(fclib_problem->W->p, W->p, (unsigned)(W->m + 1));
     problem->M->matrix2->csr = W;
-    problem->M->matrix2->origin=NSM_CSR;
-  }
-  else
-  {
+    problem->M->matrix2->origin = NSM_CSR;
+  } else {
     /* triplet */
-    W->p = (CS_INT*) malloc(sizeof(CS_INT)*W->nzmax);
-    int_to_csi(fclib_problem->W->p, W->p, (unsigned) W->nzmax);
+    W->p = (CS_INT*)malloc(sizeof(CS_INT) * W->nzmax);
+    int_to_csi(fclib_problem->W->p, W->p, (unsigned)W->nzmax);
     problem->M->matrix2->triplet = W;
-    problem->M->matrix2->origin=NSM_TRIPLET;
+    problem->M->matrix2->origin = NSM_TRIPLET;
   }
 
-  W->i = (CS_INT*) malloc(sizeof(CS_INT)*W->nzmax);
-  int_to_csi(fclib_problem->W->i, W->i, (unsigned) W->nzmax);
+  W->i = (CS_INT*)malloc(sizeof(CS_INT) * W->nzmax);
+  int_to_csi(fclib_problem->W->i, W->i, (unsigned)W->nzmax);
 
   W->x = fclib_problem->W->x;
   W->nz = fclib_problem->W->nz;
-  
+
   NM_reset_versions(problem->M);
 
   return problem;
-
 }
 
-FrictionContactProblem* frictionContact_fclib_read(const char *path)
-{
-
-  fclib_local   *fclib_problem;
+FrictionContactProblem* frictionContact_fclib_read(const char* path) {
+  fclib_local* fclib_problem;
 
   fclib_problem = fclib_read_local(path);
 
@@ -178,6 +169,7 @@ FrictionContactProblem* frictionContact_fclib_read(const char *path)
   }
 
   return from_fclib_local(fclib_problem);
+  // return from_fclib_local_sparse(fclib_problem);
 }
 
 int frictionContact_fclib_write_csr(FrictionContactProblem* problem, char* title,

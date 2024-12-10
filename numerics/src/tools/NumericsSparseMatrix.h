@@ -206,7 +206,9 @@ CS_INT* NSM_diag_indices(NumericsMatrix* M);
  */
 void NSM_extract_block(NumericsMatrix* M, double* blockM, size_t pos_row, size_t pos_col,
                        size_t block_row_size, size_t block_col_size);
-
+double**  NSM_extract_diagonal_blocks(NumericsMatrix* M, size_t block_size);
+CSparseMatrix*   NSM_remove_diagonal_blocks(NumericsMatrix* M, size_t block_size);
+  
 /** Free allocated space for NSM_linear_solver_params.
  *
  *  \param p a NSM_linear_solver_params

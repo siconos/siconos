@@ -91,7 +91,7 @@ void SBM_clear_block(SparseBlockStructuredMatrix* sbm) {
     sbm->block = NULL;
   }
 }
-void SBM_clear(SparseBlockStructuredMatrix *sbm) {
+void SBM_clear(SparseBlockStructuredMatrix* sbm) {
   /* Free memory for SparseBlockStructuredMatrix */
   /* Warning: nothing is done to check if memory has really been
    allocated for each component or if it was only pointer links.  Note
@@ -113,11 +113,10 @@ void SBM_clear(SparseBlockStructuredMatrix *sbm) {
     free(sbm->blocksize1);
     sbm->blocksize1 = NULL;
   }
-  
+
   SBM_clear_block(sbm);
 
-  if(sbm->index1_data)
-  {
+  if (sbm->index1_data) {
     free(sbm->index1_data);
     sbm->index1_data = NULL;
   }
@@ -263,32 +262,29 @@ typedef struct sparse_matrix_iterator {
 static sparse_matrix_iterator sparseMatrixBegin(const CSparseMatrix* const sparseMat);
 static int sparseMatrixNext(sparse_matrix_iterator* it);
 
-size_t SBM_nnz(SparseBlockStructuredMatrix * A)
-{
-  size_t nnz=0;
+size_t SBM_nnz(SparseBlockStructuredMatrix* A) {
+  size_t nnz = 0;
   /* Column (block) position of the current block*/
   size_t colNumber;
   /* Number of rows/columns of the current block */
   unsigned int nbRows, nbColumns;
-  for(unsigned int currentRowNumber = 0 ; currentRowNumber < A->filled1 - 1; ++currentRowNumber)
-  {
+  for (unsigned int currentRowNumber = 0; currentRowNumber < A->filled1 - 1;
+       ++currentRowNumber) {
     /* Get dim. of the current block */
     nbRows = A->blocksize0[currentRowNumber];
-    if(currentRowNumber != 0)
-      nbRows -= A->blocksize0[currentRowNumber - 1];
-    for(size_t blockNum = A->index1_data[currentRowNumber];
-        blockNum < A->index1_data[currentRowNumber + 1]; ++blockNum)
-    {
+    if (currentRowNumber != 0) nbRows -= A->blocksize0[currentRowNumber - 1];
+    for (size_t blockNum = A->index1_data[currentRowNumber];
+         blockNum < A->index1_data[currentRowNumber + 1]; ++blockNum) {
       assert(blockNum < A->filled2);
-
-      nbColumns = A->blocksize1[colNumber];
-      if(colNumber != 0)
+      colNumber = A->index2_data[blockNum];
+      if (colNumber != 0) {
         nbColumns -= A->blocksize1[colNumber - 1];
-      nnz += nbRows*nbColumns;
+        nnz += nbRows * nbColumns;
+      }
     }
   }
 
-  return  nnz;
+  return nnz;
 };
 
 void SBM_gemv(unsigned int sizeX, unsigned int sizeY, double alpha,
@@ -1426,7 +1422,6 @@ void SBM_row_prod_no_diag_3x3(unsigned int sizeX, unsigned int sizeY,
                               unsigned int currentRowNumber,
                               const SparseBlockStructuredMatrix* const A, double* const x,
                               double* y) {
-
   /*
      If: A is a SparseBlockStructuredMatrix matrix, Aij a block at row
      i and column j (Warning: i and j are indices of block position,

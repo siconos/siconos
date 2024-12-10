@@ -22,12 +22,12 @@
 #include "FrictionContactProblem.h"  // for frictionContactProblem_free
 #include "NonSmoothDrivers.h"        // for fc2d_driver, fc3d_driver
 #include "NumericsFwd.h"             // for SolverOptions, FrictionConta...
-#include "SiconosConfig.h"           // for WITH_FCLIB
-#include "SiconosConfig.h"           // for WITH_FCLIB, HAVE_GAMS_C_API // IWYU pragma: keep
-#include "SolverOptions.h"           // for SolverOptions, solver_option...
+#include "SiconosBlas.h"
+#include "SiconosConfig.h"  // for WITH_FCLIB
+#include "SiconosConfig.h"  // for WITH_FCLIB, HAVE_GAMS_C_API // IWYU pragma: keep
+#include "SolverOptions.h"  // for SolverOptions, solver_option...
 #include "frictionContact_test_utils.h"  // for frictionContact_test_function
 #include "test_utils.h"                  // for TestCase
-
 // avoid a conflict with old csparse.h in case fclib includes it
 #define _CS_H
 
@@ -138,24 +138,21 @@ int frictionContact_test_function(TestCase* current) {
     info = fc3d_driver(problem, reaction, velocity, current->options);
   } else
     info = 1;
-  
-  int print_size = 10;
-  printf("Norm velocity:  %12.8e\n", cblas_dnrm2(NC*dim, velocity, 1));
-  printf("Norm reaction:  %12.8e\n", cblas_dnrm2(NC*dim, reaction, 1));
 
-  if(dim * NC >= print_size)
-  {
+  int print_size = 10;
+  printf("Norm velocity:  %12.8e\n", cblas_dnrm2(NC * dim, velocity, 1));
+  printf("Norm reaction:  %12.8e\n", cblas_dnrm2(NC * dim, reaction, 1));
+
+  if (dim * NC >= print_size) {
     printf("First values (%i)\n", print_size);
-    for(int k = 0 ; k < print_size; k++)
-    {
-      printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k, reaction[k]);
+    for (int k = 0; k < print_size; k++) {
+      printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k,
+             reaction[k]);
     }
-  }
-  else
-  {
-    for(int k = 0 ; k < dim * NC; k++)
-    {
-      printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k, reaction[k]);
+  } else {
+    for (int k = 0; k < dim * NC; k++) {
+      printf("Velocity[%i] = %12.8e \t \t Reaction[%i] = %12.8e\n", k, velocity[k], k,
+             reaction[k]);
     }
   }
   printf(" ..... \n");

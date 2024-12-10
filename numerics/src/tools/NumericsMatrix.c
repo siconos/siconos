@@ -26,7 +26,7 @@
 #include <string.h>  // for memcpy, memset
 
 #include "CSparseMatrix.h"
-#include "CSparseMatrix.h"   // for CSparseMatrix, CS_INT, cs_dl_sp...
+#include "CSparseMatrix.h"            // for CSparseMatrix, CS_INT, cs_dl_sp...
 #include "NM_MPI.h"                   // for NM_MPI_copy
 #include "NM_MUMPS.h"                 // for NM_MUMPS_copy
 #include "NM_conversions.h"           // for NM_csc_to_csr, NM_csc_to_triplet
@@ -478,7 +478,6 @@ void NM_row_prod_no_diag3(size_t sizeX, int block_start, size_t row_start, Numer
       x[it] = 0.;
       x[is] = 0.;
 
-
       CSparseMatrix* M;
       if (A->matrix2->origin == NSM_CSR) {
         M = NM_csr(A);
@@ -489,32 +488,31 @@ void NM_row_prod_no_diag3(size_t sizeX, int block_start, size_t row_start, Numer
       CS_INT* Mp = M->p;
       CS_INT* Mi = M->i;
       CS_ENTRY* Mx = M->x;
+//#define OPTIMIZE_ROW_PROD_NO_DIAG3_FOR_SPARSE
+#ifdef OPTIMIZE_ROW_PROD_NO_DIAG3_FOR_SPARSE
+      // Try to optimize for 3x3 blocks
+      // the idea is to optimize cache access by using continuous values in the x vector
+      // the optimization is risky if one of the block is not dense.
+      // since
 
-      /* for (size_t i = 0, j = row_start; i < 3; ++i, ++j) { */
-      /*   for (CS_INT p = Mp[j]; p < Mp[j + 1]; ++p) { */
-      /*     y[i] += Mx[p] * x[Mi[p]]; */
-      /*   } */
-      /* } */
-
-
-      // try to optimize for 3x3 blocks
-      // the idea is to optimize cache access by using continuous values in each x
-
-      CS_INT j =row_start;
+      CS_INT j = row_start;
       CS_INT p = Mp[j];
-      CS_INT p_1 =  Mp[j+1];
-      CS_INT p_2 =  Mp[j+2];
+      CS_INT p_1 = Mp[j + 1];
+      CS_INT p_2 = Mp[j + 2];
 
-      while (p < Mp[j + 1])
-	{
-	 y[0]+=  Mx[p] * x[Mi[p]] + Mx[p+1] * x[Mi[p+1]]+ Mx[p+2] * x[Mi[p+2]];
-	 y[1]+=  Mx[p_1] * x[Mi[p_1]]+ Mx[p_1+1] * x[Mi[p_1+1]]+ Mx[p_1+2] * x[Mi[p_1+2]];;
-	 y[2]+=  Mx[p_2] * x[Mi[p_2]]+ Mx[p_2+1] * x[Mi[p_2+1]]+ Mx[p_2+2] * x[Mi[p_2+2]];;
-	 //printf("j = %i\t p = %i \t, i = %i % i %i \n", j, p, Mi[p], Mi[p_1], Mi[p_2]);
-	 p = p+3;
-	 p_1 = p_1+3;
-	 p_2 = p_2+3;
-	}
+      while (p < Mp[j + 1]) {
+        y[0] += Mx[p] * x[Mi[p]] + Mx[p + 1] * x[Mi[p + 1]] + Mx[p + 2] * x[Mi[p + 2]];
+        y[1] +=
+            Mx[p_1] * x[Mi[p_1]] + Mx[p_1 + 1] * x[Mi[p_1 + 1]] + Mx[p_1 + 2] * x[Mi[p_1 + 2]];
+        ;
+        y[2] +=
+            Mx[p_2] * x[Mi[p_2]] + Mx[p_2 + 1] * x[Mi[p_2 + 1]] + Mx[p_2 + 2] * x[Mi[p_2 + 2]];
+        ;
+        // printf("j = %i\t p = %i \t, i = %i % i %i \n", j, p, Mi[p], Mi[p_1], Mi[p_2]);
+        p = p + 3;
+        p_1 = p_1 + 3;
+        p_2 = p_2 + 3;
+      }
 
       /* // the following version is slower? */
       /* while (p < Mp[j + 1]) */
@@ -526,16 +524,19 @@ void NM_row_prod_no_diag3(size_t sizeX, int block_start, size_t row_start, Numer
       /* 	 y[0]+=  Mx[p] * x[i0] + Mx[p+1] * x[i1]+ Mx[p+2] * x[i2]; */
       /* 	 y[1]+=  Mx[p_1] * x[i0]+ Mx[p_1+1] * x[i1]+ Mx[p_1+2] * x[i2];; */
       /* 	 y[2]+=  Mx[p_2] * x[i0]+ Mx[p_2+1] * x[i1]+ Mx[p_2+2] * x[i2];; */
-      /* 	 //printf("j = %i\t p = %i \t, i = %i % i %i \n", j, p, Mi[p], Mi[p_1], Mi[p_2]); */
+      /* 	 //printf("j = %i\t p = %i \t, i = %i % i %i \n", j, p, Mi[p], Mi[p_1],
+       * Mi[p_2]); */
       /* 	 p = p+3; */
       /* 	 p_1 = p_1+3; */
       /* 	 p_2 = p_2+3; */
       /* 	} */
-
-
-
-
-
+#else
+      for (size_t i = 0, j = row_start; i < 3; ++i, ++j) {
+        for (CS_INT p = Mp[j]; p < Mp[j + 1]; ++p) {
+          y[i] += Mx[p] * x[Mi[p]];
+        }
+      }
+#endif
 
       x[in] = rin;
       x[it] = rit;
@@ -1107,8 +1108,8 @@ double NM_get_value(const NumericsMatrix* const M, int i, int j) {
           }
           return 0.0;
           break;
-	}
-      case NSM_CSR: {
+        }
+        case NSM_CSR: {
           assert(M->matrix2->csr);
           CS_INT* Mi = M->matrix2->csr->i;
           CS_INT* Mp = M->matrix2->csr->p;
@@ -1119,7 +1120,7 @@ double NM_get_value(const NumericsMatrix* const M, int i, int j) {
           }
           return 0.0;
           break;
-	  }
+        }
         default: {
           fprintf(stderr, "NM_get_value ::  unknown origin %d for sparse matrix\n",
                   M->matrix2->origin);
@@ -1292,7 +1293,7 @@ void NM_display(const NumericsMatrix* const m) {
         }
       }
 
-      int brief= 1;
+      int brief = 1;
       printf("========== size0 = %i, size1 = %i\n", m->size0, m->size1);
       if (m->matrix2->triplet) {
         printf("========== a matrix in format triplet is stored\n");
@@ -1306,7 +1307,7 @@ void NM_display(const NumericsMatrix* const m) {
         printf("========== a matrix in format trans_csc is stored\n");
         cs_print(m->matrix2->trans_csc, brief);
       }
-     if (m->matrix2->csr) {
+      if (m->matrix2->csr) {
         printf("========== a matrix in format csr is stored\n");
         CSparseMatrix_print(m->matrix2->csr, brief);
       }
@@ -1730,21 +1731,15 @@ void NM_extract_diag_block5(NumericsMatrix* M, int block_row_nb, double** Block)
     }
   }
 }
-SparseBlockStructuredMatrix *   NM_extract_diagonal_blocks(NumericsMatrix* M, size_t block_size)
-{
+SparseBlockStructuredMatrix* NM_extract_diagonal_blocks(NumericsMatrix* M, size_t block_size) {
   assert(M);
   NM_types storageType = M->storageType;
 
+  if (M->size0 != M->size1) return NULL;
+  if (M->size0 % block_size != 0) return NULL;
 
-  if (M->size0 != M->size1)
-    return NULL;
-  if (M->size0 % block_size != 0)
-    return NULL;
-
-
-  SparseBlockStructuredMatrix * sbm = SBM_new();
-  sbm->nbblocks= M->size0 / block_size;
-
+  SparseBlockStructuredMatrix* sbm = SBM_new();
+  sbm->nbblocks = M->size0 / block_size;
 
   switch (storageType) {
     /* case NM_DENSE: { */
@@ -1754,7 +1749,7 @@ SparseBlockStructuredMatrix *   NM_extract_diagonal_blocks(NumericsMatrix* M, si
     /*   break; */
     /* } */
     case NM_SPARSE: {
-      sbm->block =  NSM_extract_diagonal_blocks(M, block_size);
+      sbm->block = NSM_extract_diagonal_blocks(M, block_size);
       break;
     }
     default: {
@@ -1764,18 +1759,14 @@ SparseBlockStructuredMatrix *   NM_extract_diagonal_blocks(NumericsMatrix* M, si
   }
   return sbm;
 }
-NumericsMatrix *   NM_remove_diagonal_blocks(NumericsMatrix* M, size_t block_size)
-{
+NumericsMatrix* NM_remove_diagonal_blocks(NumericsMatrix* M, size_t block_size) {
   assert(M);
   NM_types storageType = M->storageType;
 
+  if (M->size0 != M->size1) return NULL;
+  if (M->size0 % block_size != 0) return NULL;
 
-  if (M->size0 != M->size1)
-    return NULL;
-  if (M->size0 % block_size != 0)
-    return NULL;
-
-  NumericsMatrix* out =NULL;
+  NumericsMatrix* out = NULL;
 
   switch (storageType) {
     /* case NM_DENSE: { */
@@ -1785,8 +1776,8 @@ NumericsMatrix *   NM_remove_diagonal_blocks(NumericsMatrix* M, size_t block_siz
     /*   break; */
     /* } */
     case NM_SPARSE: {
-      CSparseMatrix * out_cs =  NSM_remove_diagonal_blocks(M, block_size);
-      out  =  NM_create(NM_SPARSE,M->size0, M->size1);
+      CSparseMatrix* out_cs = NSM_remove_diagonal_blocks(M, block_size);
+      out = NM_create(NM_SPARSE, M->size0, M->size1);
       out->matrix2->origin = NSM_TRIPLET;
       out->matrix2->triplet = out_cs;
       break;
@@ -4583,12 +4574,10 @@ int NM_check(const NumericsMatrix* const A) {
 
 size_t NM_nnz(const NumericsMatrix* M) {
   switch (M->storageType) {
-    case NM_DENSE:
-      {
+    case NM_DENSE: {
       return M->size0 * M->size1;
-      }
-  case NM_SPARSE_BLOCK:
-    {
+    }
+    case NM_SPARSE_BLOCK: {
       return SBM_nnz(M->matrix1);
     }
     case NM_SPARSE: {

@@ -201,15 +201,16 @@ extern "C" {
  */
 SparseBlockStructuredMatrix* SBM_new(void);
 
-
 /** set Sparse Block Matrix. fields to NULL
  *
  *  \param sbm a matrix
  */
 void SBM_null(SparseBlockStructuredMatrix* sbm);
 
-size_t SBM_nnz(SparseBlockStructuredMatrix * A);
-  
+size_t SBM_nnz(SparseBlockStructuredMatrix* A);
+
+void SBM_clear_block(SparseBlockStructuredMatrix* sbm);
+
 /**
    SparseMatrix - vector product y = alpha*A*x + beta*y
 
@@ -346,7 +347,7 @@ void SBM_row_prod_no_diag(unsigned int sizeX, unsigned int sizeY,
 /**
    Row of a SparseMatrix - vector product y = rowA*x or y += rowA*x, rowA being a row of blocks
    of A of size 3x3
-   
+
    \param[in] sizeX dim of the vector x
    \param[in] sizeY dim of the vector y
    \param[in] currentRowNumber number of the required row of blocks
@@ -372,7 +373,6 @@ void SBM_extract_component_3x3(const SparseBlockStructuredMatrix* const A,
                                unsigned int row_components_size, unsigned int* col_components,
                                unsigned int col_components_size);
 
-
 /**
     Destructor for SparseBlockStructuredMatrix objects
     \param blmat SparseBlockStructuredMatrix the matrix to be destroyed.
@@ -381,11 +381,10 @@ void SBM_clear(SparseBlockStructuredMatrix* blmat);
 
 /** To free a SBM matrix (for example allocated by NM_new_from_file).
  *
- *  \param[in] A the SparseBlockStructuredMatrix that mus be de-allocated.
+ *  \param[in] A the SparseBlockStructuredMatrix that must be de-allocated.
  *  \param[in] level use NUMERICS_SBM_FREE_BLOCK | NUMERICS_SBM_FREE_SBM
  */
 void SBMfree(SparseBlockStructuredMatrix* A, unsigned int level);
-
 
 /**
     Screen display of the matrix content
@@ -522,10 +521,9 @@ int SBM_transpose(const SparseBlockStructuredMatrix* const A, SparseBlockStructu
 int SBM_inverse_diagonal_block_matrix_in_place(const SparseBlockStructuredMatrix* M,
                                                int* ipiv);
 
-
 /**
    Copy a SBM into a Dense Matrix
-   
+
    \param[in] A the SparseBlockStructuredMatrix matrix
    \param[in] denseMat pointer on the filled dense Matrix
 */

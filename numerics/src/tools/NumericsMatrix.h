@@ -451,7 +451,8 @@ size_t NM_nnz(const NumericsMatrix* M);
  */
 void NM_extract_diag_block(NumericsMatrix* M, int block_row_nb, size_t start_row, int size,
                            double** Block);
-
+SparseBlockStructuredMatrix* NM_extract_diagonal_blocks(NumericsMatrix* M, size_t block_size);
+NumericsMatrix* NM_remove_diagonal_blocks(NumericsMatrix* M, size_t block_size);
 /** get a 3x3 diagonal block of a NumericsMatrix. No allocation is done.
  *
  *  \param[in] M a NumericsMatrix
