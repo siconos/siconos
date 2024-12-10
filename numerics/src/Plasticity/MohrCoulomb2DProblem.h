@@ -28,8 +28,7 @@
 #include "SiconosConfig.h"   // for BUILD_AS_CPP // IWYU pragma: keep
 
 /**
-    The structure that defines a (reduced or dual) Friction-Contact (3D or 2D)
-    problem.
+    The structure that defines a Mohr Coulomb 2D xproblem.
 */
 struct MohrCoulomb2DProblem {
   /** dimension of the stress space */

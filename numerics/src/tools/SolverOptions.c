@@ -25,19 +25,20 @@
 #include <stdlib.h>  // for free, calloc, malloc
 #include <string.h>  // for strcmp
 
-#include "AVI_cst.h"                        // for SICONOS_AVI_CAOFERRIS_STR
-#include "ConvexQP_Solvers.h"               // for convexQP_ADMM_set_default
-#include "ConvexQP_cst.h"                   // for SICONOS_CONVEXQP_ADMM_STR
-#include "Friction_cst.h"                   // for SICONOS_FRICTION_2D_CPG_STR
-#include "GenericMechanical_Solvers.h"      // for gmp_set_default
-#include "GenericMechanical_cst.h"          // for SICONOS_GENERIC_MECHANICA...
-#include "LCP_Solvers.h"                    // for lcp_pivot_set_default
-#include "MCP_cst.h"                        // for SICONOS_MCP_NEWTON_FB_FBL...
-#include "MLCP_Solvers.h"                   // for mlcp_direct_set_default
-#include "NCP_cst.h"                        // for SICONOS_NCP_NEWTON_FB_FBL...
-#include "Newton_methods.h"                 // for newton_lsa_set_default
-#include "NonSmoothNewton.h"                // for nonSmoothNewton_set_default
-#include "PathSearch.h"                     // for pathsearch_set_default
+#include "AVI_cst.h"                    // for SICONOS_AVI_CAOFERRIS_STR
+#include "ConvexQP_Solvers.h"           // for convexQP_ADMM_set_default
+#include "ConvexQP_cst.h"               // for SICONOS_CONVEXQP_ADMM_STR
+#include "Friction_cst.h"               // for SICONOS_FRICTION_2D_CPG_STR
+#include "GenericMechanical_Solvers.h"  // for gmp_set_default
+#include "GenericMechanical_cst.h"      // for SICONOS_GENERIC_MECHANICA...
+#include "LCP_Solvers.h"                // for lcp_pivot_set_default
+#include "MCP_cst.h"                    // for SICONOS_MCP_NEWTON_FB_FBL...
+#include "MLCP_Solvers.h"               // for mlcp_direct_set_default
+#include "NCP_cst.h"                    // for SICONOS_NCP_NEWTON_FB_FBL...
+#include "Newton_methods.h"             // for newton_lsa_set_default
+#include "NonSmoothNewton.h"            // for nonSmoothNewton_set_default
+#include "PathSearch.h"                 // for pathsearch_set_default
+#include "Plasticity_cst.h"
 #include "SOCLCP_Solvers.h"                 // for soclcp_nsgs_set_default
 #include "SOCLCP_cst.h"                     // for SICONOS_SOCLCP_NSGS_STR
 #include "SiconosNumerics_Solvers.h"        // for SICONOS_REGISTER_SOLVERS
@@ -48,11 +49,11 @@
 #include "gfc3d_Solvers.h"                  // for gfc3d_aclmfp_set_default
 #include "grfc3d_Solvers.h"                 // for grfc3d_IPM_set_default
 #include "lcp_cst.h"                        // for SICONOS_LCP_AVI_CAOFERRIS...
-#include "mlcp_cst.h"                       // for SICONOS_MLCP_DIRECT_ENUM_STR
-#include "numerics_verbose.h"               // for numerics_printf, numerics...
-#include "relay_cst.h"                      // for SICONOS_RELAY_AVI_CAOFERR...
-#include "rolling_fc_Solvers.h"             // for rfc3d_poc_set_default
-
+#include "mc2d_solvers.h"
+#include "mlcp_cst.h"            // for SICONOS_MLCP_DIRECT_ENUM_STR
+#include "numerics_verbose.h"    // for numerics_printf, numerics...
+#include "relay_cst.h"           // for SICONOS_RELAY_AVI_CAOFERR...
+#include "rolling_fc_Solvers.h"  // for rfc3d_poc_set_default
 /** Create a struct SolverOptions and initialize its content.
 
     Allocate memory for internal parameters array, ensure that pointers
@@ -817,6 +818,30 @@ SolverOptions* solver_options_create(int solverId) {
       gmp_set_default(options);
       break;
     }
+    case MOHR_COULOMB_2D_NSGS: {
+      options = solver_options_initialize(solverId, 1000, 1e-4, 1);
+      mc2d_nsgs_set_default(options);
+      break;
+    }
+
+    case MOHR_COULOMB_2D_ONECONTACT_NSN_GP: {
+      options = solver_options_initialize(solverId, 1000, 1e-14, 0);
+      mc2d_onecontact_nsn_set_default(options);
+      break;
+    }
+
+    case MOHR_COULOMB_2D_ONECONTACT_NSN_GP_HYBRID: {
+      options = solver_options_initialize(solverId, 1000, 1e-14, 0);
+      mc2d_onecontact_nsn_gp_set_default(options);
+      break;
+    }
+
+    case MOHR_COULOMB_2D_ONECONTACT_ProjectionOnConeWithLocalIteration: {
+      options = solver_options_initialize(solverId, 1000, 1e-12, 0);
+      mc2d_poc_set_default(options);
+      break;
+    }
+
     default:
       numerics_error("solver_options_create", "Unknown solver : %s (%i) !",
                      solver_options_id_to_name(solverId), solverId);

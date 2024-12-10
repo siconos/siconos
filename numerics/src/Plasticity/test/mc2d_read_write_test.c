@@ -21,14 +21,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "FrictionContactProblem.h"
-#include "Friction_cst.h"
 #include "MohrCoulomb2DProblem.h"
 #include "NumericsMatrix.h"
 #include "NonSmoothDrivers.h"
 #include "SolverOptions.h"
-#include "fc3d_Solvers.h"
-#include "frictionContact_test_utils.h"
 #include "numerics_verbose.h"
 
 
@@ -66,26 +62,7 @@ int main(void) {
   MohrCoulomb2DProblem* MC2D_r= mohrCoulomb2D_new_from_filename("mc2d_example1.dat");
   mohrCoulomb2D_display(MC2D_r);
   mohrCoulomb2DProblem_free(MC2D_r);
-  
-  FrictionContactProblem* FC = frictionContactProblem_new_with_data(3, 3, W, q, mu);
-  double r[9] = {0.};
-  double u[9] = {0.};
 
-  FC->M = NULL;
-  FC->q = NULL;
-  FC->mu = NULL;
-  frictionContactProblem_free(FC);
-
-
-  FrictionContactProblem* FCdense = frictionContactProblem_new_with_data(3, 3, tmpM, q, mu);
-  double rdense[9] = {0.};
-  double udense[9] = {0.};
-    
-  FCdense->M = NULL;
-  FCdense->q = NULL;
-  FCdense->mu = NULL;
-  frictionContactProblem_free(FCdense);
-  
   NM_clear(W);
   tmpM->matrix0 = NULL;
   NM_clear(tmpM);

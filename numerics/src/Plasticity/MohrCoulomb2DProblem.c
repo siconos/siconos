@@ -150,7 +150,6 @@ MohrCoulomb2DProblem* mohrCoulomb2D_new_from_filename(const char* filename) {
   // if the input file is an hdf5 file, we try to read it with fclib interface function.
   if (is_hdf5) {
     /* #if defined(WITH_FCLIB) */
-    /*     problem = frictionContact_fclib_read(filename); */
     /* #else */
     numerics_error("MohrCoulomb2DProblem",
                    "Try to read an hdf5 file, while fclib interface is not active. Recompile "
@@ -232,7 +231,7 @@ MohrCoulomb2DProblem* mohrCoulomb2D_copy(MohrCoulomb2DProblem* problem) {
   memcpy(new->q, problem->q, n * sizeof(double));
   new->eta = (double*)malloc(nc * sizeof(double));
   memcpy(new->eta, problem->eta, nc * sizeof(double));
-  new->eta = (double*)malloc(nc * sizeof(double));
+  new->mu = (double*)malloc(nc * sizeof(double));
   memcpy(new->mu, problem->mu, nc * sizeof(double));
   return new;
 }

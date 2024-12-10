@@ -356,6 +356,7 @@ if(WITH_TESTING)
   #===========================================
   begin_tests(src/Plasticity/test)
   new_test(SOURCES mc2d_read_write_test.c)
+  new_test(SOURCES mc2d_simple_solve_test.c)
   
 
     

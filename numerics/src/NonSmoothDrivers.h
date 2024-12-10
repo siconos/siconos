@@ -273,6 +273,19 @@ int soclcp_driver(SecondOrderConeLinearComplementarityProblem *problem, double *
    involved in contact (for output in file.) \return result (0 if successful otherwise 1).
 
 */
+
+/**
+    General interface to solvers for Mohr Coulomb 2D problem
+
+    \param[in] problem the structure which handles the Friction-Contact problem
+    \param[in,out] stress global vector (n)
+    \param[in,out] plastic_strain_rate global vector (n)
+    \param[in,out] options structure used to define the solver(s) and their parameters
+    \return result (0 if successful otherwise 1).
+*/
+int mc2d_driver(MohrCoulomb2DProblem *problem, double *stress, double *plastic_strain_rate,
+                SolverOptions *options);
+
 int fc3d_LmgcDriver(double *reaction, double *velocity, double *q, double *mu, double *W,
                     unsigned int *row, unsigned int *column, unsigned int nc, unsigned int nb,
                     int solver_id, double tolerance, int itermax, int verbose, int outputFile,
