@@ -11,14 +11,16 @@ enum PLASTICITY_SOLVER {
   /* 2D Mohr Coulomb  solvers for one cone (used mainly inside NSGS solvers) */
 
   /** Non-smooth Newton Alart-Curnier, 'direct', one contact solver */
-  MOHR_COULOMB_2D_ONECONTACT_NSN = 20050,
+  MOHR_COULOMB_2D_ONECONE_NSN = 20050,
   /** Non-smooth Newton Alart-Curnier, 'damped', one contact solver */
-  MOHR_COULOMB_2D_ONECONTACT_NSN_GP = 20051,
+  MOHR_COULOMB_2D_ONECONE_NSN_GP = 20051,
   /** Projection on cone, one contact solver */
-  MOHR_COULOMB_2D_ONECONTACT_ProjectionOnCone = 20052,
+  MOHR_COULOMB_2D_ONECONE_ProjectionOnCone = 20052,
   /** Projection on cone, one contact solver */
-  MOHR_COULOMB_2D_ONECONTACT_ProjectionOnConeWithLocalIteration = 20053,
-  MOHR_COULOMB_2D_ONECONTACT_NSN_GP_HYBRID = 20065
+  MOHR_COULOMB_2D_ONECONE_ProjectionOnConeWithLocalIteration = 20053,
+  /** Non-smooth Newton Alart-Curnier, 'damped' and hybrid with projection, one contact solver
+   */
+  MOHR_COULOMB_2D_ONECONE_NSN_GP_HYBRID = 20065
 };
 
 extern const char* const MOHR_COULOMB_2D__NSGS_STR;
@@ -31,7 +33,7 @@ enum PLASTICITY_IPARAM {
   /** index in iparam to store the rescaling  */
   PLASTICITY_IPARAM_RESCALING_CONE = 4,
   /** current contact number (example of use: one contact solvers) **/
-  PLASTICITY_CURRENT_CONTACT_NUMBER = 5,
+  PLASTICITY_CURRENT_CONE_NUMBER = 5,
   /** index in iparam to store the error evaluation method */
   PLASTICITY_IPARAM_ERROR_EVALUATION = 7,
   /** index in iparam to store the frequency of error evaluation method */
@@ -168,10 +170,8 @@ enum PLASTICITY_NSN_RHO_STRATEGY_ENUM {
 
 enum PLASTICITY_NSN_FORMULATION_ENUM {
   PLASTICITY_NSN_FORMULATION_ALARTCURNIER_STD = 0,
-  PLASTICITY_NSN_FORMULATION_JEANMOREAU_STD = 1,
-  PLASTICITY_NSN_FORMULATION_ALARTCURNIER_GENERATED = 2,
-  PLASTICITY_NSN_FORMULATION_JEANMOREAU_GENERATED = 3,
-  PLASTICITY_NSN_FORMULATION_NULL = 4,
+  PLASTICITY_NSN_FORMULATION_NATURALMAP = 1,
+  PLASTICITY_NSN_FORMULATION_NULL = 2,
 };
 
 enum PLASTICITY_NSN_LINESEARCH_ENUM {

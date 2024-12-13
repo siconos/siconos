@@ -49,7 +49,6 @@ typedef void (*PerformRelaxationPtr)(double *, double *, double);
 
 typedef double (*LightErrorSquaredPtr)(double *, double *);
 
-
 typedef double (*SquaredNormPtr)(double *);
 
 struct LocalMC2DProblemFunctionToolkit {
@@ -76,7 +75,6 @@ void mc2d_local_problem_compute_q(MohrCoulomb2DProblem *problem,
                                   int contact);
 void mc2d_local_problem_fill_M(MohrCoulomb2DProblem *problem,
                                MohrCoulomb2DProblem *localproblem, int contact);
-
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

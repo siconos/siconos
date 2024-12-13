@@ -24,19 +24,19 @@
 #include <stdio.h>   // for fprintf, printf, NULL, stderr
 #include <stdlib.h>  // for calloc, free, exit, EXIT_FAILURE
 
-#include "MohrCoulomb2DProblem.h"  // for MohrCoulomb2DProblem
+#include "MohrCoulomb2DProblem.h"      // for MohrCoulomb2DProblem
+#include "NumericsFwd.h"               // for SolverOptions, MohrCoulomb2D...
+#include "NumericsMatrix.h"            // for NumericsMatrix, RawNumericsMatrix
 #include "Plasticity_cst.h"            // for PLASTICITY_NSGS_LOCAL...
-#include "NumericsFwd.h"             // for SolverOptions, MohrCoulomb2D...
-#include "NumericsMatrix.h"          // for NumericsMatrix, RawNumericsMatrix
-#include "SiconosBlas.h"             // for cblas_ddot
-#include "SolverOptions.h"           // for SolverOptions, solver_options_...
-#include "SparseBlockMatrix.h"       // for SBM_row_prod
-#include "mc2d_solvers.h"
+#include "SiconosBlas.h"               // for cblas_ddot
+#include "SolverOptions.h"             // for SolverOptions, solver_options_...
+#include "SparseBlockMatrix.h"         // for SBM_row_prod
 #include "mc2d_compute_error.h"        // for mc2d_Tresca_unitary_compute_an...
 #include "mc2d_local_problem_tools.h"  // for mc2d_local_problem_compute_q
-#include "numerics_verbose.h"          // for numerics_printf, numerics_prin...
-#include "projectionOnCone.h"          // for projectionOnCone
-#include "projectionOnCylinder.h"      // for projectionOnCylinder
+#include "mc2d_solvers.h"
+#include "numerics_verbose.h"      // for numerics_printf, numerics_prin...
+#include "projectionOnCone.h"      // for projectionOnCone
+#include "projectionOnCylinder.h"  // for projectionOnCylinder
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */
@@ -290,8 +290,7 @@ int mc2d_projectionOnConeWithLocalIteration_solve(MohrCoulomb2DProblem* localpro
   /* double as = 1.0 / (MLocal[8] + mu_i); */
   /* at = an; */
   /* as = an; */
-  double rho = options->dWork[options->iparam[PLASTICITY_CURRENT_CONTACT_NUMBER]],
-         rho_k;
+  double rho = options->dWork[options->iparam[PLASTICITY_CURRENT_CONE_NUMBER]], rho_k;
   DEBUG_PRINTF(" Contact options->iparam[PLASTICITY_CURRENT_CONTACT_NUMBER] = %i\n",
                options->iparam[PLASTICITY_CURRENT_CONTACT_NUMBER]);
   DEBUG_PRINTF("saved rho = %14.7e\n", rho);
@@ -317,7 +316,7 @@ int mc2d_projectionOnConeWithLocalIteration_solve(MohrCoulomb2DProblem* localpro
   double tau = 2.0 / 3.0, tauinv = 3.0 / 2.0, L = 0.9, Lmin = 0.3;
 
   numerics_printf_verbose(2, "--  mc2d_projectionOnConeWithLocalIteration_solve contact = %i",
-                          options->iparam[PLASTICITY_CURRENT_CONTACT_NUMBER]);
+                          options->iparam[PLASTICITY_CURRENT_CONE_NUMBER]);
   numerics_printf_verbose(2,
                           "--  mc2d_projectionOnConeWithLocalIteration_solve | localiter \t| "
                           "rho \t\t\t| error\t\t\t|");
@@ -417,7 +416,7 @@ int mc2d_projectionOnConeWithLocalIteration_solve(MohrCoulomb2DProblem* localpro
         2, "--                                                | %i \t\t| %.10e\t| %.10e\t|",
         localiter, rho, localerror);
   }
-  options->dWork[options->iparam[PLASTICITY_CURRENT_CONTACT_NUMBER]] = rho;
+  options->dWork[options->iparam[PLASTICITY_CURRENT_CONE_NUMBER]] = rho;
   options->dparam[SICONOS_DPARAM_RESIDU] = localerror;
   DEBUG_PRINTF("final rho  =%e\n", rho);
 
@@ -425,7 +424,6 @@ int mc2d_projectionOnConeWithLocalIteration_solve(MohrCoulomb2DProblem* localpro
   if (localerror > localtolerance) return 1;
   return 0;
 }
-
 
 int mc2d_projectionOnCone_solve(MohrCoulomb2DProblem* localproblem, double* reaction,
                                 SolverOptions* options) {
@@ -469,8 +467,7 @@ int mc2d_projectionOnCone_solve(MohrCoulomb2DProblem* localproblem, double* reac
   return 0;
 }
 
-void mc2d_projection_free(MohrCoulomb2DProblem* problem,
-                          MohrCoulomb2DProblem* localproblem,
+void mc2d_projection_free(MohrCoulomb2DProblem* problem, MohrCoulomb2DProblem* localproblem,
                           SolverOptions* localsolver_options) {}
 
 void mc2d_projection_with_regularization_free(MohrCoulomb2DProblem* problem,
@@ -481,8 +478,7 @@ void mc2d_projection_with_regularization_free(MohrCoulomb2DProblem* problem,
 }
 
 void mc2d_poc_set_default(SolverOptions* options) {
-  options->iparam[PLASTICITY_CURRENT_CONTACT_NUMBER] =
-      0;  // this will be set by external solver
+  options->iparam[PLASTICITY_CURRENT_CONE_NUMBER] = 0;  // this will be set by external solver
   options->dparam[PLASTICITY_NSN_RHO] =
       0.;  // Used only for ProjectionOnConeWithRegularization
 }

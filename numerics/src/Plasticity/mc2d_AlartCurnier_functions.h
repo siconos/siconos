@@ -57,17 +57,15 @@
 extern "C" {
 #endif
 
-void mc2d_compute_rho_split_spectral_norm_cond(MohrCoulomb2DProblem* localproblem, double* rho);
+void mc2d_compute_rho_split_spectral_norm_cond(MohrCoulomb2DProblem* localproblem,
+                                               double* rho);
 
 void mc2d_compute_rho_split_spectral_norm(MohrCoulomb2DProblem* localproblem, double* rho);
 
 void mc2d_compute_rho_spectral_norm(MohrCoulomb2DProblem* localproblem, double* rho);
 
-void mc2d_computeAlartCurnierSTD(double reaction[3], double velocity[3], double mu, double rho[3],
-                            double result[3], double A[9], double B[9]);
-
-void mc2d_computeAlartCurnierJeanMoreau(double reaction[3], double velocity[3], double mu,
-                                   double rho[3], double result[3], double A[9], double B[9]);
+void mc2d_computeAlartCurnierSTD(double reaction[3], double velocity[3], double mu, double eta,
+                                 double rho[3], double result[3], double A[9], double B[9]);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

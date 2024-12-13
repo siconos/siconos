@@ -15,11 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef MOHRCOULOMB2D_onecontact_nonsmooth_Newton_solvers_H
-#define MOHRCOULOMB2D_onecontact_nonsmooth_Newton_solvers_H
+#ifndef MOHRCOULOMB2D_onecone_nonsmooth_Newton_solvers_H
+#define MOHRCOULOMB2D_onecone_nonsmooth_Newton_solvers_H
 
-/*!\file mc2d_onecontact_nonsmooth_Newton_solvers.h
-  \brief Typedef and functions declarations related to Newton solver for Mohr Coulomb 2D problems.
+/*!\file mc2d_onecone_nonsmooth_Newton_solvers.h
+  \brief Typedef and functions declarations related to Newton solver for Mohr Coulomb 2D
+  problems.
 
   Each solver must have 4 functions in its interface:
   - initialize: link local static variables to the global ones (M,q,...)
@@ -37,34 +38,34 @@
 extern "C" {
 #endif
 
-typedef void (*computeNonsmoothFunction)(double*, double*, double, double*, double*, double*,
-                                         double*);
+typedef void (*computeNonsmoothFunction)(double*, double*, double, double, double*, double*,
+                                         double*, double*);
 
 /** initialize Mohr Coulomb 2D Newton solver
  * \param problem to solve
  * \param localproblem to solve
  * \param options of the solver
  */
-void mc2d_onecontact_nonsmooth_Newton_solvers_initialize(MohrCoulomb2DProblem* problem,
-                                                         MohrCoulomb2DProblem* localproblem,
-                                                         SolverOptions* options);
+void mc2d_onecone_nonsmooth_Newton_solvers_initialize(MohrCoulomb2DProblem* problem,
+                                                      MohrCoulomb2DProblem* localproblem,
+                                                      SolverOptions* options);
 
 /** solve Mohr Coulomb 2D problem with Newton
  * \param localproblem to solve
  * \param options of the solver
  * \return 0 iff successful.
  */
-int mc2d_onecontact_nonsmooth_Newton_solvers_solve(MohrCoulomb2DProblem* localproblem,
-                                                   double*, SolverOptions* options);
+int mc2d_onecone_nonsmooth_Newton_solvers_solve(MohrCoulomb2DProblem* localproblem, double*,
+                                                SolverOptions* options);
 
 /** free memory for Mohr Coulomb 2D Newton solver
     \param problem the global problem to solve
     \param localproblem for freeing matrix0
     \param localsolver_options options of the solver
  */
-void mc2d_onecontact_nonsmooth_Newton_solvers_free(MohrCoulomb2DProblem* problem,
-                                                   MohrCoulomb2DProblem* localproblem,
-                                                   SolverOptions* localsolver_options);
+void mc2d_onecone_nonsmooth_Newton_solvers_free(MohrCoulomb2DProblem* problem,
+                                                MohrCoulomb2DProblem* localproblem,
+                                                SolverOptions* localsolver_options);
 
 /** compute error for Mohr Coulomb 2D problem with Newton
  *  \param dimension of the global problem
@@ -72,9 +73,9 @@ void mc2d_onecontact_nonsmooth_Newton_solvers_free(MohrCoulomb2DProblem* problem
  *  \param reaction global reaction vector
  *  \param output_error
  */
-void mc2d_onecontact_nonsmooth_Newton_solvers_computeError(int dimension, double* velocity,
-                                                           double* reaction,
-                                                           double* output_error);
+void mc2d_onecone_nonsmooth_Newton_solvers_computeError(int dimension, double* velocity,
+                                                        double* reaction,
+                                                        double* output_error);
 
 /** Update Mohr Coulomb 2D problem: formalize local problem for one contact
     \param problem the global problem to solve
@@ -86,19 +87,19 @@ void mc2d_onecontact_nonsmooth_Newton_solvers_computeError(int dimension, double
 
     the rest is used to formalize the local problem)
 */
-void mc2d_onecontact_nonsmooth_Newton_AC_update(int number, MohrCoulomb2DProblem* problem,
-                                                MohrCoulomb2DProblem* localproblem,
-                                                double* reaction, SolverOptions* options);
+void mc2d_onecone_nonsmooth_Newton_AC_update(int number, MohrCoulomb2DProblem* problem,
+                                             MohrCoulomb2DProblem* localproblem,
+                                             double* reaction, SolverOptions* options);
 
-int mc2d_onecontact_nonsmooth_Newton_solvers_solve_direct(MohrCoulomb2DProblem* localproblem,
-                                                          double* R, SolverOptions* options);
+int mc2d_onecone_nonsmooth_Newton_solvers_solve_direct(MohrCoulomb2DProblem* localproblem,
+                                                       double* R, SolverOptions* options);
 
-int mc2d_onecontact_nonsmooth_Newton_solvers_solve_damped(MohrCoulomb2DProblem* localproblem,
-                                                          double* R, SolverOptions* options);
+int mc2d_onecone_nonsmooth_Newton_solvers_solve_damped(MohrCoulomb2DProblem* localproblem,
+                                                       double* R, SolverOptions* options);
 
-int mc2d_onecontact_nonsmooth_Newton_solvers_solve_hybrid(MohrCoulomb2DProblem* localproblem,
-                                                          double* local_reaction,
-                                                          SolverOptions* options);
+int mc2d_onecone_nonsmooth_Newton_solvers_solve_hybrid(MohrCoulomb2DProblem* localproblem,
+                                                       double* local_reaction,
+                                                       SolverOptions* options);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

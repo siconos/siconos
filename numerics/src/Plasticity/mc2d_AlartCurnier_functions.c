@@ -15,17 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "mc2d_AlartCurnier_functions.h"  // for mc2d_computeAlartCu...
+
 #include <assert.h>  // for assert
 #include <math.h>    // for sqrt
 
-#include "MohrCoulomb2DProblem.h"                      // for MohrCoulomb2D...
-#include "NumericsFwd.h"                               // for MohrCoulomb2D...
-#include "NumericsMatrix.h"                            // for NumericsMatrix
-#include "fc3d_AlartCurnier_functions.h"               // for mc2d_computeAlartCu...
-#include "fc3d_onecontact_nonsmooth_Newton_solvers.h"  // for mc2d_computeNonsmoo...
-#include "numerics_verbose.h"                          // for numerics_printf
-#include "op3x3.h"                                     // for SET3, eig_3x3
-#include "siconos_debug.h"                             // for DEBUG_PRINTF
+#include "MohrCoulomb2DProblem.h"                   // for MohrCoulomb2D...
+#include "NumericsFwd.h"                            // for MohrCoulomb2D...
+#include "NumericsMatrix.h"                         // for NumericsMatrix
+#include "mc2d_onecone_nonsmooth_Newton_solvers.h"  // for mc2d_computeNonsmoo...
+#include "numerics_verbose.h"                       // for numerics_printf
+#include "op3x3.h"                                  // for SET3, eig_3x3
+#include "siconos_debug.h"                          // for DEBUG_PRINTF
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
@@ -33,8 +34,8 @@ extern computeNonsmoothFunction Function;
 /* #define VERBOSE_DEBUG */
 
 /* Alart & Curnier version (Radius = mu*max(0,RVN)) */
-void mc2d_computeAlartCurnierSTDOld(double R[3], double velocity[3], double mu, double rho[3],
-                                    double F[3], double A[9], double B[9]) {
+void mc2d_computeAlartCurnierSTDOld(double R[3], double velocity[3], double eta, double mu,
+                                    double rho[3], double F[3], double A[9], double B[9]) {
   double RVN, RVT, RVS;
   double RhoN = rho[0];
   double RhoT = rho[1];
@@ -199,8 +200,8 @@ void mc2d_computeAlartCurnierSTDOld(double R[3], double velocity[3], double mu, 
 }
 
 /* Alart & Curnier version (Radius = mu*max(0,RVN)) */
-void mc2d_computeAlartCurnierSTD(double R[3], double velocity[3], double mu, double rho[3],
-                                 double F[3], double A[9], double B[9]) {
+void mc2d_computeAlartCurnierSTD(double R[3], double velocity[3], double eta, double mu,
+                                 double rho[3], double F[3], double A[9], double B[9]) {
   DEBUG_PRINT("mc2d_computeAlartCurnierSTD starts\n");
   DEBUG_EXPR_WE(for (int i = 0; i < 3; i++) printf("R[%i]= %12.8e,\t velocity[%i]= %12.8e,\n",
                                                    i, R[i], i, velocity[i]););

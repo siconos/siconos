@@ -21,24 +21,21 @@
 #include <stdlib.h>
 #include <string.h>
 
-
+#include "FrictionContactProblem.h"
+#include "Friction_cst.h"
 #include "MohrCoulomb2DProblem.h"
 #include "NonSmoothDrivers.h"
-#include "mc2d_solvers.h"
 #include "NumericsMatrix.h"
 #include "Plasticity_cst.h"
 #include "SiconosBlas.h"
 #include "SolverOptions.h"
-
 #include "fc3d_Solvers.h"
 #include "frictionContact_test_utils.h"
-#include "FrictionContactProblem.h"
-#include "Friction_cst.h"
-
+#include "mc2d_solvers.h"
 #include "numerics_verbose.h"
 
 static int test_unit(char* filename, SolverOptions* options) {
-  numerics_set_verbose(1);
+
 
   MohrCoulomb2DProblem* problem = mohrCoulomb2D_new_from_filename(filename);
   // mohrCoulomb2D_display(problem);
@@ -94,14 +91,32 @@ int main(void) {
   int total_info = 0;
 
   SolverOptions* options = solver_options_create(MOHR_COULOMB_2D_NSGS);
-  /* total_info +=  test_unit("./data/mc2d_example1.dat", options); */
-  /* total_info +=  test_unit("./data/mc2d_example1_mu0.dat", options); */
-
-
   options->dparam[SICONOS_DPARAM_TOL] = 1e-16;
+
+
+  numerics_set_verbose(0);
+  printf("#######\ntest with default options\n");
+  total_info += test_unit("./data/mc2d_example1.dat", options);
+  total_info += test_unit("./data/mc2d_example1_mu0.dat", options);
   
+  numerics_set_verbose(0);
+  printf("#######\n test with pure Newton local solver \n");
+  solver_options_update_internal(options, 0, MOHR_COULOMB_2D_ONECONE_NSN);
+  /* parameters for hybrid solvers */
+  options->internalSolvers[0]->iparam[PLASTICITY_NSN_HYBRID_STRATEGY] =
+      PLASTICITY_NSN_HYBRID_STRATEGY_NO;
+  options->internalSolvers[0]->iparam[PLASTICITY_NSN_FORMULATION] = PLASTICITY_NSN_FORMULATION_ALARTCURNIER_STD;
+  options->internalSolvers[0]->iparam[PLASTICITY_NSN_FORMULATION] = PLASTICITY_NSN_FORMULATION_NATURALMAP;
+  options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-16;
+  total_info += test_unit("./data/mc2d_example1.dat", options);
+  /* total_info += test_unit("./data/mc2d_example1_mu0.dat", options); */
+
+
+
+  numerics_set_verbose(0);
+  printf("#######\ntest with projection on Cone with local iteration solver \n");
   solver_options_update_internal(
-      options, 0, MOHR_COULOMB_2D_ONECONTACT_ProjectionOnConeWithLocalIteration);
+      options, 0, MOHR_COULOMB_2D_ONECONE_ProjectionOnConeWithLocalIteration);
 
   options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-16;
   options->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 100;

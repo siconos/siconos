@@ -28,12 +28,12 @@
 
 /** pointer to function used to update plastic_strain_rate and compute error */
 typedef void (*mc2d_ComputeErrorPtr)(MohrCoulomb2DProblem *, double *, double *, double,
-                                SolverOptions *, double, double *);
+                                     SolverOptions *, double, double *);
 
 /** pointer to function used to call internal solver for proximal point solver
  */
 typedef void (*mc2d_internalSolverPtr)(MohrCoulomb2DProblem *, double *, double *, int *,
-                                  SolverOptions *);
+                                       SolverOptions *);
 
 /** pointer to function used to free memory for objects used in nsgs solvers */
 typedef void (*FreeSolverPtr)();
@@ -113,14 +113,12 @@ int mc2d_checkTrivialCase(MohrCoulomb2DProblem *problem, double *plastic_strain_
  * @{
  */
 void mc2d_nsgs_set_default(SolverOptions *options);
-void mc2d_onecontact_nsn_set_default(SolverOptions *options);
-void mc2d_onecontact_nsn_gp_set_default(SolverOptions *options);
+void mc2d_onecone_nsn_set_default(SolverOptions *options);
+void mc2d_onecone_nsn_gp_set_default(SolverOptions *options);
 void mc2d_poc_set_default(SolverOptions *options);
 void mc2d_set_internalsolver_tolerance(MohrCoulomb2DProblem *problem, SolverOptions *options,
                                        SolverOptions *internalsolver_options, double error);
 
-
-  
 /** @} */
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

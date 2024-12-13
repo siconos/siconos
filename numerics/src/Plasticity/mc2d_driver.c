@@ -20,16 +20,15 @@
 #include <stdio.h>   // for NULL
 #include <string.h>  // for NULL
 
-#include "MohrCoulomb2DProblem.h"                    // for MohrCoulomb2DProblem...
-#include "Plasticity_cst.h"                              // for SICONOS_FRICTI...
-#include "NonSmoothDrivers.h"                          // for fc3d_driver
-#include "NumericsFwd.h"                               // for SolverOptions
-#include "SolverOptions.h"                             // for SolverOptions
-#include "mc2d_solvers.h" 
-#include "numerics_verbose.h"                          // for numerics_printf
+#include "MohrCoulomb2DProblem.h"  // for MohrCoulomb2DProblem...
+#include "NonSmoothDrivers.h"      // for fc3d_driver
+#include "NumericsFwd.h"           // for SolverOptions
+#include "Plasticity_cst.h"        // for SICONOS_FRICTI...
+#include "SolverOptions.h"         // for SolverOptions
+#include "mc2d_solvers.h"
+#include "numerics_verbose.h"  // for numerics_printf
 
 const char* const SICONOS_MOHR_COULOMB_2D_NSGS_STR = "MC2D_NSGS";
-
 
 int mc2d_driver(MohrCoulomb2DProblem* problem, double* stress, double* plastic_strain_rate,
                 SolverOptions* options) {
@@ -63,7 +62,7 @@ int mc2d_driver(MohrCoulomb2DProblem* problem, double* stress, double* plastic_s
     case MOHR_COULOMB_2D_NSGS: {
       numerics_printf(
           " ========================== Call NSGS solver for Mohr Coulomb 2D problem "
-          "==========================\n");
+          "==========================");
       mc2d_nsgs(problem, stress, plastic_strain_rate, &info, options);
       break;
     }
@@ -82,8 +81,8 @@ exit:
   return info;
 }
 
-int mc2d_checkTrivialCase(MohrCoulomb2DProblem* problem, double* plastic_strain_rate, double* stress,
-                          SolverOptions* options) {
+int mc2d_checkTrivialCase(MohrCoulomb2DProblem* problem, double* plastic_strain_rate,
+                          double* stress, SolverOptions* options) {
   /* Number of contacts */
   int nc = problem->numberOfCones;
   double* q = problem->q;

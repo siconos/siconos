@@ -19,7 +19,7 @@
 #define MOHRCOULOMB2DProjection_H
 
 /*!\file mc2d_projection.h
-  \brief Typedef and functions declarations related to projection solver for 
+  \brief Typedef and functions declarations related to projection solver for
   Mohr Coulomb 2D
 
   Each solver must have 4 functions in its interface:
@@ -142,8 +142,7 @@ void mc2d_projectionOnConeWithLocalIteration_initialize(MohrCoulomb2DProblem* pr
  * \param localproblem :  the  problem to free
  * \param localsolver_options
  */
-void mc2d_projection_free(MohrCoulomb2DProblem* problem,
-                          MohrCoulomb2DProblem* localproblem,
+void mc2d_projection_free(MohrCoulomb2DProblem* problem, MohrCoulomb2DProblem* localproblem,
                           SolverOptions* localsolver_options);
 
 /** free memory for Mohr Coulomb 2D projection solver

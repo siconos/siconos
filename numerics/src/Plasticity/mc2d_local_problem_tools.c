@@ -21,31 +21,31 @@
 #endif
 #include <stdlib.h>  // for malloc, NULL
 
-#include "MohrCoulomb2DProblem.h"  // for MohrCoulomb2DProblem, 
-#include "NumericsMatrix.h"          // for NM_create_from_data, NumericsMatrix
+#include "MohrCoulomb2DProblem.h"  // for MohrCoulomb2DProblem,
+#include "NumericsMatrix.h"        // for NM_create_from_data, NumericsMatrix
 #include "SparseBlockMatrix.h"
 
-
 struct LocalMC2DProblemFunctionToolkit* localMC2DProblemFunctionToolkit_new() {
-  struct LocalMC2DProblemFunctionToolkit * lpft = (struct LocalMC2DProblemFunctionToolkit*)malloc(sizeof(struct LocalMC2DProblemFunctionToolkit));
-   
+  struct LocalMC2DProblemFunctionToolkit* lpft =
+      (struct LocalMC2DProblemFunctionToolkit*)malloc(
+          sizeof(struct LocalMC2DProblemFunctionToolkit));
+
   lpft->local_solver = NULL;
   lpft->update_local_problem = NULL;
   lpft->post_processed_local_result = NULL;
-  lpft->free_local_solver =NULL;
+  lpft->free_local_solver = NULL;
   return lpft;
 }
-void localMC2DProblemFunctionToolkit_display(struct LocalMC2DProblemFunctionToolkit* lpft)
-{
+void localMC2DProblemFunctionToolkit_display(struct LocalMC2DProblemFunctionToolkit* lpft) {
   printf("local_solver %p\n ", lpft->local_solver);
   printf("update_local_problem %p\n ", lpft->update_local_problem);
   printf("post_processed_local_result %p\n ", lpft->post_processed_local_result);
   printf("free_local_solver %p\n ", lpft->free_local_solver);
 };
-void mc2d_local_problem_compute_q(MohrCoulomb2DProblem * problem, MohrCoulomb2DProblem * localproblem, double *reaction, int contact)
-{
-
-  double *qLocal = localproblem->q;
+void mc2d_local_problem_compute_q(MohrCoulomb2DProblem* problem,
+                                  MohrCoulomb2DProblem* localproblem, double* reaction,
+                                  int contact) {
+  double* qLocal = localproblem->q;
 
   int n = 3 * problem->numberOfCones;
 
@@ -59,17 +59,12 @@ void mc2d_local_problem_compute_q(MohrCoulomb2DProblem * problem, MohrCoulomb2DP
   NM_row_prod_no_diag3(n, contact, 3 * contact, problem->M, reaction, qLocal, false);
 }
 
-
-void mc2d_local_problem_fill_M(MohrCoulomb2DProblem * problem, MohrCoulomb2DProblem * localproblem, int contact)
-{
-
-  if (problem->M->storageType == NM_SPARSE)
-    {
-      localproblem->M->matrix0 = problem->M->matrix1->block[contact];
-    }
-  else
+void mc2d_local_problem_fill_M(MohrCoulomb2DProblem* problem,
+                               MohrCoulomb2DProblem* localproblem, int contact) {
+  if (problem->M->storageType == NM_SPARSE) {
+    localproblem->M->matrix0 = problem->M->matrix1->block[contact];
+  } else
     NM_extract_diag_block3(problem->M, contact, &localproblem->M->matrix0);
-
 }
 
 MohrCoulomb2DProblem* mc2d_local_problem_allocate(MohrCoulomb2DProblem* problem) {
@@ -93,11 +88,10 @@ MohrCoulomb2DProblem* mc2d_local_problem_allocate(MohrCoulomb2DProblem* problem)
 }
 
 void mc2d_local_problem_free(MohrCoulomb2DProblem* localproblem,
-                             MohrCoulomb2DProblem* problem)
-{
-  if(problem->M->storageType == NM_SPARSE_BLOCK || problem->M->storageType == NM_SPARSE)
-  {
-    /* we release the pointer to avoid deallocation of the diagonal blocks of the original matrix of the problem*/
+                             MohrCoulomb2DProblem* problem) {
+  if (problem->M->storageType == NM_SPARSE_BLOCK || problem->M->storageType == NM_SPARSE) {
+    /* we release the pointer to avoid deallocation of the diagonal blocks of the original
+     * matrix of the problem*/
     localproblem->M->matrix0 = NULL;
   }
   mohrCoulomb2DProblem_free(localproblem);

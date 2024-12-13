@@ -19,11 +19,11 @@
 #include <math.h>  // for fmax
 
 #include "MohrCoulomb2DProblem.h"  // for MohrCoulomb2DProblem
-#include "Plasticity_cst.h"            // for PLASTICITY_IPARAM_INTER...
-#include "NumericsFwd.h"             // for SolverOptions, MohrCoulomb2DPr...
-#include "SolverOptions.h"           // for SolverOptions
-#include "mc2d_solvers.h"            // for mc2d_set_internalsolver_tolerance
-#include "numerics_verbose.h"        // for numerics_printf_verbose, numeric...
+#include "NumericsFwd.h"           // for SolverOptions, MohrCoulomb2DPr...
+#include "Plasticity_cst.h"        // for PLASTICITY_IPARAM_INTER...
+#include "SolverOptions.h"         // for SolverOptions
+#include "mc2d_solvers.h"          // for mc2d_set_internalsolver_tolerance
+#include "numerics_verbose.h"      // for numerics_printf_verbose, numeric...
 
 void mc2d_set_internalsolver_tolerance(MohrCoulomb2DProblem* problem, SolverOptions* options,
                                        SolverOptions* internalsolver_options, double error) {
@@ -40,8 +40,8 @@ void mc2d_set_internalsolver_tolerance(MohrCoulomb2DProblem* problem, SolverOpti
   } else if (iparam[PLASTICITY_IPARAM_INTERNAL_ERROR_STRATEGY] ==
              PLASTICITY_INTERNAL_ERROR_STRATEGY_ADAPTIVE_N_CONTACT) {
     internalsolver_options->dparam[SICONOS_DPARAM_TOL] =
-        error / (options->dparam[PLASTICITY_DPARAM_INTERNAL_ERROR_RATIO] *
-                 problem->numberOfCones);
+        error /
+        (options->dparam[PLASTICITY_DPARAM_INTERNAL_ERROR_RATIO] * problem->numberOfCones);
     numerics_printf_verbose(2,
                             "mc2d_FixedPoint_set_internalsolver_tolerance - Internal solver "
                             "tolerance is set to %e",

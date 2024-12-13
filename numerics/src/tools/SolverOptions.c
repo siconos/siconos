@@ -824,19 +824,19 @@ SolverOptions* solver_options_create(int solverId) {
       break;
     }
 
-    case MOHR_COULOMB_2D_ONECONTACT_NSN_GP: {
+    case MOHR_COULOMB_2D_ONECONE_NSN: {
       options = solver_options_initialize(solverId, 1000, 1e-14, 0);
-      mc2d_onecontact_nsn_set_default(options);
+      mc2d_onecone_nsn_set_default(options);
       break;
     }
-
-    case MOHR_COULOMB_2D_ONECONTACT_NSN_GP_HYBRID: {
+    case MOHR_COULOMB_2D_ONECONE_NSN_GP:
+    case MOHR_COULOMB_2D_ONECONE_NSN_GP_HYBRID: {
       options = solver_options_initialize(solverId, 1000, 1e-14, 0);
-      mc2d_onecontact_nsn_gp_set_default(options);
+      mc2d_onecone_nsn_gp_set_default(options);
       break;
     }
-
-    case MOHR_COULOMB_2D_ONECONTACT_ProjectionOnConeWithLocalIteration: {
+    case MOHR_COULOMB_2D_ONECONE_ProjectionOnCone:
+    case MOHR_COULOMB_2D_ONECONE_ProjectionOnConeWithLocalIteration: {
       options = solver_options_initialize(solverId, 1000, 1e-12, 0);
       mc2d_poc_set_default(options);
       break;

@@ -31,10 +31,10 @@
 #include "SiconosBlas.h"     // for cblas_dnrm2
 #include "SolverOptions.h"   // for SolverOptions
 #include "SparseBlockMatrix.h"
-#include "mc2d_compute_error.h"        // for fc3d_compute_e..
-#include "mc2d_local_problem_tools.h"  // for fc3d_local_pro..
-#include "mc2d_projection.h"           // for fc3d_projectio...
-#include "mc2d_onecontact_nonsmooth_Newton_solvers.h"  //
+#include "mc2d_compute_error.h"                     // for fc3d_compute_e..
+#include "mc2d_local_problem_tools.h"               // for fc3d_local_pro..
+#include "mc2d_onecone_nonsmooth_Newton_solvers.h"  //
+#include "mc2d_projection.h"                        // for fc3d_projectio...
 #include "mc2d_solvers.h"
 #include "numerics_verbose.h"  // for numerics_printf
 /* #define DEBUG_STDOUT */
@@ -130,9 +130,9 @@ static void mc2d_nsgs_update(int contact, MohrCoulomb2DProblem *problem,
 }
 
 void mc2d_nsgs_initialize_local_solver(
-    struct LocalMC2DProblemFunctionToolkit *local_function_toolkit, mc2d_ComputeErrorPtr *computeError,
-    MohrCoulomb2DProblem *problem, MohrCoulomb2DProblem *localproblem,
-    SolverOptions *options) {
+    struct LocalMC2DProblemFunctionToolkit *local_function_toolkit,
+    mc2d_ComputeErrorPtr *computeError, MohrCoulomb2DProblem *problem,
+    MohrCoulomb2DProblem *localproblem, SolverOptions *options) {
   SolverOptions *localsolver_options = options->internalSolvers[0];
 
   *computeError = (mc2d_ComputeErrorPtr)&mc2d_compute_error;
@@ -146,14 +146,14 @@ void mc2d_nsgs_initialize_local_solver(
 
   /** Connect to local solver */
   switch (localsolver_options->solverId) {
-    case MOHR_COULOMB_2D_ONECONTACT_ProjectionOnCone: {
+    case MOHR_COULOMB_2D_ONECONE_ProjectionOnCone: {
       local_function_toolkit->local_solver = &mc2d_projectionOnCone_solve;
       local_function_toolkit->update_local_problem = &mc2d_nsgs_update;
       local_function_toolkit->free_local_solver = &mc2d_projection_free;
       mc2d_projection_initialize(problem, localproblem);
       break;
     }
-    case MOHR_COULOMB_2D_ONECONTACT_ProjectionOnConeWithLocalIteration: {
+    case MOHR_COULOMB_2D_ONECONE_ProjectionOnConeWithLocalIteration: {
       local_function_toolkit->local_solver = &mc2d_projectionOnConeWithLocalIteration_solve;
       local_function_toolkit->update_local_problem = &mc2d_nsgs_update;
       local_function_toolkit->free_local_solver =
@@ -163,52 +163,44 @@ void mc2d_nsgs_initialize_local_solver(
       break;
     }
     /* Newton solver (Alart-Curnier) */
-    case MOHR_COULOMB_2D_ONECONTACT_NSN: {
-      local_function_toolkit->local_solver = &mc2d_onecontact_nonsmooth_Newton_solvers_solve;
-      local_function_toolkit->update_local_problem =
-          &mc2d_onecontact_nonsmooth_Newton_AC_update;
-      local_function_toolkit->free_local_solver =
-          &mc2d_onecontact_nonsmooth_Newton_solvers_free;
-      mc2d_onecontact_nonsmooth_Newton_solvers_initialize(problem, localproblem,
-                                                          localsolver_options);
+    case MOHR_COULOMB_2D_ONECONE_NSN: {
+      local_function_toolkit->local_solver = &mc2d_onecone_nonsmooth_Newton_solvers_solve;
+      local_function_toolkit->update_local_problem = &mc2d_onecone_nonsmooth_Newton_AC_update;
+      local_function_toolkit->free_local_solver = &mc2d_onecone_nonsmooth_Newton_solvers_free;
+      mc2d_onecone_nonsmooth_Newton_solvers_initialize(problem, localproblem,
+                                                       localsolver_options);
       break;
     }
-    case MOHR_COULOMB_2D_ONECONTACT_NSN_GP: {
-      local_function_toolkit->local_solver = &mc2d_onecontact_nonsmooth_Newton_solvers_solve;
-      local_function_toolkit->update_local_problem =
-          &mc2d_onecontact_nonsmooth_Newton_AC_update;
-      local_function_toolkit->free_local_solver =
-          &mc2d_onecontact_nonsmooth_Newton_solvers_free;
-      mc2d_onecontact_nonsmooth_Newton_solvers_initialize(problem, localproblem,
-                                                          localsolver_options);
+    case MOHR_COULOMB_2D_ONECONE_NSN_GP: {
+      local_function_toolkit->local_solver = &mc2d_onecone_nonsmooth_Newton_solvers_solve;
+      local_function_toolkit->update_local_problem = &mc2d_onecone_nonsmooth_Newton_AC_update;
+      local_function_toolkit->free_local_solver = &mc2d_onecone_nonsmooth_Newton_solvers_free;
+      mc2d_onecone_nonsmooth_Newton_solvers_initialize(problem, localproblem,
+                                                       localsolver_options);
       break;
     }
-    case MOHR_COULOMB_2D_ONECONTACT_NSN_GP_HYBRID: {
-      local_function_toolkit->local_solver = &mc2d_onecontact_nonsmooth_Newton_solvers_solve;
-      local_function_toolkit->update_local_problem =
-          &mc2d_onecontact_nonsmooth_Newton_AC_update;
-      local_function_toolkit->free_local_solver =
-          &mc2d_onecontact_nonsmooth_Newton_solvers_free;
-      mc2d_onecontact_nonsmooth_Newton_solvers_initialize(problem, localproblem,
-                                                          localsolver_options);
+    case MOHR_COULOMB_2D_ONECONE_NSN_GP_HYBRID: {
+      local_function_toolkit->local_solver = &mc2d_onecone_nonsmooth_Newton_solvers_solve;
+      local_function_toolkit->update_local_problem = &mc2d_onecone_nonsmooth_Newton_AC_update;
+      local_function_toolkit->free_local_solver = &mc2d_onecone_nonsmooth_Newton_solvers_free;
+      mc2d_onecone_nonsmooth_Newton_solvers_initialize(problem, localproblem,
+                                                       localsolver_options);
       break;
     }
-  default: {
-    numerics_error("mc2d_nsgs_initialize_local_solver",
-                   "Numerics, mc2d_nsgs failed. Unknown internal solver : %s.\n",
-                   solver_options_id_to_name(localsolver_options->solverId));
+    default: {
+      numerics_error("mc2d_nsgs_initialize_local_solver",
+                     "Numerics, mc2d_nsgs failed. Unknown internal solver : %s.\n",
+                     solver_options_id_to_name(localsolver_options->solverId));
+    }
   }
-}
 }
 
 static unsigned int *allocShuffledContacts(MohrCoulomb2DProblem *problem,
                                            SolverOptions *options) {
   unsigned int *scontacts = 0;
   unsigned int nc = problem->numberOfCones;
-  if (options->iparam[PLASTICITY_NSGS_SHUFFLE] ==
-          PLASTICITY_NSGS_SHUFFLE_TRUE ||
-      options->iparam[PLASTICITY_NSGS_SHUFFLE] ==
-          PLASTICITY_NSGS_SHUFFLE_TRUE_EACH_LOOP) {
+  if (options->iparam[PLASTICITY_NSGS_SHUFFLE] == PLASTICITY_NSGS_SHUFFLE_TRUE ||
+      options->iparam[PLASTICITY_NSGS_SHUFFLE] == PLASTICITY_NSGS_SHUFFLE_TRUE_EACH_LOOP) {
     if (options->iparam[PLASTICITY_NSGS_SHUFFLE_SEED] > 0) {
       srand((unsigned int)options->iparam[PLASTICITY_NSGS_SHUFFLE_SEED]);
     } else
@@ -241,7 +233,7 @@ static int solveLocalReaction(UpdatePtr update_localproblem, SolverPtr local_sol
                               SolverOptions *localsolver_options, double localreaction[3]) {
   (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
 
-  localsolver_options->iparam[PLASTICITY_CURRENT_CONTACT_NUMBER] = contact;
+  localsolver_options->iparam[PLASTICITY_CURRENT_CONE_NUMBER] = contact;
 
   copyLocalReaction(&(reaction[contact * problem->dimension]), localreaction);
 
@@ -270,37 +262,39 @@ static void acceptLocalReactionFiltered(MohrCoulomb2DProblem *localproblem,
         "with local_error = %e\n",
         contact, iter, localsolver_options->dparam[SICONOS_DPARAM_RESIDU]);
 
-/* #ifdef FCLIB_OUTPUT */
+    /* #ifdef FCLIB_OUTPUT */
 
-/*     /\* printf("step counter value = %i\n", localsolver_options->iparam[19]); *\/ */
-/*     char fname[256]; */
-/*     fccounter++; */
-/*     snprintf(fname, sizeof(fname), "./local_problem/localproblem_%i_%i.hdf5", contact, */
-/*              localsolver_options->iparam[19]); */
+    /*     /\* printf("step counter value = %i\n", localsolver_options->iparam[19]); *\/ */
+    /*     char fname[256]; */
+    /*     fccounter++; */
+    /*     snprintf(fname, sizeof(fname), "./local_problem/localproblem_%i_%i.hdf5", contact,
+     */
+    /*              localsolver_options->iparam[19]); */
 
-/*     if (file_exists(fname)) { */
-/*       /\* printf(" %s already dumped\n", fname); *\/ */
-/*     } else { */
-/*       printf("Dump %s\n", fname); */
-/*       int n = 100; */
-/*       char *title = (char *)malloc(n * sizeof(char)); */
-/*       strcpy(title, "Bad local problem dump in hdf5"); */
-/*       char *description = (char *)malloc(n * sizeof(char)); */
-/*       strcpy(description, "Rewriting in hdf5 from siconos "); */
-/*       strcat(description, fname); */
-/*       strcat(description, " in FCLIB format"); */
-/*       char *mathInfo = (char *)malloc(n * sizeof(char)); */
-/*       strcpy(mathInfo, "unknown"); */
+    /*     if (file_exists(fname)) { */
+    /*       /\* printf(" %s already dumped\n", fname); *\/ */
+    /*     } else { */
+    /*       printf("Dump %s\n", fname); */
+    /*       int n = 100; */
+    /*       char *title = (char *)malloc(n * sizeof(char)); */
+    /*       strcpy(title, "Bad local problem dump in hdf5"); */
+    /*       char *description = (char *)malloc(n * sizeof(char)); */
+    /*       strcpy(description, "Rewriting in hdf5 from siconos "); */
+    /*       strcat(description, fname); */
+    /*       strcat(description, " in FCLIB format"); */
+    /*       char *mathInfo = (char *)malloc(n * sizeof(char)); */
+    /*       strcpy(mathInfo, "unknown"); */
 
-/*       mohrCoulomb2D_fclib_write(localproblem, title, description, mathInfo, fname, 3); */
-      
-/*       printf("end of dump %s\n", fname); */
-/*       free(title); */
-/*       free(description); */
-/*       free(mathInfo); */
-/*     } */
+    /*       mohrCoulomb2D_fclib_write(localproblem, title, description, mathInfo, fname, 3);
+     */
 
-/* #endif */
+    /*       printf("end of dump %s\n", fname); */
+    /*       free(title); */
+    /*       free(description); */
+    /*       free(mathInfo); */
+    /*     } */
+
+    /* #endif */
 
     numerics_printf(
         "Discard local reaction for contact %i at iteration %i "
@@ -491,8 +485,7 @@ void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *reaction, double *velocity
   /*****  Check solver options *****/
   if (!(iparam[PLASTICITY_NSGS_SHUFFLE] == PLASTICITY_NSGS_SHUFFLE_FALSE ||
         iparam[PLASTICITY_NSGS_SHUFFLE] == PLASTICITY_NSGS_SHUFFLE_TRUE ||
-        iparam[PLASTICITY_NSGS_SHUFFLE] ==
-            PLASTICITY_NSGS_SHUFFLE_TRUE_EACH_LOOP)) {
+        iparam[PLASTICITY_NSGS_SHUFFLE] == PLASTICITY_NSGS_SHUFFLE_TRUE_EACH_LOOP)) {
     numerics_error("mc2d_nsgs",
                    "iparam[PLASTICITY_NSGS_SHUFFLE] must be equal to "
                    "PLASTICITY_NSGS_SHUFFLE_FALSE (0), "
@@ -501,12 +494,10 @@ void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *reaction, double *velocity
     return;
   }
 
-  if (!(iparam[PLASTICITY_IPARAM_ERROR_EVALUATION] ==
-            PLASTICITY_NSGS_ERROR_EVALUATION_FULL ||
+  if (!(iparam[PLASTICITY_IPARAM_ERROR_EVALUATION] == PLASTICITY_NSGS_ERROR_EVALUATION_FULL ||
         iparam[PLASTICITY_IPARAM_ERROR_EVALUATION] ==
             PLASTICITY_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL ||
-        iparam[PLASTICITY_IPARAM_ERROR_EVALUATION] ==
-            PLASTICITY_NSGS_ERROR_EVALUATION_LIGHT ||
+        iparam[PLASTICITY_IPARAM_ERROR_EVALUATION] == PLASTICITY_NSGS_ERROR_EVALUATION_LIGHT ||
         iparam[PLASTICITY_IPARAM_ERROR_EVALUATION] ==
             PLASTICITY_NSGS_ERROR_EVALUATION_ADAPTIVE)) {
     numerics_error("mc2d_nsgs",
@@ -524,12 +515,10 @@ void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *reaction, double *velocity
    * with mechanics_run.py **/
   if (iparam[PLASTICITY_NSGS_SHUFFLE] == PLASTICITY_NSGS_SHUFFLE_FALSE &&
       iparam[PLASTICITY_NSGS_FREEZING_CONTACT] == 0 &&
-      iparam[PLASTICITY_NSGS_RELAXATION] ==
-          PLASTICITY_NSGS_RELAXATION_FALSE &&
+      iparam[PLASTICITY_NSGS_RELAXATION] == PLASTICITY_NSGS_RELAXATION_FALSE &&
       iparam[PLASTICITY_NSGS_FILTER_LOCAL_SOLUTION] ==
           PLASTICITY_NSGS_FILTER_LOCAL_SOLUTION_TRUE &&
-      iparam[PLASTICITY_IPARAM_ERROR_EVALUATION] ==
-          PLASTICITY_NSGS_ERROR_EVALUATION_LIGHT) {
+      iparam[PLASTICITY_IPARAM_ERROR_EVALUATION] == PLASTICITY_NSGS_ERROR_EVALUATION_LIGHT) {
     while ((iter < itermax) && (hasNotConverged > 0)) {
       ++iter;
       double light_error_sum = 0.0;
@@ -585,12 +574,9 @@ void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *reaction, double *velocity
         }
       }
       for (unsigned int i = 0; i < nc; ++i) {
-        if (iparam[PLASTICITY_NSGS_SHUFFLE] ==
-                PLASTICITY_NSGS_SHUFFLE_TRUE ||
-            iparam[PLASTICITY_NSGS_SHUFFLE] ==
-                PLASTICITY_NSGS_SHUFFLE_TRUE_EACH_LOOP) {
-          if (iparam[PLASTICITY_NSGS_SHUFFLE] ==
-              PLASTICITY_NSGS_SHUFFLE_TRUE_EACH_LOOP)
+        if (iparam[PLASTICITY_NSGS_SHUFFLE] == PLASTICITY_NSGS_SHUFFLE_TRUE ||
+            iparam[PLASTICITY_NSGS_SHUFFLE] == PLASTICITY_NSGS_SHUFFLE_TRUE_EACH_LOOP) {
+          if (iparam[PLASTICITY_NSGS_SHUFFLE] == PLASTICITY_NSGS_SHUFFLE_TRUE_EACH_LOOP)
             uint_shuffle(scontacts, nc);
           contact = scontacts[i];
         } else
@@ -609,8 +595,7 @@ void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *reaction, double *velocity
                            localProblemFunctionToolkit->copy_local_reaction, contact, problem,
                            localproblem, reaction, localsolver_options, localreaction);
 
-        if (iparam[PLASTICITY_NSGS_RELAXATION] ==
-            PLASTICITY_NSGS_RELAXATION_TRUE)
+        if (iparam[PLASTICITY_NSGS_RELAXATION] == PLASTICITY_NSGS_RELAXATION_TRUE)
           localProblemFunctionToolkit->perform_relaxation(localreaction,
                                                           &reaction[contact * 3], omega);
 
@@ -760,13 +745,11 @@ void mc2d_nsgs_set_default(SolverOptions *options) {
   options->iparam[PLASTICITY_NSGS_FREEZING_CONTACT] = 0;
   options->iparam[PLASTICITY_NSGS_FILTER_LOCAL_SOLUTION] =
       PLASTICITY_NSGS_FILTER_LOCAL_SOLUTION_FALSE;
-  options->iparam[PLASTICITY_NSGS_RELAXATION] =
-      PLASTICITY_NSGS_RELAXATION_FALSE;
+  options->iparam[PLASTICITY_NSGS_RELAXATION] = PLASTICITY_NSGS_RELAXATION_FALSE;
   options->iparam[PLASTICITY_IPARAM_ERROR_EVALUATION_FREQUENCY] = 0;
   options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
   options->dparam[PLASTICITY_DPARAM_INTERNAL_ERROR_RATIO] = 10.0;
   // Internal solver
   assert(options->numberOfInternalSolvers == 1);
-  options->internalSolvers[0] =
-      solver_options_create(MOHR_COULOMB_2D_ONECONTACT_NSN_GP_HYBRID);
+  options->internalSolvers[0] = solver_options_create(MOHR_COULOMB_2D_ONECONE_NSN_GP_HYBRID);
 }
