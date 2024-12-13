@@ -56,16 +56,16 @@ void mohrCoulomb2D_display(MohrCoulomb2DProblem* problem) {
     printf("No q vector:\n");
 
   if (problem->eta) {
-    printf("mu vector:\n");
+    printf("eta vector:\n");
     NM_vector_display(problem->eta, problem->numberOfCones);
   } else
     printf("No eta vector:\n");
 
-  if (problem->mu) {
-    printf("mu vector:\n");
-    NM_vector_display(problem->mu, problem->numberOfCones);
+  if (problem->theta) {
+    printf("theta vector:\n");
+    NM_vector_display(problem->theta, problem->numberOfCones);
   } else
-    printf("No mu vector:\n");
+    printf("No theta vector:\n");
 }
 
 int mohrCoulomb2D_printInFile(MohrCoulomb2DProblem* problem, FILE* file) {
@@ -89,7 +89,7 @@ int mohrCoulomb2D_printInFile(MohrCoulomb2DProblem* problem, FILE* file) {
   }
   fprintf(file, "\n");
   for (i = 0; i < nc; i++) {
-    fprintf(file, "%32.24e ", problem->mu[i]);
+    fprintf(file, "%32.24e ", problem->theta[i]);
   }
   fprintf(file, "\n");
   return 0;
@@ -133,9 +133,9 @@ MohrCoulomb2DProblem* mohrCoulomb2D_newFromFile(FILE* file) {
     CHECK_IO(fscanf(file, "%lf ", &(problem->eta[i])));
   }
 
-  problem->mu = (double*)malloc(nc * sizeof(double));
+  problem->theta = (double*)malloc(nc * sizeof(double));
   for (i = 0; i < nc; i++) {
-    CHECK_IO(fscanf(file, "%lf ", &(problem->mu[i])));
+    CHECK_IO(fscanf(file, "%lf ", &(problem->theta[i])));
   }
   DEBUG_PRINT(
       "End --  int mohrCoulomb2D_newFromFile(MohrCoulomb2DProblem* problem, FILE* "
@@ -174,9 +174,9 @@ void mohrCoulomb2DProblem_free(MohrCoulomb2DProblem* problem) {
     problem->M = NULL;
   }
 
-  if (problem->mu) {
-    free(problem->mu);
-    problem->mu = NULL;
+  if (problem->theta) {
+    free(problem->theta);
+    problem->theta = NULL;
   }
   if (problem->eta) {
     free(problem->eta);
@@ -198,13 +198,13 @@ MohrCoulomb2DProblem* mohrCoulomb2DProblem_new(void) {
   mc2d->M = NULL;
   mc2d->q = NULL;
   mc2d->eta = NULL;
-  mc2d->mu = NULL;
+  mc2d->theta = NULL;
 
   return mc2d;
 }
 
 MohrCoulomb2DProblem* mohrCoulomb2DProblem_new_with_data(int dim, int nc, NumericsMatrix* M,
-                                                         double* q, double* eta, double* mu) {
+                                                         double* q, double* eta, double* theta) {
   MohrCoulomb2DProblem* mc2d = (MohrCoulomb2DProblem*)malloc(sizeof(MohrCoulomb2DProblem));
 
   mc2d->dimension = dim;
@@ -212,7 +212,7 @@ MohrCoulomb2DProblem* mohrCoulomb2DProblem_new_with_data(int dim, int nc, Numeri
   mc2d->M = M;
   mc2d->q = q;
   mc2d->eta = eta;
-  mc2d->mu = mu;
+  mc2d->theta = theta;
 
   return mc2d;
 }
@@ -231,8 +231,8 @@ MohrCoulomb2DProblem* mohrCoulomb2D_copy(MohrCoulomb2DProblem* problem) {
   memcpy(new->q, problem->q, n * sizeof(double));
   new->eta = (double*)malloc(nc * sizeof(double));
   memcpy(new->eta, problem->eta, nc * sizeof(double));
-  new->mu = (double*)malloc(nc * sizeof(double));
-  memcpy(new->mu, problem->mu, nc * sizeof(double));
+  new->theta = (double*)malloc(nc * sizeof(double));
+  memcpy(new->theta, problem->theta, nc * sizeof(double));
   return new;
 }
 

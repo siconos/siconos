@@ -52,11 +52,11 @@ int mc2d_compute_error(MohrCoulomb2DProblem *problem, double *z, double *w, doub
     \param r the reaction force
     \param u the local velocity
     \param eta coefficient of the cone
-    \param mu coefficient of the dilatency
+    \param theta coefficient of the dilatency
     \param worktmp work vector
     \param[in,out] error value
  */
-void mc2d_unitary_compute_and_add_error(double r[3], double u[3], double eta, double mu,
+void mc2d_unitary_compute_and_add_error(double r[3], double u[3], double eta, double theta,
                                         double *error, double *worktmp);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

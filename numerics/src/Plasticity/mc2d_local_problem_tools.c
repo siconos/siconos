@@ -74,7 +74,7 @@ MohrCoulomb2DProblem* mc2d_local_problem_allocate(MohrCoulomb2DProblem* problem)
   localproblem->numberOfCones = 1;
   localproblem->dimension = 3;
   localproblem->q = (double*)malloc(3 * sizeof(double));
-  localproblem->mu = (double*)malloc(sizeof(double));
+  localproblem->theta = (double*)malloc(sizeof(double));
   localproblem->eta = (double*)malloc(sizeof(double));
 
   if (problem->M->storageType != NM_SPARSE_BLOCK) {

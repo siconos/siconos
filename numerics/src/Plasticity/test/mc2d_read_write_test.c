@@ -34,7 +34,7 @@ int main(void) {
   //  numerics_set_verbose(1);
 
   double q[] = {-1, 1, 3, -1, 1, 3, -1, 1, 3};
-  double mu[] = {0.1, 0.1, 0.1};
+  double theta[] = {0.1, 0.1, 0.1};
   double eta[] = {0.1, 0.1, 0.1};
 
   double Wdata[81] = {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
@@ -47,7 +47,7 @@ int main(void) {
   NM_copy_to_sparse(tmpM, W, 1e-16);
 
 
-  MohrCoulomb2DProblem* MC2D = mohrCoulomb2DProblem_new_with_data(3, 3, W, q, eta, mu);
+  MohrCoulomb2DProblem* MC2D = mohrCoulomb2DProblem_new_with_data(3, 3, W, q, eta, theta);
   double stress[9] = {0.};
   double plastic_strain_rate[9] = {0.};
   mohrCoulomb2D_display(MC2D);
@@ -56,7 +56,7 @@ int main(void) {
   MC2D->M = NULL;
   MC2D->q = NULL;
   MC2D->eta = NULL;
-  MC2D->mu = NULL;
+  MC2D->theta = NULL;
   mohrCoulomb2DProblem_free(MC2D);
   
   MohrCoulomb2DProblem* MC2D_r= mohrCoulomb2D_new_from_filename("mc2d_example1.dat");

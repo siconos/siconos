@@ -126,7 +126,7 @@ static void mc2d_nsgs_update(int contact, MohrCoulomb2DProblem *problem,
   localproblem->eta[0] = problem->eta[contact];
 
   /* coefficient for current block*/
-  localproblem->mu[0] = problem->mu[contact];
+  localproblem->theta[0] = problem->theta[contact];
 }
 
 void mc2d_nsgs_initialize_local_solver(

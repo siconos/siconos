@@ -34,7 +34,7 @@ extern computeNonsmoothFunction Function;
 /* #define VERBOSE_DEBUG */
 
 /* Alart & Curnier version (Radius = mu*max(0,RVN)) */
-void mc2d_computeAlartCurnierSTDOld(double R[3], double velocity[3], double eta, double mu,
+void mc2d_computeAlartCurnierSTDOld(double R[3], double velocity[3], double eta, double theta,
                                     double rho[3], double F[3], double A[9], double B[9]) {
   double RVN, RVT, RVS;
   double RhoN = rho[0];
@@ -45,7 +45,7 @@ void mc2d_computeAlartCurnierSTDOld(double R[3], double velocity[3], double eta,
   RVT = R[1] - RhoT * velocity[1];
   RVS = R[2] - RhoT * velocity[2];
   RV = sqrt(RVT * RVT + RVS * RVS);
-  // Radius = mu*R[0];
+  // Radius = theta*R[0];
 
   if (A) {
     A[0 + 3 * 1] = 0.;
@@ -63,7 +63,7 @@ void mc2d_computeAlartCurnierSTDOld(double R[3], double velocity[3], double eta,
 
   if (RVN >= 0.0) {
     DEBUG_PRINT("Normal part in the cone\n");
-    Radius = mu * RVN;
+    Radius = theta * RVN;
     F[0] = RhoN * (velocity[0]);
     if (A && B) {
       A[0 + 3 * 0] = RhoN;
@@ -115,8 +115,8 @@ void mc2d_computeAlartCurnierSTDOld(double R[3], double velocity[3], double eta,
         GammaST = GammaTS;
         GammaSS = RV1 - RVS * RVS * RV3;
 
-        A[1 + 3 * 0] = mu * RhoN * RVT * RV1;
-        A[2 + 3 * 0] = mu * RhoN * RVS * RV1;
+        A[1 + 3 * 0] = theta * RhoN * RVT * RV1;
+        A[2 + 3 * 0] = theta * RhoN * RVS * RV1;
 
         A[1 + 3 * 1] = GammaTT * RhoT * Radius;
 
@@ -125,12 +125,12 @@ void mc2d_computeAlartCurnierSTDOld(double R[3], double velocity[3], double eta,
 
         A[2 + 3 * 2] = GammaSS * RhoT * Radius;
 
-        B[1 + 3 * 0] = -mu * RVT * RV1;
+        B[1 + 3 * 0] = -theta * RVT * RV1;
 
         B[1 + 3 * 1] = 1.0 - GammaTT * Radius;
         B[1 + 3 * 2] = -GammaTS * Radius;
 
-        B[2 + 3 * 0] = -mu * RVS * RV1;
+        B[2 + 3 * 0] = -theta * RVS * RV1;
 
         B[2 + 3 * 1] = -GammaST * Radius;
         B[2 + 3 * 2] = 1.0 - GammaSS * Radius;
@@ -199,8 +199,8 @@ void mc2d_computeAlartCurnierSTDOld(double R[3], double velocity[3], double eta,
   });
 }
 
-/* Alart & Curnier version (Radius = mu*max(0,RVN)) */
-void mc2d_computeAlartCurnierSTD(double R[3], double velocity[3], double eta, double mu,
+/* Alart & Curnier version (Radius = theta*max(0,RVN)) */
+void mc2d_computeAlartCurnierSTD(double R[3], double velocity[3], double eta, double theta,
                                  double rho[3], double F[3], double A[9], double B[9]) {
   DEBUG_PRINT("mc2d_computeAlartCurnierSTD starts\n");
   DEBUG_EXPR_WE(for (int i = 0; i < 3; i++) printf("R[%i]= %12.8e,\t velocity[%i]= %12.8e,\n",
@@ -222,7 +222,7 @@ void mc2d_computeAlartCurnierSTD(double R[3], double velocity[3], double eta, do
   RVT = *R1 - RhoT * *velocity1;
   RVS = *R2 - RhoT * *velocity2;
   RV = sqrt(RVT * RVT + RVS * RVS);
-  // Radius = mu*R[0];
+  // Radius = theta*R[0];
 
   if (A00) {
     // always true
@@ -247,7 +247,7 @@ void mc2d_computeAlartCurnierSTD(double R[3], double velocity[3], double eta, do
   if (RVN > 0.0) {
     DEBUG_PRINT("Normal part in the cone\n");
 
-    Radius = mu * RVN;
+    Radius = theta * RVN;
     *F0 = RhoN * *velocity0;
     if (A00 && B00) {
       *A00 = RhoN;
@@ -300,8 +300,8 @@ void mc2d_computeAlartCurnierSTD(double R[3], double velocity[3], double eta, do
         GammaST = GammaTS;
         GammaSS = RV1 - RVS * RVS * RV3;
 
-        *A10 = mu * RhoN * RVT * RV1;
-        *A20 = mu * RhoN * RVS * RV1;
+        *A10 = theta * RhoN * RVT * RV1;
+        *A20 = theta * RhoN * RVS * RV1;
 
         *A11 = GammaTT * RhoT * Radius;
 
@@ -310,12 +310,12 @@ void mc2d_computeAlartCurnierSTD(double R[3], double velocity[3], double eta, do
 
         *A22 = GammaSS * RhoT * Radius;
 
-        *B10 = -mu * RVT * RV1;
+        *B10 = -theta * RVT * RV1;
 
         *B11 = 1.0 - GammaTT * Radius;
         *B12 = -GammaTS * Radius;
 
-        *B20 = -mu * RVS * RV1;
+        *B20 = -theta * RVS * RV1;
 
         *B21 = -GammaST * Radius;
         *B22 = 1.0 - GammaSS * Radius;
@@ -342,8 +342,8 @@ void mc2d_computeAlartCurnierSTD(double R[3], double velocity[3], double eta, do
   }
 }
 
-/* Christensen & Pang version (Radius = mu* R[0])*/
-void mc2d_computeAlartCurnierJeanMoreau(double R[3], double velocity[3], double mu,
+/* Christensen & Pang version (Radius = theta* R[0])*/
+void mc2d_computeAlartCurnierJeanMoreau(double R[3], double velocity[3], double theta,
                                         double rho[3], double F[3], double A[9], double B[9]) {
   double RVN, RVT, RVS;
   double RhoN = rho[0];
@@ -354,7 +354,7 @@ void mc2d_computeAlartCurnierJeanMoreau(double R[3], double velocity[3], double 
   RVT = R[1] - RhoT * velocity[1];
   RVS = R[2] - RhoT * velocity[2];
   RV = sqrt(RVT * RVT + RVS * RVS);
-  Radius = mu * R[0];
+  Radius = theta * R[0];
 
   // Compute the value of the Alart--Curnier Function and its gradient for the normal part
   DEBUG_PRINTF("[Numerics]  mc2d_computeAlartCurnierJeanMoreau - RVN = %e\n", RVN);
@@ -421,8 +421,8 @@ void mc2d_computeAlartCurnierJeanMoreau(double R[3], double velocity[3], double 
       GammaSS = RV1 - RVS * RVS * RV3;
 
       // come back to r2146
-      //        A[0+3*1]= mu * RhoN * RVT*RV1;
-      //        A[0+3*2]= mu * RhoN * RVS*RV1;
+      //        A[0+3*1]= theta * RhoN * RVT*RV1;
+      //        A[0+3*2]= theta * RhoN * RVS*RV1;
 
       A[1 + 3 * 1] = GammaTT * RhoT * Radius;
 
@@ -431,12 +431,12 @@ void mc2d_computeAlartCurnierJeanMoreau(double R[3], double velocity[3], double 
       A[2 + 3 * 1] = GammaST * RhoT * Radius;
       A[2 + 3 * 2] = GammaSS * RhoT * Radius;
 
-      B[1 + 3 * 0] = -mu * RVT * RV1;
+      B[1 + 3 * 0] = -theta * RVT * RV1;
 
       B[1 + 3 * 1] = 1.0 - GammaTT * Radius;
       B[1 + 3 * 2] = -GammaTS * Radius;
 
-      B[2 + 3 * 0] = -mu * RVS * RV1;
+      B[2 + 3 * 0] = -theta * RVS * RV1;
 
       B[2 + 3 * 1] = -GammaST * Radius;
       B[2 + 3 * 2] = 1.0 - GammaSS * Radius;

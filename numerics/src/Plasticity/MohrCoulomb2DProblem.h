@@ -43,9 +43,9 @@ struct MohrCoulomb2DProblem {
   /** \f$ {\mu} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of cone coefficients
       (\f$ n_c = \f$ numberOfCones) */
   double *eta;
-  /** \f$ {\mu} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of dilatency coefficients
+  /** \f$ {\theta} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of dilatency coefficients
       (\f$ n_c = \f$ numberOfCones) */
-  double *mu;
+  double *theta;
 };
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
@@ -62,11 +62,11 @@ MohrCoulomb2DProblem *mohrCoulomb2DProblem_new(void);
  *  \param[in] nc the number of contact
  *  \param[in] M the NumericsMatrix
  *  \param[in] q the q vector
- *  \param[in] mu the mu vector
+ *  \param[in] theta the theta vector
  *  \return a pointer to a MohrCoulomb2DProblem structure
  */
 MohrCoulomb2DProblem *mohrCoulomb2DProblem_new_with_data(int dim, int nc, NumericsMatrix *M,
-                                                         double *q, double *eta, double *mu);
+                                                         double *q, double *eta, double *theta);
 
 /** free a MohrCoulomb2DProblem
  *

@@ -65,13 +65,13 @@ static int test_unit(char* filename, SolverOptions* options) {
 
   mohrCoulomb2DProblem_free(problem);
 
-  /* FrictionContactProblem* FC = frictionContactProblem_new_with_data(3, 3, W, q, mu); */
+  /* FrictionContactProblem* FC = frictionContactProblem_new_with_data(3, 3, W, q, theta); */
   /* double r[9] = {0.}; */
   /* double u[9] = {0.}; */
 
   /* FC->M = NULL; */
   /* FC->q = NULL; */
-  /* FC->mu = NULL; */
+  /* FC->theta = NULL; */
   /* frictionContactProblem_free(FC); */
 
   /* FrictionContactProblem* FCdense = frictionContactProblem_new_with_data(3, 3, tmpM, q, mu);
@@ -97,7 +97,7 @@ int main(void) {
   numerics_set_verbose(0);
   printf("#######\ntest with default options\n");
   total_info += test_unit("./data/mc2d_example1.dat", options);
-  total_info += test_unit("./data/mc2d_example1_mu0.dat", options);
+  total_info += test_unit("./data/mc2d_example1_theta0.dat", options);
   
   numerics_set_verbose(0);
   printf("#######\n test with pure Newton local solver \n");
@@ -109,7 +109,7 @@ int main(void) {
   options->internalSolvers[0]->iparam[PLASTICITY_NSN_FORMULATION] = PLASTICITY_NSN_FORMULATION_NATURALMAP;
   options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-16;
   total_info += test_unit("./data/mc2d_example1.dat", options);
-  /* total_info += test_unit("./data/mc2d_example1_mu0.dat", options); */
+  /* total_info += test_unit("./data/mc2d_example1_theta0.dat", options); */
 
 
 
@@ -121,7 +121,7 @@ int main(void) {
   options->internalSolvers[0]->dparam[SICONOS_DPARAM_TOL] = 1e-16;
   options->internalSolvers[0]->iparam[SICONOS_IPARAM_MAX_ITER] = 100;
   total_info += test_unit("./data/mc2d_example1.dat", options);
-  total_info += test_unit("./data/mc2d_example1_mu0.dat", options);
+  total_info += test_unit("./data/mc2d_example1_theta0.dat", options);
 
   return total_info;
 }

@@ -39,12 +39,12 @@
 #include "SiconosBlas.h"  // for cblas_dcopy, cblas_dnrm2
 
 void mc2d_unitary_compute_and_add_error(double *restrict r, double *restrict u, double eta,
-                                        double mu, double *restrict error, double *worktmp) {
+                                        double theta, double *restrict error, double *worktmp) {
   // double normUT;
   // double worktmp[3];
   /* Compute the modified local velocity */
   /* worktmp[0] = r[0] - u[0] - eta *  hypot(u[1], u[2]); */
-  worktmp[0] = r[0] - u[0] - mu * sqrt(u[1] * u[1] + u[2] * u[2]);
+  worktmp[0] = r[0] - u[0] - theta * sqrt(u[1] * u[1] + u[2] * u[2]);
   worktmp[1] = r[1] - u[1];
   worktmp[2] = r[2] - u[2];
   projectionOnCone(worktmp, eta);
@@ -67,7 +67,7 @@ int mc2d_compute_error(MohrCoulomb2DProblem *problem, double *z, double *w, doub
   int nc = problem->numberOfCones;
   int n = nc * 3;
   double *eta = problem->eta;
-  double *mu = problem->mu;
+  double *theta = problem->theta;
 
   /* Compute the current velocity */
   cblas_dcopy(n, problem->q, incx, w, incy);  // w <-q
@@ -84,7 +84,7 @@ int mc2d_compute_error(MohrCoulomb2DProblem *problem, double *z, double *w, doub
   int ic, ic3;
   double worktmp[3];
   for (ic = 0, ic3 = 0; ic < nc; ic++, ic3 += 3) {
-    mc2d_unitary_compute_and_add_error(z + ic3, w + ic3, eta[ic], mu[ic], error, worktmp);
+    mc2d_unitary_compute_and_add_error(z + ic3, w + ic3, eta[ic], theta[ic], error, worktmp);
     /*DEBUG_PRINTF("absolute error = %12.8e contact =%i nc= %i\n", *error, ic, nc);*/
   }
   *error = sqrt(*error);

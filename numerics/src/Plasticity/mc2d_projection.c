@@ -53,14 +53,14 @@
 /* static int n=0; */
 /* static const NumericsMatrix* MGlobal = NULL; */
 /* static const double* qGlobal = NULL; */
-/* static const double* mu = NULL; */
+/* static const double* theta = NULL; */
 
 /* Local problem operators */
 /* static const int nLocal = 3; */
 /* static double* MLocal; */
 /* static int isMAllocatedIn = 0; /\* True if a malloc is done for MLocal, else false *\/ */
 /* static double qLocal[3]; */
-/* static double mu_i = 0.0; */
+/* static double theta_i = 0.0; */
 
 void mc2d_projection_initialize(MohrCoulomb2DProblem* problem,
                                 MohrCoulomb2DProblem* localproblem) {}
@@ -86,7 +86,7 @@ void mc2d_projection_update(int contact, MohrCoulomb2DProblem* problem,
 
   /* coefficient for current block*/
   localproblem->eta[0] = problem->eta[contact];
-  localproblem->mu[0] = problem->mu[contact];
+  localproblem->theta[0] = problem->theta[contact];
 }
 
 void mc2d_projectionWithDiagonalization_update(int contact, MohrCoulomb2DProblem* problem,
@@ -151,7 +151,7 @@ void mc2d_projectionWithDiagonalization_update(int contact, MohrCoulomb2DProblem
 
   /* Coefficient for current block*/
   localproblem->eta[0] = problem->eta[contact];
-  localproblem->mu[0] = problem->mu[contact];
+  localproblem->theta[0] = problem->theta[contact];
 }
 
 void mc2d_projection_initialize_with_regularization(MohrCoulomb2DProblem* problem,
@@ -192,7 +192,7 @@ void mc2d_projection_update_with_regularization(int contact, MohrCoulomb2DProble
 
   /* Coefficient for current block*/
   localproblem->eta[0] = problem->eta[contact];
-  localproblem->mu[0] = problem->mu[contact];
+  localproblem->theta[0] = problem->theta[contact];
 }
 
 int mc2d_projectionWithDiagonalization_solve(MohrCoulomb2DProblem* localproblem,
@@ -205,10 +205,10 @@ int mc2d_projectionWithDiagonalization_solve(MohrCoulomb2DProblem* localproblem,
 
   double* MLocal = localproblem->M->matrix0;
   double* qLocal = localproblem->q;
-  double mu_i = localproblem->mu[0];
+  double theta_i = localproblem->theta[0];
   int nLocal = 3;
 
-  double mrn, num, mu2 = mu_i * mu_i;
+  double mrn, num, theta2 = theta_i * theta_i;
 
   /* projection */
   if (qLocal[0] > 0.) {
@@ -228,8 +228,8 @@ int mc2d_projectionWithDiagonalization_solve(MohrCoulomb2DProblem* localproblem,
 
     mrn = reaction[1] * reaction[1] + reaction[2] * reaction[2];
 
-    if (mrn > mu2 * reaction[0] * reaction[0]) {
-      num = mu_i * reaction[0] / sqrt(mrn);
+    if (mrn > theta2 * reaction[0] * reaction[0]) {
+      num = theta_i * reaction[0] / sqrt(mrn);
       reaction[1] = reaction[1] * num;
       reaction[2] = reaction[2] * num;
     }
@@ -271,7 +271,7 @@ int mc2d_projectionOnConeWithLocalIteration_solve(MohrCoulomb2DProblem* localpro
   double* MLocal = localproblem->M->matrix0;
   double* qLocal = localproblem->q;
   double eta_i = localproblem->eta[0];
-  double mu_i = localproblem->mu[0];
+  double theta_i = localproblem->theta[0];
   /* int nLocal = 3; */
 
   /*   /\* Builds local problem for the current contact *\/ */
@@ -286,8 +286,8 @@ int mc2d_projectionOnConeWithLocalIteration_solve(MohrCoulomb2DProblem* localpro
 
   /* double an = 1. / (MLocal[0]); */
 
-  /* double at = 1.0 / (MLocal[4] + mu_i); */
-  /* double as = 1.0 / (MLocal[8] + mu_i); */
+  /* double at = 1.0 / (MLocal[4] + theta_i); */
+  /* double as = 1.0 / (MLocal[8] + theta_i); */
   /* at = an; */
   /* as = an; */
   double rho = options->dWork[options->iparam[PLASTICITY_CURRENT_CONE_NUMBER]], rho_k;
@@ -360,7 +360,7 @@ int mc2d_projectionOnConeWithLocalIteration_solve(MohrCoulomb2DProblem* localpro
     while (!success && (ls_iter < ls_itermax)) {
       rho_k = rho_k * tau;
       DEBUG_PRINTF("rho_k =%f\n", rho_k);
-      reaction[0] = reaction_k[0] - rho_k * (velocity_k[0] + mu_i * normUT);
+      reaction[0] = reaction_k[0] - rho_k * (velocity_k[0] + theta_i * normUT);
       reaction[1] = reaction_k[1] - rho_k * velocity_k[1];
       reaction[2] = reaction_k[2] - rho_k * velocity_k[2];
       DEBUG_PRINT("r-rho tilde v before projection")
@@ -404,7 +404,7 @@ int mc2d_projectionOnConeWithLocalIteration_solve(MohrCoulomb2DProblem* localpro
 
     /* compute local error */
     localerror = 0.0;
-    mc2d_unitary_compute_and_add_error(reaction, velocity, eta_i, mu_i, &localerror, worktmp);
+    mc2d_unitary_compute_and_add_error(reaction, velocity, eta_i, theta_i, &localerror, worktmp);
 
     /*Update rho*/
     if ((rho_k * a1 < Lmin * a2) && (localerror < localerror_k)) {
@@ -433,7 +433,7 @@ int mc2d_projectionOnCone_solve(MohrCoulomb2DProblem* localproblem, double* reac
   double* MLocal = localproblem->M->matrix0;
   double* qLocal = localproblem->q;
   double eta_i = localproblem->eta[0];
-  double mu_i = localproblem->mu[0];
+  double theta_i = localproblem->theta[0];
   /* int nLocal = 3; */
 
   /* this part is critical for the success of the projection */
@@ -444,7 +444,7 @@ int mc2d_projectionOnCone_solve(MohrCoulomb2DProblem* localproblem, double* reac
   /*   double beta = alpha*alpha - 4*det; */
   /*   double at = 2*(alpha - beta)/((alpha + beta)*(alpha + beta)); */
 
-  // double an = 1./(MLocal[0]+mu_i);
+  // double an = 1./(MLocal[0]+theta_i);
   double an = 1. / (MLocal[0]);
 
   /* int incx = 1, incy = 1; */
@@ -459,7 +459,7 @@ int mc2d_projectionOnCone_solve(MohrCoulomb2DProblem* localproblem, double* reac
                  MLocal[i + 1 * 3] * reaction[1] + +MLocal[i + 2 * 3] * reaction[2];
 
   normUT = sqrt(worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2]);
-  reaction[0] -= an * (worktmp[0] + mu_i * normUT);
+  reaction[0] -= an * (worktmp[0] + theta_i * normUT);
   reaction[1] -= an * worktmp[1];
   reaction[2] -= an * worktmp[2];
 

@@ -71,7 +71,7 @@ static double mc2d_compute_local_error(MohrCoulomb2DProblem* localproblem,
   double current_error = 0.0;
 
   mc2d_unitary_compute_and_add_error(local_reaction, local_velocity, localproblem->eta[0],
-                                     localproblem->mu[0], &current_error, worktmp);
+                                     localproblem->theta[0], &current_error, worktmp);
   current_error = sqrt(current_error);
   DEBUG_PRINTF("absolute local error = %e", current_error);
   if (fabs(norm_q) > DBL_EPSILON) current_error /= norm_q;
@@ -332,7 +332,7 @@ void mc2d_onecone_nonsmooth_Newton_solvers_computeError(int n, double* velocity,
   /*   free(FGlobal); */
 }
 #ifdef DEBUG_CHECK
-static int mc2d_onecone_nonsmooth_Newton_AC_debug(double* R, double* velocity, double mu,
+static int mc2d_onecone_nonsmooth_Newton_AC_debug(double* R, double* velocity, double theta,
                                                   double* rho, double* MLocal, double* F,
                                                   double* A, double* B, double* AWplusB,
                                                   int* iparam) {
@@ -344,11 +344,11 @@ static int mc2d_onecone_nonsmooth_Newton_AC_debug(double* R, double* velocity, d
     double Bg[9] = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
     assert(*rho > 0. && *(rho + 1) > 0. && *(rho + 2) > 0.);
     if (iparam[PLASTICITY_NSN_FORMULATION] == PLASTICITY_NSN_FORMULATION_ALARTCURNIER_STD) {
-      mc2d_AlartCurnierFunctionGenerated(R, velocity, mu, rho, Fg, Ag, Bg);
+      mc2d_AlartCurnierFunctionGenerated(R, velocity, theta, rho, Fg, Ag, Bg);
     }
 
     if (iparam[PLASTICITY_NSN_FORMULATION] == PLASTICITY_NSN_FORMULATION_JEANMOREAU_STD) {
-      mc2d_AlartCurnierJeanMoreauFunctionGenerated(R, velocity, mu, rho, Fg, Ag, Bg);
+      mc2d_AlartCurnierJeanMoreauFunctionGenerated(R, velocity, theta, rho, Fg, Ag, Bg);
     }
 
     sub3(F, Fg);
@@ -392,7 +392,7 @@ void mc2d_onecone_nonsmooth_Newton_AC_update(int cone, MohrCoulomb2DProblem* pro
 
   /*  coefficient for current block*/
   localproblem->eta[0] = problem->eta[cone];
-  localproblem->mu[0] = problem->mu[cone];
+  localproblem->theta[0] = problem->theta[cone];
 }
 
 int mc2d_onecone_nonsmooth_Newton_solvers_solve_direct(MohrCoulomb2DProblem* localproblem,
@@ -403,7 +403,7 @@ int mc2d_onecone_nonsmooth_Newton_solvers_solve_direct(MohrCoulomb2DProblem* loc
   /* numerics_printf_verbose( */
   /*     2, "--------------- mc2d_onecone_nonsmooth_Newton_solvers_solve_direct starts"); */
 
-  double mu = localproblem->mu[0];
+  double theta = localproblem->theta[0];
   double eta = localproblem->eta[0];
   double* qLocal = localproblem->q;
 
@@ -448,7 +448,7 @@ int mc2d_onecone_nonsmooth_Newton_solvers_solve_direct(MohrCoulomb2DProblem* loc
   int info_solv3x3;
 
   /* compute first residue */
-  Function(R, velocity, eta, mu, rho, F, NULL, NULL);
+  Function(R, velocity, eta, theta, rho, F, NULL, NULL);
   dparam[SICONOS_DPARAM_RESIDU] =
       0.5 * (F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) * norm_relative;
   dparam[SICONOS_DPARAM_RESIDU] =
@@ -466,7 +466,7 @@ int mc2d_onecone_nonsmooth_Newton_solvers_solve_direct(MohrCoulomb2DProblem* loc
 
   for (inew = 1; inew < itermax; ++inew) {
     /* Update function and gradient */
-    Function(R, velocity, eta, mu, rho, F, A, B);
+    Function(R, velocity, eta, theta, rho, F, A, B);
 
     /* compute -(A MLocal +B) */
     mm3x3(A, MLocal, AWplusB);
@@ -474,7 +474,7 @@ int mc2d_onecone_nonsmooth_Newton_solvers_solve_direct(MohrCoulomb2DProblem* loc
     scal3x3(-1., AWplusB);
 
 #ifdef DEBUG_CHECK
-    mc2d_onecone_nonsmooth_Newton_AC_debug(R, velocity, mu, rho, MLocal, F, A, B, AWplusB,
+    mc2d_onecone_nonsmooth_Newton_AC_debug(R, velocity, theta, rho, MLocal, F, A, B, AWplusB,
                                            iparam);
 #endif
 
@@ -496,7 +496,7 @@ int mc2d_onecone_nonsmooth_Newton_solvers_solve_direct(MohrCoulomb2DProblem* loc
     /* compute new residue */
     cpy3(qLocal, velocity);
     mvp3x3(MLocal, R, velocity);
-    Function(R, velocity, eta, mu, rho, F, NULL, NULL);
+    Function(R, velocity, eta, theta, rho, F, NULL, NULL);
     /* dparam[SICONOS_DPARAM_RESIDU] = 0.5 * (F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) * */
     /*                                 norm_relative;  // improve with relative tolerance */
     dparam[SICONOS_DPARAM_RESIDU] = sqrt(F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) *
@@ -554,7 +554,7 @@ static int LineSearchGP(MohrCoulomb2DProblem* localproblem, computeNonsmoothFunc
   /*     double velocity[3]={0.,0.,0.}; */
 
   double eta = localproblem->eta[0];
-  double mu = localproblem->mu[0];
+  double theta = localproblem->theta[0];
   double* qLocal = localproblem->q;
   double* MLocal = localproblem->M->matrix0;
 
@@ -562,7 +562,7 @@ static int LineSearchGP(MohrCoulomb2DProblem* localproblem, computeNonsmoothFunc
   /*          + MLocal[i+1*3]*R[1] + */
   /*          + MLocal[i+2*3]*R[2] ; */
 
-  /*     Function(R,velocity,mu,rho,F,A,B); */
+  /*     Function(R,velocity,theta,rho,F,A,B); */
 
   // Computation of q(t) and q'(t) for t =0
 
@@ -624,7 +624,7 @@ static int LineSearchGP(MohrCoulomb2DProblem* localproblem, computeNonsmoothFunc
       velocity[i] = MLocal[i + 0 * 3] * tmp[0] + qLocal[i] + MLocal[i + 1 * 3] * tmp[1] +
                     +MLocal[i + 2 * 3] * tmp[2];
 
-    Function(tmp, velocity, eta, mu, rho, F, NULL, NULL);
+    Function(tmp, velocity, eta, theta, rho, F, NULL, NULL);
 
     double q = 0.5 * cblas_ddot(3, F, 1, F, 1);
 
@@ -687,7 +687,7 @@ int mc2d_onecone_nonsmooth_Newton_solvers_solve_damped(MohrCoulomb2DProblem* loc
       2, "--------------- mc2d_onecone_nonsmooth_Newton_solvers_solve_damped starts");
 
   double eta = localproblem->eta[0];
-  double mu = localproblem->mu[0];
+  double theta = localproblem->theta[0];
   double* qLocal = localproblem->q;
 
   double norm_qLocal =
@@ -736,7 +736,7 @@ int mc2d_onecone_nonsmooth_Newton_solvers_solve_damped(MohrCoulomb2DProblem* loc
   int LSitermax = iparam[PLASTICITY_NSN_LINESEARCH_MAX_ITER];
   for (inew = 0; inew < itermax; ++inew) {
     /* Update function and gradient */
-    Function(R, velocity, eta, mu, rho, F, A, B);
+    Function(R, velocity, eta, theta, rho, F, A, B);
 
     /* compute -(A MLocal +B) */
     mm3x3(A, MLocal, AWplusB);
@@ -744,7 +744,7 @@ int mc2d_onecone_nonsmooth_Newton_solvers_solve_damped(MohrCoulomb2DProblem* loc
     scal3x3(-1., AWplusB);
 
 #ifdef DEBUG_CHECK
-    mc2d_onecone_nonsmooth_Newton_AC_debug(R, velocity, mu, rho, MLocal, F, A, B, AWplusB,
+    mc2d_onecone_nonsmooth_Newton_AC_debug(R, velocity, theta, rho, MLocal, F, A, B, AWplusB,
                                            iparam);
 #endif
 
@@ -775,7 +775,7 @@ int mc2d_onecone_nonsmooth_Newton_solvers_solve_damped(MohrCoulomb2DProblem* loc
     /* compute new residue */
     cpy3(qLocal, velocity);
     mvp3x3(MLocal, R, velocity);
-    Function(R, velocity, eta, mu, rho, F, NULL, NULL);
+    Function(R, velocity, eta, theta, rho, F, NULL, NULL);
     /* dparam[SICONOS_DPARAM_RESIDU] = 0.5 * (F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) * */
     /*                                 norm_relative;  // improve with relative tolerance */
     dparam[SICONOS_DPARAM_RESIDU] = sqrt(F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) *

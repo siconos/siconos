@@ -32,7 +32,7 @@
 extern "C" {
 #endif
 
-void mc2d_computeNaturalMap(double reaction[3], double velocity[3], double eta, double mu,
+void mc2d_computeNaturalMap(double reaction[3], double velocity[3], double eta, double theta,
                             double rho[3], double result[3], double A[9], double B[9]);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)

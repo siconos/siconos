@@ -36,7 +36,7 @@ extern computeNonsmoothFunction Function;
 /* #define DEBUG_STDOUT */
 #include "siconos_debug.h"  // for DEBUG_PRINTF
 
-void mc2d_computeNaturalMap(double R[3], double velocity[3], double eta, double mu,
+void mc2d_computeNaturalMap(double R[3], double velocity[3], double eta, double theta,
                             double Rho[3], double F[3], double A[9], double B[9]) {
   DEBUG_PRINT("mc2d_computeNaturalMap starts\n");
   DEBUG_EXPR_WE(for (int i = 0; i < 3; i++) printf("R[%i]= %12.8e,\t velocity[%i]= %12.8e,\n",
@@ -54,13 +54,13 @@ void mc2d_computeNaturalMap(double R[3], double velocity[3], double eta, double 
   double normVT;
 
   normVT = sqrt(*velocity1 * *velocity1 + *velocity2 * *velocity2);
-  RV[0] = *R0 - rho * (*velocity0 + mu * normVT);
+  RV[0] = *R0 - rho * (*velocity0 + theta * normVT);
   RV[1] = *R1 - rho * *velocity1;
   RV[2] = *R2 - rho * *velocity2;
 
   cpy3(RV, F);
 
-  DEBUG_PRINTF("mu= %12.8e \n", mu);
+  DEBUG_PRINTF("theta= %12.8e \n", theta);
   DEBUG_PRINTF("eta= %12.8e \n", eta);
   DEBUG_PRINTF("rho= %12.8e \n", rho);
   unsigned int where = projectionOnCone(F, eta);
@@ -93,8 +93,8 @@ void mc2d_computeNaturalMap(double R[3], double velocity[3], double eta, double 
       DEBUG_PRINTF("normVT = %6.4e\t, s1 = %6.4e\t, s2 = %6.4e\n ", normVT, s1, s2);
 
       *A00 = rho;
-      *A01 = rho * mu * s1;
-      *A02 = rho * mu * s2;
+      *A01 = rho * theta * s1;
+      *A02 = rho * theta * s2;
       *A10 = 0.;
       *A11 = rho;
       ;
@@ -123,8 +123,8 @@ void mc2d_computeNaturalMap(double R[3], double velocity[3], double eta, double 
 
       // B = rho * (I+D) we use B for storage
       *B00 = rho;
-      *B01 = rho * mu * s1;
-      *B02 = rho * mu * s2;
+      *B01 = rho * theta * s1;
+      *B02 = rho * theta * s2;
       *B10 = 0.;
       *B11 = rho;
       ;
