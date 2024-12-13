@@ -61,6 +61,8 @@ unsigned projectionOnDualCone(double *u, double mu);
 */
 void projectionOnSecondOrderCone(double *r, double mu, int size);
 
+unsigned subdifferentialProjectionOnCone(double *H, double *r, double mu);
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
