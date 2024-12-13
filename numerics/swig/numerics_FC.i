@@ -65,7 +65,7 @@
     FCP->q = (double*) malloc(size * sizeof(double));
     memcpy(FCP->q, fcp->q, size * sizeof(double));
 
-    FCP->q = (double*) malloc(size * sizeof(double));
+    FCP->mu = (double*) malloc(size * sizeof(double));
     memcpy(FCP->mu, fcp->mu, size * sizeof(double));
 
     return FCP;
