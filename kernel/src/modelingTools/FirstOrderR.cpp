@@ -20,14 +20,11 @@
 #include "Interaction.hpp"
 #include "SiconosVisitor.hpp"
 
-void siconos::modeling::FirstOrderR::initialize(Interaction& inter)
-{
-  inter.relationMatrices().resize(FirstOrderR::relationMatricesSize);
+void siconos::modeling::FirstOrderR::initialize(Interaction& inter) {
   inter.relationVectors().resize(FirstOrderR::relationVectorsSize);
 }
 
 void siconos::modeling::FirstOrderR::accept(
-    std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const
-{
+    std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const {
   tourist->visit(*this);
 }

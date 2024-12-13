@@ -441,7 +441,6 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
               (static_cast<siconos::integrators::EulerMoreauOSI&>(osi)).gamma();
         }
       }
-
       // for ZOH, we have a different formula ...
       if ((osiType == siconos::integrators::IntegratorType::ZOHOSI) &&
           indexSet->properties(vd).forControl) {
@@ -462,9 +461,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
         //      *currentInteractionBlock += h *Theta[*itDS]* *leftInteractionBlock *
         // (*rightInteractionBlock);  // left = C, right = W.B
         // gemm(h,*leftInteractionBlock,*rightInteractionBlock,1.0,*currentInteractionBlock);
-        *leftInteractionBlock *= h;
-        siconos::algebra::prod(*leftInteractionBlock, *rightInteractionBlock,
-                               *currentInteractionBlock, false);
+        *currentInteractionBlock += h * *leftInteractionBlock * *rightInteractionBlock;
         // left = C, right = inv(W).B
       }
     } else if (relationType == siconos::modeling::RelationType::Lagrangian ||
@@ -718,6 +715,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock(
         std::to_string(
             static_cast<std::underlying_type<siconos::modeling::RelationType>::type>(
                 relationType1)));
+
   DEBUG_END(
       "siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock(const "
       "siconos::graphs::InteractionsGraph::EDescriptor& ed)\n");
@@ -941,16 +939,14 @@ bool siconos::nonsmooth_formulations::LinearOSNS::preCompute(double time) {
 
 void siconos::nonsmooth_formulations::LinearOSNS::postCompute() {
   DEBUG_BEGIN("void siconos::nonsmooth_formulations::LinearOSNS::postCompute()\n");
-  // This function is used to set y/lambda values using output from
-  // lcp_driver (w,z).  Only Interactions (ie Interactions) of
-  // indexSet(leveMin) are concerned.
+  // This function is used to set lambda values using output from
+  // lcp_driver (w,z).  Only Interactions of indexSet(leveMin) are concerned.
 
   // === Get index set from Topology ===
   auto& indexSet = *simulation()->indexSet(indexSetLevel());
 
   // y and lambda vectors
   std::shared_ptr<siconos::algebra::SiconosVector> lambda;
-  std::shared_ptr<siconos::algebra::SiconosVector> y;
 
   // === Loop through "active" Interactions (ie present in
   // indexSets[1]) ===
@@ -960,17 +956,13 @@ void siconos::nonsmooth_formulations::LinearOSNS::postCompute() {
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   for (std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui) {
     auto& inter = *indexSet.bundle(*ui);
-    // Get the  position of inter-interactionBlock in the vector w
-    // or z
+    // Get the  position of inter-interactionBlock in the vector w or z
     pos = indexSet.properties(*ui).absolute_position;
 
-    // Get Y and Lambda for the current Interaction
-    y = inter.y(inputOutputLevel());
+    // Get lambda for the current Interaction
+    // y = inter.y(inputOutputLevel());
     lambda = inter.lambda(inputOutputLevel());
-    // Copy _w/_z values, starting from index pos into y/lambda.
-
-    // Warning: yEquivalent is
-    //  saved in y !!
+    // Copy _z values, starting from index pos into lambda.
     *lambda = _z->segment(pos, lambda->size());
     DEBUG_EXPR(lambda->display(););
   }

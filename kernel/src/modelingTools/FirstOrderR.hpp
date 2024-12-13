@@ -53,9 +53,8 @@ namespace siconos::modeling {
 */
 class FirstOrderR : public Relation {
  public:
-  enum FirstOrderRDS { x, z, r, DSlinkSize };
+  enum FirstOrderRDS { Xxx, Rrr, DSlinkSize };
   enum FirstOrderRVec { e, relationVectorsSize };
-  enum FirstOrderRMat { mat_C, mat_D, mat_F, mat_B, mat_K, relationMatricesSize };
 
  protected:
   ACCEPT_SERIALIZATION(FirstOrderR);
@@ -113,8 +112,8 @@ class FirstOrderR : public Relation {
   bool hasConstantJacobiangOver_lambda_{false};
 
  public:
-  /** destructor
-   */
+
+  /** destructor */
   virtual ~FirstOrderR() noexcept = default;
 
   /** initialize the relation (check sizes, memory allocation ...)

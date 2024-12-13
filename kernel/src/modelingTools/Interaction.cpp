@@ -377,8 +377,8 @@ void siconos::modeling::Interaction::__initDataFirstOrder(
     std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink, DynamicalSystem& ds1,
     DynamicalSystem& ds2) {
   DSlink.resize(FirstOrderR::DSlinkSize);
-  DSlink[FirstOrderR::x] = std::make_shared<siconos::algebra::BlockVector>();
-  DSlink[FirstOrderR::r] = std::make_shared<siconos::algebra::BlockVector>();
+  DSlink[FirstOrderR::Xxx] = std::make_shared<siconos::algebra::BlockVector>();
+  DSlink[FirstOrderR::Rrr] = std::make_shared<siconos::algebra::BlockVector>();
   auto relationSubType = _relation->getSubType();
 
   if (relationSubType != RelationSubType::LinearTIR) {
@@ -394,8 +394,8 @@ void siconos::modeling::Interaction::__initDSDataFirstOrder(
     DynamicalSystem& ds, std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink) {
   // Put x/r ... of each DS into a block. (Pointers links, no copy!!)
   FirstOrderNonLinearDS& lds = static_cast<FirstOrderNonLinearDS&>(ds);
-  DSlink[FirstOrderR::x]->insertPtr(lds.x());
-  DSlink[FirstOrderR::r]->insertPtr(lds.r());
+  DSlink[FirstOrderR::Xxx]->insertPtr(lds.x());
+  DSlink[FirstOrderR::Rrr]->insertPtr(lds.r());
 }
 
 void siconos::modeling::Interaction::__initDataLagrangian(

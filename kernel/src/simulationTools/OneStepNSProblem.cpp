@@ -355,7 +355,6 @@ siconos::nonsmooth_formulations::OneStepNSProblem::getOSIMatrix(
   // Returns the LU factorization of the integration matrix of the one-step integrator
 
   // Matrix depends on OSI type.
-  std::shared_ptr<siconos::algebra::SiconosMatrix> block;
   std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>> luIterationMatrix{
       nullptr};
 
@@ -365,6 +364,7 @@ siconos::nonsmooth_formulations::OneStepNSProblem::getOSIMatrix(
   // First, we deal with the non-standard cases (when iteration matrix is not available in the
   // graph)
   if (osiType == siconos::integrators::IntegratorType::LSODAROSI) {
+
     if (auto lds = dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
       luIterationMatrix = lds->LUMass();
     } else

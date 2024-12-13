@@ -100,7 +100,6 @@ SICONOS_IO_REGISTER(Interaction,
   (_nslaw)
   (_number)
   (_relation)
-  (_relationMatrices)
   (_relationVectors)
   (_sizeOfDS)
   (_upperLevelForInput)

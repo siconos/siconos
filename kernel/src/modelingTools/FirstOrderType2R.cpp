@@ -36,7 +36,6 @@ void siconos::modeling::FirstOrderType2R::initialize(Interaction& inter) {
   auto sizeY = inter.dimension();
   auto sizeX = inter.getSizeOfDS();
   auto& DSlink = inter.linkToDSVariables();
-  auto sizeZ = DSlink[FirstOrderR::z]->size();
 
   if (computejacobianhOver_state_) {
     if (!jacobianhOver_state_internal_storage_) {
@@ -45,8 +44,6 @@ void siconos::modeling::FirstOrderType2R::initialize(Interaction& inter) {
     }
     jacobianhOver_state_view_ = std::make_shared<siconos::algebra::MapType>(
         jacobianhOver_state_internal_storage_->data(), sizeY, sizeX);
-    //   relationMat[FirstOrderR::mat_C] =
-    // std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeX);
   }
   // if the jacobian is a constant matrix (following a call to setConstant...)
   // then
@@ -60,8 +57,6 @@ void siconos::modeling::FirstOrderType2R::initialize(Interaction& inter) {
     }
     jacobianhOver_lambda_view_ = std::make_shared<siconos::algebra::MapType>(
         jacobianhOver_lambda_internal_storage_->data(), sizeY, sizeY);
-    //   relationMat[FirstOrderR::mat_D] =
-    // std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeY);
   }
 
   if (computejacobiangOver_lambda_) {
@@ -71,8 +66,6 @@ void siconos::modeling::FirstOrderType2R::initialize(Interaction& inter) {
     }
     jacobiangOver_lambda_view_ = std::make_shared<siconos::algebra::MapType>(
         jacobiangOver_lambda_internal_storage_->data(), sizeX, sizeY);
-    // relationMat[FirstOrderR::mat_B] =
-    //     std::make_shared<siconos::algebra::SiconosMatrix>(sizeX, sizeY);
   }
   checkSize(inter);
 }
@@ -210,7 +203,7 @@ void siconos::modeling::FirstOrderType2R::computeOutput(double time, Interaction
   siconos::algebra::SiconosVector& y = *inter.y(0);
   siconos::algebra::SiconosVector& lambda = *inter.lambda(level);
   auto& DSlink = inter.linkToDSVariables();
-  computeh(*DSlink[FirstOrderR::x], lambda, y);
+  computeh(*DSlink[FirstOrderR::Xxx], lambda, y);
 }
 
 void siconos::modeling::FirstOrderType2R::computeInput(double time, Interaction& inter,
@@ -218,17 +211,17 @@ void siconos::modeling::FirstOrderType2R::computeInput(double time, Interaction&
   auto lambda = inter.lambda(level);
 
   auto& DSlink = inter.linkToDSVariables();
-  computeg_(*lambda, *DSlink[FirstOrderR::r]);
+  computeg_(*lambda, *DSlink[FirstOrderR::Rrr]);
 }
 
 void siconos::modeling::FirstOrderType2R::computeJach(double time, Interaction& inter) {
   DEBUG_BEGIN("siconos::modeling::FirstOrderType2R::computeJach\n");
   auto& DSlink = inter.linkToDSVariables();
   if (computejacobianhOver_state_)
-    computejacobianhOver_state_(*DSlink[FirstOrderR::x], *inter.lambda(0),
+    computejacobianhOver_state_(*DSlink[FirstOrderR::Xxx], *inter.lambda(0),
                                 *jacobianhOver_state_view_);
   if (computejacobianhOver_lambda_)
-    computejacobianhOver_lambda_(*DSlink[FirstOrderR::x], *inter.lambda(0),
+    computejacobianhOver_lambda_(*DSlink[FirstOrderR::Xxx], *inter.lambda(0),
                                  *jacobianhOver_state_view_);
   DEBUG_END("siconos::modeling::FirstOrderType2R::computeJach\n");
 }

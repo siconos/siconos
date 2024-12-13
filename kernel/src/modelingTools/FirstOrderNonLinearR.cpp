@@ -30,7 +30,6 @@ void siconos::modeling::FirstOrderNonLinearR::initialize(Interaction& inter) {
 
   auto sizeY = inter.dimension();
   auto sizeX = inter.getSizeOfDS();
-  auto& relationMat = inter.relationMatrices();
 
   if (computejacobianhOver_state_) {
     if (!jacobianhOver_state_internal_storage_) {
@@ -39,8 +38,6 @@ void siconos::modeling::FirstOrderNonLinearR::initialize(Interaction& inter) {
     }
     jacobianhOver_state_view_ = std::make_shared<siconos::algebra::MapType>(
         jacobianhOver_state_internal_storage_->data(), sizeY, sizeX);
-    //   relationMat[FirstOrderR::mat_C] =
-    // std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeX);
   }
   // if the jacobian is a constant matrix (following a call to setConstant...)
   // then
@@ -54,8 +51,6 @@ void siconos::modeling::FirstOrderNonLinearR::initialize(Interaction& inter) {
     }
     jacobianhOver_lambda_view_ = std::make_shared<siconos::algebra::MapType>(
         jacobianhOver_lambda_internal_storage_->data(), sizeY, sizeY);
-    // relationMat[FirstOrderR::mat_D] =
-    //     std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeY);
   }
 
   if (computejacobiangOver_state_) {
@@ -65,8 +60,6 @@ void siconos::modeling::FirstOrderNonLinearR::initialize(Interaction& inter) {
     }
     jacobiangOver_state_view_ = std::make_shared<siconos::algebra::MapType>(
         jacobiangOver_state_internal_storage_->data(), sizeX, sizeX);
-    //   relationMat[FirstOrderR::mat_K] =
-    //       std::make_shared<siconos::algebra::SiconosMatrix>(sizeDS, sizeDS);
   }
 
   if (computejacobiangOver_lambda_) {
@@ -76,8 +69,6 @@ void siconos::modeling::FirstOrderNonLinearR::initialize(Interaction& inter) {
     }
     jacobiangOver_lambda_view_ = std::make_shared<siconos::algebra::MapType>(
         jacobiangOver_lambda_internal_storage_->data(), sizeX, sizeY);
-    // relationMat[FirstOrderR::mat_B] =
-    //     std::make_shared<siconos::algebra::SiconosMatrix>(sizeX, sizeY);
   }
 
   checkSize(inter);
@@ -252,7 +243,7 @@ void siconos::modeling::FirstOrderNonLinearR::computeOutput(double time, Interac
   auto& DSlink = inter.linkToDSVariables();
   auto& y = *inter.y(level);
   auto& lambda = *inter.lambda(level);
-  if (computeh_) computeh_(*DSlink[FirstOrderR::x], time, lambda, y);
+  if (computeh_) computeh_(*DSlink[FirstOrderR::Xxx], time, lambda, y);
   DEBUG_END("siconos::modeling::FirstOrderNonLinearR::computeOutput \n");
 }
 
@@ -261,38 +252,35 @@ void siconos::modeling::FirstOrderNonLinearR::computeInput(double time, Interact
   DEBUG_PRINT("siconos::modeling::FirstOrderNonLinearR::computeInput \n");
   auto& DSlink = inter.linkToDSVariables();
   auto& lambda = *inter.lambda(level);
-  if (computeg_) computeg_(*DSlink[FirstOrderR::x], time, lambda, *DSlink[FirstOrderR::r]);
+  if (computeg_) computeg_(*DSlink[FirstOrderR::Xxx], time, lambda, *DSlink[FirstOrderR::Rrr]);
   DEBUG_END("siconos::modeling::FirstOrderNonLinearR::computeinput \n");
 }
 
 void siconos::modeling::FirstOrderNonLinearR::computeJach(double time, Interaction& inter) {
   auto& DSlink = inter.linkToDSVariables();
-  auto& relationMat = inter.relationMatrices();
-
   auto& lambda = *inter.lambda(0);
 
-  if (!hasConstantJacobianhOver_state_) {
-    computejacobianhOver_state_(*DSlink[FirstOrderR::x], time, lambda,
+  if (computejacobianhOver_state_) {
+    computejacobianhOver_state_(*DSlink[FirstOrderR::Xxx], time, lambda,
                                 *jacobianhOver_state_view_);
   }
 
-  if (!hasConstantJacobianhOver_lambda_) {
-    computejacobianhOver_lambda_(*DSlink[FirstOrderR::x], time, lambda,
+  if (computejacobianhOver_lambda_) {
+    computejacobianhOver_lambda_(*DSlink[FirstOrderR::Xxx], time, lambda,
                                  *jacobianhOver_lambda_view_);
   }
 }
 
 void siconos::modeling::FirstOrderNonLinearR::computeJacg(double time, Interaction& inter) {
   auto& DSlink = inter.linkToDSVariables();
-  auto& relationMat = inter.relationMatrices();
 
   auto& lambda = *inter.lambda(0);
-  if (!hasConstantJacobiangOver_lambda_) {
-    computejacobiangOver_lambda_(*DSlink[FirstOrderR::x], time, lambda,
+  if (computejacobiangOver_lambda_) {
+    computejacobiangOver_lambda_(*DSlink[FirstOrderR::Xxx], time, lambda,
                                  *jacobiangOver_lambda_view_);
   }
-  if (!hasConstantJacobiangOver_state_) {
-    computejacobiangOver_state_(*DSlink[FirstOrderR::x], time, lambda,
+  if (computejacobiangOver_state_) {
+    computejacobiangOver_state_(*DSlink[FirstOrderR::Xxx], time, lambda,
                                 *jacobiangOver_state_view_);
   }
 }

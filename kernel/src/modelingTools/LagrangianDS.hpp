@@ -513,7 +513,7 @@ class LagrangianDS : public SecondOrderDS {
   void setConstantJacobianFintOver_velocity(
       Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
 
-  /** \return True if \f$ \nabla_{\dot q}F_{int} \f$ matrix has been set
+  /** \return True if \f$ \nabla_{\dot q}F_{int} \f$ matrix has been set */
   bool hasJacobianFintOver_velocity() const { return hasJacobianFintOver_velocity_; }
 
   /** set a user-defined function to compute \f$ \nabla_{\dot q}F_{int} \f$

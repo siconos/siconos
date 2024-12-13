@@ -140,8 +140,6 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
    * and OneStepIntegrator classes. */
   std::vector<std::shared_ptr<siconos::algebra::BlockVector>> _linkToDSVariables = {};
 
-  std::vector<std::shared_ptr<siconos::algebra::SiconosMatrix>> _relationMatrices = {};
-
   std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> _relationVectors = {};
 
   // internal struct used to handle visitors process to set Interaction levels
@@ -531,10 +529,6 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
 
   inline std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>& relationVectors() {
     return _relationVectors;
-  };
-
-  inline std::vector<std::shared_ptr<siconos::algebra::SiconosMatrix>>& relationMatrices() {
-    return _relationMatrices;
   };
 
   // --- OTHER FUNCTIONS ---
