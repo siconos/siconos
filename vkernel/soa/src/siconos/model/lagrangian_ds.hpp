@@ -8,7 +8,7 @@ struct lagrangian_ds
     : item<description<"A lagrangian dynamical system [...]">> {
   using dof = some::indice_parameter<"dof">;
 
-  using attributes = types::attributes<
+  using attributes = gather<
       attribute<"q", some::vector<some::scalar, dof>>,
       attribute<"velocity", some::vector<some::scalar, dof>>,
       attribute<"mass_matrix", some::matrix<some::scalar, dof, dof>>,

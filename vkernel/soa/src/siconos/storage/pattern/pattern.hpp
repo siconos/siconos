@@ -521,15 +521,18 @@ using transform = decltype(transform(
 template <match::attribute... Attrs>
 using attributes = gather<Attrs...>;
 
-template <match::item... Items>
-using attributes_of_items = decltype(ground::concat_all(
-    siconos::storage::pattern::attributes(Items{})...));
+
 
 template <match::item... Items>
 using properties_of_items =
     decltype(ground::concat_all(typename Items::properties{}...));
 
 }  // namespace types
+
+template <match::item... Items>
+using attributes_of_items = decltype(ground::concat_all(
+    siconos::storage::pattern::attributes(Items{})...));
+
 
 template <string_literal S>
 struct indice_value : symbol<S> {

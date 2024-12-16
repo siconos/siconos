@@ -15,7 +15,7 @@ struct time_stepping : item<> {
 
   using formulation_t =
       typename one_step_nonsmooth_problem_t::problem_t::formulation_t;
-  using attributes = types::attributes_of_items<Items...>;
+  using attributes = attributes_of_items<Items...>;
 
   template <typename Handle>
   struct interface : default_interface<Handle> {

@@ -9,6 +9,8 @@ if(WITH_vkernel_TESTING)
   add_executable(bouncing_disks bouncing_disks.cpp)
   add_executable(fixed_disks fixed_disks.cpp)
   #add_executable(tnonos tnonos.cpp)
+
+  add_executable(fem_t3 fem_t3.cpp)
   
   set_target_properties(t1 PROPERTIES COMPILE_FLAGS "${flags}")# -fconcepts-diagnostics-depth=10")
   
@@ -22,6 +24,7 @@ if(WITH_vkernel_TESTING)
   #set_target_properties(bouncing_disk_sf PROPERTIES COMPILE_FLAGS "${flags}")# -fconcepts-diagnostics-depth=10")
   set_target_properties(bouncing_disks PROPERTIES COMPILE_FLAGS "${flags}")# -fconcepts-diagnostics-depth=10")
   set_target_properties(fixed_disks PROPERTIES COMPILE_FLAGS "${flags}")# -fconcepts-diagnostics-depth=10")
+  set_target_properties(fem_t3 PROPERTIES COMPILE_FLAGS "${flags}")
   
   
   target_link_libraries(t1 Eigen3::Eigen Siconos::numerics benchmark pthread fmt)
@@ -32,6 +35,8 @@ if(WITH_vkernel_TESTING)
   target_link_libraries(bouncing_disk_line Eigen3::Eigen Siconos::numerics benchmark pthread fmt CompactNSearch)
   target_link_libraries(bouncing_disks Eigen3::Eigen Siconos::numerics benchmark pthread fmt CompactNSearch)
   target_link_libraries(fixed_disks Eigen3::Eigen Siconos::numerics benchmark pthread fmt CompactNSearch)
+
+  target_link_libraries(fem_t3 Eigen3::Eigen numerics kernel mechanics pthread fmt CompactNSearch)
 endif()
 
 

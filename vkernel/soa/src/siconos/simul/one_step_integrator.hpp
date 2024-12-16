@@ -34,7 +34,7 @@ struct one_step_integrator {
     using system = DynamicalSystem;
     using interaction = Interaction;
 
-    using attributes = types::attributes<
+    using attributes = gather<
         attribute<"theta", some::scalar>, attribute<"gamma", some::scalar>,
         attribute<"constraint_activation_threshold", some::scalar>,
         attribute<"h_matrix_assembled", some::unbounded_matrix<h_matrix1>>,
