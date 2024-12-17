@@ -228,6 +228,9 @@ class DynamicalSystem {
   /** \return r vector (input due to nonsmooth behavior) */
   inline std::shared_ptr<siconos::algebra::SiconosVector> r() const { return rVector_; }
 
+  /** \return r vector (input due to nonsmooth behavior) */
+  inline siconos::algebra::SiconosVector& r_python() const { return *rVector_; }
+
   /** \return the right-hand side vector (i.e. \f$ \dot x \f$) */
   inline std::shared_ptr<siconos::algebra::SiconosVector> rhs() const { return state_x_[1]; }
 
