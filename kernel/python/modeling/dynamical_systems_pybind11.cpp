@@ -41,6 +41,8 @@ void wrap_dynamical_systems(py::module_ &m) {
   py::class_<siconos::modeling::DynamicalSystem,
              std::shared_ptr<siconos::modeling::DynamicalSystem>>(m, "DynamicalSystem")
       .def("x", &siconos::modeling::DynamicalSystem::x_python,
+           py::return_value_policy::reference_internal)
+      .def("r", &siconos::modeling::DynamicalSystem::r_python,
            py::return_value_policy::reference_internal);
 
   // ============================== FIRST ORDER DS ==============================
