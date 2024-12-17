@@ -17,6 +17,7 @@
  */
 
 #include <pybind11/pybind11.h>
+#include <pybind11/eigen.h>
 
 #include "DynamicalSystem.hpp"
 #include "Interaction.hpp"
@@ -40,11 +41,14 @@ PYBIND11_MODULE(modeling, m) {
   wrap_nonsmoothlaws(m);
   wrap_relations(m);
 
+  // CLASSES with no Derived classes
   py::class_<siconos::modeling::Interaction, std::shared_ptr<siconos::modeling::Interaction>>(
       m, "Interaction")
       .def(py::init<std::shared_ptr<siconos::modeling::NonSmoothLaw>,
                     std::shared_ptr<siconos::modeling::Relation>>())
       .def("lambda_python", &siconos::modeling::Interaction::lambda_python,
+           py::return_value_policy::reference_internal)
+      .def("y", &siconos::modeling::Interaction::y_python,
            py::return_value_policy::reference_internal);
 
   py::class_<siconos::modeling::NonSmoothDynamicalSystem,
@@ -57,6 +61,8 @@ PYBIND11_MODULE(modeling, m) {
       .def("link", &siconos::modeling::NonSmoothDynamicalSystem::link,
            "link an interaction to two dynamical systems", py::arg("inter"), py::arg("ds1"),
            py::arg("ds2") = std::shared_ptr<siconos::modeling::DynamicalSystem>())
+
+      .def("setTitle", &siconos::modeling::NonSmoothDynamicalSystem::setTitle, "set DS title")
 
       .def("__repr__", [](const siconos::modeling::NonSmoothDynamicalSystem &a) {
         a.display();
