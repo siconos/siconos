@@ -18,6 +18,7 @@
 
 #include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
+
 #include "FirstOrderLinearTIR.hpp"
 #include "LagrangianLinearTIR.hpp"
 namespace py = pybind11;
@@ -25,24 +26,41 @@ namespace py = pybind11;
 PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
 
 void wrap_relations(py::module_ &m) {
+  // ============================ Relation BASE CLASS ===================================
   py::class_<siconos::modeling::Relation, std::shared_ptr<siconos::modeling::Relation>>(
       m, "Relation");
 
-  py::class_<siconos::modeling::LagrangianLinearTIR, siconos::modeling::Relation,
-             std::shared_ptr<siconos::modeling::LagrangianLinearTIR>>(m, "LagrangianLinearTIR")
-      .def(py::init<Eigen::Ref<siconos::algebra::SiconosMatrix> &>())
+  // ============================ LagrangianR CLASS ===================================
+  py::class_<siconos::modeling::LagrangianR, std::shared_ptr<siconos::modeling::LagrangianR>,
+             siconos::modeling::Relation>(m, "LagrangianR");
+
+  // ============================ LagrangianLinearTIR CLASS ==============================
+  py::class_<siconos::modeling::LagrangianLinearTIR,
+             std::shared_ptr<siconos::modeling::LagrangianLinearTIR>,
+             siconos::modeling::LagrangianR>(m, "LagrangianLinearTIR")
+      .def(py::init<Eigen::Ref<siconos::algebra::SiconosMatrix>>(), py::keep_alive<1, 2>())
       .def("display", &siconos::modeling::LagrangianLinearTIR::display)
       .def("__repr__", [](const siconos::modeling::LagrangianLinearTIR &a) {
         a.display();
         return "\n";
       });
 
-  // FirstOrderR
-  py::class_<siconos::modeling::FirstOrderR, siconos::modeling::Relation,
-             std::shared_ptr<siconos::modeling::FirstOrderR>>(m, "FirstOrderR");
+  // ============================ FirstOrderR CLASS ==============================
+  py::class_<siconos::modeling::FirstOrderR, std::shared_ptr<siconos::modeling::FirstOrderR>,
+             siconos::modeling::Relation>(m, "FirstOrderR");
 
-  // FirstOrderLinearTIR
-  py::class_<siconos::modeling::FirstOrderLinearTIR, siconos::modeling::FirstOrderR,
-             std::shared_ptr<siconos::modeling::FirstOrderLinearTIR>>(m,
-                                                                      "FirstOrderLinearTIR");
+  // ============================ FirstOrderLinearTIR CLASS ==============================
+  py::class_<siconos::modeling::FirstOrderLinearTIR,
+             std::shared_ptr<siconos::modeling::FirstOrderLinearTIR>,
+             siconos::modeling::FirstOrderR>(m, "FirstOrderLinearTIR")
+      .def(py::init<Eigen::Ref<siconos::algebra::SiconosMatrix>,
+                    Eigen::Ref<siconos::algebra::SiconosMatrix>>(),
+           py::keep_alive<1, 2>(), py::keep_alive<1, 3>())
+      .def("setConstantD", &siconos::modeling::FirstOrderLinearTIR::setConstantD,
+           py::keep_alive<1, 2>(), "To define a constant D operator")
+      .def("display", &siconos::modeling::FirstOrderLinearTIR::display)
+      .def("__repr__", [](const siconos::modeling::FirstOrderLinearTIR &a) {
+        a.display();
+        return "\n";
+      });
 }
