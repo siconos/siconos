@@ -39,22 +39,28 @@ void wrap_dynamical_systems(py::module_ &m) {
   m.doc() = "Siconos modeling library";
 
   py::class_<siconos::modeling::DynamicalSystem,
-             std::shared_ptr<siconos::modeling::DynamicalSystem>>(m, "DynamicalSystem");
+             std::shared_ptr<siconos::modeling::DynamicalSystem>>(m, "DynamicalSystem")
+      .def("x", &siconos::modeling::DynamicalSystem::x_python,
+           py::return_value_policy::reference_internal);
 
   // ============================== FIRST ORDER DS ==============================
 
-  py::class_<siconos::modeling::FirstOrderNonLinearDS, siconos::modeling::DynamicalSystem,
-             std::shared_ptr<siconos::modeling::FirstOrderNonLinearDS>>(
-      m, "FirstOrderNonLinearDS");
+  py::class_<siconos::modeling::FirstOrderNonLinearDS,
+             std::shared_ptr<siconos::modeling::FirstOrderNonLinearDS>,
+             siconos::modeling::DynamicalSystem>(m, "FirstOrderNonLinearDS");
 
-  py::class_<siconos::modeling::FirstOrderLinearDS, siconos::modeling::FirstOrderNonLinearDS,
-             std::shared_ptr<siconos::modeling::FirstOrderLinearDS>>(m, "FirstOrderLinearDS")
-      .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector> &>(),
-           py::keep_alive<1, 2>(), py::arg("x0"))
+  py::class_<siconos::modeling::FirstOrderLinearDS,
+             std::shared_ptr<siconos::modeling::FirstOrderLinearDS>,
+             siconos::modeling::FirstOrderNonLinearDS>(m, "FirstOrderLinearDS")
+      .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector> &>(), py::keep_alive<1, 2>(),
+           py::arg("x0"))
       .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector> &,
                     Eigen::Ref<siconos::algebra::SiconosMatrix> &,
                     Eigen::Ref<siconos::algebra::SiconosVector> &>(),
-           py::keep_alive<1, 2>(), py::keep_alive<1, 3>(), py::keep_alive<1, 4>(), py::arg("x0"), py::arg("A"), py::arg("b"));
+           py::keep_alive<1, 2>(), py::keep_alive<1, 3>(), py::keep_alive<1, 4>(),
+           py::arg("x0"), py::arg("A"), py::arg("b"))
+      .def("setConstantA", &siconos::modeling::FirstOrderLinearDS::setConstantA,
+           py::keep_alive<1, 2>(), "To define a constant A operator");
 
   // ============================== SECOND ORDER DS ==============================
 
