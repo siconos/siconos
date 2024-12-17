@@ -390,6 +390,16 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
     return _y[i];
   }
 
+  /** get y[i], derivative number i of output
+   *
+   *  \param i derivative number i of output
+   *  \return reference on a SiconosVector
+   */
+  inline siconos::algebra::SiconosVector &y_python(const unsigned int i) const {
+    assert(_y[i]);
+    return *(_y[i]);
+  }
+
   /** set the output vector y to newVector with copy of the y[i] (ie
    *  memory allocation)
    *
