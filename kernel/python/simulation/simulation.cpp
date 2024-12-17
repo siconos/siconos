@@ -30,5 +30,6 @@ PYBIND11_MODULE(simulation, m)
                std::shared_ptr<siconos::integrators::OneStepIntegrator>,
                std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem>>())
         .def("computeOneStep", &siconos::simulation::TimeStepping::computeOneStep)
-        .def("nextStep", &siconos::simulation::TimeStepping::nextStep);
+        .def("nextStep", &siconos::simulation::TimeStepping::nextStep)
+        .def("timeStep", &siconos::simulation::TimeStepping::timeStep);
 }
