@@ -23,6 +23,7 @@
 // #include <memory>
 // #include <span>
 
+#include "ComplementarityConditionNSL.hpp"
 #include "NewtonImpactNSL.hpp"
 // #include <pybind11/stl.h>  // Pour permettre la conversion entre std::vector et les objets
 // Python comme les listes
@@ -38,7 +39,8 @@ void wrap_nonsmoothlaws(py::module_ &m) {
 
   // nsl(e)
   py::class_<siconos::modeling::NewtonImpactNSL,
-             std::shared_ptr<siconos::modeling::NewtonImpactNSL>>(m, "NewtonImpactNSL")
+             std::shared_ptr<siconos::modeling::NewtonImpactNSL>,
+             siconos::modeling::NonSmoothLaw>(m, "NewtonImpactNSL")
       .def(py::init<double>())
 
       // nsl(size, e)
@@ -46,4 +48,9 @@ void wrap_nonsmoothlaws(py::module_ &m) {
       // Access to restitution coefficient
       .def_property("e", &siconos::modeling::NewtonImpactNSL::e,
                     &siconos::modeling::NewtonImpactNSL::setE);
+
+  py::class_<siconos::modeling::ComplementarityConditionNSL,
+             std::shared_ptr<siconos::modeling::ComplementarityConditionNSL>,
+             siconos::modeling::NonSmoothLaw>(m, "ComplementarityConditionNSL")
+      .def(py::init<unsigned int>());
 }
