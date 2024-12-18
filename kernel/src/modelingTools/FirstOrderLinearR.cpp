@@ -249,9 +249,10 @@ void siconos::modeling::FirstOrderLinearR::computeOutput(double time, Interactio
     y += *jacobianhOver_lambda_view_ * lambda;
   }
 
-  if (eVector_view_)
+  if (eVector_view_) {
     if (!hasConstanteVector_) computeeVector_(time, *eVector_view_);
-  y += *eVector_view_;
+    y += *eVector_view_;
+  }
   DEBUG_END("siconos::modeling::FirstOrderLinearR::computeOutput \n");
 }
 
