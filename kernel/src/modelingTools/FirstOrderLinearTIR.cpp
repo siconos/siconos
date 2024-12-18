@@ -54,7 +54,7 @@ void siconos::modeling::FirstOrderLinearTIR::initialize(Interaction &inter) {
   checkSize(inter);
 }
 
-void siconos::modeling::FirstOrderLinearTIR::checkSize(Interaction &inter) {
+void siconos::modeling::FirstOrderLinearTIR::checkSize(const Interaction &inter) const {
   // get inter and ds sizes
   auto sizeY = inter.dimension();
   auto sizeX = inter.getSizeOfDS();

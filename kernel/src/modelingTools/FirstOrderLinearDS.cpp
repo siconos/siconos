@@ -172,7 +172,7 @@ void siconos::modeling::FirstOrderLinearDS::computeJacobianRhsOver_x(double time
       }
       if (!hasLU_M_) {
         LU_M_ = std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(
-            *MMatrix_view_);
+            *MMatrix_view_);  
         hasLU_M_ = true;
       }
       *(jacobianRhsOver_x_->block(0, 0)) = LU_M_->solve(*(jacobianRhsOver_x_->block(0, 0)));
@@ -184,7 +184,7 @@ void siconos::modeling::FirstOrderLinearDS::computeJacobianRhsOver_x(double time
 void siconos::modeling::FirstOrderLinearDS::display(bool brief) const {
   std::cout << "=== Linear system display, " << number_ << std::endl;
   std::cout << "- dimension : " << x_size_ << std::endl;
-  std::cout << "- state :\n" << state_x_[0] << "\n";
+  std::cout << "- state :\n" << *state_x_[0] << "\n";
   std::cout << "- initial state : \n" << *x0_view_ << "\n";
   std::cout << "- M matrix: \n";
   if (MMatrix_view_)

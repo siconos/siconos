@@ -42,9 +42,9 @@ void siconos::modeling::LagrangianCompliantLinearTIR::initialize(Interaction& in
   checkSize(inter);
 }
 
-void siconos::modeling::LagrangianCompliantLinearTIR::checkSize(Interaction& inter) {
+void siconos::modeling::LagrangianCompliantLinearTIR::checkSize(
+    const Interaction& inter) const {
   auto sizeY = inter.dimension();
-  auto& DSlink = inter.linkToDSVariables();
 
   if (!(jacobianhOver_q_view_) || jacobianhOver_q_view_->cols() != inter.getSizeOfDS() ||
       jacobianhOver_q_view_->rows() != sizeY)

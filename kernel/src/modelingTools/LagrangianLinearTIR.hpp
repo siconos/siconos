@@ -62,7 +62,7 @@ class LagrangianLinearTIR : public LagrangianR {
    *
    *  \param inter an Interaction using this relation
    */
-  void checkSize(Interaction &inter) override;
+  void checkSize(const Interaction &inter) const override;
   ;
 
   /** \return a read-only view on the C matrix */

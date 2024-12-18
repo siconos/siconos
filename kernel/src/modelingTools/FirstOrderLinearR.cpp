@@ -83,9 +83,7 @@ void siconos::modeling::FirstOrderLinearR::initialize(Interaction &inter) {
   checkSize(inter);
 }
 
-void siconos::modeling::FirstOrderLinearR::checkSize(Interaction &inter) {
-  auto &DSlink = inter.linkToDSVariables();
-
+void siconos::modeling::FirstOrderLinearR::checkSize(const Interaction &inter) const {
   // get inter and ds sizes
   auto sizeY = inter.dimension();
   auto sizeX = inter.getSizeOfDS();

@@ -35,7 +35,6 @@ void siconos::modeling::FirstOrderType2R::initialize(Interaction& inter) {
 
   auto sizeY = inter.dimension();
   auto sizeX = inter.getSizeOfDS();
-  auto& DSlink = inter.linkToDSVariables();
 
   if (computejacobianhOver_state_) {
     if (!jacobianhOver_state_internal_storage_) {
@@ -67,12 +66,11 @@ void siconos::modeling::FirstOrderType2R::initialize(Interaction& inter) {
     jacobiangOver_lambda_view_ = std::make_shared<siconos::algebra::MapType>(
         jacobiangOver_lambda_internal_storage_->data(), sizeX, sizeY);
   }
+
   checkSize(inter);
 }
 
-void siconos::modeling::FirstOrderType2R::checkSize(Interaction& inter) {
-  auto& DSlink = inter.linkToDSVariables();
-
+void siconos::modeling::FirstOrderType2R::checkSize(const Interaction& inter) const {
   // get inter and ds sizes
   auto sizeY = inter.dimension();
   auto sizeX = inter.getSizeOfDS();
@@ -84,13 +82,13 @@ void siconos::modeling::FirstOrderType2R::checkSize(Interaction& inter) {
     assert(jacobianhOver_state_view_->rows() == sizeY);
     assert(jacobianhOver_state_view_->cols() == sizeX);
   }
-  if (jacobiangOver_lambda_view_) {
-    assert(jacobiangOver_lambda_view_->rows() == sizeX);
-    assert(jacobiangOver_lambda_view_->cols() == sizeY);
-  }
   if (jacobianhOver_lambda_view_) {
     assert(jacobianhOver_lambda_view_->rows() == sizeY);
     assert(jacobianhOver_lambda_view_->cols() == sizeY);
+  }
+  if (jacobiangOver_lambda_view_) {
+    assert(jacobiangOver_lambda_view_->rows() == sizeX);
+    assert(jacobiangOver_lambda_view_->cols() == sizeY);
   }
 }
 
@@ -200,36 +198,36 @@ void siconos::modeling::FirstOrderType2R::computeJacobiangOver_lambda(
 
 void siconos::modeling::FirstOrderType2R::computeOutput(double time, Interaction& inter,
                                                         unsigned int level) {
-  siconos::algebra::SiconosVector& y = *inter.y(0);
-  siconos::algebra::SiconosVector& lambda = *inter.lambda(level);
   auto& DSlink = inter.linkToDSVariables();
-  computeh(*DSlink[FirstOrderR::Xxx], lambda, y);
+  auto& y = *inter.y(level);
+  auto& lambda = *inter.lambda(level);
+  if (computeh_) computeh_(*DSlink[FirstOrderR::Xxx], lambda, y);
 }
 
 void siconos::modeling::FirstOrderType2R::computeInput(double time, Interaction& inter,
                                                        unsigned int level) {
-  auto lambda = inter.lambda(level);
-
   auto& DSlink = inter.linkToDSVariables();
-  computeg_(*lambda, *DSlink[FirstOrderR::Rrr]);
+  auto& lambda = *inter.lambda(level);
+  if (computeg_) computeg_(lambda, *DSlink[FirstOrderR::Rrr]);
 }
 
 void siconos::modeling::FirstOrderType2R::computeJach(double time, Interaction& inter) {
-  DEBUG_BEGIN("siconos::modeling::FirstOrderType2R::computeJach\n");
   auto& DSlink = inter.linkToDSVariables();
-  if (computejacobianhOver_state_)
-    computejacobianhOver_state_(*DSlink[FirstOrderR::Xxx], *inter.lambda(0),
-                                *jacobianhOver_state_view_);
-  if (computejacobianhOver_lambda_)
-    computejacobianhOver_lambda_(*DSlink[FirstOrderR::Xxx], *inter.lambda(0),
-                                 *jacobianhOver_state_view_);
-  DEBUG_END("siconos::modeling::FirstOrderType2R::computeJach\n");
+  auto& lambda = *inter.lambda(0);
+
+  if (computejacobianhOver_state_) {
+    computejacobianhOver_state_(*DSlink[FirstOrderR::Xxx], lambda, *jacobianhOver_state_view_);
+  }
+  if (computejacobianhOver_lambda_) {
+    computejacobianhOver_lambda_(*DSlink[FirstOrderR::Xxx], lambda,
+                                 *jacobianhOver_lambda_view_);
+  }
 }
 
 void siconos::modeling::FirstOrderType2R::computeJacg(double time, Interaction& inter) {
   DEBUG_BEGIN("siconos::modeling::FirstOrderType2R::computeJacg\n");
-  if (!hasConstantJacobiangOver_lambda_) {
-    auto& DSlink = inter.linkToDSVariables();
+
+  if (computejacobiangOver_lambda_) {
     computejacobiangOver_lambda_(*inter.lambda(0), *jacobiangOver_lambda_view_);
   }
   DEBUG_END("siconos::modeling::FirstOrderType2R::computeJacg\n");

@@ -96,7 +96,7 @@ class LagrangianR : public Relation {
    *
    *  \param inter an Interaction using this relation
    */
-  virtual void checkSize(Interaction &inter) override {};
+  virtual void checkSize(const Interaction &inter) const override {};
   // Does nothing by default. Reimplement if required.
 
   /** \return a read-only view on \f$ \nabla^\top_q h(q, \ldots) \f$ matrix */

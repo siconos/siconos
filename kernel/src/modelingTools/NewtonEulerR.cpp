@@ -83,7 +83,7 @@ void siconos::modeling::NewtonEulerR::initialize(Interaction& inter) {
   DEBUG_END("siconos::modeling::NewtonEulerR::initialize(Interaction& inter)\n");
 }
 
-void siconos::modeling::NewtonEulerR::checkSize(Interaction& inter) {
+void siconos::modeling::NewtonEulerR::checkSize(const Interaction &inter) const {
   unsigned int ySize = inter.dimension();
   unsigned int qSize = inter.getSizeOfDS();  // sum of considered DS sizes
   unsigned int Hcols = 7 * (qSize / 6);      // 7 * number of DS in the interaction

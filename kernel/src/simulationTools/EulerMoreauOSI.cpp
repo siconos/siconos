@@ -1094,20 +1094,20 @@ void siconos::integrators::EulerMoreauOSI::updateInput(double time, unsigned int
 
     auto relationSubType = inter.relation()->getSubType();
     if (relationSubType == siconos::modeling::RelationSubType::Type2R) {
-      auto& r = static_cast<siconos::modeling::FirstOrderType2R&>(*inter.relation());
+      auto& relation = static_cast<siconos::modeling::FirstOrderType2R&>(*inter.relation());
       auto lambda = *inter.lambda(level);
       lambda -= *inter_work[siconos::integrators::EulerMoreauOSI::LAMBDAOLD];
 
-      if (r.hasJacobianhOver_lambda())
-        *inter_work_block[siconos::integrators::EulerMoreauOSI::G_ALPHA] +=
-            r.jacobianhOver_lambda() * lambda;
+      if (relation.hasJacobiangOver_lambda())
+        *inter_work_block[siconos::integrators::EulerMoreauOSI::G_ALPHA]->vector(0) +=
+            relation.jacobiangOver_lambda() * lambda;
       *DSlink[siconos::modeling::FirstOrderR::Rrr] +=
           *inter_work_block[siconos::integrators::EulerMoreauOSI::G_ALPHA];
       DEBUG_EXPR(DSlink[siconos::modeling::FirstOrderR::Rrr]->display(););
       // compute the new g_alpha
 
-      r.computeg(*inter.lambda(level),
-                 *inter_work_block[siconos::integrators::EulerMoreauOSI::G_ALPHA]);
+      relation.computeg(*inter.lambda(level),
+                        *inter_work_block[siconos::integrators::EulerMoreauOSI::G_ALPHA]);
       DEBUG_EXPR(inter_work_block[siconos::integrators::EulerMoreauOSI::G_ALPHA]->display(););
     } else if (relationSubType == siconos::modeling::RelationSubType::NonLinearR) {
       auto forel =
@@ -1174,21 +1174,16 @@ double siconos::integrators::EulerMoreauOSI::computeResiduInput(
     auto& DSlink = inter->linkToDSVariables();
     auto& residuR = *inter_work[siconos::integrators::EulerMoreauOSI::WORK_DS];
     // Residu_r = r_alpha_k+1 - g_alpha;
-
-    auto r = DSlink[siconos::modeling::FirstOrderR::Rrr];
+    auto rVec = DSlink[siconos::modeling::FirstOrderR::Rrr];
+    auto s1 = rVec->vector(0)->size();
     auto galpha = inter_work_block[siconos::integrators::EulerMoreauOSI::G_ALPHA];
-    double norm2 = 0;
-    assert(r->size() == galpha->size());
-
-    // Compute euclidian norm of the difference between r and galpha
-    for (size_t i = 0; i < r->size(); ++i) {
-      const siconos::algebra::SiconosVector& v = *r->vector(i);
-      const siconos::algebra::SiconosVector& w = *galpha->vector(i);
-      norm2 += (v - w).squaredNorm();
+    residuR.head(s1) = *rVec->vector(0);
+    if (rVec->numberOfBlocks() > 1) {
+      auto v2 = rVec->vector(1);
+      residuR.tail(v2->size()) = *v2;
     }
-    norm2 = std::sqrt(norm2);
-    DEBUG_EXPR(norm2.display(););
-    residu = std::max(residu, norm2);
+    residuR -= *galpha->vector(0);
+    residu = std::max(residu, residuR.norm2());
   }
   return residu;
 }

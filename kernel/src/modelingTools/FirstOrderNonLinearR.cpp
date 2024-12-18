@@ -74,7 +74,7 @@ void siconos::modeling::FirstOrderNonLinearR::initialize(Interaction& inter) {
   checkSize(inter);
 }
 
-void siconos::modeling::FirstOrderNonLinearR::checkSize(Interaction& inter) {
+void siconos::modeling::FirstOrderNonLinearR::checkSize(const Interaction& inter) const {
   // get inter and ds sizes
   auto sizeY = inter.dimension();
   auto sizeX = inter.getSizeOfDS();
@@ -239,21 +239,17 @@ void siconos::modeling::FirstOrderNonLinearR::computeJacobiangOver_lambda(
 
 void siconos::modeling::FirstOrderNonLinearR::computeOutput(double time, Interaction& inter,
                                                             unsigned int level) {
-  DEBUG_PRINT("siconos::modeling::FirstOrderNonLinearR::computeOutput \n");
   auto& DSlink = inter.linkToDSVariables();
   auto& y = *inter.y(level);
   auto& lambda = *inter.lambda(level);
   if (computeh_) computeh_(*DSlink[FirstOrderR::Xxx], time, lambda, y);
-  DEBUG_END("siconos::modeling::FirstOrderNonLinearR::computeOutput \n");
 }
 
 void siconos::modeling::FirstOrderNonLinearR::computeInput(double time, Interaction& inter,
                                                            unsigned int level) {
-  DEBUG_PRINT("siconos::modeling::FirstOrderNonLinearR::computeInput \n");
   auto& DSlink = inter.linkToDSVariables();
   auto& lambda = *inter.lambda(level);
   if (computeg_) computeg_(*DSlink[FirstOrderR::Xxx], time, lambda, *DSlink[FirstOrderR::Rrr]);
-  DEBUG_END("siconos::modeling::FirstOrderNonLinearR::computeinput \n");
 }
 
 void siconos::modeling::FirstOrderNonLinearR::computeJach(double time, Interaction& inter) {
@@ -264,7 +260,6 @@ void siconos::modeling::FirstOrderNonLinearR::computeJach(double time, Interacti
     computejacobianhOver_state_(*DSlink[FirstOrderR::Xxx], time, lambda,
                                 *jacobianhOver_state_view_);
   }
-
   if (computejacobianhOver_lambda_) {
     computejacobianhOver_lambda_(*DSlink[FirstOrderR::Xxx], time, lambda,
                                  *jacobianhOver_lambda_view_);

@@ -28,3 +28,31 @@ void siconos::modeling::FirstOrderR::accept(
     std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const {
   tourist->visit(*this);
 }
+
+void siconos::modeling::FirstOrderR::display() const {
+  std::cout << "=====> Relation of type "
+            << static_cast<std::underlying_type<RelationType>::type>(_relationType)
+            << " and subtype "
+            << static_cast<std::underlying_type<RelationSubType>::type>(_subType) << "\n";
+
+  if (jacobianhOver_state_view_) {
+    std::cout << " jacobian h over state";
+    if (hasConstantJacobianhOver_state_) std::cout << "(constant matrix) \n";
+    std::cout << jacobianhOver_state_view_ << "\n";
+  }
+  if (jacobianhOver_lambda_view_) {
+    std::cout << " jacobian h over lambda";
+    if (hasConstantJacobianhOver_lambda_) std::cout << "(constant matrix) \n";
+    std::cout << jacobianhOver_lambda_view_ << "\n";
+  }
+  if (jacobiangOver_state_view_) {
+    std::cout << " jacobian g over state";
+    if (hasConstantJacobiangOver_state_) std::cout << "(constant matrix) \n";
+    std::cout << jacobiangOver_state_view_ << "\n";
+  }
+  if (jacobiangOver_lambda_view_) {
+    std::cout << " jacobian g over lambda";
+    if (hasConstantJacobiangOver_lambda_) std::cout << "(constant matrix) \n";
+    std::cout << jacobiangOver_lambda_view_ << "\n";
+  }
+}

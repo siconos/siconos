@@ -38,9 +38,8 @@ siconos::modeling::LagrangianLinearTIR::LagrangianLinearTIR(
       std::make_shared<siconos::algebra::MapType>(newC.data(), newC.rows(), newC.cols());
 }
 
-void siconos::modeling::LagrangianLinearTIR::checkSize(Interaction& inter) {
+void siconos::modeling::LagrangianLinearTIR::checkSize(const Interaction& inter) const {
   auto sizeY = inter.dimension();
-  auto& DSlink = inter.linkToDSVariables();
 
   if (!(jacobianhOver_q_view_) || jacobianhOver_q_view_->cols() != inter.getSizeOfDS() ||
       jacobianhOver_q_view_->rows() != sizeY)

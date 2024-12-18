@@ -93,7 +93,7 @@ class FirstOrderType2R : public FirstOrderR {
    *
    *  \param inter an Interaction using this relation
    */
-  inline void checkSize(Interaction& inter) override;
+  void checkSize(const Interaction& inter) const override;
 
   /** set a user-defined function to compute \f$ h(x) \f$
    *
@@ -193,6 +193,9 @@ class FirstOrderType2R : public FirstOrderR {
    */
   virtual void computeJacobiangOver_lambda(
       const Eigen::Ref<const siconos::algebra::SiconosVector>& lambda);
+  void computeJach(double time, Interaction& inter) override;
+
+  void computeJacg(double time, Interaction& inter) override;
 
   /** default function to compute y, using the data from the Interaction and DS
    *
@@ -210,16 +213,8 @@ class FirstOrderType2R : public FirstOrderR {
    */
   void computeInput(double time, Interaction& inter, unsigned int level = 0) override;
 
-  /**
-     return true if the relation requires the computation of residu
-
-     \return true if residu are required, false otherwise
-   */
+  /**\return true if residu are required, false otherwise */
   bool requireResidu() override { return true; }
-
-  void computeJach(double time, Interaction& inter) override;
-
-  void computeJacg(double time, Interaction& inter) override;
 };
 }  // namespace siconos::modeling
 

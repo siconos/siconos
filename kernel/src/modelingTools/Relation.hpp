@@ -145,7 +145,7 @@ class Relation {
    *
    *  \param inter an Interaction using this relation
    */
-  virtual void checkSize(Interaction &inter) = 0;
+  virtual void checkSize(const Interaction &inter) const = 0;
 
   /** compute all the H Jacobian
    *

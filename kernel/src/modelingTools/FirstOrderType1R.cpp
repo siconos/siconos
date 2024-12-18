@@ -54,9 +54,7 @@ void siconos::modeling::FirstOrderType1R::initialize(Interaction& inter) {
   checkSize(inter);
 }
 
-void siconos::modeling::FirstOrderType1R::checkSize(Interaction& inter) {
-  auto& DSlink = inter.linkToDSVariables();
-
+void siconos::modeling::FirstOrderType1R::checkSize(const Interaction& inter) const {
   // get inter and ds sizes
   auto sizeY = inter.dimension();
   auto sizeX = inter.getSizeOfDS();

@@ -82,7 +82,7 @@ class FirstOrderLinearR : public FirstOrderR {
    *
    *  \param inter an Interaction using this relation
    */
-  void checkSize(Interaction &inter) override;
+  void checkSize(const Interaction &inter) const override;
 
  public:
   /** default (and only) constructor */

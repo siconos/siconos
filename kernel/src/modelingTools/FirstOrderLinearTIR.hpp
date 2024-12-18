@@ -59,7 +59,7 @@ class FirstOrderLinearTIR : public FirstOrderR {
    *
    *  \param inter an Interaction using this relation
    */
-  void checkSize(Interaction &inter) override;
+  void checkSize(const Interaction &inter) const override;
 
  public:
   /** minimal constuctor. Use setXXX functions to fix B,C, D ... */

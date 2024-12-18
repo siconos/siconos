@@ -363,7 +363,7 @@ void siconos::modeling::FirstOrderNonLinearDS::swapInMemory() {
 void siconos::modeling::FirstOrderNonLinearDS::display(bool brief) const {
   std::cout << " =====> First Order Non Linear DS (number: " << number_ << ").\n";
   std::cout << "- dimension : " << x_size_ << std::endl;
-  std::cout << "- state :\n" << state_x_[0] << "\n";
+  std::cout << "- state :\n" << *state_x_[0] << "\n";
   std::cout << "- initial state : \n" << *x0_view_ << "\n";
   std::cout << "- M matrix: \n";
   if (MMatrix_view_)

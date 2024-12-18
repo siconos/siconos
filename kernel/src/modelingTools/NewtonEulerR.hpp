@@ -141,7 +141,7 @@ class NewtonEulerR : public Relation {
    *
    *  \param inter an Interaction using this relation
    */
-  virtual void checkSize(Interaction &inter) override;
+  virtual void checkSize(const Interaction &inter) const override;
 
   /** \return a read-only view on \f$ H(q, \ldots) \f$ matrix */
   inline const auto jacobianhOver_q() const {

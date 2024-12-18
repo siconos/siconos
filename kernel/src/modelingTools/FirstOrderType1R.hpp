@@ -88,7 +88,7 @@ class FirstOrderType1R : public FirstOrderR {
    *
    *  \param inter an Interaction using this relation
    */
-  inline void checkSize(Interaction &inter) override;
+  inline void checkSize(const Interaction &inter) const override;
 
   /** set a user-defined function to compute \f$ h(x) \f$
    *

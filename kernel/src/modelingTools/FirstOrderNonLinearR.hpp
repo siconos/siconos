@@ -82,8 +82,7 @@ class FirstOrderNonLinearR : public FirstOrderR {
   siconos::modeling::func_prototypes::FunctionBVSV_M computejacobiangOver_lambda_{nullptr};
 
  public:
-  /** basic constructor
-   */
+  /** Default and only constructor */
   FirstOrderNonLinearR() : FirstOrderR(RelationSubType::NonLinearR) {}
 
   /** destructor */
@@ -99,7 +98,7 @@ class FirstOrderNonLinearR : public FirstOrderR {
    *
    *  \param inter an Interaction using this relation
    */
-  void checkSize(Interaction &inter) override;
+  void checkSize(const Interaction &inter) const override;
 
   /** set a user-defined function to compute \f$ h(x,t,\lambda) \f$
    *
@@ -243,13 +242,9 @@ class FirstOrderNonLinearR : public FirstOrderR {
    */
   void computeInput(double time, Interaction &inter, unsigned int level = 0) override;
 
-  /** return true if the relation requires the computation of residu
-   *
-   *  \return true if residu are required, false otherwise
-   */
+  /**\return true if residu are required, false otherwise */
   bool requireResidu() override { return true; }
 };
-
 }  // namespace siconos::modeling
 
 #endif
