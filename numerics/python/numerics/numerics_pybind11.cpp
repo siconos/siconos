@@ -20,6 +20,7 @@
 
 #include "Friction_cst.h"
 #include "SolverOptions.h"
+#include "relay_cst.h"
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 
@@ -46,7 +47,7 @@ py::array_t<double> get_dparam(SolverOptions &options) {
 }
 
 
-PYBIND11_MODULE(numerics, m) {
+PYBIND11_MODULE(pynumerics, m) {
 
     py::class_<SolverOptions, std::shared_ptr<SolverOptions>>(m, "SolverOptions")
         // Membres simples
@@ -152,6 +153,15 @@ PYBIND11_MODULE(numerics, m) {
         .def_property_readonly_static("SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnCone", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnCone); })
         .def_property_readonly_static("SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnConeWithLocalIteration", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnConeWithLocalIteration); })
         .def_property_readonly_static("SICONOS_GLOBAL_ROLLING_FRICTION_3D_NSGS_WR", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_GLOBAL_ROLLING_FRICTION_3D_NSGS_WR); })
-        .def_property_readonly_static("SICONOS_GLOBAL_ROLLING_FRICTION_3D_IPM", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_GLOBAL_ROLLING_FRICTION_3D_IPM); });
+        .def_property_readonly_static("SICONOS_GLOBAL_ROLLING_FRICTION_3D_IPM", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_GLOBAL_ROLLING_FRICTION_3D_IPM); })
+        
+        // RELAY_SOLVER enum
+        .def_property_readonly_static("SICONOS_RELAY_PGS", [](py::object) { return static_cast<int>(RELAY_SOLVER::SICONOS_RELAY_PGS); })
+        .def_property_readonly_static("SICONOS_RELAY_ENUM", [](py::object) { return static_cast<int>(RELAY_SOLVER::SICONOS_RELAY_ENUM); })
+        .def_property_readonly_static("SICONOS_RELAY_PATH", [](py::object) { return static_cast<int>(RELAY_SOLVER::SICONOS_RELAY_PATH); })
+        .def_property_readonly_static("SICONOS_RELAY_LEMKE", [](py::object) { return static_cast<int>(RELAY_SOLVER::SICONOS_RELAY_LEMKE); })
+        .def_property_readonly_static("SICONOS_RELAY_AVI_CAOFERRIS", [](py::object) { return static_cast<int>(RELAY_SOLVER::SICONOS_RELAY_AVI_CAOFERRIS); })
+        .def_property_readonly_static("SICONOS_RELAY_AVI_CAOFERRIS_TEST", [](py::object) { return static_cast<int>(RELAY_SOLVER::SICONOS_RELAY_AVI_CAOFERRIS_TEST); })
+        ;
 
 }
