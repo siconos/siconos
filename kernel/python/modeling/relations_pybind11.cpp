@@ -19,6 +19,7 @@
 #include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
 
+#include "FirstOrderLinearR.hpp"
 #include "FirstOrderLinearTIR.hpp"
 #include "LagrangianLinearTIR.hpp"
 namespace py = pybind11;
@@ -48,6 +49,20 @@ void wrap_relations(py::module_ &m) {
   // ============================ FirstOrderR CLASS ==============================
   py::class_<siconos::modeling::FirstOrderR, std::shared_ptr<siconos::modeling::FirstOrderR>,
              siconos::modeling::Relation>(m, "FirstOrderR");
+
+  // ============================ FirstOrderLinearR CLASS ==============================
+  py::class_<siconos::modeling::FirstOrderLinearR,
+             std::shared_ptr<siconos::modeling::FirstOrderLinearR>,
+             siconos::modeling::FirstOrderR>(m, "FirstOrderLinearR")
+      .def(py::init<>())
+      .def("setConstantB", &siconos::modeling::FirstOrderLinearR::setConstantB,
+           py::keep_alive<1, 2>(), "To define a constant B operator")
+      .def("setConstantC", &siconos::modeling::FirstOrderLinearR::setConstantC,
+           py::keep_alive<1, 2>(), "To define a constant C operator")
+      .def("__repr__", [](const siconos::modeling::FirstOrderLinearR &a) {
+        a.display();
+        return "\n";
+      });
 
   // ============================ FirstOrderLinearTIR CLASS ==============================
   py::class_<siconos::modeling::FirstOrderLinearTIR,
