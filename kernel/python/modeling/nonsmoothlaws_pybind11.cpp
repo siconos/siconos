@@ -25,6 +25,7 @@
 
 #include "ComplementarityConditionNSL.hpp"
 #include "NewtonImpactNSL.hpp"
+#include "RelayNSL.hpp"
 // #include <pybind11/stl.h>  // Pour permettre la conversion entre std::vector et les objets
 // Python comme les listes
 
@@ -53,4 +54,7 @@ void wrap_nonsmoothlaws(py::module_ &m) {
              std::shared_ptr<siconos::modeling::ComplementarityConditionNSL>,
              siconos::modeling::NonSmoothLaw>(m, "ComplementarityConditionNSL")
       .def(py::init<unsigned int>());
+
+  py::class_<siconos::modeling::RelayNSL, std::shared_ptr<siconos::modeling::RelayNSL>, siconos::modeling::NonSmoothLaw>(m, "RelayNSL")
+       .def(py::init<unsigned int, double, double>());
 }
