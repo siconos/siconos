@@ -17,22 +17,22 @@ create_pybind11_module(
 )
 
 create_pybind11_module(MODULE_NAME  integrators 
-SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/integrators/integrators.cpp
+SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/integrators/integrators_pybind11.cpp
 DEPENDENCIES kernel numerics
 )
 
 create_pybind11_module(MODULE_NAME simulation
-SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/simulation/simulation.cpp
+SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/simulation/simulation_pybind11.cpp
 DEPENDENCIES kernel numerics
 )
 
 create_pybind11_module(MODULE_NAME nonsmooth_formulations
-SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/nonsmooth_formulations/nonsmooth_formulations.cpp
+SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/nonsmooth_formulations/nonsmooth_formulations_pybind11.cpp
 DEPENDENCIES kernel numerics
 )
 
 create_pybind11_module(MODULE_NAME input
-SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/io/io.cpp
+SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/io/io_pybind11.cpp
 DEPENDENCIES kernel numerics
 )
 
