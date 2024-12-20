@@ -160,7 +160,7 @@ class LagrangianLinearDiagonalDS : public LagrangianDS {
   bool hasMassMatrix() const { return massMatrix_view_ != nullptr; }
 
   /**\return true if the Dynamical system is linear. */
-  bool isLinear() override { return true; }
+  bool isLinear() const override { return true; }
 
   /** print the data of the dynamical system on the standard output
    */

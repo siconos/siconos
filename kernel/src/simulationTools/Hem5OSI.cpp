@@ -485,9 +485,9 @@ void siconos::integrators::Hem5OSI::initializeWorkVectorsForInteraction(
     inter_work_block[siconos::integrators::Hem5OSI::xfree]->insertPtr(
         workVds1[siconos::integrators::Hem5OSI::FREE]);
     auto& lds = *std::static_pointer_cast<siconos::modeling::LagrangianDS>(ds1);
-    DSlink[siconos::modeling::LagrangianR::q2] =
+    DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q2)] =
         std::make_shared<siconos::algebra::BlockVector>();
-    DSlink[siconos::modeling::LagrangianR::q2]->insertPtr(lds.acceleration());
+    DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q2)]->insertPtr(lds.acceleration());
   }
   // else if (relationType == siconos::modeling::RelationType::NewtonEuler)
   // {
@@ -501,7 +501,7 @@ void siconos::integrators::Hem5OSI::initializeWorkVectorsForInteraction(
       inter_work_block[siconos::integrators::Hem5OSI::xfree]->insertPtr(
           workVds2[siconos::integrators::Hem5OSI::FREE]);
       auto& lds = *std::static_pointer_cast<siconos::modeling::LagrangianDS>(ds2);
-      DSlink[siconos::modeling::LagrangianR::q2]->insertPtr(lds.acceleration());
+      DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q2)]->insertPtr(lds.acceleration());
     }
     // else if (relationType == siconos::modeling::RelationType::NewtonEuler)
     // {
@@ -842,7 +842,7 @@ void siconos::integrators::Hem5OSI::computeFreeOutput(
     //        std::cout << "Computeqblock Xfree (Gamma)========" << "\n";
     //       Xfree->display();
   } else if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_IMPACT]).get() == osnsp) {
-    Xfree = DSlink[siconos::modeling::LagrangianR::q1];
+    Xfree = DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q1)];
     //        std::cout << "Computeqblock Xfree (Velocity)========" << "\n";
     //       Xfree->display();
   } else
@@ -867,7 +867,7 @@ void siconos::integrators::Hem5OSI::computeFreeOutput(
       } else if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp) {
         auto rheoR = std::static_pointer_cast<siconos::modeling::LagrangianRheonomousR>(
             inter->relation());
-        rheoR->computehdot(*DSlink[siconos::modeling::LagrangianR::q0],
+        rheoR->computehdot(*DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q0)],
                            simulation()->getTkp1());
         auto hDot = osnsp_rhs += *ID * rheoR->hdot();
       } else

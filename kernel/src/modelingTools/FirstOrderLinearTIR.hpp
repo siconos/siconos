@@ -163,7 +163,7 @@ class FirstOrderLinearTIR : public FirstOrderR {
    *
    *  \return true if the relation is linear.
    */
-  inline bool isLinear() override { return true; }
+  inline bool isLinear() const override { return true; }
 
   // Jacobians: required to fullfill base abstract class API but do nothing.
   // Note FP: final would be better than override but swig cannot handle it.

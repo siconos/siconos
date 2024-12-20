@@ -255,20 +255,20 @@ void siconos::integrators::D1MinusLinearOSI::initializeWorkVectorsForInteraction
 
   if (relationType == siconos::modeling::RelationType::Lagrangian) {
     auto& lds = *std::static_pointer_cast<siconos::modeling::LagrangianDS>(ds1);
-    DSlink[siconos::modeling::LagrangianR::p2] =
+    DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::p2)] =
         std::make_shared<siconos::algebra::BlockVector>();
-    DSlink[siconos::modeling::LagrangianR::p2]->insertPtr(lds.p(2));
-    DSlink[siconos::modeling::LagrangianR::q2] =
+    DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::p2)]->insertPtr(lds.p(2));
+    DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q2)] =
         std::make_shared<siconos::algebra::BlockVector>();
-    DSlink[siconos::modeling::LagrangianR::q2]->insertPtr(lds.acceleration());
+    DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q2)]->insertPtr(lds.acceleration());
   } else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
   }
 
   if (ds1 != ds2) {
     if (relationType == siconos::modeling::RelationType::Lagrangian) {
       auto& lds = *std::static_pointer_cast<siconos::modeling::LagrangianDS>(ds2);
-      DSlink[siconos::modeling::LagrangianR::p2]->insertPtr(lds.p(2));
-      DSlink[siconos::modeling::LagrangianR::q2]->insertPtr(lds.acceleration());
+      DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::p2)]->insertPtr(lds.p(2));
+      DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q2)]->insertPtr(lds.acceleration());
     } else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
     }
   }

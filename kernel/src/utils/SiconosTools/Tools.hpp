@@ -78,6 +78,12 @@ std::string enum_to_string(T value) {
   return std::to_string(static_cast<typename std::underlying_type<T>::type>(value));
 }
 
+// Helper to access to the underlying index of an enum class
+template <typename Enum>
+constexpr auto enum_to_index(Enum e) noexcept {
+  return static_cast<std::underlying_type_t<Enum>>(e);
+}
+
 }  // namespace siconos::tools
 
 #endif

@@ -182,7 +182,7 @@ class FirstOrderLinearDS : public FirstOrderNonLinearDS {
   void display(bool brief = true) const override;
 
   /** \return always true */
-  bool isLinear() override { return true; }
+  bool isLinear() const override { return true; }
 };
 }  // namespace siconos::modeling
 #endif  // FirstOrderLinearDS_H

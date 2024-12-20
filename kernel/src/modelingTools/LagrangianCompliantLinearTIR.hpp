@@ -59,16 +59,21 @@ class LagrangianCompliantLinearTIR : public LagrangianR {
   std::shared_ptr<siconos::algebra::MapVectorType> eVector_view_{nullptr};
 
  public:
-  /** Default constructor
-   */
-  LagrangianCompliantLinearTIR() : LagrangianR(RelationSubType::CompliantLinearTIR) {};
-
   /** create the Relation from a set of data
    *  \param C the matrix C
    *  \param D the matrix D
    */
   LagrangianCompliantLinearTIR(Eigen::Ref<siconos::algebra::SiconosMatrix> C,
                                Eigen::Ref<siconos::algebra::SiconosMatrix> D);
+
+  /** create a complete Relation from a set of data
+   *  \param C matrix operator (constant) C
+   *  \param D matrix operator (constant) D
+   *  \param e vector operator (constant) e
+   */
+  LagrangianCompliantLinearTIR(Eigen::Ref<siconos::algebra::SiconosMatrix> C,
+                               Eigen::Ref<siconos::algebra::SiconosMatrix> D,
+                               Eigen::Ref<siconos::algebra::SiconosVector> e);
 
   /** destructor */
   virtual ~LagrangianCompliantLinearTIR() noexcept = default;
@@ -100,12 +105,6 @@ class LagrangianCompliantLinearTIR : public LagrangianR {
   /** True if e is defined */
   bool haseVector() const { return eVector_view_ != nullptr; }
 
-  /** set a constant e vector. Warning: shared memory with input
-   *
-   *  \param newe e value
-   */
-  void seteVector(Eigen::Ref<siconos::algebra::SiconosVector> newe);
-
   /** default function to compute y
    *  \param time dummy parameter for this kind of relation
    *  \param inter the Interaction we want to update
@@ -136,7 +135,7 @@ class LagrangianCompliantLinearTIR : public LagrangianR {
    * \return true if the relation is linear.
    */
 
-  bool isLinear() override { return true; }
+  bool isLinear() const override { return true; }
 };
 }  // namespace siconos::modeling
 #endif

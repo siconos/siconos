@@ -25,6 +25,7 @@
 #include "SiconosMatrix.hpp"
 #include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
+#include "Tools.hpp"
 
 // Minimum data (C as pointer) constructor
 siconos::modeling::LagrangianCompliantLinearTIR::LagrangianCompliantLinearTIR(
@@ -36,6 +37,20 @@ siconos::modeling::LagrangianCompliantLinearTIR::LagrangianCompliantLinearTIR(
 
   DMatrix_view_ =
       std::make_shared<siconos::algebra::MapType>(newD.data(), newD.rows(), newD.cols());
+}
+
+siconos::modeling::LagrangianCompliantLinearTIR::LagrangianCompliantLinearTIR(
+    Eigen::Ref<siconos::algebra::SiconosMatrix> newC,
+    Eigen::Ref<siconos::algebra::SiconosMatrix> newD,
+    Eigen::Ref<siconos::algebra::SiconosVector> newe)
+    : LagrangianR(RelationSubType::CompliantLinearTIR) {
+  jacobianhOver_q_view_ =  // C
+      std::make_shared<siconos::algebra::MapType>(newC.data(), newC.rows(), newC.cols());
+
+  DMatrix_view_ =
+      std::make_shared<siconos::algebra::MapType>(newD.data(), newD.rows(), newD.cols());
+
+  eVector_view_ = std::make_shared<siconos::algebra::MapVectorType>(newe.data(), newe.size());
 }
 
 void siconos::modeling::LagrangianCompliantLinearTIR::initialize(Interaction& inter) {
@@ -63,12 +78,6 @@ void siconos::modeling::LagrangianCompliantLinearTIR::checkSize(
         "between e vector and the dimension of the interaction.");
 }
 
-void siconos::modeling::LagrangianCompliantLinearTIR::seteVector(
-    Eigen::Ref<siconos::algebra::SiconosVector> newValue) {
-  eVector_view_ =
-      std::make_shared<siconos::algebra::MapVectorType>(newValue.data(), newValue.size());
-}
-
 void siconos::modeling::LagrangianCompliantLinearTIR::computeInput(double time,
                                                                    Interaction& inter,
                                                                    unsigned int level) {
@@ -77,7 +86,8 @@ void siconos::modeling::LagrangianCompliantLinearTIR::computeInput(double time,
   auto& DSlink = inter.linkToDSVariables();
   // computation of p = Ht lambda
   siconos::algebra::transposeMatrixVector_prod_toBlock(
-      lambda, *jacobianhOver_q_view_, *DSlink[LagrangianR::p0 + level], false);
+      lambda, *jacobianhOver_q_view_, *DSlink[tools::enum_to_index(WorkDS::p0) + level],
+      false);
 }
 void siconos::modeling::LagrangianCompliantLinearTIR::computeOutput(
     double time, Interaction& inter, unsigned int derivativeNumber) {
@@ -86,8 +96,8 @@ void siconos::modeling::LagrangianCompliantLinearTIR::computeOutput(
   auto& lambda = *inter.lambda(derivativeNumber);
   auto& DSlink = inter.linkToDSVariables();
 
-  siconos::algebra::matrixBlockVector_prod(*jacobianhOver_q_view_,
-                                           *DSlink[LagrangianR::q0 + derivativeNumber], y);
+  siconos::algebra::matrixBlockVector_prod(
+      *jacobianhOver_q_view_, *DSlink[tools::enum_to_index(WorkDS::q0) + derivativeNumber], y);
   y += *DMatrix_view_ * lambda;
   siconos::algebra::prod(*DMatrix_view_, lambda, y, false);
 

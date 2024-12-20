@@ -42,6 +42,7 @@
 #include "SiconosVector.hpp"
 #include "SiconosVisitor.hpp"
 #include "Simulation.hpp"
+#include "Tools.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -1045,7 +1046,7 @@ void siconos::integrators::MoreauJeanOSI::computeFreeOutput(
                  ->jacobianhOver_q_prod_T();
     siconos::algebra::matrixBlockVector_prod(H, *xfree, osnsp_rhs, true);
   }
-  
+
   auto relationSubType = inter.relation()->getSubType();
 
   // 2 -  compute additional terms for ScleronomousR and CompliantLinearTIR
@@ -1063,7 +1064,8 @@ void siconos::integrators::MoreauJeanOSI::computeFreeOutput(
 
       auto rheoR =
           std::static_pointer_cast<siconos::modeling::LagrangianRheonomousR>(inter.relation());
-      rheoR->computehdot(*DSlink[siconos::modeling::LagrangianR::q0], simulation()->getTkp1());
+      rheoR->computehdot(*DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q0)],
+                         simulation()->getTkp1());
 
       // siconos::algebra::SiconosMatrix ID =
       //     siconos::algebra::SiconosMatrix::Identity(sizeY, sizeY);
@@ -1085,14 +1087,16 @@ void siconos::integrators::MoreauJeanOSI::computeFreeOutput(
       /* we have to check that the value are at the beginnning of the time
        * step */
       // + C q_k
-      siconos::algebra::matrixBlockVector_prod(C, *DSlink[siconos::modeling::LagrangianR::q0],
-                                               osnsp_rhs, false);
+      siconos::algebra::matrixBlockVector_prod(
+          C, *DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q0)], osnsp_rhs,
+          false);
 
       // + h(1-_theta)v_k
 
-      *DSlink[siconos::modeling::LagrangianR::q1] *= (1 - _theta) * h;
-      siconos::algebra::matrixBlockVector_prod(C, *DSlink[siconos::modeling::LagrangianR::q1],
-                                               osnsp_rhs, false);
+      *DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q1)] *= (1 - _theta) * h;
+      siconos::algebra::matrixBlockVector_prod(
+          C, *DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q1)], osnsp_rhs,
+          false);
 
       if (compR->haseVector()) {
         osnsp_rhs += compR->eVector();

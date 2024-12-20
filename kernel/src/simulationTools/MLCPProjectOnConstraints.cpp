@@ -1014,7 +1014,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::postComputeLagra
       "updated\n");
 
   auto& DSlink = *(indexSet->properties(ui)).DSlink;
-//  (*DSlink[siconos::modeling::LagrangianR::q0]).display();
+//  (*DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q0)]).display();
 //  (lr->q())->display();
 #endif
 

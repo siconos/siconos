@@ -35,6 +35,7 @@
 #include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
 #include "SiconosVisitor.hpp"  // for NSLEffectOnFreeOutput visitor
+#include "Tools.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -351,12 +352,13 @@ void siconos::integrators::LsodarOSI::initializeWorkVectorsForInteraction(
         std::make_shared<siconos::algebra::BlockVector>();
     inter_work_block[siconos::integrators::LsodarOSI::xfree]->insertPtr(
         workVds1[siconos::integrators::LsodarOSI::FREE]);
-    DSlink[siconos::modeling::LagrangianR::p2] =
+    DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::p2)] =
         std::make_shared<siconos::algebra::BlockVector>();
-    DSlink[siconos::modeling::LagrangianR::p2]->insertPtr(lds.p(2));
-    DSlink[siconos::modeling::LagrangianR::q2] =
+    DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::p2)]->insertPtr(lds.p(2));
+    DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q2)] =
         std::make_shared<siconos::algebra::BlockVector>();
-    DSlink[siconos::modeling::LagrangianR::q2]->insertPtr(lds.acceleration());
+    DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q2)]->insertPtr(
+        lds.acceleration());
   }
   // else if (relationType == NewtonEuler)
   // {
@@ -371,8 +373,9 @@ void siconos::integrators::LsodarOSI::initializeWorkVectorsForInteraction(
       auto& lds = *std::static_pointer_cast<siconos::modeling::LagrangianDS>(ds2);
       inter_work_block[siconos::integrators::LsodarOSI::xfree]->insertPtr(
           workVds2[siconos::integrators::LsodarOSI::FREE]);
-      DSlink[siconos::modeling::LagrangianR::p2]->insertPtr(lds.p(2));
-      DSlink[siconos::modeling::LagrangianR::q2]->insertPtr(lds.acceleration());
+      DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::p2)]->insertPtr(lds.p(2));
+      DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q2)]->insertPtr(
+          lds.acceleration());
     }
     // else if (relationType == NewtonEuler)
     // {
@@ -651,7 +654,7 @@ void siconos::integrators::LsodarOSI::computeFreeOutput(
     //        std::cout << "Computeqblock Xfree (Gamma)========" << std::endl;
     //       Xfree->display();
   } else if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_IMPACT]).get() == osnsp) {
-    Xfree = DSlink[siconos::modeling::LagrangianR::q1];
+    Xfree = DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q1)];
     //        std::cout << "Computeqblock Xfree (Velocity)========" <<
     //        std::endl;
     //       Xfree->display();
@@ -678,7 +681,7 @@ void siconos::integrators::LsodarOSI::computeFreeOutput(
         auto rheoR = std::static_pointer_cast<siconos::modeling::LagrangianRheonomousR>(
             inter->relation());
 
-        rheoR->computehdot(*DSlink[siconos::modeling::LagrangianR::q0],
+        rheoR->computehdot(*DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q0)],
                            simulation()->getTkp1());
         osnsp_rhs += *ID * rheoR->hdot();
       } else

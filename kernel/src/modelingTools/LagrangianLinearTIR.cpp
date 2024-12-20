@@ -28,14 +28,25 @@
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "SiconosException.hpp"
+#include "Tools.hpp"
 #include "siconos_debug.h"
 
-// Minimum data (C as pointer) constructor
+// Minimum data (C) constructor
 siconos::modeling::LagrangianLinearTIR::LagrangianLinearTIR(
     Eigen::Ref<siconos::algebra::SiconosMatrix> newC)
     : LagrangianR(RelationSubType::LinearTIR) {
   jacobianhOver_q_view_ =
       std::make_shared<siconos::algebra::MapType>(newC.data(), newC.rows(), newC.cols());
+}
+
+siconos::modeling::LagrangianLinearTIR::LagrangianLinearTIR(
+    Eigen::Ref<siconos::algebra::SiconosMatrix> newC,
+    Eigen::Ref<siconos::algebra::SiconosVector> newe)
+    : LagrangianR(RelationSubType::LinearTIR) {
+  jacobianhOver_q_view_ =
+      std::make_shared<siconos::algebra::MapType>(newC.data(), newC.rows(), newC.cols());
+
+  eVector_view_ = std::make_shared<siconos::algebra::MapVectorType>(newe.data(), newe.size());
 }
 
 void siconos::modeling::LagrangianLinearTIR::checkSize(const Interaction& inter) const {
@@ -54,11 +65,6 @@ void siconos::modeling::LagrangianLinearTIR::checkSize(const Interaction& inter)
         "between e vector and the dimension of the interaction.");
 }
 
-void siconos::modeling::LagrangianLinearTIR::seteVector(
-    Eigen::Ref<siconos::algebra::SiconosVector> newValue) {
-  eVector_view_ =
-      std::make_shared<siconos::algebra::MapVectorType>(newValue.data(), newValue.size());
-}
 void siconos::modeling::LagrangianLinearTIR::computeOutput(double time, Interaction& inter,
                                                            unsigned int derivativeNumber) {
   DEBUG_BEGIN(
@@ -69,7 +75,7 @@ void siconos::modeling::LagrangianLinearTIR::computeOutput(double time, Interact
   auto& y = *inter.y(derivativeNumber);
   auto& DSlink = inter.linkToDSVariables();
   siconos::algebra::matrixBlockVector_prod(*jacobianhOver_q_view_,
-                                           *DSlink[LagrangianR::q0 + derivativeNumber], y);
+                                           *DSlink[tools::enum_to_index(WorkDS::q0) + derivativeNumber], y);
 
   if (derivativeNumber == 0) {
     if (eVector_view_) y += *eVector_view_;
@@ -92,9 +98,9 @@ void siconos::modeling::LagrangianLinearTIR::computeInput(double time, Interacti
   // computation of p = Ht lambda
   DEBUG_EXPR(lambda.display(););
   DEBUG_EXPR(jacobianhOver_q_->display(););
-  DEBUG_EXPR(DSlink[LagrangianR::p0 + level]->display(););
+  DEBUG_EXPR(DSlink[tools::enum_to_index(WorkDS::p0) + level]->display(););
   siconos::algebra::transposeMatrixVector_prod_toBlock(
-      lambda, *jacobianhOver_q_view_, *DSlink[LagrangianR::p0 + level], false);
+      lambda, *jacobianhOver_q_view_, *DSlink[tools::enum_to_index(WorkDS::p0) + level], false);
   DEBUG_END(
       "void siconos::modeling::LagrangianLinearTIR::computeInput(double time, "
       "Interaction& "

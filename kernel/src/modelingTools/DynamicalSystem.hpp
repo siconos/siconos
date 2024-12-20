@@ -305,7 +305,7 @@ class DynamicalSystem {
 
   /** \return true if the system is linear
    */
-  virtual bool isLinear() { return false; };
+  virtual bool isLinear() const { return false; };
 
   /** print the data of the dynamical system on the standard output
    */

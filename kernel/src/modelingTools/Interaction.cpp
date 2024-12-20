@@ -47,6 +47,7 @@
 #include "SiconosMatrixOp.hpp"  // For setBlock
 #include "SiconosVector.hpp"
 #include "SiconosVisitor.hpp"
+#include "Tools.hpp"
 #include "siconos_debug.h"
 
 // Test : the following line is allowed only from C++17.
@@ -402,11 +403,13 @@ void siconos::modeling::Interaction::__initDataLagrangian(
     std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink, DynamicalSystem& ds1,
     DynamicalSystem& ds2) {
   DEBUG_PRINT("siconos::modeling::Interaction::initDataLagrangian()\n");
-  DSlink.resize(LagrangianR::DSlinkSize);
+  DSlink.resize(tools::enum_to_index(LagrangianR::WorkDS::DSlinkSize));
 
   // Default DSlink
-  DSlink[LagrangianR::q0] = std::make_shared<siconos::algebra::BlockVector>();  // displacement
-  DSlink[LagrangianR::q1] = std::make_shared<siconos::algebra::BlockVector>();  // velocity
+  DSlink[tools::enum_to_index(LagrangianR::WorkDS::q0)] =
+      std::make_shared<siconos::algebra::BlockVector>();  // displacement
+  DSlink[tools::enum_to_index(LagrangianR::WorkDS::q1)] =
+      std::make_shared<siconos::algebra::BlockVector>();  // velocity
 
   // auto relationSubType = _relation->getSubType();
   // if(relationSubType != LinearTIR)
@@ -427,22 +430,23 @@ void siconos::modeling::Interaction::__initDSDataLagrangian(
   auto& lds = static_cast<LagrangianDS&>(ds);
 
   // Put q, velocity of each DS into a block. (Pointers links, no copy!!)
-  DSlink[LagrangianR::q0]->insertPtr(lds.q());
-  DSlink[LagrangianR::q1]->insertPtr(lds.velocity());
+  DSlink[tools::enum_to_index(LagrangianR::WorkDS::q0)]->insertPtr(lds.q());
+  DSlink[tools::enum_to_index(LagrangianR::WorkDS::q1)]->insertPtr(lds.velocity());
 
   if (lds.acceleration()) {
-    if (!DSlink[LagrangianR::q2])
-      DSlink[LagrangianR::q2] =
+    if (!DSlink[tools::enum_to_index(LagrangianR::WorkDS::q2)])
+      DSlink[tools::enum_to_index(LagrangianR::WorkDS::q2)] =
           std::make_shared<siconos::algebra::BlockVector>();  // acceleration
 
-    DSlink[LagrangianR::q2]->insertPtr(lds.acceleration());
+    DSlink[tools::enum_to_index(LagrangianR::WorkDS::q2)]->insertPtr(lds.acceleration());
   }
 
   for (unsigned int k = 0; k < 3; k++) {
     if (lds.p(k)) {
-      if (!DSlink[LagrangianR::p0 + k])
-        DSlink[LagrangianR::p0 + k] = std::make_shared<siconos::algebra::BlockVector>();
-      DSlink[LagrangianR::p0 + k]->insertPtr(lds.p(k));
+      if (!DSlink[tools::enum_to_index(LagrangianR::WorkDS::p0) + k])
+        DSlink[tools::enum_to_index(LagrangianR::WorkDS::p0) + k] =
+            std::make_shared<siconos::algebra::BlockVector>();
+      DSlink[tools::enum_to_index(LagrangianR::WorkDS::p0) + k]->insertPtr(lds.p(k));
     }
   }
 }
@@ -453,18 +457,21 @@ void siconos::modeling::Interaction::__initDataNewtonEuler(
   DEBUG_BEGIN(
       "siconos::modeling::Interaction::initDataNewtonEuler(std::vector<std::shared_ptr<"
       "siconos::algebra::BlockVector>>& DSlink)\n");
-  DSlink.resize(NewtonEulerR::DSlinkSize);
-  // DSlink[NewtonEulerR::xfree] = std::make_shared<siconos::algebra::BlockVector>());
-  DSlink[NewtonEulerR::q0] =
+  DSlink.resize(siconos::tools::enum_to_index(NewtonEulerR::WorkDS::DSlinkSize));
+  DSlink[siconos::tools::enum_to_index(NewtonEulerR::WorkDS::q0)] =
       std::make_shared<siconos::algebra::BlockVector>();  // displacement
-  DSlink[NewtonEulerR::velocity] =
-      std::make_shared<siconos::algebra::BlockVector>();                           // velocity
-  DSlink[NewtonEulerR::dotq] = std::make_shared<siconos::algebra::BlockVector>();  // qdot
-  //  data[NewtonEulerR::q2] = std::make_shared<siconos::algebra::BlockVector>(); //
+  DSlink[siconos::tools::enum_to_index(NewtonEulerR::WorkDS::velocity)] =
+      std::make_shared<siconos::algebra::BlockVector>();  // velocity
+  DSlink[siconos::tools::enum_to_index(NewtonEulerR::WorkDS::dotq)] =
+      std::make_shared<siconos::algebra::BlockVector>();  // qdot
+  //  data[NewtonEulerR::WorkDS::::q2] = std::make_shared<siconos::algebra::BlockVector>(); //
   //  acceleration
-  DSlink[NewtonEulerR::p0] = std::make_shared<siconos::algebra::BlockVector>();
-  DSlink[NewtonEulerR::p1] = std::make_shared<siconos::algebra::BlockVector>();
-  DSlink[NewtonEulerR::p2] = std::make_shared<siconos::algebra::BlockVector>();
+  DSlink[siconos::tools::enum_to_index(NewtonEulerR::WorkDS::p0)] =
+      std::make_shared<siconos::algebra::BlockVector>();
+  DSlink[siconos::tools::enum_to_index(NewtonEulerR::WorkDS::p1)] =
+      std::make_shared<siconos::algebra::BlockVector>();
+  DSlink[siconos::tools::enum_to_index(NewtonEulerR::WorkDS::p2)] =
+      std::make_shared<siconos::algebra::BlockVector>();
   DEBUG_END(
       "siconos::modeling::Interaction::initDataNewtonEuler(std::vector<std::shared_ptr<"
       "siconos::algebra::BlockVector>>& DSlink)\n");
@@ -485,14 +492,18 @@ void siconos::modeling::Interaction::__initDSDataNewtonEuler(
   // convert vDS systems into NewtonEulerDS and put them in vLDS
   NewtonEulerDS& neds = static_cast<NewtonEulerDS&>(ds);
   // Put q/velocity/acceleration of each DS into a block. (Pointers links, no copy!!)
-  DSlink[NewtonEulerR::q0]->insertPtr(neds.q());
-  DSlink[NewtonEulerR::velocity]->insertPtr(neds.twist());
-  //  DSlink[NewtonEulerR::deltaq]->insertPtr(neds.deltaq());
-  DSlink[NewtonEulerR::dotq]->insertPtr(neds.dotq());
-  //    data[NewtonEulerR::q2]->insertPtr( neds.acceleration());
-  if (neds.p(0)) DSlink[NewtonEulerR::p0]->insertPtr(neds.p(0));
-  if (neds.p(1)) DSlink[NewtonEulerR::p1]->insertPtr(neds.p(1));
-  if (neds.p(2)) DSlink[NewtonEulerR::p2]->insertPtr(neds.p(2));
+  DSlink[siconos::tools::enum_to_index(NewtonEulerR::WorkDS::q0)]->insertPtr(neds.q());
+  DSlink[siconos::tools::enum_to_index(NewtonEulerR::WorkDS::velocity)]->insertPtr(
+      neds.twist());
+  //  DSlink[NewtonEulerR::WorkDS::deltaq]->insertPtr(neds.deltaq());
+  DSlink[siconos::tools::enum_to_index(NewtonEulerR::WorkDS::dotq)]->insertPtr(neds.dotq());
+  //    data[NewtonEulerR::WorkDS::q2]->insertPtr( neds.acceleration());
+  if (neds.p(0))
+    DSlink[siconos::tools::enum_to_index(NewtonEulerR::WorkDS::p0)]->insertPtr(neds.p(0));
+  if (neds.p(1))
+    DSlink[siconos::tools::enum_to_index(NewtonEulerR::WorkDS::p1)]->insertPtr(neds.p(1));
+  if (neds.p(2))
+    DSlink[siconos::tools::enum_to_index(NewtonEulerR::WorkDS::p2)]->insertPtr(neds.p(2));
 
   DEBUG_END(
       "siconos::modeling::Interaction::initDSDataNewtonEuler(DynamicalSystem& ds, "

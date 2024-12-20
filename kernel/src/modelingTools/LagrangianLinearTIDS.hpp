@@ -171,7 +171,7 @@ class LagrangianLinearTIDS : public LagrangianDS {
 
   /** \return true if the Dynamical system is linear.
    */
-  bool isLinear() override { return true; }
+  bool isLinear() const override { return true; }
 
   /** print the data onto the screen
    */

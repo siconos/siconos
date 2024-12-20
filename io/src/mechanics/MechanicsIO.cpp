@@ -19,7 +19,7 @@
 #include "MechanicsIO.hpp"
 
 #include "SiconosConfig.h"
-
+#include "Tools.hpp"
 #ifdef SICONOS_HAS_BULLET
 #include "Bullet2d3DR.hpp"
 #include "Bullet2dR.hpp"
@@ -214,7 +214,7 @@ template <>
 void siconos::io::ContactPointVisitor::operator()(
     const siconos::collision::native::bodies::DiskDiskR& rel) {
   auto& DSlink = inter->linkToDSVariables();
-  auto& q = *DSlink[siconos::modeling::LagrangianR::q0];
+  auto& q = *DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q0)];
 
   auto x1 = q(0);
   auto y1 = q(1);
@@ -268,7 +268,7 @@ template <>
 void siconos::io::ContactPointVisitor::operator()(
     const siconos::collision::native::bodies::CircleCircleR& rel) {
   auto& DSlink = inter->linkToDSVariables();
-  auto& q = *DSlink[siconos::modeling::LagrangianR::q0];
+  auto& q = *DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q0)];
 
   auto x1 = q(0);
   auto y1 = q(1);
@@ -331,7 +331,7 @@ template <>
 void siconos::io::ContactPointVisitor::operator()(
     const siconos::collision::native::bodies::DiskPlanR& rel) {
   auto& DSlink = inter->linkToDSVariables();
-  const auto& q0 = *DSlink[siconos::modeling::LagrangianR::q0];
+  const auto& q0 = *DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q0)];
 
   auto x1 = q0(0);
   auto y1 = q0(1);

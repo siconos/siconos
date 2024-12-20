@@ -25,6 +25,7 @@
 #include "NewtonEulerR.hpp"
 #include "Relation.hpp"
 #include "SiconosVector.hpp"
+#include "Tools.hpp"
 // #include "Simulation.hpp"
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -93,9 +94,9 @@ void siconos::integrators::MoreauJeanCombinedProjectionOSI::
 
   unsigned int p0 = 0;
   if (relationType == siconos::modeling::RelationType::Lagrangian) {
-    p0 = siconos::modeling::LagrangianR::p0;
+    p0 = tools::enum_to_index(modeling::LagrangianR::WorkDS::p0);
   } else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
-    p0 = siconos::modeling::NewtonEulerR::p0;
+    p0 = siconos::tools::enum_to_index(siconos::modeling::NewtonEulerR::WorkDS::p0);
   }
   if (ds1 != ds2) {
     DEBUG_PRINT("ds1 != ds2\n");

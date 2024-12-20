@@ -31,6 +31,8 @@
 #include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
 #include "Simulation.hpp"
+#include "Tools.hpp"
+
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -539,12 +541,13 @@ void siconos::integrators::NewMarkAlphaOSI::initializeWorkVectorsForInteraction(
         std::make_shared<siconos::algebra::BlockVector>();
     inter_work_block[siconos::integrators::NewMarkAlphaOSI::xfree]->insertPtr(
         workVds1[siconos::integrators::NewMarkAlphaOSI::FREE]);
-    DSlink[siconos::modeling::LagrangianR::p2] =
+    DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::p2)] =
         std::make_shared<siconos::algebra::BlockVector>();
-    DSlink[siconos::modeling::LagrangianR::p2]->insertPtr(lds.p(2));
-    DSlink[siconos::modeling::LagrangianR::q2] =
+    DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::p2)]->insertPtr(lds.p(2));
+    DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q2)] =
         std::make_shared<siconos::algebra::BlockVector>();
-    DSlink[siconos::modeling::LagrangianR::q2]->insertPtr(lds.acceleration());
+    DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q2)]->insertPtr(
+        lds.acceleration());
   }
   // else if (relationType == NewtonEuler)
   // {
@@ -559,8 +562,9 @@ void siconos::integrators::NewMarkAlphaOSI::initializeWorkVectorsForInteraction(
       auto& lds = *std::static_pointer_cast<siconos::modeling::LagrangianDS>(ds2);
       inter_work_block[siconos::integrators::NewMarkAlphaOSI::xfree]->insertPtr(
           workVds2[siconos::integrators::NewMarkAlphaOSI::FREE]);
-      DSlink[siconos::modeling::LagrangianR::p2]->insertPtr(lds.p(2));
-      DSlink[siconos::modeling::LagrangianR::q2]->insertPtr(lds.acceleration());
+      DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::p2)]->insertPtr(lds.p(2));
+      DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q2)]->insertPtr(
+          lds.acceleration());
     }
     // else if (relationType == NewtonEuler)
     // {

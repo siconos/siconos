@@ -174,7 +174,7 @@ void siconos::modeling::NewtonEuler1DR::initialize(Interaction& inter) {
   // proj_with_q  jacobianhOver_q_Proj =
   // std::make_shared<siconos::algebra::SiconosMatrix>(jacobianhOver_q_->size(0),jacobianhOver_q_->size(1)));
   auto qSize = 7 * (inter.getSizeOfDS() / 6);
-  
+
   jacobianhOver_q_internal_storage_ = std::make_unique<std::vector<double>>(qSize);
   jacobianhOver_q_view_ = std::make_shared<siconos::algebra::MapType>(
       jacobianhOver_q_internal_storage_->data(), 1, qSize);

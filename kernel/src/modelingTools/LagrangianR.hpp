@@ -59,7 +59,7 @@ namespace siconos::modeling {
 
 class LagrangianR : public Relation {
  public:
-  enum LagrangianRDS { z, q0, q1, q2, p0, p1, p2, DSlinkSize };
+  enum class WorkDS : std::size_t { q0, q1, q2, p0, p1, p2, DSlinkSize };
 
  protected:
   ACCEPT_SERIALIZATION(LagrangianR);

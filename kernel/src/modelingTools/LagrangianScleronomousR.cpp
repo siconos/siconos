@@ -28,6 +28,7 @@
 #include "SiconosMatrix.hpp"
 #include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
+#include "Tools.hpp"
 
 // #define DEBUG_MESSAGES
 // #define DEBUG_STDOUT
@@ -89,12 +90,14 @@ void siconos::modeling::LagrangianScleronomousR::computeJacobianhOver_q_dot_X_qd
   auto& DSlink = inter.linkToDSVariables();
   DEBUG_PRINT("siconos::modeling::LagrangianScleronomousR::computedotjacqhXqdot starts");
 
-  computejacobianhOver_q_dot(*DSlink[LagrangianR::q0], *DSlink[LagrangianR::q1]);
+  computejacobianhOver_q_dot(*DSlink[tools::enum_to_index(WorkDS::q0)],
+                             *DSlink[tools::enum_to_index(WorkDS::q1)]);
   if (!jacobianhOver_q_dot_X_qdot_) {
     jacobianhOver_q_dot_X_qdot_ =
         std::make_shared<siconos::algebra::SiconosVector>(jacobianhOver_q_dot_->size(0));
   }
-  siconos::algebra::matrixBlockVector_prod(*jacobianhOver_q_dot_, *DSlink[LagrangianR::q1],
+  siconos::algebra::matrixBlockVector_prod(*jacobianhOver_q_dot_,
+                                           *DSlink[tools::enum_to_index(WorkDS::q1)],
                                            *jacobianhOver_q_dot_X_qdot_);
   DEBUG_PRINT("siconos::modeling::LagrangianScleronomousR::computedotjacqhXqdot ends");
 }
@@ -110,19 +113,20 @@ void siconos::modeling::LagrangianScleronomousR::computeOutput(double time, Inte
   auto& DSlink = inter.linkToDSVariables();
   auto& y = *inter.y(derivativeNumber);
   if (derivativeNumber == 0) {
-    computeh(*DSlink[LagrangianR::q0], y);
+    computeh(*DSlink[tools::enum_to_index(WorkDS::q0)], y);
   } else {
-    computeJacobianhOver_q(*DSlink[LagrangianR::q0]);
+    computeJacobianhOver_q(*DSlink[tools::enum_to_index(WorkDS::q0)]);
 
     if (derivativeNumber == 1) {
       siconos::algebra::matrixBlockVector_prod(*jacobianhOver_q_view_,
-                                               *DSlink[LagrangianR::q1], y);
+                                               *DSlink[tools::enum_to_index(WorkDS::q1)], y);
     } else if (derivativeNumber == 2) {
       siconos::algebra::matrixBlockVector_prod(*jacobianhOver_q_view_,
-                                               *DSlink[LagrangianR::q2], y);
-      computejacobianhOver_q_dot(*DSlink[LagrangianR::q0], *DSlink[LagrangianR::q1]);
-      siconos::algebra::matrixBlockVector_prod(*jacobianhOver_q_dot_, *DSlink[LagrangianR::q1],
-                                               y, false);
+                                               *DSlink[tools::enum_to_index(WorkDS::q2)], y);
+      computejacobianhOver_q_dot(*DSlink[tools::enum_to_index(WorkDS::q0)],
+                                 *DSlink[tools::enum_to_index(WorkDS::q1)]);
+      siconos::algebra::matrixBlockVector_prod(
+          *jacobianhOver_q_dot_, *DSlink[tools::enum_to_index(WorkDS::q1)], y, false);
 
     } else
       THROW_EXCEPTION(
@@ -140,14 +144,15 @@ void siconos::modeling::LagrangianScleronomousR::computeInput(double time, Inter
 
   DEBUG_PRINTF("level = %i\n", level);
   auto& DSlink = inter.linkToDSVariables();
-  computeJacobianhOver_q(*DSlink[LagrangianR::q0]);
+  computeJacobianhOver_q(*DSlink[tools::enum_to_index(WorkDS::q0)]);
   // get lambda of the concerned interaction
   auto& lambda = *inter.lambda(level);
   DEBUG_EXPR(lambda.display(););
   // data[name] += trans(G) * lambda
   siconos::algebra::transposeMatrixVector_prod_toBlock(
-      lambda, *jacobianhOver_q_view_, *DSlink[LagrangianR::p0 + level], false);
-  DEBUG_EXPR(DSlink[LagrangianR::p0 + level]->display(););
+      lambda, *jacobianhOver_q_view_, *DSlink[tools::enum_to_index(WorkDS::p0) + level],
+      false);
+  DEBUG_EXPR(DSlink[tools::enum_to_index(WorkDS::p0) + level]->display(););
   DEBUG_END(
       "void siconos::modeling::LagrangianScleronomousR::computeInput(double time, "
       "Interaction& inter, InteractionProperties& interProp, unsigned int level) \n");
@@ -160,8 +165,9 @@ void siconos::modeling::LagrangianScleronomousR::computeJach(double time, Intera
       "inter) \n");
   auto& DSlink = inter.linkToDSVariables();
   DEBUG_EXPR(inter.display(););
-  computeJacobianhOver_q(*DSlink[LagrangianR::q0]);
-  computejacobianhOver_q_dot(*DSlink[LagrangianR::q0], *DSlink[LagrangianR::q1]);
+  computeJacobianhOver_q(*DSlink[tools::enum_to_index(WorkDS::q0)]);
+  computejacobianhOver_q_dot(*DSlink[tools::enum_to_index(WorkDS::q0)],
+                             *DSlink[tools::enum_to_index(WorkDS::q1)]);
 
   DEBUG_END(
       "void siconos::modeling::LagrangianScleronomousR::computeJach(double time, "

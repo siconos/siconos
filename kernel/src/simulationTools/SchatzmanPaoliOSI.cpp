@@ -154,9 +154,9 @@ void siconos::integrators::SchatzmanPaoliOSI::initializeWorkVectorsForInteractio
   auto& workVds1 = *DSG.properties(DSG.descriptor(ds1)).workVectors;
   if (relationType == siconos::modeling::RelationType::Lagrangian) {
     auto& lds = *std::static_pointer_cast<siconos::modeling::LagrangianDS>(ds1);
-    DSlink[siconos::modeling::LagrangianR::p0] =
+    DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::p0)] =
         std::make_shared<siconos::algebra::BlockVector>();
-    DSlink[siconos::modeling::LagrangianR::p0]->insertPtr(lds.p(0));
+    DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::p0)]->insertPtr(lds.p(0));
 
     inter_work_block[siconos::integrators::SchatzmanPaoliOSI::xfree] =
         std::make_shared<siconos::algebra::BlockVector>();
@@ -175,7 +175,7 @@ void siconos::integrators::SchatzmanPaoliOSI::initializeWorkVectorsForInteractio
       inter_work_block[siconos::integrators::SchatzmanPaoliOSI::xfree]->insertPtr(
           workVds2[siconos::integrators::SchatzmanPaoliOSI::FREE]);
       auto& lds = *std::static_pointer_cast<siconos::modeling::LagrangianDS>(ds2);
-      DSlink[siconos::modeling::LagrangianR::p0]->insertPtr(lds.p(0));
+      DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::p0)]->insertPtr(lds.p(0));
     } else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
       inter_work_block[siconos::integrators::SchatzmanPaoliOSI::xfree]->insertPtr(
           workVds2[siconos::integrators::SchatzmanPaoliOSI::FREE]);

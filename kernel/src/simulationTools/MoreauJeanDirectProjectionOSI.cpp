@@ -25,36 +25,34 @@
 #include "NewtonEulerR.hpp"
 #include "SiconosVector.hpp"
 #include "Simulation.hpp"
-//#define STANDARD_ACTIVATION
+#include "Tools.hpp"
+// #define STANDARD_ACTIVATION
 #define FIRSTWAY_ACTIVATION
-//#define SECONDWAY_ACTIVATION
-//#define QFREE_ACTIVATION
+// #define SECONDWAY_ACTIVATION
+// #define QFREE_ACTIVATION
 
 // #define DEBUG_NOCOLOR
 // #define DEBUG_MESSAGES
 // #define DEBUG_STDOUT
-//#define DEBUG_WHERE_MESSAGES
+// #define DEBUG_WHERE_MESSAGES
 #include "siconos_debug.h"
 
 siconos::integrators::MoreauJeanDirectProjectionOSI::MoreauJeanDirectProjectionOSI(
     double theta)
-    : MoreauJeanOSI(theta)
-{
+    : MoreauJeanOSI(theta) {
   _levelMinForInput = 0;
   _integratorType = IntegratorType::MOREAUDIRECTPROJECTIONOSI;
 }
 
 siconos::integrators::MoreauJeanDirectProjectionOSI::MoreauJeanDirectProjectionOSI(
     double theta, double gamma)
-    : MoreauJeanOSI(theta, gamma)
-{
+    : MoreauJeanOSI(theta, gamma) {
   _levelMinForInput = 0;
   _integratorType = IntegratorType::MOREAUDIRECTPROJECTIONOSI;
 }
 
 void siconos::integrators::MoreauJeanDirectProjectionOSI::initializeWorkVectorsForDS(
-    double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds)
-{
+    double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
   DEBUG_BEGIN(
       "siconos::integrators::MoreauJeanDirectProjectionOSI::initializeWorkVectorsForDS( "
       "double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) \n");
@@ -64,12 +62,10 @@ void siconos::integrators::MoreauJeanDirectProjectionOSI::initializeWorkVectorsF
   if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
     workVectors[MoreauJeanOSI::QTMP] =
         std::make_shared<siconos::algebra::SiconosVector>(d->dimension());
-  }
-  else if (auto d = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
+  } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
     workVectors[MoreauJeanOSI::QTMP] =
         std::make_shared<siconos::algebra::SiconosVector>(d->getqDim());
-  }
-  else {
+  } else {
     THROW_EXCEPTION(
         "siconos::integrators::MoreauJeanDirectProjectionOSI::initialize() - DS not of the "
         "right type");
@@ -87,8 +83,7 @@ void siconos::integrators::MoreauJeanDirectProjectionOSI::initializeWorkVectorsF
 
 void siconos::integrators::MoreauJeanDirectProjectionOSI::initializeWorkVectorsForInteraction(
     siconos::modeling::Interaction& inter, siconos::graphs::InteractionProperties& interProp,
-    siconos::graphs::DynamicalSystemsGraph& DSG)
-{
+    siconos::graphs::DynamicalSystemsGraph& DSG) {
   DEBUG_BEGIN(
       "siconos::integrators::MoreauJeanDirectProjectionOSI::"
       "initializeWorkVectorsForInteraction(siconos::modeling::Interaction&inter, "
@@ -107,18 +102,16 @@ void siconos::integrators::MoreauJeanDirectProjectionOSI::initializeWorkVectorsF
 
   unsigned int p0 = 0;
   if (relationType == siconos::modeling::RelationType::Lagrangian) {
-    p0 = siconos::modeling::LagrangianR::p0;
-  }
-  else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
-    p0 = siconos::modeling::NewtonEulerR::p0;
+    p0 = siconos::tools::enum_to_index(siconos::modeling::LagrangianR::WorkDS::p0);
+  } else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
+    p0 = siconos::tools::enum_to_index(siconos::modeling::NewtonEulerR::WorkDS::p0);
   }
 
   if (ds1 != ds2) {
     DEBUG_PRINT("ds1 != ds2\n");
     if ((!DSlink[p0]) || (DSlink[p0]->numberOfBlocks() != 2))
       DSlink[p0] = std::make_shared<siconos::algebra::BlockVector>(2);
-  }
-  else {
+  } else {
     if ((!DSlink[p0]) || (DSlink[p0]->numberOfBlocks() != 1))
       DSlink[p0] = std::make_shared<siconos::algebra::BlockVector>(1);
   }
@@ -129,8 +122,7 @@ void siconos::integrators::MoreauJeanDirectProjectionOSI::initializeWorkVectorsF
     if (relationType == siconos::modeling::RelationType::Lagrangian) {
       auto& lds = *std::static_pointer_cast<siconos::modeling::LagrangianDS>(ds1);
       DSlink[p0]->setVectorPtr(0, lds.p(0));
-    }
-    else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
+    } else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
       auto& neds = *std::static_pointer_cast<siconos::modeling::NewtonEulerDS>(ds1);
       DSlink[p0]->setVectorPtr(0, neds.p(0));
     }
@@ -146,8 +138,7 @@ void siconos::integrators::MoreauJeanDirectProjectionOSI::initializeWorkVectorsF
       if (relationType == siconos::modeling::RelationType::Lagrangian) {
         auto& lds = *std::static_pointer_cast<siconos::modeling::LagrangianDS>(ds2);
         DSlink[p0]->setVectorPtr(1, lds.p(0));
-      }
-      else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
+      } else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
         auto& neds = *std::static_pointer_cast<siconos::modeling::NewtonEulerDS>(ds2);
         DSlink[p0]->setVectorPtr(1, neds.p(0));
       }
@@ -160,29 +151,25 @@ void siconos::integrators::MoreauJeanDirectProjectionOSI::initializeWorkVectorsF
       "InteractionProperties& interProp, siconos::graphs::DynamicalSystemsGraph & DSG)\n");
 }
 
-void siconos::integrators::MoreauJeanDirectProjectionOSI::computeFreeState()
-{
+void siconos::integrators::MoreauJeanDirectProjectionOSI::computeFreeState() {
   MoreauJeanOSI::computeFreeState();
 }
 
 #ifdef STANDARD_ACTIVATION
 bool siconos::integrators::MoreauJeanDirectProjectionOSI::addInteractionInIndexSet(
-    std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i)
-{
+    std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i) {
   return MoreauJeanOSI::addInteractionInIndexSet(inter, i);
 }
 
 bool siconos::integrators::MoreauJeanDirectProjectionOSI::removeInteractionFromIndexSet(
-    std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i)
-{
+    std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i) {
   return MoreauJeanOSI::removeInteractionFromIndexSet(inter, i);
 }
 #endif
 
 #ifdef FIRSTWAY_ACTIVATION
 bool siconos::integrators::MoreauJeanDirectProjectionOSI::addInteractionInIndexSet(
-    std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i)
-{
+    std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i) {
   assert(i == 1);
   auto h = _simulation->timeStep();
   auto y = (inter->y(i - 1))->getValue(0);  // for i=1 y(i-1) is the position
@@ -257,8 +244,7 @@ bool siconos::integrators::MoreauJeanDirectProjectionOSI::removeInteractionFromI
 
 #ifdef SECONDWAY_ACTIVATION
 bool siconos::integrators::MoreauJeanDirectProjectionOSI::addInteractionInIndexSet(
-    std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i)
-{
+    std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i) {
   assert(i == 1);
   auto y = (inter->y(i - 1))->getValue(0);  // for i=1 y(i-1) is the position
 #ifdef DEBUG_MESSAGES
@@ -318,8 +304,7 @@ bool siconos::integrators::MoreauJeanDirectProjectionOSI::removeInteractionFromI
 
 #ifdef QFREE_ACTIVATION
 bool siconos::integrators::MoreauJeanDirectProjectionOSI::addInteractionInIndexSet(
-    std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i)
-{
+    std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i) {
   assert(i == 1);
   auto y = (inter->y(i - 1))->getValue(0);  // for i=1 y(i-1) is the position
 #ifdef DEBUG_MESSAGES

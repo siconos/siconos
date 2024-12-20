@@ -55,7 +55,7 @@ class DynamicalSystem;
 class NewtonEulerR : public Relation {
  public:
   // add deltaq ??? -- xhub 30/03/2014
-  enum NewtonEulerRDS { z, q0, velocity, dotq, p0, p1, p2, DSlinkSize };
+  enum class WorkDS : std::size_t { q0, velocity, dotq, p0, p1, p2, DSlinkSize };
 
  protected:
   ACCEPT_SERIALIZATION(NewtonEulerR);

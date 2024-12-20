@@ -46,14 +46,20 @@ class LagrangianLinearTIR : public LagrangianR {
   std::shared_ptr<siconos::algebra::MapVectorType> eVector_view_{nullptr};
 
  public:
-  // /** Default constructor */
-  // LagrangianLinearTIR() : LagrangianR(RelationSubType::LinearTIR) {};
-
-  /** Build a relation with only C matrix defined. Use set.. if e is required.
+  /** Build a relation with only C matrix defined (i.e. e=0)
    *
-   *  \param C the matrix C
+   *  \param C matrix operator (constant) C
    */
   LagrangianLinearTIR(Eigen::Ref<siconos::algebra::SiconosMatrix> C);
+
+  /** Build a complete relation (C and e). Warning: shared memory between input and class
+   * attributes.
+   *
+   *  \param C matrix operator (constant) C
+   *  \param e vector operator (constant) e
+   */
+  LagrangianLinearTIR(Eigen::Ref<siconos::algebra::SiconosMatrix> C,
+                      Eigen::Ref<siconos::algebra::SiconosVector> e);
 
   /** destructor */
   virtual ~LagrangianLinearTIR() noexcept = default;
@@ -75,12 +81,6 @@ class LagrangianLinearTIR : public LagrangianR {
 
   /** True if e is defined */
   bool haseVector() const { return eVector_view_ != nullptr; }
-
-  /** set a constant e vector. Warning: shared memory with input
-   *
-   *  \param newe e value
-   */
-  void seteVector(Eigen::Ref<siconos::algebra::SiconosVector> newe);
 
   /** default function to compute y
    *
@@ -114,7 +114,7 @@ class LagrangianLinearTIR : public LagrangianR {
   /** \return true if the relation is linear.
    */
 
-  bool isLinear() override  // final would be better but swig does not like it
+  bool isLinear() const override  // final would be better but swig does not like it
   {
     return true;
   }

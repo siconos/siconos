@@ -594,11 +594,11 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitAccele
     // Xfree = inter->dataX();
     /* get the current velocity  of the aggregated ds */
     if (relationType == siconos::modeling::RelationType::Lagrangian) {
-      Xfree = DSlink[siconos::modeling::LagrangianR::q1];
+      Xfree = DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q1)];
       DEBUG_PRINT("Xfree = DSlink[siconos::modeling::LagrangianR::q1];\n");
     } else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
-      Xfree = DSlink[siconos::modeling::NewtonEulerR::velocity];
-      DEBUG_PRINT("Xfree = DSlink[NewtonEulerR::velocity];\n");
+      Xfree = DSlink[siconos::tools::enum_to_index(modeling::NewtonEulerR::WorkDS::velocity)];
+      DEBUG_PRINT("Xfree = DSlink[NewtonEulerR::WorkDS::velocity];\n");
     } else
       THROW_EXCEPTION(
           "siconos::integrators::D1MinusLinearOSI::computeFreeOutput - unknown relation "
@@ -653,7 +653,7 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitAccele
       // if (relationSubType == RheonomousR) // explicit time dependence -> partial time
       // derivative has to be added
       // {
-      //   auto  q = *DSlink[siconos::modeling::LagrangianR::q0];
+      //   auto  q = *DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q0)];
       //   auto  z = *DSlink[siconos::modeling::LagrangianR::z];
 
       //   std::static_pointer_cast<LagrangianRheonomousR>(inter->relation())->computehDot(simulation()->getTkp1(),

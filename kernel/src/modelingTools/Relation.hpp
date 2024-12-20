@@ -182,7 +182,7 @@ class Relation {
   virtual void computeInput(double time, Interaction &inter, unsigned int level = 0) = 0;
 
   /** \return true if the relation is linear */
-  virtual bool isLinear() { return false; }
+  virtual bool isLinear() const { return false; }
 
   /** \return true if the relation requires the computation of residu */
   virtual bool requireResidu() { return false; }

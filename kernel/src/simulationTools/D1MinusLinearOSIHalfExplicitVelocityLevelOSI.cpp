@@ -603,10 +603,10 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitVeloci
   if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]).get() == osnsp) {
     /* get the current velocity  of the aggregated ds */
     if (relationType == siconos::modeling::RelationType::Lagrangian) {
-      Xfree = DSlink[siconos::modeling::LagrangianR::q1];
+      Xfree = DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q1)];
       DEBUG_PRINT("Xfree = DSlink[siconos::modeling::LagrangianR::q1];\n");
     } else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
-      Xfree = DSlink[siconos::modeling::NewtonEulerR::velocity];
+      Xfree = DSlink[tools::enum_to_index(modeling::NewtonEulerR::WorkDS::velocity)];
       DEBUG_PRINT("Xfree = DSlink[siconos::modeling::NewtonEulerR::velocity];\n");
     } else
       THROW_EXCEPTION(
