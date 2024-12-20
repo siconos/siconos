@@ -21,14 +21,13 @@
 #include "BoundaryCondition.hpp"
 #include "SiconosVector.hpp"
 
-namespace siconos::algebra {
-}
-
 namespace siconos::modeling {
-/**\brief This class models a simple harmonic boundary conditions for
- *   prescribing the velocities in a Dynamical System. A simple
- *   boundary condition is considered to fix a component \f$ j \f$ of
- *   the velocity vector, i.e., \f$ v_j(t) = a +  b cos( \omega t+ \phi) \f$.
+/** \brief This class models a simple harmonic boundary conditions for
+ *   prescribing the velocities in a Dynamical System.
+ *
+ * A simple boundary condition is considered to fix a component \f$ j \f$ of
+ *   the velocity vector, i.e.,
+ *  \f$ v_j(t) = a +  b cos( \omega t+ \phi) \f$.
  *
  */
 class HarmonicBC : public BoundaryCondition {
@@ -41,12 +40,16 @@ class HarmonicBC : public BoundaryCondition {
    * \param phi phase
    */
   HarmonicBC(Indices&& newVelocityIndices, double a, double b, double omega, double phi)
-    : BoundaryCondition(std::move(newVelocityIndices)), _a(a), _b(b), _omega(omega), _phi(phi){};
+      : BoundaryCondition(std::move(newVelocityIndices)),
+        aCoeff_(a),
+        bCoeff_(b),
+        omega_(omega),
+        phi_(phi) {};
 
-  HarmonicBC(Indices&& newVelocityIndices, std::shared_ptr<siconos::algebra::SiconosVector> a,
-             std::shared_ptr<siconos::algebra::SiconosVector> b,
-             std::shared_ptr<siconos::algebra::SiconosVector> omega,
-             std::shared_ptr<siconos::algebra::SiconosVector> phi);
+  HarmonicBC(Indices&& newVelocityIndices, Eigen::Ref<siconos::algebra::SiconosVector> newa,
+             Eigen::Ref<siconos::algebra::SiconosVector> newb,
+             Eigen::Ref<siconos::algebra::SiconosVector> omega,
+             Eigen::Ref<siconos::algebra::SiconosVector> phi);
 
   /** destructor */
   virtual ~HarmonicBC() noexcept = default;
@@ -61,28 +64,25 @@ class HarmonicBC : public BoundaryCondition {
   ACCEPT_SERIALIZATION(HarmonicBC);
 
   /** Constant additive term of the prescribed velocity  */
-  double _a = 0.;
+  double aCoeff_ = 0.;
   /** Constant multiplicative term of the prescribed velocity  */
-  double _b = 0;
+  double bCoeff_ = 0;
   ;
   /** Constant frequency  */
-  double _omega = 0;
+  double omega_ = 0;
   ;
   /** Constant phase  */
-  double _phi = 0;
+  double phi_ = 0;
   ;
 
   /** Constant additive term of the prescribed velocity  */
-  std::shared_ptr<siconos::algebra::SiconosVector> _aV{nullptr};
+  std::unique_ptr<siconos::algebra::MapVectorType> a_view_{nullptr};
   /** Constant multiplicative term of the prescribed velocity  */
-  std::shared_ptr<siconos::algebra::SiconosVector> _bV{nullptr};
+  std::unique_ptr<siconos::algebra::MapVectorType> b_view_{nullptr};
   /** Constant frequency  */
-  std::shared_ptr<siconos::algebra::SiconosVector> _omegaV{nullptr};
+  std::unique_ptr<siconos::algebra::MapVectorType> omega_view_{nullptr};
   /** Constant phase  */
-  std::shared_ptr<siconos::algebra::SiconosVector> _phiV{nullptr};
-
-  //   /*Link to the precribed DynamicalSystem*/
-  //   std::shared_ptr<DynamicalSystem> _DS;
+  std::unique_ptr<siconos::algebra::MapVectorType> phi_view_{nullptr};
 };
 }  // namespace siconos::modeling
 #endif  // HARMONICBC_HPP

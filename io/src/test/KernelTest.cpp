@@ -320,7 +320,6 @@ void KernelTest::t6() {
 
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
-    dataPlot.resize(k, outputSize);
     ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
     // Comparison with a reference file
     siconos::algebra::SiconosMatrix dataPlotRef(dataPlot);

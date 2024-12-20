@@ -209,8 +209,7 @@ bool siconos::nonsmooth_formulations::GlobalFrictionContact::preCompute(double t
     size_t sizeM = 0;
 
 #ifdef WITH_TIMER
-    std::chrono::time_point<std::chrono::system_clock> start, end, end_old;
-    start = std::chrono::system_clock::now();
+    auto start = std::chrono::system_clock::now();
 #endif
     // fill _W
     _W->fillW(DSG0);
@@ -218,7 +217,7 @@ bool siconos::nonsmooth_formulations::GlobalFrictionContact::preCompute(double t
     _sizeGlobalOutput = sizeM;
     DEBUG_PRINTF("sizeM = %lu \n", sizeM);
 #ifdef WITH_TIMER
-    end = std::chrono::system_clock::now();
+    auto end = std::chrono::system_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
     std::cout << "\nGlobalFrictionContact: fill W  " << elapsed << " ms" << std::endl;
 #endif
@@ -228,7 +227,7 @@ bool siconos::nonsmooth_formulations::GlobalFrictionContact::preCompute(double t
       _W_inverse->fillWinverse(DSG0);
     }
 #ifdef WITH_TIMER
-    end_old = end;
+    auto end_old = end;
     end = std::chrono::system_clock::now();
     elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - end_old).count();
     std::cout << "GlobalFrictionContact: fillW inverse " << elapsed << " ms" << std::endl;
@@ -329,7 +328,7 @@ bool siconos::nonsmooth_formulations::GlobalFrictionContact::preCompute(double t
 
     // Checks z and w sizes and reset if necessary
     if (_z->size() != _sizeOutput) {
-      _z->resize(_sizeOutput, false);
+      _z->resize(_sizeOutput);
       _z->setZero();
     }
 

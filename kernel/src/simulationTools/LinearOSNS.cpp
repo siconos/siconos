@@ -467,15 +467,10 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
     } else if (relationType == siconos::modeling::RelationType::Lagrangian ||
                relationType == siconos::modeling::RelationType::NewtonEuler) {
       // Applying boundary conditions
-      std::shared_ptr<siconos::modeling::BoundaryCondition> bc;
       auto d = std::static_pointer_cast<siconos::modeling::SecondOrderDS>(ds);
-      if (d->boundaryConditions()) bc = d->boundaryConditions();
-      if (bc) {
-        for (const auto itindex : bc->velocityIndices()) {
-          // (nslawSize,sizeDS));
-          auto coltmp = std::make_shared<siconos::algebra::SiconosVector>(nslawSize);
-          coltmp->setZero();
-          leftInteractionBlock->col(itindex) = *coltmp;
+      if (auto bc = d->boundaryConditions()) {
+        for (const auto& itindex : bc->velocityIndices()) {
+          leftInteractionBlock->col(itindex).setZero();
         }
       }
 

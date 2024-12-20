@@ -541,12 +541,10 @@ void siconos::integrators::MoreauJeanOSI::applyBoundaryConditions(
         *_dynamicalSystemsGraph->properties(*dsi).iterationMatrixBoundaryConditions;
     auto columntmp = std::make_shared<siconos::algebra::SiconosVector>(d.dimension());
 
-    for (const auto itindex : d.boundaryConditions()->velocityIndices()) {
-      double DeltaPrescribedVelocity =
-          d.boundaryConditions()->prescribedVelocity()->getValue(columnindex) -
-          v.getValue(itindex);
-      DEBUG_PRINTF("index  = %i, value = %e\n", *itindex,
-                   d.boundaryConditions()->prescribedVelocity()->getValue(columnindex));
+    auto prescribedVelocity = d.boundaryConditions()->prescribedVelocity();
+    for (const auto &itindex : d.boundaryConditions()->velocityIndices()) {
+      double DeltaPrescribedVelocity = prescribedVelocity(columnindex) - v.getValue(itindex);
+      DEBUG_PRINTF("index  = %i, value = %e\n", *itindex, prescribedVelocity(columnindex));
       DEBUG_PRINTF("DeltaPrescribedVelocity = %e\n", DeltaPrescribedVelocity);
       *columntmp = IterationMatrixBoundaryConditions.col(columnindex);
       residu -= *columntmp * (DeltaPrescribedVelocity);

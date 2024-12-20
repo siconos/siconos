@@ -44,23 +44,6 @@ std::string toString(const T& obj) {
   return o.str();
 }
 
-// /** Print the contents of any sequence - From Thinking in C++, vol 2 p365.
-// \param first, any iterator, beginning of the sequence
-// \param last, any iterator, end of the sequence
-// \param char*, optional message on top of output, default ""
-// \param char*, separator between sequence elements, default new line
-// \param ostream, output destination, default std::cout
-// */
-// template <typename Iter>
-// void print(Iter first, Iter last, const char* nm = "", const char* sep = "\n",
-//            std::ostream& os = std::cout)
-// {
-//   if (nm != nullptr && *nm != '\0') os << nm << ": " << sep;
-//   typedef typename std::iterator_traits<Iter>::value_type T;
-//   std::copy(first, last, std::ostream_iterator<T>(os, sep));
-//   os << std::endl;
-// }
-
 /** Print to screen the content of any stl-like container.
     Warning: c++20 required
     \param description anything like a string, a number ... to describe the output

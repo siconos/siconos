@@ -22,7 +22,6 @@
 
 #include "BlockMatrix.hpp"
 #include "BlockVector.hpp"
-#include "PluggedObject.hpp"  // for getPluginfunctionname ...
 #include "SiconosConst.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod

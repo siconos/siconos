@@ -349,11 +349,7 @@ void siconos::mechanisms::MBTB_BodyBuild(
     DEBUG_PRINT("###\n");
 
     DEBUG_PRINTF("Set boundary Condition for body numDs = %i\n", numDS);
-    DEBUG_EXPR(
-        for (std::vector<unsigned int>::iterator itindex = boundaryConditionIndex->begin();
-             itindex != boundaryConditionIndex->end();
-             ++itindex) { std::cout << *itindex << std::endl; };);
-
+    DEBUG_EXPR(tools::print("bc indices ", *boundaryConditionIndex));
     auto bd = std::make_shared<siconos::modeling::BoundaryCondition>(boundaryConditionIndex);
     bd->setComputePrescribedVelocityFunction(pluginBoundaryConditionLib,
                                              pluginBoundaryConditionFct);

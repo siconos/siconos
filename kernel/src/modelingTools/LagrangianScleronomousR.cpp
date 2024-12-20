@@ -24,7 +24,6 @@
 #include "Interaction.hpp"
 #include "PluggedObject.hpp"
 #include "PluggedObject.hpp"  // getPluginFunctionname ...
-#include "PluginTypes.hpp"    // FPtr2 ...
 #include "SiconosMatrix.hpp"
 #include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"

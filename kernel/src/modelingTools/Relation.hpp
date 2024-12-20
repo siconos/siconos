@@ -31,10 +31,6 @@
 #include "SiconosSerialization.hpp"  // For ACCEPT_SERIALIZATION
 #include "SiconosVector.hpp"
 
-namespace siconos::plugins {
-class PluggedObject;
-}
-
 namespace siconos::internal {
 
 struct SiconosVisitor;

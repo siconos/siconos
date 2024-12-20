@@ -19,7 +19,6 @@
 #include "FirstOrderType1RTest.hpp"
 
 #include "Interaction.hpp"
-#include "PluggedObject.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
   if ((alpha) == (omega)) CPPUNIT_FAIL(message);

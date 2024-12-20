@@ -19,7 +19,6 @@
 
 #include "BlockVector.hpp"
 #include "Interaction.hpp"
-#include "PluggedObject.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 

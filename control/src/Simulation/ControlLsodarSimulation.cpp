@@ -84,5 +84,5 @@ void siconos::control::ControlLsodarSimulation::run()
   auto end = std::chrono::system_clock::now();
   std::chrono::duration<double, std::milli> fp_s = end - start;
   _elapsedTime = fp_s.count();
-  _dataM->resize(k, _nDim + 1);
+  /// _dataM->resize(k, _nDim + 1);
 }

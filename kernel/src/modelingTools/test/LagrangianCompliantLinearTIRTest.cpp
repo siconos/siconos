@@ -17,7 +17,6 @@
  */
 #include "LagrangianCompliantLinearTIRTest.hpp"
 
-#include "PluggedObject.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 

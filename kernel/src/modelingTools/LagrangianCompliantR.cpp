@@ -22,8 +22,6 @@
 
 #include "BlockVector.hpp"
 #include "Interaction.hpp"
-#include "PluggedObject.hpp"
-#include "PluginTypes.hpp"
 #include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod

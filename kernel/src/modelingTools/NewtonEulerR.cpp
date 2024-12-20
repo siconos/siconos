@@ -25,8 +25,6 @@
 #include "BlockVector.hpp"
 #include "Interaction.hpp"
 #include "NewtonEulerDS.hpp"  // computeT ...
-#include "PluggedObject.hpp"
-#include "PluginTypes.hpp"  // FPtr2 ...
 #include "SiconosMatrix.hpp"
 #include "SiconosMatrixOp.hpp"  // setblock
 #include "SiconosMatrixVectorOp.hpp"

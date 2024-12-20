@@ -29,14 +29,13 @@ SICONOS_IO_REGISTER_WITH_BASES(MultipleImpactNSL, (NonSmoothLaw), (_ElasCof)(_Re
 SICONOS_IO_REGISTER_WITH_BASES(ComplementarityConditionNSL, (NonSmoothLaw), )
 SICONOS_IO_REGISTER_WITH_BASES(FixedBC, (BoundaryCondition), )
 SICONOS_IO_REGISTER_WITH_BASES(HarmonicBC, (BoundaryCondition),
-                               (_a)(_aV)(_b)(_bV)(_omega)(_omegaV)(_phi)(_phiV))
+                               (_a)(aVector_)(_b)(bVector_)(_omega)(omega_)(_phi)(phi_))
 SICONOS_IO_REGISTER(NSLawMatrix, )
 SICONOS_IO_REGISTER_WITH_BASES(EqualityConditionNSL, (NonSmoothLaw), )
 SICONOS_IO_REGISTER_WITH_BASES(siconos::modeling::NewtonImpactFrictionNSL, (NonSmoothLaw),
                                (_en)(_et)(_mu))
 SICONOS_IO_REGISTER_WITH_BASES(MixedComplementarityConditionNSL, (NonSmoothLaw),
                                (_equalitySize))
-SICONOS_IO_REGISTER(PluggedObject, (_pluginName))
 SICONOS_IO_REGISTER_WITH_BASES(siconos::modeling::NewtonEuler3DR, (NewtonEuler1DR), )
 SICONOS_IO_REGISTER_WITH_BASES(FirstOrderLinearTIR, (FirstOrderR), (_e))
 SICONOS_IO_REGISTER(
@@ -44,7 +43,7 @@ SICONOS_IO_REGISTER(
     (_BVP)(_T)(_author)(_changeLog)(_date)(_description)(_mIsLinear)(_t)(_t0)(_title)(_topology))
 SICONOS_IO_REGISTER(
     BoundaryCondition,
-    (_pluginPrescribedVelocity)(_prescribedVelocity)(_prescribedVelocityOld)(_velocityIndices))
+   (prescribedVelocityOld_)(velocityIndices_))
 SICONOS_IO_REGISTER_WITH_BASES(siconos::modeling::NewtonImpactNSL, (NonSmoothLaw), (_e))
 SICONOS_IO_REGISTER_WITH_BASES(
     NewtonEuler1DR, (NewtonEulerR),
@@ -496,7 +495,7 @@ void siconos_io_register_generated_Kernel(Archive& ar)
   ar.register_type(static_cast<BlockMatrix*>(nullptr));
   ar.register_type(static_cast<GraphProperties*>(nullptr));
   ar.register_type(static_cast<DynamicalSystemProperties*>(nullptr));
-  ar.register_type(static_cast<InteractionProperties*>(nullptr));
+  ar.register_type(static_cast<InteractionProperties*>(nullptr));u
   ar.register_type(static_cast<MatrixIntegrator*>(nullptr));
   ar.register_type(static_cast<DynamicalSystemsGraph*>(nullptr));
   ar.register_type(static_cast<InteractionsGraph*>(nullptr));
@@ -509,7 +508,6 @@ void siconos_io_register_generated_Kernel(Archive& ar)
   ar.register_type(static_cast<EqualityConditionNSL*>(nullptr));
   ar.register_type(static_cast<siconos::modeling::NewtonImpactFrictionNSL*>(nullptr));
   ar.register_type(static_cast<MixedComplementarityConditionNSL*>(nullptr));
-  ar.register_type(static_cast<PluggedObject*>(nullptr));
   ar.register_type(static_cast<siconos::modeling::NewtonEuler3DR*>(nullptr));
   ar.register_type(static_cast<FirstOrderLinearTIR*>(nullptr));
   ar.register_type(static_cast<siconos::modeling::NonSmoothDynamicalSystem*>(nullptr));

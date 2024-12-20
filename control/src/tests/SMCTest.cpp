@@ -193,8 +193,6 @@ void SMCTest::test_itw_ZOH() {
   data->col(3) = _beta * data->col(2) + data->col(1);
   dataRef.col(3) = _beta * dataRef.col(2) + dataRef.col(1);
   dataRef -= *data;
-  // data->resize(data.size(0), 4);
-  // dataRef.resize(data.size(0), 4);
   std::cout << "------- Integration done, error = " << dataRef.normInf() << " -------\n";
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test_itw_ZOH : ", dataRef.normInf() < _tol, true);
 }
@@ -219,8 +217,6 @@ void SMCTest::test_itw_Lsodar() {
   data->col(3) = _beta * data->col(2) + data->col(1);
   dataRef.col(3) = _beta * dataRef.col(2) + dataRef.col(1);
   dataRef -= *data;
-  // data->resize(data.size(0), 4);
-  // dataRef.resize(data.size(0), 4);
   std::cout << "------- Integration done, error = " << dataRef.normInf() << " -------\n";
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test_itw_Lsodar : ", dataRef.normInf() < _tol, true);
 }

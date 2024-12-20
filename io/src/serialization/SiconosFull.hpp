@@ -261,13 +261,11 @@ void siconos_io(Archive& ar, SiconosMatrix& m, unsigned int version) {
 
 namespace siconos {
 MAKE_SICONOS_IO_PROPERTIES(std::shared_ptr<siconos::simulation::MatrixIntegrator>);
-MAKE_SICONOS_IO_PROPERTIES(std::shared_ptr<siconos::plugins::PluggedObject>);
 MAKE_SICONOS_IO_PROPERTIES(std::shared_ptr<siconos::integrators::OneStepIntegrator>);
 MAKE_SICONOS_IO_PROPERTIES(std::shared_ptr<siconos::algebra::SiconosMatrix>);
 MAKE_SICONOS_IO_PROPERTIES(std::shared_ptr<siconos::algebra::SimpleMatrix>);
 MAKE_SICONOS_IO_PROPERTIES(std::shared_ptr<siconos::algebra::SiconosVector>);
 MAKE_SICONOS_IO_SP_PROPERTIES(std::shared_ptr<siconos::simulation::MatrixIntegrator>);
-MAKE_SICONOS_IO_SP_PROPERTIES(std::shared_ptr<siconos::plugins::PluggedObject>);
 MAKE_SICONOS_IO_SP_PROPERTIES(std::shared_ptr<siconos::integrators::OneStepIntegrator>);
 MAKE_SICONOS_IO_SP_PROPERTIES(std::shared_ptr<siconos::algebra::SiconosMatrix>);
 MAKE_SICONOS_IO_SP_PROPERTIES(std::shared_ptr<siconos::algebra::SimpleMatrix>);
