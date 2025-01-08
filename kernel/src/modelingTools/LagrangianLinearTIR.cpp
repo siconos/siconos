@@ -74,8 +74,8 @@ void siconos::modeling::LagrangianLinearTIR::computeOutput(double time, Interact
   // get y and lambda of the interaction
   auto& y = *inter.y(derivativeNumber);
   auto& DSlink = inter.linkToDSVariables();
-  siconos::algebra::matrixBlockVector_prod(*jacobianhOver_q_view_,
-                                           *DSlink[tools::enum_to_index(WorkDS::q0) + derivativeNumber], y);
+  siconos::algebra::matrixBlockVector_prod(
+      *jacobianhOver_q_view_, *DSlink[tools::enum_to_index(WorkDS::q0) + derivativeNumber], y);
 
   if (derivativeNumber == 0) {
     if (eVector_view_) y += *eVector_view_;
@@ -100,7 +100,8 @@ void siconos::modeling::LagrangianLinearTIR::computeInput(double time, Interacti
   DEBUG_EXPR(jacobianhOver_q_->display(););
   DEBUG_EXPR(DSlink[tools::enum_to_index(WorkDS::p0) + level]->display(););
   siconos::algebra::transposeMatrixVector_prod_toBlock(
-      lambda, *jacobianhOver_q_view_, *DSlink[tools::enum_to_index(WorkDS::p0) + level], false);
+      lambda, *jacobianhOver_q_view_, *DSlink[tools::enum_to_index(WorkDS::p0) + level],
+      false);
   DEBUG_END(
       "void siconos::modeling::LagrangianLinearTIR::computeInput(double time, "
       "Interaction& "

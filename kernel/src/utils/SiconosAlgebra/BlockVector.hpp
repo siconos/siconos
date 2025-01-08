@@ -247,13 +247,6 @@ class BlockVector {
   */
   BlockVector& operator=(const double* data);
 
-  /** Assignment operator
-   *
-   *  \param vIn the vector to be copied
-   *  \return  BlockVector&
-   */
-  BlockVector& operator=(const SiconosVector& vIn);
-
   /**
      Subtract in place operator
 

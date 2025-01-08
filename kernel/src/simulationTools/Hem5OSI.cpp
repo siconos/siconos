@@ -487,7 +487,8 @@ void siconos::integrators::Hem5OSI::initializeWorkVectorsForInteraction(
     auto& lds = *std::static_pointer_cast<siconos::modeling::LagrangianDS>(ds1);
     DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q2)] =
         std::make_shared<siconos::algebra::BlockVector>();
-    DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q2)]->insertPtr(lds.acceleration());
+    DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q2)]->insertPtr(
+        lds.acceleration());
   }
   // else if (relationType == siconos::modeling::RelationType::NewtonEuler)
   // {
@@ -501,7 +502,8 @@ void siconos::integrators::Hem5OSI::initializeWorkVectorsForInteraction(
       inter_work_block[siconos::integrators::Hem5OSI::xfree]->insertPtr(
           workVds2[siconos::integrators::Hem5OSI::FREE]);
       auto& lds = *std::static_pointer_cast<siconos::modeling::LagrangianDS>(ds2);
-      DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q2)]->insertPtr(lds.acceleration());
+      DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q2)]->insertPtr(
+          lds.acceleration());
     }
     // else if (relationType == siconos::modeling::RelationType::NewtonEuler)
     // {
@@ -723,10 +725,11 @@ void siconos::integrators::Hem5OSI::integrate(double& tinit, double& tend, doubl
                 std::cout << "NFCN = " << iwork[33] << "\n";
                 std::cout << "NDEC = " << iwork[34] << "\n";
                 std::cout << "NSOL = " << iwork[35] << "\n";);
-  *_qWork = *_qtmp;
-  *_vWork = *_vtmp;
-  *_aWork = *_atmp;
 
+  // Copy into work vectors ... This should be reviewed (BlockVectors)
+  for (int i = 0; i < _qtmp->size(); ++i) (*_qWork)(i) = (*_qtmp)(i);
+  for (int i = 0; i < _vtmp->size(); ++i) (*_vWork)(i) = (*_vtmp)(i);
+  for (int i = 0; i < _atmp->size(); ++i) (*_aWork)(i) = (*_atmp)(i);
   DEBUG_PRINTF("tend_DR = %f\n", (double)tend_DR);
   DEBUG_EXPR(_qWork->display());
   DEBUG_EXPR(_vWork->display());

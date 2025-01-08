@@ -79,12 +79,9 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
     if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
       auto& accFree = *workVectors[siconos::integrators::D1MinusLinearOSI::FREE];
       /* POINTER CONSTRUCTOR : will contain the acceleration without contact force */
-      accFree.setZero();
-
       // get left state from memory
       auto qold = d->qMemory().getSiconosVector(0);
       auto vold = d->velocityMemory().getSiconosVector(0);  // right limit
-      DEBUG_EXPR(accFree.display());
       DEBUG_EXPR(qold.display());
       DEBUG_EXPR(vold.display());
 
@@ -92,7 +89,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
       d->computeTotalForces(vold, qold, told);
 
       DEBUG_EXPR(d->totalForces()->display());
-      accFree += d->totalForces();
+      accFree = d->totalForces();
 
       /* Compute the acceleration due to the external force */
       /* accFree contains left (right limit) acceleration without contact force */
@@ -103,7 +100,6 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
 
       /* Store the value of accFree in workspace(::FREE_TDG) */
       work_tdg = workVectors[siconos::integrators::D1MinusLinearOSI::FREE_TDG];
-      work_tdg->setZero();
       *work_tdg = accFree;  // store the value in WorkFreeFree
 
       DEBUG_PRINT(
@@ -124,11 +120,10 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
       DEBUG_EXPR(vold.display());
 
       work_tdg = workVectors[siconos::integrators::D1MinusLinearOSI::FREE_TDG];
-      work_tdg->setZero();
       DEBUG_EXPR(work_tdg->display());
 
       d->computeWrench(vold, qold, told);
-      accFree += d->wrench();
+      accFree += d->wrench();  // Warning FP: acFree has not been set to zero. Is that right?
 
       if (d->LUMass()) {
         accFree = d->LUMass()->solve(accFree);
@@ -236,24 +231,19 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
       auto& residuFree = *workVectors[siconos::integrators::D1MinusLinearOSI::RESIDU_FREE];
       auto& accFree = *workVectors[siconos::integrators::D1MinusLinearOSI::FREE];
 
-      residuFree.setZero();
-
       DEBUG_EXPR(accFree.display());
       DEBUG_EXPR(qold.display());
       DEBUG_EXPR(vold.display());
 
-      residuFree -= 0.5 * h * accFree;
+      residuFree = -0.5 * h * accFree;
 
       const auto& vold = d->velocityMemory().getSiconosVector(0);
 
-      *d->velocity() = h * accFree;
-      *d->velocity() += vold;
-
+      *d->velocity() = h * accFree + vold;
       DEBUG_EXPR(residuFree.display());
       DEBUG_EXPR(v.display());
 
-      *d->q() = 0.5 * h * vold;
-      *d->q() += d->qMemory().getSiconosVector(0);
+      *d->q() = 0.5 * h * (vold + d->velocity_read()) + d->qMemory().getSiconosVector(0);
 
     } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
       auto& residuFree =
@@ -265,16 +255,14 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
       const auto& vold = d->twistMemory().getSiconosVector(0);
 
       // initialize *it->residuFree and predicted right velocity (left limit)
-      residuFree.setZero();
 
       DEBUG_EXPR(accFree.display());
       DEBUG_EXPR(qold.display());
       DEBUG_EXPR(vold.display());
 
-      residuFree -= 0.5 * h * accFree;
+      residuFree = -0.5 * h * accFree;
 
-      *d->twist() = h * accFree;
-      *d->twist() += vold;
+      *d->twist() = h * accFree + vold;
 
       DEBUG_EXPR(residuFree.display());
       DEBUG_EXPR(v.display());
@@ -285,8 +273,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
       *d->dotq() = d->T() * d->twist_read();
       const auto& dotqold = d->dotqMemory().getSiconosVector(0);
 
-      *d->q() = 0.5 * h * (dotqold + d->dotq_read());
-      *d->q() += qold;
+      *d->q() = 0.5 * h * (dotqold + d->dotq_read()) + qold;
 
       // q[3:6] must be normalized
       DEBUG_EXPR(std::cout << d->q_read() << "\n");

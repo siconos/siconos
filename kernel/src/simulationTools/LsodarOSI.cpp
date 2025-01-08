@@ -266,7 +266,6 @@ void siconos::integrators::LsodarOSI::initializeWorkVectorsForDS(
   updateData();
 
   _xtmp = std::make_shared<siconos::algebra::SiconosVector>(_xWork->size());
-
   computeRhs(t);
 
   DEBUG_END(
@@ -530,7 +529,8 @@ void siconos::integrators::LsodarOSI::integrate(double& tinit, double& tend, dou
     THROW_EXCEPTION("LsodarOSI, integration failed");
   }
 
-  *_xWork = *_xtmp;
+  // Copy into work vectors ... This should be reviewed (BlockVectors)
+  for (int i = 0; i < _xtmp->size(); ++i) (*_xWork)(i) = (*_xtmp)(i);
   istate = _intData[3];
   tout = tinit_DR;  // real ouput time
   tend = tend_DR;   // necessary for next start of DLSODAR

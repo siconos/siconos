@@ -54,36 +54,7 @@ class Cable2d3DR : public siconos::modeling::LagrangianScleronomousR {
    */
   std::shared_ptr<siconos::algebra::SiconosVector> _Tangent{nullptr};
 
-  /** Set the coordinates of first contact point.  Must only be done
-   *  in a computeh() override.
-   *
-   *  \param npc new coordinates
-   */
-  void setpc1(std::shared_ptr<siconos::algebra::SiconosVector> npc) { _Pc1 = npc; };
-
-  /** Set the coordinates of second contact point.  Must only be done
-   *  in a computeh() override.
-   *
-   *  \param npc new coordinates
-   */
-  void setpc2(std::shared_ptr<siconos::algebra::SiconosVector> npc) { _Pc2 = npc; };
-
-  /** Set the coordinates of inside normal vector at the contact point.
-
-   *  Must only be done in a computeh() override.
-   *
-   *  \param nnc new coordinates
-   */
-  void setnc(std::shared_ptr<siconos::algebra::SiconosVector> nnc) { _Normal = nnc; };
-
-  /** Set the coordinates of inside normal vector at the contact point.
-   *  Must only be done in a computeh() override.
-   *
-   *  \param nnc new coordinates
-   */
-  void settc(std::shared_ptr<siconos::algebra::SiconosVector> ntc) { _Tangent = ntc; };
-
- public:
+  public:
   /** constructor
    */
   Cable2d3DR(unsigned int node_index)

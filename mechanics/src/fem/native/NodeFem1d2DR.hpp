@@ -51,21 +51,6 @@ class NodeFem1d2DR : public siconos::modeling::LagrangianScleronomousR {
    */
   std::shared_ptr<siconos::algebra::SiconosVector> _Normal{nullptr};
 
-  /** Set the coordinates of second contact point.  Must only be done
-   *  in a computeh() override.
-   *
-   *  \param npc new coordinates
-   */
-  void setpc2(std::shared_ptr<siconos::algebra::SiconosVector> npc) { _Pc2 = npc; };
-
-  /** Set the coordinates of inside normal vector at the contact point.
-
-   *  Must only be done in a computeh() override.
-   *
-   *  \param nnc new coordinates
-   */
-  void setnc(std::shared_ptr<siconos::algebra::SiconosVector> nnc) { _Normal = nnc; };
-
  public:
   /** constructor
    */
@@ -121,8 +106,8 @@ class NodeFem1d2DR : public siconos::modeling::LagrangianScleronomousR {
    */
   void updateContactPoint(std::shared_ptr<siconos::algebra::SiconosVector> pc2,
                           std::shared_ptr<siconos::algebra::SiconosVector> normal) {
-    setpc2(pc2);
-    setnc(normal);
+    _Pc2 = pc2;
+    _Normal = normal;
   };
 
   /** update the contact points from references

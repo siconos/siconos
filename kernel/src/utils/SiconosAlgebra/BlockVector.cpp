@@ -446,26 +446,19 @@ std::shared_ptr<siconos::algebra::SiconosVector>
 siconos::algebra::BlockVector::toSiconosVector() const {
   {
     if (_tabIndex->size() > 1) {
-      size_t total_size = 0;
-      for (auto t : *_tabIndex) {
-        total_size += t;
-      }
-      auto vectOut = std::make_shared<SiconosVector>(total_size);
+      auto result = std::make_shared<SiconosVector>(_tabIndex->back());
+      size_t currentIndex = 0;
       for (auto v : _vect) {
-        *vectOut << *v;
+        const size_t vecSize = v->size();
+        result->segment(currentIndex, vecSize) = *v; // Copy
+        currentIndex += vecSize;
       }
-      return vectOut;
+      return result;
     } else {
       // No copy, just a ref.
       return _vect[0];
     }
   }
-}
-
-siconos::algebra::BlockVector& siconos::algebra::BlockVector::operator=(
-    const SiconosVector& vIn) {
-  setBlock(vIn, _sizeV, 0, 0);
-  return *this;
 }
 
 siconos::algebra::BlockVector& siconos::algebra::BlockVector::operator*=(double s) {

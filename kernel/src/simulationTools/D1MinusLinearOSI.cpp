@@ -42,7 +42,7 @@ siconos::integrators::D1MinusLinearOSI::_NSLEffectOnFreeOutput::_NSLEffectOnFree
     siconos::nonsmooth_formulations::OneStepNSProblem* p,
     std::shared_ptr<siconos::modeling::Interaction> inter,
     siconos::graphs::InteractionProperties& interProp)
-    : _osnsp(p), _inter(inter), _interProp(interProp){};
+    : _osnsp(p), _inter(inter), _interProp(interProp) {};
 
 void siconos::integrators::D1MinusLinearOSI::_NSLEffectOnFreeOutput::visit(
     const siconos::modeling::NewtonImpactNSL& nslaw) const {
@@ -260,7 +260,8 @@ void siconos::integrators::D1MinusLinearOSI::initializeWorkVectorsForInteraction
     DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::p2)]->insertPtr(lds.p(2));
     DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q2)] =
         std::make_shared<siconos::algebra::BlockVector>();
-    DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q2)]->insertPtr(lds.acceleration());
+    DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q2)]->insertPtr(
+        lds.acceleration());
   } else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
   }
 
@@ -268,7 +269,8 @@ void siconos::integrators::D1MinusLinearOSI::initializeWorkVectorsForInteraction
     if (relationType == siconos::modeling::RelationType::Lagrangian) {
       auto& lds = *std::static_pointer_cast<siconos::modeling::LagrangianDS>(ds2);
       DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::p2)]->insertPtr(lds.p(2));
-      DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q2)]->insertPtr(lds.acceleration());
+      DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q2)]->insertPtr(
+          lds.acceleration());
     } else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
     }
   }
@@ -323,30 +325,21 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeState() {
     auto& ds_work_vectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
     /* \warning the following conditional statement should be removed with a MechanicalDS class
      */
-    if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
-      // Lagrangian Systems
 
+    auto& residuFree = *ds_work_vectors[siconos::integrators::D1MinusLinearOSI::RESIDU_FREE];
+    if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
       // get left state from memory
       const auto& vold = d->velocityMemory().getSiconosVector(0);  // right limit
-      DEBUG_EXPR(vold.display());
-      auto& residuFree = *ds_work_vectors[siconos::integrators::D1MinusLinearOSI::RESIDU_FREE];
-      siconos::algebra::SiconosVector& vfree =
-          *d->velocity();  // POINTER CONSTRUCTOR : contains free velocity
-
+      // POINTER CONSTRUCTOR : contains free velocity
+      auto& vfree = *d->velocity();
       // get right information
-      vfree = residuFree;
+      vfree = -residuFree + vold;
       DEBUG_EXPR(residuFree.display());
       // d->computeMass();
       // M->resetFactorizationFlags();
       // M->Solve(vfree);
       // DEBUG_EXPR(M->display());
-
-      vfree *= -1.;
-      vfree += vold;
-      DEBUG_EXPR(vfree.display());
     } else if (auto d = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
-      // NewtonEuler Systems
-
       // get left state from memory
       const auto& vold = d->twistMemory().getSiconosVector(0);  // right limit
       DEBUG_EXPR(vold.display());
@@ -355,14 +348,9 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeState() {
       // auto M = std::make_shared<siconos::algebra::SiconosMatrix>(*(d->mass()))); // we copy
       // the mass matrix to avoid its factorization;
       auto& vfree = *d->twist();  // POINTER CONSTRUCTOR : contains free velocity
-      auto& residuFree = *ds_work_vectors[siconos::integrators::D1MinusLinearOSI::RESIDU_FREE];
 
-      vfree = residuFree;
+      vfree = -residuFree + vold;
       DEBUG_EXPR(residuFree.display());
-
-      vfree *= -1.;
-      vfree += vold;
-      DEBUG_EXPR(vfree.display());
     } else
       THROW_EXCEPTION(
           "siconos::integrators::D1MinusLinearOSI::computeResidu - only implemented for "

@@ -104,10 +104,10 @@ void siconos::fem::cable::Cable2d3DR::updateContactPoint(
     std::shared_ptr<siconos::algebra::SiconosVector> pc2,
     std::shared_ptr<siconos::algebra::SiconosVector> normal,
     std::shared_ptr<siconos::algebra::SiconosVector> tangent) {
-  setpc1(pc1);
-  setpc2(pc2);
-  setnc(normal);
-  settc(tangent);
+  _Pc1 = pc1;
+  _Pc2 = pc2;
+  _Normal = normal;
+  _Tangent = tangent;
 };
 
 /** update the contact points from references

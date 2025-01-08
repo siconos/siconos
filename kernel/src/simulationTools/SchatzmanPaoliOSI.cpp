@@ -293,15 +293,10 @@ double siconos::integrators::SchatzmanPaoliOSI::computeResidu() {
       else
         residuFree = q_k_1 - q_k;
 
-      if (lltids->hasExternalForces()) {
-        lltids->computeFext(t);
-        residuFree -= lltids->fext();  // freeR = _workspace[freeresidu] - F
-      }
       if (lltids->hasDampingMatrix()) {
         // residufree += h^2 C (\theta \Frac{q-q_{k-1}}{2h}+ (1-\theta) v_k))
-        siconos::algebra::SiconosVector buffer =
-            1.0 / (2.0 * h) * _theta * (q_k - q_k_1) + (1.0 - _theta) * v_k;
-        residuFree += h * h * lltids->dampingMatrix() * buffer;
+        residuFree += h * h * lltids->dampingMatrix() *
+                      (1.0 / (2.0 * h) * _theta * (q_k - q_k_1) + (1.0 - _theta) * v_k);
       }
       if (lltids->hasStiffnessMatrix())
         residuFree += h * h * lltids->hasStiffnessMatrix() * q_k;
@@ -361,7 +356,7 @@ void siconos::integrators::SchatzmanPaoliOSI::computeFreeState() {
     auto ds = _dynamicalSystemsGraph->bundle(*dsi);
     auto& ds_work_vectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
     // 1 - Lagrangian Non Linear Systemsv
-    if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+    if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianLinearTIDS>(ds)) {
       // IN to be updated at current time: Fext
       // IN at told: qi,vi, fext
       // IN constants: K,C
@@ -381,10 +376,8 @@ void siconos::integrators::SchatzmanPaoliOSI::computeFreeState() {
       auto& qfree = *ds_work_vectors[siconos::integrators::SchatzmanPaoliOSI::FREE];
 
       // Velocity free and residu. vFree = RESfree (pointer equality !!).
-      qfree = residuFree;
-      qfree = _dynamicalSystemsGraph->properties(*dsi).LUW->solve(qfree);
-      qfree *= -1.0;
-      qfree += d->qMemory().getSiconosVector(0);
+      qfree = -_dynamicalSystemsGraph->properties(*dsi).LUW->solve(residuFree) +
+              d->qMemory().getSiconosVector(0);
     } else
       THROW_EXCEPTION(
           "siconos::integrators::SchatzmanPaoliOSI::computeFreeState - Only implemented for "
@@ -558,13 +551,11 @@ void siconos::integrators::SchatzmanPaoliOSI::updateState(const unsigned int) {
 
       // To compute q, we solve W(q - qfree) = p
       if (d->p(_levelMaxForInput)) {
-        *d->q() = d->p_read(_levelMaxForInput);  // q = p
-        *d->q() = _dynamicalSystemsGraph->properties(*dsi).LUW->solve(*d->q());
+        *d->q() = qfree + _dynamicalSystemsGraph->properties(*dsi).LUW->solve(
+                              d->p_read(_levelMaxForInput));
 
       } else
-        d->q()->setZero();
-
-      *d->q() += qfree;
+        *d->q() += qfree;
 
       // Computation of the velocity
 

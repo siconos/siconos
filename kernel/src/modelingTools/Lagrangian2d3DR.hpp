@@ -70,27 +70,6 @@ class Lagrangian2d3DR : public LagrangianScleronomousR {
   std::shared_ptr<siconos::algebra::SiconosMatrix> _AUX1{nullptr};
   std::shared_ptr<siconos::algebra::SiconosMatrix> _AUX2{nullptr};
 
-  /** Set the coordinates of first contact point.  Must only be done
-   *  in a computeh() override.
-   *
-   *  \param npc new coordinates
-   */
-  void setpc1(std::shared_ptr<siconos::algebra::SiconosVector> npc) { _Pc1 = npc; };
-
-  /** Set the coordinates of second contact point.  Must only be done
-   *  in a computeh() override.
-   *
-   *  \param npc new coordinates
-   */
-  void setpc2(std::shared_ptr<siconos::algebra::SiconosVector> npc) { _Pc2 = npc; };
-
-  /** Set the coordinates of inside normal vector at the contact point.
-   *  Must only be done in a computeh() override.
-   *
-   *  \param nnc new coordinates
-   */
-  void setnc(std::shared_ptr<siconos::algebra::SiconosVector> nnc) { _Nc = nnc; };
-
  public:
   /** V.A. boolean _isOnCOntact ?? Why is it public members ?
    *  seems parametrize the projection algorithm

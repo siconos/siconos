@@ -54,7 +54,7 @@ double siconos::modeling::Lagrangian2d2DR::distance() const {
   DEBUG_EXPR(_Pc2->display(););
   DEBUG_EXPR(dpc.display(););
   DEBUG_END("siconos::modeling::Lagrangian2d2DR::distance(...)\n")
-  return dpc.norm2() * (_Nc->dot(dpc) >= 0 ? -1 : 1);
+  return dpc.norm() * (_Nc->dot(dpc) >= 0 ? -1 : 1);
 }
 
 void siconos::modeling::Lagrangian2d2DR::computeh(
@@ -106,6 +106,14 @@ void siconos::modeling::Lagrangian2d2DR::computeJacobianhOver_q(
   // jacobianhOver_q_->setValue(1,2,lever_arm_x*Ty - lever_arm_y*Tx );
 
   double* array = &*jacobianhOver_q_view_->data();
+  array[0] = Nx;
+  array[2] = Ny;
+  array[4] = lever_arm_x * Ny - lever_arm_y * Nx;
+
+  array[1] = Tx;
+  array[3] = Ty;
+  array[5] = lever_arm_x * Ty - lever_arm_y * Tx;
+
   array[0] = Nx;
   array[2] = Ny;
   array[4] = lever_arm_x * Ny - lever_arm_y * Nx;
