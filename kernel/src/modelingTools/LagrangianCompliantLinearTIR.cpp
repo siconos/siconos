@@ -95,12 +95,9 @@ void siconos::modeling::LagrangianCompliantLinearTIR::computeOutput(
   auto& y = *inter.y(derivativeNumber);
   auto& lambda = *inter.lambda(derivativeNumber);
   auto& DSlink = inter.linkToDSVariables();
-
   siconos::algebra::matrixBlockVector_prod(
       *jacobianhOver_q_view_, *DSlink[tools::enum_to_index(WorkDS::q0) + derivativeNumber], y);
   y += *DMatrix_view_ * lambda;
-  siconos::algebra::prod(*DMatrix_view_, lambda, y, false);
-
   if (derivativeNumber == 0) {
     if (eVector_view_) y += *eVector_view_;
   }
@@ -109,12 +106,12 @@ void siconos::modeling::LagrangianCompliantLinearTIR::computeOutput(
 void siconos::modeling::LagrangianCompliantLinearTIR::display() const {
   LagrangianR::display();
   std::cout << "===== Lagrangian Linear Relation display ===== " << std::endl;
-  std::cout << " C: \n" << jacobianhOver_q_view_ << "\n";
+  std::cout << " C: \n" << *jacobianhOver_q_view_ << "\n";
   std::cout << " e: " << std::endl;
   if (eVector_view_)
-    std::cout << eVector_view_ << "\n";
+    std::cout << *eVector_view_ << "\n";
   else
     std::cout << " -> nullptr " << std::endl;
-  std::cout << " D: \n" << DMatrix_view_ << "\n";
+  std::cout << " D: \n" << *DMatrix_view_ << "\n";
   std::cout << "===================================== " << std::endl;
 }

@@ -58,13 +58,7 @@ siconos::integrators::MoreauJeanOSI::_NSLEffectOnFreeOutput::_NSLEffectOnFreeOut
 
 void siconos::integrators::MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(
     const siconos::modeling::NewtonImpactNSL &nslaw) const {
-  double e;
-  e = nslaw.e();
-  std::vector<std::size_t> subCoord(4);
-  subCoord[0] = 0;
-  subCoord[1] = _inter.nonSmoothLaw()->size();
-  subCoord[2] = 0;
-  subCoord[3] = subCoord[1];
+  auto e = nslaw.e();
   auto &osnsp_rhs = *(*_interProp.workVectors)[siconos::integrators::MoreauJeanOSI::OSNSP_RHS];
   osnsp_rhs += e * _inter.y_k(_osnsp.inputOutputLevel());
 }
@@ -1039,7 +1033,7 @@ void siconos::integrators::MoreauJeanOSI::computeFreeOutput(
     auto H = std::dynamic_pointer_cast<siconos::modeling::LagrangianR>(inter.relation())
                  ->jacobianhOver_q();
     siconos::algebra::matrixBlockVector_prod(H, *xfree, osnsp_rhs, true);
-  } else if (relationType == siconos::modeling::RelationType::Lagrangian) {
+  } else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
     auto H = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerR>(inter.relation())
                  ->jacobianhOver_q_prod_T();
     siconos::algebra::matrixBlockVector_prod(H, *xfree, osnsp_rhs, true);
@@ -1230,7 +1224,8 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
           *d.velocity() = vfree;
           *d.velocity() += iterationMatrix.diagonal().cwiseProduct(d.velocity_read());
         } else {
-          *d.velocity() = _dynamicalSystemsGraph->properties(*dsi).LUW->solve(*d.velocity());
+          *d.velocity() =
+              _dynamicalSystemsGraph->properties(*dsi).LUW->solve(d.velocity_read());
           *d.velocity() += vfree;
         }
       } else {
@@ -1640,17 +1635,17 @@ void siconos::integrators::moreau_jean::updatePosition(
       dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS) {
     siconos::modeling::LagrangianDS &lds = static_cast<siconos::modeling::LagrangianDS &>(ds);
     // *q = *qold + h*(theta * *v +(1.0 - theta)* *vold)
-    *(lds.q()) = time_step * theta * lds.velocity_read();
-    *(lds.q()) += time_step * (1. - theta) * lds.velocityMemory().getSiconosVector(0);
-    *(lds.q()) += lds.qMemory().getSiconosVector(0);
+    *(lds.q()) = time_step * theta * lds.velocity_read() +
+                 time_step * (1. - theta) * lds.velocityMemory().getSiconosVector(0) +
+                 lds.qMemory().getSiconosVector(0);
 
   } else if (dsType == siconos::modeling::Type::NewtonEulerDS) {
     siconos::modeling::NewtonEulerDS &neds =
         static_cast<siconos::modeling::NewtonEulerDS &>(ds);
 
     siconos::algebra::SiconosVector velocityIncrement{neds.dimension()};
-    velocityIncrement = time_step * theta * neds.twist_read();
-    velocityIncrement += time_step * (1. - theta) * neds.twistMemory().getSiconosVector(0);
+    velocityIncrement = time_step * theta * neds.twist_read() +
+                        time_step * (1. - theta) * neds.twistMemory().getSiconosVector(0);
     DEBUG_EXPR(velocityIncrement->display());
 
     neds.q()->head(3) = velocityIncrement.head(3);

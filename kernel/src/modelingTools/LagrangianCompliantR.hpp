@@ -134,7 +134,7 @@ class LagrangianCompliantR : public LagrangianR {
       const Eigen::Ref<const siconos::algebra::SiconosVector> &lambda);
 
   /*  \return a read-only view on the matrix \f$ \nabla^\top_{\lambda}h(q,\lambda) \f$*/
-  inline const auto jacobianhOver_lambda() const {
+  inline const siconos::algebra::ConstMapType jacobianhOver_lambda() const override {
     return siconos::algebra::ConstMapType(jacobianhOver_lambda_->data(),
                                           jacobianhOver_lambda_->rows(),
                                           jacobianhOver_lambda_->cols());

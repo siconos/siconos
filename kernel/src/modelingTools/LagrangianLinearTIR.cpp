@@ -61,7 +61,7 @@ void siconos::modeling::LagrangianLinearTIR::checkSize(const Interaction& inter)
 
   if ((eVector_view_) && eVector_view_->size() != sizeY)
     THROW_EXCEPTION(
-        "siconos::modeling::LagrangianCompliantLinearTIR::checkSize inconsistent sizes "
+        "siconos::modeling::LagrangianLinearTIR::checkSize inconsistent sizes "
         "between e vector and the dimension of the interaction.");
 }
 

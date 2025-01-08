@@ -30,7 +30,7 @@ void siconos::modeling::LagrangianR::display() const {
             << static_cast<std::underlying_type<RelationType>::type>(_relationType)
             << " and subtype "
             << static_cast<std::underlying_type<RelationSubType>::type>(_subType) << "\n";
-  std::cout << " jacobianhOver_q_ :\n" << jacobianhOver_q_view_ << "\n";
+  std::cout << " jacobianhOver_q_ :\n" << *jacobianhOver_q_view_ << "\n";
 }
 
 void siconos::modeling::LagrangianR::accept(

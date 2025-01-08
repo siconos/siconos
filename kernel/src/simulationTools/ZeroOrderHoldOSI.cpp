@@ -81,9 +81,10 @@ void siconos::integrators::ZeroOrderHoldOSI::initializeWorkVectorsForDS(
     auto E =
         std::make_shared<siconos::algebra::SiconosMatrix>(ds->dimension(), ds->dimension());
     E->setIdentity();
+    auto constE = siconos::algebra::ConstMapType(E->data(), E->rows(), E->cols());
     DSG0.AdInt.insert(dsgVD, std::make_shared<siconos::simulation::MatrixIntegrator>(
                                  *ds, *_simulation->nonSmoothDynamicalSystem(),
-                                 _simulation->eventsManager()->timeDiscretisation(), *E));
+                                 _simulation->eventsManager()->timeDiscretisation(), constE));
     if (DSG0.AdInt.at(dsgVD)->isConst()) DSG0.AdInt.at(dsgVD)->integrate();
   }
 
@@ -391,8 +392,7 @@ void siconos::integrators::ZeroOrderHoldOSI::computeFreeOutput(
       assert(lambda);
 
       if (forel->hasJacobianhOver_lambda()) {
-        auto D = std::static_pointer_cast<siconos::modeling::FirstOrderR>(rel)
-                     ->jacobianhOver_lambda();
+        auto D = rel->jacobianhOver_lambda();
         osnsp_rhs = D * *lambda;
         osnsp_rhs *= -1.0;
       }

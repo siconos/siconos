@@ -24,16 +24,13 @@
 #define SimulationGraphs_H
 
 #include "BlockVector.hpp"
+#include "FunctionTypes.hpp"
 #include "SiconosGraph.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosProperties.hpp"
 #include "SiconosVector.hpp"
 
 namespace siconos::algebra {}  // namespace siconos::algebra
-
-namespace siconos::plugins {
-class PluggedObject;
-}
 
 namespace siconos::modeling {
 
@@ -187,17 +184,17 @@ struct DynamicalSystemsGraph : public _DynamicalSystemsGraph {
       ((siconos::graphs::VertexSP, siconos::algebra::SiconosMatrix,
         B))  // For Controlled System
       ((siconos::graphs::VertexSP, siconos::algebra::SiconosMatrix, L))  // For Observer
-      ((siconos::graphs::VertexSP, siconos::plugins::PluggedObject,
+      ((siconos::graphs::VertexSP, siconos::modeling::func_prototypes::FunctionS_M,
         pluginB))  // For Controlled System
-      ((siconos::graphs::VertexSP, siconos::plugins::PluggedObject,
+      ((siconos::graphs::VertexSP, siconos::modeling::func_prototypes::FunctionS_M,
         pluginL))                                                        // For Observer
       ((siconos::graphs::VertexSP, siconos::algebra::SiconosVector, e))  // For Observer
       ((siconos::graphs::VertexSP, siconos::algebra::SiconosVector,
         u))  // For Controlled System
-      ((siconos::graphs::VertexSP, siconos::plugins::PluggedObject,
-        pluginU))  // For Controlled System (nonlinear w.r.t u)
-      ((siconos::graphs::VertexSP, siconos::plugins::PluggedObject,
-        pluginJacgx))  // For Controlled System (nonlinear w.r.t u); compute nabla_x g(x, u)
+      // ((siconos::graphs::VertexSP, siconos::plugins::PluggedObject,
+      //   pluginU))  // For Controlled System (nonlinear w.r.t u)
+      // ((siconos::graphs::VertexSP, siconos::plugins::PluggedObject,
+      //   pluginJacgx))  // For Controlled System (nonlinear w.r.t u); compute nabla_x g(x, u)
       ((siconos::graphs::VertexSP, siconos::algebra::SiconosVector,
         tmpXdot))  // For Controlled System (nonlinear w.r.t u); tmpXdot = g(x, u)
       ((siconos::graphs::VertexSP, siconos::algebra::SiconosMatrix,
@@ -222,8 +219,8 @@ struct DynamicalSystemsGraph : public _DynamicalSystemsGraph {
     pluginL._store->erase(vd);
     e._store->erase(vd);
     u._store->erase(vd);
-    pluginU._store->erase(vd);
-    pluginJacgx._store->erase(vd);
+    // pluginU._store->erase(vd);
+    // pluginJacgx._store->erase(vd);
     tmpXdot._store->erase(vd);
     jacgx._store->erase(vd);
     name._store->erase(vd);

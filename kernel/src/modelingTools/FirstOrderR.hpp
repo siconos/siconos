@@ -125,7 +125,9 @@ class FirstOrderR : public Relation {
   bool hasJacobianhOver_state() const { return jacobianhOver_state_view_ != nullptr; }
 
   /** \return True if \f$ \nabla_x h(x,t,\lambda) \f$ is taken into account */
-  bool hasJacobianhOver_lambda() const { return jacobianhOver_lambda_view_ != nullptr; }
+  bool hasJacobianhOver_lambda() const override {
+    return jacobianhOver_lambda_view_ != nullptr;
+  }
 
   /** \return True if \f$ \nabla_x h(x,t,\lambda) \f$ is taken into account */
   bool hasJacobiangOver_state() const { return jacobiangOver_state_view_ != nullptr; }
@@ -144,7 +146,7 @@ class FirstOrderR : public Relation {
   }
 
   /** \return a read-only view on \f$ \nabla_{\lambda} h(x,t,\lambda) \f$ matrix */
-  inline const auto jacobianhOver_lambda() const {
+  inline const siconos::algebra::ConstMapType jacobianhOver_lambda() const override {
     return siconos::algebra::ConstMapType(jacobianhOver_lambda_view_->data(),
                                           jacobianhOver_lambda_view_->rows(),
                                           jacobianhOver_lambda_view_->cols());

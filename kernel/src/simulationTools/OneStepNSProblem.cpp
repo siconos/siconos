@@ -153,7 +153,9 @@ void siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks(
         currentInteractionBlock->setZero();
       }
       if (!isLinear || !_hasBeenUpdated) {
-        { computeInteractionBlock(*ei); }
+        {
+          computeInteractionBlock(*ei);
+        }
 
         // allocation for transposed block
         // should be avoided
@@ -196,7 +198,7 @@ void siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks(
           "siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks(). "
           "Computation of "
           "diaganal block\n");
-      std::shared_ptr<siconos::modeling::Interaction> inter = indexSet->bundle(*vi);
+      auto inter = indexSet->bundle(*vi);
       auto nslawSize = inter->nonSmoothLaw()->size();
       if (!indexSet->properties(*vi).block) {
         indexSet->properties(*vi).block =
@@ -364,7 +366,6 @@ siconos::nonsmooth_formulations::OneStepNSProblem::getOSIMatrix(
   // First, we deal with the non-standard cases (when iteration matrix is not available in the
   // graph)
   if (osiType == siconos::integrators::IntegratorType::LSODAROSI) {
-
     if (auto lds = dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
       luIterationMatrix = lds->LUMass();
     } else

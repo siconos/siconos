@@ -27,6 +27,7 @@
 
 #include "BlockVector.hpp"
 #include "FunctionTypes.hpp"
+#include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosSerialization.hpp"  // For ACCEPT_SERIALIZATION
 #include "SiconosVector.hpp"
@@ -185,6 +186,23 @@ class Relation {
 
   /** main relation members display */
   virtual void display() const = 0;
+
+  /** \return True if \f$ \nabla_x h(x,t,\lambda) \f$ is taken into account */
+  virtual bool hasJacobianhOver_lambda() const { return false; }
+
+  /*  \return a read-only view on the matrix \f$ \nabla^\top_{\lambda}h(q,\lambda) \f$
+
+      warning: use hasJacobianhOver_lambda before any call to ensure the jacobian is
+      defined and has sense
+  */
+  virtual const siconos::algebra::ConstMapType jacobianhOver_lambda() const {
+    // To be overriden in classes where jacobianhOver_lambda has sense
+    THROW_EXCEPTION("jacobian h over lambda is not defined for this kind of relation.");
+    // handle return value to avoid compiler warning.
+    static const siconos::algebra::SiconosMatrix empty_matrix;
+    static const siconos::algebra::ConstMapType empty_map(empty_matrix.data(), 0, 0);
+    return empty_map;
+  }
 
   virtual void accept(std::shared_ptr<siconos::internal::SiconosVisitor>) const = 0;
 };

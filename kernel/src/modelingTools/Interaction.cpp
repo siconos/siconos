@@ -778,23 +778,11 @@ void siconos::modeling::Interaction::getExtraInteractionBlock(
   // coupling between relations through D must be taken into account
   // thanks to the nslaw (by "increasing" its dimension).
 
-  auto relationType = relation()->getType();
-
-  if (relationType == RelationType::FirstOrder) {
-    auto forel = std::static_pointer_cast<FirstOrderR>(relation());
-    if (forel->hasJacobianhOver_lambda()) {
-      auto originalMatrix = forel->jacobianhOver_lambda();
-      *interactionBlock = originalMatrix;  // copy!
-    } else
-      interactionBlock->setZero();
+  if (relation()->hasJacobianhOver_lambda()) {
+    auto originalMatrix = relation()->jacobianhOver_lambda();
+    *interactionBlock = originalMatrix;  // copy!
   } else
     interactionBlock->setZero();
-
-  // THROW_EXCEPTION(
-  //     "siconos::modeling::Interaction::getExtraInteractionBlock, not yet implemented "
-  //     "for relations of type " +
-  //     std::to_string(
-  //         static_cast<std::underlying_type<RelationSubType>::type>(relationType)));
 }
 
 void siconos::modeling::Interaction::display(bool brief) const {

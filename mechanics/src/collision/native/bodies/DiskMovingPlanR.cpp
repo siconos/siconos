@@ -21,7 +21,6 @@
 #include <cmath>
 
 #include "BlockVector.hpp"
-#include "PluggedObject.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 

@@ -97,10 +97,15 @@ class LagrangianCompliantLinearTIR : public LagrangianR {
                                           DMatrix_view_->cols());
   }
 
+  /* \return a read-only view on the matrix \f$ D = \nabla^\top_{\lambda}h(q,\lambda) \f$*/
+  inline const siconos::algebra::ConstMapType jacobianhOver_lambda() const override { return DMatrix(); }
+
   /** \return  a read-only view on e vector */
   inline const auto eVector() const {
     return siconos::algebra::ConstMapVectorType(eVector_view_->data(), eVector_view_->size());
   }
+
+  virtual bool hasJacobianhOver_lambda() const override { return DMatrix_view_ != nullptr; }
 
   /** True if e is defined */
   bool haseVector() const { return eVector_view_ != nullptr; }

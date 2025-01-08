@@ -127,7 +127,7 @@ void siconos::control::LinearSMCOT2::actuate() {
   // XXX small hack here
   auto CS = std::make_shared<siconos::algebra::SiconosVector>(_B->size(0));
   *CS = _Csurface->row(0);
-  _coeff = -1 / (CS->vector_sum() * hCurrent);
+  _coeff = -1 / (CS->sum() * hCurrent);
 
   double uEq = CS->dot(_coeff * (*_XPhi + *_X - *_Xhat));
   double uEqP;
