@@ -190,7 +190,14 @@ void wrap_dynamical_systems(py::module_ &m) {
            py::keep_alive<1, 2>(),  // keep python object (np array arguments) memory alive
                                     // as long as object is referenced
            py::keep_alive<1, 3>(), py::keep_alive<1, 4>(), py::arg("q0"), py::arg("v0"),
-           py::arg("M"));
+           py::arg("M"))
+
+      .def("setStiffnessMatrix", &siconos::modeling::LagrangianLinearTIDS::setStiffnessMatrix,
+           py::keep_alive<1, 2>(), "To define the stiffness matrix (constant)")
+      .def("setDampingMatrix", &siconos::modeling::LagrangianLinearTIDS::setDampingMatrix,
+           py::keep_alive<1, 2>(), "To define the damping matrix (constant)")
+
+      ;
   // .def("__repr__", [](const siconos::modeling::LagrangianLinearTIDS &a) {
   //     (a.display());
   //   return "\n";

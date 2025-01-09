@@ -764,9 +764,9 @@ void siconos::nonsmooth_formulations::MultipleImpact::UpdateDuringImpact() {
     auto lambda = inter.lambda(inputOutputLevel());
     // Copy _velocityContact/_tolImpulseContact, starting from index pos into y/lambda
     // save into y !!
-    *y = _velocityContact->segment(pos, y->size());
+    y->segment(0, y->size()) = _velocityContact->segment(pos, y->size());
     // saved into lambda[1] !!
-    *lambda = _impulseContactUpdate->segment(pos, lambda->size());
+    lambda->segment(0, lambda->size()) = _impulseContactUpdate->segment(pos, lambda->size());
   };
   // 2. Update the Input[1], state of DS systems, Output[1]
   simulation()->update(inputOutputLevel());
@@ -797,9 +797,9 @@ void siconos::nonsmooth_formulations::MultipleImpact::SaveDataOneStep(unsigned i
     if (indexSet1->is_vertex(inter))  // if Interaction belongs to the IndexSet[1]
     {
       auto pos = indexSet0->properties(*ui).absolute_position;
-      *P_inter = _tolImpulseContact->segment(pos, P_inter->size());
-      *F_inter = _forceContact->segment(pos, F_inter->size());
-      *E_inter = _energyContact->segment(pos, E_inter->size());
+      P_inter->segment(0, P_inter->size()) = _tolImpulseContact->segment(pos, P_inter->size());
+      F_inter->segment(0, F_inter->size()) = _forceContact->segment(pos, F_inter->size());
+      E_inter->segment(0, E_inter->size()) = _energyContact->segment(pos, E_inter->size());
     } else {
       P_inter->setZero();  // no impulse at this Interaction
       F_inter->setZero();  // no force at this Interaction
@@ -947,9 +947,9 @@ void siconos::nonsmooth_formulations::MultipleImpact::PostComputeImpact() {
     auto lambda = inter.lambda(inputOutputLevel());
     // Copy _velocityContact/_tolImpulseContact, starting from index pos into y/lambda
     // save into y !!
-    *y = _velocityContact->segment(pos, y->size());
+    y->segment(0, y->size()) = _velocityContact->segment(pos, y->size());
     // Warning: yEquivalent is saved into lambda[1] !!
-    *lambda = _impulseContactUpdate->segment(pos, lambda->size());
+    lambda->segment(0, lambda->size()) = _impulseContactUpdate->segment(pos, lambda->size());
     // If the update is performed at the end of the impact process, we update the total normal
     // impulse at contacts from the beginning to the end of impact (vector _tolImpulseContact).
     // Otherwise, we must reset the lambda[1] to zero because the post-impact velocity has been

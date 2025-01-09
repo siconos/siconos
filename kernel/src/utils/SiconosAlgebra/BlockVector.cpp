@@ -309,7 +309,7 @@ siconos::algebra::BlockVector& siconos::algebra::BlockVector::operator-=(
   unsigned int index = 0;
   for (auto& v : _vect) {
     currentSize = v->size();
-    *v -= vIn.segment(index, currentSize);
+    v->segment(0, currentSize) -= vIn.segment(index, currentSize);
     index += currentSize;
   }
   return *this;
@@ -347,7 +347,7 @@ siconos::algebra::BlockVector& siconos::algebra::BlockVector::operator+=(
 
   for (auto& it : _vect) {
     currentSize = it->size();
-    *it += vIn.segment(index, currentSize);
+    it->segment(0, currentSize) += vIn.segment(index, currentSize);
     index += currentSize;
   }
   return *this;
@@ -450,7 +450,7 @@ siconos::algebra::BlockVector::toSiconosVector() const {
       size_t currentIndex = 0;
       for (auto v : _vect) {
         const size_t vecSize = v->size();
-        result->segment(currentIndex, vecSize) = *v; // Copy
+        result->segment(currentIndex, vecSize) = *v;  // Copy
         currentIndex += vecSize;
       }
       return result;

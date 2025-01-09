@@ -958,7 +958,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::postCompute() {
     // y = inter.y(inputOutputLevel());
     lambda = inter.lambda(inputOutputLevel());
     // Copy _z values, starting from index pos into lambda.
-    *lambda = _z->segment(pos, lambda->size());
+    lambda->segment(0, lambda->size()) = _z->segment(pos, lambda->size());
     DEBUG_EXPR(lambda->display(););
   }
   DEBUG_END("void siconos::nonsmooth_formulations::LinearOSNS::postCompute()\n");

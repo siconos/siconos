@@ -406,7 +406,7 @@ void siconos::nonsmooth_formulations::GlobalFrictionContact::postCompute() {
 
     // siconos::algebra::setBlock(*_w, y, y->size(), pos, 0);// Warning: yEquivalent is
     //  saved in y !!
-    *lambda = _z->segment(pos, lambda->size());
+    lambda->segment(0, lambda->size()) = _z->segment(pos, lambda->size());
     DEBUG_EXPR(lambda->display(););
   }
   auto& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
@@ -422,7 +422,7 @@ void siconos::nonsmooth_formulations::GlobalFrictionContact::postCompute() {
       DEBUG_EXPR(velocity->display(););
       DEBUG_EXPR(_globalVelocities->display(););
       pos = DSG0.properties(*dsi).absolute_position;
-      *velocity = _globalVelocities->segment(pos, sizeDS);
+      velocity->segment(0, sizeDS) = _globalVelocities->segment(pos, sizeDS);
       DEBUG_EXPR(velocity->display(););
     } else if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
       auto sizeDS = neds->dimension();
@@ -431,7 +431,7 @@ void siconos::nonsmooth_formulations::GlobalFrictionContact::postCompute() {
       DEBUG_EXPR(twist->display(););
       DEBUG_EXPR(_globalVelocities->display(););
       pos = DSG0.properties(*dsi).absolute_position;
-      *twist = _globalVelocities->segment(pos, sizeDS);
+      twist->segment(0, sizeDS) = _globalVelocities->segment(pos, sizeDS);
       DEBUG_EXPR(twist->display(););
     } else
       THROW_EXCEPTION(

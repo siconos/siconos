@@ -937,7 +937,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::postComputeLagra
           inter);
   // Copy _w/_z values, starting from index pos into y/lambda.
 
-  *lambda = _z->segment(pos, sizeY);
+  lambda->segment(0, sizeY) = _z->segment(pos, sizeY);
 
 #ifdef MLCPPROJ_DEBUG
   printf("MLCPP lambda of Interaction is pos =%i :\n", pos);
@@ -945,7 +945,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::postComputeLagra
   lambda->display();
   auto nslawsize = inter->nonSmoothLaw()->size();
   auto aBuff = std::make_shared<siconos::algebra::SiconosVector>(nslawsize);
-  *aBuff = _z->segment(pos, sizeY);
+  aBuff->segment(0, sizeY) = _z->segment(pos, sizeY);
   auto J = lr->jacobianhOver_q();
   auto aux = std::make_shared<siconos::algebra::SiconosMatrix>(*J);
   aux->trans();
@@ -1032,7 +1032,7 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::postComputeNewto
           inter);
   // Copy _w/_z values, starting from index pos into y/lambda.
 
-  *lambda = _z->segment(pos, sizeY);
+  lambda->segment(0, sizeY) = _z->segment(pos, sizeY);
 }
 
 void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::computeOptions(
