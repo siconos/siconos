@@ -207,6 +207,10 @@ SparseBlockStructuredMatrix* SBM_new(void);
  */
 void SBM_null(SparseBlockStructuredMatrix* sbm);
 
+size_t SBM_nnz(SparseBlockStructuredMatrix* A);
+
+void SBM_clear_block(SparseBlockStructuredMatrix* sbm);
+
 /**
    SparseMatrix - vector product y = alpha*A*x + beta*y
 
@@ -239,6 +243,7 @@ void SBM_gemv_3x3(unsigned int sizeX, unsigned int sizeY,
    The routine has to be used with precaution. The allocation of C is not done
    since we want to add beta*C. We assume that the structure and the allocation
    of the matrix C are right. Especially:
+
 
    - the blocks C(i,j) must exists
    - the sizes of blocks must be consistent
@@ -370,20 +375,20 @@ void SBM_extract_component_3x3(const SparseBlockStructuredMatrix* const A,
 
 /**
     Destructor for SparseBlockStructuredMatrix objects
-
     \param blmat SparseBlockStructuredMatrix the matrix to be destroyed.
  */
 void SBM_clear(SparseBlockStructuredMatrix* blmat);
 
 /** To free a SBM matrix (for example allocated by NM_new_from_file).
  *
- *  \param[in] A the SparseBlockStructuredMatrix that mus be de-allocated.
+ *  \param[in] A the SparseBlockStructuredMatrix that must be de-allocated.
  *  \param[in] level use NUMERICS_SBM_FREE_BLOCK | NUMERICS_SBM_FREE_SBM
  */
 void SBMfree(SparseBlockStructuredMatrix* A, unsigned int level);
 
 /**
     Screen display of the matrix content
+
 
     \param m the matrix to be displayed
  */
@@ -407,6 +412,7 @@ void SBM_read_in_file(SparseBlockStructuredMatrix* const M, FILE* file);
 
 /**
    Create from file a SparseBlockStructuredMatrix with  memory allocation
+
 
    \param file the corresponding name of the file
    \return the matrix to be displayed
@@ -446,6 +452,7 @@ void SBM_clear_pred(SparseBlockStructuredMatrixPred* blmatpred);
 
 /**
     Compute the indices of blocks of the diagonal block
+
 
     \param M the SparseBlockStructuredMatrix matrix
     \return the indices for all the rows

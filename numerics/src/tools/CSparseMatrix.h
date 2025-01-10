@@ -259,6 +259,7 @@ int CSparseMatrix_print(const CSparseMatrix* A, int brief);
 int CSparseMatrix_print_in_file(const CSparseMatrix* A, int brief, FILE* file);
 
 int CSparseMatrix_print_in_Matlab_file(const CSparseMatrix* A, int brief, FILE* file);
+int CSparseMatrix_is_equal(const CSparseMatrix *A, const CSparseMatrix *B, double tol);
 
 CSparseMatrix* CSparseMatrix_new_from_file(FILE* file);
 

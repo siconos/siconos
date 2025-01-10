@@ -485,11 +485,24 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers *equation
   }
 
   // compute rho here
-  FrictionContactProblem *localproblem = fc3d_local_problem_allocate(problem);
-  assert(options->dparam[SICONOS_FRICTION_3D_NSN_RHO] > 0.0);
-  for (int contact = 0; contact < problem->numberOfContacts; ++contact) {
-    if (options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] ==
-        SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPLIT_SPECTRAL_NORM_COND) {
+  FrictionContactProblem * localproblem =fc3d_local_problem_allocate(problem);
+  assert(options->dparam[SICONOS_FRICTION_3D_NSN_RHO]>0.0);
+  SparseBlockStructuredMatrix* matrix1 = problem->M->matrix1;
+  if (problem->M->storageType == NM_SPARSE) {
+
+    if (problem->M->matrix1)
+      {
+	printf("Warning matrix 1 different from NULL");
+      }
+
+    problem->M->matrix1 = NM_extract_diagonal_blocks(problem->M, problem->dimension);
+  }
+
+
+  for(int contact = 0; contact < problem->numberOfContacts; ++contact)
+  {
+    if(options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] == SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPLIT_SPECTRAL_NORM_COND)
+    {
       fc3d_local_problem_fill_M(problem, localproblem, contact);
       compute_rho_split_spectral_norm_cond(localproblem, &rho[3 * contact]);
     } else if (options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] ==
@@ -517,6 +530,18 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers *equation
         "contact = %i, rho[0] = %4.2e, rho[1] = %4.2e, rho[2] = %4.2e",
         contact, rho[3 * contact], rho[3 * contact + 1], rho[3 * contact + 2]);
   }
+  if (problem->M->storageType == NM_SPARSE) {
+    SBM_clear_block(problem->M->matrix1);
+    SBM_clear(problem->M->matrix1);
+    problem->M->matrix1= matrix1;
+    localproblem->M->matrix0 = NULL;
+  }
+  if(problem->M->storageType == NM_SPARSE_BLOCK)
+  {
+    /* we release the pointer to avoid deallocation of the diagonal blocks of the original matrix of the problem*/
+    localproblem->M->matrix0 = NULL;
+  }
+  frictionContactProblem_free(localproblem);
 
   // velocity <- M*reaction + qfree
   cblas_dcopy(problemSize, problem->q, 1, velocity, 1);
@@ -662,12 +687,6 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers *equation
   }
 
   options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
-  if (problem->M->storageType == NM_SPARSE_BLOCK) {
-    /* we release the pointer to avoid deallocation of the diagonal blocks of the original
-     * matrix of the problem*/
-    localproblem->M->matrix0 = NULL;
-  }
-  frictionContactProblem_free(localproblem);
 
   if (!options->dWork) {
     assert(buffer);

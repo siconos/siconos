@@ -17,9 +17,16 @@
  */
 #include "projectionOnCone.h"
 
+#include "op3x3.h"   // for SET3, eig_3x3
+                     //
 #include <math.h>    // for sqrt
 #include <stdio.h>   // for fprintf, stderr
 #include <stdlib.h>  // for exit, EXIT_FAILURE
+
+/* #define DEBUG_NOCOLOR */
+/* #define DEBUG_MESSAGES */
+/* #define DEBUG_STDOUT */
+#include "siconos_debug.h"  // for DEBUG_PRINTF
 
 unsigned projectionOnCone(double* r, double mu) {
   double normT = sqrt(r[1] * r[1] + r[2] * r[2]);
@@ -69,7 +76,48 @@ void projectionOnSecondOrderCone(double* r, double mu, int size) {
     projectionOnCone(r, mu);
   } else {
     fprintf(stderr,
-            "Numerics, projectionOnSecondOrderCone f not yet implementes for size != 3 \n");
+            "Numerics, projectionOnSecondOrderCone f not yet implemented for size != 3 \n");
     exit(EXIT_FAILURE);
+  }
+}
+
+unsigned subdifferentialProjectionOnCone(double* H, double* r, double mu) {
+  double normT = sqrt(r[1] * r[1] + r[2] * r[2]);
+  /* hypot of libm is sure but really slow */
+  /* double normT = hypot(r[1], r[2]); */
+  SET3X3(H);
+  zero3x3(H00);
+
+  if (mu * normT <= -r[0]) {
+    // printf("We are in the polar cone\n");
+    return PROJCONE_DUAL;
+  } else if (normT <= mu * r[0]) {
+    *H00 = 1.;
+    *H11 = 1.;
+    *H22 = 1.;
+    // printf("We are in the cone\n");
+    return PROJCONE_INSIDE;
+  } else {
+    double oneoveroneplusmu2 = 1. / (1. + mu * mu);
+
+    *H00 = 1. * oneoveroneplusmu2;
+    *H10 = mu * r[1] * oneoveroneplusmu2;
+    *H20 = mu * r[2] * oneoveroneplusmu2;
+    double s1 = r[1] / normT;
+    double s2 = r[2] / normT;
+
+    double muoveroneplusmu2 = mu * oneoveroneplusmu2;
+
+    *H01 = muoveroneplusmu2 * s1;
+    *H02 = muoveroneplusmu2 * s2;
+
+    *H11 =
+        muoveroneplusmu2 / normT * (r[0] + mu * normT + r[0] * r[1] * r[1] / (normT * normT));
+    *H12 = muoveroneplusmu2 / normT * (r[0] * r[1] * r[2] / (normT * normT));
+    *H21 = muoveroneplusmu2 / normT * (r[0] * r[1] * r[2] / (normT * normT));
+    *H22 =
+        muoveroneplusmu2 / normT * (r[0] + mu * normT + r[0] * r[2] * r[2] / (normT * normT));
+    // printf("We are outside the cone and its polar\n");
+    return PROJCONE_BOUNDARY;
   }
 }
