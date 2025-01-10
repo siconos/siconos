@@ -79,7 +79,7 @@ class FirstOrderLinearDS : public FirstOrderNonLinearDS {
 
   /** True if b(t) is taken into account */
   bool hasbVector_{false};
-  
+
   // /** default constructor */
   // FirstOrderLinearDS() = default;
 

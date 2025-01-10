@@ -116,10 +116,11 @@ void siconos::integrators::OneStepIntegrator::OneStepIntegrator::updateAndSwapAl
 
   // Compute a first value for the output
   // VA 10/04/2024 What is the interest of the following line ?
-  inter.computeOutput(time, 0);
+  // FP: think it's useless.
+  //  inter.computeOutput(time, 0);
 
-  // prepare the gradients
-  inter.relation()->computeJach(time, inter);
+  // prepare the gradients --> Note FP: useless. This is done in computeOutput
+  //  inter.relation()->computeJach(time, inter);
   for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i) {
     inter.computeOutput(time, i);
   }

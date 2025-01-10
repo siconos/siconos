@@ -160,15 +160,13 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
 
   // Iteration through the set of Dynamical Systems.
   //
-  std::shared_ptr<siconos::modeling::DynamicalSystem> ds;  // Current Dynamical System.
-
   double maxResidu = 0;
   double normResidu = maxResidu;
 
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
   for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
     if (!checkOSI(dsi)) continue;
-    ds = _dynamicalSystemsGraph->bundle(*dsi);
+    auto ds = _dynamicalSystemsGraph->bundle(*dsi);
     auto& ds_work_vectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
 
     if (auto lltids = std::dynamic_pointer_cast<siconos::modeling::LagrangianLinearTIDS>(ds)) {
@@ -196,7 +194,7 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
       // -- No need to update W --
       //    auto v = d->velocity();  // v = v_k,i+1
       // free_rhs += h*C*vi
-      if (lltids->hasDampingMatrix()) free_rhs += time_step * lltids->dampingMatrix() * vold;
+      if (lltids->hasDampingMatrix()) free_rhs -= time_step * lltids->dampingMatrix() * vold;
       if (lltids->hasStiffnessMatrix()) {
         auto coeff = time_step * time_step * _theta;
         free_rhs -=
@@ -278,8 +276,7 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
         // scal(coef, *d->totalForces(), residu, false);
       }
 
-      residu = -1.0 * free_rhs;
-      residu += iterationMatrix * lds->velocity_read();
+      residu = iterationMatrix * lds->velocity_read() - free_rhs;
 
       DEBUG_EXPR(residu.display());
 
@@ -308,7 +305,6 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
       // Get the state  (previous time step) from memory vector
       // -> var. indexed with "Old"
 
-      residu.setZero();
       // Get the (constant mass matrix)
       // auto massMatrix = d->mass();
       // siconos::algebra::prod(*massMatrix, (*v - vold), residu, true); // residu = M(v -
@@ -316,13 +312,9 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
 
       auto& iterationMatrix = *_dynamicalSystemsGraph->properties(*dsi).iterationMatrix;
       const auto& vold = neds->twistMemory().getSiconosVector(0);
-      free_rhs = iterationMatrix * vold;
-
-      DEBUG_PRINTF("siconos::integrators::MoreauJeanGOSI:: _theta = %e\n", _theta);
-      DEBUG_PRINTF("siconos::integrators::MoreauJeanGOSI:: h = %e\n", time_step);
-
       // Cheaper version: get forces(ti,vi,qi) from memory
-      free_rhs += time_step * (1 - _theta) * neds->forcesMemory().getSiconosVector(0);
+      free_rhs = iterationMatrix * vold +
+                 time_step * (1 - _theta) * neds->forcesMemory().getSiconosVector(0);
 
       // Expensive version to check ...
       // d->computeTotalForces(vold,qold,told);
@@ -342,8 +334,7 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
             "yet implemented for this type of Dynamical system\n");
       }
 
-      residu = -1.0 * free_rhs;
-      residu = iterationMatrix * neds->twist_read();
+      residu = iterationMatrix * neds->twist_read() - free_rhs;
       if (neds->p(1)) residu -= neds->p_read(1);
 
       if (neds->boundaryConditions()) {

@@ -843,7 +843,7 @@ bool siconos::nonsmooth_formulations::LinearOSNS::preCompute(double time) {
   // Get topology
   auto topology = simulation()->nonSmoothDynamicalSystem()->topology();
   bool isLinear = simulation()->nonSmoothDynamicalSystem()->isLinear();
-  // int elapsed =0;
+  // auto elapsed =0;
   //    std::cout << "!b || !isLinear :"  << boolalpha <<  (!b || !isLinear) <<  std::endl;
 
   // nothing to do

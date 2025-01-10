@@ -521,11 +521,11 @@ void siconos::modeling::NewtonEulerDS::display(bool brief) const {
   std::cout << "- q \n";
   state_q_->display();
 
-  std::cout << "- initial state: " << q0_view_ << "\n";
+  std::cout << "- initial state: \n" << *q0_view_ << "\n";
   std::cout << "- twist \n";
   twist_->display();
 
-  std::cout << "- twist0 " << *twist0_view_ << "\n";
+  std::cout << "- twist0 \n " << *twist0_view_ << "\n";
 
   std::cout << "- dotq \n";
   if (dotq_)
@@ -551,7 +551,7 @@ void siconos::modeling::NewtonEulerDS::display(bool brief) const {
   else
     std::cout << "-> nullptr\n";
 
-  std::cout << "total inertia matrix :" << *totalInertiaMatrix_ << std::endl;
+  std::cout << "total inertia matrix :\n" << *totalInertiaMatrix_ << std::endl;
 
   std::cout << "===================================== \n";
 }

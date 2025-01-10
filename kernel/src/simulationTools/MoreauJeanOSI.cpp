@@ -614,8 +614,7 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
       DEBUG_EXPR(vold.display());
       DEBUG_EXPR(v.display());
 
-      residuFree = v;
-      residuFree -= vold;
+      residuFree = v - vold;
       if (d.hasMass()) {
         d.computeMass(*d.q());
         residuFree = d.mass() * residuFree;  // residuFree = M(v - vold)

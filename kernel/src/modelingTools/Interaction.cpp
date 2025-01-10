@@ -799,7 +799,7 @@ void siconos::modeling::Interaction::display(bool brief) const {
   _relation->display();
   _nslaw->display();
   for (unsigned int i = 0; i < _upperLevelForOutput + 1; i++) {
-    std::cout << "| y[" << i << "] : ";
+    std::cout << "| y[" << i << "] : \n";
     if (_y[i]) {
       if (_y[i]->size() >= 5) std::cout << "\n";
       _y[i]->display();
@@ -807,7 +807,7 @@ void siconos::modeling::Interaction::display(bool brief) const {
       std::cout << "->nullptr\n";
   }
   for (unsigned int i = 0; i < _upperLevelForInput + 1; i++) {
-    std::cout << "| lambda[" << i << "] : ";
+    std::cout << "| lambda[" << i << "] :\n ";
     if (_lambda[i]) {
       if (_lambda[i]->size() >= 5) std::cout << "\n";
       _lambda[i]->display();
@@ -818,7 +818,7 @@ void siconos::modeling::Interaction::display(bool brief) const {
     std::cout << "| _yMemory size: " << _yMemory.size() << "\n";
     ;
     for (unsigned int i = 0; i < _upperLevelForOutput + 1; i++) {
-      std::cout << "| y_Memory[" << i << "] : ";
+      std::cout << "| y_Memory[" << i << "] :\n ";
       _yMemory[i].display();
     }
   }
