@@ -200,3 +200,105 @@ int color_graph(int n, NumericsMatrix *M, long int *n_colors, size_t **set_sizes
     return 0;
 
 }
+
+
+int color_graph_permut(int n, NumericsMatrix *M, long int *n_colors, size_t **sum_sizes, size_t *inv_permutation) {
+    Mat A;
+
+    PetscFunctionBeginUser;
+    switch (M->storageType) {
+        case NM_DENSE: {
+            PetscCall(MatCreateSeqDense(PETSC_COMM_SELF, n, n, M->matrix0, &A));
+            PetscCall(MatConvert(A, MATSEQAIJ, MAT_INPLACE_MATRIX, &A));
+            PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
+            PetscCall(MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY));
+            break;
+        }
+        case NM_SPARSE: {
+            CSparseMatrix* sparse;
+            if (M->matrix2->origin == NSM_CSR) {
+                sparse = NM_csr(M);
+            } else {
+                sparse = NM_csc_trans(M);
+            }
+
+            int64_t* Mp = sparse->p;
+            int64_t* Mi = sparse->i;
+            double* Mx = sparse->x;
+
+            PetscCall(MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, n, n, Mp, Mi, Mx, &A));
+            PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
+            PetscCall(MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY));
+            break;
+        }
+        case NM_SPARSE_BLOCK: {
+            fprintf(stderr, "color_graph_petsc :: matrix storage not supported yet %d", M->storageType);
+            exit(EXIT_FAILURE);
+        }
+        default: {
+            fprintf(stderr, "color_graph_petsc :: unknown matrix storage %d", M->storageType);
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    /*          *
+     * COLORING *
+     *          */
+    MatColoring mc;
+    ISColoring iscoloring;
+
+    PetscCall(MatColoringCreate(A, &mc));
+    PetscCall(MatColoringSetDistance(mc, 1));
+
+    PetscCall(MatColoringSetType(mc, MATCOLORINGJP)); // Coloring algorithm 
+    // PetscCall(MatColoringSetType(mc, MATCOLORINGGREEDY));
+
+    PetscCall(MatColoringSetFromOptions(mc));
+    PetscCall(MatColoringApply(mc, &iscoloring));
+
+    /* Get index sets for each color */
+    PetscInt nn;
+    IS *is;
+    size_t *sum_size = NULL; // Array of sum of sizes of each color set
+    const PetscInt *idxin = NULL;
+    PetscCall(ISColoringGetIS(iscoloring, PETSC_USE_POINTER, &nn, &is)); // Get index sets
+
+    PetscInt size_petsc;
+
+    sum_size = (size_t *)malloc((size_t)(nn + 1) * sizeof(size_t)); // sum of sizes before color i
+    sum_size[0] = 0;
+
+    int k = 0;
+
+    for (int i = 0; i < (int)nn; i++) {
+        PetscCall(ISGetLocalSize(is[i], &size_petsc));
+        sum_size[i + 1] = (size_t)size_petsc + sum_size[i];
+        PetscCall(ISGetIndices(is[i], &idxin)); // Get indices for i-th color
+
+        /*
+        COPYING INDICES IN NEW ARRAY
+        TO USE IT OUTSIDE THIS FUNCTION
+        WITHOUT PETSC
+
+        I COULD ONLY USE POINTERS IF I WROTE BOTH COLORING AND COMPUTING IN PETSC???
+        */
+        for (int j = 0; j < (int)size_petsc; j++) {
+            inv_permutation[k] = (size_t)idxin[j];
+            k++;
+        }
+
+        PetscCall(ISRestoreIndices(is[i], &idxin));
+    }
+
+    // Call this because of option PETSC_USE_POINTER (see https://petsc.org/release/manualpages/IS/ISColoringGetIS/)
+    PetscCall(ISColoringRestoreIS(iscoloring, PETSC_USE_POINTER, &is));
+
+    PetscCall(MatColoringDestroy(&mc));
+    PetscCall(ISColoringDestroy(&iscoloring));
+    PetscCall(MatDestroy(&A));
+
+    *n_colors = nn;
+    *sum_sizes = sum_size;
+
+    return 0;
+}

@@ -12,4 +12,6 @@
 
 int color_graph(int n, NumericsMatrix *M, long int *n_colors, size_t **set_sizes, size_t ***set_indices);
 
+int color_graph_permut(int n, NumericsMatrix *M, long int *n_colors, size_t **set_sizes, size_t *inv_permutation);
+
 #endif

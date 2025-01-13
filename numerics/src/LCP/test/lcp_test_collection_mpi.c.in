@@ -38,7 +38,7 @@ int main(void)
   // Set solvers list for each collection of data.
 #if defined(TEST_LCP_MPI_COLLECTION_1) || defined(TEST_LCP_MPI_COLLECTION_2)
   // same solvers for data collections 1 and 2
-  int solvers[] = {SICONOS_LCP_PGS_GRAPH};
+  int solvers[] = {SICONOS_LCP_PGS_GRAPH, SICONOS_LCP_PGS_GRAPH_PERMUT};
 #endif
 
   int n_solvers = (int)(sizeof(solvers) / sizeof(solvers[0]));
@@ -53,6 +53,11 @@ int main(void)
   collection[3].will_fail = 1;
   collection[4].will_fail = 1;
   collection[5].will_fail = 1;
+  collection[7].will_fail = 1;
+  collection[9].will_fail = 1;
+  collection[10].will_fail = 1;
+  collection[11].will_fail = 1;
+  collection[12].will_fail = 1;
 #endif
 
   

@@ -143,6 +143,27 @@ void lcp_pgs_parallel(LinearComplementarityProblem* problem, double* z, double* 
 void lcp_pgs_graph(LinearComplementarityProblem* problem, double* z, double* w, int* info,
                    SolverOptions* options);
 
+/** lcp_pgs_graph_permut is an optimized version of lcp_pgs_graph.
+ It builds a graph to identify independent rows and update them in parallel. 
+ 
+ See https://erkaman.github.io/posts/gauss_seidel_graph_coloring.html
+ *
+ *  \param[in] problem structure that represents the LCP (M, q...)
+ *  \param[in,out] z a n-vector of doubles which contains the initial solution and returns the
+ solution of the problem.
+ *  \param[in,out] w a n-vector of doubles which returns the solution of the problem.
+ *  \param[out] info an integer which returns the termination value:
+ 0 : convergence
+ 1 : iter = itermax
+ 2 : negative diagonal term
+ *  \param[in,out] options structure used to define the solver and its parameters.
+
+ \todo Sizing the regularization paramter and apply it only on null diagnal term
+
+*/
+void lcp_pgs_graph_permut(LinearComplementarityProblem *problem, double *z, double *w, int *info,
+                          SolverOptions *options);
+
 /** lcp_psor Projected Succesive over relaxation solver for LCP. See cottle, Pang Stone Chap 5
  *
  *  \param[in] problem structure that represents the LCP (M, q...)

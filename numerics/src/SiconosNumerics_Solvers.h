@@ -35,6 +35,7 @@ See functions in SolverOptions.h
   SICONOS_SOLVER_MACRO(SICONOS_LCP_PGS);                                                    \
   SICONOS_SOLVER_MACRO(SICONOS_LCP_PGS_PARALLEL);                                           \
   SICONOS_SOLVER_MACRO(SICONOS_LCP_PGS_GRAPH);                                              \
+  SICONOS_SOLVER_MACRO(SICONOS_LCP_PGS_GRAPH_PERMUT);                                              \
   SICONOS_SOLVER_MACRO(SICONOS_LCP_CPG);                                                    \
   SICONOS_SOLVER_MACRO(SICONOS_LCP_LATIN);                                                  \
   SICONOS_SOLVER_MACRO(SICONOS_LCP_LATIN_W);                                                \

@@ -18,8 +18,8 @@
 
 #include "graph_tools.h"
 
-void lcp_pgs_graph(LinearComplementarityProblem *problem, double *z, double *w, int *info,
-                   SolverOptions *options) {  
+void lcp_pgs_graph_permut(LinearComplementarityProblem *problem, double *z, double *w, int *info,
+                          SolverOptions *options) {
 
   NumericsMatrix *M = problem->M;
   double *q = problem->q;
@@ -48,48 +48,78 @@ void lcp_pgs_graph(LinearComplementarityProblem *problem, double *z, double *w, 
     return;
   }
 
-  /* Graph coloring */
+  /* Graph coloring + permutation */
   long int n_colors = 0;
-  size_t *partition_size = NULL;
-  size_t **partitions = NULL;
+  size_t *sum_sizes = NULL;
+  size_t *inv_permutation = (size_t *)malloc(n * sizeof(size_t));
   
-  color_graph(n, M, &n_colors, &partition_size, &partitions); 
-  
+  color_graph_permut(n, M, &n_colors, &sum_sizes, inv_permutation);
+
+  size_t *permutation = (size_t *)malloc(n * sizeof(size_t));
+  for (int i = 0; i < n; i++) {
+    permutation[inv_permutation[i]] = i;
+  }
+
+  /* 2-norm of q, to normalize error */
+  double norm_q = cblas_dnrm2(n, q, 1); 
+  if (fabs(norm_q) <= DBL_EPSILON) norm_q = 1.;
+
   /* Solver variables */
   int iter = 0;
   double err = 1.;
 
   double zi;
-  int i;
+  double right = 0.;
+  int i, row;
+
+  double *lefts = (double *)malloc(n * sizeof(double));
+
+  int is_last = 0;
 
   /* Start solving */
-  while ((iter < itermax) && (err > tol)) {
+  while ((iter < itermax) && (is_last == 0)) {
 
+    if (err < tol) {
+      is_last = 1;
+    }
+
+    err = 0.;
+    
     for (int color = 0; color < n_colors; color++) {
 
-      #pragma omp parallel for default(none) private(zi, i) shared(q, z, diag, M, n, partitions, partition_size, color)
-      for (int v = 0; v < partition_size[color]; v++) {
-        i = partitions[color][v];
-        zi = q[i];
+      #pragma omp parallel for reduction(+:err) default(none) private(zi, right, i, row) shared(q, z, inv_permutation, permutation, diag, M, n, sum_sizes, color, w, lefts, is_last)
+      for (int i = sum_sizes[color]; i < sum_sizes[color + 1]; i++) {
+        row = inv_permutation[i];
+        right = q[row];
         DEBUG_PRINTF("zi = %e\n", zi);
-        NM_row_prod_no_diag1x1(n, i, i, M, z, &zi, false);
-        DEBUG_PRINTF("diag[i] = %e\t zi = %e\n", diag[i], zi);
-        zi = -(zi)*diag[i];
 
-        if (zi < 0)
-          z[i] = 0.0;
-        else
-          z[i] = zi;
+        w[row] = lefts[row];
 
-        /**
-         * Some threads may modify z while others are using it in 
-         * NM_row_prod_no_diag1x1 but it does not matter as 
-         * each line are independent inside a color
-        */
+        lefts[row] = 0.;
+
+        NM_row_prod_graph(n, row, row, sum_sizes[color], sum_sizes[color + 1], M, permutation, z, &lefts[row], &right, false);
+
+        w[row] += right + z[row] / diag[row];
+
+        err += pow(z[row] - fmax(0, (z[row] - w[row])), 2);
+
+        /* If err < tol, do not execute this (= do not update z)
+           So that we have w = Mz + q when we exit the loop */
+        if (is_last == 0) {
+          zi = lefts[row] + right;      
+
+          DEBUG_PRINTF("diag[i] = %e\t zi = %e\n", diag[i], zi);
+          zi = -(zi)*diag[row];
+
+          if (zi < 0)
+            z[row] = 0.0;
+          else
+            z[row] = zi;
+        }
       }
     }
 
-    lcp_compute_error(problem, z, w, tol, &err);
+    err = sqrt(err) / norm_q;
 
     if (verbose == 2) {
       printf(" # i%d -- %g : ", iter, err);
@@ -119,9 +149,10 @@ void lcp_pgs_graph(LinearComplementarityProblem *problem, double *z, double *w, 
     *info = 0;
   }
 
-  free(partition_size);
-  for (int i = 0; i < n_colors; i++) free(partitions[i]);
-  free(partitions);
+  free(sum_sizes);
+  free(inv_permutation);
+  free(permutation);
   free(diag);
+  free(lefts);
 
 }

@@ -6204,8 +6204,8 @@ void NM_get_invdiag(int n, int *info, NumericsMatrix *M, double *diag) {
   }
 }
 
-void NM_row_prod_leftright(size_t sizeX, int block_start, size_t row_start,
-                           NumericsMatrix* A, double* x, double* left, double *right, bool init) {
+void NM_row_prod_graph(size_t sizeX, int block_start, size_t row_start, size_t size_left, size_t col_start_right,
+                       NumericsMatrix* A, size_t *permutation, double* x, double* left, double *right, bool init) {
   assert(A);
   assert(x);
   assert(left);
@@ -6223,8 +6223,14 @@ void NM_row_prod_leftright(size_t sizeX, int block_start, size_t row_start,
       assert(M);
       int incx = sizeX, incy = 1;
 
-      left[0] += cblas_ddot(row_start, &M[row_start], incx, x, incy);
-      right[0] += cblas_ddot(sizeX - row_start - 1, &M[row_start] + incx * (row_start + 1), incx, x, incy);
+      size_t col;
+
+      for (int j = 0; j < sizeX; j++) {
+        col = permutation[j];
+        if (col < size_left) left[0] += M[row_start + incx * j] * x[j];
+        else if (col >= col_start_right) right[0] += M[row_start + incx * j] * x[j];   
+      }
+
       break;
     }
     case NM_SPARSE_BLOCK: {
@@ -6243,9 +6249,6 @@ void NM_row_prod_leftright(size_t sizeX, int block_start, size_t row_start,
         right[0] = 0.;
       }
 
-      double rin = x[row_start];
-      x[row_start] = 0.;
-
       CSparseMatrix* M;
       if (A->matrix2->origin == NSM_CSR) {
         M = NM_csr(A);
@@ -6257,11 +6260,13 @@ void NM_row_prod_leftright(size_t sizeX, int block_start, size_t row_start,
       CS_INT* Mi = M->i;
       double* Mx = M->x;
 
+      size_t col;
+
       for (CS_INT p = Mp[row_start]; p < Mp[row_start + 1]; ++p) {
-        if (Mi[p] < row_start) left[0] += Mx[p] * x[Mi[p]];
-        else right[0] += Mx[p] * x[Mi[p]];   
+        col = permutation[Mi[p]];
+        if (col < size_left) left[0] += Mx[p] * x[Mi[p]];
+        else if (col >= col_start_right) right[0] += Mx[p] * x[Mi[p]];   
       }
-      x[row_start] = rin;
       break;
     }
     default: {

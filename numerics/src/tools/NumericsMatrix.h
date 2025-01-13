@@ -1176,7 +1176,7 @@ void NM_get_invdiag(int n, int *info, NumericsMatrix *M, double *diag);
    \param[in,out] right right part of the sum (after the diagonal)
    \param[in] init if True left,right = Ax, else left,right += Ax
 */
-void NM_row_prod_leftright(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A, double* x, double* left, double *right, bool init);
+void NM_row_prod_graph(size_t sizeX, int block_start, size_t row_start, size_t size_left, size_t col_start_right, NumericsMatrix* A, size_t *permutation, double* x, double* left, double *right, bool init);
 
 #ifdef WITH_OPENSSL
 /** Compute sha1 hash of matrix values. Matrices of differents size and same
