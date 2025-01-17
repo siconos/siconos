@@ -42,6 +42,19 @@ extern "C" {
 unsigned projectionOnCone(double *r, double mu);
 
 /**
+   subdifferentialProjectionOnCone.
+   Compute an element of the the subdifferential of the
+   projection on the second Order Cone in \f$ R^3 \f$, \f$ K \{
+   r, r_1 \geq 0, 0 \sqrt(r_2^2+r_3^2) \geq mu r_1  \} \f$
+
+   \param[out] H an element of the the subdifferential
+   \param[in] r the vector to be projected
+   \param[in] mu the angle of the cone
+   \return the type of projection
+*/
+unsigned subdifferentialProjectionOnCone(double *H, double *r, double mu);
+
+/**
     projectionOnDualCone Projection on the second Order Cone in \f$ R^3 \f$,
     \f$ K \{ r, r_1 \geq 0, 0 mu \sqrt(u_2^2+u_3^2) \geq u_1  \} \f$
 
@@ -60,8 +73,6 @@ unsigned projectionOnDualCone(double *u, double mu);
    \param[in] size dimension
 */
 void projectionOnSecondOrderCone(double *r, double mu, int size);
-
-unsigned subdifferentialProjectionOnCone(double *H, double *r, double mu);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

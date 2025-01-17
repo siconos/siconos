@@ -100,23 +100,24 @@ unsigned subdifferentialProjectionOnCone(double* H, double* r, double mu) {
   } else {
     double oneoveroneplusmu2 = 1. / (1. + mu * mu);
 
-    *H00 = 1. * oneoveroneplusmu2;
-    *H10 = mu * r[1] * oneoveroneplusmu2;
-    *H20 = mu * r[2] * oneoveroneplusmu2;
     double s1 = r[1] / normT;
     double s2 = r[2] / normT;
+    *H00 = 1. * oneoveroneplusmu2;
 
     double muoveroneplusmu2 = mu * oneoveroneplusmu2;
+    *H10 = muoveroneplusmu2 * s1;
+    *H20 = muoveroneplusmu2 * s2;
 
-    *H01 = muoveroneplusmu2 * s1;
-    *H02 = muoveroneplusmu2 * s2;
+    *H01 = *H10;
+    *H02 = *H20;
 
-    *H11 =
-        muoveroneplusmu2 / normT * (r[0] + mu * normT + r[0] * r[1] * r[1] / (normT * normT));
-    *H12 = muoveroneplusmu2 / normT * (r[0] * r[1] * r[2] / (normT * normT));
-    *H21 = muoveroneplusmu2 / normT * (r[0] * r[1] * r[2] / (normT * normT));
-    *H22 =
-        muoveroneplusmu2 / normT * (r[0] + mu * normT + r[0] * r[2] * r[2] / (normT * normT));
+    double muoveroneplusmu2overnormT = muoveroneplusmu2 / normT;
+    double r0plusmunormT = r[0] + mu * normT;
+
+    *H11 = muoveroneplusmu2overnormT * (r0plusmunormT - r[0] * s1 * s1);
+    *H12 = muoveroneplusmu2overnormT * (-r[0] * s1 * s2);
+    *H21 = muoveroneplusmu2overnormT * (-r[0] * s1 * s2);
+    *H22 = muoveroneplusmu2overnormT * (r0plusmunormT - r[0] * s2 * s2);
     // printf("We are outside the cone and its polar\n");
     return PROJCONE_BOUNDARY;
   }
