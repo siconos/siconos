@@ -451,8 +451,8 @@ int mc2d_onecone_nonsmooth_Newton_solvers_solve_direct(MohrCoulomb2DProblem* loc
   Function(R, velocity, eta, theta, rho, F, NULL, NULL);
   dparam[SICONOS_DPARAM_RESIDU] =
       0.5 * (F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) * norm_relative;
-  dparam[SICONOS_DPARAM_RESIDU] =
-      sqrt(F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) * norm_relative;
+  /* dparam[SICONOS_DPARAM_RESIDU] = */
+  /*     sqrt(F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) * norm_relative; */
 
   numerics_printf_verbose(
       2,
@@ -497,12 +497,16 @@ int mc2d_onecone_nonsmooth_Newton_solvers_solve_direct(MohrCoulomb2DProblem* loc
     cpy3(qLocal, velocity);
     mvp3x3(MLocal, R, velocity);
     Function(R, velocity, eta, theta, rho, F, NULL, NULL);
-    /* dparam[SICONOS_DPARAM_RESIDU] = 0.5 * (F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) * */
-    /*                                 norm_relative;  // improve with relative tolerance */
-    dparam[SICONOS_DPARAM_RESIDU] = sqrt(F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) *
+
+    dparam[SICONOS_DPARAM_RESIDU] = 0.5 * (F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) *
                                     norm_relative;  // improve with relative tolerance
+
+    // VA 01/2025 : should be better but prevents convergemce due to rounding error
+    /* dparam[SICONOS_DPARAM_RESIDU] = sqrt(F[0] * F[0] + F[1] * F[1] + F[2] * F[2] )* */
+    /* 					 norm_relative;  // improve with relative tolerance */
     /* double error = mc2d_compute_local_error(localproblem, R); */
     /* printf("New local error = %e\n", error); */
+
     if (info_solv3x3) {
       if (verbose > 0)
         numerics_warning("mc2d_onecone_nonsmooth_Newton_solvers_solve_direct",
@@ -776,10 +780,10 @@ int mc2d_onecone_nonsmooth_Newton_solvers_solve_damped(MohrCoulomb2DProblem* loc
     cpy3(qLocal, velocity);
     mvp3x3(MLocal, R, velocity);
     Function(R, velocity, eta, theta, rho, F, NULL, NULL);
-    /* dparam[SICONOS_DPARAM_RESIDU] = 0.5 * (F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) * */
-    /*                                 norm_relative;  // improve with relative tolerance */
-    dparam[SICONOS_DPARAM_RESIDU] = sqrt(F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) *
+    dparam[SICONOS_DPARAM_RESIDU] = 0.5 * (F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) *
                                     norm_relative;  // improve with relative tolerance
+    /* dparam[SICONOS_DPARAM_RESIDU] = sqrt(F[0] * F[0] + F[1] * F[1] + F[2] * F[2]) * */
+    /*                                 norm_relative;  // improve with relative tolerance */
 
     if (info_solv3x3) {
       if (verbose > 0)
