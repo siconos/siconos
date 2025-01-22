@@ -97,7 +97,7 @@ int mc2d_compute_error(MohrCoulomb2DProblem *problem, double *z, double *w, doub
   /* double relative_scaling = fmax(norm_r,norm_w); */
   /* double relative_scaling = norm; */
 
-  if (fabs(relative_scaling) > DBL_EPSILON) *error /= relative_scaling;
+  //if (fabs(relative_scaling) > DBL_EPSILON) *error /= relative_scaling;
 
   DEBUG_PRINTF("relative error in complementarity = %12.8e\n", *error);
   DEBUG_END("mc2d_compute_error(...)\n");
