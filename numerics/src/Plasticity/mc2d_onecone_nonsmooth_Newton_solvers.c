@@ -79,15 +79,17 @@ static double mc2d_compute_local_error(MohrCoulomb2DProblem* localproblem,
   return current_error;
 }
 
-static void mc2d_AC_initialize(MohrCoulomb2DProblem* problem,
-                               MohrCoulomb2DProblem* localproblem, SolverOptions* options) {
+static void mc2d_onecone_nonsmooth_Newton_initialize(MohrCoulomb2DProblem* problem,
+                                                      MohrCoulomb2DProblem* localproblem,
+                                                      SolverOptions* options) {
   /** In initialize, these operators are "connected" to their corresponding static variables,
    * that will be used to build local problem for each considered cone.
    * Local problem is built during call to update (which depends on the storage type for M).
    */
 
   DEBUG_PRINTF(
-      "mc2d_AC_initialize starts with options->iparam[PLASTICITY_NSN_FORMULATION] = "
+      "mc2d_onecone_nonsmooth_Newton_initialize starts with "
+      "options->iparam[PLASTICITY_NSN_FORMULATION] = "
       "%i\n",
       options->iparam[PLASTICITY_NSN_FORMULATION]);
 
@@ -131,10 +133,10 @@ static void mc2d_AC_initialize(MohrCoulomb2DProblem* problem,
       options->dWork[cone] = 1.0;  // for PLI algorithm.
       rho = &options->dWork[3 * cone + nc];
     }
-    numerics_printf(
-        "mc2d_AC_initialize "
-        " mc2d_compute rho for cone = %i",
-        cone);
+    /* numerics_printf_verbose(2, */
+    /*     "mc2d_onecone_nonsmooth_Newton_initialize" */
+    /*     " mc2d_compute rho for cone = %i", */
+    /*     cone); */
 
     if (options->iparam[PLASTICITY_NSN_RHO_STRATEGY] ==
         PLASTICITY_NSN_FORMULATION_RHO_STRATEGY_SPLIT_SPECTRAL_NORM_COND) {
@@ -155,43 +157,38 @@ static void mc2d_AC_initialize(MohrCoulomb2DProblem* problem,
       rho[2] = options->dparam[PLASTICITY_NSN_RHO];
     } else if (options->iparam[PLASTICITY_NSN_RHO_STRATEGY] ==
                PLASTICITY_NSN_FORMULATION_RHO_STRATEGY_ADAPTIVE) {
-      numerics_error("mc2d_AC_initialize",
+      numerics_error("mc2d_onecone_nonsmooth_Newton_initialize",
                      "Adaptive strategy for computing rho not yet implemented");
     } else
-      numerics_error("mc2d_AC_initialize", "unknown strategy for computing rho");
+      numerics_error("mc2d_onecone_nonsmooth_Newton_initialize",
+                     "unknown strategy for computing rho");
+
+    mc2d_local_problem_fill_M(problem, localproblem, cone);
 
     if (verbose > 0) {
       avg_rho[0] += rho[0];
       avg_rho[1] += rho[1];
       avg_rho[2] += rho[2];
-    }
-    numerics_printf(
-        "mc2d_AC_initialize"
-        "cone = %i, rho[0] = %4.2e, rho[1] = %4.2e, rho[2] = %4.2e",
-        cone, rho[0], rho[1], rho[2]);
 
-    mc2d_local_problem_fill_M(problem, localproblem, cone);
-    double m_row_norm = 0.0, sum;
-    for (int i = 0; i < 3; i++) {
-      sum = 0.0;
-      for (int j = 0; j < 3; j++) {
-        sum += fabs(localproblem->M->matrix0[i + j * 3]);
+      double m_row_norm = 0.0, sum;
+      for (int i = 0; i < 3; i++) {
+        sum = 0.0;
+        for (int j = 0; j < 3; j++) {
+          sum += fabs(localproblem->M->matrix0[i + j * 3]);
+        }
+        m_row_norm = max(sum, m_row_norm);
       }
-      m_row_norm = max(sum, m_row_norm);
+      numerics_printf_verbose(2,
+                              "mc2d_onecone_nonsmooth_Newton_initialize : "
+                              "cone = %i, rho[0] = %4.2e, rho[1] = %4.2e, rho[2] = %4.2e, "
+                              "||M||^-1 = %4.2e, ||M||_row^-1 = %4.2e ",
+                              cone, rho[0], rho[1], rho[2],
+                              1.0 / hypot9(localproblem->M->matrix0), 1.0 / m_row_norm);
     }
-    numerics_printf(
-        "mc2d_AC_initialize"
-        " inverse of norm of M = %e",
-        1.0 / hypot9(localproblem->M->matrix0));
-    numerics_printf(
-        "mc2d_AC_initialize"
-        " inverse of row norm of M = %e",
-        1.0 / m_row_norm);
-
     DEBUG_EXPR(NM_display(localproblem->M););
   }
   numerics_printf(
-      "mc2d_AC_initialize"
+      "mc2d_onecone_nonsmooth_Newton_initialize"
       " Avg. rho value = %e\t%e\t%e\t",
       avg_rho[0] / nc, avg_rho[1] / nc, avg_rho[2] / nc);
 }
@@ -209,12 +206,10 @@ void mc2d_onecone_nonsmooth_Newton_solvers_initialize(MohrCoulomb2DProblem* prob
                                                       SolverOptions* localsolver_options) {
   /* Initialize solver (Connect F and its jacobian, set local size ...) according to the chosen
    * formulation. */
-
-  /* Alart-Curnier formulation */
   if (localsolver_options->solverId == MOHR_COULOMB_2D_ONECONE_NSN ||
       localsolver_options->solverId == MOHR_COULOMB_2D_ONECONE_NSN_GP ||
       localsolver_options->solverId == MOHR_COULOMB_2D_ONECONE_NSN_GP_HYBRID) {
-    mc2d_AC_initialize(problem, localproblem, localsolver_options);
+    mc2d_onecone_nonsmooth_Newton_initialize(problem, localproblem, localsolver_options);
   } else {
     numerics_error("mc2d_onecone_nonsmooth_Newton_solvers_initialize",
                    "Unknown formulation type.");
@@ -765,7 +760,6 @@ int mc2d_onecone_nonsmooth_Newton_solvers_solve_damped(MohrCoulomb2DProblem* loc
     }
     if (!info_solv3x3) {
       /* Perform Line Search */
-
       t_opt = t_init;
       LineSearchGP(localproblem, Function, &t_opt, R, dR, rho, LSitermax, F, A, B, velocity);
       t = t_opt;

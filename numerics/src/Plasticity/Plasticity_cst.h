@@ -10,15 +10,15 @@ enum PLASTICITY_SOLVER {
 
   /* 2D Mohr Coulomb  solvers for one cone (used mainly inside NSGS solvers) */
 
-  /** Non-smooth Newton Alart-Curnier, 'direct', one contact solver */
+  /** Non-smooth Newton Alart-Curnier, 'direct', one cone solver */
   MOHR_COULOMB_2D_ONECONE_NSN = 20050,
-  /** Non-smooth Newton Alart-Curnier, 'damped', one contact solver */
+  /** Non-smooth Newton Alart-Curnier, 'damped', one cone solver */
   MOHR_COULOMB_2D_ONECONE_NSN_GP = 20051,
-  /** Projection on cone, one contact solver */
+  /** Projection on cone, one cone solver */
   MOHR_COULOMB_2D_ONECONE_ProjectionOnCone = 20052,
-  /** Projection on cone, one contact solver */
+  /** Projection on cone, one cone solver */
   MOHR_COULOMB_2D_ONECONE_ProjectionOnConeWithLocalIteration = 20053,
-  /** Non-smooth Newton Alart-Curnier, 'damped' and hybrid with projection, one contact solver
+  /** Non-smooth Newton Alart-Curnier, 'damped' and hybrid with projection, one cone solver
    */
   MOHR_COULOMB_2D_ONECONE_NSN_GP_HYBRID = 20065
 };
@@ -32,19 +32,19 @@ enum PLASTICITY_IPARAM {
   PLASTICITY_IPARAM_RESCALING = 3,
   /** index in iparam to store the rescaling  */
   PLASTICITY_IPARAM_RESCALING_CONE = 4,
-  /** current contact number (example of use: one contact solvers) **/
+  /** current cone number (example of use: one cone solvers) **/
   PLASTICITY_CURRENT_CONE_NUMBER = 5,
   /** index in iparam to store the error evaluation method */
   PLASTICITY_IPARAM_ERROR_EVALUATION = 7,
   /** index in iparam to store the frequency of error evaluation method */
   PLASTICITY_IPARAM_ERROR_EVALUATION_FREQUENCY = 8,
-  PLASTICITY_NUMBER_OF_CONTACTS = 17,
+  PLASTICITY_NUMBER_OF_CONES = 17,
 };
 
 enum PLASTICITY_INTERNAL_ERROR_STRATEGY {
   PLASTICITY_INTERNAL_ERROR_STRATEGY_ADAPTIVE = 0,
   PLASTICITY_INTERNAL_ERROR_STRATEGY_GIVEN_VALUE = 1,
-  PLASTICITY_INTERNAL_ERROR_STRATEGY_ADAPTIVE_N_CONTACT = 2
+  PLASTICITY_INTERNAL_ERROR_STRATEGY_ADAPTIVE_N_CONE = 2
 };
 
 enum PLASTICITY_RESCALING_ENUM {
@@ -73,7 +73,7 @@ enum PLASTICITY_NSGS_IPARAM {
   /** index in iparam to store the shuffle seed */
   PLASTICITY_NSGS_SHUFFLE_SEED = 6,
   /** index in iparam to store the  */
-  PLASTICITY_NSGS_FREEZING_CONTACT = 19,
+  PLASTICITY_NSGS_FREEZING_CONE = 19,
   /** index in iparam to store the  */
   PLASTICITY_NSGS_FILTER_LOCAL_SOLUTION = 14,
 };
