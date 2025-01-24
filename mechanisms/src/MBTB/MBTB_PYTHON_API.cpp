@@ -678,7 +678,7 @@ void siconos::mechanisms::MBTB_initSimu(double hTS, int withProj) {
   std::ofstream myfile("simulation_results.dat");
   mbtb::internal::MBTB_printHeader(myfile);
   myfile.close();
-  cout << "====> end of initialisation" << endl << endl;
+  cout << "====> end of initialisation\n\n";
 }
 std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> siconos::mechanisms::MBTB_nsds() {
   return mbtb::data::myNsds;

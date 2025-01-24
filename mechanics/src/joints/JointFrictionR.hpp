@@ -49,7 +49,7 @@ class JointFrictionR : public siconos::modeling::NewtonEulerR {
    *  \param inter the interaction using this relation
    *  \param q0  q states vectors of the related the dynamical systems
    */
-  virtual void computeJacobianhOver_q_(double time, siconos::modeling::Interaction& inter,
+  virtual void computeH_NE_(double time, siconos::modeling::Interaction& inter,
                                        const siconos::algebra::BlockVector& q0) override;
 
  public:
@@ -74,7 +74,7 @@ class JointFrictionR : public siconos::modeling::NewtonEulerR {
   void computeh(const siconos::algebra::BlockVector& q,
                 Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
-  virtual unsigned int numberOfConstraints();
+  virtual unsigned int numberOfConstraints() const;
 
   /** Return the joint axis number assigned to a friction axis. */
   unsigned int axis(unsigned int _index);

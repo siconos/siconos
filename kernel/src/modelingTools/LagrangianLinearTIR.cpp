@@ -34,7 +34,7 @@
 // Minimum data (C) constructor
 siconos::modeling::LagrangianLinearTIR::LagrangianLinearTIR(
     Eigen::Ref<siconos::algebra::SiconosMatrix> newC)
-    : LagrangianR(RelationSubType::LinearTIR) {
+    : LagrangianR{RelationSubType::LinearTIR} {
   jacobianhOver_q_view_ =
       std::make_shared<siconos::algebra::MapType>(newC.data(), newC.rows(), newC.cols());
 }
@@ -42,7 +42,7 @@ siconos::modeling::LagrangianLinearTIR::LagrangianLinearTIR(
 siconos::modeling::LagrangianLinearTIR::LagrangianLinearTIR(
     Eigen::Ref<siconos::algebra::SiconosMatrix> newC,
     Eigen::Ref<siconos::algebra::SiconosVector> newe)
-    : LagrangianR(RelationSubType::LinearTIR) {
+    : LagrangianR{RelationSubType::LinearTIR} {
   jacobianhOver_q_view_ =
       std::make_shared<siconos::algebra::MapType>(newC.data(), newC.rows(), newC.cols());
 

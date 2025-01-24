@@ -43,19 +43,19 @@ class CylindricalJointR : public NewtonEulerJointR {
 
   /** Axis of the cylindrical point in the q1 frame of reference
    */
-  std::shared_ptr<siconos::algebra::SiconosVector> _axis0{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector3> _axis0{nullptr};
 
   /** _V1 is an unit vector that is orthogonal to the cylindrical axis
    * _axis0.  It forms with _V2 and _axis0 a base such that
    * (_axis0,_V1,_v2) is an orthogonal frame
    */
-  std::shared_ptr<siconos::algebra::SiconosVector> _V1{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector3> _V1{nullptr};
 
   /** _V2 is an unit vector that is orthogonal to the cylindrical axis
    * _axis0.  It forms with _V2 and _axis0 a base such that
    * (_axis0,_V1,_v2) is an orthogonal frame
    */
-  std::shared_ptr<siconos::algebra::SiconosVector> _V2{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector3> _V2{nullptr};
 
   double _cq2q101{0.};
   double _cq2q102{0.};
@@ -65,10 +65,10 @@ class CylindricalJointR : public NewtonEulerJointR {
   /** P is the point defining the location of the line created by
    * _axis0.  It is stored in the q1 frame, i.e. the vector from
    * initial G1 to P, called _G1P0. */
-  std::shared_ptr<siconos::algebra::SiconosVector> _G1P0{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector3> _G1P0{nullptr};
 
   /** _G2P0 is the vector from initial G1 to P */
-  std::shared_ptr<siconos::algebra::SiconosVector> _G2P0{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector3> _G2P0{nullptr};
 
   /** Cumulative number of twists around the joint relative to initial
    * angular difference. */
@@ -76,39 +76,27 @@ class CylindricalJointR : public NewtonEulerJointR {
   double _previousAngle{0.};  // Needed to track _twistCount, TODO: work vector?
   double _initialAngle{0.};
 
-  /** Return the normal of the angular DoF axis of rotation.
-   * \param axis must be 0 */
-  virtual void _normalDoF(siconos::algebra::SiconosVector& ans,
-                          const siconos::algebra::BlockVector& q0, int axis,
-                          bool absoluteRef = true) override;
-
   /** compute the jacobian of h w.r.t. q
    *
    *  \param time current time
    *  \param inter the interaction using this relation
    *  \param q0  q states vectors of the related the dynamical systems
    */
-  virtual void computeJacobianhOver_q_(double time, siconos::modeling::Interaction& inter,
+  virtual void computeH_NE_(double time, siconos::modeling::Interaction& inter,
                                        const siconos::algebra::BlockVector& q0) override;
 
  public:
-  /** Empty constructor. The relation may be initialized later by
-   *  setPoint, setAbsolute, and setBasePositions. */
-  CylindricalJointR();
-
   /** Constructor based on one or two dynamical systems, a point and an axis.
    *
+   *  \param P a vector to define the point around which rotation is allowed.
+   *  \param A a vector to define the cylindrical axis.
+   *  \param absoluteRef if true, P and A are in the absolute frame, otherwise P and A are in
+   *  d1 frame.
    *  \param d1 first DynamicalSystem linked by the joint.
-   *  \param d2 second DynamicalSystem linked by the joint, or NULL
-   *  for absolute frame.
-   *  \param P siconos::algebra::SiconosVector of size 3 that defines the point around
-   *  which rotation is allowed.
-   *  \param A siconos::algebra::SiconosVector of size 3 that defines the cylindrical axis.
-   *  \param absoluteRef if true, P and A are in the absolute frame,
-   *  otherwise P and A are in d1 frame.
+   *  \param d2 second DynamicalSystem linked by the joint (nullptr for absolute frame)
    */
-  CylindricalJointR(std::shared_ptr<siconos::algebra::SiconosVector> P,
-                    std::shared_ptr<siconos::algebra::SiconosVector> A, bool absoluteRef,
+  CylindricalJointR(const Eigen::Ref<siconos::algebra::SiconosVector3>& P,
+                    const Eigen::Ref<siconos::algebra::SiconosVector3>& A, bool absoluteRef,
                     std::shared_ptr<siconos::modeling::NewtonEulerDS> d1 = nullptr,
                     std::shared_ptr<siconos::modeling::NewtonEulerDS> d2 = nullptr);
 
@@ -117,14 +105,31 @@ class CylindricalJointR : public NewtonEulerJointR {
 
   /** Initialize the joint constants based on the provided base positions.
    *
-   *  \param q1 A siconos::algebra::SiconosVector of size 7 indicating translation and
-   *  orientation in inertial coordinates.
-   *  \param q2 An optional siconos::algebra::SiconosVector of size 7 indicating
-   *  translation and orientation; if null, the inertial
-   *  frame will be considered as the second base. */
+   *  \param[in] q1 a vector of size 7 indicating translation and orientation in inertial
+   * coordinates.
+   *  \param[in] q2 an optional vector of size 7 indicating translation and orientation; if
+   * null, the inertial frame will be considered as the second base.
+   */
   virtual void setBasePositions(
-      std::shared_ptr<siconos::algebra::SiconosVector> q1,
-      std::shared_ptr<siconos::algebra::SiconosVector> q2 = nullptr) override;
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2 =
+          std::nullopt) override;
+
+  /** \return the axis of rotation.
+   *  Retrieve a normal in the direction of a 0-indexed free
+   *  axis. Useful for calculating velocities in the axis, or for
+   *  calculating axis-aligned forces applied to connected bodies.  If
+   *  axis is of angular type (see typeOfDoF), then the returned normal
+   *  is the axis of rotation.
+   *
+   *  \param[in] q0 The state q of one or more NewtonEulerDS
+   *  \param[in] axis
+   *  \param[in] absoluteRef If true, ans is in the inertial frame,
+   *  otherwise the q1 frame is assumed.
+   */
+  virtual siconos::algebra::SiconosVector3 normalDoF(const siconos::algebra::BlockVector& q0,
+                                                     int axis,
+                                                     bool absoluteRef = true) override;
 
   void computeV1V2FromAxis();
 
@@ -149,21 +154,21 @@ class CylindricalJointR : public NewtonEulerJointR {
 
      \return the number of constraints
    */
-  virtual unsigned int numberOfConstraints() override { return 4; }
+  virtual unsigned int numberOfConstraints() const override { return 4; }
 
   /**
      Return the number of degrees of freedom of this joint.
 
      \return the number of degrees of freedom (DoF)
    */
-  virtual unsigned int numberOfDoF() override { return 2; }
+  virtual unsigned int numberOfDoF() const override { return 2; }
 
   /**
      Return the type of a degree of freedom of this joint.
 
      \return the type of the degree of freedom (DoF)
   */
-  virtual DofType typeOfDoF(unsigned int axis) override {
+  virtual DofType typeOfDoF(unsigned int axis) const override {
     if (axis == 0)
       return DofType::LINEAR;
     else if (axis == 1)
@@ -172,15 +177,16 @@ class CylindricalJointR : public NewtonEulerJointR {
       return DofType::INVALID;
   }
   /** Compute the vector of linear and angular positions of the free axes */
-  virtual void computehDoF(const siconos::algebra::BlockVector& q0,
-                            Eigen::Ref<siconos::algebra::SiconosVector> y,
-                            unsigned int axis = 0) override;
+  virtual void computehDoF(
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      Eigen::Ref<siconos::algebra::SiconosVector> y, unsigned int axis = 0) override;
 
   /** Compute the jacobian of linear and angular DoF with respect to some q */
   virtual void computeJachqDoF(siconos::modeling::Interaction& inter,
-                                const siconos::algebra::BlockVector& q0,
-                                Eigen::Ref<siconos::algebra::SiconosMatrix> jachq,
-                                unsigned int axis = 0) override;
+                               const siconos::algebra::BlockVector& q0,
+                               Eigen::Ref<siconos::algebra::SiconosMatrix> jachq,
+                               unsigned int axis = 0) override;
 };
 }  // namespace siconos::joints
 #endif  // CylindricalJointRELATION_H

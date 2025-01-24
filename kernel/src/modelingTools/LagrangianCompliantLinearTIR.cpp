@@ -31,7 +31,7 @@
 siconos::modeling::LagrangianCompliantLinearTIR::LagrangianCompliantLinearTIR(
     Eigen::Ref<siconos::algebra::SiconosMatrix> newC,
     Eigen::Ref<siconos::algebra::SiconosMatrix> newD)
-    : LagrangianR(RelationSubType::CompliantLinearTIR) {
+    : LagrangianR{RelationSubType::CompliantLinearTIR} {
   jacobianhOver_q_view_ =  // C
       std::make_shared<siconos::algebra::MapType>(newC.data(), newC.rows(), newC.cols());
 
@@ -43,7 +43,7 @@ siconos::modeling::LagrangianCompliantLinearTIR::LagrangianCompliantLinearTIR(
     Eigen::Ref<siconos::algebra::SiconosMatrix> newC,
     Eigen::Ref<siconos::algebra::SiconosMatrix> newD,
     Eigen::Ref<siconos::algebra::SiconosVector> newe)
-    : LagrangianR(RelationSubType::CompliantLinearTIR) {
+    : LagrangianR{RelationSubType::CompliantLinearTIR} {
   jacobianhOver_q_view_ =  // C
       std::make_shared<siconos::algebra::MapType>(newC.data(), newC.rows(), newC.cols());
 

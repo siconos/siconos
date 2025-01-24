@@ -263,7 +263,7 @@ bool siconos::nonsmooth_formulations::GlobalRollingFrictionContact::preCompute(d
     DEBUG_EXPR(_b->display(););
     // Checks z and w sizes and reset if necessary
     if (_z->size() != _sizeOutput) {
-      _z->resize(_sizeOutput, false);
+      _z->resize(_sizeOutput, Eigen::NoChange);
       _z->setZero();
     }
 

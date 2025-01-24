@@ -117,7 +117,14 @@ class LagrangianScleronomousR : public LagrangianR {
   virtual void computeh(const siconos::algebra::BlockVector &q,
                         Eigen::Ref<siconos::algebra::SiconosVector> y);
 
-  /** set a user-defined function to compute \f$ \nabla^\top_q h(q) \f$ \f$
+  /** Set a constant  \f$ \nabla^\top_q h(q) \f$
+   *
+   *  \param newValue the constant matrix
+   *
+   */
+  void setConstantJacobianhOver_q(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+
+  /** set a user-defined function to compute \f$ \nabla^\top_q h(q) \f$
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */

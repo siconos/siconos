@@ -52,23 +52,23 @@ siconos::modeling::NewtonEuler1DR::NewtonEuler1DR() : NewtonEulerR{} {
 }
 
 void siconos::modeling::NewtonEuler1DR::NIcomputeJachqTFromContacts(
-    std::shared_ptr<siconos::algebra::SiconosVector> q1) {
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& q1) {
   double Nx = _Nc->getValue(0);
   double Ny = _Nc->getValue(1);
   double Nz = _Nc->getValue(2);
   double Px = _Pc1->getValue(0);
   double Py = _Pc1->getValue(1);
   double Pz = _Pc1->getValue(2);
-  double G1x = q1->getValue(0);
-  double G1y = q1->getValue(1);
-  double G1z = q1->getValue(2);
+  double G1x = q1.getValue(0);
+  double G1y = q1.getValue(1);
+  double G1z = q1.getValue(2);
 #ifdef NEFC3D_DEBUG
   printf("contact normal:\n");
   _Nc->display();
   printf("point de contact :\n");
   _Pc1->display();
   printf("center of masse :\n");
-  q1->display();
+  q1.display();
 #endif
   _rotationAbsoluteToContactFrame->setValue(0, 0, Nx);
   _rotationAbsoluteToContactFrame->setValue(0, 1, Ny);
@@ -86,16 +86,16 @@ void siconos::modeling::NewtonEuler1DR::NIcomputeJachqTFromContacts(
   (*_NPG1)(2, 1) = (G1x - Px);
   (*_NPG1)(2, 2) = 0;
 
-  siconos::geometry::computeRotationMatrix(*q1, *_rotationBodyToAbsoluteFrame);
+  siconos::geometry::computeRotationMatrix(q1, *_rotationBodyToAbsoluteFrame);
   siconos::algebra::prod(*_NPG1, *_rotationBodyToAbsoluteFrame, *_AUX1, true);
 
   siconos::algebra::prod(*_rotationAbsoluteToContactFrame, *_AUX1, *_AUX2, true);
 
   for (unsigned int jj = 0; jj < 3; jj++)
-    jacobianhOver_q_prod_T_->setValue(0, jj, _rotationAbsoluteToContactFrame->getValue(0, jj));
+    H_NE_prod_T_->setValue(0, jj, _rotationAbsoluteToContactFrame->getValue(0, jj));
 
   for (unsigned int jj = 3; jj < 6; jj++)
-    jacobianhOver_q_prod_T_->setValue(0, jj, _AUX2->getValue(0, jj - 3));
+    H_NE_prod_T_->setValue(0, jj, _AUX2->getValue(0, jj - 3));
 
 #ifdef NEFC3D_DEBUG
   printf("NewtonEuler1DR jhqt\n");
@@ -104,17 +104,17 @@ void siconos::modeling::NewtonEuler1DR::NIcomputeJachqTFromContacts(
 }
 
 void siconos::modeling::NewtonEuler1DR::NIcomputeJachqTFromContacts(
-    std::shared_ptr<siconos::algebra::SiconosVector> q1,
-    std::shared_ptr<siconos::algebra::SiconosVector> q2) {
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& q2) {
   double Nx = _Nc->getValue(0);
   double Ny = _Nc->getValue(1);
   double Nz = _Nc->getValue(2);
   double Px = _Pc1->getValue(0);
   double Py = _Pc1->getValue(1);
   double Pz = _Pc1->getValue(2);
-  double G1x = q1->getValue(0);
-  double G1y = q1->getValue(1);
-  double G1z = q1->getValue(2);
+  double G1x = q1.getValue(0);
+  double G1y = q1.getValue(1);
+  double G1z = q1.getValue(2);
 
   _rotationAbsoluteToContactFrame->setValue(0, 0, Nx);
   _rotationAbsoluteToContactFrame->setValue(0, 1, Ny);
@@ -132,19 +132,19 @@ void siconos::modeling::NewtonEuler1DR::NIcomputeJachqTFromContacts(
   (*_NPG1)(2, 1) = (G1x - Px);
   (*_NPG1)(2, 2) = 0;
 
-  siconos::geometry::computeRotationMatrix(*q1, *_rotationBodyToAbsoluteFrame);
+  siconos::geometry::computeRotationMatrix(q1, *_rotationBodyToAbsoluteFrame);
   siconos::algebra::prod(*_NPG1, *_rotationBodyToAbsoluteFrame, *_AUX1, true);
   siconos::algebra::prod(*_rotationAbsoluteToContactFrame, *_AUX1, *_AUX2, true);
 
   for (unsigned int jj = 0; jj < 3; jj++)
-    jacobianhOver_q_prod_T_->setValue(0, jj, _rotationAbsoluteToContactFrame->getValue(0, jj));
+    H_NE_prod_T_->setValue(0, jj, _rotationAbsoluteToContactFrame->getValue(0, jj));
 
   for (unsigned int jj = 3; jj < 6; jj++)
-    jacobianhOver_q_prod_T_->setValue(0, jj, _AUX2->getValue(0, jj - 3));
+    H_NE_prod_T_->setValue(0, jj, _AUX2->getValue(0, jj - 3));
 
-  double G2x = q2->getValue(0);
-  double G2y = q2->getValue(1);
-  double G2z = q2->getValue(2);
+  double G2x = q2.getValue(0);
+  double G2y = q2.getValue(1);
+  double G2z = q2.getValue(2);
 
   _NPG2->setZero();
   (*_NPG2)(0, 0) = 0;
@@ -157,17 +157,16 @@ void siconos::modeling::NewtonEuler1DR::NIcomputeJachqTFromContacts(
   (*_NPG2)(2, 1) = (G2x - Px);
   (*_NPG2)(2, 2) = 0;
 
-  siconos::geometry::computeRotationMatrix(*q2, *_rotationBodyToAbsoluteFrame);
+  siconos::geometry::computeRotationMatrix(q2, *_rotationBodyToAbsoluteFrame);
   siconos::algebra::prod(*_NPG2, *_rotationBodyToAbsoluteFrame, *_AUX1, true);
 
   siconos::algebra::prod(*_rotationAbsoluteToContactFrame, *_AUX1, *_AUX2, true);
 
   for (unsigned int jj = 0; jj < 3; jj++)
-    jacobianhOver_q_prod_T_->setValue(0, jj + 6,
-                                      -_rotationAbsoluteToContactFrame->getValue(0, jj));
+    H_NE_prod_T_->setValue(0, jj + 6, -_rotationAbsoluteToContactFrame->getValue(0, jj));
 
   for (unsigned int jj = 3; jj < 6; jj++)
-    jacobianhOver_q_prod_T_->setValue(0, jj + 6, -_AUX2->getValue(0, jj - 3));
+    H_NE_prod_T_->setValue(0, jj + 6, -_AUX2->getValue(0, jj - 3));
 }
 
 void siconos::modeling::NewtonEuler1DR::initialize(Interaction& inter) {
@@ -175,9 +174,11 @@ void siconos::modeling::NewtonEuler1DR::initialize(Interaction& inter) {
   // std::make_shared<siconos::algebra::SiconosMatrix>(jacobianhOver_q_->size(0),jacobianhOver_q_->size(1)));
   auto qSize = 7 * (inter.getSizeOfDS() / 6);
 
-  jacobianhOver_q_internal_storage_ = std::make_unique<std::vector<double>>(qSize);
-  jacobianhOver_q_view_ = std::make_shared<siconos::algebra::MapType>(
-      jacobianhOver_q_internal_storage_->data(), 1, qSize);
+  // H_NE_internal_storage_ = std::make_unique<std::vector<double>>(qSize);
+  H_NE_internal_storage_.resize(1, qSize);
+  H_NE_view_ =
+      std::make_shared<siconos::algebra::MapType>(H_NE_internal_storage_.data(), 1, qSize);
+  H_NE_view_->setZero();
   NewtonEulerR::initialize(inter);
   /* VA 12/04/2016 All of what follows should be put in WorkM*/
   _rotationAbsoluteToContactFrame = std::make_shared<siconos::algebra::SiconosMatrix>(1, 3);
@@ -189,9 +190,9 @@ void siconos::modeling::NewtonEuler1DR::initialize(Interaction& inter) {
   //  _isContact=1;
 }
 
-void siconos::modeling::NewtonEuler1DR::computeJacobianhOver_q_(
-    double time, siconos::modeling::Interaction& inter,
-    const siconos::algebra::BlockVector& q0) {
+void siconos::modeling::NewtonEuler1DR::computeH_NE_(double time,
+                                                     siconos::modeling::Interaction& inter,
+                                                     const siconos::algebra::BlockVector& q0) {
   DEBUG_BEGIN(
       "siconos::modeling::NewtonEuler1DR::computeJacobianhOver_q(double time, Interaction& "
       "inter, "
@@ -199,13 +200,13 @@ void siconos::modeling::NewtonEuler1DR::computeJacobianhOver_q_(
   DEBUG_PRINTF("with time =  %f\n", time);
   DEBUG_PRINTF("with inter =  %p\n", &inter);
 
-  jacobianhOver_q_view_->setValue(0, 0, _Nc->getValue(0));
-  jacobianhOver_q_view_->setValue(0, 1, _Nc->getValue(1));
-  jacobianhOver_q_view_->setValue(0, 2, _Nc->getValue(2));
+  H_NE_view_->setValue(0, 0, _Nc->getValue(0));
+  H_NE_view_->setValue(0, 1, _Nc->getValue(1));
+  H_NE_view_->setValue(0, 2, _Nc->getValue(2));
   if (inter.has2Bodies()) {
-    jacobianhOver_q_view_->setValue(0, 7, -_Nc->getValue(0));
-    jacobianhOver_q_view_->setValue(0, 8, -_Nc->getValue(1));
-    jacobianhOver_q_view_->setValue(0, 9, -_Nc->getValue(2));
+    H_NE_view_->setValue(0, 7, -_Nc->getValue(0));
+    H_NE_view_->setValue(0, 8, -_Nc->getValue(1));
+    H_NE_view_->setValue(0, 9, -_Nc->getValue(2));
   }
 
   for (unsigned int iDS = 0; iDS < q0.numberOfBlocks(); iDS++) {
@@ -245,10 +246,10 @@ void siconos::modeling::NewtonEuler1DR::computeJacobianhOver_q_(
     DEBUG_PRINTF("siconos::modeling::NewtonEuler1DR::computeJachq :quattBuuf : %e,%e,%e \n",
                  quatBuff.R_component_2(), quatBuff.R_component_3(), quatBuff.R_component_4());
 
-    jacobianhOver_q_view_->setValue(0, 7 * iDS + 3,
-                                    sign * (quatBuff.R_component_2() * _Nc->getValue(0) +
-                                            quatBuff.R_component_3() * _Nc->getValue(1) +
-                                            quatBuff.R_component_4() * _Nc->getValue(2)));
+    H_NE_view_->setValue(0, 7 * iDS + 3,
+                         sign * (quatBuff.R_component_2() * _Nc->getValue(0) +
+                                 quatBuff.R_component_3() * _Nc->getValue(1) +
+                                 quatBuff.R_component_4() * _Nc->getValue(2)));
     // cout<<"WARNING NewtonEuler1DR set jachq \n";
     // jacobianhOver_q_->setValue(0,7*iDS+3,0);
     for (unsigned int i = 1; i < 4; i++) {
@@ -257,10 +258,10 @@ void siconos::modeling::NewtonEuler1DR::computeJacobianhOver_q_(
       _2qiquatGP = quatGP;
       _2qiquatGP *= 2 * (q->getValue(3 + i));
       quatBuff = quatei * quatcQ * quatGP - quatGP * quatQ * quatei - _2qiquatGP;
-      jacobianhOver_q_view_->setValue(0, 7 * iDS + 3 + i,
-                                      sign * (quatBuff.R_component_2() * _Nc->getValue(0) +
-                                              quatBuff.R_component_3() * _Nc->getValue(1) +
-                                              quatBuff.R_component_4() * _Nc->getValue(2)));
+      H_NE_view_->setValue(0, 7 * iDS + 3 + i,
+                           sign * (quatBuff.R_component_2() * _Nc->getValue(0) +
+                                   quatBuff.R_component_3() * _Nc->getValue(1) +
+                                   quatBuff.R_component_4() * _Nc->getValue(2)));
     }
   }
 
@@ -271,20 +272,20 @@ void siconos::modeling::NewtonEuler1DR::computeJacobianhOver_q_(
       "std::shared_ptr<siconos::algebra::BlockVector> q0 \n");
 }
 
-void siconos::modeling::NewtonEuler1DR::computeJacobianhOver_q_prod_T(
-    Interaction& inter, std::shared_ptr<siconos::algebra::BlockVector> q0) {
+void siconos::modeling::NewtonEuler1DR::computeH_NE_prod_T(
+    const Interaction& inter, const siconos::algebra::BlockVector& q0) {
   DEBUG_BEGIN(
-      "siconos::modeling::NewtonEuler1DR::computeJacobianhOver_q_prod_T(Interaction& inter, "
+      "siconos::modeling::NewtonEuler1DR::computeH_NE_prod_T(Interaction& inter, "
       "std::shared_ptr<siconos::algebra::BlockVector> q0 \n")
 
-  if (q0->numberOfBlocks() > 1) {
-    NIcomputeJachqTFromContacts((q0->getAllVect())[0], (q0->getAllVect())[1]);
+  if (q0.numberOfBlocks() > 1) {
+    NIcomputeJachqTFromContacts(*q0.vector(0), *q0.vector(1));
   } else {
-    NIcomputeJachqTFromContacts((q0->getAllVect())[0]);
+    NIcomputeJachqTFromContacts(*q0.vector(0));
   }
 
   DEBUG_END(
-      "siconos::modeling::NewtonEuler1DR::computeJacobianhOver_q_prod_T(Interaction& inter, "
+      "siconos::modeling::NewtonEuler1DR::computeH_NE_prod_T(Interaction& inter, "
       "std::shared_ptr<siconos::algebra::BlockVector> q0) \n");
 }
 
@@ -299,27 +300,27 @@ void siconos::modeling::NewtonEuler1DR::computehFromRelativeContactPoints(
   // no q2 then pc2 and normal are absolute.
 
   // Update pc1 based on q0 and relPc1
-  std::shared_ptr<siconos::algebra::SiconosVector> q1 = (q0.getAllVect())[0];
-  boost::math::quaternion<double> qq1((*q1)(3), (*q1)(4), (*q1)(5), (*q1)(6));
+  auto& q1 = *q0.vector(0);
+  boost::math::quaternion<double> qq1(q1(3), q1(4), q1(5), q1(6));
   boost::math::quaternion<double> qpc1(0, (*_relPc1)(0), (*_relPc1)(1), (*_relPc1)(2));
 
   // apply q1 rotation and add
   qpc1 = qq1 * qpc1 / qq1;
-  (*_Pc1)(0) = qpc1.R_component_2() + (*q1)(0);
-  (*_Pc1)(1) = qpc1.R_component_3() + (*q1)(1);
-  (*_Pc1)(2) = qpc1.R_component_4() + (*q1)(2);
+  (*_Pc1)(0) = qpc1.R_component_2() + q1(0);
+  (*_Pc1)(1) = qpc1.R_component_3() + q1(1);
+  (*_Pc1)(2) = qpc1.R_component_4() + q1(2);
 
   if (q0.numberOfBlocks() > 1) {
     // Update pc2 based on q0 and relPc2
-    std::shared_ptr<siconos::algebra::SiconosVector> q2 = (q0.getAllVect())[1];
-    boost::math::quaternion<double> qq2((*q2)(3), (*q2)(4), (*q2)(5), (*q2)(6));
+    auto& q2 = *q0.vector(1);
+    boost::math::quaternion<double> qq2(q2(3), q2(4), q2(5), q2(6));
     boost::math::quaternion<double> qpc2(0, (*_relPc2)(0), (*_relPc2)(1), (*_relPc2)(2));
 
     // apply q2 rotation and add
     qpc2 = qq2 * qpc2 / qq2;
-    (*_Pc2)(0) = qpc2.R_component_2() + (*q2)(0);
-    (*_Pc2)(1) = qpc2.R_component_3() + (*q2)(1);
-    (*_Pc2)(2) = qpc2.R_component_4() + (*q2)(2);
+    (*_Pc2)(0) = qpc2.R_component_2() + q2(0);
+    (*_Pc2)(1) = qpc2.R_component_3() + q2(1);
+    (*_Pc2)(2) = qpc2.R_component_4() + q2(2);
 
     // same for normal
     boost::math::quaternion<double> qnc(0, (*_relNc)(0), (*_relNc)(1), (*_relNc)(2));

@@ -519,35 +519,35 @@ void siconos::modeling::NewtonEulerDS::computeJacobianWrenchOver_twist(
 void siconos::modeling::NewtonEulerDS::display(bool brief) const {
   std::cout << "=====> NewtonEuler System display (number: " << number_ << ").\n";
   std::cout << "- q \n";
-  state_q_->display();
+  state_q_->displayT();
 
-  std::cout << "- initial state: \n" << *q0_view_ << "\n";
+  std::cout << "- initial state: \n" << q0_view_->transpose() << "\n";
   std::cout << "- twist \n";
-  twist_->display();
+  twist_->displayT();
 
-  std::cout << "- twist0 \n " << *twist0_view_ << "\n";
+  std::cout << "- twist0 \n " << twist0_view_->transpose() << "\n";
 
   std::cout << "- dotq \n";
   if (dotq_)
-    dotq_->display();
+    dotq_->displayT();
   else
     std::cout << "-> nullptr\n";
 
   std::cout << "- p[0] \n";
   if (p_[0])
-    p_[0]->display();
+    p_[0]->displayT();
   else
     std::cout << "-> nullptr\n";
 
   std::cout << "- p[1] \n";
   if (p_[1])
-    p_[1]->display();
+    p_[1]->displayT();
   else
     std::cout << "-> nullptr\n";
 
   std::cout << "- p[2] \n";
   if (p_[2])
-    p_[2]->display();
+    p_[2]->displayT();
   else
     std::cout << "-> nullptr\n";
 
@@ -762,14 +762,12 @@ void siconos::modeling::newton_euler::computeJacobianMGyrOver_twist(
   auto iomega = inertia.block<3, 3>(3, 3) * omega;
 
   siconos::algebra::SiconosVector3 ei;
-  siconos::algebra::SiconosVector3 iei;
   /*See equation of DevNotes.pdf, equation with label eq:NE_nablaFL1*/
 
   for (int i = 0; i < 3; i++) {
     ei.setZero();
     ei(i) = 1.0;
-    iei = inertia.block<3, 3>(3, 3) * ei;
-    result.col(i + 3) = ei.cross(omega) + omega.cross(iei);
+    result.col(i + 3) = ei.cross(iomega) + omega.cross(inertia.block<3, 3>(3, 3) * ei);
   }
   // Check if Jacobian is valid. Warning to the transpose operation in
   // _jacobianMGyrtwist->setValue(3 + j, 3 + i, ei_Iomega.getValue(j) +

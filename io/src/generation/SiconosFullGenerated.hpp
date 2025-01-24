@@ -713,8 +713,8 @@ SICONOS_IO_REGISTER_WITH_BASES(KneeJointR,(NewtonEulerJointR),
   (_G2P0z)
   (_P0))
 SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerJointR,(NewtonEulerR),
-  (_absoluteRef)
-  (_allowSelfCollide)
+  (absoluteRef_)
+  (allowSelfCollide_)
   (_axes)
   (_points))
 SICONOS_IO_REGISTER_WITH_BASES(SphereLDS,(LagrangianDS),

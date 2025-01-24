@@ -97,7 +97,7 @@ void computeRotationMatrix(double q0, double q1, double q2, double q3,
  * \param[in,out] v the vector to be rotated
  */
 
-void computeRotationMatrix(siconos::algebra::SiconosVector &q,
+void computeRotationMatrix(const siconos::algebra::SiconosVector &q,
                            siconos::algebra::SiconosMatrix &rotationMatrix);
 
 /* For a given configuration vector q composed of a position and a quaternion,
@@ -106,7 +106,7 @@ void computeRotationMatrix(siconos::algebra::SiconosVector &q,
  * \param[in] q the position vector
  * \param[in,out] v the vector to be rotated
  */
-void computeRotationMatrixTransposed(siconos::algebra::SiconosVector &q,
+void computeRotationMatrixTransposed(const siconos::algebra::SiconosVector &q,
                                      siconos::algebra::SiconosMatrix &rotationMatrix);
 
 /* For a given configuration vector q composed of a position and a quaternion,

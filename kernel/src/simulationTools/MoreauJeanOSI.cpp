@@ -1034,7 +1034,7 @@ void siconos::integrators::MoreauJeanOSI::computeFreeOutput(
     siconos::algebra::matrixBlockVector_prod(H, *xfree, osnsp_rhs, true);
   } else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
     auto H = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerR>(inter.relation())
-                 ->jacobianhOver_q_prod_T();
+                 ->H_NE_prod_T();
     siconos::algebra::matrixBlockVector_prod(H, *xfree, osnsp_rhs, true);
   }
 

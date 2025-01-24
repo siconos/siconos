@@ -76,41 +76,38 @@ double piwrap(double x) {
 
 }  // namespace
 
-siconos::joints::CylindricalJointR::CylindricalJointR()
-    : NewtonEulerJointR{},
-      _axis0{std::make_shared<siconos::algebra::SiconosVector>(3)},
-      _G1P0{std::make_shared<siconos::algebra::SiconosVector>(3)} {
-  _points.resize(1);
-  _axes.resize(1);
-}
-
 siconos::joints::CylindricalJointR::CylindricalJointR(
-    std::shared_ptr<siconos::algebra::SiconosVector> P,
-    std::shared_ptr<siconos::algebra::SiconosVector> A, bool absoluteRef,
+    const Eigen::Ref<siconos::algebra::SiconosVector3>& P,
+    const Eigen::Ref<siconos::algebra::SiconosVector3>& A, bool absoluteRef,
     std::shared_ptr<siconos::modeling::NewtonEulerDS> d1,
-    std::shared_ptr<siconos::modeling::NewtonEulerDS> d2)
-    : CylindricalJointR{} {
+    std::shared_ptr<siconos::modeling::NewtonEulerDS> d2) {
+  _axis0 = std::make_shared<siconos::algebra::SiconosVector3>();
+  _G1P0 = std::make_shared<siconos::algebra::SiconosVector3>();
+
   setAbsolute(absoluteRef);
   setPoint(0, P);
   setAxis(0, A);
-  if (d1)
-    setBasePositions(d1->q(),
-                     d2 ? d2->q() : std::shared_ptr<siconos::algebra::SiconosVector>());
+  if (d1) {
+    if (d2)
+      setBasePositions(d1->q_read(), d2->q_read());
+    else
+      setBasePositions(d1->q_read(), std::nullopt);
+  }
 }
 
 void siconos::joints::CylindricalJointR::setBasePositions(
-    std::shared_ptr<siconos::algebra::SiconosVector> q1,
-    std::shared_ptr<siconos::algebra::SiconosVector> q2) {
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2) {
   // in the two-DS case, _P is unused.
   _G1P0->setZero();
-  *_G1P0 = *_points[0];
+  *_G1P0 = *points_[0];
   _axis0->setZero();
-  *_axis0 = *_axes[0];
+  *_axis0 = *axes_[0];
 
-  if (_absoluteRef) {
-    _G1P0->setValue(0, _G1P0->getValue(0) - q1->getValue(0));
-    _G1P0->setValue(1, _G1P0->getValue(1) - q1->getValue(1));
-    _G1P0->setValue(2, _G1P0->getValue(2) - q1->getValue(2));
+  if (absoluteRef_) {
+    _G1P0->setValue(0, _G1P0->getValue(0) - q1(0));
+    _G1P0->setValue(1, _G1P0->getValue(1) - q1(1));
+    _G1P0->setValue(2, _G1P0->getValue(2) - q1(2));
   }
 
   computeV1V2FromAxis();
@@ -118,9 +115,9 @@ void siconos::joints::CylindricalJointR::setBasePositions(
   q2i->setZero();
   q2i->setValue(3, 1);
 
-  if (q2) *q2i = *q2;
+  if (q2) *q2i = q2.value();
 
-  auto quat1{siconos::geometry::rotquat(*q1)};
+  auto quat1{siconos::geometry::rotquat(q1)};
   auto quat2{siconos::geometry::rotquat(*q2i)};
 
   // Initial orientation offset
@@ -137,21 +134,21 @@ void siconos::joints::CylindricalJointR::setBasePositions(
   tmp = quat1 * quatG1P0 / quat1;
 
   siconos::algebra::SiconosVector P0_abs(3);
-  P0_abs.setValue(0, tmp.R_component_2() + q1->getValue(0));
-  P0_abs.setValue(1, tmp.R_component_3() + q1->getValue(1));
-  P0_abs.setValue(2, tmp.R_component_4() + q1->getValue(2));
+  P0_abs.setValue(0, tmp.R_component_2() + q1(0));
+  P0_abs.setValue(1, tmp.R_component_3() + q1(1));
+  P0_abs.setValue(2, tmp.R_component_4() + q1(2));
 
   siconos::algebra::SiconosVector G2_abs(3);
   G2_abs.setValue(0, q2i->getValue(0));
   G2_abs.setValue(1, q2i->getValue(1));
   G2_abs.setValue(2, q2i->getValue(2));
 
-  auto G2P0_abs = std::make_shared<siconos::algebra::SiconosVector>(3);
+  auto G2P0_abs = std::make_shared<siconos::algebra::SiconosVector3>();
   *G2P0_abs = P0_abs - G2_abs;
   auto quatG2P0_abs{siconos::geometry::posquat(*G2P0_abs)};
   tmp = 1.0 / quat2 * quatG2P0_abs * quat2;
 
-  _G2P0 = std::make_shared<siconos::algebra::SiconosVector>(3);
+  _G2P0 = std::make_shared<siconos::algebra::SiconosVector3>();
   _G2P0->setValue(0, tmp.R_component_2());
   _G2P0->setValue(1, tmp.R_component_3());
   _G2P0->setValue(2, tmp.R_component_4());
@@ -162,12 +159,9 @@ void siconos::joints::CylindricalJointR::setBasePositions(
   _initialAngle = 0.0;
   siconos::algebra::SiconosVector tmpy(1);
   if (q2) {
-    siconos::algebra::BlockVector q0(q1, q2);
-    this->computehDoF(q0, tmpy, 1);
+    computehDoF(q1, q2, tmpy, 1);
   } else {
-    siconos::algebra::BlockVector q0(1);
-    q0.setVectorPtr(0, q1);
-    this->computehDoF(q0, tmpy, 1);
+    computehDoF(q1, std::nullopt, tmpy, 1);
   }
   _initialAngle = tmpy(0);
 
@@ -200,7 +194,7 @@ void siconos::joints::CylindricalJointR::computeV1V2FromAxis() {
   _V2 = _axis0->head<3>().cross(_V1);
 }
 
-void siconos::joints::CylindricalJointR::computeJacobianhOver_q_(
+void siconos::joints::CylindricalJointR::computeH_NE_(
     double time, siconos::modeling::Interaction& inter,
     const siconos::algebra::BlockVector& q0) {
   auto q1 = (q0.getAllVect())[0];
@@ -436,94 +430,94 @@ void siconos::joints::CylindricalJointR::Jd1d2(double X1, double Y1, double Z1, 
       2 * _V2->getValue(0) * q13 + 2 * _V2->getValue(1) * q10 - 2 * _V2->getValue(2) * q11;
   const double x72 =
       2 * _V2->getValue(0) * q10 - 2 * _V2->getValue(1) * q13 + 2 * _V2->getValue(2) * q12;
-  jacobianhOver_q_view_->setValue(0, 0, -x1 + x3 - x5 - x7);
-  jacobianhOver_q_view_->setValue(0, 1, -x10 - x11 + x8 - x9);
-  jacobianhOver_q_view_->setValue(0, 2, x12 - x13 - x14 - x15);
-  jacobianhOver_q_view_->setValue(0, 3,
+  H_NE_view_->setValue(0, 0, -x1 + x3 - x5 - x7);
+  H_NE_view_->setValue(0, 1, -x10 - x11 + x8 - x9);
+  H_NE_view_->setValue(0, 2, x12 - x13 - x14 - x15);
+  H_NE_view_->setValue(0, 3,
                                   -2 * x16 * x17 - 2 * x18 * x19 - 2 * x2 * x29 -
                                       2 * x20 * x21 - 2 * x27 * x4 - 2 * x28 * x6);
-  jacobianhOver_q_view_->setValue(0, 4,
+  H_NE_view_->setValue(0, 4,
                                   -2 * x0 * x27 - 2 * x17 * x22 + 2 * x18 * x21 -
                                       2 * x19 * x20 - 2 * x2 * x28 + 2 * x29 * x6);
-  jacobianhOver_q_view_->setValue(0, 5,
+  H_NE_view_->setValue(0, 5,
                                   -2 * x0 * x29 + 2 * x16 * x19 - 2 * x17 * x18 -
                                       2 * x21 * x22 - 2 * x27 * x6 + 2 * x28 * x4);
-  jacobianhOver_q_view_->setValue(0, 6,
+  H_NE_view_->setValue(0, 6,
                                   -2 * x0 * x28 - 2 * x16 * x21 + 2 * x17 * x20 -
                                       2 * x19 * x22 + 2 * x2 * x27 - 2 * x29 * x4);
-  jacobianhOver_q_view_->setValue(0, 7, x17);
-  jacobianhOver_q_view_->setValue(0, 8, x21);
-  jacobianhOver_q_view_->setValue(0, 9, x19);
-  jacobianhOver_q_view_->setValue(0, 10, 2 * x17 * x25 + 2 * x19 * x26 + 2 * x21 * x24);
-  jacobianhOver_q_view_->setValue(0, 11, 2 * x17 * x23 + 2 * x19 * x24 - 2 * x21 * x26);
-  jacobianhOver_q_view_->setValue(0, 12, 2 * x17 * x26 - 2 * x19 * x25 + 2 * x21 * x23);
-  jacobianhOver_q_view_->setValue(0, 13, -2 * x17 * x24 + 2 * x19 * x23 + 2 * x21 * x25);
-  jacobianhOver_q_view_->setValue(1, 0, -x31 + x33 - x35 - x37);
-  jacobianhOver_q_view_->setValue(1, 1, x38 - x39 - x40 - x41);
-  jacobianhOver_q_view_->setValue(1, 2, x42 - x43 - x44 - x45);
-  jacobianhOver_q_view_->setValue(1, 3,
+  H_NE_view_->setValue(0, 7, x17);
+  H_NE_view_->setValue(0, 8, x21);
+  H_NE_view_->setValue(0, 9, x19);
+  H_NE_view_->setValue(0, 10, 2 * x17 * x25 + 2 * x19 * x26 + 2 * x21 * x24);
+  H_NE_view_->setValue(0, 11, 2 * x17 * x23 + 2 * x19 * x24 - 2 * x21 * x26);
+  H_NE_view_->setValue(0, 12, 2 * x17 * x26 - 2 * x19 * x25 + 2 * x21 * x23);
+  H_NE_view_->setValue(0, 13, -2 * x17 * x24 + 2 * x19 * x23 + 2 * x21 * x25);
+  H_NE_view_->setValue(1, 0, -x31 + x33 - x35 - x37);
+  H_NE_view_->setValue(1, 1, x38 - x39 - x40 - x41);
+  H_NE_view_->setValue(1, 2, x42 - x43 - x44 - x45);
+  H_NE_view_->setValue(1, 3,
                                   -2 * x16 * x46 - 2 * x18 * x47 - 2 * x20 * x48 -
                                       2 * x27 * x34 - 2 * x28 * x36 - 2 * x29 * x32);
-  jacobianhOver_q_view_->setValue(1, 4,
+  H_NE_view_->setValue(1, 4,
                                   2 * x18 * x48 - 2 * x20 * x47 - 2 * x22 * x46 -
                                       2 * x27 * x30 - 2 * x28 * x32 + 2 * x29 * x36);
-  jacobianhOver_q_view_->setValue(1, 5,
+  H_NE_view_->setValue(1, 5,
                                   2 * x16 * x47 - 2 * x18 * x46 - 2 * x22 * x48 -
                                       2 * x27 * x36 + 2 * x28 * x34 - 2 * x29 * x30);
-  jacobianhOver_q_view_->setValue(1, 6,
+  H_NE_view_->setValue(1, 6,
                                   -2 * x16 * x48 + 2 * x20 * x46 - 2 * x22 * x47 +
                                       2 * x27 * x32 - 2 * x28 * x30 - 2 * x29 * x34);
-  jacobianhOver_q_view_->setValue(1, 7, x46);
-  jacobianhOver_q_view_->setValue(1, 8, x48);
-  jacobianhOver_q_view_->setValue(1, 9, x47);
-  jacobianhOver_q_view_->setValue(1, 10, 2 * x24 * x48 + 2 * x25 * x46 + 2 * x26 * x47);
-  jacobianhOver_q_view_->setValue(1, 11, 2 * x23 * x46 + 2 * x24 * x47 - 2 * x26 * x48);
-  jacobianhOver_q_view_->setValue(1, 12, 2 * x23 * x48 - 2 * x25 * x47 + 2 * x26 * x46);
-  jacobianhOver_q_view_->setValue(1, 13, 2 * x23 * x47 - 2 * x24 * x46 + 2 * x25 * x48);
+  H_NE_view_->setValue(1, 7, x46);
+  H_NE_view_->setValue(1, 8, x48);
+  H_NE_view_->setValue(1, 9, x47);
+  H_NE_view_->setValue(1, 10, 2 * x24 * x48 + 2 * x25 * x46 + 2 * x26 * x47);
+  H_NE_view_->setValue(1, 11, 2 * x23 * x46 + 2 * x24 * x47 - 2 * x26 * x48);
+  H_NE_view_->setValue(1, 12, 2 * x23 * x48 - 2 * x25 * x47 + 2 * x26 * x46);
+  H_NE_view_->setValue(1, 13, 2 * x23 * x47 - 2 * x24 * x46 + 2 * x25 * x48);
 
   /* Orientation constraints (H3, H4, H5)
    */
-  jacobianhOver_q_view_->setValue(2, 0, 0);
-  jacobianhOver_q_view_->setValue(2, 1, 0);
-  jacobianhOver_q_view_->setValue(2, 2, 0);
-  jacobianhOver_q_view_->setValue(
+  H_NE_view_->setValue(2, 0, 0);
+  H_NE_view_->setValue(2, 1, 0);
+  H_NE_view_->setValue(2, 2, 0);
+  H_NE_view_->setValue(
       2, 3, -x17 * x51 - x19 * x53 - x2 * x56 - x21 * x52 - x4 * x54 + x49 * x50 - x55 * x6);
-  jacobianhOver_q_view_->setValue(
+  H_NE_view_->setValue(
       2, 4,
       -x17 * x49 - x19 * x52 + x21 * x53 - x50 * x51 + x57 * x58 - x59 * x60 + x61 * x62);
-  jacobianhOver_q_view_->setValue(
+  H_NE_view_->setValue(
       2, 5,
       -x17 * x53 + x19 * x51 - x21 * x49 - x50 * x52 + x57 * x60 + x58 * x59 - x62 * x63);
-  jacobianhOver_q_view_->setValue(
+  H_NE_view_->setValue(
       2, 6, x17 * x52 - x19 * x49 - x21 * x51 - x50 * x53 + x57 * x62 - x58 * x61 + x60 * x63);
-  jacobianhOver_q_view_->setValue(2, 7, 0);
-  jacobianhOver_q_view_->setValue(2, 8, 0);
-  jacobianhOver_q_view_->setValue(2, 9, 0);
-  jacobianhOver_q_view_->setValue(2, 10, x17 * x65 + x19 * x67 + x21 * x66 - x50 * x64);
-  jacobianhOver_q_view_->setValue(2, 11, -x17 * x64 + x19 * x66 - x21 * x67 - x50 * x65);
-  jacobianhOver_q_view_->setValue(2, 12, x17 * x67 - x19 * x65 - x21 * x64 - x50 * x66);
-  jacobianhOver_q_view_->setValue(2, 13, -x17 * x66 - x19 * x64 + x21 * x65 - x50 * x67);
-  jacobianhOver_q_view_->setValue(3, 0, 0);
-  jacobianhOver_q_view_->setValue(3, 1, 0);
-  jacobianhOver_q_view_->setValue(3, 2, 0);
-  jacobianhOver_q_view_->setValue(
+  H_NE_view_->setValue(2, 7, 0);
+  H_NE_view_->setValue(2, 8, 0);
+  H_NE_view_->setValue(2, 9, 0);
+  H_NE_view_->setValue(2, 10, x17 * x65 + x19 * x67 + x21 * x66 - x50 * x64);
+  H_NE_view_->setValue(2, 11, -x17 * x64 + x19 * x66 - x21 * x67 - x50 * x65);
+  H_NE_view_->setValue(2, 12, x17 * x67 - x19 * x65 - x21 * x64 - x50 * x66);
+  H_NE_view_->setValue(2, 13, -x17 * x66 - x19 * x64 + x21 * x65 - x50 * x67);
+  H_NE_view_->setValue(3, 0, 0);
+  H_NE_view_->setValue(3, 1, 0);
+  H_NE_view_->setValue(3, 2, 0);
+  H_NE_view_->setValue(
       3, 3,
       -x32 * x56 - x34 * x54 - x36 * x55 - x46 * x51 - x47 * x53 - x48 * x52 + x49 * x68);
-  jacobianhOver_q_view_->setValue(
+  H_NE_view_->setValue(
       3, 4,
       -x46 * x49 - x47 * x52 + x48 * x53 - x51 * x68 + x58 * x69 - x60 * x70 + x62 * x71);
-  jacobianhOver_q_view_->setValue(
+  H_NE_view_->setValue(
       3, 5,
       -x46 * x53 + x47 * x51 - x48 * x49 - x52 * x68 + x58 * x70 + x60 * x69 - x62 * x72);
-  jacobianhOver_q_view_->setValue(
+  H_NE_view_->setValue(
       3, 6, x46 * x52 - x47 * x49 - x48 * x51 - x53 * x68 - x58 * x71 + x60 * x72 + x62 * x69);
-  jacobianhOver_q_view_->setValue(3, 7, 0);
-  jacobianhOver_q_view_->setValue(3, 8, 0);
-  jacobianhOver_q_view_->setValue(3, 9, 0);
-  jacobianhOver_q_view_->setValue(3, 10, x46 * x65 + x47 * x67 + x48 * x66 - x64 * x68);
-  jacobianhOver_q_view_->setValue(3, 11, -x46 * x64 + x47 * x66 - x48 * x67 - x65 * x68);
-  jacobianhOver_q_view_->setValue(3, 12, x46 * x67 - x47 * x65 - x48 * x64 - x66 * x68);
-  jacobianhOver_q_view_->setValue(3, 13, -x46 * x66 - x47 * x64 + x48 * x65 - x67 * x68);
+  H_NE_view_->setValue(3, 7, 0);
+  H_NE_view_->setValue(3, 8, 0);
+  H_NE_view_->setValue(3, 9, 0);
+  H_NE_view_->setValue(3, 10, x46 * x65 + x47 * x67 + x48 * x66 - x64 * x68);
+  H_NE_view_->setValue(3, 11, -x46 * x64 + x47 * x66 - x48 * x67 - x65 * x68);
+  H_NE_view_->setValue(3, 12, x46 * x67 - x47 * x65 - x48 * x64 - x66 * x68);
+  H_NE_view_->setValue(3, 13, -x46 * x66 - x47 * x64 + x48 * x65 - x67 * x68);
 }
 
 void siconos::joints::CylindricalJointR::Jd1(double X1, double Y1, double Z1, double q10,
@@ -616,85 +610,85 @@ void siconos::joints::CylindricalJointR::Jd1(double X1, double Y1, double Z1, do
   const double x56 = -q10 * x26 + q11 * x30 + q12 * x28 + q13 * x32;
   const double x57 =
       2 * _V2->getValue(0) * q11 + 2 * _V2->getValue(1) * q12 + 2 * _V2->getValue(2) * q13;
-  jacobianhOver_q_view_->setValue(0, 0, -x1 + x3 - x5 - x7);
-  jacobianhOver_q_view_->setValue(0, 1, -x10 - x11 + x8 - x9);
-  jacobianhOver_q_view_->setValue(0, 2, x12 - x13 - x14 - x15);
-  jacobianhOver_q_view_->setValue(0, 3,
+  H_NE_view_->setValue(0, 0, -x1 + x3 - x5 - x7);
+  H_NE_view_->setValue(0, 1, -x10 - x11 + x8 - x9);
+  H_NE_view_->setValue(0, 2, x12 - x13 - x14 - x15);
+  H_NE_view_->setValue(0, 3,
                                   -2 * x16 * x17 - 2 * x18 * x19 - 2 * x2 * x25 -
                                       2 * x20 * x21 - 2 * x23 * x4 - 2 * x24 * x6);
-  jacobianhOver_q_view_->setValue(0, 4,
+  H_NE_view_->setValue(0, 4,
                                   -2 * x0 * x23 - 2 * x17 * x22 + 2 * x18 * x21 -
                                       2 * x19 * x20 - 2 * x2 * x24 + 2 * x25 * x6);
-  jacobianhOver_q_view_->setValue(0, 5,
+  H_NE_view_->setValue(0, 5,
                                   -2 * x0 * x25 + 2 * x16 * x19 - 2 * x17 * x18 -
                                       2 * x21 * x22 - 2 * x23 * x6 + 2 * x24 * x4);
-  jacobianhOver_q_view_->setValue(0, 6,
+  H_NE_view_->setValue(0, 6,
                                   -2 * x0 * x24 - 2 * x16 * x21 + 2 * x17 * x20 -
                                       2 * x19 * x22 + 2 * x2 * x23 - 2 * x25 * x4);
-  jacobianhOver_q_view_->setValue(1, 0, -x27 + x29 - x31 - x33);
-  jacobianhOver_q_view_->setValue(1, 1, x34 - x35 - x36 - x37);
-  jacobianhOver_q_view_->setValue(1, 2, x38 - x39 - x40 - x41);
-  jacobianhOver_q_view_->setValue(1, 3,
+  H_NE_view_->setValue(1, 0, -x27 + x29 - x31 - x33);
+  H_NE_view_->setValue(1, 1, x34 - x35 - x36 - x37);
+  H_NE_view_->setValue(1, 2, x38 - x39 - x40 - x41);
+  H_NE_view_->setValue(1, 3,
                                   -2 * x16 * x42 - 2 * x18 * x43 - 2 * x20 * x44 -
                                       2 * x23 * x30 - 2 * x24 * x32 - 2 * x25 * x28);
-  jacobianhOver_q_view_->setValue(1, 4,
+  H_NE_view_->setValue(1, 4,
                                   2 * x18 * x44 - 2 * x20 * x43 - 2 * x22 * x42 -
                                       2 * x23 * x26 - 2 * x24 * x28 + 2 * x25 * x32);
-  jacobianhOver_q_view_->setValue(1, 5,
+  H_NE_view_->setValue(1, 5,
                                   2 * x16 * x43 - 2 * x18 * x42 - 2 * x22 * x44 -
                                       2 * x23 * x32 + 2 * x24 * x30 - 2 * x25 * x26);
-  jacobianhOver_q_view_->setValue(1, 6,
+  H_NE_view_->setValue(1, 6,
                                   -2 * x16 * x44 + 2 * x20 * x42 - 2 * x22 * x43 +
                                       2 * x23 * x28 - 2 * x24 * x26 - 2 * x25 * x30);
 
   /* Orientation constraints (H3, H4, H5)
    */
-  jacobianhOver_q_view_->setValue(2, 0, 0);
-  jacobianhOver_q_view_->setValue(2, 1, 0);
-  jacobianhOver_q_view_->setValue(2, 2, 0);
-  jacobianhOver_q_view_->setValue(2, 3,
+  H_NE_view_->setValue(2, 0, 0);
+  H_NE_view_->setValue(2, 1, 0);
+  H_NE_view_->setValue(2, 2, 0);
+  H_NE_view_->setValue(2, 3,
                                   -_cq2q101 * x51 - _cq2q102 * x17 - _cq2q103 * x21 -
                                       _cq2q104 * x19 + x45 * x46 + x47 * x48 + x49 * x50);
-  jacobianhOver_q_view_->setValue(2, 4,
+  H_NE_view_->setValue(2, 4,
                                   _cq2q101 * x17 - _cq2q102 * x51 - _cq2q103 * x19 +
                                       _cq2q104 * x21 + x46 * x52 - x47 * x50 + x48 * x49);
-  jacobianhOver_q_view_->setValue(2, 5,
+  H_NE_view_->setValue(2, 5,
                                   _cq2q101 * x21 + _cq2q102 * x19 - _cq2q103 * x51 -
                                       _cq2q104 * x17 - x45 * x48 + x46 * x47 + x50 * x52);
-  jacobianhOver_q_view_->setValue(2, 6,
+  H_NE_view_->setValue(2, 6,
                                   _cq2q101 * x19 - _cq2q102 * x21 + _cq2q103 * x17 -
                                       _cq2q104 * x51 + x45 * x50 - x46 * x49 + x48 * x52);
-  jacobianhOver_q_view_->setValue(3, 0, 0);
-  jacobianhOver_q_view_->setValue(3, 1, 0);
-  jacobianhOver_q_view_->setValue(3, 2, 0);
-  jacobianhOver_q_view_->setValue(3, 3,
+  H_NE_view_->setValue(3, 0, 0);
+  H_NE_view_->setValue(3, 1, 0);
+  H_NE_view_->setValue(3, 2, 0);
+  H_NE_view_->setValue(3, 3,
                                   -_cq2q101 * x56 - _cq2q102 * x42 - _cq2q103 * x44 -
                                       _cq2q104 * x43 + x46 * x53 + x48 * x54 + x50 * x55);
-  jacobianhOver_q_view_->setValue(3, 4,
+  H_NE_view_->setValue(3, 4,
                                   _cq2q101 * x42 - _cq2q102 * x56 - _cq2q103 * x43 +
                                       _cq2q104 * x44 + x46 * x57 + x48 * x55 - x50 * x54);
-  jacobianhOver_q_view_->setValue(3, 5,
+  H_NE_view_->setValue(3, 5,
                                   _cq2q101 * x44 + _cq2q102 * x43 - _cq2q103 * x56 -
                                       _cq2q104 * x42 + x46 * x54 - x48 * x53 + x50 * x57);
-  jacobianhOver_q_view_->setValue(3, 6,
+  H_NE_view_->setValue(3, 6,
                                   _cq2q101 * x43 - _cq2q102 * x44 + _cq2q103 * x42 -
                                       _cq2q104 * x56 - x46 * x55 + x48 * x57 + x50 * x53);
 }
 
 /** Compute the vector of linear and angular positions of the free axes */
 void siconos::joints::CylindricalJointR::computehDoF(
-    const siconos::algebra::BlockVector& q0, Eigen::Ref<siconos::algebra::SiconosVector> y,
-    unsigned int axis) {
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+    Eigen::Ref<siconos::algebra::SiconosVector> y, unsigned int axis) {
   if (axis > 1) return;
 
-  auto q1 = (q0.getAllVect())[0];
-  double X1 = q1->getValue(0);
-  double Y1 = q1->getValue(1);
-  double Z1 = q1->getValue(2);
-  double q10 = q1->getValue(3);
-  double q11 = q1->getValue(4);
-  double q12 = q1->getValue(5);
-  double q13 = q1->getValue(6);
+  double X1 = q1(0);
+  double Y1 = q1(1);
+  double Z1 = q1(2);
+  double q10 = q1(3);
+  double q11 = q1(4);
+  double q12 = q1(5);
+  double q13 = q1(6);
   double X2 = 0;
   double Y2 = 0;
   double Z2 = 0;
@@ -703,8 +697,7 @@ void siconos::joints::CylindricalJointR::computehDoF(
   double q22 = 0;
   double q23 = 0;
 
-  if (q0.numberOfBlocks() > 1) {
-    auto q2 = (q0.getAllVect())[1];
+  if (q2) {
     X2 = q2->getValue(0);
     Y2 = q2->getValue(1);
     Z2 = q2->getValue(2);
@@ -821,14 +814,14 @@ void siconos::joints::CylindricalJointR::computeJachqDoF(
     Eigen::Ref<siconos::algebra::SiconosMatrix> jachq, unsigned int axis) {
   if (axis > 1) return;
 
-  auto q1 = (q0.getAllVect())[0];
-  double X1 = q1->getValue(0);
-  double Y1 = q1->getValue(1);
-  double Z1 = q1->getValue(2);
-  double q10 = q1->getValue(3);
-  double q11 = q1->getValue(4);
-  double q12 = q1->getValue(5);
-  double q13 = q1->getValue(6);
+  auto& q1 = *(q0.vector(0));
+  double X1 = q1(0);
+  double Y1 = q1(1);
+  double Z1 = q1(2);
+  double q10 = q1(3);
+  double q11 = q1(4);
+  double q12 = q1(5);
+  double q13 = q1(6);
   double X2 = 0;
   double Y2 = 0;
   double Z2 = 0;
@@ -1046,18 +1039,17 @@ void siconos::joints::CylindricalJointR::computeJachqDoF(
   }
 }
 
-/** Return the normal of the angular DoF axis of rotation.
- * \param axis must be 0 */
-void siconos::joints::CylindricalJointR::_normalDoF(siconos::algebra::SiconosVector& ans,
-                                                    const siconos::algebra::BlockVector& q0,
-                                                    int axis, bool absoluteRef) {
+// Return the normal of the angular DoF axis of rotation. axis must be 0
+siconos::algebra::SiconosVector3 siconos::joints::CylindricalJointR::normalDoF(
+    const siconos::algebra::BlockVector& q0, int axis, bool absoluteRef) {
   // Return the same axis for linear and rotational DoFs
   assert(axis == 0 || axis == 1);
-  if (axis != 0 && axis != 1) return;
+  if (axis != 0 && axis != 1) return siconos::algebra::SiconosVector3{};
 
   // We assume that _axis0 is normalized.
-  ans = *_axis0;
+  auto result = *_axis0;
 
   if (absoluteRef)
-    siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(*q0.getAllVect()[0], ans);
+    siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(*q0.vector(0), result);
+  return result;
 }

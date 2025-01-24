@@ -176,7 +176,7 @@ void KernelTest::t5() {
   // --- Dynamical systems ---
   // -------------------------
 
-  cout << "====> Model loading ..." << endl << endl;
+  cout << "====> Model loading ...\n\n";
 
   auto Mass = std::make_shared<siconos::algebra::SiconosMatrix>(nDof, nDof);
   (*Mass)(0, 0) = m;
@@ -301,7 +301,7 @@ void KernelTest::t6() {
     dataPlot(0, 3) = (*p)(0);
     dataPlot(0, 4) = (*lambda)(0);
     // --- Time loop ---
-    cout << "====> Start computation ... " << endl << endl;
+    cout << "====> Start computation ... \n\n";
     // ==== Simulation loop - Writing without explicit event handling =====
     int k = 1;
     while (s->hasNextEvent()) {

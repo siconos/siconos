@@ -7,6 +7,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -116,9 +117,9 @@ void siconos::joints::CouplerJointR::setReferences(
 void siconos::joints::CouplerJointR::setRatio(double ratio) { _ratio = ratio; }
 
 void siconos::joints::CouplerJointR::makeBlockVectors(
-    std::shared_ptr<siconos::algebra::SiconosVector> q1,
-    std::shared_ptr<siconos::algebra::SiconosVector> q2, siconos::algebra::BlockVector& q01,
-    siconos::algebra::BlockVector& q02) {
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+    siconos::algebra::BlockVector& q01, siconos::algebra::BlockVector& q02) {
   /* Decide what to do for each combination of presence of references
    * and/or q2. Only the existence of q1 is absolutely required.
    * Logic: if no references, then the coupling is between DoFs of q1
@@ -135,37 +136,49 @@ void siconos::joints::CouplerJointR::makeBlockVectors(
    * calculated automatically.  Here we do not have that luxury since
    * we only have std::shared_ptr<siconos::algebra::SiconosVector>s. */
 
-  std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> vects1(2), vects2(2);
+  // Convert q1 and q2 to shared_ptr<SiconosVector>
+  // This is a tmp workaround. To be reviewed
+  auto makeSharedPtr = [](const Eigen::Ref<const siconos::algebra::SiconosVector>& vec) {
+    return std::make_shared<siconos::algebra::SiconosVector>(vec);
+  };
 
-  if (!_ref1 && !_ref2 && q2) {
-    vects1[0] = q1;
-    vects1[1] = q2;
+  auto q1Shared = makeSharedPtr(q1);
+  std::shared_ptr<siconos::algebra::SiconosVector> q2Shared =
+      q2 ? makeSharedPtr(q2.value()) : nullptr;
+
+  // Initialize vects1 and vects2
+  std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> vects1(2, nullptr);
+  std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> vects2(2, nullptr);
+
+  if (!_ref1 && !_ref2 && q2Shared) {
+    vects1[0] = q1Shared;
+    vects1[1] = q2Shared;
     vects2 = vects1;
-  } else if (!q2) {
+  } else if (!q2Shared) {
     if (_ref1) {
       vects1[_ref1_index] = _ref1;
-      vects1[1 - _ref1_index] = q1;
+      vects1[1 - _ref1_index] = q1Shared;
       vects2 = vects1;
     } else {
       vects1.resize(1);
-      vects1[0] = q1;
+      vects1[0] = q1Shared;
       vects2 = vects1;
     }
   } else if (q2) {
     if (_ref1) {
       vects1[_ref1_index] = _ref1;
-      vects1[1 - _ref1_index] = q1;
+      vects1[1 - _ref1_index] = q1Shared;
     } else {
-      vects1[0] = q1;
-      vects1[1] = q2;
+      vects1[0] = q1Shared;
+      vects1[1] = q2Shared;
     }
 
     if (_ref2) {
       vects2[_ref2_index] = _ref2;
-      vects2[1 - _ref2_index] = q2;
+      vects2[1 - _ref2_index] = q2Shared;
     } else {
-      vects2[0] = q1;
-      vects2[1] = q2;
+      vects2[0] = q1Shared;
+      vects2[1] = q2Shared;
     }
   }
 
@@ -174,16 +187,22 @@ void siconos::joints::CouplerJointR::makeBlockVectors(
 }
 
 void siconos::joints::CouplerJointR::setBasePositions(
-    std::shared_ptr<siconos::algebra::SiconosVector> q1,
-    std::shared_ptr<siconos::algebra::SiconosVector> q2) {
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2) {
   // TODO: time=0?
 
   // Get current positions of the implicated degrees of freedom
   siconos::algebra::SiconosVector y1(1), y2(1);
   siconos::algebra::BlockVector q01, q02;
   makeBlockVectors(q1, q2, q01, q02);
-  _joint1->computehDoF(q01, y1, _dof1);
-  _joint2->computehDoF(q02, y2, _dof2);
+  if (q01.numberOfBlocks() == 2)
+    _joint1->computehDoF(*q01.vector(0), *q01.vector(1), y1, _dof1);
+  else
+    _joint1->computehDoF(*q01.vector(0), std::nullopt, y1, _dof1);
+  if (q02.numberOfBlocks() == 2)
+    _joint2->computehDoF(*q02.vector(0), *q02.vector(1), y2, _dof2);
+  else
+    _joint2->computehDoF(*q02.vector(0), std::nullopt, y2, _dof2);
 
   // Compute initial offset between the DoFs
   _offset = y1(0) * _ratio - y2(0);
@@ -197,19 +216,25 @@ void siconos::joints::CouplerJointR::computeh(const siconos::algebra::BlockVecto
   siconos::algebra::BlockVector q01, q02;
   // auto v0 = q0.vector(0);
   // const_cast<siconos::algebra::BlockVector&>(q0)
-  makeBlockVectors(const_cast<siconos::algebra::BlockVector&>(q0).vector(0),
-                   q0.getAllVect().size() > 1
-                       ? const_cast<siconos::algebra::BlockVector&>(q0).vector(1)
-                       : nullptr,
-                   q01, q02);
-  _joint1->computehDoF(q01, y1, _dof1);
-  _joint2->computehDoF(q02, y2, _dof2);
+  if (q0.numberOfBlocks() > 1)
+    makeBlockVectors(*q0.vector(0), *q0.vector(1), q01, q02);
+  else
+    makeBlockVectors(*q0.vector(0), std::nullopt, q01, q02);
+
+  if (q01.numberOfBlocks() == 2)
+    _joint1->computehDoF(*q01.vector(0), *q01.vector(1), y1, _dof1);
+  else
+    _joint1->computehDoF(*q01.vector(0), std::nullopt, y1, _dof1);
+  if (q02.numberOfBlocks() == 2)
+    _joint2->computehDoF(*q02.vector(0), *q02.vector(1), y2, _dof2);
+  else
+    _joint2->computehDoF(*q02.vector(0), std::nullopt, y2, _dof2);
 
   // Constraint is the linear relation between them
   y(0) = y2(0) - y1(0) * _ratio + _offset;
 }
 
-void siconos::joints::CouplerJointR::computeJacobianhOver_q_(
+void siconos::joints::CouplerJointR::computeH_NE_(
     double time, siconos::modeling::Interaction& inter,
     const siconos::algebra::BlockVector& q0) {
   auto jachq1 = std::make_shared<siconos::algebra::SiconosMatrix>(1, q0.size());
@@ -219,51 +244,60 @@ void siconos::joints::CouplerJointR::computeJacobianhOver_q_(
   // Compute the jacobian for the required range of axes
   auto q01 = std::make_shared<siconos::algebra::BlockVector>();
   auto q02 = std::make_shared<siconos::algebra::BlockVector>();
-  makeBlockVectors(std::const_pointer_cast<siconos::algebra::SiconosVector>(q0.vector(0)),
-                   q0.getAllVect().size() > 1
-                       ? std::const_pointer_cast<siconos::algebra::SiconosVector>(q0.vector(1))
-                       : std::shared_ptr<siconos::algebra::SiconosVector>(),
-                   *q01, *q02);
+  if (q0.numberOfBlocks() > 1)
+    makeBlockVectors(*q0.vector(0), *q0.vector(1), *q01, *q02);
+  else
+    makeBlockVectors(*q0.vector(0), std::nullopt, *q01, *q02);
+
   _joint1->computeJachqDoF(inter, *q01, *jachq1, _dof1);
   _joint2->computeJachqDoF(inter, *q02, *jachq2, _dof2);
 
   // Constraint is the linear relation between them
   for (unsigned int i = 0; i < 1; i++)
-    for (unsigned int j = 0; j < jacobianhOver_q_view_->cols(); j++)
-      jacobianhOver_q_view_->setValue(
+    for (unsigned int j = 0; j < H_NE_view_->cols(); j++)
+      H_NE_view_->setValue(
           i, j, jachq2->getValue(i, j) - jachq1->getValue(i, j) * _ratio);
 }
 
-void siconos::joints::CouplerJointR::_normalDoF(siconos::algebra::SiconosVector& ans,
-                                                const siconos::algebra::BlockVector& q0,
-                                                int axis, bool absoluteRef) {
-  assert("siconos::joints::CouplerJointR::_normalDoF is not defined.");
+// siconos::algebra::SiconosVector siconos::joints::CouplerJointR::normalDoF(
+//     const siconos::algebra::BlockVector& q0, int axis, bool absoluteRef) {
+//   assert("siconos::joints::CouplerJointR::_normalDoF is not defined.");
 
-  // We could define the normal of this constraint as simply the cross
-  // product of the normals of the two coupled DoFs, as calculated
-  // below, however this is not really sensible as the constraint is
-  // defined in terms of a line through a manifold, and would need to
-  // be projected down to world coordinates somehow here.  For
-  // example, what is the "direction of the constraint" in world
-  // coordinates for a coupling between rotational and lineawr motion?
+//   // We could define the normal of this constraint as simply the cross
+//   // product of the normals of the two coupled DoFs, as calculated
+//   // below, however this is not really sensible as the constraint is
+//   // defined in terms of a line through a manifold, and would need to
+//   // be projected down to world coordinates somehow here.  For
+//   // example, what is the "direction of the constraint" in world
+//   // coordinates for a coupling between rotational and lineawr motion?
 
-  /*
-  siconos::algebra::SiconosVector n1(3), n2(3);
-  siconos::algebra::BlockVector q01, q02;
-  makeBlockVectors(q0.getAllVect()[0],
-                   q0.getAllVect().size()>1 ? q0.getAllVect()[1] :
-  std::shared_ptr<siconos::algebra::SiconosVector>(), q01, q02); _joint1->normalDoF(n1, q01,
-  _dof1, absoluteRef); _joint2->normalDoF(n2, q02, _dof2, absoluteRef); cross_product(n1, n2,
-  ans);
-  */
-}
+//   /*
+//   siconos::algebra::SiconosVector n1(3), n2(3);
+//   siconos::algebra::BlockVector q01, q02;
+//   makeBlockVectors(q0.getAllVect()[0],
+//                    q0.getAllVect().size()>1 ? q0.getAllVect()[1] :
+//   std::shared_ptr<siconos::algebra::SiconosVector>(), q01, q02); _joint1->normalDoF(n1,
+//   q01, _dof1, absoluteRef); _joint2->normalDoF(n2, q02, _dof2, absoluteRef);
+//   cross_product(n1, n2, ans);
+//   */
+// }
 
-void siconos::joints::CouplerJointR::computehDoF(const siconos::algebra::BlockVector& q0,
-                                                 Eigen::Ref<siconos::algebra::SiconosVector> y,
-                                                 unsigned int axis) {
+void siconos::joints::CouplerJointR::computehDoF(
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+    Eigen::Ref<siconos::algebra::SiconosVector> y, unsigned int axis) {
   // The DoF of the constraint is the same as the constraint itself
   assert(axis == 0);
-  this->computeh(q0, y);
+  siconos::algebra::BlockVector q0;
+  // This is a tmp workaround. To be reviewed
+  auto makeSharedPtr = [](const Eigen::Ref<const siconos::algebra::SiconosVector>& vec) {
+    return std::make_shared<siconos::algebra::SiconosVector>(vec);
+  };
+  auto q1Shared = makeSharedPtr(q1);
+  q0.insertPtr(q1Shared);
+  if (q2) q0.insertPtr(makeSharedPtr(q2.value()));
+
+  computeh(q0, y);
 }
 
 void siconos::joints::CouplerJointR::computeJachqDoF(
@@ -281,16 +315,16 @@ void siconos::joints::CouplerJointR::computeJachqDoF(
   // Compute the jacobian for the required range of axes
   auto q01 = std::make_shared<siconos::algebra::BlockVector>();
   auto q02 = std::make_shared<siconos::algebra::BlockVector>();
-  makeBlockVectors(std::const_pointer_cast<siconos::algebra::SiconosVector>(q0.vector(0)),
-                   q0.getAllVect().size() > 1
-                       ? std::const_pointer_cast<siconos::algebra::SiconosVector>(q0.vector(1))
-                       : nullptr,
-                   *q01, *q02);
+  if (q0.numberOfBlocks() > 1)
+    makeBlockVectors(*q0.vector(0), *q0.vector(1), *q01, *q02);
+  else
+    makeBlockVectors(*q0.vector(0), std::nullopt, *q01, *q02);
+
   _joint1->computeJachqDoF(inter, *q01, *jachq1, _dof1);
   _joint2->computeJachqDoF(inter, *q02, *jachq2, _dof2);
 
   // Constraint is the linear relation between them
   for (unsigned int i = 0; i < 1; i++)
-    for (unsigned int j = 0; j < jacobianhOver_q_view_->cols(); j++)
+    for (unsigned int j = 0; j < H_NE_view_->cols(); j++)
       jachq.setValue(i, j, jachq2->getValue(i, j) - jachq1->getValue(i, j) * _ratio);
 }

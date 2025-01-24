@@ -68,6 +68,9 @@ using ConstMapType = Eigen::Map<const SiconosMatrix>;
 
 using SiconosDiagonalMatrix = Eigen::DiagonalMatrix<double_t, Eigen::Dynamic>;
 
+// Tmp version. To replace BlockVector ?
+using EigenBlock = std::vector<Eigen::Ref<SiconosVector>>;
+
 enum class StorageType { dense, sparse };
 
 /** return the number of non-zero in the matrix

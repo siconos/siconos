@@ -36,13 +36,20 @@
 void siconos::modeling::LagrangianScleronomousR::initialize(Interaction& inter) {
   auto sizeY = inter.dimension();
   auto sizeDS = inter.getSizeOfDS();
-  if (!jacobianhOver_q_internal_storage_) {
-    jacobianhOver_q_internal_storage_ = std::make_unique<std::vector<double>>(sizeY * sizeDS);
+  if (hasConstantJacobianhOver_q_) {
+    assert(jacobianhOver_q_view_);
+    assert(jacobianhOver_q_view_->rows() == sizeY);
+    assert(jacobianhOver_q_view_->cols() == sizeDS);
+  } else {
+    if (!jacobianhOver_q_internal_storage_) {
+      jacobianhOver_q_internal_storage_ =
+          std::make_unique<std::vector<double>>(sizeY * sizeDS);
+    }
+    jacobianhOver_q_view_ = std::make_shared<siconos::algebra::MapType>(
+        jacobianhOver_q_internal_storage_->data(), sizeY, sizeDS);
   }
-  jacobianhOver_q_view_ = std::make_shared<siconos::algebra::MapType>(
-      jacobianhOver_q_internal_storage_->data(), sizeY, sizeDS);
 
-  if (computejacobianhOver_q_dot_) {
+  if (hasJacobianhOver_q_dot_) {
     // True only if setComputejacobianhOver_q_dotFunction has been called
     // Ensure that memory is properly allocated for hdot_
     if (!jacobianhOver_q_dot_) {
@@ -62,6 +69,16 @@ void siconos::modeling::LagrangianScleronomousR::computeh(
   if (computeh_) computeh_(positions, y);
 }
 
+void siconos::modeling::LagrangianScleronomousR::setConstantJacobianhOver_q(
+    Eigen::Ref<siconos::algebra::SiconosMatrix> newValue) {
+  jacobianhOver_q_internal_storage_ = nullptr;
+
+  jacobianhOver_q_view_ = std::make_shared<siconos::algebra::MapType>(
+      newValue.data(), newValue.rows(), newValue.cols());
+  hasConstantJacobianhOver_q_ = true;
+  computejacobianhOver_q_ = nullptr;
+}
+
 void siconos::modeling::LagrangianScleronomousR::setComputeJacobianhOver_qFunction(
     const siconos::modeling::func_prototypes::FunctionBV_M& func) {
   computejacobianhOver_q_ = func;
@@ -74,6 +91,7 @@ void siconos::modeling::LagrangianScleronomousR::computeJacobianhOver_q(
 
 void siconos::modeling::LagrangianScleronomousR::setComputejacobianhOver_q_dotFunction(
     const siconos::modeling::func_prototypes::FunctionBVBV_M& func) {
+  hasJacobianhOver_q_dot_ = true;
   computejacobianhOver_q_dot_ = func;
 }
 

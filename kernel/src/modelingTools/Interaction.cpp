@@ -675,7 +675,7 @@ const siconos::algebra::ConstMapType siconos::modeling::Interaction::getLeftInte
     return r->jacobianhOver_q();
   } else if (relationType == RelationType::NewtonEuler) {
     auto r = std::static_pointer_cast<NewtonEulerR>(relation());
-    return r->jacobianhOver_q_prod_T();
+    return r->H_NE_prod_T();
   } else if (relationType == RelationType::FirstOrder) {
     auto forel = std::dynamic_pointer_cast<FirstOrderR>(relation());
     return forel->jacobianhOver_state();
@@ -710,7 +710,7 @@ siconos::modeling::Interaction::getLeftInteractionBlockForDS(unsigned int pos,
 
   } else if (relationType == RelationType::NewtonEuler) {
     auto newtonr = std::dynamic_pointer_cast<NewtonEulerR>(relation());
-    auto originalMatrix = newtonr->jacobianhOver_q_prod_T();
+    auto originalMatrix = newtonr->H_NE_prod_T();
     *interactionBlock = originalMatrix.block(0, pos, nslaw_size, ds_size);
   } else
     THROW_EXCEPTION(
@@ -738,9 +738,9 @@ void siconos::modeling::Interaction::getLeftInteractionBlockForDSProjectOnConstr
   auto relationType = relation()->getType();
   assert(relationType == RelationType::NewtonEuler);
 
-  std::shared_ptr<NewtonEulerR> r = std::static_pointer_cast<NewtonEulerR>(relation());
+  auto neR = std::static_pointer_cast<NewtonEulerR>(relation());
   // proj_with_q originalMatrix = r->jachqProj();
-  auto originalMatrix = r->jacobianhOver_q();
+  auto originalMatrix = neR->H_NE();
 
   // copy sub-interactionBlock of originalMatrix into InteractionBlock
   *interactionBlock =

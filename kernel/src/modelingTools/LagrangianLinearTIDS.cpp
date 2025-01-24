@@ -132,19 +132,18 @@ void siconos::modeling::LagrangianLinearTIDS::setDampingMatrix(
 
 void siconos::modeling::LagrangianLinearTIDS::display(bool brief) const {
   LagrangianDS::display(brief);
-  std::cout << "===== Lagrangian Linear Time Invariant System display ===== " << std::endl;
+  std::cout << "===== Lagrangian Linear Time Invariant System display ===== \n";
 
-  std::cout << "- Stiffness Matrix K : " << std::endl;
-  if (stiffnessMatrix_view_)
+  if (stiffnessMatrix_view_) {
+    std::cout << "- Stiffness Matrix K:\n";
     std::cout << *stiffnessMatrix_view_ << "\n";
-  else
-    std::cout << "-> nullptr" << std::endl;
-  std::cout << "- Viscosity Matrix C : " << std::endl;
-  if (dampingMatrix_view_)
+  }
+
+  if (dampingMatrix_view_) {
+    std::cout << "- Viscosity Matrix C:\n";
     std::cout << *dampingMatrix_view_ << "\n";
-  else
-    std::cout << "-> nullptr" << std::endl;
-  std::cout << "=========================================================== " << std::endl;
+  }
+  std::cout << "=========================================================== \n";
 }
 
 void siconos::modeling::LagrangianLinearTIDS::computeTotalForces(

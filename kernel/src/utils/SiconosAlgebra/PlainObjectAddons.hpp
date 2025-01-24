@@ -39,6 +39,10 @@ inline Index size() const { return this->rows() * this->cols(); }
 
 void display() const { std::cout << std::scientific << std::setprecision(6) << *this << "\n"; }
 
+void displayT() const {
+  std::cout << std::scientific << std::setprecision(6) << this->transpose() << "\n";
+}
+
 inline Scalar norm2() { return this->norm(); }
 
 // inline Scalar normInf() {

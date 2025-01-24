@@ -203,10 +203,10 @@ void siconos::simulation::BlockCSRMatrix::fillH(siconos::graphs::InteractionsGra
     auto rel = std::static_pointer_cast<siconos::modeling::NewtonEulerR>(
         indexSet.bundle(*vi)->relation());
     (*_blockCSR)(std::min(pos, col), std::max(pos, col)) =
-        const_cast<double*>(rel->jacobianhOver_q_prod_T().data());
+        const_cast<double*>(rel->H_NE_prod_T().data());
 
     (*_blockCSR)(std::max(pos, col), std::min(pos, col)) =
-        const_cast<double*>(rel->jacobianhOver_q_prod_T().data());
+        const_cast<double*>(rel->H_NE_prod_T().data());
   }
 
   _diagsize0->resize(involvedDS.size());

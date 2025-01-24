@@ -281,6 +281,7 @@ void siconos::modeling::LagrangianDS::setConstantJacobianFintOver_q(
   hasJacobianFintOver_q_ = true;
   hasConstantJacobianFintOver_q_ = true;
   computejacobianFintOver_q_ = nullptr;
+  hasJacobianTotalForces_ = true;
 }
 
 void siconos::modeling::LagrangianDS::setComputeJacobianFintOver_qFunction(
@@ -296,6 +297,7 @@ void siconos::modeling::LagrangianDS::setComputeJacobianFintOver_qFunction(
   hasJacobianFintOver_q_ = true;
   hasConstantJacobianFintOver_q_ = false;
   computejacobianFintOver_q_ = new_func;
+  hasJacobianTotalForces_ = true;
 }
 
 void siconos::modeling::LagrangianDS::computeJacobianFintOver_q(
@@ -322,6 +324,7 @@ void siconos::modeling::LagrangianDS::setConstantJacobianFintOver_velocity(
   hasJacobianFintOver_velocity_ = true;
   hasConstantJacobianFintOver_velocity_ = true;
   computejacobianFintOver_velocity_ = nullptr;
+  hasJacobianTotalForces_ = true;
 }
 
 void siconos::modeling::LagrangianDS::setComputeJacobianFintOver_velocityFunction(
@@ -337,6 +340,7 @@ void siconos::modeling::LagrangianDS::setComputeJacobianFintOver_velocityFunctio
   hasJacobianFintOver_velocity_ = true;
   hasConstantJacobianFintOver_velocity_ = false;
   computejacobianFintOver_velocity_ = new_func;
+  hasJacobianTotalForces_ = true;
 }
 
 void siconos::modeling::LagrangianDS::computeJacobianFintOver_velocity(
@@ -381,6 +385,7 @@ void siconos::modeling::LagrangianDS::setConstantJacobianFgyrOver_q(
   hasJacobianFgyrOver_q_ = true;
   hasConstantJacobianFgyrOver_q_ = true;
   computejacobianFgyrOver_q_ = nullptr;
+  hasJacobianTotalForces_ = true;
 }
 
 void siconos::modeling::LagrangianDS::setComputeJacobianFgyrOver_qFunction(
@@ -396,6 +401,7 @@ void siconos::modeling::LagrangianDS::setComputeJacobianFgyrOver_qFunction(
   hasJacobianFgyrOver_q_ = true;
   hasConstantJacobianFgyrOver_q_ = false;
   computejacobianFgyrOver_q_ = new_func;
+  hasJacobianTotalForces_ = true;
 }
 
 void siconos::modeling::LagrangianDS::computeJacobianFgyrOver_q(
@@ -422,6 +428,7 @@ void siconos::modeling::LagrangianDS::setConstantJacobianFgyrOver_velocity(
   hasJacobianFgyrOver_velocity_ = true;
   hasConstantJacobianFgyrOver_velocity_ = true;
   computejacobianFgyrOver_velocity_ = nullptr;
+  hasJacobianTotalForces_ = true;
 }
 
 void siconos::modeling::LagrangianDS::setComputeJacobianFgyrOver_velocityFunction(
@@ -437,6 +444,7 @@ void siconos::modeling::LagrangianDS::setComputeJacobianFgyrOver_velocityFunctio
   hasJacobianFgyrOver_velocity_ = true;
   hasConstantJacobianFgyrOver_velocity_ = false;
   computejacobianFgyrOver_velocity_ = new_func;
+  hasJacobianTotalForces_ = true;
 }
 
 void siconos::modeling::LagrangianDS::computeJacobianFgyrOver_velocity(
@@ -545,16 +553,15 @@ void siconos::modeling::LagrangianDS::computeTotalForces(
   if (hasFint_ or hasFext_ or hasFgyr_) {
     if (!totalForces_) {
       totalForces_ = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
-      totalForces_->setZero();
-    } else
-      totalForces_->setZero();
+    }
+    totalForces_->setZero();
   } else
     return;
 
   // 1 - Computes the required function
   computeFint(velocity, position, time);
   computeFext(time);
-  computeFgyr(position, velocity);
+  computeFgyr(velocity, position);
 
   if (fint_) *totalForces_ -= *fint_;
 
@@ -606,30 +613,33 @@ void siconos::modeling::LagrangianDS::computeJacobianTotalForcesOver_velocity(
 void siconos::modeling::LagrangianDS::display(bool brief) const {
   std::cout << "=====> Lagrangian System display (number: " << number_ << ").\n";
   std::cout << "- ndof_ : " << ndof_ << "\n";
-  std::cout << "- q " << *state_q_[0] << "\n";
-  std::cout << "- q0 " << *q0_view_ << "\n";
-  std::cout << "- velocity " << *state_q_[1] << "\n";
+  std::cout << "- q \n";
+  state_q_[0]->displayT();
+  std::cout << "- q0 \n" << q0_view_->transpose() << "\n";
+  std::cout << "- velocity\n ";
+  state_q_[1]->displayT();
   std::cout << "- acceleration \n";
   if (state_q_[2])
-    std::cout << *state_q_[2] << "\n";
+    state_q_[2]->displayT();
   else
     std::cout << "-> nullptr\n";
 
-  std::cout << "- v0 " << *velocity0_view_ << "\n";
+  std::cout << "- v0 " << velocity0_view_->transpose() << "\n";
 
   std::cout << "- p[0] \n";
   if (p_[0])
-    std::cout << *p_[0] << "\n";
+    p_[0]->displayT();
   else
     std::cout << "-> nullptr\n";
-  std::cout << "- p[1] " << *p_[1] << "\n";
+  std::cout << "- p[1]\n";
+  p_[1]->displayT();
   if (p_[2])
-    std::cout << *p_[2] << "\n";
+    p_[2]->displayT();
   else
     std::cout << "-> nullptr\n";
 
   if (!brief) {
-    if (mass_view_) std::cout << "- Mass " << mass_view_ << "\n";
+    if (mass_view_) std::cout << "- Mass\n " << *mass_view_ << "\n";
 
     std::cout << "- Forces \n";
     if (totalForces_)
@@ -637,22 +647,33 @@ void siconos::modeling::LagrangianDS::display(bool brief) const {
     else
       std::cout << "-> nullptr\n";
 
-    if (fint_) std::cout << "- FInt " << *fint_ << "\n";
-
     std::cout << "- jacobian of TotalForces over q \n";
     if (jacobianTotalForcesOver_q_)
       std::cout << *jacobianTotalForcesOver_q_ << "\n";
     else
       std::cout << "-> nullptr\n";
 
-    if (hasJacobianFintOver_q_)
-      std::cout << "- jacobian of fint over q " << jacobianFintOver_q_view_ << "\n";
-
     std::cout << "- jacobian of TotalForces over velocity \n";
     if (jacobianTotalForcesOver_velocity_)
       std::cout << *jacobianTotalForcesOver_velocity_ << "\n";
     else
       std::cout << "-> nullptr\n";
+
+    if (fint_) std::cout << "- FInt \n" << *fint_ << "\n";
+
+    if (hasJacobianFintOver_q_)
+      std::cout << "- jacobian of fint over q\n" << *jacobianFintOver_q_view_ << "\n";
+    if (hasJacobianFintOver_velocity_)
+      std::cout << "- jacobian of fint over velocity\n"
+                << *jacobianFintOver_velocity_view_ << "\n";
+
+    if (fgyr_) std::cout << "- FGyr \n" << *fgyr_ << "\n";
+
+    if (hasJacobianFgyrOver_q_)
+      std::cout << "- jacobian of fgyr over q\n" << *jacobianFgyrOver_q_view_ << "\n";
+    if (hasJacobianFgyrOver_velocity_)
+      std::cout << "- jacobian of fgyr over velocity\n " << *jacobianFgyrOver_velocity_view_
+                << "\n";
   }
 
   std::cout << "===================================== \n";

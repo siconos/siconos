@@ -48,17 +48,17 @@ class CouplerJointR : public NewtonEulerJointR {
   unsigned int _ref1_index{0}, _ref2_index{0};
   double _ratio{0.}, _offset{0.};
 
-  /** Return the normal of the linear DoF axis.  \param axis must be 0 */
-  virtual void _normalDoF(siconos::algebra::SiconosVector& ans,
-                          const siconos::algebra::BlockVector& q0, int axis,
-                          bool absoluteRef = true) override;
+  // /** Return the normal of the linear DoF axis.  \param axis must be 0 */
+  // virtual void _normalDoF(siconos::algebra::SiconosVector& ans,
+  //                         const siconos::algebra::BlockVector& q0, int axis,
+  //                         bool absoluteRef = true) override;
 
   /** An internal helper function to assign reference vectors during
    * computeh and computeJachq. */
-  void makeBlockVectors(std::shared_ptr<siconos::algebra::SiconosVector> q1,
-                        std::shared_ptr<siconos::algebra::SiconosVector> q2,
-                        siconos::algebra::BlockVector& q01,
-                        siconos::algebra::BlockVector& q02);
+  void makeBlockVectors(
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      siconos::algebra::BlockVector& q01, siconos::algebra::BlockVector& q02);
 
   /** compute the jacobian of h w.r.t. q
    *
@@ -66,7 +66,7 @@ class CouplerJointR : public NewtonEulerJointR {
    *  \param inter the interaction using this relation
    *  \param q0  q states vectors of the related the dynamical systems
    */
-  virtual void computeJacobianhOver_q_(double time, siconos::modeling::Interaction& inter,
+  virtual void computeH_NE_(double time, siconos::modeling::Interaction& inter,
                                        const siconos::algebra::BlockVector& q0) override;
 
  public:
@@ -179,32 +179,38 @@ class CouplerJointR : public NewtonEulerJointR {
   /* Set the gear ratio. */
   void setRatio(double ratio);
 
-  /* From provided position vectors, calculate initial offsets to be
-   * maintained in the relation. */
-  void setBasePositions(std::shared_ptr<siconos::algebra::SiconosVector> q1,
-                        std::shared_ptr<siconos::algebra::SiconosVector> q2 =
-                            std::shared_ptr<siconos::algebra::SiconosVector>()) override;
+  /** Initialize the joint constants based on the provided base positions.
+   *
+   *  \param[in] q1 a vector of size 7 indicating translation and orientation in inertial
+   * coordinates.
+   *  \param[in] q2 an optional vector of size 7 indicating translation and orientation; if
+   * null, the inertial frame will be considered as the second base.
+   */
+  virtual void setBasePositions(
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2 =
+          std::nullopt) override;
 
   /**
      Get the number of constraints defined in the joint
 
      \return the number of constraints
    */
-  virtual unsigned int numberOfConstraints() override { return 1; }
+  virtual unsigned int numberOfConstraints() const override { return 1; }
 
   /**
      Get the number of degrees of freedom defined in the joint
 
      \return the number of degrees of freedom (DoF)
    */
-  virtual unsigned int numberOfDoF() override { return 1; }
+  virtual unsigned int numberOfDoF() const override { return 1; }
 
   /**
      Return the type of a degree of freedom of this joint.
 
      \return the type of the degree of freedom (DoF)
   */
-  virtual DofType typeOfDoF(unsigned int axis) override {
+  virtual DofType typeOfDoF(unsigned int axis) const override {
     if (axis < 1)
       return DofType::LINEAR;
     else
@@ -212,7 +218,8 @@ class CouplerJointR : public NewtonEulerJointR {
   };
 
   /** Compute the vector of linear and angular positions of the free axes */
-  virtual void computehDoF(const siconos::algebra::BlockVector& q0,
+  virtual void computehDoF(const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
                            Eigen::Ref<siconos::algebra::SiconosVector> y,
                            unsigned int axis = 0) override;
 

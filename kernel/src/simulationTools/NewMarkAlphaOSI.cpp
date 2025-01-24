@@ -369,7 +369,7 @@ void siconos::integrators::NewMarkAlphaOSI::computeFreeOutput(
           siconos::algebra::matrixBlockVector_prod(C, *q_free, osnsp_rhs, false);
         } else if (auto ner = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerR>(
                        inter->relation())) {
-          auto C = ner->jacobianhOver_q_prod_T();
+          auto C = ner->H_NE_prod_T();
           siconos::algebra::matrixBlockVector_prod(C, *q_free, osnsp_rhs, false);
         }
 

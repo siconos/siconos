@@ -165,11 +165,13 @@ void siconos::geometry::rewriteMatrixFromBodyToAbsoluteFrame(
 }
 
 void siconos::geometry::computeRotationMatrix(
-    siconos::algebra::SiconosVector &q, siconos::algebra::SiconosMatrix &rotationMatrix) {
+    const siconos::algebra::SiconosVector &q,
+    siconos::algebra::SiconosMatrix &rotationMatrix) {
   siconos::geometry::computeRotationMatrix(q(3), q(4), q(5), q(6), rotationMatrix);
 }
 void siconos::geometry::computeRotationMatrixTransposed(
-    siconos::algebra::SiconosVector &q, siconos::algebra::SiconosMatrix &rotationMatrix) {
+    const siconos::algebra::SiconosVector &q,
+    siconos::algebra::SiconosMatrix &rotationMatrix) {
   siconos::geometry::computeRotationMatrix(q(3), -q(4), -q(5), -q(6), rotationMatrix);
 }
 

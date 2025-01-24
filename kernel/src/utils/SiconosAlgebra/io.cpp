@@ -172,12 +172,15 @@ double siconos::algebra::io::compareRefFile(const SiconosMatrix &data, std::stri
   }
   if (!compare) return -1.0;
 
-  if (verbose) std::cout << "Comparison with reference file " << filename << std::endl;
+  if (verbose) std::cout << "\n ===> Comparison with reference file " << filename << std::endl;
 
   SiconosVector err(data.size(1));
   siconos::algebra::normInfByColumn(data - *ref, err);
 
-  if (verbose) err.display();
+  if (verbose) {
+    std::cout << "Error vector:\n";
+    err.displayT();
+  }
 
   double error = 0.;
   /* Scalar error = max of columns */
@@ -190,11 +193,11 @@ double siconos::algebra::io::compareRefFile(const SiconosMatrix &data, std::stri
   }
   error = std::abs(error);
 
-  if (verbose) std::cout << "Error = " << error << "\n";
+  if (verbose) std::cout << "\nError max = " << error << "\n\n";
   if (error > epsilon) {
     if (verbose) {
-      std::cout << "Warning. The results are rather different from the "
-                   "reference file.\n";
+      std::cout << "\nWarning. The results are rather different from the "
+                   "reference file.\n\n";
     }
   }
 

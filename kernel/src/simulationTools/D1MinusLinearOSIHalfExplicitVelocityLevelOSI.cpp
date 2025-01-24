@@ -673,7 +673,7 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitVeloci
   else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
     auto ner =
         std::static_pointer_cast<siconos::modeling::NewtonEulerR>(mainInteraction->relation());
-    auto CT = ner->jacobianhOver_q_prod_T();
+    auto CT = ner->H_NE_prod_T();
     DEBUG_EXPR(CT->display());
     assert(Xfree);
     // creates a POINTER link between workX[ds] (xfree) and the

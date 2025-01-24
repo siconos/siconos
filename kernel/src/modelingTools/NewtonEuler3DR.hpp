@@ -39,9 +39,11 @@ class NewtonEuler3DR : public NewtonEuler1DR {
  private:
   ACCEPT_SERIALIZATION(NewtonEuler3DR);
 
-  void FC3DcomputeJachqTFromContacts(std::shared_ptr<siconos::algebra::SiconosVector> q1);
-  void FC3DcomputeJachqTFromContacts(std::shared_ptr<siconos::algebra::SiconosVector> q1,
-                                     std::shared_ptr<siconos::algebra::SiconosVector> q2);
+  void FC3DcomputeJachqTFromContacts(
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& q1);
+  void FC3DcomputeJachqTFromContacts(
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& q2);
 
  public:
   /** destructor */
@@ -51,7 +53,7 @@ class NewtonEuler3DR : public NewtonEuler1DR {
    *
    *  \param inter the interaction using this relation
    */
-  void initialize(Interaction &inter) override;
+  void initialize(Interaction& inter) override;
 
   /** Default implementation consists in multiplying jachq and T (see
    *  NewtonEulerR::computeJachqT) but here we compute the operator from the the
@@ -60,8 +62,8 @@ class NewtonEuler3DR : public NewtonEuler1DR {
    *  \param inter  interaction that owns the relation
    *  \param q0  the block vector to the dynamical system position
    */
-  void computeJacobianhOver_q_prod_T(Interaction &inter,
-                     std::shared_ptr<siconos::algebra::BlockVector> q0) override;
+  void computeH_NE_prod_T(const Interaction& inter,
+                          const siconos::algebra::BlockVector& q0) override;
 
   void display() const override {}
 };

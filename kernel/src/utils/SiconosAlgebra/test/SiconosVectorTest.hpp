@@ -44,6 +44,7 @@ class SiconosVectorTest : public CppUnit::TestFixture {
   CPPUNIT_TEST(testOperators5Bis);
   CPPUNIT_TEST(testOperators6Bis);
   CPPUNIT_TEST(testOperators7);
+  CPPUNIT_TEST(testOrthoBaseFromVector);
   CPPUNIT_TEST(End);
 
   CPPUNIT_TEST_SUITE_END();
@@ -56,6 +57,7 @@ class SiconosVectorTest : public CppUnit::TestFixture {
   void testOperators5Bis();
   void testOperators6Bis();
   void testOperators7();
+  void testOrthoBaseFromVector();
   void End();
   // Members
 

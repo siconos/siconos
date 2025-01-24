@@ -79,13 +79,15 @@ class NewtonEuler1DR : public NewtonEulerR {
    *  \param inter the interaction using this relation
    *  \param q0  q states vectors of the related the dynamical systems
    */
-  virtual void computeJacobianhOver_q_(double time, siconos::modeling::Interaction &inter,
-                                       const siconos::algebra::BlockVector &q0) override;
+  virtual void computeH_NE_(double time, siconos::modeling::Interaction &inter,
+                            const siconos::algebra::BlockVector &q0) override;
 
  private:
-  void NIcomputeJachqTFromContacts(std::shared_ptr<siconos::algebra::SiconosVector> q1);
-  void NIcomputeJachqTFromContacts(std::shared_ptr<siconos::algebra::SiconosVector> q1,
-                                   std::shared_ptr<siconos::algebra::SiconosVector> q2);
+  void NIcomputeJachqTFromContacts(
+      const Eigen::Ref<const siconos::algebra::SiconosVector> &q1);
+  void NIcomputeJachqTFromContacts(
+      const Eigen::Ref<const siconos::algebra::SiconosVector> &q1,
+      const Eigen::Ref<const siconos::algebra::SiconosVector> &q2);
 
  public:
   /** V.A. boolean _isOnCOntact ?? Why is it public members ?
@@ -110,8 +112,8 @@ class NewtonEuler1DR : public NewtonEulerR {
    *  \param inter interaction that owns the relation
    *  \param q0 the block vector to the dynamical system position
    */
-  void computeJacobianhOver_q_prod_T(
-      Interaction &inter, std::shared_ptr<siconos::algebra::BlockVector> q0) override;
+  void computeH_NE_prod_T(const Interaction &inter,
+                          const siconos::algebra::BlockVector &q0) override;
 
   /**
       to compute the output y = h(t,q,z) of the Relation

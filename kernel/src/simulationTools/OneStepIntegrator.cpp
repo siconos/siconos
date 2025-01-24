@@ -73,6 +73,7 @@ void siconos::integrators::OneStepIntegrator::initialize() {
   initialize_nonsmooth_problems();
   _isInitialized = true;
 }
+
 void siconos::integrators::OneStepIntegrator::updateAndSwapAllOutput(double time) {
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   auto& indexSet0 = *_simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
@@ -116,11 +117,18 @@ void siconos::integrators::OneStepIntegrator::OneStepIntegrator::updateAndSwapAl
 
   // Compute a first value for the output
   // VA 10/04/2024 What is the interest of the following line ?
-  // FP: think it's useless.
-  //  inter.computeOutput(time, 0);
+  // FP: thought it was useless but for NewtonEuler5D for example,
+  // we need Nc to be set before any call to computeJach (below)
+  // so we need a first call to computeOutput (for h)
+  inter.computeOutput(time, 0);
 
-  // prepare the gradients --> Note FP: useless. This is done in computeOutput
-  //  inter.relation()->computeJach(time, inter);
+  // prepare the gradients
+  // --> Note FP:
+  // useless. This is done in computeOutput ?
+  // No, it's not (why ?)
+  // This means that when we call computeOutput, operators depending
+  // on the state might not be uptodate. See V.A remark in NewtonEulerR computeOutput
+  inter.relation()->computeJach(time, inter);
   for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i) {
     inter.computeOutput(time, i);
   }

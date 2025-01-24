@@ -140,7 +140,7 @@ void siconos::io::ContactPointVisitor::operator()(
 
   auto id = inter->number();
   auto mu = siconos::internal::ask<ForMu>(*inter->nonSmoothLaw());
-  auto cf = *inter->lambda(1) * rel.jacobianhOver_q_prod_T();
+  auto cf = *inter->lambda(1) * rel.H_NE_prod_T();
 
   answer.resize(23);
 
@@ -182,7 +182,7 @@ void siconos::io::ContactPointVisitor::operator()(
 
   auto id = inter->number();
   auto mu = siconos::internal::ask<ForMu>(*inter->nonSmoothLaw());
-  auto cf = *inter->lambda(1) * rel.jacobianhOver_q_prod_T();
+  auto cf = *inter->lambda(1) * rel.H_NE_prod_T();
   answer.resize(23);
 
   answer.setValue(0, mu);
