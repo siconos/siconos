@@ -38,7 +38,7 @@ void mc2d_set_internalsolver_tolerance(MohrCoulomb2DProblem* problem, SolverOpti
                             "tolerance is set to %e\n",
                             internalsolver_options->dparam[SICONOS_DPARAM_TOL]);
   } else if (iparam[PLASTICITY_IPARAM_INTERNAL_ERROR_STRATEGY] ==
-             PLASTICITY_INTERNAL_ERROR_STRATEGY_ADAPTIVE_N_CONTACT) {
+             PLASTICITY_INTERNAL_ERROR_STRATEGY_ADAPTIVE_N_CONE) {
     internalsolver_options->dparam[SICONOS_DPARAM_TOL] =
         error /
         (options->dparam[PLASTICITY_DPARAM_INTERNAL_ERROR_RATIO] * problem->numberOfCones);

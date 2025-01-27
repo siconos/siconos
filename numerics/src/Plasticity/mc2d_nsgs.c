@@ -91,9 +91,9 @@ static double calculateLightError(double light_error_sum, unsigned int nc, doubl
   return error;
 }
 
-static void acceptLocalReactionUnconditionally(unsigned int contact, double *reaction,
+static void acceptLocalReactionUnconditionally(unsigned int cone, double *reaction,
                                                double localreaction[3]) {
-  memcpy(&reaction[contact * 3], localreaction, sizeof(double) * 3);
+  memcpy(&reaction[cone * 3], localreaction, sizeof(double) * 3);
 }
 
 static void statsIterationCallback(MohrCoulomb2DProblem *problem, SolverOptions *options,
@@ -104,29 +104,29 @@ static void statsIterationCallback(MohrCoulomb2DProblem *problem, SolverOptions 
   }
 }
 
-static void mc2d_nsgs_update(int contact, MohrCoulomb2DProblem *problem,
+static void mc2d_nsgs_update(int cone, MohrCoulomb2DProblem *problem,
                              MohrCoulomb2DProblem *localproblem, double *reaction,
                              SolverOptions *options) {
-  /* Build a local problem for a specific contact
+  /* Build a local problem for a specific cone
      reaction corresponds to the global vector (size n) of the global problem.
   */
   /* Call the update function which depends on the storage for MGlobal/MBGlobal */
-  /* Build a local problem for a specific contact
+  /* Build a local problem for a specific cone
      reaction corresponds to the global vector (size n) of the global problem.
   */
 
   /* The part of MGlobal which corresponds to the current block is copied into MLocal */
-  mc2d_local_problem_fill_M(problem, localproblem, contact);
+  mc2d_local_problem_fill_M(problem, localproblem, cone);
 
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products
-     MLocal.reactionBlock, excluding the block corresponding to the current contact. ****/
-  mc2d_local_problem_compute_q(problem, localproblem, reaction, contact);
+     MLocal.reactionBlock, excluding the block corresponding to the current cone. ****/
+  mc2d_local_problem_compute_q(problem, localproblem, reaction, cone);
 
   /* coefficient for current block*/
-  localproblem->eta[0] = problem->eta[contact];
+  localproblem->eta[0] = problem->eta[cone];
 
   /* coefficient for current block*/
-  localproblem->theta[0] = problem->theta[contact];
+  localproblem->theta[0] = problem->theta[cone];
 }
 
 void mc2d_nsgs_initialize_local_solver(
@@ -195,9 +195,9 @@ void mc2d_nsgs_initialize_local_solver(
   }
 }
 
-static unsigned int *allocShuffledContacts(MohrCoulomb2DProblem *problem,
+static unsigned int *allocShuffledCones(MohrCoulomb2DProblem *problem,
                                            SolverOptions *options) {
-  unsigned int *scontacts = 0;
+  unsigned int *scones = 0;
   unsigned int nc = problem->numberOfCones;
   if (options->iparam[PLASTICITY_NSGS_SHUFFLE] == PLASTICITY_NSGS_SHUFFLE_TRUE ||
       options->iparam[PLASTICITY_NSGS_SHUFFLE] == PLASTICITY_NSGS_SHUFFLE_TRUE_EACH_LOOP) {
@@ -205,37 +205,37 @@ static unsigned int *allocShuffledContacts(MohrCoulomb2DProblem *problem,
       srand((unsigned int)options->iparam[PLASTICITY_NSGS_SHUFFLE_SEED]);
     } else
       srand(1);
-    scontacts = (unsigned int *)malloc(nc * sizeof(unsigned int));
+    scones = (unsigned int *)malloc(nc * sizeof(unsigned int));
     for (unsigned int i = 0; i < nc; ++i) {
-      scontacts[i] = i;
+      scones[i] = i;
     }
-    uint_shuffle(scontacts, nc);
+    uint_shuffle(scones, nc);
   }
-  return scontacts;
+  return scones;
 }
-static unsigned int *allocfreezingContacts(MohrCoulomb2DProblem *problem,
+static unsigned int *allocfreezingCones(MohrCoulomb2DProblem *problem,
                                            SolverOptions *options) {
-  unsigned int *fcontacts = 0;
+  unsigned int *fcones = 0;
   unsigned int nc = problem->numberOfCones;
-  if (options->iparam[PLASTICITY_NSGS_FREEZING_CONTACT] > 0) {
-    fcontacts = (unsigned int *)malloc(nc * sizeof(unsigned int));
+  if (options->iparam[PLASTICITY_NSGS_FREEZING_CONE] > 0) {
+    fcones = (unsigned int *)malloc(nc * sizeof(unsigned int));
     for (unsigned int i = 0; i < nc; ++i) {
-      fcontacts[i] = 0;
+      fcones[i] = 0;
     }
   }
-  return fcontacts;
+  return fcones;
 }
 
 static int solveLocalReaction(UpdatePtr update_localproblem, SolverPtr local_solver,
-                              CopyLocalReactionPtr copyLocalReaction, unsigned int contact,
+                              CopyLocalReactionPtr copyLocalReaction, unsigned int cone,
                               MohrCoulomb2DProblem *problem,
                               MohrCoulomb2DProblem *localproblem, double *reaction,
                               SolverOptions *localsolver_options, double localreaction[3]) {
-  (*update_localproblem)(contact, problem, localproblem, reaction, localsolver_options);
+  (*update_localproblem)(cone, problem, localproblem, reaction, localsolver_options);
 
-  localsolver_options->iparam[PLASTICITY_CURRENT_CONE_NUMBER] = contact;
+  localsolver_options->iparam[PLASTICITY_CURRENT_CONE_NUMBER] = cone;
 
-  copyLocalReaction(&(reaction[contact * problem->dimension]), localreaction);
+  copyLocalReaction(&(reaction[cone * problem->dimension]), localreaction);
 
   return (*local_solver)(localproblem, localreaction, localsolver_options);
 }
@@ -251,23 +251,23 @@ static int file_exists(const char *fname) {
 
 static void acceptLocalReactionFiltered(MohrCoulomb2DProblem *localproblem,
                                         SolverOptions *localsolver_options,
-                                        unsigned int contact, unsigned int iter,
+                                        unsigned int cone, unsigned int iter,
                                         double *reaction, double localreaction[3]) {
   if (isnan(localsolver_options->dparam[SICONOS_DPARAM_RESIDU]) ||
       isinf(localsolver_options->dparam[SICONOS_DPARAM_RESIDU]) ||
       localsolver_options->dparam[SICONOS_DPARAM_RESIDU] > 1.0) {
     DEBUG_EXPR(mohrCoulomb2DProblem_display(localproblem));
     DEBUG_PRINTF(
-        "Discard local reaction for contact %i at iteration %i "
+        "Discard local reaction for cone %i at iteration %i "
         "with local_error = %e\n",
-        contact, iter, localsolver_options->dparam[SICONOS_DPARAM_RESIDU]);
+        cone, iter, localsolver_options->dparam[SICONOS_DPARAM_RESIDU]);
 
     /* #ifdef FCLIB_OUTPUT */
 
     /*     /\* printf("step counter value = %i\n", localsolver_options->iparam[19]); *\/ */
     /*     char fname[256]; */
     /*     fccounter++; */
-    /*     snprintf(fname, sizeof(fname), "./local_problem/localproblem_%i_%i.hdf5", contact,
+    /*     snprintf(fname, sizeof(fname), "./local_problem/localproblem_%i_%i.hdf5", cone,
      */
     /*              localsolver_options->iparam[19]); */
 
@@ -297,11 +297,11 @@ static void acceptLocalReactionFiltered(MohrCoulomb2DProblem *localproblem,
     /* #endif */
 
     numerics_printf(
-        "Discard local reaction for contact %i at iteration %i "
+        "Discard local reaction for cone %i at iteration %i "
         "with local_error = %e",
-        contact, iter, localsolver_options->dparam[SICONOS_DPARAM_RESIDU]);
+        cone, iter, localsolver_options->dparam[SICONOS_DPARAM_RESIDU]);
   } else
-    memcpy(&reaction[contact * localproblem->dimension], localreaction,
+    memcpy(&reaction[cone * localproblem->dimension], localreaction,
            sizeof(double) * localproblem->dimension);
 }
 
@@ -421,11 +421,18 @@ static int determine_convergence_with_full_final(MohrCoulomb2DProblem *problem,
 void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *reaction, double *velocity, int *info,
                SolverOptions *options) {
   /* verbose=1; */
+  
+  FILE* foutput = fopen("mc2d_footing_100_theta0.05.dat", "w");
+  int info_output = mohrCoulomb2D_printInFile(problem, foutput);
+  fclose(foutput);
+
+
   /* int and double parameters */
+
   int *iparam = options->iparam;
   double *dparam = options->dparam;
 
-  /* Number of contacts */
+  /* Number of cones */
   unsigned int nc = problem->numberOfCones;
 
   /* Maximum number of iterations */
@@ -458,9 +465,9 @@ void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *reaction, double *velocity
   int iter = 0;      /* Current iteration number */
   double error = 1.; /* Current error */
   int hasNotConverged = 1;
-  unsigned int contact; /* Number of the current row of blocks in M */
-  unsigned int *scontacts = NULL;
-  unsigned int *freeze_contacts = NULL;
+  unsigned int cone; /* Number of the current row of blocks in M */
+  unsigned int *scones = NULL;
+  unsigned int *freeze_cones = NULL;
 
   if (*info == 0) return;
 
@@ -480,8 +487,8 @@ void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *reaction, double *velocity
                                     localproblem, options);
 
   /* localProblemFunctionToolkit_display(localProblemFunctionToolkit); */
-  scontacts = allocShuffledContacts(problem, options);
-  freeze_contacts = allocfreezingContacts(problem, options);
+  scones = allocShuffledCones(problem, options);
+  freeze_cones = allocfreezingCones(problem, options);
   /*****  Check solver options *****/
   if (!(iparam[PLASTICITY_NSGS_SHUFFLE] == PLASTICITY_NSGS_SHUFFLE_FALSE ||
         iparam[PLASTICITY_NSGS_SHUFFLE] == PLASTICITY_NSGS_SHUFFLE_TRUE ||
@@ -514,7 +521,7 @@ void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *reaction, double *velocity
   /* A special case for the most common options (should correspond
    * with mechanics_run.py **/
   if (iparam[PLASTICITY_NSGS_SHUFFLE] == PLASTICITY_NSGS_SHUFFLE_FALSE &&
-      iparam[PLASTICITY_NSGS_FREEZING_CONTACT] == 0 &&
+      iparam[PLASTICITY_NSGS_FREEZING_CONE] == 0 &&
       iparam[PLASTICITY_NSGS_RELAXATION] == PLASTICITY_NSGS_RELAXATION_FALSE &&
       iparam[PLASTICITY_NSGS_FILTER_LOCAL_SOLUTION] ==
           PLASTICITY_NSGS_FILTER_LOCAL_SOLUTION_TRUE &&
@@ -526,18 +533,18 @@ void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *reaction, double *velocity
       mc2d_set_internalsolver_tolerance(problem, options, localsolver_options, error);
 
       for (unsigned int i = 0; i < nc; ++i) {
-        contact = i;
+        cone = i;
 
         solveLocalReaction(localProblemFunctionToolkit->update_local_problem,
                            localProblemFunctionToolkit->local_solver,
-                           localProblemFunctionToolkit->copy_local_reaction, contact, problem,
+                           localProblemFunctionToolkit->copy_local_reaction, cone, problem,
                            localproblem, reaction, localsolver_options, localreaction);
 
         light_error_sum += localProblemFunctionToolkit->light_error_squared(
-            localreaction, &reaction[contact * 3]);
+            localreaction, &reaction[cone * 3]);
 
         /* #if 0 */
-        acceptLocalReactionFiltered(localproblem, localsolver_options, contact, iter, reaction,
+        acceptLocalReactionFiltered(localproblem, localsolver_options, cone, iter, reaction,
                                     localreaction);
       }
 
@@ -560,58 +567,58 @@ void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *reaction, double *velocity
       double light_error_2 = 0.0;
       mc2d_set_internalsolver_tolerance(problem, options, localsolver_options, error);
 
-      unsigned int number_of_freezed_contact = 0;
+      unsigned int number_of_freezed_cone = 0;
       double tmp_criteria1 = tolerance * tolerance * 100 * 100;
       double tmp_criteria2 = *norm_r * *norm_r / (nc * nc * 1000);
 
-      if (iparam[PLASTICITY_NSGS_FREEZING_CONTACT] > 0) {
+      if (iparam[PLASTICITY_NSGS_FREEZING_CONE] > 0) {
         for (unsigned int i = 0; i < nc; ++i) {
-          if (freeze_contacts[i] > 0) number_of_freezed_contact++;
+          if (freeze_cones[i] > 0) number_of_freezed_cone++;
         }
-        if (number_of_freezed_contact >= nc - 1) {
-          // printf("number of freezed contact too large\n");
-          for (unsigned int c = 0; c < nc; ++c) freeze_contacts[c] = 0;
+        if (number_of_freezed_cone >= nc - 1) {
+          // printf("number of freezed cone too large\n");
+          for (unsigned int c = 0; c < nc; ++c) freeze_cones[c] = 0;
         }
       }
       for (unsigned int i = 0; i < nc; ++i) {
         if (iparam[PLASTICITY_NSGS_SHUFFLE] == PLASTICITY_NSGS_SHUFFLE_TRUE ||
             iparam[PLASTICITY_NSGS_SHUFFLE] == PLASTICITY_NSGS_SHUFFLE_TRUE_EACH_LOOP) {
           if (iparam[PLASTICITY_NSGS_SHUFFLE] == PLASTICITY_NSGS_SHUFFLE_TRUE_EACH_LOOP)
-            uint_shuffle(scontacts, nc);
-          contact = scontacts[i];
+            uint_shuffle(scones, nc);
+          cone = scones[i];
         } else
-          contact = i;
+          cone = i;
 
-        if (iparam[PLASTICITY_NSGS_FREEZING_CONTACT] > 0) {
-          if (freeze_contacts[contact] > 0) {
-            /* we skip freeze contacts */
-            freeze_contacts[contact] -= 1;
+        if (iparam[PLASTICITY_NSGS_FREEZING_CONE] > 0) {
+          if (freeze_cones[cone] > 0) {
+            /* we skip freeze cones */
+            freeze_cones[cone] -= 1;
             continue;
           }
         }
 
         solveLocalReaction(localProblemFunctionToolkit->update_local_problem,
                            localProblemFunctionToolkit->local_solver,
-                           localProblemFunctionToolkit->copy_local_reaction, contact, problem,
+                           localProblemFunctionToolkit->copy_local_reaction, cone, problem,
                            localproblem, reaction, localsolver_options, localreaction);
 
         if (iparam[PLASTICITY_NSGS_RELAXATION] == PLASTICITY_NSGS_RELAXATION_TRUE)
           localProblemFunctionToolkit->perform_relaxation(localreaction,
-                                                          &reaction[contact * 3], omega);
+                                                          &reaction[cone * 3], omega);
 
         light_error_2 = localProblemFunctionToolkit->light_error_squared(
-            localreaction, &reaction[contact * 3]);
+            localreaction, &reaction[cone * 3]);
 
         light_error_sum += light_error_2;
 
         /* int test =100; */
-        /* if (contact == test) */
+        /* if (cone == test) */
         /* { */
-        /*   printf("reaction[%i] = %16.8e\t",3*contact-1,reaction[3*contact]); */
+        /*   printf("reaction[%i] = %16.8e\t",3*cone-1,reaction[3*cone]); */
         /*   printf("localreaction[%i] = %16.8e\n",2,localreaction[0]); */
         /* } */
 
-        if (iparam[PLASTICITY_NSGS_FREEZING_CONTACT] > 0) {
+        if (iparam[PLASTICITY_NSGS_FREEZING_CONE] > 0) {
           double squared_norm_localreaction =
               localProblemFunctionToolkit->squared_norm(localreaction);
           int relative_convergence_criteria =
@@ -624,8 +631,8 @@ void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *reaction, double *velocity
           /*      || squared_norm(localreaction) <=  (*norm_r* *norm_r/(nc*nc*1000))) */
           /*     && iter >=10) */
           {
-            /* we  freeze the contact for n iterations*/
-            freeze_contacts[contact] = iparam[PLASTICITY_NSGS_FREEZING_CONTACT];
+            /* we  freeze the cone for n iterations*/
+            freeze_cones[cone] = iparam[PLASTICITY_NSGS_FREEZING_CONE];
 
             DEBUG_EXPR(printf("first criteria : light_error_2*squared_norm(localreaction) <= "
                               "tolerance*tolerance/(nc*nc*10) ==> %e <= %e, bool =%i\n",
@@ -636,27 +643,27 @@ void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *reaction, double *velocity
                               "*norm_r/(nc*nc))/1000. ==> %e <= %e, bool =%i \n",
                               squared_norm(localreaction),
                               *norm_r * *norm_r / (nc * nc * 1000), small_reaction_criteria);
-                       printf("Contact % i is freezed for %i steps\n", contact,
-                              iparam[PLASTICITY_NSGS_FREEZING_CONTACT]););
+                       printf("Cone % i is freezed for %i steps\n", cone,
+                              iparam[PLASTICITY_NSGS_FREEZING_CONE]););
           }
         }
 
         if (iparam[PLASTICITY_NSGS_FILTER_LOCAL_SOLUTION] ==
             PLASTICITY_NSGS_FILTER_LOCAL_SOLUTION_TRUE)
-          acceptLocalReactionFiltered(localproblem, localsolver_options, contact, iter,
+          acceptLocalReactionFiltered(localproblem, localsolver_options, cone, iter,
                                       reaction, localreaction);
         else
-          acceptLocalReactionUnconditionally(contact, reaction, localreaction);
+          acceptLocalReactionUnconditionally(cone, reaction, localreaction);
       }
 
       /* DEBUG_EXPR( */
-      /*   if(iparam[PLASTICITY_NSGS_FREEZING_CONTACT] >0) */
+      /*   if(iparam[PLASTICITY_NSGS_FREEZING_CONE] >0) */
       /*   { */
-      /*     int frozen_contact=0; */
-      /*     for(unsigned int ii = 0 ; ii < nc ; ++ii) if (freeze_contacts[ii] >0)
-       * frozen_contact++; */
-      /*     numerics_printf_verbose(1,"number of frozen contacts %i at iter : %i",
-       * frozen_contact, iter ); */
+      /*     int frozen_cone=0; */
+      /*     for(unsigned int ii = 0 ; ii < nc ; ++ii) if (freeze_cones[ii] >0)
+       * frozen_cone++; */
+      /*     numerics_printf_verbose(1,"number of frozen cones %i at iter : %i",
+       * frozen_cone, iter ); */
       /*   } */
       /*   ); */
 
@@ -686,18 +693,18 @@ void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *reaction, double *velocity
 
       statsIterationCallback(problem, options, reaction, velocity, error);
 
-      /* if(iparam[PLASTICITY_NSGS_FREEZING_CONTACT] >0) */
+      /* if(iparam[PLASTICITY_NSGS_FREEZING_CONE] >0) */
       /* { */
-      /*   int frozen_contact=0; */
+      /*   int frozen_cone=0; */
       /*   for(unsigned int i = 0 ; i < nc ; ++i) */
       /*   { */
-      /*     if (freeze_contacts[i] >0) */
+      /*     if (freeze_cones[i] >0) */
       /*     { */
-      /*       frozen_contact++; */
+      /*       frozen_cone++; */
       /*     } */
       /*   } */
-      /*   printf("number of frozen contacts %i at iter : %i over number of contacts: %i\n",
-       * frozen_contact, iter, nc ); */
+      /*   printf("number of frozen cones %i at iter : %i over number of cones: %i\n",
+       * frozen_cone, iter, nc ); */
       /* } */
     }
   }
@@ -728,21 +735,22 @@ void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *reaction, double *velocity
   localProblemFunctionToolkit->free_local_solver(problem, localproblem, localsolver_options);
 
   mc2d_local_problem_free(localproblem, problem);
-  if (scontacts) free(scontacts);
+  if (scones) free(scones);
 }
 
 void mc2d_nsgs_set_default(SolverOptions *options) {
   options->iparam[PLASTICITY_IPARAM_ERROR_EVALUATION] =
       PLASTICITY_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL;
+  //options->iparam[PLASTICITY_IPARAM_ERROR_EVALUATION] =  PLASTICITY_NSGS_ERROR_EVALUATION_FULL;
   options->iparam[PLASTICITY_IPARAM_INTERNAL_ERROR_STRATEGY] =
       PLASTICITY_INTERNAL_ERROR_STRATEGY_GIVEN_VALUE;
   /* options->iparam[PLASTICITY_IPARAM_INTERNAL_ERROR_STRATEGY] =
    * PLASTICITY_INTERNAL_ERROR_STRATEGY_ADAPTIVE; */
   /* options->iparam[PLASTICITY_IPARAM_INTERNAL_ERROR_STRATEGY] =
-   * PLASTICITY_INTERNAL_ERROR_STRATEGY_ADAPTIVE_N_CONTACT; */
+   * PLASTICITY_INTERNAL_ERROR_STRATEGY_ADAPTIVE_N_CONE; */
   options->iparam[PLASTICITY_NSGS_SHUFFLE] = PLASTICITY_NSGS_SHUFFLE_FALSE;
   options->iparam[PLASTICITY_NSGS_SHUFFLE_SEED] = 0;
-  options->iparam[PLASTICITY_NSGS_FREEZING_CONTACT] = 0;
+  options->iparam[PLASTICITY_NSGS_FREEZING_CONE] = 0;
   options->iparam[PLASTICITY_NSGS_FILTER_LOCAL_SOLUTION] =
       PLASTICITY_NSGS_FILTER_LOCAL_SOLUTION_FALSE;
   options->iparam[PLASTICITY_NSGS_RELAXATION] = PLASTICITY_NSGS_RELAXATION_FALSE;
