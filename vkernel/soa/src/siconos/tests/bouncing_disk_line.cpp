@@ -16,10 +16,10 @@ using disk_shape = collision::shape::disk;
 using diskdisk_r = collision::diskdisk_r;
 using diskline_r = collision::diskline_r;
 using interaction = simul::interaction<nslaw, diskdisk_r, diskline_r>;
-using osi = simul::one_step_integrator<disk, interaction>::moreau_jean;
-using td = simul::time_discretization<>;
 using topo = simul::topology<disk, interaction>;
-using simulation = simul::time_stepping<td, osi, osnspb, topo>;
+using osi = simul::one_step_integrator<topo>::moreau_jean;
+using td = simul::time_discretization<>;
+using simulation = simul::time_stepping<td, osi, osnspb>;
 
 using params = map<iparam<"dof", 3>>;
 }  // namespace siconos::config

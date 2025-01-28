@@ -233,11 +233,11 @@ using osnspb = simul::one_step_nonsmooth_problem<lcp>;
 using nslaw = model::newton_impact;
 using relation = model::lagrangian_r<nslaw::size>;
 using interaction = simul::interaction<nslaw, relation>;
-using osi = simul::one_step_integrator<ball, interaction>::moreau_jean;
-using td = simul::time_discretization<>;
 using topo = simul::topology<ball, interaction>;
+using osi = simul::one_step_integrator<topo>::moreau_jean;
+using td = simul::time_discretization<>;
 using disk = collision::shape::disk;
-using simulation = simul::time_stepping<td, osi, osnspb, topo>;
+using simulation = simul::time_stepping<td, osi, osnspb>;
 
 using disk_shape = collision::shape::disk;
 
@@ -402,9 +402,9 @@ using disk_shape = collision::shape::disk;
 using diskdisk_r = collision::diskdisk_r;
 using diskline_r = collision::diskline_r;
 using interaction = simul::interaction<nslaw, diskdisk_r, diskline_r>;
-using osi = simul::one_step_integrator<disk, interaction>::moreau_jean;
-using td = simul::time_discretization<>;
 using topo = simul::topology<disk, interaction>;
+using osi = simul::one_step_integrator<topo>::moreau_jean;
+using td = simul::time_discretization<>;
 using simulation = simul::time_stepping<td, osi, osnspb, topo>;
 using pointd = collision::point<disk>;
 using pointl = collision::point<collision::shape::line>;

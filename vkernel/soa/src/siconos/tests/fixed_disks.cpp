@@ -21,16 +21,16 @@ using osnspb = simul::one_step_nonsmooth_problem<fc2d>;
 using solver_options = simul::solver_options;
 using interaction =
     simul::interaction<nslaw, diskdisk_r, disksegment_r, diskfdisk_r>;
-using osi = simul::one_step_integrator<disk, interaction>::moreau_jean;
-using td = simul::time_discretization<>;
 using topo = simul::topology<disk, interaction>;
+using osi = simul::one_step_integrator<topo>::moreau_jean;
+using td = simul::time_discretization<>;
 using pointd = collision::point<disk>;
 using pointl = collision::point<collision::shape::segment>;
 using pointtds = collision::point<translated_disk_shape>;
 using neighborhood = collision::neighborhood<pointd, pointl, pointtds>;
 using space_filter = collision::space_filter<topo, neighborhood>;
 using interaction_manager = simul::interaction_manager<space_filter>;
-using simulation = simul::time_stepping<td, osi, osnspb, topo>;
+using simulation = simul::time_stepping<td, osi, osnspb>;
 
 using io = io::io<osi>;
 using params = map<iparam<"dof", 3>, iparam<"ncgroups", 1>>;
@@ -67,7 +67,7 @@ int main(int argc, char* argv[])
               storage::pattern::attr_t<config::disk, "fext">>,
           storage::diagonal<
               storage::pattern::attr_t<config::disk, "mass_matrix">>,
-          storage::unbounded_diagonal<storage::pattern::attr_t<
+          storage::assembled_diagonal<storage::pattern::attr_t<
               config::osi, "mass_matrix_assembled">>>>();
 
   // unsigned int nDof = 3;         // degrees of freedom for the disk

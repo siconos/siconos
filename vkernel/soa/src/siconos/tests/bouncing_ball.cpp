@@ -9,15 +9,15 @@ using osnspb = simul::one_step_nonsmooth_problem<lcp>;
 using nslaw = model::newton_impact;
 using relation = model::lagrangian_r<nslaw::size>;
 using interaction = simul::interaction<nslaw, relation>;
-using osi = simul::one_step_integrator<ball, interaction>::moreau_jean;
-using td = simul::time_discretization<>;
 using topo = simul::topology<ball, interaction>;
-struct simulation : simul::time_stepping<td, osi, osnspb, topo> {};
+using osi = simul::one_step_integrator<topo>::moreau_jean;
+using td = simul::time_discretization<>;
+struct simulation : simul::time_stepping<td, osi, osnspb> {};
 
 using params = map<iparam<"dof", 3>>;
 
 struct make : storage::make<
-                  standard_environment<params>, simulation,
+  standard_environment<params>, simulation,
                   storage::with_properties<
                       storage::time_invariant<storage::attr_t<ball, "fext">>,
                       storage::diagonal<storage::attr_t<ball, "mass_matrix">>,

@@ -10,12 +10,11 @@
 
 namespace siconos::simul {
 
-template <typename DynamicalSystem, typename Interaction>
+template <typename Topology>
 struct one_step_integrator {
-  using items = gather<DynamicalSystem, Interaction>;
-  using interaction_i = Interaction;
+  using interaction_i = typename Topology::fixed_dof_interaction;
   using nonsmooth_law = typename interaction_i::nslaw;
-  using system_i = DynamicalSystem;
+  using system_i = typename Topology::fixed_dof_system;
   using dof = typename interaction_i::dof;
   using nslaw_size = typename interaction_i::nslaw_size;
   using nslaw = typename interaction_i::nslaw;
@@ -31,8 +30,12 @@ struct one_step_integrator {
   using fext = attr_t<system_i, "fext">;
 
   struct moreau_jean : item<> {
-    using system = DynamicalSystem;
-    using interaction = Interaction;
+    using topology = Topology;
+
+    using system = typename topology::fixed_dof_system;
+    using interaction = typename topology::fixed_dof_interaction;
+
+    using items = gather<topology>;
 
     using attributes = gather<
         attribute<"theta", some::scalar>, attribute<"gamma", some::scalar>,

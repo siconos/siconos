@@ -21,12 +21,12 @@ using osnspb = simul::one_step_nonsmooth_problem<fc2d>;
 using solver_options = simul::solver_options;
 using interaction =
     simul::interaction<nslaw, diskdisk_r, disksegment_r, diskfdisk_r>;
-using osi = simul::one_step_integrator<disk, interaction>::moreau_jean;
-using td = simul::time_discretization<>;
 using topo = simul::topology<disk, interaction>;
+using osi = simul::one_step_integrator<topo>::moreau_jean;
+using td = simul::time_discretization<>;
 using pointd = collision::point<disk>;
 using pointl = collision::point<collision::shape::segment>;
-//using pointtds = collision::point<translated_disk_shape>;
+// using pointtds = collision::point<translated_disk_shape>;
 using neighborhood = collision::neighborhood<pointd, pointl>;
 using space_filter = collision::space_filter<topo, neighborhood>;
 using interaction_manager = simul::interaction_manager<space_filter>;
@@ -52,7 +52,8 @@ int main(int argc, char* argv[])
           storage::wrapped<config::disksegment_r, some::unbounded_collection>,
           storage::wrapped<config::pointl, some::unbounded_collection>,
           storage::wrapped<config::pointd, some::unbounded_collection>,
-//          storage::wrapped<config::pointtds, some::unbounded_collection>,
+          //          storage::wrapped<config::pointtds,
+          //          some::unbounded_collection>,
           storage::wrapped<config::interaction, some::unbounded_collection>,
           storage::wrapped<config::segment_shape, some::unbounded_collection>,
           storage::wrapped<config::disk_shape, some::unbounded_collection>,

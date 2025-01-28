@@ -16,10 +16,10 @@ using osnspb = simul::one_step_nonsmooth_problem<fc2d>;
 using nslaw = model::newton_impact_friction;
 using relation = model::lagrangian_r<nslaw::size>;
 using interaction = simul::interaction<nslaw, relation>;
-using osi = simul::one_step_integrator<ball, interaction>::moreau_jean;
-using td = simul::time_discretization<>;
 using topo = simul::topology<ball, interaction>;
-using simulation = simul::time_stepping<td, osi, osnspb, topo>;
+using osi = simul::one_step_integrator<topo>::moreau_jean;
+using td = simul::time_discretization<>;
+using simulation = simul::time_stepping<td, osi, osnspb>;
 
 using params = map<iparam<"dof", 3>>;
 }  // namespace siconos::config
