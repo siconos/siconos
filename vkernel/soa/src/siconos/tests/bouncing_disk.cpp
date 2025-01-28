@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
                             storage::some::item_ref<config::disk_shape>>,
           storage::time_invariant<storage::attr_t<config::disk, "fext">>,
           storage::diagonal<storage::attr_t<config::disk, "mass_matrix">>,
-          storage::unbounded_diagonal<
+          storage::assembled_diagonal<
               storage::attr_t<config::osi, "mass_matrix_assembled">>>>();
 
   // unsigned int nDof = 3;         // degrees of freedom for the disk

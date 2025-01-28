@@ -91,7 +91,7 @@ struct maker
                   storage::pattern::attr_t<config::disk, "fext">>,
               storage::diagonal<
                   storage::pattern::attr_t<config::disk, "mass_matrix">>,
-              storage::unbounded_diagonal<storage::pattern::attr_t<
+              storage::assembled_diagonal<storage::pattern::attr_t<
                   config::osi, "mass_matrix_assembled">>,
               storage::bind<config::disk, "disk">,
               storage::bind<config::nslaw, "nslaw">,

@@ -31,10 +31,32 @@ struct diagonal : refine {
   template <match::attribute A>
   using refine = some::diagonal_matrix<typename A::type, A>;
 };
-struct unbounded_diagonal : refine {
+struct assembled_diagonal : refine {
   template <match::attribute A>
-  using refine = some::unbounded_diagonal_matrix<typename A::type>;
+  using refine = some::assembled_diagonal_matrix<typename A::type>;
 };
+
+struct unbounded_vector : refine {
+  template <match::attribute A>
+  using refine = some::unbounded_vector<typename A::type>;
+};
+
+struct unbounded_matrix : refine {
+  template <match::attribute A>
+  using refine = some::unbounded_matrix<typename A::type>;
+};
+
+struct assembled_vector : refine {
+  template <match::attribute A>
+  using refine = some::assembled_vector<typename A::type>;
+};
+
+struct assembled_matrix : refine {
+  template <match::attribute A>
+  using refine = some::assembled_matrix<typename A::type>;
+};
+
+
 }  // namespace property
 
 template <match::attribute A, typename T>
@@ -75,27 +97,40 @@ struct bind : property::bind, symbol<S> {
   using bind_t = void;
 };
 
-//  template <typename T, string_literal = "">
-// struct diagonal {
-//};
-
-template <match::attribute Attr>
+template <match::abstract_matrix M>
 struct diagonal : property::diagonal {
-  static_assert(match::abstract_matrix<Attr>);
-  using type = Attr;
+  using type = M;
   using diagonal_t = void;
 };
 
-// template <match::abstract_matrix M>
-// struct diagonal<M> : property::diagonal {
-//   using type = M;
-//   using diagonal_t = void;
-// };
+template <match::abstract_matrix M>
+struct assembled_diagonal : property::assembled_diagonal {
+  using type = M;
+  using assembled_diagonal_t = void;
+};
 
 template <match::abstract_matrix M>
-struct unbounded_diagonal : property::unbounded_diagonal {
+struct unbounded_matrix : property::unbounded_matrix {
   using type = M;
-  using unbounded_diagonal_t = void;
+  using unbounded_matrix_t = void;
+};
+
+template <match::abstract_vector V>
+struct unbounded_vector : property::unbounded_vector {
+  using type = V;
+  using unbounded_vector_t = void;
+};
+
+template <match::abstract_matrix M>
+struct assembled_matrix : property::assembled_matrix {
+  using type = M;
+  using assembled_matrix_t = void;
+};
+
+template <match::abstract_vector V>
+struct assembled_vector : property::assembled_vector {
+  using type = V;
+  using assembled_vector_t = void;
 };
 
 template <match::property K>

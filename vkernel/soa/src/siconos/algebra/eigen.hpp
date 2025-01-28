@@ -13,9 +13,21 @@ concept matrix = requires(T m) { m(0, 0); };
 template <typename T>
 concept vector = matrix<T> && T::ColsAtCompileTime == 1;
 
+// Is there a better way to check if a matrix from the Eigen C++ library  is
+// diagonal :
 template <typename T>
-concept diagonal_matrix = !
-matrix<T>&& requires(T m) { m.diagonal()[0]; };
+concept diagonal_matrix = !matrix<T> && requires(T m) { m.diagonal()[0]; };
+
+// template <typename T>
+// concept unbounded_matrix = requires(T m) {
+//   { m.rows() } -> std::convertible_to<int>;
+//   { m.cols() } -> std::convertible_to<int>;
+// };
+
+// template <typename T>
+// concept unbounded_vector = requires(T m) {
+//   { m.rows() } -> std::convertible_to<int>;
+// } && T::ColsAtCompileTime == 1;
 
 template <typename T>
 concept any_matrix = (diagonal_matrix<T> || matrix<T>);
@@ -33,6 +45,9 @@ using unbounded_col_matrix =
 
 template <typename T>
 using unbounded_matrix = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
+
+template <typename T>
+using unbounded_vector = Eigen::Vector<T, Eigen::Dynamic>;
 
 template <typename T, size_t M>
 using vector = Eigen::Vector<T, M>;  // column vector
@@ -104,11 +119,9 @@ static constexpr decltype(auto) nrows(T)
     return T::RowsAtCompileTime;  // specific to Eigen
   }
   else {
-    []<typename Attr = T, bool flag = false>()
-    {
+    []<typename Attr = T, bool flag = false>() {
       static_assert(flag, "no value type");
-    }
-    ();
+    }();
   }
 }
 
@@ -121,11 +134,9 @@ static constexpr decltype(auto) ncols(T)
     return T::ColsAtCompileTime;  // specific to Eigen
   }
   else {
-    []<typename Attr = T, bool flag = false>()
-    {
+    []<typename Attr = T, bool flag = false>() {
       static_assert(flag, "no value type");
-    }
-    ();
+    }();
   }
 }
 

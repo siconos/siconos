@@ -147,7 +147,7 @@ template <typename Topology, typename Neighborhood>
 struct space_filter : item<> {
   using items = gather<Topology, Neighborhood>;
   using topology = Topology;
-  using dynamical_system = typename topology::dynamical_system;
+  using dynamical_system = typename topology::fixed_dof_system;
   using interaction = typename topology::interaction;
   using nslaw = typename interaction::nslaw;
 

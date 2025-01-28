@@ -152,6 +152,30 @@ static_assert(match::diagonal_matrix<
                                     attr_t<item0, "attr0">>>>())))>);
 
 static_assert(
+    match::mat<
+        std::decay_t<decltype(storage::attr<"attr0">(storage::add<item0>(
+            storage::make<standard_environment<int>, item0,
+                          storage::with_properties<storage::assembled_matrix<
+                              attr_t<item0, "attr0">>>>())))>>);
+
+/* alias : same type, item1 has a diagonal matrix also */
+using item1 = item0;
+
+static_assert(match::diagonal_matrix<
+              decltype(storage::attr<"attr0">(storage::add<item1>(
+                  storage::make<standard_environment<int>, item0, item1,
+                                storage::with_properties<storage::diagonal<
+                                    attr_t<item0, "attr0">>>>())))>);
+
+/* new type, item2 does not have a diagonal matrix */
+struct item2 : item0 {};
+static_assert(!match::diagonal_matrix<
+              decltype(storage::attr<"attr0">(storage::add<item2>(
+                  storage::make<standard_environment<int>, item0, item2,
+                                storage::with_properties<storage::diagonal<
+                                    attr_t<item0, "attr0">>>>())))>);
+
+static_assert(
     match::matrix<decltype(storage::attr<"attr0">(storage::add<item0>(
         storage::make<standard_environment<int>,
                       wrap<some::unbounded_collection, item0>>())))>);

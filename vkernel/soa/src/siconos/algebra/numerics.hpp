@@ -3,6 +3,7 @@
 #include <siconos/numerics/CSparseMatrix_internal.h>  // for CSparseMatrix
 #include <siconos/numerics/NumericsMatrix.h>
 #include <siconos/numerics/NumericsSparseMatrix.h>
+
 #include "siconos/algebra/algebra.hpp"
 #include "siconos/algebra/linear_algebra.hpp"
 #include "siconos/storage/pattern/pattern.hpp"
@@ -21,7 +22,7 @@ concept mat = any_mat<T> && requires { typename T::mat_t; };
 template <typename T>
 concept diag_mat = any_mat<T> && requires { typename T::diag_mat_t; };
 
-}  // namespace match
+}  // namespace siconos::storage::pattern::match
 
 namespace siconos::algebra {
 
@@ -36,8 +37,25 @@ struct any_mat {
 template <typename T>
 struct mat : any_mat {
   using mat_t = void;
-  static constexpr auto vncols = T::ColsAtCompileTime;
-  static constexpr auto vnrows = T::RowsAtCompileTime;
+  static constexpr auto vncols = []() {
+    if constexpr (match::matrix<T>) {
+      // only eigen
+      return T::ColsAtCompileTime;
+    }
+    else {
+      return 1;
+    }
+  }();
+  static constexpr auto vnrows = []() {
+    if constexpr (match::matrix<T>) {
+      // only eigen
+      return T::RowsAtCompileTime;
+    }
+    else {
+      return 1;
+    }
+  }();
+
   NumericsMatrix* _m = nullptr;
   bool _inversed = false;         // for diagonal format
   NumericsMatrix* _mt = nullptr;  // transposed is allocated with Numerics
@@ -68,6 +86,24 @@ struct vec {
   using vec_t = void;
   static constexpr auto vncols = 1;
   static constexpr auto vnrows = T::RowsAtCompileTime;
+
+  NumericsMatrix* _v = nullptr;
+
+  constexpr vec() {}
+
+  ~vec()
+  {
+    if (_v) {
+      _v = NM_free(_v);
+    }
+  }
+};
+
+template <>
+struct vec<double> {
+  using vec_t = void;
+  static constexpr auto vncols = 1;
+  static constexpr auto vnrows = 1;
 
   NumericsMatrix* _v = nullptr;
 
@@ -143,11 +179,9 @@ void set_value(match::any_mat auto& m, match::indice auto i,
     }
   }
   else {
-    []<bool flag = false>()
-    {
+    []<bool flag = false>() {
       static_assert(flag, "set_value: cannot insert this value");
-    }
-    ();
+    }();
   }
 }
 
@@ -165,11 +199,9 @@ void set_value(match::vec auto& m, match::indice auto i, const T& value)
   }
   // compile time error
   else {
-    []<bool flag = false>()
-    {
+    []<bool flag = false>() {
       static_assert(flag, "set_value: cannot insert this value");
-    }
-    ();
+    }();
   }
 }
 
@@ -261,5 +293,4 @@ void display(match::any_mat auto& a) { NM_display(a._m); }
 
 void display(match::vec auto& v) { NM_display(v._v); }
 
-}  // namespace numerics
-
+}  // namespace siconos::algebra

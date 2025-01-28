@@ -62,6 +62,26 @@ static auto translate = rec([]<typename E, typename T>(auto&& translate, E,
         decltype(translate(E{}, typename T::type{})),
         decltype(translate(E{}, nth_t<0, typename T::sizes>{}))::value>{};
   }
+
+  else if constexpr (std::derived_from<T,
+                                       some::structure_for_assembled_data>) {
+    if constexpr (std::derived_from<T, some::undefined_diagonal_matrix> &&
+                  std::derived_from<T, some::unbounded_storage>) {
+      return
+          typename E::template assembled_diagonal_matrix<decltype(translate(
+              E{}, typename T::type{}))>{};
+    }
+    else if constexpr (std::derived_from<T,
+                                         some::undefined_unbounded_matrix>) {
+      return typename E::template assembled_matrix<decltype(translate(
+          E{}, typename T::type{}))>{};
+    }
+    else if constexpr (std::derived_from<T,
+                                         some::undefined_unbounded_vector>) {
+      return typename E::template assembled_vector<decltype(translate(
+          E{}, typename T::type{}))>{};
+    }
+  }
   else if constexpr (std::derived_from<T, some::undefined_vector>) {
     return typename E::template vector<
         decltype(translate(E{}, typename T::type{})),
@@ -116,11 +136,9 @@ static auto translate = rec([]<typename E, typename T>(auto&& translate, E,
     return typename E::template item_ref<typename T::type>{};
   }
   else {
-    []<typename Attr = T, bool flag = false>()
-    {
+    []<typename Attr = T, bool flag = false>() {
       static_assert(flag, "cannot translate attribute");
-    }
-    ();
+    }();
   }
 });
 

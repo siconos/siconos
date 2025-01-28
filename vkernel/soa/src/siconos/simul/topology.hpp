@@ -6,109 +6,123 @@
 
 namespace siconos::simul {
 
-template <typename DynamicalSystem, typename Interaction>
+struct empty_item : item<> {};
+
+template <typename FixedDofDynamicalSystem, typename FixedDofInteraction,
+          typename DynamicDofDynamicalSystem = empty_item,
+          typename DynamicDofInteraction = empty_item>
 struct topology : item<> {
-  using items = gather<DynamicalSystem, Interaction>;
+  using items = gather<FixedDofDynamicalSystem, FixedDofInteraction,
+                       DynamicDofDynamicalSystem, DynamicDofInteraction>;
+
+  // fixed dof case
   using dof = some::indice_parameter<"dof">;
 
-  using dynamical_system = DynamicalSystem;
-  using interaction = Interaction;
+  using fixed_dof_system = FixedDofDynamicalSystem;
+  using dynamic_dof_system = DynamicDofDynamicalSystem;
+  using fixed_dof_interaction = FixedDofInteraction;
+  using dynamic_dof_interaction = DynamicDofInteraction;
 
-  using nslaw = typename interaction::nslaw;
+  using nslaw = typename fixed_dof_interaction::nslaw;
   using nslaw_size = some::indice_value<nslaw::size>;
 
-  using attributes = gather<
-      attribute<"system_id",
-                some::map<some::indice, some::item_ref<dynamical_system>>>>;
+  using fsystem = fixed_dof_system;
+  using dsystem = dynamic_dof_system;
+
+  using finteraction = fixed_dof_interaction;
+  using dinteraction = dynamic_dof_interaction;
+
+  using attributes =
+      gather<attribute<"system_id",
+                       some::map<some::indice, some::item_ref<fsystem>>>>;
 
   using properties = gather<
-      storage::attached<dynamical_system, symbol<"involved">, some::boolean>,
-      storage::attached<dynamical_system, symbol<"index">, some::indice>,
-      storage::attached<dynamical_system, symbol<"id">, some::indice>,
-      storage::attached<dynamical_system, symbol<"p0">,
+      storage::attached<fsystem, symbol<"involved">, some::boolean>,
+      storage::attached<fsystem, symbol<"index">, some::indice>,
+      storage::attached<fsystem, symbol<"id">, some::indice>,
+      storage::attached<fsystem, symbol<"p0">,
                         some::array<some::vector<some::scalar, dof>,
                                     std::integral_constant<int, 2>>>,
 
-      storage::attached<interaction, symbol<"nds">, some::indice>,
-      storage::attached<interaction, symbol<"ds1">,
-                        some::item_ref<dynamical_system>>,
-      storage::attached<interaction, symbol<"ds2">,
-                        some::item_ref<dynamical_system>>,
-      storage::attached<interaction, symbol<"ydot_backup">,
+      storage::attached<dsystem, symbol<"involved">, some::boolean>,
+      storage::attached<dsystem, symbol<"index">, some::indice>,
+      storage::attached<dsystem, symbol<"id">, some::indice>,
+      storage::attached<
+          dsystem, symbol<"p0">,
+          some::array<some::unbounded_vector<some::vector<
+                          some::scalar, std::integral_constant<int, 1>>>,
+                      std::integral_constant<int, 2>>>,
+
+      storage::attached<finteraction, symbol<"nds">, some::indice>,
+      storage::attached<finteraction, symbol<"ds1">, some::item_ref<fsystem>>,
+      storage::attached<finteraction, symbol<"ds2">, some::item_ref<fsystem>>,
+      storage::attached<finteraction, symbol<"ydot_backup">,
                         some::vector<some::scalar, nslaw_size>>,
-      storage::attached<interaction, symbol<"activation">, some::boolean>>;
+    storage::attached<finteraction, symbol<"activation">, some::boolean>,
+
+      storage::attached<dinteraction, symbol<"ds1">, some::item_ref<fsystem>>,
+      storage::attached<dinteraction, symbol<"ds2">, some::item_ref<dsystem>>,
+      storage::attached<dinteraction, symbol<"ydot_backup">,
+                        some::vector<some::scalar, nslaw_size>>,
+      storage::attached<dinteraction, symbol<"activation">, some::boolean>>;
 
   template <typename Handle>
   struct interface : default_interface<Handle> {
     using default_interface<Handle>::self;
 
-    template <match::handle<dynamical_system> Hds>
+    template <match::handle<fsystem> Hds>
     decltype(auto) link(Hds ds)
     {
       auto &data = self()->data();
 
-      auto inter = storage::add<interaction>(data);
-      //      auto dsgv = dsg0.add_vertex(ds);
-      //      auto [dsg0_ed, ig0_vd] = dsg0.add_edge(dsgv, dsgv, inter, ig0);
+      auto inter = storage::add<finteraction>(data);
 
       attr<"y">(inter).setZero();
       attr<"ydot">(inter).setZero();
       attr<"lambda">(inter).setZero();
 
-      //      prop<"vd">(ds) = dsgv;
-      //      prop<"vd">(inter) = ig0_vd;
       prop<"nds">(inter) = 1;
       prop<"ds1">(inter) = ds;
       prop<"ds2">(inter) = ds;
 
-      //      prop<"ds1d">(inter) = dsgv;
-      //      prop<"ds2d">(inter) = dsgv;
-      //      dsg0.update_vertices_indices();
-      //      dsg0.update_edges_indices();
-
-      //      ig0.update_vertices_indices();
-      //      ig0.update_edges_indices();
-
-      /*      print("dsg0:\n:");
-            print("=========\n");
-            dsg0.display();
-            print("=========\n");
-
-            print("ig0:\n");
-            print("=========\n");
-            ig0.display();
-            print("=========\n");*/
-
       return inter;
     };
 
-    template <match::handle<dynamical_system> Hds>
+    /* rigid <-> rigid */
+    template <match::handle<fsystem> Hds>
     decltype(auto) link(Hds ds1, Hds ds2)
     {
       auto &data = self()->data();
 
-      auto inter = storage::add<interaction>(data);
-      //      auto dsgv1 = dsg0.add_vertex(ds1);
-      //      auto dsgv2 = dsg0.add_vertex(ds2);
-      //      auto [dsg0_ed, ig0_vd] = dsg0.add_edge(dsgv1, dsgv2, inter,
-      //      ig0);
-      // dsg0_ed may be invalidated on edge removal so it is useless to store
-      // it
+      auto inter = storage::add<finteraction>(data);
 
       attr<"y">(inter).setZero();
       attr<"ydot">(inter).setZero();
       attr<"lambda">(inter).setZero();
 
-      //      ds1.property(symbol<"vd">{}) = dsgv1;
-      //      ds2.property(symbol<"vd">{}) = dsgv2;
+      prop<"nds">(inter) = 2;
+      prop<"ds1">(inter) = ds1;
+      prop<"ds2">(inter) = ds2;
 
-      inter.property(symbol<"nds">{}) = 2;
-      //      inter.property(symbol<"vd">{}) = ig0_vd;
-      inter.property(symbol<"ds1">{}) = ds1;
-      inter.property(symbol<"ds2">{}) = ds2;
+      return inter;
+    };
 
-      //      inter.property(symbol<"ds1d">{}) = dsgv1;
-      //      inter.property(symbol<"ds2d">{}) = dsgv2;
+    /* rigid <-> fem */
+    template <match::handle<fsystem> Hfds, match::handle<dsystem> Hdds>
+    decltype(auto) link(Hfds ds1, Hdds ds2)
+    {
+      auto &data = self()->data();
+
+      auto inter = storage::add<dinteraction>(data);
+
+      attr<"y">(inter).setZero();
+      attr<"ydot">(inter).setZero();
+      attr<"lambda">(inter).setZero();
+
+      prop<"nds">(inter) = 2;
+
+      prop<"ds1">(inter) = ds1;
+      prop<"dds2">(inter) = ds2;
 
       return inter;
     };
@@ -128,8 +142,7 @@ struct topology : item<> {
       using data_t = std::decay_t<decltype(self()->data())>;
       using env_t = decltype(self()->env());
       using indice = typename env_t::indice;
-      using ds_t = DynamicalSystem;
-      using hds_t = storage::handle<ds_t, indice, data_t>;
+      using hds_t = storage::handle<fsystem, indice, data_t>;
 
       return collect(
           method("set_dynamical_system_id",

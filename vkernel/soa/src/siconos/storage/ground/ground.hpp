@@ -349,7 +349,8 @@ static auto map_transform = hana::demux(hana::to<hana::map_tag>)(
 static auto dup = []<typename F>(F &&f) constexpr -> decltype(auto) {
   return [&f]<typename X>(X &&x) {
     auto &&px = std::forward<X>(x);  // x must be forwarded once!!
-    return std::forward<F>(f)(px, px);
+    return std::forward<F>(f)
+    (px, px);
   };
 };
 

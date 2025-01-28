@@ -37,23 +37,23 @@ struct one_step_integrator {
     using attributes = gather<
         attribute<"theta", some::scalar>, attribute<"gamma", some::scalar>,
         attribute<"constraint_activation_threshold", some::scalar>,
-        attribute<"h_matrix_assembled", some::unbounded_matrix<h_matrix1>>,
+        attribute<"h_matrix_assembled", some::assembled_matrix<h_matrix1>>,
         attribute<"mass_matrix_assembled",
-                  some::unbounded_matrix<attr_t<system, "mass_matrix">>>,
+                  some::assembled_matrix<attr_t<system, "mass_matrix">>>,
         attribute<"w_matrix",
-                  some::unbounded_matrix<some::matrix<
+                  some::assembled_matrix<some::matrix<
                       some::scalar, nth_t<0, typename h_matrix1::sizes>,
                       nth_t<0, typename h_matrix1::sizes>>>>,
         attribute<
             "q_nsp_vector_assembled",
-            some::unbounded_vector<some::vector<some::scalar, nslaw_size>>>,
+            some::assembled_vector<some::vector<some::scalar, nslaw_size>>>,
         attribute<"velocity_vector_assembled",
-                  some::unbounded_vector<velocity>>,
-        attribute<"y_vector_assembled", some::unbounded_vector<ydot>>,
-        attribute<"ydot_vector_assembled", some::unbounded_vector<ydot>>,
-        attribute<"lambda_vector_assembled", some::unbounded_vector<lambda>>,
+                  some::assembled_vector<velocity>>,
+        attribute<"y_vector_assembled", some::assembled_vector<ydot>>,
+        attribute<"ydot_vector_assembled", some::assembled_vector<ydot>>,
+        attribute<"lambda_vector_assembled", some::assembled_vector<lambda>>,
         attribute<"p0_vector_assembled",
-                  some::unbounded_vector<some::vector<some::scalar, dof>>>>;
+                  some::assembled_vector<some::vector<some::scalar, dof>>>>;
 
     using properties = gather<storage::keep<attr_t<system, "q">, 2>,
                               storage::keep<attr_t<system, "velocity">, 2>,
@@ -106,12 +106,9 @@ struct one_step_integrator {
       auto compute_iteration_matrix(auto step)
       {
         auto &data = self()->data();
-        auto &mass_matrices =
-            storage::attr_memory<system, "mass_matrix">(data);
-        auto &external_forces = storage::attr_memory<fext>(data);
 
-        auto &mats = storage::memory(step, mass_matrices);
-        auto &fs = storage::memory(step, external_forces);
+        auto &mats = storage::attr_values<system, "mass_matrix">(data, step);
+        auto &fs = storage::attr_values<system, "velocity">(data, step);
 
         for (auto [mat, f] : view::zip(mats, fs)) {
           f = mat.inverse() * f;
@@ -472,16 +469,17 @@ struct one_step_integrator {
           }
         }
 
+        print(
+            "  [compute_active_interactions] total number of ds: {}, total "
+            "number of "
+            "interactions: {}\n",
+            std::size(involveds), std::size(activations));
 
         print(
-          "  [compute_active_interactions] total number of ds: {}, total number of "
-          "interactions: {}\n",
-          std::size(involveds), std::size(activations));
-
-        print(
-          "  [compute_active_interactions] number of involved ds:{}, number of "
-          "activated interactions: {}\n",
-          ds_counter, inter_counter);
+            "  [compute_active_interactions] number of involved ds:{}, "
+            "number of "
+            "activated interactions: {}\n",
+            ds_counter, inter_counter);
         return std::pair{inter_counter, ds_counter};
       }
 
@@ -595,7 +593,7 @@ struct one_step_integrator {
 
         using env = typename info_t::env;
         auto tmp_matrix = typename traits::config<env>::template convert<
-            some::unbounded_matrix<some::transposed_matrix<h_matrix1>>>::
+            some::assembled_matrix<some::transposed_matrix<h_matrix1>>>::
             type{};
 
         resize(tmp_matrix, size1(h_matrix_assembled()),

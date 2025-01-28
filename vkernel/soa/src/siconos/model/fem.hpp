@@ -1,5 +1,4 @@
 #pragma once
-
 #include "FENode.hpp"
 #include "FiniteElementModel.hpp"
 #include "FiniteElementLinearTIDS.hpp"

@@ -12,21 +12,24 @@ using interaction = simul::interaction<nslaw, relation>;
 using osi = simul::one_step_integrator<ball, interaction>::moreau_jean;
 using td = simul::time_discretization<>;
 using topo = simul::topology<ball, interaction>;
-using simulation = simul::time_stepping<td, osi, osnspb, topo>;
+struct simulation : simul::time_stepping<td, osi, osnspb, topo> {};
 
 using params = map<iparam<"dof", 3>>;
+
+struct make : storage::make<
+                  standard_environment<params>, simulation,
+                  storage::with_properties<
+                      storage::time_invariant<storage::attr_t<ball, "fext">>,
+                      storage::diagonal<storage::attr_t<ball, "mass_matrix">>,
+                      storage::assembled_diagonal<
+                          storage::attr_t<osi, "mass_matrix_assembled">>>> {};
+
 }  // namespace siconos::config
 
 int main(int argc, char* argv[])
 {
   using namespace siconos;
-  auto data = storage::make<
-      standard_environment<config::params>, config::simulation,
-      storage::with_properties<
-          storage::time_invariant<storage::attr_t<config::ball, "fext">>,
-          storage::diagonal<storage::attr_t<config::ball, "mass_matrix">>,
-          storage::unbounded_diagonal<
-              storage::attr_t<config::osi, "mass_matrix_assembled">>>>();
+  auto data = config::make();
 
   // unsigned int nDof = 3;         // degrees of freedom for the ball
   double t0 = 0;               // initial computation time

@@ -34,10 +34,11 @@ while [ $# -gt 0 ]; do
       shift
       pwd=`pwd`
       unset GUIX_PROFILE
-      . $pwd/.siconos-guix-profile/etc/profile
+      export GUIX_PROFILE=$pwd/.siconos-guix-profile
+      . ${GUIX_PROFILE}/etc/profile
 
       export PYTHONPATH=$GUIX_PYTHONPATH
-      exec $0 --env-ok "$@"
+      exec $0 "$@"
       ;;
 
     --gcc)

@@ -5,6 +5,7 @@
 
 namespace siconos::config {
 using fem = model::finite_element_linear_tids;
+using fem_ds = model::lagrangian_ds;
 using material = model::material;
 using ball = model::lagrangian_ds;
 using lcp = simul::nonsmooth_problem<LinearComplementarityProblem>;
@@ -14,18 +15,19 @@ using relation = model::lagrangian_r<nslaw::size>;
 using interaction = simul::interaction<nslaw, relation>;
 using osi = simul::one_step_integrator<ball, interaction>::moreau_jean;
 using td = simul::time_discretization<>;
-using topo = simul::topology<ball, interaction>;
+  using topo = simul::topology<ball, interaction, fem>;
 using simulation = simul::time_stepping<td, osi, osnspb, topo>;
 
 using params = map<iparam<"dof", 3>>;
 
-struct make : storage::make<
-                  standard_environment<params>, fem, material, simulation,
-                  storage::with_properties<
-                      storage::time_invariant<storage::attr_t<ball, "fext">>,
-                      storage::diagonal<storage::attr_t<ball, "mass_matrix">>,
-                      storage::unbounded_diagonal<
-                          storage::attr_t<osi, "mass_matrix_assembled">>>> {};
+struct make
+    : storage::make<
+          standard_environment<params>, fem_ds, fem, material, simulation,
+          storage::with_properties<
+              storage::time_invariant<storage::attr_t<ball, "fext">>,
+              storage::diagonal<storage::attr_t<ball, "mass_matrix">>,
+              storage::assembled_diagonal<
+                  storage::attr_t<osi, "mass_matrix_assembled">>>> {};
 
 }  // namespace siconos::config
 
@@ -73,11 +75,10 @@ int main(int args, char* argv[])
 
   fe_solid.instance()->applyDirichletBoundaryConditions(
       boundary_condition_tag, node_dof_index);
-  fe_solid.instance()->boundaryConditions()->display();
+  //  fe_solid.instance()->boundaryConditions()->display();
 
   double t0 = 0;       // initial computation time
   double T = 1e-02;    // final computation time
   double h = 1e-05;    // time step
   double theta = 1.0;  // theta for MoreauJeanOSI integrator
-
 }

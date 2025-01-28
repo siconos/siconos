@@ -27,4 +27,5 @@ struct lagrangian_ds
     decltype(auto) fext() { return attr<"fext">(*self()); }
   };
 };
+
 }  // namespace siconos::model

@@ -113,6 +113,11 @@ struct transposed_matrix : undefined_matrix,
 template <typename Type = some::scalar>
 struct unbounded_matrix : undefined_unbounded_matrix, with_type<Type> {};
 
+template <typename Type, typename N>
+struct unbounded_col_matrix : undefined_unbounded_matrix,
+                              with_type<Type>,
+                              with_sizes<N> {};
+
 template <typename Type = some::scalar>
 struct unbounded_vector : undefined_unbounded_vector, with_type<Type> {};
 
@@ -125,6 +130,20 @@ template <typename Type>
 struct unbounded_diagonal_matrix : unbounded_storage,
                                    undefined_diagonal_matrix,
                                    with_type<Type> {};
+
+struct structure_for_assembled_data {};
+
+template <typename Type = some::scalar>
+struct assembled_matrix : unbounded_matrix<Type>,
+                          structure_for_assembled_data {};
+
+template <typename Type = some::scalar>
+struct assembled_diagonal_matrix : unbounded_diagonal_matrix<Type>,
+                                   structure_for_assembled_data {};
+
+template <typename Type = some::scalar>
+struct assembled_vector : unbounded_vector<Type>,
+                          structure_for_assembled_data {};
 
 template <typename Type, typename N>
 struct vector : undefined_vector, with_sizes<N>, with_type<Type> {};
