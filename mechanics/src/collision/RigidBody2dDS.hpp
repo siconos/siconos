@@ -24,10 +24,8 @@
 #define RigidBody2dDS_h
 
 #include <LagrangianLinearTIDS.hpp>
+#include "SiconosContactor.hpp"
 
-namespace siconos::collision {
-class SiconosContactorSet;
-}
 
 namespace siconos::collision {
 

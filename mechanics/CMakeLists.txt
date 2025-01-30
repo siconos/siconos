@@ -97,6 +97,9 @@ endif()
 if(WITH_${COMPONENT}_PYTHON_WRAPPER)
   add_subdirectory(swig)
 endif()
+if(WITH_PYB11_WRAPPER)
+  add_subdirectory(python)
+endif()
 
 # ---- Installation ----
 # Call siconos_component_install_setup(<COMPONENT>)

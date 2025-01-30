@@ -1327,7 +1327,7 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
 
   /* Call createCollisionObject for each shape type using the visitor
    * defined above */
-  for (auto &it : *con) {
+  for (auto &it : *con->vector()) {
     // special collision group -1 = do not collide, thus we can skip
     // creation of associated collision objects
     if (it->collision_group == -1) continue;
@@ -1390,7 +1390,7 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
 
   /* Call createCollisionObject for each shape type using the visitor
    * defined above */
-  for (auto it : *con) {
+  for (auto it : *con->vector()) {
     // special collision group -1 = do not collide, thus we can skip
     // creation of associated collision objects
     if (it->collision_group == -1) continue;

@@ -22,6 +22,7 @@
 #define NewtonEulerJointRELATION_H
 
 #include <vector>
+#include <optional>
 
 #include "NewtonEulerR.hpp"
 namespace siconos::joints {
