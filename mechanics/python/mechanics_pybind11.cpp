@@ -39,8 +39,6 @@
 
 namespace py = pybind11;
 
-PYBIND11_MAKE_OPAQUE(std::vector<std::shared_ptr<siconos::collision::SiconosContactor>>);
-
 PYBIND11_MODULE(pymechanics, m) {
   py::module_ modeling_module = py::module_::import("siconos.modeling");
 
