@@ -28,5 +28,10 @@ create_pybind11_module(
 install(TARGETS
 pynumerics
   COMPONENT python
-  LIBRARY DESTINATION "${SICONOS_PYTHON_INSTALL_DIR}/siconos/"
+  LIBRARY DESTINATION "${SICONOS_PYTHON_INSTALL_DIR}/siconos/numerics"
   )
+
+  # Installation des fichiers Python supplémentaires
+install(FILES
+${CMAKE_SOURCE_DIR}/numerics/python/__init__.py
+DESTINATION "${SICONOS_PYTHON_INSTALL_DIR}/siconos/numerics")
