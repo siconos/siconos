@@ -19,10 +19,8 @@
 from __future__ import print_function
 
 import siconos.numerics as N
-import siconos.kernel as K
 
-from siconos.kernel import \
-    FrictionContact,\
+from siconos.nonsmooth_formulations import FrictionContact, \
     GlobalFrictionContact,\
     GlobalRollingFrictionContact
 
