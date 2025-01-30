@@ -74,8 +74,8 @@ void wrap_dynamical_systems(py::module_ &m) {
       .def("p", &siconos::modeling::SecondOrderDS::p_python,
            py::return_value_policy::reference_internal);
 
-  py::class_<siconos::modeling::LagrangianDS, siconos::modeling::SecondOrderDS,
-             std::shared_ptr<siconos::modeling::LagrangianDS>>(m, "LagrangianDS")
+  py::class_<siconos::modeling::LagrangianDS, std::shared_ptr<siconos::modeling::LagrangianDS>,
+             siconos::modeling::SecondOrderDS>(m, "LagrangianDS")
 
       .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>,
                     Eigen::Ref<siconos::algebra::SiconosVector>>(),
@@ -183,9 +183,9 @@ void wrap_dynamical_systems(py::module_ &m) {
 
       .def_property_readonly("mass", &siconos::modeling::LagrangianDS::mass, "mass matrix");
 
-  py::class_<siconos::modeling::LagrangianLinearTIDS, siconos::modeling::LagrangianDS,
-             std::shared_ptr<siconos::modeling::LagrangianLinearTIDS>>(m,
-                                                                       "LagrangianLinearTIDS")
+  py::class_<siconos::modeling::LagrangianLinearTIDS,
+             std::shared_ptr<siconos::modeling::LagrangianLinearTIDS>,
+             siconos::modeling::LagrangianDS>(m, "LagrangianLinearTIDS")
       .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>,
                     Eigen::Ref<siconos::algebra::SiconosVector>,
                     Eigen::Ref<siconos::algebra::SiconosMatrix>>(),
