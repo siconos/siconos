@@ -21,6 +21,7 @@
 #include "Friction_cst.h"
 #include "SolverOptions.h"
 #include "relay_cst.h"
+#include "NM_types.h"
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 
@@ -164,4 +165,12 @@ PYBIND11_MODULE(pynumerics, m) {
         .def_property_readonly_static("SICONOS_RELAY_AVI_CAOFERRIS_TEST", [](py::object) { return static_cast<int>(RELAY_SOLVER::SICONOS_RELAY_AVI_CAOFERRIS_TEST); })
         ;
 
+    py::module_ constants = m.def_submodule("constants", "Constants for numerics module");
+    
+    py::enum_<NumericsMatrix_types>(constants, "NumericsMatrix_types", "Types of storage for NumericsMatrix")
+    .value("NM_DENSE", NM_DENSE, "Dense format")
+    .value("NM_SPARSE_BLOCK", NM_SPARSE_BLOCK, "Sparse block format")
+    .value("NM_SPARSE", NM_SPARSE, "Compressed column format")
+    .value("NM_UNKNOWN", NM_UNKNOWN, "Unset. Used in NM_null")
+    .export_values();
 }
