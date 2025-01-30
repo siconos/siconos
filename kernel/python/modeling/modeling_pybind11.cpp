@@ -16,8 +16,8 @@
  * limitations under the License.
  */
 
-#include <pybind11/pybind11.h>
 #include <pybind11/eigen.h>
+#include <pybind11/pybind11.h>
 
 #include "DynamicalSystem.hpp"
 #include "Interaction.hpp"
@@ -63,6 +63,12 @@ PYBIND11_MODULE(modeling, m) {
            py::arg("ds2") = std::shared_ptr<siconos::modeling::DynamicalSystem>())
 
       .def("setTitle", &siconos::modeling::NonSmoothDynamicalSystem::setTitle, "set DS title")
+
+      .def("setName",
+           py::overload_cast<std::shared_ptr<siconos::modeling::DynamicalSystem>,
+                             const std::string &>(
+               &siconos::modeling::NonSmoothDynamicalSystem::setName),
+           "set DS name")
 
       .def("__repr__", [](const siconos::modeling::NonSmoothDynamicalSystem &a) {
         a.display();
