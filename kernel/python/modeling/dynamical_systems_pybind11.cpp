@@ -43,7 +43,9 @@ void wrap_dynamical_systems(py::module_ &m) {
       .def("x", &siconos::modeling::DynamicalSystem::x_python,
            py::return_value_policy::reference_internal)
       .def("r", &siconos::modeling::DynamicalSystem::r_python,
-           py::return_value_policy::reference_internal);
+           py::return_value_policy::reference_internal)
+      .def("resetCount", &siconos::modeling::DynamicalSystem::resetCount)
+      .def("setNumber", &siconos::modeling::DynamicalSystem::setNumber);
 
   // ============================== FIRST ORDER DS ==============================
 
