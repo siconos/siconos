@@ -127,20 +127,21 @@ class SiconosBulletCollisionManager : public siconos::collision::SiconosCollisio
 
   /** Remove a body from the collision detector.
    */
-  void removeStaticBody(const std::shared_ptr<siconos::collision::StaticBody>& body);
+  void removeStaticBody(const std::shared_ptr<siconos::collision::StaticBody>& body) override;
 
   /** Remove a body from the collision detector. This must be done
    *  after removing a body from the NonSmoothDynamicalSystem
    *  otherwise contact will occur with a non-graph body which results
    *  in failure. */
-  void removeBody(const std::shared_ptr<siconos::modeling::SecondOrderDS>& body);
+  void removeBody(const std::shared_ptr<siconos::modeling::SecondOrderDS>& body) override;
 
-  void updateInteractions(std::shared_ptr<siconos::simulation::Simulation> simulation);
+  void updateInteractions(
+      std::shared_ptr<siconos::simulation::Simulation> simulation) override;
 
   std::vector<std::shared_ptr<siconos::collision::SiconosCollisionQueryResult>>
   lineIntersectionQuery(const siconos::algebra::SiconosVector& start,
                         const siconos::algebra::SiconosVector& end, bool closestOnly = false,
-                        bool sorted = true);
+                        bool sorted = true) override;
 
   void clearOverlappingPairCache();
 

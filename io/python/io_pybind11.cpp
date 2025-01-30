@@ -32,18 +32,18 @@ PYBIND11_MODULE(pyio, m) {
   py::class_<siconos::io::MechanicsIO, std::shared_ptr<siconos::io::MechanicsIO>>(
       m, "MechanicsIO")
       .def(py::init<>())
-      .def("contactInfo", &siconos::io::MechanicsIO::contactInfo)
-      //   .def("positions", &siconos::io::MechanicsIO::positions)
-      .def(
-          "positions",
-          [](siconos::io::MechanicsIO& self,
-             const siconos::modeling::NonSmoothDynamicalSystem& nsds) -> Eigen::MatrixXd {
-            auto matrix_ptr = self.positions(nsds);
-            if (!matrix_ptr) {
-              throw std::runtime_error("Error: MechanicsIO::positions returned nullptr");
-            }
-            return *matrix_ptr;  // Retourner une copie d'Eigen::MatrixXd
-          },
-          py::return_value_policy::move)  // On retourne un nouvel objet Python
-      .def("velocities", &siconos::io::MechanicsIO::velocities);
+      .def("contactInfo", &siconos::io::MechanicsIO::contactInfo);
+  //   .def("positions", &siconos::io::MechanicsIO::positions)
+  // .def(
+  //     "positions",
+  //     [](siconos::io::MechanicsIO& self,
+  //        const siconos::modeling::NonSmoothDynamicalSystem& nsds) -> Eigen::MatrixXd {
+  //       auto matrix_ptr = self.positions(nsds);
+  //       if (!matrix_ptr) {
+  //         throw std::runtime_error("Error: MechanicsIO::positions returned nullptr");
+  //       }
+  //       return *matrix_ptr;  // Retourner une copie d'Eigen::MatrixXd
+  //     },
+  //     py::return_value_policy::move)  // On retourne un nouvel objet Python
+  // .def("velocities", &siconos::io::MechanicsIO::velocities);
 }

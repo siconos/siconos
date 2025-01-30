@@ -701,58 +701,59 @@ void ContactInfoVisitor::operator()(const siconos::collision::Contact2d3DR& rel)
     answer.setValue(3, 0);
 }
 
-std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::contactInfo(
+std::optional<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::contactInfo(
     const siconos::modeling::NonSmoothDynamicalSystem& nsds, unsigned int index_set) const {
   DEBUG_BEGIN("MechanicsIO::contactInfo");
 
   siconos::graphs::InteractionsGraph::VIterator vi, viend;
-  if (nsds.topology()->numberOfIndexSet() > 0) {
-    auto& graph = *nsds.topology()->indexSet(index_set);
-    unsigned int current_row;
-    auto result =
-        std::make_shared<siconos::algebra::SiconosMatrix>(graph.vertices_number(), 4);
 
-    int data_size = 0;
-    for (current_row = 0, std::tie(vi, viend) = graph.vertices(); vi != viend; ++vi) {
-      DEBUG_PRINTF("process interaction : %p\n", &*graph.bundle(*vi));
+  if (!(nsds.topology()->numberOfIndexSet() > 0)) return std::nullopt;
 
-      /* create a visitor for specified classes */
-      using ContactInfoInspector = siconos::internal::Visitor<
-          siconos::internal::Classes<
-              siconos::modeling::NewtonEuler3DR, siconos::collision::ContactR,
-              siconos::collision::Contact5DR, siconos::collision::Contact2dR,
-              siconos::collision::Contact2d3DR>,
-          ContactInfoVisitor>::Make;
+  auto& graph = *nsds.topology()->indexSet(index_set);
+  unsigned int current_row;
+  siconos::algebra::SiconosMatrix result{graph.vertices_number(), 4};
 
-      auto inspector = std::make_shared<ContactInfoInspector>();
-      inspector->inter = graph.bundle(*vi);
-      graph.bundle(*vi)->relation()->accept(inspector);
-      auto& data = inspector->answer;
-      data_size = data.size();
+  int data_size = 0;
+  for (current_row = 0, std::tie(vi, viend) = graph.vertices(); vi != viend; ++vi) {
+    DEBUG_PRINTF("process interaction : %p\n", &*graph.bundle(*vi));
 
-      if (data_size == 0) {
-        // Nothing is done since the relation does not appear as a relation
-        // related to a contact points (perhaps a joint)
-      } else {
-        // We add at the end the number of ds1 and ds2
-        DEBUG_EXPR(data.display(););
-        auto& ds1 = *graph.properties(*vi).source;
-        auto& ds2 = *graph.properties(*vi).target;
-        data.setValue(1, ds1.number());
-        data.setValue(2, ds2.number());
-      }
-      if (result->size(1) != data.size()) {
-        result->resize(graph.vertices_number(), data.size());
-      }
-      result->row(current_row++) = data;
+    /* create a visitor for specified classes */
+    using ContactInfoInspector = siconos::internal::Visitor<
+        siconos::internal::Classes<
+            siconos::modeling::NewtonEuler3DR, siconos::collision::ContactR,
+            siconos::collision::Contact5DR, siconos::collision::Contact2dR,
+            siconos::collision::Contact2d3DR>,
+        ContactInfoVisitor>::Make;
+
+    auto inspector = std::make_shared<ContactInfoInspector>();
+    inspector->inter = graph.bundle(*vi);
+    graph.bundle(*vi)->relation()->accept(inspector);
+    auto& data = inspector->answer;
+    data_size = data.size();
+
+    if (data_size == 0) {
+      // Nothing is done since the relation does not appear as a relation
+      // related to a contact points (perhaps a joint)
+    } else {
+      // We add at the end the number of ds1 and ds2
+      DEBUG_EXPR(data.display(););
+      auto& ds1 = *graph.properties(*vi).source;
+      auto& ds2 = *graph.properties(*vi).target;
+      data.setValue(1, ds1.number());
+      data.setValue(2, ds2.number());
     }
-    result->resize(current_row, data_size);
-    DEBUG_EXPR(result->display(););
-    return result;
+    if (result.cols() != data.size()) {
+      result.resize(graph.vertices_number(), data.size());
+    }
+    result.row(current_row++) = data;
   }
-  DEBUG_END(" MechanicsIO::contactInfo");
+  // result.resize(current_row, data_size);
+  // Why do we need a resize? If result is too small, the line 748 will fail anyway.
+  // Note FP: warning resize with eigen may lead to reset
+  DEBUG_EXPR(result.display(););
+  return result;  // RVO, no copy
 
-  return nullptr;
+  DEBUG_END(" MechanicsIO::contactInfo");
 }
 
 namespace siconos::io {

@@ -103,7 +103,7 @@ class MechanicsIO {
    *   object number (if possible)
    */
 
-  std::shared_ptr<siconos::algebra::SiconosMatrix> contactInfo(
+  std::optional<siconos::algebra::SiconosMatrix> contactInfo(
       const siconos::modeling::NonSmoothDynamicalSystem& nsds,
       unsigned int index_set = 1) const;
 
