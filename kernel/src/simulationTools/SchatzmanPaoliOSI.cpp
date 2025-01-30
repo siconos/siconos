@@ -63,7 +63,7 @@ siconos::integrators::SchatzmanPaoliOSI::IterationMatrixBoundaryConditions(
 }
 
 void siconos::integrators::SchatzmanPaoliOSI::initializeWorkVectorsForDS(
-    double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
+    double time, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
   DEBUG_BEGIN(
       "siconos::integrators::SchatzmanPaoliOSI::initializeWorkVectorsForDS( double t, "
       "std::shared_ptr<siconos::modeling::DynamicalSystem> ds)\n");
@@ -95,7 +95,7 @@ void siconos::integrators::SchatzmanPaoliOSI::initializeWorkVectorsForDS(
   }
 
   // W initialization
-  initializeIterationMatrix(t, ds);
+  initializeIterationMatrix(time, ds);
 
   for (auto k = _levelMinForInput; k < _levelMaxForInput + 1; k++) {
     ds->initializeNonSmoothInput(k);
@@ -184,7 +184,7 @@ void siconos::integrators::SchatzmanPaoliOSI::initializeWorkVectorsForInteractio
 }
 
 void siconos::integrators::SchatzmanPaoliOSI::initializeIterationMatrix(
-    double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
+    double time, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
   // This function:
   // - allocate memory for the matrix W
   // - update its content for the current (initial) state of the dynamical system, depending
@@ -200,31 +200,29 @@ void siconos::integrators::SchatzmanPaoliOSI::initializeIterationMatrix(
   const auto& dsv = _dynamicalSystemsGraph->descriptor(ds);
   assert(!_dynamicalSystemsGraph->properties(dsv).iterationMatrix);
 
-  // Memory allocation for W
   auto h = _simulation->timeStep();
-  auto sizeW = ds->dimension();
+  auto ndof = ds->dimension();
 
   // Allocate storage for W in the graph
   _dynamicalSystemsGraph->properties(dsv).iterationMatrix =
-      std::make_shared<siconos::algebra::SiconosMatrix>(ds->dimension(), ds->dimension());
+      std::make_shared<siconos::algebra::SiconosMatrix>(ndof, ndof);
+      
+  auto iterationMat = _dynamicalSystemsGraph->properties(dsv).iterationMatrix;
 
   if (auto lltids = std::dynamic_pointer_cast<siconos::modeling::LagrangianLinearTIDS>(ds)) {
     if (lltids->hasMass())
-      *_dynamicalSystemsGraph->properties(dsv).iterationMatrix = lltids->mass();
+      *iterationMat = lltids->mass();
     else
-      _dynamicalSystemsGraph->properties(dsv).iterationMatrix->setIdentity();
+      iterationMat->setIdentity();
 
     if (lltids->hasDampingMatrix())
-      *_dynamicalSystemsGraph->properties(dsv).iterationMatrix +=
-          1 / 2.0 * h * _theta * lltids->dampingMatrix();
+      *iterationMat += 1 / 2.0 * h * _theta * lltids->dampingMatrix();
     if (lltids->hasStiffnessMatrix())
-      *_dynamicalSystemsGraph->properties(dsv).iterationMatrix +=
-          h * h * _theta * _theta * lltids->stiffnessMatrix();
+      *iterationMat += h * h * _theta * _theta * lltids->stiffnessMatrix();
 
     // LU Factorisation
     _dynamicalSystemsGraph->properties(dsv).LUW =
-        std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(
-            *_dynamicalSystemsGraph->properties(dsv).iterationMatrix);
+        std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(*iterationMat);
   }
 
   else

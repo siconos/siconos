@@ -258,8 +258,6 @@ class LagrangianDS : public SecondOrderDS {
   /** jacobian_{velocity} forces*/
   std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianTotalForcesOver_velocity_{nullptr};
 
-  bool hasJacobianTotalForces_{false};
-
   /** memory of previous forces of the system */
   siconos::algebra::SiconosMemory totalForcesMemory_;
 
@@ -663,8 +661,13 @@ class LagrangianDS : public SecondOrderDS {
   /** \return True if total forces are defined */
   bool hasTotalForces() const { return totalForces_ != nullptr; }
 
-  /** \return True if the jacobians of total forces are defined */
-  bool hasJacobianTotalForces() const { return hasJacobianTotalForces_; }
+  /** \return True if  \f$ \nabla_q F_{total}\f$ is taken into account */
+  bool hasJacobianTotalForcesOver_q() const { return jacobianTotalForcesOver_q_ != nullptr; }
+
+  /** \return True if  \f$ \nabla_{velocity} F_{total}\f$ is taken into account */
+  bool hasJacobianTotalForcesOver_velocity() const {
+    return jacobianTotalForcesOver_velocity_ != nullptr;
+  }
 
   /** \return a read-only view on \f$  \nabla_qF_{total}(v,q,t) \f$ */
   inline virtual const siconos::algebra::ConstMapType jacobianTotalForcesOver_q() const {

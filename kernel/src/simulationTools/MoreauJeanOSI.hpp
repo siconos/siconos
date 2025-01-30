@@ -23,14 +23,8 @@
 
 #include <limits>
 
-#include "LagrangianLinearTIDS.hpp"
 #include "OneStepIntegrator.hpp"
-#include "SiconosVector.hpp"
-#include "SiconosVisitor.hpp"
-// namespace siconos::internal {
-
-// class SiconosVisitor;
-// }
+#include "SiconosVisitor.hpp" // For NSLeffects ...
 
 namespace siconos::modeling {
 
@@ -193,14 +187,14 @@ class MoreauJeanOSI : public OneStepIntegrator {
 
     void visit(const siconos::modeling::NewtonImpactNSL &nslaw) const override;
 
-    void visit(const siconos::modeling::RelayNSL &nslaw) const override{};
+    void visit(const siconos::modeling::RelayNSL &nslaw) const override {};
     void visit(const siconos::modeling::NewtonImpactFrictionNSL &nslaw) const override;
     void visit(const siconos::modeling::FremondImpactFrictionNSL &nslaw) const override;
     void visit(const siconos::modeling::NewtonImpactRollingFrictionNSL &nslaw) const override;
-    void visit(const siconos::modeling::EqualityConditionNSL &nslaw) const override{};
+    void visit(const siconos::modeling::EqualityConditionNSL &nslaw) const override {};
     void visit(
-        const siconos::modeling::MixedComplementarityConditionNSL &nslaw) const override{};
-    void visit(const siconos::modeling::ComplementarityConditionNSL &nslaw) const override{};
+        const siconos::modeling::MixedComplementarityConditionNSL &nslaw) const override {};
+    void visit(const siconos::modeling::ComplementarityConditionNSL &nslaw) const override {};
   };
 
  public:
@@ -525,7 +519,7 @@ namespace moreau_jean {
 void computeIterationMatrix_Lagrangian(
     double time, double h, double theta, siconos::modeling::LagrangianDS &ds,
     Eigen::Ref<siconos::algebra::SiconosMatrix> W,
-    std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>& LUW);
+    std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>> &LUW);
 
 /** compute Moreau-Jean W iteration matrix for Newton-Euler systems
  *
@@ -539,7 +533,7 @@ void computeIterationMatrix_Lagrangian(
 void computeIterationMatrix_NewtonEuler(
     double time, double h, double theta, siconos::modeling::NewtonEulerDS &ds,
     Eigen::Ref<siconos::algebra::SiconosMatrix> W,
-    std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>& LUW);
+    std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>> &LUW);
 
 /** Update the state vector of a given dynamical system
  *  \param time_step current time step

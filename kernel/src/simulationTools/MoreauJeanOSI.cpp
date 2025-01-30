@@ -1589,10 +1589,13 @@ void siconos::integrators::moreau_jean::computeIterationMatrix_Lagrangian(
   } else
     iterationMatrix.setIdentity();
 
-  if (lds.hasJacobianTotalForces()) {
-    lds.computeJacobianTotalForcesOver_velocity(lds.velocity_read(), lds.q_read(), time);
-    lds.computeJacobianTotalForcesOver_q(lds.velocity_read(), lds.q_read(), time);
+  lds.computeJacobianTotalForcesOver_velocity(lds.velocity_read(), lds.q_read(), time);
+  if (lds.hasJacobianTotalForcesOver_velocity()) {
     iterationMatrix -= time_step * theta * lds.jacobianTotalForcesOver_velocity();
+  }
+
+  lds.computeJacobianTotalForcesOver_q(lds.velocity_read(), lds.q_read(), time);
+  if (lds.hasJacobianTotalForcesOver_q()) {
     iterationMatrix -= time_step * time_step * theta * theta * lds.jacobianTotalForcesOver_q();
   }
 

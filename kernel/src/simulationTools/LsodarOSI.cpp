@@ -41,9 +41,6 @@
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
-int siconos::integrators::LsodarOSI::count_NST = 0;
-int siconos::integrators::LsodarOSI::count_NFE = 0;
-
 // ===== Out of class objects and functions =====
 
 namespace {  // Anonymous, local scope only
@@ -542,8 +539,8 @@ void siconos::integrators::LsodarOSI::integrate(double& tinit, double& tend, dou
     assert(true);
   }
   // Update counters
-  count_NST = iwork[10];
-  count_NFE = iwork[11];
+  count_NST += iwork[10];
+  count_NFE += iwork[11];
   //  tinit = tinit_DR;
   DEBUG_END("LsodarOSI::integrate(double& tinit, double& tend, double& tout, int& istate)\n");
 }
@@ -589,6 +586,7 @@ struct siconos::integrators::LsodarOSI::_NSLEffectOnFreeOutput
                          siconos::graphs::InteractionProperties& interProp)
       : _osnsp(p), _inter(inter), _interProp(interProp) {};
 
+  _NSLEffectOnFreeOutput() = delete;
   _NSLEffectOnFreeOutput(const _NSLEffectOnFreeOutput&) = delete;
   _NSLEffectOnFreeOutput(const _NSLEffectOnFreeOutput&&) = delete;
   _NSLEffectOnFreeOutput& operator=(const _NSLEffectOnFreeOutput&) = delete;
@@ -602,7 +600,7 @@ struct siconos::integrators::LsodarOSI::_NSLEffectOnFreeOutput
   }
 
   // visit function added by Son (9/11/2010)
-  void visit(const siconos::modeling::MultipleImpactNSL& nslaw) const override { ; }
+  void visit(const siconos::modeling::MultipleImpactNSL& nslaw) const override {}
 
   // note : no NewtonImpactFrictionNSL
 };

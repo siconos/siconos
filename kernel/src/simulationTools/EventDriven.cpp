@@ -810,7 +810,7 @@ double siconos::simulation::EventDriven::computeResiduConstraints() {
     if (itosi->getType() == siconos::integrators::IntegratorType::NEWMARKALPHAOSI) {
       auto osi_NewMark =
           std::static_pointer_cast<siconos::integrators::NewMarkAlphaOSI>(itosi);
-      bool _flag = osi_NewMark->getFlagVelocityLevel();
+      bool _flag = osi_NewMark->handleVelocityConstraints();
       for (std::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui) {
         auto& inter = *indexSet2->bundle(*ui);
         if (!_flag)  // constraints at the position level

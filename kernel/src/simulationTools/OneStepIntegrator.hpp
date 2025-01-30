@@ -25,7 +25,6 @@
 
 #include "ExtraAdditionalTerms.hpp"
 #include "OneStepIntegratorTypes.hpp"  // IntegratorType
-#include "Simulation.hpp"
 #include "SimulationGraphs.hpp"
 
 namespace siconos::simulation {

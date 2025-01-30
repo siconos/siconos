@@ -163,13 +163,10 @@ void siconos::joints::PrismaticJointR::computeV1V2FromAxis() {
   _V2z = _V2(2);
 }
 
-void siconos::joints::PrismaticJointR::computeH_NE_(
-    double time, siconos::modeling::Interaction& inter,
-    const siconos::algebra::BlockVector& q0) {
-  DEBUG_PRINT(
-      "siconos::joints::PrismaticJointR::computeJacobianhOver_q(double time, Interaction& "
-      "inter, "
-      "std::shared_ptr<siconos::algebra::BlockVector> q0 ) \n");
+void siconos::joints::PrismaticJointR::computeH_NE_(double time,
+                                                    siconos::modeling::Interaction& inter,
+                                                    const siconos::algebra::BlockVector& q0) {
+  DEBUG_PRINT("siconos::joints::PrismaticJointR::computeH_NE_() \n");
 
   H_NE_view_->setZero();
   auto q1 = (q0.getAllVect())[0];
@@ -194,10 +191,7 @@ void siconos::joints::PrismaticJointR::computeH_NE_(
   } else
     Jd1(X1, Y1, Z1, q10, q11, q12, q13);
 
-  DEBUG_END(
-      "siconos::joints::PrismaticJointR::computeJacobianhOver_q(double time, Interaction& "
-      "inter, "
-      "std::shared_ptr<siconos::algebra::BlockVector> q0 ) \n");
+  DEBUG_END("siconos::joints::PrismaticJointR::computeH_NE_() \n");
 }
 
 void siconos::joints::PrismaticJointR::computeh(
@@ -357,120 +351,110 @@ void siconos::joints::PrismaticJointR::Jd1d2(double X1, double Y1, double Z1, do
 
   /* Prismatic constraints (H1, H2)
    */
-  H_NE_view_->setValue(
-      0, 0,
-      _V1x * (-pow(q10, 2) - pow(q11, 2) + pow(q12, 2) + pow(q13, 2)) +
-          _V1y * (2 * q10 * q13 - 2 * q11 * q12) + _V1z * (-2 * q10 * q12 - 2 * q11 * q13));
-  H_NE_view_->setValue(
-      0, 1,
-      _V1x * (-2 * q10 * q13 - 2 * q11 * q12) +
-          _V1y * (-pow(q10, 2) + pow(q11, 2) - pow(q12, 2) + pow(q13, 2)) +
-          _V1z * (2 * q10 * q11 - 2 * q12 * q13));
-  H_NE_view_->setValue(
-      0, 2,
-      _V1x * (2 * q10 * q12 - 2 * q11 * q13) + _V1y * (-2 * q10 * q11 - 2 * q12 * q13) +
-          _V1z * (-pow(q10, 2) + pow(q11, 2) + pow(q12, 2) - pow(q13, 2)));
+  H_NE_view_->setValue(0, 0,
+                       _V1x * (-pow(q10, 2) - pow(q11, 2) + pow(q12, 2) + pow(q13, 2)) +
+                           _V1y * (2 * q10 * q13 - 2 * q11 * q12) +
+                           _V1z * (-2 * q10 * q12 - 2 * q11 * q13));
+  H_NE_view_->setValue(0, 1,
+                       _V1x * (-2 * q10 * q13 - 2 * q11 * q12) +
+                           _V1y * (-pow(q10, 2) + pow(q11, 2) - pow(q12, 2) + pow(q13, 2)) +
+                           _V1z * (2 * q10 * q11 - 2 * q12 * q13));
+  H_NE_view_->setValue(0, 2,
+                       _V1x * (2 * q10 * q12 - 2 * q11 * q13) +
+                           _V1y * (-2 * q10 * q11 - 2 * q12 * q13) +
+                           _V1z * (-pow(q10, 2) + pow(q11, 2) + pow(q12, 2) - pow(q13, 2)));
   H_NE_view_->setValue(
       0, 3,
       _V1x * (2 * q10 * (-X1 + X2) - 2 * q12 * (-Z1 + Z2) + 2 * q13 * (-Y1 + Y2)) +
           _V1y * (2 * q10 * (-Y1 + Y2) + 2 * q11 * (-Z1 + Z2) - 2 * q13 * (-X1 + X2)) +
           _V1z * (2 * q10 * (-Z1 + Z2) - 2 * q11 * (-Y1 + Y2) + 2 * q12 * (-X1 + X2)));
-  H_NE_view_->setValue(
-      0, 4,
-      _V1x * (q11 * (-X1 + X2) - q11 * (X1 - X2) + q12 * (-Y1 + Y2) - q12 * (Y1 - Y2) +
-              2 * q13 * (-Z1 + Z2)) +
-          _V1y * (2 * q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q11 * (Y1 - Y2) +
-                  q12 * (-X1 + X2) - q12 * (X1 - X2)) +
-          _V1z * (-q10 * (-Y1 + Y2) + q10 * (Y1 - Y2) - 2 * q11 * (-Z1 + Z2) +
-                  q13 * (-X1 + X2) - q13 * (X1 - X2)));
-  H_NE_view_->setValue(
-      0, 5,
-      _V1x * (-q10 * (-Z1 + Z2) + q10 * (Z1 - Z2) + q11 * (-Y1 + Y2) - q11 * (Y1 - Y2) -
-              2 * q12 * (-X1 + X2)) +
-          _V1y * (2 * q11 * (-X1 + X2) + q12 * (-Y1 + Y2) - q12 * (Y1 - Y2) +
-                  q13 * (-Z1 + Z2) - q13 * (Z1 - Z2)) +
-          _V1z * (2 * q10 * (-X1 + X2) - q12 * (-Z1 + Z2) + q12 * (Z1 - Z2) +
-                  q13 * (-Y1 + Y2) - q13 * (Y1 - Y2)));
-  H_NE_view_->setValue(
-      0, 6,
-      _V1x * (2 * q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q11 * (Z1 - Z2) - q13 * (-X1 + X2) +
-              q13 * (X1 - X2)) +
-          _V1y * (-q10 * (-X1 + X2) + q10 * (X1 - X2) + q12 * (-Z1 + Z2) - q12 * (Z1 - Z2) -
-                  2 * q13 * (-Y1 + Y2)) +
-          _V1z * (q11 * (-X1 + X2) - q11 * (X1 - X2) + 2 * q12 * (-Y1 + Y2) +
-                  q13 * (-Z1 + Z2) - q13 * (Z1 - Z2)));
-  H_NE_view_->setValue(
-      0, 7,
-      _V1x * (pow(q10, 2) + pow(q11, 2) - pow(q12, 2) - pow(q13, 2)) +
-          _V1y * (-2 * q10 * q13 + 2 * q11 * q12) + _V1z * (2 * q10 * q12 + 2 * q11 * q13));
-  H_NE_view_->setValue(
-      0, 8,
-      _V1x * (2 * q10 * q13 + 2 * q11 * q12) +
-          _V1y * (pow(q10, 2) - pow(q11, 2) + pow(q12, 2) - pow(q13, 2)) +
-          _V1z * (-2 * q10 * q11 + 2 * q12 * q13));
-  H_NE_view_->setValue(
-      0, 9,
-      _V1x * (-2 * q10 * q12 + 2 * q11 * q13) + _V1y * (2 * q10 * q11 + 2 * q12 * q13) +
-          _V1z * (pow(q10, 2) - pow(q11, 2) - pow(q12, 2) + pow(q13, 2)));
+  H_NE_view_->setValue(0, 4,
+                       _V1x * (q11 * (-X1 + X2) - q11 * (X1 - X2) + q12 * (-Y1 + Y2) -
+                               q12 * (Y1 - Y2) + 2 * q13 * (-Z1 + Z2)) +
+                           _V1y * (2 * q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q11 * (Y1 - Y2) +
+                                   q12 * (-X1 + X2) - q12 * (X1 - X2)) +
+                           _V1z * (-q10 * (-Y1 + Y2) + q10 * (Y1 - Y2) - 2 * q11 * (-Z1 + Z2) +
+                                   q13 * (-X1 + X2) - q13 * (X1 - X2)));
+  H_NE_view_->setValue(0, 5,
+                       _V1x * (-q10 * (-Z1 + Z2) + q10 * (Z1 - Z2) + q11 * (-Y1 + Y2) -
+                               q11 * (Y1 - Y2) - 2 * q12 * (-X1 + X2)) +
+                           _V1y * (2 * q11 * (-X1 + X2) + q12 * (-Y1 + Y2) - q12 * (Y1 - Y2) +
+                                   q13 * (-Z1 + Z2) - q13 * (Z1 - Z2)) +
+                           _V1z * (2 * q10 * (-X1 + X2) - q12 * (-Z1 + Z2) + q12 * (Z1 - Z2) +
+                                   q13 * (-Y1 + Y2) - q13 * (Y1 - Y2)));
+  H_NE_view_->setValue(0, 6,
+                       _V1x * (2 * q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q11 * (Z1 - Z2) -
+                               q13 * (-X1 + X2) + q13 * (X1 - X2)) +
+                           _V1y * (-q10 * (-X1 + X2) + q10 * (X1 - X2) + q12 * (-Z1 + Z2) -
+                                   q12 * (Z1 - Z2) - 2 * q13 * (-Y1 + Y2)) +
+                           _V1z * (q11 * (-X1 + X2) - q11 * (X1 - X2) + 2 * q12 * (-Y1 + Y2) +
+                                   q13 * (-Z1 + Z2) - q13 * (Z1 - Z2)));
+  H_NE_view_->setValue(0, 7,
+                       _V1x * (pow(q10, 2) + pow(q11, 2) - pow(q12, 2) - pow(q13, 2)) +
+                           _V1y * (-2 * q10 * q13 + 2 * q11 * q12) +
+                           _V1z * (2 * q10 * q12 + 2 * q11 * q13));
+  H_NE_view_->setValue(0, 8,
+                       _V1x * (2 * q10 * q13 + 2 * q11 * q12) +
+                           _V1y * (pow(q10, 2) - pow(q11, 2) + pow(q12, 2) - pow(q13, 2)) +
+                           _V1z * (-2 * q10 * q11 + 2 * q12 * q13));
+  H_NE_view_->setValue(0, 9,
+                       _V1x * (-2 * q10 * q12 + 2 * q11 * q13) +
+                           _V1y * (2 * q10 * q11 + 2 * q12 * q13) +
+                           _V1z * (pow(q10, 2) - pow(q11, 2) - pow(q12, 2) + pow(q13, 2)));
   H_NE_view_->setValue(0, 10, 0);
   H_NE_view_->setValue(0, 11, 0);
   H_NE_view_->setValue(0, 12, 0);
   H_NE_view_->setValue(0, 13, 0);
-  H_NE_view_->setValue(
-      1, 0,
-      _V2x * (-pow(q10, 2) - pow(q11, 2) + pow(q12, 2) + pow(q13, 2)) +
-          _V2y * (2 * q10 * q13 - 2 * q11 * q12) + _V2z * (-2 * q10 * q12 - 2 * q11 * q13));
-  H_NE_view_->setValue(
-      1, 1,
-      _V2x * (-2 * q10 * q13 - 2 * q11 * q12) +
-          _V2y * (-pow(q10, 2) + pow(q11, 2) - pow(q12, 2) + pow(q13, 2)) +
-          _V2z * (2 * q10 * q11 - 2 * q12 * q13));
-  H_NE_view_->setValue(
-      1, 2,
-      _V2x * (2 * q10 * q12 - 2 * q11 * q13) + _V2y * (-2 * q10 * q11 - 2 * q12 * q13) +
-          _V2z * (-pow(q10, 2) + pow(q11, 2) + pow(q12, 2) - pow(q13, 2)));
+  H_NE_view_->setValue(1, 0,
+                       _V2x * (-pow(q10, 2) - pow(q11, 2) + pow(q12, 2) + pow(q13, 2)) +
+                           _V2y * (2 * q10 * q13 - 2 * q11 * q12) +
+                           _V2z * (-2 * q10 * q12 - 2 * q11 * q13));
+  H_NE_view_->setValue(1, 1,
+                       _V2x * (-2 * q10 * q13 - 2 * q11 * q12) +
+                           _V2y * (-pow(q10, 2) + pow(q11, 2) - pow(q12, 2) + pow(q13, 2)) +
+                           _V2z * (2 * q10 * q11 - 2 * q12 * q13));
+  H_NE_view_->setValue(1, 2,
+                       _V2x * (2 * q10 * q12 - 2 * q11 * q13) +
+                           _V2y * (-2 * q10 * q11 - 2 * q12 * q13) +
+                           _V2z * (-pow(q10, 2) + pow(q11, 2) + pow(q12, 2) - pow(q13, 2)));
   H_NE_view_->setValue(
       1, 3,
       _V2x * (2 * q10 * (-X1 + X2) - 2 * q12 * (-Z1 + Z2) + 2 * q13 * (-Y1 + Y2)) +
           _V2y * (2 * q10 * (-Y1 + Y2) + 2 * q11 * (-Z1 + Z2) - 2 * q13 * (-X1 + X2)) +
           _V2z * (2 * q10 * (-Z1 + Z2) - 2 * q11 * (-Y1 + Y2) + 2 * q12 * (-X1 + X2)));
-  H_NE_view_->setValue(
-      1, 4,
-      _V2x * (q11 * (-X1 + X2) - q11 * (X1 - X2) + q12 * (-Y1 + Y2) - q12 * (Y1 - Y2) +
-              2 * q13 * (-Z1 + Z2)) +
-          _V2y * (2 * q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q11 * (Y1 - Y2) +
-                  q12 * (-X1 + X2) - q12 * (X1 - X2)) +
-          _V2z * (-q10 * (-Y1 + Y2) + q10 * (Y1 - Y2) - 2 * q11 * (-Z1 + Z2) +
-                  q13 * (-X1 + X2) - q13 * (X1 - X2)));
-  H_NE_view_->setValue(
-      1, 5,
-      _V2x * (-q10 * (-Z1 + Z2) + q10 * (Z1 - Z2) + q11 * (-Y1 + Y2) - q11 * (Y1 - Y2) -
-              2 * q12 * (-X1 + X2)) +
-          _V2y * (2 * q11 * (-X1 + X2) + q12 * (-Y1 + Y2) - q12 * (Y1 - Y2) +
-                  q13 * (-Z1 + Z2) - q13 * (Z1 - Z2)) +
-          _V2z * (2 * q10 * (-X1 + X2) - q12 * (-Z1 + Z2) + q12 * (Z1 - Z2) +
-                  q13 * (-Y1 + Y2) - q13 * (Y1 - Y2)));
-  H_NE_view_->setValue(
-      1, 6,
-      _V2x * (2 * q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q11 * (Z1 - Z2) - q13 * (-X1 + X2) +
-              q13 * (X1 - X2)) +
-          _V2y * (-q10 * (-X1 + X2) + q10 * (X1 - X2) + q12 * (-Z1 + Z2) - q12 * (Z1 - Z2) -
-                  2 * q13 * (-Y1 + Y2)) +
-          _V2z * (q11 * (-X1 + X2) - q11 * (X1 - X2) + 2 * q12 * (-Y1 + Y2) +
-                  q13 * (-Z1 + Z2) - q13 * (Z1 - Z2)));
-  H_NE_view_->setValue(
-      1, 7,
-      _V2x * (pow(q10, 2) + pow(q11, 2) - pow(q12, 2) - pow(q13, 2)) +
-          _V2y * (-2 * q10 * q13 + 2 * q11 * q12) + _V2z * (2 * q10 * q12 + 2 * q11 * q13));
-  H_NE_view_->setValue(
-      1, 8,
-      _V2x * (2 * q10 * q13 + 2 * q11 * q12) +
-          _V2y * (pow(q10, 2) - pow(q11, 2) + pow(q12, 2) - pow(q13, 2)) +
-          _V2z * (-2 * q10 * q11 + 2 * q12 * q13));
-  H_NE_view_->setValue(
-      1, 9,
-      _V2x * (-2 * q10 * q12 + 2 * q11 * q13) + _V2y * (2 * q10 * q11 + 2 * q12 * q13) +
-          _V2z * (pow(q10, 2) - pow(q11, 2) - pow(q12, 2) + pow(q13, 2)));
+  H_NE_view_->setValue(1, 4,
+                       _V2x * (q11 * (-X1 + X2) - q11 * (X1 - X2) + q12 * (-Y1 + Y2) -
+                               q12 * (Y1 - Y2) + 2 * q13 * (-Z1 + Z2)) +
+                           _V2y * (2 * q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q11 * (Y1 - Y2) +
+                                   q12 * (-X1 + X2) - q12 * (X1 - X2)) +
+                           _V2z * (-q10 * (-Y1 + Y2) + q10 * (Y1 - Y2) - 2 * q11 * (-Z1 + Z2) +
+                                   q13 * (-X1 + X2) - q13 * (X1 - X2)));
+  H_NE_view_->setValue(1, 5,
+                       _V2x * (-q10 * (-Z1 + Z2) + q10 * (Z1 - Z2) + q11 * (-Y1 + Y2) -
+                               q11 * (Y1 - Y2) - 2 * q12 * (-X1 + X2)) +
+                           _V2y * (2 * q11 * (-X1 + X2) + q12 * (-Y1 + Y2) - q12 * (Y1 - Y2) +
+                                   q13 * (-Z1 + Z2) - q13 * (Z1 - Z2)) +
+                           _V2z * (2 * q10 * (-X1 + X2) - q12 * (-Z1 + Z2) + q12 * (Z1 - Z2) +
+                                   q13 * (-Y1 + Y2) - q13 * (Y1 - Y2)));
+  H_NE_view_->setValue(1, 6,
+                       _V2x * (2 * q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q11 * (Z1 - Z2) -
+                               q13 * (-X1 + X2) + q13 * (X1 - X2)) +
+                           _V2y * (-q10 * (-X1 + X2) + q10 * (X1 - X2) + q12 * (-Z1 + Z2) -
+                                   q12 * (Z1 - Z2) - 2 * q13 * (-Y1 + Y2)) +
+                           _V2z * (q11 * (-X1 + X2) - q11 * (X1 - X2) + 2 * q12 * (-Y1 + Y2) +
+                                   q13 * (-Z1 + Z2) - q13 * (Z1 - Z2)));
+  H_NE_view_->setValue(1, 7,
+                       _V2x * (pow(q10, 2) + pow(q11, 2) - pow(q12, 2) - pow(q13, 2)) +
+                           _V2y * (-2 * q10 * q13 + 2 * q11 * q12) +
+                           _V2z * (2 * q10 * q12 + 2 * q11 * q13));
+  H_NE_view_->setValue(1, 8,
+                       _V2x * (2 * q10 * q13 + 2 * q11 * q12) +
+                           _V2y * (pow(q10, 2) - pow(q11, 2) + pow(q12, 2) - pow(q13, 2)) +
+                           _V2z * (-2 * q10 * q11 + 2 * q12 * q13));
+  H_NE_view_->setValue(1, 9,
+                       _V2x * (-2 * q10 * q12 + 2 * q11 * q13) +
+                           _V2y * (2 * q10 * q11 + 2 * q12 * q13) +
+                           _V2z * (pow(q10, 2) - pow(q11, 2) - pow(q12, 2) + pow(q13, 2)));
   H_NE_view_->setValue(1, 10, 0);
   H_NE_view_->setValue(1, 11, 0);
   H_NE_view_->setValue(1, 12, 0);
@@ -481,69 +465,69 @@ void siconos::joints::PrismaticJointR::Jd1d2(double X1, double Y1, double Z1, do
   H_NE_view_->setValue(2, 0, 0.0);
   H_NE_view_->setValue(2, 1, 0.0);
   H_NE_view_->setValue(2, 2, 0.0);
-  H_NE_view_->setValue(
-      2, 3, -_cq2q101 * q21 - _cq2q102 * q20 + _cq2q103 * q23 - _cq2q104 * q22);
-  H_NE_view_->setValue(
-      2, 4, _cq2q101 * q20 - _cq2q102 * q21 - _cq2q103 * q22 - _cq2q104 * q23);
-  H_NE_view_->setValue(
-      2, 5, -_cq2q101 * q23 + _cq2q102 * q22 - _cq2q103 * q21 - _cq2q104 * q20);
-  H_NE_view_->setValue(
-      2, 6, _cq2q101 * q22 + _cq2q102 * q23 + _cq2q103 * q20 - _cq2q104 * q21);
+  H_NE_view_->setValue(2, 3,
+                       -_cq2q101 * q21 - _cq2q102 * q20 + _cq2q103 * q23 - _cq2q104 * q22);
+  H_NE_view_->setValue(2, 4,
+                       _cq2q101 * q20 - _cq2q102 * q21 - _cq2q103 * q22 - _cq2q104 * q23);
+  H_NE_view_->setValue(2, 5,
+                       -_cq2q101 * q23 + _cq2q102 * q22 - _cq2q103 * q21 - _cq2q104 * q20);
+  H_NE_view_->setValue(2, 6,
+                       _cq2q101 * q22 + _cq2q102 * q23 + _cq2q103 * q20 - _cq2q104 * q21);
   H_NE_view_->setValue(2, 7, 0.0);
   H_NE_view_->setValue(2, 8, 0.0);
   H_NE_view_->setValue(2, 9, 0.0);
-  H_NE_view_->setValue(
-      2, 10, _cq2q101 * q11 - _cq2q102 * q10 + _cq2q103 * q13 - _cq2q104 * q12);
-  H_NE_view_->setValue(
-      2, 11, -_cq2q101 * q10 - _cq2q102 * q11 - _cq2q103 * q12 - _cq2q104 * q13);
-  H_NE_view_->setValue(
-      2, 12, _cq2q101 * q13 + _cq2q102 * q12 - _cq2q103 * q11 - _cq2q104 * q10);
-  H_NE_view_->setValue(
-      2, 13, -_cq2q101 * q12 + _cq2q102 * q13 + _cq2q103 * q10 - _cq2q104 * q11);
+  H_NE_view_->setValue(2, 10,
+                       _cq2q101 * q11 - _cq2q102 * q10 + _cq2q103 * q13 - _cq2q104 * q12);
+  H_NE_view_->setValue(2, 11,
+                       -_cq2q101 * q10 - _cq2q102 * q11 - _cq2q103 * q12 - _cq2q104 * q13);
+  H_NE_view_->setValue(2, 12,
+                       _cq2q101 * q13 + _cq2q102 * q12 - _cq2q103 * q11 - _cq2q104 * q10);
+  H_NE_view_->setValue(2, 13,
+                       -_cq2q101 * q12 + _cq2q102 * q13 + _cq2q103 * q10 - _cq2q104 * q11);
   H_NE_view_->setValue(3, 0, 0.0);
   H_NE_view_->setValue(3, 1, 0.0);
   H_NE_view_->setValue(3, 2, 0.0);
-  H_NE_view_->setValue(
-      3, 3, -_cq2q101 * q22 - _cq2q102 * q23 - _cq2q103 * q20 + _cq2q104 * q21);
-  H_NE_view_->setValue(
-      3, 4, _cq2q101 * q23 - _cq2q102 * q22 + _cq2q103 * q21 + _cq2q104 * q20);
-  H_NE_view_->setValue(
-      3, 5, _cq2q101 * q20 - _cq2q102 * q21 - _cq2q103 * q22 - _cq2q104 * q23);
-  H_NE_view_->setValue(
-      3, 6, -_cq2q101 * q21 - _cq2q102 * q20 + _cq2q103 * q23 - _cq2q104 * q22);
+  H_NE_view_->setValue(3, 3,
+                       -_cq2q101 * q22 - _cq2q102 * q23 - _cq2q103 * q20 + _cq2q104 * q21);
+  H_NE_view_->setValue(3, 4,
+                       _cq2q101 * q23 - _cq2q102 * q22 + _cq2q103 * q21 + _cq2q104 * q20);
+  H_NE_view_->setValue(3, 5,
+                       _cq2q101 * q20 - _cq2q102 * q21 - _cq2q103 * q22 - _cq2q104 * q23);
+  H_NE_view_->setValue(3, 6,
+                       -_cq2q101 * q21 - _cq2q102 * q20 + _cq2q103 * q23 - _cq2q104 * q22);
   H_NE_view_->setValue(3, 7, 0.0);
   H_NE_view_->setValue(3, 8, 0.0);
   H_NE_view_->setValue(3, 9, 0.0);
-  H_NE_view_->setValue(
-      3, 10, _cq2q101 * q12 - _cq2q102 * q13 - _cq2q103 * q10 + _cq2q104 * q11);
-  H_NE_view_->setValue(
-      3, 11, -_cq2q101 * q13 - _cq2q102 * q12 + _cq2q103 * q11 + _cq2q104 * q10);
-  H_NE_view_->setValue(
-      3, 12, -_cq2q101 * q10 - _cq2q102 * q11 - _cq2q103 * q12 - _cq2q104 * q13);
-  H_NE_view_->setValue(
-      3, 13, _cq2q101 * q11 - _cq2q102 * q10 + _cq2q103 * q13 - _cq2q104 * q12);
+  H_NE_view_->setValue(3, 10,
+                       _cq2q101 * q12 - _cq2q102 * q13 - _cq2q103 * q10 + _cq2q104 * q11);
+  H_NE_view_->setValue(3, 11,
+                       -_cq2q101 * q13 - _cq2q102 * q12 + _cq2q103 * q11 + _cq2q104 * q10);
+  H_NE_view_->setValue(3, 12,
+                       -_cq2q101 * q10 - _cq2q102 * q11 - _cq2q103 * q12 - _cq2q104 * q13);
+  H_NE_view_->setValue(3, 13,
+                       _cq2q101 * q11 - _cq2q102 * q10 + _cq2q103 * q13 - _cq2q104 * q12);
   H_NE_view_->setValue(4, 0, 0.0);
   H_NE_view_->setValue(4, 1, 0.0);
   H_NE_view_->setValue(4, 2, 0.0);
-  H_NE_view_->setValue(
-      4, 3, -_cq2q101 * q23 + _cq2q102 * q22 - _cq2q103 * q21 - _cq2q104 * q20);
-  H_NE_view_->setValue(
-      4, 4, -_cq2q101 * q22 - _cq2q102 * q23 - _cq2q103 * q20 + _cq2q104 * q21);
-  H_NE_view_->setValue(
-      4, 5, _cq2q101 * q21 + _cq2q102 * q20 - _cq2q103 * q23 + _cq2q104 * q22);
-  H_NE_view_->setValue(
-      4, 6, _cq2q101 * q20 - _cq2q102 * q21 - _cq2q103 * q22 - _cq2q104 * q23);
+  H_NE_view_->setValue(4, 3,
+                       -_cq2q101 * q23 + _cq2q102 * q22 - _cq2q103 * q21 - _cq2q104 * q20);
+  H_NE_view_->setValue(4, 4,
+                       -_cq2q101 * q22 - _cq2q102 * q23 - _cq2q103 * q20 + _cq2q104 * q21);
+  H_NE_view_->setValue(4, 5,
+                       _cq2q101 * q21 + _cq2q102 * q20 - _cq2q103 * q23 + _cq2q104 * q22);
+  H_NE_view_->setValue(4, 6,
+                       _cq2q101 * q20 - _cq2q102 * q21 - _cq2q103 * q22 - _cq2q104 * q23);
   H_NE_view_->setValue(4, 7, 0.0);
   H_NE_view_->setValue(4, 8, 0.0);
   H_NE_view_->setValue(4, 9, 0.0);
-  H_NE_view_->setValue(
-      4, 10, _cq2q101 * q13 + _cq2q102 * q12 - _cq2q103 * q11 - _cq2q104 * q10);
-  H_NE_view_->setValue(
-      4, 11, _cq2q101 * q12 - _cq2q102 * q13 - _cq2q103 * q10 + _cq2q104 * q11);
-  H_NE_view_->setValue(
-      4, 12, -_cq2q101 * q11 + _cq2q102 * q10 - _cq2q103 * q13 + _cq2q104 * q12);
-  H_NE_view_->setValue(
-      4, 13, -_cq2q101 * q10 - _cq2q102 * q11 - _cq2q103 * q12 - _cq2q104 * q13);
+  H_NE_view_->setValue(4, 10,
+                       _cq2q101 * q13 + _cq2q102 * q12 - _cq2q103 * q11 - _cq2q104 * q10);
+  H_NE_view_->setValue(4, 11,
+                       _cq2q101 * q12 - _cq2q102 * q13 - _cq2q103 * q10 + _cq2q104 * q11);
+  H_NE_view_->setValue(4, 12,
+                       -_cq2q101 * q11 + _cq2q102 * q10 - _cq2q103 * q13 + _cq2q104 * q12);
+  H_NE_view_->setValue(4, 13,
+                       -_cq2q101 * q10 - _cq2q102 * q11 - _cq2q103 * q12 - _cq2q104 * q13);
 }
 
 void siconos::joints::PrismaticJointR::Jd1(double X1, double Y1, double Z1, double q10,
@@ -559,64 +543,62 @@ void siconos::joints::PrismaticJointR::Jd1(double X1, double Y1, double Z1, doub
 
   /* Prismatic constraints (H1, H2)
    */
-  H_NE_view_->setValue(
-      0, 0,
-      _V1x * (-pow(q10, 2) - pow(q11, 2) + pow(q12, 2) + pow(q13, 2)) +
-          _V1y * (2 * q10 * q13 - 2 * q11 * q12) + _V1z * (-2 * q10 * q12 - 2 * q11 * q13));
-  H_NE_view_->setValue(
-      0, 1,
-      _V1x * (-2 * q10 * q13 - 2 * q11 * q12) +
-          _V1y * (-pow(q10, 2) + pow(q11, 2) - pow(q12, 2) + pow(q13, 2)) +
-          _V1z * (2 * q10 * q11 - 2 * q12 * q13));
-  H_NE_view_->setValue(
-      0, 2,
-      _V1x * (2 * q10 * q12 - 2 * q11 * q13) + _V1y * (-2 * q10 * q11 - 2 * q12 * q13) +
-          _V1z * (-pow(q10, 2) + pow(q11, 2) + pow(q12, 2) - pow(q13, 2)));
+  H_NE_view_->setValue(0, 0,
+                       _V1x * (-pow(q10, 2) - pow(q11, 2) + pow(q12, 2) + pow(q13, 2)) +
+                           _V1y * (2 * q10 * q13 - 2 * q11 * q12) +
+                           _V1z * (-2 * q10 * q12 - 2 * q11 * q13));
+  H_NE_view_->setValue(0, 1,
+                       _V1x * (-2 * q10 * q13 - 2 * q11 * q12) +
+                           _V1y * (-pow(q10, 2) + pow(q11, 2) - pow(q12, 2) + pow(q13, 2)) +
+                           _V1z * (2 * q10 * q11 - 2 * q12 * q13));
+  H_NE_view_->setValue(0, 2,
+                       _V1x * (2 * q10 * q12 - 2 * q11 * q13) +
+                           _V1y * (-2 * q10 * q11 - 2 * q12 * q13) +
+                           _V1z * (-pow(q10, 2) + pow(q11, 2) + pow(q12, 2) - pow(q13, 2)));
   H_NE_view_->setValue(0, 3,
-                                  _V1x * (-2 * X1 * q10 - 2 * Y1 * q13 + 2 * Z1 * q12) +
-                                      _V1y * (2 * X1 * q13 - 2 * Y1 * q10 - 2 * Z1 * q11) +
-                                      _V1z * (-2 * X1 * q12 + 2 * Y1 * q11 - 2 * Z1 * q10));
+                       _V1x * (-2 * X1 * q10 - 2 * Y1 * q13 + 2 * Z1 * q12) +
+                           _V1y * (2 * X1 * q13 - 2 * Y1 * q10 - 2 * Z1 * q11) +
+                           _V1z * (-2 * X1 * q12 + 2 * Y1 * q11 - 2 * Z1 * q10));
   H_NE_view_->setValue(0, 4,
-                                  _V1x * (-2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13) +
-                                      _V1y * (-2 * X1 * q12 + 2 * Y1 * q11 - 2 * Z1 * q10) +
-                                      _V1z * (-2 * X1 * q13 + 2 * Y1 * q10 + 2 * Z1 * q11));
+                       _V1x * (-2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13) +
+                           _V1y * (-2 * X1 * q12 + 2 * Y1 * q11 - 2 * Z1 * q10) +
+                           _V1z * (-2 * X1 * q13 + 2 * Y1 * q10 + 2 * Z1 * q11));
   H_NE_view_->setValue(0, 5,
-                                  _V1x * (2 * X1 * q12 - 2 * Y1 * q11 + 2 * Z1 * q10) +
-                                      _V1y * (-2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13) +
-                                      _V1z * (-2 * X1 * q10 - 2 * Y1 * q13 + 2 * Z1 * q12));
+                       _V1x * (2 * X1 * q12 - 2 * Y1 * q11 + 2 * Z1 * q10) +
+                           _V1y * (-2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13) +
+                           _V1z * (-2 * X1 * q10 - 2 * Y1 * q13 + 2 * Z1 * q12));
   H_NE_view_->setValue(0, 6,
-                                  _V1x * (2 * X1 * q13 - 2 * Y1 * q10 - 2 * Z1 * q11) +
-                                      _V1y * (2 * X1 * q10 + 2 * Y1 * q13 - 2 * Z1 * q12) +
-                                      _V1z * (-2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13));
-  H_NE_view_->setValue(
-      1, 0,
-      _V2x * (-pow(q10, 2) - pow(q11, 2) + pow(q12, 2) + pow(q13, 2)) +
-          _V2y * (2 * q10 * q13 - 2 * q11 * q12) + _V2z * (-2 * q10 * q12 - 2 * q11 * q13));
-  H_NE_view_->setValue(
-      1, 1,
-      _V2x * (-2 * q10 * q13 - 2 * q11 * q12) +
-          _V2y * (-pow(q10, 2) + pow(q11, 2) - pow(q12, 2) + pow(q13, 2)) +
-          _V2z * (2 * q10 * q11 - 2 * q12 * q13));
-  H_NE_view_->setValue(
-      1, 2,
-      _V2x * (2 * q10 * q12 - 2 * q11 * q13) + _V2y * (-2 * q10 * q11 - 2 * q12 * q13) +
-          _V2z * (-pow(q10, 2) + pow(q11, 2) + pow(q12, 2) - pow(q13, 2)));
+                       _V1x * (2 * X1 * q13 - 2 * Y1 * q10 - 2 * Z1 * q11) +
+                           _V1y * (2 * X1 * q10 + 2 * Y1 * q13 - 2 * Z1 * q12) +
+                           _V1z * (-2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13));
+  H_NE_view_->setValue(1, 0,
+                       _V2x * (-pow(q10, 2) - pow(q11, 2) + pow(q12, 2) + pow(q13, 2)) +
+                           _V2y * (2 * q10 * q13 - 2 * q11 * q12) +
+                           _V2z * (-2 * q10 * q12 - 2 * q11 * q13));
+  H_NE_view_->setValue(1, 1,
+                       _V2x * (-2 * q10 * q13 - 2 * q11 * q12) +
+                           _V2y * (-pow(q10, 2) + pow(q11, 2) - pow(q12, 2) + pow(q13, 2)) +
+                           _V2z * (2 * q10 * q11 - 2 * q12 * q13));
+  H_NE_view_->setValue(1, 2,
+                       _V2x * (2 * q10 * q12 - 2 * q11 * q13) +
+                           _V2y * (-2 * q10 * q11 - 2 * q12 * q13) +
+                           _V2z * (-pow(q10, 2) + pow(q11, 2) + pow(q12, 2) - pow(q13, 2)));
   H_NE_view_->setValue(1, 3,
-                                  _V2x * (-2 * X1 * q10 - 2 * Y1 * q13 + 2 * Z1 * q12) +
-                                      _V2y * (2 * X1 * q13 - 2 * Y1 * q10 - 2 * Z1 * q11) +
-                                      _V2z * (-2 * X1 * q12 + 2 * Y1 * q11 - 2 * Z1 * q10));
+                       _V2x * (-2 * X1 * q10 - 2 * Y1 * q13 + 2 * Z1 * q12) +
+                           _V2y * (2 * X1 * q13 - 2 * Y1 * q10 - 2 * Z1 * q11) +
+                           _V2z * (-2 * X1 * q12 + 2 * Y1 * q11 - 2 * Z1 * q10));
   H_NE_view_->setValue(1, 4,
-                                  _V2x * (-2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13) +
-                                      _V2y * (-2 * X1 * q12 + 2 * Y1 * q11 - 2 * Z1 * q10) +
-                                      _V2z * (-2 * X1 * q13 + 2 * Y1 * q10 + 2 * Z1 * q11));
+                       _V2x * (-2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13) +
+                           _V2y * (-2 * X1 * q12 + 2 * Y1 * q11 - 2 * Z1 * q10) +
+                           _V2z * (-2 * X1 * q13 + 2 * Y1 * q10 + 2 * Z1 * q11));
   H_NE_view_->setValue(1, 5,
-                                  _V2x * (2 * X1 * q12 - 2 * Y1 * q11 + 2 * Z1 * q10) +
-                                      _V2y * (-2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13) +
-                                      _V2z * (-2 * X1 * q10 - 2 * Y1 * q13 + 2 * Z1 * q12));
+                       _V2x * (2 * X1 * q12 - 2 * Y1 * q11 + 2 * Z1 * q10) +
+                           _V2y * (-2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13) +
+                           _V2z * (-2 * X1 * q10 - 2 * Y1 * q13 + 2 * Z1 * q12));
   H_NE_view_->setValue(1, 6,
-                                  _V2x * (2 * X1 * q13 - 2 * Y1 * q10 - 2 * Z1 * q11) +
-                                      _V2y * (2 * X1 * q10 + 2 * Y1 * q13 - 2 * Z1 * q12) +
-                                      _V2z * (-2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13));
+                       _V2x * (2 * X1 * q13 - 2 * Y1 * q10 - 2 * Z1 * q11) +
+                           _V2y * (2 * X1 * q10 + 2 * Y1 * q13 - 2 * Z1 * q12) +
+                           _V2z * (-2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13));
 
   /* Orientation constraints (H3, H4, H5)
    */

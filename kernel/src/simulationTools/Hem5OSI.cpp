@@ -786,12 +786,16 @@ struct siconos::integrators::Hem5OSI::_NSLEffectOnFreeOutput
   std::shared_ptr<siconos::modeling::Interaction> _inter{nullptr};
   siconos::graphs::InteractionProperties& _interProp;
 
-  _NSLEffectOnFreeOutput() = delete;
-
   _NSLEffectOnFreeOutput(siconos::nonsmooth_formulations::OneStepNSProblem* p,
                          std::shared_ptr<siconos::modeling::Interaction> inter,
                          siconos::graphs::InteractionProperties& interProp)
       : _osnsp(p), _inter(inter), _interProp(interProp) {};
+
+  _NSLEffectOnFreeOutput() = delete;
+  _NSLEffectOnFreeOutput(const _NSLEffectOnFreeOutput&) = delete;
+  _NSLEffectOnFreeOutput(const _NSLEffectOnFreeOutput&&) = delete;
+  _NSLEffectOnFreeOutput& operator=(const _NSLEffectOnFreeOutput&) = delete;
+  _NSLEffectOnFreeOutput& operator=(const _NSLEffectOnFreeOutput&&) = delete;
 
   void visit(const siconos::modeling::NewtonImpactNSL& nslaw) const override {
     double e;
@@ -801,7 +805,7 @@ struct siconos::integrators::Hem5OSI::_NSLEffectOnFreeOutput
   }
 
   // visit function added by Son (9/11/2010)
-  void visit(const siconos::modeling::MultipleImpactNSL& nslaw) const override { ; }
+  void visit(const siconos::modeling::MultipleImpactNSL& nslaw) const override {}
   // note : no NewtonImpactFrictionNSL
 };
 
@@ -828,8 +832,8 @@ void siconos::integrators::Hem5OSI::computeFreeOutput(
 
   /* V.A. 10/10/2010
    * Following the type of OSNS  we need to retrieve the velocity or the acceleration
-   * This tricks is not very nice but for the moment the OSNS do not known if
-   * it is in accelaration of not
+   * This tricks is not very nice but for the moment the OSNS does not know if
+   * it is in accelaration or not
    */
 
   // auto  allOSNS  = _simulation->oneStepNSProblems();
@@ -872,7 +876,7 @@ void siconos::integrators::Hem5OSI::computeFreeOutput(
             inter->relation());
         rheoR->computehdot(*DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q0)],
                            simulation()->getTkp1());
-        auto hDot = osnsp_rhs += *ID * rheoR->hdot();
+        osnsp_rhs += *ID * rheoR->hdot();
       } else
         THROW_EXCEPTION(
             "siconos::integrators::Hem5OSI::computeFreeOutput not implemented for "

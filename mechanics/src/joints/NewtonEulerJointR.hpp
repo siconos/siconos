@@ -21,6 +21,7 @@
 #ifndef NewtonEulerJointRELATION_H
 #define NewtonEulerJointRELATION_H
 
+#include <optional>
 #include <vector>
 #include <optional>
 
