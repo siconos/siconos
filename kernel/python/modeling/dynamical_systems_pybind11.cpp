@@ -204,4 +204,13 @@ void wrap_dynamical_systems(py::module_ &m) {
   //     (a.display());
   //   return "\n";
   // });
+
+  py::class_<siconos::modeling::NewtonEulerDS,
+             std::shared_ptr<siconos::modeling::NewtonEulerDS>,
+             siconos::modeling::SecondOrderDS>(m, "NewtonEulerDS")
+  .def("setConstantFext", &siconos::modeling::NewtonEulerDS::setConstantFext,
+           py::keep_alive<1, 2>(), "To define a constant external forces vector")
+  .def_property("scalarMass", &siconos::modeling::NewtonEulerDS::scalarMass,
+                &siconos::modeling::NewtonEulerDS::setScalarMass);
+
 }
