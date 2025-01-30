@@ -24,10 +24,10 @@ from siconos.nonsmooth_formulations import FrictionContact, \
     GlobalFrictionContact,\
     GlobalRollingFrictionContact
 
-from siconos.numerics import \
-    FrictionContactProblem,\
-    GlobalFrictionContactProblem,\
-    GlobalRollingFrictionContactProblem
+# from siconos.numerics import \
+#     FrictionContactProblem,\
+#     GlobalFrictionContactProblem,\
+#     GlobalRollingFrictionContactProblem
 
 try:
     import siconos.fclib as F
