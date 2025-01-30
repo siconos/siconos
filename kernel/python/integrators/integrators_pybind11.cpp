@@ -3,8 +3,9 @@
 #include <pybind11/stl.h>
 #include <memory>
 
-#include "MoreauJeanOSI.hpp"
 #include "EulerMoreauOSI.hpp"
+#include "MoreauJeanGOSI.hpp"
+#include "MoreauJeanOSI.hpp"
 
 namespace py = pybind11;
 
@@ -12,7 +13,8 @@ namespace py = pybind11;
 // {
 //   // OSI base class
 //   py::class_<siconos::integrators::OneStepIntegrator,
-//              std::shared_ptr<siconos::integrators::OneStepIntegrator>>(m, "OneStepIntegrator");
+//              std::shared_ptr<siconos::integrators::OneStepIntegrator>>(m,
+//              "OneStepIntegrator");
 
 //   // MoreauJean
 //   py::class_<siconos::integrators::MoreauJeanOSI, siconos::integrators::OneStepIntegrator,
@@ -56,24 +58,34 @@ namespace py = pybind11;
 
 PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
 
-PYBIND11_MODULE(integrators, m)
-{
+PYBIND11_MODULE(integrators, m) {
   // Optional docstring
   m.doc() = "Siconos one-step integrators";
 
-  py::class_<siconos::integrators::OneStepIntegrator, std::shared_ptr<siconos::integrators::OneStepIntegrator>>(m, "OneStepIntegrator");
+  py::class_<siconos::integrators::OneStepIntegrator,
+             std::shared_ptr<siconos::integrators::OneStepIntegrator>>(m, "OneStepIntegrator");
 
-  py::class_<siconos::integrators::MoreauJeanOSI, std::shared_ptr<siconos::integrators::MoreauJeanOSI>, siconos::integrators::OneStepIntegrator>(m, "MoreauJeanOSI")
-    .def(py::init<double, double>(), py::arg("theta") = 0.5,
-          py::arg("gamma") = std::numeric_limits<double>::quiet_NaN())
-    
-    // .def("tonche_mass", &siconos::integrators::MoreauJeanOSI::tonch_mass) 
-    
-    .def("__repr__", [](const siconos::integrators::MoreauJeanOSI &a) {
-      a.display();
-      return "\n";
-    });
+  py::class_<siconos::integrators::MoreauJeanOSI,
+             std::shared_ptr<siconos::integrators::MoreauJeanOSI>,
+             siconos::integrators::OneStepIntegrator>(m, "MoreauJeanOSI")
+      .def(py::init<double, double>(), py::arg("theta") = 0.5,
+           py::arg("gamma") = std::numeric_limits<double>::quiet_NaN())
 
-  py::class_<siconos::integrators::EulerMoreauOSI, std::shared_ptr<siconos::integrators::EulerMoreauOSI>, siconos::integrators::OneStepIntegrator>(m, "EulerMoreauOSI")
-    .def(py::init<double>());
+      // .def("tonche_mass", &siconos::integrators::MoreauJeanOSI::tonch_mass)
+
+      .def("__repr__", [](const siconos::integrators::MoreauJeanOSI &a) {
+        a.display();
+        return "\n";
+      });
+
+  py::class_<siconos::integrators::MoreauJeanGOSI,
+             std::shared_ptr<siconos::integrators::MoreauJeanGOSI>,
+             siconos::integrators::MoreauJeanOSI>(m, "MoreauJeanGOSI")
+      .def(py::init<double, double>(), py::arg("theta") = 0.5,
+           py::arg("gamma") = std::numeric_limits<double>::quiet_NaN());
+
+  py::class_<siconos::integrators::EulerMoreauOSI,
+             std::shared_ptr<siconos::integrators::EulerMoreauOSI>,
+             siconos::integrators::OneStepIntegrator>(m, "EulerMoreauOSI")
+      .def(py::init<double>());
 }
