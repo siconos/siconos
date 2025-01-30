@@ -16,7 +16,7 @@ import tempfile
 from contextlib import contextmanager
 
 # Siconos Mechanics imports
-from siconos.mechanics.collision.tools import Volume
+from siconos.mechanics.tools import Volume
 
 # Constants
 joint_points_axes = {
