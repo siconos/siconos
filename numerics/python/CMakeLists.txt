@@ -20,7 +20,7 @@
 
 create_pybind11_module(
   MODULE_NAME pynumerics 
-  SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/numerics/numerics_pybind11.cpp
+  SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/numerics_pybind11.cpp
   DEPENDENCIES kernel numerics
 )
 
