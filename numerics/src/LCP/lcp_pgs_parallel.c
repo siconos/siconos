@@ -28,10 +28,10 @@ void lcp_pgs_parallel(LinearComplementarityProblem *problem, double *z, double *
    * and it will not pass the 106th test...
    * so in that case, default to non-parallel version
   */
-  if (g == 1) {
+  /* if (g == 1) {
     lcp_pgs(problem, z, w, info, options);
     return;
-  }
+  } */
 
   NumericsMatrix *M = problem->M;
   double *q = problem->q;
@@ -128,8 +128,10 @@ void lcp_pgs_parallel(LinearComplementarityProblem *problem, double *z, double *
   /* DEBUGGING */
   // double *old_z = (double *)malloc(n * sizeof(double));
 
+  // double time = omp_get_wtime();
+
   /* Start solving */
-#pragma omp parallel default(none) shared(g, itermax, counter, err, flag, block_sizes, start_indexes, M, diag, tol, q, norm_q, w, z)
+#pragma omp parallel default(none) shared(n, g, itermax, counter, err, flag, block_sizes, start_indexes, M, diag, tol, q, norm_q, w, z)
   {
     /* Thread number */
     int rank = omp_get_thread_num();
@@ -206,13 +208,17 @@ void lcp_pgs_parallel(LinearComplementarityProblem *problem, double *z, double *
         err = 0.;
       }
 
-      /* Diagonal block */
-      NM_block_prod_no_diag(start_i, size_i, M, z, t_right, &zsave, 0);
+      // NM_block_prod_no_diag(start_i, size_i, M, z, t_right, &zsave, 0);
 
       if (flag == 0) {
         /* Last update of w and error, without 
         updating z so that w = Mz + q when we exit the while loop */
+
+        /* Diagonal block */
+        // NM_block_prod_no_diag(start_i, size_i, M, z, t_right, &zsave, 0);
+
         for (int i = start_i; i < start_i + size_i; i++) {
+          NM_block_prod_no_diag_one_row(i - start_i, start_i, size_i, M, z, t_left, t_right, &zsave, 0);
           w[i] += t_right[i - start_i];
           err += pow(z[i] - fmax(0, (z[i] - w[i])), 2);
           // printf("END [%d] %e\n", rank, w[i] - cblas_ddot(n, &(M->matrix0[i]), n, z, 1) - q[i]);
@@ -221,6 +227,10 @@ void lcp_pgs_parallel(LinearComplementarityProblem *problem, double *z, double *
       else {
         /* Update z, w, and error */
         for (int i = start_i; i < start_i + size_i; i++) {
+
+          /* Diagonal block */
+          NM_block_prod_no_diag_one_row(i - start_i, start_i, size_i, M, z, t_left, t_right, &zsave, 0);
+          // NM_row_prod_no_diag1x1(size_i, i - start_i, i - start_i, M, z, &t_right[i - start_i], 0);
 
           /* Finish computing w_{iter} */
           w[i] += t_right[i - start_i];
@@ -264,6 +274,8 @@ void lcp_pgs_parallel(LinearComplementarityProblem *problem, double *z, double *
   }
 
 /* End of parallel section */
+  // time = omp_get_wtime() - time;
+  // printf("lcp_pgs_parallel: time in while loop = %e s\n", time);
 
   options->iparam[SICONOS_IPARAM_ITER_DONE] = counter / g;
   options->dparam[SICONOS_DPARAM_RESIDU] = err;

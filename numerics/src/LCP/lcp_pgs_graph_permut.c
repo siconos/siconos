@@ -34,13 +34,12 @@ void lcp_pgs_graph_permut(LinearComplementarityProblem *problem, double *z, doub
   /* Solver parameters */
   int itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
   double tol = options->dparam[SICONOS_DPARAM_TOL];
-  /* Initialize output */
 
   options->iparam[SICONOS_IPARAM_ITER_DONE] = 0;
   options->dparam[SICONOS_DPARAM_RESIDU] = 0.0;
 
-  /* Preparation of the diagonal of the inverse matrix */
-  double *diag = (double *)malloc(n * sizeof(double));
+  /* Precompute all 1 / M_{i,i} */
+  double *diag = (double *)malloc((size_t)n * sizeof(double));
   NM_get_invdiag(n, info, M, diag);
 
   /* Check if diagonal has a zero */
@@ -51,12 +50,12 @@ void lcp_pgs_graph_permut(LinearComplementarityProblem *problem, double *z, doub
   /* Graph coloring + permutation */
   long int n_colors = 0;
   size_t *sum_sizes = NULL;
-  size_t *inv_permutation = (size_t *)malloc(n * sizeof(size_t));
+  size_t *inv_permutation = (size_t *)malloc((size_t)n * sizeof(size_t));
   
   color_graph_permut(n, M, &n_colors, &sum_sizes, inv_permutation);
 
-  size_t *permutation = (size_t *)malloc(n * sizeof(size_t));
-  for (int i = 0; i < n; i++) {
+  size_t *permutation = (size_t *)malloc((size_t)n * sizeof(size_t));
+  for (size_t i = 0; i < (size_t)n; i++) {
     permutation[inv_permutation[i]] = i;
   }
 
@@ -70,11 +69,11 @@ void lcp_pgs_graph_permut(LinearComplementarityProblem *problem, double *z, doub
 
   double zi;
   double right = 0.;
-  int i, row;
-
-  double *lefts = (double *)malloc(n * sizeof(double));
-
+  size_t i, row;
+  double *lefts = (double *)malloc((size_t)n * sizeof(double));
   int is_last = 0;
+
+  // double time = omp_get_wtime();
 
   /* Start solving */
   while ((iter < itermax) && (is_last == 0)) {
@@ -88,7 +87,7 @@ void lcp_pgs_graph_permut(LinearComplementarityProblem *problem, double *z, doub
     for (int color = 0; color < n_colors; color++) {
 
       #pragma omp parallel for reduction(+:err) default(none) private(zi, right, i, row) shared(q, z, inv_permutation, permutation, diag, M, n, sum_sizes, color, w, lefts, is_last)
-      for (int i = sum_sizes[color]; i < sum_sizes[color + 1]; i++) {
+      for (size_t i = sum_sizes[color]; i < sum_sizes[color + 1]; i++) {
         row = inv_permutation[i];
         right = q[row];
         DEBUG_PRINTF("zi = %e\n", zi);
@@ -97,7 +96,7 @@ void lcp_pgs_graph_permut(LinearComplementarityProblem *problem, double *z, doub
 
         lefts[row] = 0.;
 
-        NM_row_prod_graph(n, row, row, sum_sizes[color], sum_sizes[color + 1], M, permutation, z, &lefts[row], &right, false);
+        NM_row_prod_graph((size_t)n, (int)row, row, sum_sizes[color], sum_sizes[color + 1], M, permutation, z, &lefts[row], &right, false);
 
         w[row] += right + z[row] / diag[row];
 
@@ -123,14 +122,17 @@ void lcp_pgs_graph_permut(LinearComplementarityProblem *problem, double *z, doub
 
     if (verbose == 2) {
       printf(" # i%d -- %g : ", iter, err);
-      for (i = 0; i < n; ++i) printf(" %g", z[i]);
-      for (i = 0; i < n; ++i) printf(" %g", w[i]);
+      for (i = 0; i < (size_t)n; ++i) printf(" %g", z[i]);
+      for (i = 0; i < (size_t)n; ++i) printf(" %g", w[i]);
       printf("\n");
     }
 
     iter += 1;
 
   }
+
+  // time = omp_get_wtime() - time;
+  // printf("lcp_pgs_graph_permut: time in while loop = %e s\n", time);
 
   options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
   options->dparam[SICONOS_DPARAM_RESIDU] = err;

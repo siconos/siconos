@@ -1155,6 +1155,8 @@ void NM_block_prod(int start_i, int start_j, int size_i, int size_j, NumericsMat
 */
 void NM_block_prod_no_diag(int start_i, int size_i, NumericsMatrix* A, double *x, double *y, double* xsave, int init);
 
+void NM_block_prod_no_diag_one_row(int local_line, int start_i, int size_i, NumericsMatrix* A, double *x, double *left, double *right, double* xsave, int init);
+
 /**
    Get the inverse of each diagonal element of a matrix.
 
@@ -1166,10 +1168,14 @@ void NM_block_prod_no_diag(int start_i, int size_i, NumericsMatrix* A, double *x
 void NM_get_invdiag(int n, int *info, NumericsMatrix *M, double *diag);
 
 /**
-   Computes row of A times x in two parts: before the diagonal (left) and after (right)
+   Computes row of A times x in two parts:
+   - indices part of colors already computed go to 'left'
+   - other indices go to 'right'
    \param[in] sizeX dim of the vector x
    \param[in] block_start block number (only used for SBM)
-   \param[in] row_start position of the first row of A (unused if A is SBM)
+   \param[in] row_start index of row of A to be multiplied
+   \param[in] size_left number of indices already computed
+   \param[in] col_start_right smallest index of non-computed indices
    \param[in] A the matrix to be multiplied
    \param[in] x the vector to be multiplied
    \param[in,out] left left part of the sum (before the diagonal)
