@@ -34,7 +34,7 @@ void siconos::mechanics::fem::NodeFem2d3DR::initialize(siconos::modeling::Intera
   auto sizeDS = inter.getSizeOfDS();
 
   if (!jacobianhOver_q_internal_storage_) {
-    jacobianhOver_q_internal_storage_ = std::make_unique<std::vector<double>>(1 * sizeDS);
+    jacobianhOver_q_internal_storage_ = std::make_unique<std::vector<double>>(2 * sizeDS);
   }
   
   if((sizeDS!=3) and (sizeDS !=6))
