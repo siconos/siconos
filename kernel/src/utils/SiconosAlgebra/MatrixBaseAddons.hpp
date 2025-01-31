@@ -24,6 +24,7 @@
 
 */
 
+#include <cassert>
 // Setters
 
 inline void setValue(Index i, Scalar v) {

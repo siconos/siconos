@@ -21,6 +21,7 @@
 #include "BoundaryCondition.hpp"
 #include "SiconosVector.hpp"
 
+#include <cassert>
 // #define DEBUG_MESSAGES
 // #define DEBUG_STDOUT
 #include "siconos_debug.h"
