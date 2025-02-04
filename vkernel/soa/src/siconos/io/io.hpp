@@ -6,7 +6,7 @@
 #include "siconos/model/lagrangian_r.hpp"
 #include "siconos/collision/collision.hpp"
 #include "siconos/collision/diskfdisk_r.hpp"
-#include "siconos/collision/disksegment_r.hpp"
+#include "siconos/collision/diskfsegment_r.hpp"
 #include "siconos/storage/pattern/base.hpp"
 #include "siconos/storage/pattern/pattern.hpp"
 #include "siconos/storage/some/some.hpp"
@@ -162,7 +162,7 @@ struct io : item<> {
                 data, relation,
                 ground::overload(
                     /* disk / segment */
-                    [&](storage::index<collision::disksegment_r, indice>
+                    [&](storage::index<collision::diskfsegment_r, indice>
                             rrel) {
                       auto hrel = storage::handle(data, rrel);
                       /* cb is the proj point on the segment, computed a

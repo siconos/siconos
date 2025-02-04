@@ -5,7 +5,7 @@
 #include "siconos/collision/collision_head.hpp"
 #include "siconos/collision/diskdisk_r.hpp"
 #include "siconos/collision/diskfdisk_r.hpp"
-#include "siconos/collision/disksegment_r.hpp"
+#include "siconos/collision/diskfsegment_r.hpp"
 #include "siconos/collision/point.hpp"
 #include "siconos/collision/shape/disk.hpp"
 #include "siconos/collision/shape/segment.hpp"
@@ -148,7 +148,7 @@ struct space_filter : item<> {
   using items = gather<Topology, Neighborhood>;
   using topology = Topology;
   using dynamical_system = typename topology::fixed_dof_system;
-  using interaction = typename topology::interaction;
+  using interaction = typename topology::finteraction;
   using nslaw = typename interaction::nslaw;
 
   using neighborhood = Neighborhood;
@@ -158,9 +158,9 @@ struct space_filter : item<> {
       attribute<"neighborhood", some::item_ref<neighborhood>>,
       attribute<"nslaw", some::item_ref<nslaw>>,
       attribute<"diskdisk_r", some::item_ref<diskdisk_r>>,
-      attribute<"disksegments",
+      attribute<"diskfsegments",
                 some::map<some::array<some::scalar, some::indice_value<4>>,
-                          some::item_ref<disksegment_r>>>,
+                          some::item_ref<diskfsegment_r>>>,
       attribute<"diskfdisks",
                 some::map<some::array<some::scalar, some::indice_value<2>>,
                           some::item_ref<diskfdisk_r>>>>;
@@ -187,9 +187,9 @@ struct space_filter : item<> {
       return storage::attr<"diskdisk_r">(*self());
     }
 
-    decltype(auto) disksegments()
+    decltype(auto) diskfsegments()
     {
-      return storage::attr<"disksegments">(*self());
+      return storage::attr<"diskfsegments">(*self());
     }
 
     decltype(auto) diskfdisks()
@@ -252,10 +252,10 @@ struct space_filter : item<> {
           ps_indx, points_coords.front().data(), points_coords.size());
     }
 
-    void insert_disksegment_r(auto dl)
+    void insert_diskfsegment_r(auto dl)
     {
       auto hdl = storage::handle(self()->data(), dl);
-      storage::attr<"disksegments">(
+      storage::attr<"diskfsegments">(
           *self())[{hdl.segment().x1(), hdl.segment().x2(),
                     hdl.segment().y1(), hdl.segment().y2()}] = dl;
 
@@ -347,7 +347,7 @@ struct space_filter : item<> {
       auto topo = storage::handle(data, self()->topology());
       auto nslaw = self()->nslaw();
       auto diskdisk_r = self()->diskdisk_r();
-      auto disksegments = self()->disksegments();
+      auto diskfsegments = self()->diskfsegments();
       auto diskfdisks = self()->diskfdisks();
 
       auto ngbh = storage::handle(data, self()->neighborhood());
@@ -381,7 +381,7 @@ struct space_filter : item<> {
                   // https://stackoverflow.com/questions/46114214/lambda-implicit-capture-fails-with-variable-declared-from-structured-binding
                   // capture by value ok with handles
                   [&, ds1 = ds1,
-                   inter = inter]<match::handle<disksegment_r> DiskSegmentR>(
+                   inter = inter]<match::handle<diskfsegment_r> DiskSegmentR>(
                       DiskSegmentR rel) {
                     auto segment = rel.segment();
                     auto coefs = std::array{segment.x1(), segment.x2(),
@@ -547,13 +547,13 @@ struct space_filter : item<> {
                                       nslaw;  // one nslaw for the moment
 
                                   if (auto search =
-                                          disksegments.find({x1, x2, y1, y2});
-                                      search != disksegments.end()) {
+                                          diskfsegments.find({x1, x2, y1, y2});
+                                      search != diskfsegments.end()) {
                                     inter.relation() = search->second;
                                   }
                                   else {
                                     auto dl =
-                                        storage::add<disksegment_r>(data);
+                                        storage::add<diskfsegment_r>(data);
                                     auto segment =
                                         storage::handle(data, dl.segment());
                                     segment.x1() = x1;
@@ -562,7 +562,7 @@ struct space_filter : item<> {
                                     segment.y2() = y2;
 
                                     inter.relation() = dl;
-                                    disksegments[{x1, x2, y1, y2}] = dl;
+                                    diskfsegments[{x1, x2, y1, y2}] = dl;
                                   }
                                   storage::prop<"activation">(inter) = true;
                                   ds_segment_prox[ground::make_pair(
@@ -645,7 +645,7 @@ struct space_filter : item<> {
                 data, inter.relation(),
                 ground::overload(
                     [&, inter =
-                            inter]<match::handle<disksegment_r> DiskSegmentR>(
+                            inter]<match::handle<diskfsegment_r> DiskSegmentR>(
                         DiskSegmentR rel) {
                       auto segment = rel.segment();
                       auto coefs = std::array{segment.x1(), segment.x2(),
@@ -724,8 +724,8 @@ struct space_filter : item<> {
       using env_t = decltype(self()->env());
       using indice = typename env_t::indice;
       // using scalar = typename env_t::scalar;
-      using disksegment_r_t =
-          storage::index<collision::disksegment_r, indice>;
+      using diskfsegment_r_t =
+          storage::index<collision::diskfsegment_r, indice>;
       using diskfdisk_r_t = storage::index<collision::diskfdisk_r, indice>;
       using segment_handle_t = std::decay_t<decltype(storage::handle(
           data, storage::index<collision::shape::segment, indice>{}))>;
@@ -734,8 +734,8 @@ struct space_filter : item<> {
           method("make_points", &interface<Handle>::make_points),
           method("update_index_set0",
                  &interface<Handle>::update_index_set0<indice>),
-          method("insert_disksegment_r",
-                 &interface<Handle>::insert_disksegment_r<disksegment_r_t>),
+          method("insert_diskfsegment_r",
+                 &interface<Handle>::insert_diskfsegment_r<diskfsegment_r_t>),
           method("insert_diskfdisk_r",
                  &interface<Handle>::insert_diskfdisk_r<diskfdisk_r_t>),
           method("remove_static_segment",

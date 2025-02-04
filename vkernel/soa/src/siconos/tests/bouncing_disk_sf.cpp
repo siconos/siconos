@@ -14,8 +14,8 @@ using osnspb = simul::one_step_nonsmooth_problem<fc2d>;
 using nslaw = model::newton_impact_friction;
 using disk_shape = collision::shape::disk;
 using diskdisk_r = collision::diskdisk_r;
-using disksegment_r = collision::disksegment_r;
-using interaction = simul::interaction<nslaw, diskdisk_r, disksegment_r>;
+using diskfsegment_r = collision::diskfsegment_r;
+using interaction = simul::interaction<nslaw, diskdisk_r, diskfsegment_r>;
 using topo = simul::topology<disk, interaction>;
 using osi = simul::one_step_integrator<topo>::moreau_jean;
 using td = simul::time_discretization<>;
@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
       standard_environment<config::params>, config::simulation,
       wrap<some::unbounded_collection, config::disk>, config::disk_shape,
       config::diskdisk_r,
-      wrap<some::unbounded_collection, config::disksegment_r>,
+      wrap<some::unbounded_collection, config::diskfsegment_r>,
       wrap<some::unbounded_collection, config::pointl>,
       wrap<some::unbounded_collection, config::pointd>,
       wrap<some::unbounded_collection, config::interaction>,
@@ -125,7 +125,7 @@ int main(int argc, char* argv[])
   ngbh.create(10);  // compactnsearch radius
 
   auto diskdisk_r = storage::add<config::diskdisk_r>(data);
-  auto ground_r = storage::add<config::disksegment_r>(data);
+  auto ground_r = storage::add<config::diskfsegment_r>(data);
   auto segment = storage::handle(data, ground_r.segment());
   segment.x1() = -10.;
   segment.y1() = 0.;
@@ -138,7 +138,7 @@ int main(int argc, char* argv[])
   spacef.neighborhood() = ngbh;
   spacef.diskdisk_r() = diskdisk_r;
   spacef.nslaw() = nslaw;
-  spacef.insert_disksegment_r(ground_r);
+  spacef.insert_diskfsegment_r(ground_r);
   spacef.make_points();
   ngbh.add_point_sets(0);
   // =========================== End of model definition

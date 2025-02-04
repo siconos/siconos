@@ -14,8 +14,8 @@ using osnspb = simul::one_step_nonsmooth_problem<fc2d>;
 using nslaw = model::newton_impact_friction;
 using disk_shape = collision::shape::disk;
 using diskdisk_r = collision::diskdisk_r;
-using disksegment_r = collision::disksegment_r;
-using interaction = simul::interaction<nslaw, diskdisk_r, disksegment_r>;
+using diskfsegment_r = collision::diskfsegment_r;
+using interaction = simul::interaction<nslaw, diskdisk_r, diskfsegment_r>;
 using topo = simul::topology<disk, interaction>;
 using osi = simul::one_step_integrator<topo>::moreau_jean;
 using td = simul::time_discretization<>;
@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
   so.create(SICONOS_FRICTION_2D_NSGS);
   osnspb.options() = so;
 
-  auto ground_r = storage::add<config::disksegment_r>(data);
+  auto ground_r = storage::add<config::diskfsegment_r>(data);
   auto segment = storage::handle(data, ground_r.segment());
   segment.x1() = -1.;
   segment.y1() = 0;

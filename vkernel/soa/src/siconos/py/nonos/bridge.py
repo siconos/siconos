@@ -48,10 +48,10 @@ class SpaceFilter(Stored):
         segment.set_ident(- self._static_shape_counter)
         self._static_shape_counter = self._static_shape_counter + 1
 
-        disksegment = vkernel.disks.add_disksegment_r(self.data())
-        disksegment.set_segment(segment)
+        diskfsegment = vkernel.disks.add_diskfsegment_r(self.data())
+        diskfsegment.set_segment(segment)
 
-        self.handle().insert_disksegment_r(disksegment)
+        self.handle().insert_diskfsegment_r(diskfsegment)
 
         return segment
 

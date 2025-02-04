@@ -11,7 +11,7 @@ using disk = model::lagrangian_ds;
 using nslaw = model::newton_impact_friction;
 using diskdisk_r = collision::diskdisk_r;
 using diskfdisk_r = collision::diskfdisk_r;
-using disksegment_r = collision::disksegment_r;
+using diskfsegment_r = collision::diskfsegment_r;
 using segment_shape = collision::shape::segment;
 using disk_shape = collision::shape::disk;
 using translated_disk_shape = collision::translated<disk_shape>;
@@ -20,7 +20,7 @@ using fc2d = simul::nonsmooth_problem<FrictionContactProblem>;
 using osnspb = simul::one_step_nonsmooth_problem<fc2d>;
 using solver_options = simul::solver_options;
 using interaction =
-    simul::interaction<nslaw, diskdisk_r, disksegment_r, diskfdisk_r>;
+    simul::interaction<nslaw, diskdisk_r, diskfsegment_r, diskfdisk_r>;
 using topo = simul::topology<disk, interaction>;
 using osi = simul::one_step_integrator<topo>::moreau_jean;
 using td = simul::time_discretization<>;
@@ -46,13 +46,13 @@ int main(int argc, char* argv[])
       standard_environment<config::params>, config::simulation,
       config::interaction_manager, config::neighborhood, config::space_filter,
       config::io, config::disk, config::diskdisk_r, config::diskfdisk_r,
-      config::disksegment_r, config::pointl, config::pointd, config::pointtds,
+      config::diskfsegment_r, config::pointl, config::pointd, config::pointtds,
       config::interaction, config::segment_shape, config::disk_shape,
       storage::with_properties<
           storage::wrapped<config::disk, some::unbounded_collection>,
           storage::wrapped<config::diskdisk_r, some::unbounded_collection>,
           storage::wrapped<config::diskfdisk_r, some::unbounded_collection>,
-          storage::wrapped<config::disksegment_r, some::unbounded_collection>,
+          storage::wrapped<config::diskfsegment_r, some::unbounded_collection>,
           storage::wrapped<config::pointl, some::unbounded_collection>,
           storage::wrapped<config::pointd, some::unbounded_collection>,
           storage::wrapped<config::pointtds, some::unbounded_collection>,

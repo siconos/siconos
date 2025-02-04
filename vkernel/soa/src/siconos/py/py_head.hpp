@@ -9,7 +9,7 @@
 
 #include "siconos/collision/diskdisk_r.hpp"
 #include "siconos/collision/diskfdisk_r.hpp"
-#include "siconos/collision/disksegment_r.hpp"
+#include "siconos/collision/diskfsegment_r.hpp"
 #include "siconos/collision/point.hpp"
 #include "siconos/collision/shape/disk.hpp"
 #include "siconos/collision/shape/segment.hpp"
@@ -26,7 +26,7 @@ using disk = model::lagrangian_ds;
 using nslaw = model::newton_impact_friction;
 using diskdisk_r = collision::diskdisk_r;
 using diskfdisk_r = collision::diskfdisk_r;
-using disksegment_r = collision::disksegment_r;
+using diskfsegment_r = collision::diskfsegment_r;
 using segment_shape = collision::shape::segment;
 using disk_shape = collision::shape::disk;
 using translated_disk_shape = collision::translated<disk_shape>;
@@ -35,7 +35,7 @@ using fc2d = simul::nonsmooth_problem<FrictionContactProblem>;
 using osnspb = simul::one_step_nonsmooth_problem<fc2d>;
 using solver_options = simul::solver_options;
 using interaction =
-    simul::interaction<nslaw, diskdisk_r, diskfdisk_r, disksegment_r>;
+    simul::interaction<nslaw, diskdisk_r, diskfdisk_r, diskfsegment_r>;
 using osi = simul::one_step_integrator<disk, interaction>::moreau_jean;
 using td = simul::time_discretization<>;
 using topo = simul::topology<disk, interaction>;
@@ -69,7 +69,7 @@ struct maker
               storage::wrapped<config::disk, some::unbounded_collection>,
               storage::wrapped<config::diskdisk_r,
                                some::unbounded_collection>,
-              storage::wrapped<config::disksegment_r,
+              storage::wrapped<config::diskfsegment_r,
                                some::unbounded_collection>,
               storage::wrapped<config::diskfdisk_r,
                                some::unbounded_collection>,
@@ -97,7 +97,7 @@ struct maker
               storage::bind<config::nslaw, "nslaw">,
               storage::bind<config::diskdisk_r, "diskdisk_r">,
               storage::bind<config::diskfdisk_r, "diskfdisk_r">,
-              storage::bind<config::disksegment_r, "disksegment_r">,
+              storage::bind<config::diskfsegment_r, "diskfsegment_r">,
               storage::bind<config::neighborhood, "neighborhood">,
               storage::bind<config::space_filter, "space_filter">,
               storage::bind<config::segment_shape, "segment_shape">,

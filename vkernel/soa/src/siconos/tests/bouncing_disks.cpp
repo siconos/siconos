@@ -11,7 +11,7 @@ using disk = model::lagrangian_ds;
 using nslaw = model::newton_impact_friction;
 using diskdisk_r = collision::diskdisk_r;
 using diskfdisk_r = collision::diskfdisk_r;
-using disksegment_r = collision::disksegment_r;
+using diskfsegment_r = collision::diskfsegment_r;
 using segment_shape = collision::shape::segment;
 using disk_shape = collision::shape::disk;
 using translated_disk_shape = collision::translated<disk_shape>;
@@ -20,7 +20,7 @@ using fc2d = simul::nonsmooth_problem<FrictionContactProblem>;
 using osnspb = simul::one_step_nonsmooth_problem<fc2d>;
 using solver_options = simul::solver_options;
 using interaction =
-    simul::interaction<nslaw, diskdisk_r, disksegment_r, diskfdisk_r>;
+    simul::interaction<nslaw, diskdisk_r, diskfsegment_r, diskfdisk_r>;
 using topo = simul::topology<disk, interaction>;
 using osi = simul::one_step_integrator<topo>::moreau_jean;
 using td = simul::time_discretization<>;
@@ -49,7 +49,7 @@ int main(int argc, char* argv[])
       storage::with_properties<
           storage::wrapped<config::disk, some::unbounded_collection>,
           storage::wrapped<config::diskdisk_r, some::unbounded_collection>,
-          storage::wrapped<config::disksegment_r, some::unbounded_collection>,
+          storage::wrapped<config::diskfsegment_r, some::unbounded_collection>,
           storage::wrapped<config::pointl, some::unbounded_collection>,
           storage::wrapped<config::pointd, some::unbounded_collection>,
           //          storage::wrapped<config::pointtds,
@@ -154,7 +154,7 @@ int main(int argc, char* argv[])
 
   auto segment = storage::add<config::segment_shape>(data);
   auto diskdisk_r = storage::add<config::diskdisk_r>(data);
-  auto ground_r = storage::add<config::disksegment_r>(data);
+  auto ground_r = storage::add<config::diskfsegment_r>(data);
   storage::handle(data, ground_r.segment()) = segment;
   segment.x1() = -10.;
   segment.y1() = 0.;
@@ -167,7 +167,7 @@ int main(int argc, char* argv[])
   spacef.neighborhood() = ngbh;
   spacef.diskdisk_r() = diskdisk_r;
   spacef.nslaw() = nslaw;
-  spacef.insert_disksegment_r(ground_r);
+  spacef.insert_diskfsegment_r(ground_r);
   spacef.make_points();
   ngbh.add_point_sets(0);
   // =========================== End of model definition

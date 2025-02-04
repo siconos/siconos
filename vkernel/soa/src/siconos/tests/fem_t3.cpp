@@ -13,10 +13,12 @@ using osnspb = simul::one_step_nonsmooth_problem<lcp>;
 using nslaw = model::newton_impact;
 using relation = model::lagrangian_r<nslaw::size>;
 using interaction = simul::interaction<nslaw, relation>;
-using osi = simul::one_step_integrator<ball, interaction>::moreau_jean;
+using fem_interaction = simul::rt_interaction<nslaw, relation>;
+using topo =
+    simul::topology<ball, interaction, fem, fem_interaction>;
+using osi = simul::one_step_integrator<topo>::moreau_jean;
 using td = simul::time_discretization<>;
-  using topo = simul::topology<ball, interaction, fem>;
-using simulation = simul::time_stepping<td, osi, osnspb, topo>;
+using simulation = simul::time_stepping<td, osi, osnspb>;
 
 using params = map<iparam<"dof", 3>>;
 
@@ -81,4 +83,15 @@ int main(int args, char* argv[])
   double T = 1e-02;    // final computation time
   double h = 1e-05;    // time step
   double theta = 1.0;  // theta for MoreauJeanOSI integrator
+
+  /*------------------------------------------------- Contact Conditions  */
+  double e = 0.0;
+
+  auto nslaw = storage::add<config::nslaw>(data);
+  nslaw.e() = e;
+
+  auto initial_gap = std::make_shared<Vector>(1, Ly * 5e-4);
+
+  auto inter = storage::add<config::fem_interaction>(data);
+
 }
