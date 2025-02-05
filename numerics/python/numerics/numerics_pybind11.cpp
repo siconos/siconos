@@ -21,6 +21,7 @@
 #include "Friction_cst.h"
 #include "SolverOptions.h"
 #include "relay_cst.h"
+#include "lcp_cst.h"
 #include "NM_types.h"
 #include "GenericMechanical_cst.h"
 #include <pybind11/pybind11.h>
@@ -70,12 +71,12 @@ PYBIND11_MODULE(pynumerics, m) {
             solver_options_print(const_cast<SolverOptions*>(&options));
             return oss.str();
         });
-        
-        
+
+
     m.def("solver_options_create", &solver_options_create, py::return_value_policy::take_ownership, py::arg("solverId"));
 
     py::module_ constants = m.def_submodule("constants", "Constants for numerics module");
-    
+
     py::enum_<NumericsMatrix_types>(constants, "NumericsMatrix_types", "Types of storage for NumericsMatrix")
     .value("NM_DENSE", NM_DENSE, "Dense format")
     .value("NM_SPARSE_BLOCK", NM_SPARSE_BLOCK, "Sparse block format")
@@ -172,7 +173,14 @@ PYBIND11_MODULE(pynumerics, m) {
     constants.attr("SICONOS_RELAY_LEMKE") = static_cast<int>(RELAY_SOLVER::SICONOS_RELAY_LEMKE);
     constants.attr("SICONOS_RELAY_AVI_CAOFERRIS") = static_cast<int>(RELAY_SOLVER::SICONOS_RELAY_AVI_CAOFERRIS);
     constants.attr("SICONOS_RELAY_AVI_CAOFERRIS_TEST") = static_cast<int>(RELAY_SOLVER::SICONOS_RELAY_AVI_CAOFERRIS_TEST);
-
+    
+    // LCP_SOLVER enum
+    constants.attr("SICONOS_LCP_PGS") = static_cast<int>(LCP_SOLVER::SICONOS_LCP_PGS);
+    constants.attr("SICONOS_LCP_ENUM") = static_cast<int>(LCP_SOLVER::SICONOS_LCP_ENUM);
+    constants.attr("SICONOS_LCP_PATH") = static_cast<int>(LCP_SOLVER::SICONOS_LCP_PATH);
+    constants.attr("SICONOS_LCP_LEMKE") = static_cast<int>(LCP_SOLVER::SICONOS_LCP_LEMKE);
+    constants.attr("SICONOS_LCP_AVI_CAOFERRIS") = static_cast<int>(LCP_SOLVER::SICONOS_LCP_AVI_CAOFERRIS);
+      
     // GENERIC_MECHANICAL_SOLVER enum
     constants.attr("SICONOS_GENERIC_MECHANICAL_NSGS") = static_cast<int>(GENERIC_MECHANICAL_SOLVER::SICONOS_GENERIC_MECHANICAL_NSGS);
 }

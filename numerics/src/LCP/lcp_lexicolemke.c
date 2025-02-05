@@ -43,9 +43,7 @@
 
 void lcp_lexicolemke(LinearComplementarityProblem *problem, double *zlem, double *wlem,
                      int *info, SolverOptions *options) {
-  /* matrix M of the lcp */
-  double *M = problem->M->matrix0;
-  assert(M);
+
   /* size of the LCP */
   int dim = problem->size;
   assert(dim > 0);
@@ -80,6 +78,24 @@ void lcp_lexicolemke(LinearComplementarityProblem *problem, double *zlem, double
                             "vector q => z = 0 and w = q). \n");
     return;
   }
+  /* matrix M of the lcp */
+  double *M = NULL;
+  NumericsMatrix* M_dense= NULL;
+
+
+  if (problem->M->storageType == NM_DENSE)
+    {
+    assert(problem->M->matrix0);
+    M = problem->M->matrix0;
+    }
+  else if (problem->M->storageType == NM_SPARSE)
+    {
+      M_dense = NM_create(NM_DENSE, problem->M->size0, problem->M->size1);
+      NM_to_dense(problem->M, M_dense);
+      M = M_dense->matrix0;
+    }
+  else
+    numerics_error("lcp_lexicolemke", "not implemented for this storage type");
 
   double z0, zb, delta_lexico;
   double pivot, tovip, ratio;
@@ -480,6 +496,9 @@ void lcp_lexicolemke(LinearComplementarityProblem *problem, double *zlem, double
   for (i = 0; i < dim; ++i) free(A[i]);
   free(A);
   free(candidate_pivots_indx);
+  if (M_dense) {
+    M_dense= NM_free(M_dense);
+  }
 }
 
 void lcp_lexicolemke_set_default(SolverOptions *options) {
