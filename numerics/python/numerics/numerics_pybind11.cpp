@@ -74,103 +74,6 @@ PYBIND11_MODULE(pynumerics, m) {
         
     m.def("solver_options_create", &solver_options_create, py::return_value_policy::take_ownership, py::arg("solverId"));
 
-    // Créer une classe "Constants" dans Python pour regrouper les enums
-    py::class_<py::object>(m, "Constants")
-        // SICONOS_IPARAM enum
-        .def_property_readonly_static("SICONOS_IPARAM_MAX_ITER", [](py::object) { return static_cast<int>(SICONOS_IPARAM::SICONOS_IPARAM_MAX_ITER); })
-        .def_property_readonly_static("SICONOS_IPARAM_ITER_DONE", [](py::object) { return static_cast<int>(SICONOS_IPARAM::SICONOS_IPARAM_ITER_DONE); })
-        .def_property_readonly_static("SICONOS_IPARAM_PREALLOC", [](py::object) { return static_cast<int>(SICONOS_IPARAM::SICONOS_IPARAM_PREALLOC); })
-        .def_property_readonly_static("SICONOS_IPARAM_NSGS_SHUFFLE", [](py::object) { return static_cast<int>(SICONOS_IPARAM::SICONOS_IPARAM_NSGS_SHUFFLE); })
-        .def_property_readonly_static("SICONOS_IPARAM_ERROR_EVALUATION", [](py::object) { return static_cast<int>(SICONOS_IPARAM::SICONOS_IPARAM_ERROR_EVALUATION); })
-        .def_property_readonly_static("SICONOS_IPARAM_PATHSEARCH_STACKSIZE", [](py::object) { return static_cast<int>(SICONOS_IPARAM::SICONOS_IPARAM_PATHSEARCH_STACKSIZE); })
-        
-        
-        // SICONOS_DPARAM enum
-        .def_property_readonly_static("SICONOS_DPARAM_TOL", [](py::object) { return static_cast<int>(SICONOS_DPARAM::SICONOS_DPARAM_TOL); })
-        .def_property_readonly_static("SICONOS_DPARAM_RESIDU", [](py::object) { return static_cast<int>(SICONOS_DPARAM::SICONOS_DPARAM_RESIDU); })
-        
-        // FRICTION_SOLVER enum
-        .def_property_readonly_static("SICONOS_FRICTION_2D_NSGS", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_2D_NSGS); })
-        .def_property_readonly_static("SICONOS_FRICTION_2D_CPG", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_2D_CPG); })
-        .def_property_readonly_static("SICONOS_FRICTION_2D_LEMKE", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_2D_LEMKE); })
-        .def_property_readonly_static("SICONOS_FRICTION_2D_ENUM", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_2D_ENUM); })
-        .def_property_readonly_static("SICONOS_FRICTION_3D_NSGS", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_NSGS); })
-        .def_property_readonly_static("SICONOS_FRICTION_3D_NSGSV", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_NSGSV); })
-        .def_property_readonly_static("SICONOS_FRICTION_3D_PROX", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_PROX); })
-        .def_property_readonly_static("SICONOS_FRICTION_3D_TFP", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_TFP); })
-        .def_property_readonly_static("SICONOS_FRICTION_3D_NSN_AC", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_NSN_AC); })
-        .def_property_readonly_static("SICONOS_FRICTION_3D_DSFP", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_DSFP); })
-        .def_property_readonly_static("SICONOS_FRICTION_3D_VI_FPP", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_VI_FPP); })
-        .def_property_readonly_static("SICONOS_FRICTION_3D_VI_EG", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_VI_EG); })
-        .def_property_readonly_static("SICONOS_FRICTION_3D_HP", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_HP); })
-        .def_property_readonly_static("SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint); })
-        .def_property_readonly_static("SICONOS_FRICTION_3D_FPP", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_FPP); })
-        .def_property_readonly_static("SICONOS_FRICTION_3D_EG", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_EG); })
-        .def_property_readonly_static("SICONOS_FRICTION_3D_NSN_FB", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_NSN_FB); })
-        .def_property_readonly_static("SICONOS_FRICTION_3D_GAMS_PATH", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_GAMS_PATH); })
-        .def_property_readonly_static("SICONOS_FRICTION_3D_GAMS_PATHVI", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_GAMS_PATHVI); })
-        .def_property_readonly_static("SICONOS_FRICTION_3D_ACLMFP", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_ACLMFP); })
-        .def_property_readonly_static("SICONOS_FRICTION_3D_SOCLCP", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_SOCLCP); })
-        .def_property_readonly_static("SICONOS_FRICTION_3D_GAMS_LCP_PATH", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_GAMS_LCP_PATH); })
-        .def_property_readonly_static("SICONOS_FRICTION_3D_GAMS_LCP_PATHVI", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_GAMS_LCP_PATHVI); })
-        .def_property_readonly_static("SICONOS_FRICTION_3D_NSN_NM", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_NSN_NM); })
-        .def_property_readonly_static("SICONOS_FRICTION_3D_NSN_AC_TEST", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_NSN_AC_TEST); })
-        .def_property_readonly_static("SICONOS_FRICTION_3D_PFP", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_PFP); })
-        .def_property_readonly_static("SICONOS_FRICTION_3D_ADMM", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_ADMM); })
-        .def_property_readonly_static("SICONOS_FRICTION_3D_ONECONTACT_NSN", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_NSN); })
-        .def_property_readonly_static("SICONOS_FRICTION_3D_ONECONTACT_NSN_GP", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_NSN_GP); })
-        .def_property_readonly_static("SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone); })
-        .def_property_readonly_static("SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration); })
-        .def_property_readonly_static("SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization); })
-        .def_property_readonly_static("SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization); })
-        .def_property_readonly_static("SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity); })
-        .def_property_readonly_static("SICONOS_FRICTION_3D_NCPGlockerFBPATH", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_NCPGlockerFBPATH); })
-        .def_property_readonly_static("SICONOS_FRICTION_3D_NCPGlockerFBNewton", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_NCPGlockerFBNewton); })
-        .def_property_readonly_static("SICONOS_FRICTION_3D_ONECONTACT_QUARTIC", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_QUARTIC); })
-        .def_property_readonly_static("SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU); })
-        .def_property_readonly_static("SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinder", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinder); })
-        .def_property_readonly_static("SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinderWithLocalIteration", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinderWithLocalIteration); })
-        .def_property_readonly_static("SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID); })
-        .def_property_readonly_static("SICONOS_FRICTION_3D_VI_FPP_Cylinder", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_VI_FPP_Cylinder); })
-        .def_property_readonly_static("SICONOS_FRICTION_3D_CONVEXQP_PG_CYLINDER", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_CONVEXQP_PG_CYLINDER); })
-        .def_property_readonly_static("SICONOS_GLOBAL_FRICTION_3D_NSGS_WR", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_3D_NSGS_WR); })
-        .def_property_readonly_static("SICONOS_GLOBAL_FRICTION_3D_NSGSV_WR", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_3D_NSGSV_WR); })
-        .def_property_readonly_static("SICONOS_GLOBAL_FRICTION_3D_PROX_WR", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_3D_PROX_WR); })
-        .def_property_readonly_static("SICONOS_GLOBAL_FRICTION_3D_DSFP_WR", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_3D_DSFP_WR); })
-        .def_property_readonly_static("SICONOS_GLOBAL_FRICTION_3D_TFP_WR", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_3D_TFP_WR); })
-        .def_property_readonly_static("SICONOS_GLOBAL_FRICTION_3D_NSGS", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_3D_NSGS); })
-        .def_property_readonly_static("SICONOS_GLOBAL_FRICTION_3D_NSN_AC_WR", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_3D_NSN_AC_WR); })
-        .def_property_readonly_static("SICONOS_GLOBAL_FRICTION_3D_NSN_AC", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_3D_NSN_AC); })
-        .def_property_readonly_static("SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH); })
-        .def_property_readonly_static("SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI); })
-        .def_property_readonly_static("SICONOS_GLOBAL_FRICTION_3D_VI_FPP", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_3D_VI_FPP); })
-        .def_property_readonly_static("SICONOS_GLOBAL_FRICTION_3D_VI_EG", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_3D_VI_EG); })
-        .def_property_readonly_static("SICONOS_GLOBAL_FRICTION_3D_ACLMFP", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_3D_ACLMFP); })
-        .def_property_readonly_static("SICONOS_GLOBAL_FRICTION_3D_ADMM", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_3D_ADMM); })
-        .def_property_readonly_static("SICONOS_GLOBAL_FRICTION_3D_ADMM_WR", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_3D_ADMM_WR); })
-        .def_property_readonly_static("SICONOS_GLOBAL_FRICTION_3D_IPM", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_3D_IPM); })
-        .def_property_readonly_static("SICONOS_ROLLING_FRICTION_3D_NSGS", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_ROLLING_FRICTION_3D_NSGS); })
-        .def_property_readonly_static("SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone); })
-        .def_property_readonly_static("SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration); })
-        .def_property_readonly_static("SICONOS_ROLLING_FRICTION_3D_ADMM", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_ROLLING_FRICTION_3D_ADMM); })
-        .def_property_readonly_static("SICONOS_ROLLING_FRICTION_2D_NSGS", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_ROLLING_FRICTION_2D_NSGS); })
-        .def_property_readonly_static("SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnCone", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnCone); })
-        .def_property_readonly_static("SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnConeWithLocalIteration", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnConeWithLocalIteration); })
-        .def_property_readonly_static("SICONOS_GLOBAL_ROLLING_FRICTION_3D_NSGS_WR", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_GLOBAL_ROLLING_FRICTION_3D_NSGS_WR); })
-        .def_property_readonly_static("SICONOS_GLOBAL_ROLLING_FRICTION_3D_IPM", [](py::object) { return static_cast<int>(FRICTION_SOLVER::SICONOS_GLOBAL_ROLLING_FRICTION_3D_IPM); })
-        
-        // RELAY_SOLVER enum
-        .def_property_readonly_static("SICONOS_RELAY_PGS", [](py::object) { return static_cast<int>(RELAY_SOLVER::SICONOS_RELAY_PGS); })
-        .def_property_readonly_static("SICONOS_RELAY_ENUM", [](py::object) { return static_cast<int>(RELAY_SOLVER::SICONOS_RELAY_ENUM); })
-        .def_property_readonly_static("SICONOS_RELAY_PATH", [](py::object) { return static_cast<int>(RELAY_SOLVER::SICONOS_RELAY_PATH); })
-        .def_property_readonly_static("SICONOS_RELAY_LEMKE", [](py::object) { return static_cast<int>(RELAY_SOLVER::SICONOS_RELAY_LEMKE); })
-        .def_property_readonly_static("SICONOS_RELAY_AVI_CAOFERRIS", [](py::object) { return static_cast<int>(RELAY_SOLVER::SICONOS_RELAY_AVI_CAOFERRIS); })
-        .def_property_readonly_static("SICONOS_RELAY_AVI_CAOFERRIS_TEST", [](py::object) { return static_cast<int>(RELAY_SOLVER::SICONOS_RELAY_AVI_CAOFERRIS_TEST); })
-
-        // GENERIC_MECHANICAL_SOLVER enum
-        .def_property_readonly_static("SICONOS_GENERIC_MECHANICAL_NSGS", [](py::object) { return static_cast<int>(GENERIC_MECHANICAL_SOLVER::SICONOS_GENERIC_MECHANICAL_NSGS); })
-        ;
-
     py::module_ constants = m.def_submodule("constants", "Constants for numerics module");
     
     py::enum_<NumericsMatrix_types>(constants, "NumericsMatrix_types", "Types of storage for NumericsMatrix")
@@ -179,4 +82,97 @@ PYBIND11_MODULE(pynumerics, m) {
     .value("NM_SPARSE", NM_SPARSE, "Compressed column format")
     .value("NM_UNKNOWN", NM_UNKNOWN, "Unset. Used in NM_null")
     .export_values();
+
+    // SICONOS_IPARAM enum
+    constants.attr("SICONOS_IPARAM_MAX_ITER") = static_cast<int>(SICONOS_IPARAM::SICONOS_IPARAM_MAX_ITER);
+    constants.attr("SICONOS_IPARAM_ITER_DONE") = static_cast<int>(SICONOS_IPARAM::SICONOS_IPARAM_ITER_DONE);
+    constants.attr("SICONOS_IPARAM_PREALLOC") = static_cast<int>(SICONOS_IPARAM::SICONOS_IPARAM_PREALLOC);
+    constants.attr("SICONOS_IPARAM_NSGS_SHUFFLE") = static_cast<int>(SICONOS_IPARAM::SICONOS_IPARAM_NSGS_SHUFFLE);
+    constants.attr("SICONOS_IPARAM_ERROR_EVALUATION") = static_cast<int>(SICONOS_IPARAM::SICONOS_IPARAM_ERROR_EVALUATION);
+    constants.attr("SICONOS_IPARAM_PATHSEARCH_STACKSIZE") = static_cast<int>(SICONOS_IPARAM::SICONOS_IPARAM_PATHSEARCH_STACKSIZE);
+
+    // SICONOS_DPARAM enum
+    constants.attr("SICONOS_DPARAM_TOL") = static_cast<int>(SICONOS_DPARAM::SICONOS_DPARAM_TOL);
+    constants.attr("SICONOS_DPARAM_RESIDU") = static_cast<int>(SICONOS_DPARAM::SICONOS_DPARAM_RESIDU);
+
+    // FRICTION_SOLVER enum
+    constants.attr("SICONOS_FRICTION_2D_NSGS") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_2D_NSGS);
+    constants.attr("SICONOS_FRICTION_2D_CPG") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_2D_CPG);
+    constants.attr("SICONOS_FRICTION_2D_LEMKE") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_2D_LEMKE);
+    constants.attr("SICONOS_FRICTION_2D_ENUM") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_2D_ENUM);
+    constants.attr("SICONOS_FRICTION_3D_NSGS") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_NSGS);
+    constants.attr("SICONOS_FRICTION_3D_NSGSV") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_NSGSV);
+    constants.attr("SICONOS_FRICTION_3D_PROX") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_PROX);
+    constants.attr("SICONOS_FRICTION_3D_TFP") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_TFP);
+    constants.attr("SICONOS_FRICTION_3D_NSN_AC") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_NSN_AC);
+    constants.attr("SICONOS_FRICTION_3D_DSFP") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_DSFP);
+    constants.attr("SICONOS_FRICTION_3D_VI_FPP") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_VI_FPP);
+    constants.attr("SICONOS_FRICTION_3D_VI_EG") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_VI_EG);
+    constants.attr("SICONOS_FRICTION_3D_HP") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_HP);
+    constants.attr("SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint);
+    constants.attr("SICONOS_FRICTION_3D_FPP") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_FPP);
+    constants.attr("SICONOS_FRICTION_3D_EG") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_EG);
+    constants.attr("SICONOS_FRICTION_3D_NSN_FB") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_NSN_FB);
+    constants.attr("SICONOS_FRICTION_3D_GAMS_PATH") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_GAMS_PATH);
+    constants.attr("SICONOS_FRICTION_3D_GAMS_PATHVI") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_GAMS_PATHVI);
+    constants.attr("SICONOS_FRICTION_3D_ACLMFP") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_ACLMFP);
+    constants.attr("SICONOS_FRICTION_3D_SOCLCP") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_SOCLCP);
+    constants.attr("SICONOS_FRICTION_3D_GAMS_LCP_PATH") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_GAMS_LCP_PATH);
+    constants.attr("SICONOS_FRICTION_3D_GAMS_LCP_PATHVI") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_GAMS_LCP_PATHVI);
+    constants.attr("SICONOS_FRICTION_3D_NSN_NM") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_NSN_NM);
+    constants.attr("SICONOS_FRICTION_3D_NSN_AC_TEST") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_NSN_AC_TEST);
+    constants.attr("SICONOS_FRICTION_3D_PFP") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_PFP);
+    constants.attr("SICONOS_FRICTION_3D_ADMM") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_ADMM);
+    constants.attr("SICONOS_FRICTION_3D_ONECONTACT_NSN") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_NSN);
+    constants.attr("SICONOS_FRICTION_3D_ONECONTACT_NSN_GP") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_NSN_GP);
+    constants.attr("SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone);
+    constants.attr("SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
+    constants.attr("SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization);
+    constants.attr("SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithDiagonalization);
+    constants.attr("SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity);
+    constants.attr("SICONOS_FRICTION_3D_NCPGlockerFBPATH") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_NCPGlockerFBPATH);
+    constants.attr("SICONOS_FRICTION_3D_NCPGlockerFBNewton") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_NCPGlockerFBNewton);
+    constants.attr("SICONOS_FRICTION_3D_ONECONTACT_QUARTIC") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_QUARTIC);
+    constants.attr("SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU);
+    constants.attr("SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinder") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinder);
+    constants.attr("SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinderWithLocalIteration") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCylinderWithLocalIteration);
+    constants.attr("SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID);
+    constants.attr("SICONOS_FRICTION_3D_VI_FPP_Cylinder") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_VI_FPP_Cylinder);
+    constants.attr("SICONOS_FRICTION_3D_CONVEXQP_PG_CYLINDER") = static_cast<int>(FRICTION_SOLVER::SICONOS_FRICTION_3D_CONVEXQP_PG_CYLINDER);
+    constants.attr("SICONOS_GLOBAL_FRICTION_3D_NSGS_WR") = static_cast<int>(FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_3D_NSGS_WR);
+    constants.attr("SICONOS_GLOBAL_FRICTION_3D_NSGSV_WR") = static_cast<int>(FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_3D_NSGSV_WR);
+    constants.attr("SICONOS_GLOBAL_FRICTION_3D_PROX_WR") = static_cast<int>(FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_3D_PROX_WR);
+    constants.attr("SICONOS_GLOBAL_FRICTION_3D_DSFP_WR") = static_cast<int>(FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_3D_DSFP_WR);
+    constants.attr("SICONOS_GLOBAL_FRICTION_3D_TFP_WR") = static_cast<int>(FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_3D_TFP_WR);
+    constants.attr("SICONOS_GLOBAL_FRICTION_3D_NSGS") = static_cast<int>(FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_3D_NSGS);
+    constants.attr("SICONOS_GLOBAL_FRICTION_3D_NSN_AC_WR") = static_cast<int>(FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_3D_NSN_AC_WR);
+    constants.attr("SICONOS_GLOBAL_FRICTION_3D_NSN_AC") = static_cast<int>(FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_3D_NSN_AC);
+    constants.attr("SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH") = static_cast<int>(FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_3D_GAMS_PATH);
+    constants.attr("SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI") = static_cast<int>(FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_3D_GAMS_PATHVI);
+    constants.attr("SICONOS_GLOBAL_FRICTION_3D_VI_FPP") = static_cast<int>(FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_3D_VI_FPP);
+    constants.attr("SICONOS_GLOBAL_FRICTION_3D_VI_EG") = static_cast<int>(FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_3D_VI_EG);
+    constants.attr("SICONOS_GLOBAL_FRICTION_3D_ACLMFP") = static_cast<int>(FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_3D_ACLMFP);
+    constants.attr("SICONOS_GLOBAL_FRICTION_3D_ADMM") = static_cast<int>(FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_3D_ADMM);
+    constants.attr("SICONOS_GLOBAL_FRICTION_3D_ADMM_WR") = static_cast<int>(FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_3D_ADMM_WR);
+    constants.attr("SICONOS_GLOBAL_FRICTION_3D_IPM") = static_cast<int>(FRICTION_SOLVER::SICONOS_GLOBAL_FRICTION_3D_IPM);
+    constants.attr("SICONOS_ROLLING_FRICTION_3D_NSGS") = static_cast<int>(FRICTION_SOLVER::SICONOS_ROLLING_FRICTION_3D_NSGS);
+    constants.attr("SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone") = static_cast<int>(FRICTION_SOLVER::SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnCone);
+    constants.attr("SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration") = static_cast<int>(FRICTION_SOLVER::SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);
+    constants.attr("SICONOS_ROLLING_FRICTION_3D_ADMM") = static_cast<int>(FRICTION_SOLVER::SICONOS_ROLLING_FRICTION_3D_ADMM);
+    constants.attr("SICONOS_ROLLING_FRICTION_2D_NSGS") = static_cast<int>(FRICTION_SOLVER::SICONOS_ROLLING_FRICTION_2D_NSGS);
+    constants.attr("SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnCone") = static_cast<int>(FRICTION_SOLVER::SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnCone);
+    constants.attr("SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnConeWithLocalIteration") = static_cast<int>(FRICTION_SOLVER::SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnConeWithLocalIteration);
+    constants.attr("SICONOS_GLOBAL_ROLLING_FRICTION_3D_NSGS_WR") = static_cast<int>(FRICTION_SOLVER::SICONOS_GLOBAL_ROLLING_FRICTION_3D_NSGS_WR);
+    constants.attr("SICONOS_GLOBAL_ROLLING_FRICTION_3D_IPM") = static_cast<int>(FRICTION_SOLVER::SICONOS_GLOBAL_ROLLING_FRICTION_3D_IPM);
+
+    // RELAY_SOLVER enum
+    constants.attr("SICONOS_RELAY_PGS") = static_cast<int>(RELAY_SOLVER::SICONOS_RELAY_PGS);
+    constants.attr("SICONOS_RELAY_ENUM") = static_cast<int>(RELAY_SOLVER::SICONOS_RELAY_ENUM);
+    constants.attr("SICONOS_RELAY_PATH") = static_cast<int>(RELAY_SOLVER::SICONOS_RELAY_PATH);
+    constants.attr("SICONOS_RELAY_LEMKE") = static_cast<int>(RELAY_SOLVER::SICONOS_RELAY_LEMKE);
+    constants.attr("SICONOS_RELAY_AVI_CAOFERRIS") = static_cast<int>(RELAY_SOLVER::SICONOS_RELAY_AVI_CAOFERRIS);
+    constants.attr("SICONOS_RELAY_AVI_CAOFERRIS_TEST") = static_cast<int>(RELAY_SOLVER::SICONOS_RELAY_AVI_CAOFERRIS_TEST);
+
+    // GENERIC_MECHANICAL_SOLVER enum
+    constants.attr("SICONOS_GENERIC_MECHANICAL_NSGS") = static_cast<int>(GENERIC_MECHANICAL_SOLVER::SICONOS_GENERIC_MECHANICAL_NSGS);
 }
