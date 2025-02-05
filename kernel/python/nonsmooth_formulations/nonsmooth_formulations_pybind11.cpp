@@ -31,7 +31,9 @@ PYBIND11_MODULE(nonsmooth_formulations, m) {
            "Set the maximum size of the problem")
       .def("setNumericsVerboseMode",
            &siconos::nonsmooth_formulations::OneStepNSProblem::setNumericsVerboseMode,
-           "Set the verbose mode for the numerics solver");
+           "Set the verbose mode for the numerics solver")
+       .def("getSizeOutput", &siconos::nonsmooth_formulations::OneStepNSProblem::getSizeOutput,
+           "Get the size of the output of the problem");
 
   py::class_<siconos::nonsmooth_formulations::LinearOSNS,
              std::shared_ptr<siconos::nonsmooth_formulations::LinearOSNS>,

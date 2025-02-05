@@ -41,7 +41,11 @@ PYBIND11_MODULE(simulation, m) {
            "Set an object to automatically manage interactions during the simulation")
       .def("startingTime", &siconos::simulation::Simulation::startingTime,
            "get current time (ie starting point for current integration, time of currentEvent "
-           "of eventsManager.)");
+           "of eventsManager.)")
+       .def("oneStepNSProblem", &siconos::simulation::Simulation::oneStepNSProblem,
+           "get the OneStepNSProblem with the given id")
+       .def("clearNSDSChangeLog", &siconos::simulation::Simulation::clearNSDSChangeLog,
+           "clear the change log of the non-smooth dynamical system");
 
   py::class_<siconos::simulation::TimeStepping,
              std::shared_ptr<siconos::simulation::TimeStepping>,

@@ -22,6 +22,7 @@
 #include "SolverOptions.h"
 #include "relay_cst.h"
 #include "NM_types.h"
+#include "GenericMechanical_cst.h"
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 
@@ -54,6 +55,8 @@ PYBIND11_MODULE(pynumerics, m) {
         // Membres simples
         .def(py::init<>())  // Constructeur par défaut
         .def_readwrite("solverId", &SolverOptions::solverId)
+        .def_readonly("iSize", &SolverOptions::iSize)
+        .def_readonly("dSize", &SolverOptions::dSize)
         .def_readwrite("isSet", &SolverOptions::isSet)
         .def_property_readonly("iparam", &get_iparam)  // Exposer iparam avec accès direct
         .def_property_readonly("dparam", &get_dparam)  // Exposer dparam avec accès direct
@@ -163,6 +166,9 @@ PYBIND11_MODULE(pynumerics, m) {
         .def_property_readonly_static("SICONOS_RELAY_LEMKE", [](py::object) { return static_cast<int>(RELAY_SOLVER::SICONOS_RELAY_LEMKE); })
         .def_property_readonly_static("SICONOS_RELAY_AVI_CAOFERRIS", [](py::object) { return static_cast<int>(RELAY_SOLVER::SICONOS_RELAY_AVI_CAOFERRIS); })
         .def_property_readonly_static("SICONOS_RELAY_AVI_CAOFERRIS_TEST", [](py::object) { return static_cast<int>(RELAY_SOLVER::SICONOS_RELAY_AVI_CAOFERRIS_TEST); })
+
+        // GENERIC_MECHANICAL_SOLVER enum
+        .def_property_readonly_static("SICONOS_GENERIC_MECHANICAL_NSGS", [](py::object) { return static_cast<int>(GENERIC_MECHANICAL_SOLVER::SICONOS_GENERIC_MECHANICAL_NSGS); })
         ;
 
     py::module_ constants = m.def_submodule("constants", "Constants for numerics module");
