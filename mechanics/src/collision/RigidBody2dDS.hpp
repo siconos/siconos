@@ -24,8 +24,8 @@
 #define RigidBody2dDS_h
 
 #include <LagrangianLinearTIDS.hpp>
-#include "SiconosContactor.hpp"
 
+#include "SiconosContactor.hpp"
 
 namespace siconos::collision {
 
@@ -84,7 +84,9 @@ class RigidBody2dDS : public siconos::modeling::LagrangianLinearTIDS,
    *  \return a std::shared_ptr<siconos::algebra::SiconosVector> */
   virtual std::shared_ptr<siconos::algebra::SiconosVector> base_position() { return q(); }
 
-  void acceptSP(std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const override;
+  virtual void accept(modeling::dynamical_systems::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 };
 }  // namespace siconos::collision
 #endif /* RigidBody2dDS_h */

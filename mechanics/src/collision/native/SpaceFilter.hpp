@@ -38,11 +38,11 @@
 #include <unordered_set>
 
 #include "BodiesAndRelationsDeclaration.hpp"  // For CircularDS, SphereNEDS, DiskPlanR ...
-#include "FMatrix.hpp"                        // For FMatrix
+#include "DynamicalSystemVisitor.hpp"
+#include "FMatrix.hpp"  // For FMatrix
 #include "InteractionManager.hpp"
-#include "SiconosSerialization.hpp"
 #include "SiconosMatrix.hpp"
-
+#include "SiconosSerialization.hpp"
 
 namespace siconos::collision::native {
 
@@ -109,23 +109,20 @@ class SpaceFilter : public siconos::simulation::InteractionManager {
       std::shared_ptr<siconos::simulation::Simulation>, double A, double B, double C, double D,
       std::shared_ptr<siconos::collision::native::bodies::SphereNEDS> ds);
 
-  /* visitors defined as Inner class */
-  /* note : cf Thinking in C++, vol2, the inner class idiom. */
-
-  /* each kind of proximity detection */
-  struct _CircularFilter;
-  struct _SphereLDSFilter;
-  struct _SphereNEDSFilter;
+  // Visitors for each kind of proximity detection
+  struct CircularFilterVisitor_;
+  struct SphereLDSFilterVisitor_;
+  struct SphereNEDSFilterVisitor_;
 
   /* The body hasher, a visitor
 
      Its visit functions are supposed to insert a specific ds into
      the SpaceFilter hash_table.
    */
-  struct _BodyHash;
+  struct BodyHashVisitor_;
 
   /* the proximity detection */
-  struct _FindInteractions;
+  struct FindInteractionsVisitor_;
 
   /* to compare relation */
   struct _IsSameDiskPlanR;
@@ -133,7 +130,7 @@ class SpaceFilter : public siconos::simulation::InteractionManager {
   struct _IsSameSpherePlanR;
 
   /* to compute distance */
-  struct _DiskDistance;
+  struct DiskDistanceVisitor_;
 
   // friend struct SpaceFilter::_CircularFilter;
   // friend struct SpaceFilter::_SphereLDSFilter;

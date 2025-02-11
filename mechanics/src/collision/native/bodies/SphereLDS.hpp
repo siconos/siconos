@@ -51,12 +51,11 @@ class SphereLDS : public siconos::modeling::LagrangianDS,
 
   ~SphereLDS() noexcept = default;
 
-
- /** to compute the mass matrix operator \f$ M(q) \f$
+  /** to compute the mass matrix operator \f$ M(q) \f$
    *
    *  \param position q vector
    */
-  void computeMass(const Eigen::Ref<const siconos::algebra::SiconosVector> &position) override;
+  void computeMass(const Eigen::Ref<const siconos::algebra::SiconosVector>& position) override;
 
   double getQ(unsigned int pos);
 
@@ -65,6 +64,10 @@ class SphereLDS : public siconos::modeling::LagrangianDS,
   inline double getMassValue() const { return massValue_; };
 
   inline double getRadius() const { return radius_; };
+
+  virtual void accept(modeling::dynamical_systems::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 };
 
 }  // namespace siconos::collision::native::bodies

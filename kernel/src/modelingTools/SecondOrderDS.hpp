@@ -204,7 +204,7 @@ class SecondOrderDS : public DynamicalSystem {
   virtual std::shared_ptr<siconos::algebra::SiconosVector> q() const = 0;
 
   // FP: override SecondOrderDS. Used only in visitors of MechanicsIO. To be reviewed ...
-  virtual std::shared_ptr<siconos::algebra::SiconosVector> velocity() const = 0;
+  virtual const siconos::algebra::ConstMapVectorType velocity_read() const = 0;
 
   /** \return a read-only view on the initial state vector */
   inline const siconos::algebra::ConstMapVectorType q0() const {

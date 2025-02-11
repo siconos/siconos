@@ -358,7 +358,13 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
   auto isTimeInvariant() const { return isTimeInvariant_; }
 
   // visitors hook
-  void acceptSP(std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const override;
+  //  void acceptSP(std::shared_ptr<dynamical_systems::Visitor> tourist) const override;
+
+  template <typename Visitor>
+  void accept(Visitor &visitor) {
+    visitor.visit(*this);
+  }
+
   Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
 };
 }  // namespace siconos::modeling

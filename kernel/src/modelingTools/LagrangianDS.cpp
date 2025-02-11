@@ -730,8 +730,3 @@ double siconos::modeling::LagrangianDS::computeKineticEnergy() {
   DEBUG_END("siconos::modeling::LagrangianDS::computeKineticEnergy()\n");
   return K;
 }
-
-void siconos::modeling::LagrangianDS::acceptSP(
-    std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const {
-  tourist->visit(*this);
-}

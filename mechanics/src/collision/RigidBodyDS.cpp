@@ -29,11 +29,6 @@ siconos::collision::RigidBodyDS::RigidBodyDS(
     : siconos::modeling::NewtonEulerDS{position, velocity, mass, inertia},
       _contactors(std::make_shared<siconos::collision::SiconosContactorSet>()) {}
 
-void siconos::collision::RigidBodyDS::acceptSP(
-    std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const {
-  tourist->visit(*this);
-}
-
 void siconos::collision::RigidBodyDS::compute_extrapolated_position(
     double extrapolationCoefficient) {
   // we compute an extrapolation of the position

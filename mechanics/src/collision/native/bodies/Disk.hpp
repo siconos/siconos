@@ -23,6 +23,7 @@
 #define Disk_H
 
 #include "CircularDS.hpp"
+#include "SiconosVisitor.hpp"
 
 namespace siconos::collision::native::bodies {
 /** \class Disk
@@ -44,9 +45,12 @@ class Disk : public CircularDS, public std::enable_shared_from_this<Disk> {
   Disk(double radius, double mass, Eigen::Ref<siconos::algebra::SiconosVector> position,
        Eigen::Ref<siconos::algebra::SiconosVector> velocity);
 
-  /** destructor
-   */
+  /** destructor */
   virtual ~Disk() noexcept = default;
+
+  virtual void accept(modeling::dynamical_systems::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 };
 }  // namespace siconos::collision::native::bodies
 #endif /* Disk_H */

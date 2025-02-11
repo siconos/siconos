@@ -97,6 +97,10 @@ class CableDS : public siconos::modeling::LagrangianDS {
   // + some access op to be added later, if required
 
   std::shared_ptr<siconos::algebra::SiconosMatrix> TRNp_NpMatrix();
+
+  virtual void accept(modeling::dynamical_systems::Visitor &tourist) const override {
+    tourist.visit(*this);
+  }
 };
 }  // namespace siconos::fem::cable
 

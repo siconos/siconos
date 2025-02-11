@@ -50,12 +50,10 @@ struct ContactContactWorkVisitor;
 class MechanicsIO {
  protected:
   template <typename T, typename G>
-  std::shared_ptr<siconos::algebra::SiconosMatrix> visitAllVerticesForVector(
-      const G& graph) const;
+  siconos::algebra::SiconosMatrix visitAllVerticesForVector(const G& graph) const;
 
   template <typename T, typename G>
-  std::shared_ptr<siconos::algebra::SiconosVector> visitAllVerticesForDouble(
-      const G& graph) const;
+  siconos::algebra::SiconosVector visitAllVerticesForDouble(const G& graph) const;
 
   MechanicsIO(const MechanicsIO&) = delete;
   MechanicsIO& operator=(const MechanicsIO&) = delete;
@@ -68,22 +66,19 @@ class MechanicsIO {
   MechanicsIO() = default;
   ~MechanicsIO() noexcept = default;
 
-  /** get all positions: translation (x,y,z) + orientation quaternion (qw, qx, qy, qz)
-   *  \param nsds current nonsmooth dynamical system
-   *  \return a std::shared_ptr<siconos::algebra::SiconosMatrix> where the columns are
-   *   id, x, y, z, qw, qx, qy, qz
-   *   id being the DynamicalSystem number + 1
+  /** Collect  positions from all dynamical systems and save them in a matrix
+   *  
+   *  \param nsds the nonsmooth dynamical system
+   *  \return a matrix whith column(i) = [ds(i).number, ds(i).q_read()].T 
    */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> positions(
+  siconos::algebra::SiconosMatrix positions(
       const siconos::modeling::NonSmoothDynamicalSystem& nsds) const;
 
-  /** get all velocities: translation (xdot, ydot, zdot) + orientation velocities ox, oy, oz
+  /** Collect velocities/twists from all dynamical systems and save them in a matrix
    *  \param nsds current nonsmooth dynamical system
-   *  \return a matrix where the columns are id, xdot, ydot, zdot,
-   *   ox, oy, oz
-   *   id is the DynamicalSystem number + 1
+   *  \return  a matrix whith column(i) = [ds(i).number, ds(i).velocity_read()].T 
    */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> velocities(
+  siconos::algebra::SiconosMatrix velocities(
       const siconos::modeling::NonSmoothDynamicalSystem& nsds) const;
 
   /** get the coordinates of all contact points, normals, reactions and velocities

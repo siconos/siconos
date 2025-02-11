@@ -373,53 +373,6 @@ void KernelTest::t7() {
                  std::static_pointer_cast<Disk>(ds2)->getRadius());
 }
 
-void KernelTest::t8() {
-  std::shared_ptr < siconos::modeling::DynamicalSystem ds1, ds2;
-
-  auto q = std::make_shared<siconos::algebra::SiconosVector>(3);
-  auto v = std::make_shared<siconos::algebra::SiconosVector>(3);
-
-  (*q)(0) = 0.;
-  (*q)(1) = 1.;
-  (*q)(2) = 1.;
-
-  (*v)(0) = 0;
-  (*v)(1) = 0;
-  (*v)(2) = 10.;
-
-  auto nsds = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(0, 10);
-
-  ds1 = std::make_shared<Disk(1, 1, q, v));
-  ds2 = std::make_shared<Disk(2, 2, q, v));
-
-  nsds->insertDynamicalSystem(ds1);
-  nsds->insertDynamicalSystem(ds2);
-
-  MechanicsIO IO;
-
-  auto positions = IO.positions(*nsds);
-  auto velocities = IO.velocities(*nsds);
-
-  // ids
-  CPPUNIT_ASSERT((*positions)(0, 0) == 0);
-  CPPUNIT_ASSERT((*velocities)(0, 0) == 0);
-  CPPUNIT_ASSERT((*positions)(0, 0) == ds1->number());
-  CPPUNIT_ASSERT((*velocities)(0, 0) == ds1->number());
-
-  CPPUNIT_ASSERT((*positions)(1, 0) == 1);
-  CPPUNIT_ASSERT((*velocities)(1, 0) == 1);
-  CPPUNIT_ASSERT((*positions)(1, 0) == ds2->number());
-  CPPUNIT_ASSERT((*velocities)(1, 0) == ds2->number());
-
-  CPPUNIT_ASSERT((*positions)(0, 1) == 0.);
-  CPPUNIT_ASSERT((*velocities)(0, 1) == 0.);
-  CPPUNIT_ASSERT((*positions)(0, 2) == 1.);
-  CPPUNIT_ASSERT((*positions)(1, 2) == 1.);
-  CPPUNIT_ASSERT((*velocities)(0, 3) == 10.);
-  CPPUNIT_ASSERT((*velocities)(1, 3) == 10.);
-}
-#endif
-
 void KernelTest::t9() {
   try {
     // Serialize and deserialize an NSDS with T=inf

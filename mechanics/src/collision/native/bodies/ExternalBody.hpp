@@ -38,6 +38,10 @@ class ExternalBody : public siconos::modeling::LagrangianDS,
   virtual void selfFindInteractions(
       std::shared_ptr<siconos::collision::native::SpaceFilter>) = 0;
 
+  virtual void accept(modeling::dynamical_systems::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
+
  protected:
   ACCEPT_SERIALIZATION(ExternalBody);
 };

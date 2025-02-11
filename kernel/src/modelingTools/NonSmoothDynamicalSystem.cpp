@@ -270,12 +270,12 @@ void siconos::modeling::NonSmoothDynamicalSystem::computeInteractionJacobians(
 }
 
 void siconos::modeling::NonSmoothDynamicalSystem::visitDynamicalSystems(
-    std::shared_ptr<siconos::internal::SiconosVisitor> visitor) {
+    siconos::modeling::dynamical_systems::Visitor& visitor) {
   auto& dsg = *dynamicalSystems();
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsiend;
   std::tie(dsi, dsiend) = dsg.vertices();
   for (; dsi != dsiend; ++dsi) {
-    dsg.bundle(*dsi)->acceptSP(visitor);
+    dsg.bundle(*dsi)->accept(visitor);
   }
 }
 

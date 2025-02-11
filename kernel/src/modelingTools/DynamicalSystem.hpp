@@ -27,16 +27,12 @@
 #include <vector>
 
 #include "BlockMatrix.hpp"
+#include "DynamicalSystemVisitor.hpp"
 #include "FunctionTypes.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosMemory.hpp"
 #include "SiconosVector.hpp"
 #include "TypeName.hpp"  // visitor to get ds type
-
-namespace siconos::internal {
-
-struct SiconosVisitor;
-}
 
 namespace siconos::modeling {
 
@@ -229,7 +225,7 @@ class DynamicalSystem {
   inline std::shared_ptr<siconos::algebra::SiconosVector> r() const { return rVector_; }
 
   /** \return r vector (input due to nonsmooth behavior) */
-  inline siconos::algebra::SiconosVector& r_python() const { return *rVector_; }
+  inline siconos::algebra::SiconosVector &r_python() const { return *rVector_; }
 
   /** \return the right-hand side vector (i.e. \f$ \dot x \f$) */
   inline std::shared_ptr<siconos::algebra::SiconosVector> rhs() const { return state_x_[1]; }
@@ -311,8 +307,15 @@ class DynamicalSystem {
    */
   virtual void display(bool brief = true) const = 0;
 
-  // visitors stuff.
-  virtual void acceptSP(std::shared_ptr<siconos::internal::SiconosVisitor>) const = 0;
+  virtual void acceptSP(std::shared_ptr<dynamical_systems::Visitor>) {
+    throw std::logic_error(
+        "this class derived from DynamicalSystem does not accept a visitor for shared "
+        "pointers");
+  };
+  virtual void accept(dynamical_systems::Visitor &) const {
+    throw std::logic_error("accept: no visitor defined");
+  };
+
   virtual Type acceptType(siconos::types::FindType &ft) const = 0;
 };
 }  // namespace siconos::modeling

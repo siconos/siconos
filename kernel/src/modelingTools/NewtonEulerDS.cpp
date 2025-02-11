@@ -650,10 +650,6 @@ void siconos::modeling::NewtonEulerDS::setScalarMass(double mass) {
   (*totalInertiaMatrix_)(2, 2) = scalarMass_;
 };
 
-void siconos::modeling::NewtonEulerDS::acceptSP(
-    std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const {
-  tourist->visit(*this);
-}
 
 ///////////////////////////////////////////////////////////////////////////////////////
 /////////// Free functions in the namespace siconos::modeling::newton_euler ///////////

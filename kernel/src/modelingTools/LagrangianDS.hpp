@@ -381,14 +381,12 @@ class LagrangianDS : public SecondOrderDS {
   inline siconos::algebra::SiconosVector &q_python() const { return *(state_q_[0]); }
 
   /** \return  a read-only view on velocity vector */
-  inline const auto velocity_read() const {
+  inline const siconos::algebra::ConstMapVectorType velocity_read() const override {
     return siconos::algebra::ConstMapVectorType(state_q_[1]->data(), state_q_[1]->size());
   }
 
   /** \return the velocity vector (pointer link) */
-  std::shared_ptr<siconos::algebra::SiconosVector> velocity() const override {
-    return state_q_[1];
-  }
+  std::shared_ptr<siconos::algebra::SiconosVector> velocity() const { return state_q_[1]; }
 
   // /** \return  a read-only view on velocity vector */
   inline siconos::algebra::SiconosVector &velocity_python() const { return *(state_q_[1]); }
@@ -748,7 +746,7 @@ class LagrangianDS : public SecondOrderDS {
   void update_lu_mass();
 
   // visitors hook
-  void acceptSP(std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const override;
+  void accept(dynamical_systems::Visitor &tourist) const override { tourist.visit(*this); }
   Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
 };
 

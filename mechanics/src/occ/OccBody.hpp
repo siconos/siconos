@@ -109,6 +109,10 @@ class OccBody : public siconos::modeling::NewtonEulerDS {
    *  \param id the number of the shape.
    */
   const TopoDS_Shape& shape(int id) const;
+
+  virtual void accept(modeling::dynamical_systems::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 };
 }  // namespace siconos::mechanics::occ
 

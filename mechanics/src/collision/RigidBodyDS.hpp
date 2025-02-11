@@ -87,7 +87,9 @@ class RigidBodyDS : public siconos::modeling::NewtonEulerDS,
   };
   virtual void compute_extrapolated_position(double extrapolationCoefficient);
 
-  void acceptSP(std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const override;
+  virtual void accept(modeling::dynamical_systems::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 };
 }  // namespace siconos::collision
 #endif /* RigidBodyDS_h */

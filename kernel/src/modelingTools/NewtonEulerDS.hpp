@@ -321,7 +321,7 @@ class NewtonEulerDS : public SecondOrderDS {
                                           jacobianWrenchOver_q_->cols());
   }
 
-  /** \return the jacobian matrix  of forces with respect to velocity */
+  /** \return the jacobian matrix  of forces with respect to twist */
   inline const auto jacobianWrenchOver_twist() const {
     return siconos::algebra::ConstMapType(jacobianWrenchOver_twist_->data(),
                                           jacobianWrenchOver_twist_->rows(),
@@ -358,7 +358,9 @@ class NewtonEulerDS : public SecondOrderDS {
   std::shared_ptr<siconos::algebra::SiconosVector> twist() const { return twist_; }
 
   // FP: override SecondOrderDS. Used only in visitors of MechanicsIO. To be reviewed ...
-  std::shared_ptr<siconos::algebra::SiconosVector> velocity() const override { return twist_; }
+  inline const siconos::algebra::ConstMapVectorType velocity_read() const override {
+    return twist_read();
+  }
 
   /** \return a read-only view onto linear velocity (twist(0:2))*/
   inline const auto linearVelocity_view() const {
@@ -630,8 +632,8 @@ class NewtonEulerDS : public SecondOrderDS {
 
   virtual void computeTdot();
 
-  // visitors hook
-  void acceptSP(std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const override;
+  void accept(dynamical_systems::Visitor &tourist) const override { tourist.visit(*this); }
+
   Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
 };
 

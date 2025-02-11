@@ -56,8 +56,3 @@ siconos::collision::RigidBody2dDS::RigidBody2dDS(
 //         "velocity must of size 3");
 //   }
 // }
-
-void siconos::collision::RigidBody2dDS::acceptSP(
-    std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const {
-  tourist->visit(*this);
-}

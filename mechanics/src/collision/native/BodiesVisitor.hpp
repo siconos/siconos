@@ -39,74 +39,39 @@ struct BodiesVisitor : public siconos::internal::SiconosVisitor {
 
   using siconos::internal::SiconosVisitor::visit;
 
-  // Dynamical Systems
-  virtual void visit(std::shared_ptr<siconos::collision::native::bodies::Circle>)
-  {
+  virtual void visit(const siconos::collision::native::bodies::DiskDiskR &) {
     THROW_EXCEPTION("you must define a visit function in a derived class of BodiesVisitor");
   };
 
-  virtual void visit(std::shared_ptr<siconos::collision::native::bodies::Disk>)
-  {
+  virtual void visit(const siconos::collision::native::bodies::CircleCircleR &) {
     THROW_EXCEPTION("you must define a visit function in a derived class of BodiesVisitor");
   };
 
-  virtual void visit(std::shared_ptr<siconos::collision::native::bodies::SphereLDS>)
-  {
+  virtual void visit(const siconos::collision::native::bodies::DiskMovingPlanR &) {
     THROW_EXCEPTION("you must define a visit function in a derived class of BodiesVisitor");
   };
 
-  virtual void visit(std::shared_ptr<siconos::collision::native::bodies::SphereNEDS>)
-  {
+  virtual void visit(const siconos::modeling::LagrangianScleronomousR &) {
     THROW_EXCEPTION("you must define a visit function in a derived class of BodiesVisitor");
   };
 
-  virtual void visit(std::shared_ptr<siconos::collision::native::bodies::ExternalBody>)
-  {
+  virtual void visit(const siconos::collision::native::bodies::DiskPlanR &rel) {
     THROW_EXCEPTION("you must define a visit function in a derived class of BodiesVisitor");
   };
 
-  virtual void visit(const siconos::collision::native::bodies::DiskDiskR &)
-  {
+  virtual void visit(const siconos::collision::native::bodies::SphereLDSSphereLDSR &) {
     THROW_EXCEPTION("you must define a visit function in a derived class of BodiesVisitor");
   };
 
-  virtual void visit(const siconos::collision::native::bodies::CircleCircleR &)
-  {
+  virtual void visit(const siconos::collision::native::bodies::SphereNEDSSphereNEDSR &) {
     THROW_EXCEPTION("you must define a visit function in a derived class of BodiesVisitor");
   };
 
-  virtual void visit(const siconos::collision::native::bodies::DiskMovingPlanR &)
-  {
+  virtual void visit(const siconos::collision::native::bodies::SphereLDSPlanR &rel) {
     THROW_EXCEPTION("you must define a visit function in a derived class of BodiesVisitor");
   };
 
-  virtual void visit(const siconos::modeling::LagrangianScleronomousR &)
-  {
-    THROW_EXCEPTION("you must define a visit function in a derived class of BodiesVisitor");
-  };
-
-  virtual void visit(const siconos::collision::native::bodies::DiskPlanR &rel)
-  {
-    THROW_EXCEPTION("you must define a visit function in a derived class of BodiesVisitor");
-  };
-
-  virtual void visit(const siconos::collision::native::bodies::SphereLDSSphereLDSR &)
-  {
-    THROW_EXCEPTION("you must define a visit function in a derived class of BodiesVisitor");
-  };
-
-  virtual void visit(const siconos::collision::native::bodies::SphereNEDSSphereNEDSR &)
-  {
-    THROW_EXCEPTION("you must define a visit function in a derived class of BodiesVisitor");
-  };
-
-  virtual void visit(const siconos::collision::native::bodies::SphereLDSPlanR &rel)
-  {
-    THROW_EXCEPTION("you must define a visit function in a derived class of BodiesVisitor");
-  };
-
-  virtual void visit(const siconos::collision::native::bodies::SphereNEDSPlanR &rel)
-  {
+  virtual void visit(const siconos::collision::native::bodies::SphereNEDSPlanR &rel) {
     THROW_EXCEPTION("you must define a visit function in a derived class of BodiesVisitor");
   };
 

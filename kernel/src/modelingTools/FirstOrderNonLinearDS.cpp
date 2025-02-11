@@ -21,7 +21,6 @@
 #include "BlockMatrix.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "SiconosVisitor.hpp"
 // #define DEBUG_MESSAGES
 // #define DEBUG_STDOUT
 #include <iostream>
@@ -383,7 +382,7 @@ void siconos::modeling::FirstOrderNonLinearDS::resetNonSmoothPart(unsigned int l
   rVector_->setZero();
 }
 
-void siconos::modeling::FirstOrderNonLinearDS::acceptSP(
-    std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const {
-  tourist->visit(*this);
-}
+// void siconos::modeling::FirstOrderNonLinearDS::acceptSP(
+//     std::shared_ptr<dynamical_systems::Visitor> tourist) const {
+//   tourist->visit(*this);
+// }

@@ -46,6 +46,10 @@ class Circle : public CircularDS, public std::enable_shared_from_this<Circle> {
 
   /** destructor */
   virtual ~Circle() noexcept = default;
+
+  virtual void accept(modeling::dynamical_systems::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 };
 }  // namespace siconos::collision::native::bodies
 #endif /* Circle_H */

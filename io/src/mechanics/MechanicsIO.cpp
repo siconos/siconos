@@ -30,6 +30,7 @@
 #include "NewtonEuler5DR.hpp"
 #include "SpaceFilter.hpp"
 #endif
+#include <concepts>
 
 #include "BlockVector.hpp"
 #include "BodyShapeRecord.hpp"
@@ -74,25 +75,42 @@
 // #define DEBUG_MESSAGES 1
 #include "siconos_debug.h"
 
-struct siconos::io::GetPosition : public siconos::internal::SiconosVisitor {
-  std::shared_ptr<siconos::algebra::SiconosVector> result{nullptr};
+// struct siconos::io::GetPosition : public siconos::dynamical_systems::Visitor {
+//   std::shared_ptr<siconos::algebra::SiconosVector> result{nullptr};
 
+//   template <typename T>
+//   void operator()(const T& ds) {
+//     result = std::make_shared<siconos::algebra::SiconosVector>(1 + ds.q()->size());
+//     result->setValue(0, ds.number());
+//     result->setBlock(1, *ds.q());
+//   }
+// };
+
+// -------------------
+//  Visitor stuff to collect all states, velocities, ... of the nsds and put them in a matrix
+// ------------------
+
+struct siconos::io::GetPosition : public siconos::modeling::dynamical_systems::Visitor {
+  std::shared_ptr<siconos::algebra::MapVectorType> result;
+  void setMap(Eigen::Ref<siconos::algebra::SiconosVector> buffer) override {
+    result = std::make_shared<siconos::algebra::MapVectorType>(buffer.data(), buffer.size());
+  }
   template <typename T>
   void operator()(const T& ds) {
-    result = std::make_shared<siconos::algebra::SiconosVector>(1 + ds.q()->size());
-    result->setValue(0, ds.number());
-    result->setBlock(1, *ds.q());
+    (*result)(0) = ds.number();
+    result->segment(1, ds.q_read().size()) = ds.q_read();
   }
 };
 
-struct siconos::io::GetVelocity : public siconos::internal::SiconosVisitor {
-  std::shared_ptr<siconos::algebra::SiconosVector> result{nullptr};
-
+struct siconos::io::GetVelocity : public siconos::modeling::dynamical_systems::Visitor {
+  std::shared_ptr<siconos::algebra::MapVectorType> result;
+  void setMap(Eigen::Ref<siconos::algebra::SiconosVector> buffer) override {
+    result = std::make_shared<siconos::algebra::MapVectorType>(buffer.data(), buffer.size());
+  }
   template <typename T>
   void operator()(const T& ds) {
-    result = std::make_shared<siconos::algebra::SiconosVector>(1 + ds.velocity()->size());
-    result->setValue(0, ds.number());
-    result->setBlock(1, *ds.velocity());
+    (*result)(0) = ds.number();
+    result->segment(1, ds.velocity_read().size()) = ds.velocity_read();
   }
 };
 
@@ -513,41 +531,67 @@ std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::domai
   return nullptr;
 }
 
+// template <typename T, typename G>
+// siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::visitAllVerticesForVector(
+//     const G& graph) const {
+//   siconos::algebra::SiconosMatrix result{0, 0};
+
+//   typename G::VIterator vi, viend;
+//   unsigned int current_row;
+//   for (current_row = 0, std::tie(vi, viend) = graph.vertices(); vi != viend;
+//        ++vi, ++current_row) {
+//     auto getter = std::make_shared<T>();
+//     graph.bundle(*vi)->acceptSP(getter);
+//     const auto& data = *getter->result;
+//     result.resize(current_row + 1, data.size());
+//     result.row(current_row) = data;
+//   }
+//   return result;  // RVO, no copy
+// }
+
 template <typename T, typename G>
-std::shared_ptr<siconos::algebra::SiconosMatrix>
-siconos::io::MechanicsIO::visitAllVerticesForVector(const G& graph) const {
-  auto result = std::make_shared<siconos::algebra::SiconosMatrix>(0, 0);
+siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::visitAllVerticesForVector(
+    const G& graph) const {
+  // Temp. Iterate through the graph to count the number of DS and
+  // the max size of these systems
+  typename G::VIterator vi, viend;
+  unsigned int current_col;
+
+  long max_size = 0;
+  for (current_col = 0, std::tie(vi, viend) = graph.vertices(); vi != viend;
+       ++vi, ++current_col) {
+    auto ds = std::dynamic_pointer_cast<siconos::modeling::SecondOrderDS>(graph.bundle(*vi));
+    max_size = std::max(max_size, (ds->q_read()).size());
+  }
+
+  siconos::algebra::SiconosMatrix results{max_size + 1, current_col};
+
+  for (current_col = 0, std::tie(vi, viend) = graph.vertices(); vi != viend;
+       ++vi, ++current_col) {
+    T getter;
+    getter.setMap(results.col(current_col));
+    graph.bundle(*vi)->accept(getter);
+  }
+  return results;  // RVO, no copy
+}
+
+template <typename T, typename G>
+siconos::algebra::SiconosVector siconos::io::MechanicsIO::visitAllVerticesForDouble(
+    const G& graph) const {
+  siconos::algebra::SiconosVector result{graph.vertices_number()};
 
   typename G::VIterator vi, viend;
   unsigned int current_row;
   for (current_row = 0, std::tie(vi, viend) = graph.vertices(); vi != viend;
        ++vi, ++current_row) {
-    auto getter = std::make_shared<T>();
-    graph.bundle(*vi)->acceptSP(getter);
-    const auto& data = *getter->result;
-    result->resize(current_row + 1, data.size());
-    result->row(current_row) = data;
+    T getter;
+    graph.bundle(*vi)->accept(getter);
+    result.setValue(current_row, getter.result);
   }
   return result;
 }
 
-template <typename T, typename G>
-std::shared_ptr<siconos::algebra::SiconosVector>
-siconos::io::MechanicsIO::visitAllVerticesForDouble(const G& graph) const {
-  auto result = std::make_shared<siconos::algebra::SiconosVector>(graph.vertices_number());
-
-  typename G::VIterator vi, viend;
-  unsigned int current_row;
-  for (current_row = 0, std::tie(vi, viend) = graph.vertices(); vi != viend;
-       ++vi, ++current_row) {
-    auto getter = std::make_shared<T>();
-    graph.bundle(*vi)->acceptSP(getter);
-    result->setValue(current_row, getter.result);
-  }
-  return result;
-}
-
-std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::positions(
+siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::positions(
     const siconos::modeling::NonSmoothDynamicalSystem& nsds) const {
   using Getter =
       siconos::internal::Visitor<siconos::internal::Classes<siconos::modeling::LagrangianDS,
@@ -557,7 +601,7 @@ std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::posit
   return visitAllVerticesForVector<Getter>(*(nsds.topology()->dSG(0)));
 };
 
-std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::velocities(
+siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::velocities(
     const siconos::modeling::NonSmoothDynamicalSystem& nsds) const {
   using Getter =
       siconos::internal::Visitor<siconos::internal::Classes<siconos::modeling::LagrangianDS,
