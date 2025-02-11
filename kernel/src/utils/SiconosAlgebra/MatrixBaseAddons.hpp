@@ -23,8 +23,6 @@
   See https://eigen.tuxfamily.org/dox/TopicCustomizing_Plugins.html
 
 */
-
-#include <cassert>
 // Setters
 
 inline void setValue(Index i, Scalar v) {
