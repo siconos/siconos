@@ -130,7 +130,9 @@ class KneeJointR : public NewtonEulerJointR {
   */
   void computeh(const siconos::algebra::BlockVector& q,
                 Eigen::Ref<siconos::algebra::SiconosVector> y) override;
-
+  virtual void accept(modeling::relations::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 };
 
 // Free functions for knee joints

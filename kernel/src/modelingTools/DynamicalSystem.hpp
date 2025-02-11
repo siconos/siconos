@@ -307,11 +307,14 @@ class DynamicalSystem {
    */
   virtual void display(bool brief = true) const = 0;
 
-  virtual void acceptSP(std::shared_ptr<dynamical_systems::Visitor>) {
+  // accept function used to call visit(shared_ptr<DS>)
+  virtual void acceptSP(dynamical_systems::Visitor &) {
     throw std::logic_error(
         "this class derived from DynamicalSystem does not accept a visitor for shared "
         "pointers");
   };
+
+  // accept function used to call visit(DS)
   virtual void accept(dynamical_systems::Visitor &) const {
     throw std::logic_error("accept: no visitor defined");
   };

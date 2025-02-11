@@ -47,7 +47,9 @@ class SphereNEDS : public siconos::modeling::NewtonEulerDS,
   double getTwist(unsigned int pos);
 
   inline double getRadius() const { return radius; };
-
+  virtual void acceptSP(modeling::dynamical_systems::Visitor& tourist) override {
+    tourist.visit(shared_from_this());
+  }
   virtual void accept(modeling::dynamical_systems::Visitor& tourist) const override {
     tourist.visit(*this);
   }

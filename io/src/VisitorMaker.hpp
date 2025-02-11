@@ -145,7 +145,7 @@ class VisitMaker {
 
 /* build the global visitor for all specified classes */
 template <typename T>
-struct GlobalVisitor {
+struct GlobalDSVisitor {
   using Make = typename VisitMaker<
       siconos::modeling::DynamicalSystem,
       VisitMaker<
@@ -157,6 +157,39 @@ struct GlobalVisitor {
                                     VisitMaker<siconos::collision::RigidBodyDS,
                                                VisitMaker<siconos::collision::RigidBody2dDS,
                                                           T>>>>>>>::Action;
+};
+
+template <typename T>
+struct GlobalRelationVisitor {
+  using Make = typename VisitMaker<
+      siconos::modeling::LagrangianR,
+      VisitMaker<
+          siconos::modeling::Lagrangian2d2DR,
+          VisitMaker<
+              siconos::modeling::Lagrangian2d3DR,
+              VisitMaker<
+                  siconos::modeling::NewtonEulerR,
+                  VisitMaker<
+                      siconos::modeling::NewtonEuler1DR,
+                      VisitMaker<
+                          siconos::modeling::NewtonEuler3DR,
+                          VisitMaker<
+                              siconos::modeling::NewtonEuler5DR,
+                              VisitMaker<
+                                  siconos::collision::ContactR,
+                                  VisitMaker<
+                                      siconos::collision::Contact5DR,
+                                      VisitMaker<
+                                          siconos::collision::Contact2dR,
+                                          VisitMaker<
+                                              siconos::collision::Contact2d3DR,
+                                              VisitMaker<
+                                                  siconos::joints::PivotJointR,
+                                                  VisitMaker<siconos::joints::KneeJointR,
+                                                             VisitMaker<siconos::joints::
+                                                                            PrismaticJointR,
+                                                                        T>>>>>>>>>>>>>>::
+      Action;
 };
 
 template <typename... Ts>
@@ -175,67 +208,18 @@ struct Filter {
 };
 
 template <typename C, typename T>
-struct Visitor {
+struct DSVisitor {
   using LocalFilter = typename Filter<C, T>::Make;
 
-  using Make = typename GlobalVisitor<LocalFilter>::Make;
+  using Make = typename GlobalDSVisitor<LocalFilter>::Make;
 };
 
-// // template <typename T>
-// // struct GlobalVisitor {
-// //   using Make = VisitMaker<
-// //       siconos::modeling::DynamicalSystem,
-// //       VisitMaker<
-// //           siconos::modeling::LagrangianDS,
-// //           VisitMaker<
-// //               siconos::modeling::NewtonEulerDS,
-// //               VisitMaker<
-// //                   siconos::modeling::LagrangianR,
-// //                   VisitMaker<
-//                       siconos::collision::native::bodies::Disk,
-//                       VisitMaker<
-//                           siconos::collision::native::bodies::Circle,
-//                           VisitMaker<
-//                               siconos::modeling::Lagrangian2d2DR,
-//                               VisitMaker<
-//                                   siconos::modeling::Lagrangian2d3DR,
-//                                   VisitMaker<
-//                                       siconos::modeling::NewtonEulerR,
-//                                       VisitMaker<
-//                                           siconos::modeling::NewtonEuler1DR,
-//                                           VisitMaker<
-//                                               siconos::modeling::NewtonEuler3DR,
-//                                               VisitMaker<
-//                                                   siconos::modeling::NewtonEuler5DR,
-//                                                   VisitMaker<
-//                                                       siconos::collision::ContactR,
-//                                                       VisitMaker<
-// siconos::collision::Contact5DR,
-//                                                           VisitMaker<
-// siconos::collision::Contact2dR,
-//                                                               VisitMaker<
-//                                                                   siconos::collision::
-//                                                                       Contact2d3DR,
-//                                                                   VisitMaker<
-//                                                                       siconos::joints::
-//                                                                           PivotJointR,
-//                                                                       VisitMaker<
-// siconos::joints::
-// KneeJointR,
-//                                                                           VisitMaker<
-// siconos::joints::
-// PrismaticJointR,
-// VisitMaker<
-// siconos::
-// collision::
-// RigidBodyDS,
-// VisitMaker<
-// siconos::
-// collision::
-// RigidBody2dDS,
-// // T>>>>>>>>>>>>>>>>>>>>>::
-// //       Action;
-// // };
+template <typename C, typename T>
+struct RelationVisitor {
+  using LocalFilter = typename Filter<C, T>::Make;
+
+  using Make = typename GlobalRelationVisitor<LocalFilter>::Make;
+};
 
 }  // namespace siconos::internal
 

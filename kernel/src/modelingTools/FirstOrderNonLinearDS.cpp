@@ -381,8 +381,3 @@ void siconos::modeling::FirstOrderNonLinearDS::resetNonSmoothPart(unsigned int l
   // assert(0);
   rVector_->setZero();
 }
-
-// void siconos::modeling::FirstOrderNonLinearDS::acceptSP(
-//     std::shared_ptr<dynamical_systems::Visitor> tourist) const {
-//   tourist->visit(*this);
-// }

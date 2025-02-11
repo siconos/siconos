@@ -328,8 +328,3 @@ void siconos::modeling::NewtonEulerR::computeSecondOrderTimeDerivativeTerms(
   DEBUG_EXPR(_secondOrderTimeDerivativeTerms->display());
   DEBUG_PRINT("siconos::modeling::NewtonEulerR::computeSecondOrderTimeDerivativeTerms ends\n");
 }
-
-void siconos::modeling::NewtonEulerR::accept(
-    std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const {
-  tourist->visit(*this);
-}

@@ -24,11 +24,6 @@ void siconos::modeling::FirstOrderR::initialize(Interaction& inter) {
   inter.relationVectors().resize(FirstOrderR::relationVectorsSize);
 }
 
-void siconos::modeling::FirstOrderR::accept(
-    std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const {
-  tourist->visit(*this);
-}
-
 void siconos::modeling::FirstOrderR::display() const {
   std::cout << "=====> Relation of type "
             << static_cast<std::underlying_type<RelationType>::type>(_relationType)

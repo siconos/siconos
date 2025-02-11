@@ -137,7 +137,7 @@ struct siconos::io::ForE : public siconos::internal::Question<double> {
 
 /* Get contact informations */
 /* default: a visitor that do nothing */
-struct siconos::io::ContactPointVisitor : public siconos::internal::SiconosVisitor {
+struct siconos::io::ContactPointVisitor : public siconos::modeling::relations::Visitor {
   std::shared_ptr<siconos::modeling::Interaction> inter{nullptr};
   siconos::algebra::SiconosVector answer;
 
@@ -479,7 +479,7 @@ void siconos::io::ContactPointVisitor::operator()(
   answer.setValue(15, id);
 };
 
-struct siconos::io::ContactPointDomainVisitor : public siconos::internal::SiconosVisitor {
+struct siconos::io::ContactPointDomainVisitor : public siconos::modeling::relations::Visitor {
   std::shared_ptr<siconos::modeling::Interaction> inter{nullptr};
   siconos::algebra::SiconosVector answer;
 
@@ -513,41 +513,23 @@ std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::domai
          ++vi, ++current_row) {
       DEBUG_PRINTF("process interaction : %p\n", &*graph.bundle(*vi));
 
-      using DomainInspector = siconos::internal::Visitor<
+      using DomainInspector = siconos::internal::RelationVisitor<
           siconos::internal::Classes<
               siconos::modeling::NewtonEuler1DR, siconos::modeling::NewtonEuler3DR,
               siconos::joints::PrismaticJointR, siconos::joints::KneeJointR,
               siconos::joints::PivotJointR>,
           ContactPointDomainVisitor>::Make;
 
-      auto inspector = std::make_shared<DomainInspector>();
-      inspector->inter = graph.bundle(*vi);
+      DomainInspector inspector;
+      inspector.inter = graph.bundle(*vi);
       graph.bundle(*vi)->relation()->accept(inspector);
-      const auto& data = inspector->answer;
+      const auto& data = inspector.answer;
       if (data.size() == 2) result->row(current_row) = data;
     }
     return result;
   }
   return nullptr;
 }
-
-// template <typename T, typename G>
-// siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::visitAllVerticesForVector(
-//     const G& graph) const {
-//   siconos::algebra::SiconosMatrix result{0, 0};
-
-//   typename G::VIterator vi, viend;
-//   unsigned int current_row;
-//   for (current_row = 0, std::tie(vi, viend) = graph.vertices(); vi != viend;
-//        ++vi, ++current_row) {
-//     auto getter = std::make_shared<T>();
-//     graph.bundle(*vi)->acceptSP(getter);
-//     const auto& data = *getter->result;
-//     result.resize(current_row + 1, data.size());
-//     result.row(current_row) = data;
-//   }
-//   return result;  // RVO, no copy
-// }
 
 template <typename T, typename G>
 siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::visitAllVerticesForVector(
@@ -593,20 +575,20 @@ siconos::algebra::SiconosVector siconos::io::MechanicsIO::visitAllVerticesForDou
 
 siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::positions(
     const siconos::modeling::NonSmoothDynamicalSystem& nsds) const {
-  using Getter =
-      siconos::internal::Visitor<siconos::internal::Classes<siconos::modeling::LagrangianDS,
-                                                            siconos::modeling::NewtonEulerDS>,
-                                 GetPosition>::Make;
+  using Getter = siconos::internal::DSVisitor<
+      siconos::internal::Classes<siconos::modeling::LagrangianDS,
+                                 siconos::modeling::NewtonEulerDS>,
+      GetPosition>::Make;
 
   return visitAllVerticesForVector<Getter>(*(nsds.topology()->dSG(0)));
 };
 
 siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::velocities(
     const siconos::modeling::NonSmoothDynamicalSystem& nsds) const {
-  using Getter =
-      siconos::internal::Visitor<siconos::internal::Classes<siconos::modeling::LagrangianDS,
-                                                            siconos::modeling::NewtonEulerDS>,
-                                 GetVelocity>::Make;
+  using Getter = siconos::internal::DSVisitor<
+      siconos::internal::Classes<siconos::modeling::LagrangianDS,
+                                 siconos::modeling::NewtonEulerDS>,
+      GetVelocity>::Make;
 
   return visitAllVerticesForVector<Getter>(*nsds.topology()->dSG(0));
 }
@@ -625,7 +607,7 @@ std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::conta
       DEBUG_PRINTF("process interaction : %p\n", &*graph.bundle(*vi));
 
       /* create a visitor for specified classes */
-      using ContactPointInspector = siconos::internal::Visitor<
+      using ContactPointInspector = siconos::internal::RelationVisitor<
           siconos::internal::Classes<
               siconos::modeling::NewtonEuler1DR, siconos::modeling::NewtonEuler3DR,
               siconos::modeling::NewtonEuler5DR, siconos::modeling::Lagrangian2d2DR,
@@ -635,10 +617,10 @@ std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::conta
               siconos::collision::native::bodies::DiskPlanR>,
           ContactPointVisitor>::Make;
 
-      auto inspector = std::make_shared<ContactPointInspector>();
-      inspector->inter = graph.bundle(*vi);
+      ContactPointInspector inspector;
+      inspector.inter = graph.bundle(*vi);
       graph.bundle(*vi)->relation()->accept(inspector);
-      siconos::algebra::SiconosVector& data = inspector->answer;
+      siconos::algebra::SiconosVector& data = inspector.answer;
       data_size = data.size();
 
       if (data_size == 0) {
@@ -671,7 +653,7 @@ std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::conta
 
 /* Get contact informations */
 /* default: a visitor that do nothing */
-struct ContactInfoVisitor : public siconos::internal::SiconosVisitor {
+struct ContactInfoVisitor : public siconos::modeling::relations::Visitor {
   std::shared_ptr<siconos::modeling::Interaction> inter{nullptr};
   // std::vector<int> answer; better with a vector of int
   siconos::algebra::SiconosVector answer;
@@ -762,17 +744,17 @@ std::optional<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::contact
     DEBUG_PRINTF("process interaction : %p\n", &*graph.bundle(*vi));
 
     /* create a visitor for specified classes */
-    using ContactInfoInspector = siconos::internal::Visitor<
+    using ContactInfoInspector = siconos::internal::RelationVisitor<
         siconos::internal::Classes<
             siconos::modeling::NewtonEuler3DR, siconos::collision::ContactR,
             siconos::collision::Contact5DR, siconos::collision::Contact2dR,
             siconos::collision::Contact2d3DR>,
         ContactInfoVisitor>::Make;
 
-    auto inspector = std::make_shared<ContactInfoInspector>();
-    inspector->inter = graph.bundle(*vi);
+    ContactInfoInspector inspector;
+    inspector.inter = graph.bundle(*vi);
     graph.bundle(*vi)->relation()->accept(inspector);
-    auto& data = inspector->answer;
+    auto& data = inspector.answer;
     data_size = data.size();
 
     if (data_size == 0) {
@@ -804,7 +786,7 @@ namespace siconos::io {
 /* Get contact work information */
 /* default: a visitor that do nothing */
 
-struct ContactContactWorkVisitor : public siconos::internal::SiconosVisitor {
+struct ContactContactWorkVisitor : public siconos::modeling::relations::Visitor {
   std::shared_ptr<siconos::modeling::Interaction> inter{nullptr};
   // std::vector<int> answer; better with a vector of int
   siconos::algebra::SiconosVector answer;
@@ -974,18 +956,18 @@ std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::conta
       DEBUG_PRINTF("process interaction : %p\n", &*graph.bundle(*vi));
 
       /* create a visitor for specified classes */
-      using ContactContactWorkInspector = siconos::internal::Visitor<
+      using ContactContactWorkInspector = siconos::internal::RelationVisitor<
           siconos::internal::Classes<
               siconos::modeling::NewtonEuler3DR, siconos::collision::ContactR,
               siconos::collision::Contact5DR, siconos::collision::Contact2dR,
               siconos::collision::Contact2d3DR>,
           ContactContactWorkVisitor>::Make;
-      auto inspector = std::make_shared<ContactContactWorkInspector>();
-      inspector->inter = graph.bundle(*vi);
-      inspector->tol = tol;
-      inspector->omega = omega;
+      ContactContactWorkInspector inspector;
+      inspector.inter = graph.bundle(*vi);
+      inspector.tol = tol;
+      inspector.omega = omega;
       graph.bundle(*vi)->relation()->accept(inspector);
-      auto& data = inspector->answer;
+      auto& data = inspector.answer;
       data_size = data.size();
 
       if (data_size == 0) {

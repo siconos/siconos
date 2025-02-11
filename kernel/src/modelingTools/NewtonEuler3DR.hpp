@@ -66,6 +66,8 @@ class NewtonEuler3DR : public NewtonEuler1DR {
                           const siconos::algebra::BlockVector& q0) override;
 
   void display() const override {}
+  virtual void accept(relations::Visitor& tourist) const override { tourist.visit(*this); }
+
 };
 }  // namespace siconos::modeling
 #endif  // NEWTONEULERRELATIONFC3D_H

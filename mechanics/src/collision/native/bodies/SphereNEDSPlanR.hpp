@@ -65,6 +65,7 @@ class SphereNEDSPlanR : public siconos::modeling::NewtonEuler3DR,
   bool equal(double _A, double _B, double _C, double _D, double _r) const {
     return (A == _A && B == _B && C == _C && D == _D && r == _r);
   }
+  virtual void accept(modeling::relations::Visitor &tourist) const override { tourist.visit(*this); }
 };
 }  // namespace siconos::collision::native::bodies
 #endif /* SphereNEDSPlanR_h */

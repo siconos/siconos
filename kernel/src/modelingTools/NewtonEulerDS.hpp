@@ -632,7 +632,7 @@ class NewtonEulerDS : public SecondOrderDS {
 
   virtual void computeTdot();
 
-  void accept(dynamical_systems::Visitor &tourist) const override { tourist.visit(*this); }
+  virtual void accept(dynamical_systems::Visitor &tourist) const override { tourist.visit(*this); }
 
   Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
 };

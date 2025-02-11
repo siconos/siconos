@@ -127,6 +127,8 @@ class Lagrangian2d3DR : public LagrangianScleronomousR {
    */
   void setRelNc(std::shared_ptr<siconos::algebra::SiconosVector> nnc) { _relNc = nnc; };
   void display() const override;
+  virtual void accept(relations::Visitor &tourist) const override { tourist.visit(*this); }
+
 };
 }  // namespace siconos::modeling
 #endif  // NEWTONEULERRIMPACT_H

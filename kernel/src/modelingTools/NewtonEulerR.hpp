@@ -272,9 +272,7 @@ class NewtonEulerR : public Relation {
   virtual void computeInput(double time, Interaction &inter, unsigned int level = 0) override;
 
   void display() const override {}
-
-  // Visitors stuff
-  void accept(std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const override;
+  virtual void accept(relations::Visitor &tourist) const override { tourist.visit(*this); }
 };
 }  // namespace siconos::modeling
 #endif  // NEWTONEULERRELATION_H

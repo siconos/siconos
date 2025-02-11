@@ -125,9 +125,9 @@ class SpaceFilter : public siconos::simulation::InteractionManager {
   struct FindInteractionsVisitor_;
 
   /* to compare relation */
-  struct _IsSameDiskPlanR;
-  struct _IsSameDiskMovingPlanR;
-  struct _IsSameSpherePlanR;
+  struct IsSameDiskPlanRVisitor_;
+  struct IsSameDiskMovingPlanRVisitor_;
+  struct IsSameSpherePlanRVisitor_;
 
   /* to compute distance */
   struct DiskDistanceVisitor_;

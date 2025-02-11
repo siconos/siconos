@@ -107,6 +107,8 @@ class DiskPlanR : public siconos::modeling::LagrangianScleronomousR,
   bool equal(const DiskPlanR&) const;
 
   bool isFinite() const { return finite; };
+
+  virtual void accept(modeling::relations::Visitor& tourist) const override { tourist.visit(*this); }
 };
 }  // namespace siconos::collision::native::bodies
 #endif /* DiskPlanR */

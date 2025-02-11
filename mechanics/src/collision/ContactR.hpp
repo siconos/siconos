@@ -60,6 +60,9 @@ class ContactR : public siconos::modeling::NewtonEuler3DR {
   virtual void preDelete() {}
 
   void display() const override;
+  virtual void accept(modeling::relations::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 };
 }  // namespace siconos::collision
 #endif

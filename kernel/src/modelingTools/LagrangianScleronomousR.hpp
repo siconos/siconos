@@ -190,6 +190,8 @@ class LagrangianScleronomousR : public LagrangianR {
    *  \param level "derivative" order of lambda used to compute input
    */
   void computeInput(double time, Interaction &inter, unsigned int level = 0) override;
+
+  virtual void accept(relations::Visitor &tourist) const override { tourist.visit(*this); }
 };
 }  // namespace siconos::modeling
 

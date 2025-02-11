@@ -68,6 +68,7 @@ class CircleCircleR : public CircularR, public std::enable_shared_from_this<Circ
    * \param q coordinates of the dynamical systems involved in the relation
    */
   void computeJacobianhOver_q(const siconos::algebra::BlockVector& q) override;
+  virtual void accept(modeling::relations::Visitor& tourist) const override { tourist.visit(*this); }
 };
 }  // namespace siconos::collision::native::bodies
 #endif /* CircleCircleR_h */

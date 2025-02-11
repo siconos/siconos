@@ -27,15 +27,11 @@
 
 #include "BlockVector.hpp"
 #include "FunctionTypes.hpp"
+#include "RelationVisitor.hpp"
 #include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosSerialization.hpp"  // For ACCEPT_SERIALIZATION
 #include "SiconosVector.hpp"
-
-namespace siconos::internal {
-
-struct SiconosVisitor;
-}
 
 namespace siconos::modeling {
 
@@ -204,7 +200,9 @@ class Relation {
     return empty_map;
   }
 
-  virtual void accept(std::shared_ptr<siconos::internal::SiconosVisitor>) const = 0;
+  virtual void accept(relations::Visitor &) const {
+    throw std::logic_error("accept (relation): no visitor defined");
+  }
 };
 }  // namespace siconos::modeling
 

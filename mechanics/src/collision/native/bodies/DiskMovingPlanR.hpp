@@ -162,6 +162,9 @@ class DiskMovingPlanR : public siconos::modeling::LagrangianRheonomousR,
      \param t the time
   */
   inline void computeCDot(double t);
+
+  virtual void accept(modeling::relations::Visitor &tourist) const override { tourist.visit(*this); }
+
 };
 }  // namespace siconos::collision::native::bodies
 

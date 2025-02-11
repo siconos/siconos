@@ -32,8 +32,3 @@ void siconos::modeling::LagrangianR::display() const {
             << static_cast<std::underlying_type<RelationSubType>::type>(_subType) << "\n";
   std::cout << " jacobianhOver_q_ :\n" << *jacobianhOver_q_view_ << "\n";
 }
-
-void siconos::modeling::LagrangianR::accept(
-    std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const {
-  tourist->visit(*this);
-}

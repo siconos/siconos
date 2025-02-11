@@ -48,6 +48,9 @@ class Disk : public CircularDS, public std::enable_shared_from_this<Disk> {
   /** destructor */
   virtual ~Disk() noexcept = default;
 
+  virtual void acceptSP(modeling::dynamical_systems::Visitor& tourist) override {
+    tourist.visit(shared_from_this());
+  }
   virtual void accept(modeling::dynamical_systems::Visitor& tourist) const override {
     tourist.visit(*this);
   }

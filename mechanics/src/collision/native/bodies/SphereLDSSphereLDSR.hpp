@@ -57,6 +57,8 @@ class SphereLDSSphereLDSR : public siconos::modeling::LagrangianScleronomousR,
    * \param q coordinates of the dynamical systems involved in the relation
    */
   void computeJacobianhOver_q(const siconos::algebra::BlockVector& q) override;
+
+  virtual void accept(modeling::relations::Visitor& tourist) const override { tourist.visit(*this); }
 };
 }  // namespace siconos::collision::native::bodies
 #endif /* SphereLDSSphereLDSR_h */

@@ -24,13 +24,15 @@
 #include <limits>
 
 #include "OneStepIntegrator.hpp"
-#include "SiconosVisitor.hpp" // For NSLeffects ...
+#include "SiconosVisitor.hpp"  // For NSLeffects ...
 
 namespace siconos::modeling {
 
 class SecondOrderDS;
+class LagrangianDS;
+class NewtonEulerDS;
 
-}
+}  // namespace siconos::modeling
 
 namespace siconos::integrators {
 

@@ -64,7 +64,9 @@ class SphereLDS : public siconos::modeling::LagrangianDS,
   inline double getMassValue() const { return massValue_; };
 
   inline double getRadius() const { return radius_; };
-
+  virtual void acceptSP(modeling::dynamical_systems::Visitor& tourist) override {
+    tourist.visit(shared_from_this());
+  }
   virtual void accept(modeling::dynamical_systems::Visitor& tourist) const override {
     tourist.visit(*this);
   }

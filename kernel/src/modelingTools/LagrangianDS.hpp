@@ -746,7 +746,7 @@ class LagrangianDS : public SecondOrderDS {
   void update_lu_mass();
 
   // visitors hook
-  void accept(dynamical_systems::Visitor &tourist) const override { tourist.visit(*this); }
+  virtual void accept(dynamical_systems::Visitor &tourist) const override { tourist.visit(*this); }
   Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
 };
 

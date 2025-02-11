@@ -94,6 +94,8 @@ class Lagrangian2d2DR : public LagrangianScleronomousR {
   inline auto pc2() const { return _Pc2; }
   inline auto nc() const { return _Nc; }
   void display() const override;
+  virtual void accept(relations::Visitor &tourist) const override { tourist.visit(*this); }
+
 };
 }  // namespace siconos::modeling
 #endif  // NEWTONEULERRIMPACT_H

@@ -45,15 +45,16 @@ class SphereNEDSSphereNEDSR : public siconos::modeling::NewtonEuler3DR,
 
   double distance(double, double, double, double, double, double, double, double);
 
-   /**
-      to compute the output y = h(q) of the Relation
+  /**
+     to compute the output y = h(q) of the Relation
 
-      \param[in] q generalized coordinates vector of the concerned dynamical systems
-      \param[in,out] y the resulting vector
-  */
-   void computeh(const siconos::algebra::BlockVector &q,
-                        Eigen::Ref<siconos::algebra::SiconosVector> y) override;
+     \param[in] q generalized coordinates vector of the concerned dynamical systems
+     \param[in,out] y the resulting vector
+ */
+  void computeh(const siconos::algebra::BlockVector &q,
+                Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
+  virtual void accept(modeling::relations::Visitor &tourist) const override { tourist.visit(*this); }
 };
 }  // namespace siconos::collision::native::bodies
 #endif /* SphereNEDSSphereNEDSR_h */

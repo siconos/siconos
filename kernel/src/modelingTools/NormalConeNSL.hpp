@@ -23,7 +23,7 @@
 #define NORMALCONENSLAW_H
 
 #include "NonSmoothLaw.hpp"
-
+#include "SiconosMatrix.hpp"
 
 namespace siconos::modeling {
 /**
@@ -94,17 +94,15 @@ class NormalConeNSL : public NonSmoothLaw {
    *  \return true if the NS Law is verified, false otherwise
    */
   bool isVerified() const override;
- 
 
   /** print the data to the screen */
   void display() const override;
- 
+
   // visitors hook
-  void accept(siconos::internal::SiconosVisitor& tourist) const override
-  {
+  void accept(siconos::internal::SiconosVisitor& tourist) const override {
     tourist.visit(*this);
   }
-  Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
+  Type acceptType(types::FindType& ft) const override { return ft.visit(*this); }
 };
 }  // namespace siconos::modeling
 
