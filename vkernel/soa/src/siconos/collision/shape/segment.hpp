@@ -35,8 +35,6 @@ struct segment : item<> {
     {
       const auto& v = dp2p1();
       length_sq() = algebra::dot(v, v);
-      const auto& l = length_sq();
-      print("l:{}\n", l);
     };
 
     void compute_normal()
