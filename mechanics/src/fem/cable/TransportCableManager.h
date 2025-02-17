@@ -26,10 +26,16 @@
 #include "TransportCableModel.h"
 #include "TransportCableResult.h"
 
-/** API to the cable model (TransportCableModel) and its FEM counterpart (TransportCableResult)
- */
+
+/*! \file TransportCableManager.h
+
+*/
+
 namespace siconos::fem::cable {
 
+/** 
+ * 
+ */
 class TransportCableManager {
  private:
   // Rule of five
@@ -45,7 +51,10 @@ class TransportCableManager {
   ~TransportCableManager() noexcept = default;
 
   int importModel(const nlohmann::json &a_input, const std::string &a_filename = "");
-  int computeFEM(const nlohmann::json &a_args, const std::string &a_outfile,
+
+
+    
+  void computeFEM(const nlohmann::json &a_args, const std::string &a_outfile,
                  nlohmann::ordered_json &output);
   int exportTC(const nlohmann::json &a_args, const std::string &a_outfile,
                nlohmann::ordered_json &output);
@@ -55,8 +64,8 @@ class TransportCableManager {
                  nlohmann::ordered_json &output);
 
  private:
-  TransportCableModel m_model;
-  TransportCableResult m_results;
+  TransportCableModel m_model{};
+  TransportCableResult m_results{};
 
   void computeDS(double a_tolContact = 1e-3, double a_mus = 0.8, double a_mup = 1.1);
 

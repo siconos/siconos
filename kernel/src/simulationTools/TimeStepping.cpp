@@ -60,9 +60,7 @@ siconos::simulation::TimeStepping::TimeStepping(
   (*_allNSProblems).resize(SICONOS_NB_OSNSP_TS);
   if (osnspb) insertNonSmoothProblem(osnspb, SICONOS_OSNSP_TS_VELOCITY);
 
-  if (auto euosi =
-          std::dynamic_pointer_cast<siconos::integrators::EulerMoreauOSI>(
-              osi)) {
+  if (auto euosi = std::dynamic_pointer_cast<siconos::integrators::EulerMoreauOSI>(osi)) {
     _computeResiduY = true;
     _computeResiduR = true;
   }
@@ -78,9 +76,7 @@ siconos::simulation::TimeStepping::TimeStepping(
 void siconos::simulation::TimeStepping::insertIntegrator(
     std::shared_ptr<siconos::integrators::OneStepIntegrator> osi) {
   _allOSI->insert(osi);
-  if (auto euosi =
-          std::dynamic_pointer_cast<siconos::integrators::EulerMoreauOSI>(
-              osi)) {
+  if (auto euosi = std::dynamic_pointer_cast<siconos::integrators::EulerMoreauOSI>(osi)) {
     _computeResiduY = true;
     _computeResiduR = true;
   }
@@ -167,8 +163,7 @@ void siconos::simulation::TimeStepping::updateIndexSet(unsigned int i) {
   for (v1next = ui1; ui1 != ui1end; ui1 = v1next) {
     ++v1next;
 
-    std::shared_ptr<siconos::modeling::Interaction> inter1 =
-        indexSet1->bundle(*ui1);
+    std::shared_ptr<siconos::modeling::Interaction> inter1 = indexSet1->bundle(*ui1);
     if (indexSet0->is_vertex(inter1)) {
       siconos::graphs::InteractionsGraph::VDescriptor inter1_descr0 =
           indexSet0->descriptor(inter1);
@@ -176,8 +171,7 @@ void siconos::simulation::TimeStepping::updateIndexSet(unsigned int i) {
       assert((indexSet0->color(inter1_descr0) == boost::white_color));
 
       indexSet0->color(inter1_descr0) = boost::gray_color;
-      if (not std::dynamic_pointer_cast<
-              siconos::modeling::EqualityConditionNSL>(
+      if (not std::dynamic_pointer_cast<siconos::modeling::EqualityConditionNSL>(
               inter1->nonSmoothLaw())) {
         // We assume that the integrator of the ds1 drive the update of the
         // index set std::shared_ptr<siconos::integrators::OneStepIntegrator>
@@ -194,11 +188,10 @@ void siconos::simulation::TimeStepping::updateIndexSet(unsigned int i) {
           indexSet1->eraseProperties(*ui1);
 
           siconos::graphs::InteractionsGraph::OEIterator oei, oeiend;
-          for (std::tie(oei, oeiend) = indexSet1->out_edges(*ui1);
-               oei != oeiend; ++oei) {
+          for (std::tie(oei, oeiend) = indexSet1->out_edges(*ui1); oei != oeiend; ++oei) {
             siconos::graphs::InteractionsGraph::EDescriptor ed1, ed2;
-            std::tie(ed1, ed2) = indexSet1->edges(indexSet1->source(*oei),
-                                                  indexSet1->target(*oei));
+            std::tie(ed1, ed2) =
+                indexSet1->edges(indexSet1->source(*oei), indexSet1->target(*oei));
             if (ed2 != ed1) {
               indexSet1->eraseProperties(ed1);
               indexSet1->eraseProperties(ed2);
@@ -218,8 +211,7 @@ void siconos::simulation::TimeStepping::updateIndexSet(unsigned int i) {
       // ui1 becomes invalid
       indexSet1->eraseProperties(*ui1);
       siconos::graphs::InteractionsGraph::OEIterator oei, oeiend;
-      for (std::tie(oei, oeiend) = indexSet1->out_edges(*ui1); oei != oeiend;
-           ++oei) {
+      for (std::tie(oei, oeiend) = indexSet1->out_edges(*ui1); oei != oeiend; ++oei) {
         siconos::graphs::InteractionsGraph::EDescriptor ed1, ed2;
         std::tie(ed1, ed2) =
             indexSet1->edges(indexSet1->source(*oei), indexSet1->target(*oei));
@@ -257,24 +249,16 @@ void siconos::simulation::TimeStepping::updateIndexSet(unsigned int i) {
       } else {
         assert(indexSet0->color(*ui0) == boost::white_color);
 
-        std::shared_ptr<siconos::modeling::Interaction> inter0 =
-            indexSet0->bundle(*ui0);
+        auto inter0 = indexSet0->bundle(*ui0);
         assert(!indexSet1->is_vertex(inter0));
         bool activate = true;
-        if ((not std::dynamic_pointer_cast<
-                siconos::modeling::EqualityConditionNSL>(
+        if ((not std::dynamic_pointer_cast<siconos::modeling::EqualityConditionNSL>(
                 inter0->nonSmoothLaw())) &&
             (not std::dynamic_pointer_cast<siconos::modeling::RelayNSL>(
                 inter0->nonSmoothLaw()))) {
-          // Type::value(*(inter0->nonSmoothLaw())) !=
-          // Type::EqualityConditionNSL &&
-          //  Type::value(*(inter0->nonSmoothLaw())) != Type::RelayNSL) {
-          // std::shared_ptr<siconos::integrators::OneStepIntegrator> Osi =
-          // indexSet0->properties(*ui0).osi;
           //  We assume that the integrator of the ds1 drive the update of the
           //  index set
-          std::shared_ptr<siconos::modeling::DynamicalSystem> ds1 =
-              indexSet1->properties(*ui0).source;
+          auto ds1 = indexSet1->properties(*ui0).source;
           auto& osi = *DSG0.properties(DSG0.descriptor(ds1)).osi;
 
           activate = osi.addInteractionInIndexSet(inter0, i);
@@ -359,10 +343,9 @@ void siconos::simulation::TimeStepping::nextStep() {
 
 void siconos::simulation::TimeStepping::computeFreeState() {
   DEBUG_BEGIN("siconos::simulation::TimeStepping::computeFreeState()\n");
-  std::for_each(
-      _allOSI->begin(), _allOSI->end(),
-      std::bind(&siconos::integrators::OneStepIntegrator::computeFreeState,
-                std::placeholders::_1));
+  std::for_each(_allOSI->begin(), _allOSI->end(),
+                std::bind(&siconos::integrators::OneStepIntegrator::computeFreeState,
+                          std::placeholders::_1));
   DEBUG_END("siconos::simulation::TimeStepping::computeFreeState()\n");
 }
 
@@ -402,9 +385,7 @@ void siconos::simulation::TimeStepping::resetLambdas() {
 }
 
 void siconos::simulation::TimeStepping::advanceToEvent() {
-  DEBUG_PRINTF(
-      "siconos::simulation::TimeStepping::advanceToEvent(). Time =%f\n",
-      getTkp1());
+  DEBUG_PRINTF("siconos::simulation::TimeStepping::advanceToEvent(). Time =%f\n", getTkp1());
   initialize();
   if (!_skip_resetLambdas) resetLambdas();
   newtonSolve(_newtonTolerance, _newtonMaxIteration);
@@ -460,8 +441,7 @@ void siconos::simulation::TimeStepping::displayNewtonConvergenceAtTheEnd(
                  "_newtonCumulativeNbIterations ="
               << _newtonCumulativeNbIterations << std::endl;
   } else {
-    DEBUG_PRINTF("# _newtonCumulativeNbIterations= %i\n",
-                 _newtonCumulativeNbIterations);
+    DEBUG_PRINTF("# _newtonCumulativeNbIterations= %i\n", _newtonCumulativeNbIterations);
   }
 
   if (!_isNewtonConverge) {
@@ -470,8 +450,7 @@ void siconos::simulation::TimeStepping::displayNewtonConvergenceAtTheEnd(
       std::cout << "[kernel][warning] "
                    "siconos::simulation::TimeStepping::newtonSolve reached "
                    "max. number of iterations: "
-                << maxStep << " with accuracy: " << _newtonResiduDSMax
-                << std::endl;
+                << maxStep << " with accuracy: " << _newtonResiduDSMax << std::endl;
 
     if (info && _newtonWarningOnNonConvergence)
       std::cout << "[kernel] siconos::simulation::TimeStepping::newtonSolve -- "
@@ -482,8 +461,7 @@ void siconos::simulation::TimeStepping::displayNewtonConvergenceAtTheEnd(
 }
 
 void siconos::simulation::TimeStepping::computeInitialStateOfTheStep() {
-  DEBUG_BEGIN(
-      "siconos::simulation::TimeStepping::computeInitialNewtonState()\n");
+  DEBUG_BEGIN("siconos::simulation::TimeStepping::computeInitialNewtonState()\n");
   if (_newtonOptions == TimeSteppingType::NONLINEAR ||
       _newtonOptions == TimeSteppingType::NONLINEAR_FULL) {
     for (auto& osi : *_allOSI) {
@@ -525,8 +503,7 @@ void siconos::simulation::TimeStepping::initializeNewtonSolve() {
   DEBUG_END("TimeStepping::initializeNewtonSolve()\n");
 }
 
-void siconos::simulation::TimeStepping::newtonSolve(double criterion,
-                                                    unsigned int maxStep) {
+void siconos::simulation::TimeStepping::newtonSolve(double criterion, unsigned int maxStep) {
   DEBUG_BEGIN("siconos::simulation::TimeStepping::newtonSolve \n");
   _isNewtonConverge = false;
   _newtonNbIterations = 0;  // number of Newton iterations
@@ -541,15 +518,13 @@ void siconos::simulation::TimeStepping::newtonSolve(double criterion,
        _newtonOptions == TimeSteppingType::LINEAR_IMPLICIT) ||
       isLinear) {
     _newtonNbIterations++;
-    if (_newtonOptions == TimeSteppingType::LINEAR_IMPLICIT)
-      prepareNewtonIteration();
+    if (_newtonOptions == TimeSteppingType::LINEAR_IMPLICIT) prepareNewtonIteration();
 
     computeFreeState();
 
     bool hasNSProblems = (!_allNSProblems->empty()) ? true : false;
 
-    if (hasNSProblems)
-      info = computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
+    if (hasNSProblems) info = computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
 
     // Check output from solver (convergence or not ...)
     if (!checkSolverOutput)
@@ -581,8 +556,7 @@ void siconos::simulation::TimeStepping::newtonSolve(double criterion,
       computeFreeState();
 
       if (info && _newtonWarningOnNonConvergence)
-        std::cout << "New Newton loop because of nonsmooth solver failed\n"
-                  << std::endl;
+        std::cout << "New Newton loop because of nonsmooth solver failed\n" << std::endl;
 
       // if there is not any Interaction at
       // the beginning of the simulation _allNSProblems may not be
@@ -648,8 +622,7 @@ void siconos::simulation::TimeStepping::newtonSolve(double criterion,
   DEBUG_END("siconos::simulation::TimeStepping::newtonSolve\n");
 }
 
-bool siconos::simulation::TimeStepping::newtonCheckConvergence(
-    double criterion) {
+bool siconos::simulation::TimeStepping::newtonCheckConvergence(double criterion) {
   bool checkConvergence = true;
   //_relativeConvergenceCriterionHeld is true means that the RCC is
   // activated, and the relative criteron helds.  In this case the
@@ -730,18 +703,15 @@ void siconos::simulation::TimeStepping::DefaultCheckSolverOutput(int info) {
   // info = 0 => ok
   // else: depend on solver
   if (info != 0 and _warningNonsmoothSolver) {
-    auto options =
-        (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->numericsSolverOptions();
+    auto options = (*_allNSProblems)[SICONOS_OSNSP_TS_VELOCITY]->numericsSolverOptions();
 
     std::cout << "[kernel] TimeStepping at time " << getTkp1()
               << " --numerics solver warning -- info=" << info
-              << " reached accuracy : "
-              << options->dparam[SICONOS_DPARAM_RESIDU] << " iteration done  : "
-              << options->iparam[SICONOS_IPARAM_ITER_DONE] << "\n";
+              << " reached accuracy : " << options->dparam[SICONOS_DPARAM_RESIDU]
+              << " iteration done  : " << options->iparam[SICONOS_IPARAM_ITER_DONE] << "\n";
   }
 }
 
-void siconos::simulation::TimeStepping::setCheckSolverFunction(
-    CheckSolverFPtr newF) {
+void siconos::simulation::TimeStepping::setCheckSolverFunction(CheckSolverFPtr newF) {
   checkSolverOutput = newF;
 }

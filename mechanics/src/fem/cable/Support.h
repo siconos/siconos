@@ -17,8 +17,8 @@
  */
 
 /*! \file Support.h
+Support class
 
-  A pile and its contact point description (nonsmooth law ...)
 */
 #pragma once
 
@@ -32,20 +32,32 @@ class NonSmoothLaw;
 
 namespace siconos::fem::cable {
 
-class Pile;
+class Pylon;
 class Point;
 class Rope;
 
+/** A pylon, its contact point description (coordinates, normal ...) and a nonsmooth law
+ *
+ */
 class Support {
  protected:
-  const Pile &r_pile;  // reference to the cable model
+  /** The pylon (geometrical descr) */
+  const Pylon &pylon_;
+
+  /**  Pylon position */
   Point m_p;
 
+  /** Non smooth law (for the contact pylon-rope) */
   std::shared_ptr<siconos::modeling::NonSmoothLaw> m_nslaw{nullptr};
 
-  std::shared_ptr<siconos::algebra::SiconosVector> m_pc2{nullptr};
-  std::shared_ptr<siconos::algebra::SiconosVector> m_normal{nullptr};
-  std::shared_ptr<siconos::algebra::SiconosVector> m_tangent{nullptr};
+  /** Contact point coordinates  */
+  std::shared_ptr<siconos::algebra::SiconosVector3> m_pc2{nullptr};
+
+  /** Normal at contact */
+  std::shared_ptr<siconos::algebra::SiconosVector3> m_normal{nullptr};
+
+  /** Tangent at contact */
+  std::shared_ptr<siconos::algebra::SiconosVector3> m_tangent{nullptr};
 
   // Rule of 5
   Support() = delete;
@@ -55,34 +67,41 @@ class Support {
   Support &operator=(Support &&) = delete;
 
  public:
-  Support(const Pile &a_pile);
+  Support(const Pylon &a_pile);
   virtual ~Support() noexcept = default;
   virtual double get_radius() const;
   virtual const Point &get_center() const { return m_p; };
 
-  //------------ statique -------------
+  //------------ static -------------
   virtual void prepare(const Rope &a_rope);
-  virtual void prepare(const Pile &a_start, const Pile &a_end, double T);
+  virtual void prepare(const Pylon &a_start, const Pylon &a_end, double T);
 
   virtual void compute(const Point &a_p, double a_tol, double &g, Point &G, Point &T, int &c);
 
-  //------------ dynamique -------------
-  virtual bool isContact(const std::shared_ptr<siconos::algebra::SiconosVector> &a_p,
-                         const double &a_tol);
+  //------------ dynamic -------------
 
+  /** \return true if contact is on */
+  virtual bool isContact(const Eigen::Ref<siconos::algebra::SiconosVector3> &a_p,
+                         double a_tol);
+
+  /** \return true if contact is on */
+  bool isContact(double a_tol, double dx, double dy, double dz, double &g, double &nx,
+                 double &ny, double &nz, double &tx, double &ty, double &tz);
+
+  /** Build the nonsmooth law (if required) */
   virtual void InitFriction(double a_mu);
+
+  /** \return the nonsmooth law used for this support */
   std::shared_ptr<siconos::modeling::NonSmoothLaw> nslaw();
 
-  inline std::shared_ptr<siconos::algebra::SiconosVector> pc2() const { return m_pc2; }
-  inline std::shared_ptr<siconos::algebra::SiconosVector> normal() const { return m_normal; }
-  inline std::shared_ptr<siconos::algebra::SiconosVector> tangent() const { return m_tangent; }
+  /** \return the coordinates of the contact point */
+  inline auto pc2() const { return m_pc2; }
 
-  bool isContact(const double &a_tol, const double &dx, const double &dy, const double &dz,
-                 double &g,
+  /** \return the normal at contact */
+  inline auto normal() const { return m_normal; }
 
-                 double &nx, double &ny, double &nz,
-
-                 double &tx, double &ty, double &tz);
+  /**\return the tangent at contact */
+  inline auto tangent() const { return m_tangent; }
 };
 
 //------ Export ----------

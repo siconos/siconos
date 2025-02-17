@@ -85,3 +85,9 @@ void siconos::collision::native::bodies::DiskDiskR::computeJacobianhOver_q(
   jacobianhOver_q_view_->setValue(0, 5, 0.);
   jacobianhOver_q_view_->setValue(1, 5, -_r2);
 }
+
+void siconos::collision::native::bodies::DiskDiskR::display() const {
+  std::cout << "=====> Disk-Disk relation \n";
+  if (jacobianhOver_q_view_)
+    std::cout << " jacobianhOver_q_ :\n" << *jacobianhOver_q_view_ << "\n";
+}

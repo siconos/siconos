@@ -18,29 +18,35 @@
 
 /*! \file Rope.h
 
-  A discrete piece of cable, between two piles.
+  Rope class
 */
 #pragma once
 
 #include <vector>
 
-#include "Cable.h"
+#include "MechanicalProperties.h"
 #include "Point.h"
 
 namespace siconos::fem::cable {
 
-class Pile;
+class Pylon;
 
+/** Describes a  discrete piece of cable, between two pylons.
+ *
+ */
 class Rope {
  public:
-  /** Build a rope span (a piece of cable between to pylons)
+  /** Build a rope span (a piece of cable between two pylons)
+
       \param a_pile1 first pylon supporting the rope
       \param a_pile2 second pylon
       \param a_tol tolerance used to perform (stop) Newton-Raphson iterations
       \param n_max max. number of iterations used in Newton-Raphson
   */
-  Rope(const Pile &a_pile0, const Pile &a_pile1, double a_tol, int n_max);
+  Rope(const Pylon &a_pile0, const Pylon &a_pile1, double a_tol, int n_max);
+
   Rope(Rope &&) = default;
+
   Rope(const Rope &) = default;
 
   virtual ~Rope() noexcept = default;
@@ -54,9 +60,18 @@ class Rope {
       \param[in] a_T0 initial tension applied at the beginning of the rope
       \para[in] m a_R0 support reaction at the beginning of the rope
   */
-  void compute(const class Cable &a_meca, int nb_nodes, double a_T0, const Point &a_R0);
+  void compute(const class MechanicalProperties &a_meca, int nb_nodes, double a_T0,
+               const Point &a_R0);
 
   int computeNbNodes(int nb_elem, double L);
+
+  /** Computes the profile of the rope
+   * \param[out] a_q nodes coordinates
+   * \param[out] a_R reaction forces at nodes
+   * \param[out] a_TS tension at nodes
+   * \param[in] q_offset offset (index) in a_q vector
+   * \param[in] a_reverse true when 'down' ropeway is concerned
+   */
   int computeMesh(std::vector<Point> &a_q, std::vector<Point> &a_R, std::vector<double> &a_TS,
                   int q_offset, bool a_reverse = false);
 
@@ -64,82 +79,96 @@ class Rope {
   double get_LastT();
   Point get_LastR();
   double get_L();
-  const Point &get_SR() const;
-  const Cable &get_meca() const;
-  const Pile &get_pile0() const;
+  const Point &supportReaction() const;
+  const MechanicalProperties &get_meca() const;
+  const Pylon &left_pylon() const;
 
   void to_json(ojson &j);
 
  private:
   Point ropeway_inc;
 
-  /** Positions */
-  std::vector<Point> q = {};
+  /** Coordinates of rope nodes */
+  std::vector<Point> nodes_coords_ = {};
 
-  /** Internal forces  [x,y,z]-> [H,V,B] */
-  std::vector<Point> R = {};
+  /** Internal forces (at each node) [x,y,z]-> [H,V,B] */
+  std::vector<Point> internal_forces_ = {};
 
-  /** Tension */
-  std::vector<double> TS = {};
+  /** Tension (at each node)*/
+  std::vector<double> TS_ = {};
 
-  Cable meca;         // contient T0, EA, rho
-  const Pile &pile0;  // référence vers le support associé
-  const Pile &pile1;  // référence vers le support associé
-  Point SR;           // support reaction [H,V,B]
-  bool m_last{false};
+  /** Mechanical properties of the rope (EA, rho ...) */
+  MechanicalProperties meca;
 
-  /** level of tolerance for the cable equation */
-  double tol = 1e-7;
-  /** max number of iterations */
-  int n_max = 50;
-  /** */
-  int m_nbNodes{0};
+  /** First pylon supporting the rope */
+  const Pylon &left_pylon_;
+
+  /** Second pylon supporting the rope */
+  const Pylon &right_pylon_;
+
+  /** Support reaction at contact [H,V,B]*/
+  Point support_reaction_;
+
+  /** True if the rope is the last one in the line */
+  bool m_last_{false};
+
+  /** level of tolerance used in get_adm_1C to compute ropeway_inc */
+  double tol_ = 1e-7;
+
+  /** max number of iterations used in get_adm_1C to compute ropeway_inc */
+  int max_iter_ = 50;
+
+  /** number of nodes used to discretize the rope */
+  int number_of_nodes_{0};
 
   Rope() = delete;
   Rope &operator=(const Rope &) = delete;
   Rope &operator=(Rope &&) = delete;
 
   /**
-      Modifies cable_inc such that the cable equation is satisfied (using tolerance tol and for
-     a max number of iteration equal n_max) n_max iteration
+      Modifies cable_inc such that the cable equation is satisfied (using tolerance tol and max
+     number of iteration)
 
       \param a_meca object which handles the geometric and material description of the cable
-      \param bc a vector of two Pile objects
-      \return a Point
+      \param bc a vector of two Pylon objects
+      \return [lenght, slope_y, slope_z]
   */
-  Point get_adm_1C(const Cable &a_meca, const std::vector<Pile> &bc);
+  Point get_adm_1C(const MechanicalProperties &a_meca, const std::vector<Pylon> &bc);
 
   /**
-     \returns a Point, initial guess for the length and the slopes
-     \param a vector of two Pile objects
+     \returns an initial guess for the length and the slopes
+     \param bc a vector of two Pylons
    */
-  Point guess(const std::vector<Pile> &bc);
+  Point guess(const std::vector<Pylon> &bc);
 
   /**
      computes the residual equation and the jacobian of a fixed-fixed cable with imposed
      initial tension
 
      \param a_meca object which handles the geometric and material description of the cable
-     \param bc a vector of two Pile objects
+     \param bc a vector of two Pylons (end points of the rope)
      \param cable_inc = [L, etaY, etaZ], with L
      the unstretched length of the cable, etaY the initial y-slope and etaZ the initial z-slope
-     \param J the resulting jacobian
+     \param[out] residu the resulting residual
+     \param[out] J the resulting jacobian
    */
-  void cable_eq(const Cable &a_meca, const std::vector<Pile> &bc, const Point &cable_inc,
-                Point &r, std::vector<std::vector<double>> &J);
+  void cable_eq(const MechanicalProperties &a_meca, const std::vector<Pylon> &bc,
+                const Point &cable_inc, Point &residu, std::vector<std::vector<double>> &J);
 
   /** Computes initial profile of the cable
 
-     \param[in] a__meca object which handles the geometric and material description of the
-     cable \param[in] cable_inc [L, etaY, etaZ], with L the unstretched length of the cable,
-     etaY the initial y-slope and etaZ the initial z-slope \param[in] nb_nodes number of nodes
-     in the system \param[in, out] a_q positions \param[in, out] a_R internal forces
-     \param[in,out] a_TS tension
+     \param[in] a__meca mechanical properties of the cable
+     \param[in] cable_inc [L, etaY, etaZ], L is the unstretched length of the cable,
+     etaY the initial y-slope and etaZ the initial z-slope
+     \param[in] nb_nodes number of nodes
+     \param[in, out] a_q nodes coordinates
+     \param[in, out] a_R internal forces at each node
+     \param[in, out] a_TS tension at each node
      \param[in] q_offset
      \param[in] a_reverse
 
   */
-  void get_profile_1C(const Cable &a_meca, const Point &cable_inc, int nb_nodes,
+  void get_profile_1C(const MechanicalProperties &a_meca, const Point &cable_inc, int nb_nodes,
                       std::vector<Point> &a_q, std::vector<Point> &a_R,
                       std::vector<double> &a_TS, int q_offset = 0, bool a_reverse = false);
 };

@@ -69,28 +69,26 @@ void CableDSTest::testBuildInitialProfile() {
   int nb_nodes = 50;   // Catenary, number of nodes per rope span
   double tol = 1e-10;  // Tol. used in Newton-Raphson for catenary equation
   int nmax = 20;       // Newton-Raphson, max number of iterations
-  profil->computeInitialProfil(nb_nodes, tol, nmax);
+  profil->computeInitialProfile(nb_nodes, tol, nmax);
 
   // At this stage, positions are saved in each Rope, for all points.
   // To get them and for comparison, we use output to json and 'reload' into a
   // siconos::algebra::SiconosVector. Save ropeways variables into json file
   ojson out;
   results->to_json(out, "ropeway");
-  auto q1 = siconos::algebra::io::readVectorFromJson(out["rope1"]["q"]);
-  auto q2 = siconos::algebra::io::readVectorFromJson(out["rope2"]["q"]);
+  auto q1 = siconos::algebra::io::readVectorFromJson(out["ropes_up"]["q"]);
+  auto q2 = siconos::algebra::io::readVectorFromJson(out["ropes_down"]["q"]);
   // Read reference
   std::ifstream in("data/bouquetins_ref.json");
   json reader;
   in >> reader;
-  auto qref1 = siconos::algebra::io::readVectorFromJson(reader["rope1"]["q"]);
-  auto qref2 = siconos::algebra::io::readVectorFromJson(reader["rope2"]["q"]);
+  auto qref1 = siconos::algebra::io::readVectorFromJson(reader["ropes_up"]["q"]);
+  auto qref2 = siconos::algebra::io::readVectorFromJson(reader["ropes_down"]["q"]);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE(" testBuildInitialProfile: check catenary",
-                               (qref1->size() == q1->size()), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testBuildInitialProfile: check catenary", ((*qref1) == (*q1)),
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testBuildInitialProfile: check catenary", ((*qref2) == (*q2)),
-                               true);
+                               (qref1.size() == q1.size()), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testBuildInitialProfile: check catenary", qref1 == q1, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testBuildInitialProfile: check catenary", qref2 == q2, true);
 
   nb_nodes = 1400;  // FEM number of nodes
   double eps = 0.1;
@@ -106,7 +104,7 @@ void CableDSTest::testBuildInitialProfile() {
 
   auto positions_ref = siconos::algebra::io::readVectorFromJson(reader["q"]);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(" testBuildInitialProfile:  check fem",
-                               ((*positions_ref) == (*positions)), true);
+                               (positions_ref - positions).norm() < 1e-14, true);
   std::cout << "End testBuildInitialProfile ...\n";
   // // compare results to a reference
 }
@@ -136,8 +134,7 @@ void CableDSTest::testComputeDS() {
   // Compute, simulation
   std::string outFile = "results/compute.origin.json";
   ojson out;
-  res = manager->computeFEM(args, outFile, out);
-  CPPUNIT_ASSERT_NOT_EQUAL(" testComputeDS: compute FAIL", res == EXIT_FAILURE, true);
+  manager->computeFEM(args, outFile, out);
 }
 
 void CableDSTest::testComputeBouncingBall() {

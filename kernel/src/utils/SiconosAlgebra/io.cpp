@@ -204,13 +204,22 @@ double siconos::algebra::io::compareRefFile(const SiconosMatrix &data, std::stri
   return error;
 }
 
-std::shared_ptr<siconos::algebra::SiconosVector> siconos::algebra::io::readVectorFromJson(
+siconos::algebra::SiconosVector siconos::algebra::io::readVectorFromJson(
     const nlohmann::json &jin) {
-  auto vec = std::make_shared<SiconosVector>(jin.size());
+  // jin might be a vector of double or a list of points
+  // so we must update vec_size by checking the first element in jin
+  auto first = jin[0];
+  auto vec_size = jin.size();
+  if (first.is_array()) vec_size *= first.size();
+  siconos::algebra::SiconosVector vec{vec_size};
   size_t element_index = 0;
   for (const auto &element : jin) {
-    (*vec)(element_index++) = (double)element;
+    if (element.is_array()) {
+      for (const auto &sub_element : element)
+        vec.coeffRef(element_index++) = sub_element.get<double>();
+    } else
+      vec.coeffRef(element_index++) = element.get<double>();
   }
 
-  return vec;
+  return vec;  // RVO
 }

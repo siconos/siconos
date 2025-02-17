@@ -100,10 +100,10 @@ double siconos::fem::cable::Cable2d3DR::distance() const {
 }
 
 void siconos::fem::cable::Cable2d3DR::updateContactPoint(
-    std::shared_ptr<siconos::algebra::SiconosVector> pc1,
-    std::shared_ptr<siconos::algebra::SiconosVector> pc2,
-    std::shared_ptr<siconos::algebra::SiconosVector> normal,
-    std::shared_ptr<siconos::algebra::SiconosVector> tangent) {
+    std::shared_ptr<siconos::algebra::SiconosVector3> pc1,
+    std::shared_ptr<siconos::algebra::SiconosVector3> pc2,
+    std::shared_ptr<siconos::algebra::SiconosVector3> normal,
+    std::shared_ptr<siconos::algebra::SiconosVector3> tangent) {
   _Pc1 = pc1;
   _Pc2 = pc2;
   _Normal = normal;
@@ -113,8 +113,8 @@ void siconos::fem::cable::Cable2d3DR::updateContactPoint(
 /** update the contact points from references
  */
 void siconos::fem::cable::Cable2d3DR::updateContactPoint(
-    siconos::algebra::SiconosVector& pc1, siconos::algebra::SiconosVector& pc2,
-    siconos::algebra::SiconosVector& normal, siconos::algebra::SiconosVector& tangent) {
+    siconos::algebra::SiconosVector3& pc1, siconos::algebra::SiconosVector3& pc2,
+    siconos::algebra::SiconosVector3& normal, siconos::algebra::SiconosVector3& tangent) {
   *_Pc1 = pc1;
   *_Pc2 = pc2;
   *_Normal = normal;

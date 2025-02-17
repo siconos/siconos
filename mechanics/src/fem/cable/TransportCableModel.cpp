@@ -24,7 +24,7 @@
 #include <nlohmann/json.hpp>
 #include <string>
 
-#include "Cable.h"
+#include "MechanicalProperties.h"
 
 using json = nlohmann::json;
 
@@ -59,7 +59,7 @@ int siconos::fem::cable::TransportCableModel::from_json(const json &j) {
       if (jpiles.is_array()) {
         m_piles.reserve(jpiles.size());
         for (const auto &jp : jpiles) {
-          m_piles.push_back(Pile());
+          m_piles.push_back(Pylon{});
           m_piles.back().from_json(jp);
         }
       }
@@ -76,7 +76,8 @@ bool siconos::fem::cable::TransportCableModel::isLoaded() {
   return (m_pilesUp.size() != 0 && m_pilesDown.size() != 0);
 }
 
-const siconos::fem::cable::Cable &siconos::fem::cable::TransportCableModel::get_cable() const {
+const siconos::fem::cable::MechanicalProperties &
+siconos::fem::cable::TransportCableModel::mechanicalProperties() const {
   return m_cable;
 }
 
@@ -85,41 +86,42 @@ const siconos::fem::cable::Carriers &siconos::fem::cable::TransportCableModel::g
   return m_carriers;
 }
 
-const std::vector<siconos::fem::cable::Pile> &
-siconos::fem::cable::TransportCableModel::get_piles1() const {
+const std::vector<siconos::fem::cable::Pylon> &
+siconos::fem::cable::TransportCableModel::get_pylons_up() const {
   return m_pilesUp;
 }
 
-const std::vector<siconos::fem::cable::Pile> &
-siconos::fem::cable::TransportCableModel::get_piles2() const {
+const std::vector<siconos::fem::cable::Pylon> &
+siconos::fem::cable::TransportCableModel::get_pylons_down() const {
   return m_pilesDown;
 }
 
 void siconos::fem::cable::TransportCableModel::clear() {
-  // raz du modèle
+  // Reset model
   m_piles.clear();
   m_pilesUp.clear();
   m_pilesDown.clear();
 }
 
 int siconos::fem::cable::TransportCableModel::validate() {
-  // Validation du modèle
-  // Création des 2 lignes à partir de la définition des poteaux
+  // Build the two ropeways from the piles setup
   if (m_stationUp > m_stationDown) {
     bool vOk = true;
     if (m_piles.size()) {
-      // les x des poteaux doivent être croissant
+      // piles x-coords must be in ascending order
       std::sort(m_piles.begin(), m_piles.end());
 
       vOk = (m_piles.front() > m_stationDown && m_piles.back() < m_stationUp);
     }
     if (vOk) {
-      m_pilesUp.push_back(Pile(m_stationDown, true));
+      // Insert piles (including first and last special ones) into the 'up' vector
+      m_pilesUp.push_back(Pylon(m_stationDown, true));
       for (auto &p : m_piles) {
         m_pilesUp.push_back(p);  // Copy
       }
-      m_pilesUp.push_back(Pile(m_stationUp, true));
+      m_pilesUp.push_back(Pylon(m_stationUp, true));
 
+      // Same for the 'down' part
       for (auto &p : m_pilesUp) {
         m_pilesDown.push_back(p);  // Copy
         p.transform(true);         // useless ???

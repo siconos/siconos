@@ -18,9 +18,9 @@
 
 #include "TransportCableProfil.h"
 
-#include "Cable.h"
 #include "CableTools.h"
 #include "Carriers.h"
+#include "MechanicalProperties.h"
 #include "Pulley.h"
 #include "Rope.h"
 #include "TransportCableModel.h"
@@ -30,16 +30,21 @@ siconos::fem::cable::TransportCableProfil::TransportCableProfil(
     const TransportCableModel &a_model, TransportCableResult &a_results)
     : r_model(a_model), r_results(a_results) {}
 
-void siconos::fem::cable::TransportCableProfil::computeInitialProfil(int nb_nodes,
+void siconos::fem::cable::TransportCableProfil::computeInitialProfile(int nb_nodes,
                                                                      double a_tol,
                                                                      int a_nmax) {
   // calcul les positions, tensions des cordes
-  Cable meca = r_model.get_cable();
-  Carriers vehicules = r_model.get_carriers();  // Copy !!
+  MechanicalProperties meca = r_model.mechanicalProperties();
+  Carriers vehicules = r_model.get_carriers();
   meca.set_rho(meca.get_rho() + vehicules.get_rho());
-  r_results.rope1.compute(meca, r_model.get_piles1(), nb_nodes, a_tol, a_nmax);
-  meca.set_T(r_results.rope1.get_T0());
-  r_results.rope2.compute(meca, r_model.get_piles2(), nb_nodes, a_tol, a_nmax);
+
+  // Build all ropes and compute their initial profiles (Catenary)
+  // up ...
+  r_results.ropes_up.compute(meca, r_model.get_pylons_up(), nb_nodes, a_tol, a_nmax);
+  meca.set_T(r_results.ropes_up.get_T0());
+
+  // and down
+  r_results.ropes_down.compute(meca, r_model.get_pylons_down(), nb_nodes, a_tol, a_nmax);
 
   // prépare les supports: pile, station -> support
   r_results.prepareSupport();
@@ -51,15 +56,15 @@ void siconos::fem::cable::TransportCableProfil::computeFEM(int nb_elem, double a
 
   auto puller21 = std::dynamic_pointer_cast<Pulley>(r_results.supports[r_results.puller21idx]);
 
-  double Lt = puller12->get_L(r_results.rope2);
-  double Lb = puller21->get_L(r_results.rope1);
-  r_results.length = r_results.rope1.get_L() + Lt + r_results.rope2.get_L() + Lb;
+  double Lt = puller12->get_L(r_results.ropes_down);
+  double Lb = puller21->get_L(r_results.ropes_up);
+  r_results.length = r_results.ropes_up.get_L() + Lt + r_results.ropes_down.get_L() + Lb;
 
   int n_Pt = (int)rint(nb_elem * Lt / r_results.length);
   int n_Pb = (int)rint(nb_elem * Lb / r_results.length);
 
-  int n1 = r_results.rope1.computeNbNodes(nb_elem, r_results.length);
-  int n2 = r_results.rope2.computeNbNodes(nb_elem, r_results.length);
+  int n1 = r_results.ropes_up.computeNbNodes(nb_elem, r_results.length);
+  int n2 = r_results.ropes_down.computeNbNodes(nb_elem, r_results.length);
   r_results.nb_nodes = n_Pt + n1 + n_Pb + n2;
 
   auto &q = r_results.q;
@@ -71,9 +76,9 @@ void siconos::fem::cable::TransportCableProfil::computeFEM(int nb_elem, double a
   auto &TS = r_results.TS;
   TS.clear();
   TS.resize(r_results.nb_nodes);
-  int offset = r_results.rope1.computeMesh(q, R, TS, 0);
+  int offset = r_results.ropes_up.computeMesh(q, R, TS, 0);
   offset = puller12->compute(n_Pt + 1, q, offset);
-  offset = r_results.rope2.computeMesh(q, R, TS, offset);
+  offset = r_results.ropes_down.computeMesh(q, R, TS, offset);
   puller21->compute(n_Pb + 1, q, offset);
 
   r_results.elem_length = r_results.length / r_results.nb_nodes;
@@ -190,6 +195,6 @@ int siconos::fem::cable::TransportCableProfil::to_json(ojson &ro) {
   // j = {}
 
   // r_results.rope1.to_json(out);
-  // r_results.rope2.to_json(out);
+  // r_results.ropes_down.to_json(out);
   return 0;
 }

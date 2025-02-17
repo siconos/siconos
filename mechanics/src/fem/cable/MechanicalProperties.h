@@ -16,8 +16,8 @@
  * limitations under the License.
  */
 
-/*! \file Cable.h
-  \brief Material properties of a cable
+/*! \file MechanicalProperties.h
+  \brief Some mechanical Properties of a cable
 */
 
 #pragma once
@@ -25,18 +25,20 @@
 
 namespace siconos::fem::cable {
 
-class Cable : public BaseModel {
+/** Class to handle mechanical properties of a cable */
+class MechanicalProperties : public BaseModel {
  public:
-  Cable() = default;
-  Cable &operator=(const Cable &) = default;
-  virtual ~Cable() noexcept = default;
+  /** Default and only constructor */
+  MechanicalProperties() = default;
 
-  const double &get_EA() const;
-  const double &get_rho() const;
-  const double &get_T0() const;
+  MechanicalProperties &operator=(const MechanicalProperties &) = default;
+  virtual ~MechanicalProperties() noexcept = default;
 
-  double get_alpha() const;
-  double get_beta() const;
+  inline auto get_EA() const { return m_EA; }
+  inline auto get_rho() const { return m_rho; }
+  inline auto get_T0() const { return m_T0; }
+  inline auto get_alpha() const { return 9.81 * m_rho / m_T0; }
+  inline auto get_beta() const { return m_T0 / m_EA; }
 
   void set_T(double a_T);
   void set_rho(double a_rho);

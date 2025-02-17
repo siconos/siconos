@@ -25,20 +25,20 @@
 #include "SiconosMatrix.hpp"
 #include "Support.h"
 
-siconos::fem::cable::TransportCableResult::TransportCableResult() { rope2.set_Down(true); }
+siconos::fem::cable::TransportCableResult::TransportCableResult() { ropes_down.set_Down(true); }
 
 void siconos::fem::cable::TransportCableResult::prepareSupport() {
   supports.clear();
   puller12idx = -1;
   puller21idx = -1;
-  rope1.prepareSupport(supports, puller12idx);
-  rope2.prepareSupport(supports, puller21idx);
+  ropes_up.prepareSupport(supports, puller12idx);
+  ropes_down.prepareSupport(supports, puller21idx);
 
   // Bottom pylon/pulley
-  supports[puller12idx]->prepare(rope1.get_LastPile(), rope2.get_LastPile(),
-                                 rope1.get_LastT());
+  supports[puller12idx]->prepare(ropes_up.get_LastPylon(), ropes_down.get_LastPylon(),
+                                 ropes_up.get_LastT());
   // Top pylon/pulley
-  supports[puller21idx]->prepare(rope2.get_FirstPile(), rope1.get_FirstPile(), rope2.get_T0());
+  supports[puller21idx]->prepare(ropes_down.get_FirstPylon(), ropes_up.get_FirstPylon(), ropes_down.get_T0());
 }
 
 void siconos::fem::cable::TransportCableResult::prepareIneqConstraint(int nb_node) {
@@ -85,11 +85,11 @@ int siconos::fem::cable::TransportCableResult::to_json(ojson &j, const std::stri
   if (a_option == "fem") {
     j["g"] = g;
   } else if (a_option == "ropeway") {
-    rope1.to_json(j["rope1"]);
-    rope2.to_json(j["rope2"]);
+    ropes_up.to_json(j["ropes_up"]);
+    ropes_down.to_json(j["ropes_down"]);
   } else {
-    rope1.to_json(j["rope1"]);
-    rope2.to_json(j["rope2"]);
+    ropes_up.to_json(j["ropes_up"]);
+    ropes_down.to_json(j["ropes_down"]);
     j["supports"] = ojson::array();
     j["pulleys"] = ojson::array();
     int ns = supports.size();

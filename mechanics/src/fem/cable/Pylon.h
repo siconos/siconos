@@ -16,28 +16,28 @@
  * limitations under the License.
  */
 
-/*! \file Pile.h
-
-  Description of a pylon (position, geometry ...)
-
+/*! \file Pylon.h
+  Pylon class
 */
 #pragma once
 
 #include "Point.h"
 
 namespace siconos::fem::cable {
-class Pile : public Point {
+/**   Description of a pylon (position, geometry ...)
+ */
+class Pylon : public Point {
  public:
-  Pile() = default;
-  Pile(const Pile &) = default;
-  Pile(Pile &&) = default;
-  Pile &operator=(const Pile &) = delete;
-  Pile &operator=(Pile &&) = default;
+  Pylon() = default;
+  Pylon(const Pylon &) = default;
+  Pylon(Pylon &&) = default;
+  Pylon &operator=(const Pylon &) = delete;
+  Pylon &operator=(Pylon &&) = default;
 
-  Pile(const Pile &a_pile, bool a_isStation);
+  Pylon(const Pylon &a_pile, bool a_isStation);
 
-  virtual ~Pile();
-  const double &get_radius() const;
+  virtual ~Pylon();
+  inline auto get_radius() const { return m_radius; }
   // const double &get_dUp() const;
   // const double &get_dDown() const;
 
@@ -46,14 +46,19 @@ class Pile : public Point {
   void transform(bool a_Up);
 
  private:
+  /** True if it's a station pylon else false */
   bool m_isStation{false};
-  /** rayon de la poulie dans le cas station, rayon courbure sinon */
+
+  /** radius (of the pulley for a station, of curvature in other cases) */
   double m_radius{0.};
-  /** distance poteau - cable montant */
+
+  /** distance between the pylon and the up-rope */
   double m_dUp{0.};
-  /* distance poteau - cable descendant */
+
+  /* distance between the pylon and the down-rope  */
   double m_dDown{0.};
-  /** hauteur du poteau */
+
+  /** pylon height */
   double m_h{0.};
 };
 }  // namespace siconos::fem::cable

@@ -32,6 +32,7 @@ namespace siconos::fem::cable {
 
 class Point;
 
+/**  */
 class TransportCableResult {
  private:
   TransportCableResult(const TransportCableResult &) = delete;
@@ -40,10 +41,12 @@ class TransportCableResult {
   TransportCableResult &operator=(TransportCableResult &&) = delete;
 
  public:
+  /** Default and only constructor */
   TransportCableResult();
 
   virtual ~TransportCableResult() noexcept = default;
 
+  /** Build supports  */
   void prepareSupport();
   void prepareIneqConstraint(int nb_nodes);
 
@@ -54,33 +57,32 @@ class TransportCableResult {
 
   int puller12idx{-1};
   int puller21idx{-1};
-  Ropeway rope1;
-  Ropeway rope2;
+  Ropeway ropes_up;
+  Ropeway ropes_down;
 
   std::vector<std::shared_ptr<Support>> supports;
 
   std::vector<Point> q = {};       // positions
   std::vector<Point> R = {};       // internal forces [x,y,z]-> [H,V,B]
   std::vector<double> TS = {};     // tension
-  std::vector<int> contacts = {};  // points en contact (=1)
+  std::vector<int> contacts = {};  // contact points
 
   int nb_nodes{0};
   double length{0.};
   double elem_length{0.};
   // à convertir en siconos (vecteur ou matrice)
   std::vector<double> punct = {};
-  ;
 
   std::vector<double> g = {};
-  ;
+
   std::vector<std::vector<Point>> G = {};
   std::vector<std::vector<Point>> T = {};
-  ;
 
+  /**  */
   std::shared_ptr<siconos::algebra::SiconosVector> q0{nullptr};
   std::shared_ptr<siconos::algebra::SiconosVector> v0{nullptr};
 
   std::shared_ptr<siconos::algebra::SiconosMatrix> mass{nullptr};
-  std::shared_ptr<siconos::algebra::SiconosVector> b{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> fext{nullptr};
 };
 }  // namespace siconos::fem::cable

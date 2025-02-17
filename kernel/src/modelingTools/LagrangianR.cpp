@@ -24,11 +24,11 @@
 
 #include "SiconosMatrix.hpp"
 #include "SiconosVisitor.hpp"
+#include "Tools.hpp"
 
 void siconos::modeling::LagrangianR::display() const {
-  std::cout << "=====> Relation of type "
-            << static_cast<std::underlying_type<RelationType>::type>(_relationType)
-            << " and subtype "
-            << static_cast<std::underlying_type<RelationSubType>::type>(_subType) << "\n";
-  std::cout << " jacobianhOver_q_ :\n" << *jacobianhOver_q_view_ << "\n";
+  std::cout << "=====> Relation of type " << tools::enum_to_string(_relationType)
+            << " and subtype " << tools::enum_to_string(_subType) << "\n";
+  if (jacobianhOver_q_view_)
+    std::cout << " jacobianhOver_q_ :\n" << *jacobianhOver_q_view_ << "\n";
 }

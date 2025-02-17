@@ -29,13 +29,22 @@ class TransportCableModel;
 class TransportCableResult;
 class Point;
 
+/**  */
 class TransportCableProfil {
  public:
   TransportCableProfil(const TransportCableModel &a_model, TransportCableResult &a_results);
 
   virtual ~TransportCableProfil() noexcept = default;
 
-  void computeInitialProfil(int nb_nodes, double a_tol = 1e-20, int a_nmax = 20);
+  /** Build all ropes for each cable (up and down) and initialize (Catenary) their profiles
+     + build and initialize supports
+
+     \param[in] nb_nodes number of nodes by segment
+     \param[in] tol tolerance used to compute initial profile
+     \param[in] nmax max number of iterations used to compute initial profile
+
+  */
+  void computeInitialProfile(int nb_nodes, double tol = 1e-20, int nmax = 20);
 
   void computeFEM(int nb_elem, double a_eps = 0.1, double a_tol = 1e-3);
 

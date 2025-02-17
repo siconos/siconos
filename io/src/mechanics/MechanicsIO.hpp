@@ -20,6 +20,7 @@
 #define MechanicsIO_hpp
 
 #include <memory>
+#include <optional>
 
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
@@ -67,16 +68,16 @@ class MechanicsIO {
   ~MechanicsIO() noexcept = default;
 
   /** Collect  positions from all dynamical systems and save them in a matrix
-   *  
+   *
    *  \param nsds the nonsmooth dynamical system
-   *  \return a matrix whith column(i) = [ds(i).number, ds(i).q_read()].T 
+   *  \return a matrix whith column(i) = [ds(i).number, ds(i).q_read()].T
    */
   siconos::algebra::SiconosMatrix positions(
       const siconos::modeling::NonSmoothDynamicalSystem& nsds) const;
 
   /** Collect velocities/twists from all dynamical systems and save them in a matrix
    *  \param nsds current nonsmooth dynamical system
-   *  \return  a matrix whith column(i) = [ds(i).number, ds(i).velocity_read()].T 
+   *  \return  a matrix whith column(i) = [ds(i).number, ds(i).velocity_read()].T
    */
   siconos::algebra::SiconosMatrix velocities(
       const siconos::modeling::NonSmoothDynamicalSystem& nsds) const;

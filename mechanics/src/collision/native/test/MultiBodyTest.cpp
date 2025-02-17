@@ -73,6 +73,11 @@ using ContactManager = siconos::collision::native::SpaceFilter;
 
 class Disks : public siconos::collision::native::SiconosBodies,
               public std::enable_shared_from_this<Disks> {
+ private:
+  siconos::algebra::SiconosVector initial_positions_{0};
+  siconos::algebra::SiconosVector initial_velocities_{0};
+  siconos::algebra::SiconosVector fext_{0};
+
  public:
   void init() { assert(false); };
   void init(std::string);
@@ -181,6 +186,13 @@ void Disks::init(std::string disks_input) {
     auto disks_matrix = std::make_shared<siconos::algebra::SiconosMatrix>(
         siconos::algebra::readMatrixFromFile(disks_input));
 
+    initial_positions_.resize(NDOF * disks_matrix->rows());
+    initial_velocities_.resize(NDOF * disks_matrix->rows());
+    initial_positions_.setZero();
+    initial_velocities_.setZero();
+    fext_.resize(NDOF * disks_matrix->rows());
+    ;
+    fext_.setZero();
     // -- OneStepIntegrators --
     auto osi = std::make_shared<siconos::integrators::MoreauJeanOSI>(theta);
 
@@ -188,25 +200,25 @@ void Disks::init(std::string disks_input) {
 
     auto nsds = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(t0, T);
 
-    for (unsigned int i = 0; i < disks_matrix->size(0); i++) {
+    for (unsigned int i = 0; i < disks_matrix->rows(); i++) {
       R = disks_matrix->getValue(i, 2);
       m = disks_matrix->getValue(i, 3);
-      siconos::algebra::SiconosVector qTmp{NDOF}, vTmp{NDOF};
-      vTmp.setZero();
-      qTmp(0) = (*disks_matrix)(i, 0);
-      qTmp(1) = (*disks_matrix)(i, 1);
+
+      initial_positions_.segment(NDOF * i, 2) = disks_matrix->row(i).segment(0, 2);
 
       std::shared_ptr<siconos::collision::native::bodies::CircularDS> body{nullptr};
       if (R > 0)
-        body = std::make_shared<siconos::collision::native::bodies::Disk>(R, m, qTmp, vTmp);
+        body = std::make_shared<siconos::collision::native::bodies::Disk>(
+            R, m, initial_positions_.segment(NDOF * i, NDOF),
+            initial_velocities_.segment(NDOF * i, NDOF));
       else
-        body = std::make_shared<siconos::collision::native::bodies::Circle>(-R, m, qTmp, vTmp);
+        body = std::make_shared<siconos::collision::native::bodies::Circle>(
+            -R, m, initial_positions_.segment(NDOF * i, NDOF),
+            initial_velocities_.segment(NDOF * i, NDOF));
 
       // -- Set external forces (weight) --
-      siconos::algebra::SiconosVector FExt{NDOF};
-      FExt.setZero();
-      FExt(1) = -m * g;
-      body->setConstantFext(FExt);
+      fext_(NDOF * i + 1) = -m * g;
+      body->setConstantFext(fext_.segment(NDOF * i, NDOF));
 
       // add the dynamical system in the non smooth dynamical system
       nsds->insertDynamicalSystem(body);
@@ -247,7 +259,7 @@ void Disks::init(std::string disks_input) {
 
     // --- Simulation initialization ---
 
-    std::cout << "====> Simulation initialisation ..." << std::endl << std::endl;
+    std::cout << "====> Simulation initialisation ...\n\n";
 
     auto nslaw = std::make_shared<siconos::modeling::NewtonImpactFrictionNSL>(0, 0, 0.3, 2);
 
@@ -280,7 +292,6 @@ void MultiBodyTest::t1() {
   // if something is broken with SpaceFilter
   // an exception may occurs
   for (unsigned int i = 0; i < 20; ++i) {
-    std::cout << i << " kjkjkkjjk \n";
     disks->compute();
   }
 

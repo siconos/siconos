@@ -16,9 +16,9 @@
  * limitations under the License.
  */
 
-#include "Pile.h"
+#include "Pylon.h"
 
-siconos::fem::cable::Pile::Pile(const Pile &a_pile, bool a_isStation) : Point(a_pile) {
+siconos::fem::cable::Pylon::Pylon(const Pylon &a_pile, bool a_isStation) : Point(a_pile) {
   m_radius = a_pile.get_radius();
   m_h = 0;
   m_dDown = 0;
@@ -26,11 +26,9 @@ siconos::fem::cable::Pile::Pile(const Pile &a_pile, bool a_isStation) : Point(a_
   m_isStation = a_isStation;
 }
 
-siconos::fem::cable::Pile::~Pile() {}
+siconos::fem::cable::Pylon::~Pylon() {}
 
-const double &siconos::fem::cable::Pile::get_radius() const { return m_radius; }
-
-void siconos::fem::cable::Pile::from_json(const json &j) {
+void siconos::fem::cable::Pylon::from_json(const json &j) {
   Point::from_json(j);
   j.at("R").get_to(m_radius);
   try {
@@ -41,9 +39,9 @@ void siconos::fem::cable::Pile::from_json(const json &j) {
   }
 }
 
-bool siconos::fem::cable::Pile::isStation() const { return m_isStation; }
+bool siconos::fem::cable::Pylon::isStation() const { return m_isStation; }
 
-void siconos::fem::cable::Pile::transform(bool a_Up) {
+void siconos::fem::cable::Pylon::transform(bool a_Up) {
   if (!a_Up) {
     if (m_isStation) {
       y += 2.0 * m_radius;

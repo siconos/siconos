@@ -19,9 +19,8 @@
 #include "InteractionManager.hpp"
 
 /*! \file CableCollisionmanager.h
-
-  Manager for interactions in the cable setup.
- */
+  CableCollisionManager class
+*/
 
 namespace siconos::modeling {
 class Interaction;
@@ -32,12 +31,18 @@ namespace siconos::fem::cable {
 class CableDS;
 class Support;
 
+/**
+ *  A class which handles:
+ *   - a dynamical system (the cable)
+ *   - a vector of supports
+ *   and manage their interactions.
+ */
 class CableCollisionManager : public siconos::simulation::InteractionManager {
  public:
-  CableCollisionManager(const std::shared_ptr<CableDS> a_model,
+  CableCollisionManager(const std::shared_ptr<CableDS> a_cableDS,
                         const std::vector<std::shared_ptr<Support>> &a_supports,
                         double a_tolContact = 1e-3)
-      : m_model{a_model}, m_supports{a_supports}, m_tolContact{a_tolContact} {};
+      : cable_ds_{a_cableDS}, supports_{a_supports}, tolAtContact_{a_tolContact} {};
 
   virtual ~CableCollisionManager() noexcept = default;
 
@@ -45,11 +50,11 @@ class CableCollisionManager : public siconos::simulation::InteractionManager {
       std::shared_ptr<siconos::simulation::Simulation> simulation) override;
 
  protected:
-  std::shared_ptr<CableDS> m_model{nullptr};
-  std::vector<std::shared_ptr<Support>> m_supports = {};
-  double m_tolContact{1e-3};
+  std::shared_ptr<CableDS> cable_ds_{nullptr};
+  std::vector<std::shared_ptr<Support>> supports_ = {};
+  double tolAtContact_{1e-3};
 
   using t_contacts = std::map<unsigned int, std::shared_ptr<siconos::modeling::Interaction>>;
-  t_contacts m_contacts;
+  t_contacts contacts_map_;
 };
 }  // namespace siconos::fem::cable

@@ -17,20 +17,62 @@
  */
 
 /*! \file TransportCableModel.h
-  Full description of the setup (cable, piles, carriers)
+  Class TransportCableModel : full description of the setup (cable, piles, carriers)
   before discretization
 */
 #pragma once
 
 #include <vector>
 
-#include "Cable.h"
 #include "Carriers.h"
-#include "Pile.h"
+#include "MechanicalProperties.h"
+#include "Pylon.h"
 
 namespace siconos::fem::cable {
 
+/** A class to handle the full description of the setup
+ *
+ *  - mechanical properties
+ *  - the pylons (standard + top and down stations)
+ *  - carriers
+ *
+ *  Build from json and read-only use afterwards.
+ *
+ */
 class TransportCableModel {
+ private:
+  MechanicalProperties m_cable;
+
+  /** The set of vehicles */
+  Carriers m_carriers;
+
+  /** End station (top) */
+  Pylon m_stationUp;
+
+  /** Down station */
+  Pylon m_stationDown;
+
+  /** Standard pylons list (without top and down station) */
+  std::vector<Pylon> m_piles = {};
+
+  /** Pylons corresponding to the 'up' ropeway, including end-line stations */
+  std::vector<Pylon> m_pilesUp = {};
+
+  /** Pylons corresponding to the 'down' ropeway, including end-line stations */
+  std::vector<Pylon> m_pilesDown = {};
+
+  // Rule of five
+  TransportCableModel(const TransportCableModel &) = delete;
+  TransportCableModel(TransportCableModel &&) = delete;
+  TransportCableModel &operator=(const TransportCableModel &) = delete;
+  TransportCableModel &operator=(TransportCableModel &&) = delete;
+
+  /** Reset the model */
+  void clear();
+
+  /** Internal validation of the model (fill pilesUp and pilesDown in) */
+  int validate();
+
  public:
   TransportCableModel() = default;
 
@@ -41,30 +83,29 @@ class TransportCableModel {
 
   virtual ~TransportCableModel() noexcept = default;
 
+  /** Build the model from a file (json)
+   * \param a_filename json file name
+   */
   int from_file(const std::string &a_fileName);
+
+  /** Build a model from a json object
+   *  \param j json object
+   */
   int from_json(const nlohmann::json &j);
+
+  /** \return true if the model has been loaded and validated */
   bool isLoaded();
 
-  const Cable &get_cable() const;
+  /** \return the mechanical properties of the cable */
+  const MechanicalProperties &mechanicalProperties() const;
+
+  /** \return the set of vehicles */
   const Carriers &get_carriers() const;
-  const std::vector<Pile> &get_piles1() const;
-  const std::vector<Pile> &get_piles2() const;
 
- private:
-  Cable m_cable;
-  Carriers m_carriers;
-  Pile m_stationUp;  // drive station
-  Pile m_stationDown;
-  std::vector<Pile> m_piles = {};  // Roller batteries
-  // Rule of five
-  TransportCableModel(const TransportCableModel &) = delete;
-  TransportCableModel(TransportCableModel &&) = delete;
-  TransportCableModel &operator=(const TransportCableModel &) = delete;
-  TransportCableModel &operator=(TransportCableModel &&) = delete;
+  /** \return the list of pylons corresponding to the 'up' ropeway */
+  const std::vector<Pylon> &get_pylons_up() const;
 
-  void clear();
-  int validate();
-  std::vector<Pile> m_pilesUp = {};
-  std::vector<Pile> m_pilesDown = {};
+  /** \return the list of pylons corresponding to the 'down' ropeway */
+  const std::vector<Pylon> &get_pylons_down() const;
 };
 }  // namespace siconos::fem::cable

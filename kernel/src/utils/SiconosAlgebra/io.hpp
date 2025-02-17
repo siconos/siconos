@@ -28,9 +28,8 @@
 #include <nlohmann/json.hpp>  // json in/out
 #include <vector>
 // #include <string>
+#include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "SiconosMatrix.hpp"
-#include "SiconosMatrix.hpp"
 
 /** utilities to handle file input/output for vectors and matrices */
 namespace siconos::algebra {
@@ -150,10 +149,10 @@ double compareRefFile(const SiconosMatrix &data, std::string filename, double ep
                       const std::ios_base::openmode mode = std::ios_base::in,
                       bool verbose = true);
 
-/** \returns a pointer to a SiconosVector, built from json input
-    \param jin json input
+/** \returns a SiconosVector, built from json input
+    \param jin json input (either a list of values or a list of points)
 */
-std::shared_ptr<SiconosVector> readVectorFromJson(const nlohmann::json &jin);
+SiconosVector readVectorFromJson(const nlohmann::json &jin);
 }  // namespace io
 }  // namespace siconos::algebra
 #endif

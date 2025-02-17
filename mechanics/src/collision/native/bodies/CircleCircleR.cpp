@@ -24,6 +24,10 @@
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 
+
+
+
+
 double siconos::collision::native::bodies::CircleCircleR::distance(double x1, double y1,
                                                                    double r1, double x2,
                                                                    double y2, double r2) {
@@ -67,4 +71,10 @@ void siconos::collision::native::bodies::CircleCircleR::computeJacobianhOver_q(
   jacobianhOver_q_view_->setValue(1, 4, -dxsd);
   jacobianhOver_q_view_->setValue(0, 5, 0.);
   jacobianhOver_q_view_->setValue(1, 5, -_r2);
+}
+
+void siconos::collision::native::bodies::CircleCircleR::display() const {
+  std::cout << "=====> Circle-Circle relation \n";
+  if (jacobianhOver_q_view_)
+    std::cout << " jacobianhOver_q_ :\n" << *jacobianhOver_q_view_ << "\n";
 }
