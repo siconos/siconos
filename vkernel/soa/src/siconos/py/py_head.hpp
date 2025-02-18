@@ -36,9 +36,9 @@ using osnspb = simul::one_step_nonsmooth_problem<fc2d>;
 using solver_options = simul::solver_options;
 using interaction =
     simul::interaction<nslaw, diskdisk_r, diskfdisk_r, diskfsegment_r>;
-using osi = simul::one_step_integrator<disk, interaction>::moreau_jean;
-using td = simul::time_discretization<>;
 using topo = simul::topology<disk, interaction>;
+using osi = simul::one_step_integrator<topo>::moreau_jean;
+using td = simul::time_discretization<>;
 using pointd = collision::point<disk>;
 using pointl = collision::point<collision::shape::segment>;
 using pointtds = collision::point<translated_disk_shape>;

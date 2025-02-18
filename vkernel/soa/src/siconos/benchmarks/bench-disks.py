@@ -9,12 +9,14 @@ import sys
 from siconos.mechanics.collision.tools import Contactor
 from siconos.mechanics.collision.bullet import SiconosBulletOptions
 
-from nonos.mechanics_run import MechanicsHdf5Runner, MechanicsHdf5Runner_run_options
+from siconos.io.mechanics_run import MechanicsHdf5Runner,\
+    MechanicsHdf5Runner_run_options,\
+    set_backend
 import nonos
 
 backend = str(sys.argv[1])
 
-nonos.mechanics_run.set_backend(backend)
+set_backend(backend)
 
 N = int(sys.argv[2])
 

@@ -1,15 +1,14 @@
 #pragma once
 
-#include "siconos/utils/print.hpp"
-#include "siconos/collision/collision_head.hpp"
+#include "siconos/algebra/eigen.hpp"
 #include "siconos/collision/collision.hpp"
+#include "siconos/collision/collision_head.hpp"
 
 namespace siconos::collision::shape {
 
 struct segment : item<> {
   using attributes = gather<
-      attribute<"p1", some::vector<some::scalar, some::indice_value<3>>>,
-      attribute<"p2", some::vector<some::scalar, some::indice_value<3>>>,
+      attribute<"points", some::vector<some::scalar, some::indice_value<6>>>,
       attribute<"normal", some::vector<some::scalar, some::indice_value<3>>>,
       attribute<"dp2p1", some::vector<some::scalar, some::indice_value<3>>>,
       attribute<"maxpoints", some::scalar>,
@@ -19,8 +18,20 @@ struct segment : item<> {
   struct interface : default_interface<Handle> {
     using default_interface<Handle>::self;
 
-    decltype(auto) p1() { return attr<"p1">(*self()); };
-    decltype(auto) p2() { return attr<"p2">(*self()); };
+    decltype(auto) p1()
+    {
+      using scalar = typename decltype(self()->env())::scalar;
+
+      return algebra::matrix_view<algebra::vector<scalar, 3>>(
+          attr<"points">(*self()).data());
+    };
+    decltype(auto) p2()
+    {
+      using scalar = typename decltype(self()->env())::scalar;
+
+      return algebra::matrix_view<algebra::vector<scalar, 3>>(
+          attr<"points">(*self()).data() + 3);
+    };
     decltype(auto) x1() { return p1()[0]; };
     decltype(auto) y1() { return p1()[1]; };
     decltype(auto) x2() { return p2()[0]; };
@@ -51,7 +62,6 @@ struct segment : item<> {
       compute_normal();
     }
 
-
     decltype(auto) distance(match::vector auto& q)
     {
       /* dof 3 -> 2D + 1 (CompactNSearch) */
@@ -70,8 +80,7 @@ struct segment : item<> {
       const auto pstep = 1. / maxpoints();
       const auto dir = dp2p1();
       return view::iota(0, maxpoints()) |
-        view::transform([=](auto i) {
-          return p + i * pstep * dir; });
+             view::transform([=](auto i) { return p + i * pstep * dir; });
     }
 
     auto methods()

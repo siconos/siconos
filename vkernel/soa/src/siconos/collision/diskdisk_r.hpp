@@ -36,8 +36,7 @@ struct diskdisk_r : item<>, model::relation2, model::any_lagrangian_relation {
 
     template <typename S, match::handle<model::lagrangian_ds> DS1,
               match::handle<model::lagrangian_ds> DS2, typename M>
-    decltype(auto) compute_jachq(S step, DS1& ds1, DS2& ds2, M& h_matrix1,
-                                 M& h_matrix2)
+    void compute_jachq(S step, DS1& ds1, DS2& ds2, M& h_matrix1, M& h_matrix2)
     {
       auto& data = self()->data();
 
@@ -66,7 +65,7 @@ struct diskdisk_r : item<>, model::relation2, model::any_lagrangian_relation {
       g1(0, 0) = -dxsd;
       g1(1, 0) = dysd;
       g1(0, 1) = -dysd;
-      g1(1, 1) =-dxsd;
+      g1(1, 1) = -dxsd;
       g1(0, 2) = 0.;
       g1(1, 2) = -r1;
 

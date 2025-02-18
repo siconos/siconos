@@ -36,7 +36,7 @@ struct diskfdisk_r : item<>,
              translated_disk_shape().item().radius();
     }
 
-    decltype(auto) compute_jachq(auto step, auto& ds, auto& h_matrix1)
+    void compute_jachq(auto step, auto& ds, auto& h_matrix1)
     {
       auto& data = self()->data();
       using scalar = typename decltype(self()->env())::scalar;

@@ -1,6 +1,6 @@
 from siconos.mechanics.collision.tools import Contactor
-from nonos.mechanics_run import MechanicsHdf5Runner, \
-    MechanicsHdf5Runner_run_options
+from siconos.io.mechanics_run import MechanicsHdf5Runner, \
+    MechanicsHdf5Runner_run_options, set_backend
 
 import nonos
 import siconos.numerics as sn
@@ -12,7 +12,7 @@ import numpy
 from math import sqrt
 from random import random
 
-nonos.mechanics_run.set_backend('vnative')
+set_backend('vnative')
 
 disk_radius = 1
 N = 10

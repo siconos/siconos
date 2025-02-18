@@ -27,7 +27,7 @@ struct diskline_r : item<>, model::relation1, model::any_lagrangian_relation {
              handle(self()->data(), prop<"shape">(ds)).radius();
     }
 
-    decltype(auto) compute_jachq(auto step, auto& ds, auto& h_matrix1)
+    void compute_jachq(auto step, auto& ds, auto& h_matrix1)
     {
       auto& data = self()->data();
 

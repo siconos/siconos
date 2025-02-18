@@ -19,8 +19,10 @@ while [ $# -gt 0 ]; do
       shift
       args=$@
       set --
-      . ${venv}/bin/activate
-      export LD_LIBRARY_PATH=`pwd`/${venv}/lib/python${python_version}/site-packages/nonos/:$LD_LIBRARY_PATH
+      if [ -f ${venv}/bin/activate ]; then
+        . ${venv}/bin/activate
+        export LD_LIBRARY_PATH=`pwd`/${venv}/lib/python${python_version}/site-packages/nonos/:$LD_LIBRARY_PATH
+      fi
       exec python3 ./src/siconos/py/nonos/vview.py $args
       ;;
 
@@ -37,7 +39,7 @@ while [ $# -gt 0 ]; do
       export GUIX_PROFILE=$pwd/.siconos-guix-profile
       . ${GUIX_PROFILE}/etc/profile
 
-      export PYTHONPATH=$GUIX_PYTHONPATH
+      export PYTHONPATH=$GUIX_PYTHONPATH:$PYTHONPATH
       exec $0 "$@"
       ;;
 
@@ -76,7 +78,7 @@ EOF
        (url "https://gitlab.inria.fr/bremond/guix-hpc.git")
        (branch "add-siconosx")
        (commit
-        "7e107ae4b0b75e7e0d396263a2b1df409e425697")))
+        "c3588b261e3d3f279a3b6a43e2eb5865e1a47247")))
 EOF
       # guix environment setup
       # export PATH=/var/guix/profiles/per-user/root/current-guix/bin:$PATH
@@ -84,8 +86,8 @@ EOF
       [ -f /applis/site/guix-start.sh ] && . /applis/site/guix-start.sh
       pwd=`pwd`
       rm -f $pwd/.siconos-guix-profile
-      #guix_isolation_args="--container -N --emulate-fhs --share=/tmp --share=/scratch --share=$HOME"
-      guix_isolation_args="--pure --preserve=OMP* --preserve=VRUN*"
+      guix_isolation_args="--container -N --emulate-fhs --share=/tmp --share=/scratch --share=$HOME"
+      #guix_isolation_args="--pure --preserve=OMP* --preserve=VRUN*"
       guix_cmd="guix time-machine -C ./.siconos-vrun-channels.scm --"
       # it seems that we need to pass explicitely the package for transformations
       exec $guix_cmd shell $guix_isolation_args \
@@ -176,8 +178,10 @@ EOF
 
     --shell)
       shift
-      [ -f ${mydir}/${venv}/bin/activate ] && . ${venv}/bin/activate
-      export LD_LIBRARY_PATH=`pwd`/${venv}/lib/python${python_version}/site-packages/nonos/:$LD_LIBRARY_PATH
+      if [ -f ${mydir}/${venv}/bin/activate ]; then
+        . ${venv}/bin/activate
+        export LD_LIBRARY_PATH=`pwd`/${venv}/lib/python${python_version}/site-packages/nonos/:$LD_LIBRARY_PATH
+      fi
       bash -i
       ;;
 
@@ -229,10 +233,13 @@ EOF
       else
         xex="exec"
       fi
-      [ -f ${venv}/bin/activate ] && . ${venv}/bin/activate
-      python_version=`python3 -c 'import sys; print(".".join(map(str, sys.version_info[:2])))'`
-      python_site_packages_path=`python3 -c 'import os; import sys; print(os.path.join(sys.prefix, "lib", "python" + sys.version[:3], "site-packages"))'`
-      export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:`pwd`/${venv}/lib/python${python_version}/site-packages/nonos/
+      if [ -f ${venv}/bin/activate ]; then
+        . ${venv}/bin/activate
+        python_version=`python3 -c 'import sys; print(".".join(map(str, sys.version_info[:2])))'`
+        python_site_packages_path=`python3 -c 'import os; import sys; print(os.path.join(sys.prefix, "lib", "python" + sys.version[:3], "site-packages"))'`
+        export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:`pwd`/${venv}/lib/python${python_version}/site-packages/nonos/
+      fi
+
       if [ ! -z "$timer" ]; then
         $xex $timer -f "$timer_args" $interp $script $args
       else
