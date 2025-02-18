@@ -18,9 +18,9 @@
 #include "ZOHTest.hpp"
 
 #include "EventsManager.hpp"
-#include "SiconosVector.hpp"
-#include "SiconosMatrixVectorOp.hpp"
 #include "SiconosMatrix.hpp"
+#include "SiconosMatrixVectorOp.hpp"
+#include "SiconosVector.hpp"
 #include "io.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
@@ -95,8 +95,8 @@ void ZOHTest::testMatrixExp1() {
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp1 : ", Phi.size(1) == _n, true);
   siconos::algebra::SiconosMatrix diff2Tmp = *tmpM - Phi;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp1 : ", diff2Tmp.normInf() < _tol, true);
-  std::cout << "------- Second computation ok, error = " << diff2Tmp.normInf()
-            << " -------" << std::endl;
+  std::cout << "------- Second computation ok, error = " << diff2Tmp.normInf() << " -------"
+            << std::endl;
   std::cout << std::endl << std::endl;
 }
 
@@ -141,10 +141,8 @@ void ZOHTest::testMatrixIntegration1() {
   //  sed -i "1i100 3" testMatrixIntegration1.ref
   siconos::algebra::io::read("testMatrixIntegration1.ref", dataPlotRef);
   siconos::algebra::SiconosMatrix diff = dataPlot - dataPlotRef;
-  std::cout << "------- Integration Ok, error = " << diff.normInf()
-            << " -------" << std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp1 : ", diff.normInf() < _tol,
-                               true);
+  std::cout << "------- Integration Ok, error = " << diff.normInf() << " -------" << std::endl;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp1 : ", diff.normInf() < _tol, true);
 }
 
 void ZOHTest::testMatrixIntegration2() {
@@ -178,7 +176,8 @@ void ZOHTest::testMatrixIntegration2() {
   auto osnspb = std::make_shared<siconos::nonsmooth_formulations::Relay>();
   _sim->insertNonSmoothProblem(osnspb);
   _sim->initialize();
-  siconos::algebra::SiconosMatrix dataPlot((unsigned)ceil((_T - _t0) / _h) + 10, 5);
+  auto N = (unsigned)ceil((_T - _t0) / _h);
+  siconos::algebra::SiconosMatrix dataPlot(N + 1, 5);
   auto& xProc = *_DS->x();
   auto& lambda = *inter->lambda(0);
   unsigned int k = 0;
@@ -187,8 +186,10 @@ void ZOHTest::testMatrixIntegration2() {
   dataPlot(0, 2) = (*_x0)(1);
   dataPlot(0, 3) = 0;
   dataPlot(0, 4) = 0;
+
   while (_sim->hasNextEvent()) {
     _sim->computeOneStep();
+    (*_x0)(0) = 12;
     k++;
     dataPlot(k, 0) = _sim->nextTime();
     dataPlot(k, 1) = xProc(0);
@@ -197,7 +198,6 @@ void ZOHTest::testMatrixIntegration2() {
     dataPlot(k, 4) = lambda(1);
     _sim->nextStep();
   }
-  dataPlot.resize(k, 5);
   dataPlot.display();
   std::cout << std::endl << std::endl;
   siconos::algebra::io::write("testMatrixIntegration2.dat", dataPlot,
@@ -208,10 +208,8 @@ void ZOHTest::testMatrixIntegration2() {
   dataPlotRef.setZero();
   siconos::algebra::io::read("testMatrixIntegration2.ref", dataPlotRef);
   siconos::algebra::SiconosMatrix diff = dataPlot - dataPlotRef;
-  std::cout << "------- Integration Ok, error = " << diff.normInf()
-            << " -------" << std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp2 : ", diff.normInf() < _tol,
-                               true);
+  std::cout << "------- Integration Ok, error = " << diff.normInf() << " -------" << std::endl;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp2 : ", diff.normInf() < _tol, true);
 }
 
 void ZOHTest::testMatrixIntegration3() {
@@ -249,7 +247,8 @@ void ZOHTest::testMatrixIntegration3() {
   auto osnspb = std::make_shared<siconos::nonsmooth_formulations::Relay>();
   _sim->insertNonSmoothProblem(osnspb);
   _sim->initialize();
-  siconos::algebra::SiconosMatrix dataPlot((unsigned)ceil((_T - _t0) / _h) + 10, 7);
+  auto N = (unsigned)ceil((_T - _t0) / _h);
+  siconos::algebra::SiconosMatrix dataPlot(N + 1, 7);
   auto& xProc = *_DS->x();
   auto& lambda = *inter->lambda(0);
   siconos::algebra::SiconosVector sampledControl(_n);
@@ -274,7 +273,6 @@ void ZOHTest::testMatrixIntegration3() {
     dataPlot(k, 6) = lambda(1);
     _sim->nextStep();
   }
-  dataPlot.resize(k, 7);
   dataPlot.display();
   std::cout << std::endl << std::endl;
   siconos::algebra::io::write("testMatrixIntegration3.dat", dataPlot,
@@ -285,10 +283,8 @@ void ZOHTest::testMatrixIntegration3() {
   dataPlotRef.setZero();
   siconos::algebra::io::read("testMatrixIntegration3.ref", dataPlotRef);
   siconos::algebra::SiconosMatrix diff = dataPlot - dataPlotRef;
-  std::cout << "------- Integration Ok, error = " << diff.normInf()
-            << " -------" << std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp3 : ", diff.normInf() < _tol,
-                               true);
+  std::cout << "------- Integration Ok, error = " << diff.normInf() << " -------" << std::endl;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp3 : ", diff.normInf() < _tol, true);
 }
 
 void ZOHTest::testMatrixIntegration4() {
@@ -326,7 +322,8 @@ void ZOHTest::testMatrixIntegration4() {
   auto osnspb = std::make_shared<siconos::nonsmooth_formulations::Relay>();
   _sim->insertNonSmoothProblem(osnspb);
   _sim->initialize();
-  siconos::algebra::SiconosMatrix dataPlot((unsigned)ceil((_T - _t0) / _h) + 10, 7);
+  auto N = (unsigned)ceil((_T - _t0) / _h);
+  siconos::algebra::SiconosMatrix dataPlot(N + 1, 7);
   auto& xProc = *_DS->x();
   auto& lambda = *inter->lambda(0);
   siconos::algebra::SiconosVector sampledControl(_n);
@@ -351,7 +348,6 @@ void ZOHTest::testMatrixIntegration4() {
     dataPlot(k, 6) = lambda(1);
     _sim->nextStep();
   }
-  dataPlot.resize(k, 7);
   dataPlot.display();
   std::cout << std::endl << std::endl;
   siconos::algebra::io::write("testMatrixIntegration4.dat", dataPlot,
@@ -362,8 +358,6 @@ void ZOHTest::testMatrixIntegration4() {
   dataPlotRef.setZero();
   siconos::algebra::io::read("testMatrixIntegration4.ref", dataPlotRef);
   siconos::algebra::SiconosMatrix diff = dataPlot - dataPlotRef;
-  std::cout << "------- Integration Ok, error = " << diff.normInf()
-            << " -------" << std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp4 : ", diff.normInf() < _tol,
-                               true);
+  std::cout << "------- Integration Ok, error = " << diff.normInf() << " -------" << std::endl;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp4 : ", diff.normInf() < _tol, true);
 }

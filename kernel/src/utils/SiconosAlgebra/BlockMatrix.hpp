@@ -85,7 +85,6 @@ class BlockMatrix {
    *  \param m a MapMatrix
    */
   BlockMatrix(std::shared_ptr<MapType> m);
-  
 
   /** Build from eigen view (shared-memory !) */
   BlockMatrix(Eigen::Ref<siconos::algebra::SiconosMatrix> input);
@@ -304,7 +303,7 @@ class BlockMatrix {
   /** number of non-zero in the matrix
    * \param tol the tolerance under which a number is considered zero
    */
-  virtual size_t nnz(double tol = 1.e-14);
+  size_t nnz(double tol = 1.e-14);
 };
 
 }  // namespace siconos::algebra

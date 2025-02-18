@@ -73,7 +73,7 @@ siconos::simulation::MatrixIntegrator::MatrixIntegrator(
 
   if (auto folds = dynamic_cast<const siconos::modeling::FirstOrderLinearDS*>(&ds)) {
     _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*folds);
-    _isConst = (_TD->hConst()) && !(folds->isTimeInvariant()) ? true : false;
+    _isConst = (_TD->hConst()) && (folds->isTimeInvariant()) ? true : false;
   }
 
   _DS->setNumber(9999999);

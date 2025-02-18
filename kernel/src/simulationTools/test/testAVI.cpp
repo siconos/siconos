@@ -28,24 +28,7 @@
 // test suite registration
 CPPUNIT_TEST_SUITE_REGISTRATION(AVITest);
 
-void AVITest::setUp() {
-  _A = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
-  _b = std::make_shared<siconos::algebra::SiconosVector>(_n);
-  _x0 = std::make_shared<siconos::algebra::SiconosVector>(_n);
-  _A->setZero();
-  _b->setZero();
-  _x0->setZero();
-}
-
-void AVITest::init() {
-  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, *_A, *_b);
-  _TD = std::make_shared<siconos::simulation::TimeDiscretisation>(_t0, _h);
-  _nsds = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(_t0, _T);
-  _osi = std::make_shared<siconos::integrators::EulerMoreauOSI>(_theta);
-  _nsds->insertDynamicalSystem(_DS);
-  _sim = std::make_shared<siconos::simulation::TimeStepping>(_nsds, _TD, 0);
-  _sim->associate(_osi, _DS);
-}
+void AVITest::setUp() {}
 
 void AVITest::tearDown() {}
 
@@ -58,7 +41,11 @@ void AVITest::testAVI() {
   _T = 20.0;
   double G = 10.0;
   double beta = .3;
+  _A = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
+  _b = std::make_shared<siconos::algebra::SiconosVector>(_n);
+  _x0 = std::make_shared<siconos::algebra::SiconosVector>(_n);
   _A->setZero();
+  _b->setZero();
   (*_A)(0, 1) = 1.0;
   _x0->setZero();
   (*_x0)(0) = 10.0;
@@ -96,7 +83,8 @@ void AVITest::testAVI() {
   auto osnspb = std::make_shared<siconos::nonsmooth_formulations::AVI>();
   _sim->insertNonSmoothProblem(osnspb);
 
-  siconos::algebra::SiconosMatrix dataPlot((unsigned)ceil((_T - _t0) / _h) + 10, 5);
+  auto N = (unsigned)ceil((_T - _t0) / _h);
+  siconos::algebra::SiconosMatrix dataPlot(N + 1, 5);
   auto& xProc = *_DS->x();
   auto& lambda = *inter->lambda(0);
   unsigned int k = 0;
@@ -115,22 +103,21 @@ void AVITest::testAVI() {
     dataPlot(k, 4) = lambda(1);
     _sim->nextStep();
   }
-  std::cout << std::endl << std::endl;
-  dataPlot.resize(k, dataPlot.size(1));
+
   siconos::algebra::io::write("testAVI.dat", dataPlot, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
   siconos::algebra::SiconosMatrix dataPlotRef(dataPlot);
   dataPlotRef.setZero();
   siconos::algebra::io::read("testAVI.ref", dataPlotRef);
-  siconos::algebra::SiconosVector err{dataPlot.size(1)};
+  siconos::algebra::SiconosVector err{dataPlot.cols()};
   siconos::algebra::normInfByColumn(dataPlot - dataPlotRef, err);
   err.display();
 
   double maxErr = err(0) > err(1) ? (err(0) > err(2) ? err(0) : err(2))
                                   : (err(1) > err(2) ? err(1) : err(2));
 
-  std::cout << "------- Integration Ok, error = " << maxErr << " -------" << std::endl;
+  std::cout << "------- Integration Ok, error = " << maxErr << " -------\n";
   if (maxErr > _tol) {
     dataPlot.display();
     siconos::algebra::SiconosMatrix diff = dataPlot - dataPlotRef;

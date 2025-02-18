@@ -184,25 +184,25 @@ void siconos::modeling::FirstOrderLinearTIR::display() const {
   std::cout << " ===== Linear Time Invariant relation display =====\n";
   std::cout << "| C \n";
   if (jacobianhOver_state_view_)
-    std::cout << jacobianhOver_state_view_ << "\n";
+    std::cout << *jacobianhOver_state_view_ << "\n";
   else
     std::cout << "->nullptr\n";
 
   std::cout << "| D\n";
   if (jacobianhOver_lambda_view_)
-    std::cout << jacobianhOver_lambda_view_ << "\n";
+    std::cout << *jacobianhOver_lambda_view_ << "\n";
   else
     std::cout << "->nullptr\n";
 
   std::cout << "| e\n";
   if (eVector_view_)
-    std::cout << eVector_view_ << "\n";
+    std::cout << *eVector_view_ << "\n";
   else
     std::cout << "->nullptr\n";
 
   std::cout << "| B \n";
   if (jacobiangOver_lambda_view_)
-    std::cout << jacobiangOver_lambda_view_ << "\n";
+    std::cout << *jacobiangOver_lambda_view_ << "\n";
   else
     std::cout << "->nullptr\n";
   std::cout << " ================================================== \n";

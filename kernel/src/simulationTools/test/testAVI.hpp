@@ -46,7 +46,6 @@ class AVITest : public CppUnit::TestFixture {
 
   CPPUNIT_TEST_SUITE_END();
 
-  void init();
   void testAVI();
 
   unsigned int _n{2};

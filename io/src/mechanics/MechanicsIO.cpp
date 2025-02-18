@@ -580,7 +580,7 @@ siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::positions(
                                  siconos::modeling::NewtonEulerDS>,
       GetPosition>::Make;
 
-  return visitAllVerticesForVector<Getter>(*(nsds.topology()->dSG(0)));
+  return visitAllVerticesForVector<Getter>(*(nsds.topology()->dSG(0))).transpose();
 };
 
 siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::velocities(
@@ -590,7 +590,7 @@ siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::velocities(
                                  siconos::modeling::NewtonEulerDS>,
       GetVelocity>::Make;
 
-  return visitAllVerticesForVector<Getter>(*nsds.topology()->dSG(0));
+  return visitAllVerticesForVector<Getter>(*nsds.topology()->dSG(0)).transpose();
 }
 
 std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::contactPoints(
