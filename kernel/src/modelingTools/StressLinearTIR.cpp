@@ -94,22 +94,21 @@ void siconos::modeling::StressLinearTIR::computeOutput(double time, Interaction&
   auto& y = *inter.y(derivativeNumber);
   auto& DSlink = inter.linkToDSVariables();
   siconos::algebra::prod(*_jachq, *DSlink[LagrangianR::DSlinkSize + SolidLinearDS::sigma + derivativeNumber], y);
-  std::cout << "-----------------------  StressLinearTIR::computeOutput -------------------------" << std::endl;
+  // std::cout << "-----------------------  StressLinearTIR::computeOutput -------------------------" << std::endl;
 
-  std::cout << "Computing y (sigma_alpha) at derivativeNumber:" << derivativeNumber << std::endl;
-  std::cout << "DSlink[LagrangianR::DSlinkSize + SolidLinearDS::sigma + derivativeNumber]: " << std::endl;
-  DSlink[LagrangianR::DSlinkSize + SolidLinearDS::sigma + derivativeNumber]->display();
-//    DSlink[LagrangianR::DSlinkSize + SolidLinearDS::sigma + derivativeNumber]->display();
+  // std::cout << "Computing y (sigma_alpha) at derivativeNumber:" << derivativeNumber << std::endl;
+  // std::cout << "DSlink[LagrangianR::DSlinkSize + SolidLinearDS::sigma + derivativeNumber]: " << std::endl;
+  // DSlink[LagrangianR::DSlinkSize + SolidLinearDS::sigma + derivativeNumber]->display();
 
   if (derivativeNumber == 0) {
     if (_e) y += *_e;
 
     if (_F) siconos::algebra::prod(*_F, *DSlink[LagrangianR::z], y, false);
   }
-  std::cout << "y : " << std::endl;
-  y.display();
+  // std::cout << "y : " << std::endl;
+  // y.display();
 
-  std::cout << "-----------------------  StressLinearTIR::computeOutput END -------------------------" << std::endl;
+  // std::cout << "-----------------------  StressLinearTIR::computeOutput END -------------------------" << std::endl;
 
 
   DEBUG_END(
@@ -133,19 +132,18 @@ void siconos::modeling::StressLinearTIR::computeInput(double time, Interaction& 
   DEBUG_EXPR(lambda.display(););
   DEBUG_EXPR(_jachq->display(););
   DEBUG_EXPR(DSlink[SolidLinearDS::dotEpsilon]->display(););
-  std::cout << "-----------------------  StressLinearTIR::computeInput -------------------------" << std::endl;
-//  inter.display();
-  std::cout << "level:" << level << " lambda :" << std::endl;
-  lambda.display();
-  std::cout << "_jachq :" << std::endl;
-  _jachq->display();
+//   std::cout << "-----------------------  StressLinearTIR::computeInput -------------------------" << std::endl;
+//   std::cout << "level:" << level << " lambda :" << std::endl;
+//   lambda.display();
+//   std::cout << "_jachq :" << std::endl;
+//   _jachq->display();
 
 
 
   siconos::algebra::prod(lambda, *_jachq, *DSlink[LagrangianR::DSlinkSize+SolidLinearDS::epsilonp + level], false);
-  std::cout << "DSlink[LagrangianR::DSlinkSize+SolidLinearDS::epsilonp + level]" << std::endl;
-  DSlink[LagrangianR::DSlinkSize+SolidLinearDS::epsilonp + level]->display();
-  std::cout << "-----------------------  StressLinearTIR::computeInput END-------------------------" << std::endl;
+  // std::cout << "DSlink[LagrangianR::DSlinkSize+SolidLinearDS::epsilonp + level]" << std::endl;
+  // DSlink[LagrangianR::DSlinkSize+SolidLinearDS::epsilonp + level]->display();
+  // std::cout << "-----------------------  StressLinearTIR::computeInput END-------------------------" << std::endl;
 
   DEBUG_END(
       "void siconos::modeling::StressLinearTIR::computeInput(double time, Interaction& "

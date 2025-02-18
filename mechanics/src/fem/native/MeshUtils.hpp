@@ -43,11 +43,17 @@ std::shared_ptr<Mesh> createMeshFromGMSH2(std::string gmsh_filename);
 void writeMeshforPython(std::shared_ptr<Mesh> mesh);
 
 std::string prepareWriteDisplacementforPython(std::string basename);
-
+std::string prepareWriteTensorforPython(std::string basename, std::string tensorName);
 void writeDisplacementforPython(std::shared_ptr<Mesh> mesh,
                                 std::shared_ptr<FiniteElementModel> femodel,
                                 std::shared_ptr<siconos::algebra::SiconosVector> x,
                                 std::string filename);
+
+void writeTensorforPython(std::shared_ptr<FiniteElementModel> femodel,
+                          std::shared_ptr<siconos::algebra::SiconosVector> x,
+                          std::string filename,
+                          std::string tensorName);
+
 
 }  // namespace siconos::mechanics::fem
 #endif

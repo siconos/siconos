@@ -287,7 +287,26 @@ std::string siconos::mechanics::fem::prepareWriteDisplacementforPython(std::stri
   fclose(foutput);
   return filename;
 }
+std::string siconos::mechanics::fem::prepareWriteTensorforPython(std::string basename, std::string tensorName) {
+  std::string filename = basename + "_tensor.py";
 
+  std::cout << "Output Tensor for python post-processing in " << filename << std::endl;
+
+  FILE *foutput = fopen(filename.c_str(), "w");
+  fprintf(foutput, "import numpy as np\n");
+
+  std::string strxx = tensorName + "_xx=[]\n";
+  fprintf(foutput, strxx.c_str());
+
+  std::string stryy = tensorName + "_yy=[]\n";
+  fprintf(foutput, stryy.c_str());
+
+  std::string strxy = tensorName + "_xy=[]\n";
+  fprintf(foutput, strxy.c_str());
+
+  fclose(foutput);
+  return filename;
+}
 void siconos::mechanics::fem::writeDisplacementforPython(
     std::shared_ptr<Mesh> mesh, std::shared_ptr<FiniteElementModel> femodel,
     std::shared_ptr<siconos::algebra::SiconosVector> x, std::string filename) {
@@ -336,5 +355,55 @@ void siconos::mechanics::fem::writeDisplacementforPython(
   fprintf(foutput, "]))\n");
   fprintf(foutput, "\n");
 
+  fclose(foutput);
+}
+
+void siconos::mechanics::fem::writeTensorforPython(
+     std::shared_ptr<FiniteElementModel> femodel,
+    std::shared_ptr<siconos::algebra::SiconosVector> x, std::string filename, std::string tensorName) {
+  FILE *foutput = fopen(filename.c_str(), "a");
+
+  std::string stringxx = tensorName + "_xx.append(np.array([";
+  x->display();
+  fprintf(foutput, stringxx.c_str());
+
+  unsigned int elem_cnt = 0;
+  double value;
+  for(std::shared_ptr<FElement> fe : femodel->elements())
+  {
+    value = (*x)(elem_cnt*3);
+    fprintf(foutput, "%e,", value);
+    elem_cnt++;
+  }
+  std::cout << " elem_cnt:" << elem_cnt << std::endl;
+
+  fprintf(foutput, "]))\n");
+  fprintf(foutput, "\n");
+
+  std::string stringyy = tensorName + "_yy.append(np.array([";
+  fprintf(foutput, stringyy.c_str());
+elem_cnt = 0;
+  for(std::shared_ptr<FElement> fe : femodel->elements())
+  {
+    value = (*x)(elem_cnt*3+1);
+    fprintf(foutput, "%e,", value);
+    elem_cnt++;
+  }
+
+  fprintf(foutput, "]))\n");
+  fprintf(foutput, "\n");
+
+  std::string stringxy = tensorName + "_xy.append(np.array([";
+  fprintf(foutput, stringxy.c_str());
+elem_cnt = 0;
+  for(std::shared_ptr<FElement> fe : femodel->elements())
+  {
+    value = (*x)(elem_cnt*3+2);
+    fprintf(foutput, "%e,", value);
+    elem_cnt++;
+  }
+
+  fprintf(foutput, "]))\n");
+  fprintf(foutput, "\n");
   fclose(foutput);
 }
