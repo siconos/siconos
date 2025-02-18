@@ -36,8 +36,7 @@ class SpaceFilter(Stored):
 
     def insertSegment(self, x1, y1, x2, y2):
         segment = vkernel.disks.add_segment_shape(self.data())
-        segment.set_p1(array([x1, y1, 0]))
-        segment.set_p2(array([x2, y2, 0]))
+        segment.set_points(array([x1, y1, 0, x2, y2, 0]))
 
         mp = int(max(3, sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1)) / self._options.min_radius))
 
