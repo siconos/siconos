@@ -25,7 +25,7 @@
 #include "NumericsMatrix.h"        // for NM_create_from_data, NumericsMatrix
 #include "SparseBlockMatrix.h"
 
-struct LocalMC2DProblemFunctionToolkit* localMC2DProblemFunctionToolkit_new() {
+struct LocalMC2DProblemFunctionToolkit* localMC2DProblemFunctionToolkit_new(void) {
   struct LocalMC2DProblemFunctionToolkit* lpft =
       (struct LocalMC2DProblemFunctionToolkit*)malloc(
           sizeof(struct LocalMC2DProblemFunctionToolkit));

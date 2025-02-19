@@ -153,7 +153,7 @@ class LagrangianScleronomousR : public LagrangianR {
 
   /** \return a read-only view on \f$ \frac{\partial}{\partial t}(\nabla^T_{q} h(q)).\dot q\f$
    * vector */
-  inline const auto jacobianhOver_q_dot_X_qdot() const {
+  inline auto jacobianhOver_q_dot_X_qdot() const {
     return siconos::algebra::ConstMapVectorType(jacobianhOver_q_dot_X_qdot_->data(),
                                                 jacobianhOver_q_dot_X_qdot_->size());
   }

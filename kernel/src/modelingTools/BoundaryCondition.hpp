@@ -24,10 +24,6 @@
 #include "SiconosSerialization.hpp"
 #include "SiconosVector.hpp"
 
-namespace siconos::algebra {
-// class SiconosVector;
-}
-
 namespace siconos::modeling {
 
 /** This class models simple boundary conditions for
@@ -44,7 +40,7 @@ namespace siconos::modeling {
 class BoundaryCondition {
  public:
   /** Type of list of indices used in boundary conditions */
-  using Indices = std::vector<unsigned int>;
+  using Indices = std::vector<siconos::algebra::SiconosVector::Index>;
 
  protected:
   ACCEPT_SERIALIZATION(BoundaryCondition);
@@ -96,13 +92,13 @@ class BoundaryCondition {
   inline const Indices& velocityIndices() { return velocityIndices_; };
 
   /** \return  a read-only view on the prescribed velocities vector  */
-  inline const auto prescribedVelocity() const {
+  inline auto prescribedVelocity() const {
     return siconos::algebra::ConstMapVectorType(prescribedVelocity_->data(),
                                                 prescribedVelocity_->size());
   }
 
   /** \return  a read-only view on the former prescribed velocities vector  */
-  inline const auto prescribedVelocityOld() const {
+  inline auto prescribedVelocityOld() const {
     return siconos::algebra::ConstMapVectorType(prescribedVelocityOld_->data(),
                                                 prescribedVelocityOld_->size());
   }

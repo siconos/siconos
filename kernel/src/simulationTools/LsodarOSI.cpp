@@ -619,7 +619,6 @@ void siconos::integrators::LsodarOSI::computeFreeOutput(
   auto relationSubType = inter->relation()->getSubType();
   unsigned int sizeY = inter->nonSmoothLaw()->size();
 
-  unsigned int relativePosition = 0;
   auto mainInteraction = inter;
   std::shared_ptr<siconos::algebra::SiconosMatrix> C;
   //   std::shared_ptr<siconos::algebra::SiconosMatrix>  D;

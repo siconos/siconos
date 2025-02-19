@@ -355,15 +355,12 @@ void siconos::integrators::ZeroOrderHoldOSI::computeFreeOutput(
    */
   auto indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   auto inter = indexSet->bundle(vertex_inter);
-  auto& DSlink = inter->linkToDSVariables();
   auto& inter_work = *indexSet->properties(vertex_inter).workVectors;
   auto& inter_work_block = *indexSet->properties(vertex_inter).workBlockVectors;
 
   // Get relation and non smooth law types
   auto relationType = inter->relation()->getType();
   auto relationSubType = inter->relation()->getSubType();
-
-  auto sizeY = inter->nonSmoothLaw()->size();
   auto deltax = inter_work_block[siconos::integrators::ZeroOrderHoldOSI::DELTA_X];
 
   auto& osnsp_rhs = *(*indexSet->properties(vertex_inter)

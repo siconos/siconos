@@ -77,7 +77,7 @@ class FirstOrderLinearTIR : public FirstOrderR {
   virtual ~FirstOrderLinearTIR() noexcept = default;
 
   /** \return a read-only view on B(t) matrix */
-  inline const auto B() const { return jacobiangOver_lambda(); }
+  inline auto B() const { return jacobiangOver_lambda(); }
 
   /** Set a constant B matrix for the system
    *
@@ -87,7 +87,7 @@ class FirstOrderLinearTIR : public FirstOrderR {
   void setConstantB(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
 
   /** \return a read-only view on C(t) matrix */
-  inline const auto C() const { return jacobianhOver_state(); }
+  inline auto C() const { return jacobianhOver_state(); }
 
   /** Set a constant C matrix for the system
    *
@@ -97,7 +97,7 @@ class FirstOrderLinearTIR : public FirstOrderR {
   void setConstantC(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
 
   /** \return a read-only view on D(t) matrix */
-  inline const auto D() const { return jacobianhOver_lambda(); }
+  inline auto D() const { return jacobianhOver_lambda(); }
 
   /** Set a constant D matrix for the system
    *
@@ -107,7 +107,7 @@ class FirstOrderLinearTIR : public FirstOrderR {
   void setConstantD(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
 
   /** \return  a read-only view on e(t) */
-  inline const auto eVector() const {
+  inline auto eVector() const {
     return siconos::algebra::ConstMapVectorType(eVector_view_->data(), eVector_view_->size());
   }
 

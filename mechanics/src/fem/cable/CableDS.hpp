@@ -55,7 +55,8 @@ class CableDS : public siconos::modeling::LagrangianDS {
 
   std::shared_ptr<siconos::algebra::SiconosMatrix> TRNp_Np{nullptr};
 
-  void matmult(const Eigen::Ref<const siconos::algebra::SiconosVector> &V, size_t a_startIdx,
+  void matmult(const Eigen::Ref<const siconos::algebra::SiconosVector> &V,
+               siconos::algebra::SiconosSize_t a_startIdx,
                Eigen::Ref<siconos::algebra::SiconosVector> R);
   void matmult2(const Eigen::Ref<const siconos::algebra::SiconosVector> &V,
                 Eigen::Ref<siconos::algebra::SiconosMatrix> R);

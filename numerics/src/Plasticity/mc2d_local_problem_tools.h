@@ -62,7 +62,7 @@ struct LocalMC2DProblemFunctionToolkit {
   SquaredNormPtr squared_norm;
 };
 
-struct LocalMC2DProblemFunctionToolkit *localMC2DProblemFunctionToolkit_new();
+struct LocalMC2DProblemFunctionToolkit *localMC2DProblemFunctionToolkit_new(void);
 
 void localMC2DProblemFunctionToolkit_display(struct LocalMC2DProblemFunctionToolkit *);
 

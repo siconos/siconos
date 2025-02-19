@@ -93,7 +93,7 @@ class FirstOrderLinearR : public FirstOrderR {
   virtual ~FirstOrderLinearR() noexcept = default;
 
   /** \return a read-only view on B(t) matrix */
-  inline const auto B() const { return jacobiangOver_lambda(); }
+  inline  auto B() const { return jacobiangOver_lambda(); }
 
   /** Set a constant B matrix for the system
    *
@@ -114,7 +114,7 @@ class FirstOrderLinearR : public FirstOrderR {
   void computeB(double time);
 
   /** \return a read-only view on C(t) matrix */
-  inline const auto C() const { return jacobianhOver_state(); }
+  inline  auto C() const { return jacobianhOver_state(); }
 
   /** Set a constant C matrix for the system
    *
@@ -135,7 +135,7 @@ class FirstOrderLinearR : public FirstOrderR {
   void computeC(double time);
 
   /** \return a read-only view on D(t) matrix */
-  inline const auto D() const { return jacobianhOver_lambda(); }
+  inline  auto D() const { return jacobianhOver_lambda(); }
 
   /** Set a constant D matrix for the system
    *
@@ -156,7 +156,7 @@ class FirstOrderLinearR : public FirstOrderR {
   void computeD(double time);
 
   /** \return  a read-only view on e(t) */
-  inline const auto eVector() const {
+  inline  auto eVector() const {
     return siconos::algebra::ConstMapVectorType(eVector_view_->data(), eVector_view_->size());
   }
 

@@ -153,14 +153,14 @@ class FirstOrderR : public Relation {
   }
 
   /** \return a read-only view on \f$ \nabla_x g(x,t,\lambda) \f$ matrix */
-  inline const auto jacobiangOver_state() const {
+  inline auto jacobiangOver_state() const {
     return siconos::algebra::ConstMapType(jacobiangOver_state_view_->data(),
                                           jacobiangOver_state_view_->rows(),
                                           jacobiangOver_state_view_->cols());
   }
 
   /** \return a read-only view on \f$ \nabla_{\lambda} g(x,t,\lambda) \f$ matrix */
-  inline const auto jacobiangOver_lambda() const {
+  inline auto jacobiangOver_lambda() const {
     return siconos::algebra::ConstMapType(jacobiangOver_lambda_view_->data(),
                                           jacobiangOver_lambda_view_->rows(),
                                           jacobiangOver_lambda_view_->cols());

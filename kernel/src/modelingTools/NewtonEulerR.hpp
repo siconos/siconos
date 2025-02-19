@@ -151,7 +151,7 @@ class NewtonEulerR : public Relation {
   virtual void checkSize(const Interaction &inter) const override;
 
   /** \return a read-only view on \f$ H(q, \ldots) \f$ matrix */
-  inline const auto H_NE() const {
+  inline auto H_NE() const {
     return siconos::algebra::ConstMapType(H_NE_view_->data(), H_NE_view_->rows(),
                                           H_NE_view_->cols());
   }
@@ -164,7 +164,7 @@ class NewtonEulerR : public Relation {
   void setConstantH_NE(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
 
   /** \return  a read-only view on e(t) */
-  inline const auto eVector() const {
+  inline auto eVector() const {
     return siconos::algebra::ConstMapVectorType(eVector_view_->data(), eVector_view_->size());
   }
 
@@ -178,7 +178,7 @@ class NewtonEulerR : public Relation {
   bool haseVector() const { return haseVector_; }
 
   /** \return a read-only view on \f$ H(q, \ldots).T \f$ matrix */
-  inline const auto H_NE_prod_T() const {
+  inline auto H_NE_prod_T() const {
     return siconos::algebra::ConstMapType(H_NE_prod_T_->data(), H_NE_prod_T_->rows(),
                                           H_NE_prod_T_->cols());
   }
@@ -201,7 +201,7 @@ class NewtonEulerR : public Relation {
   /** \return  a read-only view on additional  terms of the second order time derivative of y
    *  \f$ \nabla_q h(q) \dot T v + \frac{d}{dt}(\nabla_q h(q) ) T v \f$
    */
-  inline const auto secondOrderTimeDerivativeTerms() {
+  inline auto secondOrderTimeDerivativeTerms() {
     return siconos::algebra::ConstMapVectorType(secondOrderTimeDerivativeTerms_->data(),
                                                 secondOrderTimeDerivativeTerms_->size());
   }
@@ -222,7 +222,7 @@ class NewtonEulerR : public Relation {
 
   /** \return  a read-only view on the vector of the forces due to this relation
    */
-  inline const auto contactForce() const {
+  inline auto contactForce() const {
     return siconos::algebra::ConstMapVectorType(contactForce_->data(), contactForce_->size());
   }
 

@@ -51,7 +51,7 @@ siconos::modeling::BoundaryCondition::BoundaryCondition(
       prescribedVelocity_(newVelocityValues),
       prescribedVelocityOld_{
           std::make_shared<siconos::algebra::SiconosVector>(*newVelocityValues)} {
-  if (newVelocityIndices.size() != newVelocityValues->size())
+  if (newVelocityIndices.size() != (size_t)newVelocityValues->size())
     THROW_EXCEPTION(
         "siconos::modeling::BoundaryCondition::BoundaryCondition  "
         "constructor. "
@@ -65,7 +65,7 @@ siconos::modeling::BoundaryCondition::BoundaryCondition(
       prescribedVelocity_(newVelocityValues),
       prescribedVelocityOld_{
           std::make_shared<siconos::algebra::SiconosVector>(*newVelocityValues)} {
-  if (newVelocityIndices.size() != newVelocityValues->size())
+  if (newVelocityIndices.size() != (size_t)newVelocityValues->size())
     THROW_EXCEPTION(
         "siconos::modeling::BoundaryCondition::BoundaryCondition  "
         "constructor. "

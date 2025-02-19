@@ -338,7 +338,6 @@ void siconos::integrators::MoreauJeanBilbaoOSI::computeFreeOutput(
   //   THROW_EXCEPTION("siconos::integrators::MoreauJeanBilbaoOSI::computeFreeOutput
   //   only Lagrangian Linear Relations are allowed.");
 
-  auto sizeY = inter.nonSmoothLaw()->size();
   // buffer used to save output
   auto& x_free = *inter_work_block[siconos::integrators::MoreauJeanBilbaoOSI::xfree];
   auto& osnsp_rhs = *(*indexSet.properties(vertex_inter)

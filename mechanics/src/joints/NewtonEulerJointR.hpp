@@ -23,7 +23,6 @@
 
 #include <optional>
 #include <vector>
-#include <optional>
 
 #include "NewtonEulerR.hpp"
 namespace siconos::joints {
@@ -84,7 +83,7 @@ class NewtonEulerJointR : public siconos::modeling::NewtonEulerR {
    *
    *  \param index required position in axes vector
    */
-  inline const auto axis(unsigned int index) {
+  inline auto axis(unsigned int index) {
     return siconos::algebra::ConstMapVectorType(axes_[index]->data(), axes_[index]->size());
   }
 

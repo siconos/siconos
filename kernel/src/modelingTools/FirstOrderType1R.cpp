@@ -27,7 +27,6 @@ void siconos::modeling::FirstOrderType1R::initialize(Interaction& inter) {
 
   auto sizeY = inter.dimension();
   auto sizeX = inter.getSizeOfDS();
-  auto& DSlink = inter.linkToDSVariables();
 
   if (computejacobianhOver_state_) {
     if (!jacobianhOver_state_internal_storage_) {
@@ -171,7 +170,6 @@ void siconos::modeling::FirstOrderType1R::computeJach(double time, Interaction& 
 
 void siconos::modeling::FirstOrderType1R::computeJacg(double time, Interaction& inter) {
   if (!hasConstantJacobiangOver_lambda_) {
-    auto& DSlink = inter.linkToDSVariables();
     computejacobiangOver_lambda_(*inter.lambda(0), *jacobiangOver_lambda_view_);
   }
 }

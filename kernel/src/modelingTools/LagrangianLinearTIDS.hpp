@@ -141,7 +141,7 @@ class LagrangianLinearTIDS : public LagrangianDS {
   void setDampingMatrix(Eigen::Ref<siconos::algebra::SiconosMatrix> C);
 
   /** \return a read-only view on the stiffness matrix */
-  inline const auto stiffnessMatrix() const {
+  inline  auto stiffnessMatrix() const {
     return siconos::algebra::ConstMapType(stiffnessMatrix_view_->data(),
                                           stiffnessMatrix_view_->rows(),
                                           stiffnessMatrix_view_->cols());
@@ -154,7 +154,7 @@ class LagrangianLinearTIDS : public LagrangianDS {
   bool hasDampingMatrix() const { return dampingMatrix_view_ != nullptr; }
 
   /** \return a read-only view on the damping matrix */
-  inline const auto dampingMatrix() const {
+  inline  auto dampingMatrix() const {
     return siconos::algebra::ConstMapType(
         dampingMatrix_view_->data(), dampingMatrix_view_->rows(), dampingMatrix_view_->cols());
   }

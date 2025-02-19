@@ -161,7 +161,7 @@ class SecondOrderDS : public DynamicalSystem {
    *  \param ndof number of degrees of freedom
    */
   SecondOrderDS(unsigned int dimension, unsigned int ndof)
-      : DynamicalSystem(dimension), ndof_(ndof){};
+      : DynamicalSystem(dimension), ndof_(ndof) {};
 
  public:
   /** destructor */
@@ -171,7 +171,7 @@ class SecondOrderDS : public DynamicalSystem {
    *
    *  \param level required level for p, default = 2
    */
-  inline const auto p_read(unsigned int level = 2) const {
+  inline auto p_read(unsigned int level = 2) const {
     return siconos::algebra::ConstMapVectorType(p_[level]->data(), p_[level]->size());
   }
 

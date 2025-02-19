@@ -168,9 +168,7 @@ void siconos::modeling::FirstOrderLinearTIR::computeInput(double time, Interacti
   DEBUG_BEGIN(
       "siconos::modeling::FirstOrderLinearTIR::computeInput(double time, Interaction& "
       "inter, unsigned int level)\n")
-  auto &DSlink = inter.linkToDSVariables();
   DEBUG_EXPR(inter.lambda(level)->display(););
-  DEBUG_EXPR(DSlink[FirstOrderR::Rrr]->display(););
   if (jacobiangOver_lambda_view_) {
     auto &DSlink = inter.linkToDSVariables();
     *DSlink[FirstOrderR::Rrr] += *jacobiangOver_lambda_view_ * *inter.lambda(0);

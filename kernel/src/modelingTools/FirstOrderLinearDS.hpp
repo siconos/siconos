@@ -111,7 +111,7 @@ class FirstOrderLinearDS : public FirstOrderNonLinearDS {
   virtual ~FirstOrderLinearDS() noexcept = default;
 
   /** \return a read-only view on A(t) matrix */
-  inline const auto A() const { return jacobianfOver_x(); }
+  inline  auto A() const { return jacobianfOver_x(); }
 
   /** \return true if A is taken into account */
   auto hasA() { return hasJacobianfOver_x_; }
@@ -135,7 +135,7 @@ class FirstOrderLinearDS : public FirstOrderNonLinearDS {
   void computeA(double time);
 
   /** \return  a read-only view on b(t) */
-  inline const auto bVector() const {
+  inline  auto bVector() const {
     return siconos::algebra::ConstMapVectorType(bVector_view_->data(), bVector_view_->size());
   }
 

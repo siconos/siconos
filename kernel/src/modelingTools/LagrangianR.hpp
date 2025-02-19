@@ -100,7 +100,7 @@ class LagrangianR : public Relation {
   // Does nothing by default. Reimplement if required.
 
   /** \return a read-only view on \f$ \nabla^\top_q h(q, \ldots) \f$ matrix */
-  inline const auto jacobianhOver_q() const {
+  inline auto jacobianhOver_q() const {
     return siconos::algebra::ConstMapType(jacobianhOver_q_view_->data(),
                                           jacobianhOver_q_view_->rows(),
                                           jacobianhOver_q_view_->cols());

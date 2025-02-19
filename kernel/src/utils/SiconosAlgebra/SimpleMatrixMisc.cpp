@@ -16,14 +16,12 @@
  * limitations under the License.
  */
 
-
 #include "BlockMatrix.hpp"
 #include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosMatrixOp.hpp"
 #include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
-#include "SiconosMatrix.hpp"
 #include "Simulation.hpp"
 #include "Tools.hpp"  // enum_to_string
 #include "boost/numeric/bindings/lapack.hpp"
@@ -35,34 +33,32 @@
 #include "expm.hpp"  // boost contribs expm_pad
 #include "io.hpp"
 
-
-void siconos::algebra::normInfByColumn(const SiconosMatrix &m, SiconosVector &v)
-{
-    if(v.size() != m.size(1)) THROW_EXCEPTION("the given vector does not have the right length");
-    for (size_t i = 0; i < m.size(1); i++)
-    {
-        v(i) = m.col(i).norm();
-    }
+void siconos::algebra::normInfByColumn(const SiconosMatrix &m, SiconosVector &v) {
+  if (v.size() != m.size(1))
+    THROW_EXCEPTION("the given vector does not have the right length");
+  for (auto i = 0; i < m.size(1); i++) {
+    v(i) = m.col(i).norm();
+  }
 }
 
 bool siconos::algebra::checkSymmetry(SiconosMatrix &m, double tol) {
-    auto m_trans = m.transpose();
-    auto tmp = m - m_trans;
-    double err = tmp.normInf();
-    if (m_trans.normInf() > 0.0) {
+  auto m_trans = m.transpose();
+  auto tmp = m - m_trans;
+  double err = tmp.normInf();
+  if (m_trans.normInf() > 0.0) {
     err /= m_trans.normInf();
-    }
-    // std::cout << "err_rel  ="<< err <<"\n";
-    return (err < tol);
+  }
+  // std::cout << "err_rel  ="<< err <<"\n";
+  return (err < tol);
 }
 
-
-siconos::algebra::SiconosMatrix siconos::algebra::readMatrixFromFile(const std::string &filename, bool ascii) {
-    SiconosMatrix m;
-    if (ascii) {
-        io::read(filename, m, io::ASCII_IN);
-    } else {
-        io::read(filename, m, io::BINARY_IN);
-    }
-    return m;
+siconos::algebra::SiconosMatrix siconos::algebra::readMatrixFromFile(
+    const std::string &filename, bool ascii) {
+  SiconosMatrix m;
+  if (ascii) {
+    io::read(filename, m, io::ASCII_IN);
+  } else {
+    io::read(filename, m, io::BINARY_IN);
+  }
+  return m;
 }

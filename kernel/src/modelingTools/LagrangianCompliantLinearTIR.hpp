@@ -89,19 +89,21 @@ class LagrangianCompliantLinearTIR : public LagrangianR {
   void checkSize(const Interaction &inter) const override;
 
   /** \return a read-only view on the C matrix */
-  inline const auto CMatrix() const { return jacobianhOver_q(); }
+  inline auto CMatrix() const { return jacobianhOver_q(); }
 
   /** \return a read-only view on the D matrix */
-  inline const auto DMatrix() const {
+  inline auto DMatrix() const {
     return siconos::algebra::ConstMapType(DMatrix_view_->data(), DMatrix_view_->rows(),
                                           DMatrix_view_->cols());
   }
 
   /* \return a read-only view on the matrix \f$ D = \nabla^\top_{\lambda}h(q,\lambda) \f$*/
-  inline const siconos::algebra::ConstMapType jacobianhOver_lambda() const override { return DMatrix(); }
+  inline const siconos::algebra::ConstMapType jacobianhOver_lambda() const override {
+    return DMatrix();
+  }
 
   /** \return  a read-only view on e vector */
-  inline const auto eVector() const {
+  inline auto eVector() const {
     return siconos::algebra::ConstMapVectorType(eVector_view_->data(), eVector_view_->size());
   }
 

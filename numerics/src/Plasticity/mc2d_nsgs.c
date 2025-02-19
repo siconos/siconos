@@ -43,7 +43,7 @@
 #include "op3x3.h"
 #include "siconos_debug.h"  // for DEBUG_EXPR
 
-//#define FCLIB_OUTPUT
+// #define FCLIB_OUTPUT
 
 #ifdef FCLIB_OUTPUT
 static int fccounter = -1;
@@ -196,7 +196,7 @@ void mc2d_nsgs_initialize_local_solver(
 }
 
 static unsigned int *allocShuffledCones(MohrCoulomb2DProblem *problem,
-                                           SolverOptions *options) {
+                                        SolverOptions *options) {
   unsigned int *scones = 0;
   unsigned int nc = problem->numberOfCones;
   if (options->iparam[PLASTICITY_NSGS_SHUFFLE] == PLASTICITY_NSGS_SHUFFLE_TRUE ||
@@ -214,7 +214,7 @@ static unsigned int *allocShuffledCones(MohrCoulomb2DProblem *problem,
   return scones;
 }
 static unsigned int *allocfreezingCones(MohrCoulomb2DProblem *problem,
-                                           SolverOptions *options) {
+                                        SolverOptions *options) {
   unsigned int *fcones = 0;
   unsigned int nc = problem->numberOfCones;
   if (options->iparam[PLASTICITY_NSGS_FREEZING_CONE] > 0) {
@@ -240,19 +240,19 @@ static int solveLocalReaction(UpdatePtr update_localproblem, SolverPtr local_sol
   return (*local_solver)(localproblem, localreaction, localsolver_options);
 }
 
-static int file_exists(const char *fname) {
-  FILE *file;
-  if ((file = fopen(fname, "r"))) {
-    fclose(file);
-    return 1;
-  }
-  return 0;
-}
+// static int file_exists(const char *fname) {
+//   FILE *file;
+//   if ((file = fopen(fname, "r"))) {
+//     fclose(file);
+//     return 1;
+//   }
+//   return 0;
+// }
 
 static void acceptLocalReactionFiltered(MohrCoulomb2DProblem *localproblem,
-                                        SolverOptions *localsolver_options,
-                                        unsigned int cone, unsigned int iter,
-                                        double *reaction, double localreaction[3]) {
+                                        SolverOptions *localsolver_options, unsigned int cone,
+                                        unsigned int iter, double *reaction,
+                                        double localreaction[3]) {
   if (isnan(localsolver_options->dparam[SICONOS_DPARAM_RESIDU]) ||
       isinf(localsolver_options->dparam[SICONOS_DPARAM_RESIDU]) ||
       localsolver_options->dparam[SICONOS_DPARAM_RESIDU] > 1.0) {
@@ -421,11 +421,11 @@ static int determine_convergence_with_full_final(MohrCoulomb2DProblem *problem,
 void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *reaction, double *velocity, int *info,
                SolverOptions *options) {
   /* verbose=1; */
-  
-  FILE* foutput = fopen("mc2d_footing_100_theta0.05.dat", "w");
-  int info_output = mohrCoulomb2D_printInFile(problem, foutput);
-  fclose(foutput);
 
+  FILE *foutput = fopen("mc2d_footing_100_theta0.05.dat", "w");
+  // int info_output =
+  mohrCoulomb2D_printInFile(problem, foutput);
+  fclose(foutput);
 
   /* int and double parameters */
 
@@ -603,11 +603,11 @@ void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *reaction, double *velocity
                            localproblem, reaction, localsolver_options, localreaction);
 
         if (iparam[PLASTICITY_NSGS_RELAXATION] == PLASTICITY_NSGS_RELAXATION_TRUE)
-          localProblemFunctionToolkit->perform_relaxation(localreaction,
-                                                          &reaction[cone * 3], omega);
+          localProblemFunctionToolkit->perform_relaxation(localreaction, &reaction[cone * 3],
+                                                          omega);
 
-        light_error_2 = localProblemFunctionToolkit->light_error_squared(
-            localreaction, &reaction[cone * 3]);
+        light_error_2 = localProblemFunctionToolkit->light_error_squared(localreaction,
+                                                                         &reaction[cone * 3]);
 
         light_error_sum += light_error_2;
 
@@ -650,8 +650,8 @@ void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *reaction, double *velocity
 
         if (iparam[PLASTICITY_NSGS_FILTER_LOCAL_SOLUTION] ==
             PLASTICITY_NSGS_FILTER_LOCAL_SOLUTION_TRUE)
-          acceptLocalReactionFiltered(localproblem, localsolver_options, cone, iter,
-                                      reaction, localreaction);
+          acceptLocalReactionFiltered(localproblem, localsolver_options, cone, iter, reaction,
+                                      localreaction);
         else
           acceptLocalReactionUnconditionally(cone, reaction, localreaction);
       }
@@ -741,7 +741,8 @@ void mc2d_nsgs(MohrCoulomb2DProblem *problem, double *reaction, double *velocity
 void mc2d_nsgs_set_default(SolverOptions *options) {
   options->iparam[PLASTICITY_IPARAM_ERROR_EVALUATION] =
       PLASTICITY_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL;
-  //options->iparam[PLASTICITY_IPARAM_ERROR_EVALUATION] =  PLASTICITY_NSGS_ERROR_EVALUATION_FULL;
+  // options->iparam[PLASTICITY_IPARAM_ERROR_EVALUATION] =
+  // PLASTICITY_NSGS_ERROR_EVALUATION_FULL;
   options->iparam[PLASTICITY_IPARAM_INTERNAL_ERROR_STRATEGY] =
       PLASTICITY_INTERNAL_ERROR_STRATEGY_GIVEN_VALUE;
   /* options->iparam[PLASTICITY_IPARAM_INTERNAL_ERROR_STRATEGY] =

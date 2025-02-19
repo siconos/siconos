@@ -210,25 +210,26 @@ void siconos::fem::cable::CableDS::dampingMatrix(/** ...*/) {
 }
 
 void siconos::fem::cable::CableDS::matmult(
-    const Eigen::Ref<const siconos::algebra::SiconosVector> &V, size_t a_startIdx,
+    const Eigen::Ref<const siconos::algebra::SiconosVector> &V,
+    siconos::algebra::SiconosSize_t a_startIdx,
     Eigen::Ref<siconos::algebra::SiconosVector> R) {
   R.setZero();
   assert(TRNp_Np);
   auto n = R.size();
   if (n + a_startIdx < V.size()) {
-    for (size_t i = 0; i < n; i++) {
-      for (size_t j = 0; j < n; j++) {
+    for (auto i = 0; i < n; i++) {
+      for (auto j = 0; j < n; j++) {
         auto val = TRNp_Np->getValue(i, j);
         R(i) += val * V(j + a_startIdx);
       }
     }
   } else {
-    for (size_t i = 0; i < n; i++) {
-      for (size_t j = 0; j < 3; j++) {
+    for (auto i = 0; i < n; i++) {
+      for (auto j = 0; j < 3; j++) {
         auto val = TRNp_Np->getValue(i, j);
         R(i) += val * V(j + a_startIdx);
       }
-      for (size_t j = 3; j < 6; j++) {
+      for (auto j = 3; j < 6; j++) {
         auto val = TRNp_Np->getValue(i, j);
         R(i) += val * V(j - 3);
       }

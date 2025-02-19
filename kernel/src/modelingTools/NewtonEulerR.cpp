@@ -238,9 +238,6 @@ void siconos::modeling::NewtonEulerR::computeH_NE_prod_T(
   DEBUG_PRINTF("with inter =  %p\n", &inter);
   DEBUG_EXPR(inter.display());
 
-  unsigned int k = 0;
-  auto ySize = inter.dimension();
-
   // For each qi from DS
   // compute H.T(qi)
 
@@ -300,7 +297,6 @@ void siconos::modeling::NewtonEulerR::computeSecondOrderTimeDerivativeTerms(
 
   // Compute the product of H and Tdot --> jachqTdot
 
-  unsigned int k = 0;
   auto ySize = inter.dimension();
   auto qSize = inter.getSizeOfDS();
   auto auxBloc = std::make_shared<siconos::algebra::SiconosMatrix>(ySize, 7);

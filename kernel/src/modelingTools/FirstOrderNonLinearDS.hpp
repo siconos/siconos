@@ -186,7 +186,7 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
   void initializeNonSmoothInput(unsigned int level) override;
 
   /*  \return a read-only view on the matrix M(t) */
-  inline const auto MMatrix() const {
+  inline auto MMatrix() const {
     return siconos::algebra::ConstMapType(MMatrix_view_->data(), MMatrix_view_->rows(),
                                           MMatrix_view_->cols());
   }
@@ -213,12 +213,12 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
   virtual void computeMMatrix(double time);
 
   /** \return  a read-only view on f(x,t)  */
-  inline const auto fVector() const {
+  inline auto fVector() const {
     return siconos::algebra::ConstMapVectorType(fVector_view_->data(), fVector_view_->size());
   }
 
   /** \return  a read-only view on fbuffer (value of f(x,t) at previous time step)  */
-  inline const auto fold() const {
+  inline auto fold() const {
     return siconos::algebra::ConstMapVectorType(fbuffer_->data(), fbuffer_->size());
   }
 
@@ -244,7 +244,7 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
   void computefVector(const Eigen::Ref<siconos::algebra::SiconosVector> &state, double time);
 
   /** \return a read-only view on \f$ \nabla_xf(x,t) \f$ matrix */
-  inline const auto jacobianfOver_x() const {
+  inline auto jacobianfOver_x() const {
     return siconos::algebra::ConstMapType(jacobianfOver_x_view_->data(),
                                           jacobianfOver_x_view_->rows(),
                                           jacobianfOver_x_view_->cols());

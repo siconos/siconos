@@ -308,21 +308,21 @@ class NewtonEulerDS : public SecondOrderDS {
   void resetNonSmoothPart(unsigned int level) override;
 
   /** \return a read-only view onto the wrench vector */
-  inline const auto wrench() const {
+  inline auto wrench() const {
     return siconos::algebra::ConstMapVectorType(wrench_->data(), wrench_->size());
   }
 
   // -- Jacobian Forces w.r.t q --
 
   /** \return the jacobian matrix of forces, with respect to q */
-  inline const auto jacobianWrenchOver_q() const {
+  inline auto jacobianWrenchOver_q() const {
     return siconos::algebra::ConstMapType(jacobianWrenchOver_q_->data(),
                                           jacobianWrenchOver_q_->rows(),
                                           jacobianWrenchOver_q_->cols());
   }
 
   /** \return the jacobian matrix  of forces with respect to twist */
-  inline const auto jacobianWrenchOver_twist() const {
+  inline auto jacobianWrenchOver_twist() const {
     return siconos::algebra::ConstMapType(jacobianWrenchOver_twist_->data(),
                                           jacobianWrenchOver_twist_->rows(),
                                           jacobianWrenchOver_twist_->cols());
@@ -340,7 +340,7 @@ class NewtonEulerDS : public SecondOrderDS {
   std::shared_ptr<siconos::algebra::SiconosVector> q() const override { return state_q_; }
 
   /**  \return a read-only view on  $\dot q$ */
-  inline const auto dotq_read() {
+  inline auto dotq_read() {
     return siconos::algebra::ConstMapVectorType(dotq_->data(), dotq_->size());
   }
 
@@ -349,7 +349,7 @@ class NewtonEulerDS : public SecondOrderDS {
 
   /** \return a read-only view on twist = \left[\begin{array}{c} v_g \\ \Omega
    *   \end{array}\right] \in \RR^6\f$ */
-  inline const auto twist_read() const {
+  inline auto twist_read() const {
     return siconos::algebra::ConstMapVectorType(twist_->data(), twist_->size());
   }
 
@@ -363,12 +363,12 @@ class NewtonEulerDS : public SecondOrderDS {
   }
 
   /** \return a read-only view onto linear velocity (twist(0:2))*/
-  inline const auto linearVelocity_view() const {
+  inline auto linearVelocity_view() const {
     return siconos::algebra::ConstMapVectorType(twist_->data(), 3);
   }
 
   /** \return a read-only view onto angular velocity (twist(3:6))*/
-  inline const auto angularVelocity_view() const {
+  inline auto angularVelocity_view() const {
     return siconos::algebra::ConstMapVectorType(twist_->data() + 3, 3);
   }
 
@@ -400,7 +400,7 @@ class NewtonEulerDS : public SecondOrderDS {
   void setScalarMass(double mass);
 
   /** \return a read-only view on total inertia matrix */
-  inline const auto totalInertiaMatrix() const {
+  inline auto totalInertiaMatrix() const {
     return siconos::algebra::ConstMapType(
         totalInertiaMatrix_->data(), totalInertiaMatrix_->rows(), totalInertiaMatrix_->cols());
   }
@@ -423,12 +423,12 @@ class NewtonEulerDS : public SecondOrderDS {
      0
      \\ 0 &  \phi(p) \end{array}\right] \f]T(q)
   */
-  inline const auto T() const {
+  inline auto T() const {
     return siconos::algebra::ConstMapType(T_->data(), T_->rows(), T_->cols());
   }
 
   /** \return a read-only view on last computed \f$ \dot T(q)\f$  */
-  inline const auto Tdot() {
+  inline auto Tdot() {
     return siconos::algebra::ConstMapType(Tdot_->data(), Tdot_->rows(), Tdot_->cols());
   }
 
@@ -632,7 +632,9 @@ class NewtonEulerDS : public SecondOrderDS {
 
   virtual void computeTdot();
 
-  virtual void accept(dynamical_systems::Visitor &tourist) const override { tourist.visit(*this); }
+  virtual void accept(dynamical_systems::Visitor &tourist) const override {
+    tourist.visit(*this);
+  }
 
   Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
 };

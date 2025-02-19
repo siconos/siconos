@@ -29,16 +29,16 @@
 #include "siconos_debug.h"
 #define EPS 1e-40
 
-NumericsMatrix* Arrow_repr(const double* const vec, const unsigned int vecSize,
-                           const size_t varsCount) {
+NumericsMatrix* Arrow_repr(const double* const vec, size_t vecSize, size_t varsCount) {
   /* validation */
   if (vecSize % varsCount != 0) {
-    fprintf(stderr, "Arrow_repr: %zu variables can not be extracted from vector of size %d.\n",
+    fprintf(stderr,
+            "Arrow_repr: %zu variables can not be extracted from vector of size %zu.\n",
             varsCount, vecSize);
     exit(EXIT_FAILURE);
   }
 
-  size_t dimension = (size_t)(vecSize / varsCount);
+  size_t dimension = vecSize / varsCount;
   if (dimension < 2) {
     fprintf(stderr,
             "Arrow_repr: The dimension of variables can not be less than 2 but given %zu.\n",
@@ -47,7 +47,7 @@ NumericsMatrix* Arrow_repr(const double* const vec, const unsigned int vecSize,
   }
 
   NumericsMatrix* Arw_mat = NM_create(NM_SPARSE, vecSize, vecSize);
-  size_t nzmax = (dimension * 3 - 2) * varsCount;
+  CS_INT nzmax = (CS_INT)((dimension * 3 - 2) * varsCount);
   NM_triplet_alloc(Arw_mat, nzmax);
   NM_fill(Arw_mat, NM_SPARSE, vecSize, vecSize, Arw_mat->matrix2);
 

@@ -255,8 +255,6 @@ void siconos::integrators::EulerMoreauOSI::initializeIterationMatrix(
 
   assert(!_dynamicalSystemsGraph->properties(dsv).iterationMatrix);
 
-  double timeStep = _simulation->timeStep();
-
   // Memory allocation for W
   _dynamicalSystemsGraph->properties(dsv).iterationMatrix =
       std::make_shared<siconos::algebra::SiconosMatrix>(ds->dimension(), ds->dimension());
@@ -576,8 +574,6 @@ void siconos::integrators::EulerMoreauOSI::computeFreeState() {
 
     auto& ds_work_vectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
 
-    auto& W = *_dynamicalSystemsGraph->properties(*dsi).iterationMatrix;
-
     // No need to check if the DS is a first order: it must have been done during init steps.
     auto d = std::static_pointer_cast<siconos::modeling::FirstOrderNonLinearDS>(ds);
 
@@ -695,7 +691,6 @@ void siconos::integrators::EulerMoreauOSI::prepareNewtonIteration(double time) {
       auto& inter_work = *interProp.workVectors;
       auto& inter_work_block = *interProp.workBlockVectors;
 
-      auto relationType = inter.relation()->getType();
       auto relationSubType = inter.relation()->getSubType();
       if (relationSubType == siconos::modeling::RelationSubType::NonLinearR ||
           relationSubType == siconos::modeling::RelationSubType::Type2R) {
@@ -756,16 +751,11 @@ void siconos::integrators::EulerMoreauOSI::computeFreeOutput(
   auto indexSet = osnsp->simulation()->indexSet(osnsp->indexSetLevel());
   auto inter = indexSet->bundle(vertex_inter);
 
-  auto& DSlink = inter->linkToDSVariables();
-  auto& relationVec = inter->relationVectors();
-
   auto& inter_work = *indexSet->properties(vertex_inter).workVectors;
   auto& inter_work_block = *(indexSet->properties(vertex_inter)).workBlockVectors;
   // Get relation and non smooth law types
   auto relationType = inter->relation()->getType();
   auto relationSubType = inter->relation()->getSubType();
-
-  auto sizeY = static_cast<std::size_t>(inter->nonSmoothLaw()->size());
 
   std::shared_ptr<siconos::algebra::SiconosVector> H_alpha{nullptr};
 

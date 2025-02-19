@@ -300,7 +300,6 @@ void siconos::integrators::MoreauJeanOSI::initializeIterationMatrix(
 
   assert(!_dynamicalSystemsGraph->properties(dsv).iterationMatrix);
   double timeStep = _simulation->timeStep();
-  auto dsType = siconos::types::type_value(*ds);
   auto ndof = ds->dimension();
 
   // Allocate storage for W in the graph
@@ -882,7 +881,6 @@ void siconos::integrators::MoreauJeanOSI::computeFreeState() {
 
     // Current dynamical system
     auto ds = _dynamicalSystemsGraph->bundle(*dsi);
-    auto dsType = siconos::types::type_value(*ds);
 
     // ========= Lagrangian Systems ===========
     if (auto lldds =
@@ -1046,7 +1044,6 @@ void siconos::integrators::MoreauJeanOSI::computeFreeOutput(
 
   if ((relationType == siconos::modeling::RelationType::Lagrangian) &&
       (relationSubType != siconos::modeling::RelationSubType::ScleronomousR)) {
-    auto sizeY = inter.nonSmoothLaw()->size();
     auto &DSlink = inter.linkToDSVariables();
 
     // For the relation of type LagrangianRheonomousR
@@ -1507,13 +1504,6 @@ siconos::integrators::MoreauJeanOSI::computeWorkForces() {
       // -- Convert the DS into a NewtonEulerDS one.
       auto neds = static_pointer_cast<siconos::modeling::NewtonEulerDS>(ds);
 
-      // Get the state  (previous time step) from memory vector
-      // -> var. indexed with "Old"
-      const auto &vold = neds->twistMemory().getSiconosVector(0);
-
-      // Get the current state vector
-      // SiconosVector& q = *neds->q();
-      const auto &v = *neds->twist();  // v = v_k,i+1
       siconos::algebra::SiconosVector f_k_theta{neds->dimension()};
       siconos::algebra::SiconosVector v_k_theta{neds->dimension()};
 

@@ -267,7 +267,7 @@ size_t SBM_nnz(SparseBlockStructuredMatrix* A) {
   /* Column (block) position of the current block*/
   size_t colNumber;
   /* Number of rows/columns of the current block */
-  unsigned int nbRows, nbColumns;
+  unsigned int nbRows, nbColumns = 0;
   for (unsigned int currentRowNumber = 0; currentRowNumber < A->filled1 - 1;
        ++currentRowNumber) {
     /* Get dim. of the current block */
@@ -1099,9 +1099,10 @@ static int SBM_check_C_for_gemm(const SparseBlockStructuredMatrix* const A,
                    currentRowNumberofA, currentRowNumberofA);
       return 0;
     }
+#ifdef DEBUG_MESSAGES
     unsigned int Cblocksize0 = A->blocksize0[currentRowNumberofA];
     if (currentRowNumberofA != 0) Cblocksize0 -= A->blocksize0[currentRowNumberofA - 1];
-
+#endif
     for (size_t currentColNumberofB = 0;
          currentColNumberofB < SBM_index_by_column_B->filled3 - 1; ++currentColNumberofB) {
       DEBUG_PRINT("\n");
@@ -1126,10 +1127,11 @@ static int SBM_check_C_for_gemm(const SparseBlockStructuredMatrix* const A,
 
           if (rowNumberBB == colNumberAA) {
             BlockCexists = 1;
-
+#ifdef DEBUG_MESSAGES
             unsigned int Cblocksize1 = B->blocksize1[currentColNumberofB];
             if (currentColNumberofB != 0)
               Cblocksize1 -= B->blocksize1[currentColNumberofB - 1];
+#endif
             DEBUG_PRINTF("C block number is needed for %zu %zu of size %dX%d\n",
                          currentRowNumberofA, currentColNumberofB, (int)Cblocksize0,
                          (int)Cblocksize1);

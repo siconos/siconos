@@ -49,7 +49,6 @@ typedef void (*PerformRelaxationPtr)(double *, double *, double);
 
 typedef double (*LightErrorSquaredPtr)(double *, double *);
 
-
 typedef double (*SquaredNormPtr)(double *);
 
 struct LocalProblemFunctionToolkit {
@@ -63,7 +62,7 @@ struct LocalProblemFunctionToolkit {
   SquaredNormPtr squared_norm;
 };
 
-struct LocalProblemFunctionToolkit *localProblemFunctionToolkit_new();
+struct LocalProblemFunctionToolkit *localProblemFunctionToolkit_new(void);
 
 void localProblemFunctionToolkit_display(struct LocalProblemFunctionToolkit *);
 
@@ -76,7 +75,6 @@ void fc3d_local_problem_compute_q(FrictionContactProblem *problem,
                                   int contact);
 void fc3d_local_problem_fill_M(FrictionContactProblem *problem,
                                FrictionContactProblem *localproblem, int contact);
-
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

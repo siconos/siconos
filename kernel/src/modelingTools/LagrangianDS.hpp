@@ -408,7 +408,7 @@ class LagrangianDS : public SecondOrderDS {
   }
 
   /*  \return a read-only view on the mass matrix */
-  inline const auto mass() const {
+  inline auto mass() const {
     return siconos::algebra::ConstMapType(mass_view_->data(), mass_view_->rows(),
                                           mass_view_->cols());
   }
@@ -439,7 +439,7 @@ class LagrangianDS : public SecondOrderDS {
   virtual void computeMass(const Eigen::Ref<const siconos::algebra::SiconosVector> &position);
 
   /** \return  a read-only view on \f$ F_{int}(\dot q, q, t) \f$  */
-  inline const auto fint() const {
+  inline auto fint() const {
     return siconos::algebra::ConstMapVectorType(fint_->data(), fint_->size());
   }
 
@@ -462,7 +462,7 @@ class LagrangianDS : public SecondOrderDS {
                    double time);
 
   /** \return a read-only view on \f$ \nabla_qF_{int} \f$ matrix */
-  inline const auto jacobianFintOver_q_view() const {
+  inline auto jacobianFintOver_q_view() const {
     return siconos::algebra::ConstMapType(jacobianFintOver_q_view_->data(),
                                           jacobianFintOver_q_view_->rows(),
                                           jacobianFintOver_q_view_->cols());
@@ -495,7 +495,7 @@ class LagrangianDS : public SecondOrderDS {
                                  double time);
 
   /** \return \f$ \nabla_{\dot q}F_{int} \f$ (view onto memory) */
-  inline const auto jacobianFintOver_velocity_view() const {
+  inline auto jacobianFintOver_velocity_view() const {
     return siconos::algebra::ConstMapType(jacobianFintOver_velocity_view_->data(),
                                           jacobianFintOver_velocity_view_->rows(),
                                           jacobianFintOver_velocity_view_->cols());
@@ -530,7 +530,7 @@ class LagrangianDS : public SecondOrderDS {
       const Eigen::Ref<siconos::algebra::SiconosVector> &position, double time);
 
   /** \return  a read-only view on \f$ F_{gyr}(\dot q, q) \f$ */
-  inline const auto fgyr() const {
+  inline auto fgyr() const {
     return siconos::algebra::ConstMapVectorType(fgyr_->data(), fgyr_->size());
   }
 
@@ -557,7 +557,7 @@ class LagrangianDS : public SecondOrderDS {
                    const Eigen::Ref<const siconos::algebra::SiconosVector> &position);
 
   /** \return  \f$ \nabla_qF_{gyr} \f$ matrix (view onto memory) */
-  inline const auto jacobianFgyrOver_q_view() const {
+  inline auto jacobianFgyrOver_q_view() const {
     return siconos::algebra::ConstMapType(jacobianFgyrOver_q_view_->data(),
                                           jacobianFgyrOver_q_view_->rows(),
                                           jacobianFgyrOver_q_view_->cols());
@@ -588,7 +588,7 @@ class LagrangianDS : public SecondOrderDS {
                                  const Eigen::Ref<siconos::algebra::SiconosVector> &position);
 
   /** \return \f$ \nabla_{\dot q}F_{gyr} \f$ (view onto memory) */
-  inline const auto jacobianFgyrOver_velocity_view() const {
+  inline auto jacobianFgyrOver_velocity_view() const {
     return siconos::algebra::ConstMapType(jacobianFgyrOver_velocity_view_->data(),
                                           jacobianFgyrOver_velocity_view_->rows(),
                                           jacobianFgyrOver_velocity_view_->cols());
@@ -622,7 +622,7 @@ class LagrangianDS : public SecondOrderDS {
       const Eigen::Ref<siconos::algebra::SiconosVector> &position);
 
   /** \return  a read-only view on \f$ F_{ext}(t) \f$ */
-  inline const auto fext() const {
+  inline auto fext() const {
     return siconos::algebra::ConstMapVectorType(fext_view_->data(), fext_view_->size());
   }
 
@@ -648,7 +648,7 @@ class LagrangianDS : public SecondOrderDS {
   void computeFext(double time);
 
   /**  \return  a read-only view on \f$  F_{total}(v,q,t) \f$ */
-  inline const auto totalForces() const {
+  inline auto totalForces() const {
     return siconos::algebra::ConstMapVectorType(totalForces_->data(), totalForces_->size());
   }
 
@@ -746,7 +746,9 @@ class LagrangianDS : public SecondOrderDS {
   void update_lu_mass();
 
   // visitors hook
-  virtual void accept(dynamical_systems::Visitor &tourist) const override { tourist.visit(*this); }
+  virtual void accept(dynamical_systems::Visitor &tourist) const override {
+    tourist.visit(*this);
+  }
   Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
 };
 

@@ -93,19 +93,19 @@ class LagrangianLinearDiagonalDS : public LagrangianDS {
   void setMassMatrix(Eigen::Ref<siconos::algebra::SiconosVector> M);
 
   /** \return a read-only view on the stiffness matrix */
-  inline const auto stiffnessMatrix() const {
+  inline auto stiffnessMatrix() const {
     return siconos::algebra::ConstMapVectorType(stiffnessMatrix_view_->data(),
                                                 stiffnessMatrix_view_->size());
   }
 
   /** \return a read-only view on the damping matrix */
-  inline const auto dampingMatrix() const {
+  inline auto dampingMatrix() const {
     return siconos::algebra::ConstMapVectorType(dampingMatrix_view_->data(),
                                                 dampingMatrix_view_->size());
   }
 
   /** \return a read-only view on the damping matrix */
-  inline const auto massMatrix() const {
+  inline auto massMatrix() const {
     return siconos::algebra::ConstMapVectorType(massMatrix_view_->data(),
                                                 massMatrix_view_->size());
   }

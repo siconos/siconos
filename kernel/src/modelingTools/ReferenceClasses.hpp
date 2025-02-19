@@ -265,7 +265,7 @@ class ClassA {
 
   // ----- vector2 ------
   /** \return  a read-only view on ... */
-  inline const auto vector2() const {
+  inline auto vector2() const {
     return siconos::algebra::ConstMapVectorType(vector2_view_->data(), vector2_view_->size());
   }
 
@@ -367,7 +367,7 @@ class ClassA {
   // Setters: we keep only the Map signature (not the set(std::shared...)
 
   /*  \return a read-only view on ... */
-  inline const auto matrix1() const {
+  inline auto matrix1() const {
     return siconos::algebra::ConstMapType(matrix1_view_->data(), matrix1_view_->rows(),
                                           matrix1_view_->cols());
   }

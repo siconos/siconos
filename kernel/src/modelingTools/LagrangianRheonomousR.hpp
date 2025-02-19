@@ -90,7 +90,7 @@ class LagrangianRheonomousR : public LagrangianR {
   void initialize(Interaction &inter) override;
 
   /** \return  a read-only view on \f$ \frac{\partial }{\partial t}h(q,t) \f$  */
-  inline const auto hdot() const {
+  inline auto hdot() const {
     return siconos::algebra::ConstMapVectorType(hdot_->data(), hdot_->size());
   }
 

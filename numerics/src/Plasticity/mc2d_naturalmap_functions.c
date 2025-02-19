@@ -116,7 +116,8 @@ void mc2d_computeNaturalMap(double R[3], double velocity[3], double eta, double 
       DEBUG_PRINTF("normVT = %6.4e\t, s1 = %6.4e\t, s2 = %6.4e\n ", normVT, s1, s2);
       double H[9];
       /* //zero3x3(H); */
-      unsigned int where2 = subdifferentialProjectionOnCone(H, RV, eta);
+      // unsigned int where2 =
+      subdifferentialProjectionOnCone(H, RV, eta);
       DEBUG_EXPR_WE(printf("H:"); display3x3(H););
 
       // A = rho * (I+D) * H

@@ -39,7 +39,8 @@
 #include "SiconosBlas.h"  // for cblas_dcopy, cblas_dnrm2
 
 void mc2d_unitary_compute_and_add_error(double *restrict r, double *restrict u, double eta,
-                                        double theta, double *restrict error, double *worktmp) {
+                                        double theta, double *restrict error,
+                                        double *worktmp) {
   // double normUT;
   // double worktmp[3];
   /* Compute the modified local velocity */
@@ -91,13 +92,13 @@ int mc2d_compute_error(MohrCoulomb2DProblem *problem, double *z, double *w, doub
   DEBUG_PRINTF("absolute error in complementarity = %12.8e\n", *error);
 
   /* Compute relative error */
-  double norm_r = cblas_dnrm2(n, z, 1);
-  double norm_u = cblas_dnrm2(n, w, 1);
-  double relative_scaling = fmax(norm, fmax(norm_r, norm_u));
+  // double norm_r = cblas_dnrm2(n, z, 1);
+  // double norm_u = cblas_dnrm2(n, w, 1);
+  //  double relative_scaling = fmax(norm, fmax(norm_r, norm_u));
   /* double relative_scaling = fmax(norm_r,norm_w); */
   /* double relative_scaling = norm; */
 
-  //if (fabs(relative_scaling) > DBL_EPSILON) *error /= relative_scaling;
+  // if (fabs(relative_scaling) > DBL_EPSILON) *error /= relative_scaling;
 
   DEBUG_PRINTF("relative error in complementarity = %12.8e\n", *error);
   DEBUG_END("mc2d_compute_error(...)\n");

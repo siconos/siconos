@@ -206,7 +206,7 @@ void siconos::integrators::SchatzmanPaoliOSI::initializeIterationMatrix(
   // Allocate storage for W in the graph
   _dynamicalSystemsGraph->properties(dsv).iterationMatrix =
       std::make_shared<siconos::algebra::SiconosMatrix>(ndof, ndof);
-      
+
   auto iterationMat = _dynamicalSystemsGraph->properties(dsv).iterationMatrix;
 
   if (auto lltids = std::dynamic_pointer_cast<siconos::modeling::LagrangianLinearTIDS>(ds)) {
@@ -454,9 +454,6 @@ void siconos::integrators::SchatzmanPaoliOSI::computeFreeOutput(
   // Get relation and non smooth law types
   auto relationType = inter->relation()->getType();
   auto relationSubType = inter->relation()->getSubType();
-  auto sizeY = inter->nonSmoothLaw()->size();
-
-  unsigned int relativePosition = 0;
 
   std::shared_ptr<siconos::algebra::BlockVector> deltax;
   auto& osnsp_rhs = *(*indexSet->properties(vertex_inter)

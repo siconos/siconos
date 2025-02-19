@@ -72,10 +72,10 @@ class LagrangianLinearTIR : public LagrangianR {
   ;
 
   /** \return a read-only view on the C matrix */
-  inline const auto CMatrix() const { return jacobianhOver_q(); }
+  inline auto CMatrix() const { return jacobianhOver_q(); }
 
   /** \return  a read-only view on e vector */
-  inline const auto eVector() const {
+  inline auto eVector() const {
     return siconos::algebra::ConstMapVectorType(eVector_view_->data(), eVector_view_->size());
   }
 

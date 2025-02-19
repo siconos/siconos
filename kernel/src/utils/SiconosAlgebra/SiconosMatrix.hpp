@@ -71,6 +71,9 @@ using SiconosDiagonalMatrix = Eigen::DiagonalMatrix<double_t, Eigen::Dynamic>;
 // Tmp version. To replace BlockVector ?
 using EigenBlock = std::vector<Eigen::Ref<SiconosVector>>;
 
+// type used as return value for vectors and matrix dimensions.
+using SiconosSize_t = Eigen::Index;
+
 enum class StorageType { dense, sparse };
 
 /** return the number of non-zero in the matrix

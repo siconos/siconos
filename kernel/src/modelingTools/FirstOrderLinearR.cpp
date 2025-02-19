@@ -38,9 +38,6 @@ void siconos::modeling::FirstOrderLinearR::initialize(Interaction &inter) {
   auto sizeY = inter.dimension();
   auto sizeX = inter.getSizeOfDS();
 
-  auto &DSlink = inter.linkToDSVariables();
-  auto &relationVec = inter.relationVectors();
-
   if (computeC_) {
     if (!jacobianhOver_state_internal_storage_) {
       jacobianhOver_state_internal_storage_ =

@@ -922,9 +922,9 @@ CSparseMatrix* NSM_remove_diagonal_blocks(NumericsMatrix* M, size_t block_size) 
 
     int is_block_diagonal_element = 0;
 
-    int index = i % block_size;
-
-    if ((j >= i - index) && (j < i - index + block_size)) {
+    CS_INT index = i % block_size;
+    CS_INT k = block_size - index;
+    if ((j >= i - index) && (j < (i + k))) {
       is_block_diagonal_element = 1;
     }
 
