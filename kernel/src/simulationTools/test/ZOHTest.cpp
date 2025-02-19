@@ -111,7 +111,8 @@ void ZOHTest::testMatrixIntegration1() {
   _x0->setZero();
   (*_x0)(0) = 1;
   init();
-  siconos::algebra::SiconosMatrix dataPlot((unsigned)ceil((_T - _t0) / _h) + 10, 3);
+  auto N = (unsigned)ceil((_T - _t0) / _h);
+  siconos::algebra::SiconosMatrix dataPlot(N + 1, 3);
   auto& xProc = *_DS->x();
   unsigned int k = 0;
   dataPlot(0, 0) = _t0;
@@ -124,11 +125,10 @@ void ZOHTest::testMatrixIntegration1() {
     dataPlot(k, 1) = xProc(0);
     dataPlot(k, 2) = xProc(1);
     _sim->nextStep();
-    _sim->eventsManager()->display();
+    //_sim->eventsManager()->display();
   }
   dataPlot.display();
   std::cout << std::endl << std::endl;
-  dataPlot.resize(k, 3);
   siconos::algebra::io::write("testMatrixIntegration1.dat", dataPlot,
                               siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
@@ -189,7 +189,6 @@ void ZOHTest::testMatrixIntegration2() {
 
   while (_sim->hasNextEvent()) {
     _sim->computeOneStep();
-    (*_x0)(0) = 12;
     k++;
     dataPlot(k, 0) = _sim->nextTime();
     dataPlot(k, 1) = xProc(0);
@@ -205,7 +204,6 @@ void ZOHTest::testMatrixIntegration2() {
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
   siconos::algebra::SiconosMatrix dataPlotRef(dataPlot);
-  dataPlotRef.setZero();
   siconos::algebra::io::read("testMatrixIntegration2.ref", dataPlotRef);
   siconos::algebra::SiconosMatrix diff = dataPlot - dataPlotRef;
   std::cout << "------- Integration Ok, error = " << diff.normInf() << " -------" << std::endl;
@@ -280,7 +278,6 @@ void ZOHTest::testMatrixIntegration3() {
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
   siconos::algebra::SiconosMatrix dataPlotRef(dataPlot);
-  dataPlotRef.setZero();
   siconos::algebra::io::read("testMatrixIntegration3.ref", dataPlotRef);
   siconos::algebra::SiconosMatrix diff = dataPlot - dataPlotRef;
   std::cout << "------- Integration Ok, error = " << diff.normInf() << " -------" << std::endl;

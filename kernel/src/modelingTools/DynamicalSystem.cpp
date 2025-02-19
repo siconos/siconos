@@ -35,8 +35,9 @@ siconos::modeling::DynamicalSystem::DynamicalSystem(const DynamicalSystem &ds)
   // The following data should always be initialize
   if (ds.x0_view_) {
     x0_internal_storage_ = std::make_unique<std::vector<double>>(ds.x0_view_->size());
-    x0_view_ = std::make_shared<siconos::algebra::MapVectorType>(ds.x0_view_->data(),
-                                                                 ds.x0_view_->size());
+    x0_view_ = std::make_shared<siconos::algebra::MapVectorType>(x0_internal_storage_->data(),
+                                                                 x0_internal_storage_->size());
+    *x0_view_ = *ds.x0_view_; // copy
   }
   if (ds.r()) rVector_ = std::make_shared<siconos::algebra::SiconosVector>(*(ds.r()));
 

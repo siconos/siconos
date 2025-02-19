@@ -446,8 +446,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
           indexSet->properties(vd).forControl) {
         *rightInteractionBlock =
             static_cast<siconos::integrators::ZeroOrderHoldOSI&>(osi).Bd(ds);
-        siconos::algebra::prod(*leftInteractionBlock, *rightInteractionBlock,
-                               *currentInteractionBlock, false);
+        *currentInteractionBlock += *leftInteractionBlock * *rightInteractionBlock;
       } else {
         // centralInteractionBlock contains a lu-factorized matrix and we solve
         // centralInteractionBlock * X = rightInteractionBlock with PLU

@@ -78,13 +78,11 @@ void siconos::integrators::ZeroOrderHoldOSI::initializeWorkVectorsForDS(
         "initialized for ds the DS");
 
   if ((static_cast<const siconos::modeling::FirstOrderLinearDS&>(*ds)).hasbVector()) {
-    auto E =
-        std::make_shared<siconos::algebra::SiconosMatrix>(ds->dimension(), ds->dimension());
-    E->setIdentity();
-    auto constE = siconos::algebra::ConstMapType(E->data(), E->rows(), E->cols());
+    siconos::algebra::SiconosMatrix E{ds->dimension(), ds->dimension()};
+    E.setIdentity();
     DSG0.AdInt.insert(dsgVD, std::make_shared<siconos::simulation::MatrixIntegrator>(
                                  *ds, *_simulation->nonSmoothDynamicalSystem(),
-                                 _simulation->eventsManager()->timeDiscretisation(), constE));
+                                 _simulation->eventsManager()->timeDiscretisation(), E));
     if (DSG0.AdInt.at(dsgVD)->isConst()) DSG0.AdInt.at(dsgVD)->integrate();
   }
 

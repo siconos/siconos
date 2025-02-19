@@ -2039,7 +2039,10 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         time = self.current_time()
 
-        positions = self._io.positions(self._nsds)
+        # io.positions returns ds state vectors in columns.
+        # Each column corresponds to one DS. First value in the column
+        # is the ds number.
+        positions = self._io.positions(self._nsds).transpose()
         self._ds_positions = positions
         if positions is not None:
             self._dynamic_data.resize(current_line + positions.shape[0], 0)
@@ -2048,7 +2051,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             times.fill(time)
             if self._dimension == 3:
                 self._dynamic_data[current_line:, :] = np.concatenate(
-                    (times, positions), axis=1)
+                    (times, positions.transpose()), axis=1)
             elif self._dimension == 2:
                 # VA. change the position such that is corresponds to a 3D object
                 new_positions = np.zeros((positions.shape[0], 8))
@@ -2070,7 +2073,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         time = self.current_time()
 
-        velocities = self._io.velocities(self._nsds)
+        velocities = self._io.velocities(self._nsds).transpose()
 
         if velocities is not None:
 

@@ -36,10 +36,12 @@
 siconos::simulation::MatrixIntegrator::MatrixIntegrator(
     const siconos::modeling::DynamicalSystem& ds,
     const siconos::modeling::NonSmoothDynamicalSystem& nsds,
-    std::shared_ptr<TimeDiscretisation> td, const siconos::algebra::ConstMapType& E)
+    std::shared_ptr<TimeDiscretisation> td, const siconos::algebra::SiconosMatrix& E)
     : MatrixIntegrator{ds, nsds, td} {
-  E_view_ = std::make_shared<siconos::algebra::ConstMapType>(E);
-  _mat = std::make_shared<siconos::algebra::SiconosMatrix>(E);
+  E_buffer_ = std::make_shared<siconos::algebra::SiconosMatrix>(E);  // Copy.rows(), E.cols());
+  //  *E_buffer_ = E;  // copy
+
+  _mat = std::make_shared<siconos::algebra::SiconosMatrix>(E.rows(), E.cols());
   _mat->setZero();
 }
 
@@ -98,8 +100,6 @@ siconos::simulation::MatrixIntegrator::MatrixIntegrator(
 void siconos::simulation::MatrixIntegrator::integrate() {
   DEBUG_BEGIN("siconos::simulation::MatrixIntegrator::integrate()\n");
 
-  auto x = *_DS->x();
-
   auto fods = std::dynamic_pointer_cast<siconos::modeling::FirstOrderNonLinearDS>(_DS);
   assert(fods && "MatrixIntegrator only available for first order DS.");
 
@@ -111,9 +111,8 @@ void siconos::simulation::MatrixIntegrator::integrate() {
           std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(fods)) {
     for (unsigned int i = 0; i < p; i++) {
       x0->setZero();
-      if (E_view_) {
-        siconos::algebra::SiconosVector b = E_view_->col(i);
-        linear_ds->setConstantbVector(b);
+      if (E_buffer_ && !computeEMatrix_) {
+        linear_ds->setConstantbVector(E_buffer_->col(i));
       } else if (computeEMatrix_)
         linear_ds->setComputebVectorFunction(
             [this, i](double time, Eigen::Ref<siconos::algebra::MapVectorType> result) {
@@ -128,7 +127,7 @@ void siconos::simulation::MatrixIntegrator::integrate() {
       _DS->resetToInitialState();
       _sim->setIstate(1);
       _sim->advanceToEvent();
-      _mat->col(i) = x;
+      _mat->col(i) = _DS->x_read();
     }
 
   } else  // Non linear case
@@ -144,7 +143,7 @@ void siconos::simulation::MatrixIntegrator::integrate() {
       _DS->resetToInitialState();
       _sim->setIstate(1);
       _sim->advanceToEvent();
-      _mat->col(i) = x;
+      _mat->col(i) = _DS->x_read();
     }
   }
 

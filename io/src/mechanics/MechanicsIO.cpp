@@ -95,6 +95,7 @@ struct siconos::io::GetPosition : public siconos::modeling::dynamical_systems::V
   void setMap(Eigen::Ref<siconos::algebra::SiconosVector> buffer) override {
     result = std::make_shared<siconos::algebra::MapVectorType>(buffer.data(), buffer.size());
   }
+
   template <typename T>
   void operator()(const T& ds) {
     (*result)(0) = ds.number();
@@ -580,7 +581,7 @@ siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::positions(
                                  siconos::modeling::NewtonEulerDS>,
       GetPosition>::Make;
 
-  return visitAllVerticesForVector<Getter>(*(nsds.topology()->dSG(0))).transpose();
+  return visitAllVerticesForVector<Getter>(*(nsds.topology()->dSG(0)));
 };
 
 siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::velocities(
@@ -590,7 +591,7 @@ siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::velocities(
                                  siconos::modeling::NewtonEulerDS>,
       GetVelocity>::Make;
 
-  return visitAllVerticesForVector<Getter>(*nsds.topology()->dSG(0)).transpose();
+  return visitAllVerticesForVector<Getter>(*nsds.topology()->dSG(0));
 }
 
 std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::contactPoints(

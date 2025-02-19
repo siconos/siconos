@@ -53,10 +53,7 @@ class MatrixIntegrator {
   /** The matrix solution to the ODE */
   std::shared_ptr<siconos::algebra::SiconosMatrix> _mat{nullptr};
 
-  /** entry matrix of the system (as a view onto memory)*/
-  std::shared_ptr<siconos::algebra::ConstMapType> E_view_{nullptr};
-
-  /** buffer used to compute entry matrix from a user defined function */
+  /** buffer used to save or compute entry matrix from a user defined function */
   std::shared_ptr<siconos::algebra::SiconosMatrix> E_buffer_{nullptr};
 
   /** The entry Matrix E as a user-defined function */
@@ -93,12 +90,12 @@ class MatrixIntegrator {
    * \param ds the siconos::modeling::DynamicalSystem
    * \param nsds current nonsmooth dynamical system
    * \param td current time discretisation
-   * \param E the entry matrix (shared view with class attribute)
+   * \param E the entry matrix
    */
   MatrixIntegrator(const siconos::modeling::DynamicalSystem& ds,
                    const siconos::modeling::NonSmoothDynamicalSystem& nsds,
                    std::shared_ptr<TimeDiscretisation> td,
-                   const siconos::algebra::ConstMapType& E);
+                   const siconos::algebra::SiconosMatrix& E);
 
   /** Constructor to compute \f$\int exp(A\tau)E(\tau)\mathrm{d}\tau\f$
    * \param ds the siconos::modeling::DynamicalSystem
