@@ -35,7 +35,7 @@ class MBTB_Body : public siconos::modeling::NewtonEulerDS {
   //! The cad file.
   const std::string _cadFileName{""};
 
-  MBTB_Body() = default;
+  //MBTB_Body() = default;
 
  public:
   /** Constructor without plugin builder

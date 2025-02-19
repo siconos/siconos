@@ -289,7 +289,7 @@ struct Visitor {
         "OccBody in a derived class of SiconosVisitor");
   }
 
-  virtual void visit(iconos::mechanics::occ::OccBody &) {
+  virtual void visit(siconos::mechanics::occ::OccBody &) {
     THROW_EXCEPTION(
         "you must define a visit function for OccBody "
         "in a derived class of SiconosVisitor");

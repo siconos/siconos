@@ -265,16 +265,7 @@ void siconos::mechanisms::MBTB_BodyBuild(
     std::shared_ptr<siconos::algebra::SiconosVector> initPos,
     std::shared_ptr<siconos::algebra::SiconosVector> modelCenterMass,
     std::shared_ptr<siconos::algebra::SiconosMatrix> inertialMatrix,
-    // const siconos::modeling::func_prototypes::FunctionS_V& fext_func,
-    // const siconos::modeling::func_prototypes::FunctionS_V& mext_func,
-    // const siconos::modeling::func_prototypes::FunctionVVS_V& fint_func,
-    // const siconos::modeling::func_prototypes::FunctionVVS_V& mint_func,
-    // const siconos::modeling::func_prototypes::FunctionVVS_V& jacobianfint_qfunc,
-    // const siconos::modeling::func_prototypes::FunctionVVS_V& jacobianfint_twistfunc,
-    // const siconos::modeling::func_prototypes::FunctionVVS_V& jacobianmint_qfunc,
-    // const siconos::modeling::func_prototypes::FunctionVVS_V& jacobianmint_twistfunc,
-    const std::string& pluginBoundaryConditionLib,
-    const std::string& pluginBoundaryConditionFct,
+    const siconos::modeling::func_prototypes::FunctionS_V& boundaryCondition_func,
     const siconos::modeling::BoundaryCondition::Indices& boundaryConditionIndex) {
   assert(mbtb::data::sNbOfBodies > numDS && "MBTB_BodyBuild numDS out of range.");
   unsigned int qDim = 7;
@@ -290,6 +281,8 @@ void siconos::mechanisms::MBTB_BodyBuild(
                                Eigen::Ref<siconos::algebra::SiconosMatrix>(*inertialMatrix),
                                Eigen::Ref<siconos::algebra::SiconosVector>(*modelCenterMass),
                                BodyName, BodyName);
+
+  // Note FP: review process to set fext, fint ... with user-defined plugins for this MBTB_Body
 
   // We fix a ds number just to be able to use postprocessing based on hdf5 file
   p->setNumber(numDS + 1);
@@ -337,24 +330,19 @@ void siconos::mechanisms::MBTB_BodyBuild(
   //   }
   // }
   // set boundary condition
-  if (pluginBoundaryConditionFct.length() > 1) {
-    // auto bdindex(new IndexInt(1));
-    //(*bdindex)[0] = 4;
-    DEBUG_PRINT("################################################################\n");
+  DEBUG_PRINT("################################################################\n");
 
-    DEBUG_PRINT("###\n");
+  DEBUG_PRINT("###\n");
 
-    DEBUG_PRINT("###\n");
+  DEBUG_PRINT("###\n");
 
-    DEBUG_PRINT("###\n");
+  DEBUG_PRINT("###\n");
 
-    DEBUG_PRINTF("Set boundary Condition for body numDs = %i\n", numDS);
-    DEBUG_EXPR(tools::print("bc indices ", *boundaryConditionIndex));
-    auto bd = std::make_shared<siconos::modeling::BoundaryCondition>(boundaryConditionIndex);
-    bd->setComputePrescribedVelocityFunction(pluginBoundaryConditionLib,
-                                             pluginBoundaryConditionFct);
-    p->setBoundaryConditions(bd);
-  }
+  DEBUG_PRINTF("Set boundary Condition for body numDs = %i\n", numDS);
+  DEBUG_EXPR(tools::print("bc indices ", *boundaryConditionIndex));
+  auto bd = std::make_shared<siconos::modeling::BoundaryCondition>(boundaryConditionIndex);
+  bd->setComputePrescribedVelocityFunction(boundaryCondition_func);
+  p->setBoundaryConditions(bd);
 
   mbtb::data::sDS[numDS].reset(p);
   // sAllDS.insert(mbtb::data::sDS[numDS]);
@@ -389,15 +377,15 @@ void siconos::mechanisms::MBTB_JointBuild(
     nbDS = 1;
   }
 
-  auto P = std::make_shared<siconos::algebra::SiconosVector>(3);
-  auto A = std::make_shared<siconos::algebra::SiconosVector>(3);
+  siconos::algebra::SiconosVector3 P;
+  siconos::algebra::SiconosVector3 A;
   auto ds1CenterOfMass = mbtb::data::sDS[indexDS1]->centerOfMass();
-  P->setValue(0, jointPosition->getValue(3) - ds1CenterOfMass->getValue(0));
-  P->setValue(1, jointPosition->getValue(4) - ds1CenterOfMass->getValue(1));
-  P->setValue(2, jointPosition->getValue(5) - ds1CenterOfMass->getValue(2));
-  A->setValue(0, jointPosition->getValue(0));
-  A->setValue(1, jointPosition->getValue(1));
-  A->setValue(2, jointPosition->getValue(2));
+  P.setValue(0, jointPosition->getValue(3) - ds1CenterOfMass->getValue(0));
+  P.setValue(1, jointPosition->getValue(4) - ds1CenterOfMass->getValue(1));
+  P.setValue(2, jointPosition->getValue(5) - ds1CenterOfMass->getValue(2));
+  A.setValue(0, jointPosition->getValue(0));
+  A.setValue(1, jointPosition->getValue(1));
+  A.setValue(2, jointPosition->getValue(2));
   mbtb::data::sJointRelations[numJ] = new MBTB_JointR();
   if (jointType == JointsType::Pivot1) {
     mbtb::data::sJointRelations[numJ]->_jointR =
@@ -425,7 +413,7 @@ void siconos::mechanisms::MBTB_JointBuild(
   lH->setZero();
   auto lNSL = std::make_shared<siconos::modeling::EqualityConditionNSL>(lNbEq);
 
-  mbtb::data::sJointRelations[numJ]->_jointR->setJachq(lH);
+  mbtb::data::sJointRelations[numJ]->_jointR->setConstantH_NE(*lH);
   //  mbtb::data::sInterJoints[numJ].reset(new Interaction(JointName,
   //  sAllDSByInter[numJ],
   //                                           numJ, lNbEq , lNSL,

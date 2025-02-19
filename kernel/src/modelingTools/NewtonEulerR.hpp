@@ -222,7 +222,7 @@ class NewtonEulerR : public Relation {
 
   /** \return  a read-only view on the vector of the forces due to this relation
    */
-  inline const auto contactForce() {
+  inline const auto contactForce() const {
     return siconos::algebra::ConstMapVectorType(contactForce_->data(), contactForce_->size());
   }
 

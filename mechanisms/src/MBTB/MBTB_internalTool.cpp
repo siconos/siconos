@@ -43,7 +43,7 @@ void siconos::mechanisms::mbtb::internal::MBTB_updateContactFromDS() {
     std::cout << "....> contact force of %s :"
               << siconos::mechanisms::mbtb::data::sContacts[numC]->contactName() << "\n";
 
-    mbtb::data::sContacts[numC]->relation()->contactForce()->display();
+    mbtb::data::sContacts[numC]->relation()->contactForce().display();
 #endif
     int index1 = mbtb::data::sContacts[numC]->indexBody1();
     int index2 = mbtb::data::sContacts[numC]->indexBody2();
@@ -163,10 +163,8 @@ void siconos::mechanisms::mbtb::internal::MBTB_DRAW_STEP() {
         auto R = inter1->relation();
         for (unsigned int nC = 0; nC < mbtb::data::sNbOfContacts; nC++) {
           if (mbtb::data::sContacts[nC]->relation() == R) {
-            auto F = mbtb::data::sContacts[nC]->relation()->contactForce();
-            aux = sqrt(F->getValue(0) * F->getValue(0) + F->getValue(1) * F->getValue(1) +
-                       F->getValue(2) * F->getValue(2)) /
-                  h;
+            auto cF = mbtb::data::sContacts[nC]->relation()->contactForce();
+            aux = sqrt(cF(0) * cF(0) + cF(1) * cF(1) + cF(2) * cF(2)) / h;
             if (aux > FMax) FMax = aux;
           }
         }
@@ -179,9 +177,8 @@ void siconos::mechanisms::mbtb::internal::MBTB_DRAW_STEP() {
       auto R = inter1->relation();
       for (unsigned int nC = 0; nC < mbtb::data::sNbOfContacts; nC++) {
         if (mbtb::data::sContacts[nC]->relation() == R) {
-          auto F = mbtb::data::sContacts[nC]->relation()->contactForce();
-          normF = sqrt(F->getValue(0) * F->getValue(0) + F->getValue(1) * F->getValue(1) +
-                       F->getValue(2) * F->getValue(2));
+          auto cF = mbtb::data::sContacts[nC]->relation()->contactForce();
+          normF = sqrt(cF(0) * cF(0) + cF(1) * cF(1) + cF(2) * cF(2));
           aux = normF / h;
           aux = aux / FMax;
           if (aux > 1)
@@ -193,15 +190,15 @@ void siconos::mechanisms::mbtb::internal::MBTB_DRAW_STEP() {
           // printf("siconos::mechanisms::mbtb::internal::MBTB_DRAW_STEP aux=%e
           // \n",aux);
           if (aux > mbtb::data::sArtefactThreshold) {
-            auto F = mbtb::data::sContacts[nC]->relation()->contactForce();
+            auto cF = mbtb::data::sContacts[nC]->relation()->contactForce();
             double x1, x2, y1, y2, z1, z2;
             x1 = mbtb::data::sContacts[nC]->relation()->pc1()->getValue(0);
             y1 = mbtb::data::sContacts[nC]->relation()->pc1()->getValue(1);
             z1 = mbtb::data::sContacts[nC]->relation()->pc1()->getValue(2);
 
-            x2 = x1 + aux * (mbtb::data::sArtefactLength / normF) * F->getValue(0);
-            y2 = y1 + aux * (mbtb::data::sArtefactLength / normF) * F->getValue(1);
-            z2 = z1 + aux * (mbtb::data::sArtefactLength / normF) * F->getValue(2);
+            x2 = x1 + aux * (mbtb::data::sArtefactLength / normF) * cF(0);
+            y2 = y1 + aux * (mbtb::data::sArtefactLength / normF) * cF(1);
+            z2 = z1 + aux * (mbtb::data::sArtefactLength / normF) * cF(2);
             double radius = 0.03 * aux * mbtb::data::sArtefactLength;
             CADMBTB_buildCylinderArtefactLine(nC + 2 * mbtb::data::sNbOfContacts, &x1, &y1,
                                               &z1, &x2, &y2, &z2, &radius);
@@ -301,7 +298,7 @@ void siconos::mechanisms::mbtb::internal::MBTB_displayStep() {
       printf("\n");
       printf("Forces in Joint  %i\n", numJ);
       for (int ii = 0; ii < 3; ii++) {
-        printf("%e", mbtb::data::sJointRelations[numJ]->_jointR->contactForce()->getValue(ii));
+        printf("%e", mbtb::data::sJointRelations[numJ]->_jointR->contactForce().getValue(ii));
         printf("\t");
       }
       printf("\n");
@@ -310,7 +307,7 @@ void siconos::mechanisms::mbtb::internal::MBTB_displayStep() {
       auto vaux(new siconos::algebra::SiconosVector(3));
       for (int ii = 3; ii < 6; ii++) {
         vaux->setValue(
-            ii - 3, mbtb::data::sJointRelations[numJ]->_jointR->contactForce()->getValue(ii));
+            ii - 3, mbtb::data::sJointRelations[numJ]->_jointR->contactForce().getValue(ii));
         printf("%e", vaux->getValue(ii - 3));
         printf("\t");
       }
@@ -345,14 +342,14 @@ void siconos::mechanisms::mbtb::internal::MBTB_displayStep() {
       printf("Contact number %i\n", numC);
       printf("Contact forces in contact  %i\n", numC);
       for (int ii = 0; ii < 3; ii++) {
-        printf("%e", mbtb::data::sContacts[numC]->relation()->contactForce()->getValue(ii));
+        printf("%e", mbtb::data::sContacts[numC]->relation()->contactForce().getValue(ii));
         printf("\t");
       }
 
       auto vaux(new siconos::algebra::SiconosVector(3));
       for (int ii = 3; ii < 6; ii++) {
         vaux->setValue(ii - 3,
-                       mbtb::data::sContacts[numC]->relation()->contactForce()->getValue(ii));
+                       mbtb::data::sContacts[numC]->relation()->contactForce().getValue(ii));
       }
       /*convert momentum in abs frame*/
       siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(
@@ -430,13 +427,13 @@ void siconos::mechanisms::mbtb::internal::MBTB_printStep(std::ofstream& myfile) 
   }
   for (decltype(mbtb::data::sNbOfJoints) numJ = 0; numJ < mbtb::data::sNbOfJoints; numJ++) {
     for (auto ii = 0; ii < 3; ii++) {
-      myfile << mbtb::data::sJointRelations[numJ]->_jointR->contactForce()->getValue(ii)
+      myfile << mbtb::data::sJointRelations[numJ]->_jointR->contactForce().getValue(ii)
              << "\t";
     }
     auto vaux = std::make_shared<siconos::algebra::SiconosVector>(3);
     for (auto ii = 3; ii < 6; ii++) {
       vaux->setValue(ii - 3,
-                     mbtb::data::sJointRelations[numJ]->_jointR->contactForce()->getValue(ii));
+                     mbtb::data::sJointRelations[numJ]->_jointR->contactForce().getValue(ii));
     }
     /*convert momentum in abs frame*/
     siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(
@@ -458,12 +455,12 @@ void siconos::mechanisms::mbtb::internal::MBTB_printStep(std::ofstream& myfile) 
 
   for (numC = 0; numC < numref; numC++) {
     for (auto ii = 0; ii < 3; ii++) {
-      myfile << mbtb::data::sContacts[numC]->relation()->contactForce()->getValue(ii) << "\t";
+      myfile << mbtb::data::sContacts[numC]->relation()->contactForce().getValue(ii) << "\t";
     }
     auto vaux = std::make_shared<siconos::algebra::SiconosVector>(3);
     for (auto ii = 3; ii < 6; ii++) {
       vaux->setValue(ii - 3,
-                     mbtb::data::sContacts[numC]->relation()->contactForce()->getValue(ii));
+                     mbtb::data::sContacts[numC]->relation()->contactForce().getValue(ii));
     }
     /*convert momentum in abs frame*/
     siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(

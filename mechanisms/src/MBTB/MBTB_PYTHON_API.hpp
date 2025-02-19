@@ -81,26 +81,9 @@ void MBTB_BodyLoadCADFile(unsigned int numDS, const std::string& CADFile,
     in R^3, vector in R^3, angle in R) that must be appyed after the load to
     get the initial position of the object
 
-    \param [in] initCenterMass coordinate of the mass center in the  model
+    \param [in] modelCenterMass coordinate of the mass center in the  model
     \param [in] inertialMatrix matrix in R^{3,3}
-    \param [in] pluginFextLib the path to the plugin library
-    \param [in] pluginFextFct the name of the pluged fonction
-    \param [in] pluginMextLib the path to the plugin library
-    \param [in] pluginMextFct the name of the pluged fonction
-    \param [in] pluginFintLib the path to the plugin library
-    \param [in] pluginFintFct the name of the pluged fonction
-    \param [in] pluginMintLib the path to the plugin library
-    \param [in] pluginMintFct the name of the pluged fonction
-    \param [in] pluginFintJacqLib the path to the plugin library
-    \param [in] pluginFintJacqFct the name of the pluged fonction
-    \param [in] pluginMintJacqLib path to the plugin library
-    \param [in] pluginMintJacqFct name of the pluged fonction
-    \param [in] pluginFintJacvLib path to the plugin library
-    \param [in] pluginFintJacvFct name of the pluged fonction
-    \param [in] pluginMintJacvLib path to the plugin library
-    \param [in] pluginMintJacvFct name of the pluged fonction
-    \param [in] pluginBoundaryConditionLib path to the plugin library
-    \param [in] pluginBoundaryConditionFct name of the pluged fonction
+    \param [in] boundaryCondition_func user function to compute boundary conditions
     \param [in] boundaryConditionIndex the indices of the velocities
    prescribed by the boundary condition
  */
@@ -109,16 +92,7 @@ void MBTB_BodyBuild(
     std::shared_ptr<siconos::algebra::SiconosVector> initPos,
     std::shared_ptr<siconos::algebra::SiconosVector> modelCenterMass,
     std::shared_ptr<siconos::algebra::SiconosMatrix> inertialMatrix,
-    // const siconos::modeling::func_prototypes::FunctionS_V& fext_func,
-    // const siconos::modeling::func_prototypes::FunctionS_V& mext_func,
-    // const siconos::modeling::func_prototypes::FunctionVVS_V& fint_func,
-    // const siconos::modeling::func_prototypes::FunctionVVS_V& mint_func,
-    // const siconos::modeling::func_prototypes::FunctionVVS_V& jacobianfint_qfunc,
-    // const siconos::modeling::func_prototypes::FunctionVVS_V& jacobianfint_twistfunc,
-    // const siconos::modeling::func_prototypes::FunctionVVS_V& jacobianmint_qfunc,
-    // const siconos::modeling::func_prototypes::FunctionVVS_V& jacobianmint_twistfunc,
-    const std::string& pluginBoundaryConditionLib,
-    const std::string& pluginBoundaryConditionFct,
+    const siconos::modeling::func_prototypes::FunctionS_V& boundaryCondition_func,
     const siconos::modeling::BoundaryCondition::Indices& boundaryConditionIndex);
 
 /** To build a joint.

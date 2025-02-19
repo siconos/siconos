@@ -54,18 +54,11 @@ void siconos::mechanisms::MBTB_JointR::computeEquivalentForces() {
   ::boost::math::quaternion<double> quattrf(q1, q2, q3, q4);
   ::boost::math::quaternion<double> cquattrf(q1, -q2, -q3, -q4);
   ::boost::math::quaternion<double> quatbuff;
-  auto Blambda = _jointR->contactForce();
-  siconos::algebra::SiconosVector3 FL;
-  FL(0) = (*Blambda)(0);
-  FL(1) = (*Blambda)(1);
-  FL(2) = (*Blambda)(2);
+  siconos::algebra::SiconosVector3 FL = _jointR->contactForce().head(3);
 
-  siconos::algebra::SiconosVector ML_G(3);
-  siconos::algebra::SiconosVector ML_G_abs(3);
-  ML_G(0) = (*Blambda)(3);
-  ML_G(1) = (*Blambda)(4);
-  ML_G(2) = (*Blambda)(5);
-  auto spML_G_abs = std::make_shared<siconos::algebra::SiconosVector>(3);
+  siconos::algebra::SiconosVector3 ML_G = _jointR->contactForce().tail(3);
+  siconos::algebra::SiconosVector3 ML_G_abs;
+  auto spML_G_abs = std::make_shared<siconos::algebra::SiconosVector3>();
   *spML_G_abs = ML_G;
   siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(*_ds1->q(), *spML_G_abs);
   ML_G_abs = *spML_G_abs;
