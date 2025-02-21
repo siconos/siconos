@@ -22,6 +22,7 @@
 #include "MoreauJeanGOSI.hpp"  // Numerics Header
 #include "NewtonEulerDS.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
+#include "MohrCoulombPlasticityNSL.hpp"
 #include "NumericsSolversNamespace.h"  // solver_options stuff
 #include "OSNSMatrix.hpp"
 #include "SiconosVector.hpp"
@@ -327,6 +328,12 @@ bool siconos::nonsmooth_formulations::GlobalFrictionContact::preCompute(double t
           _mu->push_back(std::static_pointer_cast<siconos::modeling::NewtonImpactFrictionNSL>(
                          inter->nonSmoothLaw())
                          ->mu());  // curious !!
+      if(siconos::types::type_value(*(inter->nonSmoothLaw())) ==
+          siconos::modeling::Type::MohrCoulombPlasticityNSL)
+          _mu->push_back(1/tan(std::static_pointer_cast<siconos::modeling::MohrCoulombPlasticityNSL>(
+                           inter->nonSmoothLaw())
+                           ->phi()));
+
 
       auto ds1 = indexSet.properties(*ui).source;
       auto ds2 = indexSet.properties(*ui).target;
@@ -404,7 +411,7 @@ int siconos::nonsmooth_formulations::GlobalFrictionContact::compute(double time)
      end = std::chrono::high_resolution_clock::now();
      float_ms = end - start;
     std::cout << "solve time:" << float_ms.count() << " ms" <<std::endl;
-
+     std::cout << "mu is:" << getMu(0) <<std::endl;
     DEBUG_EXPR(display(););
      start = std::chrono::high_resolution_clock::now();
     postCompute();
@@ -421,12 +428,12 @@ int siconos::nonsmooth_formulations::GlobalFrictionContact::solve(
   if (!problem) {
     problem = globalFrictionContactProblem();
   }
-  display();
+
   auto info = (*_gfc_driver)(&*problem, _z->getArray(), _w->getArray(),
                              _globalVelocities->getArray(), &*_numerics_solver_options);
-  std::cout << "display of z and w" << std::endl;
-  _z->display();
-  _w->display();
+  // std::cout << "display of z and w" << std::endl;
+  // _z->display();
+  // _w->display();
 //  getchar();
   return info;
 }
@@ -458,12 +465,12 @@ void siconos::nonsmooth_formulations::GlobalFrictionContact::postCompute() {
 
     // siconos::algebra::setBlock(*_w, y, y->size(), pos, 0);// Warning: yEquivalent is
     //  saved in y !!
-    std::cout << "_z in postCompute:" << std::endl;
-    _z->display();
+    // std::cout << "_z in postCompute:" << std::endl;
+    // _z->display();
 
     siconos::algebra::setBlock(*_z, lambda, lambda->size(), pos, 0);
-    std::cout << "And lambda/epsilonp in postCompute with inputOutputLevel():" << inputOutputLevel() << std::endl;
-    inter.lambda(inputOutputLevel())->display();
+    // std::cout << "And lambda/epsilonp in postCompute with inputOutputLevel():" << inputOutputLevel() << std::endl;
+    // inter.lambda(inputOutputLevel())->display();
 //    std::cout << "inter.display() in postCompute:" << std::endl;
 //    inter.display();
     DEBUG_EXPR(lambda->display(););
@@ -484,8 +491,8 @@ void siconos::nonsmooth_formulations::GlobalFrictionContact::postCompute() {
         DEBUG_EXPR(stress->display(););
         DEBUG_EXPR(_globalVelocities->display(););
         pos = DSG0.properties(*dsi).absolute_position;
-        std::cout << "_globalVelocities in postCompute:" << std::endl;
-        _globalVelocities->display();
+        // std::cout << "_globalVelocities in postCompute:" << std::endl;
+        // _globalVelocities->display();
         siconos::algebra::setBlock(*_globalVelocities, velocity, sizeDS, pos, 0);
         siconos::algebra::setBlock(*_globalVelocities, stress, solid.stressDimension(), pos+solid.velocityDimension(), 0);
     }
@@ -583,5 +590,11 @@ void siconos::nonsmooth_formulations::GlobalFrictionContact::updateMu() {
         _mu->push_back(std::static_pointer_cast<siconos::modeling::NewtonImpactFrictionNSL>(
                        indexSet->bundle(*ui)->nonSmoothLaw())
                        ->mu());
+    if(siconos::types::type_value(*(inter->nonSmoothLaw())) ==
+        siconos::modeling::Type::MohrCoulombPlasticityNSL)
+      _mu->push_back(1/tan(std::static_pointer_cast<siconos::modeling::MohrCoulombPlasticityNSL>(
+                             inter->nonSmoothLaw())
+                             ->phi()));
+
   }
 }
