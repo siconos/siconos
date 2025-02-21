@@ -1,0 +1,484 @@
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2024 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "mc2d_projection.h"  // for mc2d_projectionOnConeWithDiago...
+
+#include <assert.h>  // for assert
+#include <float.h>   // for DBL_EPSILON
+#include <math.h>    // for sqrt
+#include <stdio.h>   // for fprintf, printf, NULL, stderr
+#include <stdlib.h>  // for calloc, free, exit, EXIT_FAILURE
+
+#include "MohrCoulomb2DProblem.h"      // for MohrCoulomb2DProblem
+#include "NumericsFwd.h"               // for SolverOptions, MohrCoulomb2D...
+#include "NumericsMatrix.h"            // for NumericsMatrix, RawNumericsMatrix
+#include "Plasticity_cst.h"            // for PLASTICITY_NSGS_LOCAL...
+#include "SiconosBlas.h"               // for cblas_ddot
+#include "SolverOptions.h"             // for SolverOptions, solver_options_...
+#include "SparseBlockMatrix.h"         // for SBM_row_prod
+#include "mc2d_compute_error.h"        // for mc2d_Tresca_unitary_compute_an...
+#include "mc2d_local_problem_tools.h"  // for mc2d_local_problem_compute_q
+#include "mc2d_solvers.h"
+#include "numerics_verbose.h"      // for numerics_printf, numerics_prin...
+#include "projectionOnCone.h"      // for projectionOnCone
+#include "projectionOnCylinder.h"  // for projectionOnCylinder
+/* #define DEBUG_NOCOLOR */
+/* #define DEBUG_MESSAGES */
+/* #define DEBUG_STDOUT */
+#include "siconos_debug.h"  // for DEBUG_PRINTF, DEBUG_EXPR, DEBU...
+#ifdef DEBUG_MESSAGES
+#include "NumericsVector.h"
+#endif
+
+/* Static variables */
+
+/* The global problem of size n= 3*nc, nc being the number of contacts, is locally saved in
+ * MGlobal and qGlobal */
+/* note that either MGlobal or MBGlobal is used, depending on the chosen storage */
+/* static int n=0; */
+/* static const NumericsMatrix* MGlobal = NULL; */
+/* static const double* qGlobal = NULL; */
+/* static const double* theta = NULL; */
+
+/* Local problem operators */
+/* static const int nLocal = 3; */
+/* static double* MLocal; */
+/* static int isMAllocatedIn = 0; /\* True if a malloc is done for MLocal, else false *\/ */
+/* static double qLocal[3]; */
+/* static double theta_i = 0.0; */
+
+void mc2d_projection_initialize(MohrCoulomb2DProblem* problem,
+                                MohrCoulomb2DProblem* localproblem) {}
+
+void mc2d_projection_update(int contact, MohrCoulomb2DProblem* problem,
+                            MohrCoulomb2DProblem* localproblem, double* reaction,
+                            SolverOptions* options) {
+  /* Build a local problem for a specific contact
+     reaction corresponds to the global vector (size n) of the global problem.
+  */
+
+  /* Call the update function which depends on the storage for MGlobal/MBGlobal */
+  /* Build a local problem for a specific contact
+   reaction corresponds to the global vector (size n) of the global problem.
+  */
+
+  /* The part of MGlobal which corresponds to the current block is copied into MLocal */
+  mc2d_local_problem_fill_M(problem, localproblem, contact);
+
+  /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products
+     MLocal.reactionBlock, excluding the block corresponding to the current contact. ****/
+  mc2d_local_problem_compute_q(problem, localproblem, reaction, contact);
+
+  /* coefficient for current block*/
+  localproblem->eta[0] = problem->eta[contact];
+  localproblem->theta[0] = problem->theta[contact];
+}
+
+void mc2d_projectionWithDiagonalization_update(int contact, MohrCoulomb2DProblem* problem,
+                                               MohrCoulomb2DProblem* localproblem,
+                                               double* reaction, SolverOptions* options) {
+  /* Build a local problem for a specific contact
+     reaction corresponds to the global vector (size n) of the global problem.
+  */
+
+  /* Call the update function which depends on the storage for MGlobal/MBGlobal */
+  /* Build a local problem for a specific contact
+   reaction corresponds to the global vector (size n) of the global problem.
+  */
+
+  /* The part of MGlobal which corresponds to the current block is copied into MLocal */
+  mc2d_local_problem_fill_M(problem, localproblem, contact);
+
+  /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products
+     MLocal.reactionBlock, excluding the block corresponding to the current contact. ****/
+
+  NumericsMatrix* MGlobal = problem->M;
+  double* MLocal = localproblem->M->matrix0;
+
+  double* qLocal = localproblem->q;
+  double* qGlobal = problem->q;
+  int n = 3 * problem->numberOfCones;
+
+  int in = 3 * contact, it = in + 1, is = it + 1;
+  /* reaction current block set to zero, to exclude current contact block */
+  /*   double rin= reaction[in] ; double rit= reaction[it] ; double ris= reaction[is] ;  */
+  /* qLocal computation*/
+  qLocal[0] = qGlobal[in];
+  qLocal[1] = qGlobal[it];
+  qLocal[2] = qGlobal[is];
+
+  if (MGlobal->storageType == NM_DENSE) {
+    double* MM = MGlobal->matrix0;
+    int incx = n, incy = 1;
+    qLocal[0] += cblas_ddot(n, &MM[in], incx, reaction, incy);
+    qLocal[1] += cblas_ddot(n, &MM[it], incx, reaction, incy);
+    qLocal[2] += cblas_ddot(n, &MM[is], incx, reaction, incy);
+    // Substract diagonal term
+    qLocal[0] -= MM[in + n * in] * reaction[in];
+    qLocal[1] -= MM[it + n * it] * reaction[it];
+    qLocal[2] -= MM[is + n * is] * reaction[is];
+  } else if (MGlobal->storageType == NM_SPARSE_BLOCK) {
+    /* qLocal += rowMB * reaction
+       with rowMB the row of blocks of MGlobal which corresponds to the current contact
+    */
+    SBM_row_prod(n, 3, contact, MGlobal->matrix1, reaction, qLocal, 0);
+    // Substract diagonal term
+    qLocal[0] -= MLocal[0] * reaction[in];
+    qLocal[1] -= MLocal[4] * reaction[it];
+    qLocal[2] -= MLocal[8] * reaction[is];
+
+  } else {
+    fprintf(stderr,
+            "mc2d_projectionWithDiagonalization_update :: Unsupported matrix storage)");
+    exit(EXIT_FAILURE);
+  }
+  /*   reaction[in] = rin; reaction[it] = rit; reaction[is] = ris; */
+
+  /* Coefficient for current block*/
+  localproblem->eta[0] = problem->eta[contact];
+  localproblem->theta[0] = problem->theta[contact];
+}
+
+void mc2d_projection_initialize_with_regularization(MohrCoulomb2DProblem* problem,
+                                                    MohrCoulomb2DProblem* localproblem) {
+  if (!localproblem->M->matrix0) localproblem->M->matrix0 = (double*)calloc(9, sizeof(double));
+}
+
+void mc2d_projection_update_with_regularization(int contact, MohrCoulomb2DProblem* problem,
+                                                MohrCoulomb2DProblem* localproblem,
+                                                double* reaction, SolverOptions* options) {
+  /* Build a local problem for a specific contact
+     reaction corresponds to the global vector (size n) of the global problem.
+  */
+
+  /* Call the update function which depends on the storage for MGlobal/MBGlobal */
+  /* Build a local problem for a specific contact
+   reaction corresponds to the global vector (size n) of the global problem.
+  */
+
+  /* The part of MGlobal which corresponds to the current block is copied into MLocal */
+
+  NM_copy_diag_block3(problem->M, contact, &localproblem->M->matrix0);
+
+  /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products
+     MLocal.reactionBlock, excluding the block corresponding to the current contact. ****/
+  mc2d_local_problem_compute_q(problem, localproblem, reaction, contact);
+
+  double rho = options->dparam[PLASTICITY_NSN_RHO];
+  for (int i = 0; i < 3; i++) localproblem->M->matrix0[i + 3 * i] += rho;
+
+  double* qLocal = localproblem->q;
+  int in = 3 * contact, it = in + 1, is = it + 1;
+
+  /* qLocal computation*/
+  qLocal[0] -= rho * reaction[in];
+  qLocal[1] -= rho * reaction[it];
+  qLocal[2] -= rho * reaction[is];
+
+  /* Coefficient for current block*/
+  localproblem->eta[0] = problem->eta[contact];
+  localproblem->theta[0] = problem->theta[contact];
+}
+
+int mc2d_projectionWithDiagonalization_solve(MohrCoulomb2DProblem* localproblem,
+                                             double* reaction, SolverOptions* options) {
+  /* Current block position */
+
+  /* Builds local problem for the current contact */
+  /*  mc2d_projection_update(contact, reaction); */
+  /*  mc2d_projectionWithDiagonalization_update(contact, reaction);  */
+
+  double* MLocal = localproblem->M->matrix0;
+  double* qLocal = localproblem->q;
+  double theta_i = localproblem->theta[0];
+  int nLocal = 3;
+
+  double mrn, num, theta2 = theta_i * theta_i;
+
+  /* projection */
+  if (qLocal[0] > 0.) {
+    reaction[0] = 0.;
+    reaction[1] = 0.;
+    reaction[2] = 0.;
+  } else {
+    if (MLocal[0] < DBL_EPSILON || MLocal[nLocal + 1] < DBL_EPSILON ||
+        MLocal[2 * nLocal + 2] < DBL_EPSILON) {
+      fprintf(stderr, "mc2d_projection error: null term on MLocal diagonal.\n");
+      exit(EXIT_FAILURE);
+    }
+
+    reaction[0] = -qLocal[0] / MLocal[0];
+    reaction[1] = -qLocal[1] / MLocal[nLocal + 1];
+    reaction[2] = -qLocal[2] / MLocal[2 * nLocal + 2];
+
+    mrn = reaction[1] * reaction[1] + reaction[2] * reaction[2];
+
+    if (mrn > theta2 * reaction[0] * reaction[0]) {
+      num = theta_i * reaction[0] / sqrt(mrn);
+      reaction[1] = reaction[1] * num;
+      reaction[2] = reaction[2] * num;
+    }
+  }
+  return 0;
+}
+
+void mc2d_projectionOnConeWithLocalIteration_initialize(MohrCoulomb2DProblem* problem,
+                                                        MohrCoulomb2DProblem* localproblem,
+                                                        SolverOptions* localsolver_options) {
+  size_t nc = problem->numberOfCones;
+  /* printf("mc2d_projectionOnConeWithLocalIteration_initialize. Allocation of dwork\n"); */
+  if (!localsolver_options->dWork || localsolver_options->dWorkSize < nc) {
+    localsolver_options->dWork =
+        (double*)realloc(localsolver_options->dWork, nc * sizeof(double));
+    localsolver_options->dWorkSize = nc;
+  }
+  for (size_t i = 0; i < nc; i++) {
+    localsolver_options->dWork[i] = 1.0;
+  }
+}
+
+void mc2d_projectionOnConeWithLocalIteration_free(MohrCoulomb2DProblem* problem,
+                                                  MohrCoulomb2DProblem* localproblem,
+                                                  SolverOptions* localsolver_options) {
+  free(localsolver_options->dWork);
+  localsolver_options->dWork = NULL;
+}
+
+int mc2d_projectionOnConeWithLocalIteration_solve(MohrCoulomb2DProblem* localproblem,
+                                                  double* reaction, SolverOptions* options) {
+  DEBUG_BEGIN("mc2d_projectionOnConeWithLocalIteration_solve(...)\n");
+
+  DEBUG_EXPR(mohrCoulomb2DProblem_display(localproblem););
+  /* int and double parameters */
+  int* iparam = options->iparam;
+  double* dparam = options->dparam;
+
+  double* MLocal = localproblem->M->matrix0;
+  double* qLocal = localproblem->q;
+  double eta_i = localproblem->eta[0];
+  double theta_i = localproblem->theta[0];
+  /* int nLocal = 3; */
+
+  /*   /\* Builds local problem for the current contact *\/ */
+  /*   mc2d_projection_update(localproblem, reaction); */
+
+  /*double an = 1./(MLocal[0]);*/
+  /*   double alpha = MLocal[nLocal+1] + MLocal[2*nLocal+2]; */
+  /*   double det = MLocal[1*nLocal+1]*MLocal[2*nLocal+2] - MLocal[2*nLocal+1] +
+   * MLocal[1*nLocal+2]; */
+  /*   double beta = alpha*alpha - 4*det; */
+  /*   double at = 2*(alpha - beta)/((alpha + beta)*(alpha + beta)); */
+
+  /* double an = 1. / (MLocal[0]); */
+
+  /* double at = 1.0 / (MLocal[4] + theta_i); */
+  /* double as = 1.0 / (MLocal[8] + theta_i); */
+  /* at = an; */
+  /* as = an; */
+  double rho = options->dWork[options->iparam[PLASTICITY_CURRENT_CONE_NUMBER]], rho_k;
+  DEBUG_PRINTF(" Contact options->iparam[PLASTICITY_CURRENT_CONTACT_NUMBER] = %i\n",
+               options->iparam[PLASTICITY_CURRENT_CONTACT_NUMBER]);
+  DEBUG_PRINTF("saved rho = %14.7e\n", rho);
+  assert(rho > 0);
+
+  /* int incx = 1, incy = 1; */
+  int i;
+
+  double velocity[3], velocity_k[3], reaction_k[3], worktmp[3];
+  double normUT;
+  double localerror = 1.0;
+  // printf ("localerror = %14.7e\n",localerror );
+  int localiter = 0;
+  double localtolerance = dparam[SICONOS_DPARAM_TOL];
+
+  /* Variable for Line_search */
+  double a1, a2;
+  int success = 0;
+  double localerror_k;
+  int ls_iter = 0;
+  int ls_itermax = 10;
+
+  double tau = 2.0 / 3.0, tauinv = 3.0 / 2.0, L = 0.9, Lmin = 0.3;
+
+  numerics_printf_verbose(2, "--  mc2d_projectionOnConeWithLocalIteration_solve contact = %i",
+                          options->iparam[PLASTICITY_CURRENT_CONE_NUMBER]);
+  numerics_printf_verbose(2,
+                          "--  mc2d_projectionOnConeWithLocalIteration_solve | localiter \t| "
+                          "rho \t\t\t| error\t\t\t|");
+  numerics_printf_verbose(
+      2, "--                                                | %i \t\t| %.10e\t| %.10e\t|",
+      localiter, rho, localerror);
+
+  /*     printf ("localtolerance = %14.7e\n",localtolerance ); */
+  while ((localerror > localtolerance) && (localiter < iparam[SICONOS_IPARAM_MAX_ITER])) {
+    DEBUG_PRINT("\n Local iteration starts \n");
+    localiter++;
+
+    /*    printf ("reaction[0] = %14.7e\n",reaction[0]); */
+    /*    printf ("reaction[1] = %14.7e\n",reaction[1]); */
+    /*    printf ("reaction[2] = %14.7e\n",reaction[2]); */
+
+    /* Store the error */
+    localerror_k = localerror;
+
+    /* store the reaction at the beginning of the iteration */
+    /* cblas_dcopy(nLocal , reaction , 1 , reaction_k, 1); */
+
+    reaction_k[0] = reaction[0];
+    reaction_k[1] = reaction[1];
+    reaction_k[2] = reaction[2];
+    DEBUG_EXPR(NV_display(reaction_k, 3););
+    /* /\* velocity_k <- q  *\/ */
+    /* cblas_dcopy_msan(nLocal , qLocal , 1 , velocity_k, 1); */
+    /* /\* velocity_k <- q + M * reaction  *\/ */
+    /* cblas_dgemv(CblasColMajor,CblasNoTrans, nLocal, nLocal, 1.0, MLocal, 3, reaction,
+     * incx, 1.0, velocity_k, incy); */
+    for (i = 0; i < 3; i++)
+      velocity_k[i] = MLocal[i + 0 * 3] * reaction[0] + qLocal[i] +
+                      MLocal[i + 1 * 3] * reaction[1] + +MLocal[i + 2 * 3] * reaction[2];
+    DEBUG_EXPR(NV_display(velocity_k, 3););
+    ls_iter = 0;
+    success = 0;
+    rho_k = rho / tau;
+
+    normUT = sqrt(velocity_k[1] * velocity_k[1] + velocity_k[2] * velocity_k[2]);
+    while (!success && (ls_iter < ls_itermax)) {
+      rho_k = rho_k * tau;
+      DEBUG_PRINTF("rho_k =%f\n", rho_k);
+      reaction[0] = reaction_k[0] - rho_k * (velocity_k[0] + theta_i * normUT);
+      reaction[1] = reaction_k[1] - rho_k * velocity_k[1];
+      reaction[2] = reaction_k[2] - rho_k * velocity_k[2];
+      DEBUG_PRINT("r-rho tilde v before projection")
+      DEBUG_EXPR(NV_display(reaction, 3););
+
+      projectionOnCone(&reaction[0], eta_i);
+
+      /* velocity <- q  */
+      /* cblas_dcopy(nLocal , qLocal , 1 , velocity, 1); */
+      /* velocity <- q + M * reaction  */
+      /* cblas_dgemv(CblasColMajor,CblasNoTrans, nLocal, nLocal, 1.0, MLocal, 3, reaction,
+       * incx, 1.0, velocity, incy); */
+
+      for (i = 0; i < 3; i++)
+        velocity[i] = MLocal[i + 0 * 3] * reaction[0] + qLocal[i] +
+                      MLocal[i + 1 * 3] * reaction[1] + +MLocal[i + 2 * 3] * reaction[2];
+
+      a1 = sqrt((velocity_k[0] - velocity[0]) * (velocity_k[0] - velocity[0]) +
+                (velocity_k[1] - velocity[1]) * (velocity_k[1] - velocity[1]) +
+                (velocity_k[2] - velocity[2]) * (velocity_k[2] - velocity[2]));
+
+      a2 = sqrt((reaction_k[0] - reaction[0]) * (reaction_k[0] - reaction[0]) +
+                (reaction_k[1] - reaction[1]) * (reaction_k[1] - reaction[1]) +
+                (reaction_k[2] - reaction[2]) * (reaction_k[2] - reaction[2]));
+
+      success = (rho_k * a1 <= L * a2) ? 1 : 0;
+
+      DEBUG_PRINTF("rho_k = %12.8e\t", rho_k);
+      DEBUG_PRINTF("a1 = %12.8e\t", a1);
+      DEBUG_PRINTF("a2 = %12.8e\t", a2);
+      DEBUG_PRINTF("norm reaction = %12.8e\t",
+                   sqrt(reaction[0] * reaction[0] + reaction[1] * reaction[1] +
+                        reaction[2] * reaction[2]));
+      DEBUG_PRINTF("success = %i\n", success);
+
+      ls_iter++;
+    }
+
+    /* printf("--  localiter = %i\t, rho= %.10e\t, error = %.10e \n", localiter, rho,
+     * localerror); */
+
+    /* compute local error */
+    localerror = 0.0;
+    mc2d_unitary_compute_and_add_error(reaction, velocity, eta_i, theta_i, &localerror, worktmp);
+
+    /*Update rho*/
+    if ((rho_k * a1 < Lmin * a2) && (localerror < localerror_k)) {
+      rho = rho_k * tauinv;
+    } else
+      rho = rho_k;
+
+    numerics_printf_verbose(
+        2, "--                                                | %i \t\t| %.10e\t| %.10e\t|",
+        localiter, rho, localerror);
+  }
+  options->dWork[options->iparam[PLASTICITY_CURRENT_CONE_NUMBER]] = rho;
+  options->dparam[SICONOS_DPARAM_RESIDU] = localerror;
+  DEBUG_PRINTF("final rho  =%e\n", rho);
+
+  DEBUG_END("mc2d_projectionOnConeWithLocalIteration_solve(...)\n");
+  if (localerror > localtolerance) return 1;
+  return 0;
+}
+
+int mc2d_projectionOnCone_solve(MohrCoulomb2DProblem* localproblem, double* reaction,
+                                SolverOptions* options) {
+  /*  /\* Builds local problem for the current contact *\/ */
+  /*   mc2d_projection_update(contact, reaction); */
+
+  double* MLocal = localproblem->M->matrix0;
+  double* qLocal = localproblem->q;
+  double eta_i = localproblem->eta[0];
+  double theta_i = localproblem->theta[0];
+  /* int nLocal = 3; */
+
+  /* this part is critical for the success of the projection */
+  /*double an = 1./(MLocal[0]);*/
+  /*   double alpha = MLocal[nLocal+1] + MLocal[2*nLocal+2]; */
+  /*   double det = MLocal[1*nLocal+1]*MLocal[2*nLocal+2] - MLocal[2*nLocal+1] +
+   * MLocal[1*nLocal+2]; */
+  /*   double beta = alpha*alpha - 4*det; */
+  /*   double at = 2*(alpha - beta)/((alpha + beta)*(alpha + beta)); */
+
+  // double an = 1./(MLocal[0]+theta_i);
+  double an = 1. / (MLocal[0]);
+
+  /* int incx = 1, incy = 1; */
+  double worktmp[3];
+  double normUT;
+  /* cblas_dcopy_msan(nLocal , qLocal, incx , worktmp , incy); */
+  /* cblas_dgemv(CblasColMajor,CblasNoTrans, nLocal, nLocal, 1.0, MLocal, 3, reaction,
+   * incx, 1.0, worktmp, incy); */
+
+  for (int i = 0; i < 3; i++)
+    worktmp[i] = MLocal[i + 0 * 3] * reaction[0] + qLocal[i] +
+                 MLocal[i + 1 * 3] * reaction[1] + +MLocal[i + 2 * 3] * reaction[2];
+
+  normUT = sqrt(worktmp[1] * worktmp[1] + worktmp[2] * worktmp[2]);
+  reaction[0] -= an * (worktmp[0] + theta_i * normUT);
+  reaction[1] -= an * worktmp[1];
+  reaction[2] -= an * worktmp[2];
+
+  projectionOnCone(reaction, eta_i);
+  return 0;
+}
+
+void mc2d_projection_free(MohrCoulomb2DProblem* problem, MohrCoulomb2DProblem* localproblem,
+                          SolverOptions* localsolver_options) {}
+
+void mc2d_projection_with_regularization_free(MohrCoulomb2DProblem* problem,
+                                              MohrCoulomb2DProblem* localproblem,
+                                              SolverOptions* localsolver_options) {
+  free(localproblem->M->matrix0);
+  localproblem->M->matrix0 = NULL;
+}
+
+void mc2d_poc_set_default(SolverOptions* options) {
+  options->iparam[PLASTICITY_CURRENT_CONE_NUMBER] = 0;  // this will be set by external solver
+  options->dparam[PLASTICITY_NSN_RHO] =
+      0.;  // Used only for ProjectionOnConeWithRegularization
+}

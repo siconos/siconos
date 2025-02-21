@@ -126,7 +126,7 @@ siconos::modeling::NewtonEulerDS::NewtonEulerDS() : SecondOrderDS(13, 6) {
 
   _zeroPlugin();
 
-  // Current state
+          // Current state
   _q = std::make_shared<siconos::algebra::SiconosVector>(_qDim);
   _twist = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
   _dotq = std::make_shared<siconos::algebra::SiconosVector>(_qDim);
@@ -145,8 +145,8 @@ siconos::modeling::NewtonEulerDS::NewtonEulerDS() : SecondOrderDS(13, 6) {
 
   init_forces();
 
-  // We initialize _z with a null vector of size 1, since z is required in plug-in functions
-  // call.
+          // We initialize _z with a null vector of size 1, since z is required in plug-in functions
+          // call.
   _z = std::make_shared<siconos::algebra::SiconosVector>(1);
 }
 
@@ -163,7 +163,7 @@ siconos::modeling::NewtonEulerDS::NewtonEulerDS(
       "std::shared_ptr<siconos::algebra::SiconosVector> Twist0,double  mass, "
       "std::shared_ptr<siconos::algebra::SiconosMatrix> inertialMatrix)\n");
 
-  // Initial conditions
+          // Initial conditions
   _q0 = Q0;
   _twist0 = Twist0;
   resetToInitialState();
@@ -272,15 +272,15 @@ void siconos::modeling::NewtonEulerDS::initRhs(double time) {
 
   if (!_acceleration) _acceleration = std::make_shared<siconos::algebra::SiconosVector>(6);
 
-  // Compute _dotq
+          // Compute _dotq
   computeT();
   siconos::algebra::prod(*_T, *_twist, *_dotq, true);
   _x[1] = std::make_shared<siconos::algebra::SiconosVector>(*_dotq, *_acceleration);
 
-  // Nothing to do for the initialization of the wrench
+          // Nothing to do for the initialization of the wrench
 
-  // Everything concerning rhs and its jacobian is handled in initRhs and computeXXX related
-  // functions.
+          // Everything concerning rhs and its jacobian is handled in initRhs and computeXXX related
+          // functions.
   _rhsMatrices.resize(numberOfRhsMatrices_);
 
   if (!_p[2]) _p[2] = std::make_shared<siconos::algebra::SiconosVector>(6);
@@ -545,13 +545,13 @@ void siconos::modeling::NewtonEulerDS::computeJacobianMExtqExpressedInInertialFr
 
   DEBUG_EXPR(_jacobianMExtq->display());
 
-  // std::shared_ptr<siconos::algebra::SimpleMatrix> jacobianMExtqtmp (new
-  // SimpleMatrix(*_jacobianMExtq)); computeJacobianMExtqExpressedInInertialFrameByFD(time, q);
+          // std::shared_ptr<siconos::algebra::SimpleMatrix> jacobianMExtqtmp (new
+          // SimpleMatrix(*_jacobianMExtq)); computeJacobianMExtqExpressedInInertialFrameByFD(time, q);
 
-  // std::cout << "#################  " << (*jacobianMExtqtmp- *_jacobianMExtq).normInf() <<
-  // std::endl; assert((*jacobianMExtqtmp- *_jacobianMExtq).normInf()< 1e-10);
+          // std::cout << "#################  " << (*jacobianMExtqtmp- *_jacobianMExtq).normInf() <<
+          // std::endl; assert((*jacobianMExtqtmp- *_jacobianMExtq).normInf()< 1e-10);
 
-  // DEBUG_EXPR(_jacobianMExtq->display(););
+          // DEBUG_EXPR(_jacobianMExtq->display(););
   DEBUG_END(
       "siconos::modeling::NewtonEulerDS::computeJacobianMExtqExpressedInInertialFrame(...)\n");
 }
@@ -800,7 +800,7 @@ void siconos::modeling::NewtonEulerDS::computeRhs(double time) {
 
   if (_inverseMass) _inverseMass->Solve(*_acceleration);
 
-  // Compute _dotq
+          // Compute _dotq
   computeT();
   siconos::algebra::prod(*_T, *_twist, *_dotq, true);
 
@@ -884,7 +884,7 @@ void siconos::modeling::NewtonEulerDS::computeForces(
   if (_wrench) {
     _wrench->zero();
 
-    // External wrench
+            // External wrench
 
     if (_fExt) {
       computeFExt(time);
@@ -902,7 +902,7 @@ void siconos::modeling::NewtonEulerDS::computeForces(
         _wrench->setBlock(3, *_mExt);
     }
 
-    // Internal wrench
+            // Internal wrench
 
     if (_fInt) {
       computeFInt(time, q, twist);
@@ -920,7 +920,7 @@ void siconos::modeling::NewtonEulerDS::computeForces(
       _wrench->setValue(5, _wrench->getValue(5) - _mInt->getValue(2));
     }
 
-    // Gyroscopical effect
+            // Gyroscopical effect
     if (!_nullifyMGyr) {
       computeMGyr(twist);
       assert(!std::isnan(_mGyr->vector_sum()));

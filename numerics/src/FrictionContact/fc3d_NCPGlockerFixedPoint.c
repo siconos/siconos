@@ -33,10 +33,6 @@
  */
 typedef void (*UpdateSolverPtr)(int, double*);
 
-static UpdateSolverPtr updateSolver = NULL;
-static PostSolverPtr postSolver = NULL;
-static FreeSolverPtr freeSolver = NULL;
-
 /* size of a block */
 static int Fsize;
 
@@ -70,10 +66,9 @@ void fc3d_FixedP_initialize(FrictionContactProblem* problem,
   if (localsolver_options->solverId == SICONOS_FRICTION_3D_NCPGlockerFBFixedPoint) {
     Fsize = 5;
     NCPGlocker_initialize(problem, localproblem);
-    /*     updateSolver = &NCPGlocker_update; */
-    postSolver = &NCPGlocker_post;
-    freeSolver = &NCPGlocker_free;
-  } else {
+  }
+  else
+  {
     fprintf(stderr, "Numerics, fc3d_nsgs failed. Unknown formulation type.\n");
     exit(EXIT_FAILURE);
   }
@@ -100,11 +95,8 @@ int fc3d_FixedP_solve(FrictionContactProblem* localproblem, double* reaction,
   /*   (*postSolver)(contact,reaction); */
 }
 
-void fc3d_FixedP_free(FrictionContactProblem* problem, FrictionContactProblem* localproblem,
-                      SolverOptions* localsolver_option) {
-  updateSolver = NULL;
-  postSolver = NULL;
-  (*freeSolver)();
+void fc3d_FixedP_free(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions * localsolver_option)
+{
 }
 
 /*

@@ -48,14 +48,33 @@
 #include "NumericsVector.h"
 #endif
 
+
 double CSparseMatrix_get_value(const CSparseMatrix *A, CS_INT i, CS_INT j) {
   CS_INT *Ai = A->i;
   CS_INT *Ap = A->p;
   double *Ax = A->x;
 
-  for (CS_INT row = Ap[j]; row < Ap[j + 1]; row++) {
-    if (i == Ai[row]) return Ax[row];
+  if (A->nz == -1) {
+    for (CS_INT row = Ap[j]; row < Ap[j + 1]; row++) {
+      if (i == Ai[row]) return Ax[row];
+    }
   }
+  else if (A->nz >= 0) {
+    for (CS_INT row = 0 ; row < A->nz; row++) {
+      if ((i == Ai[row]) && (j == Ap[row]) ) return Ax[row];
+    }
+  }
+  else if (A->nz == -2) {
+    for (CS_INT col = Ap[i]; col < Ap[i + 1]; col++) {
+      if (j == Ai[col]) return Ax[col];
+    }
+  }
+
+  else
+    {
+      fprintf(stderr, "CSparseMatrix_get_value :: format\n");
+      exit(EXIT_FAILURE);
+    }
   return 0.0;
 }
 
@@ -73,6 +92,29 @@ void CSparseMatrix_write_in_file_python(const CSparseMatrix *const m, FILE *file
   fprintf(file, "]");
 }
 
+int CSparseMatrix_is_equal(const CSparseMatrix *A, const CSparseMatrix *B, double tol) {
+
+
+  CS_INT m  = A->n;
+  CS_INT n = A->m;
+  double *Ax = A->x;
+
+  if (m != B->m) return 1;
+  if (n != B->n) return 1;
+
+
+  for (CS_INT i =0; i < m; i++)
+    {
+      for (CS_INT j =0; j < n; j++)
+	{
+	  if (fabs(CSparseMatrix_get_value(A, i,j) - CSparseMatrix_get_value(B, i,j)) > tol)
+	    return 0;
+	}
+    }
+
+  return 1;
+}
+
 /* y = alpha*A*x+beta*y */
 int CSparseMatrix_aaxpby(const double alpha, const CSparseMatrix *A, const double *restrict x,
                          const double beta, double *restrict y) {
@@ -86,13 +128,21 @@ int CSparseMatrix_aaxpby(const double alpha, const CSparseMatrix *A, const doubl
     Ai = A->i;
     Ax = A->x;
 
-    for (int j = 0; j < m; j++) {
-      y[j] *= beta;
-    }
+    if ((beta == 1.0) && (alpha == 1.0)) {
+      for (int j = 0; j < n; j++) {
+        for (CS_INT p = Ap[j]; p < Ap[j + 1]; p++) {
+          y[Ai[p]] += Ax[p] * x[j];
+        }
+      }
+    } else {
+      for (int j = 0; j < m; j++) {
+        y[j] *= beta;
+      }
 
-    for (int j = 0; j < n; j++) {
-      for (CS_INT p = Ap[j]; p < Ap[j + 1]; p++) {
-        y[Ai[p]] += alpha * Ax[p] * x[j];
+      for (int j = 0; j < n; j++) {
+        for (CS_INT p = Ap[j]; p < Ap[j + 1]; p++) {
+          y[Ai[p]] += alpha * Ax[p] * x[j];
+        }
       }
     }
   }
@@ -623,7 +673,10 @@ CSparseMatrix *CSparseMatrix_new_from_file(FILE *file) {
   const char s_1[2] = " ", s_2[2] = "-";
   int k;
   int is_triplet = 0;
-  for (k = 1, str1 = line;; k++, str1 = NULL) {
+
+  int is_csr = 0;
+  for(k = 1, str1 = line; ; k++, str1 = NULL)
+  {
     token = strtok_r(str1, s_1, &saveptr1);
     if (token == NULL) break;
     DEBUG_PRINTF("%d: %s\n", k, token);
@@ -631,9 +684,18 @@ CSparseMatrix *CSparseMatrix_new_from_file(FILE *file) {
       DEBUG_PRINT(" triplet matrix\n");
       is_triplet = 1;
     }
-    if (k == 1 + is_triplet) {
-      int kk = 0;
-      for (str2 = token;; str2 = NULL) {
+    if(strncmp(token, "csr:",4) == 0)
+    {
+      DEBUG_PRINT(" csr matrix\n");
+      is_csr =1;
+    }
+    int shift = is_triplet + is_csr;
+    if(k==1+shift)
+    {
+      int kk =0;
+      for(str2 = token; ; str2 = NULL)
+      {
+
         subtoken = strtok_r(str2, s_2, &saveptr2);
         if (kk == 0) {
           if (1 == sscanf(subtoken, "%lld", &foo)) m = (CS_INT)foo;
@@ -648,20 +710,32 @@ CSparseMatrix *CSparseMatrix_new_from_file(FILE *file) {
       DEBUG_PRINTF("m = %li, n = %li \n", m, n);
     }
 
-    if (k == 3 + is_triplet) {
-      if (1 == sscanf(token, "%lld", &foo)) nzmax = (CS_INT)foo;
+
+    if(k==3+shift)
+    {
+      if(1 == sscanf(token, "%lld", &foo))
+        nzmax = (CS_INT)foo;
     }
-    if (k == 6 && is_triplet) {
-      if (1 == sscanf(token, "%lld", &foo)) nz = (CS_INT)foo;
+    if(k==6  && shift)
+    {
+      if(1 == sscanf(token, "%lld", &foo))
+        nz = (CS_INT)foo;
     }
   }
 
   CSparseMatrix *out = cs_spalloc(m, n, nzmax, 1, is_triplet);
 
-  if (is_triplet) {
-    out->nz = nz;
-  } else {
-    out->nz = -1;
+  if(is_triplet)
+  {
+    out->nz=nz;
+  }
+  else if (is_csr)
+    {
+      out->nz=-2;
+    }
+  else
+  {
+    out->nz=-1;
   }
 
   Ai = out->i;
@@ -749,7 +823,6 @@ CS_INT CSparseMatrix_block_dense_zentry(CSparseMatrix *T, CS_INT row_off, CS_INT
   for (CS_INT j = 0; j < col_size; ++j) {
     for (CS_INT i = 0; i < row_size; ++i) {
       // col-major
-
       CSparseMatrix_zentry(T, i + row_off, j + col_off, x[i + j * row_size], DBL_EPSILON);
     }
   }
@@ -767,8 +840,51 @@ CS_INT CSparseMatrix_symmetric_zentry(CSparseMatrix *T, CS_INT i, CS_INT j, doub
   return 1;
 }
 
-int CSparseMatrix_print(const CSparseMatrix *A, int brief) {
-  cs_print(A, brief);
+
+int CSparseMatrix_print(const CSparseMatrix *A, int brief)
+{
+  CS_INT nz = A->nz;
+  if (nz > -2)  // triplet and csc cases
+  {
+    cs_print(A, brief);
+  } else {
+    CS_INT p, j, m, n, nzmax, nz, *Ap, *Ai;
+    CS_ENTRY *Ax;
+    if (!A) {
+      printf("(null)\n");
+      return (0);
+    }
+    m = A->m;
+    n = A->n;
+    Ap = A->p;
+    Ai = A->i;
+    Ax = A->x;
+    nzmax = A->nzmax;
+    nz = A->nz;
+    printf("CXSparse Version %d.%d.%d, %s.  %s\n", CS_VER, CS_SUBVER, CS_SUBSUB, CS_DATE,
+           CS_COPYRIGHT);
+    printf("csr :%g-by-%g, nzmax: %g nnz: %g, 1-norm: %g\n", (double)m, (double)n,
+           (double)nzmax, (double)(Ap[n]), cs_norm(A));
+    for (j = 0; j < n; j++) {
+      printf("    row %g : locations %g to %g\n", (double)j, (double)(Ap[j]),
+             (double)(Ap[j + 1] - 1));
+      for (p = Ap[j]; p < Ap[j + 1]; p++) {
+        printf("      %g : ", (double)(Ai[p]));
+#ifdef CS_COMPLEX
+        printf("(%g, %g)\n", Ax ? CS_REAL(Ax[p]) : 1, Ax ? CS_IMAG(Ax[p]) : 0);
+#else
+        printf("%g\n", Ax ? Ax[p] : 1);
+#endif
+        if (brief && p > 20) {
+          printf("  ...\n");
+          return (1);
+        }
+      }
+    }
+  }
+
+
+
   return 0;
 }
 
@@ -792,38 +908,65 @@ int CSparseMatrix_print_in_file(const CSparseMatrix *A, int brief, FILE *file) {
     fprintf(file, "(null)\n");
     return (0);
   }
-  m = A->m;
-  n = A->n;
-  Ap = A->p;
-  Ai = A->i;
-  Ax = A->x;
-  nzmax = A->nzmax;
-  nz = A->nz;
-  fprintf(file, "CSparse Version %d.%d.%d, %s.  %s\n", CS_VER, CS_SUBVER, CS_SUBSUB, CS_DATE,
-          CS_COPYRIGHT);
-  if (nz < 0) {
-    fprintf(file, "%lld-by-%lld, nzmax: %lld nnz: %lld, 1-norm: %g\n", (long long int)m,
-            (long long int)n, (long long int)nzmax, (long long int)Ap[n], cs_norm(A));
-    for (j = 0; j < n; j++) {
-      fprintf(file, "    col %lld : locations %lld to %lld\n", (long long int)j,
-              (long long int)Ap[j], (long long int)Ap[j + 1] - 1);
-      for (p = Ap[j]; p < Ap[j + 1]; p++) {
-        fprintf(file, "      %lld : %g\n", (long long int)Ai[p], Ax ? Ax[p] : 1);
-        if (brief && p > 20) {
-          fprintf(file, "  ...\n");
-          return (1);
+  m = A->m ;
+  n = A->n ;
+  Ap = A->p ;
+  Ai = A->i ;
+  Ax = A->x ;
+  nzmax = A->nzmax ;
+  nz = A->nz ;
+  fprintf(file,"CSparse Version %d.%d.%d, %s.  %s\n", CS_VER, CS_SUBVER,
+          CS_SUBSUB, CS_DATE, CS_COPYRIGHT) ;
+  if(nz ==-1)
+  {
+    fprintf(file,"%lld-by-%lld, nzmax: %lld nnz: %lld, 1-norm: %g\n",
+            (long long int)m, (long long int)n, (long long int)nzmax,
+            (long long int)Ap [n],  cs_norm(A)) ;
+    for(j = 0 ; j < n ; j++)
+    {
+      fprintf(file,"    col %lld : locations %lld to %lld\n", (long long int)j, (long long int)Ap [j], (long long int)Ap [j+1]-1);
+      for(p = Ap [j] ; p < Ap [j+1] ; p++)
+      {
+        fprintf(file,"      %lld : %g\n", (long long int)Ai [p], Ax ? Ax [p] : 1) ;
+        if(brief && p > 20)
+        {
+          fprintf(file,"  ...\n") ;
+          return (1) ;
         }
       }
     }
-  } else {
-    fprintf(file, "triplet: %lld-by-%lld, nzmax: %lld nnz: %lld\n", (long long int)m,
-            (long long int)n, (long long int)nzmax, (long long int)nz);
-    for (p = 0; p < nz; p++) {
-      fprintf(file, "    %lld %lld : %g\n", (long long int)Ai[p], (long long int)Ap[p],
-              Ax ? Ax[p] : 1);
-      if (brief && p > 20) {
-        fprintf(file, "  ...\n");
-        return (1);
+  }
+  else if(nz == -2)
+  {
+    fprintf(file,"csr: %lld-by-%lld, nzmax: %lld nnz: %lld, 1-norm: %g\n",
+            (long long int)m, (long long int)n, (long long int)nzmax,
+            (long long int)Ap [n],  cs_norm(A)) ;
+    for(j = 0 ; j < n ; j++)
+    {
+      fprintf(file,"    row %lld : locations %lld to %lld\n", (long long int)j, (long long int)Ap [j], (long long int)Ap [j+1]-1);
+      for(p = Ap [j] ; p < Ap [j+1] ; p++)
+      {
+        fprintf(file,"      %lld : %g\n", (long long int)Ai [p], Ax ? Ax [p] : 1) ;
+        if(brief && p > 20)
+        {
+          fprintf(file,"  ...\n") ;
+          return (1) ;
+        }
+      }
+    }
+  }
+  else
+  {
+    fprintf(file,"triplet: %lld-by-%lld, nzmax: %lld nnz: %lld\n", (long long int)m, (long long int)n,
+            (long long int)nzmax, (long long int)nz) ;
+    for(p = 0 ; p < nz ; p++)
+    {
+      fprintf(file,"    %lld %lld : %g\n", (long long int)Ai [p], (long long int)Ap [p], Ax ? Ax [p] : 1) ;
+      if(brief && p > 20)
+      {
+        fprintf(file,"  ...\n") ;
+        return (1) ;
+
       }
     }
   }
