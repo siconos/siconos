@@ -382,7 +382,7 @@ void siconos::mechanics::fem::writeTensorforPython(
 
   std::string stringyy = tensorName + "_yy.append(np.array([";
   fprintf(foutput, stringyy.c_str());
-elem_cnt = 0;
+  elem_cnt = 0;
   for(std::shared_ptr<FElement> fe : femodel->elements())
   {
     value = (*x)(elem_cnt*3+1);
@@ -395,7 +395,7 @@ elem_cnt = 0;
 
   std::string stringxy = tensorName + "_xy.append(np.array([";
   fprintf(foutput, stringxy.c_str());
-elem_cnt = 0;
+  elem_cnt = 0;
   for(std::shared_ptr<FElement> fe : femodel->elements())
   {
     value = (*x)(elem_cnt*3+2);

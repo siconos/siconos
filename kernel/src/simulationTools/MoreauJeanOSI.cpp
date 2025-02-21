@@ -1769,7 +1769,6 @@ void siconos::integrators::MoreauJeanOSI::computeFreeOutput(
   // 3 - add part due to NonSmoothLaw
   if (inter.relation()->getType() == siconos::modeling::RelationType::Lagrangian ||
       inter.relation()->getType() == siconos::modeling::RelationType::NewtonEuler) {
-    std::cout << "in compute freeOutput from OSI, call nslEffectOnFreeOutput " << std::endl;
     _NSLEffectOnFreeOutput nslEffectOnFreeOutput(*osnsp, inter,
                                                  indexSet.properties(vertex_inter), _theta);
     inter.nonSmoothLaw()->accept(nslEffectOnFreeOutput);

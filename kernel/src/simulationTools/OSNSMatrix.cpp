@@ -170,6 +170,7 @@ unsigned siconos::nonsmooth_formulations::OSNSMatrix::updateSizeAndPositions(
   for (std::tie(dsi, dsend) = DSG.vertices(); dsi != dsend; ++dsi) {
     std::shared_ptr<siconos::modeling::DynamicalSystem> ds = DSG.bundle(*dsi);
     DSG.properties(*dsi).absolute_position = dim;
+    std::cout << "Setting absolute_position in OSNSMatrix::updateSizeAndPositions: " << dim << std::endl;
 
     dim += ds->dimension();
     auto dsType = siconos::types::type_value(*ds);
@@ -500,9 +501,17 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillHtrans(
         siconos::graphs::InteractionsGraph::VIterator ui, uiend;
         for (std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui) {
           auto& inter = *indexSet.bundle(*ui);
+          auto relationSubType = inter.relation()->getSubType();
+          // if(relationSubType == modeling::RelationSubType::StressLinearTIR){
+          //   std::cout << "StressLinearTIR in FillHTrans" << std::endl;
+          // }
+          // else
+          // {
+          //   std::cout << "Not StressLinearTIR in FillHTrans" << std::endl;
+          // }
           size_t sizeY = inter.dimension();
           leftInteractionBlock = inter.getLeftInteractionBlock();
-          std::cout << "taille H:" << leftInteractionBlock->size(0) << " " << leftInteractionBlock->size(1) << std::endl;
+          // std::cout << "taille H:" << leftInteractionBlock->size(0) << " " << leftInteractionBlock->size(1) << std::endl;
 
           double* array = (double *) calloc(leftInteractionBlock->size(0)*leftInteractionBlock->size(1),sizeof(double));
           array = &*leftInteractionBlock->getArray();
@@ -516,14 +525,14 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillHtrans(
           auto pos_ds2 = indexSet.properties(*ui).target_pos;
 
           pos = indexSet.properties(*ui).absolute_position;
-
+          // std::cout << "pos in FillHtrans: " << pos << std::endl;
           for (auto ds = ds1; !endl; ds = ds2, posBlock = pos_ds2) {
             endl = (ds == ds2);
             size_t sizeDS = ds->dimension();
             size_t sizeH = sizeDS;
             abs_pos_ds = DSG.properties(DSG.descriptor(ds)).absolute_position;
-
-            auto relationSubType = inter.relation()->getSubType();
+            // std::cout << "abs_pos_ds in FillHtrans: " << abs_pos_ds << std::endl;
+            // auto relationSubType = inter.relation()->getSubType();
             if(relationSubType == modeling::RelationSubType::StressLinearTIR){
                 auto &solid = static_cast<siconos::mechanics::fem::SolidLinearTIDS &>(*ds);
                 sizeDS=solid.stressDimension();
