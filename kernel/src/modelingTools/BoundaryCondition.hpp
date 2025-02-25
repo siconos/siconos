@@ -109,7 +109,8 @@ class BoundaryCondition {
       \param ind new index value
   */
   void appendIndex(unsigned int ind);
-  
+  void appendIndex(unsigned int ind, double imposedVelocity);
+
  protected:
   ACCEPT_SERIALIZATION(BoundaryCondition);
 

@@ -67,6 +67,8 @@ class FiniteElementLinearTIDS : public modeling::LagrangianLinearTIDS {
 
   void applyDirichletBoundaryConditions(int physical_entity_tag,
                                         std::shared_ptr<std::vector<int>> node_dof_index);
+  void applyUniformDirichletBoundaryConditions(int physical_entity_tag,
+                                        std::shared_ptr<std::vector<int>> node_dof_index, double imposedVelocity);
 
   void applyNodalForces(int physical_entity_tag,
                         std::shared_ptr<siconos::algebra::SiconosVector> nodal_forces);

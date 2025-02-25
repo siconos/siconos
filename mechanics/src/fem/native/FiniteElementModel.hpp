@@ -160,6 +160,10 @@ class FiniteElementModel {
   void applyDirichletBoundaryConditions(
       int physical_entity_tag, std::shared_ptr<std::vector<int>> node_dof_index,
       std::shared_ptr<siconos::modeling::BoundaryCondition> _boundaryCondition);
+  void applyUniformDirichletBoundaryConditions(
+      int physical_entity_tag, std::shared_ptr<std::vector<int>> node_dof_index,
+      std::shared_ptr<siconos::modeling::BoundaryCondition> _boundaryCondition, double imposedVelocity);
+
   /** apply Neuman Boundary conditions (nodal forces) for a given tag on
    *element.
    **/

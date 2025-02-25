@@ -987,6 +987,23 @@ void siconos::mechanics::fem::FiniteElementModel::applyDirichletBoundaryConditio
   }
 }
 
+void siconos::mechanics::fem::FiniteElementModel::applyUniformDirichletBoundaryConditions(
+    int physical_entity_tag, std::shared_ptr<std::vector<int>> node_dof_index,
+    std::shared_ptr<siconos::modeling::BoundaryCondition> boundaryConditions, double imposedVelocity) {
+  assert(boundaryConditions);
+  for (auto &e : _mesh->elements()) {
+    if (e->tags(0) == physical_entity_tag) {
+      for (auto &v : e->vertices()) {
+        auto n = _vertexToNode[v];
+        auto n_dof_index = n->dofIndex();
+        for (const auto &i : *node_dof_index) {
+          boundaryConditions->appendIndex((*n_dof_index)[i],imposedVelocity);
+        }
+      }
+    }
+  }
+}
+
 void siconos::mechanics::fem::FiniteElementModel::applyNodalForces(
     int physical_entity_tag, std::shared_ptr<siconos::algebra::SiconosVector> nodal_forces,
     std::shared_ptr<siconos::algebra::SiconosVector> forces) {

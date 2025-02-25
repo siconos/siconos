@@ -95,13 +95,23 @@ void siconos::mechanics::fem::FiniteElementLinearTIDS::applyDirichletBoundaryCon
   if (!_boundaryConditions)
     _boundaryConditions = std::make_shared<siconos::modeling::BoundaryCondition>(
         siconos::modeling::BoundaryCondition::Indices{});
-
   _FEModel->applyDirichletBoundaryConditions(physical_entity_tag, node_dof_index,
                                              _boundaryConditions);
-
   _reactionToBoundaryConditions = std::make_shared<siconos::algebra::SiconosVector>(
       _boundaryConditions->velocityIndices().size());
 };
+
+void siconos::mechanics::fem::FiniteElementLinearTIDS::applyUniformDirichletBoundaryConditions(
+    int physical_entity_tag, std::shared_ptr<std::vector<int>> node_dof_index, double imposedVelocity) {
+  if (!_boundaryConditions)
+    _boundaryConditions = std::make_shared<siconos::modeling::BoundaryCondition>(
+        siconos::modeling::BoundaryCondition::Indices{}, std::make_shared<siconos::algebra::SiconosVector>(siconos::modeling::BoundaryCondition::Indices{}.size(), 0.));
+  _FEModel->applyUniformDirichletBoundaryConditions(physical_entity_tag, node_dof_index,
+                                             _boundaryConditions, imposedVelocity);
+  _reactionToBoundaryConditions = std::make_shared<siconos::algebra::SiconosVector>(
+      _boundaryConditions->velocityIndices().size());
+};
+
 
 void siconos::mechanics::fem::FiniteElementLinearTIDS::applyNodalForces(
     int physical_entity_tag, std::shared_ptr<siconos::algebra::SiconosVector> nodal_forces) {

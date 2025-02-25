@@ -113,3 +113,15 @@ void siconos::modeling::BoundaryCondition::appendIndex(unsigned int ind)
       _prescribedVelocityOld->resize(size(), 0.);
     }
 }
+
+void siconos::modeling::BoundaryCondition::appendIndex(unsigned int ind, double imposedVelocity)
+{
+  if (find(_velocityIndices.begin(), _velocityIndices.end(), ind) == _velocityIndices.end())
+  {
+    _velocityIndices.push_back(ind);
+    _prescribedVelocity->resize(size(), 0);
+    _prescribedVelocity->setValue(size()-1,imposedVelocity);
+    _prescribedVelocityOld->resize(size(), 0);
+    _prescribedVelocityOld->setValue(size()-1,imposedVelocity);
+  }
+}
