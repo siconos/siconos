@@ -36,9 +36,9 @@ siconos::algebra::BlockMatrix::BlockMatrix(std::shared_ptr<SiconosMatrix> m) {
   _tabCol->reserve(1);
 
   (*_mat)(0, 0) = m;
-  _dimRow = m->size(0);
+  _dimRow = m->rows();
   _tabRow->push_back(_dimRow);
-  _dimCol = m->size(1);
+  _dimCol = m->cols();
   _tabCol->push_back(_dimCol);
 }
 
@@ -52,7 +52,7 @@ siconos::algebra::BlockMatrix::BlockMatrix(std::shared_ptr<MapType> m) {
 
   m->display();
   (*_mat)(0, 0) = std::make_shared<siconos::algebra::SiconosMatrix>();
-  *((*_mat)(0, 0)) = *m; // TODOSAM : copy here, should not
+  *((*_mat)(0, 0)) = *m;  // TODOSAM : copy here, should not
   _dimRow = m->rows();
   _tabRow->push_back(_dimRow);
   _dimCol = m->cols();
@@ -86,8 +86,8 @@ siconos::algebra::BlockMatrix::BlockMatrix(Eigen::Ref<siconos::algebra::SiconosM
 //   _mat = std::make_shared<BlocksMatrix>(1, 1);
 //   _mat->setValue(0, 0, std::make_shared<SiconosMatrix>(m));
 
-//   _dimRow = m.size(0);
-//   _dimCol = m.size(1);
+//   _dimRow = m.rows();
+//   _dimCol = m.cols();
 //   _tabRow->push_back(_dimRow);
 //   _tabCol->push_back(_dimCol);
 // }
@@ -114,7 +114,7 @@ siconos::algebra::BlockMatrix::BlockMatrix(const BlockMatrix &m) {
       (*_mat)(i, j) = col;
       // _dimCol must be incremented only at first "column-loop"
       if (firstLoop) {
-        _dimCol += col->size(1);
+        _dimCol += col->cols();
         _tabCol->push_back(_dimCol);
       }
       ++j;
@@ -147,11 +147,11 @@ siconos::algebra::BlockMatrix::BlockMatrix(
 
       // _dimCol must be incremented only at first "column-loop"
       if (firstColLoop) {
-        _dimCol += m[k - 1]->size(1);
+        _dimCol += m[k - 1]->cols();
         _tabCol->push_back(_dimCol);
       }
       if (firstRowLoop) {
-        _dimRow += m[k - 1]->size(0);
+        _dimRow += m[k - 1]->rows();
         _tabRow->push_back(_dimRow);
         firstRowLoop = false;
       }
@@ -165,8 +165,8 @@ siconos::algebra::BlockMatrix::BlockMatrix(std::shared_ptr<SiconosMatrix> A,
                                            std::shared_ptr<SiconosMatrix> B,
                                            std::shared_ptr<SiconosMatrix> C,
                                            std::shared_ptr<SiconosMatrix> D) {
-  if (A->size(0) != B->size(0) || C->size(0) != D->size(0) || A->size(1) != C->size(1) ||
-      B->size(1) != D->size(1))
+  if (A->rows() != B->rows() || C->rows() != D->rows() || A->cols() != C->cols() ||
+      B->cols() != D->cols())
     THROW_EXCEPTION("inconsistent sizes between A, B, C or D SiconosMatrices.");
 
   // _mat = [ A B ]
@@ -184,13 +184,13 @@ siconos::algebra::BlockMatrix::BlockMatrix(std::shared_ptr<SiconosMatrix> A,
   (*_mat)(0, 1) = B;
   (*_mat)(1, 0) = C;
   (*_mat)(1, 1) = D;
-  _dimRow = A->size(0);
+  _dimRow = A->rows();
   _tabRow->push_back(_dimRow);
-  _dimRow += C->size(0);
+  _dimRow += C->rows();
   _tabRow->push_back(_dimRow);
-  _dimCol = A->size(1);
+  _dimCol = A->cols();
   _tabCol->push_back(_dimCol);
-  _dimCol += B->size(1);
+  _dimCol += B->cols();
   _tabCol->push_back(_dimCol);
 }
 
@@ -254,30 +254,14 @@ void siconos::algebra::BlockMatrix::setIdentity() {
   }
 }
 
-unsigned int siconos::algebra::BlockMatrix::size(unsigned int index) const {
-  if (index == 0)
-    return _dimRow;
-  else
-    return _dimCol;
-};
-
-//=======================
-// set matrix dimensions
-//=======================
-
-void siconos::algebra::BlockMatrix::resize(unsigned int, unsigned int, unsigned int,
-                                           unsigned int, bool) {
-  THROW_EXCEPTION("forbidden for block matrices.");
-}
-
 //=======================
 //       get norm
 //=======================
 
 double siconos::algebra::BlockMatrix::normInf() const {
   double sum = 0, norm = 0;
-  for (unsigned int i = 0; i < size(0); i++) {
-    for (unsigned int j = 0; j < size(1); j++) {
+  for (unsigned int i = 0; i < rows(); i++) {
+    for (unsigned int j = 0; j < cols(); j++) {
       sum += (*this)(i, j);
     }
     if (fabs(sum) > norm) norm = fabs(sum);
@@ -409,37 +393,6 @@ void siconos::algebra::BlockMatrix::setValue(unsigned int row, unsigned int col,
   (*tmp)(posRow, posCol) = value;
 }
 
-void siconos::algebra::BlockMatrix::trans() { THROW_EXCEPTION("not yet implemented."); }
-
-void siconos::algebra::BlockMatrix::trans(const SiconosMatrix &m) {
-  THROW_EXCEPTION("not yet implemented.");
-}
-
-void siconos::algebra::BlockMatrix::PLUFactorizationInPlace() {
-  THROW_EXCEPTION("not yet implemented for Block Matrices.");
-}
-void siconos::algebra::BlockMatrix::Factorize() {
-  THROW_EXCEPTION("not yet implemented for Block Matrices.");
-}
-
-void siconos::algebra::BlockMatrix::PLUInverseInPlace() {
-  THROW_EXCEPTION("not yet implemented for Block Matrices.");
-}
-
-void siconos::algebra::BlockMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B) {
-  THROW_EXCEPTION("not yet implemented for Block Matrices.");
-}
-void siconos::algebra::BlockMatrix::Solve(SiconosMatrix &B) {
-  THROW_EXCEPTION("not yet implemented for Block Matrices.");
-}
-
-void siconos::algebra::BlockMatrix::PLUForwardBackwardInPlace(SiconosVector &B) {
-  THROW_EXCEPTION("not yet implemented for Block Matrices.");
-}
-void siconos::algebra::BlockMatrix::Solve(SiconosVector &B) {
-  THROW_EXCEPTION("not yet implemented for Block Matrices.");
-}
-
 std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::algebra::BlockMatrix::block(
     unsigned int row, unsigned int col) {
   return (*_mat)(row, col);
@@ -464,14 +417,14 @@ void siconos::algebra::BlockMatrix::setBlock(
 std::shared_ptr<siconos::algebra::SiconosMatrix>
 siconos::algebra::BlockMatrix::toSiconosMatrix() const {
   // get number of blocks in a row/col of m.
-  auto m = std::make_shared<SiconosMatrix>(this->size(0), this->size(1));
+  auto m = std::make_shared<SiconosMatrix>(this->rows(), this->cols());
   unsigned int posRow = 0;
   unsigned int posCol = 0;
 
   for (auto it : this->_mat->rowwise()) {
     for (auto it2 : it) {
       m->setBlock(posRow, posCol, *it2);
-      posCol += it2->size(1);
+      posCol += it2->cols();
     }
     posRow += it.size();
     posCol = 0;

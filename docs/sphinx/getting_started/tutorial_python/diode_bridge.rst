@@ -148,7 +148,7 @@ we get a first order linear system
 
 with the unknowns :math:`x` and :math:`r`.
 
-To represent this kind of ordinary differential equations, siconos has a class :class:`FirstOrderLinearTIDS` (TIDS stands for time-invariant coefficients dynamical system)
+To represent this kind of ordinary differential equations, siconos has a class :class:`FirstOrderLinearDS` (TIDS stands for time-invariant coefficients dynamical system)
 which inherits from :class:`DynamicalSystem`. Check :ref:`dynamical_systems` to find a complete review of all the dynamical systems formalisms available in the software.
 
 ::
@@ -169,7 +169,7 @@ which inherits from :class:`DynamicalSystem`. Check :ref:`dynamical_systems` to 
    A.flat[...] = [0., -1.0/Cvalue, 1.0/Lvalue, 0.]
    
    # build the dynamical system
-   ds = sk.FirstOrderLinearTIDS(x0, A)
+   ds = sk.FirstOrderLinearDS(x0, A)
 
 A few remarks:
 
@@ -177,7 +177,7 @@ A few remarks:
 * help can be found on siconos objects with the standard python help function. For example, to find how
   the system can be build::
 
-    help(sk.FirstOrderLinearTIDS)
+    help(sk.FirstOrderLinearDS)
 
  or by checking the :ref:`siconos_api_reference` or :ref:`siconos_python_reference` documention.
 

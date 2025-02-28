@@ -88,6 +88,5 @@ void siconos::control::ControlZOHSimulation::run() {
   std::chrono::duration<double, std::milli> fp_s = end - start;
   _elapsedTime = fp_s.count();
 
-  //// _dataM->resize(k, _nDim + 1);
   DEBUG_END("void siconos::control::ControlZOHSimulation::run()\n");
 }

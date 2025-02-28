@@ -5,7 +5,7 @@
 # ===============================================================================
 
 # --- List of siconos components to build and install ---
-set(COMPONENTS externals numerics kernel  mechanics mechanisms io CACHE INTERNAL "List of siconos components to build and install")
+set(COMPONENTS externals numerics kernel control mechanics mechanisms io CACHE INTERNAL "List of siconos components to build and install")
 option(WITH_PYB11_WRAPPER "Build and install python bindings" ON)
 
 # --- Build/compiling options ---

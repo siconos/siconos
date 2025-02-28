@@ -200,8 +200,6 @@ class ZeroOrderHoldOSI : public OneStepIntegrator {
   /** Displays the data of the ZeroOrderHoldOSI's integrator
    */
   void display() const override;
-
-  void updateMatrices(std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 };
 }  // namespace siconos::integrators
 #endif  // ZEROORDERHOLD_H

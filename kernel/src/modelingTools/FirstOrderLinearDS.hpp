@@ -111,10 +111,13 @@ class FirstOrderLinearDS : public FirstOrderNonLinearDS {
   virtual ~FirstOrderLinearDS() noexcept = default;
 
   /** \return a read-only view on A(t) matrix */
-  inline  auto A() const { return jacobianfOver_x(); }
+  inline auto A() const { return jacobianfOver_x(); }
 
   /** \return true if A is taken into account */
-  auto hasA() { return hasJacobianfOver_x_; }
+  auto hasA() const { return hasJacobianfOver_x_; }
+
+  /** \return true if A is taken into account and is time independant */
+  auto hasConstantA() const { return hasConstantJacobianfOver_x_; }
 
   /** Set a constant A matrix for the system
    *
@@ -135,7 +138,7 @@ class FirstOrderLinearDS : public FirstOrderNonLinearDS {
   void computeA(double time);
 
   /** \return  a read-only view on b(t) */
-  inline  auto bVector() const {
+  inline auto bVector() const {
     return siconos::algebra::ConstMapVectorType(bVector_view_->data(), bVector_view_->size());
   }
 
@@ -154,10 +157,17 @@ class FirstOrderLinearDS : public FirstOrderNonLinearDS {
    */
   void setComputebVectorFunction(const siconos::modeling::func_prototypes::FunctionS_V &fct);
 
+  /** Remove any plugin connection for b(t)
+   * Seems to be useful only for MatrixIntegrator and control stuff. Use it with care ...
+   */
+  void clearbVector();
+
   /** Computes b(t)
    *  \param time current time value
    */
   void computeb(double time);
+
+  bool isbVectorPlugged() const { return computebVector_ != nullptr; }
 
   /** update right-hand side for the current state
    *

@@ -38,7 +38,6 @@
 		<xsd:enumeration value="LagrangianDS"/>
 		<xsd:enumeration value="LagrangianLinearTIDS"/>
 		<xsd:enumeration value="FirstOrderLinearDS"/>
-		<xsd:enumeration value="FirstOrderLinearTIDS"/>
 		<xsd:enumeration value="FirstOrderNonLinearDS"/>
 	</xsd:restriction>
 </xsd:simpleType>

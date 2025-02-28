@@ -15,17 +15,14 @@ def compute_dt_matrices(A, B, h, TV=False):
     Csurface = np.random.random((m, n))
 
     # Declaration of the Dynamical System
-    if TV:
-        process_ds = SK.FirstOrderLinearDS(x0, A)
-    else:
-        process_ds = SK.FirstOrderLinearTIDS(x0, A)
+    process_ds = SK.FirstOrderLinearDS(x0, A)
     # Model
     process = SK.NonSmoothDynamicalSystem(t0, T)
     process.insertDynamicalSystem(process_ds)
     # time discretisation
     process_time_discretisation = SK.TimeDiscretisation(t0, h)
     # Creation of the Simulation
-    process_simu = SK.TimeStepping(process,process_time_discretisation,0)
+    process_simu = SK.TimeStepping(process, process_time_discretisation, 0)
     process_simu.setName("plant simulation")
     # Declaration of the integrator
     process_integrator = SK.ZeroOrderHoldOSI()
@@ -35,10 +32,9 @@ def compute_dt_matrices(A, B, h, TV=False):
     nslaw = SK.RelayNSL(m)
     inter = SK.Interaction(nslaw, rel)
 
-    #process.nonSmoothDynamicalSystem().insertInteraction(inter, True)
+    # process.nonSmoothDynamicalSystem().insertInteraction(inter, True)
     process.link(inter, process_ds)
     process.setControlProperty(inter, True)
-
 
     # Main loop
     process_simu.computeOneStep()
@@ -49,7 +45,7 @@ def compute_dt_matrices(A, B, h, TV=False):
 
 
 def pole_placement(A, B, P):
-    """ Compute the column vector K such that the eigenvalues of A - B*F are
+    """Compute the column vector K such that the eigenvalues of A - B*F are
     the ones given by the vector P
     A is an nxn matrix, B and P are vectors
     Please note that if you want to specify complex eigenvalues, P is a matrix
@@ -74,29 +70,30 @@ def pole_placement(A, B, P):
     """
 
     import DSEVAS
+
     n = A.shape[0]
-    k = np.int(np.ceil((n**2 - 2*n + 1.0)/4))+1
-    w = np.int(np.ceil((n**2 + 3*n - 4.0)/2))+1
-    AA = np.array(A, order='F', dtype='f8')
-    BB = np.array(B, order='F', dtype='f8')
+    k = np.int(np.ceil((n**2 - 2 * n + 1.0) / 4)) + 1
+    w = np.int(np.ceil((n**2 + 3 * n - 4.0) / 2)) + 1
+    AA = np.array(A, order="F", dtype="f8")
+    BB = np.array(B, order="F", dtype="f8")
     ieigal = np.zeros((1), dtype=int)
-    rstor = np.zeros((4, k), dtype='f8', order='F')
+    rstor = np.zeros((4, k), dtype="f8", order="F")
     istor = np.zeros((k), dtype=int)
-    cstor = np.zeros((w), dtype='f8')
+    cstor = np.zeros((w), dtype="f8")
     if P.ndim == 1:
-        PP = np.zeros((2, n), dtype='f8', order='F')
+        PP = np.zeros((2, n), dtype="f8", order="F")
         PP[0, :] = P
     else:
-        PP = np.array(P, dtype='f8', order='F')
-    K = np.zeros((n), dtype='f8', order='F')
+        PP = np.array(P, dtype="f8", order="F")
+    K = np.zeros((n), dtype="f8", order="F")
 
     DSEVAS.dsevas(AA, BB, PP, rstor, istor, cstor, 0, 0, ieigal, K, n, n)
 
-    errPoles = np.linalg.norm(P-np.linalg.eig(A - B*K)[0], ord=np.inf)
+    errPoles = np.linalg.norm(P - np.linalg.eig(A - B * K)[0], ord=np.inf)
     if errPoles > 1e-10:
         print("Error, the poles are not placed correctly")
         print("The error is: " + str(errPoles))
         print("Desired poles: " + str(P))
-        print("Obtained poles: " + str(np.linalg.eig(A - B*K)[0]))
+        print("Obtained poles: " + str(np.linalg.eig(A - B * K)[0]))
 
     return (K, errPoles)

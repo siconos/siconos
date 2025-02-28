@@ -296,6 +296,12 @@ class DynamicalSystem {
     return old_count;
   };
 
+  /** Reset initial state. Warning: shared view between newX0 and internal x0!
+   *
+   *  \param newx0 the new x0 vector
+   */
+  void setX0(Eigen::Ref<siconos::algebra::SiconosVector> newx0);
+
   /** reset the state x() to the initial state x0 */
   virtual void resetToInitialState() = 0;
 

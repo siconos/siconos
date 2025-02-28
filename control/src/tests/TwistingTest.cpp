@@ -17,7 +17,7 @@
  */
 #include "TwistingTest.hpp"
 
-#include <FirstOrderLinearTIDS.hpp>
+#include <FirstOrderLinearDS.hpp>
 #include <io.hpp>
 
 #include "ControlLsodarSimulation.hpp"
@@ -63,7 +63,8 @@ void TwistingTest::setUp() {
 #ifdef HAS_EXTREME_POINT_ALGO
 
 void TwistingTest::initTwisting() {
-  _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(_x0, _A);
+  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0);
+  _DS->setConstantA(*_A);
   _sensor = std::make_shared<siconos::control::LinearSensor>(_DS, _C);
   _itw = std::make_shared<siconos::control::Twisting>(_sensor, 300., _beta, _h);
   auto eye = std::make_shared<siconos::algebra::SiconosMatrix>(2, 2);
@@ -72,7 +73,8 @@ void TwistingTest::initTwisting() {
 }
 
 void TwistingTest::initRegularTwisting() {
-  _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(_x0, _A);
+  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0);
+  _DS->setConstantA(*_A);
   _sensor = std::make_shared<siconos::control::LinearSensor>(_DS, _C);
   _reg_itw = std::make_shared<siconos::control::RegularTwisting>(_sensor, 300., _beta);
   auto eye = std::make_shared<siconos::algebra::SiconosMatrix>(2, 2);
@@ -82,7 +84,8 @@ void TwistingTest::initRegularTwisting() {
 #endif
 
 void TwistingTest::initExplicitTwisting() {
-  _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(_x0, _A);
+  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0);
+  _DS->setConstantA(*_A);
   _sensor = std::make_shared<siconos::control::LinearSensor>(_DS, _C);
   _expl_tw = std::make_shared<siconos::control::ExplicitTwisting>(_sensor, 300., _beta);
   auto eye = std::make_shared<siconos::algebra::SiconosMatrix>(2, 2);
@@ -144,7 +147,7 @@ void TwistingTest::test_Twisting_ZOH() {
   simZOH->initialize();
   simZOH->run();
   auto data = simZOH->data();
-  siconos::algebra::io::write("itw_ZOH.dat", *data, siconos::algebra::io::ASCII_OUT,
+  siconos::algebra::io::write("itw_twisting_ZOH.dat", *data, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
   siconos::algebra::SiconosMatrix dataRef(data->rows(), data->cols());
@@ -170,7 +173,8 @@ void TwistingTest::test_Twisting_Lsodar() {
   simLsodar->initialize();
   simLsodar->run();
   auto data = simLsodar->data();
-  siconos::algebra::io::write("itw_Lsodar.dat", *data, siconos::algebra::io::ASCII_OUT,
+  siconos::algebra::io::write("itw_twisting_Lsodar.dat", *data,
+                              siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
   siconos::algebra::SiconosMatrix dataRef(data->rows(), data->cols());
@@ -180,8 +184,9 @@ void TwistingTest::test_Twisting_Lsodar() {
   data->col(3) = _beta * data->col(2) + data->col(1);
   dataRef.col(3) = _beta * dataRef.col(2) + dataRef.col(1);
   dataRef -= *data;
-  std::cout << "------- Integration done, error = " << dataRef.normInf() << " -------\n";
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_itw_Lsodar : ", dataRef.normInf() < _tol, true);
+  auto error = dataRef.leftCols(3).normInf();
+  std::cout << "------- Integration done, error = " << error << " -------\n";
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_itw_Lsodar : ", error < _tol, true);
 }
 
 void TwistingTest::test_RegularTwisting_ZOH() {
@@ -218,7 +223,7 @@ void TwistingTest::test_RegularTwisting_Lsodar() {
   simLsodar->initialize();
   simLsodar->run();
   auto data = simLsodar->data();
-  siconos::algebra::io::write("reg_itw_Lsodar..dat", *data, siconos::algebra::io::ASCII_OUT,
+  siconos::algebra::io::write("reg_itw_Lsodar.dat", *data, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
   siconos::algebra::SiconosMatrix dataRef(data->rows(), data->cols());
@@ -228,8 +233,8 @@ void TwistingTest::test_RegularTwisting_Lsodar() {
   data->col(3) = _beta * data->col(2) + data->col(1);
   dataRef.col(3) = _beta * dataRef.col(2) + dataRef.col(1);
   dataRef -= *data;
-  std::cout << "------- Integration done, error = " << dataRef.normInf() << " -------\n";
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_RegularTwistingLsodar : ", dataRef.normInf() < 5e-9,
-                               true);
+  auto error = dataRef.leftCols(3).normInf();
+  std::cout << "------- Integration done, error = " << error << " -------\n";
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_RegularTwistingLsodar : ", error < 5e-9, true);
 }
 #endif

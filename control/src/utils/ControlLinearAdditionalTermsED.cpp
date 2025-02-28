@@ -19,9 +19,9 @@
 #include "ControlLinearAdditionalTermsED.hpp"
 
 #include "DynamicalSystem.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
-#include "SiconosMatrix.hpp"
 
 namespace siconos::control {
 
@@ -32,13 +32,12 @@ typedef void (*AdditionalTermsEDfctU)(double, unsigned, double*, unsigned, doubl
 void siconos::control::ControlLinearAdditionalTermsED::init(
     siconos::graphs::DynamicalSystemsGraph& DSG0,
     const siconos::modeling::NonSmoothDynamicalSystem& nsds,
-     std::shared_ptr<siconos::simulation::TimeDiscretisation> td) {
+    std::shared_ptr<siconos::simulation::TimeDiscretisation> td) {
   siconos::graphs::DynamicalSystemsGraph::VIterator dsvi, dsvdend;
   for (std::tie(dsvi, dsvdend) = DSG0.vertices(); dsvi != dsvdend; ++dsvi) {
     auto& ds = *DSG0.bundle(*dsvi);
     if (DSG0.pluginU.hasKey(*dsvi)) {
-      DSG0.tmpXdot[*dsvi] =
-          std::make_shared<siconos::algebra::SiconosVector>(ds.dimension());
+      DSG0.tmpXdot[*dsvi] = std::make_shared<siconos::algebra::SiconosVector>(ds.dimension());
     }
     if (DSG0.pluginJacgx.hasKey(*dsvi)) {
       DSG0.jacgx[*dsvi] =
@@ -59,11 +58,13 @@ void siconos::control::ControlLinearAdditionalTermsED::addSmoothTerms(
     } else if (DSG0.pluginU.hasKey(dsgVD)) {
       auto& ds = *DSG0.bundle(dsgVD);
       auto& u = DSG0.u.getRef(dsgVD);
-      auto& tmpXdot = DSG0.tmpXdot.getRef(dsgVD);
-      ((AdditionalTermsEDfctU)DSG0.pluginU.getRef(dsgVD).fPtr)(
-          t, xdot.size(), const_cast<double*>(ds.x_read().data()), u.size(), u.data(), tmpXdot.data(),
-          ds.getz().size(), const_cast<double*>(ds.getz().data()));
-      xdot += tmpXdot;  // xdot += g(x, u)
+      auto tmpXdot = DSG0.tmpXdot[dsgVD];
+      siconos::algebra::BlockVector xb;
+      xb.insertPtr(ds.x());
+      siconos::algebra::BlockVector xdotb;
+      xdotb.insertPtr(tmpXdot);
+      (DSG0.pluginU[dsgVD])(xb, t, u, xdotb);
+      xdot += *tmpXdot;  // xdot += g(x, u)
     } else {
       THROW_EXCEPTION(
           "siconos::control::ControlLinearAdditionalTermsED :: input u but no B nor pluginU");
@@ -85,12 +86,13 @@ void siconos::control::ControlLinearAdditionalTermsED::addJacobianRhsContributio
     auto& ds = *DSG0.bundle(dsgVD);
     auto& u = DSG0.u.getRef(dsgVD);
     auto& tmpJacgx = DSG0.jacgx.getRef(dsgVD);
-    ((AdditionalTermsEDfctU)DSG0.pluginJacgx.getRef(dsgVD).fPtr)(
-        t, ds.x_read().size(), const_cast<double*>(ds.x_read().data()), u.size(), u.data(), tmpJacgx.data(),
-        ds.getz().size(), const_cast<double*>(ds.getz().data()));
+    siconos::algebra::BlockVector xb;
+    xb.insertPtr(ds.x());
+    DSG0.pluginJacgx[dsgVD](xb, t, u, tmpJacgx);
     jacRhs += tmpJacgx;  // JacRhs += \nabla_x g(x, u)
   } else {
     THROW_EXCEPTION(
-        "siconos::control::ControlLinearAdditionalTermsED :: input u but no B nor pluginU");
+        "siconos::control::ControlLinearAdditionalTermsED :: input u but no B nor "
+        "pluginJacgx");
   }
 }

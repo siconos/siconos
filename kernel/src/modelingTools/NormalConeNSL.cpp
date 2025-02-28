@@ -30,7 +30,7 @@ siconos::modeling::NormalConeNSL::NormalConeNSL(
     std::shared_ptr<siconos::algebra::SiconosVector> K)
     : NonSmoothLaw(size), _H(H), _K(K)
 {
-  assert(H->size(1) == size &&
+  assert(H->cols() == size &&
          "NormalConeNSL::NormalConeNSL - the number of columns in H and the declared size are "
          "not equal, check your code !");
 }

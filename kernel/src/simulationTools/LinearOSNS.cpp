@@ -391,8 +391,8 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
   checkCompatibleNSLaw(*nslaw);
 
   // --- Check block size ---
-  assert(indexSet->properties(vd).block->size(0) == nslaw->size());
-  assert(indexSet->properties(vd).block->size(1) == nslaw->size());
+  assert(indexSet->properties(vd).block->rows() == nslaw->size());
+  assert(indexSet->properties(vd).block->cols() == nslaw->size());
 
   // --- Compute diagonal block ---
   // Block to be set in OSNS Matrix, corresponding to
@@ -599,14 +599,14 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock(
 
   if (index2 > index1)  // upper block
   {
-    assert(indexSet->properties(ed).upper_block->size(0) == nslawSize1);
-    assert(indexSet->properties(ed).upper_block->size(1) == nslawSize2);
+    assert(indexSet->properties(ed).upper_block->rows() == nslawSize1);
+    assert(indexSet->properties(ed).upper_block->cols() == nslawSize2);
 
     currentInteractionBlock = indexSet->properties(ed).upper_block;
   } else  // lower block
   {
-    assert(indexSet->properties(ed).lower_block->size(0) == nslawSize1);
-    assert(indexSet->properties(ed).lower_block->size(1) == nslawSize2);
+    assert(indexSet->properties(ed).lower_block->rows() == nslawSize1);
+    assert(indexSet->properties(ed).lower_block->cols() == nslawSize2);
 
     currentInteractionBlock = indexSet->properties(ed).lower_block;
   }

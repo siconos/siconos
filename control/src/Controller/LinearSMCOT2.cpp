@@ -41,32 +41,21 @@ void siconos::control::LinearSMCOT2::initialize(
         "CommonSMC::initialize - you have to set either _Csurface or h(.) before initializing "
         "the Actuator");
   } else {
-    if (_Csurface && !_u)
-      _u = std::make_shared<siconos::algebra::SiconosVector>(_Csurface->size(0), 0);
+    if (_Csurface && !_u) {
+      _u = std::make_shared<siconos::algebra::SiconosVector>(_Csurface->rows());
+      _u->setZero();
+    }
   }
 
   Actuator::initialize(nsds, s);
 
-  // We can only work with FirstOrderNonLinearDS, FirstOrderLinearDS and FirstOrderLinearTIDS
+  // We can only work with FirstOrderNonLinearDS and FirstOrderLinearDS
   // We can use the Visitor mighty power to check if we have the right type
   auto DS = _sensor->getDS();
 
-  if (auto folds = std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearTIDS>(DS)) {
-    _DSPhi = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(*folds);
-    _DSPred = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(*folds);
-  } else if (auto fods =
-                 std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(DS)) {
-    auto x0 = std::make_shared<siconos::algebra::SiconosVector>(*fods->x0());
-    _DSPhi = std::make_shared<siconos::modeling::FirstOrderLinearDS>(x0);
-    _DSPred = std::make_shared<siconos::modeling::FirstOrderLinearDS>(x0);
-    if (fods->A()) {
-      _DSPhi->setA(*fods->A());
-      _DSPred->setA(*fods->A());
-    }
-    if (fods->b()) {
-      _DSPhi->setb(*fods->b());
-      _DSPred->setb(*fods->b());
-    }
+  if (auto fods = std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(DS)) {
+    _DSPhi = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*fods);
+    _DSPred = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*fods);
   } else
     THROW_EXCEPTION("LinearSMCOT2 implemented only for first order systems");
 
@@ -86,9 +75,10 @@ void siconos::control::LinearSMCOT2::initialize(
   _XPhi = _DSPhi->x();
 
   _Xhat = _DSPred->x();
-  auto dummyb = std::make_shared<siconos::algebra::SiconosVector>(_B->size(0), 0);
-  _DSPred->setbPtr(dummyb);
-  siconos::algebra::prod(*_B, *_u, *_DSPred->b());
+  bpred_.resize(_B->rows());
+  bpred_.setZero();
+  bpred_ = *_B * *_u;
+  _DSPred->setConstantbVector(bpred_);
 
   //  _Xhat= std::make_shared<siconos::algebra::SiconosVector>(_nDim, 0));
   //  _DSPred->setXPtr(_Xhat);
@@ -125,7 +115,7 @@ void siconos::control::LinearSMCOT2::actuate() {
   _simulPhi->advanceToEvent();
   _simulPhi->processEvents();
   // XXX small hack here
-  auto CS = std::make_shared<siconos::algebra::SiconosVector>(_B->size(0));
+  auto CS = std::make_shared<siconos::algebra::SiconosVector>(_B->rows());
   *CS = _Csurface->row(0);
   _coeff = -1 / (CS->sum() * hCurrent);
 
@@ -136,7 +126,7 @@ void siconos::control::LinearSMCOT2::actuate() {
   uEqP = std::min(uEq, 2.0);
   uEqP = std::max(uEqP, -2.0);
   (*_u)(_u->size() - 1) = uEqP;
-  siconos::algebra::prod(*_B, *_u, *_DSPred->b());
+  bpred_ = *_B * *_u;  // --> update DSPred b vector
   _indx++;
   *_Xhat = *_X;
   // Compute \hat{x}_k

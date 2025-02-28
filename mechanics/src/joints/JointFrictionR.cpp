@@ -75,7 +75,7 @@ void siconos::joints::JointFrictionR::computeH_NE_(double time,
   assert(n == 1);  // For now, multi-axis support TODO
 
   if (!jacobianhOver_q_Tmp ||
-      !(jacobianhOver_q_Tmp->size(1) == q0.size() && jacobianhOver_q_Tmp->size(0) == n)) {
+      !(jacobianhOver_q_Tmp->cols() == q0.size() && jacobianhOver_q_Tmp->rows() == n)) {
     jacobianhOver_q_Tmp = std::make_shared<siconos::algebra::SiconosMatrix>(n, q0.size());
   }
 

@@ -38,13 +38,13 @@ void siconos::control::ControlZOHAdditionalTerms::init(
   for (std::tie(dsvi, dsvdend) = DSG0.vertices(); dsvi != dsvdend; ++dsvi) {
     auto& ds = *DSG0.bundle(*dsvi);
     if (DSG0.B.hasKey(*dsvi)) {
-      DSG0.Bd[*dsvi] =
-          std::make_shared<siconos::simulation::MatrixIntegrator>(ds, nsds, td, DSG0.B[*dsvi]);
+      DSG0.Bd[*dsvi] = std::make_shared<siconos::simulation::MatrixIntegrator>(ds, nsds, td,
+                                                                               *DSG0.B[*dsvi]);
       if (DSG0.Bd.at(*dsvi)->isConst()) DSG0.Bd.at(*dsvi)->integrate();
     }
     if (DSG0.L.hasKey(*dsvi)) {
-      DSG0.Ld[*dsvi] =
-          std::make_shared<siconos::simulation::MatrixIntegrator>(ds, nsds, td, DSG0.L[*dsvi]);
+      DSG0.Ld[*dsvi] = std::make_shared<siconos::simulation::MatrixIntegrator>(ds, nsds, td,
+                                                                               *DSG0.L[*dsvi]);
       if (DSG0.Ld.at(*dsvi)->isConst()) DSG0.Ld.at(*dsvi)->integrate();
     }
     if (DSG0.pluginB.hasKey(*dsvi))

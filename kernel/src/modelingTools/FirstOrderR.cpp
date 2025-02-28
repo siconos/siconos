@@ -31,23 +31,23 @@ void siconos::modeling::FirstOrderR::display() const {
             << static_cast<std::underlying_type<RelationSubType>::type>(_subType) << "\n";
 
   if (jacobianhOver_state_view_) {
-    std::cout << " jacobian h over state";
+    std::cout << " jacobian h over state\n";
     if (hasConstantJacobianhOver_state_) std::cout << "(constant matrix) \n";
-    std::cout << jacobianhOver_state_view_ << "\n";
+    std::cout << *jacobianhOver_state_view_ << "\n";
   }
   if (jacobianhOver_lambda_view_) {
-    std::cout << " jacobian h over lambda";
+    std::cout << " jacobian h over lambda\n";
     if (hasConstantJacobianhOver_lambda_) std::cout << "(constant matrix) \n";
-    std::cout << jacobianhOver_lambda_view_ << "\n";
+    std::cout << *jacobianhOver_lambda_view_ << "\n";
   }
   if (jacobiangOver_state_view_) {
-    std::cout << " jacobian g over state";
+    std::cout << " jacobian g over state\n";
     if (hasConstantJacobiangOver_state_) std::cout << "(constant matrix) \n";
-    std::cout << jacobiangOver_state_view_ << "\n";
+    std::cout << *jacobiangOver_state_view_ << "\n";
   }
   if (jacobiangOver_lambda_view_) {
-    std::cout << " jacobian g over lambda";
+    std::cout << " jacobian g over lambda\n";
     if (hasConstantJacobiangOver_lambda_) std::cout << "(constant matrix) \n";
-    std::cout << jacobiangOver_lambda_view_ << "\n";
+    std::cout << *jacobiangOver_lambda_view_ << "\n";
   }
 }

@@ -1122,8 +1122,8 @@ void siconos::integrators::EulerMoreauOSI::updateInput(double time, unsigned int
       DEBUG_EXPR(deltax.display());
 
       if (forel->hasJacobiangOver_state())
-        siconos::algebra::matrixBlockVector_prod(forel->jacobiangOver_lambda(), deltax,
-                                                 g_alpha, false);
+        siconos::algebra::matrixBlockVector_prod(forel->jacobiangOver_state(), deltax, g_alpha,
+                                                 false);
       // Khat = h * K * W^-1 * B
       g_alpha += *inter_work_mat[siconos::integrators::EulerMoreauOSI::MAT_KHAT] *
                  *inter.lambda(level);

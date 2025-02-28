@@ -725,7 +725,7 @@ void siconos::integrators::NewMarkAlphaOSI::computeCoefsDenseOutput(
         workMatrices[siconos::integrators::NewMarkAlphaOSI::DENSE_OUTPUT_COEFFICIENTS];
     // d->workMatrix(siconos::integrators::NewMarkAlphaOSI::DENSE_OUTPUT_COEFFICIENTS); //
     // matrix of coefficients [a0 a1 a2 a3 a4 a5]
-    if (_CoeffsDense->size(1) != 6) {
+    if (_CoeffsDense->cols() != 6) {
       THROW_EXCEPTION(
           "In siconos::integrators::NewMarkAlphaOSI::computeCoefsDenseOutput: the number "
           "of "

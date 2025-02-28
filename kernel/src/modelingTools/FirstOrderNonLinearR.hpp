@@ -66,7 +66,7 @@ class FirstOrderNonLinearR : public FirstOrderR {
   /** function wrapper used to compute \f$ h(x,t,\lambda) \f$ */
   siconos::modeling::func_prototypes::FunctionBVSV_V computeh_{nullptr};
 
-  /** function wrapper used to compute \f$ h(x,t,\lambda) \f$ */
+  /** function wrapper used to compute \f$ g(x,t,\lambda) \f$ */
   siconos::modeling::func_prototypes::FunctionBVSV_BV computeg_{nullptr};
 
   /** function wrapper used to compute  \f$ \nabla_x h(x,t,\lambda) \f$ */

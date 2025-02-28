@@ -79,8 +79,8 @@ void BlockMatrixTest::testConstructor0()  // constructor with a vector of
   std::cout << "--> Test: constructor 0." << std::endl;
   auto test = std::make_shared<BlockMatrix>(m, 2, 3);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->isBlock() == true, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->size(0) == 5, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->size(1) == 7, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->rows() == 5, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->cols() == 7, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->block(0, 0) == B, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->block(0, 1) == C, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->block(0, 2) == D, true);
@@ -98,8 +98,8 @@ void BlockMatrixTest::testConstructor1()  // Copy constructor, from a BlockMatri
   auto ref = std::make_shared<BlockMatrix>(m, 2, 3);
   auto test = std::make_shared<BlockMatrix>(*ref);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", test->isBlock() == true, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", test->size(0) == 5, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", test->size(1) == 7, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", test->rows() == 5, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", test->cols() == 7, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", *(test->block(0, 0)) == *B, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", *(test->block(0, 1)) == *C, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", *(test->block(0, 2)) == *D, true);
@@ -117,8 +117,8 @@ void BlockMatrixTest::testConstructor2()  // Copy constructor, from a SiconosMat
   auto ref = std::make_shared<BlockMatrix>(m, 2, 3);
   auto test = std::make_shared<BlockMatrix>(*ref);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", test->isBlock() == true, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", test->size(0) == 5, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", test->size(1) == 7, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", test->rows() == 5, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", test->cols() == 7, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", *(test->block(0, 0)) == *B, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", *(test->block(0, 1)) == *C, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", *(test->block(0, 2)) == *D, true);
@@ -137,8 +137,8 @@ void BlockMatrixTest::testConstructor3()  // Copy constructor, from a SiconosMat
   auto test = std::make_shared<BlockMatrix>(*ref);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", test->isBlock() == true, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", test->size(0) == 5, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", test->size(1) == 7, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", test->rows() == 5, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", test->cols() == 7, true);
   for (unsigned int i = 0; i < 5; ++i)
     for (unsigned int j = 0; j < 7; ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", fabs((*test)(i, j) - 2.3) < tol,
@@ -159,8 +159,8 @@ void BlockMatrixTest::testConstructor4()  // Constructor from 4 std::shared_ptr<
   std::cout << "--> Test: constructor 4." << std::endl;
   auto test = std::make_shared<BlockMatrix>(B, C, E, F);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", test->isBlock() == true, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", test->size(0) == 5, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", test->size(1) == 6, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", test->rows() == 5, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", test->cols() == 6, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", test->block(0, 0) == B, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", test->block(0, 1) == C, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", test->block(1, 0) == E, true);
@@ -189,8 +189,8 @@ void BlockMatrixTest::testConstructor4()  // Constructor from 4 std::shared_ptr<
 //   (*test)(1,3) = F;
 
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ",test->isBlock() == true);
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ",test->size(0) == 7, true);
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ",test->size(1) == 11, true);
+//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ",test->rows() == 7, true);
+//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ",test->cols() == 11, true);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ",test->block(0,0) == B, true);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ",test->block(0,1) == C, true);
 //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ",test->block(0,2) == D, true);
@@ -236,8 +236,8 @@ void BlockMatrixTest::testZero() {
   v[3] = J;
   auto test = std::make_shared<BlockMatrix>(v, 2, 2);
   test->setZero();
-  unsigned int n1 = test->size(0);
-  unsigned int n2 = test->size(1);
+  unsigned int n1 = test->rows();
+  unsigned int n2 = test->cols();
   for (unsigned int i = 0; i < n1; ++i)
     for (unsigned int j = 0; j < n2; ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testZero : ", (*test)(i, j) == 0, true);
@@ -271,8 +271,8 @@ void BlockMatrixTest::testEye() {
   v[3] = J;
   auto test = std::make_shared<BlockMatrix>(v, 2, 2);
   test->setIdentity();
-  unsigned int n1 = test->size(0);
-  unsigned int n2 = test->size(1);
+  unsigned int n1 = test->rows();
+  unsigned int n2 = test->cols();
   for (unsigned int i = 0; i < n1; ++i)
     for (unsigned int j = 0; j < n2; ++j)
       if (i == j)
@@ -351,7 +351,7 @@ void BlockMatrixTest::testAssignment() {
 
   auto test = std::make_shared<BlockMatrix>(Btmp, Ctmp, Dtmp, Etmp);
   // Block = Siconos(Simple)
-  unsigned int size0 = test->size(0), size1 = test->size(1);
+  unsigned int size0 = test->rows(), size1 = test->cols();
   auto ref = std::make_shared<siconos::algebra::SiconosMatrix>(size0, size1);
   for (unsigned int i = 0; i < size0; ++i)
     for (unsigned int j = 0; j < size1; ++j) (*ref)(i, j) = i + j;
@@ -387,53 +387,53 @@ void BlockMatrixTest::testOperators1() {
 
   // Block *= scal or /= scal
   *Cb *= a;
-  for (unsigned int i = 0; i < Cb->size(0); ++i)
-    for (unsigned int j = 0; j < Cb->size(1); ++j)
+  for (unsigned int i = 0; i < Cb->rows(); ++i)
+    for (unsigned int j = 0; j < Cb->cols(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE(
           "testOperators1: ", fabs((*Cb)(i, j) - a * (*Ab)(i, j)) < tol, true);
 
   *Cb *= a1;
-  for (unsigned int i = 0; i < Cb->size(0); ++i)
-    for (unsigned int j = 0; j < Cb->size(1); ++j)
+  for (unsigned int i = 0; i < Cb->rows(); ++i)
+    for (unsigned int j = 0; j < Cb->cols(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE(
           "testOperators1: ", fabs((*Cb)(i, j) - a1 * a * (*Ab)(i, j)) < tol, true);
 
   *Cb /= a;
-  for (unsigned int i = 0; i < Cb->size(0); ++i)
-    for (unsigned int j = 0; j < Cb->size(1); ++j)
+  for (unsigned int i = 0; i < Cb->rows(); ++i)
+    for (unsigned int j = 0; j < Cb->cols(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE(
           "testOperators1: ", fabs((*Cb)(i, j) - a1 * (*Ab)(i, j)) < tol, true);
   *Cb /= a1;
-  for (unsigned int i = 0; i < Cb->size(0); ++i)
-    for (unsigned int j = 0; j < Cb->size(1); ++j)
+  for (unsigned int i = 0; i < Cb->rows(); ++i)
+    for (unsigned int j = 0; j < Cb->cols(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators1: ", fabs((*Cb)(i, j) - (*Ab)(i, j)) < tol,
                                    true);
 
   // Block +=  Simple
   *Cb += *A;
-  for (unsigned int i = 0; i < Cb->size(0); ++i)
-    for (unsigned int j = 0; j < Cb->size(1); ++j)
+  for (unsigned int i = 0; i < Cb->rows(); ++i)
+    for (unsigned int j = 0; j < Cb->cols(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE(
           "testOperators1: ", fabs((*Cb)(i, j) - (*Ab)(i, j) - (*A)(i, j)) < tol, true);
 
   // Block -=  Block
   *Cb -= *Ab;
-  for (unsigned int i = 0; i < Cb->size(0); ++i)
-    for (unsigned int j = 0; j < Cb->size(1); ++j)
+  for (unsigned int i = 0; i < Cb->rows(); ++i)
+    for (unsigned int j = 0; j < Cb->cols(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators1: ", fabs((*Cb)(i, j) - (*A)(i, j)) < tol,
                                    true);
 
   // Block += Block
   *Cb += *Ab;
-  for (unsigned int i = 0; i < Cb->size(0); ++i)
-    for (unsigned int j = 0; j < Cb->size(1); ++j)
+  for (unsigned int i = 0; i < Cb->rows(); ++i)
+    for (unsigned int j = 0; j < Cb->cols(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE(
           "testOperators1: ", fabs((*Cb)(i, j) - (*Ab)(i, j) - (*A)(i, j)) < tol, true);
 
   // Block -= Simple
   *Cb -= *A;
-  for (unsigned int i = 0; i < Cb->size(0); ++i)
-    for (unsigned int j = 0; j < Cb->size(1); ++j)
+  for (unsigned int i = 0; i < Cb->rows(); ++i)
+    for (unsigned int j = 0; j < Cb->cols(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators1: ", fabs((*Cb)(i, j) - (*Ab)(i, j)) < tol,
                                    true);
 

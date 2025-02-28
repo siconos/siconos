@@ -395,7 +395,7 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
    *  \param i derivative number i of output
    *  \return reference on a SiconosVector
    */
-  inline siconos::algebra::SiconosVector &y_python(const unsigned int i) const {
+  inline siconos::algebra::SiconosVector& y_python(const unsigned int i) const {
     assert(_y[i]);
     return *(_y[i]);
   }
@@ -597,7 +597,7 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
    *  \param pos int, relative position of the beginning of the required block in relation
    matrix.
    *  \param size int, size(0) of the block
-   *  \param sizeDS int, size(1) of the block
+   *  \param sizeDS int, cols() of the block
    *  \return InteractionBlock a pointer to SiconosMatrix (in-out parameter): the resulting
    interactionBlock matrix
    */
@@ -620,10 +620,10 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
    *  (left * W * rigth), depends on the relation type (ex, LinearTIR, left = C, right = B).
    *  We get only the part corresponding to ds.
    *
-   *  \param pos int, relative position of the beginning of the required block in relation
-   * matrix. \param sizeDS int, size(0) of the block \param size int, size(1) of the block
-   *  \return InteractionBlock a pointer to SiconosMatrix (in-out parameter): the resulting
-   * interactionBlock matrix
+   *  \param pos relative position of the beginning of the required block in relation matrix.
+   *  \param sizeDS number of rows of the block
+   *  \param size number of columns of the block
+   *  \return the resulting interactionBlock matrix
    */
   std::shared_ptr<siconos::algebra::SiconosMatrix> getRightInteractionBlockForDS(
       unsigned int pos, unsigned int sizeDS, unsigned size) const;

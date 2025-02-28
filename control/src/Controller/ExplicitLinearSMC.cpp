@@ -43,9 +43,7 @@ void siconos::control::ExplicitLinearSMC::actuate() {
   if (!_noUeq) {
     computeUeq();
   }
-
-  siconos::algebra::prod(*_Csurface, _sensor->y(), *_sigma);
-
+  *_sigma = *_Csurface * _sensor->y();
   auto sDim = _u->size();
 
   if (_D)  // we are using a saturation

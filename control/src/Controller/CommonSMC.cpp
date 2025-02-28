@@ -27,7 +27,6 @@
 #include "FirstOrderLinearR.hpp"
 #include "FirstOrderLinearTIR.hpp"
 #include "FirstOrderNonLinearR.hpp"
-#include "FirstOrderR_helpers.hpp"
 #include "FirstOrderType1R.hpp"
 #include "FirstOrderType2R.hpp"
 #include "Interaction.hpp"
@@ -62,9 +61,11 @@ void siconos::control::CommonSMC::initialize(
         "before initializing "
         "the Actuator");
   } else {
-    if (_Csurface && !_u)
-      _u = std::make_shared<siconos::algebra::SiconosVector>(_Csurface->size(0));
-    _u->setZero();
+    if (_Csurface && !_u) {
+
+      _u = std::make_shared<siconos::algebra::SiconosVector>(_Csurface->rows());
+      _u->setZero();
+    }
 
     Actuator::initialize(nsds, s);
   }
@@ -77,11 +78,12 @@ void siconos::control::CommonSMC::initialize(
   // if the plant model is not exact, we can use the setSimulatedDS
   // method
   if (auto folds = std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(DS)) {
+    // Copy but use a different b vector
     _DS_SMC = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*folds);
-    auto dummyb = std::make_shared<siconos::algebra::SiconosVector>(_DS_SMC->dimension());
-    dummyb->setZero();
+    bSMC_.resize(_DS_SMC->dimension());
+    bSMC_.setZero();
     std::static_pointer_cast<siconos::modeling::FirstOrderLinearDS>(_DS_SMC)
-        ->setConstantbVector(*dummyb);
+        ->setConstantbVector(bSMC_);  // Shared memory view, bSMC_ is DS.b
   } else if (auto fonlds =
                  std::dynamic_pointer_cast<siconos::modeling::FirstOrderNonLinearDS>(DS)) {
     _DS_SMC = std::make_shared<siconos::modeling::FirstOrderNonLinearDS>(*fonlds);
@@ -111,16 +113,18 @@ void siconos::control::CommonSMC::initialize(
   {
     if (computee_) {
       DEBUG_PRINT("A FirstOrderLinearR is created for the _relationSMC\n");
-      _relationSMC = std::make_shared<siconos::modeling::FirstOrderLinearR>(_Csurface, _B);
+      _relationSMC = std::make_shared<siconos::modeling::FirstOrderLinearR>();
       auto folr = std::static_pointer_cast<siconos::modeling::FirstOrderLinearR>(_relationSMC);
+      folr->setConstantC(*_Csurface);
+      folr->setConstantB(*_B);
       folr->setComputeeVectorFunction(computee_);
       folr->setConstantD(*_D);
     } else {
       DEBUG_PRINT("A FirstOrderLinearTIR is created for the _relationSMC\n");
-      _relationSMC = std::make_shared<siconos::modeling::FirstOrderLinearTIR>(_Csurface, _B);
+      _relationSMC = std::make_shared<siconos::modeling::FirstOrderLinearTIR>(*_Csurface, *_B);
       auto foltir =
           std::static_pointer_cast<siconos::modeling::FirstOrderLinearTIR>(_relationSMC);
-      foltir->setConstantD(*_D);
+      if (_D) foltir->setConstantD(*_D);
     }
   } else {
     // Non linear relations. NonLinearR, Type1R, Type2R.
@@ -199,10 +203,8 @@ void siconos::control::CommonSMC::initialize(
   _ueq->setZero();
 
   if (_Csurface) {
-    siconos::algebra::SiconosMatrix tmpM{_Csurface->size(0), _B->size(1)};
-    _invCB =
-        std::make_shared<siconos::algebra::SiconosMatrix>(_Csurface->size(0), _B->size(1));
-    tmpM = *_Csurface * *_B;
+    _invCB = std::make_shared<siconos::algebra::SiconosMatrix>(_Csurface->rows(), _B->cols());
+    auto tmpM = *_Csurface * *_B;
     *_invCB = tmpM.inverse();
   }
   DEBUG_END(
@@ -218,43 +220,44 @@ void siconos::control::CommonSMC::computeUeq() {
   assert(_Csurface &&
          "siconos::control::CommonSMC::computeUeq the sliding variable should be linear "
          "subpsace of the state");
-  auto& LinearDS_SMC =
-      *std::static_pointer_cast<siconos::modeling::FirstOrderLinearDS>(_DS_SMC);
-  auto n = LinearDS_SMC.A().rows();
-  // equivalent part, explicit contribution
-  auto tmpM1 = std::make_shared<siconos::algebra::SiconosMatrix>(_Csurface->size(0), n);
-  auto tmpN = std::make_shared<siconos::algebra::SiconosMatrix>(n, n);
-  auto quasiProjB_A = std::make_shared<siconos::algebra::SiconosMatrix>(_invCB->size(0), n);
 
-  auto xTk = std::make_shared<siconos::algebra::SiconosVector>(_sensor->y());
-  *tmpM1 = *_Csurface * LinearDS_SMC.A();
-  // compute (CB)^{-1}CA
-  *quasiProjB_A = *_invCB * *tmpM1;
-  *_ueq = (_thetaSMC - 1) * *quasiProjB_A * *xTk;
+  auto LinearDS_SMC = std::static_pointer_cast<siconos::modeling::FirstOrderLinearDS>(_DS_SMC);
 
-  // equivalent part, implicit contribution
-  // XXX when to call this ?
-  auto& zoh =
-      *std::static_pointer_cast<siconos::integrators::ZeroOrderHoldOSI>(_integratorSMC);
-  zoh.updateMatrices(_DS_SMC);
+  if (LinearDS_SMC->hasA()) {
+    auto n = LinearDS_SMC->dimension();
+    auto xTk = std::make_shared<siconos::algebra::SiconosVector>(_sensor->y());
 
-  // tmpN = B^{*}(CB)^{-1}CA
-  *tmpN = zoh.Bd(_DS_SMC) * *quasiProjB_A;
+    auto zoh =
+        std::static_pointer_cast<siconos::integrators::ZeroOrderHoldOSI>(_integratorSMC);
 
-  // W = I + \theta B^{*})CB)^{-1}CA
-  siconos::algebra::SiconosMatrix tmpW = siconos::algebra::SiconosMatrix::Identity(n, n);
-  tmpW += _thetaSMC * *tmpN;
+    auto tmpM1 = *_Csurface * LinearDS_SMC->A();
+    // compute (CB)^{-1}CA
+    auto quasiProjB_A = *_invCB * tmpM1;
+    *_ueq = (_thetaSMC - 1) * quasiProjB_A * *xTk;
 
-  // compute e^{Ah}x_k
-  *xTk = zoh.Ad(_DS_SMC) * *xTk;
-  // xTk = (e^{Ah}-(1-\theta)\Psi_k\Pi_B A)x_k
-  *xTk += (_thetaSMC - 1) * *tmpN * _sensor->y();
-  // compute the solution x_{k+1} of the system W*x_{k+1} = x_k
-  Eigen::FullPivLU<siconos::algebra::SiconosMatrix> luW(tmpW);
-  *xTk = luW.solve(*xTk);
+    // equivalent part, explicit contribution
+    // tmpN = B^{*}(CB)^{-1}CA
+    auto tmpN = zoh->Bd(_DS_SMC) * quasiProjB_A;
 
-  // add the contribution from the implicit part to ueq
-  *_ueq -= _thetaSMC * *quasiProjB_A * *xTk;
+    // W = I + \theta B^{*})CB)^{-1}CA
+
+    auto tmpW = siconos::algebra::SiconosMatrix::Identity(n, n) + _thetaSMC * tmpN;
+    Eigen::FullPivLU<siconos::algebra::SiconosMatrix> luW(tmpW);
+
+    // compute e^{Ah}x_k
+    *xTk = zoh->Ad(_DS_SMC) * *xTk;
+
+    // xTk = (e^{Ah}-(1-\theta)\Psi_k\Pi_B A)x_k
+    *xTk += (_thetaSMC - 1) * tmpN * _sensor->y();
+    // compute the solution x_{k+1} of the system W*x_{k+1} = x_k
+    *xTk = luW.solve(*xTk);
+
+    // add the contribution from the implicit part to ueq
+    *_ueq -= _thetaSMC * quasiProjB_A * *xTk;
+
+  } else {
+    _ueq->setZero();
+  }
   DEBUG_END("void siconos::control::CommonSMC::computeUeq()\n");
 }
 
@@ -267,7 +270,7 @@ void siconos::control::CommonSMC::setCsurface(
 void siconos::control::CommonSMC::setSaturationMatrix(
     std::shared_ptr<siconos::algebra::SiconosMatrix> newSat) {
   // check dimensions ...
-  if (newSat->size(1) != _B->size(1)) {
+  if (newSat->cols() != _B->cols()) {
     THROW_EXCEPTION(
         "siconos::control::CommonSMC::setSaturationMatrixPtr - inconstency between the "
         "dimension of the state "
@@ -287,32 +290,30 @@ void siconos::control::CommonSMC::sete(
   computee_ = fct;
   isRelationLinear_ = true;
 }
-void siconos::control::CommonSMC::seth(
+
+void siconos::control::CommonSMC::setComputehFunction(
+
     const siconos::modeling::func_prototypes::FunctionBVSV_V& fct) {
   computeh_ = fct;
   isRelationLinear_ = false;
 }
-void siconos::control::CommonSMC::setJachx(
+
+void siconos::control::CommonSMC::setComputeJacobianhOver_stateFunction(
+
     const siconos::modeling::func_prototypes::FunctionBVSV_M& fct) {
   computejacobianhOver_state_ = fct;
   isRelationLinear_ = false;
 }
-void siconos::control::CommonSMC::setJachlambda(
+
+void siconos::control::CommonSMC::setComputeJacobianhOver_lambdaFunction(
+
     const siconos::modeling::func_prototypes::FunctionBVSV_M& fct) {
   computejacobianhOver_lambda_ = fct;
   isRelationLinear_ = false;
 }
-void siconos::control::CommonSMC::setg(
-    const siconos::modeling::func_prototypes::FunctionBVSV_BV& fct) {
-  computeg_ = fct;
-  isRelationLinear_ = false;
-}
-void siconos::control::CommonSMC::setJacgx(
-    const siconos::modeling::func_prototypes::FunctionBVSV_M& fct) {
-  computejacobiangOver_lambda_ = fct;
-  isRelationLinear_ = false;
-}
-void siconos::control::CommonSMC::setJacglambda(
+
+void siconos::control::CommonSMC::setComputeJacobiangOver_lambdaFunction(
+
     const siconos::modeling::func_prototypes::FunctionBVSV_M& fct) {
   computejacobiangOver_lambda_ = fct;
   isRelationLinear_ = false;

@@ -220,9 +220,9 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::updateInteractio
 #endif
           currentInteractionBlock = indexSet->upper_blockProj[ed1];
 #ifdef MLCPPROJ_DEBUG
-          std::cout << "currentInteractionBlock->size(0)" << currentInteractionBlock->size(0)
+          std::cout << "currentInteractionBlock->rows()" << currentInteractionBlock->rows()
                     << "\n";
-          std::cout << "currentInteractionBlock->size(1)" << currentInteractionBlock->size(1)
+          std::cout << "currentInteractionBlock->cols()" << currentInteractionBlock->cols()
                     << "\n";
 
           std::cout << "inter1->display() " << inter1->number() << "\n";
@@ -252,9 +252,9 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::updateInteractio
           currentInteractionBlock = indexSet->lower_blockProj[ed1];
 
 #ifdef MLCPPROJ_DEBUG
-          std::cout << "currentInteractionBlock->size(0)" << currentInteractionBlock->size(0)
+          std::cout << "currentInteractionBlock->rows()" << currentInteractionBlock->rows()
                     << "\n";
-          std::cout << "currentInteractionBlock->size(1)" << currentInteractionBlock->size(1)
+          std::cout << "currentInteractionBlock->cols()" << currentInteractionBlock->cols()
                     << "\n";
 
           std::cout << "inter1->display() " << inter1->number() << "\n";
@@ -414,8 +414,8 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::
   //    currentInteractionBlock->display();
   std::cout << "sizeY " << sizeY << "\n";
   std::cout << "blockProj " << indexSet->blockProj[vd].get() << " of edge " << vd
-            << " of size " << currentInteractionBlock->size(0) << " x "
-            << currentInteractionBlock->size(0) << " for interaction " << inter->number()
+            << " of size " << currentInteractionBlock->rows() << " x "
+            << currentInteractionBlock->rows() << " for interaction " << inter->number()
             << "\n";
   // std::cout<<"inter1->display() "<< inter1->number()<< "\n";
   // inter1->display();
@@ -424,8 +424,8 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::
 
 #endif
 
-  assert(currentInteractionBlock->size(0) == sizeY);
-  assert(currentInteractionBlock->size(1) == sizeY);
+  assert(currentInteractionBlock->rows() == sizeY);
+  assert(currentInteractionBlock->cols() == sizeY);
 
   if (!_hasBeenUpdated) computeOptions(inter, inter);
   // Computes matrix _interactionBlocks[inter1][inter2] (and allocates memory if
@@ -674,8 +674,8 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::computeInteracti
     std::cout << "sizeY1 " << sizeY1 << "\n";
     std::cout << "sizeY2 " << sizeY2 << "\n";
     std::cout << "upper_blockProj " << indexSet->upper_blockProj[ed].get() << " of edge " << ed
-              << " of size " << currentInteractionBlock->size(0) << " x "
-              << currentInteractionBlock->size(0) << " for interaction " << inter1->number()
+              << " of size " << currentInteractionBlock->rows() << " x "
+              << currentInteractionBlock->rows() << " for interaction " << inter1->number()
               << " and interaction " << inter2->number() << "\n";
     // std::cout<<"inter1->display() "<< inter1->number()<< "\n";
     // inter1->display();
@@ -683,8 +683,8 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::computeInteracti
     // inter2->display();
 
 #endif
-    assert(currentInteractionBlock->size(0) == sizeY1);
-    assert(currentInteractionBlock->size(1) == sizeY2);
+    assert(currentInteractionBlock->rows() == sizeY1);
+    assert(currentInteractionBlock->cols() == sizeY2);
   } else  // lower block
   {
     //     if (! indexSet->properties(ed).lower_block)
@@ -693,8 +693,8 @@ void siconos::nonsmooth_formulations::MLCPProjectOnConstraints::computeInteracti
     //       std::make_shared<siconos::algebra::SiconosMatrix>(sizeY1, sizeY2));
     //     }
 
-    assert(indexSet->lower_blockProj[ed]->size(0) == sizeY1);
-    assert(indexSet->lower_blockProj[ed]->size(1) == sizeY2);
+    assert(indexSet->lower_blockProj[ed]->rows() == sizeY1);
+    assert(indexSet->lower_blockProj[ed]->cols() == sizeY2);
 
     currentInteractionBlock = indexSet->lower_blockProj[ed];
   }

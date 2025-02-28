@@ -114,30 +114,23 @@ void siconos::control::LinearSMCimproved::predictionPerturbation(
 }
 
 void siconos::control::LinearSMCimproved::actuate() {
-  auto sDim = _u->size();
-  auto tmpM1 = std::make_shared<siconos::algebra::SiconosMatrix>(*_Csurface);
   auto xTk = std::make_shared<siconos::algebra::SiconosVector>(_sensor->y());
 
   auto& zoh =
       *std::static_pointer_cast<siconos::integrators::ZeroOrderHoldOSI>(_integratorSMC);
 
   // equivalent part
-  zoh.updateMatrices(_DS_SMC);
-  siconos::algebra::prod(*_Csurface, zoh.Ad(_DS_SMC), *tmpM1);
-  *tmpM1 *= -1.0;
-  *tmpM1 += *_Csurface;
-  siconos::algebra::SiconosMatrix CBstar{sDim, sDim};
-  CBstar = *_Csurface * zoh.Bd(_DS_SMC);
+  auto tmpM1 = -*_Csurface * zoh.Ad(_DS_SMC) + *_Csurface;
+  auto CBstar = *_Csurface * zoh.Bd(_DS_SMC);
 
   // compute C(I-e^{Ah})x_k
-  siconos::algebra::prod(*tmpM1, *xTk, *_ueq);
+  *_ueq = tmpM1 * *xTk;
   // compute the solution u^eq of the system CB^{*}u^eq = C(I-e^{Ah})x_k
   Eigen::FullPivLU<siconos::algebra::SiconosMatrix> luCBstar(CBstar);
   *_ueq = luCBstar.solve(*_ueq);
   *(_DS_SMC->x()) = *xTk;
-  siconos::algebra::prod(
-      *_B, *_ueq,
-      *(std::static_pointer_cast<siconos::modeling::FirstOrderLinearDS>(_DS_SMC)->b()));
+
+  bSMC_ = *_B * *_ueq;  // update DS_SMC b vector because of shared memory view
   _simulationSMC->computeOneStep();
   _simulationSMC->nextStep();
 

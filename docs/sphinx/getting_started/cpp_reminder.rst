@@ -161,7 +161,7 @@ false, "+=".
    
    v->size() // return the size of the vector
    m->size(0); // number of rows in the matrix
-   m->size(1), // number of columns
+   m->cols(), // number of columns
    m->resize(a,b); // resize m, available also for vectors
 
    // To compute C = A*B

@@ -265,7 +265,6 @@ void siconos::integrators::ZeroOrderHoldOSI::computeFreeState() {
     DEBUG_EXPR(ds->display(););
     auto dsgVD = DSG0.descriptor(ds);
     auto& ds_work_vectors = *DSG0.properties(dsgVD).workVectors;
-    //    updateMatrices(dsDescr);
     if (auto d = std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(ds)) {
       // Check whether we have to recompute things
       if (!DSG0.Ad.at(dsgVD)->isConst()) DSG0.Ad.at(dsgVD)->integrate();
@@ -550,21 +549,17 @@ void siconos::integrators::ZeroOrderHoldOSI::display() const {
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
   for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
     if (!checkOSI(dsi)) continue;
+
     auto ds = _dynamicalSystemsGraph->bundle(*dsi);
-    std::cout << "--> Phi of dynamical system number: \n";
-    Ad(ds).display();
-    std::cout << "--> Psi of dynamical system number: \n";
-    Bd(ds).display();
+    if (_dynamicalSystemsGraph->Ad[*dsi]) {
+      std::cout << "--> Phi of dynamical system number: \n";
+      _dynamicalSystemsGraph->Ad[*dsi]->mat().display();
+    }
+
+    if (_dynamicalSystemsGraph->Bd[*dsi]) {
+      std::cout << "--> Psi of dynamical system number: \n";
+      _dynamicalSystemsGraph->Bd[*dsi]->mat().display();
+    }
   }
   std::cout << "================================" << std::endl;
-}
-
-void siconos::integrators::ZeroOrderHoldOSI::updateMatrices(
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
-  //  DynamicalSystemsGraph& DSG0 =
-  //  *_simulation->nonSmoothDynamicalSystem()->topology()->dSG(0); if
-  //  (!DSG0.Ad[dsgVD]->isConst())
-  //    computeAd(dsgVD);
-  //  if (DSG0.Bd.hasKey(dsgVD) && !DSG->Bd[dsgVD]->isConst())
-  //    computeBd(ds);
 }

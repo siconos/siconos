@@ -184,17 +184,17 @@ struct DynamicalSystemsGraph : public _DynamicalSystemsGraph {
       ((siconos::graphs::VertexSP, siconos::algebra::SiconosMatrix,
         B))  // For Controlled System
       ((siconos::graphs::VertexSP, siconos::algebra::SiconosMatrix, L))  // For Observer
-      ((siconos::graphs::VertexSP, siconos::modeling::func_prototypes::FunctionS_M,
+      ((Vertex, siconos::modeling::func_prototypes::FunctionS_M,
         pluginB))  // For Controlled System
-      ((siconos::graphs::VertexSP, siconos::modeling::func_prototypes::FunctionS_M,
+      ((Vertex, siconos::modeling::func_prototypes::FunctionS_M,
         pluginL))                                                        // For Observer
       ((siconos::graphs::VertexSP, siconos::algebra::SiconosVector, e))  // For Observer
       ((siconos::graphs::VertexSP, siconos::algebra::SiconosVector,
         u))  // For Controlled System
-      // ((siconos::graphs::VertexSP, siconos::plugins::PluggedObject,
-      //   pluginU))  // For Controlled System (nonlinear w.r.t u)
-      // ((siconos::graphs::VertexSP, siconos::plugins::PluggedObject,
-      //   pluginJacgx))  // For Controlled System (nonlinear w.r.t u); compute nabla_x g(x, u)
+      ((Vertex, siconos::modeling::func_prototypes::FunctionBVSV_BV,
+        pluginU))  // For Controlled System (nonlinear w.r.t u)
+      ((Vertex, siconos::modeling::func_prototypes::FunctionBVSV_M,
+        pluginJacgx))  // For Controlled System (nonlinear w.r.t u); compute nabla_x g(x, u)
       ((siconos::graphs::VertexSP, siconos::algebra::SiconosVector,
         tmpXdot))  // For Controlled System (nonlinear w.r.t u); tmpXdot = g(x, u)
       ((siconos::graphs::VertexSP, siconos::algebra::SiconosMatrix,

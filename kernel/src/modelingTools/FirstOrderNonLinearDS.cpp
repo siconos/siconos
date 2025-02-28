@@ -62,11 +62,12 @@ siconos::modeling::FirstOrderNonLinearDS::FirstOrderNonLinearDS(
   if (ds.MMatrix_view_) {
     MMatrix_internal_storage_ =
         std::make_unique<std::vector<double>>(ds.MMatrix_view_->size());
-    MMatrix_view_ = std::make_shared<siconos::algebra::MapType>(ds.MMatrix_view_->data(),
-                                                                x_size_, x_size_);
+    MMatrix_view_ = std::make_shared<siconos::algebra::MapType>(
+        MMatrix_internal_storage_->data(), x_size_, x_size_);
+    *MMatrix_view_ = ds.MMatrix();  // Copy
     hasMMatrix_ = true;
     if (ds.computeMMatrix_) {
-      computeMMatrix_ = ds.computeMMatrix_;
+      setComputeMMatrixFunction(ds.computeMMatrix_);
     } else
       hasConstantMMatrix_ = true;
   }
@@ -75,9 +76,10 @@ siconos::modeling::FirstOrderNonLinearDS::FirstOrderNonLinearDS(
     fVector_internal_storage_ =
         std::make_unique<std::vector<double>>(ds.fVector_view_->size());
     fVector_view_ = std::make_shared<siconos::algebra::MapVectorType>(
-        ds.fVector_view_->data(), ds.fVector_view_->size());
+        fVector_internal_storage_->data(), fVector_internal_storage_->size());
+    *fVector_view_ = ds.fVector();
     if (ds.computefVector_) {
-      computefVector_ = ds.computefVector_;
+      setComputefVectorFunction(ds.computefVector_);
     } else
       hasConstantfVector_ = true;
   }
@@ -86,9 +88,10 @@ siconos::modeling::FirstOrderNonLinearDS::FirstOrderNonLinearDS(
     jacobianfOver_x_internal_storage_ =
         std::make_unique<std::vector<double>>(ds.jacobianfOver_x_view_->size());
     jacobianfOver_x_view_ = std::make_shared<siconos::algebra::MapType>(
-        ds.jacobianfOver_x_view_->data(), x_size_, x_size_);
+        jacobianfOver_x_internal_storage_->data(), x_size_, x_size_);
+    *jacobianfOver_x_view_ = ds.jacobianfOver_x();  // Copy
     if (ds.computejacobianfOver_x_) {
-      computejacobianfOver_x_ = ds.computejacobianfOver_x_;
+      setComputeJacobianfOver_xFunction(ds.computejacobianfOver_x_);
     } else
       hasConstantJacobianfOver_x_ = true;
   }

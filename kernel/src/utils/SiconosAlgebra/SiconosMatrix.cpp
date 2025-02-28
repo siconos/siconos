@@ -27,8 +27,8 @@
 bool siconos::algebra::fillTriplet(SiconosMatrix& m, CSparseMatrix* triplet, size_t row_off,
                                    size_t col_off, double tol) {
   assert(triplet);
-  size_t nrow = m.size(0);
-  size_t ncol = m.size(1);
+  size_t nrow = m.rows();
+  size_t ncol = m.cols();
 
   double* arr = m.data();
   for (size_t j = 0; j < ncol; ++j) {

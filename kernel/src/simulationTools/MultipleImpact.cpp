@@ -227,7 +227,7 @@ void siconos::nonsmooth_formulations::MultipleImpact::AllocateMemory() {
     _DataMatrix =
         std::make_shared<siconos::algebra::SiconosMatrix>(_sizeDataSave, _numberCols);
   else {
-    if ((_DataMatrix->size(0) != _sizeDataSave) || (_DataMatrix->size(1) != _numberCols))
+    if ((_DataMatrix->rows() != _sizeDataSave) || (_DataMatrix->cols() != _numberCols))
       _DataMatrix->resize(_sizeDataSave, _numberCols);
   }
 }
@@ -776,7 +776,7 @@ void siconos::nonsmooth_formulations::MultipleImpact::UpdateDuringImpact() {
 void siconos::nonsmooth_formulations::MultipleImpact::SaveDataOneStep(unsigned int _ithPoint) {
   // Save the total impulse at the primary contacts (time-like independent variable) and the
   // time evolution during impact
-  if (_ithPoint >= _DataMatrix->size(0))
+  if (_ithPoint >= _DataMatrix->rows())
     THROW_EXCEPTION(
         "In siconos::nonsmooth_formulations::MultipleImpact::ComputeImpact, number of points "
         "saved "

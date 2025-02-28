@@ -637,7 +637,7 @@ std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::conta
         data.setValue(data_size, ds1.number());
         data.setValue(data_size + 1, ds2.number());
         DEBUG_EXPR(data.display(););
-        if (result->size(1) != data.size()) {
+        if (result->cols() != data.size()) {
           result->resize(graph.vertices_number(), data.size());
         }
         result->row(current_row++) = data;
@@ -976,7 +976,7 @@ std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::conta
         // related to a contact points (perhaps a joint)
       } else {
       }
-      if (result->size(1) != data.size()) {
+      if (result->cols() != data.size()) {
         result->resize(graph.vertices_number(), data.size());
       }
       result->row(current_row++) = data;

@@ -42,8 +42,8 @@ void siconos::control::LinearSensor::initialize(
     THROW_EXCEPTION("LinearSensor::initialize - no C matrix was given");
   }
 
-  auto colC = _matC->size(1);
-  auto rowC = _matC->size(0);
+  auto colC = _matC->cols();
+  auto rowC = _matC->rows();
   // What happen here if we have more than one DS ?
   // This may be unlikely to happen.
   //  _DS = _model->nonSmoothDynamicalSystem()->dynamicalSystemNumber(0);
@@ -53,7 +53,7 @@ void siconos::control::LinearSensor::initialize(
         "the length of x");
   }
   if (_matD) {
-    auto rowD = _matD->size(0);
+    auto rowD = _matD->rows();
     if (rowC != rowD) {
       THROW_EXCEPTION("C and D must have the same number of rows");
     }

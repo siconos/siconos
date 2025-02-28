@@ -64,23 +64,16 @@ class CommonSMC : public Actuator {
   /** function wrapper used to compute \f$ h(x,t,\lambda) in relation \f$ */
   siconos::modeling::func_prototypes::FunctionBVSV_V computeh_{nullptr};
 
-  /** function wrapper used to compute \f$ h(x,t,\lambda)  in relation\f$ */
-  siconos::modeling::func_prototypes::FunctionBVSV_BV computeg_{nullptr};
-
   /** function wrapper used to compute  \f$ \nabla_x h(x,t,\lambda)  in relation\f$ */
   siconos::modeling::func_prototypes::FunctionBVSV_M computejacobianhOver_state_{nullptr};
 
   /** function wrapper used to compute  \f$ \nabla_{\lambda} h(x,t,\lambda)  in relation\f$ */
   siconos::modeling::func_prototypes::FunctionBVSV_M computejacobianhOver_lambda_{nullptr};
 
-  /** function wrapper used to compute  \f$ \nabla_x g(x,t,\lambda)  in relation\f$ */
-  siconos::modeling::func_prototypes::FunctionBVSV_M computejacobiangOver_state_{nullptr};
-
-  /** function wrapper used to compute  \f$ \nabla_{\lambda} g(x,t,\lambda)  in relation\f$ */
+  /** function wrapper used to compute  \f$ \nabla_{\lambda} g(x,\lambda)  in relation\f$ */
   siconos::modeling::func_prototypes::FunctionBVSV_M computejacobiangOver_lambda_{nullptr};
 
-  /** true if the relation is linear. This is deduced from the set... functions above */
-  bool isRelationLinear_{true};
+  // Note: g and  \f$ \nabla_x g(x,\lambda) \f$ */ are attributes of the Actuator base class.
 
   /** the vector defining the linear contribution of the state to the sliding variable  ( \f$
    * \sigma = Cx \f$ ) */
@@ -112,6 +105,9 @@ class CommonSMC : public Actuator {
 
   /** the DynamicalSystem for the controller */  // XXX replace this by FirstOrderDS
   std::shared_ptr<siconos::modeling::FirstOrderNonLinearDS> _DS_SMC{nullptr};
+
+  /** Internal buffer for b vector of DS_SMC_ */
+  siconos::algebra::SiconosVector bSMC_;
 
   /** the TimeDiscretisation for the controller */
   std::shared_ptr<siconos::simulation::TimeDiscretisation> _td{nullptr};
@@ -190,12 +186,33 @@ class CommonSMC : public Actuator {
 
   void sete(const siconos::modeling::func_prototypes::FunctionS_V&
                 fct);  // Meaningful only for FirstOrderLinearR
-  void seth(const siconos::modeling::func_prototypes::FunctionBVSV_V& fct);
-  void setJachx(const siconos::modeling::func_prototypes::FunctionBVSV_M& fct);
-  void setJachlambda(const siconos::modeling::func_prototypes::FunctionBVSV_M& fct);
-  void setg(const siconos::modeling::func_prototypes::FunctionBVSV_BV& fct);
-  void setJacgx(const siconos::modeling::func_prototypes::FunctionBVSV_M& fct);
-  void setJacglambda(const siconos::modeling::func_prototypes::FunctionBVSV_M& fct);
+
+  /** set a user-defined function to compute \f$ h(x,t,\lambda) \f$
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputehFunction(const siconos::modeling::func_prototypes::FunctionBVSV_V& fct);
+
+  /** set a user-defined function to compute \f$ \nabla_x h(x, t, \lambda) \f$ \f$
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputeJacobianhOver_stateFunction(
+      const siconos::modeling::func_prototypes::FunctionBVSV_M& fct);
+
+  /** set a user-defined function to compute \f$ \nabla_{\lambda} h(x, t, \lambda) \f$ \f$
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputeJacobianhOver_lambdaFunction(
+      const siconos::modeling::func_prototypes::FunctionBVSV_M& fct);
+
+  /** set a user-defined function to compute \f$ \nabla_{\lambda} g(x, \lambda) \f$ \f$
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputeJacobiangOver_lambdaFunction(
+      const siconos::modeling::func_prototypes::FunctionBVSV_M& fct);
 
   /** Set Csurface
    *

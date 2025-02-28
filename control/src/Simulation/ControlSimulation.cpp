@@ -23,16 +23,15 @@
 #include "DynamicalSystem.hpp"
 #include "Interaction.hpp"
 #include "Observer.hpp"
-#include "SiconosVector.hpp"
 #include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 #include "Simulation.hpp"
 #include "TimeDiscretisation.hpp"
 #include "Topology.hpp"
 
 namespace siconos::control::internal {
 static inline std::pair<unsigned, std::string> getNumberOfStates(
-    siconos::graphs::DynamicalSystemsGraph& DSG0, siconos::graphs::InteractionsGraph& IG0)
-{
+    siconos::graphs::DynamicalSystemsGraph& DSG0, siconos::graphs::InteractionsGraph& IG0) {
   std::string legend;
   siconos::graphs::DynamicalSystemsGraph::VIterator dsvi, dsvdend;
   unsigned nb = 0;
@@ -44,8 +43,7 @@ static inline std::pair<unsigned, std::string> getNumberOfStates(
     std::string nameDS;
     if (DSG0.name.hasKey(*dsvi)) {
       nameDS = DSG0.name[*dsvi];
-    }
-    else {
+    } else {
       nameDS = "unknownDS" + std::to_string(counter);
       ++counter;
     }
@@ -77,8 +75,7 @@ static inline std::pair<unsigned, std::string> getNumberOfStates(
     std::string nameInter;
     if (IG0.name.hasKey(*ivi)) {
       nameInter = IG0.name[*ivi];
-    }
-    else {
+    } else {
       nameInter = "unknownInteraction" + std::to_string(counter);
       ++counter;
     }
@@ -109,8 +106,7 @@ static inline std::pair<unsigned, std::string> getNumberOfStates(
 static inline unsigned storeAllStates(unsigned indx, unsigned startColumn,
                                       siconos::graphs::DynamicalSystemsGraph& DSG0,
                                       siconos::graphs::InteractionsGraph& IG0,
-                                      siconos::algebra::SiconosMatrix& data)
-{
+                                      siconos::algebra::SiconosMatrix& data) {
   siconos::graphs::DynamicalSystemsGraph::VIterator dsvi, dsvdend;
   auto column = startColumn;
   for (std::tie(dsvi, dsvdend) = DSG0.vertices(); dsvi != dsvdend; ++dsvi) {
@@ -159,14 +155,12 @@ static inline unsigned storeAllStates(unsigned indx, unsigned startColumn,
 }  // namespace siconos::control::internal
 
 siconos::control::ControlSimulation::ControlSimulation(double t0, double T, double h)
-    : _t0(t0), _T(T), _h(h)
-{
+    : _t0(t0), _T(T), _h(h) {
   _nsds = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(_t0, _T);
   _processTD = std::make_shared<siconos::simulation::TimeDiscretisation>(_t0, _h);
 }
 
-void siconos::control::ControlSimulation::initialize()
-{
+void siconos::control::ControlSimulation::initialize() {
   std::pair<unsigned, std::string> res;
   _dataLegend = "time";
 
@@ -178,7 +172,7 @@ void siconos::control::ControlSimulation::initialize()
   _CM->initialize(*_nsds);
 
   // Output
-  _N = (unsigned)ceil((_T - _t0) / _h) + 10;  // Number of time steps
+  _N = (unsigned)ceil((_T - _t0) / _h) + 1;  // Number of time steps
   auto& DSG0 = *_nsds->topology()->dSG(0);
   auto& IG0 = *_nsds->topology()->indexSet0();
   res = siconos::control::internal::getNumberOfStates(DSG0, IG0);
@@ -210,14 +204,12 @@ void siconos::control::ControlSimulation::initialize()
   // we save the system state
 }
 
-void siconos::control::ControlSimulation::setTheta(unsigned int newTheta)
-{
+void siconos::control::ControlSimulation::setTheta(unsigned int newTheta) {
   _theta = newTheta;
 }
 
 void siconos::control::ControlSimulation::addDynamicalSystem(
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds, const std::string& name)
-{
+    std::shared_ptr<siconos::modeling::DynamicalSystem> ds, const std::string& name) {
   _nsds->insertDynamicalSystem(ds);
   _processSimulation->associate(_processIntegrator, ds);
 
@@ -227,8 +219,7 @@ void siconos::control::ControlSimulation::addDynamicalSystem(
 }
 
 void siconos::control::ControlSimulation::addSensor(std::shared_ptr<Sensor> sensor,
-                                                    const double h)
-{
+                                                    const double h) {
   if (h < _h) {
     THROW_EXCEPTION(
         "The timestep for a sensor cannot be smaller than the one for the simulation");
@@ -239,8 +230,7 @@ void siconos::control::ControlSimulation::addSensor(std::shared_ptr<Sensor> sens
 }
 
 void siconos::control::ControlSimulation::addActuator(std::shared_ptr<Actuator> actuator,
-                                                      const double h)
-{
+                                                      const double h) {
   if (h < _h) {
     THROW_EXCEPTION(
         "The timestep for an actuator cannot be smaller than the one for the simulation");
@@ -251,8 +241,7 @@ void siconos::control::ControlSimulation::addActuator(std::shared_ptr<Actuator> 
 }
 
 void siconos::control::ControlSimulation::addObserver(std::shared_ptr<Observer> observer,
-                                                      const double h)
-{
+                                                      const double h) {
   if (h < _h) {
     THROW_EXCEPTION(
         "The timestep for an observer cannot be smaller than the one for the simulation");
@@ -262,8 +251,7 @@ void siconos::control::ControlSimulation::addObserver(std::shared_ptr<Observer> 
   _CM->addObserverPtr(observer, td);
 }
 
-void siconos::control::ControlSimulation::storeData(unsigned indx)
-{
+void siconos::control::ControlSimulation::storeData(unsigned indx) {
   unsigned startingColumn = 1;
   startingColumn =
       siconos::control::internal::storeAllStates(indx, startingColumn, *_DSG0, *_IG0, *_dataM);

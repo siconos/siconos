@@ -109,7 +109,7 @@ void siconos::modeling::LagrangianScleronomousR::computeJacobianhOver_q_dot_X_qd
                              *DSlink[tools::enum_to_index(WorkDS::q1)]);
   if (!jacobianhOver_q_dot_X_qdot_) {
     jacobianhOver_q_dot_X_qdot_ =
-        std::make_shared<siconos::algebra::SiconosVector>(jacobianhOver_q_dot_->size(0));
+        std::make_shared<siconos::algebra::SiconosVector>(jacobianhOver_q_dot_->rows());
   }
   siconos::algebra::matrixBlockVector_prod(*jacobianhOver_q_dot_,
                                            *DSlink[tools::enum_to_index(WorkDS::q1)],

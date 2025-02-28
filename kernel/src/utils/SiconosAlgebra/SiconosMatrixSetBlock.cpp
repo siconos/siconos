@@ -40,10 +40,10 @@ void siconos::algebra::setBlock(const SiconosMatrix &input_matrix,
 
     // Check dimension
     std::vector<std::size_t> MDim(4);  // dim. of matrices input_matrix and output_matrix.
-    MDim[0] = input_matrix.size(0);
-    MDim[1] = input_matrix.size(1);
-    MDim[2] = output_matrix->size(0);
-    MDim[3] = output_matrix->size(1);
+    MDim[0] = input_matrix.rows();
+    MDim[1] = input_matrix.cols();
+    MDim[2] = output_matrix->rows();
+    MDim[3] = output_matrix->cols();
 
     for (unsigned int i = 0; i < 4; ++i)
         if (start[i] >= MDim[i])
@@ -84,8 +84,8 @@ void siconos::algebra::setBlock(const SiconosMatrix &input_matrix,
 
 //     // Check dimension
 //     std::vector<std::size_t> MDim(4);  // dim. of matrices input_matrix and output_matrix.
-//     MDim[0] = input_matrix.size(0);
-//     MDim[1] = input_matrix.size(1);
+//     MDim[0] = input_matrix.rows();
+//     MDim[1] = input_matrix.cols();
 //     MDim[2] = output_matrix->rows();
 //     MDim[3] = output_matrix->cols();
 

@@ -165,8 +165,8 @@ void siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks(
           if (!indexSet->properties(ed1).lower_block) {
             indexSet->properties(ed1).lower_block =
                 std::make_shared<siconos::algebra::SiconosMatrix>(
-                    indexSet->properties(ed1).upper_block->size(1),
-                    indexSet->properties(ed1).upper_block->size(0));
+                    indexSet->properties(ed1).upper_block->cols(),
+                    indexSet->properties(ed1).upper_block->rows());
           }
           *(indexSet->properties(ed1).lower_block) =
               (*indexSet->properties(ed1).upper_block).transpose();
@@ -176,8 +176,8 @@ void siconos::nonsmooth_formulations::OneStepNSProblem::updateInteractionBlocks(
           if (!indexSet->properties(ed1).upper_block) {
             indexSet->properties(ed1).upper_block =
                 std::make_shared<siconos::algebra::SiconosMatrix>(
-                    indexSet->properties(ed1).lower_block->size(1),
-                    indexSet->properties(ed1).lower_block->size(0));
+                    indexSet->properties(ed1).lower_block->cols(),
+                    indexSet->properties(ed1).lower_block->rows());
           }
           *(indexSet->properties(ed1).upper_block) =
               (*indexSet->properties(ed1).lower_block).transpose();
@@ -415,15 +415,16 @@ siconos::nonsmooth_formulations::OneStepNSProblem::getOSIMatrix(
     //    (static_cast<siconos::integrators::ZeroOrderHoldOSI&>(osi)).Ad(ds);
   } else if (osiType == siconos::integrators::IntegratorType::MOREAUJEANBILBAOOSI) {
     THROW_EXCEPTION("getOSIMatrix - Must not be used for MOREAUJEANBILBAOOSI");
-  } else  // if (osiType == siconos::integrators::IntegratorType::MOREAUJEANOSI ||
-          //     osiType == siconos::integrators::IntegratorType::MOREAUDIRECTPROJECTIONOSI ||
-          //
-          //     osiType == siconos::integrators::IntegratorType::SCHATZMANPAOLIOSI ||
-          //     osiType == siconos::integrators::IntegratorType::EULERMOREAUOSI ||)
+  } else {  // if (osiType == siconos::integrators::IntegratorType::MOREAUJEANOSI ||
+            //     osiType == siconos::integrators::IntegratorType::MOREAUDIRECTPROJECTIONOSI
+            //     ||
+            //
+            //     osiType == siconos::integrators::IntegratorType::SCHATZMANPAOLIOSI ||
+            //     osiType == siconos::integrators::IntegratorType::EULERMOREAUOSI ||)
 
     // // All other cases but we keep osiType test for the time being ...
     luIterationMatrix = osi.LUiterationMatrix(ds);
-
+  }
   // else THROW_EXCEPTION(
   //     "siconos::nonsmooth_formulations::OneStepNSProblem::getOSIMatrix not yet implemented "
   //     "for "

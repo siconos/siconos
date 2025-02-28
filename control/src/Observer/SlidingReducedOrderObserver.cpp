@@ -20,7 +20,7 @@
 
 #include "ControlSensor.hpp"
 #include "ControlZOHAdditionalTerms.hpp"
-#include "FirstOrderLinearTIDS.hpp"
+#include "FirstOrderLinearDS.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
@@ -54,7 +54,7 @@ void siconos::control::SlidingReducedOrderObserver::initialize(
   siconos::graphs::DynamicalSystemsGraph::VDescriptor originaldsgVD;
   if (!_DS)  // No DynamicalSystem was given
   {
-    // We can only work with FirstOrderNonLinearDS, FirstOrderLinearDS and FirstOrderLinearTIDS
+    // We can only work with FirstOrderNonLinearDS and FirstOrderLinearDS
     // We can use the Visitor mighty power to check if we have the right type
     auto observedDS = _sensor->getDS();
     // create the DS for the controller
@@ -63,12 +63,9 @@ void siconos::control::SlidingReducedOrderObserver::initialize(
     // if the plant model is not exact, we can use the setSimulatedDS
     // method
     if (auto folds =
-            std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearTIDS>(observedDS)) {
-      _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(*folds);
-    } else if (auto folds = std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(
-                   observedDS)) {
+            std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(observedDS)) {
       DEBUG_PRINT("dsType == Type::FirstOrderLinearDS\n");
-      _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*folds);
+     _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*folds);
     } else
       THROW_EXCEPTION(
           "SlidingReducedOrderObserver is only implemented for FirstOrderLinearDS");
@@ -84,10 +81,10 @@ void siconos::control::SlidingReducedOrderObserver::initialize(
   }
 
   // Initialize with the guessed state
-  _DS->setX0Ptr(_xHat);
+  _DS->setX0(*_xHat);  // Shared memory view
   _DS->resetToInitialState();
-  _e = std::make_shared<siconos::algebra::SiconosVector>(_C->size(0));
-  _y = std::make_shared<siconos::algebra::SiconosVector>(_C->size(0));
+  _e = std::make_shared<siconos::algebra::SiconosVector>(_C->rows());
+  _y = std::make_shared<siconos::algebra::SiconosVector>(_C->rows());
 
   auto t0 = nsds.t0();
   auto h = s.currentTimeStep();
@@ -182,8 +179,8 @@ void siconos::control::SlidingReducedOrderObserver::process() {
     // But first we need to reset the state to the
     // previous value (at t_k)
     DEBUG_EXPR(_DS->xMemory().display(););
-    auto current_x = _DS->x(); // Pointer
-    *current_x = _DS->xMemory().getSiconosVector(0); // Copy
+    auto current_x = _DS->x();                        // Pointer
+    *current_x = _DS->xMemory().getSiconosVector(0);  // Copy
     // integrate with the new innovation term
     _simulation->computeOneStep();
 

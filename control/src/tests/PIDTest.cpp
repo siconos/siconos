@@ -19,7 +19,7 @@
 
 #include "ControlLsodarSimulation.hpp"
 #include "ControlZOHSimulation.hpp"
-#include "FirstOrderLinearTIDS.hpp"
+#include "FirstOrderLinearDS.hpp"
 #include "LinearSensor.hpp"
 #include "PID.hpp"
 #include "SiconosMatrix.hpp"
@@ -49,7 +49,8 @@ void PIDTest::setUp() {
 }
 
 void PIDTest::init() {
-  _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(_x0, _A);
+  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0);
+  _DS->setConstantA(*_A);
   auto C = std::make_shared<siconos::algebra::SiconosMatrix>(1, 2);
   C->setZero();
   (*C)(0, 0) = 1;
@@ -80,9 +81,9 @@ void PIDTest::testPIDZOH() {
   siconos::algebra::SiconosMatrix dataRef(data->rows(), data->cols());
   siconos::algebra::io::read("PID.ref", dataRef);
 
-  dataRef -= *data;
   // std::cout << diff << std::endl;
-  auto error = dataRef.normInf();
+  auto diff = *data - dataRef;
+  auto error = diff.normInf();
   std::cout << "------- Integration done, error = " << error << " -------\n";
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testPIDZOH : ", error < _tol, true);
 }

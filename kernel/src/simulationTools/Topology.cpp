@@ -22,13 +22,12 @@
 #include "NonSmoothLaw.hpp"
 #include "SiconosException.hpp"
 #include "SiconosVector.hpp"
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES 1
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES 1
 #include "siconos_debug.h"
 
 // default
-siconos::simulation::Topology::Topology()
-{
+siconos::simulation::Topology::Topology() {
   _IG.resize(1);
   _DSG.resize(1);
 
@@ -47,8 +46,7 @@ std::pair<siconos::graphs::DynamicalSystemsGraph::EDescriptor,
 siconos::simulation::Topology::__addInteractionInIndexSet0(
     std::shared_ptr<siconos::modeling::Interaction> inter,
     std::shared_ptr<siconos::modeling::DynamicalSystem> ds1,
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds2)
-{
+    std::shared_ptr<siconos::modeling::DynamicalSystem> ds2) {
   // !! Private function !!
   //
   // This function must
@@ -76,8 +74,7 @@ siconos::simulation::Topology::__addInteractionInIndexSet0(
 
   if (ds2) {
     dsgv2 = _DSG[0]->add_vertex(ds2);
-  }
-  else {
+  } else {
     dsgv2 = dsgv1;
     ds2_ = ds1;
   }
@@ -101,8 +98,7 @@ siconos::simulation::Topology::__addInteractionInIndexSet0(
   {
     _IG[0]->properties(ig_new_ve).target = ds1;
     _IG[0]->properties(ig_new_ve).target_pos = 0;
-  }
-  else {
+  } else {
     _IG[0]->properties(ig_new_ve).target = ds2;
     _IG[0]->properties(ig_new_ve).target_pos = ds1->dimension();
   }
@@ -123,9 +119,8 @@ struct VertexIsRemoved {
   VertexIsRemoved(std::shared_ptr<siconos::modeling::Interaction> I,
                   std::shared_ptr<siconos::graphs::DynamicalSystemsGraph> sg,
                   std::shared_ptr<siconos::graphs::InteractionsGraph> asg)
-      : _I(I), __DSG(sg), __IG(asg){};
-  bool operator()(siconos::graphs::DynamicalSystemsGraph::EDescriptor ed)
-  {
+      : _I(I), __DSG(sg), __IG(asg) {};
+  bool operator()(siconos::graphs::DynamicalSystemsGraph::EDescriptor ed) {
     if (__IG->is_vertex(__DSG->bundle(ed))) {
       auto ivd = __IG->descriptor(__DSG->bundle(ed));
 
@@ -135,12 +130,10 @@ struct VertexIsRemoved {
         assert(__IG->size() == __DSG->edges_number() - 1);
 
         return true;
-      }
-      else {
+      } else {
         return false;
       }
-    }
-    else {
+    } else {
       return true;
     }
   }
@@ -156,9 +149,8 @@ struct VertexIsRemovedDS {
   VertexIsRemovedDS(std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
                     std::shared_ptr<siconos::graphs::DynamicalSystemsGraph> sg,
                     std::shared_ptr<siconos::graphs::InteractionsGraph> asg)
-      : _ds(ds), __DSG(sg), __IG(asg){};
-  bool operator()(siconos::graphs::DynamicalSystemsGraph::EDescriptor ed)
-  {
+      : _ds(ds), __DSG(sg), __IG(asg) {};
+  bool operator()(siconos::graphs::DynamicalSystemsGraph::EDescriptor ed) {
     if (__IG->is_vertex(__DSG->bundle(ed))) {
       auto ivd = __IG->descriptor(__DSG->bundle(ed));
 
@@ -168,12 +160,10 @@ struct VertexIsRemovedDS {
         assert(__IG->size() == __DSG->edges_number() - 1);
 
         return true;
-      }
-      else {
+      } else {
         return false;
       }
-    }
-    else {
+    } else {
       return true;
     }
   }
@@ -185,8 +175,7 @@ struct VertexIsRemovedDS {
 /* remove an interaction : remove edges (Interaction) from _DSG if
    corresponding vertices are removed from _IG */
 void siconos::simulation::Topology::__removeInteractionFromIndexSet(
-    std::shared_ptr<siconos::modeling::Interaction> inter)
-{
+    std::shared_ptr<siconos::modeling::Interaction> inter) {
   std::shared_ptr<siconos::modeling::DynamicalSystem> ds1 =
       _IG[0]->properties(_IG[0]->descriptor(inter)).source;
   std::shared_ptr<siconos::modeling::DynamicalSystem> ds2 =
@@ -199,8 +188,7 @@ void siconos::simulation::Topology::__removeInteractionFromIndexSet(
 }
 
 void siconos::simulation::Topology::insertDynamicalSystem(
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds)
-{
+    std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
   _DSG[0]->add_vertex(ds);
   setHasChanged(true);
 }
@@ -208,8 +196,7 @@ void siconos::simulation::Topology::insertDynamicalSystem(
 /* remove a dynamical system : remove edges (DynamicalSystem) from _IG if
    corresponding vertices are removed from _DSG */
 void siconos::simulation::Topology::__removeDynamicalSystemFromIndexSet(
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds)
-{
+    std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
   _DSG[0]->remove_edge_if(_DSG[0]->descriptor(ds), VertexIsRemovedDS(ds, _DSG[0], _IG[0]));
 
   // note: remove_vertex also calls clear_vertex and removes all in/out edges
@@ -217,15 +204,13 @@ void siconos::simulation::Topology::__removeDynamicalSystemFromIndexSet(
 }
 
 void siconos::simulation::Topology::setName(
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds, const std::string& name)
-{
+    std::shared_ptr<siconos::modeling::DynamicalSystem> ds, const std::string& name) {
   auto dsgv = _DSG[0]->descriptor(ds);
   _DSG[0]->name.insert(dsgv, name);
 }
 
 std::string siconos::simulation::Topology::name(
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds)
-{
+    std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
   auto dsgv = _DSG[0]->descriptor(ds);
   if (dsgv)
     return _DSG[0]->name.at(dsgv);
@@ -234,15 +219,13 @@ std::string siconos::simulation::Topology::name(
 }
 
 void siconos::simulation::Topology::setName(
-    std::shared_ptr<siconos::modeling::Interaction> inter, const std::string& name)
-{
+    std::shared_ptr<siconos::modeling::Interaction> inter, const std::string& name) {
   auto igv = _IG[0]->descriptor(inter);
   _IG[0]->name.insert(igv, name);
 }
 
 std::string siconos::simulation::Topology::name(
-    std::shared_ptr<siconos::modeling::Interaction> inter)
-{
+    std::shared_ptr<siconos::modeling::Interaction> inter) {
   auto igv = _IG[0]->descriptor(inter);
   if (igv)
     return _IG[0]->name.at(igv);
@@ -252,14 +235,12 @@ std::string siconos::simulation::Topology::name(
 
 void siconos::simulation::Topology::setOSI(
     std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
-    std::shared_ptr<siconos::integrators::OneStepIntegrator> OSI)
-{
+    std::shared_ptr<siconos::integrators::OneStepIntegrator> OSI) {
   _DSG[0]->properties(_DSG[0]->descriptor(ds)).osi = OSI;
 }
 
 void siconos::simulation::Topology::setControlProperty(
-    std::shared_ptr<siconos::modeling::Interaction> inter, const bool isControlInteraction)
-{
+    std::shared_ptr<siconos::modeling::Interaction> inter, const bool isControlInteraction) {
   auto ivd = _IG[0]->descriptor(inter);
   auto dvd = _DSG[0]->descriptor(_IG[0]->properties(ivd).target);
   std::shared_ptr<siconos::modeling::Interaction> interG;
@@ -275,8 +256,7 @@ void siconos::simulation::Topology::setControlProperty(
 }
 
 std::shared_ptr<siconos::graphs::InteractionsGraph> siconos::simulation::Topology::indexSet(
-    unsigned int num) const
-{
+    unsigned int num) const {
   if (num >= _IG.size()) {
     THROW_EXCEPTION("siconos::simulation::Topology::indexSet: indexSet does not exist");
   }
@@ -285,8 +265,7 @@ std::shared_ptr<siconos::graphs::InteractionsGraph> siconos::simulation::Topolog
 };
 
 void siconos::simulation::Topology::removeInteraction(
-    std::shared_ptr<siconos::modeling::Interaction> inter)
-{
+    std::shared_ptr<siconos::modeling::Interaction> inter) {
   DEBUG_PRINTF("removeInteraction : %p\n", &*inter);
 
   assert(_DSG[0]->edges_number() == _IG[0]->size());
@@ -296,8 +275,7 @@ void siconos::simulation::Topology::removeInteraction(
 }
 
 void siconos::simulation::Topology::removeDynamicalSystem(
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds)
-{
+    std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
   DEBUG_PRINTF("removeDynamicalSystem : %p\n", &*ds);
 
   assert(_DSG[0]->edges_number() == _IG[0]->size() && "1");
@@ -310,8 +288,7 @@ std::pair<siconos::graphs::DynamicalSystemsGraph::EDescriptor,
           siconos::graphs::InteractionsGraph::VDescriptor>
 siconos::simulation::Topology::link(std::shared_ptr<siconos::modeling::Interaction> inter,
                                     std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
-                                    std::shared_ptr<siconos::modeling::DynamicalSystem> ds2)
-{
+                                    std::shared_ptr<siconos::modeling::DynamicalSystem> ds2) {
   DEBUG_PRINTF("siconos::simulation::Topology::link : inter %p, ds1 %p, ds2 %p\n", &*inter,
                &*ds, &*ds2);
 
@@ -333,19 +310,16 @@ siconos::simulation::Topology::link(std::shared_ptr<siconos::modeling::Interacti
 }
 
 bool siconos::simulation::Topology::hasInteraction(
-    std::shared_ptr<siconos::modeling::Interaction> inter) const
-{
+    std::shared_ptr<siconos::modeling::Interaction> inter) const {
   return indexSet0()->is_vertex(inter);
 }
 
 bool siconos::simulation::Topology::hasDynamicalSystem(
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds) const
-{
+    std::shared_ptr<siconos::modeling::DynamicalSystem> ds) const {
   return _DSG[0]->is_vertex(ds);
 }
 
-void siconos::simulation::Topology::setProperties()
-{
+void siconos::simulation::Topology::setProperties() {
   _IG[0]->update_vertices_indices();
   _IG[0]->update_edges_indices();
 
@@ -367,15 +341,13 @@ void siconos::simulation::Topology::setProperties()
   _DSG[0]->update_edges_indices();
 }
 
-void siconos::simulation::Topology::clear()
-{
+void siconos::simulation::Topology::clear() {
   _IG.clear();
   _DSG.clear();
 }
 
 std::shared_ptr<siconos::modeling::DynamicalSystem>
-siconos::simulation::Topology::getDynamicalSystem(unsigned int requiredNumber) const
-{
+siconos::simulation::Topology::getDynamicalSystem(unsigned int requiredNumber) const {
   siconos::graphs::DynamicalSystemsGraph::VIterator vi, vdend;
   std::shared_ptr<siconos::modeling::DynamicalSystem> ds;
   unsigned int currentNumber;
@@ -390,8 +362,7 @@ siconos::simulation::Topology::getDynamicalSystem(unsigned int requiredNumber) c
   return ds;
 }
 
-void siconos::simulation::Topology::displayDynamicalSystems() const
-{
+void siconos::simulation::Topology::displayDynamicalSystems() const {
   siconos::graphs::DynamicalSystemsGraph::VIterator vi, vdend;
   std::shared_ptr<siconos::modeling::DynamicalSystem> ds;
   unsigned int currentNumber;
@@ -404,8 +375,7 @@ void siconos::simulation::Topology::displayDynamicalSystems() const
 }
 
 std::shared_ptr<siconos::modeling::DynamicalSystem>
-siconos::simulation::Topology::getDynamicalSystem(std::string name) const
-{
+siconos::simulation::Topology::getDynamicalSystem(std::string name) const {
   siconos::graphs::DynamicalSystemsGraph::VIterator vi, vdend;
   for (std::tie(vi, vdend) = _DSG[0]->vertices(); vi != vdend; ++vi) {
     if (name == _DSG[0]->name.at(*vi)) return _DSG[0]->bundle(*vi);
@@ -416,8 +386,7 @@ siconos::simulation::Topology::getDynamicalSystem(std::string name) const
   return std::shared_ptr<siconos::modeling::DynamicalSystem>();
 }
 
-unsigned int siconos::simulation::Topology::numberOfInvolvedDS(unsigned int inumber)
-{
+unsigned int siconos::simulation::Topology::numberOfInvolvedDS(unsigned int inumber) {
   if (inumber >= _IG.size()) {
     THROW_EXCEPTION(
         "siconos::simulation::Topology::numberOfInvolvedDS :: index number must be smaller "
@@ -460,8 +429,7 @@ unsigned int siconos::simulation::Topology::numberOfInvolvedDS(unsigned int inum
 }
 
 std::shared_ptr<siconos::modeling::Interaction> siconos::simulation::Topology::getInteraction(
-    unsigned int requiredNumber) const
-{
+    unsigned int requiredNumber) const {
   siconos::graphs::InteractionsGraph::VIterator vi, vdend;
   std::shared_ptr<siconos::modeling::Interaction> inter;
   unsigned int currentNumber;
@@ -475,8 +443,7 @@ std::shared_ptr<siconos::modeling::Interaction> siconos::simulation::Topology::g
 }
 
 std::shared_ptr<siconos::modeling::Interaction> siconos::simulation::Topology::getInteraction(
-    std::string name) const
-{
+    std::string name) const {
   siconos::graphs::DynamicalSystemsGraph::VIterator vi, vdend;
   for (std::tie(vi, vdend) = _IG[0]->vertices(); vi != vdend; ++vi) {
     if (name == _IG[0]->name.at(*vi)) return _IG[0]->bundle(*vi);
@@ -487,8 +454,7 @@ std::shared_ptr<siconos::modeling::Interaction> siconos::simulation::Topology::g
 
 std::vector<std::shared_ptr<siconos::modeling::Interaction>>
 siconos::simulation::Topology::interactionsForDS(
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds) const
-{
+    std::shared_ptr<siconos::modeling::DynamicalSystem> ds) const {
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   std::shared_ptr<siconos::modeling::Interaction> inter;
   std::vector<std::shared_ptr<siconos::modeling::Interaction>> result;
@@ -507,8 +473,7 @@ siconos::simulation::Topology::interactionsForDS(
 std::vector<std::shared_ptr<siconos::modeling::Interaction>>
 siconos::simulation::Topology::interactionsForPairOfDS(
     std::shared_ptr<siconos::modeling::DynamicalSystem> dsA,
-    std::shared_ptr<siconos::modeling::DynamicalSystem> dsB) const
-{
+    std::shared_ptr<siconos::modeling::DynamicalSystem> dsB) const {
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   std::shared_ptr<siconos::modeling::Interaction> inter;
   std::vector<std::shared_ptr<siconos::modeling::Interaction>> result;
@@ -535,8 +500,7 @@ siconos::simulation::Topology::interactionsForPairOfDS(
 
 std::vector<std::shared_ptr<siconos::modeling::DynamicalSystem>>
 siconos::simulation::Topology::dynamicalSystemsForInteraction(
-    std::shared_ptr<siconos::modeling::Interaction> inter) const
-{
+    std::shared_ptr<siconos::modeling::Interaction> inter) const {
   std::shared_ptr<siconos::modeling::DynamicalSystem> ds1 =
       _IG[0]->properties(_IG[0]->descriptor(inter)).source;
   std::shared_ptr<siconos::modeling::DynamicalSystem> ds2 =

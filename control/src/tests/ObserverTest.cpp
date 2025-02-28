@@ -17,7 +17,7 @@
  */
 #include "ObserverTest.hpp"
 
-#include <FirstOrderLinearTIDS.hpp>
+#include <FirstOrderLinearDS.hpp>
 
 #include "ControlLsodarSimulation.hpp"
 #include "ControlZOHSimulation.hpp"
@@ -25,8 +25,8 @@
 #include "LinearSensor.hpp"
 #include "LuenbergerObserver.hpp"
 #include "PID.hpp"
-#include "SiconosVector.hpp"
 #include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 #include "SlidingReducedOrderObserver.hpp"
 #include "io.hpp"
 
@@ -36,8 +36,7 @@
 // test suite registration
 CPPUNIT_TEST_SUITE_REGISTRATION(ObserverTest);
 
-void ObserverTest::setUp()
-{
+void ObserverTest::setUp() {
   _A = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
   _A->setZero();
   (*_A)(0, 1) = 1.0;
@@ -74,9 +73,9 @@ void ObserverTest::setUp()
   (*_K)(2) = 2.0;
 }
 
-void ObserverTest::init()
-{
-  _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(_x0, _A);
+void ObserverTest::init() {
+  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0);
+  _DS->setConstantA(*_A);
   _sensor = std::make_shared<siconos::control::LinearSensor>(_DS, _C);
   _pid = std::make_shared<siconos::control::PID>(_sensor);
   _pid->setRef(0.0);
@@ -86,8 +85,7 @@ void ObserverTest::init()
 
 void ObserverTest::tearDown() {}
 
-void ObserverTest::test_SMO_ZOH()
-{
+void ObserverTest::test_SMO_ZOH() {
   init();
   auto simZOH = std::make_shared<siconos::control::ControlZOHSimulation>(_t0, _T, _h);
   simZOH->addDynamicalSystem(_DS);
@@ -102,13 +100,12 @@ void ObserverTest::test_SMO_ZOH()
   siconos::algebra::io::write("SMO_ZOH.dat", data, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   auto error = siconos::algebra::io::compareRefFile(data, "SMO.ref", _tol);
-  bool test = !(error  > _tol);
+  bool test = !(error > _tol);
   std::cout << "------- Integration done -------" << test << std::endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test_SMO_ZOH : ", test, true);
 }
 
-void ObserverTest::test_SMO_Lsodar()
-{
+void ObserverTest::test_SMO_Lsodar() {
   init();
   auto simLsodar = std::make_shared<siconos::control::ControlLsodarSimulation>(_t0, _T, _h);
   simLsodar->addDynamicalSystem(_DS);
@@ -128,8 +125,7 @@ void ObserverTest::test_SMO_Lsodar()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test_SMO_Lsodar : ", test, true);
 }
 
-void ObserverTest::test_Luenberger_ZOH()
-{
+void ObserverTest::test_Luenberger_ZOH() {
   init();
   auto simZOH = std::make_shared<siconos::control::ControlZOHSimulation>(_t0, _T, _h);
   simZOH->addDynamicalSystem(_DS);
@@ -150,8 +146,7 @@ void ObserverTest::test_Luenberger_ZOH()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", test, true);
 }
 
-void ObserverTest::test_Luenberger_Lsodar()
-{
+void ObserverTest::test_Luenberger_Lsodar() {
   init();
   auto simLsodar = std::make_shared<siconos::control::ControlLsodarSimulation>(_t0, _T, _h);
   simLsodar->addDynamicalSystem(_DS);

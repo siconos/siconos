@@ -34,9 +34,9 @@
 #include "io.hpp"
 
 void siconos::algebra::normInfByColumn(const SiconosMatrix &m, SiconosVector &v) {
-  if (v.size() != m.size(1))
+  if (v.size() != m.cols())
     THROW_EXCEPTION("the given vector does not have the right length");
-  for (auto i = 0; i < m.size(1); i++) {
+  for (auto i = 0; i < m.cols(); i++) {
     v(i) = m.col(i).norm();
   }
 }

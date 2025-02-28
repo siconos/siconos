@@ -48,9 +48,9 @@ void siconos::control::LinearSMC::actuate() {
     computeUeq();
     auto& LinearDS_SMC =
         *std::static_pointer_cast<siconos::modeling::FirstOrderLinearDS>(_DS_SMC);
-    auto b = std::make_shared<siconos::algebra::SiconosVector>(_ueq->size());
-    *b = *_B * *_ueq;
-    LinearDS_SMC.setConstantbVector(*b);
+    bSMC_.resize(_ueq->size());
+    bSMC_ = *_B * *_ueq;
+    LinearDS_SMC.setConstantbVector(bSMC_);  // Shared memory view
   }
 
   DEBUG_EXPR(_DS_SMC->xMemory().display(););
@@ -67,7 +67,9 @@ void siconos::control::LinearSMC::actuate() {
 
   _simulationSMC->computeOneStep();
   //  if (_indx > 0)
-  { _simulationSMC->nextStep(); }
+  {
+    _simulationSMC->nextStep();
+  }
 
   // discontinous part
   *_us = *_lambda;

@@ -30,7 +30,7 @@
 
 void siconos::modeling::Lagrangian2d1DR::initialize(Interaction& inter) {
   // proj_with_q  jacobianhOver_q_Proj =
-  // std::make_shared<siconos::algebra::SiconosMatrix>(jacobianhOver_q_->size(0),jacobianhOver_q_->size(1)));
+  // std::make_shared<siconos::algebra::SiconosMatrix>(jacobianhOver_q_->rows(),jacobianhOver_q_->cols()));
 
   if ((inter.getSizeOfDS() != 3) and (inter.getSizeOfDS() != 6)) {
     THROW_EXCEPTION(

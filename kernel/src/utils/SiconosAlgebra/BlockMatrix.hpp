@@ -147,18 +147,11 @@ class BlockMatrix {
    */
   void setIdentity();
 
-  /** get the number of rows or columns of the matrix
-   *  \param index 0 for rows, 1 for columns
-   *  \return an int
-   */
-  unsigned int size(unsigned int index) const;
+  /** \return the number of rows of the matrix */
+  auto rows() const { return _dimRow; }
 
-  /** resize the matrix with nbrow rows and nbcol columns, lower and upper are useful only for
-   * SparseMat.The existing elements of the Block matrix are preseved when specified. \param
-   * nbrow \param nbcol \param lower \param upper \param b
-   */
-  void resize(unsigned int nbrow, unsigned int nbcol, unsigned int lower = 0,
-              unsigned int upper = 0, bool b = true);
+  /** \return the number of columns of the matrix */
+  auto cols() const { return _dimCol; }
 
   /** compute the infinite norm of the Block matrix
    *  \return a double
@@ -202,15 +195,6 @@ class BlockMatrix {
    *  \param value
    */
   void setValue(unsigned int i, unsigned int j, double value);
-
-  /** transpose in place: x->trans() is x = transpose of x.
-   */
-  void trans();
-
-  /** transpose a matrix: x->trans(m) is x = transpose of m.
-   *  \param m the matrix to be transposed.
-   */
-  void trans(const SiconosMatrix &m);
 
   /** get the vector tabRow
    *  \return a vector of int
@@ -266,35 +250,6 @@ class BlockMatrix {
   void updateNumericsMatrix() {
     THROW_EXCEPTION("BlockMatrix::updateNumericsMatrix(), not implemented fro BlockMatrix");
   };
-
-  /** computes an LU factorization of a general M-by-N matrix using partial pivoting with row
-   * interchanges. The result is returned in this (InPlace). Based on Blas dgetrf function.
-   */
-  void PLUFactorizationInPlace();
-
-  void Factorize();
-
-  /**  compute inverse of this thanks to LU factorization with Partial pivoting. This method
-   * inverts U and then computes inv(A) by solving the system inv(A)*L = inv(U) for inv(A). The
-   * result is returned in this (InPlace). Based on Blas dgetri function.
-   */
-  void PLUInverseInPlace();
-
-  /** solves a system of linear equations A * X = B  (A=this) with a general N-by-N matrix A
-   * using the LU factorization computed by PLUFactorizationInPlace. Based on Blas dgetrs
-   * function. \param[in,out] B on input the RHS matrix b; on output: the result x
-   */
-  void PLUForwardBackwardInPlace(SiconosMatrix &B);
-  void Solve(SiconosMatrix &B);
-
-  /** solves a system of linear equations A * X = B  (A=this) with a general N-by-N matrix A
-   * using the LU factorization computed by PLUFactorizationInPlace.  Based on Blas dgetrs
-   * function. \param[in,out] B on input the RHS matrix b; on output: the result x
-   */
-  void PLUForwardBackwardInPlace(SiconosVector &B);
-  void Solve(SiconosVector &B);
-
-  // ACCEPT_STD_VISITORS();
 
   // friend class SiconosMatrix;
   friend SiconosMatrix &operator*=(SiconosMatrix &m, const double &s);

@@ -73,10 +73,10 @@ int find_index_closest_point_btConvexHullShape(btVector3 &pointA, btConvexHullSh
 template <typename SCALAR>
 std::pair<std::shared_ptr<btTriangleIndexVertexArray>, SCALAR *> make_bt_vertex_array(
     std::shared_ptr<siconos::collision::SiconosMesh> mesh, SCALAR _s1, SCALAR _s2) {
-  assert(mesh->vertices()->size(0) == 3);
+  assert(mesh->vertices()->rows() == 3);
   auto bttris = std::make_shared<btTriangleIndexVertexArray>(
       mesh->indexes()->size() / 3, (int *)mesh->indexes()->data(), sizeof(int) * 3,
-      mesh->vertices()->size(1), mesh->vertices()->data(), sizeof(btScalar) * 3);
+      mesh->vertices()->cols(), mesh->vertices()->data(), sizeof(btScalar) * 3);
 
   return std::make_pair(bttris, (btScalar *)nullptr);
 }
@@ -85,9 +85,9 @@ std::pair<std::shared_ptr<btTriangleIndexVertexArray>, SCALAR *> make_bt_vertex_
 template <typename SCALAR1, typename SCALAR2>
 std::pair<std::shared_ptr<btTriangleIndexVertexArray>, btScalar *> make_bt_vertex_array(
     std::shared_ptr<siconos::collision::SiconosMesh> mesh, SCALAR1 _s1, SCALAR2 _s2) {
-  assert(mesh->vertices()->size(0) == 3);
+  assert(mesh->vertices()->rows() == 3);
   unsigned int numIndices = mesh->indexes()->size();
-  unsigned int numVertices = mesh->vertices()->size(1);
+  unsigned int numVertices = mesh->vertices()->cols();
   btScalar *vertices = new btScalar[numVertices * 3];
   for (unsigned int i = 0; i < numVertices; i++) {
     vertices[i * 3 + 0] = (*mesh->vertices())(0, i);
@@ -556,11 +556,11 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
                           const std::shared_ptr<siconos::collision::StaticBody> staticBody) {
   if (!ch->vertices()) THROW_EXCEPTION("No vertices matrix specified for convex hull.");
 
-  if (ch->vertices()->size(1) != 3)
+  if (ch->vertices()->cols() != 3)
     THROW_EXCEPTION("Convex hull vertices matrix must have 3 columns.");
 
   // Copy and scale the points
-  int rows = ch->vertices()->size(0);
+  int rows = ch->vertices()->rows();
   std::vector<btScalar> pts;
   pts.resize(rows * 3);
   for (int r = 0; r < rows; r++) {
@@ -648,7 +648,7 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
 
   if (!mesh->vertices()) THROW_EXCEPTION("No vertices matrix specified for mesh.");
 
-  if (mesh->vertices()->size(0) != 3)
+  if (mesh->vertices()->rows() != 3)
     THROW_EXCEPTION("Convex hull vertices matrix must have 3 columns.");
 
   // Create Bullet triangle list, either by copying on non-copying method
@@ -715,7 +715,7 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
 
   auto data = heightmap->height_data();
 
-  if (!data || data->size(0) < 2 || data->size(1) < 2)
+  if (!data || data->rows() < 2 || data->cols() < 2)
     THROW_EXCEPTION(
         "Height matrix does not have sufficient dimensions "
         "to represent a plane.");
@@ -728,12 +728,12 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
   std::shared_ptr<std::vector<btScalar>> heightfield(
       std::make_shared<std::vector<btScalar>>());
 
-  heightfield->resize(data->size(0) * data->size(1));
+  heightfield->resize(data->rows() * data->cols());
 
-  for (unsigned int i = 0; i < data->size(0); i++) {
-    for (unsigned int j = 0; j < data->size(1); j++) {
+  for (unsigned int i = 0; i < data->rows(); i++) {
+    for (unsigned int j = 0; j < data->cols(); j++) {
       double v = data->getValue(i, j);
-      (*heightfield)[j * data->size(0) + i] = v;
+      (*heightfield)[j * data->rows() + i] = v;
       if (v > vmax) vmax = v;
       if (v < vmin) vmin = v;
     }
@@ -741,7 +741,7 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
 
   // Create Bullet height object
   auto btheight = std::make_shared<siconos::collision::bullet::internal::SiconosHeightData>(
-      data->size(0), heightfield, vmin, vmax);
+      data->rows(), heightfield, vmin, vmax);
 
   // initialization
   auto btobject =
@@ -771,8 +771,8 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::u
 
     // The local scaling determines the extents of the base of the heightmap
     btheight->setLocalScaling(
-        btVector3(height->length_x() / (height->height_data()->size(0) - 1),
-                  height->length_y() / (height->height_data()->size(1) - 1), 1));
+        btVector3(height->length_x() / (height->height_data()->rows() - 1),
+                  height->length_y() / (height->height_data()->cols() - 1), 1));
 
     // TODO vertical position offset to compensate for Bullet's centering
     //  TODO: Calculate the local Aabb
@@ -1042,13 +1042,13 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
   // directly, makes it easier to change during update
   if (!ch2d->vertices()) THROW_EXCEPTION("No vertices matrix specified for convex hull.");
 
-  if (ch2d->vertices()->size(1) != 2)
+  if (ch2d->vertices()->cols() != 2)
     THROW_EXCEPTION("2d Convex hull vertices matrix must have 2 columns.");
 
   // First way. We avoid to double the point
   // This works well if the  _options->worldScale is near to 1.
   // for a unknown reason
-  // int rows = ch2d->vertices()->size(0);
+  // int rows = ch2d->vertices()->rows();
   // std::vector<btScalar> pts;
   // pts.resize(rows*3);
   // for(int r=0; r < rows; r++)
@@ -1062,7 +1062,7 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
   // it seems to be more robust for the contact detection
   // it avoids to find contact on the edge of the convex hull "plate"
   // Copy and scale the points
-  int rows2d = ch2d->vertices()->size(0);
+  int rows2d = ch2d->vertices()->rows();
   int rows = rows2d * 2;
 
   std::vector<btScalar> pts;

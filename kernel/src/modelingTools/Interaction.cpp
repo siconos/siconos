@@ -743,7 +743,7 @@ void siconos::modeling::Interaction::getLeftInteractionBlockForDSProjectOnConstr
 
   // copy sub-interactionBlock of originalMatrix into InteractionBlock
   *interactionBlock =
-      originalMatrix.block(0, pos, interactionBlock->size(0), interactionBlock->size(1));
+      originalMatrix.block(0, pos, interactionBlock->rows(), interactionBlock->cols());
 }
 
 std::shared_ptr<siconos::algebra::SiconosMatrix>
@@ -760,7 +760,7 @@ siconos::modeling::Interaction::getRightInteractionBlockForDS(unsigned int pos,
     assert(forel->hasJacobiangOver_lambda());
     auto originalMatrix = forel->jacobiangOver_lambda();
     *interactionBlock =
-        originalMatrix.block(pos, 0, interactionBlock->size(0), interactionBlock->size(1));
+        originalMatrix.block(pos, 0, interactionBlock->rows(), interactionBlock->cols());
   } else  // (relationType == RelationType::Lagrangian ||
           //  relationType == RelationType::NewtonEuler) {
     THROW_EXCEPTION(

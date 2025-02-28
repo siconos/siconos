@@ -171,7 +171,7 @@ void siconos::modeling::NewtonEuler1DR::NIcomputeJachqTFromContacts(
 
 void siconos::modeling::NewtonEuler1DR::initialize(Interaction& inter) {
   // proj_with_q  jacobianhOver_q_Proj =
-  // std::make_shared<siconos::algebra::SiconosMatrix>(jacobianhOver_q_->size(0),jacobianhOver_q_->size(1)));
+  // std::make_shared<siconos::algebra::SiconosMatrix>(jacobianhOver_q_->rows(),jacobianhOver_q_->cols()));
   auto qSize = 7 * (inter.getSizeOfDS() / 6);
 
   // H_NE_internal_storage_ = std::make_unique<std::vector<double>>(qSize);

@@ -75,9 +75,9 @@ void siconos::algebra::prod(const SiconosMatrix& A, const SiconosVector& x, Sico
   // To compute y = A * x in an "optimized" way (in comparison with y =
   // prod(A,x) ) or y += A*x if init = false.
 
-  if (A.size(1) != x.size()) THROW_EXCEPTION("inconsistent sizes between A and x.")
+  if (A.cols() != x.size()) THROW_EXCEPTION("inconsistent sizes between A and x.")
 
-  if (A.size(0) != y.size()) THROW_EXCEPTION("inconsistent sizes between A and y.");
+  if (A.rows() != y.size()) THROW_EXCEPTION("inconsistent sizes between A and y.");
 
   // === First case: y is not a block vector ===
   if (init) {
@@ -136,9 +136,9 @@ void siconos::algebra::transposeMatrixVector_prod(const SiconosVector& x,
   // To compute y = trans(A) * x in an "optimized" way, if init = true
   // (or y = trans(A) * x + y if init = false
 
-  if (A.size(0) != x.size()) THROW_EXCEPTION("inconsistent sizes between A and x.");
+  if (A.rows() != x.size()) THROW_EXCEPTION("inconsistent sizes between A and x.");
 
-  if (A.size(1) != y.size()) THROW_EXCEPTION("inconsistent sizes between A and y.");
+  if (A.cols() != y.size()) THROW_EXCEPTION("inconsistent sizes between A and y.");
 
   if (init) {
     if (&x != &y)  // if no common memory between x and y.
@@ -163,9 +163,9 @@ void siconos::algebra::transposeMatrixVector_prod(const SiconosVector& x,
 void siconos::algebra::transposeMatrixVector_prod_toBlock(const SiconosVector& x,
                                                           const SiconosMatrix& A,
                                                           BlockVector& y, bool init) {
-  if (A.size(0) != x.size()) THROW_EXCEPTION("inconsistent sizes between A and x.");
+  if (A.rows() != x.size()) THROW_EXCEPTION("inconsistent sizes between A and x.");
 
-  if (A.size(1) != y.size()) THROW_EXCEPTION("inconsistent sizes between A and y.");
+  if (A.cols() != y.size()) THROW_EXCEPTION("inconsistent sizes between A and y.");
 
   unsigned int pos = 0;
   // For Each subvector of y, y[i], computes y[i] = transpose(subA) x, subA
@@ -182,9 +182,9 @@ void siconos::algebra::transposeMatrixVector_prod_toBlock(const SiconosVector& x
 void siconos::algebra::prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
                             bool init) {
   // To compute C = A * B
-  if ((A.size(1) != B.size(0))) THROW_EXCEPTION("inconsistent sizes between A and B");
+  if ((A.cols() != B.rows())) THROW_EXCEPTION("inconsistent sizes between A and B");
 
-  if (A.size(0) != C.size(0) || B.size(1) != C.size(1))
+  if (A.rows() != C.rows() || B.cols() != C.cols())
     THROW_EXCEPTION("inconsistent sizes between A and C or B and C.");
 
   // neither A or B is equal to identity or zero.
@@ -213,9 +213,9 @@ void siconos::algebra::prod(double a, const SiconosMatrix& A, const SiconosVecto
   // To compute y = a*A * x in an "optimized" way (in comparison with y =
   // prod(A,x) ) or y += a*A*x if init = false.
 
-  if (A.size(1) != x.size()) THROW_EXCEPTION("inconsistent sizes between A and x.");
+  if (A.cols() != x.size()) THROW_EXCEPTION("inconsistent sizes between A and x.");
 
-  if (A.size(0) != y.size()) THROW_EXCEPTION("inconsistent sizes between A and y.");
+  if (A.rows() != y.size()) THROW_EXCEPTION("inconsistent sizes between A and y.");
 
   if (init) {
     if (&x != &y)  // if no common memory between x and y.

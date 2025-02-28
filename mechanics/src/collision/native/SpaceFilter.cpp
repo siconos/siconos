@@ -777,12 +777,12 @@ struct siconos::collision::native::SpaceFilter::FindInteractionsVisitor_
       : sim(s), parent(p), time(time) {};
 
   void visit_circular(std::shared_ptr<siconos::collision::native::bodies::CircularDS> ds1) {
-    assert(parent->_plans->size(0) > 0);
+    assert(parent->_plans->rows() > 0);
 
     // interactions with plans
 
     if (parent->_plans) {
-      for (unsigned int i = 0; i < parent->_plans->size(0); ++i) {
+      for (unsigned int i = 0; i < parent->_plans->rows(); ++i) {
         parent->_PlanCircularFilter(sim, (*parent->_plans)(i, 0), (*parent->_plans)(i, 1),
                                     (*parent->_plans)(i, 2), (*parent->_plans)(i, 3),
                                     (*parent->_plans)(i, 4), (*parent->_plans)(i, 5), ds1);
@@ -837,7 +837,7 @@ struct siconos::collision::native::SpaceFilter::FindInteractionsVisitor_
 
   void visit(std::shared_ptr<siconos::collision::native::bodies::SphereLDS> ds1) override {
     // interactions with plans
-    for (unsigned int i = 0; i < parent->_plans->size(0); ++i) {
+    for (unsigned int i = 0; i < parent->_plans->rows(); ++i) {
       parent->_PlanSphereLDSFilter(sim, (*parent->_plans)(i, 0), (*parent->_plans)(i, 1),
                                    (*parent->_plans)(i, 2), (*parent->_plans)(i, 3), ds1);
     }
@@ -878,7 +878,7 @@ struct siconos::collision::native::SpaceFilter::FindInteractionsVisitor_
 
   void visit(std::shared_ptr<siconos::collision::native::bodies::SphereNEDS> ds1) override {
     // interactions with plans
-    for (unsigned int i = 0; i < parent->_plans->size(0); ++i) {
+    for (unsigned int i = 0; i < parent->_plans->rows(); ++i) {
       parent->_PlanSphereNEDSFilter(sim, (*parent->_plans)(i, 0), (*parent->_plans)(i, 1),
                                     (*parent->_plans)(i, 2), (*parent->_plans)(i, 3), ds1);
     }
@@ -1006,8 +1006,8 @@ void siconos::collision::native::SpaceFilter::insertLine(double a, double b, dou
     _plans = std::make_shared<siconos::algebra::SiconosMatrix>(1, 6);
     row = 0;
   } else {
-    _plans->resize(_plans->size(0) + 1, 6);
-    row = _plans->size(0) - 1;
+    _plans->resize(_plans->rows() + 1, 6);
+    row = _plans->rows() - 1;
   }
   (*_plans)(row, 0) = a;
   (*_plans)(row, 1) = b;

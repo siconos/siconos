@@ -130,7 +130,7 @@ void Disks::init(std::string disks_input) {
 
     _plans = std::make_shared<siconos::algebra::SiconosMatrix>(
         siconos::algebra::readMatrixFromFile("plans.dat"));
-    if (_plans->size(0) == 0) {
+    if (_plans->rows() == 0) {
       /* default plans */
       double A1 = P1A;
       double B1 = P1B;
@@ -167,7 +167,7 @@ void Disks::init(std::string disks_input) {
     }
 
     /* set center positions */
-    for (unsigned int i = 0; i < _plans->size(0); ++i) {
+    for (unsigned int i = 0; i < _plans->rows(); ++i) {
       auto tmpr =
           std::make_shared<DiskPlanR>(1., (*_plans)(i, 0), (*_plans)(i, 1), (*_plans)(i, 2),
                                       (*_plans)(i, 3), (*_plans)(i, 4), (*_plans)(i, 5));

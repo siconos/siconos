@@ -19,12 +19,14 @@
 
 #include "ControlLsodarSimulation.hpp"
 #include "ControlZOHSimulation.hpp"
+#include "EventsManager.hpp"
 #include "ExplicitLinearSMC.hpp"
-#include "FirstOrderLinearTIDS.hpp"
+#include "FirstOrderLinearDS.hpp"
 #include "LinearSMC.hpp"
 #include "LinearSensor.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
+#include "Simulation.hpp"
 #include "Twisting.hpp"
 #include "io.hpp"
 
@@ -59,24 +61,26 @@ void SMCTest::setUp() {
 }
 
 void SMCTest::init() {
-  _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(_x0, _A);
+  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0);
+  _DS->setConstantA(*_A);
   _sensor = std::make_shared<siconos::control::LinearSensor>(_DS, _C);
   _iSMC = std::make_shared<siconos::control::LinearSMC>(_sensor, _B);
   _iSMC->setCsurface(_Csurface);
-
-  _iSMC->display();
 }
 
 void SMCTest::init2() {
-  _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(_x0, _A);
+  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0);
+  _DS->setConstantA(*_A);
   _sensor = std::make_shared<siconos::control::LinearSensor>(_DS, _C);
   _eSMC = std::make_shared<siconos::control::ExplicitLinearSMC>(_sensor, _B);
   _eSMC->setCsurface(_Csurface);
+  _eSMC->display();
 }
 
 #ifdef HAS_EXTREME_POINT_ALGO
 void SMCTest::initTwisting() {
-  _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(_x0, _A);
+  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0);
+  _DS->setConstantA(*_A);
   _sensor = std::make_shared<siconos::control::LinearSensor>(_DS, _C);
   _itw = std::make_shared<siconos::control::Twisting>(_sensor, 300., _beta, _h);
   auto eye = std::make_shared<siconos::algebra::SiconosMatrix>(2, 2);
@@ -86,8 +90,6 @@ void SMCTest::initTwisting() {
 #endif
 
 void SMCTest::tearDown() {}
-#include <EventsManager.hpp>
-#include <Simulation.hpp>
 
 void SMCTest::test_iSMC_ZOH() {
   init();
@@ -124,11 +126,10 @@ void SMCTest::test_iSMC_Lsodar() {
   siconos::algebra::io::write("iSMC_Lsodar.dat", data, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   double error = 0.0;
-  bool test =
-      !((error = siconos::algebra::io::compareRefFile(data, "iSMC.ref", _tol)) >= 0.0 &&
-        error > _tol);
-  std::cout << "------- Integration done -------" << test << std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", test, true);
+  bool failed =
+      ((error = siconos::algebra::io::compareRefFile(data, "iSMC.ref", _tol)) >= _tol);
+  std::cout << "------- Integration done -------" << failed << std::endl;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", !failed, true);
 }
 
 void SMCTest::test_eSMC_ZOH() {
@@ -144,11 +145,9 @@ void SMCTest::test_eSMC_ZOH() {
   siconos::algebra::io::write("eSMC_ZOH.dat", data, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   double error = 0.0;
-  bool test =
-      !((error = siconos::algebra::io::compareRefFile(data, "eSMC.ref", _tol)) >= 0.0 &&
-        error > _tol);
-  std::cout << "------- Integration done -------" << test << std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", test, true);
+  bool failed = (error = siconos::algebra::io::compareRefFile(data, "eSMC.ref", _tol) >= _tol);
+  std::cout << "------- Integration done -------" << failed << std::endl;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_Luenberger_ZOH : ", !failed, true);
 }
 
 void SMCTest::test_eSMC_Lsodar() {
@@ -217,7 +216,8 @@ void SMCTest::test_itw_Lsodar() {
   data->col(3) = _beta * data->col(2) + data->col(1);
   dataRef.col(3) = _beta * dataRef.col(2) + dataRef.col(1);
   dataRef -= *data;
-  std::cout << "------- Integration done, error = " << dataRef.normInf() << " -------\n";
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_itw_Lsodar : ", dataRef.normInf() < _tol, true);
+  auto error = dataRef.leftCols(3).normInf();
+  std::cout << "------- Integration done, error = " << error << " -------\n";
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_itw_Lsodar : ", error < _tol, true);
 }
 #endif

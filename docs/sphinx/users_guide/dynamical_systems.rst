@@ -179,20 +179,6 @@ And we have:
    rhs &= M^{-1}(A(t,z)x(t)+b(t,z)) \\
    \nabla_x rhs&= M^{-1}(A(t,z)
 
-Linear and time-invariant
-"""""""""""""""""""""""""
-
- class FirstOrderLinearTIDS
-
-Derived from FirstOrderLinearDS, described by the set of n equations and initial conditions: 
-
-.. math::
-   
-   \dot x(t) &= Ax(t)+ b + r \\
-   x(t_0)&=x_0 
-
-Same as for FirstOrderLinearDS but with A and b constant (ie no plug-in).
-
 Second order (Lagrangian) systems
 ---------------------------------
 

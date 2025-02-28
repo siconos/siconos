@@ -48,13 +48,13 @@ void siconos::collision::SiconosBox::setDimensions(
 siconos::collision::SiconosConvexHull::SiconosConvexHull(
     std::shared_ptr<siconos::algebra::SiconosMatrix> vertices)
     : SiconosShape(), _vertices(vertices) {
-  if (_vertices && _vertices->size(1) != 3)
+  if (_vertices && _vertices->cols() != 3)
     THROW_EXCEPTION("Convex hull vertices matrix must have 3 columns.");
 }
 
 siconos::collision::SiconosConvexHull::SiconosConvexHull(Eigen::Ref<siconos::algebra::SiconosMatrix> vertices)
   : SiconosShape(), _vertices(std::make_shared<siconos::algebra::SiconosMatrix>(vertices)) {
-    if (_vertices && _vertices->size(1) != 3)
+    if (_vertices && _vertices->cols() != 3)
     THROW_EXCEPTION("Convex hull vertices matrix must have 3 columns.");
 }
 
@@ -64,7 +64,7 @@ siconos::collision::SiconosMesh::SiconosMesh(
     : SiconosShape(), _indexes(indexes), _vertices(vertices) {
   if (!_indexes || (_indexes->size() % 3) != 0)
     THROW_EXCEPTION("Mesh indexes size must be divisible by 3.");
-  if (!_vertices || _vertices->size(0) != 3)
+  if (!_vertices || _vertices->rows() != 3)
     THROW_EXCEPTION("Mesh vertices matrix must have 3 columns.");
 }
 
@@ -90,14 +90,14 @@ void siconos::collision::SiconosBox2d::setDimensions(
 siconos::collision::SiconosConvexHull2d::SiconosConvexHull2d(
     std::shared_ptr<siconos::algebra::SiconosMatrix> vertices)
     : SiconosShape(), _vertices(vertices) {
-  if (_vertices && _vertices->size(1) != 2)
+  if (_vertices && _vertices->cols() != 2)
     THROW_EXCEPTION("Convex hull vertices matrix must have 2 columns in 2d.");
 }
 
 siconos::collision::SiconosConvexHull2d::SiconosConvexHull2d(
     Eigen::Ref<siconos::algebra::SiconosMatrix> vertices)
     : SiconosShape(), _vertices(std::make_shared<siconos::algebra::SiconosMatrix>(vertices)) {
-  if (_vertices && _vertices->size(1) != 2)
+  if (_vertices && _vertices->cols() != 2)
     THROW_EXCEPTION("Convex hull vertices matrix must have 2 columns in 2d.");
 }
 

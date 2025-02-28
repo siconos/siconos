@@ -29,9 +29,10 @@
 #include <memory>
 #include <string>
 
-#include "SiconosVector.hpp"
+#include "FunctionTypes.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosSerialization.hpp"
+#include "SiconosVector.hpp"
 
 namespace siconos::modeling {
 class NonSmoothDynamicalSystem;
@@ -113,11 +114,16 @@ class Actuator {
   /** B Matrix */
   std::shared_ptr<siconos::algebra::SiconosMatrix> _B{nullptr};
 
-  /** name of the plugin for g (nonlinear affine in control system)*/
-  std::string _plugingName;
+  /** function wrapper used to compute \f$ h(x,t,\lambda)  in relation\f$ */
+  siconos::modeling::func_prototypes::FunctionBVSV_BV computeg_{nullptr};
 
-  /** name of the plugin to compute \f$ \nabla_x g \f$ for the nonlinear case*/
-  std::string _pluginJacgxName;
+  /** function wrapper used to compute  \f$ \nabla_x g(x,\lambda) \f$ */
+  siconos::modeling::func_prototypes::FunctionBVSV_M computejacobiangOver_state_{nullptr};
+
+  /** true if the relation is linear. This is deduced from the set... functions above
+   * Mostly used in CommonSMC derived class.
+   */
+  bool isRelationLinear_{true};
 
   /** ControlSensor feeding the Controller */
   std::shared_ptr<ControlSensor> _sensor{nullptr};
@@ -167,9 +173,7 @@ class Actuator {
    */
   inline ActuatorType getType() const { return _type; };
 
-  /** Get the control value
-   *
-   *  \return current control value u
+  /** \return current control value u
    */
   inline const siconos::algebra::SiconosVector& u() const { return *_u; };
 
@@ -185,11 +189,18 @@ class Actuator {
    */
   inline void setB(std::shared_ptr<siconos::algebra::SiconosMatrix> B) { _B = B; };
 
-  /** Set the name of the plugin for computing g
+  /** set a user-defined function to compute g
    *
-   *  \param g the name of the plugin to compute g
+   *  \param fct the user-defined function (std::function, lambda ...)
    */
-  inline void setg(const std::string& g) { _plugingName = g; };
+  void setComputegFunction(const siconos::modeling::func_prototypes::FunctionBVSV_BV& fct);
+
+  /** set a user-defined function to compute \f$ \nabla_x g(x, \lambda) \f$ \f$
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputeJacobiangOver_stateFunction(
+      const siconos::modeling::func_prototypes::FunctionBVSV_M& fct);
 
   /** add a Sensor in the actuator.
    *
@@ -202,7 +213,7 @@ class Actuator {
    *
    *  \param td the TimeDiscretisation for this Actuator
    */
-  virtual void setTimeDiscretisation(const siconos::simulation::TimeDiscretisation& td){};
+  virtual void setTimeDiscretisation(const siconos::simulation::TimeDiscretisation& td) {};
 
   /** initialize actuator data.
    *
@@ -260,21 +271,18 @@ class ActuatorFactory {
       \param type type of the actuator (must be a ActuatorType (enum))
       \return a pointer to actuator
   */
-  std::shared_ptr<Actuator> create(std::shared_ptr<ControlSensor> sensor, ActuatorType type)
-  {
+  std::shared_ptr<Actuator> create(std::shared_ptr<ControlSensor> sensor, ActuatorType type) {
     assert(m_factories.contains(type) && "unknown Actuator type");
     return m_factories[type](sensor);
   }
 
   /** access to the (singleton) factory instance */
-  static ActuatorFactory* instance()
-  {
+  static ActuatorFactory* instance() {
     static ActuatorFactory factory;
     return &factory;
   }
 
-  void registerCreator(ActuatorType newtype, ActuatorCreator caller)
-  {
+  void registerCreator(ActuatorType newtype, ActuatorCreator caller) {
     m_factories[newtype] = caller;
   }
 };
@@ -282,8 +290,7 @@ class ActuatorFactory {
 template <class T>
 class ActuatorRegistration {
  public:
-  ActuatorRegistration(ActuatorType newtype)
-  {
+  ActuatorRegistration(ActuatorType newtype) {
     ActuatorFactory::instance()->registerCreator(
         newtype,
         [](std::shared_ptr<ControlSensor> sensor) { return std::make_shared<T>(sensor); });

@@ -184,95 +184,95 @@ void SimpleMatrixTest::testOperators9() {
 
   // Simple = a * Simple or Simple/a
   *C = a * *A;
-  for (unsigned int i = 0; i < C->size(0); ++i)
-    for (unsigned int j = i; j < C->size(1); ++j)
+  for (unsigned int i = 0; i < C->rows(); ++i)
+    for (unsigned int j = i; j < C->cols(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators9: ", fabs((*C)(i, j) - a * (*A)(i, j)) < tol,
                                    true);
   *C = a1 * *A;
-  for (unsigned int i = 0; i < C->size(0); ++i)
-    for (unsigned int j = i; j < C->size(1); ++j)
+  for (unsigned int i = 0; i < C->rows(); ++i)
+    for (unsigned int j = i; j < C->cols(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE(
           "testOperators9: ", fabs((*C)(i, j) - a1 * (*A)(i, j)) < tol, true);
 
   // *C = *A / a;
-  // for (unsigned int i = 0; i < C->size(0); ++i)
-  //   for (unsigned int j = i ; j < C->size(1); ++j)
+  // for (unsigned int i = 0; i < C->rows(); ++i)
+  //   for (unsigned int j = i ; j < C->cols(); ++j)
   //     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators9: ", fabs((*C)(i, j) - (*A)(i, j) / a) <
   //     tol, true);
   // *C = *A / a1;
-  // for (unsigned int i = 0; i < C->size(0); ++i)
-  //   for (unsigned int j = i ; j < C->size(1); ++j)
+  // for (unsigned int i = 0; i < C->rows(); ++i)
+  //   for (unsigned int j = i ; j < C->cols(); ++j)
   //     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators9: ", fabs((*C)(i, j) - (*A)(i, j) / a1) <
   //     tol, true);
 
   // Simple = a * Block
 
   *C = a * *Ab;
-  for (unsigned int i = 0; i < C->size(0); ++i)
-    for (unsigned int j = i; j < C->size(1); ++j)
+  for (unsigned int i = 0; i < C->rows(); ++i)
+    for (unsigned int j = i; j < C->cols(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE(
           "testOperators9: ", fabs((*C)(i, j) - a * (*Ab)(i, j)) < tol, true);
   ;
   *C = a1 * *Ab;
-  for (unsigned int i = 0; i < C->size(0); ++i)
-    for (unsigned int j = i; j < C->size(1); ++j)
+  for (unsigned int i = 0; i < C->rows(); ++i)
+    for (unsigned int j = i; j < C->cols(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE(
           "testOperators9: ", fabs((*C)(i, j) - a1 * (*Ab)(i, j)) < tol, true);
 
   // *C = *Ab / a;
-  // for (unsigned int i = 0; i < C->size(0); ++i)
-  //   for (unsigned int j = i ; j < C->size(1); ++j)
+  // for (unsigned int i = 0; i < C->rows(); ++i)
+  //   for (unsigned int j = i ; j < C->cols(); ++j)
   //     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators9: ", fabs((*C)(i, j) - (*Ab)(i, j) / a) <
   //     tol, true);
   // *C = *Ab / a1;
-  // for (unsigned int i = 0; i < C->size(0); ++i)
-  //   for (unsigned int j = i ; j < C->size(1); ++j)
+  // for (unsigned int i = 0; i < C->rows(); ++i)
+  //   for (unsigned int j = i ; j < C->cols(); ++j)
   //     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators9: ", fabs((*C)(i, j) - (*Ab)(i, j) / a1) <
   //     tol, true);
 
   // Block = a * Block
   *Cb = a * *Ab;
-  for (unsigned int i = 0; i < Cb->size(0); ++i)
-    for (unsigned int j = i; j < Cb->size(1); ++j)
+  for (unsigned int i = 0; i < Cb->rows(); ++i)
+    for (unsigned int j = i; j < Cb->cols(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE(
           "testOperators9: ", fabs((*Cb)(i, j) - a * (*Ab)(i, j)) < tol, true);
   *Cb = a1 * *Ab;
-  for (unsigned int i = 0; i < Cb->size(0); ++i)
-    for (unsigned int j = i; j < Cb->size(1); ++j)
+  for (unsigned int i = 0; i < Cb->rows(); ++i)
+    for (unsigned int j = i; j < Cb->cols(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE(
           "testOperators9: ", fabs((*Cb)(i, j) - a1 * (*Ab)(i, j)) < tol, true);
 
   // *Cb = *Ab / a;
-  // for (unsigned int i = 0; i < Cb->size(0); ++i)
-  //   for (unsigned int j = i ; j < Cb->size(1); ++j)
+  // for (unsigned int i = 0; i < Cb->rows(); ++i)
+  //   for (unsigned int j = i ; j < Cb->cols(); ++j)
   //     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators9: ", fabs((*Cb)(i, j) - (*Ab)(i, j) / a) <
   //     tol, true);
   // *Cb = *Ab / a1;
-  // for (unsigned int i = 0; i < Cb->size(0); ++i)
-  //   for (unsigned int j = i ; j < Cb->size(1); ++j)
+  // for (unsigned int i = 0; i < Cb->rows(); ++i)
+  //   for (unsigned int j = i ; j < Cb->cols(); ++j)
   //     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators9: ", fabs((*Cb)(i, j) - (*Ab)(i, j) / a1)
   //     < tol, true);
 
   // Block = a * Simple
   *Cb = a * *A;
-  for (unsigned int i = 0; i < Cb->size(0); ++i)
-    for (unsigned int j = i; j < Cb->size(1); ++j)
+  for (unsigned int i = 0; i < Cb->rows(); ++i)
+    for (unsigned int j = i; j < Cb->cols(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE(
           "testOperators9: ", fabs((*Cb)(i, j) - a * (*A)(i, j)) < tol, true);
   *Cb = a1 * *A;
-  for (unsigned int i = 0; i < Cb->size(0); ++i)
-    for (unsigned int j = i; j < Cb->size(1); ++j)
+  for (unsigned int i = 0; i < Cb->rows(); ++i)
+    for (unsigned int j = i; j < Cb->cols(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE(
           "testOperators9: ", fabs((*Cb)(i, j) - a1 * (*A)(i, j)) < tol, true);
 
   // *Cb = *A / a;
-  // for (unsigned int i = 0; i < Cb->size(0); ++i)
-  //   for (unsigned int j = i ; j < Cb->size(1); ++j)
+  // for (unsigned int i = 0; i < Cb->rows(); ++i)
+  //   for (unsigned int j = i ; j < Cb->cols(); ++j)
   //     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators9: ", fabs((*Cb)(i, j) - (*A)(i, j) / a) <
   //     tol, true);
   // *Cb = *A / a1;
-  // for (unsigned int i = 0; i < Cb->size(0); ++i)
-  //   for (unsigned int j = i ; j < Cb->size(1); ++j)
+  // for (unsigned int i = 0; i < Cb->rows(); ++i)
+  //   for (unsigned int j = i ; j < Cb->cols(); ++j)
   //     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators9: ", fabs((*Cb)(i, j) - (*A)(i, j) / a1) <
   //     tol, true);
   std::cout << "-->  test operators9 ended with success." << std::endl;
@@ -300,14 +300,14 @@ void SimpleMatrixTest::testProdBis() {
   double sum;
   for (unsigned int i = 0; i < size; ++i) {
     sum = 0;
-    for (unsigned int j = 0; j < A->size(1); ++j) sum += (*A)(i, j) * (*x)(j);
+    for (unsigned int j = 0; j < A->cols(); ++j) sum += (*A)(i, j) * (*x)(j);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdBis: ", fabs((*y)(i)-sum) < tol, true);
   }
   // Simple = Simple * Block
   siconos::algebra::matrixBlockVector_prod(*A, *xB, *y);
   for (unsigned int i = 0; i < size; ++i) {
     sum = 0;
-    for (unsigned int j = 0; j < A->size(1); ++j) sum += (*A)(i, j) * (*xB)(j);
+    for (unsigned int j = 0; j < A->cols(); ++j) sum += (*A)(i, j) * (*xB)(j);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdBis: ", fabs((*y)(i)-sum) < tol, true);
   }
 
@@ -315,7 +315,7 @@ void SimpleMatrixTest::testProdBis() {
   siconos::algebra::matrixVector_prod_toBlock(*A, *x, *yB);
   for (unsigned int i = 0; i < size; ++i) {
     sum = 0;
-    for (unsigned int j = 0; j < A->size(1); ++j) sum += (*A)(i, j) * (*x)(j);
+    for (unsigned int j = 0; j < A->cols(); ++j) sum += (*A)(i, j) * (*x)(j);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdBis: ", fabs((*yB)(i)-sum) < tol, true);
   }
   std::cout << "-->  test ublas::prodBis ended with success." << std::endl;
@@ -345,7 +345,7 @@ void SimpleMatrixTest::testProd4()  // y += A*x
   double sum;
   for (unsigned int i = 0; i < size; ++i) {
     sum = 0;
-    for (unsigned int j = 0; j < A->size(1); ++j) sum += 2 * (*A)(i, j) * (*x)(j);
+    for (unsigned int j = 0; j < A->cols(); ++j) sum += 2 * (*A)(i, j) * (*x)(j);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd4: ", fabs((*y)(i)-sum) < tol, true);
   }
   // Simple = Simple * Block
@@ -354,7 +354,7 @@ void SimpleMatrixTest::testProd4()  // y += A*x
   siconos::algebra::matrixBlockVector_prod(*A, *xB, *y, false);
   for (unsigned int i = 0; i < size; ++i) {
     sum = 0;
-    for (unsigned int j = 0; j < A->size(1); ++j) sum += 2 * (*A)(i, j) * (*xB)(j);
+    for (unsigned int j = 0; j < A->cols(); ++j) sum += 2 * (*A)(i, j) * (*xB)(j);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd4: ", fabs((*y)(i)-sum) < tol, true);
   }
 
@@ -364,7 +364,7 @@ void SimpleMatrixTest::testProd4()  // y += A*x
   siconos::algebra::matrixVector_prod_toBlock(*A, *x, *yB, false);
   for (unsigned int i = 0; i < size; ++i) {
     sum = 0;
-    for (unsigned int j = 0; j < A->size(1); ++j) sum += 2 * (*A)(i, j) * (*x)(j);
+    for (unsigned int j = 0; j < A->cols(); ++j) sum += 2 * (*A)(i, j) * (*x)(j);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd4: ", fabs((*yB)(i)-sum) < tol, true);
   }
 
@@ -375,7 +375,7 @@ void SimpleMatrixTest::testProd4()  // y += A*x
   //  for (unsigned int i = 0; i< size; ++i)
   //  {
   //    sum = 0;
-  //    for (unsigned int j=0; j< A->size(1); ++j)
+  //    for (unsigned int j=0; j< A->cols(); ++j)
   //      sum += 2*(*A)(i,j)*(*xB)(j);
   //    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd4: ", fabs((*yB)(i) - sum)< tol, true);
   //  }
@@ -407,7 +407,7 @@ void SimpleMatrixTest::testProd5()  // y += a*A*x
   double sum;
   for (unsigned int i = 0; i < size; ++i) {
     sum = 0;
-    for (unsigned int j = 0; j < A->size(1); ++j) sum += 2 * a * (*A)(i, j) * (*x)(j);
+    for (unsigned int j = 0; j < A->cols(); ++j) sum += 2 * a * (*A)(i, j) * (*x)(j);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd5: ", fabs((*y)(i)-sum) < tol, true);
   }
   // Simple = Simple * Block
@@ -417,7 +417,7 @@ void SimpleMatrixTest::testProd5()  // y += a*A*x
   //  for (unsigned int i = 0; i< size; ++i)
   //  {
   //    sum = 0;
-  //    for (unsigned int j=0; j< A->size(1); ++j)
+  //    for (unsigned int j=0; j< A->cols(); ++j)
   //      sum += a*2*(*A)(i,j)*(*xB)(j);
   //    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd5: ", fabs((*y)(i) - sum)< tol, true);
   //  }
@@ -429,7 +429,7 @@ void SimpleMatrixTest::testProd5()  // y += a*A*x
   //  for (unsigned int i = 0; i< size; ++i)
   //  {
   //    sum = 0;
-  //    for (unsigned int j=0; j< A->size(1); ++j)
+  //    for (unsigned int j=0; j< A->cols(); ++j)
   //      sum += a*2*(*A)(i,j)*(*x)(j);
   //    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd5: ", fabs((*yB)(i) - sum)< tol, true);
   //  }
@@ -441,7 +441,7 @@ void SimpleMatrixTest::testProd5()  // y += a*A*x
   //  for (unsigned int i = 0; i< size; ++i)
   //  {
   //    sum = 0;
-  //    for (unsigned int j=0; j< A->size(1); ++j)
+  //    for (unsigned int j=0; j< A->cols(); ++j)
   //      sum += a*2*(*A)(i,j)*(*xB)(j);
   //    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd5: ", fabs((*yB)(i) - sum)< tol, true);
   //  }
@@ -475,7 +475,7 @@ void SimpleMatrixTest::testProd6()  // y += trans(A)*x
   double sum;
   for (unsigned int i = 0; i < size; ++i) {
     sum = 0;
-    for (unsigned int j = 0; j < A->size(1); ++j) sum += 2 * (*tmp)(i, j) * (*x)(j);
+    for (unsigned int j = 0; j < A->cols(); ++j) sum += 2 * (*tmp)(i, j) * (*x)(j);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd6: ", fabs((*y)(i)-sum) < tol, true);
   }
   // Simple = Simple * Block
@@ -497,7 +497,7 @@ void SimpleMatrixTest::testProd6()  // y += trans(A)*x
   siconos::algebra::transposeMatrixVector_prod_toBlock(*x, *A, *yB, false);
   for (unsigned int i = 0; i < size; ++i) {
     sum = 0;
-    for (unsigned int j = 0; j < A->size(1); ++j) sum += 2 * (*tmp)(i, j) * (*x)(j);
+    for (unsigned int j = 0; j < A->cols(); ++j) sum += 2 * (*tmp)(i, j) * (*x)(j);
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd6: ", fabs((*yB)(i)-sum) < tol, true);
   }
 
@@ -508,7 +508,7 @@ void SimpleMatrixTest::testProd6()  // y += trans(A)*x
   //  for (unsigned int i = 0; i< size; ++i)
   //  {
   //    sum = 0;
-  //    for (unsigned int j=0; j< A->size(1); ++j)
+  //    for (unsigned int j=0; j< A->cols(); ++j)
   //      sum += 2*(*tmp)(i,j)*(*xB)(j);
   //    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd6: ", fabs((*yB)(i) - sum)< tol, true);
   //  }

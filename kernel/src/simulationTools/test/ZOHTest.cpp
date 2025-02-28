@@ -66,8 +66,8 @@ void ZOHTest::testMatrixExp0() {
   tmpM->setIdentity();
   *tmpM = (*tmpM) * exp(_h);
   const auto& Phi = _ZOH->Ad(_DS);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp0 : ", Phi.size(0) == _n, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp0 : ", Phi.size(1) == _n, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp0 : ", Phi.rows() == _n, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp0 : ", Phi.cols() == _n, true);
   siconos::algebra::SiconosMatrix diffTmp = *tmpM - Phi;
   double diff = diffTmp.normInf();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp0 : ", diff < _tol, true);
@@ -91,8 +91,8 @@ void ZOHTest::testMatrixExp1() {
   tmpM->setIdentity();
   (*tmpM)(0, 1) = _h;
   const auto& Phi = _ZOH->Ad(_DS);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp1 : ", Phi.size(0) == _n, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp1 : ", Phi.size(1) == _n, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp1 : ", Phi.rows() == _n, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp1 : ", Phi.cols() == _n, true);
   siconos::algebra::SiconosMatrix diff2Tmp = *tmpM - Phi;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp1 : ", diff2Tmp.normInf() < _tol, true);
   std::cout << "------- Second computation ok, error = " << diff2Tmp.normInf() << " -------"

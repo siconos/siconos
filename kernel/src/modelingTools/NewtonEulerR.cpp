@@ -285,7 +285,7 @@ void siconos::modeling::NewtonEulerR::computeSecondOrderTimeDerivativeTerms(
 
   if (!secondOrderTimeDerivativeTerms_)
     secondOrderTimeDerivativeTerms_ =
-        std::make_shared<siconos::algebra::SiconosVector>(H_NE_dot_->size(0));
+        std::make_shared<siconos::algebra::SiconosVector>(H_NE_dot_->rows());
 
   DEBUG_EXPR(H_NE_dot_->display(););
 

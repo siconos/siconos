@@ -46,11 +46,21 @@ siconos::modeling::FirstOrderLinearDS::FirstOrderLinearDS(const FirstOrderLinear
     bVector_internal_storage_ =
         std::make_unique<std::vector<double>>(ds.bVector_view_->size());
     bVector_view_ = std::make_shared<siconos::algebra::MapVectorType>(
-        ds.bVector_view_->data(), ds.bVector_view_->size());
+        bVector_internal_storage_->data(), bVector_internal_storage_->size());
+    *bVector_view_ = ds.bVector();  // Copy content
     if (ds.computebVector_) {
-      computebVector_ = ds.computebVector_;
+      setComputebVectorFunction(ds.computebVector_);
     } else
       hasConstantbVector_ = true;
+  }
+
+  if (ds.jacobianfOver_x_view_) {
+    hasJacobianfOver_x_ = true;
+    computejacobianfOver_x_ = nullptr;
+    if (ds.computeA_) {
+      setComputeAFunction(ds.computeA_);
+    } else
+      hasConstantJacobianfOver_x_ = true;
   }
 }
 
@@ -105,6 +115,15 @@ void siconos::modeling::FirstOrderLinearDS::setComputebVectorFunction(
   hasbVector_ = true;
   computebVector_ = func;
   isTimeInvariant_ = false;
+  hasConstantbVector_ = false;
+}
+
+void siconos::modeling::FirstOrderLinearDS::clearbVector() {
+  computebVector_ = nullptr;  // Usefull for MatrixIntegrator and control stuff
+  hasbVector_ = false;
+  bVector_internal_storage_ = nullptr;
+  bVector_view_ = nullptr;
+  hasConstantbVector_ = false;
 }
 
 void siconos::modeling::FirstOrderLinearDS::computeb(double time) {
@@ -172,7 +191,7 @@ void siconos::modeling::FirstOrderLinearDS::computeJacobianRhsOver_x(double time
       }
       if (!hasLU_M_) {
         LU_M_ = std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(
-            *MMatrix_view_);  
+            *MMatrix_view_);
         hasLU_M_ = true;
       }
       *(jacobianRhsOver_x_->block(0, 0)) = LU_M_->solve(*(jacobianRhsOver_x_->block(0, 0)));

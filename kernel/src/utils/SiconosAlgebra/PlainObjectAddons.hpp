@@ -23,19 +23,6 @@
    See https://eigen.tuxfamily.org/dox/TopicCustomizing_Plugins.html
 
 */
-// #include <iomanip>  // Required for setprecision
-
-inline Index size(unsigned int index) const {
-  if (index == 0) {
-    return this->rows();
-  } else if (index == 1) {
-    return this->cols();
-  } else {
-    return 0;
-  }
-}
-
-inline Index size() const { return this->rows() * this->cols(); }
 
 void display() const { std::cout << std::scientific << std::setprecision(6) << *this << "\n"; }
 
@@ -52,7 +39,7 @@ inline Scalar norm2() { return this->norm(); }
 size_t nnz(double tol = 1e-14) {
   size_t nnz = 0;
   double* arr = this->data();
-  for (size_t i = 0; i < this->size(0) * this->size(1); ++i) {
+  for (size_t i = 0; i < this->rows() * this->cols(); ++i) {
     if (fabs(arr[i]) > tol) {
       nnz++;
     }

@@ -114,7 +114,7 @@ siconos::nonsmooth_formulations::OSNSMatrix::OSNSMatrix(
 // construct by copy of SiconosMatrix
 siconos::nonsmooth_formulations::OSNSMatrix::OSNSMatrix(
     const siconos::algebra::SiconosMatrix& MSource)
-    : _dimRow(MSource.size(0)), _dimColumn(MSource.size(1)), _storageType(NM_DENSE) {
+    : _dimRow(MSource.rows()), _dimColumn(MSource.cols()), _storageType(NM_DENSE) {
   //  _numericsMatrix = std::make_shared<NumericsMatrix>()
   //  NM_null(_numericsMatrix.get());
   _M1 = std::make_shared<siconos::algebra::SiconosMatrix>(MSource);
@@ -194,7 +194,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillM(
       if (!_M1)
         _M1 = std::make_shared<siconos::algebra::SiconosMatrix>(_dimRow, _dimColumn);
       else {
-        if (_M1->size(0) != _dimRow || _M1->size(1) != _dimColumn)
+        if (_M1->rows() != _dimRow || _M1->cols() != _dimColumn)
           _M1->resize(_dimRow, _dimColumn);
         _M1->setZero();
       }
@@ -210,9 +210,9 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillM(
 
       std::static_pointer_cast<siconos::algebra::SiconosMatrix>(_M1)->setBlock(
           pos, pos, *indexSet.properties(*vi).block);
-      DEBUG_PRINTF("OSNSMatrix _M1: %i %i\n", _M1->size(0), _M1->size(1));
-      DEBUG_PRINTF("OSNSMatrix block: %i %i\n", indexSet.properties(*vi).block->size(0),
-                   indexSet.properties(*vi).block->size(1));
+      DEBUG_PRINTF("OSNSMatrix _M1: %i %i\n", _M1->rows(), _M1->cols());
+      DEBUG_PRINTF("OSNSMatrix block: %i %i\n", indexSet.properties(*vi).block->rows(),
+                   indexSet.properties(*vi).block->cols());
     }
 
     // == Loop through all edges (ds) in active index set ==
@@ -234,11 +234,11 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillM(
       assert(pos < _dimRow);
       assert(col < _dimColumn);
 
-      DEBUG_PRINTF("OSNSMatrix _M1: %i %i\n", _M1->size(0), _M1->size(1));
-      DEBUG_PRINTF("OSNSMatrix upper: %i %i\n", indexSet.properties(*ei).upper_block->size(0),
-                   indexSet.properties(*ei).upper_block->size(1));
-      DEBUG_PRINTF("OSNSMatrix lower: %i %i\n", indexSet.properties(*ei).lower_block->size(0),
-                   indexSet.properties(*ei).lower_block->size(1));
+      DEBUG_PRINTF("OSNSMatrix _M1: %i %i\n", _M1->rows(), _M1->cols());
+      DEBUG_PRINTF("OSNSMatrix upper: %i %i\n", indexSet.properties(*ei).upper_block->rows(),
+                   indexSet.properties(*ei).upper_block->cols());
+      DEBUG_PRINTF("OSNSMatrix lower: %i %i\n", indexSet.properties(*ei).lower_block->rows(),
+                   indexSet.properties(*ei).lower_block->cols());
 
       assert(indexSet.properties(*ei).lower_block);
       assert(indexSet.properties(*ei).upper_block);

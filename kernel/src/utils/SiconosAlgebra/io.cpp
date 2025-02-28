@@ -107,7 +107,7 @@ bool siconos::algebra::io::read(const std::string &filename, SiconosMatrix &m,
   infile >> s1;
   infile >> s2;
 
-  if (s1 != m.size(0) || s2 != m.size(1)) m.resize(s1, s2);
+  if (s1 != m.rows() || s2 != m.cols()) m.resize(s1, s2);
 
   // Note: using istream stl iterator seems to be 2-times faster than << with a
   // loop over matrix data.
@@ -139,11 +139,11 @@ bool siconos::algebra::io::write(const std::string &filename, const SiconosMatri
   outfile.setf(std::ios::scientific);
   // Writing
 
-  if (outputType == WriteType::python) outfile << m.size(0) << " " << m.size(1) << std::endl;
+  if (outputType == WriteType::python) outfile << m.rows() << " " << m.cols() << std::endl;
 
   double tmp;
-  for (decltype(m.size(0)) i = 0; i < m.size(0); i++) {
-    for (decltype(m.size(1)) j = 0; j < m.size(1); j++) {
+  for (decltype(m.rows()) i = 0; i < m.rows(); i++) {
+    for (decltype(m.cols()) j = 0; j < m.cols(); j++) {
       tmp = m(i, j);
       if (fabs(tmp) < std::numeric_limits<double>::min()) tmp = 0.0;
       outfile << tmp << " ";
@@ -174,7 +174,7 @@ double siconos::algebra::io::compareRefFile(const SiconosMatrix &data, std::stri
 
   if (verbose) std::cout << "\n ===> Comparison with reference file " << filename << std::endl;
 
-  SiconosVector err(data.size(1));
+  SiconosVector err(data.cols());
   siconos::algebra::normInfByColumn(data - *ref, err);
 
   if (verbose) {
