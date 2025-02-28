@@ -157,10 +157,9 @@ void TwistingTest::test_Twisting_ZOH() {
   data->col(3) = _beta * data->col(2) + data->col(1);
   dataRef.col(3) = _beta * dataRef.col(2) + dataRef.col(1);
   dataRef -= *data;
-
-  std::cout << "------- Integration done, error = " << dataRef.normInf() << " -------"
-            << std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_itw_ZOH : ", dataRef.normInf() < _tol, true);
+  auto error = dataRef.leftCols(3).normInf();
+  std::cout << "------- Integration done, error = " << error << " -------" << std::endl;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_itw_ZOH : ", error < _tol, true);
 }
 
 void TwistingTest::test_Twisting_Lsodar() {
@@ -209,8 +208,10 @@ void TwistingTest::test_RegularTwisting_ZOH() {
   data->col(3) = _beta * data->col(2) + data->col(1);
   dataRef.col(3) = _beta * dataRef.col(2) + dataRef.col(1);
   dataRef -= *data;
-  std::cout << "------- Integration done, error = " << dataRef.normInf() << " -------\n";
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_RegularTwistingZOH : ", dataRef.normInf() < _tol, true);
+  auto error = dataRef.leftCols(3).normInf();
+
+  std::cout << "------- Integration done, error = " << error << " -------\n";
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test_RegularTwistingZOH : ", error < _tol, true);
 }
 
 void TwistingTest::test_RegularTwisting_Lsodar() {

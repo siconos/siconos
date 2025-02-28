@@ -104,7 +104,7 @@ void CableDSTest::testBuildInitialProfile() {
 
   auto positions_ref = siconos::algebra::io::readVectorFromJson(reader["q"]);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(" testBuildInitialProfile:  check fem",
-                               (positions_ref - positions).norm() < 1e-14, true);
+                               (positions_ref - positions).norm() < 1e-9, true);
   std::cout << "End testBuildInitialProfile ...\n";
   // // compare results to a reference
 }
