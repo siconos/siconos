@@ -27,9 +27,9 @@ def test_autocast():
 def test_getVector():
     assert (sk.getVector([1, 2, 3]) == np.array([1, 2, 3])).all()
     v = sk.SiconosVector(3)
-    v.setValue(0, 1)
-    v.setValue(1, 2)
-    v.setValue(2, 4)
+    v(0) = 1
+    v(1) = 2
+    v(2) = 4
 
     assert (sk.getVector(v) != np.array([1, 2, 3])).any()
 

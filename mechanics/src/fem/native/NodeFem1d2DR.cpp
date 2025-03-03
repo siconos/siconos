@@ -46,8 +46,8 @@ void siconos::mechanics::fem::NodeFem1d2DR::computeJacobianhOver_q(
       "NodeFem1d2DR::computeJacobianhOver_q(const siconos::algebra::BlockVector& q, "
       "siconos::algebra::BlockVector& z \n");
 
-  double Nx = _Normal->getValue(0);
-  double Ny = _Normal->getValue(1);
+  double Nx = (*_Normal)(0);
+  double Ny = (*_Normal)(1);
 
   DEBUG_PRINTF("N_x = %4.2e,\t N_y = %4.2e\n", Nx, Ny);
 
@@ -58,7 +58,7 @@ void siconos::mechanics::fem::NodeFem1d2DR::computeJacobianhOver_q(
     DEBUG_PRINT("take into account second ds\n");
     THROW_EXCEPTION("NodeFem1d2DR is not implemented for node/node contact");
   }
-  DEBUG_EXPR(jacobianhOver_q_->display(););
+  DEBUG_EXPR(siconos::algebra::print(*jacobianhOver_q_););
   DEBUG_END(
       "NodeFem1d2DR::computeJacobianhOver_q(const siconos::algebra::BlockVector& q, "
       "siconos::algebra::BlockVector& z) \n");
@@ -67,11 +67,11 @@ void siconos::mechanics::fem::NodeFem1d2DR::computeJacobianhOver_q(
 double siconos::mechanics::fem::NodeFem1d2DR::distance() const {
   DEBUG_BEGIN("NodeFem1d2DR::distance(...)\n")
   siconos::algebra::SiconosVector dpc(*_Pc2 - *_Pc1);
-  DEBUG_EXPR(_Pc1->display(););
-  DEBUG_EXPR(_Pc2->display(););
-  DEBUG_EXPR(dpc.display(););
+  DEBUG_EXPR(siconos::algebra::print(*_Pc1););
+  DEBUG_EXPR(siconos::algebra::print(*_Pc2););
+  DEBUG_EXPR(siconos::algebra::print(dpc););
   DEBUG_END("NodeFem1d2DR::distance(...)\n")
-  return dpc.norm2() * (_Normal->dot(dpc) >= 0 ? -1 : 1);
+  return dpc.norm() * (_Normal->dot(dpc) >= 0 ? -1 : 1);
 }
 
 void siconos::mechanics::fem::NodeFem1d2DR::computeh(
@@ -80,11 +80,11 @@ void siconos::mechanics::fem::NodeFem1d2DR::computeh(
 
   LagrangianScleronomousR::computeh(q, y);
   siconos::algebra::SiconosVector& displacement = *((q.getAllVect())[0]);
-  _Pc1->setValue(0, displacement((*_node->dofIndex())[0]) + _node->x());
-  _Pc1->setValue(1, displacement((*_node->dofIndex())[1]) + _node->y());
-  y.setValue(0, distance());
+  (*_Pc1)(0) = displacement((*_node->dofIndex())[0]) + _node->x();
+  (*_Pc1)(1) = displacement((*_node->dofIndex())[1]) + _node->y();
+  y(0) = distance();
 
-  DEBUG_EXPR(y.display(););
+  DEBUG_EXPR(siconos::algebra::print(y););
   DEBUG_EXPR(display(););
   DEBUG_END("NodeFem1d2DR::computeh(...)\n")
 }
@@ -97,10 +97,10 @@ void siconos::mechanics::fem::NodeFem1d2DR::updateContactPoint(
 
 void siconos::mechanics::fem::NodeFem1d2DR::updateContactPoint(double pc2[2],
                                                                double normal[2]) {
-  _Pc2->setValue(0, pc2[0]);
-  _Pc2->setValue(1, pc2[1]);
-  _Normal->setValue(0, normal[0]);
-  _Normal->setValue(1, normal[1]);
+  (*_Pc2)(0) = pc2[0];
+  (*_Pc2)(1) = pc2[1];
+  (*_Normal)(0) = normal[0];
+  (*_Normal)(1) = normal[1];
 };
 
 void siconos::mechanics::fem::NodeFem1d2DR::display() const {
@@ -114,19 +114,19 @@ void siconos::mechanics::fem::NodeFem1d2DR::display() const {
 
   std::cout << " _Pc1 :\n";
   if (_Pc1)
-    _Pc1->display();
+    siconos::algebra::print(*_Pc1);
   else
     std::cout << " nullptr :\n";
 
   std::cout << " _Pc2 :\n";
   if (_Pc2)
-    _Pc2->display();
+    siconos::algebra::print(*_Pc2);
   else
     std::cout << " nullptr :\n";
 
   std::cout << " _Normal :\n";
   if (_Normal)
-    _Normal->display();
+    siconos::algebra::print(*_Normal);
   else
     std::cout << " nullptr\n";
 }

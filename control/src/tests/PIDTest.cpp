@@ -83,7 +83,7 @@ void PIDTest::testPIDZOH() {
 
   // std::cout << diff << std::endl;
   auto diff = *data - dataRef;
-  auto error = diff.normInf();
+  auto error = siconos::algebra::normInf(diff);
   std::cout << "------- Integration done, error = " << error << " -------\n";
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testPIDZOH : ", error < _tol, true);
 }
@@ -104,7 +104,7 @@ void PIDTest::testPIDLsodar() {
   dataRef.setZero();
   siconos::algebra::io::read("PID.ref", dataRef);
   auto diff = data - dataRef;
-  std::cout << "------- Integration done, error = " << diff.normInf() << " -------"
+  std::cout << "------- Integration done, error = " << siconos::algebra::normInf(diff) << " -------"
             << std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testPIDLsodar : ", diff.normInf() < _tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testPIDLsodar : ", siconos::algebra::normInf(diff) < _tol, true);
 }

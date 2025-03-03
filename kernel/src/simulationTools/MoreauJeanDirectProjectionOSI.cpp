@@ -172,8 +172,8 @@ bool siconos::integrators::MoreauJeanDirectProjectionOSI::addInteractionInIndexS
     std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i) {
   assert(i == 1);
   auto h = _simulation->timeStep();
-  auto y = (inter->y(i - 1))->getValue(0);  // for i=1 y(i-1) is the position
-  auto yDot = (inter->y(i))->getValue(0);   // for i=1 y(i) is the velocity
+  auto y = (*inter->y(i - 1))(0);  // for i=1 y(i-1) is the position
+  auto yDot = (*(inter->y(i)))(0);   // for i=1 y(i) is the velocity
   double gamma = 1.0 / 2.0;
   if (_useGamma) {
     gamma = _gamma;
@@ -213,8 +213,8 @@ bool siconos::integrators::MoreauJeanDirectProjectionOSI::removeInteractionFromI
 {
   assert(i == 1);
   auto h = _simulation->timeStep();
-  auto y = (inter->y(i - 1))->getValue(0);  // for i=1 y(i-1) is the position
-  auto yDot = (inter->y(i))->getValue(0);   // for i=1 y(i) is the velocity
+  auto y = (*inter->y(i - 1))(0);  // for i=1 y(i-1) is the position
+  auto yDot = (*(inter->y(i)))(0);   // for i=1 y(i) is the velocity
   double gamma = 1.0 / 2.0;
   if (_useGamma) {
     gamma = _gamma;
@@ -246,9 +246,9 @@ bool siconos::integrators::MoreauJeanDirectProjectionOSI::removeInteractionFromI
 bool siconos::integrators::MoreauJeanDirectProjectionOSI::addInteractionInIndexSet(
     std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i) {
   assert(i == 1);
-  auto y = (inter->y(i - 1))->getValue(0);  // for i=1 y(i-1) is the position
+  auto y = (*inter->y(i - 1))(0);  // for i=1 y(i-1) is the position
 #ifdef DEBUG_MESSAGES
-  auto yDot = (inter->y(i))->getValue(0);  // for i=1 y(i) is the velocity
+  auto yDot = (*(inter->y(i)))(0);  // for i=1 y(i) is the velocity
 #endif
   DEBUG_PRINTF(
       "siconos::integrators::MoreauJeanDirectProjectionOSI::addInteractionInIndexSet "
@@ -278,9 +278,9 @@ bool siconos::integrators::MoreauJeanDirectProjectionOSI::removeInteractionFromI
 
 {
   assert(i == 1);
-  auto y = (inter->y(i - 1))->getValue(0);        // for i=1 y(i-1) is the position
-  auto yDot = (inter->y(i))->getValue(0);         // for i=1 y(i) is the velocity
-  auto lambda = (inter->lambda(i))->getValue(0);  // for i=1 y(i) is the velocity
+  auto y = (*inter->y(i - 1))(0);        // for i=1 y(i-1) is the position
+  auto yDot = (*(inter->y(i)))(0);         // for i=1 y(i) is the velocity
+  auto lambda = (*(inter->lambda(i)))(0);  // for i=1 y(i) is the velocity
 
   DEBUG_PRINTF(
       "siconos::integrators::MoreauJeanDirectProjectionOSI::removeInteractionFromIndexSet "
@@ -306,9 +306,9 @@ bool siconos::integrators::MoreauJeanDirectProjectionOSI::removeInteractionFromI
 bool siconos::integrators::MoreauJeanDirectProjectionOSI::addInteractionInIndexSet(
     std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i) {
   assert(i == 1);
-  auto y = (inter->y(i - 1))->getValue(0);  // for i=1 y(i-1) is the position
+  auto y = (*inter->y(i - 1))(0);  // for i=1 y(i-1) is the position
 #ifdef DEBUG_MESSAGES
-  auto yDot = (inter->y(i))->getValue(0);  // for i=1 y(i) is the velocity
+  auto yDot = (*(inter->y(i)))(0);  // for i=1 y(i) is the velocity
 #endif
   DEBUG_PRINTF(
       "siconos::integrators::MoreauJeanDirectProjectionOSI::addInteractionInIndexSet "
@@ -334,8 +334,8 @@ bool siconos::integrators::MoreauJeanDirectProjectionOSI::removeInteractionFromI
 
 {
   assert(i == 1);
-  auto y = (inter->y(i - 1))->getValue(0);  // for i=1 y(i-1) is the position
-  auto yDot = (inter->y(i))->getValue(0);   // for i=1 y(i) is the velocity
+  auto y = (*inter->y(i - 1))(0);  // for i=1 y(i-1) is the position
+  auto yDot = (*(inter->y(i)))(0);   // for i=1 y(i) is the velocity
 
   DEBUG_PRINTF(
       "siconos::integrators::MoreauJeanDirectProjectionOSI::removeInteractionFromIndexSet "

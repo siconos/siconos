@@ -37,45 +37,6 @@ namespace siconos::algebra {
   */
 void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, bool init = true);
 
-/** send data of the matrix to an ostream
- * \param os An output stream
- * \param bm a BlockMatrix
- * \return The same output stream
- */
-// std::ostream& operator<<(std::ostream& os, const SiconosMatrix& sm);
-// std::ostream& operator<<(std::ostream& os, const SiconosMatrix& sm);
-std::ostream& operator<<(std::ostream& os, const BlockMatrix& sm);
-
-// /** Compute the matrix exponential Exp = exp(A) for general matrices,
-//   using scaling and Padé approximation. See expm.hpp.
-//   \param A : input matrix
-//   \param Exp : result = exp(A)
-//   \param computeAndAdd : if true, result = result + exp(A)
-// **/
-// void expm(SiconosMatrix& A, SiconosMatrix& Exp, bool computeAndAdd = false);
-
-/** Copy a subBlock of MIn into a sub-block of MOut - Dim and positions of the sub-block are
- *  given in dim and start.
- *  \param MIn a SPC::SiconosMatrix \param[in,out] MOut a std::shared_ptr<SiconosMatrix>
- *  \param dim an Index, dim[0], dim[1]: number of rows and columns of the sub-block
- *  \param start an Index, start[0], start[1]: position (row, column) of the first
- *  element of the sub-block in MIn start[2], start[3]: position (row, column) of the first
- *  element of the sub-block in MOut.
- */
-void setBlock(const SiconosMatrix& MIn, std::shared_ptr<SiconosMatrix> MOut,
-              const std::vector<std::size_t>& dim, const std::vector<std::size_t>& start);
-
-// /** Copy a subBlock of MIn into a sub-block of MOut - Dim and positions of the sub-block are
-//  *  given in dim and start.
-//  *  \param MIn a SPC::SiconosMatrix \param[in,out] MOut a std::shared_ptr<SiconosMatrix>
-//  *  \param dim an Index, dim[0], dim[1]: number of rows and columns of the sub-block
-//  *  \param start an Index, start[0], start[1]: position (row, column) of the first
-//  *  element of the sub-block in MIn start[2], start[3]: position (row, column) of the first
-//  *  element of the sub-block in MOut.
-//  */
-// void setBlock(const SiconosMatrix& MIn, std::shared_ptr<MapType> MOut,
-//               const std::vector<std::size_t>& dim, const std::vector<std::size_t>& start);
-
 }  // namespace siconos::algebra
 
 #endif

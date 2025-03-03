@@ -214,7 +214,7 @@ void BlockMatrixTest::testNormInf() {
   double n = 12;
   (*test)(4, 3) = n;
   (*test)(2, 1) = n - 3;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testNormInf: ", test->normInf() == n, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testNormInf: ", siconos::algebra::normInf(*test) == n, true);
   std::cout << "--> normInf test ended with success." << std::endl;
 }
 

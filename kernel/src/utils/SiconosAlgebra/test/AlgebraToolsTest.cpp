@@ -45,7 +45,7 @@ void AlgebraToolsTest::testExpm() {
   auto Exp = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
 
   siconos::algebra::expm(*A, *Exp);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testExpm : ", (*ref - *Exp).normInf() < 1e-6, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testExpm : ", siconos::algebra::normInf(*ref - *Exp) < 1e-6, true);
   std::cout << "--> Expm test ended with success." << std::endl;
 }
 

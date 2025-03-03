@@ -19,7 +19,6 @@
 #include "SiconosVector.hpp"
 
 #include "SiconosException.hpp"
-#include "SiconosVectorOp.hpp"  // For setBlock decl. ...
 
 void siconos::algebra::concatenateVectors(siconos::algebra::SiconosVector& target,
                                           const siconos::algebra::SiconosVector& a,
@@ -36,15 +35,6 @@ std::shared_ptr<siconos::algebra::SiconosVector> siconos::algebra::concatenateVe
   tmp->head(a.size()) = a;
   tmp->tail(b.size()) = b;
   return tmp;
-}
-
-void siconos::algebra::setBlock(const SiconosVector& vIn, std::shared_ptr<SiconosVector> vOut,
-                                unsigned int sizeB, unsigned int startIn,
-                                unsigned int startOut) {
-  unsigned int endOut = startOut + sizeB;
-  assert(vOut->size() >= endOut && "The output vector is too small");
-
-  vOut->segment(startOut, sizeB).noalias() = vIn.segment(startIn, sizeB);
 }
 
 bool siconos::algebra::orthoBaseFromVector(SiconosVector3& A, SiconosVector3& A1,

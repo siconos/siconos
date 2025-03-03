@@ -596,13 +596,13 @@ void siconos::modeling::LagrangianDS::display(bool brief) const {
   std::cout << "=====> Lagrangian System display (number: " << number_ << ").\n";
   std::cout << "- ndof_ : " << ndof_ << "\n";
   std::cout << "- q \n";
-  state_q_[0]->displayT();
+  siconos::algebra::print(*state_q_[0]);
   std::cout << "- q0 \n" << q0_view_->transpose() << "\n";
   std::cout << "- velocity\n ";
-  state_q_[1]->displayT();
+  siconos::algebra::print(*state_q_[1]);
   std::cout << "- acceleration \n";
   if (state_q_[2])
-    state_q_[2]->displayT();
+    siconos::algebra::print(*state_q_[2]);
   else
     std::cout << "-> nullptr\n";
 
@@ -610,13 +610,13 @@ void siconos::modeling::LagrangianDS::display(bool brief) const {
 
   std::cout << "- p[0] \n";
   if (p_[0])
-    p_[0]->displayT();
+    siconos::algebra::print(*p_[0]);
   else
     std::cout << "-> nullptr\n";
   std::cout << "- p[1]\n";
-  p_[1]->displayT();
+  siconos::algebra::print(*p_[1]);
   if (p_[2])
-    p_[2]->displayT();
+    siconos::algebra::print(*p_[2]);
   else
     std::cout << "-> nullptr\n";
 

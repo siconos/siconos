@@ -64,11 +64,11 @@ void siconos::mechanisms::MBTB_JointR::computeEquivalentForces() {
   ML_G_abs = *spML_G_abs;
 #ifdef MBTB_JOINTR_DEBUG
   printf("siconos::mechanisms::MBTB_JointR::computeEquivalentForces Blambda\n");
-  Blambda->display();
+  siconos::algebra::print(*Blambda);
   printf(
       "siconos::mechanisms::MBTB_JointR::computeEquivalentForces ML_G_abs (in "
       "abs frame):\n");
-  ML_G_abs.display();
+  siconos::algebra::print(ML_G_abs);
 #endif
 
   siconos::algebra::SiconosVector AB0(3);
@@ -81,9 +81,9 @@ void siconos::mechanisms::MBTB_JointR::computeEquivalentForces() {
   AB(2) = quatbuff.R_component_4();
 #ifdef MBTB_JOINTR_DEBUG
   printf("siconos::mechanisms::MBTB_JointR::computeEquivalentForces AB0:\n");
-  AB0.display();
+  siconos::algebra::print(AB0);
   printf("siconos::mechanisms::MBTB_JointR::computeEquivalentForces AB:\n");
-  AB.display();
+  siconos::algebra::print(AB);
 #endif
 
   ::boost::math::quaternion<double> quatG0C1(0, (*_G0C1)(0), (*_G0C1)(1), (*_G0C1)(2));
@@ -94,7 +94,7 @@ void siconos::mechanisms::MBTB_JointR::computeEquivalentForces() {
   GA(2) = quatbuff.R_component_4();
 #ifdef MBTB_JOINTR_DEBUG
   printf("siconos::mechanisms::MBTB_JointR::computeEquivalentForces GA:\n");
-  GA.display();
+  siconos::algebra::print(GA);
 #endif
   siconos::algebra::SiconosVector ML_A_abs(3);
   siconos::algebra::SiconosVector3 GA_FL;
@@ -102,11 +102,11 @@ void siconos::mechanisms::MBTB_JointR::computeEquivalentForces() {
   ML_A_abs = ML_G_abs - GA_FL;
 #ifdef MBTB_JOINTR_DEBUG
   printf("siconos::mechanisms::MBTB_JointR::computeEquivalentForces GA_FL:\n");
-  GA_FL.display();
+  siconos::algebra::print(GA_FL);
   printf("siconos::mechanisms::MBTB_JointR::computeEquivalentForces ML_A_abs :\n");
-  ML_A_abs.display();
+  siconos::algebra::print(ML_A_abs);
 #endif
-  double normAB = 1.0 / AB.norm2();
+  double normAB = 1.0 / AB.norm();
   double e0_x = normAB * AB(0);
   double e0_y = normAB * AB(1);
   double e0_z = normAB * AB(2);
@@ -165,7 +165,7 @@ void siconos::mechanisms::MBTB_JointR::computeEquivalentForces() {
   printf(
       "siconos::mechanisms::MBTB_JointR::computeEquivalentForces the sytem M "
       "is:\n");
-  _M->display();
+  siconos::algebra::print(*_M);
 #endif
   (*_F)(0) = FL(0);
   (*_F)(1) = FL(1);
@@ -175,7 +175,7 @@ void siconos::mechanisms::MBTB_JointR::computeEquivalentForces() {
   (*_F)(5) = e2_x * ML_A_abs(0) + e2_y * ML_A_abs(1) + e2_z * ML_A_abs(2);
 #ifdef MBTB_JOINTR_DEBUG
   printf("siconos::mechanisms::MBTB_JointR::computeEquivalentForces Mx=b, b:");
-  _F->display();
+  siconos::algebra::print(*_F);
 #endif
 
   /*Solve the system.*/
@@ -186,7 +186,7 @@ void siconos::mechanisms::MBTB_JointR::computeEquivalentForces() {
     printf(
         "siconos::mechanisms::MBTB_JointR::computeEquivalentForces Forces "
         "equivalent:");
-    _F->display();
+    siconos::algebra::print(*_F);
     printf(
         "siconos::mechanisms::MBTB_JointR::computeEquivalentForces checking "
         "ML_G_abs = MF1_G+MF2_G:");
@@ -202,7 +202,7 @@ void siconos::mechanisms::MBTB_JointR::computeEquivalentForces() {
     printf(
         "siconos::mechanisms::MBTB_JointR::computeEquivalentForces  "
         "FL-F1-F2(must be zero):\n");
-    dif.display();
+    siconos::algebra::print(dif);
     // MF1_G=F1/\C1G
     Maux1 = GA.cross(F1);
     ::boost::math::quaternion<double> quatG0C2(0, (*_G0C2)(0), (*_G0C2)(1), (*_G0C2)(2));
@@ -216,12 +216,12 @@ void siconos::mechanisms::MBTB_JointR::computeEquivalentForces() {
     printf(
         "siconos::mechanisms::MBTB_JointR::computeEquivalentForces  momentum "
         "(must be ML_G_abs):\n");
-    dif.display();
+    siconos::algebra::print(dif);
     dif = Maux1 + Maux2 - ML_G_abs;
     printf(
         "siconos::mechanisms::MBTB_JointR::computeEquivalentForces  dif "
         "momentum(must be zero):\n");
-    dif.display();
+    siconos::algebra::print(dif);
 #endif
   } catch (const std::exception& e) {
     printf("MBTB_JointR: exception caught.\n");

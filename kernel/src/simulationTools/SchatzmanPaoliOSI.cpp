@@ -275,8 +275,8 @@ double siconos::integrators::SchatzmanPaoliOSI::computeResidu() {
           *ds_work_vectors[siconos::integrators::SchatzmanPaoliOSI::RESIDU_FREE];
       auto& free = *ds_work_vectors[siconos::integrators::SchatzmanPaoliOSI::FREE];
 
-      DEBUG_EXPR(free.display());
-      DEBUG_EXPR(residuFree.display());
+      DEBUG_EXPR(siconos::algebra::print(free));
+      DEBUG_EXPR(siconos::algebra::print(residuFree));
 
       // Get state i (previous time step) from Memories -> var. indexed with "Old"
       const auto& q_k = lltids->qMemory().getSiconosVector(0);         // q_k
@@ -308,18 +308,18 @@ double siconos::integrators::SchatzmanPaoliOSI::computeResidu() {
         residuFree -= h * h * _theta * lltids->fext();
       }
 
-      DEBUG_EXPR(free.display());
-      DEBUG_EXPR(residuFree.display());
+      DEBUG_EXPR(siconos::algebra::print(free));
+      DEBUG_EXPR(siconos::algebra::print(residuFree));
 
       //  std::cout << "siconos::integrators::SchatzmanPaoliOSI::ComputeResidu
       //  LagrangianLinearTIDS residufree :"  << std::endl;
-      // residuFree->display();
+      // siconos::algebra::print(*residuFree);
 
       free = residuFree;                            // copy residuFree in Workfree
       if (lltids->p(0)) free -= lltids->p_read(0);  // Compute Residu in Workfree Notation !!
-      DEBUG_EXPR(free.display());
+      DEBUG_EXPR(siconos::algebra::print(free));
       normResidu = 0.0;  // we assume that v = vfree + W^(-1) p
-      //     normResidu = realresiduFree.norm2();
+      //     normResidu = realresiduFree.norm();
     } else
       THROW_EXCEPTION(
           "siconos::integrators::SchatzmanPaoliOSI::computeResidu - only implemented for "
@@ -413,7 +413,7 @@ struct siconos::integrators::SchatzmanPaoliOSI::_NSLEffectOnFreeOutput
     const auto& y_k_1(_inter->yMemory(_osnsp->inputOutputLevel()).getSiconosVector(1));
 
     DEBUG_PRINTF("_osnsp->inputOutputLevel() = %i \n ", _osnsp->inputOutputLevel());
-    DEBUG_EXPR(y_k_1.display());
+    DEBUG_EXPR(siconos::algebra::print(y_k_1));
     ;
     auto& osnsp_rhs =
         *(*_interProp.workVectors)[siconos::integrators::SchatzmanPaoliOSI::OSNSP_RHS];
@@ -558,15 +558,15 @@ void siconos::integrators::SchatzmanPaoliOSI::updateState(const unsigned int) {
 
       //  std::cout << "siconos::integrators::SchatzmanPaoliOSI::updateState - q_k_1 ="
       //  <<std::endl;
-      // q_k_1->display();
+      // siconos::algebra::print(*q_k_1);
       //  std::cout << "siconos::integrators::SchatzmanPaoliOSI::updateState - q ="
       //  <<std::endl;
-      // q->display();
+      // siconos::algebra::print(*q);
 
       *d->velocity() = 1.0 / (2.0 * h) * (d->q_read() - q_k_1);
       //  std::cout << "siconos::integrators::SchatzmanPaoliOSI::updateState - v ="
       //  <<std::endl;
-      // v->display();
+      // siconos::algebra::print(*v);
 
       // int bc=0;
       // auto columntmp =
@@ -579,7 +579,7 @@ void siconos::integrators::SchatzmanPaoliOSI::updateState(const unsigned int) {
       //     _IterationMatrixBoundaryConditionsMap[ds]->getCol(bc,*columntmp);
       //     /*\warning we assume that W is symmetric in the Lagrangian case*/
       //     double value = - columntmp->dot(*v);
-      //     value += (d->p(level))->getValue(itindex);
+      //     value += (d->p(level))(itindex);
       //     /* \warning the computation of reactionToBoundaryConditions take into
       //        account the contact impulse but not the external and internal forces.
       //        A complete computation of the residue should be better */
@@ -591,7 +591,7 @@ void siconos::integrators::SchatzmanPaoliOSI::updateState(const unsigned int) {
         double ds_norm_ref = 1. + ds->x0().norm();  // Should we save this in the graph?
         *ds_work_vectors[siconos::integrators::SchatzmanPaoliOSI::LOCAL_BUFFER] -= d->q_read();
         auto aux =
-            (ds_work_vectors[siconos::integrators::SchatzmanPaoliOSI::LOCAL_BUFFER]->norm2()) /
+            (ds_work_vectors[siconos::integrators::SchatzmanPaoliOSI::LOCAL_BUFFER]->norm()) /
             ds_norm_ref;
         if (aux > RelativeTol) _simulation->setRelativeConvergenceCriterionHeld(false);
       }
@@ -603,7 +603,7 @@ void siconos::integrators::SchatzmanPaoliOSI::updateState(const unsigned int) {
       //       auto v = d->velocity();
       // #ifdef SCHATZMANPAOLI_NE_DEBUG
       //       std::cout<<"siconos::integrators::SchatzmanPaoliOSI::updatestate prev
-      //       v"<<endl; v->display();
+      //       v"<<endl; siconos::algebra::print(*v);
       // #endif
 
       //       /*d->p has been fill by the Relation->computeInput, it contains
@@ -613,13 +613,13 @@ void siconos::integrators::SchatzmanPaoliOSI::updateState(const unsigned int) {
 
       // #ifdef SCHATZMANPAOLI_NE_DEBUG
       //       std::cout<<"siconos::integrators::SchatzmanPaoliOSI::updatestate hWB
-      //       lambda"<<endl; v->display();
+      //       lambda"<<endl; siconos::algebra::print(*v);
       // #endif
 
       // #ifdef SCHATZMANPAOLI_NE_DEBUG
       //       std::cout<<"siconos::integrators::SchatzmanPaoliOSI::updatestate work
       //       free"<<endl; std::cout<<"siconos::integrators::SchatzmanPaoliOSI::updatestate
-      //       new v"<<endl; v->display();
+      //       new v"<<endl; siconos::algebra::print(*v);
       // #endif
       //       //compute q
       //       //first step consists in computing  \dot q.
@@ -629,10 +629,10 @@ void siconos::integrators::SchatzmanPaoliOSI::updateState(const unsigned int) {
       //       auto dotq = d->dotq();
       //       siconos::algebra::prod(*T,*v,*dotq,true);
       //       // std::cout<<"siconos::integrators::SchatzmanPaoliOSI::updateState v"<<endl;
-      //       // v->display();
+      //       // siconos::algebra::print(*v);
       //       // std::cout<<"siconos::integrators::SchatzmanPaoliOSI::updateState
       //       dotq"<<endl;
-      //       // dotq->display();
+      //       // siconos::algebra::print(*dotq);
 
       //       auto q = d->q();
 
@@ -649,15 +649,15 @@ void siconos::integrators::SchatzmanPaoliOSI::updateState(const unsigned int) {
       //       *q += *qold;
       // #ifdef SCHATZMANPAOLI_NE_DEBUG
       //       std::cout<<"new q before normalizing"<<endl;
-      //       q->display();
+      //       siconos::algebra::print(*q);
       // #endif
 
       //       //q[3:6] must be normalized
       //       d->normalizeq();
-      //       dotq->setValue(3,(q->getValue(3)-qold->getValue(3))/h);
-      //       dotq->setValue(4,(q->getValue(4)-qold->getValue(4))/h);
-      //       dotq->setValue(5,(q->getValue(5)-qold->getValue(5))/h);
-      //       dotq->setValue(6,(q->getValue(6)-qold->getValue(6))/h);
+      //       (*dotq)(3) = ((*q)(3)-(*qold)(3))/h;
+      //       (*dotq)(4) = ((*q)(4)-(*qold)(4))/h;
+      //       (*dotq)(5) = ((*q)(5)-(*qold)(5))/h;
+      //       (*dotq)(6) = ((*q)(6)-(*qold)(6))/h;
       //       d->updateT();
       THROW_EXCEPTION(
           "siconos::integrators::SchatzmanPaoliOSI::updateState - only implemented for "
@@ -679,7 +679,7 @@ void siconos::integrators::SchatzmanPaoliOSI::display() const {
     std::cout << "--------------------------------\n";
     std::cout << "--> W of dynamical system number " << ds->number() << ":\n";
     if (_dynamicalSystemsGraph->properties(*dsi).iterationMatrix)
-      _dynamicalSystemsGraph->properties(*dsi).iterationMatrix->display();
+      siconos::algebra::print(*_dynamicalSystemsGraph->properties(*dsi).iterationMatrix);
     else
       std::cout << "-> nullptr"
                 << "\n";

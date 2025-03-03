@@ -26,11 +26,10 @@
 #include <memory>
 #include <vector>
 
-#include "SiconosVector.hpp"
 #include "SiconosSerialization.hpp"
+#include "SiconosVector.hpp"
 
 namespace siconos::algebra {
-
 
 /**
    "Block" vector : container (list) of SiconosVector
@@ -42,7 +41,6 @@ namespace siconos::algebra {
 */
 class BlockVector {
  private:
-
   using VectorOfVectors = std::vector<std::shared_ptr<SiconosVector>>;
 
   ACCEPT_SERIALIZATION(BlockVector);
@@ -103,8 +101,8 @@ class BlockVector {
   //    \param start_in starting position in input vector of the block to be copied
   //    \param start_out starting position in current vector of the block to be filled in.
   // */
-  void setBlock(const SiconosVector& input, unsigned int size_block, unsigned int start_in,
-                unsigned int start_out);
+  // void setBlock(const SiconosVector& input, unsigned int size_block, unsigned int start_in,
+  //               unsigned int start_out);
 
   /** \return the size of the vector (sum of the sizes of all its blocks) */
   unsigned int size() const { return _sizeV; };
@@ -127,8 +125,8 @@ class BlockVector {
   /** \return the number of SiconosVectors in the container */
   inline auto numberOfBlocks() const { return _tabIndex->size(); };
 
-//   /** \return true if all SiconosVector in the container are dense **/
-//   bool isDense() const;
+  //   /** \return true if all SiconosVector in the container are dense **/
+  //   bool isDense() const;
 
   /** sets all the values of the vector to 0.0 */
   void setZero();
@@ -138,9 +136,6 @@ class BlockVector {
    *  \param a double
    */
   void fill(double a);
-
-  /** display data on standard output */
-  void display(void) const;
 
   /** Get a component of the vector
    *
@@ -182,8 +177,7 @@ class BlockVector {
    *  \param pos index of the required block
    *  \return the expected block
    */
-  inline std::shared_ptr<const SiconosVector> vector(unsigned int pos) const
-  {
+  inline std::shared_ptr<const SiconosVector> vector(unsigned int pos) const {
     return _vect[pos];
   };
 
@@ -309,9 +303,6 @@ class BlockVector {
   /** \return the Euclidian norm of the vector */
   double norm() const;
 
-  /** \return the infinite norm of the vector */
-  double normInf() const;
-
   /**
      Tranform a BlockVector into a SiconosVector.
 
@@ -340,6 +331,19 @@ class BlockVector {
 
   /** End of Friend functions group @} */
 };
+
+// Free functions
+
+/** \return the infinite norm of a block vector
+ * \param v the input vector
+ */
+double normInf(const BlockVector& v);
+
+/** display data on standard output
+ *  \param v the input vector
+ */
+void print(const BlockVector& v);
+
 }  // namespace siconos::algebra
 
 #endif

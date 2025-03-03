@@ -179,7 +179,7 @@ double siconos::algebra::io::compareRefFile(const SiconosMatrix &data, std::stri
 
   if (verbose) {
     std::cout << "Error vector:\n";
-    err.displayT();
+    siconos::algebra::print(err);
   }
 
   double error = 0.;

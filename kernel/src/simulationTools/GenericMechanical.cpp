@@ -217,7 +217,7 @@ int siconos::nonsmooth_formulations::GenericMechanical::compute(double time)
     info = gmp_driver(_pnumerics_GMP, &*_z->data(), &*_w->data(),
                                          &*_numerics_solver_options);
     // printf("siconos::nonsmooth_formulations::GenericMechanical::compute : R:\n");
-    //_z->display();
+    //siconos::algebra::print(*_z);
     postCompute();
   }
   else {

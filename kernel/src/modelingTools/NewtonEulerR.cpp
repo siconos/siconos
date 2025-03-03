@@ -171,8 +171,10 @@ void siconos::modeling::NewtonEulerR::computeOutput(double time, Interaction& in
     if (derivativeNumber == 1) {
       assert(H_NE_prod_T_);
       assert(DSlink[siconos::tools::enum_to_index(WorkDS::velocity)]);
-      DEBUG_EXPR(H_NE_prod_T_->display(););
-      DEBUG_EXPR((*DSlink[siconos::tools::enum_to_index(WorkDS::velocity)]).display(););
+      DEBUG_EXPR(siconos::algebra::print(*H_NE_prod_T_););
+      DEBUG_EXPR(
+          siconos::algebra::print((*DSlink[siconos::tools::enum_to_index(WorkDS::velocity)])));
+      ;
       /* \warning  V.A. 15/04/2016
        * We decide finally not to update the Jacobian there. To be discussed
        */
@@ -180,7 +182,7 @@ void siconos::modeling::NewtonEulerR::computeOutput(double time, Interaction& in
       //      computeH_NE_prod_T(inter, q);
       auto& vel = *DSlink[siconos::tools::enum_to_index(WorkDS::velocity)];
       siconos::algebra::matrixBlockVector_prod(*H_NE_prod_T_, vel, y);
-      DEBUG_EXPR(y.display(););
+      DEBUG_EXPR(siconos::algebra::print(y););
     } else if (derivativeNumber == 2) {
       THROW_EXCEPTION(
           "Call siconos::modeling::NewtonEulerR::computeOutput(..., derivativeNumber=2) is "
@@ -198,27 +200,29 @@ void siconos::modeling::NewtonEulerR::computeInput(double time, Interaction& int
   DEBUG_BEGIN("siconos::modeling::NewtonEulerR::computeInput(...)\n")
   DEBUG_PRINTF("with time = %f and level = %i starts\n", time, level);
   DEBUG_EXPR(printf("interaction %p\n", &inter););
-  DEBUG_EXPR(inter.display(););
+  DEBUG_EXPR(siconos::algebra::print(inter););
   auto& DSlink = inter.linkToDSVariables();
 
   // get lambda of the concerned interaction
   auto& lambda = *inter.lambda(level);
 
-  DEBUG_EXPR(lambda.display(););
-  DEBUG_EXPR(DSlink[siconos::tools::enum_to_index(WorkDS::p0) + level]->display(););
+  DEBUG_EXPR(siconos::algebra::print(lambda););
+  DEBUG_EXPR(
+      siconos::algebra::print(*DSlink[siconos::tools::enum_to_index(WorkDS::p0) + level]););
 
   if (level == 1 ||
       level == 2) /* \warning : we assume that ContactForce is given by lambda[level] */
   {
     siconos::algebra::transposeMatrixVector_prod(lambda, *H_NE_prod_T_, *contactForce_, true);
-    DEBUG_EXPR(contactForce_->display(););
+    DEBUG_EXPR(siconos::algebra::print(*contactForce_););
 
     siconos::algebra::transposeMatrixVector_prod_toBlock(
         lambda, *H_NE_prod_T_, *DSlink[siconos::tools::enum_to_index(WorkDS::p0) + level],
         false);
 
-    DEBUG_EXPR(H_NE_prod_T_->display(););
-    DEBUG_EXPR(DSlink[siconos::tools::enum_to_index(WorkDS::p0) + level]->display(););
+    DEBUG_EXPR(siconos::algebra::print(*H_NE_prod_T_););
+    DEBUG_EXPR(
+        siconos::algebra::print(*DSlink[siconos::tools::enum_to_index(WorkDS::p0) + level]););
   } else if (level == 0) {
     siconos::algebra::transposeMatrixVector_prod_toBlock(
         lambda, *H_NE_view_, *DSlink[siconos::tools::enum_to_index(WorkDS::p0) + level],
@@ -278,7 +282,7 @@ void siconos::modeling::NewtonEulerR::computeSecondOrderTimeDerivativeTerms(
   // Compute the time derivative of the Jacobian
   // and the product of the time derivative of the Jacobian with dotq
   // we assume that dotq is up to date !
-  DEBUG_EXPR(DSlink[siconos::tools::enum_to_index(WorkDS::dotq)]->display();)
+  DEBUG_EXPR(siconos::algebra::print(*DSlink[siconos::tools::enum_to_index(WorkDS::dotq)]);)
   assert(computeH_NE_dot_);
   computeH_NE_dot_(*DSlink[siconos::tools::enum_to_index(WorkDS::q0)],
                    *DSlink[siconos::tools::enum_to_index(WorkDS::dotq)], *H_NE_dot_);
@@ -287,13 +291,13 @@ void siconos::modeling::NewtonEulerR::computeSecondOrderTimeDerivativeTerms(
     secondOrderTimeDerivativeTerms_ =
         std::make_shared<siconos::algebra::SiconosVector>(H_NE_dot_->rows());
 
-  DEBUG_EXPR(H_NE_dot_->display(););
+  DEBUG_EXPR(siconos::algebra::print(*H_NE_dot_););
 
   siconos::algebra::matrixBlockVector_prod(
       *H_NE_dot_, *DSlink[siconos::tools::enum_to_index(WorkDS::dotq)],
       *secondOrderTimeDerivativeTerms_, true);
 
-  DEBUG_EXPR(_secondOrderTimeDerivativeTerms->display());
+  DEBUG_EXPR(siconos::algebra::print(*_secondOrderTimeDerivativeTerms));
 
   // Compute the product of H and Tdot --> jachqTdot
 
@@ -321,6 +325,6 @@ void siconos::modeling::NewtonEulerR::computeSecondOrderTimeDerivativeTerms(
       jacobianhOver_q_prod_Tdot, *DSlink[siconos::tools::enum_to_index(WorkDS::velocity)],
       *secondOrderTimeDerivativeTerms_, false);
 
-  DEBUG_EXPR(_secondOrderTimeDerivativeTerms->display());
+  DEBUG_EXPR(siconos::algebra::print(*_secondOrderTimeDerivativeTerms));
   DEBUG_PRINT("siconos::modeling::NewtonEulerR::computeSecondOrderTimeDerivativeTerms ends\n");
 }

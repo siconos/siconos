@@ -53,7 +53,7 @@ void siconos::control::LinearSMC::actuate() {
     LinearDS_SMC.setConstantbVector(bSMC_);  // Shared memory view
   }
 
-  DEBUG_EXPR(_DS_SMC->xMemory().display(););
+  DEBUG_EXPR(siconos::algebra::print(_DS_SMC->xMemory()););
 
   *(_DS_SMC->x()) = _sensor->y();
 
@@ -75,7 +75,7 @@ void siconos::control::LinearSMC::actuate() {
   *_us = *_lambda;
   *_u = *_us;
   *_u += *_ueq;
-  DEBUG_EXPR(_u->display(););
+  DEBUG_EXPR(siconos::algebra::print(*_u));;
   _indx++;
   DEBUG_END("void siconos::control::LinearSMC::actuate()\n")
 }

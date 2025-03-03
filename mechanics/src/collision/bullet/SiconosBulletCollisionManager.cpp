@@ -915,9 +915,9 @@ siconos::collision::bullet::SiconosBulletCollisionManager::lineIntersectionQuery
       if (rec) {
         auto result = std::make_shared<siconos::collision::SiconosCollisionQueryResult>();
         result->point = std::make_shared<siconos::algebra::SiconosVector>(3);
-        result->point->setValue(0, rayResult.m_hitPointWorld.getX());
-        result->point->setValue(1, rayResult.m_hitPointWorld.getY());
-        result->point->setValue(2, rayResult.m_hitPointWorld.getZ());
+        (*result->point)(0) = rayResult.m_hitPointWorld.getX();
+        (*result->point)(1) = rayResult.m_hitPointWorld.getY();
+        (*result->point)(2) = rayResult.m_hitPointWorld.getZ();
         result->distance = (*result->point - start).norm();
         result->body = rec->ds;  // note: may be null for static contactors
         result->shape = rec->sshape;
@@ -946,9 +946,9 @@ siconos::collision::bullet::SiconosBulletCollisionManager::lineIntersectionQuery
           auto result(std::make_shared<SiconosCollisionQueryResult>());
           result->point = std::make_shared<siconos::algebra::SiconosVector>(3);
           result->point->resize(3);
-          result->point->setValue(0, rayResult.m_hitPointWorld[i].getX());
-          result->point->setValue(1, rayResult.m_hitPointWorld[i].getY());
-          result->point->setValue(2, rayResult.m_hitPointWorld[i].getZ());
+          (*result->point)(0) = rayResult.m_hitPointWorld[i].getX();
+          (*result->point)(1) = rayResult.m_hitPointWorld[i].getY();
+          (*result->point)(2) = rayResult.m_hitPointWorld[i].getZ();
           result->distance = (*result->point - start).norm();
           result->body = rec->ds;  // note: null for static contactors
           result->shape = rec->sshape;

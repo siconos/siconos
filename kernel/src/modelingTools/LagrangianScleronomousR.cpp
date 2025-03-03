@@ -162,12 +162,12 @@ void siconos::modeling::LagrangianScleronomousR::computeInput(double time, Inter
   computeJacobianhOver_q(*DSlink[tools::enum_to_index(WorkDS::q0)]);
   // get lambda of the concerned interaction
   auto& lambda = *inter.lambda(level);
-  DEBUG_EXPR(lambda.display(););
+  DEBUG_EXPR(siconos::algebra::print(lambda););
   // data[name] += trans(G) * lambda
   siconos::algebra::transposeMatrixVector_prod_toBlock(
       lambda, *jacobianhOver_q_view_, *DSlink[tools::enum_to_index(WorkDS::p0) + level],
       false);
-  DEBUG_EXPR(DSlink[tools::enum_to_index(WorkDS::p0) + level]->display(););
+  DEBUG_EXPR(siconos::algebra::print(*DSlink[tools::enum_to_index(WorkDS::p0) + level]););
   DEBUG_END(
       "void siconos::modeling::LagrangianScleronomousR::computeInput(double time, "
       "Interaction& inter, InteractionProperties& interProp, unsigned int level) \n");
@@ -179,7 +179,7 @@ void siconos::modeling::LagrangianScleronomousR::computeJach(double time, Intera
       "Interaction& "
       "inter) \n");
   auto& DSlink = inter.linkToDSVariables();
-  DEBUG_EXPR(inter.display(););
+  DEBUG_EXPR(siconos::algebra::print(inter););
   computeJacobianhOver_q(*DSlink[tools::enum_to_index(WorkDS::q0)]);
   computejacobianhOver_q_dot(*DSlink[tools::enum_to_index(WorkDS::q0)],
                              *DSlink[tools::enum_to_index(WorkDS::q1)]);

@@ -181,7 +181,7 @@ void siconos::integrators::LsodarOSI::computeRhs(double t) {
         // lds->update_lu_mass();
         free = lds->LUMass()->solve(free);
       }
-      DEBUG_EXPR(free.display(););
+      DEBUG_EXPR(siconos::algebra::print(free););
     }
     if (_extraAdditionalTerms) {
       auto dsgVD = _dynamicalSystemsGraph->descriptor(ds);
@@ -484,7 +484,7 @@ void siconos::integrators::LsodarOSI::integrate(double& tinit, double& tend, dou
                             // initialisation.
 
   // === LSODAR CALL ===
-  DEBUG_EXPR(_xWork->display(););
+  DEBUG_EXPR(siconos::algebra::print(*_xWork););
   *_xtmp = *(_xWork->toSiconosVector());
   if (istate == 3) {
     istate = 1;  // restart TEMPORARY
@@ -532,8 +532,8 @@ void siconos::integrators::LsodarOSI::integrate(double& tinit, double& tend, dou
   tout = tinit_DR;  // real ouput time
   tend = tend_DR;   // necessary for next start of DLSODAR
   DEBUG_PRINTF("tout = %g, tinit = %g, tend = %g ", tout, tinit, tend);
-  DEBUG_EXPR(_xtmp->display(););
-  DEBUG_EXPR(_xWork->display(););
+  DEBUG_EXPR(siconos::algebra::print(*_xtmp););
+  DEBUG_EXPR(siconos::algebra::print(*_xWork););
   if (istate == 3) {
     //      std:: std::cout << "ok\n";
     assert(true);
@@ -641,7 +641,7 @@ void siconos::integrators::LsodarOSI::computeFreeOutput(
   if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_ACC]).get() == osnsp) {
     if (relationType == siconos::modeling::RelationType::Lagrangian) {
       Xfree = inter_work_block[siconos::integrators::LsodarOSI::xfree];
-      DEBUG_EXPR(Xfree->display(););
+      DEBUG_EXPR(siconos::algebra::print(*Xfree););
     }
     // else if  (relationType == siconos::modeling::RelationType::NewtonEuler)
     // {
@@ -649,12 +649,12 @@ void siconos::integrators::LsodarOSI::computeFreeOutput(
     // }
     assert(Xfree);
     //        std::cout << "Computeqblock Xfree (Gamma)========" << std::endl;
-    //       Xfree->display();
+    //       siconos::algebra::print(*Xfree);
   } else if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_IMPACT]).get() == osnsp) {
     Xfree = DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q1)];
     //        std::cout << "Computeqblock Xfree (Velocity)========" <<
     //        std::endl;
-    //       Xfree->display();
+    //       siconos::algebra::print(*Xfree);
   } else
     THROW_EXCEPTION(" computeqBlock for Event Event-driven is wrong ");
 

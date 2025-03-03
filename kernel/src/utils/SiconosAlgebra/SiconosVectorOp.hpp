@@ -31,23 +31,6 @@
 
 namespace siconos::algebra {
 
-// class SiconosVector;
-
-/** Copy a subBlock of size sizeB of vIn (from index startIn) into a subBlock
- *  of vOut (from index startOut)
- * \param vIn block to copy
- * \param vOut vector to change (destination)
- * \param sizeB number of the elements to copy
- * \param startIn the beginning of the range of elements to copy from
- * \param startOut the beginning of the destination range
- */
-void setBlock(const SiconosVector& vIn, std::shared_ptr<SiconosVector> vOut,
-              unsigned int sizeB, unsigned int startIn, unsigned int startOut);
-
-/** formatted output for block vectors
- */
-std::ostream& operator<<(std::ostream& os, const BlockVector& bv);
-
 /** test if two BlockVectors have the same number of blocks with
     blocks of the same size when at the same position
     \param v1 first vector to compare with

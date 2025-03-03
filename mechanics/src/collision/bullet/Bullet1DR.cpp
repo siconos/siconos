@@ -27,7 +27,7 @@ siconos::collision::bullet::Bullet1DR::Bullet1DR(std::shared_ptr<btManifoldPoint
 
 void siconos::collision::bullet::Bullet1DR::computeh(
     const siconos::algebra::BlockVector &q, Eigen::Ref<siconos::algebra::SiconosVector> y) {
-    y.setValue(0, _contactPoints->getDistance());
+    y(0) = _contactPoints->getDistance();
   auto posa = _contactPoints->getPositionWorldOnA();
   auto posb = _contactPoints->getPositionWorldOnB();
   (*pc1())(0) = posa[0];

@@ -732,7 +732,7 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
 
   for (unsigned int i = 0; i < data->rows(); i++) {
     for (unsigned int j = 0; j < data->cols(); j++) {
-      double v = data->getValue(i, j);
+      double v = (*data)(i, j);
       (*heightfield)[j * data->rows() + i] = v;
       if (v > vmax) vmax = v;
       if (v < vmin) vmin = v;
@@ -1266,10 +1266,10 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
 
     } else if (record->base->size() == 3) {
       DEBUG_PRINT("2D DS\n");
-      q(0) = record->base->getValue(0);
-      q(1) = record->base->getValue(1);
+      q(0) = (*record->base)(0);
+      q(1) = (*record->base)(1);
       q(2) = 0.0;
-      double angle = record->base->getValue(2);
+      double angle = (*record->base)(2);
       q(3) = cos(angle / 2.);
       q(4) = 0.0;
       q(5) = 0.0;
@@ -1280,7 +1280,7 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
     q(3) = 1;
   }
   DEBUG_PRINT("Position of the shape given to bullet:")
-  DEBUG_EXPR_WE(q.display(););
+  DEBUG_EXPR_WE(siconos::algebra::print(q););
 
   btTransform t;
   if (record->contactor->offset) {
@@ -1367,7 +1367,7 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
       base = rbds->base_extrapolated_position();
     } else {
       base = rbds->base_position();
-      // base->display();
+      // siconos::algebra::print(*base);
     }
   }
   if (rb2dds) {

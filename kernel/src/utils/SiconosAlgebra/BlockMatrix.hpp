@@ -153,19 +153,6 @@ class BlockMatrix {
   /** \return the number of columns of the matrix */
   auto cols() const { return _dimCol; }
 
-  /** compute the infinite norm of the Block matrix
-   *  \return a double
-   */
-  double normInf() const;
-
-  /** display data on standard output
-   */
-  void display() const;
-
-  /** display data on standard output
-   */
-  void displayExpert(bool brief = true) const;
-
   friend std::ostream &operator<<(std::ostream &os, const BlockMatrix &bm);
 
   /** get or set the element matrix[i,j]
@@ -241,12 +228,6 @@ class BlockMatrix {
   void copyBlock(unsigned int i, unsigned int j,
                  std::shared_ptr<siconos::algebra::SiconosMatrix>);
 
-  /** Set new block pointer
-   *
-   */
-  void setBlock(unsigned int i, unsigned int j,
-                std::shared_ptr<siconos::algebra::SiconosMatrix>);
-
   void updateNumericsMatrix() {
     THROW_EXCEPTION("BlockMatrix::updateNumericsMatrix(), not implemented fro BlockMatrix");
   };
@@ -254,12 +235,30 @@ class BlockMatrix {
   // friend class SiconosMatrix;
   friend SiconosMatrix &operator*=(SiconosMatrix &m, const double &s);
   friend SiconosMatrix &operator/=(SiconosMatrix &m, const double &s);
-
+  friend void print(const BlockMatrix &mat);
   /** number of non-zero in the matrix
    * \param tol the tolerance under which a number is considered zero
    */
-  size_t nnz(double tol = 1.e-14);
+  size_t nonZeros(double tol = 1.e-14);
 };
+
+// Free functions
+
+/** \return compute the infinite norm of a matrix
+ *  \param mat the input matrix
+ */
+double normInf(const BlockMatrix &mat);
+
+/** display data on standard output
+ *  \param mat the input matrix
+ */
+void print(const BlockMatrix &mat);
+
+// /** Set new block pointer
+//  *
+//  */
+// void setBlock(unsigned int i, unsigned int j,
+//   std::shared_ptr<siconos::algebra::SiconosMatrix>);
 
 }  // namespace siconos::algebra
 

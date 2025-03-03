@@ -23,8 +23,6 @@
 #include "BlockMatrix.hpp"
 #include "RotationQuaternion.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixOp.hpp"        // setBlock
-#include "SiconosMatrixVectorOp.hpp"  // mat-vec prod
 #include "SiconosVector.hpp"
 #include "SiconosVisitor.hpp"
 // #define DEBUG_STDOUT
@@ -217,13 +215,13 @@ void siconos::modeling::NewtonEulerDS::computeRhs(double time) {
 
   computeWrench(*twist_, *state_q_, time);
   *acceleration_ += *wrench_;
-  DEBUG_EXPR(wrench_->display(););
+  DEBUG_EXPR(siconos::algebra::print(*wrench_););
 
   if (LUMass_) *acceleration_ = LUMass_->solve(*acceleration_);
 
   // Compute dotq_
   siconos::modeling::newton_euler::computeT(*state_q_, *T_);
-  siconos::algebra::prod(*T_, *twist_, *dotq_, true);
+  *dotq_ = *T_ * *twist_;
 
   state_x_[1]->head(qDim_) = *dotq_;
   state_x_[1]->tail(qDim_) = *acceleration_;
@@ -422,7 +420,7 @@ void siconos::modeling::NewtonEulerDS::computeWrench(
     wrench_->tail(3) -= buffer;
   }
 
-  DEBUG_EXPR(wrench_->display());
+  DEBUG_EXPR(siconos::algebra::print(*wrench_));
   DEBUG_END("siconos::modeling::NewtonEulerDS::computeWrench(...) \n");
 }
 
@@ -469,7 +467,7 @@ void siconos::modeling::NewtonEulerDS::computeJacobianWrenchOver_q(
           *state_q_, time, computemext_, isMextExpressedInInertialFrame_, matrix_buffer);
       jacobianWrenchOver_q_->bottomRows(3) += matrix_buffer;
     }
-    DEBUG_EXPR(_jacobianWrenchq->display(););
+    DEBUG_EXPR(siconos::algebra::print(*_jacobianWrenchq););
   }
 }
 
@@ -519,35 +517,35 @@ void siconos::modeling::NewtonEulerDS::computeJacobianWrenchOver_twist(
 void siconos::modeling::NewtonEulerDS::display(bool brief) const {
   std::cout << "=====> NewtonEuler System display (number: " << number_ << ").\n";
   std::cout << "- q \n";
-  state_q_->displayT();
+  siconos::algebra::print(*state_q_);
 
   std::cout << "- initial state: \n" << q0_view_->transpose() << "\n";
   std::cout << "- twist \n";
-  twist_->displayT();
+  siconos::algebra::print(*twist_);
 
   std::cout << "- twist0 \n " << twist0_view_->transpose() << "\n";
 
   std::cout << "- dotq \n";
   if (dotq_)
-    dotq_->displayT();
+    siconos::algebra::print(*dotq_);
   else
     std::cout << "-> nullptr\n";
 
   std::cout << "- p[0] \n";
   if (p_[0])
-    p_[0]->displayT();
+    siconos::algebra::print(*p_[0]);
   else
     std::cout << "-> nullptr\n";
 
   std::cout << "- p[1] \n";
   if (p_[1])
-    p_[1]->displayT();
+    siconos::algebra::print(*p_[1]);
   else
     std::cout << "-> nullptr\n";
 
   std::cout << "- p[2] \n";
   if (p_[2])
-    p_[2]->displayT();
+    siconos::algebra::print(*p_[2]);
   else
     std::cout << "-> nullptr\n";
 
@@ -618,7 +616,7 @@ double siconos::modeling::NewtonEulerDS::computeKineticEnergy() {
   DEBUG_BEGIN("siconos::modeling::NewtonEulerDS::computeKineticEnergy()\n");
   assert(twist_);
   assert(totalInertiaMatrix_);
-  DEBUG_EXPR(twist_->display());
+  DEBUG_EXPR(siconos::algebra::print(*twist_));
 
   auto tmp = *totalInertiaMatrix_ * *twist_;
 
@@ -649,7 +647,6 @@ void siconos::modeling::NewtonEulerDS::setScalarMass(double mass) {
   (*totalInertiaMatrix_)(1, 1) = scalarMass_;
   (*totalInertiaMatrix_)(2, 2) = scalarMass_;
 };
-
 
 ///////////////////////////////////////////////////////////////////////////////////////
 /////////// Free functions in the namespace siconos::modeling::newton_euler ///////////
@@ -766,8 +763,8 @@ void siconos::modeling::newton_euler::computeJacobianMGyrOver_twist(
     result.col(i + 3) = ei.cross(iomega) + omega.cross(inertia.block<3, 3>(3, 3) * ei);
   }
   // Check if Jacobian is valid. Warning to the transpose operation in
-  // _jacobianMGyrtwist->setValue(3 + j, 3 + i, ei_Iomega.getValue(j) +
-  // omega_Iei.getValue(j));
+  // _jacobianMGyrtwist->setValue(3 + j, 3 + i, ei_Iomega(j) +
+  // omega_Iei(j));
 }
 
 void siconos::modeling::newton_euler::computeJacobianMGyrOver_twist_byFD(
@@ -800,8 +797,8 @@ void siconos::modeling::newton_euler::computeJacobianMExtqExpressedInInertialFra
   if (isMextExpressedInInertialFrame)
     siconos::geometry::rewriteVectorFromAbsoluteToBodyFrame(q, mext);
 
-  DEBUG_EXPR(q.display());
-  DEBUG_EXPR(mext.display());
+  DEBUG_EXPR(siconos::algebra::print(q));
+  DEBUG_EXPR(siconos::algebra::print(mext));
 
   isMextExpressedInInertialFrame = isMextExpressedInInertialFrame_save;
 

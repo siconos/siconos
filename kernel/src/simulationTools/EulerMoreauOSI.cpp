@@ -388,7 +388,7 @@ void siconos::integrators::EulerMoreauOSI::computeIterationMatrix(
     }
   }
 
-  DEBUG_EXPR(W.display(););
+  DEBUG_EXPR(siconos::algebra::print(W););
 
   //  if (_useGamma)
   {
@@ -406,7 +406,7 @@ void siconos::integrators::EulerMoreauOSI::computeIterationMatrix(
   _dynamicalSystemsGraph->properties(dsv).LUW =
       std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(iterationMatrix);
 
-  DEBUG_EXPR(W.display());
+  DEBUG_EXPR(siconos::algebra::print(W));
   DEBUG_END("siconos::integrators::EulerMoreauOSI::computeIterationMatrix(...)\n");
 }
 
@@ -524,8 +524,8 @@ double siconos::integrators::EulerMoreauOSI::computeResidu() {
     if (!fods->isTimeInvariant()) {
       if (!_useGamma)  // no gamma
       {
-        DEBUG_EXPR(fonlds->r()->display(););
-        DEBUG_EXPR(residu.display());
+        DEBUG_EXPR(siconos::algebra::print(*fonlds->r()););
+        DEBUG_EXPR(siconos::algebra::print(residu));
         residu -= h * *fods->r();
       } else {
         residu -= h * _gamma * *fods->r();
@@ -533,10 +533,10 @@ double siconos::integrators::EulerMoreauOSI::computeResidu() {
       }
     }
 
-    normResidu = residu.norm2();
-    DEBUG_EXPR(residu.display());
+    normResidu = residu.norm();
+    DEBUG_EXPR(siconos::algebra::print(residu));
     DEBUG_PRINT("siconos::integrators::EulerMoreauOSI::computeResidu final residuFree\n");
-    DEBUG_EXPR(residuFree.display());
+    DEBUG_EXPR(siconos::algebra::print(residuFree));
 
     if (normResidu > maxResidu) maxResidu = normResidu;
   }
@@ -594,7 +594,7 @@ void siconos::integrators::EulerMoreauOSI::computeFreeState() {
 
     DEBUG_PRINT(
         "siconos::integrators::EulerMoreauOSI::computeFreeState xfree <- residuFree\n");
-    DEBUG_EXPR(xfree.display());
+    DEBUG_EXPR(siconos::algebra::print(xfree));
 
     if (_useGamma) {
       const auto& rold = d->rMemory().getSiconosVector(0);
@@ -611,7 +611,7 @@ void siconos::integrators::EulerMoreauOSI::computeFreeState() {
     xfree *= -1.0;
     xfree += x;
 
-    DEBUG_EXPR(xfree.display());
+    DEBUG_EXPR(siconos::algebra::print(xfree));
 
     // now the crazy intermediate variables
     // xPartialNS was updated before this fonction call
@@ -622,7 +622,7 @@ void siconos::integrators::EulerMoreauOSI::computeFreeState() {
     DEBUG_PRINT(
         "siconos::integrators::EulerMoreauOSI::computeFreeState xPartialNS from "
         "Interaction\n");
-    DEBUG_EXPR(xPartialNS.display());
+    DEBUG_EXPR(siconos::algebra::print(xPartialNS));
 
     // -> Solve WX = g(x, \lambda, t_{k+1}) - B_{k+1}^{\alpha} \lambda - K_{k+1}^{\alpha} x
     // and set xPartialNS = X
@@ -633,7 +633,7 @@ void siconos::integrators::EulerMoreauOSI::computeFreeState() {
     xPartialNS += xfree;
     DEBUG_PRINT(
         "siconos::integrators::EulerMoreauOSI::computeFreeState xPartialNS real value\n");
-    DEBUG_EXPR(xPartialNS.display());
+    DEBUG_EXPR(siconos::algebra::print(xPartialNS));
 
     // deltaxForRelation = (\widetilde{K}_{k+1}^{\alpha})^{-1} xPartialNS - x
     auto& deltaxForRelation =
@@ -642,7 +642,7 @@ void siconos::integrators::EulerMoreauOSI::computeFreeState() {
 
     deltaxForRelation -= x;
 
-    DEBUG_EXPR(deltaxForRelation.display());
+    DEBUG_EXPR(siconos::algebra::print(deltaxForRelation));
 
     // have a look at the end of the DevNotes for this part
     if (_useGammaForRelation) {
@@ -658,9 +658,9 @@ void siconos::integrators::EulerMoreauOSI::computeFreeState() {
     }
 
     // some output
-    DEBUG_EXPR(xfree.display(););
-    DEBUG_EXPR(xPartialNS.display(););
-    DEBUG_EXPR(deltaxForRelation.display(););
+    DEBUG_EXPR(siconos::algebra::print(xfree););
+    DEBUG_EXPR(siconos::algebra::print(xPartialNS););
+    DEBUG_EXPR(siconos::algebra::print(deltaxForRelation););
   }
   DEBUG_END("siconos::integrators::EulerMoreauOSI::computeFreeState()\n");
 }
@@ -760,12 +760,12 @@ void siconos::integrators::EulerMoreauOSI::computeFreeOutput(
   std::shared_ptr<siconos::algebra::SiconosVector> H_alpha{nullptr};
 
   auto deltax = inter_work_block[siconos::integrators::EulerMoreauOSI::DELTA_X];
-  DEBUG_EXPR(deltax->display(););
+  DEBUG_EXPR(siconos::algebra::print(*deltax););
   auto& osnsp_rhs = *(*indexSet->properties(vertex_inter)
                            .workVectors)[siconos::integrators::EulerMoreauOSI::OSNSP_RHS];
 
   auto Xfree = inter_work_block[siconos::integrators::EulerMoreauOSI::XFREE];
-  DEBUG_EXPR(Xfree->display(););
+  DEBUG_EXPR(siconos::algebra::print(*Xfree););
   assert(Xfree);
 
   auto mainInteraction = inter;
@@ -797,13 +797,13 @@ void siconos::integrators::EulerMoreauOSI::computeFreeOutput(
     if (_useGammaForRelation) {
       THROW_EXCEPTION(
           "siconos::integrators::EulerMoreauOSI::ComputeFreeOutput not yet implemented with "
-          "useGammaForRelation() for FirstOrderR and Type2R and H_alpha->getValue() should "
+          "useGammaForRelation() for FirstOrderR and Type2R and H_alpha() should "
           "return the mid-point value");
     }
     auto& hAlpha = *inter_work[siconos::integrators::EulerMoreauOSI::H_ALPHA];
-    DEBUG_EXPR(hAlpha.display());
+    DEBUG_EXPR(siconos::algebra::print(hAlpha));
     osnsp_rhs += hAlpha;
-    DEBUG_EXPR(osnsp_rhs.display(););
+    DEBUG_EXPR(siconos::algebra::print(osnsp_rhs););
   } else if (relationSubType == siconos::modeling::RelationSubType::Type1R) {
     DEBUG_PRINT(
         "relationType == siconos::modeling::RelationType::FirstOrder && relationSubType == "
@@ -820,7 +820,7 @@ void siconos::integrators::EulerMoreauOSI::computeFreeOutput(
     if (_useGammaForRelation) {
       THROW_EXCEPTION(
           "siconos::integrators::EulerMoreauOSI::ComputeFreeOutput not yet implemented with "
-          "useGammaForRelation() for FirstOrderR and Typ2R and H_alpha->getValue() should "
+          "useGammaForRelation() for FirstOrderR and Typ2R and H_alpha() should "
           "return the mid-point value");
     }
     if (inter_work[siconos::integrators::EulerMoreauOSI::H_ALPHA]) {
@@ -841,7 +841,7 @@ void siconos::integrators::EulerMoreauOSI::computeFreeOutput(
     } else
       osnsp_rhs.setZero();
 
-    DEBUG_EXPR(osnsp_rhs.display(););
+    DEBUG_EXPR(siconos::algebra::print(osnsp_rhs););
     //    if (relationSubType == siconos::modeling::RelationSubType::LinearTIR ||
     //  relationSubType == siconos::modeling::RelationSubType::LinearR) {
     // In the first order linear case it may be required to add e to y.
@@ -859,7 +859,7 @@ void siconos::integrators::EulerMoreauOSI::computeFreeOutput(
         osnsp_rhs += e;
       }
     }
-    DEBUG_EXPR(osnsp_rhs.display(););
+    DEBUG_EXPR(siconos::algebra::print(osnsp_rhs););
     //}
   }
   DEBUG_END("siconos::integrators::EulerMoreauOSI::computeFreeOutput(...)\n");
@@ -905,9 +905,9 @@ void siconos::integrators::EulerMoreauOSI::updateState(const unsigned int) {
     auto fods = std::static_pointer_cast<siconos::modeling::FirstOrderNonLinearDS>(ds);
     auto& x = *ds->x();
     DEBUG_PRINT("siconos::integrators::EulerMoreauOSI::updateState Old value of x\n");
-    DEBUG_EXPR(x.display());
+    DEBUG_EXPR(siconos::algebra::print(x));
     DEBUG_PRINT("siconos::integrators::EulerMoreauOSI::updateState residu value\n");
-    DEBUG_EXPR(d->r()->display());
+    DEBUG_EXPR(siconos::algebra::print(*d->r()));
 
     // TODO ???
     bool baux = (useRCC &&
@@ -934,12 +934,12 @@ void siconos::integrators::EulerMoreauOSI::updateState(const unsigned int) {
       auto ds_norm_ref = 1. + fods->x0().norm();  // Should we save this in the graph?
       *ds_work_vectors[siconos::integrators::EulerMoreauOSI::LOCAL_BUFFER] -= x;
       auto aux =
-          (ds_work_vectors[siconos::integrators::EulerMoreauOSI::LOCAL_BUFFER]->norm2()) /
+          (ds_work_vectors[siconos::integrators::EulerMoreauOSI::LOCAL_BUFFER]->norm()) /
           (ds_norm_ref);
       if (aux > RelativeTol) _simulation->setRelativeConvergenceCriterionHeld(false);
     }
     DEBUG_PRINT("siconos::integrators::EulerMoreauOSI::updateState New value of x\n");
-    DEBUG_EXPR(x.display());
+    DEBUG_EXPR(siconos::algebra::print(x));
   }
 }
 
@@ -957,7 +957,7 @@ void siconos::integrators::EulerMoreauOSI::display() const {
     std::cout << "--> W of dynamical system number " << ds->number() << ": "
               << "\n";
     if (_dynamicalSystemsGraph->properties(*dsi).iterationMatrix)
-      _dynamicalSystemsGraph->properties(*dsi).iterationMatrix->display();
+      siconos::algebra::print(*_dynamicalSystemsGraph->properties(*dsi).iterationMatrix);
     else
       std::cout << "-> nullptr\n";
     std::cout << "--> and corresponding theta is: " << _theta << "\n";
@@ -1011,10 +1011,10 @@ void siconos::integrators::EulerMoreauOSI::updateOutput(double time, unsigned in
       //                     + D_{k+1}^alpha ( lambda_{k+1}^{alpha+1} - lambda_{k+1}^{alpha}
       //                     )
       auto& y = *inter.y(level);
-      DEBUG_EXPR(y.display());
+      DEBUG_EXPR(siconos::algebra::print(y));
 
       auto& residuY = *inter_work[siconos::integrators::EulerMoreauOSI::VEC_RESIDU_Y];
-      DEBUG_EXPR(residuY.display());
+      DEBUG_EXPR(siconos::algebra::print(residuY));
       y = *inter_work[siconos::integrators::EulerMoreauOSI::YOLD] - residuY;
 
       if (rel.hasJacobianhOver_lambda())
@@ -1022,11 +1022,11 @@ void siconos::integrators::EulerMoreauOSI::updateOutput(double time, unsigned in
              *inter_work[siconos::integrators::EulerMoreauOSI::LAMBDAOLD];
 
       DEBUG_PRINT("siconos::integrators::EulerMoreauOSI::updateOutput : y(level) \n");
-      DEBUG_EXPR(y.display());
+      DEBUG_EXPR(siconos::algebra::print(y));
 
       auto& deltax = *inter_work_block[siconos::integrators::EulerMoreauOSI::DELTA_X];
       DEBUG_PRINT("siconos::integrators::EulerMoreauOSI::updateOutput : deltax \n");
-      DEBUG_EXPR(deltax.display());
+      DEBUG_EXPR(siconos::algebra::print(deltax));
 
       if (rel.hasJacobianhOver_state()) {
         auto C = rel.jacobianhOver_state();
@@ -1034,16 +1034,16 @@ void siconos::integrators::EulerMoreauOSI::updateOutput(double time, unsigned in
       }
 
       DEBUG_PRINT("siconos::integrators::EulerMoreauOSI::updateOutput : y before osnsM\n");
-      DEBUG_EXPR(y.display());
+      DEBUG_EXPR(siconos::algebra::print(y));
       if (interProp.block) {
         y += *interProp.block * *inter.lambda(level);
         // block = h* C* W ^ -1 * B + D
         // y += osnsM * *inter.lambda(level);
-        DEBUG_EXPR(inter.lambda(level)->display());
-        DEBUG_EXPR(osnsM.display());
+        DEBUG_EXPR(siconos::algebra::print(*inter.lambda(level)));
+        DEBUG_EXPR(siconos::algebra::print(osnsM));
         DEBUG_PRINT(
             "siconos::integrators::EulerMoreauOSI::updateOutput : new linearized y \n");
-        DEBUG_EXPR(y.display());
+        DEBUG_EXPR(siconos::algebra::print(y));
       }
 
       auto& hAlpha = *inter_work[siconos::integrators::EulerMoreauOSI::H_ALPHA];
@@ -1051,7 +1051,7 @@ void siconos::integrators::EulerMoreauOSI::updateOutput(double time, unsigned in
       rel.computeh(*DSlink[siconos::modeling::FirstOrderR::Xxx], time, *inter.lambda(level),
                    hAlpha);
       DEBUG_PRINT("siconos::integrators::EulerMoreauOSI::updateOutput : new Halpha \n");
-      DEBUG_EXPR(hAlpha.display());
+      DEBUG_EXPR(siconos::algebra::print(hAlpha));
     } else
       inter.computeOutput(time, level);
   }
@@ -1093,12 +1093,13 @@ void siconos::integrators::EulerMoreauOSI::updateInput(double time, unsigned int
             relation.jacobiangOver_lambda() * lambda;
       *DSlink[siconos::modeling::FirstOrderR::Rrr] +=
           *inter_work_block[siconos::integrators::EulerMoreauOSI::G_ALPHA];
-      DEBUG_EXPR(DSlink[siconos::modeling::FirstOrderR::Rrr]->display(););
+      DEBUG_EXPR(siconos::algebra::print(*DSlink[siconos::modeling::FirstOrderR::Rrr]););
       // compute the new g_alpha
 
       relation.computeg(*inter.lambda(level),
                         *inter_work_block[siconos::integrators::EulerMoreauOSI::G_ALPHA]);
-      DEBUG_EXPR(inter_work_block[siconos::integrators::EulerMoreauOSI::G_ALPHA]->display(););
+      DEBUG_EXPR(siconos::algebra::print(
+                     *inter_work_block[siconos::integrators::EulerMoreauOSI::G_ALPHA]););
     } else if (relationSubType == siconos::modeling::RelationSubType::NonLinearR) {
       auto forel =
           std::dynamic_pointer_cast<siconos::modeling::FirstOrderNonLinearR>(inter.relation());
@@ -1119,7 +1120,7 @@ void siconos::integrators::EulerMoreauOSI::updateInput(double time, unsigned int
 
       auto& deltax = *inter_work_block[siconos::integrators::EulerMoreauOSI::DELTA_X];
       DEBUG_PRINT("siconos::modeling::FirstOrderNonLinearR::computeInput : deltax \n");
-      DEBUG_EXPR(deltax.display());
+      DEBUG_EXPR(siconos::algebra::print(deltax));
 
       if (forel->hasJacobiangOver_state())
         siconos::algebra::matrixBlockVector_prod(forel->jacobiangOver_state(), deltax, g_alpha,
@@ -1148,7 +1149,7 @@ double siconos::integrators::EulerMoreauOSI::computeResiduOutput(
     auto& residuY = *inter_work[siconos::integrators::EulerMoreauOSI::VEC_RESIDU_Y];
     auto& inter = *indexSet->bundle(*ui);
     residuY = *(inter.y(0)) - *inter_work[siconos::integrators::EulerMoreauOSI::H_ALPHA];
-    residu = std::max(residu, residuY.norm2());
+    residu = std::max(residu, residuY.norm());
   }
   return residu;
 }
@@ -1173,7 +1174,7 @@ double siconos::integrators::EulerMoreauOSI::computeResiduInput(
       residuR.tail(v2->size()) = *v2;
     }
     residuR -= *galpha->vector(0);
-    residu = std::max(residu, residuR.norm2());
+    residu = std::max(residu, residuR.norm());
   }
   return residu;
 }

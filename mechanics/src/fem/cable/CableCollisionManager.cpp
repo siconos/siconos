@@ -39,9 +39,9 @@ void siconos::fem::cable::CableCollisionManager::updateInteractions(
       contact = contactItr->second;
     }
     auto pc1 = std::make_shared<siconos::algebra::SiconosVector3>();
-    pc1->setValue(0, q.getValue(i));
-    pc1->setValue(1, q.getValue(i + 1));
-    pc1->setValue(2, q.getValue(i + 2));
+    (*pc1)(0) = q(i);
+    (*pc1)(1) = q(i + 1);
+    (*pc1)(2) = q(i + 2);
 
     for (auto &s : supports_) {
       if (s->isContact(*pc1, tolAtContact_)) {

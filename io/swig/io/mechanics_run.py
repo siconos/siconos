@@ -2352,11 +2352,9 @@ class MechanicsHdf5Runner(siconos.mechanics.mechanics_hdf5.MechanicsHdf5):
             elif self._dimension == 2:
                 # VA. change the position such that is corresponds to a 3D object
                 new_positions = np.zeros((number_of_ds, 8))
-
                 new_positions[:, 0] = positions[0, :]  # ds number
                 new_positions[:, 1] = positions[1, :]  # x position
                 new_positions[:, 2] = positions[2, :]  # y position
-
                 new_positions[:, 4] = np.cos(positions[3, :] / 2.0)
                 new_positions[:, 7] = np.sin(positions[3, :] / 2.0)
                 self._dynamic_data[current_line:, :] = np.concatenate(
@@ -2374,7 +2372,7 @@ class MechanicsHdf5Runner(siconos.mechanics.mechanics_hdf5.MechanicsHdf5):
         velocities = self._io.velocities(self._nsds)
         # io.velocities : contains the velocities for all DS (1 column per DS)
         # with DS numbers on the first row.
-        # WARNING: last line is useless in velocities but exists to optimize 
+        # WARNING: last line is useless in velocities but exists to optimize
         # memory print in C++.
         number_of_ds = velocities.shape[1]
 

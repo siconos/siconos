@@ -133,11 +133,13 @@ class SiconosMemory : public std::vector<siconos::algebra::SiconosVector> {
    * is null
    */
   void swap(std::shared_ptr<siconos::algebra::SiconosVector> v);
-
-  /** displays the data of the memory object
-   */
-  void display() const;
 };
+
+// Free functions
+
+/** displays the data of the memory object */
+void print(const SiconosMemory&);
+
 }  // namespace siconos::algebra
 
 #endif

@@ -45,11 +45,11 @@ void siconos::fem::cable::Cable2d3DR::computeh(const siconos::algebra::BlockVect
 
   // LagrangianScleronomousR::computeh(q, z, y);
   auto& position = *((q.getAllVect())[0]);
-  _Pc1->setValue(0, position(_node_dof_index));
-  _Pc1->setValue(1, position(_node_dof_index + 1));
-  _Pc1->setValue(2, position(_node_dof_index + 2));
-  y.setValue(0, distance());
-  DEBUG_EXPR(y.display(););
+  (*_Pc1)(0) = position(_node_dof_index);
+  (*_Pc1)(1) = position(_node_dof_index + 1);
+  (*_Pc1)(2) = position(_node_dof_index + 2);
+  y(0) = distance();
+  DEBUG_EXPR(siconos::algebra::print(y););
   DEBUG_EXPR(display(););
   DEBUG_END("Cable2d3DR::computeh(...)\n")
 }
@@ -60,13 +60,13 @@ void siconos::fem::cable::Cable2d3DR::computeJacobianhOver_q(
       "Cable2d3DR::computeJacobianhOver_q(const siconos::algebra::BlockVector& q, "
       "siconos::algebra::BlockVector& z \n");
 
-  double Nx = _Normal->getValue(0);
-  double Ny = _Normal->getValue(1);
-  double Nz = _Normal->getValue(2);
+  double Nx = (*_Normal)(0);
+  double Ny = (*_Normal)(1);
+  double Nz = (*_Normal)(2);
 
-  double Tx = _Tangent->getValue(0);
-  double Ty = _Tangent->getValue(1);
-  double Tz = _Tangent->getValue(2);
+  double Tx = (*_Tangent)(0);
+  double Ty = (*_Tangent)(1);
+  double Tz = (*_Tangent)(2);
 
   DEBUG_PRINTF("N_x = %4.2e,\t N_y = %4.2e,\t N_z= %4.2e\n", Nx, Ny, Nz);
   DEBUG_PRINTF("T_x = %4.2e,\t T_y = %4.2e,\t T_z= %4.2e\n", Tx, Ty, Tz);
@@ -92,11 +92,11 @@ void siconos::fem::cable::Cable2d3DR::computeJacobianhOver_q(
 double siconos::fem::cable::Cable2d3DR::distance() const {
   DEBUG_BEGIN("Cable2d3DR::distance(...)\n")
   siconos::algebra::SiconosVector dpc(*_Pc2 - *_Pc1);
-  DEBUG_EXPR(_Pc1->display(););
-  DEBUG_EXPR(_Pc2->display(););
-  DEBUG_EXPR(dpc.display(););
+  DEBUG_EXPR(siconos::algebra::print(*_Pc1););
+  DEBUG_EXPR(siconos::algebra::print(*_Pc2););
+  DEBUG_EXPR(siconos::algebra::print(dpc););
   DEBUG_END("Cable2d3DR::distance(...)\n")
-  return dpc.norm2() * (_Normal->dot(dpc) >= 0 ? -1 : 1);
+  return dpc.norm() * (_Normal->dot(dpc) >= 0 ? -1 : 1);
 }
 
 void siconos::fem::cable::Cable2d3DR::updateContactPoint(
@@ -123,18 +123,18 @@ void siconos::fem::cable::Cable2d3DR::updateContactPoint(
 
 void siconos::fem::cable::Cable2d3DR::updateContactPoint(double pc1[3], double pc2[3],
                                                          double normal[3], double tangent[3]) {
-  _Pc1->setValue(0, pc1[0]);
-  _Pc1->setValue(1, pc1[1]);
-  _Pc1->setValue(2, pc1[2]);
-  _Pc2->setValue(0, pc2[0]);
-  _Pc2->setValue(1, pc2[1]);
-  _Pc2->setValue(2, pc2[2]);
-  _Normal->setValue(0, normal[0]);
-  _Normal->setValue(1, normal[1]);
-  _Normal->setValue(2, normal[2]);
-  _Tangent->setValue(0, tangent[0]);
-  _Tangent->setValue(1, tangent[1]);
-  _Tangent->setValue(2, normal[2]);
+  (*_Pc1)(0) = pc1[0];
+  (*_Pc1)(1) = pc1[1];
+  (*_Pc1)(2) = pc1[2];
+  (*_Pc2)(0) = pc2[0];
+  (*_Pc2)(1) = pc2[1];
+  (*_Pc2)(2) = pc2[2];
+  (*_Normal)(0) = normal[0];
+  (*_Normal)(1) = normal[1];
+  (*_Normal)(2) = normal[2];
+  (*_Tangent)(0) = tangent[0];
+  (*_Tangent)(1) = tangent[1];
+  (*_Tangent)(2) = normal[2];
 };
 
 void siconos::fem::cable::Cable2d3DR::display() const {
@@ -144,25 +144,25 @@ void siconos::fem::cable::Cable2d3DR::display() const {
 
   std::cout << " _Pc1: \n";
   if (_Pc1)
-    _Pc1->display();
+    siconos::algebra::print(*_Pc1);
   else
     std::cout << " nullptr\n";
 
   std::cout << " _Pc2 :\n";
   if (_Pc2)
-    _Pc2->display();
+    siconos::algebra::print(*_Pc2);
   else
     std::cout << " nullptr\n";
 
   std::cout << " _Normal:\n";
   if (_Normal)
-    _Normal->display();
+    siconos::algebra::print(*_Normal);
   else
     std::cout << " nullptr\n";
 
   std::cout << " _Tangent:\n";
   if (_Tangent)
-    _Tangent->display();
+    siconos::algebra::print(*_Tangent);
   else
     std::cout << " nullptr\n";
 }

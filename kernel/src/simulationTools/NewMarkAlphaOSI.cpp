@@ -165,15 +165,15 @@ double siconos::integrators::NewMarkAlphaOSI::computeResidu() {
           std::make_shared<siconos::algebra::SiconosVector>(residuFree);  // _residu = freeR
       *_residu -= d->p_read(2);  // _residu = _workspace[freeresidu] - p
       // Compute Euclidean norm of the residual
-      normResidu = _residu->norm2();
+      normResidu = _residu->norm();
       // Take maximum value of norm over all DS
       if (normResidu > maxResidu) {
         maxResidu = normResidu;
       }
       //
 
-      DEBUG_EXPR(residuFree.display(););
-      DEBUG_EXPR(_residu->display(););
+      DEBUG_EXPR(siconos::algebra::print(residuFree););
+      DEBUG_EXPR(siconos::algebra::print(*_residu););
     } else {
       THROW_EXCEPTION(
           "In siconos::integrators::NewMarkAlphaOSI::computeResidu(t,ds), this type of "
@@ -206,7 +206,7 @@ void siconos::integrators::NewMarkAlphaOSI::computeFreeState() {
           _dynamicalSystemsGraph->properties(*dsi).LUW->solve(qfree);  //_qfree = (W^-1)*R_free
       qfree *= -1.0;  //_qfree = -(W^-1)*R_free
       //
-      DEBUG_EXPR(qfree.display(););
+      DEBUG_EXPR(siconos::algebra::print(qfree););
     } else {
       THROW_EXCEPTION(
           "In siconos::integrators::NewMarkAlphaOSI::computeResidu(t,ds), this type of "
@@ -242,7 +242,7 @@ void siconos::integrators::NewMarkAlphaOSI::computeFreeOutput(
     q_free = workBlockV[siconos::integrators::NewMarkAlphaOSI::xfree];
   }
   assert(q_free);
-  DEBUG_EXPR(q_free->display(););
+  DEBUG_EXPR(siconos::algebra::print(*q_free););
 
   // get pointer to yForNSsolver vector
 
@@ -326,7 +326,7 @@ void siconos::integrators::NewMarkAlphaOSI::computeFreeOutput(
       }
     }  // endif(relationSubType == ScleronomousR)
 
-    DEBUG_EXPR(osnsp_rhs.display(););
+    DEBUG_EXPR(siconos::algebra::print(osnsp_rhs););
   } else {
     THROW_EXCEPTION(
         "In siconos::integrators::NewMarkAlphaOSI::computeFreeOutput, this type of relation "
@@ -565,10 +565,10 @@ void siconos::integrators::NewMarkAlphaOSI::prediction() {
       acce_like = d->acceleration_read();
 
       DEBUG_PRINT("Before prediction :\n")
-      DEBUG_EXPR(d->q()->display(););
-      DEBUG_EXPR(d->velocity()->display(););
-      DEBUG_EXPR(d->acceleration()->display(););
-      DEBUG_EXPR(acce_like.display(););
+      DEBUG_EXPR(siconos::algebra::print(*d->q()););
+      DEBUG_EXPR(siconos::algebra::print(*d->velocity()););
+      DEBUG_EXPR(siconos::algebra::print(*d->acceleration()););
+      DEBUG_EXPR(siconos::algebra::print(acce_like););
 
       *d->q() += d->velocity_read() * h +
                  acce_like *
@@ -590,10 +590,10 @@ void siconos::integrators::NewMarkAlphaOSI::prediction() {
       d->acceleration()->setZero();
 
       DEBUG_PRINT("After prediction :\n")
-      DEBUG_EXPR(d->q()->display(););
-      DEBUG_EXPR(d->velocity()->display(););
-      DEBUG_EXPR(d->acceleration()->display(););
-      DEBUG_EXPR(acce_like.display(););
+      DEBUG_EXPR(siconos::algebra::print(*d->q()););
+      DEBUG_EXPR(siconos::algebra::print(*d->velocity()););
+      DEBUG_EXPR(siconos::algebra::print(*d->acceleration()););
+      DEBUG_EXPR(siconos::algebra::print(acce_like););
     } else {
       THROW_EXCEPTION(
           "In siconos::integrators::NewMarkAlphaOSI::prediction: this type of DS is not "
@@ -651,10 +651,10 @@ void siconos::integrators::NewMarkAlphaOSI::correction() {
                    ((beta_prime / (h * h)) * delta_q);
 
       DEBUG_PRINT("After correction : \n");
-      DEBUG_EXPR(d->q()->display(););
-      DEBUG_EXPR(d->velocity()->display(););
-      DEBUG_EXPR(d->acceleration()->display(););
-      DEBUG_EXPR(acce_like.display(););
+      DEBUG_EXPR(siconos::algebra::print(*d->q()););
+      DEBUG_EXPR(siconos::algebra::print(*d->velocity()););
+      DEBUG_EXPR(siconos::algebra::print(*d->acceleration()););
+      DEBUG_EXPR(siconos::algebra::print(acce_like););
     } else {
       THROW_EXCEPTION(
           "In siconos::integrators::NewMarkAlphaOSI::updateState: this type of DS is not "
@@ -737,33 +737,33 @@ void siconos::integrators::NewMarkAlphaOSI::computeCoefsDenseOutput(
     // a0 = q_n
     (*_vec) = q_n;
     _CoeffsDense->col(0) = (*_vec);
-    DEBUG_EXPR(std::cout << "a0: "; _vec->display(););
+    DEBUG_EXPR(std::cout << "a0: "; siconos::algebra::print(*_vec););
     // a1 = h*dotq_n
     (*_vec) = h * dotq_n;
     _CoeffsDense->col(1) = (*_vec);
-    DEBUG_EXPR(std::cout << "a1: "; _vec->display(););
+    DEBUG_EXPR(std::cout << "a1: "; siconos::algebra::print(*_vec););
     // a2 = 0.5*h^2*ddotq_n
     (*_vec) = (0.5 * h * h) * ddotq_n;
     _CoeffsDense->col(2) = (*_vec);
-    DEBUG_EXPR(std::cout << "a2: "; _vec->display(););
+    DEBUG_EXPR(std::cout << "a2: "; siconos::algebra::print(*_vec););
     // a3 = -10*q_n - 6*h*dotq_n - 1.5*h^2*ddotq_n + 10*q_{n+1} - 4*h*dotq_{n+1} +
     // 0.5*h^2*ddotq_{n+1}
     (*_vec) = (-10.0) * q_n - (6.0 * h) * dotq_n - (1.5 * h * h) * ddotq_n + 10.0 * q_np1 -
               (4.0 * h) * dotq_np1 + (0.5 * h * h) * ddotq_np1;
     _CoeffsDense->col(3) = (*_vec);
-    DEBUG_EXPR(std::cout << "a3: "; _vec->display(););
+    DEBUG_EXPR(std::cout << "a3: "; siconos::algebra::print(*_vec);)
     // a4 = 15*q_n + 8*h*dotq_n + 1.5*h^2*ddotq_n - 15*q_{n+1} + 7*h*dotq_{n+1} -
     // h^2*ddotq_{n+1}
     (*_vec) = 15.0 * q_n + (8.0 * h) * dotq_n + (1.5 * h * h) * ddotq_n - 15.0 * q_np1 +
               (7.0 * h) * dotq_np1 - h * h * ddotq_np1;
     _CoeffsDense->col(4) = (*_vec);
-    DEBUG_EXPR(std::cout << "a4: "; _vec->display(););
+    DEBUG_EXPR(std::cout << "a4: "; siconos::algebra::print(*_vec);)
     // a5 = -6*q_n - 3*h*dotq_n - 0.5*h^2*ddotq_n + 6*q_{n+1} - 3*h*dotq_{n+1} +
     // 0.5*h^2*ddotq_{n+1}
     (*_vec) = (-6.0) * q_n - (3.0 * h) * dotq_n - (0.5 * h * h) * ddotq_n + 6.0 * q_np1 -
               (3.0 * h) * dotq_np1 + (0.5 * h * h) * ddotq_np1;
     _CoeffsDense->col(5) = (*_vec);
-    DEBUG_EXPR(std::cout << "a5: "; _vec->display(););
+    DEBUG_EXPR(std::cout << "a5: "; siconos::algebra::print(*_vec);)
     //
 #ifdef DEBUG_NEWMARK
     std::cout << "==================== In "
@@ -772,19 +772,19 @@ void siconos::integrators::NewMarkAlphaOSI::computeCoefsDenseOutput(
               << std::endl;
     std::cout << "DS number: " << ds->number() << std::endl;
     std::cout << "q_n: ";
-    q_n->display();
+    siconos::algebra::print(*q_n);
     std::cout << "dotq_n: ";
-    dotq_n->display();
+    siconos::algebra::print(*dotq_n);
     std::cout << "ddotq_n: ";
-    ddotq_n->display();
+    siconos::algebra::print(*ddotq_n);
     std::cout << "q_n+1: ";
-    q_np1->display();
+    siconos::algebra::print(*q_np1);
     std::cout << "dotq_n+1: ";
-    dotq_np1->display();
+    siconos::algebra::print(*dotq_np1);
     std::cout << "ddotq_n+1: ";
-    ddotq_np1->display();
+    siconos::algebra::print(*ddotq_np1);
     std::cout << "Dense output coefficient matrix: " << std::endl;
-    _CoeffsDense->display();
+    siconos::algebra::print(*_CoeffsDense);
 #endif
   } else {
     THROW_EXCEPTION(
@@ -896,6 +896,6 @@ void siconos::integrators::newmark_alpha::computeIterationMatrix_Lagrangian(
 #ifdef DEBUG_NEWMARK
   std::cout.precision(15);
   std::cout << "Iteration matrix W: ";
-  W->display();
+  siconos::algebra::print(*W);
 #endif
 }

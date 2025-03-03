@@ -63,7 +63,7 @@ void siconos::collision::native::bodies::SphereLDSPlanR::computeh(
   double q_1 = q(1);
   double q_2 = q(2);
 
-  y.setValue(0, distance(q_0, q_1, q_2, r));
+  y(0) = distance(q_0, q_1, q_2, r);
 };
 
 void normalize(std::shared_ptr<siconos::algebra::SiconosVector>, unsigned int);

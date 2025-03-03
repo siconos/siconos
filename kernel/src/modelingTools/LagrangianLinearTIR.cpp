@@ -96,9 +96,9 @@ void siconos::modeling::LagrangianLinearTIR::computeInput(double time, Interacti
   siconos::algebra::SiconosVector& lambda = *inter.lambda(level);
   auto& DSlink = inter.linkToDSVariables();
   // computation of p = Ht lambda
-  DEBUG_EXPR(lambda.display(););
-  DEBUG_EXPR(jacobianhOver_q_->display(););
-  DEBUG_EXPR(DSlink[tools::enum_to_index(WorkDS::p0) + level]->display(););
+  DEBUG_EXPR(siconos::algebra::print(lambda););
+  DEBUG_EXPR(siconos::algebra::print(*jacobianhOver_q_););
+  DEBUG_EXPR(siconos::algebra::print(*DSlink[tools::enum_to_index(WorkDS::p0) + level]););
   siconos::algebra::transposeMatrixVector_prod_toBlock(
       lambda, *jacobianhOver_q_view_, *DSlink[tools::enum_to_index(WorkDS::p0) + level],
       false);

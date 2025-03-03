@@ -201,8 +201,8 @@ void Disks::init(std::string disks_input) {
     auto nsds = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(t0, T);
 
     for (unsigned int i = 0; i < disks_matrix->rows(); i++) {
-      R = disks_matrix->getValue(i, 2);
-      m = disks_matrix->getValue(i, 3);
+      R = (*disks_matrix)(i, 2);
+      m = (*disks_matrix)(i, 3);
 
       initial_positions_.segment(NDOF * i, 2) = disks_matrix->row(i).segment(0, 2);
 

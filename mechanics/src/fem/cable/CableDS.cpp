@@ -31,7 +31,7 @@ siconos::fem::cable::CableDS::CableDS(Eigen::Ref<siconos::algebra::SiconosVector
 
   TRNp_Np = TRNp_NpMatrix();
 
-  TRNp_Np->display();
+  siconos::algebra::print(*TRNp_Np);
 
   // Constructor with initial state and mass.
   // We assume that q0, v0 and mass are computed by the "cable model" based on mesh and other
@@ -135,15 +135,14 @@ void siconos::fem::cable::CableDS::tangentStiffnessMatrix(
       kKT = k * kKT * kKT * (1 / (l_e_ * n_e));
       for (size_t j = 0; j < 6; j++) {
         for (size_t l = 0; l < 6; l++) {
-          auto val = jacobianTotalForcesOver_q_->getValue(i + j, i + l) + kKT * TqqT(j, l);
+          auto val = (*jacobianTotalForcesOver_q_)(i + j, i + l) + kKT * TqqT(j, l);
           jacobianTotalForcesOver_q_->setValue(i + j, i + l, val);
         }
       }
     }
     for (size_t j = 0; j < 6; j++) {
       for (size_t l = 0; l < 6; l++) {
-        auto val =
-            jacobianTotalForcesOver_q_->getValue(i + j, i + l) + kf * TRNp_Np->getValue(j, l);
+        auto val = (*jacobianTotalForcesOver_q_)(i + j, i + l) + kf * (*TRNp_Np)(j, l);
         jacobianTotalForcesOver_q_->setValue(i + j, i + l, val);
       }
     }
@@ -174,30 +173,27 @@ void siconos::fem::cable::CableDS::tangentStiffnessMatrix(
     kKT = k * kKT * kKT * (1 / (l_e_ * n_e));
     for (size_t j = 0; j < 3; j++) {
       for (size_t l = 0; l < 3; l++) {
-        auto val =
-            jacobianTotalForcesOver_q_->getValue(nb_elem + j, nb_elem + l) + kKT * TqqT(j, l);
+        auto val = (*jacobianTotalForcesOver_q_)(nb_elem + j, nb_elem + l) + kKT * TqqT(j, l);
         jacobianTotalForcesOver_q_->setValue(nb_elem + j, nb_elem + l, val);
-        val = jacobianTotalForcesOver_q_->getValue(nb_elem + j, l) + kKT * TqqT(j, l + 3);
+        val = (*jacobianTotalForcesOver_q_)(nb_elem + j, l) + kKT * TqqT(j, l + 3);
         jacobianTotalForcesOver_q_->setValue(nb_elem + j, l, val);
-        val = jacobianTotalForcesOver_q_->getValue(j, nb_elem + l) + kKT * TqqT(j + 3, l);
+        val = (*jacobianTotalForcesOver_q_)(j, nb_elem + l) + kKT * TqqT(j + 3, l);
         jacobianTotalForcesOver_q_->setValue(j, nb_elem + l, val);
-        val = jacobianTotalForcesOver_q_->getValue(j, l) + kKT * TqqT(j + 3, l + 3);
+        val = (*jacobianTotalForcesOver_q_)(j, l) + kKT * TqqT(j + 3, l + 3);
         jacobianTotalForcesOver_q_->setValue(j, l, val);
       }
     }
   }
   for (size_t j = 0; j < 3; j++) {
     for (size_t l = 0; l < 3; l++) {
-      auto val = jacobianTotalForcesOver_q_->getValue(nb_elem + j, nb_elem + l) +
-                 kf * TRNp_Np->getValue(j, l);
+      auto val =
+          (*jacobianTotalForcesOver_q_)(nb_elem + j, nb_elem + l) + kf * (*TRNp_Np)(j, l);
       jacobianTotalForcesOver_q_->setValue(nb_elem + j, nb_elem + l, val);
-      val = jacobianTotalForcesOver_q_->getValue(nb_elem + j, l) +
-            kf * TRNp_Np->getValue(j, l + 3);
+      val = (*jacobianTotalForcesOver_q_)(nb_elem + j, l) + kf * (*TRNp_Np)(j, l + 3);
       jacobianTotalForcesOver_q_->setValue(nb_elem + j, l, val);
-      val = jacobianTotalForcesOver_q_->getValue(j, nb_elem + l) +
-            kf * TRNp_Np->getValue(j + 3, l);
+      val = (*jacobianTotalForcesOver_q_)(j, nb_elem + l) + kf * (*TRNp_Np)(j + 3, l);
       jacobianTotalForcesOver_q_->setValue(j, nb_elem + l, val);
-      val = jacobianTotalForcesOver_q_->getValue(j, l) + kf * TRNp_Np->getValue(j + 3, l + 3);
+      val = (*jacobianTotalForcesOver_q_)(j, l) + kf * (*TRNp_Np)(j + 3, l + 3);
       jacobianTotalForcesOver_q_->setValue(j, l, val);
     }
   }
@@ -219,18 +215,18 @@ void siconos::fem::cable::CableDS::matmult(
   if (n + a_startIdx < V.size()) {
     for (auto i = 0; i < n; i++) {
       for (auto j = 0; j < n; j++) {
-        auto val = TRNp_Np->getValue(i, j);
+        auto val = (*TRNp_Np)(i, j);
         R(i) += val * V(j + a_startIdx);
       }
     }
   } else {
     for (auto i = 0; i < n; i++) {
       for (auto j = 0; j < 3; j++) {
-        auto val = TRNp_Np->getValue(i, j);
+        auto val = (*TRNp_Np)(i, j);
         R(i) += val * V(j + a_startIdx);
       }
       for (auto j = 3; j < 6; j++) {
-        auto val = TRNp_Np->getValue(i, j);
+        auto val = (*TRNp_Np)(i, j);
         R(i) += val * V(j - 3);
       }
     }

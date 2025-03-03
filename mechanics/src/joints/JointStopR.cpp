@@ -43,8 +43,8 @@ siconos::joints::JointStopR::JointStopR(std::shared_ptr<NewtonEulerJointR> joint
       _pos(std::make_shared<siconos::algebra::SiconosVector>(1)),
       _dir(std::make_shared<siconos::algebra::SiconosVector>(1)) {
   _axis->push_back(axis);
-  _pos->setValue(0, pos);
-  _dir->setValue(0, dir ? -1 : 1);
+  (*_pos)(0) = pos;
+  (*_dir)(0) = dir ? -1 : 1;
   _axisMin = axis;
   _axisMax = axis;
   assert((_axisMax - _axisMin + 1) <= _joint->numberOfDoF());
@@ -84,10 +84,10 @@ siconos::joints::JointStopR::JointStopR(std::shared_ptr<NewtonEulerJointR> joint
 {
   _axis->push_back(axis);
   _axis->push_back(axis);
-  _pos->setValue(0, pos);
-  _pos->setValue(1, neg);
-  _dir->setValue(0, 1);
-  _dir->setValue(1, -1);
+  (*_pos)(0) = pos;
+  (*_pos)(1) = neg;
+  (*_dir)(0) = 1;
+  (*_dir)(1) = -1;
   _axisMin = axis;
   _axisMax = axis;
   assert((_axisMax - _axisMin + 1) <= _joint->numberOfDoF());
@@ -104,8 +104,8 @@ void siconos::joints::JointStopR::computeh(const siconos::algebra::BlockVector& 
       _joint->computehDoF(*q.vector(0), *q.vector(1), y, (*_axis)[0]);
     else
       _joint->computehDoF(*q.vector(0), std::nullopt, y, (*_axis)[0]);
-    y.setValue(0, (y.getValue(0) - _pos->getValue(0)) * _dir->getValue(0));
-    if (case_posneg) y.setValue(1, (y.getValue(0) - _pos->getValue(1)) * _dir->getValue(1));
+    y(0) = (y(0) - (*_pos)(0)) * (*_dir)(0);
+    if (case_posneg) y(1) = (y(0) - (*_pos)(1)) * (*_dir)(1);
     return;
   }
 
@@ -119,7 +119,7 @@ void siconos::joints::JointStopR::computeh(const siconos::algebra::BlockVector& 
 
   // Copy and scale each stop for its axis/position/direction
   for (unsigned int i = 0; i < y.size(); i++) {
-    y.setValue(i, (tmp_y.getValue((*_axis)[i]) - _pos->getValue(i)) * _dir->getValue(i));
+    y(i) = (tmp_y((*_axis)[i]) - (*_pos)(i)) * (*_dir)(i);
   }
 }
 
@@ -140,7 +140,7 @@ void siconos::joints::JointStopR::computeH_NE_(
   for (unsigned int i = 0; i < H_NE_view_->rows(); i++)
     for (unsigned int j = 0; j < H_NE_view_->cols(); j++)
       H_NE_view_->setValue(
-          i, j, jacobianhOver_q_Tmp->getValue((*_axis)[i] - _axisMin, j) * _dir->getValue(i));
+          i, j, (*jacobianhOver_q_Tmp)((*_axis)[i] - _axisMin, j) * (*_dir)(i));
 }
 
 unsigned int siconos::joints::JointStopR::numberOfConstraints() const { return _axis->size(); }
@@ -148,11 +148,11 @@ unsigned int siconos::joints::JointStopR::numberOfConstraints() const { return _
 auto siconos::joints::JointStopR::axis(unsigned int _index) { return _axis->at(_index); }
 
 double siconos::joints::JointStopR::position(unsigned int _index) {
-  return _pos->getValue(_index);
+  return (*_pos)(_index);
 }
 
 double siconos::joints::JointStopR::direction(unsigned int _index) {
-  return _dir->getValue(_index);
+  return (*_dir)(_index);
 }
 
 auto siconos::joints::JointStopR::numberOfAxes() { return _axis->size(); }

@@ -60,9 +60,9 @@ void LsodarTest::testCstGradTIDS() {
   std::cout << " ===== Lsodar tests start ... ===== " << std::endl;
   std::cout << "===========================================" << std::endl;
   std::cout << "------- Integrate a TIL system with constant gradients -------" << std::endl;
-  _b->setValue(0, -1.);
-  _x0->setValue(0, 5.);
-  _x0->setValue(1, 10);
+  (*_b)(0) = -1.;
+  (*_x0)(0) = 5.;
+  (*_x0)(1) = 10;
 
   _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, *_A, *_b);
 
@@ -73,10 +73,8 @@ void LsodarTest::testCstGradTIDS() {
     _sim->processEvents();
   }
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testCstGradTIDS : ", fabs(_DS->x()->getValue(0) + 5.) < _tol,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testCstGradTIDS : ", fabs(_DS->x()->getValue(1) - 10.) < _tol,
-                               true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testCstGradTIDS : ", fabs((*_DS->x())(0) + 5.) < _tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testCstGradTIDS : ", fabs((*_DS->x())(1) - 10.) < _tol, true);
   std::cout << std::endl << std::endl;
 }
 
@@ -85,9 +83,9 @@ void LsodarTest::testCstGradDS() {
   std::cout << " ===== Lsodar tests start ... ===== " << std::endl;
   std::cout << "===========================================" << std::endl;
   std::cout << "------- Integrate a L system with constant gradients -------" << std::endl;
-  _b->setValue(0, -1.);
-  _x0->setValue(0, 5.);
-  _x0->setValue(1, 10);
+  (*_b)(0) = -1.;
+  (*_x0)(0) = 5.;
+  (*_x0)(1) = 10;
 
   _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, *_A, *_b);
 
@@ -98,10 +96,8 @@ void LsodarTest::testCstGradDS() {
     _sim->processEvents();
   }
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testCstGradDS : ", fabs(_DS->x()->getValue(0) + 5.) < _tol,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testCstGradDS : ", fabs(_DS->x()->getValue(1) - 10.) < _tol,
-                               true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testCstGradDS : ", fabs((*_DS->x())(0) + 5.) < _tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testCstGradDS : ", fabs((*_DS->x())(1) - 10.) < _tol, true);
   std::cout << std::endl << std::endl;
 }
 
@@ -110,9 +106,9 @@ void LsodarTest::testCstGradNLDS() {
   std::cout << " ===== Lsodar tests start ... ===== " << std::endl;
   std::cout << "===========================================" << std::endl;
   std::cout << "------- Integrate a NL system with constant gradients -------" << std::endl;
-  _b->setValue(0, -1.);
-  _x0->setValue(0, 5.);
-  _x0->setValue(1, 10);
+  (*_b)(0) = -1.;
+  (*_x0)(0) = 5.;
+  (*_x0)(1) = 10;
 
   _DS = std::make_shared<siconos::modeling::FirstOrderNonLinearDS>(*_x0);
   auto& DSNL = static_cast<siconos::modeling::FirstOrderNonLinearDS&>(*_DS);
@@ -135,9 +131,7 @@ void LsodarTest::testCstGradNLDS() {
     _sim->processEvents();
   }
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testCstGradNLDS : ", fabs(_DS->x()->getValue(0) + 5.) < _tol,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testCstGradNLDS : ", fabs(_DS->x()->getValue(1) - 10.) < _tol,
-                               true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testCstGradNLDS : ", fabs((*_DS->x())(0) + 5.) < _tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testCstGradNLDS : ", fabs((*_DS->x())(1) - 10.) < _tol, true);
   std::cout << std::endl << std::endl;
 }

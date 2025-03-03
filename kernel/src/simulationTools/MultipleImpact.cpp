@@ -22,9 +22,7 @@
 #include "MultipleImpactNSL.hpp"
 #include "OSNSMatrix.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixVectorOp.hpp"  // for mat-vec prod
 #include "SiconosVector.hpp"
-#include "SiconosVectorOp.hpp"  // for setBlock
 #include "Simulation.hpp"
 #include "Topology.hpp"
 #include "io.hpp"  // for siconos::algebra::write
@@ -253,11 +251,11 @@ void siconos::nonsmooth_formulations::MultipleImpact::BuildParaContact() {
   }
   /*
     std::cout << " Restitution coefficients: " <<std::endl;
-    _restitutionContact->display();
+    siconos::algebra::print(*_restitutionContact);
     std::cout << "Stiffnesses: " <<std::endl;
-    _Kcontact->display();
+    siconos::algebra::print(*_Kcontact);
     std::cout << "Elasticity coeffients at contacts: " <<std::endl;
-    _elasticyCoefficientcontact->display();
+    siconos::algebra::print(*_elasticyCoefficientcontact);
   */
 }
 //========================================================================================
@@ -384,11 +382,11 @@ void siconos::nonsmooth_formulations::MultipleImpact::InitializeInput() {
   };
   /*
     std::cout << "Initial relative velocity at contacts" <<std::endl;
-    _velocityContact->display();
+    siconos::algebra::print(*_velocityContact);
     std::cout<< "Initial energy at contacts" <<std::endl;
-    _energyContact->display();
+    siconos::algebra::print(*_energyContact);
     std::cout << "Impulse at contact" <<std::endl;
-    _tolImpulseContact->display();
+    siconos::algebra::print(*_tolImpulseContact);
   */
 }
 //=========================================================================================
@@ -669,9 +667,9 @@ void siconos::nonsmooth_formulations::MultipleImpact::Compute_velocityContact() 
   //
   /*
     std::cout << "Relative velocity at contacts at the beginning of step:" <<std::endl;
-    _oldVelocityContact->display();
+    siconos::algebra::print(*_oldVelocityContact);
     std::cout << "Relative velocity at contacts at the end of step:" <<std::endl;
-    _velocityContact->display();
+    siconos::algebra::print(*_velocityContact);
   */
   //
 }
@@ -742,9 +740,9 @@ void siconos::nonsmooth_formulations::MultipleImpact::Compute_energyContact() {
   /*
 
     std::cout << "Potential energy at contacts at the end of step:" <<std::endl;
-    _energyContact->display();
+    siconos::algebra::print(*_energyContact);
     std::cout << "Work done during the compression phase at contacts" <<std::endl;
-    _WorkcContact->display();
+    siconos::algebra::print(*_WorkcContact);
 
   */
 }
@@ -837,9 +835,9 @@ void siconos::nonsmooth_formulations::MultipleImpact::ComputeImpact() {
   /*
      std::cout << "----------Before multiple impacts computation---------------" <<std::endl;
      std::cout << "Velocity at contacts: ";
-     _velocityContact->display();
+     siconos::algebra::print(*_velocityContact);
      std::cout << "Impulse at contact: ";
-     _tolImpulseContact->display();
+     siconos::algebra::print(*_tolImpulseContact);
   */
   // cout << "-------------------Multiple impacts computation starts:-----------------------"
   // <<std::endl;
@@ -903,24 +901,24 @@ void siconos::nonsmooth_formulations::MultipleImpact::ComputeImpact() {
       break;
     }
     // std::cout << "Distribution vector: ";
-    // _distributionVector->display();
+    // siconos::algebra::print(*_distributionVector);
     // std::cout << "Incremental Impulse: ";
-    // _deltaImpulseContact->display();
+    // siconos::algebra::print(*_deltaImpulseContact);
     // std::cout << "Impulse at contact: ";
-    // _tolImpulseContact->display();
+    // siconos::algebra::print(*_tolImpulseContact);
     // std::cout << "Velocity at contacts: ";
-    // _velocityContact->display();
+    // siconos::algebra::print(*_velocityContact);
     // std::cout << "Potential energy at contacts: ";
-    // _energyContact->display();
+    // siconos::algebra::print(*_energyContact);
   }
 
   //
   // std::cout << "*****************Impact computation is terminated******************"
   // <<std::endl; std::cout << "Number of integration steps: " << number_step <<std::endl;
   // std::cout << "Velocity at contacts: ";
-  // _velocityContact->display();
+  // siconos::algebra::print(*_velocityContact);
   // std::cout << "Impulse at contact: ";
-  // _tolImpulseContact->display();
+  // siconos::algebra::print(*_tolImpulseContact);
   // std::cout << "Duration of the multiple impacts process: " << _timeVariable << " s"
   // <<std::endl;
 
@@ -1013,9 +1011,9 @@ void siconos::nonsmooth_formulations::MultipleImpact::display() const {
     auto lag_ds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds);
     std::cout << "DS number: " << ds->number() << std::endl;
     std::cout << "Pre-impact velocity: ";
-    (lag_ds->velocityMemory().getSiconosVector(1)).display();
+    siconos::algebra::print((lag_ds->velocityMemory().getSiconosVector(1)));
     std::cout << "Post-impact velocity: ";
-    (lag_ds->velocity())->display();
+    siconos::algebra::print((lag_ds->velocity_read()));
   }
   // Display impulses at contact points
   auto IndexSet0 = simulation()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
@@ -1023,6 +1021,6 @@ void siconos::nonsmooth_formulations::MultipleImpact::display() const {
   for (std::tie(vi, viend) = IndexSet0->vertices(); vi != viend; ++vi) {
     auto inter = IndexSet0->bundle(*vi);
     std::cout << "Impulse at contact point " << inter->number() << ":";
-    (inter->lambda(1))->display();
+    siconos::algebra::print(*(inter->lambda(1)));
   }
 };

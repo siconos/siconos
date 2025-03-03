@@ -149,7 +149,7 @@ bool siconos::integrators::MoreauJeanCombinedProjectionOSI::addInteractionInInde
   // double h = _simulation->timeStep();
   if (i == 1)  // index set for resolution at the velocity
   {
-    auto y = (inter->y(0))->getValue(0);  // y(0) is the position
+    auto y = (*(inter->y(0)))(0);  // y(0) is the position
     DEBUG_PRINTF(
         "siconos::integrators::MoreauJeanCombinedProjectionOSI::addInteractionInIndexSet "
         "yref=%e \n",
@@ -163,7 +163,7 @@ bool siconos::integrators::MoreauJeanCombinedProjectionOSI::addInteractionInInde
   } else if (i == 2)  //  special index for the projection
   {
     DEBUG_EXPR(
-        auto lambda = (inter->lambda(1))->getValue(0);
+        auto lambda = (*(inter->lambda(1)))(0);
         // lambda(1) is the contact impulse for MoreauJeanOSI scheme
         printf("siconos::integrators::MoreauJeanCombinedProjectionOSI::"
                "addInteractionInIndexSet lambdaref=%e \n",

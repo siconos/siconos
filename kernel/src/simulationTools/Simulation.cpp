@@ -542,7 +542,7 @@ std::shared_ptr<siconos::algebra::SiconosVector> siconos::simulation::Simulation
     inter = indexSet0->bundle(*ui);
     assert(inter->lowerLevelForOutput() <= level);
     assert(inter->upperLevelForOutput() >= level);
-    y->setValue(i, inter->y(level)->getValue(coor));
+    (*y)(i) = (*inter->y(level))(coor);
     i++;
   }
   DEBUG_END(
@@ -572,7 +572,7 @@ std::shared_ptr<siconos::algebra::SiconosVector> siconos::simulation::Simulation
     inter = indexSet0->bundle(*ui);
     assert(inter->lowerLevelForOutput() <= level);
     assert(inter->upperLevelForOutput() >= level);
-    lambda->setValue(i, inter->lambda(level)->getValue(coor));
+    (*lambda)(i) = (*inter->lambda(level))(coor);
     i++;
   }
   DEBUG_END(

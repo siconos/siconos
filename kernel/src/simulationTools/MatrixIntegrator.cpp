@@ -152,7 +152,7 @@ void siconos::simulation::MatrixIntegrator::integrate() {
   _sim->processEvents();
   //_DS->resetToInitialState();
 
-  DEBUG_EXPR(_mat->display(););
+  DEBUG_EXPR(siconos::algebra::print(*_mat););
   DEBUG_EXPR(_DS->display(););
   DEBUG_END("siconos::simulation::MatrixIntegrator::integrate()\n");
 }

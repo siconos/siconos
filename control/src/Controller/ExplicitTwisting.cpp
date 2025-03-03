@@ -60,8 +60,8 @@ void siconos::control::ExplicitTwisting::actuate()
   const auto& sigma = _sensor->y();
 
   // discontinous part
-  _u->setValue(0, std::copysign(1., -sigma(0)));
-  _u->setValue(1, std::copysign(1., -sigma(1)));
+  (*_u)(0) = std::copysign(1., -sigma(0));
+  (*_u)(1) = std::copysign(1., -sigma(1));
   *_us = *_u;
   _indx++;
 }

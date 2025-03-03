@@ -24,19 +24,11 @@
 
 */
 
-void display() const { std::cout << std::scientific << std::setprecision(6) << *this << "\n"; }
-
-void displayT() const {
-  std::cout << std::scientific << std::setprecision(6) << this->transpose() << "\n";
-}
-
-inline Scalar norm2() { return this->norm(); }
-
-// inline Scalar normInf() {
-//     return this->cwiseAbs().rowwise().sum().maxCoeff();
-// }
-
-size_t nnz(double tol = 1e-14) {
+/** \return the number of non zero coefficients
+ * \param tol tolerance value under which a coeff. is considered to be null
+ */
+size_t nonZeros(double tol = 1e-14) {
+  // Warning: nonZeros to keep the same method name as in Eigen Sparse
   size_t nnz = 0;
   double* arr = this->data();
   for (size_t i = 0; i < this->rows() * this->cols(); ++i) {

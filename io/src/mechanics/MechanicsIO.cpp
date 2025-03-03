@@ -75,17 +75,6 @@
 // #define DEBUG_MESSAGES 1
 #include "siconos_debug.h"
 
-// struct siconos::io::GetPosition : public siconos::dynamical_systems::Visitor {
-//   std::shared_ptr<siconos::algebra::SiconosVector> result{nullptr};
-
-//   template <typename T>
-//   void operator()(const T& ds) {
-//     result = std::make_shared<siconos::algebra::SiconosVector>(1 + ds.q()->size());
-//     result->setValue(0, ds.number());
-//     result->setBlock(1, *ds.q());
-//   }
-// };
-
 // -------------------
 //  Visitor stuff to collect all states, velocities, ... of the nsds and put them in a matrix
 // ------------------
@@ -163,29 +152,29 @@ void siconos::io::ContactPointVisitor::operator()(
 
   answer.resize(23);
 
-  answer.setValue(0, mu);
-  answer.setValue(1, posa(0));
-  answer.setValue(2, posa(1));
-  answer.setValue(3, posa(2));
-  answer.setValue(4, posb(0));
-  answer.setValue(5, posb(1));
-  answer.setValue(6, posb(2));
-  answer.setValue(7, nc(0));
-  answer.setValue(8, nc(1));
-  answer.setValue(9, nc(2));
-  answer.setValue(10, cf(0));
-  answer.setValue(11, cf(1));
-  answer.setValue(12, cf(2));
-  answer.setValue(13, inter->y(0)->getValue(0));
-  answer.setValue(14, inter->y(0)->getValue(1));
-  answer.setValue(15, inter->y(0)->getValue(2));
-  answer.setValue(16, inter->y(1)->getValue(0));
-  answer.setValue(17, inter->y(1)->getValue(1));
-  answer.setValue(18, inter->y(1)->getValue(2));
-  answer.setValue(19, inter->lambda(1)->getValue(0));
-  answer.setValue(20, inter->lambda(1)->getValue(1));
-  answer.setValue(21, inter->lambda(1)->getValue(2));
-  answer.setValue(22, id);
+  answer(0) = mu;
+  answer(1) = posa(0);
+  answer(2) = posa(1);
+  answer(3) = posa(2);
+  answer(4) = posb(0);
+  answer(5) = posb(1);
+  answer(6) = posb(2);
+  answer(7) = nc(0);
+  answer(8) = nc(1);
+  answer(9) = nc(2);
+  answer(10) = cf(0);
+  answer(11) = cf(1);
+  answer(12) = cf(2);
+  answer(13) = (*inter->y(0))(0);
+  answer(14) = (*inter->y(0))(1);
+  answer(15) = (*inter->y(0))(2);
+  answer(16) = (*inter->y(1))(0);
+  answer(17) = (*inter->y(1))(1);
+  answer(18) = (*inter->y(1))(2);
+  answer(19) = (*inter->lambda(1))(0);
+  answer(20) = (*inter->lambda(1))(1);
+  answer(21) = (*inter->lambda(1))(2);
+  answer(22) = id;
 }
 
 /* then specializations : */
@@ -204,29 +193,29 @@ void siconos::io::ContactPointVisitor::operator()(
   auto cf = *inter->lambda(1) * rel.H_NE_prod_T();
   answer.resize(23);
 
-  answer.setValue(0, mu);
-  answer.setValue(1, posa(0));
-  answer.setValue(2, posa(1));
-  answer.setValue(3, posa(2));
-  answer.setValue(4, posb(0));
-  answer.setValue(5, posb(1));
-  answer.setValue(6, posb(2));
-  answer.setValue(7, nc(0));
-  answer.setValue(8, nc(1));
-  answer.setValue(9, nc(2));
-  answer.setValue(10, cf(0));
-  answer.setValue(11, cf(1));
-  answer.setValue(12, cf(2));
-  answer.setValue(13, inter->y(0)->getValue(0));
-  answer.setValue(14, inter->y(0)->getValue(1));
-  answer.setValue(15, inter->y(0)->getValue(2));
-  answer.setValue(16, inter->y(1)->getValue(0));
-  answer.setValue(17, inter->y(1)->getValue(1));
-  answer.setValue(18, inter->y(1)->getValue(2));
-  answer.setValue(19, inter->lambda(1)->getValue(0));
-  answer.setValue(20, inter->lambda(1)->getValue(1));
-  answer.setValue(21, inter->lambda(1)->getValue(2));
-  answer.setValue(22, id);
+  answer(0) = mu;
+  answer(1) = posa(0);
+  answer(2) = posa(1);
+  answer(3) = posa(2);
+  answer(4) = posb(0);
+  answer(5) = posb(1);
+  answer(6) = posb(2);
+  answer(7) = nc(0);
+  answer(8) = nc(1);
+  answer(9) = nc(2);
+  answer(10) = cf(0);
+  answer(11) = cf(1);
+  answer(12) = cf(2);
+  answer(13) = (*inter->y(0))(0);
+  answer(14) = (*inter->y(0))(1);
+  answer(15) = (*inter->y(0))(2);
+  answer(16) = (*inter->y(1))(0);
+  answer(17) = (*inter->y(1))(1);
+  answer(18) = (*inter->y(1))(2);
+  answer(19) = (*inter->lambda(1))(0);
+  answer(20) = (*inter->lambda(1))(1);
+  answer(21) = (*inter->lambda(1))(2);
+  answer(22) = id;
 }
 
 template <>
@@ -257,29 +246,29 @@ void siconos::io::ContactPointVisitor::operator()(
   auto cf = *inter->lambda(1) * rel.jacobianhOver_q();
   answer.resize(16);
 
-  answer.setValue(0, mu);
-  answer.setValue(1, cpax);
-  answer.setValue(2, cpay);
+  answer(0) = mu;
+  answer(1) = cpax;
+  answer(2) = cpay;
 
-  answer.setValue(3, cpbx);
-  answer.setValue(4, cpby);
+  answer(3) = cpbx;
+  answer(4) = cpby;
 
-  answer.setValue(5, ncx);
-  answer.setValue(6, ncy);
+  answer(5) = ncx;
+  answer(6) = ncy;
 
-  answer.setValue(7, cf(0));
-  answer.setValue(8, cf(1));
+  answer(7) = cf(0);
+  answer(8) = cf(1);
 
-  answer.setValue(9, inter->y(0)->getValue(0));
-  answer.setValue(10, inter->y(0)->getValue(1));
+  answer(9) = (*inter->y(0))(0);
+  answer(10) = (*inter->y(0))(1);
 
-  answer.setValue(11, inter->y(1)->getValue(0));
-  answer.setValue(12, inter->y(1)->getValue(1));
+  answer(11) = (*inter->y(1))(0);
+  answer(12) = (*inter->y(1))(1);
 
-  answer.setValue(13, inter->lambda(1)->getValue(0));
-  answer.setValue(14, inter->lambda(1)->getValue(1));
+  answer(13) = (*inter->lambda(1))(0);
+  answer(14) = (*inter->lambda(1))(1);
 
-  answer.setValue(15, id);
+  answer(15) = id;
 }
 
 // CircleCircleR should be named DiskCircleR
@@ -321,29 +310,29 @@ void siconos::io::ContactPointVisitor::operator()(
   auto cf = *inter->lambda(1) * rel.jacobianhOver_q();
   answer.resize(16);
 
-  answer.setValue(0, mu);
-  answer.setValue(1, cpax);
-  answer.setValue(2, cpay);
+  answer(0) = mu;
+  answer(1) = cpax;
+  answer(2) = cpay;
 
-  answer.setValue(3, cpbx);
-  answer.setValue(4, cpby);
+  answer(3) = cpbx;
+  answer(4) = cpby;
 
-  answer.setValue(5, ncx);
-  answer.setValue(6, ncy);
+  answer(5) = ncx;
+  answer(6) = ncy;
 
-  answer.setValue(7, cf(0));
-  answer.setValue(8, cf(1));
+  answer(7) = cf(0);
+  answer(8) = cf(1);
 
-  answer.setValue(9, inter->y(0)->getValue(0));
-  answer.setValue(10, inter->y(0)->getValue(1));
+  answer(9) = (*inter->y(0))(0);
+  answer(10) = (*inter->y(0))(1);
 
-  answer.setValue(11, inter->y(1)->getValue(0));
-  answer.setValue(12, inter->y(1)->getValue(1));
+  answer(11) = (*inter->y(1))(0);
+  answer(12) = (*inter->y(1))(1);
 
-  answer.setValue(13, inter->lambda(1)->getValue(0));
-  answer.setValue(14, inter->lambda(1)->getValue(1));
+  answer(13) = (*inter->lambda(1))(0);
+  answer(14) = (*inter->lambda(1))(1);
 
-  answer.setValue(15, id);
+  answer(15) = id;
 }
 
 template <>
@@ -375,29 +364,29 @@ void siconos::io::ContactPointVisitor::operator()(
   auto cf = *inter->lambda(1) * rel.jacobianhOver_q();
   answer.resize(16);
 
-  answer.setValue(0, mu);
-  answer.setValue(1, cpax);
-  answer.setValue(2, cpay);
+  answer(0) = mu;
+  answer(1) = cpax;
+  answer(2) = cpay;
 
-  answer.setValue(3, x2);
-  answer.setValue(4, y2);
+  answer(3) = x2;
+  answer(4) = y2;
 
-  answer.setValue(5, ncx);
-  answer.setValue(6, ncy);
+  answer(5) = ncx;
+  answer(6) = ncy;
 
-  answer.setValue(7, cf(0));
-  answer.setValue(8, cf(1));
+  answer(7) = cf(0);
+  answer(8) = cf(1);
 
-  answer.setValue(9, inter->y(0)->getValue(0));
-  answer.setValue(10, inter->y(0)->getValue(1));
+  answer(9) = (*inter->y(0))(0);
+  answer(10) = (*inter->y(0))(1);
 
-  answer.setValue(11, inter->y(1)->getValue(0));
-  answer.setValue(12, inter->y(1)->getValue(1));
+  answer(11) = (*inter->y(1))(0);
+  answer(12) = (*inter->y(1))(1);
 
-  answer.setValue(13, inter->lambda(1)->getValue(0));
-  answer.setValue(14, inter->lambda(1)->getValue(1));
+  answer(13) = (*inter->lambda(1))(0);
+  answer(14) = (*inter->lambda(1))(1);
 
-  answer.setValue(15, id);
+  answer(15) = id;
 }
 
 template <>
@@ -415,29 +404,29 @@ void siconos::io::ContactPointVisitor::operator()(
 
   answer.resize(16);
 
-  answer.setValue(0, mu);
-  answer.setValue(1, posa(0));
-  answer.setValue(2, posa(1));
+  answer(0) = mu;
+  answer(1) = posa(0);
+  answer(2) = posa(1);
 
-  answer.setValue(3, posb(0));
-  answer.setValue(4, posb(1));
+  answer(3) = posb(0);
+  answer(4) = posb(1);
 
-  answer.setValue(5, nc(0));
-  answer.setValue(6, nc(1));
+  answer(5) = nc(0);
+  answer(6) = nc(1);
 
-  answer.setValue(7, cf(0));
-  answer.setValue(8, cf(1));
+  answer(7) = cf(0);
+  answer(8) = cf(1);
 
-  answer.setValue(9, inter->y(0)->getValue(0));
-  answer.setValue(10, inter->y(0)->getValue(1));
+  answer(9) = (*inter->y(0))(0);
+  answer(10) = (*inter->y(0))(1);
 
-  answer.setValue(11, inter->y(1)->getValue(0));
-  answer.setValue(12, inter->y(1)->getValue(1));
+  answer(11) = (*inter->y(1))(0);
+  answer(12) = (*inter->y(1))(1);
 
-  answer.setValue(13, inter->lambda(1)->getValue(0));
-  answer.setValue(14, inter->lambda(1)->getValue(1));
+  answer(13) = (*inter->lambda(1))(0);
+  answer(14) = (*inter->lambda(1))(1);
 
-  answer.setValue(15, id);
+  answer(15) = id;
 };
 
 template <>
@@ -455,29 +444,29 @@ void siconos::io::ContactPointVisitor::operator()(
 
   answer.resize(16);
 
-  answer.setValue(0, mu);
-  answer.setValue(1, posa(0));
-  answer.setValue(2, posa(1));
+  answer(0) = mu;
+  answer(1) = posa(0);
+  answer(2) = posa(1);
 
-  answer.setValue(3, posb(0));
-  answer.setValue(4, posb(1));
+  answer(3) = posb(0);
+  answer(4) = posb(1);
 
-  answer.setValue(5, nc(0));
-  answer.setValue(6, nc(1));
+  answer(5) = nc(0);
+  answer(6) = nc(1);
 
-  answer.setValue(7, cf(0));
-  answer.setValue(8, cf(1));
+  answer(7) = cf(0);
+  answer(8) = cf(1);
 
-  answer.setValue(9, inter->y(0)->getValue(0));
-  answer.setValue(10, inter->y(0)->getValue(1));
+  answer(9) = (*inter->y(0))(0);
+  answer(10) = (*inter->y(0))(1);
 
-  answer.setValue(11, inter->y(1)->getValue(0));
-  answer.setValue(12, inter->y(1)->getValue(1));
+  answer(11) = (*inter->y(1))(0);
+  answer(12) = (*inter->y(1))(1);
 
-  answer.setValue(13, inter->lambda(1)->getValue(0));
-  answer.setValue(14, inter->lambda(1)->getValue(1));
+  answer(13) = (*inter->lambda(1))(0);
+  answer(14) = (*inter->lambda(1))(1);
 
-  answer.setValue(15, id);
+  answer(15) = id;
 };
 
 struct siconos::io::ContactPointDomainVisitor : public siconos::modeling::relations::Visitor {
@@ -497,9 +486,9 @@ void siconos::io::ContactPointDomainVisitor::operator()(
    * TODO: contact point domain coloring (e.g. based on broadphase).
    * currently, domain = (x>0):1?0
    */
-  answer.setValue(0, rel.pc1()->getValue(0) > 0);
+  answer(0) = (*rel.pc1())(0) > 0;
 
-  answer.setValue(1, inter->number());
+  answer(1) = inter->number();
 }
 
 std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::domains(
@@ -569,7 +558,7 @@ siconos::algebra::SiconosVector siconos::io::MechanicsIO::visitAllVerticesForDou
        ++vi, ++current_row) {
     T getter;
     graph.bundle(*vi)->accept(getter);
-    result.setValue(current_row, getter.result);
+    result(current_row) = getter.result;
   }
   return result;
 }
@@ -601,7 +590,6 @@ std::optional<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::contact
     auto& graph = *nsds.topology()->indexSet(index_set);
     unsigned int current_row;
     siconos::algebra::SiconosMatrix result{graph.vertices_number(), 25};
-        std::make_shared<siconos::algebra::SiconosMatrix>(graph.vertices_number(), 25);
 
     int data_size = 0;
     for (current_row = 0, std::tie(vi, viend) = graph.vertices(); vi != viend; ++vi) {
@@ -630,13 +618,12 @@ std::optional<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::contact
       } else {
         // We add at the end the number of ds1 and ds2
         data.resize(data_size + 2);
-        DEBUG_EXPR(data.display(););
+        DEBUG_EXPR(siconos::algebra::print(data););
         auto& ds1 = *graph.properties(*vi).source;
         auto& ds2 = *graph.properties(*vi).target;
-
-        data.setValue(data_size, ds1.number());
-        data.setValue(data_size + 1, ds2.number());
-        DEBUG_EXPR(data.display(););
+        data(data_size) = ds1.number();
+        data(data_size + 1) = ds2.number();
+        DEBUG_EXPR(siconos::algebra::print(data););
         if (result.cols() != data.size()) {
           result.resize(graph.vertices_number(), data.size());
         }
@@ -645,7 +632,7 @@ std::optional<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::contact
       }
     }
     result.resize(current_row, data_size);
-    DEBUG_EXPR(result->display(););
+    DEBUG_EXPR(siconos::algebra::print(result));
     return result;
   }
   return std::nullopt;
@@ -670,61 +657,61 @@ void ContactInfoVisitor::operator()(const siconos::modeling::NewtonEuler3DR& rel
   // answer[0]= id;
   // answer[1]= 0; // reserve for ds1.number
   // answer[2]= 0; // reserve for ds2.number
-  answer.setValue(0, id);
-  answer.setValue(1, 0);
-  answer.setValue(2, 0);
+  answer(0) = id;
+  answer(1) = 0;
+  answer(2) = 0;
 }
 
 template <>
 void ContactInfoVisitor::operator()(const siconos::collision::ContactR& rel) {
   auto id = inter->number();
   answer.resize(4);
-  answer.setValue(0, id);
-  answer.setValue(1, 0);
-  answer.setValue(2, 0);
+  answer(0) = id;
+  answer(1) = 0;
+  answer(2) = 0;
   if (rel.bodyShapeRecordB->staticBody) {
-    answer.setValue(3, rel.bodyShapeRecordB->staticBody->number);
+    answer(3) = rel.bodyShapeRecordB->staticBody->number;
   } else
-    answer.setValue(3, 0);
+    answer(3) = 0;
 }
 
 template <>
 void ContactInfoVisitor::operator()(const siconos::collision::Contact5DR& rel) {
   auto id = inter->number();
   answer.resize(4);
-  answer.setValue(0, id);
-  answer.setValue(1, 0);
-  answer.setValue(2, 0);
+  answer(0) = id;
+  answer(1) = 0;
+  answer(2) = 0;
   if (rel.bodyShapeRecordB->staticBody) {
-    answer.setValue(3, rel.bodyShapeRecordB->staticBody->number);
+    answer(3) = rel.bodyShapeRecordB->staticBody->number;
   } else
-    answer.setValue(3, 0);
+    answer(3) = 0;
 }
 
 template <>
 void ContactInfoVisitor::operator()(const siconos::collision::Contact2dR& rel) {
   auto id = inter->number();
   answer.resize(4);
-  answer.setValue(0, id);
-  answer.setValue(1, 0);
-  answer.setValue(2, 0);
+  answer(0) = id;
+  answer(1) = 0;
+  answer(2) = 0;
   if (rel.bodyShapeRecordB->staticBody) {
-    answer.setValue(3, rel.bodyShapeRecordB->staticBody->number);
+    answer(3) = rel.bodyShapeRecordB->staticBody->number;
   } else
-    answer.setValue(3, 0);
+    answer(3) = 0;
 }
 
 template <>
 void ContactInfoVisitor::operator()(const siconos::collision::Contact2d3DR& rel) {
   auto id = inter->number();
   answer.resize(4);
-  answer.setValue(0, id);
-  answer.setValue(1, 0);
-  answer.setValue(2, 0);
+  answer(0) = id;
+  answer(1) = 0;
+  answer(2) = 0;
   if (rel.bodyShapeRecordB->staticBody) {
-    answer.setValue(3, rel.bodyShapeRecordB->staticBody->number);
+    answer(3) = rel.bodyShapeRecordB->staticBody->number;
   } else
-    answer.setValue(3, 0);
+    answer(3) = 0;
 }
 
 std::optional<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::contactInfo(
@@ -762,11 +749,11 @@ std::optional<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::contact
       // related to a contact points (perhaps a joint)
     } else {
       // We add at the end the number of ds1 and ds2
-      DEBUG_EXPR(data.display(););
+      DEBUG_EXPR(siconos::algebra::print(data););
       auto& ds1 = *graph.properties(*vi).source;
       auto& ds2 = *graph.properties(*vi).target;
-      data.setValue(1, ds1.number());
-      data.setValue(2, ds2.number());
+      data(1) = ds1.number();
+      data(2) = ds2.number();
     }
     if (result.cols() != data.size()) {
       result.resize(graph.vertices_number(), data.size());
@@ -776,7 +763,7 @@ std::optional<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::contact
   // result.resize(current_row, data_size);
   // Why do we need a resize? If result is too small, the line 748 will fail anyway.
   // Note FP: warning resize with eigen may lead to reset
-  DEBUG_EXPR(result.display(););
+  DEBUG_EXPR(siconos::algebra::print(result););
   return result;  // RVO, no copy
 
   DEBUG_END(" MechanicsIO::contactInfo");
@@ -808,34 +795,34 @@ static void compute_contact_work_and_status(
   auto mu = siconos::internal::ask<ForMu>(*inter->nonSmoothLaw());
   auto e = siconos::internal::ask<ForE>(*inter->nonSmoothLaw());
   // Compute normal contact work
-  auto vn_minus = inter->y_k(1).getValue(0);
-  auto vn_plus = inter->y(1)->getValue(0);
-  auto pn = inter->lambda(1)->getValue(0);
+  auto vn_minus = (inter->y_k(1))(0);
+  auto vn_plus = (*inter->y(1))(0);
+  auto pn = (*inter->lambda(1))(0);
 
   // double vn_average = omega * vn_plus + (1. - omega) * vn_minus;
   auto normal_contact_work = 0.5 * (vn_minus + vn_plus) * pn;
-  answer.setValue(1, normal_contact_work);
+  answer(1) = normal_contact_work;
 
   // Compute tangent contact work of impulse
 
-  auto vt_1_minus = inter->y_k(1).getValue(1);
-  auto vt_2_minus = inter->y_k(1).getValue(2);
-  auto vt_1_plus = inter->y(1)->getValue(1);
-  auto vt_2_plus = inter->y(1)->getValue(2);
+  auto vt_1_minus = (inter->y_k(1))(1);
+  auto vt_2_minus = (inter->y_k(1))(2);
+  auto vt_1_plus = (*inter->y(1))(1);
+  auto vt_2_plus = (*inter->y(1))(2);
 
   double vt_1_average = omega * vt_1_plus + (1. - omega) * vt_1_minus;
   double vt_2_average = omega * vt_2_plus + (1. - omega) * vt_2_minus;
 
-  double pt_1 = inter->lambda(1)->getValue(1);
-  double pt_2 = inter->lambda(1)->getValue(2);
+  double pt_1 = (*inter->lambda(1))(1);
+  double pt_2 = (*inter->lambda(1))(2);
 
   double tangent_contact_work = vt_1_average * pt_1 + vt_2_average * pt_2;
-  answer.setValue(2, tangent_contact_work);
+  answer(2) = tangent_contact_work;
 
   // Compute directly work dissipated by friction impulse
   double norm_vt_average = sqrt(vt_1_average * vt_1_average + vt_2_average * vt_2_average);
   double friction_dissipation = mu * norm_vt_average * pn;
-  answer.setValue(3, friction_dissipation);
+  answer(3) = friction_dissipation;
 
   /* Compute contact status
    * Warning the status are consistent for the sticking and sliding
@@ -847,26 +834,26 @@ static void compute_contact_work_and_status(
   double norm_vt_plus = sqrt(vt_1_plus * vt_1_plus + vt_2_plus * vt_2_plus);
   // double norm_vt_minus = sqrt(vt_1_minus * vt_1_minus + vt_2_minus * vt_2_minus);
   if ((pn < tol) and (vn_plus + e * vn_minus > tol))
-    answer.setValue(4, 0);  // take-off = 0
+    answer(4) = 0;  // take-off = 0
   else if ((pn > tol) and (vn_plus + e * vn_minus < tol)) {
     if ((norm_pt - mu * pn > tol)) {
       // std::cout << "WARNING: the impulse is outside the Coulomb cone  " << std::endl;
-      answer.setValue(4, -3);  // outside the cone = -3
+      answer(4) = -3;  // outside the cone = -3
     } else if ((norm_pt - mu * pn < -tol)) {
       // std::cout << "the impulse is in the *interior* of  the Coulomb cone  " << std::endl;
       // std::cout << "norm_vt_plus  " << norm_vt_plus << std::endl;
       if (norm_vt_plus > tol) {
         // std::cout << "WARNING: but the norm of vt is not zero  " << std::endl;
-        answer.setValue(4, -2);  // sticking with a non zero slifing velocity = -2
+        answer(4) = -2;  // sticking with a non zero slifing velocity = -2
       }
-      answer.setValue(4, 1);  // sticking = 1
+      answer(4) = 1;  // sticking = 1
     } else {
       // std::cout << "the impulse is on the *boundary* of the Coulomb cone  " << std::endl;
       // std::cout << "norm_vt_plus  " << norm_vt_plus << std::endl;
-      answer.setValue(4, 2);  // sliding = 2
+      answer(4) = 2;  // sliding = 2
     }
   } else
-    answer.setValue(4, -1);  // undetermined = -1
+    answer(4) = -1;  // undetermined = -1
 
   if ((pn > tol) and (vn_minus > tol)) {
     // std::cout << "WARNING: we apply the impact law of positive velocity " << std::endl;
@@ -874,7 +861,7 @@ static void compute_contact_work_and_status(
     // 		<< " normal_contact_work " << normal_contact_work
     // 		<< " -e * vn_minus   " << -e*vn_minus
     // 		<< std::endl;
-    answer.setValue(5, normal_contact_work);
+    answer(5) = normal_contact_work;
   }
   // double id = inter->number();
   // std::cout << "\nid "<< id << std::endl;
@@ -895,7 +882,7 @@ static void compute_contact_work_and_status(
   // std::cout << "norm_pt  "<< norm_pt  << std::endl;
   // std::cout << "norm_pt - mu* pn  "<< norm_pt -mu *pn   << std::endl;
   // std::cout << "vn_plus + e * vn_minus  " << vn_plus + e * vn_minus   << std::endl;
-  // std::cout << "status   "<<   answer.getValue(4) << std::endl;
+  // std::cout << "status   "<<   answer(4) << std::endl;
 }
 }  // namespace siconos::io
 
@@ -904,7 +891,7 @@ void siconos::io::ContactContactWorkVisitor::operator()(
     const siconos::collision::ContactR& rel) {
   auto id = inter->number();
   answer.resize(6);
-  answer.setValue(0, id);
+  answer(0) = id;
   compute_contact_work_and_status(inter, omega, tol, answer);
 }
 
@@ -913,7 +900,7 @@ void siconos::io::ContactContactWorkVisitor::operator()(
     const siconos::collision::Contact5DR& rel) {
   auto id = inter->number();
   answer.resize(6);
-  answer.setValue(0, id);
+  answer(0) = id;
 
   compute_contact_work_and_status(inter, omega, tol, answer);
 }
@@ -923,7 +910,7 @@ void siconos::io::ContactContactWorkVisitor::operator()(
     const siconos::collision::Contact2dR& rel) {
   auto id = inter->number();
   answer.resize(6);
-  answer.setValue(0, id);
+  answer(0) = id;
 
   compute_contact_work_and_status(inter, omega, tol, answer);
 }
@@ -933,7 +920,7 @@ void siconos::io::ContactContactWorkVisitor::operator()(
     const siconos::collision::Contact2d3DR& rel) {
   auto id = inter->number();
   answer.resize(6);
-  answer.setValue(0, id);
+  answer(0) = id;
 
   compute_contact_work_and_status(inter, omega, tol, answer);
 }
@@ -981,11 +968,12 @@ std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::conta
       result->row(current_row++) = data;
     }
     result->resize(current_row, data_size);
-    DEBUG_EXPR(result->display(););
+    DEBUG_EXPR(siconos::algebra::print(*result));
+    ;
     return result;
   }
   DEBUG_END("MechanicsIO::contactContactWork");
 
-  // result->display();
+  // siconos::algebra::print(*result);
   return nullptr;
 }

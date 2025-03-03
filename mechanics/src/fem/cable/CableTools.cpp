@@ -10,8 +10,8 @@ void siconos::fem::cable::tools::pointsToSiconosVector(
   assert(vecin.size() * 3 == (size_t)vecout->size());
   size_t i = 0;
   for (auto &point : vecin) {
-    vecout->setValue(i++, point.x);
-    vecout->setValue(i++, point.y);
-    vecout->setValue(i++, point.z);
+    (*vecout)(i++) = point.x;
+    (*vecout)(i++) = point.y;
+    (*vecout)(i++) = point.z;
   }
 }

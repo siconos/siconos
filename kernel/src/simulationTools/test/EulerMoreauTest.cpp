@@ -59,9 +59,9 @@ void EulerMoreauTest::testCstGradTIDS() {
   std::cout << "------- Integrate a time-invariant coeff and linear system with constant "
                "gradients -------"
             << std::endl;
-  _b->setValue(0, -1.);
-  _x0->setValue(0, 5.);
-  _x0->setValue(1, 10);
+  (*_b)(0) = -1.;
+  (*_x0)(0) = 5.;
+  (*_x0)(1) = 10;
 
   _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, *_A, *_b);
 
@@ -122,7 +122,7 @@ void EulerMoreauTest::testCstGradNLDS() {
   std::cout << "===========================================" << std::endl;
   std::cout << "------- Integrate a nonlinear system with constant gradients -------"
             << std::endl;
-  _b->setValue(0, -1.);
+  (*_b)(0) = -1.;
   siconos::algebra::SiconosVector x0{2};
   x0 << 5, 10;
   _DS = std::make_shared<siconos::modeling::FirstOrderNonLinearDS>(x0);

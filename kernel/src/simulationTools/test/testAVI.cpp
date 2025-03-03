@@ -112,17 +112,17 @@ void AVITest::testAVI() {
   siconos::algebra::io::read("testAVI.ref", dataPlotRef);
   siconos::algebra::SiconosVector err{dataPlot.cols()};
   siconos::algebra::normInfByColumn(dataPlot - dataPlotRef, err);
-  err.display();
+  siconos::algebra::print(err);
 
   double maxErr = err(0) > err(1) ? (err(0) > err(2) ? err(0) : err(2))
                                   : (err(1) > err(2) ? err(1) : err(2));
 
   std::cout << "------- Integration Ok, error = " << maxErr << " -------\n";
   if (maxErr > _tol) {
-    dataPlot.display();
+    siconos::algebra::print(dataPlot);
     siconos::algebra::SiconosMatrix diff = dataPlot - dataPlotRef;
     std::cout << "------- diff \n";
-    diff.display();
+    siconos::algebra::print(diff);
   }
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAVI : ", maxErr < _tol, true);

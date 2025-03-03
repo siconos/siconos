@@ -34,34 +34,20 @@ class SimpleMatrixTest : public CppUnit::TestFixture {
 
   CPPUNIT_TEST(testNormInf);
   CPPUNIT_TEST(testSetBlock);
-  CPPUNIT_TEST(testSetBlock2);
-  CPPUNIT_TEST(testOperators9);
   CPPUNIT_TEST(testProdBis);
   CPPUNIT_TEST(testProd4);
   CPPUNIT_TEST(testProd5);
   CPPUNIT_TEST(testProd6);
-  // CPPUNIT_TEST(testGemv);
-  // CPPUNIT_TEST(testGemm);
-  // CPPUNIT_TEST(testPLUFactorizationInPlace);
-  // CPPUNIT_TEST(testFactorize);
   CPPUNIT_TEST(End);
   CPPUNIT_TEST_SUITE_END();
 
   void testNormInf();
   void testSetBlock();
-  void testSetBlock2();
-  void testOperators9();
   void testProdBis();
   void testProdTer();
   void testProd4();
   void testProd5();
   void testProd6();
-  // void testGemm();
-  // void testGemv();
-  // void testFromAndFillCSC();
-  // void testPLUFactorizationInPlace();
-  // void testFactorize();
-  // void testSolve();
   void End();
 
   unsigned int size, size2;

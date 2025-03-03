@@ -502,7 +502,7 @@ void siconos::simulation::EventDriven::computeJacobianfx(
           std::dynamic_pointer_cast<siconos::algebra::BlockMatrix>(lds->jacobianRhsOver_x());
       for (decltype(lds->x_size()) j = 0; j < lds->x_size(); ++j) {
         for (decltype(lds->dimension()) k = 0; k < lds->dimension(); ++k)
-          jacob[i++] = jacotmp->getValue(k, j);
+          jacob[i++] = (*jacotmp)(k, j);
       }
     } else if (auto lds =
                    std::dynamic_pointer_cast<siconos::modeling::FirstOrderNonLinearDS>(ds)) {

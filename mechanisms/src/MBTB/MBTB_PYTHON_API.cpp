@@ -91,14 +91,14 @@ void siconos::mechanisms::MBTB_updateDSFromSiconos() {
   for (unsigned int numDS = 0; numDS < mbtb::data::sNbOfBodies; numDS++) {
     auto q = mbtb::data::sDS[numDS]->q();
     // printf("step %d siconos %s ->q:\n",mTimerCmp,sPieceName[numDS]);
-    // q->display();
-    double x = q->getValue(0);
-    double y = q->getValue(1);
-    double z = q->getValue(2);
-    double q1 = q->getValue(3);
-    double q2 = q->getValue(4);
-    double q3 = q->getValue(5);
-    double q4 = q->getValue(6);
+    // siconos::algebra::print(*q);
+    double x = (*q)(0);
+    double y = (*q)(1);
+    double z = (*q)(2);
+    double q1 = (*q)(3);
+    double q2 = (*q)(4);
+    double q3 = (*q)(5);
+    double q4 = (*q)(6);
     ACE_times[ACE_TIMER_UPDATE_POS].start();
     CADMBTB_moveObjectFromQ(numDS, x, y, z, q1, q2, q3, q4);
     ACE_times[ACE_TIMER_UPDATE_POS].stop();
@@ -182,13 +182,13 @@ void MBTB_BodyBuildComputeInitPosition(
     to the initial position of the simulation. This position is not q0 of the
     siconos::DS because siconos work in the frame of G, and G is not necessary
     at the origin.*/
-  double q1 = cos(0.5 * initPos->getValue(6));
-  double q2 = initPos->getValue(3) * sin(0.5 * initPos->getValue(6));
-  double q3 = initPos->getValue(4) * sin(0.5 * initPos->getValue(6));
-  double q4 = initPos->getValue(5) * sin(0.5 * initPos->getValue(6));
-  double x = initPos->getValue(0);
-  double y = initPos->getValue(1);
-  double z = initPos->getValue(2);
+  double q1 = cos(0.5 * (*initPos)(6));
+  double q2 = (*initPos)(3) * sin(0.5 * (*initPos)(6));
+  double q3 = (*initPos)(4) * sin(0.5 * (*initPos)(6));
+  double q4 = (*initPos)(5) * sin(0.5 * (*initPos)(6));
+  double x = (*initPos)(0);
+  double y = (*initPos)(1);
+  double z = (*initPos)(2);
 
   CADMBTB_moveObjectFromQ(numDS, x, y, z, q1, q2, q3, q4);
   internal::MBTB_updateContactFromDS(numDS);
@@ -210,29 +210,29 @@ void MBTB_BodyBuildComputeInitPosition(
    */
   ::boost::math::quaternion<double> quattrf(q1, q2, q3, q4);
 
-  ::boost::math::quaternion<double> quatOG(0, modelCenterMass->getValue(0),
-                                           modelCenterMass->getValue(1),
-                                           modelCenterMass->getValue(2));
+  ::boost::math::quaternion<double> quatOG(0, (*modelCenterMass)(0),
+                                           (*modelCenterMass)(1),
+                                           (*modelCenterMass)(2));
   ::boost::math::quaternion<double> quatRes(0, 0, 0, 0);
   quatRes = quattrf * quatOG / quattrf;
 
-  q10->setValue(0, quatRes.R_component_2() + initPos->getValue(0));
-  q10->setValue(1, quatRes.R_component_3() + initPos->getValue(1));
-  q10->setValue(2, quatRes.R_component_4() + initPos->getValue(2));
+  (*q10)(0) = quatRes.R_component_2() + (*initPos)(0);
+  (*q10)(1) = quatRes.R_component_3() + (*initPos)(1);
+  (*q10)(2) = quatRes.R_component_4() + (*initPos)(2);
   // In current version, the initial orientation is (1,0,0,0)
-  q10->setValue(3, q1);
-  q10->setValue(4, q2);
-  q10->setValue(5, q3);
-  q10->setValue(6, q4);
-  // sq10[numDS]->display();
+  (*q10)(3) = q1;
+  (*q10)(4) = q2;
+  (*q10)(5) = q3;
+  (*q10)(6) = q4;
+  // siconos::algebra::print(*sq10[numDS]);
   // gp_Ax3 aux=GetPosition(data::sTopoDSPiece[numDS]);
   // printf("and sould be : %e, %e,
   // %e\n",aux.Location().X(),aux.Location().Y(),aux.Location().Z());
 
   // set the translation of the CAD model.
-  double q10x = q10->getValue(0);
-  double q10y = q10->getValue(1);
-  double q10z = q10->getValue(2);
+  double q10x = (*q10)(0);
+  double q10y = (*q10)(1);
+  double q10z = (*q10)(2);
   CADMBTB_setLocation(numDS, q10x, q10y, q10z);
 
   // sStartPiece[numDS]=Ax3Aux2;
@@ -346,8 +346,6 @@ void siconos::mechanisms::MBTB_BodyBuild(
 
   mbtb::data::sDS[numDS].reset(p);
   // sAllDS.insert(mbtb::data::sDS[numDS]);
-  //  std::cout << "MBTB_BodyBuild()" <<std::endl;
-  //  mbtb::data::sDS[numDS]->display();
   //  myModel->nonSmoothDynamicalSystem()->insertDynamicalSystem(mbtb::data::sDS[numDS]);
 }
 
@@ -380,12 +378,12 @@ void siconos::mechanisms::MBTB_JointBuild(
   siconos::algebra::SiconosVector3 P;
   siconos::algebra::SiconosVector3 A;
   auto ds1CenterOfMass = mbtb::data::sDS[indexDS1]->centerOfMass();
-  P.setValue(0, jointPosition->getValue(3) - ds1CenterOfMass->getValue(0));
-  P.setValue(1, jointPosition->getValue(4) - ds1CenterOfMass->getValue(1));
-  P.setValue(2, jointPosition->getValue(5) - ds1CenterOfMass->getValue(2));
-  A.setValue(0, jointPosition->getValue(0));
-  A.setValue(1, jointPosition->getValue(1));
-  A.setValue(2, jointPosition->getValue(2));
+  P(0) = (*jointPosition)(3) - (*ds1CenterOfMass)(0);
+  P(1) = (*jointPosition)(4) - (*ds1CenterOfMass)(1);
+  P(2) = (*jointPosition)(5) - (*ds1CenterOfMass)(2);
+  A(0) = (*jointPosition)(0);
+  A(1) = (*jointPosition)(1);
+  A(2) = (*jointPosition)(2);
   mbtb::data::sJointRelations[numJ] = new MBTB_JointR();
   if (jointType == JointsType::Pivot1) {
     mbtb::data::sJointRelations[numJ]->_jointR =
@@ -469,7 +467,6 @@ void siconos::mechanisms::MBTB_ContactBuild(unsigned int numContact,
   // std::cout << "MBTB_ContactBuild() insert "<<
   // mbtb::data::sContacts[numContact]->_indexBody1 <<std::endl;
 
-  // mbtb::data::sDS[mbtb::data::sContacts[numContact]->_indexBody1]->display();
   // if(mbtb::data::sContacts[numContact]->_indexBody2!=-1)
   //   myModel->nonSmoothDynamicalSystem()->link(mbtb::data::sInterContacts[numContact],
   //                                             mbtb::data::sDS[mbtb::data::sContacts[numContact]->_indexBody2]);
@@ -515,14 +512,6 @@ void siconos::mechanisms::MBTB_initSimu(double hTS, int withProj) {
       // mbtb::data::sDS[mbtb::data::sContacts[numC]->_indexBody1]); " <<
       // std::endl; std::cout <<
       // "============"<<   mbtb::data::sInterContacts[numC] <<std::endl;
-      // mbtb::data::sInterContacts[numC]->display();
-      // std::cout << mbtb::data::sDS[mbtb::data::sContacts[numC]->_indexBody1]
-      // << std::endl;
-      // mbtb::data::sDS[mbtb::data::sContacts[numC]->_indexBody1]->display();
-      // mbtb::data::sInterContacts[numC]->insert(
-      // mbtb::data::sDS[mbtb::data::sContacts[numC]->_indexBody1]  );
-      // mbtb::data::sInterContacts[numC]->display();
-      //    mbtb::data::sInterContacts[numC]->dynamicalSystem(0)->display();
     }
   }
 
@@ -659,7 +648,7 @@ void siconos::mechanisms::MBTB_initSimu(double hTS, int withProj) {
     auto inter = mbtb::data::sJointRelations[numJ]->_interaction;
     auto& y = *(inter->y(0));
     mbtb::data::sJointRelations[numJ]->_jointR->computeOutput(0., *inter, 0);
-    y.display();
+    siconos::algebra::print(y);
   }
   printf("====> COMPUTE H OF INTERATION END)\n");
 

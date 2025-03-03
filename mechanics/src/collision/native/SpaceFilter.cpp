@@ -797,8 +797,8 @@ struct siconos::collision::native::SpaceFilter::FindInteractionsVisitor_
 
     auto Q1 = ds1->q();
 
-    auto x1 = Q1->getValue(0);
-    auto y1 = Q1->getValue(1);
+    auto x1 = (*Q1)(0);
+    auto y1 = (*Q1)(1);
     auto hds1 = std::make_shared<siconos::collision::native::internal::Hashed>(
         std::static_pointer_cast<siconos::modeling::DynamicalSystem>(ds1),
         (int)floor(x1 / parent->_cellsize), (int)floor(y1 / parent->_cellsize));
@@ -844,9 +844,9 @@ struct siconos::collision::native::SpaceFilter::FindInteractionsVisitor_
 
     auto Q1 = ds1->q();
 
-    double x1 = Q1->getValue(0);
-    double y1 = Q1->getValue(1);
-    double z1 = Q1->getValue(2);
+    double x1 = (*Q1)(0);
+    double y1 = (*Q1)(1);
+    double z1 = (*Q1)(2);
     auto hds1 = std::make_shared<siconos::collision::native::internal::Hashed>(
         ds1, (int)floor(x1 / parent->_cellsize), (int)floor(y1 / parent->_cellsize),
         (int)floor(z1 / parent->_cellsize));
@@ -885,9 +885,9 @@ struct siconos::collision::native::SpaceFilter::FindInteractionsVisitor_
 
     auto Q1 = ds1->q();
 
-    double x1 = Q1->getValue(0);
-    double y1 = Q1->getValue(1);
-    double z1 = Q1->getValue(2);
+    double x1 = (*Q1)(0);
+    double y1 = (*Q1)(1);
+    double z1 = (*Q1)(2);
     auto hds1 = std::make_shared<siconos::collision::native::internal::Hashed>(
         ds1, (int)floor(x1 / parent->_cellsize), (int)floor(y1 / parent->_cellsize),
         (int)floor(z1 / parent->_cellsize));
@@ -969,8 +969,8 @@ struct siconos::collision::native::SpaceFilter::DiskDistanceVisitor_
   DiskDistanceVisitor_(double x, double y, double r) : x(x), y(y), r(r) {};
 
   void visit(std::shared_ptr<siconos::collision::native::bodies::Disk> d) override {
-    double xd = d->q()->getValue(0);
-    double yd = d->q()->getValue(1);
+    double xd = (*d->q())(0);
+    double yd = (*d->q())(1);
 
     result = (hypot(x - xd, y - yd) - (r + d->getRadius()));
   }

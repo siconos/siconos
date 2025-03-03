@@ -41,9 +41,7 @@
 #include "SiconosConst.hpp"
 #include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixOp.hpp"  // for prod
 #include "SiconosVector.hpp"
-#include "SiconosVectorOp.hpp"  // for setBlock
 #include "Simulation.hpp"
 #include "Topology.hpp"
 #include "ZeroOrderHoldOSI.hpp"
@@ -429,7 +427,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
     // get _interactionBlocks corresponding to the current DS
     // These _interactionBlocks depends on the relation type.
     leftInteractionBlock = inter->getLeftInteractionBlockForDS(pos, nslawSize, sizeDS);
-    DEBUG_EXPR(leftInteractionBlock->display(););
+    DEBUG_EXPR(siconos::algebra::print(*leftInteractionBlock););
     // Computing depends on relation type -> move this in Interaction method?
     if (relationType == siconos::modeling::RelationType::FirstOrder) {
       rightInteractionBlock = inter->getRightInteractionBlockForDS(pos, sizeDS, nslawSize);
@@ -495,18 +493,18 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
         }
       } else {
         DEBUG_PRINT("leftInteractionBlock after application of boundary conditions\n");
-        DEBUG_EXPR(leftInteractionBlock->display(););
+        DEBUG_EXPR(siconos::algebra::print(*leftInteractionBlock););
         // (inter1 == inter2)
         auto work = std::make_shared<siconos::algebra::SiconosMatrix>(*leftInteractionBlock);
         work->transposeInPlace();
         auto centralInteractionBlock = getOSIMatrix(osi, ds);
         *work = centralInteractionBlock->solve(*work);
         //*currentInteractionBlock +=  *leftInteractionBlock ** work;
-        DEBUG_EXPR(work->display(););
+        DEBUG_EXPR(siconos::algebra::print(*work););
         *currentInteractionBlock += *leftInteractionBlock * *work;
         //      gemm(CblasNoTrans,CblasNoTrans,1.0,*leftInteractionBlock,*work,1.0,*currentInteractionBlock);
         //*currentInteractionBlock *=h;
-        DEBUG_EXPR(currentInteractionBlock->display(););
+        DEBUG_EXPR(siconos::algebra::print(*currentInteractionBlock););
         // assert(currentInteractionBlock->checkSymmetry(1e-10));
         if (relationSubType == siconos::modeling::RelationSubType::CompliantLinearTIR) {
           if (osiType == siconos::integrators::IntegratorType::MOREAUJEANOSI) {
@@ -733,7 +731,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeqBlock(
   auto& osnsp_rhs = osi1.osnsp_rhs(vertex_inter, *indexSet);
   _q->segment(pos, sizeY) = osnsp_rhs;
 
-  DEBUG_EXPR(_q->display());
+  DEBUG_EXPR(siconos::algebra::print(*_q));
   DEBUG_END(
       "siconos::nonsmooth_formulations::LinearOSNS::computeqBlock(std::shared_ptr<siconos::"
       "modeling::"
@@ -816,7 +814,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeM() {
     NM_scal(theta, &*_M->numericsMatrix());
   }
 
-  DEBUG_EXPR(_M->display(););
+  DEBUG_EXPR(siconos::algebra::print(*_M););
   // NumericsMatrix *   M_NM = _M->numericsMatrix().get();
   // if (M_NM )
   //   NM_display(M_NM);
@@ -958,7 +956,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::postCompute() {
     lambda = inter.lambda(inputOutputLevel());
     // Copy _z values, starting from index pos into lambda.
     lambda->segment(0, lambda->size()) = _z->segment(pos, lambda->size());
-    DEBUG_EXPR(lambda->display(););
+    DEBUG_EXPR(siconos::algebra::print(*lambda););
   }
   DEBUG_END("void siconos::nonsmooth_formulations::LinearOSNS::postCompute()\n");
 }
@@ -973,18 +971,18 @@ void siconos::nonsmooth_formulations::LinearOSNS::display() const {
     std::cout << "-> nullptr" << std::endl;
   std::cout << std::endl << "q : ";
   if (_q)
-    _q->display();
+    siconos::algebra::print(*_q);
   else
     std::cout << "-> nullptr" << std::endl;
   std::cout << std::endl;
   std::cout << "w : ";
   if (_w)
-    _w->display();
+    siconos::algebra::print(*_w);
   else
     std::cout << "-> nullptr" << std::endl;
   std::cout << std::endl << "z : ";
   if (_z)
-    _z->display();
+    siconos::algebra::print(*_z);
   else
     std::cout << "-> nullptr" << std::endl;
   std::cout << std::endl;

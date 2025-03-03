@@ -88,8 +88,7 @@ void siconos::simulation::TimeSteppingD1Minus::updateIndexSet(unsigned int i) {
 
   // For all Interactions in indexSet[i-1], compute y[i-1] and
   // update the indexSet[i].
-  auto indexSet0 =
-      topo->indexSet(0);  // ALL Interactions : formula (8.30) of Acary2008
+  auto indexSet0 = topo->indexSet(0);        // ALL Interactions : formula (8.30) of Acary2008
   auto indexSetCurrent = topo->indexSet(i);  // ACTIVE Interactions for IMPACTS
   assert(indexSet0);
   assert(indexSetCurrent);
@@ -112,8 +111,7 @@ void siconos::simulation::TimeSteppingD1Minus::updateIndexSet(unsigned int i) {
     auto ds1 = indexSetCurrent->properties(*uip).source;
     auto& osi = *DSG0.properties(DSG0.descriptor(ds1)).osi;
     auto levelMaxForInput = osi.levelMaxForInput();
-    if ((!indexSetCurrent->is_vertex(inter)) and
-        (osi.addInteractionInIndexSet(inter, i))) {
+    if ((!indexSetCurrent->is_vertex(inter)) and (osi.addInteractionInIndexSet(inter, i))) {
       indexSetCurrent->copy_vertex(inter, *indexSet0);
       topo->setHasChanged(true);
     } else if ((indexSetCurrent->is_vertex(inter)) and
@@ -127,15 +125,14 @@ void siconos::simulation::TimeSteppingD1Minus::updateIndexSet(unsigned int i) {
     }
 
     if (!indexSetCurrent->is_vertex(inter)) {
-      DEBUG_PRINTF("The current interaction is not in the indexSet(%i)\n",
-                   (int)i);
+      DEBUG_PRINTF("The current interaction is not in the indexSet(%i)\n", (int)i);
       if (i <= levelMaxForInput) {
-        DEBUG_EXPR(inter->lambda(i)->display());
+        DEBUG_EXPR(siconos::algebra::print(*inter->lambda(i)));
         inter->lambda(i)->setZero();
       }
     } else {
       DEBUG_PRINTF("The current interaction is in the indexSet(%i)\n", (int)i);
-      DEBUG_EXPR(if (i <= levelMaxForInput) inter->lambda(i)->display());
+      DEBUG_EXPR(if (i <= levelMaxForInput) siconos::algebra::print(*(inter->lambda(i)));)
     }
   }
   DEBUG_PRINTF("\nINDEXSETS AFTER UPDATE for level i = %i\n", i);
@@ -219,10 +216,8 @@ void siconos::simulation::TimeSteppingD1Minus::advanceToEvent() {
   if (!_allNSProblems->empty())
     computeOneStepNSProblem(siconos::simulation::SICONOS_OSNSP_TS_VELOCITY);
 
-  DEBUG_EXPR(
-      if (_nsds->topology()->indexSet(1)->size() >
-          0)(*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]
-          ->display(););
+  DEBUG_EXPR(if (_nsds->topology()->indexSet(1)->size() > 0) siconos::algebra::print(
+                 *((*_allNSProblems)[siconos::simulation::SICONOS_OSNSP_TS_VELOCITY]));)
 
   // update on impulse level
   // * calculate global impulse (p_{k+1}^+)
@@ -240,8 +235,7 @@ void siconos::simulation::TimeSteppingD1Minus::computeResidu() {
 }
 
 void siconos::simulation::TimeSteppingD1Minus::computeFreeState() {
-  std::for_each(
-      _allOSI->begin(), _allOSI->end(),
-      std::bind(&siconos::integrators::OneStepIntegrator::computeFreeState,
-                std::placeholders::_1));
+  std::for_each(_allOSI->begin(), _allOSI->end(),
+                std::bind(&siconos::integrators::OneStepIntegrator::computeFreeState,
+                          std::placeholders::_1));
 }

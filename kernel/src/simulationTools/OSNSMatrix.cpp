@@ -208,8 +208,9 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillM(
       std::shared_ptr<siconos::modeling::Interaction> inter = indexSet.bundle(*vi);
       pos = indexSet.properties(*vi).absolute_position;
 
-      std::static_pointer_cast<siconos::algebra::SiconosMatrix>(_M1)->setBlock(
-          pos, pos, *indexSet.properties(*vi).block);
+      siconos::algebra::setBlock(
+          pos, pos, *indexSet.properties(*vi).block,
+          *std::static_pointer_cast<siconos::algebra::SiconosMatrix>(_M1));
       DEBUG_PRINTF("OSNSMatrix _M1: %i %i\n", _M1->rows(), _M1->cols());
       DEBUG_PRINTF("OSNSMatrix block: %i %i\n", indexSet.properties(*vi).block->rows(),
                    indexSet.properties(*vi).block->cols());
@@ -242,11 +243,12 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillM(
 
       assert(indexSet.properties(*ei).lower_block);
       assert(indexSet.properties(*ei).upper_block);
-      std::static_pointer_cast<siconos::algebra::SiconosMatrix>(_M1)->setBlock(
-          std::min(pos, col), std::max(pos, col), *indexSet.properties(*ei).upper_block);
-
-      std::static_pointer_cast<siconos::algebra::SiconosMatrix>(_M1)->setBlock(
-          std::max(pos, col), std::min(pos, col), *indexSet.properties(*ei).lower_block);
+      siconos::algebra::setBlock(
+          std::min(pos, col), std::max(pos, col), *indexSet.properties(*ei).upper_block,
+          *std::static_pointer_cast<siconos::algebra::SiconosMatrix>(_M1));
+      siconos::algebra::setBlock(
+          std::max(pos, col), std::min(pos, col), *indexSet.properties(*ei).lower_block,
+          *std::static_pointer_cast<siconos::algebra::SiconosMatrix>(_M1));
     }
   } else if (_storageType == NM_SPARSE_BLOCK) {
     if (!_M2) {
@@ -411,7 +413,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillWinverse(
                 "siconos:simulation::OSNSMatrix::fillWinverse not yet implemented for this "
                 "type of OSI  ");
 
-          // W->display();
+          // siconos::algebra::print(*W);
         }
 
         // // Ugly inversion
@@ -592,7 +594,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::display() const {
     if (!_M1)
       std::cout << " matrix = nullptr pointer" << std::endl;
     else
-      _M1->display();
+      siconos::algebra::print(*_M1);
   } else if (_storageType == NM_SPARSE_BLOCK) {
     std::cout << "----- OSNS Matrix using Sparse InteractionBlock storage type for Numerics "
                  "(SparseBlockStructuredMatrix)"

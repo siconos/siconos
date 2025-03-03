@@ -147,7 +147,7 @@ void siconos::control::SlidingReducedOrderObserver::process() {
     _DS->initMemory(1);
     _DS->swapInMemory();
     DEBUG_EXPR(_DS->display(););
-    DEBUG_EXPR(_DS->xMemory().display(););
+    DEBUG_EXPR(siconos::algebra::print(_DS->xMemory()););
   } else {
     DEBUG_PRINT("Second pass\n");
     // get measurement from sensor
@@ -178,7 +178,7 @@ void siconos::control::SlidingReducedOrderObserver::process() {
     //
     // But first we need to reset the state to the
     // previous value (at t_k)
-    DEBUG_EXPR(_DS->xMemory().display(););
+    DEBUG_EXPR(siconos::algebra::print(_DS->xMemory()););
     auto current_x = _DS->x();                        // Pointer
     *current_x = _DS->xMemory().getSiconosVector(0);  // Copy
     // integrate with the new innovation term

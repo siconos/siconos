@@ -42,7 +42,6 @@
 #include "Relation.hpp"
 #include "RelayNSL.hpp"
 #include "SiconosMatrix.hpp"
-// #include "SiconosMatrixOp.hpp"  // For setBlock
 #include "SiconosMemory.hpp"
 #include "SiconosVector.hpp"
 #include "SiconosVisitor.hpp"
@@ -801,7 +800,7 @@ void siconos::modeling::Interaction::display(bool brief) const {
     std::cout << "| y[" << i << "] : \n";
     if (_y[i]) {
       if (_y[i]->size() >= 5) std::cout << "\n";
-      _y[i]->display();
+      siconos::algebra::print(*_y[i]);
     } else
       std::cout << "->nullptr\n";
   }
@@ -809,16 +808,16 @@ void siconos::modeling::Interaction::display(bool brief) const {
     std::cout << "| lambda[" << i << "] :\n ";
     if (_lambda[i]) {
       if (_lambda[i]->size() >= 5) std::cout << "\n";
-      _lambda[i]->display();
+      siconos::algebra::print(*_lambda[i]);
     } else
       std::cout << "->nullptr\n";
   }
   if (!brief) {
     std::cout << "| _yMemory size: " << _yMemory.size() << "\n";
-    ;
+
     for (unsigned int i = 0; i < _upperLevelForOutput + 1; i++) {
       std::cout << "| y_Memory[" << i << "] :\n ";
-      _yMemory[i].display();
+      siconos::algebra::print(_yMemory[i]);
     }
   }
 

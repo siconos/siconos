@@ -276,13 +276,13 @@ void siconos::integrators::MoreauJeanBilbaoOSI::computeFreeState() {
     // Get velocity computed at the beginning of the time step.
     const auto& v_i = lldds.velocityMemory().getSiconosVector(0);
     const auto& q_i = lldds.qMemory().getSiconosVector(0);
-    DEBUG_EXPR(q_i.display(););
-    DEBUG_EXPR(v_i.display(););
+    DEBUG_EXPR(siconos::algebra::print(q_i););
+    DEBUG_EXPR(siconos::algebra::print(v_i););
     auto stiffness = lldds.stiffnessMatrix();
     // Get iteration matrix
     const auto& dsv = _dynamicalSystemsGraph->descriptor(ds);
     auto& inv_iteration_matrix = *_dynamicalSystemsGraph->properties(dsv).iterationMatrix;
-    DEBUG_EXPR(inv_iteration_matrix.display(););
+    DEBUG_EXPR(siconos::algebra::print(inv_iteration_matrix););
     // Get 2.*dt*sigma^*
     auto& two_dt_sigma_star =
         *work_ds[siconos::integrators::MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR];
@@ -293,7 +293,7 @@ void siconos::integrators::MoreauJeanBilbaoOSI::computeFreeState() {
     for (decltype(dimension) k = 0; k < dimension; ++k)
       vfree(k) = v_i(k) - inv_iteration_matrix(k, k) * (time_step * stiffness(k) * q_i(k) +
                                                         two_dt_sigma_star(k) * v_i(k));
-    DEBUG_EXPR(vfree.display(););
+    DEBUG_EXPR(siconos::algebra::print(vfree););
   }
   DEBUG_END("siconos::integrators::MoreauJeanBilbaoOSI::computeFreeState()")
 }
@@ -374,7 +374,7 @@ void siconos::integrators::MoreauJeanBilbaoOSI::updatePosition(
   // update positions
   *d.q() = time_step * d.velocity_read();
   *d.q() += qold;
-  DEBUG_EXPR(q.display(););
+  DEBUG_EXPR(siconos::algebra::print(q););
 }
 
 void siconos::integrators::MoreauJeanBilbaoOSI::updateState(const unsigned int) {
@@ -399,14 +399,14 @@ void siconos::integrators::MoreauJeanBilbaoOSI::updateState(const unsigned int) 
       v = *lldds.p(_levelMaxForInput);  // v = p
       if (lldds.boundaryConditions())
         for (const auto itindex : lldds.boundaryConditions()->velocityIndices()) {
-          v.setValue(itindex, 0.0);
+          v(itindex) = 0.0;
         }
       auto ndof = lldds.dimension();
       for (unsigned int k = 0; k < ndof; ++k)
         v(k) = vfree(k) + v(k) * inv_iteration_matrix(k, k);
     } else
       v = vfree;
-    DEBUG_EXPR(v.display(););
+    DEBUG_EXPR(siconos::algebra::print(v););
     // Update positions with the last computed velocities.
     updatePosition(lldds);
   }
@@ -428,7 +428,7 @@ void siconos::integrators::MoreauJeanBilbaoOSI::display() const {
       std::cout << "--------------------------------\n";
       std::cout << "--> W of dynamical system number " << ds->number() << ": \n";
       if (_dynamicalSystemsGraph->properties(*dsi).iterationMatrix)
-        _dynamicalSystemsGraph->properties(*dsi).iterationMatrix->display();
+        siconos::algebra::print(*_dynamicalSystemsGraph->properties(*dsi).iterationMatrix);
       else
         std::cout << "-> nullptr\n";
     }
@@ -451,8 +451,8 @@ bool siconos::integrators::MoreauJeanBilbaoOSI::addInteractionInIndexSet(
 
   assert(i == 1);
   double h = _simulation->timeStep();
-  auto y = (inter->y(i - 1))->getValue(0);  // for i=1 y(i-1) is the position
-  auto yDot = (inter->y(i))->getValue(0);   // for i=1 y(i) is the velocity
+  auto y = (*inter->y(i - 1))(0);  // for i=1 y(i-1) is the position
+  auto yDot = (*(inter->y(i)))(0);   // for i=1 y(i) is the velocity
   bool _useGamma = false;
   double _gamma = 1.0 / 2.0;
   double _constraintActivationThreshold = 0.0;

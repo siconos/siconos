@@ -175,18 +175,18 @@ public:
   void updateContactPoint(double pc1[3], double pc2[3],
 			  double normal[3], double tangent[3])
   {
-    _Pc1->setValue(0, pc1[0]);
-    _Pc1->setValue(1, pc1[1]);
-    _Pc1->setValue(2, pc1[2]);
-    _Pc2->setValue(0, pc2[0]);
-    _Pc2->setValue(1, pc2[1]);
-    _Pc2->setValue(2, pc2[2]);
-    _Normal->setValue(0, normal[0]);
-    _Normal->setValue(1, normal[1]);
-    _Normal->setValue(2, normal[2]);
-    _Tangent->setValue(0, tangent[0]);
-    _Tangent->setValue(1, tangent[1]);
-    _Tangent->setValue(2, normal[2]);
+    (*_Pc1)(0) = pc1[0];
+    (*_Pc1)(1) = pc1[1];
+    (*_Pc1)(2) = pc1[2];
+    (*_Pc2)(0) = pc2[0];
+    (*_Pc2)(1) = pc2[1];
+    (*_Pc2)(2) = pc2[2];
+    (*_Normal)(0) = normal[0];
+    (*_Normal)(1) = normal[1];
+    (*_Normal)(2) = normal[2];
+    (*_Tangent)(0) = tangent[0];
+    (*_Tangent)(1) = tangent[1];
+    (*_Tangent)(2) = normal[2];
   };
   void display() const override;
 

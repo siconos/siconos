@@ -272,14 +272,14 @@ void siconos::integrators::ZeroOrderHoldOSI::computeFreeState() {
         DSG0.AdInt.at(dsgVD)->integrate();
 
       auto& xfree = *ds_work_vectors[siconos::integrators::ZeroOrderHoldOSI::FREE];
-      DEBUG_EXPR(xfree.display(););
+      DEBUG_EXPR(siconos::algebra::print(xfree););
 
       xfree = DSG0.Ad.at(dsgVD)->mat() * *d->x();  // xfree = Ad*xold
-      DEBUG_EXPR(xfree.display(););
+      DEBUG_EXPR(siconos::algebra::print(xfree););
       if (d->hasbVector()) {
         assert(DSG0.AdInt.hasKey(dsgVD));
         xfree += DSG0.AdInt.at(dsgVD)->mat() * d->bVector();  // xfree += AdInt*b
-        DEBUG_EXPR(xfree.display(););
+        DEBUG_EXPR(siconos::algebra::print(xfree););
       }
 
       // add extra term, possible control terms
@@ -287,7 +287,7 @@ void siconos::integrators::ZeroOrderHoldOSI::computeFreeState() {
         DEBUG_PRINT("add extra additional terms\n");
         _extraAdditionalTerms->addSmoothTerms(DSG0, dsgVD, h, xfree);
       }
-      DEBUG_EXPR(xfree.display(););
+      DEBUG_EXPR(siconos::algebra::print(xfree););
     } else
       THROW_EXCEPTION(
           "siconos::integrators::ZeroOrderHoldOSI::computeFreeState - Only implemented for "
@@ -398,7 +398,7 @@ void siconos::integrators::ZeroOrderHoldOSI::computeFreeOutput(
       if (_useGammaForRelation) {
         THROW_EXCEPTION(
             "siconos::integrators::ZeroOrderHoldOSI::ComputeFreeOutput not yet implemented "
-            "with useGammaForRelation() for FirstorderR and Typ2R and H_alpha->getValue() "
+            "with useGammaForRelation() for FirstorderR and Typ2R and H_alpha() "
             "should return the mid-point value");
       }
 
@@ -506,8 +506,8 @@ bool siconos::integrators::ZeroOrderHoldOSI::addInteractionInIndexSet(
     std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i) {
   assert(i == 1);
   double h = _simulation->timeStep();
-  double y = (inter->y(i - 1))->getValue(0);  // for i=1 y(i-1) is the position
-  double yDot = (inter->y(i))->getValue(0);   // for i=1 y(i) is the velocity
+  double y = (*inter->y(i - 1))(0);  // for i=1 y(i-1) is the position
+  double yDot = (*(inter->y(i)))(0);   // for i=1 y(i) is the velocity
   double gamma = .5;
   DEBUG_PRINTF(
       "siconos::integrators::ZeroOrderHoldOSI::addInteractionInIndexSet yref=%e, yDot=%e, "
@@ -553,12 +553,12 @@ void siconos::integrators::ZeroOrderHoldOSI::display() const {
     auto ds = _dynamicalSystemsGraph->bundle(*dsi);
     if (_dynamicalSystemsGraph->Ad[*dsi]) {
       std::cout << "--> Phi of dynamical system number: \n";
-      _dynamicalSystemsGraph->Ad[*dsi]->mat().display();
+      siconos::algebra::print(_dynamicalSystemsGraph->Ad[*dsi]->mat());
     }
 
     if (_dynamicalSystemsGraph->Bd[*dsi]) {
       std::cout << "--> Psi of dynamical system number: \n";
-      _dynamicalSystemsGraph->Bd[*dsi]->mat().display();
+      siconos::algebra::print(_dynamicalSystemsGraph->Bd[*dsi]->mat());
     }
   }
   std::cout << "================================" << std::endl;

@@ -80,7 +80,7 @@ siconos::joints::PrismaticJointR::PrismaticJointR(
 
 void siconos::joints::PrismaticJointR::displayInitialPosition() {
   std::cout << "Prismatic axis :\n";
-  _axis0->display();
+  siconos::algebra::print(*_axis0);
   std::cout << "V1 :" << _V1x << " " << _V1y << " " << _V1z << "\n";
   std::cout << "V2 :" << _V2x << " " << _V2y << " " << _V2z << "\n";
   std::cout << "G10G20d1 :" << _G10G20d1x << " " << _G10G20d1y << " " << _G10G20d1z << "\n";
@@ -96,29 +96,27 @@ void siconos::joints::PrismaticJointR::setBasePositions(
   if (absoluteRef_) {
     // Adjust axis to be in q1 frame
     boost::math::quaternion<double> quat1(q1(3), q1(4), q1(5), q1(6));
-    boost::math::quaternion<double> quatA(0, _axis0->getValue(0), _axis0->getValue(1),
-                                          _axis0->getValue(2));
+    boost::math::quaternion<double> quatA(0, (*_axis0)(0), (*_axis0)(1), (*_axis0)(2));
     boost::math::quaternion<double> tmp = (1.0 / quat1) * quatA * quat1;
-    _axis0->setValue(0, tmp.R_component_2());
-    _axis0->setValue(1, tmp.R_component_3());
-    _axis0->setValue(2, tmp.R_component_4());
+    (*_axis0)(0) = tmp.R_component_2();
+    (*_axis0)(1) = tmp.R_component_3();
+    (*_axis0)(2) = tmp.R_component_4();
   }
 
   auto q2i = std::make_shared<siconos::algebra::SiconosVector>(7);
   q2i->setZero();
-  q2i->setValue(3, 1);
+  (*q2i)(3) = 1;
 
   if (q2) *q2i = *q2;
 
   boost::math::quaternion<double> quat1(q1(3), q1(4), q1(5), q1(6));
-  boost::math::quaternion<double> quat2(q2i->getValue(3), q2i->getValue(4), q2i->getValue(5),
-                                        q2i->getValue(6));
+  boost::math::quaternion<double> quat2((*q2i)(3), (*q2i)(4), (*q2i)(5), (*q2i)(6));
 
   computeV1V2FromAxis();
 
   boost::math::quaternion<double> quat1_inv(q1(3), -q1(4), -q1(5), -q1(6));
-  boost::math::quaternion<double> quatG10G20_abs(
-      0, q2i->getValue(0) - q1(0), q2i->getValue(1) - q1(1), q2i->getValue(2) - q1(2));
+  boost::math::quaternion<double> quatG10G20_abs(0, (*q2i)(0) - q1(0), (*q2i)(1) - q1(1),
+                                                 (*q2i)(2) - q1(2));
   boost::math::quaternion<double> quatBuff(0, 0, 0, 0);
   quatBuff = quat1_inv * (quatG10G20_abs * quat1);
   _G10G20d1x = quatBuff.R_component_2();
@@ -137,22 +135,22 @@ void siconos::joints::PrismaticJointR::computeV1V2FromAxis() {
   _V1.setZero();
   _V2.setZero();
   // build _V1
-  if (_axis0->getValue(0) > _axis0->getValue(1))
-    if (_axis0->getValue(0) > _axis0->getValue(2)) {
-      _V1(1) = -_axis0->getValue(0);
-      _V1(0) = _axis0->getValue(1);
+  if ((*_axis0)(0) > (*_axis0)(1))
+    if ((*_axis0)(0) > (*_axis0)(2)) {
+      _V1(1) = -(*_axis0)(0);
+      _V1(0) = (*_axis0)(1);
     } else {
-      _V1(1) = -_axis0->getValue(2);
-      _V1(2) = _axis0->getValue(1);
+      _V1(1) = -(*_axis0)(2);
+      _V1(2) = (*_axis0)(1);
     }
-  else if (_axis0->getValue(2) > _axis0->getValue(1)) {
-    _V1(1) = -_axis0->getValue(2);
-    _V1(2) = _axis0->getValue(1);
+  else if ((*_axis0)(2) > (*_axis0)(1)) {
+    _V1(1) = -(*_axis0)(2);
+    _V1(2) = (*_axis0)(1);
   } else {
-    _V1(1) = -_axis0->getValue(0);
-    _V1(0) = _axis0->getValue(1);
+    _V1(1) = -(*_axis0)(0);
+    _V1(0) = (*_axis0)(1);
   }
-  double aux = 1. / _V1.norm2();
+  double aux = 1. / _V1.norm();
   _V1 *= aux;
   _V2 = _axis0->head<3>().cross(_V1);
   _V1x = _V1(0);
@@ -170,23 +168,23 @@ void siconos::joints::PrismaticJointR::computeH_NE_(double time,
 
   H_NE_view_->setZero();
   auto q1 = (q0.getAllVect())[0];
-  double X1 = q1->getValue(0);
-  double Y1 = q1->getValue(1);
-  double Z1 = q1->getValue(2);
-  double q10 = q1->getValue(3);
-  double q11 = q1->getValue(4);
-  double q12 = q1->getValue(5);
-  double q13 = q1->getValue(6);
+  double X1 = (*q1)(0);
+  double Y1 = (*q1)(1);
+  double Z1 = (*q1)(2);
+  double q10 = (*q1)(3);
+  double q11 = (*q1)(4);
+  double q12 = (*q1)(5);
+  double q13 = (*q1)(6);
 
   if (q0.numberOfBlocks() > 1) {
     auto q2 = (q0.getAllVect())[1];
-    double X2 = q2->getValue(0);
-    double Y2 = q2->getValue(1);
-    double Z2 = q2->getValue(2);
-    double q20 = q2->getValue(3);
-    double q21 = q2->getValue(4);
-    double q22 = q2->getValue(5);
-    double q23 = q2->getValue(6);
+    double X2 = (*q2)(0);
+    double Y2 = (*q2)(1);
+    double Z2 = (*q2)(2);
+    double q20 = (*q2)(3);
+    double q21 = (*q2)(4);
+    double q22 = (*q2)(5);
+    double q23 = (*q2)(6);
     Jd1d2(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23);
   } else
     Jd1(X1, Y1, Z1, q10, q11, q12, q13);
@@ -201,13 +199,13 @@ void siconos::joints::PrismaticJointR::computeh(
       "siconos::algebra::BlockVector& "
       "q0, siconos::algebra::SiconosVector& y) \n");
   auto q1 = (q0.getAllVect())[0];
-  double X1 = q1->getValue(0);
-  double Y1 = q1->getValue(1);
-  double Z1 = q1->getValue(2);
-  double q10 = q1->getValue(3);
-  double q11 = q1->getValue(4);
-  double q12 = q1->getValue(5);
-  double q13 = q1->getValue(6);
+  double X1 = (*q1)(0);
+  double Y1 = (*q1)(1);
+  double Z1 = (*q1)(2);
+  double q10 = (*q1)(3);
+  double q11 = (*q1)(4);
+  double q12 = (*q1)(5);
+  double q13 = (*q1)(6);
   double X2 = 0;
   double Y2 = 0;
   double Z2 = 0;
@@ -218,27 +216,27 @@ void siconos::joints::PrismaticJointR::computeh(
 
   if (q0.numberOfBlocks() > 1) {
     auto q2 = (q0.getAllVect())[1];
-    X2 = q2->getValue(0);
-    Y2 = q2->getValue(1);
-    Z2 = q2->getValue(2);
-    q20 = q2->getValue(3);
-    q21 = q2->getValue(4);
-    q22 = q2->getValue(5);
-    q23 = q2->getValue(6);
+    X2 = (*q2)(0);
+    Y2 = (*q2)(1);
+    Z2 = (*q2)(2);
+    q20 = (*q2)(3);
+    q21 = (*q2)(4);
+    q22 = (*q2)(5);
+    q23 = (*q2)(6);
   }
 
-  y.setValue(0, H1(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
-  y.setValue(1, H2(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
-  y.setValue(2, H3(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
-  y.setValue(3, H4(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
-  y.setValue(4, H5(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23));
+  y(0) = H1(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23);
+  y(1) = H2(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23);
+  y(2) = H3(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23);
+  y(3) = H4(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23);
+  y(4) = H5(X1, Y1, Z1, q10, q11, q12, q13, X2, Y2, Z2, q20, q21, q22, q23);
 
-  DEBUG_EXPR(y.display());
-  DEBUG_PRINTF(" y.normInf() = %12.8e \n", y.normInf());
+  DEBUG_EXPR(siconos::algebra::print(y));
+  DEBUG_PRINTF(" siconos::algebra::normInf(y) = %12.8e \n", siconos::algebra::normInf(y));
 
   // double norm = 0;
   // for(int ii = 0; ii < 5; ii++)
-  //   norm += y.getValue(ii) * y.getValue(ii);
+  //   norm += y(ii) * y(ii);
   // std::cout<<"Prismatic norm computeH: "<<norm<<std::endl;
 }
 
@@ -659,28 +657,24 @@ void siconos::joints::PrismaticJointR::computehDoF(
   double Z2 = 0;
 
   if (q2) {
-    X2 = q2->getValue(0);
-    Y2 = q2->getValue(1);
-    Z2 = q2->getValue(2);
+    X2 = (*q2)(0);
+    Y2 = (*q2)(1);
+    Z2 = (*q2)(2);
   }
 
-  y.setValue(0, -_G10G20d1x * _axis0->getValue(0) - _G10G20d1y * _axis0->getValue(1) -
-                    _G10G20d1z * _axis0->getValue(2) +
-                    _axis0->getValue(0) *
-                        (q10 * (q10 * (-X1 + X2) - q12 * (-Z1 + Z2) + q13 * (-Y1 + Y2)) -
+  y(0) = -_G10G20d1x * (*_axis0)(0) - _G10G20d1y * (*_axis0)(1) - _G10G20d1z * (*_axis0)(2) +
+         (*_axis0)(0) * (q10 * (q10 * (-X1 + X2) - q12 * (-Z1 + Z2) + q13 * (-Y1 + Y2)) -
                          q11 * (-q11 * (-X1 + X2) - q12 * (-Y1 + Y2) - q13 * (-Z1 + Z2)) -
                          q12 * (q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q12 * (-X1 + X2)) +
                          q13 * (q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q13 * (-X1 + X2))) +
-                    _axis0->getValue(1) *
-                        (q10 * (q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q13 * (-X1 + X2)) +
+         (*_axis0)(1) * (q10 * (q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q13 * (-X1 + X2)) +
                          q11 * (q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q12 * (-X1 + X2)) -
                          q12 * (-q11 * (-X1 + X2) - q12 * (-Y1 + Y2) - q13 * (-Z1 + Z2)) -
                          q13 * (q10 * (-X1 + X2) - q12 * (-Z1 + Z2) + q13 * (-Y1 + Y2))) +
-                    _axis0->getValue(2) *
-                        (q10 * (q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q12 * (-X1 + X2)) -
+         (*_axis0)(2) * (q10 * (q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q12 * (-X1 + X2)) -
                          q11 * (q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q13 * (-X1 + X2)) +
                          q12 * (q10 * (-X1 + X2) - q12 * (-Z1 + Z2) + q13 * (-Y1 + Y2)) -
-                         q13 * (-q11 * (-X1 + X2) - q12 * (-Y1 + Y2) - q13 * (-Z1 + Z2))));
+                         q13 * (-q11 * (-X1 + X2) - q12 * (-Y1 + Y2) - q13 * (-Z1 + Z2)));
 }
 
 /** Compute the jacobian of linear and angular DoF with respect to some q */
@@ -693,87 +687,78 @@ void siconos::joints::PrismaticJointR::computeJachqDoF(
   if (axis != 0) return;
 
   auto q1 = (q0.getAllVect())[0];
-  double X1 = q1->getValue(0);
-  double Y1 = q1->getValue(1);
-  double Z1 = q1->getValue(2);
-  double q10 = q1->getValue(3);
-  double q11 = q1->getValue(4);
-  double q12 = q1->getValue(5);
-  double q13 = q1->getValue(6);
+  double X1 = (*q1)(0);
+  double Y1 = (*q1)(1);
+  double Z1 = (*q1)(2);
+  double q10 = (*q1)(3);
+  double q11 = (*q1)(4);
+  double q12 = (*q1)(5);
+  double q13 = (*q1)(6);
   double X2 = 0;
   double Y2 = 0;
   double Z2 = 0;
 
   if (q0.numberOfBlocks() > 1) {
     auto q2 = (q0.getAllVect())[1];
-    X2 = q2->getValue(0);
-    Y2 = q2->getValue(1);
-    Z2 = q2->getValue(2);
+    X2 = (*q2)(0);
+    Y2 = (*q2)(1);
+    Z2 = (*q2)(2);
   }
 
+  jachq.setValue(0, 0,
+                 (*_axis0)(0) * (-pow(q10, 2) - pow(q11, 2) + pow(q12, 2) + pow(q13, 2)) +
+                     (*_axis0)(1) * (2 * q10 * q13 - 2 * q11 * q12) +
+                     (*_axis0)(2) * (-2 * q10 * q12 - 2 * q11 * q13));
+  jachq.setValue(0, 1,
+                 (*_axis0)(0) * (-2 * q10 * q13 - 2 * q11 * q12) +
+                     (*_axis0)(1) * (-pow(q10, 2) + pow(q11, 2) - pow(q12, 2) + pow(q13, 2)) +
+                     (*_axis0)(2) * (2 * q10 * q11 - 2 * q12 * q13));
+  jachq.setValue(0, 2,
+                 (*_axis0)(0) * (2 * q10 * q12 - 2 * q11 * q13) +
+                     (*_axis0)(1) * (-2 * q10 * q11 - 2 * q12 * q13) +
+                     (*_axis0)(2) * (-pow(q10, 2) + pow(q11, 2) + pow(q12, 2) - pow(q13, 2)));
   jachq.setValue(
-      0, 0,
-      _axis0->getValue(0) * (-pow(q10, 2) - pow(q11, 2) + pow(q12, 2) + pow(q13, 2)) +
-          _axis0->getValue(1) * (2 * q10 * q13 - 2 * q11 * q12) +
-          _axis0->getValue(2) * (-2 * q10 * q12 - 2 * q11 * q13));
-  jachq.setValue(
-      0, 1,
-      _axis0->getValue(0) * (-2 * q10 * q13 - 2 * q11 * q12) +
-          _axis0->getValue(1) * (-pow(q10, 2) + pow(q11, 2) - pow(q12, 2) + pow(q13, 2)) +
-          _axis0->getValue(2) * (2 * q10 * q11 - 2 * q12 * q13));
-  jachq.setValue(
-      0, 2,
-      _axis0->getValue(0) * (2 * q10 * q12 - 2 * q11 * q13) +
-          _axis0->getValue(1) * (-2 * q10 * q11 - 2 * q12 * q13) +
-          _axis0->getValue(2) * (-pow(q10, 2) + pow(q11, 2) + pow(q12, 2) - pow(q13, 2)));
-  jachq.setValue(0, 3,
-                 _axis0->getValue(0) *
-                         (2 * q10 * (-X1 + X2) - 2 * q12 * (-Z1 + Z2) + 2 * q13 * (-Y1 + Y2)) +
-                     _axis0->getValue(1) *
-                         (2 * q10 * (-Y1 + Y2) + 2 * q11 * (-Z1 + Z2) - 2 * q13 * (-X1 + X2)) +
-                     _axis0->getValue(2) *
-                         (2 * q10 * (-Z1 + Z2) - 2 * q11 * (-Y1 + Y2) + 2 * q12 * (-X1 + X2)));
+      0, 3,
+      (*_axis0)(0) * (2 * q10 * (-X1 + X2) - 2 * q12 * (-Z1 + Z2) + 2 * q13 * (-Y1 + Y2)) +
+          (*_axis0)(1) * (2 * q10 * (-Y1 + Y2) + 2 * q11 * (-Z1 + Z2) - 2 * q13 * (-X1 + X2)) +
+          (*_axis0)(2) * (2 * q10 * (-Z1 + Z2) - 2 * q11 * (-Y1 + Y2) + 2 * q12 * (-X1 + X2)));
   jachq.setValue(
       0, 4,
-      _axis0->getValue(0) * (q11 * (-X1 + X2) - q11 * (X1 - X2) + q12 * (-Y1 + Y2) -
-                             q12 * (Y1 - Y2) + 2 * q13 * (-Z1 + Z2)) +
-          _axis0->getValue(1) * (2 * q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q11 * (Y1 - Y2) +
-                                 q12 * (-X1 + X2) - q12 * (X1 - X2)) +
-          _axis0->getValue(2) * (-q10 * (-Y1 + Y2) + q10 * (Y1 - Y2) - 2 * q11 * (-Z1 + Z2) +
-                                 q13 * (-X1 + X2) - q13 * (X1 - X2)));
-  jachq.setValue(
-      0, 5,
-      _axis0->getValue(0) * (-q10 * (-Z1 + Z2) + q10 * (Z1 - Z2) + q11 * (-Y1 + Y2) -
-                             q11 * (Y1 - Y2) - 2 * q12 * (-X1 + X2)) +
-          _axis0->getValue(1) * (2 * q11 * (-X1 + X2) + q12 * (-Y1 + Y2) - q12 * (Y1 - Y2) +
-                                 q13 * (-Z1 + Z2) - q13 * (Z1 - Z2)) +
-          _axis0->getValue(2) * (2 * q10 * (-X1 + X2) - q12 * (-Z1 + Z2) + q12 * (Z1 - Z2) +
-                                 q13 * (-Y1 + Y2) - q13 * (Y1 - Y2)));
+      (*_axis0)(0) * (q11 * (-X1 + X2) - q11 * (X1 - X2) + q12 * (-Y1 + Y2) - q12 * (Y1 - Y2) +
+                      2 * q13 * (-Z1 + Z2)) +
+          (*_axis0)(1) * (2 * q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q11 * (Y1 - Y2) +
+                          q12 * (-X1 + X2) - q12 * (X1 - X2)) +
+          (*_axis0)(2) * (-q10 * (-Y1 + Y2) + q10 * (Y1 - Y2) - 2 * q11 * (-Z1 + Z2) +
+                          q13 * (-X1 + X2) - q13 * (X1 - X2)));
+  jachq.setValue(0, 5,
+                 (*_axis0)(0) * (-q10 * (-Z1 + Z2) + q10 * (Z1 - Z2) + q11 * (-Y1 + Y2) -
+                                 q11 * (Y1 - Y2) - 2 * q12 * (-X1 + X2)) +
+                     (*_axis0)(1) * (2 * q11 * (-X1 + X2) + q12 * (-Y1 + Y2) -
+                                     q12 * (Y1 - Y2) + q13 * (-Z1 + Z2) - q13 * (Z1 - Z2)) +
+                     (*_axis0)(2) * (2 * q10 * (-X1 + X2) - q12 * (-Z1 + Z2) +
+                                     q12 * (Z1 - Z2) + q13 * (-Y1 + Y2) - q13 * (Y1 - Y2)));
   jachq.setValue(
       0, 6,
-      _axis0->getValue(0) * (2 * q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q11 * (Z1 - Z2) -
-                             q13 * (-X1 + X2) + q13 * (X1 - X2)) +
-          _axis0->getValue(1) * (-q10 * (-X1 + X2) + q10 * (X1 - X2) + q12 * (-Z1 + Z2) -
-                                 q12 * (Z1 - Z2) - 2 * q13 * (-Y1 + Y2)) +
-          _axis0->getValue(2) * (q11 * (-X1 + X2) - q11 * (X1 - X2) + 2 * q12 * (-Y1 + Y2) +
-                                 q13 * (-Z1 + Z2) - q13 * (Z1 - Z2)));
+      (*_axis0)(0) * (2 * q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q11 * (Z1 - Z2) -
+                      q13 * (-X1 + X2) + q13 * (X1 - X2)) +
+          (*_axis0)(1) * (-q10 * (-X1 + X2) + q10 * (X1 - X2) + q12 * (-Z1 + Z2) -
+                          q12 * (Z1 - Z2) - 2 * q13 * (-Y1 + Y2)) +
+          (*_axis0)(2) * (q11 * (-X1 + X2) - q11 * (X1 - X2) + 2 * q12 * (-Y1 + Y2) +
+                          q13 * (-Z1 + Z2) - q13 * (Z1 - Z2)));
 
   if (q0.numberOfBlocks() > 1) {
-    jachq.setValue(
-        0, 7,
-        _axis0->getValue(0) * (pow(q10, 2) + pow(q11, 2) - pow(q12, 2) - pow(q13, 2)) +
-            _axis0->getValue(1) * (-2 * q10 * q13 + 2 * q11 * q12) +
-            _axis0->getValue(2) * (2 * q10 * q12 + 2 * q11 * q13));
-    jachq.setValue(
-        0, 8,
-        _axis0->getValue(0) * (2 * q10 * q13 + 2 * q11 * q12) +
-            _axis0->getValue(1) * (pow(q10, 2) - pow(q11, 2) + pow(q12, 2) - pow(q13, 2)) +
-            _axis0->getValue(2) * (-2 * q10 * q11 + 2 * q12 * q13));
-    jachq.setValue(
-        0, 9,
-        _axis0->getValue(0) * (-2 * q10 * q12 + 2 * q11 * q13) +
-            _axis0->getValue(1) * (2 * q10 * q11 + 2 * q12 * q13) +
-            _axis0->getValue(2) * (pow(q10, 2) - pow(q11, 2) - pow(q12, 2) + pow(q13, 2)));
+    jachq.setValue(0, 7,
+                   (*_axis0)(0) * (pow(q10, 2) + pow(q11, 2) - pow(q12, 2) - pow(q13, 2)) +
+                       (*_axis0)(1) * (-2 * q10 * q13 + 2 * q11 * q12) +
+                       (*_axis0)(2) * (2 * q10 * q12 + 2 * q11 * q13));
+    jachq.setValue(0, 8,
+                   (*_axis0)(0) * (2 * q10 * q13 + 2 * q11 * q12) +
+                       (*_axis0)(1) * (pow(q10, 2) - pow(q11, 2) + pow(q12, 2) - pow(q13, 2)) +
+                       (*_axis0)(2) * (-2 * q10 * q11 + 2 * q12 * q13));
+    jachq.setValue(0, 9,
+                   (*_axis0)(0) * (-2 * q10 * q12 + 2 * q11 * q13) +
+                       (*_axis0)(1) * (2 * q10 * q11 + 2 * q12 * q13) +
+                       (*_axis0)(2) * (pow(q10, 2) - pow(q11, 2) - pow(q12, 2) + pow(q13, 2)));
     jachq.setValue(0, 10, 0);
     jachq.setValue(0, 11, 0);
     jachq.setValue(0, 12, 0);

@@ -49,3 +49,5 @@ option(INSTALL_EXTERNAL_HEADERS
 # If ON, internal headers will not be installed.
 option(INSTALL_INTERNAL_HEADERS
   "Whether or not headers for internal definitions should be installed" OFF)
+
+option(SICONOS_SPARSE "Use sparse matrices as default." OFF)

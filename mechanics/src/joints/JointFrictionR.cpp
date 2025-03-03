@@ -88,7 +88,7 @@ void siconos::joints::JointFrictionR::computeH_NE_(double time,
   for (unsigned int i = 0; i < 1; i++)
     for (unsigned int j = 0; j < H_NE_view_->cols(); j++) {
       H_NE_view_->setValue(
-          i, j, jacobianhOver_q_Tmp->getValue((*_axis)[i] - _axisMin, j) * (i == 1 ? 1 : -1));
+          i, j, (*jacobianhOver_q_Tmp)((*_axis)[i] - _axisMin, j) * (i == 1 ? 1 : -1));
     }
 }
 

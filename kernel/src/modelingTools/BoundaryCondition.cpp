@@ -90,7 +90,7 @@ void siconos::modeling::BoundaryCondition::display() const {
   tools::print("- Indices on which boundary conditions are applied:\n ", velocityIndices_);
 
   std::cout << "- velocities : " << std::endl;
-  if (prescribedVelocity_) prescribedVelocity_->display();
+  if (prescribedVelocity_) siconos::algebra::print(*prescribedVelocity_);
   std::cout << "=========================================================== " << std::endl;
 }
 

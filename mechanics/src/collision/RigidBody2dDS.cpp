@@ -35,7 +35,7 @@ siconos::collision::RigidBody2dDS::RigidBody2dDS(
         "siconos::modeling::RigidBody2dDS::RigidBody2dDS(...). The size of position and "
         "velocity must of size 3");
   }
-  scalarMass_ = mass.getValue(0, 0);
+  scalarMass_ = mass(0, 0);
 }
 
 // siconos::collision::RigidBody2dDS::RigidBody2dDS(

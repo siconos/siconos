@@ -288,7 +288,7 @@ void siconos::integrators::Hem5OSI::Hem5OSI_impl::fprob(
       }
     }
     for (unsigned int ii = 0; ii < (unsigned int)(*NV); ii++) {
-      F[ii] = hem5osi->_forcesWork->getValue(ii);
+      F[ii] = (*hem5osi->_forcesWork)(ii);
     }
   }
   if (ifcn == 4)  // compute G (constraints)
@@ -664,9 +664,9 @@ void siconos::integrators::Hem5OSI::integrate(double& tinit, double& tend, doubl
   //*_utmp = *_uWork; // Copy into a continuous memory chuck
   *_atmp = *(_aWork->toSiconosVector());  // Copy into a continuous memory chuck
 
-  DEBUG_EXPR(_qtmp->display(););
-  DEBUG_EXPR(_vtmp->display(););
-  DEBUG_EXPR(_atmp->display(););
+  DEBUG_EXPR(siconos::algebra::print(*_qtmp););
+  DEBUG_EXPR(siconos::algebra::print(*_vtmp););
+  DEBUG_EXPR(siconos::algebra::print(*_atmp););
 
   //*_lambdatmp = *_lambdaWork; // Copy into a continuous memory chuck
 
@@ -731,9 +731,9 @@ void siconos::integrators::Hem5OSI::integrate(double& tinit, double& tend, doubl
   for (int i = 0; i < _vtmp->size(); ++i) (*_vWork)(i) = (*_vtmp)(i);
   for (int i = 0; i < _atmp->size(); ++i) (*_aWork)(i) = (*_atmp)(i);
   DEBUG_PRINTF("tend_DR = %f\n", (double)tend_DR);
-  DEBUG_EXPR(_qWork->display());
-  DEBUG_EXPR(_vWork->display());
-  DEBUG_EXPR(_aWork->display());
+  DEBUG_EXPR(siconos::algebra::print(*_qWork));
+  DEBUG_EXPR(siconos::algebra::print(*_vWork));
+  DEBUG_EXPR(siconos::algebra::print(*_aWork));
   DEBUG_PRINT("\n");
   DEBUG_PRINT("\n");
 
@@ -744,7 +744,7 @@ void siconos::integrators::Hem5OSI::integrate(double& tinit, double& tend, doubl
   unsigned int pos = 0;
   for (std::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui) {
     auto inter = indexSet2->bundle(*ui);
-    inter->lambda(2)->setValue(0, (*_lambdatmp)(pos));
+    (*inter->lambda(2))(0) = (*_lambdatmp)(pos);
     pos++;
   }
 
@@ -847,11 +847,11 @@ void siconos::integrators::Hem5OSI::computeFreeOutput(
     // }
     assert(Xfree);
     //        std::cout << "Computeqblock Xfree (Gamma)========" << "\n";
-    //       Xfree->display();
+    //       siconos::algebra::print(*Xfree);
   } else if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_IMPACT]).get() == osnsp) {
     Xfree = DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q1)];
     //        std::cout << "Computeqblock Xfree (Velocity)========" << "\n";
-    //       Xfree->display();
+    //       siconos::algebra::print(*Xfree);
   } else
     THROW_EXCEPTION(" computeqBlock for Event Event-driven is wrong ");
 

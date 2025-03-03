@@ -45,8 +45,8 @@ double siconos::collision::native::bodies::SphereLDSSphereLDSR::distance(
 
 void siconos::collision::native::bodies::SphereLDSSphereLDSR::computeh(
     const siconos::algebra::BlockVector& q, Eigen::Ref<siconos::algebra::SiconosVector> y) {
-  y.setValue(0, distance(q(0), q(1), q(2), r1, q(6), q(7), q(8), r2));
-  y.setValue(1, 0.);
+  y(0) = distance(q(0), q(1), q(2), r1, q(6), q(7), q(8), r2);
+  y(1) = 0.;
 };
 
 void siconos::collision::native::bodies::SphereLDSSphereLDSR::computeJacobianhOver_q(

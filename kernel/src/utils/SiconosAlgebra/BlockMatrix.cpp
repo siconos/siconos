@@ -50,7 +50,7 @@ siconos::algebra::BlockMatrix::BlockMatrix(std::shared_ptr<MapType> m) {
   _tabRow->reserve(1);
   _tabCol->reserve(1);
 
-  m->display();
+  siconos::algebra::print(*m);
   (*_mat)(0, 0) = std::make_shared<siconos::algebra::SiconosMatrix>();
   *((*_mat)(0, 0)) = *m;  // TODOSAM : copy here, should not
   _dimRow = m->rows();
@@ -254,49 +254,6 @@ void siconos::algebra::BlockMatrix::setIdentity() {
   }
 }
 
-//=======================
-//       get norm
-//=======================
-
-double siconos::algebra::BlockMatrix::normInf() const {
-  double sum = 0, norm = 0;
-  for (unsigned int i = 0; i < rows(); i++) {
-    for (unsigned int j = 0; j < cols(); j++) {
-      sum += (*this)(i, j);
-    }
-    if (fabs(sum) > norm) norm = fabs(sum);
-    sum = 0;
-  }
-  return norm;
-}
-
-//=====================
-// screen display
-//=====================
-
-void siconos::algebra::BlockMatrix::display(void) const {
-  std::cout << "==========> BlockMatrix (" << numberOfBlocks(0) << " X " << numberOfBlocks(1)
-            << " blocks): \n";
-  for (auto row : _mat->rowwise()) {
-    for (auto col : row) {
-      col->display();
-    }
-  }
-  std::cout << "=============================================================================="
-               "=============\n";
-}
-void siconos::algebra::BlockMatrix::displayExpert(bool brief) const {
-  std::cout << "==========> BlockMatrix (" << numberOfBlocks(0) << " X " << numberOfBlocks(1)
-            << " blocks): \n";
-  for (auto row : _mat->rowwise()) {
-    for (auto col : row) {
-      // col->displayExpert(brief); // TODO
-    }
-  }
-  std::cout << "=============================================================================="
-               "=============\n";
-}
-
 //=====================
 // convert to an ostream
 //=====================
@@ -409,11 +366,6 @@ void siconos::algebra::BlockMatrix::copyBlock(
   *((*_mat)(i, j)) = *m;
 }
 
-void siconos::algebra::BlockMatrix::setBlock(
-    unsigned int i, unsigned int j, std::shared_ptr<siconos::algebra::SiconosMatrix> m) {
-  (*_mat)(i, j) = m;
-}
-
 std::shared_ptr<siconos::algebra::SiconosMatrix>
 siconos::algebra::BlockMatrix::toSiconosMatrix() const {
   // get number of blocks in a row/col of m.
@@ -423,7 +375,7 @@ siconos::algebra::BlockMatrix::toSiconosMatrix() const {
 
   for (auto it : this->_mat->rowwise()) {
     for (auto it2 : it) {
-      m->setBlock(posRow, posCol, *it2);
+      siconos::algebra::setBlock(posRow, posCol, *it2, *m);
       posCol += it2->cols();
     }
     posRow += it.size();
@@ -432,10 +384,43 @@ siconos::algebra::BlockMatrix::toSiconosMatrix() const {
   return m;
 }
 
-size_t siconos::algebra::BlockMatrix::nnz(double tol) {
+size_t siconos::algebra::BlockMatrix::nonZeros(double tol) {
   size_t nnz = 0;
   for (auto row : _mat->rowwise()) {
-    for (auto col : row) nnz += (*col).nnz();
+    for (auto col : row) nnz += (*col).nonZeros();
   }
   return nnz;
+}
+
+// Free functions
+//=======================
+//       get norm
+//=======================
+
+double siconos::algebra::normInf(const siconos::algebra::BlockMatrix &mat) {
+  double sum = 0, norm = 0;
+  for (unsigned int i = 0; i < mat.rows(); i++) {
+    for (unsigned int j = 0; j < mat.cols(); j++) {
+      sum += mat(i, j);
+    }
+    if (fabs(sum) > norm) norm = fabs(sum);
+    sum = 0;
+  }
+  return norm;
+}
+
+//=====================
+// screen display
+//=====================
+
+void siconos::algebra::print(const siconos::algebra::BlockMatrix &mat) {
+  std::cout << "==========> BlockMatrix (" << mat.numberOfBlocks(0) << " X "
+            << mat.numberOfBlocks(1) << " blocks): \n";
+  for (auto row : mat._mat->rowwise()) {
+    for (auto col : row) {
+      siconos::algebra::print(*col);
+    }
+  }
+  std::cout << "=============================================================================="
+               "=============\n";
 }

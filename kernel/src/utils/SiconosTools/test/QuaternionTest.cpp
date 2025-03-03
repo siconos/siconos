@@ -95,7 +95,7 @@ void QuaternionTest::testQuaternion() {
   // std::cout << "q01 axis : " << axis << "\n";
   siconos::geometry::quaternionFromAxisAngle(axis, angle, q01);
   // std::cout << "q01  : " << std::endl;
-  // q01->display();
+  // siconos::algebra::print(*q01);
   siconos::algebra::SiconosVector q01ref{7};
   q01ref.setZero();
   q01ref(3) = cos(angle / 2.0);

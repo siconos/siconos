@@ -69,9 +69,9 @@ void siconos::control::ControlZOHAdditionalTerms::addSmoothTerms(
     if (!DSG0.Bd.at(dsgVD)->isConst()) {
       DSG0.Bd.at(dsgVD)->integrate();
     }
-    DEBUG_EXPR(DSG0.Bd.at(dsgVD)->mat().display());
-    DEBUG_EXPR(xfree.display());
-    DEBUG_EXPR((*DSG0.u.at(dsgVD)).display());
+    DEBUG_EXPR( siconos::algebra::print( DSG0.Bd.at(dsgVD)->mat() ) );
+    DEBUG_EXPR(siconos::algebra::print(xfree));
+    DEBUG_EXPR(siconos::algebra::print(*DSG0.u.at(dsgVD)));
     siconos::algebra::prod(DSG0.Bd.at(dsgVD)->mat(), *DSG0.u.at(dsgVD), xfree,
                            false);  // xfree += Bd*u
   }

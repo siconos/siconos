@@ -203,10 +203,10 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
       // std::cout << "inter->getSizeOfDS()" << inter->getSizeOfDS()     <<
       // std::endl;
       std::cout << "inter->y(" << level << ")\n";
-      inter->y(level)->display();
+      siconos::algebra::print(*inter->y(level));
 
       std::cout << "inter->y_k(" << level << ")\n";
-      inter->y_k(level)->display();
+      siconos::algebra::print(*inter->y_k(level));
 
       level = 1;
       assert(inter->lowerLevelForOutput() <= level);
@@ -214,9 +214,9 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
       // std::cout << "inter->getSizeOfDS()" << inter->getSizeOfDS()     <<
       // std::endl;
       std::cout << "inter->y(" << level << ")\n";
-      inter->y(level)->display();
+      siconos::algebra::print(*inter->y(level));
       std::cout << "inter->y_k(" << level << ")\n";
-      inter->y_k(level)->display();
+      siconos::algebra::print(*inter->y_k(level));
     }
 
 #endif
@@ -246,9 +246,9 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
       //   std::cout << "inter->getSizeOfDS()" << inter->getSizeOfDS()     <<
       //   std::endl;
       std::cout << "inter->y(" << level << ")\n";
-      inter->y(level)->display();
+      siconos::algebra::print(*inter->y(level));
       std::cout << "inter->y_k(" << level << ")\n";
-      inter->y_k(level)->display();
+      siconos::algebra::print(*inter->y_k(level));
 
       level = 1;
       assert(inter->lowerLevelForOutput() <= level);
@@ -256,9 +256,9 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
       // std::cout << "inter->getSizeOfDS()" << inter->getSizeOfDS()     <<
       // std::endl;
       std::cout << "inter->y(" << level << ")\n";
-      inter->y(level)->display();
+      siconos::algebra::print(*inter->y(level));
       std::cout << "inter->y_k(" << level << ")\n";
-      inter->y_k(level)->display();
+      siconos::algebra::print(*inter->y_k(level));
     }
 #endif
 
@@ -394,11 +394,11 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
           }
 #ifdef TSPROJ_DEBUG_LEVEL1
           std::cout << " q=\n";
-          q->display();
+          siconos::algebra::print(*q);
           std::cout << " p(0)=\n";
-          d->p(0)->display();
+          siconos::algebra::print(*d->p(0));
           std::cout << " p(1)=\n";
-          d->p(1)->display();
+          siconos::algebra::print(*d->p(1));
 #endif
         } else
           THROW_EXCEPTION(
@@ -423,13 +423,13 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
       // for (std::tie(ui, uiend) = indexSet1->vertices(); ui != uiend; ++ui)
       // {
       //   auto inter = indexSet1->bundle(*ui);
-      //   inter->lambda(1)->display();
+      //   siconos::algebra::print(*inter->lambda(1));
       // }
       auto indexSet2 = _nsds->topology()->indexSet(2);
       std ::cout << "lambda(0) in indexSet2\n";
       for (std::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui) {
         auto inter = indexSet2->bundle(*ui);
-        inter->lambda(0)->display();
+        siconos::algebra::print(*inter->lambda(0));
       }
 
 #endif
@@ -508,9 +508,9 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
 
       std::cout << "inter->getSizeOfDS()" << inter->getSizeOfDS() << std::endl;
       std::cout << "inter->y(" << level << ")\n";
-      inter->y(level)->display();
+      siconos::algebra::print(*inter->y(level));
       std::cout << "inter->y_k(" << level << ")\n";
-      inter->y_k(level)->display();
+      siconos::algebra::print(*inter->y_k(level));
     }
     level = 1;
     for (std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui) {
@@ -519,9 +519,9 @@ void siconos::simulation::TimeSteppingCombinedProjection::advanceToEvent() {
       assert(inter->upperLevelForOutput() >= level);
       std::cout << "inter->getSizeOfDS()" << inter->getSizeOfDS() << std::endl;
       std::cout << "inter->y(" << level << ")\n";
-      inter->y(level)->display();
+      siconos::algebra::print(*inter->y(level));
       std::cout << "inter->y_k(" << level << ")\n";
-      inter->y_k(level)->display();
+      siconos::algebra::print(*inter->y_k(level));
     }
 
 #endif
@@ -569,12 +569,12 @@ void siconos::simulation::TimeSteppingCombinedProjection::computeCriteria(
           "siconos::simulation::TimeSteppingCombinedProjection::"
           "computeCriteria  "
           "Unilateral "
-          "interac->y(0)->getValue(0) %e.\n",
-          interac->y(0)->getValue(0));
+          "(*interac->y(0))(0) %e.\n",
+          (*interac->y(0))(0));
 #endif
       if (!_doCombinedProjOnEquality) {
         if (maxViolationUnilateral > _constraintTolUnilateral) {
-          double criteria = std::max(0.0, -interac->y(0)->getValue(0));
+          double criteria = std::max(0.0, -(*interac->y(0))(0));
           if (criteria > maxViolationUnilateral) maxViolationUnilateral = criteria;
 
           *runningProjection = true;
@@ -583,7 +583,7 @@ void siconos::simulation::TimeSteppingCombinedProjection::computeCriteria(
 #endif
         }
       } else {
-        auto criteria = interac->y(0)->getValue(0);
+        auto criteria = (*interac->y(0))(0);
         if (criteria > maxViolationUnilateral) maxViolationUnilateral = criteria;
 
         if (std::abs(criteria) >= _constraintTolUnilateral) {
@@ -594,15 +594,16 @@ void siconos::simulation::TimeSteppingCombinedProjection::computeCriteria(
         }
       }
     } else {
-      DEBUG_EXPR(interac->y(0)->display(););
-      if (interac->y(0)->normInf() > maxViolationEquality) {
-        DEBUG_EXPR(interac->y(0)->display(););
-        maxViolationEquality = interac->y(0)->normInf();
+      DEBUG_EXPR(siconos::algebra::print(*interac->y(0)););
+      if (siconos::algebra::normInf(*interac->y(0)) > maxViolationEquality) {
+        DEBUG_EXPR(siconos::algebra::print(*interac->y(0)););
+        maxViolationEquality = siconos::algebra::normInf(*interac->y(0));
       }
-      if (interac->y(0)->normInf() > _constraintTol) {
+      if (siconos::algebra::normInf(*interac->y(0)) > _constraintTol) {
         *runningProjection = true;
 #ifdef TSPROJ_DEBUG_LEVEL1
-        printf("TSProj  newton criteria equality true %e.\n", interac->y(0)->normInf());
+        printf("TSProj  newton criteria equality true %e.\n",
+               siconos::algebra::normInf(*interac->y(0)));
 #endif
       }
     }

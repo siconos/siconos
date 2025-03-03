@@ -39,7 +39,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION(KernelTest);
 
 void KernelTest::setUp() { BBxml = "BouncingBall1.xml"; }
 
-void KernelTest::tearDown(){};
+void KernelTest::tearDown() {};
 
 void KernelTest::t0() {
   auto q = std::make_shared<siconos::algebra::SiconosVector>(3);
@@ -89,8 +89,8 @@ void KernelTest::t1() {
     ia >> NVP(m2);
   }
 
-  m1->display();
-  m2->display();
+  siconos::algebra::print(*m1);
+  siconos::algebra::print(*m2);
 
   CPPUNIT_ASSERT(*m1 == *m2);
 }
@@ -325,10 +325,10 @@ void KernelTest::t6() {
     siconos::algebra::SiconosMatrix dataPlotRef(dataPlot);
     dataPlotRef.setZero();
     ioMatrix::read("result.ref", "ascii", dataPlotRef);
-
-    if ((dataPlot - dataPlotRef).normInf() > 1e-12) {
-      std::cout << "Warning. The results is rather different from the reference file :"
-                << (dataPlot - dataPlotRef).normInf() << std::endl;
+    auto ninf = siconos::algebra::normInf(dataPlot - dataPlotRef);
+    if (ninf > 1e-12) {
+      std::cout << "Warning. The results is rather different from the reference file :" << ninf
+                << "\n";
       CPPUNIT_ASSERT(false);
     }
 

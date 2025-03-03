@@ -109,6 +109,6 @@ void siconos::control::Actuator::display() const {
   if (_sensor) _sensor->display();
   std::cout << "======" << std::endl;
   std::cout << "The value of the control is: " << std::endl;
-  _u->display();
+  siconos::algebra::print(*_u);
   std::cout << std::endl;
 }

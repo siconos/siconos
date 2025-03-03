@@ -67,7 +67,7 @@ void siconos::geometry::quaternionRotateVector(
     const Eigen::Ref<const siconos::algebra::SiconosVector> &q,
     Eigen::Ref<siconos::algebra::SiconosVector3> v) {
   DEBUG_BEGIN("::quaternionRotateVector(q,v)\n");
-  DEBUG_EXPR(v.display(););
+  DEBUG_EXPR(siconos::algebra::print(v););
   DEBUG_EXPR(std::cout << std::scientific << std::setprecision(12) << std::setw(16)
                        << "q[3:6] " << q.tail(4) << "\n";);
 
@@ -192,7 +192,7 @@ double siconos::geometry::axisAngleFromQuaternion(
     axis.setZero();
   }
   DEBUG_PRINTF("angle= %12.8e\n", angle);
-  DEBUG_EXPR(axis->display(););
+  DEBUG_EXPR(siconos::algebra::print(*axis);)
   DEBUG_END(
       "axisAngleFromQuaternion(double q0, double q1, double q2, double q3, "
       "std::shared_ptr<siconos::algebra::SiconosVector> axis )\n");
@@ -226,7 +226,7 @@ void siconos::geometry::rotationVectorFromQuaternion(
   } else {
     rotationVector *= 2.0 * asin(norm_v) / norm_v;
   }
-  DEBUG_EXPR(rotationVector->display(););
+  DEBUG_EXPR(siconos::algebra::print(*rotationVector);)
   DEBUG_END(
       "rotationVectorFromQuaternion(double q0, double q1, double q2, double q3, "
       "std::shared_ptr<siconos::algebra::SiconosVector> rotationVector )\n");

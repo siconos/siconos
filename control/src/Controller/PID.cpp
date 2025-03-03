@@ -62,8 +62,8 @@ void siconos::control::PID::actuate()
   (*_err).push_front(_ref - _sensor->y()(0));
   DEBUG_PRINTF("_curDeltaT = %g\n", _curDeltaT);
   DEBUG_PRINTF("_ref = %g\n", _ref);
-  DEBUG_EXPR(_sensor->y().display(););
-  DEBUG_EXPR(_u->display(););
+  DEBUG_EXPR(siconos::algebra::print(_sensor->y()););
+  DEBUG_EXPR(siconos::algebra::print(*_u));;
   DEBUG_PRINTF("added term  = %g\n",
                ((*_K)(0) + (*_K)(2) / _curDeltaT + (*_K)(1) * _curDeltaT) * (*_err)[0] +
                    (-(*_K)(0) - 2 * (*_K)(2) / _curDeltaT) * (*_err)[1] +
@@ -72,7 +72,7 @@ void siconos::control::PID::actuate()
   (*_u)(0) += ((*_K)(0) + (*_K)(2) / _curDeltaT + (*_K)(1) * _curDeltaT) * (*_err)[0] +
               (-(*_K)(0) - 2 * (*_K)(2) / _curDeltaT) * (*_err)[1] +
               (*_K)(2) / _curDeltaT * (*_err)[2];
-  DEBUG_EXPR(_u->display(););
+  DEBUG_EXPR(siconos::algebra::print(*_u));;
   DEBUG_END("void siconos::control::PID::actuate()\n");
 }
 

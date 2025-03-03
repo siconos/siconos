@@ -665,7 +665,7 @@ bool siconos::simulation::TimeStepping::newtonCheckConvergence(double criterion)
     //       auto& workV = *indexSet0->properties(*ui).workVectors;
 
     //       inter->computeResiduY(, workV);
-    //     inter->residuY()->norm2();
+    //     inter->residuY()->norm();
     if (residu > _newtonResiduYMax) _newtonResiduYMax = residu;
     if (residu > criterion) checkConvergence = false;
   }

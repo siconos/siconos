@@ -192,7 +192,7 @@ void SMCTest::test_itw_ZOH() {
   data->col(3) = _beta * data->col(2) + data->col(1);
   dataRef.col(3) = _beta * dataRef.col(2) + dataRef.col(1);
   dataRef -= *data;
-  auto error = dataRef.leftCols(3).normInf();
+  auto error = siconos::algebra::normInf(dataRef.leftCols(3));
   std::cout << "------- Integration done, error = " << error << " -------\n";
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test_itw_ZOH : ", error < _tol, true);
 }
@@ -217,7 +217,7 @@ void SMCTest::test_itw_Lsodar() {
   data->col(3) = _beta * data->col(2) + data->col(1);
   dataRef.col(3) = _beta * dataRef.col(2) + dataRef.col(1);
   dataRef -= *data;
-  auto error = dataRef.leftCols(3).normInf();
+  auto error = siconos::algebra::normInf(dataRef.leftCols(3));
   std::cout << "------- Integration done, error = " << error << " -------\n";
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test_itw_Lsodar : ", error < _tol, true);
 }

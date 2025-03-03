@@ -310,7 +310,7 @@ void siconos::nonsmooth_formulations::OneStepNSProblem::displayBlocks(
   for (std::tie(vi, viend) = indexSet->vertices(); vi != viend; ++vi) {
     std::shared_ptr<siconos::modeling::Interaction> inter = indexSet->bundle(*vi);
     if (indexSet->properties(*vi).block) {
-      indexSet->properties(*vi).block->display();
+      siconos::algebra::print(*indexSet->properties(*vi).block);
     }
 
     siconos::graphs::InteractionsGraph::OEIterator oei, oeiend;
@@ -319,16 +319,16 @@ void siconos::nonsmooth_formulations::OneStepNSProblem::displayBlocks(
       std::tie(ed1, ed2) = indexSet->edges(indexSet->source(*oei), indexSet->target(*oei));
 
       if (indexSet->properties(ed1).upper_block) {
-        indexSet->properties(ed1).upper_block->display();
+        siconos::algebra::print(*indexSet->properties(ed1).upper_block);
       }
       if (indexSet->properties(ed1).lower_block) {
-        indexSet->properties(ed1).lower_block->display();
+        siconos::algebra::print(*indexSet->properties(ed1).lower_block);
       }
       if (indexSet->properties(ed2).upper_block) {
-        indexSet->properties(ed2).upper_block->display();
+        siconos::algebra::print(*indexSet->properties(ed2).upper_block);
       }
       if (indexSet->properties(ed2).lower_block) {
-        indexSet->properties(ed2).lower_block->display();
+        siconos::algebra::print(*indexSet->properties(ed2).lower_block);
       }
     }
   }

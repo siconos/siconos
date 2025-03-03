@@ -216,7 +216,7 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
         free_rhs += coeff * lltids->fext();
       }
 
-      DEBUG_EXPR(free_rhs.display());
+      DEBUG_EXPR(siconos::algebra::print(free_rhs));
 
       if (lltids->boundaryConditions()) {
         THROW_EXCEPTION(
@@ -226,7 +226,7 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
 
       // residu = -1.0*free_rhs;
       // siconos::algebra::prod(1.0, W, *v, residu, false);
-      // DEBUG_EXPR(free_rhs.display());
+      // DEBUG_EXPR(siconos::algebra::print(free_rhs));
       // if(d->p(1))
       //   residu -= *d->p(1); // Compute Residu in Workfree Notation !!
 
@@ -278,7 +278,7 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
 
       residu = iterationMatrix * lds->velocity_read() - free_rhs;
 
-      DEBUG_EXPR(residu.display());
+      DEBUG_EXPR(siconos::algebra::print(residu));
 
       if (lds->p(1)) residu -= lds->p_read(1);  // Compute Residu in Workfree Notation !!
 
@@ -288,8 +288,8 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
             "yet implemented for this type of Dynamical system\n");
       }
 
-      DEBUG_EXPR(residu.display());
-      normResidu = residu.norm2();
+      DEBUG_EXPR(siconos::algebra::print(residu));
+      normResidu = residu.norm();
       DEBUG_PRINTF("normResidu= %e\n", normResidu);
     } else if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
       DEBUG_PRINT(
@@ -308,7 +308,7 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
       // Get the (constant mass matrix)
       // auto massMatrix = d->mass();
       // siconos::algebra::prod(*massMatrix, (*v - vold), residu, true); // residu = M(v -
-      // vold) DEBUG_EXPR(residu.display(););
+      // vold) DEBUG_EXPR(siconos::algebra::print(residu););
 
       auto& iterationMatrix = *_dynamicalSystemsGraph->properties(*dsi).iterationMatrix;
       const auto& vold = neds->twistMemory().getSiconosVector(0);
@@ -325,8 +325,8 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
       neds->computeWrench(neds->twist_read(), neds->q_read(), t);
       free_rhs += time_step * _theta * neds->wrench();
       DEBUG_PRINT("siconos::integrators::MoreauJeanGOSI:: new forces :\n");
-      DEBUG_EXPR(d->totalForces()->display(););
-      DEBUG_EXPR(residu.display(););
+      DEBUG_EXPR(siconos::algebra::print(*d->totalForces()););
+      DEBUG_EXPR(siconos::algebra::print(residu););
 
       if (neds->boundaryConditions()) {
         THROW_EXCEPTION(
@@ -344,11 +344,11 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
       }
 
       DEBUG_PRINT("siconos::integrators::MoreauJeanGOSI::computeResidu :\n");
-      DEBUG_EXPR(residu.display(););
-      DEBUG_EXPR(if (neds->p(1)) neds->p(1)->display(););
-      DEBUG_EXPR(free_rhs.display(););
+      DEBUG_EXPR(siconos::algebra::print(residu););
+      DEBUG_EXPR(if (neds->p(1)) siconos::algebra::print(*neds->p(1)););
+      DEBUG_EXPR(siconos::algebra::print(free_rhs););
 
-      normResidu = residu.norm2();
+      normResidu = residu.norm();
       DEBUG_PRINTF("normResidu= %e\n", normResidu);
     } else
       THROW_EXCEPTION(
@@ -413,9 +413,9 @@ void siconos::integrators::MoreauJeanGOSI::updateState(const unsigned int) {
 
       // if(baux)
       // {
-      //   double ds_norm_ref = 1. + ds.x0()->norm2(); // Should we save this in the graph?
+      //   double ds_norm_ref = 1. + ds.x0()->norm(); // Should we save this in the graph?
       //   local_buffer -= q;
-      //   double aux = (local_buffer.norm2()) / ds_norm_ref;
+      //   double aux = (local_buffer.norm()) / ds_norm_ref;
       //   if(aux > RelativeTol)
       //     _simulation->setRelativeConvergenceCriterionHeld(false);
       // }
@@ -433,7 +433,7 @@ void siconos::integrators::MoreauJeanGOSI::updateState(const unsigned int) {
       if (baux) {
         double ds_norm_ref = 1. + lds->x0().norm();  // Should we save this in the graph?
         local_buffer -= lds->q_read();
-        double aux = (local_buffer.norm2()) / ds_norm_ref;
+        double aux = (local_buffer.norm()) / ds_norm_ref;
         if (aux > RelativeTol) _simulation->setRelativeConvergenceCriterionHeld(false);
       }
     } else if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(
@@ -465,7 +465,7 @@ void siconos::integrators::MoreauJeanGOSI::display() const {
       std::cout << "--> W of dynamical system number " << ds->number() << ": "
                 << "\n";
       if (_dynamicalSystemsGraph->properties(*dsi).iterationMatrix)
-        _dynamicalSystemsGraph->properties(*dsi).iterationMatrix->display();
+        siconos::algebra::print(*_dynamicalSystemsGraph->properties(*dsi).iterationMatrix);
       else
         std::cout << "-> nullptr"
                   << "\n";

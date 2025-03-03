@@ -18,7 +18,6 @@
 #include "SiconosVectorTest.hpp"
 
 #include "SiconosVectorIterator.hpp"
-#include "SiconosVectorOp.hpp"  // for setBlock
 
 using namespace boost::numeric::ublas;
 namespace ublas = boost::numeric::ublas;
@@ -71,7 +70,7 @@ void SiconosVectorTest::testSetBlock() {
   auto subBlock = std::make_shared<SiconosVector>(sizeB);
   unsigned int pos = 1;
   // copy ref into subBlock
-  subBlock->setBlock(pos, *ref);
+  siconos::algebra::setBlock(pos, *ref, *subBlock);
 
   for (unsigned int i = pos; i < pos + 5; ++i)
     CPPUNIT_ASSERT_EQUAL_MESSAGE(

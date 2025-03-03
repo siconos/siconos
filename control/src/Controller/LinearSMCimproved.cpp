@@ -52,7 +52,7 @@ void siconos::control::LinearSMCimproved::initialize(
 void siconos::control::LinearSMCimproved::predictionPerturbation(
     const siconos::algebra::SiconosVector& xTk,
     const Eigen::FullPivLU<siconos::algebra::SiconosMatrix>& LUCBstar) {
-  if (_us->normInf() < _alpha) {
+  if (siconos::algebra::normInf(*_us) < _alpha) {
     if (_inDisceteTimeSlidingPhase) {
       if (_measuredPert->full()) {
         if (_measuredPert->size() > 1) {
@@ -100,7 +100,7 @@ void siconos::control::LinearSMCimproved::predictionPerturbation(
       *_up = LUCBstar.solve(*_up);
 
       // project onto feasible set
-      double norm = _up->norm2();
+      double norm = _up->norm();
       if (norm > _ubPerturbation) {
         *_up *= _ubPerturbation / norm;
         predictedPertC *= _ubPerturbation / norm;

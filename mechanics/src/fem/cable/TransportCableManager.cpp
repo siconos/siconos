@@ -226,6 +226,6 @@ void siconos::fem::cable::TransportCableManager::compute_external_load(double a_
 
   double k = -9.81 * a_rho * a_length;
   for (auto i = 2; i < ndof; i += 3) {
-    m_results.fext->setValue(i, k);
+    (*m_results.fext)(i) = k;
   }
 }

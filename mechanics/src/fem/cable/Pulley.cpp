@@ -62,16 +62,16 @@ void siconos::fem::cable::to_json(ojson &j, const Pulley &p) {
 
 bool siconos::fem::cable::Pulley::isContact(
     const Eigen::Ref<siconos::algebra::SiconosVector3> &a_p, double a_tol) {
-  double dx = a_p.getValue(0) - m_p.x;
-  double dy = a_p.getValue(1) - m_p.y;
+  double dx = a_p(0) - m_p.x;
+  double dy = a_p(1) - m_p.y;
   double d = sqrt(dx * dx + dy * dy);
   double go = d - get_radius();
   bool isCt = (go <= a_tol);
   if (isCt) {
-    m_normal->setValue(0, dx / d);
-    m_normal->setValue(1, dy / d);
-    m_tangent->setValue(0, -m_normal->getValue(1));
-    m_tangent->setValue(1, m_normal->getValue(0));
+    (*m_normal)(0) = dx / d;
+    (*m_normal)(1) = dy / d;
+    (*m_tangent)(0) = -(*m_normal)(1);
+    (*m_tangent)(1) = (*m_normal)(0);
   }
   return isCt;
 }

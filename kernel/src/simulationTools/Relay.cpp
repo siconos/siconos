@@ -187,7 +187,7 @@ void siconos::nonsmooth_formulations::Relay::display() const
   std::cout << "======= Relay of size " << _sizeOutput << " with: " << std::endl;
   LinearOSNS::display();
   std::cout << "lower bound : (_lb)" << std::endl;
-  _lb->display();
+  siconos::algebra::print(*_lb);
   std::cout << "upper bound : (_ub)" << std::endl;
-  _ub->display();
+  siconos::algebra::print(*_ub);
 }

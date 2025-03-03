@@ -356,7 +356,7 @@ void siconos::modeling::FirstOrderNonLinearDS::swapInMemory() {
     assert(fbuffer_);
     *fbuffer_ = *fVector_view_;
   }
-  DEBUG_EXPR(xMemory_.display());
+  DEBUG_EXPR(siconos::algebra::print(xMemory_));
   DEBUG_END("void siconos::modeling::FirstOrderNonLinearDS::swapInMemory()\n");
 }
 

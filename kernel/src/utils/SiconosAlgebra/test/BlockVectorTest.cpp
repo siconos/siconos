@@ -173,7 +173,7 @@ void BlockVectorTest::testConstructor5() {
   auto v = std::make_shared<BlockVector>(3);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->size() == 0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->numberOfBlocks() == 3, true);
-  v->display();
+  siconos::algebra::print(*v);
 
   // test insertion
   auto w = std::make_shared<siconos::algebra::SiconosVector>(3, 2);
@@ -183,14 +183,14 @@ void BlockVectorTest::testConstructor5() {
 
   // set Vector
   v->setVectorPtr(2, w);
-  v->display();
+  siconos::algebra::print(*v);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->size() == 6, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->numberOfBlocks() == 4, true);
 
   auto ww = std::make_shared<siconos::algebra::SiconosVector>(5, 3);
   v->setVectorPtr(0, ww);
-  v->display();
+  siconos::algebra::print(*v);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->size() == 11, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->numberOfBlocks() == 4, true);
 
@@ -199,7 +199,7 @@ void BlockVectorTest::testConstructor5() {
   std::cout << "v->size()" << v->size() << std::endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->size() == 16, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->numberOfBlocks() == 5, true);
-  v->display();
+  siconos::algebra::print(*v);
   auto tab = v->tabIndex();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", tab->size() == 5, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", (*tab)[0] == 5, true);
@@ -209,7 +209,7 @@ void BlockVectorTest::testConstructor5() {
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", (*tab)[4] == 16, true);
 
   v->setVectorPtr(2, ww);
-  v->display();
+  siconos::algebra::print(*v);
   tab = v->tabIndex();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->size() == 18, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->numberOfBlocks() == 5, true);
@@ -263,9 +263,9 @@ void BlockVectorTest::testNorm() {
   //
   //
   //  auto v= std::make_shared<BlockVector>(w,z);
-  //  double n2 = v->norm2();
+  //  double n2 = v->norm();
   //  v->insertPtr(ref.vector(0));
-  ////  double ni = v->normInf();
+  ////  double ni = siconos::algebra::normInf(*v)
   //
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testNorm : ",
   //  n2-sqrt(69)<std::numeric_limits<double>::epsilon(), true);

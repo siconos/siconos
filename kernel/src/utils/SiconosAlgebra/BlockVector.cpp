@@ -26,7 +26,7 @@
 #include <vector>
 
 #include "SiconosException.hpp"
-#include "SiconosVector.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosVectorOp.hpp"  // for isComparableTo ...
 #include "siconos_debug.h"
 // //#define DEBUG_STDOUT
@@ -143,23 +143,6 @@ void siconos::algebra::BlockVector::fill(double value) {
     if (it) {
       it->fill(value);
     }
-  }
-}
-
-//=====================
-// screen display
-//=====================
-
-void siconos::algebra::BlockVector::display() const {
-  std::cout << "=======> Block Vector Display (" << _tabIndex->size()
-            << " block(s)): " << std::endl;
-  for (auto& it : _vect) {
-    DEBUG_EXPR(std::cout << "(*it)" << (*it) << std::endl;);
-    if (it) {
-      it->displayT();
-      std::cout << std::endl;
-    } else
-      std::cout << "(*it)-> nullptr" << std::endl;
   }
 }
 
@@ -361,85 +344,12 @@ void siconos::algebra::BlockVector::insertPtr(std::shared_ptr<SiconosVector> v) 
   _tabIndex->push_back(_sizeV);
 }
 
-void siconos::algebra::BlockVector::setBlock(const SiconosVector& vIn, unsigned int sizeB,
-                                             unsigned int startIn, unsigned int startOut) {
-  // Check dim ...
-  unsigned int endOut = startOut + sizeB;
-
-  assert(startIn < vIn.size());
-  assert(startOut < size());
-  assert((startIn + sizeB) <= vIn.size());
-  assert(endOut <= size());
-
-  // We look for the block of vOut that include index startOut
-  unsigned int blockOutStart = 0;
-  while (startOut >= (*_tabIndex)[blockOutStart] && blockOutStart < _tabIndex->size())
-    blockOutStart++;
-  // Relative position in the block blockOutStart.
-  unsigned int posOut = startOut;
-  if (blockOutStart != 0) posOut -= (*_tabIndex)[blockOutStart - 1];
-
-  // We look for the block of vOut that include index endOut
-  unsigned int blockOutEnd = blockOutStart;
-  while (endOut > (*_tabIndex)[blockOutEnd] && blockOutEnd < _tabIndex->size()) blockOutEnd++;
-
-  // => the block to be set runs from block number blockOutStart to block number
-  // blockOutEnd.
-
-  if (blockOutEnd == blockOutStart)  //
-  {
-    _vect[blockOutStart]->segment(posOut, sizeB) = vIn.segment(startIn, sizeB);
-  } else  // More that one block of vOut are concerned
-  {
-    // The current considered block ...
-    auto currentBlock = _vect[blockOutStart];
-
-    // Size of the subBlock of vOut to be set.
-    size_t subSizeB = currentBlock->size() - posOut;
-    unsigned int posIn = startIn;
-
-    // Set first sub-block (currentBlock) values, between index posOut and
-    // posOut+subSizeB, with vIn values from posIn to posIn+subSizeB.
-    if (currentBlock->size() < sizeB) {
-      currentBlock->resizeLike(vIn);
-    }
-    currentBlock->segment(posOut, sizeB) = vIn.segment(posIn, sizeB);
-
-    // Other blocks, except number blockOutEnd.
-    unsigned int currentBlockNum = blockOutStart + 1;
-    while (currentBlockNum != blockOutEnd) {
-      posIn += subSizeB;
-      currentBlock = _vect[currentBlockNum];
-      subSizeB = currentBlock->size();
-      currentBlock->segment(0, subSizeB) = vIn.segment(posIn, subSizeB);
-      currentBlockNum++;
-    }
-    // set last subBlock ...
-    currentBlock = _vect[blockOutEnd];
-
-    posIn += subSizeB;
-
-    // Size of the considered sub-block
-    subSizeB = endOut - (*_tabIndex)[blockOutEnd - 1];
-
-    currentBlock->segment(0, subSizeB) = vIn.segment(posIn, subSizeB);
-  }
-}
-
 double siconos::algebra::BlockVector::norm() const {
   double d = 0;
   for (auto& v : _vect) {
     d += v->squaredNorm();
   }
   return std::sqrt(d);
-}
-
-double siconos::algebra::BlockVector::normInf() const {
-  double d = 0;
-  for (auto& v : _vect) {
-    d = std::max(v->lpNorm<Eigen::Infinity>(), d);
-  }
-  return d;
 }
 
 std::shared_ptr<siconos::algebra::SiconosVector>
@@ -485,4 +395,31 @@ bool siconos::algebra::isComparableTo(const BlockVector& v1, const BlockVector& 
   auto& I2 = *v2.tabIndex();
 
   return (I1 == I2);
+}
+
+// Free functions
+
+double siconos::algebra::normInf(const siconos::algebra::BlockVector& vect) {
+  double d = 0;
+  for (auto& v : vect) {
+    d = std::max(v->lpNorm<Eigen::Infinity>(), d);
+  }
+  return d;
+}
+
+//=====================
+// screen display
+//=====================
+
+void siconos::algebra::print(const siconos::algebra::BlockVector& vect) {
+  std::cout << "=======> Block Vector Display (" << vect.numberOfBlocks()
+            << " block(s)): " << std::endl;
+  for (auto& it : vect) {
+    DEBUG_EXPR(std::cout << "(*it)" << (*it) << std::endl;);
+    if (it) {
+      siconos::algebra::print(*it);
+      std::cout << std::endl;
+    } else
+      std::cout << "(*it)-> nullptr" << std::endl;
+  }
 }

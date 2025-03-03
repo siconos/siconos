@@ -13,9 +13,9 @@ def test_serialization1():
 
     v2.xml_import(v1.xml_export())
 
-    assert(v2.getValue(0) == 1.0)
-    assert(v2.getValue(1) == 2.0)
-    assert(v2.getValue(2) == 3.0)
+    assert(v2(0) == 1.0)
+    assert(v2(1) == 2.0)
+    assert(v2(2) == 3.0)
 
 # question to Maurice: should we keep that or is it completely obsolete?
 #def test_serialization2():
@@ -23,9 +23,9 @@ def test_serialization1():
 #
 #    v2.text_import(v1.text_export())
 #
-#    assert(v2.getValue(0) == 1.0)
-#    assert(v2.getValue(1) == 2.0)
-#    assert(v2.getValue(2) == 3.0)
+#    assert(v2(0) == 1.0)
+#    assert(v2(1) == 2.0)
+#    assert(v2(2) == 3.0)
 #
 
 def test_serialization3():
@@ -33,9 +33,9 @@ def test_serialization3():
 
     v2.binary_import(v1.binary_export())
 
-    assert(v2.getValue(0) == 1.0)
-    assert(v2.getValue(1) == 2.0)
-    assert(v2.getValue(2) == 3.0)
+    assert(v2(0) == 1.0)
+    assert(v2(1) == 2.0)
+    assert(v2(2) == 3.0)
 
 # uses pytest fixture datafile
 def test_serialization4(datafile):

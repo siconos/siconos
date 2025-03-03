@@ -256,7 +256,7 @@ void siconos::joints::CouplerJointR::computeH_NE_(
   for (unsigned int i = 0; i < 1; i++)
     for (unsigned int j = 0; j < H_NE_view_->cols(); j++)
       H_NE_view_->setValue(
-          i, j, jachq2->getValue(i, j) - jachq1->getValue(i, j) * _ratio);
+          i, j, (*jachq2)(i, j) - (*jachq1)(i, j) * _ratio);
 }
 
 // siconos::algebra::SiconosVector siconos::joints::CouplerJointR::normalDoF(
@@ -326,5 +326,5 @@ void siconos::joints::CouplerJointR::computeJachqDoF(
   // Constraint is the linear relation between them
   for (unsigned int i = 0; i < 1; i++)
     for (unsigned int j = 0; j < H_NE_view_->cols(); j++)
-      jachq.setValue(i, j, jachq2->getValue(i, j) - jachq1->getValue(i, j) * _ratio);
+      jachq.setValue(i, j, (*jachq2)(i, j) - (*jachq1)(i, j) * _ratio);
 }

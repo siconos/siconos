@@ -52,12 +52,12 @@ void siconos::modeling::Lagrangian2d3DR::computeJacobianhOver_q(
       "siconos::modeling::Lagrangian2d3DR::computeJacobianhOver_q(Interaction& inter, "
       "siconos::algebra::BlockVector q0 \n");
 
-  double Nx = _Nc->getValue(0);
-  double Ny = _Nc->getValue(1);
-  double Px = _Pc1->getValue(0);
-  double Py = _Pc1->getValue(1);
-  double G1x = q.getValue(0);
-  double G1y = q.getValue(1);
+  double Nx = (*_Nc)(0);
+  double Ny = (*_Nc)(1);
+  double Px = (*_Pc1)(0);
+  double Py = (*_Pc1)(1);
+  double G1x = q(0);
+  double G1y = q(1);
 
   /* construct tangent vector */
   double Tx = -Ny;
@@ -82,8 +82,8 @@ void siconos::modeling::Lagrangian2d3DR::computeJacobianhOver_q(
 
   if (q.size() == 6) {
     DEBUG_PRINT("take into account second ds\n");
-    double G2x = q.getValue(3);
-    double G2y = q.getValue(4);
+    double G2x = q(3);
+    double G2y = q(4);
     lever_arm_x = Px - G2x;
     lever_arm_y = Py - G2y;
 
@@ -108,25 +108,25 @@ void siconos::modeling::Lagrangian2d3DR::computeJacobianhOver_q(
 double siconos::modeling::Lagrangian2d3DR::distance() const {
   DEBUG_BEGIN("siconos::modeling::Lagrangian2d3DR::distance(...)\n")
   siconos::algebra::SiconosVector dpc(*_Pc2 - *_Pc1);
-  DEBUG_EXPR(_Pc1->display(););
-  DEBUG_EXPR(_Pc2->display(););
-  DEBUG_EXPR(dpc.display(););
+  DEBUG_EXPR(siconos::algebra::print(*_Pc1););
+  DEBUG_EXPR(siconos::algebra::print(*_Pc2););
+  DEBUG_EXPR(siconos::algebra::print(dpc););
   DEBUG_END("siconos::modeling::Lagrangian2d3DR::distance(...)\n")
-  return dpc.norm2() * (_Nc->dot(dpc) >= 0 ? -1 : 1);
+  return dpc.norm() * (_Nc->dot(dpc) >= 0 ? -1 : 1);
 }
 
 void siconos::modeling::Lagrangian2d3DR::computeh(
     const siconos::algebra::BlockVector& q, Eigen::Ref<siconos::algebra::SiconosVector> y) {
   DEBUG_BEGIN("siconos::modeling::Lagrangian2d3DR::computeh(...)\n");
-  DEBUG_EXPR(q.display());
+  DEBUG_EXPR(siconos::algebra::print(q));
 
-  DEBUG_EXPR(_Pc1->display(););
-  DEBUG_EXPR(_Pc2->display(););
-  DEBUG_EXPR(_Nc->display(););
+  DEBUG_EXPR(siconos::algebra::print(*_Pc1););
+  DEBUG_EXPR(siconos::algebra::print(*_Pc2););
+  DEBUG_EXPR(siconos::algebra::print(*_Nc););
 
   LagrangianScleronomousR::computeh(q, y);
-  y.setValue(0, distance());
-  DEBUG_EXPR(y.display(););
+  y(0) = distance();
+  DEBUG_EXPR(siconos::algebra::print(y););
   DEBUG_EXPR(display(););
   DEBUG_END("siconos::modeling::Lagrangian2d3DR::computeh(...)\n")
 }
@@ -136,19 +136,19 @@ void siconos::modeling::Lagrangian2d3DR::display() const {
 
   std::cout << " _Pc1 :" << std::endl;
   if (_Pc1)
-    _Pc1->display();
+    siconos::algebra::print(*_Pc1);
   else
     std::cout << " nullptr :" << std::endl;
 
   std::cout << " _Pc2 :" << std::endl;
   if (_Pc2)
-    _Pc2->display();
+    siconos::algebra::print(*_Pc2);
   else
     std::cout << " nullptr :" << std::endl;
 
   std::cout << " _Nc :" << std::endl;
   if (_Nc)
-    _Nc->display();
+    siconos::algebra::print(*_Nc);
   else
     std::cout << " nullptr :" << std::endl;
 }

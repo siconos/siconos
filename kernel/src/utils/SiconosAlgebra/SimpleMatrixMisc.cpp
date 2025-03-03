@@ -34,8 +34,7 @@
 #include "io.hpp"
 
 void siconos::algebra::normInfByColumn(const SiconosMatrix &m, SiconosVector &v) {
-  if (v.size() != m.cols())
-    THROW_EXCEPTION("the given vector does not have the right length");
+  if (v.size() != m.cols()) THROW_EXCEPTION("the given vector does not have the right length");
   for (auto i = 0; i < m.cols(); i++) {
     v(i) = m.col(i).norm();
   }
@@ -44,9 +43,9 @@ void siconos::algebra::normInfByColumn(const SiconosMatrix &m, SiconosVector &v)
 bool siconos::algebra::checkSymmetry(SiconosMatrix &m, double tol) {
   auto m_trans = m.transpose();
   auto tmp = m - m_trans;
-  double err = tmp.normInf();
-  if (m_trans.normInf() > 0.0) {
-    err /= m_trans.normInf();
+  double err = siconos::algebra::normInf(tmp);
+  if (siconos::algebra::normInf(m_trans) > 0.0) {
+    err /= siconos::algebra::normInf(m_trans);
   }
   // std::cout << "err_rel  ="<< err <<"\n";
   return (err < tol);

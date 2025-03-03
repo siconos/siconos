@@ -35,10 +35,10 @@ siconos::collision::native::bodies::SphereNEDS::SphereNEDS(
 
 double siconos::collision::native::bodies::SphereNEDS::getQ(unsigned int pos) {
   assert(pos < 7);
-  return (state_q_->getValue(pos));
+  return ((*state_q_)(pos));
 };
 
 double siconos::collision::native::bodies::SphereNEDS::getTwist(unsigned int pos) {
   assert(pos < 6);
-  return (twist_->getValue(pos));
+  return ((*twist_)(pos));
 };

@@ -169,8 +169,8 @@ void siconos::joints::PivotJointR::computeh(const siconos::algebra::BlockVector&
   } else
     pivot::rot2to1(q1->tail(4), Eigen::Vector4d(1, 0, 0, 0), cq2q_, rot221);
 
-  y.setValue(3, A1_.dot(rot221) - _initial_AscalA1);
-  y.setValue(4, A2_.dot(rot221) - _initial_AscalA2);
+  y(3) = A1_.dot(rot221) - _initial_AscalA1;
+  y(4) = A2_.dot(rot221) - _initial_AscalA2;
 }
 
 /** Compute the vector of linear and angular positions of the free axes */
@@ -205,7 +205,7 @@ void siconos::joints::PivotJointR::computehDoF(
   _previousAngle = wrappedAngle;
   double unwrappedAngle = wrappedAngle + 2 * std::numbers::pi * _twistCount;
 
-  y.setValue(0, unwrappedAngle);
+  y(0) = unwrappedAngle;
 }
 
 /** Compute the jacobian of linear and angular DoF with respect to some q */
@@ -218,10 +218,10 @@ void siconos::joints::PivotJointR::computeJachqDoF(
   if (axis != 0) return;
 
   auto q1 = (q0.getAllVect())[0];
-  double q10 = q1->getValue(3);
-  double q11 = q1->getValue(4);
-  double q12 = q1->getValue(5);
-  double q13 = q1->getValue(6);
+  double q10 = (*q1)(3);
+  double q11 = (*q1)(4);
+  double q12 = (*q1)(5);
+  double q13 = (*q1)(6);
 
   double q20 = 1;
   double q21 = 0;
@@ -230,10 +230,10 @@ void siconos::joints::PivotJointR::computeJachqDoF(
 
   if (q0.numberOfBlocks() > 1) {
     auto q2 = (q0.getAllVect())[1];
-    q20 = q2->getValue(3);
-    q21 = q2->getValue(4);
-    q22 = q2->getValue(5);
-    q23 = q2->getValue(6);
+    q20 = (*q2)(3);
+    q21 = (*q2)(4);
+    q22 = (*q2)(5);
+    q23 = (*q2)(6);
   }
 
   jachq.setZero();
@@ -273,9 +273,9 @@ void siconos::joints::PivotJointR::computeJachqDoF(
   double x17 = q13 * x14;
   double x18 = cq2q_(0) * q20 - cq2q_(1) * q21 - cq2q_(2) * q22 - cq2q_(3) * q23;
   double x19 = q10 * x18;
-  double x20 = axis_coords_->getValue(0) * (q10 * x4 + q11 * x18 - q12 * x14 + q13 * x9) +
-               axis_coords_->getValue(1) * (q10 * x9 + q11 * x14 + q12 * x18 - q13 * x4) +
-               axis_coords_->getValue(2) * (q10 * x14 - q11 * x9 + q12 * x4 + q13 * x18);
+  double x20 = (*axis_coords_)(0) * (q10 * x4 + q11 * x18 - q12 * x14 + q13 * x9) +
+               (*axis_coords_)(1) * (q10 * x9 + q11 * x14 + q12 * x18 - q13 * x4) +
+               (*axis_coords_)(2) * (q10 * x14 - q11 * x9 + q12 * x4 + q13 * x18);
   double x21 = 1.0 / (pow(x20, 2) + pow(-x15 - x16 - x17 + x19, 2));
   double x22 = 2 * x21 * (x15 + x16 + x17 - x19);
   double x23 = 2 * x20 * x21;
@@ -319,19 +319,19 @@ void siconos::joints::PivotJointR::computeJachqDoF(
 
   jachq.setValue(
       0, 3,
-      x18 * x23 + x22 * (axis_coords_->getValue(0) * x4 + axis_coords_->getValue(1) * x9 +
-                         axis_coords_->getValue(2) * x14));
+      x18 * x23 + x22 * ((*axis_coords_)(0) * x4 + (*axis_coords_)(1) * x9 +
+                         (*axis_coords_)(2) * x14));
   jachq.setValue(0, 4,
-                 x22 * (axis_coords_->getValue(0) * x18 + axis_coords_->getValue(1) * x14 +
-                        axis_coords_->getValue(2) * x24) +
+                 x22 * ((*axis_coords_)(0) * x18 + (*axis_coords_)(1) * x14 +
+                        (*axis_coords_)(2) * x24) +
                      x23 * x25);
   jachq.setValue(0, 5,
-                 x22 * (axis_coords_->getValue(0) * x26 + axis_coords_->getValue(1) * x18 +
-                        axis_coords_->getValue(2) * x4) +
+                 x22 * ((*axis_coords_)(0) * x26 + (*axis_coords_)(1) * x18 +
+                        (*axis_coords_)(2) * x4) +
                      x23 * x24);
   jachq.setValue(0, 6,
-                 x22 * (axis_coords_->getValue(0) * x9 + axis_coords_->getValue(1) * x25 +
-                        axis_coords_->getValue(2) * x18) +
+                 x22 * ((*axis_coords_)(0) * x9 + (*axis_coords_)(1) * x25 +
+                        (*axis_coords_)(2) * x18) +
                      x23 * x26);
 
   if (q0.numberOfBlocks() < 2) return;
@@ -343,24 +343,24 @@ void siconos::joints::PivotJointR::computeJachqDoF(
    */
 
   jachq.setValue(0, 10,
-                 x22 * (axis_coords_->getValue(0) * (x30 + x31 + x33) +
-                        axis_coords_->getValue(1) * (x34 + x35 + x40) +
-                        axis_coords_->getValue(2) * (x44 + x45 + x47)) +
+                 x22 * ((*axis_coords_)(0) * (x30 + x31 + x33) +
+                        (*axis_coords_)(1) * (x34 + x35 + x40) +
+                        (*axis_coords_)(2) * (x44 + x45 + x47)) +
                      x23 * (x48 + x49 + x52));
   jachq.setValue(0, 11,
-                 x22 * (axis_coords_->getValue(0) * (-x49 + x52 + x53) +
-                        axis_coords_->getValue(1) * (x44 + x46 + x54) +
-                        axis_coords_->getValue(2) * (-x34 + x40 + x55)) +
+                 x22 * ((*axis_coords_)(0) * (-x49 + x52 + x53) +
+                        (*axis_coords_)(1) * (x44 + x46 + x54) +
+                        (*axis_coords_)(2) * (-x34 + x40 + x55)) +
                      x23 * (x30 + x32 + x56));
   jachq.setValue(0, 12,
-                 x22 * (axis_coords_->getValue(0) * (-x41 + x43 + x59) +
-                        axis_coords_->getValue(1) * (-x50 + x51 + x57) +
-                        axis_coords_->getValue(2) * (x27 + x28 + x58)) +
+                 x22 * ((*axis_coords_)(0) * (-x41 + x43 + x59) +
+                        (*axis_coords_)(1) * (-x50 + x51 + x57) +
+                        (*axis_coords_)(2) * (x27 + x28 + x58)) +
                      x23 * (x37 + x38 + x60));
   jachq.setValue(0, 13,
-                 x22 * (axis_coords_->getValue(0) * (x36 + x39 + x60) +
-                        axis_coords_->getValue(1) * (-x27 + x29 + x58) +
-                        axis_coords_->getValue(2) * (x50 - x51 + x57)) +
+                 x22 * ((*axis_coords_)(0) * (x36 + x39 + x60) +
+                        (*axis_coords_)(1) * (-x27 + x29 + x58) +
+                        (*axis_coords_)(2) * (x50 - x51 + x57)) +
                      x23 * (x41 + x42 + x59));
 }
 
@@ -480,7 +480,7 @@ void siconos::joints::pivot::computeH_for_2DS(
   /*proj_with_q
   for (unsigned int ii=0; ii <result.rows(); ii++)
     for (unsigned int jj=0; jj <result.cols(); jj++)
-  H_NE_view_Proj->setValue(ii,jj,result.getValue(ii,jj));
+  H_NE_view_Proj->setValue(ii,jj,result(ii, jj));
 
   H_NE_view_Proj->setValue(5,0,0);
   H_NE_view_Proj->setValue(5,1,0);
@@ -498,7 +498,7 @@ void siconos::joints::pivot::computeH_for_2DS(
   H_NE_view_Proj->setValue(6,6+7,2.0*q23);
   */
 
-  // result.display();
+  // siconos::algebra::print(result);
 }
 
 void siconos::joints::pivot::computeH_for_1DS(
@@ -521,7 +521,7 @@ void siconos::joints::pivot::computeH_for_1DS(
   /*proj_with_q
       for (unsigned int ii=0; ii <result.rows(); ii++)
         for (unsigned int jj=0; jj <result.cols(); jj++)
-    H_NE_view_Proj->setValue(ii,jj,result.getValue(ii,jj));
+    H_NE_view_Proj->setValue(ii,jj,result(ii, jj));
 
       H_NE_view_Proj->setValue(5,0,0);
       H_NE_view_Proj->setValue(5,1,0);

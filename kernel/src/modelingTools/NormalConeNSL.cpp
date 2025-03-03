@@ -48,9 +48,9 @@ void siconos::modeling::NormalConeNSL::display() const
   std::cout << "____ data of the NormalConeNSL" << std::endl;
   std::cout << "| nSLawSize : " << _size << std::endl;
   std::cout << "| H : " << std::endl;
-  _H->display();
+  siconos::algebra::print(*_H);
   std::cout << "| K : " << std::endl;
-  _K->display();
+  siconos::algebra::print(*_K);
   std::cout << "____________________________" << std::endl;
   std::cout << "------------------------------------" << std::endl;
 }

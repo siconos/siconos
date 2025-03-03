@@ -23,7 +23,3 @@
    See https://eigen.tuxfamily.org/dox/TopicCustomizing_Plugins.html
 
 */
-
-void display() const { std::cout << *this << "\n";}
-
-inline Scalar norm2() { return this->norm(); }

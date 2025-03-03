@@ -47,18 +47,18 @@ void siconos::collision::native::bodies::SphereNEDSSphereNEDSR::computeh(
   double q_8 = q0(8);
   double q_9 = q0(9);
 
-  y.setValue(0, distance(q_0, q_1, q_2, r1, q_7, q_8, q_9, r2));
+  y(0) = distance(q_0, q_1, q_2, r1, q_7, q_8, q_9, r2);
   // Approximation _Pc1=_Pc2
-  _Pc1->setValue(0, (r1 * q_0 + r2 * q_7) / (r1 + r2));
-  _Pc1->setValue(1, (r1 * q_1 + r2 * q_8) / (r1 + r2));
-  _Pc1->setValue(2, (r1 * q_2 + r2 * q_9) / (r1 + r2));
-  _Pc2->setValue(0, (r1 * q_0 + r2 * q_7) / (r1 + r2));
-  _Pc2->setValue(1, (r1 * q_1 + r2 * q_8) / (r1 + r2));
-  _Pc2->setValue(2, (r1 * q_2 + r2 * q_9) / (r1 + r2));
-  _Nc->setValue(0, (q_0 - q_7) / (y.getValue(0) + r1pr2));
-  _Nc->setValue(1, (q_1 - q_8) / (y.getValue(0) + r1pr2));
-  _Nc->setValue(2, (q_2 - q_9) / (y.getValue(0) + r1pr2));
+  (*_Pc1)(0) = (r1 * q_0 + r2 * q_7) / (r1 + r2);
+  (*_Pc1)(1) = (r1 * q_1 + r2 * q_8) / (r1 + r2);
+  (*_Pc1)(2) = (r1 * q_2 + r2 * q_9) / (r1 + r2);
+  (*_Pc2)(0) = (r1 * q_0 + r2 * q_7) / (r1 + r2);
+  (*_Pc2)(1) = (r1 * q_1 + r2 * q_8) / (r1 + r2);
+  (*_Pc2)(2) = (r1 * q_2 + r2 * q_9) / (r1 + r2);
+  (*_Nc)(0) = (q_0 - q_7) / (y(0) + r1pr2);
+  (*_Nc)(1) = (q_1 - q_8) / (y(0) + r1pr2);
+  (*_Nc)(2) = (q_2 - q_9) / (y(0) + r1pr2);
   // std::cout<<" siconos::modeling::SphereNEDSSphereNEDSR::computeh
-  // dist:"<<y->getValue(0)<<"\n"; std::cout<<"_Pc:\n"; _Pc->display(); std::cout<<"_Nc:\n";
-  //_Nc->display();
+  // dist:"<<(*y)(0)<<"\n"; std::cout<<"_Pc:\n"; siconos::algebra::print(*_Pc); std::cout<<"_Nc:\n";
+  //siconos::algebra::print(*_Nc);
 }

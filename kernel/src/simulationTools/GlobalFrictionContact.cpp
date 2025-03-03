@@ -25,7 +25,6 @@
 #include "NumericsSolversNamespace.h"  // solver_options stuff
 #include "OSNSMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "SiconosVectorOp.hpp"  // setBlock
 #include "Simulation.hpp"
 #include "Topology.hpp"
 // #define DEBUG_NOCOLOR
@@ -261,7 +260,7 @@ bool siconos::nonsmooth_formulations::GlobalFrictionContact::preCompute(double t
       }
       offset += ds_size;
     }
-    DEBUG_EXPR(_q->display(););
+    DEBUG_EXPR(siconos::algebra::print(*_q););
 #ifdef WITH_TIMER
     end_old = end;
     end = std::chrono::system_clock::now();
@@ -318,7 +317,7 @@ bool siconos::nonsmooth_formulations::GlobalFrictionContact::preCompute(double t
       auto sizeY = inter->dimension();
       _b->segment(pos, sizeY) = osnsp_rhs.head(sizeY);
     }
-    DEBUG_EXPR(_b->display(););
+    DEBUG_EXPR(siconos::algebra::print(*_b););
 #ifdef WITH_TIMER
     end_old = end;
     end = std::chrono::system_clock::now();
@@ -404,10 +403,8 @@ void siconos::nonsmooth_formulations::GlobalFrictionContact::postCompute() {
     auto lambda = inter.lambda(inputOutputLevel());
     // Copy _w/_z values, starting from index pos into y/lambda.
 
-    // siconos::algebra::setBlock(*_w, y, y->size(), pos, 0);// Warning: yEquivalent is
-    //  saved in y !!
     lambda->segment(0, lambda->size()) = _z->segment(pos, lambda->size());
-    DEBUG_EXPR(lambda->display(););
+    DEBUG_EXPR(siconos::algebra::print(*lambda););
   }
   auto& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
 
@@ -419,20 +416,20 @@ void siconos::nonsmooth_formulations::GlobalFrictionContact::postCompute() {
       auto sizeDS = d->dimension();
       auto velocity = d->velocity();
       DEBUG_PRINTF("ds.number() : %i \n", ds.number());
-      DEBUG_EXPR(velocity->display(););
-      DEBUG_EXPR(_globalVelocities->display(););
+      DEBUG_EXPR(siconos::algebra::print(*velocity););
+      DEBUG_EXPR(siconos::algebra::print(*_globalVelocities););
       pos = DSG0.properties(*dsi).absolute_position;
       velocity->segment(0, sizeDS) = _globalVelocities->segment(pos, sizeDS);
-      DEBUG_EXPR(velocity->display(););
+      DEBUG_EXPR(siconos::algebra::print(*velocity););
     } else if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
       auto sizeDS = neds->dimension();
       auto twist = neds->twist();
       DEBUG_PRINTF("ds.number() : %i \n", ds.number());
-      DEBUG_EXPR(twist->display(););
-      DEBUG_EXPR(_globalVelocities->display(););
+      DEBUG_EXPR(siconos::algebra::print(*twist););
+      DEBUG_EXPR(siconos::algebra::print(*_globalVelocities););
       pos = DSG0.properties(*dsi).absolute_position;
       twist->segment(0, sizeDS) = _globalVelocities->segment(pos, sizeDS);
-      DEBUG_EXPR(twist->display(););
+      DEBUG_EXPR(siconos::algebra::print(*twist););
     } else
       THROW_EXCEPTION(
           "siconos::nonsmooth_formulations::GlobalFrictionContact::postCompute() - Only "
@@ -452,14 +449,14 @@ void siconos::nonsmooth_formulations::GlobalFrictionContact::display() const {
   std::cout << "and  size (_sizeGlobalOutput) " << _sizeGlobalOutput << std::endl;
   std::cout << "_numericsMatrixStorageType" << _numericsMatrixStorageType << std::endl;
   std::cout << " - Matrix M  : \n";
-  // if (_W) _W->display();
+  // if (_W) siconos::algebra::print(*_W);
   // else std::cout << "-> nullptr" <<std::endl;
   auto* W_NM = _W->numericsMatrix().get();
   if (W_NM) {
     NM_display(W_NM);
   }
   std::cout << " - Matrix H : \n";
-  // if (_H) _H->display();
+  // if (_H) siconos::algebra::print(*_H);
   // else std::cout << "-> nullptr" <<std::endl;
   auto* H_NM = _H->numericsMatrix().get();
   if (H_NM) {
@@ -468,30 +465,30 @@ void siconos::nonsmooth_formulations::GlobalFrictionContact::display() const {
 
   std::cout << " - Vector q : \n";
   if (_q)
-    _q->display();
+    siconos::algebra::print(*_q);
   else
     std::cout << "-> nullptr\n";
   std::cout << " - Vector b : \n";
   if (_b)
-    _b->display();
+    siconos::algebra::print(*_b);
   else
     std::cout << "-> nullptr\n";
 
   std::cout << " - Vector z (reaction) : \n";
   if (_z)
-    _z->display();
+    siconos::algebra::print(*_z);
   else
     std::cout << "-> nullptr\n";
 
   std::cout << " - Vector w (local velocities): \n";
   if (_w)
-    _w->display();
+    siconos::algebra::print(*_w);
   else
     std::cout << "-> nullptr\n";
 
   std::cout << " - Vector globalVelocities : \n";
   if (_globalVelocities)
-    _globalVelocities->display();
+    siconos::algebra::print(*_globalVelocities);
   else
     std::cout << "-> nullptr\n";
 

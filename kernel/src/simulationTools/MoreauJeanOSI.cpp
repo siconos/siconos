@@ -268,7 +268,7 @@ void siconos::integrators::MoreauJeanOSI::initializeWorkVectorsForInteraction(
     }
   }
 
-  DEBUG_EXPR(inter_work_block[xfree]->display(););
+  DEBUG_EXPR(siconos::algebra::print(*inter_work_block[xfree]););
   DEBUG_END(
       "siconos::integrators::MoreauJeanOSI::"
       "initializeWorkVectorsForInteraction(Interaction "
@@ -435,7 +435,7 @@ void siconos::integrators::MoreauJeanOSI::_computeIterationMatrixBoundaryConditi
             iteration_matrix,
             1e-10))  // Warning this operation could be quite expensive
     {
-      // iteration_matrix.display();
+      // siconos::algebra::print(iteration_matrix);
       std::cout << "Warning, we apply boundary conditions assuming W symmetric" << std::endl;
     }
 
@@ -449,15 +449,15 @@ void siconos::integrators::MoreauJeanOSI::_computeIterationMatrixBoundaryConditi
 
     columnindex = 0;
     for (const auto itindex : d.boundaryConditions()->velocityIndices()) {
-      double diag = iteration_matrix.getValue(itindex, itindex);
+      double diag = iteration_matrix(itindex, itindex);
       columntmp->setZero();
       (*columntmp)(itindex) = diag;
       iteration_matrix.col(itindex) = *columntmp;
       iteration_matrix.row(itindex) = *columntmp;
       columnindex++;
     }
-    DEBUG_EXPR(iteration_matrix.display(););
-    DEBUG_EXPR(IterationMatrixBoundaryConditions.display(););
+    DEBUG_EXPR(siconos::algebra::print(iteration_matrix););
+    DEBUG_EXPR(siconos::algebra::print(IterationMatrixBoundaryConditions););
   } else
     THROW_EXCEPTION(
         "siconos::integrators::MoreauJeanOSI::computeIterationMatrixBoundaryConditions - not "
@@ -536,13 +536,13 @@ void siconos::integrators::MoreauJeanOSI::applyBoundaryConditions(
 
     auto prescribedVelocity = d.boundaryConditions()->prescribedVelocity();
     for (const auto &itindex : d.boundaryConditions()->velocityIndices()) {
-      double DeltaPrescribedVelocity = prescribedVelocity(columnindex) - v.getValue(itindex);
+      double DeltaPrescribedVelocity = prescribedVelocity(columnindex) - v(itindex);
       DEBUG_PRINTF("index  = %i, value = %e\n", *itindex, prescribedVelocity(columnindex));
       DEBUG_PRINTF("DeltaPrescribedVelocity = %e\n", DeltaPrescribedVelocity);
       *columntmp = IterationMatrixBoundaryConditions.col(columnindex);
       residu -= *columntmp * (DeltaPrescribedVelocity);
 
-      residu.setValue(itindex, -columntmp->getValue(itindex) * (DeltaPrescribedVelocity));
+      residu(itindex) = -(*columntmp)(itindex) * (DeltaPrescribedVelocity);
 
       columnindex++;
     }
@@ -608,10 +608,10 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
 
       const auto &v = *d.velocity();  // v = v_k,i+1
       // residuFree.setZero();
-      DEBUG_EXPR(residuFree.display());
+      DEBUG_EXPR(siconos::algebra::print(residuFree));
 
-      DEBUG_EXPR(vold.display());
-      DEBUG_EXPR(v.display());
+      DEBUG_EXPR(siconos::algebra::print(vold));
+      DEBUG_EXPR(siconos::algebra::print(v));
 
       residuFree = v - vold;
       if (d.hasMass()) {
@@ -646,14 +646,14 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
       applyBoundaryConditions(d, residuFree, dsi, t, v);
 
       free = residuFree;  // copy residuFree into Workfree
-      DEBUG_EXPR(residuFree.display());
+      DEBUG_EXPR(siconos::algebra::print(residuFree));
 
       if (d.p(1)) free -= *d.p(1);  // Compute Residu in Workfree Notation !!
 
       applyBoundaryConditions(d, free, dsi, t, v);
 
-      DEBUG_EXPR(free.display());
-      normResidu = free.norm2();
+      DEBUG_EXPR(siconos::algebra::print(free));
+      normResidu = free.norm();
       DEBUG_PRINTF("normResidu= %e\n", normResidu);
     }
     // 4 - Lagrangian Linear Systems
@@ -707,11 +707,11 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
       free = residuFree;                          // copy residuFree into free
       if (lltids.p(1)) free -= lltids.p_read(1);  // Compute Residu in Workfree Notation !!
       // We use free as tmp buffer
-      DEBUG_EXPR(free.display());
-      DEBUG_EXPR(residuFree.display());
+      DEBUG_EXPR(siconos::algebra::print(free));
+      DEBUG_EXPR(siconos::algebra::print(residuFree));
 
       normResidu = 0.0;  // we assume that v = vfree + W^(-1) p
-      //     normResidu = realresiduFree->norm2();
+      //     normResidu = realresiduFree->norm();
     }
 
     else if (dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS) {
@@ -762,7 +762,7 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
       if (d.p(1)) free -= d.p_read(1);  // Compute Residu in Workfree Notation !!
 
       normResidu = 0.0;  // we assume that v = vfree + W^(-1) p
-      //     normResidu = realresiduFree->norm2();
+      //     normResidu = realresiduFree->norm();
     }
 
     else if (dsType == siconos::modeling::Type::NewtonEulerDS) {
@@ -793,18 +793,18 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
       // std::shared_ptr<siconos::algebra::SiconosVector> vold =
       // d.twistMemory()->getSiconosVector(0);
       //  d.computeTotalForces(vold,qold,told);
-      //  DEBUG_EXPR(d.totalForces()->display(););
+      //  DEBUG_EXPR(siconos::algebra::print(*d.totalForces()););
       // double coef = -h * (1.0 - _theta);
       // siconos::algebra::scal(coef, *d.totalForces(), *residuFree, false);
 
-      DEBUG_EXPR(residuFree.display(););
+      DEBUG_EXPR(siconos::algebra::print(residuFree););
 
       // computes forces(ti,v,q)
       d.computeWrench(d.twist_read(), d.q_read(), t);
       residuFree -= time_step * _theta * d.wrench();
       DEBUG_PRINT("siconos::integrators::MoreauJeanOSI:: new forces :\n");
-      DEBUG_EXPR(d.totalForces()->display(););
-      DEBUG_EXPR(residuFree.display(););
+      DEBUG_EXPR(siconos::algebra::print(*d.totalForces()););
+      DEBUG_EXPR(siconos::algebra::print(residuFree););
 
       applyBoundaryConditions(d, residuFree, dsi, t, d.twist_read());
 
@@ -815,11 +815,11 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
       applyBoundaryConditions(d, free, dsi, t, d.twist_read());
 
       DEBUG_PRINT("siconos::integrators::MoreauJeanOSI::computeResidu :\n");
-      DEBUG_EXPR(residuFree.display(););
-      DEBUG_EXPR(if (d.p(1)) d.p(1)->display(););
-      DEBUG_EXPR(free.display(););
+      DEBUG_EXPR(siconos::algebra::print(residuFree););
+      DEBUG_EXPR(if (d.p(1)) siconos::algebra::print(*d.p(1)););
+      DEBUG_EXPR(siconos::algebra::print(free););
 
-      normResidu = free.norm2();
+      normResidu = free.norm();
       DEBUG_PRINTF("normResidu= %e\n", normResidu);
     } else
       THROW_EXCEPTION(
@@ -1090,7 +1090,7 @@ void siconos::integrators::MoreauJeanOSI::computeFreeOutput(
         osnsp_rhs += compR->eVector();
       }
     }
-    DEBUG_EXPR(osnsp_rhs.display(););
+    DEBUG_EXPR(siconos::algebra::print(osnsp_rhs););
   }
 
   // 3 - add part due to NonSmoothLaw
@@ -1098,7 +1098,7 @@ void siconos::integrators::MoreauJeanOSI::computeFreeOutput(
                                                indexSet.properties(vertex_inter), _theta);
   inter.nonSmoothLaw()->accept(nslEffectOnFreeOutput);
 
-  DEBUG_EXPR(osnsp_rhs.display(););
+  DEBUG_EXPR(siconos::algebra::print(osnsp_rhs););
 
   DEBUG_END(
       "siconos::integrators::MoreauJeanOSI::computeFreeOutput("
@@ -1212,7 +1212,7 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
         *d.velocity() = d.p_read(_levelMaxForInput);  // v = p
         if (d.boundaryConditions()) {
           for (const auto itindex : d.boundaryConditions()->velocityIndices()) {
-            d.velocity()->setValue(itindex, 0.0);
+            (*d.velocity())(itindex) = 0.0;
           }
         }
 
@@ -1227,7 +1227,7 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
       } else {
         *d.velocity() = vfree;
       }
-      DEBUG_EXPR(v.display());
+      DEBUG_EXPR(siconos::algebra::print(v));
 
       if (d.boundaryConditions()) {
         int bc = 0;
@@ -1246,7 +1246,7 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
           /* \warning the computation of reactionToBoundaryConditions take into
              account the contact impulse but not the external and internal
              forces. A complete computation of the residu should be better */
-          d.reactionToBoundaryConditions()->setValue(bc, value);
+          (*d.reactionToBoundaryConditions())(bc) = value;
           bc++;
         }
       }
@@ -1260,7 +1260,7 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
       if (baux) {
         double ds_norm_ref = 1. + ds.x0().norm();  // Should we save this in the graph?
         local_buffer -= d.q_read();
-        double aux = (local_buffer.norm2()) / ds_norm_ref;
+        double aux = (local_buffer.norm()) / ds_norm_ref;
         if (aux > RelativeTol) _simulation->setRelativeConvergenceCriterionHeld(false);
       }
     } else if (dsType == siconos::modeling::Type::NewtonEulerDS) {
@@ -1273,7 +1273,7 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
       auto &d = static_cast<siconos::modeling::NewtonEulerDS &>(ds);
       // auto &v = *d.twist();
       // DEBUG_PRINT("siconos::integrators::MoreauJeanOSI::updateState()\n ")
-      // DEBUG_EXPR(d.display());
+      // DEBUG_EXPR(siconos::algebra::print(d));
       DEBUG_PRINT("siconos::integrators::MoreauJeanOSI::updateState() prev v\n")
 
       // failure on bullet sims
@@ -1291,21 +1291,21 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
         *d.twist() = d.p_read(_levelMaxForInput);  // v = p
         if (d.boundaryConditions())
           for (const auto itindex : d.boundaryConditions()->velocityIndices()) {
-            d.twist()->setValue(itindex, 0.0);
+            (*d.twist())(itindex) = 0.;
           }
         *d.twist() = _dynamicalSystemsGraph->properties(*dsi).LUW->solve(*d.twist());
 
         DEBUG_EXPR(std::cout << d.p_read(_levelMaxForInput));
         DEBUG_PRINT("siconos::integrators::MoreauJeanOSI::updatestate W CT lambda\n");
-        DEBUG_EXPR(v.display());
+        DEBUG_EXPR(siconos::algebra::print(v));
         *d.twist() += vfree;
       } else
         *d.twist() = vfree;
 
       DEBUG_PRINT("siconos::integrators::MoreauJeanOSI::updatestate work free\n");
-      DEBUG_EXPR(vfree.display());
+      DEBUG_EXPR(siconos::algebra::print(vfree));
       DEBUG_PRINT("siconos::integrators::MoreauJeanOSI::updatestate new v\n");
-      DEBUG_EXPR(v.display());
+      DEBUG_EXPR(siconos::algebra::print(v));
 
       if (d.boundaryConditions()) {
         int bc = 0;
@@ -1323,7 +1323,7 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
           /* \warning the computation of reactionToBoundaryConditions take into
              account the contact impulse but not the external and internal
              forces. A complete computation of the residu should be better */
-          d.reactionToBoundaryConditions()->setValue(bc, value);
+          (*d.reactionToBoundaryConditions())(bc) = value;
           bc++;
         }
       }
@@ -1347,12 +1347,11 @@ bool siconos::integrators::MoreauJeanOSI::addInteractionInIndexSet(
 
   assert(i == 1);
   double h = _simulation->timeStep();
-  double y = (inter->y(i - 1))->getValue(0);  // for i=1 y(i-1) is the position
-  double yDot = (inter->y(i))->getValue(0);   // for i=1 y(i) is the velocity
+  double y = (*inter->y(i - 1))(0);   // for i=1 y(i-1) is the position
+  double yDot = (*(inter->y(i)))(0);  // for i=1 y(i) is the velocity
 #ifdef DEBUG_ACTIVATION
-  double yDot_k =
-      (inter->y_k(i))
-          .getValue(0);  // for i=1 y(i) is the velocity et the beginning of the time step
+  double yDot_k = (inter->y_k(i))(0);
+  // for i=1 y(i) is the velocity et the beginning of the time step
 #endif
   double gamma = 1.0 / 2.0;
   if (_useGamma) {
@@ -1487,14 +1486,14 @@ siconos::integrators::MoreauJeanOSI::computeWorkForces() {
         v_k_theta += _theta * lds->velocity_read();
 
         DEBUG_PRINT("MoreauJeanOSI:: new forces :\n");
-        DEBUG_EXPR(lds->totalForces()->display(););
-        DEBUG_EXPR(f_k_theta->display(););
+        DEBUG_EXPR(siconos::algebra::print(*lds->totalForces()););
+        DEBUG_EXPR(siconos::algebra::print(*f_k_theta););
 
         // scalar product
         (*workForces)(ds->number(), 0) = ds->number();
         (*workForces)(ds->number(), 1) = h * f_k_theta.dot(v_k_theta);
 
-        DEBUG_EXPR(workForces->display(););
+        DEBUG_EXPR(siconos::algebra::print(*workForces););
       }
     } else if (dsType == siconos::modeling::Type::NewtonEulerDS) {
       DEBUG_PRINT("MoreauJeanOSI::computeWorkForces(), dsType == Type::NewtonEulerDS\n");
@@ -1520,8 +1519,8 @@ siconos::integrators::MoreauJeanOSI::computeWorkForces() {
       v_k_theta = _theta * neds->twist_read();
 
       DEBUG_PRINT("MoreauJeanOSI:: new forces :\n");
-      DEBUG_EXPR(neds->totalForces()->display(););
-      DEBUG_EXPR(f_k_theta->display(););
+      DEBUG_EXPR(siconos::algebra::print(*neds->totalForces()););
+      DEBUG_EXPR(siconos::algebra::print(*f_k_theta););
 
       // scalar product
       (*workForces)(cnt_ds, 0) = ds->number();
@@ -1553,7 +1552,7 @@ void siconos::integrators::MoreauJeanOSI::display() const {
       std::cout << "--------------------------------" << std::endl;
       std::cout << "--> W of dynamical system number " << ds->number() << ": " << std::endl;
       if (_dynamicalSystemsGraph->properties(*dsi).iterationMatrix)
-        _dynamicalSystemsGraph->properties(*dsi).iterationMatrix->display();
+        siconos::algebra::print(*_dynamicalSystemsGraph->properties(*dsi).iterationMatrix);
       else
         std::cout << "-> nullptr" << std::endl;
       std::cout << "--> and corresponding theta is: " << _theta << std::endl;
@@ -1638,14 +1637,14 @@ void siconos::integrators::moreau_jean::updatePosition(
     siconos::algebra::SiconosVector velocityIncrement{neds.dimension()};
     velocityIncrement = time_step * theta * neds.twist_read() +
                         time_step * (1. - theta) * neds.twistMemory().getSiconosVector(0);
-    DEBUG_EXPR(velocityIncrement->display());
+    DEBUG_EXPR(siconos::algebra::print(*velocityIncrement));
 
     neds.q()->head(3) = velocityIncrement.head(3);
     siconos::geometry::quaternionFromTwistVector(velocityIncrement, *neds.q());
 
-    DEBUG_EXPR(q.display());
+    DEBUG_EXPR(siconos::algebra::print(q));
     siconos::geometry::compositionLawLieGroup(neds.qMemory().getSiconosVector(0), *neds.q());
-    DEBUG_EXPR(q.display());
+    DEBUG_EXPR(siconos::algebra::print(q));
   }
   DEBUG_END("siconos::integrators::moreau_jean::updatePosition(...)");
 }

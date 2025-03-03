@@ -84,7 +84,7 @@ void siconos::modeling::DynamicalSystem::initMemory(unsigned int steps) {
       xMemory_.setMemorySize(steps, x_size_);
     }
   }
-  DEBUG_EXPR(xMemory_.display(););
+  DEBUG_EXPR(siconos::algebra::print(xMemory_););
 
   DEBUG_END("void siconos::modeling::DynamicalSystem::initMemory(unsigned int steps)\n");
 }
