@@ -12,6 +12,7 @@
 #include "TimeDiscretisation.hpp"
 #include "TimeStepping.hpp"
 #include "TimeSteppingDirectProjection.hpp"
+#include "Topology.hpp"
 
 namespace py = pybind11;
 
@@ -29,6 +30,9 @@ PYBIND11_MODULE(simulation, m) {
   py::class_<siconos::simulation::TimeDiscretisation,
              std::shared_ptr<siconos::simulation::TimeDiscretisation>>(m, "TimeDiscretisation")
       .def(py::init<double, double>());
+
+  py::class_<siconos::simulation::Topology, std::shared_ptr<siconos::simulation::Topology>>(m, "Topology")
+       .def("indexSetsSize", &siconos::simulation::Topology::indexSetsSize);
 
   py::class_<siconos::simulation::Simulation,
              std::shared_ptr<siconos::simulation::Simulation>>(m, "Simulation")

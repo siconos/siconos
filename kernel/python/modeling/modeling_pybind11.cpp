@@ -64,6 +64,9 @@ PYBIND11_MODULE(modeling, m) {
 
       .def("setTitle", &siconos::modeling::NonSmoothDynamicalSystem::setTitle, "set DS title")
 
+      .def("topology", &siconos::modeling::NonSmoothDynamicalSystem::topology,
+           "display the topology of the system")
+
       .def("setName",
            py::overload_cast<std::shared_ptr<siconos::modeling::DynamicalSystem>,
                              const std::string &>(
