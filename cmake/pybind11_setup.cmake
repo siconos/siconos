@@ -37,11 +37,10 @@ execute_process(COMMAND
 find_package(pybind11 CONFIG REQUIRED)
 
 set(SICONOS_PB11_BINARY_DIR ${CMAKE_BINARY_DIR}/python
-  CACHE INTERNAL "Working/binary for swig and python stuff.")
+  CACHE INTERNAL "Working/binary for pybind11 and python stuff.")
 
 if(WITH_TESTING)
   # Create test dir
   file(MAKE_DIRECTORY ${SICONOS_PB11_BINARY_DIR}/tests)
 endif()
-
 

@@ -33,8 +33,30 @@ pyio
   LIBRARY DESTINATION "${SICONOS_PYTHON_INSTALL_DIR}/siconos/io"
   )
 
-# Installation des fichiers Python supplémentaires
-install(FILES
-    ${CMAKE_SOURCE_DIR}/io/swig/io/FrictionContactTrace.py
-    ${CMAKE_SOURCE_DIR}/io/python/__init__.py
-    DESTINATION "${SICONOS_PYTHON_INSTALL_DIR}/siconos/io")
+
+if(HAVE_SICONOS_MECHANICS)
+    # -- collect python files for the siconos/io module --
+    collect_files(VAR pyfiles DIRS ${CMAKE_CURRENT_SOURCE_DIR} EXTS py)
+    if (SICONOS_HAS_OpenCASCADE)
+       MESSAGE(STATUS "Siconos has OpenCASCADE")
+    else()
+      list(REMOVE_ITEM pyfiles occtools.py)
+    endif()
+
+    foreach(pyfile IN LISTS pyfiles)
+      configure_file(${pyfile} ${SICONOS_PB11_BINARY_DIR}/siconos/io/${pyfile} @ONLY)
+    endforeach()
+
+
+    # -- collect python files used to create scripts --
+
+    collect_files(VAR scriptfiles DIRS ${CMAKE_CURRENT_SOURCE_DIR}/scripts EXTS py)
+
+    foreach(pyfile IN LISTS scriptfiles)
+      get_filename_component(short_name ${pyfile} NAME_WE)
+      configure_file(${pyfile}  ${SICONOS_PB11_BINARY_DIR}/siconos/io/${short_name} @ONLY)
+      install(PROGRAMS ${SICONOS_PB11_BINARY_DIR}/siconos/io/${short_name} DESTINATION bin)
+    endforeach()
+
+endif()
+
