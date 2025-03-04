@@ -30,16 +30,15 @@ target_include_directories(pymechanics PRIVATE ${CMAKE_SOURCE_DIR}/mechanics/src
 target_include_directories(pymechanics PRIVATE ${CMAKE_SOURCE_DIR}/mechanics/src/collision)
 target_include_directories(pymechanics PRIVATE ${CMAKE_SOURCE_DIR}/numerics/src/tools)
 
+collect_files(VAR pyfiles DIRS ${CMAKE_CURRENT_SOURCE_DIR} EXTS py RECURSIVE)
+
+foreach(pyfile IN LISTS pyfiles)
+  configure_file(${pyfile} ${SICONOS_PB11_BINARY_DIR}/siconos/mechanics/${pyfile} @ONLY)
+endforeach()
+
+
 install(TARGETS
 pymechanics
   COMPONENT python
   LIBRARY DESTINATION "${SICONOS_PYTHON_INSTALL_DIR}/siconos/mechanics"
   )
-
-# Installation des fichiers Python supplémentaires
-install(FILES
-  ${CMAKE_SOURCE_DIR}/mechanics/swig/mechanics/collision/tools.py
-  ${CMAKE_SOURCE_DIR}/io/swig/io/mechanics_run.py
-  ${CMAKE_SOURCE_DIR}/io/swig/io/mechanics_hdf5.py
-  ${CMAKE_SOURCE_DIR}/mechanics/python/__init__.py
-  DESTINATION "${SICONOS_PYTHON_INSTALL_DIR}/siconos/mechanics")
