@@ -28,16 +28,13 @@
 
 #include "DynamicalSystemVisitor.hpp"
 #include "SiconosSerialization.hpp"
+#include "Topology.hpp"
 
 namespace siconos::graphs {
 
 struct DynamicalSystemsGraph;
 struct InteractionsGraph;
 }  // namespace siconos::graphs
-
-namespace siconos::simulation {
-class Topology;
-}
 
 namespace siconos::modeling {
 
