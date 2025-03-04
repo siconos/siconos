@@ -594,13 +594,13 @@ siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::velocities(
   return visitAllVerticesForVector<Getter>(*nsds.topology()->dSG(0));
 }
 
-std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::contactPoints(
+std::optional<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::contactPoints(
     const siconos::modeling::NonSmoothDynamicalSystem& nsds, unsigned int index_set) const {
   siconos::graphs::InteractionsGraph::VIterator vi, viend;
   if (nsds.topology()->numberOfIndexSet() > 0) {
     auto& graph = *nsds.topology()->indexSet(index_set);
     unsigned int current_row;
-    auto result =
+    siconos::algebra::SiconosMatrix result{graph.vertices_number(), 25};
         std::make_shared<siconos::algebra::SiconosMatrix>(graph.vertices_number(), 25);
 
     int data_size = 0;
@@ -637,19 +637,18 @@ std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::conta
         data.setValue(data_size, ds1.number());
         data.setValue(data_size + 1, ds2.number());
         DEBUG_EXPR(data.display(););
-        if (result->cols() != data.size()) {
-          result->resize(graph.vertices_number(), data.size());
+        if (result.cols() != data.size()) {
+          result.resize(graph.vertices_number(), data.size());
         }
-        result->row(current_row++) = data;
+        result.row(current_row++) = data;
         data_size += 2;
       }
     }
-    result->resize(current_row, data_size);
+    result.resize(current_row, data_size);
     DEBUG_EXPR(result->display(););
     return result;
   }
-
-  return nullptr;
+  return std::nullopt;
 }
 
 /* Get contact informations */

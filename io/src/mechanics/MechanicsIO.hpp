@@ -88,7 +88,7 @@ class MechanicsIO {
    *  \return a matrix where the columns are mu x y z, nx, ny, nz, rx, ry, rz, vx, vy, vz, ox,
    *   oy, oz, id
    */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> contactPoints(
+  std::optional<siconos::algebra::SiconosMatrix> contactPoints(
       const siconos::modeling::NonSmoothDynamicalSystem& nsds,
       unsigned int index_set = 1) const;
 
