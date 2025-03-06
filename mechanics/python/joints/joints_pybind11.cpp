@@ -20,20 +20,14 @@
 #include <pybind11/eigen.h>
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
-
-#include "MechanicsIO.hpp"
-#include "NonSmoothDynamicalSystem.hpp"
+#include <pybind11/stl.h>
+#include <pybind11/stl_bind.h>
 
 namespace py = pybind11;
 
-PYBIND11_MODULE(_io, m) {
-  m.doc() = "Siconos io module";
+PYBIND11_MODULE(_joints, m) {
+  py::module_ modeling_module = py::module_::import("siconos.modeling");
 
-  py::class_<siconos::io::MechanicsIO, std::shared_ptr<siconos::io::MechanicsIO>>(
-      m, "MechanicsIO")
-      .def(py::init<>())
-      .def("contactInfo", &siconos::io::MechanicsIO::contactInfo)
-      .def("positions", &siconos::io::MechanicsIO::positions)
-      .def("velocities", &siconos::io::MechanicsIO::velocities)
-      .def("contactPoints", &siconos::io::MechanicsIO::contactPoints);
+  m.doc() = "Siconos mechanics.koints module";
+  m.def("example_function", []() { return "This is an example function in joints"; });
 }

@@ -18,17 +18,37 @@
 #
 
 
-create_pybind11_module(
-  MODULE_NAME pymechanics 
-  SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/mechanics_pybind11.cpp
-  DEPENDENCIES kernel mechanics
-)
+# # create_pybind11_module(
+# #   MODULE_NAME pymechanics 
+# #   SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/mechanics_pybind11.cpp
+# #   DEPENDENCIES kernel mechanics
+# #   PARENT_NAME mechanics
+# # )
+# # set_target_properties(pymechanics PROPERTIES OUTPUT_NAME "_mechanics")
+# # install(TARGETS
+# # pymechanics
+# #   COMPONENT python
+# #   LIBRARY DESTINATION "${SICONOS_PYTHON_INSTALL_DIR}/siconos/mechanics"
+# #   )
 
-target_include_directories(pymechanics PRIVATE ${CMAKE_SOURCE_DIR}/mechanics/src/collision/bullet)
-target_include_directories(pymechanics PRIVATE ${CMAKE_SOURCE_DIR}/mechanics/src/collision/native/bodies)
-target_include_directories(pymechanics PRIVATE ${CMAKE_SOURCE_DIR}/mechanics/src/collision/native)
-target_include_directories(pymechanics PRIVATE ${CMAKE_SOURCE_DIR}/mechanics/src/collision)
-target_include_directories(pymechanics PRIVATE ${CMAKE_SOURCE_DIR}/numerics/src/tools)
+create_pybind11_module(
+  MODULE_NAME pycollision 
+  SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/collision/collision_pybind11.cpp
+  DEPENDENCIES kernel mechanics
+  PARENT_NAME mechanics/collision
+)
+set_target_properties(pycollision PROPERTIES OUTPUT_NAME "_collision")
+install(TARGETS
+pycollision
+  COMPONENT python
+  LIBRARY DESTINATION "${SICONOS_PYTHON_INSTALL_DIR}/siconos/mechanics/collision"
+  )
+
+target_include_directories(pycollision PRIVATE ${CMAKE_SOURCE_DIR}/mechanics/src/collision/bullet)
+target_include_directories(pycollision PRIVATE ${CMAKE_SOURCE_DIR}/mechanics/src/collision/native/bodies)
+target_include_directories(pycollision PRIVATE ${CMAKE_SOURCE_DIR}/mechanics/src/collision/native)
+target_include_directories(pycollision PRIVATE ${CMAKE_SOURCE_DIR}/mechanics/src/collision)
+target_include_directories(pycollision PRIVATE ${CMAKE_SOURCE_DIR}/numerics/src/tools)
 
 collect_files(VAR pyfiles DIRS ${CMAKE_CURRENT_SOURCE_DIR} EXTS py RECURSIVE)
 
@@ -37,8 +57,8 @@ foreach(pyfile IN LISTS pyfiles)
 endforeach()
 
 
-install(TARGETS
-pymechanics
-  COMPONENT python
-  LIBRARY DESTINATION "${SICONOS_PYTHON_INSTALL_DIR}/siconos/mechanics"
-  )
+
+
+if(WITH_TESTING)
+  build_python_tests()
+endif()

@@ -1,7 +1,7 @@
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.
 #
-# Copyright 2024 INRIA.
+# Copyright 2025 INRIA.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,32 +15,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-#
+
+import siconos.numerics as sn
+from siconos.numerics import solver_ids
+from siconos.numerics import params as pnames
 
 
-create_pybind11_module(
-  MODULE_NAME pynumerics 
-  SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/numerics_pybind11.cpp
-  DEPENDENCIES kernel numerics
-  PARENT_NAME numerics
-)
-
-set_target_properties(pynumerics PROPERTIES OUTPUT_NAME "_numerics")
-
-install(TARGETS
-pynumerics
-  COMPONENT python
-  LIBRARY DESTINATION "${SICONOS_PYTHON_INSTALL_DIR}/siconos/numerics"
-  )
-
-
-collect_files(VAR pyfiles DIRS ${CMAKE_CURRENT_SOURCE_DIR} EXTS py RECURSIVE)
-
-foreach(pyfile IN LISTS pyfiles)
-  configure_file(${pyfile} ${SICONOS_PB11_BINARY_DIR}/siconos/numerics/${pyfile} @ONLY)
-endforeach()
-
-
-if(WITH_TESTING)
-  build_python_tests()
-endif()
+def test_solver_options_create():
+    sid = solver_ids.SICONOS_FRICTION_3D_NSGS
+    so = sn.solver_options_create(sid)
+    so.iparam[pnames.SICONOS_IPARAM_MAX_ITER] = 1000
+    print(so.iparam)
+    print(so)
+    assert so.iparam[pnames.SICONOS_IPARAM_MAX_ITER] == 1000
+    assert so.solverId == solver_ids.SICONOS_FRICTION_3D_NSGS
+    assert so.dparam[pnames.SICONOS_DPARAM_TOL] == 1.e-4

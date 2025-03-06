@@ -23,9 +23,9 @@
 #include "NewtonEulerDS.hpp"
 #include "NewtonEulerJointR.hpp"
 #include "RotationQuaternion.hpp"  // For rewriteVectorFromBodyToAbsoluteFrame
-#include "SiconosVectorOp.hpp"     // For cross_product
-#include "SimpleMatrix.hpp"
-#include "op3x3.h"  // For orthoBaseFromVector
+#include "SiconosMatrix.hpp"
+#include "SiconosVectorOp.hpp"  // For cross_product
+#include "op3x3.h"              // For orthoBaseFromVector
 // #define MBTB_JOINTR_DEBUG
 
 siconos::mechanisms::MBTB_JointR::MBTB_JointR() {
