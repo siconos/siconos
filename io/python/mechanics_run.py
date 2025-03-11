@@ -2741,7 +2741,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 d["controller"] = "not serialized"
 
         for key, value in d.items():
-            if isinstance(value, siconos.simulation.constants.TimeSteppingType):
+            if isinstance(value, siconos.simulation.TimeSteppingType):
                 d[key] = value.value  # Convertit en entier
                 dict_json = json.dumps(d)
                 self._run_options_data.attrs["options"] = dict_json

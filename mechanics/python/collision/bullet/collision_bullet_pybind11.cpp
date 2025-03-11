@@ -86,6 +86,25 @@ PYBIND11_MODULE(_bullet, m) {
           &siconos::collision::bullet::SiconosBulletOptions::extrapolationCoefficient,
           "Extrapolation coefficient");
 
+  py::class_<siconos::collision::bullet::SiconosBulletStatistics>(m, "SiconosBulletStatistics")
+      .def(py::init<>())  // Constructeur par défaut
+      .def_readwrite(
+          "new_interactions_created",
+          &siconos::collision::bullet::SiconosBulletStatistics::new_interactions_created,
+          "New interactions created")
+      .def_readwrite("existing_interactions_processed",
+                     &siconos::collision::bullet::SiconosBulletStatistics::
+                         existing_interactions_processed,
+                     "Existing interactions processed")
+      .def_readwrite(
+          "interaction_warnings",
+          &siconos::collision::bullet::SiconosBulletStatistics::interaction_warnings,
+          "Interaction warnings")
+      .def_readwrite(
+          "interaction_destroyed",
+          &siconos::collision::bullet::SiconosBulletStatistics::interaction_destroyed,
+          "Interaction destroyed");
+
   py::class_<siconos::collision::bullet::SiconosBulletCollisionManager,
              std::shared_ptr<siconos::collision::bullet::SiconosBulletCollisionManager>,
              siconos::collision::SiconosCollisionManager>(m, "SiconosBulletCollisionManager")
@@ -93,5 +112,8 @@ PYBIND11_MODULE(_bullet, m) {
            py::arg("options"))
       .def("addStaticBody",
            &siconos::collision::bullet::SiconosBulletCollisionManager::addStaticBody,
-           py::arg("cs"), py::arg("position"), py::arg("number"));
+           py::arg("cs"), py::arg("position"), py::arg("number"))
+
+      .def("statistics",
+           &siconos::collision::bullet::SiconosBulletCollisionManager::statistics);
 }
