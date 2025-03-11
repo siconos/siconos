@@ -35,10 +35,56 @@ PYBIND11_MODULE(_bullet, m) {
 
   m.doc() = "Siconos mechanics.collision.bullet module";
 
+  py::enum_<siconos::collision::bullet::SiconosBulletDimension>(m, "SiconosBulletDimension",
+                                                                "Bullet dim")
+      .value("ThreeD", siconos::collision::bullet::SiconosBulletDimension::ThreeD, "3D case")
+      .value("TwoD", siconos::collision::bullet::SiconosBulletDimension::TwoD, "2D case")
+      .export_values();
+
   py::class_<siconos::collision::bullet::SiconosBulletOptions,
              std::shared_ptr<siconos::collision::bullet::SiconosBulletOptions>>(
       m, "SiconosBulletOptions")
-      .def(py::init<>());
+      .def(py::init<>())
+      .def_readwrite("dimension", &siconos::collision::bullet::SiconosBulletOptions::dimension,
+                     "Dimension setting")
+      .def_readwrite(
+          "contactBreakingThreshold",
+          &siconos::collision::bullet::SiconosBulletOptions::contactBreakingThreshold,
+          "Contact breaking threshold")
+      .def_readwrite(
+          "contactProcessingThreshold",
+          &siconos::collision::bullet::SiconosBulletOptions::contactProcessingThreshold,
+          "Contact processing threshold")
+      .def_readwrite("worldScale",
+                     &siconos::collision::bullet::SiconosBulletOptions::worldScale,
+                     "World scale factor")
+      .def_readwrite("useAxisSweep3",
+                     &siconos::collision::bullet::SiconosBulletOptions::useAxisSweep3,
+                     "Use Axis Sweep 3")
+      .def_readwrite(
+          "clearOverlappingPairCache",
+          &siconos::collision::bullet::SiconosBulletOptions::clearOverlappingPairCache,
+          "Clear overlapping pair cache")
+      .def_readwrite("perturbationIterations",
+                     &siconos::collision::bullet::SiconosBulletOptions::perturbationIterations,
+                     "Number of perturbation iterations")
+      .def_readwrite("minimumPointsPerturbationThreshold",
+                     &siconos::collision::bullet::SiconosBulletOptions::
+                         minimumPointsPerturbationThreshold,
+                     "Minimum points perturbation threshold")
+      .def_readwrite("enableSatConvex",
+                     &siconos::collision::bullet::SiconosBulletOptions::enableSatConvex,
+                     "Enable SAT convex")
+      .def_readwrite(
+          "enablePolyhedralContactClipping",
+          &siconos::collision::bullet::SiconosBulletOptions::enablePolyhedralContactClipping,
+          "Enable polyhedral contact clipping")
+      .def_readwrite("Depth2D", &siconos::collision::bullet::SiconosBulletOptions::Depth2D,
+                     "2D depth value")
+      .def_readwrite(
+          "extrapolationCoefficient",
+          &siconos::collision::bullet::SiconosBulletOptions::extrapolationCoefficient,
+          "Extrapolation coefficient");
 
   py::class_<siconos::collision::bullet::SiconosBulletCollisionManager,
              std::shared_ptr<siconos::collision::bullet::SiconosBulletCollisionManager>,

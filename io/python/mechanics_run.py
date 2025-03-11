@@ -42,8 +42,6 @@ from siconos.io.FrictionContactTrace import (
     GlobalRollingFrictionContactTrace as GRFCTrace,
 )
 
-import siconos.simulation.constants as ss_consts
-
 
 class NativeShape:
 
@@ -84,11 +82,7 @@ have_bullet = False
 have_occ = False
 
 try:
-    from siconos.mechanics.collision.bullet import (
-        SiconosBulletCollisionManager,
-        SiconosBulletOptions,
-        SICONOS_BULLET_2D,
-    )
+    import siconos.mechanics.collision.bullet as siconos_bullet
 
     have_bullet = True
 except Exception:
@@ -121,8 +115,8 @@ def setup_default_classes():
 
         def m(bullet_options):
             if bullet_options is None:
-                bullet_options = SiconosBulletOptions()
-            return SiconosBulletCollisionManager(bullet_options)
+                bullet_options = siconos_bullet.SiconosBulletOptions()
+            return siconos_bullet.SiconosBulletCollisionManager(bullet_options)
 
         default_manager_class = m
         use_bullet = have_bullet
@@ -847,7 +841,7 @@ class MechanicsHdf5Runner_run_options(dict):
         d["projection_tolerance_unilateral"] = 1e-8
 
         # default Newton solve options
-        d["Newton_options"] = ss_consts.SICONOS_TS_NONLINEAR
+        d["Newton_options"] = siconos.simulation.NONLINEAR
         d["Newton_max_iter"] = 20
         d["Newton_tolerance"] = 1e-10
         d["Newton_warning_on_nonconvergence"] = True
@@ -2941,7 +2935,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         multipoints_iterations=None,
         theta=0.50001,
         gamma=0.0,
-        Newton_options=ss_consts.SICONOS_TS_NONLINEAR,
+        Newton_options=siconos.simulation.NONLINEAR,
         Newton_max_iter=20,
         set_external_forces=None,
         solver_options=None,
@@ -3272,7 +3266,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             raise RuntimeError(msg)
 
         if bullet_options is None and have_bullet:
-            bullet_options = SiconosBulletOptions()
+            bullet_options = siconos_bullet.SiconosBulletOptions()
             if multipoints_iterations:
                 bullet_options.perturbationIterations = 3 * multipoints_iterations
                 bullet_options.minimumPointsPerturbationThreshold = (
@@ -3280,7 +3274,10 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 )
 
         # MB: this may be in conflict with 'dimension' attribute
-        if bullet_options is not None and bullet_options.dimension == SICONOS_BULLET_2D:
+        if (
+            bullet_options is not None
+            and bullet_options.dimension == siconos_bullet.TwoD
+        ):
             self._dimension = 2
         else:
             if self._out.attrs.get("dimension", None) is None:
@@ -3488,7 +3485,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # (6) Simulation setup with (1) (2) (3) (4) (5)
         if self._time_stepping_class == simu.TimeSteppingDirectProjection:
             if solver_options_pos is None:
-                osnspb_pos = nsf.MLCPProjectOnConstraints(sn.params.SICONOS_MLCP_ENUM, 1.0)
+                osnspb_pos = nsf.MLCPProjectOnConstraints(
+                    sn.params.SICONOS_MLCP_ENUM, 1.0
+                )
             else:
                 osnspb_pos = nsf.MLCPProjectOnConstraints(solver_options_pos, 1.0)
 

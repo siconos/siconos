@@ -51,7 +51,6 @@ class Contact5DR;
 class Contact2d3DR;
 class Contact2dR;
 
-
 #ifdef SICONOS_HAS_BULLET
 namespace bullet {
 class BulletR;

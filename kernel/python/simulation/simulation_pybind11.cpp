@@ -31,8 +31,9 @@ PYBIND11_MODULE(simulation, m) {
              std::shared_ptr<siconos::simulation::TimeDiscretisation>>(m, "TimeDiscretisation")
       .def(py::init<double, double>());
 
-  py::class_<siconos::simulation::Topology, std::shared_ptr<siconos::simulation::Topology>>(m, "Topology")
-       .def("indexSetsSize", &siconos::simulation::Topology::indexSetsSize);
+  py::class_<siconos::simulation::Topology, std::shared_ptr<siconos::simulation::Topology>>(
+      m, "Topology")
+      .def("indexSetsSize", &siconos::simulation::Topology::indexSetsSize);
 
   py::class_<siconos::simulation::Simulation,
              std::shared_ptr<siconos::simulation::Simulation>>(m, "Simulation")
@@ -46,9 +47,9 @@ PYBIND11_MODULE(simulation, m) {
       .def("startingTime", &siconos::simulation::Simulation::startingTime,
            "get current time (ie starting point for current integration, time of currentEvent "
            "of eventsManager.)")
-       .def("oneStepNSProblem", &siconos::simulation::Simulation::oneStepNSProblem,
+      .def("oneStepNSProblem", &siconos::simulation::Simulation::oneStepNSProblem,
            "get the OneStepNSProblem with the given id")
-       .def("clearNSDSChangeLog", &siconos::simulation::Simulation::clearNSDSChangeLog,
+      .def("clearNSDSChangeLog", &siconos::simulation::Simulation::clearNSDSChangeLog,
            "clear the change log of the non-smooth dynamical system");
 
   py::class_<siconos::simulation::TimeStepping,
@@ -104,13 +105,15 @@ PYBIND11_MODULE(simulation, m) {
   constants.attr("SICONOS_OSNSP_TS_POS") =
       static_cast<int>(siconos::simulation::SICONOS_OSNSP_TS_POS);
 
-  py::enum_<siconos::simulation::TimeSteppingType>(
-      constants, "TimeSteppingType", "Enum to define the type of time stepping scheme")
-      .value("SICONOS_TS_LINEAR", siconos::simulation::TimeSteppingType::LINEAR)
-      .value("SICONOS_TS_LINEAR_IMPLICIT",
-             siconos::simulation::TimeSteppingType::LINEAR_IMPLICIT)
-      .value("SICONOS_TS_NONLINEAR", siconos::simulation::TimeSteppingType::NONLINEAR)
-      .value("SICONOS_TS_NONLINEAR_FULL",
-             siconos::simulation::TimeSteppingType::NONLINEAR_FULL)
+  py::enum_<siconos::simulation::TimeSteppingType>(m, "TimeSteppingType",
+                                                   "define the type of time stepping scheme")
+      .value("LINEAR", siconos::simulation::TimeSteppingType::LINEAR,
+             "force a single iteration of the Newton Solver")
+      .value("LINEAR_IMPLICIT", siconos::simulation::TimeSteppingType::LINEAR_IMPLICIT,
+             "force a single iteration of the Newton Solver")
+      .value("NONLINEAR", siconos::simulation::TimeSteppingType::NONLINEAR,
+             "performs the newton iterations up to convergence")
+      .value("NONLINEAR_FULL", siconos::simulation::TimeSteppingType::NONLINEAR_FULL,
+             "performs the newton iterations up to convergence")
       .export_values();
 }

@@ -8,6 +8,7 @@
 #include "GlobalFrictionContact.hpp"
 #include "GlobalRollingFrictionContact.hpp"
 #include "LCP.hpp"
+#include "LinearOSNS.hpp"
 #include "Relay.hpp"
 #include "RollingFrictionContact.hpp"
 #include "SolverOptions.h"
@@ -22,6 +23,21 @@ PYBIND11_MODULE(nonsmooth_formulations, m) {
 
   py::module_ numerics = py::module_::import("siconos.numerics");
   py::object solver_ids = numerics.attr("solver_ids");
+
+  py::enum_<siconos::nonsmooth_formulations::LinearOSNSAssemblyType>(m,
+                                                                     "LinearOSNSAssemblyType")
+      .value("REDUCED_BLOCK",
+             siconos::nonsmooth_formulations::LinearOSNSAssemblyType::REDUCED_BLOCK,
+             "Reduced block formulation")
+      .value("GLOBAL", siconos::nonsmooth_formulations::LinearOSNSAssemblyType::GLOBAL,
+             "Global formulation")
+      .value("REDUCED_DIRECT",
+             siconos::nonsmooth_formulations::LinearOSNSAssemblyType::REDUCED_DIRECT,
+             "Reduced direct formulation")
+      .value("GLOBAL_REDUCED",
+             siconos::nonsmooth_formulations::LinearOSNSAssemblyType::GLOBAL_REDUCED,
+             "Global reduced formulation")
+      .export_values();
 
   py::class_<siconos::nonsmooth_formulations::OneStepNSProblem,
              std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem>>(
