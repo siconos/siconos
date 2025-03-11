@@ -29,7 +29,6 @@
 #include "SiconosMatrixOp.hpp"  // setblock
 #include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
-#include "SiconosVisitor.hpp"
 #include "Tools.hpp"
 // #define DEBUG_BEGIN_END_ONLY
 // #define DEBUG_NOCOLOR

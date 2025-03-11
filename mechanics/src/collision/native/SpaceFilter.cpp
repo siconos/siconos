@@ -19,7 +19,6 @@
 
 #include <boost/container_hash/hash.hpp>  // For hash_combine
 
-#include "BodiesVisitor.hpp"
 #include "Circle.hpp"
 #include "CircleCircleR.hpp"
 #include "Disk.hpp"

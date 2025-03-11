@@ -313,8 +313,8 @@ void siconos::integrators::ZeroOrderHoldOSI::prepareNewtonIteration(double time)
 }
 
 struct siconos::integrators::ZeroOrderHoldOSI::_NSLEffectOnFreeOutput
-    : public siconos::internal::SiconosVisitor {
-  using siconos::internal::SiconosVisitor::visit;
+    : public siconos::modeling::nonsmooth_laws::Visitor {
+  using siconos::modeling::nonsmooth_laws::Visitor::visit;
 
   siconos::nonsmooth_formulations::OneStepNSProblem* _osnsp{nullptr};
   std::shared_ptr<siconos::modeling::Interaction> _inter{nullptr};
@@ -324,14 +324,14 @@ struct siconos::integrators::ZeroOrderHoldOSI::_NSLEffectOnFreeOutput
                          siconos::graphs::InteractionProperties& interProp)
       : _osnsp(p), _inter(inter), _interProp(interProp) {};
 
-  void visit(const siconos::modeling::NewtonImpactNSL& nslaw) const override {
+  void visit(const siconos::modeling::NewtonImpactNSL& nslaw) override {
     auto e = nslaw.e();
     siconos::algebra::SiconosVector& osnsp_rhs =
         *(*_interProp.workVectors)[siconos::integrators::ZeroOrderHoldOSI::OSNSP_RHS];
     osnsp_rhs += e * _inter->y_k(_osnsp->inputOutputLevel());
   }
 
-  void visit(const siconos::modeling::NewtonImpactFrictionNSL& nslaw) const override {
+  void visit(const siconos::modeling::NewtonImpactFrictionNSL& nslaw) override {
     double e;
     e = nslaw.en();
     // Only the normal part is multiplied by e
@@ -340,10 +340,8 @@ struct siconos::integrators::ZeroOrderHoldOSI::_NSLEffectOnFreeOutput
     osnsp_rhs(0) += e * _inter->y_k(_osnsp->inputOutputLevel())(0);
   }
 
-  void visit(const siconos::modeling::EqualityConditionNSL& nslaw) const override { ; }
-  void visit(const siconos::modeling::MixedComplementarityConditionNSL& nslaw) const override {
-    ;
-  }
+  void visit(const siconos::modeling::EqualityConditionNSL& nslaw) override { ; }
+  void visit(const siconos::modeling::MixedComplementarityConditionNSL& nslaw) override { ; }
 };
 
 void siconos::integrators::ZeroOrderHoldOSI::computeFreeOutput(
@@ -506,8 +504,8 @@ bool siconos::integrators::ZeroOrderHoldOSI::addInteractionInIndexSet(
     std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i) {
   assert(i == 1);
   double h = _simulation->timeStep();
-  double y = (*inter->y(i - 1))(0);  // for i=1 y(i-1) is the position
-  double yDot = (*(inter->y(i)))(0);   // for i=1 y(i) is the velocity
+  double y = (*inter->y(i - 1))(0);   // for i=1 y(i-1) is the position
+  double yDot = (*(inter->y(i)))(0);  // for i=1 y(i) is the velocity
   double gamma = .5;
   DEBUG_PRINTF(
       "siconos::integrators::ZeroOrderHoldOSI::addInteractionInIndexSet yref=%e, yDot=%e, "

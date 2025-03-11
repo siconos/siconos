@@ -31,7 +31,7 @@ except Exception:
     pass
 
 
-# @pytest.mark.skipif(not has_mechanics_run, reason="Only if mechanics is available")
+@pytest.mark.skipif(not has_mechanics_run, reason="Only if mechanics is available")
 def test_create_h5run():
     outputfile_name = "mytest.h5"
     # Just test creation and proper writing for the output file

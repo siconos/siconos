@@ -724,9 +724,9 @@ void siconos::integrators::EulerMoreauOSI::prepareNewtonIteration(double time) {
 
 // Visitor is not required for EulerMoreauOSI ?
 // struct siconos::integrators::EulerMoreauOSI::_NSLEffectOnFreeOutput : public
-// SiconosVisitor
+// siconos::modeling::nonsmooth_laws::Visitor
 // {
-//   using SiconosVisitor::visit;
+//   using siconos::modeling::nonsmooth_laws::Visitor::visit;
 
 //   siconos::nonsmooth_formulations::OneStepNSProblem* _osnsp{nullptr};
 //   std::shared_ptr<siconos::modeling::Interaction> _inter{nullptr};

@@ -29,7 +29,6 @@
 #include "SiconosMatrix.hpp"
 #include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
-#include "SiconosVisitor.hpp"
 #include "Simulation.hpp"
 #include "Tools.hpp"
 // #define DEBUG_NOCOLOR
@@ -395,8 +394,8 @@ void siconos::integrators::SchatzmanPaoliOSI::prepareNewtonIteration(double time
 }
 
 struct siconos::integrators::SchatzmanPaoliOSI::_NSLEffectOnFreeOutput
-    : public siconos::internal::SiconosVisitor {
-  using siconos::internal::SiconosVisitor::visit;
+    : public siconos::modeling::nonsmooth_laws::Visitor {
+  using siconos::modeling::nonsmooth_laws::Visitor::visit;
 
   siconos::nonsmooth_formulations::OneStepNSProblem* _osnsp{nullptr};
   std::shared_ptr<siconos::modeling::Interaction> _inter;
@@ -407,7 +406,7 @@ struct siconos::integrators::SchatzmanPaoliOSI::_NSLEffectOnFreeOutput
                          siconos::graphs::InteractionProperties& interProp)
       : _osnsp(p), _inter(inter), _interProp(interProp) {};
 
-  void visit(const siconos::modeling::NewtonImpactNSL& nslaw) const override {
+  void visit(const siconos::modeling::NewtonImpactNSL& nslaw) override {
     auto e = nslaw.e();
     // Only the normal part is multiplied by e
     const auto& y_k_1(_inter->yMemory(_osnsp->inputOutputLevel()).getSiconosVector(1));
@@ -420,7 +419,7 @@ struct siconos::integrators::SchatzmanPaoliOSI::_NSLEffectOnFreeOutput
     osnsp_rhs += e * y_k_1;
   }
 
-  void visit(const siconos::modeling::NewtonImpactFrictionNSL& nslaw) const override {
+  void visit(const siconos::modeling::NewtonImpactFrictionNSL& nslaw) override {
     double e;
     e = nslaw.en();
     // Only the normal part is multiplied by e
@@ -429,10 +428,8 @@ struct siconos::integrators::SchatzmanPaoliOSI::_NSLEffectOnFreeOutput
         *(*_interProp.workVectors)[siconos::integrators::SchatzmanPaoliOSI::OSNSP_RHS];
     osnsp_rhs(0) += e * (y_k_1)(0);
   }
-  void visit(const siconos::modeling::EqualityConditionNSL& nslaw) const override { ; }
-  void visit(const siconos::modeling::MixedComplementarityConditionNSL& nslaw) const override {
-    ;
-  }
+  void visit(const siconos::modeling::EqualityConditionNSL& nslaw) override { ; }
+  void visit(const siconos::modeling::MixedComplementarityConditionNSL& nslaw) override { ; }
 };
 
 void siconos::integrators::SchatzmanPaoliOSI::computeFreeOutput(

@@ -15,8 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/*! \file DynamicalSystem.hpp
-  Abstract class - General interface for all Dynamical Systems.
+/*! \file DynamicalSystemVisitor.hpp
+  Abstract class - General interface for visitors of  Dynamical Systems.
 */
 
 #ifndef DSVisitor_H
@@ -77,227 +77,227 @@ struct Visitor {
 
   virtual void visit(std::shared_ptr<siconos::modeling::DynamicalSystem>) {
     THROW_EXCEPTION(
-        "you must define a visit function for SP :: "
-        "DynamicalSystem in a derived class of SiconosVisitor");
+        "you must define a visit function for shared ptr to "
+        "DynamicalSystem in a derived class of dynamical_systems::Visitor");
   }
   virtual void visit(siconos::modeling::DynamicalSystem &) {
     THROW_EXCEPTION(
         "you must define a visit function for DynamicalSystem in "
-        "a derived class of SiconosVisitor");
+        "a derived class of dynamical_systems::Visitor");
   }
 
   virtual void visit(const siconos::modeling::DynamicalSystem &) {
     THROW_EXCEPTION(
         "you must define a visit function for DynamicalSystem in "
-        "a derived class of SiconosVisitor");
+        "a derived class of dynamical_systems::Visitor");
   }
 
   virtual void visit(std::shared_ptr<siconos::modeling::LagrangianDS>) {
     THROW_EXCEPTION(
         "you must define a visit function for SP :: LagrangianDS "
-        "in a derived class of SiconosVisitor");
+        "in a derived class of dynamical_systems::Visitor");
   }
   virtual void visit(siconos::modeling::LagrangianDS &) {
     THROW_EXCEPTION(
         "you must define a visit function for LagrangianDS in a "
-        "derived class of SiconosVisitor");
+        "derived class of dynamical_systems::Visitor");
   }
   virtual void visit(const siconos::modeling::LagrangianDS &) {
     THROW_EXCEPTION(
         "you must define a visit function for LagrangianDS in a "
-        "derived class of SiconosVisitor");
+        "derived class of dynamical_systems::Visitor");
   }
 
   virtual void visit(std::shared_ptr<siconos::modeling::LagrangianLinearTIDS>) {
     THROW_EXCEPTION(
         "you must define a visit function for SP :: LagrangianLinearTIDS "
-        "in a derived class of SiconosVisitor");
+        "in a derived class of dynamical_systems::Visitor");
   }
   virtual void visit(siconos::modeling::LagrangianLinearTIDS &) {
     THROW_EXCEPTION(
         "you must define a visit function for LagrangianLinearTIDS in a "
-        "derived class of SiconosVisitor");
+        "derived class of dynamical_systems::Visitor");
   }
   virtual void visit(const siconos::modeling::LagrangianLinearTIDS &) {
     THROW_EXCEPTION(
         "you must define a visit function for LagrangianLinearTIDS in a "
-        "derived class of SiconosVisitor");
+        "derived class of dynamical_systems::Visitor");
   }
 
   virtual void visit(std::shared_ptr<siconos::modeling::NewtonEulerDS>) {
     THROW_EXCEPTION(
         "you must define a visit function for SP :: NewtonEulerDS "
-        "in a derived class of SiconosVisitor");
+        "in a derived class of dynamical_systems::Visitor");
   }
   virtual void visit(siconos::modeling::NewtonEulerDS &) {
     THROW_EXCEPTION(
         "you must define a visit function for NewtonEulerDS in a "
-        "derived class of SiconosVisitor");
+        "derived class of dynamical_systems::Visitor");
   }
   virtual void visit(const siconos::modeling::NewtonEulerDS &) {
     THROW_EXCEPTION(
         "you must define a visit function for NewtonEulerDS in a "
-        "derived class of SiconosVisitor");
+        "derived class of dynamical_systems::Visitor");
   }
 
 #ifdef HAVE_SICONOS_MECHANICS
   virtual void visit(std::shared_ptr<siconos::collision::RigidBody2dDS>) {
     THROW_EXCEPTION(
-        "you must define a visit function for SP :: "
-        "RigidBody2dDS in a derived class of SiconosVisitor");
+        "you must define a visit function for shared ptr to "
+        "RigidBody2dDS in a derived class of dynamical_systems::Visitor");
   }
 
   virtual void visit(siconos::collision::RigidBody2dDS &) {
     THROW_EXCEPTION(
         "you must define a visit function for RigidBody2dDS "
-        "in a derived class of SiconosVisitor");
+        "in a derived class of dynamical_systems::Visitor");
   }
   virtual void visit(const siconos::collision::RigidBody2dDS &) {
     THROW_EXCEPTION(
         "you must define a visit function for RigidBody2dDS "
-        "in a derived class of SiconosVisitor");
+        "in a derived class of dynamical_systems::Visitor");
   }
   virtual void visit(std::shared_ptr<siconos::collision::RigidBodyDS>) {
     THROW_EXCEPTION(
-        "you must define a visit function for SP :: "
-        "RigidBodyDS in a derived class of SiconosVisitor");
+        "you must define a visit function for shared ptr to "
+        "RigidBodyDS in a derived class of dynamical_systems::Visitor");
   }
 
   virtual void visit(siconos::collision::RigidBodyDS &) {
     THROW_EXCEPTION(
         "you must define a visit function for RigidBodyDS "
-        "in a derived class of SiconosVisitor");
+        "in a derived class of dynamical_systems::Visitor");
   }
   virtual void visit(const siconos::collision::RigidBodyDS &) {
     THROW_EXCEPTION(
         "you must define a visit function for RigidBodyDS "
-        "in a derived class of SiconosVisitor");
+        "in a derived class of dynamical_systems::Visitor");
   }
   virtual void visit(std::shared_ptr<siconos::collision::native::bodies::SphereNEDS>) {
     THROW_EXCEPTION(
-        "you must define a visit function for SP :: "
-        "SphereNEDS in a derived class of SiconosVisitor");
+        "you must define a visit function for shared ptr to "
+        "SphereNEDS in a derived class of dynamical_systems::Visitor");
   }
 
   virtual void visit(siconos::collision::native::bodies::SphereNEDS &) {
     THROW_EXCEPTION(
         "you must define a visit function for SphereNEDS "
-        "in a derived class of SiconosVisitor");
+        "in a derived class of dynamical_systems::Visitor");
   }
   virtual void visit(const siconos::collision::native::bodies::SphereNEDS &) {
     THROW_EXCEPTION(
         "you must define a visit function for SphereNEDS "
-        "in a derived class of SiconosVisitor");
+        "in a derived class of dynamical_systems::Visitor");
   }
   virtual void visit(std::shared_ptr<siconos::collision::native::bodies::ExternalBody>) {
     THROW_EXCEPTION(
         "you must define a visit function for SP :: ExternalBody "
-        "in a derived class of SiconosVisitor");
+        "in a derived class of dynamical_systems::Visitor");
   }
   virtual void visit(siconos::collision::native::bodies::ExternalBody &) {
     THROW_EXCEPTION(
         "you must define a visit function for ExternalBody in a "
-        "derived class of SiconosVisitor");
+        "derived class of dynamical_systems::Visitor");
   }
   virtual void visit(const siconos::collision::native::bodies::ExternalBody &) {
     THROW_EXCEPTION(
         "you must define a visit function for ExternalBody in a "
-        "derived class of SiconosVisitor");
+        "derived class of dynamical_systems::Visitor");
   }
 
   virtual void visit(std::shared_ptr<siconos::collision::native::bodies::Disk>) {
     THROW_EXCEPTION(
-        "you must define a visit function for SP :: "
-        "Disk in a derived class of SiconosVisitor");
+        "you must define a visit function for shared ptr to "
+        "Disk in a derived class of dynamical_systems::Visitor");
   }
 
   virtual void visit(siconos::collision::native::bodies::Disk &) {
     THROW_EXCEPTION(
         "you must define a visit function for Disk "
-        "in a derived class of SiconosVisitor");
+        "in a derived class of dynamical_systems::Visitor");
   }
   virtual void visit(const siconos::collision::native::bodies::Disk &) {
     THROW_EXCEPTION(
         "you must define a visit function for Disk "
-        "in a derived class of SiconosVisitor");
+        "in a derived class of dynamical_systems::Visitor");
   }
 
   virtual void visit(std::shared_ptr<siconos::collision::native::bodies::Circle>) {
     THROW_EXCEPTION(
-        "you must define a visit function for SP :: "
-        "Circle in a derived class of SiconosVisitor");
+        "you must define a visit function for shared ptr to "
+        "Circle in a derived class of dynamical_systems::Visitor");
   }
 
   virtual void visit(siconos::collision::native::bodies::Circle &) {
     THROW_EXCEPTION(
         "you must define a visit function for Circle "
-        "in a derived class of SiconosVisitor");
+        "in a derived class of dynamical_systems::Visitor");
   }
   virtual void visit(const siconos::collision::native::bodies::Circle &) {
     THROW_EXCEPTION(
         "you must define a visit function for Circle "
-        "in a derived class of SiconosVisitor");
+        "in a derived class of dynamical_systems::Visitor");
   }
 
   virtual void visit(std::shared_ptr<siconos::collision::native::bodies::SphereLDS>) {
     THROW_EXCEPTION(
-        "you must define a visit function for SP :: "
-        "SphereLDS in a derived class of SiconosVisitor");
+        "you must define a visit function for shared ptr to "
+        "SphereLDS in a derived class of dynamical_systems::Visitor");
   }
 
   virtual void visit(siconos::collision::native::bodies::SphereLDS &) {
     THROW_EXCEPTION(
         "you must define a visit function for SphereLDS "
-        "in a derived class of SiconosVisitor");
+        "in a derived class of dynamical_systems::Visitor");
   }
   virtual void visit(const siconos::collision::native::bodies::SphereLDS &) {
     THROW_EXCEPTION(
         "you must define a visit function for SphereLDS "
-        "in a derived class of SiconosVisitor");
+        "in a derived class of dynamical_systems::Visitor");
   }
 
   virtual void visit(std::shared_ptr<siconos::fem::cable::CableDS>) {
     THROW_EXCEPTION(
-        "you must define a visit function for SP :: "
-        "CableDS in a derived class of SiconosVisitor");
+        "you must define a visit function for shared ptr to "
+        "CableDS in a derived class of dynamical_systems::Visitor");
   }
 
   virtual void visit(siconos::fem::cable::CableDS &) {
     THROW_EXCEPTION(
         "you must define a visit function for CableDS "
-        "in a derived class of SiconosVisitor");
+        "in a derived class of dynamical_systems::Visitor");
   }
   virtual void visit(const siconos::fem::cable::CableDS &) {
     THROW_EXCEPTION(
         "you must define a visit function for CableDS "
-        "in a derived class of SiconosVisitor");
+        "in a derived class of dynamical_systems::Visitor");
   }
   virtual void visit(siconos::collision::native::bodies::CircularDS &) {
     THROW_EXCEPTION(
         "you must define a visit function for CircularDS in a "
-        "derived class of SiconosVisitor");
+        "derived class of dynamical_systems::Visitor");
   }
   virtual void visit(const siconos::collision::native::bodies::CircularDS &) {
     THROW_EXCEPTION(
         "you must define a visit function for CircularDS in a "
-        "derived class of SiconosVisitor");
+        "derived class of dynamical_systems::Visitor");
   }
 #ifdef SICONOS_HAS_OpenCASCADE
   virtual void visit(std::shared_ptr<siconos::mechanics::occ::OccBody>) {
     THROW_EXCEPTION(
-        "you must define a visit function for SP :: "
-        "OccBody in a derived class of SiconosVisitor");
+        "you must define a visit function for shared ptr to "
+        "OccBody in a derived class of dynamical_systems::Visitor");
   }
 
   virtual void visit(siconos::mechanics::occ::OccBody &) {
     THROW_EXCEPTION(
         "you must define a visit function for OccBody "
-        "in a derived class of SiconosVisitor");
+        "in a derived class of dynamical_systems::Visitor");
   }
   virtual void visit(const siconos::mechanics::occ::OccBody &) {
     THROW_EXCEPTION(
         "you must define a visit function for OccBody "
-        "in a derived class of SiconosVisitor");
+        "in a derived class of dynamical_systems::Visitor");
   }
 #endif
 #endif

@@ -44,7 +44,6 @@
 #include "SiconosMatrix.hpp"
 #include "SiconosMemory.hpp"
 #include "SiconosVector.hpp"
-#include "SiconosVisitor.hpp"
 #include "Tools.hpp"
 #include "siconos_debug.h"
 
@@ -53,18 +52,19 @@
 
 size_t siconos::modeling::Interaction::count_ = 0;
 
-struct siconos::modeling::Interaction::SetLevels : public siconos::internal::SiconosVisitor {
+struct siconos::modeling::Interaction::SetLevels
+    : public siconos::modeling::nonsmooth_laws::Visitor {
   /* we set the _lowerLevelForOutput, _upperLevelForOutput,
      _lowerLevelForOutput, _upperLevelForOutput
      w.r.t to the choice of the nslaw and the relation
   */
-  using SiconosVisitor::visit;
+  using siconos::modeling::nonsmooth_laws::Visitor::visit;
 
   Interaction* interaction_{nullptr};
 
   SetLevels(Interaction* inter) : interaction_(inter) {};
 
-  void visit(const ComplementarityConditionNSL& nslaw) const override {
+  void visit(const ComplementarityConditionNSL& nslaw) override {
     auto relationType = interaction_->relation()->getType();
     auto subType = interaction_->relation()->getSubType();
 
@@ -88,7 +88,7 @@ struct siconos::modeling::Interaction::SetLevels : public siconos::internal::Sic
     };
   }
 
-  void visit(const RelayNSL& nslaw) const override {
+  void visit(const RelayNSL& nslaw) override {
     RelationType relationType = interaction_->relation()->getType();
     if (relationType == RelationType::FirstOrder) {
       interaction_->setLowerLevelForOutput(0);
@@ -111,7 +111,7 @@ struct siconos::modeling::Interaction::SetLevels : public siconos::internal::Sic
     };
   }
 
-  void visit(const NormalConeNSL& nslaw) const override {
+  void visit(const NormalConeNSL& nslaw) override {
     RelationType relationType = interaction_->relation()->getType();
     if (relationType == RelationType::FirstOrder) {
       interaction_->setLowerLevelForOutput(0);
@@ -126,7 +126,7 @@ struct siconos::modeling::Interaction::SetLevels : public siconos::internal::Sic
     };
   }
 
-  void visit(const MixedComplementarityConditionNSL& nslaw) const override {
+  void visit(const MixedComplementarityConditionNSL& nslaw) override {
     RelationType relationType = interaction_->relation()->getType();
     if (relationType == RelationType::FirstOrder) {
       interaction_->setLowerLevelForOutput(0);
@@ -141,7 +141,7 @@ struct siconos::modeling::Interaction::SetLevels : public siconos::internal::Sic
     };
   }
 
-  void visit(const EqualityConditionNSL& nslaw) const override {
+  void visit(const EqualityConditionNSL& nslaw) override {
     RelationType relationType = interaction_->relation()->getType();
     if (relationType == RelationType::Lagrangian ||
         relationType == RelationType::NewtonEuler) {
@@ -162,7 +162,7 @@ struct siconos::modeling::Interaction::SetLevels : public siconos::internal::Sic
           "nslaw ");
     };
   }
-  void visit(const NewtonImpactNSL& nslaw) const override {
+  void visit(const NewtonImpactNSL& nslaw) override {
     RelationType relationType = interaction_->relation()->getType();
     if (relationType == RelationType::Lagrangian ||
         relationType == RelationType::NewtonEuler) {
@@ -178,7 +178,7 @@ struct siconos::modeling::Interaction::SetLevels : public siconos::internal::Sic
     }
   }
 
-  void visit(const NewtonImpactFrictionNSL& nslaw) const override {
+  void visit(const NewtonImpactFrictionNSL& nslaw) override {
     RelationType relationType = interaction_->relation()->getType();
     if (relationType == RelationType::Lagrangian ||
         relationType == RelationType::NewtonEuler) {
@@ -193,7 +193,7 @@ struct siconos::modeling::Interaction::SetLevels : public siconos::internal::Sic
           "nslaw ");
     }
   }
-  void visit(const NewtonImpactRollingFrictionNSL& nslaw) const override {
+  void visit(const NewtonImpactRollingFrictionNSL& nslaw) override {
     RelationType relationType = interaction_->relation()->getType();
     if (relationType == RelationType::Lagrangian ||
         relationType == RelationType::NewtonEuler) {
@@ -209,7 +209,7 @@ struct siconos::modeling::Interaction::SetLevels : public siconos::internal::Sic
     }
   }
 
-  void visit(const FremondImpactFrictionNSL& nslaw) const override {
+  void visit(const FremondImpactFrictionNSL& nslaw) override {
     auto relationType = interaction_->relation()->getType();
     if (relationType == RelationType::Lagrangian ||
         relationType == RelationType::NewtonEuler) {
@@ -224,7 +224,7 @@ struct siconos::modeling::Interaction::SetLevels : public siconos::internal::Sic
     }
   }
 
-  void visit(const MultipleImpactNSL& nslaw) const override {
+  void visit(const MultipleImpactNSL& nslaw) override {
     RelationType relationType = interaction_->relation()->getType();
     if (relationType == RelationType::Lagrangian ||
         relationType == RelationType::NewtonEuler) {

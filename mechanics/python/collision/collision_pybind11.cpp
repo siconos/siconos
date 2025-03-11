@@ -28,10 +28,7 @@
 #include "InteractionManager.hpp"
 #include "RigidBody2dDS.hpp"
 #include "RigidBodyDS.hpp"
-#include "SiconosBulletCollisionManager.hpp"
-#include "SiconosBulletOptions.hpp"
 #include "SiconosCollisionManager.hpp"
-#include "SiconosContactor.hpp"
 #include "SiconosShape.hpp"
 #include "SpaceFilter.hpp"
 #include "StaticBody.hpp"
@@ -158,26 +155,11 @@ PYBIND11_MODULE(_collision, m) {
                     Eigen::Ref<siconos::algebra::SiconosVector>>(),
            py::arg("radius"), py::arg("mass"), py::arg("position"), py::arg("velocity"));
 
-  py::class_<siconos::collision::bullet::SiconosBulletOptions,
-             std::shared_ptr<siconos::collision::bullet::SiconosBulletOptions>>(
-      bullet_module, "SiconosBulletOptions")
-      .def(py::init<>());
-
   py::class_<siconos::collision::SiconosCollisionManager,
              std::shared_ptr<siconos::collision::SiconosCollisionManager>,
              siconos::simulation::InteractionManager>(m, "SiconosCollisionManager")
       .def("insertNonSmoothLaw",
            &siconos::collision::SiconosCollisionManager::insertNonSmoothLaw);
-
-  py::class_<siconos::collision::bullet::SiconosBulletCollisionManager,
-             std::shared_ptr<siconos::collision::bullet::SiconosBulletCollisionManager>,
-             siconos::collision::SiconosCollisionManager>(bullet_module,
-                                                          "SiconosBulletCollisionManager")
-      .def(py::init<std::shared_ptr<siconos::collision::bullet::SiconosBulletOptions>>(),
-           py::arg("options"))
-      .def("addStaticBody",
-           &siconos::collision::bullet::SiconosBulletCollisionManager::addStaticBody,
-           py::arg("cs"), py::arg("position"), py::arg("number"));
 
   py::class_<siconos::collision::StaticBody, std::shared_ptr<siconos::collision::StaticBody>>(
       m, "StaticBody")

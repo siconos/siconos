@@ -45,6 +45,10 @@ class BulletR : public siconos::collision::ContactR {
       std::shared_ptr<siconos::modeling::NewtonEulerDS> ds2);
 
   void display() const override;
+
+  virtual void accept(modeling::relations::Visitor &tourist) const override {
+    tourist.visit(*this);
+  }
 };
 }  // namespace siconos::collision::bullet
 

@@ -44,6 +44,24 @@ pycollision
   LIBRARY DESTINATION "${SICONOS_PYTHON_INSTALL_DIR}/siconos/mechanics/collision"
   )
 
+
+if(WITH_BULLET)
+  create_pybind11_module(
+    MODULE_NAME siconos_bullet 
+    SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/collision/bullet/collision_bullet_pybind11.cpp
+    DEPENDENCIES kernel mechanics
+    PARENT_NAME mechanics/collision/bullet
+  )
+  set_target_properties(siconos_bullet PROPERTIES OUTPUT_NAME "_bullet")
+  install(TARGETS
+    siconos_bullet
+    COMPONENT python
+    LIBRARY DESTINATION "${SICONOS_PYTHON_INSTALL_DIR}/siconos/mechanics/collision/bullet"
+    )
+endif()
+
+  
+
 target_include_directories(pycollision PRIVATE ${CMAKE_SOURCE_DIR}/mechanics/src/collision/bullet)
 target_include_directories(pycollision PRIVATE ${CMAKE_SOURCE_DIR}/mechanics/src/collision/native/bodies)
 target_include_directories(pycollision PRIVATE ${CMAKE_SOURCE_DIR}/mechanics/src/collision/native)

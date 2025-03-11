@@ -20,7 +20,6 @@
 #include "RotationQuaternion.hpp"  // for quaternionFromTwistVector and compositionLawLieGroup
 #include "SiconosContactor.hpp"
 #include "SiconosVector.hpp"
-#include "SiconosVisitor.hpp"
 
 siconos::collision::RigidBodyDS::RigidBodyDS(
     Eigen::Ref<siconos::algebra::SiconosVector> position,

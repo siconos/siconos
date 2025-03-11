@@ -31,17 +31,17 @@ def solve(problem, solver, options):
 
 def test_fc3dnsgs():
     """Non-smooth Gauss Seidel, default"""
-    SO = sn.SolverOptions(sn.SICONOS_FRICTION_3D_NSGS)
+    SO = sn.SolverOptions(sn.solver_ids.SICONOS_FRICTION_3D_NSGS)
     solve(FCP, sn.fc3d_nsgs, SO)
 
 
 def test_fc3dlocalac():
     """Non-smooth Gauss Seidel, Alart-Curnier as local solver."""
-    SO = sn.SolverOptions(sn.SICONOS_FRICTION_3D_NSN_AC)
+    SO = sn.SolverOptions(sn.solver_ids.SICONOS_FRICTION_3D_NSN_AC)
     solve(FCP, sn.fc3d_nonsmooth_Newton_AlartCurnier, SO)
 
 
 def test_fc3dfischer():
     """Non-smooth Newton, Fischer-Burmeister."""
-    SO = sn.SolverOptions(sn.SICONOS_FRICTION_3D_NSN_FB)
+    SO = sn.SolverOptions(sn.solver_ids.SICONOS_FRICTION_3D_NSN_FB)
     solve(FCP, sn.fc3d_nonsmooth_Newton_FischerBurmeister, SO)

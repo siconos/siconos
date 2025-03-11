@@ -23,7 +23,6 @@
 #define Disk_H
 
 #include "CircularDS.hpp"
-#include "SiconosVisitor.hpp"
 
 namespace siconos::collision::native::bodies {
 /** \class Disk

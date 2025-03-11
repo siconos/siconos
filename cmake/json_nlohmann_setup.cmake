@@ -35,22 +35,6 @@ location might be used later as input to nlohmann_ROOT.
 
 #]=======================================================================]
 
-# function(set_bullet_target)
-#   if(BULLET_DEFINITIONS)
-#     string(REPLACE "-D" "" BULLET_DEFINITIONS ${BULLET_DEFINITIONS})
-#     set(BULLET_DEFINITIONS ${BULLET_DEFINITIONS} PARENT_SCOPE)
-#   endif()
-#   create_target(NAME BULLET::BULLET
-#     LIBRARIES "${BULLET_LIBRARIES}"
-#     LIBRARY_DIRS "${BULLET_ROOT_DIR}/${BULLET_LIBRARY_DIRS}"
-#     INCLUDE_DIRS "${BULLET_INCLUDE_DIRS}"
-#     COMPILE_DEFINITIONS "${BULLET_DEFINITIONS}")
-#   # Add bullet headers and libs to the build.
-#   # first draft ... turn this to private later
-#   target_link_libraries(${COMPONENT} PUBLIC $<BUILD_INTERFACE:BULLET::BULLET>)
-#   set(SICONOS_HAS_BULLET TRUE CACHE INTERNAL "True if Bullet API has been found and is activated.")
-# endfunction()
-
 # Three ways:
   # - JSON_INSTALL=ON : use fetchcontent to download and install json/nlohmann as a siconos part;
   # - WITH_JSON is ON, nothing more: look for json/nlohmann, check version and link with siconos components.

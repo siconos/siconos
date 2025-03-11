@@ -28,9 +28,9 @@
 // #define DEBUG_MESSAGES
 #endif
 
+#include "NonSmoothLaw.hpp"
 #include "OneStepIntegrator.hpp"
 #include "SiconosException.hpp"
-#include "SiconosVisitor.hpp"
 
 namespace siconos::integrators {
 
@@ -139,8 +139,8 @@ class D1MinusLinearOSI : public OneStepIntegrator {
   /** nslaw effects */
 
   // visitor stuff to handle properly nslaw effects.
-  struct _NSLEffectOnFreeOutput : public siconos::internal::SiconosVisitor {
-    using siconos::internal::SiconosVisitor::visit;
+  struct _NSLEffectOnFreeOutput : public siconos::modeling::nonsmooth_laws::Visitor {
+    using siconos::modeling::nonsmooth_laws::Visitor::visit;
 
     siconos::nonsmooth_formulations::OneStepNSProblem *_osnsp{nullptr};
     std::shared_ptr<siconos::modeling::Interaction> _inter{nullptr};
@@ -150,7 +150,7 @@ class D1MinusLinearOSI : public OneStepIntegrator {
                            std::shared_ptr<siconos::modeling::Interaction> inter,
                            siconos::graphs::InteractionProperties &interProp);
 
-    void visit(const siconos::modeling::NewtonImpactNSL &nslaw) const override;
+    void visit(const siconos::modeling::NewtonImpactNSL &nslaw) override;
   };
 
   bool _isThereImpactInTheTimeStep{false};

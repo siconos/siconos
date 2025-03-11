@@ -45,8 +45,8 @@ def test_mc2dnsgs():
     
 def test_fc3dnsgs():
     """Non-smooth Gauss Seidel, default"""
-    SO = sn.SolverOptions(sn.SICONOS_FRICTION_3D_NSGS)
-    sn.solver_options_update_internal(SO, 0, sn.SICONOS_FRICTION_3D_ONECONTACT_NSN)
+    SO = sn.SolverOptions(sn.solver_ids.SICONOS_FRICTION_3D_NSGS)
+    sn.solver_options_update_internal(SO, 0, sn.solver_ids.SICONOS_FRICTION_3D_ONECONTACT_NSN)
     solve(FC, sn.fc3d_nsgs, SO)
 
 def test_driver():

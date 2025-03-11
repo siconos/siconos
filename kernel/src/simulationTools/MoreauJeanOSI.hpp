@@ -23,9 +23,8 @@
 
 #include <limits>
 
+#include "NonSmoothLaw.hpp"
 #include "OneStepIntegrator.hpp"
-#include "SiconosVisitor.hpp"  // For NSLeffects ...
-
 namespace siconos::modeling {
 
 class SecondOrderDS;
@@ -175,8 +174,8 @@ class MoreauJeanOSI : public OneStepIntegrator {
 
  protected:
   // visitor stuff to handle properly nslaw effects.
-  struct _NSLEffectOnFreeOutput : public siconos::internal::SiconosVisitor {
-    using siconos::internal::SiconosVisitor::visit;
+  struct _NSLEffectOnFreeOutput : public siconos::modeling::nonsmooth_laws::Visitor {
+    using siconos::modeling::nonsmooth_laws::Visitor::visit;
 
     siconos::nonsmooth_formulations::OneStepNSProblem &_osnsp;
     siconos::modeling::Interaction &_inter;
@@ -187,16 +186,15 @@ class MoreauJeanOSI : public OneStepIntegrator {
                            siconos::modeling::Interaction &inter,
                            siconos::graphs::InteractionProperties &interProp, double theta);
 
-    void visit(const siconos::modeling::NewtonImpactNSL &nslaw) const override;
+    void visit(const siconos::modeling::NewtonImpactNSL &nslaw) override;
 
-    void visit(const siconos::modeling::RelayNSL &nslaw) const override {};
-    void visit(const siconos::modeling::NewtonImpactFrictionNSL &nslaw) const override;
-    void visit(const siconos::modeling::FremondImpactFrictionNSL &nslaw) const override;
-    void visit(const siconos::modeling::NewtonImpactRollingFrictionNSL &nslaw) const override;
-    void visit(const siconos::modeling::EqualityConditionNSL &nslaw) const override {};
-    void visit(
-        const siconos::modeling::MixedComplementarityConditionNSL &nslaw) const override {};
-    void visit(const siconos::modeling::ComplementarityConditionNSL &nslaw) const override {};
+    void visit(const siconos::modeling::RelayNSL &nslaw) override {};
+    void visit(const siconos::modeling::NewtonImpactFrictionNSL &nslaw) override;
+    void visit(const siconos::modeling::FremondImpactFrictionNSL &nslaw) override;
+    void visit(const siconos::modeling::NewtonImpactRollingFrictionNSL &nslaw) override;
+    void visit(const siconos::modeling::EqualityConditionNSL &nslaw) override {};
+    void visit(const siconos::modeling::MixedComplementarityConditionNSL &nslaw) override {};
+    void visit(const siconos::modeling::ComplementarityConditionNSL &nslaw) override {};
   };
 
  public:

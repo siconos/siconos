@@ -55,7 +55,7 @@ siconos::simulation::TimeSteppingCombinedProjection::TimeSteppingCombinedProject
 
 // struct
 // siconos::simulation::TimeSteppingCombinedProjection::_SimulationEffectOnOSNSP
-//   : public ssiconos::internal::SiconosVisitor {
+//   : public siconos::modeling::nonsmooth_laws::Visitor {
 
 //   TimeSteppingCombinedProjection* _parent{nullptr};
 

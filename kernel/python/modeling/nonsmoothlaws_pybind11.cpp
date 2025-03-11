@@ -25,8 +25,10 @@
 
 #include "ComplementarityConditionNSL.hpp"
 #include "EqualityConditionNSL.hpp"
+#include "FremondImpactFrictionNSL.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
 #include "NewtonImpactNSL.hpp"
+#include "NewtonImpactRollingFrictionNSL.hpp"
 #include "RelayNSL.hpp"
 // #include <pybind11/stl.h>  // Pour permettre la conversion entre std::vector et les objets
 // Python comme les listes
@@ -55,6 +57,20 @@ void wrap_nonsmoothlaws(py::module_ &m) {
   py::class_<siconos::modeling::NewtonImpactFrictionNSL,
              std::shared_ptr<siconos::modeling::NewtonImpactFrictionNSL>,
              siconos::modeling::NonSmoothLaw>(m, "NewtonImpactFrictionNSL")
+      .def(py::init<unsigned int>(), py::arg("size") = 1)
+      .def(py::init<double, double, double, unsigned int>(), py::arg("en") = 0.,
+           py::arg("et") = 0., py::arg("mu") = 0., py::arg("size") = 1);
+
+  py::class_<siconos::modeling::NewtonImpactRollingFrictionNSL,
+             std::shared_ptr<siconos::modeling::NewtonImpactRollingFrictionNSL>,
+             siconos::modeling::NonSmoothLaw>(m, "NewtonImpactRollingFrictionNSL")
+      .def(py::init<unsigned int>(), py::arg("size") = 1)
+      .def(py::init<double, double, double, double, unsigned int>(), py::arg("en") = 0.,
+           py::arg("et") = 0., py::arg("mu") = 0., py::arg("muR") = 0., py::arg("size") = 1);
+
+  py::class_<siconos::modeling::FremondImpactFrictionNSL,
+             std::shared_ptr<siconos::modeling::FremondImpactFrictionNSL>,
+             siconos::modeling::NonSmoothLaw>(m, "FremondImpactFrictionNSL")
       .def(py::init<unsigned int>(), py::arg("size") = 1)
       .def(py::init<double, double, double, unsigned int>(), py::arg("en") = 0.,
            py::arg("et") = 0., py::arg("mu") = 0., py::arg("size") = 1);

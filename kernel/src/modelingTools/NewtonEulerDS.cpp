@@ -24,7 +24,6 @@
 #include "RotationQuaternion.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "SiconosVisitor.hpp"
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"

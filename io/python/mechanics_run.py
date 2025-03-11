@@ -7,6 +7,7 @@ from math import cos, sin, asin, atan2, acos
 from scipy import constants
 import numpy as np
 import h5py
+import subprocess
 
 # fix compatibility with h5py version
 if hasattr(h5py, "vlen_dtype"):
@@ -26,7 +27,6 @@ from contextlib import contextmanager
 # Siconos imports
 import siconos.io.mechanics_hdf5
 import siconos.numerics as sn
-from siconos.numerics import solver_ids
 import siconos.modeling as sm
 import siconos.nonsmooth_formulations as nsf
 import siconos.simulation as simu
@@ -270,7 +270,7 @@ def data(h, name, nbcolumns, use_compression=False):
 #
 def upgrade_io_format(filename):
 
-    with MechanicsHdf5(filename, mode="a") as io:
+    with siconos.io.mechanics_hdf5.MechanicsHdf5(filename, mode="a") as io:
 
         for instance_name in io.instances():
             for contactor_instance_name in io.instances()[instance_name]:
@@ -522,7 +522,8 @@ class ShapeCollection:
                     if self.shape(shape_name).dtype == h5py_vlen_dtype(str):
                         with tmpfile() as tmpf:
                             data = self.shape(shape_name)[:][0]
-                            # fix compatibility with h5py version: to be removed in the future
+                            # fix compatibility with h5py version
+                            # to be removed in the future
                             if h5py.version.version_tuple.major >= 3:
                                 tmpf[0].write(data.decode("utf-8"))
                             else:
@@ -562,7 +563,7 @@ class ShapeCollection:
                             "self.shape(shape_name).dtype != h5py_vlen_dtype(str)"
                         )
 
-                    ## fix compatibility with h5py version: to be removed in the future
+                    # fix compatibility with h5py version: to be removed in the future
                     if h5py.version.version_tuple.major >= 3:
                         tmp_contents = self.shape(shape_name)[:][0].decode("utf-8")
                     else:
@@ -1178,7 +1179,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
             # only one contactor
             ctor = contactors[0]
-            shape = self._shape.get(ctor.shape_name, new_instance=True)
+            # shape = self._shape.get(ctor.shape_name, new_instance=True)
             a = self._shape._io.shapes()[ctor.shape_name][:][0][0]
             b = self._shape._io.shapes()[ctor.shape_name][:][0][1]
             c = self._shape._io.shapes()[ctor.shape_name][:][0][2]
@@ -1190,8 +1191,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         else:
             # a dynamic object
             ctor = contactors[0]
-            shape = self._shape.get(ctor.shape_name)
-            attrs = self._shape.attributes(ctor.shape_name)
+            # shape = self._shape.get(ctor.shape_name)
+            # attrs = self._shape.attributes(ctor.shape_name)
 
             if self._shape.attributes(ctor.shape_name)["primitive"] == "Disk":
                 body_class = smc.Disk
@@ -1531,7 +1532,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 # if second joint provided but no reference, then
                 # infer refds_name from the reference joints
                 dss = set([joint1_ds1, joint1_ds2, joint2_ds1, joint2_ds2])
-                diff = list(dsimu.difference(set([ds1_name, ds2_name])))
+                diff = list(dss.difference(set([ds1_name, ds2_name])))
                 # there must be exactly one reference in common that
                 # is not either of the DSs
                 refds_name = diff[0]
@@ -1732,7 +1733,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             topo = self._nsds.topology()
 
             bc_type = self.boundary_conditions()[name].attrs["type"]
-            bc_class = getattr(sk, bc_type)
+            bc_class = getattr(sm, bc_type)
 
             ds1_name = self.boundary_conditions()[name].attrs["object1"]
             ds1 = topo.getDynamicalSystem(ds1_name)
@@ -2390,7 +2391,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
                 elif self._dimension == 2:
 
-                    # VA. change the contact info such that is corresponds to a 3D object
+                    # VA. change the contact info such that
+                    # this corresponds to a 3D object
                     new_contact_points = np.zeros((contact_points.shape[0], 25))
 
                     new_contact_points[:, 0] = contact_points[:, 0]  # mu
@@ -2494,7 +2496,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             time = self.current_time()
 
             kinetic_sum = 0.0
-            external_forces_work_sum_old = 0.0
+            # external_forces_work_sum_old = 0.0
             external_forces_work_sum = 0.0
             energy_contact_work = np.zeros(7)
 
@@ -2603,11 +2605,11 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         current_line = self._solv_data.shape[0]
         self._solv_data.resize(current_line + 1, 0)
-        iterations = so.iparam[solver_ids.SICONOS_IPARAM_ITER_DONE]
-        precision = so.dparam[solver_ids.SICONOS_DPARAM_RESIDU]
-        if so.solverId == solver_ids.SICONOS_GENERIC_MECHANICAL_NSGS:
+        iterations = so.iparam[sn.params.SICONOS_IPARAM_ITER_DONE]
+        precision = so.dparam[sn.params.SICONOS_DPARAM_RESIDU]
+        if so.solverId == sn.solver_ids.SICONOS_GENERIC_MECHANICAL_NSGS:
             local_precision = so.dparam[3]  # Check this !
-        elif so.solverId == solver_ids.SICONOS_FRICTION_3D_NSGS:
+        elif so.solverId == sn.solver_ids.SICONOS_FRICTION_3D_NSGS:
             local_precision = 0.0
         else:
             local_precision = precision
@@ -2687,7 +2689,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     d["solver_options_pos"]["dparam[" + str(i) + "]"] = float(
                         so.dparam[i]
                     )
-            # d['solver_options_pos']['numberOfInternalSolvers']=so.numberOfInternalSolvers        # fix it
+            # d['solver_options_pos']['numberOfInternalSolvers']=so.numberOfInternalSolvers
+            # fix it
 
         bo = d["bullet_options"]
         if bo:
@@ -2758,8 +2761,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         """
         time = self.current_time()
         so = self._simulation.oneStepNSProblem(0).numericsSolverOptions()
-        iterations = so.iparam[solver_ids.SICONOS_IPARAM_ITER_DONE]
-        precision = so.dparam[solver_ids.SICONOS_DPARAM_RESIDU]
+        iterations = so.iparam[sn.params.SICONOS_IPARAM_ITER_DONE]
+        precision = so.dparam[sn.params.SICONOS_DPARAM_RESIDU]
         msg = "Numerics solver info at time : {0:10.6f}".format(time)
         msg += " iterations = {0:8d}".format(iterations)
         msg += " precision = {0:5.3e}".format(precision)
@@ -2769,7 +2772,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         """
         Plugins extraction and compilation.
         """
-        import subprocess
 
         for name in self._plugins:
 
@@ -2787,7 +2789,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 file_of_str(plugin_fname, plugin_src)
 
         # build
-        subprocesimu.check_call(["siconos", "--build-plugins"])
+        subprocess.check_call(["siconos", "--build-plugins"])
 
     def import_external_functions(self):
         topo = self._nsds.topology()
@@ -3378,7 +3380,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         friction_contact_trace_params = run_options.get("friction_contact_trace_params")
         if friction_contact_trace_params is None:
             # Global friction contact.
-            if osi == si.MoreauJeanGOSI:
+            if osi == integrators.MoreauJeanGOSI:
                 if "NewtonImpactFrictionNSL" in set(nslaw_type_list):
                     if solver_options is None:
                         osnspb = nsf.GlobalFrictionContact(self._dimension)
@@ -3398,7 +3400,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                             dimension_contact, solver_options
                         )
                 osnspb.setMStorageType(sn.NM_SPARSE)
-                # if sid == sn.SICONOS_GLOBAL_FRICTION_3D_ADMM:
+                # if sid == sn.solver_ids.SICONOS_GLOBAL_FRICTION_3D_ADMM:
                 #     osnspb.setMStorageType(sn.NM_SPARSE)
                 #     # which is the default for gfc in kernel, is it?
                 # else:
@@ -3423,7 +3425,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                                 self._dimension, solver_options
                             )
                         osnspb.setMaxSize(osnspb_max_size)
-                        osnspb.setMStorageType(solver_ids.NM_SPARSE_BLOCK)
+                        osnspb.setMStorageType(sn.params.NM_SPARSE_BLOCK)
 
                     elif "NewtonImpactRollingFrictionNSL" in set(nslaw_type_list):
                         if self._dimension == 3:
@@ -3450,7 +3452,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 solver_options = sn.solver_options_create(
                     solver_ids.SICONOS_FRICTION_3D_NSGS
                 )
-            sid = solver_options.solverId
+            # sid = solver_options.solverId
             if osi == integrators.MoreauJeanGOSI:
                 if "NewtonImpactFrictionNSL" in set(nslaw_type_list):
                     osnspb = GFCTrace(
@@ -3486,7 +3488,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # (6) Simulation setup with (1) (2) (3) (4) (5)
         if self._time_stepping_class == simu.TimeSteppingDirectProjection:
             if solver_options_pos is None:
-                osnspb_pos = nsf.MLCPProjectOnConstraints(sn.SICONOS_MLCP_ENUM, 1.0)
+                osnspb_pos = nsf.MLCPProjectOnConstraints(sn.params.SICONOS_MLCP_ENUM, 1.0)
             else:
                 osnspb_pos = nsf.MLCPProjectOnConstraints(solver_options_pos, 1.0)
 
@@ -3721,7 +3723,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
             if exit_tolerance is not None:
                 solver_options = self._osnspb.numericsSolverOptions()
-                precision = solver_options.dparam[sn.SICONOS_DPARAM_RESIDU]
+                precision = solver_options.dparam[sn.params.SICONOS_DPARAM_RESIDU]
                 if precision > exit_tolerance:
                     print("precision is larger exit_tolerance")
                     return False

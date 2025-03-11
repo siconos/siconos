@@ -170,16 +170,16 @@ def test_SolverOption():
     lcp = sk.LCP()
 
     # Check default solver
-    assert lcp.numericsSolverOptions().solverId == sn.SICONOS_LCP_LEMKE
+    assert lcp.numericsSolverOptions().solverId == sn.params.SICONOS_LCP_LEMKE
 
-    lcp.numericsSolverOptions().iparam[sn.SICONOS_IPARAM_MAX_ITER] = 1000
-    lcp.numericsSolverOptions().dparam[sn.SICONOS_DPARAM_TOL] = 1e-12
+    lcp.numericsSolverOptions().iparam[sn.params.SICONOS_IPARAM_MAX_ITER] = 1000
+    lcp.numericsSolverOptions().dparam[sn.params.SICONOS_DPARAM_TOL] = 1e-12
 
     iparam = lcp.numericsSolverOptions().iparam
     dparam = lcp.numericsSolverOptions().dparam
 
-    assert iparam[sn.SICONOS_IPARAM_MAX_ITER] == 1000
-    assert dparam[sn.SICONOS_DPARAM_TOL] == 1e-12
+    assert iparam[sn.params.SICONOS_IPARAM_MAX_ITER] == 1000
+    assert dparam[sn.params.SICONOS_DPARAM_TOL] == 1e-12
 
 
 def test_BoundaryCondition():

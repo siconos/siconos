@@ -49,7 +49,7 @@ class FremondImpactFrictionNSL : public NonSmoothLaw {
    *
    *  \param size size of the ns law
    */
-  FremondImpactFrictionNSL(unsigned int size) : NonSmoothLaw(size){};
+  FremondImpactFrictionNSL(unsigned int size) : NonSmoothLaw(size) {};
 
   /** constructor with the value of the FremondImpactFrictionNSL attributes
    *
@@ -59,7 +59,7 @@ class FremondImpactFrictionNSL : public NonSmoothLaw {
    *  \param size unsigned int: size of the ns law
    */
   FremondImpactFrictionNSL(double en, double et, double mu, unsigned int size)
-      : NonSmoothLaw(size), _en(en), _et(et), _mu(mu){};
+      : NonSmoothLaw(size), _en(en), _et(et), _mu(mu) {};
 
   /** Destructor */
   ~FremondImpactFrictionNSL() noexcept = default;
@@ -103,7 +103,7 @@ class FremondImpactFrictionNSL : public NonSmoothLaw {
   void display() const override;
 
   // visitors hook
-  void accept(siconos::internal::SiconosVisitor& tourist) const override {
+  virtual void accept(nonsmooth_laws::Visitor& tourist) const override {
     tourist.visit(*this);
   }
 

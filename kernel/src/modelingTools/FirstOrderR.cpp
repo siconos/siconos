@@ -18,7 +18,6 @@
 #include "FirstOrderR.hpp"
 
 #include "Interaction.hpp"
-#include "SiconosVisitor.hpp"
 
 void siconos::modeling::FirstOrderR::initialize(Interaction& inter) {
   inter.relationVectors().resize(FirstOrderR::relationVectorsSize);

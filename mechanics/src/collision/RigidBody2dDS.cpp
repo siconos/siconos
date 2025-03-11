@@ -21,7 +21,6 @@
 #include "SiconosContactor.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "SiconosVisitor.hpp"
 
 siconos::collision::RigidBody2dDS::RigidBody2dDS(
     Eigen::Ref<siconos::algebra::SiconosVector> position,

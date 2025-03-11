@@ -23,7 +23,6 @@
 #include <iostream>
 
 #include "SiconosMatrix.hpp"
-#include "SiconosVisitor.hpp"
 #include "Tools.hpp"
 
 void siconos::modeling::LagrangianR::display() const {

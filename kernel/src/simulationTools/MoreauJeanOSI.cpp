@@ -40,7 +40,6 @@
 #include "SiconosMatrixVectorOp.hpp"
 #include "SiconosPointers.hpp"  // For createSPtr
 #include "SiconosVector.hpp"
-#include "SiconosVisitor.hpp"
 #include "Simulation.hpp"
 #include "Tools.hpp"
 // #define DEBUG_NOCOLOR
@@ -57,14 +56,14 @@ siconos::integrators::MoreauJeanOSI::_NSLEffectOnFreeOutput::_NSLEffectOnFreeOut
     : _osnsp{p}, _inter{inter}, _interProp{interProp}, _theta{theta} {};
 
 void siconos::integrators::MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(
-    const siconos::modeling::NewtonImpactNSL &nslaw) const {
+    const siconos::modeling::NewtonImpactNSL &nslaw) {
   auto e = nslaw.e();
   auto &osnsp_rhs = *(*_interProp.workVectors)[siconos::integrators::MoreauJeanOSI::OSNSP_RHS];
   osnsp_rhs += e * _inter.y_k(_osnsp.inputOutputLevel());
 }
 
 void siconos::integrators::MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(
-    const siconos::modeling::NewtonImpactFrictionNSL &nslaw) const {
+    const siconos::modeling::NewtonImpactFrictionNSL &nslaw) {
   auto &osnsp_rhs = *(*_interProp.workVectors)[siconos::integrators::MoreauJeanOSI::OSNSP_RHS];
 
   // The normal part is multiplied depends on en
@@ -81,7 +80,7 @@ void siconos::integrators::MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(
 }
 
 void siconos::integrators::MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(
-    const siconos::modeling::FremondImpactFrictionNSL &nslaw) const {
+    const siconos::modeling::FremondImpactFrictionNSL &nslaw) {
   auto &osnsp_rhs = *(*_interProp.workVectors)[MoreauJeanOSI::OSNSP_RHS];
 
   // compute the local tangential velocity at t_{k+theta}
@@ -104,7 +103,7 @@ void siconos::integrators::MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(
 }
 
 void siconos::integrators::MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(
-    const siconos::modeling::NewtonImpactRollingFrictionNSL &nslaw) const {
+    const siconos::modeling::NewtonImpactRollingFrictionNSL &nslaw) {
   auto &osnsp_rhs = *(*_interProp.workVectors)[siconos::integrators::MoreauJeanOSI::OSNSP_RHS];
 
   // The normal part is multiplied depends on en

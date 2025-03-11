@@ -23,10 +23,10 @@
 #ifndef NSLAW_H
 #define NSLAW_H
 
+#include "NSLVisitor.hpp"
 #include "SiconosException.hpp"
 #include "SiconosSerialization.hpp"  // For ACCEPT_SERIALIZATION
-#include "SiconosVisitor.hpp"
-#include "TypeName.hpp"  // visitor to get ds type
+#include "TypeName.hpp"              // visitor to get ds type
 
 namespace siconos::modeling {
 /**
@@ -94,7 +94,9 @@ class NonSmoothLaw {
   virtual void display() const = 0;
 
   // visitors stuff.
-  virtual void accept(siconos::internal::SiconosVisitor &) const = 0;
+  virtual void accept(nonsmooth_laws::Visitor &) const {
+    throw std::logic_error("accept (nonsmooth law): no visitor defined");
+  }
   virtual Type acceptType(siconos::types::FindType &ft) const = 0;
 };
 }  // namespace siconos::modeling
