@@ -339,6 +339,9 @@ class NewtonEulerDS : public SecondOrderDS {
   /** \return the generalized coordinates of the system (pointer link) */
   std::shared_ptr<siconos::algebra::SiconosVector> q() const override { return state_q_; }
 
+  // Only for pybind11
+  inline siconos::algebra::SiconosVector &q_python() const { return *(state_q_); }
+
   /**  \return a read-only view on  $\dot q$ */
   inline auto dotq_read() {
     return siconos::algebra::ConstMapVectorType(dotq_->data(), dotq_->size());
@@ -356,6 +359,9 @@ class NewtonEulerDS : public SecondOrderDS {
   /** \return the twist = \left[\begin{array}{c} v_g \\ \Omega \end{array}\right]\f$
    * (pointer link) */
   std::shared_ptr<siconos::algebra::SiconosVector> twist() const { return twist_; }
+
+  // Only for pybind11
+  inline siconos::algebra::SiconosVector &twist_python() const { return *(twist_); }
 
   // FP: override SecondOrderDS. Used only in visitors of MechanicsIO. To be reviewed ...
   inline const siconos::algebra::ConstMapVectorType velocity_read() const override {

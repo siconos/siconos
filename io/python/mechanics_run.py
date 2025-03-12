@@ -152,7 +152,7 @@ joint_points_axes = {
 
 # Utility functions
 def floatv(v):
-    return [float(x) for x in v]
+    return np.asarray(v, dtype=np.float64)  # [float(x) for x in v]
 
 
 def arguments():
@@ -1375,11 +1375,11 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             if mass is None:
 
                 cset = smc.SiconosContactorSet()
-                csetpos = translation + orientation
+                csetpos = np.concatenate([translation, orientation], axis=0)
                 for c in contactors:
                     shp = self._shape.get(c.shape_name)
-                    pos = list(c.translation) + list(c.orientation)
-                    pos = np.array(pos, dtype=np.float64, order="F")
+                    pos = np.concatenate([c.translation, c.orientation], axis=0)
+                    pos = np.asarray(pos, dtype=np.float64, order="F")
                     cset.append(smc.SiconosContactor(shp, pos, c.group))
                     self.print_verbose(
                         "              Adding shape %s to static contactor"
@@ -1406,15 +1406,19 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
                 if not np.isscalar(mass) or mass <= 0:
                     self.print_verbose("Warning mass must be a positive scalar")
-
+                if inertia is not None:
+                    assert inertia.flags["F_CONTIGUOUS"]
                 inertia_ok = False
+                initial_pos = np.concatenate([translation, orientation], axis=0)
                 if self._dimension == 3:
                     if inertia is not None:
                         if np.shape(inertia) == (3,):
                             inertia = np.diag(inertia)
+                            inertia = np.asfortranarray(inertia)
                             inertia_ok = True
                         if np.shape(inertia) == (3, 3):
                             inertia_ok = True
+
                 elif self._dimension == 2:
                     if inertia is not None:
                         if (
@@ -1425,13 +1429,11 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                             inertia_ok = True
 
                 if inertia_ok:
+                    if not inertia.flags["F_CONTIGUOUS"]:
+                        inertia = inertia.copy(order="F")
+                    assert inertia.flags["F_CONTIGUOUS"]
                     # create the dynamics object with mass and inertia
-                    body = body_class(
-                        np.asfortranarray(translation + orientation),
-                        np.asfarray(velocity),
-                        float(mass),
-                        inertia,
-                    )
+                    body = body_class(initial_pos, velocity, mass, inertia)
                     body.setUseContactorInertia(False)
                 else:
                     if inertia is not None:
@@ -1453,13 +1455,12 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                             self.print_verbose(
                                 "**** Inertia will be computed with the shape of the first contactor"
                             )
-
-                    body = body_class(
-                        np.asfortranarray(translation + orientation),
-                        np.asfarray(velocity),
-                        float(mass),
-                        inertia,
-                    )
+                    if self._dimension == 3:
+                        inertia = np.zeros((3, 3), order="F")
+                    elif self._dimension == 2:
+                        inertia = np.zeros((1, 1), order="F")
+                    np.fill_diagonal(inertia, 1)
+                    body = body_class(initial_pos, velocity, mass, inertia)
                     body.setUseContactorInertia(True)
 
                 fext = self._input[name].get("allow_self_collide", None)
@@ -1497,7 +1498,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 # dynamical system
                 self._nsds.insertDynamicalSystem(body)
                 self._nsds.setName(body, str(name))
-
+                body.display(True)
             return body, "dynamic"
 
     def make_coupler_jointr(self, ds1_name, ds2_name, coupled, references):
@@ -1897,6 +1898,10 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         if velocity is None:
             velocity = obj.attrs["velocity"]
 
+        velocity = np.asarray(velocity, dtype=np.float64)
+        translation = np.asarray(translation, dtype=np.float64)
+        orientation = np.asarray(orientation, dtype=np.float64)
+
         # bodyframe center of mass
         center_of_mass = floatv(obj.attrs.get("center_of_mass", [0, 0, 0]))
 
@@ -1977,9 +1982,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             # Occ object
             body, flag = self.import_occ_object(
                 name,
-                floatv(translation),
-                floatv(orientation),
-                floatv(velocity),
+                translation,
+                orientation,
+                velocity,
                 contactors,
                 mass,
                 inertia,
@@ -1993,9 +1998,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         elif backend == "native":
             body, flag = self.import_native_object(
                 name,
-                floatv(translation),
-                floatv(orientation),
-                floatv(velocity),
+                translation,
+                orientation,
+                velocity,
                 contactors,
                 mass,
                 inertia,
@@ -2008,9 +2013,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             # Bullet object
             body, flag = self.import_bullet_object(
                 name,
-                floatv(translation),
-                floatv(orientation),
-                floatv(velocity),
+                translation,
+                orientation,
+                velocity,
                 contactors,
                 mass,
                 inertia,
@@ -3447,7 +3452,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         else:  # With trace
             if solver_options is None:
                 solver_options = sn.solver_options_create(
-                    solver_ids.SICONOS_FRICTION_3D_NSGS
+                    sn.solver_ids.SICONOS_FRICTION_3D_NSGS
                 )
             # sid = solver_options.solverId
             if osi == integrators.MoreauJeanGOSI:

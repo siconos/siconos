@@ -17,8 +17,10 @@
  */
 
 #include <pybind11/eigen.h>
+#include <pybind11/iostream.h>
 #include <pybind11/pybind11.h>
 
+#include <sstream>
 // #include <functional>
 // #include <memory>
 // #include <span>
@@ -45,8 +47,23 @@ void wrap_dynamical_systems(py::module_ &m) {
       .def("r", &siconos::modeling::DynamicalSystem::r_python,
            py::return_value_policy::reference_internal)
       .def("resetCount", &siconos::modeling::DynamicalSystem::resetCount)
-      .def("setNumber", &siconos::modeling::DynamicalSystem::setNumber);
-
+      .def("setNumber", &siconos::modeling::DynamicalSystem::setNumber)
+      .def("display", &siconos::modeling::DynamicalSystem::display)
+      .def("__str__",
+           [](const siconos::modeling::DynamicalSystem &self) {
+             std::ostringstream buffer;
+             py::scoped_ostream_redirect redirect(std::cout,
+                                                  py::module_::import("sys").attr("stdout"));
+             self.display(true);
+             return buffer.str();
+           })
+      .def("__repr__", [](const siconos::modeling::DynamicalSystem &self) {
+        std::ostringstream buffer;
+        py::scoped_ostream_redirect redirect(std::cout,
+                                             py::module_::import("sys").attr("stdout"));
+        self.display(true);
+        return buffer.str();
+      });
   // ============================== FIRST ORDER DS ==============================
 
   py::class_<siconos::modeling::FirstOrderNonLinearDS,
@@ -197,20 +214,38 @@ void wrap_dynamical_systems(py::module_ &m) {
       .def("setStiffnessMatrix", &siconos::modeling::LagrangianLinearTIDS::setStiffnessMatrix,
            py::keep_alive<1, 2>(), "To define the stiffness matrix (constant)")
       .def("setDampingMatrix", &siconos::modeling::LagrangianLinearTIDS::setDampingMatrix,
-           py::keep_alive<1, 2>(), "To define the damping matrix (constant)")
-
-      ;
-  // .def("__repr__", [](const siconos::modeling::LagrangianLinearTIDS &a) {
-  //     (a.display());
-  //   return "\n";
-  // });
+           py::keep_alive<1, 2>(), "To define the damping matrix (constant)");
 
   py::class_<siconos::modeling::NewtonEulerDS,
              std::shared_ptr<siconos::modeling::NewtonEulerDS>,
              siconos::modeling::SecondOrderDS>(m, "NewtonEulerDS")
-  .def("setConstantFext", &siconos::modeling::NewtonEulerDS::setConstantFext,
-           py::keep_alive<1, 2>(), "To define a constant external forces vector")
-  .def_property("scalarMass", &siconos::modeling::NewtonEulerDS::scalarMass,
-                &siconos::modeling::NewtonEulerDS::setScalarMass);
 
+      .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>,
+                    Eigen::Ref<siconos::algebra::SiconosVector>, double,
+                    Eigen::Ref<siconos::algebra::SiconosMatrix>>(),
+           py::keep_alive<1, 2>(),  // keep python object (np array arguments) memory alive
+                                    // as long as object is referenced
+           py::keep_alive<1, 3>(), py::keep_alive<1, 5>(), py::arg("q0"), py::arg("twist0"),
+           py::arg("mass"), py::arg("inertia"))
+
+      .def("q", &siconos::modeling::NewtonEulerDS::q_python,
+           py::return_value_policy::reference_internal)
+      .def("velocity", &siconos::modeling::NewtonEulerDS::twist_python,
+           py::return_value_policy::reference_internal)
+
+      .def("setConstantFext", &siconos::modeling::NewtonEulerDS::setConstantFext,
+           py::keep_alive<1, 2>(), "To define a constant external forces vector")
+
+      .def(
+          "setComputeFextFunction",
+          [](siconos::modeling::NewtonEulerDS &self, py::function f) {
+            // Catch Python function and create a complient std::function
+            self.setComputeFextFunction(
+                [f](double val, Eigen::Ref<siconos::algebra::MapVectorType> result) {
+                  f(val, result);  // Call python func with a memory view ...
+                });
+          },
+          "How to compute external forces")
+      .def_property("scalarMass", &siconos::modeling::NewtonEulerDS::scalarMass,
+                    &siconos::modeling::NewtonEulerDS::setScalarMass);
 }

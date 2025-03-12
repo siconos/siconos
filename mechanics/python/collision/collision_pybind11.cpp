@@ -172,7 +172,7 @@ PYBIND11_MODULE(_collision, m) {
                     Eigen::Ref<siconos::algebra::SiconosMatrix>>(),
            py::keep_alive<1, 2>(),  // keep python object (np array arguments) memory alive
                                     // as long as object is referenced
-           py::keep_alive<1, 3>(), py::keep_alive<1, 4>(), py::arg("position"),
+           py::keep_alive<1, 3>(), py::keep_alive<1, 5>(), py::arg("position"),
            py::arg("velocity"), py::arg("mass"), py::arg("inertia"))
       .def("setUseContactorInertia", &siconos::collision::RigidBodyDS::setUseContactorInertia,
            py::arg("useContactorInertia"))
