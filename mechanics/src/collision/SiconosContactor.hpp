@@ -49,16 +49,14 @@ class SiconosContactor {
   ACCEPT_SERIALIZATION(SiconosContactor);
 
  public:
-  SiconosContactor(std::shared_ptr<SiconosShape> shape,
-                   std::shared_ptr<siconos::algebra::SiconosVector> offset = nullptr,
-                   int collision_group = 0);
+  SiconosContactor(std::shared_ptr<SiconosShape> shape);
 
   SiconosContactor(std::shared_ptr<SiconosShape> shape,
-                   Eigen::Ref<siconos::algebra::SiconosVector> offset,
+                   const siconos::algebra::SiconosVector& input_offset,
                    int collision_group = 0);
 
   std::shared_ptr<SiconosShape> shape{nullptr};
-  std::shared_ptr<siconos::algebra::SiconosVector> offset{nullptr};
+  const siconos::algebra::SiconosVector offset;
   int collision_group{0};
 
   virtual ~SiconosContactor() noexcept = default;
@@ -71,7 +69,8 @@ class SiconosContactorSet {
   // using iterator = std::vector<std::shared_ptr<SiconosContactor>>::iterator;
 
  public:
-  SiconosContactorSet() : _vector(std::make_shared<std::vector<std::shared_ptr<SiconosContactor>>>()) {}
+  SiconosContactorSet()
+      : _vector(std::make_shared<std::vector<std::shared_ptr<SiconosContactor>>>()) {}
   void append(std::shared_ptr<SiconosContactor> b) { _vector->push_back(b); }
   void append(std::vector<std::shared_ptr<SiconosContactor>> b) {
     _vector->insert(_vector->end(), b.begin(), b.end());

@@ -246,13 +246,7 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::u
   auto plane = record->shape;
   auto btplane = record->btshape;
 
-  siconos::algebra::SiconosVector o(7);
-  if (record->contactor->offset) {
-    o = *record->contactor->offset;
-  } else {
-    o.setZero();
-    o(3) = 1.0;
-  }
+  auto o = record->contactor->offset;
 
   // Adjust the offset according to plane implementation
 #ifdef USE_BOX_FOR_PLANE
@@ -807,15 +801,7 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::u
   o(2) = z_offset;
   o(3) = 1;
 
-  btTransform t;
-  if (record->contactor->offset) {
-    t = offsetTransform(*record->contactor->offset, o);
-  } else {
-    siconos::algebra::SiconosVector offset(7);
-    offset.setZero();
-    offset(3) = 1.0;
-    t = offsetTransform(offset, o);
-  }
+  auto t = offsetTransform(record->contactor->offset, o);
 
   o(0) = t.getOrigin().getX();
   o(1) = t.getOrigin().getY();
@@ -1282,12 +1268,7 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
   DEBUG_PRINT("Position of the shape given to bullet:")
   DEBUG_EXPR_WE(siconos::algebra::print(q););
 
-  btTransform t;
-  if (record->contactor->offset) {
-    t = offsetTransform(q, *record->contactor->offset);
-  } else {
-    t = offsetTransform(q);
-  }
+  auto t = offsetTransform(q, record->contactor->offset);
 
   t.setOrigin(t.getOrigin() * _options->worldScale);
   DEBUG_PRINTF("transformation = %f,%f,%f\n", float(t.getOrigin().getX()),

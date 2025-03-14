@@ -1005,6 +1005,10 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self._time_stepping_class = None
         self._k = None
         self._k0 = None
+        self._q0 = []
+        self._v0 = []
+        self.fext = []
+        self.weight = []
 
     def __enter__(self):
         super(MechanicsHdf5Runner, self).__enter__()
@@ -1093,8 +1097,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             weight = [0, 0, -scalar_mass * g]
         elif self._dimension == 2:
             weight = [0, -scalar_mass * g, 0.0]
-        weight = np.array(weight, dtype=np.float64, order="F")
-        body.setConstantFext(weight)
+        self.weight.append(np.array(weight, dtype=np.float64, order="F"))
+        body.setConstantFext(self.weight[-1])
 
     def import_nonsmooth_law(self, name):
         if self._interman is not None:
@@ -1360,7 +1364,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         birth=False,
         number=None,
     ):
-
         if body_class is None:
             body_class = default_body_class
 
@@ -1373,7 +1376,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             # a static object
             # ---------------
             if mass is None:
-
                 cset = smc.SiconosContactorSet()
                 csetpos = np.concatenate([translation, orientation], axis=0)
                 for c in contactors:
@@ -1387,7 +1389,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         "at relative position",
                         pos,
                     )
-
                 staticBody = self._interman.addStaticBody(cset, csetpos, number)
                 self._static[name] = {
                     "number": number,
@@ -1433,7 +1434,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         inertia = inertia.copy(order="F")
                     assert inertia.flags["F_CONTIGUOUS"]
                     # create the dynamics object with mass and inertia
-                    body = body_class(initial_pos, velocity, mass, inertia)
+                    self._q0.append(initial_pos.copy())
+                    self._v0.append(velocity)
+                    body = body_class(self._q0[-1], self._v0[-1], mass, inertia)
                     body.setUseContactorInertia(False)
                 else:
                     if inertia is not None:
@@ -1463,9 +1466,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     body = body_class(initial_pos, velocity, mass, inertia)
                     body.setUseContactorInertia(True)
 
-                fext = self._input[name].get("allow_self_collide", None)
-                if fext is not None:
-                    body.setConstantFext(fext)
+                self.fext.append(self._input[name].get("allow_self_collide", None))
+                if self.fext[-1] is not None:
+                    body.setConstantFext(self.fext[-1])
 
                 self_collide = self._input[name].get("allow_self_collide", None)
                 if self_collide is not None:
@@ -1498,7 +1501,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 # dynamical system
                 self._nsds.insertDynamicalSystem(body)
                 self._nsds.setName(body, str(name))
-                body.display(True)
             return body, "dynamic"
 
     def make_coupler_jointr(self, ds1_name, ds2_name, coupled, references):
@@ -3566,12 +3568,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             self.log(self.output_domains, with_timer)()
 
         self.output_run_options()
-
-        # nsds = model.nonSmoothDynamicalSystem()
-        # nds= nsds.getNumberOfDS()
-        # for i in range(nds):
-        #     ds = nsds.dynamicalSystem(i)
-        #     ds.display()
 
         self.print_verbose("start simulation ...")
         self._initializing = False

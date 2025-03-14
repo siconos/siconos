@@ -20,7 +20,7 @@
 #include <boost/math/quaternion.hpp>
 #include <iostream>
 
-#include "BlockMatrix.hpp"
+#include "BlockMatrix.hpp"  
 #include "RotationQuaternion.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
