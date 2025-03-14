@@ -123,7 +123,8 @@ PYBIND11_MODULE(_collision, m) {
              std::shared_ptr<siconos::collision::SiconosContactor>>(m, "SiconosContactor")
       .def(py::init<std::shared_ptr<siconos::collision::SiconosShape>,
                     Eigen::Ref<siconos::algebra::SiconosVector>, int>(),
-           py::arg("shape"), py::arg("offset"), py::arg("collision_group"));
+           py::arg("shape"), py::arg("offset") = siconos::algebra::SiconosVector::Zero(7),
+           py::arg("collision_group") = 0);
 
   py::class_<siconos::collision::SiconosContactorSet,
              std::shared_ptr<siconos::collision::SiconosContactorSet>>(m,
