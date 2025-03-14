@@ -179,7 +179,8 @@ PYBIND11_MODULE(_collision, m) {
       .def("setUseContactorInertia", &siconos::collision::RigidBodyDS::setUseContactorInertia,
            py::arg("useContactorInertia"))
       .def("setContactors", &siconos::collision::RigidBodyDS::setContactors,
-           py::arg("contactors"));
+           py::arg("contactors"))
+      .def("contactors", &siconos::collision::RigidBodyDS::contactors);
 
   py::class_<siconos::collision::RigidBody2dDS,
              std::shared_ptr<siconos::collision::RigidBody2dDS>,
