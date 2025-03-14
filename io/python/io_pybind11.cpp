@@ -36,5 +36,6 @@ PYBIND11_MODULE(_io, m) {
       .def("contactInfo", &siconos::io::MechanicsIO::contactInfo)
       .def("positions", &siconos::io::MechanicsIO::positions)
       .def("velocities", &siconos::io::MechanicsIO::velocities)
-      .def("contactPoints", &siconos::io::MechanicsIO::contactPoints);
+      .def("contactPoints", &siconos::io::MechanicsIO::contactPoints)
+      .def("contactContactWork", &siconos::io::MechanicsIO::contactContactWork);
 }

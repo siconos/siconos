@@ -936,7 +936,7 @@ void siconos::io::ContactContactWorkVisitor::operator()(
   compute_contact_work_and_status(inter, omega, tol, answer);
 }
 
-std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::contactContactWork(
+std::optional<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::contactContactWork(
     const siconos::modeling::NonSmoothDynamicalSystem& nsds, unsigned int index_set,
     double omega, double tol) const {
   DEBUG_BEGIN("SiconosMatrix MechanicsIO::contactContactWork");
@@ -946,8 +946,7 @@ std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::conta
     auto& graph = *nsds.topology()->indexSet(index_set);
 
     unsigned int current_row;
-    auto result =
-        std::make_shared<siconos::algebra::SiconosMatrix>(graph.vertices_number(), 25);
+    siconos::algebra::SiconosMatrix result{graph.vertices_number(), 25};
 
     int data_size = 0;
     for (current_row = 0, std::tie(vi, viend) = graph.vertices(); vi != viend; ++vi) {
@@ -973,12 +972,12 @@ std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::conta
         // related to a contact points (perhaps a joint)
       } else {
       }
-      if (result->cols() != data.size()) {
-        result->resize(graph.vertices_number(), data.size());
+      if (result.cols() != data.size()) {
+        result.resize(graph.vertices_number(), data.size());
       }
-      result->row(current_row++) = data;
+      result.row(current_row++) = data;
     }
-    result->resize(current_row, data_size);
+    result.resize(current_row, data_size);
     DEBUG_EXPR(siconos::algebra::print(*result));
     ;
     return result;
@@ -986,5 +985,5 @@ std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::conta
   DEBUG_END("MechanicsIO::contactContactWork");
 
   // siconos::algebra::print(*result);
-  return nullptr;
+  return std::nullopt;
 }
