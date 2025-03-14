@@ -110,9 +110,10 @@ PYBIND11_MODULE(_bullet, m) {
              siconos::collision::SiconosCollisionManager>(m, "SiconosBulletCollisionManager")
       .def(py::init<std::shared_ptr<siconos::collision::bullet::SiconosBulletOptions>>(),
            py::arg("options"))
+      .def(py::init<>())
       .def("addStaticBody",
            &siconos::collision::bullet::SiconosBulletCollisionManager::addStaticBody,
-           py::arg("cs"), py::arg("position"), py::arg("number"))
+           py::arg("cs"), py::arg("position"), py::arg("number") = 0)
 
       .def("statistics",
            &siconos::collision::bullet::SiconosBulletCollisionManager::statistics);
