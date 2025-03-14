@@ -93,7 +93,8 @@ PYBIND11_MODULE(_collision, m) {
 
   py::class_<siconos::collision::SiconosPlane,
              std::shared_ptr<siconos::collision::SiconosPlane>,
-             siconos::collision::SiconosShape>(m, "SiconosPlane");
+             siconos::collision::SiconosShape>(m, "SiconosPlane")
+       .def(py::init());
 
   py::class_<siconos::collision::SiconosConvexHull,
              std::shared_ptr<siconos::collision::SiconosConvexHull>,
