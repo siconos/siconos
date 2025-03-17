@@ -23,7 +23,6 @@
 namespace siconos::mechanics::occ {
 class OccSpaceFilter : public siconos::collision::native::SpaceFilter {
  public:
-  // Do we need a default constructor ?
   virtual void updateInteractions(std::shared_ptr<siconos::simulation::Simulation>){};
 };
 }  // namespace siconos::mechanics::occ

@@ -60,7 +60,8 @@ PYBIND11_MODULE(nonsmooth_formulations, m) {
              siconos::nonsmooth_formulations::OneStepNSProblem>(m, "LinearOSNS")
       .def("setMStorageType", &siconos::nonsmooth_formulations::LinearOSNS::setMStorageType)
       .def("setKeepLambdaAndYState",
-           &siconos::nonsmooth_formulations::LinearOSNS::setKeepLambdaAndYState);
+           &siconos::nonsmooth_formulations::LinearOSNS::setKeepLambdaAndYState)
+      .def("setAssemblyType", &siconos::nonsmooth_formulations::LinearOSNS::setAssemblyType);
 
   py::class_<siconos::nonsmooth_formulations::LCP,
              std::shared_ptr<siconos::nonsmooth_formulations::LCP>,

@@ -29,6 +29,7 @@ import json
 
 # Siconos imports
 import siconos.io.mechanics_hdf5
+import siconos.nonsmooth_formulations
 import siconos.numerics as sn
 import siconos.modeling as sm
 import siconos.nonsmooth_formulations as nsf
@@ -409,6 +410,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             scalar_mass = body.scalarMass
         elif hasattr(body, "getMassValue"):
             scalar_mass = body.getMassValue()
+        else:
+            raise RuntimeError(f"Can't get mass value for this kind of DS {type(body)}")
         if self._dimension == 3:
             weight = [0, 0, -scalar_mass * g]
         elif self._dimension == 2:
@@ -514,7 +517,10 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             radius = self._shape._io.shapes()[ctor.shape_name][:][0][0]
 
             body = body_class(
-                radius, mass, list(translation) + list(orientation), velocity
+                radius,
+                mass,
+                np.concatenate([translation, orientation], axis=0),
+                velocity,
             )
 
             self._set_external_forces(body)
@@ -578,7 +584,10 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     self.print_verbose("Wrong shape of inertia")
 
             body = body_class(
-                list(translation) + list(orientation), velocity, mass, inertia
+                np.concatenate([translation, orientation], axis=0),
+                velocity,
+                mass,
+                inertia,
             )
 
             if number is not None:
@@ -754,21 +763,24 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     if inertia is not None:
                         if self._dimension == 3:
                             self.print_verbose(
-                                "**** Warning inertia for object named {0} does not have the correct shape: {1} instead of (3, 3) or (3,)".format(
+                                "**** Warning inertia for object named {0} does not have the"
+                                " correct shape: {1} instead of (3, 3) or (3,)".format(
                                     name, np.shape(inertia)
                                 )
                             )
                             self.print_verbose(
-                                "**** Inertia will be computed with the shape of the first contactor"
+                                "**** Inertia will be computed with the shape"
+                                " of the first contactor"
                             )
                         elif self._dimension == 2:
                             self.print_verbose(
-                                "**** Warning inertia for object named {0} does not have the correct shape: {1} instead of (1, 1) or (1,) or scalar".format(
-                                    name, np.shape(inertia)
-                                )
+                                "**** Warning inertia for object named {0} does not have the"
+                                " correct shape: {1} instead of (1, 1) or (1,)"
+                                "or scalar".format(name, np.shape(inertia))
                             )
                             self.print_verbose(
-                                "**** Inertia will be computed with the shape of the first contactor"
+                                "**** Inertia will be computed with the shape of"
+                                " the first contactor"
                             )
                     if self._dimension == 3:
                         inertia = np.zeros((3, 3), order="F")
@@ -2064,13 +2076,30 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             except KeyError:
                 d["controller"] = "not serialized"
 
-        for key, value in d.items():
-            if isinstance(value, siconos.simulation.TimeSteppingType):
-                d[key] = value.value  # Convertit en entier
-                dict_json = json.dumps(d)
-                self._run_options_data.attrs["options"] = dict_json
+        # Special care for enum, to make them json-complient
+        def serialize_enum(obj):
+            enum_types = (
+                siconos.nonsmooth_formulations.LinearOSNSAssemblyType,
+                siconos.simulation.TimeSteppingType,
+            )
+            if self.config.use_bullet:
+                enum_types += (siconos.mechanics.collision.bullet.SiconosBulletDimension,)
+            if isinstance(obj, enum_types):
+                return obj.value
+            elif isinstance(obj, (str, int, float, bool, list, dict, type(None))):
+                return obj
+            elif hasattr(obj, "__class__") and hasattr(obj, "__dir__"):
+                return {
+                    key: serialize_enum(getattr(obj, key))
+                    for key in dir(obj)
+                    if not key.startswith("_") and hasattr(obj, key)
+                }
 
-        dict_json = json.dumps(d)
+            raise TypeError(
+                f"Object of type {obj.__class__.__name__} is not JSON serializable"
+            )
+
+        dict_json = json.dumps(d, default=serialize_enum)
         self._run_options_data.attrs["options"] = dict_json
 
     def print_solver_infos(self):
@@ -2572,7 +2601,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             msg += "bullet_options.minimumPointsPerturbationThreshold."
             raise RuntimeError(msg)
 
-        if bullet_options is None and siconos.mechanics.have_bullet:
+        if (
+            bullet_options is None and self.config.use_bullet
+        ):  # siconos.mechanics.have_bullet:
             bullet_options = self.config.bullet.SiconosBulletOptions()
             if multipoints_iterations:
                 bullet_options.perturbationIterations = 3 * multipoints_iterations
@@ -2669,7 +2700,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 msg += "with NewtonImpactFrictionNSL or NewtonImpactRollingFrictionNSL."
                 raise RuntimeError(msg)
             if nb_of_nslaw_type > 1:
-                msg = "MoreauJeanGOSI cannot only deal with multiple inpact laws at the same time "
+                msg = "MoreauJeanGOSI cannot only deal with multiple"
+                msg += "impact laws at the same time "
                 raise RuntimeError(msg)
 
         # Creates and initialises the one-step nonsmooth problem.
@@ -3037,8 +3069,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             self.log(self._simulation.nextStep, with_timer)()
 
             if self._end_run_iteration_hook is not None:
-                if False == self.log(self._end_run_iteration_hook.call, with_timer)(
-                    self._k
+                if (
+                    self.log(self._end_run_iteration_hook.call, with_timer)(self._k)
+                    is False
                 ):
                     break
 

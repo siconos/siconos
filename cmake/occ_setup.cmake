@@ -9,8 +9,8 @@ find_package(OpenCASCADE  REQUIRED)
 
 if(OpenCASCADE_FOUND)
   message(STATUS "Found OpenCASCADE version ${OpenCASCADE_VERSION}")
-  message("    OpenCASCADE libraries : ${OpenCASCADE_LIBRARIES}.")
-  message("    OpenCASCADE headers path : ${OpenCASCADE_INCLUDE_DIR}")
+  message("    OpenCASCADE libraries : ${OpenCASCADE_LIBRARIES}.\n")
+  message("    OpenCASCADE headers path : ${OpenCASCADE_INCLUDE_DIR}\n")
 endif()
 
 if(NOT OpenCASCADE_VERSION VERSION_GREATER 7.6)

@@ -55,8 +55,6 @@ class OccBody : public siconos::modeling::NewtonEulerDS {
   std::shared_ptr<TopoDS_Shape_vector> _shapes{nullptr};
 
  public:
-  // using NewtonEulerDS::NewtonEulerDS;
-
   virtual ~OccBody() noexcept = default;
 
   /** Constructor from a minimum set of data.

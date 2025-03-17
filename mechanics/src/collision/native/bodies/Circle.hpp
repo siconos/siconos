@@ -46,7 +46,7 @@ class Circle : public CircularDS, public std::enable_shared_from_this<Circle> {
 
   /** destructor */
   virtual ~Circle() noexcept = default;
-  
+
   virtual void acceptSP(modeling::dynamical_systems::Visitor& tourist) override {
     tourist.visit(shared_from_this());
   }

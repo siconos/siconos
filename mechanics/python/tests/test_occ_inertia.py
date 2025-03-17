@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 #
 
-import numpy as np
 import math
 
-from siconos.mechanics.collision.tools import Contactor, Shape, Volume, Material
+from siconos.mechanics.collision.tools import Volume, Material
 from siconos.io.mechanics_run import MechanicsHdf5Runner
 from OCC.Core.BRepPrimAPI import BRepPrimAPI_MakeCylinder, BRepPrimAPI_MakeSphere
-from OCC.Core.gp import gp_Pnt
 from OCC.Core.gp import gp_Pnt, gp_Ax2, gp_Dir
 from OCC.Core.BRep import BRep_Builder
 from OCC.Core.TopoDS import TopoDS_Compound
@@ -309,9 +307,9 @@ def test_sphere_1cm():
         volume = 4 / 3.0 * math.pi * radius**3
         mass = volume * steel_cm.density
 
-        inertia = (
-            2 / 5 * mass * radius**2
-        )  # * 1e-4 # Warning the inertia unit is kg.m^2, so it is not sufficient to scale to density.
+        inertia = 2 / 5 * mass * radius**2
+        # * 1e-4 # Warning the inertia unit is kg.m^2, so it is
+        # not sufficient to scale to density.
 
         print("volume :", volume)
         print("mass :", mass)

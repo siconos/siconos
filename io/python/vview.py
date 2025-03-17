@@ -10,6 +10,11 @@ import json
 import getopt
 import math
 import traceback
+from math import pi
+from numpy.linalg import norm
+import numpy
+import random
+
 import vtk
 from vtk.util.vtkAlgorithm import VTKPythonAlgorithmBase
 from vtk.numpy_interface import dataset_adapter as dsa
@@ -537,7 +542,7 @@ class VRawDataExportOptions(VViewOptions):
             --no-export-position do not export position
             --no-export-velocity do not export position
             --export-cf          do export of contact friction data
-            --export-velocity-in-absolute-frame        
+            --export-velocity-in-absolute-frame
                 do export of contact friction data
 
             """
@@ -956,7 +961,7 @@ class CellConnector(vtk.vtkProgrammableFilter):
 
             data = self._datas[i]
 
-            data_t = data[0: self._data_sizes[i]]
+            data_t = data[0 : self._data_sizes[i]]
 
             for c in range(ncells):
                 output.GetCellData().GetArray(data_name).SetTuple(c, data_t)
@@ -1094,7 +1099,7 @@ class IOReader(VTKPythonAlgorithmBase):
                         self.cf_data = self._icf_data[self._id_t_m_cf, :]
 
                     else:
-                        self.cf_data = self._icf_data[self._cf_indices[id_t_cf]:, :]
+                        self.cf_data = self._icf_data[self._cf_indices[id_t_cf] :, :]
 
                     self._cf_time = self._cf_times[id_t_cf]
 
@@ -2354,7 +2359,11 @@ class VView(object):
                     actor.VisibilityOn()
                 elif self.opts.visible_mode == "avatars" and group == -1 and has_avatar:
                     actor.VisibilityOn()
-                elif self.opts.visible_mode == "contactors" and group != -1 and has_avatar:
+                elif (
+                    self.opts.visible_mode == "contactors"
+                    and group != -1
+                    and has_avatar
+                ):
                     actor.VisibilityOn()
                 else:
                     actor.VisibilityOff()
@@ -2381,7 +2390,11 @@ class VView(object):
                     actor.VisibilityOn()
                 elif self.opts.visible_mode == "avatars" and group == -1 and has_avatar:
                     actor.VisibilityOn()
-                elif self.opts.visible_mode == "contactors" and group != -1 and has_avatar:
+                elif (
+                    self.opts.visible_mode == "contactors"
+                    and group != -1
+                    and has_avatar
+                ):
                     actor.VisibilityOn()
                 else:
                     actor.VisibilityOff()
@@ -2827,7 +2840,7 @@ class VView(object):
     def export(self):
         self.print_verbose("export start")
         times = self.io_reader._times[
-            self.opts.start_step: self.opts.end_step: self.opts.stride
+            self.opts.start_step : self.opts.end_step : self.opts.stride
         ]
         ntime = len(times)
 
@@ -2952,7 +2965,7 @@ class VView(object):
     def export_raw_data(self):
 
         times = self.io_reader._times[
-            self.opts.start_step: self.opts.end_step: self.opts.stride
+            self.opts.start_step : self.opts.end_step : self.opts.stride
         ]
         ntime = len(times)
         export_2d = False
@@ -3230,16 +3243,12 @@ if __name__ == "__main__":
 
 # Heavier imports after command line parsing
 from vtk.util import numpy_support
-from math import pi
-from numpy.linalg import norm
-import numpy
-import random
 
 from siconos.io.mechanics_hdf5 import MechanicsHdf5
 from siconos.io.tools import tmpfile as io_tmpfile
 import siconos.mechanics
 
-have_occ = False  # siconos.mechanics.have_occ
+have_occ = siconos.mechanics.have_occ
 if have_occ:
     from siconos.io.occ_tools import (
         occ_topo_list,

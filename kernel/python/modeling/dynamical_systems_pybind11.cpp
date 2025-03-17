@@ -235,7 +235,6 @@ void wrap_dynamical_systems(py::module_ &m) {
 
       .def("setConstantFext", &siconos::modeling::NewtonEulerDS::setConstantFext,
            py::keep_alive<1, 2>(), "To define a constant external forces vector")
-
       .def(
           "setComputeFextFunction",
           [](siconos::modeling::NewtonEulerDS &self, py::function f) {

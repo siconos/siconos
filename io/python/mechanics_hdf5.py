@@ -23,6 +23,7 @@ import pickle
 import siconos.io.tools
 from siconos.mechanics.quaternions import quaternion_get
 import siconos.mechanics.collision.tools as smct
+from siconos.mechanics import have_bullet, have_occ
 
 # fix compatibility with h5py version
 if hasattr(h5py, "vlen_dtype"):
@@ -907,7 +908,7 @@ class MechanicsHdf5(object):
 
                     # a computed inertia and center of mass
                     # occ only
-                    assert siconos.mechanics.have_occ
+                    assert have_occ
                     import siconos.io.occ_tools
 
                     volumes = filter(
@@ -968,7 +969,8 @@ class MechanicsHdf5(object):
                 if np.isscalar(mass) and mass <= 0.0:
 
                     self.print_verbose(
-                        "The use of a mass equal to zero to define a static object is deprecated."
+                        "The use of a mass equal to zero"
+                        " to define a static object is deprecated."
                     )
                     self.print_verbose("Set mass=None to define a static object")
             else:

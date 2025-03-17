@@ -60,7 +60,21 @@ if(WITH_BULLET)
     )
 endif()
 
-  
+if(SICONOS_HAS_MECHANICS_OCC)
+  create_pybind11_module(
+    MODULE_NAME siconos_occ
+    SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/mechanics_occ_pybind11.cpp
+    DEPENDENCIES kernel mechanics
+    PARENT_NAME mechanics/occ
+  )
+  set_target_properties(siconos_occ PROPERTIES OUTPUT_NAME "_occ")
+  install(TARGETS
+    siconos_occ
+    COMPONENT python
+    LIBRARY DESTINATION "${SICONOS_PYTHON_INSTALL_DIR}/siconos/mechanics/occ"
+    )
+endif()
+
 
 target_include_directories(pycollision PRIVATE ${CMAKE_SOURCE_DIR}/mechanics/src/collision/bullet)
 target_include_directories(pycollision PRIVATE ${CMAKE_SOURCE_DIR}/mechanics/src/collision/native/bodies)

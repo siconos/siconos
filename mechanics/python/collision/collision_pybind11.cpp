@@ -1,20 +1,20 @@
 /* Siconos is a program dedicated to modeling, simulation and control
-* of non smooth dynamical systems.
-*
-* Copyright 2025 INRIA.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2025 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include <pybind11/eigen.h>
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
@@ -140,19 +140,37 @@ PYBIND11_MODULE(_collision, m) {
              siconos::collision::SiconosShape>(m, "SiconosHeightMap");
 
   py::class_<siconos::collision::native::SpaceFilter,
-             std::shared_ptr<siconos::collision::native::SpaceFilter>>(m, "SpaceFilter");
+             std::shared_ptr<siconos::collision::native::SpaceFilter>,
+             siconos::simulation::InteractionManager>(m, "SpaceFilter")
+      .def(py::init<>())
+      .def("setBBoxfactor", &siconos::collision::native::SpaceFilter::setBBoxfactor)
+      .def("setCellsize", &siconos::collision::native::SpaceFilter::setCellsize)
+      .def("insertLine", &siconos::collision::native::SpaceFilter::insertLine);
+
+  py::class_<siconos::collision::native::bodies::CircularDS,
+             std::shared_ptr<siconos::collision::native::bodies::CircularDS>,
+             siconos::modeling::LagrangianDS>(m, "CircularDS")
+      .def(py::init<double, double, Eigen::Ref<siconos::algebra::SiconosVector>,
+                    Eigen::Ref<siconos::algebra::SiconosVector>>(),
+           py::keep_alive<1, 4>(), py::keep_alive<1, 5>(), py::arg("radius"), py::arg("mass"),
+           py::arg("q0"), py::arg("v0"))
+      .def("getMassValue", &siconos::collision::native::bodies::CircularDS::getMassValue);
 
   py::class_<siconos::collision::native::bodies::Circle,
-             std::shared_ptr<siconos::collision::native::bodies::Circle>>(m, "Circle")
+             std::shared_ptr<siconos::collision::native::bodies::Circle>,
+             siconos::collision::native::bodies::CircularDS>(m, "Circle")
       .def(py::init<double, double, Eigen::Ref<siconos::algebra::SiconosVector>,
                     Eigen::Ref<siconos::algebra::SiconosVector>>(),
-           py::arg("radius"), py::arg("mass"), py::arg("position"), py::arg("velocity"));
+           py::keep_alive<1, 4>(), py::keep_alive<1, 5>(), py::arg("radius"), py::arg("mass"),
+           py::arg("q0"), py::arg("v0"));
 
   py::class_<siconos::collision::native::bodies::Disk,
-             std::shared_ptr<siconos::collision::native::bodies::Disk>>(m, "Disk")
+             std::shared_ptr<siconos::collision::native::bodies::Disk>,
+             siconos::collision::native::bodies::CircularDS>(m, "Disk")
       .def(py::init<double, double, Eigen::Ref<siconos::algebra::SiconosVector>,
                     Eigen::Ref<siconos::algebra::SiconosVector>>(),
-           py::arg("radius"), py::arg("mass"), py::arg("position"), py::arg("velocity"));
+           py::keep_alive<1, 4>(), py::keep_alive<1, 5>(), py::arg("radius"), py::arg("mass"),
+           py::arg("q0"), py::arg("v0"));
 
   py::class_<siconos::collision::SiconosCollisionManager,
              std::shared_ptr<siconos::collision::SiconosCollisionManager>,

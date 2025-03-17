@@ -16,7 +16,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from OCC import STEPControl
+
+# ignore flake8 warning for line too long, only for this file
+# noqa: E501
+
 import webbrowser
 from OCC.Visualization import Tesselator
 import OCC
@@ -24,51 +27,22 @@ from time import time
 import os
 import tempfile
 
-
-import subprocess
-from OCC import VERSION
-from OCC.gp import gp_Ax1, gp_Pnt, gp_Dir, gp_Trsf, gp_Quaternion, gp_Vec, gp_XYZ
-from OCC.TopLoc import TopLoc_Location
-from OCC.Display.SimpleGui import get_backend, init_display
-from OCC.STEPControl import STEPControl_Reader, STEPControl_Writer, STEPControl_AsIs
-from OCC.Interface import Interface_Static_SetCVal
-from OCC.BRep import BRep_Builder
-from OCC.BRepBuilderAPI import BRepBuilderAPI_Transform
-from OCC.TopoDS import TopoDS_Compound
+from OCC.STEPControl import STEPControl_Reader
 from OCC.IFSelect import IFSelect_RetDone, IFSelect_ItemsByEntity
-import OCC.Graphic3d as Graphic3d
-from OCC.Quantity import (
-    Quantity_NOC_DARKVIOLET,
-    Quantity_NOC_BLUE1,
-    Quantity_NOC_GREEN,
-    Quantity_NOC_RED,
-    Quantity_NOC_ORANGE,
-    Quantity_NOC_SALMON,
-    Quantity_NOC_YELLOW,
-)
 import sys
-import random
 import math
 import vtk
-from vtk.util import numpy_support
+
+import siconos.io.mechanics_run as IO
+from operator import itemgetter
 
 vtkmath = vtk.vtkMath()
-from OCC.gp import gp_Ax1, gp_Pnt, gp_Dir, gp_Trsf, gp_Quaternion, gp_Vec, gp_XYZ
-from OCC.TopLoc import TopLoc_Location
-
-# from Siconos.Mechanics import IO
-import siconos.io.mechanics_run as IO
-from Quaternion import Quat
-from collections import Counter, defaultdict
-from itertools import groupby
-from operator import itemgetter
-from timeit import timeit
 
 
 # update_progress() : Displays or updates a console progress bar
-## Accepts a float between 0 and 1. Any int will be converted to a float.
-## A value under 0 represents a 'halt'.
-## A value at 1 or bigger represents 100%
+# Accepts a float between 0 and 1. Any int will be converted to a float.
+# A value under 0 represents a 'halt'.
+# A value at 1 or bigger represents 100%
 def update_progress(progress):
     barLength = 50  # Modify this to change the length of the progress bar
     status = ""
@@ -2184,7 +2158,7 @@ class HTMLBody(object):
             "0x673300",
             "0x333b53",
         ]
-        numberOfColors = len(listOfColors)
+        # numberOfColors = len(listOfColors)
         for key in (self._interstellarVectors).keys():
             if type(key) is int:
                 POINTSOFAPPLICATION += "\n"
@@ -2468,7 +2442,7 @@ class HTMLBody(object):
             else:
                 body_str = body_str.replace("@Uniforms@", self._uniforms)
                 if "time" in self._uniforms:
-                    backbody_str = body_str.replace(
+                    body_str = body_str.replace(
                         "@IncrementTime@", "uniforms.time.value += 0.05;"
                     )
                 else:
@@ -2544,7 +2518,7 @@ class ThreejsRenderer(object):
         print("done in %f s." % (t1 - t0))
         print("Exporting tesselation to JSON ...")
         t2 = time()
-        if filename == None:
+        if filename is None:
             tess.ExportShapeToThreejs(self._js_filename)
         else:
             tess.ExportShapeToThreejs(filename)
@@ -2576,7 +2550,7 @@ class ThreejsRenderer(object):
             print("Creating the html output in the default directory ...")
             # previous version us a os.system call to the "open" command
             # but this is a platform (osx) specific solution
-            _path = "file:///{0}".format(os.path.join(os.getcwd(), self._html_filename))
+            # _path = "file:///{0}".format(os.path.join(os.getcwd(), self._html_filename))
             # os.rename(_path, "/home/inria/siconos/Examples/Mechanics/Mechanisms/SliderCrank/")
             # webbrowser.open_new_tab(_path)
 
@@ -2616,7 +2590,7 @@ if __name__ == "__main__":
     output_path = os.getcwd()
     bin_path = os.path.dirname(os.path.realpath(__file__))
     share_path = os.path.join(bin_path, "../share/siconos/")
-    import sys, getopt
+    import getopt
 
     try:
         if len(sys.argv) < 2:
@@ -2644,7 +2618,6 @@ if __name__ == "__main__":
 
     print(sys.argv[-1])
     tempfile.tempdir = output_path
-    from OCC.BRepPrimAPI import BRepPrimAPI_MakeBox
 
     with IO.Hdf5(sys.argv[-1], "r") as io:  # sys.argv[1]
         nbobjs = len(
@@ -2885,13 +2858,18 @@ if __name__ == "__main__":
             # print("\nNumber of Time Steps: %d" % numberOfTimeSteps)
             update_progress(timestep / float(numberOfTimeSteps))
             positions = dpos_data[nbobjs * timestep : nbobjs * timestep + nbobjs, 2:]
-            # print("\nPositions: %s" % positions)             #Positions of all objects at timestep
+            # print("\nPositions: %s" % positions)
+            #           #Positions of all objects at timestep
             for instance in io.instances():
                 _id = io.instances()[instance].attrs["id"]
                 _idTab = _id
                 if _id >= 0:
                     if zeroIN:
-                        _idTab += 1  # if _id=0 present then we have to be careful that positions[0] returns positions of object id=0 whereas if _id=0 NOT PRESENT then position[0] returns positions of object id=1
+                        _idTab += 1
+                        # if _id=0 present then we have to be careful
+                        # that positions[0] returns positions of object id=0 whereas
+                        # if _id=0 NOT PRESENT then position[0]
+                        # returns positions of object id=1
                     q0, q1, q2, q3, q4, q5, q6 = [
                         float(x) for x in positions[_idTab - 1, :]
                     ]  # positions and quaternions of the object at timestep
