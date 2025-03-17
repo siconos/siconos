@@ -43,6 +43,15 @@ void SolidLinearTIDSTest::setUp() {
   auto mat1 = std::make_shared<siconos::mechanics::fem::Material>(density, 210e9, 1 / 3.);
   materials = {{bulk_material_tag, mat1}};
 
+          // S = std::make_shared<siconos::algebra::SimpleMatrix>("S.dat", true);
+  S = std::make_shared<siconos::algebra::SimpleMatrix>(12,12,siconos::algebra::UblasType::SPARSE);
+  for (int i = 0; i< 4; i++){
+    S->setValue(i*3,i*3,4.232804e-12);
+    S->setValue(i*3+1,i*3+1,4.232804e-12);
+    S->setValue(i*3,i*3+1,-2.116402e-12);
+    S->setValue(i*3+1,i*3,-2.116402e-12);
+    S->setValue(i*3+2,i*3+2,1.269841e-11);
+  }
 }
 
 void SolidLinearTIDSTest::tearDown() {}
@@ -53,7 +62,17 @@ void SolidLinearTIDSTest::testBuildSolidLinearTIDS1() {
   auto FEsolid = std::make_shared<siconos::mechanics::fem::SolidLinearTIDS>(
       mesh, materials, siconos::algebra::UblasType::SPARSE);
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSolidLinearTIDS1 : ", FEsolid->FEModel()->elements().size() == 6,
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSolidLinearTIDS1 : ", FEsolid->dimension() == 10,
                                true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSolidLinearTIDS1 : ", FEsolid->velocityDimension() == 10,
+                               true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSolidLinearTIDS1 : ", FEsolid->stressDimension() == 12,
+                               true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSolidLinearTIDS1 : ", FEsolid->FEModel()->elements().size() == 4,
+                               true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSolidLinearTIDS1 : ", (*FEsolid->stress())(0) == 0.0,
+                               true);
+  // CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSolidLinearTIDS1 : ", (FEsolid->S())->getValue(0,0) - S->getValue(0,0),
+  //                              true);
   std::cout << "--> Constructor 1 test ended with success." << std::endl;
 }
