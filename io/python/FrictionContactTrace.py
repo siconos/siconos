@@ -35,13 +35,10 @@ try:
     import siconos.fclib as F
 
     has_fclib = True
-except:
+except ImportError:
     has_fclib = False
     print("No module named siconos.fclib.")
 
-import sys
-import time
-import getopt
 import random
 import h5py
 import os
@@ -70,8 +67,8 @@ class FrictionContactTraceParams:
 
 class FrictionContactTrace(FrictionContact):
 
-    def __init__(self, dim, solver_options, params=None, nsds=None):
-        if params == None:
+    def __init__(self, dim, solver_id, params=None, nsds=None):
+        if params is None:
             self._params = FrictionContactTraceParams()
         else:
             self._params = params
@@ -89,7 +86,7 @@ class FrictionContactTrace(FrictionContact):
         self._counter = 0
         self._stepcounter = 0
         self._nsds = nsds
-        super(FrictionContactTrace, self).__init__(dim, solver_options)
+        super(FrictionContactTrace, self).__init__(dim, solver_id)
 
     def maxiter_condition(self, SO):
         return SO.iparam[sn.params.SICONOS_IPARAM_ITER_DONE] >= self._maxiter
@@ -215,8 +212,8 @@ class GlobalFrictionContactTraceParams:
 
 class GlobalFrictionContactTrace(GlobalFrictionContact):
 
-    def __init__(self, dim, solver_options, params=None, nsds=None):
-        if params == None:
+    def __init__(self, dim, solver_id, params=None, nsds=None):
+        if params is None:
             self._params = GlobalFrictionContactTraceParams()
         else:
             self._params = params
@@ -234,7 +231,7 @@ class GlobalFrictionContactTrace(GlobalFrictionContact):
         self._counter = 0
         self._stepcounter = 0
         self._nsds = nsds
-        super(GlobalFrictionContactTrace, self).__init__(dim, solver_options)
+        super(GlobalFrictionContactTrace, self).__init__(dim, solver_id)
 
     def maxiter_condition(self, SO):
         return SO.iparam[sn.params.SICONOS_IPARAM_ITER_DONE] >= self._maxiter
@@ -269,8 +266,8 @@ class GlobalFrictionContactTrace(GlobalFrictionContact):
                 # problem = self.getNumericsProblemPtr()
                 # print(problem, type(problem))
 
-                solver_maxiter = SO.iparam[0]
-                n_format_string = len(str(solver_maxiter))
+                # solver_maxiter = SO.iparam[0]
+                # n_format_string = len(str(solver_maxiter))
                 format_string = "{0}-ndof-{1}-nc-{2}-{3}.hdf5"
 
                 filename = format_string.format(
@@ -313,8 +310,8 @@ class GlobalFrictionContactTrace(GlobalFrictionContact):
 
 class GlobalRollingFrictionContactTrace(GlobalRollingFrictionContact):
 
-    def __init__(self, dim, solver_options, params=None, nsds=None):
-        if params == None:
+    def __init__(self, dim, solver_id, params=None, nsds=None):
+        if params is None:
             self._params = GlobalFrictionContactTraceParams()
         else:
             self._params = params
@@ -332,7 +329,7 @@ class GlobalRollingFrictionContactTrace(GlobalRollingFrictionContact):
         self._counter = 0
         self._stepcounter = 0
         self._nsds = nsds
-        super(GlobalRollingFrictionContactTrace, self).__init__(dim, solver_options)
+        super(GlobalRollingFrictionContactTrace, self).__init__(dim, solver_id)
 
     def maxiter_condition(self, SO):
         return SO.iparam[sn.params.SICONOS_IPARAM_ITER_DONE] >= self._maxiter
@@ -369,8 +366,8 @@ class GlobalRollingFrictionContactTrace(GlobalRollingFrictionContact):
                 # problem = self.getNumericsProblemPtr()
                 # print(problem, type(problem))
 
-                solver_maxiter = SO.iparam[0]
-                n_format_string = len(str(solver_maxiter))
+                # solver_maxiter = SO.iparam[0]
+                # n_format_string = len(str(solver_maxiter))
                 format_string = "{0}-ndof-{1}-nc-{2}-{3}.hdf5"
 
                 filename = format_string.format(

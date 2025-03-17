@@ -23,7 +23,7 @@ import pickle
 import siconos.io.tools
 from siconos.mechanics.quaternions import quaternion_get
 import siconos.mechanics.collision.tools as smct
-from siconos.mechanics import have_bullet, have_occ
+from siconos.mechanics import have_occ  # , have_bullet
 
 # fix compatibility with h5py version
 if hasattr(h5py, "vlen_dtype"):

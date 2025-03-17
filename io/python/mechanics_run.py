@@ -2083,7 +2083,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 siconos.simulation.TimeSteppingType,
             )
             if self.config.use_bullet:
-                enum_types += (siconos.mechanics.collision.bullet.SiconosBulletDimension,)
+                enum_types += (
+                    siconos.mechanics.collision.bullet.SiconosBulletDimension,
+                )
             if isinstance(obj, enum_types):
                 return obj.value
             elif isinstance(obj, (str, int, float, bool, list, dict, type(None))):
