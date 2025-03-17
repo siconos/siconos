@@ -1,23 +1,34 @@
-# Mechanics IO
+#!/usr/bin/env @Python_EXECUTABLE@
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
+#
+# Copyright 2025 INRIA.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 import os
 import sys
-from math import cos, sin, asin, atan2
 import numpy as np
 import h5py
+import pickle
+import siconos.io.tools
+from siconos.mechanics.quaternions import quaternion_get
+import siconos.mechanics.collision.tools as smct
 
-## fix compatibility with h5py version
+# fix compatibility with h5py version
 if hasattr(h5py, "vlen_dtype"):
     h5py_vlen_dtype = h5py.vlen_dtype
 elif hasattr(h5py, "new_vlen"):
     h5py_vlen_dtype = h5py.new_vlen
-
-
-import pickle
-import tempfile
-from contextlib import contextmanager
-
-# Siconos Mechanics imports
-from siconos.mechanics.collision.tools import Volume
 
 # Constants
 joint_points_axes = {
@@ -27,24 +38,6 @@ joint_points_axes = {
     "CylindricalJointR": (1, 1),
     "FixedJointR": (0, 0),
 }
-
-
-# Utility functions
-def floatv(v):
-    return [float(x) for x in v]
-
-
-def arguments():
-    """Returns tuple containing dictionary of calling function's
-    named arguments and a list of calling function's unnamed
-    positional arguments.
-    """
-    from inspect import getargvalues, stack
-
-    posname, kwname, args = getargvalues(stack()[1][0])[-3:]
-    posargs = args.pop(posname, [])
-    args.update(args.pop(kwname, []))
-    return args, posargs
 
 
 def check_points_axes(name, joint_class, points, axes):
@@ -75,49 +68,6 @@ def check_points_axes(name, joint_class, points, axes):
 
     check(points, 0)
     check(axes, 1)
-
-
-@contextmanager
-def tmpfile(suffix="", prefix="siconos_io", contents=None, debug=False):
-    """
-    A context manager for a named temporary file.
-    """
-    (_fid, tfilename) = tempfile.mkstemp(suffix=suffix, prefix=prefix)
-    fid = open(tfilename, "w")
-    if contents is not None:
-        fid.write(contents)
-        fid.flush()
-
-    class TmpFile:
-
-        def __init__(self, fid, name):
-            self.fid = fid
-            self.name = name
-
-        def __getitem__(self, n):
-            if n == 0:
-                return self.fid
-            elif n == 1:
-                return self.name
-            else:
-                raise IndexError
-
-    r = TmpFile(fid, tfilename)
-
-    yield r
-    fid.close()
-    os.close(_fid)
-    if not debug:
-        os.remove(tfilename)
-
-
-def warn(msg):
-    sys.stderr.write("{0}: {1}".format(sys.argv[0], msg))
-
-
-def object_id(obj):
-    """returns an unique object identifier"""
-    return obj.__hash__()
 
 
 def group(h, name, must_exist=True):
@@ -168,322 +118,13 @@ def upgrade_io_format(filename):
             for contactor_instance_name in io.instances()[instance_name]:
                 contactor = io.instances()[instance_name][contactor_instance_name]
                 if "name" in contactor.attrs:
-                    warn(
+                    siconos.io.tools.warn(
                         """
 contactor {0} attribute 'name': renamed in 'shape_name'
                     """
                     )
                     contactor.attrs["shape_name"] = contactor["name"]
                     del contactor["name"]
-
-
-def str_of_file(filename):
-    with open(filename, "r") as f:
-        return str(f.read())
-
-
-def file_of_str(filename, string):
-    if not os.path.exists(os.path.dirname(filename)):
-        try:
-            os.makedirs(os.path.dirname(filename))
-        except OSError as exc:
-            if exc.errno != exc.errno.EEXIST:
-                raise
-
-    with open(filename, "w") as f:
-        f.write(string)
-
-
-#
-# fix orientation -> rotation ?
-#
-def quaternion_get(orientation):
-    """
-    Get quaternion from orientation
-    """
-    if len(orientation) == 2:
-        # axis + angle
-        axis = orientation[0]
-        assert len(axis) == 3
-        angle = orientation[1]
-        assert type(angle) is float
-        n = sin(angle / 2.0) / np.linalg.norm(axis)
-
-        ori = [cos(angle / 2.0), axis[0] * n, axis[1] * n, axis[2] * n]
-    else:
-        assert len(orientation) == 4
-        # a given quaternion
-        ori = orientation
-    return ori
-
-
-def quaternion_multiply(q1, q0):
-    w0, x0, y0, z0 = q0
-    w1, x1, y1, z1 = q1
-    return np.array(
-        [
-            -x1 * x0 - y1 * y0 - z1 * z0 + w1 * w0,
-            x1 * w0 + y1 * z0 - z1 * y0 + w1 * x0,
-            -x1 * z0 + y1 * w0 + z1 * x0 + w1 * y0,
-            x1 * y0 - y1 * x0 + z1 * w0 + w1 * z0,
-        ],
-        dtype=np.float64,
-    )
-
-
-def phi(q0, q1, q2, q3):
-    """
-    Euler angle phi from quaternion.
-    """
-    return atan2(2 * (q0 * q1 + q2 * q3), 1 - 2 * (q1 * q1 + q2 * q2))
-
-
-def theta(q0, q1, q2, q3):
-    """
-    Euler angle theta from quaternion.
-    """
-    return asin(2 * (q0 * q2 - q3 * q1))
-
-
-def psi(q0, q1, q2, q3):
-    """
-    Euler angle psi from quaternion.
-    """
-    return atan2(2 * (q0 * q3 + q1 * q2), 1 - 2 * (q2 * q2 + q3 * q3))
-
-
-# vectorized versions
-phiv = np.vectorize(phi)
-thetav = np.vectorize(theta)
-psiv = np.vectorize(psi)
-
-
-#
-# inertia
-#
-def compute_inertia_and_center_of_mass(shapes, io=None):
-    """
-    Compute inertia from a list of Shapes.
-
-    Returns
-    -------
-    mass
-    center_of_mass
-    inertia
-    inertia_matrix
-    """
-    from OCC.Core.GProp import GProp_GProps
-    from OCC.Core.BRepGProp import brepgprop_VolumeProperties
-    from OCC.Core.gp import gp_Ax1, gp_Dir
-    from siconos.mechanics import occ
-
-    system = GProp_GProps()
-
-    for shape in shapes:
-
-        iprops = GProp_GProps()
-
-        if shape.data is None:
-            if io is not None:
-                shape.data = io._shape.get(shape.shape_name, new_instance=True)
-            else:
-                warn("cannot get shape {0}".format(shape.shape_name))
-                return None
-
-        iishape = shape.data
-
-        ishape = occ.OccContactShape(iishape).data()
-        # the shape relative displacement
-        occ.occ_move(ishape, list(shape.translation) + list(shape.orientation))
-
-        brepgprop_VolumeProperties(iishape, iprops)
-
-        density = None
-
-        if hasattr(shape, "mass") and shape.mass is not None:
-            density = shape.mass / iprops.Mass()
-
-        elif shape.parameters is not None and hasattr(shape.parameters, "density"):
-            density = shape.parameters.density
-            # print('shape.parameters.density:', shape.parameters.density)
-        else:
-            density = 1.0
-
-        assert density is not None
-        # print("shape", shape.shape_name)
-        # print('density:', density)
-        # print('iprops.Mass():', iprops.Mass())
-
-        system.Add(iprops, density)
-
-    mass = system.Mass()
-    assert system.Mass() > 0.0
-
-    computed_com = system.CentreOfMass()
-
-    gp_mat = system.MatrixOfInertia()
-    inertia_matrix = np.zeros((3, 3))
-    for i in range(0, 3):
-        for j in range(0, 3):
-            inertia_matrix[i, j] = gp_mat.Value(i + 1, j + 1)
-
-    I1 = system.MomentOfInertia(gp_Ax1(computed_com, gp_Dir(1, 0, 0)))
-    I2 = system.MomentOfInertia(gp_Ax1(computed_com, gp_Dir(0, 1, 0)))
-    I3 = system.MomentOfInertia(gp_Ax1(computed_com, gp_Dir(0, 0, 1)))
-
-    inertia = [I1, I2, I3]
-    center_of_mass = np.array(
-        [computed_com.Coord(1), computed_com.Coord(2), computed_com.Coord(3)]
-    )
-
-    return mass, center_of_mass, inertia, inertia_matrix
-
-
-def occ_topo_list(shape):
-    """return the edges & faces from `shape`
-
-    :param shape: a TopoDS_Shape
-    :return: a list of edges and faces
-    """
-
-    from OCC.Core.TopAbs import TopAbs_FACE
-    from OCC.Core.TopAbs import TopAbs_EDGE
-    from OCC.Core.TopExp import TopExp_Explorer
-    from OCC.Core.TopoDS import topods_Face, topods_Edge
-
-    topExp = TopExp_Explorer()
-    topExp.Init(shape, TopAbs_FACE)
-    faces = []
-    edges = []
-
-    while topExp.More():
-        face = topods_Face(topExp.Current())
-        faces.append(face)
-        topExp.Next()
-
-    topExp.Init(shape, TopAbs_EDGE)
-
-    while topExp.More():
-        edge = topods_Edge(topExp.Current())
-        edges.append(edge)
-        topExp.Next()
-
-    return faces, edges
-
-
-def occ_load_file(filename):
-    """
-    load in pythonocc a igs or step file
-
-    :param filename: a filename with extension
-    :return: a topods_shape
-    """
-
-    from OCC.Core.STEPControl import STEPControl_Reader
-    from OCC.Core.IGESControl import IGESControl_Reader
-    from OCC.Core.BRep import BRep_Builder
-    from OCC.Core.TopoDS import TopoDS_Compound
-    from OCC.Core.IFSelect import IFSelect_RetDone, IFSelect_ItemsByEntity
-
-    reader_switch = {
-        "stp": STEPControl_Reader,
-        "step": STEPControl_Reader,
-        "igs": IGESControl_Reader,
-        "iges": IGESControl_Reader,
-    }
-
-    builder = BRep_Builder()
-    comp = TopoDS_Compound()
-    builder.MakeCompound(comp)
-
-    reader = reader_switch[os.path.splitext(filename)[1][1:].lower()]()
-
-    status = reader.ReadFile(filename)
-
-    if status == IFSelect_RetDone:  # check status
-        failsonly = False
-        reader.PrintCheckLoad(failsonly, IFSelect_ItemsByEntity)
-        reader.PrintCheckTransfer(failsonly, IFSelect_ItemsByEntity)
-
-        reader.TransferRoots()
-        nbs = reader.NbShapes()
-
-        for i in range(1, nbs + 1):
-            shape = reader.Shape(i)
-            builder.Add(comp, shape)
-
-    return comp
-
-
-import os
-import shutil
-import subprocess
-
-
-def get_open_fds() -> int:
-    """Get the number of open file descriptors for the current process."""
-    lsof_path = shutil.which("lsof")
-    if lsof_path is None:
-        raise NotImplementedError("Didn't handle unavailable lsof.")
-    raw_procs = subprocess.check_output(
-        [lsof_path, "-w", "-Ff", "-p", str(os.getpid())]
-    )
-
-    def filter_fds(lsof_entry: str) -> bool:
-        return lsof_entry.startswith("f") and lsof_entry[1:].isdigit()
-
-    fds = list(filter(filter_fds, raw_procs.decode().split(os.linesep)))
-
-    return len(fds)
-
-
-def topods_shape_reader(shape, deflection=0.001):
-
-    from OCC.Core.StlAPI import StlAPI_Writer
-    from OCC.Core.BRepMesh import BRepMesh_IncrementalMesh
-
-    import vtk
-
-    stl_writer = StlAPI_Writer()
-    reader = vtk.vtkSTLReader()
-
-    with tmpfile(suffix=".stl") as tmpf:
-        mesh = BRepMesh_IncrementalMesh(shape, deflection)
-        mesh.Perform()
-        assert mesh.IsDone()
-        stl_writer.SetASCIIMode(False)
-        stl_writer.Write(shape, tmpf[1])
-        tmpf[0].flush()
-
-        reader.SetFileName(tmpf[1])
-        reader.Update()
-
-    return reader
-
-
-def brep_reader(brep_string, indx):
-
-    from OCC.Core.StlAPI import StlAPI_Writer
-    from OCC.Core.BRepTools import BRepTools_ShapeSet
-    import vtk
-
-    shape_set = BRepTools_ShapeSet()
-    shape_set.ReadFromString(brep_string)
-    shape = shape_set.Shape(shape_set.NbShapes())
-    location = shape_set.Locations().Location(indx)
-    shape.Location(location)
-
-    stl_writer = StlAPI_Writer()
-
-    with tmpfile(suffix=".stl") as tmpf:
-        stl_writer.Write(shape, tmpf[1])
-        tmpf[0].flush()
-
-        reader = vtk.vtkSTLReader()
-        reader.SetFileName(tmpf[1])
-        reader.Update()
-
-        return reader
 
 
 class MechanicsHdf5(object):
@@ -636,7 +277,8 @@ class MechanicsHdf5(object):
                 ] += " [14:16] : relative gap,\n [17:19] : reaction velocity,\n"
                 self._cf_data.attrs[
                     "info"
-                ] += " [20:22] : reaction impulse (local frame),\n [23] : interaction id,\n"
+                ] += " [20:22] : reaction impulse (local frame),\n"
+                self._cf_data.attrs["info"] += "[23] : interaction id,\n"
                 self._cf_data.attrs[
                     "info"
                 ] += " [24] : ds 1 number,\n [25] : ds 2 number"
@@ -858,7 +500,7 @@ class MechanicsHdf5(object):
             plugin_src = self._plugins.create_dataset(
                 name, (1,), dtype=h5py_vlen_dtype(str)
             )
-            plugin_src[:] = str_of_file(filename)
+            plugin_src[:] = siconos.io.tools.str_of_file(filename)
             plugin_src.attrs["filename"] = filename
 
     def add_external_function(
@@ -929,17 +571,17 @@ class MechanicsHdf5(object):
                     print("vtkSTLReader error", reader.GetErrorCode())
                     sys.exit(1)
 
-                with tmpfile() as tmpf:
+                with siconos.io.tools.tmpfile() as tmpf:
                     writer = vtk.vtkXMLPolyDataWriter()
                     writer.SetInputData(reader.GetOutput())
                     writer.SetFileName(tmpf[1])
                     writer.Write()
 
-                    shape_data = str_of_file(tmpf[1])
+                    shape_data = siconos.io.tools.str_of_file(tmpf[1])
 
             else:
                 assert os.path.splitext(filename)[-1][1:] == "vtp"
-                shape_data = str_of_file(filename)
+                shape_data = siconos.io.tools.str_of_file(filename)
 
             self.add_mesh_from_string(
                 name,
@@ -980,7 +622,7 @@ class MechanicsHdf5(object):
         """
         if name not in self._ref:
             shape = self._ref.create_dataset(name, (1,), dtype=h5py_vlen_dtype(str))
-            if type(shape_data) == str:
+            if type(shape_data) is str:
                 # raw str
                 shape[:] = shape_data
             else:
@@ -1009,12 +651,12 @@ class MechanicsHdf5(object):
 
             shape_data = None
 
-            with tmpfile() as tmpf:
+            with siconos.io.tools.tmpfile() as tmpf:
 
                 step_writer.Write(tmpf[1])
 
                 tmpf[0].flush()
-                shape_data = str_of_file(tmpf[1])
+                shape_data = siconos.io.tools.str_of_file(tmpf[1])
 
                 shape = self._ref.create_dataset(name, (1,), dtype=h5py_vlen_dtype(str))
                 shape[:] = shape_data
@@ -1028,11 +670,11 @@ class MechanicsHdf5(object):
         """
         if name not in self._ref:
             shape = self._ref.create_dataset(name, (1,), dtype=h5py_vlen_dtype(str))
-            shape[:] = str_of_file(filename)
+            shape[:] = siconos.io.tools.str_of_file(filename)
             shape.attrs["id"] = self._number_of_shapes
             try:
                 shape.attrs["type"] = os.path.splitext(filename)[1][1:]
-            except:
+            except IOError:
                 shape.attrs["type"] = "unknown"
 
             self._number_of_shapes += 1
@@ -1080,12 +722,14 @@ class MechanicsHdf5(object):
         """
         Add a convex shape defined by a list of points.
 
-        outsideMargin is the value of margin that substract from the actual contact distance
+        outsideMargin is the value of margin that substract
+        from the actual contact distance
 
         If insideMargin is positive, the convex hull is shrunken by that amount
-        (each face is moved by "shrink" length units towards the center along its normal).
-        This value is then added to outsideMargin to compensate the shrink. The convex hull
-        appears for the user as in its original size.
+        (each face is moved by "shrink" length units towards
+        the center along its normal).
+        This value is then added to outsideMargin to compensate the shrink.
+        The convex hull appears for the user as in its original size.
 
 
 
@@ -1254,14 +898,27 @@ class MechanicsHdf5(object):
         if name not in self._input:
 
             if (inertia is None) or (mass is None):
-                if any(map(lambda s: isinstance(s, Volume), shapes)):
+                if any(
+                    map(
+                        lambda s: isinstance(s, smct.Volume),
+                        shapes,
+                    )
+                ):
 
                     # a computed inertia and center of mass
                     # occ only
-                    volumes = filter(lambda s: isinstance(s, Volume), shapes)
+                    assert siconos.mechanics.have_occ
+                    import siconos.io.occ_tools
+
+                    volumes = filter(
+                        lambda s: isinstance(s, smct.Volume),
+                        shapes,
+                    )
 
                     computed_mass, com, computed_inertia, computed_inertia_matrix = (
-                        compute_inertia_and_center_of_mass(volumes, self)
+                        siconos.io.occ_tools.compute_inertia_and_center_of_mass(
+                            volumes, self
+                        )
                     )
                     self.print_verbose("{0}: computed mass from Volume".format(name))
                     self.print_verbose(
@@ -1313,9 +970,7 @@ class MechanicsHdf5(object):
                     self.print_verbose(
                         "The use of a mass equal to zero to define a static object is deprecated."
                     )
-                    self.print_verbose(
-                        "Do not give the mass or set mass=None to define a static object"
-                    )
+                    self.print_verbose("Set mass=None to define a static object")
             else:
                 obj.attrs["type"] = "static"
             obj.attrs["translation"] = translation
@@ -1351,7 +1006,8 @@ class MechanicsHdf5(object):
                     dat.attrs["group"] = ctor.group
 
                 if hasattr(ctor, "parameters") and ctor.parameters is not None:
-                    # we add np.void to manage writing string in hdf5 files see http://docs.h5py.org/en/latest/strings.html
+                    # we add np.void to manage writing string in hdf5 files
+                    # see http://docs.h5py.org/en/latest/strings.html
                     dat.attrs["parameters"] = np.void(pickle.dumps(ctor.parameters))
 
                 if hasattr(ctor, "contact_type") and ctor.contact_type is not None:

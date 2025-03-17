@@ -74,6 +74,10 @@ foreach(pyfile IN LISTS pyfiles)
   configure_file(${pyfile} ${SICONOS_PB11_BINARY_DIR}/siconos/mechanics/${pyfile} @ONLY)
 endforeach()
 
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/__init__.py.in
+               ${SICONOS_PB11_BINARY_DIR}/siconos/mechanics/__init__.py @ONLY)
+
+
 
 
 

@@ -50,7 +50,6 @@ if(HAVE_SICONOS_MECHANICS)
       configure_file(${pyfile} ${SICONOS_PB11_BINARY_DIR}/siconos/io/${pyfile} @ONLY)
     endforeach()
 
-
     # -- collect python files used to create scripts --
 
     collect_files(VAR scriptfiles DIRS ${CMAKE_CURRENT_SOURCE_DIR}/scripts EXTS py)

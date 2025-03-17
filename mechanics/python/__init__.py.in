@@ -1,0 +1,6 @@
+have_bullet = "@SICONOS_HAS_BULLET@"
+have_bullet = have_bullet in [True, "ON", "1", "TRUE", "YES"]
+
+have_occ ="@SICONOS_HAS_OpenCASCADE@"
+have_occ = have_occ in [True, "ON", "1", "TRUE", "YES"]
+

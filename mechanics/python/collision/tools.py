@@ -1,3 +1,22 @@
+#!/usr/bin/env @Python_EXECUTABLE@
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
+#
+# Copyright 2025 INRIA.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
 from math import cos, sin
 from numpy.linalg import norm
 
@@ -11,8 +30,7 @@ class Material(object):
     :density: float, the material density.
     """
 
-    def __init__(self,
-                 density=None):
+    def __init__(self, density=None):
         self.density = density
 
 
@@ -40,11 +58,14 @@ class MovedShape(object):
       It may be expressed with a quaternion [w, x, y, z] or a couple
       ([x, y, z], angle)
     """
-    def __init__(self,
-                 shape_name,
-                 shape_data=None,
-                 relative_translation=[0, 0, 0],
-                 relative_orientation=[1, 0, 0, 0]):
+
+    def __init__(
+        self,
+        shape_name,
+        shape_data=None,
+        relative_translation=[0, 0, 0],
+        relative_orientation=[1, 0, 0, 0],
+    ):
 
         if len(relative_orientation) == 2:
             # axis + angle
@@ -54,7 +75,7 @@ class MovedShape(object):
             assert type(angle) is float
             n = sin(angle / 2) / norm(axis)
 
-            ori = [cos(angle / 2.), axis[0] * n, axis[1] * n, axis[2] * n]
+            ori = [cos(angle / 2.0), axis[0] * n, axis[1] * n, axis[2] * n]
         else:
             # a given quaternion
             assert len(relative_orientation) == 4
@@ -89,18 +110,19 @@ class Shape(MovedShape):
         ([x, y, z], angle)
     """
 
-    def __init__(self,
-                 shape_name,
-                 shape_data=None,
-                 instance_name=None,
-                 relative_translation=[0, 0, 0],
-                 relative_orientation=[1, 0, 0, 0]):
+    def __init__(
+        self,
+        shape_name,
+        shape_data=None,
+        instance_name=None,
+        relative_translation=[0, 0, 0],
+        relative_orientation=[1, 0, 0, 0],
+    ):
 
         self.instance_name = instance_name
-        super(Shape, self).__init__(shape_name,
-                                    shape_data,
-                                    relative_translation,
-                                    relative_orientation)
+        super(Shape, self).__init__(
+            shape_name, shape_data, relative_translation, relative_orientation
+        )
 
 
 class Volume(Shape):
@@ -132,21 +154,22 @@ class Volume(Shape):
         ([x, y, z], angle)
     """
 
-    def __init__(self,
-                 shape_name,
-                 shape_data=None,
-                 instance_name=None,
-                 mass=None,
-                 parameters=Material(density=1),
-                 relative_translation=[0, 0, 0],
-                 relative_orientation=[1, 0, 0, 0]):
+    def __init__(
+        self,
+        shape_name,
+        shape_data=None,
+        instance_name=None,
+        mass=None,
+        parameters=Material(density=1),
+        relative_translation=[0, 0, 0],
+        relative_orientation=[1, 0, 0, 0],
+    ):
         self.instance_name = instance_name
         self.mass = mass
         self.parameters = parameters
-        super(Shape, self).__init__(shape_name,
-                                    shape_data,
-                                    relative_translation,
-                                    relative_orientation)
+        super(Shape, self).__init__(
+            shape_name, shape_data, relative_translation, relative_orientation
+        )
 
 
 class Contactor(Shape):
@@ -182,26 +205,28 @@ class Contactor(Shape):
 
     """
 
-    def __init__(self,
-                 shape_name,
-                 shape_data=None,
-                 instance_name=None,
-                 collision_group=0,
-                 parameters=None,
-                 contact_type=None,
-                 contact_index=None,
-                 relative_translation=[0, 0, 0],
-                 relative_orientation=[1, 0, 0, 0]):
+    def __init__(
+        self,
+        shape_name,
+        shape_data=None,
+        instance_name=None,
+        collision_group=0,
+        parameters=None,
+        contact_type=None,
+        contact_index=None,
+        relative_translation=[0, 0, 0],
+        relative_orientation=[1, 0, 0, 0],
+    ):
 
         self.group = collision_group
         self.parameters = parameters
         self.contact_type = contact_type
         self.contact_index = contact_index
 
-        super(Contactor, self).__init__(shape_name,
-                                        shape_data,
-                                        instance_name,
-                                        relative_translation,
-                                        relative_orientation)
-
-
+        super(Contactor, self).__init__(
+            shape_name,
+            shape_data,
+            instance_name,
+            relative_translation,
+            relative_orientation,
+        )
