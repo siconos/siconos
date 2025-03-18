@@ -2160,13 +2160,13 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self.log(s.firstInitialize, with_timer)()
 
         # 2  advanceToEvent:
-        if not s.skipResetLambdas():
+        if not s.skipResetLambdas:
             self.log(s.resetLambdas, with_timer)()
 
         # 2.1   newtonSolve:
         # Again the access to s._newtonTolerance generates a segfault due to director
         # newtonTolerance = s.newtonTolerance()
-        newtonMaxIteration = s.newtonMaxIteration()
+        newtonMaxIteration = s.newtonMaxIteration
 
         # return _kernel.TimeStepping_newtonSolve(self, criterion, maxStep)
         # RuntimeError: accessing protected member newtonSolve
@@ -2184,22 +2184,19 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # missing computeResiduY
         # self.log(s.computeResiduY, with_timer)()
 
-        if (
-            s.newtonOptions() == simu.constants.SICONOS_TS_LINEAR
-            or s.newtonOptions() == simu.constants.SICONOS_TS_LINEAR_IMPLICIT
-        ):
-            if s.newtonOptions() == simu.constants.SICONOS_TS_LINEAR_IMPLICIT:
+        if s.newtonOptions == simu.LINEAR or s.newtonOptions == simu.LINEAR_IMPLICIT:
+            if s.newtonOptions == simu.LINEAR_IMPLICIT:
                 self.log(s.prepareNewtonIteration, with_timer)()
             self.log(s.computeFreeState, with_timer)()
             info = 0
-            if s.numberOfOSNSProblems() > 0:
+            if s.numberOfOSNSProblems > 0:
                 if explode_computeOneStep:
                     fc = self._osnspb
                     # self.log(fc.updateInteractionBlocks, with_timer)()
                     self.log(fc.preCompute, with_timer, before=False)(s.nextTime())
                     self.log(fc.updateMu, with_timer)()
                     if self._run_options.get("osi") == integrators.MoreauJeanOSI:
-                        if fc.getSizeOutput() != 0:
+                        if fc.getSizeOutput != 0:
                             info = self.log(fc.solve, with_timer)()
                             self.log(fc.postCompute, with_timer)()
                     else:
@@ -2223,12 +2220,12 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 newtonNbIterations = newtonNbIterations + 1
                 self.log(s.prepareNewtonIteration, with_timer)()
                 self.log(s.computeFreeState, with_timer)()
-                if s.numberOfOSNSProblems() > 0:
+                if s.numberOfOSNSProblems > 0:
                     if explode_computeOneStep:
                         fc = self._osnspb
                         self.log(fc.preCompute, with_timer)(s.nextTime())
                         self.log(fc.updateMu, with_timer)()
-                        if fc.getSizeOutput() != 0:
+                        if fc.getSizeOutput != 0:
                             info = self.log(fc.solve, with_timer)()
                             self.log(fc.postCompute, with_timer)()
                     else:
@@ -3013,13 +3010,13 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         "number of contacts",
                         number_of_contacts,
                         "(detected)",
-                        self._osnspb.getSizeOutput() // self._dimension,
+                        self._osnspb.getSizeOutput // self._dimension,
                         "(active at velocity level. approx)",
                     )
                     self.print_solver_infos()
 
             else:
-                number_of_contacts = self._osnspb.getSizeOutput() // self._dimension
+                number_of_contacts = self._osnspb.getSizeOutput // self._dimension
                 if verbose and number_of_contacts > 0:
                     msg = "number of active contacts at the velocity level (approx)"
                     self.print_verbose(msg, number_of_contacts)

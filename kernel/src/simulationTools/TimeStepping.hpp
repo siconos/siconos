@@ -157,12 +157,10 @@ class TimeStepping : public Simulation {
    *  \param osi one step integrator (default none)
    *  \param osnspb one step non smooth problem (default none)
    */
-  TimeStepping(
-      std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
-      std::shared_ptr<TimeDiscretisation> td,
-      std::shared_ptr<siconos::integrators::OneStepIntegrator> osi,
-      std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem>
-          osnspb);
+  TimeStepping(std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
+               std::shared_ptr<TimeDiscretisation> td,
+               std::shared_ptr<siconos::integrators::OneStepIntegrator> osi,
+               std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem> osnspb);
 
   /** Constructor with the time-discretisation.
    *
@@ -170,16 +168,14 @@ class TimeStepping : public Simulation {
    *  \param td pointer to a timeDiscretisation used in the integration
    *  \param nb number of non smooth problem
    */
-  TimeStepping(
-      std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
-      std::shared_ptr<TimeDiscretisation> td, int nb = 0);
+  TimeStepping(std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds,
+               std::shared_ptr<TimeDiscretisation> td, int nb = 0);
 
   /** insert an Integrator into the simulation list of integrators
    *
    *  \param osi the OneStepIntegrator to add
    */
-  void insertIntegrator(
-      std::shared_ptr<siconos::integrators::OneStepIntegrator> osi) override;
+  void insertIntegrator(std::shared_ptr<siconos::integrators::OneStepIntegrator> osi) override;
 
   /** Destructor.
    */
@@ -236,9 +232,7 @@ class TimeStepping : public Simulation {
    *
    *  \return  the cumulative number of steps performed by the Newton algorithm
    */
-  unsigned int getNewtonCumulativeNbIterations() {
-    return _newtonCumulativeNbIterations;
-  }
+  unsigned int getNewtonCumulativeNbIterations() { return _newtonCumulativeNbIterations; }
 
   /** initialize the Newton
    *  It computes the initial residu and set the, if needed to Newton variable
@@ -276,20 +270,14 @@ class TimeStepping : public Simulation {
   bool isNewtonConverge() { return _isNewtonConverge; };
 
   bool displayNewtonConvergence() { return _displayNewtonConvergence; };
-  void setDisplayNewtonConvergence(bool newval) {
-    _displayNewtonConvergence = newval;
-  };
+  void setDisplayNewtonConvergence(bool newval) { _displayNewtonConvergence = newval; };
 
   void setNewtonWarningOnNonConvergence(bool newval) {
     _newtonWarningOnNonConvergence = newval;
   };
-  bool newtonWarningOnNonConvergence() {
-    return _newtonWarningOnNonConvergence;
-  };
+  bool newtonWarningOnNonConvergence() { return _newtonWarningOnNonConvergence; };
 
-  void setWarningNonsmoothSolver(bool newval) {
-    _warningNonsmoothSolver = newval;
-  };
+  void setWarningNonsmoothSolver(bool newval) { _warningNonsmoothSolver = newval; };
   bool warningNonsmoothSolver() { return _warningNonsmoothSolver; };
 
   void displayNewtonConvergenceAtTheEnd(int info, unsigned int maxStep);
@@ -297,14 +285,12 @@ class TimeStepping : public Simulation {
 
   void setResetAllLambda(bool newval) { _resetAllLambda = newval; };
 
-  void setSkipLastUpdateOutput(bool newval) {
-    _skip_last_updateOutput = newval;
-  };
+  void setSkipLastUpdateOutput(bool newval) { _skip_last_updateOutput = newval; };
   bool skipLastUpdateOutput() { return _skip_last_updateOutput; };
   void setSkipLastUpdateInput(bool newval) { _skip_last_updateInput = newval; };
   bool skipLastUpdateInput() { return _skip_last_updateInput; };
   void setSkipResetLambdas(bool newval) { _skip_resetLambdas = newval; };
-  bool skipResetLambdas() { return _skip_resetLambdas; };
+  bool skipResetLambdas() const { return _skip_resetLambdas; };
 
   /** To specify if the output interaction residu must be computed.
    *
@@ -340,21 +326,19 @@ class TimeStepping : public Simulation {
    *
    *  \return default Newton solver tolerance
    */
-  double newtonTolerance() { return _newtonTolerance; };
+  double newtonTolerance() const { return _newtonTolerance; };
 
   /** set the maximum number of Newton iteration
    *
    *  \param maxStep maximum number of Newton solver iterations
    */
-  void setNewtonMaxIteration(unsigned int maxStep) {
-    _newtonMaxIteration = maxStep;
-  };
+  void setNewtonMaxIteration(unsigned int maxStep) { _newtonMaxIteration = maxStep; };
 
   /** get the maximum number of Newton iteration
    *
    *  \return maximum number of Newton solver iterations
    */
-  unsigned int newtonMaxIteration() { return _newtonMaxIteration; };
+  unsigned int newtonMaxIteration() const { return _newtonMaxIteration; };
 
   /** set the NewtonOptions
    *

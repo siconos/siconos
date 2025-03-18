@@ -108,6 +108,15 @@ class LagrangianLinearTIDS : public LagrangianDS {
   /** default constructor */
   LagrangianLinearTIDS() = default;  // Used in FiniteElementLinearTIDS
 
+  /** constructor from initial state - Used for RigidBodies
+   *
+   *  \param q0 initial coordinates
+   *  \param v0 initial velocity
+   */
+  LagrangianLinearTIDS(Eigen::Ref<siconos::algebra::SiconosVector> q0,
+                       Eigen::Ref<siconos::algebra::SiconosVector> v0)
+      : LagrangianDS{q0, v0} {}
+
  public:
   /** constructor from initial state and mass matrix only. Leads to \f$ M\dot v
    *  = F_{ext}(t) + p \f$ .
@@ -119,6 +128,7 @@ class LagrangianLinearTIDS : public LagrangianDS {
   LagrangianLinearTIDS(Eigen::Ref<siconos::algebra::SiconosVector> q0,
                        Eigen::Ref<siconos::algebra::SiconosVector> v0,
                        Eigen::Ref<siconos::algebra::SiconosMatrix> M);
+
   /** destructor */
   ~LagrangianLinearTIDS() noexcept = default;
 
@@ -141,7 +151,7 @@ class LagrangianLinearTIDS : public LagrangianDS {
   void setDampingMatrix(Eigen::Ref<siconos::algebra::SiconosMatrix> C);
 
   /** \return a read-only view on the stiffness matrix */
-  inline  auto stiffnessMatrix() const {
+  inline auto stiffnessMatrix() const {
     return siconos::algebra::ConstMapType(stiffnessMatrix_view_->data(),
                                           stiffnessMatrix_view_->rows(),
                                           stiffnessMatrix_view_->cols());
@@ -154,7 +164,7 @@ class LagrangianLinearTIDS : public LagrangianDS {
   bool hasDampingMatrix() const { return dampingMatrix_view_ != nullptr; }
 
   /** \return a read-only view on the damping matrix */
-  inline  auto dampingMatrix() const {
+  inline auto dampingMatrix() const {
     return siconos::algebra::ConstMapType(
         dampingMatrix_view_->data(), dampingMatrix_view_->rows(), dampingMatrix_view_->cols());
   }

@@ -1,6 +1,7 @@
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+
 #include <memory>
 
 #include "EulerMoreauOSI.hpp"
@@ -70,9 +71,8 @@ PYBIND11_MODULE(integrators, m) {
              siconos::integrators::OneStepIntegrator>(m, "MoreauJeanOSI")
       .def(py::init<double, double>(), py::arg("theta") = 0.5,
            py::arg("gamma") = std::numeric_limits<double>::quiet_NaN())
-
-      // .def("tonche_mass", &siconos::integrators::MoreauJeanOSI::tonch_mass)
-
+      .def("setConstraintActivationThreshold",
+           &siconos::integrators::MoreauJeanOSI::setConstraintActivationThreshold)
       .def("__repr__", [](const siconos::integrators::MoreauJeanOSI &a) {
         a.display();
         return "\n";

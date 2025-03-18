@@ -201,10 +201,18 @@ PYBIND11_MODULE(_collision, m) {
              std::shared_ptr<siconos::collision::RigidBody2dDS>,
              siconos::modeling::LagrangianLinearTIDS>(m, "RigidBody2dDS")
       .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>,
-                    Eigen::Ref<siconos::algebra::SiconosVector>,
-                    Eigen::Ref<siconos::algebra::SiconosMatrix>>(),
-           py::keep_alive<1, 2>(),  // keep python object (np array arguments) memory alive
-                                    // as long as object is referenced
-           py::keep_alive<1, 3>(), py::keep_alive<1, 4>(), py::arg("position"),
-           py::arg("velocity"), py::arg("mass"));
+                    Eigen::Ref<siconos::algebra::SiconosVector>, double, double>(),
+           py::keep_alive<1, 2>(), py::keep_alive<1, 3>(), py::arg("q0"), py::arg("v0"),
+           py::arg("mass"), py::arg("inertia"))
+      .def("setUseContactorInertia",
+           &siconos::collision::RigidBody2dDS::setUseContactorInertia)
+      .def("setContactors", &siconos::collision::RigidBody2dDS::setContactors)
+      .def("setAllowSelfCollide", &siconos::collision::RigidBody2dDS::setAllowSelfCollide)
+      .def_property_readonly("useContactorInertia",
+                             &siconos::collision::RigidBody2dDS::useContactorInertia)
+      .def_property_readonly("allowSelfCollide",
+                             &siconos::collision::RigidBody2dDS::allowSelfCollide)
+      .def_property_readonly("scalarMass", &siconos::collision::RigidBody2dDS::scalarMass)
+
+      ;
 }

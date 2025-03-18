@@ -586,3 +586,5 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
 };
 }  // namespace siconos::simulation
 #endif  // SIMULATION_H
+
+

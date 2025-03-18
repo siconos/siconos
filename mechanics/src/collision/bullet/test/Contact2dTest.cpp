@@ -90,11 +90,8 @@ static BounceResult bounceTest(std::string moving, std::string ground,
 
   // Set up a Siconos Mechanics environment:
   // A RigidBody2dDS with a contactor consisting of a single disk.
-  siconos::algebra::SiconosMatrix mass{3, 3};
-  mass(0, 0) = params.mass;
-  mass(1, 1) = params.mass;
-  mass(2, 2) = params.mass;
-  auto body = std::make_shared<siconos::collision::RigidBody2dDS>(q0, v0, mass);
+  auto body =
+      std::make_shared<siconos::collision::RigidBody2dDS>(q0, v0, params.mass, params.mass);
   auto contactors = std::make_shared<siconos::collision::SiconosContactorSet>();
   std::shared_ptr<siconos::collision::SiconosDisk> disk;
   if (moving == "disk") {

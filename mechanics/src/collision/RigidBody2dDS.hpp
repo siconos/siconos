@@ -45,17 +45,17 @@ class RigidBody2dDS : public siconos::modeling::LagrangianLinearTIDS,
   bool _allowSelfCollide{true};
 
  public:
-  RigidBody2dDS(Eigen::Ref<siconos::algebra::SiconosVector> position,
-                Eigen::Ref<siconos::algebra::SiconosVector> velocity,
-                Eigen::Ref<siconos::algebra::SiconosMatrix> mass);
+  // RigidBody2dDS(Eigen::Ref<siconos::algebra::SiconosVector> position,
+  //               Eigen::Ref<siconos::algebra::SiconosVector> velocity,
+  //               Eigen::Ref<siconos::algebra::SiconosMatrix> mass);
 
-  // RigidBody2dDS(Eigen::Ref<siconos::algebra::SiconosVector> &position,
-  //               Eigen::Ref<siconos::algebra::SiconosVector> &velocity, double mass,
-  //               double inertia);
+  RigidBody2dDS(Eigen::Ref<siconos::algebra::SiconosVector> position,
+                Eigen::Ref<siconos::algebra::SiconosVector> velocity, double mass,
+                double inertia);
 
   virtual ~RigidBody2dDS() noexcept = default;
 
-  double scalarMass() { return scalarMass_; };
+  double scalarMass() const { return scalarMass_; };
 
   void setUseContactorInertia(bool use) { _useContactorInertia = use; }
 
@@ -84,7 +84,7 @@ class RigidBody2dDS : public siconos::modeling::LagrangianLinearTIDS,
    *  \return a std::shared_ptr<siconos::algebra::SiconosVector> */
   virtual std::shared_ptr<siconos::algebra::SiconosVector> base_position() { return q(); }
 
-  virtual void accept(modeling::dynamical_systems::Visitor& tourist) const override {
+  virtual void accept(modeling::dynamical_systems::Visitor &tourist) const override {
     tourist.visit(*this);
   }
 };
