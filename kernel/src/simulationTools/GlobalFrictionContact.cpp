@@ -114,23 +114,6 @@ siconos::nonsmooth_formulations::GlobalFrictionContact::globalFrictionContactPro
   return numerics_problem;
 }
 
-// GlobalFrictionContactProblem*
-// siconos::nonsmooth_formulations::GlobalFrictionContact::globalFrictionContactProblemPtr()
-// {
-//   GlobalFrictionContactProblem* numerics_problem = &_numerics_problem;
-//   numerics_problem->M = &*_W->numericsMatrix();
-//   numerics_problem->H = &*_H->numericsMatrix();
-//   numerics_problem->q = _q->data();
-//   numerics_problem->b = _b->data();
-//   numerics_problem->numberOfContacts = _sizeOutput / _contactProblemDim;
-//   numerics_problem->mu = _mu->data();
-//   numerics_problem->dimension = _contactProblemDim;
-//   if (_assemblyType == GLOBAL_REDUCED) {
-//     numerics_problem->M_inverse = &*_W_inverse->numericsMatrix();
-//   }
-//   return numerics_problem;
-// }
-
 bool siconos::nonsmooth_formulations::GlobalFrictionContact::checkCompatibleNSLaw(
     siconos::modeling::NonSmoothLaw& nslaw) {
   float type_number =
@@ -204,17 +187,13 @@ bool siconos::nonsmooth_formulations::GlobalFrictionContact::preCompute(double t
 #endif
     dsMatMap dsMat;
     dsPosMap absPosDS;
-
-    size_t sizeM = 0;
-
 #ifdef WITH_TIMER
     auto start = std::chrono::system_clock::now();
 #endif
     // fill _W
     _W->fillW(DSG0);
-    sizeM = _W->size();
-    _sizeGlobalOutput = sizeM;
-    DEBUG_PRINTF("sizeM = %lu \n", sizeM);
+    _sizeGlobalOutput = _W->rows();
+    DEBUG_PRINTF("sizeW = %lu \n", _sizeGlobalOutput);
 #ifdef WITH_TIMER
     auto end = std::chrono::system_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
@@ -274,7 +253,7 @@ bool siconos::nonsmooth_formulations::GlobalFrictionContact::preCompute(double t
     _H->fillH(DSG0, indexSet);
     DEBUG_EXPR(NM_display(_H->numericsMatrix().get()););
 
-    _sizeOutput = _H->sizeColumn();
+    _sizeOutput = _H->cols();
     DEBUG_PRINTF("_sizeOutput = %i\n ", _sizeOutput);
 #ifdef WITH_TIMER
     end_old = end;

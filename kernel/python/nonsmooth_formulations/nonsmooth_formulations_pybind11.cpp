@@ -49,7 +49,7 @@ PYBIND11_MODULE(nonsmooth_formulations, m) {
            &siconos::nonsmooth_formulations::OneStepNSProblem::numericsSolverOptions,
            py::return_value_policy::reference_internal, "Access to solver options object")
       .def("setMaxSize", &siconos::nonsmooth_formulations::OneStepNSProblem::setMaxSize,
-           "Set the maximum size of the problem")
+           "Set the maximum size of the nonsmooth problem")
       .def("setNumericsVerboseMode",
            &siconos::nonsmooth_formulations::OneStepNSProblem::setNumericsVerboseMode,
            "Set the verbose mode for the numerics solver")

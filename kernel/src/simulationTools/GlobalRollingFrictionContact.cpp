@@ -79,21 +79,6 @@ std::shared_ptr<GlobalRollingFrictionContactProblem> siconos::nonsmooth_formulat
   return numerics_problem;
 }
 
-// GlobalRollingFrictionContactProblem*
-// siconos::nonsmooth_formulations::GlobalRollingFrictionContact::globalRollingFrictionContactProblemPtr()
-// {
-//   GlobalRollingFrictionContactProblem* numerics_problem = &_numerics_problem;
-//   numerics_problem->M = &*_W->numericsMatrix();
-//   numerics_problem->H = &*_H->numericsMatrix();
-//   numerics_problem->q = _q->data();
-//   numerics_problem->b = _b->data();
-//   numerics_problem->numberOfContacts = _sizeOutput / _contactProblemDim;
-//   numerics_problem->mu = _mu->data();
-//   numerics_problem->mu_r = _mu_r->data();
-//   numerics_problem->dimension = 5;
-//   return numerics_problem;
-// }
-
 bool siconos::nonsmooth_formulations::GlobalRollingFrictionContact::checkCompatibleNSLaw(
     siconos::modeling::NonSmoothLaw& nslaw) {
   auto type_number =
@@ -172,13 +157,10 @@ bool siconos::nonsmooth_formulations::GlobalRollingFrictionContact::preCompute(d
     dsMatMap dsMat;
     dsPosMap absPosDS;
 
-    size_t sizeM = 0;
-
     // fill _W
     _W->fillW(DSG0);
-    sizeM = _W->size();
-    _sizeGlobalOutput = sizeM;
-    DEBUG_PRINTF("sizeM = %lu \n", sizeM);
+    _sizeGlobalOutput = _W->rows();
+    DEBUG_PRINTF("sizeW = %lu \n", _sizeGlobalOutput);
 
     // fill _q
     if (_q->size() != _sizeGlobalOutput) _q->resize(_sizeGlobalOutput);
@@ -218,7 +200,7 @@ bool siconos::nonsmooth_formulations::GlobalRollingFrictionContact::preCompute(d
     _H->fillH(DSG0, indexSet);
     DEBUG_EXPR(NM_display(_H->numericsMatrix().get()););
 
-    _sizeOutput = _H->sizeColumn();
+    _sizeOutput = _H->cols();
     DEBUG_PRINTF("_sizeOutput = %i\n ", _sizeOutput);
 
     // fill _b

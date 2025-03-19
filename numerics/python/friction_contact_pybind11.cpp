@@ -20,61 +20,15 @@
 #include <pybind11/iostream.h>
 #include <pybind11/pybind11.h>
 
+// #include <cassert>
+
 #include "FrictionContactProblem.h"
 #include "Friction_cst.h"
-
+#include "GlobalFrictionContactProblem.h"
+#include "GlobalRollingFrictionContactProblem.h"
+#include "NumericsMatrix_pybind11.h"
+#include "RollingFrictionContactProblem.h"
 namespace py = pybind11;
-
-// M to numpy array without copy
-py::array_t<double> get_M(FrictionContactProblem &self) {
-  if (!self.M || !self.M->matrix0) {
-    throw std::runtime_error("M n'est pas initialisé.");
-  }
-  return py::array_t<double>(
-      {self.dimension * self.numberOfContacts,
-       self.dimension * self.numberOfContacts},                                   // Shape
-      {sizeof(double) * self.dimension * self.numberOfContacts, sizeof(double)},  // Strides
-      self.M->matrix0, py::capsule(self.M->matrix0)  // Partage mémoire
-  );
-}
-
-// M as numpy array, no copy
-void set_M(FrictionContactProblem &self, py::array_t<double> array) {
-  if (array.ndim() != 2) {
-    throw std::runtime_error("M doit être une matrice 2D.");
-  }
-  if (array.shape(0) != self.dimension * self.numberOfContacts ||
-      array.shape(1) != self.dimension * self.numberOfContacts) {
-    throw std::runtime_error("Taille invalide pour M.");
-  }
-
-  if (!self.M) {
-    self.M = new NumericsMatrix();
-    self.M->storageType = NM_DENSE;
-  }
-
-  self.M->size0 = self.dimension * self.numberOfContacts;
-  self.M->size1 = self.dimension * self.numberOfContacts;
-  self.M->matrix0 = static_cast<double *>(array.mutable_data());  // Partage mémoire
-}
-
-// Template pour gérer n'importe quel tableau `double*`
-template <typename T>
-void set_array(T &self, double *&array_ptr, py::array_t<double> arr, int expected_size) {
-  auto buf = arr.request();
-  if (buf.ndim != 1 || buf.shape[0] != expected_size)
-    throw std::runtime_error("Incorrect array size");
-
-  array_ptr = static_cast<double *>(buf.ptr);  // Partage la mémoire avec NumPy
-}
-
-template <typename T>
-py::array_t<double> get_array(const T &self, double *array_ptr, int size) {
-  return py::array_t<double>({size},            // Shape
-                             {sizeof(double)},  // Strides
-                             array_ptr          // Data pointer
-  );
-}
 
 void wrap_friction_contact(py::module_ &m, py::module_ &params, py::module_ &solver_ids) {
   py::class_<FrictionContactProblem>(m, "FrictionContactProblem")
@@ -83,9 +37,24 @@ void wrap_friction_contact(py::module_ &m, py::module_ &params, py::module_ &sol
                                                          nullptr, nullptr);
            }),
            py::arg("dimension"), py::arg("numberOfContacts"))
+      .def("__del__",
+           [](FrictionContactProblem *self) {
+             if (self) {
+               frictionContactProblem_free(self);
+             }
+           })
       .def_readwrite("dimension", &FrictionContactProblem::dimension)
       .def_readwrite("numberOfContacts", &FrictionContactProblem::numberOfContacts)
-      .def_property("M", &get_M, &set_M, "Matrix M (shared memory)")
+      .def_property(
+          "M",
+          [](const FrictionContactProblem &self) {
+            return get_matrix(self, &FrictionContactProblem::M);
+          },
+          [](FrictionContactProblem &self, py::array_t<double> array) {
+            set_matrix(self, &FrictionContactProblem::M, array);
+            assert(self.M->size0 == self.dimension * self.numberOfContacts);
+            assert(self.M->size1 == self.dimension * self.numberOfContacts);
+          })
       .def_property(
           "q",
           [](const FrictionContactProblem &self) {
@@ -104,6 +73,202 @@ void wrap_friction_contact(py::module_ &m, py::module_ &params, py::module_ &sol
             set_array(self, self.mu, arr, self.numberOfContacts);
           },
           "Vector of friction coeffs");
+
+  py::class_<RollingFrictionContactProblem>(m, "RollingFrictionContactProblem")
+      .def(py::init([](int dimension, int numberOfContacts) {
+             return rollingFrictionContactProblem_new_with_data(
+                 dimension, numberOfContacts, nullptr, nullptr, nullptr, nullptr);
+           }),
+           py::arg("dimension"), py::arg("numberOfContacts"))
+      .def("__del__",
+           [](RollingFrictionContactProblem *self) {
+             if (self) {
+               rollingFrictionContactProblem_free(self);
+             }
+           })
+      .def_readwrite("dimension", &RollingFrictionContactProblem::dimension)
+      .def_readwrite("numberOfContacts", &RollingFrictionContactProblem::numberOfContacts)
+      .def_property(
+          "M",
+          [](const RollingFrictionContactProblem &self) {
+            return get_matrix(self, &RollingFrictionContactProblem::M);
+          },
+          [](RollingFrictionContactProblem &self, py::array_t<double> array) {
+            set_matrix(self, &RollingFrictionContactProblem::M, array);
+            assert(self.M->size0 == self.dimension * self.numberOfContacts);
+            assert(self.M->size1 == self.dimension * self.numberOfContacts);
+          })
+      .def_property(
+          "q",
+          [](const RollingFrictionContactProblem &self) {
+            return get_array(self, self.q, self.numberOfContacts * self.dimension);
+          },
+          [](RollingFrictionContactProblem &self, py::array_t<double> arr) {
+            set_array(self, self.q, arr, self.numberOfContacts * self.dimension);
+          },
+          "Vector q (shared memory)")
+      .def_property(
+          "mu",
+          [](const RollingFrictionContactProblem &self) {
+            return get_array(self, self.mu, self.numberOfContacts);
+          },
+          [](RollingFrictionContactProblem &self, py::array_t<double> arr) {
+            set_array(self, self.mu, arr, self.numberOfContacts);
+          },
+          "Vector of friction coeffs")
+      .def_property(
+          "mu_r",
+          [](const RollingFrictionContactProblem &self) {
+            return get_array(self, self.mu_r, self.numberOfContacts);
+          },
+          [](RollingFrictionContactProblem &self, py::array_t<double> arr) {
+            set_array(self, self.mu_r, arr, self.numberOfContacts);
+          },
+          "Vector of friction coeffs");
+  ;
+
+  py::class_<GlobalFrictionContactProblem>(m, "GlobalFrictionContactProblem")
+      .def(py::init([](int dimension, int numberOfContacts) {
+        auto pb = globalFrictionContactProblem_new();
+        pb->dimension = dimension;
+        pb->numberOfContacts = numberOfContacts;
+        return pb;
+      }))
+      .def("__del__",
+           [](GlobalFrictionContactProblem *self) {
+             if (self) {
+               globalFrictionContact_free(self);
+             }
+           })
+
+      .def_readwrite("dimension", &GlobalFrictionContactProblem::dimension)
+      .def_readwrite("numberOfContacts", &GlobalFrictionContactProblem::numberOfContacts)
+      .def_property(
+          "M",
+          [](const GlobalFrictionContactProblem &self) {
+            return get_matrix(self, &GlobalFrictionContactProblem::M);
+          },
+          [](GlobalFrictionContactProblem &self, py::array_t<double> array) {
+            set_matrix(self, &GlobalFrictionContactProblem::M, array);
+            assert(self.M->size0 == self.M->size1);
+          })
+      .def_property(
+          "H",
+          [](const GlobalFrictionContactProblem &self) {
+            return get_matrix(self, &GlobalFrictionContactProblem::H);
+          },
+          [](GlobalFrictionContactProblem &self, py::array_t<double> array) {
+            set_matrix(self, &GlobalFrictionContactProblem::H, array);
+            assert(self.H->size1 == self.dimension * self.numberOfContacts);
+          })
+      .def_property(
+          "q",
+          [](const GlobalFrictionContactProblem &self) {
+            assert(self.M &&
+                   "M must be properly set before any access to q");  // the only way to get q
+                                                                      // size ...
+            return get_array(self, self.q, self.M->size0);
+          },
+          [](GlobalFrictionContactProblem &self, py::array_t<double> arr) {
+            set_array(self, self.q, arr);  //, self.M.size0, might be unknown ...
+          },
+          "Vector q (shared memory)")
+      //       .def_property_readonly(
+      //           "norm_q", [](const GlobalFrictionContactProblem &self) { return self.norm_q;
+      //           })
+      .def_property(
+          "b",
+          [](const GlobalFrictionContactProblem &self) {
+            return get_array(self, self.b, self.dimension * self.numberOfContacts);
+          },
+          [](GlobalFrictionContactProblem &self, py::array_t<double> arr) {
+            set_array(self, self.b, arr, self.dimension * self.numberOfContacts);
+          })
+      //       .def_property_readonly(
+      //           "norm_b", [](const GlobalFrictionContactProblem &self) { return self.norm_b;
+      //           })
+      .def_property(
+          "mu",
+          [](const GlobalFrictionContactProblem &self) {
+            return get_array(self, self.mu, self.numberOfContacts);
+          },
+          [](GlobalFrictionContactProblem &self, py::array_t<double> arr) {
+            set_array(self, self.mu, arr, self.numberOfContacts);
+          },
+          "Vector of friction coeffs");
+
+  py::class_<GlobalRollingFrictionContactProblem>(m, "GlobalRollingFrictionContactProblem")
+      .def(py::init([](int dimension, int numberOfContacts) {
+        return globalRollingFrictionContactProblem_new_with_data(
+            dimension, numberOfContacts, nullptr, nullptr, nullptr, nullptr);
+      }))
+      .def("__del__",
+           [](GlobalRollingFrictionContactProblem *self) {
+             if (self) {
+               globalRollingFrictionContactProblem_free(self);
+             }
+           })
+      .def_readwrite("dimension", &GlobalRollingFrictionContactProblem::dimension)
+      .def_readwrite("numberOfContacts",
+                     &GlobalRollingFrictionContactProblem::numberOfContacts)
+      .def_property(
+          "M",
+          [](const GlobalRollingFrictionContactProblem &self) {
+            return get_matrix(self, &GlobalRollingFrictionContactProblem::M);
+          },
+          [](GlobalRollingFrictionContactProblem &self, py::array_t<double> array) {
+            set_matrix(self, &GlobalRollingFrictionContactProblem::M, array);
+            assert(self.M->size0 == self.M->size1);
+          })
+      .def_property(
+          "H",
+          [](const GlobalRollingFrictionContactProblem &self) {
+            return get_matrix(self, &GlobalRollingFrictionContactProblem::H);
+          },
+          [](GlobalRollingFrictionContactProblem &self, py::array_t<double> array) {
+            set_matrix(self, &GlobalRollingFrictionContactProblem::H, array);
+            assert(self.H->size1 == self.dimension * self.numberOfContacts);
+          })
+      .def_property(
+          "q",
+          [](const GlobalRollingFrictionContactProblem &self) {
+            assert(self.M &&
+                   "M must be properly set before any access to q");  // the only way to get q
+                                                                      // size ...
+
+            return get_array(self, self.q, self.M->size0);
+          },
+          [](GlobalRollingFrictionContactProblem &self, py::array_t<double> arr) {
+            set_array(self, self.q, arr);  //, self.M.size0, might be unknown ...
+          },
+          "Vector q (shared memory)")
+      .def_property(
+          "b",
+          [](const GlobalRollingFrictionContactProblem &self) {
+            return get_array(self, self.b, self.dimension * self.numberOfContacts);
+          },
+          [](GlobalRollingFrictionContactProblem &self, py::array_t<double> arr) {
+            set_array(self, self.b, arr, self.dimension * self.numberOfContacts);
+          })
+      .def_property(
+          "mu",
+          [](const GlobalRollingFrictionContactProblem &self) {
+            return get_array(self, self.mu, self.numberOfContacts);
+          },
+          [](GlobalRollingFrictionContactProblem &self, py::array_t<double> arr) {
+            set_array(self, self.mu, arr, self.numberOfContacts);
+          },
+          "Vector of friction coeffs")
+      .def_property(
+          "mu_r",
+          [](const GlobalRollingFrictionContactProblem &self) {
+            return get_array(self, self.mu_r, self.numberOfContacts);
+          },
+          [](GlobalRollingFrictionContactProblem &self, py::array_t<double> arr) {
+            set_array(self, self.mu_r, arr, self.numberOfContacts);
+          },
+          "Vector of friction coeffs");
+  ;
 
   // Exposing the FRICTION_SOLVER enum using .value
   py::enum_<FRICTION_SOLVER>(solver_ids, "FRICTION_SOLVER",

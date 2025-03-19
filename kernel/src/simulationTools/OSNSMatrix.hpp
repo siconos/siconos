@@ -133,9 +133,9 @@ class OSNSMatrix {
 
   /** For each Interaction in the graph, compute its absolute position
    *
-   *  \param indexSet the index set ot the concerned interactios.
+   *  \param indexSet the index set ot the concerned interactions.
    *  \return the dimension of the problem (or size of the matrix),
-   *  computed as the sum of the nslaw of all the Interaction in indexSet
+   *  computed as the sum of the nslaw of all the Interaction in the indexSet
    */
   virtual unsigned updateSizeAndPositions(siconos::graphs::InteractionsGraph& indexSet);
 
@@ -143,7 +143,7 @@ class OSNSMatrix {
    *
    *  \param DSG the index set of the dynamical systems
    *  \return the dimension of the problem (or size of the matrix),
-   *  computed as the sum of the nslaw of all the Interaction in indexSet
+   *  computed as the sum of the size of all DS in the indexSet
    */
   virtual unsigned updateSizeAndPositions(siconos::graphs::DynamicalSystemsGraph& DSG);
 
@@ -158,14 +158,6 @@ class OSNSMatrix {
   /** Default constructor -> empty matrix
    */
   OSNSMatrix() = default;
-
-  /** Constructor with _dimRow. of the matrix
-   *
-   *  \param n size of the square matrix
-   *  \param stor storage type (NM_DENSE or
-   * NM_SPARSE_BLOCK)
-   */
-  OSNSMatrix(unsigned int n, NM_types stor);
 
   /** Constructor with _dimRow and DimColumn of the matrix
    *
@@ -193,23 +185,17 @@ class OSNSMatrix {
    */
   virtual ~OSNSMatrix() noexcept = default;
 
-  /** get dimension of the square matrix
-   *
-   *  \return unsigned int
-   */
-  inline unsigned int size() const { return _dimRow; };
+  /** \return number of rows */
+  inline unsigned int rows() const { return _dimRow; };
 
-  /** get dimension of the square matrix
+  /** set dimension of the square matrix
    *
    *  \return unsigned int
    */
   inline void setSize(unsigned int size) { _dimRow = size; };
 
-  /** get dimension of the square matrix
-   *
-   *  \return unsigned int
-   */
-  inline unsigned int sizeColumn() const { return _dimColumn; };
+  /** \return number of columns of the matrix */
+  inline unsigned int cols() const { return _dimColumn; };
 
   /** get the type of storage for current matrix
    *

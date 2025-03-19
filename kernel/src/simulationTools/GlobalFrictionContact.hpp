@@ -45,12 +45,13 @@ namespace siconos::nonsmooth_formulations {
    contact.
 
    With:
-   - \f$ velocity \in R^{n} \f$  and \f$ reaction \in R^{n} \f$ the unknowns,
    - \f$ M \in R^{n \times n } \f$  and \f$ q \in R^{n} \f$
-   - \f$ globalVelocities \in R^{m} \f$  and \f$ reaction \in R^{m} \f$ the unknowns,
+   - \f$ globalVelocities \in R^{m} and \f$ reaction \in R^{m} \f$ the unknowns,
    - \f$ tildeGlobalVelocities \in R^{m} \f$ is the modified local velocity (\f$ e U_{N,k} \f$)
-   - \f$ M \in R^{n \times n } \f$  and \f$ q \in R^{n} \f$
    - \f$ H \in R^{n \times m } \f$
+
+   n is given by the DS graph (sum of all dynamical systems sizes)
+   m is given by the Interaction graph (sum of all interactions sizes)
 
    The dimension of the problem (2D or 3D) is given by the variable contactProblemDim and the
    right Numerics driver will be called according to this value.

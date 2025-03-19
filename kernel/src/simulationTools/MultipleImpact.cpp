@@ -276,7 +276,7 @@ void siconos::nonsmooth_formulations::MultipleImpact::PreComputeImpact() {
     updateInteractionBlocks();
     // Updates matrix M
     _M->fillM(indexSet, !_hasBeenUpdated);
-    _sizeOutput = _M->size();
+    _sizeOutput = _M->rows();
   }
   if (_nContact != _sizeOutput)
     THROW_EXCEPTION(
@@ -403,12 +403,13 @@ void siconos::nonsmooth_formulations::MultipleImpact::initialize(
 
   if (!_M) {
     if (_numericsMatrixStorageType == NM_DENSE)
-      _M = std::make_shared<OSNSMatrix>(maxSize(), NM_DENSE);
+      _M = std::make_shared<OSNSMatrix>(maxSize(), maxSize(), NM_DENSE);
 
-    else  // if(_numericsMatrixStorageType == 1) size = number of _interactionBlocks
-      // = number of Interactionin the largest considered indexSet
-      _M = std::make_shared<OSNSMatrix>(simulation()->indexSet(indexSetLevel())->size(),
-                                        NM_SPARSE_BLOCK);
+    else {
+      // = number of Interaction in the largest considered indexSet
+      auto Msize = simulation()->indexSet(indexSetLevel())->size();
+      _M = std::make_shared<OSNSMatrix>(Msize, Msize, NM_SPARSE_BLOCK);
+    }
   }
 };
 //========================================================================================
