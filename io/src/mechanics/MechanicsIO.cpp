@@ -105,6 +105,8 @@ struct siconos::io::GetVelocity : public siconos::modeling::dynamical_systems::V
 };
 
 struct siconos::io::ForMu : public siconos::modeling::nonsmooth_laws::Question<double> {
+  using siconos::modeling::nonsmooth_laws::Visitor::visit;
+
   void visit(const siconos::modeling::NewtonImpactFrictionNSL& nsl) override {
     answer = nsl.mu();
   }
@@ -118,6 +120,8 @@ struct siconos::io::ForMu : public siconos::modeling::nonsmooth_laws::Question<d
 };
 
 struct siconos::io::ForE : public siconos::modeling::nonsmooth_laws::Question<double> {
+  using siconos::modeling::nonsmooth_laws::Visitor::visit;
+
   void visit(const siconos::modeling::NewtonImpactFrictionNSL& nsl) override {
     answer = nsl.en();
   }
