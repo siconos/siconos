@@ -7,11 +7,14 @@
 #include "FrictionContact.hpp"
 #include "FrictionContactProblem.h"
 #include "GlobalFrictionContact.hpp"
+#include "GlobalFrictionContactProblem.h"
 #include "GlobalRollingFrictionContact.hpp"
+#include "GlobalRollingFrictionContactProblem.h"
 #include "LCP.hpp"
 #include "LinearOSNS.hpp"
 #include "Relay.hpp"
 #include "RollingFrictionContact.hpp"
+#include "RollingFrictionContactProblem.h"
 #include "SolverOptions.h"
 #include "relay_cst.h"
 
@@ -53,6 +56,8 @@ PYBIND11_MODULE(nonsmooth_formulations, m) {
       .def("setNumericsVerboseMode",
            &siconos::nonsmooth_formulations::OneStepNSProblem::setNumericsVerboseMode,
            "Set the verbose mode for the numerics solver")
+      .def("postCompute", &siconos::nonsmooth_formulations::OneStepNSProblem::postCompute,
+           "post treatment for output of the solver")
       .def_property_readonly("getSizeOutput",
                              &siconos::nonsmooth_formulations::OneStepNSProblem::getSizeOutput,
                              "Get the size of the output of the problem");
@@ -96,8 +101,8 @@ PYBIND11_MODULE(nonsmooth_formulations, m) {
            py::arg("numericsSolverId") = solver_ids.attr("SICONOS_ROLLING_FRICTION_3D_NSGS"))
       .def(py::init<int, std::shared_ptr<SolverOptions>>(), py::arg("dimPb"),
            py::arg("options"))
-      .def("updateMu", &siconos::nonsmooth_formulations::RollingFrictionContact::updateMu);
-  //      .def("solve", &siconos::nonsmooth_formulations::RollingFrictionContact::solve);
+      .def("updateMu", &siconos::nonsmooth_formulations::RollingFrictionContact::updateMu)
+      .def("solve", &siconos::nonsmooth_formulations::RollingFrictionContact::solve);
 
   py::class_<siconos::nonsmooth_formulations::GlobalFrictionContact,
              std::shared_ptr<siconos::nonsmooth_formulations::GlobalFrictionContact>,
@@ -106,8 +111,9 @@ PYBIND11_MODULE(nonsmooth_formulations, m) {
            py::arg("numericsSolverId") = solver_ids.attr("SICONOS_GLOBAL_FRICTION_3D_NSGS"))
       .def(py::init<int, std::shared_ptr<SolverOptions>>(), py::arg("dimPb"),
            py::arg("options"))
-      .def("updateMu", &siconos::nonsmooth_formulations::GlobalFrictionContact::updateMu);
-  //  .def("solve", &siconos::nonsmooth_formulations::GlobalFrictionContact::solve);
+      .def("updateMu", &siconos::nonsmooth_formulations::GlobalFrictionContact::updateMu)
+      .def("solve", &siconos::nonsmooth_formulations::GlobalFrictionContact::solve,
+           py::arg("problem") = nullptr);
 
   py::class_<siconos::nonsmooth_formulations::GlobalRollingFrictionContact,
              std::shared_ptr<siconos::nonsmooth_formulations::GlobalRollingFrictionContact>,
@@ -117,6 +123,6 @@ PYBIND11_MODULE(nonsmooth_formulations, m) {
            py::arg("numericsSolverId") =
                solver_ids.attr("SICONOS_GLOBAL_ROLLING_FRICTION_3D_NSGS_WR"))
       .def("updateMu",
-           &siconos::nonsmooth_formulations::GlobalRollingFrictionContact::updateMu);
-  //      .def("solve", &siconos::nonsmooth_formulations::GlobalRollingFrictionContact::solve);
+           &siconos::nonsmooth_formulations::GlobalRollingFrictionContact::updateMu)
+      .def("solve", &siconos::nonsmooth_formulations::GlobalRollingFrictionContact::solve);
 }

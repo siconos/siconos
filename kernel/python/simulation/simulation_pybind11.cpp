@@ -1,3 +1,4 @@
+#include <pybind11/eigen.h>
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -79,8 +80,13 @@ PYBIND11_MODULE(simulation, m) {
       .def("computeResidu", &siconos::simulation::Simulation::computeResidu,
            "Compute the residu for all integrators")
       .def("updateAllInput", &siconos::simulation::Simulation::updateAllInput)
+      .def("updateState", &siconos::simulation::Simulation::updateState, py::arg("level") = 0)
+      .def("y_output", &siconos::simulation::Simulation::y_output,
+           py::return_value_policy::move)
+      .def("lambda_input", &siconos::simulation::Simulation::lambda_input,
+           py::return_value_policy::move)
       .def_property_readonly("numberOfOSNSProblems",
-                             &siconos::simulation::TimeStepping::numberOfOSNSProblems);
+                             &siconos::simulation::Simulation::numberOfOSNSProblems);
 
   py::class_<siconos::simulation::TimeStepping,
              std::shared_ptr<siconos::simulation::TimeStepping>,
@@ -129,6 +135,10 @@ PYBIND11_MODULE(simulation, m) {
       .def_property_readonly("newtonOptions",
                              &siconos::simulation::TimeStepping::newtonOptions)
       .def("computeFreeState", &siconos::simulation::TimeStepping::computeFreeState)
+      .def("DefaultCheckSolverOutput",
+           &siconos::simulation::TimeStepping::DefaultCheckSolverOutput)
+      .def("skipLastUpdateInput", &siconos::simulation::TimeStepping::skipLastUpdateInput)
+      .def("skipLastUpdateOutput", &siconos::simulation::TimeStepping::skipLastUpdateOutput)
       .def("prepareNewtonIteration",
            &siconos::simulation::TimeStepping::prepareNewtonIteration);
 

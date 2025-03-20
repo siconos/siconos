@@ -34,8 +34,10 @@ PYBIND11_MODULE(_io, m) {
       m, "MechanicsIO")
       .def(py::init<>())
       .def("contactInfo", &siconos::io::MechanicsIO::contactInfo)
-      .def("positions", &siconos::io::MechanicsIO::positions)
-      .def("velocities", &siconos::io::MechanicsIO::velocities)
-      .def("contactPoints", &siconos::io::MechanicsIO::contactPoints)
-      .def("contactContactWork", &siconos::io::MechanicsIO::contactContactWork);
+      .def("positions", &siconos::io::MechanicsIO::positions, py::return_value_policy::move)
+      .def("velocities", &siconos::io::MechanicsIO::velocities, py::return_value_policy::move)
+      .def("contactPoints", &siconos::io::MechanicsIO::contactPoints,
+           py::return_value_policy::move)
+      .def("contactContactWork", &siconos::io::MechanicsIO::contactContactWork),
+      py::return_value_policy::move;
 }

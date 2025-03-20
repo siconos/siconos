@@ -1681,13 +1681,13 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 )
             elif self._dimension == 2:
                 # VA. change the position such that is corresponds to a 3D object
-                new_velocities = np.zeros((velocities.shape[0], 7))
+                new_velocities = np.zeros((velocities.shape[1], 7))
                 # 7 because we assume NewtonEuler DS
-                new_velocities[:, 0] = velocities[0, :-1]  # ds number
-                new_velocities[:, 1] = velocities[1, :-1]  # x velocity
-                new_velocities[:, 2] = velocities[2, :-1]  # y velocity
+                new_velocities[:, 0] = velocities[0, :]  # ds number
+                new_velocities[:, 1] = velocities[1, :]  # x velocity
+                new_velocities[:, 2] = velocities[2, :]  # y velocity
 
-                new_velocities[:, 6] = velocities[3, :-1]  # theta velocity
+                new_velocities[:, 6] = velocities[3, :]  # theta velocity
                 self._velocities_data[current_line:, :] = np.concatenate(
                     (times, new_velocities), axis=1
                 )
@@ -1702,7 +1702,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             contact_points = self._io.contactPoints(
                 self._nsds, self._output_contact_index_set
             )
-            if contact_points is not None:
+            if contact_points.shape[0] > 0:
                 current_line = self._cf_data.shape[0]
                 # Increase the number of lines in cf_data
                 # (h5 dataset with chunks)
@@ -1716,10 +1716,10 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     )
 
                 elif self._dimension == 2:
+
                     # VA. change the contact info such that
                     # this corresponds to a 3D object
                     new_contact_points = np.zeros((contact_points.shape[0], 25))
-
                     new_contact_points[:, 0] = contact_points[:, 0]  # mu
                     new_contact_points[:, 1] = contact_points[:, 1]  # posa
                     new_contact_points[:, 2] = contact_points[:, 2]
@@ -3023,9 +3023,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     self.print_solver_infos()
 
             if self._run_options.get("violation_verbose") and number_of_contacts > 0:
-                if len(self._simulation.y(0, 0)) > 0:
+                if len(self._simulation.y_output(0, 0)) > 0:
                     self.print_verbose("violation info")
-                    y = self._simulation.y(0, 0)
+                    y = self._simulation.y_output(0, 0)
                     yplus = np.zeros((2, len(y)))
                     yplus[0, :] = y
                     y = np.min(yplus, axis=1)
@@ -3036,12 +3036,12 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                             self.print_verbose(
                                 "  violation max is larger than the collision_margin"
                             )
-                    lam = self._simulation.lambda_(1, 0)
+                    lam = self._simulation.lambda_input(1, 0)
                     self.print_verbose("  lambda max :", np.max(lam))
                     # print(' lambda : ',lam)
 
-                if len(self._simulation.y(1, 0)) > 0:
-                    v = self._simulation.y(1, 0)
+                if len(self._simulation.y_output(1, 0)) > 0:
+                    v = self._simulation.y_output(1, 0)
                     vplus = np.zeros((2, len(v)))
                     vplus[0, :] = v
                     v = np.max(vplus, axis=1)

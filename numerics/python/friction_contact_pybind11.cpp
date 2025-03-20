@@ -127,7 +127,8 @@ void wrap_friction_contact(py::module_ &m, py::module_ &params, py::module_ &sol
           "Vector of friction coeffs");
   ;
 
-  py::class_<GlobalFrictionContactProblem>(m, "GlobalFrictionContactProblem")
+  py::class_<GlobalFrictionContactProblem, std::shared_ptr<GlobalFrictionContactProblem>>(
+      m, "GlobalFrictionContactProblem")
       .def(py::init([](int dimension, int numberOfContacts) {
         auto pb = globalFrictionContactProblem_new();
         pb->dimension = dimension;

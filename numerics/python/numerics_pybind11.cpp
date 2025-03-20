@@ -20,6 +20,7 @@
 #include <pybind11/pybind11.h>
 
 #include "NM_types.h"
+#include "NumericsVerbose.h"
 #include "SolverOptions.h"
 
 namespace py = pybind11;
@@ -77,6 +78,9 @@ PYBIND11_MODULE(_numerics, m) {
 
   m.def("solver_options_create", &solver_options_create,
         py::return_value_policy::take_ownership, py::arg("solverId"));
+  m.def("solver_options_get_internal_solver", &solver_options_get_internal_solver,
+        py::return_value_policy::take_ownership, py::arg("options"), py::arg("id"));
+  m.def("numerics_set_verbose", &numerics_set_verbose);
 
   py::module_ params = m.def_submodule(
       "params", "Parameter names in numerics (storage types, param for solvers ...)");

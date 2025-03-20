@@ -26,10 +26,10 @@
 #include <map>
 #include <set>
 
-#include "SiconosVector.hpp"
 #include "NonSmoothDynamicalSystem.hpp"  // To get ChangeLogIter
 #include "SiconosConst.hpp"              // for DEFAULT_TOLERANCE
 #include "SiconosSerialization.hpp"
+#include "SiconosVector.hpp"
 #include "SimulationTypes.hpp"  // SICONOS_OSNSP_DEFAULT
 // #include "InteractionManager.hpp"
 
@@ -361,7 +361,7 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
    */
   inline bool getPrintStat() const { return _printStat; };
 
-  virtual void computeInitialStateOfTheStep(){};
+  virtual void computeInitialStateOfTheStep() {};
 
   /**
       update all index sets of the topology, using current y and lambda values of Interactions
@@ -498,27 +498,22 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
    */
   inline bool relativeConvergenceCriterionHeld() { return _relativeConvergenceCriterionHeld; };
 
-  /**
-     return input lambda[level](coor) for all the interactions
+  /** \return a vector which contains all input lambda[level](coor) for all interactions of a
+      given index set
 
-     \param level lambda min order to be computed
-     \param coor the coordinate of interest
-     \return a std::shared_ptr<siconos::algebra::SiconosVector> that contains the concatenated
-     value
+      \param level lambda min order to be computed
+      \param coor the coordinate of interest
   */
-  std::shared_ptr<siconos::algebra::SiconosVector> lambda(unsigned int level = 0,
-                                                          unsigned int coor = 0);
+  siconos::algebra::SiconosVector lambda_input(unsigned int level, unsigned int coor) const;
 
   /**
-      return output y[level](coor) for all the interactions
+      \return  a vector which contains all output  y[level](coor) for all interactions of a
+      given index set
 
       \param level y min order to be computed
       \param coor the coordinate of interest
-      \return a std::shared_ptr<siconos::algebra::SiconosVector> that contains the concatenated
-     value
   */
-  std::shared_ptr<siconos::algebra::SiconosVector> y(unsigned int level = 0,
-                                                     unsigned int coor = 0);
+  siconos::algebra::SiconosVector y_output(unsigned int level, unsigned int coor);
 
   /** call eventsManager processEvents.
    */
@@ -586,5 +581,3 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
 };
 }  // namespace siconos::simulation
 #endif  // SIMULATION_H
-
-
