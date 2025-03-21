@@ -43,15 +43,27 @@ void SolidLinearTIDSTest::setUp() {
   auto mat1 = std::make_shared<siconos::mechanics::fem::Material>(density, 210e9, 1 / 3.);
   materials = {{bulk_material_tag, mat1}};
 
-          // S = std::make_shared<siconos::algebra::SimpleMatrix>("S.dat", true);
+  std::shared_ptr<siconos::algebra::SiconosMatrix> denseS;
+  denseS = std::make_shared<siconos::algebra::SimpleMatrix>("S.dat", true);
   S = std::make_shared<siconos::algebra::SimpleMatrix>(12,12,siconos::algebra::UblasType::SPARSE);
   for (int i = 0; i< 4; i++){
-    S->setValue(i*3,i*3,4.232804e-12);
-    S->setValue(i*3+1,i*3+1,4.232804e-12);
-    S->setValue(i*3,i*3+1,-2.116402e-12);
-    S->setValue(i*3+1,i*3,-2.116402e-12);
-    S->setValue(i*3+2,i*3+2,1.269841e-11);
+    for (int j = 0; j< 3; j++){
+      for (int k = 0; k< 3; k++){
+        S->setValue(3*i+j,3*i+k,denseS->getValue(3*i+j,3*i+k));
+      }
+    }
   }
+
+  std::shared_ptr<siconos::algebra::SiconosMatrix> denseB;
+  denseB = std::make_shared<siconos::algebra::SimpleMatrix>("B.dat", true);
+  B = std::make_shared<siconos::algebra::SimpleMatrix>(12,10,siconos::algebra::UblasType::SPARSE);
+  for (int i = 0; i< 12; i++){
+    for (int j = 0; j< 10; j++){
+      B->setValue(i,j,denseB->getValue(i,j));
+    }
+  }
+
+
 }
 
 void SolidLinearTIDSTest::tearDown() {}
@@ -61,7 +73,9 @@ void SolidLinearTIDSTest::testBuildSolidLinearTIDS1() {
   std::cout << "--> Test: constructor 1." << std::endl;
   auto FEsolid = std::make_shared<siconos::mechanics::fem::SolidLinearTIDS>(
       mesh, materials, siconos::algebra::UblasType::SPARSE);
-
+  std::cout << "B and B:" << std::endl;
+  (FEsolid->B())->display();
+   B->display();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSolidLinearTIDS1 : ", FEsolid->dimension() == 10,
                                true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSolidLinearTIDS1 : ", FEsolid->velocityDimension() == 10,
@@ -72,7 +86,9 @@ void SolidLinearTIDSTest::testBuildSolidLinearTIDS1() {
                                true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSolidLinearTIDS1 : ", (*FEsolid->stress())(0) == 0.0,
                                true);
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSolidLinearTIDS1 : ", (FEsolid->S())->getValue(0,0) - S->getValue(0,0),
-  //                              true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testS : ",((*FEsolid->S())-*S).normInf() < 1.0e-16,
+                               true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testB: ",((*FEsolid->B())-*B).normInf() < 1.0e-16,
+                               true);
   std::cout << "--> Constructor 1 test ended with success." << std::endl;
 }

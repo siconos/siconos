@@ -47,7 +47,7 @@ private:
 
   std::shared_ptr<siconos::mechanics::fem::Mesh> mesh;
   std::map<unsigned int, std::shared_ptr<siconos::mechanics::fem::Material>> materials;
-  std::shared_ptr<siconos::algebra::SiconosMatrix> S;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> S,B;
 
 public:
   void setUp();
