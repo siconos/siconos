@@ -14,6 +14,7 @@
 #include "TimeStepping.hpp"
 #include "TimeSteppingDirectProjection.hpp"
 #include "Topology.hpp"
+#include "SimulationGraphs.hpp"
 
 namespace py = pybind11;
 
@@ -34,7 +35,8 @@ PYBIND11_MODULE(simulation, m) {
 
   py::class_<siconos::simulation::Topology, std::shared_ptr<siconos::simulation::Topology>>(
       m, "Topology")
-      .def("indexSetsSize", &siconos::simulation::Topology::indexSetsSize);
+      .def("indexSetsSize", &siconos::simulation::Topology::indexSetsSize)
+      .def("numberOfIndexSet", &siconos::simulation::Topology::numberOfIndexSet);
 
   py::class_<siconos::simulation::Simulation,
              std::shared_ptr<siconos::simulation::Simulation>>(m, "Simulation")
@@ -85,6 +87,7 @@ PYBIND11_MODULE(simulation, m) {
            py::return_value_policy::move)
       .def("lambda_input", &siconos::simulation::Simulation::lambda_input,
            py::return_value_policy::move)
+      .def("indexSet", &siconos::simulation::Simulation::indexSet)
       .def_property_readonly("numberOfOSNSProblems",
                              &siconos::simulation::Simulation::numberOfOSNSProblems);
 
@@ -150,6 +153,9 @@ PYBIND11_MODULE(simulation, m) {
       .def("nextStep", &siconos::simulation::TimeSteppingDirectProjection::nextStep)
       .def("computeCriteria",
            &siconos::simulation::TimeSteppingDirectProjection::computeCriteria);
+
+  py::class_<siconos::graphs::InteractionsGraph,
+             std::shared_ptr<siconos::graphs::InteractionsGraph>>(m, "InteractionsGraph");
 
   py::module_ constants = m.def_submodule("constants", "Constants for simulation module");
   constants.attr("SICONOS_OSNSP_TS_VELOCITY") =
