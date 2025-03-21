@@ -18,6 +18,7 @@
 
 #include <pybind11/eigen.h>
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 #include "DynamicalSystem.hpp"
 #include "Interaction.hpp"
@@ -33,7 +34,20 @@ void wrap_dynamical_systems(py::module_ &m);
 void wrap_nonsmoothlaws(py::module_ &m);
 void wrap_relations(py::module_ &m);
 
+std::vector<std::shared_ptr<siconos::modeling::Interaction>> interactions(
+    std::shared_ptr<siconos::graphs::InteractionsGraph> dsg) {
+  std::vector<std::shared_ptr<siconos::modeling::Interaction>> r =
+      std::vector<std::shared_ptr<siconos::modeling::Interaction>>();
+  siconos::graphs::InteractionsGraph::VIterator vi, viend;
+  for (boost::tie(vi, viend) = dsg->vertices(); vi != viend; ++vi) {
+    r.push_back(dsg->bundle(*vi));
+  };
+  return r;
+};
+
 PYBIND11_MODULE(modeling, m) {
+     // py::module_ simulation_module = py::module_::import("siconos.simulation");
+
   // Optional docstring
   m.doc() = "Siconos modeling library";
 
@@ -49,7 +63,10 @@ PYBIND11_MODULE(modeling, m) {
       .def("lambda_python", &siconos::modeling::Interaction::lambda_python,
            py::return_value_policy::reference_internal)
       .def("y", &siconos::modeling::Interaction::y_python,
-           py::return_value_policy::reference_internal);
+           py::return_value_policy::reference_internal);    
+
+  m.def("interactions", &interactions, py::arg("graph"),
+        "Return a list of Interaction objects from an InteractionsGraph");
 
   py::class_<siconos::modeling::NonSmoothDynamicalSystem,
              std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem>>(
