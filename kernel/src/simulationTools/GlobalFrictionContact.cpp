@@ -328,11 +328,11 @@ bool siconos::nonsmooth_formulations::GlobalFrictionContact::preCompute(double t
           _mu->push_back(std::static_pointer_cast<siconos::modeling::NewtonImpactFrictionNSL>(
                          inter->nonSmoothLaw())
                          ->mu());  // curious !!
-      if(siconos::types::type_value(*(inter->nonSmoothLaw())) ==
-          siconos::modeling::Type::MohrCoulombPlasticityNSL)
-          _mu->push_back(1/tan(std::static_pointer_cast<siconos::modeling::MohrCoulombPlasticityNSL>(
-                           inter->nonSmoothLaw())
-                           ->phi()));
+      // if(siconos::types::type_value(*(inter->nonSmoothLaw())) ==
+      //     siconos::modeling::Type::MohrCoulombPlasticityNSL)
+      //     _mu->push_back(tan(std::static_pointer_cast<siconos::modeling::MohrCoulombPlasticityNSL>(
+      //                      inter->nonSmoothLaw())
+      //                      ->phi()));
 
 
       auto ds1 = indexSet.properties(*ui).source;
@@ -590,11 +590,11 @@ void siconos::nonsmooth_formulations::GlobalFrictionContact::updateMu() {
         _mu->push_back(std::static_pointer_cast<siconos::modeling::NewtonImpactFrictionNSL>(
                        indexSet->bundle(*ui)->nonSmoothLaw())
                        ->mu());
-    if(siconos::types::type_value(*(inter->nonSmoothLaw())) ==
-        siconos::modeling::Type::MohrCoulombPlasticityNSL)
-      _mu->push_back(1/tan(std::static_pointer_cast<siconos::modeling::MohrCoulombPlasticityNSL>(
-                             inter->nonSmoothLaw())
-                             ->phi()));
+    // if(siconos::types::type_value(*(inter->nonSmoothLaw())) ==
+    //     siconos::modeling::Type::MohrCoulombPlasticityNSL)
+    //   _mu->push_back(tan(std::static_pointer_cast<siconos::modeling::MohrCoulombPlasticityNSL>(
+    //                          inter->nonSmoothLaw())
+    //                          ->phi()));
 
   }
 }

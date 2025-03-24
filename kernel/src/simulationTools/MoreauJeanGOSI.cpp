@@ -386,16 +386,6 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
         free_rhs.toBlock(qSigmaold, solid.velocityDimension(), 0, 0);
         residusigmafree.toBlock(qSigmaold, solid.stressDimension(), 0, solid.velocityDimension());  // q_sigma = [v; sigma]
 
-//        free = residuFree;            // copy residuFree into free
-  //      if (d.p(1)) free -= *d.p(1);  // Compute Residu in Workfree Notation !!
-//        if (solid.p(1)) free += *solid.p(1);  // Compute Residu in Workfree Notation !!
-
-//        sigfreed = residuSigfreed;
-//        if (d.epsilonp(1)) {
-//            sigfreed -= *d.epsilonp(1)*h;
-//        }
-
-
 
         DEBUG_EXPR(free_rhs.display());
 //        applyBoundaryConditions(*d, free_rhs, dsi, t);
@@ -405,12 +395,6 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
   //            "siconos::integrators::MoreauJeanGOSI::computeResidu - boundary conditions not "
   //            "yet implemented for this type of Dynamical system\n");
   //      }
-
-        // residu = -1.0*free_rhs;
-        // siconos::algebra::prod(1.0, W, *v, residu, false);
-        // DEBUG_EXPR(free_rhs.display());
-        // if(d->p(1))
-        //   residu -= *d->p(1); // Compute Residu in Workfree Notation !!
 
         normResidu = 0.0;  // we assume that v_sigma = vfree_sigma + W^(-1)  [ p ; z]
       }
@@ -614,7 +598,6 @@ void siconos::integrators::MoreauJeanGOSI::applyBoundaryConditions(
       residu -= *columntmp * (DeltaPrescribedVelocity);
       residu.setValue(
           itindex, -columntmp->getValue(itindex) * (DeltaPrescribedVelocity));
-
       columnindex++;
     }
   }
