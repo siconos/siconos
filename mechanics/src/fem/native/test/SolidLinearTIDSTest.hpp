@@ -20,8 +20,10 @@
 
 #include <cppunit/TestCase.h>
 #include <cppunit/extensions/HelperMacros.h>
-#include "SolidLinearTIDS.hpp"
-#include "SiconosException.hpp"
+#include "Material.hpp"
+#include "Mesh.hpp"
+#include "SiconosMatrix.hpp"
+#include "SiconosSerialization.hpp"
 
 class SolidLinearTIDSTest : public CppUnit::TestFixture
 {

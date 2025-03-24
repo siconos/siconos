@@ -17,16 +17,14 @@
  */
 #include "SolidLinearTIDSTest.hpp"
 
-#include "BlockMatrix.hpp"
 #include "SiconosMatrixOp.hpp"
 #include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 #include "MeshUtils.hpp"
-#include "FENode.hpp"
 #include "FiniteElementModel.hpp"
-#include "FiniteElement.hpp"
 #include "Material.hpp"
+#include "SolidLinearTIDS.hpp"
 
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
@@ -73,9 +71,6 @@ void SolidLinearTIDSTest::testBuildSolidLinearTIDS1() {
   std::cout << "--> Test: constructor 1." << std::endl;
   auto FEsolid = std::make_shared<siconos::mechanics::fem::SolidLinearTIDS>(
       mesh, materials, siconos::algebra::UblasType::SPARSE);
-  std::cout << "B and B:" << std::endl;
-  (FEsolid->B())->display();
-   B->display();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSolidLinearTIDS1 : ", FEsolid->dimension() == 10,
                                true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSolidLinearTIDS1 : ", FEsolid->velocityDimension() == 10,
