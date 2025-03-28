@@ -39,26 +39,11 @@ class Simplex(object):
         return numpy.abs(numpy.dot(numpy.cross(vA, vB), vC)) / 6.0
 
     def det(self):
-        # import numpy
-        # J = numpy.zeros((3,3))
-        # J[:,0]= numpy.array(self._coordinates[1])-numpy.array(self._coordinates[0])
-        # J[:,1]= numpy.array(self._coordinates[2])-numpy.array(self._coordinates[0])
-        # J[:,2]= numpy.array(self._coordinates[3])-numpy.array(self._coordinates[0])
         J = self._coordinates[:-1] - self._coordinates[-1]
-        # print('J',J)
-        det = abs(numpy.linalg.det(J))
-        # print('det', det, 'volume',det/6.0)
-        return det
+        return abs(numpy.linalg.det(J))
 
     def centroid(self):
-
-        # compute centroid
-        cm = numpy.zeros(3)
-        for coords in self._coordinates:
-            cm = cm + coords
-        cm = cm / len(self._coordinates)
-        # print('centroid',cm)
-        return cm
+        return numpy.mean(self.coordinates, axis=0)
 
     def inertia(self, G):
         """
@@ -241,50 +226,49 @@ class ConvexHull(object):
 
         if len(coordinates) < 4:
             raise RuntimeError("You must provide at least 4 coordinates!")
-        self._coordinates = numpy.array(coordinates)
-        self.hull = scipy.spatial.ConvexHull(self._coordinates)
+        self.hull = scipy.spatial.ConvexHull(coordinates)
 
     def centroid(self):
         cm = numpy.zeros(3)
-        volume = self.volume_divergence_theorem()
-        for vertices in self.hull.vertices:
-            a = self._coordinates[vertices[0]]
-            b = self._coordinates[vertices[1]]
-            c = self._coordinates[vertices[2]]
-            n = -numpy.cross(b - a, c - a)
+        vol = self.hull.volume  # self.volume_divergence_theorem()
+        # volume is a method of Scipy ConvexHull
+        inside = numpy.mean(self.hull.points, axis=0)
+        for vertices in self.hull.simplices:
+            a = self.hull.points[vertices[0]]
+            b = self.hull.points[vertices[1]]
+            c = self.hull.points[vertices[2]]
+            n = numpy.cross(b - a, c - a)
+            # ensure proper normal orientation
+            if numpy.dot(n, a - inside) < 0:
+                n = -n
             cm[:] += (
                 1.0
-                / (48.0 * volume)
+                / (48.0 * vol)
                 * n[:]
                 * ((a[:] + b[:]) ** 2 + (c[:] + b[:]) ** 2 + (c[:] + a[:]) ** 2)
             )
-        # print('cm ---------- ' ,cm)
-        # print('barycenter ---------', self.barycenter())
         return cm
-
-    __centroid = centroid
 
     def barycenter(self):
         # compute barycenter
         b = numpy.zeros(3)
-        for coords in self._coordinates:
+        for coords in self.hull.points:
             b = b + coords
-        b = b / len(self._coordinates)
+        b = b / len(self.hull.points)
         # print('barycenter',cm)
         return b
 
     def volume_divergence_theorem(self):
         volume = 0
-        for vertices in self.hull.vertices:
-            a = self._coordinates[vertices[0]]
-            b = self._coordinates[vertices[1]]
-            c = self._coordinates[vertices[2]]
-            n = -numpy.cross(b - a, c - a)
-            # bary = self.barycenter()
-            # print "numpy.dot(bary-a,n)", numpy.dot(bary-a,n)
-            # assert (numpy.dot(bary-a,n)<0)
-            # we assume that the facet are oriented by qhull
-            # n= n/numpy.linalg.norm(n)
+        inside = numpy.mean(self.hull.points, axis=0)
+        for vertices in self.hull.simplices:
+            a = self.hull.points[vertices[0]]
+            b = self.hull.points[vertices[1]]
+            c = self.hull.points[vertices[2]]
+            n = numpy.cross(b - a, c - a)
+            # ensure proper normal orientation
+            if numpy.dot(n, a - inside) < 0:
+                n = -n
             volume += 1 / 6.0 * numpy.dot(a, n)
         return volume
 
@@ -292,11 +276,11 @@ class ConvexHull(object):
 
         volume = 0
         # compute centroid
-        c = self.__centroid()
-        for vertices in self.hull.vertices:
+        c = self.centroid()
+        for vertices in self.hull.simplices:
             coords = [list(c)]
             for i in vertices:
-                coords.append(self._coordinates[i])
+                coords.append(self.hull.points[i])
             simplex = Simplex(coords)
 
             # print(vertices)
@@ -310,11 +294,11 @@ class ConvexHull(object):
         volume = 0
         imat = numpy.zeros((3, 3))
         # compute centroid
-        c = self.__centroid()
-        for vertices in self.hull.vertices:
+        c = self.centroid()
+        for vertices in self.hull.simplices:
             coords = [list(c)]
             for i in vertices:
-                coords.append(self._coordinates[i])
+                coords.append(self.hull.points[i])
             simplex = Simplex(coords)
             volume += simplex.volume()
             imat += simplex.inertia(G)

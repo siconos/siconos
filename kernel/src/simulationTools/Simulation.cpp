@@ -556,7 +556,7 @@ siconos::algebra::SiconosVector siconos::simulation::Simulation::lambda_input(
   // assert(level>=0);
 
   DEBUG_BEGIN(
-      "siconos::simulation::Simulation::input(unsigned int level, unsigned int "
+      "siconos::simulation::Simulation::input(unigned int level, unsigned int "
       "coor)\n");
   DEBUG_PRINTF("with level = %i and coor = %i \n", level, coor);
 

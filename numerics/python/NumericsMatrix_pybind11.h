@@ -81,9 +81,9 @@ void set_array(T &self, double *&array_ptr, py::array_t<double> arr, int expecte
 
 template <typename T>
 py::array_t<double> get_array(const T &self, double *array_ptr, int size) {
-  return py::array_t<double>({size},            // Shape
-                             {sizeof(double)},  // Strides
-                             array_ptr          // Data pointer
+  return py::array_t<double>({size},                            // Shape
+                             {sizeof(double)},                  // Strides
+                             array_ptr, py::capsule(array_ptr)  // Data pointer
   );
 }
 
