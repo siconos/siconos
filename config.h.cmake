@@ -81,8 +81,6 @@ Example : if cmake is executed with WITH_MPI=ON
 #cmakedefine WITH_SUPERLU_MT
 #cmakedefine WITH_SUPERLU_dist
 // -- CSparse config (numerics) --
-#cmakedefine SICONOS_INT64 // are int 64 bits longs
-/* #cmakedefine CS_LONG */
 /* #cmakedefine NCOMPLEX */
 /* #cmakedefine LDL_LONG  Done with target_compile in CMake */
 

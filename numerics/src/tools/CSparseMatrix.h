@@ -25,75 +25,16 @@
 */
 
 #include <cs.h>
-#include <inttypes.h>
-#include <stdint.h>  // for intXX_t
+//#include <inttypes.h>
+//#include <stdint.h>  // for intXX_t
 #include <stdio.h>   // for FILE
 
 #include "SiconosConfig.h"
 
-/* Compile-time assertion: users of SparseMatrix.h must have CS_LONG
- * set if and only if SICONOS_INT64 is also set
- * CMake : SICONOS_INT64 ==> CS_LONG
- * We just check that CS_LONG is not set if SICONOS_INT64 is false
- * ... which indeed never occurs for the C standard we use.
- */
-#ifndef SICONOS_INT64
-#ifdef CS_LONG
-#error "CS_LONG (set) does not correspond with SICONOS_INT64 (unset)"
-#endif
-#endif
-
-// #ifndef CS_INT
-
-/* From cs.h */
-// Note FP why can't we just include cs.h?
-
-// #ifdef CS_LONG
-// #define CS_INT long
-// #else
-// #define CS_INT int
-// #endif
-
-// /* Treat CXSparse structs as opaque types.  Users may #include "cs.h"
-//  * to use them outside Siconos. */
-// struct cs_dl_sparse;
-// struct cs_di_sparse;
-// struct cs_dl_symbolic;
-// struct cs_di_symbolic;
-// struct cs_dl_numeric;
-// struct cs_di_numeric;
-// typedef struct cs_dl_symbolic cs_dls;
-// typedef struct cs_di_symbolic cs_dis;
-// typedef struct cs_dl_numeric cs_dln;
-// typedef struct cs_di_numeric cs_din;
-
-// #ifdef SICONOS_INT64  // SWIG gives syntax error for CS_NAME(_sparse)
-// #ifndef css
-// #define css cs_dls
-// #endif
-// #ifndef csn
-// #define csn cs_dln
-// #endif
-// #else
-// #ifndef css
-// #define css cs_dis
-// #endif
-// #ifndef csn
-// #define csn cs_din
-// #endif
-// #endif
-
-// #endif
-
-// #ifdef SICONOS_INT64 // SWIG gives syntax error for CS_NAME(_sparse)
-// typedef struct cs_dl_sparse CSparseMatrix;
-// #else
-// typedef struct cs_di_sparse CSparseMatrix;
-// #endif
-
 /** Sparse matrix structure
     switch to the proper cxspsarse (T. Davies) interface
  */
+
 typedef struct CS_NAME(_sparse) CSparseMatrix;
 // Format types for printf
 // See https://en.cppreference.com/w/cpp/types/integer

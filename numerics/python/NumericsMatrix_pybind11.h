@@ -33,6 +33,8 @@
 #include <pybind11/iostream.h>
 #include <pybind11/pybind11.h>
 
+#include "NumericsMatrix.h"
+
 namespace py = pybind11;
 
 template <typename T>

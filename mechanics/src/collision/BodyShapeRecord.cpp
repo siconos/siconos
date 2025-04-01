@@ -27,8 +27,8 @@ shape in a contactor.
 
 #include "SecondOrderDS.hpp"
 #include "SiconosShape.hpp"
-#include "StaticBody.hpp"
 #include "SiconosVector.hpp"
+#include "StaticBody.hpp"
 
 siconos::collision::BodyShapeRecord::BodyShapeRecord(
     std::shared_ptr<siconos::algebra::SiconosVector> b,
@@ -39,12 +39,9 @@ siconos::collision::BodyShapeRecord::BodyShapeRecord(
       sshape(sh),
       contactor(con),
       shape_version(sh->version()),
-      staticBody(staticCSR)
-{
-}
+      staticBody(staticCSR) {}
 
-void siconos::collision::BodyShapeRecord::display() const
-{
+void siconos::collision::BodyShapeRecord::display() const {
   std::cout << "BodyShapeRecord display\n";
 
   if (ds) {

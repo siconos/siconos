@@ -37,7 +37,7 @@ void NM_internalData_free(NumericsMatrix* m);
 #ifdef WITH_UMFPACK
 #include <umfpack.h>
 
-#ifdef SICONOS_INT64
+#ifdef CS_LONG
 #define UMFPACKPREFIX(X) umfpack_dl##X
 #else
 #define UMFPACKPREFIX(X) umfpack_di##X

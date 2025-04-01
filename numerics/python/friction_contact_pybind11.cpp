@@ -30,6 +30,113 @@
 #include "RollingFrictionContactProblem.h"
 namespace py = pybind11;
 
+// Sparse CSC
+void set_matrix_sparse(FrictionContactProblem &self,
+                       NumericsMatrix *FrictionContactProblem::*matrix_attr,
+                       py::object M_obj) {
+  NumericsMatrix *&matrix = self.*matrix_attr;
+  if (!matrix) {
+    matrix = new NumericsMatrix();
+    matrix->storageType = NM_SPARSE;
+    matrix->matrix2 = new NumericsSparseMatrix();
+  }
+
+  NumericsSparseMatrix *sparseMat = matrix->matrix2;
+
+  // Ensure CSC format (conversion). Copy if not? Check this
+  py::object csc_M = M_obj.attr("tocsc")();
+
+  // Get numpy array. Warn FP: mind types (must be int64 in scipy because of cs.h types)
+  py::array_t<double> data_array = csc_M.attr("data").cast<py::array_t<double>>();
+  py::array_t<int64_t> indptr_array = csc_M.attr("indptr").cast<py::array_t<int64_t>>();
+  py::array_t<int64_t> indices_array = csc_M.attr("indices").cast<py::array_t<int64_t>>();
+  auto shape = csc_M.attr("shape").cast<std::pair<int, int>>();
+
+  if (indices_array.itemsize() != sizeof(int64_t)) {
+    throw std::runtime_error(
+        "indices must be of type int64_t to be complient with SuiteSparse");
+  }
+
+  // Build CSparseMatrix
+  sparseMat->csc = new CSparseMatrix();
+  sparseMat->csc->nzmax = data_array.shape(0);
+  sparseMat->csc->m = shape.first;
+  sparseMat->csc->n = shape.second;
+  sparseMat->csc->p = static_cast<int64_t *>(indptr_array.mutable_data());
+  sparseMat->csc->i = static_cast<int64_t *>(indices_array.mutable_data());
+  sparseMat->csc->x = static_cast<double *>(data_array.mutable_data());
+  sparseMat->csc->nz = -1;  // CSC format
+
+  matrix->size0 = shape.first;
+  matrix->size1 = shape.second;
+
+  // Capsules to ensure that data/memories are kept alive
+  py::capsule data_capsule = py::reinterpret_steal<py::capsule>(
+      PyCapsule_New(static_cast<void *>(data_array.mutable_data()), nullptr, nullptr));
+
+  py::capsule indices_capsule = py::reinterpret_steal<py::capsule>(
+      PyCapsule_New(static_cast<void *>(indices_array.mutable_data()), nullptr, nullptr));
+
+  py::capsule indptr_capsule = py::reinterpret_steal<py::capsule>(
+      PyCapsule_New(static_cast<void *>(indptr_array.mutable_data()), nullptr, nullptr));
+
+  csc_M.attr("data").attr("setflags")(py::arg("write") = false);
+  csc_M.attr("indices").attr("setflags")(py::arg("write") = false);
+  csc_M.attr("indptr").attr("setflags")(py::arg("write") = false);
+}
+
+void display_csc_matrix(const CSparseMatrix *csc) {
+  // Afficher les indices des colonnes (p)
+  std::cout << "START ... " << csc->nzmax << " " << csc->n << "\n";
+  std::cout << "Adress csc->p : " << static_cast<void *>(csc->p) << std::endl;
+  std::cout << "Adress  csc->i : " << static_cast<void *>(csc->i) << std::endl;
+  std::cout << "Adresd csc->x : " << static_cast<void *>(csc->x) << std::endl;
+  std::cout << "p:" << std::endl;
+  for (int j = 0; j < csc->n + 1; ++j) {
+    std::cout << csc->p[j] << " ";
+  }
+  std::cout << std::endl;
+
+  std::cout << "i):" << std::endl;
+  for (int j = 0; j < csc->nzmax; ++j) {
+    std::cout << csc->i[j] << " ";
+  }
+  std::cout << std::endl;
+
+  std::cout << "(x):" << std::endl;
+  for (int j = 0; j < csc->nzmax; ++j) {
+    std::cout << csc->x[j] << " ";
+  }
+
+  std::cout << std::endl;
+}
+
+py::object get_matrix_sparse(const FrictionContactProblem &self) {
+  const NumericsMatrix *matrix = self.M;
+  if (!matrix || !matrix->matrix2 || !matrix->matrix2->csc) {
+    throw std::runtime_error("M is not allocated.");
+  }
+
+  CSparseMatrix *csc = matrix->matrix2->csc;
+  display_csc_matrix(csc);
+  py::array_t<double> data({csc->nzmax}, {sizeof(double)}, csc->x);
+  display_csc_matrix(csc);
+
+  std::cout << "sizeof(csc->i[0]) : " << sizeof(csc->i[0]) << std::endl;
+  std::cout << "Type de csc->i : " << typeid(csc->i[0]).name() << std::endl;
+ py::array_t<int64_t> indices({csc->nzmax}, {sizeof(int64_t)}, csc->i);
+  display_csc_matrix(csc);
+  py::array_t<int64_t> indptr({csc->n + 1}, {sizeof(int64_t)}, csc->p);
+  display_csc_matrix(csc);
+
+  // Build Python (scipy) csc (no copies)
+  py::object csc_matrix = py::module_::import("scipy.sparse")
+                              .attr("csc_matrix")(py::make_tuple(data, indices, indptr),
+                                                  py::make_tuple(csc->m, csc->n));
+
+  return csc_matrix;
+}
+
 void wrap_friction_contact(py::module_ &m, py::module_ &params, py::module_ &solver_ids) {
   py::class_<FrictionContactProblem>(m, "FrictionContactProblem")
       //       .def(py::init([](int dimension, int numberOfContacts) {
@@ -38,20 +145,33 @@ void wrap_friction_contact(py::module_ &m, py::module_ &params, py::module_ &sol
       //                                                          nullptr, nullptr);
       //            }),
       //            py::arg("dimension"), py::arg("numberOfContacts"))
-      .def(py::init(
-               [](int dim, int nc, py::array_t<double> M_array, py::array_t<double> q_array) {
-                 FrictionContactProblem *problem = new FrictionContactProblem();
-                 problem->dimension = dim;
-                 problem->numberOfContacts = nc;
+      //      .def(py::init(
+      //             [](int dim, int nc, py::array_t<double> M_array, py::array_t<double>
+      //             q_array)
+      .def(py::init([](int dim, int nc, py::object M_obj, py::array_t<double> q_array) {
+             FrictionContactProblem *problem = new FrictionContactProblem();
+             problem->dimension = dim;
+             problem->numberOfContacts = nc;
 
-                 // Set M
-                 set_matrix(*problem, &FrictionContactProblem::M, M_array);
+             // Set M
 
-                 // Set q
-                 set_array(*problem, problem->q, q_array);
+             // Check M_array type
+             if (py::isinstance<py::array>(M_obj)) {
+               set_matrix(*problem, &FrictionContactProblem::M,
+                          M_obj.cast<py::array_t<double>>());
+               //  set_matrix(*problem, &FrictionContactProblem::M, M_array);
+             } else if (py::hasattr(M_obj, "tocsc") || py::hasattr(M_obj, "tocsr") ||
+                        py::hasattr(M_obj, "tocoo")) {
+               set_matrix_sparse(*problem, &FrictionContactProblem::M, M_obj);
+             } else {
+               throw std::runtime_error("Unsupported matrix type");
+             }
 
-                 return problem;
-               }),
+             // Set q
+             set_array(*problem, problem->q, q_array);
+
+             return problem;
+           }),
            py::arg("dimension"), py::arg("numberOfContacts"), py::arg("M"), py::arg("q"),
            py::keep_alive<1, 4>(), py::keep_alive<1, 5>())
 
@@ -65,8 +185,16 @@ void wrap_friction_contact(py::module_ &m, py::module_ &params, py::module_ &sol
       .def_readwrite("numberOfContacts", &FrictionContactProblem::numberOfContacts)
       .def_property_readonly(
           "M",
-          [](const FrictionContactProblem &self) {
-            return get_matrix(self, &FrictionContactProblem::M);
+          [](const FrictionContactProblem &self) -> py::object {
+            if (self.M->storageType == NM_DENSE) {
+              return get_matrix(self, &FrictionContactProblem::M);
+            } else if (self.M->storageType == NM_SPARSE) {
+              CSparseMatrix *csc = self.M->matrix2->csc;
+              display_csc_matrix(csc);
+
+              return get_matrix_sparse(self);
+            }
+            throw std::runtime_error("Unsupported matrix type");
           }
           //,
           //    [](FrictionContactProblem &self, py::array_t<double> array) {
@@ -225,7 +353,8 @@ void wrap_friction_contact(py::module_ &m, py::module_ &params, py::module_ &sol
           },
           "Vector q (shared memory)")
       //       .def_property_readonly(
-      //           "norm_q", [](const GlobalFrictionContactProblem &self) { return self.norm_q;
+      //           "norm_q", [](const GlobalFrictionContactProblem &self) { return
+      //           self.norm_q;
       //           })
       .def_property(
           "b",
@@ -236,7 +365,8 @@ void wrap_friction_contact(py::module_ &m, py::module_ &params, py::module_ &sol
             set_array(self, self.b, arr, self.dimension * self.numberOfContacts);
           })
       //       .def_property_readonly(
-      //           "norm_b", [](const GlobalFrictionContactProblem &self) { return self.norm_b;
+      //           "norm_b", [](const GlobalFrictionContactProblem &self) { return
+      //           self.norm_b;
       //           })
       .def_property(
           "mu",

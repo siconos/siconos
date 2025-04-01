@@ -158,26 +158,6 @@ if(WITH_FCLIB)
 endif()
 
 # - SuiteSparse -
-# numerics possibly needs suite sparse installed on the system.
-# -- Check size_t value --> choice of CSparse/CXSparse integer size
-if(NOT DEFINED SICONOS_INT64)
-  if(NOT SIZE_OF_CSI)
-    include(CheckTypeSize)
-    check_type_size("size_t" SIZE_OF_CSI LANGUAGE C)
-    # check_type_size("size_t" SIZE_OF_CSIX LANGUAGE CXX)
-
-    if(NOT SIZE_OF_CSI) # This won't happen with c11
-      message(FATAL_ERROR
-        "Could not get size of size_t, please specify SICONOS_INT64.")
-    endif()
-  endif()
-
-  if("${SIZE_OF_CSI}" EQUAL 8)
-    set(SICONOS_INT64 TRUE CACHE INTERNAL "")
-  else()
-    set(SICONOS_INT64 FALSE CACHE INTERNAL "")
-  endif()
-endif()
 
 #   Note : the CSparse data structures are referred to in
 #   kernel, but the functions are only called from numerics, so it is
@@ -191,14 +171,19 @@ target_include_directories(numerics PUBLIC $<INSTALL_INTERFACE:${SuiteSparse_CXS
 find_package(SuiteSparse COMPONENTS LDL REQUIRED)
 target_link_libraries(numerics PUBLIC $<BUILD_INTERFACE:SuiteSparse::LDL>)
 target_include_directories(numerics PUBLIC $<INSTALL_INTERFACE:${SuiteSparse_LDL_INCLUDE_DIR}>)
-
-if(DEFINED SICONOS_INT64) 
-  # Use CS_LONG 
+# numerics possibly needs suite sparse installed on the system.
+# -- Check size_t value --> choice of CSparse/CXSparse integer size
+include(CheckTypeSize)
+check_type_size(size_t SIZE_OF_SIZE_T LANGUAGE C)
+# check_type_size("size_t" SIZE_OF_CSIX LANGUAGE CXX)
+if("${SIZE_OF_SIZE_T}" EQUAL 8)
+  # Use CS_LONG
   target_compile_definitions(numerics PUBLIC CS_LONG) # used to select CXSparse version (depends on int size), for CS_INT and so on
-  # set(CS_LONG 1 CACHE INTERNAL "") # for SiconosConfig.h Done with target_compile ...
-  # set(LDL_LONG 1 CACHE INTERNAL "") # for SiconosConfig.h Done with target_compile ...
   target_compile_definitions(numerics PUBLIC LDL_LONG) # we use long interface of ldl (see ldl.h from suitesparse)
+else()
+
 endif()
+
 target_compile_definitions(numerics PUBLIC NCOMPLEX) # We don't need the complex interface of CXSparse
 #  set(NCOMPLEX 1 CACHE INTERNAL "") # for SiconosConfig.h Done with target_compile ...
 

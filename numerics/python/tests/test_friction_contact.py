@@ -169,3 +169,8 @@ def test_global_rolling_friction_contact_build():
     print(problem.H)  # just to check if it's still alive
     print(problem.q)  # just to check if it's still alive
     del problem
+
+
+data = np.array([1., 0.5, -0.2,  1., 0.5, -0.2,  1.,   0.5, -0.2,  1.,   0.5, -0.2,  1.,   0.5, 1. ], dtype=np.float64)
+indices = np.array([0, 1 ,2 ,1 ,2 ,3 ,2 ,3 ,4 ,3 ,4 ,5 ,4 ,5 ,5], dtype=np.int64)  # Assurez-vous que les indices sont en int64
+indptr = np.array([0,  3,  6,  9 ,12, 14, 15], dtype=np.int64)
