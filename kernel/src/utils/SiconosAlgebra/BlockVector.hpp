@@ -344,6 +344,8 @@ double normInf(const BlockVector& v);
  */
 void print(const BlockVector& v);
 
+std::ostream &operator<<(std::ostream &os, const BlockVector &bv);
+
 }  // namespace siconos::algebra
 
 #endif

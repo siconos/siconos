@@ -260,6 +260,8 @@ void print(const BlockMatrix &mat);
 // void setBlock(unsigned int i, unsigned int j,
 //   std::shared_ptr<siconos::algebra::SiconosMatrix>);
 
+std::ostream &operator<<(std::ostream &os, const BlockMatrix &bm);
+
 }  // namespace siconos::algebra
 
 #endif
