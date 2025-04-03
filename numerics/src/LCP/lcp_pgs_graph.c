@@ -40,7 +40,7 @@ void lcp_pgs_graph(LinearComplementarityProblem *problem, double *z, double *w, 
   options->dparam[SICONOS_DPARAM_RESIDU] = 0.0;
 
   /* Preparation of the diagonal of the inverse matrix */
-  double *diag = (double *)malloc(n * sizeof(double));
+  double *diag = (double *)malloc((size_t)n * sizeof(double));
   NM_get_invdiag(n, info, M, diag);
 
   /* Check if diagonal has a zero */
@@ -49,30 +49,38 @@ void lcp_pgs_graph(LinearComplementarityProblem *problem, double *z, double *w, 
   }
 
   /* Graph coloring */
-  long int n_colors = 0;
+  int err_not_symmetric;
+  size_t n_colors = 0;
   size_t *partition_size = NULL;
   size_t **partitions = NULL;
   
-  color_graph(n, M, &n_colors, &partition_size, &partitions); 
+  err_not_symmetric = color_graph(n, M, &n_colors, &partition_size, &partitions);
+
+  /* Matrix not symmetric */
+  if (err_not_symmetric == 1) {
+    // printf("ERROR: matrix is not symmetric.\n");
+    free(diag);
+    return;
+  }
   
   /* Solver variables */
   int iter = 0;
   double err = 1.;
 
   double zi;
-  int i;
+  size_t i;
 
   /* Start solving */
   while ((iter < itermax) && (err > tol)) {
 
-    for (int color = 0; color < n_colors; color++) {
+    for (size_t color = 0; color < n_colors; color++) {
 
       #pragma omp parallel for default(none) private(zi, i) shared(q, z, diag, M, n, partitions, partition_size, color)
       for (int v = 0; v < partition_size[color]; v++) {
         i = partitions[color][v];
         zi = q[i];
         DEBUG_PRINTF("zi = %e\n", zi);
-        NM_row_prod_no_diag1x1(n, i, i, M, z, &zi, false);
+        NM_row_prod_no_diag1x1((size_t)n, (int)i, i, M, z, &zi, false);
         DEBUG_PRINTF("diag[i] = %e\t zi = %e\n", diag[i], zi);
         zi = -(zi)*diag[i];
 
@@ -85,6 +93,7 @@ void lcp_pgs_graph(LinearComplementarityProblem *problem, double *z, double *w, 
          * Some threads may modify z while others are using it in 
          * NM_row_prod_no_diag1x1 but it does not matter as 
          * each line are independent inside a color
+         * AS LONG AS M IS SYMMETRIC
         */
       }
     }
@@ -93,8 +102,8 @@ void lcp_pgs_graph(LinearComplementarityProblem *problem, double *z, double *w, 
 
     if (verbose == 2) {
       printf(" # i%d -- %g : ", iter, err);
-      for (i = 0; i < n; ++i) printf(" %g", z[i]);
-      for (i = 0; i < n; ++i) printf(" %g", w[i]);
+      for (int j = 0; j < n; ++j) printf(" %g", z[j]);
+      for (int j = 0; j < n; ++j) printf(" %g", w[j]);
       printf("\n");
     }
 
@@ -120,7 +129,7 @@ void lcp_pgs_graph(LinearComplementarityProblem *problem, double *z, double *w, 
   }
 
   free(partition_size);
-  for (int i = 0; i < n_colors; i++) free(partitions[i]);
+  for (size_t i = 0; i < n_colors; i++) free(partitions[i]);
   free(partitions);
   free(diag);
 

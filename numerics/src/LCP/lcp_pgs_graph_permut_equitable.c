@@ -18,8 +18,8 @@
 
 #include "graph_tools.h"
 
-void lcp_pgs_graph_permut(LinearComplementarityProblem *problem, double *z, double *w, int *info,
-                          SolverOptions *options) {
+void lcp_pgs_graph_permut_equitable(LinearComplementarityProblem *problem, double *z, double *w, int *info,
+                                    SolverOptions *options) {
 
   NumericsMatrix *M = problem->M;
   double *q = problem->q;
@@ -53,7 +53,7 @@ void lcp_pgs_graph_permut(LinearComplementarityProblem *problem, double *z, doub
   size_t *sum_sizes = NULL;
   size_t *inv_permutation = (size_t *)malloc((size_t)n * sizeof(size_t));
   
-  err_not_symmetric = color_graph_permut(n, M, &n_colors, &sum_sizes, inv_permutation);
+  err_not_symmetric = color_graph_permut_equitable(n, M, &n_colors, &sum_sizes, inv_permutation);
 
   /* Matrix not symmetric */
   if (err_not_symmetric == 1) {
@@ -63,10 +63,60 @@ void lcp_pgs_graph_permut(LinearComplementarityProblem *problem, double *z, doub
     return;
   }
 
+  /* printf("Number of colors = %d\n", n_colors);
+  printf("sum_sizes = [");
+  for (int i = 0; i < n_colors + 1; i++) {
+    printf(" %d ", sum_sizes[i]);
+  }
+  printf("]\n"); */
+
   size_t *permutation = (size_t *)malloc((size_t)n * sizeof(size_t));
   for (size_t i = 0; i < (size_t)n; i++) {
     permutation[inv_permutation[i]] = i;
   }
+
+  /* Check coloring */
+  /* int *colors = (int *)malloc(n * sizeof(int));
+  int current_color = 0;
+  for (int i = 0; i < n; i++) {
+    if (i == sum_sizes[current_color + 1]) current_color += 1;
+    colors[inv_permutation[i]] = current_color;
+  } */
+
+  /* printf("Colors = [");
+  for (int i = 0; i < n; i++) {
+    printf(" %d ", colors[i]);
+  }
+  printf("]\n"); */
+
+  /* TO CHECK COLORING
+  
+  CSparseMatrix *sparse;
+  if (M->matrix2->origin == NSM_CSR)
+  {
+    sparse = NM_csr(M);
+  }
+  else
+  {
+    sparse = NM_csc_trans(M);
+  }
+
+  CS_INT *Mp = sparse->p;
+  CS_INT *Mi = sparse->i;
+  double *Mx = sparse->x;
+
+  size_t col;
+
+  for (int row = 0; row < n; row++)
+  {
+    for (CS_INT p = Mp[row]; p < Mp[row + 1]; ++p)
+    {
+      if (Mi[p] == row) printf("Same vertex\n");
+      else if (colors[row] == colors[Mi[p]]) printf("ERROR: %d %d\n", row, Mi[p]);
+      
+    }
+
+  } */
 
   /* 2-norm of q, to normalize error */
   double norm_q = cblas_dnrm2(n, q, 1); 
@@ -81,8 +131,6 @@ void lcp_pgs_graph_permut(LinearComplementarityProblem *problem, double *z, doub
   size_t i, row;
   double *lefts = (double *)malloc((size_t)n * sizeof(double));
   int is_last = 0;
-
-  // double time = omp_get_wtime();
 
   /* Start solving */
   while ((iter < itermax) && (is_last == 0)) {

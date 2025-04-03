@@ -59,6 +59,8 @@ const char* const SICONOS_LCP_CONVEXQP_PG_STR = "Convex QP Projected Gradient";
 const char* const SICONOS_LCP_PGS_PARALLEL_STR = "Parallel PGS";
 const char* const SICONOS_LCP_PGS_GRAPH_STR = "Parallel Graph PGS";
 const char* const SICONOS_LCP_PGS_GRAPH_PERMUT_STR = "Parallel Graph PGS with permutation";
+const char* const SICONOS_LCP_PGS_GRAPH_PERMUT_EQUITABLE_STR = "Parallel Graph PGS with permutation and equitable coloring";
+const char* const SICONOS_LCP_PGS_GRAPH_PERMUT_EQUITABLE_OPTI_STR = "Parallel Graph PGS with permutation and equitable coloring, optimized";
 
 static int lcp_driver_SparseBlockMatrix(LinearComplementarityProblem* problem, double* z,
                                         double* w, SolverOptions* options);
@@ -238,7 +240,19 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double* z, dou
     /* IN: itermax, tolerance
        OUT: iter, error */
     case SICONOS_LCP_PGS_GRAPH_PERMUT:
-      lcp_pgs_graph(problem, z, w, &info, options);
+      lcp_pgs_graph_permut(problem, z, w, &info, options);
+      break;
+    /****** Parallel Graph PGS with permutation and equitable coloring Solver ******/
+    /* IN: itermax, tolerance
+       OUT: iter, error */
+    case SICONOS_LCP_PGS_GRAPH_PERMUT_EQUITABLE:
+      lcp_pgs_graph_permut_equitable(problem, z, w, &info, options);
+      break;
+    /****** Parallel Graph PGS with permutation and equitable coloring, optimized Solver ******/
+    /* IN: itermax, tolerance
+       OUT: iter, error */
+    case SICONOS_LCP_PGS_GRAPH_PERMUT_EQUITABLE_OPTI:
+      lcp_pgs_graph_permut_equitable_opti(problem, z, w, &info, options);
       break;
     /****** CPG Solver ******/
     /* IN: itermax, tolerance

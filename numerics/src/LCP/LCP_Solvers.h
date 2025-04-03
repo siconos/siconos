@@ -140,6 +140,10 @@ void lcp_pgs_parallel(LinearComplementarityProblem* problem, double* z, double* 
  \todo Sizing the regularization paramter and apply it only on null diagnal term
 
 */
+
+void lcp_pgs_permut(LinearComplementarityProblem* problem, double* z, double* w, int* info,
+                   SolverOptions* options);
+
 void lcp_pgs_graph(LinearComplementarityProblem* problem, double* z, double* w, int* info,
                    SolverOptions* options);
 
@@ -163,6 +167,12 @@ void lcp_pgs_graph(LinearComplementarityProblem* problem, double* z, double* w, 
 */
 void lcp_pgs_graph_permut(LinearComplementarityProblem *problem, double *z, double *w, int *info,
                           SolverOptions *options);
+
+void lcp_pgs_graph_permut_equitable(LinearComplementarityProblem *problem, double *z, double *w, int *info,
+                                    SolverOptions *options);
+
+void lcp_pgs_graph_permut_equitable_opti(LinearComplementarityProblem *problem, double *z, double *w, int *info,
+                                       SolverOptions *options);
 
 /** lcp_psor Projected Succesive over relaxation solver for LCP. See cottle, Pang Stone Chap 5
  *
