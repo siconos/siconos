@@ -36,12 +36,12 @@ class SpaceFilter(Stored):
 
     def insertSegment(self, x1, y1, x2, y2):
         segment = vkernel.disks.add_segment_shape(self.data())
-        segment.set_points(array([x1, y1, 0, x2, y2, 0]))
+        segment.set_points(array([x1, y1, 0, x2, y2, 0]), 0)
 
         mp = int(max(3, sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1)) / self._options.min_radius))
 
         segment.set_maxpoints(mp) # fix / size of smallest disk
-        segment.initialize()
+        segment.initialize(0)
 
         # negative for static shape
         segment.set_ident(- self._static_shape_counter)
@@ -53,6 +53,9 @@ class SpaceFilter(Stored):
         self.handle().insert_diskfsegment_r(diskfsegment)
 
         return segment
+
+    def insertMesh(self, points):
+        mesh
 
     def insertLine(self, a, b , c):
         line = vkernel.disks.add_line_shape(self.data())

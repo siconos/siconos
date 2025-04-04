@@ -393,7 +393,6 @@ static_assert(
 //}  // namespace siconos
 
 namespace siconos::config {
-
 using disk = model::lagrangian_ds;
 using lcp = simul::nonsmooth_problem<LinearComplementarityProblem>;
 using osnspb = simul::one_step_nonsmooth_problem<lcp>;

@@ -175,7 +175,8 @@ auto constexpr concat_all(Args... args)
 
 // static_assert(concat(make_tuple(1, 2, 3), make_tuple(4, 5, 6)) ==
 //               make_tuple(1, 2, 3, 4, 5, 6));
-// static_assert(concat_all(make_tuple(1), make_tuple(2), make_tuple(3, 4, 5)) ==
+// static_assert(concat_all(make_tuple(1), make_tuple(2), make_tuple(3, 4, 5))
+// ==
 //               make_tuple(1, 2, 3, 4, 5));
 
 using hana::zip;
@@ -349,8 +350,7 @@ static auto map_transform = hana::demux(hana::to<hana::map_tag>)(
 static auto dup = []<typename F>(F &&f) constexpr -> decltype(auto) {
   return [&f]<typename X>(X &&x) {
     auto &&px = std::forward<X>(x);  // x must be forwarded once!!
-    return std::forward<F>(f)
-    (px, px);
+    return std::forward<F>(f)(px, px);
   };
 };
 

@@ -64,7 +64,8 @@ static auto car = []<typename Tpl>(Tpl tpl) constexpr {
   return tpl[0_c];
 };
 
-// static_assert(std::is_same_v<decltype(car(gather<int, float, char>{})), int>);
+// static_assert(std::is_same_v<decltype(car(gather<int, float, char>{})),
+// int>);
 
 static auto cdr =
     []<typename A0, typename... As>(ground::tuple<A0, As...> tpl) constexpr {
@@ -161,14 +162,14 @@ static constexpr auto make_instance(T&&)
 };
 
 template <typename U>
-static auto contains =
+static auto contains_type =
     []<typename... Attrs>(gather<Attrs...>) constexpr -> bool {
   return (std::is_same_v<U, Attrs> || ...);
 };
 
 namespace must {
 template <typename T, typename Tpl>
-concept contains = contains<T>(instance<Tpl>);
+concept contains = contains_type<T>(instance<Tpl>);
 }
 
 // static_assert(match::size<std::vector<double>>);
@@ -521,8 +522,6 @@ using transform = decltype(transform(
 template <match::attribute... Attrs>
 using attributes = gather<Attrs...>;
 
-
-
 template <match::item... Items>
 using properties_of_items =
     decltype(ground::concat_all(typename Items::properties{}...));
@@ -532,7 +531,6 @@ using properties_of_items =
 template <match::item... Items>
 using attributes_of_items = decltype(ground::concat_all(
     siconos::storage::pattern::attributes(Items{})...));
-
 
 template <string_literal S>
 struct indice_value : symbol<S> {
@@ -603,6 +601,12 @@ auto method(auto s, F f)
   return std::make_tuple(s, f);
 };
 
+template <typename Tpl1, typename Tpl2>
+auto concat_methods(Tpl1 m1, Tpl2 m2)
+{
+  return std::tuple_cat(m1, m2);
+}
+
 namespace match {
 template <typename T>
 concept def_method = requires { typename T::def_method_t; };
@@ -623,6 +627,15 @@ concept npy_format = (requires { typename T::value_type; } &&
 
 template <typename D>
 concept store = requires(D d) { d.store(); };
+
+template <typename Item>
+concept without_attributes_bindings =
+    requires { typename Item::without_attributes_bindings; };
+
+template <typename Item>
+concept without_attached_storages_bindings =
+    requires { typename Item::without_attached_storages_bindings; };
+
 }  // namespace match
 
 }  // namespace siconos::storage::pattern

@@ -56,7 +56,6 @@ struct assembled_matrix : refine {
   using refine = some::assembled_matrix<typename A::type>;
 };
 
-
 }  // namespace property
 
 template <match::attribute A, typename T>

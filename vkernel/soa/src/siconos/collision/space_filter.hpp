@@ -231,7 +231,7 @@ struct space_filter : item<> {
           flag = true;
         };
       }
-
+      // XX check with one loop : flag = (item_handle.get() == pitem.get())
       // remove points
       auto ff = std::ranges::find(points_flags, true);
 

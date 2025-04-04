@@ -10,8 +10,11 @@
 #include "siconos/collision/diskdisk_r.hpp"
 #include "siconos/collision/diskfdisk_r.hpp"
 #include "siconos/collision/diskfsegment_r.hpp"
+#include "siconos/collision/diskmesh_r.hpp"
 #include "siconos/collision/point.hpp"
+#include "siconos/collision/shape/chained_segment.hpp"
 #include "siconos/collision/shape/disk.hpp"
+#include "siconos/collision/shape/mesh.hpp"
 #include "siconos/collision/shape/segment.hpp"
 #include "siconos/collision/space_filter.hpp"
 #include "siconos/siconos.hpp"
@@ -22,21 +25,27 @@
 namespace py = pybind11;
 
 namespace siconos::config::disks {
-using disk = model::lagrangian_ds;
+
+struct disk : model::lagrangian_ds {};
+struct mesh : model::rt_lagrangian_ds {};
+
 using nslaw = model::newton_impact_friction;
 using diskdisk_r = collision::diskdisk_r;
 using diskfdisk_r = collision::diskfdisk_r;
 using diskfsegment_r = collision::diskfsegment_r;
+using diskmesh_r = collision::diskmesh_r;
 using segment_shape = collision::shape::segment;
 using disk_shape = collision::shape::disk;
+using mesh_shape = collision::shape::chained_segment;
 using translated_disk_shape = collision::translated<disk_shape>;
 
 using fc2d = simul::nonsmooth_problem<FrictionContactProblem>;
 using osnspb = simul::one_step_nonsmooth_problem<fc2d>;
 using solver_options = simul::solver_options;
-using interaction =
+using ct_interaction =
     simul::interaction<nslaw, diskdisk_r, diskfdisk_r, diskfsegment_r>;
-using topo = simul::topology<disk, interaction>;
+using rt_interaction = simul::rt_interaction<nslaw, diskmesh_r>;
+using topo = simul::topology<disk, ct_interaction, mesh, rt_interaction>;
 using osi = simul::one_step_integrator<topo>::moreau_jean;
 using td = simul::time_discretization<>;
 using pointd = collision::point<disk>;
@@ -47,7 +56,8 @@ using space_filter = collision::space_filter<topo, neighborhood>;
 using interaction_manager = simul::interaction_manager<space_filter>;
 using simulation = simul::time_stepping<td, osi, osnspb, topo>;
 
-using io = io::io<osi, collision::shape::segment, translated_disk_shape>;
+using io =
+    io::io<osi, collision::shape::segment, translated_disk_shape, mesh_shape>;
 using params = map<iparam<"dof", 3>, iparam<"ncgroups", 1>>;
 }  // namespace siconos::config::disks
 
@@ -64,21 +74,27 @@ struct maker
     : storage::make<
           standard_environment<config::params>, config::simulation,
           config::interaction_manager, config::io, config::segment_shape,
-          config::disk_shape,
+          config::disk_shape, config::mesh_shape,
           storage::with_properties<
               storage::wrapped<config::disk, some::unbounded_collection>,
               storage::wrapped<config::diskdisk_r,
                                some::unbounded_collection>,
               storage::wrapped<config::diskfsegment_r,
                                some::unbounded_collection>,
+              storage::wrapped<config::diskmesh_r,
+                               some::unbounded_collection>,
               storage::wrapped<config::diskfdisk_r,
                                some::unbounded_collection>,
               storage::wrapped<config::pointl, some::unbounded_collection>,
               storage::wrapped<config::pointd, some::unbounded_collection>,
               storage::wrapped<config::pointtds, some::unbounded_collection>,
-              storage::wrapped<config::interaction,
+              storage::wrapped<config::ct_interaction,
+                               some::unbounded_collection>,
+              storage::wrapped<config::rt_interaction,
                                some::unbounded_collection>,
               storage::wrapped<config::segment_shape,
+                               some::unbounded_collection>,
+              storage::wrapped<config::mesh_shape,
                                some::unbounded_collection>,
               storage::wrapped<config::disk_shape,
                                some::unbounded_collection>,
@@ -87,6 +103,9 @@ struct maker
               storage::attached<config::disk,
                                 storage::pattern::symbol<"shape">,
                                 storage::some::item_ref<config::disk_shape>>,
+              storage::attached<config::mesh,
+                                storage::pattern::symbol<"shape">,
+                                storage::some::item_ref<config::mesh_shape>>,
               storage::time_invariant<
                   storage::pattern::attr_t<config::disk, "fext">>,
               storage::diagonal<
@@ -94,19 +113,23 @@ struct maker
               storage::assembled_diagonal<storage::pattern::attr_t<
                   config::osi, "mass_matrix_assembled">>,
               storage::bind<config::disk, "disk">,
+              storage::bind<config::mesh, "mesh">,
               storage::bind<config::nslaw, "nslaw">,
               storage::bind<config::diskdisk_r, "diskdisk_r">,
               storage::bind<config::diskfdisk_r, "diskfdisk_r">,
               storage::bind<config::diskfsegment_r, "diskfsegment_r">,
+              storage::bind<config::diskmesh_r, "diskmesh_r">,
               storage::bind<config::neighborhood, "neighborhood">,
               storage::bind<config::space_filter, "space_filter">,
               storage::bind<config::segment_shape, "segment_shape">,
               storage::bind<config::disk_shape, "disk_shape">,
+              storage::bind<config::mesh_shape, "mesh_shape">,
               storage::bind<config::translated_disk_shape,
                             "translated_disk_shape">,
               storage::bind<config::interaction_manager,
                             "interaction_manager">,
-              storage::bind<config::interaction, "interaction">,
+              storage::bind<config::ct_interaction, "ct_interaction">,
+              storage::bind<config::ct_interaction, "rt_interaction">,
               storage::bind<config::osnspb, "osnspb">,
               storage::bind<config::solver_options, "solver_options">,
               storage::bind<config::osi, "osi">,

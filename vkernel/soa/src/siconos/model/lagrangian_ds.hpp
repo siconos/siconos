@@ -8,11 +8,11 @@ struct lagrangian_ds
     : item<description<"A lagrangian dynamical system [...]">> {
   using dof = some::indice_parameter<"dof">;
 
-  using attributes = gather<
-      attribute<"q", some::vector<some::scalar, dof>>,
-      attribute<"velocity", some::vector<some::scalar, dof>>,
-      attribute<"mass_matrix", some::matrix<some::scalar, dof, dof>>,
-      attribute<"fext", some::vector<some::scalar, dof>>>;
+  using attributes =
+      gather<attribute<"q", some::vector<some::scalar, dof>>,
+             attribute<"velocity", some::vector<some::scalar, dof>>,
+             attribute<"mass_matrix", some::matrix<some::scalar, dof, dof>>,
+             attribute<"fext", some::vector<some::scalar, dof>>>;
 
   template <typename Handle>
   struct interface : default_interface<Handle> {
@@ -28,4 +28,13 @@ struct lagrangian_ds
   };
 };
 
+  struct rt_lagrangian_ds : item<> {
+  using without_attached_storages_bindings = void;
+
+  using attributes =
+      gather<attribute<"q", some::unbounded_vector<some::scalar>>,
+             attribute<"velocity", some::unbounded_vector<some::scalar>>,
+             attribute<"mass_matrix", some::unbounded_matrix<some::scalar>>,
+             attribute<"fext", some::unbounded_vector<some::scalar>>>;
+};
 }  // namespace siconos::model

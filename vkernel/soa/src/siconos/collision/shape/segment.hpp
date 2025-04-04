@@ -6,63 +6,65 @@
 
 namespace siconos::collision::shape {
 
-struct segment : item<> {
+struct segment_base : item<> {
+  using indice_t = std::size_t;
+  template <typename T>
+  using vector_t = algebra::vector<T, 6>;
+
+  using without_attributes_bindings = void;
   using attributes = gather<
-      attribute<"points", some::vector<some::scalar, some::indice_value<6>>>,
-      attribute<"normal", some::vector<some::scalar, some::indice_value<3>>>,
-      attribute<"dp2p1", some::vector<some::scalar, some::indice_value<3>>>,
+      attribute<
+          "points",
+          // fixed vector of size 1 => same interface for an unbounded vector
+          // in the case of chained segment
+          some::vector<some::vector<some::scalar, some::indice_value<3>>,
+                       some::indice_value<2>>>,
+      attribute<"dp2p1", some::vector<some::vector<some::scalar,
+                                                   some::indice_value<3>>,
+                                      some::indice_value<1>>>,
       attribute<"maxpoints", some::scalar>,
-      attribute<"length_sq", some::scalar>>;
+      attribute<"length_sq",
+                some::vector<some::scalar, some::indice_value<1>>>>;
 
   template <typename Handle>
   struct interface : default_interface<Handle> {
     using default_interface<Handle>::self;
 
-    decltype(auto) p1()
-    {
-      using scalar = typename decltype(self()->env())::scalar;
+    decltype(auto) points() { return attr<"points">(*self()); }
 
-      return algebra::matrix_view<algebra::vector<scalar, 3>>(
-          attr<"points">(*self()).data());
-    };
-    decltype(auto) p2()
+    decltype(auto) p1(indice_t index = 0) { return points()[index * 2]; };
+    decltype(auto) p2(indice_t index = 0) { return points()[index * 2 + 1]; };
+    decltype(auto) x1(indice_t index = 0) { return p1(index)[0]; };
+    decltype(auto) y1(indice_t index = 0) { return p1(index)[1]; };
+    decltype(auto) x2(indice_t index = 0) { return p2(index)[0]; };
+    decltype(auto) y2(indice_t index = 0) { return p2(index)[1]; };
+    decltype(auto) dp2p1(indice_t index = 0)
     {
-      using scalar = typename decltype(self()->env())::scalar;
-
-      return algebra::matrix_view<algebra::vector<scalar, 3>>(
-          attr<"points">(*self()).data() + 3);
+      return attr<"dp2p1">(*self())[index];
     };
-    decltype(auto) x1() { return p1()[0]; };
-    decltype(auto) y1() { return p1()[1]; };
-    decltype(auto) x2() { return p2()[0]; };
-    decltype(auto) y2() { return p2()[1]; };
-    decltype(auto) dp2p1() { return attr<"dp2p1">(*self()); };
     decltype(auto) maxpoints() { return attr<"maxpoints">(*self()); };
-    decltype(auto) length_sq() { return attr<"length_sq">(*self()); };
-    decltype(auto) normal() { return attr<"normal">(*self()); };
-
-    void compute_dp2p1() { dp2p1() = p2() - p1(); };
-    void compute_length_sq()
+    decltype(auto) length_sq(indice_t index = 0)
     {
-      const auto& v = dp2p1();
+      return attr<"length_sq">(*self())[index];
+    };
+
+    void compute_dp2p1(indice_t index = 0)
+    {
+      dp2p1(index) = p2(index) - p1(index);
+    };
+    void compute_length_sq(indice_t index = 0)
+    {
+      const auto& v = dp2p1(index);
       length_sq() = algebra::dot(v, v);
     };
 
-    void compute_normal()
+    void initialize(indice_t index = 0)
     {
-      const auto& v = dp2p1();
-      normal()[0] = -v[1];
-      normal()[1] = v[0];
+      compute_dp2p1(index);
+      compute_length_sq(index);
     }
 
-    void initialize()
-    {
-      compute_dp2p1();
-      compute_length_sq();
-      compute_normal();
-    }
-
-    decltype(auto) distance(match::vector auto& q)
+    decltype(auto) distance(match::vector auto& q, indice_t index = 0)
     {
       /* dof 3 -> 2D + 1 (CompactNSearch) */
       auto qp = q;
@@ -74,7 +76,7 @@ struct segment : item<> {
       return collision::distance(qp, p);
     }
 
-    decltype(auto) points_coords()
+    decltype(auto) points_coords(indice_t index = 0)
     {
       const auto p = p1();
       const auto pstep = 1. / maxpoints();
@@ -83,10 +85,47 @@ struct segment : item<> {
              view::transform([=](auto i) { return p + i * pstep * dir; });
     }
 
+    void set_points(auto points_array, indice_t index = 0)
+    {
+      p1(index) = {points_array[0], points_array[1], points_array[2]};
+      p2(index) = {points_array[3], points_array[4], points_array[5]};
+    }
+
+    void set_maxpoints(indice_t mp) { maxpoints() = mp; }
+
+    template <typename Scalar>
+    auto insert(Scalar x, Scalar y, Scalar z = 0)
+    {
+      using env_t = decltype(self()->env());
+      using indice = typename env_t::indice;
+
+      using points_store_t = decltype(points());
+
+      if constexpr (match::push_back<points_store_t>) {
+        points().push_back({x, y, 0.}); /* 2D */
+
+        /* initialize must be called on even sizes */
+        indice number_of_points = std::size(points());
+        if (number_of_points % 2 == 0) self()->initialize(number_of_points);
+      }
+      else {
+        // throw an exception ?
+      };
+    }
+
     auto methods()
     {
-      return collect(method("initialize", &interface<Handle>::initialize));
+      using env_t = decltype(self()->env());
+      using scalar = typename env_t::scalar;
+
+      return collect(
+          method("initialize", &interface<Handle>::initialize),
+          method("set_maxpoints", &interface<Handle>::set_maxpoints),
+          method("set_points",
+                 &interface<Handle>::set_points<vector_t<scalar>>),
+          method("insert", &interface<Handle>::insert<scalar>));
     }
   };
 };
+struct segment : segment_base {};
 }  // namespace siconos::collision::shape

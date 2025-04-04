@@ -142,4 +142,9 @@ static auto handles =
                data, index<I, indice>(i));
          });
 };
+
+// Check if a  __init__ member function is present.
+auto has_init =
+  ground::is_valid([](auto &&x) -> decltype(x.__init__()) {});
+
 }  // namespace siconos::storage

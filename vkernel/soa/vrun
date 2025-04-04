@@ -78,7 +78,7 @@ EOF
        (url "https://gitlab.inria.fr/bremond/guix-hpc.git")
        (branch "add-siconosx")
        (commit
-        "c3588b261e3d3f279a3b6a43e2eb5865e1a47247")))
+        "9307bb85fb5c89a62aabdce6d7e4ce90f8e66292")))
 EOF
       # guix environment setup
       # export PATH=/var/guix/profiles/per-user/root/current-guix/bin:$PATH
@@ -92,8 +92,10 @@ EOF
       # it seems that we need to pass explicitely the package for transformations
       exec $guix_cmd shell $guix_isolation_args \
            --root=.siconos-guix-profile \
+           -e '(list (@ (gnu packages gcc) gcc-14) "lib")' \
            -m .siconos-disks-manifest.scm \
-           -- $0  "$@"
+           python --with-c-toolchain=python=gcc-toolchain@14 \
+           -- $0 "$@" # bash -c "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/scratch/maurice/install/siconos/lib/python3.10/site-packages/nonos; export PYTHONPATH=\$PYTHONPATH:/scratch/maurice/install/siconos/lib/python3.10/site-packages; $0 $@"
       ;;
 
     --venv-dir)
