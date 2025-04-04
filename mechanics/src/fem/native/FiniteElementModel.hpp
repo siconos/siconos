@@ -147,6 +147,10 @@ class FiniteElementModel {
       siconos::algebra::SimpleMatrix& Me, FElement& fe,
       std::shared_ptr<siconos::algebra::SimpleMatrix> D, double thickness);
 
+  void computeBeamElementaryStiffnessMatrix_direct(siconos::algebra::SimpleMatrix &Ke, FElement &fe, double length);
+
+  void computeElementary_B_Matrix(FElement& fe, siconos::algebra::SimpleMatrix& B, double length);
+
   void computeElementaryBMatrix_direct(FElement& fe, siconos::algebra::SimpleMatrix& Be, double thickness);
 
   void computeBMatrix(std::shared_ptr<siconos::algebra::SiconosMatrix> B,

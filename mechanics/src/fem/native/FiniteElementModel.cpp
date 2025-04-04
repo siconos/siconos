@@ -360,8 +360,7 @@ void siconos::mechanics::fem::FiniteElementModel::computeElementaryStiffnessMatr
   /** We perform integration by summing over the gauss points
    * this could be simplified by explicit formulae
    */
-
-  if (_mesh->dim() == 2 and fe.family() == FiniteElementFamily::isoparametric)  // Ugly
+ if (_mesh->dim() == 2 and fe.family() == FiniteElementFamily::isoparametric)  // Ugly
   {
     // Direct computation without Gauss Integration
     double x1 = nodes[0]->x();
@@ -547,6 +546,32 @@ void siconos::mechanics::fem::FiniteElementModel::computeElementaryStiffnessMatr
       "siconos::algebra::SimpleMatrix& Ke, FElement& fe, Material& mat  )\n");
 }
 
+void siconos::mechanics::fem::FiniteElementModel::computeBeamElementaryStiffnessMatrix_direct(
+    siconos::algebra::SimpleMatrix &Ke, FElement &fe, double length) {
+
+  Ke.setValue(0,0,12);
+  Ke.setValue(0,1,6*length);
+  Ke.setValue(0,2,-12);
+  Ke.setValue(0,3,6*length);
+
+  Ke.setValue(1,0,6*length);
+  Ke.setValue(1,1,4*length*length);
+  Ke.setValue(1,2,-6*length);
+  Ke.setValue(1,3,2*length*length);
+
+  Ke.setValue(2,0,-12);
+  Ke.setValue(2,1,-6*length);
+  Ke.setValue(2,2,12);
+  Ke.setValue(2,3,-6*length);
+
+  Ke.setValue(3,0,6*length);
+  Ke.setValue(3,1,2*length*length);
+  Ke.setValue(3,2,-6*length);
+  Ke.setValue(3,3,4*length*length);
+
+}
+
+
 void siconos::mechanics::fem::FiniteElementModel::computeElementaryStiffnessMatrix(
     siconos::algebra::SimpleMatrix &Ke, FElement &fe,
     std::shared_ptr<siconos::algebra::SimpleMatrix> D, double thickness) {
@@ -577,163 +602,185 @@ void siconos::mechanics::fem::FiniteElementModel::computeElementaryStiffnessMatr
   /** We perform integration by summing over the gauss points
    * this could be simplified by explicit formulae
    */
+  if (_mesh->dim() == 1){
+    int integrationOrder = 3;
+    for (const auto &gp : fe.GaussPoints(integrationOrder)) {
 
-  int integrationOrder = 1;
-  for (const auto &gp : fe.GaussPoints(integrationOrder)) {
-    if (_mesh->dim() == 2 and fe.family() == FiniteElementFamily::isoparametric)  // Ugly
-    {
-      // Compute shape function and derivatives of shape function
-      double gp_eta = gp[0];
-      double gp_ksi = gp[1];
-      double gp_w = gp[2];
-      fe.shapeFunctionIso2D(gp_eta, gp_ksi, N, Nksi, Neta);
-      // Compute element determinant
-      for (int i = 0; i < 4; i++) J[i] = 0.0;
-      for (int n = 0; n < nnodes; n++) {
-        // DEBUG_PRINTF(" Nksi[%i] = %e\t Neta[%i] = %e\n", n, Nksi[n], n,
-        // Neta[n]); DEBUG_PRINTF(" x = %e\t y = %e\n", nodes[n]->x(),
-        // nodes[n]->y());
-        J[0] = J[0] + Nksi[n] * nodes[n]->x();
-        J[1] = J[1] + Nksi[n] * nodes[n]->y();
-        J[2] = J[2] + Neta[n] * nodes[n]->x();
-        J[3] = J[3] + Neta[n] * nodes[n]->y();
+        // Compute shape function and derivatives of shape function
+        double gp_eta = gp[0];
+        double gp_w = gp[3];
+
+        for (int n = 0; n < nnodes; n++) {
+          B.setValue( 0, 6*gp_eta/(length*length));
+          B.setValue( 1, (3*gp_eta - 1)/length);
+          B.setValue( 2, -6*gp_eta/(length*length));
+          B.setValue( 3, (3*gp_eta + 1)/length);
+        }
+
+
+    }
+  }
+  else
+  {
+
+
+    int integrationOrder = 1;
+    for (const auto &gp : fe.GaussPoints(integrationOrder)) {
+      if (_mesh->dim() == 2 and fe.family() == FiniteElementFamily::isoparametric)  // Ugly
+      {
+        // Compute shape function and derivatives of shape function
+        double gp_eta = gp[0];
+        double gp_ksi = gp[1];
+        double gp_w = gp[2];
+        fe.shapeFunctionIso2D(gp_eta, gp_ksi, N, Nksi, Neta);
+        // Compute element determinant
+        for (int i = 0; i < 4; i++) J[i] = 0.0;
+        for (int n = 0; n < nnodes; n++) {
+          // DEBUG_PRINTF(" Nksi[%i] = %e\t Neta[%i] = %e\n", n, Nksi[n], n,
+          // Neta[n]); DEBUG_PRINTF(" x = %e\t y = %e\n", nodes[n]->x(),
+          // nodes[n]->y());
+          J[0] = J[0] + Nksi[n] * nodes[n]->x();
+          J[1] = J[1] + Nksi[n] * nodes[n]->y();
+          J[2] = J[2] + Neta[n] * nodes[n]->x();
+          J[3] = J[3] + Neta[n] * nodes[n]->y();
+        }
+        double detJ = J[0] * J[3] - J[1] * J[2];
+        DEBUG_PRINTF("detJ = %e\n", detJ);
+
+                // compute inverse of the Jacobian
+        Jinv[0] = J[3] / detJ;
+        Jinv[1] = -J[1] / detJ;
+        Jinv[2] = -J[2] / detJ;
+        Jinv[3] = J[0] / detJ;
+
+                // Compute the derivative w.r.t x and y of the shape function
+        for (int n = 0; n < nnodes; n++) {
+          // DEBUG_PRINTF(" Nksi[%i] = %e\t Neta[%i] = %e\n", n, Nksi[n], n,
+          // Neta[n]);
+          Nx[n] = Jinv[0] * Nksi[n] + Jinv[1] * Neta[n];
+          Ny[n] = Jinv[2] * Nksi[n] + Jinv[3] * Neta[n];
+          // DEBUG_PRINTF(" Nx[%i] = %e\t Ny[%i] = %e\n", n, Nx[n], n, Ny[n]);
+        }
+
+                // Construct the B matrix (its form is consistent with the choice of the
+                // representation of strain)
+        auto B = std::make_shared<siconos::algebra::SimpleMatrix>(3, ndof);
+        B->zero();
+        for (int n = 0; n < nnodes; n++) {
+          B->setValue(0, 2 * n, Nx[n]);
+          B->setValue(1, 2 * n, 0.0);
+          B->setValue(2, 2 * n, Ny[n]);
+          B->setValue(0, 2 * n + 1, 0.0);
+          B->setValue(1, 2 * n + 1, Ny[n]);
+          B->setValue(2, 2 * n + 1, Nx[n]);
+        }
+
+                // Compte BT D B
+        auto DB = std::make_shared<siconos::algebra::SimpleMatrix>(3, ndof);
+        prod(*D, *B, *DB, true);
+        auto BT = std::make_shared<siconos::algebra::SimpleMatrix>(ndof, 3);
+        BT->trans(*B);
+        auto BTDB = std::make_shared<siconos::algebra::SimpleMatrix>(ndof, ndof);
+        prod(*BT, *DB, *BTDB, true);
+
+        double coeff = gp_w * detJ * thickness;
+        Ke += (coeff * *BTDB);
+
+                // // check with direct computation (see IFEM Chap 15 Felippa)
+                // std::shared_ptr<siconos::algebra::SimpleMatrix> Ke_direct =
+                // std::make_shared<siconos::algebra::SimpleMatrix>(ndof,ndof);
+                // computeElementaryStiffnessMatrix_direct(*Ke_direct, fe, D, thickness );
+                // std::cout << "diff " <<   (*Ke_direct- Ke).normInf() << std::endl;
+      } else if (_mesh->dim() == 3 and
+                 fe.family() == FiniteElementFamily::isoparametric)  // Ugly
+      {
+        // Compute shape function and derivatives of shape function
+        double gp_eta = gp[0];
+        double gp_ksi = gp[1];
+        double gp_zeta = gp[2];
+        double gp_w = gp[3];
+        fe.shapeFunctionIso3D(gp_eta, gp_ksi, gp_zeta, N, Nksi, Neta, Nzeta);
+        // Compute element determinant
+        for (int i = 0; i < 9; i++) J[i] = 0.0;
+        for (int n = 0; n < nnodes; n++) {
+          // DEBUG_PRINTF(" Nksi[%i] = %e\t Neta[%i] = %e\n", n, Nksi[n], n,
+          // Neta[n]); DEBUG_PRINTF(" x = %e\t y = %e\n", nodes[n]->x(),
+          // nodes[n]->y());
+          J[0] = J[0] + Nksi[n] * nodes[n]->x();
+          J[1] = J[1] + Nksi[n] * nodes[n]->y();
+          J[2] = J[2] + Nksi[n] * nodes[n]->z();
+          J[3] = J[3] + Neta[n] * nodes[n]->x();
+          J[4] = J[4] + Neta[n] * nodes[n]->y();
+          J[5] = J[5] + Neta[n] * nodes[n]->z();
+          J[6] = J[6] + Nzeta[n] * nodes[n]->x();
+          J[7] = J[7] + Nzeta[n] * nodes[n]->y();
+          J[8] = J[8] + Nzeta[n] * nodes[n]->z();
+        }
+        double detJ = det3x3(J.data());
+        DEBUG_PRINTF("detJ = %e\n", detJ);
+        // for (int j = 0; j < 3; j++) {
+        //   for (int i = 0; i < 3; i++) b[i] = 0.0;
+        //   b[j] = 1.0;
+        //   // int info = solv3x3(J, &Jinv[j * 3], b);
+        // }
+
+                // Compute the derivative w.r.t x and y of the shape function
+        for (int n = 0; n < nnodes; n++) {
+          // DEBUG_PRINTF(" Nksi[%i] = %e\t Neta[%i] = %e\n", n, Nksi[n], n,
+          // Neta[n]);
+          Nx[n] = Jinv[0] * Nksi[n] + Jinv[1] * Neta[n] + Jinv[2] * Nzeta[n];
+          Ny[n] = Jinv[3] * Nksi[n] + Jinv[4] * Neta[n] + Jinv[5] * Nzeta[n];
+          Nz[n] = Jinv[6] * Nksi[n] + Jinv[7] * Neta[n] + Jinv[8] * Nzeta[n];
+          // DEBUG_PRINTF(" Nx[%i] = %e\t Ny[%i] = %e\n", n, Nx[n], n, Ny[n]);
+        }
+
+        /* Construct the B matrix (its form is consistent with the choice
+         * of the representation of strain) */
+        auto B = std::make_shared<siconos::algebra::SimpleMatrix>(6, ndof);
+        B->zero();
+        for (int n = 0; n < nnodes; n++) {
+          B->setValue(0, 3 * n, Nx[n]);
+          B->setValue(1, 3 * n, 0.0);
+          B->setValue(2, 3 * n, 0.0);
+          B->setValue(3, 3 * n, Ny[n]);
+          B->setValue(4, 3 * n, 0.0);
+          B->setValue(5, 3 * n, Nz[n]);
+
+          B->setValue(0, 3 * n + 1, 0.0);
+          B->setValue(1, 3 * n + 1, Ny[n]);
+          B->setValue(2, 3 * n + 1, 0.0);
+          B->setValue(3, 3 * n + 1, Nx[n]);
+          B->setValue(4, 3 * n + 1, Nz[n]);
+          B->setValue(5, 3 * n + 1, 0.0);
+
+          B->setValue(0, 3 * n + 2, 0.0);
+          B->setValue(1, 3 * n + 2, 0.0);
+          B->setValue(2, 3 * n + 2, Nz[n]);
+          B->setValue(3, 3 * n + 2, 0.0);
+          B->setValue(4, 3 * n + 2, Ny[n]);
+          B->setValue(5, 3 * n + 2, Nx[n]);
+        }
+        DEBUG_EXPR(B->display(););
+        // Compte BT D B
+        auto DB = std::make_shared<siconos::algebra::SimpleMatrix>(6, ndof);
+        prod(*D, *B, *DB, true);
+        auto BT = std::make_shared<siconos::algebra::SimpleMatrix>(ndof, 6);
+        BT->trans(*B);
+        auto BTDB = std::make_shared<siconos::algebra::SimpleMatrix>(ndof, ndof);
+        prod(*BT, *DB, *BTDB, true);
+        DEBUG_EXPR(BTDB->display(););
+
+        double coeff = 0.0;
+        coeff = gp_w * detJ / 6.0;  // we divide again by 6.0 since the reference
+                                    // element has volume equal to 1/6.0
+        Ke += (coeff * *BTDB);
+
+                // // check with direct computation (see AFEM Chap 16 Felippa)
+                // auto Ke_direct =
+                // std::make_shared<siconos::algebra::SimpleMatrix>(ndof,ndof);
+                // computeElementaryStiffnessMatrix_direct(*Ke_direct, fe, D, thickness );
+                // std::cout << "diff " <<   (*Ke_direct- Ke).normInf() << std::endl;
       }
-      double detJ = J[0] * J[3] - J[1] * J[2];
-      DEBUG_PRINTF("detJ = %e\n", detJ);
-
-      // compute inverse of the Jacobian
-      Jinv[0] = J[3] / detJ;
-      Jinv[1] = -J[1] / detJ;
-      Jinv[2] = -J[2] / detJ;
-      Jinv[3] = J[0] / detJ;
-
-      // Compute the derivative w.r.t x and y of the shape function
-      for (int n = 0; n < nnodes; n++) {
-        // DEBUG_PRINTF(" Nksi[%i] = %e\t Neta[%i] = %e\n", n, Nksi[n], n,
-        // Neta[n]);
-        Nx[n] = Jinv[0] * Nksi[n] + Jinv[1] * Neta[n];
-        Ny[n] = Jinv[2] * Nksi[n] + Jinv[3] * Neta[n];
-        // DEBUG_PRINTF(" Nx[%i] = %e\t Ny[%i] = %e\n", n, Nx[n], n, Ny[n]);
-      }
-
-      // Construct the B matrix (its form is consistent with the choice of the
-      // representation of strain)
-      auto B = std::make_shared<siconos::algebra::SimpleMatrix>(3, ndof);
-      B->zero();
-      for (int n = 0; n < nnodes; n++) {
-        B->setValue(0, 2 * n, Nx[n]);
-        B->setValue(1, 2 * n, 0.0);
-        B->setValue(2, 2 * n, Ny[n]);
-        B->setValue(0, 2 * n + 1, 0.0);
-        B->setValue(1, 2 * n + 1, Ny[n]);
-        B->setValue(2, 2 * n + 1, Nx[n]);
-      }
-
-      // Compte BT D B
-      auto DB = std::make_shared<siconos::algebra::SimpleMatrix>(3, ndof);
-      prod(*D, *B, *DB, true);
-      auto BT = std::make_shared<siconos::algebra::SimpleMatrix>(ndof, 3);
-      BT->trans(*B);
-      auto BTDB = std::make_shared<siconos::algebra::SimpleMatrix>(ndof, ndof);
-      prod(*BT, *DB, *BTDB, true);
-
-      double coeff = gp_w * detJ * thickness;
-      Ke += (coeff * *BTDB);
-
-      // // check with direct computation (see IFEM Chap 15 Felippa)
-      // std::shared_ptr<siconos::algebra::SimpleMatrix> Ke_direct =
-      // std::make_shared<siconos::algebra::SimpleMatrix>(ndof,ndof);
-      // computeElementaryStiffnessMatrix_direct(*Ke_direct, fe, D, thickness );
-      // std::cout << "diff " <<   (*Ke_direct- Ke).normInf() << std::endl;
-    } else if (_mesh->dim() == 3 and
-               fe.family() == FiniteElementFamily::isoparametric)  // Ugly
-    {
-      // Compute shape function and derivatives of shape function
-      double gp_eta = gp[0];
-      double gp_ksi = gp[1];
-      double gp_zeta = gp[2];
-      double gp_w = gp[3];
-      fe.shapeFunctionIso3D(gp_eta, gp_ksi, gp_zeta, N, Nksi, Neta, Nzeta);
-      // Compute element determinant
-      for (int i = 0; i < 9; i++) J[i] = 0.0;
-      for (int n = 0; n < nnodes; n++) {
-        // DEBUG_PRINTF(" Nksi[%i] = %e\t Neta[%i] = %e\n", n, Nksi[n], n,
-        // Neta[n]); DEBUG_PRINTF(" x = %e\t y = %e\n", nodes[n]->x(),
-        // nodes[n]->y());
-        J[0] = J[0] + Nksi[n] * nodes[n]->x();
-        J[1] = J[1] + Nksi[n] * nodes[n]->y();
-        J[2] = J[2] + Nksi[n] * nodes[n]->z();
-        J[3] = J[3] + Neta[n] * nodes[n]->x();
-        J[4] = J[4] + Neta[n] * nodes[n]->y();
-        J[5] = J[5] + Neta[n] * nodes[n]->z();
-        J[6] = J[6] + Nzeta[n] * nodes[n]->x();
-        J[7] = J[7] + Nzeta[n] * nodes[n]->y();
-        J[8] = J[8] + Nzeta[n] * nodes[n]->z();
-      }
-      double detJ = det3x3(J.data());
-      DEBUG_PRINTF("detJ = %e\n", detJ);
-      // for (int j = 0; j < 3; j++) {
-      //   for (int i = 0; i < 3; i++) b[i] = 0.0;
-      //   b[j] = 1.0;
-      //   // int info = solv3x3(J, &Jinv[j * 3], b);
-      // }
-
-      // Compute the derivative w.r.t x and y of the shape function
-      for (int n = 0; n < nnodes; n++) {
-        // DEBUG_PRINTF(" Nksi[%i] = %e\t Neta[%i] = %e\n", n, Nksi[n], n,
-        // Neta[n]);
-        Nx[n] = Jinv[0] * Nksi[n] + Jinv[1] * Neta[n] + Jinv[2] * Nzeta[n];
-        Ny[n] = Jinv[3] * Nksi[n] + Jinv[4] * Neta[n] + Jinv[5] * Nzeta[n];
-        Nz[n] = Jinv[6] * Nksi[n] + Jinv[7] * Neta[n] + Jinv[8] * Nzeta[n];
-        // DEBUG_PRINTF(" Nx[%i] = %e\t Ny[%i] = %e\n", n, Nx[n], n, Ny[n]);
-      }
-
-      /* Construct the B matrix (its form is consistent with the choice
-       * of the representation of strain) */
-      auto B = std::make_shared<siconos::algebra::SimpleMatrix>(6, ndof);
-      B->zero();
-      for (int n = 0; n < nnodes; n++) {
-        B->setValue(0, 3 * n, Nx[n]);
-        B->setValue(1, 3 * n, 0.0);
-        B->setValue(2, 3 * n, 0.0);
-        B->setValue(3, 3 * n, Ny[n]);
-        B->setValue(4, 3 * n, 0.0);
-        B->setValue(5, 3 * n, Nz[n]);
-
-        B->setValue(0, 3 * n + 1, 0.0);
-        B->setValue(1, 3 * n + 1, Ny[n]);
-        B->setValue(2, 3 * n + 1, 0.0);
-        B->setValue(3, 3 * n + 1, Nx[n]);
-        B->setValue(4, 3 * n + 1, Nz[n]);
-        B->setValue(5, 3 * n + 1, 0.0);
-
-        B->setValue(0, 3 * n + 2, 0.0);
-        B->setValue(1, 3 * n + 2, 0.0);
-        B->setValue(2, 3 * n + 2, Nz[n]);
-        B->setValue(3, 3 * n + 2, 0.0);
-        B->setValue(4, 3 * n + 2, Ny[n]);
-        B->setValue(5, 3 * n + 2, Nx[n]);
-      }
-      DEBUG_EXPR(B->display(););
-      // Compte BT D B
-      auto DB = std::make_shared<siconos::algebra::SimpleMatrix>(6, ndof);
-      prod(*D, *B, *DB, true);
-      auto BT = std::make_shared<siconos::algebra::SimpleMatrix>(ndof, 6);
-      BT->trans(*B);
-      auto BTDB = std::make_shared<siconos::algebra::SimpleMatrix>(ndof, ndof);
-      prod(*BT, *DB, *BTDB, true);
-      DEBUG_EXPR(BTDB->display(););
-
-      double coeff = 0.0;
-      coeff = gp_w * detJ / 6.0;  // we divide again by 6.0 since the reference
-                                  // element has volume equal to 1/6.0
-      Ke += (coeff * *BTDB);
-
-      // // check with direct computation (see AFEM Chap 16 Felippa)
-      // auto Ke_direct =
-      // std::make_shared<siconos::algebra::SimpleMatrix>(ndof,ndof);
-      // computeElementaryStiffnessMatrix_direct(*Ke_direct, fe, D, thickness );
-      // std::cout << "diff " <<   (*Ke_direct- Ke).normInf() << std::endl;
     }
   }
   DEBUG_EXPR(Ke.display(););
@@ -837,6 +884,32 @@ void siconos::mechanics::fem::FiniteElementModel::computeStiffnessMatrix(
       "siconos::mechanics::fem::FiniteElementModel::computeStiffnessMatrix(std:"
       ":shared_ptr<"
       "siconos::algebra::SiconosMatrix K, Material& mat )\n");
+}
+
+void siconos::mechanics::fem::FiniteElementModel::computeElementary_B_Matrix(FElement& fe, siconos::algebra::SimpleMatrix& B, double length)
+{
+  int ndof = fe.ndof();
+  auto &nodes = fe.nodes();
+  int nnodes = nodes.size();
+  B.zero();
+  int cpt=0;
+  for (const auto &gp : fe.GaussPoints(3)) {
+    if (_mesh->dim() == 1)
+    {
+      // Compute shape function and derivatives of shape function
+      double gp_eta = gp[0];
+      double gp_w = gp[3];
+
+      for (int n = 0; n < nnodes; n++) {
+        B.setValue(cpt, 0, 6*gp_eta/(length*length));
+        B.setValue(cpt, 1, (3*gp_eta - 1)/length);
+        B.setValue(cpt, 2, -6*gp_eta/(length*length));
+        B.setValue(cpt, 3, (3*gp_eta + 1)/length);
+      }
+
+      cpt++;
+    }
+  }
 }
 
 void siconos::mechanics::fem::FiniteElementModel::computeElementaryBMatrix_direct(FElement& fe, siconos::algebra::SimpleMatrix& B, double thickness)

@@ -57,6 +57,8 @@ int siconos::mechanics::fem::FElement::ndofPerNode() {
 const siconos::mechanics::fem::GaussPointsTab& siconos::mechanics::fem::FElement::GaussPoints(
     int order) {
   switch (_type) {
+    case FiniteElementType::L2:
+      return GaussPointsL2_3;
     case FiniteElementType::T3:
       if (order == 1)
         return GaussPointsT3_1;

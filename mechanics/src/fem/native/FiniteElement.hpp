@@ -18,6 +18,7 @@
 #ifndef FEHPP
 #define FEHPP
 
+#include <cmath>
 #include <memory>
 #include <vector>
 
@@ -28,6 +29,10 @@ class FENode;
 class MElement;
 
 using GaussPointsTab = std::vector<std::vector<double>>;
+
+static const GaussPointsTab GaussPointsL2_3 = {
+    {1/sqrt(3), 1.0},
+    {-1/sqrt(3), 1.0}};
 
 static const GaussPointsTab GaussPointsT3_1 = {
     {0.333333333333333333, 0.333333333333333333, 0.5}};
