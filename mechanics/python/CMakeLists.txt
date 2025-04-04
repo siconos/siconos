@@ -76,6 +76,20 @@ if(SICONOS_HAS_MECHANICS_OCC)
 endif()
 
 
+create_pybind11_module(
+  MODULE_NAME pyjoints 
+  SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/joints/joints_pybind11.cpp
+  DEPENDENCIES kernel mechanics
+  PARENT_NAME mechanics/joints
+)
+
+set_target_properties(pyjoints PROPERTIES OUTPUT_NAME "_joints")
+install(TARGETS
+pyjoints
+  COMPONENT python
+  LIBRARY DESTINATION "${SICONOS_PYTHON_INSTALL_DIR}/siconos/mechanics/joints"
+  )
+
 target_include_directories(pycollision PRIVATE ${CMAKE_SOURCE_DIR}/mechanics/src/collision/bullet)
 target_include_directories(pycollision PRIVATE ${CMAKE_SOURCE_DIR}/mechanics/src/collision/native/bodies)
 target_include_directories(pycollision PRIVATE ${CMAKE_SOURCE_DIR}/mechanics/src/collision/native)

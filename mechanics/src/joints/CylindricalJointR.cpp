@@ -76,6 +76,15 @@ double piwrap(double x) {
 
 }  // namespace
 
+siconos::joints::CylindricalJointR::CylindricalJointR()
+{
+  _G1P0 = std::make_shared<siconos::algebra::SiconosVector3>();
+  _G2P0 = std::make_shared<siconos::algebra::SiconosVector3>();
+  _axis0 = std::make_shared<siconos::algebra::SiconosVector3>();
+  _V1 = std::make_shared<siconos::algebra::SiconosVector3>();
+  _V2 = std::make_shared<siconos::algebra::SiconosVector3>();
+}
+
 siconos::joints::CylindricalJointR::CylindricalJointR(
     const Eigen::Ref<siconos::algebra::SiconosVector3>& P,
     const Eigen::Ref<siconos::algebra::SiconosVector3>& A, bool absoluteRef,

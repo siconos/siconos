@@ -22,6 +22,7 @@
 #include "FirstOrderLinearR.hpp"
 #include "FirstOrderLinearTIR.hpp"
 #include "LagrangianLinearTIR.hpp"
+#include "NewtonEulerR.hpp"
 namespace py = pybind11;
 
 PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
@@ -78,4 +79,16 @@ void wrap_relations(py::module_ &m) {
         a.display();
         return "\n";
       });
+
+  // ============================ NewtonEulerR CLASS ==============================
+  py::class_<siconos::modeling::NewtonEulerR,
+             std::shared_ptr<siconos::modeling::NewtonEulerR>,
+             siconos::modeling::Relation>(m, "NewtonEulerR")
+      .def(py::init<>())
+      // .def("display", &siconos::modeling::NewtonEulerR::display)
+      // .def("__repr__", [](const siconos::modeling::NewtonEulerR &a) {
+      //   a.display();
+      //   return "\n";
+      // })
+      ;
 }

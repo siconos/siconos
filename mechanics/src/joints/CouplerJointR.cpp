@@ -41,19 +41,28 @@
 siconos::joints::CouplerJointR::CouplerJointR(
     std::shared_ptr<NewtonEulerJointR> joint1, unsigned int dof1,
     std::shared_ptr<NewtonEulerJointR> joint2, unsigned int dof2, double ratio,
-    std::shared_ptr<siconos::algebra::SiconosVector> ref1, unsigned int ref1_index,
-    std::shared_ptr<siconos::algebra::SiconosVector> ref2, unsigned int ref2_index)
+    std::optional<siconos::algebra::SiconosVector> ref1, unsigned int ref1_index,
+    std::optional<siconos::algebra::SiconosVector> ref2, unsigned int ref2_index)
     : NewtonEulerJointR(),
       _joint1(joint1),
       _joint2(joint2),
-      _ref1(ref1),
-      _ref2(ref2),
+      // _ref1(ref1),
+      // _ref2(ref2),
       _dof1(dof1),
       _dof2(dof2),
       _ref1_index(ref1_index),
       _ref2_index(ref2_index),
       _ratio(ratio),
       _offset(0.0) {
+  if (ref1)
+  _ref1 = std::make_shared<siconos::algebra::SiconosVector>(*ref1); // ref1.value()
+  else
+    _ref1 = nullptr;
+      
+  if (ref2)
+    _ref2 = std::make_shared<siconos::algebra::SiconosVector>(*ref2);
+  else
+        _ref2 = nullptr;
   assert(_dof1 < _joint1->numberOfDoF());
   assert(_dof2 < _joint2->numberOfDoF());
 }

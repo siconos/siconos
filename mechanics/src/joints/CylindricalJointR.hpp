@@ -86,6 +86,10 @@ class CylindricalJointR : public NewtonEulerJointR {
                                        const siconos::algebra::BlockVector& q0) override;
 
  public:
+  /** Default constructor */
+  CylindricalJointR();
+
+
   /** Constructor based on one or two dynamical systems, a point and an axis.
    *
    *  \param P a vector to define the point around which rotation is allowed.

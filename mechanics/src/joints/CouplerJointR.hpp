@@ -74,9 +74,9 @@ class CouplerJointR : public NewtonEulerJointR {
    *  the parameters. */
   CouplerJointR(std::shared_ptr<NewtonEulerJointR> joint1, unsigned int dof1,
                 std::shared_ptr<NewtonEulerJointR> joint2, unsigned int dof2, double ratio,
-                std::shared_ptr<siconos::algebra::SiconosVector> ref1 = nullptr,
+                std::optional<siconos::algebra::SiconosVector> ref1 = std::nullopt,
                 unsigned int ref1_index = 0,
-                std::shared_ptr<siconos::algebra::SiconosVector> ref2 = nullptr,
+                std::optional<siconos::algebra::SiconosVector> ref2 = std::nullopt,
                 unsigned int ref2_index = 0);
 
   /** Initialize a coupler. See setReferences() for an explanation of
