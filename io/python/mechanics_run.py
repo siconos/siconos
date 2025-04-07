@@ -968,8 +968,10 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 # Generic NewtonEulerJointR interface
                 joint = joint_class()
                 for n, p in enumerate(points):
+                    p = np.asarray(p, dtype=np.float64, order="F")
                     joint.setPoint(n, p)
                 for n, a in enumerate(axes):
+                    a = np.asarray(a, dtype=np.float64, order="F")
                     joint.setAxis(n, a)
                 joint.setAbsolute(absolute)
 
