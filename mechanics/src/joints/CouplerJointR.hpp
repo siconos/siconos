@@ -67,7 +67,7 @@ class CouplerJointR : public NewtonEulerJointR {
    *  \param q0  q states vectors of the related the dynamical systems
    */
   virtual void computeH_NE_(double time, siconos::modeling::Interaction& inter,
-                                       const siconos::algebra::BlockVector& q0) override;
+                            const siconos::algebra::BlockVector& q0) override;
 
  public:
   /** Initialize a coupler. See setReferences() for an explanation of
@@ -218,10 +218,10 @@ class CouplerJointR : public NewtonEulerJointR {
   };
 
   /** Compute the vector of linear and angular positions of the free axes */
-  virtual void computehDoF(const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
-    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
-                           Eigen::Ref<siconos::algebra::SiconosVector> y,
-                           unsigned int axis = 0) override;
+  virtual void computehDoF(
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      Eigen::Ref<siconos::algebra::SiconosVector> y, unsigned int axis = 0) override;
 
   /** Compute the jacobian of linear and angular DoF with respect to some q */
   virtual void computeJachqDoF(siconos::modeling::Interaction& inter,

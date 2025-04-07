@@ -230,7 +230,9 @@ void wrap_dynamical_systems(py::module_ &m) {
 
       .def("q", &siconos::modeling::NewtonEulerDS::q_python,
            py::return_value_policy::reference_internal)
-      .def("velocity", &siconos::modeling::NewtonEulerDS::twist_python,
+      //  .def("velocity", &siconos::modeling::NewtonEulerDS::twist_python,
+      //       py::return_value_policy::reference_internal)
+      .def("twist", &siconos::modeling::NewtonEulerDS::twist_python,
            py::return_value_policy::reference_internal)
 
       .def("setConstantFext", &siconos::modeling::NewtonEulerDS::setConstantFext,

@@ -26,6 +26,7 @@
 
 #include "BlockVector.hpp"
 #include "NewtonEulerDS.hpp"
+#include "NewtonEulerJointR.hpp"
 #include "RotationQuaternion.hpp"  // for rewriteVectorFromBodyToAbsoluteFrame
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
@@ -76,8 +77,7 @@ double piwrap(double x) {
 
 }  // namespace
 
-siconos::joints::CylindricalJointR::CylindricalJointR()
-{
+siconos::joints::CylindricalJointR::CylindricalJointR() : NewtonEulerJointR{} {
   _G1P0 = std::make_shared<siconos::algebra::SiconosVector3>();
   _G2P0 = std::make_shared<siconos::algebra::SiconosVector3>();
   _axis0 = std::make_shared<siconos::algebra::SiconosVector3>();
@@ -89,7 +89,8 @@ siconos::joints::CylindricalJointR::CylindricalJointR(
     const Eigen::Ref<siconos::algebra::SiconosVector3>& P,
     const Eigen::Ref<siconos::algebra::SiconosVector3>& A, bool absoluteRef,
     std::shared_ptr<siconos::modeling::NewtonEulerDS> d1,
-    std::shared_ptr<siconos::modeling::NewtonEulerDS> d2) {
+    std::shared_ptr<siconos::modeling::NewtonEulerDS> d2)
+    : NewtonEulerJointR{} {
   _axis0 = std::make_shared<siconos::algebra::SiconosVector3>();
   _G1P0 = std::make_shared<siconos::algebra::SiconosVector3>();
 

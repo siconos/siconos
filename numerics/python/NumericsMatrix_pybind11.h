@@ -53,6 +53,42 @@ py::array_t<double> get_matrix(const T &self, NumericsMatrix *T::*matrix_attr) {
 }
 
 template <typename T>
+py::object get_matrix_sparse(const T &self, NumericsMatrix *T::*matrix_attr) {
+  const NumericsMatrix *matrix = self.*matrix_attr;
+  if (!matrix || !matrix->matrix2 || !matrix->matrix2->csc) {
+    throw std::runtime_error("input matrix is not allocated.");
+  }
+
+  CSparseMatrix *csc = matrix->matrix2->csc;
+  py::capsule data_capsule(csc->x, [](void *) {});
+  // py::capsule indices_capsule(csc->i, [](void *) {});
+  // py::capsule indptr_capsule(csc->p, [](void *) {});
+
+  py::array_t<double> data({csc->nzmax}, {sizeof(double)}, csc->x, data_capsule);
+  // Note FP: capsule only for csc->x.
+  // .cast for csc->i, csc->p
+  // No copies.
+  // This is the only way I found to ensure a correct behavior.
+  // All other ways leed to strange results, with data corruption
+  // after a sequence of print(M) in python ...
+  //  py::array_t<int64_t> indices({csc->nzmax}, {sizeof(int64_t)}, csc->i, indices_capsule);
+  py::array_t<int64_t> indices = py::array_t<int64_t>({csc->nzmax}, {sizeof(int64_t)}, csc->i)
+                                     .cast<py::array_t<int64_t>>();
+
+  py::array_t<int64_t> indptr = py::array_t<int64_t>({csc->n + 1}, {sizeof(int64_t)}, csc->p)
+                                    .cast<py::array_t<int64_t>>();
+
+  // Build Python (scipy) csc (no copies)
+  py::object csc_matrix = py::module_::import("scipy.sparse")
+                              .attr("csc_matrix")(py::make_tuple(data, indices, indptr),
+                                                  py::make_tuple(csc->m, csc->n));
+  csc_matrix.attr("_keep_data") = data;
+  csc_matrix.attr("_keep_indices") = indices;
+  csc_matrix.attr("_keep_indptr") = indptr;
+
+  return csc_matrix;
+}
+template <typename T>
 void set_matrix(T &self, NumericsMatrix *T::*matrix_attr, py::array_t<double> array) {
   int size = self.dimension * self.numberOfContacts;
 
@@ -79,6 +115,61 @@ void set_array(T &self, double *&array_ptr, py::array_t<double> arr, int expecte
       throw std::runtime_error("Incorrect array size");
   }
   array_ptr = static_cast<double *>(buf.ptr);
+}
+
+template <typename T>
+void set_matrix_sparse(T &self, NumericsMatrix *T::*matrix_attr, py::object pymat) {
+  NumericsMatrix *&matrix = self.*matrix_attr;
+  if (!matrix) {
+    matrix = new NumericsMatrix();
+    matrix->storageType = NM_SPARSE;
+    matrix->matrix2 = new NumericsSparseMatrix();
+  }
+
+  NumericsSparseMatrix *sparseMat = matrix->matrix2;
+
+  // Ensure CSC format (conversion). Copy if not? Check this
+  py::object csc_M = pymat.attr("tocsc")();
+
+  // Get numpy array. Warn FP: mind types (must be int64 in scipy because of cs.h types)
+  py::array_t<double> data_array = csc_M.attr("data").cast<py::array_t<double>>();
+  py::array_t<int64_t> indptr_array = csc_M.attr("indptr").cast<py::array_t<int64_t>>();
+  py::array_t<int64_t> indices_array = csc_M.attr("indices").cast<py::array_t<int64_t>>();
+  auto shape = csc_M.attr("shape").cast<std::pair<int, int>>();
+
+  if (indices_array.itemsize() != sizeof(int64_t)) {
+    throw std::runtime_error(
+        "indices must be of type int64_t to be complient with SuiteSparse");
+  }
+
+  // Build CSparseMatrix
+  sparseMat->csc = new CSparseMatrix();
+  sparseMat->csc->nzmax = data_array.shape(0);
+  sparseMat->csc->m = shape.first;
+  sparseMat->csc->n = shape.second;
+  sparseMat->csc->p = static_cast<int64_t *>(indptr_array.mutable_data());
+  sparseMat->csc->i = static_cast<int64_t *>(indices_array.mutable_data());
+  sparseMat->csc->x = static_cast<double *>(data_array.mutable_data());
+  sparseMat->csc->nz = -1;  // CSC format
+
+  matrix->size0 = shape.first;
+  matrix->size1 = shape.second;
+
+  // Note FP: capsules and M.attr version below.
+  // stuff finally not needed. Check this carefully
+  //   // Capsules to ensure that data/memories are kept alive
+  //   py::capsule data_capsule = py::reinterpret_steal<py::capsule>(
+  //       PyCapsule_New(static_cast<void *>(data_array.mutable_data()), nullptr, nullptr));
+
+  //   py::capsule indices_capsule = py::reinterpret_steal<py::capsule>(
+  //       PyCapsule_New(static_cast<void *>(indices_array.mutable_data()), nullptr, nullptr));
+
+  //   py::capsule indptr_capsule = py::reinterpret_steal<py::capsule>(
+  //       PyCapsule_New(static_cast<void *>(indptr_array.mutable_data()), nullptr, nullptr));
+
+  //   csc_M.attr("data").attr("setflags")(py::arg("write") = false);
+  //   csc_M.attr("indices").attr("setflags")(py::arg("write") = false);
+  //   csc_M.attr("indptr").attr("setflags")(py::arg("write") = false);
 }
 
 template <typename T>

@@ -81,8 +81,7 @@ void wrap_relations(py::module_ &m) {
       });
 
   // ============================ NewtonEulerR CLASS ==============================
-  py::class_<siconos::modeling::NewtonEulerR,
-             std::shared_ptr<siconos::modeling::NewtonEulerR>,
+  py::class_<siconos::modeling::NewtonEulerR, std::shared_ptr<siconos::modeling::NewtonEulerR>,
              siconos::modeling::Relation>(m, "NewtonEulerR")
       .def(py::init<>())
       // .def("display", &siconos::modeling::NewtonEulerR::display)

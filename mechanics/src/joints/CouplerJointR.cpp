@@ -43,7 +43,7 @@ siconos::joints::CouplerJointR::CouplerJointR(
     std::shared_ptr<NewtonEulerJointR> joint2, unsigned int dof2, double ratio,
     std::optional<siconos::algebra::SiconosVector> ref1, unsigned int ref1_index,
     std::optional<siconos::algebra::SiconosVector> ref2, unsigned int ref2_index)
-    : NewtonEulerJointR(),
+    : NewtonEulerJointR{},
       _joint1(joint1),
       _joint2(joint2),
       // _ref1(ref1),
@@ -55,14 +55,14 @@ siconos::joints::CouplerJointR::CouplerJointR(
       _ratio(ratio),
       _offset(0.0) {
   if (ref1)
-  _ref1 = std::make_shared<siconos::algebra::SiconosVector>(*ref1); // ref1.value()
+    _ref1 = std::make_shared<siconos::algebra::SiconosVector>(*ref1);  // ref1.value()
   else
     _ref1 = nullptr;
-      
+
   if (ref2)
     _ref2 = std::make_shared<siconos::algebra::SiconosVector>(*ref2);
   else
-        _ref2 = nullptr;
+    _ref2 = nullptr;
   assert(_dof1 < _joint1->numberOfDoF());
   assert(_dof2 < _joint2->numberOfDoF());
 }
@@ -243,9 +243,9 @@ void siconos::joints::CouplerJointR::computeh(const siconos::algebra::BlockVecto
   y(0) = y2(0) - y1(0) * _ratio + _offset;
 }
 
-void siconos::joints::CouplerJointR::computeH_NE_(
-    double time, siconos::modeling::Interaction& inter,
-    const siconos::algebra::BlockVector& q0) {
+void siconos::joints::CouplerJointR::computeH_NE_(double time,
+                                                  siconos::modeling::Interaction& inter,
+                                                  const siconos::algebra::BlockVector& q0) {
   auto jachq1 = std::make_shared<siconos::algebra::SiconosMatrix>(1, q0.size());
   auto jachq2 = std::make_shared<siconos::algebra::SiconosMatrix>(1, q0.size());
 
@@ -264,8 +264,7 @@ void siconos::joints::CouplerJointR::computeH_NE_(
   // Constraint is the linear relation between them
   for (unsigned int i = 0; i < 1; i++)
     for (unsigned int j = 0; j < H_NE_view_->cols(); j++)
-      H_NE_view_->setValue(
-          i, j, (*jachq2)(i, j) - (*jachq1)(i, j) * _ratio);
+      H_NE_view_->setValue(i, j, (*jachq2)(i, j) - (*jachq1)(i, j) * _ratio);
 }
 
 // siconos::algebra::SiconosVector siconos::joints::CouplerJointR::normalDoF(
