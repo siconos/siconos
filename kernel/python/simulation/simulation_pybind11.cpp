@@ -9,12 +9,12 @@
 #include "NonSmoothDynamicalSystem.hpp"
 #include "OneStepIntegrator.hpp"
 #include "OneStepNSProblem.hpp"
+#include "SimulationGraphs.hpp"
 #include "SimulationTypes.hpp"
 #include "TimeDiscretisation.hpp"
 #include "TimeStepping.hpp"
 #include "TimeSteppingDirectProjection.hpp"
 #include "Topology.hpp"
-#include "SimulationGraphs.hpp"
 
 namespace py = pybind11;
 
@@ -36,7 +36,10 @@ PYBIND11_MODULE(simulation, m) {
   py::class_<siconos::simulation::Topology, std::shared_ptr<siconos::simulation::Topology>>(
       m, "Topology")
       .def("indexSetsSize", &siconos::simulation::Topology::indexSetsSize)
-      .def("numberOfIndexSet", &siconos::simulation::Topology::numberOfIndexSet);
+      .def("numberOfIndexSet", &siconos::simulation::Topology::numberOfIndexSet)
+      .def("getDynamicalSystem",
+           py::overload_cast<std::string>(&siconos::simulation::Topology::getDynamicalSystem,
+                                          py::const_));
 
   py::class_<siconos::simulation::Simulation,
              std::shared_ptr<siconos::simulation::Simulation>>(m, "Simulation")
@@ -148,11 +151,27 @@ PYBIND11_MODULE(simulation, m) {
   py::class_<siconos::simulation::TimeSteppingDirectProjection,
              std::shared_ptr<siconos::simulation::TimeSteppingDirectProjection>,
              siconos::simulation::TimeStepping>(m, "TimeSteppingDirectProjection")
+      .def(py::init<std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem>,
+                    std::shared_ptr<siconos::simulation::TimeDiscretisation>,
+                    std::shared_ptr<siconos::integrators::OneStepIntegrator>,
+                    std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem>,
+                    std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem>,
+                    unsigned int>(),
+           py::arg("nsds"), py::arg("td"), py::arg("osi"), py::arg("osnspb_velo"),
+           py::arg("osnspb_pos"), py::arg("level") = 1)
       .def("advanceToEvent",
            &siconos::simulation::TimeSteppingDirectProjection::advanceToEvent)
       .def("nextStep", &siconos::simulation::TimeSteppingDirectProjection::nextStep)
       .def("computeCriteria",
-           &siconos::simulation::TimeSteppingDirectProjection::computeCriteria);
+           &siconos::simulation::TimeSteppingDirectProjection::computeCriteria)
+      .def("setProjectionMaxIteration",
+           &siconos::simulation::TimeSteppingDirectProjection::setProjectionMaxIteration,
+           py::arg("v"))
+      .def("setConstraintTolUnilateral",
+           &siconos::simulation::TimeSteppingDirectProjection::setConstraintTolUnilateral,
+           py::arg("v"))
+      .def("setConstraintTol",
+           &siconos::simulation::TimeSteppingDirectProjection::setConstraintTol, py::arg("v"));
 
   py::class_<siconos::graphs::InteractionsGraph,
              std::shared_ptr<siconos::graphs::InteractionsGraph>>(m, "InteractionsGraph");
