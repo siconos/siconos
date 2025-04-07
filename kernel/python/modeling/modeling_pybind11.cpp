@@ -89,6 +89,11 @@ PYBIND11_MODULE(modeling, m) {
                              const std::string &>(
                &siconos::modeling::NonSmoothDynamicalSystem::setName),
            "set DS name")
+      .def("setName",
+           py::overload_cast<std::shared_ptr<siconos::modeling::Interaction>,
+                             const std::string &>(
+               &siconos::modeling::NonSmoothDynamicalSystem::setName),
+           "set Interaction name")
       .def("displayDynamicalSystems",
            &siconos::modeling::NonSmoothDynamicalSystem::displayDynamicalSystems,
            "Print all dynamical systems infos")
