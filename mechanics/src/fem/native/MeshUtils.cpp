@@ -27,7 +27,6 @@
 
 #include "FENode.hpp"
 #include "FiniteElementModel.hpp"  // FENode
-#include "Mesh.hpp"                // For MVertex, MElement ...
 #include "SiconosException.hpp"
 #include "SiconosVector.hpp"
 
@@ -97,6 +96,32 @@ std::shared_ptr<siconos::mechanics::fem::Mesh> siconos::mechanics::fem::create2d
     }
   }
   return std::make_shared<Mesh>(2, vertices, elements);
+}
+
+std::shared_ptr<siconos::mechanics::fem::Mesh> siconos::mechanics::fem::createBeamMesh(std::shared_ptr<MVertex> v0, std::shared_ptr<MVertex> vEnd, int nbBeams, int dim){
+
+  std::vector<std::shared_ptr<MVertex>> vertices;
+  vertices.resize(nbBeams+1);
+  std::vector<std::shared_ptr<MElement>> elements;
+
+  if (dim == 2)
+    for (int i=0; i<nbBeams+1;i++){
+      vertices[i] = std::make_shared<MVertex>(i,i*(vEnd->x() - v0->x())/nbBeams + v0->x(), i*(vEnd->y() - v0->y())/nbBeams + v0->y(), 0.0);
+    }
+  else if (dim ==3)
+    for (int i=0; i<nbBeams+1;i++){
+      vertices[i] = std::make_shared<MVertex>(i,i*(vEnd->x() - v0->x())/nbBeams + v0->x(), i*(vEnd->y() - v0->y())/nbBeams + v0->y(), i*(vEnd->z() - v0->z())/nbBeams + v0->z());
+    }
+  else
+    THROW_EXCEPTION("Invalid beam dimension, should be 2 or 3 !");
+
+  for (int i = 0; i < nbBeams; i++) {
+    std::vector<std::shared_ptr<MVertex>> verticesInBeamElement = {vertices[i], vertices[i + 1]};                                                          ;
+    auto e = std::make_shared<MElement>(i, FiniteElementType::L2, verticesInBeamElement);
+    elements.push_back(e);
+  }
+
+  return std::make_shared<Mesh>(dim, vertices, elements);
 }
 
 std::shared_ptr<siconos::mechanics::fem::Mesh> siconos::mechanics::fem::createMeshFromGMSH2(

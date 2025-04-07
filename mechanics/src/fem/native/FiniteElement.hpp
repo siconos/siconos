@@ -94,11 +94,15 @@ class FElement {
 
   auto mElement() { return _mElement; }
 
+  auto type() { return _type; }
+
   auto family() { return _family; }
 
   int order();
 
   int ndofPerNode();
+
+  double length();
 
   const GaussPointsTab& GaussPoints(int order);
 

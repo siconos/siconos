@@ -54,6 +54,15 @@ int siconos::mechanics::fem::FElement::ndofPerNode() {
   return 0;
 }
 
+double siconos::mechanics::fem::FElement::length() {
+  switch (_type) {
+    case FiniteElementType::L2:
+      return sqrt(pow(_nodes[0]->x()-_nodes[1]->x(),2) + pow(_nodes[0]->y()-_nodes[1]->y(),2) + pow(_nodes[0]->z()-_nodes[1]->z(),2));
+    default:
+      throw("FElement::norm(). element type not recognized");
+  }
+}
+
 const siconos::mechanics::fem::GaussPointsTab& siconos::mechanics::fem::FElement::GaussPoints(
     int order) {
   switch (_type) {

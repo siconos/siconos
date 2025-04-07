@@ -51,6 +51,9 @@ class Material {
   /** thickness in 2D plane stress analysis */
   double _thickness{1.0};
 
+  /** Moment of Inertia for Beams */
+  double _I{1.0};
+
   /** default constructor */
   Material() = default;
 
@@ -60,6 +63,12 @@ class Material {
       : _massDensity(massDensity),
         _elasticYoungModulus(ElasticYoungModulus),
         _poissonCoefficient(poissonCoefficient) {}
+
+  Material(double massDensity, double ElasticYoungModulus, double poissonCoefficient, double I)
+      : _massDensity(massDensity),
+        _elasticYoungModulus(ElasticYoungModulus),
+        _poissonCoefficient(poissonCoefficient),
+        _I(I)  {}
 
   /** destructor */
   ~Material() noexcept = default;

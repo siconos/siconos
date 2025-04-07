@@ -24,6 +24,7 @@
 
 #include <memory>
 #include <string>
+#include "Mesh.hpp"                // For MVertex, MElement ...
 
 namespace siconos::algebra {
 class SiconosVector;
@@ -37,6 +38,8 @@ class FiniteElementModel;
 std::shared_ptr<Mesh> create2dMesh2x1();
 
 std::shared_ptr<Mesh> create2dMeshnxm(int n, int m, double Lx, double Ly);
+
+std::shared_ptr<Mesh> createBeamMesh(std::shared_ptr<MVertex> v0, std::shared_ptr<MVertex> vEnd, int nbBeams, int dim);
 
 std::shared_ptr<Mesh> createMeshFromGMSH2(std::string gmsh_filename);
 
