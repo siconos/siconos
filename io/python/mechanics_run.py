@@ -2827,7 +2827,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         if self._time_stepping_class == simu.TimeSteppingDirectProjection:
             if solver_options_pos is None:
                 osnspb_pos = nsf.MLCPProjectOnConstraints(
-                    sn.params.SICONOS_MLCP_ENUM, 1.0
+                    sn.solver_ids.SICONOS_MLCP_ENUM, 1.0
                 )
             else:
                 osnspb_pos = nsf.MLCPProjectOnConstraints(solver_options_pos, 1.0)
