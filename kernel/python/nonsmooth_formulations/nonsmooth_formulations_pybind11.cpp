@@ -6,12 +6,15 @@
 
 #include "FrictionContact.hpp"
 #include "FrictionContactProblem.h"
+#include "GenericMechanical.hpp"
 #include "GlobalFrictionContact.hpp"
 #include "GlobalFrictionContactProblem.h"
 #include "GlobalRollingFrictionContact.hpp"
 #include "GlobalRollingFrictionContactProblem.h"
 #include "LCP.hpp"
 #include "LinearOSNS.hpp"
+#include "MLCP.hpp"
+#include "MLCPProjectOnConstraints.hpp"
 #include "Relay.hpp"
 #include "RollingFrictionContact.hpp"
 #include "RollingFrictionContactProblem.h"
@@ -114,6 +117,29 @@ PYBIND11_MODULE(nonsmooth_formulations, m) {
       .def("updateMu", &siconos::nonsmooth_formulations::GlobalFrictionContact::updateMu)
       .def("solve", &siconos::nonsmooth_formulations::GlobalFrictionContact::solve,
            py::arg("problem") = nullptr);
+
+  py::class_<siconos::nonsmooth_formulations::GenericMechanical,
+             std::shared_ptr<siconos::nonsmooth_formulations::GenericMechanical>,
+             siconos::nonsmooth_formulations::LinearOSNS>(m, "GenericMechanical")
+      .def(py::init<int>(),
+           py::arg("numericsSolverId") = solver_ids.attr("SICONOS_FRICTION_3D_ONECONTACT_NSN"))
+      .def(py::init<std::shared_ptr<SolverOptions>>(), py::arg("options"));
+
+  py::class_<siconos::nonsmooth_formulations::MLCP,
+             std::shared_ptr<siconos::nonsmooth_formulations::MLCP>,
+             siconos::nonsmooth_formulations::LinearOSNS>(m, "MLCP")
+      .def(py::init<int>(), py::arg("numericsSolverId") = solver_ids.attr("SICONOS_MLCP_ENUM"))
+      .def(py::init<std::shared_ptr<SolverOptions>>(), py::arg("options"))
+      .def("solve", &siconos::nonsmooth_formulations::MLCP::solve);
+
+  py::class_<siconos::nonsmooth_formulations::MLCPProjectOnConstraints,
+             std::shared_ptr<siconos::nonsmooth_formulations::MLCPProjectOnConstraints>,
+             siconos::nonsmooth_formulations::MLCP>(m, "MLCPProjectOnConstraints")
+      .def(py::init<int, double>(),
+           py::arg("numericsSolverId") = solver_ids.attr("SICONOS_MLCP_ENUM"),
+           py::arg("alpha") = 1.0)
+      .def(py::init<std::shared_ptr<SolverOptions>, double>(), py::arg("options"),
+           py::arg("alpha") = 1.0);
 
   py::class_<siconos::nonsmooth_formulations::GlobalRollingFrictionContact,
              std::shared_ptr<siconos::nonsmooth_formulations::GlobalRollingFrictionContact>,
