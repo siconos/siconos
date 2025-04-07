@@ -40,6 +40,7 @@ import siconos.integrators as integrators
 # import siconos.mechanics.collision.tools as smc_tools
 import siconos.mechanics
 import siconos.mechanics.collision
+import siconos.mechanics.joints
 import siconos.mechanics.quaternions
 import siconos.io as sio
 from siconos.io.FrictionContactTrace import GlobalFrictionContactTrace as GFCTrace
