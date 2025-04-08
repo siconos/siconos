@@ -30,7 +30,7 @@ class MElement;
 
 using GaussPointsTab = std::vector<std::vector<double>>;
 
-static const GaussPointsTab GaussPointsL2_3 = {
+static const GaussPointsTab GaussPointsB2_3 = {
     {1/sqrt(3), 1.0},
     {-1/sqrt(3), 1.0}};
 

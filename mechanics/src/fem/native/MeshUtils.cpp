@@ -106,18 +106,18 @@ std::shared_ptr<siconos::mechanics::fem::Mesh> siconos::mechanics::fem::createBe
 
   if (dim == 2)
     for (int i=0; i<nbBeams+1;i++){
-      vertices[i] = std::make_shared<MVertex>(i,i*(vEnd->x() - v0->x())/nbBeams + v0->x(), i*(vEnd->y() - v0->y())/nbBeams + v0->y(), 0.0);
+      vertices[i] = std::make_shared<MVertex>(i+1,i*(vEnd->x() - v0->x())/nbBeams + v0->x(), i*(vEnd->y() - v0->y())/nbBeams + v0->y(), 0.0);
     }
   else if (dim ==3)
     for (int i=0; i<nbBeams+1;i++){
-      vertices[i] = std::make_shared<MVertex>(i,i*(vEnd->x() - v0->x())/nbBeams + v0->x(), i*(vEnd->y() - v0->y())/nbBeams + v0->y(), i*(vEnd->z() - v0->z())/nbBeams + v0->z());
+      vertices[i] = std::make_shared<MVertex>(i+1,i*(vEnd->x() - v0->x())/nbBeams + v0->x(), i*(vEnd->y() - v0->y())/nbBeams + v0->y(), i*(vEnd->z() - v0->z())/nbBeams + v0->z());
     }
   else
     THROW_EXCEPTION("Invalid beam dimension, should be 2 or 3 !");
 
   for (int i = 0; i < nbBeams; i++) {
     std::vector<std::shared_ptr<MVertex>> verticesInBeamElement = {vertices[i], vertices[i + 1]};                                                          ;
-    auto e = std::make_shared<MElement>(i, FiniteElementType::L2, verticesInBeamElement);
+    auto e = std::make_shared<MElement>(i+1, FiniteElementType::B2, verticesInBeamElement);
     elements.push_back(e);
   }
 

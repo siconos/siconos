@@ -29,6 +29,7 @@
 #include "SiconosVector.hpp"
 #include "SimpleMatrix.hpp"
 #include "op3x3.h"  // det3x3
+#include "Tools.hpp"
 
 #include "SiconosMatrixOp.hpp"  // prod ...
 
@@ -63,12 +64,18 @@ unsigned int siconos::mechanics::fem::FiniteElementModel::init() {
   std::vector<std::shared_ptr<MElement>> ignored_elements;
 
   for (auto e : _mesh->elements()) {
+    // e->display();
+    // std::cout << "type of element:"<< siconos::tools::enum_to_string(e->type()) <<std::endl;
+    // std::cout << "type L2 of element:"<< siconos::tools::enum_to_string(FiniteElementType::L2) <<std::endl;
+    // std::cout << "type T3 of element:"<< siconos::tools::enum_to_string(FiniteElementType::T3) <<std::endl;
     /* contruction of a FE element */
     DEBUG_PRINTF("MElement->num() : %zu\n", e->num());
+    std::cout << "dim is " << dim << std::endl;
     std::shared_ptr<FElement> fe;
     if (dim == 2) {
       switch (e->type())  // we follow gmsh convention
       {
+
         case FiniteElementType::T3:  // 3-node triangle.
         {
           /* We should normally ask the user for the type of element we
@@ -77,9 +84,12 @@ unsigned int siconos::mechanics::fem::FiniteElementModel::init() {
           /* the FE element number is equal to the MElement number */
           break;
         }
-          case FiniteElementType::L2:  // Beam in 2D.
+        case FiniteElementType::B2:  // Beam in 2D.
         {
-           fe = std::make_shared<FElement>(FiniteElementType::L2, 4, e);
+          std::cout << "Creating Fe element B2 in 2D..." << std::endl;
+          fe = std::make_shared<FElement>(FiniteElementType::B2, 4, e);
+          std::cout << "Created!" << std::endl;
+          break;
         }
         default:
           ignored_elements.push_back(e);
@@ -96,10 +106,14 @@ unsigned int siconos::mechanics::fem::FiniteElementModel::init() {
           /* the FE element number is equal to the MElement number */
           break;
         }
-        case FiniteElementType::L2:  // Beam in 2D.
+        case FiniteElementType::B2:  // Beam in 2D.
         {
-          fe = std::make_shared<FElement>(FiniteElementType::L2, 6, e);
+          std::cout << "Creating Fe element B2 in 3D..." << std::endl;
+          fe = std::make_shared<FElement>(FiniteElementType::B2, 4, e);
+          std::cout << "Created!" << std::endl;
+          break;
         }
+
         default:
           ignored_elements.push_back(e);
           continue;
@@ -324,6 +338,37 @@ void siconos::mechanics::fem::FiniteElementModel::computeElementaryMassMatrix(
       "siconos::mechanics::fem::FiniteElementModel::"
       "computeElementaryMassMatrix(siconos::"
       "algebra::SimpleMatrix& Me, FElement& fe, double massDensity )\n");
+}
+
+void siconos::mechanics::fem::FiniteElementModel::computeBeamElementaryMassMatrix_direct(
+    siconos::algebra::SimpleMatrix &Me, FElement &fe, double massDensity, double A) {
+  int dim = _mesh->dim();
+  double length  = fe.length();
+  double length2  = length*length;
+  double length3  = length2*length;
+
+  if (dim == 2)
+  {
+    Me.setValue(0,0,massDensity*A*length*156/420);
+    Me.setValue(0,1,massDensity*A*length2*22/420);
+    Me.setValue(0,2,massDensity*A*length*54/420);
+    Me.setValue(0,3,6/length2);
+
+    Me.setValue(1,0,massDensity*A*length2*22/420);
+    Me.setValue(1,1,massDensity*A*length3*4/420);
+    Me.setValue(1,2,massDensity*A*length2*13/420);
+    Me.setValue(1,3,massDensity*A*length3*(-3)/420);
+
+    Me.setValue(2,0,massDensity*A*length*54/420);
+    Me.setValue(2,1,massDensity*A*length2*13/420);
+    Me.setValue(2,2,massDensity*A*length*156/420);
+    Me.setValue(2,3,-massDensity*A*length2*22/420);
+
+    Me.setValue(3,0,6/length2);
+    Me.setValue(3,1,massDensity*A*length3*(-3)/420);
+    Me.setValue(3,2,-massDensity*A*length2*22/420);
+    Me.setValue(3,3,massDensity*A*length3*4/420);
+  }
 }
 
 void siconos::mechanics::fem::FiniteElementModel::computeMassMatrix(
@@ -559,28 +604,30 @@ void siconos::mechanics::fem::FiniteElementModel::computeBeamElementaryStiffness
 
   int dim = _mesh->dim();
   double length  = fe.length();
+  double length2  = length*length;
+  double length3  = length2*length;
 
   if (dim == 2)
   {
-    Ke.setValue(0,0,12);
-    Ke.setValue(0,1,6*length);
-    Ke.setValue(0,2,-12);
-    Ke.setValue(0,3,6*length);
+    Ke.setValue(0,0,12/length3);
+    Ke.setValue(0,1,6/length2);
+    Ke.setValue(0,2,-12/length3);
+    Ke.setValue(0,3,6/length2);
 
-    Ke.setValue(1,0,6*length);
-    Ke.setValue(1,1,4*length*length);
-    Ke.setValue(1,2,-6*length);
-    Ke.setValue(1,3,2*length*length);
+    Ke.setValue(1,0,6/length2);
+    Ke.setValue(1,1,4/length);
+    Ke.setValue(1,2,-6/length2);
+    Ke.setValue(1,3,2/length);
 
-    Ke.setValue(2,0,-12);
-    Ke.setValue(2,1,-6*length);
-    Ke.setValue(2,2,12);
-    Ke.setValue(2,3,-6*length);
+    Ke.setValue(2,0,-12/length3);
+    Ke.setValue(2,1,-6/length2);
+    Ke.setValue(2,2,12/length3);
+    Ke.setValue(2,3,-6/length2);
 
-    Ke.setValue(3,0,6*length);
-    Ke.setValue(3,1,2*length*length);
-    Ke.setValue(3,2,-6*length);
-    Ke.setValue(3,3,4*length*length);
+    Ke.setValue(3,0,6/length2);
+    Ke.setValue(3,1,2/length);
+    Ke.setValue(3,2,-6/length2);
+    Ke.setValue(3,3,4/length);
   }
 
 }
@@ -799,12 +846,16 @@ void siconos::mechanics::fem::FiniteElementModel::computeStiffnessMatrix(
 
   /* loop over the elements */
   for (std::shared_ptr<FElement> fe : elements()) {
-    if (fe->type() == FiniteElementType::L2){
+    if (fe->type() == FiniteElementType::B2){
+      Material &mat = *(materials[fe->mElement()->tags(0)]);
+      double E = mat.elasticYoungModulus();
+      double I = mat.momentOfInertia();
       unsigned int ndofElement = fe->ndof();
       auto Ke = std::make_shared<siconos::algebra::SimpleMatrix>(
           ndofElement,
           ndofElement);
       computeBeamElementaryStiffnessMatrix_direct(*Ke, *fe);
+      scal(E*I, *Ke, *Ke, true);
       AssembleElementaryMatrix(K, *Ke, *fe);
 
     }

@@ -127,6 +127,9 @@ class FiniteElementModel {
   void computeElementaryMassMatrix(siconos::algebra::SimpleMatrix& Me, FElement& fe,
                                    double massDensity);
 
+  void computeBeamElementaryMassMatrix_direct(siconos::algebra::SimpleMatrix &Me,
+                                              FElement &fe, double massDensity, double A);
+
   /** compute Stiffness Matrix
    * should be computeMass of LagrangianDS ?
    **/

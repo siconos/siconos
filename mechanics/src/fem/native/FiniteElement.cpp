@@ -48,6 +48,8 @@ int siconos::mechanics::fem::FElement::ndofPerNode() {
       return 2;
     case FiniteElementType::TH4:
       return 3;
+    case FiniteElementType::B2:
+      return 2;
     default:
       throw("FElement::ndorPernode(). element type not recognized");
   }
@@ -56,7 +58,7 @@ int siconos::mechanics::fem::FElement::ndofPerNode() {
 
 double siconos::mechanics::fem::FElement::length() {
   switch (_type) {
-    case FiniteElementType::L2:
+    case FiniteElementType::B2:
       return sqrt(pow(_nodes[0]->x()-_nodes[1]->x(),2) + pow(_nodes[0]->y()-_nodes[1]->y(),2) + pow(_nodes[0]->z()-_nodes[1]->z(),2));
     default:
       throw("FElement::norm(). element type not recognized");
@@ -66,8 +68,6 @@ double siconos::mechanics::fem::FElement::length() {
 const siconos::mechanics::fem::GaussPointsTab& siconos::mechanics::fem::FElement::GaussPoints(
     int order) {
   switch (_type) {
-    case FiniteElementType::L2:
-      return GaussPointsL2_3;
     case FiniteElementType::T3:
       if (order == 1)
         return GaussPointsT3_1;
@@ -79,6 +79,9 @@ const siconos::mechanics::fem::GaussPointsTab& siconos::mechanics::fem::FElement
         return GaussPointsTH4_1;
       else if (order == 2)
         return GaussPointsTH4_2;
+      break;
+    case FiniteElementType::B2:
+      return GaussPointsB2_3;
       break;
 
     default:

@@ -82,6 +82,8 @@ class Material {
   auto analysisType2D() { return _analysisType2D; }
 
   auto thickness() { return _thickness; }
+
+  auto momentOfInertia() { return _I; }
 };
 }  // namespace siconos::mechanics::fem
 #endif

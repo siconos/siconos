@@ -34,6 +34,7 @@ enum class FiniteElementType  // we follow the gmsh numbering convention.
               edge) */
   T6 = 9, /** 6-node second order triangle (3 nodes associated with the vertices and 3 with the
              edges) */
+  B2 = 10,  /** 2-node beam */
 };
 
 /** Ids for element families */
