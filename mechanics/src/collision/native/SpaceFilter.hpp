@@ -149,8 +149,8 @@ class SpaceFilter : public siconos::simulation::InteractionManager {
 
  public:
   /** Default constructor, no plans */
-  SpaceFilter() = default;
-  // Do we need a default? Yes, it seems, for occ derived class.
+  SpaceFilter();
+  // Do we need a default? Yes, it seems, for occ derived class AND for mechanics_run
 
   SpaceFilter(unsigned int bboxfactor, unsigned int cellsize,
               std::shared_ptr<siconos::algebra::SiconosMatrix> plans,

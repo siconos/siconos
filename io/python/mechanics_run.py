@@ -510,20 +510,15 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             ctor = contactors[0]
             # shape = self._shape.get(ctor.shape_name)
             # attrs = self._shape.attributes(ctor.shape_name)
-
+            initial_pos = np.concatenate([translation, orientation], axis=0)
+            self._q0.append(initial_pos.copy())
+            self._v0.append(velocity)
             if self._shape.attributes(ctor.shape_name)["primitive"] == "Disk":
                 body_class = siconos.mechanics.collision.Disk
             elif self._shape.attributes(ctor.shape_name)["primitive"] == "Circle":
                 body_class = siconos.mechanics.collision.Circle
             radius = self._shape._io.shapes()[ctor.shape_name][:][0][0]
-
-            body = body_class(
-                radius,
-                mass,
-                np.concatenate([translation, orientation], axis=0),
-                velocity,
-            )
-
+            body = body_class(radius, mass, self._q0[-1], self._v0[-1])
             self._set_external_forces(body)
             self._nsds.insertDynamicalSystem(body)
             if birth and self._verbose:
@@ -2625,6 +2620,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 self._dimension = 3
 
         self._interman = interaction_manager(bullet_options)
+        # bullet_options is ignored for native or occ backend
 
         joints = list(self.joints())
         if hasattr(self._interman, "useEqualityConstraints"):

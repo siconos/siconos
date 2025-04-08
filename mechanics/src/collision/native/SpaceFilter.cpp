@@ -65,6 +65,12 @@ std::size_t siconos::collision::native::internal::hash_value(
   return seed;
 }
 
+siconos::collision::native::SpaceFilter::SpaceFilter()
+    : _hash_table(std::make_shared<SpaceHash>()),
+      diskdisk_relations(std::make_shared<DiskDiskRDeclaredPool>()),
+      diskplan_relations(std::make_shared<DiskPlanRDeclaredPool>()),
+      circlecircle_relations(std::make_shared<CircleCircleRDeclaredPool>()) {};
+
 siconos::collision::native::SpaceFilter::SpaceFilter(
     unsigned int bboxfactor, unsigned int cellsize,
     std::shared_ptr<siconos::algebra::SiconosMatrix> plans,
