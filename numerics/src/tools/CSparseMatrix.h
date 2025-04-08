@@ -25,7 +25,7 @@
 */
 
 #include <cs.h>
-//#include <inttypes.h>
+#include <inttypes.h>
 //#include <stdint.h>  // for intXX_t
 #include <stdio.h>   // for FILE
 

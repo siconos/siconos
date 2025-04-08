@@ -23,6 +23,11 @@ if(WITH_FCLIB)
     FetchContent_MakeAvailable(fclib)
     add_library(FCLIB::fclib ALIAS fclib)
   endif()
+  target_compile_options(fclib INTERFACE
+    $<$<CXX_COMPILER_ID:GNU>:-w>
+    $<$<CXX_COMPILER_ID:Clang>:-w>
+  )
+
   message(STATUS "End setup for fclib ... ")
 
   if(WITH_PYTHON_WRAPPER)
