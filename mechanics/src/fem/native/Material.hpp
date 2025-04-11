@@ -54,6 +54,10 @@ class Material {
   /** Moment of Inertia for Beams */
   double _I{1.0};
 
+  /** Cross section area for Beams */
+  double _A{1.0};
+
+
   /** default constructor */
   Material() = default;
 
@@ -84,6 +88,9 @@ class Material {
   auto thickness() { return _thickness; }
 
   auto momentOfInertia() { return _I; }
+
+  auto crossSectionArea() { return _A; }
+
 };
 }  // namespace siconos::mechanics::fem
 #endif

@@ -70,7 +70,6 @@ unsigned int siconos::mechanics::fem::FiniteElementModel::init() {
     // std::cout << "type T3 of element:"<< siconos::tools::enum_to_string(FiniteElementType::T3) <<std::endl;
     /* contruction of a FE element */
     DEBUG_PRINTF("MElement->num() : %zu\n", e->num());
-    std::cout << "dim is " << dim << std::endl;
     std::shared_ptr<FElement> fe;
     if (dim == 2) {
       switch (e->type())  // we follow gmsh convention
@@ -86,9 +85,7 @@ unsigned int siconos::mechanics::fem::FiniteElementModel::init() {
         }
         case FiniteElementType::B2:  // Beam in 2D.
         {
-          std::cout << "Creating Fe element B2 in 2D..." << std::endl;
           fe = std::make_shared<FElement>(FiniteElementType::B2, 4, e);
-          std::cout << "Created!" << std::endl;
           break;
         }
         default:
@@ -108,9 +105,7 @@ unsigned int siconos::mechanics::fem::FiniteElementModel::init() {
         }
         case FiniteElementType::B2:  // Beam in 2D.
         {
-          std::cout << "Creating Fe element B2 in 3D..." << std::endl;
           fe = std::make_shared<FElement>(FiniteElementType::B2, 4, e);
-          std::cout << "Created!" << std::endl;
           break;
         }
 
@@ -386,8 +381,16 @@ void siconos::mechanics::fem::FiniteElementModel::computeMassMatrix(
     auto Me = std::make_shared<siconos::algebra::SimpleMatrix>(ndofElement, ndofElement);
     // to be optimized if all the element are similar
     double massDensity = mat[fe->mElement()->tags(0)]->massDensity();
-    computeElementaryMassMatrix(*Me, *fe, massDensity);
+
+    if (fe->type() == FiniteElementType::B2){
+      double A = mat[fe->mElement()->tags(0)]->crossSectionArea();
+      computeBeamElementaryMassMatrix_direct(*Me, *fe, massDensity, A);
+    }
+    else {
+      computeElementaryMassMatrix(*Me, *fe, massDensity);
+    }
     AssembleElementaryMatrix(M, *Me, *fe);
+
   }
   DEBUG_END(
       "siconos::mechanics::fem::FiniteElementModel::computeMassMatrix(std::"
