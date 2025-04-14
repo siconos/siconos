@@ -58,24 +58,45 @@ def euler_from_quaternion(q0, q1, q2, q3):
 
 def quaternion_get(orientation):
     """
-    Get quaternion from orientation
+    Converts the orientation (either axis-angle or quaternion) into a
+    quaternion representation.
+
+    If the input is already a quaternion, it is returned as-is.
+
+    Parameters
+    ----------
+    orientation : np array or tuple
+        The orientation in either of the following formats:
+        - Axis-angle: ([x, y, z], angle) where [x, y, z] is a 3D vector and angle is a float.
+        - Quaternion: [w, x, y, z] where w, x, y, z are the quaternion components.
     """
-    if len(orientation) == 2:
-        # axis + angle
-        axis = orientation[0]
-        if not (len(axis) == 3):
-            raise AssertionError("quaternion_get. axis in not a 3D vector")
-        angle = orientation[1]
-        if not isinstance(angle, float):
-            raise AssertionError("quaternion_get. angle must be a float")
-        n = sin(angle / 2.0) / np.linalg.norm(axis)
-        ori = [cos(angle / 2.0), axis[0] * n, axis[1] * n, axis[2] * n]
-    else:
-        if not (len(orientation) == 4):
+
+    if isinstance(orientation, np.ndarray) or isinstance(orientation, list):
+        orientation = np.asarray(orientation, dtype=np.float64)
+        if orientation.shape[0] != 4:
             raise AssertionError("quaternion_get. The quaternion must be of size 4")
-        # a given quaternion
-        ori = orientation
-    return ori
+        return orientation
+
+    if isinstance(orientation, tuple):
+        if len(orientation) != 2:  # orientation is a tuple
+            raise AssertionError("quaternion_get. Wrong input format")
+        # axis + angle
+        axis, angle = orientation
+        if len(axis) != 3:
+            raise ValueError("Axis must be a 3D vector.")
+        if not isinstance(angle, float):
+            raise ValueError("Angle must be a float.")
+        axis_norm = np.linalg.norm(axis)
+        if axis_norm == 0:
+            raise ValueError("Axis vector cannot be the zero vector.")
+        n = sin(angle / 2.0) / axis_norm
+        return np.array([cos(angle / 2.0), axis[0] * n, axis[1] * n, axis[2] * n])
+
+    else:
+        raise ValueError(
+            "Orientation must be either an axis-angle pair (3D vector + float)"
+            + " or a quaternion."
+        )
 
 
 def quaternion_multiply(q1, q0):

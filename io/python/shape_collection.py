@@ -57,16 +57,108 @@ class NativeLineShape(NativeShape):
         self.params = [a, b, c]
 
 
+def load_vtp_file(shape_ref):
+    """
+    Read a VTP shape from an HDF5 reference and return a loaded mesh.
+
+    Parameters:
+    ----------
+
+    shape_ref: h5py.Dataset
+        HDF5 dataset containing the VTP shape, stored as a string
+
+    Returns
+    -------
+    mesh : SiconosMesh or SiconosConvexHull
+        Loaded mesh object
+
+    """
+    assert shape_ref.attrs["type"] == "vtp"
+    if shape_ref.dtype != h5py_vlen_dtype(str):
+        raise AssertionError(
+            "load_vtp_file(), wrong dtype, must be h5py_vlen_dtype(str) "
+        )
+
+    with siconos.io.tools.tmpfile() as tmpf:
+        data = shape_ref[:][0]
+        # fix compatibility with h5py version
+        # to be removed in the future
+        tmpf[0].write(data.decode("utf-8"))
+        tmpf[0].flush()
+        scale = shape_ref.attrs.get("scale", None)
+        mesh, dims = siconos.io.tools.load_siconos_mesh(tmpf[1], scale=scale)
+        mesh.setInsideMargin(shape_ref.attrs.get("insideMargin", min(dims) * 0.02))
+        mesh.setOutsideMargin(shape_ref.attrs.get("outsideMargin", 0))
+    return mesh
+
+
+def load_heightmap(hm_data):
+    # a heightmap defined by a matrix
+    r = hm_data.attrs["rect"]
+    if len(r) != 2:
+        raise AssertionError("len(r) != 2")
+    # assert(len(r) == 2)
+    hm = siconos.mechanics.collision.SiconosHeightMap(hm_data, r[0], r[1])
+    # dims = list(r) + [np.max(hm_data) - np.min(hm_data)]
+    # hm.setInsideMargin(
+    #    hm_data.attrs.get('insideMargin', np.min(dims) * 0.02))
+    hm.setInsideMargin(hm_data.attrs.get("insideMargin", 0))
+    hm.setOutsideMargin(hm_data.attrs.get("outsideMargin", 0))
+    return hm
+
+
+def load_convex(shape_ref, dimension):
+
+    points = np.array(shape_ref, dtype=np.float64, order="F")
+    if dimension == 3:
+        convex = siconos.mechanics.collision.SiconosConvexHull(points)
+        dims = [
+            points[:, 0].max() - points[:, 0].min(),
+            points[:, 1].max() - points[:, 1].min(),
+            points[:, 2].max() - points[:, 2].min(),
+        ]
+    elif dimension == 2:
+        convex = siconos.mechanics.collision.SiconosConvexHull2d(points)
+        dims = [
+            points[:, 0].max() - points[:, 0].min(),
+            points[:, 1].max() - points[:, 1].min(),
+        ]
+
+    avoid_internal_edge_contact = shape_ref.attrs.get(
+        "avoid_internal_edge_contact", False
+    )
+    if avoid_internal_edge_contact:
+        convex.setAvoidInternalEdgeContact(True)
+
+    convex.setInsideMargin(shape_ref.attrs.get("insideMargin", min(dims) * 0.02))
+    convex.setOutsideMargin(shape_ref.attrs.get("outsideMargin", 0))
+    return convex
+
+
 class ShapeCollection:
     """
     Instantiation of added contact shapes
+
+    Parameters
+    ----------
+
+    io: reference object. Either a MechanicsHdf5Runner
+        or a file name (vtk file describing a mesh)
+    collision_margin: tolerance for collision, defaults to 0.04
+    backend: chosen backend, defaults to bullet
+
     """
 
-    def __init__(self, io, collision_margin=0.04, backend="bullet"):
+    # Note FP: can't work with vtk input, can it?
+
+    def __init__(self, io, collision_margin=None, backend="bullet"):
         self._io = io
         self._shapes = dict()
         self._tri = dict()
-
+        if collision_margin is None:
+            collision_margin = 0.04
+        self._collision_margin = collision_margin
+        self.backend = backend
         if backend == "native":
             self._primitive = {
                 "Disk": NativeDiskShape,
@@ -114,190 +206,68 @@ class ShapeCollection:
 
         if new_instance or shape_name not in self._shapes:
 
+            shape_ref = self.shape(shape_name)
+
             # load shape if it is an existing file
-            if not isinstance(
-                self.url(shape_name), str
-            ) and "primitive" not in self.attributes(shape_name):
+            if (
+                not isinstance(self.url(shape_name), str)
+                and "primitive" not in shape_ref.attrs
+            ):
+                shape_type = shape_ref.attrs["type"]
+                # --- case 1: load a vtp file ---
                 # assume a vtp file (xml) stored in a string buffer
+                if shape_type == "vtp":
+                    self._shapes[shape_name] = load_vtp_file(shape_ref)
 
-                if self.attributes(shape_name)["type"] == "vtp":
-                    if self.shape(shape_name).dtype == h5py_vlen_dtype(str):
-                        with siconos.io.tools.tmpfile() as tmpf:
-                            data = self.shape(shape_name)[:][0]
-                            # fix compatibility with h5py version
-                            # to be removed in the future
-                            tmpf[0].write(data.decode("utf-8"))
-                            tmpf[0].flush()
-                            scale = self.attributes(shape_name).get("scale", None)
-                            mesh, dims = siconos.io.tools.load_siconos_mesh(
-                                tmpf[1], scale=scale
-                            )
-                            self._shapes[shape_name] = mesh
-                            mesh.setInsideMargin(
-                                self.shape(shape_name).attrs.get(
-                                    "insideMargin", min(dims) * 0.02
-                                )
-                            )
-                            mesh.setOutsideMargin(
-                                self.shape(shape_name).attrs.get("outsideMargin", 0)
-                            )
+                # --- case 2: load a step file ---
+                # occ only
+                elif shape_type in ["step", "stp", "iges", "igs"]:
+                    assert self.backend == "occ"
+                    import siconos.io.occ_tools
+
+                    if shape_ref.dtype != h5py_vlen_dtype(str):
+                        raise AssertionError(
+                            "ShapeCollection, get: dtype must be h5py_vlen_dtype(str)"
+                        )
+
+                    content = shape_ref[:][0].decode("utf-8")
+                    with siconos.io.tools.tmpfile(
+                        contents=content, suffix=".{0}".format(shape_type)
+                    ) as tmpf:
+                        comp = siconos.io.occ_tools.occ_load_file(tmpf[1])
+                    self._shapes[shape_name] = comp
+                    self._io._keep.append(self._shapes[shape_name])
+
+                # --- case 3: load brep  ---
+                elif shape_type in ["brep"]:
+                    assert self.backend == "occ"
+                    if shape_class is None:
+                        brep_class = siconos.mechanics.collision.occ.OccContactShape
                     else:
-                        raise AssertionError(
-                            'ShapeCollection.get(), attributes(shape_name)["type"] != vtp '
+                        brep_class = shape_class
+
+                    if "contact" not in shape_ref.attrs:
+                        self._shapes[shape_name] = siconos.io.occ_tools.occ_load_brep(
+                            shape_ref, brep_class
                         )
-
-                elif self.attributes(shape_name)["type"] in ["step", "stp"]:
-                    from OCC.Core.STEPControl import STEPControl_Reader
-                    from OCC.Core.BRep import BRep_Builder
-                    from OCC.Core.TopoDS import TopoDS_Compound
-                    from OCC.Core.IFSelect import (
-                        IFSelect_RetDone,
-                        IFSelect_ItemsByEntity,
-                    )
-
-                    builder = BRep_Builder()
-                    comp = TopoDS_Compound()
-                    builder.MakeCompound(comp)
-
-                    if self.shape(shape_name).dtype != h5py_vlen_dtype(str):
-                        raise AssertionError(
-                            "self.shape(shape_name).dtype != h5py_vlen_dtype(str)"
-                        )
-
-                    tmp_contents = self.shape(shape_name)[:][0].decode("utf-8")
-
-                    with siconos.io.tools.tmpfile(contents=tmp_contents) as tmpf:
-                        step_reader = STEPControl_Reader()
-
-                        status = step_reader.ReadFile(tmpf[1])
-
-                        if status == IFSelect_RetDone:  # check status
-                            failsonly = False
-                            step_reader.PrintCheckLoad(
-                                failsonly, IFSelect_ItemsByEntity
-                            )
-                            step_reader.PrintCheckTransfer(
-                                failsonly, IFSelect_ItemsByEntity
-                            )
-
-                            #  ok = step_reader.TransferRoot(1)
-                            step_reader.TransferRoots()
-                            # VA : We decide to loads all shapes in the step file
-                            nbs = step_reader.NbShapes()
-
-                            for i in range(1, nbs + 1):
-                                shape = step_reader.Shape(i)
-                                builder.Add(comp, shape)
-
-                            self._shapes[shape_name] = comp
-                            self._io._keep.append(self._shapes[shape_name])
-
-                elif self.attributes(shape_name)["type"] in ["iges", "igs"]:
-                    from OCC.Core.IGESControl import IGESControl_Reader
-                    from OCC.Core.BRep import BRep_Builder
-                    from OCC.Core.TopoDS import TopoDS_Compound
-                    from OCC.Core.IFSelect import (
-                        IFSelect_RetDone,
-                        IFSelect_ItemsByEntity,
-                    )
-
-                    builder = BRep_Builder()
-                    comp = TopoDS_Compound()
-                    builder.MakeCompound(comp)
-
-                    if not (self.shape(shape_name).dtype == h5py_vlen_dtype(str)):
-                        raise AssertionError("ShapeCollection.get()")
-
-                    # assert(self.shape(shape_name).dtype == h5py_vlen_dtype(str))
-
-                    with tmpfile(contents=self.shape(shape_name)[:][0]) as tmpf:
-                        iges_reader = IGESControl_Reader()
-
-                        status = iges_reader.ReadFile(tmpf[1])
-
-                        if status == IFSelect_RetDone:  # check status
-                            failsonly = False
-                            iges_reader.PrintCheckLoad(
-                                failsonly, IFSelect_ItemsByEntity
-                            )
-                            iges_reader.PrintCheckTransfer(
-                                failsonly, IFSelect_ItemsByEntity
-                            )
-
-                            iges_reader.TransferRoots()
-                            nbs = iges_reader.NbShapes()
-
-                            for i in range(1, nbs + 1):
-                                shape = iges_reader.Shape(i)
-                                builder.Add(comp, shape)
-
-                            self._shapes[shape_name] = comp
-                            self._io._keep.append(self._shapes[shape_name])
-
-                elif self.attributes(shape_name)["type"] in ["brep"]:
-                    if "contact" not in self.attributes(shape_name):
-
-                        # the reference brep
-                        if shape_class is None:
-                            brep_class = occ.OccContactShape
-                        else:
-                            brep_class = shape_class
-
-                        if "occ_indx" in self.attributes(shape_name):
-
-                            from OCC.Core.BRepTools import BRepTools_ShapeSet
-
-                            shape_set = BRepTools_ShapeSet()
-                            shape_set.ReadFromString(self.shape(shape_name)[:][0])
-                            the_shape = shape_set.Shape(shape_set.NbShapes())
-                            location = shape_set.Locations().Location(
-                                self.attributes(shape_name)["occ_indx"]
-                            )
-                            the_shape.Location(location)
-                            brep = brep_class()
-                            brep.setData(the_shape)
-
-                        else:
-                            # raw brep
-                            brep = brep_class()
-                            brep.importBRepFromString(self.shape(shape_name)[:][0])
-
-                        self._shapes[shape_name] = brep
                         self._io._keep.append(self._shapes[shape_name])
 
                     else:
-                        # a contact on a brep
-                        if not ("contact" in self.attributes(shape_name)):
+                        required_keys = {"contact", "contact_index", "brep"}
+                        missing = required_keys - shape_ref.attrs.keys()
+                        if missing:
                             raise AssertionError(
-                                "contact not in self.attributes(shape_name)"
-                            )
-                        if not ("contact_index" in self.attributes(shape_name)):
-                            raise AssertionError(
-                                "contact_index not in self.attributes(shape_name)"
-                            )
-                        if not ("brep" in self.attributes(shape_name)):
-                            raise AssertionError(
-                                "brep not in self.attributes(shape_name)"
+                                f"Missing required attribute(s): {', '.join(missing)}"
                             )
 
-                        # assert 'contact' in self.attributes(shape_name)
-                        # assert 'contact_index' in self.attributes(shape_name)
-                        # assert 'brep' in self.attributes(shape_name)
+                        contact_index = shape_ref.attrs["contact_index"]
 
-                        contact_index = self.attributes(shape_name)["contact_index"]
-
-                        if shape_class is None:
-                            brep_class = occ.OccContactShape
-                        else:
-                            brep_class = shape_class
-
-                        ref_brep = self.get(
-                            self.attributes(shape_name)["brep"], shape_class
-                        )
-
-                        if self.attributes(shape_name)["contact"] == "Face":
+                        ref_brep = self.get(shape_ref.attrs["brep"], shape_class)
+                        if shape_ref.attrs["contact"] == "Face":
                             if face_class is None:
-                                face_maker = occ.OccContactFace
+                                face_maker = (
+                                    siconos.mechanics.collision.occ.OccContactFace
+                                )
                             else:
                                 face_maker = face_class
 
@@ -305,9 +275,11 @@ class ShapeCollection:
                                 brep_class(ref_brep), contact_index
                             )
 
-                        elif self.attributes(shape_name)["contact"] == "Edge":
+                        elif shape_ref.attrs["contact"] == "Edge":
                             if edge_class is None:
-                                edge_maker = occ.OccContactEdge
+                                edge_maker = (
+                                    siconos.mechanics.collision.occ.OccContactEdge
+                                )
                             else:
                                 edge_maker = edge_class
                             self._shapes[shape_name] = edge_maker(
@@ -316,72 +288,35 @@ class ShapeCollection:
 
                         self._io._keep.append(self._shapes[shape_name])
 
-                elif self.attributes(shape_name)["type"] in ["heightmap"]:
-                    # a heightmap defined by a matrix
-                    hm_data = self.shape(shape_name)
-                    r = hm_data.attrs["rect"]
-                    if len(r) != 2:
-                        raise AssertionError("len(r) != 2")
-                    # assert(len(r) == 2)
-                    hm = siconos.mechanics.collision.SiconosHeightMap(
-                        hm_data, r[0], r[1]
-                    )
-                    # dims = list(r) + [np.max(hm_data) - np.min(hm_data)]
-                    # hm.setInsideMargin(
-                    #    hm_data.attrs.get('insideMargin', np.min(dims) * 0.02))
-                    hm.setInsideMargin(hm_data.attrs.get("insideMargin", 0))
-                    hm.setOutsideMargin(hm_data.attrs.get("outsideMargin", 0))
+                # --- case 5: load heightmap ---
+                elif shape_type in ["heightmap"]:
+                    self._shapes[shape_name] = load_heightmap(shape_ref)
 
-                    self._shapes[shape_name] = hm
-
-                elif self.attributes(shape_name)["type"] in ["convex"]:
+                # --- case 6: load convex ---
+                elif shape_type in ["convex"]:
                     # a convex point set
-                    points = self.shape(shape_name)
-                    points = np.array(points, dtype=np.float64, order="F")
-                    if self._io._dimension == 3:
-                        convex = siconos.mechanics.collision.SiconosConvexHull(points)
-                        dims = [
-                            points[:, 0].max() - points[:, 0].min(),
-                            points[:, 1].max() - points[:, 1].min(),
-                            points[:, 2].max() - points[:, 2].min(),
-                        ]
-                    elif self._io._dimension == 2:
-                        convex = siconos.mechanics.collision.SiconosConvexHull2d(points)
-                        dims = [
-                            points[:, 0].max() - points[:, 0].min(),
-                            points[:, 1].max() - points[:, 1].min(),
-                        ]
-
-                    avoid_internal_edge_contact = self.shape(shape_name).attrs.get(
-                        "avoid_internal_edge_contact", False
+                    self._shapes[shape_name] = load_convex(
+                        shape_ref, self._io._dimension
                     )
-                    if avoid_internal_edge_contact:
-                        convex.setAvoidInternalEdgeContact(True)
-
-                    convex.setInsideMargin(
-                        self.shape(shape_name).attrs.get(
-                            "insideMargin", min(dims) * 0.02
-                        )
-                    )
-                    convex.setOutsideMargin(
-                        self.shape(shape_name).attrs.get("outsideMargin", 0)
-                    )
-                    self._shapes[shape_name] = convex
 
             elif isinstance(self.url(shape_name), str) and os.path.exists(
                 self.url(shape_name)
             ):
                 self._tri[shape_name], self._shapes[shape_name] = loadMesh(
-                    self.url(shape_name), _collision_margin
+                    self.url(shape_name), self._collision_margin
                 )
+                # Warning FP: can't find the function loadMesh anywhere?
+                # Where does it supposed to come from?
+
             else:
+
                 # it must be a primitive with attributes
                 if isinstance(self.url(shape_name), str):
                     name = self.url(shape_name)
-                    attrs = [float(x) for x in self.shape(shape_name)[0]]
+                    attrs = [float(x) for x in shape_ref[0]]
                 else:
-                    name = self.attributes(shape_name)["primitive"]
-                    attrs = [float(x) for x in self.shape(shape_name)[0]]
+                    name = shape_ref.attrs["primitive"]
+                    attrs = [float(x) for x in shape_ref[0]]
                 primitive = self._primitive[name]
 
                 if name in ["Box"]:
@@ -389,13 +324,9 @@ class ShapeCollection:
                     box = primitive(attrs)
                     self._shapes[shape_name] = box
                     box.setInsideMargin(
-                        self.shape(shape_name).attrs.get(
-                            "insideMargin", min(attrs) * 0.02
-                        )
+                        shape_ref.attrs.get("insideMargin", min(attrs) * 0.02)
                     )
-                    box.setOutsideMargin(
-                        self.shape(shape_name).attrs.get("outsideMargin", 0)
-                    )
+                    box.setOutsideMargin(shape_ref.attrs.get("outsideMargin", 0))
                 # elif name in ['Compound']:
                 #     obj1 = attrs[0]
                 #     orig1 = attrs[1:4]
@@ -407,7 +338,7 @@ class ShapeCollection:
                 #     bcols.addChildShape(...
                 else:  # e.g. name in ['Sphere']:
                     prim = self._shapes[shape_name] = primitive(*attrs)
-                    shp = self.shape(shape_name)
+                    shp = shape_ref
                     prim.setInsideMargin(
                         shp.attrs.get("insideMargin", min(attrs) * 0.02)
                     )

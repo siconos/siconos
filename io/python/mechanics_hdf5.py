@@ -638,32 +638,45 @@ class MechanicsHdf5(object):
 
     def add_occ_shape(self, name, occ_shape):
         """
-        Add an OpenCascade TopoDS_Shape.
+        Adds an OpenCascade TopoDS_Shape to the hdf5 group 'ref'
+
+        It takes an OpenCascade shape (e.g., a sphere, box, etc.),
+        converts it into the STEP format,
+        and stores it as a dataset
+
+        Parameters:
+        -----------
+        name : str
+            The name associated with the shape. This name will be used as the
+            identifier for the shape in the internal storage.
+            If the name already exists in the storage, the shape will not be added again.
+
+        occ_shape : TopoDS_Shape
+            The OpenCascade shape to be added, expected to be an instance
+            of the `TopoDS_Shape` class.
         """
+        if name in self._ref:
+            return
 
-        if name not in self._ref:
+        from OCC.Core.STEPControl import STEPControl_Writer, STEPControl_AsIs
 
-            from OCC.Core.STEPControl import STEPControl_Writer, STEPControl_AsIs
+        # step format is used for the storage.
+        step_writer = STEPControl_Writer()
+        step_writer.Transfer(occ_shape, STEPControl_AsIs)
 
-            # step format is used for the storage.
-            step_writer = STEPControl_Writer()
+        shape_data = None
 
-            step_writer.Transfer(occ_shape, STEPControl_AsIs)
+        with siconos.io.tools.tmpfile() as tmpf:
 
-            shape_data = None
+            step_writer.Write(tmpf[1])
 
-            with siconos.io.tools.tmpfile() as tmpf:
-
-                step_writer.Write(tmpf[1])
-
-                tmpf[0].flush()
-                shape_data = siconos.io.tools.str_of_file(tmpf[1])
-
-                shape = self._ref.create_dataset(name, (1,), dtype=h5py_vlen_dtype(str))
-                shape[:] = shape_data
-                shape.attrs["id"] = self._number_of_shapes
-                shape.attrs["type"] = "step"
-                self._number_of_shapes += 1
+            tmpf[0].flush()
+            shape_data = siconos.io.tools.str_of_file(tmpf[1])
+            shape = self._ref.create_dataset(name, (1,), dtype=h5py_vlen_dtype(str))
+            shape[:] = shape_data
+            shape.attrs["id"] = self._number_of_shapes
+            shape.attrs["type"] = "step"
+            self._number_of_shapes += 1
 
     def add_shape_data_from_file(self, name, filename):
         """
@@ -808,7 +821,7 @@ class MechanicsHdf5(object):
         velocity=None,
         use_volume_centroid_as_initial_translation=False,
         mass=None,
-        center_of_mass=[0, 0, 0],
+        center_of_mass=None,
         inertia=None,
         time_of_birth=-1,
         time_of_death=-1,
@@ -876,160 +889,173 @@ class MechanicsHdf5(object):
             the position of
             the volume centroid is used as initial translation.
         """
-        # print(arguments())
+
+        # Does nothing if an object of the same name is already registered.
+        if name in self._input:
+            return
+
+        # Ensure all input parameters have proper values
+        # (set default values, convert tuple or list to numpy arrays ...)
+
+        translation = np.asarray(translation, dtype=np.float64)
+
+        if center_of_mass is None:
+            center_of_mass = np.zeros(3, dtype=np.float64)
 
         if self._dimension == 3:
             if orientation is None:
-                orientation = [1, 0, 0, 0]
+                orientation = np.array([1, 0, 0, 0], dtype=np.float64)
             if velocity is None:
-                velocity = [0, 0, 0, 0, 0, 0]
+                velocity = np.zeros(6, dtype=np.float64)
+
             ori = quaternion_get(orientation)
             assert len(translation) == 3
             assert len(ori) == 4
 
         elif self._dimension == 2:
             if orientation is None:
-                orientation = [0.0]
+                orientation = np.zeros(1, dtype=np.float64)
             if velocity is None:
-                velocity = [0, 0, 0]
+                velocity = np.zeros(3, dtype=np.float64)
             assert len(translation) == 2
-            ori = orientation
+            ori = np.asarray(orientation, dtype=np.float64)
 
         is_center_of_mass_computed = False
-        if name not in self._input:
 
-            if (inertia is None) or (mass is None):
-                if any(
-                    map(
-                        lambda s: isinstance(s, smct.Volume),
-                        shapes,
-                    )
-                ):
-
-                    # a computed inertia and center of mass
-                    # occ only
-                    assert have_occ
-                    import siconos.io.occ_tools
-
-                    volumes = filter(
-                        lambda s: isinstance(s, smct.Volume),
-                        shapes,
-                    )
-
-                    computed_mass, com, computed_inertia, computed_inertia_matrix = (
-                        siconos.io.occ_tools.compute_inertia_and_center_of_mass(
-                            volumes, self
-                        )
-                    )
-                    self.print_verbose("{0}: computed mass from Volume".format(name))
-                    self.print_verbose(
-                        "{0}: computed center of mass:".format(name),
-                        com[0],
-                        com[1],
-                        com[2],
-                    )
-                    self.print_verbose(
-                        "{0}: computed mass:".format(name), computed_mass
-                    )
-                    self.print_verbose(
-                        "{0}: computed inertia:".format(name),
-                        computed_inertia[0],
-                        computed_inertia[1],
-                        computed_inertia[2],
-                    )
-                    self.print_verbose(
-                        "{0}: computed inertia matrix:".format(name),
-                        computed_inertia_matrix,
-                    )
-                    is_center_of_mass_computed = True
-                    if mass is None:
-                        mass = computed_mass
-
-                    if inertia is None:
-                        inertia = computed_inertia_matrix
-
-            obj = group(self._input, name)
-
-            if (
-                use_volume_centroid_as_initial_translation
-                and is_center_of_mass_computed
+        if (inertia is None) or (mass is None):
+            # if :
+            # - we need to compute mass or inertia
+            # - and a Volume is present in the shapes list
+            # - and occ is available
+            if any(
+                map(
+                    lambda s: isinstance(s, smct.Volume),
+                    shapes,
+                )
             ):
-                translation = com
-                for s in shapes:
-                    s.translation = s.translation - com
 
-            if time_of_birth >= 0:
-                obj.attrs["time_of_birth"] = time_of_birth
-            if time_of_death >= 0:
-                obj.attrs["time_of_death"] = time_of_death
+                # --- We compute inertia and center of mass ---
+                # This part requires occ.
+                assert have_occ
+                import siconos.io.occ_tools
 
-            if mass is not None:
-                obj.attrs["mass"] = mass
-                obj.attrs["type"] = "dynamic"
-                if np.isscalar(mass) and mass <= 0.0:
+                # get the list of volumes (as an iterator)
+                volumes = filter(
+                    lambda s: isinstance(s, smct.Volume),
+                    shapes,
+                )
 
-                    self.print_verbose(
-                        "The use of a mass equal to zero"
-                        " to define a static object is deprecated."
+                # compute mass, inertia for these volumes
+                computed_mass, com, computed_inertia, computed_inertia_matrix = (
+                    siconos.io.occ_tools.compute_inertia_and_center_of_mass(
+                        volumes, self
                     )
-                    self.print_verbose("Set mass=None to define a static object")
+                )
+
+                self.print_verbose("{0}: computed mass from Volume".format(name))
+                self.print_verbose(
+                    "{0}: computed center of mass:".format(name),
+                    com[0],
+                    com[1],
+                    com[2],
+                )
+                self.print_verbose("{0}: computed mass:".format(name), computed_mass)
+                self.print_verbose(
+                    "{0}: computed inertia:".format(name),
+                    computed_inertia[0],
+                    computed_inertia[1],
+                    computed_inertia[2],
+                )
+                self.print_verbose(
+                    "{0}: computed inertia matrix:".format(name),
+                    computed_inertia_matrix,
+                )
+                is_center_of_mass_computed = True
+                if mass is None:
+                    mass = computed_mass
+
+                if inertia is None:
+                    inertia = computed_inertia_matrix
+
+        obj = group(self._input, name)
+
+        if use_volume_centroid_as_initial_translation and is_center_of_mass_computed:
+            translation = com
+            for s in shapes:
+                s.translation = s.translation - com
+
+        if time_of_birth >= 0:
+            obj.attrs["time_of_birth"] = time_of_birth
+        if time_of_death >= 0:
+            obj.attrs["time_of_death"] = time_of_death
+
+        if mass is not None:
+            obj.attrs["mass"] = mass
+            obj.attrs["type"] = "dynamic"
+            if np.isscalar(mass) and mass <= 0.0:
+
+                self.print_verbose(
+                    "The use of a mass equal to zero"
+                    " to define a static object is deprecated."
+                )
+                self.print_verbose("Set mass=None to define a static object")
+        else:
+            obj.attrs["type"] = "static"
+        obj.attrs["translation"] = translation
+        obj.attrs["orientation"] = ori
+        obj.attrs["velocity"] = np.asarray(velocity, dtype=np.float64)
+        obj.attrs["center_of_mass"] = np.asarray(center_of_mass, dtype=np.float64)
+
+        if inertia is not None:
+            obj.attrs["inertia"] = inertia
+
+        if fext is not None:
+            obj.attrs["fext"] = np.asarray(fext, dtype=np.float64)
+
+        if allow_self_collide is not None:
+            obj.attrs["allow_self_collide"] = allow_self_collide
+
+        contactors = shapes
+
+        for num, ctor in enumerate(contactors):
+
+            if ctor.instance_name is not None:
+                # a specified name
+                instance_name = ctor.instance_name
             else:
-                obj.attrs["type"] = "static"
-            obj.attrs["translation"] = translation
-            obj.attrs["orientation"] = ori
-            obj.attrs["velocity"] = velocity
-            obj.attrs["center_of_mass"] = center_of_mass
+                # the default name for contactor
+                instance_name = "{0}-{1}".format(ctor.shape_name, num)
 
-            if inertia is not None:
-                obj.attrs["inertia"] = inertia
+            dat = data(obj, instance_name, 0, use_compression=self._use_compression)
 
-            if fext is not None:
-                obj.attrs["fext"] = fext
+            dat.attrs["instance_name"] = instance_name
+            dat.attrs["shape_name"] = ctor.shape_name
+            if hasattr(ctor, "group"):
+                dat.attrs["group"] = ctor.collision_group
 
-            if allow_self_collide is not None:
-                obj.attrs["allow_self_collide"] = allow_self_collide
+            if hasattr(ctor, "parameters") and ctor.parameters is not None:
+                # we add np.void to manage writing string in hdf5 files
+                # see http://docs.h5py.org/en/latest/strings.html
+                dat.attrs["parameters"] = np.void(pickle.dumps(ctor.parameters))
 
-            contactors = shapes
+            if hasattr(ctor, "contact_type") and ctor.contact_type is not None:
+                dat.attrs["type"] = ctor.contact_type
 
-            for num, ctor in enumerate(contactors):
+            if hasattr(ctor, "contact_index") and ctor.contact_index is not None:
+                dat.attrs["contact_index"] = ctor.contact_index
 
-                if ctor.instance_name is not None:
-                    # a specified name
-                    instance_name = ctor.instance_name
-                else:
-                    # the default name for contactor
-                    instance_name = "{0}-{1}".format(ctor.shape_name, num)
+            dat.attrs["translation"] = ctor.translation
+            dat.attrs["orientation"] = quaternion_get(ctor.orientation)
 
-                dat = data(obj, instance_name, 0, use_compression=self._use_compression)
+        if mass is None or mass == 0:
+            obj.attrs["id"] = -(self._number_of_static_objects + 1)
+            self._number_of_static_objects += 1
 
-                dat.attrs["instance_name"] = instance_name
-                dat.attrs["shape_name"] = ctor.shape_name
-                if hasattr(ctor, "group"):
-                    dat.attrs["group"] = ctor.group
+        else:
+            obj.attrs["id"] = self._number_of_dynamic_objects + 1
+            self._number_of_dynamic_objects += 1
 
-                if hasattr(ctor, "parameters") and ctor.parameters is not None:
-                    # we add np.void to manage writing string in hdf5 files
-                    # see http://docs.h5py.org/en/latest/strings.html
-                    dat.attrs["parameters"] = np.void(pickle.dumps(ctor.parameters))
-
-                if hasattr(ctor, "contact_type") and ctor.contact_type is not None:
-                    dat.attrs["type"] = ctor.contact_type
-
-                if hasattr(ctor, "contact_index") and ctor.contact_index is not None:
-                    dat.attrs["contact_index"] = ctor.contact_index
-
-                dat.attrs["translation"] = ctor.translation
-                dat.attrs["orientation"] = quaternion_get(ctor.orientation)
-
-            if mass is None or mass == 0:
-                obj.attrs["id"] = -(self._number_of_static_objects + 1)
-                self._number_of_static_objects += 1
-
-            else:
-                obj.attrs["id"] = self._number_of_dynamic_objects + 1
-                self._number_of_dynamic_objects += 1
-
-            return obj
+        return obj
 
     def add_Newton_impact_rolling_friction_nsl(
         self, name, mu, mu_r, e=0, collision_group1=0, collision_group2=0

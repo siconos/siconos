@@ -21,6 +21,8 @@ from vtk.numpy_interface import dataset_adapter as dsa
 
 from vtkmodules.vtkRenderingCore import vtkTextActor
 import h5py
+from siconos.io.tools import tmpfile as io_tmpfile
+import siconos.mechanics
 
 
 # Exports from this module
@@ -3243,10 +3245,7 @@ if __name__ == "__main__":
 
 # Heavier imports after command line parsing
 from vtk.util import numpy_support
-
 from siconos.io.mechanics_hdf5 import MechanicsHdf5
-from siconos.io.tools import tmpfile as io_tmpfile
-import siconos.mechanics
 
 have_occ = siconos.mechanics.have_occ
 if have_occ:

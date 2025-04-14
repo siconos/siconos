@@ -328,29 +328,19 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         if self._set_external_forces is None:
             self._set_external_forces = self.apply_gravity
 
+        # -- Build shape collection and save it in self._shape
         if self._shape_filename is None:
-            if self._collision_margin:
-                self._shape = siconos.io.shape_collection.ShapeCollection(
-                    io=self,
-                    collision_margin=self._collision_margin,
-                    backend=self.config.backend,
-                )
-
-            else:
-                self._shape = siconos.io.shape_collection.ShapeCollection(
-                    io=self, backend=self.config.backend
-                )
+            shape_collection_ref = self
         else:
-            if self._collision_margin:
-                self._shape = siconos.io.shape_collection.ShapeCollection(
-                    io=self._shape_filename,
-                    collision_margin=self._collision_margin,
-                    backend=self.config.backend,
-                )
-            else:
-                self._shape = siconos.io.shape_collection.ShapeCollection(
-                    io=self._shape_filename, backend=self.config.backend
-                )
+            shape_collection_ref = self._shape_filename
+
+        # Note FP: I can't find an example using vtk file for shape_filename and I can not
+        # understant how it can work. To be reviewed.
+        self._shape = siconos.io.shape_collection.ShapeCollection(
+            io=shape_collection_ref,
+            collision_margin=self._collision_margin,
+            backend=self.config.backend,
+        )
         self.print_verbose(f"Start Mechanics Runner - Backend: {self.config.backend}\n")
         return self
 
@@ -632,7 +622,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         contact_shape,
                         contactor.translation,
                         contactor.orientation,
-                        contactor.group,
+                        contactor.collision_group,
                     )
 
             if reference_shape not in ref_added:
@@ -697,9 +687,10 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 for c in contactors:
                     shp = self._shape.get(c.shape_name)
                     pos = np.concatenate([c.translation, c.orientation], axis=0)
-                    pos = np.asarray(pos, dtype=np.float64, order="F")
                     cset.append(
-                        siconos.mechanics.collision.SiconosContactor(shp, pos, c.group)
+                        siconos.mechanics.collision.SiconosContactor(
+                            shp, pos, c.collision_group
+                        )
                     )
                     self.print_verbose(
                         "              Adding shape %s to static contactor"
@@ -797,8 +788,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 cset = siconos.mechanics.collision.SiconosContactorSet()
                 for c in contactors:
                     shp = self._shape.get(c.shape_name)
-                    pos = list(c.translation) + list(c.orientation)
-                    pos = np.array(pos, dtype=np.float64, order="F")
+                    pos = np.concatenate([c.translation, c.orientation], axis=0)
                     cset.append(
                         siconos.mechanics.collision.SiconosContactor(shp, pos, c.group)
                     )

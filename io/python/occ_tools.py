@@ -24,9 +24,8 @@ import numpy as np
 import vtk
 
 from OCC.Core.GProp import GProp_GProps
-from OCC.Core.BRepGProp import brepgprop_VolumeProperties
 from OCC.Core.gp import gp_Ax1, gp_Dir
-from siconos.mechanics import occ
+import siconos.mechanics.occ
 from OCC.Core.TopAbs import TopAbs_FACE
 from OCC.Core.TopAbs import TopAbs_EDGE
 from OCC.Core.TopExp import TopExp_Explorer
@@ -39,6 +38,7 @@ from OCC.Core.IFSelect import IFSelect_RetDone, IFSelect_ItemsByEntity
 from OCC.Core.StlAPI import StlAPI_Writer
 from OCC.Core.BRepMesh import BRepMesh_IncrementalMesh
 from OCC.Core.BRepTools import BRepTools_ShapeSet
+import OCC.Core.BRepGProp
 
 import siconos.io.tools
 
@@ -48,7 +48,7 @@ import siconos.io.tools
 #
 def compute_inertia_and_center_of_mass(shapes, io=None):
     """
-    Compute inertia from a list of Shapes.
+    Computes inertia from a list of volumes
 
     Returns
     -------
@@ -71,13 +71,12 @@ def compute_inertia_and_center_of_mass(shapes, io=None):
                 siconos.io.tools.warn("cannot get shape {0}".format(shape.shape_name))
                 return None
 
-        iishape = shape.data
+        ishape = siconos.mechanics.occ.OccContactShape(shape.data)
+        siconos.mechanics.occ.occ_move(
+            ishape, np.concatenate([shape.translation, shape.orientation], axis=0)
+        )
 
-        ishape = occ.OccContactShape(iishape).data()
-        # the shape relative displacement
-        occ.occ_move(ishape, list(shape.translation) + list(shape.orientation))
-
-        brepgprop_VolumeProperties(iishape, iprops)
+        OCC.Core.BRepGProp.brepgprop.VolumeProperties(shape.data, iprops)
 
         density = None
 
@@ -103,7 +102,7 @@ def compute_inertia_and_center_of_mass(shapes, io=None):
     computed_com = system.CentreOfMass()
 
     gp_mat = system.MatrixOfInertia()
-    inertia_matrix = np.zeros((3, 3))
+    inertia_matrix = np.zeros((3, 3), dtype=np.float64)
     for i in range(0, 3):
         for j in range(0, 3):
             inertia_matrix[i, j] = gp_mat.Value(i + 1, j + 1)
@@ -114,7 +113,8 @@ def compute_inertia_and_center_of_mass(shapes, io=None):
 
     inertia = [I1, I2, I3]
     center_of_mass = np.array(
-        [computed_com.Coord(1), computed_com.Coord(2), computed_com.Coord(3)]
+        [computed_com.Coord(1), computed_com.Coord(2), computed_com.Coord(3)],
+        dtype=np.float64,
     )
 
     return mass, center_of_mass, inertia, inertia_matrix
@@ -149,12 +149,18 @@ def occ_topo_list(shape):
 
 def occ_load_file(filename):
     """
-    load in pythonocc a igs or step file
+    Build a TopoDS from a file (step or igs)
 
-    :param filename: a filename with extension
-    :return: a topods_shape
+
+    Parameters
+    ----------
+    filename : input file name (must be "stp", "step", "igs", or "iges"
+
+    Returns
+    -------
+    TopoDS_Compound
+        Compound shape built from all the shapes found in the IGES file.
     """
-
     reader_switch = {
         "stp": STEPControl_Reader,
         "step": STEPControl_Reader,
@@ -165,22 +171,22 @@ def occ_load_file(filename):
     builder = BRep_Builder()
     comp = TopoDS_Compound()
     builder.MakeCompound(comp)
-
     reader = reader_switch[os.path.splitext(filename)[1][1:].lower()]()
 
     status = reader.ReadFile(filename)
+    if status != IFSelect_RetDone:
+        raise RuntimeError("occ_load_file read failed")
 
-    if status == IFSelect_RetDone:  # check status
-        failsonly = False
-        reader.PrintCheckLoad(failsonly, IFSelect_ItemsByEntity)
-        reader.PrintCheckTransfer(failsonly, IFSelect_ItemsByEntity)
+    failsonly = False
+    reader.PrintCheckLoad(failsonly, IFSelect_ItemsByEntity)
+    reader.PrintCheckTransfer(failsonly, IFSelect_ItemsByEntity)
 
-        reader.TransferRoots()
-        nbs = reader.NbShapes()
+    reader.TransferRoots()
+    nbs = reader.NbShapes()
 
-        for i in range(1, nbs + 1):
-            shape = reader.Shape(i)
-            builder.Add(comp, shape)
+    for i in range(1, nbs + 1):
+        shape = reader.Shape(i)
+        builder.Add(comp, shape)
 
     return comp
 
@@ -223,3 +229,39 @@ def brep_reader(brep_string, indx):
         reader.Update()
 
         return reader
+
+
+def occ_load_brep(shape_ref, brep_class):
+    """
+    Load a BRep shape from a HDF5 dataset
+
+    Parameters
+    ----------
+    shape_ref : h5py.Dataset
+        HDF5 dataset containing either a raw BRep string or an encoded
+        shape set with 'occ_indx'.
+
+    brep_class : type
+        Class used to instantiate the shape.
+        Defaults to `siconos.mechanics.collision.occ.OccContactShape`.
+
+    Returns
+    -------
+    brep : shape_class instance
+        Loaded OpenCascade shape wrapped in OccContactShape)
+    """
+    if "occ_indx" in shape_ref.attrs:
+        shape_set = BRepTools_ShapeSet()
+        shape_set.ReadFromString(shape_ref[:][0])
+        the_shape = shape_set.Shape(shape_set.NbShapes())
+        location = shape_set.Locations().Location(shape_ref.attrs["occ_indx"])
+        the_shape.Location(location)
+        brep = brep_class()
+        brep.setData(the_shape)
+
+    else:
+        # raw brep
+        brep = brep_class()
+        brep.importBRepFromString(shape_ref[:][0])
+
+    return brep

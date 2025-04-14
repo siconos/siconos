@@ -68,6 +68,8 @@ int siconos::nonsmooth_formulations::LCP::solve() {
   // The LCP in Numerics format
   _numerics_problem->M = &*_M->numericsMatrix();
   _numerics_problem->q = _q->data();
+  _numerics_problem->size = _sizeOutput;
+
   int info = 0;
   // const char * name = &*_numerics_solver_options->solverName;
 
