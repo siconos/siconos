@@ -103,10 +103,11 @@ endforeach()
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/__init__.py.in
   ${SICONOS_PB11_BINARY_DIR}/siconos/mechanics/__init__.py @ONLY)
 
-
-
-
-
 if(WITH_TESTING)
-  build_python_tests()
+  if(NOT WITH_OpenCASCADE)
+    list(APPEND python_excluded_tests tests/test_occ_inertia.py)
+  else()
+    find_python_module(OCC REQUIRED)
+  endif()
+  build_python_tests(EXCLUDE ${python_excluded_tests})
 endif()

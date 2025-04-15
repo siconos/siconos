@@ -29,14 +29,14 @@ set(${COMPONENT}_DIRS)
 list(APPEND ${COMPONENT}_DIRS src)
 
 if(HAVE_SICONOS_MECHANICS)
-  list(APPEND ${COMPONENT}_DIRS src/mechanics) 
+  list(APPEND ${COMPONENT}_DIRS src/mechanics)
 endif()
 
 # --- Serialization setup ---
 
 if(WITH_SERIALIZATION)
   list(APPEND ${COMPONENT}_DIRS src/serialization)
-  
+
   if(NOT WITH_GENERATION)
     # in that case, we use headers in src/generation.
     # Warning : they must regularly updated (build siconos with generation ON!)
@@ -66,7 +66,7 @@ if(WITH_SERIALIZATION)
     if(SuiteSparse_CXSparse_INCLUDE_DIR)
       list(APPEND GENERATED_INCLUDES -I${SuiteSparse_CXSparse_INCLUDE_DIR})
     endif()
-    
+
     if(MPI_FOUND)
       foreach(_DIR IN LISTS MPI_CXX_INCLUDE_PATH)
         list(APPEND GENERATED_INCLUDES -I${_DIR})
@@ -77,13 +77,13 @@ if(WITH_SERIALIZATION)
       ${GENERATED_TARGETS} ${GENERATED_INCLUDES} --output=${GENERATED_HEADER}
       --source="${CMAKE_CURRENT_SOURCE_DIR}/../" --build="${CMAKE_BINARY_DIR}")
 
-		## CMake >= 3.12
+    ## CMake >= 3.12
     # set(io_targets_doxy2xml "${io_targets}")
     # list(TRANSFORM io_targets_doxy2xml APPEND "-doxy2xml")
     set(io_targets_doxy2xml)
-		foreach(_T IN LISTS io_targets)
-			list(APPEND io_targets_doxy2xml "${_T}-doxy2xml")
-		endforeach()
+    foreach(_T IN LISTS io_targets)
+      list(APPEND io_targets_doxy2xml "${_T}-doxy2xml")
+    endforeach()
 
     add_custom_command(
       OUTPUT ${GENERATED_HEADER}
@@ -92,7 +92,7 @@ if(WITH_SERIALIZATION)
       ${CMAKE_SOURCE_DIR}/io/tools/builder_common.py
       ${GENERATED_COMMAND})
 
-    SET(GENERATED_COMMAND_KERNEL COMMAND ${CMAKE_SOURCE_DIR}/io/tools/build_from_doxygen.py
+    set(GENERATED_COMMAND_KERNEL COMMAND ${CMAKE_SOURCE_DIR}/io/tools/build_from_doxygen.py
       --targets=kernel ${GENERATED_INCLUDES}
       --output=${GENERATED_HEADER_KERNEL}
       --source="${CMAKE_CURRENT_SOURCE_DIR}/../" --build="${CMAKE_BINARY_DIR}")

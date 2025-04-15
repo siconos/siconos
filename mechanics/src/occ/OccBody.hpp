@@ -24,6 +24,7 @@
 #define OccBody_hpp
 
 #include <TopoDS_Shape.hxx>
+#include <optional>
 
 #include "NewtonEulerDS.hpp"  // Base class
 #include "OccContactShape.hpp"
