@@ -43,7 +43,8 @@ class SpaceFilter(Stored):
         segment.set_maxpoints(mp) # fix / size of smallest disk
         segment.initialize(0)
 
-        # negative for static shape
+        # ident is attached in io.hpp
+        # it is negative for static shape
         segment.set_ident(- self._static_shape_counter)
         self._static_shape_counter = self._static_shape_counter + 1
 

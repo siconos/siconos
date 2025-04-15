@@ -16,6 +16,7 @@
 #include "siconos/collision/shape/disk.hpp"
 #include "siconos/collision/shape/mesh.hpp"
 #include "siconos/collision/shape/segment.hpp"
+#include "siconos/collision/neighborhood.hpp"
 #include "siconos/collision/space_filter.hpp"
 #include "siconos/siconos.hpp"
 #include "siconos/storage/ground/ground.hpp"

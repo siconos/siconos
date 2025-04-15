@@ -1,6 +1,7 @@
 #include <bits/stdc++.h>
 #include <siconos/numerics/Friction_cst.h>
 
+#include "siconos/collision/neighborhood.hpp"
 #include "siconos/collision/space_filter.hpp"
 #include "siconos/io/io.hpp"
 #include "siconos/siconos.hpp"

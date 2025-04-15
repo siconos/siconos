@@ -15,6 +15,7 @@ using env = standard_environment<config::params>;
 
 #include "siconos/collision/point.hpp"
 #include "siconos/collision/shape/disk.hpp"
+#include "siconos/collision/neighborhood.hpp"
 #include "siconos/collision/space_filter.hpp"
 #include "siconos/model/lagrangian_r.hpp"
 #include "siconos/storage/ground/ground.hpp"
