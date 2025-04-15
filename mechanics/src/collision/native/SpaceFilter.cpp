@@ -787,6 +787,7 @@ struct siconos::collision::native::SpaceFilter::FindInteractionsVisitor_
     // interactions with plans
 
     if (parent->_plans) {
+      siconos::algebra::print(*parent->_plans);
       for (unsigned int i = 0; i < parent->_plans->rows(); ++i) {
         parent->_PlanCircularFilter(sim, (*parent->_plans)(i, 0), (*parent->_plans)(i, 1),
                                     (*parent->_plans)(i, 2), (*parent->_plans)(i, 3),
@@ -1009,9 +1010,10 @@ void siconos::collision::native::SpaceFilter::insertLine(double a, double b, dou
   size_t row;
   if (!_plans) {
     _plans = std::make_shared<siconos::algebra::SiconosMatrix>(1, 6);
+    _plans->setZero();
     row = 0;
   } else {
-    _plans->resize(_plans->rows() + 1, 6);
+    _plans->conservativeResize(_plans->rows() + 1, 6);
     row = _plans->rows() - 1;
   }
   (*_plans)(row, 0) = a;
