@@ -30,7 +30,6 @@
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "op3x3.h"  // for orthoBaseFromVector
-// #include <iostream>
 
 /*
  * This file contains some code generated using sympy.  The following
@@ -112,7 +111,7 @@ void siconos::joints::PivotJointR::setBasePositions(
       cq2q10.R_component_4();
 
   // Initialize the two orthogonal vectors that define the constraint plane.
-  buildA1A2();
+  buildOrthonormalBase();
 
   // Get initial offsets relative to plane constraints.
   siconos::algebra::SiconosVector rot221{4};
@@ -134,19 +133,15 @@ void siconos::joints::PivotJointR::setBasePositions(
   _previousAngle = 0;
 }
 
-void siconos::joints::PivotJointR::buildA1A2() {
+void siconos::joints::PivotJointR::buildOrthonormalBase() {
   // Update axis_coords, A1 and A2 and check
-  if (!siconos::algebra::orthoBaseFromVector(*axis_coords_, A1_, A2_))
-    THROW_EXCEPTION(
-        "siconos::joints::PivotJointR::initializeWorkVectorsAndMatrices. Problem in calling "
-        "orthoBaseFromVector");
 
-  assert(fabs(axis_coords_->dot(A1_)) < 1e-9 && "PivotJoint, _A1 wrong\n");
-  assert(fabs(axis_coords_->dot(A2_)) < 1e-9 && "PivotJoint, _A2 wrong\n");
-  assert(fabs(A1_.dot(A1_)) < 1e-9 && "PivotJoint, _A12 wrong\n");
-  // std::cout << "JointPivot: A1_(0) A1_(1) A1_(2) :" << A1_(0) << " " << A1_(1) << " " <<
-  // A1_(2) << std::endl; std::cout << "JointPivot: A2_(0) A2_(1) A2_(2) :" << A2_(0) << " " <<
-  // A2_(1) << " " << A2_(2) << std::endl;
+  // Compute orthonormal basis (axis_coords_,A1,A2) from axis_coords_
+  auto base_ok = siconos::algebra::orthoBaseFromVector(*axis_coords_, A1_, A2_);
+  if (!base_ok)
+    THROW_EXCEPTION(
+        "siconos::joints::PivotJointR::buildOrthonormalBase. Can not compute orthonormal "
+        "vectors.")
 }
 
 void siconos::joints::PivotJointR::computeH_NE_(double time,
@@ -198,7 +193,7 @@ void siconos::joints::PivotJointR::computehDoF(
   // In case of joint constraints, it's okay to use dot product=0, but
   // in the case of the free axis we must measure the actual angle
   // using atan2 so that stops can be placed correctly.
-  double Adot2to1 = axis_coords_->dot(rot221);
+  double Adot2to1 = axis_coords_->dot(rot221.head(3));
   double wrappedAngle = piwrap(2 * atan2(rot221(3), Adot2to1) - _initial_AscalA);
 
   // Count the number of twists around the angle, and report the

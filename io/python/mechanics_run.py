@@ -341,7 +341,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             collision_margin=self._collision_margin,
             backend=self.config.backend,
         )
-        self.print_verbose(f"Start Mechanics Runner - Backend: {self.config.backend}\n")
+        self.print_verbose(
+            f"Start Mechanics Runner - Backend: {self.config.backend} - Mode: {self._mode}\n"
+        )
         return self
 
     def log(self, fun, with_timer=False, before=True):
@@ -821,17 +823,13 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         refds_name = None
         if len(references) > 0:
             joint1_name = references[0]
-            joint1 = siconos.mechanics.joints.cast_NewtonEulerJointR(
-                topo.getInteraction(str(joint1_name)).relation()
-            )
+            joint1 = topo.getInteraction(str(joint1_name)).relation()
             joint2 = joint1
             joint1_ds1 = self.joints()[joint1_name].attrs["object1"]
             joint1_ds2 = self.joints()[joint1_name].attrs.get("object2", None)
         if len(references) > 1:
             joint2_name = references[1]
-            joint2 = siconos.mechanics.joints.cast_NewtonEulerJointR(
-                topo.getInteraction(str(joint2_name)).relation()
-            )
+            joint2 = topo.getInteraction(str(joint2_name)).relation()
             joint2_ds1 = self.joints()[joint2_name].attrs["object1"]
             joint2_ds2 = self.joints()[joint2_name].attrs.get("object2", None)
 
@@ -899,145 +897,145 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         return joint
 
     def import_joint(self, name):
-        if self._interman is not None:
-            nsds = self._nsds
-            topo = nsds.topology()
-
-            joint_type = self.joints()[name].attrs["type"]
-            joint_class = getattr(siconos.mechanics.joints, joint_type)
-            absolute = not not self.joints()[name].attrs.get("absolute", True)
-            allow_self_collide = self.joints()[name].attrs.get(
-                "allow_self_collide", None
+        if self._interman is None:
+            self.print_verbose(
+                "Try to import joints but no interaction manager has been defined."
+                " Nothing will be done."
             )
-            stops = self.joints()[name].attrs.get("stops", None)
-            nslaws = self.joints()[name].attrs.get("nslaws", None)
-            friction = self.joints()[name].attrs.get("friction", None)
-            coupled = self.joints()[name].attrs.get("coupled", None)
-            references = self.joints()[name].attrs.get("references", None)
+            return
 
-            # work-around h5py unicode bug
-            # https://github.com/h5py/h5py/issues/379
-            if references is not None:
-                references = [
-                    r.decode("utf-8") if isinstance(r, bytes) else r for r in references
-                ]
+        nsds = self._nsds
+        topo = nsds.topology()
 
-            points = self.joints()[name].attrs.get("points", [])
-            axes = self.joints()[name].attrs.get("axes", [])
-            siconos.io.mechanics_hdf5.check_points_axes(name, joint_class, points, axes)
+        # Read hdf file: ["data"]["joints"][name]
+        joint_type = self.joints()[name].attrs["type"]
+        joint_class = getattr(siconos.mechanics.joints, joint_type)
+        absolute = bool(self.joints()[name].attrs.get("absolute", True))
+        allow_self_collide = self.joints()[name].attrs.get("allow_self_collide", None)
+        stops = self.joints()[name].attrs.get("stops", None)
+        nslaws = self.joints()[name].attrs.get("nslaws", None)
+        friction = self.joints()[name].attrs.get("friction", None)
+        coupled = self.joints()[name].attrs.get("coupled", None)
+        references = self.joints()[name].attrs.get("references", None)
 
-            ds1_name = self.joints()[name].attrs["object1"]
-            ds1 = topo.getDynamicalSystem(ds1_name)
-            ds2 = None
+        # work-around h5py unicode bug
+        # https://github.com/h5py/h5py/issues/379
+        if references is not None:
+            references = [
+                r.decode("utf-8") if isinstance(r, bytes) else r for r in references
+            ]
 
-            if "object2" in self.joints()[name].attrs:
-                ds2_name = self.joints()[name].attrs["object2"]
-                ds2 = topo.getDynamicalSystem(ds2_name)
+        points = self.joints()[name].attrs.get("points", [])
+        axes = self.joints()[name].attrs.get("axes", [])
+        siconos.io.mechanics_hdf5.check_points_axes(name, joint_class, points, axes)
 
-            if joint_class == siconos.mechanics.joints.CouplerJointR:
-                # This case is a little different, handle it specially
-                # assert(references is not None)
-                # assert(np.shape(coupled) == (1, 3))
-                if references is None:
-                    raise AssertionError("references is None")
-                if np.shape(coupled) != (1, 3):
-                    raise AssertionError("np.shape(coupled) != (1, 3)")
+        ds1_name = self.joints()[name].attrs["object1"]
+        ds1 = topo.getDynamicalSystem(ds1_name)
+        ds2 = None
 
-                joint = self.make_coupler_jointr(
-                    ds1_name, ds2_name, coupled, references
-                )
-                coupled = None  # Skip the use for "coupled" below, to
-                # install joint-local couplings
+        if "object2" in self.joints()[name].attrs:
+            ds2_name = self.joints()[name].attrs["object2"]
+            ds2 = topo.getDynamicalSystem(ds2_name)
 
+        if joint_class == siconos.mechanics.joints.CouplerJointR:
+            # This case is a little different, handle it specially
+            # assert(references is not None)
+            # assert(np.shape(coupled) == (1, 3))
+            if references is None:
+                raise AssertionError("references is None")
+            if np.shape(coupled) != (1, 3):
+                raise AssertionError("np.shape(coupled) != (1, 3)")
+
+            joint = self.make_coupler_jointr(ds1_name, ds2_name, coupled, references)
+            coupled = None  # Skip the use for "coupled" below, to
+            # install joint-local couplings
+
+        else:
+            # Generic NewtonEulerJointR interface
+            joint = joint_class()
+            for n, p in enumerate(points):
+                p = np.asarray(p, dtype=np.float64)
+                joint.setPoint(n, p)
+            for n, a in enumerate(axes):
+                a = np.asarray(a, dtype=np.float64)
+                joint.setAxis(n, a)
+            joint.setAbsolute(absolute)
+
+        q1 = ds1.q()
+        q2 = None if ds2 is None else ds2.q()
+
+        joint.setBasePositions(q1, q2)
+
+        if allow_self_collide is not None:
+            joint.setAllowSelfCollide(not not allow_self_collide)
+        joint_nslaw = sm.EqualityConditionNSL(joint.numberOfConstraints())
+        joint_inter = sm.Interaction(joint_nslaw, joint)
+        self._nsds.link(joint_inter, ds1, ds2)
+        nsds.setName(joint_inter, str(name))
+
+        # Add a e=0 joint by default, otherwise user can specify
+        # the impact law by name or a list of names for each axis.
+        if stops is not None:
+            if np.shape(stops)[1] != 3:
+                raise AssertionError("np.shape(stops)[1] != 3")
+            # assert np.shape(stops)[1] == 3, 'Joint stops shape must be (?, 3)'
+            if nslaws is None:
+                nslaws = [sm.NewtonImpactNSL(0.0)] * np.shape(stops)[0]
+            elif isinstance(nslaws, bytes):
+                nslaws = [self._nslaws[nslaws.decode("utf-8")]] * np.shape(stops)[0]
+            elif isinstance(nslaws, str):
+                nslaws = [self._nslaws[nslaws]] * np.shape(stops)[0]
             else:
-                # Generic NewtonEulerJointR interface
-                joint = joint_class()
-                for n, p in enumerate(points):
-                    p = np.asarray(p, dtype=np.float64, order="F")
-                    joint.setPoint(n, p)
-                for n, a in enumerate(axes):
-                    a = np.asarray(a, dtype=np.float64, order="F")
-                    joint.setAxis(n, a)
-                joint.setAbsolute(absolute)
+                if np.shape(nslaws)[0] != np.shape(stops)[0]:
+                    raise AssertionError("np.shape(nslaws)[0] != np.shape(stops)[0]")
+                # assert(np.shape(nslaws)[0] == np.shape(stops)[0])
+                nslaws = [self._nslaws[nsl] for nsl in nslaws]
+            for n, (nsl, (axis, pos, _dir)) in enumerate(zip(nslaws, stops)):
+                # "bool()" is needed because type of _dir is
+                # numpy.bool_, which SWIG doesn't handle well.
+                stop = siconos.mechanics.joints.JointStopR(
+                    joint, pos, bool(_dir < 0), int(axis)
+                )
+                stop_inter = sm.Interaction(nsl, stop)
+                self._nsds.link(stop_inter, ds1, ds2)
+                nsds.setName(stop_inter, "%s_stop%d" % (str(name), n))
 
-            q1 = ds1.q()
-            q2 = None if ds2 is None else ds2.q()
+        # The per-axis friction NSL, can be ''
+        if friction is not None:
+            if isinstance(friction, str):
+                friction = [friction]
+            elif isinstance(friction, bytes):
+                friction = [friction.decode("utf-8")]
+            else:
+                friction = [
+                    (f.decode("utf-8") if isinstance(f, bytes) else f) for f in friction
+                ]
+            for ax, fr_nslaw in enumerate(friction):
+                if fr_nslaw == "":  # no None in hdf5, use empty string
+                    continue  # instead for no NSL on an axis
+                nslaw = self._nslaws[fr_nslaw]
+                fr = siconos.mechanics.joints.JointFrictionR(joint, [ax])
+                fr_inter = sm.Interaction(nslaw, fr)
+                self._nsds.link(fr_inter, ds1, ds2)
+                nsds.setName(fr_inter, "%s_friction%d" % (str(name), ax))
 
-            joint.setBasePositions(q1, q2)
-
-            if allow_self_collide is not None:
-                joint.setAllowSelfCollide(not not allow_self_collide)
-            joint_nslaw = sm.EqualityConditionNSL(joint.numberOfConstraints())
-            joint_inter = sm.Interaction(joint_nslaw, joint)
-            self._nsds.link(joint_inter, ds1, ds2)
-            nsds.setName(joint_inter, str(name))
-
-            # Add a e=0 joint by default, otherwise user can specify
-            # the impact law by name or a list of names for each axis.
-            if stops is not None:
-                if np.shape(stops)[1] != 3:
-                    raise AssertionError("np.shape(stops)[1] != 3")
-                # assert np.shape(stops)[1] == 3, 'Joint stops shape must be (?, 3)'
-                if nslaws is None:
-                    nslaws = [sm.NewtonImpactNSL(0.0)] * np.shape(stops)[0]
-                elif isinstance(nslaws, bytes):
-                    nslaws = [self._nslaws[nslaws.decode("utf-8")]] * np.shape(stops)[0]
-                elif isinstance(nslaws, str):
-                    nslaws = [self._nslaws[nslaws]] * np.shape(stops)[0]
-                else:
-                    if np.shape(nslaws)[0] != np.shape(stops)[0]:
-                        raise AssertionError(
-                            "np.shape(nslaws)[0] != np.shape(stops)[0]"
-                        )
-                    # assert(np.shape(nslaws)[0] == np.shape(stops)[0])
-                    nslaws = [self._nslaws[nsl] for nsl in nslaws]
-                for n, (nsl, (axis, pos, _dir)) in enumerate(zip(nslaws, stops)):
-                    # "bool()" is needed because type of _dir is
-                    # numpy.bool_, which SWIG doesn't handle well.
-                    stop = siconos.mechanics.joints.JointStopR(
-                        joint, pos, bool(_dir < 0), int(axis)
-                    )
-                    stop_inter = sm.Interaction(nsl, stop)
-                    self._nsds.link(stop_inter, ds1, ds2)
-                    nsds.setName(stop_inter, "%s_stop%d" % (str(name), n))
-
-            # The per-axis friction NSL, can be ''
-            if friction is not None:
-                if isinstance(friction, str):
-                    friction = [friction]
-                elif isinstance(friction, bytes):
-                    friction = [friction.decode("utf-8")]
-                else:
-                    friction = [
-                        (f.decode("utf-8") if isinstance(f, bytes) else f)
-                        for f in friction
-                    ]
-                for ax, fr_nslaw in enumerate(friction):
-                    if fr_nslaw == "":  # no None in hdf5, use empty string
-                        continue  # instead for no NSL on an axis
-                    nslaw = self._nslaws[fr_nslaw]
-                    fr = siconos.mechanics.joints.JointFrictionR(joint, [ax])
-                    fr_inter = sm.Interaction(nslaw, fr)
-                    self._nsds.link(fr_inter, ds1, ds2)
-                    nsds.setName(fr_inter, "%s_friction%d" % (str(name), ax))
-
-            # An array of tuples (dof1, dof2, ratio) specifies
-            # coupling between a joint's DoFs (e.g., to turn a
-            # cylindrical joint into a screw joint)
-            if coupled is not None:
-                if len(coupled.shape) == 1:
-                    coupled = np.array([coupled])
-                if coupled.shape[1] != 3:
-                    raise AssertionError("coupled.shape[1] != 3")
-                # assert(coupled.shape[1] == 3)
-                for n, (dof1, dof2, ratio) in enumerate(coupled):
-                    cpl = siconos.mechanics.joints.CouplerJointR(
-                        joint, int(dof1), joint, int(dof2), ratio
-                    )
-                    cpl.setBasePositions(q1, q2)
-                    cpl_inter = sm.Interaction(sm.EqualityConditionNSL(1), cpl)
-                    self._nsds.link(cpl_inter, ds1, ds2)
-                    nsds.setName(cpl_inter, "%s_coupler%d" % (str(name), n))
+        # An array of tuples (dof1, dof2, ratio) specifies
+        # coupling between a joint's DoFs (e.g., to turn a
+        # cylindrical joint into a screw joint)
+        if coupled is not None:
+            if len(coupled.shape) == 1:
+                coupled = np.array([coupled])
+            if coupled.shape[1] != 3:
+                raise AssertionError("coupled.shape[1] != 3")
+            # assert(coupled.shape[1] == 3)
+            for n, (dof1, dof2, ratio) in enumerate(coupled):
+                cpl = siconos.mechanics.joints.CouplerJointR(
+                    joint, int(dof1), joint, int(dof2), ratio
+                )
+                cpl.setBasePositions(q1, q2)
+                cpl_inter = sm.Interaction(sm.EqualityConditionNSL(1), cpl)
+                self._nsds.link(cpl_inter, ds1, ds2)
+                nsds.setName(cpl_inter, "%s_coupler%d" % (str(name), n))
 
     def import_boundary_conditions(self, name):
         if self._interman is not None:
@@ -2432,13 +2430,10 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         """
 
         if run_options is None:
-            self.print_verbose("\nyou should consider to use a run_options dictionnary")
-            self.print_verbose(
-                "we create a run_options for you and fill it with given options"
-            )
-            self.print_verbose(
-                "some new options may not be available without run_options"
-            )
+            self.print_verbose("\nWarning: no options given.\n")
+            self.print_verbose("Consider to use a run options dictionnary.")
+            self.print_verbose("else, some new options may not be available.\n")
+            self.print_verbose("Anyway, options default to:\n")
 
             run_options = MechanicsHdf5Runner_run_options()
             run_options["with_timer"] = with_timer

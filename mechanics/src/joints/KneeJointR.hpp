@@ -67,20 +67,19 @@ class KneeJointR : public NewtonEulerJointR {
 
   /** Constructor based on one or two dynamical systems and a point.
    *
+   *  \param P SiconosVector of size 3 that defines the point around
+   *   which rotation is allowed.
    *  \param d1 first DynamicalSystem linked by the joint.
    *  \param d2 second DynamicalSystem linked by the joint, or NULL
    *  for absolute frame.
-   *  \param P SiconosVector of size 3 that defines the point around
-   *  which rotation is allowed.
    *  \param absoluteRef if true, P is in the absolute frame,
-   *  otherwise P is in d1 frame.
+   *   otherwise P is in d1 frame.
    */
   KneeJointR(const Eigen::Ref<siconos::algebra::SiconosVector3>& P, bool absoluteRef,
              std::shared_ptr<siconos::modeling::NewtonEulerDS> d1 = nullptr,
              std::shared_ptr<siconos::modeling::NewtonEulerDS> d2 = nullptr);
 
-  /** destructor
-   */
+  /** destructor */
   virtual ~KneeJointR() noexcept = default;
 
   /** Initialize the joint constants based on the provided base positions.

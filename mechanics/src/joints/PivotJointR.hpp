@@ -46,7 +46,7 @@ class PivotJointR : public KneeJointR {
   int _twistCount{0};     // TODO: Should be in a graph work vector?
   int _previousAngle{0};  // Needed to track _twistCount, TODO: work vector?
 
-  void buildA1A2();
+  void buildOrthonormalBase();
 
   /** compute H_NE matrix
    *

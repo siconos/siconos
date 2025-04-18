@@ -58,7 +58,7 @@ bool siconos::algebra::orthoBaseFromVector(SiconosVector3& A, SiconosVector3& A1
   const double a = -1.0 / (sign + A.z());
   const double b = A.x() * A.y() * a;
 
-  // Compute A1 and A2 ...
+  // Build the orthonormal basis using a and b
   A1 << 1.0 + sign * A.x() * A.x() * a, sign * b, -sign * A.x();
   A2 << b, sign + A.y() * A.y() * a, -A.y();
 
