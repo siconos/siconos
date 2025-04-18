@@ -145,7 +145,7 @@ void hfunction(const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
                const siconos::algebra::SiconosVector3& coords1,
                const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2opt,
                const siconos::algebra::SiconosVector3& coords2,
-               Eigen::Ref<siconos::algebra::MapVector3Type> result);
+               Eigen::Ref<siconos::algebra::SiconosVector> result);
 
 void computeH_for_2DS(const Eigen::Ref<const siconos::algebra::SiconosVector>& qp1,
                       const siconos::algebra::SiconosVector3& coords1,

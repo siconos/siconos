@@ -173,7 +173,7 @@ void siconos::joints::knee::hfunction(
     const siconos::algebra::SiconosVector3& coords1,
     const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2opt,
     const siconos::algebra::SiconosVector3& coords2,
-    Eigen::Ref<siconos::algebra::MapVector3Type> result) {
+    Eigen::Ref<siconos::algebra::SiconosVector> result) {
   auto t1 = q1(4) * q1(4);
   auto t2 = q1(3) * q1(3);
   auto t3 = q1(6) * q1(6);
