@@ -78,6 +78,12 @@ siconos::joints::PrismaticJointR::PrismaticJointR(
   }
 }
 
+siconos::joints::PrismaticJointR::PrismaticJointR() {
+  axes_.resize(1);
+  _axis0 = std::make_shared<siconos::algebra::SiconosVector3>();
+  _axis0->setZero();
+}
+
 void siconos::joints::PrismaticJointR::displayInitialPosition() {
   std::cout << "Prismatic axis :\n";
   siconos::algebra::print(*_axis0);

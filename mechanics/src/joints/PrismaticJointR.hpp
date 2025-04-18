@@ -96,6 +96,9 @@ class PrismaticJointR : public NewtonEulerJointR {
                   std::shared_ptr<siconos::modeling::NewtonEulerDS> d1 = nullptr,
                   std::shared_ptr<siconos::modeling::NewtonEulerDS> d2 = nullptr);
 
+  /** Default constructor */
+  PrismaticJointR();
+
   /** destructor */
   virtual ~PrismaticJointR() noexcept = default;
 
