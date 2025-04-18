@@ -63,6 +63,8 @@ PYBIND11_MODULE(modeling, m) {
       .def("lambda_python", &siconos::modeling::Interaction::lambda_python,
            py::return_value_policy::reference_internal)
       .def("y", &siconos::modeling::Interaction::y_python,
+           py::return_value_policy::reference_internal)
+      .def("relation", &siconos::modeling::Interaction::relation,
            py::return_value_policy::reference_internal);    
 
   m.def("interactions", &interactions, py::arg("graph"),

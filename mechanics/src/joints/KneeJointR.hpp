@@ -61,6 +61,10 @@ class KneeJointR : public NewtonEulerJointR {
                             const siconos::algebra::BlockVector& q0) override;
 
  public:
+  /** Default constructor
+   */
+  KneeJointR();
+
   /** Constructor based on one or two dynamical systems and a point.
    *
    *  \param d1 first DynamicalSystem linked by the joint.

@@ -60,6 +60,12 @@ double piwrap(double x) {
 }
 }  // namespace
 
+siconos::joints::PivotJointR::PivotJointR() : KneeJointR{} {
+  axes_.resize(1);
+  axis_coords_ = std::make_shared<siconos::algebra::SiconosVector3>();
+  axis_coords_->setZero();
+}
+
 siconos::joints::PivotJointR::PivotJointR(
     const Eigen::Ref<siconos::algebra::SiconosVector3>& P,
     const Eigen::Ref<siconos::algebra::SiconosVector3>& A, bool absoluteRef,
@@ -317,22 +323,21 @@ void siconos::joints::PivotJointR::computeJachqDoF(
   double x59 = x47 + x54;
   double x60 = x34 + x55;
 
+  jachq.setValue(0, 3,
+                 x18 * x23 + x22 * ((*axis_coords_)(0) * x4 + (*axis_coords_)(1) * x9 +
+                                    (*axis_coords_)(2) * x14));
   jachq.setValue(
-      0, 3,
-      x18 * x23 + x22 * ((*axis_coords_)(0) * x4 + (*axis_coords_)(1) * x9 +
-                         (*axis_coords_)(2) * x14));
-  jachq.setValue(0, 4,
-                 x22 * ((*axis_coords_)(0) * x18 + (*axis_coords_)(1) * x14 +
-                        (*axis_coords_)(2) * x24) +
-                     x23 * x25);
-  jachq.setValue(0, 5,
-                 x22 * ((*axis_coords_)(0) * x26 + (*axis_coords_)(1) * x18 +
-                        (*axis_coords_)(2) * x4) +
-                     x23 * x24);
-  jachq.setValue(0, 6,
-                 x22 * ((*axis_coords_)(0) * x9 + (*axis_coords_)(1) * x25 +
-                        (*axis_coords_)(2) * x18) +
-                     x23 * x26);
+      0, 4,
+      x22 * ((*axis_coords_)(0) * x18 + (*axis_coords_)(1) * x14 + (*axis_coords_)(2) * x24) +
+          x23 * x25);
+  jachq.setValue(
+      0, 5,
+      x22 * ((*axis_coords_)(0) * x26 + (*axis_coords_)(1) * x18 + (*axis_coords_)(2) * x4) +
+          x23 * x24);
+  jachq.setValue(
+      0, 6,
+      x22 * ((*axis_coords_)(0) * x9 + (*axis_coords_)(1) * x25 + (*axis_coords_)(2) * x18) +
+          x23 * x26);
 
   if (q0.numberOfBlocks() < 2) return;
 
@@ -342,26 +347,26 @@ void siconos::joints::PivotJointR::computeJachqDoF(
    * for i in range(4): print('jachq.setValue(0, {}, {});'.format(i+10,e[i+4]))
    */
 
-  jachq.setValue(0, 10,
-                 x22 * ((*axis_coords_)(0) * (x30 + x31 + x33) +
-                        (*axis_coords_)(1) * (x34 + x35 + x40) +
-                        (*axis_coords_)(2) * (x44 + x45 + x47)) +
-                     x23 * (x48 + x49 + x52));
-  jachq.setValue(0, 11,
-                 x22 * ((*axis_coords_)(0) * (-x49 + x52 + x53) +
-                        (*axis_coords_)(1) * (x44 + x46 + x54) +
-                        (*axis_coords_)(2) * (-x34 + x40 + x55)) +
-                     x23 * (x30 + x32 + x56));
+  jachq.setValue(
+      0, 10,
+      x22 * ((*axis_coords_)(0) * (x30 + x31 + x33) + (*axis_coords_)(1) * (x34 + x35 + x40) +
+             (*axis_coords_)(2) * (x44 + x45 + x47)) +
+          x23 * (x48 + x49 + x52));
+  jachq.setValue(
+      0, 11,
+      x22 * ((*axis_coords_)(0) * (-x49 + x52 + x53) + (*axis_coords_)(1) * (x44 + x46 + x54) +
+             (*axis_coords_)(2) * (-x34 + x40 + x55)) +
+          x23 * (x30 + x32 + x56));
   jachq.setValue(0, 12,
                  x22 * ((*axis_coords_)(0) * (-x41 + x43 + x59) +
                         (*axis_coords_)(1) * (-x50 + x51 + x57) +
                         (*axis_coords_)(2) * (x27 + x28 + x58)) +
                      x23 * (x37 + x38 + x60));
-  jachq.setValue(0, 13,
-                 x22 * ((*axis_coords_)(0) * (x36 + x39 + x60) +
-                        (*axis_coords_)(1) * (-x27 + x29 + x58) +
-                        (*axis_coords_)(2) * (x50 - x51 + x57)) +
-                     x23 * (x41 + x42 + x59));
+  jachq.setValue(
+      0, 13,
+      x22 * ((*axis_coords_)(0) * (x36 + x39 + x60) + (*axis_coords_)(1) * (-x27 + x29 + x58) +
+             (*axis_coords_)(2) * (x50 - x51 + x57)) +
+          x23 * (x41 + x42 + x59));
 }
 
 siconos::algebra::SiconosVector3 siconos::joints::PivotJointR::normalDoF(
@@ -393,89 +398,109 @@ void siconos::joints::pivot::computeH_for_2DS(
   result.setValue(
       3, 3,
       A1(0) * (-cq2q(0) * qp2(1) - cq2q(1) * qp2(0) + cq2q(2) * qp2(3) - cq2q(3) * qp2(2)) +
-          A1(1) * (-cq2q(0) * qp2(2) - cq2q(1) * qp2(3) - cq2q(2) * qp2(0) + cq2q(3) * qp2(1)) +
-          A1(2) * (-cq2q(0) * qp2(3) + cq2q(1) * qp2(2) - cq2q(2) * qp2(1) - cq2q(3) * qp2(0)));
+          A1(1) *
+              (-cq2q(0) * qp2(2) - cq2q(1) * qp2(3) - cq2q(2) * qp2(0) + cq2q(3) * qp2(1)) +
+          A1(2) *
+              (-cq2q(0) * qp2(3) + cq2q(1) * qp2(2) - cq2q(2) * qp2(1) - cq2q(3) * qp2(0)));
   result.setValue(
       3, 4,
       A1(0) * (cq2q(0) * qp2(0) - cq2q(1) * qp2(1) - cq2q(2) * qp2(2) - cq2q(3) * qp2(3)) +
-          A1(1) * (-cq2q(0) * qp2(3) + cq2q(1) * qp2(2) - cq2q(2) * qp2(1) - cq2q(3) * qp2(0)) +
+          A1(1) *
+              (-cq2q(0) * qp2(3) + cq2q(1) * qp2(2) - cq2q(2) * qp2(1) - cq2q(3) * qp2(0)) +
           A1(2) * (cq2q(0) * qp2(2) + cq2q(1) * qp2(3) + cq2q(2) * qp2(0) - cq2q(3) * qp2(1)));
   result.setValue(
       3, 5,
       A1(0) * (cq2q(0) * qp2(3) - cq2q(1) * qp2(2) + cq2q(2) * qp2(1) + cq2q(3) * qp2(0)) +
           A1(1) * (cq2q(0) * qp2(0) - cq2q(1) * qp2(1) - cq2q(2) * qp2(2) - cq2q(3) * qp2(3)) +
-          A1(2) * (-cq2q(0) * qp2(1) - cq2q(1) * qp2(0) + cq2q(2) * qp2(3) - cq2q(3) * qp2(2)));
-  result.setValue(3, 6,
-                  A1(0) * (-cq2q(0) * qp2(2) - cq2q(1) * qp2(3) - cq2q(2) * qp2(0) + cq2q(3) * qp2(1)) +
-                      A1(1) * (cq2q(0) * qp2(1) + cq2q(1) * qp2(0) - cq2q(2) * qp2(3) + cq2q(3) * qp2(2)) +
-                      A1(2) * (cq2q(0) * qp2(0) - cq2q(1) * qp2(1) - cq2q(2) * qp2(2) - cq2q(3) * qp2(3)));
+          A1(2) *
+              (-cq2q(0) * qp2(1) - cq2q(1) * qp2(0) + cq2q(2) * qp2(3) - cq2q(3) * qp2(2)));
+  result.setValue(
+      3, 6,
+      A1(0) * (-cq2q(0) * qp2(2) - cq2q(1) * qp2(3) - cq2q(2) * qp2(0) + cq2q(3) * qp2(1)) +
+          A1(1) * (cq2q(0) * qp2(1) + cq2q(1) * qp2(0) - cq2q(2) * qp2(3) + cq2q(3) * qp2(2)) +
+          A1(2) * (cq2q(0) * qp2(0) - cq2q(1) * qp2(1) - cq2q(2) * qp2(2) - cq2q(3) * qp2(3)));
 
   result.setValue(3, 7, 0);
   result.setValue(3, 8, 0);
   result.setValue(3, 9, 0);
 
   // sympy expression: [AscalA1.diff(x) for x in q2]
-  result.setValue(3, 10,
-                  A1(0) * (cq2q(0) * qp1(1) - cq2q(1) * qp1(0) - cq2q(2) * qp1(3) + cq2q(3) * qp1(2)) +
-                      A1(1) * (cq2q(0) * qp1(2) + cq2q(1) * qp1(3) - cq2q(2) * qp1(0) - cq2q(3) * qp1(1)) +
-                      A1(2) * (cq2q(0) * qp1(3) - cq2q(1) * qp1(2) + cq2q(2) * qp1(1) - cq2q(3) * qp1(0)));
+  result.setValue(
+      3, 10,
+      A1(0) * (cq2q(0) * qp1(1) - cq2q(1) * qp1(0) - cq2q(2) * qp1(3) + cq2q(3) * qp1(2)) +
+          A1(1) * (cq2q(0) * qp1(2) + cq2q(1) * qp1(3) - cq2q(2) * qp1(0) - cq2q(3) * qp1(1)) +
+          A1(2) * (cq2q(0) * qp1(3) - cq2q(1) * qp1(2) + cq2q(2) * qp1(1) - cq2q(3) * qp1(0)));
   result.setValue(
       3, 11,
       A1(0) * (-cq2q(0) * qp1(0) - cq2q(1) * qp1(1) + cq2q(2) * qp1(2) + cq2q(3) * qp1(3)) +
           A1(1) * (cq2q(0) * qp1(3) - cq2q(1) * qp1(2) - cq2q(2) * qp1(1) + cq2q(3) * qp1(0)) +
-          A1(2) * (-cq2q(0) * qp1(2) - cq2q(1) * qp1(3) - cq2q(2) * qp1(0) - cq2q(3) * qp1(1)));
+          A1(2) *
+              (-cq2q(0) * qp1(2) - cq2q(1) * qp1(3) - cq2q(2) * qp1(0) - cq2q(3) * qp1(1)));
   result.setValue(
       3, 12,
       A1(0) * (-cq2q(0) * qp1(3) - cq2q(1) * qp1(2) - cq2q(2) * qp1(1) - cq2q(3) * qp1(0)) +
-          A1(1) * (-cq2q(0) * qp1(0) + cq2q(1) * qp1(1) - cq2q(2) * qp1(2) + cq2q(3) * qp1(3)) +
+          A1(1) *
+              (-cq2q(0) * qp1(0) + cq2q(1) * qp1(1) - cq2q(2) * qp1(2) + cq2q(3) * qp1(3)) +
           A1(2) * (cq2q(0) * qp1(1) + cq2q(1) * qp1(0) - cq2q(2) * qp1(3) - cq2q(3) * qp1(2)));
   result.setValue(
       3, 13,
       A1(0) * (cq2q(0) * qp1(2) - cq2q(1) * qp1(3) + cq2q(2) * qp1(0) - cq2q(3) * qp1(1)) +
-          A1(1) * (-cq2q(0) * qp1(1) - cq2q(1) * qp1(0) - cq2q(2) * qp1(3) - cq2q(3) * qp1(2)) +
-          A1(2) * (-cq2q(0) * qp1(0) + cq2q(1) * qp1(1) + cq2q(2) * qp1(2) - cq2q(3) * qp1(3)));
+          A1(1) *
+              (-cq2q(0) * qp1(1) - cq2q(1) * qp1(0) - cq2q(2) * qp1(3) - cq2q(3) * qp1(2)) +
+          A1(2) *
+              (-cq2q(0) * qp1(0) + cq2q(1) * qp1(1) + cq2q(2) * qp1(2) - cq2q(3) * qp1(3)));
 
   // sympy expression: [AscalA2.diff(x) for x in q1]
   result.setValue(
       4, 3,
       A2(0) * (-cq2q(0) * qp2(1) - cq2q(1) * qp2(0) + cq2q(2) * qp2(3) - cq2q(3) * qp2(2)) +
-          A2(1) * (-cq2q(0) * qp2(2) - cq2q(1) * qp2(3) - cq2q(2) * qp2(0) + cq2q(3) * qp2(1)) +
-          A2(2) * (-cq2q(0) * qp2(3) + cq2q(1) * qp2(2) - cq2q(2) * qp2(1) - cq2q(3) * qp2(0)));
+          A2(1) *
+              (-cq2q(0) * qp2(2) - cq2q(1) * qp2(3) - cq2q(2) * qp2(0) + cq2q(3) * qp2(1)) +
+          A2(2) *
+              (-cq2q(0) * qp2(3) + cq2q(1) * qp2(2) - cq2q(2) * qp2(1) - cq2q(3) * qp2(0)));
   result.setValue(
       4, 4,
       A2(0) * (cq2q(0) * qp2(0) - cq2q(1) * qp2(1) - cq2q(2) * qp2(2) - cq2q(3) * qp2(3)) +
-          A2(1) * (-cq2q(0) * qp2(3) + cq2q(1) * qp2(2) - cq2q(2) * qp2(1) - cq2q(3) * qp2(0)) +
+          A2(1) *
+              (-cq2q(0) * qp2(3) + cq2q(1) * qp2(2) - cq2q(2) * qp2(1) - cq2q(3) * qp2(0)) +
           A2(2) * (cq2q(0) * qp2(2) + cq2q(1) * qp2(3) + cq2q(2) * qp2(0) - cq2q(3) * qp2(1)));
   result.setValue(
       4, 5,
       A2(0) * (cq2q(0) * qp2(3) - cq2q(1) * qp2(2) + cq2q(2) * qp2(1) + cq2q(3) * qp2(0)) +
           A2(1) * (cq2q(0) * qp2(0) - cq2q(1) * qp2(1) - cq2q(2) * qp2(2) - cq2q(3) * qp2(3)) +
-          A2(2) * (-cq2q(0) * qp2(1) - cq2q(1) * qp2(0) + cq2q(2) * qp2(3) - cq2q(3) * qp2(2)));
-  result.setValue(4, 6,
-                  A2(0) * (-cq2q(0) * qp2(2) - cq2q(1) * qp2(3) - cq2q(2) * qp2(0) + cq2q(3) * qp2(1)) +
-                      A2(1) * (cq2q(0) * qp2(1) + cq2q(1) * qp2(0) - cq2q(2) * qp2(3) + cq2q(3) * qp2(2)) +
-                      A2(2) * (cq2q(0) * qp2(0) - cq2q(1) * qp2(1) - cq2q(2) * qp2(2) - cq2q(3) * qp2(3)));
+          A2(2) *
+              (-cq2q(0) * qp2(1) - cq2q(1) * qp2(0) + cq2q(2) * qp2(3) - cq2q(3) * qp2(2)));
+  result.setValue(
+      4, 6,
+      A2(0) * (-cq2q(0) * qp2(2) - cq2q(1) * qp2(3) - cq2q(2) * qp2(0) + cq2q(3) * qp2(1)) +
+          A2(1) * (cq2q(0) * qp2(1) + cq2q(1) * qp2(0) - cq2q(2) * qp2(3) + cq2q(3) * qp2(2)) +
+          A2(2) * (cq2q(0) * qp2(0) - cq2q(1) * qp2(1) - cq2q(2) * qp2(2) - cq2q(3) * qp2(3)));
 
   // sympy expression: [AscalA2.diff(x) for x in q1]
-  result.setValue(4, 10,
-                  A2(0) * (cq2q(0) * qp1(1) - cq2q(1) * qp1(0) - cq2q(2) * qp1(3) + cq2q(3) * qp1(2)) +
-                      A2(1) * (cq2q(0) * qp1(2) + cq2q(1) * qp1(3) - cq2q(2) * qp1(0) - cq2q(3) * qp1(1)) +
-                      A2(2) * (cq2q(0) * qp1(3) - cq2q(1) * qp1(2) + cq2q(2) * qp1(1) - cq2q(3) * qp1(0)));
+  result.setValue(
+      4, 10,
+      A2(0) * (cq2q(0) * qp1(1) - cq2q(1) * qp1(0) - cq2q(2) * qp1(3) + cq2q(3) * qp1(2)) +
+          A2(1) * (cq2q(0) * qp1(2) + cq2q(1) * qp1(3) - cq2q(2) * qp1(0) - cq2q(3) * qp1(1)) +
+          A2(2) * (cq2q(0) * qp1(3) - cq2q(1) * qp1(2) + cq2q(2) * qp1(1) - cq2q(3) * qp1(0)));
   result.setValue(
       4, 11,
       A2(0) * (-cq2q(0) * qp1(0) - cq2q(1) * qp1(1) + cq2q(2) * qp1(2) + cq2q(3) * qp1(3)) +
           A2(1) * (cq2q(0) * qp1(3) - cq2q(1) * qp1(2) - cq2q(2) * qp1(1) + cq2q(3) * qp1(0)) +
-          A2(2) * (-cq2q(0) * qp1(2) - cq2q(1) * qp1(3) - cq2q(2) * qp1(0) - cq2q(3) * qp1(1)));
+          A2(2) *
+              (-cq2q(0) * qp1(2) - cq2q(1) * qp1(3) - cq2q(2) * qp1(0) - cq2q(3) * qp1(1)));
   result.setValue(
       4, 12,
       A2(0) * (-cq2q(0) * qp1(3) - cq2q(1) * qp1(2) - cq2q(2) * qp1(1) - cq2q(3) * qp1(0)) +
-          A2(1) * (-cq2q(0) * qp1(0) + cq2q(1) * qp1(1) - cq2q(2) * qp1(2) + cq2q(3) * qp1(3)) +
+          A2(1) *
+              (-cq2q(0) * qp1(0) + cq2q(1) * qp1(1) - cq2q(2) * qp1(2) + cq2q(3) * qp1(3)) +
           A2(2) * (cq2q(0) * qp1(1) + cq2q(1) * qp1(0) - cq2q(2) * qp1(3) - cq2q(3) * qp1(2)));
   result.setValue(
       4, 13,
       A2(0) * (cq2q(0) * qp1(2) - cq2q(1) * qp1(3) + cq2q(2) * qp1(0) - cq2q(3) * qp1(1)) +
-          A2(1) * (-cq2q(0) * qp1(1) - cq2q(1) * qp1(0) - cq2q(2) * qp1(3) - cq2q(3) * qp1(2)) +
-          A2(2) * (-cq2q(0) * qp1(0) + cq2q(1) * qp1(1) + cq2q(2) * qp1(2) - cq2q(3) * qp1(3)));
+          A2(1) *
+              (-cq2q(0) * qp1(1) - cq2q(1) * qp1(0) - cq2q(2) * qp1(3) - cq2q(3) * qp1(2)) +
+          A2(2) *
+              (-cq2q(0) * qp1(0) + cq2q(1) * qp1(1) + cq2q(2) * qp1(2) - cq2q(3) * qp1(3)));
 
   /*proj_with_q
   for (unsigned int ii=0; ii <result.rows(); ii++)
@@ -505,7 +530,8 @@ void siconos::joints::pivot::computeH_for_1DS(
     const Eigen::Ref<const siconos::algebra::SiconosVector>& qp1,
     const siconos::algebra::SiconosVector3& coords1,
     const siconos::algebra::SiconosVector3& A1, const siconos::algebra::SiconosVector3& A2,
-    const siconos::algebra::SiconosVector& cq2q, Eigen::Ref<siconos::algebra::MapType> result) {
+    const siconos::algebra::SiconosVector& cq2q,
+    Eigen::Ref<siconos::algebra::MapType> result) {
   knee::computeH_for_1DS(qp1, coords1, result.topRows(3));
   // sympy expression: [AscalA1.diff(x) for x in q1]
   result.setValue(3, 3, A1(0) * (-cq2q(1)) + A1(1) * (-cq2q(2)) + A1(2) * (-cq2q(3)));
@@ -568,5 +594,6 @@ void siconos::joints::pivot::rot2to1(
              (-cq2q(0) * qp2(1) - cq2q(1) * qp2(0) + cq2q(2) * qp2(3) - cq2q(3) * qp2(2)) -
          qp1(2) *
              (-cq2q(0) * qp2(2) - cq2q(1) * qp2(3) - cq2q(2) * qp2(0) + cq2q(3) * qp2(1)) -
-         qp1(3) * (-cq2q(0) * qp2(3) + cq2q(1) * qp2(2) - cq2q(2) * qp2(1) - cq2q(3) * qp2(0)));
+         qp1(3) *
+             (-cq2q(0) * qp2(3) + cq2q(1) * qp2(2) - cq2q(2) * qp2(1) - cq2q(3) * qp2(0)));
 }

@@ -29,13 +29,13 @@
 #include "SiconosMatrix.hpp"
 #include "SiconosProperties.hpp"
 #include "SiconosVector.hpp"
+#include "Interaction.hpp"
 
 namespace siconos::algebra {}  // namespace siconos::algebra
 
 namespace siconos::modeling {
 
 class DynamicalSystem;
-class Interaction;
 }  // namespace siconos::modeling
 
 namespace siconos::simulation {

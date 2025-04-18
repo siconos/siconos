@@ -39,6 +39,9 @@ PYBIND11_MODULE(simulation, m) {
       .def("numberOfIndexSet", &siconos::simulation::Topology::numberOfIndexSet)
       .def("getDynamicalSystem",
            py::overload_cast<std::string>(&siconos::simulation::Topology::getDynamicalSystem,
+                                          py::const_))
+      .def("getInteraction",
+           py::overload_cast<std::string>(&siconos::simulation::Topology::getInteraction,
                                           py::const_));
 
   py::class_<siconos::simulation::Simulation,

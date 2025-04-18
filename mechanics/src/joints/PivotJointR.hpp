@@ -58,6 +58,9 @@ class PivotJointR : public KneeJointR {
                             const siconos::algebra::BlockVector& q0) override;
 
  public:
+  /** Default constructor */
+  PivotJointR();
+
   /** Constructor based on one or two dynamical systems, a point and an axis.
    *
    *  \param d1 first DynamicalSystem linked by the joint.

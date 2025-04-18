@@ -70,6 +70,13 @@ siconos::joints::KneeJointR::KneeJointR(const Eigen::Ref<siconos::algebra::Sicon
   });
 }
 
+siconos::joints::KneeJointR::KneeJointR()
+{
+  points_.resize(1);
+  P0_ = std::make_shared<siconos::algebra::SiconosVector3>();
+  P0_->setZero();
+}
+
 void siconos::joints::KneeJointR::checkInitPos(
     const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
     const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2) {
