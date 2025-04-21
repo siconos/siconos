@@ -60,6 +60,7 @@ struct neighborhood
                                     &instance]<typename Point>(Point) {
         auto& coords = storage::attr_values<Point, "coord">(data, step);
 
+        // std::vector assumed for coords
         psid[i++] =
             instance->add_point_set(coords.front().data(), coords.size());
       });

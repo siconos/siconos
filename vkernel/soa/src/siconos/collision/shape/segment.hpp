@@ -11,21 +11,6 @@ struct segment_base : item<> {
   template <typename T>
   using vector_t = algebra::vector<T, 6>;
 
-  using without_attributes_bindings = void;
-  using attributes = gather<
-      attribute<
-          "points",
-          // fixed vector of size 1 => same interface for an unbounded vector
-          // in the case of chained segment
-          some::vector<some::vector<some::scalar, some::indice_value<3>>,
-                       some::indice_value<2>>>,
-      attribute<"dp2p1", some::vector<some::vector<some::scalar,
-                                                   some::indice_value<3>>,
-                                      some::indice_value<1>>>,
-      attribute<"maxpoints", some::scalar>,
-      attribute<"length_sq",
-                some::vector<some::scalar, some::indice_value<1>>>>;
-
   template <typename Handle>
   struct interface : default_interface<Handle> {
     using default_interface<Handle>::self;
@@ -78,9 +63,10 @@ struct segment_base : item<> {
 
     decltype(auto) points_coords(indice_t index = 0)
     {
-      const auto p = p1();
+      const auto p = p1(index);
+      const auto dir = dp2p1(index);
       const auto pstep = 1. / maxpoints();
-      const auto dir = dp2p1();
+
       return view::iota(0, maxpoints()) |
              view::transform([=](auto i) { return p + i * pstep * dir; });
     }
@@ -127,5 +113,21 @@ struct segment_base : item<> {
     }
   };
 };
-struct segment : segment_base {};
+
+struct segment : segment_base {
+  using without_attributes_bindings = void;
+  using attributes = gather<
+      attribute<
+          "points",
+          // fixed vector of size 1 => same interface for an unbounded vector
+          // in the case of chained segment
+          some::vector<some::vector<some::scalar, some::indice_value<3>>,
+                       some::indice_value<2>>>,
+      attribute<"dp2p1", some::vector<some::vector<some::scalar,
+                                                   some::indice_value<3>>,
+                                      some::indice_value<1>>>,
+      attribute<"maxpoints", some::scalar>,
+      attribute<"length_sq",
+                some::vector<some::scalar, some::indice_value<1>>>>;
+};
 }  // namespace siconos::collision::shape

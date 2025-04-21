@@ -40,9 +40,6 @@ struct lagrangian_r : item<>,
 
     decltype(auto) b() { return attr<"b">(*self()); }
 
-    decltype(auto) compute_h(auto ds1, auto ds2) { assert(false); return 0.;};
-    decltype(auto) compute_h(auto ds1) { assert(false); return 0.;};
-
     decltype(auto) compute_jachq(auto step, auto& ds1, auto& ds2,
                                  auto& h_matrix1, auto& h_matrix2)
     {
@@ -54,7 +51,6 @@ struct lagrangian_r : item<>,
       h_matrix1 << -h_matrix();
     }
   };
-
 };
 
 }  // namespace siconos::model

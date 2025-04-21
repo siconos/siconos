@@ -11,13 +11,14 @@
 #include "siconos/collision/diskfdisk_r.hpp"
 #include "siconos/collision/diskfsegment_r.hpp"
 #include "siconos/collision/diskmesh_r.hpp"
+#include "siconos/collision/neighborhood.hpp"
 #include "siconos/collision/point.hpp"
 #include "siconos/collision/shape/chained_segment.hpp"
 #include "siconos/collision/shape/disk.hpp"
 #include "siconos/collision/shape/mesh.hpp"
 #include "siconos/collision/shape/segment.hpp"
-#include "siconos/collision/neighborhood.hpp"
 #include "siconos/collision/space_filter.hpp"
+#include "siconos/io/io.hpp"
 #include "siconos/siconos.hpp"
 #include "siconos/storage/ground/ground.hpp"
 #include "siconos/storage/pattern/pattern.hpp"
@@ -30,7 +31,7 @@ namespace siconos::config::disks {
 struct disk : model::lagrangian_ds {};
 struct mesh : model::rt_lagrangian_ds {};
 
-using nslaw = model::newton_impact_friction;
+struct nslaw : model::newton_impact_friction {};
 using diskdisk_r = collision::diskdisk_r;
 using diskfdisk_r = collision::diskfdisk_r;
 using diskfsegment_r = collision::diskfsegment_r;
@@ -40,25 +41,27 @@ using disk_shape = collision::shape::disk;
 using mesh_shape = collision::shape::chained_segment;
 using translated_disk_shape = collision::translated<disk_shape>;
 
-using fc2d = simul::nonsmooth_problem<FrictionContactProblem>;
-using osnspb = simul::one_step_nonsmooth_problem<fc2d>;
-using solver_options = simul::solver_options;
-using ct_interaction =
-    simul::interaction<nslaw, diskdisk_r, diskfdisk_r, diskfsegment_r>;
-using rt_interaction = simul::rt_interaction<nslaw, diskmesh_r>;
-using topo = simul::topology<disk, ct_interaction, mesh, rt_interaction>;
-using osi = simul::one_step_integrator<topo>::moreau_jean;
-using td = simul::time_discretization<>;
+struct fc2d : simul::nonsmooth_problem<FrictionContactProblem> {};
+struct osnspb : simul::one_step_nonsmooth_problem<fc2d> {};
+struct solver_options : simul::solver_options {};
+struct ct_interaction
+    : simul::interaction<nslaw, diskdisk_r, diskfdisk_r, diskfsegment_r> {};
+struct rt_interaction : simul::rt_interaction<nslaw, diskmesh_r> {};
+struct topo : simul::topology<disk, ct_interaction, mesh, rt_interaction> {};
+struct osi : simul::one_step_integrator<topo>::moreau_jean {};
+struct td : simul::time_discretization<> {};
 using pointd = collision::point<disk>;
-using pointl = collision::point<collision::shape::segment>;
+using pointl = collision::point<segment_shape>;
 using pointtds = collision::point<translated_disk_shape>;
-using neighborhood = collision::neighborhood<pointd, pointl, pointtds>;
-using space_filter = collision::space_filter<topo, neighborhood>;
-using interaction_manager = simul::interaction_manager<space_filter>;
-using simulation = simul::time_stepping<td, osi, osnspb, topo>;
+struct neighborhood : collision::neighborhood<pointd, pointl, pointtds> {};
+struct space_filter : collision::space_filter<topo, neighborhood> {};
+struct interaction_manager : simul::interaction_manager<space_filter> {};
+struct simulation : simul::time_stepping<td, osi, osnspb, topo> {};
 
-using io =
-    io::io<osi, collision::shape::segment, translated_disk_shape, mesh_shape>;
+struct io
+    : siconos::io::io<osi, segment_shape, translated_disk_shape, mesh_shape> {
+};
+
 using params = map<iparam<"dof", 3>, iparam<"ncgroups", 1>>;
 }  // namespace siconos::config::disks
 
@@ -145,7 +148,7 @@ static auto imake_storage() { return maker(); }
 
 static auto idata = imake_storage();
 
-using idata_t = std::decay_t<decltype(idata)>;
+struct idata_t : std::decay_t<decltype(idata)> {};
 
 // static_assert(storage::pattern::match::diagonal_matrix<
 //               decltype(storage::get<
