@@ -99,7 +99,7 @@ struct Call<T, Action, TypeNotFound> : public Action {
 
   using Action::visit;
 
-  virtual void visit(const T& x) { std::cout << "Not good vis \n"; }
+  virtual void visit(const T& x) {}
 };
 
 /* search for a base type of T in Pred::Action::Base and creation of a visitor */
@@ -164,23 +164,23 @@ struct GlobalRelationVisitor {
                                               VisitMaker<
                                                   siconos::collision::bullet::BulletR,
                                                   VisitMaker<
-                                                      siconos::joints::CouplerJointR,
+                                                      siconos::joints::NewtonEulerJointR,
                                                       VisitMaker<
-                                                          siconos::joints::CylindricalJointR,
+                                                          siconos::joints::CouplerJointR,
                                                           VisitMaker<
-                                                              siconos::joints::FixedJointR,
+                                                              siconos::joints::
+                                                                  CylindricalJointR,
                                                               VisitMaker<
-                                                                  siconos::joints::
-                                                                      JointFrictionR,
+                                                                  siconos::joints::FixedJointR,
                                                                   VisitMaker<
                                                                       siconos::joints::
-                                                                          JointStopR,
+                                                                          JointFrictionR,
                                                                       VisitMaker<
                                                                           siconos::joints::
-                                                                              KneeJointR,
+                                                                              JointStopR,
                                                                           VisitMaker<
                                                                               siconos::joints::
-                                                                                  NewtonEulerJointR,
+                                                                                  KneeJointR,
                                                                               VisitMaker<
                                                                                   siconos::joints::
                                                                                       PivotJointR,

@@ -81,7 +81,7 @@ class MovedShape:
     data: Optional[object] = None
     relative_translation: Tuple[float, float, float] = (0.0, 0.0, 0.0)
     relative_orientation: Union[
-        Tuple[float, float, float, float], Tuple[List[float], float]
+        Tuple[float, float, float, float], Tuple[Tuple[float, float, float], float]
     ] = (1.0, 0.0, 0.0, 0.0)
     translation: np.ndarray = field(init=False)
     orientation: np.ndarray = field(init=False)

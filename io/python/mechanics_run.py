@@ -564,12 +564,12 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             # assert (given_inertia is not None)
             if given_inertia is None:
                 raise AssertionError("given_inertia is  None")
-            inertia = given_inertia
-            if inertia is not None:
-                if np.shape(inertia) == (3,):
-                    inertia = np.diag(inertia)
-                elif np.shape(inertia) != (3, 3):
+            else:
+                if np.shape(given_inertia) == (3,):
+                    given_inertia = np.diag(given_inertia)
+                elif np.shape(given_inertia) != (3, 3):
                     self.print_verbose("Wrong shape of inertia")
+                inertia = np.asfortranarray(given_inertia, dtype=np.float64)
 
             body = body_class(
                 np.concatenate([translation, orientation], axis=0),
@@ -717,18 +717,16 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             else:
                 if not np.isscalar(mass) or mass <= 0:
                     self.print_verbose("Warning mass must be a positive scalar")
-                if inertia is not None:
-                    assert inertia.flags["F_CONTIGUOUS"]
                 inertia_ok = False
                 initial_pos = np.concatenate([translation, orientation], axis=0)
                 if self._dimension == 3:
                     if inertia is not None:
                         if np.shape(inertia) == (3,):
                             inertia = np.diag(inertia)
-                            inertia = np.asfortranarray(inertia)
-                            inertia_ok = True
-                        if np.shape(inertia) == (3, 3):
-                            inertia_ok = True
+                        elif np.shape(inertia) != (3, 3):
+                            self.print_verbose("Wrong shape of inertia")
+                        inertia = np.asfortranarray(inertia, dtype=np.float64)
+                        inertia_ok = True
 
                 elif self._dimension == 2:
                     if inertia is not None:
@@ -772,11 +770,13 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                                 " the first contactor"
                             )
                     if self._dimension == 3:
-                        inertia = np.zeros((3, 3), order="F")
+                        inertia = np.zeros((3, 3), order="F", dtype=np.float64)
                     elif self._dimension == 2:
-                        inertia = np.zeros((1, 1), order="F")
+                        inertia = np.zeros((1, 1), order="F", dtype=np.float64)
                     np.fill_diagonal(inertia, 1)
-                    body = body_class(initial_pos, velocity, mass, inertia)
+                    self._q0.append(initial_pos.copy())
+                    self._v0.append(velocity)
+                    body = body_class(self._q0[-1], self._v0[-1], mass, inertia)
                     body.setUseContactorInertia(True)
 
                 self.fext.append(self._input[name].get("allow_self_collide", None))
@@ -1081,7 +1081,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             and self.permanent_interactions() is not None
         ):
             topo = self._nsds.topology()
-
             pinter = self.permanent_interactions()[name]
             body1_name = pinter.attrs["body1_name"]
             body2_name = pinter.attrs["body2_name"]
@@ -1206,7 +1205,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         obj = self._input[name]
         self.print_verbose("Import object name:", name)
         self.print_verbose("              number (id): {0} ".format(obj.attrs["id"]))
-
         if translation is None:
             translation = obj.attrs["translation"]
         if orientation is None:
@@ -1224,8 +1222,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         )
 
         mass = obj.attrs.get("mass", None)
-        inertia = obj.attrs.get("inertia", np.identity(3, dtype=np.float64))
-        inertia = np.asfortranarray(inertia)
+        inertia = obj.attrs.get("inertia", None)
 
         if mass is None:
             self.print_verbose("              static object")

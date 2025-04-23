@@ -40,9 +40,8 @@ PYBIND11_MODULE(simulation, m) {
       .def("getDynamicalSystem",
            py::overload_cast<std::string>(&siconos::simulation::Topology::getDynamicalSystem,
                                           py::const_))
-      .def("getInteraction",
-           py::overload_cast<std::string>(&siconos::simulation::Topology::getInteraction,
-                                          py::const_));
+      .def("getInteraction", py::overload_cast<std::string>(
+                                 &siconos::simulation::Topology::getInteraction, py::const_));
 
   py::class_<siconos::simulation::Simulation,
              std::shared_ptr<siconos::simulation::Simulation>>(m, "Simulation")

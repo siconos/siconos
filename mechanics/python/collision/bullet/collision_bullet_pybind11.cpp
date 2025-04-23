@@ -124,7 +124,8 @@ PYBIND11_MODULE(_bullet, m) {
       .def("addStaticBody",
            &siconos::collision::bullet::SiconosBulletCollisionManager::addStaticBody,
            py::arg("cs"), py::arg("position"), py::arg("number") = 0)
-
+      .def("useEqualityConstraints",
+           &siconos::collision::bullet::SiconosBulletCollisionManager::useEqualityConstraints)
       .def("statistics",
            &siconos::collision::bullet::SiconosBulletCollisionManager::statistics);
 }
