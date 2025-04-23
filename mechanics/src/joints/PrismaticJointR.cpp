@@ -49,8 +49,8 @@
  *                      Symbol('_G10G20d1y'), Symbol('_G10G20d1z')])
  * G1 = np.array([0, Symbol('X1'), Symbol('Y1'), Symbol('Z1')])
  * G2 = np.array([0, Symbol('X2'), Symbol('Y2'), Symbol('Z2')])
- * V1 = np.array([0, Symbol('_V1x'), Symbol('_V1y'), Symbol('_V1z')])
- * V2 = np.array([0, Symbol('_V2x'), Symbol('_V2y'), Symbol('_V2z')])
+ * V1 = np.array([0, Symbol('axis1_x'), Symbol('axis1_y'), Symbol('axis1_z')])
+ * V2 = np.array([0, Symbol('axis2_(0)'), Symbol('axis2_(1)'), Symbol('axis2_(2)')])
  *
  * qinv = lambda q: np.array([q[0],-q[1],-q[2],-q[3]])
  * qmul = lambda a,b: np.array([
@@ -67,7 +67,6 @@ siconos::joints::PrismaticJointR::PrismaticJointR(
     const Eigen::Ref<siconos::algebra::SiconosVector3>& axis, bool absoluteRef,
     std::shared_ptr<siconos::modeling::NewtonEulerDS> d1,
     std::shared_ptr<siconos::modeling::NewtonEulerDS> d2) {
-  _axis0 = std::make_shared<siconos::algebra::SiconosVector3>();
   setAbsolute(absoluteRef);
   setAxis(0, axis);
   if (d1) {
@@ -78,17 +77,13 @@ siconos::joints::PrismaticJointR::PrismaticJointR(
   }
 }
 
-siconos::joints::PrismaticJointR::PrismaticJointR() {
-  axes_.resize(1);
-  _axis0 = std::make_shared<siconos::algebra::SiconosVector3>();
-  _axis0->setZero();
-}
+siconos::joints::PrismaticJointR::PrismaticJointR() { axes_.resize(1); }
 
 void siconos::joints::PrismaticJointR::displayInitialPosition() {
   std::cout << "Prismatic axis :\n";
-  siconos::algebra::print(*_axis0);
-  std::cout << "V1 :" << _V1x << " " << _V1y << " " << _V1z << "\n";
-  std::cout << "V2 :" << _V2x << " " << _V2y << " " << _V2z << "\n";
+  siconos::algebra::print(axis0_);
+  siconos::algebra::print(axis1_);
+  siconos::algebra::print(axis2_);
   std::cout << "G10G20d1 :" << _G10G20d1x << " " << _G10G20d1y << " " << _G10G20d1z << "\n";
   std::cout << "cq2c10 :" << _cq2q101 << " " << _cq2q102 << " " << _cq2q103 << " " << _cq2q104
             << "\n";
@@ -97,16 +92,17 @@ void siconos::joints::PrismaticJointR::displayInitialPosition() {
 void siconos::joints::PrismaticJointR::setBasePositions(
     const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
     const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2) {
-  *_axis0 = *axes_[0];
+  axis0_ = *axes_[0];
+  axis0_.normalize();
 
   if (absoluteRef_) {
     // Adjust axis to be in q1 frame
     boost::math::quaternion<double> quat1(q1(3), q1(4), q1(5), q1(6));
-    boost::math::quaternion<double> quatA(0, (*_axis0)(0), (*_axis0)(1), (*_axis0)(2));
+    boost::math::quaternion<double> quatA(0, axis0_(0), axis0_(1), axis0_(2));
     boost::math::quaternion<double> tmp = (1.0 / quat1) * quatA * quat1;
-    (*_axis0)(0) = tmp.R_component_2();
-    (*_axis0)(1) = tmp.R_component_3();
-    (*_axis0)(2) = tmp.R_component_4();
+    axis0_(0) = tmp.R_component_2();
+    axis0_(1) = tmp.R_component_3();
+    axis0_(2) = tmp.R_component_4();
   }
 
   auto q2i = std::make_shared<siconos::algebra::SiconosVector>(7);
@@ -118,8 +114,7 @@ void siconos::joints::PrismaticJointR::setBasePositions(
   boost::math::quaternion<double> quat1(q1(3), q1(4), q1(5), q1(6));
   boost::math::quaternion<double> quat2((*q2i)(3), (*q2i)(4), (*q2i)(5), (*q2i)(6));
 
-  computeV1V2FromAxis();
-
+  siconos::geometry::computeOrthonormalBaseFromAxis(axis0_, axis1_, axis2_);
   boost::math::quaternion<double> quat1_inv(q1(3), -q1(4), -q1(5), -q1(6));
   boost::math::quaternion<double> quatG10G20_abs(0, (*q2i)(0) - q1(0), (*q2i)(1) - q1(1),
                                                  (*q2i)(2) - q1(2));
@@ -136,35 +131,26 @@ void siconos::joints::PrismaticJointR::setBasePositions(
   //  displayInitialPosition();
 }
 
-void siconos::joints::PrismaticJointR::computeV1V2FromAxis() {
-  siconos::algebra::SiconosVector3 _V1, _V2;
-  _V1.setZero();
-  _V2.setZero();
-  // build _V1
-  if ((*_axis0)(0) > (*_axis0)(1))
-    if ((*_axis0)(0) > (*_axis0)(2)) {
-      _V1(1) = -(*_axis0)(0);
-      _V1(0) = (*_axis0)(1);
+void siconos::joints::PrismaticJointR::computeOrthonormalBaseFromAxis() {
+  axis1_.setZero();
+  // build axis1_
+  if (axis0_(0) > axis0_(1))
+    if (axis0_(0) > axis0_(2)) {
+      axis1_(1) = -axis0_(0);
+      axis1_(0) = axis0_(1);
     } else {
-      _V1(1) = -(*_axis0)(2);
-      _V1(2) = (*_axis0)(1);
+      axis1_(1) = -axis0_(2);
+      axis1_(2) = axis0_(1);
     }
-  else if ((*_axis0)(2) > (*_axis0)(1)) {
-    _V1(1) = -(*_axis0)(2);
-    _V1(2) = (*_axis0)(1);
+  else if (axis0_(2) > axis0_(1)) {
+    axis1_(1) = -axis0_(2);
+    axis1_(2) = axis0_(1);
   } else {
-    _V1(1) = -(*_axis0)(0);
-    _V1(0) = (*_axis0)(1);
+    axis1_(1) = -axis0_(0);
+    axis1_(0) = axis0_(1);
   }
-  double aux = 1. / _V1.norm();
-  _V1 *= aux;
-  _V2 = _axis0->head<3>().cross(_V1);
-  _V1x = _V1(0);
-  _V1y = _V1(1);
-  _V1z = _V1(2);
-  _V2x = _V2(0);
-  _V2y = _V2(1);
-  _V2z = _V2(2);
+  axis1_.normalize();
+  axis2_ = axis0_.cross(axis1_);
 }
 
 void siconos::joints::PrismaticJointR::computeH_NE_(double time,
@@ -262,19 +248,19 @@ double siconos::joints::PrismaticJointR::H1(double X1, double Y1, double Z1, dou
                                             double q11, double q12, double q13, double X2,
                                             double Y2, double Z2, double q20, double q21,
                                             double q22, double q23) {
-  return -_G10G20d1x * _V1x - _G10G20d1y * _V1y - _G10G20d1z * _V1z +
-         _V1x * (q10 * (q10 * (-X1 + X2) - q12 * (-Z1 + Z2) + q13 * (-Y1 + Y2)) -
-                 q11 * (-q11 * (-X1 + X2) - q12 * (-Y1 + Y2) - q13 * (-Z1 + Z2)) -
-                 q12 * (q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q12 * (-X1 + X2)) +
-                 q13 * (q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q13 * (-X1 + X2))) +
-         _V1y * (q10 * (q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q13 * (-X1 + X2)) +
-                 q11 * (q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q12 * (-X1 + X2)) -
-                 q12 * (-q11 * (-X1 + X2) - q12 * (-Y1 + Y2) - q13 * (-Z1 + Z2)) -
-                 q13 * (q10 * (-X1 + X2) - q12 * (-Z1 + Z2) + q13 * (-Y1 + Y2))) +
-         _V1z * (q10 * (q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q12 * (-X1 + X2)) -
-                 q11 * (q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q13 * (-X1 + X2)) +
-                 q12 * (q10 * (-X1 + X2) - q12 * (-Z1 + Z2) + q13 * (-Y1 + Y2)) -
-                 q13 * (-q11 * (-X1 + X2) - q12 * (-Y1 + Y2) - q13 * (-Z1 + Z2)));
+  return -_G10G20d1x * axis1_(0) - _G10G20d1y * axis1_(1) - _G10G20d1z * axis1_(2) +
+         axis1_(0) * (q10 * (q10 * (-X1 + X2) - q12 * (-Z1 + Z2) + q13 * (-Y1 + Y2)) -
+                      q11 * (-q11 * (-X1 + X2) - q12 * (-Y1 + Y2) - q13 * (-Z1 + Z2)) -
+                      q12 * (q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q12 * (-X1 + X2)) +
+                      q13 * (q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q13 * (-X1 + X2))) +
+         axis1_(1) * (q10 * (q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q13 * (-X1 + X2)) +
+                      q11 * (q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q12 * (-X1 + X2)) -
+                      q12 * (-q11 * (-X1 + X2) - q12 * (-Y1 + Y2) - q13 * (-Z1 + Z2)) -
+                      q13 * (q10 * (-X1 + X2) - q12 * (-Z1 + Z2) + q13 * (-Y1 + Y2))) +
+         axis1_(2) * (q10 * (q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q12 * (-X1 + X2)) -
+                      q11 * (q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q13 * (-X1 + X2)) +
+                      q12 * (q10 * (-X1 + X2) - q12 * (-Z1 + Z2) + q13 * (-Y1 + Y2)) -
+                      q13 * (-q11 * (-X1 + X2) - q12 * (-Y1 + Y2) - q13 * (-Z1 + Z2)));
 }
 
 /* The options were    : operatorarrow */
@@ -282,19 +268,19 @@ double siconos::joints::PrismaticJointR::H2(double X1, double Y1, double Z1, dou
                                             double q11, double q12, double q13, double X2,
                                             double Y2, double Z2, double q20, double q21,
                                             double q22, double q23) {
-  return -_G10G20d1x * _V2x - _G10G20d1y * _V2y - _G10G20d1z * _V2z +
-         _V2x * (q10 * (q10 * (-X1 + X2) - q12 * (-Z1 + Z2) + q13 * (-Y1 + Y2)) -
-                 q11 * (-q11 * (-X1 + X2) - q12 * (-Y1 + Y2) - q13 * (-Z1 + Z2)) -
-                 q12 * (q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q12 * (-X1 + X2)) +
-                 q13 * (q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q13 * (-X1 + X2))) +
-         _V2y * (q10 * (q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q13 * (-X1 + X2)) +
-                 q11 * (q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q12 * (-X1 + X2)) -
-                 q12 * (-q11 * (-X1 + X2) - q12 * (-Y1 + Y2) - q13 * (-Z1 + Z2)) -
-                 q13 * (q10 * (-X1 + X2) - q12 * (-Z1 + Z2) + q13 * (-Y1 + Y2))) +
-         _V2z * (q10 * (q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q12 * (-X1 + X2)) -
-                 q11 * (q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q13 * (-X1 + X2)) +
-                 q12 * (q10 * (-X1 + X2) - q12 * (-Z1 + Z2) + q13 * (-Y1 + Y2)) -
-                 q13 * (-q11 * (-X1 + X2) - q12 * (-Y1 + Y2) - q13 * (-Z1 + Z2)));
+  return -_G10G20d1x * axis2_(0) - _G10G20d1y * axis2_(1) - _G10G20d1z * axis2_(2) +
+         axis2_(0) * (q10 * (q10 * (-X1 + X2) - q12 * (-Z1 + Z2) + q13 * (-Y1 + Y2)) -
+                      q11 * (-q11 * (-X1 + X2) - q12 * (-Y1 + Y2) - q13 * (-Z1 + Z2)) -
+                      q12 * (q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q12 * (-X1 + X2)) +
+                      q13 * (q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q13 * (-X1 + X2))) +
+         axis2_(1) * (q10 * (q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q13 * (-X1 + X2)) +
+                      q11 * (q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q12 * (-X1 + X2)) -
+                      q12 * (-q11 * (-X1 + X2) - q12 * (-Y1 + Y2) - q13 * (-Z1 + Z2)) -
+                      q13 * (q10 * (-X1 + X2) - q12 * (-Z1 + Z2) + q13 * (-Y1 + Y2))) +
+         axis2_(2) * (q10 * (q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q12 * (-X1 + X2)) -
+                      q11 * (q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q13 * (-X1 + X2)) +
+                      q12 * (q10 * (-X1 + X2) - q12 * (-Z1 + Z2) + q13 * (-Y1 + Y2)) -
+                      q13 * (-q11 * (-X1 + X2) - q12 * (-Y1 + Y2) - q13 * (-Z1 + Z2)));
 }
 
 /* sympy expression:
@@ -356,109 +342,121 @@ void siconos::joints::PrismaticJointR::Jd1d2(double X1, double Y1, double Z1, do
   /* Prismatic constraints (H1, H2)
    */
   H_NE_view_->setValue(0, 0,
-                       _V1x * (-pow(q10, 2) - pow(q11, 2) + pow(q12, 2) + pow(q13, 2)) +
-                           _V1y * (2 * q10 * q13 - 2 * q11 * q12) +
-                           _V1z * (-2 * q10 * q12 - 2 * q11 * q13));
-  H_NE_view_->setValue(0, 1,
-                       _V1x * (-2 * q10 * q13 - 2 * q11 * q12) +
-                           _V1y * (-pow(q10, 2) + pow(q11, 2) - pow(q12, 2) + pow(q13, 2)) +
-                           _V1z * (2 * q10 * q11 - 2 * q12 * q13));
-  H_NE_view_->setValue(0, 2,
-                       _V1x * (2 * q10 * q12 - 2 * q11 * q13) +
-                           _V1y * (-2 * q10 * q11 - 2 * q12 * q13) +
-                           _V1z * (-pow(q10, 2) + pow(q11, 2) + pow(q12, 2) - pow(q13, 2)));
+                       axis1_(0) * (-pow(q10, 2) - pow(q11, 2) + pow(q12, 2) + pow(q13, 2)) +
+                           axis1_(1) * (2 * q10 * q13 - 2 * q11 * q12) +
+                           axis1_(2) * (-2 * q10 * q12 - 2 * q11 * q13));
+  H_NE_view_->setValue(
+      0, 1,
+      axis1_(0) * (-2 * q10 * q13 - 2 * q11 * q12) +
+          axis1_(1) * (-pow(q10, 2) + pow(q11, 2) - pow(q12, 2) + pow(q13, 2)) +
+          axis1_(2) * (2 * q10 * q11 - 2 * q12 * q13));
+  H_NE_view_->setValue(
+      0, 2,
+      axis1_(0) * (2 * q10 * q12 - 2 * q11 * q13) +
+          axis1_(1) * (-2 * q10 * q11 - 2 * q12 * q13) +
+          axis1_(2) * (-pow(q10, 2) + pow(q11, 2) + pow(q12, 2) - pow(q13, 2)));
   H_NE_view_->setValue(
       0, 3,
-      _V1x * (2 * q10 * (-X1 + X2) - 2 * q12 * (-Z1 + Z2) + 2 * q13 * (-Y1 + Y2)) +
-          _V1y * (2 * q10 * (-Y1 + Y2) + 2 * q11 * (-Z1 + Z2) - 2 * q13 * (-X1 + X2)) +
-          _V1z * (2 * q10 * (-Z1 + Z2) - 2 * q11 * (-Y1 + Y2) + 2 * q12 * (-X1 + X2)));
-  H_NE_view_->setValue(0, 4,
-                       _V1x * (q11 * (-X1 + X2) - q11 * (X1 - X2) + q12 * (-Y1 + Y2) -
-                               q12 * (Y1 - Y2) + 2 * q13 * (-Z1 + Z2)) +
-                           _V1y * (2 * q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q11 * (Y1 - Y2) +
-                                   q12 * (-X1 + X2) - q12 * (X1 - X2)) +
-                           _V1z * (-q10 * (-Y1 + Y2) + q10 * (Y1 - Y2) - 2 * q11 * (-Z1 + Z2) +
-                                   q13 * (-X1 + X2) - q13 * (X1 - X2)));
+      axis1_(0) * (2 * q10 * (-X1 + X2) - 2 * q12 * (-Z1 + Z2) + 2 * q13 * (-Y1 + Y2)) +
+          axis1_(1) * (2 * q10 * (-Y1 + Y2) + 2 * q11 * (-Z1 + Z2) - 2 * q13 * (-X1 + X2)) +
+          axis1_(2) * (2 * q10 * (-Z1 + Z2) - 2 * q11 * (-Y1 + Y2) + 2 * q12 * (-X1 + X2)));
+  H_NE_view_->setValue(
+      0, 4,
+      axis1_(0) * (q11 * (-X1 + X2) - q11 * (X1 - X2) + q12 * (-Y1 + Y2) - q12 * (Y1 - Y2) +
+                   2 * q13 * (-Z1 + Z2)) +
+          axis1_(1) * (2 * q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q11 * (Y1 - Y2) +
+                       q12 * (-X1 + X2) - q12 * (X1 - X2)) +
+          axis1_(2) * (-q10 * (-Y1 + Y2) + q10 * (Y1 - Y2) - 2 * q11 * (-Z1 + Z2) +
+                       q13 * (-X1 + X2) - q13 * (X1 - X2)));
   H_NE_view_->setValue(0, 5,
-                       _V1x * (-q10 * (-Z1 + Z2) + q10 * (Z1 - Z2) + q11 * (-Y1 + Y2) -
-                               q11 * (Y1 - Y2) - 2 * q12 * (-X1 + X2)) +
-                           _V1y * (2 * q11 * (-X1 + X2) + q12 * (-Y1 + Y2) - q12 * (Y1 - Y2) +
-                                   q13 * (-Z1 + Z2) - q13 * (Z1 - Z2)) +
-                           _V1z * (2 * q10 * (-X1 + X2) - q12 * (-Z1 + Z2) + q12 * (Z1 - Z2) +
-                                   q13 * (-Y1 + Y2) - q13 * (Y1 - Y2)));
-  H_NE_view_->setValue(0, 6,
-                       _V1x * (2 * q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q11 * (Z1 - Z2) -
-                               q13 * (-X1 + X2) + q13 * (X1 - X2)) +
-                           _V1y * (-q10 * (-X1 + X2) + q10 * (X1 - X2) + q12 * (-Z1 + Z2) -
-                                   q12 * (Z1 - Z2) - 2 * q13 * (-Y1 + Y2)) +
-                           _V1z * (q11 * (-X1 + X2) - q11 * (X1 - X2) + 2 * q12 * (-Y1 + Y2) +
-                                   q13 * (-Z1 + Z2) - q13 * (Z1 - Z2)));
+                       axis1_(0) * (-q10 * (-Z1 + Z2) + q10 * (Z1 - Z2) + q11 * (-Y1 + Y2) -
+                                    q11 * (Y1 - Y2) - 2 * q12 * (-X1 + X2)) +
+                           axis1_(1) * (2 * q11 * (-X1 + X2) + q12 * (-Y1 + Y2) -
+                                        q12 * (Y1 - Y2) + q13 * (-Z1 + Z2) - q13 * (Z1 - Z2)) +
+                           axis1_(2) * (2 * q10 * (-X1 + X2) - q12 * (-Z1 + Z2) +
+                                        q12 * (Z1 - Z2) + q13 * (-Y1 + Y2) - q13 * (Y1 - Y2)));
+  H_NE_view_->setValue(
+      0, 6,
+      axis1_(0) * (2 * q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q11 * (Z1 - Z2) -
+                   q13 * (-X1 + X2) + q13 * (X1 - X2)) +
+          axis1_(1) * (-q10 * (-X1 + X2) + q10 * (X1 - X2) + q12 * (-Z1 + Z2) -
+                       q12 * (Z1 - Z2) - 2 * q13 * (-Y1 + Y2)) +
+          axis1_(2) * (q11 * (-X1 + X2) - q11 * (X1 - X2) + 2 * q12 * (-Y1 + Y2) +
+                       q13 * (-Z1 + Z2) - q13 * (Z1 - Z2)));
   H_NE_view_->setValue(0, 7,
-                       _V1x * (pow(q10, 2) + pow(q11, 2) - pow(q12, 2) - pow(q13, 2)) +
-                           _V1y * (-2 * q10 * q13 + 2 * q11 * q12) +
-                           _V1z * (2 * q10 * q12 + 2 * q11 * q13));
-  H_NE_view_->setValue(0, 8,
-                       _V1x * (2 * q10 * q13 + 2 * q11 * q12) +
-                           _V1y * (pow(q10, 2) - pow(q11, 2) + pow(q12, 2) - pow(q13, 2)) +
-                           _V1z * (-2 * q10 * q11 + 2 * q12 * q13));
-  H_NE_view_->setValue(0, 9,
-                       _V1x * (-2 * q10 * q12 + 2 * q11 * q13) +
-                           _V1y * (2 * q10 * q11 + 2 * q12 * q13) +
-                           _V1z * (pow(q10, 2) - pow(q11, 2) - pow(q12, 2) + pow(q13, 2)));
+                       axis1_(0) * (pow(q10, 2) + pow(q11, 2) - pow(q12, 2) - pow(q13, 2)) +
+                           axis1_(1) * (-2 * q10 * q13 + 2 * q11 * q12) +
+                           axis1_(2) * (2 * q10 * q12 + 2 * q11 * q13));
+  H_NE_view_->setValue(
+      0, 8,
+      axis1_(0) * (2 * q10 * q13 + 2 * q11 * q12) +
+          axis1_(1) * (pow(q10, 2) - pow(q11, 2) + pow(q12, 2) - pow(q13, 2)) +
+          axis1_(2) * (-2 * q10 * q11 + 2 * q12 * q13));
+  H_NE_view_->setValue(
+      0, 9,
+      axis1_(0) * (-2 * q10 * q12 + 2 * q11 * q13) +
+          axis1_(1) * (2 * q10 * q11 + 2 * q12 * q13) +
+          axis1_(2) * (pow(q10, 2) - pow(q11, 2) - pow(q12, 2) + pow(q13, 2)));
   H_NE_view_->setValue(0, 10, 0);
   H_NE_view_->setValue(0, 11, 0);
   H_NE_view_->setValue(0, 12, 0);
   H_NE_view_->setValue(0, 13, 0);
   H_NE_view_->setValue(1, 0,
-                       _V2x * (-pow(q10, 2) - pow(q11, 2) + pow(q12, 2) + pow(q13, 2)) +
-                           _V2y * (2 * q10 * q13 - 2 * q11 * q12) +
-                           _V2z * (-2 * q10 * q12 - 2 * q11 * q13));
-  H_NE_view_->setValue(1, 1,
-                       _V2x * (-2 * q10 * q13 - 2 * q11 * q12) +
-                           _V2y * (-pow(q10, 2) + pow(q11, 2) - pow(q12, 2) + pow(q13, 2)) +
-                           _V2z * (2 * q10 * q11 - 2 * q12 * q13));
-  H_NE_view_->setValue(1, 2,
-                       _V2x * (2 * q10 * q12 - 2 * q11 * q13) +
-                           _V2y * (-2 * q10 * q11 - 2 * q12 * q13) +
-                           _V2z * (-pow(q10, 2) + pow(q11, 2) + pow(q12, 2) - pow(q13, 2)));
+                       axis2_(0) * (-pow(q10, 2) - pow(q11, 2) + pow(q12, 2) + pow(q13, 2)) +
+                           axis2_(1) * (2 * q10 * q13 - 2 * q11 * q12) +
+                           axis2_(2) * (-2 * q10 * q12 - 2 * q11 * q13));
+  H_NE_view_->setValue(
+      1, 1,
+      axis2_(0) * (-2 * q10 * q13 - 2 * q11 * q12) +
+          axis2_(1) * (-pow(q10, 2) + pow(q11, 2) - pow(q12, 2) + pow(q13, 2)) +
+          axis2_(2) * (2 * q10 * q11 - 2 * q12 * q13));
+  H_NE_view_->setValue(
+      1, 2,
+      axis2_(0) * (2 * q10 * q12 - 2 * q11 * q13) +
+          axis2_(1) * (-2 * q10 * q11 - 2 * q12 * q13) +
+          axis2_(2) * (-pow(q10, 2) + pow(q11, 2) + pow(q12, 2) - pow(q13, 2)));
   H_NE_view_->setValue(
       1, 3,
-      _V2x * (2 * q10 * (-X1 + X2) - 2 * q12 * (-Z1 + Z2) + 2 * q13 * (-Y1 + Y2)) +
-          _V2y * (2 * q10 * (-Y1 + Y2) + 2 * q11 * (-Z1 + Z2) - 2 * q13 * (-X1 + X2)) +
-          _V2z * (2 * q10 * (-Z1 + Z2) - 2 * q11 * (-Y1 + Y2) + 2 * q12 * (-X1 + X2)));
-  H_NE_view_->setValue(1, 4,
-                       _V2x * (q11 * (-X1 + X2) - q11 * (X1 - X2) + q12 * (-Y1 + Y2) -
-                               q12 * (Y1 - Y2) + 2 * q13 * (-Z1 + Z2)) +
-                           _V2y * (2 * q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q11 * (Y1 - Y2) +
-                                   q12 * (-X1 + X2) - q12 * (X1 - X2)) +
-                           _V2z * (-q10 * (-Y1 + Y2) + q10 * (Y1 - Y2) - 2 * q11 * (-Z1 + Z2) +
-                                   q13 * (-X1 + X2) - q13 * (X1 - X2)));
+      axis2_(0) * (2 * q10 * (-X1 + X2) - 2 * q12 * (-Z1 + Z2) + 2 * q13 * (-Y1 + Y2)) +
+          axis2_(1) * (2 * q10 * (-Y1 + Y2) + 2 * q11 * (-Z1 + Z2) - 2 * q13 * (-X1 + X2)) +
+          axis2_(2) * (2 * q10 * (-Z1 + Z2) - 2 * q11 * (-Y1 + Y2) + 2 * q12 * (-X1 + X2)));
+  H_NE_view_->setValue(
+      1, 4,
+      axis2_(0) * (q11 * (-X1 + X2) - q11 * (X1 - X2) + q12 * (-Y1 + Y2) - q12 * (Y1 - Y2) +
+                   2 * q13 * (-Z1 + Z2)) +
+          axis2_(1) * (2 * q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q11 * (Y1 - Y2) +
+                       q12 * (-X1 + X2) - q12 * (X1 - X2)) +
+          axis2_(2) * (-q10 * (-Y1 + Y2) + q10 * (Y1 - Y2) - 2 * q11 * (-Z1 + Z2) +
+                       q13 * (-X1 + X2) - q13 * (X1 - X2)));
   H_NE_view_->setValue(1, 5,
-                       _V2x * (-q10 * (-Z1 + Z2) + q10 * (Z1 - Z2) + q11 * (-Y1 + Y2) -
-                               q11 * (Y1 - Y2) - 2 * q12 * (-X1 + X2)) +
-                           _V2y * (2 * q11 * (-X1 + X2) + q12 * (-Y1 + Y2) - q12 * (Y1 - Y2) +
-                                   q13 * (-Z1 + Z2) - q13 * (Z1 - Z2)) +
-                           _V2z * (2 * q10 * (-X1 + X2) - q12 * (-Z1 + Z2) + q12 * (Z1 - Z2) +
-                                   q13 * (-Y1 + Y2) - q13 * (Y1 - Y2)));
-  H_NE_view_->setValue(1, 6,
-                       _V2x * (2 * q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q11 * (Z1 - Z2) -
-                               q13 * (-X1 + X2) + q13 * (X1 - X2)) +
-                           _V2y * (-q10 * (-X1 + X2) + q10 * (X1 - X2) + q12 * (-Z1 + Z2) -
-                                   q12 * (Z1 - Z2) - 2 * q13 * (-Y1 + Y2)) +
-                           _V2z * (q11 * (-X1 + X2) - q11 * (X1 - X2) + 2 * q12 * (-Y1 + Y2) +
-                                   q13 * (-Z1 + Z2) - q13 * (Z1 - Z2)));
+                       axis2_(0) * (-q10 * (-Z1 + Z2) + q10 * (Z1 - Z2) + q11 * (-Y1 + Y2) -
+                                    q11 * (Y1 - Y2) - 2 * q12 * (-X1 + X2)) +
+                           axis2_(1) * (2 * q11 * (-X1 + X2) + q12 * (-Y1 + Y2) -
+                                        q12 * (Y1 - Y2) + q13 * (-Z1 + Z2) - q13 * (Z1 - Z2)) +
+                           axis2_(2) * (2 * q10 * (-X1 + X2) - q12 * (-Z1 + Z2) +
+                                        q12 * (Z1 - Z2) + q13 * (-Y1 + Y2) - q13 * (Y1 - Y2)));
+  H_NE_view_->setValue(
+      1, 6,
+      axis2_(0) * (2 * q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q11 * (Z1 - Z2) -
+                   q13 * (-X1 + X2) + q13 * (X1 - X2)) +
+          axis2_(1) * (-q10 * (-X1 + X2) + q10 * (X1 - X2) + q12 * (-Z1 + Z2) -
+                       q12 * (Z1 - Z2) - 2 * q13 * (-Y1 + Y2)) +
+          axis2_(2) * (q11 * (-X1 + X2) - q11 * (X1 - X2) + 2 * q12 * (-Y1 + Y2) +
+                       q13 * (-Z1 + Z2) - q13 * (Z1 - Z2)));
   H_NE_view_->setValue(1, 7,
-                       _V2x * (pow(q10, 2) + pow(q11, 2) - pow(q12, 2) - pow(q13, 2)) +
-                           _V2y * (-2 * q10 * q13 + 2 * q11 * q12) +
-                           _V2z * (2 * q10 * q12 + 2 * q11 * q13));
-  H_NE_view_->setValue(1, 8,
-                       _V2x * (2 * q10 * q13 + 2 * q11 * q12) +
-                           _V2y * (pow(q10, 2) - pow(q11, 2) + pow(q12, 2) - pow(q13, 2)) +
-                           _V2z * (-2 * q10 * q11 + 2 * q12 * q13));
-  H_NE_view_->setValue(1, 9,
-                       _V2x * (-2 * q10 * q12 + 2 * q11 * q13) +
-                           _V2y * (2 * q10 * q11 + 2 * q12 * q13) +
-                           _V2z * (pow(q10, 2) - pow(q11, 2) - pow(q12, 2) + pow(q13, 2)));
+                       axis2_(0) * (pow(q10, 2) + pow(q11, 2) - pow(q12, 2) - pow(q13, 2)) +
+                           axis2_(1) * (-2 * q10 * q13 + 2 * q11 * q12) +
+                           axis2_(2) * (2 * q10 * q12 + 2 * q11 * q13));
+  H_NE_view_->setValue(
+      1, 8,
+      axis2_(0) * (2 * q10 * q13 + 2 * q11 * q12) +
+          axis2_(1) * (pow(q10, 2) - pow(q11, 2) + pow(q12, 2) - pow(q13, 2)) +
+          axis2_(2) * (-2 * q10 * q11 + 2 * q12 * q13));
+  H_NE_view_->setValue(
+      1, 9,
+      axis2_(0) * (-2 * q10 * q12 + 2 * q11 * q13) +
+          axis2_(1) * (2 * q10 * q11 + 2 * q12 * q13) +
+          axis2_(2) * (pow(q10, 2) - pow(q11, 2) - pow(q12, 2) + pow(q13, 2)));
   H_NE_view_->setValue(1, 10, 0);
   H_NE_view_->setValue(1, 11, 0);
   H_NE_view_->setValue(1, 12, 0);
@@ -548,61 +546,65 @@ void siconos::joints::PrismaticJointR::Jd1(double X1, double Y1, double Z1, doub
   /* Prismatic constraints (H1, H2)
    */
   H_NE_view_->setValue(0, 0,
-                       _V1x * (-pow(q10, 2) - pow(q11, 2) + pow(q12, 2) + pow(q13, 2)) +
-                           _V1y * (2 * q10 * q13 - 2 * q11 * q12) +
-                           _V1z * (-2 * q10 * q12 - 2 * q11 * q13));
-  H_NE_view_->setValue(0, 1,
-                       _V1x * (-2 * q10 * q13 - 2 * q11 * q12) +
-                           _V1y * (-pow(q10, 2) + pow(q11, 2) - pow(q12, 2) + pow(q13, 2)) +
-                           _V1z * (2 * q10 * q11 - 2 * q12 * q13));
-  H_NE_view_->setValue(0, 2,
-                       _V1x * (2 * q10 * q12 - 2 * q11 * q13) +
-                           _V1y * (-2 * q10 * q11 - 2 * q12 * q13) +
-                           _V1z * (-pow(q10, 2) + pow(q11, 2) + pow(q12, 2) - pow(q13, 2)));
+                       axis1_(0) * (-pow(q10, 2) - pow(q11, 2) + pow(q12, 2) + pow(q13, 2)) +
+                           axis1_(1) * (2 * q10 * q13 - 2 * q11 * q12) +
+                           axis1_(2) * (-2 * q10 * q12 - 2 * q11 * q13));
+  H_NE_view_->setValue(
+      0, 1,
+      axis1_(0) * (-2 * q10 * q13 - 2 * q11 * q12) +
+          axis1_(1) * (-pow(q10, 2) + pow(q11, 2) - pow(q12, 2) + pow(q13, 2)) +
+          axis1_(2) * (2 * q10 * q11 - 2 * q12 * q13));
+  H_NE_view_->setValue(
+      0, 2,
+      axis1_(0) * (2 * q10 * q12 - 2 * q11 * q13) +
+          axis1_(1) * (-2 * q10 * q11 - 2 * q12 * q13) +
+          axis1_(2) * (-pow(q10, 2) + pow(q11, 2) + pow(q12, 2) - pow(q13, 2)));
   H_NE_view_->setValue(0, 3,
-                       _V1x * (-2 * X1 * q10 - 2 * Y1 * q13 + 2 * Z1 * q12) +
-                           _V1y * (2 * X1 * q13 - 2 * Y1 * q10 - 2 * Z1 * q11) +
-                           _V1z * (-2 * X1 * q12 + 2 * Y1 * q11 - 2 * Z1 * q10));
+                       axis1_(0) * (-2 * X1 * q10 - 2 * Y1 * q13 + 2 * Z1 * q12) +
+                           axis1_(1) * (2 * X1 * q13 - 2 * Y1 * q10 - 2 * Z1 * q11) +
+                           axis1_(2) * (-2 * X1 * q12 + 2 * Y1 * q11 - 2 * Z1 * q10));
   H_NE_view_->setValue(0, 4,
-                       _V1x * (-2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13) +
-                           _V1y * (-2 * X1 * q12 + 2 * Y1 * q11 - 2 * Z1 * q10) +
-                           _V1z * (-2 * X1 * q13 + 2 * Y1 * q10 + 2 * Z1 * q11));
+                       axis1_(0) * (-2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13) +
+                           axis1_(1) * (-2 * X1 * q12 + 2 * Y1 * q11 - 2 * Z1 * q10) +
+                           axis1_(2) * (-2 * X1 * q13 + 2 * Y1 * q10 + 2 * Z1 * q11));
   H_NE_view_->setValue(0, 5,
-                       _V1x * (2 * X1 * q12 - 2 * Y1 * q11 + 2 * Z1 * q10) +
-                           _V1y * (-2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13) +
-                           _V1z * (-2 * X1 * q10 - 2 * Y1 * q13 + 2 * Z1 * q12));
+                       axis1_(0) * (2 * X1 * q12 - 2 * Y1 * q11 + 2 * Z1 * q10) +
+                           axis1_(1) * (-2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13) +
+                           axis1_(2) * (-2 * X1 * q10 - 2 * Y1 * q13 + 2 * Z1 * q12));
   H_NE_view_->setValue(0, 6,
-                       _V1x * (2 * X1 * q13 - 2 * Y1 * q10 - 2 * Z1 * q11) +
-                           _V1y * (2 * X1 * q10 + 2 * Y1 * q13 - 2 * Z1 * q12) +
-                           _V1z * (-2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13));
+                       axis1_(0) * (2 * X1 * q13 - 2 * Y1 * q10 - 2 * Z1 * q11) +
+                           axis1_(1) * (2 * X1 * q10 + 2 * Y1 * q13 - 2 * Z1 * q12) +
+                           axis1_(2) * (-2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13));
   H_NE_view_->setValue(1, 0,
-                       _V2x * (-pow(q10, 2) - pow(q11, 2) + pow(q12, 2) + pow(q13, 2)) +
-                           _V2y * (2 * q10 * q13 - 2 * q11 * q12) +
-                           _V2z * (-2 * q10 * q12 - 2 * q11 * q13));
-  H_NE_view_->setValue(1, 1,
-                       _V2x * (-2 * q10 * q13 - 2 * q11 * q12) +
-                           _V2y * (-pow(q10, 2) + pow(q11, 2) - pow(q12, 2) + pow(q13, 2)) +
-                           _V2z * (2 * q10 * q11 - 2 * q12 * q13));
-  H_NE_view_->setValue(1, 2,
-                       _V2x * (2 * q10 * q12 - 2 * q11 * q13) +
-                           _V2y * (-2 * q10 * q11 - 2 * q12 * q13) +
-                           _V2z * (-pow(q10, 2) + pow(q11, 2) + pow(q12, 2) - pow(q13, 2)));
+                       axis2_(0) * (-pow(q10, 2) - pow(q11, 2) + pow(q12, 2) + pow(q13, 2)) +
+                           axis2_(1) * (2 * q10 * q13 - 2 * q11 * q12) +
+                           axis2_(2) * (-2 * q10 * q12 - 2 * q11 * q13));
+  H_NE_view_->setValue(
+      1, 1,
+      axis2_(0) * (-2 * q10 * q13 - 2 * q11 * q12) +
+          axis2_(1) * (-pow(q10, 2) + pow(q11, 2) - pow(q12, 2) + pow(q13, 2)) +
+          axis2_(2) * (2 * q10 * q11 - 2 * q12 * q13));
+  H_NE_view_->setValue(
+      1, 2,
+      axis2_(0) * (2 * q10 * q12 - 2 * q11 * q13) +
+          axis2_(1) * (-2 * q10 * q11 - 2 * q12 * q13) +
+          axis2_(2) * (-pow(q10, 2) + pow(q11, 2) + pow(q12, 2) - pow(q13, 2)));
   H_NE_view_->setValue(1, 3,
-                       _V2x * (-2 * X1 * q10 - 2 * Y1 * q13 + 2 * Z1 * q12) +
-                           _V2y * (2 * X1 * q13 - 2 * Y1 * q10 - 2 * Z1 * q11) +
-                           _V2z * (-2 * X1 * q12 + 2 * Y1 * q11 - 2 * Z1 * q10));
+                       axis2_(0) * (-2 * X1 * q10 - 2 * Y1 * q13 + 2 * Z1 * q12) +
+                           axis2_(1) * (2 * X1 * q13 - 2 * Y1 * q10 - 2 * Z1 * q11) +
+                           axis2_(2) * (-2 * X1 * q12 + 2 * Y1 * q11 - 2 * Z1 * q10));
   H_NE_view_->setValue(1, 4,
-                       _V2x * (-2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13) +
-                           _V2y * (-2 * X1 * q12 + 2 * Y1 * q11 - 2 * Z1 * q10) +
-                           _V2z * (-2 * X1 * q13 + 2 * Y1 * q10 + 2 * Z1 * q11));
+                       axis2_(0) * (-2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13) +
+                           axis2_(1) * (-2 * X1 * q12 + 2 * Y1 * q11 - 2 * Z1 * q10) +
+                           axis2_(2) * (-2 * X1 * q13 + 2 * Y1 * q10 + 2 * Z1 * q11));
   H_NE_view_->setValue(1, 5,
-                       _V2x * (2 * X1 * q12 - 2 * Y1 * q11 + 2 * Z1 * q10) +
-                           _V2y * (-2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13) +
-                           _V2z * (-2 * X1 * q10 - 2 * Y1 * q13 + 2 * Z1 * q12));
+                       axis2_(0) * (2 * X1 * q12 - 2 * Y1 * q11 + 2 * Z1 * q10) +
+                           axis2_(1) * (-2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13) +
+                           axis2_(2) * (-2 * X1 * q10 - 2 * Y1 * q13 + 2 * Z1 * q12));
   H_NE_view_->setValue(1, 6,
-                       _V2x * (2 * X1 * q13 - 2 * Y1 * q10 - 2 * Z1 * q11) +
-                           _V2y * (2 * X1 * q10 + 2 * Y1 * q13 - 2 * Z1 * q12) +
-                           _V2z * (-2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13));
+                       axis2_(0) * (2 * X1 * q13 - 2 * Y1 * q10 - 2 * Z1 * q11) +
+                           axis2_(1) * (2 * X1 * q10 + 2 * Y1 * q13 - 2 * Z1 * q12) +
+                           axis2_(2) * (-2 * X1 * q11 - 2 * Y1 * q12 - 2 * Z1 * q13));
 
   /* Orientation constraints (H3, H4, H5)
    */
@@ -668,19 +670,19 @@ void siconos::joints::PrismaticJointR::computehDoF(
     Z2 = (*q2)(2);
   }
 
-  y(0) = -_G10G20d1x * (*_axis0)(0) - _G10G20d1y * (*_axis0)(1) - _G10G20d1z * (*_axis0)(2) +
-         (*_axis0)(0) * (q10 * (q10 * (-X1 + X2) - q12 * (-Z1 + Z2) + q13 * (-Y1 + Y2)) -
-                         q11 * (-q11 * (-X1 + X2) - q12 * (-Y1 + Y2) - q13 * (-Z1 + Z2)) -
-                         q12 * (q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q12 * (-X1 + X2)) +
-                         q13 * (q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q13 * (-X1 + X2))) +
-         (*_axis0)(1) * (q10 * (q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q13 * (-X1 + X2)) +
-                         q11 * (q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q12 * (-X1 + X2)) -
-                         q12 * (-q11 * (-X1 + X2) - q12 * (-Y1 + Y2) - q13 * (-Z1 + Z2)) -
-                         q13 * (q10 * (-X1 + X2) - q12 * (-Z1 + Z2) + q13 * (-Y1 + Y2))) +
-         (*_axis0)(2) * (q10 * (q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q12 * (-X1 + X2)) -
-                         q11 * (q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q13 * (-X1 + X2)) +
-                         q12 * (q10 * (-X1 + X2) - q12 * (-Z1 + Z2) + q13 * (-Y1 + Y2)) -
-                         q13 * (-q11 * (-X1 + X2) - q12 * (-Y1 + Y2) - q13 * (-Z1 + Z2)));
+  y(0) = -_G10G20d1x * axis0_(0) - _G10G20d1y * axis0_(1) - _G10G20d1z * axis0_(2) +
+         axis0_(0) * (q10 * (q10 * (-X1 + X2) - q12 * (-Z1 + Z2) + q13 * (-Y1 + Y2)) -
+                      q11 * (-q11 * (-X1 + X2) - q12 * (-Y1 + Y2) - q13 * (-Z1 + Z2)) -
+                      q12 * (q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q12 * (-X1 + X2)) +
+                      q13 * (q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q13 * (-X1 + X2))) +
+         axis0_(1) * (q10 * (q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q13 * (-X1 + X2)) +
+                      q11 * (q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q12 * (-X1 + X2)) -
+                      q12 * (-q11 * (-X1 + X2) - q12 * (-Y1 + Y2) - q13 * (-Z1 + Z2)) -
+                      q13 * (q10 * (-X1 + X2) - q12 * (-Z1 + Z2) + q13 * (-Y1 + Y2))) +
+         axis0_(2) * (q10 * (q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q12 * (-X1 + X2)) -
+                      q11 * (q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q13 * (-X1 + X2)) +
+                      q12 * (q10 * (-X1 + X2) - q12 * (-Z1 + Z2) + q13 * (-Y1 + Y2)) -
+                      q13 * (-q11 * (-X1 + X2) - q12 * (-Y1 + Y2) - q13 * (-Z1 + Z2)));
 }
 
 /** Compute the jacobian of linear and angular DoF with respect to some q */
@@ -712,59 +714,57 @@ void siconos::joints::PrismaticJointR::computeJachqDoF(
   }
 
   jachq.setValue(0, 0,
-                 (*_axis0)(0) * (-pow(q10, 2) - pow(q11, 2) + pow(q12, 2) + pow(q13, 2)) +
-                     (*_axis0)(1) * (2 * q10 * q13 - 2 * q11 * q12) +
-                     (*_axis0)(2) * (-2 * q10 * q12 - 2 * q11 * q13));
+                 axis0_(0) * (-pow(q10, 2) - pow(q11, 2) + pow(q12, 2) + pow(q13, 2)) +
+                     axis0_(1) * (2 * q10 * q13 - 2 * q11 * q12) +
+                     axis0_(2) * (-2 * q10 * q12 - 2 * q11 * q13));
   jachq.setValue(0, 1,
-                 (*_axis0)(0) * (-2 * q10 * q13 - 2 * q11 * q12) +
-                     (*_axis0)(1) * (-pow(q10, 2) + pow(q11, 2) - pow(q12, 2) + pow(q13, 2)) +
-                     (*_axis0)(2) * (2 * q10 * q11 - 2 * q12 * q13));
+                 axis0_(0) * (-2 * q10 * q13 - 2 * q11 * q12) +
+                     axis0_(1) * (-pow(q10, 2) + pow(q11, 2) - pow(q12, 2) + pow(q13, 2)) +
+                     axis0_(2) * (2 * q10 * q11 - 2 * q12 * q13));
   jachq.setValue(0, 2,
-                 (*_axis0)(0) * (2 * q10 * q12 - 2 * q11 * q13) +
-                     (*_axis0)(1) * (-2 * q10 * q11 - 2 * q12 * q13) +
-                     (*_axis0)(2) * (-pow(q10, 2) + pow(q11, 2) + pow(q12, 2) - pow(q13, 2)));
+                 axis0_(0) * (2 * q10 * q12 - 2 * q11 * q13) +
+                     axis0_(1) * (-2 * q10 * q11 - 2 * q12 * q13) +
+                     axis0_(2) * (-pow(q10, 2) + pow(q11, 2) + pow(q12, 2) - pow(q13, 2)));
   jachq.setValue(
       0, 3,
-      (*_axis0)(0) * (2 * q10 * (-X1 + X2) - 2 * q12 * (-Z1 + Z2) + 2 * q13 * (-Y1 + Y2)) +
-          (*_axis0)(1) * (2 * q10 * (-Y1 + Y2) + 2 * q11 * (-Z1 + Z2) - 2 * q13 * (-X1 + X2)) +
-          (*_axis0)(2) * (2 * q10 * (-Z1 + Z2) - 2 * q11 * (-Y1 + Y2) + 2 * q12 * (-X1 + X2)));
-  jachq.setValue(
-      0, 4,
-      (*_axis0)(0) * (q11 * (-X1 + X2) - q11 * (X1 - X2) + q12 * (-Y1 + Y2) - q12 * (Y1 - Y2) +
-                      2 * q13 * (-Z1 + Z2)) +
-          (*_axis0)(1) * (2 * q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q11 * (Y1 - Y2) +
-                          q12 * (-X1 + X2) - q12 * (X1 - X2)) +
-          (*_axis0)(2) * (-q10 * (-Y1 + Y2) + q10 * (Y1 - Y2) - 2 * q11 * (-Z1 + Z2) +
-                          q13 * (-X1 + X2) - q13 * (X1 - X2)));
+      axis0_(0) * (2 * q10 * (-X1 + X2) - 2 * q12 * (-Z1 + Z2) + 2 * q13 * (-Y1 + Y2)) +
+          axis0_(1) * (2 * q10 * (-Y1 + Y2) + 2 * q11 * (-Z1 + Z2) - 2 * q13 * (-X1 + X2)) +
+          axis0_(2) * (2 * q10 * (-Z1 + Z2) - 2 * q11 * (-Y1 + Y2) + 2 * q12 * (-X1 + X2)));
+  jachq.setValue(0, 4,
+                 axis0_(0) * (q11 * (-X1 + X2) - q11 * (X1 - X2) + q12 * (-Y1 + Y2) -
+                              q12 * (Y1 - Y2) + 2 * q13 * (-Z1 + Z2)) +
+                     axis0_(1) * (2 * q10 * (-Z1 + Z2) - q11 * (-Y1 + Y2) + q11 * (Y1 - Y2) +
+                                  q12 * (-X1 + X2) - q12 * (X1 - X2)) +
+                     axis0_(2) * (-q10 * (-Y1 + Y2) + q10 * (Y1 - Y2) - 2 * q11 * (-Z1 + Z2) +
+                                  q13 * (-X1 + X2) - q13 * (X1 - X2)));
   jachq.setValue(0, 5,
-                 (*_axis0)(0) * (-q10 * (-Z1 + Z2) + q10 * (Z1 - Z2) + q11 * (-Y1 + Y2) -
-                                 q11 * (Y1 - Y2) - 2 * q12 * (-X1 + X2)) +
-                     (*_axis0)(1) * (2 * q11 * (-X1 + X2) + q12 * (-Y1 + Y2) -
-                                     q12 * (Y1 - Y2) + q13 * (-Z1 + Z2) - q13 * (Z1 - Z2)) +
-                     (*_axis0)(2) * (2 * q10 * (-X1 + X2) - q12 * (-Z1 + Z2) +
-                                     q12 * (Z1 - Z2) + q13 * (-Y1 + Y2) - q13 * (Y1 - Y2)));
-  jachq.setValue(
-      0, 6,
-      (*_axis0)(0) * (2 * q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q11 * (Z1 - Z2) -
-                      q13 * (-X1 + X2) + q13 * (X1 - X2)) +
-          (*_axis0)(1) * (-q10 * (-X1 + X2) + q10 * (X1 - X2) + q12 * (-Z1 + Z2) -
-                          q12 * (Z1 - Z2) - 2 * q13 * (-Y1 + Y2)) +
-          (*_axis0)(2) * (q11 * (-X1 + X2) - q11 * (X1 - X2) + 2 * q12 * (-Y1 + Y2) +
-                          q13 * (-Z1 + Z2) - q13 * (Z1 - Z2)));
+                 axis0_(0) * (-q10 * (-Z1 + Z2) + q10 * (Z1 - Z2) + q11 * (-Y1 + Y2) -
+                              q11 * (Y1 - Y2) - 2 * q12 * (-X1 + X2)) +
+                     axis0_(1) * (2 * q11 * (-X1 + X2) + q12 * (-Y1 + Y2) - q12 * (Y1 - Y2) +
+                                  q13 * (-Z1 + Z2) - q13 * (Z1 - Z2)) +
+                     axis0_(2) * (2 * q10 * (-X1 + X2) - q12 * (-Z1 + Z2) + q12 * (Z1 - Z2) +
+                                  q13 * (-Y1 + Y2) - q13 * (Y1 - Y2)));
+  jachq.setValue(0, 6,
+                 axis0_(0) * (2 * q10 * (-Y1 + Y2) + q11 * (-Z1 + Z2) - q11 * (Z1 - Z2) -
+                              q13 * (-X1 + X2) + q13 * (X1 - X2)) +
+                     axis0_(1) * (-q10 * (-X1 + X2) + q10 * (X1 - X2) + q12 * (-Z1 + Z2) -
+                                  q12 * (Z1 - Z2) - 2 * q13 * (-Y1 + Y2)) +
+                     axis0_(2) * (q11 * (-X1 + X2) - q11 * (X1 - X2) + 2 * q12 * (-Y1 + Y2) +
+                                  q13 * (-Z1 + Z2) - q13 * (Z1 - Z2)));
 
   if (q0.numberOfBlocks() > 1) {
     jachq.setValue(0, 7,
-                   (*_axis0)(0) * (pow(q10, 2) + pow(q11, 2) - pow(q12, 2) - pow(q13, 2)) +
-                       (*_axis0)(1) * (-2 * q10 * q13 + 2 * q11 * q12) +
-                       (*_axis0)(2) * (2 * q10 * q12 + 2 * q11 * q13));
+                   axis0_(0) * (pow(q10, 2) + pow(q11, 2) - pow(q12, 2) - pow(q13, 2)) +
+                       axis0_(1) * (-2 * q10 * q13 + 2 * q11 * q12) +
+                       axis0_(2) * (2 * q10 * q12 + 2 * q11 * q13));
     jachq.setValue(0, 8,
-                   (*_axis0)(0) * (2 * q10 * q13 + 2 * q11 * q12) +
-                       (*_axis0)(1) * (pow(q10, 2) - pow(q11, 2) + pow(q12, 2) - pow(q13, 2)) +
-                       (*_axis0)(2) * (-2 * q10 * q11 + 2 * q12 * q13));
+                   axis0_(0) * (2 * q10 * q13 + 2 * q11 * q12) +
+                       axis0_(1) * (pow(q10, 2) - pow(q11, 2) + pow(q12, 2) - pow(q13, 2)) +
+                       axis0_(2) * (-2 * q10 * q11 + 2 * q12 * q13));
     jachq.setValue(0, 9,
-                   (*_axis0)(0) * (-2 * q10 * q12 + 2 * q11 * q13) +
-                       (*_axis0)(1) * (2 * q10 * q11 + 2 * q12 * q13) +
-                       (*_axis0)(2) * (pow(q10, 2) - pow(q11, 2) - pow(q12, 2) + pow(q13, 2)));
+                   axis0_(0) * (-2 * q10 * q12 + 2 * q11 * q13) +
+                       axis0_(1) * (2 * q10 * q11 + 2 * q12 * q13) +
+                       axis0_(2) * (pow(q10, 2) - pow(q11, 2) - pow(q12, 2) + pow(q13, 2)));
     jachq.setValue(0, 10, 0);
     jachq.setValue(0, 11, 0);
     jachq.setValue(0, 12, 0);
@@ -778,7 +778,7 @@ siconos::algebra::SiconosVector3 siconos::joints::PrismaticJointR::normalDoF(
   if (axis != 0) return siconos::algebra::SiconosVector3{};
 
   // We assume that a is normalized.
-  auto result = *_axis0;
+  auto result = axis0_;
 
   if (absoluteRef)
     siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(*q0.vector(0), result);

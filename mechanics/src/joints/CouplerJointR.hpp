@@ -48,11 +48,6 @@ class CouplerJointR : public NewtonEulerJointR {
   unsigned int _ref1_index{0}, _ref2_index{0};
   double _ratio{0.}, _offset{0.};
 
-  // /** Return the normal of the linear DoF axis.  \param axis must be 0 */
-  // virtual void _normalDoF(siconos::algebra::SiconosVector& ans,
-  //                         const siconos::algebra::BlockVector& q0, int axis,
-  //                         bool absoluteRef = true) override;
-
   /** An internal helper function to assign reference vectors during
    * computeh and computeJachq. */
   void makeBlockVectors(

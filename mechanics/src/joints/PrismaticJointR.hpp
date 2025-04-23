@@ -41,28 +41,28 @@ class PrismaticJointR : public NewtonEulerJointR {
 
   /** Axis of the prismatic point in the q1 frame of reference
    */
-  std::shared_ptr<siconos::algebra::SiconosVector3> _axis0{nullptr};
+  siconos::algebra::SiconosVector3 axis0_;
 
-  /** _V1 is an unit vector that is orthogonal to the prismatic axis _axis0.
-   * It forms with _V2 and _axis0 a base such that (_axis0,_V1,_v2) is an orthogonal
+  /** axis1_ is an unit vector that is orthogonal to the prismatic axis axis0_.
+   * It forms with axis2_ and axis0_ a base such that (axis0_,axis1_,_v2) is an orthogonal
    * frame
    */
-  std::shared_ptr<siconos::algebra::SiconosVector3> _V1{nullptr};
+  siconos::algebra::SiconosVector3 axis1_;
 
-  /** _V2 is an unit vector that is orthogonal to the prismatic axis _axis0.
-   * It forms with _V2 and _axis0 a base such that (_axis0,_V1,_v2) is an orthogonal
+  /** axis2_ is an unit vector that is orthogonal to the prismatic axis axis0_.
+   * It forms with axis2_ and axis0_ a base such that (axis0_,axis1_,_v2) is an orthogonal
    * frame
    */
-  std::shared_ptr<siconos::algebra::SiconosVector3> _V2{nullptr};
+  siconos::algebra::SiconosVector3 axis2_;
 
-  /** Convenient storage of the components of _V1 and _V2
+  /** Convenient storage of the components of axis1_ and axis2_
    */
-  double _V1x{0.};
-  double _V1y{0.};
-  double _V1z{0.};
-  double _V2x{0.};
-  double _V2y{0.};
-  double _V2z{0.};
+  double axis1_x{0.};
+  double axis1_y{0.};
+  double axis1_z{0.};
+  double axis2_x{0.};
+  double axis2_y{0.};
+  double axis2_z{0.};
 
   double _G10G20d1x{0.};
   double _G10G20d1y{0.};
@@ -81,6 +81,8 @@ class PrismaticJointR : public NewtonEulerJointR {
    */
   virtual void computeH_NE_(double time, siconos::modeling::Interaction& inter,
                             const siconos::algebra::BlockVector& q0) override;
+
+  void computeOrthonormalBaseFromAxis();
 
  public:
   /** Constructor based on one or two dynamical systems and an axis.
@@ -131,8 +133,6 @@ class PrismaticJointR : public NewtonEulerJointR {
                                                      bool absoluteRef = true) override;
 
   void displayInitialPosition();
-
-  void computeV1V2FromAxis();
 
   /**
        to compute the output y = h(q) of the Relation

@@ -388,3 +388,20 @@ boost::math::quaternion<double> siconos::geometry::posquat(
     const siconos::algebra::SiconosVector &v) {
   return boost::math::quaternion<double>{0, v(0), v(1), v(2)};
 }
+
+void siconos::geometry::computeOrthonormalBaseFromAxis(
+    siconos::algebra::SiconosVector3 &axis0, siconos::algebra::SiconosVector3 &axis1,
+    siconos::algebra::SiconosVector3 &axis2) {
+  if (axis0.norm() < 1e-10)
+    throw std::invalid_argument(
+        "input vector has a norm equal to zero, can't compute a base.");
+
+  axis0.normalize();
+
+  siconos::algebra::SiconosVector3 arbitrary(1.0, 0.0, 0.0);
+  if (std::abs(axis0.dot(arbitrary)) > 0.99)
+    arbitrary = siconos::algebra::SiconosVector3(0.0, 1.0, 0.0);
+
+  axis1 = axis0.cross(arbitrary).normalized();
+  axis2 = axis0.cross(axis1);
+}

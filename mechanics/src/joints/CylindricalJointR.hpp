@@ -43,19 +43,19 @@ class CylindricalJointR : public NewtonEulerJointR {
 
   /** Axis of the cylindrical point in the q1 frame of reference
    */
-  std::shared_ptr<siconos::algebra::SiconosVector3> _axis0{nullptr};
+  siconos::algebra::SiconosVector3 axis0_;
 
-  /** _V1 is an unit vector that is orthogonal to the cylindrical axis
-   * _axis0.  It forms with _V2 and _axis0 a base such that
-   * (_axis0,_V1,_v2) is an orthogonal frame
+  /** axis1_ is an unit vector that is orthogonal to the cylindrical axis
+   * axis0_.  It forms with axis2_ and axis0_ a base such that
+   * (axis0_,axis1_,_v2) is an orthogonal frame
    */
-  std::shared_ptr<siconos::algebra::SiconosVector3> _V1{nullptr};
+  siconos::algebra::SiconosVector3 axis1_;
 
-  /** _V2 is an unit vector that is orthogonal to the cylindrical axis
-   * _axis0.  It forms with _V2 and _axis0 a base such that
-   * (_axis0,_V1,_v2) is an orthogonal frame
+  /** axis2_ is an unit vector that is orthogonal to the cylindrical axis
+   * axis0_.  It forms with axis2_ and axis0_ a base such that
+   * (axis0_,axis1_,_v2) is an orthogonal frame
    */
-  std::shared_ptr<siconos::algebra::SiconosVector3> _V2{nullptr};
+  siconos::algebra::SiconosVector3 axis2_;
 
   double _cq2q101{0.};
   double _cq2q102{0.};
@@ -63,7 +63,7 @@ class CylindricalJointR : public NewtonEulerJointR {
   double _cq2q104{0.};
 
   /** P is the point defining the location of the line created by
-   * _axis0.  It is stored in the q1 frame, i.e. the vector from
+   * axis0_.  It is stored in the q1 frame, i.e. the vector from
    * initial G1 to P, called _G1P0. */
   std::shared_ptr<siconos::algebra::SiconosVector3> _G1P0{nullptr};
 
@@ -84,6 +84,8 @@ class CylindricalJointR : public NewtonEulerJointR {
    */
   virtual void computeH_NE_(double time, siconos::modeling::Interaction& inter,
                             const siconos::algebra::BlockVector& q0) override;
+
+  void computeOrthonormalBaseFromAxis();
 
  public:
   /** Default constructor */
@@ -133,8 +135,6 @@ class CylindricalJointR : public NewtonEulerJointR {
   virtual siconos::algebra::SiconosVector3 normalDoF(const siconos::algebra::BlockVector& q0,
                                                      int axis,
                                                      bool absoluteRef = true) override;
-
-  void computeV1V2FromAxis();
 
   int twistCount() { return _twistCount; }
 

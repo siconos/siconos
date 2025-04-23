@@ -190,5 +190,15 @@ boost::math::quaternion<double> rotquat(const siconos::algebra::SiconosVector &v
 
 boost::math::quaternion<double> posquat(const siconos::algebra::SiconosVector &v);
 
+/** Compute an orthonormal basis from a given input axis
+
+    \param[in,out] axis0 reference axis (will be normalized)
+    \param[inout] axis1 second axis of the base
+    \param[inout] axis2 third axis of the base
+
+*/
+void computeOrthonormalBaseFromAxis(siconos::algebra::SiconosVector3 &axis0,
+                                    siconos::algebra::SiconosVector3 &axis1,
+                                    siconos::algebra::SiconosVector3 &axis2);
 }  // namespace siconos::geometry
 #endif  // ROTATIONQUATERNION_H
