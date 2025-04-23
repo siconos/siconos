@@ -28,47 +28,6 @@
 
 namespace py = pybind11;
 
-namespace siconos::python_cast {
-
-using RelationPtr = std::shared_ptr<siconos::modeling::Relation>;
-
-std::shared_ptr<siconos::joints::NewtonEulerJointR> cast_NewtonEulerJointR(RelationPtr rel) {
-  return std::dynamic_pointer_cast<siconos::joints::NewtonEulerJointR>(rel);
-}
-
-std::shared_ptr<siconos::joints::KneeJointR> cast_KneeJointR(RelationPtr rel) {
-  return std::dynamic_pointer_cast<siconos::joints::KneeJointR>(rel);
-}
-
-std::shared_ptr<siconos::joints::PivotJointR> cast_PivotJointR(RelationPtr rel) {
-  return std::dynamic_pointer_cast<siconos::joints::PivotJointR>(rel);
-}
-
-std::shared_ptr<siconos::joints::PrismaticJointR> cast_PrismaticJointR(RelationPtr rel) {
-  return std::dynamic_pointer_cast<siconos::joints::PrismaticJointR>(rel);
-}
-
-std::shared_ptr<siconos::joints::FixedJointR> cast_FixedJointR(RelationPtr rel) {
-  return std::dynamic_pointer_cast<siconos::joints::FixedJointR>(rel);
-}
-
-std::shared_ptr<siconos::joints::CylindricalJointR> cast_CylindricalJointR(RelationPtr rel) {
-  return std::dynamic_pointer_cast<siconos::joints::CylindricalJointR>(rel);
-}
-
-std::shared_ptr<siconos::joints::CouplerJointR> cast_CouplerJointR(RelationPtr rel) {
-  return std::dynamic_pointer_cast<siconos::joints::CouplerJointR>(rel);
-}
-
-std::shared_ptr<siconos::joints::JointStopR> cast_JointStopR(RelationPtr rel) {
-  return std::dynamic_pointer_cast<siconos::joints::JointStopR>(rel);
-}
-
-std::shared_ptr<siconos::joints::JointFrictionR> cast_JointFrictionR(RelationPtr rel) {
-  return std::dynamic_pointer_cast<siconos::joints::JointFrictionR>(rel);
-}
-}  // namespace siconos::python_cast
-
 PYBIND11_MODULE(_joints, m) {
   py::module_ modeling_module = py::module_::import("siconos.modeling");
 
@@ -145,14 +104,4 @@ PYBIND11_MODULE(_joints, m) {
            "To define the base position of the joint")
       .def("numberOfConstraints", &siconos::joints::CouplerJointR::numberOfConstraints,
            "To get the number of constraints in the joint");
-
-  m.def("cast_NewtonEulerJointR", &siconos::python_cast::cast_NewtonEulerJointR);
-  m.def("cast_KneeJointR", &siconos::python_cast::cast_KneeJointR);
-  m.def("cast_PivotJointR", &siconos::python_cast::cast_PivotJointR);
-  m.def("cast_PrismaticJointR", &siconos::python_cast::cast_PrismaticJointR);
-  m.def("cast_FixedJointR", &siconos::python_cast::cast_FixedJointR);
-  m.def("cast_CylindricalJointR", &siconos::python_cast::cast_CylindricalJointR);
-  m.def("cast_CouplerJointR", &siconos::python_cast::cast_CouplerJointR);
-  m.def("cast_JointStopR", &siconos::python_cast::cast_JointStopR);
-  m.def("cast_JointFrictionR", &siconos::python_cast::cast_JointFrictionR);
 }
