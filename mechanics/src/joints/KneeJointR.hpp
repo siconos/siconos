@@ -167,6 +167,7 @@ void computeH_dot_for2DS(const Eigen::Ref<const siconos::algebra::SiconosVector>
                          const siconos::algebra::SiconosVector3& coords2,
                          Eigen::Ref<siconos::algebra::MapType> result);
 
+
 }  // namespace knee
 
 }  // namespace siconos::joints

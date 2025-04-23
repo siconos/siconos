@@ -46,7 +46,7 @@
 #include "DynamicalSystem.hpp"
 #include "FremondImpactFrictionNSL.hpp"
 #include "Interaction.hpp"
-#include "KneeJointR.hpp"
+#include "SiconosJoints.hpp"
 #include "Lagrangian2d2DR.hpp"
 #include "Lagrangian2d3DR.hpp"
 #include "LagrangianDS.hpp"

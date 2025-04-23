@@ -228,6 +228,10 @@ class CouplerJointR : public NewtonEulerJointR {
                                const siconos::algebra::BlockVector& q0,
                                Eigen::Ref<siconos::algebra::SiconosMatrix> jachq,
                                unsigned int axis = 0) override;
+
+  virtual void accept(modeling::relations::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 };
 }  // namespace siconos::joints
 #endif  // CouplerJointRELATION_H

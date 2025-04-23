@@ -103,6 +103,10 @@ class FixedJointR : public NewtonEulerJointR {
 
   virtual void Jd1(double X1, double Y1, double Z1, double q10, double q11, double q12,
                    double q13);
+
+  virtual void accept(modeling::relations::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 };
 }  // namespace siconos::joints
 #endif  // FixedJointRELATION_H

@@ -27,9 +27,9 @@
 #include <boost/mpl/if.hpp>
 #include <boost/mpl/vector.hpp>
 #include <boost/type_traits.hpp>
+#include <iostream>
 
 #include "SiconosConfig.h"
-
 namespace siconos::modeling {
 class DynamicalSystem;
 class LagrangianDS;
@@ -64,8 +64,14 @@ class Circle;
 }  // namespace siconos::collision
 
 namespace siconos::joints {
-class PivotJointR;
+class CouplerJointR;
+class CylindricalJointR;
+class FixedJointR;
+class JointFrictionR;
+class JointStopR;
 class KneeJointR;
+class NewtonEulerJointR;
+class PivotJointR;
 class PrismaticJointR;
 }  // namespace siconos::joints
 
@@ -158,12 +164,33 @@ struct GlobalRelationVisitor {
                                               VisitMaker<
                                                   siconos::collision::bullet::BulletR,
                                                   VisitMaker<
-                                                      siconos::joints::PivotJointR,
+                                                      siconos::joints::CouplerJointR,
                                                       VisitMaker<
-                                                          siconos::joints::KneeJointR,
+                                                          siconos::joints::CylindricalJointR,
                                                           VisitMaker<
-                                                              siconos::joints::PrismaticJointR,
-                                                              T>>>>>>>>>>>>>>>::Action;
+                                                              siconos::joints::FixedJointR,
+                                                              VisitMaker<
+                                                                  siconos::joints::
+                                                                      JointFrictionR,
+                                                                  VisitMaker<
+                                                                      siconos::joints::
+                                                                          JointStopR,
+                                                                      VisitMaker<
+                                                                          siconos::joints::
+                                                                              KneeJointR,
+                                                                          VisitMaker<
+                                                                              siconos::joints::
+                                                                                  NewtonEulerJointR,
+                                                                              VisitMaker<
+                                                                                  siconos::joints::
+                                                                                      PivotJointR,
+                                                                                  VisitMaker<
+                                                                                      siconos::
+                                                                                          joints::
+                                                                                              PrismaticJointR,
+
+                                                                                      T>>>>>>>>>>>>>>>>>>>>>::
+      Action;
 };
 
 #else

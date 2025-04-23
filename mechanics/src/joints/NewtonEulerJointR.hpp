@@ -184,6 +184,9 @@ class NewtonEulerJointR : public siconos::modeling::NewtonEulerR {
                                const siconos::algebra::BlockVector& q0,
                                Eigen::Ref<siconos::algebra::SiconosMatrix> jachq,
                                unsigned int axis = 0) {}
+  virtual void accept(modeling::relations::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 };
 }  // namespace siconos::joints
 #endif  // NewtonEulerJointRELATION_H

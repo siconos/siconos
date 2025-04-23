@@ -59,6 +59,18 @@ class BulletR;
 
 }  // namespace siconos::collision
 
+namespace siconos::joints {
+class CouplerJointR;
+class CylindricalJointR;
+class FixedJointR;
+class JointFrictionR;
+class JointStopR;
+class KneeJointR;
+class NewtonEulerJointR;
+class PivotJointR;
+class PrismaticJointR;
+}  // namespace siconos::joints
+
 #ifdef SICONOS_HAS_OpenCASCADE
 namespace siconos::mechanics::occ {
 class OccBody;
@@ -331,6 +343,141 @@ struct Visitor {
         "in a derived class of relations::Visitor");
   }
 #endif
+  virtual void visit(std::shared_ptr<siconos::joints::CouplerJointR>) {
+    THROW_EXCEPTION(
+        "you must define a visit function for shared ptr to "
+        "CouplerJointR in a derived class of relations::Visitor");
+  }
+  virtual void visit(siconos::joints::CouplerJointR &) {
+    THROW_EXCEPTION(
+        "you must define a visit function for CouplerJointR "
+        "in a derived class of relations::Visitor");
+  }
+  virtual void visit(const siconos::joints::CouplerJointR &) {
+    THROW_EXCEPTION(
+        "you must define a visit function for CouplerJointR "
+        "in a derived class of relations::Visitor");
+  }
+  virtual void visit(std::shared_ptr<siconos::joints::CylindricalJointR>) {
+    THROW_EXCEPTION(
+        "you must define a visit function for shared ptr to "
+        "CylindricalJointR in a derived class of relations::Visitor");
+  }
+  virtual void visit(siconos::joints::CylindricalJointR &) {
+    THROW_EXCEPTION(
+        "you must define a visit function for CylindricalJointR "
+        "in a derived class of relations::Visitor");
+  }
+  virtual void visit(const siconos::joints::CylindricalJointR &) {
+    THROW_EXCEPTION(
+        "you must define a visit function for CylindricalJointR "
+        "in a derived class of relations::Visitor");
+  }
+  virtual void visit(std::shared_ptr<siconos::joints::FixedJointR>) {
+    THROW_EXCEPTION(
+        "you must define a visit function for shared ptr to "
+        "FixedJointR in a derived class of relations::Visitor");
+  }
+  virtual void visit(siconos::joints::FixedJointR &) {
+    THROW_EXCEPTION(
+        "you must define a visit function for FixedJointR "
+        "in a derived class of relations::Visitor");
+  }
+  virtual void visit(const siconos::joints::FixedJointR &) {
+    THROW_EXCEPTION(
+        "you must define a visit function for FixedJointR "
+        "in a derived class of relations::Visitor");
+  }
+  virtual void visit(std::shared_ptr<siconos::joints::JointFrictionR>) {
+    THROW_EXCEPTION(
+        "you must define a visit function for shared ptr to "
+        "JointFrictionR in a derived class of relations::Visitor");
+  }
+  virtual void visit(siconos::joints::JointFrictionR &) {
+    THROW_EXCEPTION(
+        "you must define a visit function for JointFrictionR "
+        "in a derived class of relations::Visitor");
+  }
+  virtual void visit(const siconos::joints::JointFrictionR &) {
+    THROW_EXCEPTION(
+        "you must define a visit function for JointFrictionR "
+        "in a derived class of relations::Visitor");
+  }
+  virtual void visit(std::shared_ptr<siconos::joints::JointStopR>) {
+    THROW_EXCEPTION(
+        "you must define a visit function for shared ptr to "
+        "JointStopR in a derived class of relations::Visitor");
+  }
+  virtual void visit(siconos::joints::JointStopR &) {
+    THROW_EXCEPTION(
+        "you must define a visit function for JointStopR "
+        "in a derived class of relations::Visitor");
+  }
+  virtual void visit(const siconos::joints::JointStopR &) {
+    THROW_EXCEPTION(
+        "you must define a visit function for JointStopR "
+        "in a derived class of relations::Visitor");
+  }
+  virtual void visit(std::shared_ptr<siconos::joints::KneeJointR>) {
+    THROW_EXCEPTION(
+        "you must define a visit function for shared ptr to "
+        "KneeJointR in a derived class of relations::Visitor");
+  }
+  virtual void visit(siconos::joints::KneeJointR &) {
+    THROW_EXCEPTION(
+        "you must define a visit function for KneeJointR "
+        "in a derived class of relations::Visitor");
+  }
+  virtual void visit(const siconos::joints::KneeJointR &) {
+    THROW_EXCEPTION(
+        "you must define a visit function for KneeJointR "
+        "in a derived class of relations::Visitor");
+  }
+  virtual void visit(std::shared_ptr<siconos::joints::NewtonEulerJointR>) {
+    THROW_EXCEPTION(
+        "you must define a visit function for shared ptr to "
+        "NewtonEulerJointR in a derived class of relations::Visitor");
+  }
+  virtual void visit(siconos::joints::NewtonEulerJointR &) {
+    THROW_EXCEPTION(
+        "you must define a visit function for NewtonEulerJointR "
+        "in a derived class of relations::Visitor");
+  }
+  virtual void visit(const siconos::joints::NewtonEulerJointR &) {
+    THROW_EXCEPTION(
+        "you must define a visit function for NewtonEulerJointR "
+        "in a derived class of relations::Visitor");
+  }
+  virtual void visit(std::shared_ptr<siconos::joints::PivotJointR>) {
+    THROW_EXCEPTION(
+        "you must define a visit function for shared ptr to "
+        "PivotJointR in a derived class of relations::Visitor");
+  }
+  virtual void visit(siconos::joints::PivotJointR &) {
+    THROW_EXCEPTION(
+        "you must define a visit function for PivotJointR "
+        "in a derived class of relations::Visitor");
+  }
+  virtual void visit(const siconos::joints::PivotJointR &) {
+    THROW_EXCEPTION(
+        "you must define a visit function for PivotJointR "
+        "in a derived class of relations::Visitor");
+  }
+  virtual void visit(std::shared_ptr<siconos::joints::PrismaticJointR>) {
+    THROW_EXCEPTION(
+        "you must define a visit function for shared ptr to "
+        "PrismaticJointR in a derived class of relations::Visitor");
+  }
+  virtual void visit(siconos::joints::PrismaticJointR &) {
+    THROW_EXCEPTION(
+        "you must define a visit function for PrismaticJointR "
+        "in a derived class of relations::Visitor");
+  }
+  virtual void visit(const siconos::joints::PrismaticJointR &) {
+    THROW_EXCEPTION(
+        "you must define a visit function for PrismaticJointR "
+        "in a derived class of relations::Visitor");
+  }
 
 #endif
 };

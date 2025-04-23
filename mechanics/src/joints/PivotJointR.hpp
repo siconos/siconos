@@ -177,6 +177,7 @@ void rot2to1(const Eigen::Ref<const siconos::algebra::SiconosVector>& qp1,
              const siconos::algebra::SiconosVector& cq2q,
              Eigen::Ref<siconos::algebra::SiconosVector> result);
 
+             
 }  // namespace pivot
 
 }  // namespace siconos::joints
