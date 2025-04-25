@@ -957,7 +957,7 @@ static void compute_contact_work_and_status(SP::Interaction inter, double omega,
   double mu = ask<ForMu>(*inter->nonSmoothLaw());
   double e = ask<ForE>(*inter->nonSmoothLaw());
 
- 
+
   // Compute normal contact work
   double vn_minus =  inter->y_k(1).getValue(0);
   double vn_plus = inter->y(1)->getValue(0);
@@ -1040,7 +1040,7 @@ static void compute_contact_work_and_status(SP::Interaction inter, double omega,
       answer.setValue(5, normal_contact_work);
     }
   // double id = inter->number();
-  // std::cout << "\nid "<< id << std::endl;
+  // std::cout << "\nid "<< id << " 3D" << std::endl;
   // std::cout << " e "<< e  << " mu "<< mu << std::endl;
   // std::cout << " tol "<< tol << " omega " << omega << std::endl;
   // std::cout << "vn_plus "<< vn_plus << std::endl;
@@ -1061,6 +1061,109 @@ static void compute_contact_work_and_status(SP::Interaction inter, double omega,
   // std::cout << "status   "<<   answer.getValue(4) << std::endl;
 }
 
+static void compute_contact_work_and_status_2d(SP::Interaction inter, double omega, double tol, SiconosVector& answer) {
+  double mu = ask<ForMu>(*inter->nonSmoothLaw());
+  double e = ask<ForE>(*inter->nonSmoothLaw());
+
+
+  // Compute normal contact work
+  double vn_minus =  inter->y_k(1).getValue(0);
+  double vn_plus = inter->y(1)->getValue(0);
+  double pn  = inter->lambda(1)->getValue(0);
+
+  double vn_average = omega*vn_plus + (1. - omega)*vn_minus;
+  double normal_contact_work = vn_average*pn;
+  answer.setValue(1,normal_contact_work);
+
+  // Compute tangent contact work of impulse
+
+  double vt_1_minus =  inter->y_k(1).getValue(1);
+  double vt_1_plus = inter->y(1)->getValue(1);
+
+
+  double vt_1_average = omega*vt_1_plus + (1. - omega)*vt_1_minus;
+
+  double pt_1  = inter->lambda(1)->getValue(1);
+
+  double tangent_contact_work = vt_1_average * pt_1;
+  answer.setValue(2,tangent_contact_work);
+
+  // Compute directly work dissipated by friction impulse
+  double norm_vt_average =  sqrt(vt_1_average*vt_1_average);
+  double friction_dissipation = mu * norm_vt_average  * pn;
+  answer.setValue(3,friction_dissipation);
+
+
+
+  /* Compute contact status
+   * Warning the status are consistent for the sticking and sliding
+   * only with fully implicit discretization o NewtonImpact law
+   * and not wih Fremond impact law
+   */
+
+  double norm_pt = sqrt(pt_1*pt_1);
+  double norm_vt_plus =  sqrt(vt_1_plus*vt_1_plus);
+  // double norm_vt_minus = sqrt(vt_1_minus*vt_1_minus);
+  if ( (pn < tol ) and (vn_plus + e * vn_minus > tol) )
+    answer.setValue(4,0);// take-off = 0
+  else if ( (pn > tol ) and (vn_plus + e * vn_minus  < tol) )
+    {
+      if (     (norm_pt  - mu * pn >  tol))
+	{
+	  //std::cout << "WARNING: the impulse is outside the Coulomb cone  " << std::endl;
+	  answer.setValue(4,-3);// outside the cone = -3
+	}
+      else if ( (norm_pt  - mu*pn < - tol))
+	{
+	  //std::cout << "the impulse is in the *interior* of  the Coulomb cone  " << std::endl;
+	  //std::cout << "norm_vt_plus  " << norm_vt_plus << std::endl;
+	  if (norm_vt_plus > tol)
+	    {
+	      //std::cout << "WARNING: but the norm of vt is not zero  " << std::endl;
+	      answer.setValue(4,-2);// sticking with a non zero slifing velocity = -2
+	    }
+	  answer.setValue(4,1);// sticking = 1
+	}
+      else
+	{
+	  //std::cout << "the impulse is on the *boundary* of the Coulomb cone  " << std::endl;
+	  //std::cout << "norm_vt_plus  " << norm_vt_plus << std::endl;
+	  answer.setValue(4,2); // sliding = 2
+	}
+    }
+  else
+    answer.setValue(4,-1);// undetermined = -1
+
+  if ( (pn > tol ) and (vn_minus  > tol) )
+    {
+      // std::cout << "WARNING: we apply the impact law of positive velocity " << std::endl;
+      // std::cout << "pn " << pn << " vn minus " << vn_minus << " vn plus " << vn_plus
+      // 		<< " normal_contact_work " << normal_contact_work
+      // 		<< " -e * vn_minus   " << -e*vn_minus
+      // 		<< std::endl;
+      answer.setValue(5, normal_contact_work);
+    }
+  // double id = inter->number();
+  // std::cout << "\nid "<< id << " 2D" << std::endl;
+  // std::cout << " e "<< e  << " mu "<< mu << std::endl;
+  // std::cout << " tol "<< tol << " omega " << omega << std::endl;
+  // std::cout << "vn_plus "<< vn_plus << std::endl;
+  // std::cout << "vn_minus "<< vn_minus << std::endl;
+  // std::cout << "pn "<< pn << std::endl;
+  // std::cout << "normal_contact_work  "<< normal_contact_work  << std::endl;
+
+  // std::cout << "vt_plus "<< vt_1_plus <<  std::endl;
+  // std::cout << "vt_minus "<< vt_1_minus <<  std::endl;
+  // std::cout << "pt "<< pt_1 << " "  <<  std::endl;
+  // std::cout << "tangent_contact_work  "<< tangent_contact_work  << std::endl;
+
+  // std::cout << "friction_dissipation  "<< friction_dissipation << std::endl;
+
+  // std::cout << "norm_pt  "<< norm_pt  << std::endl;
+  // std::cout << "norm_pt - mu* pn  "<< norm_pt -mu *pn   << std::endl;
+  // std::cout << "vn_plus + e * vn_minus  " << vn_plus + e * vn_minus   << std::endl;
+  // std::cout << "status   "<<   answer.getValue(4) << std::endl;
+}
 
 template<>
 void ContactContactWorkVisitor::operator()(const ContactR& rel)
@@ -1091,7 +1194,7 @@ void ContactContactWorkVisitor::operator()(const Contact2dR& rel)
   answer.setValue(0,id);
 
 
-  compute_contact_work_and_status(inter, omega, tol, answer);
+  compute_contact_work_and_status_2d(inter, omega, tol, answer);
 
 }
 
@@ -1103,7 +1206,7 @@ void ContactContactWorkVisitor::operator()(const Contact2d3DR& rel)
   answer.setValue(0,id);
 
 
-  compute_contact_work_and_status(inter, omega, tol, answer);
+  compute_contact_work_and_status_2d(inter, omega, tol, answer);
 
 }
 
