@@ -174,6 +174,14 @@ void lcp_pgs_graph_permut_equitable(LinearComplementarityProblem *problem, doubl
 void lcp_pgs_graph_permut_equitable_opti(LinearComplementarityProblem *problem, double *z, double *w, int *info,
                                        SolverOptions *options);
 
+void lcp_jacobi(LinearComplementarityProblem *problem, double *z, double *w, int *info, SolverOptions *options);
+
+void lcp_jacobi_parallel(LinearComplementarityProblem *problem, double *z, double *w, int *info,
+                         SolverOptions *options);
+
+void lcp_pgs_opti(LinearComplementarityProblem *problem, double *z, double *w, int *info,
+                  SolverOptions *options);
+
 /** lcp_psor Projected Succesive over relaxation solver for LCP. See cottle, Pang Stone Chap 5
  *
  *  \param[in] problem structure that represents the LCP (M, q...)

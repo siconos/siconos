@@ -1152,10 +1152,14 @@ void NM_block_prod(int start_i, int start_j, int size_i, int size_j, NumericsMat
    \param[in] x the vector to be multiplied
    \param[in,out] y the resulting vector
    \param[in] init = 0 for y += Ax, =1 for y = Ax
+
+   THIS ONE I DONT USE ANYMORE 
 */
 void NM_block_prod_no_diag(int start_i, int size_i, NumericsMatrix* A, double *x, double *y, double* xsave, int init);
 
 void NM_block_prod_no_diag_one_row(int local_line, int start_i, int size_i, NumericsMatrix* A, double *x, double *left, double *right, double* xsave, int init);
+
+void NM_row_prod_no_diag_leftright(size_t sizeX, int block_start, size_t row, NumericsMatrix* A, double* x, double *left, double* right, bool init);
 
 /**
    Get the inverse of each diagonal element of a matrix.

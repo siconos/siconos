@@ -61,6 +61,7 @@ const char* const SICONOS_LCP_PGS_GRAPH_STR = "Parallel Graph PGS";
 const char* const SICONOS_LCP_PGS_GRAPH_PERMUT_STR = "Parallel Graph PGS with permutation";
 const char* const SICONOS_LCP_PGS_GRAPH_PERMUT_EQUITABLE_STR = "Parallel Graph PGS with permutation and equitable coloring";
 const char* const SICONOS_LCP_PGS_GRAPH_PERMUT_EQUITABLE_OPTI_STR = "Parallel Graph PGS with permutation and equitable coloring, optimized";
+const char* const SICONOS_LCP_PGS_OPTI_STR = "PGS optimized";
 
 static int lcp_driver_SparseBlockMatrix(LinearComplementarityProblem* problem, double* z,
                                         double* w, SolverOptions* options);
@@ -253,6 +254,12 @@ int lcp_driver_DenseMatrix(LinearComplementarityProblem* problem, double* z, dou
        OUT: iter, error */
     case SICONOS_LCP_PGS_GRAPH_PERMUT_EQUITABLE_OPTI:
       lcp_pgs_graph_permut_equitable_opti(problem, z, w, &info, options);
+      break;
+    /****** Parallel Graph PGS with permutation and equitable coloring, optimized Solver ******/
+    /* IN: itermax, tolerance
+       OUT: iter, error */
+    case SICONOS_LCP_PGS_OPTI:
+      lcp_pgs_opti(problem, z, w, &info, options);
       break;
     /****** CPG Solver ******/
     /* IN: itermax, tolerance
