@@ -50,11 +50,7 @@ void lcp_jacobi(LinearComplementarityProblem *problem, double *z, double *w, int
   int iter = 0;
   double err = 1.;
 
-  double omega = 1. / 2.;
-
   double *new_z = (double *)malloc((size_t)n * sizeof(double));
-
-  printf("Starting lcp_jacobi...\n");
 
   /* Start solving */
   while ((iter < itermax) && (err > tol)) {
@@ -72,8 +68,7 @@ void lcp_jacobi(LinearComplementarityProblem *problem, double *z, double *w, int
         new_z[i] = 0.0;
     }
 
-    // Update z: z = omega * new_z + (1 - omega) * z
-    cblas_daxpby(n, omega, new_z, 1, 1 - omega, z, 1);
+    cblas_dcopy(n, new_z, 1, z, 1);
 
     lcp_compute_error(problem, z, w, tol, &err);
 
