@@ -114,10 +114,10 @@ std::shared_ptr<siconos::mechanics::fem::Mesh> siconos::mechanics::fem::createBe
     }
   else
     THROW_EXCEPTION("Invalid beam dimension, should be 2 or 3 !");
-
+  std::vector<int> tags = {1,2,3};
   for (int i = 0; i < nbBeams; i++) {
     std::vector<std::shared_ptr<MVertex>> verticesInBeamElement = {vertices[i], vertices[i + 1]};                                                          ;
-    auto e = std::make_shared<MElement>(i+1, FiniteElementType::B2, verticesInBeamElement);
+    auto e = std::make_shared<MElement>(i+1, FiniteElementType::B2, verticesInBeamElement, tags); // Tag by default
     elements.push_back(e);
   }
 

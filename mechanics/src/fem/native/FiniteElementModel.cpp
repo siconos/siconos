@@ -972,6 +972,59 @@ void siconos::mechanics::fem::FiniteElementModel::computeElementary_B_Matrix(FEl
   }
 }
 
+void siconos::mechanics::fem::FiniteElementModel::computeBeamElementaryBMatrix_direct(FElement& fe, siconos::algebra::SimpleMatrix& B, double thickness)
+{
+  int ndof = fe.ndof();
+  int order = fe.order();
+
+  std::vector<std::shared_ptr<FENode>> & nodes= fe.nodes();
+  int nnodes= nodes.size();
+  int dim = _mesh->dim();
+  // Direct computation without Gauss Integration
+  double x1 = nodes[0]->x();
+  double x2 = nodes[1]->x();
+  double x3 = nodes[2]->x();
+
+  double y1 = nodes[0]->y();
+  double y2 = nodes[1]->y();
+  double y3 = nodes[2]->y();
+
+  double x21 = x2-x1;
+  double x31 = x3-x1;
+  double x32 = x3-x2;
+
+  double y21 = y2-y1;
+  double y31 = y3-y1;
+  double y32 = y3-y2;
+
+  double twoA =
+      x2*y3-x3*y2 +
+      x3*y1-x1*y3 +
+      x1*y2-x2*y1;
+  DEBUG_PRINTF("twoA = %e\n", twoA);
+  //    std::shared_ptr<SimpleMatrix> B = std::make_shared<SimpleMatrix>(3,ndof);
+
+  B.setValue(0,0, - y32);
+  B.setValue(0,2,   y31);
+  B.setValue(0,4, - y21);
+
+  B.setValue(1,1,   x32);
+  B.setValue(1,3, - x31);
+  B.setValue(1,5,   x21);
+
+  B.setValue(2,0,   x32);
+  B.setValue(2,1, - y32);
+  B.setValue(2,2, - x31);
+  B.setValue(2,3,   y31);
+  B.setValue(2,4,   x21);
+  B.setValue(2,5, - y21);
+
+  B = 1.0/twoA * B;
+  double coeff = sqrt(twoA / 2.0 * thickness);
+  B = coeff * B;
+
+}
+
 void siconos::mechanics::fem::FiniteElementModel::computeElementaryBMatrix_direct(FElement& fe, siconos::algebra::SimpleMatrix& B, double thickness)
 {
     int ndof = fe.ndof();
