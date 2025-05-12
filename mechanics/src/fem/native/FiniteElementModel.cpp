@@ -85,7 +85,7 @@ unsigned int siconos::mechanics::fem::FiniteElementModel::init() {
         }
         case FiniteElementType::B2:  // Beam in 2D.
         {
-          fe = std::make_shared<FElement>(FiniteElementType::B2, 4, e);
+          fe = std::make_shared<FElement>(FiniteElementType::B2, 6, e);
           break;
         }
         default:
@@ -105,7 +105,7 @@ unsigned int siconos::mechanics::fem::FiniteElementModel::init() {
         }
         case FiniteElementType::B2:  // Beam in 2D.
         {
-          fe = std::make_shared<FElement>(FiniteElementType::B2, 4, e);
+          fe = std::make_shared<FElement>(FiniteElementType::B2, 12, e);
           break;
         }
 
@@ -123,6 +123,7 @@ unsigned int siconos::mechanics::fem::FiniteElementModel::init() {
 
     /* ------------- contruction of  FE nodes */
     for (auto v : e->vertices()) {
+      std::cout << "looping vertices : " << v->num() << std::endl;
       if (_vertexToNode.find(v) ==
           _vertexToNode.end())  // check if the node is already existing
       {
@@ -604,33 +605,53 @@ void siconos::mechanics::fem::FiniteElementModel::computeElementaryStiffnessMatr
 
 void siconos::mechanics::fem::FiniteElementModel::computeBeamElementaryStiffnessMatrix_direct(
     siconos::algebra::SimpleMatrix &Ke, FElement &fe) {
-
   int dim = _mesh->dim();
+  auto &nodes = fe.nodes();
+  int nnodes = nodes.size();
   double length  = fe.length();
   double length2  = length*length;
   double length3  = length2*length;
-
+  double c, s;
   if (dim == 2)
   {
-    Ke.setValue(0,0,12/length3);
-    Ke.setValue(0,1,6/length2);
-    Ke.setValue(0,2,-12/length3);
-    Ke.setValue(0,3,6/length2);
+    auto Te = std::make_shared<siconos::algebra::SimpleMatrix>(4, 6);
+    auto Ke_loc = std::make_shared<siconos::algebra::SimpleMatrix>(4, 4);
+    auto KT = std::make_shared<siconos::algebra::SimpleMatrix>(4, 6);
+    Te->zero();
+    c = (nodes[1]->x() - nodes[2]->x())/length;
+    s = (nodes[1]->y() - nodes[2]->y())/length;
+    Te->setValue(0,0,-s);
+    Te->setValue(0,1,c);
+    Te->setValue(1,2,1);
+    Te->setValue(2,3,-s);
+    Te->setValue(2,4,c);
+    Te->setValue(3,5,1);
+    Te->display();
 
-    Ke.setValue(1,0,6/length2);
-    Ke.setValue(1,1,4/length);
-    Ke.setValue(1,2,-6/length2);
-    Ke.setValue(1,3,2/length);
+    Ke_loc->setValue(0,0,12/length3);
+    Ke_loc->setValue(0,1,6/length2);
+    Ke_loc->setValue(0,2,-12/length3);
+    Ke_loc->setValue(0,3,6/length2);
 
-    Ke.setValue(2,0,-12/length3);
-    Ke.setValue(2,1,-6/length2);
-    Ke.setValue(2,2,12/length3);
-    Ke.setValue(2,3,-6/length2);
+    Ke_loc->setValue(1,0,6/length2);
+    Ke_loc->setValue(1,1,4/length);
+    Ke_loc->setValue(1,2,-6/length2);
+    Ke_loc->setValue(1,3,2/length);
 
-    Ke.setValue(3,0,6/length2);
-    Ke.setValue(3,1,2/length);
-    Ke.setValue(3,2,-6/length2);
-    Ke.setValue(3,3,4/length);
+    Ke_loc->setValue(2,0,-12/length3);
+    Ke_loc->setValue(2,1,-6/length2);
+    Ke_loc->setValue(2,2,12/length3);
+    Ke_loc->setValue(2,3,-6/length2);
+
+    Ke_loc->setValue(3,0,6/length2);
+    Ke_loc->setValue(3,1,2/length);
+    Ke_loc->setValue(3,2,-6/length2);
+    Ke_loc->setValue(3,3,4/length);
+
+    Ke_loc->display();
+    prod(*Ke_loc, *Te, *KT, true);
+    Te->trans();
+    prod(*Te, *KT, Ke, true);
   }
 
 }
