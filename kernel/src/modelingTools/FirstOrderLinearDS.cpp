@@ -91,6 +91,7 @@ void siconos::modeling::FirstOrderLinearDS::setComputeAFunction(
 void siconos::modeling::FirstOrderLinearDS::computeA(double time) {
   if (computeA_) {
     computeA_(time, *jacobianfOver_x_view_);
+    is_jacobianRhsOver_x_uptodate_ = false;
   }
 }
 
@@ -167,8 +168,7 @@ void siconos::modeling::FirstOrderLinearDS::computeRhs(double time) {
     }
     // allocate invM if required
     if (!hasLU_M_) {
-      LU_M_ =
-          std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(*MMatrix_view_);
+      LU_M_ = std::make_shared<siconos::algebra::SiconosLUMatrix>(*MMatrix_view_);
       hasLU_M_ = true;
     }
     *(state_x_[1]) = LU_M_->solve(*(state_x_[1]));
@@ -177,27 +177,39 @@ void siconos::modeling::FirstOrderLinearDS::computeRhs(double time) {
 
 void siconos::modeling::FirstOrderLinearDS::computeJacobianRhsOver_x(double time) {
   if (isTimeInvariant_ && !isFirstCall_) return;
-  isFirstCall_ = false;
-  if (jacobianfOver_x_view_) {
-    if (computeA_) computeA_(time, *jacobianfOver_x_view_);
-    if (MMatrix_view_) {
-      if (hasConstantJacobianfOver_x_)  // else memory is shared between jacobianRhsOver_x_
-                                        // and jacobianfOver_x_view_
-        *jacobianRhsOver_x_->block(0, 0) = *jacobianfOver_x_view_;
 
-      if (computeMMatrix_) {
-        computeMMatrix_(time, *MMatrix_view_);
-        hasLU_M_ = false;  // LUM needs to be updated.
-      }
-      if (!hasLU_M_) {
-        LU_M_ = std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(
-            *MMatrix_view_);
-        hasLU_M_ = true;
-      }
-      *(jacobianRhsOver_x_->block(0, 0)) = LU_M_->solve(*(jacobianRhsOver_x_->block(0, 0)));
+  if (!hasJacobianfOver_x_) return;
+  if (computeA_)  // if plugged, update
+    computeA_(time, *jacobianfOver_x_view_);
+
+  // If M is defined ...
+  if (MMatrix_view_) {
+    if (computeMMatrix_) {
+      // and plugged: update
+      computeMMatrix_(time, *MMatrix_view_);
+      hasLU_M_ = false;  // M has changed, LUM needs to be updated.
+    }
+    if (!hasLU_M_) {
+      // When? If M has been updated or if it's the first call
+      is_jacobianRhsOver_x_uptodate_ = false;
+      LU_M_ = std::make_shared<siconos::algebra::SiconosLUMatrix>(*MMatrix_view_);
+      hasLU_M_ = true;
+    }
+    // solve M*jacobianXRhS = jacobianfx
+    if (!is_jacobianRhsOver_x_uptodate_) {
+      // Solve M-1.jacobianfOver_x_view_ in temp result matrix
+      siconos::algebra::SiconosMatrix result = LU_M_->solve(*jacobianfOver_x_view_);
+      // and keep it as a flattened vector
+      std::copy(result.data(), result.data() + x_size_ * x_size_, jacobianRhsOver_x_.begin());
+      is_jacobianRhsOver_x_uptodate_ = true;
+    }
+  } else {  // No M. Just copy jacobianfOver_x_view_ into jacobianRhsOver_x_ (flat)
+    if (!is_jacobianRhsOver_x_uptodate_) {
+      std::copy(jacobianfOver_x_view_->data(),
+                jacobianfOver_x_view_->data() + x_size_ * x_size_, jacobianRhsOver_x_.begin());
+      is_jacobianRhsOver_x_uptodate_ = true;
     }
   }
-  // else 0
 }
 
 void siconos::modeling::FirstOrderLinearDS::display(bool brief) const {

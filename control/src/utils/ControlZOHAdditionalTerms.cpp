@@ -90,6 +90,6 @@ void siconos::control::ControlZOHAdditionalTerms::addSmoothTerms(
 void siconos::control::ControlZOHAdditionalTerms::addJacobianRhsContribution(
     siconos::graphs::DynamicalSystemsGraph& DSG0,
     const siconos::graphs::DynamicalSystemsGraph::VDescriptor& dsgVD, const double h,
-    siconos::algebra::SiconosMatrix& jacRhs) {
+    siconos::algebra::SiconosVector&jacRhs) {
   // nothing to be done here
 }

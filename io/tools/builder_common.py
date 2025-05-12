@@ -55,7 +55,7 @@ input_headers = {
 def unwanted(s):
     """un processed classed or attributes : to be defined explicitely in SiconosFull.hpp"""
     m = re.search(
-        "xml|XML|Xml|MBlockCSR|fPtr|SimpleMatrix|SiconosVector|SiconosGraph|SiconosSharedLibrary|numerics|computeFIntPtr|computeJacobianFIntqPtr|computeJacobianFIntqDotPtr|PrimalFrictionContact|FrictionContact|Lsodar|_moving_plans|_err|Hem5|_bufferY|_spo|_measuredPert|_predictedPert|_blockCSR|NonSmoothDynamicalSystem::ChangeLogIter|_impl",
+        "xml|XML|Xml|MBlockCSR|fPtr|SiconosMatrix|SiconosVector|SiconosGraph|SiconosSharedLibrary|numerics|computeFIntPtr|computeJacobianFIntqPtr|computeJacobianFIntqDotPtr|PrimalFrictionContact|FrictionContact|Lsodar|_moving_plans|_err|Hem5|_bufferY|_spo|_measuredPert|_predictedPert|_blockCSR|NonSmoothDynamicalSystem::ChangeLogIter|_impl",
         s,
     )
     # note _err,_bufferY, _spo, _measuredPert, _predictedPert -> boost::circular_buffer issue with serialization

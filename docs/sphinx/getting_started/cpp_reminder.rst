@@ -51,12 +51,11 @@ The basic classes available in the platform to deal with vectors and matrices ar
 
 * :class:`SiconosVector` : vector of double, can be dense or sparse.
 * :class:`BlockVector` : vector of :class:`SiconosVector`
-* :class:`SimpleMatrix` : matrix of double, can be dense, sparse, triangular, banded, symmetric, zero or identity.
-* :class:`BlockMatrix` : matrix of :class:`SimpleMatrix` 
+* :class:`SiconosMatrix` : matrix of double, can be dense, sparse, triangular, banded, symmetric, zero or identity.
 
 All these objects are just an interface to `Boost Ublas library <http://www.boost.org/libs/numeric/ublas/doc/index.htm>`_ vector and matrix. 
 
-Notice that BlockVector or BlockMatrix are no more that a collection of pointers to SiconosVector or SimpleMatrix.
+Notice that BlockVector are no more that a collection of pointers to SiconosVector.
 Then in most cases, to build such an object, you just need to insert some existing objects.
 The usual ways of construction are described below.
 
@@ -108,20 +107,6 @@ Note that a BlockVector can also contain some other BlockVector::
   V1->insertPtr(v1);
   
 V1 has now two blocks: the first one is a block of two blocks and the second is equal to v1.
-
-::
-
-   // m1 ... m4 some SiconosMatrix
-   auto M = std::make_shared<siconos::algebra::BlockMatrix>(m1,m2,m3,m4);
-   // M is a 2X2 blocks matrix 
-   // (first row: m1, m2, second: m3, m4).
-
-   
-Keywords for constructors, in Siconos namespace: DENSE (default), TRIANGULAR, SYMMETRIC, SPARSE, BANDED, ZERO, IDENTITY.
-
-
-Check the complete list of available constructors in reference documentation of each class.
-
 
 Read/write vectors and matrices from/to file
 """"""""""""""""""""""""""""""""""""""""""""
@@ -186,7 +171,7 @@ false, "+=".
    auto M = std::make_shared<siconos::algebra::SiconosMatrix>(3,3); // M = [ 0 0 0 ]
                                                //     [ 0 0 0 ]
 					       //     [ 0 0 0 ]
-   SimpleMatrix P(1,2);   		       // P = [ 0 0 ]
+   SiconosMatrix P(1,2);   		       // P = [ 0 0 ]
 
    (*M)(1,2) = 2; 
    P(0,1) = 12;				   // P = [ 0 12.0 ]

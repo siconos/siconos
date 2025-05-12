@@ -21,7 +21,6 @@
 #include "SiconosMatrixOp.hpp"        // For prod
 #include "SiconosMatrixVectorOp.hpp"  // For prod
 #include "SiconosVector.hpp"
-#include "SiconosVectorIterator.hpp"
 #include "SiconosVectorOp.hpp"
 
 void siconos::algebra::matrixVector_prod_toBlock(const SiconosMatrix& A,
@@ -179,8 +178,8 @@ void siconos::algebra::transposeMatrixVector_prod_toBlock(const SiconosVector& x
 
 // ========== Products matrix - vector
 
-void siconos::algebra::prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
-                            bool init) {
+void siconos::algebra::prod(const SiconosDenseMatrix& A, const SiconosDenseMatrix& B,
+                            SiconosDenseMatrix& C, bool init) {
   // To compute C = A * B
   if ((A.cols() != B.rows())) THROW_EXCEPTION("inconsistent sizes between A and B");
 

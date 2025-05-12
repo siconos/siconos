@@ -91,9 +91,14 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS1() {
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", *ds->rhs() == ref_rhs,
                                true);
 
-  auto b00 = ds->jacobianRhsOver_x()->block(0, 0);
-  auto ref_block = LU_M_->solve(ref_mat);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", *b00 == ref_block, true);
+  const auto& b00 = ds->jacobianRhsOver_x();
+  siconos::algebra::SiconosMatrix ref_block = LU_M_->solve(ref_mat);
+  siconos::algebra::SiconosVector jacoref;
+  auto x_size = ds->dimension();
+  jacoref.noalias() = Eigen::Map<const Eigen::VectorXd>(ref_block.data(), ref_block.size());
+
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "testBuildFirstOrderNonLinearDS1 : ", jacoref.isApprox(b00, 1e-12), true);
 
   std::cout << "--> Constructor 1 test ended with success." << std::endl;
 }
@@ -132,11 +137,11 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS3() {
 
   // f(x,t) = t.x
   ds->setComputefVectorFunction(
-      [](const Eigen::Ref<const siconos::algebra::SiconosVector> &x, double time,
+      [](const Eigen::Ref<const siconos::algebra::SiconosVector>& x, double time,
          Eigen::Ref<siconos::algebra::MapVectorType> result) { result = time * x; });
 
   ds->setComputeJacobianfOver_xFunction(
-      [](const Eigen::Ref<const siconos::algebra::SiconosVector> &x, double time,
+      [](const Eigen::Ref<const siconos::algebra::SiconosVector>& x, double time,
          Eigen::Ref<siconos::algebra::MapType> result) {
         result << 1, 4, 7, 2, 5, 8, 3, 6, 9;
       });
@@ -174,10 +179,14 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS3() {
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testBuildFirstOrderNonLinearDS3 : ", (*ds->rhs() - ref_rhs).norm() < 1e-15, true);
 
-  auto b00 = ds->jacobianRhsOver_x()->block(0, 0);
-  auto ref_block = LUM.solve(ds->jacobianfOver_x()).eval();
+  const auto& b00 = ds->jacobianRhsOver_x();
+  siconos::algebra::SiconosMatrix ref_block = LUM.solve(ds->jacobianfOver_x()).eval();
+  siconos::algebra::SiconosVector jacoref;
+  auto x_size = ds->dimension();
+  jacoref.noalias() = Eigen::Map<const Eigen::VectorXd>(ref_block.data(), ref_block.size());
+
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildFirstOrderNonLinearDS3 : ", (*b00 - ref_block).norm() < 1e-15, true);
+      "testBuildFirstOrderNonLinearDS3 : ", jacoref.isApprox(b00, 1e-12), true);
 
   // Last call to check if everything is ok when we repeat compute... functions
   ds->update(2. * time);

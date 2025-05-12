@@ -59,7 +59,7 @@ def test_xml1(datafile):
 
     # Comparison with a reference file
     dataPlotRef = SK.getMatrix(
-        SK.SimpleMatrix(datafile("BBallTSXML.ref"))
+        SK.SiconosMatrix(datafile("BBallTSXML.ref"))
     )
     if np.linalg.norm(dataPlot - dataPlotRef, ord=np.inf) > 1e-12:
         print(dataPlot - dataPlotRef)
@@ -338,7 +338,7 @@ if siconos.WITH_FORTRAN:
         # np.savetxt("BBallED.dat", dataPlot)
         # Comparison with a reference file
         dataPlotRef = SK.getMatrix(
-            SK.SimpleMatrix(datafile("BouncingBallEDXml.ref")))
+            SK.SiconosMatrix(datafile("BouncingBallEDXml.ref")))
 
         if np.linalg.norm(dataPlot - dataPlotRef, ord=np.inf) > 1e-11:
             print("Warning. The results is rather different from the reference file.")

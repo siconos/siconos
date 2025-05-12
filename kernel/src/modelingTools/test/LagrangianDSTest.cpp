@@ -17,7 +17,6 @@
  */
 #include "LagrangianDSTest.hpp"
 
-#include "BlockMatrix.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosMatrixOp.hpp"
 #include "SiconosVector.hpp"
@@ -74,15 +73,15 @@ void LagrangianDSTest::testBuildLagrangianDS1() {
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 1 - 8: ", ds->x_size() == 2 * 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 1 - 9: ", ds->x0() == x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 1 - 10: ", *(ds->rhs()) == rhs0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "test - Constr 1 - 11: ", ds->jacobianRhsOver_x()->block(0, 0)->isZero(), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "test - Constr 1 - 12: ", ds->jacobianRhsOver_x()->block(0, 1)->isIdentity(), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "test - Constr 1 - 13: ", ds->jacobianRhsOver_x()->block(1, 0)->isZero(), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "test - Constr 1 - 14: ", ds->jacobianRhsOver_x()->block(1, 1)->isZero(), true);
 
+  siconos::algebra::SiconosVector jacoref{36};
+  jacoref.setZero();
+  for (unsigned int j = 0; j < 3; ++j) {
+    jacoref((3 + j) * 6 + j) = 1.0;
+  }
+  const auto &jaco_rhs = ds->jacobianRhsOver_x();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 1 - 11: ", jacoref.isApprox(jaco_rhs, 1e-12),
+                               true);
   std::cout << "--> Constructor 1 test ended with success." << std::endl;
 }
 
@@ -169,21 +168,28 @@ void LagrangianDSTest::testBuildLagrangianDS2() {
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 2: ", ds->x_size() == 2 * 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 2: ", ds->x0() == x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 2: ", *(ds->rhs()) == rhs0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 2: ", ds->jacobianRhsOver_x()->block(0, 0)->isZero(),
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "test - Constr 2: ", ds->jacobianRhsOver_x()->block(0, 1)->isIdentity(), true);
+
+  siconos::algebra::SiconosVector jacoref{36};
+  jacoref.setZero();
+  for (unsigned int j = 0; j < 3; ++j) {
+    jacoref((3 + j) * 6 + j) = 1.0;
+  }
   siconos::algebra::SiconosMatrix33 refj2;
   refjac.setConstant(-1);
 
   refj2 = mass.inverse() * refjac;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "test - Constr 2: ", ds->jacobianRhsOver_x()->block(1, 0)->isApprox(refj2), true);
+  for (unsigned int j = 0; j < 3; ++j) {
+    for (unsigned int i = 0; i < 3; ++i) jacoref(j * 6 + i + 3) = refj2(i, j);
+  }
   refjac.setConstant(-2);
   refj2 = mass.inverse() * refjac;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "test - Constr 2: ", ds->jacobianRhsOver_x()->block(1, 1)->isApprox(refj2), true);
+  for (unsigned int j = 0; j < 3; ++j) {
+    for (unsigned int i = 0; i < 3; ++i) jacoref((j + 3) * 6 + i + 3) = refj2(i, j);
+  }
 
+  const auto &jaco_rhs = ds->jacobianRhsOver_x();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 1 - 11: ", jacoref.isApprox(jaco_rhs, 1e-12),
+                               true);
   std::cout << "--> Constructor 2 test ended with success." << std::endl;
 }
 

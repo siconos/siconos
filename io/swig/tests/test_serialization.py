@@ -166,9 +166,9 @@ def test_serialization4(datafile):
     #
     # comparison with the reference file
     #
-    from siconos.kernel import SimpleMatrix, getMatrix
+    from siconos.kernel import SiconosMatrix, getMatrix
     from numpy.linalg import norm
 
-    ref = getMatrix(SimpleMatrix(datafile("data/result.ref")))
+    ref = getMatrix(SiconosMatrix(datafile("data/result.ref")))
 
     assert (norm(dataPlot - ref) < 1e-12)

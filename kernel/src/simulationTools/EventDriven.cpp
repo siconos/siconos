@@ -17,7 +17,6 @@
  */
 #include "EventDriven.hpp"
 
-#include "BlockMatrix.hpp"
 #include "EventsManager.hpp"
 #include "FirstOrderNonLinearDS.hpp"
 #include "Interaction.hpp"
@@ -489,35 +488,14 @@ void siconos::simulation::EventDriven::computeJacobianfx(
   // Save jacobianX values from dynamical system into current jacob
   // (in-out parameter)
 
-  unsigned int i = 0;
-  unsigned pos = 0;
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
   auto osiDSGraph = lsodar.dynamicalSystemsGraph();
   for (std::tie(dsi, dsend) = osiDSGraph->vertices(); dsi != dsend; ++dsi) {
     if (!(lsodar.checkOSI(dsi))) continue;
 
     auto ds = osiDSGraph->bundle(*dsi);
-    if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
-      auto jacotmp =
-          std::dynamic_pointer_cast<siconos::algebra::BlockMatrix>(lds->jacobianRhsOver_x());
-      for (decltype(lds->x_size()) j = 0; j < lds->x_size(); ++j) {
-        for (decltype(lds->dimension()) k = 0; k < lds->dimension(); ++k)
-          jacob[i++] = (*jacotmp)(k, j);
-      }
-    } else if (auto lds =
-                   std::dynamic_pointer_cast<siconos::modeling::FirstOrderNonLinearDS>(ds)) {
-      auto jacotmp = ds->jacobianRhsOver_x()->block(0, 0);  // just one block in JacxRhs
-      auto jaco_size = jacotmp->rows() * jacotmp->cols();
-      // assert(pos + jacotmp.size() <= jacobsize && "Destination buffer too small!");
-      std::copy(jacotmp->data(), jacotmp->data() + jacotmp->size(), &jacob[pos]);
-      pos += jaco_size;
-
-    } else {
-      THROW_EXCEPTION(
-          "siconos::simulation::EventDriven::computeJacobianfx, type of "
-          "DynamicalSystem not "
-          "yet supported.");
-    }
+    const auto& jacotmp = ds->jacobianRhsOver_x();
+    std::copy(jacotmp.begin(), jacotmp.end(), jacob);
   }
 }
 

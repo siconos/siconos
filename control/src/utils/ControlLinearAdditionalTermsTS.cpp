@@ -40,6 +40,6 @@ void siconos::control::ControlLinearAdditionalTermsTS::addSmoothTerms(
 void siconos::control::ControlLinearAdditionalTermsTS::addJacobianRhsContribution(
     siconos::graphs::DynamicalSystemsGraph& DSG0,
     const siconos::graphs::DynamicalSystemsGraph::VDescriptor& dsgVD, const double t,
-    siconos::algebra::SiconosMatrix& jacRhs) {
+    siconos::algebra::SiconosVector& jacRhs) {
   // nothing to be done here
 }

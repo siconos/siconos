@@ -24,7 +24,6 @@
 #define SICOMAT_OPH
 #include <memory>
 
-#include "BlockMatrix.hpp"
 #include "SiconosMatrix.hpp"
 
 namespace siconos::algebra {

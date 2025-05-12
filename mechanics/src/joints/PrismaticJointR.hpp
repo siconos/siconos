@@ -39,30 +39,18 @@ class PrismaticJointR : public NewtonEulerJointR {
  protected:
   ACCEPT_SERIALIZATION(PrismaticJointR);
 
-  /** Axis of the prismatic point in the q1 frame of reference
-   */
-  siconos::algebra::SiconosVector3 axis0_;
-
-  /** axis1_ is an unit vector that is orthogonal to the prismatic axis axis0_.
-   * It forms with axis2_ and axis0_ a base such that (axis0_,axis1_,_v2) is an orthogonal
+  /** axis1_ is an unit vector that is orthogonal to the prismatic axis axes_[0].
+   * It forms with axis2_ and axes_[0] a base such that (axes_[0],axis1_,_v2) is an orthogonal
    * frame
    */
   siconos::algebra::SiconosVector3 axis1_;
 
-  /** axis2_ is an unit vector that is orthogonal to the prismatic axis axis0_.
-   * It forms with axis2_ and axis0_ a base such that (axis0_,axis1_,_v2) is an orthogonal
+  /** axis2_ is an unit vector that is orthogonal to the prismatic axis axes_[0].
+   * It forms with axis2_ and axes_[0] a base such that (axes_[0],axis1_,_v2) is an orthogonal
    * frame
    */
   siconos::algebra::SiconosVector3 axis2_;
 
-  /** Convenient storage of the components of axis1_ and axis2_
-   */
-  double axis1_x{0.};
-  double axis1_y{0.};
-  double axis1_z{0.};
-  double axis2_x{0.};
-  double axis2_y{0.};
-  double axis2_z{0.};
 
   double _G10G20d1x{0.};
   double _G10G20d1y{0.};
@@ -82,7 +70,7 @@ class PrismaticJointR : public NewtonEulerJointR {
   virtual void computeH_NE_(double time, siconos::modeling::Interaction& inter,
                             const siconos::algebra::BlockVector& q0) override;
 
-  void computeOrthonormalBaseFromAxis();
+  // void computeOrthonormalBaseFromAxis();
 
  public:
   /** Constructor based on one or two dynamical systems and an axis.

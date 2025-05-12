@@ -22,13 +22,53 @@ import numpy as np
 
 
 def test_joints():
-    j1 = mj.CylindricalJointR()
-    j2 = mj.CylindricalJointR()
-    j3 = mj.PrismaticJointR(np.ones(3), True)
-    j4 = mj.PrismaticJointR(np.ones(3), True)
-    assert isinstance(j1, mj.NewtonEulerJointR)
-    cj = mj.CouplerJointR(j1, 0, j2, 1, 0.5, np.ones(7), 1, np.ones(7), 1)
-    ck = mj.CouplerJointR(j3, 0, j4, 1, 0.5)
+    joints = []
+    joints.append(mj.CylindricalJointR())
+    joints.append(mj.FixedJointR())
+    joints.append(mj.KneeJointR())
+    joints.append(mj.PivotJointR())
+    joints.append(mj.PrismaticJointR())
+
+    point0 = np.random.random(3)
+    axis0 = np.random.random(3)
+    pos = np.random.random(7)
+
+    # Cylindrical joints
+    joints[0].setPoint(0, point0)
+    joints[0].setAxis(0, axis0)
+    joints[0].setBasePositions(pos, None)
+
+    # Fixed
+    joints[1].setBasePositions(pos, None)
+
+    # Knee
+    joints[2].setPoint(0, point0)
+    joints[2].setBasePositions(pos, None)
+
+    # Pivot
+    joints[3].setPoint(0, point0)
+    joints[3].setAxis(0, axis0)
+    joints[3].setBasePositions(pos, None)
+
+    # Prismatic
+    joints[4].setAxis(0, axis0)
+    joints[4].setBasePositions(pos, None)
+
+    # Coupler
+    joints.append(mj.PrismaticJointR())
+    joints.append(mj.CylindricalJointR())
+    point1 = np.random.random(3)
+    axis1 = np.random.random(3)
+    pos1 = np.random.random(7)
+
+    joints[5].setAxis(0, axis1)
+    joints[5].setBasePositions(pos1, None)
+    joints[6].setPoint(0, point1)
+    joints[6].setAxis(0, axis1)
+    joints[6].setBasePositions(pos1, None)
+
+    cj = mj.CouplerJointR(joints[0], 0, joints[6], 1, 0.5, np.ones(7), 1, np.ones(7), 1)
+    ck = mj.CouplerJointR(joints[4], 0, joints[5], 1, 0.5)
     q0 = np.ones(7, dtype=np.float64)
     twist0 = np.ones(6, dtype=np.float64)
     mass = 2.0

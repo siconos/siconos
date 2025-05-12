@@ -18,14 +18,31 @@
 
 #include "SiconosMatrix.hpp"
 
-#include "BlockMatrix.hpp"  // for BlockMatrix
 // #include "NumericsToolsNamespace.h"  // for CSparseMatrix,  NSM_fix_csc
 // #include "SiconosMatrixOp.hpp"       // for matrix operators declaration
 #include "SiconosVector.hpp"  // for SiconosVector
 #include "Tools.hpp"          // toString
 
-bool siconos::algebra::fillTriplet(SiconosMatrix& m, CSparseMatrix* triplet, size_t row_off,
-                                   size_t col_off, double tol) {
+void siconos::algebra::fillTriplet(const SiconosSparseMatrix& m, CSparseMatrix* triplet,
+                                   size_t row_off, size_t col_off) {
+  assert(triplet);
+
+  const int* outer = m.outerIndexPtr();  // column pointers
+  const int* inner = m.innerIndexPtr();  // row indices
+  const double* values = m.valuePtr();   // non-zero values
+
+  int cols = m.cols();
+
+  for (int j = 0; j < cols; ++j) {
+    for (int idx = outer[j]; idx < outer[j + 1]; ++idx) {
+      // Insert triplet directly, no threshold check
+      cs_entry(triplet, inner[idx] + row_off, j + col_off, values[idx]);
+    }
+  }
+}
+
+void siconos::algebra::fillTriplet(SiconosDenseMatrix& m, CSparseMatrix* triplet,
+                                   size_t row_off, size_t col_off, double tol) {
   assert(triplet);
   size_t nrow = m.rows();
   size_t ncol = m.cols();
@@ -39,5 +56,4 @@ bool siconos::algebra::fillTriplet(SiconosMatrix& m, CSparseMatrix* triplet, siz
                            std::numeric_limits<double>::epsilon());
     }
   }
-  return true;
 }

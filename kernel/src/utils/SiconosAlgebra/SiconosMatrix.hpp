@@ -29,6 +29,7 @@
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
 #include <Eigen/SparseCore>  // For Eigen Sparse matrices
+#include <Eigen/SparseLU>
 
 #include "CSparseMatrix.h"  // For CSparseMatrix
 #include "SiconosVector.hpp"
@@ -43,9 +44,6 @@ namespace siconos::algebra {
    Matrices can be either block or Simple.
    See Derived classes for details.
 
-   In Siconos, a "matrix" can be either a SiconosMatrix or a BlockMatrix, ie a
-   container of several pointers to SiconosMatrix
-
    You can find an overview on how to build and use vectors and matrices in
    siconos users guide
    .
@@ -58,22 +56,16 @@ using SiconosMatrix33 = Eigen::Matrix<double_t, 3, 3, Eigen::ColMajor>;
 using SiconosSparseMatrix = Eigen::SparseMatrix<double, Eigen::ColMajor, int>;
 using Triplet = Eigen::Triplet<double>;  // Used to fill sparse matrices
 
-// Select between dense and sparse storage
-// SICONOS_SPARSE is set by cmake.
-// Use -DSICONOS_SPARSE=1 to activate sparse storage
-#ifdef SICONOS_SPARSE
-using SiconosMatrix = SiconosSparseMatrix;
-#else
-using SiconosMatrix = SiconosDenseMatrix;
-#endif
 // Map types
 
 using MapVectorType = Eigen::Map<SiconosVector>;
 using MapVector3Type = Eigen::Map<SiconosVector3>;
+using MapVector6Type = Eigen::Map<SiconosVector6>;
+using MapVector7Type = Eigen::Map<SiconosVector7>;
 using ConstMapVectorType = Eigen::Map<const SiconosVector>;
 using ConstMapVector3Type = Eigen::Map<const SiconosVector3>;
-using MapType = Eigen::Map<SiconosMatrix>;
-using ConstMapType = Eigen::Map<const SiconosMatrix>;
+using ConstMapVector6Type = Eigen::Map<const SiconosVector6>;
+using ConstMapVector7Type = Eigen::Map<const SiconosVector7>;
 
 using SiconosDiagonalMatrix = Eigen::DiagonalMatrix<double_t, Eigen::Dynamic>;
 
@@ -83,18 +75,48 @@ using EigenBlock = std::vector<Eigen::Ref<SiconosVector>>;
 // type used as return value for vectors and matrix dimensions.
 using SiconosSize_t = Eigen::Index;
 
+// LU Factorization
+using DenseLUMatrix = Eigen::FullPivLU<siconos::algebra::SiconosDenseMatrix>;
+using SparseLUMatrix = Eigen::SparseLU<SiconosSparseMatrix>;
+
+// --- Select between dense and sparse storage ---
+// SICONOS_SPARSE is set by cmake.
+// Use -DSICONOS_SPARSE=1 to activate sparse storage
+#ifdef SICONOS_SPARSE
+using SiconosMatrix = SiconosSparseMatrix;
+using SiconosLUMatrix = SparseLUMatrix;
+#else
+using SiconosMatrix = SiconosDenseMatrix;
+using SiconosLUMatrix = DenseLUMatrix;
+#endif
+
+using MapType = Eigen::Map<SiconosMatrix>;
+using ConstMapType = Eigen::Map<const SiconosMatrix>;
+
 enum class StorageType { dense, sparse };
 
-/** return the number of non-zero in the matrix
+/** fill a CSparseMatrix (triplet) from non null values of a SiconosSparseMatrix
  *
+ *  \param m input matrix
+ *  \param csc the compressed column sparse matrix
+ *  \param row_off
+ *  \param col_off
+ */
+void fillTriplet(const SiconosSparseMatrix &m, CSparseMatrix *triplet, size_t row_off,
+                 size_t col_off);
+
+/** fill a CSparseMatrix (triplet) from non null values of a SiconosDenseMatrix
+ *
+ *  \param m input matrix
  *  \param csc the compressed column sparse matrix
  *  \param row_off
  *  \param col_off
  *  \param tol the tolerance to consider a number zero (not used if the matrix
- * is sparse) \return the number of non-zeros
+ *  is sparse)
  */
-bool fillTriplet(SiconosMatrix &m, CSparseMatrix *csc, size_t row_off, size_t col_off,
+void fillTriplet(SiconosDenseMatrix &m, CSparseMatrix *csc, size_t row_off, size_t col_off,
                  double tol = 1e-14);
+
 void normInfByColumn(const SiconosMatrix &m, SiconosVector &v);
 
 bool checkSymmetry(SiconosMatrix &m, double tol);

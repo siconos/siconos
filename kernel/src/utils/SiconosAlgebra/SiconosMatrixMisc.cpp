@@ -16,21 +16,8 @@
  * limitations under the License.
  */
 
-#include "BlockMatrix.hpp"
 #include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixOp.hpp"
-#include "SiconosMatrixVectorOp.hpp"
-#include "SiconosVector.hpp"
-#include "Simulation.hpp"
-#include "Tools.hpp"  // enum_to_string
-#include "boost/numeric/bindings/lapack.hpp"
-#include "boost/numeric/bindings/std/vector.hpp"
-#include "boost/numeric/bindings/ublas/matrix.hpp"
-#include "boost/numeric/bindings/ublas/symmetric.hpp"
-#include "boost/numeric/bindings/ublas/vector.hpp"
-#include "determinant.hpp"
-#include "expm.hpp"  // boost contribs expm_pad
 #include "io.hpp"
 
 void siconos::algebra::normInfByColumn(const SiconosMatrix &m, SiconosVector &v) {

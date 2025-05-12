@@ -20,7 +20,6 @@
 #include <boost/math/quaternion.hpp>
 #include <iostream>
 
-#include "BlockMatrix.hpp"  
 #include "RotationQuaternion.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
@@ -66,6 +65,7 @@ siconos::modeling::NewtonEulerDS::NewtonEulerDS(
   (*totalInertiaMatrix_)(1, 1) = scalarMass_;
   (*totalInertiaMatrix_)(2, 2) = scalarMass_;
   totalInertiaMatrix_->block<3, 3>(3, 3) = inertia;
+  hasLUMass_ = false;
 
   // --- T(q) matrix ---
 
@@ -136,60 +136,59 @@ void siconos::modeling::NewtonEulerDS::initRhs(double time) {
 
   computeRhs(time);
 
+  // -- Jacobian Rhs over x --
   /** \warning the derivative of T w.r.t to q is neglected */
-  rhsMatrices_[jacobianXBloc00_] =
-      std::make_shared<siconos::algebra::SiconosMatrix>(qDim_, qDim_);
 
-  rhsMatrices_[jacobianXBloc01_] = std::make_shared<siconos::algebra::SiconosMatrix>(*T_);
-  bool flag1 = false, flag2 = false;
-  if (jacobianWrenchOver_q_) {
-    // Solve MjacobianX(1,0) = jacobianFL[0]
+  // The jacobian is saved in a flattened version, as a vector
+  jacobianRhsOver_x_.resize(x_size_ * x_size_);
+  // initialize to zero
+  jacobianRhsOver_x_.setZero();
+
+  // Set top-right block to T
+  for (unsigned int j = 0; j < 6; ++j) {
+    for (unsigned int i = 0; i < qDim_; ++i) {
+      jacobianRhsOver_x_((j + qDim_) * x_size_ + i) = (*T_)(i, j);
+    }
+  }
+
+  // - Fill parts corresponding to the jacobians of total forces -
+  // mass and lu_mass are up to date since we have already called init_lu_mass
+  // In that case, we'll need a buffer to save inv(Mass).jacobian_qForces and
+  // inv(Mass).jacobian_v Forces
+  if (hasJacobianWrenchOver_q() || hasJacobianWrenchOver_twist())
+    buffer_.resize(6 * qDim_ + 36);
+
+  // bottom-right block
+  if (hasJacobianWrenchOver_q()) {
+    // Update if required
     computeJacobianWrenchOver_q(*twist_, *state_q_, time);
-
-    rhsMatrices_[jacobianXBloc10_] =
-        std::make_shared<siconos::algebra::SiconosMatrix>(*jacobianWrenchOver_q_);
-    *rhsMatrices_[jacobianXBloc10_] = LUMass_->solve(*rhsMatrices_[jacobianXBloc10_]);
-
-    flag1 = true;
+    // View onto left part of buffer_
+    Eigen::Map<siconos::algebra::SiconosMatrix> jacq(buffer_.data(), ndof_, qDim_);
+    // Solve MjacobianX(1,0) = jacobianFL[0]
+    jacq = LUMass_->solve(*jacobianWrenchOver_q_);
+    for (unsigned int j = 0; j < qDim_; ++j) {
+      for (unsigned int i = 0; i < 6; ++i) {
+        jacobianRhsOver_x_(j * x_size_ + i + qDim_) = jacq(i, j);
+      }
+    }
   }
 
-  if (jacobianWrenchOver_twist_) {
-    // Solve MjacobianX(1,1) = jacobianFL[1]
+  // bottom-left block
+  if (hasJacobianWrenchOver_twist()) {
+    // Update if required
     computeJacobianWrenchOver_twist(*twist_, *state_q_, time);
-    rhsMatrices_[jacobianXBloc11_] =
-        std::make_shared<siconos::algebra::SiconosMatrix>(*jacobianWrenchOver_twist_);
-    *rhsMatrices_[jacobianXBloc11_] = LUMass_->solve(*rhsMatrices_[jacobianXBloc11_]);
-
-    flag2 = true;
+    // View onto right part of buffer_
+    Eigen::Map<siconos::algebra::SiconosMatrix> jacv(buffer_.data() + 6 * qDim_, ndof_, ndof_);
+    // Solve MjacobianX(1,1) = jacobianFL[1]
+    jacv = LUMass_->solve(*jacobianWrenchOver_twist_);
+    for (unsigned int j = 0; j < 6; ++j) {
+      for (unsigned int i = 0; i < 6; ++i) {
+        jacobianRhsOver_x_((j + qDim_) * x_size_ + i + qDim_) = jacv(i, j);
+      }
+    }
   }
+  is_jacobianRhsOver_x_uptodate_ = true;
 
-  if (!rhsMatrices_[zeroMatrix_]) {
-    rhsMatrices_[zeroMatrix_] = std::make_shared<siconos::algebra::SiconosMatrix>(6, 6);
-    rhsMatrices_[zeroMatrix_]->setZero();
-  }
-
-  if (!rhsMatrices_[zeroMatrixqDim_]) {
-    rhsMatrices_[zeroMatrixqDim_] =
-        std::make_shared<siconos::algebra::SiconosMatrix>(6, qDim_);
-    rhsMatrices_[zeroMatrixqDim_]->setZero();
-  }
-
-  if (flag1 && flag2)
-    jacobianRhsOver_x_ = std::make_shared<siconos::algebra::BlockMatrix>(
-        rhsMatrices_[jacobianXBloc00_], rhsMatrices_[jacobianXBloc01_],
-        rhsMatrices_[jacobianXBloc10_], rhsMatrices_[jacobianXBloc11_]);
-  else if (flag1)  // flag2 = false
-    jacobianRhsOver_x_ = std::make_shared<siconos::algebra::BlockMatrix>(
-        rhsMatrices_[jacobianXBloc00_], rhsMatrices_[jacobianXBloc01_],
-        rhsMatrices_[jacobianXBloc10_], rhsMatrices_[zeroMatrix_]);
-  else if (flag2)  // flag1 = false
-    jacobianRhsOver_x_ = std::make_shared<siconos::algebra::BlockMatrix>(
-        rhsMatrices_[jacobianXBloc00_], rhsMatrices_[jacobianXBloc01_],
-        rhsMatrices_[zeroMatrixqDim_], rhsMatrices_[jacobianXBloc11_]);
-  else
-    jacobianRhsOver_x_ = std::make_shared<siconos::algebra::BlockMatrix>(
-        rhsMatrices_[jacobianXBloc00_], rhsMatrices_[jacobianXBloc01_],
-        rhsMatrices_[zeroMatrixqDim_], rhsMatrices_[zeroMatrix_]);
   DEBUG_EXPR(display(););
   DEBUG_END("siconos::modeling::NewtonEulerDS::initRhs(double time)\n");
 }
@@ -227,17 +226,39 @@ void siconos::modeling::NewtonEulerDS::computeRhs(double time) {
 }
 
 void siconos::modeling::NewtonEulerDS::computeJacobianRhsOver_x(double time) {
-  if (jacobianWrenchOver_q_) {
-    auto bloc10 = jacobianRhsOver_x_->block(1, 0);
-    computeJacobianWrenchOver_q(*twist_, *state_q_, time);
-    *bloc10 = *jacobianWrenchOver_q_;
-    *bloc10 = LUMass_->solve(*bloc10);
+  siconos::modeling::newton_euler::computeT(*state_q_, *T_);
+  for (unsigned int j = 0; j < 6; ++j) {
+    for (unsigned int i = 0; i < qDim_; ++i) {
+      jacobianRhsOver_x_((j + qDim_) * x_size_ + i) = (*T_)(i, j);
+    }
   }
-  if (jacobianWrenchOver_twist_) {
-    auto bloc11 = jacobianRhsOver_x_->block(1, 1);
+  // bottom-right block
+  if (hasJacobianWrenchOver_q()) {
+    // Update if required
+    computeJacobianWrenchOver_q(*twist_, *state_q_, time);
+    // View onto left part of buffer_
+    Eigen::Map<siconos::algebra::SiconosMatrix> jacq(buffer_.data(), ndof_, ndof_);
+    // Solve MjacobianX(1,0) = jacobianFL[0]
+    jacq = LUMass_->solve(*jacobianWrenchOver_q_);
+    for (unsigned int j = 0; j < qDim_; ++j) {
+      for (unsigned int i = 0; i < 6; ++i) {
+        jacobianRhsOver_x_(j * x_size_ + i + qDim_) = jacq(i, j);
+      }
+    }
+  }
+  // bottom-left block
+  if (hasJacobianWrenchOver_twist()) {
+    // Update if required
     computeJacobianWrenchOver_twist(*twist_, *state_q_, time);
-    *bloc11 = *jacobianWrenchOver_twist_;
-    *bloc11 = LUMass_->solve(*bloc11);
+    // View onto right part of buffer_
+    Eigen::Map<siconos::algebra::SiconosMatrix> jacv(buffer_.data(), ndof_, ndof_);
+    // Solve MjacobianX(1,1) = jacobianFL[1]
+    jacv = LUMass_->solve(*jacobianWrenchOver_twist_);
+    for (unsigned int j = 0; j < 6; ++j) {
+      for (unsigned int i = 0; i < 6; ++i) {
+        jacobianRhsOver_x_((j + qDim_) * x_size_ + i + qDim_) = jacv(i, j);
+      }
+    }
   }
 }
 
@@ -245,12 +266,13 @@ void siconos::modeling::NewtonEulerDS::setInertia(double ix, double iy, double i
   (*totalInertiaMatrix_)(3, 3) = ix;
   (*totalInertiaMatrix_)(4, 4) = iy;
   (*totalInertiaMatrix_)(5, 5) = iz;
+  hasLUMass_ = false;
 }
 
 void siconos::modeling::NewtonEulerDS::init_lu_mass() {
   if (totalInertiaMatrix_ && !LUMass_) {
-    LUMass_ = std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(
-        *totalInertiaMatrix_);
+    LUMass_ = std::make_shared<siconos::algebra::SiconosLUMatrix>(*totalInertiaMatrix_);
+    hasLUMass_ = true;
   }
 }
 
@@ -564,8 +586,8 @@ void siconos::modeling::NewtonEulerDS::initMemory(unsigned int steps) {
   DynamicalSystem::initMemory(steps);
 
   if (steps == 0)
-    std::cout
-        << "Warning : siconos::modeling::NewtonEulerDS::initMemory with size equal to zero\n";
+    std::cout << "Warning : siconos::modeling::NewtonEulerDS::initMemory with size equal to "
+                 "zero\n";
   else {
     qMemory_.setMemorySize(steps, qDim_);
     twistMemory_.setMemorySize(steps, ndof_);
@@ -645,6 +667,7 @@ void siconos::modeling::NewtonEulerDS::setScalarMass(double mass) {
   (*totalInertiaMatrix_)(0, 0) = scalarMass_;
   (*totalInertiaMatrix_)(1, 1) = scalarMass_;
   (*totalInertiaMatrix_)(2, 2) = scalarMass_;
+  hasLUMass_ = false;
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////
@@ -703,8 +726,8 @@ void siconos::modeling::newton_euler::computeMextForceAtPos(
     siconos::geometry::rewriteVectorFromAbsoluteToBodyFrame(q, local_pos);
     moment = local_pos.cross(local_frc);
   } else {
-    auto posview =
-        pos.head<3>();  // trick to get a view with the proper size to fit with cross. No copy.
+    auto posview = pos.head<3>();  // trick to get a view with the proper size to fit with
+                                   // cross. No copy.
     moment = posview.cross(local_frc);
   }
 

@@ -17,7 +17,6 @@
  */
 #include "LagrangianLinearTIDSTest.hpp"
 
-#include "BlockMatrix.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosMatrixOp.hpp"
 #include "SiconosMatrixVectorOp.hpp"
@@ -109,14 +108,19 @@ void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS1() {
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ", ds->x0() == x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ", *(ds->rhs()) == rhs0,
                                true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ",
-                               *(ds->jacobianRhsOver_x()->block(0, 0)) == m0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ",
-                               *(ds->jacobianRhsOver_x()->block(0, 1)) == i0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ",
-                               *(ds->jacobianRhsOver_x()->block(1, 0)) == rhsK, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ",
-                               *(ds->jacobianRhsOver_x()->block(1, 1)) == rhsC, true);
+
+  siconos::algebra::SiconosVector jacoref{36};
+  jacoref.setZero();
+  for (unsigned int j = 0; j < 3; ++j) {
+    jacoref((3 + j) * 6 + j) = 1.0;
+  }
+  for (unsigned int j = 0; j < 3; ++j) {
+    for (unsigned int i = 0; i < 3; ++i) jacoref(j * 6 + i + 3) = rhsK(i, j);
+    for (unsigned int i = 0; i < 3; ++i) jacoref((j + 3) * 6 + i + 3) = rhsC(i, j);
+  }
+  const auto& jaco_rhs = ds->jacobianRhsOver_x();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 1 - 11: ", jacoref.isApprox(jaco_rhs, 1e-12),
+                               true);
   siconos::algebra::SiconosVector f0(3);
   f0 = K * q0 + C * velocity0;
   auto external_forces = [](double time, Eigen::Ref<siconos::algebra::MapVectorType> result) {
@@ -144,14 +148,8 @@ void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS1() {
   ds->computeJacobianRhsOver_x(time);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ", *(ds->rhs()) == rhs1,
                                true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ",
-                               *(ds->jacobianRhsOver_x()->block(0, 0)) == m0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ",
-                               *(ds->jacobianRhsOver_x()->block(0, 1)) == i0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ",
-                               *(ds->jacobianRhsOver_x()->block(1, 0)) == rhsK, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS1 : ",
-                               *(ds->jacobianRhsOver_x()->block(1, 1)) == rhsC, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 1 - 11: ", jacoref.isApprox(jaco_rhs, 1e-12),
+                               true);
   std::cout << "--> Constructor 1 test ended with success." << std::endl;
 }
 
@@ -200,14 +198,14 @@ void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS2() {
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2 : ", ds->x0() == x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2 : ", ds->rhs()->isApprox(rhs0),
                                true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2 : ",
-                               *(ds->jacobianRhsOver_x()->block(0, 0)) == m0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2 : ",
-                               *(ds->jacobianRhsOver_x()->block(0, 1)) == i0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2 : ",
-                               *(ds->jacobianRhsOver_x()->block(1, 0)) == m0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2 : ",
-                               *(ds->jacobianRhsOver_x()->block(1, 1)) == m0, true);
+  siconos::algebra::SiconosVector jacoref{36};
+  jacoref.setZero();
+  for (unsigned int j = 0; j < 3; ++j) {
+    jacoref((3 + j) * 6 + j) = 1.0;
+  }
+  const auto& jaco_rhs = ds->jacobianRhsOver_x();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 1 - 11: ", jacoref.isApprox(jaco_rhs, 1e-12),
+                               true);
   auto external_forces = [](double time, Eigen::Ref<siconos::algebra::MapVectorType> result) {
     auto count = 0;
     for (auto& v : result) v = count++ * time;

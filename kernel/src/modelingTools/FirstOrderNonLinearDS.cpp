@@ -18,7 +18,6 @@
 
 #include "FirstOrderNonLinearDS.hpp"
 
-#include "BlockMatrix.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 // #define DEBUG_MESSAGES
@@ -97,8 +96,7 @@ siconos::modeling::FirstOrderNonLinearDS::FirstOrderNonLinearDS(
   }
 
   if (ds.LU_M()) {
-    LU_M_ =
-        std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(*MMatrix_view_);
+    LU_M_ = std::make_shared<siconos::algebra::SiconosLUMatrix>(*MMatrix_view_);
     hasLU_M_ = true;
   }
   // Memory stuff to me moved to graph/osi
@@ -109,31 +107,13 @@ siconos::modeling::FirstOrderNonLinearDS::FirstOrderNonLinearDS(
 
 void siconos::modeling::FirstOrderNonLinearDS::initRhs(double time) {
   computeRhs(time);
-
-  // Cases:
-  // 1- M not defined then jacobianfx and jacobianRhsOver_x_ share memory.
-  // 2- M is defined and jacobianfx constant.
-  //    since jacobianRhsOver_x_ is used to solve in place M-1.f(x,t)
-  //    we allocate memory for jacobianRhsOver_x
-  // 3- M is defined and jacobianfx not constant
-  //     then jacobianfx and jacobianRhsOver_x_ share memory.
-  //     Even if jacobianfx is outdated after jacobianRhsOver_x_ computation,
-  //     it's not a problem since jacobianfx will be updated with computeJacobian
-  //     when required.
+  jacobianRhsOver_x_.resize(x_size_ * x_size_);
   if (jacobianfOver_x_view_) {
-    if (!MMatrix_view_ || (MMatrix_view_ && !hasConstantJacobianfOver_x_))
-      jacobianRhsOver_x_ =
-          std::make_shared<siconos::algebra::BlockMatrix>(*jacobianfOver_x_view_);
-    else {
-      auto tmp = std::make_shared<siconos::algebra::SiconosMatrix>(x_size_, x_size_);
-      tmp->setZero();
-      jacobianRhsOver_x_ = std::make_shared<siconos::algebra::BlockMatrix>(*tmp);
-    }
+    computeJacobianRhsOver_x(time);
+  } else  // else no resize, jacobian of rhs is equal to 0.
+    jacobianRhsOver_x_.setZero();
 
-    // else no allocation, jacobian of rhs is equal to 0.
-  }
-  isFirstCall_ = true;
-  computeJacobianRhsOver_x(time);
+  is_jacobianRhsOver_x_uptodate_ = true;
 }
 
 void siconos::modeling::FirstOrderNonLinearDS::computeRhs(double time) {
@@ -149,46 +129,70 @@ void siconos::modeling::FirstOrderNonLinearDS::computeRhs(double time) {
   }
 
   if (MMatrix_view_) {
-    if (computeMMatrix_) {
-      computeMMatrix_(time, *MMatrix_view_);
-      hasLU_M_ = false;  // M has changed, LUM needs to be updated.
+    computeMMatrix(time);
+    if (!hasLU_M_) {
+      // allocate invM at the first call of the present function
+#ifdef SICONOS_SPARSE
+      LU_M_ = std::make_shared<siconos::algebra::SparseLUMatrix>();
+      LU_M_->analysePattern(*MMatrix_view_);
+      LU_M_->factorize(*MMatrix_view_);
+#else
+      LU_M_ = std::make_shared<siconos::algebra::DenseLUMatrix>(*MMatrix_view_);
+#endif
+      *(state_x_[1]) = LU_M_->solve(*(state_x_[1]));
+      hasLU_M_ = true;
     }
-
-    // allocate invM at the first call of the present function
-    LU_M_ =
-        std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(*MMatrix_view_);
-    *(state_x_[1]) = LU_M_->solve(*(state_x_[1]));
-    hasLU_M_ = true;
   }
 }
+
 void siconos::modeling::FirstOrderNonLinearDS::computeJacobianRhsOver_x(double time) {
-  // second argument is useless at the time - Used in derived classes
+  // second argument is useless here but used in derived classes
 
   // compute jacobian of rhs according to x, = M-1(jacobianfx + jacobianX(T.u))
   // At the time, second term is set to zero.
-  // assert(!_pluginJacxf->fPtr &&
-  // "siconos::modeling::FirstOrderNonLinearDS::computeJacobianRhsOver_x: there is no plugin to
-  // compute the jacobian of f");
 
-  if (computejacobianfOver_x_)
+  // Cases:
+  // 1- M not defined then jacobianRhsOver_x_ contains a flat version of jacobianfOver_x_view_
+  // 2- M is defined then jacobianRhsOver_x_ contains a flat version of
+  // M-1.jacobianfOver_x_view_
+
+  if (!hasJacobianfOver_x_) return;
+
+  if (computejacobianfOver_x_)  // if plugged, update
     computejacobianfOver_x_(*state_x_[0], time, *jacobianfOver_x_view_);
-  // solve M*jacobianXRhS = jacobianfx
-  if (MMatrix_view_ && jacobianfOver_x_view_) {
-    if (hasConstantJacobianfOver_x_)  // else memory is shared between jacobianRhsOver_x_
-                                      // and jacobianfOver_x_view_
-      *jacobianRhsOver_x_->block(0, 0) = *jacobianfOver_x_view_;
-    if (computeMMatrix_) {
-      computeMMatrix_(time, *MMatrix_view_);
-      hasLU_M_ = false;  // M has changed, LUM needs to be updated.
-    }
+
+  // If M is defined ...
+  if (MMatrix_view_) {
+    computeMMatrix(time);
     if (!hasLU_M_) {
-      LU_M_ =
-          std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(*MMatrix_view_);
+      // When? If M has been updated or if it's the first call
+      is_jacobianRhsOver_x_uptodate_ = false;
+#ifdef SICONOS_SPARSE
+      LU_M_ = std::make_shared<siconos::algebra::SparseLUMatrix>();
+      LU_M_->analysePattern(*MMatrix_view_);
+      LU_M_->factorize(*MMatrix_view_);
+#else
+      LU_M_ = std::make_shared<siconos::algebra::DenseLUMatrix>(*MMatrix_view_);
+#endif
       hasLU_M_ = true;
     }
-    *(jacobianRhsOver_x_->block(0, 0)) = LU_M_->solve(*(jacobianRhsOver_x_->block(0, 0)));
+    // solve M*jacobianXRhS = jacobianfx
+    if (!is_jacobianRhsOver_x_uptodate_) {
+      // Solve M-1.jacobianfOver_x_view_ in temp result matrix
+      siconos::algebra::SiconosMatrix result = LU_M_->solve(*jacobianfOver_x_view_);
+      // and keep it as a flattened vector
+      jacobianRhsOver_x_.noalias() =
+          Eigen::Map<const Eigen::VectorXd>(result.data(), jacobianRhsOver_x_.size());
+      is_jacobianRhsOver_x_uptodate_ = true;
+    }
+  } else {
+    if (!is_jacobianRhsOver_x_uptodate_) {
+      // No M. Just copy jacobianfOver_x_view_ into jacobianRhsOver_x_ (flat)
+      jacobianRhsOver_x_.noalias() = Eigen::Map<const Eigen::VectorXd>(
+          jacobianfOver_x_view_->data(), jacobianRhsOver_x_.size());
+      is_jacobianRhsOver_x_uptodate_ = true;
+    }
   }
-  // else jacobianRhsOver_x_ = jacobianfx, pointers equality set in initRhs
 }
 
 void siconos::modeling::FirstOrderNonLinearDS::setConstantMMatrix(
@@ -207,6 +211,7 @@ void siconos::modeling::FirstOrderNonLinearDS::setConstantMMatrix(
   hasMMatrix_ = true;
   hasConstantMMatrix_ = true;
   computeMMatrix_ = nullptr;
+  is_jacobianRhsOver_x_uptodate_ = false;
 }
 
 void siconos::modeling::FirstOrderNonLinearDS::setComputeMMatrixFunction(
@@ -228,6 +233,7 @@ void siconos::modeling::FirstOrderNonLinearDS::computeMMatrix(double time) {
   if (computeMMatrix_) {
     computeMMatrix_(time, *MMatrix_view_);
     hasLU_M_ = false;  // M has changed, LUM needs to be updated.
+    is_jacobianRhsOver_x_uptodate_ = false;
   }
 }
 
@@ -256,10 +262,11 @@ void siconos::modeling::FirstOrderNonLinearDS::setComputefVectorFunction(
 
 void siconos::modeling::FirstOrderNonLinearDS::computefVector(
     const Eigen::Ref<siconos::algebra::SiconosVector> &state, double time) {
-  if (computefVector_)
+  if (computefVector_) {
     // in that case, internal_storage must have been allocated by
     // setCompute... call
     computefVector_(state, time, *fVector_view_);
+  }
 }
 
 void siconos::modeling::FirstOrderNonLinearDS::setConstantJacobianfOver_x(
@@ -278,6 +285,7 @@ void siconos::modeling::FirstOrderNonLinearDS::setConstantJacobianfOver_x(
   hasJacobianfOver_x_ = true;
   hasConstantJacobianfOver_x_ = true;
   computejacobianfOver_x_ = nullptr;
+  is_jacobianRhsOver_x_uptodate_ = false;
 }
 
 void siconos::modeling::FirstOrderNonLinearDS::setComputeJacobianfOver_xFunction(
@@ -300,14 +308,12 @@ void siconos::modeling::FirstOrderNonLinearDS::computeJacobianfOver_x(
     const Eigen::Ref<siconos::algebra::SiconosVector> &state, double time) {
   if (computejacobianfOver_x_) {
     computejacobianfOver_x_(state, time, *jacobianfOver_x_view_);
+    is_jacobianRhsOver_x_uptodate_ = false;
   }
 }
 
 void siconos::modeling::FirstOrderNonLinearDS::updatePlugins(double time) {
-  if (computeMMatrix_) {
-    computeMMatrix_(time, *MMatrix_view_);
-    hasLU_M_ = false;  // M has changed, LUM needs to be updated.
-  }
+  computeMMatrix(time);
   if (computefVector_) computefVector_(*state_x_[0], time, *fVector_view_);
   if (computejacobianfOver_x_)
     computejacobianfOver_x_(*state_x_[0], time, *jacobianfOver_x_view_);

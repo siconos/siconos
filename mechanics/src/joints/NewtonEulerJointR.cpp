@@ -30,15 +30,14 @@ void siconos::joints::NewtonEulerJointR::setPoint(
   // - if shared memory -> see for example the handling of q0 in LagrangianDS
   // - if copy, see below. That's the way we choose for the moment.
   assert(index < points_.size());
-  if (!points_[index]) points_[index] = std::make_shared<siconos::algebra::SiconosVector3>();
-  *points_[index] = point;
+  points_[index] = point;
 }
 
 void siconos::joints::NewtonEulerJointR::setAxis(
     size_t index, const Eigen::Ref<siconos::algebra::SiconosVector3>& axis) {
   assert(index < axes_.size());
-  if (!axes_[index]) axes_[index] = std::make_shared<siconos::algebra::SiconosVector3>();
-  *axes_[index] = axis;
+  axes_[index] = axis;
+  axes_[index].normalize();
 }
 
 siconos::algebra::SiconosVector3 siconos::joints::NewtonEulerJointR::projectVectorDoF(

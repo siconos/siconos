@@ -18,6 +18,8 @@
 
 #include "BlockMatrix.hpp"
 
+#include <memory>
+
 #include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosMatrixOp.hpp"  // For setBlock, isComparableto ...
@@ -59,6 +61,7 @@ siconos::algebra::BlockMatrix::BlockMatrix(std::shared_ptr<MapType> m) {
   _tabCol->push_back(_dimCol);
 }
 
+#ifndef SICONOS_SPARSE
 siconos::algebra::BlockMatrix::BlockMatrix(Eigen::Ref<siconos::algebra::SiconosMatrix> input) {
   // Initialize _mat
   _mat = std::make_shared<BlocksMatrix>(1, 1);
@@ -75,22 +78,7 @@ siconos::algebra::BlockMatrix::BlockMatrix(Eigen::Ref<siconos::algebra::SiconosM
   _dimCol = input.cols();
   _tabCol->push_back(_dimCol);
 }
-
-// siconos::algebra::BlockMatrix::BlockMatrix(const SiconosMatrix &m) {
-//   _tabRow = std::make_shared<std::vector<std::size_t>>();
-//   _tabCol = std::make_shared<std::vector<std::size_t>>();
-
-//   _tabRow->reserve(1);
-//   _tabCol->reserve(1);
-//   // _mat construction
-//   _mat = std::make_shared<BlocksMatrix>(1, 1);
-//   _mat->setValue(0, 0, std::make_shared<SiconosMatrix>(m));
-
-//   _dimRow = m.rows();
-//   _dimCol = m.cols();
-//   _tabRow->push_back(_dimRow);
-//   _tabCol->push_back(_dimCol);
-// }
+#endif
 
 siconos::algebra::BlockMatrix::BlockMatrix(const BlockMatrix &m) {
   unsigned int nbRows = m.numberOfBlocks(0);
@@ -213,15 +201,6 @@ unsigned int siconos::algebra::BlockMatrix::numberOfBlocks(unsigned int dim) con
     return _tabCol->size();
 }
 
-// =================================================
-//        get Ublas component (dense ...)
-// =================================================
-
-double *siconos::algebra::BlockMatrix::getArray(unsigned int i, unsigned int j) const {
-  std::shared_ptr<SiconosMatrix> tmp = (*_mat)(i, j);
-  return tmp->data();
-}
-
 // ===========================
 //       fill matrix
 // ===========================
@@ -232,6 +211,7 @@ void siconos::algebra::BlockMatrix::zero() {
   }
 }
 
+#ifndef SICONOS_SPARSE
 void siconos::algebra::BlockMatrix::randomize() {
   for (auto it : _mat->reshaped()) {
     // auto nrows = it->rows();
@@ -239,6 +219,7 @@ void siconos::algebra::BlockMatrix::randomize() {
     it->setRandom();
   }
 }
+#endif
 
 void siconos::algebra::BlockMatrix::setIdentity() {
   int i = 0, j = 0;
@@ -277,23 +258,23 @@ std::ostream &siconos::algebra::operator<<(std::ostream &os, const BlockMatrix &
 // Elements access (get or set)
 //=============================
 
-double &siconos::algebra::BlockMatrix::operator()(unsigned int row, unsigned int col) {
-  unsigned int nbRow = 0;
-  unsigned int nbCol = 0;
+// // double &siconos::algebra::BlockMatrix::operator()(unsigned int row, unsigned int col) {
+// //   unsigned int nbRow = 0;
+// //   unsigned int nbCol = 0;
 
-  while (row >= (*_tabRow)[nbRow] && nbRow < _tabRow->size()) nbRow++;
+// //   while (row >= (*_tabRow)[nbRow] && nbRow < _tabRow->size()) nbRow++;
 
-  while (col >= (*_tabCol)[nbCol] && nbCol < _tabCol->size()) nbCol++;
+// //   while (col >= (*_tabCol)[nbCol] && nbCol < _tabCol->size()) nbCol++;
 
-  unsigned int posRow = row;
-  unsigned int posCol = col;
+// //   unsigned int posRow = row;
+// //   unsigned int posCol = col;
 
-  if (nbRow != 0) posRow -= (*_tabRow)[nbRow - 1];
-  if (nbCol != 0) posCol -= (*_tabCol)[nbCol - 1];
+// //   if (nbRow != 0) posRow -= (*_tabRow)[nbRow - 1];
+// //   if (nbCol != 0) posCol -= (*_tabCol)[nbCol - 1];
 
-  std::shared_ptr<SiconosMatrix> tmp = (*_mat)(nbRow, nbCol);
-  return (*tmp)(posRow, posCol);
-}
+// //   std::shared_ptr<SiconosMatrix> tmp = (*_mat)(nbRow, nbCol);
+// //   return tmp->coeff(posRow, posCol);
+// // }
 
 double siconos::algebra::BlockMatrix::operator()(unsigned int row, unsigned int col) const {
   unsigned int nbRow = 0;
@@ -310,45 +291,45 @@ double siconos::algebra::BlockMatrix::operator()(unsigned int row, unsigned int 
   if (nbCol != 0) posCol -= (*_tabCol)[nbCol - 1];
 
   std::shared_ptr<SiconosMatrix> tmp = (*_mat)(nbRow, nbCol);
-  return (*tmp)(posRow, posCol);
+  return tmp->coeff(posRow, posCol);
 }
 
-double siconos::algebra::BlockMatrix::getValue(unsigned int row, unsigned int col) const {
-  unsigned int nbRow = 0;
-  unsigned int nbCol = 0;
+// double siconos::algebra::BlockMatrix::getValue(unsigned int row, unsigned int col) const {
+//   unsigned int nbRow = 0;
+//   unsigned int nbCol = 0;
 
-  while (row >= (*_tabRow)[nbRow] && nbRow < _tabRow->size()) nbRow++;
+//   while (row >= (*_tabRow)[nbRow] && nbRow < _tabRow->size()) nbRow++;
 
-  while (col >= (*_tabCol)[nbCol] && nbCol < _tabCol->size()) nbCol++;
+//   while (col >= (*_tabCol)[nbCol] && nbCol < _tabCol->size()) nbCol++;
 
-  unsigned int posRow = row;
-  unsigned int posCol = col;
+//   unsigned int posRow = row;
+//   unsigned int posCol = col;
 
-  if (nbRow != 0) posRow -= (*_tabRow)[nbRow - 1];
-  if (nbCol != 0) posCol -= (*_tabCol)[nbCol - 1];
+//   if (nbRow != 0) posRow -= (*_tabRow)[nbRow - 1];
+//   if (nbCol != 0) posCol -= (*_tabCol)[nbCol - 1];
 
-  std::shared_ptr<SiconosMatrix> tmp = (*_mat)(nbRow, nbCol);
-  return (*tmp)(posRow, posCol);
-}
+//   std::shared_ptr<SiconosMatrix> tmp = (*_mat)(nbRow, nbCol);
+//   return (*tmp)(posRow, posCol);
+// }
 
-void siconos::algebra::BlockMatrix::setValue(unsigned int row, unsigned int col,
-                                             double value) {
-  unsigned int nbRow = 0;
-  unsigned int nbCol = 0;
+// void siconos::algebra::BlockMatrix::setValue(unsigned int row, unsigned int col,
+//                                              double value) {
+//   unsigned int nbRow = 0;
+//   unsigned int nbCol = 0;
 
-  while (row >= (*_tabRow)[nbRow] && nbRow < _tabRow->size()) nbRow++;
+//   while (row >= (*_tabRow)[nbRow] && nbRow < _tabRow->size()) nbRow++;
 
-  while (col >= (*_tabCol)[nbCol] && nbCol < _tabCol->size()) nbCol++;
+//   while (col >= (*_tabCol)[nbCol] && nbCol < _tabCol->size()) nbCol++;
 
-  unsigned int posRow = row;
-  unsigned int posCol = col;
+//   unsigned int posRow = row;
+//   unsigned int posCol = col;
 
-  if (nbRow != 0) posRow -= (*_tabRow)[nbRow - 1];
-  if (nbCol != 0) posCol -= (*_tabCol)[nbCol - 1];
+//   if (nbRow != 0) posRow -= (*_tabRow)[nbRow - 1];
+//   if (nbCol != 0) posCol -= (*_tabCol)[nbCol - 1];
 
-  std::shared_ptr<SiconosMatrix> tmp = (*_mat)(nbRow, nbCol);
-  (*tmp)(posRow, posCol) = value;
-}
+//   std::shared_ptr<SiconosMatrix> tmp = (*_mat)(nbRow, nbCol);
+//   (*tmp)(posRow, posCol) = value;
+// }
 
 std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::algebra::BlockMatrix::block(
     unsigned int row, unsigned int col) {
@@ -397,17 +378,17 @@ size_t siconos::algebra::BlockMatrix::nonZeros(double tol) {
 //       get norm
 //=======================
 
-double siconos::algebra::normInf(const siconos::algebra::BlockMatrix &mat) {
-  double sum = 0, norm = 0;
-  for (unsigned int i = 0; i < mat.rows(); i++) {
-    for (unsigned int j = 0; j < mat.cols(); j++) {
-      sum += mat(i, j);
-    }
-    if (fabs(sum) > norm) norm = fabs(sum);
-    sum = 0;
-  }
-  return norm;
-}
+// double siconos::algebra::normInf(const siconos::algebra::BlockMatrix &mat) {
+//   double sum = 0, norm = 0;
+//   for (unsigned int i = 0; i < mat.rows(); i++) {
+//     for (unsigned int j = 0; j < mat.cols(); j++) {
+//       sum += mat(i, j);
+//     }
+//     if (fabs(sum) > norm) norm = fabs(sum);
+//     sum = 0;
+//   }
+//   return norm;
+// }
 
 //=====================
 // screen display

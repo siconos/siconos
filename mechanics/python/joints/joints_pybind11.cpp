@@ -39,38 +39,27 @@ PYBIND11_MODULE(_joints, m) {
              siconos::modeling::NewtonEulerR>(m, "NewtonEulerJointR")
       .def("setAbsolute", &siconos::joints::NewtonEulerJointR::setAbsolute,
            "To set the absolute reference frame for the joint")
-      .def("setPoint",
-           py::overload_cast<size_t, const Eigen::Ref<siconos::algebra::SiconosVector3>&>(
-               &siconos::joints::NewtonEulerJointR::setPoint),
-           py::arg("index"), py::arg("point"), "To define a point in the joint")
-      .def("setAxis", &siconos::joints::NewtonEulerJointR::setAxis,
-           "To define an axis in the joint");
+      .def("setPoint", &siconos::joints::NewtonEulerJointR::setPoint, py::arg("index"),
+           py::arg("point"))
+      .def("setAxis", &siconos::joints::NewtonEulerJointR::setAxis)
+      .def("numberOfConstraints", &siconos::joints::NewtonEulerJointR::numberOfConstraints,
+           "To get the number of constraints in the joint")
+      .def("setBasePositions", &siconos::joints::NewtonEulerJointR::setBasePositions,
+           "To define the base position of the joint");
 
   py::class_<siconos::joints::CylindricalJointR,
              std::shared_ptr<siconos::joints::CylindricalJointR>,
              siconos::joints::NewtonEulerJointR>(m, "CylindricalJointR")
-      .def(py::init<>(), "Default constructor for CylindricalJointR")
-      .def("setBasePositions", &siconos::joints::CylindricalJointR::setBasePositions,
-           "To define the base position of the joint")
-      .def("numberOfConstraints", &siconos::joints::CylindricalJointR::numberOfConstraints,
-           "To get the number of constraints in the joint");
+      .def(py::init<>(), "Default constructor for CylindricalJointR");
 
   py::class_<siconos::joints::PrismaticJointR,
              std::shared_ptr<siconos::joints::PrismaticJointR>,
              siconos::joints::NewtonEulerJointR>(m, "PrismaticJointR")
-      .def(py::init<>(), "Default constructor for PrismaticJointR")
-      .def("setBasePositions", &siconos::joints::PrismaticJointR::setBasePositions,
-           "To define the base position of the joint")
-      .def("numberOfConstraints", &siconos::joints::PrismaticJointR::numberOfConstraints,
-           "To get the number of constraints in the joint");
+      .def(py::init<>(), "Default constructor for PrismaticJointR");
 
   py::class_<siconos::joints::FixedJointR, std::shared_ptr<siconos::joints::FixedJointR>,
              siconos::joints::NewtonEulerJointR>(m, "FixedJointR")
-      .def(py::init<>(), "Default constructor for FixedJointR")
-      .def("setBasePositions", &siconos::joints::FixedJointR::setBasePositions,
-           "To define the base position of the joint")
-      .def("numberOfConstraints", &siconos::joints::FixedJointR::numberOfConstraints,
-           "To get the number of constraints in the joint");
+      .def(py::init<>(), "Default constructor for FixedJointR");
 
   py::class_<siconos::joints::KneeJointR, std::shared_ptr<siconos::joints::KneeJointR>,
              siconos::joints::NewtonEulerJointR>(m, "KneeJointR")
@@ -78,11 +67,7 @@ PYBIND11_MODULE(_joints, m) {
 
   py::class_<siconos::joints::PivotJointR, std::shared_ptr<siconos::joints::PivotJointR>,
              siconos::joints::KneeJointR>(m, "PivotJointR")
-      .def(py::init<>(), "Default constructor for PivotJointR")
-      .def("setBasePositions", &siconos::joints::PivotJointR::setBasePositions,
-           "To define the base position of the joint")
-      .def("numberOfConstraints", &siconos::joints::PivotJointR::numberOfConstraints,
-           "To get the number of constraints in the joint");
+      .def(py::init<>(), "Default constructor for PivotJointR");
 
   py::class_<siconos::joints::CouplerJointR, std::shared_ptr<siconos::joints::CouplerJointR>,
              siconos::joints::NewtonEulerJointR>(m, "CouplerJointR")
@@ -99,9 +84,5 @@ PYBIND11_MODULE(_joints, m) {
                     std::shared_ptr<siconos::modeling::NewtonEulerDS>, unsigned int>(),
            py::arg("joint1"), py::arg("dof1"), py::arg("joint2"), py::arg("dof2"),
            py::arg("ratio"), py::arg("refds1"), py::arg("ref1_index") = 0, py::arg("refds2"),
-           py::arg("ref2_index") = 0)
-      .def("setBasePositions", &siconos::joints::CouplerJointR::setBasePositions,
-           "To define the base position of the joint")
-      .def("numberOfConstraints", &siconos::joints::CouplerJointR::numberOfConstraints,
-           "To get the number of constraints in the joint");
+           py::arg("ref2_index") = 0);
 }

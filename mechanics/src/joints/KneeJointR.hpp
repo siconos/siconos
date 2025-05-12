@@ -35,18 +35,17 @@ class KneeJointR : public NewtonEulerJointR {
  protected:
   ACCEPT_SERIALIZATION(KneeJointR);
 
-  /** Coordinate of the knee point in the body frame of the first dynamical system _d1
-   */
-  std::shared_ptr<siconos::algebra::SiconosVector3> P0_{nullptr};
+  // For this joint, points_[0] corresponds to the coordinate of the knee point
+  // in the body frame of the first dynamical system _d1
 
   /**Absolute coodinates of the vector  G1P0 when d1 is located in q=(0,0,0,1,0,0,0)
-   * i.e. P0 in the body frame of d1.
+   * i.e. points_[0] in the body frame of d1.
    * These values are computed when the constructor is called.
    */
   siconos::algebra::SiconosVector3 G1P0_ = siconos::algebra::SiconosVector3::Zero();
 
   /** Absolute coodinates of the vector G2P0 when d2 is located in q=(0,0,0,1,0,0,0)
-   *  i.e. P0 in the body frame of d2.
+   *  i.e. points_[0] in the body frame of d2.
    * These values are computed when the constructor is called.
    */
   siconos::algebra::SiconosVector3 G2P0_ = siconos::algebra::SiconosVector3::Zero();

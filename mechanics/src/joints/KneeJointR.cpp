@@ -41,10 +41,9 @@ siconos::joints::KneeJointR::KneeJointR(const Eigen::Ref<siconos::algebra::Sicon
                                         bool absoluteRef,
                                         std::shared_ptr<siconos::modeling::NewtonEulerDS> d1,
                                         std::shared_ptr<siconos::modeling::NewtonEulerDS> d2) {
-  P0_ = std::make_shared<siconos::algebra::SiconosVector3>();
 
+  points_.emplace_back(P);                                          
   setAbsolute(absoluteRef);
-  setPoint(0, P);
   if (d1) {
     if (d2) {
       setBasePositions(d1->q_read(), d2->q_read());
@@ -73,8 +72,7 @@ siconos::joints::KneeJointR::KneeJointR(const Eigen::Ref<siconos::algebra::Sicon
 siconos::joints::KneeJointR::KneeJointR()
 {
   points_.resize(1);
-  P0_ = std::make_shared<siconos::algebra::SiconosVector3>();
-  P0_->setZero();
+  points_[0].setZero();
 }
 
 void siconos::joints::KneeJointR::checkInitPos(
@@ -111,24 +109,25 @@ void siconos::joints::KneeJointR::checkInitPos(
 void siconos::joints::KneeJointR::setBasePositions(
     const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
     const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2) {
-  *P0_ = *points_[0];
+
+  // Assumes that points_[0] is properly set 
   boost::math::quaternion<double> rot1{siconos::geometry::rotquat(q1)}, quatBuff, quatP0_abs;
 
   /** Computation of G1P0_ and G2P0_ */
 
   /* Calculate G1P0 and P0_abs */
   if (absoluteRef_) {
-    quatP0_abs = siconos::geometry::posquat(*P0_);
+    quatP0_abs = siconos::geometry::posquat(points_[0]);
 
     /* Move to q1 frame by unapplying q1 frame translation/rotation */
     quatBuff = (1.0 / rot1) * (quatP0_abs - siconos::geometry::posquat(q1)) * rot1;
     G1P0_ << quatBuff.R_component_2(), quatBuff.R_component_3(), quatBuff.R_component_4();
   } else {
-    G1P0_ = *P0_;
+    G1P0_ = points_[0];
 
     /* Move to abs frame by applying q1 frame rotation/translation */
     quatP0_abs =
-        (rot1 * siconos::geometry::posquat(*P0_) / rot1) + siconos::geometry::posquat(q1);
+        (rot1 * siconos::geometry::posquat(points_[0]) / rot1) + siconos::geometry::posquat(q1);
   }
 
   /* Calculate G2P0, or set it to P0_abs (i.e. G2=absolute frame) */

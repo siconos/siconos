@@ -21,11 +21,12 @@
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include <string>
 
-#include "SiconosAlgebraTypes.hpp"
+#include "BlockMatrix.hpp"
+#include "BlockVector.hpp"
 #include "SiconosConfig.h"
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixOp.hpp"
 #include "SiconosVector.hpp"
-#include "SiconosMatrix.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
   if ((alpha) == (omega)) CPPUNIT_FAIL(message);

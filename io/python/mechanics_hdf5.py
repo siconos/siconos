@@ -31,7 +31,8 @@ if hasattr(h5py, "vlen_dtype"):
 elif hasattr(h5py, "new_vlen"):
     h5py_vlen_dtype = h5py.new_vlen
 
-# Constants
+# Mapping from joint type to expected number of points and axes.
+# Format: joint_type -> (number_of_points, number_of_axes)
 joint_points_axes = {
     "KneeJointR": (1, 0),
     "PivotJointR": (1, 1),
@@ -42,18 +43,27 @@ joint_points_axes = {
 
 
 def check_points_axes(name, joint_class, points, axes):
+    """
+    Check that the number and shape of provided `points` and `axes`
+    match what is expected for the given joint type.
+
+    Parameters
+    ----------
+    name : str
+        The name of the joint
+    joint_class : str
+        The type of joint. Must be one of the keys in `joint_points_axes`.
+    points : np.ndarray, optional
+        array of points
+    axes : np.ndarray, optional
+        array of axes
+    """
+
     def check(x, idx):
         def er():
             n = joint_points_axes[joint_class][idx]
-            raise ValueError(
-                "{} ({}) expects {} {} (got {})".format(
-                    joint_class,
-                    name,
-                    n,
-                    ["point", "points", "axis", "axes"][idx * 2 + 1 * (n != 1)],
-                    x,
-                )
-            )
+            item_type = "point" if idx == 0 else "axis"
+            raise ValueError(f"{joint_class} ({name}) expects {n} {item_type}(got {x})")
 
         if np.shape(x) == (0,) or np.shape(x) == ():
             num = 0

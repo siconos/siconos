@@ -133,8 +133,6 @@ bool siconos::algebra::io::write(const std::string &filename, const SiconosMatri
 
   if (!outfile.good()) THROW_EXCEPTION("");
 
-  // if (m.isBlock()) THROW_EXCEPTION("not yet implemented for BlockMatrix");
-
   outfile.precision(15);
   outfile.setf(std::ios::scientific);
   // Writing

@@ -86,9 +86,10 @@ class BlockMatrix {
    */
   BlockMatrix(std::shared_ptr<MapType> m);
 
+#ifndef SICONOS_SPARSE
   /** Build from eigen view (shared-memory !) */
   BlockMatrix(Eigen::Ref<siconos::algebra::SiconosMatrix> input);
-
+#endif
   // /** copy constructor
   //  *  \param m a SiconosMatrix
   //  */
@@ -128,21 +129,16 @@ class BlockMatrix {
    */
   unsigned int numberOfBlocks(unsigned int i) const;
 
-  /** return the address of the array of double values of the matrix
-   *  \param row position for the required block ->useless for SiconosMatrix
-   *  \param col position for the required block ->useless for SiconosMatrix
-   *  \return double* : the pointer on the double array
-   */
-  double *getArray(unsigned int row = 0, unsigned int col = 0) const;
-
   /** sets all the values of the matrix to 0.0
    */
   void zero();
 
+#ifndef SICONOS_SPARSE
+
   /** Initialize the matrix with random values
    */
   void randomize();
-
+#endif
   /** set an identity matrix
    */
   void setIdentity();
@@ -155,12 +151,12 @@ class BlockMatrix {
 
   friend std::ostream &operator<<(std::ostream &os, const BlockMatrix &bm);
 
-  /** get or set the element matrix[i,j]
-   *  \param i an unsigned int
-   *  \param j an unsigned int
-   *  \return the element matrix[i,j]
-   */
-  double &operator()(unsigned int i, unsigned int j);
+  // /** get or set the element matrix[i,j]
+  //  *  \param i an unsigned int
+  //  *  \param j an unsigned int
+  //  *  \return the element matrix[i,j]
+  //  */
+  // double &operator()(unsigned int i, unsigned int j);
 
   /** get or set the element matrix[i,j]
    *  \param i an unsigned int
@@ -169,19 +165,19 @@ class BlockMatrix {
    */
   double operator()(unsigned int i, unsigned int j) const;
 
-  /** return the element matrix[i,j]
-   *  \param i an unsigned int
-   *  \param j an unsigned int
-   *  \return a double
-   */
-  double getValue(unsigned int i, unsigned int j) const;
+  // /** return the element matrix[i,j]
+  //  *  \param i an unsigned int
+  //  *  \param j an unsigned int
+  //  *  \return a double
+  //  */
+  // double getValue(unsigned int i, unsigned int j) const;
 
-  /** set the element matrix[i,j]
-   *  \param i an unsigned int i
-   *  \param j an unsigned int j
-   *  \param value
-   */
-  void setValue(unsigned int i, unsigned int j, double value);
+  // /** set the element matrix[i,j]
+  //  *  \param i an unsigned int i
+  //  *  \param j an unsigned int j
+  //  *  \param value
+  //  */
+  // // //void setValue(unsigned int i, unsigned int j, double value);
 
   /** get the vector tabRow
    *  \return a vector of int
@@ -247,7 +243,7 @@ class BlockMatrix {
 /** \return compute the infinite norm of a matrix
  *  \param mat the input matrix
  */
-double normInf(const BlockMatrix &mat);
+// double normInf(const BlockMatrix &mat);
 
 /** display data on standard output
  *  \param mat the input matrix

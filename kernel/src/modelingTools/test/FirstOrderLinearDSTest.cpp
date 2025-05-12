@@ -106,11 +106,13 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS0() {
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testBuildFirstOrderNonLinearDS1 : ", (*ds->rhs() - ref_rhs).norm() < 1e-15, true);
 
-  auto b00 = ds->jacobianRhsOver_x()->block(0, 0);
+  const auto& b00 = ds->jacobianRhsOver_x();
   auto ref_block = LUM.solve(*A0).eval();
-
+  siconos::algebra::SiconosVector jacoref;
+  auto x_size = ds->dimension();
+  jacoref.noalias() = Eigen::Map<const Eigen::VectorXd>(ref_block.data(), ref_block.size());
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildFirstOrderNonLinearDS1 : ", (*b00 - ref_block).norm() < 1e-15, true);
+      "testBuildFirstOrderNonLinearDS3 : ", jacoref.isApprox(b00, 1e-12), true);
 
   std::cout << "--> Constructor 0 test ended with success." << std::endl;
 }
@@ -169,20 +171,23 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS1() {
   Mref(0, 0) = 1. * time;
   Mref(1, 1) = 2. * time;
   Mref(2, 2) = 3. * time;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3 : ", ds->MMatrix() == Mref,
-                               true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", ds->MMatrix() == Mref, true);
 
   // Rhs ...
   ds->initRhs(time);
   auto LUM = Mref.lu();
   auto ref_rhs = LUM.solve(ds->A() * *x0 + ds->bVector()).eval();
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildFirstOrderNonLinearDS3 : ", (*ds->rhs() - ref_rhs).norm() < 1e-15, true);
+      "testBuildFirstOrderLinearDS1 : ", (*ds->rhs() - ref_rhs).norm() < 1e-15, true);
 
-  auto b00 = ds->jacobianRhsOver_x()->block(0, 0);
+  const auto& b00 = ds->jacobianRhsOver_x();
   auto ref_block = LUM.solve(ds->A()).eval();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildFirstOrderNonLinearDS3 : ", (*b00 - ref_block).norm() < 1e-15, true);
+  siconos::algebra::SiconosVector jacoref;
+  auto x_size = ds->dimension();
+  jacoref.noalias() = Eigen::Map<const Eigen::VectorXd>(ref_block.data(), ref_block.size());
+
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS1 : ", jacoref.isApprox(b00, 1e-12),
+                               true);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearDS0 : ", ds->isTimeInvariant(),
                                false);

@@ -41,19 +41,15 @@ class CylindricalJointR : public NewtonEulerJointR {
  protected:
   ACCEPT_SERIALIZATION(CylindricalJointR);
 
-  /** Axis of the cylindrical point in the q1 frame of reference
-   */
-  siconos::algebra::SiconosVector3 axis0_;
-
-  /** axis1_ is an unit vector that is orthogonal to the cylindrical axis
-   * axis0_.  It forms with axis2_ and axis0_ a base such that
-   * (axis0_,axis1_,_v2) is an orthogonal frame
+  /** axis1_ is a unit vector that is orthogonal to the cylindrical axis
+   * axes_[0].  It forms with axis2_ and axes_[0] a base such that
+   * (axes_[0],axis1_,_v2) is an orthogonal frame
    */
   siconos::algebra::SiconosVector3 axis1_;
 
-  /** axis2_ is an unit vector that is orthogonal to the cylindrical axis
-   * axis0_.  It forms with axis2_ and axis0_ a base such that
-   * (axis0_,axis1_,_v2) is an orthogonal frame
+  /** axis2_ is a unit vector that is orthogonal to the cylindrical axis
+   * axes_[0].  It forms with axis2_ and axes_[0] a base such that
+   * (axes_[0],axis1_,_v2) is an orthogonal frame
    */
   siconos::algebra::SiconosVector3 axis2_;
 
@@ -63,7 +59,7 @@ class CylindricalJointR : public NewtonEulerJointR {
   double _cq2q104{0.};
 
   /** P is the point defining the location of the line created by
-   * axis0_.  It is stored in the q1 frame, i.e. the vector from
+   * axes_[0].  It is stored in the q1 frame, i.e. the vector from
    * initial G1 to P, called _G1P0. */
   std::shared_ptr<siconos::algebra::SiconosVector3> _G1P0{nullptr};
 
@@ -85,7 +81,7 @@ class CylindricalJointR : public NewtonEulerJointR {
   virtual void computeH_NE_(double time, siconos::modeling::Interaction& inter,
                             const siconos::algebra::BlockVector& q0) override;
 
-  void computeOrthonormalBaseFromAxis();
+  // void computeOrthonormalBaseFromAxis();
 
  public:
   /** Default constructor */

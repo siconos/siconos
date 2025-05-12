@@ -38,8 +38,8 @@
  * from sympy import Symbol
  * import numpy as np
  *
- * A1 = np.array([0, Symbol('A1_(0)'), Symbol('A1_(1)'), Symbol('A1_(2)')])
- * A2 = np.array([0, Symbol('A2_(0)'), Symbol('A2_(1)'), Symbol('A2_(2)')])
+ * A1 = np.array([0, Symbol('axis1_(0)'), Symbol('axis1_(1)'), Symbol('axis1_(2)')])
+ * A2 = np.array([0, Symbol('axis2_(0)'), Symbol('axis2_(1)'), Symbol('axis2_(2)')])
  * q1 = np.array([Symbol('q10'), Symbol('q11'), Symbol('q12'), Symbol('q13')])
  * q2 = np.array([Symbol('q20'), Symbol('q21'), Symbol('q22'), Symbol('q23')])
  * cq2q10 = np.array([Symbol('cq2q_(0)'),Symbol('cq2q_(1)'),
@@ -61,8 +61,7 @@ double piwrap(double x) {
 
 siconos::joints::PivotJointR::PivotJointR() : KneeJointR{} {
   axes_.resize(1);
-  axis_coords_ = std::make_shared<siconos::algebra::SiconosVector3>();
-  axis_coords_->setZero();
+  axes_[0].setZero();
 }
 
 siconos::joints::PivotJointR::PivotJointR(
@@ -70,9 +69,9 @@ siconos::joints::PivotJointR::PivotJointR(
     const Eigen::Ref<siconos::algebra::SiconosVector3>& A, bool absoluteRef,
     std::shared_ptr<siconos::modeling::NewtonEulerDS> d1,
     std::shared_ptr<siconos::modeling::NewtonEulerDS> d2)
-    : KneeJointR{P, absoluteRef, d1, d2},
-      axis_coords_{std::make_shared<siconos::algebra::SiconosVector3>()} {
-  setAxis(0, A);
+    : KneeJointR{P, absoluteRef, d1, d2} {
+  axes_.emplace_back(A);
+  axes_[0].normalize();
   if (d1) {
     if (d2)
       setBasePositions(d1->q_read(), d2->q_read());
@@ -87,18 +86,17 @@ void siconos::joints::PivotJointR::setBasePositions(
     const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2) {
   KneeJointR::setBasePositions(q1, q2);
 
+  // Assume that axes_[0] has been properly set (by constructor or setAxis)
+
   // The provided axis is the basis for the orthogonal plane
   // constraint relative to q1.
-  *axis_coords_ = *axes_[0];
-
   // If provided in absolute coordinates, must be rotated to q1 frame.
   if (absoluteRef_) {
     boost::math::quaternion<double> rot1{siconos::geometry::rotquat(q1)}, quatBuff;
 
     // Move to q1 frame by unapplying q1 frame rotation
-    quatBuff = (1.0 / rot1) * siconos::geometry::posquat(*axis_coords_) * rot1;
-    *axis_coords_ << quatBuff.R_component_2(), quatBuff.R_component_3(),
-        quatBuff.R_component_4();
+    quatBuff = (1.0 / rot1) * siconos::geometry::posquat(axes_[0]) * rot1;
+    axes_[0] << quatBuff.R_component_2(), quatBuff.R_component_3(), quatBuff.R_component_4();
   }
   boost::math::quaternion<double> cq2q10;
   if (q2)
@@ -120,13 +118,13 @@ void siconos::joints::PivotJointR::setBasePositions(
   else
     pivot::rot2to1(q1.tail(4), Eigen::Vector4d(1, 0, 0, 0), cq2q_, rot221);
 
-  _initial_AscalA1 = A1_.dot(rot221.head(3));
-  _initial_AscalA2 = A2_.dot(rot221.head(3));
+  _initial_AscalA1 = axis1_.dot(rot221.head(3));
+  _initial_AscalA2 = axis2_.dot(rot221.head(3));
 
   // In case of joint constraints, it's okay to use dot product=0, but
   // in the case of the free axis we must measure the actual angle
   // using atan2 so that stops can be placed correctly.
-  double Adot2to1 = axis_coords_->dot(rot221.head(3));
+  double Adot2to1 = axes_[0].dot(rot221.head(3));
   _initial_AscalA = 2 * atan2(rot221(3), Adot2to1);
 
   _twistCount = 0;
@@ -134,10 +132,10 @@ void siconos::joints::PivotJointR::setBasePositions(
 }
 
 void siconos::joints::PivotJointR::buildOrthonormalBase() {
-  // Update axis_coords, A1 and A2 and check
+  // Update axes_[0], A1 and A2 and check
 
-  // Compute orthonormal basis (axis_coords_,A1,A2) from axis_coords_
-  auto base_ok = siconos::algebra::orthoBaseFromVector(*axis_coords_, A1_, A2_);
+  // Compute orthonormal basis (axes_[0],A1,A2) from axes_[0]
+  auto base_ok = siconos::geometry::orthoBaseFromVector(axes_[0], axis1_, axis2_);
   if (!base_ok)
     THROW_EXCEPTION(
         "siconos::joints::PivotJointR::buildOrthonormalBase. Can not compute orthonormal "
@@ -152,10 +150,10 @@ void siconos::joints::PivotJointR::computeH_NE_(double time,
   // Only the quaternion part of q is required to compute H (last 4 components)
   if (q0.numberOfBlocks() > 1) {
     auto q2 = q0.vector(1);
-    pivot::computeH_for_2DS(q1->tail(4), G1P0_, q2->tail(4), G2P0_, A1_, A2_, cq2q_,
+    pivot::computeH_for_2DS(q1->tail(4), G1P0_, q2->tail(4), G2P0_, axis1_, axis2_, cq2q_,
                             *H_NE_view_);
   } else
-    pivot::computeH_for_1DS(q1->tail(4), G1P0_, A1_, A2_, cq2q_, *H_NE_view_);
+    pivot::computeH_for_1DS(q1->tail(4), G1P0_, axis1_, axis2_, cq2q_, *H_NE_view_);
 }
 
 void siconos::joints::PivotJointR::computeh(const siconos::algebra::BlockVector& q0,
@@ -170,8 +168,8 @@ void siconos::joints::PivotJointR::computeh(const siconos::algebra::BlockVector&
   } else
     pivot::rot2to1(q1->tail(4), Eigen::Vector4d(1, 0, 0, 0), cq2q_, rot221);
 
-  y(3) = A1_.dot(rot221) - _initial_AscalA1;
-  y(4) = A2_.dot(rot221) - _initial_AscalA2;
+  y(3) = axis1_.dot(rot221) - _initial_AscalA1;
+  y(4) = axis2_.dot(rot221) - _initial_AscalA2;
 }
 
 /** Compute the vector of linear and angular positions of the free axes */
@@ -193,7 +191,7 @@ void siconos::joints::PivotJointR::computehDoF(
   // In case of joint constraints, it's okay to use dot product=0, but
   // in the case of the free axis we must measure the actual angle
   // using atan2 so that stops can be placed correctly.
-  double Adot2to1 = axis_coords_->dot(rot221.head(3));
+  double Adot2to1 = axes_[0].dot(rot221.head(3));
   double wrappedAngle = piwrap(2 * atan2(rot221(3), Adot2to1) - _initial_AscalA);
 
   // Count the number of twists around the angle, and report the
@@ -274,9 +272,9 @@ void siconos::joints::PivotJointR::computeJachqDoF(
   double x17 = q13 * x14;
   double x18 = cq2q_(0) * q20 - cq2q_(1) * q21 - cq2q_(2) * q22 - cq2q_(3) * q23;
   double x19 = q10 * x18;
-  double x20 = (*axis_coords_)(0) * (q10 * x4 + q11 * x18 - q12 * x14 + q13 * x9) +
-               (*axis_coords_)(1) * (q10 * x9 + q11 * x14 + q12 * x18 - q13 * x4) +
-               (*axis_coords_)(2) * (q10 * x14 - q11 * x9 + q12 * x4 + q13 * x18);
+  double x20 = axes_[0](0) * (q10 * x4 + q11 * x18 - q12 * x14 + q13 * x9) +
+               axes_[0](1) * (q10 * x9 + q11 * x14 + q12 * x18 - q13 * x4) +
+               axes_[0](2) * (q10 * x14 - q11 * x9 + q12 * x4 + q13 * x18);
   double x21 = 1.0 / (pow(x20, 2) + pow(-x15 - x16 - x17 + x19, 2));
   double x22 = 2 * x21 * (x15 + x16 + x17 - x19);
   double x23 = 2 * x20 * x21;
@@ -319,20 +317,13 @@ void siconos::joints::PivotJointR::computeJachqDoF(
   double x60 = x34 + x55;
 
   jachq.setValue(0, 3,
-                 x18 * x23 + x22 * ((*axis_coords_)(0) * x4 + (*axis_coords_)(1) * x9 +
-                                    (*axis_coords_)(2) * x14));
+                 x18 * x23 + x22 * (axes_[0](0) * x4 + axes_[0](1) * x9 + axes_[0](2) * x14));
   jachq.setValue(
-      0, 4,
-      x22 * ((*axis_coords_)(0) * x18 + (*axis_coords_)(1) * x14 + (*axis_coords_)(2) * x24) +
-          x23 * x25);
-  jachq.setValue(
-      0, 5,
-      x22 * ((*axis_coords_)(0) * x26 + (*axis_coords_)(1) * x18 + (*axis_coords_)(2) * x4) +
-          x23 * x24);
-  jachq.setValue(
-      0, 6,
-      x22 * ((*axis_coords_)(0) * x9 + (*axis_coords_)(1) * x25 + (*axis_coords_)(2) * x18) +
-          x23 * x26);
+      0, 4, x22 * (axes_[0](0) * x18 + axes_[0](1) * x14 + axes_[0](2) * x24) + x23 * x25);
+  jachq.setValue(0, 5,
+                 x22 * (axes_[0](0) * x26 + axes_[0](1) * x18 + axes_[0](2) * x4) + x23 * x24);
+  jachq.setValue(0, 6,
+                 x22 * (axes_[0](0) * x9 + axes_[0](1) * x25 + axes_[0](2) * x18) + x23 * x26);
 
   if (q0.numberOfBlocks() < 2) return;
 
@@ -342,26 +333,22 @@ void siconos::joints::PivotJointR::computeJachqDoF(
    * for i in range(4): print('jachq.setValue(0, {}, {});'.format(i+10,e[i+4]))
    */
 
-  jachq.setValue(
-      0, 10,
-      x22 * ((*axis_coords_)(0) * (x30 + x31 + x33) + (*axis_coords_)(1) * (x34 + x35 + x40) +
-             (*axis_coords_)(2) * (x44 + x45 + x47)) +
-          x23 * (x48 + x49 + x52));
-  jachq.setValue(
-      0, 11,
-      x22 * ((*axis_coords_)(0) * (-x49 + x52 + x53) + (*axis_coords_)(1) * (x44 + x46 + x54) +
-             (*axis_coords_)(2) * (-x34 + x40 + x55)) +
-          x23 * (x30 + x32 + x56));
+  jachq.setValue(0, 10,
+                 x22 * (axes_[0](0) * (x30 + x31 + x33) + axes_[0](1) * (x34 + x35 + x40) +
+                        axes_[0](2) * (x44 + x45 + x47)) +
+                     x23 * (x48 + x49 + x52));
+  jachq.setValue(0, 11,
+                 x22 * (axes_[0](0) * (-x49 + x52 + x53) + axes_[0](1) * (x44 + x46 + x54) +
+                        axes_[0](2) * (-x34 + x40 + x55)) +
+                     x23 * (x30 + x32 + x56));
   jachq.setValue(0, 12,
-                 x22 * ((*axis_coords_)(0) * (-x41 + x43 + x59) +
-                        (*axis_coords_)(1) * (-x50 + x51 + x57) +
-                        (*axis_coords_)(2) * (x27 + x28 + x58)) +
+                 x22 * (axes_[0](0) * (-x41 + x43 + x59) + axes_[0](1) * (-x50 + x51 + x57) +
+                        axes_[0](2) * (x27 + x28 + x58)) +
                      x23 * (x37 + x38 + x60));
-  jachq.setValue(
-      0, 13,
-      x22 * ((*axis_coords_)(0) * (x36 + x39 + x60) + (*axis_coords_)(1) * (-x27 + x29 + x58) +
-             (*axis_coords_)(2) * (x50 - x51 + x57)) +
-          x23 * (x41 + x42 + x59));
+  jachq.setValue(0, 13,
+                 x22 * (axes_[0](0) * (x36 + x39 + x60) + axes_[0](1) * (-x27 + x29 + x58) +
+                        axes_[0](2) * (x50 - x51 + x57)) +
+                     x23 * (x41 + x42 + x59));
 }
 
 siconos::algebra::SiconosVector3 siconos::joints::PivotJointR::normalDoF(
@@ -370,7 +357,7 @@ siconos::algebra::SiconosVector3 siconos::joints::PivotJointR::normalDoF(
   if (axis != 0) return siconos::algebra::SiconosVector3{};
 
   // We assume that A is normalized.
-  auto result = *axis_coords_;
+  auto result = axes_[0];
 
   if (absoluteRef)
     siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(*q0.vector(0), result);

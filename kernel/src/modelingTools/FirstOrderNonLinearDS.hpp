@@ -143,7 +143,7 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
   /**
       Copy of M Matrix, LU-factorized, used to solve systems like Mx = b with LU-factorization.
       (Warning: may not exist, used if we need to avoid factorization in place of M) */
-  std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>> LU_M_{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosLUMatrix> LU_M_{nullptr};
 
   bool hasLU_M_{false};
 

@@ -22,7 +22,6 @@
 #include "Rope.h"
 #include "SiconosKernel.hpp"
 #include "SiconosVector.hpp"
-#include "SiconosVectorIterator.hpp"
 #include "TransportCableProfil.h"
 #include "io.hpp"
 

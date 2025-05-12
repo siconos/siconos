@@ -56,6 +56,6 @@ struct ControlZOHAdditionalTerms : siconos::integrators::ExtraAdditionalTerms {
   virtual void addJacobianRhsContribution(
       siconos::graphs::DynamicalSystemsGraph& DSG0,
       const siconos::graphs::DynamicalSystemsGraph::VDescriptor& dsgVD, const double h,
-      siconos::algebra::SiconosMatrix& jacRhs);
+      siconos::algebra::SiconosVector& jacRhs);
 };
 }

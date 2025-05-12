@@ -15,10 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "SimpleMatrixTest.hpp"
+#include "SiconosMatrixTest.hpp"
 
 #include "NumericsToolsNamespace.h"  // for NM_csc, NM_free ...
-#include "SiconosAlgebraTypes.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosMatrixOp.hpp"        // for prod
 #include "SiconosMatrixVectorOp.hpp"  // for prod
@@ -75,8 +74,6 @@ void SimpleMatrixTest::setUp() {
   m6 = std::make_shared<SiconosMatrix>(size2 - 2, 2);
   m7 = std::make_shared<SiconosMatrix>(2, size2 - 2);
   m8 = std::make_shared<SiconosMatrix>(2, 2);
-  Ab = (std::make_shared<siconos::algebra::BlockMatrix>(m1, m2, m3, m4))->toSiconosMatrix();
-  Cb = std::make_shared<siconos::algebra::BlockMatrix>(m5, m6, m7, m8)->toSiconosMatrix();
 }
 
 void SimpleMatrixTest::tearDown() {}

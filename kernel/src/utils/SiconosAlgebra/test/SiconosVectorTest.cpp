@@ -90,7 +90,7 @@ void SiconosVectorTest::testOrthoBaseFromVector() {
         n << base(i), base(j), base(k);
         if ((i == 1 && j == 1) && k == 1) {
         } else {
-          auto info = siconos::algebra::orthoBaseFromVector(n, t, s);
+          auto info = siconos::geometry::orthoBaseFromVector(n, t, s);
           std::cout << "n: " << n << "\n";
           std::cout << "t: " << t << "\n";
           std::cout << "s: " << s << "\n";

@@ -177,7 +177,7 @@ void siconos::integrators::LsodarOSI::computeRhs(double t) {
       // ds->computeRhs(t);
       free = lds->totalForces();
       if (lds->LUMass()) {
-        // lds->update_lu_mass();
+        // lds->init_lu_mass();
         free = lds->LUMass()->solve(free);
       }
       DEBUG_EXPR(siconos::algebra::print(free););
@@ -201,8 +201,8 @@ void siconos::integrators::LsodarOSI::computeJacobianRhs(
     ds->computeJacobianRhsOver_x(t);
     if (_extraAdditionalTerms) {
       auto dsgVD = DSG0.descriptor(ds);
-      _extraAdditionalTerms->addJacobianRhsContribution(
-          DSG0, dsgVD, t, *(ds->jacobianRhsOver_x()->toSiconosMatrix()));
+      _extraAdditionalTerms->addJacobianRhsContribution(DSG0, dsgVD, t,
+                                                        ds->jacobianRhsOver_x_readwrite());
     }
   }
 }

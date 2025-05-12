@@ -200,5 +200,31 @@ boost::math::quaternion<double> posquat(const siconos::algebra::SiconosVector &v
 void computeOrthonormalBaseFromAxis(siconos::algebra::SiconosVector3 &axis0,
                                     siconos::algebra::SiconosVector3 &axis1,
                                     siconos::algebra::SiconosVector3 &axis2);
+
+/* function to compute an orthonormal basis form a given vector
+ * adapted with eigen vectors from
+ * Tom Duff, James Burgess, Per Christensen, Christophe Hery, Andrew Kensler, Max Liani, and
+ * Ryusuke Villemin, Building an Orthonormal Basis, Revisited, Journal of Computer Graphics
+ * Techniques (JCGT), vol. 6, no. 1, 1-8, 2017 Available online
+ * http://jcgt.org/published/0006/01/01/ void branchlessONB(const Vec3f &n, Vec3f &b1, Vec3f
+ * &b2)
+ * {
+ *   float sign = copysignf(1.0f, n.z);
+ *   const float a = -1.0f / (sign + n.z);
+ *   const float b = n.x * n.y * a;
+ *   b1 = Vec3f(1.0f + sign * n.x * n.x * a, sign * b, -sign * n.x);
+ *   b2 = Vec3f(b, sign + n.y * n.y * a, -n.y);
+ * }
+ */
+/**  compute an orthonormal basis
+ *   \param[in,out] A a reference vector (normalized after call)
+ *   \param[out] A1 second base vector
+ *   \param[out] A2 third base vector
+ *   \return true if all went right else false (e.g. if A.norm =0)
+ */
+bool orthoBaseFromVector(siconos::algebra::SiconosVector3 &A,
+                         siconos::algebra::SiconosVector3 &A1,
+                         siconos::algebra::SiconosVector3 &A2);
+
 }  // namespace siconos::geometry
 #endif  // ROTATIONQUATERNION_H

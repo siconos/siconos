@@ -34,8 +34,8 @@ class PivotJointR : public KneeJointR {
   /*Axis coordonates*/
   std::shared_ptr<siconos::algebra::SiconosVector3> axis_coords_{nullptr};
 
-  siconos::algebra::SiconosVector3 A1_{siconos::algebra::SiconosVector3::Zero()};
-  siconos::algebra::SiconosVector3 A2_{siconos::algebra::SiconosVector3::Zero()};
+  siconos::algebra::SiconosVector3 axis1_{siconos::algebra::SiconosVector3::Zero()};
+  siconos::algebra::SiconosVector3 axis2_{siconos::algebra::SiconosVector3::Zero()};
 
   /*Initial conditions*/
   double _initial_AscalA{0.}, _initial_AscalA1{0.}, _initial_AscalA2{0.};

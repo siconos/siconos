@@ -36,12 +36,6 @@ SICONOS_IO_REGISTER(BlockVector,
   (_sizeV)
   (_tabIndex)
   (_vect))
-SICONOS_IO_REGISTER_WITH_BASES(BlockMatrix,(SiconosMatrix),
-  (_dimCol)
-  (_dimRow)
-  (_mat)
-  (_tabCol)
-  (_tabRow))
 SICONOS_IO_REGISTER(SiconosMatrix,
   (_num))
 SICONOS_IO_REGISTER(GraphProperties,

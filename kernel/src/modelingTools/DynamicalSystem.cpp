@@ -44,7 +44,7 @@ siconos::modeling::DynamicalSystem::DynamicalSystem(const DynamicalSystem &ds)
   state_x_.resize(2);
   if (ds.x()) state_x_[0] = std::make_shared<siconos::algebra::SiconosVector>(*(ds.x()));
   if (ds.rhs()) state_x_[1] = std::make_shared<siconos::algebra::SiconosVector>(*(ds.rhs()));
-  if (ds.jacobianRhsOver_x()) *jacobianRhsOver_x_ = *(ds.jacobianRhsOver_x());
+  jacobianRhsOver_x_ = ds.jacobianRhsOver_x();
 
   xMemory_ = ds.xMemory();
   stepsInMemory_ = ds.stepsInMemory();

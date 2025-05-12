@@ -26,21 +26,11 @@
 #include "FiniteElement.hpp"
 #include "Material.hpp"
 #include "Mesh.hpp"  // MVertex, MElement ...
+#include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
+#include "SiconosMatrixOp.hpp"  // prod ...
 #include "SiconosVector.hpp"
 #include "op3x3.h"  // det3x3
-
-//
-// #include "SiconosException.hpp"
-// #include "Tools.hpp"  // enum_to_string
-// #include "Material.hpp"
-// #include "SiconosException.hpp"
-#include "SiconosMatrixOp.hpp"  // prod ...
-// #include "SiconosMatrixVectorOp.hpp"
-// #include "SiconosVectorOp.hpp"
-// #include "SiconosMatrix.hpp"
-// // #include "SiconosAlgebraProd.hpp"
-// // #include "SimpleMatrixFriends.hpp"
 
 #define DEBUG_STDOUT
 #define DEBUG_NOCOLOR

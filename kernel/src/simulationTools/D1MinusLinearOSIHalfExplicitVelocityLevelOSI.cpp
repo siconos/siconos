@@ -88,7 +88,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitVelocity
       /* Compute the acceleration due to the external force */
       /* vFree contains left (right limit) acceleration without contact force */
       if (d->LUMass()) {
-        d->update_lu_mass();
+        d->init_lu_mass();
         vFree = d->LUMass()->solve(vFree);
       }
 
@@ -369,7 +369,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitVelocity
         *work_tdg = d->totalForces();
 
         if (d->LUMass()) {
-          d->update_lu_mass();
+          d->init_lu_mass();
           *work_tdg = d->LUMass()->solve(*work_tdg);
           // contains right (left limit) acceleration without contact force
         }
@@ -426,7 +426,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitVelocity
         vFree += d->totalForces();
 
         if (d->LUMass()) {
-          d->update_lu_mass();
+          d->init_lu_mass();
           vFree = d->LUMass()->solve(vFree);
         }
         /* vFree contains right (left limit) acceleration without contact force */
@@ -526,7 +526,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitVelocity
           p2 *= 2.0 / h;
 
           if (d->LUMass()) {
-            d->update_lu_mass();
+            d->init_lu_mass();
             dummy = d->LUMass()->solve(dummy);
           }
           residuFree -= dummy;
