@@ -49,7 +49,7 @@ int siconos::mechanics::fem::FElement::ndofPerNode() {
     case FiniteElementType::TH4:
       return 3;
     case FiniteElementType::B2:
-      return 2;
+      return 3;
     default:
       throw("FElement::ndorPernode(). element type not recognized");
   }

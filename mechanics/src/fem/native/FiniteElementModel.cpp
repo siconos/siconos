@@ -64,6 +64,8 @@ unsigned int siconos::mechanics::fem::FiniteElementModel::init() {
   std::vector<std::shared_ptr<MElement>> ignored_elements;
 
   for (auto e : _mesh->elements()) {
+    std::cout << "element number: " << e->num() << std::endl;
+
     // e->display();
     // std::cout << "type of element:"<< siconos::tools::enum_to_string(e->type()) <<std::endl;
     // std::cout << "type L2 of element:"<< siconos::tools::enum_to_string(FiniteElementType::L2) <<std::endl;
@@ -123,7 +125,6 @@ unsigned int siconos::mechanics::fem::FiniteElementModel::init() {
 
     /* ------------- contruction of  FE nodes */
     for (auto v : e->vertices()) {
-      std::cout << "looping vertices : " << v->num() << std::endl;
       if (_vertexToNode.find(v) ==
           _vertexToNode.end())  // check if the node is already existing
       {
@@ -337,33 +338,72 @@ void siconos::mechanics::fem::FiniteElementModel::computeElementaryMassMatrix(
 }
 
 void siconos::mechanics::fem::FiniteElementModel::computeBeamElementaryMassMatrix_direct(
-    siconos::algebra::SimpleMatrix &Me, FElement &fe, double massDensity, double A) {
+    siconos::algebra::SimpleMatrix &Me, FElement &fe, std::map<unsigned int, std::shared_ptr<Material>> &materials) {
   int dim = _mesh->dim();
   double length  = fe.length();
   double length2  = length*length;
   double length3  = length2*length;
+  auto &nodes = fe.nodes();
+  int nnodes = nodes.size();
+  Material &mat = *(materials[fe.mElement()->tags(0)]);
+  double massDensity = mat.massDensity();
+  double A = mat.crossSectionArea();
+  double c, s;
 
   if (dim == 2)
   {
-    Me.setValue(0,0,massDensity*A*length*156/420);
-    Me.setValue(0,1,massDensity*A*length2*22/420);
-    Me.setValue(0,2,massDensity*A*length*54/420);
-    Me.setValue(0,3,6/length2);
+    auto Te = std::make_shared<siconos::algebra::SimpleMatrix>(6, 6);
+    auto Me_loc = std::make_shared<siconos::algebra::SimpleMatrix>(6, 6);
+    auto MT = std::make_shared<siconos::algebra::SimpleMatrix>(6, 6);
+    Te->zero();
+    c = (nodes[1]->x() - nodes[0]->x())/length;
+    s = (nodes[1]->y() - nodes[0]->y())/length;
+    Te->setValue(0,0,c);
+    Te->setValue(0,1,s);
+    Te->setValue(1,0,-s);
+    Te->setValue(1,1,c);
+    Te->setValue(2,2,1);
+    Te->setValue(3,3,c);
+    Te->setValue(3,4,s);
+    Te->setValue(4,3,-s);
+    Te->setValue(4,4,c);
+    Te->setValue(5,5,1);
 
-    Me.setValue(1,0,massDensity*A*length2*22/420);
-    Me.setValue(1,1,massDensity*A*length3*4/420);
-    Me.setValue(1,2,massDensity*A*length2*13/420);
-    Me.setValue(1,3,massDensity*A*length3*(-3)/420);
+    Me_loc->setValue(0,0,massDensity*A*length*2/6);
+    Me_loc->setValue(0,3,massDensity*A*length*1/6);
+    Me_loc->setValue(3,0,Me_loc->getValue(0,3));
 
-    Me.setValue(2,0,massDensity*A*length*54/420);
-    Me.setValue(2,1,massDensity*A*length2*13/420);
-    Me.setValue(2,2,massDensity*A*length*156/420);
-    Me.setValue(2,3,-massDensity*A*length2*22/420);
+    Me_loc->setValue(1,1,massDensity*A*length*156/420);
+    Me_loc->setValue(1,2,massDensity*A*length2*21/420);
+    Me_loc->setValue(1,4,massDensity*A*length*54/420);
+    Me_loc->setValue(1,5,massDensity*A*length2*(-13)/420);
+    Me_loc->setValue(2,1,Me_loc->getValue(1,2));
+    Me_loc->setValue(4,1,Me_loc->getValue(1,4));
+    Me_loc->setValue(5,1,Me_loc->getValue(1,5));
 
-    Me.setValue(3,0,6/length2);
-    Me.setValue(3,1,massDensity*A*length3*(-3)/420);
-    Me.setValue(3,2,-massDensity*A*length2*22/420);
-    Me.setValue(3,3,massDensity*A*length3*4/420);
+    Me_loc->setValue(2,2,massDensity*A*length3*4/420);
+    Me_loc->setValue(2,4,massDensity*A*length2*13/420);
+    Me_loc->setValue(2,5,massDensity*A*length3*(-3)/420);
+    Me_loc->setValue(4,2,Me_loc->getValue(2,4));
+    Me_loc->setValue(5,2,Me_loc->getValue(2,5));
+
+    Me_loc->setValue(3,3,massDensity*A*length*2/6);
+
+    Me_loc->setValue(4,4,massDensity*A*length*156/420);
+    Me_loc->setValue(4,5,massDensity*A*length2*(-21)/420);
+    Me_loc->setValue(5,4,Me_loc->getValue(4,5));
+
+    Me_loc->setValue(5,5,massDensity*A*length3*4/420);
+
+    std::cout << "Me_loc:" << std::endl;
+    Me_loc->display();
+    prod(*Me_loc, *Te, *MT, true);
+    Te->trans();
+    prod(*Te, *MT, Me, true);
+
+    std::cout << "Me:" << std::endl;
+    Me.display();
+
   }
 }
 
@@ -384,14 +424,14 @@ void siconos::mechanics::fem::FiniteElementModel::computeMassMatrix(
     double massDensity = mat[fe->mElement()->tags(0)]->massDensity();
 
     if (fe->type() == FiniteElementType::B2){
-      double A = mat[fe->mElement()->tags(0)]->crossSectionArea();
-      computeBeamElementaryMassMatrix_direct(*Me, *fe, massDensity, A);
+      computeBeamElementaryMassMatrix_direct(*Me, *fe, mat);
     }
     else {
       computeElementaryMassMatrix(*Me, *fe, massDensity);
     }
     AssembleElementaryMatrix(M, *Me, *fe);
-
+    std::cout << "M: " << std::endl;
+    M->display();
   }
   DEBUG_END(
       "siconos::mechanics::fem::FiniteElementModel::computeMassMatrix(std::"
@@ -604,54 +644,74 @@ void siconos::mechanics::fem::FiniteElementModel::computeElementaryStiffnessMatr
 }
 
 void siconos::mechanics::fem::FiniteElementModel::computeBeamElementaryStiffnessMatrix_direct(
-    siconos::algebra::SimpleMatrix &Ke, FElement &fe) {
+    siconos::algebra::SimpleMatrix &Ke, FElement &fe, std::map<unsigned int, std::shared_ptr<Material>> &materials) {
   int dim = _mesh->dim();
   auto &nodes = fe.nodes();
   int nnodes = nodes.size();
+  Material &mat = *(materials[fe.mElement()->tags(0)]);
+  double E = mat.elasticYoungModulus();
+  double I = mat.momentOfInertia();
+  double A = mat.crossSectionArea();
   double length  = fe.length();
   double length2  = length*length;
   double length3  = length2*length;
   double c, s;
   if (dim == 2)
   {
-    auto Te = std::make_shared<siconos::algebra::SimpleMatrix>(4, 6);
-    auto Ke_loc = std::make_shared<siconos::algebra::SimpleMatrix>(4, 4);
-    auto KT = std::make_shared<siconos::algebra::SimpleMatrix>(4, 6);
+    auto Te = std::make_shared<siconos::algebra::SimpleMatrix>(6, 6);
+    auto Ke_loc = std::make_shared<siconos::algebra::SimpleMatrix>(6, 6);
+    auto KT = std::make_shared<siconos::algebra::SimpleMatrix>(6, 6);
     Te->zero();
-    c = (nodes[1]->x() - nodes[2]->x())/length;
-    s = (nodes[1]->y() - nodes[2]->y())/length;
-    Te->setValue(0,0,-s);
-    Te->setValue(0,1,c);
-    Te->setValue(1,2,1);
-    Te->setValue(2,3,-s);
-    Te->setValue(2,4,c);
-    Te->setValue(3,5,1);
+    c = (nodes[1]->x() - nodes[0]->x())/length;
+    s = (nodes[1]->y() - nodes[0]->y())/length;
+    Te->setValue(0,0,c);
+    Te->setValue(0,1,s);
+    Te->setValue(1,0,-s);
+    Te->setValue(1,1,c);
+    Te->setValue(2,2,1);
+    Te->setValue(3,3,c);
+    Te->setValue(3,4,s);
+    Te->setValue(4,3,-s);
+    Te->setValue(4,4,c);
+    Te->setValue(5,5,1);
+
+    std::cout << "Te:" << std::endl;
     Te->display();
 
-    Ke_loc->setValue(0,0,12/length3);
-    Ke_loc->setValue(0,1,6/length2);
-    Ke_loc->setValue(0,2,-12/length3);
-    Ke_loc->setValue(0,3,6/length2);
+    Ke_loc->setValue(0,0,E*A/length);
+    Ke_loc->setValue(0,3,-E*A/length);
+    Ke_loc->setValue(3,0,Ke_loc->getValue(0,3));
 
-    Ke_loc->setValue(1,0,6/length2);
-    Ke_loc->setValue(1,1,4/length);
-    Ke_loc->setValue(1,2,-6/length2);
-    Ke_loc->setValue(1,3,2/length);
+    Ke_loc->setValue(1,1,E*I*12/length3);
+    Ke_loc->setValue(1,2,E*I*6/length2);
+    Ke_loc->setValue(1,4,-E*I*12/length3);
+    Ke_loc->setValue(1,5,E*I*6/length2);
+    Ke_loc->setValue(2,1,Ke_loc->getValue(1,2));
+    Ke_loc->setValue(4,1,Ke_loc->getValue(1,4));
+    Ke_loc->setValue(5,1,Ke_loc->getValue(1,5));
 
-    Ke_loc->setValue(2,0,-12/length3);
-    Ke_loc->setValue(2,1,-6/length2);
-    Ke_loc->setValue(2,2,12/length3);
-    Ke_loc->setValue(2,3,-6/length2);
+    Ke_loc->setValue(2,2,E*I*4/length);
+    Ke_loc->setValue(2,4,-E*I*6/length2);
+    Ke_loc->setValue(2,5,E*I*2/length);
+    Ke_loc->setValue(4,2,Ke_loc->getValue(2,4));
+    Ke_loc->setValue(5,2,Ke_loc->getValue(2,5));
 
-    Ke_loc->setValue(3,0,6/length2);
-    Ke_loc->setValue(3,1,2/length);
-    Ke_loc->setValue(3,2,-6/length2);
-    Ke_loc->setValue(3,3,4/length);
+    Ke_loc->setValue(3,3,E*A/length);
 
+    Ke_loc->setValue(4,4,E*I*12/length3);
+    Ke_loc->setValue(4,5,-E*I*6/length2);
+    Ke_loc->setValue(5,4,Ke_loc->getValue(4,5));
+
+    Ke_loc->setValue(5,5,E*I*4/length);
+
+    std::cout << "Ke_loc:" << std::endl;
     Ke_loc->display();
     prod(*Ke_loc, *Te, *KT, true);
     Te->trans();
     prod(*Te, *KT, Ke, true);
+
+    std::cout << "Ke:" << std::endl;
+    Ke.display();
   }
 
 }
@@ -871,17 +931,14 @@ void siconos::mechanics::fem::FiniteElementModel::computeStiffnessMatrix(
   /* loop over the elements */
   for (std::shared_ptr<FElement> fe : elements()) {
     if (fe->type() == FiniteElementType::B2){
-      Material &mat = *(materials[fe->mElement()->tags(0)]);
-      double E = mat.elasticYoungModulus();
-      double I = mat.momentOfInertia();
       unsigned int ndofElement = fe->ndof();
       auto Ke = std::make_shared<siconos::algebra::SimpleMatrix>(
           ndofElement,
           ndofElement);
-      computeBeamElementaryStiffnessMatrix_direct(*Ke, *fe);
-      scal(E*I, *Ke, *Ke, true);
+      computeBeamElementaryStiffnessMatrix_direct(*Ke, *fe, materials);
       AssembleElementaryMatrix(K, *Ke, *fe);
-
+      std::cout << "K:" << std::endl;
+      K->display();
     }
     else {
 

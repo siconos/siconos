@@ -128,7 +128,7 @@ class FiniteElementModel {
                                    double massDensity);
 
   void computeBeamElementaryMassMatrix_direct(siconos::algebra::SimpleMatrix &Me,
-                                              FElement &fe, double massDensity, double A);
+                                              FElement &fe, std::map<unsigned int, std::shared_ptr<Material>> &materials);
 
   /** compute Stiffness Matrix
    * should be computeMass of LagrangianDS ?
@@ -150,7 +150,7 @@ class FiniteElementModel {
       siconos::algebra::SimpleMatrix& Me, FElement& fe,
       std::shared_ptr<siconos::algebra::SimpleMatrix> D, double thickness);
 
-  void computeBeamElementaryStiffnessMatrix_direct(siconos::algebra::SimpleMatrix &Ke, FElement &fe);
+  void computeBeamElementaryStiffnessMatrix_direct(siconos::algebra::SimpleMatrix &Ke, FElement &fe, std::map<unsigned int, std::shared_ptr<Material>> &materials);
 
   void computeElementary_B_Matrix(FElement& fe, siconos::algebra::SimpleMatrix& B, double length);
 
