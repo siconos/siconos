@@ -407,7 +407,9 @@ void siconos::simulation::EventDriven::computef(siconos::integrators::OneStepInt
 
   auto& lsodar = static_cast<siconos::integrators::LsodarOSI&>(osi);
   // fill in xWork vector (ie all the x of the ds of this osi) with x
-  lsodar.fillXWork(sizeOfX, x);
+  assert(*sizeOfX >= 0);
+  std::size_t sizex = static_cast<std::size_t>(*sizeOfX);
+  lsodar.fillXWork(sizex, x);
 
   double t = *time;
   // Update Jacobian matrices at all interactions
@@ -516,7 +518,9 @@ void siconos::simulation::EventDriven::computeg(
   auto lsodar = std::static_pointer_cast<siconos::integrators::LsodarOSI>(osi);
   // Solve LCP at acceleration level to calculate the lambda[2] at Interaction
   // of indexSet[2]
-  lsodar->fillXWork(sizeOfX, x);
+  assert(*sizeOfX >= 0);
+  std::size_t sizex = static_cast<std::size_t>(*sizeOfX);
+  lsodar->fillXWork(sizex, x);
   //
   double t = *time;
   if (!_allNSProblems->empty()) {

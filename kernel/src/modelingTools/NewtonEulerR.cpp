@@ -26,8 +26,7 @@
 #include "Interaction.hpp"
 #include "NewtonEulerDS.hpp"  // computeT ...
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixOp.hpp"  // setblock
-#include "SiconosMatrixVectorOp.hpp"
+#include "SiconosAlgebraAddons.hpp"
 #include "SiconosVector.hpp"
 #include "Tools.hpp"
 // #define DEBUG_BEGIN_END_ONLY
@@ -212,7 +211,7 @@ void siconos::modeling::NewtonEulerR::computeInput(double time, Interaction& int
   if (level == 1 ||
       level == 2) /* \warning : we assume that ContactForce is given by lambda[level] */
   {
-    siconos::algebra::transposeMatrixVector_prod(lambda, *H_NE_prod_T_, *contactForce_, true);
+    contactForce_->noalias() = H_NE_prod_T_->transpose() * lambda;
     DEBUG_EXPR(siconos::algebra::print(*contactForce_););
 
     siconos::algebra::transposeMatrixVector_prod_toBlock(

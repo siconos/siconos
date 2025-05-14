@@ -29,7 +29,6 @@
 #include "RotationQuaternion.hpp"  // for rewriteVectorFromBodyToAbsoluteFrame
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "SiconosVectorOp.hpp"  // for scal
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"
@@ -95,8 +94,7 @@ void siconos::joints::PrismaticJointR::displayInitialPosition() {
 void siconos::joints::PrismaticJointR::setBasePositions(
     const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
     const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2) {
-
-      // Assume that axes_[0] has been properly set (by constructor or setAxis)
+  // Assume that axes_[0] has been properly set (by constructor or setAxis)
 
   if (absoluteRef_) {
     // Adjust axis to be in q1 frame

@@ -19,6 +19,7 @@
 
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
+#include "io.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
   if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -28,9 +29,9 @@ CPPUNIT_TEST_SUITE_REGISTRATION(LagrangianCompliantLinearTIRTest);
 
 void LagrangianCompliantLinearTIRTest::setUp() {
   C = std::make_shared<siconos::algebra::SiconosMatrix>(
-      siconos::algebra::readMatrixFromFile("matC.dat"));
+      siconos::algebra::io::readDenseMatrix("matC.dat"));
   D = std::make_shared<siconos::algebra::SiconosMatrix>(
-      siconos::algebra::readMatrixFromFile("matD.dat"));
+      siconos::algebra::io::readDenseMatrix("matD.dat"));
   e = std::make_shared<siconos::algebra::SiconosVector>(1);
   (*e)(0) = 0.1;
 }

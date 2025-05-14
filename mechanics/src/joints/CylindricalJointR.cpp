@@ -30,7 +30,6 @@
 #include "RotationQuaternion.hpp"  // for rewriteVectorFromBodyToAbsoluteFrame
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "SiconosVectorOp.hpp"  // for scal
 
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES

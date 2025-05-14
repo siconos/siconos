@@ -150,8 +150,7 @@ void TwistingTest::test_Twisting_ZOH() {
   siconos::algebra::io::write("itw_twisting_ZOH.dat", *data, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  siconos::algebra::SiconosMatrix dataRef(data->rows(), data->cols());
-  siconos::algebra::io::read("itw2.ref", dataRef);
+  auto dataRef = siconos::algebra::io::readDenseMatrix("itw2.ref");
   // it is a bad idea to compare solutions to an AVI that does not admit a unique
   // solution
   data->col(3) = _beta * data->col(2) + data->col(1);
@@ -176,8 +175,7 @@ void TwistingTest::test_Twisting_Lsodar() {
                               siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  siconos::algebra::SiconosMatrix dataRef(data->rows(), data->cols());
-  siconos::algebra::io::read("itw2.ref", dataRef);
+  auto dataRef = siconos::algebra::io::readDenseMatrix("itw2.ref");
   // it is a bad idea to compare solutions to an AVI that does not admit a unique
   // solution
   data->col(3) = _beta * data->col(2) + data->col(1);
@@ -201,8 +199,7 @@ void TwistingTest::test_RegularTwisting_ZOH() {
   siconos::algebra::io::write("reg_itw_ZOH.dat", *data, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  siconos::algebra::SiconosMatrix dataRef(data->rows(), data->cols());
-  siconos::algebra::io::read("reg_itw.ref", dataRef);
+  auto dataRef = siconos::algebra::io::readDenseMatrix("reg_itw.ref");
   // it is a bad idea to compare solutions to an AVI that does not admit a
   // unique solution
   data->col(3) = _beta * data->col(2) + data->col(1);
@@ -227,8 +224,7 @@ void TwistingTest::test_RegularTwisting_Lsodar() {
   siconos::algebra::io::write("reg_itw_Lsodar.dat", *data, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  siconos::algebra::SiconosMatrix dataRef(data->rows(), data->cols());
-  siconos::algebra::io::read("reg_itw.ref", dataRef);
+  auto dataRef = siconos::algebra::io::readDenseMatrix("reg_itw.ref");
   // it is a bad idea to compare solutions to an AVI that does not admit a unique
   // solution
   data->col(3) = _beta * data->col(2) + data->col(1);

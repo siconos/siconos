@@ -27,8 +27,10 @@
 #include "NonSmoothLaw.hpp"
 #include "NumericsToolsNamespace.h"  // For NumericsMatrix
 #include "SecondOrderDS.hpp"
+#include "SiconosAlgebraAddons.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
+
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -172,7 +174,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillM(
     // === Loop through "active" Interactions (ie vertices present in indexSets[level]) ===
     siconos::graphs::InteractionsGraph::VIterator vi, viend;
     for (std::tie(vi, viend) = indexSet.vertices(); vi != viend; ++vi) {
-      std::shared_ptr<siconos::modeling::Interaction> inter = indexSet.bundle(* vi);
+      std::shared_ptr<siconos::modeling::Interaction> inter = indexSet.bundle(*vi);
       pos = indexSet.properties(*vi).absolute_position;
 
       siconos::algebra::setBlock(

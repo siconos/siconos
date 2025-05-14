@@ -22,7 +22,7 @@
 #include "BlockVector.hpp"
 #include "Interaction.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
+#include "SiconosAlgebraAddons.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT

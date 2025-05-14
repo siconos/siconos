@@ -23,7 +23,6 @@
 #include "RotationQuaternion.hpp"  // siconos::geometry::computeRotationMatrix
 #include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixOp.hpp"  // For mat prod
 #include "SiconosVector.hpp"
 #include "op3x3.h"  // numerics: orthobasefromvector
 
@@ -135,12 +134,12 @@ void siconos::modeling::NewtonEuler3DR::FC3DcomputeJachqTFromContacts(
   DEBUG_EXPR(siconos::algebra::print(*_rotationBodyToAbsoluteFrame););
 
   // 5 - compose the body lever arm matrix with the rotation matrix
-  siconos::algebra::prod(*_NPG1, *_rotationBodyToAbsoluteFrame, *_AUX1, true);
+  _AUX1->noalias() = *_NPG1 * *_rotationBodyToAbsoluteFrame;
   DEBUG_EXPR(siconos::algebra::print(*_rotationBodyToAbsoluteFrame););
   DEBUG_EXPR(siconos::algebra::print(*_AUX1););
 
   // 6 -  Rotate the resulting matric in the contact frame
-  siconos::algebra::prod(*_rotationAbsoluteToContactFrame, *_AUX1, *_AUX2, true);
+  _AUX2->noalias() = *_rotationAbsoluteToContactFrame * *_AUX1;
   DEBUG_EXPR(siconos::algebra::print(*_rotationAbsoluteToContactFrame););
   DEBUG_EXPR(siconos::algebra::print(*_AUX2););
 
@@ -162,15 +161,15 @@ void siconos::modeling::NewtonEuler3DR::FC3DcomputeJachqTFromContacts(
   //   std::make_shared<siconos::algebra::SiconosVector>(3));
   //   std::shared_ptr<siconos::algebra::SiconosVector> vRes =
   //   std::make_shared<siconos::algebra::SiconosVector>(6)); v->setZero(); (*v)(0) = 1;
-  //   siconos::algebra::prod(*jaux, *v, *vRes, true);
+  //   *vRes = *jaux **v ;
   //   siconos::algebra::print(*vRes);
   //   v->setZero();
   //   (*v)(1) = 1;
-  //   siconos::algebra::prod(*jaux, *v, *vRes, true);
+  //   *vRes  = *jaux **v;
   //   siconos::algebra::print(*vRes);
   //   v->setZero();
   //   (*v)(2) = 1;
-  //   siconos::algebra::prod(*jaux, *v, *vRes, true);
+  //   *vRes = *jaux **v;
   //   siconos::algebra::print(*vRes);
   //   );
   DEBUG_END(
@@ -243,9 +242,8 @@ void siconos::modeling::NewtonEuler3DR::FC3DcomputeJachqTFromContacts(
   (*_NPG2)(2, 2) = 0;
 
   siconos::geometry::computeRotationMatrix(q1, *_rotationBodyToAbsoluteFrame);
-  siconos::algebra::prod(*_NPG1, *_rotationBodyToAbsoluteFrame, *_AUX1, true);
-  siconos::algebra::prod(*_rotationAbsoluteToContactFrame, *_AUX1, *_AUX2, true);
-
+  _AUX1->noalias() = *_NPG1 * *_rotationBodyToAbsoluteFrame;
+  _AUX2->noalias() = *_rotationAbsoluteToContactFrame * *_AUX1;
   for (unsigned int ii = 0; ii < 3; ii++)
     for (unsigned int jj = 0; jj < 3; jj++)
       H_NE_prod_T_->setValue(ii, jj, (*_rotationAbsoluteToContactFrame)(ii, jj));
@@ -255,8 +253,8 @@ void siconos::modeling::NewtonEuler3DR::FC3DcomputeJachqTFromContacts(
       H_NE_prod_T_->setValue(ii, jj, (*_AUX2)(ii, jj - 3));
 
   siconos::geometry::computeRotationMatrix(q2, *_rotationBodyToAbsoluteFrame);
-  siconos::algebra::prod(*_NPG2, *_rotationBodyToAbsoluteFrame, *_AUX1, true);
-  siconos::algebra::prod(*_rotationAbsoluteToContactFrame, *_AUX1, *_AUX2, true);
+  _AUX1->noalias() = *_NPG2 * *_rotationBodyToAbsoluteFrame;
+  _AUX2->noalias() = *_rotationAbsoluteToContactFrame * *_AUX1;
 
   for (unsigned int ii = 0; ii < 3; ii++)
     for (unsigned int jj = 0; jj < 3; jj++)

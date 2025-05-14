@@ -32,6 +32,14 @@ using SiconosVector = Eigen::Matrix<double_t, Eigen::Dynamic, 1, Eigen::ColMajor
 using SiconosVector3 = Eigen::Matrix<double_t, 3, 1, Eigen::ColMajor>;
 using SiconosVector7 = Eigen::Matrix<double_t, 7, 1, Eigen::ColMajor>;
 using SiconosVector6 = Eigen::Matrix<double_t, 6, 1, Eigen::ColMajor>;
+using MapVectorType = Eigen::Map<SiconosVector>;
+using MapVector3Type = Eigen::Map<SiconosVector3>;
+using MapVector6Type = Eigen::Map<SiconosVector6>;
+using MapVector7Type = Eigen::Map<SiconosVector7>;
+using ConstMapVectorType = Eigen::Map<const SiconosVector>;
+using ConstMapVector3Type = Eigen::Map<const SiconosVector3>;
+using ConstMapVector6Type = Eigen::Map<const SiconosVector6>;
+using ConstMapVector7Type = Eigen::Map<const SiconosVector7>;
 
 void concatenateVectors(SiconosVector& target, const SiconosVector& a, const SiconosVector& b);
 std::shared_ptr<SiconosVector> concatenateVectors(const SiconosVector& a,

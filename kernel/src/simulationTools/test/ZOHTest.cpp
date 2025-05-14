@@ -19,7 +19,6 @@
 
 #include "EventsManager.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
 #include "io.hpp"
 
@@ -94,9 +93,10 @@ void ZOHTest::testMatrixExp1() {
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp1 : ", Phi.rows() == _n, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp1 : ", Phi.cols() == _n, true);
   siconos::algebra::SiconosMatrix diff2Tmp = *tmpM - Phi;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp1 : ", siconos::algebra::normInf(diff2Tmp) < _tol, true);
-  std::cout << "------- Second computation ok, error = " << siconos::algebra::normInf(diff2Tmp) << " -------"
-            << std::endl;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp1 : ", siconos::algebra::normInf(diff2Tmp) < _tol,
+                               true);
+  std::cout << "------- Second computation ok, error = " << siconos::algebra::normInf(diff2Tmp)
+            << " -------" << std::endl;
   std::cout << std::endl << std::endl;
 }
 
@@ -133,16 +133,12 @@ void ZOHTest::testMatrixIntegration1() {
                               siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  siconos::algebra::SiconosMatrix dataPlotRef(dataPlot);
-  dataPlotRef.setZero();
-  // magic line to compute the following:
-  //  python -c "import numpy as np; t = np.linspace(0, 9.9, 100);
-  //  np.savetxt('testMatrixIntegration1.ref', np.transpose([t, np.cos(t), -np.sin(t)]))" &&
-  //  sed -i "1i100 3" testMatrixIntegration1.ref
-  siconos::algebra::io::read("testMatrixIntegration1.ref", dataPlotRef);
+  auto dataPlotRef = siconos::algebra::io::readDenseMatrix("testMatrixIntegration1.ref");
   siconos::algebra::SiconosMatrix diff = dataPlot - dataPlotRef;
-  std::cout << "------- Integration Ok, error = " << siconos::algebra::normInf(diff) << " -------" << std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp1 : ", siconos::algebra::normInf(diff) < _tol, true);
+  std::cout << "------- Integration Ok, error = " << siconos::algebra::normInf(diff)
+            << " -------" << std::endl;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp1 : ", siconos::algebra::normInf(diff) < _tol,
+                               true);
 }
 
 void ZOHTest::testMatrixIntegration2() {
@@ -203,11 +199,12 @@ void ZOHTest::testMatrixIntegration2() {
                               siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  siconos::algebra::SiconosMatrix dataPlotRef(dataPlot);
-  siconos::algebra::io::read("testMatrixIntegration2.ref", dataPlotRef);
+  auto dataPlotRef = siconos::algebra::io::readDenseMatrix("testMatrixIntegration2.ref");
   siconos::algebra::SiconosMatrix diff = dataPlot - dataPlotRef;
-  std::cout << "------- Integration Ok, error = " << siconos::algebra::normInf(diff) << " -------" << std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp2 : ", siconos::algebra::normInf(diff) < _tol, true);
+  std::cout << "------- Integration Ok, error = " << siconos::algebra::normInf(diff)
+            << " -------" << std::endl;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp2 : ", siconos::algebra::normInf(diff) < _tol,
+                               true);
 }
 
 void ZOHTest::testMatrixIntegration3() {
@@ -260,7 +257,7 @@ void ZOHTest::testMatrixIntegration3() {
   dataPlot(0, 6) = 0;
   while (_sim->hasNextEvent()) {
     _sim->computeOneStep();
-    siconos::algebra::prod(*B, lambda, sampledControl, true);
+    sampledControl.noalias() = *B * lambda;
     k++;
     dataPlot(k, 0) = _sim->nextTime();
     dataPlot(k, 1) = xProc(0);
@@ -277,11 +274,12 @@ void ZOHTest::testMatrixIntegration3() {
                               siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  siconos::algebra::SiconosMatrix dataPlotRef(dataPlot);
-  siconos::algebra::io::read("testMatrixIntegration3.ref", dataPlotRef);
+  auto dataPlotRef = siconos::algebra::io::readDenseMatrix("testMatrixIntegration3.ref");
   siconos::algebra::SiconosMatrix diff = dataPlot - dataPlotRef;
-  std::cout << "------- Integration Ok, error = " << siconos::algebra::normInf(diff) << " -------" << std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp3 : ", siconos::algebra::normInf(diff) < _tol, true);
+  std::cout << "------- Integration Ok, error = " << siconos::algebra::normInf(diff)
+            << " -------" << std::endl;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp3 : ", siconos::algebra::normInf(diff) < _tol,
+                               true);
 }
 
 void ZOHTest::testMatrixIntegration4() {
@@ -334,7 +332,7 @@ void ZOHTest::testMatrixIntegration4() {
   dataPlot(0, 6) = 0;
   while (_sim->hasNextEvent()) {
     _sim->computeOneStep();
-    siconos::algebra::prod(*B, lambda, sampledControl, true);
+    sampledControl.noalias() = *B * lambda;
     k++;
     dataPlot(k, 0) = _sim->nextTime();
     dataPlot(k, 1) = xProc(0);
@@ -351,10 +349,10 @@ void ZOHTest::testMatrixIntegration4() {
                               siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  siconos::algebra::SiconosMatrix dataPlotRef(dataPlot);
-  dataPlotRef.setZero();
-  siconos::algebra::io::read("testMatrixIntegration4.ref", dataPlotRef);
+  auto dataPlotRef = siconos::algebra::io::readDenseMatrix("testMatrixIntegration4.ref");
   siconos::algebra::SiconosMatrix diff = dataPlot - dataPlotRef;
-  std::cout << "------- Integration Ok, error = " << siconos::algebra::normInf(diff) << " -------" << std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp4 : ", siconos::algebra::normInf(diff) < _tol, true);
+  std::cout << "------- Integration Ok, error = " << siconos::algebra::normInf(diff)
+            << " -------" << std::endl;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp4 : ", siconos::algebra::normInf(diff) < _tol,
+                               true);
 }

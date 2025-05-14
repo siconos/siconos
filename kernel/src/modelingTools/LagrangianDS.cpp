@@ -23,7 +23,6 @@
 #include "BlockVector.hpp"
 #include "SiconosConst.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT

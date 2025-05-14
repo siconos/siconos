@@ -78,8 +78,7 @@ void PIDTest::testPIDZOH() {
   siconos::algebra::io::write("PIDZOH.dat", *data, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  siconos::algebra::SiconosMatrix dataRef(data->rows(), data->cols());
-  siconos::algebra::io::read("PID.ref", dataRef);
+  auto dataRef = siconos::algebra::io::readDenseMatrix("PID.ref");
 
   // std::cout << diff << std::endl;
   auto diff = *data - dataRef;
@@ -100,11 +99,10 @@ void PIDTest::testPIDLsodar() {
   siconos::algebra::io::write("PIDLsodar.dat", data, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  siconos::algebra::SiconosMatrix dataRef(data);
-  dataRef.setZero();
-  siconos::algebra::io::read("PID.ref", dataRef);
+  auto dataRef = siconos::algebra::io::readDenseMatrix("PID.ref");
   auto diff = data - dataRef;
-  std::cout << "------- Integration done, error = " << siconos::algebra::normInf(diff) << " -------"
-            << std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testPIDLsodar : ", siconos::algebra::normInf(diff) < _tol, true);
+  std::cout << "------- Integration done, error = " << siconos::algebra::normInf(diff)
+            << " -------" << std::endl;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testPIDLsodar : ", siconos::algebra::normInf(diff) < _tol,
+                               true);
 }

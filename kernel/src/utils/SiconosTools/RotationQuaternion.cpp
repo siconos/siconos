@@ -75,7 +75,7 @@ void siconos::geometry::quaternionRotateVector(
   // std::shared_ptr<siconos::algebra::SiconosMatrix> rotationMatrix(new
   // siconos::algebra::SiconosMatrix(3,3)); siconos::algebra::SiconosVector tmp(3);
   // ::computeRotationMatrix(q0,q1,q2,q3, rotationMatrix);
-  // prod(*rotationMatrix, v, tmp);
+  // tmp.noalias() = *rotationMatrix * v;
   // v = tmp;
   // return;
 
@@ -83,7 +83,7 @@ void siconos::geometry::quaternionRotateVector(
   // std::shared_ptr<siconos::algebra::SiconosMatrix> rotationMatrix(new
   // siconos::algebra::SiconosMatrix(3,3)); siconos::algebra::SiconosVector tmp(3);
   // ::computeRotationMatrix(q0,-q1,-q2,-q3, rotationMatrix);
-  // prod(v, *rotationMatrix, tmp);
+  // tmp.noalias() = *rotationMatrix * v;
   // v = tmp;
 
   // Third way. cross product and axis angle

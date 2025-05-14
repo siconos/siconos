@@ -477,7 +477,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
         //      gemm(CblasNoTrans,CblasNoTrans,1.0,*leftInteractionBlock,*work,1.0,*currentInteractionBlock);
         //*currentInteractionBlock *=h;
         DEBUG_EXPR(siconos::algebra::print(*currentInteractionBlock););
-        // assert(currentInteractionBlock->checkSymmetry(1e-10));
+        // assert(currentInteractionBlock->isSymmetric(1e-10));
         if (relationSubType == siconos::modeling::RelationSubType::CompliantLinearTIR) {
           if (osiType == siconos::integrators::IntegratorType::MOREAUJEANOSI) {
             *currentInteractionBlock *=

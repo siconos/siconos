@@ -18,8 +18,6 @@
 #include "LagrangianLinearTIDS.hpp"
 
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixOp.hpp"
-#include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES

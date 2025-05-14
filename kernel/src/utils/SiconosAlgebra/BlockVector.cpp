@@ -27,101 +27,39 @@
 
 #include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosVectorOp.hpp"  // for isComparableTo ...
 #include "siconos_debug.h"
 // //#define DEBUG_STDOUT
 // //#define DEBUG_MESSAGES
 //
 
-// =================================================
-//                CONSTRUCTORS
-// =================================================
-siconos::algebra::BlockVector::BlockVector() {
-  _tabIndex = std::make_shared<std::vector<std::size_t>>();
-}
-
-siconos::algebra::BlockVector::BlockVector(const BlockVector& v) {
-  auto nbBlocks = v.numberOfBlocks();
-  _tabIndex = std::make_shared<std::vector<std::size_t>>();
-  _tabIndex->reserve(nbBlocks);
-  _vect.reserve(nbBlocks);
-  for (auto& it : v) {
-    _vect.push_back(std::make_shared<SiconosVector>(*it));
-    _sizeV += (*it).size();
-    _tabIndex->push_back(_sizeV);
+siconos::algebra::BlockVector::BlockVector(std::size_t numberOfBlocks,
+                                           Eigen::Index blockSize) {
+  blockStartIndices_.reserve(numberOfBlocks + 1);
+  blocks_.reserve(numberOfBlocks);
+  totalSize_ = 0;
+  for (std::size_t i = 0; i < numberOfBlocks; ++i) {
+    blocks_.emplace_back(std::make_shared<SiconosVector>(blockSize));
+    totalSize_ += blockSize;
+    blockStartIndices_.push_back(totalSize_);
   }
 }
 
-siconos::algebra::BlockVector::BlockVector(std::shared_ptr<SiconosVector> v1,
-                                           std::shared_ptr<SiconosVector> v2) {
-  // Insert the two vectors in the container
-  // NO COPY !!
-  if (!v1 && !v2) THROW_EXCEPTION("both vectors are nullptr.");
-
-  _tabIndex = std::make_shared<std::vector<std::size_t>>();
-
-  _tabIndex->reserve(2);
-  _vect.reserve(2);
-
-  if (v1) {
-    _vect.push_back(v1);
-    _sizeV = v1->size();
-    _tabIndex->push_back(_sizeV);
-  } else
-  // If first parameter is a nullptr pointer, then set this(1) to a
-  // SiconosVector of the same size as v2, and equal to 0.
-  {
-    // This case is usefull to set xDot in LagrangianDS.
-    _sizeV = v2->size();
-
-    _vect.push_back(std::make_shared<SiconosVector>(_sizeV));
-    _tabIndex->push_back(_sizeV);
-  }
-  if (v2) {
-    _vect.push_back(v2);
-    _sizeV += v2->size();
-    _tabIndex->push_back(_sizeV);
-  } else  // If second parameter is a nullptr pointer, then set this(2) to a
-          // SiconosVector of the same size as v1, and equal to 0.
-  {
-    // This case is usefull to set xDot in LagrangianDS.
-
-    _vect.push_back(std::make_shared<SiconosVector>(v1->size()));
-    _sizeV += v1->size();
-    _tabIndex->push_back(_sizeV);
-  }
+siconos::algebra::BlockVector::BlockVector(std::size_t numberOfBlocks) {
+  blockStartIndices_.resize(numberOfBlocks + 1);
+  blocks_.resize(numberOfBlocks);
+  blockStartIndices_[0] = 0;
 }
-
-siconos::algebra::BlockVector::BlockVector(unsigned int numberOfBlocks, unsigned int dim) {
-  _tabIndex = std::make_shared<std::vector<std::size_t>>();
-  _tabIndex->reserve(numberOfBlocks);
-  _vect.reserve(numberOfBlocks);
-  for (unsigned int i = 0; i < numberOfBlocks; ++i) {
-    _vect.push_back(std::make_shared<SiconosVector>(dim));
-    _tabIndex->push_back(dim * (i + 1));
-  }
-  _sizeV = dim * numberOfBlocks;
-}
-
-siconos::algebra::BlockVector::BlockVector(unsigned int numberOfBlocks) {
-  _tabIndex = std::make_shared<std::vector<std::size_t>>();
-  _tabIndex->resize(numberOfBlocks);
-  _vect.resize(numberOfBlocks);
-}
-
-// ===========================
-//      private method
-// ===========================
 
 void siconos::algebra::BlockVector::_update() {
-  _sizeV = 0;
-  _tabIndex = std::make_shared<std::vector<std::size_t>>();
-
-  for (auto it : _vect) {
+  totalSize_ = 0;
+  blockStartIndices_.clear();
+  blockStartIndices_.reserve(blocks_.size() + 1);
+  blockStartIndices_.push_back(0);
+  for (const auto& it : blocks_) {
     if (it) {
-      _sizeV += it->size();
+      totalSize_ += it->size();
     }
-    _tabIndex->push_back(_sizeV);
+    blockStartIndices_.push_back(totalSize_);
   }
 }
 
@@ -129,272 +67,163 @@ void siconos::algebra::BlockVector::_update() {
 //       fill vector
 // ===========================
 
-// bool siconos::algebra::BlockVector::isDense() const {
-//   return std::find_if(_vect.begin(), _vect.end(), TestDense()) !=
-//   _vect.end();
-// }
-
 void siconos::algebra::BlockVector::setZero() {
-  for (auto& it : _vect) it->setZero();
+  for (auto& it : blocks_) it->setZero();
 }
 
-void siconos::algebra::BlockVector::fill(double value) {
-  for (auto& it : _vect) {
+void siconos::algebra::BlockVector::setConstant(double value) {
+  for (auto& it : blocks_) {
     if (it) {
-      it->fill(value);
+      it->setConstant(value);
     }
   }
 }
 
-//=====================
-// convert to an ostream
-//=====================
-
-std::ostream& siconos::algebra::operator<<(std::ostream& os, const BlockVector& bv) {
-  os << "[" << bv._vect.size() << "](";
-  for (auto& it : bv._vect) {
-    if (it)
-      os << *it;
-    else
-      os << "(nil)";
-    os << " |";  // separator
+void siconos::algebra::BlockVector::fill(std::size_t size_of_data, const double* data) {
+  assert(data && "BlockVector::fill: input data pointer is null");
+  assert(static_cast<Eigen::Index>(size_of_data) == totalSize_ &&
+         "total size of data does not match expected BlockVector size");
+  // Warning: we do not check data and assumes it is properly allocated
+  std::size_t offset = 0;
+  for (std::size_t nb = 0; nb < blocks_.size(); ++nb) {
+    auto& block = *(blocks_[nb]);
+    Eigen::Index size = block.size();
+    ConstMapVectorType src{data + offset, size};
+    block = src;  // copy data viewed by the map into the current block
+    offset += size;
   }
-  os << ")";
-  return os;
 }
 
-//=============================
-// Elements access (get or set)
-//=============================
-
-double siconos::algebra::BlockVector::getValue(unsigned int pos) const {
-  unsigned int blockNum = 0;
-
-  while (pos >= (*_tabIndex)[blockNum] && blockNum < _tabIndex->size()) blockNum++;
-
-  unsigned int relativePos = pos;
-
-  if (blockNum != 0) relativePos -= (*_tabIndex)[blockNum - 1];
-
-  return (*_vect[blockNum])(relativePos);
+void siconos::algebra::BlockVector::fill(const SiconosVector& input) {
+  assert(input.size() == totalSize_ &&
+         "total size of input vector does not match expected BlockVector size");
+  // Warning: we do not check data and assumes it is properly allocated
+  std::size_t offset = 0;
+  for (std::size_t nb = 0; nb < blocks_.size(); ++nb) {
+    auto& block = *(blocks_[nb]);
+    auto blockSize = block.size();
+    block = input.segment(offset, blockSize);  // copy
+    offset += blockSize;
+  }
 }
 
-void siconos::algebra::BlockVector::setValue(unsigned int pos, double value) {
-  unsigned int blockNum = 0;
-
-  while (pos >= (*_tabIndex)[blockNum] && blockNum < _tabIndex->size()) blockNum++;
-
-  unsigned int relativePos = pos;
-
-  if (blockNum != 0) relativePos -= (*_tabIndex)[blockNum - 1];
-
-  (*_vect[blockNum])(relativePos) = value;
+double siconos::algebra::BlockVector::operator()(Eigen::Index globalIndex) const {
+  // Find the block ...
+  for (std::size_t i = 0; i < blockStartIndices_.size() - 1; ++i) {
+    if (globalIndex >= blockStartIndices_[i] && globalIndex < blockStartIndices_[i + 1]) {
+      // Then the index in the block
+      std::size_t localIndex = globalIndex - blockStartIndices_[i];
+      return (*blocks_[i])(localIndex);
+    }
+  }
+  throw std::out_of_range("Index out of range in BlockVector");
 }
 
-double& siconos::algebra::BlockVector::operator()(unsigned int pos) {
-  unsigned int blockNum = 0;
-
-  while (pos >= (*_tabIndex)[blockNum] && blockNum < _tabIndex->size()) blockNum++;
-
-  unsigned int relativePos = pos;
-
-  if (blockNum != 0) relativePos -= (*_tabIndex)[blockNum - 1];
-
-  return (*_vect[blockNum])(relativePos);
-}
-
-double siconos::algebra::BlockVector::operator()(unsigned int pos) const {
-  return getValue(pos);
-}
-
-//============================================
-// Access (get or set) to blocks of elements
-//============================================
-
-void siconos::algebra::BlockVector::setVector(unsigned int pos, const SiconosVector& v) {
-  assert(pos < _vect.size() && "insertion out of vector size");
-  if (!_vect[pos]) THROW_EXCEPTION("this[pos] == nullptr pointer.");
-  *_vect[pos] = v;
-}
-
-void siconos::algebra::BlockVector::setVectorPtr(unsigned int pos,
+void siconos::algebra::BlockVector::setVectorPtr(std::size_t pos,
                                                  std::shared_ptr<SiconosVector> v) {
-  assert(pos < _vect.size() && "insertion out of vector size");
-  _vect[pos] = v;
+  assert(pos < blocks_.size() && "insertion out of vector size");
+  blocks_[pos] = v;
   _update();
-}
-
-void siconos::algebra::BlockVector::setAllVect(VectorOfVectors& v) {
-  _vect = v;
-  _update();
-}
-
-unsigned int siconos::algebra::BlockVector::getNumVectorAtPos(unsigned int pos) const {
-  unsigned int blockNum = 0;
-
-  while (pos >= (*_tabIndex)[blockNum] && blockNum < _tabIndex->size() - 1) blockNum++;
-  return blockNum;
 }
 
 siconos::algebra::BlockVector& siconos::algebra::BlockVector::operator=(
-    const BlockVector& vIn) {
-  if (&vIn == this)
-    return *this;
-  else {
-    if (siconos::algebra::isComparableTo(*this,
-                                         vIn))  // if vIn and this are "block-consistent"
-    {
-      auto it2 = vIn.begin();
-      for (auto& it1 : _vect) {
-        (*it1) = (**it2);
-        it2++;
-      }
-    } else {
-      for (unsigned int i = 0; i < _sizeV; ++i) (*this)(i) = vIn(i);
-    }
-    return *this;
-  }
-}
+    const BlockVector& other) {
+  if (this == &other) return *this;
+  assert(totalSize_ == other.size());
+  assert(blocks_.size() == other.numberOfBlocks());
+  assert(blockStartIndices_ == other.blockStartIndices_);
+  // totalSize_ = other.totalSize_;
+  //  blockStartIndices_ = other.blockStartIndices_;
 
-siconos::algebra::BlockVector& siconos::algebra::BlockVector::operator=(const double* data) {
-  unsigned indxPos = 0;
-
-  for (auto& vect : _vect) {
-    double* ptr = const_cast<double*>(&data[indxPos]);  // const_cat needed by Eigne::Map
-    *vect = Eigen::Map<SiconosVector>(ptr, vect->size());
-    indxPos += vect->size();
+  // Deep copy if blocks
+  blocks_.clear();
+  blocks_.reserve(other.blocks_.size());
+  for (const auto& block : other.blocks_) {
+    if (block)
+      blocks_.emplace_back(std::make_shared<SiconosVector>(*block));
+    else
+      blocks_.emplace_back(nullptr);
   }
+
   return *this;
 }
 
-siconos::algebra::BlockVector& siconos::algebra::BlockVector::operator-=(
-    const BlockVector& vIn) {
-  if (siconos::algebra::isComparableTo(*this, vIn))  // if vIn and this are "block-consistent"
-  {
-    unsigned int i = 0;
-    for (auto& it1 : _vect) {
-      *it1 -= *(vIn.vector(i++));
-    }
-  } else  // use of a temporary SimpleVector... bad way, to be improved. But
-          // this case happens rarely ...
-  {
-    for (unsigned int i = 0; i < _sizeV; ++i) (*this)(i) -= vIn(i);
-  }
-  return *this;
-}
+siconos::algebra::BlockVector& siconos::algebra::BlockVector::operator+=(
+    const BlockVector& input) {
+  assert(totalSize_ == input.size());
+  assert(blocks_.size() == input.numberOfBlocks());
 
-siconos::algebra::BlockVector& siconos::algebra::BlockVector::operator-=(
-    const SiconosVector& vIn) {
-  unsigned int dim = vIn.size();  // size of the block to be added.
-  if (dim > _sizeV) THROW_EXCEPTION("invalid ranges");
-
-  unsigned int currentSize;
-  unsigned int index = 0;
-  for (auto& v : _vect) {
-    currentSize = v->size();
-    v->segment(0, currentSize) -= vIn.segment(index, currentSize);
-    index += currentSize;
+  std::size_t pos = 0;
+  for (auto& block : blocks_) {
+    *block += *(input.vector(pos));
+    pos++;
   }
   return *this;
 }
 
 siconos::algebra::BlockVector& siconos::algebra::BlockVector::operator+=(
-    const BlockVector& vIn) {
-  if (siconos::algebra::isComparableTo(*this, vIn))  // if vIn and this are "block-consistent"
-  {
-    unsigned int i = 0;
+    const SiconosVector& input) {
+  assert(totalSize_ == input.size());
 
-    for (auto& it1 : _vect) {
-      *it1 += *(vIn.vector(i++));
-    }
-  } else  // use of a temporary SimpleVector... bad way, to be improved. But
-          // this case happens rarely ...
-  {
-    for (unsigned int i = 0; i < _sizeV; ++i) (*this)(i) += vIn(i);
-  }
-  return *this;
-}
+  Eigen::Index currentSize;
+  Eigen::Index offset = 0;
 
-siconos::algebra::BlockVector& siconos::algebra::BlockVector::operator+=(
-    const SiconosVector& vIn) {
-  // Add a part of vIn (starting from index) to the current vector.
-  // vIn must be a SimpleVector.
-
-  // At the end of the present function, index is equal to index + the dim. of
-  // the added sub-vector.
-
-  unsigned int dim = vIn.size();  // size of the block to be added.
-  if (dim > _sizeV) THROW_EXCEPTION("invalid ranges");
-  unsigned int currentSize;
-  unsigned int index = 0;
-
-  for (auto& it : _vect) {
+  for (auto& it : blocks_) {
     currentSize = it->size();
-    it->segment(0, currentSize) += vIn.segment(index, currentSize);
-    index += currentSize;
+    *it += input.segment(offset, currentSize);
+    offset += currentSize;
   }
+  return *this;
+}
+
+siconos::algebra::BlockVector& siconos::algebra::BlockVector::operator-=(
+    const SiconosVector& input) {
+  assert(totalSize_ == input.size());
+
+  Eigen::Index currentSize;
+  Eigen::Index offset = 0;
+
+  for (auto& it : blocks_) {
+    currentSize = it->size();
+    *it -= input.segment(offset, currentSize);
+    offset += currentSize;
+  }
+  return *this;
+}
+
+siconos::algebra::BlockVector& siconos::algebra::BlockVector::operator*=(double s) {
+  for (auto& block : blocks_) *block *= s;
   return *this;
 }
 
 void siconos::algebra::BlockVector::insertPtr(std::shared_ptr<SiconosVector> v) {
   if (!v) THROW_EXCEPTION("v is a nullptr vector.");
 
-  _sizeV += v->size();
-  _vect.push_back(v);
-  _tabIndex->push_back(_sizeV);
+  totalSize_ += v->size();
+  blocks_.push_back(v);
+  blockStartIndices_.push_back(totalSize_);
 }
 
 double siconos::algebra::BlockVector::norm() const {
   double d = 0;
-  for (auto& v : _vect) {
+  for (auto& v : blocks_) {
+
     d += v->squaredNorm();
   }
   return std::sqrt(d);
 }
 
-std::shared_ptr<siconos::algebra::SiconosVector>
-siconos::algebra::BlockVector::toSiconosVector() const {
-  {
-    if (_tabIndex->size() > 1) {
-      auto result = std::make_shared<SiconosVector>(_tabIndex->back());
-      size_t currentIndex = 0;
-      for (auto v : _vect) {
-        const size_t vecSize = v->size();
-        result->segment(currentIndex, vecSize) = *v;  // Copy
-        currentIndex += vecSize;
-      }
-      return result;
-    } else {
-      // No copy, just a ref.
-      return _vect[0];
+siconos::algebra::SiconosVector siconos::algebra::BlockVector::toSiconosVector() const {
+  SiconosVector result(totalSize_);
+  size_t currentIndex = 0;
+  for (const auto& block : blocks_) {
+    if (block) {
+      auto vecSize = block->size();
+      result.segment(currentIndex, vecSize) = *block;
+      currentIndex += vecSize;
     }
   }
-}
-
-siconos::algebra::BlockVector& siconos::algebra::BlockVector::operator*=(double s) {
-  for (auto it = begin(); it != end(); ++it) {
-    (**it) *= s;
-  }
-  return *this;
-}
-
-siconos::algebra::BlockVector& siconos::algebra::BlockVector::operator/=(double s) {
-  for (auto it = begin(); it != end(); ++it) {
-    (**it) /= s;
-  }
-  return *this;
-}
-
-bool siconos::algebra::isComparableTo(const BlockVector& v1, const BlockVector& v2) {
-  // return:
-  //  - true if both are block but with blocks which are facing each other of
-  //  the same size.
-  //  - false in other cases
-  //
-  auto& I1 = *v1.tabIndex();
-  auto& I2 = *v2.tabIndex();
-
-  return (I1 == I2);
+  return result;
 }
 
 // Free functions

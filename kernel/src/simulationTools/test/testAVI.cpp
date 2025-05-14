@@ -18,6 +18,7 @@
 #include "testAVI.hpp"
 
 #include "EventsManager.hpp"
+#include "SiconosAlgebraAddons.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "io.hpp"
@@ -107,11 +108,8 @@ void AVITest::testAVI() {
   siconos::algebra::io::write("testAVI.dat", dataPlot, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  siconos::algebra::SiconosMatrix dataPlotRef(dataPlot);
-  dataPlotRef.setZero();
-  siconos::algebra::io::read("testAVI.ref", dataPlotRef);
-  siconos::algebra::SiconosVector err{dataPlot.cols()};
-  siconos::algebra::normInfByColumn(dataPlot - dataPlotRef, err);
+  auto dataPlotRef = siconos::algebra::io::readDenseMatrix("testAVI.ref");
+  auto err = siconos::algebra::normInfByColumn(dataPlot - dataPlotRef);
   siconos::algebra::print(err);
 
   double maxErr = err(0) > err(1) ? (err(0) > err(2) ? err(0) : err(2))

@@ -27,7 +27,6 @@
 #include "NewtonImpactNSL.hpp"
 #include "OneStepNSProblem.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixVectorOp.hpp"  // mat-vec prod
 #include "SiconosVector.hpp"
 #include "Simulation.hpp"
 #include "Tools.hpp"  // For enum_to_string

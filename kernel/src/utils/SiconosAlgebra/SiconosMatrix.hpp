@@ -58,15 +58,6 @@ using Triplet = Eigen::Triplet<double>;  // Used to fill sparse matrices
 
 // Map types
 
-using MapVectorType = Eigen::Map<SiconosVector>;
-using MapVector3Type = Eigen::Map<SiconosVector3>;
-using MapVector6Type = Eigen::Map<SiconosVector6>;
-using MapVector7Type = Eigen::Map<SiconosVector7>;
-using ConstMapVectorType = Eigen::Map<const SiconosVector>;
-using ConstMapVector3Type = Eigen::Map<const SiconosVector3>;
-using ConstMapVector6Type = Eigen::Map<const SiconosVector6>;
-using ConstMapVector7Type = Eigen::Map<const SiconosVector7>;
-
 using SiconosDiagonalMatrix = Eigen::DiagonalMatrix<double_t, Eigen::Dynamic>;
 
 // Tmp version. To replace BlockVector ?
@@ -94,35 +85,6 @@ using MapType = Eigen::Map<SiconosMatrix>;
 using ConstMapType = Eigen::Map<const SiconosMatrix>;
 
 enum class StorageType { dense, sparse };
-
-/** fill a CSparseMatrix (triplet) from non null values of a SiconosSparseMatrix
- *
- *  \param m input matrix
- *  \param csc the compressed column sparse matrix
- *  \param row_off
- *  \param col_off
- */
-void fillTriplet(const SiconosSparseMatrix &m, CSparseMatrix *triplet, size_t row_off,
-                 size_t col_off);
-
-/** fill a CSparseMatrix (triplet) from non null values of a SiconosDenseMatrix
- *
- *  \param m input matrix
- *  \param csc the compressed column sparse matrix
- *  \param row_off
- *  \param col_off
- *  \param tol the tolerance to consider a number zero (not used if the matrix
- *  is sparse)
- */
-void fillTriplet(SiconosDenseMatrix &m, CSparseMatrix *csc, size_t row_off, size_t col_off,
-                 double tol = 1e-14);
-
-void normInfByColumn(const SiconosMatrix &m, SiconosVector &v);
-
-bool checkSymmetry(SiconosMatrix &m, double tol);
-
-siconos::algebra::SiconosMatrix readMatrixFromFile(const std::string &filename,
-                                                   bool ascii = true);
 
 /** General dense matrix print function
  *  \param mat the matrix to be displayed
@@ -175,6 +137,7 @@ inline double normInf(const SiconosSparseMatrix &mat) {
   }
   return maxNorm;
 }
+
 template <typename Derived>
 void normInf(const Eigen::EigenBase<Derived> &mat) {
   return mat->cwiseAbs().rowwise().sum().maxCoeff();
@@ -183,67 +146,66 @@ void normInf(const Eigen::EigenBase<Derived> &mat) {
 /** Set a sub-block of a matrix
  *  \param row_min starting row index of the written block
  *  \param col_min starting col index of the written block
- *  \param[in] block_input input matrix to be written in the block
+ *  \param[in] input input matrix to be written in the block
  *  \param[in,out] m_out matrix to be updated
  */
 template <typename Derived>
 inline void setBlock(typename Derived::Index row_min, typename Derived::Index col_min,
-                     const Eigen::MatrixBase<Derived> &block_input,
-                     Eigen::Ref<SiconosMatrix> m_out) {
+                     const Eigen::MatrixBase<Derived> &input,
+                     Eigen::Ref<SiconosDenseMatrix> m_out) {
   // assert(m != *this);
   assert(row_min < m_out.rows() && "row is out of range");
   assert(col_min < m_out.cols() && "column is out of range");
 
   // Get the number of rows and columns in the input block
-  auto block_rows = block_input.rows();
-  auto block_cols = block_input.cols();
+  auto block_rows = input.rows();
+  auto block_cols = input.cols();
 
   // Calculate the max row and column indices
   assert(row_min + block_rows <= m_out.rows() && "block goes out of range in rows");
   assert(col_min + block_cols <= m_out.cols() && "block goes out of range in columns");
 
-  m_out.block(row_min, col_min, block_rows, block_cols) = block_input;
+  m_out.block(row_min, col_min, block_rows, block_cols) = input;
 }
 
-/** Set a sub-block of a Vector
- *  \param row_min starting row index of the written block
- *  \param[in] block_input input matrix to be written in the block
- *  \param[in,out] v_out vector to be updated
- */
-template <typename Derived>
-inline void setBlock(typename Derived::Index row_min,
-                     const Eigen::MatrixBase<Derived> &block_input,
-                     Eigen::Ref<SiconosVector> v_out) {
-  // Assert if row_min is in range
-  assert(row_min < v_out.rows() && "row is out of range");
+// /** Set a sub-block of a Vector
+//  *  \param row_min starting row index of the written block
+//  *  \param[in] block_input input matrix to be written in the block
+//  *  \param[in,out] v_out vector to be updated
+//  */
+// template <typename Derived>
+// inline void setBlock(typename Derived::Index row_min,
+//                      const Eigen::MatrixBase<Derived> &block_input,
+//                      Eigen::Ref<SiconosVector> v_out) {
+//   // Assert if row_min is in range
+//   assert(row_min < v_out.rows() && "row is out of range");
 
-  // Get the number of rows in the input block
-  auto block_rows = block_input.rows();
+//   // Get the number of rows in the input block
+//   auto block_rows = block_input.rows();
 
-  // Check if the block fits inside v_out
-  assert(row_min + block_rows <= v_out.rows() && "block goes out of range in rows");
+//   // Check if the block fits inside v_out
+//   assert(row_min + block_rows <= v_out.rows() && "block goes out of range in rows");
 
-  // Using segment to efficiently set the block values in the vector
-  v_out.segment(row_min, block_rows) = block_input;
-}
+//   // Using segment to efficiently set the block values in the vector
+//   v_out.segment(row_min, block_rows) = block_input;
+// }
 
 /** Set a sub-block of a sparse matrix
  *  \param row_min starting row index of the written block
  *  \param col_min starting col index of the written block
- *  \param[in] block_input input matrix to be written in the block
+ *  \param[in] input input matrix to be written in the block
  *  \param[in,out] m_out matrix to be updated
  */
 template <typename Derived>
 inline void setBlock(typename Derived::Index row_min, typename Derived::Index col_min,
-                     const Eigen::MatrixBase<Derived> &block_input,
-                     SiconosSparseMatrix &m_out) {
+                     const Eigen::MatrixBase<Derived> &input, SiconosSparseMatrix &m_out) {
   // Assert if row and column are in range
   assert(row_min < m_out.rows() && "row is out of range");
   assert(col_min < m_out.cols() && "column is out of range");
 
   // Get the number of rows and columns in the input block
-  auto block_rows = block_input.rows();
-  auto block_cols = block_input.cols();
+  auto block_rows = input.rows();
+  auto block_cols = input.cols();
 
   // Check if the block fits inside m_out
   assert(row_min + block_rows <= m_out.rows() && "block goes out of range in rows");
@@ -251,18 +213,20 @@ inline void setBlock(typename Derived::Index row_min, typename Derived::Index co
 
   // We need to populate the sparse matrix using triplets
   //  std::vector<Triplet> triplets;
-  // Loop through each element in the block_input and add to triplets if non-zero
+  // Loop through each element in the input and add to triplets if non-zero
+  if (m_out.isCompressed()) m_out.uncompress();
   for (int i = 0; i < block_rows; ++i) {
     for (int j = 0; j < block_cols; ++j) {
-      auto value = block_input(i, j);
+      auto value = input(i, j);
       if (value != 0) {  // we can use a tol ?
-        m_out.insert(row_min + i, col_min + j) = value;
+        m_out.coeffRef(row_min + i, col_min + j) = value;
         // To reset the matrix use
-        // triplets.emplace_back(row_min + i, col_min + j, block_input(i, j));
+        // triplets.emplace_back(row_min + i, col_min + j, input(i, j));
         // + setFromTriplets below
       }
     }
   }
+  m_out.makeCompressed();
   //  m_out.setFromTriplets(triplets.begin(), triplets.end());
 }
 

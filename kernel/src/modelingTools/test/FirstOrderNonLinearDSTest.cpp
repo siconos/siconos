@@ -18,9 +18,8 @@
 #include "FirstOrderNonLinearDSTest.hpp"
 
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixOp.hpp"
-#include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
+#include "io.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
   if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -36,9 +35,9 @@ void FirstOrderNonLinearDSTest::setUp() {
   (*x0)(2) = 3;
 
   J0 = std::make_shared<siconos::algebra::SiconosMatrix>(
-      siconos::algebra::readMatrixFromFile("matJ0.dat"));
+      siconos::algebra::io::readDenseMatrix("matJ0.dat"));
   M = std::make_shared<siconos::algebra::SiconosMatrix>(
-      siconos::algebra::readMatrixFromFile("matM.dat"));
+      siconos::algebra::io::readDenseMatrix("matM.dat"));
 }
 
 void FirstOrderNonLinearDSTest::tearDown() {}

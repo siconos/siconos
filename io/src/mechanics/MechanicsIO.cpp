@@ -46,7 +46,6 @@
 #include "DynamicalSystem.hpp"
 #include "FremondImpactFrictionNSL.hpp"
 #include "Interaction.hpp"
-#include "SiconosJoints.hpp"
 #include "Lagrangian2d2DR.hpp"
 #include "Lagrangian2d3DR.hpp"
 #include "LagrangianDS.hpp"
@@ -64,8 +63,8 @@
 #include "Question.hpp"
 #include "RigidBody2dDS.hpp"
 #include "RigidBodyDS.hpp"
+#include "SiconosJoints.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
 #include "SimulationGraphs.hpp"
 #include "StaticBody.hpp"
@@ -158,7 +157,7 @@ void siconos::io::ContactPointVisitor::operator()(
   auto id = inter->number();
   auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
   siconos::algebra::SiconosVector cf{rel.H_NE_prod_T().cols()};
-  siconos::algebra::transposeMatrixVector_prod(*inter->lambda(1), rel.H_NE_prod_T(), cf);
+  cf.noalias() = rel.H_NE_prod_T().transpose() * *inter->lambda(1);
   answer.resize(23);
 
   answer(0) = mu;
@@ -200,7 +199,7 @@ void siconos::io::ContactPointVisitor::operator()(
   auto id = inter->number();
   auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
   siconos::algebra::SiconosVector cf{rel.H_NE_prod_T().cols()};
-  siconos::algebra::transposeMatrixVector_prod(*inter->lambda(1), rel.H_NE_prod_T(), cf);
+  cf.noalias() = rel.H_NE_prod_T().transpose() * *inter->lambda(1);
   answer.resize(23);
 
   answer(0) = mu;
@@ -254,7 +253,7 @@ void siconos::io::ContactPointVisitor::operator()(
   auto id = inter->number();
   auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
   siconos::algebra::SiconosVector cf{rel.jacobianhOver_q().cols()};
-  siconos::algebra::transposeMatrixVector_prod(*inter->lambda(1), rel.jacobianhOver_q(), cf);
+  cf.noalias() = rel.jacobianhOver_q().transpose() * *inter->lambda(1);
   answer.resize(16);
 
   answer(0) = mu;
@@ -319,7 +318,7 @@ void siconos::io::ContactPointVisitor::operator()(
   auto id = inter->number();
   auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
   siconos::algebra::SiconosVector cf{rel.jacobianhOver_q().cols()};
-  siconos::algebra::transposeMatrixVector_prod(*inter->lambda(1), rel.jacobianhOver_q(), cf);
+  cf.noalias() = rel.jacobianhOver_q().transpose() * *inter->lambda(1);
   answer.resize(16);
 
   answer(0) = mu;
@@ -374,7 +373,7 @@ void siconos::io::ContactPointVisitor::operator()(
   auto id = inter->number();
   auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
   siconos::algebra::SiconosVector cf{rel.jacobianhOver_q().cols()};
-  siconos::algebra::transposeMatrixVector_prod(*inter->lambda(1), rel.jacobianhOver_q(), cf);
+  cf.noalias() = rel.jacobianhOver_q().transpose() * *inter->lambda(1);
   answer.resize(16);
 
   answer(0) = mu;
@@ -414,7 +413,7 @@ void siconos::io::ContactPointVisitor::operator()(
   auto id = inter->number();
   auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
   siconos::algebra::SiconosVector cf{rel.jacobianhOver_q().cols()};
-  siconos::algebra::transposeMatrixVector_prod(*inter->lambda(1), rel.jacobianhOver_q(), cf);
+  cf.noalias() = rel.jacobianhOver_q().transpose() * *inter->lambda(1);
 
   answer.resize(16);
 
@@ -455,7 +454,7 @@ void siconos::io::ContactPointVisitor::operator()(
   auto id = inter->number();
   auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
   siconos::algebra::SiconosVector cf{rel.jacobianhOver_q().cols()};
-  siconos::algebra::transposeMatrixVector_prod(*inter->lambda(1), rel.jacobianhOver_q(), cf);
+  cf.noalias() = rel.jacobianhOver_q().transpose() * *inter->lambda(1);
 
   answer.resize(16);
 

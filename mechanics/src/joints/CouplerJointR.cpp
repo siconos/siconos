@@ -155,6 +155,11 @@ void siconos::joints::CouplerJointR::makeBlockVectors(
   std::shared_ptr<siconos::algebra::SiconosVector> q2Shared =
       q2 ? makeSharedPtr(q2.value()) : nullptr;
 
+  // This function must be used on empty vectors
+  // Anyway, they will be overwritten.
+  assert(q01.numberOfBlocks() == 0);
+  assert(q02.numberOfBlocks() == 0);
+
   // Initialize vects1 and vects2
   std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> vects1(2, nullptr);
   std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> vects2(2, nullptr);
@@ -191,8 +196,8 @@ void siconos::joints::CouplerJointR::makeBlockVectors(
     }
   }
 
-  q01.setAllVect(vects1);
-  q02.setAllVect(vects2);
+  for (auto v1 : vects1) q01.insertPtr(v1);
+  for (auto v2 : vects2) q02.insertPtr(v2);
 }
 
 void siconos::joints::CouplerJointR::setBasePositions(

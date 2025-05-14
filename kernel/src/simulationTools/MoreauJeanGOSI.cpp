@@ -26,9 +26,7 @@
 #include "Relation.hpp"
 #include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
-#include "SiconosVectorOp.hpp"
 #include "Simulation.hpp"
 // #define DEBUG_STDOUT
 // #define DEBUG_NOCOLOR
@@ -225,7 +223,7 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
       }
 
       // residu = -1.0*free_rhs;
-      // siconos::algebra::prod(1.0, W, *v, residu, false);
+      // residu.noalias() += W **v;
       // DEBUG_EXPR(siconos::algebra::print(free_rhs));
       // if(d->p(1))
       //   residu -= *d->p(1); // Compute Residu in Workfree Notation !!
@@ -307,7 +305,8 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
 
       // Get the (constant mass matrix)
       // auto massMatrix = d->mass();
-      // siconos::algebra::prod(*massMatrix, (*v - vold), residu, true); // residu = M(v -
+      // residu = *massMatrix * (*v - vold);
+      //  // residu = M(v -
       // vold) DEBUG_EXPR(siconos::algebra::print(residu););
 
       auto& iterationMatrix = *_dynamicalSystemsGraph->properties(*dsi).iterationMatrix;

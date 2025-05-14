@@ -21,6 +21,9 @@
 
 */
 
+// FP: shouldn't we provide an hdf reader/writer for matrix and vectors?
+//  To be explored: https://github.com/highfive-devs/highfive
+
 #ifndef __ioVector__
 #define __ioVector__
 
@@ -98,36 +101,66 @@ bool write(const std::string &fileName, const SiconosVector &m,
            const std::ios_base::fmtflags &flags = std::cout.flags());
 
 /**
-   Read a SiconosMatrix
+   Read a dense matrix from a file
 
-   \param[in] fileName the name of the file to read
-   \param[in,out] m the SiconosMatrix to be filled
+   File format:
+    rows cols
+    values of row0
+    values of row1
+    ...
+
+   \param[in] filename the name of the file to read
    \param[in] mode the storage type used in the file (either ASCII_IN or BINARY_IN)
-   \return true if read ok, else false ...
+   \return the new matrix
 */
-bool read(const std::string &fileName, SiconosMatrix &m,
-          const std::ios_base::openmode &mode = ASCII_IN);
+siconos::algebra::SiconosDenseMatrix readDenseMatrix(
+    const std::string &filename, const std::ios_base::openmode &mode = ASCII_IN);
 
 /**
-   Write a SiconosMatrix
+   Read a sparse matrix from a file
+
+   File format:
+    rows cols nnz
+    list of triplets (row col value), one per line
+
+    \param[in] filename the name of the file to read
+    \param[in] mode the storage type used in the file (either ASCII_IN or BINARY_IN)
+    \return the new matrix
+*/
+siconos::algebra::SiconosSparseMatrix readSparseMatrix(
+    const std::string &filename, const std::ios_base::openmode &mode = ASCII_IN);
+
+/**
+   Write a matrix in dense format
 
    \param[in] fileName the name of the file to write in
    \param[in] m the SiconosMatrix to write
    \param[in] mode the storage type used in the file (either ASCII_OUT or BINARY_OUT)
    \param[in] outputType type of output:
-   - python (default):
-   row col
-   a00 a01 a02 ...
-   a10 ...
-   - noDim:
-   a00 a01 a02 ...
-   a10 ...
-   Reading input format is the one corresponding to "python".
-   \return true if read ok, else false ...
+    - python (default):
+    row col
+    a00 a01 a02 ...
+    a10 ...
+    - noDim:
+    a00 a01 a02 ...
+    a10 ...
+
+    Rq: reading input format is the one corresponding to "python".
 */
-bool write(const std::string &fileName, const SiconosMatrix &m,
+void write(const std::string &filename, const siconos::algebra::SiconosDenseMatrix &mat,
            const std::ios_base::openmode &mode = ASCII_OUT,
            const WriteType = WriteType::python);
+
+/**
+   Write a matrix in sparse format
+
+   \param[in] fileName the name of the file to write in
+   \param[in] m the SiconosMatrix to write
+   \param[in] mode the storage type used in the file (either ASCII_OUT or BINARY_OUT)
+*/
+void writeSparseMatrix(const std::string &filename,
+                       const siconos::algebra::SiconosSparseMatrix &mat,
+                       const std::ios_base::openmode &mode = ASCII_OUT);
 
 /** Function to load data from a file and compare it with the provided
  *  data.  Returns the measured difference between files if the file
@@ -144,7 +177,7 @@ bool write(const std::string &fileName, const SiconosMatrix &m,
  *  \return Positive or 0.0 if the file was loaded and the comparison was performed,
  *  otherwise -1.
  */
-double compareRefFile(const SiconosMatrix &data, std::string filename, double epsilon,
+double compareRefFile(const SiconosDenseMatrix &data, std::string filename, double epsilon,
                       std::vector<int> index = {},
                       const std::ios_base::openmode mode = std::ios_base::in,
                       bool verbose = true);

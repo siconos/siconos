@@ -19,7 +19,6 @@
 #include "ControlZOHAdditionalTerms.hpp"
 
 #include "MatrixIntegrator.hpp"
-#include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
 // #define DEBUG_WHERE_MESSAGES
 
@@ -69,11 +68,10 @@ void siconos::control::ControlZOHAdditionalTerms::addSmoothTerms(
     if (!DSG0.Bd.at(dsgVD)->isConst()) {
       DSG0.Bd.at(dsgVD)->integrate();
     }
-    DEBUG_EXPR( siconos::algebra::print( DSG0.Bd.at(dsgVD)->mat() ) );
+    DEBUG_EXPR(siconos::algebra::print(DSG0.Bd.at(dsgVD)->mat()));
     DEBUG_EXPR(siconos::algebra::print(xfree));
     DEBUG_EXPR(siconos::algebra::print(*DSG0.u.at(dsgVD)));
-    siconos::algebra::prod(DSG0.Bd.at(dsgVD)->mat(), *DSG0.u.at(dsgVD), xfree,
-                           false);  // xfree += Bd*u
+    xfree.noalias() += DSG0.Bd.at(dsgVD)->mat() * *DSG0.u.at(dsgVD);  // xfree += Bd*u
   }
   // check whether the DynamicalSystem is an Observer
   if (DSG0.e.hasKey(dsgVD)) {
@@ -81,8 +79,7 @@ void siconos::control::ControlZOHAdditionalTerms::addSmoothTerms(
     if (!DSG0.Ld.at(dsgVD)->isConst()) {
       DSG0.Ld.at(dsgVD)->integrate();
     }
-    siconos::algebra::prod(DSG0.Ld.at(dsgVD)->mat(), *DSG0.e.at(dsgVD), xfree,
-                           false);  // xfree += -Ld*e
+    xfree.noalias() += DSG0.Ld.at(dsgVD)->mat() * *DSG0.e.at(dsgVD);  // xfree += -Ld*e
   }
   DEBUG_END("void siconos::control::ControlZOHAdditionalTerms::addSmoothTerms(...)\n");
 }
@@ -90,6 +87,6 @@ void siconos::control::ControlZOHAdditionalTerms::addSmoothTerms(
 void siconos::control::ControlZOHAdditionalTerms::addJacobianRhsContribution(
     siconos::graphs::DynamicalSystemsGraph& DSG0,
     const siconos::graphs::DynamicalSystemsGraph::VDescriptor& dsgVD, const double h,
-    siconos::algebra::SiconosVector&jacRhs) {
+    siconos::algebra::SiconosVector& jacRhs) {
   // nothing to be done here
 }

@@ -21,8 +21,8 @@
 
 #include "BlockVector.hpp"
 #include "Interaction.hpp"
+#include "SiconosAlgebraAddons.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixVectorOp.hpp"  // for matrixVector_prod_toBlock
 
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT

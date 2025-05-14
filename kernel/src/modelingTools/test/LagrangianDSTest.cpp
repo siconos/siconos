@@ -18,7 +18,6 @@
 #include "LagrangianDSTest.hpp"
 
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixOp.hpp"
 #include "SiconosVector.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \

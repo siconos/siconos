@@ -32,7 +32,7 @@
 #include "NewtonEulerJointR.hpp"
 #include "OneStepNSProblem.hpp"
 #include "RotationQuaternion.hpp"
-#include "SiconosMatrixVectorOp.hpp"  // for prod
+
 #include "SolverOptions.h"            // for SolverOptions struct
 #include "TimeStepping.hpp"
 #include "Topology.hpp"

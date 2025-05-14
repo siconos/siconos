@@ -8,7 +8,7 @@ if(WITH_TESTING)
 
   new_test(
     NAME testSiconosAlgebra
-    SOURCES  SiconosMatrixTest.cpp ${SIMPLE_TEST_MAIN}
+    SOURCES  SiconosMatrixTest.cpp SiconosVectorTest.cpp BlockVectorTest.cpp ${SIMPLE_TEST_MAIN}
     DEPS "numerics;CPPUNIT::CPPUNIT;externals"
     )
 

@@ -439,7 +439,7 @@ void siconos::simulation::TimeSteppingDirectProjection::advanceToEvent() {
   //     }
   //     auto T = neds->T();
   //     auto  dotq = neds->dotq();
-  //     siconos::algebra::prod(*T,*neds->velocity(),*dotq,true);
+  //     dotq->noalias() = *T **neds->velocity();
   //     if(!_allNSProblems->empty())
   //     {
   //       for(unsigned int level = _levelMinForOutput;

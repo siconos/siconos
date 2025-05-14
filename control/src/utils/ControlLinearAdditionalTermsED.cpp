@@ -20,7 +20,6 @@
 
 #include "DynamicalSystem.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
 
 namespace siconos::control {
@@ -53,8 +52,7 @@ void siconos::control::ControlLinearAdditionalTermsED::addSmoothTerms(
   // check whether we have a system with a control input
   if (DSG0.u.hasKey(dsgVD)) {
     if (DSG0.B.hasKey(dsgVD)) {
-      siconos::algebra::prod(DSG0.B.getRef(dsgVD), DSG0.u.getRef(dsgVD), xdot,
-                             false);  // xdot += B*u
+      xdot.noalias() += DSG0.B.getRef(dsgVD) * DSG0.u.getRef(dsgVD);
     } else if (DSG0.pluginU.hasKey(dsgVD)) {
       auto& ds = *DSG0.bundle(dsgVD);
       auto& u = DSG0.u.getRef(dsgVD);
@@ -73,7 +71,7 @@ void siconos::control::ControlLinearAdditionalTermsED::addSmoothTerms(
   // check whether the DynamicalSystem is an Observer
   if (DSG0.e.hasKey(dsgVD)) {
     assert(DSG0.L.hasKey(dsgVD));
-    siconos::algebra::prod(*DSG0.L[dsgVD], *DSG0.e[dsgVD], xdot, false);  // xdot += -L*e
+    xdot.noalias() += *DSG0.L[dsgVD] * *DSG0.e[dsgVD];  // xdot += -L*e
   }
 }
 

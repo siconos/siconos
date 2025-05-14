@@ -38,6 +38,6 @@ PYBIND11_MODULE(_io, m) {
       .def("velocities", &siconos::io::MechanicsIO::velocities, py::return_value_policy::move)
       .def("contactPoints", &siconos::io::MechanicsIO::contactPoints,
            py::return_value_policy::move)
-      .def("contactContactWork", &siconos::io::MechanicsIO::contactContactWork),
-      py::return_value_policy::move;
+      .def("contactContactWork", &siconos::io::MechanicsIO::contactContactWork,
+           py::return_value_policy::move);
 }

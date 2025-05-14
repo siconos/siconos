@@ -18,9 +18,8 @@
 #include "LagrangianLinearTIDSTest.hpp"
 
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixOp.hpp"
-#include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
+#include "io.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
   if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -40,8 +39,8 @@ void LagrangianLinearTIDSTest::setUp() {
   mass(0, 0) = 1;
   mass(1, 1) = 2;
   mass(2, 2) = 3;
-  K = siconos::algebra::readMatrixFromFile("K.dat");
-  C = siconos::algebra::readMatrixFromFile("C.dat");
+  K = siconos::algebra::io::readDenseMatrix("K.dat");
+  C = siconos::algebra::io::readDenseMatrix("C.dat");
 
   minus_inv_M.setZero();
   minus_inv_M(0, 0) = -1.;

@@ -22,10 +22,10 @@
 #include <fstream>
 #include <iterator>
 
+#include "SiconosAlgebraAddons.hpp"
 #include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-// #include <boost/numeric/ublas/io.hpp>
 
 bool siconos::algebra::io::read(const std::string &fileName, SiconosVector &m,
                                 const std::ios_base::openmode &mode, int prec,
@@ -87,93 +87,180 @@ bool siconos::algebra::io::write(const std::string &fileName, const SiconosVecto
   return true;
 }
 
-bool siconos::algebra::io::read(const std::string &filename, SiconosMatrix &m,
-                                const std::ios_base::openmode &mode) {
+siconos::algebra::SiconosDenseMatrix siconos::algebra::io::readDenseMatrix(
+    const std::string &filename, const std::ios_base::openmode &mode) {
   std::ifstream infile(filename, mode);
+  if (!infile.is_open()) throw std::runtime_error("Cannot open file: " + filename);
 
-  if (!infile.good()) THROW_EXCEPTION("");
+  if (infile.peek() == std::ifstream::traits_type::eof())
+    throw std::runtime_error("The given file is empty!");
+
+  // Binary read
+  if (mode & std::ios::binary) {
+    char magic[4];
+    uint16_t version, type;
+    int32_t rows, cols;
+
+    infile.read(magic, 4);
+    infile.read(reinterpret_cast<char *>(&version), sizeof(version));
+    infile.read(reinterpret_cast<char *>(&type), sizeof(type));
+    infile.read(reinterpret_cast<char *>(&rows), sizeof(rows));
+    infile.read(reinterpret_cast<char *>(&cols), sizeof(cols));
+
+    if (std::strncmp(magic, "SICO", 4) != 0 || type != 1)
+      throw std::runtime_error("Invalid file format or not a dense matrix");
+
+    SiconosDenseMatrix m(rows, cols);
+    infile.read(reinterpret_cast<char *>(m.data()), sizeof(double) * rows * cols);
+
+    infile.read(reinterpret_cast<char *>(&rows), sizeof(int));
+    infile.read(reinterpret_cast<char *>(&cols), sizeof(int));
+
+    SiconosDenseMatrix mat(rows, cols);
+    infile.read(reinterpret_cast<char *>(mat.data()), sizeof(double) * rows * cols);
+    return mat;
+  } else {
+    Eigen::Index rows, cols;
+    infile >> rows >> cols;
+
+    SiconosDenseMatrix m(rows, cols);
+
+    for (Eigen::Index i = 0; i < rows; ++i)
+      for (Eigen::Index j = 0; j < cols; ++j) infile >> m(i, j);
+
+    return m;  // RVO or move
+  }
+}
+
+siconos::algebra::SiconosSparseMatrix siconos::algebra::io::readSparseMatrix(
+    const std::string &filename, const std::ios_base::openmode &mode) {
+  std::ifstream infile(filename, mode);
+  if (!infile.is_open()) {
+    throw std::runtime_error("Cannot open file: " + filename);
+  }
 
   if (infile.peek() == std::ifstream::traits_type::eof()) {
-    THROW_EXCEPTION("the given file is empty!");
+    throw std::runtime_error("The given file is empty!");
   }
 
-  infile.precision(15);
-  infile.setf(std::ios::scientific);
+  if (mode & std::ios_base::binary) {
+    char magic[4];
+    infile.read(magic, 4);
+    if (std::string(magic, 4) != "SICO") throw std::runtime_error("Invalid magic header");
 
-  // Dim of the matrix are given in the first line.
-  // Just use to check that sizes are consistents.
+    int rows, cols, nnz;
+    infile.read(reinterpret_cast<char *>(&rows), sizeof(int));
+    infile.read(reinterpret_cast<char *>(&cols), sizeof(int));
+    infile.read(reinterpret_cast<char *>(&nnz), sizeof(int));
 
-  unsigned int s1, s2;
-  infile >> s1;
-  infile >> s2;
-
-  if (s1 != m.rows() || s2 != m.cols()) m.resize(s1, s2);
-
-  // Note: using istream stl iterator seems to be 2-times faster than << with a
-  // loop over matrix data.
-  //  copy((std::istream_iterator<double>(infile)),
-  //  std::istream_iterator<double>(), (p->data()).begin());
-  // But it fails with column-major saving ... (ok if user write its matrix in a
-  // column-major way)
-
-  for (unsigned int i = 0; i < s1; i++) {
-    for (unsigned int j = 0; j < s2; j++) {
-      infile >> m(i, j);
+    std::vector<Eigen::Triplet<double>> triplets;
+    triplets.reserve(nnz);
+    for (int k = 0; k < nnz; ++k) {
+      int i, j;
+      double v;
+      infile.read(reinterpret_cast<char *>(&i), sizeof(int));
+      infile.read(reinterpret_cast<char *>(&j), sizeof(int));
+      infile.read(reinterpret_cast<char *>(&v), sizeof(double));
+      triplets.emplace_back(i, j, v);
     }
+    SiconosSparseMatrix mat(rows, cols);
+    mat.setFromTriplets(triplets.begin(), triplets.end());
+    return mat;
+  } else {
+    int rows, cols, nnz;
+    infile >> rows >> cols >> nnz;
+    std::vector<Eigen::Triplet<double>> triplets;
+    triplets.reserve(nnz);
+    for (int k = 0; k < nnz; ++k) {
+      int i, j;
+      double v;
+      infile >> i >> j >> v;
+      triplets.emplace_back(i, j, v);
+    }
+    SiconosSparseMatrix mat(rows, cols);
+    mat.setFromTriplets(triplets.begin(), triplets.end());
+    return mat;
   }
-
-  infile.close();
-  return true;
 }
 
-bool siconos::algebra::io::write(const std::string &filename, const SiconosMatrix &m,
-                                 const std::ios_base::openmode &mode, WriteType outputType) {
-  // Open file and various checks
+void siconos::algebra::io::write(const std::string &filename,
+                                 const siconos::algebra::SiconosDenseMatrix &mat,
+                                 const std::ios_base::openmode &mode,
+                                 const WriteType outputType) {
   std::ofstream outfile(filename, mode);
+  if (!outfile.is_open()) throw std::runtime_error("Cannot open file " + filename);
 
-  if (!outfile.good()) THROW_EXCEPTION("");
+  if (mode & std::ios::binary) {
+    // We enforce row/col output when binary is on.
+    assert(outputType == WriteType::python);
+    // Unique id for siconos binary files
+    const char magic[4] = {'S', 'I', 'C', 'O'};
+    uint16_t version = 1;
+    uint16_t type = 1;
+    int32_t rows = static_cast<int32_t>(mat.rows());
+    int32_t cols = static_cast<int32_t>(mat.cols());
 
-  outfile.precision(15);
-  outfile.setf(std::ios::scientific);
-  // Writing
-
-  if (outputType == WriteType::python) outfile << m.rows() << " " << m.cols() << std::endl;
-
-  double tmp;
-  for (decltype(m.rows()) i = 0; i < m.rows(); i++) {
-    for (decltype(m.cols()) j = 0; j < m.cols(); j++) {
-      tmp = m(i, j);
-      if (fabs(tmp) < std::numeric_limits<double>::min()) tmp = 0.0;
-      outfile << tmp << " ";
-      assert(outfile.good());
+    outfile.write(magic, 4);
+    outfile.write(reinterpret_cast<const char *>(&version), sizeof(version));
+    outfile.write(reinterpret_cast<const char *>(&type), sizeof(type));
+    outfile.write(reinterpret_cast<const char *>(&rows), sizeof(rows));
+    outfile.write(reinterpret_cast<const char *>(&cols), sizeof(cols));
+    outfile.write(reinterpret_cast<const char *>(mat.data()), sizeof(double) * rows * cols);
+  } else {
+    outfile.precision(15);
+    outfile.setf(std::ios::scientific);
+    if (outputType == WriteType::python) outfile << mat.rows() << " " << mat.cols() << "\n";
+    for (Eigen::Index i = 0; i < mat.rows(); ++i) {
+      for (Eigen::Index j = 0; j < mat.cols(); ++j) {
+        auto tmp = mat(i, j);
+        if (std::abs(tmp) < std::numeric_limits<double>::min()) tmp = 0.0;
+        outfile << tmp << " ";
+      }
+      outfile << "\n";
     }
-    outfile << std::endl;
   }
-
-  outfile.close();
-  return true;
 }
 
-double siconos::algebra::io::compareRefFile(const SiconosMatrix &data, std::string filename,
-                                            double epsilon, std::vector<int> index,
-                                            const std::ios_base::openmode mode, bool verbose) {
-  auto ref = std::make_shared<SiconosMatrix>(0, 0);
-  bool compare = false;
-  // SiconosMatrix ref{0, 0};
-  try {
-    compare = read(filename, *ref, mode);
-  } catch (...) {
-    if (verbose)
-      std::cout << "Warning: reference file " << filename
-                << " not found, no comparison performed." << std::endl;
-    siconos::exception::process();
+// --- Sparse Write ---
+void siconos::algebra::io::writeSparseMatrix(const std::string &filename,
+                                             const SiconosSparseMatrix &mat,
+                                             const std::ios_base::openmode &mode) {
+  std::ofstream outfile(filename, mode);
+  if (!outfile.is_open()) throw std::runtime_error("Cannot open file " + filename);
+
+  if (mode & std::ios_base::binary) {
+    // Check for unique id in siconos binary files
+    outfile.write("SICO", 4);
+    Eigen::Index rows = mat.rows(), cols = mat.cols(), nnz = mat.nonZeros();
+    outfile.write(reinterpret_cast<const char *>(&rows), sizeof(Eigen::Index));
+    outfile.write(reinterpret_cast<const char *>(&cols), sizeof(Eigen::Index));
+    outfile.write(reinterpret_cast<const char *>(&nnz), sizeof(Eigen::Index));
+
+    for (int k = 0; k < mat.outerSize(); ++k)
+      for (SiconosSparseMatrix::InnerIterator it(mat, k); it; ++it) {
+        Eigen::Index i = it.row(), j = it.col();
+        double v = it.value();
+        outfile.write(reinterpret_cast<const char *>(&i), sizeof(Eigen::Index));
+        outfile.write(reinterpret_cast<const char *>(&j), sizeof(Eigen::Index));
+        outfile.write(reinterpret_cast<const char *>(&v), sizeof(double));
+      }
+  } else {
+    outfile << mat.rows() << " " << mat.cols() << " " << mat.nonZeros() << "\n";
+    for (Eigen::Index k = 0; k < mat.outerSize(); ++k)
+      for (SiconosSparseMatrix::InnerIterator it(mat, k); it; ++it)
+        outfile << it.row() << " " << it.col() << " " << it.value() << "\n";
   }
-  if (!compare) return -1.0;
+}
+
+double siconos::algebra::io::compareRefFile(const SiconosDenseMatrix &data,
+                                            std::string filename, double epsilon,
+                                            std::vector<int> index,
+                                            const std::ios_base::openmode mode, bool verbose) {
+  // SiconosMatrix ref{0, 0};
+  auto ref = readDenseMatrix(filename, mode);
 
   if (verbose) std::cout << "\n ===> Comparison with reference file " << filename << std::endl;
-
-  SiconosVector err(data.cols());
-  siconos::algebra::normInfByColumn(data - *ref, err);
+  auto err = siconos::algebra::normInfByColumn(data - ref);
 
   if (verbose) {
     std::cout << "Error vector:\n";

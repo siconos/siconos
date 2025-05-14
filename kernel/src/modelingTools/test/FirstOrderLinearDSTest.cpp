@@ -20,9 +20,8 @@
 #include <limits>
 
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixOp.hpp"
-#include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
+#include "io.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
   if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -42,7 +41,7 @@ void FirstOrderLinearDSTest::setUp() {
   (*b0)(2) = 6;
 
   A0 = std::make_shared<siconos::algebra::SiconosMatrix>(
-      siconos::algebra::readMatrixFromFile("matA0.dat"));
+      siconos::algebra::io::readDenseMatrix("matA0.dat"));
 }
 void FirstOrderLinearDSTest::tearDown() {}
 

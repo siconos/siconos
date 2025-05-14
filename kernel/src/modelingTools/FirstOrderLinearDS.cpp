@@ -19,7 +19,6 @@
 
 #include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixVectorOp.hpp"  // For prod matrix-vectors
 #include "SiconosVector.hpp"
 // #define DEBUG_MESSAGES
 // #define DEBUG_STDOUT

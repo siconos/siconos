@@ -21,10 +21,11 @@
 
 #include "BlockVector.hpp"
 #include "Interaction.hpp"
+#include "SiconosAlgebraAddons.hpp"
 #include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
+
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -132,7 +133,7 @@ void siconos::modeling::FirstOrderLinearTIR::setConstanteVector(
 //   // else
 //   //   y.setZero();
 
-//   if (_D) siconos::algebra::prod(*_D, lambda, y, false);
+//   if (_D) y.noalias() += *_D*lambda;
 
 //   if (_e) y += *_e;
 

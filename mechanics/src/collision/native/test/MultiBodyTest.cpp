@@ -31,6 +31,7 @@
 #include "SpaceFilter.hpp"
 #include "TimeDiscretisation.hpp"
 #include "TimeStepping.hpp"
+#include "io.hpp"
 
 // 2D
 constexpr auto NDOF = 3;
@@ -129,7 +130,7 @@ void Disks::init(std::string disks_input) {
     std::cout << "====> nsds loading ..." << std::endl << std::endl;
 
     _plans = std::make_shared<siconos::algebra::SiconosMatrix>(
-        siconos::algebra::readMatrixFromFile("plans.dat"));
+        siconos::algebra::io::readDenseMatrix("plans.dat"));
     if (_plans->rows() == 0) {
       /* default plans */
       double A1 = P1A;
@@ -184,7 +185,7 @@ void Disks::init(std::string disks_input) {
         (*_moving_plans)(0,5) = &DC;*/
 
     auto disks_matrix = std::make_shared<siconos::algebra::SiconosMatrix>(
-        siconos::algebra::readMatrixFromFile(disks_input));
+        siconos::algebra::io::readDenseMatrix(disks_input));
 
     initial_positions_.resize(NDOF * disks_matrix->rows());
     initial_velocities_.resize(NDOF * disks_matrix->rows());

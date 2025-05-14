@@ -21,12 +21,10 @@
  */
 
 #include "BlockVector.hpp"
+#include "SiconosAlgebraAddons.hpp"
 #include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixOp.hpp"
-#include "SiconosMatrixVectorOp.hpp"
 #include "SiconosMemory.hpp"
 #include "SiconosVector.hpp"
-#include "SiconosVectorOp.hpp"
 #include "Tools.hpp"
 #include "io.hpp"

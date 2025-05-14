@@ -26,11 +26,12 @@
 #include "NewtonImpactFrictionNSL.hpp"
 #include "NewtonImpactNSL.hpp"
 #include "OneStepNSProblem.hpp"
+#include "SiconosAlgebraAddons.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
 #include "Simulation.hpp"
 #include "Tools.hpp"
+
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -624,7 +625,7 @@ void siconos::integrators::SchatzmanPaoliOSI::updateState(const unsigned int) {
       //       //
       //       auto T = d->T();
       //       auto dotq = d->dotq();
-      //       siconos::algebra::prod(*T,*v,*dotq,true);
+      //       dotq->noalias() = *T **v;
       //       // std::cout<<"siconos::integrators::SchatzmanPaoliOSI::updateState v"<<endl;
       //       // siconos::algebra::print(*v);
       //       // std::cout<<"siconos::integrators::SchatzmanPaoliOSI::updateState

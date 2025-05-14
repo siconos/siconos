@@ -26,16 +26,15 @@
 #include "NonSmoothLaw.hpp"
 #include "OneStepNSProblem.hpp"
 #include "Relation.hpp"
+#include "SiconosAlgebraAddons.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixVectorOp.hpp"  // block prod
-#include "SiconosPointers.hpp"        // For createSPtr
+#include "SiconosPointers.hpp"  // For createSPtr
 #include "SiconosVector.hpp"
-#include "SiconosVectorOp.hpp"  // for scal
 #include "Simulation.hpp"
 #include "Tools.hpp"  // for enum_to_string
 #include "Topology.hpp"
 #include "TypeName.hpp"  // for siconos::types visitors
-//
+
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES

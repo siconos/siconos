@@ -24,8 +24,8 @@
 #include "LagrangianR.hpp"
 #include "NewtonImpactNSL.hpp"
 #include "OneStepNSProblem.hpp"
+#include "SiconosAlgebraAddons.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixVectorOp.hpp"  // for subprod
 #include "SiconosVector.hpp"
 #include "Simulation.hpp"
 // #define DEBUG_MESSAGES

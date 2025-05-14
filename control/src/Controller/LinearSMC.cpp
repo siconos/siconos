@@ -21,8 +21,7 @@
 #include "ControlSensor.hpp"
 #include "FirstOrderLinearDS.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixOp.hpp"
-#include "SiconosMatrixVectorOp.hpp"
+#include "SiconosAlgebraAddons.hpp"
 #include "SiconosVector.hpp"
 #include "TimeStepping.hpp"
 // #define DEBUG_WHERE_MESSAGES

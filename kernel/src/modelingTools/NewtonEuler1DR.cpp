@@ -24,8 +24,6 @@
 #include "Interaction.hpp"
 #include "RotationQuaternion.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixOp.hpp"        // for mat prod
-#include "SiconosMatrixVectorOp.hpp"  // for mat-vec prod
 #include "SiconosVector.hpp"
 
 // #define NERI_DEBUG
@@ -87,15 +85,12 @@ void siconos::modeling::NewtonEuler1DR::NIcomputeJachqTFromContacts(
   (*_NPG1)(2, 2) = 0;
 
   siconos::geometry::computeRotationMatrix(q1, *_rotationBodyToAbsoluteFrame);
-  siconos::algebra::prod(*_NPG1, *_rotationBodyToAbsoluteFrame, *_AUX1, true);
-
-  siconos::algebra::prod(*_rotationAbsoluteToContactFrame, *_AUX1, *_AUX2, true);
-
+  _AUX1->noalias() = *_NPG1 * *_rotationBodyToAbsoluteFrame;
+  _AUX2->noalias() = *_rotationAbsoluteToContactFrame * *_AUX1;
   for (unsigned int jj = 0; jj < 3; jj++)
     H_NE_prod_T_->setValue(0, jj, (*_rotationAbsoluteToContactFrame)(0, jj));
 
-  for (unsigned int jj = 3; jj < 6; jj++)
-    H_NE_prod_T_->setValue(0, jj, (*_AUX2)(0, jj - 3));
+  for (unsigned int jj = 3; jj < 6; jj++) H_NE_prod_T_->setValue(0, jj, (*_AUX2)(0, jj - 3));
 
 #ifdef NEFC3D_DEBUG
   printf("NewtonEuler1DR jhqt\n");
@@ -133,14 +128,12 @@ void siconos::modeling::NewtonEuler1DR::NIcomputeJachqTFromContacts(
   (*_NPG1)(2, 2) = 0;
 
   siconos::geometry::computeRotationMatrix(q1, *_rotationBodyToAbsoluteFrame);
-  siconos::algebra::prod(*_NPG1, *_rotationBodyToAbsoluteFrame, *_AUX1, true);
-  siconos::algebra::prod(*_rotationAbsoluteToContactFrame, *_AUX1, *_AUX2, true);
-
+  _AUX1->noalias() = *_NPG1 * *_rotationBodyToAbsoluteFrame;
+  _AUX2->noalias() = *_rotationAbsoluteToContactFrame * *_AUX1;
   for (unsigned int jj = 0; jj < 3; jj++)
     H_NE_prod_T_->setValue(0, jj, (*_rotationAbsoluteToContactFrame)(0, jj));
 
-  for (unsigned int jj = 3; jj < 6; jj++)
-    H_NE_prod_T_->setValue(0, jj, (*_AUX2)(0, jj - 3));
+  for (unsigned int jj = 3; jj < 6; jj++) H_NE_prod_T_->setValue(0, jj, (*_AUX2)(0, jj - 3));
 
   double G2x = q2(0);
   double G2y = q2(1);
@@ -158,9 +151,8 @@ void siconos::modeling::NewtonEuler1DR::NIcomputeJachqTFromContacts(
   (*_NPG2)(2, 2) = 0;
 
   siconos::geometry::computeRotationMatrix(q2, *_rotationBodyToAbsoluteFrame);
-  siconos::algebra::prod(*_NPG2, *_rotationBodyToAbsoluteFrame, *_AUX1, true);
-
-  siconos::algebra::prod(*_rotationAbsoluteToContactFrame, *_AUX1, *_AUX2, true);
+  _AUX1->noalias() = *_NPG2 * *_rotationBodyToAbsoluteFrame;
+  _AUX2->noalias() = *_rotationAbsoluteToContactFrame * *_AUX1;
 
   for (unsigned int jj = 0; jj < 3; jj++)
     H_NE_prod_T_->setValue(0, jj + 6, -(*_rotationAbsoluteToContactFrame)(0, jj));
@@ -210,22 +202,20 @@ void siconos::modeling::NewtonEuler1DR::computeH_NE_(double time,
   }
 
   for (unsigned int iDS = 0; iDS < q0.numberOfBlocks(); iDS++) {
-    std::shared_ptr<siconos::algebra::SiconosVector> q = (q0.getAllVect())[iDS];
+    auto q = q0.vector(iDS);
     double sign = 1.0;
     DEBUG_PRINTF("siconos::modeling::NewtonEuler1DR::computeJachq : ds%d->q :", iDS);
     DEBUG_EXPR_WE(siconos::algebra::print(*q));
 
     boost::math::quaternion<double> quatGP;
     if (iDS == 0) {
-      boost::math::quaternion<double> quatAux(0, (*_Pc1)(0) - (*q)(0),
-                                              (*_Pc1)(1) - (*q)(1),
+      boost::math::quaternion<double> quatAux(0, (*_Pc1)(0) - (*q)(0), (*_Pc1)(1) - (*q)(1),
                                               (*_Pc1)(2) - (*q)(2));
       quatGP = quatAux;
     } else {
       sign = -1.0;
       // cout<<"siconos::modeling::NewtonEuler1DR::computeJachq sign is -1 \n";
-      boost::math::quaternion<double> quatAux(0, (*_Pc2)(0) - (*q)(0),
-                                              (*_Pc2)(1) - (*q)(1),
+      boost::math::quaternion<double> quatAux(0, (*_Pc2)(0) - (*q)(0), (*_Pc2)(1) - (*q)(1),
                                               (*_Pc2)(2) - (*q)(2));
       quatGP = quatAux;
     }
@@ -233,10 +223,8 @@ void siconos::modeling::NewtonEuler1DR::computeH_NE_(double time,
                  quatGP.R_component_2(), quatGP.R_component_3(), quatGP.R_component_4());
     DEBUG_PRINTF("siconos::modeling::NewtonEuler1DR::computeJachq :Q :%e,%e, %e, %e\n",
                  (*q)(3), (*q)(4), (*q)(5), (*q)(6));
-    boost::math::quaternion<double> quatQ((*q)(3), (*q)(4), (*q)(5),
-                                          (*q)(6));
-    boost::math::quaternion<double> quatcQ((*q)(3), -(*q)(4), -(*q)(5),
-                                           -(*q)(6));
+    boost::math::quaternion<double> quatQ((*q)(3), (*q)(4), (*q)(5), (*q)(6));
+    boost::math::quaternion<double> quatcQ((*q)(3), -(*q)(4), -(*q)(5), -(*q)(6));
     boost::math::quaternion<double> quatBuff;
     boost::math::quaternion<double> _2qiquatGP;
     _2qiquatGP = quatGP;
@@ -246,10 +234,10 @@ void siconos::modeling::NewtonEuler1DR::computeH_NE_(double time,
     DEBUG_PRINTF("siconos::modeling::NewtonEuler1DR::computeJachq :quattBuuf : %e,%e,%e \n",
                  quatBuff.R_component_2(), quatBuff.R_component_3(), quatBuff.R_component_4());
 
-    H_NE_view_->setValue(0, 7 * iDS + 3,
-                         sign * (quatBuff.R_component_2() * (*_Nc)(0) +
-                                 quatBuff.R_component_3() * (*_Nc)(1) +
-                                 quatBuff.R_component_4() * (*_Nc)(2)));
+    H_NE_view_->setValue(
+        0, 7 * iDS + 3,
+        sign * (quatBuff.R_component_2() * (*_Nc)(0) + quatBuff.R_component_3() * (*_Nc)(1) +
+                quatBuff.R_component_4() * (*_Nc)(2)));
     // cout<<"WARNING NewtonEuler1DR set jachq \n";
     // jacobianhOver_q_->setValue(0,7*iDS+3,0);
     for (unsigned int i = 1; i < 4; i++) {
@@ -258,10 +246,10 @@ void siconos::modeling::NewtonEuler1DR::computeH_NE_(double time,
       _2qiquatGP = quatGP;
       _2qiquatGP *= 2 * ((*q)(3 + i));
       quatBuff = quatei * quatcQ * quatGP - quatGP * quatQ * quatei - _2qiquatGP;
-      H_NE_view_->setValue(0, 7 * iDS + 3 + i,
-                           sign * (quatBuff.R_component_2() * (*_Nc)(0) +
-                                   quatBuff.R_component_3() * (*_Nc)(1) +
-                                   quatBuff.R_component_4() * (*_Nc)(2)));
+      H_NE_view_->setValue(
+          0, 7 * iDS + 3 + i,
+          sign * (quatBuff.R_component_2() * (*_Nc)(0) + quatBuff.R_component_3() * (*_Nc)(1) +
+                  quatBuff.R_component_4() * (*_Nc)(2)));
     }
   }
 

@@ -24,10 +24,7 @@
 #include "LsodarOSI.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixOp.hpp"
-#include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
-#include "SiconosVectorOp.hpp"
 #include "TimeDiscretisation.hpp"
 
 siconos::control::LinearSMCOT2::LinearSMCOT2(std::shared_ptr<ControlSensor> sensor)

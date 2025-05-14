@@ -46,84 +46,65 @@ class BlockVector {
   ACCEPT_SERIALIZATION(BlockVector);
 
   /** Size (ie total number of scalar elements, not number of blocks) */
-  unsigned int _sizeV = 0;
+  Eigen::Index totalSize_ = 0;
 
   /** A container of pointers on SiconosVector. */
-  VectorOfVectors _vect;
+  VectorOfVectors blocks_;
 
-  /** tabindex[i] = tabindex[i-1] + ni, ni being the size of block[i]. */
-  std::shared_ptr<std::vector<std::size_t>> _tabIndex;
+  /** blockStartIndices_[i] = blockStartIndices_[i-1] + ni, ni being the size of block[i]. */
+  std::vector<Eigen::Index> blockStartIndices_ = {0};
 
-  /* recompute the _sizeV and _tabIndex */
+  /* recompute the totalSize_ and blockStartIndices_ */
   void _update();
+
+  // Rule of five
+  BlockVector(const BlockVector&) = delete;
+  BlockVector(BlockVector&&) noexcept = delete;
+  BlockVector& operator=(BlockVector&&) noexcept = delete;
 
  public:
   /** default contructor
    */
-  BlockVector();
-
-  /** copy contructor
-   *
-   *  \param v BlockVector&
-   */
-  BlockVector(const BlockVector& v);
-
-  /** contructor with 2 SiconosVectors
-   *
-   *  \param v1 first vector
-   *  \param v2 second vector
-   */
-  BlockVector(std::shared_ptr<SiconosVector> v1, std::shared_ptr<SiconosVector> v2);
+  BlockVector() = default;
 
   /** contructor with a BlockVector of n (numberOfBlocks) blocks
    *  of the same size (dim) filled with a new vector
    *
    *  \param numberOfBlocks number of blocks
-   *  \param dim dimension of the vector
+   *  \param blockSize unique dimension of all vectors in the BlockVector
    */
-  BlockVector(unsigned int numberOfBlocks, unsigned int dim);
+  BlockVector(std::size_t numberOfBlocks, Eigen::Index blockSize);
 
   /** contructor with a BlockVector of n (numberOfBlocks) blocks that point on nullptr
    *
    *  \param numberOfBlocks number of blocks
    */
-  BlockVector(unsigned int numberOfBlocks);
+  explicit BlockVector(std::size_t numberOfBlocks);
 
   /** destructor
    */
   ~BlockVector() noexcept = default;
 
-  // /**
-  //    Set a subblock of the current vector with the content (copy) of a SiconosVector
-
-  //    \param input the vector to be copied
-  //    \param size_block size of the block to be copied
-  //    \param start_in starting position in input vector of the block to be copied
-  //    \param start_out starting position in current vector of the block to be filled in.
-  // */
-  // void setBlock(const SiconosVector& input, unsigned int size_block, unsigned int start_in,
-  //               unsigned int start_out);
-
   /** \return the size of the vector (sum of the sizes of all its blocks) */
-  unsigned int size() const { return _sizeV; };
+  auto size() const { return totalSize_; };
 
   /** \return an iterator pointing to the first block in the container. */
-  inline VectorOfVectors::iterator begin() { return _vect.begin(); };
+  inline VectorOfVectors::iterator begin() { return blocks_.begin(); };
 
   /**  \return an iterator referring to the past-the-end element in the container. */
-  inline VectorOfVectors::iterator end() { return _vect.end(); };
+  inline VectorOfVectors::iterator end() { return blocks_.end(); };
 
   /** \return an iterator pointing to the first block in the container. */
-  inline VectorOfVectors::const_iterator begin() const { return _vect.begin(); };
+  inline VectorOfVectors::const_iterator begin() const { return blocks_.begin(); };
 
   /**  \return an iterator referring to the past-the-end element in the container. */
-  inline VectorOfVectors::const_iterator end() const { return _vect.end(); };
+  inline VectorOfVectors::const_iterator end() const { return blocks_.end(); };
 
   /** \return the complete stl container */
-  inline VectorOfVectors getAllVect() const { return _vect; }
+  inline VectorOfVectors getAllVect() const { return blocks_; }
 
   /** \return the number of SiconosVectors in the container */
-  inline auto numberOfBlocks() const { return _tabIndex->size(); };
+  inline auto numberOfBlocks() const { return blocks_.size(); };
 
   //   /** \return true if all SiconosVector in the container are dense **/
   //   bool isDense() const;
@@ -135,143 +116,71 @@ class BlockVector {
    *
    *  \param a double
    */
-  void fill(double a);
+  void setConstant(double a);
 
-  /** Get a component of the vector
-   *
-   *  \param i index of the required component
-   *  \return the component value
+  /** set the content of the BlockVector from an array
+   *  \param size_of_data size of input array (must fit with total size of the BlockVector)
+   *  \param data input array
    */
-  double getValue(unsigned int i) const;
+  void fill(std::size_t size_of_data, const double* data);
 
-  /** set a component of the vector
-   *
-   *  \param i index of the required component
-   *  \param value of the component
+  /** set the content of the BlockVector from a SiconosVector (copy)
+   *  \param vec input vector
    */
-  void setValue(unsigned int i, double value);
+  void fill(const SiconosVector& vec);
 
-  /** get a component of the vector
+  /** \return value at a given global position
    *
-   *  \param i index of the required component
-   *  \return value of the component
+   *  \param globalIndex index of the required component
    */
-  double& operator()(unsigned int i);
-
-  /** get a component of the vector
-   *
-   *  \param i index of the required component
-   *  \return value of the component
-   */
-  double operator()(unsigned int i) const;
+  double operator()(Eigen::Index globalIndex) const;
 
   /** get a block (SiconosVector) of the vector
    *
    *  \param pos index of the required block
    *  \return the expected block
    */
-  inline std::shared_ptr<SiconosVector> vector(unsigned int pos) { return _vect[pos]; };
-
-  /** gets a block (SiconosVector) of the vector
-   *
-   *  \param pos index of the required block
-   *  \return the expected block
-   */
-  inline std::shared_ptr<const SiconosVector> vector(unsigned int pos) const {
-    return _vect[pos];
-  };
-
-  // /** get a block (SiconosVector) of the vector
-  //  * \param pos index of the required block
-  //  * \return the expected block
-  //  */
-  // std::shared_ptr<SiconosVector> operator [](unsigned int pos) ;
-
-  // /** get a block (SiconosVector) of the vector
-  //  * \param pos index of the required block
-  //  * \return the expected block
-  //  */
-  // SPC::SiconosVector operator [](unsigned int pos) const;
-
-  /** set a block with a given vector (copy!)
-   *
-   *  \param pos index of the block to set
-   *  \param v source vector to be copied at position i
-   */
-  void setVector(unsigned int pos, const SiconosVector& v);
+  inline auto vector(std::size_t pos) const { return blocks_[pos]; };
 
   /** set a block with a given vector (pointer link!)
    *
    *  \param pos index of the block to set
    *  \param v source vector to be inserted at position i
    */
-  void setVectorPtr(unsigned int pos, std::shared_ptr<SiconosVector> v);
-
-  /**
-      Fill the container with a list of SiconosVector.
-      Warning: pointer links, no copy
-
-      \param v the vectors to be inserted
-  */
-  void setAllVect(VectorOfVectors& v);
-
-  /** \return a pointer to the index tab
-   */
-  inline const std::shared_ptr<std::vector<std::size_t>> tabIndex() const { return _tabIndex; }
-
-  /** get the number of the vector that handles element at position "pos"
-   *
-   *  \param pos unsigned int, position of the element
-   *  \return unsigned int number of the searched vector
-   */
-  unsigned int getNumVectorAtPos(unsigned int pos) const;
+  void setVectorPtr(std::size_t pos, std::shared_ptr<SiconosVector> v);
 
   /**
      Assignment operator
+     Full copy -> each block is a new, no shared memory
 
-     \param vIn the vector to be copied
-     \return  BlockVector&
-  */
-  BlockVector& operator=(const BlockVector& vIn);
-
-  /**
-     Assignment operator
-     \param data data to put in the BlockVector
-     \return  BlockVector&
-  */
-  BlockVector& operator=(const double* data);
-
-  /**
-     Subtract in place operator
-
-     \param vIn rhs of the operator
-     \return BlockVector&
-  */
-  BlockVector& operator-=(const BlockVector& vIn);
+      \param input the vector to be copied
+      \return  BlockVector&
+   */
+  BlockVector& operator=(const BlockVector& input);
 
   /**
       Add in place operator
 
-      \param vIn rhs of the operator
+      \param input rhs of the operator
       \return BlockVector&
   */
   BlockVector& operator+=(const BlockVector&);
 
   /**
-      Add in place operator
+      Add a SiconosVector in place
 
-      \param vIn rhs of the operator
+      \param input rhs of the operator
       \return BlockVector&
   */
-  BlockVector& operator+=(const SiconosVector& vIn);
+  BlockVector& operator+=(const SiconosVector& input);
 
   /**
-      Subtract in place operator
+      Subtract a SiconosVector in place
 
-      \param vIn rhs of the operator
+      \param input rhs of the operator
       \return BlockVector&
   */
-  BlockVector& operator-=(const SiconosVector& vIn);
+  BlockVector& operator-=(const SiconosVector& input);
 
   /**
       multiply by a scalar, result in place
@@ -280,19 +189,6 @@ class BlockVector {
       \return BlockVector&
   */
   BlockVector& operator*=(double s);
-
-  /**
-      divide by a scalar, result in place
-
-      \param s the scalar factor
-      \return BlockVector&
-  */
-  BlockVector& operator/=(double s);
-
-  // /** Insert a new block (allocation and copy)
-  // *  \param v the vector to be inserted
-  // */
-  // void insert(const SiconosVector& v) ;
 
   /** Insert a new block (no allocation and nor copy)
    *
@@ -312,24 +208,7 @@ class BlockVector {
      1 block : link to first component of the container, more : copy of all components into a
      SiconosVector)
   */
-  std::shared_ptr<SiconosVector> toSiconosVector() const;
-
-  /** \defgroup BlockVectorFriends
-
-      List of friend functions of the BlockVector class
-
-      @{
-  */
-
-  /** offstream operator
-   *
-   *  \param os An output stream
-   *  \param bv a BlockVector
-   *  \return The same output stream
-   */
-  friend std::ostream& operator<<(std::ostream& os, const BlockVector& bv);
-
-  /** End of Friend functions group @} */
+  SiconosVector toSiconosVector() const;
 };
 
 // Free functions
@@ -343,8 +222,6 @@ double normInf(const BlockVector& v);
  *  \param v the input vector
  */
 void print(const BlockVector& v);
-
-std::ostream &operator<<(std::ostream &os, const BlockVector &bv);
 
 }  // namespace siconos::algebra
 

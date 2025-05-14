@@ -18,14 +18,12 @@
 
 #include "BlockMatrixTest.hpp"
 
-#include <boost/numeric/ublas/matrix_sparse.hpp>
 #include <string>
 
 #include "BlockMatrix.hpp"
 #include "BlockVector.hpp"
 #include "SiconosConfig.h"
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixOp.hpp"
 #include "SiconosVector.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
