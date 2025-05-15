@@ -25,7 +25,6 @@
 #include <memory>
 #include <string>
 
-#include "BlockVector.hpp"
 #include "FunctionTypes.hpp"
 #include "RelationVisitor.hpp"
 #include "SiconosException.hpp"
@@ -195,9 +194,9 @@ class Relation {
     // To be overriden in classes where jacobianhOver_lambda has sense
     THROW_EXCEPTION("jacobian h over lambda is not defined for this kind of relation.");
     // handle return value to avoid compiler warning.
-    static const siconos::algebra::SiconosMatrix empty_matrix;
-    static const siconos::algebra::ConstMapType empty_map(empty_matrix.data(), 0, 0);
-    return empty_map;
+    // static const siconos::algebra::SiconosMatrix empty_matrix;
+    // static const siconos::algebra::ConstMapType empty_map(empty_matrix.data(), 0, 0);
+    // return empty_map;
   }
 
   virtual void accept(relations::Visitor &) const {

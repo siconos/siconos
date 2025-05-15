@@ -51,7 +51,6 @@ class SiconosMatrixTest : public CppUnit::TestFixture {
   unsigned int size;
   std::shared_ptr<siconos::algebra::SiconosDenseMatrix> SicM;
   siconos::algebra::SiconosSparseMatrix Asparse;
-  std::shared_ptr<const siconos::algebra::SiconosDenseMatrix> A;
   std::string fic1, fic2;
   double tol;
 

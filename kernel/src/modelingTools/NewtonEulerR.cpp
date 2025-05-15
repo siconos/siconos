@@ -25,8 +25,8 @@
 #include "BlockVector.hpp"
 #include "Interaction.hpp"
 #include "NewtonEulerDS.hpp"  // computeT ...
-#include "SiconosMatrix.hpp"
 #include "SiconosAlgebraAddons.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "Tools.hpp"
 // #define DEBUG_BEGIN_END_ONLY

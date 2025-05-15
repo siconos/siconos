@@ -48,11 +48,11 @@ void siconos::modeling::NewtonEuler5DR::initialize(Interaction& inter) {
   H_NE_view_->setZero();
   NewtonEulerR::initialize(inter);
   _rotationAbsoluteToContactFrame = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
-  _rotationBodyToAbsoluteFrame = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
-  _AUX1 = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
+  _rotationBodyToAbsoluteFrame = std::make_shared<siconos::algebra::SiconosMatrix33>();
+  _AUX1 = std::make_shared<siconos::algebra::SiconosMatrix33>();
   _AUX2 = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
-  _NPG1 = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
-  _NPG2 = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
+  _NPG1 = std::make_shared<siconos::algebra::SiconosMatrix33>();
+  _NPG2 = std::make_shared<siconos::algebra::SiconosMatrix33>();
 
   //  _isContact=1;
   DEBUG_END(

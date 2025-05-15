@@ -30,7 +30,7 @@
 
 siconos::modeling::FirstOrderLinearDS::FirstOrderLinearDS(
     Eigen::Ref<siconos::algebra::SiconosVector> x0,
-    Eigen::Ref<siconos::algebra::SiconosMatrix> A,
+    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> A,
     Eigen::Ref<siconos::algebra::SiconosVector> b)
     : FirstOrderNonLinearDS(x0) {
   setConstantA(A);
@@ -64,7 +64,7 @@ siconos::modeling::FirstOrderLinearDS::FirstOrderLinearDS(const FirstOrderLinear
 }
 
 void siconos::modeling::FirstOrderLinearDS::setConstantA(
-    Eigen::Ref<siconos::algebra::SiconosMatrix> newValue) {
+    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue) {
   setConstantJacobianfOver_x(newValue);
   computeA_ = nullptr;
 }
@@ -167,7 +167,7 @@ void siconos::modeling::FirstOrderLinearDS::computeRhs(double time) {
     }
     // allocate invM if required
     if (!hasLU_M_) {
-      LU_M_ = std::make_shared<siconos::algebra::SiconosLUMatrix>(*MMatrix_view_);
+      LU_M_ = std::make_shared<siconos::algebra::SiconosDenseLUMatrix>(*MMatrix_view_);
       hasLU_M_ = true;
     }
     *(state_x_[1]) = LU_M_->solve(*(state_x_[1]));
@@ -191,13 +191,13 @@ void siconos::modeling::FirstOrderLinearDS::computeJacobianRhsOver_x(double time
     if (!hasLU_M_) {
       // When? If M has been updated or if it's the first call
       is_jacobianRhsOver_x_uptodate_ = false;
-      LU_M_ = std::make_shared<siconos::algebra::SiconosLUMatrix>(*MMatrix_view_);
+      LU_M_ = std::make_shared<siconos::algebra::SiconosDenseLUMatrix>(*MMatrix_view_);
       hasLU_M_ = true;
     }
     // solve M*jacobianXRhS = jacobianfx
     if (!is_jacobianRhsOver_x_uptodate_) {
       // Solve M-1.jacobianfOver_x_view_ in temp result matrix
-      siconos::algebra::SiconosMatrix result = LU_M_->solve(*jacobianfOver_x_view_);
+      siconos::algebra::SiconosDenseMatrix result = LU_M_->solve(*jacobianfOver_x_view_);
       // and keep it as a flattened vector
       std::copy(result.data(), result.data() + x_size_ * x_size_, jacobianRhsOver_x_.begin());
       is_jacobianRhsOver_x_uptodate_ = true;

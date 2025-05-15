@@ -18,6 +18,7 @@
 
 #include "ControlLinearAdditionalTermsED.hpp"
 
+#include "BlockVector.hpp"
 #include "DynamicalSystem.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"

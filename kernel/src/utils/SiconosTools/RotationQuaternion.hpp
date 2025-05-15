@@ -88,7 +88,7 @@ void normalizeq(siconos::algebra::SiconosVector &q);
  */
 
 void computeRotationMatrix(double q0, double q1, double q2, double q3,
-                           siconos::algebra::SiconosMatrix &rotationMatrix);
+                           siconos::algebra::SiconosMatrix33 &rotationMatrix);
 
 /* For a given configuration vector q composed of a position and a quaternion,
  * compute the associated rotation matrix
@@ -98,7 +98,7 @@ void computeRotationMatrix(double q0, double q1, double q2, double q3,
  */
 
 void computeRotationMatrix(const siconos::algebra::SiconosVector &q,
-                           siconos::algebra::SiconosMatrix &rotationMatrix);
+                           siconos::algebra::SiconosMatrix33 &rotationMatrix);
 
 /* For a given configuration vector q composed of a position and a quaternion,
  * compute the transposed associated rotation matrix
@@ -107,7 +107,7 @@ void computeRotationMatrix(const siconos::algebra::SiconosVector &q,
  * \param[in,out] v the vector to be rotated
  */
 void computeRotationMatrixTransposed(const siconos::algebra::SiconosVector &q,
-                                     siconos::algebra::SiconosMatrix &rotationMatrix);
+                                     siconos::algebra::SiconosMatrix33 &rotationMatrix);
 
 /* For a given configuration vector q composed of a position and a quaternion,
  *  performs the rotation of the vector v
@@ -125,7 +125,7 @@ void quaternionRotateVector(const Eigen::Ref<const siconos::algebra::SiconosVect
  * \param[in,out] m the vector to be rotated
  */
 void quaternionRotateMatrix(const Eigen::Ref<const siconos::algebra::SiconosVector> &q,
-                            Eigen::Ref<siconos::algebra::SiconosMatrix> m);
+                            Eigen::Ref<siconos::algebra::SiconosMatrix33> m);
 
 /* For a given  configuration vector q composed of a position and a quaternion,
  * express the vector v given in
@@ -151,7 +151,7 @@ void rewriteVectorFromAbsoluteToBodyFrame(
  */
 void rewriteMatrixFromAbsoluteToBodyFrame(
     const Eigen::Ref<const siconos::algebra::SiconosVector> &q,
-    Eigen::Ref<siconos::algebra::SiconosMatrix> m);
+    Eigen::Ref<siconos::algebra::SiconosMatrix33> m);
 
 void rewriteVectorFromBodyToAbsoluteFrame(
     const Eigen::Ref<const siconos::algebra::SiconosVector> &q,
@@ -159,7 +159,7 @@ void rewriteVectorFromBodyToAbsoluteFrame(
 
 void rewriteMatrixFromBodyToAbsoluteFrame(
     const Eigen::Ref<const siconos::algebra::SiconosVector> &q,
-    Eigen::Ref<siconos::algebra::SiconosMatrix> m);
+    Eigen::Ref<siconos::algebra::SiconosMatrix33> m);
 
 void compositionLawLieGroup(const siconos::algebra::SiconosVector &a,
                             siconos::algebra::SiconosVector &b,

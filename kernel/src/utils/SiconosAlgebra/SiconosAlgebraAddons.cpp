@@ -18,6 +18,9 @@
 
 #include "SiconosAlgebraAddons.hpp"
 
+#include <random>
+
+#include "BlockVector.hpp"
 #include "SiconosException.hpp"
 #include "Tools.hpp"  // toString
 
@@ -59,6 +62,7 @@ bool siconos::algebra::isSymmetric(const SiconosSparseMatrix& mat, double tol) {
   }
   return true;
 }
+
 void siconos::algebra::fillTriplet(const SiconosSparseMatrix& m, CSparseMatrix* triplet,
                                    size_t row_off, size_t col_off) {
   assert(triplet);
@@ -94,80 +98,26 @@ void siconos::algebra::fillTriplet(SiconosDenseMatrix& m, CSparseMatrix* triplet
   }
 }
 
-// void siconos::algebra::matrixVector_prod_toBlock(const SiconosMatrix& A,
-//                                                  const SiconosVector& x, BlockVector& y,
-//                                                  bool init) {
-//   unsigned int startRow = 0;
-//   // For Each subvector of y, y[i], private_prod computes y[i] = subA x, subA
-//   // being a submatrix of A corresponding to y[i] position.
-//   //       // private_prod takes into account the fact that x and y[i] may be
-//   if (init) {
-//     for (auto& it : y) {
-//       it->setZero();
-//     }
-//   }
-//   //       block vectors.
-//   for (auto& it : y) {
-//     it->noalias() += A.block(startRow, 0, it->size(), x.size()) * x;
-//     startRow += it->size();
-//   }
-// }
+siconos::algebra::SiconosSparseMatrix siconos::algebra::generateRandomSparseMatrix(
+    Eigen::Index rows, Eigen::Index cols, double density) {
+  siconos::algebra::SiconosSparseMatrix mat(rows, cols);
+  std::vector<Eigen::Triplet<double>> triplets;
 
-void siconos::algebra::matrixBlockVector_prod(const SiconosMatrix& A, const BlockVector& x,
-                                              SiconosVector& y, bool init) {
-  if (init) y.setZero();
-  unsigned int startRow = 0;
-  unsigned int startCol = 0;
-  // In private_addprod, the sum of all blocks of x, x[i], is computed: y =
-  // Sum_i (subA x[i]), with subA a submatrix of A, starting from position
-  // startRow in rows and startCol in columns. private_prod takes also into
-  // account the fact that each block of x can also be a block.
-  for (auto& it : x) {
-    assert(&y != &*it);
-    y += A.block(startRow, startCol, y.size(), it->size()) * *it;
-    startCol += it->size();
-  }
-}
+  std::mt19937 rng(42);  // graine fixe pour reproductibilité
+  std::uniform_int_distribution<int> rowDist(0, rows - 1);
+  std::uniform_int_distribution<int> colDist(0, cols - 1);
+  std::uniform_real_distribution<double> valDist(-1.0, 1.0);
 
-void siconos::algebra::matrixBlockVector_prod(const SiconosMatrix& A, const BlockVector& x,
-                                              Eigen::Ref<SiconosVector> y, bool init) {
-  if (init) y.setZero();
-  unsigned int startRow = 0;
-  unsigned int startCol = 0;
-  // In private_addprod, the sum of all blocks of x, x[i], is computed: y =
-  // Sum_i (subA x[i]), with subA a submatrix of A, starting from position
-  // startRow in rows and startCol in columns. private_prod takes also into
-  // account the fact that each block of x can also be a block.
-  for (auto& it : x) {
-    y += A.block(startRow, startCol, y.size(), it->size()) * *it;
-    startCol += it->size();
-  }
-}
+  int estimatedNNZ = static_cast<int>(rows * cols * density);
+  triplets.reserve(estimatedNNZ);
 
-void siconos::algebra::transposeMatrixVector_prod_toBlock(const SiconosVector& x,
-                                                          const SiconosMatrix& A,
-                                                          BlockVector& y, bool init) {
-  if (A.rows() != x.size()) THROW_EXCEPTION("inconsistent sizes between A and x.");
-
-  if (A.cols() != y.size()) THROW_EXCEPTION("inconsistent sizes between A and y.");
-  if (init) {  // y = subA * x , else y += subA * x
-    for (auto& it : y) it->setZero();
+  for (int k = 0; k < estimatedNNZ; ++k) {
+    int i = rowDist(rng);
+    int j = colDist(rng);
+    double val = valDist(rng);
+    triplets.emplace_back(i, j, val);
   }
 
-  unsigned int pos = 0;
-  // For Each subvector of y, y[i], computes y[i] = transpose(subA) x, subA
-  // being a submatrix of A corresponding to y[i] position. private_prod takes
-  // into account the fact that x and y[i] may be block vectors.
-  auto sizeX = x.size();
-  for (auto& it : y) {
-    // we take a submatrix subA of A, starting from row startRow to row
-    // (startRow+sizeY) and between columns startCol and (startCol+sizeX). Then
-    // computation of y = subA*x + y.
-
-    auto sizeY = it->size();
-
-    assert(&*it != &x);
-    it->noalias() += A.transpose().block(pos, 0, sizeY, sizeX) * x;
-    pos += it->size();
-  }
+  mat.setFromTriplets(triplets.begin(), triplets.end());
+  return mat;
 }

@@ -49,11 +49,11 @@ void siconos::modeling::NewtonEuler3DR::initialize(Interaction& inter) {
 
   /* VA 12/04/2016 All of what follows should be put in WorkM*/
   _rotationAbsoluteToContactFrame = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
-  _rotationBodyToAbsoluteFrame = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
-  _AUX1 = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
+  _rotationBodyToAbsoluteFrame = std::make_shared<siconos::algebra::SiconosMatrix33>();
+  _AUX1 = std::make_shared<siconos::algebra::SiconosMatrix33>();
   _AUX2 = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
-  _NPG1 = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
-  _NPG2 = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
+  _NPG1 = std::make_shared<siconos::algebra::SiconosMatrix33>();
+  _NPG2 = std::make_shared<siconos::algebra::SiconosMatrix33>();
   //  _isContact=1;
 }
 

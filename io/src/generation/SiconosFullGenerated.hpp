@@ -322,7 +322,6 @@ SICONOS_IO_REGISTER_WITH_BASES(LagrangianDS,(DynamicalSystem),
   (q0_view_)
   (qMemory_)
   (reactionToBoundaryConditions_)
-  (rhsMatrices_)
   (velocity0_view_)
   (velocityMemory_))
 SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerDS,(DynamicalSystem),
@@ -373,7 +372,6 @@ SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerDS,(DynamicalSystem),
   (_qDim)
   (qMemory_)
   (reactionToBoundaryConditions_)
-  (rhsMatrices_)
   (scalarMass_)
   (_twist)
   (twist0_view_)

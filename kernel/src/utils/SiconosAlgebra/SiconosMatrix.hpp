@@ -52,6 +52,12 @@ namespace siconos::algebra {
 using SiconosDenseMatrix =
     Eigen::Matrix<double_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::ColMajor>;
 using SiconosMatrix33 = Eigen::Matrix<double_t, 3, 3, Eigen::ColMajor>;
+using SiconosMatrix36 = Eigen::Matrix<double_t, 3, 6, Eigen::ColMajor>;
+using SiconosMatrix37 = Eigen::Matrix<double_t, 3, 7, Eigen::ColMajor>;
+using SiconosMatrix66 = Eigen::Matrix<double_t, 6, 6, Eigen::ColMajor>;
+using SiconosMatrix76 = Eigen::Matrix<double_t, 7, 6, Eigen::ColMajor>;
+using SiconosMatrix67 = Eigen::Matrix<double_t, 6, 7, Eigen::ColMajor>;
+
 /** Sparse matrix storage */
 using SiconosSparseMatrix = Eigen::SparseMatrix<double, Eigen::ColMajor, int>;
 using Triplet = Eigen::Triplet<double>;  // Used to fill sparse matrices
@@ -67,22 +73,22 @@ using EigenBlock = std::vector<Eigen::Ref<SiconosVector>>;
 using SiconosSize_t = Eigen::Index;
 
 // LU Factorization
-using DenseLUMatrix = Eigen::FullPivLU<siconos::algebra::SiconosDenseMatrix>;
-using SparseLUMatrix = Eigen::SparseLU<SiconosSparseMatrix>;
+using SiconosDenseLUMatrix = Eigen::FullPivLU<siconos::algebra::SiconosDenseMatrix>;
+using SiconosSparseLUMatrix = Eigen::SparseLU<SiconosSparseMatrix>;
 
 // --- Select between dense and sparse storage ---
 // SICONOS_SPARSE is set by cmake.
 // Use -DSICONOS_SPARSE=1 to activate sparse storage
 #ifdef SICONOS_SPARSE
 using SiconosMatrix = SiconosSparseMatrix;
-using SiconosLUMatrix = SparseLUMatrix;
+using SiconosLUMatrix = SiconosSparseLUMatrix;
 #else
 using SiconosMatrix = SiconosDenseMatrix;
-using SiconosLUMatrix = DenseLUMatrix;
+using SiconosLUMatrix = SiconosDenseLUMatrix;
 #endif
 
-using MapType = Eigen::Map<SiconosMatrix>;
-using ConstMapType = Eigen::Map<const SiconosMatrix>;
+using MapType = Eigen::Map<SiconosDenseMatrix>;
+using ConstMapType = Eigen::Map<const SiconosDenseMatrix>;
 
 enum class StorageType { dense, sparse };
 

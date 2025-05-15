@@ -264,19 +264,6 @@ class LagrangianDS : public SecondOrderDS {
   /** memory of previous generalized forces due to constraints */
   std::vector<siconos::algebra::SiconosMemory> pMemory_;
 
-  // Internal constant, used to easily identify the different blocs in the rhs
-  static constexpr auto jacobianXBloc10_ = 0;
-  static constexpr auto jacobianXBloc11_ = 1;
-  static constexpr auto zeroMatrix_ = 2;
-  static constexpr auto idMatrix_ = 3;
-
-  /** A container of matrices to save matrices that are involed in first order
-   * from of LagrangianDS system values (jacobianXBloc10, jacobianXBloc11,
-   * zeroMatrix, idMatrix) No get-set functions at the time. Only used as a
-   * protected member.*/
-  std::vector<std::shared_ptr<siconos::algebra::SiconosMatrix>> rhsMatrices_ = {
-      nullptr, nullptr, nullptr, nullptr};
-
   /** Default constructor */
   LagrangianDS() = default;
 

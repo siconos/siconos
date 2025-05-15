@@ -96,7 +96,7 @@ siconos::modeling::FirstOrderNonLinearDS::FirstOrderNonLinearDS(
   }
 
   if (ds.LU_M()) {
-    LU_M_ = std::make_shared<siconos::algebra::SiconosLUMatrix>(*MMatrix_view_);
+    LU_M_ = std::make_shared<siconos::algebra::SiconosDenseLUMatrix>(*MMatrix_view_);
     hasLU_M_ = true;
   }
   // Memory stuff to me moved to graph/osi
@@ -132,13 +132,13 @@ void siconos::modeling::FirstOrderNonLinearDS::computeRhs(double time) {
     computeMMatrix(time);
     if (!hasLU_M_) {
       // allocate invM at the first call of the present function
-#ifdef SICONOS_SPARSE
-      LU_M_ = std::make_shared<siconos::algebra::SparseLUMatrix>();
-      LU_M_->analysePattern(*MMatrix_view_);
-      LU_M_->factorize(*MMatrix_view_);
-#else
-      LU_M_ = std::make_shared<siconos::algebra::DenseLUMatrix>(*MMatrix_view_);
-#endif
+      // #ifdef SICONOS_SPARSE
+      //       LU_M_ = std::make_shared<siconos::algebra::SiconosSparseLUMatrix>();
+      //       LU_M_->analysePattern(*MMatrix_view_);
+      //       LU_M_->factorize(*MMatrix_view_);
+      // #else
+      LU_M_ = std::make_shared<siconos::algebra::SiconosDenseLUMatrix>(*MMatrix_view_);
+      // #endif
       *(state_x_[1]) = LU_M_->solve(*(state_x_[1]));
       hasLU_M_ = true;
     }
@@ -167,19 +167,19 @@ void siconos::modeling::FirstOrderNonLinearDS::computeJacobianRhsOver_x(double t
     if (!hasLU_M_) {
       // When? If M has been updated or if it's the first call
       is_jacobianRhsOver_x_uptodate_ = false;
-#ifdef SICONOS_SPARSE
-      LU_M_ = std::make_shared<siconos::algebra::SparseLUMatrix>();
-      LU_M_->analysePattern(*MMatrix_view_);
-      LU_M_->factorize(*MMatrix_view_);
-#else
-      LU_M_ = std::make_shared<siconos::algebra::DenseLUMatrix>(*MMatrix_view_);
-#endif
+      // #ifdef SICONOS_SPARSE
+      //       LU_M_ = std::make_shared<siconos::algebra::SiconosSparseLUMatrix>();
+      //       LU_M_->analysePattern(*MMatrix_view_);
+      //       LU_M_->factorize(*MMatrix_view_);
+      // #else
+      LU_M_ = std::make_shared<siconos::algebra::SiconosDenseLUMatrix>(*MMatrix_view_);
+      // #endif
       hasLU_M_ = true;
     }
     // solve M*jacobianXRhS = jacobianfx
     if (!is_jacobianRhsOver_x_uptodate_) {
       // Solve M-1.jacobianfOver_x_view_ in temp result matrix
-      siconos::algebra::SiconosMatrix result = LU_M_->solve(*jacobianfOver_x_view_);
+      siconos::algebra::SiconosDenseMatrix result = LU_M_->solve(*jacobianfOver_x_view_);
       // and keep it as a flattened vector
       jacobianRhsOver_x_.noalias() =
           Eigen::Map<const Eigen::VectorXd>(result.data(), jacobianRhsOver_x_.size());
@@ -196,7 +196,7 @@ void siconos::modeling::FirstOrderNonLinearDS::computeJacobianRhsOver_x(double t
 }
 
 void siconos::modeling::FirstOrderNonLinearDS::setConstantMMatrix(
-    Eigen::Ref<siconos::algebra::SiconosMatrix> newValue) {
+    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue) {
   /**  Must:
 
    - create the Map (view onto memory handled by newValue) for MMatrix
@@ -270,7 +270,7 @@ void siconos::modeling::FirstOrderNonLinearDS::computefVector(
 }
 
 void siconos::modeling::FirstOrderNonLinearDS::setConstantJacobianfOver_x(
-    Eigen::Ref<siconos::algebra::SiconosMatrix> newValue) {
+    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue) {
   /**  Must:
 
    - create the Map (view onto memory handled by newValue) for jacobianfOver_x

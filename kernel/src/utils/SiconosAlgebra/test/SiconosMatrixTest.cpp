@@ -20,6 +20,7 @@
 #include "NumericsToolsNamespace.h"  // for NM_csc, NM_free ...
 #include "SiconosAlgebraAddons.hpp"  // for prod
 #include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 #include "Tools.hpp"
 #include "io.hpp"
 // namespace ublas = boost::numeric::ublas;
@@ -43,8 +44,6 @@ void SiconosMatrixTest::setUp() {
 
   // BlockMat
   size = 10;
-
-  A = std::make_shared<SiconosMatrix>(siconos::algebra::io::readDenseMatrix("A.dat"));
 
   // Build a reference sparse matrix
   int n = 6;
@@ -192,25 +191,61 @@ void SiconosMatrixTest::testProd() {
   siconos::algebra::BlockVector xB{};
   xB.insertPtr(x1);
   xB.insertPtr(x2);
+  auto A = siconos::algebra::io::readDenseMatrix("A.dat");
 
   siconos::algebra::SiconosVector result{10};
-  siconos::algebra::matrixBlockVector_prod(*A, xB, result);
+  siconos::algebra::matrixBlockVector_prod(A, xB, result);
 
-  double sum;
-  for (Eigen::Index i = 0; i < size; ++i) {
-    sum = 0;
-    for (Eigen::Index j = 0; j < A->cols(); ++j) sum += (*A)(i, j) * (xB)(j);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdBis: ", fabs((result)(i)-sum) < tol, true);
-  }
+  auto xref = xB.toSiconosVector();
+  auto ref = A * xref;
 
-  siconos::algebra::matrixBlockVector_prod(*A, xB, result, false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdBis: ", result.isApprox(ref, tol), true);
 
-  for (Eigen::Index i = 0; i < size; ++i) {
-    sum = 0;
-    for (Eigen::Index j = 0; j < A->cols(); ++j) sum += 2. * (*A)(i, j) * (xB)(j);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdBis: ", fabs((result)(i)-sum) < tol, true);
-  }
-  std::cout << "✅-->  test Test: mat-block vect ended with success." << std::endl;
+  siconos::algebra::matrixBlockVector_prod(A, xB, result, false);
+
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdBis: ", result.isApprox(2. * ref, tol), true);
+
+  // Call with a view
+  siconos::algebra::MapType Aview = siconos::algebra::MapType(A.data(), 10, 10);
+  siconos::algebra::matrixBlockVector_prod(Aview, xB, result);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProdBis: ", result.isApprox(ref, tol), true);
+
+  std::cout << "✅ Test: mat(dense)-block vect ended with success." << std::endl;
+
+  // Now sparse version
+  std::vector<siconos::algebra::Triplet> triplets;
+  triplets.emplace_back(0, 0, 1.0);
+  triplets.emplace_back(0, 1, 2.0);
+  triplets.emplace_back(1, 0, 2.0);
+  triplets.emplace_back(1, 1, 3.0);
+  triplets.emplace_back(2, 2, 4.0);
+  triplets.emplace_back(2, 3, 5.0);
+  triplets.emplace_back(3, 2, 7.0);
+  triplets.emplace_back(3, 3, 6.0);
+  siconos::algebra::SiconosSparseMatrix sparse{7, 6};
+  sparse.setFromTriplets(triplets.begin(), triplets.end());
+
+  auto x3 = std::make_shared<siconos::algebra::SiconosVector>(4);
+  x3->setRandom();
+  auto x4 = std::make_shared<siconos::algebra::SiconosVector>(2);
+  x4->setRandom();
+  siconos::algebra::BlockVector yB{};
+  yB.insertPtr(x3);
+  yB.insertPtr(x4);
+
+  siconos::algebra::SiconosVector resultsparse{7};
+  resultsparse.setZero();
+  siconos::algebra::matrixBlockVector_prod(sparse, yB, resultsparse);
+  auto ycopy = yB.toSiconosVector();
+  siconos::algebra::SiconosDenseMatrix dense{sparse};
+  auto ref2 = dense * ycopy;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test mat-block ", resultsparse.isApprox(ref2, tol), true);
+
+  // +=
+  siconos::algebra::matrixBlockVector_prod(sparse, yB, resultsparse, false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test mat-block: ", resultsparse.isApprox(2. * ref2, tol),
+                               true);
+  std::cout << "✅ Test: mat(sparse)-block vect ended with success." << std::endl;
 }
 
 void SiconosMatrixTest::testProd2()  // y += trans(A)*x
@@ -226,25 +261,41 @@ void SiconosMatrixTest::testProd2()  // y += trans(A)*x
   resultB.insertPtr(x1);
   resultB.insertPtr(x2);
   resultB.setZero();
+  auto A = siconos::algebra::io::readDenseMatrix("A.dat");
 
-  siconos::algebra::transposeMatrixVector_prod_toBlock(x, *A, resultB);
+  siconos::algebra::transposeMatrixVector_prod_toBlock(x, A, resultB);
 
-  auto tmp = std::make_shared<SiconosMatrix>(*A);
-  tmp->transposeInPlace();
-  double sum;
-  for (unsigned int i = 0; i < size; ++i) {
-    sum = 0;
-    for (unsigned int j = 0; j < A->cols(); ++j) sum += (*tmp)(i, j) * x(j);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd2: ", fabs(resultB(i) - sum) < tol, true);
-  }
+  auto ref = A.transpose() * x;
+  auto res = resultB.toSiconosVector();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd2: ", res.isApprox(ref, tol), true);
 
-  siconos::algebra::transposeMatrixVector_prod_toBlock(x, *A, resultB, false);
-  for (unsigned int i = 0; i < size; ++i) {
-    sum = 0;
-    for (unsigned int j = 0; j < A->cols(); ++j) sum += 2. * (*tmp)(i, j) * x(j);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd2: ", fabs(resultB(i) - sum) < tol, true);
-  }
-  std::cout << "✅-->  test prod2 ended with success." << std::endl;
+  siconos::algebra::transposeMatrixVector_prod_toBlock(x, A, resultB, false);
+  res = resultB.toSiconosVector();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd2: ", res.isApprox(2. * ref, tol), true);
+
+  // with view
+  siconos::algebra::MapType Aview = siconos::algebra::MapType(A.data(), 10, 10);
+  siconos::algebra::transposeMatrixVector_prod_toBlock(x, Aview, resultB);
+  res = resultB.toSiconosVector();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testProd2: ", res.isApprox(ref, tol), true);
+
+  std::cout << "✅-->  test mat(dense)-vec prod (to block) ended with success." << std::endl;
+  // Now, sparse
+  auto sparse = siconos::algebra::generateRandomSparseMatrix(x.size(), 8, 0.001);
+  siconos::algebra::BlockVector yB{2, 4};
+  yB.setZero();
+
+  siconos::algebra::transposeMatrixVector_prod_toBlock(x, sparse, yB);
+  auto ycopy = yB.toSiconosVector();
+  auto ref2 = sparse.transpose() * x;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test mat-block ", ycopy.isApprox(ref2, tol), true);
+
+  // +=
+  siconos::algebra::transposeMatrixVector_prod_toBlock(x, sparse, yB, false);
+  ycopy = yB.toSiconosVector();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test mat-block ", ycopy.isApprox(2. * ref2, tol), true);
+
+  std::cout << "✅-->  test mat(sparse)-vec prod (to block) ended with success." << std::endl;
 }
 
 void SiconosMatrixTest::End() {

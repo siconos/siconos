@@ -98,7 +98,7 @@ class FirstOrderLinearDS : public FirstOrderNonLinearDS {
    *  \param b vector coeff b
    */
   FirstOrderLinearDS(Eigen::Ref<siconos::algebra::SiconosVector> x0,
-                     Eigen::Ref<siconos::algebra::SiconosMatrix> A,
+                     Eigen::Ref<siconos::algebra::SiconosDenseMatrix> A,
                      Eigen::Ref<siconos::algebra::SiconosVector> b);
 
   /** Copy constructor
@@ -124,7 +124,7 @@ class FirstOrderLinearDS : public FirstOrderNonLinearDS {
    *  \param newValue A matrix
    *
    */
-  void setConstantA(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+  void setConstantA(Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue);
 
   /** set a user-defined function to compute A(t)
    *

@@ -20,7 +20,6 @@
  *  Must be used only by final user.
  */
 
-#include "BlockVector.hpp"
 #include "SiconosAlgebraAddons.hpp"
 #include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"

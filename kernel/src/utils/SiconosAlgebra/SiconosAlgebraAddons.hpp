@@ -23,11 +23,15 @@
 #ifndef SICOALGEBRA_ADDONS_HPP
 #define SICOALGEBRA_ADDONS_HPP
 
+#include <concepts>
+
 #include "BlockVector.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 
 namespace siconos::algebra {
+
+// class BlockVector;
 
 /** fill a CSparseMatrix (triplet) from non null values of a SiconosSparseMatrix
  *
@@ -68,11 +72,37 @@ siconos::algebra::SiconosVector normInfByColumn(const SiconosSparseMatrix& m);
 bool isSymmetric(SiconosDenseMatrix& mat, double tol = 1e-12);
 bool isSymmetric(const SiconosSparseMatrix& mat, double tol = 1e-12);
 
-void matrixBlockVector_prod(const SiconosMatrix& A, const BlockVector& x, SiconosVector& y,
-                            bool init = true);
+// Concept : any eigen matrix complient with middleCols * vec, which means for us dense, sparse
+// and map(dense)
+template <typename MatrixType>
+concept MatrixBlockCompatible = requires(const MatrixType& A, Eigen::Index startCol,
+                                         Eigen::Index blockSize, const SiconosVector& vec) {
+  { A.middleCols(startCol, blockSize) * vec };  // -> std::same_as<SiconosVector>;
+};
 
-void matrixBlockVector_prod(const SiconosMatrix& A, const BlockVector& x,
-                            Eigen::Ref<SiconosVector> y, bool init = true);
+/**
+ * Compute y += A.x with A a sparse or dense matrix and x a BlockVector
+ *
+ * @param[in] A input matrix (might be Dense, Map<Dense> or Sparse)
+ * @param[in] x input vector (Block)
+ * @param[in,out] y result
+ * @param init true to reset y to zero before product, else accumulate in place
+ */
+template <MatrixBlockCompatible MatrixType>
+void matrixBlockVector_prod(const MatrixType& A, const BlockVector& x,
+                            Eigen::Ref<SiconosVector> y, bool init = true) {
+  if (init) y.setZero();
+  assert(y.size() == A.rows());
+  assert(x.size() == A.cols());
+  Eigen::Index startCol = 0;
+  for (const auto& it : x) {
+    Eigen::Index blockSize = it->size();
+    auto subA = A.middleCols(startCol, blockSize);
+    y.noalias() += subA * (*it);
+
+    startCol += blockSize;
+  }
+}
 
 // /** computes y = A*x or y += A*x if init = false
 //   \param A a SiconosMatrix
@@ -85,15 +115,34 @@ void matrixBlockVector_prod(const SiconosMatrix& A, const BlockVector& x,
 //                                bool init = true);
 
 /** computes y(block vector) = trans(A)*x (init = true) or y += trans(A)*x (init= false)
-
+   works for dense and sparse
    \param x input vector
    \param A input matrix
    \param[in,out] y result
    \param init  false to accumulate result into y
   */
-void transposeMatrixVector_prod_toBlock(const SiconosVector& x, const SiconosMatrix& A,
-                                        BlockVector& y, bool init = true);
+template <typename MatrixType>
+void transposeMatrixVector_prod_toBlock(const SiconosVector& x, const MatrixType& A,
+                                        BlockVector& y, bool init = true) {
+  assert(A.rows() == x.size());
+  assert(A.cols() == y.size());
 
+  if (init) {
+    for (auto& block : y) block->setZero();
+  }
+
+  Eigen::Index startCol = 0;
+  for (auto& block : y) {
+    Eigen::Index blockSize = block->size();
+    auto subA = A.middleCols(startCol, blockSize);
+    *block += subA.transpose() * x;
+    startCol += blockSize;
+  }
+}
+
+/** Generate a random sparse matrix. Useful for tests */
+SiconosSparseMatrix generateRandomSparseMatrix(Eigen::Index rows, Eigen::Index cols,
+                                               double density = 0.001);
 }  // namespace siconos::algebra
 
 #endif
