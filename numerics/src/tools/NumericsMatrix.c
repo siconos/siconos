@@ -2784,9 +2784,7 @@ CSparseMatrix* NM_csc_trans(NumericsMatrix* A) {
                                                          * allocation */
   }
 
-  #ifdef DEBUG
-  NM_version_sync(A);
-  #endif
+  // NM_version_sync(A);
   return A->matrix2->trans_csc;
 }
 
@@ -6073,7 +6071,7 @@ void NM_block_prod_no_diag(int start_i, int size_i, NumericsMatrix* A, double *x
     }
   }
 
-  NM_version_sync(A);
+  // NM_version_sync(A);
 }
 
 
@@ -6149,9 +6147,7 @@ void NM_block_prod_no_diag_one_row(int local_line, int start_i, int size_i, Nume
     }
   }
 
-  #ifdef DEBUG
   NM_version_sync(A);
-  #endif
 }
 
 void NM_row_prod_no_diag_leftright(size_t sizeX, int block_start, size_t row, NumericsMatrix* A, double* x, double *left, double* right, bool init) {
@@ -6216,15 +6212,14 @@ void NM_row_prod_no_diag_leftright(size_t sizeX, int block_start, size_t row, Nu
     }
   }
 
-  #ifdef DEBUG
   NM_version_sync(A);
-  #endif
 }
 
 void NM_get_invdiag(int n, int *info, NumericsMatrix *M, double *diag) {
   double diag_i = 0.0;
   switch (M->storageType) {
     case NM_DENSE: {
+      assert(M->matrix0);
       for (int i = 0; i < n; ++i) {
         diag_i = M->matrix0[i + i * M->size0];
         if (fabs(diag_i) < DBL_EPSILON) {
@@ -6446,7 +6441,6 @@ void NM_row_prod_graph(size_t sizeX, int block_start, size_t row_start, size_t s
     }
   }
 
-  #ifdef DEBUG
-  NM_version_sync(A);
-  #endif
+  // NM_version_sync(A);
+
 }
