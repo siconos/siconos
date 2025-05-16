@@ -3,7 +3,7 @@ channels:
   - conda-forge
 dependencies:
   - python
-  - swig
+  - swig>=3,<4.3
   - jupyterlab
   - numpy
   - wheel
