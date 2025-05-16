@@ -31,7 +31,7 @@ RUN  apt update && apt upgrade -y && apt install --no-install-recommends -y -qq 
 	libeigen3-doc \
 	&&  apt autoclean -y && apt autoremove -y&& rm -rf /var/lib/apt/lists/*
 RUN useradd -ms /bin/bash siconos-user
-RUN wget https://boostorg.jfrog.io/artifactory/main/release/1.81.0/source/boost_1_81_0.tar.bz2 && \
+RUN  wget https://archives.boost.io/release/1.81.0/source/boost_1_81_0.tar.bz2 && \
     tar -jxvf boost_1_81_0.tar.bz2 && \
     cd boost_1_81_0 && ./bootstrap.sh && ./b2 install
 
