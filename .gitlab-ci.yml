@@ -396,7 +396,7 @@ jupyterlab:install:
   extends:
     - .siconos-jupyterlab-install
     - .devel-rules
-  needs: ["ubuntu22.04-release:build"]
+  needs: ["ubuntu24.04-release:build"]
 
 mambalab:install:
     variables:
