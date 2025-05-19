@@ -108,8 +108,10 @@ c Loop over output points, call DLSODKR, print sample solution values.
  60     format('   c1 (bot.left/middle/top rt.) =',3d12.3/
      1         '   c2 (bot.left/middle/top rt.) =',3d12.3)
         write(6,62)c2tot,jroot
- 62     format('   total c2 =',d15.6,
-     1         '   jroot =',i2' (1 = root found, 0 = no root)')
+62      format('   total c2 =', d15.6,
+     1          '   jroot =', i2, ' (1 = root found, 0 = no root)')
+
+
         if (istate .lt. 0) then
           write(6,65)istate
  65       format('DLSODKR returned istate = ',i3)
