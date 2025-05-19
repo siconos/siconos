@@ -71,7 +71,7 @@ jupyter-notebook:docker-build:
     RESULT_NAME: $SICONOS_REGISTRY/sources/jupyterlab
   extends: .docker-build
   stage: docker-build-layer2
-  needs: ["ubuntu22.04:docker-build"]
+  needs: ["ubuntu24.04:docker-build"]
 
 # The same, based on micromamba.
 mambaenv:docker-build:
@@ -95,7 +95,7 @@ mambaenv:docker-build:
 
 # -- Jobs that will always be executed (rule .devel-rules) --
 
-# ------ ubuntu 22, debug setup -------
+# ------ ubuntu 24, debug setup -------
 ubuntu24.04-debug:configure:
   variables:
     IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu24.04
@@ -126,36 +126,35 @@ ubuntu24.04-debug:test:
       - .devel-rules
     needs: ["ubuntu24.04-debug:build"]
 
-# ------ ubuntu 22, debug setup -------
-# ubuntu22.04-debug:configure:
-#   variables:
-#     IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
-#     CDASH_SUBMIT: 1
-#     CONF_FILE: $SICONOS_CMAKE_CONF_PATH/siconos_devmode.cmake
-#   extends:
-#     - .siconos-configure
-#     - .devel-rules
-#   needs:
-#     - job: ubuntu22.04:docker-build
-#       optional: true
+# ------ ubuntu 24, release setup -------
+ubuntu24.04-release:configure:
+  variables:
+    IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu24.04
+    CDASH_SUBMIT: 1
+  extends:
+    - .siconos-configure
+    - .devel-rules
+  needs:
+    - job: ubuntu24.04:docker-build
+      optional: true
 
-# ubuntu22.04-debug:build:
-#   variables:
-#       IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
-#       CDASH_SUBMIT: 1
-#   extends:
-#     - .siconos-build
-#     - .devel-rules
-#   needs: ["ubuntu22.04-debug:configure"]
+ubuntu24.04-release:build:
+  variables:
+      IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu24.04
+      CDASH_SUBMIT: 1
+  extends:
+    - .siconos-build
+    - .devel-rules
+  needs: ["ubuntu24.04-release:configure"]
 
-# ubuntu22.04-debug:test:
-#     variables:
-#       IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu22.04
-#       CDASH_SUBMIT: 1
-#     extends:
-#       - .siconos-test
-#       - .devel-rules
-#     needs: ["ubuntu22.04-debug:build"]
+ubuntu24.04-release:test:
+    variables:
+      IMAGE_NAME: $SICONOS_REGISTRY/sources/ubuntu24.04
+      CDASH_SUBMIT: 1
+    extends:
+      - .siconos-test
+      - .devel-rules
+    needs: ["ubuntu24.04-release:build"]
 
 # ------ ubuntu 22, default setup -------
 ubuntu22.04-release:configure:
@@ -164,7 +163,6 @@ ubuntu22.04-release:configure:
      CDASH_SUBMIT: 1
    extends:
      - .siconos-configure
-     - .devel-rules
    needs:
      - job: ubuntu22.04:docker-build
        optional: true
@@ -175,7 +173,6 @@ ubuntu22.04-release:build:
       CDASH_SUBMIT: 1
   extends:
     - .siconos-build
-    - .devel-rules
   needs: ["ubuntu22.04-release:configure"]
 
 ubuntu22.04-release:test:
@@ -184,7 +181,6 @@ ubuntu22.04-release:test:
       CDASH_SUBMIT: 1
     extends:
       - .siconos-test
-      - .devel-rules
     needs: ["ubuntu22.04-release:build"]
 
 # --- Siconos inside a notebook, default setup ---
