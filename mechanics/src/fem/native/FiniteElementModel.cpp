@@ -1056,50 +1056,31 @@ void siconos::mechanics::fem::FiniteElementModel::computeBeamElementaryBMatrix_d
   int order = fe.order();
 
   std::vector<std::shared_ptr<FENode>> & nodes= fe.nodes();
-  int nnodes= nodes.size();
+  int nnodes = nodes.size();
+  // Material &mat = *(materials[fe.mElement()->tags(0)]);
+  // double E = mat.elasticYoungModulus();
+  // double I = mat.momentOfInertia();
+  // double A = mat.crossSectionArea();
+  double length  = fe.length();
+  double length2 = length*length;
   int dim = _mesh->dim();
   // Direct computation without Gauss Integration
-  double x1 = nodes[0]->x();
-  double x2 = nodes[1]->x();
-  double x3 = nodes[2]->x();
 
-  double y1 = nodes[0]->y();
-  double y2 = nodes[1]->y();
-  double y3 = nodes[2]->y();
+  B.setValue(0,0, - 1/length);
+  B.setValue(0,3,   1/length);
 
-  double x21 = x2-x1;
-  double x31 = x3-x1;
-  double x32 = x3-x2;
+  int integrationOrder = 3, gp_cnt = 0;
+  for (const auto &gp : fe.GaussPoints(integrationOrder)) {
+    double gp_eta = gp[0];
+    double gp_w = gp[1];
 
-  double y21 = y2-y1;
-  double y31 = y3-y1;
-  double y32 = y3-y2;
+    B.setValue(gp_cnt,1, 6*gp_eta/length2);
+    B.setValue(gp_cnt,2, (3*gp_eta-1)/length);
+    B.setValue(gp_cnt,4, -6*gp_eta/length2);
+    B.setValue(gp_cnt,5, (3*gp_eta+1)/length);
+  }
 
-  double twoA =
-      x2*y3-x3*y2 +
-      x3*y1-x1*y3 +
-      x1*y2-x2*y1;
-  DEBUG_PRINTF("twoA = %e\n", twoA);
-  //    std::shared_ptr<SimpleMatrix> B = std::make_shared<SimpleMatrix>(3,ndof);
-
-  B.setValue(0,0, - y32);
-  B.setValue(0,2,   y31);
-  B.setValue(0,4, - y21);
-
-  B.setValue(1,1,   x32);
-  B.setValue(1,3, - x31);
-  B.setValue(1,5,   x21);
-
-  B.setValue(2,0,   x32);
-  B.setValue(2,1, - y32);
-  B.setValue(2,2, - x31);
-  B.setValue(2,3,   y31);
-  B.setValue(2,4,   x21);
-  B.setValue(2,5, - y21);
-
-  B = 1.0/twoA * B;
-  double coeff = sqrt(twoA / 2.0 * thickness);
-  B = coeff * B;
+  // A ajouter le transfert vers coordonnées globales.
 
 }
 
