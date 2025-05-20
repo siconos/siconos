@@ -6,6 +6,7 @@
 #include <tuple>
 #include <variant>
 #include <vector>
+#include <unordered_map>
 #include <map>
 
 #include "siconos/algebra/eigen.hpp"

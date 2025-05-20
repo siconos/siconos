@@ -147,4 +147,18 @@ static auto handles =
 auto has_init =
   ground::is_valid([](auto &&x) -> decltype(x.__init__()) {});
 
+// Check if a  __del__ member function is present.
+auto has_del =
+  ground::is_valid([](auto &&x) -> decltype(x.__del__()) {});
+
+template <typename B>
+static constexpr auto handle_derive_from = ground::is_a_model<[]<typename T>() consteval {
+  return std::derived_from<typename T::type, B>;
+}>;
+
+template <typename B>
+static constexpr auto not_handle_derive_from = ground::is_a_model<[]<typename T>() consteval {
+  return std::derived_from<typename T::type, B>;
+}>;
+
 }  // namespace siconos::storage

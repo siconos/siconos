@@ -146,4 +146,9 @@ decltype(auto) dot(match::vector auto& v, match::vector auto& w)
 {
   return v.dot(w);
 };
+
+void solve_in_place(match::diagonal_matrix auto& m, match::vector auto& b)
+{
+  b = m.inverse() * b;
+}
 }  // namespace siconos::algebra

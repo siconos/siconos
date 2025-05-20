@@ -3,26 +3,28 @@
 #include "siconos/utils/print.hpp"
 
 namespace siconos::config {
-using ball = model::lagrangian_ds;
-using lcp = simul::nonsmooth_problem<LinearComplementarityProblem>;
-using osnspb = simul::one_step_nonsmooth_problem<lcp>;
-using nslaw = model::newton_impact;
-using relation = model::lagrangian_r<nslaw::size>;
-using interaction = simul::interaction<nslaw, relation>;
-using topo = simul::topology<ball, interaction>;
-using osi = simul::one_step_integrator<topo>::moreau_jean;
-using td = simul::time_discretization<>;
+struct ball : model::lagrangian_ds {};
+struct lcp : simul::nonsmooth_problem<LinearComplementarityProblem> {};
+struct osnspb : simul::one_step_nonsmooth_problem<lcp> {};
+struct nslaw : model::newton_impact {};
+struct relation : model::lagrangian_r<nslaw::size> {};
+struct interaction : simul::interaction<nslaw, relation> {};
+struct topo : simul::topology<ball, interaction> {};
+struct osi : simul::one_step_integrator<topo>::moreau_jean {};
+struct td : simul::time_discretization<> {};
 struct simulation : simul::time_stepping<td, osi, osnspb> {};
 
 using params = map<iparam<"dof", 3>>;
 
-struct make : storage::make<
-  standard_environment<params>, simulation,
-                  storage::with_properties<
-                      storage::time_invariant<storage::attr_t<ball, "fext">>,
-                      storage::diagonal<storage::attr_t<ball, "mass_matrix">>,
-                      storage::assembled_diagonal<
-                          storage::attr_t<osi, "mass_matrix_assembled">>>> {};
+struct make
+    : storage::make<
+          standard_environment<params>, simulation,
+          storage::with_properties<
+              storage::time_invariant<storage::attr_t<config::ball, "fext">>,
+              storage::diagonal<storage::attr_t<config::ball, "mass_matrix">>,
+              storage::assembled_diagonal<
+                  storage::attr_t<typename config::osi::assembled_osi_t,
+                                  "mass_matrix_assembled">>>> {};
 
 }  // namespace siconos::config
 

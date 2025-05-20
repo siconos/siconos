@@ -14,6 +14,9 @@ struct diskfsegment_r : item<>,
   using attributes =
       gather<attribute<"segment", some::item_ref<shape::segment>>>;
 
+  using properties =
+      gather<storage::attached<shape::segment, symbol<"relation">,
+                               some::item_ref<diskfsegment_r>>>;
   template <typename Handle>
   struct interface : default_interface<Handle> {
     using default_interface<Handle>::self;

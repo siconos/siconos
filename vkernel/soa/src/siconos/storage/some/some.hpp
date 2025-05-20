@@ -200,4 +200,8 @@ struct given_definition : attribute<> {};
 template <string_literal S>
 struct definition : given_definition, symbol<S> {};
 
+struct undefined_tuple {};
+
+template <typename... Ts>
+struct tuple : attribute<>, undefined_tuple, with_types<Ts...> {};
 }  // namespace siconos::storage::some

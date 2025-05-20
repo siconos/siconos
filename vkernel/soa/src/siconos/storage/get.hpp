@@ -1,9 +1,11 @@
 #pragma once
 
 #include "siconos/storage/ground/ground.hpp"
+#include "siconos/storage/info.hpp"
 #include "siconos/storage/pattern/base.hpp"
 #include "siconos/storage/pattern/base_concepts.hpp"
 #include "siconos/storage/pattern/pattern.hpp"
+#include "siconos/storage/traits/traits.hpp"
 
 namespace siconos::storage {
 
@@ -148,5 +150,12 @@ static auto constexpr attached_storage_name(Astor astor)
       static_assert(flag, "tag is not a symbol!");
     }();
   }
+}
+
+template <typename Data, typename Attribute>
+static auto constexpr get_storage_type(Data&& data, Attribute)
+{
+  using env_t = typename get_info_t<decltype(data)>::env;
+  return typename traits::config<env_t>::template convert<Attribute>::type{};
 }
 }  // namespace siconos::storage

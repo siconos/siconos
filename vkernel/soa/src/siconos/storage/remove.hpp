@@ -29,6 +29,11 @@ static auto remove = [](auto& data, auto& h) {
   auto attrs = ground::tuple_unique(
       concat(attributes(item_t{}), attached_storages(h.item_type(), data)));
 
+  // call handle delete function if present
+  if constexpr (has_del(h)) {
+    h.__del__();
+  }
+
   if constexpr (ground::size(attrs) > ground::size_c<0>) {
     ground::for_each(attrs, [&data, &h]<match::attribute A>(A) {
       return ground::for_each(

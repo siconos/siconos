@@ -44,56 +44,83 @@ struct time_stepping : item<> {
 
     auto compute_one_step()
     {
+      using env_t = decltype(self()->env());
+      using indice_t = typename env_t::indice;
+
       auto osi = one_step_integrator();
-      auto step = current_step();
 
-      // update jacobians
-      // do nothing if lagrangian_r is time_invariant
-      osi.update_h_matrices(step);
+      indice_t step = current_step();
 
-      // do nothing if fext is time_invariant
-      osi.update_iteration_matrix(step);
+      indice_t total_number_of_interactions = 0;
+      indice_t total_number_of_involved_ds = 0;
 
-      // vfree stored in v(step+1)
-      osi.compute_free_state(step, time_step());
+      indice_t raw_interactions_size = 0;
+      indice_t raw_ds_size = 0;
 
-      // xfree stored in positions(step+1)
-      osi.update_positions(step, time_step());
+      // loop over different kind of dynamic systems
+      ground::for_each(osi.elements(), [&](auto elem) {
+        // udpate M^-1 * fext
+        // do nothing if fext is time_invariant
+        elem.update_iteration_matrix(step);
 
-      // -> y & ydot (step & step+1)
-      osi.compute_output(step);
-      osi.compute_output(step + 1);
+        // update jacobians
+        // do nothing if lagrangian_r is time_invariant
+        elem.update_h_matrices(step);
 
-      // compute active interactions
-      auto [ninter, nds] = osi.compute_active_interactions(step, time_step());
+        // vfree stored in v(step+1)
+        elem.compute_free_state(step, time_step());
 
-      if (nds > 0) {
-        // a least one activated interaction
+        // xfree stored in positions(step+1)
+        elem.update_positions(step, time_step());
 
-        //        print("ninter, nds = {},{}\n", ninter, nds);
-        osi.compute_h_matrices(step + 1);
-        osi.assemble_h_matrix_for_involved_ds(step, ninter, nds);
-        osi.assemble_mass_matrix_for_involved_ds(step, nds);
+        // -> y & ydot (step & step+1)
+        elem.compute_output(step);
+        elem.compute_output(step + 1);
 
-        osi.resize_assembled_vectors(step, ninter, nds);
+        // compute active interactions
+        auto [ninter, nds] =
+            elem.compute_active_interactions(step, time_step());
+
+        total_number_of_interactions += ninter;
+        total_number_of_involved_ds += nds;
+
+        raw_interactions_size += ninter * elem.nslaw_size();
+        raw_ds_size += nds * elem.dof();
+      });
+
+      if (total_number_of_involved_ds > 0) {
+        // resize assembled matrices and vectors
+        osi.assemble_setup(raw_interactions_size, raw_ds_size);
+
+        ground::for_each(osi.elements(), [&](auto elem) {
+          // a least one activated interaction
+          elem.compute_h_matrices(step + 1);
+
+          elem.assemble_h_matrix_for_involved_ds(step);
+          elem.assemble_mass_matrix_for_involved_ds(step);
+          elem.assemble_vectors(step);
+
+          elem.nsl_effect_on_free_output(step);
+          elem.compute_q_nsp_vector_assembled(step);
+        });
 
         // H M^-1 H^t
         osi.compute_w_matrix(step);
-        osi.nsl_effect_on_free_output(step);
-        osi.compute_q_nsp_vector_assembled(step, ninter);
-
-        self()->template solve_nonsmooth_problem<formulation_t>(step, ninter);
-
-        // lambda_vector_assembled -> lambdas
-        osi.keep_lambdas(step);
+        self()->template solve_nonsmooth_problem<formulation_t>(step);
 
         // velocity_vector_assembled <- mass_matrix^-1 * (h_matrix^t * lambda)
         osi.compute_input();
 
-        // velocity_vector_assembled -> velocities
-        osi.update_velocities(step, time_step());
-        osi.update_positions(step, time_step());
+        ground::for_each(osi.elements(), [&](auto elem) {
+          // lambda_vector_assembled -> lambdas
+          elem.keep_lambdas(step);
+
+          // velocity_vector_assembled -> velocities
+          elem.update_velocities(step, time_step());
+          elem.update_positions(step, time_step());
+        });
       }
+
       else {
         print(".");
       }
@@ -101,11 +128,11 @@ struct time_stepping : item<> {
       current_step() += 1;
 
       print("step {}\n", current_step());
-      return nds;
+      return total_number_of_involved_ds;
     }
 
     template <typename Formulation>
-    void solve_nonsmooth_problem(auto step, auto ninter)
+    void solve_nonsmooth_problem(auto step)
     {  // for a LCP:
        // M z = w + q
        //  z _|_ w
@@ -115,7 +142,7 @@ struct time_stepping : item<> {
       //      resize(osi.ydot_vector_assembled(), ninter);
 
       self()->one_step_nonsmooth_problem().template solve<Formulation>(
-          osi.w_matrix(),                 // M
+          osi.w_matrix_assembled(),                 // M
           osi.q_nsp_vector_assembled(),   // q
           osi.lambda_vector_assembled(),  // z
           osi.ydot_vector_assembled());   // w

@@ -10,4 +10,5 @@ namespace siconos::simul
   using namespace storage::pattern;
 
   using storage::ground::concat;
+
 }

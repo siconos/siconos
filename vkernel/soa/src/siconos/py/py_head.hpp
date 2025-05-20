@@ -43,7 +43,7 @@ using translated_disk_shape = collision::translated<disk_shape>;
 
 struct fc2d : simul::nonsmooth_problem<FrictionContactProblem> {};
 struct osnspb : simul::one_step_nonsmooth_problem<fc2d> {};
-struct solver_options : simul::solver_options {};
+using solver_options = simul::solver_options;
 struct ct_interaction
     : simul::interaction<nslaw, diskdisk_r, diskfdisk_r, diskfsegment_r> {};
 struct rt_interaction : simul::rt_interaction<nslaw, diskmesh_r> {};

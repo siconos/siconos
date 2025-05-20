@@ -6,8 +6,6 @@
 
 namespace siconos::simul {
 
-struct empty_item : item<> {};
-
 template <typename FixedDofDynamicalSystem, typename FixedDofInteraction,
           typename DynamicDofDynamicalSystem = empty_item,
           typename DynamicDofInteraction = empty_item>

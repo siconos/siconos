@@ -29,6 +29,11 @@ static auto translate = rec([]<typename E, typename T>(auto&& translate, E,
           typename E::template variant<decltype(translate(E{}, Ts{}))...>{};
     });
   }
+  else if constexpr (std::derived_from<T, some::undefined_tuple>) {
+    return ground::unpack((typename T::types{}), []<typename... Ts>(Ts...) {
+      return typename E::template tuple<decltype(translate(E{}, Ts{}))...>{};
+    });
+  }
   else if constexpr (std::derived_from<T, some::boolean>) {
     return typename E::boolean{};
   }

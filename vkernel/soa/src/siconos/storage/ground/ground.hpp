@@ -83,6 +83,8 @@ using hana::index_if;
 using hana::integral_constant;
 using hana::is_valid;
 using hana::make_lazy;
+using hana::not_;
+using hana::bool_c;
 using hana::pair;
 using hana::prepend;
 using hana::set;
@@ -93,7 +95,6 @@ using hana::to_set;
 using hana::tuple;
 using hana::unique;
 using hana::unpack;
-
 static constexpr auto typeid_ = hana::typeid_;
 
 template <template <typename... Ts> typename F>
@@ -442,9 +443,17 @@ static constexpr auto is_integral = is_a_model<[]<typename T>() consteval {
 }>;
 
 template <typename B>
+
 static constexpr auto derive_from = is_a_model<[]<typename T>() consteval {
   return std::derived_from<T, B>;
 }>;
+
+template <typename B>
+static constexpr auto not_derive_from = is_a_model<[]<typename T>() consteval {
+  return !std::derived_from<T, B>;
+}>;
+
+
 
 template <typename B>
 static constexpr auto is_parent = is_a_model<[]<typename T>() consteval {
