@@ -154,7 +154,7 @@ class FiniteElementModel {
 
   void computeElementary_B_Matrix(FElement& fe, siconos::algebra::SimpleMatrix& B, double length);
 
-  void computeBeamElementaryBMatrix_direct(FElement& fe, siconos::algebra::SimpleMatrix& Be, double thickness);
+  void computeBeamElementaryBMatrix_direct(FElement& fe, siconos::algebra::SimpleMatrix& Be,  std::map<unsigned int, std::shared_ptr<Material>> &materials);
 
   void computeElementaryBMatrix_direct(FElement& fe, siconos::algebra::SimpleMatrix& Be, double thickness);
 
@@ -162,7 +162,9 @@ class FiniteElementModel {
     std::map<unsigned int, 	std::shared_ptr<Material> > & mat);
 
   void computeSMatrix(std::shared_ptr<siconos::algebra::SiconosMatrix> S,
-    std::map<unsigned int, 	std::shared_ptr<Material> > & mat);
+                      std::map<unsigned int, 	std::shared_ptr<Material> > & mat);
+  void computeBeam_S_Matrix(std::shared_ptr<siconos::algebra::SiconosMatrix> S,
+                            std::map<unsigned int, 	std::shared_ptr<Material> > & mat);
 
   /** apply Dirichlet Boundary conditions for a given tag on element.
    **/
