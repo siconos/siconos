@@ -64,10 +64,10 @@ EOF
       cat>.siconos-vrun-channels.scm<<EOF
 (list (channel
         (name 'guix)
-        (url "https://git.savannah.gnu.org/git/guix.git")
+        (url "https://codeberg.org/guix/guix-mirror")
         (branch "master")
         (commit
-          "2b2b6a7675d43ff82487718c729cfaf5edf98c8d")
+          "efac01f19b65d7d77a98bbfd57fe2073fb13064a")
         (introduction
           (make-channel-introduction
             "9edb3f66fd807b096b48283debdcddccfea34bad"
@@ -92,9 +92,9 @@ EOF
       # it seems that we need to pass explicitely the package for transformations
       exec $guix_cmd shell $guix_isolation_args \
            --root=.siconos-guix-profile \
-           -e '(list (@ (gnu packages gcc) gcc-14) "lib")' \
+           -e '(list (@ (gnu packages gcc) gcc-15) "lib")' \
            -m .siconos-disks-manifest.scm \
-           python --with-c-toolchain=python=gcc-toolchain@14 \
+           python --with-c-toolchain=python=gcc-toolchain@15 \
            -- $0 "$@" # bash -c "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/scratch/maurice/install/siconos/lib/python3.10/site-packages/nonos; export PYTHONPATH=\$PYTHONPATH:/scratch/maurice/install/siconos/lib/python3.10/site-packages; $0 $@"
       ;;
 
