@@ -163,8 +163,6 @@ class FiniteElementModel {
 
   void computeSMatrix(std::shared_ptr<siconos::algebra::SiconosMatrix> S,
                       std::map<unsigned int, 	std::shared_ptr<Material> > & mat);
-  void computeBeam_S_Matrix(std::shared_ptr<siconos::algebra::SiconosMatrix> S,
-                            std::map<unsigned int, 	std::shared_ptr<Material> > & mat);
 
   /** apply Dirichlet Boundary conditions for a given tag on element.
    **/

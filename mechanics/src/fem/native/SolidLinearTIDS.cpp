@@ -24,6 +24,9 @@
 #include "Mesh.hpp"
 #include "SiconosVectorOp.hpp"
 #include "SimpleMatrix.hpp"
+#include "SiconosMatrixOp.hpp"  // prod ...
+#include "SiconosAlgebraScal.cpp"  // prod ...
+
 //#include "SiconosAlgebraProd.hpp"
 //#include "SimpleMatrixFriends.hpp"
 
@@ -78,12 +81,13 @@ siconos::mechanics::fem::SolidLinearTIDS::SolidLinearTIDS(std::shared_ptr<Mesh> 
 //    _mesh = mesh;
 //    _materials = materials;
 //    _storageType = storageType;
+    std::cout << "In SolidTIDS constructor" << std::endl;
     _FEModel.reset(new FiniteElementModel(mesh));
     _ndof = _FEModel->init();
     int nElements = _FEModel->elements().size();
     int dim = _FEModel->mesh()->dim();
 //    int dimStressInElem = (dim == 2) ? 4 : 9;
-    int dimStressInElem = (dim == 2) ? 3 : 6;
+    int dimStressInElem = (dim == 2) ? 3 : 6; // Careful for Beam case, OK for 2D Beam , should be 5 for 3D beam
     _dimStress = dimStressInElem*nElements;
 //    _dimStress = dim*(dim+1)/2;
 
@@ -118,8 +122,6 @@ _epsilonp[1] = std::make_shared<siconos::algebra::SiconosVector>(*_epsilonp0);
                                                                _storageType);
   }
   _FEModel->computeSMatrix(_S,_materials);
-  std::cout << "S computed in constructor!" << std::endl;
-  _S->display();
 //  if(!_mass)
 //  {
 //      _mass.reset(new siconos::algebra::SimpleMatrix(dimState, dimState, _storageType));
@@ -141,12 +143,21 @@ _epsilonp[1] = std::make_shared<siconos::algebra::SiconosVector>(*_epsilonp0);
 //        }
 //  }
 //  std::cout << "mass matrix set !" << std::endl;
+
+  // if (!_K) {
+  //   _K = std::make_shared<siconos::algebra::SimpleMatrix>(_ndof, _ndof, _storageType);
+  //   _K->setIsSymmetric(true);
+  //   _K->setIsPositiveDefinite(true);
+  // }
+  // _FEModel->computeStiffnessMatrix(_K, _materials);
+
     if(!_B)
     {
         _B = std::make_shared<siconos::algebra::SimpleMatrix>(_dimStress, _ndof,
                                                                  _storageType);
     }
     _FEModel->computeBMatrix(_B, _materials);
+
 
 //    if(!_C)
 //    {

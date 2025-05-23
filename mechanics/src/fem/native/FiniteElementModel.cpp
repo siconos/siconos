@@ -64,8 +64,6 @@ unsigned int siconos::mechanics::fem::FiniteElementModel::init() {
   std::vector<std::shared_ptr<MElement>> ignored_elements;
 
   for (auto e : _mesh->elements()) {
-    std::cout << "element number: " << e->num() << std::endl;
-
     // e->display();
     // std::cout << "type of element:"<< siconos::tools::enum_to_string(e->type()) <<std::endl;
     // std::cout << "type L2 of element:"<< siconos::tools::enum_to_string(FiniteElementType::L2) <<std::endl;
@@ -122,7 +120,6 @@ unsigned int siconos::mechanics::fem::FiniteElementModel::init() {
     _mElementTOFElement[e] = _elements.back();
 
     int ndofPerNode = fe->ndofPerNode();
-
     /* ------------- contruction of  FE nodes */
     for (auto v : e->vertices()) {
       if (_vertexToNode.find(v) ==
@@ -202,14 +199,21 @@ void siconos::mechanics::fem::FiniteElementModel::AssembleElementary_B_Matrix(st
 }
 
 void siconos::mechanics::fem::FiniteElementModel::AssembleElementary_S_Matrix(std::shared_ptr<siconos::algebra::SiconosMatrix> S,
-                                                                                      siconos::algebra::SimpleMatrix& Se, FElement& fe, int elem_cnt)
+                                                                              siconos::algebra::SimpleMatrix& Se, FElement& fe, int elem_cnt)
 {
-//    int dimStress = _mesh->dim()*(_mesh->dim()+1)/2;
-    int dimStress = (_mesh->dim() == 2) ? 3 : 6;
-        for(int i=0;i<dimStress;i++)
-            for(int j=0;j<dimStress;j++){
-                S->setValue(dimStress*elem_cnt+i, dimStress*elem_cnt+j, Se.getValue(i,j)+ S->getValue(dimStress*elem_cnt+i, dimStress*elem_cnt+j));
-            }
+  //    int dimStress = _mesh->dim()*(_mesh->dim()+1)/2;
+  int dimStress;
+  if (fe.type() == FiniteElementType::B2){
+    dimStress = 3;
+  }
+  else
+  {
+    dimStress = (_mesh->dim() == 2) ? 3 : 6;
+  };
+  for(int i=0;i<dimStress;i++)
+    for(int j=0;j<dimStress;j++){
+      S->setValue(dimStress*elem_cnt+i, dimStress*elem_cnt+j, Se.getValue(i,j)+ S->getValue(dimStress*elem_cnt+i, dimStress*elem_cnt+j));
+    }
 }
 
 
@@ -414,11 +418,11 @@ void siconos::mechanics::fem::FiniteElementModel::computeMassMatrix(
 
   /* loop over the elements */
   for (auto &fe : elements()) {
+
     unsigned int ndofElement = fe->ndof();
     auto Me = std::make_shared<siconos::algebra::SimpleMatrix>(ndofElement, ndofElement);
     // to be optimized if all the element are similar
     double massDensity = mat[fe->mElement()->tags(0)]->massDensity();
-
     if (fe->type() == FiniteElementType::B2){
       computeBeamElementaryMassMatrix_direct(*Me, *fe, mat);
     }
@@ -923,8 +927,6 @@ void siconos::mechanics::fem::FiniteElementModel::computeStiffnessMatrix(
           ndofElement);
       computeBeamElementaryStiffnessMatrix_direct(*Ke, *fe, materials);
       AssembleElementaryMatrix(K, *Ke, *fe);
-      std::cout << "K:" << std::endl;
-      K->display();
     }
     else {
 
@@ -1166,25 +1168,50 @@ void siconos::mechanics::fem::FiniteElementModel::computeBMatrix(
 
 void siconos::mechanics::fem::FiniteElementModel::computeSMatrix(
   std::shared_ptr<siconos::algebra::SiconosMatrix> S,
-  std::map<unsigned int, 	std::shared_ptr<Material> > & mat)
+  std::map<unsigned int, 	std::shared_ptr<Material> > & materials)
 {
   DEBUG_BEGIN("siconos::mechanics::fem::native::FiniteElementModel::computeMassMatrix(std::shared_ptr<SiconosMatrix> M, double massDensity )\n");
   int elem_cnt=0;
-  int dimStress = _mesh->dim()*(_mesh->dim()+1)/2;
-  Material & mate= *(mat[0]);
+  int dimStress;
+  Material & mat= *(materials[0]);
   std::shared_ptr<siconos::algebra::SimpleMatrix> D, Dinv;
-  D = std::make_shared<siconos::algebra::SimpleMatrix>(dimStress,dimStress);
+
 
 //  Dinv = std::make_shared<siconos::algebra::SimpleMatrix>(dimStress,dimStress);
-  double E;
+  double E, I, A, length;
   double nu;
   double coef;
   /* loop over the elements */
   for(std::shared_ptr<FElement> fe : elements())
   {
-      Material & mate= *(mat[fe->mElement()->tags(0)]);
-      E = mate.elasticYoungModulus();
-      nu =  mate.poissonCoefficient();
+    if (fe->type() == FiniteElementType::B2){
+      int dimStress = 3;
+      D = std::make_shared<siconos::algebra::SimpleMatrix>(dimStress,dimStress);
+      Material &mat = *(materials[fe->mElement()->tags(0)]);
+      E = mat.elasticYoungModulus();
+      I = mat.momentOfInertia();
+      A = mat.crossSectionArea();
+      length  = fe->length();
+
+      (*D)(0,0) = E*A*length;
+      (*D)(1,1) = E*I*length/2;
+      (*D)(2,2) = E*I*length/2;
+      Dinv = std::make_shared<siconos::algebra::SimpleMatrix>(*D);
+      // (*Dinv)(0,0) = 1/(*D)(0,0);
+      // (*Dinv)(1,1) = 1/(*D)(1,1);
+      // (*Dinv)(2,2) = 1/(*D)(2,2);
+      (*Dinv)(0,0) = (*D)(0,0);
+      (*Dinv)(1,1) = (*D)(1,1);
+      (*Dinv)(2,2) = (*D)(2,2);
+
+    }
+    else
+    {
+      dimStress = _mesh->dim()*(_mesh->dim()+1)/2;
+      D = std::make_shared<siconos::algebra::SimpleMatrix>(dimStress,dimStress);
+      Material & mat= *(materials[fe->mElement()->tags(0)]);
+      E = mat.elasticYoungModulus();
+      nu =  mat.poissonCoefficient();
       coef = E/((1+nu)*(1-2.*nu));
       (*D)(0,0) = coef*(1.-nu);
       (*D)(0,1) = coef*nu;
@@ -1198,7 +1225,6 @@ void siconos::mechanics::fem::FiniteElementModel::computeSMatrix(
       (*D)(2,1) = 0.0;
       (*D)(2,2) = 0.5*coef*(1.0 - 2* nu);
       Dinv = std::make_shared<siconos::algebra::SimpleMatrix>(*D);
-      Dinv->display();
       (*Dinv)(0,0) = (*D)(0,0)/((*D)(0,0)*(*D)(0,0) - (*D)(0,1)*(*D)(0,1));
       (*Dinv)(0,1) = (*D)(0,1)/((*D)(0,1)*(*D)(0,1) - (*D)(0,0)*(*D)(0,0));
       (*Dinv)(0,2) = 0.0;
@@ -1210,46 +1236,11 @@ void siconos::mechanics::fem::FiniteElementModel::computeSMatrix(
       (*Dinv)(2,0) = 0.0;
       (*Dinv)(2,1) = 0.0;
       (*Dinv)(2,2) = 1.0/(*D)(2,2);
+    }
 
 //      std::shared_ptr<siconos::algebra::SimpleMatrix> Se = std::make_shared<siconos::algebra::SimpleMatrix>(dimStress, dimStress);
       AssembleElementary_S_Matrix(S, *Dinv, *fe, elem_cnt);
       elem_cnt++;
-  }
-  DEBUG_END("siconos::mechanics::fem::native::FiniteElementModel::computeMassMatrix(std::shared_ptr<SiconosMatrix M>, double massDensity )\n");
-}
-
-void siconos::mechanics::fem::FiniteElementModel::computeBeam_S_Matrix(
-    std::shared_ptr<siconos::algebra::SiconosMatrix> S,
-    std::map<unsigned int, 	std::shared_ptr<Material> > & materials)
-{
-  DEBUG_BEGIN("siconos::mechanics::fem::native::FiniteElementModel::computeMassMatrix(std::shared_ptr<SiconosMatrix> M, double massDensity )\n");
-  int elem_cnt=0;
-  int dimStress = _mesh->dim()*(_mesh->dim()+1)/2;
-  std::shared_ptr<siconos::algebra::SimpleMatrix> D, Dinv;
-  D = std::make_shared<siconos::algebra::SimpleMatrix>(1+2*1,1+2*1);
-
-  //  Dinv = std::make_shared<siconos::algebra::SimpleMatrix>(dimStress,dimStress);
-  double E, I, A, length;
-  /* loop over the elements */
-  for(std::shared_ptr<FElement> fe : elements())
-  {
-    Material &mat = *(materials[fe->mElement()->tags(0)]);
-    E = mat.elasticYoungModulus();
-    I = mat.momentOfInertia();
-    A = mat.crossSectionArea();
-    length  = fe->length();
-
-    (*D)(0,0) = E*A*length;
-    (*D)(1,1) = E*I*length/2;
-    (*D)(2,2) = E*I*length/2;
-    Dinv = std::make_shared<siconos::algebra::SimpleMatrix>(*D);
-    (*Dinv)(0,0) = 1/(*D)(0,0);
-    (*Dinv)(0,1) = 1/(*D)(1,1);
-    (*Dinv)(0,2) = 1/(*D)(2,2);
-
-    //      std::shared_ptr<siconos::algebra::SimpleMatrix> Se = std::make_shared<siconos::algebra::SimpleMatrix>(dimStress, dimStress);
-    AssembleElementary_S_Matrix(S, *Dinv, *fe, elem_cnt);
-    elem_cnt++;
   }
   DEBUG_END("siconos::mechanics::fem::native::FiniteElementModel::computeMassMatrix(std::shared_ptr<SiconosMatrix M>, double massDensity )\n");
 }
@@ -1262,8 +1253,10 @@ void siconos::mechanics::fem::FiniteElementModel::applyDirichletBoundaryConditio
   for (auto &e : _mesh->elements()) {
     if (e->tags(0) == physical_entity_tag) {
       for (auto &v : e->vertices()) {
+
         auto n = _vertexToNode[v];
         auto n_dof_index = n->dofIndex();
+
         for (const auto &i : *node_dof_index) {
           boundaryConditions->appendIndex((*n_dof_index)[i]);
         }
