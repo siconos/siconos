@@ -440,3 +440,63 @@ void siconos::mechanics::fem::writeTensorforPython(
   fprintf(foutput, "\n");
   fclose(foutput);
 }
+
+void  siconos::mechanics::fem::writeBeamPositionforSOFA(std::shared_ptr<Mesh>  mesh,
+                                                               std::shared_ptr<FiniteElementModel> femodel,
+                                                               std::shared_ptr<siconos::algebra::SiconosVector> x, std::string filename, double t)
+{
+  FILE * foutput = fopen(filename.c_str(), "a");
+  fprintf(foutput, "T= %f\n", t);
+  auto vertices =  mesh->vertices();
+  fprintf(foutput, "X=");
+  for(auto v : mesh->vertices())
+  {
+    std::shared_ptr<FENode> n = femodel->vertexToNode(v);
+    double value = 0.0, valueqx, valueqy, valueqz;
+    if(n)
+    {
+      unsigned int idx, idy, idtheta, idqx, idqy, idqz;
+      idx = (*n->dofIndex())[0];
+      idy = (*n->dofIndex())[1];
+
+      value =(*x)(idx);
+      fprintf(foutput, " %e", value+v->x()) ;
+      idy= (*n->dofIndex())[1];
+      value =(*x)(idy);
+      fprintf(foutput, " %e", value+v->y()) ;
+      // 2D case
+      fprintf(foutput, " %e", 0.0) ;
+
+      idtheta = (*n->dofIndex())[2];
+      // idqx= (*n->dofIndex())[3];
+      valueqx =(*x)(idtheta);
+      // idqy= (*n->dofIndex())[4];
+      // valueqy =(*x)(idqy);
+      // idqz= (*n->dofIndex())[5];
+      // valueqz =(*x)(idqz);
+
+      double quat[4];
+
+      double c1 = cos( valueqx+v->z() / 2 );
+      double c2 = cos( 0 );
+      double c3 = cos( 0 );
+
+      double s1 = sin( valueqx+v->z() / 2 );
+      double s2 = sin( 0 );
+      double s3 = sin( 0 );
+
+      quat[0] = s1 * c2 * c3 + c1 * s2 * s3;
+      quat[1] = c1 * s2 * c3 - s1 * c2 * s3;
+      quat[2] = c1 * c2 * s3 + s1 * s2 * c3;
+      quat[3] = c1 * c2 * c3 - s1 * s2 * s3;
+
+      fprintf(foutput, " %e", quat[0]) ;
+      fprintf(foutput, " %e", quat[1]) ;
+      fprintf(foutput, " %e", quat[2]) ;
+      fprintf(foutput, " %e", quat[3]) ;
+
+    }
+  }
+  fprintf(foutput, "\n");
+  fclose(foutput);
+}

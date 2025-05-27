@@ -57,6 +57,10 @@ void writeTensorforPython(std::shared_ptr<FiniteElementModel> femodel,
                           std::string filename,
                           std::string tensorName);
 
+void writeBeamPositionforSOFA(std::shared_ptr<Mesh>  mesh,
+                         std::shared_ptr<FiniteElementModel> femodel,
+                              std::shared_ptr<siconos::algebra::SiconosVector> x, std::string filename, double t);
+
 
 }  // namespace siconos::mechanics::fem
 #endif
