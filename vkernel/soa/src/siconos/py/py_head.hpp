@@ -115,7 +115,8 @@ struct maker
               storage::diagonal<
                   storage::pattern::attr_t<config::disk, "mass_matrix">>,
               storage::assembled_diagonal<storage::pattern::attr_t<
-                  config::osi, "mass_matrix_assembled">>,
+                  typename config::osi::assembled_osi_t,
+                  "mass_matrix_assembled">>,
               storage::bind<config::disk, "disk">,
               storage::bind<config::mesh, "mesh">,
               storage::bind<config::nslaw, "nslaw">,

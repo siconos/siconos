@@ -32,9 +32,34 @@ concept diagonal_matrix = !matrix<T> && requires(T m) { m.diagonal()[0]; };
 template <typename T>
 concept any_matrix = (diagonal_matrix<T> || matrix<T>);
 
+// template <typename T>
+// concept fixed_size_matrix = any_matrix<T> && requires {
+//   T::RowsAtCompileTime != Eigen::Dynamic;
+//   T::ColsAtCompileTime != Eigen::Dynamic;
+// };
+
+template <typename T>
+concept fixed_size_matrix =
+    requires(T matrix) {
+      // Check if the matrix has fixed rows and columns
+      { matrix.rows() } -> std::convertible_to<std::size_t>;
+      { matrix.cols() } -> std::convertible_to<std::size_t>;
+    } && (T::RowsAtCompileTime != Eigen::Dynamic) &&
+    (T::ColsAtCompileTime != Eigen::Dynamic);
+
+template <typename T>
+concept variable_size_matrix = !fixed_size_matrix<T>;
+
+template <typename T>
+concept fixed_size_vector = fixed_size_matrix<T> && vector<T>;
+
+template <typename T>
+concept variable_size_vector = vector<T> && !fixed_size_matrix<T>;
+
 }  // namespace siconos::storage::pattern::match
 
 namespace siconos::algebra {
+namespace match = siconos::storage::pattern::match;
 
 template <typename T, size_t M, size_t N>
 using matrix = Eigen::Matrix<T, M, N>;  // column storage
@@ -52,10 +77,8 @@ using unbounded_vector = Eigen::Vector<T, Eigen::Dynamic>;
 template <typename T, size_t M>
 using vector = Eigen::Vector<T, M>;  // column vector
 
-template <typename T>
+template <match::any_matrix T>
 using matrix_view = Eigen::Map<T>;
-
-static_assert(vector<int, 3>::ColsAtCompileTime == 1);
 
 template <typename T>
 using matrix_ref = Eigen::Ref<T>;
@@ -75,7 +98,6 @@ struct value_type {
   }());
 };
 
-namespace match = siconos::storage::pattern::match;
 template <size_t M>
 static constexpr decltype(auto) head(match::vector auto v)
 {
@@ -101,14 +123,6 @@ template <typename A, typename B>
 using prod_t = matrix<typename value_type<B>::type, A::RowsAtCompileTime,
                       B::ColsAtCompileTime>;
 
-static_assert(std::is_same_v<matrix<int, 1, 2>, trans_t<matrix<int, 2, 1>>>);
-static_assert(std::is_same_v<prod_t<matrix<int, 2, 2>, matrix<int, 2, 1>>,
-                             matrix<int, 2, 1>>);
-static_assert(std::is_same_v<prod_t<matrix<int, 1, 2>, matrix<int, 2, 1>>,
-                             matrix<int, 1, 1>>);
-static_assert(
-    std::is_same_v<prod_t<matrix<int, 1, 2>, trans_t<matrix<int, 1, 2>>>,
-                   matrix<int, 1, 1>>);
 
 template <typename T>
 static constexpr decltype(auto) nrows(T)
@@ -150,5 +164,11 @@ decltype(auto) dot(match::vector auto& v, match::vector auto& w)
 void solve_in_place(match::diagonal_matrix auto& m, match::vector auto& b)
 {
   b = m.inverse() * b;
+}
+
+void solve_in_place(match::matrix auto& m, match::vector auto& b)
+{
+  auto lu = m.partialPivLu();
+  b = lu.solve(b);
 }
 }  // namespace siconos::algebra

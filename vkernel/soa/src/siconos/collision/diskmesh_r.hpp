@@ -37,7 +37,7 @@ struct diskmesh_r : item<>, model::relation2, model::any_lagrangian_relation {
     }
 
     template <typename I, match::handle<model::lagrangian_ds> DS1,
-              match::handle<model::lagrangian_ds> DS2, typename M1,
+              match::handle<model::rt_lagrangian_ds> DS2, typename M1,
               typename M2>
     void compute_jachq(I step, DS1& ds1, DS2& ds2, M1& h_matrix1,
                        M2& h_matrix2)
@@ -55,11 +55,11 @@ struct diskmesh_r : item<>, model::relation2, model::any_lagrangian_relation {
       const scalar& y = q1(1);
 
       /* segment end points */
-      const scalar& x1 = q2(self()->contact_index);
-      const scalar& y1 = q2(self()->contact_index + 1);
+      const scalar& x1 = q2(self()->contact_index());
+      const scalar& y1 = q2(self()->contact_index() + 1);
 
-      const scalar& x2 = q2(self()->contact_index + 2);
-      const scalar& y2 = q2(self()->contact_index + 3);
+      const scalar& x2 = q2(self()->contact_index() + 2);
+      const scalar& y2 = q2(self()->contact_index() + 3);
 
       auto& g1 = h_matrix1;
       auto& g2 = h_matrix2;

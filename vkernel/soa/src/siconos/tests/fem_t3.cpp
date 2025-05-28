@@ -5,7 +5,7 @@
 
 namespace siconos::config {
 using fem = model::finite_element_linear_tids;
-using fem_ds = model::lagrangian_ds;
+using fem_ds = model::rt_lagrangian_ds;
 using material = model::material;
 using ball = model::lagrangian_ds;
 using lcp = simul::nonsmooth_problem<LinearComplementarityProblem>;
@@ -15,7 +15,7 @@ using relation = model::lagrangian_r<nslaw::size>;
 using interaction = simul::interaction<nslaw, relation>;
 using fem_interaction = simul::rt_interaction<nslaw, relation>;
 using topo =
-    simul::topology<ball, interaction, fem, fem_interaction>;
+    simul::topology<ball, interaction, fem_ds, fem_interaction>;
 using osi = simul::one_step_integrator<topo>::moreau_jean;
 using td = simul::time_discretization<>;
 using simulation = simul::time_stepping<td, osi, osnspb>;
@@ -29,7 +29,7 @@ struct make
               storage::time_invariant<storage::attr_t<ball, "fext">>,
               storage::diagonal<storage::attr_t<ball, "mass_matrix">>,
               storage::assembled_diagonal<
-                  storage::attr_t<osi, "mass_matrix_assembled">>>> {};
+                storage::attr_t<typename osi::assembled_osi_t, "mass_matrix_assembled">>>> {};
 
 }  // namespace siconos::config
 

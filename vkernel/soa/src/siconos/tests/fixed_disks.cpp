@@ -70,8 +70,9 @@ int main(int argc, char* argv[])
               storage::pattern::attr_t<config::disk, "fext">>,
           storage::diagonal<
               storage::pattern::attr_t<config::disk, "mass_matrix">>,
-          storage::assembled_diagonal<storage::pattern::attr_t<
-              config::osi, "mass_matrix_assembled">>>>();
+          storage::assembled_diagonal<
+              storage::pattern::attr_t<typename config::osi::assembled_osi_t,
+                                       "mass_matrix_assembled">>>>();
 
   // unsigned int nDof = 3;         // degrees of freedom for the disk
   double t0 = 0;               // initial computation time

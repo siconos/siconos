@@ -3,10 +3,10 @@
 #include <stdexcept>
 
 #include "siconos/algebra/numerics.hpp"
-#include "siconos/model/lagrangian_r.hpp"
 #include "siconos/collision/collision.hpp"
 #include "siconos/collision/diskfdisk_r.hpp"
 #include "siconos/collision/diskfsegment_r.hpp"
+#include "siconos/model/lagrangian_r.hpp"
 #include "siconos/storage/pattern/base.hpp"
 #include "siconos/storage/pattern/pattern.hpp"
 #include "siconos/storage/some/some.hpp"
@@ -20,13 +20,15 @@ using namespace storage::pattern;
 template <typename Osi, typename... ContactShapes>
 struct io : item<> {
   using osi = Osi;
-  using system = typename osi::system;
-  using interaction = typename osi::interaction;
+  /* /!\ only system sizes defined at compile time and 2D for the moment */
+  using system = nth_t<0, typename osi::systems_t>;
+  using interaction = nth_t<0, typename osi::interactions_t>;
   using relations_t = typename interaction::relations;
   using contact_shapes = gather<ContactShapes...>;
 
   using attributes =
-      gather<attribute<"pos_info", some::unbounded_collection<some::vector<
+      gather<attribute<"osi", some::item_ref<osi>>,
+             attribute<"pos_info", some::unbounded_collection<some::vector<
                                        some::scalar, some::indice_value<4>>>>,
              attribute<"vel_info", some::unbounded_collection<some::vector<
                                        some::scalar, some::indice_value<4>>>>,
@@ -37,12 +39,14 @@ struct io : item<> {
 
   using properties =
       // an attached global ident for contact shapes
-      gather<
-          storage::attached<ContactShapes, symbol<"ident">, some::integer>...>;
+      gather<storage::attached<ContactShapes, symbol<"ident">,
+                               some::integer>...>;
 
   template <typename Handle>
   struct interface : default_interface<Handle> {
     using default_interface<Handle>::self;
+
+    decltype(auto) osi() { return storage::attr<"osi">(*self()); }
 
     decltype(auto) positions(auto step)
     {
@@ -97,8 +101,7 @@ struct io : item<> {
       using scalar = typename env_t::scalar;
 
       /* /!\ first osi */
-      auto& p0_v =
-          storage::attr_values<osi, "p0_vector_assembled">(data, step)[0];
+      auto& p0_v = self()->make_handle(osi()).p0_vector_assembled();
 
       auto& ys = storage::attr_values<interaction, "y">(data, step);
       auto& ydots = storage::attr_values<interaction, "ydot">(data, step);

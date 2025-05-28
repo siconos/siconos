@@ -2,6 +2,7 @@
 
 #include "siconos/storage/get.hpp"
 #include "siconos/storage/info.hpp"
+#include "siconos/storage/handle.hpp"
 
 namespace siconos::storage {
 
@@ -27,6 +28,8 @@ struct default_interface {
   {
     return ground::get<pattern::param<S>>(self()->params()).value;
   }
+
+  auto make_handle(auto index) { return storage::handle(self()->data(), index); }
 };
 
 }  // namespace siconos::storage

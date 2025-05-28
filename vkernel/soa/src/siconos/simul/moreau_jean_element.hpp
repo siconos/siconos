@@ -375,7 +375,12 @@ struct moreau_jean_element : item<> {
       for (auto [v_next, involved, index] :
            view::zip(vs_next, involveds, indices)) {
         if (involved) {
-          v_next += get_vector(velo, index);
+          if constexpr (match::fixed_size_vector<velocity>) {
+            v_next += get_vector(velo, index);
+          }
+          else {
+            v_next += get_vector(velo, index, v_next.size());
+          }
         }
       }
     }

@@ -38,11 +38,11 @@ struct one_step_integrator {
 
     using items = gather<topology, ct_osi_t, rt_osi_t, moreau_jean_assembled>;
 
-    using attributes =
-        gather<attribute<"elements", some::tuple<some::item_ref<ct_osi_t>,
-                                                 some::item_ref<rt_osi_t>>>,
-               attribute<"rt_osi", some::item_ref<rt_osi_t>>,
-               attribute<"assembled_osi", some::item_ref<assembled_osi_t>>>;
+    using attributes = gather<
+        attribute<"raw_elements", some::tuple<some::item_ref<ct_osi_t>,
+                                              some::item_ref<rt_osi_t>>>,
+        attribute<"rt_osi", some::item_ref<rt_osi_t>>,
+        attribute<"assembled_osi", some::item_ref<assembled_osi_t>>>;
 
     template <typename Handle>
     struct interface : default_interface<Handle> {
@@ -57,7 +57,7 @@ struct one_step_integrator {
       {
         assembled_osi() = storage::add<assembled_osi_t>(self()->data());
 
-        ground::for_each(elements(), [&]<typename Elem>(Elem& elem) {
+        ground::for_each(elements(), [&]<typename Elem>(Elem elem) {
           elem = storage::add<typename Elem::type>(self()->data());
           elem.assembled_osi() = self()->assembled_osi();
         });
@@ -78,26 +78,33 @@ struct one_step_integrator {
       {
         ground::for_each(elements(),
                          [&](auto elem) { elem.initialize(step); });
-
       }
 
       decltype(auto) theta() { return assembled_osi().theta(); }
+
       decltype(auto) gamma() { return assembled_osi().gamma(); }
+
       decltype(auto) constraint_activation_threshold()
       {
         return assembled_osi().constraint_activation_threshold();
       }
 
-      auto elements()
+      decltype(auto) elements()
       {
         return ground::transform(
             ground::filter(
-                storage::attr<"elements">(*self()),
+                storage::attr<"raw_elements">(*self()),
                 [](const auto& h) constexpr {
                   using t = typename std::decay_t<decltype(h)>::type;
                   return ground::bool_c<!std::derived_from<t, empty_item>>;
                 }),
             [&](auto elem) { return storage::handle(self()->data(), elem); });
+      }
+
+      template <size_t N, typename Func>
+      decltype(auto) visit_element(Func&& func)
+      {
+        return func(std::get<N>(elements()));
       }
 
       decltype(auto) mass_matrix_assembled()

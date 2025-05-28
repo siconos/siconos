@@ -99,24 +99,9 @@ struct moreau_jean_assembled : item<> {
 
     void compute_w_matrix(auto step)
     {
-      using env_t = decltype(self()->env());
-
-      auto tmp_matrix = typename traits::config<env_t>::template convert<
-          some::assembled_matrix<
-              some::matrix<some::scalar, size_1_t, size_1_t>>>::type{};
-
-      // resize(tmp_matrix, size1(h_matrix_assembled()),
-      //        size0(h_matrix_assembled()));
-      // // M^-1 H^t
-      // solvet(mass_matrix_assembled(), h_matrix_assembled(), tmp_matrix);
-      // resize(w_matrix_assembled(), size0(h_matrix_assembled()),
-      //        size1(tmp_matrix));
-
-      // prod(h_matrix_assembled(), tmp_matrix, w_matrix_assembled());
-
-      // W <- H M^-1 H^t
-      compute_kkt_matrix(h_matrix_assembled(), mass_matrix_assembled(),
-                         w_matrix_assembled());
+      algebra::compute_kkt_matrix(h_matrix_assembled(),
+                                  mass_matrix_assembled(),
+                                  w_matrix_assembled());
     }
 
     void compute_input()

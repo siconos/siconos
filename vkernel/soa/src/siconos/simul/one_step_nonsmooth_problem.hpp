@@ -52,10 +52,7 @@ struct solver_options : storage::data_holder<SolverOptions> {
 
     decltype(auto) solver_id() { return self()->instance()->solverId; }
 
-    void set_solver_id(auto value)
-    {
-      self()->instance()->solverId = value;
-    }
+    void set_solver_id(auto value) { self()->instance()->solverId = value; }
 
     auto methods()
     {
@@ -184,7 +181,8 @@ struct one_step_nonsmooth_problem : item<> {
       else if constexpr (std::derived_from<Formulation,
                                            FrictionContactProblem>) {
         self()->problem().instance()->dimension = 2;
-        self()->problem().instance()->numberOfContacts = size0(w_mat);
+        self()->problem().instance()->numberOfContacts =
+            size0(w_mat) / self()->problem().instance()->dimension;
         self()->problem().instance()->M = w_mat._m;
         self()->problem().instance()->q = q_vec._v->matrix0;
         self()->problem().instance()->mu =
@@ -193,7 +191,7 @@ struct one_step_nonsmooth_problem : item<> {
         // auto w_mat_dense = NM_create(NM_DENSE, size0(w_mat), size1(w_mat));
         // NM_to_dense(w_mat._m, w_mat_dense);
 
-        for (unsigned int i = 0; i < size0(w_mat); ++i)
+        for (auto i = 0; i < size0(w_mat); ++i)
           self()->problem().instance()->mu[i] = storage::attr<"mu">(*self());
         fc2d_driver(&*self()->problem().instance(), z_vec._v->matrix0,
                     w_vec._v->matrix0, &*options().instance());

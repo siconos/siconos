@@ -56,8 +56,9 @@ struct topology : item<> {
       storage::attached<finteraction, symbol<"ds2">, some::item_ref<fsystem>>,
       storage::attached<finteraction, symbol<"ydot_backup">,
                         some::vector<some::scalar, nslaw_size>>,
-    storage::attached<finteraction, symbol<"activation">, some::boolean>,
+      storage::attached<finteraction, symbol<"activation">, some::boolean>,
 
+      storage::attached<dinteraction, symbol<"nds">, some::indice>,
       storage::attached<dinteraction, symbol<"ds1">, some::item_ref<fsystem>>,
       storage::attached<dinteraction, symbol<"ds2">, some::item_ref<dsystem>>,
       storage::attached<dinteraction, symbol<"ydot_backup">,

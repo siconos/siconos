@@ -142,7 +142,7 @@ struct time_stepping : item<> {
       //      resize(osi.ydot_vector_assembled(), ninter);
 
       self()->one_step_nonsmooth_problem().template solve<Formulation>(
-          osi.w_matrix_assembled(),                 // M
+          osi.w_matrix_assembled(),       // M
           osi.q_nsp_vector_assembled(),   // q
           osi.lambda_vector_assembled(),  // z
           osi.ydot_vector_assembled());   // w

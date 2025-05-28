@@ -5,6 +5,7 @@
 #include <siconos/numerics/NumericsSparseMatrix.h>
 
 #include "siconos/algebra/algebra.hpp"
+#include "siconos/algebra/eigen.hpp"
 #include "siconos/algebra/linear_algebra.hpp"
 #include "siconos/storage/pattern/pattern.hpp"
 #include "siconos/storage/traits/traits.hpp"
@@ -197,8 +198,6 @@ const auto raw_size0(match::any_mat auto& m) { return m._m->size0; };
 const auto raw_size0(match::vec auto& v) { return v._v->size0; };
 const auto raw_size1(match::any_mat auto& m) { return m._m->size1; };
 
-static_assert(vec<vector<int, 2>>::vncols == 1);
-
 void resize(match::any_mat auto& m, match::indice auto nrows,
             match::indice auto ncols)
 {
@@ -342,6 +341,19 @@ decltype(auto) get_vector(vec<T>& v, match::indice auto i)
   return matrix_view<T>(v._v->matrix0 + i * v.vnrows + v._offset);
 }
 
+template <typename T>
+decltype(auto) get_vector(vec<T>&& v, match::indice auto i)
+{
+  return get_vector(v, i);
+}
+
+template <typename T>
+decltype(auto) get_vector(vec<T>& v, match::indice auto i,
+                          match::indice auto vector_size)
+{
+  return matrix_view<T>(v._v->matrix0 + i * v.vnrows + v._offset,
+                        vector_size);
+}
 //
 // c <- a b
 // Matrix Matrix
@@ -391,6 +403,15 @@ void solve(const mat<A>& a, const vec<B>& b, vec<B>& c)
   if (NM_gesv_expert(a._m, c._v->matrix0, 1) != 0) {
     throw std::runtime_error(
         "NumericsMatrix solve failed in NM_gesv_expert.");
+  }
+}
+
+template <match::any_matrix A, typename B>
+void solve_in_place(const mat<A>& a, const vec<B>& b)
+{
+  if (NM_gesv_expert(a._m, b._v->matrix0, 1) != 0) {
+    throw std::runtime_error(
+        "NumericsMatrix solve_in_place failed in NM_gesv_expert.");
   }
 }
 

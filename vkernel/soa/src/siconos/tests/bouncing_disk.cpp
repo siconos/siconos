@@ -44,12 +44,12 @@ int main(int argc, char* argv[])
 
   // unsigned int nDof = 3;         // degrees of freedom for the disk
   double t0 = 0;               // initial computation time
-  double tmax = 20;            // final computation time
+  double tmax = 10;            // final computation time
   double h = 0.005;            // time step
   double position_init = 1.0;  // initial position for lowest bead.
   double velocity_init = 0.0;  // initial velocity for lowest bead.
   double theta = 0.5;          // theta for MoreauJeanOSI integrator
-  double radius = 0.5;         // Disk radius
+  double radius = 0.1;         // Disk radius
   double m = 1.;               // Disk mass
   double g = 9.81;             // Gravity
 
@@ -65,16 +65,10 @@ int main(int argc, char* argv[])
   d1.velocity() = {0, velocity_init, 0};
   d1.mass_matrix().diagonal() << m, m, 2. / 5. * m * radius * radius;
 
-  // d2.q() = {2 * position_init, 0.1, 0};
-  // d2.velocity() = {velocity_init, 0, 0};
-  // d2.mass_matrix().diagonal() << m, m, 2. / 5. * m * radius * radius;
-
   storage::handle(data, prop<"shape">(d1)).radius() = radius;
-  //  storage::handle(data, prop<"shape">(d2)).radius() = 2;
 
   // -- Set external forces (weight) --
   d1.fext() = {0., -m * g, 0.};
-  //  d2.fext() = {-m * g, 0., 0.};
 
   // ------------------
   // -- The relation --
@@ -155,8 +149,11 @@ int main(int argc, char* argv[])
 
     double p0, lambda;
     if (ninvds > 0) {
-      p0 = get_vector(simulation.one_step_integrator().p0_vector_assembled(),
-                      0)(1);
+      p0 = get_vector(
+          simulation.one_step_integrator().visit_element<0>(
+              [](auto elem) { return elem.p0_vector_assembled(); }),
+          0)(1);
+
       lambda = get_vector(
           simulation.one_step_integrator().lambda_vector_assembled(), 0)(0);
     }
