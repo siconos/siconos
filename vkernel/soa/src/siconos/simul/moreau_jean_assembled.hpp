@@ -1,5 +1,8 @@
 #pragma once
 
+#include "siconos/simul/simul_head.hpp"
+#include "siconos/algebra/algebra.hpp"
+
 namespace siconos::simul {
 
 struct moreau_jean_assembled : item<> {

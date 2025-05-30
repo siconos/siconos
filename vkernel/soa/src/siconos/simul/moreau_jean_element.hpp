@@ -2,6 +2,7 @@
 
 #include "siconos/algebra/numerics.hpp"
 #include "siconos/simul/topology.hpp"
+#include "siconos/utils/variant.hpp"
 
 namespace siconos::simul {
 template <typename System, typename Inter, typename OsiAssembled>
@@ -27,7 +28,6 @@ struct moreau_jean_element : item<> {
   using fext = attr_t<system, "fext">;
 
   using attributes = gather<
-      attribute<"theta", some::scalar>,
       attribute<"offsets", some::vector<some::indice, some::indice_value<3>>>,
       attribute<"assembled_osi", some::item_ref<osi_assembled_t>>,
       attribute<"number_of_involved_ds", some::indice>,

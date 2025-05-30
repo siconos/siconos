@@ -1,12 +1,13 @@
 #pragma once
 
-#include "moreau_jean_assembled.hpp"
+#include "siconos/simul/simul_head.hpp"
+
+#include "siconos/simul/moreau_jean_assembled.hpp"
 #include "siconos/algebra/numerics.hpp"
 #include "siconos/model/lagrangian_r.hpp"
 #include "siconos/simul/moreau_jean_assembled.hpp"
 #include "siconos/simul/moreau_jean_element.hpp"
 #include "siconos/storage/ground/ground.hpp"
-#include "siconos/storage/storage.hpp"
 #include "siconos/utils/print.hpp"
 #include "siconos/utils/range.hpp"
 #include "siconos/utils/variant.hpp"

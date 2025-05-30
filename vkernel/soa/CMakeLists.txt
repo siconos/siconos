@@ -118,3 +118,4 @@ else()
   add_subdirectory(extern/CompactNSearch)
 endif()
 
+include(vkernel_tests.cmake)

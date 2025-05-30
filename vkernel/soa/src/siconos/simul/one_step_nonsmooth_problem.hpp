@@ -8,8 +8,9 @@
 #include <lcp_cst.h>
 #include <siconos/numerics/Friction_cst.h>
 #include <siconos/numerics/NumericsVerbose.h>
-
 #include "SolverOptions.h"
+
+#include "siconos/algebra/algebra.hpp"
 #include "siconos/simul/simul_head.hpp"
 
 namespace siconos {
