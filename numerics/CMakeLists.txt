@@ -37,6 +37,7 @@ set(${COMPONENT}_DIRS
   src/MCP
   src/GenericMechanical
   src/VI
+  src/Plasticity
 )
 
 # - Extras, optional -
@@ -80,6 +81,7 @@ set(${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES
   src/MCP
   src/GenericMechanical
   src/VI
+  src/Plasticity	
   )
 
 # ---- Final setup for the library ----
@@ -280,7 +282,9 @@ endif()
 if(WITH_${COMPONENT}_PYTHON_WRAPPER)
   add_subdirectory(swig)
 endif()
-
+if(WITH_PYB11_WRAPPER)
+  add_subdirectory(python)
+endif()
 
 # ---- Installation ----
 # Call siconos_component_install_setup(<COMPONENT>)
@@ -291,18 +295,23 @@ endif()
 # - <COMPONENT>_INSTALL_INTERFACE_INCLUDE_DIRECTORIES with all directories
 #    that contain headers files that must be installed.
 # 
-set(${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES
-  src
-  src/tools
-  #   src/tools/internal
-  src/AVI
-  src/LCP
-  src/MCP
-  src/MLCP
-  src/Relay
-  src/FrictionContact
-  # src/FrictionContact/Generated
-  src/GenericMechanical
+# set(${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES
+#   src
+#   src/tools
+#   #   src/tools/internal
+#   src/AVI
+#   src/LCP
+#   src/MCP
+#   src/MLCP
+#   src/Relay
+#   src/FrictionContact
+#   # src/FrictionContact/Generated
+#   src/GenericMechanical
+#   src/FrictionContact
+#   )
+
+  set(${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES
+  ${${COMPONENT}_DIRS} # All .hpp are installed
   )
 
 # List header files (in dir above) that must not be installed 

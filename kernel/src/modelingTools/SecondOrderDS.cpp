@@ -17,29 +17,19 @@
  */
 #include "SecondOrderDS.hpp"
 
-#include "BoundaryCondition.hpp"
-#include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
-// #define DEBUG_NOCOLOR
-// #define DEBUG_STDOUT
-// #define DEBUG_MESSAGES
 #include <iostream>
 
-#include "siconos_debug.h"
+#include "BoundaryCondition.hpp"
+#include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 
 void siconos::modeling::SecondOrderDS::setBoundaryConditions(
     std::shared_ptr<siconos::modeling::BoundaryCondition> newbd) {
-  if (_boundaryConditions) {
+  if (boundaryConditions_) {
     std::cout << "Warning : SecondOrderDS::setBoundaryConditions. old boundary conditions "
                  "were pre-existing. \n";
   }
-  _boundaryConditions = newbd;
-  _reactionToBoundaryConditions =
-      std::make_shared<siconos::algebra::SiconosVector>(_boundaryConditions->size());
+  boundaryConditions_ = newbd;
+  reactionToBoundaryConditions_ =
+      std::make_shared<siconos::algebra::SiconosVector>(boundaryConditions_->size());
 };
-
-void siconos::modeling::SecondOrderDS::setMassPtr(
-    std::shared_ptr<siconos::algebra::SimpleMatrix> newPtr) {
-  _mass = newPtr;
-  _hasConstantMass = true;
-}

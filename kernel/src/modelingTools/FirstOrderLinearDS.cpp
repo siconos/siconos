@@ -18,9 +18,9 @@
 #include "FirstOrderLinearDS.hpp"
 
 #include "SiconosException.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixVectorOp.hpp"  // For prod matrix-vectors
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
 // #define DEBUG_MESSAGES
 // #define DEBUG_STDOUT
 #include <iostream>
@@ -28,245 +28,197 @@
 #include "siconos_debug.h"
 
 // --- Constructors ---
-// From a minimum set of data, A and b connected to a plug-in
-siconos::modeling::FirstOrderLinearDS::FirstOrderLinearDS(
-    std::shared_ptr<siconos::algebra::SiconosVector> newX0, const std::string &APlugin,
-    const std::string &bPlugin)
-    : FirstOrderNonLinearDS(newX0) {
-  _zeroPlugin();
-  setComputeAFunction(siconos::plugins::getPluginName(APlugin),
-                      siconos::plugins::getPluginFunctionName(APlugin));
-  setComputebFunction(siconos::plugins::getPluginName(bPlugin),
-                      siconos::plugins::getPluginFunctionName(bPlugin));
-  // dot x = A(t)x + b(t)
-}
-
-// From a minimum set of data, A from a given matrix
-siconos::modeling::FirstOrderLinearDS::FirstOrderLinearDS(
-    std::shared_ptr<siconos::algebra::SiconosVector> newX0,
-    std::shared_ptr<siconos::algebra::SiconosMatrix> newA)
-    : FirstOrderNonLinearDS(newX0), _hasConstantA(true) {
-  _zeroPlugin();
-  if ((newA->size(0) != _n) || (newA->size(1) != _n))
-    THROW_EXCEPTION(
-        "FirstOrderLinearDS - constructor(number,x0,A): inconsistent dimensions "
-        "with problem size for input matrix A");
-  _A = newA;
-}
 
 siconos::modeling::FirstOrderLinearDS::FirstOrderLinearDS(
-    std::shared_ptr<siconos::algebra::SiconosVector> newX0)
-    : FirstOrderNonLinearDS(newX0) {
-  _zeroPlugin();
-}
-
-// From a minimum set of data, A from a given matrix
-siconos::modeling::FirstOrderLinearDS::FirstOrderLinearDS(
-    std::shared_ptr<siconos::algebra::SiconosVector> newX0,
-    std::shared_ptr<siconos::algebra::SiconosMatrix> newA,
-    std::shared_ptr<siconos::algebra::SiconosVector> newB)
-    : FirstOrderNonLinearDS(newX0), _hasConstantA(true), _hasConstantB(true) {
-  _zeroPlugin();
-
-  if ((newA->size(0) != _n) || (newA->size(1) != _n))
-    THROW_EXCEPTION(
-        "FirstOrderLinearDS - constructor(x0,A,b): inconsistent dimensions with "
-        "problem size for input matrix A");
-
-  if (newB->size() != _n)
-    THROW_EXCEPTION(
-        "FirstOrderLinearDS - constructor(x0,A,b): inconsistent dimensions with "
-        "problem size for input vector b ");
-
-  _A = newA;
-  _b = newB;
+    Eigen::Ref<siconos::algebra::SiconosVector> x0,
+    Eigen::Ref<siconos::algebra::SiconosMatrix> A,
+    Eigen::Ref<siconos::algebra::SiconosVector> b)
+    : FirstOrderNonLinearDS(x0) {
+  setConstantA(A);
+  setConstantbVector(b);
+  isTimeInvariant_ = true;
 }
 
 // Copy constructor
-siconos::modeling::FirstOrderLinearDS::FirstOrderLinearDS(const FirstOrderLinearDS &FOLDS)
-    : FirstOrderNonLinearDS(FOLDS) {
-  _zeroPlugin();
-  if (FOLDS.A()) _A = std::make_shared<siconos::algebra::SimpleMatrix>(*(FOLDS.A()));
-  if (FOLDS.b()) _b = std::make_shared<siconos::algebra::SiconosVector>(*(FOLDS.b()));
-
-  _hasConstantA = FOLDS.hasConstantA();
-  _hasConstantB = FOLDS.hasConstantB();
-
-  if (not _hasConstantA)
-    _pluginA = std::make_shared<siconos::plugins::PluggedObject>(*(FOLDS.getPluginA()));
-  if (not _hasConstantB)
-    _pluginb = std::make_shared<siconos::plugins::PluggedObject>(*(FOLDS.getPluginB()));
-}
-
-void siconos::modeling::FirstOrderLinearDS::initRhs(double time) {
-  DEBUG_PRINT("init Rhs in FirstOrderLinearDS");
-  computeRhs(time);  // If necessary, this will also compute A and b.
-  if (!_jacxRhs)     // if not allocated with a set or anything else
-  {
-    if (_A &&
-        !_M)  // if M is not defined, then A = jacobianRhsx, no memory allocation for that one.
-      _jacxRhs = _A;
-    else if (_A && _M)
-      _jacxRhs = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);
-    // else no allocation, jacobian is equal to 0.
+siconos::modeling::FirstOrderLinearDS::FirstOrderLinearDS(const FirstOrderLinearDS &ds)
+    : FirstOrderNonLinearDS(ds) {
+  if (ds.bVector_view_) {
+    bVector_internal_storage_ =
+        std::make_unique<std::vector<double>>(ds.bVector_view_->size());
+    bVector_view_ = std::make_shared<siconos::algebra::MapVectorType>(
+        bVector_internal_storage_->data(), bVector_internal_storage_->size());
+    *bVector_view_ = ds.bVector();  // Copy content
+    if (ds.computebVector_) {
+      setComputebVectorFunction(ds.computebVector_);
+    } else
+      hasConstantbVector_ = true;
   }
-  computeJacobianRhsx(time);
+
+  if (ds.jacobianfOver_x_view_) {
+    hasJacobianfOver_x_ = true;
+    computejacobianfOver_x_ = nullptr;
+    if (ds.computeA_) {
+      setComputeAFunction(ds.computeA_);
+    } else
+      hasConstantJacobianfOver_x_ = true;
+  }
 }
 
-void siconos::modeling::FirstOrderLinearDS::updatePlugins(double time) {
-  if (_M) computeM(time);
-  if (_A) computeA(time);
-  if (_b) computeb(time);
+void siconos::modeling::FirstOrderLinearDS::setConstantA(
+    Eigen::Ref<siconos::algebra::SiconosMatrix> newValue) {
+  setConstantJacobianfOver_x(newValue);
+  computeA_ = nullptr;
 }
 
 void siconos::modeling::FirstOrderLinearDS::setComputeAFunction(
-    const std::string &pluginPath, const std::string &functionName) {
-  if (!_A) _A = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);
-  _pluginA->setComputeFunction(pluginPath, functionName);
-  _hasConstantA = false;
-}
+    const siconos::modeling::func_prototypes::FunctionS_M &func) {
+  // Ensure that memory is properly allocated for jacobianfOver_x_
+  if (!jacobianfOver_x_internal_storage_) {
+    jacobianfOver_x_internal_storage_ =
+        std::make_unique<std::vector<double>>(x_size_ * x_size_);
+  }
+  jacobianfOver_x_view_ = std::make_shared<siconos::algebra::MapType>(
+      jacobianfOver_x_internal_storage_->data(), x_size_, x_size_);
+  jacobianfOver_x_view_->setZero();
 
-void siconos::modeling::FirstOrderLinearDS::setComputeAFunction(LDSPtrFunction fct) {
-  if (!_A) _A = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);
-  _pluginA->setComputeFunction((void *)fct);
-  _hasConstantA = false;
-}
-
-void siconos::modeling::FirstOrderLinearDS::setComputebFunction(
-    const std::string &pluginPath, const std::string &functionName) {
-  if (!_b) _b = std::make_shared<siconos::algebra::SiconosVector>(_n);
-  _pluginb->setComputeFunction(pluginPath, functionName);
-  _hasConstantB = false;
-}
-
-void siconos::modeling::FirstOrderLinearDS::setComputebFunction(LDSPtrFunction fct) {
-  if (!_b) _b = std::make_shared<siconos::algebra::SiconosVector>(_n);
-  _pluginb->setComputeFunction((void *)fct);
-  _hasConstantB = false;
-}
-
-void siconos::modeling::FirstOrderLinearDS::clearComputebFunction() {
-  _pluginb = std::make_shared<siconos::plugins::PluggedObject>();
+  hasJacobianfOver_x_ = true;
+  hasConstantJacobianfOver_x_ = false;
+  computejacobianfOver_x_ = nullptr;  // just in case ...
+  computeA_ = func;
+  isTimeInvariant_ = false;
 }
 
 void siconos::modeling::FirstOrderLinearDS::computeA(double time) {
-  if (_A && _pluginA->fPtr) {
-    ((computeAfct)_pluginA->fPtr)(time, _n, _n, &(*_A)(0, 0), _z->size(), &(*_z)(0));
+  if (computeA_) {
+    computeA_(time, *jacobianfOver_x_view_);
   }
 }
 
-void siconos::modeling::FirstOrderLinearDS::computeb(double time) {
-  if (_b && _pluginb->fPtr)
-    ((LDSPtrFunction)_pluginb->fPtr)(time, _n, &(*_b)(0), _z->size(), &(*_z)(0));
+void siconos::modeling::FirstOrderLinearDS::setConstantbVector(
+    Eigen::Ref<siconos::algebra::SiconosVector> newValue) {
+  bVector_internal_storage_ = nullptr;
+  assert(newValue.size() == x_size_);
+  bVector_view_ = std::make_shared<siconos::algebra::MapVectorType>(newValue.data(), x_size_);
+  hasbVector_ = true;
+  hasConstantbVector_ = true;
+  computebVector_ = nullptr;
 }
+
+void siconos::modeling::FirstOrderLinearDS::setComputebVectorFunction(
+    const siconos::modeling::func_prototypes::FunctionS_V &func) {
+  // Ensure that memory is properly allocated for bVector
+  if (!bVector_internal_storage_) {
+    bVector_internal_storage_ = std::make_unique<std::vector<double>>(x_size_);
+  }
+  bVector_view_ = std::make_shared<siconos::algebra::MapVectorType>(
+      bVector_internal_storage_->data(), x_size_);
+  hasbVector_ = true;
+  computebVector_ = func;
+  isTimeInvariant_ = false;
+  hasConstantbVector_ = false;
+}
+
+void siconos::modeling::FirstOrderLinearDS::clearbVector() {
+  computebVector_ = nullptr;  // Usefull for MatrixIntegrator and control stuff
+  hasbVector_ = false;
+  bVector_internal_storage_ = nullptr;
+  bVector_view_ = nullptr;
+  hasConstantbVector_ = false;
+}
+
+void siconos::modeling::FirstOrderLinearDS::computeb(double time) {
+  if (computebVector_)
+    // in that case, internal_storage must have been allocated by
+    // setCompute... call
+    computebVector_(time, *bVector_view_);
+}
+
+void siconos::modeling::FirstOrderLinearDS::updatePlugins(double time) {
+  if (isTimeInvariant_) return;
+  if (computeMMatrix_) {
+    computeMMatrix_(time, *MMatrix_view_);
+    hasLU_M_ = false;  // LUM needs to be updated.
+  }
+  if (computebVector_) computebVector_(time, *bVector_view_);
+  if (computeA_) computeA_(time, *jacobianfOver_x_view_);
+}
+
 /*This function is called only by LsodarOSI and eventDriven*/
 void siconos::modeling::FirstOrderLinearDS::computeRhs(double time) {
   // second argument is useless at the time - Used in derived classes
   // compute A=jacobianfx
 
-  *_x[1] = *_r;
+  *state_x_[1] = *rVector_;  // Warning: r update is done in Interactions/Relations
 
-  if (_A) {
-    computeA(time);
-    siconos::algebra::prod(*_A, *_x[0], *_x[1], false);
+  if (jacobianfOver_x_view_) {  // if A
+    if (computeA_) computeA_(time, *jacobianfOver_x_view_);
+    *(state_x_[1]) += *jacobianfOver_x_view_ * *(state_x_[0]);
   }
 
-  // compute and add b if required
-  if (_b) {
-    computeb(time);
-    *_x[1] += *_b;
+  if (bVector_view_) {
+    if (computebVector_) computebVector_(time, *bVector_view_);
+    *(state_x_[1]) += *bVector_view_;
   }
 
-  if (_M) {
-    computeM(time);
-    // allocate invM at the first call of the present function
-    if (!_invM) _invM = std::make_shared<siconos::algebra::SimpleMatrix>(*_M);
-
-    _invM->Solve(*_x[1]);
+  if (MMatrix_view_) {
+    if (computeMMatrix_) {
+      computeMMatrix_(time, *MMatrix_view_);
+      hasLU_M_ = false;  // LUM needs to be updated.
+    }
+    // allocate invM if required
+    if (!hasLU_M_) {
+      LU_M_ =
+          std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(*MMatrix_view_);
+      hasLU_M_ = true;
+    }
+    *(state_x_[1]) = LU_M_->solve(*(state_x_[1]));
   }
 }
 
-void siconos::modeling::FirstOrderLinearDS::computeJacobianRhsx(double time) {
-  if (_A) {
-    computeA(time);
-    if (_M) {
-      computeM(time);
-      *_jacxRhs = *_A;
-      if (!_invM)
-        _invM = std::make_shared<siconos::algebra::SimpleMatrix>(*_M);
-      else if (_pluginM->fPtr)  // if M is plugged, invM must be updated
-        *_invM = *_M;
-      // solve MjacobianRhsx = A
-      _invM->Solve(*_jacxRhs);
+void siconos::modeling::FirstOrderLinearDS::computeJacobianRhsOver_x(double time) {
+  if (isTimeInvariant_ && !isFirstCall_) return;
+  isFirstCall_ = false;
+  if (jacobianfOver_x_view_) {
+    if (computeA_) computeA_(time, *jacobianfOver_x_view_);
+    if (MMatrix_view_) {
+      if (hasConstantJacobianfOver_x_)  // else memory is shared between jacobianRhsOver_x_
+                                        // and jacobianfOver_x_view_
+        *jacobianRhsOver_x_->block(0, 0) = *jacobianfOver_x_view_;
+
+      if (computeMMatrix_) {
+        computeMMatrix_(time, *MMatrix_view_);
+        hasLU_M_ = false;  // LUM needs to be updated.
+      }
+      if (!hasLU_M_) {
+        LU_M_ = std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(
+            *MMatrix_view_);
+        hasLU_M_ = true;
+      }
+      *(jacobianRhsOver_x_->block(0, 0)) = LU_M_->solve(*(jacobianRhsOver_x_->block(0, 0)));
     }
   }
   // else 0
 }
 
 void siconos::modeling::FirstOrderLinearDS::display(bool brief) const {
-  std::cout << "=== Linear system display, " << _number << std::endl;
-  std::cout << "- x " << std::endl;
-  if (_x[0])
-    _x[0]->display();
+  std::cout << "=== Linear system display, " << number_ << std::endl;
+  std::cout << "- dimension : " << x_size_ << std::endl;
+  std::cout << "- state :\n" << *state_x_[0] << "\n";
+  std::cout << "- initial state : \n" << *x0_view_ << "\n";
+  std::cout << "- M matrix: \n";
+  if (MMatrix_view_)
+    std::cout << *MMatrix_view_ << "\n";
   else
-    std::cout << "-> nullptr" << std::endl;
-  std::cout << "- x0 " << std::endl;
-  if (_x0)
-    _x0->display();
+    std::cout << "-> nullptr\n";
+  std::cout << "- A matrix: \n";
+  if (jacobianfOver_x_view_)
+    std::cout << *jacobianfOver_x_view_ << "\n";
   else
-    std::cout << "-> nullptr" << std::endl;
-  std::cout << "M :" << std::endl;
-  if (_M) {
-    _M->display();
-  } else
-    std::cout << "M is identity" << std::endl;
-  std::cout << "A :" << std::endl;
-  if (_A)
-    _A->display();
+    std::cout << "-> nullptr\n";
+  std::cout << "- b vector: \n";
+  if (bVector_view_)
+    std::cout << *bVector_view_ << "\n";
   else
-    std::cout << "-> nullptr" << std::endl;
-  std::cout << "b :" << std::endl;
-  if (_b)
-    _b->display();
-  else
-    std::cout << "-> nullptr" << std::endl;
-  std::cout << "r :" << std::endl;
-  if (_r)
-    _r->display();
-  else
-    std::cout << "-> nullptr" << std::endl;
-  if (_hasConstantA) {
-    std::cout << "A is a time invariant matrix" << std::endl;
-  }
-  if (_hasConstantB) {
-    std::cout << "b is a time invariant vector" << std::endl;
-  }
-  if (_pluginA->fPtr) {
-    std::cout << "Has a plugin for A" << std::endl;
-  }
-  if (_pluginb->fPtr) {
-    std::cout << "Has a plugin for b" << std::endl;
-  }
+    std::cout << "-> nullptr\n";
   std::cout << "=============================" << std::endl;
-}
-
-void siconos::modeling::FirstOrderLinearDS::_zeroPlugin() {
-  _pluginA = std::make_shared<siconos::plugins::PluggedObject>();
-  _pluginb = std::make_shared<siconos::plugins::PluggedObject>();
-}
-
-void siconos::modeling::FirstOrderLinearDS::setA(const siconos::algebra::SiconosMatrix &newA) {
-  if (_A)
-    *_A = newA;
-  else
-    _A = std::make_shared<siconos::algebra::SimpleMatrix>(newA);
-  _hasConstantA = true;
-}
-
-void siconos::modeling::FirstOrderLinearDS::setb(const siconos::algebra::SiconosVector &b) {
-  if (_b)
-    *_b = b;
-  else
-    _b = std::make_shared<siconos::algebra::SiconosVector>(b);
-  _hasConstantB = true;
 }

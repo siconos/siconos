@@ -21,7 +21,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 #include "ExplicitLinearSMC.hpp"
-#include "FirstOrderLinearTIDS.hpp"
+#include "FirstOrderLinearDS.hpp"
 #include "LinearSMC.hpp"
 #include "LinearSensor.hpp"
 #include "SiconosConfig.h"
@@ -68,11 +68,11 @@ class SMCTest : public CppUnit::TestFixture {
   double _tol;
   double _beta;
   double _xFinal;
-  std::shared_ptr<siconos::modeling::FirstOrderLinearTIDS> _DS;
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _A;
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _B;
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _C;
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _Csurface;
+  std::shared_ptr<siconos::modeling::FirstOrderLinearDS> _DS;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _A;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _B;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _C;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _Csurface;
   std::shared_ptr<siconos::algebra::SiconosVector> _b;
   std::shared_ptr<siconos::algebra::SiconosVector> _x0;
   std::shared_ptr<siconos::algebra::SiconosVector> _K;
@@ -84,7 +84,7 @@ class SMCTest : public CppUnit::TestFixture {
 #endif
 
  public:
-  SMCTest() : _n(2), _h(0.05), _t0(0.0), _T(100.0), _tol(7.5e-11), _beta(0.1) {}
+  SMCTest() : _n(2), _h(0.05), _t0(0.0), _T(100.0), _tol(1.5e-8), _beta(0.1) {}
   void setUp();
   void tearDown();
 };

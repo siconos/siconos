@@ -22,70 +22,60 @@
 #include "BlockVector.hpp"
 #include "Interaction.hpp"
 #include "SiconosException.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "Tools.hpp"
 
 // Minimum data (C as pointer) constructor
 siconos::modeling::LagrangianCompliantLinearTIR::LagrangianCompliantLinearTIR(
-    std::shared_ptr<siconos::algebra::SimpleMatrix> C,
-    std::shared_ptr<siconos::algebra::SimpleMatrix> D)
-    : LagrangianR(RelationSubType::CompliantLinearTIR) {
-  _jachq = C;
-  _jachlambda = D;
+    Eigen::Ref<siconos::algebra::SiconosMatrix> newC,
+    Eigen::Ref<siconos::algebra::SiconosMatrix> newD)
+    : LagrangianR{RelationSubType::CompliantLinearTIR} {
+  jacobianhOver_q_view_ =  // C
+      std::make_shared<siconos::algebra::MapType>(newC.data(), newC.rows(), newC.cols());
+
+  DMatrix_view_ =
+      std::make_shared<siconos::algebra::MapType>(newD.data(), newD.rows(), newD.cols());
 }
 
-// Constructor from a complete set of data
 siconos::modeling::LagrangianCompliantLinearTIR::LagrangianCompliantLinearTIR(
-    std::shared_ptr<siconos::algebra::SimpleMatrix> C,
-    std::shared_ptr<siconos::algebra::SimpleMatrix> D,
-    std::shared_ptr<siconos::algebra::SimpleMatrix> F,
-    std::shared_ptr<siconos::algebra::SiconosVector> e)
-    : LagrangianR(RelationSubType::CompliantLinearTIR) {
-  _jachq = C;
-  _jachlambda = D;
-  _F = F;
-  _e = e;
-}
+    Eigen::Ref<siconos::algebra::SiconosMatrix> newC,
+    Eigen::Ref<siconos::algebra::SiconosMatrix> newD,
+    Eigen::Ref<siconos::algebra::SiconosVector> newe)
+    : LagrangianR{RelationSubType::CompliantLinearTIR} {
+  jacobianhOver_q_view_ =  // C
+      std::make_shared<siconos::algebra::MapType>(newC.data(), newC.rows(), newC.cols());
 
-// Minimum data (C, e as pointers) constructor
-siconos::modeling::LagrangianCompliantLinearTIR::LagrangianCompliantLinearTIR(
-    std::shared_ptr<siconos::algebra::SimpleMatrix> C,
-    std::shared_ptr<siconos::algebra::SimpleMatrix> D,
-    std::shared_ptr<siconos::algebra::SiconosVector> e)
-    : LagrangianR(RelationSubType::CompliantLinearTIR) {
-  _jachq = C;
-  _jachlambda = D;
-  _e = e;
+  DMatrix_view_ =
+      std::make_shared<siconos::algebra::MapType>(newD.data(), newD.rows(), newD.cols());
+
+  eVector_view_ = std::make_shared<siconos::algebra::MapVectorType>(newe.data(), newe.size());
 }
 
 void siconos::modeling::LagrangianCompliantLinearTIR::initialize(Interaction& inter) {
   checkSize(inter);
 }
-void siconos::modeling::LagrangianCompliantLinearTIR::checkSize(Interaction& inter) {
-  auto sizeY = inter.dimension();
-  auto& DSlink = inter.linkToDSVariables();
 
-  if (!(_jachq) || _jachq->size(1) != inter.getSizeOfDS() || _jachq->size(0) != sizeY)
+void siconos::modeling::LagrangianCompliantLinearTIR::checkSize(
+    const Interaction& inter) const {
+  auto sizeY = inter.dimension();
+
+  if (!(jacobianhOver_q_view_) || jacobianhOver_q_view_->cols() != inter.getSizeOfDS() ||
+      jacobianhOver_q_view_->rows() != sizeY)
     THROW_EXCEPTION(
         "siconos::modeling::LagrangianCompliantLinearTIR::checkSize inconsistent sizes "
         "between H matrix and the interaction.");
 
-  if ((_jachlambda) && (_jachlambda->size(0) != sizeY || _jachlambda->size(1) != sizeY))
+  if ((DMatrix_view_) && (DMatrix_view_->rows() != sizeY || DMatrix_view_->cols() != sizeY))
     THROW_EXCEPTION(
         "siconos::modeling::LagrangianCompliantLinearTIR::checkSize inconsistent sizes "
         "between D matrix and the interaction.");
 
-  if ((_e) && _e->size() != sizeY)
+  if ((eVector_view_) && eVector_view_->size() != sizeY)
     THROW_EXCEPTION(
         "siconos::modeling::LagrangianCompliantLinearTIR::checkSize inconsistent sizes "
         "between e vector and the dimension of the interaction.");
-
-  auto sizeZ = DSlink[LagrangianR::z]->size();
-  if ((_F) && (_F->size(0) != sizeZ || _F->size(1) != sizeZ))
-    THROW_EXCEPTION(
-        "siconos::modeling::LagrangianCompliantLinearTIR::checkSize inconsistent sizes "
-        "between F matrix and the interaction.");
 }
 
 void siconos::modeling::LagrangianCompliantLinearTIR::computeInput(double time,
@@ -95,7 +85,9 @@ void siconos::modeling::LagrangianCompliantLinearTIR::computeInput(double time,
   auto& lambda = *inter.lambda(level);
   auto& DSlink = inter.linkToDSVariables();
   // computation of p = Ht lambda
-  siconos::algebra::prod(lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
+  siconos::algebra::transposeMatrixVector_prod_toBlock(
+      lambda, *jacobianhOver_q_view_, *DSlink[tools::enum_to_index(WorkDS::p0) + level],
+      false);
 }
 void siconos::modeling::LagrangianCompliantLinearTIR::computeOutput(
     double time, Interaction& inter, unsigned int derivativeNumber) {
@@ -103,38 +95,23 @@ void siconos::modeling::LagrangianCompliantLinearTIR::computeOutput(
   auto& y = *inter.y(derivativeNumber);
   auto& lambda = *inter.lambda(derivativeNumber);
   auto& DSlink = inter.linkToDSVariables();
-
-  siconos::algebra::prod(*_jachq, *DSlink[LagrangianR::q0 + derivativeNumber], y);
-  siconos::algebra::prod(*_jachlambda, lambda, y, false);
-
+  siconos::algebra::matrixBlockVector_prod(
+      *jacobianhOver_q_view_, *DSlink[tools::enum_to_index(WorkDS::q0) + derivativeNumber], y);
+  y += *DMatrix_view_ * lambda;
   if (derivativeNumber == 0) {
-    if (_e) y += *_e;
-    if (_F) siconos::algebra::prod(*_F, *DSlink[LagrangianR::z], y, false);
+    if (eVector_view_) y += *eVector_view_;
   }
 }
 
 void siconos::modeling::LagrangianCompliantLinearTIR::display() const {
   LagrangianR::display();
   std::cout << "===== Lagrangian Linear Relation display ===== " << std::endl;
-  std::cout << " C: " << std::endl;
-  if (_jachq)
-    _jachq->display();
-  else
-    std::cout << " -> nullptr " << std::endl;
+  std::cout << " C: \n" << *jacobianhOver_q_view_ << "\n";
   std::cout << " e: " << std::endl;
-  if (_e)
-    _e->display();
+  if (eVector_view_)
+    std::cout << *eVector_view_ << "\n";
   else
     std::cout << " -> nullptr " << std::endl;
-  std::cout << " D: " << std::endl;
-  if (_jachlambda)
-    _jachlambda->display();
-  else
-    std::cout << " -> nullptr " << std::endl;
-  std::cout << " F: " << std::endl;
-  if (_F)
-    _F->display();
-  else
-    std::cout << " -> nullptr " << std::endl;
+  std::cout << " D: \n" << *DMatrix_view_ << "\n";
   std::cout << "===================================== " << std::endl;
 }

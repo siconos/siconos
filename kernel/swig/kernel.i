@@ -82,23 +82,14 @@ Example of usage:
 
 // defined in SiconosVector.cpp
 %ignore setBlock;
-%ignore add;
-%ignore sub;
-%ignore axpby;
 %ignore axpy;
-%ignore inner_prod;
-%ignore outer_prod;
 %ignore scal;
-%ignore subscal;
-%ignore cross_product;
 
 // defined in SimpleMatrix.cpp
 %ignore private_addprod;
 %ignore private_prod;
 // %ignore prod;
-%ignore axpy_prod;
 %ignore subprod;
-%ignore axpy_prod;
 %ignore gemv;
 %ignore gemm;
 
@@ -114,8 +105,8 @@ Example of usage:
 %ignore swap;
 
 %warnfilter(509) quaternionRotate;
-%warnfilter(509) changeFrameAbsToBody;
-%warnfilter(509) changeFrameBodyToAbs;
+%warnfilter(509) rewriteVectorFromAbsoluteToBodyFrame;
+%warnfilter(509) rewriteVectorFromBodyToAbsoluteFrame;
 %warnfilter(325) Change;
 %warnfilter(325) ChangeLogIter;
 

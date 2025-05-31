@@ -27,9 +27,9 @@
 #include "SiconosVector.hpp"
 
 siconos::mechanics::occ::OccBody::OccBody(
-    std::shared_ptr<siconos::algebra::SiconosVector> position,
-    std::shared_ptr<siconos::algebra::SiconosVector> velocity, double mass,
-    std::shared_ptr<siconos::algebra::SiconosMatrix> inertia)
+    Eigen::Ref<siconos::algebra::SiconosVector> position,
+    Eigen::Ref<siconos::algebra::SiconosVector> velocity, double mass,
+    Eigen::Ref<siconos::algebra::SiconosMatrix> inertia)
     : NewtonEulerDS(position, velocity, mass, inertia),
       _contactShapes(std::make_shared<ContactShape_vector>()),
       _shapes(std::make_shared<TopoDS_Shape_vector>()) {}
@@ -81,7 +81,7 @@ void siconos::mechanics::occ::OccBody::addShape(
 }
 
 void siconos::mechanics::occ::OccBody::updateContactShapes() {
-  boost::math::quaternion<double> q{(*_q)(3), (*_q)(4), (*_q)(5), (*_q)(6)};
+  boost::math::quaternion<double> q{(*state_q_)(3), (*state_q_)(4), (*state_q_)(5), (*state_q_)(6)};
 
   for (auto& cs : *_contactShapes) {
     auto offset = std::get<1>(cs);
@@ -94,9 +94,9 @@ void siconos::mechanics::occ::OccBody::updateContactShapes() {
         q * boost::math::quaternion<double>{offset[3], offset[4], offset[5], offset[6]};
 
     std::array<double, 7> fp;
-    fp[0] = (*_q)(0) + rv.R_component_2();
-    fp[1] = (*_q)(1) + rv.R_component_3();
-    fp[2] = (*_q)(2) + rv.R_component_4();
+    fp[0] = (*state_q_)(0) + rv.R_component_2();
+    fp[1] = (*state_q_)(1) + rv.R_component_3();
+    fp[2] = (*state_q_)(2) + rv.R_component_4();
     fp[3] = r.R_component_1();
     fp[4] = r.R_component_2();
     fp[5] = r.R_component_3();
@@ -110,7 +110,7 @@ void siconos::mechanics::occ::OccBody::updateContactShapes() {
 }
 
 void siconos::mechanics::occ::OccBody::updateShapes() {
-  boost::math::quaternion<double> q{(*_q)(3), (*_q)(4), (*_q)(5), (*_q)(6)};
+  boost::math::quaternion<double> q{(*state_q_)(3), (*state_q_)(4), (*state_q_)(5), (*state_q_)(6)};
 
   for (auto& cs : *_shapes) {
     // Get the offset of the current shape
@@ -126,9 +126,9 @@ void siconos::mechanics::occ::OccBody::updateShapes() {
         q * boost::math::quaternion<double>{offset[3], offset[4], offset[5], offset[6]};
 
     std::array<double, 7> fp;
-    fp[0] = (*_q)(0) + rv.R_component_2();
-    fp[1] = (*_q)(1) + rv.R_component_3();
-    fp[2] = (*_q)(2) + rv.R_component_4();
+    fp[0] = (*state_q_)(0) + rv.R_component_2();
+    fp[1] = (*state_q_)(1) + rv.R_component_3();
+    fp[2] = (*state_q_)(2) + rv.R_component_4();
     fp[3] = r.R_component_1();
     fp[4] = r.R_component_2();
     fp[5] = r.R_component_3();

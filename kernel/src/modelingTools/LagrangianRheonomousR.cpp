@@ -21,90 +21,70 @@
 
 #include "BlockVector.hpp"
 #include "Interaction.hpp"
-#include "PluggedObject.hpp"
-#include "PluggedObject.hpp"          // getPluginFunctionname ...
-#include "PluginTypes.hpp"            // FPtr4 ...
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
-
+#include "Tools.hpp"
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
+#include "SiconosException.hpp"
 #include "siconos_debug.h"
 
-// constructor from a set of data
-siconos::modeling::LagrangianRheonomousR::LagrangianRheonomousR(
-    const std::string& pluginh, const std::string& pluginJacobianhq,
-    const std::string& pluginDoth)
-    : LagrangianR(RelationSubType::RheonomousR) {
-  _zeroPlugin();
-  // h
-  setComputehFunction(siconos::plugins::getPluginName(pluginh),
-                      siconos::plugins::getPluginFunctionName(pluginh));
-
-  _pluginJachq->setComputeFunction(pluginJacobianhq);
-
-  // hDot
-  setComputehDotFunction(siconos::plugins::getPluginName(pluginDoth),
-                         siconos::plugins::getPluginFunctionName(pluginDoth));
-}
-
 void siconos::modeling::LagrangianRheonomousR::initialize(Interaction& inter) {
-  if (!_jachq) {
-    unsigned int sizeY = inter.dimension();
-    unsigned int sizeDS = inter.getSizeOfDS();
-    _jachq = std::make_shared<siconos::algebra::SimpleMatrix>(sizeY, sizeDS);
+  auto sizeY = inter.dimension();
+  auto sizeDS = inter.getSizeOfDS();
+  if (!jacobianhOver_q_internal_storage_) {
+    jacobianhOver_q_internal_storage_ = std::make_unique<std::vector<double>>(sizeY * sizeDS);
+  }
+  jacobianhOver_q_view_ = std::make_shared<siconos::algebra::MapType>(
+      jacobianhOver_q_internal_storage_->data(), sizeY, sizeDS);
+
+  if (computehdot_) {  // True only if setComputehdotFunction has been called
+    // Ensure that memory is properly allocated for hdot_
+    if (!hdot_) {
+      hdot_ = std::make_shared<siconos::algebra::SiconosVector>(sizeY);
+    }
   }
 }
 
-void siconos::modeling::LagrangianRheonomousR::setComputehDotFunction(
-    const std::string& pluginPath, const std::string& functionName) {
-  _pluginhDot->setComputeFunction(pluginPath, functionName);
+void siconos::modeling::LagrangianRheonomousR::setComputehdotFunction(
+    const siconos::modeling::func_prototypes::FunctionBVS_V& hdot_func) {
+  // Warning: we can't allocate hdot here, since we have no clue on the
+  // required size
+  computehdot_ = hdot_func;
 }
 
-void siconos::modeling::LagrangianRheonomousR::_zeroPlugin() {
-  LagrangianR::_zeroPlugin();
-  _pluginhDot = std::make_shared<siconos::plugins::PluggedObject>();
+void siconos::modeling::LagrangianRheonomousR::computehdot(
+    const siconos::algebra::BlockVector& positions, double time) {
+  if (computehdot_)
+    // in that case, internal_storage must have been allocated by
+    // setCompute... call
+    computehdot_(positions, time, *hdot_);
 }
 
-void siconos::modeling::LagrangianRheonomousR::computeh(double time,
-                                                        const siconos::algebra::BlockVector& q,
-                                                        siconos::algebra::BlockVector& z,
-                                                        siconos::algebra::SiconosVector& y) {
-  DEBUG_PRINT(
-      " siconos::modeling::LagrangianRheonomousR::computeh(double time,Interaction& inter, "
-      "std::shared_ptr<siconos::algebra::BlockVector> q, "
-      "std::shared_ptr<siconos::algebra::BlockVector> z)");
-  // arg= time. Unused in this function but required for interface.
-  if (_pluginh->fPtr) {
-    auto qp = q.prepareVectorForPlugin();
-    auto zp = z.prepareVectorForPlugin();
-    ((siconos::plugins::FPtr4)(_pluginh->fPtr))(qp->size(), &(*qp)(0), time, y.size(), &(y)(0),
-                                                zp->size(), &(*zp)(0));
-    z = *zp;
-  }
+void siconos::modeling::LagrangianRheonomousR::setComputehFunction(
+    const siconos::modeling::func_prototypes::FunctionBVS_V& h_func) {
+  computeh_ = h_func;
 }
 
-void siconos::modeling::LagrangianRheonomousR::computehDot(
-    double time, const siconos::algebra::BlockVector& q, siconos::algebra::BlockVector& z) {
-  if (_hDot && _pluginhDot->fPtr) {
-    auto qp = q.prepareVectorForPlugin();
-    auto zp = z.prepareVectorForPlugin();
-    ((siconos::plugins::FPtr4)(_pluginhDot->fPtr))(qp->size(), &(*qp)(0), time, _hDot->size(),
-                                                   &(*_hDot)(0), zp->size(), &(*zp)(0));
-    z = *zp;
-  }
+void siconos::modeling::LagrangianRheonomousR::computeh(
+    const siconos::algebra::BlockVector& positions, double time,
+    Eigen::Ref<siconos::algebra::SiconosVector> y) {
+  DEBUG_PRINT(" siconos::modeling::LagrangianRheonomousR::computeh()")
+  if (computeh_) computeh_(positions, time, y);
 }
 
-void siconos::modeling::LagrangianRheonomousR::computeJachq(
-    double time, const siconos::algebra::BlockVector& q, siconos::algebra::BlockVector& z) {
-  if (_jachq && _pluginJachq->fPtr) {
-    auto qp = q.prepareVectorForPlugin();
-    auto zp = z.prepareVectorForPlugin();
-    ((siconos::plugins::FPtr4)(_pluginJachq->fPtr))(
-        qp->size(), &(*qp)(0), time, _jachq->size(0), &(*_jachq)(0, 0), zp->size(), &(*zp)(0));
-    z = *zp;
-  }
+void siconos::modeling::LagrangianRheonomousR::setComputeJacobianhOver_qFunction(
+    const siconos::modeling::func_prototypes::FunctionBVS_M& func) {
+  // Warning: we can't allocate hdot here, since we have no clue on the
+  // required size
+  computejacobianhOver_q_ = func;
+}
+
+void siconos::modeling::LagrangianRheonomousR::computeJacobianhOver_q(
+    const siconos::algebra::BlockVector& positions, double time) {
+  if (computejacobianhOver_q_)
+    computejacobianhOver_q_(positions, time, *jacobianhOver_q_view_);
 }
 
 void siconos::modeling::LagrangianRheonomousR::computeOutput(double time, Interaction& inter,
@@ -112,51 +92,52 @@ void siconos::modeling::LagrangianRheonomousR::computeOutput(double time, Intera
   auto& DSlink = inter.linkToDSVariables();
   auto& y = *inter.y(derivativeNumber);
   if (derivativeNumber == 0)
-    computeh(time, *DSlink[LagrangianR::q0], *DSlink[LagrangianR::z], y);
+    computeh(*DSlink[tools::enum_to_index(WorkDS::q0)], time, y);
   else {
-    computeJachq(time, *DSlink[LagrangianR::q0], *DSlink[LagrangianR::z]);
+    computeJacobianhOver_q(*DSlink[tools::enum_to_index(WorkDS::q0)], time);
     if (derivativeNumber == 1) {
-      if (!_hDot) {
+      if (!hdot_) {
         auto sizeY = inter.dimension();
-        _hDot = std::make_shared<siconos::algebra::SiconosVector>(sizeY);
+        hdot_ = std::make_shared<siconos::algebra::SiconosVector>(sizeY);
       }
       // Computation of the partial derivative w.r.t time of h(q,t)
-      computehDot(time, *DSlink[LagrangianR::q0], *DSlink[LagrangianR::z]);
-      assert(_jachq);
+      computehdot(*DSlink[tools::enum_to_index(WorkDS::q0)], time);
       // Computation of the partial derivative w.r.t q of h(q,t) : \nabla_q h(q,t) \dot q
-      siconos::algebra::prod(*_jachq, *DSlink[LagrangianR::q1], y);
+      siconos::algebra::matrixBlockVector_prod(*jacobianhOver_q_view_,
+                                               *DSlink[tools::enum_to_index(WorkDS::q1)], y);
       // Sum of the terms
-      y += *_hDot;
+      y += *hdot_;
     } else if (derivativeNumber == 2) {
-      assert(_jachq);
-      siconos::algebra::prod(*_jachq, *DSlink[LagrangianR::q2], y);  // Approx:,  ...
+      siconos::algebra::matrixBlockVector_prod(*jacobianhOver_q_view_,
+                                               *DSlink[tools::enum_to_index(WorkDS::q2)],
+                                               y);  // Approx:,  ...
       // \warning : the computation of y[2] (in event-driven
       // simulation for instance) is approximated by y[2] =
       // Jach[0]q[2]. For the moment, other terms are neglected
       // (especially, partial derivatives with respect to time).
     } else
       THROW_EXCEPTION(
-          "siconos::modeling::LagrangianRheonomousR::computeOutput(double time, Interaction& "
-          "inter, InteractionProperties& interProp, unsigned int derivativeNumber) index >2  "
-          "not yet implemented.");
+          "siconos::modeling::LagrangianRheonomousR::computeOutput index >2 not yet "
+          "implemented.");
   }
 }
 
 void siconos::modeling::LagrangianRheonomousR::computeInput(double time, Interaction& inter,
                                                             unsigned int level) {
   auto& DSlink = inter.linkToDSVariables();
-  computeJachq(time, *DSlink[LagrangianR::q0], *DSlink[LagrangianR::z]);
+  computeJacobianhOver_q(*DSlink[tools::enum_to_index(WorkDS::q0)], time);
   // get lambda of the concerned interaction
   auto& lambda = *inter.lambda(level);
   // data[name] += trans(G) * lambda
-  siconos::algebra::prod(lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
+  siconos::algebra::transposeMatrixVector_prod_toBlock(
+      lambda, *jacobianhOver_q_view_, *DSlink[tools::enum_to_index(WorkDS::p0) + level], false);
 }
 
 void siconos::modeling::LagrangianRheonomousR::computeJach(double time, Interaction& inter) {
   auto& DSlink = inter.linkToDSVariables();
-  computeJachq(time, *DSlink[LagrangianR::q0], *DSlink[LagrangianR::z]);
+  computeJacobianhOver_q(*DSlink[tools::enum_to_index(WorkDS::q0)], time);
   // computeJachqDot(time, inter);
   //    computeDotJachq(time, q, z);
   // computeJachlambda(time, inter);
-  computehDot(time, *DSlink[LagrangianR::q0], *DSlink[LagrangianR::z]);
+  computehdot(*DSlink[tools::enum_to_index(WorkDS::q0)], time);
 }

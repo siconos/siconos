@@ -22,9 +22,7 @@
 #include <nlohmann/json.hpp>
 #include <vector>
 
-namespace siconos::algebra {
-class SiconosVector;
-}
+#include "SiconosVector.hpp"
 
 namespace siconos::fem::cable {
 

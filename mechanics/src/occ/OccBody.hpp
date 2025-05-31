@@ -28,11 +28,6 @@
 #include "NewtonEulerDS.hpp"  // Base class
 #include "OccContactShape.hpp"
 
-namespace siconos::algebra {
-class SiconosVector;
-class SiconosMatrix;
-}  // namespace siconos::algebra
-
 // From OpenCASCADE
 class TopoDS_Shape;
 
@@ -71,9 +66,9 @@ class OccBody : public siconos::modeling::NewtonEulerDS {
       \param mass the mass.
       \param inertia the inertia matrix.
   */
-  OccBody(std::shared_ptr<siconos::algebra::SiconosVector> position,
-          std::shared_ptr<siconos::algebra::SiconosVector> velocity, double mass,
-          std::shared_ptr<siconos::algebra::SiconosMatrix> inertia);
+  OccBody(Eigen::Ref<siconos::algebra::SiconosVector> position,
+          Eigen::Ref<siconos::algebra::SiconosVector> velocity, double mass,
+          Eigen::Ref<siconos::algebra::SiconosMatrix> inertia);
 
   /** Association of a contact shape.
 
@@ -114,6 +109,10 @@ class OccBody : public siconos::modeling::NewtonEulerDS {
    *  \param id the number of the shape.
    */
   const TopoDS_Shape& shape(int id) const;
+
+  virtual void accept(modeling::dynamical_systems::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 };
 }  // namespace siconos::mechanics::occ
 

@@ -21,27 +21,28 @@
 #include "CableTools.h"  // for sgn function
 #include "NewtonImpactFrictionNSL.hpp"
 #include "NonSmoothLaw.hpp"
-#include "Pile.h"
+#include "Pylon.h"
 #include "Rope.h"
 #include "SiconosVector.hpp"
 
-siconos::fem::cable::Support::Support(const Pile &a_pile) : r_pile(a_pile) {
-  m_p = r_pile;
+siconos::fem::cable::Support::Support(const Pylon &a_pile) : pylon_(a_pile) {
+  m_p = pylon_;
 
-  m_pc2 = std::make_shared<siconos::algebra::SiconosVector>(3);
-  m_normal = std::make_shared<siconos::algebra::SiconosVector>(3);
-  m_tangent = std::make_shared<siconos::algebra::SiconosVector>(3);
+  m_pc2 = std::make_shared<siconos::algebra::SiconosVector3>();
+  m_normal = std::make_shared<siconos::algebra::SiconosVector3>();
+  m_tangent = std::make_shared<siconos::algebra::SiconosVector3>();
 }
 
-double siconos::fem::cable::Support::get_radius() const { return r_pile.get_radius(); }
+double siconos::fem::cable::Support::get_radius() const { return pylon_.get_radius(); }
 
 void siconos::fem::cable::Support::prepare(const Rope &a_rope) {
-  double radius = siconos::fem::cable::tools::sgn(a_rope.get_SR().z) * get_radius();
+  double radius = siconos::fem::cable::tools::sgn(a_rope.supportReaction().z) * get_radius();
   m_p.z -= radius;
 }
 
-void siconos::fem::cable::Support::prepare(const Pile &a_start, const Pile &a_end, double T) {
-  // par défaut, ne fait rien
+void siconos::fem::cable::Support::prepare(const Pylon &a_start, const Pylon &a_end,
+                                           double T) {
+  // Does nothing ...
 }
 
 void siconos::fem::cable::Support::compute(const Point &a_p, double a_tol, double &g, Point &G,
@@ -56,17 +57,17 @@ void siconos::fem::cable::to_json(ojson &j, const Support &s) {
 }
 
 bool siconos::fem::cable::Support::isContact(
-    const std::shared_ptr<siconos::algebra::SiconosVector> &a_p, const double &a_tol) {
-  double dx = a_p->getValue(0) - m_p.x;
-  double dz = a_p->getValue(2) - m_p.z;
+    const Eigen::Ref<siconos::algebra::SiconosVector3> &a_p, double a_tol) {
+  double dx = a_p(0) - m_p.x;
+  double dz = a_p(2) - m_p.z;
   double d = sqrt(dx * dx + dz * dz);
   double go = d - get_radius();
   bool isCt = (go <= a_tol);
   if (isCt) {
-    m_normal->setValue(0, dx / d);
-    m_normal->setValue(2, dz / d);
-    m_tangent->setValue(0, -m_normal->getValue(2));
-    m_tangent->setValue(2, m_normal->getValue(0));
+    (*m_normal)(0) = dx / d;
+    (*m_normal)(2) = dz / d;
+    (*m_tangent)(0) = -(*m_normal)(2);
+    (*m_tangent)(2) = (*m_normal)(0);
   }
   return isCt;
 }
@@ -83,10 +84,9 @@ std::shared_ptr<siconos::modeling::NonSmoothLaw> siconos::fem::cable::Support::n
   return m_nslaw;
 }
 
-bool siconos::fem::cable::Support::isContact(const double &a_tol, const double &dx,
-                                             const double &dy, const double &dz, double &g,
-                                             double &nx, double &ny, double &nz, double &tx,
-                                             double &ty, double &tz) {
+bool siconos::fem::cable::Support::isContact(double a_tol, double dx, double dy, double dz,
+                                             double &g, double &nx, double &ny, double &nz,
+                                             double &tx, double &ty, double &tz) {
   double d = sqrt(dx * dx + dy * dy + dz * dz);
   double go = d - get_radius();
   bool isCt = (go <= a_tol);

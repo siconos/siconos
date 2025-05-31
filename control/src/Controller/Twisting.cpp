@@ -24,20 +24,21 @@
 #include "ControlSensor.hpp"
 #include "FirstOrderNonLinearDS.hpp"
 #include "NormalConeNSL.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
 #include "TimeStepping.hpp"
 
 siconos::control::Twisting::Twisting(std::shared_ptr<ControlSensor> sensor, double gain,
                                      double beta, double hControl)
-    : CommonSMC(ActuatorType::Twisting, sensor)
-{
+    : CommonSMC(ActuatorType::Twisting, sensor) {
   _u = std::make_shared<siconos::algebra::SiconosVector>(2);
+  _u->setZero();
   if (beta <= 0.0 || beta >= 1.0) {
     std::cout << "Twisting constructor: beta is not in (0, 1)" << std::endl;
   }
 
-  _B = std::make_shared<siconos::algebra::SimpleMatrix>(2, 2);
+  _B = std::make_shared<siconos::algebra::SiconosMatrix>(2, 2);
+  _B->setZero();
   (*_B)(1, 0) = gain;
   (*_B)(1, 1) = gain * beta;
 
@@ -45,16 +46,16 @@ siconos::control::Twisting::Twisting(std::shared_ptr<ControlSensor> sensor, doub
 }
 
 siconos::control::Twisting::Twisting(std::shared_ptr<ControlSensor> sensor, double hControl)
-    : CommonSMC(ActuatorType::Twisting, sensor)
-{
+    : CommonSMC(ActuatorType::Twisting, sensor) {
   _u = std::make_shared<siconos::algebra::SiconosVector>(2);
+  _u->setZero();
   setNSdata(hControl);
 }
 
-void siconos::control::Twisting::setNSdata(double hControl)
-{
-  std::shared_ptr<siconos::algebra::SimpleMatrix> H =
-      std::make_shared<siconos::algebra::SimpleMatrix>(4, 2);
+void siconos::control::Twisting::setNSdata(double hControl) {
+  std::shared_ptr<siconos::algebra::SiconosMatrix> H =
+      std::make_shared<siconos::algebra::SiconosMatrix>(4, 2);
+  H->setZero();
   (*H)(0, 0) = 1.0;
   (*H)(1, 0) = -hControl / 2.0;
   (*H)(2, 0) = -1.0;
@@ -63,11 +64,7 @@ void siconos::control::Twisting::setNSdata(double hControl)
   (*H)(3, 1) = -1.0;
 
   auto K = std::make_shared<siconos::algebra::SiconosVector>(4);
-  (*K)(0) = -1.0;
-  (*K)(1) = -1.0;
-  (*K)(2) = -1.0;
-  (*K)(3) = -1.0;
-
+  K->setConstant(-1.);
   _nsLawSMC = std::make_shared<siconos::modeling::NormalConeNSL>(2, H, K);
   _OSNSPB_SMC = std::make_shared<siconos::nonsmooth_formulations::AVI>();
   _numericsSolverId = SICONOS_AVI_CAOFERRIS;
@@ -75,8 +72,7 @@ void siconos::control::Twisting::setNSdata(double hControl)
 
 void siconos::control::Twisting::initialize(
     const siconos::modeling::NonSmoothDynamicalSystem& nsds,
-    const siconos::simulation::Simulation& s)
-{
+    const siconos::simulation::Simulation& s) {
   // basic check
   if (!_nsLawSMC || !_OSNSPB_SMC) {
     THROW_EXCEPTION(
@@ -88,8 +84,7 @@ void siconos::control::Twisting::initialize(
   CommonSMC::initialize(nsds, s);
 }
 
-void siconos::control::Twisting::actuate()
-{
+void siconos::control::Twisting::actuate() {
   *(_DS_SMC->x()) = _sensor->y();
 
   _simulationSMC->computeOneStep();

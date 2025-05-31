@@ -22,36 +22,13 @@
 
 #include <iostream>
 
-#include "PluggedObject.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosVisitor.hpp"
+#include "Tools.hpp"
 
-void siconos::modeling::LagrangianR::_zeroPlugin()
-{
-  Relation::_zeroPlugin();
-  _pluginJachq = std::make_shared<siconos::plugins::PluggedObject>();
-}
-
-void siconos::modeling::LagrangianR::display() const
-{
-  Relation::display();
-  std::cout << " _jachq :"
-            << "\n";
-  if (_jachq) _jachq->display();
-  std::cout << " _jachqDot :"
-            << "\n";
-  if (_jachqDot) _jachqDot->display();
-  std::cout << " _jachlambda :"
-            << "\n";
-  if (_jachlambda)
-    _jachlambda->display();
-  else
-    std::cout << " nullptr :"
-              << "\n";
-}
-
-void siconos::modeling::LagrangianR::accept(
-    std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const
-{
-  tourist->visit(*this);
+void siconos::modeling::LagrangianR::display() const {
+  std::cout << "=====> Relation of type " << tools::enum_to_string(_relationType)
+            << " and subtype " << tools::enum_to_string(_subType) << "\n";
+  if (jacobianhOver_q_view_)
+    std::cout << " jacobianhOver_q_ :\n" << *jacobianhOver_q_view_ << "\n";
 }

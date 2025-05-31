@@ -14,7 +14,6 @@ a_mat = np.asarray(np.random.random((nn, nn)), dtype=np.float64)
 ds_classes = {
     sk.FirstOrderNonLinearDS: (x0,),
     sk.FirstOrderLinearDS: (x0, a_mat),
-    sk.FirstOrderLinearTIDS: (x0, a_mat),
     sk.LagrangianDS: (q0, v0, inertia),
     sk.LagrangianLinearTIDS: (q0, v0, inertia),
     sk.NewtonEulerDS: (q_ne, x0, 1.0, inertia),
@@ -42,8 +41,8 @@ def test_ds_interface():
         ds.update(time)
         ds.resetToInitialState()
         ds.display()
-        ds.computeJacobianRhsx(time)
-        assert ds.jacobianRhsx() is not None
+        ds.computeJacobianRhsOver_x(time)
+        assert ds.jacobianRhsOver_x() is not None
 
 
 def test_first_order_nlds():
@@ -54,17 +53,16 @@ def test_first_order_nlds():
     ds.display()
     time = 1.2
     ds.computeRhs(time)
-    ds.computeJacobianRhsx(time)
+    ds.computeJacobianRhsOver_x(time)
     assert ds.dimension() == ndof
     assert not ds.isLinear()
     assert np.allclose(ds.x0(), x0)
     assert np.allclose(ds.x(), x0)
     assert np.allclose(ds.rhs(), 0.0)
-    ds.computef(time, ds.x())
+    ds.computefVector(ds.x(),time)
     assert ds.f() is None
     ds.initRhs(time)
-    assert ds.jacobianfx() is None
-    assert np.allclose(ds.jacobianRhsx(), 0.0)
+    assert np.allclose(ds.jacobianRhsOver_x(), 0.0)
 
 
 def test_first_order_lds():
@@ -95,41 +93,16 @@ def test_first_order_lds():
             rhs += np.dot(a_mat, ds.x())
         if isinstance(ds.b(), np.ndarray):
             rhs += ds.b()
-        ds.computef(time, ds.x())
+        ds.computefVector(ds.x(), time)
         if ds.f() is not None:
             assert np.allclose(rhs, ds.f())
 
         ds.initRhs(time)
         assert np.allclose(rhs, ds.rhs())
         if ds.A() is not None:
-            assert np.allclose(ds.jacobianRhsx(), jac_ref)
-            assert np.allclose(ds.jacobianRhsx(), ds.jacobianfx())
+            assert np.allclose(ds.jacobianRhsOver_x(), jac_ref)
+            assert np.allclose(ds.jacobianRhsOver_x(), ds.jacobianfOver_x())
 
-
-def test_first_order_ltids():
-    """Build and test first order linear
-    and time-invariant coeff. ds
-    """
-    time = 1.2
-    ds_list = []
-    b_vec = np.random.random((nn,))
-    ds_list.append(sk.FirstOrderLinearTIDS(x0, a_mat))
-    ds_list.append(sk.FirstOrderLinearTIDS(x0, a_mat, b_vec))
-
-    for ds in ds_list:
-        assert ds.isLinear()
-        assert ds.dimension() == nn
-        assert np.allclose(ds.x0(), x0)
-        assert np.allclose(ds.x(), x0)
-        assert np.allclose(ds.r(), 0.0)
-
-        rhs = np.dot(a_mat, ds.x())
-        if ds.b() is not None:
-            rhs += ds.b()
-        ds.initRhs(time)
-        assert np.allclose(rhs, ds.rhs())
-        assert np.allclose(ds.jacobianRhsx(), a_mat)
-        assert np.allclose(ds.jacobianRhsx(), ds.jacobianfx())
 
 
 def test_lagrangian_ds():
@@ -167,12 +140,12 @@ def test_lagrangian_tids():
     fref = -np.dot(stiffness, q)
     fref -= np.dot(damping, v)
     time = 0.3
-    ds.computeForces(time, q, v)
-    assert np.allclose(fref, ds.forces())
-    ds.computeJacobianqForces(time)
-    assert np.allclose(stiffness, ds.jacobianqForces())
-    ds.computeJacobianvForces(time)
-    assert np.allclose(damping, ds.jacobianvForces())
+    ds.computeTotalForces(v, q, time)
+    assert np.allclose(fref, ds.totalForces())
+    ds.computeJacobianTotalForcesOver_q(time)
+    assert np.allclose(stiffness, ds.jacobianTotalForcesOver_q())
+    ds.computeJacobianTotalForcesOver_velocity(time)
+    assert np.allclose(damping, ds.jacobianTotalForcesOver_velocity())
 
 
 if __name__ == "__main__":

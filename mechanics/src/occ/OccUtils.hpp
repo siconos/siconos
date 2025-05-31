@@ -26,11 +26,6 @@
 // OpenCascade forward declarations
 class TopoDS_Shape;
 
-namespace siconos::algebra {
-
-class SiconosVector;
-}
-
 namespace siconos::mechanics::occ {
 
 struct OccContactFace;

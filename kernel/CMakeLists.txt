@@ -105,8 +105,6 @@ find_package(Eigen3 REQUIRED)
 # Should we propagate Eigen dep? Check this later ...
 target_link_libraries (kernel PUBLIC Eigen3::Eigen) 
 
-
-
 # --- python bindings ---
 if(WITH_${COMPONENT}_PYTHON_WRAPPER)
   add_subdirectory(swig)

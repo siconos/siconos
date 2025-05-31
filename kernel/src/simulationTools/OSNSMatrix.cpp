@@ -27,8 +27,8 @@
 #include "NonSmoothLaw.hpp"
 #include "NumericsToolsNamespace.h"  // For NumericsMatrix
 #include "SecondOrderDS.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -48,7 +48,7 @@ siconos::nonsmooth_formulations::OSNSMatrix::OSNSMatrix(unsigned int n, NM_types
   switch (_storageType) {
     case NM_DENSE: {
       // A zero matrix M of size nXn is built.
-      _M1 = std::make_shared<siconos::algebra::SimpleMatrix>(n, n);
+      _M1 = std::make_shared<siconos::algebra::SiconosMatrix>(n, n);
       break;
     }
     case NM_SPARSE_BLOCK: {
@@ -80,7 +80,7 @@ siconos::nonsmooth_formulations::OSNSMatrix::OSNSMatrix(unsigned int n, unsigned
       // A zero matrix M of size nXn is built.  interactionBlocksPositions
       // remains empty (=nullptr) since we have no information concerning
       // the Interaction.
-      _M1 = std::make_shared<siconos::algebra::SimpleMatrix>(n, n);
+      _M1 = std::make_shared<siconos::algebra::SiconosMatrix>(n, n);
       break;
     }
     case NM_SPARSE_BLOCK: {
@@ -114,10 +114,10 @@ siconos::nonsmooth_formulations::OSNSMatrix::OSNSMatrix(
 // construct by copy of SiconosMatrix
 siconos::nonsmooth_formulations::OSNSMatrix::OSNSMatrix(
     const siconos::algebra::SiconosMatrix& MSource)
-    : _dimRow(MSource.size(0)), _dimColumn(MSource.size(1)), _storageType(NM_DENSE) {
+    : _dimRow(MSource.rows()), _dimColumn(MSource.cols()), _storageType(NM_DENSE) {
   //  _numericsMatrix = std::make_shared<NumericsMatrix>()
   //  NM_null(_numericsMatrix.get());
-  _M1 = std::make_shared<siconos::algebra::SimpleMatrix>(MSource);
+  _M1 = std::make_shared<siconos::algebra::SiconosMatrix>(MSource);
 }
 
 unsigned siconos::nonsmooth_formulations::OSNSMatrix::updateSizeAndPositions(
@@ -192,11 +192,11 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillM(
     // Mem. is allocate only if !M or if its size has changed.
     if (update) {
       if (!_M1)
-        _M1 = std::make_shared<siconos::algebra::SimpleMatrix>(_dimRow, _dimColumn);
+        _M1 = std::make_shared<siconos::algebra::SiconosMatrix>(_dimRow, _dimColumn);
       else {
-        if (_M1->size(0) != _dimRow || _M1->size(1) != _dimColumn)
+        if (_M1->rows() != _dimRow || _M1->cols() != _dimColumn)
           _M1->resize(_dimRow, _dimColumn);
-        _M1->zero();
+        _M1->setZero();
       }
     }
 
@@ -208,11 +208,12 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillM(
       std::shared_ptr<siconos::modeling::Interaction> inter = indexSet.bundle(*vi);
       pos = indexSet.properties(*vi).absolute_position;
 
-      std::static_pointer_cast<siconos::algebra::SimpleMatrix>(_M1)->setBlock(
-          pos, pos, *indexSet.properties(*vi).block);
-      DEBUG_PRINTF("OSNSMatrix _M1: %i %i\n", _M1->size(0), _M1->size(1));
-      DEBUG_PRINTF("OSNSMatrix block: %i %i\n", indexSet.properties(*vi).block->size(0),
-                   indexSet.properties(*vi).block->size(1));
+      siconos::algebra::setBlock(
+          pos, pos, *indexSet.properties(*vi).block,
+          *std::static_pointer_cast<siconos::algebra::SiconosMatrix>(_M1));
+      DEBUG_PRINTF("OSNSMatrix _M1: %i %i\n", _M1->rows(), _M1->cols());
+      DEBUG_PRINTF("OSNSMatrix block: %i %i\n", indexSet.properties(*vi).block->rows(),
+                   indexSet.properties(*vi).block->cols());
     }
 
     // == Loop through all edges (ds) in active index set ==
@@ -234,19 +235,20 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillM(
       assert(pos < _dimRow);
       assert(col < _dimColumn);
 
-      DEBUG_PRINTF("OSNSMatrix _M1: %i %i\n", _M1->size(0), _M1->size(1));
-      DEBUG_PRINTF("OSNSMatrix upper: %i %i\n", indexSet.properties(*ei).upper_block->size(0),
-                   indexSet.properties(*ei).upper_block->size(1));
-      DEBUG_PRINTF("OSNSMatrix lower: %i %i\n", indexSet.properties(*ei).lower_block->size(0),
-                   indexSet.properties(*ei).lower_block->size(1));
+      DEBUG_PRINTF("OSNSMatrix _M1: %i %i\n", _M1->rows(), _M1->cols());
+      DEBUG_PRINTF("OSNSMatrix upper: %i %i\n", indexSet.properties(*ei).upper_block->rows(),
+                   indexSet.properties(*ei).upper_block->cols());
+      DEBUG_PRINTF("OSNSMatrix lower: %i %i\n", indexSet.properties(*ei).lower_block->rows(),
+                   indexSet.properties(*ei).lower_block->cols());
 
       assert(indexSet.properties(*ei).lower_block);
       assert(indexSet.properties(*ei).upper_block);
-      std::static_pointer_cast<siconos::algebra::SimpleMatrix>(_M1)->setBlock(
-          std::min(pos, col), std::max(pos, col), *indexSet.properties(*ei).upper_block);
-
-      std::static_pointer_cast<siconos::algebra::SimpleMatrix>(_M1)->setBlock(
-          std::max(pos, col), std::min(pos, col), *indexSet.properties(*ei).lower_block);
+      siconos::algebra::setBlock(
+          std::min(pos, col), std::max(pos, col), *indexSet.properties(*ei).upper_block,
+          *std::static_pointer_cast<siconos::algebra::SiconosMatrix>(_M1));
+      siconos::algebra::setBlock(
+          std::max(pos, col), std::min(pos, col), *indexSet.properties(*ei).lower_block,
+          *std::static_pointer_cast<siconos::algebra::SiconosMatrix>(_M1));
     }
   } else if (_storageType == NM_SPARSE_BLOCK) {
     if (!_M2) {
@@ -277,7 +279,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::convert() {
       _numericsMatrix.get()->storageType = _storageType;
       _numericsMatrix.get()->size0 = _dimRow;
       _numericsMatrix.get()->size1 = _dimColumn;
-      _numericsMatrix->matrix0 = _M1->getArray();  // Pointer link, be careful when freed.
+      _numericsMatrix->matrix0 = _M1->data();  // Pointer link, be careful when freed.
       DEBUG_EXPR(NM_display(_numericsMatrix.get()););
       DEBUG_EXPR(_M1->display(););
       break;
@@ -335,9 +337,9 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillW(
         siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
         for (std::tie(dsi, dsend) = DSG.vertices(); dsi != dsend; ++dsi) {
           auto ds = DSG.bundle(*dsi);
-          auto W = DSG.properties(*dsi).W.get();
+          auto W = DSG.properties(*dsi).iterationMatrix.get();
           pos = DSG.properties(*dsi).absolute_position;
-          W->fillTriplet(Mtriplet, pos, pos);
+          siconos::algebra::fillTriplet(*W, Mtriplet, pos, pos);
           DEBUG_PRINTF("pos = %u \n", pos);
         }
         _triplet_nzmax = NM_nnz(&M_NM);
@@ -389,26 +391,29 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillWinverse(
         // Loop over the DS for filling M
         siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
         for (std::tie(dsi, dsend) = DSG.vertices(); dsi != dsend; ++dsi) {
-          std::shared_ptr<siconos::algebra::SimpleMatrix> Winverse;
+          std::shared_ptr<siconos::algebra::SiconosMatrix> iterationMatrixInverse;
 
           auto osi = DSG.properties(*dsi).osi;
           std::shared_ptr<siconos::modeling::DynamicalSystem> ds = DSG.bundle(*dsi);
           auto sods = std::static_pointer_cast<siconos::modeling::SecondOrderDS>(ds);
 
-          if (auto mosi = dynamic_pointer_cast<siconos::integrators::MoreauJeanGOSI>(osi)) {
-            Winverse = mosi->Winverse(sods, true);
-          } else if (auto mosi =
-                         dynamic_pointer_cast<siconos::integrators::MoreauJeanOSI>(osi)) {
-            Winverse = mosi->Winverse(sods);
+          // if (auto mosi = dynamic_pointer_cast<siconos::integrators::MoreauJeanGOSI>(osi)) {
+          //   iterationMatrixInverse = mosi->iterationMatrixInverse(sods, true);
+          //} else
+          if (auto mosi = dynamic_pointer_cast<siconos::integrators::MoreauJeanOSI>(osi)) {
+            auto iterationMatrixInverse =
+                mosi->iterationMatrixInverse(sods, *mosi->LUiterationMatrix(ds));
+
+            pos = DSG.properties(*dsi).absolute_position;
+            siconos::algebra::fillTriplet(*iterationMatrixInverse, Mtriplet, pos, pos);
+            DEBUG_PRINTF("pos = %u \n", pos);
+
           } else
             THROW_EXCEPTION(
                 "siconos:simulation::OSNSMatrix::fillWinverse not yet implemented for this "
                 "type of OSI  ");
 
-          pos = DSG.properties(*dsi).absolute_position;
-          Winverse->fillTriplet(Mtriplet, pos, pos);
-          DEBUG_PRINTF("pos = %u \n", pos);
-          // W->display();
+          // siconos::algebra::print(*W);
         }
 
         // // Ugly inversion
@@ -484,16 +489,11 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillHtrans(
         auto Htriplet = NM_triplet(&H_NM);
 
         unsigned int pos = 0, abs_pos_ds = 0;
-        std::shared_ptr<siconos::algebra::SiconosMatrix> leftInteractionBlock;
 
         siconos::graphs::InteractionsGraph::VIterator ui, uiend;
         for (std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui) {
           auto& inter = *indexSet.bundle(*ui);
           size_t sizeY = inter.dimension();
-          leftInteractionBlock = inter.getLeftInteractionBlock();
-
-          double* array = &*leftInteractionBlock->getArray();
-          // double * array_with_bc= nullptr;
 
           auto ds1 = indexSet.properties(*ui).source;
           auto ds2 = indexSet.properties(*ui).target;
@@ -528,7 +528,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillHtrans(
                 //     // (nslawSize,sizeDS));
                 //   //std::shared_ptr<siconos::algebra::SiconosVector> coltmp =
                 //   std::make_shared<siconos::algebra::SiconosVector>(nslawSize));
-                //   //coltmp->zero();
+                //   //coltmp->setZero();
                 //   std::cout <<  "bc indx "<< itindex << std::endl;
                 // }
 
@@ -540,8 +540,10 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillHtrans(
             }
 
             abs_pos_ds = DSG.properties(DSG.descriptor(ds)).absolute_position;
+            auto leftInteractionBlock = inter.getLeftInteractionBlock();
+            const double* raw_array = leftInteractionBlock.data();
             CSparseMatrix_block_dense_zentry(Htriplet, pos, abs_pos_ds,
-                                             array + posBlock * sizeY, sizeY, sizeDS,
+                                             raw_array + posBlock * sizeY, sizeY, sizeDS,
                                              DBL_EPSILON);
           }
         }
@@ -592,7 +594,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::display() const {
     if (!_M1)
       std::cout << " matrix = nullptr pointer" << std::endl;
     else
-      _M1->display();
+      siconos::algebra::print(*_M1);
   } else if (_storageType == NM_SPARSE_BLOCK) {
     std::cout << "----- OSNS Matrix using Sparse InteractionBlock storage type for Numerics "
                  "(SparseBlockStructuredMatrix)"

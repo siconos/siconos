@@ -19,11 +19,11 @@
 
 #include "ControlLsodarSimulation.hpp"
 #include "ControlZOHSimulation.hpp"
-#include "FirstOrderLinearTIDS.hpp"
+#include "FirstOrderLinearDS.hpp"
 #include "LinearSensor.hpp"
 #include "PID.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
 #include "io.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
@@ -33,25 +33,30 @@
 CPPUNIT_TEST_SUITE_REGISTRATION(PIDTest);
 
 void PIDTest::setUp() {
-  _A = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);
+  _A = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
+  _A->setZero();
   (*_A)(0, 1) = 1.0;
-  _x0 = std::make_shared<siconos::algebra::SiconosVector>(_n, 0);
+  _x0 = std::make_shared<siconos::algebra::SiconosVector>(_n);
+  _x0->setZero();
   (*_x0)(0) = 10.0;
   (*_x0)(1) = 0.0;
   _xFinal = 0.0;
 
-  _K = std::make_shared<siconos::algebra::SiconosVector>(3, 0);
+  _K = std::make_shared<siconos::algebra::SiconosVector>(3);
   (*_K)(0) = .25;
   (*_K)(1) = .125;
   (*_K)(2) = 2.0;
 }
 
 void PIDTest::init() {
-  _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(_x0, _A);
-  auto C = std::make_shared<siconos::algebra::SimpleMatrix>(1, 2, 0);
+  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0);
+  _DS->setConstantA(*_A);
+  auto C = std::make_shared<siconos::algebra::SiconosMatrix>(1, 2);
+  C->setZero();
   (*C)(0, 0) = 1;
   _sensor = std::make_shared<siconos::control::LinearSensor>(_DS, C);
-  auto B = std::make_shared<siconos::algebra::SimpleMatrix>(2, 1);
+  auto B = std::make_shared<siconos::algebra::SiconosMatrix>(2, 1);
+  B->setZero();
   (*B)(1, 0) = 1;
   _PIDcontroller = std::make_shared<siconos::control::PID>(_sensor, B);
   _PIDcontroller->setRef(_xFinal);
@@ -69,17 +74,18 @@ void PIDTest::testPIDZOH() {
   simZOH->addActuator(_PIDcontroller, _h);
   simZOH->initialize();
   simZOH->run();
-  auto& data = *simZOH->data();
-  siconos::algebra::io::write("PIDZOH.dat", data, siconos::algebra::io::ASCII_OUT,
+  auto data = simZOH->data();
+  siconos::algebra::io::write("PIDZOH.dat", *data, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  siconos::algebra::SimpleMatrix dataRef(data);
-  dataRef.zero();
+  siconos::algebra::SiconosMatrix dataRef(data->rows(), data->cols());
   siconos::algebra::io::read("PID.ref", dataRef);
 
-  std::cout << "------- Integration done, error = " << (data - dataRef).normInf() << " -------"
-            << std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testPIDZOH : ", (data - dataRef).normInf() < _tol, true);
+  // std::cout << diff << std::endl;
+  auto diff = *data - dataRef;
+  auto error = siconos::algebra::normInf(diff);
+  std::cout << "------- Integration done, error = " << error << " -------\n";
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testPIDZOH : ", error < _tol, true);
 }
 
 void PIDTest::testPIDLsodar() {
@@ -94,10 +100,11 @@ void PIDTest::testPIDLsodar() {
   siconos::algebra::io::write("PIDLsodar.dat", data, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  siconos::algebra::SimpleMatrix dataRef(data);
-  dataRef.zero();
+  siconos::algebra::SiconosMatrix dataRef(data);
+  dataRef.setZero();
   siconos::algebra::io::read("PID.ref", dataRef);
-  std::cout << "------- Integration done, error = " << (data - dataRef).normInf() << " -------"
+  auto diff = data - dataRef;
+  std::cout << "------- Integration done, error = " << siconos::algebra::normInf(diff) << " -------"
             << std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testPIDLsodar : ", (data - dataRef).normInf() < _tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testPIDLsodar : ", siconos::algebra::normInf(diff) < _tol, true);
 }

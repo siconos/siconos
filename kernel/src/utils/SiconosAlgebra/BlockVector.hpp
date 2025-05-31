@@ -27,11 +27,9 @@
 #include <vector>
 
 #include "SiconosSerialization.hpp"
+#include "SiconosVector.hpp"
 
 namespace siconos::algebra {
-
-class SiconosVector;
-
 
 /**
    "Block" vector : container (list) of SiconosVector
@@ -43,7 +41,6 @@ class SiconosVector;
 */
 class BlockVector {
  private:
-
   using VectorOfVectors = std::vector<std::shared_ptr<SiconosVector>>;
 
   ACCEPT_SERIALIZATION(BlockVector);
@@ -96,16 +93,16 @@ class BlockVector {
    */
   ~BlockVector() noexcept = default;
 
-  /**
-     Set a subblock of the current vector with the content (copy) of a SiconosVector
+  // /**
+  //    Set a subblock of the current vector with the content (copy) of a SiconosVector
 
-     \param input the vector to be copied
-     \param size_block size of the block to be copied
-     \param start_in starting position in input vector of the block to be copied
-     \param start_out starting position in current vector of the block to be filled in.
-  */
-  void setBlock(const SiconosVector& input, unsigned int size_block, unsigned int start_in,
-                unsigned int start_out);
+  //    \param input the vector to be copied
+  //    \param size_block size of the block to be copied
+  //    \param start_in starting position in input vector of the block to be copied
+  //    \param start_out starting position in current vector of the block to be filled in.
+  // */
+  // void setBlock(const SiconosVector& input, unsigned int size_block, unsigned int start_in,
+  //               unsigned int start_out);
 
   /** \return the size of the vector (sum of the sizes of all its blocks) */
   unsigned int size() const { return _sizeV; };
@@ -128,20 +125,17 @@ class BlockVector {
   /** \return the number of SiconosVectors in the container */
   inline auto numberOfBlocks() const { return _tabIndex->size(); };
 
-  /** \return true if all SiconosVector in the container are dense **/
-  bool isDense() const;
+  //   /** \return true if all SiconosVector in the container are dense **/
+  //   bool isDense() const;
 
   /** sets all the values of the vector to 0.0 */
-  void zero();
+  void setZero();
 
   /** set all values of the vector component to value.
    *
    *  \param a double
    */
   void fill(double a);
-
-  /** display data on standard output */
-  void display(void) const;
 
   /** Get a component of the vector
    *
@@ -183,8 +177,7 @@ class BlockVector {
    *  \param pos index of the required block
    *  \return the expected block
    */
-  inline std::shared_ptr<const SiconosVector> vector(unsigned int pos) const
-  {
+  inline std::shared_ptr<const SiconosVector> vector(unsigned int pos) const {
     return _vect[pos];
   };
 
@@ -248,13 +241,6 @@ class BlockVector {
   */
   BlockVector& operator=(const double* data);
 
-  /** Assignment operator
-   *
-   *  \param vIn the vector to be copied
-   *  \return  BlockVector&
-   */
-  BlockVector& operator=(const SiconosVector& vIn);
-
   /**
      Subtract in place operator
 
@@ -315,10 +301,7 @@ class BlockVector {
   void insertPtr(std::shared_ptr<SiconosVector> v);
 
   /** \return the Euclidian norm of the vector */
-  double norm2() const;
-
-  /** \return the infinite norm of the vector */
-  double normInf() const;
+  double norm() const;
 
   /**
      Tranform a BlockVector into a SiconosVector.
@@ -329,7 +312,7 @@ class BlockVector {
      1 block : link to first component of the container, more : copy of all components into a
      SiconosVector)
   */
-  std::shared_ptr<SiconosVector> prepareVectorForPlugin() const;
+  std::shared_ptr<SiconosVector> toSiconosVector() const;
 
   /** \defgroup BlockVectorFriends
 
@@ -348,6 +331,19 @@ class BlockVector {
 
   /** End of Friend functions group @} */
 };
+
+// Free functions
+
+/** \return the infinite norm of a block vector
+ * \param v the input vector
+ */
+double normInf(const BlockVector& v);
+
+/** display data on standard output
+ *  \param v the input vector
+ */
+void print(const BlockVector& v);
+
 }  // namespace siconos::algebra
 
 #endif

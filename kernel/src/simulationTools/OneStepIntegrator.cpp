@@ -34,7 +34,7 @@
 // struct siconos::integrators::OneStepIntegrator::IterationMatrixVisitor : public
 // siconos::internal::SiconosVisitor {
 
-//   std::shared_ptr<siconos::algebra::SimpleMatrix> visit(const MoreauJeanOSI& osi,
+//   std::shared_ptr<siconos::algebra::SiconosMatrix> visit(const MoreauJeanOSI& osi,
 //   std::shared_ptr<siconos::modeling::DynamicalSystem> ds) const
 //   {
 //     return osi.W(ds);
@@ -73,6 +73,7 @@ void siconos::integrators::OneStepIntegrator::initialize() {
   initialize_nonsmooth_problems();
   _isInitialized = true;
 }
+
 void siconos::integrators::OneStepIntegrator::updateAndSwapAllOutput(double time) {
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   auto& indexSet0 = *_simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
@@ -114,12 +115,19 @@ void siconos::integrators::OneStepIntegrator::OneStepIntegrator::updateAndSwapAl
     inter.swapInMemory();
   }
 
-  
   // Compute a first value for the output
   // VA 10/04/2024 What is the interest of the following line ?
+  // FP: thought it was useless but for NewtonEuler5D for example,
+  // we need Nc to be set before any call to computeJach (below)
+  // so we need a first call to computeOutput (for h)
   inter.computeOutput(time, 0);
 
   // prepare the gradients
+  // --> Note FP:
+  // useless. This is done in computeOutput ?
+  // No, it's not (why ?)
+  // This means that when we call computeOutput, operators depending
+  // on the state might not be uptodate. See V.A remark in NewtonEulerR computeOutput
   inter.relation()->computeJach(time, inter);
   for (unsigned int i = 0; i < inter.upperLevelForOutput() + 1; ++i) {
     inter.computeOutput(time, i);
@@ -161,6 +169,21 @@ void siconos::integrators::OneStepIntegrator::resetNonSmoothPart(unsigned int le
     if (!checkOSI(dsi)) continue;
     _dynamicalSystemsGraph->bundle(*dsi)->resetNonSmoothPart(level);
   }
+}
+
+std::shared_ptr<siconos::algebra::SiconosMatrix>
+siconos::integrators::OneStepIntegrator::iterationMatrix(
+    std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
+  assert(ds && "siconos::integrators::OneStepIntegrator::iterationMatrix(ds): ds == nullptr.");
+  return _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds))
+      .iterationMatrix;
+}
+
+std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>
+siconos::integrators::OneStepIntegrator::LUiterationMatrix(
+    std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
+  assert(ds && "siconos::integrators::OneStepIntegrator::iterationMatrix(ds): ds == nullptr.");
+  return _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).LUW;
 }
 
 void siconos::integrators::OneStepIntegrator::updateOutput(double time, unsigned int level) {

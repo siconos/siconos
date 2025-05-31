@@ -21,10 +21,8 @@
 
 #include <memory>
 
-namespace siconos::algebra {
-class SiconosVector;
-class SimpleMatrix;
-}  // namespace siconos::algebra
+#include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 
 namespace siconos::modeling {
 class NewtonEulerDS;
@@ -64,7 +62,7 @@ class MBTB_JointR {
   //! Joint forces. F1: F[0,1,2]. F2: F[3,4,5].
   std::shared_ptr<siconos::algebra::SiconosVector> _F{nullptr};
   //! A matrix such that  _M * F = BLambda
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _M{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _M{nullptr};
 
   //! It consists in building the system  _M * F = BLambda  and solving it.
   void computeEquivalentForces();

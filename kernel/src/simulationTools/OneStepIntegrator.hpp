@@ -25,7 +25,6 @@
 
 #include "ExtraAdditionalTerms.hpp"
 #include "OneStepIntegratorTypes.hpp"  // IntegratorType
-#include "Simulation.hpp"
 #include "SimulationGraphs.hpp"
 
 namespace siconos::simulation {
@@ -350,6 +349,21 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
    *  \param level
    */
   void resetNonSmoothPart(unsigned int level);
+
+  /** \return the iteration matrix corresponding to a given dynamical system
+   *
+   *  \param ds a dynamical system
+   */
+  virtual std::shared_ptr<siconos::algebra::SiconosMatrix> iterationMatrix(
+      std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
+
+  /** \return the LU factorization of the iteration matrix corresponding to a given dynamical
+   * system
+   *
+   *  \param ds a dynamical system
+   */
+  virtual std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>> LUiterationMatrix(
+      std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
   /** update the state of the DynamicalSystem attached to this Integrator
    *

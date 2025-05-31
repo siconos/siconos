@@ -22,7 +22,7 @@
 #include <math.h>  // for copysign
 
 #include <SiconosVector.hpp>
-#include <SimpleMatrix.hpp>
+#include <SiconosMatrix.hpp>
 #include <iostream>
 
 #include "ControlSensor.hpp"
@@ -36,7 +36,7 @@ siconos::control::ExplicitTwisting::ExplicitTwisting(std::shared_ptr<ControlSens
     std::cout << "ExplicitTwisting constructor: beta is not in (0, 1)" << std::endl;
   }
 
-  _B = std::make_shared<siconos::algebra::SimpleMatrix>(2, 2);
+  _B = std::make_shared<siconos::algebra::SiconosMatrix>(2, 2);
   (*_B)(1, 0) = gain;
   (*_B)(1, 1) = gain * beta;
 }
@@ -60,8 +60,8 @@ void siconos::control::ExplicitTwisting::actuate()
   const auto& sigma = _sensor->y();
 
   // discontinous part
-  _u->setValue(0, std::copysign(1., -sigma(0)));
-  _u->setValue(1, std::copysign(1., -sigma(1)));
+  (*_u)(0) = std::copysign(1., -sigma(0));
+  (*_u)(1) = std::copysign(1., -sigma(1));
   *_us = *_u;
   _indx++;
 }

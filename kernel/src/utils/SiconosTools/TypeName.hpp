@@ -33,7 +33,6 @@ class FirstOrderNonLinearDS;
 class NewtonEulerDS;
 class LagrangianDS;
 class FirstOrderLinearDS;
-class FirstOrderLinearTIDS;
 class LagrangianLinearTIDS;
 class LagrangianLinearDiagonalDS;
 class FremondImpactFrictionNSL;
@@ -52,7 +51,7 @@ enum class Type {
   NewtonEulerDS,
   LagrangianDS,
   FirstOrderLinearDS,
-  FirstOrderLinearTIDS,
+
   LagrangianLinearTIDS,
   LagrangianLinearDiagonalDS,
   // NSLaws

@@ -1,7 +1,7 @@
 #ifndef ADDONS_HPP
 #define ADDONS_HPP
 #include "SiconosPointers.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "DynamicalSystem.hpp"
 
 // => we need swig iterators for bgl iterators

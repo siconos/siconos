@@ -27,11 +27,7 @@
 
 #include "DynamicalSystem.hpp"
 #include "SiconosException.hpp"
-
-namespace siconos::algebra {
-class SimpleMatrix;
-
-}
+#include "SiconosMatrix.hpp"
 
 namespace siconos::modeling {
 
@@ -39,13 +35,13 @@ class BoundaryCondition;
 
 /**
 
-    Second Order non linear dynamical systems -  \f$ M(q,z) \dot v = F(v, q, t, z) + p \f$
+    Second Order non linear dynamical systems -  \f$ M(q) \dot v = F_{total}(v, q, t) + p \f$
 
     This class defines and computes a generic ndof-dimensional
     second order Non Linear Dynamical System of the form :
 
     \f[
-     M(q,z) \dot v  = F(v, q, t,  z)  + p \\
+     M(q) \dot v  = F_{total}(v, q, t)  + p \\
      \dot q = G(q,v)
     \f]
 
@@ -57,7 +53,7 @@ class BoundaryCondition;
     time derivative of the generalized coordinates.
     - \f$ p \in R^{ndof} \f$ the reaction forces due to the Non Smooth Interaction.
     - \f$ M(q) \in R^{ndof \times ndof} \f$ is the inertia term (access : mass() method).
-    - \f$ F( \dot q , q , t) \in R^{ndof} \f$ are the forces (access forces()
+    - \f$ F_{total}( \dot q , q , t) \in R^{ndof} \f$ are the forces (access totalForces()
     method).
     - \f$ z \in R^{zSize} \f$ is a vector of arbitrary algebraic variables, some
     sort of discrete state.
@@ -69,8 +65,8 @@ class BoundaryCondition;
     The following operators (and their jacobians) can be plugged, in the usual way
     (see User Guide, 'User-defined plugins')
 
-    - \f$ M(q) \f$ (computeMass())
-    - \f$ F(v , q , t, z) \f$ (computeF())
+    - \f$ M(q) \f$ (computeMass(...))
+    - \f$ F_{total}(v , q , t) \f$ (computeTotalForces(...))
 
     If required (e.g. for Event-Driven like simulation), formulation as a
     first-order system is also available, and writes:
@@ -82,7 +78,7 @@ class BoundaryCondition;
     \f[
       \dot x = \left[\begin{array}{c}
       \dot q\\
-      \ddot q = M^{-1}(q)\left[F(v, q , t, z) + p \right]\\
+      \ddot q = M^{-1}(q)\left[F_{total}(v, q , t) + p \right]\\
       \end{array}\right]
 
     \f]
@@ -92,8 +88,8 @@ class BoundaryCondition;
     \f[
        \nabla_{x}rhs(x,t) = \left[\begin{array}{cc}
        0  & I \\
-       \nabla_{q}(M^{-1}(q)F(v, q , t, z)) &  \nabla_{\dot q}(M^{-1}(q)F(v, q ,
-       t, z)) \\ \end{array}\right]
+       \nabla_{q}(M^{-1}(q)F_{total}l}(v, q , t)) &  \nabla_{\dot q}(M^{-1}(q)F_{total}(v, q ,
+       t)) \\ \end{array}\right]
 
     \f]
     with the input due to the non smooth law:
@@ -108,7 +104,7 @@ class BoundaryCondition;
     In that case, use the following methods:
     - initRhs() to allocate/initialize memory for these new operators,
     - rhs() to get the rhs vector
-    - computeRhs(), computeJacobianRhsx() ..., to update the content of rhs, its
+    - computeRhs(), computeJacobianRhsOver_x() ..., to update the content of rhs, its
     jacobians ...
 
 */
@@ -119,40 +115,37 @@ class SecondOrderDS : public DynamicalSystem {
   // -- MEMBERS --
 
   /** number of degrees of freedom of the system */
-  unsigned int _ndof{0};
-
-  /** mass of the system */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _mass{nullptr};
-
-  /** true if the  mass matrix is constant */
-  bool _hasConstantMass = false;
+  unsigned int ndof_{0};
 
   /** inverse or factorization of the mass of the system */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _inverseMass{nullptr};
+  std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>> LUMass_{nullptr};
 
-  /** "Reaction", generalized forces or imuplses due to the non smooth law
+  bool hasLUMass_{false};
+
+  /** "Reaction", generalized forces or impulses due to the non smooth law
    * The index corresponds to the kinematic
    * level of the corresponding constraints. It mainly depends on what the
    * simulation part want to store, but some rules have to be followed. For
    * instance :
-   *  - for the constraints at the acceleration level, _p[2] stores the reaction
+   *  - for the constraints at the acceleration level, p_[2] stores the reaction
    * forces,
-   *  - for the constraints at the veocity level,  _p[1] stores the (discrete)
+   *  - for the constraints at the veocity level,  p_[1] stores the (discrete)
    * reaction impulse
-   *  - for the constraints at the position level, _p[0] stores the multiplier
+   *  - for the constraints at the position level, p_[0] stores the multiplier
    * for a constraint in position
    */
-  std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> _p = {nullptr, nullptr,
+  std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> p_ = {nullptr, nullptr,
                                                                       nullptr};
 
   /** Initial position */
-  std::shared_ptr<siconos::algebra::SiconosVector> _q0{nullptr};
+  std::shared_ptr<siconos::algebra::MapVectorType> q0_view_{nullptr};
+  std::unique_ptr<std::vector<double>> q0_internal_storage_{nullptr};
 
   /** Boundary condition applied to a dynamical system*/
-  std::shared_ptr<siconos::modeling::BoundaryCondition> _boundaryConditions{nullptr};
+  std::shared_ptr<siconos::modeling::BoundaryCondition> boundaryConditions_{nullptr};
 
   /** Reaction to an applied  boundary condition */
-  std::shared_ptr<siconos::algebra::SiconosVector> _reactionToBoundaryConditions{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector> reactionToBoundaryConditions_{nullptr};
 
   // Rule of five
   SecondOrderDS() = default;
@@ -164,191 +157,65 @@ class SecondOrderDS : public DynamicalSystem {
   /** minimal constructor, from state dimension
    *  result in \f$ \dot x = r \f$
    *
-   *  \param dimension size of the system (n)
+   *  \param dimension dimension of corresponding first order system
+   *  \param ndof number of degrees of freedom
    */
   SecondOrderDS(unsigned int dimension, unsigned int ndof)
-      : DynamicalSystem(dimension), _ndof(ndof), _hasConstantMass(true){};
+      : DynamicalSystem(dimension), ndof_(ndof) {};
 
  public:
   /** destructor */
   virtual ~SecondOrderDS() noexcept = default;
 
-  /** get p
+  /** \return a read-only view onto the nonsmooth force or impulse
+   *
+   *  \param level required level for p, default = 2
+   */
+  inline auto p_read(unsigned int level = 2) const {
+    return siconos::algebra::ConstMapVectorType(p_[level]->data(), p_[level]->size());
+  }
+
+  /** \return nonsmooth force or impulse (pointer link)
    *
    *  \param level unsigned int, required level for p, default = 2
-   *  \return pointer on a siconos::algebra::SiconosVector
    */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> p(unsigned int level = 2) const
-  {
-    return _p[level];
+  std::shared_ptr<siconos::algebra::SiconosVector> p(unsigned int level = 2) const {
+    return p_[level];
   }
 
-  /** get mass matrix (pointer link)
+  /** \return nonsmooth force or impulse (only for pybind11/python bindings)
    *
-   *  \return std::shared_ptr<siconos::algebra::SiconosMatrix>
+   *  \param level unsigned int, required level for p, default = 2
    */
-  inline std::shared_ptr<siconos::algebra::SiconosMatrix> mass() const { return _mass; }
-
-  /** get (pointer) inverse or LU-factorization of the mass,
-   *  used for LU-forward-backward computation
-   *
-   *  \return pointer std::shared_ptr<siconos::algebra::SimpleMatrix>
-   */
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> inverseMass() const
-  {
-    return _inverseMass;
+  siconos::algebra::SiconosVector &p_python(unsigned int level = 2) const {
+    return *(p_[level]);
   }
 
-  /** set mass to pointer newPtr
-   *
-   *  \param newPtr a plugged matrix SP
-   */
-  void setMassPtr(std::shared_ptr<siconos::algebra::SimpleMatrix> newPtr);
+  /** \return LU-factorization of the mass (pointer link) */
+  inline auto LUMass() const { return LUMass_; }
 
-  /** set the value of the right-hand side, \f$ \dot x \f$
-   *
-   *  \param newValue siconos::algebra::SiconosVector
-   */
-  void setRhs(const siconos::algebra::SiconosVector &newValue) override
-  {
-    THROW_EXCEPTION("SecondOrderDS - setRhs call is forbidden for 2nd order systems.");
-  }
+  /** \return the number of degrees of freedom of the system */
+  inline unsigned int dimension() const override { return ndof_; }
 
-  /** set right-hand side, \f$ \dot x \f$ (pointer link)
-   *
-   *  \param newPtr std::shared_ptr<siconos::algebra::SiconosVector>
-   */
-  void setRhsPtr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) override
-  {
-    THROW_EXCEPTION("SecondOrderDS - setRhsPtr call is forbidden for 2nd order systems.");
-  }
+  /** \return a read-only view on the generalized coordinates of the system */
+  virtual const siconos::algebra::ConstMapVectorType q_read() const = 0;
 
-  /* function to compute \f$ F(v,q,t,z) \f$ for the current state
-   *
-   *  \param time the current time
-   */
-  // virtual void computeForces(double time);
-
-  /** Compute \f$ F(v,q,t,z) \f$
-   *
-   *  \param time the current time
-   *  \param q std::shared_ptr<siconos::algebra::SiconosVector>: pointers on q
-   *  \param velocity std::shared_ptr<siconos::algebra::SiconosVector>: pointers on velocity
-   */
-  virtual void computeForces(double time, std::shared_ptr<siconos::algebra::SiconosVector> q,
-                             std::shared_ptr<siconos::algebra::SiconosVector> velocity) = 0;
-
-  /** Compute \f$ \nabla_qF(v,q,t,z) \f$ for current \f$ q,v \f$
-   *  Default function to compute forces
-   *
-   *  \param time the current time
-   */
-  virtual void computeJacobianqForces(double time) = 0;
-
-  /** Compute \f$ \nabla_{\dot q}F(v,q,t,z) \f$ for current \f$ q,v \f$
-   *
-   *  \param time the current time
-   */
-  virtual void computeJacobianvForces(double time) = 0;
-
-  /** return the number of degrees of freedom of the system
-   *
-   *  \return an unsigned int.
-   */
-  inline unsigned int dimension() const override { return _ndof; }
-
-  /** generalized coordinates of the system (vector of size dimension())
-   *
-   *  \return pointer on a siconos::algebra::SiconosVector
-   */
+  /** \return the generalized coordinates of the system (pointer link) */
   virtual std::shared_ptr<siconos::algebra::SiconosVector> q() const = 0;
 
-  /** set value of generalized coordinates vector (copy)
-   *
-   *  \param newValue
-   */
-  virtual void setQ(const siconos::algebra::SiconosVector &newValue) = 0;
+  // FP: override SecondOrderDS. Used only in visitors of MechanicsIO. To be reviewed ...
+  virtual const siconos::algebra::ConstMapVectorType velocity_read() const = 0;
 
-  /** set value of generalized coordinates vector (pointer link)
-   *
-   *  \param newPtr
-   */
-  virtual void setQPtr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) = 0;
+  /** \return a read-only view on the initial state vector */
+  inline const siconos::algebra::ConstMapVectorType q0() const {
+    return siconos::algebra::ConstMapVectorType(q0_view_->data(), q0_view_->size());
+  }
 
-  /** get initial state (pointer link)
-   *
-   *  \return pointer on a siconos::algebra::SiconosVector
-   */
-  std::shared_ptr<siconos::algebra::SiconosVector> q0() const { return _q0; }
+  /** \return a read-only view on acceleration vector */
+  virtual const siconos::algebra::ConstMapVectorType acceleration_read() const = 0;
 
-  /** set initial state (copy)
-   *
-   *  \param newValue
-   */
-  virtual void setQ0(const siconos::algebra::SiconosVector &newValue) = 0;
-
-  /** set initial state (pointer link)
-   *
-   *  \param newPtr
-   */
-  virtual void setQ0Ptr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) = 0;
-
-  /** get velocity vector (pointer link)
-   *
-   *  \return pointer on a siconos::algebra::SiconosVector
-   */
-  virtual std::shared_ptr<siconos::algebra::SiconosVector> velocity() const = 0;
-
-  /** set velocity vector (copy)
-   *
-   *  \param newValue
-   */
-  virtual void setVelocity(const siconos::algebra::SiconosVector &newValue) = 0;
-
-  /** set velocity vector (pointer link)
-   *
-   *  \param newPtr
-   */
-  virtual void setVelocityPtr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) = 0;
-
-  /** get initial velocity (pointer)
-   *
-   *  \return pointer on a siconos::algebra::SiconosVector
-   */
-  virtual std::shared_ptr<siconos::algebra::SiconosVector> velocity0() const = 0;
-
-  /** set initial velocity (copy)
-   *
-   *  \param newValue
-   */
-  virtual void setVelocity0(const siconos::algebra::SiconosVector &newValue) = 0;
-
-  /** set initial velocity (pointer link)
-   *
-   *  \param newPtr
-   */
-  virtual void setVelocity0Ptr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) = 0;
-
-  /** get acceleration (pointer link)
-   *
-   *  \return pointer on a siconos::algebra::SiconosVector
-   */
+  /** \return the acceleration vector (pointer link) */
   virtual std::shared_ptr<siconos::algebra::SiconosVector> acceleration() const = 0;
-
-  /** get \f$ F(v,q,t,z) \f$ (pointer  link)
-   *
-   *  \return pointer on a siconos::algebra::SiconosVector
-   */
-  virtual std::shared_ptr<siconos::algebra::SiconosVector> forces() const = 0;
-
-  /** \return \f$ \nabla_qF(v,q,t,z) \f$ (pointer  link) */
-  virtual std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianqForces() const = 0;
-
-  /** get \f$ \nabla_{\dot q}F(v,q,t,z) \f$ (pointer  link)
-   *
-   *  \return pointer on a SiconosMatrix
-   */
-  virtual std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianvForces() const = 0;
 
   /** get all the values of the state vector q stored in memory.
    *  note: not const due to SchatzmanPaoliOSI::initializeWorkVectorsForDS
@@ -356,13 +223,6 @@ class SecondOrderDS : public DynamicalSystem {
    *  \return a memory
    */
   virtual const siconos::algebra::SiconosMemory &qMemory() = 0;
-
-  /** get all the values of the state vector velocity stored in memory.
-   *  note: not const due to SchatzmanPaoliOSI::initializeWorkVectorsForDS
-   *
-   *  \return a memory
-   */
-  virtual const siconos::algebra::SiconosMemory &velocityMemory() = 0;
 
   /** get forces in memory buff
    *
@@ -376,16 +236,6 @@ class SecondOrderDS : public DynamicalSystem {
    */
   void initMemory(unsigned int size) override = 0;
 
-  /** default function to compute the mass
-   */
-  virtual void computeMass() = 0;
-
-  /** function to compute the mass
-   *
-   *  \param position value used to evaluate the mass matrix
-   */
-  virtual void computeMass(std::shared_ptr<siconos::algebra::SiconosVector> position) = 0;
-
   /** set Boundary Conditions
    *
    *  \param newbd BoundaryConditions
@@ -398,9 +248,8 @@ class SecondOrderDS : public DynamicalSystem {
    *  \return std::shared_ptr<siconos::modeling::BoundaryCondition> pointer on a
    * BoundaryConditions
    */
-  inline std::shared_ptr<siconos::modeling::BoundaryCondition> boundaryConditions()
-  {
-    return _boundaryConditions;
+  inline std::shared_ptr<siconos::modeling::BoundaryCondition> boundaryConditions() {
+    return boundaryConditions_;
   };
 
   /** set Reaction to Boundary Conditions
@@ -408,37 +257,25 @@ class SecondOrderDS : public DynamicalSystem {
    *  \param newrbd BoundaryConditions pointer
    */
   inline void setReactionToBoundaryConditions(
-      std::shared_ptr<siconos::algebra::SiconosVector> newrbd)
-  {
-    _reactionToBoundaryConditions = newrbd;
+      std::shared_ptr<siconos::algebra::SiconosVector> newrbd) {
+    reactionToBoundaryConditions_ = newrbd;
   };
 
   /** get Reaction to  Boundary Conditions
    *
    *  \return pointer on a BoundaryConditions
    */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> reactionToBoundaryConditions()
-  {
-    return _reactionToBoundaryConditions;
+  inline std::shared_ptr<siconos::algebra::SiconosVector> reactionToBoundaryConditions() {
+    return reactionToBoundaryConditions_;
   };
 
   /**
-      Allocate memory for the lu factorization of the mass of the system.
+      Allocate memory and lu-factorize the mass of the system.
       Useful for some integrators with system inversion involving the mass
   */
-  virtual void init_inverse_mass() = 0;
+  virtual void init_lu_mass() = 0;
 
-  /**
-      Update the content of the lu factorization of the mass of the system,
-      if required.
-  */
-  virtual void update_inverse_mass() = 0;
-
-  /** Allocate memory for forces and its jacobian.
-   */
-  virtual void init_forces() = 0;
-
-  //  ACCEPT_STD_VISITORS();
+  bool hasLUMass() const { return hasLUMass_; }
 };
 }  // namespace siconos::modeling
 

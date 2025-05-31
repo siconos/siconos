@@ -18,7 +18,7 @@
 
 /*! \file Ropeway.h
 
-  A sequence of ropes used to described the whole cable between two pulleys
+  Ropeway class
 */
 
 #pragma once
@@ -28,16 +28,23 @@
 
 namespace siconos::fem::cable {
 
-class Cable;
-class Pile;
+class MechanicalProperties;
+class Pylon;
 class Rope;
 class Support;
 class Point;
 
+/**  A sequence of ropes used to described the whole cable between two pulleys (up and down
+ * stations)
+ *
+ */
 class Ropeway {
  private:
-  std::vector<Rope> m_ropes = {};
-  bool m_down{false};
+  /** All pieces of rope */
+  std::vector<Rope> ropes_ = {};
+
+  /** true if the ropeway goes down */
+  bool is_down_{false};
 
   Ropeway(const Ropeway &) = delete;
   Ropeway &operator=(const Ropeway &) = delete;
@@ -55,19 +62,22 @@ class Ropeway {
 
  public:
   using ojson = nlohmann::ordered_json;
+
+  /** Default and only constructor */
   Ropeway() = default;
+
   virtual ~Ropeway() noexcept = default;
 
-  /** Initialize/compute profile of rope segments and save them
+  /**  Build ropes and computes their initial profiles using Catenary equations
 
-     \param a_meca object which handles the geometric and material description of the cable
+     \param a_meca geometric and material properties of the cable
      \param a_piles the vector of pylons, must be ordered!
      \param nb_nodes number of nodes by segment
      \param a_tol tolerance used to compute initial profile
-     \apram a_nmax max number of iterations used to compute initial profile
+     \param a_nmax max number of iterations used to compute initial profile
   */
-  void compute(const Cable &a_meca, const std::vector<Pile> &a_piles, int nb_nodes,
-               double a_tol = 1e-20, int a_nmax = 20);
+  void compute(const MechanicalProperties &a_meca, const std::vector<Pylon> &a_piles,
+               int nb_nodes, double a_tol = 1e-20, int a_nmax = 20);
 
   /**
      Create and prepare all supports, from the list of declared ropes
@@ -80,15 +90,22 @@ class Ropeway {
                       int &a_pulleyIdx) const;
 
   int computeNbNodes(int nb_elem, double L);
+
+  /** Computes the profile of each rope in the ropeway
+   * \param[out] a_q nodes coordinates
+   * \param[out] a_R reaction forces at nodes
+   * \param[out] a_TS tension at nodes
+   * \param[in] q_offset offset (index) in a_q vector
+   */
   int computeMesh(std::vector<Point> &a_q, std::vector<Point> &a_R, std::vector<double> &a_TS,
                   int q_offset);
 
-  const Pile &get_FirstPile();
-  const Pile &get_LastPile();
+  const Pylon &get_FirstPylon();
+  const Pylon &get_LastPylon();
   double get_T0();
   double get_LastT();
   double get_L();
-  const Cable &get_meca0() const;
+  const MechanicalProperties &get_meca0() const;
 
   int to_json(ojson &j);
   void set_Down(bool a_value);

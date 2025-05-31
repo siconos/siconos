@@ -26,21 +26,15 @@
 #include <string>
 #include <vector>
 
+#include "DynamicalSystemVisitor.hpp"
 #include "SiconosSerialization.hpp"
-
-namespace siconos::internal {
-struct SiconosVisitor;
-}
+#include "Topology.hpp"
 
 namespace siconos::graphs {
 
 struct DynamicalSystemsGraph;
 struct InteractionsGraph;
 }  // namespace siconos::graphs
-
-namespace siconos::simulation {
-class Topology;
-}
 
 namespace siconos::modeling {
 
@@ -86,9 +80,9 @@ class NonSmoothDynamicalSystem {
 
     Change(Change&&) = default;  // Required for push_back ...
     Change(ChangeType t, std::shared_ptr<DynamicalSystem> dsnew)
-        : typeOfChange(t), ds(dsnew){};
-    Change(ChangeType t, std::shared_ptr<Interaction> inew) : typeOfChange(t), i(inew){};
-    Change(ChangeType t) : typeOfChange(t){};
+        : typeOfChange(t), ds(dsnew) {};
+    Change(ChangeType t, std::shared_ptr<Interaction> inew) : typeOfChange(t), i(inew) {};
+    Change(ChangeType t) : typeOfChange(t) {};
     void display() const;
   };
 
@@ -474,9 +468,9 @@ class NonSmoothDynamicalSystem {
 
   /** visit all dynamical systems in this system
    *
-   *  \param visitor a SiconosVisitor that can visit classes derived from DS
+   *  \param the visitor
    */
-  void visitDynamicalSystems(std::shared_ptr<siconos::internal::SiconosVisitor> visitor);
+  void visitDynamicalSystems(siconos::modeling::dynamical_systems::Visitor& visitor);
 };
 
 }  // namespace siconos::modeling

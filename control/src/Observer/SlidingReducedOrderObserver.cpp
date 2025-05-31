@@ -20,12 +20,12 @@
 
 #include "ControlSensor.hpp"
 #include "ControlZOHAdditionalTerms.hpp"
-#include "FirstOrderLinearTIDS.hpp"
+#include "FirstOrderLinearDS.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
 #include "SiconosException.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
 #include "TimeStepping.hpp"
 #include "Topology.hpp"
 #include "ZeroOrderHoldOSI.hpp"
@@ -54,7 +54,7 @@ void siconos::control::SlidingReducedOrderObserver::initialize(
   siconos::graphs::DynamicalSystemsGraph::VDescriptor originaldsgVD;
   if (!_DS)  // No DynamicalSystem was given
   {
-    // We can only work with FirstOrderNonLinearDS, FirstOrderLinearDS and FirstOrderLinearTIDS
+    // We can only work with FirstOrderNonLinearDS and FirstOrderLinearDS
     // We can use the Visitor mighty power to check if we have the right type
     auto observedDS = _sensor->getDS();
     // create the DS for the controller
@@ -63,12 +63,9 @@ void siconos::control::SlidingReducedOrderObserver::initialize(
     // if the plant model is not exact, we can use the setSimulatedDS
     // method
     if (auto folds =
-            std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearTIDS>(observedDS)) {
-      _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(*folds);
-    } else if (auto folds = std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(
-                   observedDS)) {
+            std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(observedDS)) {
       DEBUG_PRINT("dsType == Type::FirstOrderLinearDS\n");
-      _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*folds);
+     _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*folds);
     } else
       THROW_EXCEPTION(
           "SlidingReducedOrderObserver is only implemented for FirstOrderLinearDS");
@@ -84,10 +81,10 @@ void siconos::control::SlidingReducedOrderObserver::initialize(
   }
 
   // Initialize with the guessed state
-  _DS->setX0Ptr(_xHat);
+  _DS->setX0(*_xHat);  // Shared memory view
   _DS->resetToInitialState();
-  _e = std::make_shared<siconos::algebra::SiconosVector>(_C->size(0));
-  _y = std::make_shared<siconos::algebra::SiconosVector>(_C->size(0));
+  _e = std::make_shared<siconos::algebra::SiconosVector>(_C->rows());
+  _y = std::make_shared<siconos::algebra::SiconosVector>(_C->rows());
 
   auto t0 = nsds.t0();
   auto h = s.currentTimeStep();
@@ -135,21 +132,22 @@ void siconos::control::SlidingReducedOrderObserver::process() {
     _pass = true;
     // update the estimate using the first value of y, such that C\hat{x}_0 = y_0
     const auto& y = _sensor->y();
-    _e->zero();
-    siconos::algebra::prod(*_C, *_xHat, *_e);
+    *_e = *_C * *_xHat;
     *_e -= y;
 
-    siconos::algebra::SiconosVector tmpV(_DS->n());
-    siconos::algebra::SimpleMatrix tmpC(*_C);
+    siconos::algebra::SiconosVector tmpV{_e->size()};
+    siconos::algebra::SiconosMatrix tmpC{*_C};
     for (decltype(_e->size()) i = 0; i < _e->size(); ++i) tmpV(i) = (*_e)(i);
 
-    tmpC.SolveByLeastSquares(tmpV);
-    *(_xHat) -= tmpV;
-    *(_DS->x()) -= tmpV;
+    Eigen::BDCSVD<siconos::algebra::SiconosMatrix> svd(
+        tmpC, Eigen::ComputeThinU | Eigen::ComputeThinV);
+    auto result = svd.solve(tmpV);
+    *(_xHat) -= result;
+    *(_DS->x()) -= result;
     _DS->initMemory(1);
     _DS->swapInMemory();
     DEBUG_EXPR(_DS->display(););
-    DEBUG_EXPR(_DS->xMemory().display(););
+    DEBUG_EXPR(siconos::algebra::print(_DS->xMemory()););
   } else {
     DEBUG_PRINT("Second pass\n");
     // get measurement from sensor
@@ -157,11 +155,11 @@ void siconos::control::SlidingReducedOrderObserver::process() {
     // update the current measured value
     *_y = y;
 
-    ////    siconos::algebra::prod(*_C, _DS->getx(), *_e);
+    ////    siconos::algebra::prod(*_C, _DS->x_read(), *_e);
     //    *_e -= y;
     //
-    //    SiconosVector tmpV(_DS->n());
-    //    SimpleMatrix tmpC(*_C);
+    //    SiconosVector tmpV(_DS->dimension());
+    //    SiconosMatrix tmpC(*_C);
     //    for (unsigned int i = 0; i < _e->size(); ++i)
     //      tmpV(i) = (*_e)(i);
     //
@@ -169,26 +167,27 @@ void siconos::control::SlidingReducedOrderObserver::process() {
     //    *(_DS->x()) -= tmpV;
     // First pass, set _e to 0, integrate the system
     // and get the innovation term
-    _e->zero();
+    _e->setZero();
     _simulation->computeOneStep();
 
     // e = C*xhat_{k+1} - y_{k+1}
-    siconos::algebra::prod(*_C, _DS->getx(), *_e);
+    *_e = *_C * _DS->x_read();
     *_e -= *_y;
 
     // Second pass, now we update the state
     //
     // But first we need to reset the state to the
     // previous value (at t_k)
-    DEBUG_EXPR(_DS->xMemory().display(););
-    _DS->setX(_DS->xMemory().getSiconosVector(0));
+    DEBUG_EXPR(siconos::algebra::print(_DS->xMemory()););
+    auto current_x = _DS->x();                        // Pointer
+    *current_x = _DS->xMemory().getSiconosVector(0);  // Copy
     // integrate with the new innovation term
     _simulation->computeOneStep();
 
     // We can go one step forward
     _simulation->nextStep();
 
-    *_xHat = _DS->getx();
+    *_xHat = _DS->x_read();
   }
   DEBUG_END("void siconos::control::SlidingReducedOrderObserver::process()\n");
 }

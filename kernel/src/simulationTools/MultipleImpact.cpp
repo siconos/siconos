@@ -21,10 +21,8 @@
 #include "LagrangianDS.hpp"
 #include "MultipleImpactNSL.hpp"
 #include "OSNSMatrix.hpp"
-#include "SiconosMatrixVectorOp.hpp"  // for mat-vec prod
+#include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "SiconosVectorOp.hpp"  // for setBlock
-#include "SimpleMatrix.hpp"
 #include "Simulation.hpp"
 #include "Topology.hpp"
 #include "io.hpp"  // for siconos::algebra::write
@@ -224,9 +222,10 @@ void siconos::nonsmooth_formulations::MultipleImpact::AllocateMemory() {
   // for the data matrix
   auto _numberCols = EstimateNdataCols();
   if (!_DataMatrix)
-    _DataMatrix = std::make_shared<siconos::algebra::SimpleMatrix>(_sizeDataSave, _numberCols);
+    _DataMatrix =
+        std::make_shared<siconos::algebra::SiconosMatrix>(_sizeDataSave, _numberCols);
   else {
-    if ((_DataMatrix->size(0) != _sizeDataSave) || (_DataMatrix->size(1) != _numberCols))
+    if ((_DataMatrix->rows() != _sizeDataSave) || (_DataMatrix->cols() != _numberCols))
       _DataMatrix->resize(_sizeDataSave, _numberCols);
   }
 }
@@ -252,11 +251,11 @@ void siconos::nonsmooth_formulations::MultipleImpact::BuildParaContact() {
   }
   /*
     std::cout << " Restitution coefficients: " <<std::endl;
-    _restitutionContact->display();
+    siconos::algebra::print(*_restitutionContact);
     std::cout << "Stiffnesses: " <<std::endl;
-    _Kcontact->display();
+    siconos::algebra::print(*_Kcontact);
     std::cout << "Elasticity coeffients at contacts: " <<std::endl;
-    _elasticyCoefficientcontact->display();
+    siconos::algebra::print(*_elasticyCoefficientcontact);
   */
 }
 //========================================================================================
@@ -288,27 +287,27 @@ void siconos::nonsmooth_formulations::MultipleImpact::PreComputeImpact() {
   if (_velocityContact->size() != _sizeOutput) {
     _velocityContact->resize(_sizeOutput);
   }
-  _velocityContact->zero();
+  _velocityContact->setZero();
   //
   if (_oldVelocityContact->size() != _sizeOutput) {
     _oldVelocityContact->resize(_sizeOutput);
   }
-  _oldVelocityContact->zero();
+  _oldVelocityContact->setZero();
   //
   if (_energyContact->size() != _sizeOutput) {
     _energyContact->resize(_sizeOutput);
   }
-  _energyContact->zero();
+  _energyContact->setZero();
   //
   if (_WorkcContact->size() != _sizeOutput) {
     _WorkcContact->resize(_sizeOutput);
   }
-  _WorkcContact->zero();
+  _WorkcContact->setZero();
   //
   if (_distributionVector->size() != _sizeOutput) {
     _distributionVector->resize(_sizeOutput);
   }
-  _distributionVector->zero();
+  _distributionVector->setZero();
   //
   if (_stateContact->size() != _sizeOutput) {
     _stateContact->resize(_sizeOutput);
@@ -317,37 +316,37 @@ void siconos::nonsmooth_formulations::MultipleImpact::PreComputeImpact() {
   if (_Kcontact->size() != _sizeOutput) {
     _Kcontact->resize(_sizeOutput);
   }
-  _Kcontact->zero();
+  _Kcontact->setZero();
   //
   if (_restitutionContact->size() != _sizeOutput) {
     _restitutionContact->resize(_sizeOutput);
   }
-  _restitutionContact->zero();
+  _restitutionContact->setZero();
   //
   if (_elasticyCoefficientcontact->size() != _sizeOutput) {
     _elasticyCoefficientcontact->resize(_sizeOutput);
   }
-  _elasticyCoefficientcontact->zero();
+  _elasticyCoefficientcontact->setZero();
   //
   if (_tolImpulseContact->size() != _sizeOutput) {
     _tolImpulseContact->resize(_sizeOutput);
   }
-  _tolImpulseContact->zero();
+  _tolImpulseContact->setZero();
   //
   if (_deltaImpulseContact->size() != _sizeOutput) {
     _deltaImpulseContact->resize(_sizeOutput);
   }
-  _deltaImpulseContact->zero();
+  _deltaImpulseContact->setZero();
   //
   if (_impulseContactUpdate->size() != _sizeOutput) {
     _impulseContactUpdate->resize(_sizeOutput);
   }
-  _impulseContactUpdate->zero();
+  _impulseContactUpdate->setZero();
   //
   if (_forceContact->size() != _sizeOutput) {
     _forceContact->resize(_sizeOutput);
   }
-  _forceContact->zero();
+  _forceContact->setZero();
   // 4. Initialize the relative velocity, potential energy, impulse at contacts
   InitializeInput();
   // 5. Build the vectors of stifnesseses, of restitution coefficients, and of elaticity
@@ -367,27 +366,27 @@ void siconos::nonsmooth_formulations::MultipleImpact::InitializeInput() {
 
     unsigned int pos_inter = indexSet.properties(*ui).absolute_position;
 
-    siconos::algebra::setBlock(Vc0, _velocityContact, Vc0.size(), 0, pos_inter);
+    _velocityContact->segment(pos_inter, Vc0.size()) = Vc0;
     auto ener0 = std::make_shared<siconos::algebra::SiconosVector>(Vc0.size());
-    ener0->zero();  // We suppose that the initial potential energy before impact is equal to
-                    // zero at any contact
+    ener0->setZero();  // We suppose that the initial potential energy before impact is equal
+                       // to zero at any contact
     // at the beginning of impact
-    siconos::algebra::setBlock(*ener0, _energyContact, ener0->size(), 0, pos_inter);
+    _energyContact->segment(pos_inter, ener0->size()) = *ener0;
     // std::shared_ptr<siconos::algebra::SiconosVector> impulse0=
     // (inter)->lambda(1))->vector(inter->number());
     auto impulse0 = std::make_shared<siconos::algebra::SiconosVector>(Vc0.size());
-    impulse0
-        ->zero();  // We suppose that the impulse before impact is equal to zero at any contact
+    impulse0->setZero();  // We suppose that the impulse before impact is equal to zero at any
+                          // contact
     // at the beginning of impact
-    siconos::algebra::setBlock(*impulse0, _tolImpulseContact, impulse0->size(), 0, pos_inter);
+    _tolImpulseContact->segment(pos_inter, impulse0->size()) = *impulse0;
   };
   /*
     std::cout << "Initial relative velocity at contacts" <<std::endl;
-    _velocityContact->display();
+    siconos::algebra::print(*_velocityContact);
     std::cout<< "Initial energy at contacts" <<std::endl;
-    _energyContact->display();
+    siconos::algebra::print(*_energyContact);
     std::cout << "Impulse at contact" <<std::endl;
-    _tolImpulseContact->display();
+    siconos::algebra::print(*_tolImpulseContact);
   */
 }
 //=========================================================================================
@@ -414,8 +413,9 @@ void siconos::nonsmooth_formulations::MultipleImpact::initialize(
 };
 //========================================================================================
 void siconos::nonsmooth_formulations::MultipleImpact::PrimConVelocity() {
-  getMin(*_velocityContact, _relativeVelocityPrimaryContact, _primaryContactId);
+  _relativeVelocityPrimaryContact = _velocityContact->minCoeff(&_primaryContactId);
   _energyPrimaryContact = (*_energyContact)(_primaryContactId);
+
   if (!isVelNegative(_relativeVelocityPrimaryContact)) {
     THROW_EXCEPTION(
         "siconos::nonsmooth_formulations::MultipleImpact::PrimConVelocity, the velocity at "
@@ -431,8 +431,9 @@ void siconos::nonsmooth_formulations::MultipleImpact::PrimConVelocity() {
 }
 //=======================================================================================
 void siconos::nonsmooth_formulations::MultipleImpact::PrimConEnergy() {
-  getMax(*_energyContact, _energyPrimaryContact, _primaryContactId);
+  _energyPrimaryContact = _energyContact->maxCoeff(&_primaryContactId);
   _relativeVelocityPrimaryContact = (*_velocityContact)(_primaryContactId);
+
   if (_energyPrimaryContact < 0.0) {
     THROW_EXCEPTION(
         "siconos::nonsmooth_formulations::MultipleImpact::PrimConEnergy the potential energy "
@@ -448,20 +449,16 @@ void siconos::nonsmooth_formulations::MultipleImpact::PrimConEnergy() {
 }
 //======================================================================================
 bool siconos::nonsmooth_formulations::MultipleImpact::IsEnermaxZero() {
-  double MaxEner;
-  unsigned int IdMax;
-  getMax(*_energyContact, MaxEner, IdMax);
-  if (isEnerZero(MaxEner))
+  auto maxEner = _energyContact->maxCoeff();
+  if (isEnerZero(maxEner))
     return true;
   else
     return false;
 }
 //======================================================================================
 bool siconos::nonsmooth_formulations::MultipleImpact::IsVcminNegative() {
-  double MinVelCon;
-  unsigned int IdConVmin;
-  getMin(*_velocityContact, MinVelCon, IdConVmin);
-  if (isVelNegative(MinVelCon))
+  auto minVelCon = _velocityContact->minCoeff();
+  if (isVelNegative(minVelCon))
     return true;
   else
     return false;
@@ -665,17 +662,14 @@ void siconos::nonsmooth_formulations::MultipleImpact::ComputeImpulseContact() {
 void siconos::nonsmooth_formulations::MultipleImpact::Compute_velocityContact() {
   (*_oldVelocityContact) =
       (*_velocityContact);  // save the relative velocity at the beginning of the step
-  (*_velocityContact) =
-      (*_velocityContact) +
-      siconos::algebra::prod(
-          *(_M->defaultMatrix()),
-          *_deltaImpulseContact);  // compute the relative velocity at the end of the step
+  (*_velocityContact) = (*_velocityContact) + *(_M->defaultMatrix()) * *_deltaImpulseContact;
+  // compute the relative velocity at the end of the step
   //
   /*
     std::cout << "Relative velocity at contacts at the beginning of step:" <<std::endl;
-    _oldVelocityContact->display();
+    siconos::algebra::print(*_oldVelocityContact);
     std::cout << "Relative velocity at contacts at the end of step:" <<std::endl;
-    _velocityContact->display();
+    siconos::algebra::print(*_velocityContact);
   */
   //
 }
@@ -746,9 +740,9 @@ void siconos::nonsmooth_formulations::MultipleImpact::Compute_energyContact() {
   /*
 
     std::cout << "Potential energy at contacts at the end of step:" <<std::endl;
-    _energyContact->display();
+    siconos::algebra::print(*_energyContact);
     std::cout << "Work done during the compression phase at contacts" <<std::endl;
-    _WorkcContact->display();
+    siconos::algebra::print(*_WorkcContact);
 
   */
 }
@@ -768,20 +762,19 @@ void siconos::nonsmooth_formulations::MultipleImpact::UpdateDuringImpact() {
     auto lambda = inter.lambda(inputOutputLevel());
     // Copy _velocityContact/_tolImpulseContact, starting from index pos into y/lambda
     // save into y !!
-    siconos::algebra::setBlock(*_velocityContact, y, y->size(), pos, 0);
+    y->segment(0, y->size()) = _velocityContact->segment(pos, y->size());
     // saved into lambda[1] !!
-    siconos::algebra::setBlock(*_impulseContactUpdate, lambda, lambda->size(), pos, 0);
-    // siconos::algebra::setBlock(*_deltaImpulseContact, lambda, lambda->size(), pos, 0);
+    lambda->segment(0, lambda->size()) = _impulseContactUpdate->segment(pos, lambda->size());
   };
   // 2. Update the Input[1], state of DS systems, Output[1]
   simulation()->update(inputOutputLevel());
-  _impulseContactUpdate->zero();  // reset input[1] to zero after each update
+  _impulseContactUpdate->setZero();  // reset input[1] to zero after each update
 }
 //--------------------------------------------------------------------------------------
 void siconos::nonsmooth_formulations::MultipleImpact::SaveDataOneStep(unsigned int _ithPoint) {
   // Save the total impulse at the primary contacts (time-like independent variable) and the
   // time evolution during impact
-  if (_ithPoint >= _DataMatrix->size(0))
+  if (_ithPoint >= _DataMatrix->rows())
     THROW_EXCEPTION(
         "In siconos::nonsmooth_formulations::MultipleImpact::ComputeImpact, number of points "
         "saved "
@@ -802,13 +795,13 @@ void siconos::nonsmooth_formulations::MultipleImpact::SaveDataOneStep(unsigned i
     if (indexSet1->is_vertex(inter))  // if Interaction belongs to the IndexSet[1]
     {
       auto pos = indexSet0->properties(*ui).absolute_position;
-      siconos::algebra::setBlock(*_tolImpulseContact, P_inter, P_inter->size(), pos, 0);
-      siconos::algebra::setBlock(*_forceContact, F_inter, F_inter->size(), pos, 0);
-      siconos::algebra::setBlock(*_energyContact, E_inter, E_inter->size(), pos, 0);
+      P_inter->segment(0, P_inter->size()) = _tolImpulseContact->segment(pos, P_inter->size());
+      F_inter->segment(0, F_inter->size()) = _forceContact->segment(pos, F_inter->size());
+      E_inter->segment(0, E_inter->size()) = _energyContact->segment(pos, E_inter->size());
     } else {
-      P_inter->zero();  // no impulse at this Interaction
-      F_inter->zero();  // no force at this Interaction
-      E_inter->zero();  // no potential at this Interaction
+      P_inter->setZero();  // no impulse at this Interaction
+      F_inter->setZero();  // no force at this Interaction
+      E_inter->setZero();  // no potential at this Interaction
     };
     // Write the force at the Interaction
     WriteVectorIntoMatrix(*F_inter, _ithPoint, col_pos);
@@ -842,9 +835,9 @@ void siconos::nonsmooth_formulations::MultipleImpact::ComputeImpact() {
   /*
      std::cout << "----------Before multiple impacts computation---------------" <<std::endl;
      std::cout << "Velocity at contacts: ";
-     _velocityContact->display();
+     siconos::algebra::print(*_velocityContact);
      std::cout << "Impulse at contact: ";
-     _tolImpulseContact->display();
+     siconos::algebra::print(*_tolImpulseContact);
   */
   // cout << "-------------------Multiple impacts computation starts:-----------------------"
   // <<std::endl;
@@ -908,24 +901,24 @@ void siconos::nonsmooth_formulations::MultipleImpact::ComputeImpact() {
       break;
     }
     // std::cout << "Distribution vector: ";
-    // _distributionVector->display();
+    // siconos::algebra::print(*_distributionVector);
     // std::cout << "Incremental Impulse: ";
-    // _deltaImpulseContact->display();
+    // siconos::algebra::print(*_deltaImpulseContact);
     // std::cout << "Impulse at contact: ";
-    // _tolImpulseContact->display();
+    // siconos::algebra::print(*_tolImpulseContact);
     // std::cout << "Velocity at contacts: ";
-    // _velocityContact->display();
+    // siconos::algebra::print(*_velocityContact);
     // std::cout << "Potential energy at contacts: ";
-    // _energyContact->display();
+    // siconos::algebra::print(*_energyContact);
   }
 
   //
   // std::cout << "*****************Impact computation is terminated******************"
   // <<std::endl; std::cout << "Number of integration steps: " << number_step <<std::endl;
   // std::cout << "Velocity at contacts: ";
-  // _velocityContact->display();
+  // siconos::algebra::print(*_velocityContact);
   // std::cout << "Impulse at contact: ";
-  // _tolImpulseContact->display();
+  // siconos::algebra::print(*_tolImpulseContact);
   // std::cout << "Duration of the multiple impacts process: " << _timeVariable << " s"
   // <<std::endl;
 
@@ -952,25 +945,14 @@ void siconos::nonsmooth_formulations::MultipleImpact::PostComputeImpact() {
     auto lambda = inter.lambda(inputOutputLevel());
     // Copy _velocityContact/_tolImpulseContact, starting from index pos into y/lambda
     // save into y !!
-    siconos::algebra::setBlock(*_velocityContact, y, y->size(), pos,
-                               0);  // Warning: yEquivalent is
-    // saved into lambda[1] !!
-    siconos::algebra::setBlock(*_impulseContactUpdate, lambda, lambda->size(), pos, 0);
+    y->segment(0, y->size()) = _velocityContact->segment(pos, y->size());
+    // Warning: yEquivalent is saved into lambda[1] !!
+    lambda->segment(0, lambda->size()) = _impulseContactUpdate->segment(pos, lambda->size());
     // If the update is performed at the end of the impact process, we update the total normal
     // impulse at contacts from the beginning to the end of impact (vector _tolImpulseContact).
     // Otherwise, we must reset the lambda[1] to zero because the post-impact velocity has been
     // calculated during impact if (!_saveData) // we update the impact state at the end of
     // impact
-    //   {
-    //     // Copy _velocityContact/_tolImpulseContact, starting from index pos into y/lambda
-    //     // save into y !!
-    //     siconos::algebra::setBlock(*_velocityContact, y, y->size(), pos, 0);// Warning:
-    //     yEquivalent is
-    //     // saved into lambda[1] !!
-    //     siconos::algebra::setBlock(*_tolImpulseContact, lambda, lambda->size(), pos, 0);
-    //   }
-    // else //
-    //   lambda->zero();
   }
 }
 
@@ -1029,9 +1011,9 @@ void siconos::nonsmooth_formulations::MultipleImpact::display() const {
     auto lag_ds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds);
     std::cout << "DS number: " << ds->number() << std::endl;
     std::cout << "Pre-impact velocity: ";
-    (lag_ds->velocityMemory().getSiconosVector(1)).display();
+    siconos::algebra::print((lag_ds->velocityMemory().getSiconosVector(1)));
     std::cout << "Post-impact velocity: ";
-    (lag_ds->velocity())->display();
+    siconos::algebra::print((lag_ds->velocity_read()));
   }
   // Display impulses at contact points
   auto IndexSet0 = simulation()->nonSmoothDynamicalSystem()->topology()->indexSet(0);
@@ -1039,6 +1021,6 @@ void siconos::nonsmooth_formulations::MultipleImpact::display() const {
   for (std::tie(vi, viend) = IndexSet0->vertices(); vi != viend; ++vi) {
     auto inter = IndexSet0->bundle(*vi);
     std::cout << "Impulse at contact point " << inter->number() << ":";
-    (inter->lambda(1))->display();
+    siconos::algebra::print(*(inter->lambda(1)));
   }
 };

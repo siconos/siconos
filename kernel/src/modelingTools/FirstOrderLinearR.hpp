@@ -25,38 +25,52 @@
 
 namespace siconos::modeling {
 
-/** Pointer to function used for plug-in for matrix-type operators (C,F etc) */
-typedef void (*FOMatPtr1)(double, unsigned int, unsigned int, double *, unsigned int,
-                          double *);
-
-/** Pointer to function used for plug-in for square matrix-type operators (D) */
-typedef void (*FOMatPtr2)(double, unsigned int, double *, unsigned int, double *);
-
-/** Pointer to function used for plug-in for vector-type operators (e) */
-typedef void (*FOVecPtr)(double, unsigned int, double *, unsigned int, double *);
-
 /**
-   First Order Linear Relation
-
-
-   Linear Relation for First Order Dynamical Systems:
+   First Order Linear Relation with time-dependant operators:
 
    \f[
 
-   y &=& C(t,z)x(t) + F(t,z)z + D(t,z)\lambda + e(t,z) \\
-   R &=& B(t,z) \lambda
+   y &=& C(t)x(t) + D(t)\lambda + e(t) \\
+   R &=& B(t) \lambda
    \f]
 
-   The following operators can be plugged: B(t,z), C(t,z), D(t,z), e(t,z),
-   F(t,z)
+   The following operators can be can be set by user-defined functions:
+   B(t), C(t), D(t), e(t)
+
+   Storage for:
+    - B: \f$ \nabla_{\lambda} g(x,t,\lambda) \f$ in FirstOrderR
+    - C: \f$ \nabla_{x} h(x,t,\lambda) \f$ in FirstOrderR
+    - D: \f$ \nabla_{\lambda} h(x,t,\lambda) \f$ in FirstOrderR
+    - e: attribute in this class
 
 */
 class FirstOrderLinearR : public FirstOrderR {
  protected:
   ACCEPT_SERIALIZATION(FirstOrderLinearR);
 
-  /** e operator (time dependant) */
-  std::shared_ptr<siconos::algebra::SiconosVector> _e{nullptr};
+  /** e(t) operator */
+  std::shared_ptr<siconos::algebra::MapVectorType> eVector_view_{nullptr};
+
+  /** internal (optional) storage used for e(t) */
+  std::unique_ptr<std::vector<double>> eVector_internal_storage_{nullptr};
+
+  /** function wrapper used to compute e(t) */
+  siconos::modeling::func_prototypes::FunctionS_V computeeVector_{nullptr};
+
+  /** True if e(t) is taken into account and constant */
+  bool hasConstanteVector_{false};
+
+  /** True if e(t) is taken into account */
+  bool haseVector_{false};
+
+  /** function wrapper used to compute  B(t) */
+  siconos::modeling::func_prototypes::FunctionS_M computeB_{nullptr};
+
+  /** function wrapper used to compute  C(t) */
+  siconos::modeling::func_prototypes::FunctionS_M computeC_{nullptr};
+
+  /** function wrapper used to compute D(t) */
+  siconos::modeling::func_prototypes::FunctionS_M computeD_{nullptr};
 
   /** initialize the relation (check sizes, memory allocation in workV and workM ...)
    *
@@ -68,161 +82,135 @@ class FirstOrderLinearR : public FirstOrderR {
    *
    *  \param inter an Interaction using this relation
    */
-  void checkSize(Interaction &inter) override;
+  void checkSize(const Interaction &inter) const override;
 
  public:
-  /** default constructor
-   */
-  FirstOrderLinearR() : FirstOrderR(RelationSubType::LinearR){};
-
-  /** Constructor with C and B plugin names
-   *
-   *  \param Cname the plugin name for computing the C matrix
-   *  \param Bname the plugin name for computing the B matrix
-   */
-  FirstOrderLinearR(const std::string &Cname, const std::string &Bname);
-
-  /** Constructor with all plugin names
-   *
-   *  \param Cname the plugin name for computing the C matrix
-   *  \param Dname the plugin name for computing the D matrix
-   *  \param Fname the plugin name for computing the F matrix
-   *  \param Ename the plugin name for computing the e vector
-   *  \param Bname the plugin name for computing the B matrix
-   */
-  FirstOrderLinearR(const std::string &Cname, const std::string &Dname,
-                    const std::string &Fname, const std::string &Ename,
-                    const std::string &Bname);
-
-  /** create the Relation from constant matrices (only B and C operators)
-   *
-   *  \param C the C matrix
-   *  \param B the B matrix
-   */
-  FirstOrderLinearR(std::shared_ptr<siconos::algebra::SimpleMatrix> C,
-                    std::shared_ptr<siconos::algebra::SimpleMatrix> B);
-
-  /** create the Relation from a set of data
-   *
-   *  \param C the C matrix
-   *  \param D the D matrix
-   *  \param F the F matrix
-   *  \param e the e matrix
-   *  \param B the B matrix
-   */
-  FirstOrderLinearR(std::shared_ptr<siconos::algebra::SimpleMatrix> C,
-                    std::shared_ptr<siconos::algebra::SimpleMatrix> D,
-                    std::shared_ptr<siconos::algebra::SimpleMatrix> F,
-                    std::shared_ptr<siconos::algebra::SiconosVector> e,
-                    std::shared_ptr<siconos::algebra::SimpleMatrix> B);
+  /** default (and only) constructor */
+  FirstOrderLinearR() : FirstOrderR(RelationSubType::LinearR) {};
 
   /** destructor
    */
   virtual ~FirstOrderLinearR() noexcept = default;
 
-  /** set a specified function to compute the matrix C
+  /** \return a read-only view on B(t) matrix */
+  inline  auto B() const { return jacobiangOver_lambda(); }
+
+  /** Set a constant B matrix for the system
    *
-   *  \param pluginPath the complete path to the plugin
-   *  \param functionName the function name to use in this plugin
+   *  \param newValue B matrix
+   *
    */
-  void setComputeCFunction(const std::string &pluginPath, const std::string &functionName)
-  {
-    setComputeJachxFunction(pluginPath, functionName);
+  void setConstantB(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+
+  /** set a user-defined function to compute B(t)
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputeBFunction(const siconos::modeling::func_prototypes::FunctionS_M &fct);
+
+  /** Computes B(t)
+   *  \param time current time value
+   */
+  void computeB(double time);
+
+  /** \return a read-only view on C(t) matrix */
+  inline  auto C() const { return jacobianhOver_state(); }
+
+  /** Set a constant C matrix for the system
+   *
+   *  \param newValue C matrix
+   *
+   */
+  void setConstantC(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+
+  /** set a user-defined function to compute C(t)
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputeCFunction(const siconos::modeling::func_prototypes::FunctionS_M &fct);
+
+  /** Computes C(t)
+   *  \param time current time value
+   */
+  void computeC(double time);
+
+  /** \return a read-only view on D(t) matrix */
+  inline  auto D() const { return jacobianhOver_lambda(); }
+
+  /** Set a constant D matrix for the system
+   *
+   *  \param newValue D matrix
+   *
+   */
+  void setConstantD(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+
+  /** set a user-defined function to compute D(t)
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputeDFunction(const siconos::modeling::func_prototypes::FunctionS_M &fct);
+
+  /** Computes D(t)
+   *  \param time current time value
+   */
+  void computeD(double time);
+
+  /** \return  a read-only view on e(t) */
+  inline  auto eVector() const {
+    return siconos::algebra::ConstMapVectorType(eVector_view_->data(), eVector_view_->size());
   }
 
-  /** set a specified function to compute the matrix D
+  /** set a constant e vector
    *
-   *  \param pluginPath the complete path to the plugin
-   *  \param functionName the function name to use in this plugin
+   *  \param neweVector e vector
    */
-  void setComputeDFunction(const std::string &pluginPath, const std::string &functionName)
-  {
-    setComputeJachlambdaFunction(pluginPath, functionName);
-  }
+  void setConstanteVector(Eigen::Ref<siconos::algebra::SiconosVector> neweVector);
 
-  /** set a specified function to compute the matrix B
+  /** True if e(t) is taken into account */
+  bool haseVector() const { return haseVector_; }
+
+  /** set a user-defined function to compute external forces
    *
-   *  \param pluginPath the complete path to the plugin
-   *  \param functionName the function name to use in this plugin
+   *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeBFunction(const std::string &pluginPath, const std::string &functionName)
-  {
-    setComputeJacglambdaFunction(pluginPath, functionName);
-  }
-  /** Function to compute the matrix C
-   *
-   *  \param time the current time
-   *  \param z the auxiliary input vector
-   *  \param C the C matrix
+  void setComputeeVectorFunction(const siconos::modeling::func_prototypes::FunctionS_V &fct);
+
+  /** Computes e(t)
+   *  \param time current time value
    */
-  virtual void computeC(double time, siconos::algebra::BlockVector &z,
-                        siconos::algebra::SimpleMatrix &C);
+  void computee(double time);
 
-  /** Function to compute the matrix D
-   *
-   *  \param time the current time
-   *  \param z the auxiliary input vector
-   *  \param D the D matrix
-   */
-  virtual void computeD(double time, siconos::algebra::BlockVector &z,
-                        siconos::algebra::SimpleMatrix &D);
+  // /**
+  //    to compute the output y = h(t,x,...) of the Relation
 
-  /** Function to compute the matrix F
-   *
-   *  \param time the current time
-   *  \param z the auxiliary input vector
-   *  \param F the F matrix
-   */
-  virtual void computeF(double time, siconos::algebra::BlockVector &z,
-                        siconos::algebra::SimpleMatrix &F);
+  //    \param time current time value
+  //    \param x coordinates of the dynamical systems involved in the relation
+  //    \param lambda interaction \f$\lambda\f$ vector
+  //    \param z user defined parameters (optional)
+  //    \param y the resulting vector
+  // */
+  // virtual void computeh(double time, const siconos::algebra::BlockVector &x,
+  //                       const siconos::algebra::SiconosVector &lambda,
+  //                       siconos::algebra::BlockVector &z, siconos::algebra::SiconosVector
+  //                       &y);
 
-  /** Function to compute the vector e
-   *
-   *  \param time the current time
-   *  \param z the auxiliary input vector
-   *  \param e the e vector
-   */
-  virtual void computee(double time, siconos::algebra::BlockVector &z,
-                        siconos::algebra::SiconosVector &e);
+  // /**
+  //    to compute the nonsmooth input r = g(t,x,...) of the Relation
 
-  /** Function to compute the matrix B
-   *
-   *  \param time the current time
-   *  \param z the auxiliary input vector
-   *  \param B the B matrix
-   */
-  virtual void computeB(double time, siconos::algebra::BlockVector &z,
-                        siconos::algebra::SimpleMatrix &B);
-
-  /**
-     to compute the output y = h(t,x,...) of the Relation
-
-     \param time current time value
-     \param x coordinates of the dynamical systems involved in the relation
-     \param lambda interaction \f$\lambda\f$ vector
-     \param z user defined parameters (optional)
-     \param y the resulting vector
-  */
-  virtual void computeh(double time, const siconos::algebra::BlockVector &x,
-                        const siconos::algebra::SiconosVector &lambda,
-                        siconos::algebra::BlockVector &z, siconos::algebra::SiconosVector &y);
-
-  /**
-     to compute the nonsmooth input r = g(t,x,...) of the Relation
-
-     \param time current time value
-     \param lambda interaction \f$\lambda\f$ vector
-     \param z user defined parameters (optional)
-     \param r the resulting vector
-  */
-  virtual void computeg(double time, const siconos::algebra::SiconosVector &lambda,
-                        siconos::algebra::BlockVector &z, siconos::algebra::BlockVector &r);
+  //    \param time current time value
+  //    \param lambda interaction \f$\lambda\f$ vector
+  //    \param z user defined parameters (optional)
+  //    \param r the resulting vector
+  // */
+  // virtual void computeg(double time, const siconos::algebra::SiconosVector &lambda,
+  //                       siconos::algebra::BlockVector &z, siconos::algebra::BlockVector
+  //                       &r);
 
   /** default function to compute y
    *
    *  \param time current time
    *  \param inter Interaction using this Relation
-   *  \param level not used
+   *  \param level dummy parameter, always=0
    */
   void computeOutput(double time, Interaction &inter, unsigned int level = 0) override;
 
@@ -230,7 +218,7 @@ class FirstOrderLinearR : public FirstOrderR {
    *
    *  \param time current time
    *  \param inter Interaction using this Relation
-   *  \param level not used
+   *  \param level dummy parameter, always=0
    */
   void computeInput(double time, Interaction &inter, unsigned int level = 0) override;
 
@@ -238,34 +226,16 @@ class FirstOrderLinearR : public FirstOrderR {
    */
   void display() const override;
 
-  /** set e operator
-   *
-   *  \param  newe the new value of e
-   */
-  inline void setePtr(std::shared_ptr<siconos::algebra::SiconosVector> newe)
-  {
-    _e = newe;
-  }
-
-  /** get e
-   *
-   *  \return e matrix
-   */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> e() const
-  {
-    return _e;
-  }
-
   /** determines if the Relation is linear
    *
    *  \return true if the relation is linear.
    */
-  bool isLinear() override { return true; }
+  bool isLinear() const override { return true; }
 
   // Jacobians: required to fullfill base abstract class API but do nothing.
   // Note FP: final would be better than override but swig cannot handle it.
-  void computeJach(double time, Interaction &inter) override{};
-  void computeJacg(double time, Interaction &inter) override{};
+  void computeJach(double time, Interaction &inter) override {};
+
 };
 }  // namespace siconos::modeling
 

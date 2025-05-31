@@ -29,8 +29,8 @@
 #include "Relation.hpp"
 #include "SiconosConfig.h"  // for HAS_FORTRAN
 #include "SiconosException.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
 #include "Topology.hpp"
 
 // #define DEBUG_NOCOLOR
@@ -132,7 +132,7 @@ void siconos::simulation::EventDriven::updateIndexSet(unsigned int i) {
       {
         if (fabs(y) > tolerance_) {
           indexSet1->remove_vertex(inter);  // remove the Interaction from IndexSet[1]
-          inter->lambda(1)->zero();         // reset the lambda[1] to zero
+          inter->lambda(1)->setZero();      // reset the lambda[1] to zero
         }
       }
     } else if (i == 2)  // IndexSet[2]
@@ -150,7 +150,7 @@ void siconos::simulation::EventDriven::updateIndexSet(unsigned int i) {
         {
           if (fabs(y) > tolerance_) {
             indexSet2->remove_vertex(inter);  // remove the Interaction from IndexSet[1]
-            inter->lambda(2)->zero();         // reset the lambda[i] to zero
+            inter->lambda(2)->setZero();      // reset the lambda[i] to zero
           }
         }
       } else  // Interaction is not in the indexSet[1]
@@ -158,7 +158,7 @@ void siconos::simulation::EventDriven::updateIndexSet(unsigned int i) {
         if (indexSet2->is_vertex(inter))  // Interaction is in the indexSet[2]
         {
           indexSet2->remove_vertex(inter);  // remove the Interaction from IndexSet[2]
-          inter->lambda(2)->zero();         // reset the lambda[i] to zero
+          inter->lambda(2)->setZero();      // reset the lambda[i] to zero
         }
       }
     } else {
@@ -444,14 +444,18 @@ void siconos::simulation::EventDriven::computef(siconos::integrators::OneStepInt
 
     auto ds = osiDSGraph->bundle(*dsi);
     if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
-      auto& qDotTmp = *lds->velocity();
-      auto& qDotDotTmp = *lds->acceleration();
-      pos += qDotTmp.copyData(&xdot[pos]);
-      pos += qDotDotTmp.copyData(&xdot[pos]);
+      auto qdot = lds->velocity_read();
+      auto acc = lds->acceleration_read();
+      assert((pos + acc.size() + qdot.size()) <= *sizeOfX && "Destination buffer too small!");
+      std::copy(qdot.data(), qdot.data() + qdot.size(), &xdot[pos]);
+      pos += qdot.size();
+      std::copy(acc.data(), acc.data() + acc.size(), &xdot[pos]);
+      pos += acc.size();
     } else {
-      auto& xtmp2 = ds->getRhs();  // Pointer link !
-      // DEBUG_EXPR(xtmp2.display(););
-      pos += xtmp2.copyData(&xdot[pos]);
+      auto rhs = ds->rhs_read();
+      assert(pos + rhs.size() <= *sizeOfX && "Destination buffer too small!");
+      std::copy(rhs.data(), rhs.data() + rhs.size(), &xdot[pos]);
+      pos += rhs.size();
     }
   }
   DEBUG_END(
@@ -495,16 +499,19 @@ void siconos::simulation::EventDriven::computeJacobianfx(
     auto ds = osiDSGraph->bundle(*dsi);
     if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
       auto jacotmp =
-          std::dynamic_pointer_cast<siconos::algebra::BlockMatrix>(lds->jacobianRhsx());
-      for (decltype(lds->n()) j = 0; j < lds->n(); ++j) {
+          std::dynamic_pointer_cast<siconos::algebra::BlockMatrix>(lds->jacobianRhsOver_x());
+      for (decltype(lds->x_size()) j = 0; j < lds->x_size(); ++j) {
         for (decltype(lds->dimension()) k = 0; k < lds->dimension(); ++k)
-          jacob[i++] = jacotmp->getValue(k, j);
+          jacob[i++] = (*jacotmp)(k, j);
       }
     } else if (auto lds =
                    std::dynamic_pointer_cast<siconos::modeling::FirstOrderNonLinearDS>(ds)) {
-      auto jacotmp =
-          std::static_pointer_cast<siconos::algebra::SimpleMatrix>(ds->jacobianRhsx());
-      pos += jacotmp->copyData(&jacob[pos]);
+      auto jacotmp = ds->jacobianRhsOver_x()->block(0, 0);  // just one block in JacxRhs
+      auto jaco_size = jacotmp->rows() * jacotmp->cols();
+      // assert(pos + jacotmp.size() <= jacobsize && "Destination buffer too small!");
+      std::copy(jacotmp->data(), jacotmp->data() + jacotmp->size(), &jacob[pos]);
+      pos += jaco_size;
+
     } else {
       THROW_EXCEPTION(
           "siconos::simulation::EventDriven::computeJacobianfx, type of "
@@ -803,7 +810,7 @@ double siconos::simulation::EventDriven::computeResiduConstraints() {
     if (itosi->getType() == siconos::integrators::IntegratorType::NEWMARKALPHAOSI) {
       auto osi_NewMark =
           std::static_pointer_cast<siconos::integrators::NewMarkAlphaOSI>(itosi);
-      bool _flag = osi_NewMark->getFlagVelocityLevel();
+      bool _flag = osi_NewMark->handleVelocityConstraints();
       for (std::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui) {
         auto& inter = *indexSet2->bundle(*ui);
         if (!_flag)  // constraints at the position level
@@ -903,9 +910,9 @@ void siconos::simulation::EventDriven::predictionNewtonIteration() {
   for (std::tie(ui, uiend) = _indexSet0->vertices(); ui != uiend; ++ui) {
     auto& inter = *_indexSet0->bundle(*ui);
     inter.computeOutput(t,
-                        0);   // compute y[0] for the interaction at the end time
-                              // with the state predicted for Dynamical Systems
-    inter.lambda(2)->zero();  // reset lambda[2] to zero
+                        0);      // compute y[0] for the interaction at the end time
+                                 // with the state predicted for Dynamical Systems
+    inter.lambda(2)->setZero();  // reset lambda[2] to zero
   }
 }
 

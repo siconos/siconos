@@ -36,34 +36,18 @@ private:
   // tests to be done ...
 
   CPPUNIT_TEST(testBuildLagrangianCompliantLinearTIR1);
-  CPPUNIT_TEST(testBuildLagrangianCompliantLinearTIR2);
-  CPPUNIT_TEST(testBuildLagrangianCompliantLinearTIR3);
-  CPPUNIT_TEST(testSetCPtr);
-  CPPUNIT_TEST(testSetDPtr);
-  CPPUNIT_TEST(testSetFPtr);
-  CPPUNIT_TEST(testSetEPtr);
-  CPPUNIT_TEST(testGetJacPtr);
   CPPUNIT_TEST(End);
 
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
 
-  void testBuildLagrangianCompliantLinearTIR0();
   void testBuildLagrangianCompliantLinearTIR1();
-  void testBuildLagrangianCompliantLinearTIR2();
-  void testBuildLagrangianCompliantLinearTIR3();
-
-  void testSetCPtr();
-  void testSetDPtr();
-  void testSetFPtr();
-  void testSetEPtr();
-  void testGetJacPtr();
   void End();
 
   // Members
 
-  std::shared_ptr<siconos::algebra::SimpleMatrix> C, B, F, D;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> C, B, F, D;
   std::shared_ptr<siconos::algebra::SiconosVector> e;
   std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds;
 

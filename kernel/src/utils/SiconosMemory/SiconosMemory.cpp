@@ -113,13 +113,12 @@ void siconos::algebra::SiconosMemory::swap(
     _indx = this->size() - 1;
 }
 
-void siconos::algebra::SiconosMemory::display() const {
-  std::cout << " ====== Memory vector display ======= " << std::endl;
-  std::cout << "| size : " << this->size() << std::endl;
-  std::cout << "| _nbVectorsInMemory : " << _nbVectorsInMemory << std::endl;
-  for (unsigned int i = 0; i < _nbVectorsInMemory; i++) {
-    std::cout << "vector number " << i << ": address = " << &this->at(i) << " | " << std::endl;
-    this->at(i).display();
+void siconos::algebra::print(const SiconosMemory& vec) {
+  std::cout << " ====== Memory vector display ======= \n";
+  std::cout << "| size : " << vec.size() << "\n";
+  std::cout << "| _nbVectorsInMemory : " << vec.nbVectorsInMemory() << "\n";
+  for (unsigned int i = 0; i < vec.nbVectorsInMemory(); i++) {
+    std::cout << "vector number " << i << ": address = " << vec.at(i) << " | \n ";
   }
-  std::cout << " ===================================== " << std::endl;
+  std::cout << " ===================================== \n";
 }

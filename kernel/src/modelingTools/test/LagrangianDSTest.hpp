@@ -23,10 +23,10 @@
 #include "LagrangianDS.hpp"
 #include "SiconosException.hpp"
 
-namespace siconos::algebra {
-class SiconosVector;
-class SiconosMatrix;
-}  // namespace siconos::algebra
+// namespace siconos::algebra {
+// class SiconosVector;
+// class SiconosMatrix;
+// }  // namespace siconos::algebra
 
 class LagrangianDSTest : public CppUnit::TestFixture {
  private:
@@ -38,21 +38,22 @@ class LagrangianDSTest : public CppUnit::TestFixture {
   // tests to be done ...
 
   CPPUNIT_TEST(testBuildLagrangianDS1);
-  CPPUNIT_TEST(testBuildLagrangianDS4);
-  CPPUNIT_TEST(testBuildLagrangianDS5);
+  CPPUNIT_TEST(testBuildLagrangianDS2);
+  CPPUNIT_TEST(testBuildLagrangianDS3);
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
 
   void testBuildLagrangianDS1();
-  void testBuildLagrangianDS4();
-  void testBuildLagrangianDS5();
+  void testBuildLagrangianDS2();
+  void testBuildLagrangianDS3();
   // void testcomputeDS();
 
   // Members
 
-  std::shared_ptr<siconos::algebra::SiconosVector> q0, velocity0, u0;
-  std::shared_ptr<siconos::algebra::SiconosMatrix> mass;
+  siconos::algebra::SiconosVector3 q0, velocity0;
+
+  siconos::algebra::SiconosMatrix mass{3, 3};
 
  public:
   void setUp();

@@ -18,57 +18,139 @@
 
 #include "SphereLDS.hpp"
 
-#include <cmath>
+#include <cmath>    // fmod
+#include <numbers>  // pi
 
+#include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
 
-constexpr double TWOPI = 2.0 * M_PI;
+namespace {  // Anonymous
 
-static void normalize(siconos::algebra::SiconosVector& q, unsigned int i)
-{
-  q.setValue(i, fmod(q.getValue(i), TWOPI));
+static void normalize(Eigen::Ref<siconos::algebra::MapVectorType> q, unsigned int i) {
+  q(i) = fmod(q(i), 2.0 * std::numbers::pi);
 
-  assert(fabs(q.getValue(i)) - std::numeric_limits<double>::epsilon() >= 0.);
-  assert(fabs(q.getValue(i)) < TWOPI);
+  assert(fabs(q(i)) - std::numeric_limits<double>::epsilon() >= 0.);
+  assert(fabs(q(i)) < 2.0 * std::numbers::pi);
 }
+
+}  // namespace
 
 siconos::collision::native::bodies::SphereLDS::SphereLDS(
-    double r, double m, std::shared_ptr<siconos::algebra::SiconosVector> qinit,
-    std::shared_ptr<siconos::algebra::SiconosVector> vinit)
-  : siconos::modeling::LagrangianDS{qinit, vinit}, radius{r}, massValue{m}
-{
+    double radius, double mass, Eigen::Ref<siconos::algebra::SiconosVector> qinit,
+    Eigen::Ref<siconos::algebra::SiconosVector> vinit)
+    : siconos::modeling::LagrangianDS{qinit, vinit}, radius_{radius}, massValue_{mass} {
   normalize(*q(), 3);
   normalize(*q(), 4);
   normalize(*q(), 5);
-  _ndof = 6;
 
-  assert(qinit->size() == _ndof);
-  assert(vinit->size() == _ndof);
+  assert(vinit.size() == 6);
 
-  _mass = std::make_shared<siconos::algebra::SimpleMatrix>(_ndof, _ndof);
-  _mass->zero();
-  I = massValue * radius * radius * 2. / 5.;
-  (*_mass)(0, 0) = (*_mass)(1, 1) = (*_mass)(2, 2) = massValue;
-  ;
-  (*_mass)(3, 3) = (*_mass)(4, 4) = (*_mass)(5, 5) = I;
+  inertia_ = massValue_ * radius_ * radius_ * 2. / 5.;
 
-  computeMass();
+  // setComputeMassFunction([this](const Eigen::Ref<const siconos::algebra::MapVectorType> pos,
+  //                               Eigen::Ref<siconos::algebra::MapType> mass_result) {
+  //   normalize(pos, 3);
+  //   normalize(pos, 4);
+  //   normalize(pos, 5);
 
-  _jacobianFGyrq = std::make_shared<siconos::algebra::SimpleMatrix>(_ndof, _ndof);
-  _jacobianFGyrqDot = std::make_shared<siconos::algebra::SimpleMatrix>(_ndof, _ndof);
+  //   // // SS: Forcing modification of qold, is this necessary?
+  //   // if (qMemory().nbVectorsInMemory() >= 1)
+  //   // {
+  //   //   SiconosVector& qold = qMemory().getsiconos::algebra::SiconosVector(0);
+  //   //   normalize(qold, 3);
+  //   //   normalize(qold, 4);
+  //   //   normalize(qold, 5);
+  //   // }
 
-  _fGyr = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
-  _fGyr->zero();
+  //   double theta = pos(3);
 
-  computeFGyr();
+  //   assert(fabs(theta) - std::numeric_limits<double>::epsilon() >= 0.);
+
+  //   mass_result(4, 5) = mass_result(5, 4) = inertia_ * cos(theta);
+  // });
+  mass_internal_storage_ = std::make_unique<std::vector<double>>(ndof_ * ndof_);
+
+  mass_view_ = std::make_shared<siconos::algebra::MapType>(mass_internal_storage_->data(),
+                                                           ndof_, ndof_);
+  mass_view_->setZero();
+  hasMass_ = true;
+  hasConstantMass_ = false;
+
+  mass_view_->setZero();
+  (*mass_view_)(0, 0) = (*mass_view_)(1, 1) = (*mass_view_)(2, 2) = massValue_;
+  (*mass_view_)(3, 3) = (*mass_view_)(4, 4) = (*mass_view_)(5, 5) = inertia_;
+  computeMass(*q());
+
+  // Set function to compute gyroscopic forces
+  setComputeFgyrFunction(
+      [this](const Eigen::Ref<const siconos::algebra::SiconosVector>& velocity,
+             const Eigen::Ref<const siconos::algebra::SiconosVector>& q,
+             Eigen::Ref<siconos::algebra::MapVectorType> result) {
+        assert(q.size() == 6);
+        assert(velocity.size() == 6);
+
+        double sintheta = sin(q(3));
+
+        result(0) = result(1) = result(2) = 0.;
+
+        result(3) = inertia_ * velocity(5) * velocity(4) * sintheta;
+        result(4) = -inertia_ * velocity(5) * velocity(3) * sintheta;
+        result(5) = -inertia_ * velocity(4) * velocity(3) * sintheta;
+      });
+
+  // and the jacobian of fgyr
+  setComputeJacobianFgyrOver_qFunction(
+      [this](const Eigen::Ref<const siconos::algebra::SiconosVector>& velocity,
+             const Eigen::Ref<const siconos::algebra::SiconosVector>& q,
+             Eigen::Ref<siconos::algebra::MapVectorType> result) {
+        double costheta = cos(q(3));
+
+        result.setZero();
+
+        result(3, 3) = -inertia_ * velocity(5) * velocity(4) * costheta;
+        result(4, 3) = inertia_ * velocity(5) * velocity(3) * costheta;
+        result(5, 3) = inertia_ * velocity(5) * velocity(3) * costheta;
+      });
+
+  setComputeJacobianFgyrOver_velocityFunction(
+      [this](const Eigen::Ref<const siconos::algebra::SiconosVector>& velocity,
+             const Eigen::Ref<const siconos::algebra::SiconosVector>& q,
+             Eigen::Ref<siconos::algebra::MapVectorType> result) {
+        double sintheta = sin(q(3));
+        result.setZero();
+
+        result(3, 3) = 0;
+        result(3, 4) = inertia_ * velocity(5) * sintheta;
+        result(3, 5) = inertia_ * velocity(4) * sintheta;
+
+        result(4, 3) = -inertia_ * velocity(5) * sintheta;
+        result(4, 4) = 0;
+        result(4, 5) = -inertia_ * velocity(3) * sintheta;
+
+        result(5, 3) = -inertia_ * velocity(4) * sintheta;
+        result(5, 4) = -inertia_ * velocity(3) * sintheta;
+        result(5, 5) = 0;
+      });
+
+  computeFgyr(velocity_read(), q_read());
 }
+double siconos::collision::native::bodies::SphereLDS::getQ(unsigned int pos) {
+  return (*state_q_[0])(pos);
+};
 
-void siconos::collision::native::bodies::SphereLDS::computeMass()
-{
-  normalize(*q(), 3);
-  normalize(*q(), 4);
-  normalize(*q(), 5);
+double siconos::collision::native::bodies::SphereLDS::getVelocity(unsigned int pos) {
+  return (*state_q_[1])(pos);
+};
+
+// FP : we need to override computeMass because it also update q which is supposed to be a
+// constant input ...
+// This is kind of ugly ...
+void siconos::collision::native::bodies::SphereLDS::computeMass(
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& position) {
+  state_q_[0]->tail(3) = position.tail(3);
+  normalize(*state_q_[0], 3);
+  normalize(*state_q_[0], 4);
+  normalize(*state_q_[0], 5);
 
   // // SS: Forcing modification of qold, is this necessary?
   // if (qMemory().nbVectorsInMemory() >= 1)
@@ -79,107 +161,9 @@ void siconos::collision::native::bodies::SphereLDS::computeMass()
   //   normalize(qold, 5);
   // }
 
-  double theta = q()->getValue(3);
+  double theta = (*state_q_[0])(3);
 
   assert(fabs(theta) - std::numeric_limits<double>::epsilon() >= 0.);
-  // assert (fabs(theta) - TWOPI < 0.);
 
-  (*_mass)(4, 5) = (*_mass)(5, 4) = I * cos(theta);
+  (*mass_view_)(4, 5) = (*mass_view_)(5, 4) = inertia_ * cos(theta);
 }
-
-void siconos::collision::native::bodies::SphereLDS::computeFGyr()
-{
-  siconos::collision::native::bodies::SphereLDS::computeFGyr(q(), velocity());
-}
-
-void siconos::collision::native::bodies::SphereLDS::computeFGyr(
-    std::shared_ptr<siconos::algebra::SiconosVector> q,
-    std::shared_ptr<siconos::algebra::SiconosVector> v)
-{
-  assert(q->size() == 6);
-  assert(v->size() == 6);
-
-  //  normalize(q,3);
-  // normalize(q,4);
-  // normalize(q,5);
-
-  double theta = q->getValue(3);
-
-  double thetadot = v->getValue(3);
-  double phidot = v->getValue(4);
-  double psidot = v->getValue(5);
-
-  double sintheta = sin(theta);
-
-  (*_fGyr)(0) = (*_fGyr)(1) = (*_fGyr)(2) = 0;
-
-  (*_fGyr)(3) = I * psidot * phidot * sintheta;
-  (*_fGyr)(4) = -I * psidot * thetadot * sintheta;
-  (*_fGyr)(5) = -I * phidot * thetadot * sintheta;
-}
-
-void siconos::collision::native::bodies::SphereLDS::computeJacobianFGyrq()
-{
-  siconos::collision::native::bodies::SphereLDS::computeJacobianFGyrq(q(), velocity());
-}
-void siconos::collision::native::bodies::SphereLDS::computeJacobianFGyrqDot()
-{
-  siconos::collision::native::bodies::SphereLDS::computeJacobianFGyrqDot(q(), velocity());
-}
-
-void siconos::collision::native::bodies::SphereLDS::computeJacobianFGyrq(
-    std::shared_ptr<siconos::algebra::SiconosVector> q,
-    std::shared_ptr<siconos::algebra::SiconosVector> v)
-{
-  double theta = q->getValue(3);
-
-  double thetadot = v->getValue(3);
-  double phidot = v->getValue(4);
-  double psidot = v->getValue(5);
-
-  double costheta = cos(theta);
-
-  _jacobianFGyrq->zero();
-
-  (*_jacobianFGyrq)(3, 3) = -I * psidot * phidot * costheta;
-  (*_jacobianFGyrq)(4, 3) = I * psidot * thetadot * costheta;
-  (*_jacobianFGyrq)(5, 3) = I * psidot * thetadot * costheta;
-}
-void siconos::collision::native::bodies::SphereLDS::computeJacobianFGyrqDot(
-    std::shared_ptr<siconos::algebra::SiconosVector> q,
-    std::shared_ptr<siconos::algebra::SiconosVector> v)
-{
-  double theta = q->getValue(3);
-
-  double thetadot = v->getValue(3);
-  double phidot = v->getValue(4);
-  double psidot = v->getValue(5);
-
-  double sintheta = sin(theta);
-
-  _jacobianFGyrqDot->zero();
-
-  (*_jacobianFGyrqDot)(3, 3) = 0;
-  (*_jacobianFGyrqDot)(3, 4) = I * psidot * sintheta;
-  (*_jacobianFGyrqDot)(3, 5) = I * phidot * sintheta;
-
-  (*_jacobianFGyrqDot)(4, 3) = -I * psidot * sintheta;
-  (*_jacobianFGyrqDot)(4, 4) = 0;
-  (*_jacobianFGyrqDot)(4, 5) = -I * thetadot * sintheta;
-
-  (*_jacobianFGyrqDot)(5, 3) = -I * phidot * sintheta;
-  (*_jacobianFGyrqDot)(5, 4) = -I * thetadot * sintheta;
-  (*_jacobianFGyrqDot)(5, 5) = 0;
-}
-
-double siconos::collision::native::bodies::SphereLDS::getQ(unsigned int pos)
-{
-  assert(pos < _ndof);
-  return (*_q[0])(pos);
-};
-
-double siconos::collision::native::bodies::SphereLDS::getVelocity(unsigned int pos)
-{
-  assert(pos < _ndof);
-  return (*_q[1])(pos);
-};

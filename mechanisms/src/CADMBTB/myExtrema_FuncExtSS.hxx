@@ -43,7 +43,6 @@
 #endif
 class Standard_OutOfRange;
 class Adaptor3d_Surface;
-class math_Vector;
 class math_Matrix;
 class Extrema_POnSurf;
 

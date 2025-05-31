@@ -36,8 +36,8 @@
 #include "OccContactEdge.hpp"
 #include "OccContactFace.hpp"
 #include "OccContactShape.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
 
 CPPUNIT_TEST_SUITE_REGISTRATION(OccTest);
 
@@ -87,8 +87,7 @@ void OccTest::move() {
 
   exp.Init(mksphere.Shape(), TopAbs_SHELL);
 
-  TopoDS_Shell shell =
-      TopoDS::Shell(exp.Current().Composed(mksphere.Shape().Orientation()));
+  TopoDS_Shell shell = TopoDS::Shell(exp.Current().Composed(mksphere.Shape().Orientation()));
 
   exp.Init(shell, TopAbs_FACE);
 
@@ -98,46 +97,38 @@ void OccTest::move() {
   siconos::mechanics::occ::OccContactShapeV sphere_contact{
       std::make_shared<siconos::mechanics::occ::OccContactFace>(sphere, 0)};
 
-  auto position = std::make_shared<siconos::algebra::SiconosVector>(7);
-  auto velocity = std::make_shared<siconos::algebra::SiconosVector>(6);
-  auto inertia = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
-  position->zero();
-  (*position)(0) = 1.;
-  (*position)(1) = 2.;
-  (*position)(2) = 3.;
-
+  siconos::algebra::SiconosVector position{7};
+  position(0) = 1.;
+  position(1) = 2.;
+  position(2) = 3.;
   /* unit quaternion from 4,5,6,7 */
-  (*position)(3) = 0.35634832254989918;
-  (*position)(4) = 0.44543540318737401;
-  (*position)(5) = 0.53452248382484879;
-  (*position)(6) = 0.62360956446232352;
+  position(3) = 0.35634832254989918;
+  position(4) = 0.44543540318737401;
+  position(5) = 0.53452248382484879;
+  position(6) = 0.62360956446232352;
 
-  velocity->zero();
-  inertia->eye();
+  siconos::algebra::SiconosVector velocity{6};
+  velocity.setZero();
+  siconos::algebra::SiconosMatrix inertia = Eigen::MatrixXd::Identity(3, 3);
 
-  auto body = std::make_shared<siconos::mechanics::occ::OccBody>(
-      position, velocity, 1, inertia);
+  auto body =
+      std::make_shared<siconos::mechanics::occ::OccBody>(position, velocity, 1, inertia);
 
   body->addContactShape(sphere_contact);
 
   auto data = [](const auto& obj) { return obj->data(); };
 
-  gp_XYZ translat = std::visit(data, body->contactShape(0))
-                        .Location()
-                        .Transformation()
-                        .TranslationPart();
+  gp_XYZ translat =
+      std::visit(data, body->contactShape(0)).Location().Transformation().TranslationPart();
 
-  std::cout << translat.X() << "," << translat.Y() << "," << translat.Z()
-            << std::endl;
+  std::cout << translat.X() << "," << translat.Y() << "," << translat.Z() << std::endl;
 
   CPPUNIT_ASSERT(translat.X() == 1.);
   CPPUNIT_ASSERT(translat.Y() == 2.);
   CPPUNIT_ASSERT(translat.Z() == 3.);
 
-  gp_Quaternion rotat = std::visit(data, body->contactShape(0))
-                            .Location()
-                            .Transformation()
-                            .GetRotation();
+  gp_Quaternion rotat =
+      std::visit(data, body->contactShape(0)).Location().Transformation().GetRotation();
 
   CPPUNIT_ASSERT(std::abs(rotat.X() - 0.44543540318737401) < 1e-9);
   CPPUNIT_ASSERT(std::abs(rotat.Y() - 0.53452248382484879) < 1e-9);
@@ -161,32 +152,25 @@ void OccTest::distance() {
   siconos::mechanics::occ::OccContactShapeV sphere2_contact{
       std::make_shared<siconos::mechanics::occ::OccContactFace>(sphere2, 0)};
 
-  auto position1 = std::make_shared<siconos::algebra::SiconosVector>(7);
-  auto position2 = std::make_shared<siconos::algebra::SiconosVector>(7);
-  auto velocity = std::make_shared<siconos::algebra::SiconosVector>(6);
-  auto inertia = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
-  position1->zero();
-  (*position1)(0) = 0.;
-  (*position1)(1) = 0.;
-  (*position1)(2) = 0.;
+  siconos::algebra::SiconosVector position1{7};
+  position1.setZero();
+  position1(3) = 1;
 
-  (*position1)(3) = 1;
+  siconos::algebra::SiconosVector position2{7};
 
-  position2->zero();
-  (*position2)(0) = 3.;
-  (*position2)(1) = 0.;
-  (*position2)(2) = 0.;
+  position2.setZero();
+  position2(0) = 3.;
+  position2(3) = cos(pi / 2.);
+  position2(5) = sin(pi / 2.);
 
-  (*position2)(3) = cos(pi / 2.);
-  (*position2)(5) = sin(pi / 2.);
+  siconos::algebra::SiconosVector velocity{6};
+  velocity.setZero();
+  siconos::algebra::SiconosMatrix inertia = Eigen::MatrixXd::Identity(3, 3);
 
-  velocity->zero();
-  inertia->eye();
-
-  auto body1 = std::make_shared<siconos::mechanics::occ::OccBody>(
-      position1, velocity, 1, inertia);
-  auto body2 = std::make_shared<siconos::mechanics::occ::OccBody>(
-      position2, velocity, 1, inertia);
+  auto body1 =
+      std::make_shared<siconos::mechanics::occ::OccBody>(position1, velocity, 1, inertia);
+  auto body2 =
+      std::make_shared<siconos::mechanics::occ::OccBody>(position2, velocity, 1, inertia);
   body1->addContactShape(sphere1_contact);
   body2->addContactShape(sphere2_contact);
 
@@ -206,36 +190,27 @@ void OccTest::distance() {
 
   auto data = [](const auto& obj) { return obj->data(); };
 
-  gp_XYZ translat1 = std::visit(data, body1->contactShape(0))
-                         .Location()
-                         .Transformation()
-                         .TranslationPart();
+  gp_XYZ translat1 =
+      std::visit(data, body1->contactShape(0)).Location().Transformation().TranslationPart();
 
-  std::cout << "t1 " << translat1.X() << "," << translat1.Y() << ","
-            << translat1.Z() << "\n";
+  std::cout << "t1 " << translat1.X() << "," << translat1.Y() << "," << translat1.Z() << "\n";
 
-  gp_XYZ translat2 = std::visit(data, body2->contactShape(0))
-                         .Location()
-                         .Transformation()
-                         .TranslationPart();
+  gp_XYZ translat2 =
+      std::visit(data, body2->contactShape(0)).Location().Transformation().TranslationPart();
 
-  std::cout << "t2 " << translat2.X() << "," << translat2.Y() << ","
-            << translat2.Z() << "\n";
+  std::cout << "t2 " << translat2.X() << "," << translat2.Y() << "," << translat2.Z() << "\n";
 
-  auto dist = std::visit(siconos::mechanics::occ::Geometer<
-                             siconos::mechanics::occ::CadmbtbDistanceType>{},
-                         body1->contactShape(0), body2->contactShape(0));
+  auto dist = std::visit(
+      siconos::mechanics::occ::Geometer<siconos::mechanics::occ::CadmbtbDistanceType>{},
+      body1->contactShape(0), body2->contactShape(0));
 
   std::cout << dist.value << "\n";
 
-  std::cout << dist.point1.X() << "," << dist.point1.Y() << ","
-            << dist.point1.Z() << "\n";
+  std::cout << dist.point1.X() << "," << dist.point1.Y() << "," << dist.point1.Z() << "\n";
 
-  std::cout << dist.point2.X() << "," << dist.point2.Y() << ","
-            << dist.point2.Z() << "\n";
+  std::cout << dist.point2.X() << "," << dist.point2.Y() << "," << dist.point2.Z() << "\n";
 
-  std::cout << dist.normal.X() << "," << dist.normal.Y() << ","
-            << dist.normal.Z() << "\n";
+  std::cout << dist.normal.X() << "," << dist.normal.Y() << "," << dist.normal.Z() << "\n";
 
   CPPUNIT_ASSERT(std::abs(dist.value - 1.0) < 1e-9);
 }

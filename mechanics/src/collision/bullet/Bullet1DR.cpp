@@ -23,15 +23,11 @@
 #include "SiconosVector.hpp"
 
 siconos::collision::bullet::Bullet1DR::Bullet1DR(std::shared_ptr<btManifoldPoint> point)
-    : siconos::modeling::NewtonEuler1DR{}, _contactPoints{point}
-{
-}
+    : siconos::modeling::NewtonEuler1DR{}, _contactPoints{point} {}
 
-void siconos::collision::bullet::Bullet1DR::computeh(double time,
-                                                     const siconos::algebra::BlockVector& q0,
-                                                     siconos::algebra::SiconosVector& y)
-{
-  y.setValue(0, _contactPoints->getDistance());
+void siconos::collision::bullet::Bullet1DR::computeh(
+    const siconos::algebra::BlockVector &q, Eigen::Ref<siconos::algebra::SiconosVector> y) {
+    y(0) = _contactPoints->getDistance();
   auto posa = _contactPoints->getPositionWorldOnA();
   auto posb = _contactPoints->getPositionWorldOnB();
   (*pc1())(0) = posa[0];

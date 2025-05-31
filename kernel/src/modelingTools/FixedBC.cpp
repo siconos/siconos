@@ -14,25 +14,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #include "FixedBC.hpp"
+
 #include "BoundaryCondition.hpp"
 #include "SiconosVector.hpp"
 
-//#define DEBUG_MESSAGES
-//#define DEBUG_STDOUT
+#include <cassert>
+// #define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
 #include "siconos_debug.h"
 
-
-void siconos::modeling::FixedBC::computePrescribedVelocity(double time)
-{
-  DEBUG_BEGIN("FixedBC::computePrescribedVelocity(double time)\n");
-  if(!_prescribedVelocity) _prescribedVelocity = std::make_shared<siconos::algebra::SiconosVector>(_velocityIndices.size());
-  for(unsigned int k = 0 ; k < _velocityIndices.size(); k++)
-  {
-    _prescribedVelocity->setValue(k,0.0);
-    DEBUG_PRINTF("_prescribedVelocity[%i] at time  %e = %e \n",k, time,_prescribedVelocity->getValue(k));
-  }
-  DEBUG_END("FixedBC::computePrescribedVelocity(double time)\n");
+void siconos::modeling::FixedBC::computePrescribedVelocity(double time) {
+  assert(prescribedVelocity_);  // Allocation must have been done during construction.
+  prescribedVelocity_->setConstant(0.);
 }

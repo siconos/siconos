@@ -31,13 +31,20 @@
 namespace siconos::modeling {
 class NonSmoothLaw;
 class NSLawMatrix;
+class DynamicalSystem;
+class Relation;
 }  // namespace siconos::modeling
+
+namespace siconos::graphs {
+
+struct DynamicalSystemsGraph;
+}  // namespace siconos::graphs
 
 namespace siconos::simulation {
 
 class Simulation;
 
-  class InteractionManager : public std::enable_shared_from_this<InteractionManager>{
+class InteractionManager : public std::enable_shared_from_this<InteractionManager> {
   InteractionManager(const InteractionManager&) = delete;
   InteractionManager(InteractionManager&&) = delete;
   InteractionManager operator=(const InteractionManager&&) = delete;
@@ -50,9 +57,8 @@ class Simulation;
 
   /** Called by Simulation after updating positions prior to starting
    * the Newton loop. */
-  virtual void updateInteractions(std::shared_ptr<siconos::simulation::Simulation> simulation)
-  {
-  }
+  virtual void updateInteractions(
+      std::shared_ptr<siconos::simulation::Simulation> simulation) {}
 
   /** Specify a non-smooth law to use for a given combination of
    *  interaction groups.
@@ -81,5 +87,48 @@ class Simulation;
 
   ACCEPT_SERIALIZATION(InteractionManager);
 };
+
+// Free functions used to make interaction management easier
+namespace interactions_manager {
+
+/** \return true if an interaction between two given dynamical systems exists
+ * \param[in] ds1  first system
+ * \param[in] ds1  second system
+ * \param[in] DSG0 dynamical systems graph
+ */
+bool is_interaction_present(std::shared_ptr<siconos::modeling::DynamicalSystem> ds1,
+                            std::shared_ptr<siconos::modeling::DynamicalSystem> ds2,
+                            std::shared_ptr<siconos::graphs::DynamicalSystemsGraph> DSG0);
+
+/** Build an interaction between two dynamical systems and add it to the simulation
+ *  (Only if it does not exist)
+ * \param[in] ds1  first system
+ * \param[in] ds1  second system
+ * \param[in] DSG0 dynamical systems graph
+ * \param[in] rel the relation used to build the interaction
+ * \param[in] sim the concerned simulation
+ * \param[in] parent an interaction manager
+ */
+void build_and_link_interaction(
+    std::shared_ptr<siconos::modeling::DynamicalSystem> ds1,
+    std::shared_ptr<siconos::modeling::DynamicalSystem> ds2,
+    std::shared_ptr<siconos::graphs::DynamicalSystemsGraph> DSG0,
+    std::shared_ptr<siconos::modeling::Relation> rel,
+    std::shared_ptr<siconos::simulation::Simulation> sim,
+    std::shared_ptr<siconos::simulation::InteractionManager> parent);
+
+/** If it exists, remove an interaction between two dynamical from the NSDS (simulation)
+ * \param[in] ds1  first system
+ * \param[in] ds1  second system
+ * \param[in] DSG0 dynamical systems graph
+ * \param[in] sim the concerned simulation
+ */
+void remove_interaction_if_exists(std::shared_ptr<siconos::modeling::DynamicalSystem> ds1,
+                                  std::shared_ptr<siconos::modeling::DynamicalSystem> ds2,
+                                  std::shared_ptr<siconos::graphs::DynamicalSystemsGraph> DSG0,
+                                  std::shared_ptr<siconos::simulation::Simulation> sim);
+
+}  // namespace interactions_manager
+
 }  // namespace siconos::simulation
 #endif /* InteractionManager_h */

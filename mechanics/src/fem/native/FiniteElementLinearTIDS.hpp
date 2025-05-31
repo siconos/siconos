@@ -21,7 +21,7 @@
 #define FINITEELEMENTLAGRANGIANTIDS_H
 
 #include "LagrangianLinearTIDS.hpp"
-#include "SiconosAlgebraTypes.hpp"  // For UblasType
+#include "SiconosMatrix.hpp"  // For Sparse mat
 /** Finite Element discretization of elastic solids that inherits from
  * Lagrangian Linear Systems with time invariant coefficients
  * - \f$M\dot v + Cv + Kq = F_{ext}(t,z) + p \f$
@@ -46,8 +46,8 @@ class FiniteElementLinearTIDS : public modeling::LagrangianLinearTIDS {
   /** a finite element model */
   std::shared_ptr<FiniteElementModel> _FEModel{nullptr};
 
-  /* Storage type for the matrices */
-  siconos::algebra::UblasType _storageType{siconos::algebra::UblasType::DENSE};
+  /* Storage type for the matrices - Default = sparse*/
+  siconos::algebra::StorageType _storageType{siconos::algebra::StorageType::sparse};
 
  public:
   /** constructor from initial state and all matrix operators.
@@ -56,12 +56,12 @@ class FiniteElementLinearTIDS : public modeling::LagrangianLinearTIDS {
    */
   FiniteElementLinearTIDS(
       std::shared_ptr<Mesh> mesh, std::map<unsigned int, std::shared_ptr<Material>> materials,
-      siconos::algebra::UblasType storageType = siconos::algebra::UblasType::DENSE);
+      siconos::algebra::StorageType storageType = siconos::algebra::StorageType::sparse);
 
   /** destructor */
   ~FiniteElementLinearTIDS() noexcept = default;
 
-  void setStorageType(siconos::algebra::UblasType type) { _storageType = type; }
+  void setStorageType(siconos::algebra::StorageType type) { _storageType = type; }
 
   std::shared_ptr<FiniteElementModel> FEModel() { return _FEModel; };
 

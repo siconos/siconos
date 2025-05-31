@@ -24,11 +24,6 @@
 #include "MechanicsIO.hpp"
 #endif
 
-#include <boost/numeric/bindings/ublas/matrix.hpp>
-#include <boost/numeric/bindings/ublas/matrix_sparse.hpp>
-#include <boost/numeric/bindings/ublas/vector.hpp>
-#include <boost/numeric/bindings/ublas/vector_sparse.hpp>
-
 #include "KernelTest.hpp"
 #include "SiconosKernel.hpp"
 
@@ -48,8 +43,9 @@ void KernelTest::tearDown() {};
 
 void KernelTest::t0() {
   auto q = std::make_shared<siconos::algebra::SiconosVector>(3);
-  auto q0 = std::make_shared<siconos::algebra::SiconosVector>(3);
 
+  siconos::algebra::SiconosVector q0{3};
+  q0.setZero();
   (*q)(0) = 1.0;
   (*q)(1) = 2.0;
   (*q)(2) = 2.0;
@@ -72,39 +68,39 @@ void KernelTest::t0() {
 }
 
 void KernelTest::t1() {
-  auto m1 = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
-  auto m2 = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
+  auto m1 = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
+  auto m2 = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
 
-  m1->eye();
+  m1->setIdentity();
   (*m1)(1, 0) = 3.0;
   (*m1)(2, 1) = -7;
 
   std::ofstream ofs("Kernelt1.xml");
   {
     boost::archive::xml_oarchive oa(ofs);
-    oa.register_type(static_cast<siconos::algebra::SimpleMatrix*>(nullptr));
+    oa.register_type(static_cast<siconos::algebra::SiconosMatrix*>(nullptr));
     oa << NVP(m1);
   }
 
   std::ifstream ifs("Kernelt1.xml");
   {
     boost::archive::xml_iarchive ia(ifs);
-    ia.register_type(static_cast<siconos::algebra::SimpleMatrix*>(nullptr));
+    ia.register_type(static_cast<siconos::algebra::SiconosMatrix*>(nullptr));
     ia >> NVP(m2);
   }
 
-  m1->display();
-  m2->display();
+  siconos::algebra::print(*m1);
+  siconos::algebra::print(*m2);
 
   CPPUNIT_ASSERT(*m1 == *m2);
 }
 
 void KernelTest::t2() {
-  auto m = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
+  auto m = std::make_shared<siconos::algebra::SiconosMatrix>(3, 3);
   auto v = std::make_shared<siconos::algebra::SiconosVector>(3);
   auto q = std::make_shared<siconos::algebra::SiconosVector>(3);
 
-  m->eye();
+  m->setIdentity();
 
   auto ds1 = std::make_shared<siconos::modeling::LagrangianDS>(q, v, m);
   auto ds2 = std::make_shared<siconos::modeling::LagrangianDS>(q, v, m);
@@ -112,7 +108,7 @@ void KernelTest::t2() {
   std::ofstream ofs("Kernelt2.xml");
   {
     boost::archive::xml_oarchive oa(ofs);
-    oa.register_type(static_cast<siconos::algebra::SimpleMatrix*>(nullptr));
+    oa.register_type(static_cast<siconos::algebra::SiconosMatrix*>(nullptr));
     oa.register_type(static_cast<siconos::algebra::SiconosVector*>(nullptr));
     oa.register_type(static_cast<siconos::modeling::LagrangianDS*>(nullptr));
     oa << NVP(ds1);
@@ -121,7 +117,7 @@ void KernelTest::t2() {
   std::ifstream ifs("Kernelt2.xml");
   {
     boost::archive::xml_iarchive ia(ifs);
-    ia.register_type(static_cast<siconos::algebra::SimpleMatrix*>(nullptr));
+    ia.register_type(static_cast<siconos::algebra::SiconosMatrix*>(nullptr));
     ia.register_type(static_cast<siconos::algebra::SiconosVector*>(nullptr));
     ia.register_type(static_cast<siconos::modeling::LagrangianDS*>(nullptr));
     ia >> NVP(ds2);
@@ -159,7 +155,6 @@ void KernelTest::t3() {
   CPPUNIT_ASSERT((so->iSize == sor->iSize));
 }
 
-
 #include "SiconosRestart.hpp"
 
 using namespace std;
@@ -181,26 +176,29 @@ void KernelTest::t5() {
   // --- Dynamical systems ---
   // -------------------------
 
-  cout << "====> Model loading ..." << endl << endl;
+  cout << "====> Model loading ...\n\n";
 
-  auto Mass = std::make_shared<siconos::algebra::SimpleMatrix>(nDof, nDof);
+  auto Mass = std::make_shared<siconos::algebra::SiconosMatrix>(nDof, nDof);
   (*Mass)(0, 0) = m;
   (*Mass)(1, 1) = m;
   (*Mass)(2, 2) = 3. / 5 * m * R * R;
 
   // -- Initial positions and velocities --
-  auto q0 = std::make_shared<siconos::algebra::SiconosVector>(nDof);
-  auto v0 = std::make_shared<siconos::algebra::SiconosVector>(nDof);
-  (*q0)(0) = position_init;
-  (*v0)(0) = velocity_init;
+  siconos::algebra::SiconosVector q0{nDof};
+  siconos::algebra::SiconosVector v0{nDof};
+  q0.setZero();
+  v0.setZero();
+  q0(0) = position_init;
+  v0(0) = velocity_init;
 
   // -- The dynamical system --
-  auto ball = std::make_shared<siconos::modeling::LagrangianLinearTIDS>(q0, v0, Mass);
+  auto ball = std::make_shared<siconos::modeling::LagrangianLinearTIDS>(q0, v0, mass);
 
   // -- Set external forces (weight) --
-  auto weight = std::make_shared<siconos::algebra::SiconosVector>(nDof);
-  (*weight)(0) = -m * g;
-  ball->setFExtPtr(weight);
+  siconos::algebra::SiconosVector weight{nDof};
+  weight.setZero();
+  weight(0) = -m * g;
+  ball->setConstantFext(weight);
 
   // --------------------
   // --- Interactions ---
@@ -211,11 +209,11 @@ void KernelTest::t5() {
 
   // Interaction ball-floor
   //
-  auto H = std::make_shared<siconos::algebra::SimpleMatrix>(1, nDof);
+  auto H = std::make_shared<siconos::algebra::SiconosMatrix>(1, nDof);
   (*H)(0, 0) = 1.0;
 
   auto nslaw = std::make_shared<siconos::modeling::NewtonImpactNSL>(e);
-  auto relation = std::make_shared<siconos::modeling::LagrangianLinearTIR>(H);
+  auto relation = std::make_shared<siconos::modeling::LagrangianLinearTIR>(*H);
 
   auto inter = std::make_shared < Interaction(nslaw, relation);
 
@@ -290,7 +288,7 @@ void KernelTest::t6() {
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
     unsigned int outputSize = 5;
-    siconos::algebra::SimpleMatrix dataPlot(N + 1, outputSize);
+    siconos::algebra::SiconosMatrix dataPlot(N + 1, outputSize);
 
     auto q = ball->q();
     auto v = ball->velocity();
@@ -303,7 +301,7 @@ void KernelTest::t6() {
     dataPlot(0, 3) = (*p)(0);
     dataPlot(0, 4) = (*lambda)(0);
     // --- Time loop ---
-    cout << "====> Start computation ... " << endl << endl;
+    cout << "====> Start computation ... \n\n";
     // ==== Simulation loop - Writing without explicit event handling =====
     int k = 1;
     while (s->hasNextEvent()) {
@@ -322,16 +320,15 @@ void KernelTest::t6() {
 
     // --- Output files ---
     cout << "====> Output file writing ..." << endl;
-    dataPlot.resize(k, outputSize);
     ioMatrix::write("result.dat", "ascii", dataPlot, "noDim");
     // Comparison with a reference file
-    siconos::algebra::SimpleMatrix dataPlotRef(dataPlot);
-    dataPlotRef.zero();
+    siconos::algebra::SiconosMatrix dataPlotRef(dataPlot);
+    dataPlotRef.setZero();
     ioMatrix::read("result.ref", "ascii", dataPlotRef);
-
-    if ((dataPlot - dataPlotRef).normInf() > 1e-12) {
-      std::cout << "Warning. The results is rather different from the reference file :"
-                << (dataPlot - dataPlotRef).normInf() << std::endl;
+    auto ninf = siconos::algebra::normInf(dataPlot - dataPlotRef);
+    if (ninf > 1e-12) {
+      std::cout << "Warning. The results is rather different from the reference file :" << ninf
+                << "\n";
       CPPUNIT_ASSERT(false);
     }
 
@@ -350,7 +347,7 @@ void KernelTest::t6() {
 void KernelTest::t7() {
   std::shared_ptr < siconos::modeling::DynamicalSystem ds1, ds2;
 
-  // Must be size=1, cannot deserialize a LagrangianDS with _ndof==0
+  // Must be size=1, cannot deserialize a LagrangianDS with ndof_==0
   auto q = std::make_shared<siconos::algebra::SiconosVector>(1);
   auto v = std::make_shared<siconos::algebra::SiconosVector>(1);
 
@@ -375,53 +372,6 @@ void KernelTest::t7() {
   CPPUNIT_ASSERT(std::static_pointer_cast<Disk>(ds1)->getRadius() ==
                  std::static_pointer_cast<Disk>(ds2)->getRadius());
 }
-
-void KernelTest::t8() {
-  std::shared_ptr < siconos::modeling::DynamicalSystem ds1, ds2;
-
-  auto q = std::make_shared<siconos::algebra::SiconosVector>(3);
-  auto v = std::make_shared<siconos::algebra::SiconosVector>(3);
-
-  (*q)(0) = 0.;
-  (*q)(1) = 1.;
-  (*q)(2) = 1.;
-
-  (*v)(0) = 0;
-  (*v)(1) = 0;
-  (*v)(2) = 10.;
-
-  auto nsds = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(0, 10);
-
-  ds1 = std::make_shared<Disk(1, 1, q, v));
-  ds2 = std::make_shared<Disk(2, 2, q, v));
-
-  nsds->insertDynamicalSystem(ds1);
-  nsds->insertDynamicalSystem(ds2);
-
-  MechanicsIO IO;
-
-  auto positions = IO.positions(*nsds);
-  auto velocities = IO.velocities(*nsds);
-
-  // ids
-  CPPUNIT_ASSERT((*positions)(0, 0) == 0);
-  CPPUNIT_ASSERT((*velocities)(0, 0) == 0);
-  CPPUNIT_ASSERT((*positions)(0, 0) == ds1->number());
-  CPPUNIT_ASSERT((*velocities)(0, 0) == ds1->number());
-
-  CPPUNIT_ASSERT((*positions)(1, 0) == 1);
-  CPPUNIT_ASSERT((*velocities)(1, 0) == 1);
-  CPPUNIT_ASSERT((*positions)(1, 0) == ds2->number());
-  CPPUNIT_ASSERT((*velocities)(1, 0) == ds2->number());
-
-  CPPUNIT_ASSERT((*positions)(0, 1) == 0.);
-  CPPUNIT_ASSERT((*velocities)(0, 1) == 0.);
-  CPPUNIT_ASSERT((*positions)(0, 2) == 1.);
-  CPPUNIT_ASSERT((*positions)(1, 2) == 1.);
-  CPPUNIT_ASSERT((*velocities)(0, 3) == 10.);
-  CPPUNIT_ASSERT((*velocities)(1, 3) == 10.);
-}
-#endif
 
 void KernelTest::t9() {
   try {

@@ -23,7 +23,7 @@ from siconos.utils.functions import compute_dt_matrices
 kmax = 10 if SN.compiled_in_debug_mode() else 100
 
 
-def check_error(n, m, h, TV=False):
+def check_error(n, m, h):
     err_inv = 1
     failed = False
     A = np.random.random((n, n))
@@ -41,7 +41,7 @@ def check_error(n, m, h, TV=False):
     print("err_inv:", err_inv)
     if err_inv < 1.0e-12:
         try:
-            (AexpS, PsiS) = compute_dt_matrices(A, B, h, TV)
+            (AexpS, PsiS) = compute_dt_matrices(A, B, h)
             err_phi = np.linalg.norm((Aexp - AexpS))
             err_psi = np.linalg.norm(Psi - PsiS)
             if err_phi > 5.0e-12 or err_psi > 5.0e-12:
@@ -87,7 +87,7 @@ def test_TV():
     while k < 10:
         n = np.random.randint(2, kmax)
         m = np.random.randint(1, n)
-        err = check_error(n, m, h, True)
+        err = check_error(n, m, h)
         k += 1
 
     assert not err

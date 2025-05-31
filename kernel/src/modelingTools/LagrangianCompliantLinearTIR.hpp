@@ -23,70 +23,59 @@
 #include "LagrangianR.hpp"
 
 namespace siconos::modeling {
-/**  Lagrangian Linear Relation.
+/**  Lagrangian Compliant Linear Relation.
 
-
-Lagrangian Relation with:
+This class provides tools to describe Lagrangian (2nd order) linear relations, with:
 
 \f$
-y= Cq + e + D\lambda + Fz
+y= Cq + e + D\lambda
 \f$
 
 \f$
 p = C^t \lambda
 \f$
 
-C is the only required input to built a LagrangianCompliantLinearTIR.
-D is mandatory and may represent a stiffness in the relation
+Minimal setup requires C and D matrices.
 
+Note: considering the notations of LagrangianR or LagrangianCompliantR, we have
 
+    \f$
+    C = \nabla_q h(q,\lambda(t))
+    \f$
+and
+    \f$
+    D = \nabla_{\lambda}h(q,\lambda(t))
+    \f$
 
-
- */
+*/
 class LagrangianCompliantLinearTIR : public LagrangianR {
  protected:
   ACCEPT_SERIALIZATION(LagrangianCompliantLinearTIR);
 
-  /** F matrix, coefficient of z */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _F{nullptr};
+  /** D matrix */
+  std::shared_ptr<siconos::algebra::MapType> DMatrix_view_{nullptr};
 
   /** e*/
-  std::shared_ptr<siconos::algebra::SiconosVector> _e{nullptr};
+  std::shared_ptr<siconos::algebra::MapVectorType> eVector_view_{nullptr};
 
  public:
-  /** Default constructor
-   */
-  LagrangianCompliantLinearTIR() : LagrangianR(RelationSubType::CompliantLinearTIR){};
-
   /** create the Relation from a set of data
    *  \param C the matrix C
    *  \param D the matrix D
    */
-  LagrangianCompliantLinearTIR(std::shared_ptr<siconos::algebra::SimpleMatrix> C,
-                               std::shared_ptr<siconos::algebra::SimpleMatrix> D);
+  LagrangianCompliantLinearTIR(Eigen::Ref<siconos::algebra::SiconosMatrix> C,
+                               Eigen::Ref<siconos::algebra::SiconosMatrix> D);
 
-  /** create the Relation from a set of data
-   *  \param C the matrix C
-   *  \param D the matrix D
-   *  \param e the vector e
+  /** create a complete Relation from a set of data
+   *  \param C matrix operator (constant) C
+   *  \param D matrix operator (constant) D
+   *  \param e vector operator (constant) e
    */
-  LagrangianCompliantLinearTIR(std::shared_ptr<siconos::algebra::SimpleMatrix> C,
-                               std::shared_ptr<siconos::algebra::SimpleMatrix> D,
-                               std::shared_ptr<siconos::algebra::SiconosVector> e);
+  LagrangianCompliantLinearTIR(Eigen::Ref<siconos::algebra::SiconosMatrix> C,
+                               Eigen::Ref<siconos::algebra::SiconosMatrix> D,
+                               Eigen::Ref<siconos::algebra::SiconosVector> e);
 
-  /** create the Relation from a set of data
-   *  \param C the matrix C
-   *  \param D the matrix D
-   *  \param F the matrix F
-   *  \param e the vector e
-   */
-  LagrangianCompliantLinearTIR(std::shared_ptr<siconos::algebra::SimpleMatrix> C,
-                               std::shared_ptr<siconos::algebra::SimpleMatrix> D,
-                               std::shared_ptr<siconos::algebra::SimpleMatrix> F,
-                               std::shared_ptr<siconos::algebra::SiconosVector> e);
-
-  /** destructor
-   */
+  /** destructor */
   virtual ~LagrangianCompliantLinearTIR() noexcept = default;
 
   /** initialize LagrangianCompliantLinearTIR specific operators.
@@ -97,10 +86,34 @@ class LagrangianCompliantLinearTIR : public LagrangianR {
   /** check sizes LagrangianCompliantLinearTIR specific operators.
    * \param inter an Interaction using this relation
    */
-  void checkSize(Interaction &inter) override;
+  void checkSize(const Interaction &inter) const override;
+
+  /** \return a read-only view on the C matrix */
+  inline auto CMatrix() const { return jacobianhOver_q(); }
+
+  /** \return a read-only view on the D matrix */
+  inline auto DMatrix() const {
+    return siconos::algebra::ConstMapType(DMatrix_view_->data(), DMatrix_view_->rows(),
+                                          DMatrix_view_->cols());
+  }
+
+  /* \return a read-only view on the matrix \f$ D = \nabla^\top_{\lambda}h(q,\lambda) \f$*/
+  inline const siconos::algebra::ConstMapType jacobianhOver_lambda() const override {
+    return DMatrix();
+  }
+
+  /** \return  a read-only view on e vector */
+  inline auto eVector() const {
+    return siconos::algebra::ConstMapVectorType(eVector_view_->data(), eVector_view_->size());
+  }
+
+  virtual bool hasJacobianhOver_lambda() const override { return DMatrix_view_ != nullptr; }
+
+  /** True if e is defined */
+  bool haseVector() const { return eVector_view_ != nullptr; }
 
   /** default function to compute y
-   *  \param time not used
+   *  \param time dummy parameter for this kind of relation
    *  \param inter the Interaction we want to update
    *  \param derivativeNumber the derivative of y we want to compute
    */
@@ -108,77 +121,18 @@ class LagrangianCompliantLinearTIR : public LagrangianR {
                      unsigned int derivativeNumber = 0) override;
 
   /** default function to compute r
-   *  \param time not used
+   *  \param time dummy parameter for this kind of relation
    *  \param inter the Interaction we want to update
    *  \param level the derivative of lambda we want to compute
    */
   void computeInput(double time, Interaction &inter, unsigned int level = 0) override;
+
   /* compute all the H Jacobian
-   *  \param time not used
+   *  \param time dummy parameter for this kind of relation
    *  \param inter the Interaction we want to update
    *  \param interProp interaction properties
    */
   void computeJach(double time, Interaction &inter) override {}
-
-  /* compute all the G Jacobian
-   *  \param time not used
-   *  \param inter the Interaction we want to update
-   *  \param interProp interaction properties
-   */
-  void computeJacg(double time, Interaction &inter) override {}
-
-  // GETTERS/SETTERS
-
-  /** set C to pointer newPtr
-   *  \param newPtr a SP to plugged matrix
-   */
-  inline void setCPtr(std::shared_ptr<siconos::algebra::SimpleMatrix> newPtr)
-  {
-    _jachq = newPtr;
-  }
-
-  // -- D --
-
-  /** get D
-   *  \return pointer on a plugged matrix
-   */
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> D() const { return _jachlambda; }
-
-  /** set D to pointer newPtr
-   * \param newPtr a SP to plugged matrix
-   */
-  inline void setDPtr(std::shared_ptr<siconos::algebra::SimpleMatrix> newPtr)
-  {
-    _jachlambda = newPtr;
-  }
-
-  // -- F --
-
-  /** get F
-   *  \return pointer on a plugged matrix
-   */
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> F() const { return _F; }
-
-  /** set F to pointer newPtr
-   * \param newPtr a SP to plugged matrix
-   */
-  inline void setFPtr(std::shared_ptr<siconos::algebra::SimpleMatrix> newPtr) { _F = newPtr; }
-
-  // -- e --
-
-  /** get e
-   *  \return pointer on a plugged vector
-   */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> e() const { return _e; }
-
-  /** set e to pointer newPtr
-   *  \param newPtr a SP to plugged vector
-   */
-  inline void setEPtr(std::shared_ptr<siconos::algebra::SiconosVector> newPtr) { _e = newPtr; }
-
-  /** get a pointer on matrix Jach[index]
-   *  \return a pointer on a SimpleMatrix
-   */
 
   /** print the data to the screen
    */
@@ -188,7 +142,7 @@ class LagrangianCompliantLinearTIR : public LagrangianR {
    * \return true if the relation is linear.
    */
 
-  bool isLinear() override { return true; }
+  bool isLinear() const override { return true; }
 };
 }  // namespace siconos::modeling
 #endif

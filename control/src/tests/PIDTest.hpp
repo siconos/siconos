@@ -19,7 +19,7 @@
 #define __PIDTest__
 
 #include <cppunit/extensions/HelperMacros.h>
-#include <FirstOrderLinearTIDS.hpp>
+#include <FirstOrderLinearDS.hpp>
 #include <PID.hpp>
 #include <LinearSensor.hpp>
 
@@ -51,7 +51,7 @@ private:
   double _T;
   double _tol;
   double _xFinal;
-  std::shared_ptr<siconos::modeling::FirstOrderLinearTIDS> _DS;
+  std::shared_ptr<siconos::modeling::FirstOrderLinearDS> _DS;
   std::shared_ptr<siconos::algebra::SiconosMatrix> _A;
   std::shared_ptr<siconos::algebra::SiconosVector> _b;
   std::shared_ptr<siconos::algebra::SiconosVector> _x0;

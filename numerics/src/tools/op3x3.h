@@ -190,6 +190,27 @@ static inline void sub3(double a[3], double b[3]) { OP3(*b++ -= *a++); }
  */
 static inline void scal3x3(double scal, double m[9]) { OP3X3(*m++ *= scal); }
 
+/** set to zero a matrix3x3
+ * \param[in,out] m  m[9]
+ */
+static inline void zero3x3(double m[9]) { OP3X3(*m++ = 0.); }
+
+/** set to identity a matrix3x3
+ * \param[in,out] m  m[9]
+ */
+static inline void eye3x3(double m[9]) {
+  SET3X3(m);
+  *m00 = 1.;
+  *m01 = 0.;
+  *m02 = 0.;
+  *m10 = 0.;
+  *m11 = 1.;
+  *m12 = 0.;
+  *m20 = 0.;
+  *m21 = 0.;
+  *m22 = 1.;
+}
+
 /** diagonal scaling of a vector
  * \param[in] scal_coeffs diagonal part of a matrix
  * \param[in,out] v a 3D vector
@@ -222,6 +243,12 @@ static inline void cpytr3x3(double* restrict a, double* restrict b) {
   *b22 = *a22;
 }
 
+static inline void display3x3(double* restrict a) {
+  SET3X3(a);
+  printf("[ %6.4e\t  %6.4e\t %6.4e ]\n", *a00, *a01, *a02);
+  printf("[ %6.4e\t  %6.4e\t %6.4e ]\n", *a10, *a11, *a12);
+  printf("[ %6.4e\t  %6.4e\t %6.4e ]\n", *a20, *a21, *a22);
+}
 /** matrix vector multiplication
  * \param[in] a 3 by 3 matrix in col-major
  * \param[in] v 3 dimensional vector

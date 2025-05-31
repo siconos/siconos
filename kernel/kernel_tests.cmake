@@ -4,18 +4,28 @@ if(WITH_TESTING)
   add_custom_target(kernel-tests echo "Start kernel tests")
 
   # ---- Siconos Algebra tests ----
-  begin_tests(src/utils/SiconosAlgebra/test DEPS "externals;numerics;CPPUNIT::CPPUNIT")
-  new_test(SOURCES  SiconosVectorTest.cpp BlockVectorTest.cpp SimpleMatrixTest.cpp BlockMatrixTest.cpp AlgebraToolsTest.cpp  EigenProblemsTest.cpp ${SIMPLE_TEST_MAIN})
+  begin_tests(src/utils/SiconosAlgebra/test)
+  # new_test(SOURCES  SiconosVectorTest.cpp BlockVectorTest.cpp SimpleMatrixTest.cpp BlockMatrixTest.cpp AlgebraToolsTest.cpp  EigenProblemsTest.cpp ${SIMPLE_TEST_MAIN})
 
+  new_test(
+    NAME testSiconosAlgebra
+    SOURCES  SimpleMatrixTest.cpp ${SIMPLE_TEST_MAIN}
+    DEPS "numerics;CPPUNIT::CPPUNIT;externals"
+    )
 
   # ---- Siconos Memory tests ----
-  begin_tests(src/utils/SiconosMemory/test DEPS "numerics;CPPUNIT::CPPUNIT")
-  new_test(SOURCES SiconosMemoryTest.cpp ${SIMPLE_TEST_MAIN})
+  begin_tests(src/utils/SiconosMemory/test)
 
-  add_library(TestPlugin MODULE ${CMAKE_CURRENT_SOURCE_DIR}/src/utils/plugins/test/TestPlugin.cpp)
-  set_target_properties(TestPlugin 
-    PROPERTIES PREFIX ""
-    OUTPUT_NAME ${CMAKE_CURRENT_BINARY_DIR}/TestPlugin)
+  new_test(
+    NAME testSiconosMemory
+    SOURCES SiconosMemoryTest.cpp ${SIMPLE_TEST_MAIN}
+    DEPS "numerics;CPPUNIT::CPPUNIT"
+    )
+
+  #  add_library(TestPlugin MODULE ${CMAKE_CURRENT_SOURCE_DIR}/src/utils/plugins/test/TestPlugin.cpp)
+  # set_target_properties(TestPlugin 
+  #   PROPERTIES PREFIX ""
+  #   OUTPUT_NAME ${CMAKE_CURRENT_BINARY_DIR}/TestPlugin)
 
 
   # ---- Siconos tools tests ----

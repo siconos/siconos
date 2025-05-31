@@ -22,8 +22,8 @@
 
 #include "BlockVector.hpp"
 #include "NewtonEulerJointR.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
 // #define DEBUG_BEGIN_END_ONLY
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -62,37 +62,37 @@ siconos::joints::JointFrictionR::JointFrictionR(
   assert((_axisMax - _axisMin + 1) <= _joint->numberOfDoF());
 }
 
-void siconos::joints::JointFrictionR::computeh(double time,
-                                               const siconos::algebra::BlockVector& q0,
-                                               siconos::algebra::SiconosVector& y) {
+void siconos::joints::JointFrictionR::computeh(const siconos::algebra::BlockVector& q,
+                                               Eigen::Ref<siconos::algebra::SiconosVector> y) {
   // Velocity-level constraint, no position-level h
-  y.zero();
+  y.setZero();
 }
 
-void siconos::joints::JointFrictionR::computeJachq(
-    double time, siconos::modeling::Interaction& inter,
-    std::shared_ptr<siconos::algebra::BlockVector> q0) {
+void siconos::joints::JointFrictionR::computeH_NE_(double time,
+                                                   siconos::modeling::Interaction& inter,
+                                                   const siconos::algebra::BlockVector& q0) {
   unsigned int n = _axisMax - _axisMin + 1;
   assert(n == 1);  // For now, multi-axis support TODO
 
-  if (!_jachqTmp || !(_jachqTmp->size(1) == q0->size() && _jachqTmp->size(0) == n)) {
-    _jachqTmp = std::make_shared<siconos::algebra::SimpleMatrix>(n, q0->size());
+  if (!jacobianhOver_q_Tmp ||
+      !(jacobianhOver_q_Tmp->cols() == q0.size() && jacobianhOver_q_Tmp->rows() == n)) {
+    jacobianhOver_q_Tmp = std::make_shared<siconos::algebra::SiconosMatrix>(n, q0.size());
   }
 
   // Compute the jacobian for the required range of axes
-  _joint->computeJachqDoF(time, inter, q0, *_jachqTmp, _axisMin);
+  _joint->computeJachqDoF(inter, q0, *jacobianhOver_q_Tmp, _axisMin);
 
   // Copy indicated axes into the friction jacobian, negative and positive sides
   // NOTE trying ==1 using Relay, maybe don't need LCP formulation
-  assert(_jachq->size(0) == 1);
+  assert(H_NE_view_->cols() == 1);
   for (unsigned int i = 0; i < 1; i++)
-    for (unsigned int j = 0; j < _jachq->size(1); j++) {
-      _jachq->setValue(i, j,
-                       _jachqTmp->getValue((*_axis)[i] - _axisMin, j) * (i == 1 ? 1 : -1));
+    for (unsigned int j = 0; j < H_NE_view_->cols(); j++) {
+      H_NE_view_->setValue(
+          i, j, (*jacobianhOver_q_Tmp)((*_axis)[i] - _axisMin, j) * (i == 1 ? 1 : -1));
     }
 }
 
-unsigned int siconos::joints::JointFrictionR::numberOfConstraints() { return _axis->size(); }
+unsigned int siconos::joints::JointFrictionR::numberOfConstraints() const { return _axis->size(); }
 unsigned int siconos::joints::JointFrictionR::axis(unsigned int _index) {
   return _axis->at(_index);
 }

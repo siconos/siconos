@@ -1,5 +1,22 @@
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2024 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "SpaceFilter.hpp"
-// #include <boost/numeric/bindings/ublas/matrix.hpp>
+
 #include <boost/container_hash/hash.hpp>  // For hash_combine
 
 #include "BodiesVisitor.hpp"
@@ -10,10 +27,11 @@
 #include "DiskMovingPlanR.hpp"
 #include "DiskPlanR.hpp"
 #include "DynamicalSystem.hpp"
+#include "DynamicalSystemVisitor.hpp"
 #include "ExternalBody.hpp"
 #include "Interaction.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
 #include "Simulation.hpp"
 #include "SimulationGraphs.hpp"
 #include "SpaceFilter_impl.hpp"
@@ -60,7 +78,7 @@ siconos::collision::native::SpaceFilter::SpaceFilter(
       _hash_table(std::make_shared<SpaceHash>()),
       diskdisk_relations(std::make_shared<DiskDiskRDeclaredPool>()),
       diskplan_relations(std::make_shared<DiskPlanRDeclaredPool>()),
-      circlecircle_relations(std::make_shared<CircleCircleRDeclaredPool>()){};
+      circlecircle_relations(std::make_shared<CircleCircleRDeclaredPool>()) {};
 
 siconos::collision::native::SpaceFilter::SpaceFilter(
     unsigned int bboxfactor, unsigned int cellsize,
@@ -68,14 +86,14 @@ siconos::collision::native::SpaceFilter::SpaceFilter(
     : SpaceFilter(bboxfactor, cellsize, plans, nullptr) {}
 
 /* the hashing is done with a visitor */
-struct siconos::collision::native::SpaceFilter::_BodyHash
-    : public siconos::collision::native::BodiesVisitor {
+struct siconos::collision::native::SpaceFilter::BodyHashVisitor_
+    : public siconos::modeling::dynamical_systems::Visitor {
  public:
   siconos::simulation::Simulation& sim;
   SpaceFilter& parent;
-  _BodyHash(siconos::simulation::Simulation& s, SpaceFilter& p) : sim(s), parent(p){};
+  BodyHashVisitor_(siconos::simulation::Simulation& s, SpaceFilter& p) : sim(s), parent(p) {};
 
-  using siconos::collision::native::BodiesVisitor::visit;
+  using siconos::modeling::dynamical_systems::Visitor::visit;
 
   void visit(std::shared_ptr<siconos::collision::native::bodies::Disk> pds) override {
     int i, j, imin, imax, jmin, jmax;
@@ -169,41 +187,37 @@ struct siconos::collision::native::SpaceFilter::_BodyHash
   /* ... visit other objects */
 };
 
-/* proximity detection for circular object */
-struct siconos::collision::native::SpaceFilter::_CircularFilter
-    : public siconos::collision::native::BodiesVisitor {
-  using siconos::collision::native::BodiesVisitor::visit;
+// --- CircularDSFilterVisitor ---
+// A visitor to handle detection for CircularDS
+struct siconos::collision::native::SpaceFilter::CircularFilterVisitor_
+    : public siconos::modeling::dynamical_systems::Visitor {
+  using siconos::modeling::dynamical_systems::Visitor::visit;
+  std::shared_ptr<siconos::simulation::Simulation> sim;
+  std::shared_ptr<siconos::collision::native::SpaceFilter> parent;
+  std::shared_ptr<siconos::collision::native::bodies::CircularDS> ds1;
 
-  std::shared_ptr<siconos::simulation::Simulation> sim{nullptr};
-  std::shared_ptr<siconos::collision::native::SpaceFilter> parent{nullptr};
-  std::shared_ptr<siconos::collision::native::bodies::CircularDS> ds1{nullptr};
+  CircularFilterVisitor_(std::shared_ptr<siconos::simulation::Simulation> s,
+                         std::shared_ptr<siconos::collision::native::SpaceFilter> p,
+                         std::shared_ptr<siconos::collision::native::bodies::CircularDS> d1)
+      : sim{s}, parent{p}, ds1{d1} {};
 
-  _CircularFilter(std::shared_ptr<siconos::simulation::Simulation> s,
-                  std::shared_ptr<siconos::collision::native::SpaceFilter> parent,
-                  std::shared_ptr<siconos::collision::native::bodies::CircularDS> ds1)
-      : sim(s), parent(parent), ds1(ds1){};
-
-  void visit_circular(std::shared_ptr<siconos::collision::native::bodies::CircularDS> ds2) {
-    std::shared_ptr<siconos::collision::native::bodies::CircularR> rel;
-    auto DSG0 = sim->nonSmoothDynamicalSystem()->topology()->dSG(0);
-
+  void visit_circular(
+      std::shared_ptr<siconos::collision::native::bodies::CircularDS> ds2) const {
     assert(ds1 != ds2);
+    auto DSG0 = sim->nonSmoothDynamicalSystem()->topology()->dSG(0);
     assert(DSG0->bundle(DSG0->descriptor(ds1)) == ds1);
     assert(DSG0->bundle(DSG0->descriptor(ds2)) == ds2);
-
     double r1 = ds1->getRadius();
     double r2 = ds2->getRadius();
     double tol = r1 + r2;
-
     double x1 = ds1->getQ(0);
     double y1 = ds1->getQ(1);
     double x2 = ds2->getQ(0);
     double y2 = ds2->getQ(1);
-    double rmax = fmax(r1, r2);
-    double rmin = fmin(r1, r2);
-
-    double d = hypot(x1 - x2, y1 - y2);
-
+    double rmax = std::fmax(r1, r2);
+    double rmin = std::fmin(r1, r2);
+    double d = std::hypot(x1 - x2, y1 - y2);
+    std::shared_ptr<siconos::collision::native::bodies::CircularR> rel = nullptr;
     if (d < rmax) {
       // one inside the other : CircleCircle relation
       if (rmax - (d + rmin) < tol) {
@@ -216,7 +230,7 @@ struct siconos::collision::native::SpaceFilter::_CircularFilter
           //(*(parent->circlecircle_relations))[CircleCircleRDeclared(r1, r2)] = rel;
         } else {
           // get relation from pool
-          rel = (*rcandid).second;
+          rel = rcandid->second;
         }
       }
     } else {
@@ -232,46 +246,16 @@ struct siconos::collision::native::SpaceFilter::_CircularFilter
           // parent->diskdisk_relations[DiskDiskRDeclared(r1,r2)] = rel;
         } else {
           // get relation from pool
-          rel = (*rcandid).second;
+          rel = rcandid->second;
         }
       }
     }
-
     if (rel) {
-      bool found = false;
-      siconos::graphs::DynamicalSystemsGraph::OEIterator oei, oeiend;
-      for (std::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds1)); oei != oeiend;
-           ++oei) {
-        if (DSG0->bundle(DSG0->target(*oei)) == ds2) {
-          found = true;
-          break;
-        }
-      }
-
-      if (!found) {
-        auto nslaw = parent->nonSmoothLaw(DSG0->groupId[DSG0->descriptor(ds1)],
-                                          DSG0->groupId[DSG0->descriptor(ds2)]);
-        assert(nslaw);
-
-        auto inter = std::make_shared<siconos::modeling::Interaction>(nslaw, rel);
-        sim->nonSmoothDynamicalSystem()->link(inter, ds1, ds2);
-      }
+      siconos::simulation::interactions_manager::build_and_link_interaction(ds1, ds2, DSG0,
+                                                                            rel, sim, parent);
     } else {
-      // is interaction in graph ?
-      bool found = false;
-      siconos::graphs::DynamicalSystemsGraph::OEIterator oei, oeiend;
-      for (std::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds1)); oei != oeiend;
-           ++oei) {
-        if (DSG0->bundle(DSG0->target(*oei)) == ds2) {
-          found = true;
-          break;
-        }
-      }
-
-      if (found) {
-        DEBUG_PRINTF("remove interaction : %d\n", DSG0->bundle(*oei)->number());
-        sim->unlink(DSG0->bundle(*oei));
-      }
+      siconos::simulation::interactions_manager::remove_interaction_if_exists(ds1, ds2, DSG0,
+                                                                              sim);
     }
   }
 
@@ -288,18 +272,18 @@ struct siconos::collision::native::SpaceFilter::_CircularFilter
 };
 
 /* proximity detection for sphere objects */
-struct siconos::collision::native::SpaceFilter::_SphereLDSFilter
-    : public siconos::collision::native::BodiesVisitor {
-  using siconos::collision::native::BodiesVisitor::visit;
+struct siconos::collision::native::SpaceFilter::SphereLDSFilterVisitor_
+    : public siconos::modeling::dynamical_systems::Visitor {
+  using siconos::modeling::dynamical_systems::Visitor::visit;
 
   std::shared_ptr<siconos::simulation::Simulation> sim;
   std::shared_ptr<siconos::collision::native::SpaceFilter> parent;
   std::shared_ptr<siconos::collision::native::bodies::SphereLDS> ds1;
 
-  _SphereLDSFilter(std::shared_ptr<siconos::simulation::Simulation> _sim,
-                   std::shared_ptr<siconos::collision::native::SpaceFilter> p,
-                   std::shared_ptr<siconos::collision::native::bodies::SphereLDS> s)
-      : sim(_sim), parent(p), ds1(s){};
+  SphereLDSFilterVisitor_(std::shared_ptr<siconos::simulation::Simulation> s,
+                          std::shared_ptr<siconos::collision::native::SpaceFilter> p,
+                          std::shared_ptr<siconos::collision::native::bodies::SphereLDS> ds)
+      : sim(s), parent(p), ds1(ds) {};
 
   void visit(std::shared_ptr<siconos::collision::native::bodies::SphereLDS> ds2) override {
     auto DSG0(sim->nonSmoothDynamicalSystem()->topology()->dSG(0));
@@ -328,55 +312,28 @@ struct siconos::collision::native::SpaceFilter::_SphereLDSFilter
     if (d < 2 * tol) {
       auto rel =
           std::make_shared<siconos::collision::native::bodies::SphereLDSSphereLDSR>(r1, r2);
-
-      bool found = false;
-      siconos::graphs::DynamicalSystemsGraph::OEIterator oei, oeiend;
-      for (std::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds1)); oei != oeiend;
-           ++oei) {
-        if (DSG0->bundle(DSG0->target(*oei)) == ds2) {
-          found = true;
-          break;
-        }
-      }
-
-      if (!found) {
-        auto nslaw = parent->nonSmoothLaw(DSG0->groupId[DSG0->descriptor(ds1)],
-                                          DSG0->groupId[DSG0->descriptor(ds2)]);
-
-        auto inter = std::make_shared<siconos::modeling::Interaction>(nslaw, rel);
-        sim->link(inter, ds1, ds2);
-      }
+      siconos::simulation::interactions_manager::build_and_link_interaction(ds1, ds2, DSG0,
+                                                                            rel, sim, parent);
     } else {
-      // is interaction in graph ?
-      bool found = false;
-      siconos::graphs::DynamicalSystemsGraph::OEIterator oei, oeiend;
-      for (std::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds1)); oei != oeiend;
-           ++oei) {
-        if (DSG0->bundle(DSG0->target(*oei)) == ds2) {
-          found = true;
-          break;
-        }
-      }
-
-      if (found) {
-        sim->unlink(DSG0->bundle(*oei));
-      }
+      siconos::simulation::interactions_manager::remove_interaction_if_exists(ds1, ds2, DSG0,
+                                                                              sim);
     }
   }
 };
 
-struct siconos::collision::native::SpaceFilter::_SphereNEDSFilter
-    : public siconos::collision::native::BodiesVisitor {
-  using siconos::collision::native::BodiesVisitor::visit;
+struct siconos::collision::native::SpaceFilter::SphereNEDSFilterVisitor_
+    : public siconos::modeling::dynamical_systems::Visitor {
+  using siconos::modeling::dynamical_systems::Visitor::visit;
 
   std::shared_ptr<siconos::simulation::Simulation> sim;
   std::shared_ptr<siconos::collision::native::SpaceFilter> parent;
   std::shared_ptr<siconos::collision::native::bodies::SphereNEDS> ds1;
 
-  _SphereNEDSFilter(std::shared_ptr<siconos::simulation::Simulation> _sim,
-                    std::shared_ptr<siconos::collision::native::SpaceFilter> p,
-                    std::shared_ptr<siconos::collision::native::bodies::SphereNEDS> s)
-      : sim(_sim), parent(p), ds1(s){};
+  SphereNEDSFilterVisitor_(
+      std::shared_ptr<siconos::simulation::Simulation> s,
+      std::shared_ptr<siconos::collision::native::SpaceFilter> p,
+      std::shared_ptr<siconos::collision::native::bodies::SphereNEDS> neds)
+      : sim(s), parent(p), ds1(neds) {};
 
   void visit(std::shared_ptr<siconos::collision::native::bodies::SphereNEDS> ds2) override {
     auto DSG0 = sim->nonSmoothDynamicalSystem()->topology()->dSG(0);
@@ -405,25 +362,8 @@ struct siconos::collision::native::SpaceFilter::_SphereNEDSFilter
     if (d < 2 * tol) {
       auto rel =
           std::make_shared<siconos::collision::native::bodies::SphereNEDSSphereNEDSR>(r1, r2);
-
-      bool found = false;
-      siconos::graphs::DynamicalSystemsGraph::OEIterator oei, oeiend;
-      for (std::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds1)); oei != oeiend;
-           ++oei) {
-        if (DSG0->bundle(DSG0->target(*oei)) == ds2) {
-          found = true;
-          break;
-        }
-      }
-
-      if (!found) {
-        auto nslaw = parent->nonSmoothLaw(DSG0->groupId[DSG0->descriptor(ds1)],
-                                          DSG0->groupId[DSG0->descriptor(ds2)]);
-
-        auto inter = std::make_shared<siconos::modeling::Interaction>(nslaw, rel);
-
-        sim->link(inter, ds1, ds2);
-      }
+      siconos::simulation::interactions_manager::build_and_link_interaction(ds1, ds2, DSG0,
+                                                                            rel, sim, parent);
     } else {
       // is interaction in graph ?
       bool found = false;
@@ -444,17 +384,18 @@ struct siconos::collision::native::SpaceFilter::_SphereNEDSFilter
 };
 
 /* disk plan relation comparison */
-struct siconos::collision::native::SpaceFilter::_IsSameDiskPlanR
-    : public siconos::collision::native::BodiesVisitor {
-  using siconos::collision::native::BodiesVisitor::visit;
+struct siconos::collision::native::SpaceFilter::IsSameDiskPlanRVisitor_
+    : public siconos::modeling::relations::Visitor {
+  using siconos::modeling::relations::Visitor::visit;
 
   std::shared_ptr<siconos::simulation::Simulation> sim;
   std::shared_ptr<siconos::collision::native::SpaceFilter> parent;
   double A, B, C, r, xCenter, yCenter, width;
   bool flag;
-  _IsSameDiskPlanR(std::shared_ptr<siconos::simulation::Simulation> s,
-                   std::shared_ptr<siconos::collision::native::SpaceFilter> p, double A,
-                   double B, double C, double r, double xCenter, double yCenter, double width)
+  IsSameDiskPlanRVisitor_(std::shared_ptr<siconos::simulation::Simulation> s,
+                          std::shared_ptr<siconos::collision::native::SpaceFilter> p, double A,
+                          double B, double C, double r, double xCenter, double yCenter,
+                          double width)
       : sim(s),
         parent(p),
         A(A),
@@ -464,7 +405,7 @@ struct siconos::collision::native::SpaceFilter::_IsSameDiskPlanR
         xCenter(xCenter),
         yCenter(yCenter),
         width(width),
-        flag(false){};
+        flag(false) {};
 
   void visit(const siconos::collision::native::bodies::DiskDiskR&) override { flag = false; };
 
@@ -483,18 +424,20 @@ struct siconos::collision::native::SpaceFilter::_IsSameDiskPlanR
   };
 };
 
-struct siconos::collision::native::SpaceFilter::_IsSameDiskMovingPlanR
-    : public siconos::collision::native::BodiesVisitor {
-  using siconos::collision::native::BodiesVisitor::visit;
+struct siconos::collision::native::SpaceFilter::IsSameDiskMovingPlanRVisitor_
+    : public siconos::modeling::relations::Visitor {
+  using siconos::modeling::relations::Visitor::visit;
 
   std::shared_ptr<siconos::collision::native::SpaceFilter> parent;
-  siconos::plugins::FTime AF, BF, CF;
+  siconos::modeling::func_prototypes::FunctionS_S AF, BF, CF;
   double r;
   bool flag;
-  _IsSameDiskMovingPlanR(std::shared_ptr<siconos::collision::native::SpaceFilter> p,
-                         siconos::plugins::FTime AF, siconos::plugins::FTime BF,
-                         siconos::plugins::FTime CF, double r)
-      : parent(p), AF(AF), BF(BF), CF(CF), r(r), flag(false){};
+  IsSameDiskMovingPlanRVisitor_(std::shared_ptr<siconos::collision::native::SpaceFilter> p,
+                                const siconos::modeling::func_prototypes::FunctionS_S& AF,
+                                const siconos::modeling::func_prototypes::FunctionS_S& BF,
+                                const siconos::modeling::func_prototypes::FunctionS_S& CF,
+                                double r)
+      : parent(p), AF(AF), BF(BF), CF(CF), r(r), flag(false) {};
 
   void visit(const siconos::collision::native::bodies::DiskDiskR&) override { flag = false; };
 
@@ -512,16 +455,16 @@ struct siconos::collision::native::SpaceFilter::_IsSameDiskMovingPlanR
 };
 
 /* sphere plan relation comparison */
-struct siconos::collision::native::SpaceFilter::_IsSameSpherePlanR
-    : public siconos::collision::native::BodiesVisitor {
-  using siconos::collision::native::BodiesVisitor::visit;
+struct siconos::collision::native::SpaceFilter::IsSameSpherePlanRVisitor_
+    : public siconos::modeling::relations::Visitor {
+  using siconos::modeling::relations::Visitor::visit;
 
   std::shared_ptr<siconos::collision::native::SpaceFilter> parent;
   double A, B, C, D, r;
   bool flag;
-  _IsSameSpherePlanR(std::shared_ptr<siconos::collision::native::SpaceFilter> p, double A,
-                     double B, double C, double D, double r)
-      : parent(p), A(A), B(B), C(C), D(D), r(r), flag(false){};
+  IsSameSpherePlanRVisitor_(std::shared_ptr<siconos::collision::native::SpaceFilter> p,
+                            double A, double B, double C, double D, double r)
+      : parent(p), A(A), B(B), C(C), D(D), r(r), flag(false) {};
 
   void visit(const siconos::collision::native::bodies::SphereLDSSphereLDSR&) override {
     flag = false;
@@ -552,9 +495,12 @@ void siconos::collision::native::SpaceFilter::_PlanCircularFilter(
 
   auto DSG0 = sim->nonSmoothDynamicalSystem()->topology()->dSG(0);
 
-  auto isSameDiskPlanR = std::make_shared<_IsSameDiskPlanR>(
-      sim, std::dynamic_pointer_cast<SpaceFilter>(shared_from_this()), A, B, C, r, xCenter,
-      yCenter, width);
+  IsSameDiskPlanRVisitor_ isSameDiskPlanR{
+      sim,     std::dynamic_pointer_cast<SpaceFilter>(shared_from_this()),
+      A,       B,
+      C,       r,
+      xCenter, yCenter,
+      width};
 
   // all DS must be in DS graph
   assert(DSG0->bundle(DSG0->descriptor(ds)) == ds);
@@ -567,7 +513,7 @@ void siconos::collision::native::SpaceFilter::_PlanCircularFilter(
     siconos::graphs::DynamicalSystemsGraph::OEIterator oei, oeiend;
     for (std::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds)); oei != oeiend; ++oei) {
       DSG0->bundle(*oei)->relation()->accept(isSameDiskPlanR);
-      if (DSG0->bundle(DSG0->target(*oei)) == ds && isSameDiskPlanR->flag) {
+      if (DSG0->bundle(DSG0->target(*oei)) == ds && isSameDiskPlanR.flag) {
         found = true;
         break;
       }
@@ -589,7 +535,7 @@ void siconos::collision::native::SpaceFilter::_PlanCircularFilter(
     for (std::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds)); oei != oeiend; ++oei) {
       DSG0->bundle(*oei)->relation()->accept(isSameDiskPlanR);
 
-      if (DSG0->bundle(DSG0->target(*oei)) == ds && isSameDiskPlanR->flag) {
+      if (DSG0->bundle(DSG0->target(*oei)) == ds && isSameDiskPlanR.flag) {
         DEBUG_PRINTF("remove interaction : %d\n", DSG0->bundle(*oei)->number());
 
         sim->unlink(DSG0->bundle(*oei));
@@ -610,15 +556,20 @@ void siconos::collision::native::SpaceFilter::_MovingPlanCircularFilter(
 
   auto DSG0 = sim->nonSmoothDynamicalSystem()->topology()->dSG(0);
 
-  auto isSameDiskMovingPlanR = std::make_shared<_IsSameDiskMovingPlanR>(
+  IsSameDiskMovingPlanRVisitor_ isSameDiskMovingPlanR{
       std::dynamic_pointer_cast<SpaceFilter>(shared_from_this()), (*_moving_plans)(i, 0),
-      (*_moving_plans)(i, 1), (*_moving_plans)(i, 2), r);
+      (*_moving_plans)(i, 1), (*_moving_plans)(i, 2), r};
 
   // all DS must be in DS graph
   assert(DSG0->bundle(DSG0->descriptor(ds)) == ds);
-  auto relp = std::make_shared<siconos::collision::native::bodies::DiskMovingPlanR>(
-      (*_moving_plans)(i, 0), (*_moving_plans)(i, 1), (*_moving_plans)(i, 2),
-      (*_moving_plans)(i, 3), (*_moving_plans)(i, 4), (*_moving_plans)(i, 5), r);
+  auto relp = std::make_shared<siconos::collision::native::bodies::DiskMovingPlanR>(r);
+
+  relp->setComputeAFunction((*_moving_plans)(i, 0));
+  relp->setComputeBFunction((*_moving_plans)(i, 1));
+  relp->setComputeCFunction((*_moving_plans)(i, 2));
+  relp->setComputeAdotFunction((*_moving_plans)(i, 3));
+  relp->setComputeBdotFunction((*_moving_plans)(i, 4));
+  relp->setComputeCdotFunction((*_moving_plans)(i, 5));
 
   relp->init(time);
 
@@ -630,7 +581,7 @@ void siconos::collision::native::SpaceFilter::_MovingPlanCircularFilter(
     siconos::graphs::DynamicalSystemsGraph::OEIterator oei, oeiend;
     for (std::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds)); oei != oeiend; ++oei) {
       DSG0->bundle(*oei)->relation()->accept(isSameDiskMovingPlanR);
-      if (DSG0->bundle(DSG0->target(*oei)) == ds && isSameDiskMovingPlanR->flag) {
+      if (DSG0->bundle(DSG0->target(*oei)) == ds && isSameDiskMovingPlanR.flag) {
         found = true;
         break;
       }
@@ -650,7 +601,7 @@ void siconos::collision::native::SpaceFilter::_MovingPlanCircularFilter(
     for (std::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds)); oei != oeiend; ++oei) {
       DSG0->bundle(*oei)->relation()->accept(isSameDiskMovingPlanR);
 
-      if (DSG0->bundle(DSG0->target(*oei)) == ds && isSameDiskMovingPlanR->flag) {
+      if (DSG0->bundle(DSG0->target(*oei)) == ds && isSameDiskMovingPlanR.flag) {
         sim->unlink(DSG0->bundle(*oei));
         break;
       }
@@ -669,8 +620,8 @@ void siconos::collision::native::SpaceFilter::_PlanSphereLDSFilter(
 
   auto DSG0 = sim->nonSmoothDynamicalSystem()->topology()->dSG(0);
 
-  auto IsSameSpherePlanR = std::make_shared<_IsSameSpherePlanR>(
-      std::dynamic_pointer_cast<SpaceFilter>(shared_from_this()), A, B, C, D, r);
+  IsSameSpherePlanRVisitor_ isSameSpherePlanR{
+      std::dynamic_pointer_cast<SpaceFilter>(shared_from_this()), A, B, C, D, r};
 
   // all DS must be in DS graph
   assert(DSG0->bundle(DSG0->descriptor(ds)) == ds);
@@ -683,8 +634,8 @@ void siconos::collision::native::SpaceFilter::_PlanSphereLDSFilter(
     bool found = false;
     siconos::graphs::DynamicalSystemsGraph::OEIterator oei, oeiend;
     for (std::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds)); oei != oeiend; ++oei) {
-      DSG0->bundle(*oei)->relation()->accept(IsSameSpherePlanR);
-      if (DSG0->bundle(DSG0->target(*oei)) == ds && IsSameSpherePlanR->flag) {
+      DSG0->bundle(*oei)->relation()->accept(isSameSpherePlanR);
+      if (DSG0->bundle(DSG0->target(*oei)) == ds && isSameSpherePlanR.flag) {
         found = true;
         break;
       }
@@ -702,9 +653,9 @@ void siconos::collision::native::SpaceFilter::_PlanSphereLDSFilter(
     // is interaction in graph ?
     siconos::graphs::DynamicalSystemsGraph::OEIterator oei, oeiend;
     for (std::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds)); oei != oeiend; ++oei) {
-      DSG0->bundle(*oei)->relation()->accept(IsSameSpherePlanR);
+      DSG0->bundle(*oei)->relation()->accept(isSameSpherePlanR);
 
-      if (DSG0->bundle(DSG0->target(*oei)) == ds && IsSameSpherePlanR->flag) {
+      if (DSG0->bundle(DSG0->target(*oei)) == ds && isSameSpherePlanR.flag) {
         sim->unlink(DSG0->bundle(*oei));
         break;
       }
@@ -723,8 +674,8 @@ void siconos::collision::native::SpaceFilter::_PlanSphereNEDSFilter(
 
   auto DSG0 = sim->nonSmoothDynamicalSystem()->topology()->dSG(0);
 
-  auto isSameSpherePlanR = std::make_shared<_IsSameSpherePlanR>(
-      std::dynamic_pointer_cast<SpaceFilter>(shared_from_this()), A, B, C, D, r);
+  IsSameSpherePlanRVisitor_ isSameSpherePlanR{
+      std::dynamic_pointer_cast<SpaceFilter>(shared_from_this()), A, B, C, D, r};
 
   // all DS must be in DS graph
   assert(DSG0->bundle(DSG0->descriptor(ds)) == ds);
@@ -738,7 +689,7 @@ void siconos::collision::native::SpaceFilter::_PlanSphereNEDSFilter(
     siconos::graphs::DynamicalSystemsGraph::OEIterator oei, oeiend;
     for (std::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds)); oei != oeiend; ++oei) {
       DSG0->bundle(*oei)->relation()->accept(isSameSpherePlanR);
-      if (DSG0->bundle(DSG0->target(*oei)) == ds && isSameSpherePlanR->flag) {
+      if (DSG0->bundle(DSG0->target(*oei)) == ds && isSameSpherePlanR.flag) {
         found = true;
         break;
       }
@@ -758,7 +709,7 @@ void siconos::collision::native::SpaceFilter::_PlanSphereNEDSFilter(
     for (std::tie(oei, oeiend) = DSG0->out_edges(DSG0->descriptor(ds)); oei != oeiend; ++oei) {
       DSG0->bundle(*oei)->relation()->accept(isSameSpherePlanR);
 
-      if (DSG0->bundle(DSG0->target(*oei)) == ds && isSameSpherePlanR->flag) {
+      if (DSG0->bundle(DSG0->target(*oei)) == ds && isSameSpherePlanR.flag) {
         sim->unlink(DSG0->bundle(*oei));
         break;
       }
@@ -809,9 +760,9 @@ bool siconos::collision::native::operator==(
            a[5] == b[5]));
 }
 
-struct siconos::collision::native::SpaceFilter::_FindInteractions
-    : public siconos::collision::native::BodiesVisitor {
-  using siconos::collision::native::BodiesVisitor::visit;
+struct siconos::collision::native::SpaceFilter::FindInteractionsVisitor_
+    : public siconos::modeling::dynamical_systems::Visitor {
+  using siconos::modeling::dynamical_systems::Visitor::visit;
 
   using InterPairs =
       std::unordered_multiset<std::pair<int, int>, boost::hash<std::pair<int, int>>>;
@@ -820,17 +771,18 @@ struct siconos::collision::native::SpaceFilter::_FindInteractions
   std::shared_ptr<siconos::collision::native::SpaceFilter> parent{nullptr};
   double time{0.};
 
-  _FindInteractions(std::shared_ptr<siconos::simulation::Simulation> s,
-                    std::shared_ptr<siconos::collision::native::SpaceFilter> p, double time)
-      : sim(s), parent(p), time(time){};
+  FindInteractionsVisitor_(std::shared_ptr<siconos::simulation::Simulation> s,
+                           std::shared_ptr<siconos::collision::native::SpaceFilter> p,
+                           double time)
+      : sim(s), parent(p), time(time) {};
 
   void visit_circular(std::shared_ptr<siconos::collision::native::bodies::CircularDS> ds1) {
-    assert(parent->_plans->size(0) > 0);
+    assert(parent->_plans->rows() > 0);
 
     // interactions with plans
 
     if (parent->_plans) {
-      for (unsigned int i = 0; i < parent->_plans->size(0); ++i) {
+      for (unsigned int i = 0; i < parent->_plans->rows(); ++i) {
         parent->_PlanCircularFilter(sim, (*parent->_plans)(i, 0), (*parent->_plans)(i, 1),
                                     (*parent->_plans)(i, 2), (*parent->_plans)(i, 3),
                                     (*parent->_plans)(i, 4), (*parent->_plans)(i, 5), ds1);
@@ -845,8 +797,8 @@ struct siconos::collision::native::SpaceFilter::_FindInteractions
 
     auto Q1 = ds1->q();
 
-    auto x1 = Q1->getValue(0);
-    auto y1 = Q1->getValue(1);
+    auto x1 = (*Q1)(0);
+    auto y1 = (*Q1)(1);
     auto hds1 = std::make_shared<siconos::collision::native::internal::Hashed>(
         std::static_pointer_cast<siconos::modeling::DynamicalSystem>(ds1),
         (int)floor(x1 / parent->_cellsize), (int)floor(y1 / parent->_cellsize));
@@ -855,8 +807,7 @@ struct siconos::collision::native::SpaceFilter::_FindInteractions
     auto neighbours = parent->_hash_table->equal_range(hds1);
 
     InterPairs declaredInteractions;
-    auto circularFilter = std::make_shared<_CircularFilter>(sim, parent, ds1);
-
+    CircularFilterVisitor_ circularFilter(sim, parent, ds1);
     for (unsigned int j = 0; neighbours.first != neighbours.second; ++neighbours.first, ++j) {
       auto ds2 = (*(neighbours.first))->body;
       auto ids1 = ds1->number();
@@ -886,16 +837,16 @@ struct siconos::collision::native::SpaceFilter::_FindInteractions
 
   void visit(std::shared_ptr<siconos::collision::native::bodies::SphereLDS> ds1) override {
     // interactions with plans
-    for (unsigned int i = 0; i < parent->_plans->size(0); ++i) {
+    for (unsigned int i = 0; i < parent->_plans->rows(); ++i) {
       parent->_PlanSphereLDSFilter(sim, (*parent->_plans)(i, 0), (*parent->_plans)(i, 1),
                                    (*parent->_plans)(i, 2), (*parent->_plans)(i, 3), ds1);
     }
 
     auto Q1 = ds1->q();
 
-    double x1 = Q1->getValue(0);
-    double y1 = Q1->getValue(1);
-    double z1 = Q1->getValue(2);
+    double x1 = (*Q1)(0);
+    double y1 = (*Q1)(1);
+    double z1 = (*Q1)(2);
     auto hds1 = std::make_shared<siconos::collision::native::internal::Hashed>(
         ds1, (int)floor(x1 / parent->_cellsize), (int)floor(y1 / parent->_cellsize),
         (int)floor(z1 / parent->_cellsize));
@@ -905,8 +856,7 @@ struct siconos::collision::native::SpaceFilter::_FindInteractions
 
     InterPairs declaredInteractions;
 
-    auto sphereFilter = std::make_shared<_SphereLDSFilter>(sim, parent, ds1);
-
+    SphereLDSFilterVisitor_ sphereFilter{sim, parent, ds1};
     for (unsigned int j = 0; neighbours.first != neighbours.second; ++neighbours.first, ++j) {
       auto ds2 = (*neighbours.first)->body;
       int ids1 = ds1->number();
@@ -928,16 +878,16 @@ struct siconos::collision::native::SpaceFilter::_FindInteractions
 
   void visit(std::shared_ptr<siconos::collision::native::bodies::SphereNEDS> ds1) override {
     // interactions with plans
-    for (unsigned int i = 0; i < parent->_plans->size(0); ++i) {
+    for (unsigned int i = 0; i < parent->_plans->rows(); ++i) {
       parent->_PlanSphereNEDSFilter(sim, (*parent->_plans)(i, 0), (*parent->_plans)(i, 1),
                                     (*parent->_plans)(i, 2), (*parent->_plans)(i, 3), ds1);
     }
 
     auto Q1 = ds1->q();
 
-    double x1 = Q1->getValue(0);
-    double y1 = Q1->getValue(1);
-    double z1 = Q1->getValue(2);
+    double x1 = (*Q1)(0);
+    double y1 = (*Q1)(1);
+    double z1 = (*Q1)(2);
     auto hds1 = std::make_shared<siconos::collision::native::internal::Hashed>(
         ds1, (int)floor(x1 / parent->_cellsize), (int)floor(y1 / parent->_cellsize),
         (int)floor(z1 / parent->_cellsize));
@@ -947,8 +897,7 @@ struct siconos::collision::native::SpaceFilter::_FindInteractions
 
     InterPairs declaredInteractions;
 
-    auto sphereFilter = std::make_shared<_SphereNEDSFilter>(sim, parent, ds1);
-
+    SphereNEDSFilterVisitor_ sphereFilter{sim, parent, ds1};
     for (unsigned int j = 0; neighbours.first != neighbours.second; ++neighbours.first, ++j) {
       auto ds2 = (*neighbours.first)->body;
       int ids1 = ds1->number();
@@ -979,10 +928,9 @@ void siconos::collision::native::SpaceFilter::updateInteractions(
   double time = sim->getTk();
   auto DSG0 = sim->nonSmoothDynamicalSystem()->topology()->dSG(0);
 
-  auto hasher = std::make_shared<_BodyHash>(*sim, *this);
-
-  auto findInteractions = std::make_shared<_FindInteractions>(
-      sim, std::dynamic_pointer_cast<SpaceFilter>(shared_from_this()), time);
+  BodyHashVisitor_ hasher{*sim, *this};
+  FindInteractionsVisitor_ findInteractions{
+      sim, std::dynamic_pointer_cast<SpaceFilter>(shared_from_this()), time};
 
   _hash_table->clear();
 
@@ -1009,20 +957,20 @@ bool siconos::collision::native::SpaceFilter::haveNeighbours(
   return (neighbours.first != neighbours.second);
 }
 
-struct siconos::collision::native::SpaceFilter::_DiskDistance
-    : public siconos::collision::native::BodiesVisitor {
-  using siconos::collision::native::BodiesVisitor::visit;
+struct siconos::collision::native::SpaceFilter::DiskDistanceVisitor_
+    : public siconos::modeling::dynamical_systems::Visitor {
+  using siconos::modeling::dynamical_systems::Visitor::visit;
 
   double x;
   double y;
   double r;
   double result;
 
-  _DiskDistance(double x, double y, double r) : x(x), y(y), r(r){};
+  DiskDistanceVisitor_(double x, double y, double r) : x(x), y(y), r(r) {};
 
   void visit(std::shared_ptr<siconos::collision::native::bodies::Disk> d) override {
-    double xd = d->q()->getValue(0);
-    double yd = d->q()->getValue(1);
+    double xd = (*d->q())(0);
+    double yd = (*d->q())(1);
 
     result = (hypot(x - xd, y - yd) - (r + d->getRadius()));
   }
@@ -1040,12 +988,12 @@ double siconos::collision::native::SpaceFilter::minDistance(
   {
     auto disk = std::static_pointer_cast<siconos::collision::native::bodies::Disk>(h->body);
 
-    auto distance = std::make_shared<_DiskDistance>((*q)(0), (*q)(1), disk->getRadius());
+    DiskDistanceVisitor_ distance{(*q)(0), (*q)(1), disk->getRadius()};
 
     for (; neighbours.first != neighbours.second; ++neighbours.first) {
       (*neighbours.first)->body->acceptSP(distance);
 
-      dmin = (std::min)(dmin, distance->result);
+      dmin = (std::min)(dmin, distance.result);
     }
   }
 
@@ -1055,11 +1003,11 @@ double siconos::collision::native::SpaceFilter::minDistance(
 void siconos::collision::native::SpaceFilter::insertLine(double a, double b, double c) {
   size_t row;
   if (!_plans) {
-    _plans = std::make_shared<siconos::algebra::SimpleMatrix>(1, 6);
+    _plans = std::make_shared<siconos::algebra::SiconosMatrix>(1, 6);
     row = 0;
   } else {
-    _plans->resize(_plans->size(0) + 1, 6);
-    row = _plans->size(0) - 1;
+    _plans->resize(_plans->rows() + 1, 6);
+    row = _plans->rows() - 1;
   }
   (*_plans)(row, 0) = a;
   (*_plans)(row, 1) = b;

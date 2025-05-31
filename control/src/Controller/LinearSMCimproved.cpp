@@ -22,11 +22,11 @@
 
 #include "ControlSensor.hpp"
 #include "FirstOrderLinearDS.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixOp.hpp"
 #include "SiconosMatrixVectorOp.hpp"
-#include "SiconosVectorOp.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosVectorOp.hpp"
 #include "TimeStepping.hpp"
 #include "ZeroOrderHoldOSI.hpp"
 
@@ -34,8 +34,8 @@ siconos::control::LinearSMCimproved::LinearSMCimproved(std::shared_ptr<ControlSe
     : LinearSMC(sensor, ActuatorType::LinearSMCimproved) {}
 
 siconos::control::LinearSMCimproved::LinearSMCimproved(
-    std::shared_ptr<ControlSensor> sensor, std::shared_ptr<siconos::algebra::SimpleMatrix> B,
-    std::shared_ptr<siconos::algebra::SimpleMatrix> D)
+    std::shared_ptr<ControlSensor> sensor, std::shared_ptr<siconos::algebra::SiconosMatrix> B,
+    std::shared_ptr<siconos::algebra::SiconosMatrix> D)
     : LinearSMC(sensor, B, D, ActuatorType::LinearSMCimproved) {}
 
 void siconos::control::LinearSMCimproved::initialize(
@@ -50,10 +50,10 @@ void siconos::control::LinearSMCimproved::initialize(
 }
 
 void siconos::control::LinearSMCimproved::predictionPerturbation(
-    const siconos::algebra::SiconosVector& xTk, siconos::algebra::SimpleMatrix& CBstar) {
-  if (_us->normInf() < _alpha) {
+    const siconos::algebra::SiconosVector& xTk,
+    const Eigen::FullPivLU<siconos::algebra::SiconosMatrix>& LUCBstar) {
+  if (siconos::algebra::normInf(*_us) < _alpha) {
     if (_inDisceteTimeSlidingPhase) {
-      auto& up = *_up;
       if (_measuredPert->full()) {
         if (_measuredPert->size() > 1) {
           _measuredPert->rotate(_measuredPert->end() - 1);
@@ -95,48 +95,42 @@ void siconos::control::LinearSMCimproved::predictionPerturbation(
       }
 
       // Compute the control to counteract the perturbation
-      up = predictedPertC;
-      up *= -1;
-      CBstar.Solve(up);
+      *_up = predictedPertC;
+      *_up *= -1;
+      *_up = LUCBstar.solve(*_up);
 
       // project onto feasible set
-      double norm = up.norm2();
+      double norm = _up->norm();
       if (norm > _ubPerturbation) {
-        up *= _ubPerturbation / norm;
+        *_up *= _ubPerturbation / norm;
         predictedPertC *= _ubPerturbation / norm;
       }
     } else
       _inDisceteTimeSlidingPhase = true;
   } else if (_inDisceteTimeSlidingPhase) {
     _inDisceteTimeSlidingPhase = false;
-    _up->zero();
+    _up->setZero();
   }
 }
 
 void siconos::control::LinearSMCimproved::actuate() {
-  auto sDim = _u->size();
-  auto tmpM1 = std::make_shared<siconos::algebra::SimpleMatrix>(*_Csurface);
-  auto CBstar = std::make_shared<siconos::algebra::SimpleMatrix>(sDim, sDim, 0);
   auto xTk = std::make_shared<siconos::algebra::SiconosVector>(_sensor->y());
 
   auto& zoh =
       *std::static_pointer_cast<siconos::integrators::ZeroOrderHoldOSI>(_integratorSMC);
 
   // equivalent part
-  zoh.updateMatrices(_DS_SMC);
-  siconos::algebra::prod(*_Csurface, zoh.Ad(_DS_SMC), *tmpM1);
-  *tmpM1 *= -1.0;
-  *tmpM1 += *_Csurface;
-  siconos::algebra::prod(*_Csurface, zoh.Bd(_DS_SMC), *CBstar);
-  // compute C(I-e^{Ah})x_k
-  siconos::algebra::prod(*tmpM1, *xTk, *_ueq);
-  // compute the solution u^eq of the system CB^{*}u^eq = C(I-e^{Ah})x_k
-  CBstar->Solve(*_ueq);
+  auto tmpM1 = -*_Csurface * zoh.Ad(_DS_SMC) + *_Csurface;
+  auto CBstar = *_Csurface * zoh.Bd(_DS_SMC);
 
+  // compute C(I-e^{Ah})x_k
+  *_ueq = tmpM1 * *xTk;
+  // compute the solution u^eq of the system CB^{*}u^eq = C(I-e^{Ah})x_k
+  Eigen::FullPivLU<siconos::algebra::SiconosMatrix> luCBstar(CBstar);
+  *_ueq = luCBstar.solve(*_ueq);
   *(_DS_SMC->x()) = *xTk;
-  siconos::algebra::prod(
-      *_B, *_ueq,
-      *(std::static_pointer_cast<siconos::modeling::FirstOrderLinearDS>(_DS_SMC)->b()));
+
+  bSMC_ = *_B * *_ueq;  // update DS_SMC b vector because of shared memory view
   _simulationSMC->computeOneStep();
   _simulationSMC->nextStep();
 
@@ -148,7 +142,7 @@ void siconos::control::LinearSMCimproved::actuate() {
 
   // prediction of the perturbation
   if (_predictionPerturbation) {
-    predictionPerturbation(*xTk, *CBstar);
+    predictionPerturbation(*xTk, luCBstar);
     *_u += *_up;
   }
 

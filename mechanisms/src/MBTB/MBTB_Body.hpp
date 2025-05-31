@@ -29,17 +29,16 @@ namespace siconos::mechanisms {
 class MBTB_Body : public siconos::modeling::NewtonEulerDS {
  protected:
   /** coordinate of the center of mass in the just loaded model*/
-  std::shared_ptr<siconos::algebra::SiconosVector> _centerOfMass{nullptr};
+  std::shared_ptr<siconos::algebra::MapVectorType> centerOfMass_view_{nullptr};
   //! The name of the body.
   const std::string _mBodyName{""};
   //! The cad file.
   const std::string _cadFileName{""};
 
-  MBTB_Body() = default;
+  //MBTB_Body() = default;
 
  public:
   /** Constructor without plugin builder
-
       \param [in] q0  initial position of the center of mass.
       \param [in] v0  initial velocity.
       \param [in] mass double& ,the mass.
@@ -48,34 +47,21 @@ class MBTB_Body : public siconos::modeling::NewtonEulerDS {
       the just loaded model \param [in] BodyName const std::string& , a string
       for the body name. \param [in] CADFile const std::string& , the cad file.
     */
-  MBTB_Body(std::shared_ptr<siconos::algebra::SiconosVector> q0,
-            std::shared_ptr<siconos::algebra::SiconosVector> v0, double mass,
-            std::shared_ptr<siconos::algebra::SiconosMatrix> I,
-            std::shared_ptr<siconos::algebra::SiconosVector> centerOfMass,
+  MBTB_Body(Eigen::Ref<siconos::algebra::SiconosVector> q0,
+            Eigen::Ref<siconos::algebra::SiconosVector> v0, double mass,
+            Eigen::Ref<siconos::algebra::SiconosMatrix> I,
+            Eigen::Ref<siconos::algebra::SiconosVector> centerOfMass,
             const std::string& BodyName, const std::string& CADFile);
-
-  /** Constructor with plugins
-
-      \param [in] q0  initial position of the center of mass.
-      \param [in] v0  initial velocity.
-      \param [in] mass double& ,the mass.
-      \param [in] I  matrix in R^{3,3}
-      \param [in] centerOfMass  coordinate of the mass center in
-      the just loaded model \param [in] BodyName const std::string& , a string
-      for the body name. \param [in] CADFile const std::string& , the cad file.
-      \param [in] pluginLib const std::string& , the path to the plugin library.
-      \param [in] pluginFct const std::string& , the name of the pluged fonction
-   */
-  MBTB_Body(std::shared_ptr<siconos::algebra::SiconosVector> q0,
-            std::shared_ptr<siconos::algebra::SiconosVector> v0, double mass,
-            std::shared_ptr<siconos::algebra::SiconosMatrix> I,
-            std::shared_ptr<siconos::algebra::SiconosVector> centerOfMass,
-            const std::string& BodyName, const std::string& CADFile,
-            const std::string& pluginLib, const std::string& pluginFct);
 
   virtual ~MBTB_Body() noexcept = default;
 
-  inline auto centerOfMass() const { return _centerOfMass; }
+  inline std::shared_ptr<siconos::algebra::MapVectorType> centerOfMass() const {
+    return centerOfMass_view_;
+  }
+
+  inline siconos::algebra::MapVectorType& centerOfMass_view() const {
+    return *centerOfMass_view_;
+  }
 };
 
 }  // namespace siconos::mechanisms

@@ -23,20 +23,14 @@
 #ifndef SimulationGraphs_H
 #define SimulationGraphs_H
 
+#include "BlockVector.hpp"
+#include "FunctionTypes.hpp"
 #include "SiconosGraph.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosProperties.hpp"
+#include "SiconosVector.hpp"
 
-namespace siconos::algebra {
-
-class SiconosMatrix;
-class BlockVector;
-class SimpleMatrix;
-class SiconosVector;
-}  // namespace siconos::algebra
-
-namespace siconos::plugins {
-class PluggedObject;
-}
+namespace siconos::algebra {}  // namespace siconos::algebra
 
 namespace siconos::modeling {
 
@@ -116,7 +110,7 @@ struct InteractionProperties {
   std::shared_ptr<std::vector<std::shared_ptr<siconos::algebra::BlockVector>>>
       workBlockVectors{
           nullptr}; /**< set of BlockVector, used as buffers in OneStepIntegrator classes. */
-  std::shared_ptr<std::vector<std::shared_ptr<siconos::algebra::SimpleMatrix>>> workMatrices{
+  std::shared_ptr<std::vector<std::shared_ptr<siconos::algebra::SiconosMatrix>>> workMatrices{
       nullptr}; /**< Internal buffers used on simulation size, to store
 jacobians or other temporary matrices. */
   std::shared_ptr<siconos::integrators::OneStepIntegrator> osi1{
@@ -137,14 +131,17 @@ struct DynamicalSystemProperties {
       nullptr}; /**< Mostly for Lagrangian system.*/
   std::shared_ptr<siconos::integrators::OneStepIntegrator> osi{
       nullptr}; /**< Integrator used for the given DynamicalSystem */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> W{nullptr}; /**< Matrix for integration */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> WBoundaryConditions{
+  std::shared_ptr<siconos::algebra::SiconosMatrix> iterationMatrix{
+      nullptr}; /**< Matrix for integration */
+  std::shared_ptr<siconos::algebra::SiconosMatrix> iterationMatrixBoundaryConditions{
       nullptr}; /**< Matrix for integration of boundary conditions*/
-  std::shared_ptr<siconos::algebra::SimpleMatrix> Winverse{
-      nullptr};                      /**< Matrix for integration */
+  std::shared_ptr<siconos::algebra::SiconosMatrix> iterationMatrixInverse{
+      nullptr}; /**< Matrix for integration */
+  std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>> LUW{
+      nullptr};                      /**< LU factorisation of W */
   unsigned int absolute_position{0}; /**< Absolute position of the ds variables in the unknown
                                      vector in osnsp*/
-  //  std::shared_ptr<siconos::algebra::SiconosMemory> _xMemory            /**< old value of x,
+  //  std::shared_ptr<siconos::algebra::SiconosMemory> xMemory_            /**< old value of x,
   //  TBD */
 
   ACCEPT_SERIALIZATION(DynamicalSystemProperties);
@@ -187,20 +184,20 @@ struct DynamicalSystemsGraph : public _DynamicalSystemsGraph {
       ((siconos::graphs::VertexSP, siconos::algebra::SiconosMatrix,
         B))  // For Controlled System
       ((siconos::graphs::VertexSP, siconos::algebra::SiconosMatrix, L))  // For Observer
-      ((siconos::graphs::VertexSP, siconos::plugins::PluggedObject,
+      ((Vertex, siconos::modeling::func_prototypes::FunctionS_M,
         pluginB))  // For Controlled System
-      ((siconos::graphs::VertexSP, siconos::plugins::PluggedObject,
+      ((Vertex, siconos::modeling::func_prototypes::FunctionS_M,
         pluginL))                                                        // For Observer
       ((siconos::graphs::VertexSP, siconos::algebra::SiconosVector, e))  // For Observer
       ((siconos::graphs::VertexSP, siconos::algebra::SiconosVector,
         u))  // For Controlled System
-      ((siconos::graphs::VertexSP, siconos::plugins::PluggedObject,
+      ((Vertex, siconos::modeling::func_prototypes::FunctionBVSV_BV,
         pluginU))  // For Controlled System (nonlinear w.r.t u)
-      ((siconos::graphs::VertexSP, siconos::plugins::PluggedObject,
+      ((Vertex, siconos::modeling::func_prototypes::FunctionBVSV_M,
         pluginJacgx))  // For Controlled System (nonlinear w.r.t u); compute nabla_x g(x, u)
       ((siconos::graphs::VertexSP, siconos::algebra::SiconosVector,
         tmpXdot))  // For Controlled System (nonlinear w.r.t u); tmpXdot = g(x, u)
-      ((siconos::graphs::VertexSP, siconos::algebra::SimpleMatrix,
+      ((siconos::graphs::VertexSP, siconos::algebra::SiconosMatrix,
         jacgx))  // For Controlled System (nonlinear w.r.t u); jacgx = nabla_x g(x, u)
       ((Vertex, std::string, name))        // a name for a dynamical system
       ((Vertex, unsigned int, groupId)));  // For group manipulations (example assign
@@ -222,8 +219,8 @@ struct DynamicalSystemsGraph : public _DynamicalSystemsGraph {
     pluginL._store->erase(vd);
     e._store->erase(vd);
     u._store->erase(vd);
-    pluginU._store->erase(vd);
-    pluginJacgx._store->erase(vd);
+    // pluginU._store->erase(vd);
+    // pluginJacgx._store->erase(vd);
     tmpXdot._store->erase(vd);
     jacgx._store->erase(vd);
     name._store->erase(vd);
@@ -234,11 +231,12 @@ struct DynamicalSystemsGraph : public _DynamicalSystemsGraph {
 struct InteractionsGraph : public _InteractionsGraph {
   /** optional properties : memory is allocated only on first access */
   INSTALL_GRAPH_PROPERTIES(
-      Interactions, ((siconos::graphs::Vertex, std::shared_ptr<siconos::algebra::SimpleMatrix>,
-                      blockProj))  // ProjectOnConstraint
-      ((siconos::graphs::Edge, std::shared_ptr<siconos::algebra::SimpleMatrix>,
+      Interactions,
+      ((siconos::graphs::Vertex, std::shared_ptr<siconos::algebra::SiconosMatrix>,
+        blockProj))  // ProjectOnConstraint
+      ((siconos::graphs::Edge, std::shared_ptr<siconos::algebra::SiconosMatrix>,
         upper_blockProj))  // idem
-      ((siconos::graphs::Edge, std::shared_ptr<siconos::algebra::SimpleMatrix>,
+      ((siconos::graphs::Edge, std::shared_ptr<siconos::algebra::SiconosMatrix>,
         lower_blockProj))  // idem
       ((siconos::graphs::Vertex, std::string, name)));
 

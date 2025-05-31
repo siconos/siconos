@@ -21,144 +21,161 @@
 #include <cmath>  // for pow
 #include <iostream>
 
-#include "Cable.h"
-#include "Pile.h"
+#include "MechanicalProperties.h"
+#include "Pylon.h"
 
-siconos::fem::cable::Rope::Rope(const Pile &a_pile0, const Pile &a_pile1, double a_tol,
+siconos::fem::cable::Rope::Rope(const Pylon &a_pile0, const Pylon &a_pile1, double a_tol,
                                 int a_nmax)
-    : pile0(a_pile0), pile1(a_pile1), tol(a_tol), n_max(a_nmax) {
-  m_last = (&pile0 == &pile1);
+    : left_pylon_(a_pile0), right_pylon_(a_pile1), tol_(a_tol), max_iter_(a_nmax) {
+  m_last_ = (&left_pylon_ == &right_pylon_);
 }
 
-void siconos::fem::cable::Rope::compute(const class Cable &a_meca, int nb_nodes, double a_T0,
-                                        const Point &a_R0) {
+void siconos::fem::cable::Rope::compute(const class MechanicalProperties &a_meca, int nb_nodes,
+                                        double a_T0, const Point &a_R0) {
   // Ref: case 2 in C. Bertrand PHD, annexe A.
 
   meca = a_meca;
   meca.set_T(a_T0);
-  if (m_last) {
-    // cas particulier du dernier segment
-    // Note FP : segment fictif ? entre dernier pilier et dernier pilier
-    SR = a_R0;
-    q = {pile0};
-    TS = {a_T0};
+  if (m_last_) {
+    // Last segment specific case (if left and right pylons are the same)
+    // Note FP : fake part between last and ... last pylon?
+    support_reaction_ = a_R0;
+    nodes_coords_ = {left_pylon_};
+    TS_ = {a_T0};
   } else {
-    ropeway_inc = get_adm_1C(meca, {pile0, pile1});  // Copy !
-    q.resize(nb_nodes - 1);
-    TS.resize(nb_nodes);
-    R.resize(nb_nodes);
-    get_profile_1C(meca, ropeway_inc, nb_nodes, q, R, TS);
+    // ensures that ropeway_inc satisfies the cable equation
+    ropeway_inc = get_adm_1C(meca, {left_pylon_, right_pylon_});
 
+    nodes_coords_.resize(nb_nodes - 1);
+    TS_.resize(nb_nodes);
+    internal_forces_.resize(nb_nodes);
+
+    // computes the initial profile of the
+    // --> updates nodes_coords, internal_forces and TS
+    get_profile_1C(meca, ropeway_inc, nb_nodes, nodes_coords_, internal_forces_, TS_);
+
+    // updates support reaction
     Point drk;
-    drk.diff(q[1], q[0]);
-    double dot = drk.dot(R[0]);
+    drk.diff(nodes_coords_[1], nodes_coords_[0]);
+    double dot = drk.dot(internal_forces_[0]);
     if (dot < 0) {
-      for (auto &r : R) {
+      for (auto &r : internal_forces_) {
         r.opposite();
       }
     } else if (dot == 0) {
-      for (auto &r : R) {
+      for (auto &r : internal_forces_) {
         r.zero();
       }
     }
-    SR.diff(a_R0, R[0]);
+    support_reaction_.diff(a_R0, internal_forces_[0]);
   }
 }
 
 int siconos::fem::cable::Rope::computeNbNodes(int nb_elem, double L) {
-  m_nbNodes = 0;
-  if (!m_last) {
-    m_nbNodes = (int)rint(nb_elem * get_L() / L);
+  number_of_nodes_ = 0;
+  if (!m_last_) {
+    number_of_nodes_ = (int)rint(nb_elem * get_L() / L);
   }
-  return m_nbNodes;
+  return number_of_nodes_;
 }
 
 int siconos::fem::cable::Rope::computeMesh(std::vector<Point> &a_q, std::vector<Point> &a_R,
                                            std::vector<double> &a_TS, int q_offset,
                                            bool a_reverse) {
-  if (!m_last) {
-    get_profile_1C(meca, ropeway_inc, m_nbNodes + 1, a_q, a_R, a_TS, q_offset, a_reverse);
+  if (!m_last_) {
+    get_profile_1C(meca, ropeway_inc, number_of_nodes_ + 1, a_q, a_R, a_TS, q_offset,
+                   a_reverse);
   }
-  return m_nbNodes;
+  return number_of_nodes_;
 }
 
 double siconos::fem::cable::Rope::get_T0() {
-  if (TS.size())
-    return TS.front();
+  if (TS_.size())
+    return TS_.front();
   else
     return 0.0;
 }
 
 double siconos::fem::cable::Rope::get_LastT() {
-  if (TS.size())
-    return TS.back();
+  if (TS_.size())
+    return TS_.back();
   else
     return 0.0;
 }
 
 siconos::fem::cable::Point siconos::fem::cable::Rope::get_LastR() {
-  if (R.size())
-    return R.back();
+  if (internal_forces_.size())
+    return internal_forces_.back();
   else
     return Point();
 }
 
 double siconos::fem::cable::Rope::get_L() { return ropeway_inc.x; }
 
-const siconos::fem::cable::Point &siconos::fem::cable::Rope::get_SR() const { return SR; }
+const siconos::fem::cable::Point &siconos::fem::cable::Rope::supportReaction() const {
+  return support_reaction_;
+}
 
-const siconos::fem::cable::Cable &siconos::fem::cable::Rope::get_meca() const { return meca; }
+const siconos::fem::cable::MechanicalProperties &siconos::fem::cable::Rope::get_meca() const {
+  return meca;
+}
 
-const siconos::fem::cable::Pile &siconos::fem::cable::Rope::get_pile0() const { return pile0; }
+const siconos::fem::cable::Pylon &siconos::fem::cable::Rope::left_pylon() const {
+  return left_pylon_;
+}
 
 void siconos::fem::cable::Rope::to_json(ojson &j) {
-  if (TS.size()) {
+  if (TS_.size()) {
     j["ropeway_inc"].push_back(ropeway_inc);
 
-    for (auto &elem : q) {
+    for (auto &elem : nodes_coords_) {
       j["q"].push_back(elem);
     }
-    for (auto &elem : TS) {
+    for (auto &elem : TS_) {
       j["TS"].push_back(elem);
     }
-    for (auto &elem : R) {
+    for (auto &elem : internal_forces_) {
       j["R"].push_back(elem);
     }
 
-    j["SR"].push_back(SR);
+    j["SR"].push_back(support_reaction_);
 
     Point vMeca(meca.get_T0(), meca.get_EA(), meca.get_rho());
     j["meca_global"].push_back(vMeca);
   } else {
-    for (auto &elem : q) {
+    for (auto &elem : nodes_coords_) {
       j["q"].push_back(elem);
     }
-    j["SR"].push_back(SR);
+    j["SR"].push_back(support_reaction_);
   }
 }
 
-siconos::fem::cable::Point siconos::fem::cable::Rope::get_adm_1C(const Cable &a_meca,
-                                                                 const std::vector<Pile> &bc) {
+siconos::fem::cable::Point siconos::fem::cable::Rope::get_adm_1C(
+    const MechanicalProperties &a_meca, const std::vector<Pylon> &bc) {
+  // Initial guess for lenght and slopes
   Point cable_inc = guess(bc);
 
   bool test = true;
   int n = 0;
-  Point r;
-  std::vector<std::vector<double>> J;
+  Point residu;
+  std::vector<std::vector<double>> jacobian;
   while (test) {
     n++;
-    cable_eq(a_meca, bc, cable_inc, r, J);
+    // compute initial residual eq and jacobian
+    cable_eq(a_meca, bc, cable_inc, residu, jacobian);
 
-    //    delta = np.linalg.solve(J,r)
+    //    delta = np.linalg.solve(jacobian,r)
     Point delta;
-    double det = J[0][0] * J[1][1] * J[2][2] + J[1][0] * J[2][1] * J[0][2] +
-                 J[0][1] * J[1][2] * J[2][0] -
-                 (J[2][0] * J[1][1] * J[0][2] + J[1][0] * J[0][1] * J[2][2] +
-                  J[0][0] * J[2][1] * J[1][2]);
+    double det = jacobian[0][0] * jacobian[1][1] * jacobian[2][2] +
+                 jacobian[1][0] * jacobian[2][1] * jacobian[0][2] +
+                 jacobian[0][1] * jacobian[1][2] * jacobian[2][0] -
+                 (jacobian[2][0] * jacobian[1][1] * jacobian[0][2] +
+                  jacobian[1][0] * jacobian[0][1] * jacobian[2][2] +
+                  jacobian[0][0] * jacobian[2][1] * jacobian[1][2]);
     if (det != 0) {
-      std::vector<double> trans1{J[0][0], J[1][0], J[2][0]};
-      std::vector<double> trans2{J[0][1], J[1][1], J[2][1]};
-      std::vector<double> trans3{J[0][2], J[1][2], J[2][2]};
+      std::vector<double> trans1{jacobian[0][0], jacobian[1][0], jacobian[2][0]};
+      std::vector<double> trans2{jacobian[0][1], jacobian[1][1], jacobian[2][1]};
+      std::vector<double> trans3{jacobian[0][2], jacobian[1][2], jacobian[2][2]};
       std::vector<std::vector<double>> trans{trans1, trans2, trans3};
       double m00 = trans[1][1] * trans[2][2] - trans[2][1] * trans[1][2];
       double m01 = trans[1][0] * trans[2][2] - trans[2][0] * trans[1][2];
@@ -173,20 +190,20 @@ siconos::fem::cable::Point siconos::fem::cable::Rope::get_adm_1C(const Cable &a_
       std::vector<double> inv2{-1 * m10 / det, m11 / det, -1 * m12 / det};
       std::vector<double> inv3{m20 / det, -1 * m21 / det, m22 / det};
       std::vector<std::vector<double>> inverse{inv1, inv2, inv3};
-      delta.x = inverse[0][0] * r.x + inverse[0][1] * r.y + inverse[0][2] * r.z;
-      delta.y = inverse[1][0] * r.x + inverse[1][1] * r.y + inverse[1][2] * r.z;
-      delta.z = inverse[2][0] * r.x + inverse[2][1] * r.y + inverse[2][2] * r.z;
+      delta.x = inverse[0][0] * residu.x + inverse[0][1] * residu.y + inverse[0][2] * residu.z;
+      delta.y = inverse[1][0] * residu.x + inverse[1][1] * residu.y + inverse[1][2] * residu.z;
+      delta.z = inverse[2][0] * residu.x + inverse[2][1] * residu.y + inverse[2][2] * residu.z;
     }
     //    cable_inc = cable_inc - delta
     cable_inc.diff(cable_inc, delta);
 
-    //    test = n<n_max and np.linalg.norm(r)>tol and np.linalg.norm(delta)>tol
-    test = (n < n_max) && (r.norm() > tol) && (delta.norm() > tol);
+    //    test = n<max_iter_ and np.linalg.norm(r)>tol_ and np.linalg.norm(delta)>tol_
+    test = (n < max_iter_) && (residu.norm() > tol_) && (delta.norm() > tol_);
   }
   return cable_inc;
 }
 
-siconos::fem::cable::Point siconos::fem::cable::Rope::guess(const std::vector<Pile> &bc) {
+siconos::fem::cable::Point siconos::fem::cable::Rope::guess(const std::vector<Pylon> &bc) {
   Point res;
   Point delta;
   delta.diff(bc[1], bc[0]);
@@ -198,33 +215,13 @@ siconos::fem::cable::Point siconos::fem::cable::Rope::guess(const std::vector<Pi
   return res;
 }
 
-void siconos::fem::cable::Rope::cable_eq(const Cable &a_meca, const std::vector<Pile> &bc,
-                                         const Point &cable_inc, Point &r,
-                                         std::vector<std::vector<double>> &J) {
-  /*
-   @author: charl
+void siconos::fem::cable::Rope::cable_eq(const MechanicalProperties &a_meca,
+                                         const std::vector<Pylon> &bc, const Point &cable_inc,
+                                         Point &residu,
+                                         std::vector<std::vector<double>> &jacobian) {
+  //  Returns the residual equation and the jacobian of a fixed-fixed cable with
+  // imposed initial tension
 
-  cable_eq(cable_param,cable_inc)
-
-  where
-
-  cable_param is a list containing [T0, EA, rho, po, pl]
-          T0  : initial tension
-          EA  : rigidity of the cable
-          rho : density of the cable
-
-  bc is a np.array containing [[pox, poy, poz], [plx, ply, plz]]
-          po  : first eyelet
-          pl  : second eyelet
-
-  cable_inc is a list containing [L, etaY, etaZ]
-          L    : Unstretched length of the cable
-          etaY : Initial y-slope
-          etaZ : Initial z-slope
-
-  Returns the residual equation and the jacobian of a fixed-fixed cable with
-  imposed initial tension
-  */
   // po, pl = bc
   const Point &po = bc[0];
   const Point &pl = bc[1];
@@ -250,10 +247,10 @@ void siconos::fem::cable::Rope::cable_eq(const Cable &a_meca, const std::vector<
   double logL = log((etaZ + alpha * sq0 * L + sqL) / (etaZ + sq0));
 
   // Elastic catenary equations
-  r.x = (-((beta * L) / sq0) + xl - xo - logL / (alpha * sq0));
-  r.y = (-((beta * etaY * L) / sq0) + yl - yo - (etaY * logL) / (alpha * sq0));
-  r.z = (-((beta * etaZ * L) / sq0) - (alpha * beta * std::pow(L, 2)) / 2.0 +
-         (sq0 - sqL) / (alpha * sq0) + zl - zo);
+  residu.x = (-((beta * L) / sq0) + xl - xo - logL / (alpha * sq0));
+  residu.y = (-((beta * etaY * L) / sq0) + yl - yo - (etaY * logL) / (alpha * sq0));
+  residu.z = (-((beta * etaZ * L) / sq0) - (alpha * beta * std::pow(L, 2)) / 2.0 +
+              (sq0 - sqL) / (alpha * sq0) + zl - zo);
 
   // Elastic catenary jacobian
   double eq_x_L = (-(beta / sq0) - 1 / sqL);
@@ -295,11 +292,12 @@ void siconos::fem::cable::Rope::cable_eq(const Cable &a_meca, const std::vector<
   std::vector<double> j1{eq_x_L, eq_x_etaY, eq_x_etaZ};
   std::vector<double> j2{eq_y_L, eq_y_etaY, eq_y_etaZ};
   std::vector<double> j3{eq_z_L, eq_z_etaY, eq_z_etaZ};
-  J = {j1, j2, j3};
+  jacobian = {j1, j2, j3};
 }
 
-void siconos::fem::cable::Rope::get_profile_1C(const Cable &a_meca, const Point &cable_inc,
-                                               int nb_nodes, std::vector<Point> &a_q,
+void siconos::fem::cable::Rope::get_profile_1C(const MechanicalProperties &a_meca,
+                                               const Point &cable_inc, int nb_nodes,
+                                               std::vector<Point> &a_q,
                                                std::vector<Point> &a_R,
                                                std::vector<double> &a_TS, int q_offset,
                                                bool a_reverse) {
@@ -330,9 +328,9 @@ void siconos::fem::cable::Rope::get_profile_1C(const Cable &a_meca, const Point 
   the tension in the shape of a nb_nodes vector [T,...T]
   and the internal force vector in the shape of a 3*nb_nodes vector [H,V,B,...,H,V,B]
   */
-  double xl = pile1.x;
-  double yl = pile1.y;
-  double zl = pile1.z;
+  double xl = right_pylon_.x;
+  double yl = right_pylon_.y;
+  double zl = right_pylon_.z;
   double L = cable_inc.x;
   double etaY = cable_inc.y;
   double etaZ = cable_inc.z;

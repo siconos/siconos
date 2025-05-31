@@ -18,8 +18,7 @@
 
 /*! \file Pulley.h
 
-  Support (pile + contact description) corresponding to the last and first piles (station)
-
+  Pulley class (top and down pylons, at station)
 */
 
 #pragma once
@@ -27,9 +26,13 @@
 #include "Support.h"
 
 namespace siconos::fem::cable {
+
+/** A specific support (geometry of a Pylon + contact specifications)
+ *  for the station pylons
+ */
 class Pulley : public Support {
  public:
-  Pulley(const Pile &a_pile);
+  Pulley(const Pylon &a_pile);
   virtual ~Pulley() noexcept = default;
   virtual double get_radius() const override { return m_radiusP; };
   const Point &get_center() const override;
@@ -38,14 +41,14 @@ class Pulley : public Support {
 
   //------------ statique -------------
   virtual void prepare(const Rope &a_rope) override {};
-  virtual void prepare(const Pile &a_start, const Pile &a_end, double T) override;
+  virtual void prepare(const Pylon &a_start, const Pylon &a_end, double T) override;
 
   int compute(int nb, std::vector<Point> &a_q, int q_offset = 0) const;
   virtual void compute(const Point &a_p, double a_tol, double &g, Point &G, Point &T,
                        int &c) override;
   //------------ dynamique -------------
-  virtual bool isContact(const std::shared_ptr<siconos::algebra::SiconosVector> &a_p,
-                         const double &a_tol) override;
+  virtual bool isContact(const Eigen::Ref<siconos::algebra::SiconosVector3> &a_p,
+                         double a_tol) override;
 
  private:
   double m_radiusP{0.};

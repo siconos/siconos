@@ -19,7 +19,6 @@
 #include "FirstOrderType1RTest.hpp"
 
 #include "Interaction.hpp"
-#include "PluggedObject.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
   if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -32,54 +31,53 @@ void FirstOrderType1RTest::setUp() {}
 void FirstOrderType1RTest::tearDown() {}
 
 // data constructor
-void FirstOrderType1RTest::testBuildFirstOrderType1R1()
-{
+void FirstOrderType1RTest::testBuildFirstOrderType1R1() {
   std::cout << "======================================" << std::endl;
   std::cout << "=== FirstOrderType1R tests start ...== " << std::endl;
   std::cout << "======================================" << std::endl;
   std::cout << "--> Test: constructor 1 " << std::endl;
 
-  auto R1 = std::make_shared<siconos::modeling::FirstOrderType1R>("TestPlugin:hT1",
-                                                                  "TestPlugin:gT1");
+  // Just set constant or user-defined functions operators.
+  // We can not call compute... functions since in relations
+  // everything is properly set (memory) only after a call to initialize
+  // which required an Interaction. See examples in siconos tutorials for reals tests.
+
+  auto rel_cst = std::make_shared<siconos::modeling::FirstOrderType1R>();
+
+  rel_cst->setComputehFunction([](const siconos::algebra::BlockVector &state,
+                                  Eigen::Ref<siconos::algebra::SiconosVector> y) {});
+
+  rel_cst->setComputegFunction(
+      [](const Eigen::Ref<const siconos::algebra::SiconosVector> &lambda,
+         siconos::algebra::BlockVector &res) {});
+
+  siconos::algebra::SiconosMatrix cst_mat{3, 3};
+  cst_mat.setRandom();
+  rel_cst->setConstantJacobianhOver_state(cst_mat);
+
+  rel_cst->setConstantJacobiangOver_lambda(cst_mat);
+
+  auto rel = std::make_shared<siconos::modeling::FirstOrderType1R>();
+
+  rel->setComputehFunction([](const siconos::algebra::BlockVector &state,
+                              Eigen::Ref<siconos::algebra::SiconosVector> y) {});
+
+  rel->setComputegFunction([](const Eigen::Ref<const siconos::algebra::SiconosVector> &lambda,
+                              siconos::algebra::BlockVector &res) {});
+
+  rel->setComputeJacobianhOver_stateFunction(
+      [](const siconos::algebra::BlockVector &state,
+         Eigen::Ref<siconos::algebra::MapType> result) {});
+
+  rel->setComputeJacobiangOver_lambdaFunction(
+      [](const Eigen::Ref<const siconos::algebra::SiconosVector> &lambda,
+         Eigen::Ref<siconos::algebra::MapType> result) {});
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R1b : ",
-                               R1->getType() == siconos::modeling::RelationType::FirstOrder,
+                               rel->getType() == siconos::modeling::RelationType::FirstOrder,
                                true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R1c : ",
-                               R1->getSubType() == siconos::modeling::RelationSubType::Type1R,
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1relc : ",
+                               rel->getSubType() == siconos::modeling::RelationSubType::Type1R,
                                true);
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R1d : ",
-  //  R1->gethName()=="TestPlugin:hT1", true);
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R1e : ",
-  //  R1->getgName()=="TestPlugin:gT1", true);
-  std::string plugin = "TestPlugin" + siconos::plugins::getSharedLibraryExtension();
-  R1->setComputeJachxFunction(plugin, "Jh0T1");
-  R1->setComputeJacglambdaFunction(plugin, "Jg0T1");
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R1e : ",
-  //  R1->getJachName(0)=="TestPlugin:Jh0T1", true);
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R1g : ",
-  //  R1->getJacgName(0)=="TestPlugin:Jg0T1", true);
   std::cout << "--> Constructor1 test ended with success." << std::endl;
-}
-
-void FirstOrderType1RTest::testBuildFirstOrderType1R2()
-{
-  std::cout << "--> Test: constructor data (2)." << std::endl;
-  auto R2 = std::make_shared<siconos::modeling::FirstOrderType1R>(
-      "TestPlugin:hT1", "TestPlugin:gT1", "TestPlugin:Jh0T1", "TestPlugin:Jg0T1");
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R2b : ",
-                               R2->getType() == siconos::modeling::RelationType::FirstOrder,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R2c : ",
-                               R2->getSubType() == siconos::modeling::RelationSubType::Type1R,
-                               true);
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R2d : ",
-  //  R2->gethName()=="TestPlugin:hT1", true);
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R2e : ",
-  //  R2->getgName()=="TestPlugin:gT1", true);
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R2e : ",
-  //  R2->getJachName(0)=="TestPlugin:Jh0T1", true);
-  //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderType1R2g : ",
-  //  R2->getJacgName(0)=="TestPlugin:Jg0T1", true);
-  std::cout << "--> Constructor2 test ended with success." << std::endl;
 }

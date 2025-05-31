@@ -36,17 +36,23 @@ class SphereNEDS : public siconos::modeling::NewtonEulerDS,
   double radius{0.};
 
  public:
-  SphereNEDS(double, double, std::shared_ptr<siconos::algebra::SiconosMatrix>,
-             std::shared_ptr<siconos::algebra::SiconosVector>,
-             std::shared_ptr<siconos::algebra::SiconosVector>);
+  SphereNEDS(double r, double m, Eigen::Ref<siconos::algebra::SiconosMatrix> inertia,
+             Eigen::Ref<siconos::algebra::SiconosVector> qinit,
+             Eigen::Ref<siconos::algebra::SiconosVector> vinit);
 
   ~SphereNEDS() noexcept = default;
 
   double getQ(unsigned int pos);
 
-  double getVelocity(unsigned int pos);
+  double getTwist(unsigned int pos);
 
   inline double getRadius() const { return radius; };
+  virtual void acceptSP(modeling::dynamical_systems::Visitor& tourist) override {
+    tourist.visit(shared_from_this());
+  }
+  virtual void accept(modeling::dynamical_systems::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 };
 }  // namespace siconos::collision::native::bodies
 #endif /* SphereNEDS_h */

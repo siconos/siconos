@@ -18,20 +18,20 @@
 
 #include "CableDS.hpp"
 
+#include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
 
-siconos::fem::cable::CableDS::CableDS(
-    std::shared_ptr<siconos::algebra::SiconosVector> q0,
-    std::shared_ptr<siconos::algebra::SiconosVector> velocity0,
-    std::shared_ptr<siconos::algebra::SiconosMatrix> mass, double a_EA, double a_elem_length,
-    ExternalForcesFunction fext)
-    : LagrangianDS(q0, velocity0, mass), computefext_{fext}, _EA{a_EA}, _l_e{a_elem_length} {
+siconos::fem::cable::CableDS::CableDS(Eigen::Ref<siconos::algebra::SiconosVector> q0,
+                                      Eigen::Ref<siconos::algebra::SiconosVector> velocity0,
+                                      Eigen::Ref<siconos::algebra::SiconosMatrix> mass,
+                                      double a_EA, double a_elem_length)
+    : LagrangianDS(q0, velocity0), EA_{a_EA}, l_e_{a_elem_length} {
   std::cout << " BUlD CABLE DS \n";
+  setConstantMass(mass);
 
   TRNp_Np = TRNp_NpMatrix();
 
-  TRNp_Np->display();
+  siconos::algebra::print(*TRNp_Np);
 
   // Constructor with initial state and mass.
   // We assume that q0, v0 and mass are computed by the "cable model" based on mesh and other
@@ -39,10 +39,9 @@ siconos::fem::cable::CableDS::CableDS(
   // The call to LagrangianDS base constructor  ensures a proper allocation of memories for q0,
   // v0 Mass is just a pointer link. Mass alloc : to be done in cable model if mass is a shared
   // pointer input. _mass =
-  // std::make_shared<siconos::algebra::siconos::algebra::SimpleMatrix>(_ndof, _ndof,
+  // std::make_shared<siconos::algebra::Matrix>(ndof_, ndof_,
   // UBLAS_TYPE::SPARSE);
   // We can deal with variable mass later.
-  _hasConstantMass = true;
 
   // What may happen in cable model: (see examples in testCableDS)
   // Case 1: no fext
@@ -50,49 +49,26 @@ siconos::fem::cable::CableDS::CableDS(
 
   // Case 2: constant fext
   // cableDS{q0, v0, mass}
-  // call to setFExtPtr()
+  // call to setConstantFext()
   // cable
 
-  if (fext) {
-    _hasConstantFExt = false;  // Indeed, this is the default for SecondOrderDS
-    _fExt = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
-  } else
-    _hasConstantFExt = true;
-  // In that case _fExt = nullptr
-  // setFextPtr is to be called later by cable model to set a constant fext.
+  totalForces_ = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
+  totalForces_->setZero();
+  // ndof_ is given by the size of q0
 
-  // _ndof is given by the size of q0 during SecondOrderDS build
-  _forces = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
+  // We will use jacobianTotalForcesOver_q_ and _jacobianTotalForcesOver_velocity to save
+  // tangent stiffness and damping matrices. Those are attributes of LagrangianDS class.
+  jacobianTotalForcesOver_q_ = std::make_shared<siconos::algebra::SiconosMatrix>(ndof_, ndof_);
+  jacobianTotalForcesOver_q_->setZero();
 
-  // We will use _jacobianqForces and _jacobianvForces to save tangent stiffness and damping
-  // matrices.
-  // Those are attributes of LagrangianDS class.
-
-  _jacobianqForces = std::make_shared<siconos::algebra::SimpleMatrix>(
-      _ndof, _ndof, siconos::algebra::UblasType::SPARSE);
-
-  _jacobianqDotForces = std::make_shared<siconos::algebra::SimpleMatrix>(
-      _ndof, _ndof, siconos::algebra::UblasType::SPARSE);
+  jacobianTotalForcesOver_velocity_ =
+      std::make_shared<siconos::algebra::SiconosMatrix>(ndof_, ndof_);
+  jacobianTotalForcesOver_velocity_->setZero();
 }
 
-void siconos::fem::cable::CableDS::computeFExt(double time) {
-  assert(_fExt);
-  assert(computefext_);
-  // Call the std::function attribute that must be connected to some external function
-  computefext_(time, _fExt);
-  // ...
-}
-
-void siconos::fem::cable::CableDS::computeForces(
-    double time, std::shared_ptr<siconos::algebra::SiconosVector> q,
-    std::shared_ptr<siconos::algebra::SiconosVector> velocity) {
-  assert(_forces);
-  // if (!_forces) {
-  //   _forces = std::make_shared<siconos::algebra::SiconosVector>(_ndof);
-  // } // --> done during constructor call.
-  // else
-  _forces->zero();
-
+void siconos::fem::cable::CableDS::computeTotalForces(
+    const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
+    const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time) {
   // Update internal and external forces
   // Here you must:
   //  - compute internal forces and save them somewhere or directly in _forces
@@ -101,68 +77,73 @@ void siconos::fem::cable::CableDS::computeForces(
   tangentStiffnessMatrix(q);
 
   //  - compute external forces in fExt (or just get them if they are constant)
-  if (!_hasConstantFExt) computeFExt(time);
-  if (_fExt) *_forces += *_fExt;
+
+  computeFext(time);
+  if (fext_view_) *totalForces_ += *fext_view_;
 }
 
 // \f$ \nabla_q F \f$
-void siconos::fem::cable::CableDS::computeJacobianqForces(double time) {
+void siconos::fem::cable::CableDS::computeJacobianTotalForcesOver_q(
+    const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
+    const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time) {
   // Call a local routine which compute tangent stiffness and update a local operator
 
   // tangentStiffnessMatrix();
 }
 
 // \f$ \nabla_v F \f$
-void siconos::fem::cable::CableDS::computeJacobianvForces(double time) {
+void siconos::fem::cable::CableDS::computeJacobianTotalForcesOver_velocity(
+    const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
+    const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time) {
   // Call a local routine to compute damping matrix and update a local operator
   dampingMatrix();
 }
 
 void siconos::fem::cable::CableDS::tangentStiffnessMatrix(
-    std::shared_ptr<siconos::algebra::SiconosVector> q) {
-  // must update jacobianqForces
+    const Eigen::Ref<const siconos::algebra::SiconosVector> q) {
+  // must update jacobianTotalForcesOver_q
   // KT
   // intforces: K
 
-  size_t nb_elem = _ndof - 3;
-  double k = _EA / _l_e;
-  auto Tq = std::make_shared<siconos::algebra::SiconosVector>(6);
-  auto TqqT = std::make_shared<siconos::algebra::SimpleMatrix>(6, 6);
+  size_t nb_elem = ndof_ - 3;
+  double k = EA_ / l_e_;
+  siconos::algebra::SiconosVector Tq{6};
+  siconos::algebra::SiconosMatrix TqqT{6, 6};
 
   // tous les points moins le dernier
   for (size_t i = 0; i < nb_elem - 3; i += 3) {
     double n_e = 0;
     for (size_t j = 0; j < 3; j++) {
-      double d = ((*q)(i + j) - (*q)(i + 3 + j));
+      double d = (q(i + j) - q(i + 3 + j));
       n_e += d * d;
     }
     n_e = sqrt(n_e);
 
-    double eps = n_e / _l_e - 1;
+    double eps = n_e / l_e_ - 1;
     double f_e = fabs(eps);
     double kf = k / (1 + 1 / f_e);
     if (eps > 0) {
       // fi
       matmult(q, i, Tq);
       for (size_t j = 0; j < 6; j++) {
-        (*_forces)(i + j) += kf * (*Tq)(j);
+        (*totalForces_)(i + j) += kf * Tq(j);
       }
 
       // KT
       matmult2(Tq, TqqT);
       double kKT = 1 / (1 + f_e);
-      kKT = k * kKT * kKT * (1 / (_l_e * n_e));
+      kKT = k * kKT * kKT * (1 / (l_e_ * n_e));
       for (size_t j = 0; j < 6; j++) {
         for (size_t l = 0; l < 6; l++) {
-          auto val = _jacobianqForces->getValue(i + j, i + l) + kKT * (*TqqT)(j, l);
-          _jacobianqForces->setValue(i + j, i + l, val);
+          auto val = (*jacobianTotalForcesOver_q_)(i + j, i + l) + kKT * TqqT(j, l);
+          jacobianTotalForcesOver_q_->setValue(i + j, i + l, val);
         }
       }
     }
     for (size_t j = 0; j < 6; j++) {
       for (size_t l = 0; l < 6; l++) {
-        auto val = _jacobianqForces->getValue(i + j, i + l) + kf * TRNp_Np->getValue(j, l);
-        _jacobianqForces->setValue(i + j, i + l, val);
+        auto val = (*jacobianTotalForcesOver_q_)(i + j, i + l) + kf * (*TRNp_Np)(j, l);
+        jacobianTotalForcesOver_q_->setValue(i + j, i + l, val);
       }
     }
   }
@@ -170,50 +151,50 @@ void siconos::fem::cable::CableDS::tangentStiffnessMatrix(
   // dernier élément - premier élément
   double n_e = 0;
   for (size_t j = 0; j < 3; j++) {
-    double d = ((*q)(nb_elem + j) - (*q)(j));
+    double d = (q(nb_elem + j) - q(j));
     n_e += d * d;
   }
   n_e = sqrt(n_e);
 
-  double eps = n_e / _l_e - 1;
+  double eps = n_e / l_e_ - 1;
   double f_e = fabs(eps);
   double kf = k / (1 + 1 / f_e);
   if (eps > 0) {
     // fi
     matmult(q, nb_elem, Tq);
     for (size_t j = 0; j < 3; j++) {
-      (*_forces)(nb_elem + j) += kf * (*Tq)(j);
-      (*_forces)(j) += kf * (*Tq)(j + 3);
+      (*totalForces_)(nb_elem + j) += kf * Tq(j);
+      (*totalForces_)(j) += kf * Tq(j + 3);
     }
 
     // KT
     matmult2(Tq, TqqT);
     double kKT = 1 / (1 + f_e);
-    kKT = k * kKT * kKT * (1 / (_l_e * n_e));
+    kKT = k * kKT * kKT * (1 / (l_e_ * n_e));
     for (size_t j = 0; j < 3; j++) {
       for (size_t l = 0; l < 3; l++) {
-        auto val = _jacobianqForces->getValue(nb_elem + j, nb_elem + l) + kKT * (*TqqT)(j, l);
-        _jacobianqForces->setValue(nb_elem + j, nb_elem + l, val);
-        val = _jacobianqForces->getValue(nb_elem + j, l) + kKT * (*TqqT)(j, l + 3);
-        _jacobianqForces->setValue(nb_elem + j, l, val);
-        val = _jacobianqForces->getValue(j, nb_elem + l) + kKT * (*TqqT)(j + 3, l);
-        _jacobianqForces->setValue(j, nb_elem + l, val);
-        val = _jacobianqForces->getValue(j, l) + kKT * (*TqqT)(j + 3, l + 3);
-        _jacobianqForces->setValue(j, l, val);
+        auto val = (*jacobianTotalForcesOver_q_)(nb_elem + j, nb_elem + l) + kKT * TqqT(j, l);
+        jacobianTotalForcesOver_q_->setValue(nb_elem + j, nb_elem + l, val);
+        val = (*jacobianTotalForcesOver_q_)(nb_elem + j, l) + kKT * TqqT(j, l + 3);
+        jacobianTotalForcesOver_q_->setValue(nb_elem + j, l, val);
+        val = (*jacobianTotalForcesOver_q_)(j, nb_elem + l) + kKT * TqqT(j + 3, l);
+        jacobianTotalForcesOver_q_->setValue(j, nb_elem + l, val);
+        val = (*jacobianTotalForcesOver_q_)(j, l) + kKT * TqqT(j + 3, l + 3);
+        jacobianTotalForcesOver_q_->setValue(j, l, val);
       }
     }
   }
   for (size_t j = 0; j < 3; j++) {
     for (size_t l = 0; l < 3; l++) {
       auto val =
-          _jacobianqForces->getValue(nb_elem + j, nb_elem + l) + kf * TRNp_Np->getValue(j, l);
-      _jacobianqForces->setValue(nb_elem + j, nb_elem + l, val);
-      val = _jacobianqForces->getValue(nb_elem + j, l) + kf * TRNp_Np->getValue(j, l + 3);
-      _jacobianqForces->setValue(nb_elem + j, l, val);
-      val = _jacobianqForces->getValue(j, nb_elem + l) + kf * TRNp_Np->getValue(j + 3, l);
-      _jacobianqForces->setValue(j, nb_elem + l, val);
-      val = _jacobianqForces->getValue(j, l) + kf * TRNp_Np->getValue(j + 3, l + 3);
-      _jacobianqForces->setValue(j, l, val);
+          (*jacobianTotalForcesOver_q_)(nb_elem + j, nb_elem + l) + kf * (*TRNp_Np)(j, l);
+      jacobianTotalForcesOver_q_->setValue(nb_elem + j, nb_elem + l, val);
+      val = (*jacobianTotalForcesOver_q_)(nb_elem + j, l) + kf * (*TRNp_Np)(j, l + 3);
+      jacobianTotalForcesOver_q_->setValue(nb_elem + j, l, val);
+      val = (*jacobianTotalForcesOver_q_)(j, nb_elem + l) + kf * (*TRNp_Np)(j + 3, l);
+      jacobianTotalForcesOver_q_->setValue(j, nb_elem + l, val);
+      val = (*jacobianTotalForcesOver_q_)(j, l) + kf * (*TRNp_Np)(j + 3, l + 3);
+      jacobianTotalForcesOver_q_->setValue(j, l, val);
     }
   }
 }
@@ -225,57 +206,59 @@ void siconos::fem::cable::CableDS::dampingMatrix(/** ...*/) {
 }
 
 void siconos::fem::cable::CableDS::matmult(
-    const std::shared_ptr<siconos::algebra::SiconosVector> &V, size_t a_startIdx,
-    std::shared_ptr<siconos::algebra::SiconosVector> &R) {
-  R->zero();
+    const Eigen::Ref<const siconos::algebra::SiconosVector> &V,
+    siconos::algebra::SiconosSize_t a_startIdx,
+    Eigen::Ref<siconos::algebra::SiconosVector> R) {
+  R.setZero();
   assert(TRNp_Np);
-  auto n = R->size();
-  if (n + a_startIdx < V->size()) {
-    for (size_t i = 0; i < n; i++) {
-      for (size_t j = 0; j < n; j++) {
-        auto val = TRNp_Np->getValue(i, j);
-        (*R)(i) += val * (*V)(j + a_startIdx);
+  auto n = R.size();
+  if (n + a_startIdx < V.size()) {
+    for (auto i = 0; i < n; i++) {
+      for (auto j = 0; j < n; j++) {
+        auto val = (*TRNp_Np)(i, j);
+        R(i) += val * V(j + a_startIdx);
       }
     }
   } else {
-    for (size_t i = 0; i < n; i++) {
-      for (size_t j = 0; j < 3; j++) {
-        auto val = TRNp_Np->getValue(i, j);
-        (*R)(i) += val * (*V)(j + a_startIdx);
+    for (auto i = 0; i < n; i++) {
+      for (auto j = 0; j < 3; j++) {
+        auto val = (*TRNp_Np)(i, j);
+        R(i) += val * V(j + a_startIdx);
       }
-      for (size_t j = 3; j < 6; j++) {
-        auto val = TRNp_Np->getValue(i, j);
-        (*R)(i) += val * (*V)(j - 3);
+      for (auto j = 3; j < 6; j++) {
+        auto val = (*TRNp_Np)(i, j);
+        R(i) += val * V(j - 3);
       }
     }
   }
 }
 
 void siconos::fem::cable::CableDS::matmult2(
-    const std::shared_ptr<siconos::algebra::SiconosVector> &V,
-    std::shared_ptr<siconos::algebra::SimpleMatrix> &R) {
-  size_t n = V->size();
+    const Eigen::Ref<const siconos::algebra::SiconosVector> &V,
+    Eigen::Ref<siconos::algebra::SiconosMatrix> R) {
+  size_t n = V.size();
   for (size_t i = 0; i < n; i++) {
     for (size_t j = 0; j < n; j++) {
-      (*R)(i, j) = (*V)(i) * (*V)(j);
+      R(i, j) = V(i) * V(j);
     }
   }
 }
-std::shared_ptr<siconos::algebra::SimpleMatrix> siconos::fem::cable::CableDS::TRNp_NpMatrix() {
-  auto vTRNp_Np = std::make_shared<siconos::algebra::SimpleMatrix>(
-      6, 6, siconos::algebra::UblasType::SPARSE);
+std::shared_ptr<siconos::algebra::SiconosMatrix>
+siconos::fem::cable::CableDS::TRNp_NpMatrix() {
+  auto vTRNp_Np =
+      std::make_shared<siconos::algebra::SiconosMatrix>(6, 6);  // FP: HAS TO BE SPARSE
   /* vector<vector<double>> TRNp_Np = {{1, 0, 0, -1, 0, 0},
                                                                          {0, 1, 0, 0, -1, 0},
                                      {0, 0, 1, 0, 0, -1},
                                                                          {-1, 0, 0, 1, 0, 0},
                                      {0, -1, 0, 0, 1, 0},
-                                                                         {0, 0, -1, 0, 0, 1}};
+                                                                         {0, 0, -1, 0, 0,
+     1}};
                                                                          */
-  vTRNp_Np->eye();
-  vTRNp_Np->setValue(3, 1, -1);
-  vTRNp_Np->setValue(4, 2, -1);
-  vTRNp_Np->setValue(5, 3, -1);
-  vTRNp_Np->setIsSymmetric(true);
+  vTRNp_Np->setIdentity();
+  (*vTRNp_Np)(3, 1) = -1;
+  (*vTRNp_Np)(4, 2) = -1;
+  (*vTRNp_Np)(5, 3) = -1;
 
   return vTRNp_Np;
 }

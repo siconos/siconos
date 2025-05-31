@@ -23,14 +23,14 @@
 
 #include "SiconosException.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 
 siconos::modeling::NormalConeNSL::NormalConeNSL(
-    unsigned size, std::shared_ptr<siconos::algebra::SimpleMatrix> H,
+    unsigned size, std::shared_ptr<siconos::algebra::SiconosMatrix> H,
     std::shared_ptr<siconos::algebra::SiconosVector> K)
     : NonSmoothLaw(size), _H(H), _K(K)
 {
-  assert(H->size(1) == size &&
+  assert(H->cols() == size &&
          "NormalConeNSL::NormalConeNSL - the number of columns in H and the declared size are "
          "not equal, check your code !");
 }
@@ -48,9 +48,9 @@ void siconos::modeling::NormalConeNSL::display() const
   std::cout << "____ data of the NormalConeNSL" << std::endl;
   std::cout << "| nSLawSize : " << _size << std::endl;
   std::cout << "| H : " << std::endl;
-  _H->display();
+  siconos::algebra::print(*_H);
   std::cout << "| K : " << std::endl;
-  _K->display();
+  siconos::algebra::print(*_K);
   std::cout << "____________________________" << std::endl;
   std::cout << "------------------------------------" << std::endl;
 }

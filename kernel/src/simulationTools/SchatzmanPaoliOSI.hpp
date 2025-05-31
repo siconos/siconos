@@ -36,11 +36,11 @@ namespace siconos::integrators {
    concerned dynamical systems.  Each DynamicalSystem is associated to
    a SiconosMatrix, named "W"
 
-   W matrices are initialized and computed in initializeIterationMatrixW and
-   computeW. Depending on the DS type, they may depend on time and DS
+   W matrices are initialized and computed in initializeIterationMatrix and
+   computeIterationMatrix. Depending on the DS type, they may depend on time and DS
    state (x).
 
-   For Lagrangian systems, the implementation uses _p[0] for storing the
+   For Lagrangian systems, the implementation uses p[0] for storing the
    discrete multiplier.
 
    Main functions:
@@ -104,38 +104,13 @@ class SchatzmanPaoliOSI : public OneStepIntegrator {
    */
   virtual ~SchatzmanPaoliOSI() noexcept = default;
 
-  /** get W corresponding to DynamicalSystem ds
+  /** get IterationMatrixBoundaryConditions corresponding to DynamicalSystem ds
    *
    *  \param ds a pointer to DynamicalSystem, optional, default =
-   *  nullptr. get W[0] in that case
-   *  \return pointer to a SiconosMatrix
-   */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> W(
-      std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
-
-  /** set the value of W[ds] to newValue
-   *
-   *  \param newValue SiconosMatrix
-   *  \param ds  a pointer to DynamicalSystem,
-   */
-  void setW(const siconos::algebra::SiconosMatrix &newValue,
-            std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
-
-  /** set W[ds] to pointer newPtr
-   *
-   *  \param newPtr std::shared_ptr<siconos::algebra::SiconosMatrix>
-   *  \param ds a pointer to DynamicalSystem
-   */
-  void setWPtr(std::shared_ptr<siconos::algebra::SimpleMatrix> newPtr,
-               std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
-
-  /** get WBoundaryConditions corresponding to DynamicalSystem ds
-   *
-   *  \param ds a pointer to DynamicalSystem, optional, default =
-   *  nullptr. get WBoundaryConditions[0] in that case
+   *  nullptr. get IterationMatrixBoundaryConditions[0] in that case
    * \return pointer to a SiconosMatrix
    */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> WBoundaryConditions(
+  std::shared_ptr<siconos::algebra::SiconosMatrix> IterationMatrixBoundaryConditions(
       std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
   // -- theta --
@@ -225,40 +200,14 @@ class SchatzmanPaoliOSI : public OneStepIntegrator {
    *  \return unsigned int
    */
   unsigned int numberOfIndexSets() const override { return 1; };
+
   /** initialize iteration matrix W SchatzmanPaoliOSI matrix at time t
    *
    *  \param time (double)
    *  \param ds a pointer to DynamicalSystem
    */
-  void initializeIterationMatrixW(double time,
-                                  std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
-
-  /** compute W SchatzmanPaoliOSI matrix at time t
-   *
-   *  \param time the time (double)
-   *  \param ds a pointer to DynamicalSystem
-   *  \param W the matrix to compute
-   */
-  void computeW(double time, std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
-                siconos::algebra::SiconosMatrix &W);
-
-  /** compute WBoundaryConditionsMap[ds] SchatzmanPaoliOSI matrix at time t
-   *
-   *  \param ds a pointer to DynamicalSystem
-   *  \param WBoundaryConditions write the result in WBoundaryConditions
-   */
-  void computeWBoundaryConditions(std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
-                                  siconos::algebra::SiconosMatrix &WBoundaryConditions);
-
-  /** initialize iteration matrix WBoundaryConditionsMap[ds] SchatzmanPaoliOSI
-   *
-   *  \param ds a pointer to DynamicalSystem
-   *  \param dsv a descriptor of the ds on the graph (redundant to avoid
-   *  invocation)
-   */
-  void initializeIterationMatrixWBoundaryConditions(
-      std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
-      const siconos::graphs::DynamicalSystemsGraph::VDescriptor &dsv);
+  void initializeIterationMatrix(double time,
+                                 std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
   /** return the maximum of all norms for the "SchatzmanPaoliOSI-discretized"
    *  residus of DS \return a double

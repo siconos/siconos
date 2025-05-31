@@ -18,18 +18,21 @@
 #include "NewMarkAlphaOSI.hpp"
 
 #include "BlockVector.hpp"
+#include "FirstOrderR.hpp"
 #include "Interaction.hpp"
 #include "LagrangianLinearTIDS.hpp"
 #include "LagrangianScleronomousR.hpp"
+#include "NewtonEulerR.hpp"
 #include "NonSmoothLaw.hpp"
 #include "OneStepNSProblem.hpp"
 #include "SiconosConst.hpp"  // For MACHINE_PREC
 #include "SiconosException.hpp"
-#include "SiconosMatrixOp.hpp"        // scal
-#include "SiconosMatrixVectorOp.hpp"  // mat-vec prod
+#include "SiconosMatrix.hpp"
+#include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
 #include "Simulation.hpp"
+#include "Tools.hpp"
+
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -38,97 +41,67 @@ siconos::integrators::NewMarkAlphaOSI::NewMarkAlphaOSI(double new_beta, double n
                                                        double new_alpha_m, double new_alpha_f,
                                                        bool flag = false)
     : OneStepIntegrator(siconos::integrators::IntegratorType::NEWMARKALPHAOSI, 1, 0, 2, 1, 2),
-      _alpha_m{new_alpha_m},
-      _alpha_f{new_alpha_f},
-      _gamma{new_gamma},
-      _beta{new_beta},
-      _IsVelocityLevel{flag} {}
+      newmark_{new_beta, new_gamma, new_alpha_m, new_alpha_f},
+      handleVelocityConstraints_{flag} {}
 
 siconos::integrators::NewMarkAlphaOSI::NewMarkAlphaOSI(double rho_infty, bool flag = false)
-    : OneStepIntegrator(siconos::integrators::IntegratorType::NEWMARKALPHAOSI, 1, 0, 2, 1, 2) {
-  _alpha_m = (2 * rho_infty - 1) / (rho_infty + 1);
-  _alpha_f = rho_infty / (rho_infty + 1);
-  _gamma = 0.5 + _alpha_f - _alpha_m;
-  _beta = 0.25 * std::pow((_gamma + 0.5), 2);
-  _IsVelocityLevel = flag;
+    : OneStepIntegrator(siconos::integrators::IntegratorType::NEWMARKALPHAOSI, 1, 0, 2, 1, 2),
+      handleVelocityConstraints_{flag} {
+  setParametersFromRho_infty(rho_infty);
 }
 
-std::shared_ptr<siconos::algebra::SimpleMatrix> siconos::integrators::NewMarkAlphaOSI::W(
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
-  assert(ds && "siconos::integrators::NewMarkAlphaOSI::W(ds): ds == nullptr.");
-  assert(_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W &&
-         "siconos::integrators::NewMarkAlphaOSI::W(ds): W[ds] == nullptr.");
-  return _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W;
-}
-
-void siconos::integrators::NewMarkAlphaOSI::initializeIterationMatrixW(
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
-  if (!ds)
-    THROW_EXCEPTION(
-        "siconos::integrators::NewMarkAlphaOSI::initializeIterationMatrixW(t,ds) - ds == "
-        "nullptr");
+void siconos::integrators::NewMarkAlphaOSI::initializeIterationMatrix(
+    double time, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
+  assert(ds);
 
   if (!(checkOSI(_dynamicalSystemsGraph->descriptor(ds))))
     THROW_EXCEPTION(
-        "siconos::integrators::NewMarkAlphaOSI::initializeIterationMatrixW(t,ds) - ds does "
+        "siconos::integrators::NewMarkAlphaOSI::initializeIterationMatrix(t,ds) - ds does "
         "not belong to the OSI.");
 
-  if (_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W)
-    THROW_EXCEPTION(
-        "siconos::integrators::NewMarkAlphaOSI::initializeIterationMatrixW(t,ds) - W(ds) is "
-        "already in the map and has been initialized.");
+  const auto& dsv = _dynamicalSystemsGraph->descriptor(ds);
+  assert(!_dynamicalSystemsGraph->properties(dsv).iterationMatrix);
 
-  _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W =
-      std::make_shared<siconos::algebra::SimpleMatrix>(ds->dimension(), ds->dimension());
+  // Allocate storage for W in the graph
+  _dynamicalSystemsGraph->properties(dsv).iterationMatrix =
+      std::make_shared<siconos::algebra::SiconosMatrix>(ds->dimension(), ds->dimension());
 
-  computeW(ds, *_dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds)).W);
-}
+  auto iterationMat = _dynamicalSystemsGraph->properties(dsv).iterationMatrix;
 
-void siconos::integrators::NewMarkAlphaOSI::computeW(
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
-    siconos::algebra::SiconosMatrix& W) {
-  auto beta_prime = (1. - _alpha_m) / ((1. - _alpha_f) * _beta);
-  auto gamma_prime = _gamma / _beta;
-  auto h = _simulation->nextTime() - _simulation->startingTime();  // step size
-  if (h < 100 * siconos::internal::MACHINE_PREC)
-    THROW_EXCEPTION(
-        "In siconos::integrators::NewMarkAlphaOSI::initializeIterationMatrixW(t,ds), time "
-        "integration is too small");
-  // make sure that W is initialized before computing
-  std::shared_ptr<siconos::algebra::SiconosMatrix> M;
-  std::shared_ptr<siconos::algebra::SiconosMatrix> K;
-  std::shared_ptr<siconos::algebra::SiconosMatrix> C;
-  if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
-    if (auto ltids = std::dynamic_pointer_cast<siconos::modeling::LagrangianLinearTIDS>(ds)) {
-      K = ltids->K();     // matrix K
-      if (K) *K *= -1.0;  // K = -K
-      C = ltids->C();     // matrix C
-      if (C) *C *= -1.0;  // C = -C
-    } else                // LagrangianLinearDS
-    {
-      K = lds->jacobianqForces();  // jacobian according to q
-      C = lds->jacobianvForces();  // jacobian according to velocity
-      lds->computeMass(lds->q());
-    }
+  if (auto lltids = std::dynamic_pointer_cast<siconos::modeling::LagrangianLinearTIDS>(ds)) {
+    auto gamma_prime =
+        newmark_[newmark_alpha::names::Gamma] / newmark_[newmark_alpha::names::Beta];
+    auto inv_time_step =
+        1. / (_simulation->nextTime() - _simulation->startingTime());  // 1. / step size
+    auto beta_prime = (1. - newmark_[newmark_alpha::names::Alpha_m]) /
+                      ((1. - newmark_[newmark_alpha::names::Alpha_f]) *
+                       newmark_[newmark_alpha::names::Beta]) *
+                      inv_time_step * inv_time_step;
 
-    // Compute W = (beta_prime/h^2)*M - (gamma_prime/h)*C - K
-    if (lds->mass())
-      siconos::algebra::scal(beta_prime / (h * h), *(lds->mass()), W, true);
-    else {
-      W.eye();
-      W *= beta_prime / (h * h);
-    }
-    if (C) siconos::algebra::scal(-gamma_prime / h, *C, W, false);
-    if (K) siconos::algebra::scal(-1.0, *K, W, false);
-      //
-#ifdef DEBUG_NEWMARK
-    std::cout.precision(15);
-    std::cout << "Iteration matrix W: ";
-    W->display();
-#endif
+    if (lltids->hasMass())
+      *iterationMat = lltids->mass();
+    else
+      iterationMat->setIdentity();
+
+    *iterationMat *= beta_prime;
+
+    if (lltids->hasDampingMatrix())
+      *iterationMat += gamma_prime * inv_time_step * lltids->dampingMatrix();
+
+    if (lltids->hasStiffnessMatrix()) *iterationMat += lltids->stiffnessMatrix();
+
+    // LU Factorisation
+    _dynamicalSystemsGraph->properties(dsv).LUW =
+        std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(
+            *_dynamicalSystemsGraph->properties(dsv).iterationMatrix);
+
+  } else if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+    newmark_alpha::computeIterationMatrix_Lagrangian(
+        time, _simulation->timeStep(), newmark_, *lds, *iterationMat,
+        _dynamicalSystemsGraph->properties(dsv).LUW);
   } else {
     THROW_EXCEPTION(
-        "In siconos::integrators::NewMarkAlphaOSI::initializeIterationMatrixW(t,ds), this "
+        "In siconos::integrators::NewMarkAlphaOSI::initializeIterationMatrix(t,ds), this "
         "type of Dynamical System is not yet implemented");
   }
 }
@@ -156,56 +129,51 @@ double siconos::integrators::NewMarkAlphaOSI::computeResidu() {
     if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
       auto& residuFree = *workVectors[siconos::integrators::NewMarkAlphaOSI::RESIDU_FREE];
       // -- Convert the DS into a Lagrangian one.
-      // get position, velocity and acceleration
-      auto q = d->q();
-      auto v = d->velocity();
-      auto a = d->acceleration();
-      std::shared_ptr<siconos::algebra::SiconosVector> F;
-      // get the reaction force p
-      auto p = d->p(2);
       // Compute free residual
-      residuFree.zero();
-      if (d->mass())
-        siconos::algebra::prod(*d->mass(), *a, residuFree, true);  // freeR = M*a
+      residuFree.setZero();
+      if (d->hasMass())
+        residuFree = d->mass() * d->acceleration_read();
       else
-        residuFree = *a;
+        residuFree = d->acceleration_read();
       // LinearTIDS case
-      if (auto ltids =
+      if (auto lltids =
               std::dynamic_pointer_cast<siconos::modeling::LagrangianLinearTIDS>(ds)) {
-        // We need to add F_int = Cv + Kq to freeR
-        auto K = ltids->K();
-        auto C = ltids->C();
-        F = ltids->fExt();  // Note that for LagrangianLinearTIDS, F = F_ext
-        if (F) {
-          ltids->computeFExt(t);
+        // f = M*a + C*v + K*q
+        // freeR = M*a + C*v
+
+        if (lltids->hasExternalForces()) {
+          lltids->computeFext(t);
+          residuFree -= lltids->fext();  // freeR = _workspace[freeresidu] - F
         }
-        if (K) siconos::algebra::prod(*K, *q, residuFree, false);  // f = M*a + C*v + K*q
-        if (C) siconos::algebra::prod(*C, *v, residuFree, false);  // freeR = M*a + C*v
-      } else                                                       // LagrangianDS
+        if (lltids->hasDampingMatrix())
+          residuFree += lltids->dampingMatrix() * lltids->velocity_read();
+        if (lltids->hasStiffnessMatrix())
+          residuFree += lltids->hasStiffnessMatrix() * lltids->q_read();
+
+      } else  // LagrangianDS
       {
         // Update mass matrix
-        d->computeMass();
-        F = d->forces();
-        if (F)
+        d->computeMass(d->q_read());
+        if (d->hasTotalForces()) {
           // Compute F = F_ext - F_int - F_Gyr
-          d->computeForces(t, d->q(), d->velocity());
+          d->computeTotalForces(d->velocity_read(), d->q_read(), t);
+          residuFree -= d->totalForces();  // freeR = _workspace[freeresidu] - F
+        }
       }
-
-      residuFree -= *F;  // freeR = _workspace[freeresidu] - F
       // Compute residual
       _residu =
           std::make_shared<siconos::algebra::SiconosVector>(residuFree);  // _residu = freeR
-      *_residu -= *p;  // _residu = _workspace[freeresidu] - p
+      *_residu -= d->p_read(2);  // _residu = _workspace[freeresidu] - p
       // Compute Euclidean norm of the residual
-      normResidu = _residu->norm2();
+      normResidu = _residu->norm();
       // Take maximum value of norm over all DS
       if (normResidu > maxResidu) {
         maxResidu = normResidu;
       }
       //
 
-      DEBUG_EXPR(residuFree.display(););
-      DEBUG_EXPR(_residu->display(););
+      DEBUG_EXPR(siconos::algebra::print(residuFree););
+      DEBUG_EXPR(siconos::algebra::print(*_residu););
     } else {
       THROW_EXCEPTION(
           "In siconos::integrators::NewMarkAlphaOSI::computeResidu(t,ds), this type of "
@@ -227,19 +195,18 @@ void siconos::integrators::NewMarkAlphaOSI::computeFreeState() {
     auto ds = _dynamicalSystemsGraph->bundle(*dsi);
     auto& workVectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
 
-    // Get iteration matrix W, make sure that W was updated before
-    auto W = _dynamicalSystemsGraph->properties(*dsi).W;  // Its W matrix of iteration.
-
     auto& residuFree = *workVectors[siconos::integrators::NewMarkAlphaOSI::RESIDU_FREE];
     auto& qfree = *workVectors[siconos::integrators::NewMarkAlphaOSI::FREE];
 
     // -- Convert the DS into a Lagrangian one.
     if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
       qfree = residuFree;
-      W->Solve(qfree);  //_qfree = (W^-1)*R_free
-      qfree *= -1.0;    //_qfree = -(W^-1)*R_free
+      //  assume that iterationMatrix and LU are uptodate
+      qfree =
+          _dynamicalSystemsGraph->properties(*dsi).LUW->solve(qfree);  //_qfree = (W^-1)*R_free
+      qfree *= -1.0;  //_qfree = -(W^-1)*R_free
       //
-      DEBUG_EXPR(qfree.display(););
+      DEBUG_EXPR(siconos::algebra::print(qfree););
     } else {
       THROW_EXCEPTION(
           "In siconos::integrators::NewMarkAlphaOSI::computeResidu(t,ds), this type of "
@@ -275,7 +242,7 @@ void siconos::integrators::NewMarkAlphaOSI::computeFreeOutput(
     q_free = workBlockV[siconos::integrators::NewMarkAlphaOSI::xfree];
   }
   assert(q_free);
-  DEBUG_EXPR(q_free->display(););
+  DEBUG_EXPR(siconos::algebra::print(*q_free););
 
   // get pointer to yForNSsolver vector
 
@@ -288,14 +255,11 @@ void siconos::integrators::NewMarkAlphaOSI::computeFreeOutput(
   assert(inter->relation() &&
          "In siconos::integrators::NewMarkAlphaOSI::computeFreeOutput, relation associated "
          "with the interaction does not exist.");
-  auto C = inter->relation()->C();
-  assert(C &&
-         "In siconos::integrators::NewMarkAlphaOSI::computeFreeOutput: Jacobian matrix does "
-         "not exist");
   if (relationType == siconos::modeling::RelationType::Lagrangian) {
     if (relationSubType == siconos::modeling::RelationSubType::RheonomousR) {
       THROW_EXCEPTION(
-          "siconos::integrators::NewMarkAlphaOSI::computeFreeOutput  not yet implemented with "
+          "siconos::integrators::NewMarkAlphaOSI::computeFreeOutput  not yet implemented "
+          "with "
           "LagrangianRheonomousR");
     }
     DEBUG_EXPR(
@@ -307,55 +271,53 @@ void siconos::integrators::NewMarkAlphaOSI::computeFreeOutput(
                   << std::endl;
         std::cout << "osnsp" << osnsp << std::endl;);
     if (relationSubType == siconos::modeling::RelationSubType::ScleronomousR) {
-      std::vector<std::size_t> coord(8);
-      coord[0] = 0;
-      coord[1] = sizeY;
-      coord[2] = 0;
-      coord[3] = C->size(1);
-      coord[4] = 0;
-      coord[5] = C->size(1);
-      coord[6] = 0;
-      coord[7] = sizeY;
+      auto _SclerR = std::static_pointer_cast<siconos::modeling::LagrangianScleronomousR>(
+          inter->relation());
+      auto C = _SclerR->jacobianhOver_q();
+
       if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_ACC]).get() ==
           osnsp)  // LCP at acceleration level
       {
-        siconos::algebra::subprod(*C, *q_free, osnsp_rhs, coord, true);
-        auto ID = std::make_shared<siconos::algebra::SimpleMatrix>(sizeY, sizeY);
-        ID->eye();
-        std::vector<std::size_t> xcoord(8);
-        xcoord[0] = 0;
-        xcoord[1] = sizeY;
-        xcoord[2] = 0;
-        xcoord[3] = sizeY;
-        xcoord[4] = 0;
-        xcoord[5] = sizeY;
-        xcoord[6] = 0;
-        xcoord[7] = sizeY;
-        auto _SclerR = std::static_pointer_cast<siconos::modeling::LagrangianScleronomousR>(
-            inter->relation());
-        _SclerR->computedotjacqhXqdot(t, *inter);
-        siconos::algebra::subprod(*ID, *(_SclerR->dotjacqhXqdot()), osnsp_rhs, xcoord,
-                                  false);  // y += NonLinearPart
+        siconos::algebra::matrixBlockVector_prod(C, *q_free, osnsp_rhs, true);
+        auto ID = std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeY);
+        ID->setIdentity();
+        _SclerR->computeJacobianhOver_q_dot_X_qdot(t, *inter);
+        osnsp_rhs += *ID * _SclerR->jacobianhOver_q_dot_X_qdot();
+        // y += NonLinearPart
       } else if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_SMOOTH_POS]).get() ==
                  osnsp)  // LCP at position level
       {
         // Update Jacobian matrix
         inter->relation()->computeJach(t, *inter);
         // compute osnsp_rhs = y_{n,k} + G*q_free
-        if (!_IsVelocityLevel)  // output at the position level y_{n,k} = g_{n,k}
+        if (!handleVelocityConstraints_)  // output at the position level y_{n,k} = g_{n,k}
         {
           inter->computeOutput(t, 0);  // Update output of level 0
           osnsp_rhs = *(inter->y(0));  // g_{n,k}
         }
-        siconos::algebra::subprod(*C, *q_free, osnsp_rhs, coord, false);
+        siconos::algebra::matrixBlockVector_prod(C, *q_free, osnsp_rhs, false);
       } else if (((*allOSNS)[siconos::simulation::SICONOS_OSNSP_ED_IMPACT]).get() ==
                  osnsp)  // output at the velocity level y_{n,k} = (h/gamma_prime)*dotg_{n,k}
       {
         auto h = _simulation->nextTime() - _simulation->startingTime();
-        auto gamma_prime = _gamma / _beta;
+        auto gamma_prime =
+            newmark_[newmark_alpha::names::Gamma] / newmark_[newmark_alpha::names::Beta];
         inter->computeOutput(t, 1);                        // Update output of level 1
         osnsp_rhs = (h / gamma_prime) * (*(inter->y(1)));  //(h/gamma_prime)*dotg_{n,k}
-        siconos::algebra::subprod(*C, *q_free, osnsp_rhs, coord, false);
+        if (auto forel =
+                std::dynamic_pointer_cast<siconos::modeling::FirstOrderR>(inter->relation())) {
+          auto C = forel->jacobianhOver_state();
+          siconos::algebra::matrixBlockVector_prod(C, *q_free, osnsp_rhs, false);
+        } else if (auto lagr = std::dynamic_pointer_cast<siconos::modeling::LagrangianR>(
+                       inter->relation())) {
+          auto C = lagr->jacobianhOver_q();
+          siconos::algebra::matrixBlockVector_prod(C, *q_free, osnsp_rhs, false);
+        } else if (auto ner = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerR>(
+                       inter->relation())) {
+          auto C = ner->H_NE_prod_T();
+          siconos::algebra::matrixBlockVector_prod(C, *q_free, osnsp_rhs, false);
+        }
+
       } else {
         osnsp->display();
         THROW_EXCEPTION(
@@ -364,7 +326,7 @@ void siconos::integrators::NewMarkAlphaOSI::computeFreeOutput(
       }
     }  // endif(relationSubType == ScleronomousR)
 
-    DEBUG_EXPR(osnsp_rhs.display(););
+    DEBUG_EXPR(siconos::algebra::print(osnsp_rhs););
   } else {
     THROW_EXCEPTION(
         "In siconos::integrators::NewMarkAlphaOSI::computeFreeOutput, this type of relation "
@@ -376,7 +338,7 @@ void siconos::integrators::NewMarkAlphaOSI::computeFreeOutput(
 }
 
 void siconos::integrators::NewMarkAlphaOSI::initializeWorkVectorsForDS(
-    double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
+    double time, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
   DEBUG_BEGIN(
       "siconos::integrators::NewMarkAlphaOSI::initializeWorkVectorsForDS( double t, "
       "std::shared_ptr<siconos::modeling::DynamicalSystem> ds)\n")
@@ -395,12 +357,12 @@ void siconos::integrators::NewMarkAlphaOSI::initializeWorkVectorsForDS(
   auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds);
   assert(lds);
   // Compute W (iteration matrix)
-  initializeIterationMatrixW(ds);
+  initializeIterationMatrix(time, ds);
   // allocate memory for work space for Newton iteration procedure
-  assert(_dynamicalSystemsGraph->properties(dsv).W && "W is nullptr");
+  assert(_dynamicalSystemsGraph->properties(dsv).iterationMatrix && "W is nullptr");
   // Allocate the memory to stock the acceleration-like variable
   if (lds) {
-    lds->initRhs(t);
+    lds->initRhs(time);
 
     ds_work_vectors.resize(siconos::integrators::NewMarkAlphaOSI::WORK_LENGTH);
     ds_work_vectors[siconos::integrators::NewMarkAlphaOSI::RESIDU_FREE] =
@@ -408,24 +370,25 @@ void siconos::integrators::NewMarkAlphaOSI::initializeWorkVectorsForDS(
     // ds_work_vectors[siconos::integrators::NewMarkAlphaOSI::FREE] =
     // std::make_shared<siconos::algebra::SiconosVector>(d->dimension()));
     ds_work_vectors[siconos::integrators::NewMarkAlphaOSI::FREE] =
-        std::make_shared<siconos::algebra::SiconosVector>(*(lds->acceleration()));
+        std::make_shared<siconos::algebra::SiconosVector>(lds->acceleration_read());
     ds_work_vectors[siconos::integrators::NewMarkAlphaOSI::ACCE_LIKE] =
         std::make_shared<siconos::algebra::SiconosVector>(
-            *(lds->acceleration()));  // set a0 = ddotq0
+            lds->acceleration_read());  // set a0 = ddotq0
     ds_work_vectors[siconos::integrators::NewMarkAlphaOSI::ACCE_MEMORY] =
         std::make_shared<siconos::algebra::SiconosVector>(
-            *(lds->acceleration()));  // set a0 = ddotq0
+            lds->acceleration_read());  // set a0 = ddotq0
 
     // Allocate the memory to stock coefficients of the polynomial for the dense output
     workMatrices.resize(siconos::integrators::NewMarkAlphaOSI::MAT_WORK_LENGTH);
     workMatrices[siconos::integrators::NewMarkAlphaOSI::DENSE_OUTPUT_COEFFICIENTS] =
-        std::make_shared<siconos::algebra::SimpleMatrix>(ds->dimension(),
-                                                         (getOrderDenseOutput() + 1));
+        std::make_shared<siconos::algebra::SiconosMatrix>(ds->dimension(),
+                                                          denseOutputPolynomialOrder() + 1);
 
     //*(lds->workspace(DynamicalSystem::acce_like)) = *(lds->acceleration());
-    // ds->allocateWorkVector(DynamicalSystem::acce_like, ds->dimension()); // allocate memory
-    // for the acceleration-like of DS ds->allocateWorkVector(DynamicalSystem::acce_memory,
-    // ds->dimension()); // allocate memory to stock acceleration
+    // ds->allocateWorkVector(DynamicalSystem::acce_like, ds->dimension()); // allocate
+    // memory for the acceleration-like of DS
+    // ds->allocateWorkVector(DynamicalSystem::acce_memory, ds->dimension()); // allocate
+    // memory to stock acceleration
 
     //          lds->allocateWorkMatrix(siconos::integrators::NewMarkAlphaOSI::DENSE_OUTPUT_COEFFICIENTS,
     //          ds->dimension(), (osi_NewMark->getOrderDenseOutput() + 1));
@@ -468,7 +431,7 @@ void siconos::integrators::NewMarkAlphaOSI::initializeWorkVectorsForInteraction(
 
   if (!interProp.workMatrices) {
     interProp.workMatrices =
-        std::make_shared<std::vector<std::shared_ptr<siconos::algebra::SimpleMatrix>>>(
+        std::make_shared<std::vector<std::shared_ptr<siconos::algebra::SiconosMatrix>>>(
             siconos::integrators::NewMarkAlphaOSI::MAT_WORK_LENGTH);
   }
 
@@ -496,14 +459,16 @@ void siconos::integrators::NewMarkAlphaOSI::initializeWorkVectorsForInteraction(
     _levelMinForInput = 1;
     _levelMaxForInput = 2;
     THROW_EXCEPTION(
-        "siconos::integrators::NewMarkAlphaOSI::initializeWorkVectorsForInteraction  not yet "
+        "siconos::integrators::NewMarkAlphaOSI::initializeWorkVectorsForInteraction  not "
+        "yet "
         "implemented for nonsmooth law of type NewtonImpactFrictionNSL");
   } else
     THROW_EXCEPTION(
         "siconos::integrators::NewMarkAlphaOSI::initializeWorkVectorsForInteraction not yet "
         "implemented  for nonsmooth of type");
 
-  // Check if interations levels (i.e. y and lambda sizes) are compliant with the current osi.
+  // Check if interations levels (i.e. y and lambda sizes) are compliant with the current
+  // osi.
   _check_and_update_interaction_levels(inter);
   // Initialize/allocate memory buffers in interaction.
   inter.initializeMemory(_steps);
@@ -521,12 +486,13 @@ void siconos::integrators::NewMarkAlphaOSI::initializeWorkVectorsForInteraction(
         std::make_shared<siconos::algebra::BlockVector>();
     inter_work_block[siconos::integrators::NewMarkAlphaOSI::xfree]->insertPtr(
         workVds1[siconos::integrators::NewMarkAlphaOSI::FREE]);
-    DSlink[siconos::modeling::LagrangianR::p2] =
+    DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::p2)] =
         std::make_shared<siconos::algebra::BlockVector>();
-    DSlink[siconos::modeling::LagrangianR::p2]->insertPtr(lds.p(2));
-    DSlink[siconos::modeling::LagrangianR::q2] =
+    DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::p2)]->insertPtr(lds.p(2));
+    DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q2)] =
         std::make_shared<siconos::algebra::BlockVector>();
-    DSlink[siconos::modeling::LagrangianR::q2]->insertPtr(lds.acceleration());
+    DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q2)]->insertPtr(
+        lds.acceleration());
   }
   // else if (relationType == NewtonEuler)
   // {
@@ -541,8 +507,9 @@ void siconos::integrators::NewMarkAlphaOSI::initializeWorkVectorsForInteraction(
       auto& lds = *std::static_pointer_cast<siconos::modeling::LagrangianDS>(ds2);
       inter_work_block[siconos::integrators::NewMarkAlphaOSI::xfree]->insertPtr(
           workVds2[siconos::integrators::NewMarkAlphaOSI::FREE]);
-      DSlink[siconos::modeling::LagrangianR::p2]->insertPtr(lds.p(2));
-      DSlink[siconos::modeling::LagrangianR::q2]->insertPtr(lds.acceleration());
+      DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::p2)]->insertPtr(lds.p(2));
+      DSlink[tools::enum_to_index(modeling::LagrangianR::WorkDS::q2)]->insertPtr(
+          lds.acceleration());
     }
     // else if (relationType == NewtonEuler)
     // {
@@ -561,8 +528,12 @@ void siconos::integrators::NewMarkAlphaOSI::prepareNewtonIteration(double time) 
   for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
     if (!checkOSI(dsi)) continue;
     auto ds = _dynamicalSystemsGraph->bundle(*dsi);
-    auto& W = *_dynamicalSystemsGraph->properties(*dsi).W;
-    computeW(ds, W);
+    if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+      newmark_alpha::computeIterationMatrix_Lagrangian(
+          time, _simulation->timeStep(), newmark_, *lds,
+          *_dynamicalSystemsGraph->properties(*dsi).iterationMatrix,
+          _dynamicalSystemsGraph->properties(*dsi).LUW);
+    }
   }
   if (!_explicitJacobiansOfRelation) {
     _simulation->nonSmoothDynamicalSystem()->computeInteractionJacobians(time);
@@ -577,7 +548,8 @@ void siconos::integrators::NewMarkAlphaOSI::prediction() {
   double h = _simulation->nextTime() - _simulation->startingTime();
   if (h < 100 * siconos::internal::MACHINE_PREC)
     THROW_EXCEPTION(
-        "In siconos::integrators::NewMarkAlphaOSI::prediction, time integration is too small");
+        "In siconos::integrators::NewMarkAlphaOSI::prediction, time integration is too "
+        "small");
   // Loop over all DS
   std::shared_ptr<siconos::algebra::SiconosVector> _q, _dotq, _ddotq;
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
@@ -587,39 +559,45 @@ void siconos::integrators::NewMarkAlphaOSI::prediction() {
     auto& ds_work_vectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
     if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
       DEBUG_EXPR(d->display(););
-      _q = d->q();                 // generalized coordinate
-      _dotq = d->velocity();       // generalized velocity
-      _ddotq = d->acceleration();  // generalized acceleration
       siconos::algebra::SiconosVector& acce_like =
           *ds_work_vectors[siconos::integrators::NewMarkAlphaOSI::ACCE_LIKE];
       // Save the acceleration before the prediction
-      acce_like = *(_ddotq);
+      acce_like = d->acceleration_read();
 
       DEBUG_PRINT("Before prediction :\n")
-      DEBUG_EXPR(_q->display(););
-      DEBUG_EXPR(_dotq->display(););
-      DEBUG_EXPR(_ddotq->display(););
-      DEBUG_EXPR(acce_like.display(););
+      DEBUG_EXPR(siconos::algebra::print(*d->q()););
+      DEBUG_EXPR(siconos::algebra::print(*d->velocity()););
+      DEBUG_EXPR(siconos::algebra::print(*d->acceleration()););
+      DEBUG_EXPR(siconos::algebra::print(acce_like););
 
-      *_q = *_q + (*_dotq) * h +
-            acce_like * (h * h * (0.5 - _beta));  // q_{n+1} = q_n + (h^2)*(0.5 - beta)*a_n
-      *_dotq =
-          *_dotq + acce_like * (h * (1 - _gamma));  // dotq_{n+1} = dotq_n + h*(1 - gamma)*a_n
-      acce_like = (_alpha_f / (1 - _alpha_m)) * (*_ddotq) -
-                  (_alpha_m / (1 - _alpha_m)) *
+      *d->q() += d->velocity_read() * h +
+                 acce_like *
+                     (h * h *
+                      (0.5 - newmark_[newmark_alpha::names::Beta]));  // q_{n+1} = q_n +
+                                                                      // (h^2)*(0.5 - beta)*a_n
+      *d->velocity() +=
+          acce_like *
+          (h * (1 - newmark_[newmark_alpha::names::Gamma]));  // dotq_{n+1} = dotq_n + h*(1 -
+                                                              // gamma)*a_n
+      acce_like = (newmark_[newmark_alpha::names::Alpha_f] /
+                   (1 - newmark_[newmark_alpha::names::Alpha_m])) *
+                      d->acceleration_read() -
+                  (newmark_[newmark_alpha::names::Alpha_m] /
+                   (1 - newmark_[newmark_alpha::names::Alpha_m])) *
                       acce_like;  // a_{n+1} = (alpha_f*ddotq_n - alpha_m*a_n)/(1 - alpha_m)
-      *_q = *_q + (h * h * _beta) * acce_like;
-      *_dotq = *_dotq + (h * _gamma) * acce_like;
-      _ddotq->zero();
+      *d->q() += (h * h * newmark_[newmark_alpha::names::Beta]) * acce_like;
+      *d->velocity() += (h * newmark_[newmark_alpha::names::Gamma]) * acce_like;
+      d->acceleration()->setZero();
 
       DEBUG_PRINT("After prediction :\n")
-      DEBUG_EXPR(_q->display(););
-      DEBUG_EXPR(_dotq->display(););
-      DEBUG_EXPR(_ddotq->display(););
-      DEBUG_EXPR(acce_like.display(););
+      DEBUG_EXPR(siconos::algebra::print(*d->q()););
+      DEBUG_EXPR(siconos::algebra::print(*d->velocity()););
+      DEBUG_EXPR(siconos::algebra::print(*d->acceleration()););
+      DEBUG_EXPR(siconos::algebra::print(acce_like););
     } else {
       THROW_EXCEPTION(
-          "In siconos::integrators::NewMarkAlphaOSI::prediction: this type of DS is not yet "
+          "In siconos::integrators::NewMarkAlphaOSI::prediction: this type of DS is not "
+          "yet "
           "implemented");
     }
   }
@@ -629,9 +607,13 @@ void siconos::integrators::NewMarkAlphaOSI::prediction() {
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 void siconos::integrators::NewMarkAlphaOSI::correction() {
   auto h = _simulation->nextTime() - _simulation->startingTime();
-  auto beta_prime = (1. - _alpha_m) / ((1. - _alpha_f) * _beta);
-  auto gamma_prime = _gamma / _beta;
-  // Make sure that the input of the concerned Dynamical Systems is updated after solving LCP
+  auto beta_prime =
+      (1. - newmark_[newmark_alpha::names::Alpha_m]) /
+      ((1. - newmark_[newmark_alpha::names::Alpha_f]) * newmark_[newmark_alpha::names::Beta]);
+  auto gamma_prime =
+      newmark_[newmark_alpha::names::Gamma] / newmark_[newmark_alpha::names::Beta];
+  // Make sure that the input of the concerned Dynamical Systems is updated after solving
+  // LCP
   std::shared_ptr<siconos::algebra::SiconosVector> delta_q;
 
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
@@ -640,7 +622,7 @@ void siconos::integrators::NewMarkAlphaOSI::correction() {
     auto ds = _dynamicalSystemsGraph->bundle(*dsi);
     auto& ds_work_vectors = *_dynamicalSystemsGraph->properties(*dsi).workVectors;
 
-    auto W = _dynamicalSystemsGraph->properties(*dsi).W;
+    auto W = _dynamicalSystemsGraph->properties(*dsi).iterationMatrix;
     // Its W matrix of iteration.
     // Iteration matrix W_{n+1,k} computed at kth iteration
     auto& residuFree = *ds_work_vectors[siconos::integrators::NewMarkAlphaOSI::RESIDU_FREE];
@@ -650,29 +632,33 @@ void siconos::integrators::NewMarkAlphaOSI::correction() {
       // resultant force p_{n+1,k+1} of DS at (k+1)th iteration
       std::shared_ptr<siconos::algebra::SiconosVector> _p = d->p(2);
       // Compute delta_q = W_{n+1,k}^{-1}(p_{n+1,k+1} - r_{n+1,k})
-      delta_q = std::make_shared<siconos::algebra::SiconosVector>(
-          *_p - residuFree);  // copy (p_{n+1,k+1} - r_{n+1,k}) to delta_q
-      W->Solve(*delta_q);
+      siconos::algebra::SiconosVector delta_q{*_p - residuFree};
+      // copy (p_{n+1,k+1} - r_{n+1,k}) to delta_q
+
+      delta_q = _dynamicalSystemsGraph->properties(*dsi).LUW->solve(delta_q);
+
       // Correction q_{n+1,k+1}, dotq_{n+1,k+1}, ddotq_{n+1,k+1}
-      *(d->q()) += *delta_q;  // q_{n+1,k+1} = q_{n+1,k} + delta_q
-      *(d->velocity()) +=
-          (gamma_prime / h) *
-          (*delta_q);  // dotq_{n+1,k+1} = dotq_{n+1,k} + (gamma_prime/h)*delta_q
+      *(d->q()) += delta_q;  // q_{n+1,k+1} = q_{n+1,k} + delta_q
+      *(d->velocity()) += (gamma_prime / h) *
+                          delta_q;  // dotq_{n+1,k+1} = dotq_{n+1,k} + (gamma_prime/h)*delta_q
       *(d->acceleration()) +=
           beta_prime / (h * h) *
-          (*delta_q);  // ddotq_{n+1,k+1} = ddotq_{n+1,k} + (beta_prime/h^2)*delta_q
+          delta_q;  // ddotq_{n+1,k+1} = ddotq_{n+1,k} + (beta_prime/h^2)*delta_q
       // a_{n+1,k+1} = a_{n+1,k} + ((1-alpha_f)/(1-alpha_m))*(beta_prime/h^2)*delta_q
 
-      acce_like += ((1 - _alpha_f) / (1 - _alpha_m)) * ((beta_prime / (h * h)) * (*delta_q));
+      acce_like += ((1 - newmark_[newmark_alpha::names::Alpha_f]) /
+                    (1 - newmark_[newmark_alpha::names::Alpha_m])) *
+                   ((beta_prime / (h * h)) * delta_q);
 
       DEBUG_PRINT("After correction : \n");
-      DEBUG_EXPR(d->q()->display(););
-      DEBUG_EXPR(d->velocity()->display(););
-      DEBUG_EXPR(d->acceleration()->display(););
-      DEBUG_EXPR(acce_like.display(););
+      DEBUG_EXPR(siconos::algebra::print(*d->q()););
+      DEBUG_EXPR(siconos::algebra::print(*d->velocity()););
+      DEBUG_EXPR(siconos::algebra::print(*d->acceleration()););
+      DEBUG_EXPR(siconos::algebra::print(acce_like););
     } else {
       THROW_EXCEPTION(
-          "In siconos::integrators::NewMarkAlphaOSI::updateState: this type of DS is not yet "
+          "In siconos::integrators::NewMarkAlphaOSI::updateState: this type of DS is not "
+          "yet "
           "implemented");
     }
   }
@@ -682,7 +668,8 @@ void siconos::integrators::NewMarkAlphaOSI::correction() {
 void siconos::integrators::NewMarkAlphaOSI::integrate(double& t_ini, double& t_end,
                                                       double& t_out, int& flag) {
   THROW_EXCEPTION(
-      "In siconos::integrators::NewMarkAlphaOSI::integrate, this method does nothing in the "
+      "In siconos::integrators::NewMarkAlphaOSI::integrate, this method does nothing in "
+      "the "
       "NewMarkAlpha OneStepIntegrator!!!");
 }
 
@@ -708,7 +695,8 @@ void siconos::integrators::NewMarkAlphaOSI::updateState(const unsigned int level
     }
   } else
     THROW_EXCEPTION(
-        "In siconos::integrators::NewMarkAlphaOSI::updateState, index is out of range. Index "
+        "In siconos::integrators::NewMarkAlphaOSI::updateState, index is out of range. "
+        "Index "
         "= " +
         std::to_string(level));
 }
@@ -727,9 +715,9 @@ void siconos::integrators::NewMarkAlphaOSI::computeCoefsDenseOutput(
     const siconos::algebra::SiconosVector &q_n(d->qMemory().getSiconosVector(0)),  // q_n
         dotq_n(d->velocityMemory().getSiconosVector(0)),                           // dotq_n
         // ddotq_n = d->workspace(DynamicalSystem::acce_memory); // ddotq_n
-        q_np1(*d->q()),                 // q_{n+1}
-        dotq_np1(*d->velocity()),       // dotq_{n+1}
-        ddotq_np1(*d->acceleration());  // ddotq_{n+1}
+        q_np1(d->q_read()),                 // q_{n+1}
+        dotq_np1(d->velocity_read()),       // dotq_{n+1}
+        ddotq_np1(d->acceleration_read());  // ddotq_{n+1}
 
     auto& ddotq_n = *ds_work_vectors[siconos::integrators::NewMarkAlphaOSI::ACCE_MEMORY];
 
@@ -737,67 +725,71 @@ void siconos::integrators::NewMarkAlphaOSI::computeCoefsDenseOutput(
         workMatrices[siconos::integrators::NewMarkAlphaOSI::DENSE_OUTPUT_COEFFICIENTS];
     // d->workMatrix(siconos::integrators::NewMarkAlphaOSI::DENSE_OUTPUT_COEFFICIENTS); //
     // matrix of coefficients [a0 a1 a2 a3 a4 a5]
-    if (_CoeffsDense->size(1) != 6) {
+    if (_CoeffsDense->cols() != 6) {
       THROW_EXCEPTION(
-          "In siconos::integrators::NewMarkAlphaOSI::computeCoefsDenseOutput: the number of "
-          "polynomial coeffcients considered here must equal to 6 (dense output polynomial of "
+          "In siconos::integrators::NewMarkAlphaOSI::computeCoefsDenseOutput: the number "
+          "of "
+          "polynomial coeffcients considered here must equal to 6 (dense output "
+          "polynomial "
+          "of "
           "order 5)");
     }
     // a0 = q_n
     (*_vec) = q_n;
-    _CoeffsDense->setCol(0, (*_vec));
-    DEBUG_EXPR(std::cout << "a0: "; _vec->display(););
+    _CoeffsDense->col(0) = (*_vec);
+    DEBUG_EXPR(std::cout << "a0: "; siconos::algebra::print(*_vec););
     // a1 = h*dotq_n
     (*_vec) = h * dotq_n;
-    _CoeffsDense->setCol(1, (*_vec));
-    DEBUG_EXPR(std::cout << "a1: "; _vec->display(););
+    _CoeffsDense->col(1) = (*_vec);
+    DEBUG_EXPR(std::cout << "a1: "; siconos::algebra::print(*_vec););
     // a2 = 0.5*h^2*ddotq_n
     (*_vec) = (0.5 * h * h) * ddotq_n;
-    _CoeffsDense->setCol(2, (*_vec));
-    DEBUG_EXPR(std::cout << "a2: "; _vec->display(););
+    _CoeffsDense->col(2) = (*_vec);
+    DEBUG_EXPR(std::cout << "a2: "; siconos::algebra::print(*_vec););
     // a3 = -10*q_n - 6*h*dotq_n - 1.5*h^2*ddotq_n + 10*q_{n+1} - 4*h*dotq_{n+1} +
     // 0.5*h^2*ddotq_{n+1}
     (*_vec) = (-10.0) * q_n - (6.0 * h) * dotq_n - (1.5 * h * h) * ddotq_n + 10.0 * q_np1 -
               (4.0 * h) * dotq_np1 + (0.5 * h * h) * ddotq_np1;
-    _CoeffsDense->setCol(3, (*_vec));
-    DEBUG_EXPR(std::cout << "a3: "; _vec->display(););
+    _CoeffsDense->col(3) = (*_vec);
+    DEBUG_EXPR(std::cout << "a3: "; siconos::algebra::print(*_vec);)
     // a4 = 15*q_n + 8*h*dotq_n + 1.5*h^2*ddotq_n - 15*q_{n+1} + 7*h*dotq_{n+1} -
     // h^2*ddotq_{n+1}
     (*_vec) = 15.0 * q_n + (8.0 * h) * dotq_n + (1.5 * h * h) * ddotq_n - 15.0 * q_np1 +
               (7.0 * h) * dotq_np1 - h * h * ddotq_np1;
-    _CoeffsDense->setCol(4, (*_vec));
-    DEBUG_EXPR(std::cout << "a4: "; _vec->display(););
+    _CoeffsDense->col(4) = (*_vec);
+    DEBUG_EXPR(std::cout << "a4: "; siconos::algebra::print(*_vec);)
     // a5 = -6*q_n - 3*h*dotq_n - 0.5*h^2*ddotq_n + 6*q_{n+1} - 3*h*dotq_{n+1} +
     // 0.5*h^2*ddotq_{n+1}
     (*_vec) = (-6.0) * q_n - (3.0 * h) * dotq_n - (0.5 * h * h) * ddotq_n + 6.0 * q_np1 -
               (3.0 * h) * dotq_np1 + (0.5 * h * h) * ddotq_np1;
-    _CoeffsDense->setCol(5, (*_vec));
-    DEBUG_EXPR(std::cout << "a5: "; _vec->display(););
+    _CoeffsDense->col(5) = (*_vec);
+    DEBUG_EXPR(std::cout << "a5: "; siconos::algebra::print(*_vec);)
     //
 #ifdef DEBUG_NEWMARK
-    std::cout
-        << "==================== In "
-           "siconos::integrators::NewMarkAlphaOSI::computeCoefsDenseOutput ================"
-        << std::endl;
+    std::cout << "==================== In "
+                 "siconos::integrators::NewMarkAlphaOSI::computeCoefsDenseOutput "
+                 "================"
+              << std::endl;
     std::cout << "DS number: " << ds->number() << std::endl;
     std::cout << "q_n: ";
-    q_n->display();
+    siconos::algebra::print(*q_n);
     std::cout << "dotq_n: ";
-    dotq_n->display();
+    siconos::algebra::print(*dotq_n);
     std::cout << "ddotq_n: ";
-    ddotq_n->display();
+    siconos::algebra::print(*ddotq_n);
     std::cout << "q_n+1: ";
-    q_np1->display();
+    siconos::algebra::print(*q_np1);
     std::cout << "dotq_n+1: ";
-    dotq_np1->display();
+    siconos::algebra::print(*dotq_np1);
     std::cout << "ddotq_n+1: ";
-    ddotq_np1->display();
+    siconos::algebra::print(*ddotq_np1);
     std::cout << "Dense output coefficient matrix: " << std::endl;
-    _CoeffsDense->display();
+    siconos::algebra::print(*_CoeffsDense);
 #endif
   } else {
     THROW_EXCEPTION(
-        "In siconos::integrators::NewMarkAlphaOSI::computeCoefsDenseOutput: this type of DS "
+        "In siconos::integrators::NewMarkAlphaOSI::computeCoefsDenseOutput: this type of "
+        "DS "
         "has not been implemented yet");
   }
 }
@@ -819,33 +811,18 @@ void siconos::integrators::NewMarkAlphaOSI::DenseOutputallDSs(double t) {
   auto t_np1 = _simulation->nextTime();
   auto h = t_np1 - t_n;
   auto theta = (t - t_n) / h;
-  auto _vec1 = std::make_shared<siconos::algebra::SiconosVector>(_orderDenseOutput + 1);
-  assert((_vec1->size() == 6) && "There are six coefficients of the dense output polynomial");
-  (*_vec1)(0) = 1.0;
-  (*_vec1)(1) = theta;
-  (*_vec1)(2) = std::pow(theta, 2);
-  (*_vec1)(3) = std::pow(theta, 3);
-  (*_vec1)(4) = std::pow(theta, 4);
-  (*_vec1)(5) = std::pow(theta, 5);
-  //
-  auto _vec2 = std::make_shared<siconos::algebra::SiconosVector>(_orderDenseOutput + 1);
-  assert((_vec2->size() == 6) && "There are six coefficients of the dense output polynomial");
-  (*_vec2)(0) = 0.0;
-  (*_vec2)(1) = 1.0 / h;
-  (*_vec2)(2) = (2.0 * theta) / h;
-  (*_vec2)(3) = (3.0 * std::pow(theta, 2)) / h;
-  (*_vec2)(4) = (4.0 * std::pow(theta, 3)) / h;
-  (*_vec2)(5) = (5.0 * std::pow(theta, 4)) / h;
-  //
-  auto _vec3 = std::make_shared<siconos::algebra::SiconosVector>(_orderDenseOutput + 1);
-  assert((_vec3->size() == 6) && "There are six coefficients of the dense output polynomial");
-  (*_vec3)(0) = 0.0;
-  (*_vec3)(1) = 0.0;
-  (*_vec3)(2) = 2.0 / std::pow(h, 2);
-  (*_vec3)(3) = (6.0 * theta) / std::pow(h, 2);
-  (*_vec3)(4) = (12.0 * std::pow(theta, 2)) / std::pow(h, 2);
-  (*_vec3)(5) = (20.0 * std::pow(theta, 3)) / std::pow(h, 2);
-  //
+  siconos::algebra::SiconosVector vec1{6};
+  vec1 << 1., theta, std::pow(theta, 2), std::pow(theta, 3), std::pow(theta, 4),
+      std::pow(theta, 5);
+
+  siconos::algebra::SiconosVector vec2{6};
+  vec2 << 0., 1. / h, (2.0 * theta) / h, (3.0 * std::pow(theta, 2)) / h,
+      (4.0 * std::pow(theta, 3)) / h, (5.0 * std::pow(theta, 4)) / h;
+
+  siconos::algebra::SiconosVector vec3{6};
+  vec3 << 0., 0., 2.0 / std::pow(h, 2), (6.0 * theta) / std::pow(h, 2),
+      (12.0 * std::pow(theta, 2)) / std::pow(h, 2),
+      (20.0 * std::pow(theta, 3)) / std::pow(h, 2);
 
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
   for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
@@ -856,17 +833,69 @@ void siconos::integrators::NewMarkAlphaOSI::DenseOutputallDSs(double t) {
     if (auto d = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
       auto& coeffsDense =
           *workMatrices[siconos::integrators::NewMarkAlphaOSI::DENSE_OUTPUT_COEFFICIENTS];
-      siconos::algebra::prod(coeffsDense, *_vec1, *(d->q()), true);  // q = Matrix_coeffs*_vec1
-      siconos::algebra::prod(coeffsDense, *_vec2, *(d->velocity()),
-                             true);  // dotq = Matrix_coeffs*_vec2
-      siconos::algebra::prod(coeffsDense, *_vec3, *(d->acceleration()),
-                             true);  // ddotq = Matrix_coeffs*_vec3
+      *d->q() = coeffsDense * vec1;
+      *d->velocity() = coeffsDense * vec2;      // vel = Matrix_coeffs*_vec2
+      *d->acceleration() = coeffsDense * vec3;  // ddotq = Matrix_coeffs*_vec3
     } else {
       THROW_EXCEPTION(
-          "In siconos::integrators::NewMarkAlphaOSI::DenseOutputallDSs: this type of DS has "
+          "In siconos::integrators::NewMarkAlphaOSI::DenseOutputallDSs: this type of DS "
+          "has "
           "not been implemented yet");
     }
   }
 }
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 void siconos::integrators::NewMarkAlphaOSI::display() const {}
+
+// --------------- Free functions  ---------------
+void siconos::integrators::newmark_alpha::computeIterationMatrix_Lagrangian(
+    double time, double time_step, const std::array<double, 4>& params,
+    siconos::modeling::LagrangianDS& lds,
+    Eigen::Ref<siconos::algebra::SiconosMatrix> iterationMatrix,
+    std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>& luw) {
+  // Compute W matrix of the Dynamical System ds, at time t and for the current
+  // ds state.
+
+  if (lds.isLinear()) return;  // Nothing: W does not depend on time.
+
+  if (time_step < 100 * siconos::internal::MACHINE_PREC)
+    THROW_EXCEPTION(
+        "In siconos::integrators::NewMarkAlphaOSI::computeIterationMatrix(t,ds), "
+        "integration time step is too small");
+  auto beta = params[0];
+  auto gamma = params[1];
+  auto alpha_m = params[2];
+  auto alpha_f = params[3];
+
+  auto gamma_prime = gamma / beta;
+  auto inv_time_step = 1. / time_step;
+  auto beta_prime = (1. - alpha_m) / ((1. - alpha_f) * beta) * inv_time_step * inv_time_step;
+
+  if (lds.hasMass()) {
+    lds.computeMass(lds.q_read());
+    iterationMatrix = lds.mass();
+  } else
+    iterationMatrix.setIdentity();
+
+  iterationMatrix *= beta_prime;
+
+  lds.computeJacobianTotalForcesOver_velocity(lds.velocity_read(), lds.q_read(), time);
+  if (lds.hasJacobianTotalForcesOver_velocity()) {
+    iterationMatrix -= gamma_prime * inv_time_step * lds.jacobianTotalForcesOver_velocity();
+  }
+
+  lds.computeJacobianTotalForcesOver_q(lds.velocity_read(), lds.q_read(), time);
+  if (lds.hasJacobianTotalForcesOver_q()) {
+    iterationMatrix -= lds.jacobianTotalForcesOver_q();
+  }
+
+  // LU Factorisation
+  luw = std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(iterationMatrix);
+
+  //
+#ifdef DEBUG_NEWMARK
+  std::cout.precision(15);
+  std::cout << "Iteration matrix W: ";
+  siconos::algebra::print(*W);
+#endif
+}

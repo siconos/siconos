@@ -43,8 +43,7 @@ struct nullDeleter {
     This should be avoided as much as possible ...
  */
 template <typename T>
-std::shared_ptr<T> createSPtr(T& input)
-{
+std::shared_ptr<T> createSPtr(T& input) {
   std::shared_ptr<T> px(&input, siconos::pointers::internal::nullDeleter());
   return px;
 }

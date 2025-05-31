@@ -82,10 +82,10 @@ function(set_install_path)
   set(PIP_INSTALL_OPTIONS_LOCAL)
   execute_process(COMMAND ${Python_EXECUTABLE} -c "import sys;print(sys.prefix != sys.base_prefix)" OUTPUT_VARIABLE IN_VENV)
   string(STRIP ${IN_VENV} IN_VENV)
+
   # Maybe conda or mamba or ...
   execute_process(COMMAND ${Python_EXECUTABLE} -c "import sys, os; print(os.path.exists(os.path.join(sys.prefix, 'conda-meta')))" OUTPUT_VARIABLE IN_CONDA)
   string(STRIP ${IN_CONDA} IN_CONDA)
-
   if(SICONOS_SYSTEM_WIDE_INSTALL)
     # Keep default CMAKE_INSTALL_PREFIX (/usr/local ...)
     # Get python install path
@@ -100,43 +100,48 @@ Since make/pip install must be run as root, possibly outside this env., this mig
     if(IN_VENV)
       execute_process(COMMAND ${Python_EXECUTABLE} -c "import sys;print(sys.path[-1])" OUTPUT_VARIABLE PY_INSTALL_DIR)
     else()
-      if(IN_CONDA AND DEFINED ENV{CONDA_PREFIX})
-	execute_process(COMMAND ${Python_EXECUTABLE} -c "import sys;print(sys.path[-1])" OUTPUT_VARIABLE PY_INSTALL_DIR)
-      else()
-	execute_process(COMMAND ${Python_EXECUTABLE} -m site --user-base OUTPUT_VARIABLE PY_INSTALL_DIR)
-      endif()
+      if(IN_CONDA)
+        if(NOT DEFINED ENV{CONDA_PREFIX} AND DEFINED CONDA_PREFIX)
+          set(ENV{CONDA_PREFIX} ${CONDA_PREFIX})
+        endif() 
+        if(DEFINED ENV{CONDA_PREFIX})
+	        execute_process(COMMAND ${Python_EXECUTABLE} -c "import sys;print(sys.path[-1])" OUTPUT_VARIABLE PY_INSTALL_DIR)
+        else()
+  	      execute_process(COMMAND ${Python_EXECUTABLE} -m site --user-base OUTPUT_VARIABLE PY_INSTALL_DIR)
+        endif()
+      endif() 
     endif()
 
     if(SICONOS_CUSTOM_INSTALL)
       set(CMAKE_INSTALL_PREFIX ${SICONOS_CUSTOM_INSTALL} CACHE PATH "Install root directory." FORCE)
       if(ISOLATED_INSTALL)
-	list(APPEND PIP_INSTALL_OPTIONS_LOCAL --prefix=${SICONOS_CUSTOM_INSTALL})
-	# Change python install path to custom
-	set(PY_INSTALL_DIR ${SICONOS_CUSTOM_INSTALL}/lib/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}/site-packages)
+	      list(APPEND PIP_INSTALL_OPTIONS_LOCAL --prefix=${SICONOS_CUSTOM_INSTALL})
+	      # Change python install path to custom
+	      set(PY_INSTALL_DIR ${SICONOS_CUSTOM_INSTALL}/lib/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}/site-packages)
       else()
-	set(CMAKE_INSTALL_PREFIX $ENV{HOME}/.siconos CACHE PATH "User install default directory" FORCE)
-	if(IN_VENV OR IN_CONDA)
-	else()
-	  # There, we need to append --user to pip command
-	  list(APPEND PIP_INSTALL_OPTIONS_LOCAL --user)
-	endif()
+	      set(CMAKE_INSTALL_PREFIX $ENV{HOME}/.siconos CACHE PATH "User install default directory" FORCE)
+	      if(IN_VENV OR IN_CONDA)
+	      else()
+	        # There, we need to append --user to pip command
+	        list(APPEND PIP_INSTALL_OPTIONS_LOCAL --user)
+	      endif()
       endif()
     else() # Default for any other cases
       # Are we in some kind of virtual env?
       if(IN_VENV)
-	if(DEFINED ENV{VIRTUAL_ENV})
-	  set(CMAKE_INSTALL_PREFIX $ENV{VIRTUAL_ENV} CACHE PATH "User install default directory" FORCE)
-	else()
-	  set(CMAKE_INSTALL_PREFIX $ENV{HOME}/.siconos CACHE PATH "User install default directory" FORCE)
-	endif()
+	      if(DEFINED ENV{VIRTUAL_ENV})
+	        set(CMAKE_INSTALL_PREFIX $ENV{VIRTUAL_ENV} CACHE PATH "User install default directory" FORCE)
+	      else()
+	        set(CMAKE_INSTALL_PREFIX $ENV{HOME}/.siconos CACHE PATH "User install default directory" FORCE)
+	      endif()
       else()
-	if(IN_CONDA AND DEFINED ENV{CONDA_PREFIX})
-	  set(CMAKE_INSTALL_PREFIX $ENV{CONDA_PREFIX} CACHE PATH "User install default directory" FORCE)
-	else()
-	  # There, we need to append --user to pip command
-	  list(APPEND PIP_INSTALL_OPTIONS_LOCAL --user)
-	  set(CMAKE_INSTALL_PREFIX $ENV{HOME}/.siconos CACHE PATH "User install default directory" FORCE)
-	endif()
+	      if(IN_CONDA AND DEFINED ENV{CONDA_PREFIX})
+          set(CMAKE_INSTALL_PREFIX $ENV{CONDA_PREFIX} CACHE PATH "User install default directory" FORCE)
+	      else()
+	        # There, we need to append --user to pip command
+	        list(APPEND PIP_INSTALL_OPTIONS_LOCAL --user)
+	        set(CMAKE_INSTALL_PREFIX $ENV{HOME}/.siconos CACHE PATH "User install default directory" FORCE)
+	      endif()
       endif()
     endif()
   endif()
@@ -148,4 +153,5 @@ Since make/pip install must be run as root, possibly outside this env., this mig
   # by swig and required by python will be installed.
   list(APPEND PIP_INSTALL_OPTIONS_LOCAL --no-build-isolation) # To allow siconos install when network is not available
   set(PIP_INSTALL_OPTIONS ${PIP_INSTALL_OPTIONS_LOCAL} CACHE STRING "Options passed to pip during installation." FORCE)
+
 endfunction()

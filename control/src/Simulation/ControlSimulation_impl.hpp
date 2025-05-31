@@ -107,7 +107,7 @@ static inline std::pair<unsigned, std::string> getNumberOfStates(siconos::graphs
  * \param data the matrix where to save the data
  * \return the last written column
  */
-static inline unsigned storeAllStates(unsigned indx, unsigned startColumn, siconos::graphs::DynamicalSystemsGraph& DSG0, InteractionsGraph& IG0, siconos::algebra::SimpleMatrix& data)
+static inline unsigned storeAllStates(unsigned indx, unsigned startColumn, siconos::graphs::DynamicalSystemsGraph& DSG0, InteractionsGraph& IG0, siconos::algebra::SiconosMatrix& data)
 {
   siconos::graphs::DynamicalSystemsGraph::VIterator dsvi, dsvdend;
   unsigned column = startColumn;

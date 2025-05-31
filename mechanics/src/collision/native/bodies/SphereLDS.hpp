@@ -33,42 +33,44 @@ class SphereLDS : public siconos::modeling::LagrangianDS,
  protected:
   ACCEPT_SERIALIZATION(SphereLDS);
 
-  double radius{0.};
-  double massValue{0.};
-  double I{0.};
+  double radius_{0.};
+  double massValue_{0.};
+  double inertia_{0.};
 
  public:
-  SphereLDS(double, double, std::shared_ptr<siconos::algebra::SiconosVector>,
-            std::shared_ptr<siconos::algebra::SiconosVector>);
+  /** constructor from initial state and velocity
+   *
+   *  \param R radius of the sphere
+   *  \param m mass of the sphere
+   *  \param position initial coordinates
+   *  \param velocity initial velocity
+   */
+
+  SphereLDS(double, double, Eigen::Ref<siconos::algebra::SiconosVector> position,
+            Eigen::Ref<siconos::algebra::SiconosVector> velocity);
 
   ~SphereLDS() noexcept = default;
+
+  /** to compute the mass matrix operator \f$ M(q) \f$
+   *
+   *  \param position q vector
+   */
+  void computeMass(const Eigen::Ref<const siconos::algebra::SiconosVector>& position) override;
 
   double getQ(unsigned int pos);
 
   double getVelocity(unsigned int pos);
 
-  inline double getMassValue() const { return massValue; };
+  inline double getMassValue() const { return massValue_; };
 
-  inline double getRadius() const { return radius; };
-
-  void computeMass() override;
-  void computeMass(std::shared_ptr<siconos::algebra::SiconosVector>) override
-  {
-    THROW_EXCEPTION("SphereLDS::computeMass(vector) - not implemented");
+  inline double getRadius() const { return radius_; };
+  virtual void acceptSP(modeling::dynamical_systems::Visitor& tourist) override {
+    tourist.visit(shared_from_this());
   }
-
-  void computeFGyr(std::shared_ptr<siconos::algebra::SiconosVector>,
-                   std::shared_ptr<siconos::algebra::SiconosVector>) override;
-
-  void computeFGyr() override;
-
-  void computeJacobianFGyrq() override;
-  void computeJacobianFGyrqDot() override;
-
-  void computeJacobianFGyrq(std::shared_ptr<siconos::algebra::SiconosVector>,
-                            std::shared_ptr<siconos::algebra::SiconosVector>) override;
-  void computeJacobianFGyrqDot(std::shared_ptr<siconos::algebra::SiconosVector>,
-                               std::shared_ptr<siconos::algebra::SiconosVector>) override;
+  virtual void accept(modeling::dynamical_systems::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 };
+
 }  // namespace siconos::collision::native::bodies
 #endif /* SphereLDS_h */

@@ -31,9 +31,8 @@ siconos::mechanics::occ::OccR::OccR(const ContactPoint& contact1, const ContactP
                                     const DistanceCalculator& distance_calculator)
     : NewtonEuler3DR(), _contact1{contact1}, _contact2{contact2}, dt{distance_calculator} {}
 
-void siconos::mechanics::occ::OccR::computeh(double time,
-                                             const siconos::algebra::BlockVector& q0,
-                                             siconos::algebra::SiconosVector& y) {
+void siconos::mechanics::occ::OccR::computeh(const siconos::algebra::BlockVector&,
+                                             Eigen::Ref<siconos::algebra::SiconosVector> y) {
   DEBUG_BEGIN(
       "siconos::mechanics::occ::OccR::computeh(double time, siconos::algebra::BlockVector& "
       "q0, "
@@ -58,23 +57,23 @@ void siconos::mechanics::occ::OccR::computeh(double time,
                distance.point2.X(), distance.point2.Y(), distance.point2.Z(),
                distance.normal.X(), distance.normal.Y(), distance.normal.Z());
 
-  _Pc1->setValue(0, distance.point1.X() + _offset1 * distance.normal.X());
-  _Pc1->setValue(1, distance.point1.Y() + _offset1 * distance.normal.Y());
-  _Pc1->setValue(2, distance.point1.Z() + _offset1 * distance.normal.Z());
-  _Pc2->setValue(0, distance.point2.X() - _offset2 * distance.normal.X());
-  _Pc2->setValue(1, distance.point2.Y() - _offset2 * distance.normal.Y());
-  _Pc2->setValue(2, distance.point2.Z() - _offset2 * distance.normal.Z());
+  (*_Pc1)(0) = distance.point1.X() + _offset1 * distance.normal.X();
+  (*_Pc1)(1) = distance.point1.Y() + _offset1 * distance.normal.Y();
+  (*_Pc1)(2) = distance.point1.Z() + _offset1 * distance.normal.Z();
+  (*_Pc2)(0) = distance.point2.X() - _offset2 * distance.normal.X();
+  (*_Pc2)(1) = distance.point2.Y() - _offset2 * distance.normal.Y();
+  (*_Pc2)(2) = distance.point2.Z() - _offset2 * distance.normal.Z();
 
-  _Nc->setValue(0, distance.normal.X());
-  _Nc->setValue(1, distance.normal.Y());
-  _Nc->setValue(2, distance.normal.Z());
+  (*_Nc)(0) = distance.normal.X();
+  (*_Nc)(1) = distance.normal.Y();
+  (*_Nc)(2) = distance.normal.Z();
 
   distance.value -= (_offset1 + _offset2);
 
-  y.setValue(0, distance.value);
+  y(0) = distance.value;
 
-  DEBUG_EXPR(y.display(););
-  DEBUG_EXPR(_Nc->display(););
+  DEBUG_EXPR(siconos::algebra::print(y););
+  DEBUG_EXPR(siconos::algebra::print(*_Nc););
   DEBUG_END(
       "siconos::mechanics::occ::OccR::computeh(double time, siconos::algebra::BlockVector& "
       "q0, "

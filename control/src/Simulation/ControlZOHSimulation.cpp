@@ -24,7 +24,7 @@
 #include "ControlZOHAdditionalTerms.hpp"
 #include "Event.hpp"
 #include "EventsManager.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "TimeStepping.hpp"
 #include "Topology.hpp"  //#define DEBUG_BEGIN_END_ONLY
 #include "ZeroOrderHoldOSI.hpp"
@@ -32,6 +32,7 @@
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"
+#include "SiconosException.hpp"
 
 siconos::control::ControlZOHSimulation::ControlZOHSimulation(double t0, double T, double h)
     : ControlSimulation(t0, T, h) {
@@ -87,6 +88,5 @@ void siconos::control::ControlZOHSimulation::run() {
   std::chrono::duration<double, std::milli> fp_s = end - start;
   _elapsedTime = fp_s.count();
 
-  _dataM->resize(k, _nDim + 1);
   DEBUG_END("void siconos::control::ControlZOHSimulation::run()\n");
 }

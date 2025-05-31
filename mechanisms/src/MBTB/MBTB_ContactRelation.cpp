@@ -33,7 +33,7 @@ siconos::mechanisms::MBTB_ContactRelation::MBTB_ContactRelation(
 }
 
 void siconos::mechanisms::MBTB_ContactRelation::computeh(
-    double time, const siconos::algebra::BlockVector& q0, siconos::algebra::SiconosVector& y) {
+    const siconos::algebra::BlockVector& q, Eigen::Ref<siconos::algebra::SiconosVector> y) {
   DEBUG_PRINT(
       "siconos::mechanisms::MBTB_ContactRelation::computeh(double time, "
       "BlockVector& q0, "
@@ -75,12 +75,12 @@ void siconos::mechanisms::MBTB_ContactRelation::computeh(
   // nz=-nz;
 
   if (_pContact->offset_to_P1()) {
-    _Pc1->setValue(0, X1 + _pContact->offset() * nx);
-    _Pc1->setValue(1, Y1 + _pContact->offset() * ny);
-    _Pc1->setValue(2, Z1 + _pContact->offset() * nz);
-    _Pc2->setValue(0, X2);
-    _Pc2->setValue(1, Y2);
-    _Pc2->setValue(2, Z2);
+    (*_Pc1)(0) = X1 + _pContact->offset() * nx;
+    (*_Pc1)(1) = Y1 + _pContact->offset() * ny;
+    (*_Pc1)(2) = Z1 + _pContact->offset() * nz;
+    (*_Pc2)(0) = X2;
+    (*_Pc2)(1) = Y2;
+    (*_Pc2)(2) = Z2;
     if (mbtb::data::sPrintDist) {
       printf(
           "    OffSet is added from contact point PC1 : newPC1 =  PC1 + "
@@ -88,12 +88,12 @@ void siconos::mechanisms::MBTB_ContactRelation::computeh(
       printf("    OffSet %lf\n ", _pContact->offset());
     }
   } else {
-    _Pc1->setValue(0, X1);
-    _Pc1->setValue(1, Y1);
-    _Pc1->setValue(2, Z1);
-    _Pc2->setValue(0, X2 - _pContact->offset() * nx);
-    _Pc2->setValue(1, Y2 - _pContact->offset() * ny);
-    _Pc2->setValue(2, Z2 - _pContact->offset() * nz);
+    (*_Pc1)(0) = X1;
+    (*_Pc1)(1) = Y1;
+    (*_Pc1)(2) = Z1;
+    (*_Pc2)(0) = X2 - _pContact->offset() * nx;
+    (*_Pc2)(1) = Y2 - _pContact->offset() * ny;
+    (*_Pc2)(2) = Z2 - _pContact->offset() * nz;
     if (mbtb::data::sPrintDist) {
       printf(
           "    OffSet is substracted from contact point PC2 : newPC1 =  PC2 - "
@@ -103,14 +103,14 @@ void siconos::mechanisms::MBTB_ContactRelation::computeh(
   }
   /** Because in CAD model, the normal is going outside of the body .*/
   /** V.A. 11/01/2012 Which Body ?  */
-  // _Nc->setValue(0,-nx);
-  // _Nc->setValue(1,-ny);
-  // _Nc->setValue(2,-nz);
+  // (*_Nc)(0) = -nx;
+  // (*_Nc)(1) = -ny;
+  // (*_Nc)(2) = -nz;
 
   DEBUG_EXPR(display(););
-  DEBUG_EXPR(_Nc->display(););
-  DEBUG_EXPR(_Pc1->display(););
-  DEBUG_EXPR(_Pc2->display(););
+  DEBUG_EXPR(siconos::algebra::print(*_Nc););
+  DEBUG_EXPR(siconos::algebra::print(*_Pc1););
+  DEBUG_EXPR(siconos::algebra::print(*_Pc2););
 
   ACE_times[ACE_TIMER_DIST].stop();
   /** V.A. Is the following lin always true ? */
@@ -120,25 +120,25 @@ void siconos::mechanisms::MBTB_ContactRelation::computeh(
   else
     _pContact->_dist += _pContact->offset();
 
-  _pContact->_curTimeh = time;
+  // _pContact->_curTimeh = time; Do we need this?
 
-  // y->setValue(0,_pContact->_dist);
+  // (*y)(0) = _pContact->_dist;
   if (mbtb::data::sPrintDist) {
     printf("    Gap : Signed contact distance after Offset correction : %lf \n",
            _pContact->_dist);
     printf("    Coordinates of contact points  after Offset corrections :\n");
-    _Pc1->display();
-    _Pc2->display();
+    siconos::algebra::print(*_Pc1);
+    siconos::algebra::print(*_Pc2);
     auto deltaPC(new siconos::algebra::SiconosVector(3));
     *deltaPC = *_Pc1 - *_Pc2;
-    double realdist = (deltaPC->norm2());
+    double realdist = (deltaPC->norm());
     printf("    Distance between contact points =%lf \n", realdist);
-    printf("    Normal vector: nx=%lf, ny=%lf, nz=%lf \n", _Nc->getValue(0), _Nc->getValue(1),
-           _Nc->getValue(2));
+    printf("    Normal vector: nx=%lf, ny=%lf, nz=%lf \n", (*_Nc)(0), (*_Nc)(1),
+           (*_Nc)(2));
   }
   //}
-  y.setValue(0, _pContact->_dist);
-  DEBUG_EXPR(y.display(););
+  y(0) = _pContact->_dist;
+  DEBUG_EXPR(siconos::algebra::print(y););
   if (mbtb::data::sPrintDist) {
     std::cout << "siconos::mechanisms::MBTB_ContactRelation::computeh End "
                  "display for contact named "
@@ -148,15 +148,15 @@ void siconos::mechanisms::MBTB_ContactRelation::computeh(
 
 /*This function has to compute a Normal, at the extremal point. It is also the
  * direction (P1,P2) between the two extremal points*/
-// void siconos::mechanisms::MBTB_ContactRelation::computeJachq(double time ){
+// void siconos::mechanisms::MBTB_ContactRelation::computeJacobianhOver_q(double time ){
 
-//   _jachq->setValue(0,0,-_pContact->_nX);
-//   _jachq->setValue(0,1,-_pContact->_nY);
-//   _jachq->setValue(0,2,-_pContact->_nZ);
+//   jacobianhOver_q_->setValue(0,0,-_pContact->_nX);
+//   jacobianhOver_q_->setValue(0,1,-_pContact->_nY);
+//   jacobianhOver_q_->setValue(0,2,-_pContact->_nZ);
 //   if (_pContact->_indexBody2!=-1){
-//     _jachq->setValue(0,7,_pContact->_nX);
-//     _jachq->setValue(0,8,_pContact->_nY);
-//     _jachq->setValue(0,9,_pContact->_nZ);
+//     jacobianhOver_q_->setValue(0,7,_pContact->_nX);
+//     jacobianhOver_q_->setValue(0,8,_pContact->_nY);
+//     jacobianhOver_q_->setValue(0,9,_pContact->_nZ);
 //   }
 //   auto BlockX
 //   =boost::static_pointer_cast<BlockVector>((data[q0])); for (int
@@ -165,29 +165,29 @@ void siconos::mechanisms::MBTB_ContactRelation::computeh(
 //       continue;
 //     double sign = -1.0;
 //     auto q=(BlockX->getAllVect())[iDS];
-//     //      printf("ds%d->q :",iDS);q->display();
+//     //      printf("ds%d->q :",iDS);siconos::algebra::print(*q);
 //     ::boost::math::quaternion<float>    quatGP;
 //     if (iDS==0){
 //       ::boost::math::quaternion<float>
-//       quatAux(0,_pContact->_X1-q->getValue(0),_pContact->_Y1-q->getValue(1),_pContact->_Z1-q->getValue(2));
+//       quatAux(0,_pContact->_X1-(*q)(0),_pContact->_Y1-(*q)(1),_pContact->_Z1-(*q)(2));
 //       quatGP=quatAux;
 //     }else{
 //       sign=1.0;
 //       ::boost::math::quaternion<float>
-//       quatAux(0,_pContact->_X2-q->getValue(0),_pContact->_Y2-q->getValue(1),_pContact->_Z2-q->getValue(2));
+//       quatAux(0,_pContact->_X2-(*q)(0),_pContact->_Y2-(*q)(1),_pContact->_Z2-(*q)(2));
 //       quatGP=quatAux;
 //     }
 //     //      printf("GP :%lf, %lf,
 //     %lf\n",quatGP.R_component_2(),quatGP.R_component_3(),quatGP.R_component_4());
 //     ::boost::math::quaternion<float>
-//     quatQ(q->getValue(3),q->getValue(4),q->getValue(5),q->getValue(6));
+//     quatQ((*q)(3),(*q)(4),(*q)(5),(*q)(6));
 //     ::boost::math::quaternion<float>
-//     quatcQ(q->getValue(3),-q->getValue(4),-q->getValue(5),-q->getValue(6));
+//     quatcQ((*q)(3),-(*q)(4),-(*q)(5),-(*q)(6));
 //     ::boost::math::quaternion<float>    quat0(1,0,0,0);
 //     ::boost::math::quaternion<float>    quatBuff;
 //     quatBuff =
 //     quat0*(quatcQ*quatGP*quatQ)*quatcQ+quatQ*(quatcQ*quatGP*quatQ)*quat0;
-//     _jachq->setValue(0,7*iDS+3, sign*(quatBuff.R_component_2()*_pContact->_nX
+//     jacobianhOver_q_->setValue(0,7*iDS+3, sign*(quatBuff.R_component_2()*_pContact->_nX
 //     + quatBuff.R_component_3()*_pContact->_nY +
 //     quatBuff.R_component_4()*_pContact->_nZ)); for (int i=1;i<4;i++){
 //       ::boost::math::quaternion<float>
@@ -198,15 +198,15 @@ void siconos::mechanisms::MBTB_ContactRelation::computeh(
 //       //	       (quatBuff.R_component_2()*sOCCContacts[_indexContact]._nX
 //       + quatBuff.R_component_3()*sOCCContacts[_indexContact]._nY +
 //       quatBuff.R_component_4()*sOCCContacts[_indexContact]._nZ));
-// 	_jachq->setValue(0,7*iDS+3+i,
+// 	jacobianhOver_q_->setValue(0,7*iDS+3+i,
 // sign*(quatBuff.R_component_2()*_pContact->_nX +
 // quatBuff.R_component_3()*_pContact->_nY +
 // quatBuff.R_component_4()*_pContact->_nZ));
 //     }
 //   }
-//   //    printf("computeJachq :");_jachq->display();
+//   //    printf("computeJachq :");siconos::algebra::print(*jacobianhOver_q_);
 //   //    printf("q1dot :
-//   ");sOCCContacts[_indexContact]._DS1->dotq()->display();
+//   ");siconos::algebra::print(*sOCCContacts[_indexContact]._DS1->dotq());
 //   //    printf("q2dot :
-//   ");sOCCContacts[_indexContact]._DS2->dotq()->display();
+//   ");siconos::algebra::print(*sOCCContacts[_indexContact]._DS2->dotq());
 // }

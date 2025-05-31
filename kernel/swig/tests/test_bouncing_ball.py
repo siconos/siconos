@@ -32,7 +32,7 @@ def test_bouncing_ball1(datafile):
     # set external forces
     weight = np.zeros_like(x)
     weight[0] = -m * g
-    ball.setFExtPtr(weight)
+    ball.setConstantFext(weight)
 
     #
     # Interactions
@@ -318,20 +318,19 @@ def test_bouncing_ball2():
     ball = sk.LagrangianLinearTIDS(x, v, mass)
     weight = np.zeros(ball.dimension())
     weight[0] = -m * g
-    ball.setFExtPtr(weight)
+    ball.setConstantFext(weight)
 
-    # a ball with its own computeFExt
+    # a ball with its own computeFext
     class Ball(sk.LagrangianLinearTIDS):
-        def computeFExt(self, t):
+        def computeFext(self, t):
             """External forces operator computation"""
             print("computing FExt at t=", t)
-            # self._fExt[0] = -m * g
             weight = np.zeros(self.dimension())
             weight[0] = -m * g
-            self.setFExtPtr(weight)
+            self.setConstantFext(weight)
 
     ball_d = Ball(x.copy(), v.copy(), mass)
-    ball_d.computeFExt(t0)
+    ball_d.computeFext(t0)
 
     run_simulation_with_two_ds(ball, ball_d, t0)
 
@@ -360,20 +359,19 @@ def test_bouncing_ball3():
     ball = sk.LagrangianLinearTIDS(x, v, mass)
     weight = np.zeros(ball.dimension())
     weight[0] = -m * g
-    ball.setFExtPtr(weight)
+    ball.setConstantFext(weight)
 
-    # a ball with its own computeFExt
+    # a ball with its own computeFext
     class Ball(sk.LagrangianDS):
-        def computeFExt(self, t):
+        def computeFext(self, t):
             """External forces operator computation"""
             print("computing FExt at t=", t)
-            # self._fExt[0] = -m * g
             weight = np.zeros(self.dimension())
             weight[0] = -m * g
-            self.setFExtPtr(weight)
+            self.setConstantFext(weight)
 
     ball_d = Ball(x.copy(), v.copy(), mass)
-    ball_d.computeFExt(t0)
+    ball_d.computeFext(t0)
 
     run_simulation_with_two_ds(ball, ball_d, t0)
 
@@ -401,27 +399,27 @@ def test_bouncing_ball4():
     ball = sk.LagrangianLinearTIDS(x, v, mass)
 
     stiffness = np.eye(3, dtype=np.float64)
-    ball.setKPtr(stiffness)
+    ball.setStiffnessMatrix(stiffness)
     weight = np.zeros(ball.dimension())
     weight[0] = -m * g
-    # ball.setFExtPtr(weight)
+    # ball.setConstantFext(weight)
 
-    # a ball with its own computeFExt
+    # a ball with its own computeFext
     class Ball(sk.LagrangianLinearTIDS):
         def __init__(self, x, v, mass, stiffness):
             sk.LagrangianLinearTIDS.__init__(self, x, v, mass)
-            self.setKPtr(stiffness)
+            self.setStiffnessMatrix(stiffness)
 
-        def computeFExt(self, t):
+        def computeFext(self, t):
             """External forces operator computation"""
             print("computing FExt at t=", t)
             # self._fExt[0] = -m * g
             weight = np.zeros(self.dimension())
             weight[0] = -m * g
-            # self.setFExtPtr(weight)
+            # self.setConstantFext(weight)
 
     ball_d = Ball(x.copy(), v.copy(), mass, stiffness)
-    ball_d.computeFExt(t0)
+    ball_d.computeFext(t0)
     run_simulation_with_two_ds(ball, ball_d, t0)
 
 

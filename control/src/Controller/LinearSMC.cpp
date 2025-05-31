@@ -20,10 +20,10 @@
 
 #include "ControlSensor.hpp"
 #include "FirstOrderLinearDS.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixOp.hpp"
 #include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
 #include "TimeStepping.hpp"
 // #define DEBUG_WHERE_MESSAGES
 //  #define DEBUG_NOCOLOR
@@ -36,8 +36,8 @@ siconos::control::LinearSMC::LinearSMC(std::shared_ptr<ControlSensor> sensor,
     : CommonSMC(type, sensor) {}
 
 siconos::control::LinearSMC::LinearSMC(std::shared_ptr<ControlSensor> sensor,
-                                       std::shared_ptr<siconos::algebra::SimpleMatrix> B,
-                                       std::shared_ptr<siconos::algebra::SimpleMatrix> D,
+                                       std::shared_ptr<siconos::algebra::SiconosMatrix> B,
+                                       std::shared_ptr<siconos::algebra::SiconosMatrix> D,
                                        ActuatorType type)
     : CommonSMC(type, sensor, B, D) {}
 
@@ -48,10 +48,12 @@ void siconos::control::LinearSMC::actuate() {
     computeUeq();
     auto& LinearDS_SMC =
         *std::static_pointer_cast<siconos::modeling::FirstOrderLinearDS>(_DS_SMC);
-    siconos::algebra::prod(*_B, *_ueq, *(LinearDS_SMC.b()));
+    bSMC_.resize(_ueq->size());
+    bSMC_ = *_B * *_ueq;
+    LinearDS_SMC.setConstantbVector(bSMC_);  // Shared memory view
   }
 
-  DEBUG_EXPR(_DS_SMC->xMemory().display(););
+  DEBUG_EXPR(siconos::algebra::print(_DS_SMC->xMemory()););
 
   *(_DS_SMC->x()) = _sensor->y();
 
@@ -59,21 +61,21 @@ void siconos::control::LinearSMC::actuate() {
   _DS_SMC->xMemory().getSiconosVectorMutable(0) = _sensor->y();
 
   if (not std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(_DS_SMC)) {
-    _DS_SMC->computef(_simulationSMC->startingTime(), _DS_SMC->x());
+    _DS_SMC->computefVector(*_DS_SMC->x(), _simulationSMC->startingTime());
     _DS_SMC->swapInMemory();
-    //    _DS_SMC->computef(_simulationSMC->startingTime());
-    //    *_DS_SMC->fold() = *_DS_SMC->f();
   }
 
   _simulationSMC->computeOneStep();
   //  if (_indx > 0)
-  { _simulationSMC->nextStep(); }
+  {
+    _simulationSMC->nextStep();
+  }
 
   // discontinous part
   *_us = *_lambda;
   *_u = *_us;
   *_u += *_ueq;
-  DEBUG_EXPR(_u->display(););
+  DEBUG_EXPR(siconos::algebra::print(*_u));;
   _indx++;
   DEBUG_END("void siconos::control::LinearSMC::actuate()\n")
 }

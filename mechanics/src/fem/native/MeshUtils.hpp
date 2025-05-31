@@ -22,12 +22,10 @@
 #ifndef MESHUTILS_H
 #define MESHUTILS_H
 
+#include "SiconosVector.hpp"
 #include <memory>
 #include <string>
 
-namespace siconos::algebra {
-class SiconosVector;
-}
 
 namespace siconos::mechanics::fem {
 

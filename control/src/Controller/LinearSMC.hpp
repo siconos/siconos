@@ -59,8 +59,8 @@ class LinearSMC : public CommonSMC {
    *  \param type do not set this yourself ! this is used in derived classes
    */
   LinearSMC(std::shared_ptr<ControlSensor> sensor,
-            std::shared_ptr<siconos::algebra::SimpleMatrix> B,
-            std::shared_ptr<siconos::algebra::SimpleMatrix> D = nullptr,
+            std::shared_ptr<siconos::algebra::SiconosMatrix> B,
+            std::shared_ptr<siconos::algebra::SiconosMatrix> D = nullptr,
             ActuatorType type = ActuatorType::LinearSMC);
 
   /** destructor
@@ -77,7 +77,7 @@ class LinearSMC : public CommonSMC {
    *
    *  \param D the new D matrix
    */
-  inline void setDPtr(std::shared_ptr<siconos::algebra::SimpleMatrix> D) { _D = D; };
+  inline void setDPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> D) { _D = D; };
 };
 // Register the observer into the factory
 static ActuatorRegistration<LinearSMC> reg_ALSMC(ActuatorType::LinearSMC);

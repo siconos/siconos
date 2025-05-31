@@ -14,20 +14,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef __FirstOrderLinearTIRTest__
 #define __FirstOrderLinearTIRTest__
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "NonSmoothDynamicalSystem.hpp"
+
 #include "FirstOrderLinearTIR.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
 
-class FirstOrderLinearTIRTest : public CppUnit::TestFixture
-{
-
-private:
+class FirstOrderLinearTIRTest : public CppUnit::TestFixture {
+ private:
   ACCEPT_SERIALIZATION(FirstOrderLinearTIRTest);
-
 
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(FirstOrderLinearTIRTest);
@@ -35,54 +33,21 @@ private:
   // tests to be done ...
 
   CPPUNIT_TEST(testBuildFirstOrderLinearTIR1);
-  CPPUNIT_TEST(testBuildFirstOrderLinearTIR2);
-  //  CPPUNIT_TEST(testSetC);
-  CPPUNIT_TEST(testSetCPtr);
-  //  CPPUNIT_TEST(testSetD);
-  CPPUNIT_TEST(testSetDPtr);
-  //  CPPUNIT_TEST(testSetF);
-  CPPUNIT_TEST(testSetFPtr);
-  //  CPPUNIT_TEST(testSetE);
-  CPPUNIT_TEST(testSetEPtr);
-  //  CPPUNIT_TEST(testSetB);
-  CPPUNIT_TEST(testSetBPtr);
-  //  CPPUNIT_TEST(testGetJac);
-  CPPUNIT_TEST(testGetJacPtr);
 
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
 
-  void testBuildFirstOrderLinearTIR0();
   void testBuildFirstOrderLinearTIR1();
-  void testBuildFirstOrderLinearTIR2();
-  //  void testSetC();
-  void testSetCPtr();
-  //  void testSetD();
-  void testSetDPtr();
-  //  void testSetF();
-  void testSetFPtr();
-  //  void testSetE();
-  void testSetEPtr();
-  //  void testSetB();
-  void testSetBPtr();
-  //  void testGetJac();
-  void testGetJacPtr();
 
   // Members
 
-  std::shared_ptr<siconos::algebra::SimpleMatrix> C, B, F, D;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> C, B, D;
   std::shared_ptr<siconos::algebra::SiconosVector> e;
-  std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> nsds;
 
-public:
+ public:
   void setUp();
   void tearDown();
-
 };
 
 #endif
-
-
-
-

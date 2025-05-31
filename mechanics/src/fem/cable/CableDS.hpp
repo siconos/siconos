@@ -41,7 +41,7 @@ namespace siconos::fem::cable {
   system, that is \f$ F(v, q, t, z) =  F_{ext}(t) -  F_{int}(v, q , t) \f$
 
 
-  This vector is saved and may be accessed using forces() method.
+  This vector is saved and may be accessed using totalForces() method.
 
   Todo: check and update doc and comments.
 
@@ -50,21 +50,16 @@ namespace siconos::fem::cable {
 */
 class CableDS : public siconos::modeling::LagrangianDS {
  protected:
-  // Proto for functions used to compute external forces
-  using ExternalForcesFunction =
-      std::function<void(double, std::shared_ptr<siconos::algebra::SiconosVector>)>;
+  double EA_{1};
+  double l_e_{1};
 
-  ExternalForcesFunction computefext_{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> TRNp_Np{nullptr};
 
-  double _EA{1};
-  double _l_e{1};
-
-  std::shared_ptr<siconos::algebra::SimpleMatrix> TRNp_Np{nullptr};
-
-  void matmult(const std::shared_ptr<siconos::algebra::SiconosVector> &V, size_t a_startIdx,
-               std::shared_ptr<siconos::algebra::SiconosVector> &R);
-  void matmult2(const std::shared_ptr<siconos::algebra::SiconosVector> &V,
-                std::shared_ptr<siconos::algebra::SimpleMatrix> &R);
+  void matmult(const Eigen::Ref<const siconos::algebra::SiconosVector> &V,
+               siconos::algebra::SiconosSize_t a_startIdx,
+               Eigen::Ref<siconos::algebra::SiconosVector> R);
+  void matmult2(const Eigen::Ref<const siconos::algebra::SiconosVector> &V,
+                Eigen::Ref<siconos::algebra::SiconosMatrix> R);
 
   CableDS() = delete;
   CableDS(const CableDS &) = delete;
@@ -73,10 +68,9 @@ class CableDS : public siconos::modeling::LagrangianDS {
   CableDS &operator=(CableDS &&) = delete;
 
  public:
-  CableDS(std::shared_ptr<siconos::algebra::SiconosVector> q0,
-          std::shared_ptr<siconos::algebra::SiconosVector> velocity0,
-          std::shared_ptr<siconos::algebra::SiconosMatrix> mass, double a_EA,
-          double a_elem_length, ExternalForcesFunction fext = nullptr);
+  CableDS(Eigen::Ref<siconos::algebra::SiconosVector> q0,
+          Eigen::Ref<siconos::algebra::SiconosVector> velocity0,
+          Eigen::Ref<siconos::algebra::SiconosMatrix> mass, double a_EA, double a_elem_length);
 
   ~CableDS() noexcept = default;
 
@@ -85,23 +79,29 @@ class CableDS : public siconos::modeling::LagrangianDS {
   // This function will be called by the integrator at each time
   // step to update  \f$ F(v, q, t, z) \f$
   // --> takes into account fInt and fext
-  void computeForces(double time, std::shared_ptr<siconos::algebra::SiconosVector> q,
-                     std::shared_ptr<siconos::algebra::SiconosVector> velocity) override;
+  void computeTotalForces(const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
+                          const Eigen::Ref<const siconos::algebra::SiconosVector> &q,
+                          double time) override;
 
   // \f$ \nabla_q F \f$
-  void computeJacobianqForces(double time) override;
+  void computeJacobianTotalForcesOver_q(
+      const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
+      const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time) override;
 
   // \f$ \nabla_v F \f$
-  void computeJacobianvForces(double time) override;
+  void computeJacobianTotalForcesOver_velocity(
+      const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
+      const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time) override;
 
-  //
-  void computeFExt(double time) override;
-
-  void tangentStiffnessMatrix(std::shared_ptr<siconos::algebra::SiconosVector> q);
+  void tangentStiffnessMatrix(const Eigen::Ref<const siconos::algebra::SiconosVector> q);
   void dampingMatrix();
   // + some access op to be added later, if required
 
-  std::shared_ptr<siconos::algebra::SimpleMatrix> TRNp_NpMatrix();
+  std::shared_ptr<siconos::algebra::SiconosMatrix> TRNp_NpMatrix();
+
+  virtual void accept(modeling::dynamical_systems::Visitor &tourist) const override {
+    tourist.visit(*this);
+  }
 };
 }  // namespace siconos::fem::cable
 

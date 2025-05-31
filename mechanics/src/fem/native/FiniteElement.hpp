@@ -60,7 +60,7 @@ class FElement {
   FiniteElementFamily _family{FiniteElementFamily::isoparametric};
 
   /** number of dof by Element  */
-  unsigned _ndof{6};
+  unsigned ndof_{6};
 
   /** nodes */
   std::vector<std::shared_ptr<FENode>> _nodes = {};
@@ -84,7 +84,7 @@ class FElement {
 
   ~FElement() noexcept = default;
 
-  auto ndof() { return _ndof; }
+  auto ndof() { return ndof_; }
   auto num() { return _num; }
 
   auto mElement() { return _mElement; }

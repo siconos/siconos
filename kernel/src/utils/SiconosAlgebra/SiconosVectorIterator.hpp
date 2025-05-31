@@ -26,7 +26,7 @@
 
 namespace siconos::algebra {
 
-class SiconosVector;
+// class SiconosVector;
 
 /** Iterator for SiconosVector covering both possible types. */
 template <typename V, typename T, typename TRef>

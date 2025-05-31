@@ -161,7 +161,7 @@ false, "+=".
    
    v->size() // return the size of the vector
    m->size(0); // number of rows in the matrix
-   m->size(1), // number of columns
+   m->cols(), // number of columns
    m->resize(a,b); // resize m, available also for vectors
 
    // To compute C = A*B
@@ -177,11 +177,11 @@ false, "+=".
    SimpleVector w(4);  			 // w = [0 0 0 0]
    (*v)(0) = 4;				 // v = [4 0 0] 
    // equivalent to:
-   v->setValue(0,4); 
+   (*v)(0) = 4; 
    w(1) = 2;
    w(2) = (*v)(0);				 // w = [0 2 4 0]
    // equivalent to:
-   w.setValue( 2,v->getValue(0) );
+   w( 2) = v(0) ;
 
    auto M = std::make_shared<siconos::algebra::SiconosMatrix>(3,3); // M = [ 0 0 0 ]
                                                //     [ 0 0 0 ]
@@ -194,7 +194,7 @@ false, "+=".
 					   //     [  0  0 2.0 ]
 					   //     [ 3.6 0  0  ]
 	
-   cout << P.getValue(0,1); // display 12.0
+   cout << P(0, 1); // display 12.0
 
 Note: for sparse matrices, assignment with operator "()" fails. It is then necessary to use setValue function.
 
@@ -209,7 +209,7 @@ For BlockVector: "()" and get/setValue functions have the same action as for Sim
   // We suppose that v1 and v2 are two pointers to SimpleVector of size 3 and 4.
   auto vB = std::make_shared<siconos::algebra::BlockVector>(v1,v2); // vB = [ [1 2 3] [4 5 6 7] ]
   (*vB)(4) = 12; 				      // vB = [ [1 2 3] [4 12 6 7] ]
-  vB->setValue(6,8.6); 		              // vB = [ [1 2 3] [4 12 6 8.6] ]	
+  (*vB)(6) = 8.6; 		              // vB = [ [1 2 3] [4 12 6 8.6] ]	
   // Warning: the given input for position is an "absolute" one, not a block position.
 
 Remark: get/setValue functions are equivalent to "()" operator but mainly useful in Siconos-Python, since in that case operators can not be overloaded and thus
@@ -220,7 +220,7 @@ Remark: get/setValue functions are equivalent to "()" operator but mainly useful
    // Set vector or matrix to zero or identity
    x->zero();
    A->zero();
-   A->eye(); 
+   A->setIdentity(); 
 
    // Assignment of vectors or matrices: "A = B" or "x = y"
    // Operator =

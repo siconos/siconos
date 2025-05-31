@@ -25,22 +25,13 @@
 #include "Simulation.hpp"
 #include "TypeName.hpp"  // check nslaw type, should be replaced by dynamic_cast or variant ?
 
-siconos::nonsmooth_formulations::Equality::Equality(int numericsSolverId) : LinearOSNS()
-//:
-// Equality(std::shared_ptr<SolverOptions>(solver_options_create(numericsSolverId),
-//                            solver_options_delete))
-{
-}
+siconos::nonsmooth_formulations::Equality::Equality(int numericsSolverId) {}
 
-siconos::nonsmooth_formulations::Equality::Equality(
-    std::shared_ptr<SolverOptions> options)
-    : LinearOSNS(options)
-{
-}
+siconos::nonsmooth_formulations::Equality::Equality(std::shared_ptr<SolverOptions> options)
+    : LinearOSNS(options) {}
 
 bool siconos::nonsmooth_formulations::Equality::checkCompatibleNSLaw(
-    siconos::modeling::NonSmoothLaw& nslaw)
-{
+    siconos::modeling::NonSmoothLaw& nslaw) {
   float type_number = (float)(siconos::types::type_value(nslaw));
   _nslawtype.insert(type_number);
 
@@ -55,8 +46,7 @@ bool siconos::nonsmooth_formulations::Equality::checkCompatibleNSLaw(
 
   return true;
 }
-int siconos::nonsmooth_formulations::Equality::compute(double time)
-{
+int siconos::nonsmooth_formulations::Equality::compute(double time) {
   int info = 0;
   // --- Prepare data for EQUALITY computing ---
   bool cont = preCompute(time);
@@ -70,8 +60,8 @@ int siconos::nonsmooth_formulations::Equality::compute(double time)
   // - the global options for Numerics (verbose mode ...)
 
   if (_sizeOutput != 0) {
-    auto* q_ = q()->getArray();
-    auto* z_ = _z->getArray();
+    auto* q_ = q()->data();
+    auto* z_ = _z->data();
     for (decltype(_sizeOutput) i = 0; i < _sizeOutput; ++i) z_[i] = -q_[i];
     // info = NM_gesv(&*_M->numericsMatrix(), z_, true);
     // info =
@@ -87,16 +77,14 @@ int siconos::nonsmooth_formulations::Equality::compute(double time)
 }
 
 void siconos::nonsmooth_formulations::Equality::initialize(
-    std::shared_ptr<siconos::simulation::Simulation> sim)
-{
+    std::shared_ptr<siconos::simulation::Simulation> sim) {
   // General initialize for LinearOSNS
   LinearOSNS::initialize(sim);
   // auto indexSet = simulation()->indexSet(levelMin());
   //_M = std::make_shared<OSNSMatrix>(indexSet,_numericsMatrixStorageType));
 }
 
-void siconos::nonsmooth_formulations::Equality::updateM()
-{
+void siconos::nonsmooth_formulations::Equality::updateM() {
   assert(0);
   // Get index set from Simulation
   auto& indexSet = *simulation()->indexSet(indexSetLevel());
@@ -104,16 +92,14 @@ void siconos::nonsmooth_formulations::Equality::updateM()
   if (!_M) {
     // Creates and fills M using Interactionof indexSet
     _M = std::make_shared<OSNSMatrix>(indexSet, _numericsMatrixStorageType);
-  }
-  else {
+  } else {
     _M->setStorageType(_numericsMatrixStorageType);
     _M->fillM(indexSet);
   }
   _sizeOutput = _M->size();
 }
 
-void siconos::nonsmooth_formulations::Equality::display() const
-{
+void siconos::nonsmooth_formulations::Equality::display() const {
   std::cout << "======= EQUALITY of size " << _sizeOutput << " with: \n";
   LinearOSNS::display();
 }

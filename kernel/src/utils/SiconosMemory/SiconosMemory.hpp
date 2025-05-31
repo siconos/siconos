@@ -28,11 +28,12 @@
 #include <vector>
 
 #include "SiconosSerialization.hpp"  // For ACCEPT_SERIALIZATION
+#include "SiconosVector.hpp"
 #include "SiconosVector.hpp"  // Required because of inheritance. Works without this with gnu compilers, but not with clang (?)
 
 namespace siconos::algebra {
 
-class SiconosVector;
+// class SiconosVector;
 
 /**
    Interface to stl container of SiconosVector.
@@ -132,11 +133,13 @@ class SiconosMemory : public std::vector<siconos::algebra::SiconosVector> {
    * is null
    */
   void swap(std::shared_ptr<siconos::algebra::SiconosVector> v);
-
-  /** displays the data of the memory object
-   */
-  void display() const;
 };
+
+// Free functions
+
+/** displays the data of the memory object */
+void print(const SiconosMemory&);
+
 }  // namespace siconos::algebra
 
 #endif

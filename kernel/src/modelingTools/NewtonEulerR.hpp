@@ -30,145 +30,113 @@ namespace siconos::modeling {
 class DynamicalSystem;
 
 /**
-    NewtonEuler (Non Linear) Relation (generic interface)
+   NewtonEuler (Non Linear) Relation (generic interface), with
 
-    Relations for NewtonEuler Dynamical Systems. This class is only an
-    interface for specific (Linear, Scleronomous ...)  NewtonEuler
-    Relations (see derived classes).
+   \f[
+        y &=& H_NE.q + e \\
+        \dot y &=& H_{NE}.Tv \\
 
-    Class name = type+subType.
+        R = (H_{NE}.T)\top \lambda
+   \f]
 
-    If y = h(...), all the gradients of are handled by G object.
-    For example, G[0] = \f$ \nabla_q h(q,...) \f$.
+    Up to now, We are only considering holonomic relations.
 
-    In corresponding derived classes, h and Gi are connected to plug-in functions
-    (user-defined). For more details, see the DevNotes.pdf, chapter NewtonEuler.
-*/
+  The following operators can be set by a user-defined function:
+
+   - \f$ \frac{\partial }{\partial t} H_{NE} \f$
+
+  Storage:
+
+    - for \f$ H_NE \f$:
+          - shared view for NewtonEulerR when setConstantH is called (i.e. no internal storage)
+          - internal for all derived classes (since H is explicitely computed by a dedicated
+  function)
+    - for \f$ \frac{\partial }{\partial t}H_{NE} \f$ only at first call of
+  computeSecondOrderTimeDerivativeTerms or if setComputeH_NE_dotFunction is called.
+    - for e: shared view (i.e. no internal storage) if setConstanteVector is called
+    - for \f$ H_NE . T\f$: always.
+    - for T: always (in T_buffer_)
+
+  All allocations are done during initialize call, except for \f$ \frac{\partial }{\partial
+  t}H_{NE} \f$.
+ */
 
 class NewtonEulerR : public Relation {
  public:
   // add deltaq ??? -- xhub 30/03/2014
-  enum NewtonEulerRDS { z, q0, velocity, dotq, p0, p1, p2, DSlinkSize };
+  enum class WorkDS : std::size_t { q0, velocity, dotq, p0, p1, p2, DSlinkSize };
 
  protected:
   ACCEPT_SERIALIZATION(NewtonEulerR);
 
-  /* Jacobian matrices of H */
-  /* Jacobian matrices of  \f$ y = h(t,q,\dot q,\ldots) \f$  */
+  /** View onto the H_NE matrix of the relation */
+  std::shared_ptr<siconos::algebra::MapType> H_NE_view_{nullptr};
 
-  /** The Jacobian of the constraints with respect to the generalized coodinates
-   *  \f$ q \f$  i.e. \f[\nabla^T_q h(t,q,\dot q,\ldots)\f]
-   */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _jachq{nullptr};
+  /** internal (optional) storage used for \f$ H_{NE} \f$ */
+  siconos::algebra::SiconosMatrix H_NE_internal_storage_{0, 0};
 
-  /** The Jacobian of the constraints with respect to the generalized velocities
-   *  \f$ \dot q \f$  i.e. \f[\nabla^T_{\dot q} h(t,q,\dot q,\ldots)\f]
-   */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _jachqDot{nullptr};
+  /** True if \f$ H_{NE} \f$ is a constant matrix */
+  bool hasConstantH_NE_{false};
 
-  /** The time-derivative of Jacobian of the constraints with respect
-   *  to the generalized coordinates  \f$ q \f$
-   *  i.e. \f[\frac{d}{dt} \nabla^T_{q} h(t,q,\dot q,\ldots).\f]
+  // Rq: no need for internal storage. jacobianhOver_q is set with setHMatrix and is only
+  // a view to some external storage.
+
+  /** \f$ \frac{\partial}{\partial t}H_{NE} \f$
    *  This value is useful to compute the second-order
-   *  time--derivative of the constraints with respect to time.
+   *  derivative of the constraints with respect to time.
    */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _dotjachq{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> H_NE_dot_{nullptr};
 
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _jachlambda{nullptr};
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _jacglambda{nullptr};
+  /** function wrapper used to compute \f$ \frac{\partial}{\partial t}H_{NE} \f$
+   */
+  siconos::modeling::func_prototypes::FunctionBVBV_M computeH_NE_dot_{nullptr};
 
-  /** vector e*/
-  std::shared_ptr<siconos::algebra::SiconosVector> _e{nullptr};
-  /*Used for the projection formulation*/
+  /** True if  \f$ \frac{\partial}{\partial t}H_{NE} \f$ is taken into account */
+  bool hasH_NE_dot_{false};
 
-  /** vector of contact forces, ie: _contactForce = B lambda. Useful for the end user.*/
-  std::shared_ptr<siconos::algebra::SiconosVector> _contactForce{nullptr};
+  /** e */  // Used for the projection formulation
+  std::shared_ptr<siconos::algebra::MapVectorType> eVector_view_{nullptr};
 
-  /**
-     updated in computeJachqT:
-     In the case of the bilateral constrains, it is _jachq._T.
-     In the case of a local frame, _jachqT is built from the geometrical
+  /** True if e(t) is taken into account */
+  bool haseVector_{false};
+
+  /** vector of contact forces, ie: contactForce_ = B lambda. Useful for the end user.*/
+  std::shared_ptr<siconos::algebra::SiconosVector> contactForce_{nullptr};
+
+  /** Internal storage/buffer used to save H.T product.
+     In the case of the bilateral constrains, it is H.T.
+     In the case of a local frame, H.T is built from the geometrical
      datas(local frame, point of contact).*/
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _jachqT{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> H_NE_prod_T_{nullptr};
 
-  /** local storage of _T as working vector to compute JachqT from q */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _T{nullptr};
-
-  // /** basic constructor
-  //  *
-  //  *  \param lagType the sub-type of the relation
-  //  */
-  // NewtonEulerR(RelationSubType lagType) : Relation(RelationType::NewtonEuler, lagType) {}
-
- public:
-  /** Default constructor */
-  NewtonEulerR() : Relation(RelationType::NewtonEuler, RelationSubType::NonLinearR){};
-
-  /** destructor
-   */
-  virtual ~NewtonEulerR() noexcept = default;
-
-  // -- Jach --
-
-  /** get a pointer on matrix Jach[index]
-   *
-   *  \return a pointer on a SimpleMatrix
-   */
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> jachq() const { return _jachq; }
-
-  // proj_with_q  inline std::shared_ptr<siconos::algebra::SimpleMatrix> jachqProj() const {
-  // return _jachqProj;
-  // }
-  void setJachq(std::shared_ptr<siconos::algebra::SimpleMatrix> newJachq);
-
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> jachqDot() const { return _jachqDot; }
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> dotJachq() const
-  {
-    assert(_dotjachq);
-    return _dotjachq;
-  }
-
-  inline std::shared_ptr<siconos::algebra::SiconosVector> secondOrderTimeDerivativeTerms()
-  {
-    assert(_secondOrderTimeDerivativeTerms);
-    return _secondOrderTimeDerivativeTerms;
-  };
-
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> jachlambda() const
-  {
-    return _jachlambda;
-  }
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> jacglambda() const
-  {
-    return _jacglambda;
-  }
-  inline void setE(std::shared_ptr<siconos::algebra::SiconosVector> newE) { _e = newE; }
-
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> jachqT() const { return _jachqT; }
-  inline void setJachqT(std::shared_ptr<siconos::algebra::SimpleMatrix> newJachqT)
-  {
-    _jachqT = newJachqT;
-  }
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> H() const override { return _jachqT; }
-
-  /** set Jach[index] to pointer newPtr (pointer link)
-   *
-   *  \param newPtr the new matrix
-   */
-  void setJachqPtr(std::shared_ptr<siconos::algebra::SimpleMatrix> newPtr);
-
-  /** Plugin object for the time--derivative of Jacobian i.e.
-   *  \f$ \frac{d}{dt} \nabla^T_{q} h(t,q,\dot q,\ldots) \f$
-   *  stored in _dotjachq
-   */
-  std::shared_ptr<siconos::plugins::PluggedObject> _plugindotjacqh;
+  /** buffer to save \f[ T(q) = \left[\begin{array}{cc} I_{3x3}  & 0 \\
+               0 &  \phi(p) \end{array}\right] \f]
+      from dynamical systems
+  */
+  std::shared_ptr<siconos::algebra::SiconosMatrix> T_buffer_{nullptr};
 
   /**  the additional  terms of the second order time derivative of y
    *
-   *   \f$ \nabla_q h(q) \dot T v + \frac{d}{dt}(\nabla_q h(q) ) T v \f$
+   *   \f$ \nabla_q h(q) \dot T v + \frac{d}{dt}H_{NE}  T v \f$
    *
    */
-  std::shared_ptr<siconos::algebra::SiconosVector> _secondOrderTimeDerivativeTerms;
+  std::shared_ptr<siconos::algebra::SiconosVector> secondOrderTimeDerivativeTerms_{nullptr};
+
+  /** update H_NE matrix
+   *
+   *  \param time current time
+   *  \param inter the interaction using this relation
+   *  \param q0  q states vectors of the related the dynamical systems
+   */
+  virtual void computeH_NE_(double time, Interaction &inter,
+                            const siconos::algebra::BlockVector &q0) {}
+
+ public:
+  /** Default and only constructor */
+  NewtonEulerR() : Relation(RelationType::NewtonEuler, RelationSubType::NonLinearR) {};
+
+  /** destructor */
+  virtual ~NewtonEulerR() noexcept = default;
 
   /** initialize components specific to derived classes.
    *
@@ -180,115 +148,110 @@ class NewtonEulerR : public Relation {
    *
    *  \param inter an Interaction using this relation
    */
-  virtual void checkSize(Interaction &inter) override;
+  virtual void checkSize(const Interaction &inter) const override;
+
+  /** \return a read-only view on \f$ H(q, \ldots) \f$ matrix */
+  inline auto H_NE() const {
+    return siconos::algebra::ConstMapType(H_NE_view_->data(), H_NE_view_->rows(),
+                                          H_NE_view_->cols());
+  }
+
+  /** Set a constant \f$ H(q, \ldots) \f$ matrix for the system (warning: shared memory)
+   *
+   *  \param newValue H matrix
+   *
+   */
+  void setConstantH_NE(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+
+  /** \return  a read-only view on e(t) */
+  inline auto eVector() const {
+    return siconos::algebra::ConstMapVectorType(eVector_view_->data(), eVector_view_->size());
+  }
+
+  /** set a constant e vector
+   *
+   *  \param neweVector e vector
+   */
+  void setConstanteVector(Eigen::Ref<siconos::algebra::SiconosVector> neweVector);
+
+  /** True if e(t) is taken into account */
+  bool haseVector() const { return haseVector_; }
+
+  /** \return a read-only view on \f$ H(q, \ldots).T \f$ matrix */
+  inline auto H_NE_prod_T() const {
+    return siconos::algebra::ConstMapType(H_NE_prod_T_->data(), H_NE_prod_T_->rows(),
+                                          H_NE_prod_T_->cols());
+  }
+
+  /** set a user-defined function to compute
+   *  \f$ \frac{\partial}{\partial t}(\nabla^T_{q} h(q))\f$
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputeH_NE_dotFunction(
+      const siconos::modeling::func_prototypes::FunctionBVBV_M &fct);
+
+  /** Update \f$ \frac{\partial}{\partial t}(\nabla^T_{q} h(q))\f$
+   *  \param q 'list' of state vectors (for all ds involved in the interaction)
+   *  \param qdot 'list' of state vectors (for all ds involved in the interaction)
+   */
+  virtual void computeH_NE_dot(const siconos::algebra::BlockVector &q,
+                               const siconos::algebra::BlockVector &qdot);
+
+  /** \return  a read-only view on additional  terms of the second order time derivative of y
+   *  \f$ \nabla_q h(q) \dot T v + \frac{d}{dt}(\nabla_q h(q) ) T v \f$
+   */
+  inline auto secondOrderTimeDerivativeTerms() {
+    return siconos::algebra::ConstMapVectorType(secondOrderTimeDerivativeTerms_->data(),
+                                                secondOrderTimeDerivativeTerms_->size());
+  }
 
   /**
-      to compute the output y = h(t,q,z) of the Relation
+       To compute the terms of the second order time derivative of y
+       \f$  \nabla_q h(q) \dot T v + \frac{d}{dt}(\nabla_q h(q) ) T v \f$
 
-      \param time current time value
-      \param q coordinates of the dynamical systems involved in the relation
-      \param y the resulting vector
+       \param time  current time
+       \param inter interaction that owns the relation
+       \param ds1 dynamical system linked to this interaction (source)
+       \param ds2 second ds linked to this interaction (target). If there is
+       only one ds in the inter, call this function with ..., ds, ds)
+    */
+  void computeSecondOrderTimeDerivativeTerms(double time, Interaction &inter,
+                                             std::shared_ptr<DynamicalSystem> ds1,
+                                             std::shared_ptr<DynamicalSystem> ds2);
+
+  /** \return  a read-only view on the vector of the forces due to this relation
+   */
+  inline auto contactForce() const {
+    return siconos::algebra::ConstMapVectorType(contactForce_->data(), contactForce_->size());
+  }
+
+  /**
+      to compute the output y = h(q) of the Relation
+
+      \param[in] q generalized coordinates vector of the concerned dynamical systems
+      \param[in,out] y the resulting vector
   */
-  virtual void computeh(double time, const siconos::algebra::BlockVector &q0,
-                        siconos::algebra::SiconosVector &y);
-
-  /** default function to compute jacobianH
-   *
-   *  \param time current time
-   *  \param inter the interaction using this relation
-   */
-
-  virtual void computeJachlambda(double time, Interaction &inter) { ; }
-  /** compute the jacobian of h w.r.t. q
-   *
-   *  \param time current time
-   *  \param inter the interaction using this relation
-   *  \param q0  the container of the block vector to the dynamical system
-   */
-  virtual void computeJachq(double time, Interaction &inter,
-                            std::shared_ptr<siconos::algebra::BlockVector> q0)
-  {
-    ;
-  }
-
-  /** compute the jacobian of h w.r.t.  \f$ \dot{q} \f$
-   *
-   *  \param time current time
-   *  \param inter the interaction using this relation
-   */
-  virtual void computeJachqDot(double time, Interaction &inter)
-  {
-    /* \warning. This method should never be called, since we are only
-     * considering holonomic NewtonEulerR up to now
-     */
-    assert(0);
-  }
-  virtual void computeDotJachq(double time, const siconos::algebra::BlockVector &workQ,
-                               siconos::algebra::BlockVector &workZ,
-                               const siconos::algebra::BlockVector &workQdot);
-
-  /** compute the jacobian of h w.r.t.  \f$ \dot{q} \f$
-   *
-   *  \param time current time
-   *  \param inter the interaction using this relation
-   */
-  virtual void computeJacglambda(double time, Interaction &inter) { ; }
-  /** compute the jacobian of h w.r.t.  \f$ \dot{q} \f$
-   *
-   *  \param time current time
-   *  \param inter the interaction using this relation
-   */
-  virtual void computeJacgq(double time, Interaction &inter) { ; }
-  /** compute the jacobian of h w.r.t.  \f$ \dot{q} \f$
-   *
-   *  \param time current time
-   *  \param inter the interaction using this relation
-   */
-  virtual void computeJacgqDot(double time, Interaction &inter) { ; }
+  virtual void computeh(const siconos::algebra::BlockVector &q,
+                        Eigen::Ref<siconos::algebra::SiconosVector> y);
 
   /** default implementation consists in multiplying jachq and T
-   *  in this implementation we use _T which is consitent which directly
+   *  in this implementation we use T_buffer_ which is consitent which directly
    *  computed with computeT(q) when q is given
    *  this one in more consistent with the notion of function of q
    *
    *  \param inter interaction that owns the relation
    *  \param q0  the block vector to the dynamical system position
    */
-  virtual void computeJachqT(Interaction &inter,
-                             std::shared_ptr<siconos::algebra::BlockVector> q0);
+  virtual void computeH_NE_prod_T(const Interaction &inter,
+                                  const siconos::algebra::BlockVector &q0);
 
-  /** compute all the jacobian of h
+  /** Update H_NE and \f$ H_NE. T \f$
    *
    *  \param time current time
    *  \param inter the interaction using this relation
    */
   virtual void computeJach(double time, Interaction &inter) override;
-
-  /** compute all the jacobian of g
-   *
-   *  \param time current time
-   *  \param inter the interaction using this relation
-   */
-  virtual void computeJacg(double time, Interaction &inter) override
-  {
-    computeJacgq(time, inter);
-    computeJacgqDot(time, inter);
-    computeJacglambda(time, inter);
-  }
-
-  /**
-      To compute the terms of the second order time derivative of y
-      \f$  \nabla_q h(q) \dot T v + \frac{d}{dt}(\nabla_q h(q) ) T v \f$
-
-      \param time  current time
-      \param inter interaction that owns the relation
-      \param ds1 dynamical system linked to this interaction (source)
-      \param ds2 second ds linked to this interaction (target). If there is
-      only one ds in the inter, call this function with ..., ds, ds)
-   */
-  void computeSecondOrderTimeDerivativeTerms(double time, Interaction &inter,
-                                             std::shared_ptr<DynamicalSystem> ds1,
-                                             std::shared_ptr<DynamicalSystem> ds2);
 
   /** to compute output
    *
@@ -298,7 +261,7 @@ class NewtonEulerR : public Relation {
    *  default = 0.
    */
   virtual void computeOutput(double time, Interaction &inter,
-                     unsigned int derivativeNumber = 0) override;
+                             unsigned int derivativeNumber = 0) override;
 
   /** to compute the input
    *
@@ -308,46 +271,8 @@ class NewtonEulerR : public Relation {
    */
   virtual void computeInput(double time, Interaction &inter, unsigned int level = 0) override;
 
-  /** return a SP on the C matrix.
-   *  The matrix C in the linear case, else it returns Jacobian of the output
-   *  with respect to x.
-   */
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> C() const override { return _jachq; }
-  /** return a SP on the D matrix.
-   *  The matrix D in the linear case, else it returns Jacobian of the output
-   *  with respect to lambda.
-   */
-  virtual inline std::shared_ptr<siconos::algebra::SimpleMatrix> D() const
-  {
-    return _jachlambda;
-  }
-  /** return a SP on the B matrix.
-   *  The matrix B in the linear case, else it returns Jacobian of the input with
-   *  respect to lambda.
-   */
-  virtual inline std::shared_ptr<siconos::algebra::SimpleMatrix> B() const
-  {
-    return _jacglambda;
-  }
-
-  /**
-      A buffer containing the forces due to this.
-      It is an output unused for the computation.
-      Fix : is it usefull ?
-
-      \return std::shared_ptr<siconos::algebra::SiconosVector>
-  */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> contactForce() const
-  {
-    return _contactForce;
-  };
-
   void display() const override {}
- 
-  // Visitors stuff
-  void accept(std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const override;
-
-  
+  virtual void accept(relations::Visitor &tourist) const override { tourist.visit(*this); }
 };
 }  // namespace siconos::modeling
 #endif  // NEWTONEULERRELATION_H

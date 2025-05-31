@@ -27,81 +27,59 @@ namespace siconos::modeling {
 /**
    Lagrangian Non Linear Relation (generic interface)
 
-   This class is an interface for specific Lagrangian Relations used for Lagrangian dynamical
-   systems.
+   This class is the interface to relations used for Lagrangian (2nd order) systems.
 
-   -  \f$ y = h(t,q,\dot q,\ldots) \f$  describes the constraint (the relation)
+   -  \f$ y = h(t,q,\dot q,\ldots) \f$  describes the constraint
 
-   - The Jacobian of the constraints with respect to the coodinates  \f$ q \f$
-   i.e.  \f$ \nabla^T_q h(t,q,\dot q,\ldots) \f$ , is accessed with jachq().
+    h may be \f$ h(q)\f$  (scleronomous), \f$ h(q,t)\f$  (rheonomous), \f$ h(q, \lambda)\f$
+  (compliant)... depending on the chosen derived class.
 
-   This Jacobian is mainly used for Newton linearization and to compute the time-derivative of
-   the constraint,
+  The Jacobian of the constraints with respect to the coodinates  \f$ q \f$
+  i.e.  \f$ \nabla^T_q h(t,q,\dot q,\ldots) \f$ is always defined.
+  Other jacobians are defined only when required in the derived classes, check the API if
+  required.
 
-   \f$ y = h(q,\ldots) \f$  that is  \f$ \dot y (t) = \nabla^T_q h(t,q,\dot q,\ldots) (q) \dot
-   q +\ldots \f$
 
-   This object can also store more general linearized part of the gap function.
-   If  \f$ y=h(q) \f$  models a gap function, then the time derivative
-   can be generically  written as
+  This Jacobians are mainly used for Newton linearization and to compute the time-derivative of
+  the constraint, \f$ y = h(q,\ldots) \f$
 
-   \f$ \dot y (t) = H(q,\ldots) \dot q  +\ldots.  \f$
-   The matrix  \f$ H(q,\ldots) \f$ can also be accessed using jachq().
+  that is  \f$ \dot y (t) = \nabla^T_q h(t,q,\dot q,\ldots) (q) \dot q +\ldots \f$
 
-   - The Jacobian of the constraints with respect to the generalized velocities  \f$ \dot q \f$
+  This object can also store more general linearized part of the gap function.
+  If \f$ y=h(q) \f$ models a gap function, then the time derivative can be generically  written
+  as
 
-   i.e.  \f$ \nabla^\top_{\dot q} h(t,q,\dot q,\ldots) \f$  is accessed using jachqDot().
+  \f$ \dot y (t) = H(q,\ldots) \dot q  +\ldots.  \f$
 
-   - The time-derivative of Jacobian of the constraints with respect to the generalized
-   coordinates \f$ q \f$
-
-   i.e.  \f$ \frac{d}{dt} \nabla^\top_{q} h(t,q,\dot q,\ldots). \f$ , is accessed using
-   dotJachq().
-
-   This value is useful to compute the second-order time--derivative of the constraints with
-   respect to time.
-
-   All these operators can be defined with user-defined plugins.
-
+  All operators of Lagrangian relations can be plugged to user-defined functions.
+  The signature of the plugged functions depends on which variables are taken into
+  account in h and its jacobians. Here again, check in the proper derived class API to find
+  which functions are available.
  */
 
 class LagrangianR : public Relation {
  public:
-  enum LagrangianRDS { z, q0, q1, q2, p0, p1, p2, DSlinkSize };
+  enum class WorkDS : std::size_t { q0, q1, q2, p0, p1, p2, DSlinkSize };
 
  protected:
   ACCEPT_SERIALIZATION(LagrangianR);
 
-  /** Jacobian matrices of  \f$ y = h(t,q,\dot q,\ldots) \f$  */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _jachlambda{nullptr};
-
-  /** The Jacobian of the constraints with respect to the generalized coodinates   \f$ q \f$
+  /** The Jacobian of the constraints with respect to the generalized coordinates   \f$ q \f$
    *  i.e.  \f$ \nabla^\top_q h(t,q,\dot q,\ldots) \f$
    */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _jachq{nullptr};
+  std::shared_ptr<siconos::algebra::MapType> jacobianhOver_q_view_{nullptr};
 
-  /**The Jacobian of the constraints with respect to the generalized velocities   \f$ \dot q
-   * \f$ i.e.  \f$ \nabla^\top_{\dot q} h(t,q,\dot q,\ldots) \f$
-   */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _jachqDot{nullptr};
+  /** internal (optional) storage used for \f$ \nabla^\top_q h(t,q,\dot q,\ldots) \f$ */
+  std::unique_ptr<std::vector<double>> jacobianhOver_q_internal_storage_{nullptr};
 
-  /** The time-derivative of Jacobian of the constraints with respect
-   *  to the generalized coordinates   \f$  q \f$
-   *  i.e.  \f$ \frac{d}{dt} \nabla^\top_{ q} h(t,q,\dot q,\ldots). \f$
-   *  This value is useful to compute the second-order
-   *  time--derivative of the constraints with respect to time.
-   */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _dotjachq{nullptr};
-
-  std::shared_ptr<siconos::plugins::PluggedObject> _pluginJachq{nullptr};
+  /** True if \f$ \nabla^\top_q h(t,q,\dot q,\ldots) \f$ is a constant matrix */
+  bool hasConstantJacobianhOver_q_{false};
 
   /** basic constructor
    *
    *  \param lagType the sub-type of the relation
    */
   LagrangianR(RelationSubType lagType) : Relation(RelationType::Lagrangian, lagType) {}
-
-  void _zeroPlugin() override;
 
  public:
   /** destructor
@@ -112,42 +90,26 @@ class LagrangianR : public Relation {
    *
    *  \param inter the interaction using this relation
    */
-  inline void initialize(Interaction &inter) override{};
+  inline void initialize(Interaction &inter) override {};
 
-  // -- Jach --
-
-  /** get a pointer on matrix Jach[index]
+  /** check sizes of the relation specific operators.
    *
-   *  \return a pointer on a SimpleMatrix
+   *  \param inter an Interaction using this relation
    */
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> jachq() const { return _jachq; }
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> jachqDot() const { return _jachqDot; }
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> dotJachq() const { return _dotjachq; }
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> jachlambda() const
-  {
-    return _jachlambda;
+  virtual void checkSize(const Interaction &inter) const override {};
+  // Does nothing by default. Reimplement if required.
+
+  /** \return a read-only view on \f$ \nabla^\top_q h(q, \ldots) \f$ matrix */
+  inline auto jacobianhOver_q() const {
+    return siconos::algebra::ConstMapType(jacobianhOver_q_view_->data(),
+                                          jacobianhOver_q_view_->rows(),
+                                          jacobianhOver_q_view_->cols());
   }
 
-  /** set Jach[index] to pointer newPtr (pointer link)
-   *
-   *  \param newPtr the new matrix
-   */
-  inline void setJachqPtr(std::shared_ptr<siconos::algebra::SimpleMatrix> newPtr)
-  {
-    _jachq = newPtr;
-  }
-
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> C() const override { return _jachq; }
-
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> H() const override { return _jachq; }
-
-  /** main relation members display
-   */
+  /** main relation members display */
   void display() const override;
 
-  // Visitors stuff
-  void accept(std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const override;
-
+  virtual void accept(relations::Visitor &tourist) const override { tourist.visit(*this); }
 };
 
 }  // namespace siconos::modeling

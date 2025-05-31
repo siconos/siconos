@@ -55,49 +55,39 @@ class NewtonEuler1DR : public NewtonEulerR {
   /** _Nc must be calculated relative to q2 */
   std::shared_ptr<siconos::algebra::SiconosVector> _relNc{nullptr};
 
-  /** Rotation matrix converting the absolute coordinate to the contact frame
+  /** Rotation matrix converting the absolute coordinate to the contact frame^
    *  coordinate. This matrix contains the unit vector(s)of the contact frame in
    *  row.
    */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _rotationAbsoluteToContactFrame{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _rotationAbsoluteToContactFrame{nullptr};
 
   /** Matrix converting */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _rotationBodyToAbsoluteFrame{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _rotationBodyToAbsoluteFrame{nullptr};
 
   /** Cross product matrices that correspond the lever arm from
    *  contact point to center of mass*/
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _NPG1{nullptr};
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _NPG2{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _NPG1{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _NPG2{nullptr};
 
   /*buffer matrices*/
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _AUX1{nullptr};
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _AUX2{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _AUX1{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _AUX2{nullptr};
 
-  /** Set the coordinates of first contact point.  Must only be done
-   *  in a computeh() override.
+  /** compute the jacobian of h w.r.t. q
    *
-   *  \param npc new coordinates
+   *  \param time current time
+   *  \param inter the interaction using this relation
+   *  \param q0  q states vectors of the related the dynamical systems
    */
-  void setpc1(std::shared_ptr<siconos::algebra::SiconosVector> npc) { _Pc1 = npc; };
-
-  /** Set the coordinates of second contact point.  Must only be done
-   *  in a computeh() override.
-   *
-   *  \param npc new coordinates
-   */
-  void setpc2(std::shared_ptr<siconos::algebra::SiconosVector> npc) { _Pc2 = npc; };
-
-  /** Set the coordinates of inside normal vector at the contact point.
-   *  Must only be done in a computeh() override.
-   *
-   *  \param nnc new coordinates
-   */
-  void setnc(std::shared_ptr<siconos::algebra::SiconosVector> nnc) { _Nc = nnc; };
+  virtual void computeH_NE_(double time, siconos::modeling::Interaction &inter,
+                            const siconos::algebra::BlockVector &q0) override;
 
  private:
-  void NIcomputeJachqTFromContacts(std::shared_ptr<siconos::algebra::SiconosVector> q1);
-  void NIcomputeJachqTFromContacts(std::shared_ptr<siconos::algebra::SiconosVector> q1,
-                                   std::shared_ptr<siconos::algebra::SiconosVector> q2);
+  void NIcomputeJachqTFromContacts(
+      const Eigen::Ref<const siconos::algebra::SiconosVector> &q1);
+  void NIcomputeJachqTFromContacts(
+      const Eigen::Ref<const siconos::algebra::SiconosVector> &q1,
+      const Eigen::Ref<const siconos::algebra::SiconosVector> &q2);
 
  public:
   /** V.A. boolean _isOnCOntact ?? Why is it public members ?
@@ -113,9 +103,6 @@ class NewtonEuler1DR : public NewtonEulerR {
    */
   virtual ~NewtonEuler1DR() noexcept = default;
 
-  void computeJachq(double time, Interaction &inter,
-                    std::shared_ptr<siconos::algebra::BlockVector> q0) override;
-
   void initialize(Interaction &inter) override;
 
   /** Default implementation consists in multiplying jachq and T (see
@@ -125,8 +112,8 @@ class NewtonEuler1DR : public NewtonEulerR {
    *  \param inter interaction that owns the relation
    *  \param q0 the block vector to the dynamical system position
    */
-  void computeJachqT(Interaction &inter,
-                     std::shared_ptr<siconos::algebra::BlockVector> q0) override;
+  void computeH_NE_prod_T(const Interaction &inter,
+                          const siconos::algebra::BlockVector &q0) override;
 
   /**
       to compute the output y = h(t,q,z) of the Relation
@@ -170,6 +157,7 @@ class NewtonEuler1DR : public NewtonEulerR {
    */
   void setRelNc(std::shared_ptr<siconos::algebra::SiconosVector> nnc) { _relNc = nnc; };
   void display() const override {}
+  virtual void accept(relations::Visitor &tourist) const override { tourist.visit(*this); }
 };
 }  // namespace siconos::modeling
 #endif

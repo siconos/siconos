@@ -22,6 +22,7 @@
 #ifndef LinearOSNS_H
 #define LinearOSNS_H
 
+#include "SiconosVector.hpp"
 #include "OneStepNSProblem.hpp"
 
 // namespace siconos::numerics {
@@ -30,9 +31,6 @@
 // enum NM_types : int;  // explicit type specification is required
 //}  // namespace siconos::numerics
 
-namespace siconos::algebra {
-class SiconosVector;
-}
 
 namespace siconos::modeling {
 class NonSmoothLaw;

@@ -46,11 +46,11 @@ def test_lagrangian_and_osis():
 
     nb_ds = len(ds_list)
     for ds in ds_list.values():
-        ds.computeForces(0.0, q0, v0)
+        ds.computeTotalForces(v0, q0, 0.0)
 
-    assert np.allclose(ds_list["LTIDS+MJ"].forces(), ds_list["LTIDS+MJ"].forces())
-    assert np.allclose(ds_list["LTIDS+MJ"].forces(), ds_list["LLDDS+MJB"].forces())
-    assert np.allclose(ds_list["LTIDS+MJ"].forces(), ds_list["LLDDS+MJB2"].forces())
+    assert np.allclose(ds_list["LTIDS+MJ"].totalForces(), ds_list["LTIDS+MJ"].totalForces())
+    assert np.allclose(ds_list["LTIDS+MJ"].totalForces(), ds_list["LLDDS+MJB"].totalForces())
+    assert np.allclose(ds_list["LTIDS+MJ"].totalForces(), ds_list["LLDDS+MJB2"].totalForces())
 
 
     # --- Interactions ---

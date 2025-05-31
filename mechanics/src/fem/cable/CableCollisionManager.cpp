@@ -28,31 +28,30 @@
  * the Newton loop. */
 void siconos::fem::cable::CableCollisionManager::updateInteractions(
     std::shared_ptr<siconos::simulation::Simulation> simulation) {
-  siconos::algebra::SiconosVector &q = *(m_model->q());
+  auto &q = cable_ds_->q_read();
   size_t nb = q.size();
 
   unsigned int node_idx = 0;
-  for (size_t i = 0; i < nb; i += 3, node_idx++) {  // boucle par 3 pour récupérer x,y,z
-
-    auto contactItr = m_contacts.find(node_idx);
+  for (size_t i = 0; i < nb; i += 3, node_idx++) {
+    auto contactItr = contacts_map_.find(node_idx);
     std::shared_ptr<siconos::modeling::Interaction> contact = nullptr;
-    if (contactItr != m_contacts.end()) {
+    if (contactItr != contacts_map_.end()) {
       contact = contactItr->second;
     }
-    auto pc1 = std::make_shared<siconos::algebra::SiconosVector>(3);
-    pc1->setValue(0, q.getValue(i));
-    pc1->setValue(1, q.getValue(i + 1));
-    pc1->setValue(2, q.getValue(i + 2));
+    auto pc1 = std::make_shared<siconos::algebra::SiconosVector3>();
+    (*pc1)(0) = q(i);
+    (*pc1)(1) = q(i + 1);
+    (*pc1)(2) = q(i + 2);
 
-    for (auto &s : m_supports) {
-      if (s->isContact(pc1, m_tolContact)) {
-        // test si le point x,y,z est en contact avec le support
-        // récupérer pc2 (projection du point sur l'obstacle), normal, tangent
+    for (auto &s : supports_) {
+      if (s->isContact(*pc1, tolAtContact_)) {
+        // If the current point is in contact with the support then
+        // we get it's projection (pc2) on the obstacle, the normal and the tangent.
         auto pc2 = s->pc2();
         auto normal = s->normal();
         auto tangent = s->tangent();
 
-        if (contact) {
+        if (contact) {  // The interaction already exists
           auto relation = std::static_pointer_cast<Cable2d3DR>(contact->relation());
           relation->updateContactPoint(pc1, pc2, normal, tangent);
         } else {
@@ -61,19 +60,18 @@ void siconos::fem::cable::CableCollisionManager::updateInteractions(
 
           // create interaction
           auto inter = std::make_shared<siconos::modeling::Interaction>(s->nslaw(), relation);
-          m_contacts[node_idx] = inter;
+          contacts_map_[node_idx] = inter;
 
           // link the interaction and the dynamical system
-          simulation->link(inter, m_model);
+          simulation->link(inter, cable_ds_);
         }
       } else {
-        // pas en contact
+        // no contact
         if (contact) {
-          // si existe un contact -> remove
-          m_contacts.erase(node_idx);
+          // update the contacts map: no interaction for the current node
+          contacts_map_.erase(node_idx);
         }
       }
     }
   }
-  std::cout << "Fin UpInterac \n";
 }

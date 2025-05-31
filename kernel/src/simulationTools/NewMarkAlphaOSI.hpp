@@ -23,7 +23,40 @@
 
 #include "OneStepIntegrator.hpp"
 
+namespace siconos::modeling {
+
+class LagrangianDS;
+
+}
 namespace siconos::integrators {
+
+/////// Free Functions ///////
+namespace newmark_alpha {
+
+// Names of the Newmark integrator parameters
+// Used for newmark array indices;
+namespace names {
+constexpr int Beta = 0;
+constexpr int Gamma = 1;
+constexpr int Alpha_m = 2;
+constexpr int Alpha_f = 3;
+}  // namespace names
+
+/** compute NewmarkAlpha W iteration matrix for Lagrangian systems
+ *
+ *  \param[in] time current time
+ *  \param[in] h current time-step
+ *  \param[in] params integrator parameters ([beta, gamma, alpha_m, alpha_f])
+ *  \param[in] ds a Lagrangian dynamical system
+ *  \param[in,out] W the result in W
+ *  \param[in,out] LUW the LU factorisation of W (updated)
+ */
+void computeIterationMatrix_Lagrangian(
+    double time, double h, const std::array<double, 4> &params,
+    siconos::modeling::LagrangianDS &ds, Eigen::Ref<siconos::algebra::SiconosMatrix> W,
+    std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>> &LUW);
+
+}  // namespace newmark_alpha
 
 /**  NewMarkAlpha Scheme Time-Integrator for Dynamical Systems
  *
@@ -35,27 +68,23 @@ namespace siconos::integrators {
  * and the list of concerned dynamical systems. Each DynamicalSystem is
  * associated to a SiconosMatrix named "W"
  *
- * W matrices are initialized and computed in initializeIterationMatrixW and
- * computeW.
+ * W matrices are initialized and computed in initializeIterationMatrix and
+ * computeIterationMatrix.
  */
 class NewMarkAlphaOSI : public OneStepIntegrator {
  protected:
   ACCEPT_SERIALIZATION(NewMarkAlphaOSI);
   /** Parameters of the numerical scheme:  beta, gamma, alpha_m, alpha_f */
-
-  double _alpha_m{0.};
-  double _alpha_f{0.};
-  double _gamma{0.};
-  double _beta{0.};
+  std::array<double, 4> newmark_{};  // all 0. by default.
 
   /** Order of the polynomial for dense output*/
-  unsigned int _orderDenseOutput{5};
+  unsigned int denseOutputPolynomialOrder_{5};
 
   /** Indicator whether or not constraints at the velocity level are handled
-   * _IsVelocityLevel = true: constraints at the velocity level are handled
-   * _IsVelocityLevel = false: constraints at the position are handled
+   *  true: constraints at the velocity level are handled
+   *  false: constraints at the position are handled
    */
-  bool _IsVelocityLevel{false};
+  bool handleVelocityConstraints_{false};
 
  public:
   enum NewMarkAlphaOSI_ds_workVector_id {
@@ -96,89 +125,87 @@ class NewMarkAlphaOSI : public OneStepIntegrator {
   /** set value to the parameter beta
    * \param beta value of beta
    */
-  inline void setBeta(double beta) { _beta = beta; };
+  inline void setBeta(double beta) { newmark_[newmark_alpha::names::Beta] = beta; };
 
   /** set value to the parameter gamma
    * \param value_gamma double : value of gamma
    */
-  inline void setGamma(double value_gamma) { _gamma = value_gamma; };
+  inline void setGamma(double value_gamma) {
+    newmark_[newmark_alpha::names::Gamma] = value_gamma;
+  };
 
   /** set value to the parameter alpha_m
    * \param value_alpha_m double : value of alpha_m
    */
 
-  inline void setAlpha_m(double value_alpha_m) { _alpha_m = value_alpha_m; };
+  inline void setAlpha_m(double value_alpha_m) {
+    newmark_[newmark_alpha::names::Alpha_m] = value_alpha_m;
+  };
 
   /** set value to the parameter alpha_f
    * \param value_alpha_f double : value of alpha_f
    */
 
-  inline void setAlpha_f(double value_alpha_f) { _alpha_f = value_alpha_f; };
+  inline void setAlpha_f(double value_alpha_f) {
+    newmark_[newmark_alpha::names::Alpha_f] = value_alpha_f;
+  };
 
   /** set values to the parameters beta, gamma, alpha_f, alpha_m from the value
    * of rho_infty \param rho_infty double : value of rho_infty
    */
 
   inline void setParametersFromRho_infty(double rho_infty) {
-    _alpha_m = (2 * rho_infty - 1) / (rho_infty + 1);
-    _alpha_f = rho_infty / (rho_infty + 1);
-    _gamma = 0.5 + _alpha_f - _alpha_m;
-    _beta = 0.25 * std::pow((_gamma + 0.5), 2);
+    newmark_[newmark_alpha::names::Alpha_m] = (2 * rho_infty - 1) / (rho_infty + 1);
+    newmark_[newmark_alpha::names::Alpha_f] = rho_infty / (rho_infty + 1);
+    newmark_[newmark_alpha::names::Gamma] = 0.5 + newmark_[newmark_alpha::names::Alpha_f] -
+                                            newmark_[newmark_alpha::names::Alpha_m];
+    newmark_[newmark_alpha::names::Beta] =
+        0.25 * std::pow((newmark_[newmark_alpha::names::Gamma] + 0.5), 2);
   };
 
   /** get value of beta
    * \return double
    */
-  inline double getBeta() { return _beta; };
+  inline double getBeta() { return newmark_[newmark_alpha::names::Beta]; };
 
   /** get value of gamma
    * \return double
    */
-  inline double getGamma() { return _gamma; };
+  inline double getGamma() { return newmark_[newmark_alpha::names::Gamma]; };
 
   /** get value of alpha_m
    * \return double
    */
-  inline double getAlpha_m() { return _alpha_m; };
+  inline double getAlpha_m() { return newmark_[newmark_alpha::names::Alpha_m]; };
 
   /** get value of alpha_f
    * \return double
    */
 
-  inline double getAlpha_f() { return _alpha_f; };
-  /** get the order of the polynomial for dense output
-   * \return unsigned int
-   */
-  inline unsigned int getOrderDenseOutput() { return _orderDenseOutput; }
+  inline double getAlpha_f() { return newmark_[newmark_alpha::names::Alpha_f]; };
 
-  /** set the flag _IsVelocityLevel
+  /** \return the order of the polynomial for dense output
+   */
+  inline unsigned int denseOutputPolynomialOrder() const {
+    return denseOutputPolynomialOrder_;
+  }
+
+  /** set to true if constraints at the velocity level are handled, else false (default)
    * \param flag bool
    */
-  inline void setFlagVelocityLevel(bool flag) { _IsVelocityLevel = flag; }
+  inline void setHandleVelocityConstraints(bool flag) { handleVelocityConstraints_ = flag; }
 
-  /** get the flag _IsVelocityLevel
+  /** get the flag handleVelocityConstraints_
    * \return bool
    */
-  inline bool getFlagVelocityLevel() { return _IsVelocityLevel; }
-
-  /** get pointer to the maxtrix W
-   * \param ds std::shared_ptr<siconos::modeling::DynamicalSystem> DynamicalSystem concerned
-   * \return  std::shared_ptr<siconos::algebra::SimpleMatrix>
-   */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> W(
-      std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
+  inline bool handleVelocityConstraints() const { return handleVelocityConstraints_; }
 
   /** initialize W matrix
+   *  \param time current time value
    *  \param ds a pointer to DynamicalSystem
    */
-  void initializeIterationMatrixW(std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
-
-  /** compute W matrix
-   *  \param ds a pointer to DynamicalSystem
-   *  \param W the result in W
-   */
-  void computeW(std::shared_ptr<siconos::modeling::DynamicalSystem> ds,
-                siconos::algebra::SiconosMatrix &W);
+  void initializeIterationMatrix(double time,
+                                 std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
   /** compute the residual of dynamical equation
    *\return double: maximum residu over all DSs
@@ -273,5 +300,6 @@ class NewMarkAlphaOSI : public OneStepIntegrator {
    */
   void display() const override;
 };
+
 }  // namespace siconos::integrators
 #endif  // NEWMARKALPHAOSI_H

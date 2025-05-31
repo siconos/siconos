@@ -22,78 +22,60 @@
 
 #include "BlockVector.hpp"
 #include "Interaction.hpp"
-#include "PluggedObject.hpp"
-#include "PluginTypes.hpp"
 #include "SiconosException.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
-
-siconos::modeling::LagrangianCompliantR::LagrangianCompliantR(
-    const std::string& pluginh, const std::string& pluginJacobianhq,
-    const std::string& pluginJacobianhlambda)
-    : LagrangianR(RelationSubType::CompliantR) {
-  _zeroPlugin();
-  setComputehFunction(siconos::plugins::getPluginName(pluginh),
-                      siconos::plugins::getPluginFunctionName(pluginh));
-  _pluginJachq->setComputeFunction(siconos::plugins::getPluginName(pluginJacobianhq),
-                                   siconos::plugins::getPluginFunctionName(pluginJacobianhq));
-  _pluginJachlambda->setComputeFunction(
-      siconos::plugins::getPluginName(pluginJacobianhlambda),
-      siconos::plugins::getPluginFunctionName(pluginJacobianhlambda));
-}
-
-void siconos::modeling::LagrangianCompliantR::_zeroPlugin() {
-  _pluginJachq = std::make_shared<siconos::plugins::PluggedObject>();
-  _pluginJachlambda = std::make_shared<siconos::plugins::PluggedObject>();
-}
+#include "Tools.hpp"
 
 void siconos::modeling::LagrangianCompliantR::initialize(Interaction& inter) {
   auto sizeY = inter.dimension();
+  auto sizeDS = inter.getSizeOfDS();
 
-  if (!_jachlambda)
-    _jachlambda = std::make_shared<siconos::algebra::SimpleMatrix>(sizeY, sizeY);
-  else
-    _jachlambda->resize(sizeY, sizeY);
+  if (!jacobianhOver_q_internal_storage_) {
+    jacobianhOver_q_internal_storage_ = std::make_unique<std::vector<double>>(sizeY * sizeDS);
+  }
+  jacobianhOver_q_view_ = std::make_shared<siconos::algebra::MapType>(
+      jacobianhOver_q_internal_storage_->data(), sizeY, sizeDS);
+
+  if (!jacobianhOver_lambda_)
+    jacobianhOver_lambda_ = std::make_shared<siconos::algebra::SiconosMatrix>(sizeY, sizeY);
 }
-void siconos::modeling::LagrangianCompliantR::checkSize(Interaction& inter) {}
+
+void siconos::modeling::LagrangianCompliantR::setComputehFunction(
+    const siconos::modeling::func_prototypes::FunctionBVV_V& h_func) {
+  computeh_ = h_func;
+}
+
 void siconos::modeling::LagrangianCompliantR::computeh(
-    double time, const siconos::algebra::BlockVector& q0,
-    const siconos::algebra::SiconosVector& lambda, siconos::algebra::BlockVector& z,
-    siconos::algebra::SiconosVector& y) {
-  if (_pluginh->fPtr) {
-    auto qp = q0.prepareVectorForPlugin();
-    auto zp = z.prepareVectorForPlugin();
-    ((siconos::plugins::FPtr2)(_pluginh->fPtr))(
-        qp->size(), &(*qp)(0), y.size(), lambda.getArray(), &(y)(0), zp->size(), &(*zp)(0));
-    z = *zp;
-  }
+    const siconos::algebra::BlockVector& positions,
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& lambda,
+    Eigen::Ref<siconos::algebra::SiconosVector> y) {
+  if (computeh_) computeh_(positions, lambda, y);
 }
 
-void siconos::modeling::LagrangianCompliantR::computeJachq(
-    double time, const siconos::algebra::BlockVector& q0,
-    const siconos::algebra::SiconosVector& lambda, siconos::algebra::BlockVector& z) {
-  if (_jachq && _pluginJachq->fPtr) {
-    auto qp = q0.prepareVectorForPlugin();
-    auto zp = z.prepareVectorForPlugin();
-    ((siconos::plugins::FPtr2)(_pluginJachq->fPtr))(qp->size(), &(*qp)(0), lambda.size(),
-                                                    lambda.getArray(), &(*_jachq)(0, 0),
-                                                    zp->size(), &(*zp)(0));
-    z = *zp;
-  }
+void siconos::modeling::LagrangianCompliantR::setComputeJacobianhOver_qFunction(
+    const siconos::modeling::func_prototypes::FunctionBVV_M& func) {
+  computejacobianhOver_q_ = func;
 }
 
-void siconos::modeling::LagrangianCompliantR::computeJachlambda(
-    double time, const siconos::algebra::BlockVector& q0,
-    const siconos::algebra::SiconosVector& lambda, siconos::algebra::BlockVector& z) {
-  if (_jachlambda && _pluginJachlambda->fPtr) {
-    auto qp = q0.prepareVectorForPlugin();
-    auto zp = z.prepareVectorForPlugin();
-    ((siconos::plugins::FPtr2)_pluginJachlambda->fPtr)(
-        qp->size(), &(*qp)(0), lambda.size(), lambda.getArray(), &(*_jachlambda)(0, 0),
-        zp->size(), &(*zp)(0));
-    z = *zp;
-  }
+void siconos::modeling::LagrangianCompliantR::computeJacobianhOver_q(
+    const siconos::algebra::BlockVector& positions,
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& lambda) {
+  if (computejacobianhOver_q_)
+    computejacobianhOver_q_(positions, lambda, *jacobianhOver_q_view_);
+}
+
+void siconos::modeling::LagrangianCompliantR::setComputeJacobianhOver_lambdaFunction(
+    const siconos::modeling::func_prototypes::FunctionBVV_M& func) {
+  computejacobianhOver_lambda_ = func;
+}
+
+void siconos::modeling::LagrangianCompliantR::computeJacobianhOver_lambda(
+    const siconos::algebra::BlockVector& positions,
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& lambda) {
+  if (computejacobianhOver_lambda_)
+    computejacobianhOver_lambda_(positions, lambda, *jacobianhOver_lambda_);
 }
 
 void siconos::modeling::LagrangianCompliantR::computeOutput(double time, Interaction& inter,
@@ -102,19 +84,21 @@ void siconos::modeling::LagrangianCompliantR::computeOutput(double time, Interac
   if (derivativeNumber == 0) {
     auto& y = *inter.y(0);
     auto& lambda = *inter.lambda(0);
-    computeh(time, *DSlink[LagrangianR::q0], lambda, *DSlink[LagrangianR::z], y);
+    computeh(*DSlink[tools::enum_to_index(WorkDS::q0)], lambda, y);
   } else {
     auto& y = *inter.y(derivativeNumber);
     auto& lambda = *inter.lambda(derivativeNumber);
-    computeJachq(time, *DSlink[LagrangianR::q0], lambda, *DSlink[LagrangianR::z]);
-    computeJachlambda(time, *DSlink[LagrangianR::q0], lambda, *DSlink[LagrangianR::z]);
+    computeJacobianhOver_q(*DSlink[tools::enum_to_index(WorkDS::q0)], lambda);
+    computeJacobianhOver_lambda(*DSlink[tools::enum_to_index(WorkDS::q0)], lambda);
     if (derivativeNumber == 1) {
       // y = Jach[0] q1 + Jach[1] lambda
-      siconos::algebra::prod(*_jachq, *DSlink[LagrangianR::q1], y);
-      siconos::algebra::prod(*_jachlambda, lambda, y, false);
+      siconos::algebra::matrixBlockVector_prod(*jacobianhOver_q_view_,
+                                               *DSlink[tools::enum_to_index(WorkDS::q1)], y);
+      y += *jacobianhOver_lambda_ * lambda;
     } else if (derivativeNumber == 2)
-      siconos::algebra::prod(*_jachq, *DSlink[LagrangianR::q2],
-                             y);  // Approx: y[2] = Jach[0]q[2], other terms are neglected ...
+      siconos::algebra::matrixBlockVector_prod(
+          *jacobianhOver_q_view_, *DSlink[tools::enum_to_index(WorkDS::q2)],
+          y);  // Approx: y[2] = Jach[0]q[2], other terms are neglected ...
     else
       THROW_EXCEPTION(
           "siconos::modeling::LagrangianCompliantR::computeOutput, index out of range or not "
@@ -128,14 +112,16 @@ void siconos::modeling::LagrangianCompliantR::computeInput(double time, Interact
 
   auto& lambda = *inter.lambda(level);
   auto& DSlink = inter.linkToDSVariables();
-  computeJachq(time, *DSlink[LagrangianR::q0], lambda, *DSlink[LagrangianR::z]);
+  computeJacobianhOver_q(*DSlink[tools::enum_to_index(WorkDS::q0)], lambda);
   // data[name] += trans(G) * lambda
-  siconos::algebra::prod(lambda, *_jachq, *DSlink[LagrangianR::p0 + level], false);
+  siconos::algebra::transposeMatrixVector_prod_toBlock(
+      lambda, *jacobianhOver_q_view_, *DSlink[tools::enum_to_index(WorkDS::p0) + level],
+      false);
 }
 
 void siconos::modeling::LagrangianCompliantR::computeJach(double time, Interaction& inter) {
   auto& DSlink = inter.linkToDSVariables();
   auto& lambda = *inter.lambda(0);
-  computeJachq(time, *DSlink[LagrangianR::q0], lambda, *DSlink[LagrangianR::z]);
-  computeJachlambda(time, *DSlink[LagrangianR::q0], lambda, *DSlink[LagrangianR::z]);
+  computeJacobianhOver_q(*DSlink[tools::enum_to_index(WorkDS::q0)], lambda);
+  computeJacobianhOver_lambda(*DSlink[tools::enum_to_index(WorkDS::q0)], lambda);
 }

@@ -21,10 +21,15 @@
 
 */
 
-#ifndef BM
-#define BM
+#ifndef BLOCKMATRIX_H
+#define BLOCKMATRIX_H
 
+#include <memory>
+
+#include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
+#include "SiconosSerialization.hpp"
+#include "SiconosVector.hpp"
 
 namespace siconos::algebra {
 
@@ -39,12 +44,12 @@ namespace siconos::algebra {
  *  tabCol = [ m1 m1+m2 m1+m2+m3 ...] \n
  *
  */
-class BlockMatrix : public SiconosMatrix {
+class BlockMatrix {
  private:
   ACCEPT_SERIALIZATION(BlockMatrix);
 
-  using BlocksMatrix =
-      boost::numeric::ublas::compressed_matrix<std::shared_ptr<SiconosMatrix>>;
+  using BlocksMatrix = Eigen::Matrix<std::shared_ptr<SiconosMatrix>, Eigen::Dynamic,
+                                     Eigen::Dynamic, Eigen::ColMajor>;
 
   /** A container of pointers to SiconosMatrix
    */
@@ -71,10 +76,23 @@ class BlockMatrix : public SiconosMatrix {
   BlockMatrix() = default;
 
  public:
-  /** copy constructor
+  /** no-copy constructor
    *  \param m a SiconosMatrix
    */
-  BlockMatrix(const SiconosMatrix &m);
+  BlockMatrix(std::shared_ptr<SiconosMatrix> m);
+
+  /** copy constructor
+   *  \param m a MapMatrix
+   */
+  BlockMatrix(std::shared_ptr<MapType> m);
+
+  /** Build from eigen view (shared-memory !) */
+  BlockMatrix(Eigen::Ref<siconos::algebra::SiconosMatrix> input);
+
+  // /** copy constructor
+  //  *  \param m a SiconosMatrix
+  //  */
+  // BlockMatrix(const SiconosMatrix &m);
 
   /** copy constructor
    *  \param m a BlockMatrix
@@ -102,172 +120,38 @@ class BlockMatrix : public SiconosMatrix {
    */
   ~BlockMatrix(void) noexcept;
 
-  inline bool checkSymmetry(double tol) const override { return false; };
+  // inline bool checkSymmetry(double tol) const override { return false; };
 
   /** get the number of block (i=0, row, i=1 col)
    *  \param i unsigned int(i=0, row, i=1 col)
    *  \return an unsigned int
    */
-  unsigned int numberOfBlocks(unsigned int i) const override;
-
-  /** get DenseMat matrix
-   *  \param row an unsigned int, position of the block (row)
-   *  \param col an unsigned int, position of the block (column)
-   *  \return a DenseMat
-   */
-  const DenseMat getDense(unsigned int row = 0, unsigned int col = 0) const override;
-
-  /** get TriangMat matrix
-   *  \param row an unsigned int, position of the block (row)
-   *  \param col an unsigned int, position of the block (column)
-   *  \return a TriangMat
-   */
-  const TriangMat getTriang(unsigned int row = 0, unsigned int col = 0) const override;
-
-  /** get SymMat matrix
-   *  \param row an unsigned int, position of the block (row)
-   *  \param col an unsigned int, position of the block (column)
-   *  \return a SymMat
-   */
-  const SymMat getSym(unsigned int row = 0, unsigned int col = 0) const override;
-
-  /** get BandedMat matrix
-   *  \param row an unsigned int, position of the block (row)
-   *  \param col an unsigned int, position of the block (column)
-   *  \return a BandedMat
-   */
-  const BandedMat getBanded(unsigned int row = 0, unsigned int col = 0) const override;
-
-  /** get SparseMat matrix
-   *  \param row an unsigned int, position of the block (row)
-   *  \param col an unsigned int, position of the block (column)
-   *  \return a SparseMat
-   */
-  const SparseMat getSparse(unsigned int row = 0, unsigned int col = 0) const override;
-
-  /** get SparseCoordinateMat matrix
-   *  \param row an unsigned int, position of the block (row)
-   *  \param col an unsigned int, position of the block (column)
-   *  \return a SparseCoordinateMat
-   */
-  const SparseCoordinateMat getSparseCoordinate(unsigned int row = 0,
-                                                unsigned int col = 0) const override;
-
-  /** get ZeroMat matrix
-   *  \param row an unsigned int, position of the block (row)
-   *  \param col an unsigned int, position of the block (column)
-   *  \return a ZeroMat
-   */
-  const ZeroMat getZero(unsigned int row = 0, unsigned int col = 0) const override;
-
-  /** get  getIdentity matrix
-   *  \param row an unsigned int, position of the block (row)
-   *  \param col an unsigned int, position of the block (column)
-   *  \return an IdentityMat
-   */
-  const IdentityMat getIdentity(unsigned int row = 0, unsigned int col = 0) const override;
-
-  /** get a pointer on DenseMat matrix
-   *  \param row an unsigned int, position of the block (row)
-   *  \param col an unsigned int, position of the block (column)
-   *  \return a DenseMat*
-   */
-  DenseMat *dense(unsigned int row = 0, unsigned int col = 0) const override;
-
-  /** get a pointer on TriangMat matrix
-   *  \param row an unsigned int, position of the block (row)
-   *  \param col an unsigned int, position of the block (column)
-   *  \return a TriangMat*
-   */
-  TriangMat *triang(unsigned int row = 0, unsigned int col = 0) const override;
-
-  /** get a pointer on SymMat matrix
-   *  \param row an unsigned int, position of the block (row)
-   *  \param col `an unsigned int, position of the block (column)
-   *  \return a SymMat*
-   */
-  SymMat *sym(unsigned int row = 0, unsigned int col = 0) const override;
-
-  /** get a pointer on BandedMat matrix
-   *  \param row an unsigned int, position of the block (row)
-   *  \param col an unsigned int, position of the block (column)
-   *  \return a BandedMat*
-   */
-  BandedMat *banded(unsigned int row = 0, unsigned int col = 0) const override;
-
-  /** get a pointer on SparseMat matrix
-   *  \param row an unsigned int, position of the block (row)
-   *  \param col an unsigned int, position of the block (column)
-   *  \return a SparseMat*
-   */
-  SparseMat *sparse(unsigned int row = 0, unsigned int col = 0) const override;
-
-  /** get a pointer on SparseCoordinateMat matrix
-   *  \param row an unsigned int, position of the block (row)
-   *  \param col an unsigned int, position of the block (column)
-   *  \return a SparseCoordinateMat*
-   */
-  SparseCoordinateMat *sparseCoordinate(unsigned int row = 0,
-                                        unsigned int col = 0) const override;
-
-  /** get a pointer on ZeroMat matrix
-   *  \param row an unsigned int, position of the block (row)
-   *  \param col an unsigned int, position of the block (column)
-   *  \return a ZeroMat*
-   */
-  ZeroMat *zero_mat(unsigned int row = 0, unsigned int col = 0) const override;
-
-  /** get a pointer on Identity matrix
-   *  \param row an unsigned int, position of the block (row)
-   *  \param col an unsigned int, position of the block (column)
-   *  \return an IdentityMat*
-   */
-  IdentityMat *identity(unsigned int row = 0, unsigned int col = 0) const override;
+  unsigned int numberOfBlocks(unsigned int i) const;
 
   /** return the address of the array of double values of the matrix
-   *  \param row position for the required block ->useless for SimpleMatrix
-   *  \param col position for the required block ->useless for SimpleMatrix
+   *  \param row position for the required block ->useless for SiconosMatrix
+   *  \param col position for the required block ->useless for SiconosMatrix
    *  \return double* : the pointer on the double array
    */
-  double *getArray(unsigned int row = 0, unsigned int col = 0) const override;
+  double *getArray(unsigned int row = 0, unsigned int col = 0) const;
 
   /** sets all the values of the matrix to 0.0
    */
-  void zero() override;
+  void zero();
 
   /** Initialize the matrix with random values
    */
-  void randomize() override;
+  void randomize();
 
   /** set an identity matrix
    */
-  void eye() override;
+  void setIdentity();
 
-  /** get the number of rows or columns of the matrix
-   *  \param index 0 for rows, 1 for columns
-   *  \return an int
-   */
-  unsigned int size(unsigned int index) const override;
+  /** \return the number of rows of the matrix */
+  auto rows() const { return _dimRow; }
 
-  /** resize the matrix with nbrow rows and nbcol columns, lower and upper are useful only for
-   * SparseMat.The existing elements of the Block matrix are preseved when specified. \param
-   * nbrow \param nbcol \param lower \param upper \param b
-   */
-  void resize(unsigned int nbrow, unsigned int nbcol, unsigned int lower = 0,
-              unsigned int upper = 0, bool b = true) override;
-
-  /** compute the infinite norm of the Block matrix
-   *  \return a double
-   */
-  double normInf() const override;
-
-  /** display data on standard output
-   */
-  void display() const override;
-
-  /** display data on standard output
-   */
-  void displayExpert(bool brief = true) const override;
+  /** \return the number of columns of the matrix */
+  auto cols() const { return _dimCol; }
 
   friend std::ostream &operator<<(std::ostream &os, const BlockMatrix &bm);
 
@@ -276,37 +160,28 @@ class BlockMatrix : public SiconosMatrix {
    *  \param j an unsigned int
    *  \return the element matrix[i,j]
    */
-  double &operator()(unsigned int i, unsigned int j) override;
+  double &operator()(unsigned int i, unsigned int j);
 
   /** get or set the element matrix[i,j]
    *  \param i an unsigned int
    *  \param j an unsigned int
    *  \return the element matrix[i,j]
    */
-  double operator()(unsigned int i, unsigned int j) const override;
+  double operator()(unsigned int i, unsigned int j) const;
 
   /** return the element matrix[i,j]
    *  \param i an unsigned int
    *  \param j an unsigned int
    *  \return a double
    */
-  double getValue(unsigned int i, unsigned int j) const override;
+  double getValue(unsigned int i, unsigned int j) const;
 
   /** set the element matrix[i,j]
    *  \param i an unsigned int i
    *  \param j an unsigned int j
    *  \param value
    */
-  void setValue(unsigned int i, unsigned int j, double value) override;
-
-  /** transpose in place: x->trans() is x = transpose of x.
-   */
-  void trans() override;
-
-  /** transpose a matrix: x->trans(m) is x = transpose of m.
-   *  \param m the matrix to be transposed.
-   */
-  void trans(const SiconosMatrix &m) override;
+  void setValue(unsigned int i, unsigned int j, double value);
 
   /** get the vector tabRow
    *  \return a vector of int
@@ -321,146 +196,70 @@ class BlockMatrix : public SiconosMatrix {
   /** get the vector tabRow
    *  \return a pointer to vector of int
    */
-  inline const std::shared_ptr<std::vector<std::size_t>> tabRow() const override
-  {
-    return _tabRow;
-  };
+  inline const std::shared_ptr<std::vector<std::size_t>> tabRow() const { return _tabRow; };
 
   /** get the vector tabCol
    *  \return a pointer to vector of int
    */
-  inline const std::shared_ptr<std::vector<std::size_t>> tabCol() const override
-  {
-    return _tabCol;
-  };
+  inline const std::shared_ptr<std::vector<std::size_t>> tabCol() const { return _tabCol; };
 
   /** get block at position row-col
    *  \param row unsigned int
    *  \param col unsigned int
    *  \return std::shared_ptr<SiconosMatrix> the requested block
    */
-  std::shared_ptr<SiconosMatrix> block(unsigned int row = 0, unsigned int col = 0) override;
+  std::shared_ptr<SiconosMatrix> block(unsigned int row = 0, unsigned int col = 0);
 
   /** get block at position row-col
    *  \param row unsigned int
    *  \param col unsigned int
    *  \return std::shared_ptr<SiconosMatrix> the requested block
    */
-  std::shared_ptr<const SiconosMatrix> block(unsigned int row = 0,
-                                             unsigned int col = 0) const override;
+  std::shared_ptr<const SiconosMatrix> block(unsigned int row = 0, unsigned int col = 0) const;
 
-  /** get row index of current matrix and save it in  v
-   *  \param r index of required line
-   *  \param[out] v a vector
+  /** convert BlockMatrix to SiconosMatrix
+   *  \return SiconosMatrix the converted matrix
    */
-  void getRow(unsigned int r, SiconosVector &v) const override;
+  std::shared_ptr<siconos::algebra::SiconosMatrix> toSiconosMatrix() const;
 
-  /** set line row of the current matrix with vector v
-   *  \param r index of required line
-   *  \param v a vector
+  /**
+   *
    */
-  void setRow(unsigned int r, const SiconosVector &v) override;
+  void copyBlock(unsigned int i, unsigned int j,
+                 std::shared_ptr<siconos::algebra::SiconosMatrix>);
 
-  /** get column index of current matrix and save it into vOut
-   *  \param c index of required column
-   *  \param[out] v a vector
-   */
-  void getCol(unsigned int c, SiconosVector &v) const override;
-
-  /** set column col of the current matrix with vector
-   *  \param c index of required column
-   *  \param v a vector
-   */
-  void setCol(unsigned int c, const SiconosVector &v) override;
-
-  /** add a part of the input matrix (starting from (i,j) pos) to the current matrix
-   *  \param i an unsigned int i (in-out)
-   *  \param j an unsigned int j (in-out)
-   *  \param m a SiconosMatrix (in-out)
-   */
-  void addSimple(unsigned int &i, unsigned int &j, const SiconosMatrix &m);
-
-  /** subtract a part of the input matrix (starting from (i,j) pos) to the current matrix
-   *  \param i an unsigned int i (in-out)
-   *  \param j an unsigned int j (in-out)
-   *  \param m a SiconosMatrix (in-out)
-   */
-  void subSimple(unsigned int &i, unsigned int &j, const SiconosMatrix &m);
-
-  /** assignment
-   * \param m the matrix to be copied
-   * \return  BlockMatrix&
-   */
-  BlockMatrix &operator=(const SiconosMatrix &m) override;
-
-  /** assignment
-   *  \param m the matrix to be copied
-   * \return  BlockMatrix&
-   */
-  BlockMatrix &operator=(const BlockMatrix &m);
-
-  /** assignment
-   *  \param m the matrix to be copied
-   * \return  BlockMatrix&
-   */
-  BlockMatrix &operator=(const DenseMat &m) override;
-
-  /** operator +=
-   *  \param m the matrix to add
-   * \return  BlockMatrix&
-   */
-  BlockMatrix &operator+=(const SiconosMatrix &m) override;
-
-  /**operator -=
-   *  \param m the matrix to subtract
-   * \return  BlockMatrix&
-   */
-  BlockMatrix &operator-=(const SiconosMatrix &m) override;
-
-  void updateNumericsMatrix() override
-  {
+  void updateNumericsMatrix() {
     THROW_EXCEPTION("BlockMatrix::updateNumericsMatrix(), not implemented fro BlockMatrix");
   };
 
-  /** computes an LU factorization of a general M-by-N matrix using partial pivoting with row
-   * interchanges. The result is returned in this (InPlace). Based on Blas dgetrf function.
-   */
-  void PLUFactorizationInPlace() override;
-
-  void Factorize() override;
-
-  /**  compute inverse of this thanks to LU factorization with Partial pivoting. This method
-   * inverts U and then computes inv(A) by solving the system inv(A)*L = inv(U) for inv(A). The
-   * result is returned in this (InPlace). Based on Blas dgetri function.
-   */
-  void PLUInverseInPlace() override;
-
-  /** solves a system of linear equations A * X = B  (A=this) with a general N-by-N matrix A
-   * using the LU factorization computed by PLUFactorizationInPlace. Based on Blas dgetrs
-   * function. \param[in,out] B on input the RHS matrix b; on output: the result x
-   */
-  void PLUForwardBackwardInPlace(SiconosMatrix &B) override;
-  void Solve(SiconosMatrix &B) override;
-
-  /** solves a system of linear equations A * X = B  (A=this) with a general N-by-N matrix A
-   * using the LU factorization computed by PLUFactorizationInPlace.  Based on Blas dgetrs
-   * function. \param[in,out] B on input the RHS matrix b; on output: the result x
-   */
-  void PLUForwardBackwardInPlace(SiconosVector &B) override;
-  void Solve(SiconosVector &B) override;
-
-  //ACCEPT_STD_VISITORS();
-
-  friend class SimpleMatrix;
-  friend void scal(double, const SiconosMatrix &, SiconosMatrix &, bool);
+  // friend class SiconosMatrix;
   friend SiconosMatrix &operator*=(SiconosMatrix &m, const double &s);
   friend SiconosMatrix &operator/=(SiconosMatrix &m, const double &s);
-
+  friend void print(const BlockMatrix &mat);
   /** number of non-zero in the matrix
    * \param tol the tolerance under which a number is considered zero
    */
-  virtual size_t nnz(double tol = 1.e-14) override;
+  size_t nonZeros(double tol = 1.e-14);
 };
 
+// Free functions
+
+/** \return compute the infinite norm of a matrix
+ *  \param mat the input matrix
+ */
+double normInf(const BlockMatrix &mat);
+
+/** display data on standard output
+ *  \param mat the input matrix
+ */
+void print(const BlockMatrix &mat);
+
+// /** Set new block pointer
+//  *
+//  */
+// void setBlock(unsigned int i, unsigned int j,
+//   std::shared_ptr<siconos::algebra::SiconosMatrix>);
+
 }  // namespace siconos::algebra
+
 #endif

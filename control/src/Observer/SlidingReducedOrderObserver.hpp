@@ -32,10 +32,10 @@ class SlidingReducedOrderObserver : public Observer {
 
  protected:
   /** the vector defining the measurements (\f$ y = Cx \f$) */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _C{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _C{nullptr};
 
   /** matrix multiplying the innovation term */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _L{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _L{nullptr};
 
   double _theta{0.};
 
@@ -63,8 +63,8 @@ class SlidingReducedOrderObserver : public Observer {
    */
   SlidingReducedOrderObserver(std::shared_ptr<ControlSensor> sensor,
                               const siconos::algebra::SiconosVector& xHat0,
-                              std::shared_ptr<siconos::algebra::SimpleMatrix> C,
-                              std::shared_ptr<siconos::algebra::SimpleMatrix> L)
+                              std::shared_ptr<siconos::algebra::SiconosMatrix> C,
+                              std::shared_ptr<siconos::algebra::SiconosMatrix> L)
       : Observer(ObserverType::SlidingReducedOrder, sensor, xHat0), _C(C), _L(L)
   {
   }
@@ -87,13 +87,13 @@ class SlidingReducedOrderObserver : public Observer {
    *
    *  \param L the new L matrix
    */
-  inline void setLPtr(std::shared_ptr<siconos::algebra::SimpleMatrix> L) { _L = L; };
+  inline void setLPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> L) { _L = L; };
 
   /** Set the C matrix
    *
    *  \param C the new C matrix
    */
-  inline void setCPtr(std::shared_ptr<siconos::algebra::SimpleMatrix> C) { _C = C; };
+  inline void setCPtr(std::shared_ptr<siconos::algebra::SiconosMatrix> C) { _C = C; };
 };
 
 // Register the observer into the factory

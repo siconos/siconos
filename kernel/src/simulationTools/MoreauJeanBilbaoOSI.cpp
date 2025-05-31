@@ -21,14 +21,13 @@
 #include "BoundaryCondition.hpp"
 #include "Interaction.hpp"
 #include "LagrangianLinearDiagonalDS.hpp"
+#include "LagrangianR.hpp"
 #include "NewtonImpactNSL.hpp"
 #include "OneStepNSProblem.hpp"
-#include "Relation.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixVectorOp.hpp"  // for subprod
 #include "SiconosVector.hpp"
-#include "SiconosVectorOp.hpp"  // for subscal
 #include "SiconosVisitor.hpp"
-#include "SimpleMatrix.hpp"
 #include "Simulation.hpp"
 // #define DEBUG_MESSAGES
 // #define DEBUG_STDOUT
@@ -63,7 +62,7 @@ void siconos::integrators::MoreauJeanBilbaoOSI::initializeWorkVectorsForDS(
     // ds-dependent)
     _initialize_iteration_matrix(ds);
     // Update dynamical system components (for memory swap).
-    lldds->computeForces(t, lldds->q(), lldds->velocity());
+    lldds->computeTotalForces(lldds->velocity_read(), lldds->q_read(), t);
     lldds->swapInMemory();
   } else
     THROW_EXCEPTION(
@@ -180,7 +179,7 @@ void siconos::integrators::MoreauJeanBilbaoOSI::_initialize_iteration_matrix(
   //
   // W = mass + time_step**2/2(I - Theta)Stiffness + time_step * Sigma*
   const auto& dsv = _dynamicalSystemsGraph->descriptor(ds);
-  if (_dynamicalSystemsGraph->properties(dsv).W)
+  if (_dynamicalSystemsGraph->properties(dsv).iterationMatrix)
     THROW_EXCEPTION(
         "siconos::integrators::MoreauJeanBilbaoOSI::_initialize_iteration_"
         "matrix(ds) - W has "
@@ -192,9 +191,9 @@ void siconos::integrators::MoreauJeanBilbaoOSI::_initialize_iteration_matrix(
     auto ndof = lldds->dimension();
     // Allocate work buffers for:
     // - Iteration matrix
-    _dynamicalSystemsGraph->properties(dsv).W =
-        std::make_shared<siconos::algebra::SimpleMatrix>(
-            ndof, ndof, siconos::algebra::UblasType::BANDED, 0, 0);
+    _dynamicalSystemsGraph->properties(dsv).iterationMatrix =
+        std::make_shared<siconos::algebra::SiconosMatrix>(
+            ndof, ndof);  // WARNING : Use bandmatrix instead ?
 
     // - I - theta
     // ds_work_vectors[siconos::integrators::MoreauJeanBilbaoOSI::ONE_MINUS_THETA]
@@ -202,10 +201,10 @@ void siconos::integrators::MoreauJeanBilbaoOSI::_initialize_iteration_matrix(
     // - dt * sigma*
     // ds_work_vectors[siconos::integrators::MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR]
     // = std::make_shared<siconos::algebra::SiconosVector>(ndof));
-    auto& iteration_matrix = *_dynamicalSystemsGraph->properties(dsv).W;
-    auto omega2 = lldds->stiffness();
-    auto damp = lldds->damping();
-    auto mass = lldds->mass();
+    auto& iteration_matrix = *_dynamicalSystemsGraph->properties(dsv).iterationMatrix;
+    auto omega2 = lldds->stiffnessMatrix();
+    auto damp = lldds->dampingMatrix();
+    auto mass = lldds->massMatrix();
 
     double one_minus_theta, dt_sigma_star;
     auto time_step = _simulation->timeStep();
@@ -217,9 +216,9 @@ void siconos::integrators::MoreauJeanBilbaoOSI::_initialize_iteration_matrix(
       massk = 1.;
       sigmak = 0.;
       omega2k = 0.;
-      if (mass) massk = (*mass)(k, k);
-      if (damp) sigmak = 0.5 * (*damp)(k);
-      if (omega2) omega2k = (*omega2)(k);
+      if (lldds->hasMassMatrix()) massk = mass(k, k);
+      if (lldds->hasDampingMatrix()) sigmak = 0.5 * damp(k);
+      if (lldds->hasStiffnessMatrix()) omega2k = omega2(k);
       compute_parameters(time_step, omega2k, sigmak, one_minus_theta, dt_sigma_star);
       iteration_matrix(k, k) =
           one / (massk + coeff * one_minus_theta * omega2k + dt_sigma_star);
@@ -277,13 +276,13 @@ void siconos::integrators::MoreauJeanBilbaoOSI::computeFreeState() {
     // Get velocity computed at the beginning of the time step.
     const auto& v_i = lldds.velocityMemory().getSiconosVector(0);
     const auto& q_i = lldds.qMemory().getSiconosVector(0);
-    DEBUG_EXPR(q_i.display(););
-    DEBUG_EXPR(v_i.display(););
-    const auto& stiffness = *lldds.stiffness();
+    DEBUG_EXPR(siconos::algebra::print(q_i););
+    DEBUG_EXPR(siconos::algebra::print(v_i););
+    auto stiffness = lldds.stiffnessMatrix();
     // Get iteration matrix
     const auto& dsv = _dynamicalSystemsGraph->descriptor(ds);
-    auto& inv_iteration_matrix = *_dynamicalSystemsGraph->properties(dsv).W;
-    DEBUG_EXPR(inv_iteration_matrix.display(););
+    auto& inv_iteration_matrix = *_dynamicalSystemsGraph->properties(dsv).iterationMatrix;
+    DEBUG_EXPR(siconos::algebra::print(inv_iteration_matrix););
     // Get 2.*dt*sigma^*
     auto& two_dt_sigma_star =
         *work_ds[siconos::integrators::MoreauJeanBilbaoOSI::TWO_DT_SIGMA_STAR];
@@ -294,7 +293,7 @@ void siconos::integrators::MoreauJeanBilbaoOSI::computeFreeState() {
     for (decltype(dimension) k = 0; k < dimension; ++k)
       vfree(k) = v_i(k) - inv_iteration_matrix(k, k) * (time_step * stiffness(k) * q_i(k) +
                                                         two_dt_sigma_star(k) * v_i(k));
-    DEBUG_EXPR(vfree.display(););
+    DEBUG_EXPR(siconos::algebra::print(vfree););
   }
   DEBUG_END("siconos::integrators::MoreauJeanBilbaoOSI::computeFreeState()")
 }
@@ -313,14 +312,10 @@ struct siconos::integrators::MoreauJeanBilbaoOSI::_NSLEffectOnFreeOutput
       : _osnsp(p), _inter(inter), _interProp(interProp) {};
 
   void visit(const siconos::modeling::NewtonImpactNSL& nslaw) const override {
-    double e;
-    e = nslaw.e();
-    auto sizeY = _inter.nonSmoothLaw()->size();
-    std::vector<std::size_t> subCoord{0, sizeY, 0, sizeY};
+    auto e = nslaw.e();
     auto& osnsp_rhs =
         *(*_interProp.workVectors)[siconos::integrators::MoreauJeanBilbaoOSI::OSNSP_RHS];
-    siconos::algebra::subscal(e, _inter.y_k(_osnsp->inputOutputLevel()), osnsp_rhs, subCoord,
-                              false);
+    osnsp_rhs += e * _inter.y_k(_osnsp->inputOutputLevel());
   }
 };
 
@@ -343,20 +338,16 @@ void siconos::integrators::MoreauJeanBilbaoOSI::computeFreeOutput(
   //   THROW_EXCEPTION("siconos::integrators::MoreauJeanBilbaoOSI::computeFreeOutput
   //   only Lagrangian Linear Relations are allowed.");
 
-  auto sizeY = inter.nonSmoothLaw()->size();
-  std::vector<std::size_t> coord{0, sizeY, 0, 0, 0, 0, 0, sizeY};
   // buffer used to save output
   auto& x_free = *inter_work_block[siconos::integrators::MoreauJeanBilbaoOSI::xfree];
   auto& osnsp_rhs = *(*indexSet.properties(vertex_inter)
                            .workVectors)[siconos::integrators::MoreauJeanBilbaoOSI::OSNSP_RHS];
 
-  if (inter.relation()->C()) {
-    auto& C = *inter.relation()->C();
-    coord[3] = C.size(1);
-    coord[5] = C.size(1);
-    // osnsp_rhs[coord] = C.x_free
-    siconos::algebra::subprod(C, x_free, osnsp_rhs, coord, true);
-  }
+  auto lagr = std::dynamic_pointer_cast<siconos::modeling::LagrangianR>(inter.relation());
+  assert(lagr && "MoreauJeanBilbaoOSI only implemented for Lagrangian systems.");
+
+  auto H = lagr->jacobianhOver_q();
+  siconos::algebra::matrixBlockVector_prod(H, x_free, osnsp_rhs, true);
   _NSLEffectOnFreeOutput nslEffectOnFreeOutput{osnsp, inter,
                                                indexSet.properties(vertex_inter)};
   inter.nonSmoothLaw()->accept(nslEffectOnFreeOutput);
@@ -378,14 +369,12 @@ void siconos::integrators::MoreauJeanBilbaoOSI::updatePosition(
   // get dynamical system
   auto& d = static_cast<siconos::modeling::LagrangianLinearDiagonalDS&>(ds);
   // Compute q
-  auto& v = *d.velocity();
-  auto& q = *d.q();
   //  -> get positions at the beginning of the time step
   const auto& qold = d.qMemory().getSiconosVector(0);
   // update positions
-  siconos::algebra::scal(time_step, v, q, true);
-  q += qold;
-  DEBUG_EXPR(q.display(););
+  *d.q() = time_step * d.velocity_read();
+  *d.q() += qold;
+  DEBUG_EXPR(siconos::algebra::print(q););
 }
 
 void siconos::integrators::MoreauJeanBilbaoOSI::updateState(const unsigned int) {
@@ -398,7 +387,7 @@ void siconos::integrators::MoreauJeanBilbaoOSI::updateState(const unsigned int) 
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
   for (std::tie(dsi, dsend) = _dynamicalSystemsGraph->vertices(); dsi != dsend; ++dsi) {
     if (!checkOSI(dsi)) continue;
-    auto& inv_iteration_matrix = *_dynamicalSystemsGraph->properties(*dsi).W;
+    auto& inv_iteration_matrix = *_dynamicalSystemsGraph->properties(*dsi).iterationMatrix;
     // get dynamical system and work vector
     auto& lldds = static_cast<siconos::modeling::LagrangianLinearDiagonalDS&>(
         *_dynamicalSystemsGraph->bundle(*dsi));
@@ -410,14 +399,14 @@ void siconos::integrators::MoreauJeanBilbaoOSI::updateState(const unsigned int) 
       v = *lldds.p(_levelMaxForInput);  // v = p
       if (lldds.boundaryConditions())
         for (const auto itindex : lldds.boundaryConditions()->velocityIndices()) {
-          v.setValue(itindex, 0.0);
+          v(itindex) = 0.0;
         }
       auto ndof = lldds.dimension();
       for (unsigned int k = 0; k < ndof; ++k)
         v(k) = vfree(k) + v(k) * inv_iteration_matrix(k, k);
     } else
       v = vfree;
-    DEBUG_EXPR(v.display(););
+    DEBUG_EXPR(siconos::algebra::print(v););
     // Update positions with the last computed velocities.
     updatePosition(lldds);
   }
@@ -438,8 +427,8 @@ void siconos::integrators::MoreauJeanBilbaoOSI::display() const {
 
       std::cout << "--------------------------------\n";
       std::cout << "--> W of dynamical system number " << ds->number() << ": \n";
-      if (_dynamicalSystemsGraph->properties(*dsi).W)
-        _dynamicalSystemsGraph->properties(*dsi).W->display();
+      if (_dynamicalSystemsGraph->properties(*dsi).iterationMatrix)
+        siconos::algebra::print(*_dynamicalSystemsGraph->properties(*dsi).iterationMatrix);
       else
         std::cout << "-> nullptr\n";
     }
@@ -462,8 +451,8 @@ bool siconos::integrators::MoreauJeanBilbaoOSI::addInteractionInIndexSet(
 
   assert(i == 1);
   double h = _simulation->timeStep();
-  auto y = (inter->y(i - 1))->getValue(0);  // for i=1 y(i-1) is the position
-  auto yDot = (inter->y(i))->getValue(0);   // for i=1 y(i) is the velocity
+  auto y = (*inter->y(i - 1))(0);  // for i=1 y(i-1) is the position
+  auto yDot = (*(inter->y(i)))(0);   // for i=1 y(i) is the velocity
   bool _useGamma = false;
   double _gamma = 1.0 / 2.0;
   double _constraintActivationThreshold = 0.0;

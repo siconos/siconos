@@ -17,8 +17,9 @@
  */
 
 /*! \file SiconosBulletCollisionManager.cpp
-  \brief Definition of a Bullet-based interaction handler for contact
-  detection.
+
+    \brief Definition of a Bullet-based interaction handler for contact
+    detection.
 */
 
 // Note, in general the "outside margin" is not implemented.  What is
@@ -149,17 +150,17 @@ siconos::collision::bullet::SiconosBulletCollisionManager::
 std::shared_ptr<siconos::collision::StaticBody>
 siconos::collision::bullet::SiconosBulletCollisionManager::addStaticBody(
     std::shared_ptr<siconos::collision::SiconosContactorSet> cs,
-    std::shared_ptr<siconos::algebra::SiconosVector> position, int number) {
+    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>> &position,
+    int number) {
   auto rec = std::make_shared<siconos::collision::StaticBody>();
   rec->contactorSet = cs;
   if (!position) {
-    // Default at center
-    position = std::make_shared<siconos::algebra::SiconosVector>(7);
-    position->zero();
-    (*position)(3) = 1.0;  // we give a unit identity quarternion
+    rec->base = std::make_shared<siconos::algebra::SiconosVector>(7);
+    rec->base->setZero();
+    (*(rec->base))(3) = 1.0;  // we give a unit identity quarternion
+  } else {
+    rec->base = std::make_shared<siconos::algebra::SiconosVector>(*position);
   }
-
-  rec->base = position;
   rec->number = number;
   // std::cout << "siconos::collision::bullet::SiconosBulletCollisionManager::addStaticBody
   // number : " << number << std::endl;
@@ -510,8 +511,7 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::updateInteractio
 
       int num_contact_points = 0;
 
-      for (auto it
-           : t) { num_contact_points++; }
+      for (auto it : t) { num_contact_points++; }
 
       std::cout
       << "Number of contacts points detected by bullet: " << num_contact_points << "\n";);
@@ -915,10 +915,10 @@ siconos::collision::bullet::SiconosBulletCollisionManager::lineIntersectionQuery
       if (rec) {
         auto result = std::make_shared<siconos::collision::SiconosCollisionQueryResult>();
         result->point = std::make_shared<siconos::algebra::SiconosVector>(3);
-        result->point->setValue(0, rayResult.m_hitPointWorld.getX());
-        result->point->setValue(1, rayResult.m_hitPointWorld.getY());
-        result->point->setValue(2, rayResult.m_hitPointWorld.getZ());
-        result->distance = (*result->point - start).norm2();
+        (*result->point)(0) = rayResult.m_hitPointWorld.getX();
+        (*result->point)(1) = rayResult.m_hitPointWorld.getY();
+        (*result->point)(2) = rayResult.m_hitPointWorld.getZ();
+        result->distance = (*result->point - start).norm();
         result->body = rec->ds;  // note: may be null for static contactors
         result->shape = rec->sshape;
         result->contactor = rec->contactor;
@@ -946,10 +946,10 @@ siconos::collision::bullet::SiconosBulletCollisionManager::lineIntersectionQuery
           auto result(std::make_shared<SiconosCollisionQueryResult>());
           result->point = std::make_shared<siconos::algebra::SiconosVector>(3);
           result->point->resize(3);
-          result->point->setValue(0, rayResult.m_hitPointWorld[i].getX());
-          result->point->setValue(1, rayResult.m_hitPointWorld[i].getY());
-          result->point->setValue(2, rayResult.m_hitPointWorld[i].getZ());
-          result->distance = (*result->point - start).norm2();
+          (*result->point)(0) = rayResult.m_hitPointWorld[i].getX();
+          (*result->point)(1) = rayResult.m_hitPointWorld[i].getY();
+          (*result->point)(2) = rayResult.m_hitPointWorld[i].getZ();
+          result->distance = (*result->point - start).norm();
           result->body = rec->ds;  // note: null for static contactors
           result->shape = rec->sshape;
           result->contactor = rec->contactor;

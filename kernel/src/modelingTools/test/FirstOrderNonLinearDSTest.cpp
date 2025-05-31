@@ -17,10 +17,10 @@
  */
 #include "FirstOrderNonLinearDSTest.hpp"
 
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixOp.hpp"
 #include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
   if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -35,222 +35,165 @@ void FirstOrderNonLinearDSTest::setUp() {
   (*x0)(1) = 2;
   (*x0)(2) = 3;
 
-  J0 = std::make_shared<siconos::algebra::SimpleMatrix>("matJ0.dat", true);
-  M = std::make_shared<siconos::algebra::SimpleMatrix>("matM.dat", true);
+  J0 = std::make_shared<siconos::algebra::SiconosMatrix>(
+      siconos::algebra::readMatrixFromFile("matJ0.dat"));
+  M = std::make_shared<siconos::algebra::SiconosMatrix>(
+      siconos::algebra::readMatrixFromFile("matM.dat"));
 }
 
 void FirstOrderNonLinearDSTest::tearDown() {}
 
-// initial state only : \dot x = r
+// Test 1 - DS with constant coefficients.
 void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS1() {
   std::cout << "--> Test: constructor 1." << std::endl;
-  auto ds = std::make_shared<siconos::modeling::FirstOrderNonLinearDS>(x0);
+  auto ds = std::make_shared<siconos::modeling::FirstOrderNonLinearDS>(*x0);
 
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", Type::value(*ds) ==
   // Type::FirstOrderNonLinearDS, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", ds->n() == 3, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", *ds->x0() == *x0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", ds->f() == nullptr, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildFirstOrderNonLinearDS1 : ", ds->jacobianfx() == nullptr, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", ds->M() == nullptr, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", ds->invM() == nullptr,
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", ds->dimension() == 3,
+                               true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", ds->x0() == *x0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", ds->LU_M() == nullptr,
                                true);
   double time = 1.5;
 
-  ds->computef(time, ds->x());
-  ds->computeJacobianfx(time, ds->x());
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", ds->f() == nullptr, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildFirstOrderNonLinearDS1 : ", ds->jacobianfx() == nullptr, true);
+  // Test compute functions that should do nothing but that should not fail.
+  ds->computefVector(*ds->x(), time);
+  ds->computeJacobianfOver_x(*ds->x(), time);
+  ds->computeMMatrix(time);
 
-  siconos::algebra::SiconosVector zero(3);
-  siconos::algebra::SimpleMatrix m0(3, 3);
-  ds->update(time);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", *(ds->rhs()) == zero,
+  // Rhs stuff
+  ds->initRhs(time);  // Call computeRhs and computeJacobianRhsOver_x
+  siconos::algebra::SiconosMatrix zero_mat = siconos::algebra::SiconosMatrix::Zero(3, 3);
+  siconos::algebra::SiconosVector zero_vec = siconos::algebra::SiconosVector::Zero(3);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", *ds->rhs() == zero_vec,
                                true);
+
+  // Now, let's set constant values for all coeff.
+  siconos::algebra::SiconosMatrix ref_mat = siconos::algebra::SiconosMatrix::Random(3, 3);
+  siconos::algebra::SiconosVector ref_vec = siconos::algebra::SiconosVector::Random(3);
+  ds->setConstantfVector(ref_vec);
+
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", ds->fVector() == ref_vec,
+                               true);
+
+  ds->setConstantJacobianfOver_x(ref_mat);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildFirstOrderNonLinearDS1 : ", ds->jacobianRhsx() == nullptr, true);
+      "testBuildFirstOrderNonLinearDS1 : ", ds->jacobianfOver_x() == ref_mat, true);
+
+  ds->setConstantMMatrix(ref_mat);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", ds->MMatrix() == ref_mat,
+                               true);
 
   ds->initRhs(time);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", *(ds->rhs()) == zero,
+  auto LU_M_ = std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(ref_mat);
+  auto ref_rhs = LU_M_->solve(ref_vec);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", *ds->rhs() == ref_rhs,
                                true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildFirstOrderNonLinearDS1 : ", *(ds->jacobianRhsx()) == m0, true);
 
-  ds->setComputeFFunction("TestPlugin", "computef");
-  ds->setComputeJacobianfxFunction("TestPlugin", "computeJacobianfx");
-  time = 2.;
-  ds->computef(time, ds->x());
-  ds->computeJacobianfx(time, ds->x());
-  ds->setComputeMFunction("TestPlugin", "computeM");
-  ds->computeM(time);
-  siconos::algebra::SimpleMatrix Mref(3, 3);
-  Mref(0, 0) = 1. * time;
-  Mref(1, 1) = 2. * time;
-  Mref(2, 2) = 3. * time;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", *(ds->f()) == time * *x0,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildFirstOrderNonLinearDS1 : ", *(ds->jacobianfx()) == *J0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", *(ds->M()) == Mref, true);
-  ds->initRhs(time);
-  siconos::algebra::SimpleMatrix invM(3, 3);
-  invM(0, 0) = 1. / time;
-  invM(1, 1) = 1. / (2. * time);
-  invM(2, 2) = 1. / (3. * time);
-  siconos::algebra::SiconosVector tmp(3);
-  siconos::algebra::prod(invM, *x0, tmp);
-  siconos::algebra::prod(invM, *J0, Mref);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildFirstOrderNonLinearDS1 : ", *(ds->rhs()) == time * tmp, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildFirstOrderNonLinearDS1 : ", *(ds->jacobianRhsx()) == Mref, true);
+  auto b00 = ds->jacobianRhsOver_x()->block(0, 0);
+  auto ref_block = LU_M_->solve(ref_mat);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", *b00 == ref_block, true);
 
-  std::cout << "--> Constructor 2 test ended with success." << std::endl;
+  std::cout << "--> Constructor 1 test ended with success." << std::endl;
 }
 
-// copy
+// copy constructor
 void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS2() {
-  std::cout << "--> Test: constructor 1." << std::endl;
-  auto source = std::make_shared<siconos::modeling::FirstOrderNonLinearDS>(x0);
+  std::cout << "--> Test: constructor 2." << std::endl;
+  auto source = std::make_shared<siconos::modeling::FirstOrderNonLinearDS>(*x0);
   auto ds = std::make_shared<siconos::modeling::FirstOrderNonLinearDS>(*source);
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", ds->n() == 3, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", *ds->x0() == *x0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", ds->f() == nullptr, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildFirstOrderNonLinearDS2 : ", ds->jacobianfx() == nullptr, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", ds->M() == nullptr, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", ds->invM() == nullptr,
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", ds->dimension() == 3,
                                true);
-  siconos::algebra::SiconosVector zero(3);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", ds->x0() == *x0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", ds->LU_M() == nullptr,
+                               true);
   double time = 1.5;
-  ds->update(time);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", *(ds->rhs()) == zero,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildFirstOrderNonLinearDS2 : ", ds->jacobianRhsx() == nullptr, true);
-
   ds->initRhs(time);
-  siconos::algebra::SimpleMatrix m0(3, 3);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS2 : ", *(ds->rhs()) == zero,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildFirstOrderNonLinearDS2 : ", *(ds->jacobianRhsx()) == m0, true);
-
+  ds->update(time);
   std::cout << "--> Constructor 2 test ended with success." << std::endl;
 }
 
-// x0 + plugins for f and its gradient
 void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS3() {
-  std::cout << "--> Test: constructor 3." << std::endl;
-  auto ds = std::make_shared<siconos::modeling::FirstOrderNonLinearDS>(
-      x0, "TestPlugin:computef", "TestPlugin:computeJacobianfx");
+  std::cout << "--> Test: constructor with user-defined functions." << std::endl;
+  auto ds = std::make_shared<siconos::modeling::FirstOrderNonLinearDS>(*x0);
 
   // CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3 : ", Type::value(*ds) ==
   // Type::FirstOrderNonLinearDS, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3 : ", ds->n() == 3, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3 : ", *ds->x0() == *x0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3 : ", ds->dimension() == 3,
+                               true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3 : ", ds->x0() == *x0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3 : ", ds->LU_M() == nullptr,
+                               true);
   double time = 1.5;
-  ds->computef(time, ds->x());
-  ds->computeJacobianfx(time, ds->x());
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3 : ", *(ds->f()) == time * *x0,
-                               true);
+
+  // Set user-defined functions for all operators
+
+  // f(x,t) = t.x
+  ds->setComputefVectorFunction(
+      [](const Eigen::Ref<const siconos::algebra::SiconosVector> &x, double time,
+         Eigen::Ref<siconos::algebra::MapVectorType> result) { result = time * x; });
+
+  ds->setComputeJacobianfOver_xFunction(
+      [](const Eigen::Ref<const siconos::algebra::SiconosVector> &x, double time,
+         Eigen::Ref<siconos::algebra::MapType> result) {
+        result << 1, 4, 7, 2, 5, 8, 3, 6, 9;
+      });
+
+  ds->setComputeMMatrixFunction([](double time, Eigen::Ref<siconos::algebra::MapType> result) {
+    result.setZero();
+    result(0, 0) = time;
+    result(1, 1) = 2. * time;
+    result(2, 2) = 3. * time;
+  });
+
+  time = 2.;
+
+  ds->computefVector(*ds->x(), time);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildFirstOrderNonLinearDS3 : ", *(ds->jacobianfx()) == *J0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3 : ", ds->M() == nullptr, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3 : ", ds->invM() == nullptr,
+      "testBuildFirstOrderNonLinearDS3 : ", ds->fVector() == time * *x0, true);
+
+  ds->computeJacobianfOver_x(*ds->x(), time);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(
+      "testBuildFirstOrderNonLinearDS3 : ", ds->jacobianfOver_x() == *J0, true);
+
+  ds->computeMMatrix(time);
+  siconos::algebra::SiconosMatrix Mref(3, 3);
+  Mref.setZero();
+  Mref(0, 0) = 1. * time;
+  Mref(1, 1) = 2. * time;
+  Mref(2, 2) = 3. * time;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3 : ", ds->MMatrix() == Mref,
                                true);
 
-  ds->initRhs(time);
+  // Rhs ...
+  ds->initRhs(time);     // compute rhs and its jacobian
+  auto LUM = Mref.lu();  // Eigen::FullPivLU<siconos::algebra::SiconosMatrix>(Mref);
+  auto ref_rhs = LUM.solve(ds->fVector()).eval();
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildFirstOrderNonLinearDS3 : ", *(ds->rhs()) == time * *x0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildFirstOrderNonLinearDS3 : ", *(ds->jacobianRhsx()) == *J0, true);
+      "testBuildFirstOrderNonLinearDS3 : ", (*ds->rhs() - ref_rhs).norm() < 1e-15, true);
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS3 : ", *(ds->f()) == time * *x0,
-                               true);
+  auto b00 = ds->jacobianRhsOver_x()->block(0, 0);
+  auto ref_block = LUM.solve(ds->jacobianfOver_x()).eval();
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildFirstOrderNonLinearDS3 : ", *(ds->jacobianfx()) == *J0, true);
+      "testBuildFirstOrderNonLinearDS3 : ", (*b00 - ref_block).norm() < 1e-15, true);
+
+  // Last call to check if everything is ok when we repeat compute... functions
+  ds->update(2. * time);
+
   std::cout << "--> Constructor 3 test ended with success." << std::endl;
-}
-
-// setX0
-void FirstOrderNonLinearDSTest::testSetX0() {
-  std::cout << "--> Test: setX0." << std::endl;
-
-  auto ds1 = std::make_shared<siconos::modeling::FirstOrderNonLinearDS>(xnull);
-  ds1->setX0(*x0);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetX0 : ", *ds1->x0() == *x0, true);
-  std::cout << "--> setX0 test ended with success." << std::endl;
-}
-
-// setX0Ptr
-void FirstOrderNonLinearDSTest::testSetX0Ptr() {
-  std::cout << "--> Test: setX0Ptr." << std::endl;
-  auto ds1 = std::make_shared<siconos::modeling::FirstOrderNonLinearDS>(xnull);
-  ds1->setX0Ptr(x0);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetX0Ptr : ", *ds1->x0() == *x0, true);
-  std::cout << "--> setX0Ptr test ended with success." << std::endl;
-}
-
-// setX
-void FirstOrderNonLinearDSTest::testSetx() {
-  std::cout << "--> Test: setX." << std::endl;
-  auto ds1 = std::make_shared<siconos::modeling::FirstOrderNonLinearDS>(xnull);
-  ds1->setX(*x0);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetX : ", ds1->getx() == *x0, true);
-  std::cout << "--> setX test ended with success." << std::endl;
-}
-
-// setXPtr
-void FirstOrderNonLinearDSTest::testSetxPtr() {
-  std::cout << "--> Test: setXPtr." << std::endl;
-  auto ds1 = std::make_shared<siconos::modeling::FirstOrderNonLinearDS>(xnull);
-  ds1->setXPtr(x0);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetXPtr : ", ds1->getx() == *x0, true);
-  std::cout << "--> setXPtr test ended with success." << std::endl;
-}
-
-// setR
-void FirstOrderNonLinearDSTest::testSetR() {
-  std::cout << "--> Test: setR." << std::endl;
-  auto ds1 = std::make_shared<siconos::modeling::FirstOrderNonLinearDS>(xnull);
-  ds1->setR(*x0);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetR : ", *ds1->r() == *x0, true);
-  std::cout << "--> setR test ended with success." << std::endl;
-}
-
-// setRPtr
-void FirstOrderNonLinearDSTest::testSetRPtr() {
-  std::cout << "--> Test: setRPtr." << std::endl;
-  auto ds1 = std::make_shared<siconos::modeling::FirstOrderNonLinearDS>(xnull);
-  ds1->setRPtr(x0);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetRPtr : ", *ds1->r() == *x0, true);
-  std::cout << "--> setRPtr test ended with success." << std::endl;
-}
-
-// setJacobianXPtr
-void FirstOrderNonLinearDSTest::testSetJacobianfxPtr() {
-  std::cout << "--> Test: setJacobianfxPtr." << std::endl;
-  auto ds1 = std::make_shared<siconos::modeling::FirstOrderNonLinearDS>(xnull);
-  ds1->setJacobianfxPtr(J0);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetJacobianfxPtr : ", *(ds1->jacobianfx()) == *J0, true);
-  std::cout << "--> setJacobianfxPtr test ended with success." << std::endl;
 }
 
 // init
 void FirstOrderNonLinearDSTest::testInitMemory() {
   std::cout << "--> Test: initMemory." << std::endl;
-  auto ds1 = std::make_shared<siconos::modeling::FirstOrderNonLinearDS>(xnull);
+  auto ds1 = std::make_shared<siconos::modeling::FirstOrderNonLinearDS>(*xnull);
   ds1->initMemory(2);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testInitMem1 : ", ds1->xMemory().size() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testInitMem3 : ", ds1->rMemory().size() == 2, true);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testInitMem4 : ", ds1->xMemory().nbVectorsInMemory() == 0,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testInitMem6 : ", ds1->rMemory().nbVectorsInMemory() == 0,
                                true);
   std::cout << "--> initMemory test ended with success." << std::endl;
 }
@@ -258,15 +201,18 @@ void FirstOrderNonLinearDSTest::testInitMemory() {
 // swap
 void FirstOrderNonLinearDSTest::testSwap() {
   std::cout << "--> Test: swap." << std::endl;
-  auto ds1 = std::make_shared<siconos::modeling::FirstOrderNonLinearDS>(xnull);
-  ds1->setX(*x0);
-  ds1->setR(*x0);
-  ds1->initMemory(1);
-  ds1->swapInMemory();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap1 : ", ds1->xMemory().getSiconosVector(0) == *x0,
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap3 : ", ds1->rMemory().getSiconosVector(0) == *x0,
-                               true);
+  siconos::algebra::SiconosVector x1{x0->size()};
+  x1.setConstant(2.4);
+  auto ds = std::make_shared<siconos::modeling::FirstOrderNonLinearDS>(x1);
+  auto x_ds = ds->x();
+  auto r_ds = ds->r();
+
+  *x_ds = x1;
+  *r_ds = x1;  // Copy
+  ds->initMemory(1);
+  ds->swapInMemory();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap1 : ", ds->xMemory().getSiconosVector(0) == x1, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap3 : ", ds->rMemory().getSiconosVector(0) == x1, true);
   std::cout << "--> swap test ended with success." << std::endl;
 }
 

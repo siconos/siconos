@@ -22,8 +22,8 @@
 #include "FENode.hpp"
 #include "Interaction.hpp"
 #include "SiconosException.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
 
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -31,66 +31,63 @@
 #include "siconos_debug.h"
 
 void siconos::mechanics::fem::NodeFem2d2DR::initialize(modeling::Interaction& inter) {
-  auto qSize = inter.getSizeOfDS();
-  _jachq = std::make_shared<siconos::algebra::SimpleMatrix>(2, qSize);
-}
+  setComputeJacobianhOver_qFunction([this](const siconos::algebra::BlockVector& q,
+                                           Eigen::Ref<siconos::algebra::MapType> result) {
+    DEBUG_BEGIN(
+        "NodeFem2d2DR::computeJacobianhOver_q(const siconos::algebra::BlockVector& q, "
+        "siconos::algebra::BlockVector& z \n");
 
-void siconos::mechanics::fem::NodeFem2d2DR::computeJachq(
-    const siconos::algebra::BlockVector& q, siconos::algebra::BlockVector& z) {
-  DEBUG_BEGIN(
-      "NodeFem2d2DR::computeJachq(const siconos::algebra::BlockVector& q, "
-      "siconos::algebra::BlockVector& z \n");
+    double Nx = (*_Normal)(0);
+    double Ny = (*_Normal)(1);
 
-  double Nx = _Normal->getValue(0);
-  double Ny = _Normal->getValue(1);
+    double Tx = (*_Tangent)(0);
+    double Ty = (*_Tangent)(1);
 
-  double Tx = _Tangent->getValue(0);
-  double Ty = _Tangent->getValue(1);
+    // double Px = (*_Pc1)(0);
+    // double Py = (*_Pc1)(1);
 
-  // double Px = _Pc1->getValue(0);
-  // double Py = _Pc1->getValue(1);
+    DEBUG_PRINTF("N_x = %4.2e,\t N_y = %4.2e\n", Nx, Ny);
+    DEBUG_PRINTF("T_x = %4.2e,\t T_y = %4.2e\n", Tx, Ty);
 
-  DEBUG_PRINTF("N_x = %4.2e,\t N_y = %4.2e\n", Nx, Ny);
-  DEBUG_PRINTF("T_x = %4.2e,\t T_y = %4.2e\n", Tx, Ty);
+    result.setValue(0, (*_node->dofIndex())[0], Nx);
+    result.setValue(0, (*_node->dofIndex())[1], Ny);
 
-  _jachq->setValue(0, (*_node->dofIndex())[0], Nx);
-  _jachq->setValue(0, (*_node->dofIndex())[1], Ny);
+    result.setValue(1, (*_node->dofIndex())[0], Tx);
+    result.setValue(1, (*_node->dofIndex())[1], Ty);
 
-  _jachq->setValue(1, (*_node->dofIndex())[0], Tx);
-  _jachq->setValue(1, (*_node->dofIndex())[1], Ty);
-
-  if (q.size() == 6) {
-    DEBUG_PRINT("take into account second ds\n");
-    THROW_EXCEPTION("NodeFem2d2DR is not implemented for cable/cable contact");
-  }
-  // DEBUG_EXPR(_jachq->display(););
-  DEBUG_END(
-      "NodeFem2d2DR::computeJachq(const siconos::algebra::BlockVector& q, "
-      "siconos::algebra::BlockVector& z) \n");
+    if (q.size() == 6) {
+      DEBUG_PRINT("take into account second ds\n");
+      THROW_EXCEPTION("NodeFem2d2DR is not implemented for cable/cable contact");
+    }
+    // DEBUG_EXPR(siconos::algebra::print(*jacobianhOver_q_););
+    DEBUG_END(
+        "NodeFem2d2DR::computeJacobianhOver_q(const siconos::algebra::BlockVector& q, "
+        "siconos::algebra::BlockVector& z) \n");
+  });
+  LagrangianScleronomousR::initialize(inter);
 }
 
 double siconos::mechanics::fem::NodeFem2d2DR::distance() const {
   DEBUG_BEGIN("NodeFem2d2DR::distance(...)\n")
   siconos::algebra::SiconosVector dpc(*_Pc2 - *_Pc1);
-  DEBUG_EXPR(_Pc1->display(););
-  DEBUG_EXPR(_Pc2->display(););
-  DEBUG_EXPR(dpc.display(););
+  DEBUG_EXPR(siconos::algebra::print(*_Pc1););
+  DEBUG_EXPR(siconos::algebra::print(*_Pc2););
+  DEBUG_EXPR(siconos::algebra::print(dpc););
   DEBUG_END("NodeFem2d2DR::distance(...)\n")
-  return dpc.norm2() * (inner_prod(*_Normal, dpc) >= 0 ? -1 : 1);
+  return dpc.norm() * (_Normal->dot(dpc) >= 0 ? -1 : 1);
 }
 
-void siconos::mechanics::fem::NodeFem2d2DR::computeh(const siconos::algebra::BlockVector& q,
-                                                     siconos::algebra::BlockVector& z,
-                                                     siconos::algebra::SiconosVector& y) {
+void siconos::mechanics::fem::NodeFem2d2DR::computeh(
+    const siconos::algebra::BlockVector& q, Eigen::Ref<siconos::algebra::SiconosVector> y) {
   DEBUG_BEGIN("NodeFem2d2DR::computeh(...)\n");
 
-  LagrangianScleronomousR::computeh(q, z, y);
+  LagrangianScleronomousR::computeh(q, y);
   auto& displacement = *((q.getAllVect())[0]);
-  _Pc1->setValue(0, displacement((*_node->dofIndex())[0]) + _node->x());
-  _Pc1->setValue(1, displacement((*_node->dofIndex())[1]) + _node->y());
-  y.setValue(0, distance());
+  (*_Pc1)(0) = displacement((*_node->dofIndex())[0]) + _node->x();
+  (*_Pc1)(1) = displacement((*_node->dofIndex())[1]) + _node->y();
+  y(0) = distance();
   DEBUG_PRINTF("distance = %e\n", distance());
-  DEBUG_EXPR(y.display(););
+  DEBUG_EXPR(siconos::algebra::print(y););
   DEBUG_EXPR(display(););
   DEBUG_END("NodeFem2d2DR::computeh(...)\n")
 }
@@ -107,12 +104,12 @@ void siconos::mechanics::fem::NodeFem2d2DR::updateContactPoint(
  */
 void siconos::mechanics::fem::NodeFem2d2DR::updateContactPoint(double pc2[2], double normal[2],
                                                                double tangent[2]) {
-  _Pc2->setValue(0, pc2[0]);
-  _Pc2->setValue(1, pc2[1]);
-  _Normal->setValue(0, normal[0]);
-  _Normal->setValue(1, normal[1]);
-  _Tangent->setValue(0, tangent[0]);
-  _Tangent->setValue(1, tangent[1]);
+  (*_Pc2)(0) = pc2[0];
+  (*_Pc2)(1) = pc2[1];
+  (*_Normal)(0) = normal[0];
+  (*_Normal)(1) = normal[1];
+  (*_Tangent)(0) = tangent[0];
+  (*_Tangent)(1) = tangent[1];
 };
 void siconos::mechanics::fem::NodeFem2d2DR::display() const {
   LagrangianR::display();
@@ -125,25 +122,25 @@ void siconos::mechanics::fem::NodeFem2d2DR::display() const {
 
   std::cout << " _Pc1 :\n";
   if (_Pc1)
-    _Pc1->display();
+    siconos::algebra::print(*_Pc1);
   else
     std::cout << " nullptr :\n";
 
   std::cout << " _Pc2 :\n";
   if (_Pc2)
-    _Pc2->display();
+    siconos::algebra::print(*_Pc2);
   else
     std::cout << " nullptr :\n";
 
   std::cout << " _Normal :\n";
   if (_Normal)
-    _Normal->display();
+    siconos::algebra::print(*_Normal);
   else
     std::cout << " nullptr :\n";
 
   std::cout << " _Tangent :\n";
   if (_Tangent)
-    _Tangent->display();
+    siconos::algebra::print(*_Tangent);
   else
     std::cout << " nullptr\n";
 }

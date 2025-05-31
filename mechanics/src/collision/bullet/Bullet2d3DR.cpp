@@ -52,7 +52,7 @@ void siconos::collision::bullet::Bullet2d3DR::updateContactPointsFromManifoldPoi
   // ::boost::math::quaternion<double> pq1, pq2, posb;
 
   // /* Compute quaternion representation of the position of ds1 and the rotation */
-  // DEBUG_EXPR(ds1->q()->display(););
+  // DEBUG_EXPR(siconos::algebra::print(*ds1->q()););
   // copyQuatPos2d(*ds1->q(), pq1);
 
   // copyQuatRot2d(*ds1->q(), rq1);
@@ -61,7 +61,7 @@ void siconos::collision::bullet::Bullet2d3DR::updateContactPointsFromManifoldPoi
 
   // if(ds2)
   // {
-  //   DEBUG_EXPR(ds2->q()->display(););
+  //   DEBUG_EXPR(siconos::algebra::print(*ds2->q()););
   //   copyQuatPos2d(*ds2->q(), pq2);
   //   copyQuatRot2d(*ds2->q(), rq2);
   // }
@@ -127,15 +127,15 @@ void siconos::collision::bullet::Bullet2d3DR::updateContactPointsFromManifoldPoi
   //   vn(0) = qn.x();
   //   vn(1) = qn.y();
   //   vn(2) = qn.z();
-  //   vn = vn/vn.norm2();
+  //   vn = vn/vn.norm();
   // }
   // else
   //   copyBtVector32d(point.m_normalWorldOnB, vn);
 
   // vn.resize(2);
-  // DEBUG_EXPR(va.display(););
-  // DEBUG_EXPR(vb.display(););
-  // DEBUG_EXPR(vn.display(););
+  // DEBUG_EXPR(siconos::algebra::print(va););
+  // DEBUG_EXPR(siconos::algebra::print(vb););
+  // DEBUG_EXPR(siconos::algebra::print(vn););
   // Contact2d3DR::updateContactPoints(va, vb, vn*(flip?-1:1));
   // DEBUG_END("siconos::collision::bullet::Bullet2d3DR::updateContactPointsFromManifoldPoint(...)\n");
 

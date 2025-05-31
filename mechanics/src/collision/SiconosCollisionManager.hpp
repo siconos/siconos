@@ -26,6 +26,7 @@
 #ifndef SiconosCollisionManager_h
 #define SiconosCollisionManager_h
 
+#include <optional>
 #include "InteractionManager.hpp"
 #include "StaticBody.hpp"
 
@@ -64,12 +65,13 @@ class SiconosCollisionManager : public siconos::simulation::InteractionManager {
 
   /** Add a static body in the collision detector.
    */
-  virtual std::shared_ptr<StaticBody> addStaticBody(
-      std::shared_ptr<SiconosContactorSet> cs,
-      std::shared_ptr<siconos::algebra::SiconosVector> position = nullptr, int number = 0)
+  virtual std::shared_ptr<siconos::collision::StaticBody> addStaticBody(
+      std::shared_ptr<siconos::collision::SiconosContactorSet> cs,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& position = std::nullopt,
+      int number = 0)
   {
     return std::make_shared<StaticBody>();
-  };
+  }
 
   /** Remove a body from the collision detector.
    */

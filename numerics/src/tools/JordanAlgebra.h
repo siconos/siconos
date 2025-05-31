@@ -28,14 +28,12 @@
 typedef long double float_type;
 /* typedef double float_type; */
 
-/** Create the Arrow representation matrix from vector.
- * \param vec pointer to the vector data.
- * \param vecSize the length of the vector.
- * \param varsCount the count of variables (subvectors) in vec.
- * \return a pointer to a NumericsMatrix
+/** \return the Arrow representation matrix from vector.
+ * \param[in] vec pointer to the vector data.
+ * \param[in] vecSize the length of the vector.
+ * \param[in] varsCount the count of variables (subvectors) in vec.
  */
-NumericsMatrix* Arrow_repr(const double* const vec, const unsigned int vecSize,
-                           const size_t varsCount);
+NumericsMatrix* Arrow_repr(const double* const vec, size_t vecSize, size_t varsCount);
 
 /**
  * Returns reflection matrix.

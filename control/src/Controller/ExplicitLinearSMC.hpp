@@ -47,7 +47,7 @@ class ExplicitLinearSMC : public CommonSMC {
    *  \param B the B matrix
    */
   ExplicitLinearSMC(std::shared_ptr<ControlSensor> sensor,
-                    std::shared_ptr<siconos::algebra::SimpleMatrix> B);
+                    std::shared_ptr<siconos::algebra::SiconosMatrix> B);
 
   /** destructor
    */

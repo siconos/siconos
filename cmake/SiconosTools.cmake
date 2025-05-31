@@ -463,3 +463,28 @@ function(apply_compiler_options COMPONENT)
       $<$<OR:$<COMPILE_LANGUAGE:CXX>,$<COMPILE_LANGUAGE:C>>:${COMP_OPTIONS}>)
   endif()
 endfunction()
+
+function(create_pybind11_module)
+
+  set(oneValueArgs MODULE_NAME)
+  set(multiValueArgs SOURCES DEPENDENCIES)
+
+  cmake_parse_arguments(PYMOD ""  "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+  if (NOT PYMOD_MODULE_NAME)
+    message(FATAL_ERROR "You must provide a MODULE_NAME.")
+  endif()
+
+  # Create pybind11 module
+  pybind11_add_module(${PYMOD_MODULE_NAME} ${PYMOD_SOURCES})
+
+  # Put the generated library in binary dir so that import siconos.module_name works for tests
+  set_target_properties(${PYMOD_MODULE_NAME} PROPERTIES
+      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/python/siconos
+  )
+
+  # Set deps
+  if (PYMOD_DEPENDENCIES)
+    target_link_libraries(${PYMOD_MODULE_NAME} PUBLIC ${PYMOD_DEPENDENCIES})
+  endif()
+endfunction()

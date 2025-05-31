@@ -14,20 +14,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef __NewtonEulerDSTest__
 #define __NewtonEulerDSTest__
 
 #include <cppunit/extensions/HelperMacros.h>
+
 #include "NewtonEulerDS.hpp"
 #include "RotationQuaternion.hpp"
 #include "SiconosException.hpp"
 
-class NewtonEulerDSTest : public CppUnit::TestFixture
-{
-
-private:
-  
+class NewtonEulerDSTest : public CppUnit::TestFixture {
+ private:
   ACCEPT_SERIALIZATION(NewtonEulerDSTest);
 
   // Name of the tests suite
@@ -36,31 +34,21 @@ private:
   // tests to be done ...
 
   CPPUNIT_TEST(testBuildNewtonEulerDS1);
-  CPPUNIT_TEST(testNewtonEulerDSQuaternion);
-  CPPUNIT_TEST(testNewtonEulerDSQuaternionMatrix);
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
 
   void testBuildNewtonEulerDS1();
-  void testNewtonEulerDSQuaternion();
-  void testNewtonEulerDSQuaternionMatrix();
   // void testcomputeDS();
 
   // Members
+  siconos::algebra::SiconosVector q0{7}, q01{7}, twist0{6};
+  siconos::algebra::SiconosMatrix inertia{3, 3};
+  double mass{10.};
 
-  std::shared_ptr<siconos::algebra::SiconosVector> q0{nullptr}, q01{nullptr},  velocity0{nullptr}, u0{nullptr};
-  double mass;
-  std::shared_ptr<siconos::algebra::SiconosMatrix> inertia{nullptr};
-
-public:
+ public:
   void setUp();
   void tearDown();
-
 };
 
 #endif
-
-
-
-

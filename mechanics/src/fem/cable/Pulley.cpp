@@ -2,17 +2,16 @@
 
 #include <numbers>
 
-#include "Cable.h"
 #include "NewtonImpactFrictionNSL.hpp"
 #include "NonSmoothLaw.hpp"
-#include "Pile.h"
+#include "Pylon.h"
 #include "Rope.h"
 #include "Ropeway.h"
 #include "SiconosVector.hpp"
 
-siconos::fem::cable::Pulley::Pulley(const Pile &a_pile) : Support(a_pile) {}
+siconos::fem::cable::Pulley::Pulley(const Pylon &a_pile) : Support(a_pile) {}
 
-void siconos::fem::cable::Pulley::prepare(const Pile &a_start, const Pile &a_end, double T) {
+void siconos::fem::cable::Pulley::prepare(const Pylon &a_start, const Pylon &a_end, double T) {
   Point delta;
   delta.diff(a_start, a_end);
   m_radiusP = delta.norm() / 2.0;
@@ -46,6 +45,7 @@ void siconos::fem::cable::Pulley::compute(const Point &a_p, double a_tol, double
           ? 1
           : 0;
 }
+
 const siconos::fem::cable::Point &siconos::fem::cable::Pulley::get_center() const {
   return m_p;
 }
@@ -61,17 +61,17 @@ void siconos::fem::cable::to_json(ojson &j, const Pulley &p) {
 }
 
 bool siconos::fem::cable::Pulley::isContact(
-    const std::shared_ptr<siconos::algebra::SiconosVector> &a_p, const double &a_tol) {
-  double dx = a_p->getValue(0) - m_p.x;
-  double dy = a_p->getValue(1) - m_p.y;
+    const Eigen::Ref<siconos::algebra::SiconosVector3> &a_p, double a_tol) {
+  double dx = a_p(0) - m_p.x;
+  double dy = a_p(1) - m_p.y;
   double d = sqrt(dx * dx + dy * dy);
   double go = d - get_radius();
   bool isCt = (go <= a_tol);
   if (isCt) {
-    m_normal->setValue(0, dx / d);
-    m_normal->setValue(1, dy / d);
-    m_tangent->setValue(0, -m_normal->getValue(1));
-    m_tangent->setValue(1, m_normal->getValue(0));
+    (*m_normal)(0) = dx / d;
+    (*m_normal)(1) = dy / d;
+    (*m_tangent)(0) = -(*m_normal)(1);
+    (*m_tangent)(1) = (*m_normal)(0);
   }
   return isCt;
 }

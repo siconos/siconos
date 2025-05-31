@@ -25,7 +25,6 @@
 #include "NumericsSolversNamespace.h"  // solver_options stuff
 #include "OSNSMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "SiconosVectorOp.hpp"  // setBlock
 #include "Simulation.hpp"
 #include "Topology.hpp"
 // #define DEBUG_NOCOLOR
@@ -104,8 +103,8 @@ siconos::nonsmooth_formulations::GlobalFrictionContact::globalFrictionContactPro
   auto numerics_problem = std::make_shared<GlobalFrictionContactProblem>();
   numerics_problem->M = &*_W->numericsMatrix();
   numerics_problem->H = &*_H->numericsMatrix();
-  numerics_problem->q = _q->getArray();
-  numerics_problem->b = _b->getArray();
+  numerics_problem->q = _q->data();
+  numerics_problem->b = _b->data();
   numerics_problem->numberOfContacts = _sizeOutput / _contactProblemDim;
   numerics_problem->mu = _mu->data();
   numerics_problem->dimension = _contactProblemDim;
@@ -121,8 +120,8 @@ siconos::nonsmooth_formulations::GlobalFrictionContact::globalFrictionContactPro
 //   GlobalFrictionContactProblem* numerics_problem = &_numerics_problem;
 //   numerics_problem->M = &*_W->numericsMatrix();
 //   numerics_problem->H = &*_H->numericsMatrix();
-//   numerics_problem->q = _q->getArray();
-//   numerics_problem->b = _b->getArray();
+//   numerics_problem->q = _q->data();
+//   numerics_problem->b = _b->data();
 //   numerics_problem->numberOfContacts = _sizeOutput / _contactProblemDim;
 //   numerics_problem->mu = _mu->data();
 //   numerics_problem->dimension = _contactProblemDim;
@@ -209,8 +208,7 @@ bool siconos::nonsmooth_formulations::GlobalFrictionContact::preCompute(double t
     size_t sizeM = 0;
 
 #ifdef WITH_TIMER
-    std::chrono::time_point<std::chrono::system_clock> start, end, end_old;
-    start = std::chrono::system_clock::now();
+    auto start = std::chrono::system_clock::now();
 #endif
     // fill _W
     _W->fillW(DSG0);
@@ -218,7 +216,7 @@ bool siconos::nonsmooth_formulations::GlobalFrictionContact::preCompute(double t
     _sizeGlobalOutput = sizeM;
     DEBUG_PRINTF("sizeM = %lu \n", sizeM);
 #ifdef WITH_TIMER
-    end = std::chrono::system_clock::now();
+    auto end = std::chrono::system_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
     std::cout << "\nGlobalFrictionContact: fill W  " << elapsed << " ms" << std::endl;
 #endif
@@ -228,7 +226,7 @@ bool siconos::nonsmooth_formulations::GlobalFrictionContact::preCompute(double t
       _W_inverse->fillWinverse(DSG0);
     }
 #ifdef WITH_TIMER
-    end_old = end;
+    auto end_old = end;
     end = std::chrono::system_clock::now();
     elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end - end_old).count();
     std::cout << "GlobalFrictionContact: fillW inverse " << elapsed << " ms" << std::endl;
@@ -241,7 +239,7 @@ bool siconos::nonsmooth_formulations::GlobalFrictionContact::preCompute(double t
     siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
     for (std::tie(dsi, dsend) = DSG0.vertices(); dsi != dsend; ++dsi) {
       auto ds = DSG0.bundle(*dsi);
-      auto dss = ds->dimension();
+      auto ds_size = ds->dimension();
 
       // OneStepIntegrator& Osi = *DSG0.properties(DSG0.descriptor(ds)).osi;
       // siconos::integrators::IntegratorType osiType = Osi.getType();
@@ -252,7 +250,7 @@ bool siconos::nonsmooth_formulations::GlobalFrictionContact::preCompute(double t
         if ((std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) ||
             (std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds))) {
           auto& vfree = *ds_work_vectors[siconos::integrators::MoreauJeanGOSI::FREE];
-          siconos::algebra::setBlock(vfree, _q, dss, 0, offset);
+          _q->segment(offset, ds_size) = vfree.head(ds_size);
         }
       } else {
         THROW_EXCEPTION(
@@ -260,9 +258,9 @@ bool siconos::nonsmooth_formulations::GlobalFrictionContact::preCompute(double t
             "implemented for "
             "MoreauJeanGOSI integrator.");
       }
-      offset += dss;
+      offset += ds_size;
     }
-    DEBUG_EXPR(_q->display(););
+    DEBUG_EXPR(siconos::algebra::print(*_q););
 #ifdef WITH_TIMER
     end_old = end;
     end = std::chrono::system_clock::now();
@@ -317,9 +315,9 @@ bool siconos::nonsmooth_formulations::GlobalFrictionContact::preCompute(double t
                                .workVectors)[siconos::integrators::MoreauJeanGOSI::OSNSP_RHS];
       auto pos = indexSet.properties(*ui).absolute_position;
       auto sizeY = inter->dimension();
-      siconos::algebra::setBlock(osnsp_rhs, _b, sizeY, 0, pos);
+      _b->segment(pos, sizeY) = osnsp_rhs.head(sizeY);
     }
-    DEBUG_EXPR(_b->display(););
+    DEBUG_EXPR(siconos::algebra::print(*_b););
 #ifdef WITH_TIMER
     end_old = end;
     end = std::chrono::system_clock::now();
@@ -329,17 +327,17 @@ bool siconos::nonsmooth_formulations::GlobalFrictionContact::preCompute(double t
 
     // Checks z and w sizes and reset if necessary
     if (_z->size() != _sizeOutput) {
-      _z->resize(_sizeOutput, false);
-      _z->zero();
+      _z->resize(_sizeOutput);
+      _z->setZero();
     }
 
     if (_w->size() != _sizeOutput) {
       _w->resize(_sizeOutput);
-      _w->zero();
+      _w->setZero();
     }
     if (_globalVelocities->size() != _sizeGlobalOutput) {
       _globalVelocities->resize(_sizeGlobalOutput);
-      _globalVelocities->zero();
+      _globalVelocities->setZero();
     }
     // nothing to do (IsLinear and not changed)
 #ifdef WITH_TIMER
@@ -376,8 +374,8 @@ int siconos::nonsmooth_formulations::GlobalFrictionContact::solve(
   if (!problem) {
     problem = globalFrictionContactProblem();
   }
-  return (*_gfc_driver)(&*problem, _z->getArray(), _w->getArray(),
-                        _globalVelocities->getArray(), &*_numerics_solver_options);
+  return (*_gfc_driver)(&*problem, _z->data(), _w->data(), _globalVelocities->data(),
+                        &*_numerics_solver_options);
 }
 
 void siconos::nonsmooth_formulations::GlobalFrictionContact::postCompute() {
@@ -405,10 +403,8 @@ void siconos::nonsmooth_formulations::GlobalFrictionContact::postCompute() {
     auto lambda = inter.lambda(inputOutputLevel());
     // Copy _w/_z values, starting from index pos into y/lambda.
 
-    // siconos::algebra::setBlock(*_w, y, y->size(), pos, 0);// Warning: yEquivalent is
-    //  saved in y !!
-    siconos::algebra::setBlock(*_z, lambda, lambda->size(), pos, 0);
-    DEBUG_EXPR(lambda->display(););
+    lambda->segment(0, lambda->size()) = _z->segment(pos, lambda->size());
+    DEBUG_EXPR(siconos::algebra::print(*lambda););
   }
   auto& DSG0 = *simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
 
@@ -420,20 +416,20 @@ void siconos::nonsmooth_formulations::GlobalFrictionContact::postCompute() {
       auto sizeDS = d->dimension();
       auto velocity = d->velocity();
       DEBUG_PRINTF("ds.number() : %i \n", ds.number());
-      DEBUG_EXPR(velocity->display(););
-      DEBUG_EXPR(_globalVelocities->display(););
+      DEBUG_EXPR(siconos::algebra::print(*velocity););
+      DEBUG_EXPR(siconos::algebra::print(*_globalVelocities););
       pos = DSG0.properties(*dsi).absolute_position;
-      siconos::algebra::setBlock(*_globalVelocities, velocity, sizeDS, pos, 0);
-      DEBUG_EXPR(velocity->display(););
+      velocity->segment(0, sizeDS) = _globalVelocities->segment(pos, sizeDS);
+      DEBUG_EXPR(siconos::algebra::print(*velocity););
     } else if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
       auto sizeDS = neds->dimension();
       auto twist = neds->twist();
       DEBUG_PRINTF("ds.number() : %i \n", ds.number());
-      DEBUG_EXPR(twist->display(););
-      DEBUG_EXPR(_globalVelocities->display(););
+      DEBUG_EXPR(siconos::algebra::print(*twist););
+      DEBUG_EXPR(siconos::algebra::print(*_globalVelocities););
       pos = DSG0.properties(*dsi).absolute_position;
-      siconos::algebra::setBlock(*_globalVelocities, twist, sizeDS, pos, 0);
-      DEBUG_EXPR(twist->display(););
+      twist->segment(0, sizeDS) = _globalVelocities->segment(pos, sizeDS);
+      DEBUG_EXPR(siconos::algebra::print(*twist););
     } else
       THROW_EXCEPTION(
           "siconos::nonsmooth_formulations::GlobalFrictionContact::postCompute() - Only "
@@ -453,14 +449,14 @@ void siconos::nonsmooth_formulations::GlobalFrictionContact::display() const {
   std::cout << "and  size (_sizeGlobalOutput) " << _sizeGlobalOutput << std::endl;
   std::cout << "_numericsMatrixStorageType" << _numericsMatrixStorageType << std::endl;
   std::cout << " - Matrix M  : \n";
-  // if (_W) _W->display();
+  // if (_W) siconos::algebra::print(*_W);
   // else std::cout << "-> nullptr" <<std::endl;
   auto* W_NM = _W->numericsMatrix().get();
   if (W_NM) {
     NM_display(W_NM);
   }
   std::cout << " - Matrix H : \n";
-  // if (_H) _H->display();
+  // if (_H) siconos::algebra::print(*_H);
   // else std::cout << "-> nullptr" <<std::endl;
   auto* H_NM = _H->numericsMatrix().get();
   if (H_NM) {
@@ -469,30 +465,30 @@ void siconos::nonsmooth_formulations::GlobalFrictionContact::display() const {
 
   std::cout << " - Vector q : \n";
   if (_q)
-    _q->display();
+    siconos::algebra::print(*_q);
   else
     std::cout << "-> nullptr\n";
   std::cout << " - Vector b : \n";
   if (_b)
-    _b->display();
+    siconos::algebra::print(*_b);
   else
     std::cout << "-> nullptr\n";
 
   std::cout << " - Vector z (reaction) : \n";
   if (_z)
-    _z->display();
+    siconos::algebra::print(*_z);
   else
     std::cout << "-> nullptr\n";
 
   std::cout << " - Vector w (local velocities): \n";
   if (_w)
-    _w->display();
+    siconos::algebra::print(*_w);
   else
     std::cout << "-> nullptr\n";
 
   std::cout << " - Vector globalVelocities : \n";
   if (_globalVelocities)
-    _globalVelocities->display();
+    siconos::algebra::print(*_globalVelocities);
   else
     std::cout << "-> nullptr\n";
 

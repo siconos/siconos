@@ -25,9 +25,7 @@
 
 #include <LagrangianLinearTIDS.hpp>
 
-namespace siconos::collision {
-class SiconosContactorSet;
-}
+#include "SiconosContactor.hpp"
 
 namespace siconos::collision {
 
@@ -37,7 +35,7 @@ class RigidBody2dDS : public siconos::modeling::LagrangianLinearTIDS,
   ACCEPT_SERIALIZATION(RigidBody2dDS);
 
   /** a scalar mass in the case of RigidBody2dDS */
-  double _scalarMass{0.};
+  double scalarMass_{0.};
 
   std::shared_ptr<siconos::collision::SiconosContactorSet> _contactors{nullptr};
   bool _useContactorInertia{true};
@@ -47,17 +45,17 @@ class RigidBody2dDS : public siconos::modeling::LagrangianLinearTIDS,
   bool _allowSelfCollide{true};
 
  public:
-  RigidBody2dDS(std::shared_ptr<siconos::algebra::SiconosVector> position,
-                std::shared_ptr<siconos::algebra::SiconosVector> velocity,
-                std::shared_ptr<siconos::algebra::SiconosMatrix> mass);
+  RigidBody2dDS(Eigen::Ref<siconos::algebra::SiconosVector> position,
+                Eigen::Ref<siconos::algebra::SiconosVector> velocity,
+                Eigen::Ref<siconos::algebra::SiconosMatrix> mass);
 
-  RigidBody2dDS(std::shared_ptr<siconos::algebra::SiconosVector> position,
-                std::shared_ptr<siconos::algebra::SiconosVector> velocity, double mass,
-                double inertia);
+  // RigidBody2dDS(Eigen::Ref<siconos::algebra::SiconosVector> &position,
+  //               Eigen::Ref<siconos::algebra::SiconosVector> &velocity, double mass,
+  //               double inertia);
 
   virtual ~RigidBody2dDS() noexcept = default;
 
-  double scalarMass() { return _scalarMass; };
+  double scalarMass() { return scalarMass_; };
 
   void setUseContactorInertia(bool use) { _useContactorInertia = use; }
 
@@ -86,7 +84,9 @@ class RigidBody2dDS : public siconos::modeling::LagrangianLinearTIDS,
    *  \return a std::shared_ptr<siconos::algebra::SiconosVector> */
   virtual std::shared_ptr<siconos::algebra::SiconosVector> base_position() { return q(); }
 
-  void acceptSP(std::shared_ptr<siconos::internal::SiconosVisitor> tourist) const override;
+  virtual void accept(modeling::dynamical_systems::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 };
 }  // namespace siconos::collision
 #endif /* RigidBody2dDS_h */

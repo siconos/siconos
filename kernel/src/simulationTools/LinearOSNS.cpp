@@ -17,6 +17,8 @@
  */
 #include "LinearOSNS.hpp"
 
+#include <Eigen/src/Core/util/Constants.h>
+
 #include "BoundaryCondition.hpp"
 #include "D1MinusLinearOSI.hpp"
 #include "DynamicalSystem.hpp"
@@ -38,10 +40,8 @@
 #include "SecondOrderDS.hpp"
 #include "SiconosConst.hpp"
 #include "SiconosException.hpp"
-#include "SiconosMatrixOp.hpp"  // for prod
+#include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "SiconosVectorOp.hpp"  // for setBlock
-#include "SimpleMatrix.hpp"
 #include "Simulation.hpp"
 #include "Topology.hpp"
 #include "ZeroOrderHoldOSI.hpp"
@@ -389,8 +389,8 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
   checkCompatibleNSLaw(*nslaw);
 
   // --- Check block size ---
-  assert(indexSet->properties(vd).block->size(0) == nslaw->size());
-  assert(indexSet->properties(vd).block->size(1) == nslaw->size());
+  assert(indexSet->properties(vd).block->rows() == nslaw->size());
+  assert(indexSet->properties(vd).block->cols() == nslaw->size());
 
   // --- Compute diagonal block ---
   // Block to be set in OSNS Matrix, corresponding to
@@ -427,7 +427,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
     // get _interactionBlocks corresponding to the current DS
     // These _interactionBlocks depends on the relation type.
     leftInteractionBlock = inter->getLeftInteractionBlockForDS(pos, nslawSize, sizeDS);
-    DEBUG_EXPR(leftInteractionBlock->display(););
+    DEBUG_EXPR(siconos::algebra::print(*leftInteractionBlock););
     // Computing depends on relation type -> move this in Interaction method?
     if (relationType == siconos::modeling::RelationType::FirstOrder) {
       rightInteractionBlock = inter->getRightInteractionBlockForDS(pos, sizeDS, nslawSize);
@@ -439,19 +439,17 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
               (static_cast<siconos::integrators::EulerMoreauOSI&>(osi)).gamma();
         }
       }
-
       // for ZOH, we have a different formula ...
       if ((osiType == siconos::integrators::IntegratorType::ZOHOSI) &&
           indexSet->properties(vd).forControl) {
         *rightInteractionBlock =
             static_cast<siconos::integrators::ZeroOrderHoldOSI&>(osi).Bd(ds);
-        siconos::algebra::prod(*leftInteractionBlock, *rightInteractionBlock,
-                               *currentInteractionBlock, false);
+        *currentInteractionBlock += *leftInteractionBlock * *rightInteractionBlock;
       } else {
         // centralInteractionBlock contains a lu-factorized matrix and we solve
         // centralInteractionBlock * X = rightInteractionBlock with PLU
         auto centralInteractionBlock = getOSIMatrix(osi, ds);
-        centralInteractionBlock->Solve(*rightInteractionBlock);
+        *rightInteractionBlock = centralInteractionBlock->solve(*rightInteractionBlock);
         auto& workMInter = *indexSet->properties(vd).workMatrices;
         static_cast<siconos::integrators::EulerMoreauOSI&>(osi).computeKhat(
             *inter, *rightInteractionBlock, workMInter, h);
@@ -460,72 +458,62 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
         //      *currentInteractionBlock += h *Theta[*itDS]* *leftInteractionBlock *
         // (*rightInteractionBlock);  // left = C, right = W.B
         // gemm(h,*leftInteractionBlock,*rightInteractionBlock,1.0,*currentInteractionBlock);
-        *leftInteractionBlock *= h;
-        siconos::algebra::prod(*leftInteractionBlock, *rightInteractionBlock,
-                               *currentInteractionBlock, false);
+        *currentInteractionBlock += h * *leftInteractionBlock * *rightInteractionBlock;
         // left = C, right = inv(W).B
       }
     } else if (relationType == siconos::modeling::RelationType::Lagrangian ||
                relationType == siconos::modeling::RelationType::NewtonEuler) {
       // Applying boundary conditions
-      std::shared_ptr<siconos::modeling::BoundaryCondition> bc;
       auto d = std::static_pointer_cast<siconos::modeling::SecondOrderDS>(ds);
-      if (d->boundaryConditions()) bc = d->boundaryConditions();
-      if (bc) {
-        for (const auto itindex : bc->velocityIndices()) {
-          // (nslawSize,sizeDS));
-          auto coltmp = std::make_shared<siconos::algebra::SiconosVector>(nslawSize);
-          coltmp->zero();
-          leftInteractionBlock->setCol(itindex, *coltmp);
+      if (auto bc = d->boundaryConditions()) {
+        for (const auto& itindex : bc->velocityIndices()) {
+          leftInteractionBlock->col(itindex).setZero();
         }
       }
 
       if (osiType == siconos::integrators::IntegratorType::MOREAUJEANBILBAOOSI ||
           std::dynamic_pointer_cast<siconos::modeling::LagrangianLinearDiagonalDS>(ds)) {
-        auto work = std::make_shared<siconos::algebra::SimpleMatrix>(*leftInteractionBlock);
+        auto work = std::make_shared<siconos::algebra::SiconosMatrix>(*leftInteractionBlock);
         // Get inverse of the iteration matrix
-        auto& inv_iteration_matrix = *getOSIMatrix(osi, ds);
+        auto inv_iteration_matrix = osi.iterationMatrix(ds);
         // work = HW (remind that W contains the inverse of the iteration matrix)
-        siconos::algebra::axpy_prod(*leftInteractionBlock, inv_iteration_matrix, *work, true);
-        leftInteractionBlock->trans();
-        siconos::algebra::prod(*work, *leftInteractionBlock, *currentInteractionBlock, false);
+        *work = *leftInteractionBlock * *inv_iteration_matrix;
+        leftInteractionBlock->transposeInPlace();
+        *currentInteractionBlock = *work * *leftInteractionBlock;
         if (relationSubType == siconos::modeling::RelationSubType::CompliantLinearTIR) {
           if (osiType == siconos::integrators::IntegratorType::MOREAUJEANOSI) {
             *currentInteractionBlock *=
                 (static_cast<siconos::integrators::MoreauJeanOSI&>(osi)).theta();
             *currentInteractionBlock +=
-                *std::static_pointer_cast<siconos::modeling::LagrangianCompliantLinearTIR>(
-                     inter->relation())
-                     ->D() /
+                std::static_pointer_cast<siconos::modeling::LagrangianCompliantLinearTIR>(
+                    inter->relation())
+                    ->DMatrix() /
                 simulation()->timeStep();
           }
         }
       } else {
         DEBUG_PRINT("leftInteractionBlock after application of boundary conditions\n");
-        DEBUG_EXPR(leftInteractionBlock->display(););
+        DEBUG_EXPR(siconos::algebra::print(*leftInteractionBlock););
         // (inter1 == inter2)
-        auto work = std::make_shared<siconos::algebra::SimpleMatrix>(*leftInteractionBlock);
-        work->trans();
+        auto work = std::make_shared<siconos::algebra::SiconosMatrix>(*leftInteractionBlock);
+        work->transposeInPlace();
         auto centralInteractionBlock = getOSIMatrix(osi, ds);
-        DEBUG_EXPR_WE(std::cout << std::boolalpha
-                                << " centralInteractionBlock->isFactorized() = "
-                                << centralInteractionBlock->isFactorized() << std::endl;);
-        centralInteractionBlock->Solve(*work);
+        *work = centralInteractionBlock->solve(*work);
         //*currentInteractionBlock +=  *leftInteractionBlock ** work;
-        DEBUG_EXPR(work->display(););
-        siconos::algebra::prod(*leftInteractionBlock, *work, *currentInteractionBlock, false);
+        DEBUG_EXPR(siconos::algebra::print(*work););
+        *currentInteractionBlock += *leftInteractionBlock * *work;
         //      gemm(CblasNoTrans,CblasNoTrans,1.0,*leftInteractionBlock,*work,1.0,*currentInteractionBlock);
         //*currentInteractionBlock *=h;
-        DEBUG_EXPR(currentInteractionBlock->display(););
+        DEBUG_EXPR(siconos::algebra::print(*currentInteractionBlock););
         // assert(currentInteractionBlock->checkSymmetry(1e-10));
         if (relationSubType == siconos::modeling::RelationSubType::CompliantLinearTIR) {
           if (osiType == siconos::integrators::IntegratorType::MOREAUJEANOSI) {
             *currentInteractionBlock *=
                 (static_cast<siconos::integrators::MoreauJeanOSI&>(osi)).theta();
             *currentInteractionBlock +=
-                *std::static_pointer_cast<siconos::modeling::LagrangianCompliantLinearTIR>(
-                     inter->relation())
-                     ->D() /
+                std::static_pointer_cast<siconos::modeling::LagrangianCompliantLinearTIR>(
+                    inter->relation())
+                    ->DMatrix() /
                 simulation()->timeStep();
           }
         }
@@ -609,14 +597,14 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock(
 
   if (index2 > index1)  // upper block
   {
-    assert(indexSet->properties(ed).upper_block->size(0) == nslawSize1);
-    assert(indexSet->properties(ed).upper_block->size(1) == nslawSize2);
+    assert(indexSet->properties(ed).upper_block->rows() == nslawSize1);
+    assert(indexSet->properties(ed).upper_block->cols() == nslawSize2);
 
     currentInteractionBlock = indexSet->properties(ed).upper_block;
   } else  // lower block
   {
-    assert(indexSet->properties(ed).lower_block->size(0) == nslawSize1);
-    assert(indexSet->properties(ed).lower_block->size(1) == nslawSize2);
+    assert(indexSet->properties(ed).lower_block->rows() == nslawSize1);
+    assert(indexSet->properties(ed).lower_block->cols() == nslawSize2);
 
     currentInteractionBlock = indexSet->properties(ed).lower_block;
   }
@@ -637,7 +625,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock(
   // ==== First Order Relations - Specific treatment for diagonal
   // _interactionBlocks ===
   assert(inter1 != inter2);
-  //  currentInteractionBlock->zero();
+  //  currentInteractionBlock->setZero();
 
   // loop over the common DS
   auto sizeDS = ds->dimension();
@@ -653,16 +641,14 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock(
     // centralInteractionBlock contains a lu-factorized matrix and we solve
     // centralInteractionBlock * X = rightInteractionBlock with PLU
     auto centralInteractionBlock = getOSIMatrix(osi, ds);
-    centralInteractionBlock->Solve(*rightInteractionBlock);
-
+    *rightInteractionBlock = centralInteractionBlock->solve(*rightInteractionBlock);
     //      integration of r with theta method removed
     //      *currentInteractionBlock += h *Theta[*itDS]* *leftInteractionBlock *
     //      (*rightInteractionBlock); //left = C, right = W.B
     // gemm(h,*leftInteractionBlock,*rightInteractionBlock,1.0,*currentInteractionBlock);
     *leftInteractionBlock *= h;
+    *currentInteractionBlock += *leftInteractionBlock * *rightInteractionBlock;
 
-    siconos::algebra::prod(*leftInteractionBlock, *rightInteractionBlock,
-                           *currentInteractionBlock, false);
     // left = C, right = inv(W).B
   } else if (relationType1 == siconos::modeling::RelationType::Lagrangian ||
              relationType2 == siconos::modeling::RelationType::Lagrangian ||
@@ -677,8 +663,8 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock(
         // (nslawSize,sizeDS));
         std::shared_ptr<siconos::algebra::SiconosVector> coltmp =
             std::make_shared<siconos::algebra::SiconosVector>(nslawSize1);
-        coltmp->zero();
-        leftInteractionBlock->setCol(itindex, *coltmp);
+        coltmp->setZero();
+        leftInteractionBlock->col(itindex) = *coltmp;
       }
     }
 
@@ -688,33 +674,30 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock(
         dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS) {
       // Rightinteractionblock used first as buffer to save left * W-1
       rightInteractionBlock =
-          std::make_shared<siconos::algebra::SimpleMatrix>(nslawSize2, sizeDS);
-      // auto work(new SimpleMatrix(*leftInteractionBlock));
+          std::make_shared<siconos::algebra::SiconosMatrix>(nslawSize2, sizeDS);
+      // auto work(new SiconosMatrix(*leftInteractionBlock));
       //  Get inverse of the iteration matrix
-      auto& inv_iteration_matrix = *getOSIMatrix(osi, ds);
+      auto inv_iteration_matrix = osi.iterationMatrix(ds);
       // remind that W contains the inverse of the iteration matrix
-      siconos::algebra::axpy_prod(*leftInteractionBlock, inv_iteration_matrix,
-                                  *rightInteractionBlock, true);
+      *rightInteractionBlock = *leftInteractionBlock * *inv_iteration_matrix;
       // Then save block corresponding to the 'right' interaction into leftInteractionBlock
       leftInteractionBlock = inter2->getLeftInteractionBlockForDS(pos2, nslawSize1, sizeDS);
-      leftInteractionBlock->trans();
+      leftInteractionBlock->transposeInPlace();
       // and compute LW-1R == rightInteractionBlock * leftInteractionBlock into
       // currentInteractionBlock
-      siconos::algebra::prod(*rightInteractionBlock, *leftInteractionBlock,
-                             *currentInteractionBlock, false);
+      *currentInteractionBlock += *rightInteractionBlock * *leftInteractionBlock;
     } else {
       // inter1 != inter2
       rightInteractionBlock = inter2->getLeftInteractionBlockForDS(pos2, nslawSize2, sizeDS);
-      rightInteractionBlock->trans();
+      rightInteractionBlock->transposeInPlace();
       // Warning: we use getLeft for Right interactionBlock
       // because right = transpose(left) and because of
       // size checking inside the getBlock function, a
       // getRight call will fail.
       auto centralInteractionBlock = getOSIMatrix(osi, ds);
-      centralInteractionBlock->Solve(*rightInteractionBlock);
+      *rightInteractionBlock = centralInteractionBlock->solve(*rightInteractionBlock);
       //*currentInteractionBlock +=  *leftInteractionBlock ** work;
-      siconos::algebra::prod(*leftInteractionBlock, *rightInteractionBlock,
-                             *currentInteractionBlock, false);
+      *currentInteractionBlock += *leftInteractionBlock * *rightInteractionBlock;
     }
   } else
     THROW_EXCEPTION(
@@ -724,6 +707,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock(
         std::to_string(
             static_cast<std::underlying_type<siconos::modeling::RelationType>::type>(
                 relationType1)));
+
   DEBUG_END(
       "siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock(const "
       "siconos::graphs::InteractionsGraph::EDescriptor& ed)\n");
@@ -745,9 +729,9 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeqBlock(
 
   osi1.computeFreeOutput(vertex_inter, this);
   auto& osnsp_rhs = osi1.osnsp_rhs(vertex_inter, *indexSet);
-  setBlock(osnsp_rhs, _q, sizeY, 0, pos);
+  _q->segment(pos, sizeY) = osnsp_rhs;
 
-  DEBUG_EXPR(_q->display());
+  DEBUG_EXPR(siconos::algebra::print(*_q));
   DEBUG_END(
       "siconos::nonsmooth_formulations::LinearOSNS::computeqBlock(std::shared_ptr<siconos::"
       "modeling::"
@@ -757,7 +741,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeqBlock(
 void siconos::nonsmooth_formulations::LinearOSNS::computeq(double time) {
   DEBUG_BEGIN("void siconos::nonsmooth_formulations::LinearOSNS::computeq(double time)\n");
   if (_q->size() != _sizeOutput) _q->resize(_sizeOutput);
-  _q->zero();
+  _q->setZero();
 
   // === Get index set from Simulation ===
   auto indexSet = simulation()->indexSet(indexSetLevel());
@@ -830,7 +814,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeM() {
     NM_scal(theta, &*_M->numericsMatrix());
   }
 
-  DEBUG_EXPR(_M->display(););
+  DEBUG_EXPR(siconos::algebra::print(*_M););
   // NumericsMatrix *   M_NM = _M->numericsMatrix().get();
   // if (M_NM )
   //   NM_display(M_NM);
@@ -856,7 +840,7 @@ bool siconos::nonsmooth_formulations::LinearOSNS::preCompute(double time) {
   // Get topology
   auto topology = simulation()->nonSmoothDynamicalSystem()->topology();
   bool isLinear = simulation()->nonSmoothDynamicalSystem()->isLinear();
-  // int elapsed =0;
+  // auto elapsed =0;
   //    std::cout << "!b || !isLinear :"  << boolalpha <<  (!b || !isLinear) <<  std::endl;
 
   // nothing to do
@@ -888,13 +872,13 @@ bool siconos::nonsmooth_formulations::LinearOSNS::preCompute(double time) {
     // Checks z and _w sizes and reset if necessary
 
     if (_z->size() != _sizeOutput) {
-      _z->resize(_sizeOutput, false);
-      _z->zero();
+      _z->resize(_sizeOutput, Eigen::NoChange);
+      _z->setZero();
     }
 
     if (_w->size() != _sizeOutput) {
       _w->resize(_sizeOutput);
-      _w->zero();
+      _w->setZero();
     }
 
     // Reset _w and _z with previous values of y and lambda
@@ -916,13 +900,13 @@ bool siconos::nonsmooth_formulations::LinearOSNS::preCompute(double time) {
         const auto& lambda_k = inter.lambda_k(inputOutputLevel());
 
         if (_sizeOutput >= yOutput_k.size() + pos) {
-          siconos::algebra::setBlock(yOutput_k, _w, yOutput_k.size(), 0, pos);
-          siconos::algebra::setBlock(lambda_k, _z, lambda_k.size(), 0, pos);
+          _w->segment(pos, yOutput_k.size()) = yOutput_k;
+          _z->segment(pos, lambda_k.size()) = lambda_k;
         }
       }
     } else {
-      _w->zero();
-      _z->zero();
+      _w->setZero();
+      _z->setZero();
     }
   }
   // else
@@ -947,16 +931,14 @@ bool siconos::nonsmooth_formulations::LinearOSNS::preCompute(double time) {
 
 void siconos::nonsmooth_formulations::LinearOSNS::postCompute() {
   DEBUG_BEGIN("void siconos::nonsmooth_formulations::LinearOSNS::postCompute()\n");
-  // This function is used to set y/lambda values using output from
-  // lcp_driver (w,z).  Only Interactions (ie Interactions) of
-  // indexSet(leveMin) are concerned.
+  // This function is used to set lambda values using output from
+  // lcp_driver (w,z).  Only Interactions of indexSet(leveMin) are concerned.
 
   // === Get index set from Topology ===
   auto& indexSet = *simulation()->indexSet(indexSetLevel());
 
   // y and lambda vectors
   std::shared_ptr<siconos::algebra::SiconosVector> lambda;
-  std::shared_ptr<siconos::algebra::SiconosVector> y;
 
   // === Loop through "active" Interactions (ie present in
   // indexSets[1]) ===
@@ -966,19 +948,15 @@ void siconos::nonsmooth_formulations::LinearOSNS::postCompute() {
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   for (std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui) {
     auto& inter = *indexSet.bundle(*ui);
-    // Get the  position of inter-interactionBlock in the vector w
-    // or z
+    // Get the  position of inter-interactionBlock in the vector w or z
     pos = indexSet.properties(*ui).absolute_position;
 
-    // Get Y and Lambda for the current Interaction
-    y = inter.y(inputOutputLevel());
+    // Get lambda for the current Interaction
+    // y = inter.y(inputOutputLevel());
     lambda = inter.lambda(inputOutputLevel());
-    // Copy _w/_z values, starting from index pos into y/lambda.
-
-    // siconos::algebra::setBlock(*_w, y, y->size(), pos, 0);// Warning: yEquivalent is
-    //  saved in y !!
-    siconos::algebra::setBlock(*_z, lambda, lambda->size(), pos, 0);
-    DEBUG_EXPR(lambda->display(););
+    // Copy _z values, starting from index pos into lambda.
+    lambda->segment(0, lambda->size()) = _z->segment(pos, lambda->size());
+    DEBUG_EXPR(siconos::algebra::print(*lambda););
   }
   DEBUG_END("void siconos::nonsmooth_formulations::LinearOSNS::postCompute()\n");
 }
@@ -993,18 +971,18 @@ void siconos::nonsmooth_formulations::LinearOSNS::display() const {
     std::cout << "-> nullptr" << std::endl;
   std::cout << std::endl << "q : ";
   if (_q)
-    _q->display();
+    siconos::algebra::print(*_q);
   else
     std::cout << "-> nullptr" << std::endl;
   std::cout << std::endl;
   std::cout << "w : ";
   if (_w)
-    _w->display();
+    siconos::algebra::print(*_w);
   else
     std::cout << "-> nullptr" << std::endl;
   std::cout << std::endl << "z : ";
   if (_z)
-    _z->display();
+    siconos::algebra::print(*_z);
   else
     std::cout << "-> nullptr" << std::endl;
   std::cout << std::endl;

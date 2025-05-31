@@ -18,9 +18,9 @@
 #include "ZOHTest.hpp"
 
 #include "EventsManager.hpp"
-#include "SiconosVector.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosMatrixVectorOp.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosVector.hpp"
 #include "io.hpp"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
@@ -30,13 +30,16 @@
 CPPUNIT_TEST_SUITE_REGISTRATION(ZOHTest);
 
 void ZOHTest::setUp() {
-  _A = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n, 0);
-  _b = std::make_shared<siconos::algebra::SiconosVector>(_n, 0);
-  _x0 = std::make_shared<siconos::algebra::SiconosVector>(_n, 0);
+  _A = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
+  _b = std::make_shared<siconos::algebra::SiconosVector>(_n);
+  _x0 = std::make_shared<siconos::algebra::SiconosVector>(_n);
+  _A->setZero();
+  _b->setZero();
+  _x0->setZero();
 }
 
 void ZOHTest::init() {
-  _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(_x0, _A, _b);
+  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, *_A, *_b);
   _TD = std::make_shared<siconos::simulation::TimeDiscretisation>(_t0, _h);
   _model = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(_t0, _T);
   _sim = std::make_shared<siconos::simulation::TimeStepping>(_model, _TD, 0);
@@ -54,17 +57,19 @@ void ZOHTest::testMatrixExp0() {
   std::cout << "===========================================" << std::endl;
   std::cout << "------- Compute matrix exponential of the identity matrix -------"
             << std::endl;
-  _A->eye();
+  _A->setIdentity();
   init();
   _sim->computeOneStep();
   _sim->nextStep();
-  auto tmpM = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n, 0);
-  tmpM->eye();
+  auto tmpM = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
+  tmpM->setZero();
+  tmpM->setIdentity();
   *tmpM = (*tmpM) * exp(_h);
   const auto& Phi = _ZOH->Ad(_DS);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp0 : ", Phi.size(0) == _n, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp0 : ", Phi.size(1) == _n, true);
-  double diff = (*tmpM - Phi).normInf();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp0 : ", Phi.rows() == _n, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp0 : ", Phi.cols() == _n, true);
+  siconos::algebra::SiconosMatrix diffTmp = *tmpM - Phi;
+  double diff = siconos::algebra::normInf(diffTmp);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp0 : ", diff < _tol, true);
   std::cout << "------- First computation ok, error = " << diff << " -------" << std::endl;
   std::cout << std::endl << std::endl;
@@ -76,20 +81,22 @@ void ZOHTest::testMatrixExp1() {
   std::cout << "===========================================" << std::endl;
   std::cout << "------- Compute matrix exponential of a upper triangular matrix -------"
             << std::endl;
-  _A->zero();
+  _A->setZero();
   (*_A)(0, 1) = 1;
   init();
   _sim->computeOneStep();
   _sim->nextStep();
-  auto tmpM = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n, 0);
-  tmpM->eye();
+  auto tmpM = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
+  tmpM->setZero();
+  tmpM->setIdentity();
   (*tmpM)(0, 1) = _h;
   const auto& Phi = _ZOH->Ad(_DS);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp1 : ", Phi.size(0) == _n, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp1 : ", Phi.size(1) == _n, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp1 : ", (*tmpM - Phi).normInf() < _tol, true);
-  std::cout << "------- Second computation ok, error = " << (*tmpM - Phi).normInf()
-            << " -------" << std::endl;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp1 : ", Phi.rows() == _n, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp1 : ", Phi.cols() == _n, true);
+  siconos::algebra::SiconosMatrix diff2Tmp = *tmpM - Phi;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp1 : ", siconos::algebra::normInf(diff2Tmp) < _tol, true);
+  std::cout << "------- Second computation ok, error = " << siconos::algebra::normInf(diff2Tmp) << " -------"
+            << std::endl;
   std::cout << std::endl << std::endl;
 }
 
@@ -98,13 +105,14 @@ void ZOHTest::testMatrixIntegration1() {
   std::cout << " ===== ZOH tests start ... ===== " << std::endl;
   std::cout << "===========================================" << std::endl;
   std::cout << "------- Integrate an oscillator -------" << std::endl;
-  _A->zero();
+  _A->setZero();
   (*_A)(0, 1) = 1;
   (*_A)(1, 0) = -1;
-  _x0->zero();
+  _x0->setZero();
   (*_x0)(0) = 1;
   init();
-  siconos::algebra::SimpleMatrix dataPlot((unsigned)ceil((_T - _t0) / _h) + 10, 3);
+  auto N = (unsigned)ceil((_T - _t0) / _h);
+  siconos::algebra::SiconosMatrix dataPlot(N + 1, 3);
   auto& xProc = *_DS->x();
   unsigned int k = 0;
   dataPlot(0, 0) = _t0;
@@ -117,26 +125,24 @@ void ZOHTest::testMatrixIntegration1() {
     dataPlot(k, 1) = xProc(0);
     dataPlot(k, 2) = xProc(1);
     _sim->nextStep();
-    _sim->eventsManager()->display();
+    //_sim->eventsManager()->display();
   }
-  dataPlot.display();
+  siconos::algebra::print(dataPlot);
   std::cout << std::endl << std::endl;
-  dataPlot.resize(k, 3);
   siconos::algebra::io::write("testMatrixIntegration1.dat", dataPlot,
                               siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  siconos::algebra::SimpleMatrix dataPlotRef(dataPlot);
-  dataPlotRef.zero();
+  siconos::algebra::SiconosMatrix dataPlotRef(dataPlot);
+  dataPlotRef.setZero();
   // magic line to compute the following:
   //  python -c "import numpy as np; t = np.linspace(0, 9.9, 100);
   //  np.savetxt('testMatrixIntegration1.ref', np.transpose([t, np.cos(t), -np.sin(t)]))" &&
   //  sed -i "1i100 3" testMatrixIntegration1.ref
   siconos::algebra::io::read("testMatrixIntegration1.ref", dataPlotRef);
-  std::cout << "------- Integration Ok, error = " << (dataPlot - dataPlotRef).normInf()
-            << " -------" << std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp1 : ", (dataPlot - dataPlotRef).normInf() < _tol,
-                               true);
+  siconos::algebra::SiconosMatrix diff = dataPlot - dataPlotRef;
+  std::cout << "------- Integration Ok, error = " << siconos::algebra::normInf(diff) << " -------" << std::endl;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp1 : ", siconos::algebra::normInf(diff) < _tol, true);
 }
 
 void ZOHTest::testMatrixIntegration2() {
@@ -144,19 +150,20 @@ void ZOHTest::testMatrixIntegration2() {
   std::cout << " ===== ZOH tests start ... ===== " << std::endl;
   std::cout << "===========================================" << std::endl;
   std::cout << "------- Integrate x \\in -sgn(x)  -------" << std::endl;
-  _A->zero();
-  _x0->zero();
+  _A->setZero();
+  _x0->setZero();
   (*_x0)(0) = 1;
   (*_x0)(1) = -1;
-  auto B = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);
-  auto C = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);
-  B->eye();
-  C->eye();
-  auto rel = std::make_shared<siconos::modeling::FirstOrderLinearTIR>(C, B);
-  auto D = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n, 0);
-  rel->setDPtr(D);
+  auto B = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
+  auto C = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
+  B->setIdentity();
+  C->setIdentity();
+  auto rel = std::make_shared<siconos::modeling::FirstOrderLinearTIR>(*C, *B);
+  auto D = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
+  D->setZero();
+  rel->setConstantD(*D);
   auto nslaw = std::make_shared<siconos::modeling::RelayNSL>(_n);
-  _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(_x0, _A, _b);
+  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, *_A, *_b);
   _TD = std::make_shared<siconos::simulation::TimeDiscretisation>(_t0, _h);
   _model = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(_t0, _T);
   auto inter = std::make_shared<siconos::modeling::Interaction>(nslaw, rel);
@@ -169,7 +176,8 @@ void ZOHTest::testMatrixIntegration2() {
   auto osnspb = std::make_shared<siconos::nonsmooth_formulations::Relay>();
   _sim->insertNonSmoothProblem(osnspb);
   _sim->initialize();
-  siconos::algebra::SimpleMatrix dataPlot((unsigned)ceil((_T - _t0) / _h) + 10, 5);
+  auto N = (unsigned)ceil((_T - _t0) / _h);
+  siconos::algebra::SiconosMatrix dataPlot(N + 1, 5);
   auto& xProc = *_DS->x();
   auto& lambda = *inter->lambda(0);
   unsigned int k = 0;
@@ -178,6 +186,7 @@ void ZOHTest::testMatrixIntegration2() {
   dataPlot(0, 2) = (*_x0)(1);
   dataPlot(0, 3) = 0;
   dataPlot(0, 4) = 0;
+
   while (_sim->hasNextEvent()) {
     _sim->computeOneStep();
     k++;
@@ -188,20 +197,17 @@ void ZOHTest::testMatrixIntegration2() {
     dataPlot(k, 4) = lambda(1);
     _sim->nextStep();
   }
-  dataPlot.resize(k, 5);
-  dataPlot.display();
+  siconos::algebra::print(dataPlot);
   std::cout << std::endl << std::endl;
   siconos::algebra::io::write("testMatrixIntegration2.dat", dataPlot,
                               siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  siconos::algebra::SimpleMatrix dataPlotRef(dataPlot);
-  dataPlotRef.zero();
+  siconos::algebra::SiconosMatrix dataPlotRef(dataPlot);
   siconos::algebra::io::read("testMatrixIntegration2.ref", dataPlotRef);
-  std::cout << "------- Integration Ok, error = " << (dataPlot - dataPlotRef).normInf()
-            << " -------" << std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp2 : ", (dataPlot - dataPlotRef).normInf() < _tol,
-                               true);
+  siconos::algebra::SiconosMatrix diff = dataPlot - dataPlotRef;
+  std::cout << "------- Integration Ok, error = " << siconos::algebra::normInf(diff) << " -------" << std::endl;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp2 : ", siconos::algebra::normInf(diff) < _tol, true);
 }
 
 void ZOHTest::testMatrixIntegration3() {
@@ -210,21 +216,23 @@ void ZOHTest::testMatrixIntegration3() {
   std::cout << "===========================================" << std::endl;
   std::cout << "------- Integrate Orlov's controller  -------" << std::endl;
   _h = .001;
-  _A->zero();
+  _A->setZero();
   (*_A)(0, 1) = 1;
-  _x0->zero();
+  _x0->setZero();
   (*_x0)(0) = 1;
   (*_x0)(1) = 1;
-  auto B = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n, 0);
-  auto C = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);
+  auto B = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
+  B->setZero();
+  auto C = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
   (*B)(1, 0) = 2;
   (*B)(1, 1) = 1;
-  C->eye();
-  auto rel = std::make_shared<siconos::modeling::FirstOrderLinearTIR>(C, B);
-  auto D = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n, 0);
-  rel->setDPtr(D);
+  C->setIdentity();
+  auto rel = std::make_shared<siconos::modeling::FirstOrderLinearTIR>(*C, *B);
+  auto D = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
+  D->setZero();
+  rel->setConstantD(*D);
   auto nslaw = std::make_shared<siconos::modeling::RelayNSL>(_n);
-  _DS = std::make_shared<siconos::modeling::FirstOrderLinearTIDS>(_x0, _A, _b);
+  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, *_A, *_b);
   _TD = std::make_shared<siconos::simulation::TimeDiscretisation>(_t0, _h);
   _model = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(_t0, _T);
   auto inter = std::make_shared<siconos::modeling::Interaction>(nslaw, rel);
@@ -237,7 +245,8 @@ void ZOHTest::testMatrixIntegration3() {
   auto osnspb = std::make_shared<siconos::nonsmooth_formulations::Relay>();
   _sim->insertNonSmoothProblem(osnspb);
   _sim->initialize();
-  siconos::algebra::SimpleMatrix dataPlot((unsigned)ceil((_T - _t0) / _h) + 10, 7);
+  auto N = (unsigned)ceil((_T - _t0) / _h);
+  siconos::algebra::SiconosMatrix dataPlot(N + 1, 7);
   auto& xProc = *_DS->x();
   auto& lambda = *inter->lambda(0);
   siconos::algebra::SiconosVector sampledControl(_n);
@@ -262,20 +271,17 @@ void ZOHTest::testMatrixIntegration3() {
     dataPlot(k, 6) = lambda(1);
     _sim->nextStep();
   }
-  dataPlot.resize(k, 7);
-  dataPlot.display();
+  siconos::algebra::print(dataPlot);
   std::cout << std::endl << std::endl;
   siconos::algebra::io::write("testMatrixIntegration3.dat", dataPlot,
                               siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  siconos::algebra::SimpleMatrix dataPlotRef(dataPlot);
-  dataPlotRef.zero();
+  siconos::algebra::SiconosMatrix dataPlotRef(dataPlot);
   siconos::algebra::io::read("testMatrixIntegration3.ref", dataPlotRef);
-  std::cout << "------- Integration Ok, error = " << (dataPlot - dataPlotRef).normInf()
-            << " -------" << std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp3 : ", (dataPlot - dataPlotRef).normInf() < _tol,
-                               true);
+  siconos::algebra::SiconosMatrix diff = dataPlot - dataPlotRef;
+  std::cout << "------- Integration Ok, error = " << siconos::algebra::normInf(diff) << " -------" << std::endl;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp3 : ", siconos::algebra::normInf(diff) < _tol, true);
 }
 
 void ZOHTest::testMatrixIntegration4() {
@@ -284,21 +290,23 @@ void ZOHTest::testMatrixIntegration4() {
   std::cout << "===========================================" << std::endl;
   std::cout << "------- Integrate Orlov's controller  -------" << std::endl;
   _h = .001;
-  _A->zero();
+  _A->setZero();
   (*_A)(0, 1) = 1;
-  _x0->zero();
+  _x0->setZero();
   (*_x0)(0) = 1;
   (*_x0)(1) = 1;
-  auto B = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n, 0);
-  auto C = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n);
+  auto B = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
+  B->setZero();
+  auto C = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
   (*B)(1, 0) = 2;
   (*B)(1, 1) = 1;
-  C->eye();
-  auto rel = std::make_shared<siconos::modeling::FirstOrderLinearTIR>(C, B);
-  auto D = std::make_shared<siconos::algebra::SimpleMatrix>(_n, _n, 0);
-  rel->setDPtr(D);
+  C->setIdentity();
+  auto rel = std::make_shared<siconos::modeling::FirstOrderLinearTIR>(*C, *B);
+  auto D = std::make_shared<siconos::algebra::SiconosMatrix>(_n, _n);
+  D->setZero();
+  rel->setConstantD(*D);
   auto nslaw = std::make_shared<siconos::modeling::RelayNSL>(_n);
-  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(_x0, _A, _b);
+  _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*_x0, *_A, *_b);
   _TD = std::make_shared<siconos::simulation::TimeDiscretisation>(_t0, _h);
   _model = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(_t0, _T);
   auto inter = std::make_shared<siconos::modeling::Interaction>(nslaw, rel);
@@ -311,7 +319,8 @@ void ZOHTest::testMatrixIntegration4() {
   auto osnspb = std::make_shared<siconos::nonsmooth_formulations::Relay>();
   _sim->insertNonSmoothProblem(osnspb);
   _sim->initialize();
-  siconos::algebra::SimpleMatrix dataPlot((unsigned)ceil((_T - _t0) / _h) + 10, 7);
+  auto N = (unsigned)ceil((_T - _t0) / _h);
+  siconos::algebra::SiconosMatrix dataPlot(N + 1, 7);
   auto& xProc = *_DS->x();
   auto& lambda = *inter->lambda(0);
   siconos::algebra::SiconosVector sampledControl(_n);
@@ -336,19 +345,16 @@ void ZOHTest::testMatrixIntegration4() {
     dataPlot(k, 6) = lambda(1);
     _sim->nextStep();
   }
-  dataPlot.resize(k, 7);
-  dataPlot.display();
+  siconos::algebra::print(dataPlot);
   std::cout << std::endl << std::endl;
   siconos::algebra::io::write("testMatrixIntegration4.dat", dataPlot,
                               siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  siconos::algebra::SimpleMatrix dataPlotRef(dataPlot);
-  dataPlotRef.zero();
+  siconos::algebra::SiconosMatrix dataPlotRef(dataPlot);
+  dataPlotRef.setZero();
   siconos::algebra::io::read("testMatrixIntegration4.ref", dataPlotRef);
-
-  std::cout << "------- Integration Ok, error = " << (dataPlot - dataPlotRef).normInf()
-            << " -------" << std::endl;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp4 : ", (dataPlot - dataPlotRef).normInf() < _tol,
-                               true);
+  siconos::algebra::SiconosMatrix diff = dataPlot - dataPlotRef;
+  std::cout << "------- Integration Ok, error = " << siconos::algebra::normInf(diff) << " -------" << std::endl;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixExp4 : ", siconos::algebra::normInf(diff) < _tol, true);
 }

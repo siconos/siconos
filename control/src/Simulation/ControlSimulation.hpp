@@ -26,11 +26,9 @@
 #include <memory>
 #include <string>
 
+#include "SiconosMatrix.hpp"
 #include "SiconosSerialization.hpp"
 
-namespace siconos::algebra {
-class SimpleMatrix;
-}  // namespace siconos::algebra
 
 namespace siconos::graphs {
 struct DynamicalSystemsGraph;
@@ -97,7 +95,7 @@ class ControlSimulation {
   bool _silent{false};
 
   /** Matrix for saving result */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _dataM{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _dataM{nullptr};
 
   /** Legend for the columns in the matrix _dataM*/
   std::string _dataLegend{"none"};
@@ -198,7 +196,7 @@ class ControlSimulation {
   /** Return the data matrix
    * \return the data matrix
    */
-  inline std::shared_ptr<siconos::algebra::SimpleMatrix> data() const { return _dataM; }
+  inline std::shared_ptr<siconos::algebra::SiconosMatrix> data() const { return _dataM; }
 
   /** get the legend for the matrix
    * \return legend as string of space seperated values

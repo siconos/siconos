@@ -91,9 +91,10 @@ class LsodarOSI : public OneStepIntegrator {
   enum LsodarOSI_interaction_workBlockVector_id { xfree, BLOCK_WORK_LENGTH };
 
   /** Lsodar counter : Number of steps taken for the problem so far. */
-  static int count_NST;
+  inline static int count_NST = 0;
+
   /** Number of RHS evaluations for the problem so far. */
-  static int count_NFE;
+  inline static int count_NFE = 0;
 
   /** Default and only constructor */
   LsodarOSI();
@@ -273,7 +274,8 @@ class LsodarOSI : public OneStepIntegrator {
   void computeFreeOutput(siconos::graphs::InteractionsGraph::VDescriptor &vertex_descr,
                          siconos::nonsmooth_formulations::OneStepNSProblem *osnsp) override;
 
-  /** return the workVector corresponding to the right hand side of the OneStepNonsmooth problem */
+  /** return the workVector corresponding to the right hand side of the OneStepNonsmooth
+   * problem */
   siconos::algebra::SiconosVector &osnsp_rhs(
       siconos::graphs::InteractionsGraph::VDescriptor &vertex_inter,
       siconos::graphs::InteractionsGraph &indexSet) override {
@@ -284,17 +286,11 @@ class LsodarOSI : public OneStepIntegrator {
    */
   void display() const override;
 
-  /** Return current number of rhs call (for all lsodar-like OSIs!)
-   *
-   *  \return int
-   */
-  static int count_rhs_call() { return count_NFE; }
+  /** \return the current number of rhs call (for all lsodar-like OSIs!) */
+  auto count_rhs_call() const { return count_NFE; }
 
-  /** Return the number of lsodar steps already done (for all lsodar-like OSIs!)
-   *
-   *  \return int
-   */
-  static int count_steps() { return count_NST; }
+  /** \returnthe number of lsodar steps already done (for all lsodar-like OSIs!) */
+  auto count_steps() const { return count_NST; }
 };
 }  // namespace siconos::integrators
 

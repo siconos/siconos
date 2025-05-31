@@ -35,7 +35,7 @@ bool siconos::mechanisms::MBTB_MoreauJeanOSI::addInteractionInIndexSet(
   double h = _simulation->timeStep();
   double y =
       (inter->y(i - 1))->getValxxue(0);      // for i=1 y(i-1) is the position
-  double yDot = (inter->y(i))->getValue(0);  // for i=1 y(i) is the velocity
+  double yDot = (*(inter->y(i)))(0);  // for i=1 y(i) is the velocity
 
   double gamma = 1.0 / 2.0;
   if (_useGamma) {
@@ -58,8 +58,8 @@ bool siconos::mechanisms::MBTB_MoreauJeanOSI::removeInteractionFromIndexSet(
     std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i) {
   assert(i == 1);
   double h = _simulation->timeStep();
-  double y = (inter->y(i - 1))->getValue(0);  // for i=1 y(i-1) is the position
-  double yDot = (inter->y(i))->getValue(0);   // for i=1 y(i) is the velocity
+  double y = (*inter->y(i - 1))(0);  // for i=1 y(i-1) is the position
+  double yDot = (*(inter->y(i)))(0);   // for i=1 y(i) is the velocity
   double gamma = 1.0 / 2.0;
   if (_useGamma) {
     gamma = _gamma;
@@ -82,8 +82,8 @@ bool siconos::mechanisms::MBTB_MoreauJeanOSI::removeInteractionFromIndexSet(
 bool siconos::mechanisms::MBTB_MoreauJeanOSI::addInteractionInIndexSet(
     std::shared_ptr<siconos::modeling::Interaction> inter, unsigned int i) {
   assert(i == 1);
-  double y = (inter->y(i - 1))->getValue(0);  // for i=1 y(i-1) is the position
-  // double yDot = (inter->y(i))->getValue(0); // for i=1 y(i) is the velocity
+  double y = (*inter->y(i - 1))(0);  // for i=1 y(i-1) is the position
+  // double yDot = (*(inter->y(i)))(0); // for i=1 y(i) is the velocity
 
   DEBUG_PRINTF(
       "siconos::mechanisms::MBTB_MoreauJeanOSI::addInteractionInIndexSet "
@@ -111,8 +111,8 @@ bool siconos::mechanisms::MBTB_MoreauJeanOSI::removeInteractionFromIndexSet(
 {
   assert(i == 1);
   //  double h = _simulation->timeStep();
-  double y = (inter->y(i - 1))->getValue(0);  // for i=1 y(i-1) is the position
-  double yDot = (inter->y(i))->getValue(0);   // for i=1 y(i) is the velocity
+  double y = (*inter->y(i - 1))(0);  // for i=1 y(i-1) is the position
+  double yDot = (*(inter->y(i)))(0);   // for i=1 y(i) is the velocity
 
   DEBUG_PRINTF(
       "siconos::mechanisms::MBTB_MoreauJeanOSI::removeInteractionFromIndexSet "

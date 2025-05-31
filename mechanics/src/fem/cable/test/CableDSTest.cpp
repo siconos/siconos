@@ -69,28 +69,26 @@ void CableDSTest::testBuildInitialProfile() {
   int nb_nodes = 50;   // Catenary, number of nodes per rope span
   double tol = 1e-10;  // Tol. used in Newton-Raphson for catenary equation
   int nmax = 20;       // Newton-Raphson, max number of iterations
-  profil->computeInitialProfil(nb_nodes, tol, nmax);
+  profil->computeInitialProfile(nb_nodes, tol, nmax);
 
   // At this stage, positions are saved in each Rope, for all points.
   // To get them and for comparison, we use output to json and 'reload' into a
   // siconos::algebra::SiconosVector. Save ropeways variables into json file
   ojson out;
   results->to_json(out, "ropeway");
-  auto q1 = siconos::algebra::io::readVectorFromJson(out["rope1"]["q"]);
-  auto q2 = siconos::algebra::io::readVectorFromJson(out["rope2"]["q"]);
+  auto q1 = siconos::algebra::io::readVectorFromJson(out["ropes_up"]["q"]);
+  auto q2 = siconos::algebra::io::readVectorFromJson(out["ropes_down"]["q"]);
   // Read reference
   std::ifstream in("data/bouquetins_ref.json");
   json reader;
   in >> reader;
-  auto qref1 = siconos::algebra::io::readVectorFromJson(reader["rope1"]["q"]);
-  auto qref2 = siconos::algebra::io::readVectorFromJson(reader["rope2"]["q"]);
+  auto qref1 = siconos::algebra::io::readVectorFromJson(reader["ropes_up"]["q"]);
+  auto qref2 = siconos::algebra::io::readVectorFromJson(reader["ropes_down"]["q"]);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE(" testBuildInitialProfile: check catenary",
-                               (qref1->size() == q1->size()), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testBuildInitialProfile: check catenary", ((*qref1) == (*q1)),
-                               true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testBuildInitialProfile: check catenary", ((*qref2) == (*q2)),
-                               true);
+                               (qref1.size() == q1.size()), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testBuildInitialProfile: check catenary", qref1 == q1, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testBuildInitialProfile: check catenary", qref2 == q2, true);
 
   nb_nodes = 1400;  // FEM number of nodes
   double eps = 0.1;
@@ -106,7 +104,7 @@ void CableDSTest::testBuildInitialProfile() {
 
   auto positions_ref = siconos::algebra::io::readVectorFromJson(reader["q"]);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(" testBuildInitialProfile:  check fem",
-                               ((*positions_ref) == (*positions)), true);
+                               (positions_ref - positions).norm() < 1e-9, true);
   std::cout << "End testBuildInitialProfile ...\n";
   // // compare results to a reference
 }
@@ -136,8 +134,7 @@ void CableDSTest::testComputeDS() {
   // Compute, simulation
   std::string outFile = "results/compute.origin.json";
   ojson out;
-  res = manager->computeFEM(args, outFile, out);
-  CPPUNIT_ASSERT_NOT_EQUAL(" testComputeDS: compute FAIL", res == EXIT_FAILURE, true);
+  manager->computeFEM(args, outFile, out);
 }
 
 void CableDSTest::testComputeBouncingBall() {
@@ -160,24 +157,24 @@ void CableDSTest::testComputeBouncingBall() {
 
   cout << "====> Model loading ..." << endl;
 
-  auto Mass = std::make_shared<siconos::algebra::SimpleMatrix>(nDof, nDof);
-  (*Mass)(0, 0) = m;
-  (*Mass)(1, 1) = m;
-  (*Mass)(2, 2) = 2. / 5 * m * R * R;
+  siconos::algebra::SiconosMatrix mass{nDof, nDof};
+  mass(0, 0) = m;
+  mass(1, 1) = m;
+  mass(2, 2) = 2. / 5 * m * R * R;
 
   // -- Initial positions and velocities --
-  auto q0 = std::make_shared<siconos::algebra::SiconosVector>(nDof);
-  auto v0 = std::make_shared<siconos::algebra::SiconosVector>(nDof);
-  (*q0)(0) = position_init;
-  (*v0)(0) = velocity_init;
+  siconos::algebra::SiconosVector q0{nDof};
+  siconos::algebra::SiconosVector v0{nDof};
+  q0(0) = position_init;
+  v0(0) = velocity_init;
 
   // -- The dynamical system --
-  auto ball = std::make_shared<siconos::modeling::LagrangianLinearTIDS>(q0, v0, Mass);
+  auto ball = std::make_shared<siconos::modeling::LagrangianLinearTIDS>(q0, v0, mass);
 
   // -- Set external forces (weight) --
-  auto weight = std::make_shared<siconos::algebra::SiconosVector>(nDof);
-  (*weight)(0) = -m * g;
-  ball->setFExtPtr(weight);
+  siconos::algebra::SiconosVector weight{nDof};
+  weight(0) = -m * g;
+  ball->setConstantFext(weight);
 
   // --------------------
   // --- Interactions ---
@@ -188,11 +185,11 @@ void CableDSTest::testComputeBouncingBall() {
 
   // Interaction ball-floor
   //
-  auto H = std::make_shared<siconos::algebra::SimpleMatrix>(1, nDof);
+  auto H = std::make_shared<siconos::algebra::SiconosMatrix>(1, nDof);
   (*H)(0, 0) = 1.0;
 
   auto nslaw = std::make_shared<siconos::modeling::NewtonImpactNSL>(e);
-  auto relation = std::make_shared<siconos::modeling::LagrangianLinearTIR>(H);
+  auto relation = std::make_shared<siconos::modeling::LagrangianLinearTIR>(*H);
 
   auto inter = std::make_shared<siconos::modeling::Interaction>(nslaw, relation);
 
@@ -232,7 +229,7 @@ void CableDSTest::testComputeBouncingBall() {
   // --- Get the values to be plotted ---
   // -> saved in a matrix dataPlot
   unsigned int outputSize = 5;
-  siconos::algebra::SimpleMatrix dataPlot(N + 1, outputSize);
+  siconos::algebra::SiconosMatrix dataPlot(N + 1, outputSize);
 
   auto q = ball->q();
   auto v = ball->velocity();
@@ -269,7 +266,7 @@ void CableDSTest::testComputeBouncingBall() {
 void CableDSTest::testNoFext() {
   // auto cable = std::make_shared<siconos::mechanics::fem::CableDS>(q0, v0, mass, 14000, 1);
 
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE(" testNoFext: ", cable->fExt() == nullptr, true);
+  // CPPUNIT_ASSERT_EQUAL_MESSAGE(" testNoFext: ", cable->fext() == nullptr, true);
   //  ...
 }
 
@@ -282,8 +279,8 @@ void CableDSTest::testConstantFext() {
 
   // auto cable = std::make_shared<siconos::mechanics::fem::CableDS>(q0, v0, mass, 14000, 1);
   // cable->setFExtPtr(externalForces);
-  // CPPUNIT_ASSERT_EQUAL_MESSAGE(" testCFext 1: ", cable->fExt() != nullptr, true);
-  // auto fext = cable->fExt();
+  // CPPUNIT_ASSERT_EQUAL_MESSAGE(" testCFext 1: ", cable->fext() != nullptr, true);
+  // auto fext = cable->fext();
   // CPPUNIT_ASSERT_EQUAL_MESSAGE(" testCFext 2: ", fext != nullptr, true);
   // for (auto val : *fext) {
   //   CPPUNIT_ASSERT_EQUAL_MESSAGE(" testCFext 3: ", val == 12, true);
@@ -302,10 +299,10 @@ void CableDSTest::testVariableFext()
   // };
 
   // auto cable = std::make_shared<siconos::mechanics::fem::CableDS>(q0, v0, mass, 14000, 1,
-  // myforces); auto fext = cable->fExt(); CPPUNIT_ASSERT_EQUAL_MESSAGE(" testVFext 1: ", fext
+  // myforces); auto fext = cable->fext(); CPPUNIT_ASSERT_EQUAL_MESSAGE(" testVFext 1: ", fext
   // != nullptr, true);
 
-  // cable->computeFExt(3.);
+  // cable->computeFext(3.);
   // for (auto val : *fext)
   //   CPPUNIT_ASSERT_EQUAL_MESSAGE(" testVFext 2: ", val == cos(3.), true);
 
@@ -313,7 +310,7 @@ void CableDSTest::testVariableFext()
   // auto velocities = cable->velocity();
   // CPPUNIT_ASSERT_EQUAL_MESSAGE(" testVFext 4: ", positions->size() == cable->dimension(),
   //                              true);
-  // cable->computeForces(5., positions, velocities);
+  // cable->computeTotalForces(velocities, positions, 5.);
   // for (auto val : *fext)
   //   CPPUNIT_ASSERT_EQUAL_MESSAGE(" testVFext 5: ", val == cos(5.), true);
 

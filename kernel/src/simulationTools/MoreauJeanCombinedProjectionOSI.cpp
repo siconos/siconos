@@ -25,6 +25,7 @@
 #include "NewtonEulerR.hpp"
 #include "Relation.hpp"
 #include "SiconosVector.hpp"
+#include "Tools.hpp"
 // #include "Simulation.hpp"
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -93,9 +94,9 @@ void siconos::integrators::MoreauJeanCombinedProjectionOSI::
 
   unsigned int p0 = 0;
   if (relationType == siconos::modeling::RelationType::Lagrangian) {
-    p0 = siconos::modeling::LagrangianR::p0;
+    p0 = tools::enum_to_index(modeling::LagrangianR::WorkDS::p0);
   } else if (relationType == siconos::modeling::RelationType::NewtonEuler) {
-    p0 = siconos::modeling::NewtonEulerR::p0;
+    p0 = siconos::tools::enum_to_index(siconos::modeling::NewtonEulerR::WorkDS::p0);
   }
   if (ds1 != ds2) {
     DEBUG_PRINT("ds1 != ds2\n");
@@ -148,7 +149,7 @@ bool siconos::integrators::MoreauJeanCombinedProjectionOSI::addInteractionInInde
   // double h = _simulation->timeStep();
   if (i == 1)  // index set for resolution at the velocity
   {
-    auto y = (inter->y(0))->getValue(0);  // y(0) is the position
+    auto y = (*(inter->y(0)))(0);  // y(0) is the position
     DEBUG_PRINTF(
         "siconos::integrators::MoreauJeanCombinedProjectionOSI::addInteractionInIndexSet "
         "yref=%e \n",
@@ -162,7 +163,7 @@ bool siconos::integrators::MoreauJeanCombinedProjectionOSI::addInteractionInInde
   } else if (i == 2)  //  special index for the projection
   {
     DEBUG_EXPR(
-        auto lambda = (inter->lambda(1))->getValue(0);
+        auto lambda = (*(inter->lambda(1)))(0);
         // lambda(1) is the contact impulse for MoreauJeanOSI scheme
         printf("siconos::integrators::MoreauJeanCombinedProjectionOSI::"
                "addInteractionInIndexSet lambdaref=%e \n",

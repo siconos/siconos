@@ -28,53 +28,39 @@
 // #define DEBUG_STDOUT
 #include "siconos_debug.h"
 
-siconos::modeling::HarmonicBC::HarmonicBC(
-    Indices&& newVelocityIndices, std::shared_ptr<siconos::algebra::SiconosVector> a,
-    std::shared_ptr<siconos::algebra::SiconosVector> b,
-    std::shared_ptr<siconos::algebra::SiconosVector> omega,
-    std::shared_ptr<siconos::algebra::SiconosVector> phi)
-    : BoundaryCondition(std::move(newVelocityIndices)),
-      _aV(a),
-      _bV(b),
-      _omegaV(omega),
-      _phiV(phi) {
-  DEBUG_BEGIN(
-      "HarmonicBC::Harmonic((std::shared_ptr<std::vector<unsigned int>> newVelocityIndices,\
-               std::shared_ptr<siconos::algebra::SiconosVector> a, std::shared_ptr<siconos::algebra::SiconosVector> b,                \
-               std::shared_ptr<siconos::algebra::SiconosVector> omega, std::shared_ptr<siconos::algebra::SiconosVector> phi)\n");
+siconos::modeling::HarmonicBC::HarmonicBC(Indices&& newVelocityIndices,
+                                          Eigen::Ref<siconos::algebra::SiconosVector> newa,
+                                          Eigen::Ref<siconos::algebra::SiconosVector> newb,
+                                          Eigen::Ref<siconos::algebra::SiconosVector> omega,
+                                          Eigen::Ref<siconos::algebra::SiconosVector> phi)
+    : BoundaryCondition(std::move(newVelocityIndices)) {
+  siconos::algebra::SiconosVector::Index bc_size = newVelocityIndices.size();
+  assert(newa.size() == bc_size);
+  assert(newb.size() == bc_size);
+  assert(omega.size() == bc_size);
+  assert(phi.size() == bc_size);
 
-  auto newsize = _velocityIndices.size();
-  if (newsize != a->size() || newsize != b->size() || newsize != omega->size() ||
-      newsize != phi->size())
-    THROW_EXCEPTION(
-        "HarmonicBC::HarmonicBC indices and vectors of data \
-           (a,b,omega,phi) must be of the same size ");
-
-  DEBUG_END(
-      "HarmonicBC::Harmonic((std::shared_ptr<std::vector<unsigned int>> newVelocityIndices,\
-           std::shared_ptr<siconos::algebra::SiconosVector> a, std::shared_ptr<siconos::algebra::SiconosVector> b,\
-           std::shared_ptr<siconos::algebra::SiconosVector> omega, std::shared_ptr<siconos::algebra::SiconosVector> phi)\n");
+  a_view_ = std::make_unique<siconos::algebra::MapVectorType>(newa.data(), bc_size);
+  b_view_ = std::make_unique<siconos::algebra::MapVectorType>(newb.data(), bc_size);
+  omega_view_ = std::make_unique<siconos::algebra::MapVectorType>(omega.data(), bc_size);
+  phi_view_ = std::make_unique<siconos::algebra::MapVectorType>(phi.data(), bc_size);
 };
 
 void siconos::modeling::HarmonicBC::computePrescribedVelocity(double time) {
-  DEBUG_BEGIN("HarmonicBC::computePrescribedVelocity(double time)\n");
-  if (!_prescribedVelocity)
-    _prescribedVelocity =
-        std::make_shared<siconos::algebra::SiconosVector>(_velocityIndices.size());
-  if (!_aV) {
-    for (unsigned int k = 0; k < _velocityIndices.size(); k++) {
-      _prescribedVelocity->setValue(k, _a + _b * cos(_omega * time + _phi));
-      DEBUG_PRINTF("_prescribedVelocity[%i] at time  %e = %e \n", k, time,
-                   _prescribedVelocity->getValue(k));
-    }
-  } else {
-    for (unsigned int k = 0; k < _velocityIndices.size(); k++) {
-      _prescribedVelocity->setValue(
-          k, (*_aV)(k) + (*_bV)(k)*cos((*_omegaV)(k)*time + (*_phiV)(k)));
-      DEBUG_PRINTF("_prescribedVelocity[%i] at time  %e = %e \n", k, time,
-                   _prescribedVelocity->getValue(k));
-    }
+  assert(prescribedVelocity_);  // Allocation must have been done during construction.
+
+  if (!a_view_) {
+    auto val = aCoeff_ + bCoeff_ * cos(omega_ * time + phi_);
+    prescribedVelocity_->setConstant(val);
   }
 
-  DEBUG_END("HarmonicBC::computePrescribedVelocity(double time)\n");
+  else {
+    auto a = *a_view_;
+    auto b = *b_view_;
+    auto omega = *omega_view_;
+    auto phi = *phi_view_;
+
+    // Calculer le résultat de manière optimale
+    *prescribedVelocity_ = a.array() + b.array() * (omega.array() * time + phi.array()).cos();
+  }
 }

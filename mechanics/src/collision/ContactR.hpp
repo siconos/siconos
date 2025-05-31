@@ -19,12 +19,9 @@
 #ifndef ContactR_hpp
 #define ContactR_hpp
 
+#include "BlockVector.hpp"
 #include "NewtonEuler3DR.hpp"
-
-namespace siconos::algebra {
-class SiconosVector;
-class BlockVector;
-}  // namespace siconos::algebra
+#include "SiconosVector.hpp"
 
 namespace siconos::collision {
 class BodyShapeRecord;
@@ -42,14 +39,13 @@ class ContactR : public siconos::modeling::NewtonEuler3DR {
   std::shared_ptr<siconos::collision::BodyShapeRecord> bodyShapeRecordB{nullptr};
 
   /**
-     to compute the output y = h(t,q,z) of the Relation
+      to compute the output y = h(q) of the Relation
 
-     \param time current time value
-     \param q coordinates of the dynamical systems involved in the relation
-     \param y the resulting vector
+      \param[in] q generalized coordinates vector of the concerned dynamical systems
+      \param[in,out] y the resulting vector
   */
-  void computeh(double time, const siconos::algebra::BlockVector& q0,
-                siconos::algebra::SiconosVector& y) override;
+  virtual void computeh(const siconos::algebra::BlockVector& q,
+                        Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
   /** Update this contact point information.
    *
@@ -64,6 +60,9 @@ class ContactR : public siconos::modeling::NewtonEuler3DR {
   virtual void preDelete() {}
 
   void display() const override;
+  virtual void accept(modeling::relations::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 };
 }  // namespace siconos::collision
 #endif

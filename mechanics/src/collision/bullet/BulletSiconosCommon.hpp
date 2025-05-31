@@ -24,13 +24,11 @@
 #ifndef BulletSiconosCommon_hpp
 #define BulletSiconosCommon_hpp
 
+#include "SiconosVector.hpp"
 #include <boost/math_fwd.hpp>  // for quaternion
 
 #include "BulletDeclarations.h"  // for btVector3
 
-namespace siconos::algebra {
-class SiconosVector;
-}
 
 namespace siconos::collision::bullet {
 

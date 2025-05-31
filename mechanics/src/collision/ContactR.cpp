@@ -19,20 +19,21 @@
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES 1
 #include "ContactR.hpp"
-#include "siconos_debug.h"
+
+#include <iostream>
+
 #include "BlockVector.hpp"
 #include "SiconosVector.hpp"
+#include "siconos_debug.h"
 
-void siconos::collision::ContactR::computeh(double time,
-                                           const siconos::algebra::BlockVector& q0,
-                                           siconos::algebra::SiconosVector& y)
-{
+void siconos::collision::ContactR::computeh(const siconos::algebra::BlockVector& q,
+                                            Eigen::Ref<siconos::algebra::SiconosVector> y) {
   DEBUG_BEGIN("siconos::collision::ContactR::computeh(...)\n");
 
   // Update contact points and distance if necessary
-  NewtonEuler3DR::computeh(time, q0, y);
+  NewtonEuler3DR::computeh(q, y);
 
-  y.setValue(0, distance());
+  y(0) = distance();
 
   DEBUG_PRINTF("position on A : %g,%g,%g\n", (*pc1())(0), (*pc1())(1), (*pc1())(2));
   DEBUG_PRINTF("position on B : %g,%g,%g\n", (*pc2())(0), (*pc2())(1), (*pc2())(2));
@@ -43,8 +44,7 @@ void siconos::collision::ContactR::computeh(double time,
 
 void siconos::collision::ContactR::updateContactPoints(
     const siconos::algebra::SiconosVector& pos1, const siconos::algebra::SiconosVector& pos2,
-    const siconos::algebra::SiconosVector& normal)
-{
+    const siconos::algebra::SiconosVector& normal) {
   // Copy relative positions
   *_relPc1 = pos1;
   *_relPc2 = pos2;
@@ -56,8 +56,7 @@ void siconos::collision::ContactR::updateContactPoints(
          "nc = 0, problems..\n");
 }
 
-void siconos::collision::ContactR::display() const
-{
+void siconos::collision::ContactR::display() const {
   std::cout << "ContactR display()\n";
   if (bodyShapeRecordA) {
     std::cout << "bodyShapeRecordA : " << bodyShapeRecordA << "\n";

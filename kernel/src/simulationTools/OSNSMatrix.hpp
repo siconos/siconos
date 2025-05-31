@@ -26,12 +26,8 @@
 
 #include "NM_types.h"  // for NM_DENSE etc
 #include "NumericsFwd.h"
+#include "SiconosMatrix.hpp"
 #include "SiconosSerialization.hpp"  // for ACCEPT_SERIALIZATION
-
-namespace siconos::algebra {
-
-class SiconosMatrix;
-}
 
 namespace siconos::graphs {
 

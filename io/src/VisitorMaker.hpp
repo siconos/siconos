@@ -23,17 +23,10 @@
 #ifndef VisitorMaker_hpp
 #define VisitorMaker_hpp
 
-#include <SiconosVisitor.hpp>
 #include <boost/mpl/fold.hpp>
 #include <boost/mpl/if.hpp>
 #include <boost/mpl/vector.hpp>
 #include <boost/type_traits.hpp>
-
-#include "KneeJointR.hpp"
-#include "Lagrangian2d2DR.hpp"
-#include "Lagrangian2d3DR.hpp"
-#include "NewtonEuler3DR.hpp"
-#include "RigidBodyDS.hpp"
 
 /* With visitors on base classes, matches of derived classes is possible
    in a templated visitor operator, example:
@@ -114,24 +107,26 @@ struct TypeNotFound {};
 template <typename T, typename Action, typename BaseType>
 struct Call : public Action {
   using type = Call<T, Action, BaseType>;
+
   using Action::visit;
 
   virtual void visit(const T& x) { (*this)(static_cast<const BaseType&>(x)); }
+  // What ??
+  // If BaseType is found (if T inherits from BaseType), then visit(T) is transformed
+  // into visit(BaseType) ==> we can use a visitor defined on BaseType for T
 };
 
-/* if base type is not found then the visitor is an empty
-   function */
+/* if base type is not found then the visitor is an empty function */
 template <typename T, typename Action>
 struct Call<T, Action, TypeNotFound> : public Action {
   using type = Call<T, Action, TypeNotFound>;
 
   using Action::visit;
 
-  virtual void visit(const T& x) {}
+  virtual void visit(const T& x) { std::cout << "Not good vis \n"; }
 };
 
-/* search for a base type of T in Pred::Action::Base and creation
-   of a visitor */
+/* search for a base type of T in Pred::Action::Base and creation of a visitor */
 template <typename T, typename Pred>
 class VisitMaker {
  private:
@@ -142,134 +137,88 @@ class VisitMaker {
 
  public:
   using Action = typename Call<T, typename Pred::Action, BaseType>::type;
+  // What ??
+  // Look in Pred::Action::Base for the first class which is a base of T.
+  // If found, use Call on it --> generate a working visitor. If not generate a visitor which
+  // does nothing.
 };
 
 /* build the global visitor for all specified classes */
-
 template <typename T>
-struct GlobalVisitor {
-  using Make = VisitMaker<
+struct GlobalDSVisitor {
+  using Make = typename VisitMaker<
       siconos::modeling::DynamicalSystem,
       VisitMaker<
           siconos::modeling::LagrangianDS,
           VisitMaker<
               siconos::modeling::NewtonEulerDS,
+              VisitMaker<siconos::collision::native::bodies::Disk,
+                         VisitMaker<siconos::collision::native::bodies::Circle,
+                                    VisitMaker<siconos::collision::RigidBodyDS,
+                                               VisitMaker<siconos::collision::RigidBody2dDS,
+                                                          T>>>>>>>::Action;
+};
+
+template <typename T>
+struct GlobalRelationVisitor {
+  using Make = typename VisitMaker<
+      siconos::modeling::LagrangianR,
+      VisitMaker<
+          siconos::modeling::Lagrangian2d2DR,
+          VisitMaker<
+              siconos::modeling::Lagrangian2d3DR,
               VisitMaker<
-                  siconos::modeling::LagrangianR,
+                  siconos::modeling::NewtonEulerR,
                   VisitMaker<
-                      siconos::collision::native::bodies::Disk,
+                      siconos::modeling::NewtonEuler1DR,
                       VisitMaker<
-                          siconos::collision::native::bodies::Circle,
+                          siconos::modeling::NewtonEuler3DR,
                           VisitMaker<
-                              siconos::modeling::Lagrangian2d2DR,
+                              siconos::modeling::NewtonEuler5DR,
                               VisitMaker<
-                                  siconos::modeling::Lagrangian2d3DR,
+                                  siconos::collision::ContactR,
                                   VisitMaker<
-                                      siconos::modeling::NewtonEulerR,
+                                      siconos::collision::Contact5DR,
                                       VisitMaker<
-                                          siconos::modeling::NewtonEuler1DR,
+                                          siconos::collision::Contact2dR,
                                           VisitMaker<
-                                              siconos::modeling::NewtonEuler3DR,
+                                              siconos::collision::Contact2d3DR,
                                               VisitMaker<
-                                                  siconos::modeling::NewtonEuler5DR,
-                                                  VisitMaker<
-                                                      siconos::collision::ContactR,
-                                                      VisitMaker<
-                                                          siconos::collision::Contact5DR,
-                                                          VisitMaker<
-                                                              siconos::collision::Contact2dR,
-                                                              VisitMaker<
-                                                                  siconos::collision::
-                                                                      Contact2d3DR,
-                                                                  VisitMaker<
-                                                                      siconos::joints::
-                                                                          PivotJointR,
-                                                                      VisitMaker<
-                                                                          siconos::joints::
-                                                                              KneeJointR,
-                                                                          VisitMaker<
-                                                                              siconos::joints::
-                                                                                  PrismaticJointR,
-                                                                              VisitMaker<
-                                                                                  siconos::
-                                                                                      collision::
-                                                                                          RigidBodyDS,
-                                                                                  VisitMaker<
-                                                                                      siconos::
-                                                                                          collision::
-                                                                                              RigidBody2dDS,
-                                                                                      T>>>>>>>>>>>>>>>>>>>>>::
+                                                  siconos::joints::PivotJointR,
+                                                  VisitMaker<siconos::joints::KneeJointR,
+                                                             VisitMaker<siconos::joints::
+                                                                            PrismaticJointR,
+                                                                        T>>>>>>>>>>>>>>::
       Action;
 };
 
-/* hide mpl::vector */
-struct empty {};
-
-template <typename T1 = empty, typename T2 = empty, typename T3 = empty, typename T4 = empty,
-          typename T5 = empty, typename T6 = empty, typename T7 = empty, typename T8 = empty,
-          typename T9 = empty>
+template <typename... Ts>
 struct Classes {
-  typedef typename boost::mpl::vector<T1, T2, T3, T4, T5, T6, T7, T8, T9> Base;
+  using Base = boost::mpl::vector<Ts...>;
 };
 
-template <typename T1>
-struct Classes<T1, empty, empty, empty, empty, empty, empty, empty, empty> {
-  typedef typename boost::mpl::vector<T1> Base;
-};
-
-template <typename T1, typename T2>
-struct Classes<T1, T2, empty, empty, empty, empty, empty, empty, empty> {
-  typedef typename boost::mpl::vector<T1, T2> Base;
-};
-
-template <typename T1, typename T2, typename T3>
-struct Classes<T1, T2, T3, empty, empty, empty, empty, empty, empty> {
-  typedef typename boost::mpl::vector<T1, T2, T3> Base;
-};
-
-template <typename T1, typename T2, typename T3, typename T4>
-struct Classes<T1, T2, T3, T4, empty, empty, empty, empty, empty> {
-  typedef typename boost::mpl::vector<T1, T2, T3, T4> Base;
-};
-
-template <typename T1, typename T2, typename T3, typename T4, typename T5>
-struct Classes<T1, T2, T3, T4, T5, empty, empty, empty, empty> {
-  typedef typename boost::mpl::vector<T1, T2, T3, T4, T5> Base;
-};
-
-template <typename T1, typename T2, typename T3, typename T4, typename T5, typename T6>
-struct Classes<T1, T2, T3, T4, T5, T6, empty, empty, empty> {
-  typedef typename boost::mpl::vector<T1, T2, T3, T4, T5, T6> Base;
-};
-
-template <typename T1, typename T2, typename T3, typename T4, typename T5, typename T6,
-          typename T7>
-struct Classes<T1, T2, T3, T4, T5, T6, T7, empty, empty> {
-  typedef typename boost::mpl::vector<T1, T2, T3, T4, T5, T6, T7> Base;
-};
-
-template <typename T1, typename T2, typename T3, typename T4, typename T5, typename T6,
-          typename T7, typename T8>
-struct Classes<T1, T2, T3, T4, T5, T6, T7, T8, empty> {
-  typedef typename boost::mpl::vector<T1, T2, T3, T4, T5, T6, T7, T8> Base;
-};
-
-/* build final visitor */
 template <typename C, typename T>
 struct Filter {
   struct _T : public T, public C {
-    typedef _T Action;
+    using Action = _T;
   };
 
-  typedef typename boost::mpl::fold<typename C::Base, _T,
-                                    VisitMaker<boost::mpl::_2, boost::mpl::_1>>::type Make;
+  using Make = typename boost::mpl::fold<typename C::Base, _T,
+                                         VisitMaker<boost::mpl::_2, boost::mpl::_1>>::type;
 };
 
 template <typename C, typename T>
-struct Visitor {
-  typedef typename Filter<C, T>::Make LocalFilter;
+struct DSVisitor {
+  using LocalFilter = typename Filter<C, T>::Make;
 
-  typedef typename GlobalVisitor<LocalFilter>::Make Make;
+  using Make = typename GlobalDSVisitor<LocalFilter>::Make;
+};
+
+template <typename C, typename T>
+struct RelationVisitor {
+  using LocalFilter = typename Filter<C, T>::Make;
+
+  using Make = typename GlobalRelationVisitor<LocalFilter>::Make;
 };
 
 }  // namespace siconos::internal

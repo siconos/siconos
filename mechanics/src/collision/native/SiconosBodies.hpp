@@ -23,13 +23,14 @@
 #define SiconosBodies_hpp
 
 #include <memory>
+#include "SiconosMatrix.hpp"
 
 #include "FMatrix.hpp"  // For FMatrix
 #include "SiconosSerialization.hpp"
 
-namespace siconos::algebra {
-class SiconosMatrix;
-}
+// namespace siconos::algebra {
+// class SiconosMatrix;
+// }
 
 namespace siconos::simulation {
 class Simulation;

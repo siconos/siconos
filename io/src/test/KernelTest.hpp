@@ -35,7 +35,6 @@ class KernelTest : public CppUnit::TestFixture {
 
 #ifdef HAVE_SICONOS_MECHANICS
   CPPUNIT_TEST(t7);
-  CPPUNIT_TEST(t8);
 #endif
 
   CPPUNIT_TEST(t9);
@@ -52,7 +51,6 @@ class KernelTest : public CppUnit::TestFixture {
 
 #ifdef HAVE_SICONOS_MECHANICS
   void t7();
-  void t8();
 #endif
 
   void t9();

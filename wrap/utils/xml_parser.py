@@ -2837,7 +2837,7 @@ class DS_LMGC90Type(GeneratedsSuper):
 class DS_DefinitionType(GeneratedsSuper):
     subclass = None
     superclass = None
-    def __init__(self, FirstOrderNonLinearDS=None, FirstOrderLinearDS=None, FirstOrderLinearTIDS=None, LagrangianDS=None, LagrangianLinearTIDS=None):
+    def __init__(self, FirstOrderNonLinearDS=None, FirstOrderLinearDS=None, LagrangianDS=None, LagrangianLinearTIDS=None):
         if FirstOrderNonLinearDS is None:
             self.FirstOrderNonLinearDS = []
         else:
@@ -2846,10 +2846,6 @@ class DS_DefinitionType(GeneratedsSuper):
             self.FirstOrderLinearDS = []
         else:
             self.FirstOrderLinearDS = FirstOrderLinearDS
-        if FirstOrderLinearTIDS is None:
-            self.FirstOrderLinearTIDS = []
-        else:
-            self.FirstOrderLinearTIDS = FirstOrderLinearTIDS
         if LagrangianDS is None:
             self.LagrangianDS = []
         else:
@@ -2872,10 +2868,6 @@ class DS_DefinitionType(GeneratedsSuper):
     def set_FirstOrderLinearDS(self, FirstOrderLinearDS): self.FirstOrderLinearDS = FirstOrderLinearDS
     def add_FirstOrderLinearDS(self, value): self.FirstOrderLinearDS.append(value)
     def insert_FirstOrderLinearDS(self, index, value): self.FirstOrderLinearDS[index] = value
-    def get_FirstOrderLinearTIDS(self): return self.FirstOrderLinearTIDS
-    def set_FirstOrderLinearTIDS(self, FirstOrderLinearTIDS): self.FirstOrderLinearTIDS = FirstOrderLinearTIDS
-    def add_FirstOrderLinearTIDS(self, value): self.FirstOrderLinearTIDS.append(value)
-    def insert_FirstOrderLinearTIDS(self, index, value): self.FirstOrderLinearTIDS[index] = value
     def get_LagrangianDS(self): return self.LagrangianDS
     def set_LagrangianDS(self, LagrangianDS): self.LagrangianDS = LagrangianDS
     def add_LagrangianDS(self, value): self.LagrangianDS.append(value)
@@ -2888,7 +2880,6 @@ class DS_DefinitionType(GeneratedsSuper):
         if (
             self.FirstOrderNonLinearDS or
             self.FirstOrderLinearDS or
-            self.FirstOrderLinearTIDS or
             self.LagrangianDS or
             self.LagrangianLinearTIDS
         ):
@@ -2922,8 +2913,6 @@ class DS_DefinitionType(GeneratedsSuper):
             FirstOrderNonLinearDS_.export(outfile, level, namespace_, name_='FirstOrderNonLinearDS', pretty_print=pretty_print)
         for FirstOrderLinearDS_ in self.FirstOrderLinearDS:
             FirstOrderLinearDS_.export(outfile, level, namespace_, name_='FirstOrderLinearDS', pretty_print=pretty_print)
-        for FirstOrderLinearTIDS_ in self.FirstOrderLinearTIDS:
-            FirstOrderLinearTIDS_.export(outfile, level, namespace_, name_='FirstOrderLinearTIDS', pretty_print=pretty_print)
         for LagrangianDS_ in self.LagrangianDS:
             LagrangianDS_.export(outfile, level, namespace_, name_='LagrangianDS', pretty_print=pretty_print)
         for LagrangianLinearTIDS_ in self.LagrangianLinearTIDS:
@@ -2956,18 +2945,6 @@ class DS_DefinitionType(GeneratedsSuper):
             showIndent(outfile, level)
             outfile.write('model_.FirstOrderLinearDSType(\n')
             FirstOrderLinearDS_.exportLiteral(outfile, level, name_='FirstOrderLinearDSType')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        level -= 1
-        showIndent(outfile, level)
-        outfile.write('],\n')
-        showIndent(outfile, level)
-        outfile.write('FirstOrderLinearTIDS=[\n')
-        level += 1
-        for FirstOrderLinearTIDS_ in self.FirstOrderLinearTIDS:
-            showIndent(outfile, level)
-            outfile.write('model_.FirstOrderLinearTIDSType(\n')
-            FirstOrderLinearTIDS_.exportLiteral(outfile, level, name_='FirstOrderLinearTIDSType')
             showIndent(outfile, level)
             outfile.write('),\n')
         level -= 1
@@ -3015,10 +2992,6 @@ class DS_DefinitionType(GeneratedsSuper):
             obj_ = FirstOrderLinearDSType.factory()
             obj_.build(child_)
             self.FirstOrderLinearDS.append(obj_)
-        elif nodeName_ == 'FirstOrderLinearTIDS':
-            obj_ = FirstOrderLinearTIDSType.factory()
-            obj_.build(child_)
-            self.FirstOrderLinearTIDS.append(obj_)
         elif nodeName_ == 'LagrangianDS':
             obj_ = LagrangianDSType.factory()
             obj_.build(child_)
@@ -3300,142 +3273,6 @@ class FirstOrderLinearDSType(GeneratedsSuper):
             obj_.build(child_)
             self.M = obj_
 # end class FirstOrderLinearDSType
-
-
-class FirstOrderLinearTIDSType(GeneratedsSuper):
-    subclass = None
-    superclass = None
-    def __init__(self, Name=None, x0=None, A=None, M=None, b=None):
-        self.Name = _cast(None, Name)
-        self.x0 = x0
-        self.A = A
-        self.M = M
-        self.b = b
-    def factory(*args_, **kwargs_):
-        if FirstOrderLinearTIDSType.subclass:
-            return FirstOrderLinearTIDSType.subclass(*args_, **kwargs_)
-        else:
-            return FirstOrderLinearTIDSType(*args_, **kwargs_)
-    factory = staticmethod(factory)
-    def get_x0(self): return self.x0
-    def set_x0(self, x0): self.x0 = x0
-    def get_A(self): return self.A
-    def set_A(self, A): self.A = A
-    def get_M(self): return self.M
-    def set_M(self, M): self.M = M
-    def get_b(self): return self.b
-    def set_b(self, b): self.b = b
-    def get_Name(self): return self.Name
-    def set_Name(self, Name): self.Name = Name
-    def hasContent_(self):
-        if (
-            self.x0 is not None or
-            self.A is not None or
-            self.M is not None or
-            self.b is not None
-        ):
-            return True
-        else:
-            return False
-    def export(self, outfile, level, namespace_='', name_='FirstOrderLinearTIDSType', namespacedef_='', pretty_print=True):
-        if pretty_print:
-            eol_ = '\n'
-        else:
-            eol_ = ''
-        showIndent(outfile, level, pretty_print)
-        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
-        already_processed = set()
-        self.exportAttributes(outfile, level, already_processed, namespace_, name_='FirstOrderLinearTIDSType')
-        if self.hasContent_():
-            outfile.write('>%s' % (eol_, ))
-            self.exportChildren(outfile, level + 1, namespace_='', name_='FirstOrderLinearTIDSType', pretty_print=pretty_print)
-            showIndent(outfile, level, pretty_print)
-            outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
-        else:
-            outfile.write('/>%s' % (eol_, ))
-    def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='FirstOrderLinearTIDSType'):
-        if self.Name is not None and 'Name' not in already_processed:
-            already_processed.add('Name')
-            outfile.write(' Name=%s' % (self.gds_format_string(quote_attrib(self.Name).encode(ExternalEncoding), input_name='Name'), ))
-    def exportChildren(self, outfile, level, namespace_='', name_='FirstOrderLinearTIDSType', fromsubclass_=False, pretty_print=True):
-        if pretty_print:
-            eol_ = '\n'
-        else:
-            eol_ = ''
-        if self.x0 is not None:
-            self.x0.export(outfile, level, namespace_, name_='x0', pretty_print=pretty_print)
-        if self.A is not None:
-            self.A.export(outfile, level, namespace_, name_='A', pretty_print=pretty_print)
-        if self.M is not None:
-            self.M.export(outfile, level, namespace_, name_='M', pretty_print=pretty_print)
-        if self.b is not None:
-            self.b.export(outfile, level, namespace_, name_='b', pretty_print=pretty_print)
-    def exportLiteral(self, outfile, level, name_='FirstOrderLinearTIDSType'):
-        level += 1
-        already_processed = set()
-        self.exportLiteralAttributes(outfile, level, already_processed, name_)
-        if self.hasContent_():
-            self.exportLiteralChildren(outfile, level, name_)
-    def exportLiteralAttributes(self, outfile, level, already_processed, name_):
-        if self.Name is not None and 'Name' not in already_processed:
-            already_processed.add('Name')
-            showIndent(outfile, level)
-            outfile.write('Name="%s",\n' % (self.Name,))
-    def exportLiteralChildren(self, outfile, level, name_):
-        if self.x0 is not None:
-            showIndent(outfile, level)
-            outfile.write('x0=model_.vector(\n')
-            self.x0.exportLiteral(outfile, level, name_='x0')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.A is not None:
-            showIndent(outfile, level)
-            outfile.write('A=model_.matrix(\n')
-            self.A.exportLiteral(outfile, level, name_='A')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.M is not None:
-            showIndent(outfile, level)
-            outfile.write('M=model_.matrix(\n')
-            self.M.exportLiteral(outfile, level, name_='M')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-        if self.b is not None:
-            showIndent(outfile, level)
-            outfile.write('b=model_.vector(\n')
-            self.b.exportLiteral(outfile, level, name_='b')
-            showIndent(outfile, level)
-            outfile.write('),\n')
-    def build(self, node):
-        already_processed = set()
-        self.buildAttributes(node, node.attrib, already_processed)
-        for child in node:
-            nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
-            self.buildChildren(child, node, nodeName_)
-        return self
-    def buildAttributes(self, node, attrs, already_processed):
-        value = find_attr_value_('Name', node)
-        if value is not None and 'Name' not in already_processed:
-            already_processed.add('Name')
-            self.Name = value
-    def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
-        if nodeName_ == 'x0':
-            obj_ = vector.factory()
-            obj_.build(child_)
-            self.x0 = obj_
-        elif nodeName_ == 'A':
-            obj_ = matrix.factory()
-            obj_.build(child_)
-            self.A = obj_
-        elif nodeName_ == 'M':
-            obj_ = matrix.factory()
-            obj_.build(child_)
-            self.M = obj_
-        elif nodeName_ == 'b':
-            obj_ = vector.factory()
-            obj_.build(child_)
-            self.b = obj_
-# end class FirstOrderLinearTIDSType
 
 
 class LagrangianDSType(GeneratedsSuper):
@@ -6661,7 +6498,6 @@ GDSClassesMapping = {
     'D': matrix,
     'FirstOrderLinearDS': FirstOrderLinearDSType,
     'q0': vector,
-    'FirstOrderLinearTIDS': FirstOrderLinearTIDSType,
     'Linear': LinearType,
     'FirstOrderNonLinearDS': FirstOrderNonLinearDSType,
     'NewtonImpactFrictionNSL': NewtonImpactFrictionNSLType,
@@ -6842,7 +6678,6 @@ __all__ = [
     "DS_LMGC90Type",
     "FirstOrderLinearDSType",
     "FirstOrderLinearRType",
-    "FirstOrderLinearTIDSType",
     "FirstOrderLinearTIRType",
     "FirstOrderNonLinearDSType",
     "FirstOrderRType",

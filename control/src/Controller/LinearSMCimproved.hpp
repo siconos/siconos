@@ -62,7 +62,7 @@ class LinearSMCimproved : public LinearSMC {
    *  \param CBstar matrix  \f$ CB^{*} \f$
    */
   void predictionPerturbation(const siconos::algebra::SiconosVector& xTk,
-                              siconos::algebra::SimpleMatrix& CBstar);
+                              const Eigen::FullPivLU<siconos::algebra::SiconosMatrix>& CBstar);
 
  public:
   /** Constructor
@@ -78,8 +78,8 @@ class LinearSMCimproved : public LinearSMC {
    *  \param D the D matrix in the FirstOrderLinearR
    */
   LinearSMCimproved(std::shared_ptr<ControlSensor> sensor,
-                    std::shared_ptr<siconos::algebra::SimpleMatrix> B,
-                    std::shared_ptr<siconos::algebra::SimpleMatrix> D = nullptr);
+                    std::shared_ptr<siconos::algebra::SiconosMatrix> B,
+                    std::shared_ptr<siconos::algebra::SiconosMatrix> D = nullptr);
 
   /** destructor
    */
@@ -100,8 +100,7 @@ class LinearSMCimproved : public LinearSMC {
   virtual void actuate();
 
   /** Enable perturbation prediction */
-  void setPerturbationPrediction(double ub = std::numeric_limits<double>::quiet_NaN())
-  {
+  void setPerturbationPrediction(double ub = std::numeric_limits<double>::quiet_NaN()) {
     _ubPerturbation = ub;
     _predictionPerturbation = true;
   }

@@ -30,12 +30,10 @@
 #include <set>
 #include <string>
 
+#include "SiconosVector.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosSerialization.hpp"
 
-namespace siconos::algebra {
-class SiconosVector;
-class SimpleMatrix;
-}  // namespace siconos::algebra
 namespace siconos::modeling {
 class DynamicalSystem;
 class NonSmoothDynamicalSystem;

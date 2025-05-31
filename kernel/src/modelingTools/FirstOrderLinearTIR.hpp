@@ -25,23 +25,29 @@
 
 namespace siconos::modeling {
 /**
-    Linear Time Invariant Relation, derived from class FirstOrderR
-
-    Linear Relation for First Order Dynamical Systems with time-independant
-    operators
+  First Order Linear Relation with time-invariant coeff.
 
     \f[
-    y &=& Cx(t) + Fz + D\lambda + e \\
+    y &=& Cx(t) + D\lambda + e \\
     R &=& B\lambda
     \f]
+
+    Storage for:
+    - B: \f$ \nabla_{\lambda} g(x,t,\lambda) \f$ in FirstOrderR
+    - C: \f$ \nabla_{x} h(x,t,\lambda) \f$ in FirstOrderR
+    - D: \f$ \nabla_{\lambda} h(x,t,\lambda) \f$ in FirstOrderR
+    - e: attribute in this class
 
 */
 class FirstOrderLinearTIR : public FirstOrderR {
  protected:
   ACCEPT_SERIALIZATION(FirstOrderLinearTIR);
 
-  /** e operator (constant vector) */
-  std::shared_ptr<siconos::algebra::SiconosVector> _e{nullptr};
+  /** e */
+  std::shared_ptr<siconos::algebra::MapVectorType> eVector_view_{nullptr};
+
+  /** True if e(t) is taken into account */
+  bool haseVector_{false};
 
   /** initialize the relation (check sizes, memory allocation ...)
    *
@@ -53,53 +59,85 @@ class FirstOrderLinearTIR : public FirstOrderR {
    *
    *  \param inter an Interaction using this relation
    */
-  void checkSize(Interaction &inter) override;
+  void checkSize(const Interaction &inter) const override;
 
  public:
-  /** create the Relation from a set of data
-   *
-   *  \param C the matrix C
-   *  \param B the matrix B
-   */
-  FirstOrderLinearTIR(std::shared_ptr<siconos::algebra::SimpleMatrix> C,
-                      std::shared_ptr<siconos::algebra::SimpleMatrix> B);
+  /** minimal constuctor. Use setXXX functions to fix B,C, D ... */
+  FirstOrderLinearTIR() : FirstOrderR(RelationSubType::LinearTIR) {};
 
-  /** create the Relation from a set of data
+  /** Build a time-invariant coeff. linear relation
    *
-   *  \param C the C matrix
-   *  \param D the D matrix
-   *  \param F the F matrix
-   *  \param e the e matrix
-   *  \param B the B matrix
+   *  \param C matrix coeff C
+   *  \param B matrix coeff B
    */
-  FirstOrderLinearTIR(std::shared_ptr<siconos::algebra::SimpleMatrix> C,
-                      std::shared_ptr<siconos::algebra::SimpleMatrix> D,
-                      std::shared_ptr<siconos::algebra::SimpleMatrix> F,
-                      std::shared_ptr<siconos::algebra::SiconosVector> e,
-                      std::shared_ptr<siconos::algebra::SimpleMatrix> B);
+  FirstOrderLinearTIR(Eigen::Ref<siconos::algebra::SiconosMatrix> C,
+                      Eigen::Ref<siconos::algebra::SiconosMatrix> B);
 
-  /** destructor
-   */
+  /** destructor */
   virtual ~FirstOrderLinearTIR() noexcept = default;
 
-  /** default function to compute h = y = Cx(t) + Fz + Dlambda + e
-   *
-   *  \param x
-   *  \param lambda
-   *  \param z
-   *  \param y the resulting vector
-   */
-  void computeh(const siconos::algebra::BlockVector &x,
-                const siconos::algebra::SiconosVector &lambda,
-                siconos::algebra::BlockVector &z, siconos::algebra::SiconosVector &y);
+  /** \return a read-only view on B(t) matrix */
+  inline auto B() const { return jacobiangOver_lambda(); }
 
-  /** default function to compute g = Blambda
+  /** Set a constant B matrix for the system
    *
-   *  \param lambda
-   *  \param r non-smooth input
+   *  \param newValue B matrix
+   *
    */
-  void computeg(const siconos::algebra::SiconosVector &lambda,
-                siconos::algebra::BlockVector &r);
+  void setConstantB(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+
+  /** \return a read-only view on C(t) matrix */
+  inline auto C() const { return jacobianhOver_state(); }
+
+  /** Set a constant C matrix for the system
+   *
+   *  \param newValue C matrix
+   *
+   */
+  void setConstantC(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+
+  /** \return a read-only view on D(t) matrix */
+  inline auto D() const { return jacobianhOver_lambda(); }
+
+  /** Set a constant D matrix for the system
+   *
+   *  \param newValue D matrix
+   *
+   */
+  void setConstantD(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+
+  /** \return  a read-only view on e(t) */
+  inline auto eVector() const {
+    return siconos::algebra::ConstMapVectorType(eVector_view_->data(), eVector_view_->size());
+  }
+
+  /** set a constant e vector
+   *
+   *  \param neweVector e vector
+   */
+  void setConstanteVector(Eigen::Ref<siconos::algebra::SiconosVector> neweVector);
+
+  /** True if e(t) is taken into account */
+  bool haseVector() const { return haseVector_; }
+
+  // /** default function to compute h = y = Cx(t) + Fz + Dlambda + e
+  //  *
+  //  *  \param x
+  //  *  \param lambda
+  //  *  \param z
+  //  *  \param y the resulting vector
+  //  */
+  // void computeh(const siconos::algebra::BlockVector &x,
+  //               const siconos::algebra::SiconosVector &lambda,
+  //               siconos::algebra::BlockVector &z, siconos::algebra::SiconosVector &y);
+
+  // /** default function to compute g = Blambda
+  //  *
+  //  *  \param lambda
+  //  *  \param r non-smooth input
+  //  */
+  // void computeg(const siconos::algebra::SiconosVector &lambda,
+  //               siconos::algebra::BlockVector &r);
 
   /** default function to compute y
    *
@@ -121,34 +159,15 @@ class FirstOrderLinearTIR : public FirstOrderR {
    */
   void display() const override;
 
-  /** set e
-   *
-   *  \param  newe the new value of e
-   */
-  inline void setePtr(std::shared_ptr<siconos::algebra::SiconosVector> newe)
-  {
-    _e = newe;
-  }
-
-  /** get e
-   *
-   *  \return e matrix
-   */
-  inline std::shared_ptr<siconos::algebra::SiconosVector> e() const
-  {
-    return _e;
-  }
-
   /** determine if the Relation is linear
    *
    *  \return true if the relation is linear.
    */
-  inline bool isLinear() override { return true; }
+  inline bool isLinear() const override { return true; }
 
   // Jacobians: required to fullfill base abstract class API but do nothing.
   // Note FP: final would be better than override but swig cannot handle it.
-  void computeJach(double time, Interaction &inter) override{};
-  void computeJacg(double time, Interaction &inter) override{};
+  void computeJach(double time, Interaction &inter) override {};
 };
 }  // namespace siconos::modeling
 

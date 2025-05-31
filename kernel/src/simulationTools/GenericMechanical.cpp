@@ -210,14 +210,14 @@ int siconos::nonsmooth_formulations::GenericMechanical::compute(double time)
     // The GenericMechanical Problem in Numerics format
 
     _pnumerics_GMP->M = &*_M->numericsMatrix();
-    _pnumerics_GMP->q = &*_q->getArray();
+    _pnumerics_GMP->q = &*_q->data();
     DEBUG_EXPR(display(););
     // Call Numerics Driver for GenericMechanical
     //    display();
-    info = gmp_driver(_pnumerics_GMP, &*_z->getArray(), &*_w->getArray(),
+    info = gmp_driver(_pnumerics_GMP, &*_z->data(), &*_w->data(),
                                          &*_numerics_solver_options);
     // printf("siconos::nonsmooth_formulations::GenericMechanical::compute : R:\n");
-    //_z->display();
+    //siconos::algebra::print(*_z);
     postCompute();
   }
   else {

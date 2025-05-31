@@ -23,7 +23,7 @@
 #include "Interaction.hpp"
 #include "NonSmoothLaw.hpp"
 #include "Relation.hpp"
-#include "SimpleMatrix.hpp"
+#include "SiconosMatrix.hpp"
 #include "SimulationGraphs.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -52,7 +52,8 @@ siconos::nonsmooth_formulations::OSNSMatrixProjectOnConstraints::updateSizeAndPo
   // Interactionin indexSet
   unsigned dim = 0;
   siconos::graphs::InteractionsGraph::VIterator vd, vdend;
-  DEBUG_EXPR_WE(std::cout << "indexSet :" << &indexSet << std::endl; indexSet.display(););
+  DEBUG_EXPR_WE(std::cout << "indexSet :" << &indexSet << std::endl;
+                siconos::algebra::print(indexSet););
   for (std::tie(vd, vdend) = indexSet.vertices(); vd != vdend; ++vd) {
     assert(indexSet.descriptor(indexSet.bundle(*vd)) == *vd);
 
@@ -84,11 +85,11 @@ void siconos::nonsmooth_formulations::OSNSMatrixProjectOnConstraints::fillM(
     // Mem. is allocate only if !M or if its size has changed.
     if (update) {
       if (!_M1)
-        _M1 = std::make_shared<siconos::algebra::SimpleMatrix>(_dimRow, _dimColumn);
+        _M1 = std::make_shared<siconos::algebra::SiconosMatrix>(_dimRow, _dimColumn);
       else {
-        if (_M1->size(0) != _dimRow || _M1->size(1) != _dimColumn)
+        if (_M1->rows() != _dimRow || _M1->cols() != _dimColumn)
           _M1->resize(_dimRow, _dimColumn);
-        _M1->zero();
+        _M1->setZero();
       }
     }
 
@@ -106,8 +107,9 @@ void siconos::nonsmooth_formulations::OSNSMatrixProjectOnConstraints::fillM(
       auto inter = indexSet.bundle(*vi);
       pos = indexSet.properties(*vi).absolute_position_proj;
       assert(indexSet.blockProj[*vi]);
-      std::static_pointer_cast<siconos::algebra::SimpleMatrix>(_M1)->setBlock(
-          pos, pos, *(indexSet.blockProj[*vi]));
+      siconos::algebra::setBlock(
+          pos, pos, *(indexSet.blockProj[*vi]),
+          *std::static_pointer_cast<siconos::algebra::SiconosMatrix>(_M1));
     }
 
     siconos::graphs::InteractionsGraph::EIterator ei, eiend;
@@ -125,17 +127,19 @@ void siconos::nonsmooth_formulations::OSNSMatrixProjectOnConstraints::fillM(
       assert(pos < _dimRow);
       assert(col < _dimColumn);
 
-      DEBUG_PRINTF("OSNSMatrix _M1: %i %i\n", _M1->size(0), _M1->size(1));
-      DEBUG_PRINTF("OSNSMatrix upper: %i %i\n", (indexSet.upper_blockProj[*ei])->size(0),
-                   (indexSet.upper_blockProj[*ei])->size(1));
-      DEBUG_PRINTF("OSNSMatrix lower: %i %i\n", (indexSet.lower_blockProj[*ei])->size(0),
-                   (indexSet.upper_blockProj[*ei])->size(1));
+      DEBUG_PRINTF("OSNSMatrix _M1: %i %i\n", _M1->rows(), _M1->cols());
+      DEBUG_PRINTF("OSNSMatrix upper: %i %i\n", (indexSet.upper_blockProj[*ei])->rows(),
+                   (indexSet.upper_blockProj[*ei])->cols());
+      DEBUG_PRINTF("OSNSMatrix lower: %i %i\n", (indexSet.lower_blockProj[*ei])->rows(),
+                   (indexSet.upper_blockProj[*ei])->cols());
 
-      std::static_pointer_cast<siconos::algebra::SimpleMatrix>(_M1)->setBlock(
-          std::min(pos, col), std::max(pos, col), *(indexSet.upper_blockProj[*ei]));
+      siconos::algebra::setBlock(
+          std::min(pos, col), std::max(pos, col), *(indexSet.upper_blockProj[*ei]),
+          *std::static_pointer_cast<siconos::algebra::SiconosMatrix>(_M1));
 
-      std::static_pointer_cast<siconos::algebra::SimpleMatrix>(_M1)->setBlock(
-          std::max(pos, col), std::min(pos, col), *(indexSet.lower_blockProj[*ei]));
+      siconos::algebra::setBlock(
+          std::max(pos, col), std::min(pos, col), *(indexSet.lower_blockProj[*ei]),
+          *std::static_pointer_cast<siconos::algebra::SiconosMatrix>(_M1));
     }
   } else  // if _storageType == NM_SPARSE_BLOCK
   {

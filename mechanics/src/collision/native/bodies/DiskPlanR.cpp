@@ -21,8 +21,8 @@
 #include <cmath>  // for hypot
 
 #include "BlockVector.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "SimpleMatrix.hpp"
 
 siconos::collision::native::bodies::DiskPlanR::DiskPlanR(double r, double A, double B,
                                                          double C, double xC, double yC,
@@ -34,8 +34,7 @@ siconos::collision::native::bodies::DiskPlanR::DiskPlanR(double r, double A, dou
       C{C},
       xCenter{xC},
       yCenter{yC},
-      width{w}
-{
+      width{w} {
   sqrA2pB2 = hypot(A, B);
 
   if (width == 0 || width == std::numeric_limits<double>::infinity())
@@ -47,13 +46,11 @@ siconos::collision::native::bodies::DiskPlanR::DiskPlanR(double r, double A, dou
     // By+C=0
     {
       yCenter = -C / B;
-    }
-    else if (B == 0)
+    } else if (B == 0)
     // Ax+C=0
     {
       xCenter = -C / A;
-    }
-    else
+    } else
     // Ax+By+C=0
     {
       if (xCenter != 0)
@@ -78,20 +75,15 @@ siconos::collision::native::bodies::DiskPlanR::DiskPlanR(double r, double A, dou
 
 siconos::collision::native::bodies::DiskPlanR::DiskPlanR(double r, double A, double B,
                                                          double C)
-    : DiskPlanR(r, A, B, C, 0., 0., std::numeric_limits<double>::infinity())
-{
-}
+    : DiskPlanR(r, A, B, C, 0., 0., std::numeric_limits<double>::infinity()) {}
 
 siconos::collision::native::bodies::DiskPlanR::DiskPlanR(double r, double xa, double ya,
                                                          double xb, double yb)
     : DiskPlanR(r, (yb - ya) / (xa * yb - xb * ya), (xb - xa) / (xa * yb - xb * ya), 1,
-                (xa + xb) / 2, (ya + yb) / 2, hypot(xa - xb, ya - yb))
-{
-}
+                (xa + xb) / 2, (ya + yb) / 2, hypot(xa - xb, ya - yb)) {}
 
 double siconos::collision::native::bodies::DiskPlanR::distance(double x, double y,
-                                                               double rad) const
-{
+                                                               double rad) const {
   if (finite) {
     double x0 = -(AC - B2 * x + AB * y) / (A2 + B2);
     double y0 = -(BC - A2 * y + AB * x) / (A2 + B2);
@@ -108,9 +100,7 @@ double siconos::collision::native::bodies::DiskPlanR::distance(double x, double 
 
 /* called compute H, but only the gap function is needed! */
 void siconos::collision::native::bodies::DiskPlanR::computeh(
-    const siconos::algebra::BlockVector& q, siconos::algebra::BlockVector& z,
-    siconos::algebra::SiconosVector& y)
-{
+    const siconos::algebra::BlockVector& q, Eigen::Ref<siconos::algebra::SiconosVector> y) {
   double q_0 = q(0);
   double q_1 = q(1);
 
@@ -181,33 +171,30 @@ Jach(q) =  [                                                ]
 
 */
 
-void siconos::collision::native::bodies::DiskPlanR::computeJachq(
-    const siconos::algebra::BlockVector& q, siconos::algebra::BlockVector& z)
-{
+void siconos::collision::native::bodies::DiskPlanR::computeJacobianhOver_q(
+    const siconos::algebra::BlockVector& q) {
   double x = q(0);
   double y = q(1);
 
   double D1 = A * x + B * y + C;
   double signD1 = copysign(1, D1);
 
-  _jachq->setValue(0, 0, A * signD1 / sqrA2pB2);
-  _jachq->setValue(1, 0, -B * signD1 / sqrA2pB2);
-  _jachq->setValue(0, 1, B * signD1 / sqrA2pB2);
-  _jachq->setValue(1, 1, A * signD1 / sqrA2pB2);
-  _jachq->setValue(0, 2, 0);
-  _jachq->setValue(1, 2, -r);
+  jacobianhOver_q_view_->setValue(0, 0, A * signD1 / sqrA2pB2);
+  jacobianhOver_q_view_->setValue(1, 0, -B * signD1 / sqrA2pB2);
+  jacobianhOver_q_view_->setValue(0, 1, B * signD1 / sqrA2pB2);
+  jacobianhOver_q_view_->setValue(1, 1, A * signD1 / sqrA2pB2);
+  jacobianhOver_q_view_->setValue(0, 2, 0);
+  jacobianhOver_q_view_->setValue(1, 2, -r);
 }
 
 bool siconos::collision::native::bodies::DiskPlanR::equal(double pA, double pB, double pC,
-                                                          double pr) const
-{
+                                                          double pr) const {
   return (A == pA && B == pB && C == pC && r == pr);
 }
 
 bool siconos::collision::native::bodies::DiskPlanR::equal(double pA, double pB, double pC,
                                                           double pr, double pXc, double pYc,
-                                                          double pw) const
-{
+                                                          double pw) const {
   if (finite)
     return (A == pA && B == pB && C == pC && r == pr && pXc == xCenter && pYc == yCenter &&
             pw == width);
@@ -215,8 +202,7 @@ bool siconos::collision::native::bodies::DiskPlanR::equal(double pA, double pB, 
     return equal(pA, pB, pC, pr);
 }
 
-bool siconos::collision::native::bodies::DiskPlanR::equal(const DiskPlanR& odpr) const
-{
+bool siconos::collision::native::bodies::DiskPlanR::equal(const DiskPlanR& odpr) const {
   if (finite)
     return (equal(odpr.getA(), odpr.getB(), odpr.getC(), odpr.getRadius()));
   else

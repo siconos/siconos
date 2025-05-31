@@ -34,16 +34,13 @@
 #include <string>
 
 #include "BoundaryCondition.hpp"
+#include "FunctionTypes.hpp"
 #include "MBTB_DATA.hpp"  // for JointsType enum
-
-namespace siconos::algebra {
-class SiconosVector;
-class SimpleMatrix;
-}  // namespace siconos::algebra
+#include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 
 namespace siconos::modeling {
 class NonSmoothDynamicalSystem;
-
 }
 
 namespace siconos::simulation {
@@ -51,6 +48,7 @@ class Simulation;
 }
 
 namespace siconos::mechanisms {
+
 /**  To initialize the MBTB library (no yet dynamical memory).
 
      \param [in] NumOfBodies : unsigned int NumOfBodies, the number of bodies.
@@ -83,46 +81,20 @@ void MBTB_BodyLoadCADFile(unsigned int numDS, const std::string& CADFile,
     in R^3, vector in R^3, angle in R) that must be appyed after the load to
     get the initial position of the object
 
-    \param [in] initCenterMass coordinate of the mass center in the  model
+    \param [in] modelCenterMass coordinate of the mass center in the  model
     \param [in] inertialMatrix matrix in R^{3,3}
-    \param [in] pluginFextLib the path to the plugin library
-    \param [in] pluginFextFct the name of the pluged fonction
-    \param [in] pluginMextLib the path to the plugin library
-    \param [in] pluginMextFct the name of the pluged fonction
-    \param [in] pluginFintLib the path to the plugin library
-    \param [in] pluginFintFct the name of the pluged fonction
-    \param [in] pluginMintLib the path to the plugin library
-    \param [in] pluginMintFct the name of the pluged fonction
-    \param [in] pluginFintJacqLib the path to the plugin library
-    \param [in] pluginFintJacqFct the name of the pluged fonction
-    \param [in] pluginMintJacqLib path to the plugin library
-    \param [in] pluginMintJacqFct name of the pluged fonction
-    \param [in] pluginFintJacvLib path to the plugin library
-    \param [in] pluginFintJacvFct name of the pluged fonction
-    \param [in] pluginMintJacvLib path to the plugin library
-    \param [in] pluginMintJacvFct name of the pluged fonction
-    \param [in] pluginBoundaryConditionLib path to the plugin library
-    \param [in] pluginBoundaryConditionFct name of the pluged fonction
+    \param [in] boundaryCondition_func user function to compute boundary conditions
     \param [in] boundaryConditionIndex the indices of the velocities
    prescribed by the boundary condition
  */
 void MBTB_BodyBuild(
     unsigned int numDS, const std::string& BodyName, double mass,
     std::shared_ptr<siconos::algebra::SiconosVector> initPos,
-    std::shared_ptr<siconos::algebra::SiconosVector> initCenterMass,
-    std::shared_ptr<siconos::algebra::SimpleMatrix> inertialMatrix,
-    const std::string& pluginFextLib, const std::string& pluginFextFct,
-    const std::string& pluginMextLib, const std::string& pluginMextFct,
-    const std::string& pluginFintLib, const std::string& pluginFintFct,
-    const std::string& pluginMintLib, const std::string& pluginMintFct,
-    const std::string& pluginFintJacqLib, const std::string& pluginFintJacqFct,
-    const std::string& pluginMintJacqLib, const std::string& pluginMintJacqFct,
-    const std::string& pluginFintJacvLib, const std::string& pluginFintJacvFct,
-    const std::string& pluginMintJacvLib, const std::string& pluginMintJacvFct,
-    const std::string& pluginBoundaryConditionLib,
-    const std::string& pluginBoundaryConditionFct,
-    const siconos::modeling::BoundaryCondition::Indices&
-        boundaryConditionIndex);
+    std::shared_ptr<siconos::algebra::SiconosVector> modelCenterMass,
+    std::shared_ptr<siconos::algebra::SiconosMatrix> inertialMatrix,
+    const siconos::modeling::func_prototypes::FunctionS_V& boundaryCondition_func,
+    const siconos::modeling::BoundaryCondition::Indices& boundaryConditionIndex);
+
 /** To build a joint.
  *
  *  \param [in] numJ  an identifier
@@ -137,10 +109,9 @@ void MBTB_BodyBuild(
  * body).
  *
  */
-void MBTB_JointBuild(
-    unsigned int numJ, const std::string& JointName, JointsType jointType,
-    unsigned int indexDS1, unsigned int indexDS2,
-    std::shared_ptr<siconos::algebra::SiconosVector> xsujointPosition);
+void MBTB_JointBuild(unsigned int numJ, const std::string& JointName, JointsType jointType,
+                     unsigned int indexDS1, unsigned int indexDS2,
+                     std::shared_ptr<siconos::algebra::SiconosVector> xsujointPosition);
 
 /** To set the location where is computed the equivalente forces.
 
@@ -169,10 +140,8 @@ void MBTB_setJointPoints(unsigned int numJ,
  *  \param [in]  withGraphicModel1 1 to draw the corresponding object else 0
  *  \param [in]  withGraphicModel2 1 to draw the corresponding object else 0
  */
-void MBTB_ContactLoadCADFile(unsigned int contactId,
-                             const std::string& CADFile1,
-                             const std::string& CADFile2,
-                             unsigned int withGraphicModel1,
+void MBTB_ContactLoadCADFile(unsigned int contactId, const std::string& CADFile1,
+                             const std::string& CADFile2, unsigned int withGraphicModel1,
                              unsigned int withGraphicModel2);
 
 /** To set a double parameter.(extendable, without modifying the API)
@@ -189,8 +158,8 @@ void MBTB_ContactLoadCADFile(unsigned int contactId,
     \param  [in] idShape : identifier of the shape of the contact (0 or 1).
     \param  [in] v : value.
  */
-void MBTB_ContactSetDParam(unsigned int paramId, unsigned int contactId,
-                           unsigned int idShape, double v);
+void MBTB_ContactSetDParam(unsigned int paramId, unsigned int contactId, unsigned int idShape,
+                           double v);
 
 /** To set a integer parameter.(extendable, without modifying the API)
 
@@ -205,8 +174,8 @@ void MBTB_ContactSetDParam(unsigned int paramId, unsigned int contactId,
     \param idShape : identifier of the shape of the contact (0 or 1).
     \param v : value.
  */
-void MBTB_ContactSetIParam(unsigned int paramId, unsigned int contactId,
-                           unsigned int idShape, bool v);
+void MBTB_ContactSetIParam(unsigned int paramId, unsigned int contactId, unsigned int idShape,
+                           bool v);
 
 /** To build a contact.
 
@@ -223,9 +192,8 @@ void MBTB_ContactSetIParam(unsigned int paramId, unsigned int contactId,
     \param [in] et (not used).
  */
 void MBTB_ContactBuild(unsigned int numContact, const std::string& ContactName,
-                       unsigned int indexBody1, int indexBody2,
-                       unsigned int withFriction, double mu, double en,
-                       double et);
+                       unsigned int indexBody1, int indexBody2, unsigned int withFriction,
+                       double mu, double en, double et);
 
 /** initializes the simulation.
 
@@ -254,17 +222,17 @@ void MBTB_run(int nbSteps);
   \param [in] aPos the target position.
   \param [in] aVel the target velocity.
  */
-void MBTB_moveBodyToPosWithSpeed(
-    unsigned int numDS, std::shared_ptr<siconos::algebra::SiconosVector> aPos,
-    std::shared_ptr<siconos::algebra::SiconosVector> aVel);
+void MBTB_moveBodyToPosWithSpeed(unsigned int numDS,
+                                 std::shared_ptr<siconos::algebra::SiconosVector> aPos,
+                                 std::shared_ptr<siconos::algebra::SiconosVector> aVel);
 
-/** Set the velocity.
+// /** Set the velocity.
 
-    \param [in] numDS the id of the ds.
-    \param [in] aVel the targeted velocity.
- */
-void MBTB_BodySetVelocity(
-    unsigned int numDS, std::shared_ptr<siconos::algebra::SiconosVector> aVel);
+//     \param [in] numDS the id of the ds.
+//     \param [in] aVel the targeted velocity.
+//  */
+// void MBTB_BodySetVelocity(unsigned int numDS,
+//                           std::shared_ptr<siconos::algebra::SiconosVector> aVel);
 
 /** Defines the graphic frequency.
 

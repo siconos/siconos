@@ -27,11 +27,7 @@
 #include <vector>
 
 #include "SiconosSerialization.hpp"
-
-namespace siconos::algebra {
-class SiconosVector;
-
-}  // namespace siconos::algebra
+#include "SiconosVector.hpp"
 
 namespace siconos::collision {
 
@@ -57,6 +53,10 @@ class SiconosContactor {
                    std::shared_ptr<siconos::algebra::SiconosVector> offset = nullptr,
                    int collision_group = 0);
 
+  SiconosContactor(std::shared_ptr<SiconosShape> shape,
+                   Eigen::Ref<siconos::algebra::SiconosVector> offset,
+                   int collision_group = 0);
+
   std::shared_ptr<SiconosShape> shape{nullptr};
   std::shared_ptr<siconos::algebra::SiconosVector> offset{nullptr};
   int collision_group{0};
@@ -64,22 +64,25 @@ class SiconosContactor {
   virtual ~SiconosContactor() noexcept = default;
 };
 
-class SiconosContactorSet : public std::vector<std::shared_ptr<SiconosContactor>> {
+class SiconosContactorSet {
  protected:
   ACCEPT_SERIALIZATION(SiconosContactorSet);
-  using iterator = std::vector<std::shared_ptr<SiconosContactor>>::iterator;
+  std::shared_ptr<std::vector<std::shared_ptr<SiconosContactor>>> _vector;
+  // using iterator = std::vector<std::shared_ptr<SiconosContactor>>::iterator;
 
  public:
-  void append(std::shared_ptr<SiconosContactor> b) { push_back(b); }
-  void append(std::vector<std::shared_ptr<SiconosContactor>> b)
-  {
-    insert(end(), b.begin(), b.end());
+  SiconosContactorSet() : _vector(std::make_shared<std::vector<std::shared_ptr<SiconosContactor>>>()) {}
+  void append(std::shared_ptr<SiconosContactor> b) { _vector->push_back(b); }
+  void append(std::vector<std::shared_ptr<SiconosContactor>> b) {
+    _vector->insert(_vector->end(), b.begin(), b.end());
   }
-  void append(const SiconosContactorSet& b) { insert(end(), b.begin(), b.end()); }
-  void append(const std::shared_ptr<SiconosContactorSet>& b)
-  {
-    insert(end(), b->begin(), b->end());
+  void append(const SiconosContactorSet& b) {
+    _vector->insert(_vector->end(), b._vector->begin(), b._vector->end());
   }
+  // void append(const std::shared_ptr<SiconosContactorSet>& b) {
+  //   insert(end(), b->begin(), b->end());
+  // }
+  std::shared_ptr<std::vector<std::shared_ptr<SiconosContactor>>> vector() { return _vector; }
 };
 }  // namespace siconos::collision
 #endif /* SiconosContactor_h */

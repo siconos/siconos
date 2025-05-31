@@ -94,7 +94,7 @@ def test_smc1():
         processSimulation.nextStep()
     #    print processSimulation.nextTime()
     # Resize matrix
-    dataPlot.resize(k, outputSize)
+    ### dataPlot.resize(k, outputSize)
 
 
 # Same test, but with the simplified interface

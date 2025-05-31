@@ -71,6 +71,8 @@ class LinearSMCOT2 : public CommonSMC {
   /** Coefficient*/
   double _coeff{0.};
 
+  /** Internal buffer for b vector of _DSPred */
+  siconos::algebra::SiconosVector bpred_;
   ACCEPT_SERIALIZATION(LinearSMCOT2);
 
  public:

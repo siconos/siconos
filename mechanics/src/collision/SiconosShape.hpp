@@ -27,11 +27,8 @@
 #include <SiconosSerialization.hpp>
 #include <memory>
 #include <vector>
-
-namespace siconos::algebra {
-class SiconosVector;
-class SiconosMatrix;
-}  // namespace siconos::algebra
+#include "SiconosVector.hpp"
+#include "SiconosMatrix.hpp"
 
 namespace siconos::collision {
 
@@ -131,6 +128,9 @@ class SiconosBox : public SiconosShape, public std::enable_shared_from_this<Sico
 
   SiconosBox(std::shared_ptr<siconos::algebra::SiconosVector> dimensions)
       : SiconosShape(), _dimensions(dimensions) {}
+
+  SiconosBox(Eigen::Ref<siconos::algebra::SiconosVector> dimensions)
+      : SiconosShape(), _dimensions(std::make_shared<siconos::algebra::SiconosVector>(dimensions)) {}
 
   virtual ~SiconosBox() noexcept = default;
   void accept(std::shared_ptr<siconos::collision::internal::ShapeVisitor> tourist) override;
@@ -252,6 +252,7 @@ class SiconosConvexHull : public SiconosShape,
 
  public:
   SiconosConvexHull(std::shared_ptr<siconos::algebra::SiconosMatrix> vertices);
+  SiconosConvexHull(Eigen::Ref<siconos::algebra::SiconosMatrix> vertices);
 
   virtual ~SiconosConvexHull() noexcept = default;
   void accept(std::shared_ptr<siconos::collision::internal::ShapeVisitor> tourist) override;
@@ -379,6 +380,7 @@ class SiconosConvexHull2d : public SiconosShape,
   int _normal_edge_pointB{1};
 
   SiconosConvexHull2d(std::shared_ptr<siconos::algebra::SiconosMatrix> vertices);
+  SiconosConvexHull2d(Eigen::Ref<siconos::algebra::SiconosMatrix> vertices);
 
   virtual ~SiconosConvexHull2d() noexcept = default;
   void accept(std::shared_ptr<siconos::collision::internal::ShapeVisitor> tourist) override;

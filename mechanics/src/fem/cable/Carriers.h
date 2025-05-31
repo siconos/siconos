@@ -17,14 +17,18 @@
  */
 
 /*! \file Carriers.h
-  Description of the vehicles
+  Class Carriers, description of the vehicles
 
 */
 #pragma once
 #include "BaseModel.h"
 
 namespace siconos::fem::cable {
-// punctual masses
+
+/** Vehicles description (all of them in one single object)
+ *
+ * Build from json (in TransportCableModel) and read-only use afterwards
+ */
 class Carriers : public BaseModel {
  public:
   Carriers() = default;
@@ -33,19 +37,25 @@ class Carriers : public BaseModel {
   virtual ~Carriers() noexcept = default;
 
   /** \return the number of vehicles  */
-  const int &get_number_of_vehicles() const;
+  auto get_number_of_vehicles() const { return m_n; }
+
   /** \return density  */
-  const double &get_rho() const;
+  auto get_rho() const { return m_rho; }
+
   /** \return distance between two vehicles  */
-  const double &get_d_inter_vehicules() const;
+  auto get_d_inter_vehicules() const { return m_d; }
+
   /** \return distance between first pile and the first vehicule */
-  const double &get_d_start() const;
+  auto get_d_start() const { return m_d_start; }
+
   /** \return  up load  */
-  const double &up_load() const;
+  auto up_load() const { return m_up_load; }
+
   /** \return down load  */
-  const double &down_load() const;
+  auto down_load() const { return m_down_load; }
+
   /** \return mass 100% of one vehicule (kg)  */
-  const double &loaded_mass() const;
+  auto loaded_mass() const { return m_loaded_mass; }
 
  private:
   Carriers(Carriers &&) = delete;
@@ -55,9 +65,11 @@ class Carriers : public BaseModel {
   void from_json(const json &j);
 
   /** number of vehicules*/
-  int m_n{0};  //
+  int m_n{0};
+
   /** mass of one vehicle (kg) */
   double m_mass{0.};
+
   /** distance between two vehicles (m)*/
   double m_d{0.};  //
 

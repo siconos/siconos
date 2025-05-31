@@ -25,23 +25,15 @@
 
 #include <memory>
 
+#include "FunctionTypes.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosSerialization.hpp"
-
-namespace siconos::algebra {
-
-class SiconosMatrix;
-}
 
 namespace siconos::modeling {
 
 class DynamicalSystem;
 class NonSmoothDynamicalSystem;
 }  // namespace siconos::modeling
-
-namespace siconos::plugins {
-class PluggedObject;
-class SubPluggedObject;
-}  // namespace siconos::plugins
 
 namespace siconos::integrators {
 
@@ -61,14 +53,12 @@ class MatrixIntegrator {
   /** The matrix solution to the ODE */
   std::shared_ptr<siconos::algebra::SiconosMatrix> _mat{nullptr};
 
-  /**The entry Matrix E */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> _E{nullptr};
+  /** buffer used to save or compute entry matrix from a user defined function */
+  std::shared_ptr<siconos::algebra::SiconosMatrix> E_buffer_{nullptr};
 
-  /**The entry Matrix E, in the plugin form */
-  std::shared_ptr<siconos::plugins::PluggedObject> _plugin{nullptr};
-
-  /**Plugin to compute the value of a column of E */
-  std::shared_ptr<siconos::plugins::SubPluggedObject> _spo{nullptr};
+  /** The entry Matrix E as a user-defined function */
+  siconos::modeling::func_prototypes::FunctionS_M computeEMatrix_{nullptr};
+  // Note FP: E columns will be used to update b(t) in the linear DS.
 
   /** flag to indicate where the Matrix _mat is constant */
   bool _isConst{false};
@@ -100,24 +90,24 @@ class MatrixIntegrator {
    * \param ds the siconos::modeling::DynamicalSystem
    * \param nsds current nonsmooth dynamical system
    * \param td current time discretisation
-   * \param E a matrix
+   * \param E the entry matrix
    */
   MatrixIntegrator(const siconos::modeling::DynamicalSystem& ds,
                    const siconos::modeling::NonSmoothDynamicalSystem& nsds,
                    std::shared_ptr<TimeDiscretisation> td,
-                   const std::shared_ptr<siconos::algebra::SiconosMatrix> E);
+                   const siconos::algebra::SiconosMatrix& E);
 
   /** Constructor to compute \f$\int exp(A\tau)E(\tau)\mathrm{d}\tau\f$
    * \param ds the siconos::modeling::DynamicalSystem
    * \param nsds current nonsmooth dynamical system
    * \param td current time discretisation
-   * \param plugin the plugin to compute \f$E(t)\f$
-   * \param p the number of column in E
+   * \param computeE the plugin to compute \f$E(t)\f$
+   * \param p the number of columns in E
    */
   MatrixIntegrator(const siconos::modeling::DynamicalSystem& ds,
                    const siconos::modeling::NonSmoothDynamicalSystem& nsds,
                    std::shared_ptr<TimeDiscretisation> td,
-                   std::shared_ptr<siconos::plugins::PluggedObject> plugin,
+                   const siconos::modeling::func_prototypes::FunctionS_M& computeE,
                    const unsigned int p);
 
   /** Constructor to compute \f$\int exp(A\tau)\mathrm{d}\tau\f$

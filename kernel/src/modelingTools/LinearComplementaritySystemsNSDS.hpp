@@ -22,16 +22,14 @@
 #define LinearComplementaritySystemsNSDS_H
 
 #include "NonSmoothDynamicalSystem.hpp"
+#include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 
-namespace siconos::algebra {
-
-class SiconosVector;
-class SimpleMatrix;
-}  // namespace siconos::algebra
+namespace siconos::algebra {}  // namespace siconos::algebra
 
 namespace siconos::modeling {
 
-class FirstOrderLinearTIDS;
+class FirstOrderLinearDS;
 class FirstOrderLinearTIR;
 class ComplementarityConditionNSL;
 
@@ -44,7 +42,7 @@ class LinearComplementaritySystemsNSDS : public NonSmoothDynamicalSystem {
   ACCEPT_SERIALIZATION(LinearComplementaritySystemsNSDS);
 
   /** a first order linear TI dynamical systems */
-  std::shared_ptr<FirstOrderLinearTIDS> _ds{nullptr};
+  std::shared_ptr<FirstOrderLinearDS> _ds{nullptr};
   /** a first order linear TI relation */
   std::shared_ptr<FirstOrderLinearTIR> _relation{nullptr};
   /** a complementarity condition */
@@ -59,13 +57,13 @@ class LinearComplementaritySystemsNSDS : public NonSmoothDynamicalSystem {
    *  \param T final time
    */
   LinearComplementaritySystemsNSDS(double t0, double T,
-                                   std::shared_ptr<siconos::algebra::SiconosVector> x0,
-                                   std::shared_ptr<siconos::algebra::SimpleMatrix> A,
-                                   std::shared_ptr<siconos::algebra::SimpleMatrix> B,
-                                   std::shared_ptr<siconos::algebra::SimpleMatrix> C,
-                                   std::shared_ptr<siconos::algebra::SimpleMatrix> D,
-                                   std::shared_ptr<siconos::algebra::SiconosVector> a,
-                                   std::shared_ptr<siconos::algebra::SiconosVector> b);
+                                   Eigen::Ref<siconos::algebra::SiconosVector> x0,
+                                   Eigen::Ref<siconos::algebra::SiconosMatrix> A,
+                                   Eigen::Ref<siconos::algebra::SiconosMatrix> B,
+                                   Eigen::Ref<siconos::algebra::SiconosMatrix> C,
+                                   Eigen::Ref<siconos::algebra::SiconosMatrix> D,
+                                   Eigen::Ref<siconos::algebra::SiconosVector> b,
+                                   Eigen::Ref<siconos::algebra::SiconosVector> e);
 
   /** destructor
    */
@@ -73,7 +71,7 @@ class LinearComplementaritySystemsNSDS : public NonSmoothDynamicalSystem {
 
   // --- GETTERS/SETTERS ---
 
-  std::shared_ptr<FirstOrderLinearTIDS> ds() { return _ds; };
+  auto ds() { return _ds; };
 
   std::shared_ptr<FirstOrderLinearTIR> relation() { return _relation; };
 

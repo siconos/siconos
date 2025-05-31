@@ -24,22 +24,15 @@
 #include <limits>
 
 #include "OneStepIntegrator.hpp"
-#include "SiconosVisitor.hpp"
-// namespace siconos::internal {
-
-// class SiconosVisitor;
-// }
-
-namespace siconos::algebra {
-
-class SiconosVector;
-}
+#include "SiconosVisitor.hpp"  // For NSLeffects ...
 
 namespace siconos::modeling {
 
 class SecondOrderDS;
+class LagrangianDS;
+class NewtonEulerDS;
 
-}
+}  // namespace siconos::modeling
 
 namespace siconos::integrators {
 
@@ -112,14 +105,14 @@ constexpr auto MOREAUSTEPSINMEMORY = 1;
 
    Each DynamicalSystem is associated to a SiconosMatrix, named "W", the
    "teration" matrix"
-   W matrices are initialized and computed in initializeIterationMatrixW and
-   computeW. Depending on the DS type, they may depend on time t and DS state x.
+   W matrices are initialized and computed in initializeIterationMatrix and
+   computeIterationMatrix. Depending on the DS type, they may depend on time t and DS state x.
 
    For mechanical systems, the implementation uses _p for storing the
    the input due to the nonsmooth law. This MoreauJeanOSI scheme assumes that
    the relative degree is two.
 
-   For Lagrangian systems, the implementation uses _p[1] for storing the discrete impulse.
+   For Lagrangian systems, the implementation uses p[1] for storing the discrete impulse.
 
    Main functions:
 
@@ -196,14 +189,14 @@ class MoreauJeanOSI : public OneStepIntegrator {
 
     void visit(const siconos::modeling::NewtonImpactNSL &nslaw) const override;
 
-    void visit(const siconos::modeling::RelayNSL &nslaw) const override{};
+    void visit(const siconos::modeling::RelayNSL &nslaw) const override {};
     void visit(const siconos::modeling::NewtonImpactFrictionNSL &nslaw) const override;
     void visit(const siconos::modeling::FremondImpactFrictionNSL &nslaw) const override;
     void visit(const siconos::modeling::NewtonImpactRollingFrictionNSL &nslaw) const override;
-    void visit(const siconos::modeling::EqualityConditionNSL &nslaw) const override{};
+    void visit(const siconos::modeling::EqualityConditionNSL &nslaw) const override {};
     void visit(
-        const siconos::modeling::MixedComplementarityConditionNSL &nslaw) const override{};
-    void visit(const siconos::modeling::ComplementarityConditionNSL &nslaw) const override{};
+        const siconos::modeling::MixedComplementarityConditionNSL &nslaw) const override {};
+    void visit(const siconos::modeling::ComplementarityConditionNSL &nslaw) const override {};
   };
 
  public:
@@ -225,47 +218,19 @@ class MoreauJeanOSI : public OneStepIntegrator {
    */
   virtual ~MoreauJeanOSI() noexcept = default;
 
-  /** get the value of W corresponding to DynamicalSystem ds
-   *
-   *  \param ds a pointer to DynamicalSystem, optional, default =
-   *  nullptr. get W[0] in that case
-   *  \return SimpleMatrix
-   */
-  const siconos::algebra::SimpleMatrix getW(
-      std::shared_ptr<siconos::modeling::DynamicalSystem> ds =
-          std::shared_ptr<siconos::modeling::DynamicalSystem>());
-
-  /** get W corresponding to DynamicalSystem ds
-   *
-   *  \param ds a pointer to DynamicalSystem
-   *  \return pointer to a SiconosMatrix
-   */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> W(
-      std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
-
   inline bool isWSymmetricDefinitePositive() const { return _isWSymmetricDefinitePositive; };
 
   inline void setIsWSymmetricDefinitePositive(bool b) { _isWSymmetricDefinitePositive = b; };
 
-  // -- WBoundaryConditions --
+  // -- IterationMatrixBoundaryConditions --
 
-  /** Get the value of WBoundaryConditions corresponding to DynamicalSystem ds
+  /** get IterationMatrixBoundaryConditions corresponding to DynamicalSystem ds
    *
    *  \param ds a pointer to DynamicalSystem, optional, default =
-   *  nullptr. get WBoundaryConditions[0] in that case
-   *  \return SimpleMatrix
-   */
-  const siconos::algebra::SimpleMatrix getWBoundaryConditions(
-      std::shared_ptr<siconos::modeling::DynamicalSystem> ds =
-          std::shared_ptr<siconos::modeling::DynamicalSystem>());
-
-  /** get WBoundaryConditions corresponding to DynamicalSystem ds
-   *
-   *  \param ds a pointer to DynamicalSystem, optional, default =
-   *  nullptr. get WBoundaryConditions[0] in that case
+   *  nullptr. get IterationMatrixBoundaryConditions[0] in that case
    *  \return pointer to a SiconosMatrix
    */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> WBoundaryConditions(
+  std::shared_ptr<siconos::algebra::SiconosMatrix> IterationMatrixBoundaryConditions(
       std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
   // -- theta --
@@ -421,44 +386,34 @@ class MoreauJeanOSI : public OneStepIntegrator {
    *  \param time
    *  \param ds a pointer to DynamicalSystem
    */
-  void initializeIterationMatrixW(double time,
-                                  std::shared_ptr<siconos::modeling::SecondOrderDS> ds);
+  void initializeIterationMatrix(double time,
+                                 std::shared_ptr<siconos::modeling::SecondOrderDS> ds);
 
-  /** compute W MoreauJeanOSI matrix at time t
-   *
-   *  \param time (double)
-   *  \param ds a  DynamicalSystem
-   *  \param W the result in W
+  /** \return the inverse of the iteration matrix
+   *  \param ds the concerned dynamical system
+   *  \param LUW the LU-factorisation of W
    */
-  void computeW(double time, siconos::modeling::SecondOrderDS &ds,
-                siconos::algebra::SiconosMatrix &W);
+  std::shared_ptr<siconos::algebra::SiconosMatrix> iterationMatrixInverse(
+      std::shared_ptr<siconos::modeling::SecondOrderDS> ds,
+      const Eigen::FullPivLU<siconos::algebra::SiconosMatrix> &LUW);
 
-  /** get and compute if needed W MoreauJeanOSI matrix at time t
-   *
-   *  \param time (double)
-   *  \param ds a  DynamicalSystem
-   *  \param Winverse the result in Winverse
-   *  \param keepW
-   */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> Winverse(
-      std::shared_ptr<siconos::modeling::SecondOrderDS> ds, bool keepW = false);
-
-  /** compute WBoundaryConditionsMap[ds] MoreauJeanOSI matrix at time t
+  /** compute IterationMatrixBoundaryConditionsMap[ds] MoreauJeanOSI matrix at time t
    *
    *  \param ds a pointer to DynamicalSystem
-   *  \param WBoundaryConditions write the result in WBoundaryConditions
-   *  \param iteration_matrix the OSI iteration matrix (W)
+   *  \param IterationMatrixBoundaryConditions write the result in
+   * IterationMatrixBoundaryConditions \param iteration_matrix the OSI iteration matrix (W)
    */
-  void _computeWBoundaryConditions(siconos::modeling::SecondOrderDS &ds,
-                                   siconos::algebra::SiconosMatrix &WBoundaryConditions,
-                                   siconos::algebra::SiconosMatrix &iteration_matrix);
+  void _computeIterationMatrixBoundaryConditions(
+      siconos::modeling::SecondOrderDS &ds,
+      siconos::algebra::SiconosMatrix &IterationMatrixBoundaryConditions,
+      siconos::algebra::SiconosMatrix &iteration_matrix);
 
-  /** initialize iteration matrix WBoundaryConditionsMap[ds] MoreauJeanOSI
+  /** initialize iteration matrix IterationMatrixBoundaryConditionsMap[ds] MoreauJeanOSI
    *
    *  \param ds a pointer to DynamicalSystem
    *  \param dsv a descriptor of the ds on the graph (redundant)
    */
-  void _initializeIterationMatrixWBoundaryConditions(
+  void _initializeIterationMatrixBoundaryConditions(
       siconos::modeling::SecondOrderDS &ds,
       const siconos::graphs::DynamicalSystemsGraph::VDescriptor &dsv);
 
@@ -537,13 +492,6 @@ class MoreauJeanOSI : public OneStepIntegrator {
    */
   void integrate(double &tinit, double &tend, double &tout, int &notUsed) override;
 
-  /**
-      update the state of the dynamical systems
-
-      \param ds the dynamical to update
-   */
-  virtual void updatePosition(siconos::modeling::DynamicalSystem &ds);
-
   /** update the state of the dynamical systems
    *
    *  \param level the level of interest for the dynamics: not used at the time
@@ -552,11 +500,50 @@ class MoreauJeanOSI : public OneStepIntegrator {
 
   /** \return the  work of forces by ds
    */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> computeWorkForces();
+  std::shared_ptr<siconos::algebra::SiconosMatrix> computeWorkForces();
 
   /** Displays the data of the MoreauJeanOSI's integrator
    */
   void display() const override;
 };
+
+/////// Free Functions ///////
+namespace moreau_jean {
+/** compute Moreau-Jean W iteration matrix for Lagrangian systems
+ *
+ *  \param time current time
+ *  \param h current time-step
+ *  \param theta theta parameter of the integrator
+ *  \param ds a Lagrangian dynamical system
+ *  \param[in,out] W the result in W
+ *  \param[in,out] LUW the LU factorisation of W (updated)
+ */
+void computeIterationMatrix_Lagrangian(
+    double time, double h, double theta, siconos::modeling::LagrangianDS &ds,
+    Eigen::Ref<siconos::algebra::SiconosMatrix> W,
+    std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>> &LUW);
+
+/** compute Moreau-Jean W iteration matrix for Newton-Euler systems
+ *
+ *  \param time current time
+ *  \param h current time-step
+ *  \param theta theta parameter of the integrator
+ *  \param ds a Lagrangian dynamical system
+ *  \param[in,out] W the result in W
+ *  \param[in,out] LUW the LU factorisation of W (updated)
+ */
+void computeIterationMatrix_NewtonEuler(
+    double time, double h, double theta, siconos::modeling::NewtonEulerDS &ds,
+    Eigen::Ref<siconos::algebra::SiconosMatrix> W,
+    std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>> &LUW);
+
+/** Update the state vector of a given dynamical system
+ *  \param time_step current time step
+ *  \param theta integrator theta parameter
+ *  \param ds the dynamical system to update
+ */
+void updatePosition(double time_step, double theta, siconos::modeling::DynamicalSystem &ds);
+
+}  // namespace moreau_jean
 }  // namespace siconos::integrators
 #endif  // MoreauJeanOSI_H

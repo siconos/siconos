@@ -57,6 +57,8 @@ class Contact2dR : public siconos::modeling::Lagrangian2d2DR {
       const siconos::algebra::SiconosVector& pos1, const siconos::algebra::SiconosVector& pos2,
       const siconos::algebra::SiconosVector& normal);
   virtual void preDelete() {}
+  virtual void accept(modeling::relations::Visitor &tourist) const override { tourist.visit(*this); }
+
 };
 }  // namespace siconos::collision
 #endif

@@ -24,6 +24,7 @@
 #define CommonSMC_H
 
 #include "Actuator.hpp"
+#include "FunctionTypes.hpp"
 #include "relay_cst.h"  // contains only enum. Ok.
 
 namespace siconos::modeling {
@@ -40,7 +41,7 @@ class OneStepIntegrator;
 
 namespace siconos::nonsmooth_formulations {
 class LinearOSNS;
-}  // namespace siconos::simulation
+}  // namespace siconos::nonsmooth_formulations
 
 namespace siconos::simulation {
 class TimeStepping;
@@ -57,28 +58,29 @@ class CommonSMC : public Actuator {
   /** index for saving data */
   unsigned int _indx{0};
 
-  /** name of the plugin to add a term to the sliding variable; useful when doing trajectory
-   * tracking */
-  std::string _plugineName;
+  /** function wrapper used to compute e(t) in FirstOrderLinearR */
+  siconos::modeling::func_prototypes::FunctionS_V computee_{nullptr};
 
-  /** name of the plugin to compute \f$ y = h(x, ...) \f$ for the nonlinear case*/
-  std::string _pluginhName;
+  /** function wrapper used to compute \f$ h(x,t,\lambda) in relation \f$ */
+  siconos::modeling::func_prototypes::FunctionBVSV_V computeh_{nullptr};
 
-  /** name of the plugin to compute \f$ \nabla_x h \f$ for the nonlinear case*/
-  std::string _pluginJachxName;
+  /** function wrapper used to compute  \f$ \nabla_x h(x,t,\lambda)  in relation\f$ */
+  siconos::modeling::func_prototypes::FunctionBVSV_M computejacobianhOver_state_{nullptr};
 
-  /** name of the plugin to compute \f$ \nabla_\lambda h \f$ for the nonlinear case*/
-  std::string _pluginJachlambdaName;
+  /** function wrapper used to compute  \f$ \nabla_{\lambda} h(x,t,\lambda)  in relation\f$ */
+  siconos::modeling::func_prototypes::FunctionBVSV_M computejacobianhOver_lambda_{nullptr};
 
-  /** name of the plugin to compute \f$ \nabla_\lambda g \f$ for the nonlinear case*/
-  std::string _pluginJacglambdaName;
+  /** function wrapper used to compute  \f$ \nabla_{\lambda} g(x,\lambda)  in relation\f$ */
+  siconos::modeling::func_prototypes::FunctionBVSV_M computejacobiangOver_lambda_{nullptr};
+
+  // Note: g and  \f$ \nabla_x g(x,\lambda) \f$ */ are attributes of the Actuator base class.
 
   /** the vector defining the linear contribution of the state to the sliding variable  ( \f$
    * \sigma = Cx \f$ ) */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _Csurface{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _Csurface{nullptr};
 
   /** matrix describing the influence of \f$ lambda \f$  on \f$ \sigma \f$ */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _D{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _D{nullptr};
 
   /** scalar multiplying Sign; \f$ u^s = - \alpha Sign \f$ */
   double _alpha{1.};
@@ -104,6 +106,9 @@ class CommonSMC : public Actuator {
   /** the DynamicalSystem for the controller */  // XXX replace this by FirstOrderDS
   std::shared_ptr<siconos::modeling::FirstOrderNonLinearDS> _DS_SMC{nullptr};
 
+  /** Internal buffer for b vector of DS_SMC_ */
+  siconos::algebra::SiconosVector bSMC_;
+
   /** the TimeDiscretisation for the controller */
   std::shared_ptr<siconos::simulation::TimeDiscretisation> _td{nullptr};
 
@@ -126,7 +131,7 @@ class CommonSMC : public Actuator {
   std::shared_ptr<siconos::modeling::NonSmoothLaw> _nsLawSMC{nullptr};
 
   /** inverse of CB */
-  std::shared_ptr<siconos::algebra::SimpleMatrix> _invCB{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosMatrix> _invCB{nullptr};
 
   /** Store  \f$ u^{eq} \f$  */
   std::shared_ptr<siconos::algebra::SiconosVector> _ueq{nullptr};
@@ -152,9 +157,8 @@ class CommonSMC : public Actuator {
    *  \param type the type of the SMC Actuator
    *  \param sensor the ControlSensor feeding the Actuator
    */
-  CommonSMC(ActuatorType type, std::shared_ptr<ControlSensor> sensor) : Actuator(type, sensor)
-  {
-  }
+  CommonSMC(ActuatorType type, std::shared_ptr<ControlSensor> sensor)
+      : Actuator(type, sensor) {}
 
   /** Constructor for dynamics affine in control
    *
@@ -164,11 +168,9 @@ class CommonSMC : public Actuator {
    *  \param D the saturation matrix (optional)
    */
   CommonSMC(ActuatorType type, std::shared_ptr<ControlSensor> sensor,
-            std::shared_ptr<siconos::algebra::SimpleMatrix> B,
-            std::shared_ptr<siconos::algebra::SimpleMatrix> D = nullptr)
-      : Actuator(type, sensor, B), _D(D)
-  {
-  }
+            std::shared_ptr<siconos::algebra::SiconosMatrix> B,
+            std::shared_ptr<siconos::algebra::SiconosMatrix> D = nullptr)
+      : Actuator(type, sensor, B), _D(D) {}
 
   /** Compute the new control law at each event
    */
@@ -182,27 +184,49 @@ class CommonSMC : public Actuator {
   virtual void initialize(const siconos::modeling::NonSmoothDynamicalSystem& nsds,
                           const siconos::simulation::Simulation& s);
 
-  void sete(const std::string& plugin);
-  void seth(const std::string& plugin);
-  void setJachx(const std::string& plugin);
-  void setJachlambda(const std::string& plugin);
-  void setg(const std::string& plugin);
-  void setJacgx(const std::string& plugin);
-  void setJacglambda(const std::string& plugin);
+  void sete(const siconos::modeling::func_prototypes::FunctionS_V&
+                fct);  // Meaningful only for FirstOrderLinearR
+
+  /** set a user-defined function to compute \f$ h(x,t,\lambda) \f$
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputehFunction(const siconos::modeling::func_prototypes::FunctionBVSV_V& fct);
+
+  /** set a user-defined function to compute \f$ \nabla_x h(x, t, \lambda) \f$ \f$
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputeJacobianhOver_stateFunction(
+      const siconos::modeling::func_prototypes::FunctionBVSV_M& fct);
+
+  /** set a user-defined function to compute \f$ \nabla_{\lambda} h(x, t, \lambda) \f$ \f$
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputeJacobianhOver_lambdaFunction(
+      const siconos::modeling::func_prototypes::FunctionBVSV_M& fct);
+
+  /** set a user-defined function to compute \f$ \nabla_{\lambda} g(x, \lambda) \f$ \f$
+   *
+   *  \param fct the user-defined function (std::function, lambda ...)
+   */
+  void setComputeJacobiangOver_lambdaFunction(
+      const siconos::modeling::func_prototypes::FunctionBVSV_M& fct);
 
   /** Set Csurface
    *
-   *  \param Csurface a std::shared_ptr<siconos::algebra::SimpleMatrix> containing the new
+   *  \param Csurface a std::shared_ptr<siconos::algebra::SiconosMatrix> containing the new
    * value for _Csurface
    */
-  void setCsurface(std::shared_ptr<siconos::algebra::SimpleMatrix> Csurface);
+  void setCsurface(std::shared_ptr<siconos::algebra::SiconosMatrix> Csurface);
 
   /** Set _D to pointer newPtr
    *
-   *  \param newSat a std::shared_ptr<siconos::algebra::SimpleMatrix> containing the new value
+   *  \param newSat a std::shared_ptr<siconos::algebra::SiconosMatrix> containing the new value
    * for _D
    */
-  void setSaturationMatrix(std::shared_ptr<siconos::algebra::SimpleMatrix> newSat);
+  void setSaturationMatrix(std::shared_ptr<siconos::algebra::SiconosMatrix> newSat);
 
   /** Set _alpha
    *
@@ -292,8 +316,8 @@ class CommonSMC : public Actuator {
    *
    *  \return the NSDS used in the SMC
    */
-  virtual std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> getInternalNSDS() const
-  {
+  virtual std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem> getInternalNSDS()
+      const {
     return _nsdsSMC;
   };
 

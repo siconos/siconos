@@ -29,7 +29,7 @@ siconos::collision::SiconosContactor::SiconosContactor(
   // if(!offset)
   // {
   //   offset = std::make_shared<siconos::algebra::SiconosVector>(7);
-  //   offset->zero();
+  //   offset->setZero();
   //   (*offset)(3) = 1.0;
   // }
 
@@ -42,3 +42,8 @@ siconos::collision::SiconosContactor::SiconosContactor(
     }
   }
 }
+
+siconos::collision::SiconosContactor::SiconosContactor(
+    std::shared_ptr<SiconosShape> shape_in,
+    Eigen::Ref<siconos::algebra::SiconosVector> offset_in, int collision_group_in)
+    : SiconosContactor(shape_in, std::make_shared<siconos::algebra::SiconosVector>(offset_in), collision_group_in) {}
