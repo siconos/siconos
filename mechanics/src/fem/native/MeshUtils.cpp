@@ -441,6 +441,15 @@ void siconos::mechanics::fem::writeTensorforPython(
   fclose(foutput);
 }
 
+
+
+void siconos::mechanics::fem::prepareWriteBeamPositionforSOFA(std::string filename) {
+
+  std::cout << "Output displacement for SOFA post-processing in " << filename << std::endl;
+
+  FILE *foutput = fopen(filename.c_str(), "w");
+  fclose(foutput);
+}
 void  siconos::mechanics::fem::writeBeamPositionforSOFA(std::shared_ptr<Mesh>  mesh,
                                                                std::shared_ptr<FiniteElementModel> femodel,
                                                                std::shared_ptr<siconos::algebra::SiconosVector> x, std::string filename, double t)
@@ -461,7 +470,7 @@ void  siconos::mechanics::fem::writeBeamPositionforSOFA(std::shared_ptr<Mesh>  m
 
       value =(*x)(idx);
       fprintf(foutput, " %e", value+v->x()) ;
-      idy= (*n->dofIndex())[1];
+
       value =(*x)(idy);
       fprintf(foutput, " %e", value+v->y()) ;
       // 2D case
@@ -477,18 +486,18 @@ void  siconos::mechanics::fem::writeBeamPositionforSOFA(std::shared_ptr<Mesh>  m
 
       double quat[4];
 
-      double c1 = cos( valueqx+v->z() / 2 );
+      double c3 = cos( (valueqx+v->z()) / 2 );
+      double c1 = cos( 0 );
       double c2 = cos( 0 );
-      double c3 = cos( 0 );
 
-      double s1 = sin( valueqx+v->z() / 2 );
+      double s3 = sin( (valueqx+v->z()) / 2 );
+      double s1 = sin( 0 );
       double s2 = sin( 0 );
-      double s3 = sin( 0 );
 
-      quat[0] = s1 * c2 * c3 + c1 * s2 * s3;
-      quat[1] = c1 * s2 * c3 - s1 * c2 * s3;
-      quat[2] = c1 * c2 * s3 + s1 * s2 * c3;
-      quat[3] = c1 * c2 * c3 - s1 * s2 * s3;
+      quat[0] = s1 * c2 * c3 - c1 * s2 * s3;
+      quat[1] = c1 * s2 * c3 + s1 * c2 * s3;
+      quat[2] = c1 * c2 * s3 - s1 * s2 * c3;
+      quat[3] = c1 * c2 * c3 + s1 * s2 * s3;
 
       fprintf(foutput, " %e", quat[0]) ;
       fprintf(foutput, " %e", quat[1]) ;
