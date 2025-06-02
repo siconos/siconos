@@ -27,7 +27,6 @@
 #include "SiconosMatrix.hpp"
 #include "SiconosMatrixVectorOp.hpp"  // for subprod
 #include "SiconosVector.hpp"
-#include "SiconosVisitor.hpp"
 #include "Simulation.hpp"
 // #define DEBUG_MESSAGES
 // #define DEBUG_STDOUT
@@ -299,8 +298,8 @@ void siconos::integrators::MoreauJeanBilbaoOSI::computeFreeState() {
 }
 
 struct siconos::integrators::MoreauJeanBilbaoOSI::_NSLEffectOnFreeOutput
-    : public siconos::internal::SiconosVisitor {
-  using SiconosVisitor::visit;
+    : public siconos::modeling::nonsmooth_laws::Visitor {
+  using siconos::modeling::nonsmooth_laws::Visitor::visit;
 
   siconos::nonsmooth_formulations::OneStepNSProblem* _osnsp{nullptr};
   siconos::modeling::Interaction& _inter;
@@ -311,7 +310,7 @@ struct siconos::integrators::MoreauJeanBilbaoOSI::_NSLEffectOnFreeOutput
                          siconos::graphs::InteractionProperties& interProp)
       : _osnsp(p), _inter(inter), _interProp(interProp) {};
 
-  void visit(const siconos::modeling::NewtonImpactNSL& nslaw) const override {
+  void visit(const siconos::modeling::NewtonImpactNSL& nslaw) override {
     auto e = nslaw.e();
     auto& osnsp_rhs =
         *(*_interProp.workVectors)[siconos::integrators::MoreauJeanBilbaoOSI::OSNSP_RHS];
@@ -451,8 +450,8 @@ bool siconos::integrators::MoreauJeanBilbaoOSI::addInteractionInIndexSet(
 
   assert(i == 1);
   double h = _simulation->timeStep();
-  auto y = (*inter->y(i - 1))(0);  // for i=1 y(i-1) is the position
-  auto yDot = (*(inter->y(i)))(0);   // for i=1 y(i) is the velocity
+  auto y = (*inter->y(i - 1))(0);   // for i=1 y(i-1) is the position
+  auto yDot = (*(inter->y(i)))(0);  // for i=1 y(i) is the velocity
   bool _useGamma = false;
   double _gamma = 1.0 / 2.0;
   double _constraintActivationThreshold = 0.0;

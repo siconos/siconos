@@ -31,7 +31,6 @@ if(WITH_TESTING)
   # ---- Siconos tools tests ----
   begin_tests(src/utils/SiconosTools/test DEPS "CPPUNIT::CPPUNIT")
   new_test(SOURCES SiconosGraphTest.cpp ${SIMPLE_TEST_MAIN})
-  # new_test(SOURCES SiconosVisitorTest.cpp ${SIMPLE_TEST_MAIN})
   new_test(SOURCES  SiconosPropertiesTest.cpp ${SIMPLE_TEST_MAIN})
 
   # # ---- Modeling tools ---
@@ -50,6 +49,7 @@ if(WITH_TESTING)
   new_test(SOURCES LagrangianLinearTIDSTest.cpp  ${SIMPLE_TEST_MAIN})
   new_test(SOURCES NewtonEulerDSTest.cpp  ${SIMPLE_TEST_MAIN})
   new_test(SOURCES NonSmoothDynamicalSystemTest.cpp  ${SIMPLE_TEST_MAIN})
+  new_test(SOURCES SiconosVisitorTest.cpp  ${SIMPLE_TEST_MAIN})
   
   # # ---- Simulation tools ---
   begin_tests(src/simulationTools/test DEPS "externals;numerics;CPPUNIT::CPPUNIT")

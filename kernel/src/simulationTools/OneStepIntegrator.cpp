@@ -25,22 +25,9 @@
 #include "Relation.hpp"
 #include "SiconosException.hpp"
 #include "SiconosVector.hpp"
-#include "SiconosVisitor.hpp"
 #include "Simulation.hpp"
 #include "Tools.hpp"  // enum_to_string
 #include "Topology.hpp"
-
-// FP WIP
-// struct siconos::integrators::OneStepIntegrator::IterationMatrixVisitor : public
-// siconos::internal::SiconosVisitor {
-
-//   std::shared_ptr<siconos::algebra::SiconosMatrix> visit(const MoreauJeanOSI& osi,
-//   std::shared_ptr<siconos::modeling::DynamicalSystem> ds) const
-//   {
-//     return osi.W(ds);
-//   }
-
-// };
 
 std::shared_ptr<std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>>
 siconos::integrators::OneStepIntegrator::_initializeDSWorkVectors(

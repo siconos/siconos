@@ -23,80 +23,25 @@
 #include "NumericsSolversNamespace.h"  // solver_options stuff
 #include "NumericsToolsNamespace.h"    // polyhedron, NM_create ...
 #include "OSNSMatrix.hpp"
-#include "SiconosVector.hpp"
-#include "SiconosVisitor.hpp"
 #include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 #include "Simulation.hpp"
 #include "TypeName.hpp"  // check nslaw type, should be replaced by dynamic_cast or variant ?
-// START visitor for nslaw
-//  NOT USED FOR THE MOMENT
-//  #if 0
-//  struct siconos::nonsmooth_formulations::AVI::_BoundsNSLEffect : public
-//  siconos::internal::SiconosVisitor
-//  {
-
-//   AVI* _parent{nullptr};
-//   std::shared_ptr<siconos::modeling::Interaction> _inter{nullptr};
-//   unsigned int _pos{0};
-
-//   _BoundsNSLEffect(AVI *p, std::shared_ptr<siconos::modeling::Interaction> inter, unsigned
-//   int pos) :
-//     _parent(p), _inter(inter), _pos(pos) {};
-
-//   void visit(const siconos::modeling::NormalConeNSL& nslaw) const override
-//   {
-//     if(_pos > 0)
-//     {
-//       S
-//     }
-//     // take the
-//     auto& K = nslaw.K();
-//     auto& H = nslaw.H();
-//     _numerics_problem->size = nslaw.size();
-//     _numerics_problem->d = nullptr;
-//     _numerics_problem->poly->id = SICONOS_SET_POLYHEDRON;
-//     _numerics_problem->poly->size_ineq = K.size();
-//     _numerics_problem->poly->size_eq = 0;
-//     _numerics_problem->poly->H = H.data();
-//     _numerics_problem->poly->K = K.data();
-//     _numerics_problem->poly->Heq = nullptr;
-//     _numerics_problem->poly->Keq = nullptr;
-//   }
-
-//   void visit(const siconos::modeling::RelayNSL& nslaw) const override
-//   {
-//   }
-
-//   void visit(const siconos::modeling::ComplementarityConditionNSL& nslaw) const override
-//   {
-//   }
-
-// };
-// #endif
-// /*****************************************************
-//  * END visitor for nslaw
-// */
 
 siconos::nonsmooth_formulations::AVI::AVI(int numericsSolverId)
-    : AVI(std::shared_ptr<SolverOptions>(
-          solver_options_create(numericsSolverId),
-          solver_options_delete))
-{
-}
+    : AVI(std::shared_ptr<SolverOptions>(solver_options_create(numericsSolverId),
+                                         solver_options_delete)) {}
 
-siconos::nonsmooth_formulations::AVI::AVI(
-    std::shared_ptr<SolverOptions> options)
+siconos::nonsmooth_formulations::AVI::AVI(std::shared_ptr<SolverOptions> options)
     : LinearOSNS(options),
-      _numerics_problem(std::make_shared<AffineVariationalInequalities>())
-{
+      _numerics_problem(std::make_shared<AffineVariationalInequalities>()) {
   _numerics_problem->poly.split = new polyhedron;
 }
 
 siconos::nonsmooth_formulations::AVI::~AVI() noexcept { delete _numerics_problem->poly.split; }
 
 void siconos::nonsmooth_formulations::AVI::initialize(
-    std::shared_ptr<siconos::simulation::Simulation> sim)
-{
+    std::shared_ptr<siconos::simulation::Simulation> sim) {
   LinearOSNS::initialize(sim);
 
   // right now we support only one (1) NonsmoothLaw associated with this AVI
@@ -120,8 +65,8 @@ void siconos::nonsmooth_formulations::AVI::initialize(
     _numerics_problem->poly.split->id = SICONOS_SET_POLYHEDRON;
     _numerics_problem->poly.split->size_ineq = K.size();
     _numerics_problem->poly.split->size_eq = 0;
-    _numerics_problem->poly.split->H = NM_create_from_data(
-        NM_DENSE, K.size(), nc.size(), H.data());
+    _numerics_problem->poly.split->H =
+        NM_create_from_data(NM_DENSE, K.size(), nc.size(), H.data());
     _numerics_problem->poly.split->K = K.data();
     _numerics_problem->poly.split->Heq = nullptr;
     _numerics_problem->poly.split->Keq = nullptr;
@@ -135,8 +80,7 @@ void siconos::nonsmooth_formulations::AVI::initialize(
   }
 }
 bool siconos::nonsmooth_formulations::AVI::checkCompatibleNSLaw(
-    siconos::modeling::NonSmoothLaw& nslaw)
-{
+    siconos::modeling::NonSmoothLaw& nslaw) {
   float type_number = static_cast<float>(siconos::types::type_value(nslaw));
   _nslawtype.insert(type_number);
 
@@ -150,8 +94,7 @@ bool siconos::nonsmooth_formulations::AVI::checkCompatibleNSLaw(
   return true;
 }
 
-int siconos::nonsmooth_formulations::AVI::compute(double time)
-{
+int siconos::nonsmooth_formulations::AVI::compute(double time) {
   int info = 0;
   // --- Prepare data for AVI computing ---
   bool cont = preCompute(time);
@@ -176,8 +119,8 @@ int siconos::nonsmooth_formulations::AVI::compute(double time)
     _numerics_problem->M = _M->numericsMatrix().get();
     _numerics_problem->q = _q->data();
 
-    info = avi_driver(_numerics_problem.get(), _z->data(),
-                                         _w->data(), _numerics_solver_options.get());
+    info = avi_driver(_numerics_problem.get(), _z->data(), _w->data(),
+                      _numerics_solver_options.get());
 
     if (info != 0) {
       std::cout << "Warning : Problem in AVI resolution\n";
@@ -190,8 +133,7 @@ int siconos::nonsmooth_formulations::AVI::compute(double time)
   return info;
 }
 
-void siconos::nonsmooth_formulations::AVI::display() const
-{
+void siconos::nonsmooth_formulations::AVI::display() const {
   std::cout << "======= AVI of size " << _sizeOutput << " with: \n";
   LinearOSNS::display();
 }

@@ -7,11 +7,11 @@ import numpy as np
 
 # this could be changed at install time
 data_dir = "data/"
-# solvers = [sn.SICONOS_GLOBAL_FRICTION_3D_NSGS, sn.SICONOS_GLOBAL_FRICTION_3D_NSN_AC]
-solvers = (sn.SICONOS_GLOBAL_FRICTION_3D_NSGS,)
-solvers_reduced1 = (sn.SICONOS_FRICTION_3D_NSGS, sn.SICONOS_FRICTION_3D_NSN_AC)
-solvers_reduced2 = (sn.SICONOS_FRICTION_3D_NSN_AC,)  # sn.SICONOS_FRICTION_3D_NSN_FB)
-solvers_reduced3 = (sn.SICONOS_FRICTION_3D_NSGS,)
+# solvers = [sn.solver_ids.SICONOS_GLOBAL_FRICTION_3D_NSGS, sn.solver_ids.SICONOS_GLOBAL_FRICTION_3D_NSN_AC]
+solvers = (sn.solver_ids.SICONOS_GLOBAL_FRICTION_3D_NSGS,)
+solvers_reduced1 = (sn.solver_ids.SICONOS_FRICTION_3D_NSGS, sn.solver_ids.SICONOS_FRICTION_3D_NSN_AC)
+solvers_reduced2 = (sn.solver_ids.SICONOS_FRICTION_3D_NSN_AC,)  # sn.solver_ids.SICONOS_FRICTION_3D_NSN_FB)
+solvers_reduced3 = (sn.solver_ids.SICONOS_FRICTION_3D_NSGS,)
 
 
 def condensed_from_global(fcp):

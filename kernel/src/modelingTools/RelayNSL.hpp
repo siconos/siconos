@@ -121,10 +121,8 @@ class RelayNSL : public NonSmoothLaw {
   void display() const override;
 
   // visitors hook
-  void accept(siconos::internal::SiconosVisitor& tourist) const override
-  {
-    tourist.visit(*this);
-  }
+    virtual void accept(nonsmooth_laws::Visitor &tourist) const override { tourist.visit(*this); }
+
   Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
 };
 }  // namespace siconos::modeling

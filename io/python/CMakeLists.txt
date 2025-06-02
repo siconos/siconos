@@ -22,7 +22,10 @@ create_pybind11_module(
   MODULE_NAME pyio 
   SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/io_pybind11.cpp
   DEPENDENCIES kernel io
+  PARENT_NAME io
 )
+
+set_target_properties(pyio PROPERTIES OUTPUT_NAME "_io")
 
 target_include_directories(pyio PRIVATE ${CMAKE_SOURCE_DIR}/io/src/mechanics)
 target_include_directories(pyio PRIVATE ${CMAKE_SOURCE_DIR}/numerics/src/tools)
@@ -60,3 +63,8 @@ if(HAVE_SICONOS_MECHANICS)
 
 endif()
 
+
+
+if(WITH_TESTING)
+  build_python_tests()
+endif()

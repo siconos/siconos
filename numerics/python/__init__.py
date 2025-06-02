@@ -1,1 +1,1 @@
-from .pynumerics import *
+from ._numerics import *

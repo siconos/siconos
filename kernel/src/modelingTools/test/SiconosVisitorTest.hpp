@@ -14,41 +14,27 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef SiconosVisitorTest_h
 #define SiconosVisitorTest_h
 
 #include <cppunit/extensions/HelperMacros.h>
 
-class SiconosVisitorTest : public CppUnit::TestFixture
-{
-
-private:
-
+class SiconosVisitorTest : public CppUnit::TestFixture {
+ private:
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(SiconosVisitorTest);
 
   // tests to be done ...
-  CPPUNIT_TEST(t1);
-
-  CPPUNIT_TEST(t2);
-
-  CPPUNIT_TEST(t3);
-
-  CPPUNIT_TEST(t4);
-
+  CPPUNIT_TEST(testVisitNSL);
   CPPUNIT_TEST_SUITE_END();
 
   // Members
-  void t1();
-  void t2();
-  void t3();
-  void t4();
+  void testVisitNSL();
 
-public:
+ public:
   void setUp();
   void tearDown();
-
 };
 
 #endif

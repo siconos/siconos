@@ -68,7 +68,7 @@ def test_vi_1D():
     x = np.array([0.0])
     F = np.array([0.0])
 
-    SO = sn.SolverOptions(sn.SICONOS_VI_BOX_QI)
+    SO = sn.SolverOptions(sn.solver_ids.SICONOS_VI_BOX_QI)
     lb = np.array((-1.0,))
     ub = np.array((1.0,))
     vi.set_box_constraints(lb, ub)
@@ -86,7 +86,7 @@ def test_vi_2D():
     x = np.array((0.0, 0.0))
     F = np.array((0.0, 0.0))
 
-    SO = sn.SolverOptions(sn.SICONOS_VI_BOX_QI)
+    SO = sn.SolverOptions(sn.solver_ids.SICONOS_VI_BOX_QI)
     lb = np.array((-1.0, -1.0))
     ub = np.array((1.0, 1.0))
     vi.set_box_constraints(lb, ub)
@@ -94,7 +94,7 @@ def test_vi_2D():
     print(info)
     print(
         "number of iteration {:} ; precision {:}".format(
-            SO.iparam[sn.SICONOS_IPARAM_ITER_DONE], SO.dparam[sn.SICONOS_DPARAM_RESIDU]
+            SO.iparam[sn.params.SICONOS_IPARAM_ITER_DONE], SO.dparam[sn.params.SICONOS_DPARAM_RESIDU]
         )
     )
     print("x = ", x)
@@ -108,7 +108,7 @@ def test_vi_3D():
     x = np.zeros((3,))
     F = np.zeros((3,))
 
-    SO = sn.SolverOptions(sn.SICONOS_VI_BOX_QI)
+    SO = sn.SolverOptions(sn.solver_ids.SICONOS_VI_BOX_QI)
     vi.set_compute_nabla_F(vi_nabla_function_3D)
     lb = np.array((-1.0, -1.0, -1.0))
     ub = np.array((1.0, 1.0, 1.0))
@@ -117,14 +117,14 @@ def test_vi_3D():
     print(info)
     print(
         "number of iteration {:} ; precision {:}".format(
-            SO.iparam[sn.SICONOS_IPARAM_ITER_DONE], SO.dparam[sn.SICONOS_DPARAM_RESIDU]
+            SO.iparam[sn.params.SICONOS_IPARAM_ITER_DONE], SO.dparam[sn.params.SICONOS_DPARAM_RESIDU]
         )
     )
     print("x = ", x)
     print("F = ", F)
     assert np.linalg.norm(x - xsol_3D) <= xtol
     assert not info
-    assert np.abs(SO.dparam[sn.SICONOS_DPARAM_RESIDU]) < 1e-10
+    assert np.abs(SO.dparam[sn.params.SICONOS_DPARAM_RESIDU]) < 1e-10
 
 
 def test_vi_C_interface():
@@ -186,17 +186,17 @@ def test_vi_C_interface():
         lambda_ = np.zeros((2,))
         xkp1 = np.zeros((2,))
 
-        SO = sn.SolverOptions(sn.SICONOS_VI_BOX_QI)
+        SO = sn.SolverOptions(sn.solver_ids.SICONOS_VI_BOX_QI)
         lb = np.array((-1.0, -1.0))
         ub = np.array((1.0, 1.0))
         vi.set_box_constraints(lb, ub)
 
         N = int(T / h + 10)
         print(N)
-        SO.dparam[sn.SICONOS_DPARAM_TOL] = 1e-24
-        SO.iparam[sn.SICONOS_IPARAM_MAX_ITER] = 100
-        SO.iparam[sn.SICONOS_VI_IPARAM_ACTIVATE_UPDATE] = 1
-        SO.iparam[sn.SICONOS_VI_IPARAM_DECREASE_RHO] = 0
+        SO.dparam[sn.params.SICONOS_DPARAM_TOL] = 1e-24
+        SO.iparam[sn.params.SICONOS_IPARAM_MAX_ITER] = 100
+        SO.iparam[sn.solver_ids.SICONOS_VI_IPARAM_ACTIVATE_UPDATE] = 1
+        SO.iparam[sn.solver_ids.SICONOS_VI_IPARAM_DECREASE_RHO] = 0
         SO.iparam[4] = 5  # ???
 
         signs = np.empty((N, 2))
@@ -224,8 +224,8 @@ def test_vi_C_interface():
                 print(
                     "iter {:} ; solver iter = {:} ; prec = {:}".format(
                         k,
-                        SO.iparam[sn.SICONOS_IPARAM_ITER_DONE],
-                        SO.dparam[sn.SICONOS_DPARAM_RESIDU],
+                        SO.iparam[sn.params.SICONOS_IPARAM_ITER_DONE],
+                        SO.dparam[sn.params.SICONOS_DPARAM_RESIDU],
                     )
                 )
                 if info > 0:

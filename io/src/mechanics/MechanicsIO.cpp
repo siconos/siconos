@@ -50,6 +50,7 @@
 #include "Lagrangian2d2DR.hpp"
 #include "Lagrangian2d3DR.hpp"
 #include "LagrangianDS.hpp"
+#include "NSLVisitor.hpp"
 #include "NewtonEuler1DR.hpp"
 #include "NewtonEuler3DR.hpp"
 #include "NewtonEuler5DR.hpp"
@@ -66,7 +67,6 @@
 #include "SiconosMatrix.hpp"
 #include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
-#include "SiconosVisitor.hpp"
 #include "SimulationGraphs.hpp"
 #include "StaticBody.hpp"
 #include "Topology.hpp"
@@ -104,25 +104,30 @@ struct siconos::io::GetVelocity : public siconos::modeling::dynamical_systems::V
   }
 };
 
-struct siconos::io::ForMu : public siconos::internal::Question<double> {
-  using SiconosVisitor::visit;
-
-  void visit(const siconos::modeling::NewtonImpactFrictionNSL& nsl) { answer = nsl.mu(); }
-  void visit(const siconos::modeling::FremondImpactFrictionNSL& nsl) { answer = nsl.mu(); }
-  void visit(const siconos::modeling::NewtonImpactRollingFrictionNSL& nsl) {
+struct siconos::io::ForMu : public siconos::modeling::nonsmooth_laws::Question<double> {
+  void visit(const siconos::modeling::NewtonImpactFrictionNSL& nsl) override {
     answer = nsl.mu();
   }
-  void visit(const siconos::modeling::NewtonImpactNSL& nsl) { answer = 0.; }
+  void visit(const siconos::modeling::FremondImpactFrictionNSL& nsl) override {
+    answer = nsl.mu();
+  }
+  void visit(const siconos::modeling::NewtonImpactRollingFrictionNSL& nsl) override {
+    answer = nsl.mu();
+  }
+  void visit(const siconos::modeling::NewtonImpactNSL& nsl) override { answer = 0.; }
 };
 
-struct siconos::io::ForE : public siconos::internal::Question<double> {
-  using SiconosVisitor::visit;
-  void visit(const siconos::modeling::NewtonImpactFrictionNSL& nsl) { answer = nsl.en(); }
-  void visit(const siconos::modeling::FremondImpactFrictionNSL& nsl) { answer = nsl.en(); }
-  void visit(const siconos::modeling::NewtonImpactRollingFrictionNSL& nsl) {
+struct siconos::io::ForE : public siconos::modeling::nonsmooth_laws::Question<double> {
+  void visit(const siconos::modeling::NewtonImpactFrictionNSL& nsl) override {
     answer = nsl.en();
   }
-  void visit(const siconos::modeling::NewtonImpactNSL& nsl) { answer = 0.; }
+  void visit(const siconos::modeling::FremondImpactFrictionNSL& nsl) override {
+    answer = nsl.en();
+  }
+  void visit(const siconos::modeling::NewtonImpactRollingFrictionNSL& nsl) override {
+    answer = nsl.en();
+  }
+  void visit(const siconos::modeling::NewtonImpactNSL& nsl) override { answer = 0.; }
 };
 
 /* Get contact informations */
@@ -147,9 +152,9 @@ void siconos::io::ContactPointVisitor::operator()(
   DEBUG_PRINTF("posa(2)=%g\n", posa(2));
 
   auto id = inter->number();
-  auto mu = siconos::internal::ask<ForMu>(*inter->nonSmoothLaw());
-  auto cf = *inter->lambda(1) * rel.H_NE_prod_T();
-
+  auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
+  siconos::algebra::SiconosVector cf{rel.H_NE_prod_T().cols()};
+  siconos::algebra::transposeMatrixVector_prod(*inter->lambda(1), rel.H_NE_prod_T(), cf);
   answer.resize(23);
 
   answer(0) = mu;
@@ -189,8 +194,9 @@ void siconos::io::ContactPointVisitor::operator()(
   DEBUG_PRINTF("posa(2)=%g\n", posa(2));
 
   auto id = inter->number();
-  auto mu = siconos::internal::ask<ForMu>(*inter->nonSmoothLaw());
-  auto cf = *inter->lambda(1) * rel.H_NE_prod_T();
+  auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
+  siconos::algebra::SiconosVector cf{rel.H_NE_prod_T().cols()};
+  siconos::algebra::transposeMatrixVector_prod(*inter->lambda(1), rel.H_NE_prod_T(), cf);
   answer.resize(23);
 
   answer(0) = mu;
@@ -242,8 +248,9 @@ void siconos::io::ContactPointVisitor::operator()(
   auto cpby = y2 - ncy * r2;
 
   auto id = inter->number();
-  auto mu = siconos::internal::ask<ForMu>(*inter->nonSmoothLaw());
-  auto cf = *inter->lambda(1) * rel.jacobianhOver_q();
+  auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
+  siconos::algebra::SiconosVector cf{rel.jacobianhOver_q().cols()};
+  siconos::algebra::transposeMatrixVector_prod(*inter->lambda(1), rel.jacobianhOver_q(), cf);
   answer.resize(16);
 
   answer(0) = mu;
@@ -306,8 +313,9 @@ void siconos::io::ContactPointVisitor::operator()(
     cpay = y1 + ncy * r1;
   }
   auto id = inter->number();
-  auto mu = siconos::internal::ask<ForMu>(*inter->nonSmoothLaw());
-  auto cf = *inter->lambda(1) * rel.jacobianhOver_q();
+  auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
+  siconos::algebra::SiconosVector cf{rel.jacobianhOver_q().cols()};
+  siconos::algebra::transposeMatrixVector_prod(*inter->lambda(1), rel.jacobianhOver_q(), cf);
   answer.resize(16);
 
   answer(0) = mu;
@@ -360,8 +368,9 @@ void siconos::io::ContactPointVisitor::operator()(
   auto cpay = y1 + ncy * r1;
 
   auto id = inter->number();
-  auto mu = siconos::internal::ask<ForMu>(*inter->nonSmoothLaw());
-  auto cf = *inter->lambda(1) * rel.jacobianhOver_q();
+  auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
+  siconos::algebra::SiconosVector cf{rel.jacobianhOver_q().cols()};
+  siconos::algebra::transposeMatrixVector_prod(*inter->lambda(1), rel.jacobianhOver_q(), cf);
   answer.resize(16);
 
   answer(0) = mu;
@@ -399,8 +408,9 @@ void siconos::io::ContactPointVisitor::operator()(
   DEBUG_PRINTF("posa(1)=%g\n", posa(1));
 
   auto id = inter->number();
-  auto mu = siconos::internal::ask<ForMu>(*inter->nonSmoothLaw());
-  auto cf = *inter->lambda(1) * rel.jacobianhOver_q();
+  auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
+  siconos::algebra::SiconosVector cf{rel.jacobianhOver_q().cols()};
+  siconos::algebra::transposeMatrixVector_prod(*inter->lambda(1), rel.jacobianhOver_q(), cf);
 
   answer.resize(16);
 
@@ -439,8 +449,9 @@ void siconos::io::ContactPointVisitor::operator()(
   DEBUG_PRINTF("posa(1)=%g\n", posa(1));
 
   auto id = inter->number();
-  auto mu = siconos::internal::ask<ForMu>(*inter->nonSmoothLaw());
-  auto cf = *inter->lambda(1) * rel.jacobianhOver_q();
+  auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
+  siconos::algebra::SiconosVector cf{rel.jacobianhOver_q().cols()};
+  siconos::algebra::transposeMatrixVector_prod(*inter->lambda(1), rel.jacobianhOver_q(), cf);
 
   answer.resize(16);
 
@@ -792,8 +803,8 @@ void ContactContactWorkVisitor::operator()(const siconos::modeling::NewtonEuler3
 static void compute_contact_work_and_status(
     std::shared_ptr<siconos::modeling::Interaction> inter, double omega, double tol,
     siconos::algebra::SiconosVector& answer) {
-  auto mu = siconos::internal::ask<ForMu>(*inter->nonSmoothLaw());
-  auto e = siconos::internal::ask<ForE>(*inter->nonSmoothLaw());
+  auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
+  auto e = siconos::modeling::nonsmooth_laws::ask<ForE>(*inter->nonSmoothLaw());
   // Compute normal contact work
   auto vn_minus = (inter->y_k(1))(0);
   auto vn_plus = (*inter->y(1))(0);
@@ -925,7 +936,7 @@ void siconos::io::ContactContactWorkVisitor::operator()(
   compute_contact_work_and_status(inter, omega, tol, answer);
 }
 
-std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::contactContactWork(
+std::optional<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::contactContactWork(
     const siconos::modeling::NonSmoothDynamicalSystem& nsds, unsigned int index_set,
     double omega, double tol) const {
   DEBUG_BEGIN("SiconosMatrix MechanicsIO::contactContactWork");
@@ -935,8 +946,7 @@ std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::conta
     auto& graph = *nsds.topology()->indexSet(index_set);
 
     unsigned int current_row;
-    auto result =
-        std::make_shared<siconos::algebra::SiconosMatrix>(graph.vertices_number(), 25);
+    siconos::algebra::SiconosMatrix result{graph.vertices_number(), 25};
 
     int data_size = 0;
     for (current_row = 0, std::tie(vi, viend) = graph.vertices(); vi != viend; ++vi) {
@@ -962,12 +972,12 @@ std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::conta
         // related to a contact points (perhaps a joint)
       } else {
       }
-      if (result->cols() != data.size()) {
-        result->resize(graph.vertices_number(), data.size());
+      if (result.cols() != data.size()) {
+        result.resize(graph.vertices_number(), data.size());
       }
-      result->row(current_row++) = data;
+      result.row(current_row++) = data;
     }
-    result->resize(current_row, data_size);
+    result.resize(current_row, data_size);
     DEBUG_EXPR(siconos::algebra::print(*result));
     ;
     return result;
@@ -975,5 +985,5 @@ std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::conta
   DEBUG_END("MechanicsIO::contactContactWork");
 
   // siconos::algebra::print(*result);
-  return nullptr;
+  return std::nullopt;
 }

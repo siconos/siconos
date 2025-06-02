@@ -72,7 +72,9 @@ PYBIND11_MODULE(modeling, m) {
                              const std::string &>(
                &siconos::modeling::NonSmoothDynamicalSystem::setName),
            "set DS name")
-
+      .def("displayDynamicalSystems",
+           &siconos::modeling::NonSmoothDynamicalSystem::displayDynamicalSystems,
+           "Print all dynamical systems infos")
       .def("__repr__", [](const siconos::modeling::NonSmoothDynamicalSystem &a) {
         a.display();
         return "\n";

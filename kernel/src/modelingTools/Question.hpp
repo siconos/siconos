@@ -38,24 +38,22 @@
 #ifndef Question_hpp
 #define Question_hpp
 
-#include "SiconosVisitor.hpp"
-
-// #include <SiconosConfig.h>
 #include <array>
-// #include <type_traits>
 
-namespace siconos::internal {
+#include "NSLVisitor.hpp"
+
+namespace siconos::modeling::nonsmooth_laws {
 
 /** a generic return value visitor */
 template <typename AnswerType>
-struct Question : public SiconosVisitor {
+struct Question : public Visitor {
   using type = AnswerType;
 
   type answer{std::array<typename std::remove_reference<AnswerType>::type, 1>{}[0]};
 
   Question() = default;
 
-  Question(AnswerType ref) : answer(ref){};
+  Question(AnswerType ref) : answer(ref) {};
 };
 
 /** get some value from a visitable object with the help of a
@@ -85,39 +83,14 @@ typename GeneralQuestion::type ask(const Visitable& v, const Argument& arg) {
   return t.answer;
 }
 
-/** apply a SiconosVisitor to a visitable object
+/** apply a siconos::modeling::nonsmooth_laws::Visitor to a visitable object
  * \param v a visitable object
  */
-template <class Visitor, class Visitable>
+template <class Vtor, class Visitable>
 void apply(const Visitable& v) {
-  static Visitor t;
+  static Vtor t;
 
   v.accept(t);
 }
-
-// /** apply a parameterized SiconosVisitor to a visitable object
-//  * \param v a visitable object
-//  * \param arg the SiconosVisitor argument
-//  */
-// template <class VisitorWithArgument, class Visitable, class Argument>
-// void apply(const Visitable& v, const Argument& arg) {
-
-//   VisitorWithArgument t(arg);
-
-//   v.accept(t);
-// }
-
-// /** apply a parameterized SiconosVisitor to a visitable object
-//  * \param v a visitable object
-//  * \param arg1 the first SiconosVisitor argument
-//  * \param arg2 the second SiconosVisitor argument
-//  */
-// template <class VisitorWith2Arguments, class Visitable, class Argument1, class Argument2>
-// void apply(const Visitable& v, const Argument1& arg1, const Argument2& arg2) {
-
-//   VisitorWith2Arguments t(arg1, arg2);
-
-//   v.accept(t);
-// }
-}  // namespace siconos::internal
+}  // namespace siconos::modeling::nonsmooth_laws
 #endif

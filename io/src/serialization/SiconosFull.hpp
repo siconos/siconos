@@ -35,8 +35,6 @@
 #include <fc3d_Solvers.h>
 
 #include <SiconosVector.hpp>
-#include <SimpleMatrix.hpp>
-
 #include "SiconosFullNumerics.hpp"
 /* hand written */
 

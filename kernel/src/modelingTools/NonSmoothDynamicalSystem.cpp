@@ -86,7 +86,6 @@ void siconos::modeling::NonSmoothDynamicalSystem::clearChangeLogTo(
 void siconos::modeling::NonSmoothDynamicalSystem::display() const {
   std::cout << " ===== Non Smooth Dynamical System display =====\n ";
   std::cout << "---> isBVP = " << _BVP << std::endl;
-  dynamicalSystems()->begin();
   _topology->indexSet0()->display();
   std::cout << "---> last change :\n";
   std::prev(_changeLog.end())->display();

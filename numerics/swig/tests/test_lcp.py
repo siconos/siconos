@@ -22,10 +22,10 @@ ztol = 1e-4
 
 
 solvers = [
-    sn.SICONOS_LCP_PGS,
-    sn.SICONOS_LCP_QP,
-    sn.SICONOS_LCP_LEMKE,
-    sn.SICONOS_LCP_ENUM,
+    sn.solver_ids.SICONOS_LCP_PGS,
+    sn.solver_ids.SICONOS_LCP_QP,
+    sn.solver_ids.SICONOS_LCP_LEMKE,
+    sn.solver_ids.SICONOS_LCP_ENUM,
 ]
 
 
@@ -33,8 +33,8 @@ def lcp_generic(id, z, w):
 
     options = sn.SolverOptions(id)
     info = sn.linearComplementarity_driver(lcp, z, w, options)
-    print(" iter =", options.iparam[sn.SICONOS_IPARAM_ITER_DONE])
-    print(" error=", options.dparam[sn.SICONOS_DPARAM_RESIDU])
+    print(" iter =", options.iparam[sn.params.SICONOS_IPARAM_ITER_DONE])
+    print(" error=", options.dparam[sn.params.SICONOS_DPARAM_RESIDU])
     return info
 
 

@@ -31,7 +31,6 @@
 #include "SiconosMatrix.hpp"
 #include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
-#include "SiconosVisitor.hpp"
 #include "Simulation.hpp"
 #include "Tools.hpp"  // enum_to_string
 #include "Topology.hpp"
@@ -779,8 +778,8 @@ void siconos::integrators::Hem5OSI::updateState(const unsigned int level) {
 }
 
 struct siconos::integrators::Hem5OSI::_NSLEffectOnFreeOutput
-    : public siconos::internal::SiconosVisitor {
-  using siconos::internal::SiconosVisitor::visit;
+    : public siconos::modeling::nonsmooth_laws::Visitor {
+  using siconos::modeling::nonsmooth_laws::Visitor::visit;
 
   siconos::nonsmooth_formulations::OneStepNSProblem* _osnsp{nullptr};
   std::shared_ptr<siconos::modeling::Interaction> _inter{nullptr};
@@ -797,7 +796,7 @@ struct siconos::integrators::Hem5OSI::_NSLEffectOnFreeOutput
   _NSLEffectOnFreeOutput& operator=(const _NSLEffectOnFreeOutput&) = delete;
   _NSLEffectOnFreeOutput& operator=(const _NSLEffectOnFreeOutput&&) = delete;
 
-  void visit(const siconos::modeling::NewtonImpactNSL& nslaw) const override {
+  void visit(const siconos::modeling::NewtonImpactNSL& nslaw) override {
     double e;
     e = nslaw.e();
     auto& osnsp_rhs = *(*_interProp.workVectors)[siconos::integrators::Hem5OSI::OSNSP_RHS];
@@ -805,7 +804,7 @@ struct siconos::integrators::Hem5OSI::_NSLEffectOnFreeOutput
   }
 
   // visit function added by Son (9/11/2010)
-  void visit(const siconos::modeling::MultipleImpactNSL& nslaw) const override {}
+  void visit(const siconos::modeling::MultipleImpactNSL& nslaw) override {}
   // note : no NewtonImpactFrictionNSL
 };
 

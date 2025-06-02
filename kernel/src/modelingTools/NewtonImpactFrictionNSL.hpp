@@ -49,7 +49,7 @@ class NewtonImpactFrictionNSL : public NonSmoothLaw {
    *
    *  \param size size of the ns law
    */
-  NewtonImpactFrictionNSL(unsigned int size) : NonSmoothLaw(size){};
+  NewtonImpactFrictionNSL(unsigned int size) : NonSmoothLaw(size) {};
 
   /** constructor with the value of the NewtonImpactFrictionNSL attributes
    *
@@ -59,7 +59,7 @@ class NewtonImpactFrictionNSL : public NonSmoothLaw {
    *  \param size unsigned int: size of the ns law
    */
   NewtonImpactFrictionNSL(double en, double et, double mu, unsigned int size)
-      : NonSmoothLaw(size), _en(en), _et(et), _mu(mu){};
+      : NonSmoothLaw(size), _en(en), _et(et), _mu(mu) {};
 
   /** Destructor */
   ~NewtonImpactFrictionNSL() noexcept = default;
@@ -109,9 +109,10 @@ class NewtonImpactFrictionNSL : public NonSmoothLaw {
   void display() const override;
 
   // visitors hook
-  void accept(siconos::internal::SiconosVisitor& tourist) const override {
+  virtual void accept(nonsmooth_laws::Visitor& tourist) const override {
     tourist.visit(*this);
   }
+
   Type acceptType(types::FindType& ft) const override { return ft.visit(*this); }
 };
 }  // namespace siconos::modeling

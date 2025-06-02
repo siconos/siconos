@@ -10,3 +10,6 @@ addopts = "-ra -q"
 testpaths = [
     "tests",
 ]
+
+[tool.flake8]
+max-line-length = 88

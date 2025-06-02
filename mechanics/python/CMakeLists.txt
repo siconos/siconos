@@ -18,28 +18,65 @@
 #
 
 
+# # create_pybind11_module(
+# #   MODULE_NAME pymechanics 
+# #   SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/mechanics_pybind11.cpp
+# #   DEPENDENCIES kernel mechanics
+# #   PARENT_NAME mechanics
+# # )
+# # set_target_properties(pymechanics PROPERTIES OUTPUT_NAME "_mechanics")
+# # install(TARGETS
+# # pymechanics
+# #   COMPONENT python
+# #   LIBRARY DESTINATION "${SICONOS_PYTHON_INSTALL_DIR}/siconos/mechanics"
+# #   )
+
 create_pybind11_module(
-  MODULE_NAME pymechanics 
-  SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/mechanics_pybind11.cpp
+  MODULE_NAME pycollision 
+  SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/collision/collision_pybind11.cpp
   DEPENDENCIES kernel mechanics
+  PARENT_NAME mechanics/collision
 )
-
-target_include_directories(pymechanics PRIVATE ${CMAKE_SOURCE_DIR}/mechanics/src/collision/bullet)
-target_include_directories(pymechanics PRIVATE ${CMAKE_SOURCE_DIR}/mechanics/src/collision/native/bodies)
-target_include_directories(pymechanics PRIVATE ${CMAKE_SOURCE_DIR}/mechanics/src/collision/native)
-target_include_directories(pymechanics PRIVATE ${CMAKE_SOURCE_DIR}/mechanics/src/collision)
-target_include_directories(pymechanics PRIVATE ${CMAKE_SOURCE_DIR}/numerics/src/tools)
-
+set_target_properties(pycollision PROPERTIES OUTPUT_NAME "_collision")
 install(TARGETS
-pymechanics
+pycollision
   COMPONENT python
-  LIBRARY DESTINATION "${SICONOS_PYTHON_INSTALL_DIR}/siconos/mechanics"
+  LIBRARY DESTINATION "${SICONOS_PYTHON_INSTALL_DIR}/siconos/mechanics/collision"
   )
 
-# Installation des fichiers Python supplémentaires
-install(FILES
-  ${CMAKE_SOURCE_DIR}/mechanics/swig/mechanics/collision/tools.py
-  ${CMAKE_SOURCE_DIR}/io/swig/io/mechanics_run.py
-  ${CMAKE_SOURCE_DIR}/io/swig/io/mechanics_hdf5.py
-  ${CMAKE_SOURCE_DIR}/mechanics/python/__init__.py
-  DESTINATION "${SICONOS_PYTHON_INSTALL_DIR}/siconos/mechanics")
+
+if(WITH_BULLET)
+  create_pybind11_module(
+    MODULE_NAME siconos_bullet 
+    SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/collision/bullet/collision_bullet_pybind11.cpp
+    DEPENDENCIES kernel mechanics
+    PARENT_NAME mechanics/collision/bullet
+  )
+  set_target_properties(siconos_bullet PROPERTIES OUTPUT_NAME "_bullet")
+  install(TARGETS
+    siconos_bullet
+    COMPONENT python
+    LIBRARY DESTINATION "${SICONOS_PYTHON_INSTALL_DIR}/siconos/mechanics/collision/bullet"
+    )
+endif()
+
+  
+
+target_include_directories(pycollision PRIVATE ${CMAKE_SOURCE_DIR}/mechanics/src/collision/bullet)
+target_include_directories(pycollision PRIVATE ${CMAKE_SOURCE_DIR}/mechanics/src/collision/native/bodies)
+target_include_directories(pycollision PRIVATE ${CMAKE_SOURCE_DIR}/mechanics/src/collision/native)
+target_include_directories(pycollision PRIVATE ${CMAKE_SOURCE_DIR}/mechanics/src/collision)
+target_include_directories(pycollision PRIVATE ${CMAKE_SOURCE_DIR}/numerics/src/tools)
+
+collect_files(VAR pyfiles DIRS ${CMAKE_CURRENT_SOURCE_DIR} EXTS py RECURSIVE)
+
+foreach(pyfile IN LISTS pyfiles)
+  configure_file(${pyfile} ${SICONOS_PB11_BINARY_DIR}/siconos/mechanics/${pyfile} @ONLY)
+endforeach()
+
+
+
+
+if(WITH_TESTING)
+  build_python_tests()
+endif()

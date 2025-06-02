@@ -74,7 +74,6 @@ static BounceResult bounceTest(std::string moving, std::string ground,
   // -- Model --
   auto nsds = std::make_shared<siconos::modeling::NonSmoothDynamicalSystem>(t0, T);
 
-
   siconos::algebra::SiconosVector q0{3};
   siconos::algebra::SiconosVector v0{3};
   q0.setZero();
@@ -91,7 +90,7 @@ static BounceResult bounceTest(std::string moving, std::string ground,
 
   // Set up a Siconos Mechanics environment:
   // A RigidBody2dDS with a contactor consisting of a single disk.
-  siconos::algebra::SiconosMatrix mass{3,3};
+  siconos::algebra::SiconosMatrix mass{3, 3};
   mass(0, 0) = params.mass;
   mass(1, 1) = params.mass;
   mass(2, 2) = params.mass;
@@ -133,29 +132,30 @@ static BounceResult bounceTest(std::string moving, std::string ground,
     auto floordisk = std::make_shared<siconos::collision::SiconosDisk>(params.size);
     floordisk->setInsideMargin(params.insideMargin);
     floordisk->setOutsideMargin(params.outsideMargin);
-    auto pos = std::make_shared<siconos::algebra::SiconosVector>(7);
-    pos->setZero();
-    (*pos)(1) = -2.0;  //-params.size/2;
-
-    (*pos)(3) = 1.0;  // unit quaternion
+    siconos::algebra::SiconosVector pos{7};
+    pos.setZero();
+    pos(1) = -2.0;  //-params.size/2;
+    pos(3) = 1.0;   // unit quaternion
     static_contactors->append(
         std::make_shared<siconos::collision::SiconosContactor>(floordisk, pos));
   } else if (ground == "box") {
     auto floorbox = std::make_shared<siconos::collision::SiconosBox2d>(100, 1.);
     floorbox->setInsideMargin(params.insideMargin);
     floorbox->setOutsideMargin(params.outsideMargin);
-    auto pos = std::make_shared<siconos::algebra::SiconosVector>(7);
-    (*pos)(1) = -2.0;  //-params.size/2;
-    (*pos)(3) = 1.0;
+    siconos::algebra::SiconosVector pos{7};
+    pos.setZero();
+    pos(1) = -2.0;  //-params.size/2;
+    pos(3) = 1.0;
     static_contactors->append(
         std::make_shared<siconos::collision::SiconosContactor>(floorbox, pos));
   } else if (ground == "sphere") {
     auto floorsphere = std::make_shared<siconos::collision::SiconosSphere>(1.0);
     floorsphere->setInsideMargin(params.insideMargin);
     floorsphere->setOutsideMargin(params.outsideMargin);
-    auto pos = std::make_shared<siconos::algebra::SiconosVector>(7);
-    (*pos)(1) = -1.0 - params.size / 2;
-    (*pos)(3) = 1.0;
+    siconos::algebra::SiconosVector pos{7};
+    pos.setZero();
+    pos(1) = -1.0 - params.size / 2;
+    pos(3) = 1.0;
     static_contactors->append(
         std::make_shared<siconos::collision::SiconosContactor>(floorsphere, pos));
   }

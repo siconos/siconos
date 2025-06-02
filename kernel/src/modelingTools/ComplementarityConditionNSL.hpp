@@ -32,26 +32,26 @@ class ComplementarityConditionNSL : public NonSmoothLaw {
 
   /** default constructor
    */
-  ComplementarityConditionNSL(){};
+  ComplementarityConditionNSL() {};
 
  public:
   /** basic constructor
    *
    *  \param size of the non smooth law
    */
-  ComplementarityConditionNSL(unsigned int size) : NonSmoothLaw(size){};
+  ComplementarityConditionNSL(unsigned int size) : NonSmoothLaw(size) {};
 
   /** Destructor */
   ~ComplementarityConditionNSL() noexcept = default;
 
   /** print the data to the screen
    */
-  inline void display() const override{};
+  inline void display() const override {};
 
-  void accept(siconos::internal::SiconosVisitor& tourist) const override
-  {
+  virtual void accept(nonsmooth_laws::Visitor &tourist) const override {
     tourist.visit(*this);
   }
+
   Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
 };
 }  // namespace siconos::modeling

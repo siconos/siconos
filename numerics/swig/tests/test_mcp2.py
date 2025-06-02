@@ -31,7 +31,7 @@ def test_new():
     z = np.array([0.0, 0.0])
     w = np.array([0.0, 0.0])
 
-    SO = sn.SolverOptions(sn.SICONOS_MCP_NEWTON_FB_FBLSA)
+    SO = sn.SolverOptions(sn.solver_ids.SICONOS_MCP_NEWTON_FB_FBLSA)
     info = sn.mcp_newton_FB_FBLSA(mcp, z, w, SO)
     print("z = ", z)
     print("w = ", w)
@@ -44,7 +44,7 @@ def test_mcp_newton_FB_FBLSA():
     z = np.array([0.0, 0.0])
     w = np.array([0.0, 0.0])
 
-    SO = sn.SolverOptions(sn.SICONOS_MCP_NEWTON_FB_FBLSA)
+    SO = sn.SolverOptions(sn.solver_ids.SICONOS_MCP_NEWTON_FB_FBLSA)
     info = sn.mcp_newton_FB_FBLSA(mcp, z, w, SO)
     print("z = ", z)
     print("w = ", w)
@@ -57,7 +57,7 @@ def test_mcp_newton_min_FBLSA():
     z = np.array([0.0, 0.0])
     w = np.array([0.0, 0.0])
 
-    SO = sn.SolverOptions(sn.SICONOS_MCP_NEWTON_MIN_FBLSA)
+    SO = sn.SolverOptions(sn.solver_ids.SICONOS_MCP_NEWTON_MIN_FBLSA)
     info = sn.mcp_newton_min_FBLSA(mcp, z, w, SO)
     print("z = ", z)
     print("w = ", w)
@@ -99,7 +99,7 @@ def test_mcp_newton_FB_FBLSA_2():
     mcp = sn.MCP(n - 5, 5, mcp_function_2, mcp_Nablafunction_2)
     z = np.zeros(n)
     w = np.zeros(n)
-    SO = sn.SolverOptions(sn.SICONOS_MCP_NEWTON_FB_FBLSA)
+    SO = sn.SolverOptions(sn.solver_ids.SICONOS_MCP_NEWTON_FB_FBLSA)
     info = sn.mcp_newton_FB_FBLSA(mcp, z, w, SO)
     print("z = ", z)
     print("w = ", w)
@@ -112,10 +112,10 @@ def test_mcp_newton_min_FBLSA_2():
     mcp = sn.MCP(n - 5, 5, mcp_function_2, mcp_Nablafunction_2)
     z = np.zeros(n)
     w = np.zeros(n)
-    options = sn.SolverOptions(sn.SICONOS_MCP_NEWTON_MIN_FBLSA)
+    options = sn.SolverOptions(sn.solver_ids.SICONOS_MCP_NEWTON_MIN_FBLSA)
     options.iparam[
-        sn.SICONOS_IPARAM_STOPPING_CRITERION
-    ] = sn.SICONOS_STOPPING_CRITERION_RESIDU
+        sn.params.SICONOS_IPARAM_STOPPING_CRITERION
+    ] = sn.params.SICONOS_STOPPING_CRITERION_RESIDU
 
     sn.solver_options_print(options)
 

@@ -142,24 +142,25 @@ static BounceResult bounceTest(std::string moving, std::string ground,
     auto plane = std::make_shared<siconos::collision::SiconosPlane>();
     plane->setInsideMargin(params.insideMargin);
     plane->setOutsideMargin(params.outsideMargin);
-    static_contactors->append(
-        std::make_shared<siconos::collision::SiconosContactor>(plane));
+    static_contactors->append(std::make_shared<siconos::collision::SiconosContactor>(plane));
   } else if (ground == "box") {
     auto floorbox = std::make_shared<siconos::collision::SiconosBox>(100, 100, 100);
     floorbox->setInsideMargin(params.insideMargin);
     floorbox->setOutsideMargin(params.outsideMargin);
-    auto pos = std::make_shared<siconos::algebra::SiconosVector>(7);
-    (*pos)(2) = -50 - params.size / 2;
-    (*pos)(3) = 1.0;
+    siconos::algebra::SiconosVector pos{7};
+    pos.setZero();
+    pos(2) = -50 - params.size / 2;
+    pos(3) = 1.0;
     static_contactors->append(
         std::make_shared<siconos::collision::SiconosContactor>(floorbox, pos));
   } else if (ground == "sphere") {
     auto floorsphere = std::make_shared<siconos::collision::SiconosSphere>(1.0);
     floorsphere->setInsideMargin(params.insideMargin);
     floorsphere->setOutsideMargin(params.outsideMargin);
-    auto pos = std::make_shared<siconos::algebra::SiconosVector>(7);
-    (*pos)(2) = -1 - params.size / 2;
-    (*pos)(3) = 1.0;
+    siconos::algebra::SiconosVector pos{7};
+    pos.setZero();
+    pos(2) = -1 - params.size / 2;
+    pos(3) = 1.0;
     static_contactors->append(
         std::make_shared<siconos::collision::SiconosContactor>(floorsphere, pos));
   }

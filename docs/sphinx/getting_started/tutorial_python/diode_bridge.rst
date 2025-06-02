@@ -418,7 +418,7 @@ To each formulation, one must associate a solver, picked from the list given in 
 
   import siconos.numerics as sn
   #  Non smooth problem
-  osnspb = sk.LCP(sn.SICONOS_LCP_NSQP)
+  osnspb = sk.LCP(sn.solver_ids.SICONOS_LCP_NSQP)
 
 Notice that solvers come from siconos numerics and are identified thanks to an id. The connection between ids and solvers is given in :ref:`lcp_solvers`.
   

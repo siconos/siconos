@@ -115,7 +115,7 @@ class MechanicsIO {
       \return a matrix where the columns are id, normal contact work, tangent contact work,
       friction dissipation, contact status
   */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> contactContactWork(
+ std::optional<siconos::algebra::SiconosMatrix> contactContactWork(
       const siconos::modeling::NonSmoothDynamicalSystem& nsds, unsigned int index_set = 1,
       double omega = 0.5, double tol = 1e-08) const;
 

@@ -22,8 +22,10 @@ create_pybind11_module(
   MODULE_NAME pynumerics 
   SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/numerics_pybind11.cpp
   DEPENDENCIES kernel numerics
+  PARENT_NAME numerics
 )
 
+set_target_properties(pynumerics PROPERTIES OUTPUT_NAME "_numerics")
 
 install(TARGETS
 pynumerics
@@ -31,7 +33,14 @@ pynumerics
   LIBRARY DESTINATION "${SICONOS_PYTHON_INSTALL_DIR}/siconos/numerics"
   )
 
-  # Installation des fichiers Python supplémentaires
-install(FILES
-${CMAKE_SOURCE_DIR}/numerics/python/__init__.py
-DESTINATION "${SICONOS_PYTHON_INSTALL_DIR}/siconos/numerics")
+
+collect_files(VAR pyfiles DIRS ${CMAKE_CURRENT_SOURCE_DIR} EXTS py RECURSIVE)
+
+foreach(pyfile IN LISTS pyfiles)
+  configure_file(${pyfile} ${SICONOS_PB11_BINARY_DIR}/siconos/numerics/${pyfile} @ONLY)
+endforeach()
+
+
+if(WITH_TESTING)
+  build_python_tests()
+endif()

@@ -29,7 +29,6 @@
 #include "SiconosMatrix.hpp"
 #include "SiconosMatrixVectorOp.hpp"  // mat-vec prod
 #include "SiconosVector.hpp"
-#include "SiconosVisitor.hpp"
 #include "Simulation.hpp"
 #include "Tools.hpp"  // For enum_to_string
 // #define DEBUG_BEGIN_END_ONLY
@@ -45,7 +44,7 @@ siconos::integrators::D1MinusLinearOSI::_NSLEffectOnFreeOutput::_NSLEffectOnFree
     : _osnsp(p), _inter(inter), _interProp(interProp) {};
 
 void siconos::integrators::D1MinusLinearOSI::_NSLEffectOnFreeOutput::visit(
-    const siconos::modeling::NewtonImpactNSL& nslaw) const {
+    const siconos::modeling::NewtonImpactNSL& nslaw) {
   double e = nslaw.e();
   std::size_t nsl_size = _inter->nonSmoothLaw()->size();
   std::vector<std::size_t> subCoord = {0, nsl_size, 0, nsl_size};

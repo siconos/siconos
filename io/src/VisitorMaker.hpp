@@ -28,42 +28,8 @@
 #include <boost/mpl/vector.hpp>
 #include <boost/type_traits.hpp>
 
-/* With visitors on base classes, matches of derived classes is possible
-   in a templated visitor operator, example:
+#include "SiconosConfig.h"
 
-struct GetVelocity : public SiconosVisitor
-{
-
-std::shared_ptr<SiconosVector> result;
-
-  template<typename T>
-  void operator()(const T& ds)
-  {
-    result = ds.velocity();
-  }
-};
-
-
-Visitor < Classes < LagrangianDS, NewtonEulerDS >,
-          GetVelocity >::Make getVelocity;
-
-auto q = std::make_shared<SiconosVector>(3);
-auto v = std::make_shared<SiconosVector>(3);
-
-  (*q)(0) = 0.;
-  (*q)(1) = 1.;
-  (*q)(2) = 1.;
-
-  (*v)(0) = 0;
-  (*v)(1) = 0;
-  (*v)(2) = 10.;
-
-auto ds = std::make_shared<Disk>(1, 1, q, v);
-
-ds->accept(getVelocity)->display();
-
-
-*/
 namespace siconos::modeling {
 class DynamicalSystem;
 class LagrangianDS;
@@ -86,7 +52,11 @@ class Contact2dR;
 class Contact2d3DR;
 class RigidBodyDS;
 class RigidBody2dDS;
-
+#ifdef SICONOS_HAS_BULLET
+namespace bullet {
+class BulletR;
+}
+#endif
 namespace native::bodies {
 class Disk;
 class Circle;
@@ -159,6 +129,44 @@ struct GlobalDSVisitor {
                                                           T>>>>>>>::Action;
 };
 
+#ifdef SICONOS_HAS_BULLET
+
+template <typename T>
+struct GlobalRelationVisitor {
+  using Make = typename VisitMaker<
+      siconos::modeling::LagrangianR,
+      VisitMaker<
+          siconos::modeling::Lagrangian2d2DR,
+          VisitMaker<
+              siconos::modeling::Lagrangian2d3DR,
+              VisitMaker<
+                  siconos::modeling::NewtonEulerR,
+                  VisitMaker<
+                      siconos::modeling::NewtonEuler1DR,
+                      VisitMaker<
+                          siconos::modeling::NewtonEuler3DR,
+                          VisitMaker<
+                              siconos::modeling::NewtonEuler5DR,
+                              VisitMaker<
+                                  siconos::collision::ContactR,
+                                  VisitMaker<
+                                      siconos::collision::Contact5DR,
+                                      VisitMaker<
+                                          siconos::collision::Contact2dR,
+                                          VisitMaker<
+                                              siconos::collision::Contact2d3DR,
+                                              VisitMaker<
+                                                  siconos::collision::bullet::BulletR,
+                                                  VisitMaker<
+                                                      siconos::joints::PivotJointR,
+                                                      VisitMaker<
+                                                          siconos::joints::KneeJointR,
+                                                          VisitMaker<
+                                                              siconos::joints::PrismaticJointR,
+                                                              T>>>>>>>>>>>>>>>::Action;
+};
+
+#else
 template <typename T>
 struct GlobalRelationVisitor {
   using Make = typename VisitMaker<
@@ -191,6 +199,8 @@ struct GlobalRelationVisitor {
                                                                         T>>>>>>>>>>>>>>::
       Action;
 };
+
+#endif
 
 template <typename... Ts>
 struct Classes {
