@@ -50,6 +50,7 @@ endif()
 # - add extra mechanics sources, depending on opencascade, to the build process
 if(WITH_OpenCASCADE)
   list(APPEND ${COMPONENT}_DIRS src/occ)
+
 endif()
 
 # -- Documentation --
@@ -87,6 +88,8 @@ include(bullet_setup)
 # -- Open Cascade --
 if(WITH_OpenCASCADE)
   include(occ_setup)
+  set(SICONOS_HAS_MECHANICS_OCC TRUE CACHE INTERNAL "True if OpenCASCADE API has been found and is activated for mechanics.)")
+
   # Add opencascade headers and libs to components build
   target_link_libraries(${COMPONENT} PUBLIC $<BUILD_INTERFACE:OpenCASCADE::OpenCASCADE>)
   target_link_libraries(${COMPONENT} PUBLIC $<INSTALL_INTERFACE:OpenCASCADE::OpenCASCADE>)
@@ -94,9 +97,6 @@ endif()
 
 
 # --- python bindings ---
-if(WITH_${COMPONENT}_PYTHON_WRAPPER)
-  add_subdirectory(swig)
-endif()
 if(WITH_PYB11_WRAPPER)
   add_subdirectory(python)
 endif()

@@ -70,8 +70,8 @@ class FirstOrderLinearTIR : public FirstOrderR {
    *  \param C matrix coeff C
    *  \param B matrix coeff B
    */
-  FirstOrderLinearTIR(Eigen::Ref<siconos::algebra::SiconosMatrix> C,
-                      Eigen::Ref<siconos::algebra::SiconosMatrix> B);
+  FirstOrderLinearTIR(Eigen::Ref<siconos::algebra::SiconosDenseMatrix> C,
+                      Eigen::Ref<siconos::algebra::SiconosDenseMatrix> B);
 
   /** destructor */
   virtual ~FirstOrderLinearTIR() noexcept = default;
@@ -84,7 +84,7 @@ class FirstOrderLinearTIR : public FirstOrderR {
    *  \param newValue B matrix
    *
    */
-  void setConstantB(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+  void setConstantB(Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue);
 
   /** \return a read-only view on C(t) matrix */
   inline auto C() const { return jacobianhOver_state(); }
@@ -94,7 +94,7 @@ class FirstOrderLinearTIR : public FirstOrderR {
    *  \param newValue C matrix
    *
    */
-  void setConstantC(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+  void setConstantC(Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue);
 
   /** \return a read-only view on D(t) matrix */
   inline auto D() const { return jacobianhOver_lambda(); }
@@ -104,7 +104,7 @@ class FirstOrderLinearTIR : public FirstOrderR {
    *  \param newValue D matrix
    *
    */
-  void setConstantD(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+  void setConstantD(Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue);
 
   /** \return  a read-only view on e(t) */
   inline auto eVector() const {

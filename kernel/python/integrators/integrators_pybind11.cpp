@@ -1,9 +1,11 @@
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+
 #include <memory>
 
 #include "EulerMoreauOSI.hpp"
+#include "MoreauJeanDirectProjectionOSI.hpp"
 #include "MoreauJeanGOSI.hpp"
 #include "MoreauJeanOSI.hpp"
 
@@ -70,9 +72,8 @@ PYBIND11_MODULE(integrators, m) {
              siconos::integrators::OneStepIntegrator>(m, "MoreauJeanOSI")
       .def(py::init<double, double>(), py::arg("theta") = 0.5,
            py::arg("gamma") = std::numeric_limits<double>::quiet_NaN())
-
-      // .def("tonche_mass", &siconos::integrators::MoreauJeanOSI::tonch_mass)
-
+      .def("setConstraintActivationThreshold",
+           &siconos::integrators::MoreauJeanOSI::setConstraintActivationThreshold)
       .def("__repr__", [](const siconos::integrators::MoreauJeanOSI &a) {
         a.display();
         return "\n";
@@ -88,4 +89,11 @@ PYBIND11_MODULE(integrators, m) {
              std::shared_ptr<siconos::integrators::EulerMoreauOSI>,
              siconos::integrators::OneStepIntegrator>(m, "EulerMoreauOSI")
       .def(py::init<double>());
+
+  py::class_<siconos::integrators::MoreauJeanDirectProjectionOSI,
+             std::shared_ptr<siconos::integrators::MoreauJeanDirectProjectionOSI>,
+             siconos::integrators::MoreauJeanOSI>(m, "MoreauJeanDirectProjectionOSI")
+      .def(py::init<double, double>(), py::arg("theta") = 0.5,
+           py::arg("gamma") = std::numeric_limits<double>::quiet_NaN())
+      .def(py::init<double>(), py::arg("theta"));
 }

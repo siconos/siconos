@@ -143,7 +143,7 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
   /**
       Copy of M Matrix, LU-factorized, used to solve systems like Mx = b with LU-factorization.
       (Warning: may not exist, used if we need to avoid factorization in place of M) */
-  std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>> LU_M_{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosDenseLUMatrix> LU_M_{nullptr};
 
   bool hasLU_M_{false};
 
@@ -195,7 +195,7 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
    *
    *  \param newValue MMatrix matrix
    */
-  void setConstantMMatrix(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+  void setConstantMMatrix(Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue);
 
   /** \return True if matrix M(t) has been set (i.e. different from identity) */
   bool hasMMatrix() const { return hasMMatrix_; }
@@ -255,7 +255,7 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
    *  \param newValue jacobianfOver_x matrix
    *
    */
-  void setConstantJacobianfOver_x(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+  void setConstantJacobianfOver_x(Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue);
 
   /** \return True if \f$ \nabla_xf(x,t) \f$ matrix has been set */
   bool hasJacobianfOver_x() const { return hasJacobianfOver_x_; }

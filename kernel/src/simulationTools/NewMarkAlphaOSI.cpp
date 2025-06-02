@@ -25,10 +25,10 @@
 #include "NewtonEulerR.hpp"
 #include "NonSmoothLaw.hpp"
 #include "OneStepNSProblem.hpp"
+#include "SiconosAlgebraAddons.hpp"
 #include "SiconosConst.hpp"  // For MACHINE_PREC
 #include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
 #include "Simulation.hpp"
 #include "Tools.hpp"

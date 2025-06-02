@@ -39,30 +39,18 @@ class PrismaticJointR : public NewtonEulerJointR {
  protected:
   ACCEPT_SERIALIZATION(PrismaticJointR);
 
-  /** Axis of the prismatic point in the q1 frame of reference
-   */
-  std::shared_ptr<siconos::algebra::SiconosVector3> _axis0{nullptr};
-
-  /** _V1 is an unit vector that is orthogonal to the prismatic axis _axis0.
-   * It forms with _V2 and _axis0 a base such that (_axis0,_V1,_v2) is an orthogonal
+  /** axis1_ is an unit vector that is orthogonal to the prismatic axis axes_[0].
+   * It forms with axis2_ and axes_[0] a base such that (axes_[0],axis1_,_v2) is an orthogonal
    * frame
    */
-  std::shared_ptr<siconos::algebra::SiconosVector3> _V1{nullptr};
+  siconos::algebra::SiconosVector3 axis1_;
 
-  /** _V2 is an unit vector that is orthogonal to the prismatic axis _axis0.
-   * It forms with _V2 and _axis0 a base such that (_axis0,_V1,_v2) is an orthogonal
+  /** axis2_ is an unit vector that is orthogonal to the prismatic axis axes_[0].
+   * It forms with axis2_ and axes_[0] a base such that (axes_[0],axis1_,_v2) is an orthogonal
    * frame
    */
-  std::shared_ptr<siconos::algebra::SiconosVector3> _V2{nullptr};
+  siconos::algebra::SiconosVector3 axis2_;
 
-  /** Convenient storage of the components of _V1 and _V2
-   */
-  double _V1x{0.};
-  double _V1y{0.};
-  double _V1z{0.};
-  double _V2x{0.};
-  double _V2y{0.};
-  double _V2z{0.};
 
   double _G10G20d1x{0.};
   double _G10G20d1y{0.};
@@ -82,6 +70,8 @@ class PrismaticJointR : public NewtonEulerJointR {
   virtual void computeH_NE_(double time, siconos::modeling::Interaction& inter,
                             const siconos::algebra::BlockVector& q0) override;
 
+  // void computeOrthonormalBaseFromAxis();
+
  public:
   /** Constructor based on one or two dynamical systems and an axis.
    *
@@ -95,6 +85,9 @@ class PrismaticJointR : public NewtonEulerJointR {
   PrismaticJointR(const Eigen::Ref<siconos::algebra::SiconosVector3>& axis, bool absoluteRef,
                   std::shared_ptr<siconos::modeling::NewtonEulerDS> d1 = nullptr,
                   std::shared_ptr<siconos::modeling::NewtonEulerDS> d2 = nullptr);
+
+  /** Default constructor */
+  PrismaticJointR();
 
   /** destructor */
   virtual ~PrismaticJointR() noexcept = default;
@@ -128,8 +121,6 @@ class PrismaticJointR : public NewtonEulerJointR {
                                                      bool absoluteRef = true) override;
 
   void displayInitialPosition();
-
-  void computeV1V2FromAxis();
 
   /**
        to compute the output y = h(q) of the Relation

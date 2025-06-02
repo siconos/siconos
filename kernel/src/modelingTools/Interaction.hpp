@@ -28,7 +28,6 @@
 #include <memory>
 #include <vector>
 
-#include "BlockVector.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosSerialization.hpp"
 #include "SiconosVector.hpp"
@@ -38,7 +37,7 @@ class SiconosMemory;
 // class SiconosVector;
 // class SiconosMatrix;
 // class SiconosMatrix;
-// class BlockVector;
+class BlockVector;
 }  // namespace siconos::algebra
 
 namespace siconos::modeling {

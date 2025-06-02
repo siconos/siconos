@@ -46,7 +46,6 @@
 #include "DynamicalSystem.hpp"
 #include "FremondImpactFrictionNSL.hpp"
 #include "Interaction.hpp"
-#include "KneeJointR.hpp"
 #include "Lagrangian2d2DR.hpp"
 #include "Lagrangian2d3DR.hpp"
 #include "LagrangianDS.hpp"
@@ -64,8 +63,8 @@
 #include "Question.hpp"
 #include "RigidBody2dDS.hpp"
 #include "RigidBodyDS.hpp"
+#include "SiconosJoints.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
 #include "SimulationGraphs.hpp"
 #include "StaticBody.hpp"
@@ -105,6 +104,8 @@ struct siconos::io::GetVelocity : public siconos::modeling::dynamical_systems::V
 };
 
 struct siconos::io::ForMu : public siconos::modeling::nonsmooth_laws::Question<double> {
+  using siconos::modeling::nonsmooth_laws::Visitor::visit;
+
   void visit(const siconos::modeling::NewtonImpactFrictionNSL& nsl) override {
     answer = nsl.mu();
   }
@@ -118,6 +119,8 @@ struct siconos::io::ForMu : public siconos::modeling::nonsmooth_laws::Question<d
 };
 
 struct siconos::io::ForE : public siconos::modeling::nonsmooth_laws::Question<double> {
+  using siconos::modeling::nonsmooth_laws::Visitor::visit;
+
   void visit(const siconos::modeling::NewtonImpactFrictionNSL& nsl) override {
     answer = nsl.en();
   }
@@ -154,7 +157,7 @@ void siconos::io::ContactPointVisitor::operator()(
   auto id = inter->number();
   auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
   siconos::algebra::SiconosVector cf{rel.H_NE_prod_T().cols()};
-  siconos::algebra::transposeMatrixVector_prod(*inter->lambda(1), rel.H_NE_prod_T(), cf);
+  cf.noalias() = rel.H_NE_prod_T().transpose() * *inter->lambda(1);
   answer.resize(23);
 
   answer(0) = mu;
@@ -196,7 +199,7 @@ void siconos::io::ContactPointVisitor::operator()(
   auto id = inter->number();
   auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
   siconos::algebra::SiconosVector cf{rel.H_NE_prod_T().cols()};
-  siconos::algebra::transposeMatrixVector_prod(*inter->lambda(1), rel.H_NE_prod_T(), cf);
+  cf.noalias() = rel.H_NE_prod_T().transpose() * *inter->lambda(1);
   answer.resize(23);
 
   answer(0) = mu;
@@ -250,7 +253,7 @@ void siconos::io::ContactPointVisitor::operator()(
   auto id = inter->number();
   auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
   siconos::algebra::SiconosVector cf{rel.jacobianhOver_q().cols()};
-  siconos::algebra::transposeMatrixVector_prod(*inter->lambda(1), rel.jacobianhOver_q(), cf);
+  cf.noalias() = rel.jacobianhOver_q().transpose() * *inter->lambda(1);
   answer.resize(16);
 
   answer(0) = mu;
@@ -315,7 +318,7 @@ void siconos::io::ContactPointVisitor::operator()(
   auto id = inter->number();
   auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
   siconos::algebra::SiconosVector cf{rel.jacobianhOver_q().cols()};
-  siconos::algebra::transposeMatrixVector_prod(*inter->lambda(1), rel.jacobianhOver_q(), cf);
+  cf.noalias() = rel.jacobianhOver_q().transpose() * *inter->lambda(1);
   answer.resize(16);
 
   answer(0) = mu;
@@ -370,7 +373,7 @@ void siconos::io::ContactPointVisitor::operator()(
   auto id = inter->number();
   auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
   siconos::algebra::SiconosVector cf{rel.jacobianhOver_q().cols()};
-  siconos::algebra::transposeMatrixVector_prod(*inter->lambda(1), rel.jacobianhOver_q(), cf);
+  cf.noalias() = rel.jacobianhOver_q().transpose() * *inter->lambda(1);
   answer.resize(16);
 
   answer(0) = mu;
@@ -410,7 +413,7 @@ void siconos::io::ContactPointVisitor::operator()(
   auto id = inter->number();
   auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
   siconos::algebra::SiconosVector cf{rel.jacobianhOver_q().cols()};
-  siconos::algebra::transposeMatrixVector_prod(*inter->lambda(1), rel.jacobianhOver_q(), cf);
+  cf.noalias() = rel.jacobianhOver_q().transpose() * *inter->lambda(1);
 
   answer.resize(16);
 
@@ -451,7 +454,7 @@ void siconos::io::ContactPointVisitor::operator()(
   auto id = inter->number();
   auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
   siconos::algebra::SiconosVector cf{rel.jacobianhOver_q().cols()};
-  siconos::algebra::transposeMatrixVector_prod(*inter->lambda(1), rel.jacobianhOver_q(), cf);
+  cf.noalias() = rel.jacobianhOver_q().transpose() * *inter->lambda(1);
 
   answer.resize(16);
 
@@ -502,34 +505,33 @@ void siconos::io::ContactPointDomainVisitor::operator()(
   answer(1) = inter->number();
 }
 
-std::shared_ptr<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::domains(
+siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::domains(
     const siconos::modeling::NonSmoothDynamicalSystem& nsds) const {
-  if (nsds.topology()->numberOfIndexSet() > 0) {
-    auto& graph = *nsds.topology()->indexSet(1);
-    auto result =
-        std::make_shared<siconos::algebra::SiconosMatrix>(graph.vertices_number(), 2);
-    siconos::graphs::InteractionsGraph::VIterator vi, viend;
-    unsigned int current_row;
-    for (current_row = 0, std::tie(vi, viend) = graph.vertices(); vi != viend;
-         ++vi, ++current_row) {
-      DEBUG_PRINTF("process interaction : %p\n", &*graph.bundle(*vi));
+  if (nsds.topology()->numberOfIndexSet() < 1)
+    return siconos::algebra::SiconosMatrix{};  // empty matrix
 
-      using DomainInspector = siconos::internal::RelationVisitor<
-          siconos::internal::Classes<
-              siconos::modeling::NewtonEuler1DR, siconos::modeling::NewtonEuler3DR,
-              siconos::joints::PrismaticJointR, siconos::joints::KneeJointR,
-              siconos::joints::PivotJointR>,
-          ContactPointDomainVisitor>::Make;
+  auto& graph = *nsds.topology()->indexSet(1);
+  siconos::algebra::SiconosMatrix result{graph.vertices_number(), 2};
+  siconos::graphs::InteractionsGraph::VIterator vi, viend;
+  unsigned int current_row;
+  for (current_row = 0, std::tie(vi, viend) = graph.vertices(); vi != viend;
+       ++vi, ++current_row) {
+    DEBUG_PRINTF("process interaction : %p\n", &*graph.bundle(*vi));
 
-      DomainInspector inspector;
-      inspector.inter = graph.bundle(*vi);
-      graph.bundle(*vi)->relation()->accept(inspector);
-      const auto& data = inspector.answer;
-      if (data.size() == 2) result->row(current_row) = data;
-    }
-    return result;
+    using DomainInspector = siconos::internal::RelationVisitor<
+        siconos::internal::Classes<siconos::modeling::NewtonEuler1DR,
+                                   siconos::modeling::NewtonEuler3DR,
+                                   siconos::joints::PrismaticJointR,
+                                   siconos::joints::KneeJointR, siconos::joints::PivotJointR>,
+        ContactPointDomainVisitor>::Make;
+
+    DomainInspector inspector;
+    inspector.inter = graph.bundle(*vi);
+    graph.bundle(*vi)->relation()->accept(inspector);
+    const auto& data = inspector.answer;
+    if (data.size() == 2) result.row(current_row) = data;
   }
-  return nullptr;
+  return result;  // RVO
 }
 
 template <typename T, typename G>
@@ -594,59 +596,60 @@ siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::velocities(
   return visitAllVerticesForVector<Getter>(*nsds.topology()->dSG(0));
 }
 
-std::optional<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::contactPoints(
+siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::contactPoints(
     const siconos::modeling::NonSmoothDynamicalSystem& nsds, unsigned int index_set) const {
   siconos::graphs::InteractionsGraph::VIterator vi, viend;
-  if (nsds.topology()->numberOfIndexSet() > 0) {
-    auto& graph = *nsds.topology()->indexSet(index_set);
-    unsigned int current_row;
-    siconos::algebra::SiconosMatrix result{graph.vertices_number(), 25};
+  if (nsds.topology()->numberOfIndexSet() < 1)
+    return siconos::algebra::SiconosMatrix{};  // RVO, 0-sized matrix
 
-    int data_size = 0;
-    for (current_row = 0, std::tie(vi, viend) = graph.vertices(); vi != viend; ++vi) {
-      DEBUG_PRINTF("process interaction : %p\n", &*graph.bundle(*vi));
+  // if (nsds.topology()->numberOfIndexSet() > 0) {
+  auto& graph = *nsds.topology()->indexSet(index_set);
+  unsigned int current_row;
+  siconos::algebra::SiconosMatrix result{graph.vertices_number(), 25};
 
-      /* create a visitor for specified classes */
-      using ContactPointInspector = siconos::internal::RelationVisitor<
-          siconos::internal::Classes<
-              siconos::modeling::NewtonEuler1DR, siconos::modeling::NewtonEuler3DR,
-              siconos::modeling::NewtonEuler5DR, siconos::modeling::Lagrangian2d2DR,
-              siconos::modeling::Lagrangian2d3DR,
-              siconos::collision::native::bodies::CircleCircleR,
-              siconos::collision::native::bodies::DiskDiskR,
-              siconos::collision::native::bodies::DiskPlanR>,
-          ContactPointVisitor>::Make;
+  int data_size = 0;
+  for (current_row = 0, std::tie(vi, viend) = graph.vertices(); vi != viend; ++vi) {
+    DEBUG_PRINTF("process interaction : %p\n", &*graph.bundle(*vi));
 
-      ContactPointInspector inspector;
-      inspector.inter = graph.bundle(*vi);
-      graph.bundle(*vi)->relation()->accept(inspector);
-      siconos::algebra::SiconosVector& data = inspector.answer;
-      data_size = data.size();
+    /* create a visitor for specified classes */
+    using ContactPointInspector = siconos::internal::RelationVisitor<
+        siconos::internal::Classes<
+            siconos::modeling::NewtonEuler1DR, siconos::modeling::NewtonEuler3DR,
+            siconos::modeling::NewtonEuler5DR, siconos::modeling::Lagrangian2d2DR,
+            siconos::modeling::Lagrangian2d3DR,
+            siconos::collision::native::bodies::CircleCircleR,
+            siconos::collision::native::bodies::DiskDiskR,
+            siconos::collision::native::bodies::DiskPlanR>,
+        ContactPointVisitor>::Make;
 
-      if (data_size == 0) {
-        // Nothing is done since the relation does not appear as a relation
-        // related to a contact points (perhaps a joint)
-      } else {
-        // We add at the end the number of ds1 and ds2
-        data.resize(data_size + 2);
-        DEBUG_EXPR(siconos::algebra::print(data););
-        auto& ds1 = *graph.properties(*vi).source;
-        auto& ds2 = *graph.properties(*vi).target;
-        data(data_size) = ds1.number();
-        data(data_size + 1) = ds2.number();
-        DEBUG_EXPR(siconos::algebra::print(data););
-        if (result.cols() != data.size()) {
-          result.resize(graph.vertices_number(), data.size());
-        }
-        result.row(current_row++) = data;
-        data_size += 2;
+    ContactPointInspector inspector;
+    inspector.inter = graph.bundle(*vi);
+    graph.bundle(*vi)->relation()->accept(inspector);
+    siconos::algebra::SiconosVector& data = inspector.answer;
+    data_size = data.size();
+
+    if (data_size == 0) {
+      // Nothing is done since the relation does not appear as a relation
+      // related to a contact points (perhaps a joint)
+    } else {
+      // We add at the end the number of ds1 and ds2
+      data.conservativeResize(data_size + 2);
+      DEBUG_EXPR(siconos::algebra::print(data););
+      auto& ds1 = *graph.properties(*vi).source;
+      auto& ds2 = *graph.properties(*vi).target;
+      data(data_size) = ds1.number();
+      data(data_size + 1) = ds2.number();
+      DEBUG_EXPR(siconos::algebra::print(data););
+      if (result.cols() != data.size()) {
+        result.conservativeResize(graph.vertices_number(), data.size());
       }
+      result.row(current_row++) = data;
+      data_size += 2;
     }
-    result.resize(current_row, data_size);
-    DEBUG_EXPR(siconos::algebra::print(result));
-    return result;
   }
-  return std::nullopt;
+  result.conservativeResize(current_row, data_size);
+  DEBUG_EXPR(siconos::algebra::print(result));
+  return result;  // RVO
 }
 
 /* Get contact informations */
@@ -767,7 +770,7 @@ std::optional<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::contact
       data(2) = ds2.number();
     }
     if (result.cols() != data.size()) {
-      result.resize(graph.vertices_number(), data.size());
+      result.conservativeResize(graph.vertices_number(), data.size());
     }
     result.row(current_row++) = data;
   }
@@ -936,54 +939,53 @@ void siconos::io::ContactContactWorkVisitor::operator()(
   compute_contact_work_and_status(inter, omega, tol, answer);
 }
 
-std::optional<siconos::algebra::SiconosMatrix> siconos::io::MechanicsIO::contactContactWork(
+siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::contactContactWork(
     const siconos::modeling::NonSmoothDynamicalSystem& nsds, unsigned int index_set,
     double omega, double tol) const {
   DEBUG_BEGIN("SiconosMatrix MechanicsIO::contactContactWork");
 
   siconos::graphs::InteractionsGraph::VIterator vi, viend;
-  if (nsds.topology()->numberOfIndexSet() > 0) {
-    auto& graph = *nsds.topology()->indexSet(index_set);
 
-    unsigned int current_row;
-    siconos::algebra::SiconosMatrix result{graph.vertices_number(), 25};
+  if (nsds.topology()->numberOfIndexSet() < 1) return siconos::algebra::SiconosMatrix{};
 
-    int data_size = 0;
-    for (current_row = 0, std::tie(vi, viend) = graph.vertices(); vi != viend; ++vi) {
-      DEBUG_PRINTF("process interaction : %p\n", &*graph.bundle(*vi));
+  auto& graph = *nsds.topology()->indexSet(index_set);
 
-      /* create a visitor for specified classes */
-      using ContactContactWorkInspector = siconos::internal::RelationVisitor<
-          siconos::internal::Classes<
-              siconos::modeling::NewtonEuler3DR, siconos::collision::ContactR,
-              siconos::collision::Contact5DR, siconos::collision::Contact2dR,
-              siconos::collision::Contact2d3DR>,
-          ContactContactWorkVisitor>::Make;
-      ContactContactWorkInspector inspector;
-      inspector.inter = graph.bundle(*vi);
-      inspector.tol = tol;
-      inspector.omega = omega;
-      graph.bundle(*vi)->relation()->accept(inspector);
-      auto& data = inspector.answer;
-      data_size = data.size();
+  unsigned int current_row;
+  siconos::algebra::SiconosMatrix result{graph.vertices_number(), 25};
 
-      if (data_size == 0) {
-        // Nothing is done since the relation does not appear as a relation
-        // related to a contact points (perhaps a joint)
-      } else {
-      }
-      if (result.cols() != data.size()) {
-        result.resize(graph.vertices_number(), data.size());
-      }
-      result.row(current_row++) = data;
+  int data_size = 0;
+  for (current_row = 0, std::tie(vi, viend) = graph.vertices(); vi != viend; ++vi) {
+    DEBUG_PRINTF("process interaction : %p\n", &*graph.bundle(*vi));
+
+    /* create a visitor for specified classes */
+    using ContactContactWorkInspector = siconos::internal::RelationVisitor<
+        siconos::internal::Classes<
+            siconos::modeling::NewtonEuler3DR, siconos::collision::ContactR,
+            siconos::collision::Contact5DR, siconos::collision::Contact2dR,
+            siconos::collision::Contact2d3DR>,
+        ContactContactWorkVisitor>::Make;
+    ContactContactWorkInspector inspector;
+    inspector.inter = graph.bundle(*vi);
+    inspector.tol = tol;
+    inspector.omega = omega;
+    graph.bundle(*vi)->relation()->accept(inspector);
+    auto& data = inspector.answer;
+    data_size = data.size();
+
+    if (data_size == 0) {
+      // Nothing is done since the relation does not appear as a relation
+      // related to a contact points (perhaps a joint)
+    } else {
     }
-    result.resize(current_row, data_size);
-    DEBUG_EXPR(siconos::algebra::print(*result));
-    ;
-    return result;
+    if (result.cols() != data.size()) {
+      result.conservativeResize(graph.vertices_number(), data.size());
+    }
+    result.row(current_row++) = data;
   }
-  DEBUG_END("MechanicsIO::contactContactWork");
+  result.conservativeResize(current_row, data_size);
+  DEBUG_EXPR(siconos::algebra::print(*result));
+  ;
+  return result;  // RVO
 
-  // siconos::algebra::print(*result);
-  return std::nullopt;
+  DEBUG_END("MechanicsIO::contactContactWork");
 }

@@ -197,16 +197,16 @@ class Hem5OSI : public OneStepIntegrator {
   void updateData();
 
   /** fill qWork with a double
-   *  \param sizex int*, size of x array
-   *  \param x double* x:array of double
+   *  \param sizex size of x array
+   *  \param x input array
    */
-  void fillqWork(int* sizex, double* x);
+  void fillqWork(std::size_t sizex, double* x);
 
   /** fill vWork with a double
-   *  \param sizex int*, size of x array
-   *  \param x double* x:array of double
+   *  \param sizex size of x array
+   *  \param x input array
    */
-  void fillvWork(int* sizex, double* x);
+  void fillvWork(std::size_t sizex, double* x);
 
   /** compute rhs(t) for all dynamical systems in the set
    */

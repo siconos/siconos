@@ -22,36 +22,38 @@
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 
-siconos::collision::RigidBody2dDS::RigidBody2dDS(
-    Eigen::Ref<siconos::algebra::SiconosVector> position,
-    Eigen::Ref<siconos::algebra::SiconosVector> velocity,
-    Eigen::Ref<siconos::algebra::SiconosMatrix> mass)
-    : LagrangianLinearTIDS(position, velocity, mass),
-      _contactors(std::make_shared<siconos::collision::SiconosContactorSet>()) {
-  // Check size of positions, velocities and mass matrix
-  if ((position.size() != 3) or (velocity.size() != 3)) {
-    THROW_EXCEPTION(
-        "siconos::modeling::RigidBody2dDS::RigidBody2dDS(...). The size of position and "
-        "velocity must of size 3");
-  }
-  scalarMass_ = mass(0, 0);
-}
-
 // siconos::collision::RigidBody2dDS::RigidBody2dDS(
-//     Eigen::Ref<siconos::algebra::SiconosVector> &position,
-//     Eigen::Ref<siconos::algebra::SiconosVector> &velocity, double mass, double inertia)
-//     : LagrangianLinearTIDS(position, velocity,
-//                            std::make_shared<siconos::algebra::SiconosMatrix>(3, 3)),
-//       scalarMass_(mass),
+//     Eigen::Ref<siconos::algebra::SiconosVector> position,
+//     Eigen::Ref<siconos::algebra::SiconosVector> velocity,
+//     Eigen::Ref<siconos::algebra::SiconosMatrix> mass)
+//     : LagrangianLinearTIDS(position, velocity, mass),
 //       _contactors(std::make_shared<siconos::collision::SiconosContactorSet>()) {
-//   _mass->setValue(0, 0, mass);
-//   _mass->setValue(1, 1, mass);
-//   _mass->setValue(2, 2, inertia);
-
 //   // Check size of positions, velocities and mass matrix
 //   if ((position.size() != 3) or (velocity.size() != 3)) {
 //     THROW_EXCEPTION(
 //         "siconos::modeling::RigidBody2dDS::RigidBody2dDS(...). The size of position and "
 //         "velocity must of size 3");
 //   }
+//   scalarMass_ = mass(0, 0);
 // }
+
+siconos::collision::RigidBody2dDS::RigidBody2dDS(
+    Eigen::Ref<siconos::algebra::SiconosVector> position,
+    Eigen::Ref<siconos::algebra::SiconosVector> velocity, double mass, double inertia)
+    : LagrangianLinearTIDS(position, velocity),
+      scalarMass_(mass),
+      _contactors(std::make_shared<siconos::collision::SiconosContactorSet>()) {
+  assert(position.size() == 3 && velocity.size() == 3);
+  if (!mass_internal_storage_) {
+    mass_internal_storage_ = std::make_unique<std::vector<double>>(ndof_ * ndof_);
+  }
+  mass_view_ = std::make_shared<siconos::algebra::MapType>(mass_internal_storage_->data(),
+                                                           ndof_, ndof_);
+  mass_view_->setZero();
+  hasMass_ = true;
+  hasConstantMass_ = true;
+  computemass_ = nullptr;
+  (*mass_view_)(0, 0) = mass;
+  (*mass_view_)(1, 1) = mass;
+  (*mass_view_)(2, 2) = inertia;
+}

@@ -544,7 +544,7 @@ void NSM_write_in_file(const NumericsSparseMatrix* m, FILE* file) {
 NumericsSparseMatrix* NSM_new_from_file(FILE* file) {
   int info;
   NSM_t _origin = 0;
-  CHECK_IO(fscanf(file, "%d", &_origin), &info);
+  CHECK_IO(fscanf(file, "%d", (int*)&_origin), &info);
   NumericsSparseMatrix* out = NSM_new();
   out->origin = _origin;
 

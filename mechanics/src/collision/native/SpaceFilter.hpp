@@ -142,24 +142,22 @@ class SpaceFilter : public siconos::simulation::InteractionManager {
   // friend struct SpaceFilter::_IsSameSpherePlanR;
   // friend struct SpaceFilter::_DiskDistance;
 
-  SpaceFilter() = delete;  // Do we need a default?
   SpaceFilter(const SpaceFilter&) = delete;
   SpaceFilter(SpaceFilter&&) = delete;
   SpaceFilter operator=(const SpaceFilter&) = delete;
   SpaceFilter operator=(SpaceFilter&&) = delete;
 
  public:
+  /** Default constructor, no plans */
+  SpaceFilter();
+  // Do we need a default? Yes, it seems, for occ derived class AND for mechanics_run
+
   SpaceFilter(unsigned int bboxfactor, unsigned int cellsize,
               std::shared_ptr<siconos::algebra::SiconosMatrix> plans,
               std::shared_ptr<siconos::collision::native::FMatrix> moving_plans);
 
   SpaceFilter(unsigned int bboxfactor, unsigned int cellsize,
               std::shared_ptr<siconos::algebra::SiconosMatrix> plans);
-
-  // SpaceFilter::SpaceFilter()
-  //     : SpaceFilter(0, 0, nullptr, nullptr)
-  // {
-  // }
 
   /** Destructor */
   virtual ~SpaceFilter() noexcept = default;

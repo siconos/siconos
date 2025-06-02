@@ -118,7 +118,7 @@ class SecondOrderDS : public DynamicalSystem {
   unsigned int ndof_{0};
 
   /** inverse or factorization of the mass of the system */
-  std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>> LUMass_{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosLUMatrix> LUMass_{nullptr};
 
   bool hasLUMass_{false};
 

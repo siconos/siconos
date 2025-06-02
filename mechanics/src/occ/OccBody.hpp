@@ -24,6 +24,7 @@
 #define OccBody_hpp
 
 #include <TopoDS_Shape.hxx>
+#include <optional>
 
 #include "NewtonEulerDS.hpp"  // Base class
 #include "OccContactShape.hpp"
@@ -55,8 +56,6 @@ class OccBody : public siconos::modeling::NewtonEulerDS {
   std::shared_ptr<TopoDS_Shape_vector> _shapes{nullptr};
 
  public:
-  // using NewtonEulerDS::NewtonEulerDS;
-
   virtual ~OccBody() noexcept = default;
 
   /** Constructor from a minimum set of data.
@@ -77,10 +76,13 @@ class OccBody : public siconos::modeling::NewtonEulerDS {
       \param orientation relative orientation quaternion w, x, y, z
       \param group contact group default 0
   */
-  void addContactShape(OccContactShapeV& shape,
-                       std::shared_ptr<siconos::algebra::SiconosVector> position = nullptr,
-                       std::shared_ptr<siconos::algebra::SiconosVector> orientation = nullptr,
-                       int group = 0);
+  void addContactShape(
+      OccContactShapeV& shape,
+      std::optional<const Eigen::Ref<const siconos::algebra::SiconosVector>> position =
+          std::nullopt,
+      std::optional<const Eigen::Ref<const siconos::algebra::SiconosVector>> orientation =
+          std::nullopt,
+      int group = 0);
 
   /** Association of a shape without contact.
 
@@ -88,9 +90,12 @@ class OccBody : public siconos::modeling::NewtonEulerDS {
       \param position relative position (x, y, z).
       \param orientation relative orientation quaternion w, x, y, z
   */
-  void addShape(std::shared_ptr<TopoDS_Shape> shape,
-                std::shared_ptr<siconos::algebra::SiconosVector> position = nullptr,
-                std::shared_ptr<siconos::algebra::SiconosVector> orientation = nullptr);
+  void addShape(
+      std::shared_ptr<TopoDS_Shape> shape,
+      std::optional<const Eigen::Ref<const siconos::algebra::SiconosVector>> position =
+          std::nullopt,
+      std::optional<const Eigen::Ref<const siconos::algebra::SiconosVector>> orientation =
+          std::nullopt);
 
   /** Update positions and orientations of contact shapes.
    */

@@ -73,7 +73,7 @@ def test_getMatrix():
 
     assert (sk.getMatrix([[1, 2, 3]]) == np.array([[1, 2, 3]])).all()
 
-    m = sk.SimpleMatrix(1, 3)
+    m = sk.SiconosMatrix(1, 3)
 
     m.setValue(0, 0, 1)
 
@@ -85,13 +85,13 @@ def test_getMatrix():
 
     assert (sk.getMatrix(m) != np.array([[1, 0, 3]])).any()
 
-    m1 = sk.SimpleMatrix(((1, 2, 3), (4, 5, 6)))
-    m2 = sk.SimpleMatrix(np.array([[1, 2, 3], [4, 5, 6]]))
-    assert (sk.getMatrix(m1) == sk.getMatrix(sk.SimpleMatrix(m2))).all()
+    m1 = sk.SiconosMatrix(((1, 2, 3), (4, 5, 6)))
+    m2 = sk.SiconosMatrix(np.array([[1, 2, 3], [4, 5, 6]]))
+    assert (sk.getMatrix(m1) == sk.getMatrix(sk.SiconosMatrix(m2))).all()
 
 
 def test_matrix_bracket_operator():
-    M = sk.SimpleMatrix(10, 10)
+    M = sk.SiconosMatrix(10, 10)
     M.setZero()
     M_nparray = np.zeros((10, 10))
     print(M_nparray)
@@ -120,7 +120,7 @@ def test_matrix_bracket_operator():
         return M[0, 1] == 266.0
 
     try:
-        # Slice indexing for SimpleMatrix is not yet implemented.
+        # Slice indexing for SiconosMatrix is not yet implemented.
         M[0:1] = [0, 2]
     except Exception as e:
         print(e)

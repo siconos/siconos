@@ -26,21 +26,10 @@
 #include "FiniteElement.hpp"
 #include "Material.hpp"
 #include "Mesh.hpp"  // MVertex, MElement ...
+#include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "op3x3.h"  // det3x3
-
-//
-// #include "SiconosException.hpp"
-// #include "Tools.hpp"  // enum_to_string
-// #include "Material.hpp"
-// #include "SiconosException.hpp"
-#include "SiconosMatrixOp.hpp"  // prod ...
-// #include "SiconosMatrixVectorOp.hpp"
-// #include "SiconosVectorOp.hpp"
-// #include "SiconosMatrix.hpp"
-// // #include "SiconosAlgebraProd.hpp"
-// // #include "SimpleMatrixFriends.hpp"
 
 #define DEBUG_STDOUT
 #define DEBUG_NOCOLOR
@@ -413,13 +402,11 @@ void siconos::mechanics::fem::FiniteElementModel::computeElementaryStiffnessMatr
 
     // Compute BT D B
     auto DB = std::make_shared<siconos::algebra::SiconosMatrix>(3, ndof);
-    siconos::algebra::prod(*D, *B, *DB, true);
+    DB->noalias() = *D * *B;
 
     B->transposeInPlace();
-    auto BTDB = std::make_shared<siconos::algebra::SiconosMatrix>(ndof, ndof);
-    siconos::algebra::prod(*B, *DB, *BTDB, true);
-
-    Ke = (twoA / 2.0 * thickness * *BTDB);
+    auto BTDB = *B * *DB;
+    Ke = (twoA / 2.0 * thickness * BTDB);
 
   } else if (_mesh->dim() == 3 and fe.family() == FiniteElementFamily::isoparametric)  // Ugly
   {
@@ -536,14 +523,12 @@ void siconos::mechanics::fem::FiniteElementModel::computeElementaryStiffnessMatr
     *B = 1. / sixV * *B;
 
     // Compte BT D B
-    auto DB = std::make_shared<siconos::algebra::SiconosMatrix>(6, ndof);
-    siconos::algebra::prod(*D, *B, *DB, true);
+    auto DB = *D * *B;
     B->transposeInPlace();
-    auto BTDB = std::make_shared<siconos::algebra::SiconosMatrix>(ndof, ndof);
-    siconos::algebra::prod(*B, *DB, *BTDB, true);
-    DEBUG_EXPR(siconos::algebra::print(*BTDB););
+    auto BTDB = *B * DB;
+    DEBUG_EXPR(siconos::algebra::print(BTDB););
 
-    Ke = sixV / 6.0 * *BTDB;
+    Ke = sixV / 6.0 * BTDB;
   }
 
   DEBUG_EXPR(siconos::algebra::print(Ke););
@@ -637,16 +622,14 @@ void siconos::mechanics::fem::FiniteElementModel::computeElementaryStiffnessMatr
       }
 
       // Compte BT D B
-      auto DB = std::make_shared<siconos::algebra::SiconosMatrix>(3, ndof);
-      siconos::algebra::prod(*D, *B, *DB, true);
+      auto DB = *D * *B;
+
       auto BT = std::make_shared<siconos::algebra::SiconosMatrix>(ndof, 3);
       B->transposeInPlace();
-      auto BTDB = std::make_shared<siconos::algebra::SiconosMatrix>(ndof, ndof);
-      siconos::algebra::prod(*B, *DB, *BTDB, true);
 
+      auto BTDB = *B * DB;
       double coeff = gp_w * detJ * thickness;
-
-      Ke += (coeff * *BTDB);
+      Ke += (coeff * BTDB);
 
       // // check with direct computation (see IFEM Chap 15 Felippa)
       // std::shared_ptr<siconos::algebra::SiconosMatrix> Ke_direct =
@@ -724,18 +707,16 @@ void siconos::mechanics::fem::FiniteElementModel::computeElementaryStiffnessMatr
       }
       DEBUG_EXPR(siconos::algebra::print(*B););
       // Compte BT D B
-      auto DB = std::make_shared<siconos::algebra::SiconosMatrix>(6, ndof);
-      siconos::algebra::prod(*D, *B, *DB, true);
+      auto DB = *D * *B;
       auto BT = std::make_shared<siconos::algebra::SiconosMatrix>(ndof, 6);
       B->transposeInPlace();
-      auto BTDB = std::make_shared<siconos::algebra::SiconosMatrix>(ndof, ndof);
-      siconos::algebra::prod(*B, *DB, *BTDB, true);
-      DEBUG_EXPR(siconos::algebra::print(*BTDB););
+      auto BTDB = *B * DB;
+      DEBUG_EXPR(siconos::algebra::print(BTDB););
 
       double coeff = 0.0;
       coeff = gp_w * detJ / 6.0;  // we divide again by 6.0 since the reference
                                   // element has volume equal to 1/6.0
-      Ke += (coeff * *BTDB);
+      Ke += (coeff * BTDB);
 
       // // check with direct computation (see AFEM Chap 16 Felippa)
       // auto Ke_direct =

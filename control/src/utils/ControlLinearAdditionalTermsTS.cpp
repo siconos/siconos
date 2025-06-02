@@ -18,7 +18,6 @@
 
 #include "ControlLinearAdditionalTermsTS.hpp"
 
-#include "SiconosMatrixVectorOp.hpp"
 
 void siconos::control::ControlLinearAdditionalTermsTS::addSmoothTerms(
     siconos::graphs::DynamicalSystemsGraph& DSG0,
@@ -27,19 +26,18 @@ void siconos::control::ControlLinearAdditionalTermsTS::addSmoothTerms(
   // check whether we have a system with a control input
   if (DSG0.u.hasKey(dsgVD)) {
     assert(DSG0.B.hasKey(dsgVD));
-    siconos::algebra::prod(h, *DSG0.B[dsgVD], *DSG0.u[dsgVD], xfree, false);  // xfree += h*B*u
+    xfree.noalias() += h * *DSG0.B[dsgVD] * *DSG0.u[dsgVD];  // xfree += h*B*u
   }
   // check whether the DynamicalSystem is an Observer
   if (DSG0.e.hasKey(dsgVD)) {
     assert(DSG0.L.hasKey(dsgVD));
-    siconos::algebra::prod(h, *DSG0.L[dsgVD], *DSG0.e[dsgVD], xfree,
-                           false);  // xfree += -h*L*e
+    xfree.noalias() += h * *DSG0.L[dsgVD] * *DSG0.e[dsgVD];  // xfree += -h*L*e
   }
 }
 
 void siconos::control::ControlLinearAdditionalTermsTS::addJacobianRhsContribution(
     siconos::graphs::DynamicalSystemsGraph& DSG0,
     const siconos::graphs::DynamicalSystemsGraph::VDescriptor& dsgVD, const double t,
-    siconos::algebra::SiconosMatrix& jacRhs) {
+    siconos::algebra::SiconosVector& jacRhs) {
   // nothing to be done here
 }

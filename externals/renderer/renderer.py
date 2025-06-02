@@ -1,23 +1,25 @@
-#!/usr/bin/env python
-##Copyright 2011-2014 Thomas Paviot (tpaviot@gmail.com)
-##
-##This file is part of pythonOCC.
-##
-##pythonOCC is free software: you can redistribute it and/or modify
-##it under the terms of the GNU Lesser General Public License as published by
-##the Free Software Foundation, either version 3 of the License, or
-##(at your option) any later version.
-##
-##pythonOCC is distributed in the hope that it will be useful,
-##but WITHOUT ANY WARRANTY; without even the implied warranty of
-##MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-##GNU Lesser General Public License for more details.
-##
-##You should have received a copy of the GNU Lesser General Public License
-##along with pythonOCC.  If not, see <http://www.gnu.org/licenses/>.
-#---------------------Converting interstellar into IOJSON--------------------#
-from __future__ import print_function
-from OCC import STEPControl
+#!/usr/bin/env @Python_EXECUTABLE@
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
+#
+# Copyright 2025 INRIA.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# ignore flake8 warning for line too long, only for this file
+# noqa: E501
+
 import webbrowser
 from OCC.Visualization import Tesselator
 import OCC
@@ -25,43 +27,24 @@ from time import time
 import os
 import tempfile
 
-
-import subprocess
-from OCC import VERSION
-from OCC.gp import gp_Ax1, gp_Pnt, gp_Dir, gp_Trsf, gp_Quaternion,gp_Vec, gp_XYZ
-from OCC.TopLoc import TopLoc_Location
-from OCC.Display.SimpleGui import get_backend,init_display
-from OCC.STEPControl import STEPControl_Reader, STEPControl_Writer, STEPControl_AsIs
-from OCC.Interface import Interface_Static_SetCVal
-from OCC.BRep import BRep_Builder
-from OCC.BRepBuilderAPI import BRepBuilderAPI_Transform
-from OCC.TopoDS import TopoDS_Compound
+from OCC.STEPControl import STEPControl_Reader
 from OCC.IFSelect import IFSelect_RetDone, IFSelect_ItemsByEntity
-import OCC.Graphic3d as Graphic3d
-from OCC.Quantity import Quantity_NOC_DARKVIOLET, Quantity_NOC_BLUE1, Quantity_NOC_GREEN, Quantity_NOC_RED, Quantity_NOC_ORANGE, Quantity_NOC_SALMON, Quantity_NOC_YELLOW
 import sys
-import random
 import math
 import vtk
-from vtk.util import numpy_support
-vtkmath = vtk.vtkMath()
-from OCC.gp import gp_Ax1, gp_Pnt, gp_Dir, gp_Trsf, gp_Quaternion,gp_Vec, gp_XYZ
-from OCC.TopLoc import TopLoc_Location
 
-#from Siconos.Mechanics import IO
 import siconos.io.mechanics_run as IO
-from Quaternion import Quat
-from collections import Counter, defaultdict
-from itertools import groupby
 from operator import itemgetter
-from timeit import timeit
+
+vtkmath = vtk.vtkMath()
+
 
 # update_progress() : Displays or updates a console progress bar
-## Accepts a float between 0 and 1. Any int will be converted to a float.
-## A value under 0 represents a 'halt'.
-## A value at 1 or bigger represents 100%
+# Accepts a float between 0 and 1. Any int will be converted to a float.
+# A value under 0 represents a 'halt'.
+# A value at 1 or bigger represents 100%
 def update_progress(progress):
-    barLength = 50 # Modify this to change the length of the progress bar
+    barLength = 50  # Modify this to change the length of the progress bar
     status = ""
     if isinstance(progress, int):
         progress = float(progress)
@@ -74,11 +57,12 @@ def update_progress(progress):
     if progress >= 1:
         progress = 1
         status = "Done...\r\n"
-    block = int(round(barLength*progress))
-    text = "\rPercent: [{0}] {1}% {2}".format( "#"*block + "-"*(barLength-block), progress*100, status)
+    block = int(round(barLength * progress))
+    text = "\rPercent: [{0}] {1}% {2}".format(
+        "#" * block + "-" * (barLength - block), progress * 100, status
+    )
     sys.stdout.write(text)
     sys.stdout.flush()
-
 
 
 HEADER = """
@@ -2086,9 +2070,11 @@ function interactive( listOfObjects ){                                 // functi
 </body>
 """
 
+
 def translateOneItem(L):
-    M = [ L[-1] ] + L[:-1]
+    M = [L[-1]] + L[:-1]
     return M
+
 
 def max_occurrences_1a(seq):
     "dict iteritems"
@@ -2097,26 +2083,39 @@ def max_occurrences_1a(seq):
         c[item] = c.get(item, 0) + 1
     return max(c.iteritems(), key=itemgetter(1))
 
+
 def different_elements(seq):
     c = dict()
     for item in seq:
         c[item] = c.get(item, 0) + 1
     return len(c)
 
+
 class HTMLHeader(object):
-    def __init__(self, background_color='#000000'):
+    def __init__(self, background_color="#000000"):
         self._background_color = background_color
 
     def get_str(self):
-        header_str = HEADER.replace('@background-color@', '%s' % self._background_color)
-        header_str = header_str.replace('@VERSION@', OCC.VERSION)
+        header_str = HEADER.replace("@background-color@", "%s" % self._background_color)
+        header_str = header_str.replace("@VERSION@", OCC.VERSION)
         return header_str
 
 
 class HTMLBody(object):
-    def __init__(self, background_color='#000000', vertex_shader=None,
-                 fragment_shader=None, uniforms=None, longueur=1, numberOfVectors=0, interstellar={}, numberOfTimeSteps=1, numberStaticObjects = 0, interstellarVectors = {},
-                 ren_path=None):
+    def __init__(
+        self,
+        background_color="#000000",
+        vertex_shader=None,
+        fragment_shader=None,
+        uniforms=None,
+        longueur=1,
+        numberOfVectors=0,
+        interstellar={},
+        numberOfTimeSteps=1,
+        numberStaticObjects=0,
+        interstellarVectors={},
+        ren_path=None,
+    ):
         self._background_color = background_color
         self._vertex_shader = vertex_shader
         self._fragment_shader = fragment_shader
@@ -2128,17 +2127,22 @@ class HTMLBody(object):
         self._numberStaticObjects = numberStaticObjects
         self._interstellarVectors = interstellarVectors
         self._path = ren_path
+
     def get_str(self):
         # get the location where pythonocc is running from
-        threejs_build_location = os.sep.join([OCC.__path__[0], 'Display', 'WebGl', 'js'])
-        body_str = BODY.replace('@Three.jsPath@', '%s' % threejs_build_location)
-        body_str = body_str.replace('@background-color@', '%s' % self._background_color)
-        body_str = body_str.replace('@VERSION@', OCC.VERSION)
-        body_str = body_str.replace('@longueur@', '%d' % self._longueur )
-        body_str = body_str.replace('@numberOfVectors@', '%d' % self._numberOfVectors )
-        body_str = body_str.replace('@NUMBEROFTIMESTEPS@', '%d' % self._numberOfTimeSteps )
-        body_str = body_str.replace('@SHARE_PATH@', '%s' % share_path )
-        body_str = body_str.replace('@REN_PATH@', '%s' % self._path )
+        threejs_build_location = os.sep.join(
+            [OCC.__path__[0], "Display", "WebGl", "js"]
+        )
+        body_str = BODY.replace("@Three.jsPath@", "%s" % threejs_build_location)
+        body_str = body_str.replace("@background-color@", "%s" % self._background_color)
+        body_str = body_str.replace("@VERSION@", OCC.VERSION)
+        body_str = body_str.replace("@longueur@", "%d" % self._longueur)
+        body_str = body_str.replace("@numberOfVectors@", "%d" % self._numberOfVectors)
+        body_str = body_str.replace(
+            "@NUMBEROFTIMESTEPS@", "%d" % self._numberOfTimeSteps
+        )
+        body_str = body_str.replace("@SHARE_PATH@", "%s" % share_path)
+        body_str = body_str.replace("@REN_PATH@", "%s" % self._path)
         # moving objects are added to the scene but their number depends on the HDF5 file, to load objects in the scene the SCRIPTS, ARROWS, ... python variables take strings of code to add on the final JAVASCRIPT code
         SCRIPTS = ""
         ARROWS = ""
@@ -2146,72 +2150,171 @@ class HTMLBody(object):
         POINTSOFAPPLICATION = ""
         STATICOBJECTS = ""
         OBJECTS = ""
-        listOfColors = [ "0x3b3b3b", "0x677E52", "0x6B1A6A", "0x495CFF", "0x673300", "0x333b53" ]
-        numberOfColors = len(listOfColors)
+        listOfColors = [
+            "0x3b3b3b",
+            "0x677E52",
+            "0x6B1A6A",
+            "0x495CFF",
+            "0x673300",
+            "0x333b53",
+        ]
+        # numberOfColors = len(listOfColors)
         for key in (self._interstellarVectors).keys():
-            if ( type(key) is int ):
-                POINTSOFAPPLICATION += '\n'
-                POINTSOFAPPLICATION += '\n    //-----------------------Point of application #'+str( key )+'-----------------------//'
-                POINTSOFAPPLICATION += '\n    var materialPointOfApplication = new THREE.MeshBasicMaterial( { color: 0x046380 } );'
-                POINTSOFAPPLICATION += '\n    var lengthMax = getLengthScene();'
-                POINTSOFAPPLICATION += '\n    var radiusPointOfApplication = (1/160)*Math.max( lengthMax.x, lengthMax.y, lengthMax.z );                  // radius of 1/80 times the caracteristic length'
-                POINTSOFAPPLICATION += '\n    var geometryPointOfApplication = new THREE.SphereGeometry( radiusPointOfApplication, 42, 42 );'
-                POINTSOFAPPLICATION += '\n    var pointOfApplication = new THREE.Mesh( geometryPointOfApplication, materialPointOfApplication );'
-                POINTSOFAPPLICATION += '\n    pointOfApplication.position.set( interstellarVectors['+str( key )+']["pointOfApplicationX"][0], interstellarVectors['+str( key )+']["pointOfApplicationY"][0], interstellarVectors['+str( key )+']["pointOfApplicationZ"][0]);                // interstellarVectors contains the data needed for the representation of the vectors: point of Application, direction, intensity,..'
+            if type(key) is int:
+                POINTSOFAPPLICATION += "\n"
+                POINTSOFAPPLICATION += (
+                    "\n    //-----------------------Point of application #"
+                    + str(key)
+                    + "-----------------------//"
+                )
+                POINTSOFAPPLICATION += "\n    var materialPointOfApplication = new THREE.MeshBasicMaterial( { color: 0x046380 } );"
+                POINTSOFAPPLICATION += "\n    var lengthMax = getLengthScene();"
+                POINTSOFAPPLICATION += "\n    var radiusPointOfApplication = (1/160)*Math.max( lengthMax.x, lengthMax.y, lengthMax.z );                  // radius of 1/80 times the caracteristic length"
+                POINTSOFAPPLICATION += "\n    var geometryPointOfApplication = new THREE.SphereGeometry( radiusPointOfApplication, 42, 42 );"
+                POINTSOFAPPLICATION += "\n    var pointOfApplication = new THREE.Mesh( geometryPointOfApplication, materialPointOfApplication );"
+                POINTSOFAPPLICATION += (
+                    "\n    pointOfApplication.position.set( interstellarVectors["
+                    + str(key)
+                    + ']["pointOfApplicationX"][0], interstellarVectors['
+                    + str(key)
+                    + ']["pointOfApplicationY"][0], interstellarVectors['
+                    + str(key)
+                    + ']["pointOfApplicationZ"][0]);                // interstellarVectors contains the data needed for the representation of the vectors: point of Application, direction, intensity,..'
+                )
                 POINTSOFAPPLICATION += '\n    pointOfApplication.typeOfObjectForInteractivity = "pointOfApplication";'
-                POINTSOFAPPLICATION += '\n    pointsOfApplication[' + str( key ) + '] = pointOfApplication;'
-                POINTSOFAPPLICATION += '\n    listOfObjects.push( pointsOfApplication[' + str( key ) + '] );'
-                POINTSOFAPPLICATION += '\n    scene.add( pointsOfApplication[' + str( key ) + '] );'
-                ARROWS += '\n'
-                ARROWS += '\n    //------------------------Arrow #'+str( key )+'------------------------------//'
-                ARROWS += '\n    maxSceneLength = getLengthScene();'
-                ARROWS += '\n    maxSceneLength = Math.max( maxSceneLength.x, maxSceneLength.y, maxSceneLength.z );'
-                ARROWS += '\n    var maxScene = getMinMaxAbsoluteScene();'
-                ARROWS += '\n    maxScene = Math.max( maxScene.x, maxScene.y, maxScene.z );'
-                ARROWS += '\n'
-                ARROWS += '\n    var forceStrength = interstellarVectors[' + str( key ) + '][ "maximumIntensity" ];'
+                POINTSOFAPPLICATION += (
+                    "\n    pointsOfApplication[" + str(key) + "] = pointOfApplication;"
+                )
+                POINTSOFAPPLICATION += (
+                    "\n    listOfObjects.push( pointsOfApplication[" + str(key) + "] );"
+                )
+                POINTSOFAPPLICATION += (
+                    "\n    scene.add( pointsOfApplication[" + str(key) + "] );"
+                )
+                ARROWS += "\n"
+                ARROWS += (
+                    "\n    //------------------------Arrow #"
+                    + str(key)
+                    + "------------------------------//"
+                )
+                ARROWS += "\n    maxSceneLength = getLengthScene();"
+                ARROWS += "\n    maxSceneLength = Math.max( maxSceneLength.x, maxSceneLength.y, maxSceneLength.z );"
+                ARROWS += "\n    var maxScene = getMinMaxAbsoluteScene();"
+                ARROWS += (
+                    "\n    maxScene = Math.max( maxScene.x, maxScene.y, maxScene.z );"
+                )
+                ARROWS += "\n"
+                ARROWS += (
+                    "\n    var forceStrength = interstellarVectors["
+                    + str(key)
+                    + '][ "maximumIntensity" ];'
+                )
                 ARROWS += '\n    forceStrength /= interstellarVectors[ "absoluteMaximumIntensity" ];'
-                ARROWS += '\n    forceStrength *= (0.03)*maxSceneLength;'
-                ARROWS += '\n'
-                ARROWS += '\n    var pointX = new THREE.Vector3( 0, 100*maxScene, 0 );                  // in the begining vectors are not present but their representation cannot change of size so they are placed far far far... away from the scene so they do not seem present'
-                ARROWS += '\n    var pointY = new THREE.Vector3( forceStrength, 100*maxScene, 0 );'
-                ARROWS += '\n    var cyl_material = new THREE.MeshBasicMaterial( { color: 0x046380 } );'
-                ARROWS += '\n    var cylinderHeigth = new THREE.Vector3().subVectors( pointY, pointX ).length();            // height of the cylinder is the norm of pointY - pointX'
-                ARROWS += '\n    var cyl_width = 0.1*forceStrength;                    // default line width'
-                ARROWS += '\n    var arrow = vectorRepresentation( pointX, pointY, 0.1*cyl_width, 0.1*cyl_width, cyl_width, 0.1*cylinderHeigth , cyl_material );            // returns an arrow ( in a fact a group, may be good to take a look again in the function vectorRepresentation )'
-                ARROWS += '\n    arrows[' + str( key ) + '] = arrow;'
-                ARROWS += '\n    scene.add( arrows[' + str( key ) + '][ "arrowGroup" ] );'
+                ARROWS += "\n    forceStrength *= (0.03)*maxSceneLength;"
+                ARROWS += "\n"
+                ARROWS += "\n    var pointX = new THREE.Vector3( 0, 100*maxScene, 0 );                  // in the begining vectors are not present but their representation cannot change of size so they are placed far far far... away from the scene so they do not seem present"
+                ARROWS += "\n    var pointY = new THREE.Vector3( forceStrength, 100*maxScene, 0 );"
+                ARROWS += "\n    var cyl_material = new THREE.MeshBasicMaterial( { color: 0x046380 } );"
+                ARROWS += "\n    var cylinderHeigth = new THREE.Vector3().subVectors( pointY, pointX ).length();            // height of the cylinder is the norm of pointY - pointX"
+                ARROWS += "\n    var cyl_width = 0.1*forceStrength;                    // default line width"
+                ARROWS += "\n    var arrow = vectorRepresentation( pointX, pointY, 0.1*cyl_width, 0.1*cyl_width, cyl_width, 0.1*cylinderHeigth , cyl_material );            // returns an arrow ( in a fact a group, may be good to take a look again in the function vectorRepresentation )"
+                ARROWS += "\n    arrows[" + str(key) + "] = arrow;"
+                ARROWS += "\n    scene.add( arrows[" + str(key) + '][ "arrowGroup" ] );'
 
         for key in (self._interstellar).keys():
-            if ( key < 0 ):
-                SCRIPTS += '\n    <script src="'+self._path+'/shape_'+str( abs(key) )+'.js"></script>'
-                STATICOBJECTS += '\n'
-                STATICOBJECTS += '\n    //-----------------------Object (static) #_'+str( abs(key) )+'-----------------------//'
-                STATICOBJECTS += '\n    var loader_'+str( abs(key) )+' = new THREE.JSONLoader();'
-                STATICOBJECTS += '\n    var object = loader_'+str( abs(key) )+'.parse((new Shape_'+str( abs(key) )+'()).toJSON().data);'
-                STATICOBJECTS += '\n    var materialFix = new THREE.MeshPhongMaterial({ transparent: true, opacity: 0.5 });'
-                STATICOBJECTS += '\n    object = new THREE.Mesh( object.geometry, materialFix );'
-                STATICOBJECTS += '\n    object.position.set( interstellar[ '+str( key )+' ][ "positionX" ], interstellar[ '+str( key )+' ][ "positionY" ], interstellar[ '+str( key )+' ][ "positionZ" ] );'
-                STATICOBJECTS += '\n    object.quaternion.set( interstellar[ '+str( key )+' ][ "quaternionX" ], interstellar[ '+str( key )+' ][ "quaternionY" ], interstellar[ '+str( key )+' ][ "quaternionZ" ], interstellar[ '+str( key )+' ][ "quaternionW" ] );'
-                STATICOBJECTS += '\n    objects[ '+str(key)+' ] = object;'
-                STATICOBJECTS += '\n    scene.add( objects[ '+str(key)+' ] );'
+            if key < 0:
+                SCRIPTS += (
+                    '\n    <script src="'
+                    + self._path
+                    + "/shape_"
+                    + str(abs(key))
+                    + '.js"></script>'
+                )
+                STATICOBJECTS += "\n"
+                STATICOBJECTS += (
+                    "\n    //-----------------------Object (static) #_"
+                    + str(abs(key))
+                    + "-----------------------//"
+                )
+                STATICOBJECTS += (
+                    "\n    var loader_" + str(abs(key)) + " = new THREE.JSONLoader();"
+                )
+                STATICOBJECTS += (
+                    "\n    var object = loader_"
+                    + str(abs(key))
+                    + ".parse((new Shape_"
+                    + str(abs(key))
+                    + "()).toJSON().data);"
+                )
+                STATICOBJECTS += "\n    var materialFix = new THREE.MeshPhongMaterial({ transparent: true, opacity: 0.5 });"
+                STATICOBJECTS += (
+                    "\n    object = new THREE.Mesh( object.geometry, materialFix );"
+                )
+                STATICOBJECTS += (
+                    "\n    object.position.set( interstellar[ "
+                    + str(key)
+                    + ' ][ "positionX" ], interstellar[ '
+                    + str(key)
+                    + ' ][ "positionY" ], interstellar[ '
+                    + str(key)
+                    + ' ][ "positionZ" ] );'
+                )
+                STATICOBJECTS += (
+                    "\n    object.quaternion.set( interstellar[ "
+                    + str(key)
+                    + ' ][ "quaternionX" ], interstellar[ '
+                    + str(key)
+                    + ' ][ "quaternionY" ], interstellar[ '
+                    + str(key)
+                    + ' ][ "quaternionZ" ], interstellar[ '
+                    + str(key)
+                    + ' ][ "quaternionW" ] );'
+                )
+                STATICOBJECTS += "\n    objects[ " + str(key) + " ] = object;"
+                STATICOBJECTS += "\n    scene.add( objects[ " + str(key) + " ] );"
 
         for key in (self._interstellar).keys():
-            if ( key >= 0 ):
-                SCRIPTS += '\n    <script src="'+self._path+'/shape'+str(key)+'.js"></script>'
-                MENUOBJECTS += '\n              <li><a id = "Object'+str(key)+'" href="#" onclick="addAndRemoveObject('+str(key)+')"> Remove object '+str(key)+'</li>'
-                OBJECTS += '\n'
-                OBJECTS += '\n    //------------------------Object #'+str(key)+'------------------------------//'
-                OBJECTS += '\n    var loader'+str(key)+' = new THREE.JSONLoader();'
-                OBJECTS += '\n    var object = loader'+str(key)+'.parse((new Shape'+str(key)+'()).toJSON().data);'
-                OBJECTS += '\n    object = new THREE.Mesh( object.geometry, new THREE.MeshPhongMaterial( { transparent: true, opacity: 0.9 } ) );'
-                color = listOfColors[0]                                             # we change the colors, a list is permuted everytime a new object is added
+            if key >= 0:
+                SCRIPTS += (
+                    '\n    <script src="'
+                    + self._path
+                    + "/shape"
+                    + str(key)
+                    + '.js"></script>'
+                )
+                MENUOBJECTS += (
+                    '\n              <li><a id = "Object'
+                    + str(key)
+                    + '" href="#" onclick="addAndRemoveObject('
+                    + str(key)
+                    + ')"> Remove object '
+                    + str(key)
+                    + "</li>"
+                )
+                OBJECTS += "\n"
+                OBJECTS += (
+                    "\n    //------------------------Object #"
+                    + str(key)
+                    + "------------------------------//"
+                )
+                OBJECTS += "\n    var loader" + str(key) + " = new THREE.JSONLoader();"
+                OBJECTS += (
+                    "\n    var object = loader"
+                    + str(key)
+                    + ".parse((new Shape"
+                    + str(key)
+                    + "()).toJSON().data);"
+                )
+                OBJECTS += "\n    object = new THREE.Mesh( object.geometry, new THREE.MeshPhongMaterial( { transparent: true, opacity: 0.9 } ) );"
+                color = listOfColors[
+                    0
+                ]  # we change the colors, a list is permuted everytime a new object is added
                 listOfColors = translateOneItem(listOfColors)
-                OBJECTS += '\n    object.material.color.setHex('+ color +');'
+                OBJECTS += "\n    object.material.color.setHex(" + color + ");"
                 OBJECTS += '\n    object.typeOfObjectForInteractivity = "object";'
-                OBJECTS += '\n    objects[ '+str(key)+' ] = object;'
-                OBJECTS += '\n    objects[ '+str(key)+' ].overdraw = true;'
-                #--------  the following code in comment is not needed but the procedure is good and might be good another time, the procedure is to create a cube of dimensions 0, to initially place it on the center of the object, to add the object to the cube and by so, we move the cube of dimensions 0 to move the object  ----------#
+                OBJECTS += "\n    objects[ " + str(key) + " ] = object;"
+                OBJECTS += "\n    objects[ " + str(key) + " ].overdraw = true;"
+                # --------  the following code in comment is not needed but the procedure is good and might be good another time, the procedure is to create a cube of dimensions 0, to initially place it on the center of the object, to add the object to the cube and by so, we move the cube of dimensions 0 to move the object  ----------#
                 """
                 OBJECTS += '\n    /*var gravityCenterX = getCentroid(objects['+str(key)+']).x;'
                 OBJECTS += '\n    var gravityCenterY = getCentroid(objects['+str(key)+']).y;'
@@ -2227,41 +2330,104 @@ class HTMLBody(object):
                 OBJECTS += '\n    cubes.push( cube );'
                 OBJECTS += '\n    cubes[ '+str(key)+' ].add(objects[ '+str(i)+' ]);//*/'
                 """
-                OBJECTS += '\n'
-                OBJECTS += '\n    var quaternionTemp = new THREE.Quaternion();'
-                OBJECTS += '\n    quaternionTemp.set( interstellar[ '+str(key)+' ][ "quaternionX" ][ 0 ], interstellar[ '+str(key)+' ][ "quaternionY" ][ 0 ], interstellar[ '+str(key)+' ][ "quaternionZ" ][ 0 ], interstellar[ '+str(key)+' ][ "quaternionW" ][ 0 ] );'
-                OBJECTS += '\n    var translationInit1 = new THREE.Vector3( interstellar[ '+str(key)+' ][ "initialPosition" ][ "positionX" ], interstellar[ '+str(key)+' ][ "initialPosition" ][ "positionY" ], interstellar[ '+str(key)+' ][ "initialPosition" ][ "positionZ" ] );'
-                OBJECTS += '\n    translationInit1.copy( translationOffset(translationInit1, quaternionTemp) );'
-                OBJECTS += '\n'
-                OBJECTS += '\n    objects[ '+str(key)+' ].quaternion.x = quaternionTemp.x;'
-                OBJECTS += '\n    objects[ '+str(key)+' ].quaternion.y = quaternionTemp.y;'
-                OBJECTS += '\n    objects[ '+str(key)+' ].quaternion.z = quaternionTemp.z;'
-                OBJECTS += '\n    objects[ '+str(key)+' ].quaternion.w = quaternionTemp.w;'
-                OBJECTS += '\n    interstellar[ '+str(key)+' ][ "quaternionX" ].shift();'
-                OBJECTS += '\n    interstellar[ '+str(key)+' ][ "quaternionY" ].shift();'
-                OBJECTS += '\n    interstellar[ '+str(key)+' ][ "quaternionZ" ].shift();'
-                OBJECTS += '\n    interstellar[ '+str(key)+' ][ "quaternionW" ].shift();'
-                OBJECTS += '\n'
-                OBJECTS += '\n'
-                OBJECTS += '\n    objects[ '+str(key)+' ].position.x = interstellar[ '+str(key)+' ][ "positionX" ][ 0 ] + translationInit1.x;'
-                OBJECTS += '\n    objects[ '+str(key)+' ].position.y = interstellar[ '+str(key)+' ][ "positionY" ][ 0 ] + translationInit1.y;'
-                OBJECTS += '\n    objects[ '+str(key)+' ].position.z = interstellar[ '+str(key)+' ][ "positionZ" ][ 0 ] + translationInit1.z;'
-                OBJECTS += '\n    interstellar[ '+str(key)+' ][ "positionX" ].shift();'
-                OBJECTS += '\n    interstellar[ '+str(key)+' ][ "positionY" ].shift();'
-                OBJECTS += '\n    interstellar[ '+str(key)+' ][ "positionZ" ].shift();'
-                OBJECTS += '\n    listOfObjects.push( objects['+str(key)+'] );'
-                OBJECTS += '\n    scene.add( objects['+str(key)+'] );'
-        body_str = body_str.replace( '@SCRIPTS@', SCRIPTS )
-        body_str = body_str.replace( '@ARROWS@', ARROWS )
-        body_str = body_str.replace( '@STATICOBJECTS@', STATICOBJECTS )
-        body_str = body_str.replace( '@MENUOBJECTS@', MENUOBJECTS )
-        body_str = body_str.replace( '@POINTSOFAPPLICATION@', POINTSOFAPPLICATION )
-        body_str = body_str.replace( '@OBJECTS@', OBJECTS )
-
+                OBJECTS += "\n"
+                OBJECTS += "\n    var quaternionTemp = new THREE.Quaternion();"
+                OBJECTS += (
+                    "\n    quaternionTemp.set( interstellar[ "
+                    + str(key)
+                    + ' ][ "quaternionX" ][ 0 ], interstellar[ '
+                    + str(key)
+                    + ' ][ "quaternionY" ][ 0 ], interstellar[ '
+                    + str(key)
+                    + ' ][ "quaternionZ" ][ 0 ], interstellar[ '
+                    + str(key)
+                    + ' ][ "quaternionW" ][ 0 ] );'
+                )
+                OBJECTS += (
+                    "\n    var translationInit1 = new THREE.Vector3( interstellar[ "
+                    + str(key)
+                    + ' ][ "initialPosition" ][ "positionX" ], interstellar[ '
+                    + str(key)
+                    + ' ][ "initialPosition" ][ "positionY" ], interstellar[ '
+                    + str(key)
+                    + ' ][ "initialPosition" ][ "positionZ" ] );'
+                )
+                OBJECTS += "\n    translationInit1.copy( translationOffset(translationInit1, quaternionTemp) );"
+                OBJECTS += "\n"
+                OBJECTS += (
+                    "\n    objects[ " + str(key) + " ].quaternion.x = quaternionTemp.x;"
+                )
+                OBJECTS += (
+                    "\n    objects[ " + str(key) + " ].quaternion.y = quaternionTemp.y;"
+                )
+                OBJECTS += (
+                    "\n    objects[ " + str(key) + " ].quaternion.z = quaternionTemp.z;"
+                )
+                OBJECTS += (
+                    "\n    objects[ " + str(key) + " ].quaternion.w = quaternionTemp.w;"
+                )
+                OBJECTS += (
+                    "\n    interstellar[ " + str(key) + ' ][ "quaternionX" ].shift();'
+                )
+                OBJECTS += (
+                    "\n    interstellar[ " + str(key) + ' ][ "quaternionY" ].shift();'
+                )
+                OBJECTS += (
+                    "\n    interstellar[ " + str(key) + ' ][ "quaternionZ" ].shift();'
+                )
+                OBJECTS += (
+                    "\n    interstellar[ " + str(key) + ' ][ "quaternionW" ].shift();'
+                )
+                OBJECTS += "\n"
+                OBJECTS += "\n"
+                OBJECTS += (
+                    "\n    objects[ "
+                    + str(key)
+                    + " ].position.x = interstellar[ "
+                    + str(key)
+                    + ' ][ "positionX" ][ 0 ] + translationInit1.x;'
+                )
+                OBJECTS += (
+                    "\n    objects[ "
+                    + str(key)
+                    + " ].position.y = interstellar[ "
+                    + str(key)
+                    + ' ][ "positionY" ][ 0 ] + translationInit1.y;'
+                )
+                OBJECTS += (
+                    "\n    objects[ "
+                    + str(key)
+                    + " ].position.z = interstellar[ "
+                    + str(key)
+                    + ' ][ "positionZ" ][ 0 ] + translationInit1.z;'
+                )
+                OBJECTS += (
+                    "\n    interstellar[ " + str(key) + ' ][ "positionX" ].shift();'
+                )
+                OBJECTS += (
+                    "\n    interstellar[ " + str(key) + ' ][ "positionY" ].shift();'
+                )
+                OBJECTS += (
+                    "\n    interstellar[ " + str(key) + ' ][ "positionZ" ].shift();'
+                )
+                OBJECTS += "\n    listOfObjects.push( objects[" + str(key) + "] );"
+                OBJECTS += "\n    scene.add( objects[" + str(key) + "] );"
+        body_str = body_str.replace("@SCRIPTS@", SCRIPTS)
+        body_str = body_str.replace("@ARROWS@", ARROWS)
+        body_str = body_str.replace("@STATICOBJECTS@", STATICOBJECTS)
+        body_str = body_str.replace("@MENUOBJECTS@", MENUOBJECTS)
+        body_str = body_str.replace("@POINTSOFAPPLICATION@", POINTSOFAPPLICATION)
+        body_str = body_str.replace("@OBJECTS@", OBJECTS)
 
         if (self._fragment_shader is not None) and (self._fragment_shader is not None):
-            vertex_shader_string_definition = '<script type="x-shader/x-vertex" id="vertexShader">%s</script>' % self._vertex_shader
-            fragment_shader_string_definition = '<script type="x-shader/x-fragment" id="fragmentShader">%s</script>' % self._fragment_shader
+            vertex_shader_string_definition = (
+                '<script type="x-shader/x-vertex" id="vertexShader">%s</script>'
+                % self._vertex_shader
+            )
+            fragment_shader_string_definition = (
+                '<script type="x-shader/x-fragment" id="fragmentShader">%s</script>'
+                % self._fragment_shader
+            )
             shader_material_definition = """
             var vertexShader = document.getElementById( 'vertexShader' ).textContent;
             var fragmentShader = document.getElementById( 'fragmentShader' ).textContent;
@@ -2270,38 +2436,59 @@ class HTMLBody(object):
                                                               fragmentShader: fragmentShader } );
             """
             if self._uniforms is None:
-                body_str = body_str.replace('@Uniforms@', 'uniforms ={};\n')
-                body_str = body_str.replace('@IncrementTime@', '')
-                #-----------------MODIFICATIONS--------
+                body_str = body_str.replace("@Uniforms@", "uniforms ={};\n")
+                body_str = body_str.replace("@IncrementTime@", "")
+                # -----------------MODIFICATIONS--------
             else:
-                body_str = body_str.replace('@Uniforms@', self._uniforms)
-                if 'time' in self._uniforms:
-                    backbody_str = body_str.replace('@IncrementTime@', 'uniforms.time.value += 0.05;')
+                body_str = body_str.replace("@Uniforms@", self._uniforms)
+                if "time" in self._uniforms:
+                    body_str = body_str.replace(
+                        "@IncrementTime@", "uniforms.time.value += 0.05;"
+                    )
                 else:
-                    body_str = body_str.replace('@IncrementTime@', '')
-            body_str = body_str.replace('@VertexShaderDefinition@', vertex_shader_string_definition)
-            body_str = body_str.replace('@FragmentShaderDefinition@', fragment_shader_string_definition)
-            body_str = body_str.replace('@ShaderMaterialDefinition@', shader_material_definition)
-            body_str = body_str.replace('@ShapeMaterial@', 'shader_material')
+                    body_str = body_str.replace("@IncrementTime@", "")
+            body_str = body_str.replace(
+                "@VertexShaderDefinition@", vertex_shader_string_definition
+            )
+            body_str = body_str.replace(
+                "@FragmentShaderDefinition@", fragment_shader_string_definition
+            )
+            body_str = body_str.replace(
+                "@ShaderMaterialDefinition@", shader_material_definition
+            )
+            body_str = body_str.replace("@ShapeMaterial@", "shader_material")
         else:
-            body_str = body_str.replace('@Uniforms@', '')
-            body_str = body_str.replace('@VertexShaderDefinition@', '')
-            body_str = body_str.replace('@FragmentShaderDefinition@', '')
-            body_str = body_str.replace('@ShaderMaterialDefinition@', '')
-            body_str = body_str.replace('@ShapeMaterial@', 'phong_material')
-            body_str = body_str.replace('@IncrementTime@', '')
+            body_str = body_str.replace("@Uniforms@", "")
+            body_str = body_str.replace("@VertexShaderDefinition@", "")
+            body_str = body_str.replace("@FragmentShaderDefinition@", "")
+            body_str = body_str.replace("@ShaderMaterialDefinition@", "")
+            body_str = body_str.replace("@ShapeMaterial@", "phong_material")
+            body_str = body_str.replace("@IncrementTime@", "")
         return body_str
 
 
 class ThreejsRenderer(object):
-    def __init__(self, background_color="#123345", vertex_shader=None, fragment_shader=None, uniforms=None, path=None, longueur=1, numberOfVectors=0,interstellar = {}, numberOfTimeSteps = 1, numberStaticObjects = 0, interstellarVectors={} ):
+    def __init__(
+        self,
+        background_color="#123345",
+        vertex_shader=None,
+        fragment_shader=None,
+        uniforms=None,
+        path=None,
+        longueur=1,
+        numberOfVectors=0,
+        interstellar={},
+        numberOfTimeSteps=1,
+        numberStaticObjects=0,
+        interstellarVectors={},
+    ):
         if not path:
-            self._path =  tempfile.mkdtemp(prefix='.shape')
+            self._path = tempfile.mkdtemp(prefix=".shape")
         else:
             self._path = path
 
         self._js_filename = os.path.join(self._path, "shape.js")
-        self._html_filename = os.path.join(output_path,"index.html"    )
+        self._html_filename = os.path.join(output_path, "index.html")
         self._background_color = background_color
         self._vertex_shader = vertex_shader
         self._fragment_shader = fragment_shader
@@ -2314,29 +2501,29 @@ class ThreejsRenderer(object):
         self._interstellarVectors = interstellarVectors
 
     def set_vertex_shader(self, vertex_shader):
-        ''' adds a vertex shader definition '''
+        """adds a vertex shader definition"""
         self._vertex_shader = vertex_shader
 
     def set_fragment_shader(self, fragment_shader):
-        ''' adds a fragment shader '''
+        """adds a fragment shader"""
         self._fragment_shader = fragment_shader
 
     def create_files(self, shape, filename=None):
-        ''' generate .js and .html files '''
+        """generate .js and .html files"""
         self._shape = shape
         print("Tesselate shape ...")
         t0 = time()
         tess = Tesselator(self._shape)
         t1 = time()
-        print("done in %f s." % (t1-t0))
+        print("done in %f s." % (t1 - t0))
         print("Exporting tesselation to JSON ...")
         t2 = time()
-        if filename == None:
-        	tess.ExportShapeToThreejs(self._js_filename)
+        if filename is None:
+            tess.ExportShapeToThreejs(self._js_filename)
         else:
             tess.ExportShapeToThreejs(filename)
         t3 = time()
-        print("done in %f s." % (t3-t2))
+        print("done in %f s." % (t3 - t2))
         print("Generating HTML stream ...")
         self.GenerateHTMLFile()
         print("done.")
@@ -2352,61 +2539,76 @@ class ThreejsRenderer(object):
 
     def CreateDictionaryOfShapes(self, dictionaryOfShapes):
         for key in dictionaryOfShapes.keys():
-            if ( key >= 0 ):
-                filename=os.path.join(self._path, "shape"+str( key )+".js")
+            if key >= 0:
+                filename = os.path.join(self._path, "shape" + str(key) + ".js")
                 print(key)
-            if ( key < 0 ):
-                filename=os.path.join(self._path, "shape_"+str( abs(key) )+".js")
-            #self._shapeLists.append(filename)
-            shape = dictionaryOfShapes[ key ]
-            self.create_files(shape,filename)
+            if key < 0:
+                filename = os.path.join(self._path, "shape_" + str(abs(key)) + ".js")
+            # self._shapeLists.append(filename)
+            shape = dictionaryOfShapes[key]
+            self.create_files(shape, filename)
             print("Creating the html output in the default directory ...")
             # previous version us a os.system call to the "open" command
             # but this is a platform (osx) specific solution
-            _path = "file:///{0}".format(os.path.join(os.getcwd(), self._html_filename))
-            #os.rename(_path, "/home/inria/siconos/Examples/Mechanics/Mechanisms/SliderCrank/")
-            #webbrowser.open_new_tab(_path)
+            # _path = "file:///{0}".format(os.path.join(os.getcwd(), self._html_filename))
+            # os.rename(_path, "/home/inria/siconos/Examples/Mechanics/Mechanisms/SliderCrank/")
+            # webbrowser.open_new_tab(_path)
 
     def GenerateHTMLFile(self):
-        """ Generate the HTML file to be rendered wy the web browser
-        """
+        """Generate the HTML file to be rendered wy the web browser"""
         fp = open(self._html_filename, "w")
         fp.write("<!DOCTYPE HTML>")
         fp.write('<html lang="en">')
         # header
         fp.write(HTMLHeader(self._background_color).get_str())
         # body
-        fp.write(HTMLBody(self._background_color,
-                          self._vertex_shader,
-                          self._fragment_shader,
-                          self._uniforms, interstellar = self._interstellar,longueur = self._longueur, numberOfVectors = self._numberOfVectors, numberStaticObjects = self._numberStaticObjects, interstellarVectors = self._interstellarVectors, ren_path = self._path ).get_str())
+        fp.write(
+            HTMLBody(
+                self._background_color,
+                self._vertex_shader,
+                self._fragment_shader,
+                self._uniforms,
+                interstellar=self._interstellar,
+                longueur=self._longueur,
+                numberOfVectors=self._numberOfVectors,
+                numberStaticObjects=self._numberStaticObjects,
+                interstellarVectors=self._interstellarVectors,
+                ren_path=self._path,
+            ).get_str()
+        )
         fp.write("</html>\n")
         fp.close()
-def usage():
-    print(' usage :  renderer --help --share_path=xxx --output_path=xxx file.hdf5')
 
-#-----------------------------MODIFICATIONS------------------------------------#
+
+def usage():
+    print(" usage :  renderer --help --share_path=xxx --output_path=xxx file.hdf5")
+
+
+# -----------------------------MODIFICATIONS------------------------------------#
 if __name__ == "__main__":
 
-    output_path=os.getcwd()
+    output_path = os.getcwd()
     bin_path = os.path.dirname(os.path.realpath(__file__))
     share_path = os.path.join(bin_path, "../share/siconos/")
-    import sys, getopt
+    import getopt
+
     try:
         if len(sys.argv) < 2:
             raise RuntimeError("an hdf5 file is needed")
-        opts, args = getopt.getopt(sys.argv[1:],"",["help","share_path=","output_path="])
-        print(opts,args)
+        opts, args = getopt.getopt(
+            sys.argv[1:], "", ["help", "share_path=", "output_path="]
+        )
+        print(opts, args)
     except getopt.GetoptError:
         usage()
         sys.exit(2)
-    except RuntimeError as e :
+    except RuntimeError as e:
         print("-->", e)
         usage()
         sys.exit(2)
     for opt, arg in opts:
-        print(opt,arg)
-        if opt == '-h':
+        print(opt, arg)
+        if opt == "-h":
             usage()
             sys.exit()
         elif opt in ("--share_path"):
@@ -2415,42 +2617,62 @@ if __name__ == "__main__":
             output_path = os.path.join(arg)
 
     print(sys.argv[-1])
-    tempfile.tempdir=output_path
-    from OCC.BRepPrimAPI import BRepPrimAPI_MakeBox
-    with IO.Hdf5(sys.argv[-1], 'r') as io:    #sys.argv[1]
-        nbobjs = len(filter(lambda x: io.instances()[x].attrs['id'] >= 0, io.instances()))                # number of moving objects
-        numberStaticObjects = len(filter(lambda x: io.instances()[x].attrs['id'] < 0, io.instances()))    # number of static objects
+    tempfile.tempdir = output_path
+
+    with IO.Hdf5(sys.argv[-1], "r") as io:  # sys.argv[1]
+        nbobjs = len(
+            filter(lambda x: io.instances()[x].attrs["id"] >= 0, io.instances())
+        )  # number of moving objects
+        numberStaticObjects = len(
+            filter(lambda x: io.instances()[x].attrs["id"] < 0, io.instances())
+        )  # number of static objects
         longueur = nbobjs
         print("\nNumber of moving objects: %d" % nbobjs)
         print("########### Load shapes")
         obj_by_id = dict()
-        #----------------------Loading .step and .stp Files ( begin)------------------------#
-        dictionaryOfShapes = {}                                   # dictionaryOfShapes will contain the mesh of the objects
-        translation ={}                                     # translation and orientation are dictionaries that will contain the offset of translation and quaternion
-        orientation ={}
+        # ----------------------Loading .step and .stp Files ( begin)------------------------#
+        dictionaryOfShapes = (
+            {}
+        )  # dictionaryOfShapes will contain the mesh of the objects
+        translation = (
+            {}
+        )  # translation and orientation are dictionaries that will contain the offset of translation and quaternion
+        orientation = {}
 
-        print("%s" %dictionaryOfShapes)
-        for instance in io.instances():                    # we run through the id's and not the order of the objects so we might see object3 first then object1 and object2 so we need to initialize first the list
-            id = io.instances()[instance].attrs['id']
+        print("%s" % dictionaryOfShapes)
+        for (
+            instance
+        ) in (
+            io.instances()
+        ):  # we run through the id's and not the order of the objects so we might see object3 first then object1 and object2 so we need to initialize first the list
+            id = io.instances()[instance].attrs["id"]
             obj_by_id[id] = instance
             obj = instance
 
-            print("\nobj: %s"  % obj)
-            if (id >= 0):
-                shape_name  = obj[4:]                    # to get the correct name, it is IMPORTANT to take out a small part of the name IMPORTANT !!!!!
-            if (id < 0):
-                shape_name  = obj[9:]                    # get the name WE TAKE OUT "ARTEFACT" IMPORTANT!!!!
+            print("\nobj: %s" % obj)
+            if id >= 0:
+                shape_name = obj[
+                    4:
+                ]  # to get the correct name, it is IMPORTANT to take out a small part of the name IMPORTANT !!!!!
+            if id < 0:
+                shape_name = obj[
+                    9:
+                ]  # get the name WE TAKE OUT "ARTEFACT" IMPORTANT!!!!
 
             print("\nid : %s" % id)
-            translation[id] = io.instances()[instance][shape_name+'-0'].attrs['translation']
-            orientation[id] = io.instances()[instance][shape_name+'-0'].attrs['orientation']
-            print("\ntranslation",repr(translation))
-            print("\norientation",repr(orientation))
+            translation[id] = io.instances()[instance][shape_name + "-0"].attrs[
+                "translation"
+            ]
+            orientation[id] = io.instances()[instance][shape_name + "-0"].attrs[
+                "orientation"
+            ]
+            print("\ntranslation", repr(translation))
+            print("\norientation", repr(orientation))
             print("\nshape_name : %s" % shape_name)
-            print("\n%s" % io.instances()[obj])                              # begin of the file: .stp or .step
+            print("\n%s" % io.instances()[obj])  # begin of the file: .stp or .step
             with IO.tmpfile(contents=io.shapes()[shape_name][:][0]) as tmpfile:
                 step_reader = STEPControl_Reader()
-                status = step_reader.ReadFile(tmpfile[1])                          # step FILE
+                status = step_reader.ReadFile(tmpfile[1])  # step FILE
                 if status == IFSelect_RetDone:  # check status
                     failsonly = False
                     step_reader.PrintCheckLoad(failsonly, IFSelect_ItemsByEntity)
@@ -2461,84 +2683,87 @@ if __name__ == "__main__":
 
         print("\n%s" % dictionaryOfShapes)
         print(translation[1])
-        #----------------------Loading .step and .stp Files ( end(almost))------------------------#
+        # ----------------------Loading .step and .stp Files ( end(almost))------------------------#
 
-
-
-
-
-
-
-
-
-        #-----------------------------Loading positions----------------------------#
+        # -----------------------------Loading positions----------------------------#
         print("\n ########### Loading positions")
-        dpos_data = io.dynamic_data()[:]                  # moving objects
+        dpos_data = io.dynamic_data()[:]  # moving objects
         print("\n%s" % dpos_data)
 
         print("\n ########### Loading vectors")
-        cf_data = io.contact_forces_data()[:]              # vectors
+        cf_data = io.contact_forces_data()[:]  # vectors
         print("\n%s" % cf_data[0])
 
+        # ----------------------Vectors positions orientations----------------------#
+        lengthOfTimes = len(cf_data)
+        listOfTimes = []
+        for i in range(lengthOfTimes):
+            listOfTimes.append(cf_data[i][0])
+        numberOfVectors = max_occurrences_1a(listOfTimes)[1]
+        numberOfTimeStepsVectors = different_elements(listOfTimes)
 
-
-
-
-
-
-
-
-
-
-        #----------------------Vectors positions orientations----------------------#
-        lengthOfTimes = len( cf_data )
-        listOfTimes   = []
-        for i in range( lengthOfTimes ):
-            listOfTimes.append( cf_data[ i ][ 0 ] )
-        numberOfVectors = max_occurrences_1a( listOfTimes )[ 1 ]
-        numberOfTimeStepsVectors = different_elements( listOfTimes )
-
-
-        #----------------initialisation of the list containing the vectors
+        # ----------------initialisation of the list containing the vectors
         interstellarVectors = {}
-        for vectorNumber in range( numberOfVectors ):
-            interstellarVectors[ vectorNumber ] = {}
-            interstellarVectors[ vectorNumber ][ "timeStep" ] = []
-            interstellarVectors[ vectorNumber ][ "pointOfApplicationX" ] = []
-            interstellarVectors[ vectorNumber ][ "pointOfApplicationY" ] = []
-            interstellarVectors[ vectorNumber ][ "pointOfApplicationZ" ] = []
-            interstellarVectors[ vectorNumber ][ "forceDirectionX" ] = []
-            interstellarVectors[ vectorNumber ][ "forceDirectionY" ] = []
-            interstellarVectors[ vectorNumber ][ "forceDirectionZ" ] = []
+        for vectorNumber in range(numberOfVectors):
+            interstellarVectors[vectorNumber] = {}
+            interstellarVectors[vectorNumber]["timeStep"] = []
+            interstellarVectors[vectorNumber]["pointOfApplicationX"] = []
+            interstellarVectors[vectorNumber]["pointOfApplicationY"] = []
+            interstellarVectors[vectorNumber]["pointOfApplicationZ"] = []
+            interstellarVectors[vectorNumber]["forceDirectionX"] = []
+            interstellarVectors[vectorNumber]["forceDirectionY"] = []
+            interstellarVectors[vectorNumber]["forceDirectionZ"] = []
 
-        #---------------We get the positions and the directions of the vectors in a huge list called listOfVectors
+        # ---------------We get the positions and the directions of the vectors in a huge list called listOfVectors
         # the important thing here is that the vectors are in file similar to an excel and in this file if the vector is full of 0 then it is not showed that's why the following is used
         i = 0
         rowNumber = 0
         lastRowNumber = 0
         j = 0
-        while( (i+j) < numberOfTimeStepsVectors*numberOfVectors ):               # while the whole file is not overflied
-            timeStepNow = cf_data[rowNumber][0]                                  # timesteps represents the first arrow at a given time
+        while (
+            i + j
+        ) < numberOfTimeStepsVectors * numberOfVectors:  # while the whole file is not overflied
+            timeStepNow = cf_data[rowNumber][
+                0
+            ]  # timesteps represents the first arrow at a given time
             j = 0
-            while ( timeStepNow == cf_data[rowNumber+j][0] ):                    # while we're still in the same timestep we had the data to listOfVectors
-                interstellarVectors[ j ][ "timeStep" ].append( float(cf_data[rowNumber+j][ 0 ]) )
-                interstellarVectors[ j ][ "pointOfApplicationX" ].append( float(cf_data[rowNumber+j][ 2 ]) )
-                interstellarVectors[ j ][ "pointOfApplicationY" ].append( float(cf_data[rowNumber+j][ 3 ]) )
-                interstellarVectors[ j ][ "pointOfApplicationZ" ].append( float(cf_data[rowNumber+j][ 4 ]) )
-                interstellarVectors[ j ][ "forceDirectionX" ].append( float(cf_data[rowNumber+j][ 11 ]) )
-                interstellarVectors[ j ][ "forceDirectionY" ].append( float(cf_data[rowNumber+j][ 12 ]) )
-                interstellarVectors[ j ][ "forceDirectionZ" ].append( float(cf_data[rowNumber+j][ 13 ]) )
+            while (
+                timeStepNow == cf_data[rowNumber + j][0]
+            ):  # while we're still in the same timestep we had the data to listOfVectors
+                interstellarVectors[j]["timeStep"].append(
+                    float(cf_data[rowNumber + j][0])
+                )
+                interstellarVectors[j]["pointOfApplicationX"].append(
+                    float(cf_data[rowNumber + j][2])
+                )
+                interstellarVectors[j]["pointOfApplicationY"].append(
+                    float(cf_data[rowNumber + j][3])
+                )
+                interstellarVectors[j]["pointOfApplicationZ"].append(
+                    float(cf_data[rowNumber + j][4])
+                )
+                interstellarVectors[j]["forceDirectionX"].append(
+                    float(cf_data[rowNumber + j][11])
+                )
+                interstellarVectors[j]["forceDirectionY"].append(
+                    float(cf_data[rowNumber + j][12])
+                )
+                interstellarVectors[j]["forceDirectionZ"].append(
+                    float(cf_data[rowNumber + j][13])
+                )
                 j += 1
             rowNumber += j
             numberOfVectorsLeftToCheck = numberOfVectors - j
-            while( numberOfVectorsLeftToCheck > 0 ):                             # during timesteps if we did not overflied all the arrows then we complete by the corresponding numebr of 0 in listOfVectors
-                #interstellarVectors[ j ][ "timeStep" ].append( float(cf_data[rowNumber+j][ 0 ]) )
-                interstellarVectors[ j ][ "pointOfApplicationX" ].append( 0 )
-                interstellarVectors[ j ][ "pointOfApplicationY" ].append( 0 )
-                interstellarVectors[ j ][ "pointOfApplicationZ" ].append( 0 )
-                interstellarVectors[ j ][ "forceDirectionX" ].append( 0 )
-                interstellarVectors[ j ][ "forceDirectionY" ].append( 0 )
-                interstellarVectors[ j ][ "forceDirectionZ" ].append( 0 )
+            while (
+                numberOfVectorsLeftToCheck > 0
+            ):  # during timesteps if we did not overflied all the arrows then we complete by the corresponding numebr of 0 in listOfVectors
+                # interstellarVectors[ j ][ "timeStep" ].append( float(cf_data[rowNumber+j][ 0 ]) )
+                interstellarVectors[j]["pointOfApplicationX"].append(0)
+                interstellarVectors[j]["pointOfApplicationY"].append(0)
+                interstellarVectors[j]["pointOfApplicationZ"].append(0)
+                interstellarVectors[j]["forceDirectionX"].append(0)
+                interstellarVectors[j]["forceDirectionY"].append(0)
+                interstellarVectors[j]["forceDirectionZ"].append(0)
                 numberOfVectorsLeftToCheck -= 1
                 j += 1
             i += numberOfVectors
@@ -2548,154 +2773,206 @@ if __name__ == "__main__":
         listOfMaxima = []
         for key in interstellarVectors.keys():
             liste = []
-            for i in range( len( interstellarVectors[ key ][ "forceDirectionX" ] ) ):
+            for i in range(len(interstellarVectors[key]["forceDirectionX"])):
                 u = 0
-                u += ( interstellarVectors[ key ][ "forceDirectionX" ][ i ] ) ** 2
-                u += ( interstellarVectors[ key ][ "forceDirectionY" ][ i ] ) ** 2
-                u += ( interstellarVectors[ key ][ "forceDirectionZ" ][ i ] ) ** 2
+                u += (interstellarVectors[key]["forceDirectionX"][i]) ** 2
+                u += (interstellarVectors[key]["forceDirectionY"][i]) ** 2
+                u += (interstellarVectors[key]["forceDirectionZ"][i]) ** 2
                 u = math.sqrt(u)
                 liste.append(u)
-            maxListe = max( liste )
-            interstellarVectors[ key ][ "maximumIntensity" ] = maxListe
-            listOfMaxima.append( maxListe )
-        interstellarVectors["absoluteMaximumIntensity"] = max(listOfMaxima)        # we shall also consider the maximum of the maxima vectors
+            maxListe = max(liste)
+            interstellarVectors[key]["maximumIntensity"] = maxListe
+            listOfMaxima.append(maxListe)
+        interstellarVectors["absoluteMaximumIntensity"] = max(
+            listOfMaxima
+        )  # we shall also consider the maximum of the maxima vectors
 
-
-
-
-
-
-        #--------------Number of Time Steps, Positions and Rotations---------------#
-        numberOfTimeSteps= dpos_data.shape[0]/nbobjs
+        # --------------Number of Time Steps, Positions and Rotations---------------#
+        numberOfTimeSteps = dpos_data.shape[0] / nbobjs
         interstellar = {}
         interstellarFix = {}
-        positions_ini = dpos_data[nbobjs*0:nbobjs*0+nbobjs, 2:]
+        positions_ini = dpos_data[nbobjs * 0 : nbobjs * 0 + nbobjs, 2:]
 
         for instance in io.instances():
-            _id = io.instances()[instance].attrs['id']
+            _id = io.instances()[instance].attrs["id"]
             interstellar[_id] = {}
-            if (_id >= 0):
-                interstellar[_id][ "positionX" ] = []      # position x
-                interstellar[_id][ "positionY" ] = []      # position y
-                interstellar[_id][ "positionZ" ] = []      # position z
-                interstellar[_id][ "quaternionX" ] = []      # quaternion coordoninate x
-                interstellar[_id][ "quaternionY" ] = []      # quaternion coordoninate y
-                interstellar[_id][ "quaternionZ" ] = []      # quaternion coordoninate z
-                interstellar[_id][ "quaternionW" ] = []      # quaternion coordoninate w
-                interstellar[_id][ "initialPosition" ] = {}      # initial translation
-                interstellar[_id][ "initialQuaternion" ] = {}      # initial quaternion
-                interstellar[_id][ "initialPosition" ][ "positionX" ] = translation[_id][ 0 ]      # initial translation
-                interstellar[_id][ "initialPosition" ][ "positionY" ] = translation[_id][ 1 ]      # initial translation
-                interstellar[_id][ "initialPosition" ][ "positionZ" ] = translation[_id][ 2 ]      # initial translation
-                interstellar[_id][ "initialQuaternion" ][ "quaternionX" ] = orientation[_id][ 0 ]      # initial quaternion
-                interstellar[_id][ "initialQuaternion" ][ "quaternionY" ] = orientation[_id][ 1 ]      # initial quaternion
-                interstellar[_id][ "initialQuaternion" ][ "quaternionZ" ] = orientation[_id][ 2 ]      # initial quaternion
-                interstellar[_id][ "initialQuaternion" ][ "quaternionW" ] = orientation[_id][ 3 ]      # initial quaternion
-            if (_id < 0):
-                interstellar[_id][ "positionX" ] = translation[_id][ 0 ]
-                interstellar[_id][ "positionY" ] = translation[_id][ 1 ]
-                interstellar[_id][ "positionZ" ] = translation[_id][ 2 ]
-                interstellar[_id][ "quaternionX" ] = orientation[_id][ 1 ]
-                interstellar[_id][ "quaternionY" ] = orientation[_id][ 2 ]
-                interstellar[_id][ "quaternionZ" ] = orientation[_id][ 3 ]
-                interstellar[_id][ "quaternionW" ] = orientation[_id][ 0 ]
+            if _id >= 0:
+                interstellar[_id]["positionX"] = []  # position x
+                interstellar[_id]["positionY"] = []  # position y
+                interstellar[_id]["positionZ"] = []  # position z
+                interstellar[_id]["quaternionX"] = []  # quaternion coordoninate x
+                interstellar[_id]["quaternionY"] = []  # quaternion coordoninate y
+                interstellar[_id]["quaternionZ"] = []  # quaternion coordoninate z
+                interstellar[_id]["quaternionW"] = []  # quaternion coordoninate w
+                interstellar[_id]["initialPosition"] = {}  # initial translation
+                interstellar[_id]["initialQuaternion"] = {}  # initial quaternion
+                interstellar[_id]["initialPosition"]["positionX"] = translation[_id][
+                    0
+                ]  # initial translation
+                interstellar[_id]["initialPosition"]["positionY"] = translation[_id][
+                    1
+                ]  # initial translation
+                interstellar[_id]["initialPosition"]["positionZ"] = translation[_id][
+                    2
+                ]  # initial translation
+                interstellar[_id]["initialQuaternion"]["quaternionX"] = orientation[
+                    _id
+                ][
+                    0
+                ]  # initial quaternion
+                interstellar[_id]["initialQuaternion"]["quaternionY"] = orientation[
+                    _id
+                ][
+                    1
+                ]  # initial quaternion
+                interstellar[_id]["initialQuaternion"]["quaternionZ"] = orientation[
+                    _id
+                ][
+                    2
+                ]  # initial quaternion
+                interstellar[_id]["initialQuaternion"]["quaternionW"] = orientation[
+                    _id
+                ][
+                    3
+                ]  # initial quaternion
+            if _id < 0:
+                interstellar[_id]["positionX"] = translation[_id][0]
+                interstellar[_id]["positionY"] = translation[_id][1]
+                interstellar[_id]["positionZ"] = translation[_id][2]
+                interstellar[_id]["quaternionX"] = orientation[_id][1]
+                interstellar[_id]["quaternionY"] = orientation[_id][2]
+                interstellar[_id]["quaternionZ"] = orientation[_id][3]
+                interstellar[_id]["quaternionW"] = orientation[_id][0]
 
-        #print("interstellar:  %s" % interstellar )
-        #print("interstellarFix:  %s" % interstellar )
+        # print("interstellar:  %s" % interstellar )
+        # print("interstellarFix:  %s" % interstellar )
 
-        zeroIN = False                                          # we check if _id = 0 exists or not
+        zeroIN = False  # we check if _id = 0 exists or not
         for instance in io.instances():
-            _id = io.instances()[instance].attrs['id']
-            if ( _id==0 ):
+            _id = io.instances()[instance].attrs["id"]
+            if _id == 0:
                 zeroIN = True
                 break
 
-
         for timestep in range(numberOfTimeSteps):
-            #print("\nNumber of Time Steps: %d" % numberOfTimeSteps)
-            update_progress(timestep/float(numberOfTimeSteps))
-            positions = dpos_data[nbobjs*timestep:nbobjs*timestep+nbobjs, 2:]
-            #print("\nPositions: %s" % positions)             #Positions of all objects at timestep
+            # print("\nNumber of Time Steps: %d" % numberOfTimeSteps)
+            update_progress(timestep / float(numberOfTimeSteps))
+            positions = dpos_data[nbobjs * timestep : nbobjs * timestep + nbobjs, 2:]
+            # print("\nPositions: %s" % positions)
+            #           #Positions of all objects at timestep
             for instance in io.instances():
-                 _id = io.instances()[instance].attrs['id']
-                 _idTab = _id
-                 if ( _id >= 0 ):
-                    if ( zeroIN ):
-                        _idTab += 1                                                                 # if _id=0 present then we have to be careful that positions[0] returns positions of object id=0 whereas if _id=0 NOT PRESENT then position[0] returns positions of object id=1
-                    q0, q1, q2, q3, q4, q5, q6 = [float(x) for x in positions[_idTab-1,:]]           # positions and quaternions of the object at timestep
-                    #print("orientation["+str(_id)+"]",orientation[_id])
-                                                                                                  # position coordinates and quaternions are gathered in interstellar
-                    interstellar[_id][ "positionX" ].append(q0)
-                    interstellar[_id][ "positionY" ].append(q1)
-                    interstellar[_id][ "positionZ" ].append(q2)
+                _id = io.instances()[instance].attrs["id"]
+                _idTab = _id
+                if _id >= 0:
+                    if zeroIN:
+                        _idTab += 1
+                        # if _id=0 present then we have to be careful
+                        # that positions[0] returns positions of object id=0 whereas
+                        # if _id=0 NOT PRESENT then position[0]
+                        # returns positions of object id=1
+                    q0, q1, q2, q3, q4, q5, q6 = [
+                        float(x) for x in positions[_idTab - 1, :]
+                    ]  # positions and quaternions of the object at timestep
+                    # print("orientation["+str(_id)+"]",orientation[_id])
+                    # position coordinates and quaternions are gathered in interstellar
+                    interstellar[_id]["positionX"].append(q0)
+                    interstellar[_id]["positionY"].append(q1)
+                    interstellar[_id]["positionZ"].append(q2)
 
-
-                    interstellar[_id][ "quaternionW" ].append(q3)
-                    interstellar[_id][ "quaternionX" ].append(q4)
-                    interstellar[_id][ "quaternionY" ].append(q5)
-                    interstellar[_id][ "quaternionZ" ].append(q6)
-        my_ren = ThreejsRenderer(longueur=longueur, numberOfVectors = numberOfVectors, interstellar=interstellar, numberOfTimeSteps=numberOfTimeSteps, numberStaticObjects = numberStaticObjects, interstellarVectors = interstellarVectors )     #create the class with parameters
-        my_ren.CreateDictionaryOfShapes(dictionaryOfShapes)                              # calling the method CreateDictionaryOfShapes to create the js file corresponding to the shapes
-
+                    interstellar[_id]["quaternionW"].append(q3)
+                    interstellar[_id]["quaternionX"].append(q4)
+                    interstellar[_id]["quaternionY"].append(q5)
+                    interstellar[_id]["quaternionZ"].append(q6)
+        my_ren = ThreejsRenderer(
+            longueur=longueur,
+            numberOfVectors=numberOfVectors,
+            interstellar=interstellar,
+            numberOfTimeSteps=numberOfTimeSteps,
+            numberStaticObjects=numberStaticObjects,
+            interstellarVectors=interstellarVectors,
+        )  # create the class with parameters
+        my_ren.CreateDictionaryOfShapes(
+            dictionaryOfShapes
+        )  # calling the method CreateDictionaryOfShapes to create the js file corresponding to the shapes
 
         def inplace_change(filename, old_string, new_string):
-            s=open(filename).read()
+            s = open(filename).read()
             if old_string in s:
-                print('Changing "{old_string}" to "{new_string}"'.format(**locals()), "in", filename)
-                s=s.replace(old_string, new_string)
-                f=open(filename, 'w')
+                print(
+                    'Changing "{old_string}" to "{new_string}"'.format(**locals()),
+                    "in",
+                    filename,
+                )
+                s = s.replace(old_string, new_string)
+                f = open(filename, "w")
                 f.write(s)
                 f.flush()
                 f.close()
             else:
                 print('No occurences of "{old_string}" found.'.format(**locals()))
-        def insert_beginning_file(filename,  new_string):
-            s=open(filename).read()
+
+        def insert_beginning_file(filename, new_string):
+            s = open(filename).read()
             print(s[0])
-            s = new_string +s
+            s = new_string + s
             print(s[0])
-            f=open(filename, 'w')
+            f = open(filename, "w")
             f.write(s)
             f.flush()
             f.close()
-           
-            
-        def insert_end_file(filename,  new_string):
-            s=open(filename).read()
+
+        def insert_end_file(filename, new_string):
+            s = open(filename).read()
             print(s[-1])
-            s = s +new_string 
+            s = s + new_string
             print(s[-1])
-            f=open(filename, 'w')
+            f = open(filename, "w")
             f.write(s)
             f.flush()
             f.close()
-           
-            
-        #-----------Replace all "Shape" by "Shape1","Shape2",....etc...------------#
+
+        # -----------Replace all "Shape" by "Shape1","Shape2",....etc...------------#
         for instance in io.instances():
-            _id = io.instances()[instance].attrs['id']
-            if ( _id >= 0 ):
-                inplace_change(my_ren._path+"/shape"+str(_id)+".js", "Shape","Shape"+str(_id) ) # replace Shape in the Shape1 file by Shape1, same for Shape2, Shape3,...
-            if ( _id < 0 ):
-                inplace_change(my_ren._path+"/shape_"+str(abs(_id))+".js", "Shape","Shape_"+str(abs(_id)) ) # replace Shape in the Shape1 file by Shape1, same for Shape2, Shape3,...
-             
-        #---------------------Converting interstellar into JSON--------------------#
+            _id = io.instances()[instance].attrs["id"]
+            if _id >= 0:
+                inplace_change(
+                    my_ren._path + "/shape" + str(_id) + ".js",
+                    "Shape",
+                    "Shape" + str(_id),
+                )  # replace Shape in the Shape1 file by Shape1, same for Shape2, Shape3,...
+            if _id < 0:
+                inplace_change(
+                    my_ren._path + "/shape_" + str(abs(_id)) + ".js",
+                    "Shape",
+                    "Shape_" + str(abs(_id)),
+                )  # replace Shape in the Shape1 file by Shape1, same for Shape2, Shape3,...
+
+        # ---------------------Converting interstellar into JSON--------------------#
         import json
-        writting = json.dumps(interstellar,ensure_ascii=False)                                                                                  # add "var dataInterstellar =" at the begining of the interstellar.json file and a "; at the end"
-        with open(my_ren._path+'/interstellar.json', 'w') as outfile:
+
+        writting = json.dumps(
+            interstellar, ensure_ascii=False
+        )  # add "var dataInterstellar =" at the begining of the interstellar.json file and a "; at the end"
+        with open(my_ren._path + "/interstellar.json", "w") as outfile:
             json.dump(interstellar, outfile, indent=4)
-        insert_beginning_file(os.path.join(my_ren._path, 'interstellar.json'),"var dataInterstellar =")
-        insert_end_file(os.path.join(my_ren._path, 'interstellar.json'),";")
+        insert_beginning_file(
+            os.path.join(my_ren._path, "interstellar.json"), "var dataInterstellar ="
+        )
+        insert_end_file(os.path.join(my_ren._path, "interstellar.json"), ";")
 
-
-        writting = json.dumps(interstellarVectors,ensure_ascii=True)                                                                                  # add "var dataInterstellarVectors =" at the begining of the interstellarVectors.json file and a "; at the end"
-        with open(my_ren._path+'/interstellarVectors.json', 'w') as outfile:
+        writting = json.dumps(
+            interstellarVectors, ensure_ascii=True
+        )  # add "var dataInterstellarVectors =" at the begining of the interstellarVectors.json file and a "; at the end"
+        with open(my_ren._path + "/interstellarVectors.json", "w") as outfile:
             json.dump(interstellarVectors, outfile, indent=4)
-        insert_beginning_file(os.path.join(my_ren._path, 'interstellarVectors.json'),"var dataInterstellarVectors =")
-        insert_end_file(os.path.join(my_ren._path, 'interstellarVectors.json'),";")
+        insert_beginning_file(
+            os.path.join(my_ren._path, "interstellarVectors.json"),
+            "var dataInterstellarVectors =",
+        )
+        insert_end_file(os.path.join(my_ren._path, "interstellarVectors.json"), ";")
 
-        #---Move the files to directory SliderCrank/Shape -------------------------#
-        #subprocess.call(["mv " + my_ren._path+" "+os.getcwd() + "/simulation/static/renderer/Interstellar/shape_temps/"],shell=True)                 # move all the files from the TPF folder to the path indicated in green
+        # ---Move the files to directory SliderCrank/Shape -------------------------#
+        # subprocess.call(["mv " + my_ren._path+" "+os.getcwd() + "/simulation/static/renderer/Interstellar/shape_temps/"],shell=True)                 # move all the files from the TPF folder to the path indicated in green
 
 """
         urlstext = open(os.getcwd()+'/simulation/static/renderer/Interstellar/urls.txt', 'w')

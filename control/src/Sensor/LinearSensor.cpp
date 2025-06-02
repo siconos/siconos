@@ -20,7 +20,6 @@
 #include "DynamicalSystem.hpp"
 #include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixVectorOp.hpp"  // mat-vec prod
 #include "SiconosVector.hpp"
 siconos::control::LinearSensor::LinearSensor(
     std::shared_ptr<siconos::modeling::DynamicalSystem> ds)

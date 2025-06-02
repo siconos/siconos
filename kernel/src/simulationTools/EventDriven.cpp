@@ -17,7 +17,6 @@
  */
 #include "EventDriven.hpp"
 
-#include "BlockMatrix.hpp"
 #include "EventsManager.hpp"
 #include "FirstOrderNonLinearDS.hpp"
 #include "Interaction.hpp"
@@ -408,7 +407,9 @@ void siconos::simulation::EventDriven::computef(siconos::integrators::OneStepInt
 
   auto& lsodar = static_cast<siconos::integrators::LsodarOSI&>(osi);
   // fill in xWork vector (ie all the x of the ds of this osi) with x
-  lsodar.fillXWork(sizeOfX, x);
+  assert(*sizeOfX >= 0);
+  std::size_t sizex = static_cast<std::size_t>(*sizeOfX);
+  lsodar.fillXWork(sizex, x);
 
   double t = *time;
   // Update Jacobian matrices at all interactions
@@ -489,35 +490,14 @@ void siconos::simulation::EventDriven::computeJacobianfx(
   // Save jacobianX values from dynamical system into current jacob
   // (in-out parameter)
 
-  unsigned int i = 0;
-  unsigned pos = 0;
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
   auto osiDSGraph = lsodar.dynamicalSystemsGraph();
   for (std::tie(dsi, dsend) = osiDSGraph->vertices(); dsi != dsend; ++dsi) {
     if (!(lsodar.checkOSI(dsi))) continue;
 
     auto ds = osiDSGraph->bundle(*dsi);
-    if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
-      auto jacotmp =
-          std::dynamic_pointer_cast<siconos::algebra::BlockMatrix>(lds->jacobianRhsOver_x());
-      for (decltype(lds->x_size()) j = 0; j < lds->x_size(); ++j) {
-        for (decltype(lds->dimension()) k = 0; k < lds->dimension(); ++k)
-          jacob[i++] = (*jacotmp)(k, j);
-      }
-    } else if (auto lds =
-                   std::dynamic_pointer_cast<siconos::modeling::FirstOrderNonLinearDS>(ds)) {
-      auto jacotmp = ds->jacobianRhsOver_x()->block(0, 0);  // just one block in JacxRhs
-      auto jaco_size = jacotmp->rows() * jacotmp->cols();
-      // assert(pos + jacotmp.size() <= jacobsize && "Destination buffer too small!");
-      std::copy(jacotmp->data(), jacotmp->data() + jacotmp->size(), &jacob[pos]);
-      pos += jaco_size;
-
-    } else {
-      THROW_EXCEPTION(
-          "siconos::simulation::EventDriven::computeJacobianfx, type of "
-          "DynamicalSystem not "
-          "yet supported.");
-    }
+    const auto& jacotmp = ds->jacobianRhsOver_x();
+    std::copy(jacotmp.begin(), jacotmp.end(), jacob);
   }
 }
 
@@ -538,7 +518,9 @@ void siconos::simulation::EventDriven::computeg(
   auto lsodar = std::static_pointer_cast<siconos::integrators::LsodarOSI>(osi);
   // Solve LCP at acceleration level to calculate the lambda[2] at Interaction
   // of indexSet[2]
-  lsodar->fillXWork(sizeOfX, x);
+  assert(*sizeOfX >= 0);
+  std::size_t sizex = static_cast<std::size_t>(*sizeOfX);
+  lsodar->fillXWork(sizex, x);
   //
   double t = *time;
   if (!_allNSProblems->empty()) {

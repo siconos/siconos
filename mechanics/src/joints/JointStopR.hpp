@@ -52,7 +52,7 @@ class JointStopR : public siconos::modeling::NewtonEulerR {
    *  \param q0  q states vectors of the related the dynamical systems
    */
   virtual void computeH_NE_(double time, siconos::modeling::Interaction& inter,
-                                       const siconos::algebra::BlockVector& q0) override;
+                            const siconos::algebra::BlockVector& q0) override;
 
  public:
   /** Initialize a joint stop for a common case: a single axis with a
@@ -109,6 +109,10 @@ class JointStopR : public siconos::modeling::NewtonEulerR {
 
   /** Return the number of joint axes indexed by this relation. */
   auto numberOfAxes();
+
+  virtual void accept(modeling::relations::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 };
 }  // namespace siconos::joints
 #endif  // JointStopRELATION_H

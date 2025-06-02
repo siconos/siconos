@@ -46,11 +46,11 @@ class NewtonEulerJointR : public siconos::modeling::NewtonEulerR {
    *  will not enter into unilateral contact. */
   bool allowSelfCollide_{false};
 
-  /** Vector of points used to defined the joint constraint. Default size = 1. */
-  std::vector<std::shared_ptr<siconos::algebra::SiconosVector3>> points_ = {nullptr};
+  /** Vector of points used to defined the joint constraint. Default size = 0. */
+  std::vector<siconos::algebra::SiconosVector3> points_ = {};
 
-  /** Vector of axes used to defined the joint constraint. Default size = 1. */
-  std::vector<std::shared_ptr<siconos::algebra::SiconosVector3>> axes_ = {nullptr};
+  /** Vector of axes used to defined the joint constraint. Default size = 0 */
+  std::vector<siconos::algebra::SiconosVector3> axes_ = {};
 
   /** Defines whether points and axes are specified in absolute or
    * relative frame. */
@@ -84,7 +84,7 @@ class NewtonEulerJointR : public siconos::modeling::NewtonEulerR {
    *  \param index required position in axes vector
    */
   inline auto axis(unsigned int index) {
-    return siconos::algebra::ConstMapVectorType(axes_[index]->data(), axes_[index]->size());
+    return siconos::algebra::ConstMapVectorType(axes_[index].data(), axes_[index].size());
   }
 
   /** Set whether points and axes should be interpreted in absolute or
@@ -184,6 +184,9 @@ class NewtonEulerJointR : public siconos::modeling::NewtonEulerR {
                                const siconos::algebra::BlockVector& q0,
                                Eigen::Ref<siconos::algebra::SiconosMatrix> jachq,
                                unsigned int axis = 0) {}
+  virtual void accept(modeling::relations::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 };
 }  // namespace siconos::joints
 #endif  // NewtonEulerJointRELATION_H

@@ -17,12 +17,12 @@
  */
 #include "LCP.hpp"
 
+#include "NonSmoothLaw.hpp"
 #include "NumericsSolversNamespace.h"  // solver_options stuff
 #include "OSNSMatrix.hpp"
-#include "TypeName.hpp" // check nslaw type, should be replaced by dynamic_cast or variant ? 
 #include "SiconosException.hpp"
-#include "NonSmoothLaw.hpp"
 #include "SiconosVector.hpp"
+#include "TypeName.hpp"  // check nslaw type, should be replaced by dynamic_cast or variant ?
 // #include "SolverOptions.h"
 // #include "ComplementarityConditionNSL.hpp"
 // // --- numerics headers ---
@@ -35,24 +35,20 @@
 #include "siconos_debug.h"
 
 siconos::nonsmooth_formulations::LCP::LCP(int numericsSolverId)
-    : LCP(std::shared_ptr<SolverOptions>(
-          solver_options_create(numericsSolverId),
-          solver_options_delete))
-{
-}
+    : LCP(std::shared_ptr<SolverOptions>(solver_options_create(numericsSolverId),
+                                         solver_options_delete)) {}
 
 siconos::nonsmooth_formulations::LCP::LCP(std::shared_ptr<SolverOptions> options)
     : LinearOSNS(options),
-      _numerics_problem(std::make_shared<LinearComplementarityProblem>())
-{
-}
+      _numerics_problem(std::make_shared<LinearComplementarityProblem>()) {}
 
-bool siconos::nonsmooth_formulations::LCP::checkCompatibleNSLaw(siconos::modeling::NonSmoothLaw& nslaw)
-{
+bool siconos::nonsmooth_formulations::LCP::checkCompatibleNSLaw(
+    siconos::modeling::NonSmoothLaw& nslaw) {
   float type_number = (float)(siconos::types::type_value(nslaw));
   _nslawtype.insert(type_number);
 
-  if (not(siconos::types::type_value(nslaw) == siconos::modeling::Type::ComplementarityConditionNSL ||
+  if (not(siconos::types::type_value(nslaw) ==
+              siconos::modeling::Type::ComplementarityConditionNSL ||
           siconos::types::type_value(nslaw) == siconos::modeling::Type::NewtonImpactNSL ||
           siconos::types::type_value(nslaw) == siconos::modeling::Type::MultipleImpactNSL)) {
     THROW_EXCEPTION(
@@ -65,8 +61,7 @@ bool siconos::nonsmooth_formulations::LCP::checkCompatibleNSLaw(siconos::modelin
   return true;
 }
 
-int siconos::nonsmooth_formulations::LCP::solve()
-{
+int siconos::nonsmooth_formulations::LCP::solve() {
   // Note FP : wrap call to numerics solver inside this function
   // for python API (e.g. to allow profiling without C struct handling)
 
@@ -74,6 +69,7 @@ int siconos::nonsmooth_formulations::LCP::solve()
   _numerics_problem->M = &*_M->numericsMatrix();
   _numerics_problem->q = _q->data();
   _numerics_problem->size = _sizeOutput;
+
   int info = 0;
   // const char * name = &*_numerics_solver_options->solverName;
 
@@ -82,8 +78,8 @@ int siconos::nonsmooth_formulations::LCP::solve()
   }
 
   // Call LCP Driver
-  info = linearComplementarity_driver(
-      &*_numerics_problem, _z->data(), _w->data(), &*_numerics_solver_options);
+  info = linearComplementarity_driver(&*_numerics_problem, _z->data(), _w->data(),
+                                      &*_numerics_solver_options);
 
   if (_numerics_solver_options->solverId == SICONOS_LCP_ENUM) {
     lcp_enum_reset(&*_numerics_problem, &*_numerics_solver_options, 1);
@@ -91,8 +87,7 @@ int siconos::nonsmooth_formulations::LCP::solve()
   return info;
 }
 
-int siconos::nonsmooth_formulations::LCP::compute(double time)
-{
+int siconos::nonsmooth_formulations::LCP::compute(double time) {
   DEBUG_BEGIN("siconos::nonsmooth_formulations::LCP::compute(double time)\n");
   int info = 0;
 

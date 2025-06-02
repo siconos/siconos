@@ -137,7 +137,7 @@ def test_bouncing_ball1(datafile):
     #
 
     ref = sk.getMatrix(
-        sk.SimpleMatrix(datafile("BouncingBallTS.ref"))
+        sk.SiconosMatrix(datafile("BouncingBallTS.ref"))
     )
     error = np.linalg.norm(data - ref)
     assert error < 1e-12

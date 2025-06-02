@@ -27,7 +27,6 @@
 #include "NewtonImpactNSL.hpp"
 #include "OneStepNSProblem.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixVectorOp.hpp"  // mat-vec prod
 #include "SiconosVector.hpp"
 #include "Simulation.hpp"
 #include "Tools.hpp"  // For enum_to_string
@@ -386,7 +385,7 @@ void siconos::integrators::D1MinusLinearOSI::updateState(const unsigned int) {
         auto dummy = *d->p(1);
         /* Compute the velocity jump due to the impulse */
         if (d->hasLUMass()) {
-          d->update_lu_mass();
+          d->init_lu_mass();
           dummy = d->LUMass()->solve(dummy);
         }
         /* Add the velocity jump to the free velocity */

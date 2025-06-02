@@ -6,7 +6,7 @@ from siconos.kernel import FirstOrderLinearDS, FirstOrderLinearTIR, \
     ComplementarityConditionNSL, Interaction, NonSmoothDynamicalSystem,\
     EulerMoreauOSI, TimeDiscretisation, LCP, TimeStepping
 from numpy import empty
-from siconos.kernel import SimpleMatrix, getMatrix
+from siconos.kernel import SiconosMatrix, getMatrix
 from numpy.linalg import norm
 
 
@@ -135,6 +135,6 @@ def test_diode_bridge(datafile):
     #
     # comparison with the reference file
     #
-    ref = getMatrix(SimpleMatrix(datafile("diode_bridge.ref")))
+    ref = getMatrix(SiconosMatrix(datafile("diode_bridge.ref")))
     assert norm(data_plot - ref) < 1e-12
     return ref, data_plot

@@ -88,7 +88,7 @@ void normalizeq(siconos::algebra::SiconosVector &q);
  */
 
 void computeRotationMatrix(double q0, double q1, double q2, double q3,
-                           siconos::algebra::SiconosMatrix &rotationMatrix);
+                           siconos::algebra::SiconosMatrix33 &rotationMatrix);
 
 /* For a given configuration vector q composed of a position and a quaternion,
  * compute the associated rotation matrix
@@ -98,7 +98,7 @@ void computeRotationMatrix(double q0, double q1, double q2, double q3,
  */
 
 void computeRotationMatrix(const siconos::algebra::SiconosVector &q,
-                           siconos::algebra::SiconosMatrix &rotationMatrix);
+                           siconos::algebra::SiconosMatrix33 &rotationMatrix);
 
 /* For a given configuration vector q composed of a position and a quaternion,
  * compute the transposed associated rotation matrix
@@ -107,7 +107,7 @@ void computeRotationMatrix(const siconos::algebra::SiconosVector &q,
  * \param[in,out] v the vector to be rotated
  */
 void computeRotationMatrixTransposed(const siconos::algebra::SiconosVector &q,
-                                     siconos::algebra::SiconosMatrix &rotationMatrix);
+                                     siconos::algebra::SiconosMatrix33 &rotationMatrix);
 
 /* For a given configuration vector q composed of a position and a quaternion,
  *  performs the rotation of the vector v
@@ -125,7 +125,7 @@ void quaternionRotateVector(const Eigen::Ref<const siconos::algebra::SiconosVect
  * \param[in,out] m the vector to be rotated
  */
 void quaternionRotateMatrix(const Eigen::Ref<const siconos::algebra::SiconosVector> &q,
-                            Eigen::Ref<siconos::algebra::SiconosMatrix> m);
+                            Eigen::Ref<siconos::algebra::SiconosMatrix33> m);
 
 /* For a given  configuration vector q composed of a position and a quaternion,
  * express the vector v given in
@@ -151,7 +151,7 @@ void rewriteVectorFromAbsoluteToBodyFrame(
  */
 void rewriteMatrixFromAbsoluteToBodyFrame(
     const Eigen::Ref<const siconos::algebra::SiconosVector> &q,
-    Eigen::Ref<siconos::algebra::SiconosMatrix> m);
+    Eigen::Ref<siconos::algebra::SiconosMatrix33> m);
 
 void rewriteVectorFromBodyToAbsoluteFrame(
     const Eigen::Ref<const siconos::algebra::SiconosVector> &q,
@@ -159,7 +159,7 @@ void rewriteVectorFromBodyToAbsoluteFrame(
 
 void rewriteMatrixFromBodyToAbsoluteFrame(
     const Eigen::Ref<const siconos::algebra::SiconosVector> &q,
-    Eigen::Ref<siconos::algebra::SiconosMatrix> m);
+    Eigen::Ref<siconos::algebra::SiconosMatrix33> m);
 
 void compositionLawLieGroup(const siconos::algebra::SiconosVector &a,
                             siconos::algebra::SiconosVector &b,
@@ -189,6 +189,42 @@ void copyQuatPos2d(const siconos::algebra::SiconosVector &from,
 boost::math::quaternion<double> rotquat(const siconos::algebra::SiconosVector &v);
 
 boost::math::quaternion<double> posquat(const siconos::algebra::SiconosVector &v);
+
+/** Compute an orthonormal basis from a given input axis
+
+    \param[in,out] axis0 reference axis (will be normalized)
+    \param[inout] axis1 second axis of the base
+    \param[inout] axis2 third axis of the base
+
+*/
+void computeOrthonormalBaseFromAxis(siconos::algebra::SiconosVector3 &axis0,
+                                    siconos::algebra::SiconosVector3 &axis1,
+                                    siconos::algebra::SiconosVector3 &axis2);
+
+/* function to compute an orthonormal basis form a given vector
+ * adapted with eigen vectors from
+ * Tom Duff, James Burgess, Per Christensen, Christophe Hery, Andrew Kensler, Max Liani, and
+ * Ryusuke Villemin, Building an Orthonormal Basis, Revisited, Journal of Computer Graphics
+ * Techniques (JCGT), vol. 6, no. 1, 1-8, 2017 Available online
+ * http://jcgt.org/published/0006/01/01/ void branchlessONB(const Vec3f &n, Vec3f &b1, Vec3f
+ * &b2)
+ * {
+ *   float sign = copysignf(1.0f, n.z);
+ *   const float a = -1.0f / (sign + n.z);
+ *   const float b = n.x * n.y * a;
+ *   b1 = Vec3f(1.0f + sign * n.x * n.x * a, sign * b, -sign * n.x);
+ *   b2 = Vec3f(b, sign + n.y * n.y * a, -n.y);
+ * }
+ */
+/**  compute an orthonormal basis
+ *   \param[in,out] A a reference vector (normalized after call)
+ *   \param[out] A1 second base vector
+ *   \param[out] A2 third base vector
+ *   \return true if all went right else false (e.g. if A.norm =0)
+ */
+bool orthoBaseFromVector(siconos::algebra::SiconosVector3 &A,
+                         siconos::algebra::SiconosVector3 &A1,
+                         siconos::algebra::SiconosVector3 &A2);
 
 }  // namespace siconos::geometry
 #endif  // ROTATIONQUATERNION_H

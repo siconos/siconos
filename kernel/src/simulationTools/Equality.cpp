@@ -96,7 +96,7 @@ void siconos::nonsmooth_formulations::Equality::updateM() {
     _M->setStorageType(_numericsMatrixStorageType);
     _M->fillM(indexSet);
   }
-  _sizeOutput = _M->size();
+  _sizeOutput = _M->rows();
 }
 
 void siconos::nonsmooth_formulations::Equality::display() const {

@@ -58,6 +58,6 @@ struct ControlLinearAdditionalTermsED : siconos::integrators::ExtraAdditionalTer
   virtual void addJacobianRhsContribution(
       siconos::graphs::DynamicalSystemsGraph& DSG0,
       const siconos::graphs::DynamicalSystemsGraph::VDescriptor& dsgVD, const double t,
-      siconos::algebra::SiconosMatrix& jacRhs);
+      siconos::algebra::SiconosVector& jacRhs);
 };
 }  // namespace siconos::control

@@ -41,9 +41,7 @@ SICONOS_IO_REGISTER_WITH_BASES(FirstOrderLinearTIR, (FirstOrderR), (_e))
 SICONOS_IO_REGISTER(
     siconos::modeling::NonSmoothDynamicalSystem,
     (_BVP)(_T)(_author)(_changeLog)(_date)(_description)(_mIsLinear)(_t)(_t0)(_title)(_topology))
-SICONOS_IO_REGISTER(
-    BoundaryCondition,
-   (prescribedVelocityOld_)(velocityIndices_))
+SICONOS_IO_REGISTER(BoundaryCondition, (prescribedVelocityOld_)(velocityIndices_))
 SICONOS_IO_REGISTER_WITH_BASES(siconos::modeling::NewtonImpactNSL, (NonSmoothLaw), (_e))
 SICONOS_IO_REGISTER_WITH_BASES(
     NewtonEuler1DR, (NewtonEulerR),
@@ -58,8 +56,9 @@ SICONOS_IO_REGISTER(siconos::modeling::NonSmoothDynamicalSystem::Change, (ds)(i)
 SICONOS_IO_REGISTER_WITH_BASES(FirstOrderLinearR, (FirstOrderR), (_e))
 SICONOS_IO_REGISTER_WITH_BASES(FirstOrderType2R, (FirstOrderR), )
 SICONOS_IO_REGISTER_WITH_BASES(FirstOrderType1R, (FirstOrderR), )
-SICONOS_IO_REGISTER_WITH_BASES(FirstOrderLinearDS, (FirstOrderNonLinearDS),
-                               (_A)(_b)(_hasConstantA)(hasConstantbVector_)(_pluginA)(_pluginb))
+SICONOS_IO_REGISTER_WITH_BASES(
+    FirstOrderLinearDS, (FirstOrderNonLinearDS),
+    (_A)(_b)(_hasConstantA)(hasConstantbVector_)(_pluginA)(_pluginb))
 SICONOS_IO_REGISTER_WITH_BASES(LagrangianCompliantR, (LagrangianR), (_pluginJachlambda))
 SICONOS_IO_REGISTER(NonSmoothLaw, (_size))
 SICONOS_IO_REGISTER_WITH_BASES(RelayNSL, (NonSmoothLaw), (_lb)(_ub))
@@ -174,7 +173,6 @@ SICONOS_IO_REGISTER_WITH_BASES(LagrangianDS,(DynamicalSystem),
   (q0_view_)
   (qMemory_)
   (reactionToBoundaryConditions_)
-  (rhsMatrices_)
   (velocity0_view_)
   (velocityMemory_))
 SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerDS,(DynamicalSystem),
@@ -225,7 +223,6 @@ SICONOS_IO_REGISTER_WITH_BASES(NewtonEulerDS,(DynamicalSystem),
   (_qDim)
   (qMemory_)
   (reactionToBoundaryConditions_)
-  (rhsMatrices_)
   (scalarMass_)
   (_twist)
   (twist0_view_)
@@ -495,8 +492,8 @@ void siconos_io_register_generated_Kernel(Archive& ar)
   ar.register_type(static_cast<BlockMatrix*>(nullptr));
   ar.register_type(static_cast<GraphProperties*>(nullptr));
   ar.register_type(static_cast<DynamicalSystemProperties*>(nullptr));
-  ar.register_type(static_cast<InteractionProperties*>(nullptr));u
-  ar.register_type(static_cast<MatrixIntegrator*>(nullptr));
+  ar.register_type(static_cast<InteractionProperties*>(nullptr));
+  u ar.register_type(static_cast<MatrixIntegrator*>(nullptr));
   ar.register_type(static_cast<DynamicalSystemsGraph*>(nullptr));
   ar.register_type(static_cast<InteractionsGraph*>(nullptr));
   ar.register_type(static_cast<Topology*>(nullptr));

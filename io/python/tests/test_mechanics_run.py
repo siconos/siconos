@@ -18,7 +18,6 @@
 from pathlib import Path
 import h5py
 import pytest
-import os
 
 has_mechanics_run = False
 
@@ -30,12 +29,16 @@ try:
 except Exception:
     pass
 
+config_native = smrun.RunnerConfig(backend="native")
+
 
 @pytest.mark.skipif(not has_mechanics_run, reason="Only if mechanics is available")
 def test_create_h5run():
     outputfile_name = "mytest.h5"
     # Just test creation and proper writing for the output file
-    with smrun.MechanicsHdf5Runner(io_filename=outputfile_name) as myio:
+    with smrun.MechanicsHdf5Runner(
+        io_filename=outputfile_name, config=config_native
+    ) as myio:
         myio.print_verbose("Build mechanics_hdf5")
         # Definition of a cube as a convex shape
         myio.add_convex_shape(

@@ -36,10 +36,10 @@ struct RollingFrictionContactProblem {
   int dimension;
   /** the number of contacts \f$ n_c \f$ */
   int numberOfContacts;
-  /** \f$ {M} \in {{\mathrm{I\!R}}}^{n \times n} \f$,
-     a matrix with \f$ n = d  n_c\f$ stored in NumericsMatrix structure */
+  /** \f$ {M} \in {{\mathrm{I\!R}}}^{m \times m} \f$,
+     a matrix with \f$ m = d  n_c\f$ stored in NumericsMatrix structure */
   NumericsMatrix *M;
-  /** \f$ {q} \in {{\mathrm{I\!R}}}^{n} \f$ */
+  /** \f$ {q} \in {{\mathrm{I\!R}}}^{m} \f$ */
   double *q;
   /** \f$ {\mu} \in {{\mathrm{I\!R}}}^{n_c} \f$, vector of friction coefficients
       (\f$ n_c =\f$ numberOfContacts) */

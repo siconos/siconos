@@ -23,10 +23,7 @@
 #include "ControlSensor.hpp"
 #include "FirstOrderLinearDS.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixOp.hpp"
-#include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
-#include "SiconosVectorOp.hpp"
 #include "TimeStepping.hpp"
 #include "ZeroOrderHoldOSI.hpp"
 
@@ -72,7 +69,7 @@ void siconos::control::LinearSMCimproved::predictionPerturbation(
       auto& measuredPertC = *(*_measuredPert)[0];
 
       // Cp_k = s_k + Cp_k-tilde
-      siconos::algebra::prod(*_Csurface, xTk, measuredPertC);
+      measuredPertC.noalias() = *_Csurface * xTk;
       measuredPertC += *(*_predictedPert)[std::min((unsigned int)1,
                                                    (unsigned int)_predictedPert->size() - 1)];
 

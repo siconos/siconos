@@ -82,13 +82,15 @@ class MechanicsIO {
   siconos::algebra::SiconosMatrix velocities(
       const siconos::modeling::NonSmoothDynamicalSystem& nsds) const;
 
-  /** get the coordinates of all contact points, normals, reactions and velocities
+  /** \return the coordinates of all contact points, normals, reactions and velocities as
+   * matrix where
+   *   - each line corresponds to a contact/Interaction
+   *   - line = mu x y z, nx, ny, nz, rx, ry, rz, vx, vy, vz, ox, oy, oz, id
+   *   Empty (shape (0,0)) matrix when there are no contacts.
    *  \param nsds current nonsmooth dynamical system
-   *  \param index_set the index set number.
-   *  \return a matrix where the columns are mu x y z, nx, ny, nz, rx, ry, rz, vx, vy, vz, ox,
-   *   oy, oz, id
+   *  \param index_set id of the index set of interest
    */
-  std::optional<siconos::algebra::SiconosMatrix> contactPoints(
+  siconos::algebra::SiconosMatrix contactPoints(
       const siconos::modeling::NonSmoothDynamicalSystem& nsds,
       unsigned int index_set = 1) const;
 
@@ -103,7 +105,10 @@ class MechanicsIO {
       const siconos::modeling::NonSmoothDynamicalSystem& nsds,
       unsigned int index_set = 1) const;
 
-  /** get the dissipation values  of all contact points
+  /** \return the dissipation values  of all contact points as a matrix where:
+       - each row corresponds to a contact.
+       - row[i] = id, normal contact work, tangent contact work, friction dissipation, contact
+     status
 
       \param nsds current nonsmooth dynamical system
       \param index_set the index set number.
@@ -112,10 +117,8 @@ class MechanicsIO {
       1/2 (v^+ + v^-)^\top p
       otherwise it corresponds to v_{k+omega} p
       \param tol double for the computation of contact status
-      \return a matrix where the columns are id, normal contact work, tangent contact work,
-      friction dissipation, contact status
   */
- std::optional<siconos::algebra::SiconosMatrix> contactContactWork(
+  siconos::algebra::SiconosMatrix contactContactWork(
       const siconos::modeling::NonSmoothDynamicalSystem& nsds, unsigned int index_set = 1,
       double omega = 0.5, double tol = 1e-08) const;
 
@@ -123,7 +126,7 @@ class MechanicsIO {
    *  \param nsds current nonsmooth dynamical system
    *  \return a matrix where the columns are domain, id
    */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> domains(
+  siconos::algebra::SiconosMatrix domains(
       const siconos::modeling::NonSmoothDynamicalSystem& nsds) const;
 };
 

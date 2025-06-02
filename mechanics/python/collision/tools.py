@@ -1,207 +1,230 @@
+#!/usr/bin/env @Python_EXECUTABLE@
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
+#
+# Copyright 2025 INRIA.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+"""
+tools.py - Geometry and contact tools for Siconos mechanics module
+
+This module provides classes to describe shapes, volumes, and contactors
+used in mechanical simulations, with optional transformation, material, and
+collision metadata.
+
+Classes
+-------
+- MovedShape : Base class for geometry with translation and orientation.
+- Shape : A named shape with optional instance identifier.
+- Volume : A Shape with mass and density parameters.
+- Contactor : A Shape belonging to a collision group, with contact metadata.
+"""
+from dataclasses import dataclass, field
+from typing import Optional, Union, Tuple, List
 from math import cos, sin
 from numpy.linalg import norm
+import numpy as np
 
 
-class Material(object):
-    """Some material properties that may be associated to shapes.
-
-    Parameter
-    ---------
-
-    :density: float, the material density.
+@dataclass
+class Material:
     """
-
-    def __init__(self,
-                 density=None):
-        self.density = density
-
-
-class MovedShape(object):
-    """A shape with a reference to some shape data and that is moved by a
-    given relative translation and relative orientation. The
-    orientation may be given as a quaternion or in the form (axis,
-    angle) where len(axis) == 3 and angle is a scalar.
-
-    The default value for the translation is
-    [0, 0, 0] and [1, 0, 0, 0] for the orientation.
+    Some material properties that may be associated to shapes.
 
     Parameters
     ----------
-
-    :shape_name: a reference name
-
-    :shape_data: a pointer to actual shape representation
-
-    :relative_translation: array_like of length 3
-      translation in the bodyframe coordinates.
-
-    :relative_orientation: array_like of length 4 (quaternion) or (axis, angle)
-      The orientation of the shape in the bodyframe coordinates.
-      It may be expressed with a quaternion [w, x, y, z] or a couple
-      ([x, y, z], angle)
+    density : float, optional
+        The material density (default is None).
     """
-    def __init__(self,
-                 shape_name,
-                 shape_data=None,
-                 relative_translation=[0, 0, 0],
-                 relative_orientation=[1, 0, 0, 0]):
 
-        if len(relative_orientation) == 2:
-            # axis + angle
-            axis = relative_orientation[0]
+    density: Optional[float] = None
+
+
+@dataclass
+class MovedShape:
+    """
+    A geometrical shape moved by a translation and an orientation relative
+    to its parent frame.
+
+    The orientation can be provided either as a quaternion [w, x, y, z]
+    or as an (axis, angle) pair.
+
+    Parameters
+    ----------
+    shape_name : str
+        Reference name or identifier of the shape.
+
+    data : object, optional
+        Actual shape geometry object, typically from an external CAD or OCC representation.
+
+    relative_translation : tuple of 3 floats, optional
+        Translation vector in the local body frame. Defaults to (0.0, 0.0, 0.0).
+
+    relative_orientation : tuple, optional
+        Either a quaternion [w, x, y, z], or (axis, angle) where
+        axis is a list of 3 floats and angle is a float.
+        Defaults to (1.0, 0.0, 0.0, 0.0), i.e., identity rotation.
+    """
+
+    shape_name: str
+    data: Optional[object] = None
+    relative_translation: Tuple[float, float, float] = (0.0, 0.0, 0.0)
+    relative_orientation: Union[
+        Tuple[float, float, float, float], Tuple[Tuple[float, float, float], float]
+    ] = (1.0, 0.0, 0.0, 0.0)
+    translation: np.ndarray = field(init=False)
+    orientation: np.ndarray = field(init=False)
+
+    def __post_init__(self):
+        # Convert the relative translation into a NumPy array (modifiable)
+        # and easier to use in mechanics_run
+        self.translation = np.array(self.relative_translation, dtype=np.float64)
+
+        ori = self.relative_orientation
+
+        if isinstance(ori, tuple) and len(ori) == 2:
+            axis, angle = ori
             assert len(axis) == 3
-            angle = relative_orientation[1]
-            assert type(angle) is float
+            assert isinstance(angle, float)
             n = sin(angle / 2) / norm(axis)
-
-            ori = [cos(angle / 2.), axis[0] * n, axis[1] * n, axis[2] * n]
+            # Maybe it would be better to normalize axis ?
+            ori = np.array(
+                [
+                    cos(angle / 2),
+                    axis[0] * n,
+                    axis[1] * n,
+                    axis[2] * n,
+                ],
+                dtype=np.float64,
+            )
         else:
-            # a given quaternion
-            assert len(relative_orientation) == 4
-            ori = relative_orientation
+            assert len(ori) == 4
+            ori = np.array(ori, dtype=np.float64)
 
-        self.shape_name = shape_name
-        self.data = shape_data
-        self.translation = relative_translation
         self.orientation = ori
 
 
+@dataclass
 class Shape(MovedShape):
     """
-    A MovedShape with optional instance name.
+    A MovedShape with an optional instance name.
 
     Parameters
     ----------
+    shape_name : str
+        Reference name or identifier of the shape.
 
-    :shape_name: a reference name
+    data : object, optional
+        Actual shape geometry object, typically from an external CAD or OCC representation.
 
-    :shape_data: a pointer to actual shape representation
+    instance_name : str, optional
+        Optional identifier for this shape instance.
 
-    :instance_name: string, optional
-        The name of the instance for further reference.
+    relative_translation : tuple of 3 floats, optional
+        Translation vector in the local body frame. Defaults to (0.0, 0.0, 0.0).
 
-    :relative_translation: array_like of length 3
-        Translation in the bodyframe coordinates.
-
-    :relative_orientation: array_like of length 4 (quaternion) or (axis, angle)
-        The orientation of the shape in the bodyframe coordinates.
-        It may be expressed with a quaternion [w, x, y, z] or a couple
-        ([x, y, z], angle)
+    relative_orientation : tuple, optional
+        Either a quaternion [w, x, y, z], or (axis, angle) where
+        axis is a list of 3 floats and angle is a float.
+        Defaults to (1.0, 0.0, 0.0, 0.0), i.e., identity rotation.
     """
 
-    def __init__(self,
-                 shape_name,
-                 shape_data=None,
-                 instance_name=None,
-                 relative_translation=[0, 0, 0],
-                 relative_orientation=[1, 0, 0, 0]):
-
-        self.instance_name = instance_name
-        super(Shape, self).__init__(shape_name,
-                                    shape_data,
-                                    relative_translation,
-                                    relative_orientation)
+    instance_name: Optional[str] = None
 
 
+@dataclass
 class Volume(Shape):
-    """A Shape with associated parameters.
+    """
+    A Shape with mass properties and material parameters.
+
+    Inherits from Shape and adds physical characteristics like mass and density
 
     Parameters
     ----------
+    shape_name : str
+        Reference name of the shape.
 
-    :shape_name: a reference name
+    shape_data : object, optional
+        Actual shape geometry object.
 
-    :shape_data: a pointer to actual shape representation
+    instance_name : str, optional
+        Optional unique name for this instance.
 
-    :instance_name: string, optional
-        The name of the instance for further reference.
+    mass : float, optional
+        Total mass. If None, can be computed from density and volume.
 
-    :mass:
-        The volume mass
+    parameters : Material, optional
+        Material properties (e.g., density).
 
-    :parameters:
-        The parameters associated to the volume.
-        This may be information about the material and its density.
+    relative_translation : tuple of 3 floats, optional
+        Translation in local coordinates. Defaults to (0, 0, 0).
 
-    :relative_translation: array_like of length 3
-        translation in the bodyframe coordinates.
-
-    :relative_orientation: array_like of length 4 (quaternion) or (axis, angle)
-        The orientation of the shape in the bodyframe coordinates.
-        It may be expressed with a quaternion [w, x, y, z] or a couple
-        ([x, y, z], angle)
+    relative_orientation : tuple, optional
+        Orientation as quaternion [w, x, y, z] or (axis, angle).
     """
 
-    def __init__(self,
-                 shape_name,
-                 shape_data=None,
-                 instance_name=None,
-                 mass=None,
-                 parameters=Material(density=1),
-                 relative_translation=[0, 0, 0],
-                 relative_orientation=[1, 0, 0, 0]):
-        self.instance_name = instance_name
-        self.mass = mass
-        self.parameters = parameters
-        super(Shape, self).__init__(shape_name,
-                                    shape_data,
-                                    relative_translation,
-                                    relative_orientation)
+    mass: Optional[float] = None
+    parameters: Material = field(default_factory=lambda: Material(density=1.0))
 
 
+@dataclass
 class Contactor(Shape):
-    """A Contactor is a Shape that belongs to a collision group and may
-    have associated parameters. Depending on the geometrical engine
-    used, some information may be added to the contactor, such as the
-    kind of contact and the concerned part of the shape.  Note that
-    contact laws must then be defined between collision groups.
+    """
+    A Shape that belongs to a collision group and may carry contact-specific data.
+
+    Depending on the geometrical engine used, some information may be added
+    to the contactor, such as the kind of contact and the concerned part of the shape.
+    Contact laws must then be defined between collision groups.
+
 
     Parameters
     ----------
+    shape_name : str
+        Reference name of the shape.
 
-    :shape_name: a reference name
+    shape_data : object, optional
+        Actual shape geometry.
 
-    :shape_data: a pointer to actual shape representation
+    instance_name : str, optional
+        Identifier for this instance of the shape.
 
-    :instance_name: string, optional
-        The name of the instance for further reference.
+    collision_group : int, optional
+        Group ID used in collision detection. Default is 0.
 
-    :collision_group: int
-        The collision group, an integer >= 0.
+    parameters : object, optional
+        Extra parameters attached to the contactor (e.g., friction, tags).
 
-    :parameters: optional
-        Parameters associated to the contactor.
+    contact_type : object, optional
+        Type of contact (e.g., face, edge), engine-specific.
 
-    :relative_translation: array_like of length 3
-        Translation of in the bodyframe coordinates.
+    contact_index : int, optional
+        Index of the concerned sub-entity.
 
-    :relative_orientation: array_like of length 4 (quaternion) or (axis, angle)
-        The orientation of the shape in the bodyframe coordinates.
-        It may be expressed with a quaternion [w, x, y, z] or a couple
-        ([x, y, z], angle)
+    relative_translation : tuple of 3 floats, optional
+        Translation in local coordinates. Defaults to (0, 0, 0).
 
+    relative_orientation : tuple, optional
+        Orientation as quaternion [w, x, y, z] or (axis, angle).
     """
 
-    def __init__(self,
-                 shape_name,
-                 shape_data=None,
-                 instance_name=None,
-                 collision_group=0,
-                 parameters=None,
-                 contact_type=None,
-                 contact_index=None,
-                 relative_translation=[0, 0, 0],
-                 relative_orientation=[1, 0, 0, 0]):
+    collision_group: int = 0
+    parameters: Optional[object] = None
+    contact_type: Optional[object] = None
+    contact_index: Optional[int] = None
 
-        self.group = collision_group
-        self.parameters = parameters
-        self.contact_type = contact_type
-        self.contact_index = contact_index
-
-        super(Contactor, self).__init__(shape_name,
-                                        shape_data,
-                                        instance_name,
-                                        relative_translation,
-                                        relative_orientation)
-
-
+    def __post_init__(self):
+        super().__post_init__()
+        # We keep 'group' for compat with legacy version
+        # but it's better to use collision_group everywhere
+        self.group = self.collision_group

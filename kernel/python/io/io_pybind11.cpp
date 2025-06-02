@@ -16,21 +16,17 @@
  * limitations under the License.
  */
 
+// // #include <pybind11/eigen.h>
+// // #include <pybind11/numpy.h>
+// // #include <pybind11/pybind11.h>
+// // #include <pybind11/stl.h>
 
-#include <pybind11/numpy.h>
-#include <pybind11/pybind11.h>
-#include <pybind11/eigen.h>
+// // #include "io.hpp"
 
-#include "SiconosMatrix.hpp"
+// // namespace py = pybind11;
 
-
-namespace py = pybind11;
-
-
-PYBIND11_MODULE(input, m)
-{
-    m.doc() = "Siconos nonsmooth io module";
-
-    m.def("readMatrixFromFile", &siconos::algebra::readMatrixFromFile, py::arg("filename"), py::arg("ascii") = true,
-          "Lire une matrice à partir d'un fichier et retourner une SiconosMatrix.");
-}
+// PYBIND11_MODULE(input, m) {
+//   m.doc() = "Siconos nonsmooth io module";
+//   // Note FP: no need to wrap read/write matrices methods: it's better to use numpy or scipy
+//   // built-in functions.
+// }

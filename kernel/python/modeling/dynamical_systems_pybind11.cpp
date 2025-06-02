@@ -68,7 +68,11 @@ void wrap_dynamical_systems(py::module_ &m) {
 
   py::class_<siconos::modeling::FirstOrderNonLinearDS,
              std::shared_ptr<siconos::modeling::FirstOrderNonLinearDS>,
-             siconos::modeling::DynamicalSystem>(m, "FirstOrderNonLinearDS");
+             siconos::modeling::DynamicalSystem>(m, "FirstOrderNonLinearDS")
+      .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>>(),
+           py::keep_alive<1, 2>(),  // keep python object (np array arguments) memory alive
+                                    // as long as object is referenced
+           py::arg("x0"));
 
   py::class_<siconos::modeling::FirstOrderLinearDS,
              std::shared_ptr<siconos::modeling::FirstOrderLinearDS>,
@@ -230,12 +234,13 @@ void wrap_dynamical_systems(py::module_ &m) {
 
       .def("q", &siconos::modeling::NewtonEulerDS::q_python,
            py::return_value_policy::reference_internal)
-      .def("velocity", &siconos::modeling::NewtonEulerDS::twist_python,
+      //  .def("velocity", &siconos::modeling::NewtonEulerDS::twist_python,
+      //       py::return_value_policy::reference_internal)
+      .def("twist", &siconos::modeling::NewtonEulerDS::twist_python,
            py::return_value_policy::reference_internal)
 
       .def("setConstantFext", &siconos::modeling::NewtonEulerDS::setConstantFext,
            py::keep_alive<1, 2>(), "To define a constant external forces vector")
-
       .def(
           "setComputeFextFunction",
           [](siconos::modeling::NewtonEulerDS &self, py::function f) {
@@ -246,6 +251,8 @@ void wrap_dynamical_systems(py::module_ &m) {
                 });
           },
           "How to compute external forces")
+      .def("setIsMextExpressedInInertialFrame",
+           &siconos::modeling::NewtonEulerDS::setIsMextExpressedInInertialFrame)
       .def_property("scalarMass", &siconos::modeling::NewtonEulerDS::scalarMass,
                     &siconos::modeling::NewtonEulerDS::setScalarMass);
 }

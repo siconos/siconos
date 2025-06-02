@@ -52,7 +52,7 @@ def _createMatrix(mat, dataType=np.float64):
     :type dataType: numpy dtype
     """
     if mat.matrixFile is not None:
-        return SK.SimpleMatrix(mat.matrixFile, True)
+        return SK.SiconosMatrix(mat.matrixFile, True)
     else:
         return np.asarray(mat.row, dtype=dataType)
 

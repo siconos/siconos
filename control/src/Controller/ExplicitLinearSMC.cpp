@@ -19,10 +19,8 @@
 #include "ExplicitLinearSMC.hpp"
 
 #include "ControlSensor.hpp"
-#include "SiconosMatrixOp.hpp"
-#include "SiconosMatrixVectorOp.hpp"
-#include "SiconosVector.hpp"
 #include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 
 siconos::control::ExplicitLinearSMC::ExplicitLinearSMC(std::shared_ptr<ControlSensor> sensor)
     : CommonSMC(ActuatorType::ExplicitLinearSMC, sensor) {}

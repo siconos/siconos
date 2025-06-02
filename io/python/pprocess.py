@@ -1,13 +1,29 @@
 #!/usr/bin/env @Python_EXECUTABLE@
+# Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
+#
+# Copyright 2025 INRIA.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import OCC
 
 from OCC import VERSION
 
-from OCC.gp import gp_Ax1, gp_Pnt, gp_Dir, gp_Trsf, gp_Quaternion,gp_Vec, gp_XYZ
+from OCC.gp import gp_Ax1, gp_Pnt, gp_Dir, gp_Trsf, gp_Quaternion, gp_Vec, gp_XYZ
 from OCC.TopLoc import TopLoc_Location
 
-#from OCC.Display.SimpleGui import get_backend
+# from OCC.Display.SimpleGui import get_backend
 
 from OCC.STEPControl import STEPControl_Reader, STEPControl_Writer, STEPControl_AsIs
 from OCC.Interface import Interface_Static_SetCVal
@@ -19,7 +35,15 @@ from OCC.TopoDS import TopoDS_Compound
 from OCC.IFSelect import IFSelect_RetDone, IFSelect_ItemsByEntity
 
 import OCC.Graphic3d as Graphic3d
-from OCC.Quantity import Quantity_NOC_DARKVIOLET, Quantity_NOC_BLUE1, Quantity_NOC_GREEN, Quantity_NOC_RED, Quantity_NOC_ORANGE, Quantity_NOC_SALMON, Quantity_NOC_YELLOW
+from OCC.Quantity import (
+    Quantity_NOC_DARKVIOLET,
+    Quantity_NOC_BLUE1,
+    Quantity_NOC_GREEN,
+    Quantity_NOC_RED,
+    Quantity_NOC_ORANGE,
+    Quantity_NOC_SALMON,
+    Quantity_NOC_YELLOW,
+)
 
 import vtk
 from vtk.util import numpy_support
@@ -28,46 +52,13 @@ import sys
 
 import siconos.io.mechanics_run as IO
 
-from siconos.io.SimpleGui import get_backend,init_display
-
-vtkmath = vtk.vtkMath()
-
-class Quaternion():
-
-    def __init__(self, *args):
-        self._data = vtk.vtkQuaternion[float](*args)
-
-    def __mul__(self, q):
-        r = Quaternion()
-        vtkmath.MultiplyQuaternion(self._data, q._data, r._data)
-        return r
-
-    def __getitem__(self, i):
-        return self._data[i]
-
-    def conjugate(self):
-        r = Quaternion((self[0], self[1], self[2], self[3]))
-        r._data.Conjugate()
-        return r
-
-    def rotate(self, v):
-        pv = Quaternion((0, v[0], v[1], v[2]))
-        rv = self * pv * self.conjugate()
-        #assert(rv[0] == 0)
-        return [rv[1], rv[2], rv[3]]
-
-    def axisAngle(self):
-        r = [0,0,0]
-        a = self._data.GetRotationAngleAndAxis(r)
-        return r, a
-
-
-
-
+from siconos.io.SimpleGui import get_backend, init_display
+import siconos.mechanics.quaternions as quat_tools
 
 
 def memoize(f):
-    """ Memoization decorator for a function taking one or more arguments. """
+    """Memoization decorator for a function taking one or more arguments."""
+
     class memodict(dict):
         def __getitem__(self, *key):
             return dict.__getitem__(self, key)
@@ -81,6 +72,7 @@ def memoize(f):
 
 def make_slider(minv, maxv, vstep):
     from PyQt4 import QtCore, QtGui, QtOpenGL
+
     class SlidersGroup(QtGui.QGroupBox):
 
         valueChanged = QtCore.pyqtSignal(int)
@@ -116,13 +108,11 @@ def make_slider(minv, maxv, vstep):
         def setMaximum(self, value):
             self.slider.setMaximum(value)
 
-
     class SliderWindow(QtGui.QWidget):
         def __init__(self):
             super(SliderWindow, self).__init__()
 
-            self.horizontalSliders = SlidersGroup(QtCore.Qt.Horizontal,
-                    "Steps")
+            self.horizontalSliders = SlidersGroup(QtCore.Qt.Horizontal, "Steps")
 
             self.stackedWidget = QtGui.QStackedWidget()
             self.stackedWidget.addWidget(self.horizontalSliders)
@@ -130,7 +120,9 @@ def make_slider(minv, maxv, vstep):
             self.createControls("Controls")
 
             self.valueSpinBox.valueChanged.connect(self.horizontalSliders.setValue)
-            self.horizontalSliders.slider.valueChanged.connect(self.valueSpinBox.setValue)
+            self.horizontalSliders.slider.valueChanged.connect(
+                self.valueSpinBox.setValue
+            )
 
             layout = QtGui.QHBoxLayout()
             layout.addWidget(self.controlsGroup)
@@ -178,25 +170,37 @@ def make_slider(minv, maxv, vstep):
     return SliderWindow()
 
 
-
-with IO.Hdf5('siconos-mechanisms.hdf5', 'r') as io:
+with IO.Hdf5("siconos-mechanisms.hdf5", "r") as io:
 
     display, start_display, add_menu, add_function_to_menu, win, app = init_display()
 
     dpos_data = io.dynamic_data()[:]
-    nbobjs = len(filter(lambda x: io.instances()[x].attrs['id'] >= 0, io.instances()))
+    nbobjs = len(filter(lambda x: io.instances()[x].attrs["id"] >= 0, io.instances()))
 
     nbsteps = dpos_data.shape[0] / nbobjs
 
     assert nbsteps * nbobjs == dpos_data.shape[0]
 
     current_color = 0
+
     @memoize
     def make_shape(shape_name):
         global current_color
 
         # cf CADMBTB_API, but cannot get the same color order
-        colors = list(reversed([Quantity_NOC_DARKVIOLET, Quantity_NOC_BLUE1, Quantity_NOC_GREEN, Quantity_NOC_RED, Quantity_NOC_ORANGE, Quantity_NOC_SALMON, Quantity_NOC_YELLOW]))
+        colors = list(
+            reversed(
+                [
+                    Quantity_NOC_DARKVIOLET,
+                    Quantity_NOC_BLUE1,
+                    Quantity_NOC_GREEN,
+                    Quantity_NOC_RED,
+                    Quantity_NOC_ORANGE,
+                    Quantity_NOC_SALMON,
+                    Quantity_NOC_YELLOW,
+                ]
+            )
+        )
 
         with IO.tmpfile(contents=io.shapes()[shape_name][:][0]) as tmpfile:
 
@@ -212,9 +216,11 @@ with IO.Hdf5('siconos-mechanisms.hdf5', 'r') as io:
                 ok = step_reader.TransferRoot(1)
                 nbs = step_reader.NbShapes()
 
-                l=[]
-                for i in range(1, nbs+1):
-                    ais_shape = display.DisplayShape(step_reader.Shape(i), update=True, transparency=.55)
+                l = []
+                for i in range(1, nbs + 1):
+                    ais_shape = display.DisplayShape(
+                        step_reader.Shape(i), update=True, transparency=0.55
+                    )
                     ais_shape.GetObject().SetColor(colors[current_color % 6])
                     current_color += 1
                     ais_shape.GetObject().SetMaterial(Graphic3d.Graphic3d_NOM_PLASTIC)
@@ -222,23 +228,27 @@ with IO.Hdf5('siconos-mechanisms.hdf5', 'r') as io:
 
                 return l
 
-
     obj_by_id = dict()
     for instance in io.instances():
-        obj_by_id[io.instances()[instance].attrs['id']] = instance
+        obj_by_id[io.instances()[instance].attrs["id"]] = instance
 
     def get_offset(instance_name, shape_name):
-        return (io.instances()[instance_name][shape_name].attrs['translation'],
-                io.instances()[instance_name][shape_name].attrs['orientation'])
+        return (
+            io.instances()[instance_name][shape_name].attrs["translation"],
+            io.instances()[instance_name][shape_name].attrs["orientation"],
+        )
 
     def shape_names(obj):
-        return [io.instances()[obj][shape].attrs['name']
-                for shape in io.instances()[obj]]
+        return [
+            io.instances()[obj][shape].attrs["name"] for shape in io.instances()[obj]
+        ]
 
     @memoize
     def avatars(obj):
-        l = [make_shape(io.instances()[obj][shape].attrs['name'])
-             for shape in io.instances()[obj]]
+        l = [
+            make_shape(io.instances()[obj][shape].attrs["name"])
+            for shape in io.instances()[obj]
+        ]
         # flatten
         return [item for sublist in l for item in sublist]
 
@@ -248,18 +258,18 @@ with IO.Hdf5('siconos-mechanisms.hdf5', 'r') as io:
         step_writer = STEPControl_Writer()
 
         # missing person => load failure
-        #Interface_Static_SetCVal("write.step.schema", "AP203")
+        # Interface_Static_SetCVal("write.step.schema", "AP203")
 
         step_str, shape = stshape
 
         step_writer.Transfer(shape, STEPControl_AsIs)
-        status = step_writer.Write('siconos-mechanisms-{0}.stp'.format(step_str))
+        status = step_writer.Write("siconos-mechanisms-{0}.stp".format(step_str))
 
     def vstep(step_str):
 
         step = int(step_str)
 
-        positions = dpos_data[nbobjs*step:nbobjs*step+nbobjs, 2:]
+        positions = dpos_data[nbobjs * step : nbobjs * step + nbobjs, 2:]
 
         builder = BRep_Builder()
         comp = TopoDS_Compound()
@@ -267,22 +277,19 @@ with IO.Hdf5('siconos-mechanisms.hdf5', 'r') as io:
 
         for _id in range(positions.shape[0]):
 
-            q0, q1, q2, q3, q4, q5, q6 = [float(x) for x in positions[_id,:]]
+            q0, q1, q2, q3, q4, q5, q6 = [float(x) for x in positions[_id, :]]
 
-            obj = obj_by_id[_id+1]
+            obj = obj_by_id[_id + 1]
 
-            q = Quaternion((q3, q4, q5, q6))
+            q = quat_tools.Quaternion((q3, q4, q5, q6))
 
             for shape_name, avatar in zip(io.instances()[obj], avatars(obj)):
                 offset = get_offset(obj, shape_name)
                 p = q.rotate(offset[0])
-                r = q*Quaternion(offset[1])
+                r = q * quat_tools.Quaternion(offset[1])
 
                 tr = gp_Trsf()
-                qocc = gp_Quaternion(r[1],
-                                     r[2],
-                                     r[3],
-                                     r[0])
+                qocc = gp_Quaternion(r[1], r[2], r[3], r[0])
                 tr.SetRotation(qocc)
                 xyz = gp_XYZ(q0 + p[0], q1 + p[1], q2 + p[2])
                 vec = gp_Vec(xyz)
@@ -291,7 +298,9 @@ with IO.Hdf5('siconos-mechanisms.hdf5', 'r') as io:
 
                 display.Context.SetLocation(avatar, loc)
 
-                moved_shape = BRepBuilderAPI_Transform(avatar.GetObject().Shape(), tr, True).Shape()
+                moved_shape = BRepBuilderAPI_Transform(
+                    avatar.GetObject().Shape(), tr, True
+                ).Shape()
 
                 builder.Add(comp, moved_shape)
 
@@ -299,9 +308,8 @@ with IO.Hdf5('siconos-mechanisms.hdf5', 'r') as io:
 
         write_step((step_str, comp))
 
-
-#    add_menu('run')
-#    add_function_to_menu('run', run)
+    #    add_menu('run')
+    #    add_function_to_menu('run', run)
 
     from PyQt4 import QtGui, QtCore
 

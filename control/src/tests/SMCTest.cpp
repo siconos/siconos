@@ -185,9 +185,7 @@ void SMCTest::test_itw_ZOH() {
   siconos::algebra::io::write("itw_ZOH.dat", *data, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  siconos::algebra::SiconosMatrix dataRef(data->rows(), data->cols());
-  //    dataRef.setZero();
-  siconos::algebra::io::read("itw.ref", dataRef);
+  auto dataRef = siconos::algebra::io::readDenseMatrix("itw.ref");
   // it is a bad idea to compare solutions to an AVI that does not admit a unique solution
   data->col(3) = _beta * data->col(2) + data->col(1);
   dataRef.col(3) = _beta * dataRef.col(2) + dataRef.col(1);
@@ -210,8 +208,7 @@ void SMCTest::test_itw_Lsodar() {
   siconos::algebra::io::write("itw_Lsodar.dat", *data, siconos::algebra::io::ASCII_OUT,
                               siconos::algebra::io::WriteType::nodim);
   // Reference Matrix
-  siconos::algebra::SiconosMatrix dataRef(data->rows(), data->cols());
-  siconos::algebra::io::read("itw.ref", dataRef);
+  auto dataRef = siconos::algebra::io::readDenseMatrix("itw.ref");
   // it is a bad idea to compare solutions to an AVI that does not admit a unique
   // solution
   data->col(3) = _beta * data->col(2) + data->col(1);

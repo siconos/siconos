@@ -215,10 +215,9 @@ int gfc3d_LmgcDriver(double *reaction, double *velocity, double *globalVelocity,
       int n = 100;
       char *title = (char *)malloc(n * sizeof(char));
       strncpy(title, "LMGC dump in hdf5", n);
-      char *description = (char *)malloc(n * sizeof(char));
-
-      snprintf(description, n, "Rewriting in hdf5 through siconos of %s in FCLIB format",
-               fname);
+      size_t req_size = snprintf(NULL, 0, "Rewriting in hdf5 through siconos of %s in FCLIB format", fname) + 1;
+      char *description = malloc(req_size);
+      snprintf(description, req_size, "Rewriting in hdf5 through siconos of %s in FCLIB format", fname);
       char *mathInfo = (char *)malloc(n * sizeof(char));
       strncpy(mathInfo, "unknown", n);
 

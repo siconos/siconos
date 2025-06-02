@@ -41,21 +41,17 @@ class CylindricalJointR : public NewtonEulerJointR {
  protected:
   ACCEPT_SERIALIZATION(CylindricalJointR);
 
-  /** Axis of the cylindrical point in the q1 frame of reference
+  /** axis1_ is a unit vector that is orthogonal to the cylindrical axis
+   * axes_[0].  It forms with axis2_ and axes_[0] a base such that
+   * (axes_[0],axis1_,_v2) is an orthogonal frame
    */
-  std::shared_ptr<siconos::algebra::SiconosVector3> _axis0{nullptr};
+  siconos::algebra::SiconosVector3 axis1_;
 
-  /** _V1 is an unit vector that is orthogonal to the cylindrical axis
-   * _axis0.  It forms with _V2 and _axis0 a base such that
-   * (_axis0,_V1,_v2) is an orthogonal frame
+  /** axis2_ is a unit vector that is orthogonal to the cylindrical axis
+   * axes_[0].  It forms with axis2_ and axes_[0] a base such that
+   * (axes_[0],axis1_,_v2) is an orthogonal frame
    */
-  std::shared_ptr<siconos::algebra::SiconosVector3> _V1{nullptr};
-
-  /** _V2 is an unit vector that is orthogonal to the cylindrical axis
-   * _axis0.  It forms with _V2 and _axis0 a base such that
-   * (_axis0,_V1,_v2) is an orthogonal frame
-   */
-  std::shared_ptr<siconos::algebra::SiconosVector3> _V2{nullptr};
+  siconos::algebra::SiconosVector3 axis2_;
 
   double _cq2q101{0.};
   double _cq2q102{0.};
@@ -63,7 +59,7 @@ class CylindricalJointR : public NewtonEulerJointR {
   double _cq2q104{0.};
 
   /** P is the point defining the location of the line created by
-   * _axis0.  It is stored in the q1 frame, i.e. the vector from
+   * axes_[0].  It is stored in the q1 frame, i.e. the vector from
    * initial G1 to P, called _G1P0. */
   std::shared_ptr<siconos::algebra::SiconosVector3> _G1P0{nullptr};
 
@@ -83,9 +79,14 @@ class CylindricalJointR : public NewtonEulerJointR {
    *  \param q0  q states vectors of the related the dynamical systems
    */
   virtual void computeH_NE_(double time, siconos::modeling::Interaction& inter,
-                                       const siconos::algebra::BlockVector& q0) override;
+                            const siconos::algebra::BlockVector& q0) override;
+
+  // void computeOrthonormalBaseFromAxis();
 
  public:
+  /** Default constructor */
+  CylindricalJointR();
+
   /** Constructor based on one or two dynamical systems, a point and an axis.
    *
    *  \param P a vector to define the point around which rotation is allowed.
@@ -130,8 +131,6 @@ class CylindricalJointR : public NewtonEulerJointR {
   virtual siconos::algebra::SiconosVector3 normalDoF(const siconos::algebra::BlockVector& q0,
                                                      int axis,
                                                      bool absoluteRef = true) override;
-
-  void computeV1V2FromAxis();
 
   int twistCount() { return _twistCount; }
 
@@ -187,6 +186,9 @@ class CylindricalJointR : public NewtonEulerJointR {
                                const siconos::algebra::BlockVector& q0,
                                Eigen::Ref<siconos::algebra::SiconosMatrix> jachq,
                                unsigned int axis = 0) override;
+  virtual void accept(modeling::relations::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 };
 }  // namespace siconos::joints
 #endif  // CylindricalJointRELATION_H

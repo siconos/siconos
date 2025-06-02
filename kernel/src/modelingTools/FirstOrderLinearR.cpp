@@ -21,8 +21,8 @@
 
 #include "BlockVector.hpp"
 #include "Interaction.hpp"
+#include "SiconosAlgebraAddons.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixVectorOp.hpp"  // for matrixVector_prod_toBlock
 
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -105,7 +105,7 @@ void siconos::modeling::FirstOrderLinearR::checkSize(const Interaction &inter) c
 }
 
 void siconos::modeling::FirstOrderLinearR::setConstantB(
-    Eigen::Ref<siconos::algebra::SiconosMatrix> newValue) {
+    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue) {
   /**  Warning: we can't check if newValue size is compliant with
    * the current relation/interaction. This will be done during
    * initialize / checkSize call!
@@ -130,7 +130,7 @@ void siconos::modeling::FirstOrderLinearR::computeB(double time) {
 }
 
 void siconos::modeling::FirstOrderLinearR::setConstantC(
-    Eigen::Ref<siconos::algebra::SiconosMatrix> newValue) {
+    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue) {
   /**  Warning: we can't check if newValue size is compliant with
    * the current relation/interaction. This will be done during
    * initialize / checkSize call!
@@ -155,7 +155,7 @@ void siconos::modeling::FirstOrderLinearR::computeC(double time) {
 }
 
 void siconos::modeling::FirstOrderLinearR::setConstantD(
-    Eigen::Ref<siconos::algebra::SiconosMatrix> newValue) {
+    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue) {
   /**  Warning: we can't check if newValue size is compliant with
    * the current relation/interaction. This will be done during
    * initialize / checkSize call!

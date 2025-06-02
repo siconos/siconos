@@ -57,11 +57,9 @@ target_compile_features(kernel PUBLIC cxx_std_20)
 
 # --- Extra setup for the component ---
 # remove boring warnings from boost bindings includes
-set_source_files_properties(
+#set_source_files_properties(
   #${CMAKE_SOURCE_DIR}/kernel/src/utils/SiconosAlgebra/EigenProblems.cpp
-  ${CMAKE_SOURCE_DIR}/kernel/src/utils/SiconosAlgebra/SimpleMatrixSolvers.cpp
-  ${CMAKE_SOURCE_DIR}/kernel/src/utils/SiconosAlgebra/SimpleMatrixMisc.cpp # many warnings due to boost bindings headers
-  PROPERTIES COMPILE_OPTIONS "-Wno-unused-variable;-Wno-unused-local-typedefs")
+  # PROPERTIES COMPILE_OPTIONS "-Wno-unused-variable;-Wno-unused-local-typedefs")
 
 
 
@@ -104,6 +102,12 @@ endif()
 find_package(Eigen3 REQUIRED)
 # Should we propagate Eigen dep? Check this later ...
 target_link_libraries (kernel PUBLIC Eigen3::Eigen) 
+
+# Sparse storage
+if(SICONOS_SPARSE)
+  message("Activate sparse storage (Eigen) for all matrices in Siconos. Warning: expermimental setup, still under test!")
+  target_compile_definitions(kernel PUBLIC SICONOS_SPARSE)
+endif()
 
 # --- python bindings ---
 if(WITH_${COMPONENT}_PYTHON_WRAPPER)

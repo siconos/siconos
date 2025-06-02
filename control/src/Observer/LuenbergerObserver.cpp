@@ -22,7 +22,6 @@
 #include "ControlZOHAdditionalTerms.hpp"
 #include "FirstOrderLinearDS.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
 #include "TimeStepping.hpp"
 #include "Topology.hpp"

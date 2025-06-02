@@ -48,11 +48,6 @@ class CouplerJointR : public NewtonEulerJointR {
   unsigned int _ref1_index{0}, _ref2_index{0};
   double _ratio{0.}, _offset{0.};
 
-  // /** Return the normal of the linear DoF axis.  \param axis must be 0 */
-  // virtual void _normalDoF(siconos::algebra::SiconosVector& ans,
-  //                         const siconos::algebra::BlockVector& q0, int axis,
-  //                         bool absoluteRef = true) override;
-
   /** An internal helper function to assign reference vectors during
    * computeh and computeJachq. */
   void makeBlockVectors(
@@ -67,16 +62,16 @@ class CouplerJointR : public NewtonEulerJointR {
    *  \param q0  q states vectors of the related the dynamical systems
    */
   virtual void computeH_NE_(double time, siconos::modeling::Interaction& inter,
-                                       const siconos::algebra::BlockVector& q0) override;
+                            const siconos::algebra::BlockVector& q0) override;
 
  public:
   /** Initialize a coupler. See setReferences() for an explanation of
    *  the parameters. */
   CouplerJointR(std::shared_ptr<NewtonEulerJointR> joint1, unsigned int dof1,
                 std::shared_ptr<NewtonEulerJointR> joint2, unsigned int dof2, double ratio,
-                std::shared_ptr<siconos::algebra::SiconosVector> ref1 = nullptr,
+                std::optional<siconos::algebra::SiconosVector> ref1 = std::nullopt,
                 unsigned int ref1_index = 0,
-                std::shared_ptr<siconos::algebra::SiconosVector> ref2 = nullptr,
+                std::optional<siconos::algebra::SiconosVector> ref2 = std::nullopt,
                 unsigned int ref2_index = 0);
 
   /** Initialize a coupler. See setReferences() for an explanation of
@@ -218,16 +213,20 @@ class CouplerJointR : public NewtonEulerJointR {
   };
 
   /** Compute the vector of linear and angular positions of the free axes */
-  virtual void computehDoF(const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
-    const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
-                           Eigen::Ref<siconos::algebra::SiconosVector> y,
-                           unsigned int axis = 0) override;
+  virtual void computehDoF(
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+      const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+      Eigen::Ref<siconos::algebra::SiconosVector> y, unsigned int axis = 0) override;
 
   /** Compute the jacobian of linear and angular DoF with respect to some q */
   virtual void computeJachqDoF(siconos::modeling::Interaction& inter,
                                const siconos::algebra::BlockVector& q0,
                                Eigen::Ref<siconos::algebra::SiconosMatrix> jachq,
                                unsigned int axis = 0) override;
+
+  virtual void accept(modeling::relations::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 };
 }  // namespace siconos::joints
 #endif  // CouplerJointRELATION_H

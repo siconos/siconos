@@ -29,7 +29,7 @@
 
 void siconos::geometry::computeRotationMatrix(
     double q0, double q1, double q2, double q3,
-    siconos::algebra::SiconosMatrix &rotationMatrix) {
+    siconos::algebra::SiconosMatrix33 &rotationMatrix) {
   /* Brute force version by multiplication of quaternion
    */
   // boost::math::quaternion<double>    quatQ(q0, q1, q2, q3);
@@ -75,7 +75,7 @@ void siconos::geometry::quaternionRotateVector(
   // std::shared_ptr<siconos::algebra::SiconosMatrix> rotationMatrix(new
   // siconos::algebra::SiconosMatrix(3,3)); siconos::algebra::SiconosVector tmp(3);
   // ::computeRotationMatrix(q0,q1,q2,q3, rotationMatrix);
-  // prod(*rotationMatrix, v, tmp);
+  // tmp.noalias() = *rotationMatrix * v;
   // v = tmp;
   // return;
 
@@ -83,7 +83,7 @@ void siconos::geometry::quaternionRotateVector(
   // std::shared_ptr<siconos::algebra::SiconosMatrix> rotationMatrix(new
   // siconos::algebra::SiconosMatrix(3,3)); siconos::algebra::SiconosVector tmp(3);
   // ::computeRotationMatrix(q0,-q1,-q2,-q3, rotationMatrix);
-  // prod(v, *rotationMatrix, tmp);
+  // tmp.noalias() = *rotationMatrix * v;
   // v = tmp;
 
   // Third way. cross product and axis angle
@@ -107,7 +107,7 @@ void siconos::geometry::quaternionRotateVector(
 
 void siconos::geometry::quaternionRotateMatrix(
     const Eigen::Ref<const siconos::algebra::SiconosVector> &q,
-    Eigen::Ref<siconos::algebra::SiconosMatrix> m) {
+    Eigen::Ref<siconos::algebra::SiconosMatrix33> m) {
   DEBUG_BEGIN("::quaternionRotateMatrix(q,m)\n");
   DEBUG_EXPR(std::cout << m << "\n";);
   DEBUG_EXPR(std::cout << std::scientific << std::setprecision(12) << std::setw(16)
@@ -140,7 +140,7 @@ void siconos::geometry::rewriteVectorFromAbsoluteToBodyFrame(
 
 void siconos::geometry::rewriteMatrixFromAbsoluteToBodyFrame(
     const Eigen::Ref<const siconos::algebra::SiconosVector> &q,
-    Eigen::Ref<siconos::algebra::SiconosMatrix> m) {
+    Eigen::Ref<siconos::algebra::SiconosMatrix33> m) {
   DEBUG_BEGIN("::rewriteMatrixFromAbsoluteToBodyFrame(q,m)\n");
   siconos::algebra::SiconosVector qbis{4};
   qbis << q(3), -q(4), -q(5), -q(6);
@@ -158,7 +158,7 @@ void siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(
 
 void siconos::geometry::rewriteMatrixFromBodyToAbsoluteFrame(
     const Eigen::Ref<const siconos::algebra::SiconosVector> &q,
-    Eigen::Ref<siconos::algebra::SiconosMatrix> m) {
+    Eigen::Ref<siconos::algebra::SiconosMatrix33> m) {
   DEBUG_BEGIN("::rewriteMatrixFromBodyToAbsoluteFrame(q,m )\n");
   siconos::geometry::quaternionRotateMatrix(q, m);
   DEBUG_END("::rewriteMatrixFromBodyToAbsoluteFrame(q,m )\n");
@@ -166,12 +166,12 @@ void siconos::geometry::rewriteMatrixFromBodyToAbsoluteFrame(
 
 void siconos::geometry::computeRotationMatrix(
     const siconos::algebra::SiconosVector &q,
-    siconos::algebra::SiconosMatrix &rotationMatrix) {
+    siconos::algebra::SiconosMatrix33 &rotationMatrix) {
   siconos::geometry::computeRotationMatrix(q(3), q(4), q(5), q(6), rotationMatrix);
 }
 void siconos::geometry::computeRotationMatrixTransposed(
     const siconos::algebra::SiconosVector &q,
-    siconos::algebra::SiconosMatrix &rotationMatrix) {
+    siconos::algebra::SiconosMatrix33 &rotationMatrix) {
   siconos::geometry::computeRotationMatrix(q(3), -q(4), -q(5), -q(6), rotationMatrix);
 }
 
@@ -387,4 +387,61 @@ boost::math::quaternion<double> siconos::geometry::rotquat(
 boost::math::quaternion<double> siconos::geometry::posquat(
     const siconos::algebra::SiconosVector &v) {
   return boost::math::quaternion<double>{0, v(0), v(1), v(2)};
+}
+
+void siconos::geometry::computeOrthonormalBaseFromAxis(
+    siconos::algebra::SiconosVector3 &axis0, siconos::algebra::SiconosVector3 &axis1,
+    siconos::algebra::SiconosVector3 &axis2) {
+  if (axis0.norm() < 1e-10)
+    throw std::invalid_argument(
+        "input vector has a norm equal to zero, can't compute a base.");
+
+  axis0.normalize();
+
+  siconos::algebra::SiconosVector3 arbitrary(1.0, 0.0, 0.0);
+  if (std::abs(axis0.dot(arbitrary)) > 0.99)
+    arbitrary = siconos::algebra::SiconosVector3(0.0, 1.0, 0.0);
+
+  axis1 = axis0.cross(arbitrary).normalized();
+  axis2 = axis0.cross(axis1);
+}
+
+bool siconos::geometry::orthoBaseFromVector(siconos::algebra::SiconosVector3 &A,
+                                            siconos::algebra::SiconosVector3 &A1,
+                                            siconos::algebra::SiconosVector3 &A2) {
+  double normA = A.norm();
+  if (normA == 0.0) {
+    // If A is null, we assign Nan to outputs  and return an error code
+    A1 = siconos::algebra::SiconosVector3(std::numeric_limits<double>::quiet_NaN(),
+                                          std::numeric_limits<double>::quiet_NaN(),
+                                          std::numeric_limits<double>::quiet_NaN());
+    A2 = siconos::algebra::SiconosVector3(std::numeric_limits<double>::quiet_NaN(),
+                                          std::numeric_limits<double>::quiet_NaN(),
+                                          std::numeric_limits<double>::quiet_NaN());
+    return false;
+  }
+
+  // Normalize A
+  A.normalize();
+
+  double sign = std::copysign(1.0, A.z());
+  const double a = -1.0 / (sign + A.z());
+  const double b = A.x() * A.y() * a;
+
+  // Build the orthonormal basis using a and b
+  A1 << 1.0 + sign * A.x() * A.x() * a, sign * b, -sign * A.x();
+  A2 << b, sign + A.y() * A.y() * a, -A.y();
+
+  // and normalize them
+  // A1.normalize();
+  // A2.normalize();
+
+  // Check norms ...
+  assert(std::fabs(A1.norm() - 1.0) < 1e-14);
+  assert(std::fabs(A.dot(A1)) < 1e-14);
+  assert(std::fabs(A2.norm() - 1.0) < 1e-14);
+  assert(std::fabs(A.dot(A2)) < 1e-14);
+  assert(std::fabs(A1.dot(A2)) < 1e-14);
+
+  return true;
 }

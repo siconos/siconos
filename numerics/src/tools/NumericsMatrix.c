@@ -23,6 +23,7 @@
 #include <stdint.h>  // for SIZE_MAX
 #include <stdio.h>   // for printf, fprintf, size_t, fscanf
 #include <stdlib.h>  // for exit, malloc, free, EXIT_FAILURE
+#include <inttypes.h>
 #include <string.h>  // for memcpy, memset
 #include <time.h>
 
@@ -3417,6 +3418,11 @@ int NM_LU_factorize(NumericsMatrix* Ao) {
                   "element is 0\n",
                   info);
         } else if (info < 0) {
+          printf("info = %d\n", info);
+          printf("A->matrix0 = %p\n", A->matrix0);
+          printf("A->size0 = %d\n", A->size0);
+          printf("A->size1 = %d\n", A->size1);
+          printf("A->storageType = %d\n", A->storageType);
           fprintf(stderr,
                   "NM_LU_factorize: LU factorisation DGETRF failed. The %d-th argument has an "
                   "illegal value, stopping\n",

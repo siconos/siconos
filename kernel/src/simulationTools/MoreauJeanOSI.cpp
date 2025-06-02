@@ -35,13 +35,14 @@
 #include "OneStepNSProblem.hpp"
 #include "Relation.hpp"
 #include "RotationQuaternion.hpp"  // for quaternionFromTwistVector and compositionLawLieGroup
+#include "SiconosAlgebraAddons.hpp"
 #include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixVectorOp.hpp"
 #include "SiconosPointers.hpp"  // For createSPtr
 #include "SiconosVector.hpp"
 #include "Simulation.hpp"
 #include "Tools.hpp"
+
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -430,7 +431,7 @@ void siconos::integrators::MoreauJeanOSI::_computeIterationMatrixBoundaryConditi
 
     auto &d = static_cast<siconos::modeling::SecondOrderDS &>(ds);
 
-    if (!siconos::algebra::checkSymmetry(
+    if (!siconos::algebra::isSymmetric(
             iteration_matrix,
             1e-10))  // Warning this operation could be quite expensive
     {

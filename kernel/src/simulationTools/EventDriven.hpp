@@ -171,7 +171,7 @@ class EventDriven : public Simulation {
    *
    *  \return unsigned int
    */
-  double newtonMaxIteration() { return _newtonMaxIteration; };
+  auto newtonMaxIteration() const { return _newtonMaxIteration; };
 
   /** get the maximum number of iterations to localize events
    *

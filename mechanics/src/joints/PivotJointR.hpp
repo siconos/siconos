@@ -34,8 +34,8 @@ class PivotJointR : public KneeJointR {
   /*Axis coordonates*/
   std::shared_ptr<siconos::algebra::SiconosVector3> axis_coords_{nullptr};
 
-  siconos::algebra::SiconosVector3 A1_{siconos::algebra::SiconosVector3::Zero()};
-  siconos::algebra::SiconosVector3 A2_{siconos::algebra::SiconosVector3::Zero()};
+  siconos::algebra::SiconosVector3 axis1_{siconos::algebra::SiconosVector3::Zero()};
+  siconos::algebra::SiconosVector3 axis2_{siconos::algebra::SiconosVector3::Zero()};
 
   /*Initial conditions*/
   double _initial_AscalA{0.}, _initial_AscalA1{0.}, _initial_AscalA2{0.};
@@ -46,7 +46,7 @@ class PivotJointR : public KneeJointR {
   int _twistCount{0};     // TODO: Should be in a graph work vector?
   int _previousAngle{0};  // Needed to track _twistCount, TODO: work vector?
 
-  void buildA1A2();
+  void buildOrthonormalBase();
 
   /** compute H_NE matrix
    *
@@ -58,6 +58,9 @@ class PivotJointR : public KneeJointR {
                             const siconos::algebra::BlockVector& q0) override;
 
  public:
+  /** Default constructor */
+  PivotJointR();
+
   /** Constructor based on one or two dynamical systems, a point and an axis.
    *
    *  \param d1 first DynamicalSystem linked by the joint.
@@ -174,6 +177,7 @@ void rot2to1(const Eigen::Ref<const siconos::algebra::SiconosVector>& qp1,
              const siconos::algebra::SiconosVector& cq2q,
              Eigen::Ref<siconos::algebra::SiconosVector> result);
 
+             
 }  // namespace pivot
 
 }  // namespace siconos::joints

@@ -35,7 +35,7 @@ namespace siconos::algebra {
 
 /** "Block" matrix, ie container of matrices
  *
- * A BlockMatrix is a boost::ublas::compressed_matrix of std::shared_ptr<SiconosMatrix>.
+ * A BlockMatrix is a boost::ublas::compressed_matrix of std::shared_ptr<SiconosDenseMatrix>.
  *
  * The blocks positions are given by two Index objects, tabRow and tabCol.
  *
@@ -48,10 +48,10 @@ class BlockMatrix {
  private:
   ACCEPT_SERIALIZATION(BlockMatrix);
 
-  using BlocksMatrix = Eigen::Matrix<std::shared_ptr<SiconosMatrix>, Eigen::Dynamic,
+  using BlocksMatrix = Eigen::Matrix<std::shared_ptr<SiconosDenseMatrix>, Eigen::Dynamic,
                                      Eigen::Dynamic, Eigen::ColMajor>;
 
-  /** A container of pointers to SiconosMatrix
+  /** A container of pointers to SiconosDenseMatrix
    */
   std::shared_ptr<BlocksMatrix> _mat{nullptr};
 
@@ -77,50 +77,49 @@ class BlockMatrix {
 
  public:
   /** no-copy constructor
-   *  \param m a SiconosMatrix
+   *  \param m a SiconosDenseMatrix
    */
-  BlockMatrix(std::shared_ptr<SiconosMatrix> m);
+  BlockMatrix(std::shared_ptr<SiconosDenseMatrix> m);
 
   /** copy constructor
    *  \param m a MapMatrix
    */
   BlockMatrix(std::shared_ptr<MapType> m);
 
+#ifndef SICONOS_SPARSE
   /** Build from eigen view (shared-memory !) */
-  BlockMatrix(Eigen::Ref<siconos::algebra::SiconosMatrix> input);
-
+  BlockMatrix(Eigen::Ref<siconos::algebra::SiconosDenseMatrix> input);
+#endif
   // /** copy constructor
-  //  *  \param m a SiconosMatrix
+  //  *  \param m a SiconosDenseMatrix
   //  */
-  // BlockMatrix(const SiconosMatrix &m);
+  // BlockMatrix(const SiconosDenseMatrix &m);
 
   /** copy constructor
    *  \param m a BlockMatrix
    */
   BlockMatrix(const BlockMatrix &m);
 
-  /** constructor with a list of pointer to SiconosMatrix (!links with pointer, no copy!)
-   *  \param m a vector of SiconosMatrix
+  /** constructor with a list of pointer to SiconosDenseMatrix (!links with pointer, no copy!)
+   *  \param m a vector of SiconosDenseMatrix
    *  \param row number of blocks in a row
    *  \param col number of col in a row
    */
-  BlockMatrix(const std::vector<std::shared_ptr<SiconosMatrix>> &m, unsigned int row,
+  BlockMatrix(const std::vector<std::shared_ptr<SiconosDenseMatrix>> &m, unsigned int row,
               unsigned int col);
 
-  /** contructor with a list of 4 pointer to SiconosMatrix (!links with pointer, no copy!)
+  /** contructor with a list of 4 pointer to SiconosDenseMatrix (!links with pointer, no copy!)
    *  \param A block (0,0)
    *  \param B block (0,1)
    *  \param C block (1,0)
    *  \param D block (1,1)
    */
-  BlockMatrix(std::shared_ptr<SiconosMatrix> A, std::shared_ptr<SiconosMatrix> B,
-              std::shared_ptr<SiconosMatrix> C, std::shared_ptr<SiconosMatrix> D);
+  BlockMatrix(std::shared_ptr<SiconosDenseMatrix> A, std::shared_ptr<SiconosDenseMatrix> B,
+              std::shared_ptr<SiconosDenseMatrix> C, std::shared_ptr<SiconosDenseMatrix> D);
 
   /** destructor
    */
   ~BlockMatrix(void) noexcept;
-
-  // inline bool checkSymmetry(double tol) const override { return false; };
 
   /** get the number of block (i=0, row, i=1 col)
    *  \param i unsigned int(i=0, row, i=1 col)
@@ -128,21 +127,16 @@ class BlockMatrix {
    */
   unsigned int numberOfBlocks(unsigned int i) const;
 
-  /** return the address of the array of double values of the matrix
-   *  \param row position for the required block ->useless for SiconosMatrix
-   *  \param col position for the required block ->useless for SiconosMatrix
-   *  \return double* : the pointer on the double array
-   */
-  double *getArray(unsigned int row = 0, unsigned int col = 0) const;
-
   /** sets all the values of the matrix to 0.0
    */
   void zero();
 
+#ifndef SICONOS_SPARSE
+
   /** Initialize the matrix with random values
    */
   void randomize();
-
+#endif
   /** set an identity matrix
    */
   void setIdentity();
@@ -155,12 +149,12 @@ class BlockMatrix {
 
   friend std::ostream &operator<<(std::ostream &os, const BlockMatrix &bm);
 
-  /** get or set the element matrix[i,j]
-   *  \param i an unsigned int
-   *  \param j an unsigned int
-   *  \return the element matrix[i,j]
-   */
-  double &operator()(unsigned int i, unsigned int j);
+  // /** get or set the element matrix[i,j]
+  //  *  \param i an unsigned int
+  //  *  \param j an unsigned int
+  //  *  \return the element matrix[i,j]
+  //  */
+  // double &operator()(unsigned int i, unsigned int j);
 
   /** get or set the element matrix[i,j]
    *  \param i an unsigned int
@@ -169,19 +163,19 @@ class BlockMatrix {
    */
   double operator()(unsigned int i, unsigned int j) const;
 
-  /** return the element matrix[i,j]
-   *  \param i an unsigned int
-   *  \param j an unsigned int
-   *  \return a double
-   */
-  double getValue(unsigned int i, unsigned int j) const;
+  // /** return the element matrix[i,j]
+  //  *  \param i an unsigned int
+  //  *  \param j an unsigned int
+  //  *  \return a double
+  //  */
+  // double getValue(unsigned int i, unsigned int j) const;
 
-  /** set the element matrix[i,j]
-   *  \param i an unsigned int i
-   *  \param j an unsigned int j
-   *  \param value
-   */
-  void setValue(unsigned int i, unsigned int j, double value);
+  // /** set the element matrix[i,j]
+  //  *  \param i an unsigned int i
+  //  *  \param j an unsigned int j
+  //  *  \param value
+  //  */
+  // // //void setValue(unsigned int i, unsigned int j, double value);
 
   /** get the vector tabRow
    *  \return a vector of int
@@ -206,35 +200,31 @@ class BlockMatrix {
   /** get block at position row-col
    *  \param row unsigned int
    *  \param col unsigned int
-   *  \return std::shared_ptr<SiconosMatrix> the requested block
+   *  \return std::shared_ptr<SiconosDenseMatrix> the requested block
    */
-  std::shared_ptr<SiconosMatrix> block(unsigned int row = 0, unsigned int col = 0);
+  std::shared_ptr<SiconosDenseMatrix> block(unsigned int row = 0, unsigned int col = 0);
 
   /** get block at position row-col
    *  \param row unsigned int
    *  \param col unsigned int
-   *  \return std::shared_ptr<SiconosMatrix> the requested block
+   *  \return std::shared_ptr<SiconosDenseMatrix> the requested block
    */
-  std::shared_ptr<const SiconosMatrix> block(unsigned int row = 0, unsigned int col = 0) const;
-
-  /** convert BlockMatrix to SiconosMatrix
-   *  \return SiconosMatrix the converted matrix
-   */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> toSiconosMatrix() const;
+  std::shared_ptr<const SiconosDenseMatrix> block(unsigned int row = 0,
+                                                  unsigned int col = 0) const;
 
   /**
    *
    */
   void copyBlock(unsigned int i, unsigned int j,
-                 std::shared_ptr<siconos::algebra::SiconosMatrix>);
+                 std::shared_ptr<siconos::algebra::SiconosDenseMatrix>);
 
   void updateNumericsMatrix() {
     THROW_EXCEPTION("BlockMatrix::updateNumericsMatrix(), not implemented fro BlockMatrix");
   };
 
-  // friend class SiconosMatrix;
-  friend SiconosMatrix &operator*=(SiconosMatrix &m, const double &s);
-  friend SiconosMatrix &operator/=(SiconosMatrix &m, const double &s);
+  // friend class SiconosDenseMatrix;
+  friend SiconosDenseMatrix &operator*=(SiconosDenseMatrix &m, const double &s);
+  friend SiconosDenseMatrix &operator/=(SiconosDenseMatrix &m, const double &s);
   friend void print(const BlockMatrix &mat);
   /** number of non-zero in the matrix
    * \param tol the tolerance under which a number is considered zero
@@ -247,18 +237,14 @@ class BlockMatrix {
 /** \return compute the infinite norm of a matrix
  *  \param mat the input matrix
  */
-double normInf(const BlockMatrix &mat);
+// double normInf(const BlockMatrix &mat);
 
 /** display data on standard output
  *  \param mat the input matrix
  */
 void print(const BlockMatrix &mat);
 
-// /** Set new block pointer
-//  *
-//  */
-// void setBlock(unsigned int i, unsigned int j,
-//   std::shared_ptr<siconos::algebra::SiconosMatrix>);
+std::ostream &operator<<(std::ostream &os, const BlockMatrix &bm);
 
 }  // namespace siconos::algebra
 

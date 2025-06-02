@@ -7,28 +7,28 @@ function(collect_files)
   set(oneValueArgs VAR) # output variable name
   set(multiValueArgs DIRS EXTS)
   set(options RECURSIVE)
-  cmake_parse_arguments(collect "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+  cmake_parse_arguments(collect "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
   # Scan all dirs and check all exts ...
 
   foreach(DIR IN LISTS collect_DIRS)
     foreach(_EXT IN LISTS collect_EXTS)
       if(collect_RECURSIVE)
-	file(GLOB_RECURSE FILES_LIST
+        file(GLOB_RECURSE FILES_LIST
           RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} CONFIGURE_DEPENDS
           ${DIR}/*.${_EXT})
       else()
-	file(GLOB FILES_LIST
+        file(GLOB FILES_LIST
           RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} CONFIGURE_DEPENDS
           ${DIR}/*.${_EXT})
       endif()
       if(FILES_LIST)
-	list(APPEND COLLECTION ${FILES_LIST})
+        list(APPEND COLLECTION ${FILES_LIST})
       endif()
     endforeach()
   endforeach()
   if(COLLECTION)
     list(LENGTH COLLECTION _FILES_LEN)
-    if (_FILES_LEN GREATER 1)
+    if(_FILES_LEN GREATER 1)
       list(REMOVE_DUPLICATES COLLECTION)
     endif()
   endif()
@@ -52,13 +52,13 @@ endfunction()
 function(get_sources COMPONENT)
 
   set(multiValueArgs DIRS EXCLUDE)
-  cmake_parse_arguments(source "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+  cmake_parse_arguments(source "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
   # Get list of extensions to be taken into account
   foreach(_EXT
-      ${CMAKE_CXX_SOURCE_FILE_EXTENSIONS}
-      ${CMAKE_C_SOURCE_FILE_EXTENSIONS}
-      ${CMAKE_Fortran_SOURCE_FILE_EXTENSIONS})
+    ${CMAKE_CXX_SOURCE_FILE_EXTENSIONS}
+    ${CMAKE_C_SOURCE_FILE_EXTENSIONS}
+    ${CMAKE_Fortran_SOURCE_FILE_EXTENSIONS})
     list(APPEND SRC_EXTS ${_EXT})
   endforeach()
   list(REMOVE_DUPLICATES SRC_EXTS)
@@ -81,33 +81,33 @@ macro(PRINT_VAR V)
 endmacro()
 
 
-MACRO(WRITE_NOTES)
-  IF(IS_DIRECTORY ${CMAKE_BINARY_DIR}/Testing)
+macro(WRITE_NOTES)
+  if(IS_DIRECTORY ${CMAKE_BINARY_DIR}/Testing)
     # a note file for the dashboard
-    FILE(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/Testing/Notes)
-    FILE(WRITE ${CMAKE_BINARY_DIR}/Testing/Notes/Build "git sha1 : ${SOURCE_ABBREV_GIT_SHA1}\n")
-    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "cmake version : ${CMAKE_VERSION}\n")
+    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/Testing/Notes)
+    file(WRITE ${CMAKE_BINARY_DIR}/Testing/Notes/Build "git sha1 : ${SOURCE_ABBREV_GIT_SHA1}\n")
+    file(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "cmake version : ${CMAKE_VERSION}\n")
     # the default buildname
-    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "System name : ${CMAKE_SYSTEM_NAME}\n")
+    file(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "System name : ${CMAKE_SYSTEM_NAME}\n")
     site_name(_SITE_NAME)
-    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "Site Name: ${_SITE_NAME}\n")
-    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "Processor   : ${CMAKE_SYSTEM_PROCESSOR}\n")
-    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "C compiler : ${CMAKE_C_COMPILER}\n")
-    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "C compiler version : ${CMAKE_C_COMPILER_VERSION}\n")
-    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "CXX compiler : ${CMAKE_CXX_COMPILER}\n")
-    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "CXX compiler version : ${CMAKE_CXX_COMPILER_VERSION}\n")
-    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "Fortran compiler : ${CMAKE_Fortran_COMPILER}\n")
-    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "Fortran compiler version : ${CMAKE_Fortran_COMPILER_VERSION}\n")
-    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "BLAS libraries : ${BLAS_LIBRARIES}\n")
-    FILE(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "LAPACK libraries : ${LAPACK_LIBRARIES}\n")
-  ENDIF(IS_DIRECTORY ${CMAKE_BINARY_DIR}/Testing)
-ENDMACRO(WRITE_NOTES)
+    file(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "Site Name: ${_SITE_NAME}\n")
+    file(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "Processor   : ${CMAKE_SYSTEM_PROCESSOR}\n")
+    file(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "C compiler : ${CMAKE_C_COMPILER}\n")
+    file(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "C compiler version : ${CMAKE_C_COMPILER_VERSION}\n")
+    file(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "CXX compiler : ${CMAKE_CXX_COMPILER}\n")
+    file(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "CXX compiler version : ${CMAKE_CXX_COMPILER_VERSION}\n")
+    file(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "Fortran compiler : ${CMAKE_Fortran_COMPILER}\n")
+    file(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "Fortran compiler version : ${CMAKE_Fortran_COMPILER_VERSION}\n")
+    file(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "BLAS libraries : ${BLAS_LIBRARIES}\n")
+    file(APPEND ${CMAKE_BINARY_DIR}/Testing/Notes/Build "LAPACK libraries : ${LAPACK_LIBRARIES}\n")
+  endif(IS_DIRECTORY ${CMAKE_BINARY_DIR}/Testing)
+endmacro(WRITE_NOTES)
 
-MACRO(ASSERT VAR)
-  IF (NOT DEFINED ${VAR})
-    MESSAGE( FATAL_ERROR "ASSERTION ERROR : ${VAR} UNSET" )
-  ENDIF()
-ENDMACRO()
+macro(ASSERT VAR)
+  if(NOT DEFINED ${VAR})
+    message(FATAL_ERROR "ASSERTION ERROR : ${VAR} UNSET")
+  endif()
+endmacro()
 
 
 # -------------------------------
@@ -138,15 +138,15 @@ macro(init_to_default_option OPT)
     endif()
     # We don't want to see all with_comp_opt in the GUI.
     mark_as_advanced(WITH_${comp}_${OPT})
- endforeach()
+  endforeach()
 
- # If one with_comp_opt is on, global with_opt must also be on
- foreach(comp ${COMPONENTS})
-   if(WITH_${comp}_${OPT})
-     set(WITH_${OPT} ON  CACHE BOOL "initialize ${OPT}." FORCE)
-     break()
-   endif()
- endforeach()
+  # If one with_comp_opt is on, global with_opt must also be on
+  foreach(comp ${COMPONENTS})
+    if(WITH_${comp}_${OPT})
+      set(WITH_${OPT} ON CACHE BOOL "initialize ${OPT}." FORCE)
+      break()
+    endif()
+  endforeach()
 endmacro()
 
 # Display MPI search results
@@ -179,7 +179,7 @@ endfunction()
 function(set_find_package_hints)
   set(oneValueArgs NAME MODULE)
 
-  cmake_parse_arguments(pkg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+  cmake_parse_arguments(pkg "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
   if(${pkg_NAME}_ROOT)
     set(_${pkg_NAME}_SEARCH_OPTS
@@ -237,7 +237,7 @@ endmacro()
 function(create_target)
   set(oneValueArgs NAME)
   set(multiValueArgs LIBRARIES INCLUDE_DIRS LIBRARY_DIRS COMPILE_DEFINITIONS)
-  cmake_parse_arguments(target "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+  cmake_parse_arguments(target "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
   if(NOT TARGET ${target_NAME})
     add_library(${target_NAME} IMPORTED INTERFACE)
@@ -284,9 +284,9 @@ function(apply_sanitizer CURRENT_TARGET)
   elseif(USE_SANITIZER MATCHES "msan") # Memory sanitizer
     list(APPEND SANITIZER_OPTIONS "-fsanitize=memory")
     list(APPEND SANITIZER_OPTIONS "-fsanitize-memory-track-origins")
-  elseif (USE_SANITIZER STREQUAL "thread") # Thread sanitizer (detect data race ...)
+  elseif(USE_SANITIZER STREQUAL "thread") # Thread sanitizer (detect data race ...)
     list(APPEND SANITIZER_OPTIONS "-fsanitize=thread")
-  elseif (USE_SANITIZER STREQUAL "Leak")
+  elseif(USE_SANITIZER STREQUAL "Leak")
     list(APPEND SANITIZER_OPTIONS "-fsanitize=leak") # not implemented on macos (01/2020)
   elseif(USE_SANITIZER MATCHES "cfi") # control flow integrity
     list(APPEND SANITIZER_OPTIONS "-fsanitize=cfi")
@@ -322,9 +322,9 @@ endfunction()
 #
 function(apply_compiler_options COMPONENT)
   set(oneValueArgs DIAGNOSTICS_LEVEL)
-  cmake_parse_arguments(COMP "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
+  cmake_parse_arguments(COMP "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-  unset(COMP_OPTIONS)   # C and C++ options. Append options there by default.
+  unset(COMP_OPTIONS) # C and C++ options. Append options there by default.
 
   # -- Compiler options common to all setups --
 
@@ -409,7 +409,7 @@ function(apply_compiler_options COMPONENT)
     # Warn when a function declaration hides virtual functions from a base class
     list(APPEND COMP_OPTIONS $<$<COMPILE_LANGUAGE:CXX>:-Werror=overloaded-virtual>)
     # Warn when a class has virtual functions and an accessible non-virtual destructor itself
-    list(APPEND COMP_OPTIONS  $<$<COMPILE_LANGUAGE:CXX>:-Werror=non-virtual-dtor>)
+    list(APPEND COMP_OPTIONS $<$<COMPILE_LANGUAGE:CXX>:-Werror=non-virtual-dtor>)
     # Clang specific, C/C++
     # Error when option does not exist ...
     list(APPEND COMP_OPTIONS
@@ -436,7 +436,7 @@ function(apply_compiler_options COMPONENT)
   elseif(COMP_DIAGNOSTICS_LEVEL EQUAL 3)
     # -- Paranoid mode  options --
     # Warnings = errors
-     # Gives a warning whenever the base standard (see -Wpedantic) requires a diagnostic,
+    # Gives a warning whenever the base standard (see -Wpedantic) requires a diagnostic,
     list(APPEND COMP_OPTIONS -Werror=pedantic)
 
     # implicit conversions that may alter a value
@@ -449,12 +449,12 @@ function(apply_compiler_options COMPONENT)
   # Note FP: this part is untested and I don't know to what ends it's written?
   # msan? Keep for the record and remove it later?
   if(USE_LIBCXX)
-     list(APPEND COMP_OPTIONS $<$<COMPILE_LANGUAGE:CXX>:"-stdlib=libc++ -I${USE_LIBCXX}/include -I${USE_LIBCXX}/include/c++/v1">)
-     set(_LIBCXX_FLAGS_TO_ADD "-L${USE_LIBCXX}/lib -lc++abi -Wl,-rpath,${USE_LIBCXX}/lib")
-     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${_LIBCXX_FLAGS_TO_ADD}")
-     set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} ${_LIBCXX_FLAGS_TO_ADD}")
-     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${_LIBCXX_FLAGS_TO_ADD}")
-   endif()
+    list(APPEND COMP_OPTIONS $<$<COMPILE_LANGUAGE:CXX>:"-stdlib=libc++ -I${USE_LIBCXX}/include -I${USE_LIBCXX}/include/c++/v1">)
+    set(_LIBCXX_FLAGS_TO_ADD "-L${USE_LIBCXX}/lib -lc++abi -Wl,-rpath,${USE_LIBCXX}/lib")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${_LIBCXX_FLAGS_TO_ADD}")
+    set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} ${_LIBCXX_FLAGS_TO_ADD}")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${_LIBCXX_FLAGS_TO_ADD}")
+  endif()
 
   # --- Apply options to the current target ---
   if(COMP_OPTIONS)
@@ -469,13 +469,13 @@ function(create_pybind11_module)
   set(oneValueArgs MODULE_NAME PARENT_NAME)
   set(multiValueArgs SOURCES DEPENDENCIES)
 
-  cmake_parse_arguments(PYMOD ""  "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+  cmake_parse_arguments(PYMOD "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-  if (NOT PYMOD_MODULE_NAME)
+  if(NOT PYMOD_MODULE_NAME)
     message(FATAL_ERROR "You must provide a MODULE_NAME.")
   endif()
 
-  if (NOT PYMOD_PARENT_NAME)
+  if(NOT PYMOD_PARENT_NAME)
     set(PYMOD_PARENT_NAME "")
   endif()
 
@@ -484,11 +484,11 @@ function(create_pybind11_module)
 
   # Put the generated library in binary dir so that import siconos.module_name works for tests
   set_target_properties(${PYMOD_MODULE_NAME} PROPERTIES
-      LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/python/siconos/${PYMOD_PARENT_NAME}/
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/python/siconos/${PYMOD_PARENT_NAME}/
   )
 
   # Set deps
-  if (PYMOD_DEPENDENCIES)
+  if(PYMOD_DEPENDENCIES)
     target_link_libraries(${PYMOD_MODULE_NAME} PUBLIC ${PYMOD_DEPENDENCIES})
   endif()
 endfunction()

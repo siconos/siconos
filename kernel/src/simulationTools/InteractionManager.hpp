@@ -27,11 +27,11 @@
 
 #include "NSLawMatrix.hpp"
 #include "SiconosSerialization.hpp"
+#include "DynamicalSystem.hpp"
 
 namespace siconos::modeling {
 class NonSmoothLaw;
 class NSLawMatrix;
-class DynamicalSystem;
 class Relation;
 }  // namespace siconos::modeling
 

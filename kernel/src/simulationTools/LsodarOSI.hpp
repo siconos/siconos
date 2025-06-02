@@ -195,7 +195,7 @@ class LsodarOSI : public OneStepIntegrator {
    *  \param size size of x array
    *  \param array x array of double
    */
-  void fillXWork(int *size, double *array);
+  void fillXWork(std::size_t size, double *array);
 
   /** compute rhs(t) for all dynamical systems in the set
    *

@@ -113,18 +113,6 @@ siconos::nonsmooth_formulations::FrictionContact::frictionContactProblem() {
   return numerics_problem;
 }
 
-// FrictionContactProblem
-// *siconos::nonsmooth_formulations::FrictionContact::frictionContactProblemPtr()
-// {
-//   auto *numerics_problem = &_numerics_problem;
-//   numerics_problem->dimension = _contactProblemDim;
-//   numerics_problem->numberOfContacts = _sizeOutput / _contactProblemDim;
-//   numerics_problem->M = &*_M->numericsMatrix();
-//   numerics_problem->q = &*_q->data();
-//   numerics_problem->mu = _mu->data();
-//   return numerics_problem;
-// }
-
 int siconos::nonsmooth_formulations::FrictionContact::solve(
     std::shared_ptr<FrictionContactProblem> problem) {
   if (!problem) {

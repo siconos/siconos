@@ -27,10 +27,11 @@
 #include "Interaction.hpp"
 #include "NonSmoothLaw.hpp"
 #include "OneStepNSProblem.hpp"
+#include "SiconosAlgebraAddons.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixVectorOp.hpp"  // for prod and subprod
 #include "Simulation.hpp"
 #include "Topology.hpp"
+
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES

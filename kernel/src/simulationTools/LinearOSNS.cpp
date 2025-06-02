@@ -82,7 +82,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::initOSNSMatrix() {
       switch (_numericsMatrixStorageType) {
         case NM_DENSE:
         case NM_SPARSE: {
-          _M = std::make_shared<OSNSMatrix>(0, _numericsMatrixStorageType);
+          _M = std::make_shared<OSNSMatrix>(0, 0, _numericsMatrixStorageType);
           break;
         }
         case NM_SPARSE_BLOCK: {
@@ -90,10 +90,10 @@ void siconos::nonsmooth_formulations::LinearOSNS::initOSNSMatrix() {
           if (indexSetLevel() != siconos::internal::LEVELMAX &&
               simulation()->nonSmoothDynamicalSystem()->topology()->indexSetsSize() >
                   indexSetLevel()) {
-            _M = std::make_shared<OSNSMatrix>(simulation()->indexSet(indexSetLevel())->size(),
-                                              _numericsMatrixStorageType);
+            auto mSize = simulation()->indexSet(indexSetLevel())->size();
+            _M = std::make_shared<OSNSMatrix>(mSize, mSize, _numericsMatrixStorageType);
           } else {
-            _M = std::make_shared<OSNSMatrix>(1, _numericsMatrixStorageType);
+            _M = std::make_shared<OSNSMatrix>(1, 1, _numericsMatrixStorageType);
           }
           break;
         }
@@ -108,29 +108,20 @@ void siconos::nonsmooth_formulations::LinearOSNS::initOSNSMatrix() {
   }
 
   if (_assemblyType == LinearOSNSAssemblyType::GLOBAL) {
-    // Default size for M = _maxSize
     if (!_W) {
-      // if (_numericsMatrixStorageType == NM_DENSE)
-      //   _W = std::make_shared<OSNSMatrix>(_maxSize, NM_DENSE));
-      // else // if(MStorageType == 1) size = number of DSBlocks = number of DS in the largest
-      // considered graph of ds
-      //   _W =
-      //   std::make_shared<OSNSMatrix>(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(),
-      //   1));
-
       switch (_numericsMatrixStorageType) {
         case NM_DENSE: {
-          _W = std::make_shared<OSNSMatrix>(_maxSize, NM_DENSE);
+          // Default number of rows for W = _maxSize
+          _W = std::make_shared<OSNSMatrix>(_maxSize, _maxSize, NM_DENSE);
           break;
         }
         case NM_SPARSE: {
-          _W = std::make_shared<OSNSMatrix>(0, NM_SPARSE);
+          _W = std::make_shared<OSNSMatrix>(0, 0, NM_SPARSE);
           break;
         }
         case NM_SPARSE_BLOCK: {
-          _W = std::make_shared<OSNSMatrix>(
-              simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(),
-              NM_SPARSE_BLOCK);
+          auto wSize = simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size();
+          _W = std::make_shared<OSNSMatrix>(wSize, wSize, NM_SPARSE_BLOCK);
           break;
         }
           {
@@ -145,7 +136,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::initOSNSMatrix() {
     if (!_H) {
       switch (_numericsMatrixStorageType) {
         case NM_DENSE: {
-          _H = std::make_shared<OSNSMatrix>(_maxSize, NM_DENSE);
+          _H = std::make_shared<OSNSMatrix>(_maxSize, _maxSize, NM_DENSE);
           break;
         }
         case NM_SPARSE: {
@@ -171,27 +162,18 @@ void siconos::nonsmooth_formulations::LinearOSNS::initOSNSMatrix() {
   if (_assemblyType == LinearOSNSAssemblyType::REDUCED_DIRECT) {
     // Default size for M = _maxSize
     if (!_W_inverse) {
-      // if (_numericsMatrixStorageType == NM_DENSE)
-      //   _W_inverse = std::make_shared<OSNSMatrix>(_maxSize, NM_DENSE));
-      // else // if(MStorageType == 1) size = number of DSBlocks = number of DS in the largest
-      // considered graph of ds
-      //   _W_inverse =
-      //   std::make_shared<OSNSMatrix>(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(),
-      //   1));
-
       switch (_numericsMatrixStorageType) {
         case NM_DENSE: {
-          _W_inverse = std::make_shared<OSNSMatrix>(_maxSize, NM_DENSE);
+          _W_inverse = std::make_shared<OSNSMatrix>(_maxSize, _maxSize, NM_DENSE);
           break;
         }
         case NM_SPARSE: {
-          _W_inverse = std::make_shared<OSNSMatrix>(0, NM_SPARSE);
+          _W_inverse = std::make_shared<OSNSMatrix>(0, 0, NM_SPARSE);
           break;
         }
         case NM_SPARSE_BLOCK: {
-          _W_inverse = std::make_shared<OSNSMatrix>(
-              simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(),
-              NM_SPARSE_BLOCK);
+          auto Wsize = simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size();
+          _W_inverse = std::make_shared<OSNSMatrix>(Wsize, Wsize, NM_SPARSE_BLOCK);
           break;
         }
           {
@@ -206,7 +188,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::initOSNSMatrix() {
     if (!_H) {
       switch (_numericsMatrixStorageType) {
         case NM_DENSE: {
-          _H = std::make_shared<OSNSMatrix>(_maxSize, NM_DENSE);
+          _H = std::make_shared<OSNSMatrix>(_maxSize, _maxSize, NM_DENSE);
           break;
         }
         case NM_SPARSE: {
@@ -232,27 +214,18 @@ void siconos::nonsmooth_formulations::LinearOSNS::initOSNSMatrix() {
   if (_assemblyType == LinearOSNSAssemblyType::GLOBAL_REDUCED) {
     // Default size for M = _maxSize
     if (!_W) {
-      // if (_numericsMatrixStorageType == NM_DENSE)
-      //   _W = std::make_shared<OSNSMatrix>(_maxSize, NM_DENSE));
-      // else // if(MStorageType == 1) size = number of DSBlocks = number of DS in the largest
-      // considered graph of ds
-      //   _W =
-      //   std::make_shared<OSNSMatrix>(simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(),
-      //   1));
-
       switch (_numericsMatrixStorageType) {
         case NM_DENSE: {
-          _W = std::make_shared<OSNSMatrix>(_maxSize, NM_DENSE);
+          _W = std::make_shared<OSNSMatrix>(_maxSize, _maxSize, NM_DENSE);
           break;
         }
         case NM_SPARSE: {
-          _W = std::make_shared<OSNSMatrix>(0, NM_SPARSE);
+          _W = std::make_shared<OSNSMatrix>(0, 0, NM_SPARSE);
           break;
         }
         case NM_SPARSE_BLOCK: {
-          _W = std::make_shared<OSNSMatrix>(
-              simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(),
-              NM_SPARSE_BLOCK);
+          auto Wsize = simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size();
+          _W = std::make_shared<OSNSMatrix>(Wsize, Wsize, NM_SPARSE_BLOCK);
           break;
         }
           {
@@ -267,17 +240,16 @@ void siconos::nonsmooth_formulations::LinearOSNS::initOSNSMatrix() {
     if (!_W_inverse) {
       switch (_numericsMatrixStorageType) {
         case NM_DENSE: {
-          _W_inverse = std::make_shared<OSNSMatrix>(_maxSize, NM_DENSE);
+          _W_inverse = std::make_shared<OSNSMatrix>(_maxSize, _maxSize, NM_DENSE);
           break;
         }
         case NM_SPARSE: {
-          _W_inverse = std::make_shared<OSNSMatrix>(0, NM_SPARSE);
+          _W_inverse = std::make_shared<OSNSMatrix>(0, 0, NM_SPARSE);
           break;
         }
         case NM_SPARSE_BLOCK: {
-          _W_inverse = std::make_shared<OSNSMatrix>(
-              simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size(),
-              NM_SPARSE_BLOCK);
+          auto Wsize = simulation()->nonSmoothDynamicalSystem()->dynamicalSystems()->size();
+          _W_inverse = std::make_shared<OSNSMatrix>(Wsize, Wsize, NM_SPARSE_BLOCK);
           break;
         }
           {
@@ -292,7 +264,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::initOSNSMatrix() {
     if (!_H) {
       switch (_numericsMatrixStorageType) {
         case NM_DENSE: {
-          _H = std::make_shared<OSNSMatrix>(_maxSize, NM_DENSE);
+          _H = std::make_shared<OSNSMatrix>(_maxSize, _maxSize, NM_DENSE);
           break;
         }
         case NM_SPARSE: {
@@ -505,7 +477,7 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
         //      gemm(CblasNoTrans,CblasNoTrans,1.0,*leftInteractionBlock,*work,1.0,*currentInteractionBlock);
         //*currentInteractionBlock *=h;
         DEBUG_EXPR(siconos::algebra::print(*currentInteractionBlock););
-        // assert(currentInteractionBlock->checkSymmetry(1e-10));
+        // assert(currentInteractionBlock->isSymmetric(1e-10));
         if (relationSubType == siconos::modeling::RelationSubType::CompliantLinearTIR) {
           if (osiType == siconos::integrators::IntegratorType::MOREAUJEANOSI) {
             *currentInteractionBlock *=
@@ -766,7 +738,6 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeM() {
     // Computes new _interactionBlocks if required
     updateInteractionBlocks();
 
-    //    _M->fill(indexSet);
     _M->fillM(indexSet, !_hasBeenUpdated);
 
   } else if (_assemblyType == LinearOSNSAssemblyType::REDUCED_DIRECT) {
@@ -867,7 +838,7 @@ bool siconos::nonsmooth_formulations::LinearOSNS::preCompute(double time) {
     std::cout << "\nLinearOSNS: ComputeM " << elapsed << " ms" << std::endl;
 #endif
     //      updateOSNSMatrix();
-    _sizeOutput = _M->size();
+    _sizeOutput = _M->rows();
 
     // Checks z and _w sizes and reset if necessary
 

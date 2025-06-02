@@ -72,7 +72,7 @@ struct ExtraAdditionalTerms {
   virtual void addJacobianRhsContribution(
       siconos::graphs::DynamicalSystemsGraph& DSG0,
       const siconos::graphs::DynamicalSystemsGraph::VDescriptor& dsgVD, const double h,
-      siconos::algebra::SiconosMatrix& jacRhs) = 0;
+      siconos::algebra::SiconosVector& jacRhs) = 0;
 
   /** Desctructor */
   virtual ~ExtraAdditionalTerms() noexcept = default;

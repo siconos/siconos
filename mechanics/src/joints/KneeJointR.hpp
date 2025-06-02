@@ -35,18 +35,17 @@ class KneeJointR : public NewtonEulerJointR {
  protected:
   ACCEPT_SERIALIZATION(KneeJointR);
 
-  /** Coordinate of the knee point in the body frame of the first dynamical system _d1
-   */
-  std::shared_ptr<siconos::algebra::SiconosVector3> P0_{nullptr};
+  // For this joint, points_[0] corresponds to the coordinate of the knee point
+  // in the body frame of the first dynamical system _d1
 
   /**Absolute coodinates of the vector  G1P0 when d1 is located in q=(0,0,0,1,0,0,0)
-   * i.e. P0 in the body frame of d1.
+   * i.e. points_[0] in the body frame of d1.
    * These values are computed when the constructor is called.
    */
   siconos::algebra::SiconosVector3 G1P0_ = siconos::algebra::SiconosVector3::Zero();
 
   /** Absolute coodinates of the vector G2P0 when d2 is located in q=(0,0,0,1,0,0,0)
-   *  i.e. P0 in the body frame of d2.
+   *  i.e. points_[0] in the body frame of d2.
    * These values are computed when the constructor is called.
    */
   siconos::algebra::SiconosVector3 G2P0_ = siconos::algebra::SiconosVector3::Zero();
@@ -61,22 +60,25 @@ class KneeJointR : public NewtonEulerJointR {
                             const siconos::algebra::BlockVector& q0) override;
 
  public:
+  /** Default constructor
+   */
+  KneeJointR();
+
   /** Constructor based on one or two dynamical systems and a point.
    *
+   *  \param P SiconosVector of size 3 that defines the point around
+   *   which rotation is allowed.
    *  \param d1 first DynamicalSystem linked by the joint.
    *  \param d2 second DynamicalSystem linked by the joint, or NULL
    *  for absolute frame.
-   *  \param P SiconosVector of size 3 that defines the point around
-   *  which rotation is allowed.
    *  \param absoluteRef if true, P is in the absolute frame,
-   *  otherwise P is in d1 frame.
+   *   otherwise P is in d1 frame.
    */
   KneeJointR(const Eigen::Ref<siconos::algebra::SiconosVector3>& P, bool absoluteRef,
              std::shared_ptr<siconos::modeling::NewtonEulerDS> d1 = nullptr,
              std::shared_ptr<siconos::modeling::NewtonEulerDS> d2 = nullptr);
 
-  /** destructor
-   */
+  /** destructor */
   virtual ~KneeJointR() noexcept = default;
 
   /** Initialize the joint constants based on the provided base positions.
@@ -142,7 +144,7 @@ void hfunction(const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
                const siconos::algebra::SiconosVector3& coords1,
                const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2opt,
                const siconos::algebra::SiconosVector3& coords2,
-               Eigen::Ref<siconos::algebra::MapVector3Type> result);
+               Eigen::Ref<siconos::algebra::SiconosVector> result);
 
 void computeH_for_2DS(const Eigen::Ref<const siconos::algebra::SiconosVector>& qp1,
                       const siconos::algebra::SiconosVector3& coords1,
@@ -163,6 +165,7 @@ void computeH_dot_for2DS(const Eigen::Ref<const siconos::algebra::SiconosVector>
                          const Eigen::Ref<const siconos::algebra::SiconosVector>& qpdot2,
                          const siconos::algebra::SiconosVector3& coords2,
                          Eigen::Ref<siconos::algebra::MapType> result);
+
 
 }  // namespace knee
 

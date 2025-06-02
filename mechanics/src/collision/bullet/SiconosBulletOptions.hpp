@@ -27,7 +27,7 @@
 
 namespace siconos::collision::bullet {
 
-enum class SiconosBulletDimension { ThreeD, TwoD };
+enum class SiconosBulletDimension { ThreeD = 0, TwoD = 1 };
 
 /** Set of paramaters for Bullet API. All members have default values.*/
 class SiconosBulletOptions {
@@ -47,7 +47,6 @@ class SiconosBulletOptions {
   bool enablePolyhedralContactClipping{false};
   double Depth2D{0.04};
   double extrapolationCoefficient{0.};
-
 
   ~SiconosBulletOptions() noexcept = default;
 };

@@ -5,11 +5,10 @@ if(WITH_TESTING)
 
   # ---- Siconos Algebra tests ----
   begin_tests(src/utils/SiconosAlgebra/test)
-  # new_test(SOURCES  SiconosVectorTest.cpp BlockVectorTest.cpp SimpleMatrixTest.cpp BlockMatrixTest.cpp AlgebraToolsTest.cpp  EigenProblemsTest.cpp ${SIMPLE_TEST_MAIN})
 
   new_test(
     NAME testSiconosAlgebra
-    SOURCES  SimpleMatrixTest.cpp ${SIMPLE_TEST_MAIN}
+    SOURCES  SiconosMatrixTest.cpp SiconosVectorTest.cpp BlockVectorTest.cpp ${SIMPLE_TEST_MAIN}
     DEPS "numerics;CPPUNIT::CPPUNIT;externals"
     )
 

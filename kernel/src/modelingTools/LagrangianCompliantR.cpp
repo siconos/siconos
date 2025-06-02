@@ -24,7 +24,7 @@
 #include "Interaction.hpp"
 #include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
+#include "SiconosAlgebraAddons.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
 #include "Tools.hpp"
 

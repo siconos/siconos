@@ -41,19 +41,28 @@
 siconos::joints::CouplerJointR::CouplerJointR(
     std::shared_ptr<NewtonEulerJointR> joint1, unsigned int dof1,
     std::shared_ptr<NewtonEulerJointR> joint2, unsigned int dof2, double ratio,
-    std::shared_ptr<siconos::algebra::SiconosVector> ref1, unsigned int ref1_index,
-    std::shared_ptr<siconos::algebra::SiconosVector> ref2, unsigned int ref2_index)
-    : NewtonEulerJointR(),
+    std::optional<siconos::algebra::SiconosVector> ref1, unsigned int ref1_index,
+    std::optional<siconos::algebra::SiconosVector> ref2, unsigned int ref2_index)
+    : NewtonEulerJointR{},
       _joint1(joint1),
       _joint2(joint2),
-      _ref1(ref1),
-      _ref2(ref2),
+      // _ref1(ref1),
+      // _ref2(ref2),
       _dof1(dof1),
       _dof2(dof2),
       _ref1_index(ref1_index),
       _ref2_index(ref2_index),
       _ratio(ratio),
       _offset(0.0) {
+  if (ref1)
+    _ref1 = std::make_shared<siconos::algebra::SiconosVector>(*ref1);  // ref1.value()
+  else
+    _ref1 = nullptr;
+
+  if (ref2)
+    _ref2 = std::make_shared<siconos::algebra::SiconosVector>(*ref2);
+  else
+    _ref2 = nullptr;
   assert(_dof1 < _joint1->numberOfDoF());
   assert(_dof2 < _joint2->numberOfDoF());
 }
@@ -146,6 +155,11 @@ void siconos::joints::CouplerJointR::makeBlockVectors(
   std::shared_ptr<siconos::algebra::SiconosVector> q2Shared =
       q2 ? makeSharedPtr(q2.value()) : nullptr;
 
+  // This function must be used on empty vectors
+  // Anyway, they will be overwritten.
+  assert(q01.numberOfBlocks() == 0);
+  assert(q02.numberOfBlocks() == 0);
+
   // Initialize vects1 and vects2
   std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> vects1(2, nullptr);
   std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> vects2(2, nullptr);
@@ -182,8 +196,8 @@ void siconos::joints::CouplerJointR::makeBlockVectors(
     }
   }
 
-  q01.setAllVect(vects1);
-  q02.setAllVect(vects2);
+  for (auto v1 : vects1) q01.insertPtr(v1);
+  for (auto v2 : vects2) q02.insertPtr(v2);
 }
 
 void siconos::joints::CouplerJointR::setBasePositions(
@@ -234,9 +248,9 @@ void siconos::joints::CouplerJointR::computeh(const siconos::algebra::BlockVecto
   y(0) = y2(0) - y1(0) * _ratio + _offset;
 }
 
-void siconos::joints::CouplerJointR::computeH_NE_(
-    double time, siconos::modeling::Interaction& inter,
-    const siconos::algebra::BlockVector& q0) {
+void siconos::joints::CouplerJointR::computeH_NE_(double time,
+                                                  siconos::modeling::Interaction& inter,
+                                                  const siconos::algebra::BlockVector& q0) {
   auto jachq1 = std::make_shared<siconos::algebra::SiconosMatrix>(1, q0.size());
   auto jachq2 = std::make_shared<siconos::algebra::SiconosMatrix>(1, q0.size());
 
@@ -255,8 +269,7 @@ void siconos::joints::CouplerJointR::computeH_NE_(
   // Constraint is the linear relation between them
   for (unsigned int i = 0; i < 1; i++)
     for (unsigned int j = 0; j < H_NE_view_->cols(); j++)
-      H_NE_view_->setValue(
-          i, j, (*jachq2)(i, j) - (*jachq1)(i, j) * _ratio);
+      H_NE_view_->setValue(i, j, (*jachq2)(i, j) - (*jachq1)(i, j) * _ratio);
 }
 
 // siconos::algebra::SiconosVector siconos::joints::CouplerJointR::normalDoF(

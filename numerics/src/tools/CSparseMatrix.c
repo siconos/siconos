@@ -25,6 +25,7 @@
 #include <math.h>    // for fabs
 #include <stdio.h>   // for fprintf, sscanf, printf, NULL, fgets
 #include <stdlib.h>  // for realloc, exit, free, malloc, EXIT_FAILURE
+#include <inttypes.h>
 #include <string.h>  // for strtok_r, memcpy, strncmp
 
 #include "ldl.h"

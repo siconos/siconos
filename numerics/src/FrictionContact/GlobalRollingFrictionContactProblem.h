@@ -38,12 +38,12 @@ struct GlobalRollingFrictionContactProblem {
   /** the number of contacts \f$ n_c \f$ */
   int numberOfContacts;
   /** \f$ {M} \in {{\mathrm{I\!R}}}^{n \times n} \f$,
-     a matrix with \f$ n = d  n_c \f$ stored in NumericsMatrix structure */
+     a matrix with \f$ n \f$ the number of dof in the system */
   NumericsMatrix *M;
   /**  \f$ {H} \in {{\mathrm{I\!R}}}^{n \times m} \f$,
        a matrix with \f$ m = d  n_c \f$ stored in NumericsMatrix structure */
   NumericsMatrix *H;
-  /** \f$ {q} \in {{\mathrm{I\!R}}}^{n} \f$ */
+  /** \f$ {q} \in {{\mathrm{I\!R}}}^{m} \f$ */
   double *q;
   /** \f$ {b} \in {{\mathrm{I\!R}}}^{m} \f$ */
   double *b;

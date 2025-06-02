@@ -26,16 +26,15 @@
 #include "NonSmoothLaw.hpp"
 #include "OneStepNSProblem.hpp"
 #include "Relation.hpp"
+#include "SiconosAlgebraAddons.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixVectorOp.hpp"  // block prod
-#include "SiconosPointers.hpp"        // For createSPtr
+#include "SiconosPointers.hpp"  // For createSPtr
 #include "SiconosVector.hpp"
-#include "SiconosVectorOp.hpp"  // for scal
 #include "Simulation.hpp"
 #include "Tools.hpp"  // for enum_to_string
 #include "Topology.hpp"
 #include "TypeName.hpp"  // for siconos::types visitors
-//
+
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -94,7 +93,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
       /* Compute the acceleration due to the external force */
       /* accFree contains left (right limit) acceleration without contact force */
       if (d->LUMass()) {
-        d->update_lu_mass();
+        d->init_lu_mass();
         accFree = d->LUMass()->solve(accFree);
       }
 
@@ -189,7 +188,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
 
           siconos::algebra::SiconosVector dummy = *(d->p(2));  // copy
           if (d->LUMass()) {
-            d->update_lu_mass();
+            d->init_lu_mass();
             dummy = d->LUMass()->solve(dummy);
           }
           accFree += dummy;
@@ -362,7 +361,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
         d->computeTotalForces(d->velocity_read(), d->q_read(), t);
         *work_tdg = d->totalForces();
         if (d->LUMass()) {
-          d->update_lu_mass();
+          d->init_lu_mass();
           *work_tdg = d->LUMass()->solve(*work_tdg);
         }
         residuFree -= 0.5 * h * *work_tdg;
@@ -418,7 +417,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
         accFree += d->totalForces();
 
         if (d->LUMass()) {
-          d->update_lu_mass();
+          d->init_lu_mass();
           accFree = d->LUMass()->solve(accFree);
           // contains right (left limit) acceleration without contact force
         }
@@ -500,7 +499,7 @@ double siconos::integrators::D1MinusLinearOSI::computeResiduHalfExplicitAccelera
           DEBUG_EXPR(siconos::algebra::print(*d->p(2)));
           siconos::algebra::SiconosVector dummy = d->p_read(2);  // value = contact force
           if (d->LUMass()) {
-            d->update_lu_mass();
+            d->init_lu_mass();
             dummy = d->LUMass()->solve(dummy);
           }
 

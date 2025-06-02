@@ -28,7 +28,7 @@
 #include "siconos_debug.h"
 
 void siconos::mechanics::fem::NodeFem2d3DR::initialize(siconos::modeling::Interaction &inter) {
-  // proj_with_q  _jachqProj.reset(new SimpleMatrix(_jachq->rows(),_jachq->cols()));
+
   auto sizeDS = inter.getSizeOfDS();
 
   if (!jacobianhOver_q_internal_storage_) {

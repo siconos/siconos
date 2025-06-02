@@ -521,8 +521,8 @@ int siconos::simulation::Simulation::computeOneStepNSProblem(int Id) {
   return info;
 }
 
-std::shared_ptr<siconos::algebra::SiconosVector> siconos::simulation::Simulation::y(
-    unsigned int level, unsigned int coor) {
+siconos::algebra::SiconosVector siconos::simulation::Simulation::y_output(unsigned int level,
+                                                                          unsigned int coor) {
   // return output(level) (ie with y[level]) for all Interactions.
   // assert(level>=0);
 
@@ -532,53 +532,50 @@ std::shared_ptr<siconos::algebra::SiconosVector> siconos::simulation::Simulation
   DEBUG_PRINTF("with level = %i and coor = %i \n", level, coor);
 
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
-  std::shared_ptr<siconos::modeling::Interaction> inter;
   auto indexSet0 = _nsds->topology()->indexSet0();
 
-  auto y = std::make_shared<siconos::algebra::SiconosVector>(
-      _nsds->topology()->indexSet0()->size());
+  siconos::algebra::SiconosVector y{_nsds->topology()->indexSet0()->size()};
+
   int i = 0;
   for (std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui) {
-    inter = indexSet0->bundle(*ui);
+    auto inter = indexSet0->bundle(*ui);
     assert(inter->lowerLevelForOutput() <= level);
     assert(inter->upperLevelForOutput() >= level);
-    (*y)(i) = (*inter->y(level))(coor);
+    y(i) = (*inter->y(level))(coor);
     i++;
   }
   DEBUG_END(
       "siconos::simulation::Simulation::output(unsigned int level, unsigned "
       "int coor)\n");
-  return y;
+  return y;  // RVO
 }
 
-std::shared_ptr<siconos::algebra::SiconosVector> siconos::simulation::Simulation::lambda(
-    unsigned int level, unsigned int coor) {
+siconos::algebra::SiconosVector siconos::simulation::Simulation::lambda_input(
+    unsigned int level, unsigned int coor) const {
   // return input(level) (ie with lambda[level]) for all Interactions.
   // assert(level>=0);
 
   DEBUG_BEGIN(
-      "siconos::simulation::Simulation::input(unsigned int level, unsigned int "
+      "siconos::simulation::Simulation::input(unigned int level, unsigned int "
       "coor)\n");
   DEBUG_PRINTF("with level = %i and coor = %i \n", level, coor);
 
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
-  std::shared_ptr<siconos::modeling::Interaction> inter;
   auto indexSet0 = _nsds->topology()->indexSet0();
 
-  auto lambda = std::make_shared<siconos::algebra::SiconosVector>(
-      _nsds->topology()->indexSet0()->size());
+  siconos::algebra::SiconosVector lambda{_nsds->topology()->indexSet0()->size()};
   int i = 0;
   for (std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui) {
-    inter = indexSet0->bundle(*ui);
+    auto inter = indexSet0->bundle(*ui);
     assert(inter->lowerLevelForOutput() <= level);
     assert(inter->upperLevelForOutput() >= level);
-    (*lambda)(i) = (*inter->lambda(level))(coor);
+    lambda(i) = (*inter->lambda(level))(coor);
     i++;
   }
   DEBUG_END(
       "siconos::simulation::Simulation::input(unsigned int level, unsigned int "
       "coor)\n");
-  return lambda;
+  return lambda;  // RVO
 }
 
 void siconos::simulation::Simulation::run() {

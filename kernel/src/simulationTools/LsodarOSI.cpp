@@ -29,12 +29,13 @@
 #include "NonSmoothLaw.hpp"
 #include "OneStepNSProblem.hpp"
 #include "Relation.hpp"
+#include "SiconosAlgebraAddons.hpp"
 #include "SiconosException.hpp"
 #include "SiconosFortran.h"  // for lsodar
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
 #include "Tools.hpp"
+
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
@@ -150,11 +151,8 @@ void siconos::integrators::LsodarOSI::updateData() {
   jroot.resize(_intData[1], 0);
 }
 
-void siconos::integrators::LsodarOSI::fillXWork(int* sizeOfX, double* x) {
-  assert((unsigned int)(*sizeOfX) == _xWork->size() &&
-         "siconos::integrators::LsodarOSI::fillXWork xWork and sizeOfX have "
-         "different sizes");
-  (*_xWork) = x;
+void siconos::integrators::LsodarOSI::fillXWork(std::size_t sizeOfX, double* x) {
+  _xWork->fill(sizeOfX, x);
 }
 
 void siconos::integrators::LsodarOSI::computeRhs(double t) {
@@ -177,7 +175,7 @@ void siconos::integrators::LsodarOSI::computeRhs(double t) {
       // ds->computeRhs(t);
       free = lds->totalForces();
       if (lds->LUMass()) {
-        // lds->update_lu_mass();
+        // lds->init_lu_mass();
         free = lds->LUMass()->solve(free);
       }
       DEBUG_EXPR(siconos::algebra::print(free););
@@ -201,8 +199,8 @@ void siconos::integrators::LsodarOSI::computeJacobianRhs(
     ds->computeJacobianRhsOver_x(t);
     if (_extraAdditionalTerms) {
       auto dsgVD = DSG0.descriptor(ds);
-      _extraAdditionalTerms->addJacobianRhsContribution(
-          DSG0, dsgVD, t, *(ds->jacobianRhsOver_x()->toSiconosMatrix()));
+      _extraAdditionalTerms->addJacobianRhsContribution(DSG0, dsgVD, t,
+                                                        ds->jacobianRhsOver_x_readwrite());
     }
   }
 }
@@ -484,7 +482,7 @@ void siconos::integrators::LsodarOSI::integrate(double& tinit, double& tend, dou
 
   // === LSODAR CALL ===
   DEBUG_EXPR(siconos::algebra::print(*_xWork););
-  *_xtmp = *(_xWork->toSiconosVector());
+  *_xtmp = _xWork->toSiconosVector();
   if (istate == 3) {
     istate = 1;  // restart TEMPORARY
   }
@@ -526,7 +524,7 @@ void siconos::integrators::LsodarOSI::integrate(double& tinit, double& tend, dou
   }
 
   // Copy into work vectors ... This should be reviewed (BlockVectors)
-  for (int i = 0; i < _xtmp->size(); ++i) (*_xWork)(i) = (*_xtmp)(i);
+  _xWork->fill(*_xtmp);
   istate = _intData[3];
   tout = tinit_DR;  // real ouput time
   tend = tend_DR;   // necessary for next start of DLSODAR

@@ -20,11 +20,9 @@
 #include <iostream>
 #include <memory>
 
-#include "BlockMatrix.hpp"
 #include "BlockVector.hpp"
 #include "SiconosConst.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -81,18 +79,11 @@ void siconos::modeling::LagrangianDS::initMemoryForGeneralizedCoordinates(unsign
 }
 
 void siconos::modeling::LagrangianDS::init_lu_mass() {
-  if (mass_view_) {
-    computeMass(*state_q_[0]);
-    // LU factorization
-    LUMass_ = std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(*mass_view_);
-    hasLUMass_ = true;
-  }
-}
-
-void siconos::modeling::LagrangianDS::update_lu_mass() {
   if (mass_view_ && !hasConstantMass_) {
     computeMass(*state_q_[0]);
-    LUMass_ = std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(*mass_view_);
+    // LU factorization
+    LUMass_ = std::make_shared<siconos::algebra::SiconosLUMatrix>(*mass_view_);
+    hasLUMass_ = true;
   }
 }
 
@@ -141,55 +132,95 @@ void siconos::modeling::LagrangianDS::initRhs(double time) {
     if (!totalForces_) totalForces_ = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
   }
 
-  init_lu_mass();
+  // Compute mass and LU factorization
+  if (mass_view_) {
+    computeMass(*state_q_[0]);
+    // LU factorization
+    LUMass_ = std::make_shared<siconos::algebra::SiconosLUMatrix>(*mass_view_);
+    hasLUMass_ = true;
+  }
 
   computeRhs(time);
+  // -- Jacobian Rhs over x --
 
-  bool flag1 = false, flag2 = false;
-  if (jacobianTotalForcesOver_q_) {
-    // Solve MjacobianX(1,0) = jacobianFL[0]
-    computeJacobianTotalForcesOver_q(*state_q_[1], *state_q_[0], time);
+  // The jacobian is saved in a flattened version, as a vector
+  jacobianRhsOver_x_.resize(x_size_ * x_size_);
 
-    rhsMatrices_[jacobianXBloc10_] =
-        std::make_shared<siconos::algebra::SiconosMatrix>(*jacobianTotalForcesOver_q_);
-    *rhsMatrices_[jacobianXBloc10_] = LUMass_->solve(*rhsMatrices_[jacobianXBloc10_]);
-    flag1 = true;
+  // Fill null and identity part
+  jacobianRhsOver_x_.setZero();
+  for (unsigned int j = 0; j < ndof_; ++j) {
+    jacobianRhsOver_x_((ndof_ + j) * x_size_ + j) = 1.0;
+  }
+  if (!jacobianTotalForcesOver_q_ && !jacobianTotalForcesOver_velocity_) {
+    is_jacobianRhsOver_x_uptodate_ = true;
+
+    return;  // The jacobian is required only if at least one of the two jacobians above
+             // exists.
   }
 
-  if (jacobianTotalForcesOver_velocity_) {
-    // Solve MjacobianX(1,1) = jacobianFL[1]
-    computeJacobianTotalForcesOver_velocity(*state_q_[1], *state_q_[0], time);
-    rhsMatrices_[jacobianXBloc11_] =
-        std::make_shared<siconos::algebra::SiconosMatrix>(*jacobianTotalForcesOver_velocity_);
-    *rhsMatrices_[jacobianXBloc11_] = LUMass_->solve(*rhsMatrices_[jacobianXBloc11_]);
-    flag2 = true;
+  // - Fill parts corresponding to the jacobians of total forces -
+  // mass and lu_mass are up to date since we have already called init_lu_mass
+  if (hasMass()) {
+    // In that case, we'll need a buffer to save inv(Mass).jacobian_qForces and
+    // inv(Mass).jacobian_v Forces
+    if (hasJacobianTotalForcesOver_q() || hasJacobianTotalForcesOver_velocity())
+      buffer_.resize(ndof_ * ndof_ * 2);
+    // View onto left part of buffer_
+    Eigen::Map<siconos::algebra::SiconosMatrix> jacq(buffer_.data(), ndof_, ndof_);
+    // View onto right part of buffer_
+    Eigen::Map<siconos::algebra::SiconosMatrix> jacv(buffer_.data() + ndof_ * ndof_, ndof_,
+                                                     ndof_);
+    if (hasJacobianTotalForcesOver_q()) {
+      // Update if required
+      computeJacobianTotalForcesOver_q(*state_q_[1], *state_q_[0], time);
+      // Solve MjacobianX(1,0) = jacobianFL[0]
+      jacq = LUMass_->solve(*jacobianTotalForcesOver_q_);
+    }
+    if (hasJacobianTotalForcesOver_velocity()) {
+      // Update if required
+      computeJacobianTotalForcesOver_velocity(*state_q_[1], *state_q_[0], time);
+      // Solve MjacobianX(1,1) = jacobianFL[1]
+      jacv = LUMass_->solve(*jacobianTotalForcesOver_velocity_);
+    }
+    // Now fill in jacobianRhsOver_x_
+    for (unsigned int j = 0; j < ndof_; ++j) {
+      // Bottom-left block (jacobian / q)
+      if (hasJacobianTotalForcesOver_q()) {
+        for (unsigned int i = 0; i < ndof_; ++i)
+          jacobianRhsOver_x_(j * x_size_ + i + ndof_) = jacq(i, j);
+      }
+      // Bottom-right block (jacobian / vel)
+      if (hasJacobianTotalForcesOver_velocity()) {
+        for (unsigned int i = 0; i < ndof_; ++i)
+          jacobianRhsOver_x_((j + ndof_) * x_size_ + i + ndof_) = jacv(i, j);
+      }
+    }
+  } else  // No mass
+  {       // ==> no buffer
+    if (hasJacobianTotalForcesOver_q()) {
+      // Update if required
+      computeJacobianTotalForcesOver_q(*state_q_[1], *state_q_[0], time);
+    }
+    if (hasJacobianTotalForcesOver_velocity()) {
+      // Update if required
+      computeJacobianTotalForcesOver_velocity(*state_q_[1], *state_q_[0], time);
+    }
+    // Now fill in jacobianRhsOver_x_
+    for (unsigned int j = 0; j < ndof_; ++j) {
+      // Bottom-left block (jacobian / q)
+      if (hasJacobianTotalForcesOver_q()) {
+        for (unsigned int i = 0; i < ndof_; ++i)
+          jacobianRhsOver_x_(j * x_size_ + i + ndof_) = (*jacobianTotalForcesOver_q_)(i, j);
+      }
+      // Bottom-right block (jacobian / vel)
+      if (hasJacobianTotalForcesOver_velocity()) {
+        for (unsigned int i = 0; i < ndof_; ++i)
+          jacobianRhsOver_x_((j + ndof_) * x_size_ + i + ndof_) =
+              (*jacobianTotalForcesOver_velocity_)(i, j);
+      }
+    }
   }
-
-  if (!rhsMatrices_[zeroMatrix_]) {
-    rhsMatrices_[zeroMatrix_] =
-        std::make_shared<siconos::algebra::SiconosMatrix>(ndof_, ndof_);
-    rhsMatrices_[zeroMatrix_]->setZero();
-  }
-  if (!rhsMatrices_[idMatrix_]) {
-    rhsMatrices_[idMatrix_] = std::make_shared<siconos::algebra::SiconosMatrix>(ndof_, ndof_);
-    rhsMatrices_[idMatrix_]->setIdentity();
-  }
-  if (flag1 && flag2)
-    jacobianRhsOver_x_ = std::make_shared<siconos::algebra::BlockMatrix>(
-        rhsMatrices_[zeroMatrix_], rhsMatrices_[idMatrix_], rhsMatrices_[jacobianXBloc10_],
-        rhsMatrices_[jacobianXBloc11_]);
-  else if (flag1)  // flag2 = false
-    jacobianRhsOver_x_ = std::make_shared<siconos::algebra::BlockMatrix>(
-        rhsMatrices_[zeroMatrix_], rhsMatrices_[idMatrix_], rhsMatrices_[jacobianXBloc10_],
-        rhsMatrices_[zeroMatrix_]);
-  else if (flag2)  // flag1 = false
-    jacobianRhsOver_x_ = std::make_shared<siconos::algebra::BlockMatrix>(
-        rhsMatrices_[zeroMatrix_], rhsMatrices_[idMatrix_], rhsMatrices_[zeroMatrix_],
-        rhsMatrices_[jacobianXBloc11_]);
-  else
-    jacobianRhsOver_x_ = std::make_shared<siconos::algebra::BlockMatrix>(
-        rhsMatrices_[zeroMatrix_], rhsMatrices_[idMatrix_], rhsMatrices_[zeroMatrix_],
-        rhsMatrices_[zeroMatrix_]);
+  is_jacobianRhsOver_x_uptodate_ = true;
   DEBUG_EXPR(display(););
   DEBUG_END("siconos::modeling::LagrangianDS::initRhs(double time)\n");
 }
@@ -230,6 +261,8 @@ void siconos::modeling::LagrangianDS::computeMass(
     const Eigen::Ref<const siconos::algebra::SiconosVector>& position) {
   if (computemass_) {
     computemass_(position, *mass_view_);
+    hasLUMass_ = false;  // LU factorisation needs update
+    is_jacobianRhsOver_x_uptodate_ = false;
   }
 }
 
@@ -270,6 +303,7 @@ void siconos::modeling::LagrangianDS::setConstantJacobianFintOver_q(
   hasJacobianFintOver_q_ = true;
   hasConstantJacobianFintOver_q_ = true;
   computejacobianFintOver_q_ = nullptr;
+  is_jacobianRhsOver_x_uptodate_ = false;
 }
 
 void siconos::modeling::LagrangianDS::setComputeJacobianFintOver_qFunction(
@@ -292,6 +326,7 @@ void siconos::modeling::LagrangianDS::computeJacobianFintOver_q(
     const Eigen::Ref<siconos::algebra::SiconosVector>& position, double time) {
   if (computejacobianFintOver_q_) {
     computejacobianFintOver_q_(velocity, position, time, *jacobianFintOver_q_view_);
+    is_jacobianRhsOver_x_uptodate_ = false;
   }
 }
 
@@ -311,6 +346,7 @@ void siconos::modeling::LagrangianDS::setConstantJacobianFintOver_velocity(
   hasJacobianFintOver_velocity_ = true;
   hasConstantJacobianFintOver_velocity_ = true;
   computejacobianFintOver_velocity_ = nullptr;
+  is_jacobianRhsOver_x_uptodate_ = false;
 }
 
 void siconos::modeling::LagrangianDS::setComputeJacobianFintOver_velocityFunction(
@@ -334,6 +370,7 @@ void siconos::modeling::LagrangianDS::computeJacobianFintOver_velocity(
   if (computejacobianFintOver_velocity_) {
     computejacobianFintOver_velocity_(velocity, position, time,
                                       *jacobianFintOver_velocity_view_);
+    is_jacobianRhsOver_x_uptodate_ = false;
   }
 }
 
@@ -370,6 +407,7 @@ void siconos::modeling::LagrangianDS::setConstantJacobianFgyrOver_q(
   hasJacobianFgyrOver_q_ = true;
   hasConstantJacobianFgyrOver_q_ = true;
   computejacobianFgyrOver_q_ = nullptr;
+  is_jacobianRhsOver_x_uptodate_ = false;
 }
 
 void siconos::modeling::LagrangianDS::setComputeJacobianFgyrOver_qFunction(
@@ -392,6 +430,7 @@ void siconos::modeling::LagrangianDS::computeJacobianFgyrOver_q(
     const Eigen::Ref<siconos::algebra::SiconosVector>& position) {
   if (computejacobianFgyrOver_q_) {
     computejacobianFgyrOver_q_(velocity, position, *jacobianFgyrOver_q_view_);
+    is_jacobianRhsOver_x_uptodate_ = false;
   }
 }
 
@@ -411,6 +450,7 @@ void siconos::modeling::LagrangianDS::setConstantJacobianFgyrOver_velocity(
   hasJacobianFgyrOver_velocity_ = true;
   hasConstantJacobianFgyrOver_velocity_ = true;
   computejacobianFgyrOver_velocity_ = nullptr;
+  is_jacobianRhsOver_x_uptodate_ = false;
 }
 
 void siconos::modeling::LagrangianDS::setComputeJacobianFgyrOver_velocityFunction(
@@ -433,6 +473,7 @@ void siconos::modeling::LagrangianDS::computeJacobianFgyrOver_velocity(
     const Eigen::Ref<siconos::algebra::SiconosVector>& position) {
   if (computejacobianFgyrOver_velocity_) {
     computejacobianFgyrOver_velocity_(velocity, position, *jacobianFgyrOver_velocity_view_);
+    is_jacobianRhsOver_x_uptodate_ = false;
   }
 }
 
@@ -479,8 +520,6 @@ void siconos::modeling::LagrangianDS::computeRhs(double time) {
   DEBUG_BEGIN("siconos::modeling::LagrangianDS::computeRhs(double time)");
   *state_q_[2] = *(p_[2]);  // Warning: r/p update is done in Interactions/Relations
 
-  // if(totalForces_)
-  //   {
   computeTotalForces(*state_q_[1], *state_q_[0], time);
   if (totalForces_) {
     *state_q_[2] += *totalForces_;
@@ -488,15 +527,11 @@ void siconos::modeling::LagrangianDS::computeRhs(double time) {
   }
 
   // Computes q[2] = inv(mass)*(fL+p) by solving Mq[2]=fL+p.
-  // -- Case 1: if mass is constant, then a copy of imass is LU-factorized
-  // during initialization and saved into LUMass_
-  // -- Case 2: mass is not constant, we copy it into LUMass_
-  // Then we proceed with PLUForwardBackward.
-  // mass and inv(mass) computation
-  update_lu_mass();
+  // mass and inv(mass) updates
+  init_lu_mass();
 
   //  if(mass->isPlugged()) : mass may be not plugged in LagrangianDS children
-  if (LUMass_) *state_q_[2] = LUMass_->solve(*state_q_[2]);
+  if (hasLUMass_) *state_q_[2] = LUMass_->solve(*state_q_[2]);
 
   state_x_[1]->head(ndof_) = *state_q_[1];
   state_x_[1]->tail(ndof_) = *state_q_[2];
@@ -504,28 +539,77 @@ void siconos::modeling::LagrangianDS::computeRhs(double time) {
 }
 
 void siconos::modeling::LagrangianDS::computeJacobianRhsOver_x(double time) {
-  computeMass(*state_q_[0]);
+  if (is_jacobianRhsOver_x_uptodate_ && hasConstantMass_ &&
+      hasConstantJacobianTotalForcesOver_q() && hasConstantJacobianTotalForcesOver_velocity())
+    return;  // Mass and all jacobian constants and jacobian rhs already up to date
 
-  if (jacobianTotalForcesOver_q_ || jacobianTotalForcesOver_velocity_) {
-    update_lu_mass();
+  is_jacobianRhsOver_x_uptodate_ = true;
+  // Any compute(...) below if active, will turn this to false
+
+  if (!hasConstantJacobianTotalForcesOver_q())
+    computeJacobianTotalForcesOver_q(*state_q_[1], *state_q_[0], time);
+
+  if (!hasConstantJacobianTotalForcesOver_velocity())
+    computeJacobianTotalForcesOver_velocity(*state_q_[1], *state_q_[0], time);
+
+  if (hasMass()) init_lu_mass();  // Update mass value if required
+
+  // If none of the updates above has changed anything, then just return
+  if (is_jacobianRhsOver_x_uptodate_) return;
+
+  // At this point, all operators are up to date
+
+  if (hasMass()) {
+    // View onto left part of buffer_
+    Eigen::Map<siconos::algebra::SiconosMatrix> jacq(buffer_.data(), ndof_, ndof_);
+    // View onto right part of buffer_
+    Eigen::Map<siconos::algebra::SiconosMatrix> jacv(buffer_.data(), ndof_, ndof_);
+
+    if (hasJacobianTotalForcesOver_q()) {
+      if (!hasConstantMass_ || !hasConstantJacobianTotalForcesOver_q())
+        // Solve MjacobianX(1,0) = jacobianFL[0]
+        jacq = LUMass_->solve(*jacobianTotalForcesOver_q_);
+    }
+
+    if (hasJacobianTotalForcesOver_velocity()) {
+      if (!hasConstantMass_ || !hasConstantJacobianTotalForcesOver_velocity())
+        // Solve MjacobianX(1,1) = jacobianFL[1]
+        jacv = LUMass_->solve(*jacobianTotalForcesOver_velocity_);
+    }
+
+    if (!is_jacobianRhsOver_x_uptodate_) {
+      // Now fill in jacobianRhsOver_x_
+      for (unsigned int j = 0; j < ndof_; ++j) {
+        // Bottom-left block (jacobian / q)
+        if (hasJacobianTotalForcesOver_q()) {
+          for (unsigned int i = 0; i < ndof_; ++i)
+            jacobianRhsOver_x_(j * x_size_ + i + ndof_) = jacq(i, j);
+        }
+        // Bottom-right block (jacobian / vel)
+        if (hasJacobianTotalForcesOver_velocity()) {
+          for (unsigned int i = 0; i < ndof_; ++i)
+            jacobianRhsOver_x_((j + ndof_) * x_size_ + i + ndof_) = jacv(i, j);
+        }
+      }
+    }
+  } else  // No mass
+  {       // ==> no buffer
+          // Now fill in jacobianRhsOver_x_
+    for (unsigned int j = 0; j < ndof_; ++j) {
+      // Bottom-left block (jacobian / q)
+      if (!hasConstantJacobianTotalForcesOver_q()) {
+        for (unsigned int i = 0; i < ndof_; ++i)
+          jacobianRhsOver_x_(j * x_size_ + i + ndof_) = (*jacobianTotalForcesOver_q_)(i, j);
+      }
+      // Bottom-right block (jacobian / vel)
+      if (!hasConstantJacobianTotalForcesOver_velocity()) {
+        for (unsigned int i = 0; i < ndof_; ++i)
+          jacobianRhsOver_x_((j + ndof_) * x_size_ + i + ndof_) =
+              (*jacobianTotalForcesOver_velocity_)(i, j);
+      }
+    }
   }
-
-  computeJacobianTotalForcesOver_q(*state_q_[1], *state_q_[0], time);
-  if (jacobianTotalForcesOver_q_) {
-    /** \warning the Jacobian of the inverse of the mass matrix
-     * w.r.t q is not taken into account */
-
-    std::shared_ptr<siconos::algebra::SiconosMatrix> bloc10 = jacobianRhsOver_x_->block(1, 0);
-    *bloc10 = *jacobianTotalForcesOver_q_;
-    *bloc10 = LUMass_->solve(*bloc10);
-  }
-
-  computeJacobianTotalForcesOver_velocity(*state_q_[1], *state_q_[0], time);
-  if (jacobianTotalForcesOver_velocity_) {
-    std::shared_ptr<siconos::algebra::SiconosMatrix> bloc11 = jacobianRhsOver_x_->block(1, 1);
-    *bloc11 = *jacobianTotalForcesOver_velocity_;
-    *bloc11 = LUMass_->solve(*bloc11);
-  }
+  is_jacobianRhsOver_x_uptodate_ = true;
 }
 
 void siconos::modeling::LagrangianDS::computeTotalForces(
@@ -560,8 +644,9 @@ void siconos::modeling::LagrangianDS::computeJacobianTotalForcesOver_q(
           std::make_shared<siconos::algebra::SiconosMatrix>(ndof_, ndof_);
       jacobianTotalForcesOver_q_->setZero();
     }
-  } else
+  } else {
     return;
+  }
 
   computeJacobianFintOver_q(*state_q_[1], *state_q_[0], time);
   computeJacobianFgyrOver_q(*state_q_[1], *state_q_[0]);

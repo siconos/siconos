@@ -32,8 +32,8 @@ void QuaternionTest::tearDown() {}
 void QuaternionTest::testQuaternion() {
   std::cout << "--> Test: quaternion 1 from position" << std::endl;
 
-  siconos::algebra::SiconosVector axis{3};
-  siconos::algebra::SiconosVector axisref(3);
+  siconos::algebra::SiconosVector3 axis;
+  siconos::algebra::SiconosVector3 axisref;
   double angle = 1e24;
   double angleref = 1e24;
 
@@ -48,8 +48,8 @@ void QuaternionTest::testQuaternion() {
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testQuaternionA : ", angle == angleref, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testQuaternionB : ", axis == axisref, true);
 
-  siconos::algebra::SiconosMatrix R{3, 3};
-  siconos::algebra::SiconosMatrix Rref{3, 3};
+  siconos::algebra::SiconosMatrix33 R;
+  siconos::algebra::SiconosMatrix33 Rref;
   Rref.setZero();
   Rref(1, 1) = 1.0;
   Rref(1, 1) = -1.0;

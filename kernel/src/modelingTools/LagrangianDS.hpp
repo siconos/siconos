@@ -174,8 +174,8 @@ class LagrangianDS : public SecondOrderDS {
   /** function wrapper used to compute jacobianFintOver_q */
   siconos::modeling::func_prototypes::FunctionVVS_M computejacobianFintOver_q_{nullptr};
 
-  /** true if jacobianFintOver_q is required/set and constant */
-  bool hasConstantJacobianFintOver_q_{false};
+  /** true if jacobianFintOver_q is not set or set and constant */
+  bool hasConstantJacobianFintOver_q_{true};
 
   /** True if jacobianFintOver_q is required */
   bool hasJacobianFintOver_q_{false};
@@ -189,8 +189,8 @@ class LagrangianDS : public SecondOrderDS {
   /** function wrapper used to compute jacobianFintOver_velocity */
   siconos::modeling::func_prototypes::FunctionVVS_M computejacobianFintOver_velocity_{nullptr};
 
-  /** true if jacobianFintOver_velocity is required/set and constant */
-  bool hasConstantJacobianFintOver_velocity_{false};
+  /** true if jacobianFintOver_velocity is not set or required/set and constant */
+  bool hasConstantJacobianFintOver_velocity_{true};
 
   /** True if jacobianFintOver_velocity is required */
   bool hasJacobianFintOver_velocity_{false};
@@ -228,8 +228,8 @@ class LagrangianDS : public SecondOrderDS {
   /** function wrapper used to compute jacobianFgyrOver_q */
   siconos::modeling::func_prototypes::FunctionVV_M computejacobianFgyrOver_q_{nullptr};
 
-  /** true if jacobianFgyrOver_q is required/set and constant */
-  bool hasConstantJacobianFgyrOver_q_{false};
+  /** true if jacobianFgyrOver_q is not set or required/set and constant */
+  bool hasConstantJacobianFgyrOver_q_{true};
 
   /** True if jacobianFgyrOver_q is required */
   bool hasJacobianFgyrOver_q_{false};
@@ -243,8 +243,8 @@ class LagrangianDS : public SecondOrderDS {
   /** function wrapper used to compute jacobianFgyrOver_velocity */
   siconos::modeling::func_prototypes::FunctionVV_M computejacobianFgyrOver_velocity_{nullptr};
 
-  /** true if jacobianFgyrOver_velocity is required/set and constant */
-  bool hasConstantJacobianFgyrOver_velocity_{false};
+  /** true if jacobianFgyrOver_velocity is not set or required/set and constant */
+  bool hasConstantJacobianFgyrOver_velocity_{true};
 
   /** True if jacobianFgyrOver_velocity is required */
   bool hasJacobianFgyrOver_velocity_{false};
@@ -263,19 +263,6 @@ class LagrangianDS : public SecondOrderDS {
 
   /** memory of previous generalized forces due to constraints */
   std::vector<siconos::algebra::SiconosMemory> pMemory_;
-
-  // Internal constant, used to easily identify the different blocs in the rhs
-  static constexpr auto jacobianXBloc10_ = 0;
-  static constexpr auto jacobianXBloc11_ = 1;
-  static constexpr auto zeroMatrix_ = 2;
-  static constexpr auto idMatrix_ = 3;
-
-  /** A container of matrices to save matrices that are involed in first order
-   * from of LagrangianDS system values (jacobianXBloc10, jacobianXBloc11,
-   * zeroMatrix, idMatrix) No get-set functions at the time. Only used as a
-   * protected member.*/
-  std::vector<std::shared_ptr<siconos::algebra::SiconosMatrix>> rhsMatrices_ = {
-      nullptr, nullptr, nullptr, nullptr};
 
   /** Default constructor */
   LagrangianDS() = default;
@@ -425,6 +412,10 @@ class LagrangianDS : public SecondOrderDS {
 
   /** \return True if the mass matrix has been set (i.e. different from identity) */
   bool hasMass() const { return hasMass_; }
+
+  /** \return True if the mass matrix has been set (i.e. different from identity) and is
+   * constant */
+  bool hasConstantMass() const { return hasConstantMass_; }
 
   /** set a user-defined function to compute the mass matrix
    *
@@ -662,9 +653,19 @@ class LagrangianDS : public SecondOrderDS {
   /** \return True if  \f$ \nabla_q F_{total}\f$ is taken into account */
   bool hasJacobianTotalForcesOver_q() const { return jacobianTotalForcesOver_q_ != nullptr; }
 
+  /** \return True if  \f$ \nabla_q F_{total}\f$ is taken into account and is constant */
+  bool hasConstantJacobianTotalForcesOver_q() const {
+    return hasConstantJacobianFgyrOver_q_ && hasConstantJacobianFintOver_q_;
+  }
+
   /** \return True if  \f$ \nabla_{velocity} F_{total}\f$ is taken into account */
   bool hasJacobianTotalForcesOver_velocity() const {
     return jacobianTotalForcesOver_velocity_ != nullptr;
+  }
+
+  /** \return True if  \f$ \nabla_q F_{total}\f$ is taken into account and is constant */
+  bool hasConstantJacobianTotalForcesOver_velocity() const {
+    return hasConstantJacobianFgyrOver_velocity_ && hasConstantJacobianFintOver_velocity_;
   }
 
   /** \return a read-only view on \f$  \nabla_qF_{total}(v,q,t) \f$ */
@@ -739,11 +740,6 @@ class LagrangianDS : public SecondOrderDS {
      Useful for some integrators with system inversion involving the mass
   */
   void init_lu_mass() override;
-
-  /**
-     Update the content of the lu factorization of the mass of the system,
-     if required. */
-  void update_lu_mass();
 
   // visitors hook
   virtual void accept(dynamical_systems::Visitor &tourist) const override {

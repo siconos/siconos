@@ -24,7 +24,6 @@
 #include "NonSmoothDynamicalSystem.hpp"
 #include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixVectorOp.hpp"
 #include "SiconosVector.hpp"
 #include "TimeStepping.hpp"
 #include "Topology.hpp"
@@ -65,7 +64,7 @@ void siconos::control::SlidingReducedOrderObserver::initialize(
     if (auto folds =
             std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(observedDS)) {
       DEBUG_PRINT("dsType == Type::FirstOrderLinearDS\n");
-     _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*folds);
+      _DS = std::make_shared<siconos::modeling::FirstOrderLinearDS>(*folds);
     } else
       THROW_EXCEPTION(
           "SlidingReducedOrderObserver is only implemented for FirstOrderLinearDS");
@@ -155,7 +154,7 @@ void siconos::control::SlidingReducedOrderObserver::process() {
     // update the current measured value
     *_y = y;
 
-    ////    siconos::algebra::prod(*_C, _DS->x_read(), *_e);
+    // *_e = *_C *  _DS->x_read();
     //    *_e -= y;
     //
     //    SiconosVector tmpV(_DS->dimension());

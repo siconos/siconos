@@ -55,10 +55,10 @@ class RigidBodyDS : public siconos::modeling::NewtonEulerDS,
 
   void setUseContactorInertia(bool use) { _useContactorInertia = use; }
 
-  bool useContactorInertia() { return _useContactorInertia; }
+  bool useContactorInertia() const { return _useContactorInertia; }
 
   /** Return the value of the _allowSelfCollide flag. */
-  bool allowSelfCollide() { return _allowSelfCollide; }
+  bool allowSelfCollide() const { return _allowSelfCollide; }
 
   /** Set the value of the _allowSelfCollide flag. */
   void setAllowSelfCollide(bool x) { _allowSelfCollide = x; }

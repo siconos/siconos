@@ -46,9 +46,12 @@ class FixedJointR : public NewtonEulerJointR {
    *  \param q0  q states vectors of the related the dynamical systems
    */
   virtual void computeH_NE_(double time, siconos::modeling::Interaction& inter,
-                                       const siconos::algebra::BlockVector& q0) override;
+                            const siconos::algebra::BlockVector& q0) override;
 
  public:
+  /** default constructor */
+  FixedJointR() = default;
+
   /** constructor,
    *
    *  \param a std::shared_ptr<siconos::modeling::NewtonEulerDS> d1, a dynamical system
@@ -100,6 +103,10 @@ class FixedJointR : public NewtonEulerJointR {
 
   virtual void Jd1(double X1, double Y1, double Z1, double q10, double q11, double q12,
                    double q13);
+
+  virtual void accept(modeling::relations::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 };
 }  // namespace siconos::joints
 #endif  // FixedJointRELATION_H

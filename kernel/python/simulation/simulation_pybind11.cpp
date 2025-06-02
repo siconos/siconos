@@ -1,3 +1,4 @@
+#include <pybind11/eigen.h>
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -8,6 +9,7 @@
 #include "NonSmoothDynamicalSystem.hpp"
 #include "OneStepIntegrator.hpp"
 #include "OneStepNSProblem.hpp"
+#include "SimulationGraphs.hpp"
 #include "SimulationTypes.hpp"
 #include "TimeDiscretisation.hpp"
 #include "TimeStepping.hpp"
@@ -33,7 +35,13 @@ PYBIND11_MODULE(simulation, m) {
 
   py::class_<siconos::simulation::Topology, std::shared_ptr<siconos::simulation::Topology>>(
       m, "Topology")
-      .def("indexSetsSize", &siconos::simulation::Topology::indexSetsSize);
+      .def("indexSetsSize", &siconos::simulation::Topology::indexSetsSize)
+      .def("numberOfIndexSet", &siconos::simulation::Topology::numberOfIndexSet)
+      .def("getDynamicalSystem",
+           py::overload_cast<std::string>(&siconos::simulation::Topology::getDynamicalSystem,
+                                          py::const_))
+      .def("getInteraction", py::overload_cast<std::string>(
+                                 &siconos::simulation::Topology::getInteraction, py::const_));
 
   py::class_<siconos::simulation::Simulation,
              std::shared_ptr<siconos::simulation::Simulation>>(m, "Simulation")
@@ -50,7 +58,43 @@ PYBIND11_MODULE(simulation, m) {
       .def("oneStepNSProblem", &siconos::simulation::Simulation::oneStepNSProblem,
            "get the OneStepNSProblem with the given id")
       .def("clearNSDSChangeLog", &siconos::simulation::Simulation::clearNSDSChangeLog,
-           "clear the change log of the non-smooth dynamical system");
+           "clear the change log of the non-smooth dynamical system")
+      .def("initializeOSIAssociations",
+           &siconos::simulation::Simulation::initializeOSIAssociations,
+           "initialize integrators-DS links in the NSDS graph")
+      .def("initializeIndexSets", &siconos::simulation::Simulation::initializeIndexSets,
+           "initialize integrators index sets")
+      .def("applyNSDSChangelogForDS",
+           &siconos::simulation::Simulation::applyNSDSChangelogForDS,
+           "initialize/update all new dynamical systems and interactions")
+      .def("computeInitialStateOfTheStep",
+           &siconos::simulation::Simulation::computeInitialStateOfTheStep)
+      .def("updateWorldFromDS", &siconos::simulation::Simulation::updateWorldFromDS)
+      .def("updateInteractions", &siconos::simulation::Simulation::updateInteractions,
+           "Call the interaction manager")
+      .def("initializeNSDSChangelog",
+           &siconos::simulation::Simulation::initializeNSDSChangelog,
+           " initialize objects (DSs and Interations) found in the NSDS")
+      .def("updateOutput", &siconos::simulation::Simulation::updateOutput,
+           py::arg("level") = 0)
+      .def("updateIndexSets", &siconos::simulation::Simulation::updateIndexSets,
+           " update all index sets of the topology, using current states of the"
+           "Interactions")
+      .def("initializeOneStepNSProblem",
+           &siconos::simulation::Simulation::initializeOneStepNSProblem)
+      .def("firstInitialize", &siconos::simulation::Simulation::firstInitialize)
+      .def("updateDSPlugins", &siconos::simulation::Simulation::updateDSPlugins)
+      .def("computeResidu", &siconos::simulation::Simulation::computeResidu,
+           "Compute the residu for all integrators")
+      .def("updateAllInput", &siconos::simulation::Simulation::updateAllInput)
+      .def("updateState", &siconos::simulation::Simulation::updateState, py::arg("level") = 0)
+      .def("y_output", &siconos::simulation::Simulation::y_output,
+           py::return_value_policy::move)
+      .def("lambda_input", &siconos::simulation::Simulation::lambda_input,
+           py::return_value_policy::move)
+      .def("indexSet", &siconos::simulation::Simulation::indexSet)
+      .def_property_readonly("numberOfOSNSProblems",
+                             &siconos::simulation::Simulation::numberOfOSNSProblems);
 
   py::class_<siconos::simulation::TimeStepping,
              std::shared_ptr<siconos::simulation::TimeStepping>,
@@ -86,18 +130,53 @@ PYBIND11_MODULE(simulation, m) {
            py::arg("skip_last_update_input"))
       .def("setSkipResetLambdas", &siconos::simulation::TimeStepping::setSkipResetLambdas,
            py::arg("skip_reset_lambdas"))
+      .def_property_readonly("skipResetLambdas",
+                             &siconos::simulation::TimeStepping::skipResetLambdas)
       .def("setDisplayNewtonConvergence",
            &siconos::simulation::TimeStepping::setDisplayNewtonConvergence,
-           py::arg("display_newton_convergence"));
+           py::arg("display_newton_convergence"))
+      .def("resetLambdas", &siconos::simulation::TimeStepping::resetLambdas)
+      .def_property_readonly("newtonTolerance",
+                             &siconos::simulation::TimeStepping::newtonTolerance)
+      .def_property_readonly("newtonMaxIteration",
+                             &siconos::simulation::TimeStepping::newtonMaxIteration)
+      .def_property_readonly("newtonOptions",
+                             &siconos::simulation::TimeStepping::newtonOptions)
+      .def("computeFreeState", &siconos::simulation::TimeStepping::computeFreeState)
+      .def("DefaultCheckSolverOutput",
+           &siconos::simulation::TimeStepping::DefaultCheckSolverOutput)
+      .def("skipLastUpdateInput", &siconos::simulation::TimeStepping::skipLastUpdateInput)
+      .def("skipLastUpdateOutput", &siconos::simulation::TimeStepping::skipLastUpdateOutput)
+      .def("prepareNewtonIteration",
+           &siconos::simulation::TimeStepping::prepareNewtonIteration);
 
   py::class_<siconos::simulation::TimeSteppingDirectProjection,
              std::shared_ptr<siconos::simulation::TimeSteppingDirectProjection>,
              siconos::simulation::TimeStepping>(m, "TimeSteppingDirectProjection")
+      .def(py::init<std::shared_ptr<siconos::modeling::NonSmoothDynamicalSystem>,
+                    std::shared_ptr<siconos::simulation::TimeDiscretisation>,
+                    std::shared_ptr<siconos::integrators::OneStepIntegrator>,
+                    std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem>,
+                    std::shared_ptr<siconos::nonsmooth_formulations::OneStepNSProblem>,
+                    unsigned int>(),
+           py::arg("nsds"), py::arg("td"), py::arg("osi"), py::arg("osnspb_velo"),
+           py::arg("osnspb_pos"), py::arg("level") = 1)
       .def("advanceToEvent",
            &siconos::simulation::TimeSteppingDirectProjection::advanceToEvent)
       .def("nextStep", &siconos::simulation::TimeSteppingDirectProjection::nextStep)
       .def("computeCriteria",
-           &siconos::simulation::TimeSteppingDirectProjection::computeCriteria);
+           &siconos::simulation::TimeSteppingDirectProjection::computeCriteria)
+      .def("setProjectionMaxIteration",
+           &siconos::simulation::TimeSteppingDirectProjection::setProjectionMaxIteration,
+           py::arg("v"))
+      .def("setConstraintTolUnilateral",
+           &siconos::simulation::TimeSteppingDirectProjection::setConstraintTolUnilateral,
+           py::arg("v"))
+      .def("setConstraintTol",
+           &siconos::simulation::TimeSteppingDirectProjection::setConstraintTol, py::arg("v"));
+
+  py::class_<siconos::graphs::InteractionsGraph,
+             std::shared_ptr<siconos::graphs::InteractionsGraph>>(m, "InteractionsGraph");
 
   py::module_ constants = m.def_submodule("constants", "Constants for simulation module");
   constants.attr("SICONOS_OSNSP_TS_VELOCITY") =

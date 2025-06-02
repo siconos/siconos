@@ -39,7 +39,17 @@ PYBIND11_MODULE(_bullet, m) {
                                                                 "Bullet dim")
       .value("ThreeD", siconos::collision::bullet::SiconosBulletDimension::ThreeD, "3D case")
       .value("TwoD", siconos::collision::bullet::SiconosBulletDimension::TwoD, "2D case")
-      .export_values();
+      .export_values()
+      .def("__str__",
+           [](siconos::collision::bullet::SiconosBulletDimension d) {
+             return d == siconos::collision::bullet::SiconosBulletDimension::ThreeD ? "ThreeD"
+                                                                                    : "TwoD";
+           })
+      .def("__repr__", [](siconos::collision::bullet::SiconosBulletDimension d) {
+        return d == siconos::collision::bullet::SiconosBulletDimension::ThreeD ? "\"ThreeD\""
+                                                                               : "\"TwoD\"";
+      });
+  ;
 
   py::class_<siconos::collision::bullet::SiconosBulletOptions,
              std::shared_ptr<siconos::collision::bullet::SiconosBulletOptions>>(
@@ -114,7 +124,8 @@ PYBIND11_MODULE(_bullet, m) {
       .def("addStaticBody",
            &siconos::collision::bullet::SiconosBulletCollisionManager::addStaticBody,
            py::arg("cs"), py::arg("position"), py::arg("number") = 0)
-
+      .def("useEqualityConstraints",
+           &siconos::collision::bullet::SiconosBulletCollisionManager::useEqualityConstraints)
       .def("statistics",
            &siconos::collision::bullet::SiconosBulletCollisionManager::statistics);
 }

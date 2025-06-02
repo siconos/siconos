@@ -46,10 +46,15 @@ namespace siconos::nonsmooth_formulations {
    and a Coulomb friction law.
 
    With:
-   - \f$ velocity \in R^{n} \f$  and \f$ reaction \in R^{n} \f$ the unknowns,
-   - \f$ M \in R^{n \times n } \f$  and \f$ q \in R^{n} \f$
+   - \f$ velocity \in R^{m} \f$  and \f$ reaction \in R^{m} \f$ the unknowns,
+   - \f$ M \in R^{m \times m } \f$  and \f$ q \in R^{m} \f$
+   - \f$ m = numberOfContacts * dimension \f$
 
-   The dimension of the problem (2D or 3D) is given by the variable
+   m is saved into _sizeOutput attribute.
+   velocity is accessed with "w()" method of LinearOSNS and reaction with "z()" method.
+
+
+   The dimension of the problem (3 for 2D or 5 for 3D) is given by the variable
    contactProblemDim and the proper Numerics driver will be called according to
    this value.
 

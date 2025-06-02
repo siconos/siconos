@@ -21,18 +21,19 @@
 
 #include "BlockVector.hpp"
 #include "Interaction.hpp"
+#include "SiconosAlgebraAddons.hpp"
 #include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixVectorOp.hpp"  // for matrix-vector prod
 #include "SiconosVector.hpp"
+
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
 siconos::modeling::FirstOrderLinearTIR::FirstOrderLinearTIR(
-    Eigen::Ref<siconos::algebra::SiconosMatrix> C,
-    Eigen::Ref<siconos::algebra::SiconosMatrix> B)
+    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> C,
+    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> B)
     : FirstOrderLinearTIR() {
   setConstantC(C);
   setConstantB(B);
@@ -76,7 +77,7 @@ void siconos::modeling::FirstOrderLinearTIR::checkSize(const Interaction &inter)
   }
 }
 void siconos::modeling::FirstOrderLinearTIR::setConstantB(
-    Eigen::Ref<siconos::algebra::SiconosMatrix> newValue) {
+    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue) {
   /**  Warning: we can't check if newValue size is compliant with
    * the current relation/interaction. This will be done during
    * initialize / checkSize call!
@@ -90,7 +91,7 @@ void siconos::modeling::FirstOrderLinearTIR::setConstantB(
 }
 
 void siconos::modeling::FirstOrderLinearTIR::setConstantC(
-    Eigen::Ref<siconos::algebra::SiconosMatrix> newValue) {
+    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue) {
   /**  Warning: we can't check if newValue size is compliant with
    * the current relation/interaction. This will be done during
    * initialize / checkSize call!
@@ -104,7 +105,7 @@ void siconos::modeling::FirstOrderLinearTIR::setConstantC(
 }
 
 void siconos::modeling::FirstOrderLinearTIR::setConstantD(
-    Eigen::Ref<siconos::algebra::SiconosMatrix> newValue) {
+    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue) {
   /**  Warning: we can't check if newValue size is compliant with
    * the current relation/interaction. This will be done during
    * initialize / checkSize call!
@@ -132,7 +133,7 @@ void siconos::modeling::FirstOrderLinearTIR::setConstanteVector(
 //   // else
 //   //   y.setZero();
 
-//   if (_D) siconos::algebra::prod(*_D, lambda, y, false);
+//   if (_D) y.noalias() += *_D*lambda;
 
 //   if (_e) y += *_e;
 

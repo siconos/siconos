@@ -26,17 +26,18 @@
 #include "OccUtils.hpp"
 #include "SiconosVector.hpp"
 
-siconos::mechanics::occ::OccBody::OccBody(
-    Eigen::Ref<siconos::algebra::SiconosVector> position,
-    Eigen::Ref<siconos::algebra::SiconosVector> velocity, double mass,
-    Eigen::Ref<siconos::algebra::SiconosMatrix> inertia)
+siconos::mechanics::occ::OccBody::OccBody(Eigen::Ref<siconos::algebra::SiconosVector> position,
+                                          Eigen::Ref<siconos::algebra::SiconosVector> velocity,
+                                          double mass,
+                                          Eigen::Ref<siconos::algebra::SiconosMatrix> inertia)
     : NewtonEulerDS(position, velocity, mass, inertia),
       _contactShapes(std::make_shared<ContactShape_vector>()),
       _shapes(std::make_shared<TopoDS_Shape_vector>()) {}
 
 void siconos::mechanics::occ::OccBody::addContactShape(
-    OccContactShapeV& shape, std::shared_ptr<siconos::algebra::SiconosVector> pos,
-    std::shared_ptr<siconos::algebra::SiconosVector> ori, int group) {
+    OccContactShapeV& shape,
+    std::optional<const Eigen::Ref<const siconos::algebra::SiconosVector>> pos,
+    std::optional<const Eigen::Ref<const siconos::algebra::SiconosVector>> ori, int group) {
   OffSet offset = {0, 0, 0, 1, 0, 0, 0};
 
   if (pos) {
@@ -60,8 +61,9 @@ void siconos::mechanics::occ::OccBody::addContactShape(
 }
 
 void siconos::mechanics::occ::OccBody::addShape(
-    std::shared_ptr<TopoDS_Shape> shape, std::shared_ptr<siconos::algebra::SiconosVector> pos,
-    std::shared_ptr<siconos::algebra::SiconosVector> ori) {
+    std::shared_ptr<TopoDS_Shape> shape,
+    std::optional<const Eigen::Ref<const siconos::algebra::SiconosVector>> pos,
+    std::optional<const Eigen::Ref<const siconos::algebra::SiconosVector>> ori) {
   OffSet offset = {0, 0, 0, 1, 0, 0, 0};
   if (pos) {
     offset[0] = (*pos)(0);
@@ -81,7 +83,8 @@ void siconos::mechanics::occ::OccBody::addShape(
 }
 
 void siconos::mechanics::occ::OccBody::updateContactShapes() {
-  boost::math::quaternion<double> q{(*state_q_)(3), (*state_q_)(4), (*state_q_)(5), (*state_q_)(6)};
+  boost::math::quaternion<double> q{(*state_q_)(3), (*state_q_)(4), (*state_q_)(5),
+                                    (*state_q_)(6)};
 
   for (auto& cs : *_contactShapes) {
     auto offset = std::get<1>(cs);
@@ -110,7 +113,8 @@ void siconos::mechanics::occ::OccBody::updateContactShapes() {
 }
 
 void siconos::mechanics::occ::OccBody::updateShapes() {
-  boost::math::quaternion<double> q{(*state_q_)(3), (*state_q_)(4), (*state_q_)(5), (*state_q_)(6)};
+  boost::math::quaternion<double> q{(*state_q_)(3), (*state_q_)(4), (*state_q_)(5),
+                                    (*state_q_)(6)};
 
   for (auto& cs : *_shapes) {
     // Get the offset of the current shape

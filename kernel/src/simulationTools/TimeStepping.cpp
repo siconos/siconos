@@ -462,6 +462,7 @@ void siconos::simulation::TimeStepping::displayNewtonConvergenceAtTheEnd(
 
 void siconos::simulation::TimeStepping::computeInitialStateOfTheStep() {
   DEBUG_BEGIN("siconos::simulation::TimeStepping::computeInitialNewtonState()\n");
+
   if (_newtonOptions == TimeSteppingType::NONLINEAR ||
       _newtonOptions == TimeSteppingType::NONLINEAR_FULL) {
     for (auto& osi : *_allOSI) {

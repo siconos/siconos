@@ -26,7 +26,6 @@
 #include <memory>
 #include <vector>
 
-#include "BlockMatrix.hpp"
 #include "DynamicalSystemVisitor.hpp"
 #include "FunctionTypes.hpp"
 #include "SiconosMatrix.hpp"
@@ -105,9 +104,20 @@ class DynamicalSystem {
    *  \f$  x \in R^{n} \f$ - With state_x_[0]= \f$ x \f$ , state_x_[1]= \f$ \dot{x} \f$ . */
   std::vector<std::shared_ptr<siconos::algebra::SiconosVector>> state_x_ = {nullptr, nullptr};
 
-  /** jacobian according to x of the right-hand side (\f$ rhs = \dot x =
+  /** jacobian according to x of the right-hand side (\f$ rhs = \dot x = M^{-1}
       f(x,t) + r \f$) */
-  std::shared_ptr<siconos::algebra::BlockMatrix> jacobianRhsOver_x_{nullptr};
+  siconos::algebra::SiconosVector jacobianRhsOver_x_;
+  // Note FP: used only for EventDriven with Lsodar or similar integrators, based
+  // on fortran wrappers. We only need to get this jacobian as a vector
+  // which contains the columns of the real jacobian.
+
+  /** Internal buffer, used in rhs or jacobian rhs computation. Do not trust its content!
+  Empty by default
+   */
+  siconos::algebra::SiconosVector buffer_;
+
+  /** False if \f$ rhs = \dot x = M^{-1} f(x,t) + r \f$) needs to be updated */
+  bool is_jacobianRhsOver_x_uptodate_{false};
 
   /** the  previous state vectors stored in memory */
   siconos::algebra::SiconosMemory xMemory_;
@@ -235,13 +245,14 @@ class DynamicalSystem {
     return siconos::algebra::ConstMapVectorType(state_x_[1]->data(), state_x_[1]->size());
   }
 
-  /** returns a pointer to \f$ \nabla_x rhs()\f$
-   *
-   *  \return std::shared_ptr<siconos::algebra::SiconosMatrix>
+  /** \return a read-only access to \f$ \nabla_x rhs()\f$, as a vector =[col0, col1, ...]
    */
-  inline std::shared_ptr<siconos::algebra::BlockMatrix> jacobianRhsOver_x() const {
-    return jacobianRhsOver_x_;
-  }
+  const auto &jacobianRhsOver_x() const { return jacobianRhsOver_x_; }
+
+  /** \return a writable vector which represents \f$ \nabla_x rhs()\f$, as a vector =[col0,
+   * col1, ...]
+   */
+  auto &jacobianRhsOver_x_readwrite() { return jacobianRhsOver_x_; }
 
   /** get all the values of the state vector x stored in a SiconosMemory object
    *  (not const due to LinearSMC::actuate)

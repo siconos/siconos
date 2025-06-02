@@ -15,49 +15,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __SimpleMatrixTest__
-#define __SimpleMatrixTest__
+#ifndef __SiconosMatrixTest__
+#define __SiconosMatrixTest__
 
 #include <cppunit/extensions/HelperMacros.h>
 
-#include "BlockMatrix.hpp"
 #include "BlockVector.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 
-class SimpleMatrixTest : public CppUnit::TestFixture {
+class SiconosMatrixTest : public CppUnit::TestFixture {
  private:
-  ACCEPT_SERIALIZATION(SimpleMatrixTest);
+  ACCEPT_SERIALIZATION(SiconosMatrixTest);
 
   // test suite
-  CPPUNIT_TEST_SUITE(SimpleMatrixTest);
+  CPPUNIT_TEST_SUITE(SiconosMatrixTest);
 
   CPPUNIT_TEST(testNormInf);
+  CPPUNIT_TEST(testSymm);
+  CPPUNIT_TEST(testfillTriplet);
   CPPUNIT_TEST(testSetBlock);
-  CPPUNIT_TEST(testProdBis);
-  CPPUNIT_TEST(testProd4);
-  CPPUNIT_TEST(testProd5);
-  CPPUNIT_TEST(testProd6);
+  CPPUNIT_TEST(testProd);
+  CPPUNIT_TEST(testProd2);
   CPPUNIT_TEST(End);
   CPPUNIT_TEST_SUITE_END();
 
   void testNormInf();
+  void testSymm();
+  void testfillTriplet();
   void testSetBlock();
-  void testProdBis();
-  void testProdTer();
-  void testProd4();
-  void testProd5();
-  void testProd6();
+  void testProd();
+  void testProd2();
   void End();
 
-  unsigned int size, size2;
-  std::shared_ptr<siconos::algebra::SiconosMatrix> SicM, m1, m2, m3, m4, m5, m6, m7, m8, C, Cb,
-      Cb2;
-  std::shared_ptr<const siconos::algebra::SiconosMatrix> A, B, Ab;
-  std::shared_ptr<siconos::algebra::SiconosMatrix> SimM;
+  unsigned int size;
+  std::shared_ptr<siconos::algebra::SiconosDenseMatrix> SicM;
+  siconos::algebra::SiconosSparseMatrix Asparse;
   std::string fic1, fic2;
-  std::shared_ptr<siconos::algebra::SiconosVector> vect1, vect2, vect3, vect_sparse_1;
-  siconos::algebra::SiconosMatrix D{2, 2};
   double tol;
 
  public:

@@ -26,8 +26,11 @@
 
 #include <functional>
 
-#include "BlockVector.hpp"
 #include "SiconosMatrix.hpp"
+
+namespace siconos::algebra {
+class BlockVector;
+}
 
 namespace siconos::modeling {
 

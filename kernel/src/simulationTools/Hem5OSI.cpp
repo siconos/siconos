@@ -26,11 +26,10 @@
 #include "MultipleImpactNSL.hpp"
 #include "NewtonImpactNSL.hpp"
 #include "OneStepNSProblem.hpp"
+#include "SiconosAlgebraAddons.hpp"
 #include "SiconosException.hpp"
 #include "SiconosFortran.h"  // for Fortran to C api, fprobpointer ...
 #include "SiconosMatrix.hpp"
-#include "SiconosMatrixVectorOp.hpp"
-#include "SiconosVector.hpp"
 #include "Simulation.hpp"
 #include "Tools.hpp"  // enum_to_string
 #include "Topology.hpp"
@@ -191,14 +190,12 @@ void siconos::integrators::Hem5OSI::updateData() {
   rwork.resize(_intData[6], 0.);
 }
 
-void siconos::integrators::Hem5OSI::fillqWork(int* NQ, double* q) {
-  unsigned int sizeQ = (unsigned int)(*NQ);
-  for (unsigned int i = 0; i < sizeQ; ++i) (*_qWork)(i) = q[i];
+void siconos::integrators::Hem5OSI::fillqWork(std::size_t NQ, double* q) {
+  _qWork->fill(NQ, q);
 }
 
-void siconos::integrators::Hem5OSI::fillvWork(int* NV, double* v) {
-  unsigned int sizeV = (unsigned int)(*NV);
-  for (unsigned int i = 0; i < sizeV; ++i) (*_vWork)(i) = v[i];
+void siconos::integrators::Hem5OSI::fillvWork(std::size_t NV, double* v) {
+  _vWork->fill(NV, v);
 }
 
 void siconos::integrators::Hem5OSI::computeRhs(double t) {
@@ -232,8 +229,12 @@ void siconos::integrators::Hem5OSI::Hem5OSI_impl::fprob(
   DEBUG_PRINTF("LDG = %i\t LDF = %i \t LDA = %i \n", (int)*LDG, (int)*LDF, (int)*LDA);
 
   // fill in xWork vector (ie all the x of the ds of this osi) with x
-  hem5osi->fillqWork(NQ, q);
-  hem5osi->fillvWork(NV, v);
+  assert(*NQ >= 0);
+  assert(*NV >= 0);
+  std::size_t sizeq = static_cast<std::size_t>(*NQ);
+  std::size_t sizev = static_cast<std::size_t>(*NV);
+  hem5osi->fillqWork(sizeq, q);
+  hem5osi->fillvWork(sizev, v);
   double t = *time;
   auto dsGraph = hem5osi->_dynamicalSystemsGraph;
 
@@ -277,8 +278,8 @@ void siconos::integrators::Hem5OSI::Hem5OSI_impl::fprob(
     for (auto vi : *dsGraph) {
       auto ds = dsGraph->bundle(vi);
       if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
-        hem5osi->fillqWork(NQ, q);
-        hem5osi->fillvWork(NV, v);
+        hem5osi->fillqWork(sizeq, q);
+        hem5osi->fillvWork(sizev, v);
         lds->computeTotalForces(*lds->velocity(), *lds->q(), (double)*time);
       } else {
         THROW_EXCEPTION(
@@ -658,10 +659,10 @@ void siconos::integrators::Hem5OSI::integrate(double& tinit, double& tend, doubl
   rtol[0] = HEM5_RTOL_DEFAULT;  // rtol
   atol[0] = HEM5_ATOL_DEFAULT;  // atol
 
-  *_qtmp = *(_qWork->toSiconosVector());  // Copy into a continuous memory chuck
-  *_vtmp = *(_vWork->toSiconosVector());  // Copy into a continuous memory chuck
+  *_qtmp = _qWork->toSiconosVector();  // Copy into a continuous memory chuck
+  *_vtmp = _vWork->toSiconosVector();  // Copy into a continuous memory chuck
   //*_utmp = *_uWork; // Copy into a continuous memory chuck
-  *_atmp = *(_aWork->toSiconosVector());  // Copy into a continuous memory chuck
+  *_atmp = _aWork->toSiconosVector();  // Copy into a continuous memory chuck
 
   DEBUG_EXPR(siconos::algebra::print(*_qtmp););
   DEBUG_EXPR(siconos::algebra::print(*_vtmp););
@@ -726,9 +727,9 @@ void siconos::integrators::Hem5OSI::integrate(double& tinit, double& tend, doubl
                 std::cout << "NSOL = " << iwork[35] << "\n";);
 
   // Copy into work vectors ... This should be reviewed (BlockVectors)
-  for (int i = 0; i < _qtmp->size(); ++i) (*_qWork)(i) = (*_qtmp)(i);
-  for (int i = 0; i < _vtmp->size(); ++i) (*_vWork)(i) = (*_vtmp)(i);
-  for (int i = 0; i < _atmp->size(); ++i) (*_aWork)(i) = (*_atmp)(i);
+  _qWork->fill(*_qtmp);
+  _vWork->fill(*_vtmp);
+  _aWork->fill(*_atmp);
   DEBUG_PRINTF("tend_DR = %f\n", (double)tend_DR);
   DEBUG_EXPR(siconos::algebra::print(*_qWork));
   DEBUG_EXPR(siconos::algebra::print(*_vWork));

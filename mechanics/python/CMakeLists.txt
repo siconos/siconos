@@ -32,22 +32,21 @@
 # #   )
 
 create_pybind11_module(
-  MODULE_NAME pycollision 
+  MODULE_NAME pycollision
   SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/collision/collision_pybind11.cpp
   DEPENDENCIES kernel mechanics
   PARENT_NAME mechanics/collision
 )
 set_target_properties(pycollision PROPERTIES OUTPUT_NAME "_collision")
 install(TARGETS
-pycollision
+  pycollision
   COMPONENT python
   LIBRARY DESTINATION "${SICONOS_PYTHON_INSTALL_DIR}/siconos/mechanics/collision"
-  )
-
+)
 
 if(WITH_BULLET)
   create_pybind11_module(
-    MODULE_NAME siconos_bullet 
+    MODULE_NAME siconos_bullet
     SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/collision/bullet/collision_bullet_pybind11.cpp
     DEPENDENCIES kernel mechanics
     PARENT_NAME mechanics/collision/bullet
@@ -57,10 +56,37 @@ if(WITH_BULLET)
     siconos_bullet
     COMPONENT python
     LIBRARY DESTINATION "${SICONOS_PYTHON_INSTALL_DIR}/siconos/mechanics/collision/bullet"
-    )
+  )
 endif()
 
-  
+if(SICONOS_HAS_MECHANICS_OCC)
+  create_pybind11_module(
+    MODULE_NAME siconos_occ
+    SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/mechanics_occ_pybind11.cpp
+    DEPENDENCIES kernel mechanics
+    PARENT_NAME mechanics/occ
+  )
+  set_target_properties(siconos_occ PROPERTIES OUTPUT_NAME "_occ")
+  install(TARGETS
+    siconos_occ
+    COMPONENT python
+    LIBRARY DESTINATION "${SICONOS_PYTHON_INSTALL_DIR}/siconos/mechanics/occ"
+  )
+endif()
+
+create_pybind11_module(
+  MODULE_NAME pyjoints
+  SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/joints/joints_pybind11.cpp
+  DEPENDENCIES kernel mechanics
+  PARENT_NAME mechanics/joints
+)
+
+set_target_properties(pyjoints PROPERTIES OUTPUT_NAME "_joints")
+install(TARGETS
+  pyjoints
+  COMPONENT python
+  LIBRARY DESTINATION "${SICONOS_PYTHON_INSTALL_DIR}/siconos/mechanics/joints"
+)
 
 target_include_directories(pycollision PRIVATE ${CMAKE_SOURCE_DIR}/mechanics/src/collision/bullet)
 target_include_directories(pycollision PRIVATE ${CMAKE_SOURCE_DIR}/mechanics/src/collision/native/bodies)
@@ -74,9 +100,14 @@ foreach(pyfile IN LISTS pyfiles)
   configure_file(${pyfile} ${SICONOS_PB11_BINARY_DIR}/siconos/mechanics/${pyfile} @ONLY)
 endforeach()
 
-
-
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/__init__.py.in
+  ${SICONOS_PB11_BINARY_DIR}/siconos/mechanics/__init__.py @ONLY)
 
 if(WITH_TESTING)
-  build_python_tests()
+  if(NOT WITH_OpenCASCADE)
+    list(APPEND python_excluded_tests tests/test_occ_inertia.py)
+  else()
+    find_python_module(OCC REQUIRED)
+  endif()
+  build_python_tests(EXCLUDE ${python_excluded_tests})
 endif()
