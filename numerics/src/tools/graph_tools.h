@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <omp.h>
 #include "NumericsMatrix.h"
+#include "SparseBlockMatrix.h" // for SparseBlockStructuredMatrix because it's not included in NumericsMatrix.h
 #include <float.h> // for DBL_EPSILON
 
 
@@ -17,6 +18,8 @@ int color_graph(int n, NumericsMatrix *M, size_t *n_colors, size_t **set_sizes, 
 int color_graph_permut(int n, NumericsMatrix *M, size_t *n_colors, size_t **set_sizes, size_t *inv_permutation);
 
 int color_graph_permut_equitable(int n, NumericsMatrix *M, size_t *n_colors, size_t **sum_sizes, size_t *inv_permutation);
+
+int color_graph_2(int nc, NumericsMatrix *M, size_t *n_colors, size_t **set_sizes, size_t ***set_indices);
 
 typedef struct node node_t;
 

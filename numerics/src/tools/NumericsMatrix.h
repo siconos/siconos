@@ -1188,6 +1188,22 @@ void NM_get_invdiag(int n, int *info, NumericsMatrix *M, double *diag);
 */
 void NM_row_prod_graph(size_t sizeX, int block_start, size_t row_start, size_t size_left, size_t col_start_right, NumericsMatrix* A, size_t *permutation, double* x, double* left, double *right, bool init);
 
+/**
+ * Same as NM_row_prod_no_diag2 but usable in parallel (does not modify x)
+*/
+void NM_row_prod_no_diag2_parallel(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A, double* x, double* y, bool init);
+
+/**
+   If A is a (nc * d, nc * d) matrix, create a (nc, nc) matrix B such that:
+   - B_ij = 0 if A_{d * i, d * j} = A_{d * i + 1, d * j} = A_{d * i, d * j + 1} = A_{d * i + 1, d * j + 1} = 0
+   - B_ij = 1 else
+
+   \param[in] nc number of contacts
+   \param[in] A the matrix 
+*/
+RawNumericsMatrix* NM_group2(size_t nc, NumericsMatrix* A);
+
+
 #ifdef WITH_OPENSSL
 /** Compute sha1 hash of matrix values. Matrices of differents size and same
  *  values have the same hash.

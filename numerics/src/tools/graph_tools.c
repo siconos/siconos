@@ -777,3 +777,227 @@ int color_graph_permut_equitable(int n, NumericsMatrix *M, size_t *n_colors, siz
 
     return 0;
 }
+
+int color_graph_2(int nc, NumericsMatrix *M, size_t *n_colors, size_t **set_sizes, size_t ***set_indices) {
+    assert(M->size0 == M->size1);
+    int n = M->size0;
+    int d = n / nc; // dimension of contact space
+    
+    Mat A;
+
+    PetscFunctionBeginUser;
+
+    switch (M->storageType) {
+        case NM_DENSE: {
+            // PetscCall(PetscPrintf(PETSC_COMM_WORLD, "DENSE\n"));
+            double *M_mat = M->matrix0;
+            double *new_mat = (double *)malloc(nc * nc * sizeof(double));
+
+            for (int contact_i = 0; contact_i < nc; contact_i++) {
+                for (int contact_j = 0; contact_j < nc; contact_j++) {
+                    /* Check if block is 0 */
+                    if ((M_mat[d * contact_i + d * contact_j * n] == 0)
+                    && (M_mat[d * contact_i + (d * contact_j + 1) * n] == 0)
+                    && (M_mat[d * contact_i + 1 + d * contact_j * n] == 0)
+                    && (M_mat[d * contact_i + 1 + (d * contact_j + 1) * n] == 0)) {
+                        new_mat[contact_i + contact_j * nc] = 0.;
+                    }
+                    else {
+                        new_mat[contact_i + contact_j * nc] = 1.;
+                    }
+                }
+            }
+
+            PetscCall(MatCreateSeqDense(PETSC_COMM_SELF, nc, nc, new_mat, &A));
+            PetscCall(MatConvert(A, MATSEQAIJ, MAT_INPLACE_MATRIX, &A));
+            PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
+            PetscCall(MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY));
+            free(new_mat);
+            break;
+        }
+        case NM_SPARSE: {
+            // PetscCall(PetscPrintf(PETSC_COMM_WORLD, "SPARSE\n"));
+
+            CSparseMatrix* sparse;
+            if (M->matrix2->origin == NSM_CSR) {
+                sparse = NM_csr(M);
+            } else {
+                sparse = NM_csc_trans(M);
+            }
+
+            CS_INT* Mp = sparse->p;
+            CS_INT* Mi = sparse->i;
+            double* Mx = sparse->x;
+
+            double *new_mat = (double *)calloc(nc * nc, sizeof(double));
+            
+            for (int row_start = 0; row_start < n; row_start++) {
+                for (CS_INT p = Mp[row_start]; p < Mp[row_start + 1]; ++p) {
+                    // It is possible for a sparse matrix so store zeros ???
+                    if (Mx[p] != 0) {
+                        new_mat[row_start / d + (Mi[p] / d) * nc] = 1.;
+                    }
+                }
+            }
+
+            PetscCall(MatCreateSeqDense(PETSC_COMM_SELF, nc, nc, new_mat, &A));
+            PetscCall(MatConvert(A, MATSEQAIJ, MAT_INPLACE_MATRIX, &A));
+            // PetscCall(MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, n, n, Mp, Mi, Mx, &A));
+            PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
+            PetscCall(MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY));
+            free(new_mat);
+            break;
+        }
+        case NM_SPARSE_BLOCK: {
+            double *new_mat = (double *)calloc(nc * nc, sizeof(double));
+            SparseBlockStructuredMatrix *sbm = M->matrix1;
+
+            int block_line = 0, block_col = 0;
+
+            int *nb_row_blocks = (int *)malloc(sbm->blocknumber0 * sizeof(int));
+            int *nb_col_blocks = (int *)malloc(sbm->blocknumber1 * sizeof(int));
+            int tmp = 0;
+
+            for (int i = 0; i < sbm->blocknumber0; i++) {
+                nb_row_blocks[i] = sbm->blocksize0[i] - tmp;
+                tmp = sbm->blocksize0[i];
+            }
+
+            tmp = 0;
+            for (int i = 0; i < sbm->blocknumber1; i++) {
+                nb_col_blocks[i] = sbm->blocksize1[i] - tmp;
+                tmp = sbm->blocksize1[i];
+            }
+
+            int nb_row_block, nb_col_block;
+            int i_start_block, j_start_block;
+            double val;
+
+            // Iterate through lines of blocks
+            for (int row_block_number = 0; row_block_number < sbm->blocknumber0; row_block_number++) { 
+                nb_row_block = nb_row_blocks[row_block_number];
+                i_start_block = sbm->blocksize0[row_block_number] - nb_row_block;
+                // Iterate through blocks of a line of blocks
+                for (int block_number = sbm->index1_data[row_block_number]; block_number < sbm->index1_data[row_block_number + 1]; block_number++) {
+                    nb_col_block = nb_col_blocks[sbm->index2_data[block_number]];
+                    j_start_block = sbm->blocksize1[sbm->index2_data[block_number]] - nb_col_block;
+                    // Iterate within a block
+                    // printf("%d %d\n", i_start_block, j_start_block);
+                    for (int j = 0; j < nb_col_block; j++) {
+                        for (int i = 0; i < nb_row_block; i++) {
+                            val = sbm->block[block_number][i + nb_col_block * j];
+                            if (val != 0) {
+                                new_mat[(i_start_block + i) / d + ((j_start_block + j) / d) * nc] = 1.;
+                            }
+                        }
+                    }
+                }
+            }
+
+            /* If all the blocks have the same size, I could use the Sparse Block Format of PETSC.
+            But in any case I think I would have to convert it to MATSEQAIJ because it's the format required by MatColoringCreate.
+            */
+
+            PetscCall(MatCreateSeqDense(PETSC_COMM_SELF, nc, nc, new_mat, &A));
+            PetscCall(MatConvert(A, MATSEQAIJ, MAT_INPLACE_MATRIX, &A));
+            // PetscCall(MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, n, n, Mp, Mi, Mx, &A));
+            PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
+            PetscCall(MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY));
+            free(new_mat);
+            break;
+        }
+        default: {
+            fprintf(stderr, "color_graph_petsc :: unknown matrix storage %d", M->storageType);
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    // PetscCall(MatView(A, PETSC_VIEWER_STDOUT_WORLD));
+
+    /*          *
+     * COLORING *
+     *          */
+    // PetscCall(PetscTime(&time_start));
+    MatColoring mc;
+    ISColoring iscoloring;
+
+    PetscCall(MatColoringCreate(A, &mc));
+    PetscCall(MatColoringSetDistance(mc, 1));
+
+    PetscCall(MatColoringSetType(mc, MATCOLORINGJP)); // Coloring algorithm 
+    // PetscCall(MatColoringSetType(mc, MATCOLORINGGREEDY));
+
+    PetscCall(MatColoringSetFromOptions(mc));
+    PetscCall(MatColoringApply(mc, &iscoloring));
+    // PetscCall(MatColoringView(mc, PETSC_VIEWER_STDOUT_WORLD)); // View coloring
+    // PetscCall(ISColoringView(iscoloring, PETSC_VIEWER_STDOUT_WORLD)); // View IScoloring
+
+    /* Get index sets for each color */
+    PetscInt nn;
+    IS *is;
+    size_t *size = NULL; // Array of sizes of each color set
+    size_t **indexes = NULL; // Array of pointers to index sets
+    const PetscInt *idxin = NULL;
+    PetscCall(ISColoringGetIS(iscoloring, PETSC_USE_POINTER, &nn, &is)); // Get index sets
+    // PetscCall(PetscPrintf(PETSC_COMM_WORLD, "n_colors = %ld\n", nn));
+
+    PetscInt size_petsc;
+
+    size = (size_t *)malloc((size_t)nn * sizeof(size_t));
+    indexes = (size_t **)malloc((size_t)nn * sizeof(size_t *));
+
+    for (int i = 0; i < (int)nn; i++) {
+        PetscCall(ISGetLocalSize(is[i], &size_petsc));
+        size[i] = (size_t)size_petsc;
+        // PetscCall(ISGetLocalSize(is[i], &size[i])); // This gave me a conversion warning
+        indexes[i] = (size_t *)malloc(size[i] * sizeof(size_t)); // allocate indexes
+        PetscCall(ISGetIndices(is[i], &idxin)); // Get indices for i-th color
+
+        /*
+        COPYING INDICES IN NEW ARRAY
+        TO USE IT OUTSIDE THIS FUNCTION
+        WITHOUT PETSC
+
+        I COULD ONLY USE POINTERS IF I WROTE BOTH COLORING AND COMPUTING IN PETSC???
+        */
+        for (int j = 0; j < (int)size[i]; j++) {
+            indexes[i][j] = (size_t)idxin[j];
+        }
+
+        PetscCall(ISRestoreIndices(is[i], &idxin));
+    }
+
+    // Call this because of option PETSC_USE_POINTER (see https://petsc.org/release/manualpages/IS/ISColoringGetIS/)
+    PetscCall(ISColoringRestoreIS(iscoloring, PETSC_USE_POINTER, &is));
+
+    /* for (int i = 0; i < nn; i++)
+    {
+        PetscCall(PetscPrintf(PETSC_COMM_WORLD, "%d : [", i));
+        for (int j = 0; j < size[i]; j++)
+        {
+            PetscCall(PetscPrintf(PETSC_COMM_WORLD, " %d ", indexes[i][j]));
+        }
+        PetscCall(PetscPrintf(PETSC_COMM_WORLD, "]\n"));
+    } */
+
+    PetscCall(MatColoringDestroy(&mc));
+    PetscCall(ISColoringDestroy(&iscoloring));
+    PetscCall(MatDestroy(&A));
+
+    /* for (int i = 0; i < nn; i++)
+    {
+        PetscCall(PetscPrintf(PETSC_COMM_WORLD, "size[%d] = %d\n", i, size[i]));
+    } */
+
+    *n_colors = (size_t)nn;
+    *set_sizes = size;
+    *set_indices = indexes;
+
+    // PetscCall(PetscTime(&time_end));
+    // PetscCall(PetscPrintf(PETSC_COMM_WORLD, "Time to color: %f\n", time_end - time_start));
+
+    // PetscCall(PetscFinalize());
+
+    return 0;
+
+}

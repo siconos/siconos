@@ -10,6 +10,7 @@ enum FRICTION_SOLVER {
   SICONOS_FRICTION_2D_CPG = 402,
   SICONOS_FRICTION_2D_LEMKE = 404,
   SICONOS_FRICTION_2D_ENUM = 405,
+  SICONOS_FRICTION_2D_NSGS_GRAPH = 406,
 
   /* 3D frictional contact solvers on local formulation */
 
