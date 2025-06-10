@@ -316,8 +316,8 @@ static unsigned int *f2d_nsgs_allocate_freezing_contacts(FrictionContactProblem 
   return fcontacts;
 }
 
-void fc2d_nsgs_graph(FrictionContactProblem *problem, double *z, double *w, int *info,
-                     SolverOptions *options) {
+void fc2d_nsgs_graph_opti(FrictionContactProblem *problem, double *z, double *w, int *info,
+                          SolverOptions *options) {
   /* Notes:
      - we suppose that the trivial solution case has been checked before,
      and that all inputs differs from NULL since this function is
@@ -383,18 +383,35 @@ void fc2d_nsgs_graph(FrictionContactProblem *problem, double *z, double *w, int 
     double light_error_sum;
     double light_error_2;
     double localreaction[2];
+    unsigned int number_of_freezed_contact = 0;
+    double tmp_criteria1, tmp_criteria2;
 
     freeze_contacts = f2d_nsgs_allocate_freezing_contacts(problem, options);
 
+    #pragma omp parallel default(none) \
+                         private(contact, pos, local_problem, localreaction, light_error_2) \
+                         shared(problem, diagonal_blocks, diagonal_block_determinant, z, partition_size, partitions, iter) \
+                         shared(iparam, light_error_sum, n_colors, norm_r, nc, error, options, tolerance, has_not_converged, norm_q, w, itermax) \
+                         shared(tmp_criteria1, tmp_criteria2, freeze_contacts, number_of_freezed_contact)
+    {
+    local_problem = (LinearComplementarityProblem *)malloc(sizeof(*local_problem));
+    local_problem->M = NM_new();
+    local_problem->M->storageType = NM_DENSE;
+    local_problem->M->size0 = 2;
+    local_problem->M->size1 = 2;
+    local_problem->q = (double *)malloc(2 * sizeof(double));
+
     while ((iter < itermax) && has_not_converged) {
-      light_error_sum = 0.0;
+      // light_error_sum = 0.0;
       light_error_2 = 0.0;
       /* Loop over the rows of blocks in blmat */
       /* contact: current row (of blocks) number */
-      unsigned int number_of_freezed_contact = 0;
-      double tmp_criteria1 = tolerance * tolerance / (nc * nc * 10);
-      double tmp_criteria2 = *norm_r * *norm_r / (nc * nc * 1000);
-
+      
+      #pragma omp single
+      {
+      number_of_freezed_contact = 0;
+      tmp_criteria1 = tolerance * tolerance / (nc * nc * 10);
+      tmp_criteria2 = *norm_r * *norm_r / (nc * nc * 1000);
       if (iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] > 0) {
         for (unsigned int i = 0; i < nc; ++i) {
           if (freeze_contacts[i] > 0) number_of_freezed_contact++;
@@ -404,74 +421,61 @@ void fc2d_nsgs_graph(FrictionContactProblem *problem, double *z, double *w, int 
           for (unsigned int c = 0; c < nc; ++c) freeze_contacts[c] = 0;
         }
       }
+      }    
 
       for (size_t color = 0; color < n_colors; color++) {
-        #pragma omp parallel reduction(+:light_error_sum) default(none) \
-                            firstprivate(light_error_2) \
-                            private(contact, pos, local_problem, localreaction) \
-                            shared(iter, tmp_criteria1, tmp_criteria2, freeze_contacts, color, problem, diagonal_blocks, diagonal_block_determinant, z, partition_size, partitions, iparam)
-        {
-          local_problem = (LinearComplementarityProblem *)malloc(sizeof(*local_problem));
-          local_problem->M = NM_new();
-          local_problem->M->storageType = NM_DENSE;
-          local_problem->M->size0 = 2;
-          local_problem->M->size1 = 2;
-          local_problem->q = (double *)malloc(2 * sizeof(double));
+        #pragma omp for reduction(+:light_error_sum)
+        for (int v = 0; v < partition_size[color]; v++) {
+          contact = partitions[color][v];
 
-          #pragma omp for
-          for (int v = 0; v < partition_size[color]; v++) {
-            contact = partitions[color][v];
-
-            if (freeze_contacts[contact] > 0) {
-            /* we skip freeze contacts */
-            freeze_contacts[contact] -= 1;
-            continue;
-            }
-
-            pos = 2 * contact;
-            localreaction[0] = z[pos];
-            localreaction[1] = z[pos + 1];
-
-            /* Local problem formalization */
-            fc2d_nsgs_buildLocalProblem_parallel(contact, problem, diagonal_blocks, local_problem, z);
-
-            /* Solve local problem */
-            fc2d_nsgs_local_solve(local_problem->M->matrix0, diagonal_block_determinant[contact],
-                                    local_problem->q, problem->mu[contact], localreaction);
-
-            light_error_2 = light_error_squared(localreaction, &z[pos]);
-
-            // #pragma omp atomic update
-            light_error_sum += light_error_2;
-
-            int relative_convergence_criteria =
-                light_error_2 <= tmp_criteria1 * squared_norm(localreaction);
-            int small_reaction_criteria = squared_norm(localreaction) <= tmp_criteria2;
-            if ((relative_convergence_criteria || small_reaction_criteria) && iter >= 10) {
-              /* we  freeze the contact for n iterations*/
-              freeze_contacts[contact] = iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT];
-              DEBUG_EXPR(printf("first criteria : light_error_2*squared_norm(localreaction) <= "
-                                "tolerance*tolerance/(nc*nc*10) ==> %e <= %e, bool =%i\n",
-                                light_error_2 * squared_norm(localreaction),
-                                tolerance * tolerance / (nc * nc * 10),
-                                relative_convergence_criteria);
-                        printf("second criteria :  squared_norm(localreaction) <=  (*norm_r* "
-                                "*norm_r/(nc*nc))/1000. ==> %e <= %e, bool =%i \n",
-                                squared_norm(localreaction), *norm_r * *norm_r / (nc * nc * 1000),
-                                small_reaction_criteria);
-                        printf("Contact % i is freezed for %i steps\n", contact,
-                                iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT]););
-            }
-            /* reaction update */
-            z[pos] = localreaction[0];
-            z[pos + 1] = localreaction[1];
+          if (freeze_contacts[contact] > 0) {
+          /* we skip freeze contacts */
+          freeze_contacts[contact] -= 1;
+          continue;
           }
-          free(local_problem->q);
-          free(local_problem->M);
-          free(local_problem);
+
+          pos = 2 * contact;
+          localreaction[0] = z[pos];
+          localreaction[1] = z[pos + 1];
+
+          /* Local problem formalization */
+          fc2d_nsgs_buildLocalProblem_parallel(contact, problem, diagonal_blocks, local_problem, z);
+
+          /* Solve local problem */
+          fc2d_nsgs_local_solve(local_problem->M->matrix0, diagonal_block_determinant[contact],
+                                  local_problem->q, problem->mu[contact], localreaction);
+
+          light_error_2 = light_error_squared(localreaction, &z[pos]);
+
+          // #pragma omp atomic update
+          light_error_sum += light_error_2;
+
+          int relative_convergence_criteria =
+              light_error_2 <= tmp_criteria1 * squared_norm(localreaction);
+          int small_reaction_criteria = squared_norm(localreaction) <= tmp_criteria2;
+          if ((relative_convergence_criteria || small_reaction_criteria) && iter >= 10) {
+            /* we  freeze the contact for n iterations*/
+            freeze_contacts[contact] = iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT];
+            DEBUG_EXPR(printf("first criteria : light_error_2*squared_norm(localreaction) <= "
+                              "tolerance*tolerance/(nc*nc*10) ==> %e <= %e, bool =%i\n",
+                              light_error_2 * squared_norm(localreaction),
+                              tolerance * tolerance / (nc * nc * 10),
+                              relative_convergence_criteria);
+                      printf("second criteria :  squared_norm(localreaction) <=  (*norm_r* "
+                              "*norm_r/(nc*nc))/1000. ==> %e <= %e, bool =%i \n",
+                              squared_norm(localreaction), *norm_r * *norm_r / (nc * nc * 1000),
+                              small_reaction_criteria);
+                      printf("Contact % i is freezed for %i steps\n", contact,
+                              iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT]););
+          }
+          /* reaction update */
+          z[pos] = localreaction[0];
+          z[pos + 1] = localreaction[1];
         }
       }  // end for loop
 
+      #pragma omp single
+      {
       DEBUG_EXPR(int frozen_contact = 0;
                  for (unsigned int ii = 0; ii < nc; ++ii) if (freeze_contacts[ii] > 0)
                      frozen_contact++;
@@ -489,9 +493,14 @@ void fc2d_nsgs_graph(FrictionContactProblem *problem, double *z, double *w, int 
         has_not_converged = determine_convergence_with_full_final(
             problem, options, z, w, &tolerance, norm_q, error, iter);
       }
-
+      light_error_sum = 0.;
       ++iter;
+      }
     }  // end while loop
+    free(local_problem->q);
+    free(local_problem->M);
+    free(local_problem);
+  } // end parallel region 
 
   /***********************/
   /* NO FREEZING CONTACT */
@@ -501,29 +510,23 @@ void fc2d_nsgs_graph(FrictionContactProblem *problem, double *z, double *w, int 
     unsigned int pos;
     double light_error_sum = 0.;
     double localreaction[2];
-
-    /* Not optimal, how can I should use a reduction here  can create an array of size 2 for each thread,
-    without having to reallocate everytime I should use a reduction here  re-enter the for loop?
-    but does it really reallocate everytime???
     
-    */
-
+    #pragma omp parallel default(none) \
+                         private(contact, pos, local_problem, localreaction) \
+                         shared(problem, diagonal_blocks, diagonal_block_determinant, z, partition_size, partitions, iter) \
+                         shared(iparam, light_error_sum, n_colors, norm_r, nc, error, options, tolerance, has_not_converged, norm_q, w, itermax)
+    {
+    local_problem = (LinearComplementarityProblem *)malloc(sizeof(*local_problem));
+    local_problem->M = NM_new();
+    local_problem->M->storageType = NM_DENSE;
+    local_problem->M->size0 = 2;
+    local_problem->M->size1 = 2;
+    local_problem->q = (double *)malloc(2 * sizeof(double));
     while ((iter < itermax) && has_not_converged) {
-      light_error_sum = 0.0;
+      // light_error_sum = 0.0;
       /* Loop over the rows of blocks in blmat */
       for (size_t color = 0; color < n_colors; color++) {
-        #pragma omp parallel reduction(+:light_error_sum) default(none) \
-                            private(contact, pos, local_problem, localreaction) \
-                            shared(color, problem, diagonal_blocks, diagonal_block_determinant, z, partition_size, partitions, iparam)
-        {
-          local_problem = (LinearComplementarityProblem *)malloc(sizeof(*local_problem));
-          local_problem->M = NM_new();
-          local_problem->M->storageType = NM_DENSE;
-          local_problem->M->size0 = 2;
-          local_problem->M->size1 = 2;
-          local_problem->q = (double *)malloc(2 * sizeof(double));
-
-          #pragma omp for
+          #pragma omp for reduction(+:light_error_sum)
           for (int v = 0; v < partition_size[color]; v++) {
             contact = partitions[color][v];
             pos = 2 * contact;
@@ -556,12 +559,11 @@ void fc2d_nsgs_graph(FrictionContactProblem *problem, double *z, double *w, int 
             z[pos] = localreaction[0];
             z[pos + 1] = localreaction[1];
           }
-          free(local_problem->q);
-          free(local_problem->M);
-          free(local_problem);
-        }
-      }  // end for loop
+        }  // end for loop
+
       /*  error evaluation */
+      #pragma omp single
+      {
       if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
           SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT) {
         error = calculateLightError(light_error_sum, nc, z, norm_r);
@@ -572,10 +574,15 @@ void fc2d_nsgs_graph(FrictionContactProblem *problem, double *z, double *w, int 
         has_not_converged = determine_convergence_with_full_final(
             problem, options, z, w, &tolerance, norm_q, error, iter);
       }
-
+      light_error_sum = 0.;
       ++iter;
+      }
     }  // end while loop
-  }
+    free(local_problem->q);
+    free(local_problem->M);
+    free(local_problem);
+    }
+    }
   /* Full criterium */
   if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
       SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
