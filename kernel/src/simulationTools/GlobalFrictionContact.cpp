@@ -223,8 +223,6 @@ bool siconos::nonsmooth_formulations::GlobalFrictionContact::preCompute(double t
     _W->fillW(DSG0);
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double, std::milli> float_ms = end - start;
-    std::cout << "W fill time:" << float_ms.count() << " ms" <<std::endl;
-
     sizeM = _W->size();
     _sizeGlobalOutput = sizeM;
     DEBUG_PRINTF("sizeM = %lu \n", sizeM);
@@ -241,7 +239,6 @@ bool siconos::nonsmooth_formulations::GlobalFrictionContact::preCompute(double t
       _W_inverse->fillWinverse(DSG0);
       auto end = std::chrono::high_resolution_clock::now();
       std::chrono::duration<double, std::milli> float_ms = end - start;
-      std::cout << "W inverse time:" << float_ms.count() << " ms" <<std::endl;
 
     }
 #ifdef WITH_TIMER
@@ -411,7 +408,6 @@ int siconos::nonsmooth_formulations::GlobalFrictionContact::compute(double time)
      end = std::chrono::high_resolution_clock::now();
      float_ms = end - start;
     std::cout << "solve time:" << float_ms.count() << " ms" <<std::endl;
-     std::cout << "mu is:" << getMu(0) <<std::endl;
     DEBUG_EXPR(display(););
      start = std::chrono::high_resolution_clock::now();
     postCompute();

@@ -168,8 +168,7 @@ void siconos::mechanics::fem::FiniteElementModel::AssembleElementaryMatrix(
         for (std::size_t j = 0; j < dofIndex2.size(); j++) {
           // DEBUG_PRINTF("i = %i\t j=%i,  Me.getValue(i,j) = %e\n",
           // i+node1_cnt*dofIndex1.size(), j+node2_cnt*dofIndex2.size(),
-          // Me.getValue(i,j));
-
+          // Me.getValue(i,j));         
           M->setValue(
               dofIndex1[i], dofIndex2[j],
               Me.getValue(i + node1_cnt * dofIndex1.size(), j + node2_cnt * dofIndex2.size()) +
@@ -402,7 +401,6 @@ void siconos::mechanics::fem::FiniteElementModel::computeBeamElementaryMassMatri
     prod(*Me_loc, *Te, *MT, true);
     Te->trans();
     prod(*Te, *MT, Me, true);
-
 
   }
 }
@@ -1197,12 +1195,12 @@ void siconos::mechanics::fem::FiniteElementModel::computeSMatrix(
       (*D)(1,1) = E*I*length/2;
       (*D)(2,2) = E*I*length/2;
       Dinv = std::make_shared<siconos::algebra::SimpleMatrix>(*D);
-      // (*Dinv)(0,0) = 1/(*D)(0,0);
-      // (*Dinv)(1,1) = 1/(*D)(1,1);
-      // (*Dinv)(2,2) = 1/(*D)(2,2);
-      (*Dinv)(0,0) = (*D)(0,0);
-      (*Dinv)(1,1) = (*D)(1,1);
-      (*Dinv)(2,2) = (*D)(2,2);
+      (*Dinv)(0,0) = 1/(*D)(0,0);
+      (*Dinv)(1,1) = 1/(*D)(1,1);
+      (*Dinv)(2,2) = 1/(*D)(2,2);
+      // (*Dinv)(0,0) = (*D)(0,0);
+      // (*Dinv)(1,1) = (*D)(1,1);
+      // (*Dinv)(2,2) = (*D)(2,2);
 
     }
     else
@@ -1287,16 +1285,23 @@ void siconos::mechanics::fem::FiniteElementModel::applyNodalForces(
     std::shared_ptr<siconos::algebra::SiconosVector> forces) {
   auto f_index = std::make_shared<std::vector<int>>(0);
   for (auto &e : _mesh->elements()) {
+    std::cout << "element " << std::endl;
+    e->display();
     if (e->tags(0) == physical_entity_tag) {
+      std::cout << "We apply a force on this element " << std::endl;
       for (auto &v : e->vertices()) {       
         auto n = _vertexToNode[v];
         // check if the node is already existing
         if (find(f_index->begin(), f_index->end(), n->num()) == f_index->end()) {
           std::cout << "Apply nodal force on node number " << n->num() << " vertex number "
                     << v->num() << std::endl;
+          std::cout << "nodal_forces: " << std::endl;
+          nodal_forces->display();
           f_index->push_back(n->num());
           auto n_dof_index = n->dofIndex();
+
           for (unsigned int i = 0; i < nodal_forces->size(); i++) {
+            std::cout << "(*n_dof_index)[i]: " << (*n_dof_index)[i]<<  std::endl;
             forces->setValue((*n_dof_index)[i], (*nodal_forces)(i));           
           }
         }
