@@ -60,6 +60,8 @@ enum FRICTION_SOLVER {
   SICONOS_FRICTION_3D_PFP = 522,
   /** ADMM local formulation */
   SICONOS_FRICTION_3D_ADMM = 523,
+  /** Parallel NSGS using graph coloring */
+  SICONOS_FRICTION_3D_NSGS_GRAPH = 524,
 
   /* 3D Frictional Contact solvers for one contact (used mainly inside NSGS solvers) */
 

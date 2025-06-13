@@ -401,6 +401,28 @@ void fc3d_onecontact_nonsmooth_Newton_AC_update(int contact, FrictionContactProb
   localproblem->mu[0] = problem->mu[contact];
 }
 
+void fc3d_onecontact_nonsmooth_Newton_AC_update_parallel(int contact, FrictionContactProblem* problem,
+                                                         FrictionContactProblem* localproblem,
+                                                         double* reaction, SolverOptions* options) {
+  /* Build a local problem for a specific contact
+     reaction corresponds to the global vector (size n) of the global problem.
+  */
+  /* Call the update function which depends on the storage for MGlobal/MBGlobal */
+  /* Build a local problem for a specific contact
+   reaction corresponds to the global vector (size n) of the global problem.
+  */
+
+  /* The part of MGlobal which corresponds to the current block is copied into MLocal */
+  fc3d_local_problem_fill_M(problem, localproblem, contact);
+
+  /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products
+     MLocal.reactionBlock, excluding the block corresponding to the current contact. ****/
+  fc3d_local_problem_compute_q_parallel(problem, localproblem, reaction, contact);
+
+  /* Friction coefficient for current block*/
+  localproblem->mu[0] = problem->mu[contact];
+}
+
 int fc3d_onecontact_nonsmooth_Newton_solvers_solve_direct(FrictionContactProblem* localproblem,
                                                           double* R, SolverOptions* options) {
   int* iparam = options->iparam;

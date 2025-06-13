@@ -1191,7 +1191,12 @@ void NM_row_prod_graph(size_t sizeX, int block_start, size_t row_start, size_t s
 /**
  * Same as NM_row_prod_no_diag2 but usable in parallel (does not modify x)
 */
-void NM_row_prod_no_diag2_parallel(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A, double* x, double* y, bool init);
+void NM_row_prod_no_diag2_parallel(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A, const double* x, double* y, bool init);
+
+/**
+ * Same as NM_row_prod_no_diag3 but usable in parallel (does not modify x)
+*/
+void NM_row_prod_no_diag3_parallel(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A, const double* x, double* y, bool init);
 
 /**
    If A is a (nc * d, nc * d) matrix, create a (nc, nc) matrix B such that:

@@ -124,6 +124,9 @@ extern "C" {
 void fc3d_nsgs(FrictionContactProblem *problem, double *reaction, double *velocity, int *info,
                SolverOptions *options);
 
+void fc3d_nsgs_graph(FrictionContactProblem *problem, double *reaction, double *velocity, int *info,
+                     SolverOptions *options);
+
 void fc3d_nsgs_initialize_local_solver(SolverPtr *solve, UpdatePtr *update,
                                        FreeSolverNSGSPtr *freeSolver,
                                        ComputeErrorPtr *computeError,
