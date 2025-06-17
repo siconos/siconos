@@ -799,6 +799,7 @@ class MechanicsHdf5(object):
             or primitive == "Box2d"
             or primitive == "Line"
             or primitive == "Circle"
+            or primitive == "Segment"
         ):
             self._dimension = 2
         else:

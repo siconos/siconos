@@ -142,6 +142,8 @@ struct maker
               storage::bind<config::topo, "topology">,
               storage::bind<config::simulation, "simulation">,
               storage::bind<config::osnspb, "osnspb">,
+              storage::bind<typename config::osi::assembled_osi_t,
+                            "assembled_osi">,
               storage::bind<config::fc2d, "fc2d">,
               storage::bind<config::io, "io">>> {};
 

@@ -1,4 +1,7 @@
 
+#include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
+
 #include "siconos/model/fem.hpp"
 #include "siconos/siconos.hpp"
 #include "siconos/utils/print.hpp"
@@ -38,7 +41,7 @@ int main(int args, char* argv[])
   using namespace siconos;
   using namespace mechanics::fem;
 
-  using Matrix = siconos::algebra::SimpleMatrix;
+  using Matrix = siconos::algebra::SiconosMatrix;
   using Vector = siconos::algebra::SiconosVector;
 
   auto gmsh_filename = "./data/square_200.msh";
@@ -63,11 +66,11 @@ int main(int args, char* argv[])
 
   auto fe_solid = storage::add<config::fem>(data);
   fe_solid.instance().reset(new FiniteElementLinearTIDS(
-      mesh, materials, siconos::algebra::UblasType::SPARSE));
+      mesh, materials));
   auto fe_model = fe_solid.instance()->FEModel();
 
   auto nodal_forces = std::make_shared<Vector>(2);
-  nodal_forces->zero();
+  nodal_forces->setZero();
   (*nodal_forces)(1) = -1e7;
   fe_solid.instance()->applyNodalForces(applied_force_tag, nodal_forces);
 
@@ -90,7 +93,11 @@ int main(int args, char* argv[])
   auto nslaw = storage::add<config::nslaw>(data);
   nslaw.e() = e;
 
-  auto initial_gap = std::make_shared<Vector>(1, Ly * 5e-4);
+  // Create the vector with the size only
+  auto initial_gap = std::make_shared<Vector>(1);
+
+  // Set the value using the provided value
+  (*initial_gap)(0) = Ly * 5e-4;
 
   auto inter = storage::add<config::fem_interaction>(data);
 

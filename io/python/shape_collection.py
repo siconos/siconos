@@ -51,10 +51,17 @@ class NativeCircleShape(NativeShape):
     def __init__(self, radius):
         self.radius = radius
 
-
 class NativeLineShape(NativeShape):
     def __init__(self, a, b, c):
         self.params = [a, b, c]
+
+class NativeSegmentShape(NativeShape):
+    def __init__(self, x1, y1, x2, y2):
+        self.params = [x1, y1, x2, y2]
+
+class NativeBox2dShape(NativeShape):
+    def __init__(self, a, b):
+        self.params = [a, b]
 
 
 def load_vtp_file(shape_ref):
@@ -159,13 +166,21 @@ class ShapeCollection:
             collision_margin = 0.04
         self._collision_margin = collision_margin
         self.backend = backend
-        if backend == "native":
+        if backend == "vnative":
+            self._primitive = {
+                "Disk": NativeDiskShape,
+                "Circle": NativeCircleShape,
+                "Line": NativeLineShape,
+                "Segment": NativeSegmentShape,
+                "Box2d": NativeBox2dShape,
+            }
+        elif backend == "native":
             self._primitive = {
                 "Disk": NativeDiskShape,
                 "Circle": NativeCircleShape,
                 "Line": NativeLineShape,
             }
-        else:
+        elif backend == "bullet":
             self._primitive = {
                 "Sphere": siconos.mechanics.collision.SiconosSphere,
                 "Box": siconos.mechanics.collision.SiconosBox,

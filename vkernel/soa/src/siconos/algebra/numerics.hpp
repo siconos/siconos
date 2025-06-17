@@ -1,9 +1,8 @@
 #pragma once
 
-#include <siconos/numerics/CSparseMatrix_internal.h>  // for CSparseMatrix
-#include <siconos/numerics/NumericsMatrix.h>
-#include <siconos/numerics/NumericsSparseMatrix.h>
-
+#include "CSparseMatrix.h"  // for CSparseMatrix
+#include "NumericsMatrix.h"
+#include "NumericsSparseMatrix.h"
 #include "siconos/algebra/algebra.hpp"
 #include "siconos/algebra/eigen.hpp"
 #include "siconos/algebra/linear_algebra.hpp"
@@ -61,7 +60,7 @@ struct mat : any_mat {
     }
   }();
 
-  indice_t _offsets[2] = {0zu, 0zu};
+  indice_t _offsets[2] = {0, 0};
 
   NumericsMatrix* _m = nullptr;
   NumericsMatrix* _mt = nullptr;  // transposed is allocated with Numerics
@@ -127,10 +126,10 @@ struct vec {
     }
 
     _view = false;
-    _offset = 0zu;
+    _offset = 0;
   }
 
-  indice_t _offset = 0zu;
+  indice_t _offset = 0;
 };
 
 // template <>
@@ -153,28 +152,30 @@ struct vec {
 // };
 
 template <typename T>
-mat<T> mat_view(match::any_mat auto& m, auto offsets)
+mat<T> mat_view(match::any_mat auto& m, indice_t row_offset,
+                indice_t col_offset)
 {
   mat<T> vm;
   /* pointers copy */
   vm._m = m._m;
   vm._mt = m._mt;
   vm._inversed = m._inversed;
-  vm._offsets[0] = offsets[0];
-  vm._offsets[1] = offsets[1];
+  vm._offsets[0] = row_offset;
+  vm._offsets[1] = col_offset;
   vm._view = true;
 
   return vm; /* RVO */
 }
 
 template <typename T>
-mat<T> mat_view(T, match::any_mat auto& m, auto offsets)
+mat<T> mat_view(T, match::any_mat auto& m, indice_t row_offset,
+                indice_t col_offset)
 {
-  return mat_view<T>(m, offsets);
+  return mat_view<T>(m, row_offset, col_offset);
 }
 
 template <typename T>
-vec<T> vec_view(match::vec auto& v, auto offset)
+vec<T> vec_view(match::vec auto& v, indice_t offset)
 {
   vec<T> vv;
   /* pointers copy */
@@ -185,7 +186,7 @@ vec<T> vec_view(match::vec auto& v, auto offset)
 }
 
 template <typename T>
-decltype(auto) vec_view(T, match::vec auto& v, auto offset)
+decltype(auto) vec_view(T, match::vec auto& v, indice_t offset)
 {
   return vec_view<T>(v, offset);
 }
@@ -340,6 +341,13 @@ decltype(auto) get_vector(vec<T>& v, match::indice auto i)
 {
   return matrix_view<T>(v._v->matrix0 + i * v.vnrows + v._offset);
 }
+
+template <typename T>
+decltype(auto) get_vector(const vec<T>& v, match::indice auto i)
+{
+  return matrix_view<T>(v._v->matrix0 + i * v.vnrows + v._offset);
+}
+
 
 template <typename T>
 decltype(auto) get_vector(vec<T>&& v, match::indice auto i)

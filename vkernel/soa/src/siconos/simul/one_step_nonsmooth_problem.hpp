@@ -3,12 +3,10 @@
 #include <FrictionContactProblem.h>
 #include <LinearComplementarityProblem.h>
 #include <NonSmoothDrivers.h>
-#include <fmt/core.h>
-#include <fmt/ranges.h>
 #include <lcp_cst.h>
-#include <siconos/numerics/Friction_cst.h>
-#include <siconos/numerics/NumericsVerbose.h>
-#include "SolverOptions.h"
+#include <Friction_cst.h>
+#include <NumericsVerbose.h>
+#include <SolverOptions.h>
 
 #include "siconos/algebra/algebra.hpp"
 #include "siconos/simul/simul_head.hpp"

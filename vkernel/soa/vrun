@@ -53,12 +53,56 @@ while [ $# -gt 0 ]; do
       set -x
       cat>.siconos-disks-manifest.scm<<EOF
 (specifications->manifest
- '( "siconos-with-vkernel" "benchmark" "$VRUN_GUIX_CXX_TOOLCHAIN" "valgrind"
-    "suitesparse" "eigen" "boost" "fmt" "range-v3" "gfortran-toolchain" "cppunit" "python-pytest"
-    "cmake" "ninja" "make" "bash" "coreutils" "which" "python" "python-pip" "python-numpy" 
-    "python-scikit-build" "python-setuptools" "nlohmann-json" "python-wheel" "python-pytest"
-    "pybind11" "strace" "jupyter" "python-ipykernel" "procps" "gdb" "git" "emacs-next"
-    "time" "parallel" "findutils" "nss-certs" "rsync"))
+ '(
+ "$VRUN_GUIX_CXX_TOOLCHAIN"
+ "bash"
+ "benchmark"
+ "boost"
+ "bullet"
+ "cmake"
+ "coreutils"
+ "cppunit"
+ "eigen"
+ "emacs-next"
+ "findutils"
+ "fmt"
+ "fmt"
+ "gdb"
+ "gfortran-toolchain"
+ "git"
+ "gmp"
+ "jupyter"
+ "lapack"
+ "lpsolve"
+ "make"
+ "ninja"
+ "nlohmann-json"
+ "openblas"
+ "parallel"
+ "procps"
+ "pybind11"
+ "python"
+ "python-h5py"
+ "python-ipykernel"
+ "python-lxml"
+ "python-numpy@1.26"
+ "python-packaging"
+ "python-pip"
+ "python-pytest"
+ "python-scikit-build"
+ "python-scipy"
+ "python-setuptools"
+ "python-wheel"
+ "range-v3"
+ "rsync"
+ "strace"
+ "suitesparse"
+ "swig"
+ "time"
+ "valgrind"
+ "vtk"
+ "which"
+))
 EOF
 
       cat>.siconos-vrun-channels.scm<<EOF
@@ -72,13 +116,7 @@ EOF
           (make-channel-introduction
             "9edb3f66fd807b096b48283debdcddccfea34bad"
             (openpgp-fingerprint
-              "BBB0 2DDF 2CEA F6A8 0D1D  E643 A2A0 6DF2 A33A 54FA"))))
-      (channel
-       (name 'guix-hpc)
-       (url "https://gitlab.inria.fr/bremond/guix-hpc.git")
-       (branch "add-siconosx")
-       (commit
-        "9307bb85fb5c89a62aabdce6d7e4ce90f8e66292")))
+              "BBB0 2DDF 2CEA F6A8 0D1D  E643 A2A0 6DF2 A33A 54FA")))))
 EOF
       # guix environment setup
       # export PATH=/var/guix/profiles/per-user/root/current-guix/bin:$PATH
@@ -86,7 +124,7 @@ EOF
       [ -f /applis/site/guix-start.sh ] && . /applis/site/guix-start.sh
       pwd=`pwd`
       rm -f $pwd/.siconos-guix-profile
-      guix_isolation_args="--container -N --emulate-fhs --share=/tmp --share=/scratch --share=$HOME"
+      guix_isolation_args="--container -N --emulate-fhs --share=/tmp --share=/scratch --share=$HOME --preserve=PYTHONPATH --preserve=LD_LIBRARY_PATH"
       #guix_isolation_args="--pure --preserve=OMP* --preserve=VRUN*"
       guix_cmd="guix time-machine -C ./.siconos-vrun-channels.scm --"
       # it seems that we need to pass explicitely the package for transformations

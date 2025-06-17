@@ -27,11 +27,12 @@ struct moreau_jean_element : item<> {
   using velocity = attr_t<system, "velocity">;
   using fext = attr_t<system, "fext">;
 
-  using attributes = gather<
-      attribute<"offsets", some::vector<some::indice, some::indice_value<3>>>,
-      attribute<"assembled_osi", some::item_ref<osi_assembled_t>>,
-      attribute<"number_of_involved_ds", some::indice>,
-      attribute<"number_of_interactions", some::indice>>;
+  using attributes =
+      gather<attribute<"assembled_osi", some::item_ref<osi_assembled_t>>,
+             attribute<"ds_offset", some::indice>,
+             attribute<"inter_offset", some::indice>,
+             attribute<"number_of_involved_ds", some::indice>,
+             attribute<"number_of_interactions", some::indice>>;
 
   using properties = gather<storage::keep<attr_t<system, "q">, 2>,
                             storage::keep<attr_t<system, "velocity">, 2>,
@@ -47,7 +48,11 @@ struct moreau_jean_element : item<> {
                              storage::attr<"assembled_osi">(*self()));
     }
 
-    decltype(auto) offsets() { return storage::attr<"offsets">(*self()); }
+    decltype(auto) ds_offset() { return storage::attr<"ds_offset">(*self()); }
+    decltype(auto) inter_offset()
+    {
+      return storage::attr<"inter_offset">(*self());
+    }
 
     decltype(auto) nslaw_size() { return nslaw_size_t{}.value; }
     decltype(auto) dof()
@@ -78,7 +83,7 @@ struct moreau_jean_element : item<> {
 
       return algebra::mat_view(mass_matrix_storage,
                                assembled_osi().mass_matrix_assembled(),
-                               offsets());
+                               ds_offset(), ds_offset());
     }
 
     decltype(auto) h_matrix_assembled()
@@ -87,7 +92,7 @@ struct moreau_jean_element : item<> {
 
       return algebra::mat_view(h_matrix1_storage,
                                assembled_osi().h_matrix_assembled(),
-                               std::array{offsets()[2], offsets()[0]});
+                               inter_offset(), ds_offset());
     }
     decltype(auto) q_nsp_vector_assembled()
     {
@@ -95,7 +100,7 @@ struct moreau_jean_element : item<> {
 
       return algebra::vec_view(lambda_storage,
                                assembled_osi().q_nsp_vector_assembled(),
-                               offsets()[2]);
+                               inter_offset());
     }
     decltype(auto) velocity_vector_assembled()
     {
@@ -103,7 +108,7 @@ struct moreau_jean_element : item<> {
 
       return algebra::vec_view(velocity_storage,
                                assembled_osi().velocity_vector_assembled(),
-                               offsets()[0]);
+                               ds_offset());
     }
     decltype(auto) lambda_vector_assembled()
     {
@@ -111,7 +116,7 @@ struct moreau_jean_element : item<> {
 
       return algebra::vec_view(lambda_storage,
                                assembled_osi().lambda_vector_assembled(),
-                               offsets()[0]);
+                               inter_offset());
     }
     decltype(auto) p0_vector_assembled()
     {
@@ -120,14 +125,14 @@ struct moreau_jean_element : item<> {
           some::vector<some::scalar, dof_t>>::type;
 
       return algebra::vec_view<vec_t>(assembled_osi().p0_vector_assembled(),
-                                      offsets()[0]);
+                                      ds_offset());
     }
     decltype(auto) y_vector_assembled()
     {
       auto y_storage = get_storage_type(self()->data(), y{});
 
       return algebra::vec_view(
-          y_storage, assembled_osi().y_vector_assembled(), offsets()[0]);
+          y_storage, assembled_osi().y_vector_assembled(), inter_offset());
     }
 
     decltype(auto) ydot_vector_assembled()
@@ -136,7 +141,7 @@ struct moreau_jean_element : item<> {
 
       return algebra::vec_view(ydot_storage,
                                assembled_osi().ydot_vector_assembled(),
-                               offsets()[0]);
+                               inter_offset());
     }
 
     void initialize(auto step)
@@ -228,8 +233,8 @@ struct moreau_jean_element : item<> {
     {
       using data_t = const std::decay_t<decltype(self()->data())>;
       if constexpr (!storage::has_property_t<attr_t<system, "fext">,
-                    property::time_invariant,
-                    data_t>()) {
+                                             property::time_invariant,
+                                             data_t>()) {
         // constant fext => constant iteration matrix
         // FIX ISSUE HERE compute_iteration_matrix(current_step); (??)
       }

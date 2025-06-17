@@ -1,12 +1,10 @@
 #pragma once
 
-#include "siconos/simul/simul_head.hpp"
-
-#include "siconos/simul/moreau_jean_assembled.hpp"
 #include "siconos/algebra/numerics.hpp"
 #include "siconos/model/lagrangian_r.hpp"
 #include "siconos/simul/moreau_jean_assembled.hpp"
 #include "siconos/simul/moreau_jean_element.hpp"
+#include "siconos/simul/simul_head.hpp"
 #include "siconos/storage/ground/ground.hpp"
 #include "siconos/utils/print.hpp"
 #include "siconos/utils/range.hpp"
@@ -35,15 +33,25 @@ struct one_step_integrator {
     using rt_osi_t =
         moreau_jean_element<rt_system, rt_interaction, moreau_jean_assembled>;
 
+    using raw_elements =
+        ground::tuple<some::item_ref<ct_osi_t>, some::item_ref<rt_osi_t>>;
+
+    using elements = decltype(ground::unpack(
+        ground::filter(
+            raw_elements{},
+            [](const auto& h) constexpr {
+              using t = typename std::decay_t<decltype(h)>::type;
+              return ground::bool_c<!std::derived_from<t, empty_item>>;
+            }),
+        []<typename... Elems>(Elems...) { return some::tuple<Elems...>{}; }));
+
     using assembled_osi_t = moreau_jean_assembled;
 
     using items = gather<topology, ct_osi_t, rt_osi_t, moreau_jean_assembled>;
 
-    using attributes = gather<
-        attribute<"raw_elements", some::tuple<some::item_ref<ct_osi_t>,
-                                              some::item_ref<rt_osi_t>>>,
-        attribute<"rt_osi", some::item_ref<rt_osi_t>>,
-        attribute<"assembled_osi", some::item_ref<assembled_osi_t>>>;
+    using attributes =
+        gather<attribute<"elements", elements>,
+               attribute<"assembled_osi", some::item_ref<assembled_osi_t>>>;
 
     template <typename Handle>
     struct interface : default_interface<Handle> {
@@ -93,12 +101,7 @@ struct one_step_integrator {
       decltype(auto) elements()
       {
         return ground::transform(
-            ground::filter(
-                storage::attr<"raw_elements">(*self()),
-                [](const auto& h) constexpr {
-                  using t = typename std::decay_t<decltype(h)>::type;
-                  return ground::bool_c<!std::derived_from<t, empty_item>>;
-                }),
+            storage::attr<"elements">(*self()),
             [&](auto elem) { return storage::handle(self()->data(), elem); });
       }
 
@@ -153,9 +156,23 @@ struct one_step_integrator {
         return assembled_osi().ydot_vector_assembled();
       };
 
-      void assemble_setup(auto ninters, auto nds)
+      void assemble_setup()
       {
-        assembled_osi().assemble_setup(ninters, nds);
+        using env_t = decltype(self()->env());
+        using indice_t = typename env_t::indice;
+
+        indice_t ods = 0;
+        indice_t ointer = 0;
+
+        ground::for_each(elements(), [&ods, &ointer](auto elem) {
+          elem.ds_offset() = ods;
+          elem.inter_offset() = ointer;
+
+          ods += elem.number_of_involved_ds() * elem.dof();
+          ointer += elem.number_of_interactions() * elem.nslaw_size();
+        });
+
+        assembled_osi().assemble_setup(ods, ointer);
       }
 
       void compute_w_matrix(auto step)

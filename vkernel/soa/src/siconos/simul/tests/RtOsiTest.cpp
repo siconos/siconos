@@ -44,9 +44,9 @@ struct make
 }  // namespace siconos::config
 
 namespace config = siconos::config;
-namespace storage = siconos::storage;
-namespace ct = siconos::storage::ground;
-namespace algebra = siconos::algebra;
+namespace store = siconos::storage;
+namespace ct = store::ground;
+using siconos::algebra::vector;
 
 CPPUNIT_TEST_SUITE_REGISTRATION(RtOsiTest);
 
@@ -59,14 +59,19 @@ void RtOsiTest::testOsi0()
 {
   auto data = siconos::config::make();
 
-  auto osi = siconos::storage::add<config::osi>(data);
+  auto osi = store::add<config::osi>(data);
 
   std::size_t i = 0;
-  ct::for_each(osi.elements(),
-               [&](auto elem) { elem.offsets() = {i++, i++, i++}; });
+  std::size_t j = 0;
+  ct::for_each(osi.elements(), [&](auto elem) {
+    elem.ds_offset() = i++;
+    elem.inter_offset() = j++;
+  });
 
   i = 0;
+  j = 0;
   ct::for_each(osi.elements(), [&](auto elem) {
-    CPPUNIT_ASSERT((elem.offsets() == algebra::vector<std::size_t,3>{i++, i++, i++}));
+    CPPUNIT_ASSERT((elem.ds_offset() == i++));
+    CPPUNIT_ASSERT((elem.inter_offset() == i++));
   });
 }

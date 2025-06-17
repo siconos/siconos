@@ -101,7 +101,8 @@ struct io : item<> {
       using scalar = typename env_t::scalar;
 
       /* /!\ first osi */
-      auto& p0_v = self()->make_handle(osi()).p0_vector_assembled();
+      const auto& p0_v = self()->make_handle(osi()).template visit_element<0>(
+          [](auto elem) { return elem.p0_vector_assembled(); });
 
       auto& ys = storage::attr_values<interaction, "y">(data, step);
       auto& ydots = storage::attr_values<interaction, "ydot">(data, step);

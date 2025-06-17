@@ -51,11 +51,7 @@ struct time_stepping : item<> {
 
       indice_t step = current_step();
 
-      indice_t total_number_of_interactions = 0;
       indice_t total_number_of_involved_ds = 0;
-
-      indice_t raw_interactions_size = 0;
-      indice_t raw_ds_size = 0;
 
       // loop over different kind of dynamic systems
       ground::for_each(osi.elements(), [&](auto elem) {
@@ -81,16 +77,14 @@ struct time_stepping : item<> {
         auto [ninter, nds] =
             elem.compute_active_interactions(step, time_step());
 
-        total_number_of_interactions += ninter;
         total_number_of_involved_ds += nds;
 
-        raw_interactions_size += ninter * elem.nslaw_size();
-        raw_ds_size += nds * elem.dof();
       });
 
       if (total_number_of_involved_ds > 0) {
+
         // resize assembled matrices and vectors
-        osi.assemble_setup(raw_interactions_size, raw_ds_size);
+        osi.assemble_setup();
 
         ground::for_each(osi.elements(), [&](auto elem) {
           // a least one activated interaction

@@ -89,7 +89,7 @@ struct moreau_jean_assembled : item<> {
       return attr<"constraint_activation_threshold">(*self());
     }
 
-    void assemble_setup(auto raw_inter_size, auto raw_ds_size)
+    void assemble_setup(auto raw_ds_size, auto raw_inter_size)
     {
       algebra::resize(mass_matrix_assembled(), raw_ds_size, raw_ds_size);
       algebra::resize(h_matrix_assembled(), raw_inter_size, raw_ds_size);
@@ -98,6 +98,7 @@ struct moreau_jean_assembled : item<> {
       algebra::resize(y_vector_assembled(), raw_inter_size);
       algebra::resize(ydot_vector_assembled(), raw_inter_size);
       algebra::resize(q_nsp_vector_assembled(), raw_inter_size);
+      algebra::resize(p0_vector_assembled(), raw_ds_size);
     }
 
     void compute_w_matrix(auto step)

@@ -157,13 +157,16 @@ class Osi(Stored):
 
     def __init__(self, theta):
         self._handle = vkernel.disks.add_osi(self.data())
-        self._handle.set_theta(theta)
+        self._handle.assembled_osi().set_theta(theta)
+
+    def setTheta(self, theta):
+        self.handle().assembled_osi().set_theta(theta)
 
     def setConstraintActivationThreshold(self, cat):
-        pass # unimplemented
+        self.handle().assembled_osi().set_constraint_activation_threshold(cat)
 
-    def setGamma(self, cat):
-        pass # unimplemented
+    def setGamma(self, gamma):
+        self.handle().assembled_osi().set_gamma(gamma)
 
 
 class Topology(Stored):
@@ -212,7 +215,7 @@ class Simulation(Stored):
         self._timedisc.handle().set_tmax(self._nsds._T) # vkernel does not have nsds
         self._handle = vkernel.disks.add_simulation(self.data())
         self.handle().initialize()
-        self.handle().one_step_integrator().set_theta(0.50001)
+        self.handle().one_step_integrator().assembled_osi().set_theta(0.50001)
 
     def insertIntegrator(self, osi):
         pass # unimplemented
@@ -304,8 +307,11 @@ class Body(Stored):
         body.set_shape(disk_shape)
         body.set_fext(array([0,0,0])) # default
 
-    def scalarMass(self):
+    def getMassValue(self):
         return self.handle().mass_matrix()[0]
+
+    def setConstantFext(self, fext):
+        self.handle().set_fext(array(fext))
 
     def setFExtPtr(self, fext):
         self.handle().set_fext(array(fext))
@@ -349,10 +355,10 @@ class OSNSPB(Stored):
 
         else:
             # default
-            self._so.create(sn.SICONOS_FRICTION_2D_NSGS)
-            self._so.set_iparam(sn.SICONOS_IPARAM_MAX_ITER, 100)
-            self._so.set_dparam(sn.SICONOS_DPARAM_TOL, 1e-3)
-            self._so.set_dparam(sn.SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT, 10)
+            self._so.create(sn.solver_ids.SICONOS_FRICTION_2D_NSGS)
+            self._so.set_iparam(sn.params.SICONOS_IPARAM_MAX_ITER, 100)
+            self._so.set_dparam(sn.params.SICONOS_DPARAM_TOL, 1e-3)
+            self._so.set_dparam(sn.params.SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT, 10)
 
         self._fc2d = vkernel.disks.add_fc2d(self.data())
         self._handle = vkernel.disks.add_osnspb(self.data())

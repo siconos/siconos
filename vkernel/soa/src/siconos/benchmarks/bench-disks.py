@@ -1,7 +1,7 @@
 # Usage: disks-bench <backend> <problem size>
 
 import siconos.numerics as sn
-import siconos.kernel as sk
+import siconos.simulation as sim
 
 from math import log
 import sys
@@ -11,12 +11,11 @@ from siconos.mechanics.collision.bullet import SiconosBulletOptions
 
 from siconos.io.mechanics_run import MechanicsHdf5Runner,\
     MechanicsHdf5Runner_run_options,\
-    set_backend
+    RunnerConfig
 import nonos
 
 backend = str(sys.argv[1])
-
-set_backend(backend)
+runner_config = RunnerConfig(backend)
 
 N = int(sys.argv[2])
 
@@ -24,7 +23,7 @@ disk_radius = 1
 
 io_filename = 'bench-disks-{}-{}.hdf5'.format(backend,N)
 
-with MechanicsHdf5Runner(io_filename=io_filename) as io:
+with MechanicsHdf5Runner(io_filename=io_filename, config=runner_config) as io:
 
     io.add_primitive_shape('DiskR', 'Disk', [disk_radius],
                            insideMargin=1, outsideMargin=0.)
@@ -83,14 +82,14 @@ bullet_options.perturbationIterations = 1
 #bullet_options.contactBreakingThreshold = 1
 bullet_options.minimumPointsPerturbationThreshold = 1
 
-options = sk.solver_options_create(sn.SICONOS_FRICTION_2D_NSGS)
-options.iparam[sn.SICONOS_IPARAM_MAX_ITER] = 100
-options.dparam[sn.SICONOS_DPARAM_TOL] = 1e-2
-options.iparam[sn.SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] = 10
+options = sn.solver_options_create(sn.solver_ids.SICONOS_FRICTION_2D_NSGS)
+options.iparam[sn.params.SICONOS_IPARAM_MAX_ITER] = 100
+options.dparam[sn.params.SICONOS_DPARAM_TOL] = 1e-2
+options.iparam[sn.params.SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] = 10
 
 run_options=MechanicsHdf5Runner_run_options()
 run_options['t0']=0
-run_options['T']=10
+run_options['T']=0.01
 run_options['h']=0.005
 run_options['gravity_scale'] = 1/N
 
@@ -99,11 +98,11 @@ run_options['bullet_options']=bullet_options
 run_options['solver_options']=options
 
 run_options['constraint_activation_threshold']=1e-05
-run_options['Newton_options']=sk.SICONOS_TS_LINEAR
+#run_options['Newton_options']=sk.SICONOS_TS_LINEAR
 
 run_options['skip_last_update_output']=True
 run_options['skip_reset_lambdas']=True
-run_options['osns_assembly_type']= sk.REDUCED_DIRECT
+#run_options['osns_assembly_type']= sk.REDUCED_DIRECT
 
 #run_options['osns_assembly_type']= sk.GLOBAL_REDUCED
 #run_options['osi']= sk.MoreauJeanGOSI
@@ -120,7 +119,8 @@ run_options['with_timer']=True
 run_options['time_stepping']=None
 
 
-with MechanicsHdf5Runner(io_filename=io_filename, mode='r+') as io:
+with MechanicsHdf5Runner(io_filename=io_filename, mode='r+',
+                         config=runner_config) as io:
 
         io.run(run_options)
 

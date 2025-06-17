@@ -18,7 +18,7 @@
 
 """Run a pre-configured Siconos "mechanics" HDF5 file."""
 
-from math import cos, sin, acos
+from math import cos, sin, acos, sqrt, atan, pi
 import scipy.constants
 import numpy as np
 
@@ -50,6 +50,11 @@ from siconos.io.FrictionContactTrace import (
 )
 import siconos.io.shape_collection
 
+# rotation around the origin
+def rotate_point(x, y, alpha):
+    x_new = x * cos(alpha) - y * sin(alpha)
+    y_new = x * sin(alpha) + y * cos(alpha)
+    return x_new, y_new
 
 class RunnerConfig:
     """A class to manage the backend and the default classes to be used
@@ -59,6 +64,7 @@ class RunnerConfig:
     - 'bullet' for Bullet Physics Engine
     - 'occ' for OpenCascade Geometry (occ)
     - 'native' for a native simulation
+    - 'vnative' for a vectorized native simulation
 
     """
 
@@ -109,6 +115,23 @@ class RunnerConfig:
             self.default_manager_class = native_manager
             self.default_simulation_class = simu.TimeStepping
             self.default_body_class = siconos.mechanics.collision.RigidBodyDS
+
+        elif self.backend == "vnative":
+            global sm
+            global sio
+            global nsf
+            #global simu
+            import nonos as vkernel
+            import nonos.bridge as sm
+            import nonos.bridge as sio
+            import nonos.bridge as simu
+            import nonos.bridge as nsf
+            self.use_bullet = False
+            sm.Stored.setStorage(vkernel.disks.make_storage())
+            self.default_manager_class = sio.SpaceFilter
+            self.default_simulation_class = sio.Simulation
+            self.default_body_class = sio.Body
+
         else:
             raise RuntimeError(f"Unavailable chosen backend {self.backend}")
 
@@ -318,6 +341,11 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self._v0 = []
         self.fext = []
         self.weight = []
+
+        if self.config.backend == 'vnative':
+            self.get_io_array  = lambda array: array
+        else:
+            self.get_io_array  = lambda array: array.transpose()
 
     def __enter__(self):
         super(MechanicsHdf5Runner, self).__enter__()
@@ -580,8 +608,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             initial_pos = np.concatenate([translation, orientation], axis=0)
             self._q0.append(initial_pos.copy())
             self._v0.append(velocity)
-            if backend == 'vnative':
-                body_class = default_body_class
+            if self.config.backend == 'vnative':
+                body_class = self.config.default_body_class
             else:
                 if self._shape.attributes(ctor.shape_name)["primitive"] == "Disk":
                     body_class = siconos.mechanics.collision.Disk
@@ -615,8 +643,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         face_class,
         edge_class,
         birth=False,
-        number=None,
-    ):
+        number=None,):
+        
         assert self.config.backend == "occ"
 
         if mass is None:
@@ -763,7 +791,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 csetpos = np.concatenate([translation, orientation], axis=0)
                 for c in contactors:
                     shp = self._shape.get(c.shape_name)
-                    if type(shp) == NativeSegmentShape:
+                    if type(shp) == siconos.io.shape_collection.NativeSegmentShape:
                         # segment -> box2d
                         # to ==> in mechanics_hdf5 at the declaration level
                         x1 = shp.params[0]
@@ -771,7 +799,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                         x2 = shp.params[2]
                         y2 = shp.params[3]
                         d = sqrt((x1-x2)**2 + (y1-y2)**2)
-                        shp = SiconosBox2d([d, 0.])
+                        shp = siconos.mechanics.collision.SiconosBox2d(d, 0.)
                         shp.setInsideMargin(0.0)
                         shp.setOutsideMargin(0.01)
                         trans = [(x1+x2)/2, (y1+y2)/2, 0.]
@@ -1462,7 +1490,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         """
 
         # Ensure we count up from zero for implicit DS numbering
-        sm.DynamicalSystem.resetCount(0)
+        if self.config.backend != 'vnative':
+            sm.DynamicalSystem.resetCount(0)
 
         for _ in self._ref:
             self._number_of_shapes += 1
@@ -1710,28 +1739,29 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # io.positions returns ds state vectors in columns.
         # Each column corresponds to one DS. First value in the column
         # is the ds number.
-        positions = self._io.positions(self._nsds)
+        positions = self.get_io_array(self._io.positions(self._nsds))
+
         self._ds_positions = positions
-        number_of_ds = positions.shape[1]
         if positions is not None:
-            self._dynamic_data.resize(current_line + number_of_ds, 0)
-            times = np.empty((number_of_ds, 1))
+            self._dynamic_data.resize(current_line + positions.shape[0], 0)
+
+            times = np.empty((positions.shape[0], 1))
             times.fill(time)
             if self._dimension == 3:
                 self._dynamic_data[current_line:, :] = np.concatenate(
-                    (times, positions.transpose()), axis=1
-                )
+                    (times, positions), axis=1)
             elif self._dimension == 2:
                 # VA. change the position such that is corresponds to a 3D object
-                new_positions = np.zeros((number_of_ds, 8))
-                new_positions[:, 0] = positions[0, :]  # ds number
-                new_positions[:, 1] = positions[1, :]  # x position
-                new_positions[:, 2] = positions[2, :]  # y position
-                new_positions[:, 4] = np.cos(positions[3, :] / 2.0)
-                new_positions[:, 7] = np.sin(positions[3, :] / 2.0)
+                new_positions = np.zeros((positions.shape[0], 8))
+
+                new_positions[:, 0] = positions[:, 0] # ds number
+                new_positions[:, 1] = positions[:, 1] # x position
+                new_positions[:, 2] = positions[:, 2] # y position
+
+                new_positions[:, 4] = np.cos(positions[:, 3] / 2.0)
+                new_positions[:, 7] = np.sin(positions[:, 3] / 2.0)
                 self._dynamic_data[current_line:, :] = np.concatenate(
-                    (times, new_positions), axis=1
-                )
+                    (times, new_positions), axis=1)
 
     def output_velocities(self):
         """
@@ -1741,34 +1771,55 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         time = self.current_time()
 
-        velocities = self._io.velocities(self._nsds)
+        velocities = self.get_io_array(self._io.velocities(self._nsds))
         # io.velocities : contains the velocities for all DS (1 column per DS)
         # with DS numbers on the first row.
         # WARNING: last line is useless in velocities but exists to optimize
         # memory print in C++.
-        number_of_ds = velocities.shape[1]
+        # number_of_ds = velocities.shape[1]
 
+        # if velocities is not None:
+        #     self._velocities_data.resize(current_line + number_of_ds, 0)
+
+        #     times = np.empty((number_of_ds, 1))
+        #     times.fill(time)
+        #     if self._dimension == 3:
+        #         self._velocities_data[current_line:, :] = np.concatenate(
+        #             (times, velocities.transpose()[:, :-1]), axis=1
+        #         )
+        #     elif self._dimension == 2:
+        #         # VA. change the position such that is corresponds to a 3D object
+        #         new_velocities = np.zeros((velocities.shape[1], 7))
+        #         # 7 because we assume NewtonEuler DS
+        #         new_velocities[:, 0] = velocities[0, :]  # ds number
+        #         new_velocities[:, 1] = velocities[1, :]  # x velocity
+        #         new_velocities[:, 2] = velocities[2, :]  # y velocity
+
+        #         new_velocities[:, 6] = velocities[3, :]  # theta velocity
+        #         self._velocities_data[current_line:, :] = np.concatenate(
+        #             (times, new_velocities), axis=1
+        #         )
         if velocities is not None:
-            self._velocities_data.resize(current_line + number_of_ds, 0)
 
-            times = np.empty((number_of_ds, 1))
+            self._velocities_data.resize(current_line + velocities.shape[0], 0)
+
+            times = np.empty((velocities.shape[0], 1))
             times.fill(time)
             if self._dimension == 3:
                 self._velocities_data[current_line:, :] = np.concatenate(
-                    (times, velocities.transpose()[:, :-1]), axis=1
-                )
+                    (times, velocities), axis=1)
             elif self._dimension == 2:
-                # VA. change the position such that is corresponds to a 3D object
-                new_velocities = np.zeros((velocities.shape[1], 7))
-                # 7 because we assume NewtonEuler DS
-                new_velocities[:, 0] = velocities[0, :]  # ds number
-                new_velocities[:, 1] = velocities[1, :]  # x velocity
-                new_velocities[:, 2] = velocities[2, :]  # y velocity
+                 # VA. change the position such that is corresponds to a 3D object
+                new_velocities = np.zeros((velocities.shape[0], 7))
 
-                new_velocities[:, 6] = velocities[3, :]  # theta velocity
+                new_velocities[:, 0] = velocities[:, 0] # ds number
+                new_velocities[:, 1] = velocities[:, 1] # x velocity
+                new_velocities[:, 2] = velocities[:, 2] # y velocity
+
+                new_velocities[:, 6] = velocities[:, 3] # theta velocity
                 self._velocities_data[current_line:, :] = np.concatenate(
-                    (times, new_velocities), axis=1
-                )
+                    (times, new_velocities), axis=1)
+
 
     def output_contact_forces(self):
         """
@@ -1788,7 +1839,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 times = np.empty((contact_points.shape[0], 1))
                 times.fill(time)
 
-                if self._dimension == 3 or backend == "vnative":
+                if self._dimension == 3 or self.config.backend == "vnative":
                     self._cf_data[current_line:, :] = np.concatenate(
                         (times, contact_points), axis=1
                     )
@@ -1869,9 +1920,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         """
         if self._nsds.topology().indexSetsSize() > 1:
             time = self.current_time()
-            contact_work = self._io.contactContactWork(
-                self._nsds, self._output_contact_index_set
-            )
+            contact_work = None #self._io.contactContactWork(
+#                self._nsds, self._output_contact_index_set
+#            )
             # print(contact_work)
             if contact_work is not None:
                 current_line = self._cf_work.shape[0]
@@ -2031,13 +2082,13 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         if self._output_contact_forces:
             self.log(self.output_contact_forces, with_timer)()
 
-        if self._output_contact_info and (backend == 'bullet' or backend == 'vnative'):
+        if self._output_contact_info and (self.config.backend == 'bullet' or self.config.backend == 'vnative'):
             self.log(self.output_contact_info, with_timer)()
         else:
             self.print_verbose('[warning] output_contact_info is only available with bullet backend for the moment')
             self.print_verbose('          to remove this message set output_contact_info options to False')
             
-        if self._output_contact_work and backend == 'bullet':
+        if self._output_contact_work and self.config.backend == 'bullet':
             self.log(self.output_contact_work, with_timer)()
             if self._run_options['skip_last_update_output'] or self._run_options['skip_last_update_input']:
                 self.print_verbose('[warning] output_contact_work with the options skip_last_update_output=True'
@@ -2053,7 +2104,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         if self._should_output_domains:
             self.log(self.output_domains, with_timer)()
 
-        if (backend != "vnative"):
+        if (self.config.backend != "vnative"):
             self.log(self.output_solver_infos, with_timer)()
 
         self.log(self._out.flush)()
@@ -2173,7 +2224,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 f"Object of type {obj.__class__.__name__} is not JSON serializable"
             )
 
-        dict_json = json.dumps(d, default=serialize_enum)
+        dict_json = json.dumps(d)
         self._run_options_data.attrs["options"] = dict_json
 
     def print_solver_infos(self):
@@ -2593,6 +2644,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         interaction_manager = run_options["interaction_manager"]
         if interaction_manager is None:
+            print(self.config.backend)
+            print(self.config.default_manager_class)
             interaction_manager = self.config.default_manager_class
 
         if run_options["time_stepping"] is None:
@@ -2682,19 +2735,17 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 )
 
         # MB: this may be in conflict with 'dimension' attribute
-        if (
-            bullet_options is not None
-            and bullet_options.dimension == self.config.bullet.TwoD
-        ):
-            self._dimension = 2
+        if (bullet_options is not None and self.config.bullet is not None):
+            if bullet_options.dimension == self.config.bullet.TwoD:
+                self._dimension = 2
         else:
             if self._out.attrs.get("dimension", None) is None:
                 # this is a second place to set the default
                 self._dimension = 3
 
-        if backend == 'vnative':
+        if self.config.backend == 'vnative':
             if vnative_options == None:
-                vnative_options = vbridge.SpaceFilterOptions()
+                vnative_options = sio.SpaceFilterOptions()
             self._interman = interaction_manager(vnative_options)
         else:
             self._interman = interaction_manager(bullet_options)
@@ -2741,7 +2792,11 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             )
 
         # (2) Time discretisation --
-        timedisc = simu.TimeDiscretisation(t0, h)
+        if self.config.backend != "vnative":
+            timedisc = simu.TimeDiscretisation(t0, h)
+        else:
+            # cannot override simu, why ?
+            timedisc = sio.TimeDiscretisation(t0, h)
 
         # (3) choice of default OneStepNonSmoothProblem
         # w.r.t the type of nslaws
@@ -2944,7 +2999,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self._simulation = simulation
 
         # time step necessary for output
-        if backend == 'vnative':
+        if self.config.backend == 'vnative':
             self._io.setSimulation(self._simulation)
 
         if len(self._plugins) > 0:
@@ -2972,13 +3027,13 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         self.print_verbose("first output static and dynamic objects ...")
         self.output_static_objects()
-        # self.output_dynamic_objects()
-        # self.output_velocities()
+        self.output_dynamic_objects()
+        self.output_velocities()
 
         if self._should_output_domains:
             self.log(self.output_domains, with_timer)()
 
-        self.output_run_options()
+        #self.output_run_options()
 
         self.print_verbose("start simulation ...")
         self._initializing = False
@@ -3039,7 +3094,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     )
                     self.log(self._simulation.computeOneStep, with_timer)()
             else:
-                if backend == 'vnative':
+                if self.config.backend == 'vnative':
                     self.log(self._simulation.updateInteractions, with_timer)()
                 self.log(self._simulation.computeOneStep, with_timer)()
 
@@ -3102,7 +3157,11 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     self.print_solver_infos()
 
             else:
-                number_of_contacts = self._osnspb.getSizeOutput // self._dimension
+                if self.config.backend != 'vnative':
+                    number_of_contacts = self._osnspb.getSizeOutput // self._dimension
+                else:
+                    number_of_contacts = self._osnspb.getSizeOutput() // self._dimension
+                    
                 if verbose and number_of_contacts > 0:
                     msg = "number of active contacts at the velocity level (approx)"
                     self.print_verbose(msg, number_of_contacts)
