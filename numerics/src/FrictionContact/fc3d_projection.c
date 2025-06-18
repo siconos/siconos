@@ -193,6 +193,41 @@ void fc3d_projection_update_with_regularization(int contact, FrictionContactProb
   localproblem->mu[0] = problem->mu[contact];
 }
 
+void fc3d_projection_update_with_regularization_parallel(int contact, FrictionContactProblem* problem,
+                                                         FrictionContactProblem* localproblem,
+                                                         double* reaction, SolverOptions* options) {
+  /* Build a local problem for a specific contact
+     reaction corresponds to the global vector (size n) of the global problem.
+  */
+
+  /* Call the update function which depends on the storage for MGlobal/MBGlobal */
+  /* Build a local problem for a specific contact
+   reaction corresponds to the global vector (size n) of the global problem.
+  */
+
+  /* The part of MGlobal which corresponds to the current block is copied into MLocal */
+
+  NM_copy_diag_block3(problem->M, contact, &localproblem->M->matrix0);
+
+  /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products
+     MLocal.reactionBlock, excluding the block corresponding to the current contact. ****/
+  fc3d_local_problem_compute_q_parallel(problem, localproblem, reaction, contact);
+
+  double rho = options->dparam[SICONOS_FRICTION_3D_NSN_RHO];
+  for (int i = 0; i < 3; i++) localproblem->M->matrix0[i + 3 * i] += rho;
+
+  double* qLocal = localproblem->q;
+  int in = 3 * contact, it = in + 1, is = it + 1;
+
+  /* qLocal computation*/
+  qLocal[0] -= rho * reaction[in];
+  qLocal[1] -= rho * reaction[it];
+  qLocal[2] -= rho * reaction[is];
+
+  /* Friction coefficient for current block*/
+  localproblem->mu[0] = problem->mu[contact];
+}
+
 int fc3d_projectionWithDiagonalization_solve(FrictionContactProblem* localproblem,
                                              double* reaction, SolverOptions* options) {
   /* Current block position */
@@ -449,6 +484,26 @@ void fc3d_projectionOnCylinder_update(int contact, FrictionContactProblem* probl
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products
      MLocal.reactionBlock, excluding the block corresponding to the current contact. ****/
   fc3d_local_problem_compute_q(problem, localproblem, reaction, contact);
+}
+
+void fc3d_projectionOnCylinder_update_parallel(int contact, FrictionContactProblem* problem,
+                                               FrictionContactProblem* localproblem, double* reaction,
+                                               SolverOptions* options) {
+  /* Build a local problem for a specific contact
+     reaction corresponds to the global vector (size n) of the global problem.
+  */
+
+  /* Call the update function which depends on the storage for MGlobal/MBGlobal */
+  /* Build a local problem for a specific contact
+   reaction corresponds to the global vector (size n) of the global problem.
+  */
+
+  /* The part of MGlobal which corresponds to the current block is copied into MLocal */
+  fc3d_local_problem_fill_M(problem, localproblem, contact);
+
+  /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products
+     MLocal.reactionBlock, excluding the block corresponding to the current contact. ****/
+  fc3d_local_problem_compute_q_parallel(problem, localproblem, reaction, contact);
 }
 
 int fc3d_projectionOnCone_solve(FrictionContactProblem* localproblem, double* reaction,

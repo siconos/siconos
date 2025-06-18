@@ -82,7 +82,7 @@ static void fc3d_nsgs_update(int contact, FrictionContactProblem *problem,
 
   /****  Computation of qLocal = qBlock + sum over a row of blocks in MGlobal of the products
      MLocal.reactionBlock, excluding the block corresponding to the current contact. ****/
-  fc3d_local_problem_compute_q(problem, localproblem, reaction, contact);
+  fc3d_local_problem_compute_q_parallel(problem, localproblem, reaction, contact);
 
   /* Friction coefficient for current block*/
   localproblem->mu[0] = problem->mu[contact];
@@ -125,7 +125,7 @@ static void fc3d_nsgs_initialize_local_solver_parallel(SolverPtr *solve, UpdateP
     }
     case SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnConeWithRegularization: {
       *solve = &fc3d_projectionOnCone_solve;
-      *update = &fc3d_projection_update_with_regularization;
+      *update = &fc3d_projection_update_with_regularization_parallel;
       *freeSolver = (FreeSolverNSGSPtr)&fc3d_projection_with_regularization_free;
       *computeError = (ComputeErrorPtr)&fc3d_compute_error;
       fc3d_projection_initialize_with_regularization(problem, localproblem);
@@ -160,6 +160,8 @@ static void fc3d_nsgs_initialize_local_solver_parallel(SolverPtr *solve, UpdateP
                                                           localsolver_options);
       break;
     } /* Newton solver (Glocker-Fischer-Burmeister)*/
+    /* Celui là sera plus compliqué à faire en parallèle parce que 
+    il utilise des variables globales... */
     case SICONOS_FRICTION_3D_NCPGlockerFBNewton: {
       *solve = &fc3d_onecontact_nonsmooth_Newton_solvers_solve;
       *update = &NCPGlocker_update;
@@ -581,8 +583,6 @@ void fc3d_nsgs_graph(FrictionContactProblem *problem, double *reaction, double *
   size_t *partition_size = NULL;
   size_t **partitions = NULL;
   color_graph_2(problem->numberOfContacts, problem->M, &n_colors, &partition_size, &partitions);
-
-  printf("Number of colors: %d\n", n_colors);
 
   /*****  NSGS Iterations *****/
 
