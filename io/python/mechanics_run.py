@@ -1876,8 +1876,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         """
         if self._nsds.topology().indexSetsSize() > 1:
             time = self.current_time()
-            contact_info = self.get_io_array(self._io.contactInfo(
-                self._nsds, self._output_contact_index_set))
+            contact_info = self._io.contactInfo(
+                self._nsds, self._output_contact_index_set)
 
             if contact_info is not None:
                 current_line = self._cf_info.shape[0]
@@ -1902,8 +1902,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         """
         if self._nsds.topology().indexSetsSize() > 1:
             time = self.current_time()
-            contact_work = self.get_io_array(self._io.contactContactWork(
-                self._nsds, self._output_contact_index_set))
+            contact_work = self._io.contactContactWork(
+                self._nsds, self._output_contact_index_set)
 
             # print(contact_work)
             if contact_work is not None:

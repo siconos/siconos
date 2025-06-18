@@ -89,16 +89,16 @@ options.iparam[sn.params.SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] = 10
 
 run_options=MechanicsHdf5Runner_run_options()
 run_options['t0']=0
-run_options['T']=0.01
+run_options['T']=10
 run_options['h']=0.005
 run_options['gravity_scale'] = 1/N
-
 
 run_options['bullet_options']=bullet_options
 run_options['solver_options']=options
 
 run_options['constraint_activation_threshold']=1e-05
-#run_options['Newton_options']=sk.SICONOS_TS_LINEAR
+print(dir(sim))
+run_options['Newton_options']=sim.LINEAR
 
 run_options['skip_last_update_output']=True
 run_options['skip_reset_lambdas']=True
@@ -117,7 +117,8 @@ run_options['violation_verbose']=True
 run_options['output_frequency']=1
 run_options['with_timer']=True
 run_options['time_stepping']=None
-
+run_options['output_contact_info']=True
+run_options['output_contact_work']=False # failure for bullet/features-eigen2
 
 with MechanicsHdf5Runner(io_filename=io_filename, mode='r+',
                          config=runner_config) as io:

@@ -189,6 +189,7 @@ class ShapeCollection:
                 "Cone": siconos.mechanics.collision.SiconosCone,
                 "Plane": siconos.mechanics.collision.SiconosPlane,
                 "Disk": siconos.mechanics.collision.SiconosDisk,
+                "Segment": NativeSegmentShape, # transformed into Box2d
                 "Box2d": siconos.mechanics.collision.SiconosBox2d,
             }
 
