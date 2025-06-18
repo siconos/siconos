@@ -1,1 +1,0 @@
-../../../../../../io/swig/io/mechanics_run.py

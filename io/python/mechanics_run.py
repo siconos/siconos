@@ -113,7 +113,7 @@ class RunnerConfig:
                 return sp
 
             self.default_manager_class = native_manager
-            self.default_simulation_class = simu.TimeStepping
+            self.default_simulation_class = siconos.simulation.TimeStepping
             self.default_body_class = siconos.mechanics.collision.RigidBodyDS
 
         elif self.backend == "vnative":
@@ -626,6 +626,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                     )
                 )
             flag = "dynamic"
+
+            if number is not None:
+                body.setNumber(int(number))
 
         return body, flag
 
@@ -1772,33 +1775,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         time = self.current_time()
 
         velocities = self.get_io_array(self._io.velocities(self._nsds))
-        # io.velocities : contains the velocities for all DS (1 column per DS)
-        # with DS numbers on the first row.
-        # WARNING: last line is useless in velocities but exists to optimize
-        # memory print in C++.
-        # number_of_ds = velocities.shape[1]
 
-        # if velocities is not None:
-        #     self._velocities_data.resize(current_line + number_of_ds, 0)
-
-        #     times = np.empty((number_of_ds, 1))
-        #     times.fill(time)
-        #     if self._dimension == 3:
-        #         self._velocities_data[current_line:, :] = np.concatenate(
-        #             (times, velocities.transpose()[:, :-1]), axis=1
-        #         )
-        #     elif self._dimension == 2:
-        #         # VA. change the position such that is corresponds to a 3D object
-        #         new_velocities = np.zeros((velocities.shape[1], 7))
-        #         # 7 because we assume NewtonEuler DS
-        #         new_velocities[:, 0] = velocities[0, :]  # ds number
-        #         new_velocities[:, 1] = velocities[1, :]  # x velocity
-        #         new_velocities[:, 2] = velocities[2, :]  # y velocity
-
-        #         new_velocities[:, 6] = velocities[3, :]  # theta velocity
-        #         self._velocities_data[current_line:, :] = np.concatenate(
-        #             (times, new_velocities), axis=1
-        #         )
         if velocities is not None:
 
             self._velocities_data.resize(current_line + velocities.shape[0], 0)
@@ -1820,7 +1797,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 self._velocities_data[current_line:, :] = np.concatenate(
                     (times, new_velocities), axis=1)
 
-
     def output_contact_forces(self):
         """
         Outputs contact forces
@@ -1828,9 +1804,15 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         """
         if self._nsds.topology().indexSetsSize() > 1:
             time = self.current_time()
+
+            # failure with native backend:
+            # contact_points = self.get_io_array(self._io.contactPoints(
+            #    self._nsds, self._output_contact_index_set))
+
+            # transpose missing
             contact_points = self._io.contactPoints(
-                self._nsds, self._output_contact_index_set
-            )
+                self._nsds, self._output_contact_index_set)
+            
             if contact_points.shape[0] > 0:
                 current_line = self._cf_data.shape[0]
                 # Increase the number of lines in cf_data
@@ -1894,9 +1876,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         """
         if self._nsds.topology().indexSetsSize() > 1:
             time = self.current_time()
-            contact_info = self._io.contactInfo(
-                self._nsds, self._output_contact_index_set
-            )
+            contact_info = self.get_io_array(self._io.contactInfo(
+                self._nsds, self._output_contact_index_set))
+
             if contact_info is not None:
                 current_line = self._cf_info.shape[0]
                 # Increase the number of lines in cf_data
@@ -1920,9 +1902,9 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         """
         if self._nsds.topology().indexSetsSize() > 1:
             time = self.current_time()
-            contact_work = None #self._io.contactContactWork(
-#                self._nsds, self._output_contact_index_set
-#            )
+            contact_work = self.get_io_array(self._io.contactContactWork(
+                self._nsds, self._output_contact_index_set))
+
             # print(contact_work)
             if contact_work is not None:
                 current_line = self._cf_work.shape[0]
@@ -1954,7 +1936,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             external_forces_work_sum = 0.0
             energy_contact_work = np.zeros(7)
 
-            positions = self._io.positions(self._nsds)
+            positions = self.get_io_array(self._io.positions(self._nsds))
             nsds = self._nsds
             if positions is not None:
                 ds_idx = positions[:, 0]
@@ -2034,7 +2016,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         """
         if self._nsds.topology().indexSetsSize() > 1:
             time = self.current_time()
-            domains = self._io.domains(self._nsds)
+            domains = self.get_io_array(self._io.domains(self._nsds))
 
             if domains is not None:
                 current_line = self._domain_data.shape[0]
@@ -2644,8 +2626,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         interaction_manager = run_options["interaction_manager"]
         if interaction_manager is None:
-            print(self.config.backend)
-            print(self.config.default_manager_class)
             interaction_manager = self.config.default_manager_class
 
         if run_options["time_stepping"] is None:

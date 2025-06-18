@@ -72,6 +72,6 @@ void RtOsiTest::testOsi0()
   j = 0;
   ct::for_each(osi.elements(), [&](auto elem) {
     CPPUNIT_ASSERT((elem.ds_offset() == i++));
-    CPPUNIT_ASSERT((elem.inter_offset() == i++));
+    CPPUNIT_ASSERT((elem.inter_offset() == j++));
   });
 }
