@@ -9,5 +9,5 @@ wheel
 vtk
 packaging
 bullet
-swig
+swig>=3,<4.3
 setuptools

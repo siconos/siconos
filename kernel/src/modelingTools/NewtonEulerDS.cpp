@@ -490,8 +490,14 @@ void siconos::modeling::NewtonEulerDS::computeJacobianWrenchOver_q(
 
   if (hasMext_) {
     if (isMextExpressedInInertialFrame_) {
-      newton_euler::computeJacobianMExtqExpressedInInertialFrame(
-          *state_q_, time, computemext_, isMextExpressedInInertialFrame_, matrix_buffer);
+      // tmp value to compute mext. We do not update mext_ of the present object
+      siconos::algebra::SiconosVector3 mext;
+      if (computemext_)
+        computemext_(time, mext);
+      else
+        mext = *mext_view_;
+      newton_euler::computeJacobianMExtqExpressedInInertialFrame(*state_q_, time, mext,
+                                                                 matrix_buffer);
       jacobianWrenchOver_q_->bottomRows(3) += matrix_buffer;
     }
     DEBUG_EXPR(siconos::algebra::print(*_jacobianWrenchq););
@@ -816,21 +822,10 @@ void siconos::modeling::newton_euler::computeJacobianMGyrOver_twist_byFD(
 
 void siconos::modeling::newton_euler::computeJacobianMExtqExpressedInInertialFrame(
     const Eigen::Ref<siconos::algebra::SiconosVector>& q, double time,
-    const siconos::modeling::func_prototypes::FunctionS_V& mext_func,
-    bool isMextExpressedInInertialFrame,
+    const siconos::algebra::SiconosVector3& mext,
     Eigen::Ref<siconos::algebra::SiconosMatrix37> result) {
-  bool isMextExpressedInInertialFrame_save = isMextExpressedInInertialFrame;
-  isMextExpressedInInertialFrame = false;
-  siconos::algebra::SiconosVector3 mext;
-  mext_func(time, mext);
-
-  if (isMextExpressedInInertialFrame)
-    siconos::geometry::rewriteVectorFromAbsoluteToBodyFrame(q, mext);
-
   DEBUG_EXPR(siconos::algebra::print(q));
   DEBUG_EXPR(siconos::algebra::print(mext));
-
-  isMextExpressedInInertialFrame = isMextExpressedInInertialFrame_save;
 
   double q0 = q(3);
   double q1 = q(4);

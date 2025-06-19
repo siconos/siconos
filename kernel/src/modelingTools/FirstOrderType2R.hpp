@@ -130,7 +130,8 @@ class FirstOrderType2R : public FirstOrderR {
    *  \param newValue \f$ \nabla_x h(x, \lambda) \f$ matrix
    *
    */
-  void setConstantJacobianhOver_state(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+  void setConstantJacobianhOver_state(
+      Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue);
 
   /** set a user-defined function to compute \f$ \nabla_x h(x, \lambda) \f$ \f$
    *
@@ -154,7 +155,8 @@ class FirstOrderType2R : public FirstOrderR {
    *  \param newValue \f$ \nabla_{\lambda} h(x,\lambda) \f$ matrix
    *
    */
-  void setConstantJacobianhOver_lambda(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+  void setConstantJacobianhOver_lambda(
+      Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue);
 
   /** set a user-defined function to compute \f$ \nabla_{\lambda} h(x,\lambda) \f$ \f$
    *
@@ -178,7 +180,8 @@ class FirstOrderType2R : public FirstOrderR {
    *  \param newValue \f$ \nabla_{\lambda} g(\lambda) \f$ matrix
    *
    */
-  void setConstantJacobiangOver_lambda(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+  void setConstantJacobiangOver_lambda(
+      Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue);
 
   /** set a user-defined function to compute \f$ \nabla_{\lambda} g(\lambda) \f$ \f$
    *

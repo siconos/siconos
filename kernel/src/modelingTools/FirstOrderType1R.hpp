@@ -123,7 +123,7 @@ class FirstOrderType1R : public FirstOrderR {
    *  \param newValue \f$ \nabla_x h(x) \f$ matrix
    *
    */
-  void setConstantJacobianhOver_state(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+  void setConstantJacobianhOver_state(Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue);
 
   /** set a user-defined function to compute \f$ \nabla_x h(x) \f$ \f$
    *
@@ -143,7 +143,7 @@ class FirstOrderType1R : public FirstOrderR {
    *  \param newValue \f$ \nabla_{\lambda} g(\lambda) \f$ matrix
    *
    */
-  void setConstantJacobiangOver_lambda(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+  void setConstantJacobiangOver_lambda(Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue);
 
   /** set a user-defined function to compute \f$ \nabla_{\lambda} g(\lambda) \f$ \f$
    *
