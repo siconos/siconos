@@ -2341,90 +2341,100 @@ bool siconos::integrators::MoreauJeanOSI::addInteractionInIndexSet(
       " inter, "
       "unsigned int i)\n");
 
+
   assert(i == 1);
-  double h = _simulation->timeStep();
-  double y = (inter->y(i - 1))->getValue(0);  // for i=1 y(i-1) is the position
-  double yDot = (inter->y(i))->getValue(0);   // for i=1 y(i) is the velocity
-#ifdef DEBUG_ACTIVATION
-  double yDot_k =
-      (inter->y_k(i))
-          .getValue(0);  // for i=1 y(i) is the velocity et the beginning of the time step
-#endif
-  double gamma = 1.0 / 2.0;
-  if (_useGamma) {
-    gamma = _gamma;
+  auto relationSubType = inter->relation()->getSubType();
+  if(relationSubType == modeling::RelationSubType::StressLinearTIR){
+    std::cout << "Stress interaction !!!  " << std::endl;
+    return true;
   }
-  DEBUG_PRINTF(
-      "siconos::integrators::MoreauJeanOSI::addInteractionInIndexSet of level "
-      "= %i yref=%e, "
-      "yDot=%e, y_estimated=%e.,  _constraintActivationThreshold=%e\n",
-      i, y, yDot, y + gamma * h * yDot, _constraintActivationThreshold);
-  y += gamma * h * yDot;
-  assert(!std::isnan(y));
-
-  if (_activateWithNegativeRelativeVelocity) {
+  else
+  {
+    std::cout << "Contact interaction !!!  " << std::endl;
+    double h = _simulation->timeStep();
+    double y = (inter->y(i - 1))->getValue(0);  // for i=1 y(i-1) is the position
+    double yDot = (inter->y(i))->getValue(0);   // for i=1 y(i) is the velocity
 #ifdef DEBUG_ACTIVATION
-    if (fabs(yDot - yDot_k) > 1e-10) {
-      std::cout << "MoreauJeanOSI::addInteractionInIndexSet ACTIVATE." << y
-                << "<= " << _constraintActivationThreshold << std::endl;
-
-      getchar();
-    }
-
-    if (y <= _constraintActivationThreshold) {
-      if (not(yDot <= _constraintActivationThresholdVelocity)) {
-        std::cout << "\n MoreauJeanOSI::addInteractionInIndexSet activation at the position "
-                     "level but not at the velocity level."
-                  << "\n number :" << inter->number() << " y=" << y
-                  << "<= " << _constraintActivationThreshold << " yDot_k =" << yDot_k << " > "
-                  << _constraintActivationThresholdVelocity << " yDot =" << yDot << " > "
-                  << _constraintActivationThresholdVelocity << std::endl;
-        // getchar();
-      } else {
-        std::cout << "\n MoreauJeanOSI::addInteractionInIndexSet activation at the position "
-                     "level but not at the velocity level."
-                  << "\n number :" << inter->number() << " y=" << y
-                  << "<= " << _constraintActivationThreshold << " yDot_k =" << yDot_k
-                  << "<= " << _constraintActivationThresholdVelocity << " yDot =" << yDot
-                  << " <= " << _constraintActivationThresholdVelocity << std::endl;
-      }
-    }
-    DEBUG_EXPR_WE(
-        if ((y <= _constraintActivationThreshold) and
-            (yDot_k <= _constraintActivationThreshold)) std::cout
-            << "MoreauJeanOSI::addInteractionInIndexSet ACTIVATE with velocity threshold."
-            << " gamma " << gamma << " y=" << y << "<= " << _constraintActivationThreshold
-            << " yDot_k =" << yDot_k << "<= " << _constraintActivationThresholdVelocity
-            << std::endl;);
+    double yDot_k =
+        (inter->y_k(i))
+            .getValue(0);  // for i=1 y(i) is the velocity et the beginning of the time step
 #endif
-    return ((y <= _constraintActivationThreshold) and
-            (yDot <= _constraintActivationThresholdVelocity));
-  } else {
+    double gamma = 1.0 / 2.0;
+    if (_useGamma) {
+      gamma = _gamma;
+    }
+    DEBUG_PRINTF(
+        "siconos::integrators::MoreauJeanOSI::addInteractionInIndexSet of level "
+        "= %i yref=%e, "
+        "yDot=%e, y_estimated=%e.,  _constraintActivationThreshold=%e\n",
+        i, y, yDot, y + gamma * h * yDot, _constraintActivationThreshold);
+    y += gamma * h * yDot;
+    assert(!std::isnan(y));
+
+    if (_activateWithNegativeRelativeVelocity) {
 #ifdef DEBUG_ACTIVATION
-    if (fabs(yDot - yDot_k) > 1e-10) {
-      if (y <= _constraintActivationThreshold)
+      if (fabs(yDot - yDot_k) > 1e-10) {
         std::cout << "MoreauJeanOSI::addInteractionInIndexSet ACTIVATE." << y
                   << "<= " << _constraintActivationThreshold << std::endl;
 
-      getchar();
-    }
-    if (y <= _constraintActivationThreshold) {
-      std::cout << "ACTIVATED " << "number :" << inter->number() << " y=" << y
-                << "<= " << _constraintActivationThreshold << " yDot_k =" << yDot_k
-                << " yDot =" << yDot << std::endl;
+        getchar();
+      }
+
+      if (y <= _constraintActivationThreshold) {
+        if (not(yDot <= _constraintActivationThresholdVelocity)) {
+          std::cout << "\n MoreauJeanOSI::addInteractionInIndexSet activation at the position "
+                       "level but not at the velocity level."
+                    << "\n number :" << inter->number() << " y=" << y
+                    << "<= " << _constraintActivationThreshold << " yDot_k =" << yDot_k << " > "
+                    << _constraintActivationThresholdVelocity << " yDot =" << yDot << " > "
+                    << _constraintActivationThresholdVelocity << std::endl;
+          // getchar();
+        } else {
+          std::cout << "\n MoreauJeanOSI::addInteractionInIndexSet activation at the position "
+                       "level but not at the velocity level."
+                    << "\n number :" << inter->number() << " y=" << y
+                    << "<= " << _constraintActivationThreshold << " yDot_k =" << yDot_k
+                    << "<= " << _constraintActivationThresholdVelocity << " yDot =" << yDot
+                    << " <= " << _constraintActivationThresholdVelocity << std::endl;
+        }
+      }
+      DEBUG_EXPR_WE(
+          if ((y <= _constraintActivationThreshold) and
+              (yDot_k <= _constraintActivationThreshold)) std::cout
+              << "MoreauJeanOSI::addInteractionInIndexSet ACTIVATE with velocity threshold."
+              << " gamma " << gamma << " y=" << y << "<= " << _constraintActivationThreshold
+              << " yDot_k =" << yDot_k << "<= " << _constraintActivationThresholdVelocity
+              << std::endl;);
+#endif
+      return ((y <= _constraintActivationThreshold) and
+              (yDot <= _constraintActivationThresholdVelocity));
     } else {
-      std::cout << "NOT ACTIVATED " << " number :" << inter->number() << " y=" << y
-                << "<= " << _constraintActivationThreshold << " yDot_k =" << yDot_k
-                << " yDot =" << yDot << std::endl;
-      // getchar();
-    }
+#ifdef DEBUG_ACTIVATION
+      if (fabs(yDot - yDot_k) > 1e-10) {
+        if (y <= _constraintActivationThreshold)
+          std::cout << "MoreauJeanOSI::addInteractionInIndexSet ACTIVATE." << y
+                    << "<= " << _constraintActivationThreshold << std::endl;
+
+        getchar();
+      }
+      if (y <= _constraintActivationThreshold) {
+        std::cout << "ACTIVATED " << "number :" << inter->number() << " y=" << y
+                  << "<= " << _constraintActivationThreshold << " yDot_k =" << yDot_k
+                  << " yDot =" << yDot << std::endl;
+      } else {
+        std::cout << "NOT ACTIVATED " << " number :" << inter->number() << " y=" << y
+                  << "<= " << _constraintActivationThreshold << " yDot_k =" << yDot_k
+                  << " yDot =" << yDot << std::endl;
+        // getchar();
+      }
 
 #endif
-    DEBUG_EXPR_WE(if (y <= _constraintActivationThreshold) std::cout
-                      << "MoreauJeanOSI::addInteractionInIndexSet ACTIVATE." << y
-                      << "<= " << _constraintActivationThreshold << std::endl;);
-    // return (y <= _constraintActivationThreshold);
-    return true;
+      DEBUG_EXPR_WE(if (y <= _constraintActivationThreshold) std::cout
+                        << "MoreauJeanOSI::addInteractionInIndexSet ACTIVATE." << y
+                        << "<= " << _constraintActivationThreshold << std::endl;);
+      return (y <= _constraintActivationThreshold);
+      // return true;
+    }
   }
 }
 
