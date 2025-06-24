@@ -778,6 +778,19 @@ int color_graph_permut_equitable(int n, NumericsMatrix *M, size_t *n_colors, siz
     return 0;
 }
 
+/* Check if a block is full of zeros
+Inlined for better performance, is it necessary?
+*/
+static inline bool block_is_full_of_zeros(double *block, size_t n_row, size_t n_col, size_t col_offset) {
+    for (int j = 0; j < n_col; j++) {
+        for (int i = 0; i < n_row; i++) {
+            /* Perhaps I should compare to a threshold here instead of 0 */
+            if (block[i + j * col_offset] != 0) return false;
+        }
+    }
+    return true;
+}
+
 int color_graph_2(int nc, NumericsMatrix *M, size_t *n_colors, size_t **set_sizes, size_t ***set_indices) {
     assert(M->size0 == M->size1);
     int n = M->size0;
@@ -787,37 +800,57 @@ int color_graph_2(int nc, NumericsMatrix *M, size_t *n_colors, size_t **set_size
 
     PetscFunctionBeginUser;
 
+    // Pointers for sparse storage of matrix to be colored.
+    int64_t* Mp = NULL;
+    int64_t* Mi = NULL;
+    double* Mx = NULL;
+
     switch (M->storageType) {
         case NM_DENSE: {
-            // PetscCall(PetscPrintf(PETSC_COMM_WORLD, "DENSE\n"));
+            /*
+            THIS SHOULD BE TESTED !!!!
+            */
             double *M_mat = M->matrix0;
-            double *new_mat = (double *)malloc(nc * nc * sizeof(double));
 
+            /* Count non zero blocks */
+            size_t nnz = 0;
             for (int contact_i = 0; contact_i < nc; contact_i++) {
                 for (int contact_j = 0; contact_j < nc; contact_j++) {
                     /* Check if block is 0 */
-                    if ((M_mat[d * contact_i + d * contact_j * n] == 0)
-                    && (M_mat[d * contact_i + (d * contact_j + 1) * n] == 0)
-                    && (M_mat[d * contact_i + 1 + d * contact_j * n] == 0)
-                    && (M_mat[d * contact_i + 1 + (d * contact_j + 1) * n] == 0)) {
-                        new_mat[contact_i + contact_j * nc] = 0.;
-                    }
-                    else {
-                        new_mat[contact_i + contact_j * nc] = 1.;
+                    if (block_is_full_of_zeros(&M_mat[d * contact_i + d * contact_j * n], d, d, n) == false) nnz++;
+                }
+            }
+
+            Mp = (size_t *)malloc((nc + 1) * sizeof(size_t));
+            Mi = (size_t *)malloc(nnz * sizeof(size_t));
+            Mx = (double *)malloc(nnz * sizeof(double));
+
+            Mp[0] = 0;
+            size_t current_index = 0;
+
+            for (int contact_i = 0; contact_i < nc; contact_i++) {
+                Mp[contact_i + 1] = Mp[contact_i];
+                for (int contact_j = 0; contact_j < nc; contact_j++) {
+                    /* Check if block is 0 */
+                    if (block_is_full_of_zeros(&M_mat[d * contact_i + d * contact_j * n], d, d, n) == false) {
+                        Mp[contact_i + 1]++;
+                        Mi[current_index] = contact_j;
+                        Mx[current_index] = 1.;
+                        current_index++;
                     }
                 }
             }
 
-            PetscCall(MatCreateSeqDense(PETSC_COMM_SELF, nc, nc, new_mat, &A));
-            PetscCall(MatConvert(A, MATSEQAIJ, MAT_INPLACE_MATRIX, &A));
+            /* Is it true that MatColoringCreate only supports MATSEQAIJ format? */
+            PetscCall(MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, nc, nc, Mp, Mi, Mx, &A));
             PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
             PetscCall(MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY));
-            free(new_mat);
             break;
         }
         case NM_SPARSE: {
-            // PetscCall(PetscPrintf(PETSC_COMM_WORLD, "SPARSE\n"));
-
+            /*
+            THIS SHOULD BE TESTED !!!!
+            */
             CSparseMatrix* sparse;
             if (M->matrix2->origin == NSM_CSR) {
                 sparse = NM_csr(M);
@@ -825,35 +858,102 @@ int color_graph_2(int nc, NumericsMatrix *M, size_t *n_colors, size_t **set_size
                 sparse = NM_csc_trans(M);
             }
 
-            CS_INT* Mp = sparse->p;
-            CS_INT* Mi = sparse->i;
-            double* Mx = sparse->x;
+            CS_INT* Mp_ = sparse->p;
+            CS_INT* Mi_ = sparse->i;
+            double* Mx_ = sparse->x;
 
-            double *new_mat = (double *)calloc(nc * nc, sizeof(double));
-            
-            for (int row_start = 0; row_start < n; row_start++) {
-                for (CS_INT p = Mp[row_start]; p < Mp[row_start + 1]; ++p) {
-                    // It is possible for a sparse matrix so store zeros ???
-                    if (Mx[p] != 0) {
-                        new_mat[row_start / d + (Mi[p] / d) * nc] = 1.;
+            bool block_is_zero = true;
+
+            // Can I use sparse->nz ???
+            size_t nnz;
+
+            CS_INT *ps = (CS_INT *)malloc(d * sizeof(CS_INT));
+
+            // Count number of nonzero blocks
+            for (size_t contact_i = 0; contact_i < nc; contact_i++) {
+
+                // Initialize pointers to go trhough lines
+                for (size_t i = 0; i < d; i++) ps[i] = Mp_[d * contact_i + i];
+
+                for (size_t current_contact_col = 0; current_contact_col < nc; current_contact_col++) {
+                    
+                    block_is_zero = true;
+
+                    for (size_t i = 0; i < d; i++) {
+
+                        while ((Mi_[ps[i]] / d < current_contact_col) || (ps[i] < Mp_[d * (contact_i + 1) + i])) {
+                            if (Mx_[ps[i]] != 0) block_is_zero = false;
+                            ps[i]++;
+                        } 
                     }
+
+                    if (block_is_zero == false) nnz +=1;
+
                 }
             }
 
-            PetscCall(MatCreateSeqDense(PETSC_COMM_SELF, nc, nc, new_mat, &A));
-            PetscCall(MatConvert(A, MATSEQAIJ, MAT_INPLACE_MATRIX, &A));
-            // PetscCall(MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, n, n, Mp, Mi, Mx, &A));
+            // Initialize sparse storage
+            Mp = (size_t *)malloc((nc + 1) * sizeof(size_t));
+            Mi = (size_t *)malloc(nnz * sizeof(size_t));
+            Mx = (double *)malloc(nnz * sizeof(double));
+
+            Mp[0] = 0;
+            size_t current_index = 0;
+
+            for (size_t contact_i = 0; contact_i < nc; contact_i++) {
+
+                // Initialize pointers to go trhough lines
+                for (size_t i = 0; i < d; i++) ps[i] = Mp_[d * contact_i + i];
+
+                for (size_t current_contact_col = 0; current_contact_col < nc; current_contact_col++) {
+
+                    block_is_zero = true;
+                    
+                    for (size_t i = 0; i < d; i++) {
+
+                        while ((Mi_[ps[i]] / d < current_contact_col) || (ps[i] < Mp_[d * (contact_i + 1) + i])) {                           
+                            if (Mx_[ps[i]] != 0) block_is_zero = false;
+                            ps[i]++;
+                        } 
+                    }
+
+                    if (block_is_zero == false) {
+                        Mp[contact_i + 1]++;
+                        Mi[current_index] = current_contact_col;
+                        Mx[current_index] = 1.;
+                        current_index++;
+                    }
+
+                }
+            }
+
+            PetscCall(MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, nc, nc, Mp, Mi, Mx, &A));
             PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
             PetscCall(MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY));
-            free(new_mat);
+
+            free(ps);
             break;
         }
         case NM_SPARSE_BLOCK: {
-            double *new_mat = (double *)calloc(nc * nc, sizeof(double));
+            /* Can I make assumptions ? Like all blocks are squared with size d * d ? */
+
             SparseBlockStructuredMatrix *sbm = M->matrix1;
 
-            int block_line = 0, block_col = 0;
+            /* TO DO
 
+            Can I improve the current method to only go through the block matrix once and not twice ?
+            
+            If all blocks are squared and the same size, can I use PETSC block matrix?
+            MatCreateSeqBAIJ(PETSC_COMM_WORLD, d, n, n, PETSC_DEFAULT, NULL, &A);
+            
+            For some reason this does not support blocks of size more than 1 ??? 
+            MatCreateSeqBAIJWithArrays(PETSC_COMM_WORLD, d, n, n, sbm->blocksize0, sbm->blocksize1, sbm->block, &A);
+
+            Look at MatCreateSeqSBAIJWithArrays, which create a symmetric matrix (what does it mean?) */
+
+            /* Second method: construct sparse directly from block sparse */
+            size_t nnz = 0; // Number of non zero blocks
+            
             int *nb_row_blocks = (int *)malloc(sbm->blocknumber0 * sizeof(int));
             int *nb_col_blocks = (int *)malloc(sbm->blocknumber1 * sizeof(int));
             int tmp = 0;
@@ -871,43 +971,51 @@ int color_graph_2(int nc, NumericsMatrix *M, size_t *n_colors, size_t **set_size
 
             int nb_row_block, nb_col_block;
             int i_start_block, j_start_block;
-            double val;
 
             // Iterate through lines of blocks
             for (int row_block_number = 0; row_block_number < sbm->blocknumber0; row_block_number++) { 
                 nb_row_block = nb_row_blocks[row_block_number];
+                // Iterate through blocks of a line of blocks
+                for (int block_number = sbm->index1_data[row_block_number]; block_number < sbm->index1_data[row_block_number + 1]; block_number++) {
+                    nb_col_block = nb_col_blocks[sbm->index2_data[block_number]];
+                    // Inline function in if statement, is it good? 
+                    if (block_is_full_of_zeros(sbm->block[block_number], nb_row_block, nb_col_block, nb_col_block) == false) nnz++;  
+                }
+            }
+
+            // Allocations
+            Mp = (size_t *)malloc((nc + 1) * sizeof(size_t));
+            Mi = (size_t *)malloc(nnz * sizeof(size_t));
+            Mx = (double *)malloc(nnz * sizeof(double));
+
+            Mp[0] = 0;
+            size_t current_index = 0;
+
+            for (int row_block_number = 0; row_block_number < sbm->blocknumber0; row_block_number++) { 
+                nb_row_block = nb_row_blocks[row_block_number];
                 i_start_block = sbm->blocksize0[row_block_number] - nb_row_block;
+                Mp[row_block_number + 1] = Mp[row_block_number];
                 // Iterate through blocks of a line of blocks
                 for (int block_number = sbm->index1_data[row_block_number]; block_number < sbm->index1_data[row_block_number + 1]; block_number++) {
                     nb_col_block = nb_col_blocks[sbm->index2_data[block_number]];
                     j_start_block = sbm->blocksize1[sbm->index2_data[block_number]] - nb_col_block;
                     // Iterate within a block
-                    // printf("%d %d\n", i_start_block, j_start_block);
-                    for (int j = 0; j < nb_col_block; j++) {
-                        for (int i = 0; i < nb_row_block; i++) {
-                            val = sbm->block[block_number][i + nb_col_block * j];
-                            if (val != 0) {
-                                new_mat[(i_start_block + i) / d + ((j_start_block + j) / d) * nc] = 1.;
-                            }
-                        }
+                    if (block_is_full_of_zeros(sbm->block[block_number], nb_row_block, nb_col_block, nb_col_block) == false) {
+                        Mp[row_block_number + 1]++;
+                        Mi[current_index] = j_start_block / d;
+                        Mx[current_index] = 1.;
+                        current_index++;
                     }
                 }
             }
-
-            /* If all the blocks have the same size, I could use the Sparse Block Format of PETSC.
-            But in any case I think I would have to convert it to MATSEQAIJ because it's the format required by MatColoringCreate.
-            */
-
-            PetscCall(MatCreateSeqDense(PETSC_COMM_SELF, nc, nc, new_mat, &A));
-            PetscCall(MatConvert(A, MATSEQAIJ, MAT_INPLACE_MATRIX, &A));
-            // PetscCall(MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, n, n, Mp, Mi, Mx, &A));
+            /* Is it true that MatColoringCreate only supports MATSEQAIJ format? */
+            PetscCall(MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, nc, nc, Mp, Mi, Mx, &A));
             PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
             PetscCall(MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY));
-            free(new_mat);
             break;
         }
         default: {
-            fprintf(stderr, "color_graph_petsc :: unknown matrix storage %d", M->storageType);
+            fprintf(stderr, "color_graph_2 :: unknown matrix storage %d", M->storageType);
             exit(EXIT_FAILURE);
         }
     }
@@ -983,6 +1091,11 @@ int color_graph_2(int nc, NumericsMatrix *M, size_t *n_colors, size_t **set_size
     PetscCall(MatColoringDestroy(&mc));
     PetscCall(ISColoringDestroy(&iscoloring));
     PetscCall(MatDestroy(&A));
+
+    // Free matrix sparse storage
+    free(Mp);
+    free(Mi);
+    free(Mx);
 
     /* for (int i = 0; i < nn; i++)
     {
