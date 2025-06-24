@@ -32,6 +32,7 @@ namespace siconos::modeling {
 class FirstOrderNonLinearDS;
 class NewtonEulerDS;
 class LagrangianDS;
+class LagrangianSparseDS;
 class FirstOrderLinearDS;
 class LagrangianLinearTIDS;
 class LagrangianLinearDiagonalDS;
@@ -51,7 +52,7 @@ enum class Type {
   NewtonEulerDS,
   LagrangianDS,
   FirstOrderLinearDS,
-
+  LagrangianSparseDS,
   LagrangianLinearTIDS,
   LagrangianLinearDiagonalDS,
   // NSLaws
@@ -88,6 +89,9 @@ struct FindType {
   };
   auto visit(const siconos::modeling::LagrangianDS&) const {
     return siconos::modeling::Type::LagrangianDS;
+  };
+  auto visit(const siconos::modeling::LagrangianSparseDS&) const {
+    return siconos::modeling::Type::LagrangianSparseDS;
   };
   auto visit(const siconos::modeling::LagrangianLinearTIDS&) const {
     return siconos::modeling::Type::LagrangianLinearTIDS;

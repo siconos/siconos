@@ -742,13 +742,12 @@ void computeJacobianFOver_q_byFD(
  *  \param[in] q vector q =  \left[\begin{array}{c} x_g \\ p \end{array}\right]
  *  \param[in] time current time
  *  \param[in] computeMext function used to compute \f$ m_{ext}(time) \f$
- *  \param[in] isMextExpressedInInertialFrame true if Mext is ... expressed in the inertial
- * frame \param[in,out] result the computed jacobian matrix (size: 3x7)
+ *  \param[in,out] result the computed jacobian matrix (size: 3x7)
  */
 void computeJacobianMExtqExpressedInInertialFrame(
     const Eigen::Ref<siconos::algebra::SiconosVector> &q, double time,
-    const siconos::modeling::func_prototypes::FunctionS_V &computeMext,
-    bool isMextExpressedInInertialFrame, Eigen::Ref<siconos::algebra::SiconosMatrix37> result);
+    const siconos::algebra::SiconosVector3 &mext,
+    Eigen::Ref<siconos::algebra::SiconosMatrix37> result);
 
 /** Compute \f$\nabla_q(m_{ext})\f$, required when mext is expressed in the inertial frame.
  *  \param[in] q vector q =  \left[\begin{array}{c} x_g \\ p \end{array}\right]

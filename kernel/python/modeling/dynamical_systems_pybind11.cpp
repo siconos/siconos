@@ -28,6 +28,7 @@
 #include "FirstOrderLinearDS.hpp"
 #include "LagrangianDS.hpp"
 #include "LagrangianLinearTIDS.hpp"
+#include "LagrangianSparseDS.hpp"
 #include "NewtonEulerDS.hpp"
 
 // #include <pybind11/stl.h>  // Pour permettre la conversion entre std::vector et les objets
@@ -94,6 +95,61 @@ void wrap_dynamical_systems(py::module_ &m) {
              siconos::modeling::DynamicalSystem>(m, "SecondOrderDS")
       .def("p", &siconos::modeling::SecondOrderDS::p_python,
            py::return_value_policy::reference_internal);
+  py::class_<siconos::modeling::LagrangianSparseDS,
+             std::shared_ptr<siconos::modeling::LagrangianSparseDS>,
+             siconos::modeling::SecondOrderDS>(m, "LagrangianSparseDS")
+
+      .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>,
+                    Eigen::Ref<siconos::algebra::SiconosVector>>(),
+           py::keep_alive<1, 2>(),  // keep python object (np array arguments) memory alive
+                                    // as long as object is referenced
+           py::keep_alive<1, 3>(), py::arg("q0"), py::arg("v0"))
+
+      .def("q", &siconos::modeling::LagrangianSparseDS::q_python,
+           py::return_value_policy::reference_internal)
+      .def("velocity", &siconos::modeling::LagrangianSparseDS::velocity_python,
+           py::return_value_policy::reference_internal)
+      //  .def(
+      //      "setConstantMass",
+      //      [](siconos::modeling::LagrangianSparseDS &self,
+      //         const siconos::algebra::SiconosSparseMatrix &mat) {
+      //        self.setConstantMass(Eigen::Ref<const
+      //        siconos::algebra::SiconosSparseMatrix>(mat));
+      //      },
+      //      py::arg("mass_matrix"))
+
+      //  // Expose version shared_ptr (zéro copie, pour usage expert)
+      //  .def(
+      //      "setConstantMass",
+      //      [](siconos::modeling::LagrangianSparseDS &self,
+      //         std::shared_ptr<siconos::algebra::SiconosSparseMatrix> mat) {
+      //        self.setConstantMass(mat);
+      //      },
+      //      py::arg("mass_matrix_shared"))
+      //  .def(
+      //      "setConstantMass",
+      //      [](siconos::modeling::LagrangianSparseDS &self,
+      //         const siconos::algebra::SiconosSparseMatrix &mat) {
+      //        self.setConstantMass(Eigen::Ref<const
+      //        siconos::algebra::SiconosSparseMatrix>(mat));
+      //      },
+      //      py::arg("mass_matrix"))
+
+      .def(
+          "setConstantMass",
+          [](siconos::modeling::LagrangianSparseDS &self,
+             const siconos::algebra::SiconosSparseMatrix &mat) {
+            self.setConstantMass(std::make_shared<siconos::algebra::SiconosSparseMatrix>(mat));
+          },
+          py::arg("mass_matrix"))
+
+      .def(
+          "mass",
+          [](const siconos::modeling::LagrangianSparseDS &self)
+              -> const siconos::algebra::SiconosSparseMatrix & { return self.mass_py(); },
+          py::return_value_policy::reference_internal)
+
+      ;
 
   py::class_<siconos::modeling::LagrangianDS, std::shared_ptr<siconos::modeling::LagrangianDS>,
              siconos::modeling::SecondOrderDS>(m, "LagrangianDS")
@@ -251,8 +307,21 @@ void wrap_dynamical_systems(py::module_ &m) {
                 });
           },
           "How to compute external forces")
+      .def("setConstantMext",
+           &siconos::modeling::NewtonEulerDS::setConstantMext,
+           py::keep_alive<1, 2>(), "To define a constant external torques vector")
+      .def("setComputeMextFunction",
+           [](siconos::modeling::NewtonEulerDS &self, py::function f) {
+             // Catch Python function and create a complient std::function
+             self.setComputeMextFunction(
+                 [f](double val, Eigen::Ref<siconos::algebra::MapVectorType> result) {
+                   f(val, result);  // Call python func with a memory view ...
+                 });
+           },
+           "How to compute external torques")
       .def("setIsMextExpressedInInertialFrame",
            &siconos::modeling::NewtonEulerDS::setIsMextExpressedInInertialFrame)
       .def_property("scalarMass", &siconos::modeling::NewtonEulerDS::scalarMass,
-                    &siconos::modeling::NewtonEulerDS::setScalarMass);
+                    &siconos::modeling::NewtonEulerDS::setScalarMass)
+      .def("angularVelocity", &siconos::modeling::NewtonEulerDS::angularVelocity_view);
 }

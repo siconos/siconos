@@ -115,7 +115,7 @@ void siconos::modeling::FirstOrderType2R::computeg(
 }
 
 void siconos::modeling::FirstOrderType2R::setConstantJacobianhOver_state(
-    Eigen::Ref<siconos::algebra::SiconosMatrix> newValue) {
+    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue) {
   /**  Warning: we can't check if newValue size is compliant with
    * the current relation/interaction. This will be done during
    * initialize / checkSize call!
@@ -142,7 +142,7 @@ void siconos::modeling::FirstOrderType2R::computeJacobianhOver_state(
 }
 
 void siconos::modeling::FirstOrderType2R::setConstantJacobianhOver_lambda(
-    Eigen::Ref<siconos::algebra::SiconosMatrix> newValue) {
+    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue) {
   /**  Warning: we can't check if newValue size is compliant with
    * the current relation/interaction. This will be done during
    * initialize / checkSize call!
@@ -169,7 +169,7 @@ void siconos::modeling::FirstOrderType2R::computeJacobianhOver_lambda(
 }
 
 void siconos::modeling::FirstOrderType2R::setConstantJacobiangOver_lambda(
-    Eigen::Ref<siconos::algebra::SiconosMatrix> newValue) {
+    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue) {
   /**  Warning: we can't check if newValue size is compliant with
    * the current relation/interaction. This will be done during
    * initialize / checkSize call!

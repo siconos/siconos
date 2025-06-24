@@ -1,7 +1,7 @@
 ##  - Prepare an image including (and starting) Jupyter lab
 ARG REGISTRY=gricad-registry.univ-grenoble-alpes.fr
 ARG PROJECT=nonsmooth/siconos
-ARG DEFAULT_IMAGE=sources/ubuntu22.04
+ARG DEFAULT_IMAGE=sources/ubuntu24.04
 ARG IMAGENAME=$REGISTRY/$PROJECT/$DEFAULT_IMAGE
 # - Prepare a jupyter notebook, based on a Docker image with a complete Siconos install. Add (clone) the siconos-tutorials repository
 FROM $IMAGENAME AS jupylab
