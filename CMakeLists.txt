@@ -102,7 +102,7 @@ if(NOT COMPONENTS)
   message(WARNING "Components list is empty - Nothing will be built.")
 endif()
 
-set(AVAILABLE_COMPONENTS "externals numerics kernel control mechanics mechanisms io")
+set(AVAILABLE_COMPONENTS "externals numerics kernel control mechanics mechanisms io vkernel")
 foreach(component_name IN LISTS COMPONENTS)
   # Check and set components list
   string(TOUPPER ${component_name} upname)
@@ -204,12 +204,6 @@ endforeach()
 if(WITH_PYTHON_WRAPPER)
   add_subdirectory(wrap)
 endif()
-
-
-# vkernel
-add_subdirectory(vkernel)
-
-
 
 # ========= Documentation setup =========
 # Finalize documentation setups.

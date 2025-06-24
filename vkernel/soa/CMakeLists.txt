@@ -4,6 +4,19 @@
 #  VERSION ${SKBUILD_PROJECT_VERSION}
 #  LANGUAGES CXX C)
 
+set(COMPONENT vkernel)
+message("-- Set up for ${PROJECT_NAME}_${COMPONENT} library ...\n")
+set(${COMPONENT}_DIRS
+  src/siconos/lib)
+
+# Windows stuff
+include(WindowsKernelSetup)
+
+# -- create/setup component target --
+include(ComponentSetup)
+create_siconos_component(${COMPONENT})
+
+
 set(SOA_CMAKE_SOURCE_DIR ${CMAKE_SOURCE_DIR}/vkernel/soa)
 
 set(CMAKE_CUDA_FLAGS "-ccbin=${CMAKE_CXX_COMPILER} -allow-unsupported-compiler")
@@ -78,9 +91,9 @@ python_add_library(_nonos MODULE
 set_target_properties(_nonos PROPERTIES COMPILE_FLAGS "${flags}")
 
 if(WITH_GPU)
-  target_link_libraries(_nonos PRIVATE mechanics Eigen3::Eigen numerics benchmark pthread fmt cuNSearch pybind11::headers)
+  target_link_libraries(_nonos PRIVATE mechanics Eigen3::Eigen numerics pthread fmt cuNSearch pybind11::headers)
 else()
-  target_link_libraries(_nonos PRIVATE mechanics Eigen3::Eigen numerics benchmark pthread fmt CompactNSearch pybind11::headers)
+  target_link_libraries(_nonos PRIVATE mechanics Eigen3::Eigen numerics pthread fmt CompactNSearch pybind11::headers)
 endif()
 
 

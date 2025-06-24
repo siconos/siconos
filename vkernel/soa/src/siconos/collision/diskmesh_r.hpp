@@ -61,8 +61,8 @@ struct diskmesh_r : item<>, model::relation2, model::any_lagrangian_relation {
       const scalar& x2 = q2(self()->contact_index() + 2);
       const scalar& y2 = q2(self()->contact_index() + 3);
 
-      auto& g1 = h_matrix1;
-      auto& g2 = h_matrix2;
+      //auto& g1 = h_matrix1;
+      //auto& g2 = h_matrix2;
 
       double tmp0 = x1 - x2;
       double tmp1 = y1 - y2;

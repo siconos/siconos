@@ -1,2 +1,2 @@
-vkernel is not integrated with siconos
-cd soa && ./vrun --help
+soa: implementation of 'struct of array' storage
+
