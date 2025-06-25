@@ -1102,14 +1102,13 @@ int color_graph_2(int nc, NumericsMatrix *M, size_t *n_colors, size_t **set_size
         PetscCall(PetscPrintf(PETSC_COMM_WORLD, "size[%d] = %d\n", i, size[i]));
     } */
 
+    // Ouputs
     *n_colors = (size_t)nn;
     *set_sizes = size;
     *set_indices = indexes;
 
     // PetscCall(PetscTime(&time_end));
     // PetscCall(PetscPrintf(PETSC_COMM_WORLD, "Time to color: %f\n", time_end - time_start));
-
-    // PetscCall(PetscFinalize());
 
     return 0;
 

@@ -600,10 +600,10 @@ void fc3d_nsgs_graph(FrictionContactProblem *problem, double *reaction, double *
     double light_error_sum = 0.;
     #pragma omp parallel default(none) \
                          private(contact, localproblem, localreaction) \
-                         shared(problem, local_solver, update_localproblem, freeSolver, computeError, options) \
-                         shared(iter, itermax, hasNotConverged, localsolver_options, error) \
-                         shared(n_colors, light_error_sum, partition_size, partitions, reaction) \
-                         shared(nc, norm_r, tolerance, velocity)
+                         shared(problem, local_solver, update_localproblem, freeSolver, computeError, options, \
+                                iter, itermax, hasNotConverged, localsolver_options, error, \
+                                n_colors, light_error_sum, partition_size, partitions, reaction, \
+                                nc, norm_r, tolerance, velocity)
     {
     /* Allocate localproblem for each thread */
     localproblem = fc3d_local_problem_allocate(problem);
@@ -620,7 +620,7 @@ void fc3d_nsgs_graph(FrictionContactProblem *problem, double *reaction, double *
       }
 
       for (size_t color = 0; color < n_colors; color++) {
-        #pragma omp for reduction(+:light_error_sum)
+        #pragma omp for schedule(dynamic) reduction(+:light_error_sum)
         for (int v = 0; v < partition_size[color]; v++) {
           contact = partitions[color][v];
 
@@ -665,12 +665,12 @@ void fc3d_nsgs_graph(FrictionContactProblem *problem, double *reaction, double *
 
     #pragma omp parallel default(none) \
                          private(contact, localproblem, localreaction, light_error_2) \
-                         shared(problem, local_solver, update_localproblem, freeSolver, computeError, options) \
-                         shared(iter, itermax, hasNotConverged, localsolver_options, error) \
-                         shared(number_of_freezed_contact, tmp_criteria1, tmp_criteria2, norm_r, nc, iparam) \
-                         shared(n_colors, light_error_sum, partition_size, partitions, reaction) \
-                         shared(freeze_contacts, scontacts, norm_q, omega) \
-                         shared(tolerance, velocity)
+                         shared(problem, local_solver, update_localproblem, freeSolver, computeError, options, \
+                                iter, itermax, hasNotConverged, localsolver_options, error, \
+                                number_of_freezed_contact, tmp_criteria1, tmp_criteria2, norm_r, nc, iparam, \
+                                n_colors, light_error_sum, partition_size, partitions, reaction, \
+                                freeze_contacts, scontacts, norm_q, omega, \
+                                tolerance, velocity)
     {
     /* Allocate localproblem for each thread */
     localproblem = fc3d_local_problem_allocate(problem);
@@ -700,7 +700,7 @@ void fc3d_nsgs_graph(FrictionContactProblem *problem, double *reaction, double *
       }
 
       for (size_t color = 0; color < n_colors; color++) {
-        #pragma omp for reduction(+:light_error_sum)
+        #pragma omp for schedule(dynamic) reduction(+:light_error_sum)
         for (int v = 0; v < partition_size[color]; v++) {
           int i = partitions[color][v];
     
