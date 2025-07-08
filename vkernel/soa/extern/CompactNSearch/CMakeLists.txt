@@ -54,6 +54,12 @@ if (APPLE AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 	target_link_libraries(CompactNSearch PUBLIC oneDPL)
 endif()
 
+set_target_properties(CompactNSearch PROPERTIES
+  INSTALL_RPATH "${SICONOS_PYTHON_INSTALL_DIR}/nonos"
+  BUILD_WITH_INSTALL_RPATH TRUE
+  INSTALL_RPATH_USE_LINK_PATH TRUE
+)
+
 install(FILES "include/CompactNSearch" ${HEADER_FILES}
 	DESTINATION include/)
 

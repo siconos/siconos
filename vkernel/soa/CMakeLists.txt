@@ -99,6 +99,12 @@ endif()
 
 target_compile_definitions(_nonos PRIVATE VERSION_INFO=${PROJECT_VERSION})
 
+set_target_properties(_nonos PROPERTIES
+  INSTALL_RPATH "${SICONOS_PYTHON_INSTALL_DIR}/nonos"
+  BUILD_WITH_INSTALL_RPATH TRUE
+  INSTALL_RPATH_USE_LINK_PATH TRUE
+)
+
 install(TARGETS _nonos COMPONENT python DESTINATION ${SICONOS_PYTHON_INSTALL_DIR}/nonos/)
 install(FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/siconos/py/nonos/__init__.py
