@@ -1,10 +1,7 @@
 
-#include <siconos/numerics/Friction_cst.h>
-
 #include <chrono>
 #include <numeric>
 
-#include "siconos/model/nslaws.hpp"
 #include "siconos/siconos.hpp"
 #include "siconos/utils/print.hpp"
 

@@ -1,6 +1,4 @@
-#include <siconos/numerics/Friction_cst.h>
 
-#include "siconos/collision/space_filter.hpp"
 #include "siconos/siconos.hpp"
 #include "siconos/utils/print.hpp"
 

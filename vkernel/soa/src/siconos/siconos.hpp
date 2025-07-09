@@ -6,10 +6,13 @@
 #include <typeinfo>
 
 #include "siconos/algebra/numerics.hpp"
+#include "siconos/collision/point.hpp"
 #include "siconos/collision/diskdisk_r.hpp"
 #include "siconos/collision/diskline_r.hpp"
 #include "siconos/collision/shape/disk.hpp"
 #include "siconos/collision/shape/line.hpp"
+#include "siconos/collision/neighborhood.hpp"
+#include "siconos/collision/space_filter.hpp"
 #include "siconos/config/config.hpp"
 #include "siconos/io/io.hpp"
 #include "siconos/model/lagrangian_ds.hpp"
