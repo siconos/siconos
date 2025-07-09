@@ -1,48 +1,24 @@
-// static char help[] = "Color a matrix, returning set sizes and indices. \n\n";
-
-/*
-    Example:
-        ./ex16 -f <matrix file> -a_mat_view draw -draw_pause -1
-        ./ex16 -f <matrix file> -a_mat_view ascii::ascii_info
-*/
-
 #include "graph_tools.h"
+
+
 int color_graph(int n, NumericsMatrix *M, size_t *n_colors, size_t **set_sizes, size_t ***set_indices) {
     Mat A;
-    // PetscLogDouble time_start, time_end;
 
     PetscFunctionBeginUser;
 
-    // PetscCall(PetscTime(&time_start));
+    /* First, create PETSC matrix from NumericsMatrix.
+    PETSC coloring functions require the matrice to have sparse "MATSEQAIJ" format
+    */
     switch (M->storageType) {
         case NM_DENSE: {
-            // PetscCall(PetscPrintf(PETSC_COMM_WORLD, "DENSE\n"));
             PetscCall(MatCreateSeqDense(PETSC_COMM_SELF, n, n, M->matrix0, &A));
-            // MatCreateSeqDense does not work because coloring requires MATSEQAIJ matrix
             PetscCall(MatConvert(A, MATSEQAIJ, MAT_INPLACE_MATRIX, &A));
 
-            /* PetscCall(MatCreate(PETSC_COMM_WORLD, &A));
-            PetscCall(MatSetType(A, MATAIJ)); // CSR format
-            PetscCall(MatSetSizes(A, n, n, PETSC_DECIDE, PETSC_DECIDE));
-
-            // Fill PETSC sparse matrix
-            double *dense = M->matrix0;
-            for (int row = 0; row < n; row++) {
-                for (int col = 0; col < n; col++) {
-                    val = PetscAbsScalar(dense[row + n * col]);
-                    if (val > dtol) {
-                        PetscCall(MatSetValue(A, row, col, val, INSERT_VALUES));
-                    }
-                }
-            } */
             PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
             PetscCall(MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY));
             break;
         }
         case NM_SPARSE: {
-            // PetscCall(PetscPrintf(PETSC_COMM_WORLD, "SPARSE\n"));
-
-            /* I copied this from Numericsmatrix.c function NM_row_prod_no_diag1x1 */
             CSparseMatrix* sparse;
             if (M->matrix2->origin == NSM_CSR) {
                 sparse = NM_csr(M);
@@ -69,78 +45,25 @@ int color_graph(int n, NumericsMatrix *M, size_t *n_colors, size_t **set_sizes, 
         }
     }
 
-    /* TEST IF MATRIX IS SYMMETRIC */
+    /* Should I test if the matrix is symmetric ? */
     /* PetscReal eps = 1e-2;
     PetscBool is_symmetric;
-    PetscCall(MatIsSymmetric(A, eps, &is_symmetric));
+    PetscCall(MatIsSymmetric(A, eps, &is_symmetric)); */
 
-    if (!is_symmetric) {
-        PetscCall(MatDestroy(&A));
-        // printf("NOT SYMMETRIC\n");
-        return 1;
-    } */
-    // PetscCall(PetscTime(&time_end));
-    // PetscCall(PetscPrintf(PETSC_COMM_WORLD, "Time to build matrix: %f\n", time_end - time_start));
-    
-
-    // Create PETSC sparse matrix
-    /* PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
-    switch (M->storageType) {
-        case NM_DENSE: {
-            // PetscCall(MatCreateSeqDense(PETSC_COMM_WORLD, n, n, M->matrix0, &A));
-            PetscCall(PetscPrintf(PETSC_COMM_WORLD, "Creating PETSC matrix...\n"));
-            PetscCall(MatCreate(PETSC_COMM_WORLD, &A));
-            MatSetType(A, MATAIJ);
-            MatSetSizes(A, n, n, PETSC_DECIDE, PETSC_DECIDE);
-            double* dense = M->matrix0;
-            for (int row = 0; row < n; row++) {
-                for (int col = 0; col < n; col++) {
-                    val = PetscAbsScalar(dense[row + n * col]);
-                    if (val > dtol) {
-                        PetscCall(MatSetValue(A, row, col, val, INSERT_VALUES));
-                    }
-                }
-            }
-            PetscCall(PetscPrintf(PETSC_COMM_WORLD, "...PETSC matrix created.\n"));
-        }
-        case NM_SPARSE: {
-            fprintf(stderr, "color_graph_petsc :: storage type not supported yet %d", M->storageType);
-            exit(EXIT_FAILURE);
-            // PetscCall(MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, n, n, ))
-
-        }
-        case NM_SPARSE_BLOCK: {
-            fprintf(stderr, "color_graph_petsc :: storage type not supported yet %d", M->storageType);
-            exit(EXIT_FAILURE);
-        }
-        default: {
-            fprintf(stderr, "color_graph_petsc :: unknown matrix storage %d", M->storageType);
-            exit(EXIT_FAILURE);
-    }
-    }
-    PetscCall(MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY));
- */
-
-    /* View matrix to check
-    PetscCall(MatView(A, PETSC_VIEWER_STDOUT_WORLD)); */
-
-    /*          *
-     * COLORING *
-     *          */
-    // PetscCall(PetscTime(&time_start));
+    /*
+    Coloring
+    */
     MatColoring mc;
     ISColoring iscoloring;
 
     PetscCall(MatColoringCreate(A, &mc));
-    PetscCall(MatColoringSetDistance(mc, 1));
+    PetscCall(MatColoringSetDistance(mc, 1)); // Distance 1 coloring (default is 2 in PETSC)
 
     PetscCall(MatColoringSetType(mc, MATCOLORINGJP)); // Coloring algorithm 
-    // PetscCall(MatColoringSetType(mc, MATCOLORINGGREEDY));
+    // PetscCall(MatColoringSetType(mc, MATCOLORINGGREEDY)); // other algorithm
 
     PetscCall(MatColoringSetFromOptions(mc));
     PetscCall(MatColoringApply(mc, &iscoloring));
-    // PetscCall(MatColoringView(mc, PETSC_VIEWER_STDOUT_WORLD)); // View coloring
-    // PetscCall(ISColoringView(iscoloring, PETSC_VIEWER_STDOUT_WORLD)); // View IScoloring
 
     /* Get index sets for each color */
     PetscInt nn;
@@ -149,7 +72,6 @@ int color_graph(int n, NumericsMatrix *M, size_t *n_colors, size_t **set_sizes, 
     size_t **indexes = NULL; // Array of pointers to index sets
     const PetscInt *idxin = NULL;
     PetscCall(ISColoringGetIS(iscoloring, PETSC_USE_POINTER, &nn, &is)); // Get index sets
-    // PetscCall(PetscPrintf(PETSC_COMM_WORLD, "n_colors = %ld\n", nn));
 
     PetscInt size_petsc;
 
@@ -159,17 +81,10 @@ int color_graph(int n, NumericsMatrix *M, size_t *n_colors, size_t **set_sizes, 
     for (int i = 0; i < (int)nn; i++) {
         PetscCall(ISGetLocalSize(is[i], &size_petsc));
         size[i] = (size_t)size_petsc;
-        // PetscCall(ISGetLocalSize(is[i], &size[i])); // This gave me a conversion warning
         indexes[i] = (size_t *)malloc(size[i] * sizeof(size_t)); // allocate indexes
         PetscCall(ISGetIndices(is[i], &idxin)); // Get indices for i-th color
 
-        /*
-        COPYING INDICES IN NEW ARRAY
-        TO USE IT OUTSIDE THIS FUNCTION
-        WITHOUT PETSC
-
-        I COULD ONLY USE POINTERS IF I WROTE BOTH COLORING AND COMPUTING IN PETSC???
-        */
+        // Copy indices in output array
         for (int j = 0; j < (int)size[i]; j++) {
             indexes[i][j] = (size_t)idxin[j];
         }
@@ -180,44 +95,21 @@ int color_graph(int n, NumericsMatrix *M, size_t *n_colors, size_t **set_sizes, 
     // Call this because of option PETSC_USE_POINTER (see https://petsc.org/release/manualpages/IS/ISColoringGetIS/)
     PetscCall(ISColoringRestoreIS(iscoloring, PETSC_USE_POINTER, &is));
 
-    /* for (int i = 0; i < nn; i++)
-    {
-        PetscCall(PetscPrintf(PETSC_COMM_WORLD, "%d : [", i));
-        for (int j = 0; j < size[i]; j++)
-        {
-            PetscCall(PetscPrintf(PETSC_COMM_WORLD, " %d ", indexes[i][j]));
-        }
-        PetscCall(PetscPrintf(PETSC_COMM_WORLD, "]\n"));
-    } */
-
     PetscCall(MatColoringDestroy(&mc));
     PetscCall(ISColoringDestroy(&iscoloring));
     PetscCall(MatDestroy(&A));
-
-    /* for (int i = 0; i < nn; i++)
-    {
-        PetscCall(PetscPrintf(PETSC_COMM_WORLD, "size[%d] = %d\n", i, size[i]));
-    } */
 
     *n_colors = (size_t)nn;
     *set_sizes = size;
     *set_indices = indexes;
 
-    // PetscCall(PetscTime(&time_end));
-    // PetscCall(PetscPrintf(PETSC_COMM_WORLD, "Time to color: %f\n", time_end - time_start));
-
-    // PetscCall(PetscFinalize());
-
     return 0;
-
 }
 
 
 int color_graph_permut(int n, NumericsMatrix *M, size_t *n_colors, size_t **sum_sizes, size_t *inv_permutation) {
     
-    /*                            *
-     *   BUILD PETSC MATRIX       *
-     *                            */
+    /* Build PETSC matrix */
     Mat A;
 
     PetscFunctionBeginUser;
@@ -267,9 +159,7 @@ int color_graph_permut(int n, NumericsMatrix *M, size_t *n_colors, size_t **sum_
         return 1;
     } */
 
-    /*          *
-     * COLORING *
-     *          */
+    /* Color matrix */
     MatColoring mc;
     ISColoring iscoloring;
 
@@ -301,13 +191,6 @@ int color_graph_permut(int n, NumericsMatrix *M, size_t *n_colors, size_t **sum_
         sum_size[i + 1] = (size_t)size_petsc + sum_size[i];
         PetscCall(ISGetIndices(is[i], &idxin)); // Get indices for i-th color
 
-        /*
-        COPYING INDICES IN NEW ARRAY
-        TO USE IT OUTSIDE THIS FUNCTION
-        WITHOUT PETSC
-
-        I COULD ONLY USE POINTERS IF I WROTE BOTH COLORING AND COMPUTING IN PETSC???
-        */
         for (int j = 0; j < (int)size_petsc; j++) {
             inv_permutation[k] = (size_t)idxin[j];
             k++;
@@ -323,14 +206,13 @@ int color_graph_permut(int n, NumericsMatrix *M, size_t *n_colors, size_t **sum_
     PetscCall(ISColoringDestroy(&iscoloring));
     PetscCall(MatDestroy(&A));
 
-    *n_colors = (size_t)nn; // conversion from PetscInt (= long int) to size_t (= unsigned long). No issue if nn >= 0, which is the case
+    *n_colors = (size_t)nn;
     *sum_sizes = sum_size;
 
     return 0;
 }
 
 /* EQUITABLE GRAPH COLORING */
-
 
 typedef struct node {
     size_t val;
@@ -463,15 +345,8 @@ void create_adjacency_lists(int n, NumericsMatrix *M, node_t **adjacency_lists) 
 }
 
 int color_graph_permut_equitable(int n, NumericsMatrix *M, size_t *n_colors, size_t **sum_sizes, size_t *inv_permutation) {
-    
-    int err_not_symmetric;
 
-    err_not_symmetric = color_graph_permut(n, M, n_colors, sum_sizes, inv_permutation);
-
-    /* Matrix not symmetric */
-    if (err_not_symmetric == 1) return 1;
-
-    // printf("color_graph_permut_equitable:: err_not_symmetric = %d\n", err_not_symmetric);
+    color_graph_permut(n, M, n_colors, sum_sizes, inv_permutation);
 
     size_t tmp_n_colors = *n_colors;
     size_t *tmp_sum_sizes = *sum_sizes;
@@ -495,25 +370,12 @@ int color_graph_permut_equitable(int n, NumericsMatrix *M, size_t *n_colors, siz
         sizes_and_indexes[i].index = i;
     }
 
-    /* for (int i = 0; i < 2 * n_colors; i++)
-    {
-        printf("%d %d\n", sizes_and_indexes[i].value, sizes_and_indexes[i].index);
-    } */
-
     if (sorted == 0)
         qsort(sizes_and_indexes, tmp_n_colors, sizeof(element_t), compare);
 
-    /* printf("Sorted = %d\n", sorted);
-    printf("Number of colors = %d\n", tmp_n_colors);
-    printf("Max size = %d, min size %d\n", sizes_and_indexes[0].value, sizes_and_indexes[tmp_n_colors - 1].value);
- */
-    /* for (int i = 0; i < 2 * tmp_n_colors; i++)
-    {
-        printf("%d %d\n", sizes_and_indexes[i].value, sizes_and_indexes[i].index);
-    } */
-
-    /* ACTUALLY IT IS ALREADY SORTED BY PETSC FROM BIGGEST TO SMALLEST SET
-       SO I DON'T REALLY NEED ALL OF THIS
+    /* 
+    ACTUALLY IT IS ALREADY SORTED BY PETSC FROM BIGGEST TO SMALLEST SET
+    SO I DON'T REALLY NEED ALL OF THIS
     */
 
     /* Array containing lists of vertices for each color */
@@ -528,30 +390,13 @@ int color_graph_permut_equitable(int n, NumericsMatrix *M, size_t *n_colors, siz
                 push_new_node(&vertices_array[i], inv_permutation[j]);
             }
         }
-
-        /* printf("Color %d. List = ", i);
-        print_list(&vertices_array[i]); */
     }
 
-    /* Better adjacency lists */
+    /* Adjacency lists */
     node_t **adjacency_lists = (node_t **)malloc((size_t)n * sizeof(node_t *));
     create_adjacency_lists(n, M, adjacency_lists);
 
-    /* for (int row = 0; row < n; row++)
-    {
-        adjacency_lists[row] = create_node(0);
-        for (CS_INT p = Mp[row]; p < Mp[row + 1]; ++p)
-        {
-            push_new_node(&adjacency_lists[row], Mi[p]);
-            // if (row != Mi[p]) push_new_node(&adjacency_lists[row], Mi[p]);
-        }
-
-        printf("adjacency_list[%d] = ", row);
-        print_list(&adjacency_lists[row]);
-    }
-    */
-
-    // Color of each vertex
+    /* Color of each vertex */
     size_t *colors = (size_t *)malloc((size_t)n * sizeof(size_t));
     size_t current_color = 0;
     for (size_t v = 0; v < (size_t)n; v++)
@@ -561,14 +406,7 @@ int color_graph_permut_equitable(int n, NumericsMatrix *M, size_t *n_colors, siz
         colors[inv_permutation[v]] = current_color;
     }
 
-    // printf("color_graph_permut_equitable:: colors done\n");
-
-    /* printf("Colors = [");
-    for (int i = 0; i < n; i++)
-        printf(" %d ", colors[i]);
-    printf("]\n"); */
-
-    // Recoloring
+    /* Recolor graph to achieve equitable coloring */
     size_t current_number_of_colors = tmp_n_colors;
     int position;
     int change_is_possible = 1;
@@ -580,29 +418,8 @@ int color_graph_permut_equitable(int n, NumericsMatrix *M, size_t *n_colors, siz
     size_t i_max, i_min;
     element_t tmp;
 
-    // int n_iter = 0;
-
-    // printf("Start recoloring...\n");
-
     while ((sizes_and_indexes[0].value - sizes_and_indexes[current_number_of_colors - 1].value) > 1)
     {
-
-        /* for (int i = 0; i < tmp_n_colors * 2; i++)
-        {
-        printf("Color %d. List = ", i);
-        print_list(&vertices_array[i]);
-        }
-
-        printf("\n(value, index) sizes_and_indexes = [");
-        for (int i = 0; i < tmp_n_colors * 2; i++)
-            printf(" (%d %d) ", sizes_and_indexes[i].value, sizes_and_indexes[i].index);
-        printf("]\n"); */
-
-
-        // n_iter += 1;
-        // if (n_iter > 10) break;
-
-
         change_is_possible = 1;
         // See if some vertex in biggest color set can be changed
         i_max = sizes_and_indexes[0].index;
@@ -684,7 +501,6 @@ int color_graph_permut_equitable(int n, NumericsMatrix *M, size_t *n_colors, siz
 
         if (change_is_possible == 0)
         {
-            // printf("Adding color...\n");
             /* No change was possible from the biggest color set
                So we create a new color
             */
@@ -707,36 +523,8 @@ int color_graph_permut_equitable(int n, NumericsMatrix *M, size_t *n_colors, siz
                 sizes_and_indexes[i + 1] = tmp;
                 i += 1;
             }
-
-            // printf("...color added.\n");
         }
     }
-
-    // printf("Equitable coloring done.\n");
-
-    /* for (int i = 0; i < 2 * tmp_n_colors; i++)
-    {
-        printf("%d %d\n", sizes_and_indexes[i].value, sizes_and_indexes[i].index);
-    }
-
-    for (int i = 0; i < tmp_n_colors * 2; i++)
-    {
-        printf("Color %d. List = ", i);
-        print_list(&vertices_array[i]);
-    } */
-
-    /* for (int color = 0; color < current_number_of_colors; color++)
-    {
-        node_t *current_node = vertices_array[color];
-
-        printf("Color %d. Vertices = [", color);
-        while (current_node->next)
-        {
-            printf(" %d ", current_node->val);
-            current_node = current_node->next;
-        }
-        printf("]\n");
-    } */
 
     /* Modify inv_permutation and sum_sizes */
     size_t new_n_colors = current_number_of_colors;
@@ -770,13 +558,13 @@ int color_graph_permut_equitable(int n, NumericsMatrix *M, size_t *n_colors, siz
 
     free(*sum_sizes);
 
-    /* printf("New number of colors = %d\n", new_n_colors); */
-
     *n_colors = new_n_colors;
     *sum_sizes = new_sum_sizes;
 
     return 0;
 }
+
+/* Color graph block */
 
 /* Check if a block is full of zeros
 Inlined for better performance, is it necessary?
@@ -791,8 +579,8 @@ static inline bool block_is_full_of_zeros(double *block, size_t n_row, size_t n_
     return true;
 }
 
-int color_graph_2(int nc, NumericsMatrix *M, size_t *n_colors, size_t **set_sizes, size_t ***set_indices) {
-    assert(M->size0 == M->size1);
+int color_graph_block(int nc, NumericsMatrix *M, size_t *n_colors, size_t **set_sizes, size_t ***set_indices) {
+    assert(M->size0 == M->size1); // Check M is a squared matrix
     int n = M->size0;
     int d = n / nc; // dimension of contact space
     
@@ -805,11 +593,9 @@ int color_graph_2(int nc, NumericsMatrix *M, size_t *n_colors, size_t **set_size
     int64_t* Mi = NULL;
     double* Mx = NULL;
 
+    // Create PETSC matrix, finding which blocks are full of zeros
     switch (M->storageType) {
         case NM_DENSE: {
-            /*
-            THIS SHOULD BE TESTED !!!!
-            */
             double *M_mat = M->matrix0;
 
             /* Count non zero blocks */
@@ -841,16 +627,12 @@ int color_graph_2(int nc, NumericsMatrix *M, size_t *n_colors, size_t **set_size
                 }
             }
 
-            /* Is it true that MatColoringCreate only supports MATSEQAIJ format? */
             PetscCall(MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, nc, nc, Mp, Mi, Mx, &A));
             PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
             PetscCall(MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY));
             break;
         }
         case NM_SPARSE: {
-            /*
-            THIS SHOULD BE TESTED !!!!
-            */
             CSparseMatrix* sparse;
             if (M->matrix2->origin == NSM_CSR) {
                 sparse = NM_csr(M);
@@ -954,6 +736,7 @@ int color_graph_2(int nc, NumericsMatrix *M, size_t *n_colors, size_t **set_size
             /* Second method: construct sparse directly from block sparse */
             size_t nnz = 0; // Number of non zero blocks
             
+            // Number of rows and columns in each block
             int *nb_row_blocks = (int *)malloc(sbm->blocknumber0 * sizeof(int));
             int *nb_col_blocks = (int *)malloc(sbm->blocknumber1 * sizeof(int));
             int tmp = 0;
@@ -968,6 +751,8 @@ int color_graph_2(int nc, NumericsMatrix *M, size_t *n_colors, size_t **set_size
                 nb_col_blocks[i] = sbm->blocksize1[i] - tmp;
                 tmp = sbm->blocksize1[i];
             }
+
+            /* Count number of non zero blocks */
 
             int nb_row_block, nb_col_block;
             int i_start_block, j_start_block;
@@ -1008,24 +793,20 @@ int color_graph_2(int nc, NumericsMatrix *M, size_t *n_colors, size_t **set_size
                     }
                 }
             }
-            /* Is it true that MatColoringCreate only supports MATSEQAIJ format? */
             PetscCall(MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, nc, nc, Mp, Mi, Mx, &A));
             PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
             PetscCall(MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY));
             break;
         }
         default: {
-            fprintf(stderr, "color_graph_2 :: unknown matrix storage %d", M->storageType);
+            fprintf(stderr, "color_graph_block :: unknown matrix storage %d", M->storageType);
             exit(EXIT_FAILURE);
         }
     }
 
-    // PetscCall(MatView(A, PETSC_VIEWER_STDOUT_WORLD));
-
-    /*          *
-     * COLORING *
-     *          */
-    // PetscCall(PetscTime(&time_start));
+    /*
+    Coloring
+    */
     MatColoring mc;
     ISColoring iscoloring;
 
@@ -1037,8 +818,6 @@ int color_graph_2(int nc, NumericsMatrix *M, size_t *n_colors, size_t **set_size
 
     PetscCall(MatColoringSetFromOptions(mc));
     PetscCall(MatColoringApply(mc, &iscoloring));
-    // PetscCall(MatColoringView(mc, PETSC_VIEWER_STDOUT_WORLD)); // View coloring
-    // PetscCall(ISColoringView(iscoloring, PETSC_VIEWER_STDOUT_WORLD)); // View IScoloring
 
     /* Get index sets for each color */
     PetscInt nn;
@@ -1047,7 +826,6 @@ int color_graph_2(int nc, NumericsMatrix *M, size_t *n_colors, size_t **set_size
     size_t **indexes = NULL; // Array of pointers to index sets
     const PetscInt *idxin = NULL;
     PetscCall(ISColoringGetIS(iscoloring, PETSC_USE_POINTER, &nn, &is)); // Get index sets
-    // PetscCall(PetscPrintf(PETSC_COMM_WORLD, "n_colors = %ld\n", nn));
 
     PetscInt size_petsc;
 
@@ -1057,17 +835,10 @@ int color_graph_2(int nc, NumericsMatrix *M, size_t *n_colors, size_t **set_size
     for (int i = 0; i < (int)nn; i++) {
         PetscCall(ISGetLocalSize(is[i], &size_petsc));
         size[i] = (size_t)size_petsc;
-        // PetscCall(ISGetLocalSize(is[i], &size[i])); // This gave me a conversion warning
         indexes[i] = (size_t *)malloc(size[i] * sizeof(size_t)); // allocate indexes
         PetscCall(ISGetIndices(is[i], &idxin)); // Get indices for i-th color
 
-        /*
-        COPYING INDICES IN NEW ARRAY
-        TO USE IT OUTSIDE THIS FUNCTION
-        WITHOUT PETSC
-
-        I COULD ONLY USE POINTERS IF I WROTE BOTH COLORING AND COMPUTING IN PETSC???
-        */
+        // Copy index sets
         for (int j = 0; j < (int)size[i]; j++) {
             indexes[i][j] = (size_t)idxin[j];
         }
@@ -1078,16 +849,6 @@ int color_graph_2(int nc, NumericsMatrix *M, size_t *n_colors, size_t **set_size
     // Call this because of option PETSC_USE_POINTER (see https://petsc.org/release/manualpages/IS/ISColoringGetIS/)
     PetscCall(ISColoringRestoreIS(iscoloring, PETSC_USE_POINTER, &is));
 
-    /* for (int i = 0; i < nn; i++)
-    {
-        PetscCall(PetscPrintf(PETSC_COMM_WORLD, "%d : [", i));
-        for (int j = 0; j < size[i]; j++)
-        {
-            PetscCall(PetscPrintf(PETSC_COMM_WORLD, " %d ", indexes[i][j]));
-        }
-        PetscCall(PetscPrintf(PETSC_COMM_WORLD, "]\n"));
-    } */
-
     PetscCall(MatColoringDestroy(&mc));
     PetscCall(ISColoringDestroy(&iscoloring));
     PetscCall(MatDestroy(&A));
@@ -1097,18 +858,10 @@ int color_graph_2(int nc, NumericsMatrix *M, size_t *n_colors, size_t **set_size
     free(Mi);
     free(Mx);
 
-    /* for (int i = 0; i < nn; i++)
-    {
-        PetscCall(PetscPrintf(PETSC_COMM_WORLD, "size[%d] = %d\n", i, size[i]));
-    } */
-
     // Ouputs
     *n_colors = (size_t)nn;
     *set_sizes = size;
     *set_indices = indexes;
-
-    // PetscCall(PetscTime(&time_end));
-    // PetscCall(PetscPrintf(PETSC_COMM_WORLD, "Time to color: %f\n", time_end - time_start));
 
     return 0;
 

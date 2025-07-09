@@ -620,7 +620,7 @@ void fc3d_nsgs_graph(FrictionContactProblem *problem, double *reaction, double *
       }
 
       for (size_t color = 0; color < n_colors; color++) {
-        #pragma omp for schedule(dynamic) reduction(+:light_error_sum)
+        #pragma omp for schedule(static) reduction(+:light_error_sum)
         for (int v = 0; v < partition_size[color]; v++) {
           contact = partitions[color][v];
 
@@ -700,7 +700,7 @@ void fc3d_nsgs_graph(FrictionContactProblem *problem, double *reaction, double *
       }
 
       for (size_t color = 0; color < n_colors; color++) {
-        #pragma omp for schedule(dynamic) reduction(+:light_error_sum)
+        #pragma omp for schedule(static) reduction(+:light_error_sum)
         for (int v = 0; v < partition_size[color]; v++) {
           int i = partitions[color][v];
     
