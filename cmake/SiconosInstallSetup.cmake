@@ -78,7 +78,9 @@ function(set_install_path)
     endif()
   endif()
 
-  # Check python env
+  # --- Check python env ---
+  # - venv? Conda? Something else?
+  #
   set(PIP_INSTALL_OPTIONS_LOCAL)
   execute_process(COMMAND ${Python_EXECUTABLE} -c "import sys;print(sys.prefix != sys.base_prefix)" OUTPUT_VARIABLE IN_VENV)
   string(STRIP ${IN_VENV} IN_VENV)
@@ -97,16 +99,20 @@ Since make/pip install must be run as root, possibly outside this env., this mig
     execute_process(COMMAND ${Python_EXECUTABLE} -c
       "import site; print(site.getsitepackages()[0])" OUTPUT_VARIABLE PY_INSTALL_DIR)
   else()
+
+    # -- First, find where python packages will be installed by pip or equivalent --
+    
     if(IN_VENV)
-      execute_process(COMMAND ${Python_EXECUTABLE} -c "import sys;print(sys.path[-1])" OUTPUT_VARIABLE PY_INSTALL_DIR)
+      execute_process(COMMAND ${Python_EXECUTABLE} -c "import sysconfig;print(sysconfig.get_paths()['purelib'])" OUTPUT_VARIABLE PY_INSTALL_DIR)
     else()
       if(IN_CONDA AND DEFINED ENV{CONDA_PREFIX})
-	execute_process(COMMAND ${Python_EXECUTABLE} -c "import sys;print(sys.path[-1])" OUTPUT_VARIABLE PY_INSTALL_DIR)
+	execute_process(COMMAND ${Python_EXECUTABLE} -c "import sysconfig;print(sysconfig.get_paths()['purelib'])" OUTPUT_VARIABLE PY_INSTALL_DIR)
       else()
 	execute_process(COMMAND ${Python_EXECUTABLE} -m site --user-base OUTPUT_VARIABLE PY_INSTALL_DIR)
       endif()
     endif()
 
+    # -- Second, set the directory where libraries (required by built-in siconos python packages) will be installed --
     if(SICONOS_CUSTOM_INSTALL)
       set(CMAKE_INSTALL_PREFIX ${SICONOS_CUSTOM_INSTALL} CACHE PATH "Install root directory." FORCE)
       if(ISOLATED_INSTALL)
