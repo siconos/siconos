@@ -27,7 +27,6 @@ import os
 from contextlib import contextmanager
 import numpy as np
 import time
-import vtk
 import warnings
 import siconos.mechanics.collision
 
@@ -149,6 +148,8 @@ def load_siconos_mesh(shape_filename, scale=None):
     loads a vtk .vtp file and returns a SiconosMesh shape
     WARNING triangles cells assumed!
     """
+    import vtk
+
     reader = vtk.vtkXMLPolyDataReader()
     reader.SetFileName(shape_filename)
     reader.Update()
