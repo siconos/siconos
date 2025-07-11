@@ -6067,18 +6067,10 @@ int NM_Linear_solver_finalize(NumericsMatrix* Ao) {
 }
 
 void NM_block_prod(int start_i, int start_j, int size_i, int size_j, NumericsMatrix* A, const double *x, double *y, int init) {
-  
-  // NM_row_prod(size_j, size_i, start_i + (A->size0) * start_j, A, &x[start_j], y, init);
-  
+    
   assert(A);
   assert(x);
   assert(y);
-
-  int sizeX = size_j;
-  int sizeY = size_i;
-
-  // assert(A->size0 >= sizeY); // size0  = number of lines
-  // assert(A->size1 == sizeX); // size1 = number of columns
 
   switch (A->storageType) {
     case NM_DENSE: {
@@ -6086,17 +6078,17 @@ void NM_block_prod(int start_i, int start_j, int size_i, int size_j, NumericsMat
       double* mat = A->matrix0;
       if (init == 0)
       {
-        for (int row = 0; row < sizeY; row++)
-          y[row] += cblas_ddot(sizeX, &mat[start_i + row + incx * start_j], incx, &x[start_j], incy);
+        for (int row = 0; row < size_i; row++)
+          y[row] += cblas_ddot(size_j, &mat[start_i + row + incx * start_j], incx, &x[start_j], incy);
       } else {
-        for (int row = 0; row < sizeY; row++)
-          y[row] = cblas_ddot(sizeX, &mat[start_i + row + incx * start_j], incx, &x[start_j], incy);
+        for (int row = 0; row < size_i; row++)
+          y[row] = cblas_ddot(size_j, &mat[start_i + row + incx * start_j], incx, &x[start_j], incy);
       }
       break;
     }
     case NM_SPARSE: {
       if (init) {
-        for (int row = 0; row < sizeY; row++) {
+        for (int row = 0; row < size_i; row++) {
           y[row] = 0.;
         } 
       }
@@ -6115,7 +6107,7 @@ void NM_block_prod(int start_i, int start_j, int size_i, int size_j, NumericsMat
       CS_INT* Mi = S->i;
       double* Mx = S->x;
 
-      for (int row = 0; row < sizeY; row++) {
+      for (int row = 0; row < size_i; row++) {
         for (CS_INT p = Mp[start_i + row]; p < Mp[start_i + row + 1]; ++p) {
           if ((start_j <= Mi[p]) && (Mi[p] < start_j + size_j)) {
             y[row] += Mx[p] * x[Mi[p]];
@@ -6137,86 +6129,7 @@ void NM_block_prod(int start_i, int start_j, int size_i, int size_j, NumericsMat
   NM_version_sync(A);
 }
 
-void NM_block_prod_no_diag(int start_i, int size_i, NumericsMatrix* A, double *x, double *y, double* xsave, int init) {
-  assert(A);
-  assert(x);
-  assert(y);
-
-  int sizeX = size_i;
-  int sizeY = size_i;
-
-  // assert(A->size0 >= sizeY); // size0  = number of lines
-  // assert(A->size1 == sizeX); // size1 = number of columns
-
-  NM_types storage = A->storageType;
-
-  switch (A->storageType) {
-    case NM_DENSE: {
-      int incx = A->size0, incy = 1;
-      double* mat = A->matrix0;
-      if (init == 0) {
-        for (int row = 0; row < sizeY; row++) {
-          *xsave = x[start_i + row];
-          x[start_i + row] = 0.;
-          y[row] += cblas_ddot(sizeX, &mat[start_i + row + incx * start_i], incx, &x[start_i], incy);
-          x[start_i + row] = *xsave;
-        }
-      } 
-      else {
-        for (int row = 0; row < sizeY; row++) {
-          *xsave = x[start_i + row];
-          x[start_i + row] = 0.;
-          y[row] = cblas_ddot(sizeX, &mat[start_i + row + incx * start_i], incx, &x[start_i], incy);
-          x[start_i + row] = *xsave;
-        }
-      }
-      break;
-    }
-    case NM_SPARSE: {
-      if (init) {
-        for (int row = 0; row < sizeY; row++) {
-          y[row] = 0.;
-        } 
-      }
-
-      CSparseMatrix* S = NULL;
-      if (A->storageType == NM_SPARSE) {
-        if (A->matrix2->origin == NSM_CSR) {
-          S = NM_csr(A);
-        } 
-        else {
-          S = NM_csc_trans(A);
-        }
-      }
-
-      CS_INT* Mp = S->p;
-      CS_INT* Mi = S->i;
-      double* Mx = S->x;
-
-      for (int row = 0; row < sizeY; row++) {
-        for (CS_INT p = Mp[start_i + row]; p < Mp[start_i + row + 1]; ++p) {
-          if ((start_i <= Mi[p]) && (Mi[p] < start_i + size_i)) {
-            if (start_i + row != Mi[p]) y[row] += Mx[p] * x[Mi[p]];
-          }
-        }
-      }
-      break;
-    }
-    case NM_SPARSE_BLOCK: {
-      fprintf(stderr, "NM_row_prod_no_diag3 :: NM_SPARSE_BLOCK not implemented %d", A->storageType);
-      exit(EXIT_FAILURE);
-    }
-    default: {
-      fprintf(stderr, "NM_row_prod_no_diag3 :: unknown matrix storage %d", A->storageType);
-      exit(EXIT_FAILURE);
-    }
-  }
-
-  // NM_version_sync(A);
-}
-
-
-void NM_block_prod_no_diag_one_row(int local_line, int start_i, int size_i, NumericsMatrix* A, double* x, double* left, double* right, double* xsave, int init) {
+void NM_block_prod_no_diag_one_row(int local_row, int start_i, int size_i, NumericsMatrix* A, const double* x, double* left, double* right, int init) {
   assert(A);
   assert(x);
   assert(left);
@@ -6235,24 +6148,19 @@ void NM_block_prod_no_diag_one_row(int local_line, int start_i, int size_i, Nume
       int incx = A->size0, incy = 1;
       double* mat = A->matrix0;
       if (init) {
-        right[local_line] = 0.;
-        left[local_line] = 0.;
+        right[local_row] = 0.;
+        left[local_row] = 0.;
       }
 
-      left[local_line] += cblas_ddot(local_line, &mat[start_i + local_line + incx * start_i], incx, &x[start_i], incy);
-      right[local_line] += cblas_ddot(sizeX - local_line - 1, &mat[start_i + local_line + incx * (start_i + local_line + 1)], incx, &x[start_i + local_line + 1], incy);
-
-      /* *xsave = x[local_line + start_i];
-      x[local_line + start_i] = 0.;
-      right[local_line] += cblas_ddot(sizeX, &mat[start_i + local_line + incx * start_i], incx, &x[start_i], incy);
-      x[local_line + start_i] = *xsave; */
+      left[local_row] += cblas_ddot(local_row, &mat[start_i + local_row + incx * start_i], incx, &x[start_i], incy);
+      right[local_row] += cblas_ddot(sizeX - local_row - 1, &mat[start_i + local_row + incx * (start_i + local_row + 1)], incx, &x[start_i + local_row + 1], incy);
        
       break;
     }
     case NM_SPARSE: {
       if (init) {
-        right[local_line] = 0.;
-        left[local_line] = 0.;
+        right[local_row] = 0.;
+        left[local_row] = 0.;
       }
 
       CSparseMatrix* S = NULL;
@@ -6269,10 +6177,10 @@ void NM_block_prod_no_diag_one_row(int local_line, int start_i, int size_i, Nume
       CS_INT* Mi = S->i;
       double* Mx = S->x;
 
-      for (CS_INT p = Mp[start_i + local_line]; p < Mp[start_i + local_line + 1]; ++p) {
+      for (CS_INT p = Mp[start_i + local_row]; p < Mp[start_i + local_row + 1]; ++p) {
         if ((start_i <= Mi[p]) && (Mi[p] < start_i + size_i)) {
-          if (Mi[p] < start_i + local_line) left[local_line] += Mx[p] * x[Mi[p]];
-          else if (Mi[p] > start_i + local_line) right[local_line] += Mx[p] * x[Mi[p]];
+          if (Mi[p] < start_i + local_row) left[local_row] += Mx[p] * x[Mi[p]];
+          else if (Mi[p] > start_i + local_row) right[local_row] += Mx[p] * x[Mi[p]];
         }
       }
 
@@ -6291,14 +6199,11 @@ void NM_block_prod_no_diag_one_row(int local_line, int start_i, int size_i, Nume
   NM_version_sync(A);
 }
 
-void NM_row_prod_no_diag_leftright(size_t sizeX, int block_start, size_t row, NumericsMatrix* A, double* x, double *left, double* right, bool init) {
+void NM_row_prod_no_diag_leftright(size_t sizeX, int block, size_t row, NumericsMatrix* A, const double* x, double *left, double* right, bool init) {
   assert(A);
   assert(x);
   assert(left);
   assert(right);
-
-  // assert(A->size0 >= sizeY); // size0  = number of lines
-  // assert(A->size1 == sizeX); // size1 = number of columns
 
   NM_types storage = A->storageType;
 
@@ -6307,8 +6212,8 @@ void NM_row_prod_no_diag_leftright(size_t sizeX, int block_start, size_t row, Nu
       int incx = A->size0, incy = 1;
       double* mat = A->matrix0;
       if (init) {
-        right[row] = 0.;
-        left[0] = 0.;
+        right[0] = 0.;
+        left[row] = 0.;
       }
 
       left[row] += cblas_ddot(row, &mat[row], incx, x, incy);
@@ -6511,8 +6416,8 @@ void NM_get_invdiag(int n, int *info, NumericsMatrix *M, double *diag) {
   }
 }
 
-void NM_row_prod_graph(size_t sizeX, int block_start, size_t row_start, size_t size_left, size_t col_start_right,
-                       NumericsMatrix* A, size_t *permutation, double* x, double* left, double *right, bool init) {
+void NM_row_prod_graph(size_t sizeX, int block, size_t row, size_t size_left, size_t col_start_right,
+                       NumericsMatrix* A, size_t *permutation, const double* x, double* left, double *right, bool init) {
   assert(A);
   assert(x);
   assert(left);
@@ -6534,8 +6439,8 @@ void NM_row_prod_graph(size_t sizeX, int block_start, size_t row_start, size_t s
 
       for (int j = 0; j < sizeX; j++) {
         col = permutation[j];
-        if (col < size_left) left[0] += M[row_start + incx * j] * x[j];
-        else if (col >= col_start_right) right[0] += M[row_start + incx * j] * x[j];   
+        if (col < size_left) left[0] += M[row + incx * j] * x[j];
+        else if (col >= col_start_right) right[0] += M[row + incx * j] * x[j];   
       }
 
       break;
@@ -6547,7 +6452,7 @@ void NM_row_prod_graph(size_t sizeX, int block_start, size_t row_start, size_t s
        */
 
       /* NOT IMPLEMENTED */
-      // SBM_row_prod_no_diag_1x1(sizeX, 1, block_start, A->matrix1, x, y);
+      // SBM_row_prod_no_diag_1x1(sizeX, 1, block, A->matrix1, x, y);
       break;
     }
     case NM_SPARSE: {
@@ -6569,7 +6474,7 @@ void NM_row_prod_graph(size_t sizeX, int block_start, size_t row_start, size_t s
 
       size_t col;
 
-      for (CS_INT p = Mp[row_start]; p < Mp[row_start + 1]; ++p) {
+      for (CS_INT p = Mp[row]; p < Mp[row + 1]; ++p) {
         col = permutation[Mi[p]];
         if (col < size_left) left[0] += Mx[p] * x[Mi[p]];
         else if (col >= col_start_right) right[0] += Mx[p] * x[Mi[p]];   
@@ -6583,17 +6488,4 @@ void NM_row_prod_graph(size_t sizeX, int block_start, size_t row_start, size_t s
   }
 
   // NM_version_sync(A);
-}
-
-NumericsMatrix* NM_group2(size_t nc, NumericsMatrix* A) {
-  assert(A->size0 == A->size1);
-
-  size_t d = A->size0 / nc;
-
-  /* The output is a sparse matrix to make it easier for PETSC */
-  NumericsMatrix* out = NM_create(NM_SPARSE, (int)nc, (int)nc);
-
-  /* TODO */
-
-  return out;
 }

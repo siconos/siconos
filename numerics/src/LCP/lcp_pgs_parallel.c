@@ -218,7 +218,7 @@ void lcp_pgs_parallel(LinearComplementarityProblem *problem, double *z, double *
         // NM_block_prod_no_diag(start_i, size_i, M, z, t_right, &zsave, 0);
 
         for (int i = start_i; i < start_i + size_i; i++) {
-          NM_block_prod_no_diag_one_row(i - start_i, start_i, size_i, M, z, t_left, t_right, &zsave, 0);
+          NM_block_prod_no_diag_one_row(i - start_i, start_i, size_i, M, z, t_left, t_right, 0);
           w[i] += t_right[i - start_i];
           err += pow(z[i] - fmax(0, (z[i] - w[i])), 2);
           // printf("END [%d] %e\n", rank, w[i] - cblas_ddot(n, &(M->matrix0[i]), n, z, 1) - q[i]);
@@ -229,7 +229,7 @@ void lcp_pgs_parallel(LinearComplementarityProblem *problem, double *z, double *
         for (int i = start_i; i < start_i + size_i; i++) {
 
           /* Diagonal block */
-          NM_block_prod_no_diag_one_row(i - start_i, start_i, size_i, M, z, t_left, t_right, &zsave, 0);
+          NM_block_prod_no_diag_one_row(i - start_i, start_i, size_i, M, z, t_left, t_right, 0);
           // NM_row_prod_no_diag1x1(size_i, i - start_i, i - start_i, M, z, &t_right[i - start_i], 0);
 
           /* Finish computing w_{iter} */

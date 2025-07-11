@@ -582,7 +582,7 @@ void fc3d_nsgs_graph(FrictionContactProblem *problem, double *reaction, double *
   size_t n_colors = 0;
   size_t *partition_size = NULL;
   size_t **partitions = NULL;
-  color_graph_2(problem->numberOfContacts, problem->M, &n_colors, &partition_size, &partitions);
+  color_graph_block(problem->numberOfContacts, problem->M, &n_colors, &partition_size, &partitions);
 
   /*****  NSGS Iterations *****/
 

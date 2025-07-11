@@ -1123,70 +1123,101 @@ void NM_version_sync(NumericsMatrix* M);
  */
 int NM_isnan(NumericsMatrix* M);
 
-/**
-   Block of a Matrix - vector product y = blockA*x or y += blockA*x, blockA being a submatrix of A
-   (size_i rows and size_j columns)
-
-   \param[in] start_i row where the block starts
-   \param[in] start_j column where the block starts
-   \param[in] size_i number of rows in the block
-   \param[in] size_j number of columns in the block
-   \param[in] A the matrix to be multiplied
-   \param[in] M the sparse matrix computed from A, if needed
-   \param[in] x the vector to be multiplied
-   \param[in,out] y the resulting vector
-   \param[in] init = 0 for y += Ax, =1 for y = Ax
+/** \brief Submatrix vector product
+ *  
+ *  Submatrix vector product: y = blockA * x or y += blockA * x, blockA being a submatrix of A.
+ * 
+ *  Only used in `lcp_pgs_parallel`.
+ *
+ *  \param[in] start_i row where the block starts
+ *  \param[in] start_j column where the block starts
+ *  \param[in] size_i number of rows in the block
+ *  \param[in] size_j number of columns in the block
+ *  \param[in] A the matrix to be multiplied
+ *  \param[in] x the vector to be multiplied
+ *  \param[in,out] y the resulting vector
+ *  \param[in] init = 0 for y += Ax, =1 for y = Ax
+ * 
+ *  \warning Does not support NM_SPARSE_BLOCK format
 */
 void NM_block_prod(int start_i, int start_j, int size_i, int size_j, NumericsMatrix* A, const double *x, double *y, int init);
 
-/**
-   Block of a Matrix - vector product y = blockA*x or y += blockA*x, blockA being a submatrix of A
-   (size_i rows and size_j columns)
-
-   \param[in] start_i row where the block starts
-   \param[in] start_j column where the block starts
-   \param[in] size_i number of rows in the block
-   \param[in] size_j number of columns in the block
-   \param[in] A the matrix to be multiplied
-   \param[in] M the sparse matrix computed from A, if needed
-   \param[in] x the vector to be multiplied
-   \param[in,out] y the resulting vector
-   \param[in] init = 0 for y += Ax, =1 for y = Ax
-
-   THIS ONE I DONT USE ANYMORE 
+/** \brief Submatrix vector product, for diagonal blocks, one row only
+ *  
+ *  Dot product between a row of a diagonal block of a matrix and a vector, but it ignores the diagonal term, and does only one row.
+ *  The result is divided in two parts: the sum before the diagonal, stored in `left`, and the sum after the diagonal, in `right`.
+ * 
+ *  Writes in `left[local_row]` and in `right[local_row]` 
+ * 
+ *  Only used in `lcp_pgs_parallel`.
+ * 
+ *  \param[in] local_row row position inside the block
+ *  \param[in] start_i row where the block starts
+ *  \param[in] size_i number of rows in block
+ *  \param[in] A the matrix to be multiplied
+ *  \param[in] x the vector to be multiplied
+ *  \param[in, out] left where the left part of the sum (before the diagonal) will be stored
+ *  \param[in, out] right where the right part of the sum (after the diagonal) will be stored
+ *  \param[in] init = 0 for y += Ax, =1 for y = Ax
+ * 
+ *  \warning Does not support NM_SPARSE_BLOCK format
 */
-void NM_block_prod_no_diag(int start_i, int size_i, NumericsMatrix* A, double *x, double *y, double* xsave, int init);
+void NM_block_prod_no_diag_one_row(int local_row, int start_i, int size_i, NumericsMatrix* A, const double *x, double *left, double *right, int init);
 
-void NM_block_prod_no_diag_one_row(int local_line, int start_i, int size_i, NumericsMatrix* A, double *x, double *left, double *right, double* xsave, int init);
+/** \brief Row of matrix times vector, without the diagonal term
+ *  
+ *  Dot product between a row of a matrix, without its diagonal coefficient, and a vector.
+ *  The result is divided in two parts: the sum before the diagonal, stored in `left`, and the sum after the diagonal, in `right`.
+ *  
+ *  Writes in `left[row]` and in `right[0]` 
+ * 
+ *  Only used in `lcp_pgs_opti`.
+ * 
+ *  \param[in] sizeX row size
+ *  \param[in] block UNUSED (will be needed when support NM_SPARSE_BLOCK)
+ *  \param[in] row row number
+ *  \param[in] A the matrix to be multiplied
+ *  \param[in] x the vector to be multiplied
+ *  \param[in, out] left where the left part of the sum (before the diagonal) will be stored
+ *  \param[in, out] right where the right part of the sum (after the diagonal) will be stored
+ *  \param[in] init = 0 for y += Ax, =1 for y = Ax
+ * 
+ *  \warning Does not support NM_SPARSE_BLOCK format
+*/
+void NM_row_prod_no_diag_leftright(size_t sizeX, int block, size_t row, NumericsMatrix* A, const double* x, double *left, double* right, bool init);
 
-void NM_row_prod_no_diag_leftright(size_t sizeX, int block_start, size_t row, NumericsMatrix* A, double* x, double *left, double* right, bool init);
-
-/**
-   Get the inverse of each diagonal element of a matrix.
-
-   \param[in] n number of lines / columns
-   \param[in] info info
-   \param[in] A the matrix 
-   \param[in, out] diag array to store the diagonal
+/** \brief Get the inverse of each diagonal element of a matrix
+ *
+ *  \param[in] n number of lines (= number of columns)
+ *  \param[in] info info
+ *  \param[in] A the matrix 
+ *  \param[in, out] diag array to store the diagonal
+ *
+ *  \warning Does not support NM_SPARSE_BLOCK format
 */
 void NM_get_invdiag(int n, int *info, NumericsMatrix *M, double *diag);
 
-/**
-   Computes row of A times x in two parts:
-   - indices part of colors already computed go to 'left'
-   - other indices go to 'right'
-   \param[in] sizeX dim of the vector x
-   \param[in] block_start block number (only used for SBM)
-   \param[in] row_start index of row of A to be multiplied
-   \param[in] size_left number of indices already computed
-   \param[in] col_start_right smallest index of non-computed indices
-   \param[in] A the matrix to be multiplied
-   \param[in] x the vector to be multiplied
-   \param[in,out] left left part of the sum (before the diagonal)
-   \param[in,out] right right part of the sum (after the diagonal)
-   \param[in] init if True left,right = Ax, else left,right += Ax
+/** \brief Row of matrix times vector, for lcp_pgs_graph_* solvers
+ *  
+ *  Computes row of A times x in two parts: indices part of colors already computed go to `left`, other indices go to `right`
+ * 
+ *  The array `permutation` has the information about which contacts have been computed already.
+ * 
+ *  \param[in] sizeX dim of the vector x
+ *  \param[in] block  UNUSED (will be needed when support NM_SPARSE_BLOCK)
+ *  \param[in] row row number
+ *  \param[in] size_left number of contacts already updated. Index up to which we put the contacts in `left`
+ *  \param[in] col_start_right index of `permutation` from which we put the contacts in `right` 
+ *  \param[in] A the matrix
+ *  \param[in] permutation permutation of contacts, used to know which have already been computed
+ *  \param[in] x vector x 
+ *  \param[in, out] left where the left part of the sum (before the diagonal) will be stored
+ *  \param[in, out] right where the right part of the sum (after the diagonal) will be stored
+ *  \param[in] init = 0 for y += Ax, =1 for y = Ax
+ * 
+ *  \warning Does not support NM_SPARSE_BLOCK format
 */
-void NM_row_prod_graph(size_t sizeX, int block_start, size_t row_start, size_t size_left, size_t col_start_right, NumericsMatrix* A, size_t *permutation, double* x, double* left, double *right, bool init);
+void NM_row_prod_graph(size_t sizeX, int block, size_t row, size_t size_left, size_t col_start_right, NumericsMatrix* A, size_t *permutation, const double* x, double* left, double *right, bool init);
 
 /**
  * Same as NM_row_prod_no_diag2 but usable in parallel (does not modify x)
@@ -1197,16 +1228,6 @@ void NM_row_prod_no_diag2_parallel(size_t sizeX, int block_start, size_t row_sta
  * Same as NM_row_prod_no_diag3 but usable in parallel (does not modify x)
 */
 void NM_row_prod_no_diag3_parallel(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A, const double* x, double* y, bool init);
-
-/**
-   If A is a (nc * d, nc * d) matrix, create a (nc, nc) matrix B such that:
-   - B_ij = 0 if A_{d * i, d * j} = A_{d * i + 1, d * j} = A_{d * i, d * j + 1} = A_{d * i + 1, d * j + 1} = 0
-   - B_ij = 1 else
-
-   \param[in] nc number of contacts
-   \param[in] A the matrix 
-*/
-RawNumericsMatrix* NM_group2(size_t nc, NumericsMatrix* A);
 
 
 #ifdef WITH_OPENSSL
