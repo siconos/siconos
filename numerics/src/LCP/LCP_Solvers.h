@@ -71,13 +71,13 @@ void lcp_cpg(LinearComplementarityProblem* problem, double* z, double* w, int* i
  *
  *  \param[in] problem structure that represents the LCP (M, q...)
  *  \param[in,out] z a n-vector of doubles which contains the initial solution and returns the
- solution of the problem.
+ *  solution of the problem.
  *  \param[in,out] w a n-vector of doubles which returns the solution of the problem.
  *  \param[out] info an integer which returns the termination value:
- 0 : convergence
- 1 : iter = itermax
- 2 : negative diagonal term
- \param[in,out] options structure used to define the solver and its parameters.
+ * 0 : convergence
+ * 1 : iter = itermax
+ * 2 : negative diagonal term
+ *  \param[in,out] options structure used to define the solver and its parameters.
 */
 void lcp_pgs(LinearComplementarityProblem* problem, double* z, double* w, int* info,
              SolverOptions* options);
@@ -87,98 +87,152 @@ void lcp_pgs(LinearComplementarityProblem* problem, double* z, double* w, int* i
  *
  *  \param[in] problem structure that represents the LCP (M, q...)
  *  \param[in,out] z a n-vector of doubles which contains the initial solution and returns the
- solution of the problem.
+ *  solution of the problem.
  *  \param[in,out] w a n-vector of doubles which returns the solution of the problem.
  *  \param[out] info an integer which returns the termination value:
- 0 : convergence
- 1 : iter = itermax
- 2 : negative diagonal term
+ *  0 : convergence
+ *  1 : iter = itermax
+ *  2 : negative diagonal term
  *  \param[in,out] options structure used to define the solver and its parameters.
-
- \todo Sizing the regularization paramter and apply it only on null diagnal term
-
+ *
+ * \todo Sizing the regularization paramter and apply it only on null diagnal term
 */
 void lcp_rpgs(LinearComplementarityProblem* problem, double* z, double* w, int* info,
               SolverOptions* options);
 
-/** lcp_pgs_parallel (Parallel Projected Gauss-Seidel ) is a parallel implementation of the basic
- Projected Gauss-Seidel solver for LCP.
- 
- See 10.1109/HPCC.2009.51 
+/** \brief Parallel implementation of the Projected Gauss-Seidel solver for LCP problems.
+ * 
+ *  It is based on the paper "Parallel Dense Gauss-Seidel Algorithm on Many-Core Processors", 
+ *  by H. Courtecuisse and J. Allard
  *
  *  \param[in] problem structure that represents the LCP (M, q...)
  *  \param[in,out] z a n-vector of doubles which contains the initial solution and returns the
- solution of the problem.
+ *  solution of the problem.
  *  \param[in,out] w a n-vector of doubles which returns the solution of the problem.
  *  \param[out] info an integer which returns the termination value:
- 0 : convergence
- 1 : iter = itermax
- 2 : negative diagonal term
+ *  0 : convergence
+ *  1 : iter = itermax
+ *  2 : negative diagonal term
  *  \param[in,out] options structure used to define the solver and its parameters.
-
- \todo Sizing the regularization paramter and apply it only on null diagnal term
-
+ *
+ *  \cite H. Courtecuisse and J. Allard, "Parallel Dense Gauss-Seidel Algorithm on Many-Core Processors," 
+ *        2009 11th IEEE International Conference on High Performance Computing and Communications, Seoul, 
+ *        Korea (South), 2009, pp. 139-147, doi: 10.1109/HPCC.2009.51.
 */
 void lcp_pgs_parallel(LinearComplementarityProblem* problem, double* z, double* w, int* info,
                       SolverOptions* options);
 
-/** lcp_pgs_graph is a parallel implementation of the basic Projected Gauss-Seidel solver
- for LCP. It builds a graph to identify independent rows and update them in parallel. 
- 
- See https://erkaman.github.io/posts/gauss_seidel_graph_coloring.html
+/** \brief Parallel implementation of the Projected Gauss-Seidel solver, using graph coloring
+ *  
+ *  Builds a graph to identify independent rows and update them in parallel. 
+ *
+ *  See https://erkaman.github.io/posts/gauss_seidel_graph_coloring.html
  *
  *  \param[in] problem structure that represents the LCP (M, q...)
  *  \param[in,out] z a n-vector of doubles which contains the initial solution and returns the
- solution of the problem.
+ *  solution of the problem.
  *  \param[in,out] w a n-vector of doubles which returns the solution of the problem.
  *  \param[out] info an integer which returns the termination value:
- 0 : convergence
- 1 : iter = itermax
- 2 : negative diagonal term
+ *  0 : convergence
+ *  1 : iter = itermax
+ *  2 : negative diagonal term
  *  \param[in,out] options structure used to define the solver and its parameters.
-
- \todo Sizing the regularization paramter and apply it only on null diagnal term
-
 */
-
-void lcp_pgs_permut(LinearComplementarityProblem* problem, double* z, double* w, int* info,
-                   SolverOptions* options);
-
 void lcp_pgs_graph(LinearComplementarityProblem* problem, double* z, double* w, int* info,
                    SolverOptions* options);
 
-/** lcp_pgs_graph_permut is an optimized version of lcp_pgs_graph.
- It builds a graph to identify independent rows and update them in parallel. 
- 
- See https://erkaman.github.io/posts/gauss_seidel_graph_coloring.html
+/** \brief `lcp_pgs_graph_permut` is an optimized version of `lcp_pgs_graph`
+ *
+ *  It does not use `lcp_compute_error`, which makes it faster.
  *
  *  \param[in] problem structure that represents the LCP (M, q...)
  *  \param[in,out] z a n-vector of doubles which contains the initial solution and returns the
- solution of the problem.
+ *  solution of the problem.
  *  \param[in,out] w a n-vector of doubles which returns the solution of the problem.
  *  \param[out] info an integer which returns the termination value:
- 0 : convergence
- 1 : iter = itermax
- 2 : negative diagonal term
+ *  0 : convergence
+ *  1 : iter = itermax
+ *  2 : negative diagonal term
  *  \param[in,out] options structure used to define the solver and its parameters.
-
- \todo Sizing the regularization paramter and apply it only on null diagnal term
-
 */
 void lcp_pgs_graph_permut(LinearComplementarityProblem *problem, double *z, double *w, int *info,
                           SolverOptions *options);
 
+/** \brief Same as `lcp_pgs_graph_permut`, but with equitable graph coloring
+ *
+ *  Equitable means the size difference between two color sets is at most one.
+ *
+ *  \param[in] problem structure that represents the LCP (M, q...)
+ *  \param[in,out] z a n-vector of doubles which contains the initial solution and returns the
+ *  solution of the problem.
+ *  \param[in,out] w a n-vector of doubles which returns the solution of the problem.
+ *  \param[out] info an integer which returns the termination value:
+ *  0 : convergence
+ *  1 : iter = itermax
+ *  2 : negative diagonal term
+ *  \param[in,out] options structure used to define the solver and its parameters.
+*/
 void lcp_pgs_graph_permut_equitable(LinearComplementarityProblem *problem, double *z, double *w, int *info,
                                     SolverOptions *options);
 
+/** \brief Same as `lcp_pgs_graph_permut_equitable`, but with one big parallel region
+ *
+ *  \note It is not better than `lcp_pgs_graph_permut_equitable`
+ *
+ *  \param[in] problem structure that represents the LCP (M, q...)
+ *  \param[in,out] z a n-vector of doubles which contains the initial solution and returns the
+ *  solution of the problem.
+ *  \param[in,out] w a n-vector of doubles which returns the solution of the problem.
+ *  \param[out] info an integer which returns the termination value:
+ *  0 : convergence
+ *  1 : iter = itermax
+ *  2 : negative diagonal term
+ *  \param[in,out] options structure used to define the solver and its parameters.
+*/
 void lcp_pgs_graph_permut_equitable_opti(LinearComplementarityProblem *problem, double *z, double *w, int *info,
-                                       SolverOptions *options);
+                                         SolverOptions *options);
 
+/** \brief Jacobi solver
+ *
+ *  \param[in] problem structure that represents the LCP (M, q...)
+ *  \param[in,out] z a n-vector of doubles which contains the initial solution and returns the
+ *  solution of the problem.
+ *  \param[in,out] w a n-vector of doubles which returns the solution of the problem.
+ *  \param[out] info an integer which returns the termination value:
+ *  0 : convergence
+ *  1 : iter = itermax
+ *  2 : negative diagonal term
+ *  \param[in,out] options structure used to define the solver and its parameters.
+*/
 void lcp_jacobi(LinearComplementarityProblem *problem, double *z, double *w, int *info, SolverOptions *options);
 
+/** \brief Parallel Jacobi solver
+ *
+ *  \param[in] problem structure that represents the LCP (M, q...)
+ *  \param[in,out] z a n-vector of doubles which contains the initial solution and returns the
+ *  solution of the problem.
+ *  \param[in,out] w a n-vector of doubles which returns the solution of the problem.
+ *  \param[out] info an integer which returns the termination value:
+ *  0 : convergence
+ *  1 : iter = itermax
+ *  2 : negative diagonal term
+ *  \param[in,out] options structure used to define the solver and its parameters.
+*/
 void lcp_jacobi_parallel(LinearComplementarityProblem *problem, double *z, double *w, int *info,
                          SolverOptions *options);
 
+/** \brief Optimized sequential Projected Gauss-Seidel
+ * 
+ *  \param[in] problem structure that represents the LCP (M, q...)
+ *  \param[in,out] z a n-vector of doubles which contains the initial solution and returns the
+ *  solution of the problem.
+ *  \param[in,out] w a n-vector of doubles which returns the solution of the problem.
+ *  \param[out] info an integer which returns the termination value:
+ *  0 : convergence
+ *  1 : iter = itermax
+ *  2 : negative diagonal term
+ *  \param[in,out] options structure used to define the solver and its parameters.
+*/
 void lcp_pgs_opti(LinearComplementarityProblem *problem, double *z, double *w, int *info,
                   SolverOptions *options);
 
