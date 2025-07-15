@@ -41,9 +41,10 @@ void siconos::joints::NewtonEulerJointR::setAxis(
 }
 
 siconos::algebra::SiconosVector3 siconos::joints::NewtonEulerJointR::projectVectorDoF(
-    const siconos::algebra::SiconosVector& v, const siconos::algebra::BlockVector& q0,
-    int axis, bool absoluteRef) {
-  auto ax = normalDoF(q0, axis, absoluteRef);
+    const siconos::algebra::SiconosVector& v, const siconos::algebra::SiconosVector& q0,
+    const std::optional<Eigen::Ref<siconos::algebra::SiconosVector>>& q1, int axis,
+    bool absoluteRef) {
+  auto ax = normalDoF(q0, q1, axis, absoluteRef);
 
   double L = v(0) * ax(0) + v(1) * ax(1) + v(2) * ax(2);
   return siconos::algebra::SiconosVector3{ax(0) * L, ax(1) * L, ax(2) * L};  // RVO

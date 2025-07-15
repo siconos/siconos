@@ -39,5 +39,9 @@ PYBIND11_MODULE(_io, m) {
       .def("contactPoints", &siconos::io::MechanicsIO::contactPoints,
            py::return_value_policy::move)
       .def("contactContactWork", &siconos::io::MechanicsIO::contactContactWork,
-           py::return_value_policy::move);
+           py::return_value_policy::move, py::arg("nsds"), py::arg("index_Set")=1,
+           py::arg("omega")=0.5, py::arg("tol") = 1e-8,
+           "return the dissipation values  of all contact points as a matrix where" 
+           "each row corresponds to a contact, row[i] = id, normal contact work, "
+           "tangent contact work, friction dissipation, contact status");
 }

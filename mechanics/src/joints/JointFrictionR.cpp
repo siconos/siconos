@@ -84,7 +84,7 @@ void siconos::joints::JointFrictionR::computeH_NE_(double time,
 
   // Copy indicated axes into the friction jacobian, negative and positive sides
   // NOTE trying ==1 using Relay, maybe don't need LCP formulation
-  assert(H_NE_view_->cols() == 1);
+  assert(H_NE_view_->rows() == 1);
   for (unsigned int i = 0; i < 1; i++)
     for (unsigned int j = 0; j < H_NE_view_->cols(); j++) {
       H_NE_view_->setValue(

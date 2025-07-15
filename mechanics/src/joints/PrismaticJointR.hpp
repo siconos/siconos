@@ -51,7 +51,6 @@ class PrismaticJointR : public NewtonEulerJointR {
    */
   siconos::algebra::SiconosVector3 axis2_;
 
-
   double _G10G20d1x{0.};
   double _G10G20d1y{0.};
   double _G10G20d1z{0.};
@@ -111,14 +110,17 @@ class PrismaticJointR : public NewtonEulerJointR {
    *  axis is of angular type (see typeOfDoF), then the returned normal
    *  is the axis of rotation.
    *
-   *  \param[in] q0 The state q of one or more NewtonEulerDS
+   *  \param[in] q0 The state q of the first NewtonEulerDS
+   *  \param[in] q1 The state q of the second NewtonEulerDS (optional)
    *  \param[in] axis
    *  \param[in] absoluteRef If true, ans is in the inertial frame,
    *  otherwise the q1 frame is assumed.
    */
-  virtual siconos::algebra::SiconosVector3 normalDoF(const siconos::algebra::BlockVector& q0,
-                                                     int axis,
-                                                     bool absoluteRef = true) override;
+  virtual siconos::algebra::SiconosVector3 normalDoF(
+      const siconos::algebra::SiconosVector& q0,
+      const std::optional<Eigen::Ref<siconos::algebra::SiconosVector>>& q1 = std::nullopt,
+      int axis = 0, bool absoluteRef = true) override;
+
 
   void displayInitialPosition();
 

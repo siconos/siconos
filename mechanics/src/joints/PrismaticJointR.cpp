@@ -774,15 +774,17 @@ void siconos::joints::PrismaticJointR::computeJachqDoF(
   }
 }
 
+
 siconos::algebra::SiconosVector3 siconos::joints::PrismaticJointR::normalDoF(
-    const siconos::algebra::BlockVector& q0, int axis, bool absoluteRef) {
+    const siconos::algebra::SiconosVector& q0,
+    const std::optional<Eigen::Ref<siconos::algebra::SiconosVector>>& q1, int axis,
+    bool absoluteRef) {
   assert(axis == 0);
   if (axis != 0) return siconos::algebra::SiconosVector3{};
 
   // We assume that a is normalized.
   auto result = axes_[0];
 
-  if (absoluteRef)
-    siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(*q0.vector(0), result);
+  if (absoluteRef) siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(q0, result);
   return result;  // RVO
 }

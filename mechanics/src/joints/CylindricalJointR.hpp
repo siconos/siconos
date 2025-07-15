@@ -116,6 +116,7 @@ class CylindricalJointR : public NewtonEulerJointR {
       const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2 =
           std::nullopt) override;
 
+
   /** \return the axis of rotation.
    *  Retrieve a normal in the direction of a 0-indexed free
    *  axis. Useful for calculating velocities in the axis, or for
@@ -123,14 +124,16 @@ class CylindricalJointR : public NewtonEulerJointR {
    *  axis is of angular type (see typeOfDoF), then the returned normal
    *  is the axis of rotation.
    *
-   *  \param[in] q0 The state q of one or more NewtonEulerDS
+   *  \param[in] q0 The state q of the first NewtonEulerDS
+   *  \param[in] q1 The state q of the second NewtonEulerDS (optional)
    *  \param[in] axis
    *  \param[in] absoluteRef If true, ans is in the inertial frame,
    *  otherwise the q1 frame is assumed.
    */
-  virtual siconos::algebra::SiconosVector3 normalDoF(const siconos::algebra::BlockVector& q0,
-                                                     int axis,
-                                                     bool absoluteRef = true) override;
+  virtual siconos::algebra::SiconosVector3 normalDoF(
+      const siconos::algebra::SiconosVector& q0,
+      const std::optional<Eigen::Ref<siconos::algebra::SiconosVector>>& q1 = std::nullopt, int axis = 0,
+      bool absoluteRef = true) override;
 
   int twistCount() { return _twistCount; }
 
@@ -142,6 +145,19 @@ class CylindricalJointR : public NewtonEulerJointR {
  */
   void computeh(const siconos::algebra::BlockVector& q,
                 Eigen::Ref<siconos::algebra::SiconosVector> y) override;
+
+  /**
+     to compute the output y = h(q) of the Relation
+
+    \param[in] q1 generalized coordinates vector of the fist dynamical system involved
+    in the relation
+    \param[in] q2 generalized coordinates vector of the second dynamical system
+    involved in the relation
+    \param[in,out] y the resulting vector
+ */
+  void computeh(const Eigen::Ref<const siconos::algebra::SiconosVector>& q1,
+                const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2,
+                Eigen::Ref<siconos::algebra::SiconosVector> y);
 
   void Jd1d2(double X1, double Y1, double Z1, double q10, double q11, double q12, double q13,
              double X2, double Y2, double Z2, double q20, double q21, double q22, double q23);

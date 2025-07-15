@@ -114,6 +114,7 @@ class NewtonEulerJointR : public siconos::modeling::NewtonEulerR {
       const std::optional<Eigen::Ref<const siconos::algebra::SiconosVector>>& q2 =
           std::nullopt) = 0;
 
+
   /** \return the projection of a vector onto the given 0-indexed free axis. Useful for
    *  calculating velocities in the axis, or for calculating
    *  axis-aligned forces applied to connected bodies.  If axis is of
@@ -121,13 +122,17 @@ class NewtonEulerJointR : public siconos::modeling::NewtonEulerR {
    *  axis of rotation.
    *
    *  \param[in] v The vector to project
-   *  \param[in] q0 The state q of one or more NewtonEulerDS
+   *  \param[in] q0 The state q of the first NewtonEulerDS
+   *  \param[in] q1 The state q of the second NewtonEulerDS (optional)
    *  \param[in] absoluteRef If true, v and the result are in the inertial frame,
    *  otherwise the q1 frame is assumed.
    */
   siconos::algebra::SiconosVector3 projectVectorDoF(const siconos::algebra::SiconosVector& v,
-                                                    const siconos::algebra::BlockVector& q0,
-                                                    int axis, bool absoluteRef = true);
+                                                    const siconos::algebra::SiconosVector& q0,
+                                                    const std::optional<Eigen::Ref<siconos::algebra::SiconosVector>>& q1,
+                                                    int axis = 0, bool absoluteRef = true);
+
+  
 
   /** \return the axis of rotation.
    *  Retrieve a normal in the direction of a 0-indexed free
@@ -136,13 +141,16 @@ class NewtonEulerJointR : public siconos::modeling::NewtonEulerR {
    *  axis is of angular type (see typeOfDoF), then the returned normal
    *  is the axis of rotation.
    *
-   *  \param[in] q0 The state q of one or more NewtonEulerDS
+   *  \param[in] q0 The state q of one NewtonEulerDS
+   *  \param[in] q1 The state q of the second NewtonEulerDS (optional)
    *  \param[in] axis
    *  \param[in] absoluteRef If true, ans is in the inertial frame,
    *  otherwise the q1 frame is assumed.
    */
-  virtual siconos::algebra::SiconosVector3 normalDoF(const siconos::algebra::BlockVector& q0,
-                                                     int axis, bool absoluteRef = true) {
+  virtual siconos::algebra::SiconosVector3 normalDoF(
+      const siconos::algebra::SiconosVector& q0,
+      const std::optional<Eigen::Ref<siconos::algebra::SiconosVector>>& q1 = std::nullopt, int axis = 0,
+      bool absoluteRef = true) {
     throw std::logic_error("normalDof  not implemented for this kind of joint");
   }
 

@@ -67,7 +67,7 @@ class PivotJointR : public KneeJointR {
    *  \param d2 second DynamicalSystem linked by the joint, (null for absolute frame)
    *  \param P a vector that defines the point around which rotation is allowed.
    *  \param A a vector that defines the cylindrical axis.
-   *  \param absoluteRef if true, P and A are in the absolute frame,
+   *  \param absoluteRef if true, P and A are in the absolute frame,g
    *                     otherwise P and A are in d1 frame.
    */
   PivotJointR(const Eigen::Ref<siconos::algebra::SiconosVector3>& P,
@@ -96,14 +96,16 @@ class PivotJointR : public KneeJointR {
    *  axis is of angular type (see typeOfDoF), then the returned normal
    *  is the axis of rotation.
    *
-   *  \param[in] q0 The state q of one or more NewtonEulerDS
+   *  \param[in] q0 The state q of the fiest NewtonEulerDS
+   *  \param[in] q1 The state q of the second NewtonEulerDS
    *  \param[in] axis
    *  \param[in] absoluteRef If true, ans is in the inertial frame,
    *  otherwise the q1 frame is assumed.
    */
-  virtual siconos::algebra::SiconosVector3 normalDoF(const siconos::algebra::BlockVector& q0,
-                                                     int axis,
-                                                     bool absoluteRef = true) override;
+  virtual siconos::algebra::SiconosVector3 normalDoF(
+      const siconos::algebra::SiconosVector& q0,
+      const std::optional<Eigen::Ref<siconos::algebra::SiconosVector>>& q1 = std::nullopt,
+      int axis = 0, bool absoluteRef = true) override;
 
   /**
      to compute the output y = h(q) of the Relation
@@ -177,7 +179,6 @@ void rot2to1(const Eigen::Ref<const siconos::algebra::SiconosVector>& qp1,
              const siconos::algebra::SiconosVector& cq2q,
              Eigen::Ref<siconos::algebra::SiconosVector> result);
 
-             
 }  // namespace pivot
 
 }  // namespace siconos::joints

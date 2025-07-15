@@ -81,6 +81,9 @@ PYBIND11_MODULE(_numerics, m) {
   m.def("solver_options_get_internal_solver", &solver_options_get_internal_solver,
         py::return_value_policy::take_ownership, py::arg("options"), py::arg("id"));
   m.def("numerics_set_verbose", &numerics_set_verbose);
+  m.def("solver_options_update_internal",
+        &solver_options_update_internal, py::arg("options"), py::arg("internal_solver_number"),
+        py::arg("solver_id"));
 
   py::module_ params = m.def_submodule(
       "params", "Parameter names in numerics (storage types, param for solvers ...)");
