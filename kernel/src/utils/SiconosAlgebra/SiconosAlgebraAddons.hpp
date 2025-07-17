@@ -24,6 +24,7 @@
 #define SICOALGEBRA_ADDONS_HPP
 
 #include <concepts>
+#include <optional>
 
 #include "BlockVector.hpp"
 #include "SiconosMatrix.hpp"
