@@ -82,7 +82,7 @@ void siconos::modeling::LagrangianDS::init_lu_mass() {
   if (mass_view_ && !hasConstantMass_) {
     computeMass(*state_q_[0]);
     // LU factorization
-    LUMass_ = std::make_shared<siconos::algebra::SiconosLUMatrix>(*mass_view_);
+    LUMass_ = std::make_shared<siconos::algebra::SiconosDenseLUMatrix>(*mass_view_);
     hasLUMass_ = true;
   }
 }
@@ -136,7 +136,7 @@ void siconos::modeling::LagrangianDS::initRhs(double time) {
   if (mass_view_) {
     computeMass(*state_q_[0]);
     // LU factorization
-    LUMass_ = std::make_shared<siconos::algebra::SiconosLUMatrix>(*mass_view_);
+    LUMass_ = std::make_shared<siconos::algebra::SiconosDenseLUMatrix>(*mass_view_);
     hasLUMass_ = true;
   }
 
@@ -166,10 +166,10 @@ void siconos::modeling::LagrangianDS::initRhs(double time) {
     if (hasJacobianTotalForcesOver_q() || hasJacobianTotalForcesOver_velocity())
       buffer_.resize(ndof_ * ndof_ * 2);
     // View onto left part of buffer_
-    Eigen::Map<siconos::algebra::SiconosMatrix> jacq(buffer_.data(), ndof_, ndof_);
+    Eigen::Map<siconos::algebra::SiconosDenseMatrix> jacq(buffer_.data(), ndof_, ndof_);
     // View onto right part of buffer_
-    Eigen::Map<siconos::algebra::SiconosMatrix> jacv(buffer_.data() + ndof_ * ndof_, ndof_,
-                                                     ndof_);
+    Eigen::Map<siconos::algebra::SiconosDenseMatrix> jacv(buffer_.data() + ndof_ * ndof_,
+                                                          ndof_, ndof_);
     if (hasJacobianTotalForcesOver_q()) {
       // Update if required
       computeJacobianTotalForcesOver_q(*state_q_[1], *state_q_[0], time);
@@ -228,7 +228,7 @@ void siconos::modeling::LagrangianDS::initRhs(double time) {
 ////  MASS ////
 
 void siconos::modeling::LagrangianDS::setConstantMass(
-    Eigen::Ref<siconos::algebra::SiconosMatrix> newValue) {
+    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue) {
   /**  Must:
 
    - create the Map (view onto memory handled by newValue) for mass
@@ -288,7 +288,7 @@ void siconos::modeling::LagrangianDS::computeFint(
 }
 
 void siconos::modeling::LagrangianDS::setConstantJacobianFintOver_q(
-    Eigen::Ref<siconos::algebra::SiconosMatrix> newValue) {
+    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue) {
   /**  Must:
 
    - create the Map (view onto memory handled by newValue) for jacobianFintOver_q
@@ -331,7 +331,7 @@ void siconos::modeling::LagrangianDS::computeJacobianFintOver_q(
 }
 
 void siconos::modeling::LagrangianDS::setConstantJacobianFintOver_velocity(
-    Eigen::Ref<siconos::algebra::SiconosMatrix> newValue) {
+    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue) {
   /**  Must:
 
    - create the Map (view onto memory handled by newValue) for jacobianFintOver_velocity
@@ -392,7 +392,7 @@ void siconos::modeling::LagrangianDS::computeFgyr(
 }
 
 void siconos::modeling::LagrangianDS::setConstantJacobianFgyrOver_q(
-    Eigen::Ref<siconos::algebra::SiconosMatrix> newValue) {
+    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue) {
   /**  Must:
 
    - create the Map (view onto memory handled by newValue) for jacobianFgyrOver_q
@@ -435,7 +435,7 @@ void siconos::modeling::LagrangianDS::computeJacobianFgyrOver_q(
 }
 
 void siconos::modeling::LagrangianDS::setConstantJacobianFgyrOver_velocity(
-    Eigen::Ref<siconos::algebra::SiconosMatrix> newValue) {
+    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue) {
   /**  Must:
 
    - create the Map (view onto memory handled by newValue) for jacobianFgyrOver_velocity
@@ -561,9 +561,9 @@ void siconos::modeling::LagrangianDS::computeJacobianRhsOver_x(double time) {
 
   if (hasMass()) {
     // View onto left part of buffer_
-    Eigen::Map<siconos::algebra::SiconosMatrix> jacq(buffer_.data(), ndof_, ndof_);
+    Eigen::Map<siconos::algebra::SiconosDenseMatrix> jacq(buffer_.data(), ndof_, ndof_);
     // View onto right part of buffer_
-    Eigen::Map<siconos::algebra::SiconosMatrix> jacv(buffer_.data(), ndof_, ndof_);
+    Eigen::Map<siconos::algebra::SiconosDenseMatrix> jacv(buffer_.data(), ndof_, ndof_);
 
     if (hasJacobianTotalForcesOver_q()) {
       if (!hasConstantMass_ || !hasConstantJacobianTotalForcesOver_q())
@@ -641,7 +641,7 @@ void siconos::modeling::LagrangianDS::computeJacobianTotalForcesOver_q(
   if (hasJacobianFintOver_q_ or hasJacobianFgyrOver_q_) {
     if (!jacobianTotalForcesOver_q_) {
       jacobianTotalForcesOver_q_ =
-          std::make_shared<siconos::algebra::SiconosMatrix>(ndof_, ndof_);
+          std::make_shared<siconos::algebra::SiconosDenseMatrix>(ndof_, ndof_);
       jacobianTotalForcesOver_q_->setZero();
     }
   } else {
@@ -661,7 +661,7 @@ void siconos::modeling::LagrangianDS::computeJacobianTotalForcesOver_velocity(
   if (hasJacobianFintOver_velocity_ or hasJacobianFgyrOver_velocity_) {
     if (!jacobianTotalForcesOver_velocity_) {
       jacobianTotalForcesOver_velocity_ =
-          std::make_shared<siconos::algebra::SiconosMatrix>(ndof_, ndof_);
+          std::make_shared<siconos::algebra::SiconosDenseMatrix>(ndof_, ndof_);
       jacobianTotalForcesOver_velocity_->setZero();
     }
   } else

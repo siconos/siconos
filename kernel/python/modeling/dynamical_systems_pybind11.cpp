@@ -135,13 +135,13 @@ void wrap_dynamical_systems(py::module_ &m) {
       //      },
       //      py::arg("mass_matrix"))
 
-      .def(
-          "setConstantMass",
-          [](siconos::modeling::LagrangianSparseDS &self,
-             const siconos::algebra::SiconosSparseMatrix &mat) {
-            self.setConstantMass(std::make_shared<siconos::algebra::SiconosSparseMatrix>(mat));
-          },
-          py::arg("mass_matrix"))
+      .def("setConstantMass", &siconos::modeling::LagrangianSparseDS::setConstantMass,
+           py::keep_alive<1, 2>(), "To define a constant mass operator")
+      //           [](siconos::modeling::LagrangianSparseDS &self,
+      //              const siconos::algebra::SiconosSparseMatrix &mat) {
+      //     self.setConstantMass(std::make_shared<siconos::algebra::SiconosSparseMatrix>(mat));
+      //           },
+      //           py::arg("mass_matrix"))
 
       .def(
           "mass",
@@ -156,8 +156,8 @@ void wrap_dynamical_systems(py::module_ &m) {
 
       .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>,
                     Eigen::Ref<siconos::algebra::SiconosVector>>(),
-           py::keep_alive<1, 2>(),  // keep python object (np array arguments) memory alive
-                                    // as long as object is referenced
+           py::keep_alive<1, 2>(),  // keep python object (np array arguments) memory
+                                    // alive as long as object is referenced
            py::keep_alive<1, 3>(), py::arg("q0"), py::arg("v0"))
 
       .def("q", &siconos::modeling::LagrangianDS::q_python,
@@ -266,8 +266,8 @@ void wrap_dynamical_systems(py::module_ &m) {
       .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>,
                     Eigen::Ref<siconos::algebra::SiconosVector>,
                     Eigen::Ref<siconos::algebra::SiconosMatrix>>(),
-           py::keep_alive<1, 2>(),  // keep python object (np array arguments) memory alive
-                                    // as long as object is referenced
+           py::keep_alive<1, 2>(),  // keep python object (np array arguments) memory
+                                    // alive as long as object is referenced
            py::keep_alive<1, 3>(), py::keep_alive<1, 4>(), py::arg("q0"), py::arg("v0"),
            py::arg("M"))
 
@@ -283,8 +283,8 @@ void wrap_dynamical_systems(py::module_ &m) {
       .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>,
                     Eigen::Ref<siconos::algebra::SiconosVector>, double,
                     Eigen::Ref<siconos::algebra::SiconosMatrix>>(),
-           py::keep_alive<1, 2>(),  // keep python object (np array arguments) memory alive
-                                    // as long as object is referenced
+           py::keep_alive<1, 2>(),  // keep python object (np array arguments) memory
+                                    // alive as long as object is referenced
            py::keep_alive<1, 3>(), py::keep_alive<1, 5>(), py::arg("q0"), py::arg("twist0"),
            py::arg("mass"), py::arg("inertia"))
 
@@ -307,21 +307,23 @@ void wrap_dynamical_systems(py::module_ &m) {
                 });
           },
           "How to compute external forces")
-      .def("setConstantMext",
-           &siconos::modeling::NewtonEulerDS::setConstantMext,
+      .def("setConstantMext", &siconos::modeling::NewtonEulerDS::setConstantMext,
            py::keep_alive<1, 2>(), "To define a constant external torques vector")
-      .def("setComputeMextFunction",
-           [](siconos::modeling::NewtonEulerDS &self, py::function f) {
-             // Catch Python function and create a complient std::function
-             self.setComputeMextFunction(
-                 [f](double val, Eigen::Ref<siconos::algebra::MapVectorType> result) {
-                   f(val, result);  // Call python func with a memory view ...
-                 });
-           },
-           "How to compute external torques")
+      .def(
+          "setComputeMextFunction",
+          [](siconos::modeling::NewtonEulerDS &self, py::function f) {
+            // Catch Python function and create a complient std::function
+            self.setComputeMextFunction(
+                [f](double val, Eigen::Ref<siconos::algebra::MapVectorType> result) {
+                  f(val, result);  // Call python func with a memory view ...
+                });
+          },
+          "How to compute external torques")
       .def("setIsMextExpressedInInertialFrame",
            &siconos::modeling::NewtonEulerDS::setIsMextExpressedInInertialFrame)
       .def_property("scalarMass", &siconos::modeling::NewtonEulerDS::scalarMass,
                     &siconos::modeling::NewtonEulerDS::setScalarMass)
-      .def("angularVelocity", &siconos::modeling::NewtonEulerDS::angularVelocity_view);
+      .def("angularVelocity", &siconos::modeling::NewtonEulerDS::angularVelocity_view)
+      .def("angularVelocityInBodyFrame",
+           &siconos::modeling::NewtonEulerDS::angularVelocityInBodyFrame);
 }

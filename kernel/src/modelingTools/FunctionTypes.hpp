@@ -124,11 +124,23 @@ using FunctionVVS_M =
                        const Eigen::Ref<const siconos::algebra::SiconosVector> &, double,
                        Eigen::Ref<siconos::algebra::MapType>)>;
 
+/** fonction proto to compute f(vector,vector,t, result_matrix (sparse)) */
+using FunctionVVS_Ms =
+    std::function<void(const Eigen::Ref<const siconos::algebra::SiconosVector> &,
+                       const Eigen::Ref<const siconos::algebra::SiconosVector> &, double,
+                       siconos::algebra::SiconosSparseMatrix &)>;
+
 /** fonction proto to compute f(vector,vector, result_matrix) */
 using FunctionVV_M =
     std::function<void(const Eigen::Ref<const siconos::algebra::SiconosVector> &,
                        const Eigen::Ref<const siconos::algebra::SiconosVector> &,
                        Eigen::Ref<siconos::algebra::MapType>)>;
+
+/*** fonction proto to compute f(vector,vector, result_matrix (sparse)) */
+using FunctionVV_Ms =
+    std::function<void(const Eigen::Ref<const siconos::algebra::SiconosVector> &,
+                       const Eigen::Ref<const siconos::algebra::SiconosVector> &,
+                       siconos::algebra::SiconosSparseMatrix &)>;
 
 /** fonction proto to compute f(matrix,vector, result_matrix) */
 using FunctionMV_V =
@@ -143,6 +155,11 @@ using FunctionS_M = std::function<void(double, Eigen::Ref<siconos::algebra::MapT
 using FunctionV_M =
     std::function<void(const Eigen::Ref<const siconos::algebra::SiconosVector> &,
                        Eigen::Ref<siconos::algebra::MapType>)>;
+
+/** fonction proto to compute f(vector, result_matrix (sparse)) */
+using FunctionV_Ms =
+    std::function<void(const Eigen::Ref<const siconos::algebra::SiconosVector> &,
+                       siconos::algebra::SiconosSparseMatrix &)>;
 
 /** fonction proto to compute f(block vector, t, result_matrix) */
 using FunctionBVS_M = std::function<void(const siconos::algebra::BlockVector &, double,

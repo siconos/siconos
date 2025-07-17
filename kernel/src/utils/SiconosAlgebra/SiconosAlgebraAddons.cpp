@@ -19,6 +19,7 @@
 #include "SiconosAlgebraAddons.hpp"
 
 #include <random>
+#include <set>
 
 #include "BlockVector.hpp"
 #include "SiconosException.hpp"
@@ -99,22 +100,35 @@ void siconos::algebra::fillTriplet(SiconosDenseMatrix& m, CSparseMatrix* triplet
 }
 
 siconos::algebra::SiconosSparseMatrix siconos::algebra::generateRandomSparseMatrix(
-    Eigen::Index rows, Eigen::Index cols, double density) {
+    Eigen::Index rows, Eigen::Index cols, int nnz, std::optional<double> density) {
   siconos::algebra::SiconosSparseMatrix mat(rows, cols);
   std::vector<Eigen::Triplet<double>> triplets;
 
-  std::mt19937 rng(42);  // graine fixe pour reproductibilité
+  std::mt19937 rng(42);
   std::uniform_int_distribution<int> rowDist(0, rows - 1);
   std::uniform_int_distribution<int> colDist(0, cols - 1);
-  std::uniform_real_distribution<double> valDist(-1.0, 1.0);
+  std::uniform_real_distribution<double> valDist(1e-6, 1.0);  // never equal to zero
+  std::bernoulli_distribution signDist(0.5);
 
-  int estimatedNNZ = static_cast<int>(rows * cols * density);
-  triplets.reserve(estimatedNNZ);
+  if (density) {
+    assert(*density <= 1.);
+    assert(*density >= 0.);
+    nnz = static_cast<int>(rows * cols * *density);
+  }
 
-  for (int k = 0; k < estimatedNNZ; ++k) {
+  triplets.reserve(nnz);
+  std::set<std::pair<int, int>> used_positions;
+
+  // Step 1: Generate unique positions
+  while ((int)used_positions.size() < nnz) {
     int i = rowDist(rng);
     int j = colDist(rng);
-    double val = valDist(rng);
+    used_positions.emplace(i, j);
+  }
+
+  // Step 2: Generate triplets with non-zero values
+  for (const auto& [i, j] : used_positions) {
+    double val = (signDist(rng) ? 1.0 : -1.0) * valDist(rng);
     triplets.emplace_back(i, j, val);
   }
 

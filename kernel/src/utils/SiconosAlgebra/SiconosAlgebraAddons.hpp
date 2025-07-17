@@ -141,8 +141,8 @@ void transposeMatrixVector_prod_toBlock(const SiconosVector& x, const MatrixType
 }
 
 /** Generate a random sparse matrix. Useful for tests */
-SiconosSparseMatrix generateRandomSparseMatrix(Eigen::Index rows, Eigen::Index cols,
-                                               double density = 0.001);
+SiconosSparseMatrix generateRandomSparseMatrix(Eigen::Index rows, Eigen::Index cols, int nnz,
+                                               std::optional<double> density = std::nullopt);
 }  // namespace siconos::algebra
 
 #endif

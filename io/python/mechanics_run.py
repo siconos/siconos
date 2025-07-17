@@ -1757,9 +1757,10 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         self._ds_positions = positions
         if positions is not None:
-            self._dynamic_data.resize(current_line + positions.shape[0], 0)
+            number_of_ds = positions.shape[0]
+            self._dynamic_data.resize(current_line + number_of_ds, 0)
 
-            times = np.empty((positions.shape[0], 1))
+            times = np.empty((number_of_ds, 1))
             times.fill(time)
             if self._dimension == 3:
                 self._dynamic_data[current_line:, :] = np.concatenate(
@@ -1767,7 +1768,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 )
             elif self._dimension == 2:
                 # VA. change the position such that is corresponds to a 3D object
-                new_positions = np.zeros((positions.shape[0], 8))
+                new_positions = np.zeros((number_of_ds, 8))
 
                 new_positions[:, 0] = positions[:, 0]  # ds number
                 new_positions[:, 1] = positions[:, 1]  # x position
@@ -1790,10 +1791,10 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         velocities = self.get_io_array(self._io.velocities(self._nsds))
 
         if velocities is not None:
+            number_of_ds = velocities.shape[0]
+            self._velocities_data.resize(current_line + number_of_ds, 0)
 
-            self._velocities_data.resize(current_line + velocities.shape[0], 0)
-
-            times = np.empty((velocities.shape[0], 1))
+            times = np.empty((number_of_ds, 1))
             times.fill(time)
             if self._dimension == 3:
                 self._velocities_data[current_line:, :] = np.concatenate(
@@ -1801,7 +1802,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 )
             elif self._dimension == 2:
                 # VA. change the position such that is corresponds to a 3D object
-                new_velocities = np.zeros((velocities.shape[0], 7))
+                new_velocities = np.zeros((number_of_ds, 7))
 
                 new_velocities[:, 0] = velocities[:, 0]  # ds number
                 new_velocities[:, 1] = velocities[:, 1]  # x velocity
@@ -1820,11 +1821,6 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         if self._nsds.topology().indexSetsSize() > 1:
             time = self.current_time()
 
-            # failure with native backend:
-            # contact_points = self.get_io_array(self._io.contactPoints(
-            #    self._nsds, self._output_contact_index_set))
-
-            # transpose missing
             contact_points = self._io.contactPoints(
                 self._nsds, self._output_contact_index_set
             )

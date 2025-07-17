@@ -21,12 +21,10 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 #include "RotationQuaternion.hpp"
-#include "SiconosException.hpp"
+#include "SiconosVector.hpp"
 
 class QuaternionTest : public CppUnit::TestFixture {
  private:
-  ACCEPT_SERIALIZATION(QuaternionTest);
-
   // Name of the tests suite
   CPPUNIT_TEST_SUITE(QuaternionTest);
 
@@ -42,6 +40,8 @@ class QuaternionTest : public CppUnit::TestFixture {
  public:
   void setUp();
   void tearDown();
+  siconos::algebra::SiconosVector7 q0 = {1, 2, 3, 0, 1, 0, 0};
+  siconos::algebra::SiconosVector7 q01 = {1, 2, 3, 1, 0, 0, 0};
 };
 
 #endif

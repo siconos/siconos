@@ -426,16 +426,23 @@ void siconos::modeling::NewtonEulerDS::computeWrench(
   }
 
   if (hasMext_) {
-    if (computemext_) {
-      computemext_(time, buffer);
+    if (!computemext_ && !isMextExpressedInInertialFrame_)
+      // mext is constant (and so has been allocated and set) and not expressed in the inertial
+      // frame
+      wrench_->tail(3) += *mext_view_;
+    else {
+      // In all other cases, we need to use the buffer
+      if (computemext_)  // mext not constant --> we need to use the buffer
+        computemext_(time, buffer);
+      else  // mext constant but not expressed in the inertial frame --> we need the buffer
+        buffer = *mext_view_;
+
       if (isMextExpressedInInertialFrame_) {
         siconos::geometry::rewriteVectorFromAbsoluteToBodyFrame(q, buffer);
-        wrench_->tail(3) += buffer;
       }
-    } else  // if (hasConstantMext_)
-      wrench_->tail(3) += *mext_view_;
-
-    // wrench[3:6] += mext
+      wrench_->tail(3) += buffer;
+      // wrench[3:6] += mext
+    }
   }
 
   if (hasMgyr_) {
@@ -670,7 +677,7 @@ siconos::algebra::SiconosVector siconos::modeling::NewtonEulerDS::linearVelocity
 
 siconos::algebra::SiconosVector siconos::modeling::NewtonEulerDS::angularVelocityInBodyFrame()
     const {
-  siconos::algebra::SiconosVector w = twist_->tail(3);
+  siconos::algebra::SiconosVector3 w = twist_->tail(3);
   siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(*state_q_, w);
   return w;  // RVO, no copy!
 }
@@ -760,7 +767,7 @@ void siconos::modeling::newton_euler::computeFextForceAtPos(
   assert(fext.size() == 3);
   assert(force.size() == 3);
 
-  siconos::algebra::SiconosVector abs_frc(force);
+  siconos::algebra::SiconosVector3 abs_frc(force);
 
   if (!forceAbsRef) siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(q, abs_frc);
   if (accumulate)

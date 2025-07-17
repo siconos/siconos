@@ -73,7 +73,7 @@ void siconos::modeling::LagrangianLinearTIDS::initRhs(double time) {
   // Compute mass and LU factorization
   if (mass_view_) {
     // LU factorization
-    LUMass_ = std::make_shared<siconos::algebra::SiconosLUMatrix>(*mass_view_);
+    LUMass_ = std::make_shared<siconos::algebra::SiconosDenseLUMatrix>(*mass_view_);
     hasLUMass_ = true;
   }
 

@@ -34,6 +34,7 @@ class SiconosMatrixTest : public CppUnit::TestFixture {
   CPPUNIT_TEST(testNormInf);
   CPPUNIT_TEST(testSymm);
   CPPUNIT_TEST(testfillTriplet);
+  CPPUNIT_TEST(testBuildSparse);
   CPPUNIT_TEST(testSetBlock);
   CPPUNIT_TEST(testProd);
   CPPUNIT_TEST(testProd2);
@@ -43,9 +44,11 @@ class SiconosMatrixTest : public CppUnit::TestFixture {
   void testNormInf();
   void testSymm();
   void testfillTriplet();
+  void testBuildSparse();
   void testSetBlock();
   void testProd();
   void testProd2();
+
   void End();
 
   unsigned int size;

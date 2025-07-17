@@ -516,10 +516,10 @@ namespace moreau_jean {
  *  \param[in,out] W the result in W
  *  \param[in,out] LUW the LU factorisation of W (updated)
  */
-void computeIterationMatrix_Lagrangian(
-    double time, double h, double theta, siconos::modeling::LagrangianDS &ds,
-    Eigen::Ref<siconos::algebra::SiconosMatrix> W,
-    std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>> &LUW);
+// void computeIterationMatrix_Lagrangian(
+//     double time, double h, double theta, siconos::modeling::LagrangianDS &ds,
+//     Eigen::Ref<siconos::algebra::SiconosMatrix> W,
+//     std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>> &LUW);
 
 /** compute Moreau-Jean W iteration matrix for Newton-Euler systems
  *

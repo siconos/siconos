@@ -34,6 +34,7 @@
 #include "FremondImpactFrictionNSL.hpp"
 #include "LagrangianDS.hpp"
 #include "LagrangianR.hpp"
+#include "LagrangianSparseDS.hpp"
 #include "NewtonEulerDS.hpp"
 #include "NewtonEulerR.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
@@ -423,7 +424,7 @@ void siconos::modeling::Interaction::__initDataLagrangian(
 void siconos::modeling::Interaction::__initDSDataLagrangian(
     DynamicalSystem& ds, std::vector<std::shared_ptr<siconos::algebra::BlockVector>>& DSlink) {
   // check dynamical system type
-  assert(dynamic_cast<LagrangianDS*>(&ds));
+  assert(dynamic_cast<LagrangianDS*>(&ds) || dynamic_cast<LagrangianSparseDS*>(&ds));
 
   auto& lds = static_cast<LagrangianDS&>(ds);
 

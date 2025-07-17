@@ -156,6 +156,9 @@ class LagrangianDS : public SecondOrderDS {
   /** True if mass is required */
   bool hasMass_{false};
 
+  /** inverse or factorization of the mass of the system */
+  std::shared_ptr<siconos::algebra::SiconosDenseLUMatrix> LUMass_{nullptr};
+
   /** internal forces (\f$ F_{int}(v , q , t) \f$) applied to the system */
   std::shared_ptr<siconos::algebra::SiconosVector> fint_{nullptr};
 
@@ -253,10 +256,11 @@ class LagrangianDS : public SecondOrderDS {
   std::shared_ptr<siconos::algebra::SiconosVector> totalForces_{nullptr};
 
   /** jacobian_q forces*/
-  std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianTotalForcesOver_q_{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosDenseMatrix> jacobianTotalForcesOver_q_{nullptr};
 
   /** jacobian_{velocity} forces*/
-  std::shared_ptr<siconos::algebra::SiconosMatrix> jacobianTotalForcesOver_velocity_{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosDenseMatrix> jacobianTotalForcesOver_velocity_{
+      nullptr};
 
   /** memory of previous forces of the system */
   siconos::algebra::SiconosMemory totalForcesMemory_;
@@ -403,12 +407,15 @@ class LagrangianDS : public SecondOrderDS {
   // /** \return mass matrix operator (view onto memory) */
   // inline siconos::algebra::MapType &mass_view() const { return *mass_view_; }
 
+  /** \return LU-factorization of the mass (pointer link) */
+  inline auto LUMass() const { return LUMass_; }
+
   /** Set a constant mass matrix for the system
    *
    *  \param newValue mass matrix
    *
    */
-  void setConstantMass(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+  void setConstantMass(Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue);
 
   /** \return True if the mass matrix has been set (i.e. different from identity) */
   bool hasMass() const { return hasMass_; }
@@ -464,7 +471,8 @@ class LagrangianDS : public SecondOrderDS {
    *  \param newValue jacobianFintOver_q matrix
    *
    */
-  void setConstantJacobianFintOver_q(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+  void setConstantJacobianFintOver_q(
+      Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue);
 
   /** \return True if  \f$ \nabla_qF_{int} \f$ matrix has been set */
   bool hasJacobianFintOver_q() const { return hasJacobianFintOver_q_; }
@@ -498,7 +506,7 @@ class LagrangianDS : public SecondOrderDS {
    *
    */
   void setConstantJacobianFintOver_velocity(
-      Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+      Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue);
 
   /** \return True if \f$ \nabla_{\dot q}F_{int} \f$ matrix has been set */
   bool hasJacobianFintOver_velocity() const { return hasJacobianFintOver_velocity_; }
@@ -559,7 +567,8 @@ class LagrangianDS : public SecondOrderDS {
    *  \param newValue jacobianFgyrOver_q matrix
    *
    */
-  void setConstantJacobianFgyrOver_q(Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+  void setConstantJacobianFgyrOver_q(
+      Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue);
 
   /** \return True if  \f$ \nabla_qF_{gyr} \f$ matrix has been set */
   bool hasJacobianFgyrOver_q() const { return hasJacobianFgyrOver_q_; }
@@ -591,7 +600,7 @@ class LagrangianDS : public SecondOrderDS {
    *
    */
   void setConstantJacobianFgyrOver_velocity(
-      Eigen::Ref<siconos::algebra::SiconosMatrix> newValue);
+      Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue);
 
   /** \return True if \f$ \nabla_{\dot q}F_{gyr} \f$ matrix has been set */
   bool hasJacobianFgyrOver_velocity() const { return hasJacobianFgyrOver_velocity_; }

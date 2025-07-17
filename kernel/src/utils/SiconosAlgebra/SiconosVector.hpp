@@ -30,6 +30,7 @@ namespace siconos::algebra {
 
 using SiconosVector = Eigen::Matrix<double_t, Eigen::Dynamic, 1, Eigen::ColMajor>;
 using SiconosVector3 = Eigen::Matrix<double_t, 3, 1, Eigen::ColMajor>;
+using SiconosVector4 = Eigen::Matrix<double_t, 4, 1, Eigen::ColMajor>;
 using SiconosVector7 = Eigen::Matrix<double_t, 7, 1, Eigen::ColMajor>;
 using SiconosVector6 = Eigen::Matrix<double_t, 6, 1, Eigen::ColMajor>;
 using MapVectorType = Eigen::Map<SiconosVector>;

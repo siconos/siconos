@@ -154,6 +154,9 @@ constexpr auto str(const T& X) {
     case T::LagrangianDS:
       return "siconos::modeling::LagrangianDS";
       break;
+    case T::LagrangianSparseDS:
+      return "siconos::modeling::LagrangianSparseDS";
+      break;
     case T::LagrangianLinearTIDS:
       return "siconos::modeling::LagrangianLinearTIDS";
       break;

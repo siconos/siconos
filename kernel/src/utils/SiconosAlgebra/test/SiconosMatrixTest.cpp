@@ -138,10 +138,8 @@ void SiconosMatrixTest::testfillTriplet() {
 
   siconos::algebra::fillTriplet(sparseMat, triplet2, 0, 0);
 
-  // Vérifie que le nombre d'éléments non nuls est correct
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testfillTriplet : ", triplet2->nz == 3, true);
 
-  // Vérifie que les valeurs ont bien été copiées
   bool found_0_0 = false, found_2_1 = false, found_1_2 = false;
   for (CS_INT k = 0; k < triplet2->nz; ++k) {
     CS_INT i = triplet2->i[k];
@@ -159,6 +157,64 @@ void SiconosMatrixTest::testfillTriplet() {
   std::cout << "✅ test_fillTriplet_sparse passed.\n";
 }
 
+// How to build a SiconosSparseMatrix
+void SiconosMatrixTest::testBuildSparse() {
+  std::cout << "Start testBuildSparse \n";
+  // 1. Random values.
+  // Input = dimension and number of nonzeros values
+  int rows = 20;
+  int cols = 20;
+  int nnz = 150;
+  auto m = siconos::algebra::generateRandomSparseMatrix(rows, cols, nnz);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("Build random - check size: ", m.rows() == rows, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("Build random - check size: ", m.cols() == cols, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("Build random - check nnz: ", m.nonZeros() == nnz, true);
+
+  std::cout << "✅ testBuildSparse - Build random sparse matrix passed.\n";
+  // 2. Explicitely set values (from triplets)
+  typedef Eigen::Triplet<double> T;
+  std::vector<siconos::algebra::Triplet> triplets;
+  rows = 6;
+  cols = 6;
+  triplets.emplace_back(0, 0, 1.0);
+  triplets.emplace_back(0, 1, 2.0);
+  triplets.emplace_back(1, 0, 2.0);
+  triplets.emplace_back(1, 1, 3.0);
+  triplets.emplace_back(2, 2, 4.0);
+  triplets.emplace_back(2, 3, 5.0);
+  triplets.emplace_back(3, 2, 7.0);
+  triplets.emplace_back(3, 3, 6.0);
+  siconos::algebra::SiconosSparseMatrix m2(rows, cols);
+  m2.setFromTriplets(triplets.begin(), triplets.end());
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("Build from triplet- check size: ", m2.rows() == rows, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("Build from triplet- check size: ", m2.cols() == cols, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("Build from triplet- check nnz: ", m2.nonZeros() == 8, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("Build from triplet- check coeff: ", m2.coeffRef(1, 1) == 3.,
+                               true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("Build from triplet- check coeff: ", m2.coeffRef(3, 2) == 7.,
+                               true);
+  std::cout << "✅ testBuildSparse - Build sparse matrix from triplets passed.\n";
+
+  siconos::algebra::SiconosSparseMatrix m3(rows, cols);
+  m3.reserve(Eigen::VectorXi::Constant(cols, 6));
+  m3.insert(0, 0) = 1.0;
+  m3.insert(0, 1) = 2.0;
+  m3.insert(1, 0) = 2.0;
+  m3.insert(1, 1) = 3.0;
+  m3.insert(2, 2) = 4.0;
+  m3.insert(2, 3) = 5.0;
+  m3.insert(3, 2) = 7.0;
+  m3.insert(3, 3) = 6.0;
+  m3.makeCompressed();  // optional
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("Build with insert- check size: ", m3.rows() == rows, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("Build with insert- check size: ", m3.cols() == cols, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("Build with insert- check nnz: ", m3.nonZeros() == 8, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("Build with insert- check coeff: ", m3.coeffRef(1, 1) == 3.,
+                               true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("Build with insert- check coeff: ", m3.coeffRef(3, 2) == 7.,
+                               true);
+  std::cout << "✅ testBuildSparse - Build sparse matrix with inserts passed.\n";
+}
 void SiconosMatrixTest::testSetBlock() {
   std::cout << "--> Test: testSetBlock." << std::endl;
 
@@ -281,7 +337,7 @@ void SiconosMatrixTest::testProd2()  // y += trans(A)*x
 
   std::cout << "✅-->  test mat(dense)-vec prod (to block) ended with success." << std::endl;
   // Now, sparse
-  auto sparse = siconos::algebra::generateRandomSparseMatrix(x.size(), 8, 0.001);
+  auto sparse = siconos::algebra::generateRandomSparseMatrix(x.size(), 8, 12);
   siconos::algebra::BlockVector yB{2, 4};
   yB.setZero();
 

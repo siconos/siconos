@@ -117,11 +117,6 @@ class SecondOrderDS : public DynamicalSystem {
   /** number of degrees of freedom of the system */
   unsigned int ndof_{0};
 
-  /** inverse or factorization of the mass of the system */
-  std::shared_ptr<siconos::algebra::SiconosLUMatrix> LUMass_{nullptr};
-
-  bool hasLUMass_{false};
-
   /** "Reaction", generalized forces or impulses due to the non smooth law
    * The index corresponds to the kinematic
    * level of the corresponding constraints. It mainly depends on what the
@@ -140,6 +135,8 @@ class SecondOrderDS : public DynamicalSystem {
   /** Initial position */
   std::shared_ptr<siconos::algebra::MapVectorType> q0_view_{nullptr};
   std::unique_ptr<std::vector<double>> q0_internal_storage_{nullptr};
+
+  bool hasLUMass_{false};
 
   /** Boundary condition applied to a dynamical system*/
   std::shared_ptr<siconos::modeling::BoundaryCondition> boundaryConditions_{nullptr};
@@ -190,9 +187,6 @@ class SecondOrderDS : public DynamicalSystem {
   siconos::algebra::SiconosVector &p_python(unsigned int level = 2) const {
     return *(p_[level]);
   }
-
-  /** \return LU-factorization of the mass (pointer link) */
-  inline auto LUMass() const { return LUMass_; }
 
   /** \return the number of degrees of freedom of the system */
   inline unsigned int dimension() const override { return ndof_; }

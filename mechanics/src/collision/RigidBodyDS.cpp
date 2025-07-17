@@ -40,6 +40,6 @@ void siconos::collision::RigidBodyDS::compute_extrapolated_position(
   (*_qExtrapolated)(1) = (*velocityIncrement)(1);
   (*_qExtrapolated)(2) = (*velocityIncrement)(2);
   siconos::geometry::quaternionFromTwistVector(*velocityIncrement, *_qExtrapolated);
-  const auto &qold = qMemory().getSiconosVector(0);
+  const siconos::algebra::SiconosVector7 &qold = qMemory().getSiconosVector(0);
   siconos::geometry::compositionLawLieGroup(qold, *_qExtrapolated);
 }

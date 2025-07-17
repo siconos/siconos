@@ -122,13 +122,16 @@ class NewtonEulerDS : public SecondOrderDS {
   /** Scalar mass of the system */
   double scalarMass_{1.};
 
+  /** inverse or factorization of the mass of the system */
+  std::shared_ptr<siconos::algebra::SiconosDenseLUMatrix> LUMass_{nullptr};
+
   /** total inertia matrix \in \RR\f[ \left[\begin{array}{cc} I_{3x3}  & 0 \\
-               0 &  \phi(p) \end{array}\right] \f]
+              0 &  \phi(p) \end{array}\right] \f]
 
-      Matrix depending on the parametrization of the orientation
+     Matrix depending on the parametrization of the orientation
 
-      \f$ \dot q = T(q) v \∏
-   */
+     \f$ \dot q = T(q) v \∏
+  */
   std::shared_ptr<siconos::algebra::SiconosMatrix66> totalInertiaMatrix_{nullptr};
 
   /** \f[ T(q) = \left[\begin{array}{cc} I_{3x3}  & 0 \\
@@ -389,6 +392,9 @@ class NewtonEulerDS : public SecondOrderDS {
 
   /** Modify the scalar mass */
   void setScalarMass(double mass);
+
+  /** \return LU-factorization of the mass (pointer link) */
+  inline auto LUMass() const { return LUMass_; }
 
   /** \return a read-only view on total inertia matrix */
   inline auto totalInertiaMatrix() const {

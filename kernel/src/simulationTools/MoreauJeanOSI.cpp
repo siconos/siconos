@@ -120,6 +120,48 @@ void siconos::integrators::MoreauJeanOSI::_NSLEffectOnFreeOutput::visit(
   }
 }
 
+namespace siconos::integrators::moreau_jean {
+template <typename MatrixType, typename LUMatrixType, typename LagrangianType>
+void computeIterationMatrix_Lagrangian_T(double time, double time_step, double theta,
+                                         LagrangianType &lds, MatrixType &iterationMatrix,
+                                         std::shared_ptr<LUMatrixType> &luw) {
+  if (lds.isLinear()) return;
+
+  auto ndof = lds.dimension();
+  if (lds.hasMass()) {
+    lds.computeMass(lds.q_read());
+    iterationMatrix = lds.mass();  // copy
+  } else {
+    if constexpr (std::is_base_of_v<Eigen::SparseMatrixBase<MatrixType>, MatrixType>) {
+      iterationMatrix.resize(ndof, ndof);
+      for (auto i = 0; i < ndof; ++i) iterationMatrix.insert(i, i) = 1.0;
+      iterationMatrix.makeCompressed();
+    } else {
+      iterationMatrix.setIdentity();
+    }
+  }
+
+  lds.computeJacobianTotalForcesOver_velocity(lds.velocity_read(), lds.q_read(), time);
+  if (lds.hasJacobianTotalForcesOver_velocity()) {
+    iterationMatrix -= time_step * theta * lds.jacobianTotalForcesOver_velocity();
+  }
+
+  lds.computeJacobianTotalForcesOver_q(lds.velocity_read(), lds.q_read(), time);
+  if (lds.hasJacobianTotalForcesOver_q()) {
+    iterationMatrix -= time_step * time_step * theta * theta * lds.jacobianTotalForcesOver_q();
+  }
+
+  // LU factorization
+  luw = std::make_shared<LUMatrixType>();
+  if constexpr (std::is_same_v<LUMatrixType, Eigen::SparseLU<MatrixType>>) {
+    luw->analyzePattern(iterationMatrix);
+    luw->factorize(iterationMatrix);
+  } else {
+    *luw = LUMatrixType(iterationMatrix);
+  }
+}
+}  // namespace siconos::integrators::moreau_jean
+
 // --- constructor from a set of data ---
 siconos::integrators::MoreauJeanOSI::MoreauJeanOSI(double theta, double gamma)
     : OneStepIntegrator(IntegratorType::MOREAUJEANOSI, 1, 0, 1, 1, 1) {
@@ -155,6 +197,7 @@ void siconos::integrators::MoreauJeanOSI::initializeWorkVectorsForDS(
 
   assert(dsType == siconos::modeling::Type::LagrangianLinearTIDS ||
          dsType == siconos::modeling::Type::LagrangianDS ||
+         dsType == siconos::modeling::Type::LagrangianSparseDS ||
          dsType == siconos::modeling::Type::NewtonEulerDS ||
          dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS);
 
@@ -349,7 +392,7 @@ void siconos::integrators::MoreauJeanOSI::initializeIterationMatrix(
   }
   // General Lagrangian DS
   else if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
-    siconos::integrators::moreau_jean::computeIterationMatrix_Lagrangian(
+    siconos::integrators::moreau_jean::computeIterationMatrix_Lagrangian_T(
         time, _simulation->timeStep(), _theta, *lds, *iterationMat,
         _dynamicalSystemsGraph->properties(dsv).LUW);
     if (lds->boundaryConditions()) _initializeIterationMatrixBoundaryConditions(*lds, dsv);
@@ -365,7 +408,6 @@ void siconos::integrators::MoreauJeanOSI::initializeIterationMatrix(
         "siconos::integrators::MoreauJeanOSI::initializeIterationMatrix - not "
         "yet implemented for Dynamical system of type : " +
         siconos::types::type_name(*ds));
-
   // Remark: except for LagrangianLinearDiagonalDS and LagrangianLinearTIDS, W is not
   // LU-factorized nor inversed here.
 
@@ -906,7 +948,7 @@ void siconos::integrators::MoreauJeanOSI::computeFreeState() {
       vfree = residuFree;  // initialize vfree with the content of residuFree
       // -- Update W --
       // Note: during computeIterationMatrix, mass and jacobians of forces will be computed/
-      moreau_jean::computeIterationMatrix_Lagrangian(
+      moreau_jean::computeIterationMatrix_Lagrangian_T(
           nextTime, timeStep, _theta, *lds, *iterationMatrix,
           _dynamicalSystemsGraph->properties(*dsi).LUW);
       if (lds->boundaryConditions()) {
@@ -955,7 +997,7 @@ void siconos::integrators::MoreauJeanOSI::prepareNewtonIteration(double time) {
     if (!checkOSI(dsi)) continue;
     auto ds = _dynamicalSystemsGraph->bundle(*dsi);
     if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
-      moreau_jean::computeIterationMatrix_Lagrangian(
+      moreau_jean::computeIterationMatrix_Lagrangian_T(
           time, _simulation->timeStep(), _theta, *lds,
           *_dynamicalSystemsGraph->properties(*dsi).iterationMatrix,
           _dynamicalSystemsGraph->properties(*dsi).LUW);
@@ -1562,35 +1604,37 @@ void siconos::integrators::MoreauJeanOSI::display() const {
 }
 
 // --------------- Free functions  ---------------
-void siconos::integrators::moreau_jean::computeIterationMatrix_Lagrangian(
-    double time, double time_step, double theta, siconos::modeling::LagrangianDS &lds,
-    Eigen::Ref<siconos::algebra::SiconosMatrix> iterationMatrix,
-    std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>> &luw) {
-  // Compute W matrix of the Dynamical System ds, at time t and for the current
-  // ds state.
-  DEBUG_BEGIN("siconos::integrators::MoreauJeanOSI::computeIterationMatrix\n");
+// void siconos::integrators::moreau_jean::computeIterationMatrix_Lagrangian(
+//     double time, double time_step, double theta, siconos::modeling::LagrangianDS &lds,
+//     Eigen::Ref<siconos::algebra::SiconosMatrix> iterationMatrix,
+//     std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>> &luw) {
+//   // Compute W matrix of the Dynamical System ds, at time t and for the current
+//   // ds state.
+//   DEBUG_BEGIN("siconos::integrators::MoreauJeanOSI::computeIterationMatrix\n");
 
-  if (lds.isLinear()) return;  // Nothing: W does not depend on time.
+//   if (lds.isLinear()) return;  // Nothing: W does not depend on time.
 
-  if (lds.hasMass()) {
-    lds.computeMass(lds.q_read());
-    iterationMatrix = lds.mass();  // copy
-  } else
-    iterationMatrix.setIdentity();
+//   if (lds.hasMass()) {
+//     lds.computeMass(lds.q_read());
+//     iterationMatrix = lds.mass();  // copy
+//   } else
+//     iterationMatrix.setIdentity();
 
-  lds.computeJacobianTotalForcesOver_velocity(lds.velocity_read(), lds.q_read(), time);
-  if (lds.hasJacobianTotalForcesOver_velocity()) {
-    iterationMatrix -= time_step * theta * lds.jacobianTotalForcesOver_velocity();
-  }
+//   lds.computeJacobianTotalForcesOver_velocity(lds.velocity_read(), lds.q_read(), time);
+//   if (lds.hasJacobianTotalForcesOver_velocity()) {
+//     iterationMatrix -= time_step * theta * lds.jacobianTotalForcesOver_velocity();
+//   }
 
-  lds.computeJacobianTotalForcesOver_q(lds.velocity_read(), lds.q_read(), time);
-  if (lds.hasJacobianTotalForcesOver_q()) {
-    iterationMatrix -= time_step * time_step * theta * theta * lds.jacobianTotalForcesOver_q();
-  }
+//   lds.computeJacobianTotalForcesOver_q(lds.velocity_read(), lds.q_read(), time);
+//   if (lds.hasJacobianTotalForcesOver_q()) {
+//     iterationMatrix -= time_step * time_step * theta * theta *
+//     lds.jacobianTotalForcesOver_q();
+//   }
 
-  // LU Factorize the iteration matrix
-  luw = std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(iterationMatrix);
-}
+//   // LU Factorize the iteration matrix
+//   luw =
+//   std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(iterationMatrix);
+// }
 
 void siconos::integrators::moreau_jean::computeIterationMatrix_NewtonEuler(
     double time, double time_step, double theta, siconos::modeling::NewtonEulerDS &neds,
@@ -1634,7 +1678,7 @@ void siconos::integrators::moreau_jean::updatePosition(
     siconos::modeling::NewtonEulerDS &neds =
         static_cast<siconos::modeling::NewtonEulerDS &>(ds);
 
-    siconos::algebra::SiconosVector velocityIncrement{neds.dimension()};
+    siconos::algebra::SiconosVector6 velocityIncrement{neds.dimension()};
     velocityIncrement = time_step * theta * neds.twist_read() +
                         time_step * (1. - theta) * neds.twistMemory().getSiconosVector(0);
     DEBUG_EXPR(siconos::algebra::print(*velocityIncrement));

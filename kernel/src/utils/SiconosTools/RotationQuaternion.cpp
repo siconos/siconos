@@ -64,7 +64,7 @@ void siconos::geometry::computeRotationMatrix(
 }
 
 void siconos::geometry::quaternionRotateVector(
-    const Eigen::Ref<const siconos::algebra::SiconosVector> &q,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7> &q,
     Eigen::Ref<siconos::algebra::SiconosVector3> v) {
   DEBUG_BEGIN("::quaternionRotateVector(q,v)\n");
   DEBUG_EXPR(siconos::algebra::print(v););
@@ -98,7 +98,7 @@ void siconos::geometry::quaternionRotateVector(
   // Works only with unit quaternion
   siconos::algebra::ConstMapVector3Type qvect(q.data() + 4);  // view onto  q4, 5, 6
   auto q0 = q(3);
-  auto t = 2 * qvect.cross(v);
+  siconos::algebra::SiconosVector3 t = 2 * qvect.cross(v);
   v += qvect.cross(t);
   v += q0 * t;
   DEBUG_EXPR(std::cout << v << "\n";);
@@ -106,7 +106,7 @@ void siconos::geometry::quaternionRotateVector(
 }
 
 void siconos::geometry::quaternionRotateMatrix(
-    const Eigen::Ref<const siconos::algebra::SiconosVector> &q,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7> &q,
     Eigen::Ref<siconos::algebra::SiconosMatrix33> m) {
   DEBUG_BEGIN("::quaternionRotateMatrix(q,m)\n");
   DEBUG_EXPR(std::cout << m << "\n";);
@@ -114,50 +114,47 @@ void siconos::geometry::quaternionRotateMatrix(
                        << "q[3:6] " << q.tail(4) << "\n";);
 
   // Direct computation with cross product for each column
-  assert(m.rows() == 3 && "::quaternionRotateMatrix(q,m) m must have 3 rows");
-
   siconos::algebra::ConstMapVector3Type qvect(q.data() + 4);  // view onto  q4, 5, 6
   auto q0 = q(3);
   for (unsigned int j = 0; j < m.cols(); j++) {
     Eigen::Map<Eigen::Vector3d> mcol(m.col(j).data());
-    mcol += qvect.cross(2 * qvect.cross(mcol));
-    mcol += q0 * mcol;
-    // m.col(j) = mcol;
+    auto t = 2 * qvect.cross(mcol);
+    mcol += qvect.cross(t) + q0 * t;
   }
   DEBUG_EXPR(std::cout << m << "\n";);
   DEBUG_END("::quaternionRotateMatrix(q,m)\n");
 }
 
 void siconos::geometry::rewriteVectorFromAbsoluteToBodyFrame(
-    const Eigen::Ref<const siconos::algebra::SiconosVector> &q,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7> &q,
     Eigen::Ref<siconos::algebra::SiconosVector3> v) {
   DEBUG_BEGIN("::rewriteVectorFromAbsoluteToBodyFrame(q,v)\n");
-  siconos::algebra::SiconosVector qbis{4};
-  qbis << q(3), -q(4), -q(5), -q(6);
+  siconos::algebra::SiconosVector7 qbis;
+  qbis << q(0), q(1), q(2), q(3), -q(4), -q(5), -q(6);
   siconos::geometry::quaternionRotateVector(qbis, v);
   DEBUG_END("::rewriteVectorFromAbsoluteToBodyFrame(q,v)\n");
 }
 
 void siconos::geometry::rewriteMatrixFromAbsoluteToBodyFrame(
-    const Eigen::Ref<const siconos::algebra::SiconosVector> &q,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7> &q,
     Eigen::Ref<siconos::algebra::SiconosMatrix33> m) {
   DEBUG_BEGIN("::rewriteMatrixFromAbsoluteToBodyFrame(q,m)\n");
-  siconos::algebra::SiconosVector qbis{4};
-  qbis << q(3), -q(4), -q(5), -q(6);
+  siconos::algebra::SiconosVector7 qbis;
+  qbis << q(0), q(1), q(2), q(3), -q(4), -q(5), -q(6);
   siconos::geometry::quaternionRotateMatrix(qbis, m);
   DEBUG_END("::rewriteMatrixFromAbsoluteToBodyFrame(q,m)\n");
 }
 
 void siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(
-    const Eigen::Ref<const siconos::algebra::SiconosVector> &q,
-    Eigen::Ref<siconos::algebra::SiconosVector> v) {
+    const Eigen::Ref<const siconos::algebra::SiconosVector7> &q,
+    Eigen::Ref<siconos::algebra::SiconosVector3> v) {
   DEBUG_BEGIN("::rewriteVectorFromBodyToAbsoluteFrame(q,v)\n");
   siconos::geometry::quaternionRotateVector(q, v);
   DEBUG_END("::rewriteVectorFromBodyToAbsoluteFrame(q,v)\n");
 }
 
 void siconos::geometry::rewriteMatrixFromBodyToAbsoluteFrame(
-    const Eigen::Ref<const siconos::algebra::SiconosVector> &q,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7> &q,
     Eigen::Ref<siconos::algebra::SiconosMatrix33> m) {
   DEBUG_BEGIN("::rewriteMatrixFromBodyToAbsoluteFrame(q,m )\n");
   siconos::geometry::quaternionRotateMatrix(q, m);
@@ -165,19 +162,19 @@ void siconos::geometry::rewriteMatrixFromBodyToAbsoluteFrame(
 }
 
 void siconos::geometry::computeRotationMatrix(
-    const siconos::algebra::SiconosVector &q,
+    const siconos::algebra::SiconosVector7 &q,
     siconos::algebra::SiconosMatrix33 &rotationMatrix) {
   siconos::geometry::computeRotationMatrix(q(3), q(4), q(5), q(6), rotationMatrix);
 }
 void siconos::geometry::computeRotationMatrixTransposed(
-    const siconos::algebra::SiconosVector &q,
+    const siconos::algebra::SiconosVector7 &q,
     siconos::algebra::SiconosMatrix33 &rotationMatrix) {
   siconos::geometry::computeRotationMatrix(q(3), -q(4), -q(5), -q(6), rotationMatrix);
 }
 
 double siconos::geometry::axisAngleFromQuaternion(
     double q0, double q1, double q2, double q3,
-    Eigen::Ref<siconos::algebra::SiconosVector> &axis) {
+    Eigen::Ref<siconos::algebra::SiconosVector3> &axis) {
   DEBUG_BEGIN(
       "axisAngleFromQuaternion(double q0, double q1, double q2, double q3, "
       "std::shared_ptr<siconos::algebra::SiconosVector> axis )\n");
@@ -200,8 +197,8 @@ double siconos::geometry::axisAngleFromQuaternion(
 }
 
 double siconos::geometry::axisAngleFromConfiguration(
-    const Eigen::Ref<siconos::algebra::SiconosVector> &q,
-    Eigen::Ref<siconos::algebra::SiconosVector> axis) {
+    const Eigen::Ref<siconos::algebra::SiconosVector7> &q,
+    Eigen::Ref<siconos::algebra::SiconosVector3> axis) {
   double angle = siconos::geometry::axisAngleFromQuaternion(q(3), q(4), q(5), q(6), axis);
   return angle;
 }
@@ -237,9 +234,9 @@ void siconos::geometry::rotationVectorFromConfiguration(
   siconos::geometry::rotationVectorFromQuaternion(q(3), q(4), q(5), q(6), rotationVector);
 }
 
-void siconos::geometry::quaternionFromAxisAngle(const siconos::algebra::SiconosVector &axis,
+void siconos::geometry::quaternionFromAxisAngle(const siconos::algebra::SiconosVector3 &axis,
                                                 double angle,
-                                                siconos::algebra::SiconosVector &q) {
+                                                siconos::algebra::SiconosVector7 &q) {
   q(3) = cos(angle / 2.0);
   q(4) = axis(0) * sin(angle * 0.5);
   q(5) = axis(1) * sin(angle * 0.5);
@@ -270,12 +267,12 @@ void siconos::geometry::quaternionFromRotationVector(
   q(6) = rotationVector(2) * f;
 }
 
-double siconos::geometry::quaternionNorm(const siconos::algebra::SiconosVector &q) {
+double siconos::geometry::quaternionNorm(const siconos::algebra::SiconosVector7 &q) {
   double normq = sqrt(q(3) * q(3) + q(4) * q(4) + q(5) * q(5) + q(6) * q(6));
   return normq;
 }
 
-void siconos::geometry::normalizeq(siconos::algebra::SiconosVector &q) {
+void siconos::geometry::normalizeq(Eigen::Ref<siconos::algebra::SiconosVector7> q) {
   double normq = sqrt(q(3) * q(3) + q(4) * q(4) + q(5) * q(5) + q(6) * q(6));
   assert(normq > 0);
   normq = 1.0 / normq;
@@ -285,10 +282,9 @@ void siconos::geometry::normalizeq(siconos::algebra::SiconosVector &q) {
   q(6) = q(6) * normq;
 }
 
-void siconos::geometry::quaternionFromTwistVector(const siconos::algebra::SiconosVector &twist,
-                                                  siconos::algebra::SiconosVector &q) {
-  assert(twist.size() == 6);
-  assert(q.size() == 7);
+void siconos::geometry::quaternionFromTwistVector(
+    const siconos::algebra::SiconosVector6 &twist,
+    Eigen::Ref<siconos::algebra::SiconosVector7> q) {
   double angle = sqrt(twist(3) * twist(3) + twist(4) * twist(4) + twist(5) * twist(5));
 
   double f = 0.5 * sin_x(angle * 0.5);
@@ -298,13 +294,9 @@ void siconos::geometry::quaternionFromTwistVector(const siconos::algebra::Sicono
   q(5) = twist(4) * f;
   q(6) = twist(5) * f;
 }
-void siconos::geometry::compositionLawLieGroup(const siconos::algebra::SiconosVector &a,
-                                               siconos::algebra::SiconosVector &b,
-                                               siconos::algebra::SiconosVector &ab) {
-  assert(a.size() == 7);
-  assert(b.size() == 7);
-  assert(ab.size() == 7);
-
+void siconos::geometry::compositionLawLieGroup(const siconos::algebra::SiconosVector7 &a,
+                                               siconos::algebra::SiconosVector7 &b,
+                                               siconos::algebra::SiconosVector7 &ab) {
   // For the translational component, the composition law is the addition
   ab(0) = a(0) + b(0);
   ab(1) = a(1) + b(1);
@@ -320,11 +312,9 @@ void siconos::geometry::compositionLawLieGroup(const siconos::algebra::SiconosVe
   ab(6) = quat_ab.R_component_4();
 }
 
-void siconos::geometry::compositionLawLieGroup(const siconos::algebra::SiconosVector &a,
-                                               siconos::algebra::SiconosVector &b) {
-  assert(a.size() == 7);
-  assert(b.size() == 7);
-
+void siconos::geometry::compositionLawLieGroup(
+    const siconos::algebra::SiconosVector7 &a,
+    Eigen::Ref<siconos::algebra::SiconosVector7> b) {
   // For the translational component, the composition law is the addition
   b(0) = a(0) + b(0);
   b(1) = a(1) + b(1);
@@ -341,7 +331,7 @@ void siconos::geometry::compositionLawLieGroup(const siconos::algebra::SiconosVe
   // normalizeq(b);
 }
 
-void siconos::geometry::copyQuatRot(const siconos::algebra::SiconosVector &from,
+void siconos::geometry::copyQuatRot(const siconos::algebra::SiconosVector7 &from,
                                     boost::math::quaternion<double> &to) {
   to = boost::math::quaternion<double>{from(3), from(4), from(5), from(6)};
 }
@@ -377,7 +367,7 @@ void siconos::geometry::copyQuatPos2d(const siconos::algebra::SiconosVector &fro
 }
 
 boost::math::quaternion<double> siconos::geometry::rotquat(
-    const siconos::algebra::SiconosVector &v) {
+    const siconos::algebra::SiconosVector7 &v) {
   if (!v.isZero())
     return boost::math::quaternion<double>(v(3), v(4), v(5), v(6));
   else

@@ -150,13 +150,16 @@ class LagrangianSparseDS : public SecondOrderDS {
   // std::unique_ptr<std::vector<double>> mass_internal_storage_{nullptr};
 
   /** function wrapper used to compute mass */
-  siconos::modeling::func_prototypes::FunctionV_M computemass_{nullptr};
+  siconos::modeling::func_prototypes::FunctionV_Ms computemass_{nullptr};
 
   /** true if mass is required/set and constant */
   bool hasConstantMass_{false};
 
   /** True if mass is required */
   bool hasMass_{false};
+
+  /** inverse or factorization of the mass of the system */
+  std::shared_ptr<siconos::algebra::SiconosSparseLUMatrix> LUMass_{nullptr};
 
   /** internal forces (\f$ F_{int}(v , q , t) \f$) applied to the system */
   std::shared_ptr<siconos::algebra::SiconosVector> fint_{nullptr};
@@ -175,7 +178,7 @@ class LagrangianSparseDS : public SecondOrderDS {
   // std::unique_ptr<std::vector<double>> jacobianFintOver_q_internal_storage_{nullptr};
 
   /** function wrapper used to compute jacobianFintOver_q */
-  siconos::modeling::func_prototypes::FunctionVVS_M computejacobianFintOver_q_{nullptr};
+  siconos::modeling::func_prototypes::FunctionVVS_Ms computejacobianFintOver_q_{nullptr};
 
   /** true if jacobianFintOver_q is not set or set and constant */
   bool hasConstantJacobianFintOver_q_{true};
@@ -192,7 +195,8 @@ class LagrangianSparseDS : public SecondOrderDS {
   // std::unique_ptr<std::vector<double>> jacobianFintOver_velocity_internal_storage_{nullptr};
 
   /** function wrapper used to compute jacobianFintOver_velocity */
-  siconos::modeling::func_prototypes::FunctionVVS_M computejacobianFintOver_velocity_{nullptr};
+  siconos::modeling::func_prototypes::FunctionVVS_Ms computejacobianFintOver_velocity_{
+      nullptr};
 
   /** true if jacobianFintOver_velocity is not set or required/set and constant */
   bool hasConstantJacobianFintOver_velocity_{true};
@@ -232,7 +236,7 @@ class LagrangianSparseDS : public SecondOrderDS {
   // std::unique_ptr<std::vector<double>> jacobianFgyrOver_q_internal_storage_{nullptr};
 
   /** function wrapper used to compute jacobianFgyrOver_q */
-  siconos::modeling::func_prototypes::FunctionVV_M computejacobianFgyrOver_q_{nullptr};
+  siconos::modeling::func_prototypes::FunctionVV_Ms computejacobianFgyrOver_q_{nullptr};
 
   /** true if jacobianFgyrOver_q is not set or required/set and constant */
   bool hasConstantJacobianFgyrOver_q_{true};
@@ -250,7 +254,7 @@ class LagrangianSparseDS : public SecondOrderDS {
   //  jacobianFgyrOver_velocity_internal_storage_{nullptr};
 
   /** function wrapper used to compute jacobianFgyrOver_velocity */
-  siconos::modeling::func_prototypes::FunctionVV_M computejacobianFgyrOver_velocity_{nullptr};
+  siconos::modeling::func_prototypes::FunctionVV_Ms computejacobianFgyrOver_velocity_{nullptr};
 
   /** true if jacobianFgyrOver_velocity is not set or required/set and constant */
   bool hasConstantJacobianFgyrOver_velocity_{true};
@@ -413,13 +417,27 @@ class LagrangianSparseDS : public SecondOrderDS {
 
   // inline const siconos::algebra::SiconosSparseMatrix &mass_py() const { return *mass_mat_; }
 
+  /** \return LU-factorization of the mass (pointer link) */
+  inline auto LUMass() const { return LUMass_; }
+
   /** Set a constant mass matrix for the system
+   *  Warning: no copy! Shared memory between internal mass and newValue
+   *  newValue must not be resized, deleted or its structure changed!
    *
    *  \param newValue mass matrix
    *
    */
-  void setConstantMass(Eigen::Ref<siconos::algebra::SiconosSparseMatrix> newValue);
-  void setConstantMass(const std::shared_ptr<siconos::algebra::SiconosSparseMatrix> &input);
+  void setConstantMass(siconos::algebra::SiconosSparseMatrix &newValue);
+  //  void setConstantMass(const std::shared_ptr<siconos::algebra::SiconosSparseMatrix>
+  //  &input);
+
+  /** Set a constant mass matrix for the system
+   *  The input matrix is copied into the internal mass.
+   *
+   *  \param newValue mass matrix
+   *
+   */
+  void setConstantMassWithCopy(const siconos::algebra::SiconosSparseMatrix &newValue);
 
   /** \return True if the mass matrix has been set (i.e. different from identity) */
   bool hasMass() const { return hasMass_; }
@@ -432,7 +450,7 @@ class LagrangianSparseDS : public SecondOrderDS {
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeMassFunction(const siconos::modeling::func_prototypes::FunctionV_M &fct);
+  void setComputeMassFunction(const siconos::modeling::func_prototypes::FunctionV_Ms &fct);
 
   /** to compute the mass matrix operator \f$ M(q) \f$
    *
@@ -471,12 +489,23 @@ class LagrangianSparseDS : public SecondOrderDS {
   //   }
 
   /** Set a constant \f$ \nabla_qF_{int} \f$
+   *  Warning: no copy! Shared memory between internal mass and newValue
+   *  newValue must not be resized, deleted or its structure changed!
+   *
    *
    *  \param newValue jacobianFintOver_q matrix
    *
    */
-  void setConstantJacobianFintOver_q(
-      Eigen::Ref<siconos::algebra::SiconosSparseMatrix> newValue);
+  void setConstantJacobianFintOver_q(siconos::algebra::SiconosSparseMatrix &newValue);
+
+  /** Set a constant \f$ \nabla_qF_{int} \f$
+   *  The input matrix is copied.
+   *
+   *  \param newValue jacobianFintOver_q matrix
+   *
+   */
+  void setConstantJacobianFintOver_q_WithCopy(
+      const siconos::algebra::SiconosSparseMatrix &newValue);
 
   /** \return True if  \f$ \nabla_qF_{int} \f$ matrix has been set */
   bool hasJacobianFintOver_q() const { return hasJacobianFintOver_q_; }
@@ -486,7 +515,7 @@ class LagrangianSparseDS : public SecondOrderDS {
    *  \param fct the user-defined function (std::function, lambda ...)
    */
   void setComputeJacobianFintOver_qFunction(
-      const siconos::modeling::func_prototypes::FunctionVVS_M &fct);
+      const siconos::modeling::func_prototypes::FunctionVVS_Ms &fct);
 
   /** to compute  \f$ \nabla_qF_{int}(\dot q, q, t) \f$
    *  \param velocity \f$ \dot q \f$ vector
@@ -505,12 +534,22 @@ class LagrangianSparseDS : public SecondOrderDS {
   //   }
 
   /** Set a constant \f$ \nabla_{\dot q}F_{int} \f$ matrix for the system
+   *  Warning: no copy! Shared memory between internal mass and newValue
+   *  newValue must not be resized, deleted or its structure changed!
    *
    *  \param newValue \f$ \nabla_{\dot q}F_{int} \f$ matrix
    *
    */
-  void setConstantJacobianFintOver_velocity(
-      Eigen::Ref<siconos::algebra::SiconosSparseMatrix> newValue);
+  void setConstantJacobianFintOver_velocity(siconos::algebra::SiconosSparseMatrix &newValue);
+
+  /** Set a constant \f$ \nabla_{\dot q}F_{int} \f$ matrix for the system
+   *  The input matrix is copied.
+   *
+   *  \param newValue \f$ \nabla_{\dot q}F_{int} \f$ matrix
+   *
+   */
+  void setConstantJacobianFintOver_velocity_WithCopy(
+      const siconos::algebra::SiconosSparseMatrix &newValue);
 
   /** \return True if \f$ \nabla_{\dot q}F_{int} \f$ matrix has been set */
   bool hasJacobianFintOver_velocity() const { return hasJacobianFintOver_velocity_; }
@@ -520,7 +559,7 @@ class LagrangianSparseDS : public SecondOrderDS {
    *  \param fct the user-defined function (std::function, lambda ...)
    */
   void setComputeJacobianFintOver_velocityFunction(
-      const siconos::modeling::func_prototypes::FunctionVVS_M &fct);
+      const siconos::modeling::func_prototypes::FunctionVVS_Ms &fct);
 
   /** to compute \f$ \nabla_{\dot q}F_{int} \f$
    *
@@ -567,12 +606,22 @@ class LagrangianSparseDS : public SecondOrderDS {
   //   }
 
   /** Set a constant \f$ \nabla_qF_{gyr} \f$
+   *  Warning: no copy! Shared memory between internal mass and newValue
+   *  newValue must not be resized, deleted or its structure changed!
    *
    *  \param newValue jacobianFgyrOver_q matrix
    *
    */
-  void setConstantJacobianFgyrOver_q(
-      Eigen::Ref<siconos::algebra::SiconosSparseMatrix> newValue);
+  void setConstantJacobianFgyrOver_q(siconos::algebra::SiconosSparseMatrix &newValue);
+
+  /** Set a constant \f$ \nabla_qF_{gyr} \f$
+   *  The input matrix is copied.
+   *
+   *  \param newValue jacobianFgyrOver_q matrix
+   *
+   */
+  void setConstantJacobianFgyrOver_q_WithCopy(
+      const siconos::algebra::SiconosSparseMatrix &newValue);
 
   /** \return True if  \f$ \nabla_qF_{gyr} \f$ matrix has been set */
   bool hasJacobianFgyrOver_q() const { return hasJacobianFgyrOver_q_; }
@@ -582,7 +631,7 @@ class LagrangianSparseDS : public SecondOrderDS {
    *  \param fct the user-defined function (std::function, lambda ...)
    */
   void setComputeJacobianFgyrOver_qFunction(
-      const siconos::modeling::func_prototypes::FunctionVV_M &fct);
+      const siconos::modeling::func_prototypes::FunctionVV_Ms &fct);
 
   /** to compute  \f$ \nabla_qF_{gyr}(\dot q, q, t) \f$
    *  \param velocity \f$ \dot q \f$ vector
@@ -599,12 +648,22 @@ class LagrangianSparseDS : public SecondOrderDS {
   //   }
 
   /** Set a constant \f$ \nabla_{\dot q}F_{gyr} \f$ matrix for the system
+   *  Warning: no copy! Shared memory between internal mass and newValue
+   *  newValue must not be resized, deleted or its structure changed!
    *
    *  \param newValue \f$ \nabla_{\dot q}F_{gyr} \f$ matrix
    *
    */
-  void setConstantJacobianFgyrOver_velocity(
-      Eigen::Ref<siconos::algebra::SiconosSparseMatrix> newValue);
+  void setConstantJacobianFgyrOver_velocity(siconos::algebra::SiconosSparseMatrix &newValue);
+
+  /** Set a constant \f$ \nabla_{\dot q}F_{gyr} \f$ matrix for the system
+   *  The input matrix is copied.
+   *
+   *  \param newValue \f$ \nabla_{\dot q}F_{gyr} \f$ matrix
+   *
+   */
+  void setConstantJacobianFgyrOver_velocity_WithCopy(
+      const siconos::algebra::SiconosSparseMatrix &newValue);
 
   /** \return True if \f$ \nabla_{\dot q}F_{gyr} \f$ matrix has been set */
   bool hasJacobianFgyrOver_velocity() const { return hasJacobianFgyrOver_velocity_; }
@@ -614,7 +673,7 @@ class LagrangianSparseDS : public SecondOrderDS {
    *  \param fct the user-defined function (std::function, lambda ...)
    */
   void setComputeJacobianFgyrOver_velocityFunction(
-      const siconos::modeling::func_prototypes::FunctionVV_M &fct);
+      const siconos::modeling::func_prototypes::FunctionVV_Ms &fct);
 
   /** to compute \f$ \nabla_{\dot q}F_{gyr} \f$
    *

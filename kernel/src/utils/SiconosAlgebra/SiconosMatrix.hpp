@@ -31,7 +31,7 @@
 #include <Eigen/SparseCore>  // For Eigen Sparse matrices
 #include <Eigen/SparseLU>
 
-#include "CSparseMatrix.h"  // For CSparseMatrix
+#include "CSparseMatrix.h"
 #include "SiconosVector.hpp"
 
 struct NumericsMatrix;
