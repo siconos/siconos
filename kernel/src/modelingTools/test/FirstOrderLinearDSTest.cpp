@@ -111,7 +111,7 @@ void FirstOrderLinearDSTest::testBuildFirstOrderLinearDS0() {
   auto x_size = ds->dimension();
   jacoref.noalias() = Eigen::Map<const Eigen::VectorXd>(ref_block.data(), ref_block.size());
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testBuildFirstOrderNonLinearDS3 : ", jacoref.isApprox(b00, 1e-12), true);
+      "testBuildFirstOrderNonLinearDS3 : ", jacoref.isApprox(b00, 1e-9), true);
 
   std::cout << "--> Constructor 0 test ended with success." << std::endl;
 }

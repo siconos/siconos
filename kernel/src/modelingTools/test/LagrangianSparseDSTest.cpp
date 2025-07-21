@@ -109,7 +109,7 @@ void LagrangianSparseDSTest::testBuildLagrangianSparseDS2() {
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 2: ", ds->dimension() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 2: ", ds->q0() == q0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 2: ", ds->velocity0() == velocity0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 2: ", ds->mass()->isApprox(*mass), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 2: ", ds->mass().isApprox(*mass), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 2: ", ds->p_read(1).isZero(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 2: ", ds->p(0) == nullptr, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 2: ", ds->p(2) == nullptr, true);
@@ -153,10 +153,10 @@ void LagrangianSparseDSTest::testBuildLagrangianSparseDS2() {
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 2: ", ds->totalForces().isApprox(refforces),
                                true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "test - Constr 2: ", ds->jacobianTotalForcesOver_q()->isApprox(refjac), true);
+      "test - Constr 2: ", ds->jacobianTotalForcesOver_q().isApprox(refjac), true);
   auto refjac2 = -1. * jacvel;
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "test - Constr 2: ", ds->jacobianTotalForcesOver_velocity()->isApprox(refjac2), true);
+      "test - Constr 2: ", ds->jacobianTotalForcesOver_velocity().isApprox(refjac2), true);
 
   ds->initRhs(time);
   siconos::algebra::SiconosVector x0;
@@ -260,7 +260,7 @@ void LagrangianSparseDSTest::testBuildLagrangianSparseDS3() {
 
   ds->computeMass(q);
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 3: ", ds->mass()->isApprox(*mass), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 3: ", ds->mass().isApprox(*mass), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test - Constr 3: ", ds->computeKineticEnergy() == 87.0, true);
 
   ds->computeTotalForces(vel, q, time);
@@ -278,11 +278,11 @@ void LagrangianSparseDSTest::testBuildLagrangianSparseDS3() {
   refjac.insert(1, 1) = -6;
   refjac.makeCompressed();
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "test - Constr 2: ", ds->jacobianTotalForcesOver_q()->isApprox(refjac), true);
+      "test - Constr 2: ", ds->jacobianTotalForcesOver_q().isApprox(refjac), true);
   refjac.coeffRef(1, 1) = -8;
   refjac.makeCompressed();
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "test - Constr 2: ", ds->jacobianTotalForcesOver_velocity()->isApprox(refjac), true);
+      "test - Constr 2: ", ds->jacobianTotalForcesOver_velocity().isApprox(refjac), true);
 
   std::cout << "✅ Constructor 3 test ended with success." << std::endl;
 }

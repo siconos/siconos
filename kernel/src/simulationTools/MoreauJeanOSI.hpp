@@ -220,23 +220,7 @@ class MoreauJeanOSI : public OneStepIntegrator {
 
   inline void setIsWSymmetricDefinitePositive(bool b) { _isWSymmetricDefinitePositive = b; };
 
-  // -- IterationMatrixBoundaryConditions --
-
-  /** get IterationMatrixBoundaryConditions corresponding to DynamicalSystem ds
-   *
-   *  \param ds a pointer to DynamicalSystem, optional, default =
-   *  nullptr. get IterationMatrixBoundaryConditions[0] in that case
-   *  \return pointer to a SiconosMatrix
-   */
-  std::shared_ptr<siconos::algebra::SiconosMatrix> IterationMatrixBoundaryConditions(
-      std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
-
-  // -- theta --
-
-  /** get theta
-   *
-   *  \return a double
-   */
+  /** \return theta parameter of the osi */
   inline double theta() { return _theta; };
 
   /** set the value of theta
@@ -245,12 +229,7 @@ class MoreauJeanOSI : public OneStepIntegrator {
    */
   inline void setTheta(double newTheta) { _theta = newTheta; };
 
-  // -- gamma --
-
-  /** get gamma
-   *
-   *  \return a double
-   */
+  /** \return gamma parameter of the osi */
   inline double gamma() { return _gamma; };
 
   /** set the value of gamma
@@ -262,12 +241,7 @@ class MoreauJeanOSI : public OneStepIntegrator {
     _useGamma = true;
   };
 
-  // -- useGamma --
-
-  /** get bool useGamma
-   *
-   *  \return a bool
-   */
+  /** \return true if gamma paremeter is set and used for the OSI */
   inline bool useGamma() { return _useGamma; };
 
   /** set the Boolean to indicate that we use gamma
@@ -276,10 +250,7 @@ class MoreauJeanOSI : public OneStepIntegrator {
    */
   inline void setUseGamma(bool newUseGamma) { _useGamma = newUseGamma; };
 
-  /** get bool gammaForRelation for the relation
-   *
-   *  \return a Boolean
-   */
+  /** \return  true if gamma paremeter is set and used for the relation */
   inline bool useGammaForRelation() { return _useGammaForRelation; };
 
   /** set the boolean to indicate that we use gamma for the relation
@@ -507,19 +478,6 @@ class MoreauJeanOSI : public OneStepIntegrator {
 
 /////// Free Functions ///////
 namespace moreau_jean {
-/** compute Moreau-Jean W iteration matrix for Lagrangian systems
- *
- *  \param time current time
- *  \param h current time-step
- *  \param theta theta parameter of the integrator
- *  \param ds a Lagrangian dynamical system
- *  \param[in,out] W the result in W
- *  \param[in,out] LUW the LU factorisation of W (updated)
- */
-// void computeIterationMatrix_Lagrangian(
-//     double time, double h, double theta, siconos::modeling::LagrangianDS &ds,
-//     Eigen::Ref<siconos::algebra::SiconosMatrix> W,
-//     std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>> &LUW);
 
 /** compute Moreau-Jean W iteration matrix for Newton-Euler systems
  *

@@ -403,7 +403,6 @@ class LagrangianDS : public SecondOrderDS {
     return siconos::algebra::ConstMapType(mass_view_->data(), mass_view_->rows(),
                                           mass_view_->cols());
   }
-
   // /** \return mass matrix operator (view onto memory) */
   // inline siconos::algebra::MapType &mass_view() const { return *mass_view_; }
 

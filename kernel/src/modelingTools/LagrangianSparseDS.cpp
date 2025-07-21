@@ -182,22 +182,47 @@ void siconos::modeling::LagrangianSparseDS::initRhs(double time) {
       jacv = LUMass_->solve(*jacobianTotalForcesOver_velocity_);
     }
     // Now fill in jacobianRhsOver_x_
-    for (unsigned int j = 0; j < ndof_; ++j) {
-      // Bottom-left block (jacobian /
-      // q)
-      if (hasJacobianTotalForcesOver_q()) {
-        for (unsigned int i = 0; i < ndof_; ++i)
-          jacobianRhsOver_x_(j * x_size_ + i + ndof_) = jacq.coeff(i, j);
-      }
-      // Bottom-right block (jacobian /
-      // vel)
-      if (hasJacobianTotalForcesOver_velocity()) {
-        for (unsigned int i = 0; i < ndof_; ++i)
-          jacobianRhsOver_x_((j + ndof_) * x_size_ + i + ndof_) = jacv.coeff(i, j);
+    // Bottom-left block (jacobian / q)
+    if (hasJacobianTotalForcesOver_q()) {
+      for (int k = 0; k < jacq.outerSize(); ++k) {
+        for (siconos::algebra::SiconosSparseMatrix::InnerIterator it(jacq, k); it; ++it) {
+          int i = it.row();
+          int j = it.col();
+          double value = it.value();
+          int idx = j * x_size_ + i + ndof_;
+          jacobianRhsOver_x_(idx) = value;
+        }
       }
     }
+    // Bottom-right block (jacobian / vel)
+    if (hasJacobianTotalForcesOver_velocity()) {
+      for (int k = 0; k < jacv.outerSize(); ++k) {
+        for (siconos::algebra::SiconosSparseMatrix::InnerIterator it(jacv, k); it; ++it) {
+          int i = it.row();
+          int j = it.col();
+          double value = it.value();
+          int idx = (j + ndof_) * x_size_ + i + ndof_;
+          jacobianRhsOver_x_(idx) = value;
+        }
+      }
+    }
+
+    // for (unsigned int j = 0; j < ndof_; ++j) {
+    //   // Bottom-left block (jacobian /
+    //   // q)
+    //   if (hasJacobianTotalForcesOver_q()) {
+    //     for (unsigned int i = 0; i < ndof_; ++i)
+    //       jacobianRhsOver_x_(j * x_size_ + i + ndof_) = jacq.coeff(i, j);
+    //   }
+    //   // Bottom-right block (jacobian /
+    //   // vel)
+    //   if (hasJacobianTotalForcesOver_velocity()) {
+    //     for (unsigned int i = 0; i < ndof_; ++i)
+    //       jacobianRhsOver_x_((j + ndof_) * x_size_ + i + ndof_) = jacv.coeff(i, j);
+    //   }
+    // }
   } else  // No mass
-  {       
+  {
     if (hasJacobianTotalForcesOver_q()) {
       // Update if required
       computeJacobianTotalForcesOver_q(*state_q_[1], *state_q_[0], time);
@@ -207,18 +232,33 @@ void siconos::modeling::LagrangianSparseDS::initRhs(double time) {
       computeJacobianTotalForcesOver_velocity(*state_q_[1], *state_q_[0], time);
     }
     // Now fill in jacobianRhsOver_x_
-    for (unsigned int j = 0; j < ndof_; ++j) {
-      // Bottom-left block (jacobian / q)
-      if (hasJacobianTotalForcesOver_q()) {
-        for (unsigned int i = 0; i < ndof_; ++i)
-          jacobianRhsOver_x_(j * x_size_ + i + ndof_) =
-              jacobianTotalForcesOver_q_->coeff(i, j);
+
+    // Bottom-left block (jacobian / q)
+    if (hasJacobianTotalForcesOver_q()) {
+      for (int k = 0; k < jacobianTotalForcesOver_q_->outerSize(); ++k) {
+        for (siconos::algebra::SiconosSparseMatrix::InnerIterator it(
+                 *jacobianTotalForcesOver_q_, k);
+             it; ++it) {
+          int i = it.row();
+          int j = it.col();
+          double value = it.value();
+          int idx = j * x_size_ + i + ndof_;
+          jacobianRhsOver_x_(idx) = value;
+        }
       }
-      // Bottom-right block (jacobian / vel)
-      if (hasJacobianTotalForcesOver_velocity()) {
-        for (unsigned int i = 0; i < ndof_; ++i)
-          jacobianRhsOver_x_((j + ndof_) * x_size_ + i + ndof_) =
-              jacobianTotalForcesOver_velocity_->coeff(i, j);
+    }
+    // Bottom-right block (jacobian / vel)
+    if (hasJacobianTotalForcesOver_velocity()) {
+      for (int k = 0; k < jacobianTotalForcesOver_velocity_->outerSize(); ++k) {
+        for (siconos::algebra::SiconosSparseMatrix::InnerIterator it(
+                 *jacobianTotalForcesOver_velocity_, k);
+             it; ++it) {
+          int i = it.row();
+          int j = it.col();
+          double value = it.value();
+          int idx = (j + ndof_) * x_size_ + i + ndof_;
+          jacobianRhsOver_x_(idx) = value;
+        }
       }
     }
   }
@@ -718,7 +758,11 @@ void siconos::modeling::LagrangianSparseDS::display(bool brief) const {
     std::cout << "-> nullptr\n";
 
   if (!brief) {
-    if (mass_mat_) std::cout << "- Mass\n " << *mass_mat_ << "\n";
+    if (mass_mat_) {
+      std::cout << "- Mass\n ";
+      siconos::algebra::print(*mass_mat_);
+      std::cout << "\n";
+    }
 
     std::cout << "- Forces \n";
     if (totalForces_)

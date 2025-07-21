@@ -35,6 +35,7 @@ class LagrangianDS;
 class LagrangianSparseDS;
 class FirstOrderLinearDS;
 class LagrangianLinearTIDS;
+class LagrangianSparseLinearTIDS;
 class LagrangianLinearDiagonalDS;
 class FremondImpactFrictionNSL;
 class RelayNSL;
@@ -54,6 +55,7 @@ enum class Type {
   FirstOrderLinearDS,
   LagrangianSparseDS,
   LagrangianLinearTIDS,
+  LagrangianSparseLinearTIDS,
   LagrangianLinearDiagonalDS,
   // NSLaws
   RelayNSL,
@@ -95,6 +97,9 @@ struct FindType {
   };
   auto visit(const siconos::modeling::LagrangianLinearTIDS&) const {
     return siconos::modeling::Type::LagrangianLinearTIDS;
+  };
+  auto visit(const siconos::modeling::LagrangianSparseLinearTIDS&) const {
+    return siconos::modeling::Type::LagrangianSparseLinearTIDS;
   };
   auto visit(const siconos::modeling::LagrangianLinearDiagonalDS&) const {
     return siconos::modeling::Type::LagrangianLinearDiagonalDS;
@@ -159,6 +164,9 @@ constexpr auto str(const T& X) {
       break;
     case T::LagrangianLinearTIDS:
       return "siconos::modeling::LagrangianLinearTIDS";
+      break;
+    case T::LagrangianSparseLinearTIDS:
+      return "siconos::modeling::LagrangianSparseLinearTIDS";
       break;
     case T::LagrangianLinearDiagonalDS:
       return "siconos::modeling::LagrangianLinearDiagonalDS";

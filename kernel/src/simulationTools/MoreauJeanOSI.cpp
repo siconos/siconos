@@ -27,6 +27,8 @@
 #include "LagrangianLinearDiagonalDS.hpp"
 #include "LagrangianLinearTIDS.hpp"
 #include "LagrangianRheonomousR.hpp"
+#include "LagrangianSparseDS.hpp"
+#include "LagrangianSparseLinearTIDS.hpp"
 #include "NewtonEulerDS.hpp"
 #include "NewtonEulerR.hpp"
 #include "NewtonImpactFrictionNSL.hpp"         // for nslaw visitor
@@ -175,16 +177,6 @@ siconos::integrators::MoreauJeanOSI::MoreauJeanOSI(double theta, double gamma)
   }
 }
 
-std::shared_ptr<siconos::algebra::SiconosMatrix>
-siconos::integrators::MoreauJeanOSI::IterationMatrixBoundaryConditions(
-    std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
-  assert(ds &&
-         "siconos::integrators::MoreauJeanOSI::IterationMatrixBoundaryConditions(ds): ds == "
-         "nullptr.");
-  return _dynamicalSystemsGraph->properties(_dynamicalSystemsGraph->descriptor(ds))
-      .iterationMatrix;
-}
-
 void siconos::integrators::MoreauJeanOSI::initializeWorkVectorsForDS(
     double t, std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
   DEBUG_BEGIN(
@@ -196,6 +188,7 @@ void siconos::integrators::MoreauJeanOSI::initializeWorkVectorsForDS(
   auto dsType = siconos::types::type_value(*ds);
 
   assert(dsType == siconos::modeling::Type::LagrangianLinearTIDS ||
+         dsType == siconos::modeling::Type::LagrangianSparseLinearTIDS ||
          dsType == siconos::modeling::Type::LagrangianDS ||
          dsType == siconos::modeling::Type::LagrangianSparseDS ||
          dsType == siconos::modeling::Type::NewtonEulerDS ||
@@ -219,6 +212,16 @@ void siconos::integrators::MoreauJeanOSI::initializeWorkVectorsForDS(
       dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS) {
     // buffers allocation (inside the graph)
     auto lds = std::static_pointer_cast<siconos::modeling::LagrangianDS>(ds);
+    ds_work_vectors[siconos::integrators::MoreauJeanOSI::BUFFER] =
+        std::make_shared<siconos::algebra::SiconosVector>(lds->dimension());
+    // Update dynamical system components (for memory swap).
+    lds->computeTotalForces(lds->velocity_read(), lds->q_read(), t);
+    lds->swapInMemory();
+
+  } else if (dsType == siconos::modeling::Type::LagrangianSparseLinearTIDS ||
+             dsType == siconos::modeling::Type::LagrangianSparseDS) {
+    // buffers allocation (inside the graph)
+    auto lds = std::static_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds);
     ds_work_vectors[siconos::integrators::MoreauJeanOSI::BUFFER] =
         std::make_shared<siconos::algebra::SiconosVector>(lds->dimension());
     // Update dynamical system components (for memory swap).
@@ -389,6 +392,21 @@ void siconos::integrators::MoreauJeanOSI::initializeIterationMatrix(
     // LU factorization
     _dynamicalSystemsGraph->properties(dsv).LUW =
         std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(*iterationMat);
+  } else if (auto lstids =
+                 std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseLinearTIDS>(
+                     ds)) {
+    if (lstids->hasMass())
+      *iterationMat = lstids->mass();
+    else
+      iterationMat->setIdentity();
+
+    if (lstids->hasDampingMatrix()) *iterationMat += htheta * ltids->dampingMatrix();
+    if (lstids->hasStiffnessMatrix()) *iterationMat += h2theta2 * ltids->stiffnessMatrix();
+    if (lstids->boundaryConditions())
+      _initializeIterationMatrixBoundaryConditions(*ltids, dsv);
+    // LU factorization
+    _dynamicalSystemsGraph->properties(dsv).LUW =
+        std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(*iterationMat);
   }
   // General Lagrangian DS
   else if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
@@ -396,6 +414,13 @@ void siconos::integrators::MoreauJeanOSI::initializeIterationMatrix(
         time, _simulation->timeStep(), _theta, *lds, *iterationMat,
         _dynamicalSystemsGraph->properties(dsv).LUW);
     if (lds->boundaryConditions()) _initializeIterationMatrixBoundaryConditions(*lds, dsv);
+  }
+
+  else if (auto lsds = std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
+    siconos::integrators::moreau_jean::computeIterationMatrix_Lagrangian_T(
+        time, _simulation->timeStep(), _theta, *lsds, *iterationMat,
+        _dynamicalSystemsGraph->properties(dsv).LUW);
+    if (lsds->boundaryConditions()) _initializeIterationMatrixBoundaryConditions(*lsds, dsv);
   }
 
   else if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
@@ -425,10 +450,11 @@ void siconos::integrators::MoreauJeanOSI::_initializeIterationMatrixBoundaryCond
   // - insert this matrix into IterationMatrixBoundaryConditionsMap with ds as a key
 
   assert(!_dynamicalSystemsGraph->properties(dsv).iterationMatrixBoundaryConditions);
-
   auto dsType = siconos::types::type_value(ds);
   if (dsType == siconos::modeling::Type::LagrangianLinearTIDS ||
+      dsType == siconos::modeling::Type::LagrangianSparseLinearTIDS ||
       dsType == siconos::modeling::Type::LagrangianDS ||
+      dsType == siconos::modeling::Type::LagrangianSparseDS ||
       dsType == siconos::modeling::Type::NewtonEulerDS ||
       dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS) {
     // Memory allocation for IterationMatrixBoundaryConditions
@@ -464,7 +490,9 @@ void siconos::integrators::MoreauJeanOSI::_computeIterationMatrixBoundaryConditi
   auto dsType = siconos::types::type_value(ds);
 
   if (dsType == siconos::modeling::Type::LagrangianLinearTIDS ||
+      dsType == siconos::modeling::Type::LagrangianSparseLinearTIDS ||
       dsType == siconos::modeling::Type::LagrangianDS ||
+      dsType == siconos::modeling::Type::LagrangianSparseDS ||
       dsType == siconos::modeling::Type::NewtonEulerDS ||
       dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS) {
     auto columntmp = std::make_shared<siconos::algebra::SiconosVector>(ds.dimension());
@@ -528,6 +556,7 @@ siconos::integrators::MoreauJeanOSI::iterationMatrixInverse(
   } else {
     auto dsType = siconos::types::type_value(*ds);
     if (dsType == siconos::modeling::Type::LagrangianLinearTIDS ||
+        dsType == siconos::modeling::Type::LagrangianSparseLinearTIDS ||
         dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS) {
       // nothing, Winverse is constant and has been created at first call
     } else {
@@ -697,6 +726,50 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
       DEBUG_EXPR(siconos::algebra::print(free));
       normResidu = free.norm();
       DEBUG_PRINTF("normResidu= %e\n", normResidu);
+    } else if (dsType == siconos::modeling::Type::LagrangianSparseDS) {
+      // residu = M(q*)(v_k,i+1 - v_i) - h*theta*forces(t_i+1,v_k,i+1, q_k,i+1)
+      // - h*(1-theta)*forces(ti,vi,qi) - p_i+1
+      auto &residuFree = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::RESIDU_FREE];
+      auto &free = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::VFREE];
+
+      // -- Convert the DS into a Lagrangian one.
+      auto &d = static_cast<siconos::modeling::LagrangianSparseDS &>(ds);
+
+      // Get state i (previous time step) from Memories -> var. indexed with
+      // "Old"
+      const auto &vold = d.velocityMemory().getSiconosVector(0);
+
+      const auto &v = *d.velocity();  // v = v_k,i+1
+      // residuFree.setZero();
+      DEBUG_EXPR(siconos::algebra::print(residuFree));
+
+      DEBUG_EXPR(siconos::algebra::print(vold));
+      DEBUG_EXPR(siconos::algebra::print(v));
+
+      residuFree = v - vold;
+      if (d.hasMass()) {
+        d.computeMass(*d.q());
+        residuFree = d.mass() * residuFree;  // residuFree = M(v - vold)
+      }
+
+      if (d.hasTotalForces()) {
+        // Cheaper version: get forces(ti,vi,qi) from memory
+        residuFree -= time_step * (1. - _theta) * d.forcesMemory().getSiconosVector(0);
+        // computes forces(ti+1, v_k,i+1, q_k,i+1) = forces(t,v,q)
+        d.computeTotalForces(d.velocity_read(), d.q_read(), t);
+        residuFree -= time_step * _theta * d.totalForces();
+      }
+      applyBoundaryConditions(d, residuFree, dsi, t, v);
+      free = residuFree;  // copy residuFree into Workfree
+      DEBUG_EXPR(siconos::algebra::print(residuFree));
+
+      if (d.p(1)) free -= *d.p(1);  // Compute Residu in Workfree Notation !!
+
+      applyBoundaryConditions(d, free, dsi, t, v);
+
+      DEBUG_EXPR(siconos::algebra::print(free));
+      normResidu = free.norm();
+      DEBUG_PRINTF("normResidu= %e\n", normResidu);
     }
     // 4 - Lagrangian Linear Systems
     else if (dsType == siconos::modeling::Type::LagrangianLinearTIDS) {
@@ -754,9 +827,62 @@ double siconos::integrators::MoreauJeanOSI::computeResidu() {
 
       normResidu = 0.0;  // we assume that v = vfree + W^(-1) p
       //     normResidu = realresiduFree->norm();
-    }
+    } else if (dsType == siconos::modeling::Type::LagrangianSparseLinearTIDS) {
+      DEBUG_PRINT(
+          "siconos::integrators::MoreauJeanOSI::computeResidu(), dsType == "
+          "siconos::modeling::Type::LagrangianSparseLinearTIDS\n");
+      // ResiduFree = time_step*C*v_i + time_step*Kq_i +h*h*theta*Kv_i+hFext_theta     (1)
+      // This formulae is only valid for the first computation of the residual
+      // for v = v_i otherwise the complete formulae must be applied, that is
+      // ResiduFree = M(v - vold) + time_step*((1-theta)*(C v_i + K q_i) +theta * ( C*v
+      // + K(q_i+h(1-theta)v_i+h theta v)))
+      //                     +hFext_theta     (2)
+      // for v != vi, the formulae (1) is wrong.
+      // in the sequel, only the equation (1) is implemented
 
-    else if (dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS) {
+      // -- Convert the DS into a Lagrangian one.
+      auto &lltids = static_cast<siconos::modeling::LagrangianSparseLinearTIDS &>(ds);
+
+      auto &residuFree = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::RESIDU_FREE];
+      auto &free = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::VFREE];
+
+      // --- ResiduFree computation Equation (1) ---
+      residuFree.setZero();
+      // -- No need to update W --
+      const auto &vold = lltids.velocityMemory().getSiconosVector(0);  // vi
+      if (lltids.hasDampingMatrix()) residuFree += time_step * lltids.dampingMatrix() * vold;
+      if (lltids.hasStiffnessMatrix()) {
+        auto coeff = time_step * time_step * _theta;
+        residuFree +=
+            coeff * lltids.stiffnessMatrix() * vold;  // vfree += time_step^2*_theta*K*vi
+        residuFree += time_step * lltids.stiffnessMatrix() *
+                      lltids.qMemory().getSiconosVector(0);  // vfree += time_step*K*qi
+      }
+
+      if (lltids.hasExternalForces()) {
+        // computes Fext(ti)
+        lltids.computeFext(told);
+        auto coeff = time_step * (1 - _theta);
+        // vfree -= time_step*(1-_theta) * fext(ti)
+        residuFree -= coeff * lltids.fext();
+        // computes Fext(ti+1)
+        lltids.computeFext(t);
+        coeff = time_step * _theta;
+        // vfree -= time_step*_theta * fext(ti+1)
+        residuFree -= coeff * lltids.fext();
+      }
+
+      applyBoundaryConditions(lltids, residuFree, dsi, t, vold);
+
+      free = residuFree;                          // copy residuFree into free
+      if (lltids.p(1)) free -= lltids.p_read(1);  // Compute Residu in Workfree Notation !!
+      // We use free as tmp buffer
+      DEBUG_EXPR(siconos::algebra::print(free));
+      DEBUG_EXPR(siconos::algebra::print(residuFree));
+
+      normResidu = 0.0;  // we assume that v = vfree + W^(-1) p
+      //     normResidu = realresiduFree->norm();
+    } else if (dsType == siconos::modeling::Type::LagrangianLinearDiagonalDS) {
       // ResiduFree = time_step*C*v_i + time_step*Kq_i +h*h*theta*Kv_i+hFext_theta     (1)
       // This formulae is only valid for the first computation of the residual
       // for v = v_i otherwise the complete formulae must be applied, that is
@@ -941,6 +1067,17 @@ void siconos::integrators::MoreauJeanOSI::computeFreeState() {
           vfree);  // LUW is already up to date
       vfree *= -1.0;
       vfree += lltids->velocityMemory().getSiconosVector(0);
+    } else if (auto llstids =
+                   std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseLinearTIDS>(
+                       ds)) {
+      vfree = residuFree;  // initialize vfree with the content of residuFree
+      // -- vfree =  vold - W^{-1} ResiduFree --
+      // At this point vfree = residuFree
+      // -> Solve in place WX = vfree
+      // LUW is already up to date
+      vfree = _dynamicalSystemsGraph->properties(*dsi).LUW->solve(vfree);
+      vfree *= -1.0;
+      vfree += llstids->velocityMemory().getSiconosVector(0);
     } else if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
       // --- ResiduFree computation ---
       // ResFree = M(v-vold) - time_step*[theta*forces(t) + (1-theta)*forces(told)]
@@ -959,8 +1096,26 @@ void siconos::integrators::MoreauJeanOSI::computeFreeState() {
       vfree = _dynamicalSystemsGraph->properties(*dsi).LUW->solve(vfree);
       vfree *= -1.0;
       vfree += lds->velocity_read();  // v = v_k,i+1;
+    } else if (auto lds =
+                   std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
+      // --- ResiduFree computation ---
+      // ResFree = M(v-vold) - time_step*[theta*forces(t) + (1-theta)*forces(told)]
+      //
+      vfree = residuFree;  // initialize vfree with the content of residuFree
+      // -- Update W --
+      // Note: during computeIterationMatrix, mass and jacobians of forces will be computed/
+      moreau_jean::computeIterationMatrix_Lagrangian_T(
+          nextTime, timeStep, _theta, *lds, *iterationMatrix,
+          _dynamicalSystemsGraph->properties(*dsi).LUW);
+      if (lds->boundaryConditions()) {
+        _computeIterationMatrixBoundaryConditions(
+            *lds, *_dynamicalSystemsGraph->properties(*dsi).iterationMatrixBoundaryConditions,
+            *iterationMatrix);
+      }
+      vfree = _dynamicalSystemsGraph->properties(*dsi).LUW->solve(vfree);
+      vfree *= -1.0;
+      vfree += lds->velocity_read();  // v = v_k,i+1;
     }
-
     // ========= NewtonEuler Systems ===========
     else if (auto neds = std::dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
       vfree = residuFree;
@@ -997,6 +1152,13 @@ void siconos::integrators::MoreauJeanOSI::prepareNewtonIteration(double time) {
     if (!checkOSI(dsi)) continue;
     auto ds = _dynamicalSystemsGraph->bundle(*dsi);
     if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
+      moreau_jean::computeIterationMatrix_Lagrangian_T(
+          time, _simulation->timeStep(), _theta, *lds,
+          *_dynamicalSystemsGraph->properties(*dsi).iterationMatrix,
+          _dynamicalSystemsGraph->properties(*dsi).LUW);
+
+    } else if (auto lds =
+                   std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds)) {
       moreau_jean::computeIterationMatrix_Lagrangian_T(
           time, _simulation->timeStep(), _theta, *lds,
           *_dynamicalSystemsGraph->properties(*dsi).iterationMatrix,
@@ -1166,7 +1328,8 @@ void siconos::integrators::MoreauJeanOSI::integrate(double &tinit, double &tend,
 
     if (!lltids)
       THROW_EXCEPTION(
-          "siconos::integrators::MoreauJeanOSI::integrate - not yet implemented ds of type:" +
+          "siconos::integrators::MoreauJeanOSI::integrate - not yet implemented ds of "
+          "type:" +
           siconos::types::type_name(*ds));
 
     // get q and velocity pointers for previous time step
@@ -1266,6 +1429,77 @@ void siconos::integrators::MoreauJeanOSI::updateState(const unsigned int) {
               _dynamicalSystemsGraph->properties(*dsi).LUW->solve(d.velocity_read());
           *d.velocity() += vfree;
         }
+      } else {
+        *d.velocity() = vfree;
+      }
+      DEBUG_EXPR(siconos::algebra::print(v));
+
+      if (d.boundaryConditions()) {
+        int bc = 0;
+        auto columntmp = std::make_shared<siconos::algebra::SiconosVector>(ds.dimension());
+
+        for (const auto itindex : d.boundaryConditions()->velocityIndices()) {
+          *columntmp =
+              _dynamicalSystemsGraph->properties(*dsi).iterationMatrixBoundaryConditions->col(
+                  bc);
+          /*\warning we assume that W is symmetric in the Lagrangian case*/
+
+          double value = -1. * columntmp->dot(d.velocity_read());
+          if (d.p(_levelMaxForInput) && d.p(_levelMaxForInput)->size() > 0) {
+            value += (d.p_read(_levelMaxForInput))(itindex);
+          }
+          /* \warning the computation of reactionToBoundaryConditions take into
+             account the contact impulse but not the external and internal
+             forces. A complete computation of the residu should be better */
+          (*d.reactionToBoundaryConditions())(bc) = value;
+          bc++;
+        }
+      }
+
+      auto &local_buffer = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::BUFFER];
+      // Save value of q in stateTmp for future convergence computation
+      if (baux) local_buffer = d.q_read();
+
+      moreau_jean::updatePosition(_simulation->timeStep(), _theta, ds);
+
+      if (baux) {
+        double ds_norm_ref = 1. + ds.x0().norm();  // Should we save this in the graph?
+        local_buffer -= d.q_read();
+        double aux = (local_buffer.norm()) / ds_norm_ref;
+        if (aux > RelativeTol) _simulation->setRelativeConvergenceCriterionHeld(false);
+      }
+    } else if (dsType == siconos::modeling::Type::LagrangianSparseDS ||
+               dsType == siconos::modeling::Type::LagrangianSparseLinearTIDS) {
+      DEBUG_PRINT(
+          "siconos::integrators::MoreauJeanOSI::updateState(const unsigned int "
+          "), dsType == "
+          "siconos::modeling::Type::LagrangianSparseDS || dsType == "
+          "siconos::modeling::Type::LagrangianSparseLinearTIDS \n");
+      // get dynamical system
+      auto &d = static_cast<siconos::modeling::LagrangianSparseDS &>(ds);
+      auto &vfree = *ds_work_vectors[siconos::integrators::MoreauJeanOSI::VFREE];
+
+      //    auto *vfree = d.velocityFree();
+      // auto &v = *d.velocity();
+
+      auto baux = dsType == siconos::modeling::Type::LagrangianSparseDS && useRCC &&
+                  _simulation->relativeConvergenceCriterionHeld();
+
+      if (d.p(_levelMaxForInput) && d.p(_levelMaxForInput)->size() > 0) {
+        assert(((d.p(_levelMaxForInput)).get()) &&
+               " siconos::integrators::MoreauJeanOSI::updateState() "
+               "*d.p(_levelMaxForInput) "
+               "== nullptr.");
+        *d.velocity() = d.p_read(_levelMaxForInput);  // v = p
+        if (d.boundaryConditions()) {
+          for (const auto itindex : d.boundaryConditions()->velocityIndices()) {
+            (*d.velocity())(itindex) = 0.0;
+          }
+        }
+
+        *d.velocity() = _dynamicalSystemsGraph->properties(*dsi).LUW->solve(d.velocity_read());
+        *d.velocity() += vfree;
+
       } else {
         *d.velocity() = vfree;
       }
@@ -1537,6 +1771,36 @@ siconos::integrators::MoreauJeanOSI::computeWorkForces() {
 
         DEBUG_EXPR(siconos::algebra::print(*workForces););
       }
+    }
+    if (dsType == siconos::modeling::Type::LagrangianSparseDS ||
+        dsType == siconos::modeling::Type::LagrangianSparseLinearTIDS) {
+      // -- Convert the DS into a Lagrangian one.
+      auto lds = static_pointer_cast<siconos::modeling::LagrangianSparseDS>(ds);
+      siconos::algebra::SiconosVector f_k_theta{lds->dimension()};
+      siconos::algebra::SiconosVector v_k_theta{lds->dimension()};
+      f_k_theta.setZero();
+      v_k_theta.setZero();
+
+      if (lds->hasTotalForces()) {
+        // Cheaper version: get forces(ti,vi,qi) from memory
+        f_k_theta += (1. - _theta) * lds->forcesMemory().getSiconosVector(0);
+        v_k_theta += (1. - _theta) * lds->velocityMemory().getSiconosVector(0);
+
+        // computes forces(ti+1, v_k,i+1, q_k,i+1) = forces(t,v,q)
+        lds->computeTotalForces(lds->velocity_read(), lds->q_read(), t);
+        f_k_theta += _theta * lds->totalForces();
+        v_k_theta += _theta * lds->velocity_read();
+
+        DEBUG_PRINT("MoreauJeanOSI:: new forces :\n");
+        DEBUG_EXPR(siconos::algebra::print(*lds->totalForces()););
+        DEBUG_EXPR(siconos::algebra::print(*f_k_theta););
+
+        // scalar product
+        (*workForces)(ds->number(), 0) = ds->number();
+        (*workForces)(ds->number(), 1) = h * f_k_theta.dot(v_k_theta);
+
+        DEBUG_EXPR(siconos::algebra::print(*workForces););
+      }
     } else if (dsType == siconos::modeling::Type::NewtonEulerDS) {
       DEBUG_PRINT("MoreauJeanOSI::computeWorkForces(), dsType == Type::NewtonEulerDS\n");
       // residu = M (v_k,i+1 - v_i) - h*_theta*forces(t,v_k,i+1, q_k,i+1) -
@@ -1674,6 +1938,13 @@ void siconos::integrators::moreau_jean::updatePosition(
                  time_step * (1. - theta) * lds.velocityMemory().getSiconosVector(0) +
                  lds.qMemory().getSiconosVector(0);
 
+  } else if (dsType == siconos::modeling::Type::LagrangianSparseDS ||
+             dsType == siconos::modeling::Type::LagrangianSparseLinearTIDS) {
+    auto &lds = static_cast<siconos::modeling::LagrangianSparseDS &>(ds);
+    // *q = *qold + h*(theta * *v +(1.0 - theta)* *vold)
+    *(lds.q()) = time_step * theta * lds.velocity_read() +
+                 time_step * (1. - theta) * lds.velocityMemory().getSiconosVector(0) +
+                 lds.qMemory().getSiconosVector(0);
   } else if (dsType == siconos::modeling::Type::NewtonEulerDS) {
     siconos::modeling::NewtonEulerDS &neds =
         static_cast<siconos::modeling::NewtonEulerDS &>(ds);

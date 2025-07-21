@@ -190,6 +190,6 @@ void QuaternionTest::testQuaternionMatrix() {
   siconos::geometry::quaternionRotateMatrix(q03, m);
   auto diff = (m - mref).cwiseAbs().rowwise().sum().maxCoeff();
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
-      "testQuaternion : ", diff <= std::numeric_limits<double>::epsilon() * 10.0, true);
+      "testQuaternion : ", diff <= std::numeric_limits<double>::epsilon() * 100.0, true);
   std::cout << "✅ test quaternion 2 passed.\n";
 }

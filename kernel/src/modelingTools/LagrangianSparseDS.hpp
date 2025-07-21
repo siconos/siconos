@@ -408,14 +408,12 @@ class LagrangianSparseDS : public SecondOrderDS {
     return state_q_[2];
   }
 
-  /*  \return a read-only view on the mass matrix */
-  inline const std::shared_ptr<siconos::algebra::SiconosSparseMatrix> &mass() const {
-    return mass_mat_;
-  }
+  /*  \return a read-only reference on the mass matrix */
+  inline const siconos::algebra::SiconosSparseMatrix &mass() const { return *mass_mat_; }
 
   const siconos::algebra::SiconosSparseMatrix &mass_py() const { return *mass_mat_; }
 
-  // inline const siconos::algebra::SiconosSparseMatrix &mass_py() const { return *mass_mat_; }
+  // inline const siconos::algebra::SiconosSparseMatrix &mass_py() const { return * _; }
 
   /** \return LU-factorization of the mass (pointer link) */
   inline auto LUMass() const { return LUMass_; }
@@ -740,16 +738,15 @@ class LagrangianSparseDS : public SecondOrderDS {
     return hasConstantJacobianFgyrOver_velocity_ && hasConstantJacobianFintOver_velocity_;
   }
 
-  /** \return a read-only view on \f$  \nabla_qF_{total}(v,q,t) \f$ */
-  inline const std::shared_ptr<siconos::algebra::SiconosSparseMatrix> &
-  jacobianTotalForcesOver_q() const {
-    return jacobianTotalForcesOver_q_;
+  /** \return a read-only reference on \f$  \nabla_qF_{total}(v,q,t) \f$ */
+  inline const siconos::algebra::SiconosSparseMatrix &jacobianTotalForcesOver_q() const {
+    return *jacobianTotalForcesOver_q_;
   }
 
-  /** \return a read-only view on \f$ \nabla_{\dot q}F_{total}(v,q,t) \f$ */
-  inline const std::shared_ptr<siconos::algebra::SiconosSparseMatrix> &
-  jacobianTotalForcesOver_velocity() const {
-    return jacobianTotalForcesOver_velocity_;
+  /** \return a read-only reference on \f$ \nabla_{\dot q}F_{total}(v,q,t) \f$ */
+  inline const siconos::algebra::SiconosSparseMatrix &jacobianTotalForcesOver_velocity()
+      const {
+    return *jacobianTotalForcesOver_velocity_;
   }
 
   /** \return last saved (memory) values of the state vector*/
