@@ -29,7 +29,7 @@
 siconos::mechanics::fem::FiniteElementLinearTIDS::FiniteElementLinearTIDS(
     std::shared_ptr<Mesh> mesh, std::map<unsigned int, std::shared_ptr<Material>> materials,
     siconos::algebra::StorageType storageType)
-    : LagrangianLinearTIDS::LagrangianLinearTIDS(),
+    : LagrangianSparseLinearTIDS::LagrangianSparseLinearTIDS(),
       _mesh(mesh),
       _materials(materials),
       _storageType(storageType) {
@@ -71,28 +71,14 @@ siconos::mechanics::fem::FiniteElementLinearTIDS::FiniteElementLinearTIDS(
   hasConstantMass_ = true;
   hasMass_ = true;
   computemass_ = nullptr;
-  mass_internal_storage_ = std::make_unique<std::vector<double>>(ndof_ * ndof_);
-  mass_view_ = std::make_shared<siconos::algebra::MapType>(mass_internal_storage_->data(),
-                                                           ndof_, ndof_);
-  // _mass->setIsSymmetric(true);
-  // _mass->setIsPositiveDefinite(true);
-
-  _FEModel->computeMassMatrix(mass_view_, _materials);
+  mass_mat_ = std::make_shared<siconos::algebra::SiconosSparseMatrix>(ndof_, ndof_);
+  // Note FP - todo: evaluate number of nonzeros in mass_mat_ and reserve.
+  _FEModel->computeMassMatrix(*mass_mat_, _materials);
   //
+  stiffnessMatrix_ = std::make_shared<siconos::algebra::SiconosSparseMatrix>(ndof_, ndof_);
+  _FEModel->computeStiffnessMatrix(*stiffnessMatrix_, _materials);
 
-  // Stiffness must be set with setStiffnessMatrix ...
-  // stiffnessMatrix_ = std::make_shared<siconos::algebra::SiconosMatrix>(ndof_, ndof_);
-  // stiffnessMatrix_->setIsSymmetric(true);
-  // stiffnessMatrix_->setIsPositiveDefinite(true);
-
-  _FEModel->computeStiffnessMatrix(*stiffnessMatrix_view_, _materials);
-
-  // if(!_C)
-  // {
-  //   _C = std::make_shared<siconos::algebra::SiconosMatrix>(ndof_, ndof_,
-  //   _storageType);
-  // }
-  // _C->setZero();
+  // dampingMatrix_ = std::make_shared<siconos::algebra::SiconosSparseMatrix>(ndof_, ndof_);
 
   DEBUG_END(
       "FiniteElementLinearTIDS::FiniteElementLinearTIDS(std::shared_ptr<Mesh> "
@@ -127,12 +113,12 @@ void siconos::mechanics::fem::FiniteElementLinearTIDS::applyNodalForces(
 
 double siconos::mechanics::fem::FiniteElementLinearTIDS::elasticPotentialEnergy() const {
   siconos::algebra::SiconosVector tmp{ndof_};
-  tmp = *stiffnessMatrix_view_ * *state_q_[0];
+  tmp = *stiffnessMatrix_ * *state_q_[0];
   return 0.5 * state_q_[0]->dot(tmp);
 }
 
 void siconos::mechanics::fem::FiniteElementLinearTIDS::display(bool brief) const {
   std::cout << "===== FiniteElementLinearTIDS display ===== " << std::endl;
-  LagrangianLinearTIDS::display();
+  LagrangianSparseLinearTIDS::display();
   _FEModel->display(brief);
 }

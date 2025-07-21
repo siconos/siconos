@@ -20,7 +20,7 @@
 #ifndef FINITEELEMENTLAGRANGIANTIDS_H
 #define FINITEELEMENTLAGRANGIANTIDS_H
 
-#include "LagrangianLinearTIDS.hpp"
+#include "LagrangianSparseLinearTIDS.hpp"
 #include "SiconosMatrix.hpp"  // For Sparse mat
 /** Finite Element discretization of elastic solids that inherits from
  * Lagrangian Linear Systems with time invariant coefficients
@@ -32,11 +32,8 @@ class Mesh;
 class FiniteElementModel;
 class Material;
 
-class FiniteElementLinearTIDS : public modeling::LagrangianLinearTIDS {
+class FiniteElementLinearTIDS : public modeling::LagrangianSparseLinearTIDS {
  protected:
-  /* serialization hooks */
-  ACCEPT_SERIALIZATION(LagrangianLinearTIDS);
-
   /** a mesh */
   std::shared_ptr<Mesh> _mesh{nullptr};
 

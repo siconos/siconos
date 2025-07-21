@@ -85,7 +85,7 @@ class FiniteElementModel {
       \param ndof dof number
       \param e mesh element
    */
-  FiniteElementModel(std::shared_ptr<Mesh> m) : _mesh(m){};
+  FiniteElementModel(std::shared_ptr<Mesh> m) : _mesh(m) {};
 
   ~FiniteElementModel() noexcept = default;
 
@@ -102,44 +102,40 @@ class FiniteElementModel {
   unsigned int init();
 
   /* Assembly method for elemetary matrix */
-  void AssembleElementaryMatrix(Eigen::Ref<siconos::algebra::SiconosMatrix> M,
-                                siconos::algebra::SiconosMatrix& Me, FElement& fe);
+  void AssembleElementaryMatrix(siconos::algebra::SiconosSparseMatrix& M,
+                                siconos::algebra::SiconosDenseMatrix& Me, FElement& fe);
 
-  //   /* Assembly method for elemetary matrix */
-  //   void AssembleElementaryMatrix(std::shared_ptr<siconos::algebra::MapType> M,
-  //                                 siconos::algebra::SiconosMatrix& Me, FElement& fe);
-
+  // should be computeMass of LagrangianDS ?
   /** compute Mass Matrix
-   * should be computeMass of LagrangianDS ?
    **/
-  void computeMassMatrix(std::shared_ptr<siconos::algebra::MapType>,
+  void computeMassMatrix(siconos::algebra::SiconosSparseMatrix& mass,
                          std::map<unsigned int, std::shared_ptr<Material>>& mat);
 
   /** compute elementary Mass Matrix
-   * should be computeMass of LagrangianDS ?
    **/
-  void computeElementaryMassMatrix(siconos::algebra::SiconosMatrix& Me, FElement& fe,
+  void computeElementaryMassMatrix(siconos::algebra::SiconosDenseMatrix&, FElement& fe,
                                    double massDensity);
 
   /** compute Stiffness Matrix
    * should be computeMass of LagrangianDS ?
    **/
-  void computeStiffnessMatrix(Eigen::Ref<siconos::algebra::SiconosMatrix>,
+  void computeStiffnessMatrix(siconos::algebra::SiconosSparseMatrix&,
                               std::map<unsigned int, std::shared_ptr<Material>>& mat);
 
   /** compute elementary Stiffness Matrix
    * should be computeMass of LagrangianDS ?
    **/
-  void computeElementaryStiffnessMatrix(siconos::algebra::SiconosMatrix& Me, FElement& fe,
-                                        std::shared_ptr<siconos::algebra::SiconosMatrix> D,
+  void computeElementaryStiffnessMatrix(siconos::algebra::SiconosDenseMatrix& Me, FElement& fe,
+                                        const siconos::algebra::SiconosDenseMatrix& D,
                                         double thickness);
 
   /** compute elementary Stiffness Matrix with a direct method
    * for linear element
    **/
-  void computeElementaryStiffnessMatrix_direct(
-      siconos::algebra::SiconosMatrix& Me, FElement& fe,
-      std::shared_ptr<siconos::algebra::SiconosMatrix> D, double thickness);
+  void computeElementaryStiffnessMatrix_direct(siconos::algebra::SiconosDenseMatrix& Me,
+                                               FElement& fe,
+                                               const siconos::algebra::SiconosDenseMatrix& D,
+                                               double thickness);
 
   /** apply Dirichlet Boundary conditions for a given tag on element.
    **/
