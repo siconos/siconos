@@ -793,6 +793,10 @@ int color_graph_block(int nc, NumericsMatrix *M, size_t *n_colors, size_t **set_
                     }
                 }
             }
+            
+            free(nb_row_blocks);
+            free(nb_col_blocks);
+
             PetscCall(MatCreateSeqAIJWithArrays(PETSC_COMM_WORLD, nc, nc, Mp, Mi, Mx, &A));
             PetscCall(MatAssemblyBegin(A, MAT_FINAL_ASSEMBLY));
             PetscCall(MatAssemblyEnd(A, MAT_FINAL_ASSEMBLY));

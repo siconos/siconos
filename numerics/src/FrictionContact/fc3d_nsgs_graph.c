@@ -497,6 +497,11 @@ static void statsIterationCallback(FrictionContactProblem *problem, SolverOption
 
 void fc3d_nsgs_graph(FrictionContactProblem *problem, double *reaction, double *velocity, int *info,
                      SolverOptions *options) {
+  
+  /* double time = 0.;
+
+  time = omp_get_wtime(); */
+
   /* verbose=1; */
   /* int and double parameters */
   int *iparam = options->iparam;
@@ -584,6 +589,12 @@ void fc3d_nsgs_graph(FrictionContactProblem *problem, double *reaction, double *
   size_t **partitions = NULL;
   color_graph_block(problem->numberOfContacts, problem->M, &n_colors, &partition_size, &partitions);
 
+/*   time = omp_get_wtime() - time;
+  printf("Time before loop: %es\n", time);
+  fflush(stdout);
+
+  time = omp_get_wtime(); */
+
   /*****  NSGS Iterations *****/
 
   /* A special case for the most common options (should correspond
@@ -656,7 +667,7 @@ void fc3d_nsgs_graph(FrictionContactProblem *problem, double *reaction, double *
   /* All other cases, we put all the ifs inline.. otherwise, too many
    * variations to have dedicated loops, but add more if there are
    * common cases to avoid checking booleans on every iteration. **/
-  else {
+  else { 
     /* verbose=1; */
     double light_error_sum = 0.;
     double light_error_2;
@@ -672,12 +683,15 @@ void fc3d_nsgs_graph(FrictionContactProblem *problem, double *reaction, double *
                                 freeze_contacts, scontacts, norm_q, omega, \
                                 tolerance, velocity)
     {
+
+    double time;
+
     /* Allocate localproblem for each thread */
     localproblem = fc3d_local_problem_allocate(problem);
     /* I hopte the next line creates no problem */
     fc3d_nsgs_initialize_local_solver_parallel(&local_solver, &update_localproblem,
                                                (FreeSolverNSGSPtr *)&freeSolver, &computeError, problem,
-                                               localproblem, options);
+                                               localproblem, options);                                          
     while ((iter < itermax) && (hasNotConverged > 0)) {
 
       #pragma omp single
@@ -700,17 +714,19 @@ void fc3d_nsgs_graph(FrictionContactProblem *problem, double *reaction, double *
       }
 
       for (size_t color = 0; color < n_colors; color++) {
+        // time_it = omp_get_wtime();
+        // int chunk_size = partition_size[color] / (4 * omp_get_max_threads());
+        // if (chunk_size < 1) chunk_size = 1;
+        // time = omp_get_wtime();
         #pragma omp for schedule(static) reduction(+:light_error_sum)
         for (int v = 0; v < partition_size[color]; v++) {
           int i = partitions[color][v];
     
-          if (iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] ==
-                  SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE ||
-              iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] ==
-                  SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP) {
-            if (iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] ==
-                SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP)
+          if (iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE ||
+              iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP) {
+            if (iparam[SICONOS_FRICTION_3D_NSGS_SHUFFLE] == SICONOS_FRICTION_3D_NSGS_SHUFFLE_TRUE_EACH_LOOP) {
               uint_shuffle(scontacts, nc);
+            }
             contact = scontacts[i];
           } else
             contact = i;
@@ -776,7 +792,11 @@ void fc3d_nsgs_graph(FrictionContactProblem *problem, double *reaction, double *
           else
             acceptLocalReactionUnconditionally(contact, reaction, localreaction);
         }
+        // time = omp_get_wtime() - time;
+        // printf("%d,%d,%d,%.4e\n", omp_get_thread_num(), color, partition_size[color], time);
+        // fflush(stdout);
       }
+      // printf("\n");
 
       /* DEBUG_EXPR( */
       /*   if(iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] >0) */
@@ -839,6 +859,10 @@ void fc3d_nsgs_graph(FrictionContactProblem *problem, double *reaction, double *
     }
   }
 
+  /* time = omp_get_wtime() - time;
+  printf("Time in loop: %es\n", time);
+  time = omp_get_wtime(); */
+
   /* Full criterium */
   if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
       SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
@@ -859,4 +883,11 @@ void fc3d_nsgs_graph(FrictionContactProblem *problem, double *reaction, double *
   (*freeSolver)(problem, localproblem, localsolver_options);
   fc3d_local_problem_free(localproblem, problem);
   if (scontacts) free(scontacts);
+
+  free(partition_size);
+  for (size_t i = 0; i < n_colors; i++) free(partitions[i]);
+  free(partitions);
+
+  /* time = omp_get_wtime() - time;
+  printf("Time after loop: %es\n", time); */
 }
