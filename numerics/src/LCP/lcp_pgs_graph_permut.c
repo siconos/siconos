@@ -79,7 +79,7 @@ void lcp_pgs_graph_permut(LinearComplementarityProblem *problem, double *z, doub
   double zi;
   double right = 0.;
   size_t i, row;
-  double *lefts = (double *)malloc((size_t)n * sizeof(double));
+  double *lefts = (double *)calloc((size_t)n, sizeof(double));
   int is_last = 0;
 
   // double time = omp_get_wtime();
