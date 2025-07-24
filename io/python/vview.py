@@ -1520,20 +1520,21 @@ class VView(object):
             self.cmapper[mu].ImmediateModeRenderingOff()
         self.cmapper[mu].SetInputConnection(self.cone_glyph[mu].GetOutputPort())
 
-        # Random color map, up to 256 domains
-        self.cLUT[mu] = vtk.vtkLookupTable()
-        self.cLUT[mu].SetNumberOfColors(256)
-        self.cLUT[mu].Build()
-        for i in range(256):
-            self.cLUT[mu].SetTableValue(i, *random_color())
-        self.cLUT[mu].SetTableRange(0, 255)
-
         # By default don't allow scalars to have an effect
         self.cmapper[mu].ScalarVisibilityOff()
 
         # If domain information is available, we turn on the color
         # table and turn on scalars
         if self.io_reader.dom_at_time is not None:
+
+            # Random color map, up to 256 domains
+            self.cLUT[mu] = vtk.vtkLookupTable()
+            self.cLUT[mu].SetNumberOfColors(256)
+            self.cLUT[mu].Build()
+            for i in range(256):
+                self.cLUT[mu].SetTableValue(i, *random_color())
+                self.cLUT[mu].SetTableRange(0, 255)
+
             self.cmapper[mu].SetLookupTable(self.cLUT[mu])
             self.cmapper[mu].SetColorModeToMapScalars()
             self.cmapper[mu].SetScalarModeToUsePointData()
