@@ -93,8 +93,9 @@ static void fc3d_nsgs_initialize_local_solver_parallel(SolverPtr *solve, UpdateP
                                                        ComputeErrorPtr *computeError,
                                                        FrictionContactProblem *problem,
                                                        FrictionContactProblem *localproblem,
-                                                       SolverOptions *options) {
-  SolverOptions *localsolver_options = options->internalSolvers[0];
+                                                       SolverOptions *options,
+                                                       SolverOptions *localsolver_options) {
+  // SolverOptions *localsolver_options = options->internalSolvers[0];
   /** Connect to local solver */
   switch (localsolver_options->solverId) {
     /* Projection */
@@ -548,7 +549,7 @@ void fc3d_nsgs_graph(FrictionContactProblem *problem, double *reaction, double *
 
   fc3d_nsgs_initialize_local_solver_parallel(&local_solver, &update_localproblem,
                                              (FreeSolverNSGSPtr *)&freeSolver, &computeError, problem,
-                                             localproblem, options);
+                                             localproblem, options, localsolver_options);
 
   scontacts = allocShuffledContacts(problem, options);
   freeze_contacts = allocfreezingContacts(problem, options);
@@ -621,7 +622,7 @@ void fc3d_nsgs_graph(FrictionContactProblem *problem, double *reaction, double *
     /* I hopte the next line creates no problem */
     fc3d_nsgs_initialize_local_solver_parallel(&local_solver, &update_localproblem,
                                                (FreeSolverNSGSPtr *)&freeSolver, &computeError, problem,
-                                               localproblem, options);
+                                               localproblem, options, localsolver_options);
 
     while ((iter < itermax) && (hasNotConverged > 0)) {
 
@@ -675,29 +676,34 @@ void fc3d_nsgs_graph(FrictionContactProblem *problem, double *reaction, double *
     int number_of_freezed_contact;
 
     #pragma omp parallel default(none) \
-                         private(contact, localproblem, localreaction, light_error_2) \
+                         private(contact, localproblem, localreaction, light_error_2, localsolver_options) \
                          shared(problem, local_solver, update_localproblem, freeSolver, computeError, options, \
-                                iter, itermax, hasNotConverged, localsolver_options, error, \
+                                iter, itermax, hasNotConverged, error, \
                                 number_of_freezed_contact, tmp_criteria1, tmp_criteria2, norm_r, nc, iparam, \
                                 n_colors, light_error_sum, partition_size, partitions, reaction, \
                                 freeze_contacts, scontacts, norm_q, omega, \
-                                tolerance, velocity)
+                                tolerance, velocity, stdout)
     {
 
-    double time;
+    /* double time, time_for; */
 
     /* Allocate localproblem for each thread */
     localproblem = fc3d_local_problem_allocate(problem);
+
+    localsolver_options = solver_options_create(options->internalSolvers[0]->solverId);
+
     /* I hopte the next line creates no problem */
     fc3d_nsgs_initialize_local_solver_parallel(&local_solver, &update_localproblem,
                                                (FreeSolverNSGSPtr *)&freeSolver, &computeError, problem,
-                                               localproblem, options);                                          
+                                               localproblem, options, localsolver_options);
+                                               
     while ((iter < itermax) && (hasNotConverged > 0)) {
+
+      /* time = omp_get_wtime(); */
+      fc3d_set_internalsolver_tolerance(problem, options, localsolver_options, error);
 
       #pragma omp single
       {
-      fc3d_set_internalsolver_tolerance(problem, options, localsolver_options, error);
-
       number_of_freezed_contact = 0;
       tmp_criteria1 = tolerance * tolerance * 100 * 100;
       tmp_criteria2 = *norm_r * *norm_r / (nc * nc * 1000);
@@ -712,6 +718,12 @@ void fc3d_nsgs_graph(FrictionContactProblem *problem, double *reaction, double *
         }
       }
       }
+
+      /* time = omp_get_wtime() - time;
+      printf("[%d] Time in first single: %es\n", omp_get_thread_num(), time);
+      fflush(stdout); */
+
+      /* time = omp_get_wtime(); */
 
       for (size_t color = 0; color < n_colors; color++) {
         // time_it = omp_get_wtime();
@@ -796,6 +808,10 @@ void fc3d_nsgs_graph(FrictionContactProblem *problem, double *reaction, double *
         // printf("%d,%d,%d,%.4e\n", omp_get_thread_num(), color, partition_size[color], time);
         // fflush(stdout);
       }
+
+      /* time = omp_get_wtime() - time;
+      printf("[%d] Time in for: %es\n", omp_get_thread_num(), time);
+      fflush(stdout); */
       // printf("\n");
 
       /* DEBUG_EXPR( */
@@ -808,6 +824,8 @@ void fc3d_nsgs_graph(FrictionContactProblem *problem, double *reaction, double *
        * frozen_contact, iter ); */
       /*   } */
       /*   ); */
+
+      /* time = omp_get_wtime(); */
 
       #pragma omp single
       {
@@ -841,6 +859,10 @@ void fc3d_nsgs_graph(FrictionContactProblem *problem, double *reaction, double *
       ++iter;
       light_error_sum = 0.0;
       }
+
+      /* time = omp_get_wtime() - time;
+      printf("[%d] Time in second single: %es\n", omp_get_thread_num(), time);
+      fflush(stdout); */
 
       /* if(iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] >0) */
       /* { */
