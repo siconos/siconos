@@ -498,10 +498,6 @@ static void statsIterationCallback(FrictionContactProblem *problem, SolverOption
 
 void fc3d_nsgs_graph(FrictionContactProblem *problem, double *reaction, double *velocity, int *info,
                      SolverOptions *options) {
-  
-  /* double time = 0.;
-
-  time = omp_get_wtime(); */
 
   /* verbose=1; */
   /* int and double parameters */
@@ -590,12 +586,6 @@ void fc3d_nsgs_graph(FrictionContactProblem *problem, double *reaction, double *
   size_t **partitions = NULL;
   color_graph_block(problem->numberOfContacts, problem->M, &n_colors, &partition_size, &partitions);
 
-/*   time = omp_get_wtime() - time;
-  printf("Time before loop: %es\n", time);
-  fflush(stdout);
-
-  time = omp_get_wtime(); */
-
   /*****  NSGS Iterations *****/
 
   /* A special case for the most common options (should correspond
@@ -619,17 +609,16 @@ void fc3d_nsgs_graph(FrictionContactProblem *problem, double *reaction, double *
     {
     /* Allocate localproblem for each thread */
     localproblem = fc3d_local_problem_allocate(problem);
-    /* I hopte the next line creates no problem */
+
+    localsolver_options = solver_options_create(options->internalSolvers[0]->solverId);
+
     fc3d_nsgs_initialize_local_solver_parallel(&local_solver, &update_localproblem,
                                                (FreeSolverNSGSPtr *)&freeSolver, &computeError, problem,
                                                localproblem, options, localsolver_options);
 
     while ((iter < itermax) && (hasNotConverged > 0)) {
 
-      #pragma omp single
-      {
       fc3d_set_internalsolver_tolerance(problem, options, localsolver_options, error);
-      }
 
       for (size_t color = 0; color < n_colors; color++) {
         #pragma omp for schedule(static) reduction(+:light_error_sum)
@@ -685,21 +674,17 @@ void fc3d_nsgs_graph(FrictionContactProblem *problem, double *reaction, double *
                                 tolerance, velocity, stdout)
     {
 
-    /* double time, time_for; */
-
     /* Allocate localproblem for each thread */
     localproblem = fc3d_local_problem_allocate(problem);
 
     localsolver_options = solver_options_create(options->internalSolvers[0]->solverId);
 
-    /* I hopte the next line creates no problem */
     fc3d_nsgs_initialize_local_solver_parallel(&local_solver, &update_localproblem,
                                                (FreeSolverNSGSPtr *)&freeSolver, &computeError, problem,
                                                localproblem, options, localsolver_options);
                                                
     while ((iter < itermax) && (hasNotConverged > 0)) {
 
-      /* time = omp_get_wtime(); */
       fc3d_set_internalsolver_tolerance(problem, options, localsolver_options, error);
 
       #pragma omp single
@@ -719,17 +704,7 @@ void fc3d_nsgs_graph(FrictionContactProblem *problem, double *reaction, double *
       }
       }
 
-      /* time = omp_get_wtime() - time;
-      printf("[%d] Time in first single: %es\n", omp_get_thread_num(), time);
-      fflush(stdout); */
-
-      /* time = omp_get_wtime(); */
-
       for (size_t color = 0; color < n_colors; color++) {
-        // time_it = omp_get_wtime();
-        // int chunk_size = partition_size[color] / (4 * omp_get_max_threads());
-        // if (chunk_size < 1) chunk_size = 1;
-        // time = omp_get_wtime();
         #pragma omp for schedule(static) reduction(+:light_error_sum)
         for (int v = 0; v < partition_size[color]; v++) {
           int i = partitions[color][v];
@@ -804,15 +779,7 @@ void fc3d_nsgs_graph(FrictionContactProblem *problem, double *reaction, double *
           else
             acceptLocalReactionUnconditionally(contact, reaction, localreaction);
         }
-        // time = omp_get_wtime() - time;
-        // printf("%d,%d,%d,%.4e\n", omp_get_thread_num(), color, partition_size[color], time);
-        // fflush(stdout);
       }
-
-      /* time = omp_get_wtime() - time;
-      printf("[%d] Time in for: %es\n", omp_get_thread_num(), time);
-      fflush(stdout); */
-      // printf("\n");
 
       /* DEBUG_EXPR( */
       /*   if(iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] >0) */
@@ -824,8 +791,6 @@ void fc3d_nsgs_graph(FrictionContactProblem *problem, double *reaction, double *
        * frozen_contact, iter ); */
       /*   } */
       /*   ); */
-
-      /* time = omp_get_wtime(); */
 
       #pragma omp single
       {
@@ -843,7 +808,7 @@ void fc3d_nsgs_graph(FrictionContactProblem *problem, double *reaction, double *
         if (!(tolerance > 0.0)) {
           numerics_warning("fc3d_nsgs", "tolerance has to be positive!!");
           numerics_warning("fc3d_nsgs", "we stop the iterations");
-          // I had to put remove the break because OpenMP does not allow it.
+          // I had to remove the break because OpenMP does not allow it.
           // break;
         }
 
@@ -859,10 +824,6 @@ void fc3d_nsgs_graph(FrictionContactProblem *problem, double *reaction, double *
       ++iter;
       light_error_sum = 0.0;
       }
-
-      /* time = omp_get_wtime() - time;
-      printf("[%d] Time in second single: %es\n", omp_get_thread_num(), time);
-      fflush(stdout); */
 
       /* if(iparam[SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] >0) */
       /* { */
@@ -880,10 +841,6 @@ void fc3d_nsgs_graph(FrictionContactProblem *problem, double *reaction, double *
     }
     }
   }
-
-  /* time = omp_get_wtime() - time;
-  printf("Time in loop: %es\n", time);
-  time = omp_get_wtime(); */
 
   /* Full criterium */
   if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
@@ -909,7 +866,4 @@ void fc3d_nsgs_graph(FrictionContactProblem *problem, double *reaction, double *
   free(partition_size);
   for (size_t i = 0; i < n_colors; i++) free(partitions[i]);
   free(partitions);
-
-  /* time = omp_get_wtime() - time;
-  printf("Time after loop: %es\n", time); */
 }
