@@ -21,38 +21,60 @@
 */
 
 #pragma once
-#include "BaseModel.h"
+#include <nlohmann/json.hpp>
 
 namespace siconos::fem::cable {
 
 /** Class to handle mechanical properties of a cable */
-class MechanicalProperties : public BaseModel {
+class MechanicalProperties {
+ private:
+  /** rigidity (N) */
+  double crossSectionRigidity_{1.};
+
+  /** linear density	(kg/m) */
+  double linearDensity_{0.};
+
+  /** initial tension (kN)*/
+  double initialTension_{1.};
+
  public:
   /** Default and only constructor */
   MechanicalProperties() = default;
 
-  MechanicalProperties &operator=(const MechanicalProperties &) = default;
-  virtual ~MechanicalProperties() noexcept = default;
+  explicit MechanicalProperties(const nlohmann::json &j)
+      : crossSectionRigidity_(j.value("EA", 1.0)),
+        linearDensity_(j.value("linearDensity", 0.0)),
+        initialTension_(j.value("T0", 1.0)) {}
 
-  inline auto get_EA() const { return m_EA; }
-  inline auto get_rho() const { return m_rho; }
-  inline auto get_T0() const { return m_T0; }
-  inline auto get_alpha() const { return 9.81 * m_rho / m_T0; }
-  inline auto get_beta() const { return m_T0 / m_EA; }
+  MechanicalProperties &operator=(const MechanicalProperties &) = default;
+  ~MechanicalProperties() noexcept = default;
+
+  inline auto crossSectionRigidity() const { return crossSectionRigidity_; }
+  inline auto linearDensity() const { return linearDensity_; }
+  inline auto initialTension() const { return initialTension_; }
+  inline auto get_alpha() const { return 9.81 * linearDensity_ / initialTension_; }
+  inline auto get_beta() const { return initialTension_ / crossSectionRigidity_; }
 
   void set_T(double a_T);
   void set_rho(double a_rho);
 
- private:
-  void from_json(const json &j);
-
-  /** rigidity (N) */
-  double m_EA{1.};
-
-  /** linear density	(kg/m) */
-  double m_rho{0.};
-
-  /** initial tension (kN)*/
-  double m_T0{1.};
+  /** Display parameters to screen */
+  void display() const;
 };
 }  // namespace siconos::fem::cable
+
+// Serialization
+namespace nlohmann {
+template <>
+struct adl_serializer<siconos::fem::cable::MechanicalProperties> {
+  static siconos::fem::cable::MechanicalProperties from_json(const json &j) {
+    return siconos::fem::cable::MechanicalProperties(j);
+  }
+
+  static void to_json(json &j, const siconos::fem::cable::MechanicalProperties &input) {
+    j = json{{"EA", input.crossSectionRigidity()},
+             {"linearDensity", input.linearDensity()},
+             {"T0", input.initialTension()}};
+  }
+};
+}  // namespace nlohmann

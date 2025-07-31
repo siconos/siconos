@@ -18,55 +18,54 @@
 #include "TransportCableResult.h"
 
 #include <fstream>
+#include <memory>
 
-#include "Pulley.h"
-#include "Rope.h"
-#include "SiconosVector.hpp"
+#include "PulleyWrapping.h"
+#include "Rope.h"  // IWYU pragma: keep
 #include "SiconosMatrix.hpp"
-#include "Support.h"
+#include "SiconosVector.hpp"  // IWYU pragma: keep
 
-siconos::fem::cable::TransportCableResult::TransportCableResult() { ropes_down.set_Down(true); }
+siconos::fem::cable::TransportCableResult::TransportCableResult() {
+  ropes_down.set_Down(true);
+}
 
 void siconos::fem::cable::TransportCableResult::prepareSupport() {
   supports.clear();
-  puller12idx = -1;
-  puller21idx = -1;
-  ropes_up.prepareSupport(supports, puller12idx);
-  ropes_down.prepareSupport(supports, puller21idx);
+  topPulleyId = -1;
+  downPulleyId = -1;
+  ropes_up.prepareSupport(supports, downPulleyId);
+  ropes_down.prepareSupport(supports, topPulleyId);
 
   // Bottom pylon/pulley
-  supports[puller12idx]->prepare(ropes_up.get_LastPylon(), ropes_down.get_LastPylon(),
-                                 ropes_up.get_LastT());
+  supports[downPulleyId]->prepare(ropes_down.getFirstPylon(), ropes_up.getFirstPylon(),
+                                  ropes_down.initialTension());
+
   // Top pylon/pulley
-  supports[puller21idx]->prepare(ropes_down.get_FirstPylon(), ropes_up.get_FirstPylon(), ropes_down.get_T0());
+  supports[topPulleyId]->prepare(ropes_up.getLastPylon(), ropes_down.getLastPylon(),
+                                 ropes_up.getTensionAtLastNode());
 }
 
 void siconos::fem::cable::TransportCableResult::prepareIneqConstraint(int nb_node) {
   contacts.clear();
   contacts.resize(nb_node, 0);
-  g.clear();
-  g.resize(nb_node, 1);
-  G.clear();
-  G.resize(nb_node);
-  for (auto &gg : G) {
-    gg.clear();
-    gg.resize(nb_node);
-  }
-  T.clear();
-  T.resize(nb_node);
-  for (auto &tt : T) {
-    tt.clear();
-    tt.resize(nb_node);
-  }
+  gVector.resize(nb_node);
+  gVector.setConstant(1.);
+  // jacobian_g_Over_q =
+  //     std::make_shared<siconos::algebra::SiconosDenseMatrix>(nb_node, 3 * nb_node);
+  jacobian_g_Over_q.resize(3 * nb_node, nb_node);
+
+  T = std::make_shared<siconos::algebra::SiconosDenseMatrix>(nb_node, 3 * nb_node);
+  jacobian_g_Over_q.setZero();
+  T->setZero();
 }
 
 int siconos::fem::cable::TransportCableResult::exportTC(const std::string &a_fileName,
-                                                        ojson &a_output,
+                                                        nlohmann::ordered_json &a_output,
                                                         const std::string &a_option) {
   int res = EXIT_SUCCESS;
   try {
     res = to_json(a_output, a_option);
-  } catch (const json::exception &ex) {
+  } catch (const nlohmann::json::exception &ex) {
     // "Error exporting model " << ex.what());
     throw ex;
   }
@@ -81,32 +80,39 @@ int siconos::fem::cable::TransportCableResult::exportTC(const std::string &a_fil
   return res;
 }
 
-int siconos::fem::cable::TransportCableResult::to_json(ojson &j, const std::string &a_option) {
+int siconos::fem::cable::TransportCableResult::to_json(nlohmann::ordered_json &j,
+                                                       const std::string &a_option) {
   if (a_option == "fem") {
-    j["g"] = g;
+    j["g"] = gVector;
   } else if (a_option == "ropeway") {
-    ropes_up.to_json(j["ropes_up"]);
-    ropes_down.to_json(j["ropes_down"]);
+    j["ropes_up"] = ropes_up;
+    j["ropes_down"] = ropes_down;
+
+    // ropes_up.to_json(j["ropes_up"]);
+    // ropes_down.to_json(j["ropes_down"]);
   } else {
-    ropes_up.to_json(j["ropes_up"]);
-    ropes_down.to_json(j["ropes_down"]);
-    j["supports"] = ojson::array();
-    j["pulleys"] = ojson::array();
-    int ns = supports.size();
-    for (int i = 0; i < ns; i++) {
-      if (i == puller12idx || i == puller21idx) {
-        auto pulley = std::static_pointer_cast<Pulley>(supports[i]);
+    j["ropes_up"] = ropes_up;
+    j["ropes_down"] = ropes_down;
+
+    // ropes_up.to_json(j["ropes_up"]);
+    // ropes_down.to_json(j["ropes_down"]);
+    j["supports"] = nlohmann::ordered_json::array();
+    j["pulleys"] = nlohmann::ordered_json::array();
+    for (auto s : supports) {
+      if (auto pulley = std::dynamic_pointer_cast<PulleyWrapping>(s))
         j["pulleys"].push_back(*pulley);
-      } else {
-        j["supports"].push_back(*supports[i]);
-      }
+      else
+        j["supports"].push_back(*s);
     }
-    j["q"] = q;
-    j["R"] = R;
-    j["tension"] = TS;
-    j["punct"] = punct;
-    j["cable_length"] = length;
-    j["contacts"] = contacts;
+    if (q.size() > 0) {
+      j["q"] = q;
+      j["R"] = R;
+      j["tension"] = TS;
+      j["punct"] = weightVector;
+      j["cable_length"] = totalLength;
+      j["contacts"] = contacts;
+      j["g"] = gVector;
+    }
   }
   return EXIT_SUCCESS;
 }

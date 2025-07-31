@@ -20,48 +20,41 @@
 
 #include "CableTools.h"  // for sgn function
 #include "NewtonImpactFrictionNSL.hpp"
-#include "NonSmoothLaw.hpp"
-#include "Pylon.h"
 #include "Rope.h"
+#include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 
-siconos::fem::cable::Support::Support(const Pylon &a_pile) : pylon_(a_pile) {
-  m_p = pylon_;
-
+siconos::fem::cable::Support::Support(const siconos::algebra::SiconosVector3 &coordinates,
+                                      double radius)
+    : center_pos_{coordinates}, radius_{radius} {
   m_pc2 = std::make_shared<siconos::algebra::SiconosVector3>();
   m_normal = std::make_shared<siconos::algebra::SiconosVector3>();
   m_tangent = std::make_shared<siconos::algebra::SiconosVector3>();
 }
 
-double siconos::fem::cable::Support::get_radius() const { return pylon_.get_radius(); }
-
 void siconos::fem::cable::Support::prepare(const Rope &a_rope) {
-  double radius = siconos::fem::cable::tools::sgn(a_rope.supportReaction().z) * get_radius();
-  m_p.z -= radius;
+  center_pos_(2) -= siconos::fem::cable::tools::sgn(a_rope.supportReaction()(2)) * radius_;
 }
 
-void siconos::fem::cable::Support::prepare(const Pylon &a_start, const Pylon &a_end,
-                                           double T) {
-  // Does nothing ...
-}
 
-void siconos::fem::cable::Support::compute(const Point &a_p, double a_tol, double &g, Point &G,
-                                           Point &T, int &c) {
-  c = isContact(a_tol, a_p.x - m_p.x, 0, a_p.z - m_p.z, g, G.x, G.y, G.z, T.x, T.y, T.z) ? 1
-                                                                                         : 0;
-}
-
-void siconos::fem::cable::to_json(ojson &j, const Support &s) {
-  j["radius"] = s.get_radius();
-  j["p"] = s.get_center();
+void siconos::fem::cable::Support::compute(const siconos::algebra::SiconosVector3 &a_p,
+                                           double a_tol, double &g,
+                                           Eigen::Ref<siconos::algebra::SiconosVector3> G,
+                                           Eigen::Ref<siconos::algebra::SiconosVector3> T,
+                                           int &c) {
+  c = isContact(a_tol, a_p(0) - center_pos_(0), 0, a_p(2) - center_pos_(2), g, G(0), G(1),
+                G(2), T(0), T(1), T(2))
+          ? 1
+          : 0;
 }
 
 bool siconos::fem::cable::Support::isContact(
     const Eigen::Ref<siconos::algebra::SiconosVector3> &a_p, double a_tol) {
-  double dx = a_p(0) - m_p.x;
-  double dz = a_p(2) - m_p.z;
+  // Roller support is assumed to be in the x-z plan
+  double dx = a_p(0) - center_pos_(0);
+  double dz = a_p(2) - center_pos_(2);
   double d = sqrt(dx * dx + dz * dz);
-  double go = d - get_radius();
+  double go = d - radius_;
   bool isCt = (go <= a_tol);
   if (isCt) {
     (*m_normal)(0) = dx / d;
@@ -73,22 +66,15 @@ bool siconos::fem::cable::Support::isContact(
 }
 
 void siconos::fem::cable::Support::InitFriction(double a_mu) {
-  if (m_nslaw != nullptr) {
-    // m_nslaw->
-  } else {
+  if (!m_nslaw)
     m_nslaw = std::make_shared<siconos::modeling::NewtonImpactFrictionNSL>(0.0, 0.0, a_mu, 2);
-  }
-}
-
-std::shared_ptr<siconos::modeling::NonSmoothLaw> siconos::fem::cable::Support::nslaw() {
-  return m_nslaw;
 }
 
 bool siconos::fem::cable::Support::isContact(double a_tol, double dx, double dy, double dz,
                                              double &g, double &nx, double &ny, double &nz,
                                              double &tx, double &ty, double &tz) {
   double d = sqrt(dx * dx + dy * dy + dz * dz);
-  double go = d - get_radius();
+  double go = d - radius_;
   bool isCt = (go <= a_tol);
   if (isCt) {
     g = go;
@@ -100,4 +86,16 @@ bool siconos::fem::cable::Support::isContact(double a_tol, double dx, double dy,
     tz = (nz) ? nx : 0.0;
   }
   return isCt;
+}
+
+void siconos::fem::cable::Support::display() const {
+  std::cout << "--- Support: \n";
+  std::cout << "- Center position: ";
+  siconos::algebra::print(center_pos_.transpose());
+  std::cout << "- Radius: " << center_pos_ << ", " << radius_ << "\n";
+  std::cout << "  Normal and tangent vectors at contact: \n";
+  if (m_normal) {
+    siconos::algebra::print(m_normal->transpose());
+    siconos::algebra::print(m_tangent->transpose());
+  }
 }

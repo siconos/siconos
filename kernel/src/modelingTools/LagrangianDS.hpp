@@ -23,7 +23,6 @@
 #ifndef LAGRANGIANDS_H
 #define LAGRANGIANDS_H
 
-#include "DynamicalSystem.hpp"
 #include "FunctionTypes.hpp"
 #include "SecondOrderDS.hpp"
 

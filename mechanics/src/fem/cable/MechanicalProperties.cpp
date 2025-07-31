@@ -18,16 +18,20 @@
 
 #include "MechanicalProperties.h"
 
+#include <iostream>
+
 void siconos::fem::cable::MechanicalProperties::set_T(double a_T) {
-  if (a_T > 0.0) m_T0 = a_T;
+  if (a_T > 0.0) initialTension_ = a_T;
 }
 
 void siconos::fem::cable::MechanicalProperties::set_rho(double a_rho) {
-  if (a_rho > 0.0) m_rho = a_rho;
+  if (a_rho > 0.0) linearDensity_ = a_rho;
 }
 
-void siconos::fem::cable::MechanicalProperties::from_json(const json &j) {
-  j.at("EA").get_to(m_EA);
-  j.at("rho").get_to(m_rho);
-  j.at("T0").get_to(m_T0);
+void siconos::fem::cable::MechanicalProperties::display() const {
+  std::cout << "--- Mechanical properties: \n";
+  std::cout << "- Rigidity: " << crossSectionRigidity_;
+  std::cout << " - Linear density: " << linearDensity_;
+  std::cout << " - Initial tension: " << initialTension_;
+  std::cout << "\n --------------\n\n";
 }

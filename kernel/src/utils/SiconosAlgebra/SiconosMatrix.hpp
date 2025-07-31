@@ -23,7 +23,7 @@
 #ifndef SICOMAT
 #define SICOMAT
 
-#include "EigenInclude.hpp"  // Must be included before Eigen/Core
+#include "EigenInclude.hpp"  // IWYU pragma: keep - Must be included before Eigen/Core
 //
 #include <Eigen/Core>
 #include <Eigen/Dense>
@@ -31,7 +31,7 @@
 #include <Eigen/SparseCore>  // For Eigen Sparse matrices
 #include <Eigen/SparseLU>
 
-#include "CSparseMatrix.h"
+#include "CSparseMatrix.h"  // IWYU pragma: keep
 #include "SiconosVector.hpp"
 
 struct NumericsMatrix;

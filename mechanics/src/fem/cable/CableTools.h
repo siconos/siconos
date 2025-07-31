@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2024 INRIA.
+ * Copyright 2025 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,8 @@
 
 #ifndef CABLETOOLS
 #define CABLETOOLS
-#include <memory>
 #include <nlohmann/json.hpp>
 #include <vector>
-
-#include "SiconosVector.hpp"
 
 namespace siconos::fem::cable {
 
@@ -31,8 +28,12 @@ class Point;
 
 namespace siconos::fem::cable::tools {
 
-void pointsToSiconosVector(const std::vector<siconos::fem::cable::Point> vecin,
-                           std::shared_ptr<siconos::algebra::SiconosVector> vecout);
+// Note FP: use a generic name. We may decide later to replace json by hdf5 or something else
+/** Type of input used to read data */
+using InputNodeType = nlohmann::json;
+
+/** Type of output used to write data */
+using OutpuNodeType = nlohmann::ordered_json;
 
 template <typename T>
 int sgn(T val) {
@@ -41,30 +42,40 @@ int sgn(T val) {
 
 template <typename T>
 std::vector<double> linspace(T start_in, T end_in, int num_in) {
-  std::vector<double> linspaced;
-
   double start = static_cast<double>(start_in);
   double end = static_cast<double>(end_in);
   double num = static_cast<double>(num_in);
 
+  std::vector<double> result(num);
+
   if (num == 0) {
-    return linspaced;
-  }
-  if (num == 1) {
-    linspaced.push_back(start);
-    return linspaced;
+    return result;
   }
 
-  double delta = (end - start) / (num - 1);
+  double step = (end - start) / (num - 1);
 
-  for (int i = 0; i < num - 1; ++i) {
-    linspaced.push_back(start + delta * i);
+  for (int i = 0; i < num; ++i) {
+    result[i] = (start + step * i);
   }
-  linspaced.push_back(end);  // I want to ensure that start and end
-                             // are exactly the same as the input
-  return linspaced;
+  result[num - 1] = end;  // I want to ensure that start and end
+                          // are exactly the same as the input
+  return result;
 }
 
+/**
+ * Retrieve a parameter from a json object
+ *
+ * This template function extracts a parameter of type `T` from a json object.
+ * If the json object does not contain the given field name or is null,
+ * the provided default value is returned.
+ *
+ * \tparam T Type of the parameter to extract (must be deserializable from JSON).
+ * \param a_arg The JSON object to read from.
+ * \param a_name The name of the field to look for in the JSON object.
+ * \param a_default The default value to return if the field is not found or JSON is null.
+ * \return T The extracted value from the JSON or the default if not present.
+ *
+ */
 template <typename T>
 T getParam(const nlohmann::json &a_arg, const std::string &a_name, T a_default) {
   T vRet = a_default;
@@ -75,6 +86,13 @@ T getParam(const nlohmann::json &a_arg, const std::string &a_name, T a_default) 
   }
   return vRet;
 }
+
+/** Read a json file
+
+  \param filename name of the input file
+  \return a json object
+*/
+nlohmann::json load_json_file(const std::string &filename);
 
 }  // namespace siconos::fem::cable::tools
 

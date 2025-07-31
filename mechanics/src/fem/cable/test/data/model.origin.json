@@ -1,13 +1,13 @@
 {
-  "cable": {
+  "mechanicalProperties": {
     "EA": 40000000,
-    "rho": 4,
+    "linearDensity": 4,
     "T0": 140000
   },
   "carriers": {
-    "rho": 21,
+    "linearDensity": 21,
     "mass": 400,
-    "d": 36.6
+    "distanceBetweenCarriers": 36.6
   },
   "stationUp": {
     "x": 709.13,

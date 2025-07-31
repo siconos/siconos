@@ -22,46 +22,47 @@
 #include "CableCollisionManager.h"
 #include "CableDS.hpp"
 #include "CableTools.h"
+#include "CableTools.h"  // for load_json_file
 #include "FrictionContact.hpp"
+#include "MechanicalProperties.h"
 #include "MoreauJeanOSI.hpp"
 #include "NonSmoothDynamicalSystem.hpp"
-#include "OneStepNSProblem.hpp"
-#include "Rope.h"
+#include "Rope.h"  // IWYU pragma: keep
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "Support.h"
+#include "Support.h"  // IWYU pragma: keep
 #include "TimeDiscretisation.hpp"
 #include "TimeStepping.hpp"
-#include "TransportCableProfil.h"
-
-using json = nlohmann::json;
-using ojson = nlohmann::ordered_json;
+#include "TransportCableProfile.h"
 
 siconos::fem::cable::TransportCableManager::TransportCableManager(
-    const std::string &a_filename)
-    : TransportCableManager{} {
-  m_model.from_file(a_filename);
+    const std::string &a_filename) {
+  auto j = siconos::fem::cable::tools::load_json_file(a_filename);
+  model_ = std::make_unique<TransportCableModel>(j);
 }
 
-int siconos::fem::cable::TransportCableManager::importModel(const json &a_input,
-                                                            const std::string &a_filename) {
-  int res = EXIT_FAILURE;
-  if (a_input.is_null()) {
-    res = m_model.from_file(a_filename);
-  } else {
-    res = m_model.from_json(a_input);
-  }
-  return res;
+void siconos::fem::cable::TransportCableManager::importModel(const nlohmann::json &input) {
+  assert(!input.is_null());
+  model_ = std::make_unique<TransportCableModel>(input);
+  assert(model_->isLoaded() &&
+         "Something went wrong during model loading: there are no pylons in the setup.");
 }
 
-void siconos::fem::cable::TransportCableManager::computeFEM(const json &a_args,
+void siconos::fem::cable::TransportCableManager::importModel(const std::string &filename) {
+  auto input = siconos::fem::cable::tools::load_json_file(filename);
+  model_ = std::make_unique<TransportCableModel>(input);
+  assert(model_->isLoaded() &&
+         "Something went wrong during model loading: there are no pylons in the setup.");
+}
+
+void siconos::fem::cable::TransportCableManager::computeFEM(const nlohmann::json &a_args,
                                                             const std::string &a_outfile,
-                                                            ojson &output) {
+                                                            nlohmann::ordered_json &output) {
   // Ensures the model is valid
-  assert(m_model.isLoaded());
+  assert(model_->isLoaded());
 
   // Creates the profile
-  TransportCableProfil profile(m_model, m_results);
+  TransportCableProfile profile(*model_, m_results);
 
   // Reads method from json ()
   std::string method = "all";  // default method if json is empty
@@ -73,9 +74,9 @@ void siconos::fem::cable::TransportCableManager::computeFEM(const json &a_args,
                                 siconos::fem::cable::tools::getParam(a_args, "nmax", 20));
 
   //
-  profile.computeFEM(siconos::fem::cable::tools::getParam(a_args, "nb_node", 1400),
-                     siconos::fem::cable::tools::getParam(a_args, "eps", 0.1),
-                     siconos::fem::cable::tools::getParam(a_args, "tol_contact", 1e-3));
+  profile.initializeFEM(siconos::fem::cable::tools::getParam(a_args, "nb_node", 1400),
+                        siconos::fem::cable::tools::getParam(a_args, "eps", 0.1),
+                        siconos::fem::cable::tools::getParam(a_args, "tol_contact", 1e-3));
 #ifndef NSICONOS
   if (method == "dynamics") {
     computeDS();
@@ -84,25 +85,26 @@ void siconos::fem::cable::TransportCableManager::computeFEM(const json &a_args,
   exportTC(a_args, a_outfile, output);
 }
 
-int siconos::fem::cable::TransportCableManager::exportTC(const json &a_args,
+int siconos::fem::cable::TransportCableManager::exportTC(const nlohmann::json &a_args,
                                                          const std::string &a_outfile,
-                                                         ojson &output) {
+                                                         nlohmann::ordered_json &output) {
   auto vOption = siconos::fem::cable::tools::getParam(a_args, "export", (std::string) "all");
   m_results.exportTC(a_outfile, output, vOption);
 
   return EXIT_SUCCESS;
 }
 
-int siconos::fem::cable::TransportCableManager::simulation(const json &a_model,
-                                                           const json &a_args,
-                                                           const std::string &a_filename,
-                                                           const std::string &a_outfile,
-                                                           ojson &output) {
-  int vRet = importModel(a_model, a_filename);
-  if (vRet == EXIT_SUCCESS) {
-    computeFEM(a_args, a_outfile, output);
-  }
-  return vRet;
+void siconos::fem::cable::TransportCableManager::simulation(const nlohmann::json &a_model,
+                                                            const nlohmann::json &a_args,
+                                                            const std::string &a_filename,
+                                                            const std::string &a_outfile,
+                                                            nlohmann::ordered_json &output) {
+  if (a_model.is_null())
+    importModel(a_filename);
+  else
+    importModel(a_model);
+
+  if (model_->isLoaded()) computeFEM(a_args, a_outfile, output);
 }
 
 void siconos::fem::cable::TransportCableManager::computeDS(double a_tolContact, double a_mus,
@@ -114,22 +116,21 @@ void siconos::fem::cable::TransportCableManager::computeDS(double a_tolContact, 
   if (not m_results.q0) m_results.q0 = std::make_shared<siconos::algebra::SiconosVector>(ndof);
   if (not m_results.v0) m_results.v0 = std::make_shared<siconos::algebra::SiconosVector>(ndof);
 
-  siconos::fem::cable::tools::pointsToSiconosVector(m_results.q, m_results.q0);
+  *m_results.q0 = m_results.q;  // COPY TMP TO BE REVIEWED
 
-  double rho = m_model.mechanicalProperties().get_rho();
+  double rho = model_->mechanicalProperties().linearDensity();
 
   // compute mass -> results.mass
-  compute_mass(m_results.elem_length, rho);
+  compute_mass(m_results.elementLength, rho);
 
   // compute external forces -> results.fext
-  compute_external_load(m_results.elem_length, rho);
+  compute_external_load(m_results.elementLength, rho);
 
   // create dynamics model
   auto cable = std::make_shared<CableDS>(
       Eigen::Ref<siconos::algebra::SiconosVector>(*m_results.q0),
-      Eigen::Ref<siconos::algebra::SiconosVector>(*m_results.v0),
-      Eigen::Ref<siconos::algebra::SiconosMatrix>(*m_results.mass),
-      m_model.mechanicalProperties().get_EA(), m_results.elem_length);
+      Eigen::Ref<siconos::algebra::SiconosVector>(*m_results.v0), *m_results.mass,
+      model_->mechanicalProperties().crossSectionRigidity(), m_results.elementLength);
 
   cable->setConstantFext(Eigen::Ref<siconos::algebra::SiconosVector>(*m_results.fext));
 
@@ -140,7 +141,7 @@ void siconos::fem::cable::TransportCableManager::computeDS(double a_tolContact, 
   // frictions
   int ns = m_results.supports.size();
   for (int i = 0; i < ns; i++) {
-    if (i == m_results.puller12idx || i == m_results.puller21idx) {
+    if (i == m_results.topPulleyId || i == m_results.downPulleyId) {
       m_results.supports[i]->InitFriction(a_mup);
     } else {
       m_results.supports[i]->InitFriction(a_mus);
@@ -203,19 +204,19 @@ void siconos::fem::cable::TransportCableManager::compute_mass(double a_length, d
   */
   int ndof = m_results.q0->size();
   if (not m_results.mass)
-    m_results.mass =
-        std::make_shared<siconos::algebra::SiconosMatrix>(ndof, ndof);  // FP: must be SPARSE
+    m_results.mass = std::make_shared<siconos::algebra::SiconosSparseMatrix>(ndof, ndof);
   double k = a_rho * a_length / 3.0;
   for (auto i = 0; i < ndof - 3; i++) {
-    m_results.mass->setValue(i, i, 4 * k);
-    m_results.mass->setValue(i, i + 3, k);
-    m_results.mass->setValue(i + 3, i, k);
+    m_results.mass->insert(i, i) = 4 * k;
+    m_results.mass->insert(i, i + 3) = k;
+    m_results.mass->insert(i + 3, i) = k;
   }
   for (size_t i = 0; i < 3; i++) {
-    m_results.mass->setValue(i + ndof - 3, i + ndof - 3, 4 * k);
-    m_results.mass->setValue(i, i + ndof - 3, k);
-    m_results.mass->setValue(i + ndof - 3, i, k);
+    m_results.mass->insert(i + ndof - 3, i + ndof - 3) = 4 * k;
+    m_results.mass->insert(i, i + ndof - 3) = k;
+    m_results.mass->insert(i + ndof - 3, i) = k;
   }
+  m_results.mass->makeCompressed();
 }
 
 void siconos::fem::cable::TransportCableManager::compute_external_load(double a_length,

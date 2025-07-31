@@ -18,8 +18,8 @@
 
 /*! \file TransportCableModel.h
   Class TransportCableModel : full description of the setup (cable, piles, carriers)
-  before discretization
-*/
+
+  */
 #pragma once
 
 #include <vector>
@@ -36,30 +36,27 @@ namespace siconos::fem::cable {
  *  - the pylons (standard + top and down stations)
  *  - carriers
  *
- *  Build from json and read-only use afterwards.
+ *  The model can be:
+ *  - build empty and so must be read from an input file using from_json or from_file
+ *  - build directlty from a file or json input
+ *  Read-only use afterwards.
+ *
+ *  An example of the format of this input file is
+ *  available in mechanics/src/fem/cable/test/data/model.origin.json
  *
  */
 class TransportCableModel {
  private:
-  MechanicalProperties m_cable;
+  MechanicalProperties mechanicalProperties_;
 
   /** The set of vehicles */
   Carriers m_carriers;
 
-  /** End station (top) */
-  Pylon m_stationUp;
-
-  /** Down station */
-  Pylon m_stationDown;
-
-  /** Standard pylons list (without top and down station) */
-  std::vector<Pylon> m_piles = {};
-
   /** Pylons corresponding to the 'up' ropeway, including end-line stations */
-  std::vector<Pylon> m_pilesUp = {};
+  std::vector<Pylon> list_of_pylons_up_ = {};
 
   /** Pylons corresponding to the 'down' ropeway, including end-line stations */
-  std::vector<Pylon> m_pilesDown = {};
+  std::vector<Pylon> list_of_pylons_down_ = {};
 
   // Rule of five
   TransportCableModel(const TransportCableModel &) = delete;
@@ -67,45 +64,45 @@ class TransportCableModel {
   TransportCableModel &operator=(const TransportCableModel &) = delete;
   TransportCableModel &operator=(TransportCableModel &&) = delete;
 
-  /** Reset the model */
-  void clear();
-
-  /** Internal validation of the model (fill pilesUp and pilesDown in) */
-  int validate();
-
  public:
-  TransportCableModel() = default;
-
-  /** Read data from a json file
-      \param a_filename input file name (json)
-  */
-  TransportCableModel(const std::string &a_filename);
+  TransportCableModel() = delete;
 
   virtual ~TransportCableModel() noexcept = default;
 
-  /** Build the model from a file (json)
-   * \param a_filename json file name
-   */
-  int from_file(const std::string &a_fileName);
-
-  /** Build a model from a json object
-   *  \param j json object
-   */
-  int from_json(const nlohmann::json &j);
+  /** Read data from a json input
+      \param input json object
+  */
+  explicit TransportCableModel(const nlohmann::json &input);
 
   /** \return true if the model has been loaded and validated */
-  bool isLoaded();
+  bool isLoaded() const;
 
   /** \return the mechanical properties of the cable */
-  const MechanicalProperties &mechanicalProperties() const;
+  inline const MechanicalProperties &mechanicalProperties() const {
+    return mechanicalProperties_;
+  }
 
   /** \return the set of vehicles */
-  const Carriers &get_carriers() const;
+  inline const Carriers &get_carriers() const { return m_carriers; };
 
   /** \return the list of pylons corresponding to the 'up' ropeway */
-  const std::vector<Pylon> &get_pylons_up() const;
+  inline const std::vector<Pylon> &get_pylons_up() const { return list_of_pylons_up_; };
 
   /** \return the list of pylons corresponding to the 'down' ropeway */
-  const std::vector<Pylon> &get_pylons_down() const;
+  inline const std::vector<Pylon> &get_pylons_down() const { return list_of_pylons_down_; };
 };
+
 }  // namespace siconos::fem::cable
+
+// Serialization
+namespace nlohmann {
+template <>
+struct adl_serializer<siconos::fem::cable::TransportCableModel> {
+  static siconos::fem::cable::TransportCableModel from_json(const json &j) {
+    return siconos::fem::cable::TransportCableModel(j);
+  }
+  // static void to_json(json &j, const siconos::fem::cable::TransportCableModel &input) {
+  //   j = json{};
+  // }
+};
+}  // namespace nlohmann

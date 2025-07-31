@@ -17,11 +17,11 @@
  */
 
 /*! \file Carriers.h
-  Class Carriers, description of the vehicles
+  The set carriers (cabins)
 
 */
 #pragma once
-#include "BaseModel.h"
+#include <nlohmann/json.hpp>
 
 namespace siconos::fem::cable {
 
@@ -29,57 +29,55 @@ namespace siconos::fem::cable {
  *
  * Build from json (in TransportCableModel) and read-only use afterwards
  */
-class Carriers : public BaseModel {
- public:
-  Carriers() = default;
-  Carriers(const Carriers &) = default;
-
-  virtual ~Carriers() noexcept = default;
-
-  /** \return the number of vehicles  */
-  auto get_number_of_vehicles() const { return m_n; }
-
-  /** \return density  */
-  auto get_rho() const { return m_rho; }
-
-  /** \return distance between two vehicles  */
-  auto get_d_inter_vehicules() const { return m_d; }
-
-  /** \return distance between first pile and the first vehicule */
-  auto get_d_start() const { return m_d_start; }
-
-  /** \return  up load  */
-  auto up_load() const { return m_up_load; }
-
-  /** \return down load  */
-  auto down_load() const { return m_down_load; }
-
-  /** \return mass 100% of one vehicule (kg)  */
-  auto loaded_mass() const { return m_loaded_mass; }
-
- private:
+struct Carriers {
+  Carriers() = delete;
   Carriers(Carriers &&) = delete;
+  Carriers(const Carriers &) = delete;
   Carriers &operator=(const Carriers &) = delete;
   Carriers &operator=(Carriers &&) = delete;
+  virtual ~Carriers() noexcept = default;
 
-  void from_json(const json &j);
+  explicit Carriers(const nlohmann::json &j)
+      : number(j.value("number", 0)),
+        mass(j.value("mass", 0.0)),
+        distanceBetweenCarriers(j.value("distanceBetweenCarriers", 0.0)),
+        linearDensity(j.value("linearDensity", 0.0)),
+        firstCarrierInitialPosition(j.value("firstCarrierInitialPosition", 0.0)) {}
 
-  /** number of vehicules*/
-  int m_n{0};
+  /** number of carriers*/
+  const int number;
 
-  /** mass of one vehicle (kg) */
-  double m_mass{0.};
+  /** mass of an empty vehicle (kg)*/
+  const double mass;
 
   /** distance between two vehicles (m)*/
-  double m_d{0.};  //
+  const double distanceBetweenCarriers;  //
 
-  double m_rho{0.};
+  /** fictitious linear density due to carriers */
+  const double linearDensity;
 
-  /** mass 100% of one vehicule (kg) */
-  double m_loaded_mass{0.};
+  // /** mass (max) of a loaded carrier (kg) */
+  // const double loaded_mass_{0.};
 
-  double m_up_load{1.};    // % up load
-  double m_down_load{0.};  // % down load
-  double m_d_start{0.};    // % (m_d), distance of the first vehicule
+  /** Distance between starting pylon and the first carrier */
+  const double firstCarrierInitialPosition;
 };
 }  // namespace siconos::fem::cable
+
+// Serialization
+namespace nlohmann {
+template <>
+struct adl_serializer<siconos::fem::cable::Carriers> {
+  static siconos::fem::cable::Carriers from_json(const json &j) {
+    return siconos::fem::cable::Carriers(j);
+  }
+
+  static void to_json(ordered_json &j, const siconos::fem::cable::Carriers &c) {
+    j = json{{"number", c.number},
+             {"mass", c.mass},
+             {"distanceBetweenCarriers", c.distanceBetweenCarriers},
+             {"linearDensity", c.linearDensity},
+             {"firstCarrierInitialPosition", c.firstCarrierInitialPosition}};
+  }
+};
+}  // namespace nlohmann

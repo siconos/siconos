@@ -55,34 +55,71 @@ class TransportCableResult {
 
   int to_json(nlohmann::ordered_json &j, const std::string &a_option = "all");
 
-  int puller12idx{-1};
-  int puller21idx{-1};
-  Ropeway ropes_up;
-  Ropeway ropes_down;
-
+  /** Vector of all supports: contacts with pylons and stations (pulleys)
+  in both up and down ropeways */
   std::vector<std::shared_ptr<Support>> supports;
 
-  std::vector<Point> q = {};       // positions
-  std::vector<Point> R = {};       // internal forces [x,y,z]-> [H,V,B]
-  std::vector<double> TS = {};     // tension
+  /** id of the top pulley in the supports vector */
+  int topPulleyId{-1};
+
+  /** id of the down pulley in the supports vector */
+  int downPulleyId{-1};
+
+  /** Set of ropes corresponding to the up-way cable */
+  Ropeway ropes_up;
+
+  /** Set of ropes corresponding to the down-way cable */
+  Ropeway ropes_down;
+
+  /** nodes positions */
+  siconos::algebra::SiconosVector q = {};
+
+  /** */
+  siconos::algebra::SiconosVector R = {};   // internal forces [x,y,z]-> [H,V,B]
+  siconos::algebra::SiconosVector TS = {};  // tension
+
+  /**  */
   std::vector<int> contacts = {};  // contact points
 
-  int nb_nodes{0};
-  double length{0.};
-  double elem_length{0.};
-  // à convertir en siconos (vecteur ou matrice)
-  std::vector<double> punct = {};
+  /** Total number of elements in the finite element mesh */
+  int numberOfElements{0};
 
-  std::vector<double> g = {};
+  /** Total lenght of the cable (wrappers around pulleys + top and down cables) */
+  double totalLength{0.};
 
-  std::vector<std::vector<Point>> G = {};
-  std::vector<std::vector<Point>> T = {};
+  /** Length of an element */
+  double elementLength{0.};
+
+  /** scalar weight computed at each node (due to carriers) */
+  siconos::algebra::SiconosVector weightVector = {};
+
+  /** g(q), vector of the constraints applied to the cable */
+  siconos::algebra::SiconosVector gVector = {};
+
+  /** \f$ \nabla_q g(q) \f$ */
+  // std::shared_ptr<siconos::algebra::SiconosDenseMatrix> jacobian_g_Over_q{nullptr};
+  siconos::algebra::SiconosDenseMatrix jacobian_g_Over_q = {};
+  // siconos::algebra::SiconosSparseMatrix jacobian_g_Over_q = {};
+
+  std::shared_ptr<siconos::algebra::SiconosDenseMatrix> T{nullptr};
 
   /**  */
   std::shared_ptr<siconos::algebra::SiconosVector> q0{nullptr};
   std::shared_ptr<siconos::algebra::SiconosVector> v0{nullptr};
 
-  std::shared_ptr<siconos::algebra::SiconosMatrix> mass{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosSparseMatrix> mass{nullptr};
   std::shared_ptr<siconos::algebra::SiconosVector> fext{nullptr};
 };
 }  // namespace siconos::fem::cable
+
+// // // Serialization
+// // namespace nlohmann {
+// // template <>
+// // struct adl_serializer<siconos::fem::cable::TransportCableResult> {
+// //   static void to_json(json &j, const siconos::fem::cable::TransportCableResult &input) {
+// //     j = json{{"EA", input.crossSectionRigidity()},
+// //              {"linearDensity", input.linearDensity()},
+// //              {"T0", input.initialTension()}};
+// //   }
+// // };
+// // };  // namespace nlohmann

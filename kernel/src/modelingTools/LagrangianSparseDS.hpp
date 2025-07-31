@@ -23,7 +23,6 @@
 #ifndef LagrangianSparseDS_H
 #define LagrangianSparseDS_H
 
-#include "DynamicalSystem.hpp"
 #include "FunctionTypes.hpp"
 #include "SecondOrderDS.hpp"
 #include "SiconosMatrix.hpp"

@@ -21,10 +21,6 @@
 #include <random>
 #include <set>
 
-#include "BlockVector.hpp"
-#include "SiconosException.hpp"
-#include "Tools.hpp"  // toString
-
 siconos::algebra::SiconosVector siconos::algebra::normInfByColumn(
     const siconos::algebra::SiconosDenseMatrix& m) {
   siconos::algebra::SiconosVector v(m.cols());

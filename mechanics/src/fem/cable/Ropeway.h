@@ -26,6 +26,9 @@
 #include <nlohmann/json.hpp>
 #include <vector>
 
+#include "Rope.h"
+#include "SiconosVector.hpp"
+
 namespace siconos::fem::cable {
 
 class MechanicalProperties;
@@ -34,8 +37,8 @@ class Rope;
 class Support;
 class Point;
 
-/**  A sequence of ropes used to described the whole cable between two pulleys (up and down
- * stations)
+/**  A sequence of ropes used to described the whole cable between two pulleys
+ *   (up and down  stations)
  *
  */
 class Ropeway {
@@ -61,23 +64,21 @@ class Ropeway {
                   int &a_pulleyIdx) const;
 
  public:
-  using ojson = nlohmann::ordered_json;
-
   /** Default and only constructor */
   Ropeway() = default;
 
   virtual ~Ropeway() noexcept = default;
 
-  /**  Build ropes and computes their initial profiles using Catenary equations
+  /**  Build the vector of ropes and computes their initial profiles using Catenary equations
 
      \param a_meca geometric and material properties of the cable
      \param a_piles the vector of pylons, must be ordered!
-     \param nb_nodes number of nodes by segment
-     \param a_tol tolerance used to compute initial profile
-     \param a_nmax max number of iterations used to compute initial profile
+     \param nb_nodes number of nodes by segment (between two pylons)
+     \param a_tol tolerance used to compute admissibility conditions
+     \param a_nmax max number of iterations used to compute admissibility conditions
   */
-  void compute(const MechanicalProperties &a_meca, const std::vector<Pylon> &a_piles,
-               int nb_nodes, double a_tol = 1e-20, int a_nmax = 20);
+  void computeCatenary(const MechanicalProperties &a_meca, const std::vector<Pylon> &a_piles,
+                       int nb_nodes, double a_tol = 1e-20, int a_nmax = 20);
 
   /**
      Create and prepare all supports, from the list of declared ropes
@@ -89,7 +90,12 @@ class Ropeway {
   void prepareSupport(std::vector<std::shared_ptr<Support>> &a_supports,
                       int &a_pulleyIdx) const;
 
-  int computeNbNodes(int nb_elem, double L);
+  /** Compute the number of elements to be used in the current cable
+
+      \param[in] element_length expected element size
+      \param[in] total_length total length of the cable (all ropes, the whole setup)
+  */
+  int computeNumberOfElements(double element_length, double total_length);
 
   /** Computes the profile of each rope in the ropeway
    * \param[out] a_q nodes coordinates
@@ -97,17 +103,46 @@ class Ropeway {
    * \param[out] a_TS tension at nodes
    * \param[in] q_offset offset (index) in a_q vector
    */
-  int computeMesh(std::vector<Point> &a_q, std::vector<Point> &a_R, std::vector<double> &a_TS,
-                  int q_offset);
+  int initializeFEM(siconos::algebra::SiconosVector &a_q, siconos::algebra::SiconosVector &a_R,
+                    siconos::algebra::SiconosVector &a_TS, int q_offset) const;
 
-  const Pylon &get_FirstPylon();
-  const Pylon &get_LastPylon();
-  double get_T0();
-  double get_LastT();
-  double get_L();
-  const MechanicalProperties &get_meca0() const;
+  const Pylon &getFirstPylon();
+  const Pylon &getLastPylon();
+  double initialTension();
+  double getTensionAtLastNode();
 
-  int to_json(ojson &j);
+  /** \return the total length of the ropeway (from station to station but excluding the length
+       of the cable around the pulleys at station)
+   */
+  double length() const;
+
+  const MechanicalProperties &mechanicalProperties0() const;
+
   void set_Down(bool a_value);
+
+  // For serialisation
+  friend struct nlohmann::adl_serializer<Ropeway>;
 };
+
 }  // namespace siconos::fem::cable
+
+namespace nlohmann {
+template <>
+struct adl_serializer<siconos::fem::cable::Ropeway> {
+  static siconos::fem::cable::Ropeway from_json(const json &j) {
+    return siconos::fem::cable::Ropeway(j);
+  }
+
+  static void to_json(ordered_json &j, const siconos::fem::cable::Ropeway &input) {
+    j = {{"catenaryUnknowns", nlohmann::ordered_json::array()},
+         {"q", nlohmann::ordered_json::array()},
+         {"TS", nlohmann::ordered_json::array()},
+         {"R", nlohmann::ordered_json::array()},
+         {"SR", nlohmann::ordered_json::array()},
+         {"meca_global", nlohmann::ordered_json::array()}};
+    for (auto &r : input.ropes_) {
+      nlohmann::adl_serializer<siconos::fem::cable::Rope>::to_json(j, r);
+    }
+  }
+};
+}  // namespace nlohmann

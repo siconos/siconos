@@ -22,7 +22,7 @@
 #ifndef __SiconosVector__
 #define __SiconosVector__
 
-#include "EigenInclude.hpp"  // Must be included before Eigen/Core
+#include "EigenInclude.hpp"  // IWYU pragma: keep - Must be included before Eigen/Core
 //
 #include <Eigen/Core>
 

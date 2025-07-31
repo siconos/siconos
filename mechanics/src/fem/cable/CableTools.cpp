@@ -1,17 +1,31 @@
+/* Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ *
+ * Copyright 2025 INRIA.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "CableTools.h"
 
-#include "Point.h"
-#include "SiconosVector.hpp"
+#include <fstream>
 
-void siconos::fem::cable::tools::pointsToSiconosVector(
-    const std::vector<siconos::fem::cable::Point> vecin,
-    std::shared_ptr<siconos::algebra::SiconosVector> vecout) {
-  assert(vecout);
-  assert(vecin.size() * 3 == (size_t)vecout->size());
-  size_t i = 0;
-  for (auto &point : vecin) {
-    (*vecout)(i++) = point.x;
-    (*vecout)(i++) = point.y;
-    (*vecout)(i++) = point.z;
+nlohmann::json siconos::fem::cable::tools::load_json_file(const std::string &filename) {
+  std::ifstream file(filename);
+  if (!file.is_open()) {
+    throw std::runtime_error("Cannot open file '" + filename + "'");
   }
+
+  nlohmann::json j;
+  file >> j;
+  return j;
 }

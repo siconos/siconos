@@ -20,8 +20,6 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 
-#include "TransportCableManager.h"
-
 class CableDSTest : public CppUnit::TestFixture {
  private:
   // Name of the tests suite
@@ -29,6 +27,7 @@ class CableDSTest : public CppUnit::TestFixture {
 
   CPPUNIT_TEST(testReadModel);
   CPPUNIT_TEST(testBuildInitialProfile);
+  CPPUNIT_TEST(testInitializeFEM);
   CPPUNIT_TEST(testComputeDS);
   CPPUNIT_TEST(testComputeBouncingBall);
   CPPUNIT_TEST(testNoFext);
@@ -39,6 +38,7 @@ class CableDSTest : public CppUnit::TestFixture {
 
   void testReadModel();
   void testBuildInitialProfile();
+  void testInitializeFEM();
   void testComputeDS();
   void testComputeBouncingBall();
 

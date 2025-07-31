@@ -27,9 +27,9 @@
 #ifndef EIGENINCLUDE_HPP
 #define EIGENINCLUDE_HPP
 
-#include <iomanip>  // required for setprecision
-#include <iostream>  // TODO : get rid of this! Note FP: maybe we should use a pre-compiled file process?
-#include <memory>  // For shared_ptr in MatrixAddons // TODO : get rid of this!
+#include <iomanip>   // IWYU pragma: keep - required for setprecision
+#include <iostream>  // IWYU pragma: keep - TODO : get rid of this! Note FP: maybe we should use a pre-compiled file process?
+// #include <memory>  // For shared_ptr in MatrixAddons // TODO : get rid of this!
 
 // filename of plugin for extending the MatrixBase class
 #define EIGEN_MATRIXBASE_PLUGIN "MatrixBaseAddons.hpp"

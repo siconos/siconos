@@ -27,6 +27,6 @@
 #include <Rope.h>
 #include <TransportCableManager.h>
 #include <TransportCableModel.h>
-#include <TransportCableProfil.h>
+#include <TransportCableProfile.h>
 
 #endif

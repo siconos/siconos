@@ -23,13 +23,27 @@
 
 siconos::fem::cable::CableDS::CableDS(Eigen::Ref<siconos::algebra::SiconosVector> q0,
                                       Eigen::Ref<siconos::algebra::SiconosVector> velocity0,
-                                      Eigen::Ref<siconos::algebra::SiconosMatrix> mass,
+                                      const siconos::algebra::SiconosSparseMatrix &mass,
                                       double a_EA, double a_elem_length)
-    : LagrangianDS(q0, velocity0), EA_{a_EA}, l_e_{a_elem_length} {
+    : LagrangianSparseDS(q0, velocity0), EA_{a_EA}, l_e_{a_elem_length} {
   std::cout << " BUlD CABLE DS \n";
-  setConstantMass(mass);
+  setConstantMassWithCopy(mass);
 
-  TRNp_Np = TRNp_NpMatrix();
+  TRNp_Np = std::make_shared<siconos::algebra::SiconosSparseMatrix>(6, 6);
+  std::vector<siconos::algebra::Triplet> triplets;
+  triplets.emplace_back(0, 0, 1.);
+  triplets.emplace_back(1, 1, 1.);
+  triplets.emplace_back(2, 2, 1.);
+  triplets.emplace_back(3, 3, 1.);
+  triplets.emplace_back(4, 4, 1.);
+  triplets.emplace_back(5, 5, 1.);
+  triplets.emplace_back(3, 1, -1);
+  triplets.emplace_back(1, 3, -1);
+  triplets.emplace_back(4, 2, -1);
+  triplets.emplace_back(2, 4, -1);
+  triplets.emplace_back(5, 3, -1);
+  triplets.emplace_back(3, 5, -1);
+  TRNp_Np->setFromTriplets(triplets.begin(), triplets.end());
 
   siconos::algebra::print(*TRNp_Np);
 
@@ -58,12 +72,11 @@ siconos::fem::cable::CableDS::CableDS(Eigen::Ref<siconos::algebra::SiconosVector
 
   // We will use jacobianTotalForcesOver_q_ and _jacobianTotalForcesOver_velocity to save
   // tangent stiffness and damping matrices. Those are attributes of LagrangianDS class.
-  jacobianTotalForcesOver_q_ = std::make_shared<siconos::algebra::SiconosMatrix>(ndof_, ndof_);
-  jacobianTotalForcesOver_q_->setZero();
+  jacobianTotalForcesOver_q_ =
+      std::make_shared<siconos::algebra::SiconosSparseMatrix>(ndof_, ndof_);
 
   jacobianTotalForcesOver_velocity_ =
-      std::make_shared<siconos::algebra::SiconosMatrix>(ndof_, ndof_);
-  jacobianTotalForcesOver_velocity_->setZero();
+      std::make_shared<siconos::algebra::SiconosSparseMatrix>(ndof_, ndof_);
 }
 
 void siconos::fem::cable::CableDS::computeTotalForces(
@@ -110,50 +123,44 @@ void siconos::fem::cable::CableDS::tangentStiffnessMatrix(
   siconos::algebra::SiconosVector Tq{6};
   siconos::algebra::SiconosMatrix TqqT{6, 6};
 
-  // tous les points moins le dernier
+  // All points but the last
   for (size_t i = 0; i < nb_elem - 3; i += 3) {
-    double n_e = 0;
-    for (size_t j = 0; j < 3; j++) {
-      double d = (q(i + j) - q(i + 3 + j));
-      n_e += d * d;
-    }
-    n_e = sqrt(n_e);
-
+    auto q_e = q.segment<6>(i);  // View onto memory starting at pos i in q (size = 6)
+    double n_e = (q_e.tail<3>() - q_e.head<3>()).norm();
     double eps = n_e / l_e_ - 1;
     double f_e = fabs(eps);
-    double kf = k / (1 + 1 / f_e);
+    double kf = k / (1. + 1. / f_e);
     if (eps > 0) {
       // fi
-      matmult(q, i, Tq);
-      for (size_t j = 0; j < 6; j++) {
-        (*totalForces_)(i + j) += kf * Tq(j);
-      }
+      // matmult(q, i, Tq);
+      Tq.noalias() = *TRNp_Np * q_e;
+      totalForces_->segment<6>(i) += kf * Tq;
 
       // KT
-      matmult2(Tq, TqqT);
+      TqqT.noalias() = Tq * Tq.transpose();
       double kKT = 1 / (1 + f_e);
       kKT = k * kKT * kKT * (1 / (l_e_ * n_e));
       for (size_t j = 0; j < 6; j++) {
         for (size_t l = 0; l < 6; l++) {
-          auto val = (*jacobianTotalForcesOver_q_)(i + j, i + l) + kKT * TqqT(j, l);
-          jacobianTotalForcesOver_q_->setValue(i + j, i + l, val);
+          jacobianTotalForcesOver_q_->coeffRef(i + j, i + l) += kKT * TqqT(j, l);
         }
       }
     }
+    jacobianTotalForcesOver_q_->makeCompressed();
     for (size_t j = 0; j < 6; j++) {
       for (size_t l = 0; l < 6; l++) {
-        auto val = (*jacobianTotalForcesOver_q_)(i + j, i + l) + kf * (*TRNp_Np)(j, l);
-        jacobianTotalForcesOver_q_->setValue(i + j, i + l, val);
+        jacobianTotalForcesOver_q_->coeffRef(i + j, i + l) += kf * TRNp_Np->coeff(j, l);
       }
     }
+    jacobianTotalForcesOver_q_->makeCompressed();
   }
   // dernier point, à voir si on mets dans une seule boucle avec des if
   // dernier élément - premier élément
-  double n_e = 0;
-  for (size_t j = 0; j < 3; j++) {
-    double d = (q(nb_elem + j) - q(j));
-    n_e += d * d;
-  }
+  // Copy in a temp buffer
+  siconos::algebra::SiconosVector6 q_last;
+  q_last.segment<3>(0) = q.tail<3>();
+  q_last.segment<3>(3) = q.head<3>();
+  double n_e = (q_last.tail<3>() - q_last.head<3>()).norm();
   n_e = sqrt(n_e);
 
   double eps = n_e / l_e_ - 1;
@@ -161,42 +168,39 @@ void siconos::fem::cable::CableDS::tangentStiffnessMatrix(
   double kf = k / (1 + 1 / f_e);
   if (eps > 0) {
     // fi
-    matmult(q, nb_elem, Tq);
-    for (size_t j = 0; j < 3; j++) {
-      (*totalForces_)(nb_elem + j) += kf * Tq(j);
-      (*totalForces_)(j) += kf * Tq(j + 3);
-    }
+    //    matmult(q, nb_elem, Tq);
+    Tq.noalias() = *TRNp_Np * q_last;
+    totalForces_->segment(nb_elem, 3) += kf * Tq.head<3>();
+    totalForces_->segment(0, 3) += kf * Tq.tail<3>();
 
     // KT
-    matmult2(Tq, TqqT);
+    TqqT.noalias() = Tq * Tq.transpose();
     double kKT = 1 / (1 + f_e);
     kKT = k * kKT * kKT * (1 / (l_e_ * n_e));
     for (size_t j = 0; j < 3; j++) {
       for (size_t l = 0; l < 3; l++) {
-        auto val = (*jacobianTotalForcesOver_q_)(nb_elem + j, nb_elem + l) + kKT * TqqT(j, l);
-        jacobianTotalForcesOver_q_->setValue(nb_elem + j, nb_elem + l, val);
-        val = (*jacobianTotalForcesOver_q_)(nb_elem + j, l) + kKT * TqqT(j, l + 3);
-        jacobianTotalForcesOver_q_->setValue(nb_elem + j, l, val);
-        val = (*jacobianTotalForcesOver_q_)(j, nb_elem + l) + kKT * TqqT(j + 3, l);
-        jacobianTotalForcesOver_q_->setValue(j, nb_elem + l, val);
-        val = (*jacobianTotalForcesOver_q_)(j, l) + kKT * TqqT(j + 3, l + 3);
-        jacobianTotalForcesOver_q_->setValue(j, l, val);
+        jacobianTotalForcesOver_q_->coeffRef(nb_elem + j, nb_elem + l) +=
+            kKT * TqqT(j, l) + kf * TRNp_Np->coeff(j, l);
+        jacobianTotalForcesOver_q_->coeffRef(nb_elem + j, l) +=
+            kKT * TqqT(j, l + 3) + kf * TRNp_Np->coeff(j, l + 3);
+        jacobianTotalForcesOver_q_->coeffRef(j, nb_elem + l) +=
+            kKT * TqqT(j + 3, l) + kf * TRNp_Np->coeff(j + 3, l);
+        jacobianTotalForcesOver_q_->coeffRef(j, l) +=
+            kKT * TqqT(j + 3, l + 3) + kf * TRNp_Np->coeff(j + 3, l + 3);
+      }
+    }
+  } else {
+    for (size_t j = 0; j < 3; j++) {
+      for (size_t l = 0; l < 3; l++) {
+        jacobianTotalForcesOver_q_->coeffRef(nb_elem + j, nb_elem + l) +=
+            kf * TRNp_Np->coeff(j, l);
+        jacobianTotalForcesOver_q_->coeffRef(nb_elem + j, l) += kf * TRNp_Np->coeff(j, l + 3);
+        jacobianTotalForcesOver_q_->coeffRef(j, nb_elem + l) += kf * TRNp_Np->coeff(j + 3, l);
+        jacobianTotalForcesOver_q_->coeffRef(j, l) += kf * TRNp_Np->coeff(j + 3, l + 3);
       }
     }
   }
-  for (size_t j = 0; j < 3; j++) {
-    for (size_t l = 0; l < 3; l++) {
-      auto val =
-          (*jacobianTotalForcesOver_q_)(nb_elem + j, nb_elem + l) + kf * (*TRNp_Np)(j, l);
-      jacobianTotalForcesOver_q_->setValue(nb_elem + j, nb_elem + l, val);
-      val = (*jacobianTotalForcesOver_q_)(nb_elem + j, l) + kf * (*TRNp_Np)(j, l + 3);
-      jacobianTotalForcesOver_q_->setValue(nb_elem + j, l, val);
-      val = (*jacobianTotalForcesOver_q_)(j, nb_elem + l) + kf * (*TRNp_Np)(j + 3, l);
-      jacobianTotalForcesOver_q_->setValue(j, nb_elem + l, val);
-      val = (*jacobianTotalForcesOver_q_)(j, l) + kf * (*TRNp_Np)(j + 3, l + 3);
-      jacobianTotalForcesOver_q_->setValue(j, l, val);
-    }
-  }
+  jacobianTotalForcesOver_q_->makeCompressed();
 }
 
 void siconos::fem::cable::CableDS::dampingMatrix(/** ...*/) {
@@ -205,60 +209,30 @@ void siconos::fem::cable::CableDS::dampingMatrix(/** ...*/) {
   // C = damp*M
 }
 
-void siconos::fem::cable::CableDS::matmult(
-    const Eigen::Ref<const siconos::algebra::SiconosVector> &V,
-    siconos::algebra::SiconosSize_t a_startIdx,
-    Eigen::Ref<siconos::algebra::SiconosVector> R) {
-  R.setZero();
-  assert(TRNp_Np);
-  auto n = R.size();
-  if (n + a_startIdx < V.size()) {
-    for (auto i = 0; i < n; i++) {
-      for (auto j = 0; j < n; j++) {
-        auto val = (*TRNp_Np)(i, j);
-        R(i) += val * V(j + a_startIdx);
-      }
-    }
-  } else {
-    for (auto i = 0; i < n; i++) {
-      for (auto j = 0; j < 3; j++) {
-        auto val = (*TRNp_Np)(i, j);
-        R(i) += val * V(j + a_startIdx);
-      }
-      for (auto j = 3; j < 6; j++) {
-        auto val = (*TRNp_Np)(i, j);
-        R(i) += val * V(j - 3);
-      }
-    }
-  }
-}
-
-void siconos::fem::cable::CableDS::matmult2(
-    const Eigen::Ref<const siconos::algebra::SiconosVector> &V,
-    Eigen::Ref<siconos::algebra::SiconosMatrix> R) {
-  size_t n = V.size();
-  for (size_t i = 0; i < n; i++) {
-    for (size_t j = 0; j < n; j++) {
-      R(i, j) = V(i) * V(j);
-    }
-  }
-}
-std::shared_ptr<siconos::algebra::SiconosMatrix>
-siconos::fem::cable::CableDS::TRNp_NpMatrix() {
-  auto vTRNp_Np =
-      std::make_shared<siconos::algebra::SiconosMatrix>(6, 6);  // FP: HAS TO BE SPARSE
-  /* vector<vector<double>> TRNp_Np = {{1, 0, 0, -1, 0, 0},
-                                                                         {0, 1, 0, 0, -1, 0},
-                                     {0, 0, 1, 0, 0, -1},
-                                                                         {-1, 0, 0, 1, 0, 0},
-                                     {0, -1, 0, 0, 1, 0},
-                                                                         {0, 0, -1, 0, 0,
-     1}};
-                                                                         */
-  vTRNp_Np->setIdentity();
-  (*vTRNp_Np)(3, 1) = -1;
-  (*vTRNp_Np)(4, 2) = -1;
-  (*vTRNp_Np)(5, 3) = -1;
-
-  return vTRNp_Np;
-}
+// void siconos::fem::cable::CableDS::matmult(
+//     const Eigen::Ref<const siconos::algebra::SiconosVector> &V,
+//     siconos::algebra::SiconosSize_t a_startIdx,
+//     Eigen::Ref<siconos::algebra::SiconosVector> R) {
+//   R.setZero();
+//   assert(TRNp_Np);
+//   auto n = R.size();
+//   if (n + a_startIdx < V.size()) {
+//     for (auto i = 0; i < n; i++) {
+//       for (auto j = 0; j < n; j++) {
+//         auto val = TRNp_Np->coeff(i, j);
+//         R(i) += val * V(j + a_startIdx);
+//       }
+//     }
+//   } else {
+//     for (auto i = 0; i < n; i++) {
+//       for (auto j = 0; j < 3; j++) {
+//         auto val = TRNp_Np->coeff(i, j);
+//         R(i) += val * V(j + a_startIdx);
+//       }
+//       for (auto j = 3; j < 6; j++) {
+//         auto val = TRNp_Np->coeff(i, j);
+//         R(i) += val * V(j - 3);
+//       }
+//     }
+//   }
+// }

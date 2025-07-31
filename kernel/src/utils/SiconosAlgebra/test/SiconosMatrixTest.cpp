@@ -17,13 +17,10 @@
  */
 #include "SiconosMatrixTest.hpp"
 
-#include "NumericsToolsNamespace.h"  // for NM_csc, NM_free ...
 #include "SiconosAlgebraAddons.hpp"  // for prod
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "Tools.hpp"
 #include "io.hpp"
-// namespace ublas = boost::numeric::ublas;
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega) \
   if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -31,7 +28,6 @@
 CPPUNIT_TEST_SUITE_REGISTRATION(SiconosMatrixTest);
 
 #define DEBUG_MESSAGES
-#include "siconos_debug.h"
 
 using SiconosMatrix = siconos::algebra::SiconosDenseMatrix;
 

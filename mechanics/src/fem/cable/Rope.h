@@ -22,10 +22,8 @@
 */
 #pragma once
 
-#include <vector>
-
 #include "MechanicalProperties.h"
-#include "Point.h"
+#include "SiconosVector.hpp"
 
 namespace siconos::fem::cable {
 
@@ -35,141 +33,201 @@ class Pylon;
  *
  */
 class Rope {
+ private:
+  /** Unknowns in the catenary equation:  \f$ [L, \eta_y, \eta_z] \f$
+        L: unstretched length of the cable
+        etaY : initial y-slope (at first node)
+        etaZ : initial z-slope (at first node)
+ */
+  siconos::algebra::SiconosVector3 catenaryUnknowns_;
+
+  /** Coordinates of rope nodes */
+  siconos::algebra::SiconosVector nodes_coords_ = {};
+
+  /** Internal forces (at each node) [x,y,z]-> [H,V,B] */
+  siconos::algebra::SiconosVector internal_forces_ = {};
+
+  /** Tension (at each node)*/
+  siconos::algebra::SiconosVector TS_ = {};
+
+  /** Mechanical properties of the rope (EA, rho ...) */
+  MechanicalProperties mechanicalProp_;
+
+  /** First pylon supporting the rope */
+  const Pylon &start_pylon_;
+
+  /** Second pylon supporting the rope */
+  const Pylon &end_pylon_;
+
+  /** Support reaction at contact [H,V,B]*/
+  siconos::algebra::SiconosVector3 support_reaction_ = {0., 0., 0.};
+
+  /** True if the rope is the last one in the line */
+  bool m_last_{false};
+
+  /** level of tolerance used to compute admissibility conditions */
+  double tol_ = 1e-7;
+
+  /** max number of iterations used in compute admissibility conditions */
+  int max_iter_ = 50;
+
+  /** number of elements used to discretize the rope */
+  int number_of_elements_{0};
+
+  Rope() = delete;
+  Rope &operator=(const Rope &) = delete;
+  Rope &operator=(Rope &&) = delete;
+  Rope(const Rope &) = delete;
+
  public:
   /** Build a rope span (a piece of cable between two pylons)
-
-      \param a_pile1 first pylon supporting the rope
-      \param a_pile2 second pylon
-      \param a_tol tolerance used to perform (stop) Newton-Raphson iterations
-      \param n_max max. number of iterations used in Newton-Raphson
-  */
-  Rope(const Pylon &a_pile0, const Pylon &a_pile1, double a_tol, int n_max);
-
-  Rope(Rope &&) = default;
-
-  Rope(const Rope &) = default;
-
-  virtual ~Rope() noexcept = default;
-
-  /** Compute initial profile of the Rope using Catenary equations
+      (compute initial profile of the Rope using Catenary equations)
 
       Update positions, internal forces and tension in the rope.
 
-      \param[in] a_meca mechanical properties of the rope span
-      \param[in] nb_nodes number of nodes uses to compute profile with catenary equations
-      \param[in] a_T0 initial tension applied at the beginning of the rope
-      \para[in] m a_R0 support reaction at the beginning of the rope
+      \param start_pylon first pylon supporting the rope
+      \param end_pylon second pylon
+      \param meca_prop mechanical properties of the rope span
+      \param T0 initial tension applied at the beginning of the rope
+      \param R0 support reaction at the beginning of the rope
+      \param nb_nodes number of nodes uses to compute profile with catenary equations
+      \param tol tolerance used to perform (stop) Newton-Raphson iterations
+      \param max max. number of iterations used in Newton-Raphson
   */
-  void compute(const class MechanicalProperties &a_meca, int nb_nodes, double a_T0,
-               const Point &a_R0);
+  explicit Rope(const Pylon &start_pylon, const Pylon &end_pylon,
+                MechanicalProperties meca_prop, double T0,
+                const siconos::algebra::SiconosVector3 &R0, int nb_nodes, double tol,
+                int max_iter);
 
-  int computeNbNodes(int nb_elem, double L);
+  Rope(Rope &&) noexcept = default;  // Required for std::vector<Rope> in Ropeway
 
-  /** Computes the profile of the rope
+  ~Rope() noexcept = default;
+
+  /** Compute the number of elements to be used in the rope
+
+      \param[in] element_length expected element size
+      \param[in] total_length total length of the cable (the whole setup)
+  */
+  int computeNumberOfElements(double element_length, double total_length);
+
+  /** Compute a mesh for the current piece of rope
    * \param[out] a_q nodes coordinates
    * \param[out] a_R reaction forces at nodes
    * \param[out] a_TS tension at nodes
    * \param[in] q_offset offset (index) in a_q vector
    * \param[in] a_reverse true when 'down' ropeway is concerned
+   * \return the number of elements to be used in the rope
    */
-  int computeMesh(std::vector<Point> &a_q, std::vector<Point> &a_R, std::vector<double> &a_TS,
-                  int q_offset, bool a_reverse = false);
+  int initializeFEM(siconos::algebra::SiconosVector &a_q, siconos::algebra::SiconosVector &a_R,
+                    siconos::algebra::SiconosVector &a_TS, int q_offset,
+                    bool a_reverse = false) const;
 
-  double get_T0();
-  double get_LastT();
-  Point get_LastR();
-  double get_L();
-  const Point &supportReaction() const;
-  const MechanicalProperties &get_meca() const;
-  const Pylon &left_pylon() const;
+  /** \return tension at the first node of the Rope */
+  double initialTension();
 
-  void to_json(ojson &j);
+  /** \return tension at the last node of the Rope */
+  double getTensionAtLastNode();
 
- private:
-  Point ropeway_inc;
+  /** \return reaction at the last node of the Rope */
+  Eigen::Ref<const siconos::algebra::SiconosVector3> getLastR() const;
 
-  /** Coordinates of rope nodes */
-  std::vector<Point> nodes_coords_ = {};
+  /** \return the length of the rope span */
+  double length() const { return catenaryUnknowns_(0); };
 
-  /** Internal forces (at each node) [x,y,z]-> [H,V,B] */
-  std::vector<Point> internal_forces_ = {};
+  Eigen::Ref<const siconos::algebra::SiconosVector3> supportReaction() const {
+    return support_reaction_;
+  };
+  const MechanicalProperties &mechanicalProperties() const { return mechanicalProp_; }
+  const Pylon &start_pylon() const noexcept { return start_pylon_; };
 
-  /** Tension (at each node)*/
-  std::vector<double> TS_ = {};
+  /** Print Rope params to screen */
+  void display() const;
 
-  /** Mechanical properties of the rope (EA, rho ...) */
-  MechanicalProperties meca;
-
-  /** First pylon supporting the rope */
-  const Pylon &left_pylon_;
-
-  /** Second pylon supporting the rope */
-  const Pylon &right_pylon_;
-
-  /** Support reaction at contact [H,V,B]*/
-  Point support_reaction_;
-
-  /** True if the rope is the last one in the line */
-  bool m_last_{false};
-
-  /** level of tolerance used in get_adm_1C to compute ropeway_inc */
-  double tol_ = 1e-7;
-
-  /** max number of iterations used in get_adm_1C to compute ropeway_inc */
-  int max_iter_ = 50;
-
-  /** number of nodes used to discretize the rope */
-  int number_of_nodes_{0};
-
-  Rope() = delete;
-  Rope &operator=(const Rope &) = delete;
-  Rope &operator=(Rope &&) = delete;
-
-  /**
-      Modifies cable_inc such that the cable equation is satisfied (using tolerance tol and max
-     number of iteration)
-
-      \param a_meca object which handles the geometric and material description of the cable
-      \param bc a vector of two Pylon objects
-      \return [lenght, slope_y, slope_z]
-  */
-  Point get_adm_1C(const MechanicalProperties &a_meca, const std::vector<Pylon> &bc);
-
-  /**
-     \returns an initial guess for the length and the slopes
-     \param bc a vector of two Pylons
-   */
-  Point guess(const std::vector<Pylon> &bc);
-
-  /**
-     computes the residual equation and the jacobian of a fixed-fixed cable with imposed
-     initial tension
-
-     \param a_meca object which handles the geometric and material description of the cable
-     \param bc a vector of two Pylons (end points of the rope)
-     \param cable_inc = [L, etaY, etaZ], with L
-     the unstretched length of the cable, etaY the initial y-slope and etaZ the initial z-slope
-     \param[out] residu the resulting residual
-     \param[out] J the resulting jacobian
-   */
-  void cable_eq(const MechanicalProperties &a_meca, const std::vector<Pylon> &bc,
-                const Point &cable_inc, Point &residu, std::vector<std::vector<double>> &J);
-
-  /** Computes initial profile of the cable
-
-     \param[in] a__meca mechanical properties of the cable
-     \param[in] cable_inc [L, etaY, etaZ], L is the unstretched length of the cable,
-     etaY the initial y-slope and etaZ the initial z-slope
-     \param[in] nb_nodes number of nodes
-     \param[in, out] a_q nodes coordinates
-     \param[in, out] a_R internal forces at each node
-     \param[in, out] a_TS tension at each node
-     \param[in] q_offset
-     \param[in] a_reverse
-
-  */
-  void get_profile_1C(const MechanicalProperties &a_meca, const Point &cable_inc, int nb_nodes,
-                      std::vector<Point> &a_q, std::vector<Point> &a_R,
-                      std::vector<double> &a_TS, int q_offset = 0, bool a_reverse = false);
+  // For serialisation
+  friend struct nlohmann::adl_serializer<Rope>;
 };
+
+// Free functions
+/**
+   \returns an initial guess for the initial length and the slopes of the rope, between two
+   given pylons
+   \param[in] start coordinates of the first node in the rope
+   \param[in] end coordinates of the last node in the rope
+ */
+siconos::algebra::SiconosVector3 guess(const siconos::algebra::SiconosVector3 &start,
+                                       const siconos::algebra::SiconosVector3 &end);
+
+/** Computes initial lengths and slopes by solving admissibility conditions for the catenary
+    See Ch. Bertrand Phd
+
+  \param[in] a_meca geometric and material description of the cable
+  \param[in] start coordinates of the first node in the rope
+  \param[in] end coordinates of the last node in the rope
+  \param max_iter max number of iterations
+  \param tol required tolerance
+  \return [Unstretched length, initial y-slope, initial z-slope]
+
+*/
+siconos::algebra::SiconosVector3 computeAdmissibilityConditions(
+    const MechanicalProperties &a_meca, const siconos::algebra::SiconosVector3 &start,
+    const siconos::algebra::SiconosVector3 &end, int max_iter, double tol);
+
+/** Discretize the rope by applying catenary equation
+
+  \param[in] a_meca geometric and material description of the cable
+  \param[in] end coordinates of the last point in the rope (end pylon)
+  \param[in] cable_inc [L, etaY, etaZ], L is the unstretched length of the cable,
+    etaY the initial y-slope and etaZ the initial z-slope
+  \param[in] nb_nodes number of nodes used to compute catenary
+  \param[in, out] computed nodes coordinates, size = (nb_nodes - 1) * 3 [N0x, N0y, N0z,
+      N1x, ...], we do not keep last point
+  \param[in, out] computed internal forces at each node, size = nb_nodes * 3
+      [H, V, B, ..., H, V, B ...]
+  \param[in, out] computed tension at each node, size = nb_nodes
+  \param[in] q_offset value of the starting index (node number, not dof!) where results are
+     computed in positions, internal_forces and tension
+  \param[in] a_reverse true to compute catenary starting from the last pylon
+
+*/
+void computeCatenary(const MechanicalProperties &a_meca,
+                     const siconos::algebra::SiconosVector3 &end,
+                     const siconos::algebra::SiconosVector3 &cable_inc, int nb_nodes,
+                     siconos::algebra::SiconosVector &positions,
+                     siconos::algebra::SiconosVector &internal_forces,
+                     siconos::algebra::SiconosVector &tension, int q_offset = 0,
+                     bool a_reverse = false);
+
 }  // namespace siconos::fem::cable
+
+// Serialization
+namespace nlohmann {
+template <>
+struct adl_serializer<siconos::fem::cable::Rope> {
+  static siconos::fem::cable::Rope from_json(const json &j) {
+    return siconos::fem::cable::Rope(j);
+  }
+
+  static void to_json(ordered_json &j, const siconos::fem::cable::Rope &input) {
+    for (int i = 0; i < input.nodes_coords_.size(); ++i) {
+      j["q"].push_back(input.nodes_coords_(i));
+    }
+    j["SR"].push_back(input.supportReaction());
+
+    if (input.TS_.size()) {
+      j["catenaryUnknowns"].push_back(input.catenaryUnknowns_);
+
+      for (int i = 0; i < input.TS_.size(); ++i) {
+        j["TS"].push_back(input.TS_(i));
+      }
+      for (int i = 0; i < input.internal_forces_.size(); ++i) {
+        j["R"].push_back(input.internal_forces_(i));
+      }
+
+      std::vector<double> buff = {input.mechanicalProperties().initialTension(),
+                                  input.mechanicalProperties().crossSectionRigidity(),
+                                  input.mechanicalProperties().linearDensity()};
+      j["meca_global"].push_back(buff);
+    }
+  }
+};
+}  // namespace nlohmann

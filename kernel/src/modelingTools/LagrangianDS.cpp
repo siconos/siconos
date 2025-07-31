@@ -20,7 +20,6 @@
 #include <iostream>
 #include <memory>
 
-#include "BlockVector.hpp"
 #include "SiconosConst.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"

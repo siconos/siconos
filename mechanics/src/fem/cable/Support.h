@@ -22,7 +22,8 @@ Support class
 */
 #pragma once
 
-#include "Point.h"
+#include <nlohmann/json.hpp>
+
 #include "SiconosVector.hpp"
 
 namespace siconos::modeling {
@@ -33,19 +34,20 @@ class NonSmoothLaw;
 namespace siconos::fem::cable {
 
 class Pylon;
-class Point;
 class Rope;
 
-/** A pylon, its contact point description (coordinates, normal ...) and a nonsmooth law
+/** Support corresponds to the roller battery area where contacts
+ *  occur.
+ *  There we save coordinates of the center, normal vectors, ...
  *
  */
 class Support {
  protected:
-  /** The pylon (geometrical descr) */
-  const Pylon &pylon_;
+  /** Center (initialize with pylon position)  */
+  siconos::algebra::SiconosVector3 center_pos_ = {};
 
-  /**  Pylon position */
-  Point m_p;
+  /** Roller radius */
+  double radius_{0.};
 
   /** Non smooth law (for the contact pylon-rope) */
   std::shared_ptr<siconos::modeling::NonSmoothLaw> m_nslaw{nullptr};
@@ -67,16 +69,28 @@ class Support {
   Support &operator=(Support &&) = delete;
 
  public:
-  Support(const Pylon &a_pile);
+  /** Build from center coordinates and radius of the roller
+
+    \param coordinates roller center position
+    \param radius roller radius
+   */
+  explicit Support(const siconos::algebra::SiconosVector3 &coordinates, double radius);
+
   virtual ~Support() noexcept = default;
-  virtual double get_radius() const;
-  virtual const Point &get_center() const { return m_p; };
+
+  double radius() const { return radius_; };
+
+  Eigen::Ref<const siconos::algebra::SiconosVector3> center() const { return center_pos_; }
 
   //------------ static -------------
   virtual void prepare(const Rope &a_rope);
-  virtual void prepare(const Pylon &a_start, const Pylon &a_end, double T);
+  virtual void prepare(const Pylon &a_start, const Pylon &a_end, double T) {
+    // does nothing
+  };
 
-  virtual void compute(const Point &a_p, double a_tol, double &g, Point &G, Point &T, int &c);
+  virtual void compute(const siconos::algebra::SiconosVector3 &a_p, double a_tol, double &g,
+                       Eigen::Ref<siconos::algebra::SiconosVector3> G,
+                       Eigen::Ref<siconos::algebra::SiconosVector3> T, int &c);
 
   //------------ dynamic -------------
 
@@ -92,7 +106,7 @@ class Support {
   virtual void InitFriction(double a_mu);
 
   /** \return the nonsmooth law used for this support */
-  std::shared_ptr<siconos::modeling::NonSmoothLaw> nslaw();
+  std::shared_ptr<siconos::modeling::NonSmoothLaw> const nslaw() { return m_nslaw; };
 
   /** \return the coordinates of the contact point */
   inline auto pc2() const { return m_pc2; }
@@ -102,9 +116,24 @@ class Support {
 
   /**\return the tangent at contact */
   inline auto tangent() const { return m_tangent; }
+
+  /** display object to screen */
+  virtual void display() const;
 };
 
-//------ Export ----------
-void to_json(ojson &j, const Support &p);
-
 }  // namespace siconos::fem::cable
+
+// Serialization
+namespace nlohmann {
+template <>
+struct adl_serializer<siconos::fem::cable::Support> {
+  // No need of a from_json for pulleys
+  //   static siconos::fem::cable::PulleyWrapping from_json(const json &j) {
+  //     return siconos::fem::cable::PulleyWrapping(j);
+  //   }
+
+  static void to_json(ordered_json &j, const siconos::fem::cable::Support &input) {
+    j = json{{"radius", input.radius()}, {"center", input.center()}};
+  }
+};
+}  // namespace nlohmann

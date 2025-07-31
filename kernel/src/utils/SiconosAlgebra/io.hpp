@@ -188,4 +188,22 @@ double compareRefFile(const SiconosDenseMatrix &data, std::string filename, doub
 SiconosVector readVectorFromJson(const nlohmann::json &jin);
 }  // namespace io
 }  // namespace siconos::algebra
+
+namespace nlohmann {
+
+// Add json serialization for SiconosVector
+template <>
+struct adl_serializer<siconos::algebra::SiconosVector> {
+  static void to_json(ordered_json &j, const siconos::algebra::SiconosVector &vec) {
+    j = ordered_json::array();
+    for (int i = 0; i < vec.size(); ++i) j.push_back(vec(i));
+  }
+
+  static void from_json(const ordered_json &j, siconos::algebra::SiconosVector &vec) {
+    vec = siconos::algebra::SiconosVector(j.size());
+    for (size_t i = 0; i < j.size(); ++i) vec(i) = j.at(i).get<double>();
+  }
+};
+}  // namespace nlohmann
+
 #endif

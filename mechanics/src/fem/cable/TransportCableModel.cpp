@@ -18,118 +18,71 @@
 #include "TransportCableModel.h"
 
 #include <algorithm>
-#include <fstream>
-#include <iostream>
-#include <map>
+#include <cstdlib>
 #include <nlohmann/json.hpp>
-#include <string>
-
-#include "MechanicalProperties.h"
 
 using json = nlohmann::json;
 
-siconos::fem::cable::TransportCableModel::TransportCableModel(const std::string &a_filename) {
-  from_file(a_filename);
-}
+siconos::fem::cable::TransportCableModel::TransportCableModel(const nlohmann::json &input)
+    : m_carriers(input.at("carriers")) {
+  // -- Read cable (mechanical properties) and carriers (vehicle positions) --
+  if (!input.contains("mechanicalProperties")) throw std::runtime_error("Missing 'cable' key in json input.");
 
-int siconos::fem::cable::TransportCableModel::from_file(const std::string &a_fileName) {
-  int res = EXIT_FAILURE;
-  json input;
-  std::ifstream file(a_fileName);
-  if (file.is_open()) {
-    file >> input;
-    res = from_json(input);
+  if (!input.contains("carriers"))
+    throw std::runtime_error("Missing 'carriers' key in json input.");
+
+  if (!input.contains("stationUp"))
+    throw std::runtime_error("Missing 'stationUp' key in json input.");
+  if (!input.contains("stationDown"))
+    throw std::runtime_error("Missing 'stationDown' key in json input.");
+
+  if (!input.contains("piles")) throw std::runtime_error("Missing 'piles' key in json input.");
+
+  // cable mechanical properties
+  mechanicalProperties_ = input["mechanicalProperties"];
+
+  list_of_pylons_up_.clear();
+  list_of_pylons_down_.clear();
+
+  // Read stations positions
+  Pylon stationUp(input["stationUp"], true);
+  Pylon stationDown(input["stationDown"], true);
+  assert(stationDown < stationUp);
+
+  // -- Read pylons positions (excluding station up and down) --
+  std::vector<Pylon> list_of_pylons = {};
+  const json &jpiles = input["piles"];
+  assert(jpiles.is_array());
+  list_of_pylons.reserve(jpiles.size());
+  for (const auto &jp : jpiles) {
+    list_of_pylons.emplace_back(jp, false);
   }
-  return res;
-}
+  assert(list_of_pylons.size());
+  // piles x-coords must be in ascending order
+  std::sort(list_of_pylons.begin(), list_of_pylons.end());
 
-int siconos::fem::cable::TransportCableModel::from_json(const json &j) {
-  int res = EXIT_SUCCESS;
-  std::map<std::string, BaseModel &> vElems = {{"cable", m_cable},
-                                               {"carriers", m_carriers},
-                                               {"stationUp", m_stationUp},
-                                               {"stationDown", m_stationDown}};
-  clear();
-  try {
-    for (auto &vElem : vElems) {
-      vElem.second.from_json(j, vElem.first);
-    }
-    if (j.contains("piles")) {
-      const json &jpiles = j["piles"];
-      if (jpiles.is_array()) {
-        m_piles.reserve(jpiles.size());
-        for (const auto &jp : jpiles) {
-          m_piles.push_back(Pylon{});
-          m_piles.back().from_json(jp);
-        }
-      }
-    }
-    res = validate();
-  } catch (const json::exception &) {
-    res = EXIT_FAILURE;
+  // Ensure stations are at correct positions
+  assert((stationDown < list_of_pylons.front() && list_of_pylons.back() < stationUp));
+
+  // Build the list corresponding to "up" pylons (including stations) from list_of_pylons
+  list_of_pylons_up_.emplace_back(stationDown);
+  for (auto &p : list_of_pylons) {
+    list_of_pylons_up_.push_back(p);  // copy
   }
+  list_of_pylons_up_.emplace_back(stationUp);
 
-  return res;
-}
-
-bool siconos::fem::cable::TransportCableModel::isLoaded() {
-  return (m_pilesUp.size() != 0 && m_pilesDown.size() != 0);
-}
-
-const siconos::fem::cable::MechanicalProperties &
-siconos::fem::cable::TransportCableModel::mechanicalProperties() const {
-  return m_cable;
-}
-
-const siconos::fem::cable::Carriers &siconos::fem::cable::TransportCableModel::get_carriers()
-    const {
-  return m_carriers;
-}
-
-const std::vector<siconos::fem::cable::Pylon> &
-siconos::fem::cable::TransportCableModel::get_pylons_up() const {
-  return m_pilesUp;
-}
-
-const std::vector<siconos::fem::cable::Pylon> &
-siconos::fem::cable::TransportCableModel::get_pylons_down() const {
-  return m_pilesDown;
-}
-
-void siconos::fem::cable::TransportCableModel::clear() {
-  // Reset model
-  m_piles.clear();
-  m_pilesUp.clear();
-  m_pilesDown.clear();
-}
-
-int siconos::fem::cable::TransportCableModel::validate() {
-  // Build the two ropeways from the piles setup
-  if (m_stationUp > m_stationDown) {
-    bool vOk = true;
-    if (m_piles.size()) {
-      // piles x-coords must be in ascending order
-      std::sort(m_piles.begin(), m_piles.end());
-
-      vOk = (m_piles.front() > m_stationDown && m_piles.back() < m_stationUp);
-    }
-    if (vOk) {
-      // Insert piles (including first and last special ones) into the 'up' vector
-      m_pilesUp.push_back(Pylon(m_stationDown, true));
-      for (auto &p : m_piles) {
-        m_pilesUp.push_back(p);  // Copy
-      }
-      m_pilesUp.push_back(Pylon(m_stationUp, true));
-
-      // Same for the 'down' part
-      for (auto &p : m_pilesUp) {
-        m_pilesDown.push_back(p);  // Copy
-        p.transform(true);         // useless ???
-        m_pilesDown.back().transform(false);
-      }
-      return EXIT_SUCCESS;
-    }
+  // Now the list of "down" pylons (no stations) with a shift corresponding to the distance
+  // between the ropes
+  for (auto &p : list_of_pylons_up_) {
+    list_of_pylons_down_.push_back(p);  // copy
+    list_of_pylons_down_.back().shift_y();
   }
 
-  return EXIT_FAILURE;
+  if (!isLoaded())
+    throw std::runtime_error(
+        "Something went wrong during model loading: there are no pylons (empty lists).");
+}
+
+bool siconos::fem::cable::TransportCableModel::isLoaded() const {
+  return (list_of_pylons_up_.size() != 0 && list_of_pylons_down_.size() != 0);
 }

@@ -24,7 +24,7 @@
 #ifndef CABLEDS_H
 #define CABLEDS_H
 
-#include "LagrangianDS.hpp"
+#include "LagrangianSparseDS.hpp"
 
 namespace siconos::fem::cable {
 /**
@@ -48,18 +48,12 @@ namespace siconos::fem::cable {
   Add ref to Charlelie's phd report.
 
 */
-class CableDS : public siconos::modeling::LagrangianDS {
+class CableDS : public siconos::modeling::LagrangianSparseDS {
  protected:
   double EA_{1};
   double l_e_{1};
 
-  std::shared_ptr<siconos::algebra::SiconosMatrix> TRNp_Np{nullptr};
-
-  void matmult(const Eigen::Ref<const siconos::algebra::SiconosVector> &V,
-               siconos::algebra::SiconosSize_t a_startIdx,
-               Eigen::Ref<siconos::algebra::SiconosVector> R);
-  void matmult2(const Eigen::Ref<const siconos::algebra::SiconosVector> &V,
-                Eigen::Ref<siconos::algebra::SiconosMatrix> R);
+  std::shared_ptr<siconos::algebra::SiconosSparseMatrix> TRNp_Np{nullptr};
 
   CableDS() = delete;
   CableDS(const CableDS &) = delete;
@@ -70,7 +64,8 @@ class CableDS : public siconos::modeling::LagrangianDS {
  public:
   CableDS(Eigen::Ref<siconos::algebra::SiconosVector> q0,
           Eigen::Ref<siconos::algebra::SiconosVector> velocity0,
-          Eigen::Ref<siconos::algebra::SiconosMatrix> mass, double a_EA, double a_elem_length);
+          const siconos::algebra::SiconosSparseMatrix &mass, double a_EA,
+          double a_elem_length);
 
   ~CableDS() noexcept = default;
 
@@ -96,8 +91,6 @@ class CableDS : public siconos::modeling::LagrangianDS {
   void tangentStiffnessMatrix(const Eigen::Ref<const siconos::algebra::SiconosVector> q);
   void dampingMatrix();
   // + some access op to be added later, if required
-
-  std::shared_ptr<siconos::algebra::SiconosMatrix> TRNp_NpMatrix();
 
   virtual void accept(modeling::dynamical_systems::Visitor &tourist) const override {
     tourist.visit(*this);
