@@ -25,6 +25,7 @@
 #include "EigenInclude.hpp"  // IWYU pragma: keep - Must be included before Eigen/Core
 //
 #include <Eigen/Core>
+#include <memory>
 
 namespace siconos::algebra {
 

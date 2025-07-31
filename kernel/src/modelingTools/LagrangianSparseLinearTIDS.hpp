@@ -20,7 +20,7 @@
 #ifndef LAGRANGIANSPARSETIDS_H
 #define LAGRANGIANSPARSETIDS_H
 
-#include <siconos/kernel/SiconosMatrix.hpp>
+#include "SiconosMatrix.hpp"
 
 #include "LagrangianSparseDS.hpp"
 #include "SiconosPointers.hpp"
