@@ -27,10 +27,6 @@ usage example:
 """
 import numpy as np
 from math import cos, sin
-import vtk
-
-vtkMath = vtk.vtkMath()
-
 
 def euler_from_quaternion(q0, q1, q2, q3):
     """
@@ -112,32 +108,3 @@ def quaternion_multiply(q1, q0):
         dtype=np.float64,
     )
 
-
-class Quaternion:
-
-    def __init__(self, *args):
-        self._data = vtk.vtkQuaternion[float](*args)
-
-    def __mul__(self, q):
-        r = Quaternion()
-        vtkMath.MultiplyQuaternion(self._data, q._data, r._data)
-        return r
-
-    def __getitem__(self, i):
-        return self._data[i]
-
-    def conjugate(self):
-        r = Quaternion((self[0], self[1], self[2], self[3]))
-        r._data.Conjugate()
-        return r
-
-    def rotate(self, v):
-        pv = Quaternion((0, v[0], v[1], v[2]))
-        rv = self * pv * self.conjugate()
-        # assert(rv[0] == 0)
-        return [rv[1], rv[2], rv[3]]
-
-    def axisAngle(self):
-        r = [0, 0, 0]
-        a = self._data.GetRotationAngleAndAxis(r)
-        return r, a
