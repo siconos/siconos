@@ -136,4 +136,11 @@ else()
   add_subdirectory(extern/CompactNSearch)
 endif()
 
+
+#set(${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES
+#  ${${COMPONENT}_DIRS} # All .hpp are installed
+#  )
+
+#siconos_component_install_setup(${COMPONENT})
+
 include(vkernel_tests.cmake)

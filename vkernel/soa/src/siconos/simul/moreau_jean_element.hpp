@@ -94,6 +94,20 @@ struct moreau_jean_element : item<> {
                                assembled_osi().h_matrix_assembled(),
                                inter_offset(), ds_offset());
     }
+
+    decltype(auto) w_matrix_assembled()
+    {
+      auto w_matrix_storage = convert_storage_type(
+          self()->data(),
+          some::matrix<some::scalar, nth_t<0, typename h_matrix1::sizes>,
+                       nth_t<0, typename h_matrix1::sizes>>{});
+      ;
+
+      return algebra::mat_view(w_matrix_storage,
+                               assembled_osi().w_matrix_assembled(),
+                               inter_offset(), inter_offset());
+    }
+
     decltype(auto) q_nsp_vector_assembled()
     {
       auto lambda_storage = get_storage_type(self()->data(), lambda{});
@@ -592,7 +606,7 @@ struct moreau_jean_element : item<> {
       }
     }
 
-    // compute H M^-1 H^t
+    // nonsmooth law effect
     void nsl_effect_on_free_output(auto step)
     {
       auto &data = self()->data();

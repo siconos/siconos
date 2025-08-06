@@ -9,6 +9,7 @@ struct relay {};
 struct newton_impact_friction : item<> {
 
   static constexpr auto size = 2;
+
   using attributes =
       gather<attribute<"e", some::scalar>, attribute<"mu", some::scalar>>;
 

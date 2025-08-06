@@ -124,15 +124,14 @@ EOF
       [ -f /applis/site/guix-start.sh ] && . /applis/site/guix-start.sh
       pwd=`pwd`
       rm -f $pwd/.siconos-guix-profile
-      guix_isolation_args="--container -N --emulate-fhs --share=/tmp --share=/scratch --share=$HOME --preserve=PYTHONPATH --preserve=LD_LIBRARY_PATH"
-      #guix_isolation_args="--pure --preserve=OMP* --preserve=VRUN*"
+      #guix_isolation_args="--container -N --emulate-fhs --share=/tmp --share=/scratch --share=$HOME"
+      guix_isolation_args="--pure --preserve=OMP* --preserve=VRUN*"
       guix_cmd="guix time-machine -C ./.siconos-vrun-channels.scm --"
       # it seems that we need to pass explicitely the package for transformations
       exec $guix_cmd shell $guix_isolation_args \
            --root=.siconos-guix-profile \
-           -e '(list (@ (gnu packages gcc) gcc-15) "lib")' \
            -m .siconos-disks-manifest.scm \
-           python --with-c-toolchain=python=gcc-toolchain@15 \
+           python \
            -- $0 "$@" # bash -c "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/scratch/maurice/install/siconos/lib/python3.10/site-packages/nonos; export PYTHONPATH=\$PYTHONPATH:/scratch/maurice/install/siconos/lib/python3.10/site-packages; $0 $@"
       ;;
 

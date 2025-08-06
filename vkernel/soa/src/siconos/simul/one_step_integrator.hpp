@@ -177,7 +177,40 @@ struct one_step_integrator {
 
       void compute_w_matrix(auto step)
       {
-        assembled_osi().compute_w_matrix(step);
+        auto& data = self()->data();
+
+        // get the number of interactions where dof is defined at
+        // runtime
+        auto runtime_inters =
+          storage::prop_values<rt_interaction, "nds">(data, step);
+
+        if (std::size(runtime_inters) > 0) {
+          // general case: mass matrix is not diagonal
+          assembled_osi().compute_w_matrix(step);
+        }
+        else {
+          // mass matrix is assumed to be diagonal
+          auto& data = self()->data();
+          using info_t = storage::get_info_t<decltype(data)>;
+
+          using env = typename info_t::env;
+          auto tmp_matrix = typename traits::config<env>::template convert<
+              some::assembled_matrix<some::transposed_matrix<
+                  typename ct_osi_t::h_matrix1>>>::type{};
+
+          auto ct_elem = std::get<0>(elements());
+
+          auto&& h_mat = ct_elem.h_matrix_assembled();
+          auto&& m_mat = ct_elem.mass_matrix_assembled();
+          auto&& w_mat = ct_elem.w_matrix_assembled();
+
+          resize(tmp_matrix, size1(h_mat), size0(h_mat));
+          solvet(m_mat, h_mat, tmp_matrix);
+          resize(w_mat, size0(h_mat), size1(tmp_matrix));
+
+          prod(h_mat, tmp_matrix, w_mat);
+
+        }
       }
 
       void compute_input() { assembled_osi().compute_input(); }

@@ -98,6 +98,7 @@ class VViewOptions(object):
         self.maximum_number_of_peels = 100
         self.occlusion_ratio = 0.1
         self.global_filter = False
+        self.view_as_glyphs = False
         self.initial_camera = [None] * 5
         self.visible_mode = "all"
         self.export = False
@@ -117,7 +118,7 @@ class VViewOptions(object):
         if not long:
             print(
                 """[--help] [--tmin=<float value>] [--tmax=<float value>]
-            [--cf-scale=<float value>] [--no-cf] [--imr] [--global-filter]
+            [--cf-scale=<float value>] [--no-cf] [--imr] [--view-as-glyphs] [--global-filter]
             [--no-depth-peeling] [--maximum-number-of-peels=<int value>]
             [--occlusion-ratio=<float value>]
             [--normalcone-ratio = <float value>]
@@ -147,6 +148,8 @@ class VViewOptions(object):
      --imr
        immediate-mode-rendering, use less memory at the price of
        slower rendering
+     --views-as-glyphs (default : off)
+       Visualization of 2D dynamic objects with simple glyphs.
      --global-filter (default : off)
        With export mode, concatenates all blocks in a big vtkPolyData.
        This option is for when the number of objects is huge.
@@ -213,6 +216,7 @@ class VViewOptions(object):
                     "no-cf",
                     "imr",
                     "global-filter",
+                    "view-as-glyphs",
                     "no-depth-peeling",
                     "maximum-number-of-peels=",
                     "occlusion-ratio=",
@@ -276,6 +280,9 @@ class VViewOptions(object):
             elif o == "--global-filter":
                 self.global_filter = True
 
+            elif o == "--view-as-glyphs":
+                self.view_as_glyphs = True
+
             elif o == "--normalcone-ratio":
                 self.normalcone_ratio = float(a)
 
@@ -336,81 +343,32 @@ class VViewOptions(object):
             self.usage()
             exit(1)
 
-    def display(self):
-
-        display_str = """[io.VViewOptions] Display vview options:
-        min_time : {0}
-        min_time : {1}
-        cf_disable : {2}
-        cf_scale_factor : {3}
-        normalcone_ratio {4}
-        time_scale_factor {5}
-        advance_by_time {6}
-        frames_per_second {7}
-        imr {8}
-        depth_peeling {9}
-        maximum_number_of_peels {10}
-        occlusion_ratio {11}
-        global_filter {12}
-        initial_camera {13}
-        visible_mode {14}
-        export {15}
-        gen_para_script {16}
-        with_edges {17}
-        with_random_color {18}
-        with_charts {19}
-        depth_2d {20}
-        verbose {21}""".format(
-            self.min_time,
-            self.max_time,
-            self.cf_disable,
-            self.cf_scale_factor,
-            self.normalcone_ratio,
-            self.time_scale_factor,
-            self.advance_by_time,
-            self.frames_per_second,
-            self.imr,
-            self.depth_peeling,
-            self.maximum_number_of_peels,
-            self.occlusion_ratio,
-            self.global_filter,
-            self.initial_camera,
-            self.visible_mode,
-            self.export,
-            self.gen_para_script,
-            self.with_edges,
-            self.with_random_color,
-            self.with_charts,
-            self.depth_2d,
-            self.verbose,
-        )
-
-        print(display_str)
-        # self.cf_scale_factor = 1
-        # self.normalcone_ratio = 1
-        # self.time_scale_factor = 1
-        # self.advance_by_time = None
-        # self.frames_per_second = 25
-        # self.cf_disable = False
-        # if hasattr(vtk.vtkPolyDataMapper(), 'ImmediateModeRenderingOff'):
-        #     self.imr = False
-        # else:
-        #     # vtk 8
-        #     self.imr = True
-        # self.depth_peeling = True
-        # self.maximum_number_of_peels = 100
-        # self.occlusion_ratio = 0.1
-        # self.global_filter = False
-        # self.initial_camera = [None] * 5
-        # self.visible_mode = 'all'
-        # self.export = False
-        # self.gen_para_script = False
-        # self.with_edges = False
-        # self.with_random_color = True
-        # self.with_charts= 0
-        # self.depth=0.1
-        # self.verbose=0
-
+def display(self):
+    display_str = f"""[io.VViewOptions] Display vview options:
+        min_time : {self.min_time}
+        max_time : {self.max_time}
+        cf_disable : {self.cf_disable}
+        cf_scale_factor : {self.cf_scale_factor}
+        normalcone_ratio : {self.normalcone_ratio}
+        time_scale_factor : {self.time_scale_factor}
+        advance_by_time : {self.advance_by_time}
+        frames_per_second : {self.frames_per_second}
+        imr : {self.imr}
+        depth_peeling : {self.depth_peeling}
+        maximum_number_of_peels : {self.maximum_number_of_peels}
+        occlusion_ratio : {self.occlusion_ratio}
+        global_filter : {self.global_filter}
+        view_as_glyphs : {self.view_as_glyphs}
+        initial_camera : {self.initial_camera}
+        visible_mode : {self.visible_mode}
+        export : {self.export}
+        gen_para_script : {self.gen_para_script}
+        with_edges : {self.with_edges}
+        with_random_color : {self.with_random_color}
+        with_charts : {self.with_charts}
+        depth_2d : {self.depth_2d}
+        verbose : {self.verbose}"""
+    print(display_str)
 
 class VExportOptions(VViewOptions):
     def __init__(self):
@@ -1074,11 +1032,17 @@ class IOReader(VTKPythonAlgorithmBase):
         vtk_velo_data = dsa.numpyTovtkDataArray(self.velo_data)
         vtk_velo_data.SetName("velo_data")
 
+        self.vtk_radii_data = dsa.numpyTovtkDataArray(self._radii_data)
+        self.vtk_radii_data.SetName("radii")
+
         vtk_points_data = dsa.numpyTovtkDataArray(self.pos_data[:, 2:5])
 
         self.points.SetData(vtk_points_data)
 
+        output.GetPointData().AddArray(vtk_pos_data)
         output.GetPointData().AddArray(vtk_velo_data)
+        output.GetPointData().AddArray(self.vtk_radii_data)
+
         try:
             if self._with_contact_forces:
                 ncfindices = len(self._cf_indices)
@@ -1221,6 +1185,8 @@ class IOReader(VTKPythonAlgorithmBase):
 
     def SetIO(self, io):
         self._io = io
+
+        self._radii_data = self._io.radii_data()
 
         self._ispos_data = self._io.static_data()
         self._idpos_data = self._io.dynamic_data()
@@ -2066,12 +2032,18 @@ class VView(object):
                 pass
 
         if not (self.opts.global_filter or self.opts.export):
-            actor = vtk.vtkActor()
-            if self.opts.with_edges:
-                actor_edge = vtk.vtkActor()
 
-            if instance.attrs.get("mass", 0) > 0:
+            actor = None
+            actor_edge = None
+
+            if (instance.attrs.get("mass", 0) > 0 and
+                not self.opts.view_as_glyphs):
+
                 # objects that may move
+                actor = vtk.vtkActor()
+                if self.opts.with_edges:
+                    actor_edge = vtk.vtkActor()
+
                 self.dynamic_actors[instid].append(
                     (actor, contact_shape_indx, collision_group)
                 )
@@ -2092,8 +2064,12 @@ class VView(object):
                     )
                     actor_edge.GetProperty().SetRepresentationToWireframe()
 
-            else:
+            elif (instance.attrs.get("mass", 0) <= 0):
                 # objects that are not supposed to move
+                actor = vtk.vtkActor()
+                if self.opts.with_edges:
+                    actor_edge = vtk.vtkActor()
+
                 self.static_actors[instid].append(
                     (actor, contact_shape_indx, collision_group)
                 )
@@ -2104,103 +2080,101 @@ class VView(object):
                     )
                 )
 
-            if self.opts.with_random_color:
-                actor.GetProperty().SetColor(random_color())
+            if actor is not None:
+
+                if self.opts.with_random_color:
+                    actor.GetProperty().SetColor(random_color())
+                    if self.opts.with_edges:
+                        actor_edge.GetProperty().SetColor(random_color())
+
+                actor.SetMapper(self.unfrozen_mappers[contact_shape_indx])
                 if self.opts.with_edges:
-                    actor_edge.GetProperty().SetColor(random_color())
+                    actor_edge.SetMapper(self.unfrozen_mappers_edges[contact_shape_indx])
 
-            actor.SetMapper(self.unfrozen_mappers[contact_shape_indx])
-            if self.opts.with_edges:
-                actor_edge.SetMapper(self.unfrozen_mappers_edges[contact_shape_indx])
-
-            if not (self.opts.global_filter or self.opts.export):
                 self.renderer.AddActor(actor)
                 if self.opts.with_edges:
                     self.renderer.AddActor(actor_edge)
 
-        transform = vtk.vtkTransform()
-        transformer = vtk.vtkTransformFilter()
+                transform = vtk.vtkTransform()
+                transformer = vtk.vtkTransformFilter()
 
-        if contact_shape_indx in self.readers:
-            transformer.SetInputConnection(
-                self.readers[contact_shape_indx].GetOutputPort()
-            )
-        else:
-            transformer.SetInputData(self.datasets[contact_shape_indx])
+                if contact_shape_indx in self.readers:
+                    transformer.SetInputConnection(
+                        self.readers[contact_shape_indx].GetOutputPort()
+                    )
+                else:
+                    transformer.SetInputData(self.datasets[contact_shape_indx])
 
-        if isinstance(contact_shape_indx, tuple):
-            contact_shape_name = contact_shape_indx[1]
-        else:
-            contact_shape_name = contact_shape_indx
+                if isinstance(contact_shape_indx, tuple):
+                    contact_shape_name = contact_shape_indx[1]
+                else:
+                    contact_shape_name = contact_shape_indx
 
-        if "scale" in self.io.shapes()[contact_shape_name].attrs:
-            scale = self.io.shapes()[contact_shape_name].attrs["scale"]
-            scale_transform = vtk.vtkTransform()
-            scale_transform.Scale(scale, scale, scale)
-            scale_transform.SetInput(transform)
-            transformer.SetTransform(scale_transform)
-            if not (self.opts.global_filter or self.opts.export):
-                actor.SetUserTransform(scale_transform)
-                if self.opts.with_edges:
-                    actor_edge.SetUserTransform(scale_transform)
-        else:
-            transformer.SetTransform(transform)
-            if not (self.opts.global_filter or self.opts.export):
-                actor.SetUserTransform(transform)
-                if self.opts.with_edges:
-                    actor_edge.SetUserTransform(transform)
+                if "scale" in self.io.shapes()[contact_shape_name].attrs:
+                    scale = self.io.shapes()[contact_shape_name].attrs["scale"]
+                    scale_transform = vtk.vtkTransform()
+                    scale_transform.Scale(scale, scale, scale)
+                    scale_transform.SetInput(transform)
+                    transformer.SetTransform(scale_transform)
 
-        self.transformers[contact_shape_indx] = transformer
+                    actor.SetUserTransform(scale_transform)
+                    if self.opts.with_edges:
+                        actor_edge.SetUserTransform(scale_transform)
+                else:
+                    transformer.SetTransform(transform)
+                    actor.SetUserTransform(transform)
+                    if self.opts.with_edges:
+                        actor_edge.SetUserTransform(transform)
 
-        self.transforms[instid].append(transform)
+                self.transformers[contact_shape_indx] = transformer
 
-        if "center_of_mass" in instance.attrs:
-            center_of_mass = instance.attrs["center_of_mass"].astype(float)
-        else:
-            center_of_mass = [0.0, 0.0, 0.0]
+                self.transforms[instid].append(transform)
 
-        offset_orientation = contactor.attrs["orientation"].astype(float)
+                if "center_of_mass" in instance.attrs:
+                    center_of_mass = instance.attrs["center_of_mass"].astype(float)
+                else:
+                    center_of_mass = [0.0, 0.0, 0.0]
 
-        # for disk, we change the offset since cylinder source are directed
-        #  along the y axis by default
-        # since the disk shapemis invariant with respect to the rotation w.r.t to z-axis
-        # we propose to erase it.
-        try:
-            if self.io.shapes()[contact_shape_name].attrs["primitive"] == "Disk":
-                offset_orientation = [math.cos(pi / 4.0), math.sin(pi / 4.0), 0.0, 0.0]
-        except KeyError:
-            pass
-        self.offsets[instid].append(
-            (
-                numpy.subtract(
-                    contactor.attrs["translation"].astype(float), center_of_mass
-                ),
-                offset_orientation,
-            )
-        )
+                offset_orientation = contactor.attrs["orientation"].astype(float)
 
-        cc = CellConnector(
-            instid,
-            data_names=[
-                "instance",
-                "translation",
-                "velocity(linear)",
-                "velocity(angular)",
-                "kinetic_energy",
-                "displacement",
-            ],
-            data_sizes=[1, 3, 3, 3, 1, 3],
-        )
+                # for disk, we change the offset since cylinder source are directed
+                #  along the y axis by default
+                # since the disk shapemis invariant with respect to the rotation w.r.t to z-axis
+                # we propose to erase it.
+                try:
+                    if self.io.shapes()[contact_shape_name].attrs["primitive"] == "Disk":
+                        offset_orientation = [math.cos(pi / 4.0), math.sin(pi / 4.0), 0.0, 0.0]
+                except KeyError:
+                    pass
+                self.offsets[instid].append(
+                    (numpy.subtract(
+                        contactor.attrs["translation"].astype(float), center_of_mass),
+                     offset_orientation,
+                     )
+                )
 
-        if self.cell_connectors.get(instid, None) is None:
-            self.cell_connectors[instid] = [cc]
-        else:
-            self.cell_connectors[instid].append(cc)
+                cc = CellConnector(
+                    instid,
+                    data_names=[
+                        "instance",
+                        "translation",
+                        "velocity(linear)",
+                        "velocity(angular)",
+                        "kinetic_energy",
+                        "displacement",
+                    ],
+                    data_sizes=[1, 3, 3, 3, 1, 3],
+                )
 
-        cc.SetInputConnection(transformer.GetOutputPort())
+                if self.cell_connectors.get(instid, None) is None:
+                    self.cell_connectors[instid] = [cc]
+                else:
+                    self.cell_connectors[instid].append(cc)
 
-        self.objects_collector.AddInputConnection(cc.GetOutputPort())
-        cc.Update()
+                cc.SetInputConnection(transformer.GetOutputPort())
+
+                self.objects_collector.AddInputConnection(cc.GetOutputPort())
+                cc.Update()
 
     def init_instance(self, instance_name):
         self.print_verbose_level(2, "init_instance", instance_name)
@@ -3196,6 +3170,32 @@ class VView(object):
             self.renderer_window = vtk.vtkRenderWindow()
             self.interactor_renderer = vtk.vtkRenderWindowInteractor()
 
+            if self.opts.view_as_glyphs:
+                self.polydata = vtk.vtkPolyData()
+                self.polydata.SetPoints(self.io_reader.points)
+#                self.polydata.GetPointData().SetScalars(self.io_reader.vtk_radii_data)
+                self.obj_glyph = vtk.vtkGlyph2D()
+
+                self.disk_source = vtk.vtkDiskSource()
+                self.disk_source.SetInnerRadius(0)
+                self.disk_source.SetOuterRadius(1)
+                self.disk_source.SetRadialResolution(20)
+                self.disk_source.SetCircumferentialResolution(20)
+
+                self.glyph_filter = vtk.vtkGlyph2D()
+                self.glyph_filter.SetInputData(self.polydata)
+                self.glyph_filter.SetSourceConnection(self.disk_source.GetOutputPort())
+                self.glyph_filter.SetScaleModeToScaleByScalar()
+                self.glyph_filter.SetScaleFactor(1.0)
+                self.glyph_filter.Update()
+
+                self.glyph_mapper = vtk.vtkPolyDataMapper()
+                self.glyph_mapper.SetInputConnection(self.glyph_filter.GetOutputPort())
+                self.glyph_actor = vtk.vtkActor()
+                self.glyph_actor.SetMapper(self.glyph_mapper)
+
+                self.renderer.AddActor(self.glyph_actor)
+
             self.init_shapes()
             self.init_instances()
 
@@ -3214,7 +3214,8 @@ class VView(object):
                     self.init_cf_sources(mu, transform)
 
             if not self.opts.export:
-                if not self.opts.cf_disable and not self.opts.global_filter:
+                if (not self.opts.cf_disable and not self.opts.global_filter
+                    and not self.opts.view_as_glyphs):
                     for mu in self.io_reader._mu_coefs:
                         self.renderer.AddActor(self.gactor[mu])
                         self.renderer.AddActor(self.cactor[mu])
@@ -3223,7 +3224,7 @@ class VView(object):
                         self.renderer.AddActor(self.sactora[mu])
                         self.renderer.AddActor(self.sactorb[mu])
 
-                if self.opts.global_filter:
+                if self.opts.global_filter and not self.opts.view_as_glyphs:
                     self.renderer.AddActor(self.big_actor)
 
                 self.renderer.ResetCamera()

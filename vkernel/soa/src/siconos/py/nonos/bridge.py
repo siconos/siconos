@@ -416,6 +416,10 @@ class MechanicsIO(Stored):
     def setSimulation(self, simul):
         self._simulation = simul
 
+    def radii(self, nsds):
+        return self.handle().radii(
+            self._simulation.handle().current_step())
+
     def positions(self, nsds):
         return self.handle().positions(
             self._simulation.handle().current_step())

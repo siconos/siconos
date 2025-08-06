@@ -93,6 +93,7 @@ struct moreau_jean_assembled : item<> {
     {
       algebra::resize(mass_matrix_assembled(), raw_ds_size, raw_ds_size);
       algebra::resize(h_matrix_assembled(), raw_inter_size, raw_ds_size);
+      algebra::resize(w_matrix_assembled(), raw_inter_size, raw_inter_size);
       algebra::resize(lambda_vector_assembled(), raw_inter_size);
       algebra::resize(velocity_vector_assembled(), raw_ds_size);
       algebra::resize(y_vector_assembled(), raw_inter_size);
@@ -103,9 +104,9 @@ struct moreau_jean_assembled : item<> {
 
     void compute_w_matrix(auto step)
     {
-      algebra::compute_kkt_matrix(h_matrix_assembled(),
-                                  mass_matrix_assembled(),
-                                  w_matrix_assembled());
+        algebra::compute_kkt_matrix(h_matrix_assembled(),
+                                    mass_matrix_assembled(),
+                                    w_matrix_assembled());
     }
 
     void compute_input()

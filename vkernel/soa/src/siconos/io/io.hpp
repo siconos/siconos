@@ -7,6 +7,7 @@
 #include "siconos/collision/diskfdisk_r.hpp"
 #include "siconos/collision/diskfsegment_r.hpp"
 #include "siconos/model/lagrangian_r.hpp"
+#include "siconos/storage/handle.hpp"
 #include "siconos/storage/pattern/base.hpp"
 #include "siconos/storage/pattern/pattern.hpp"
 #include "siconos/storage/some/some.hpp"
@@ -28,6 +29,8 @@ struct io : item<> {
 
   using attributes =
       gather<attribute<"osi", some::item_ref<osi>>,
+             attribute<"radii", some::unbounded_collection<some::vector<
+                                    some::scalar, some::indice_value<2>>>>,
              attribute<"pos_info", some::unbounded_collection<some::vector<
                                        some::scalar, some::indice_value<4>>>>,
              attribute<"vel_info", some::unbounded_collection<some::vector<
@@ -47,6 +50,29 @@ struct io : item<> {
     using default_interface<Handle>::self;
 
     decltype(auto) osi() { return storage::attr<"osi">(*self()); }
+
+    decltype(auto) radii(auto step)
+    {
+      auto& data = self()->data();
+      using env_t = decltype(self()->env());
+      //      using indice = typename env_t::indice;
+      using scalar = typename env_t::scalar;
+
+      auto& ids = storage::prop_values<system, "id">(data, step);
+      auto& shapes = storage::prop_values<system, "shape">(data, step);
+
+      attr<"radii">(*self()).clear();
+
+      for (auto [id, shape] : view::zip(ids, shapes)) {
+        attr<"radii">(*self()).push_back(
+            {(scalar)id, storage::handle(data, shape).radius()});
+      }
+
+      return algebra::matrix_view<algebra::unbounded_col_matrix<scalar, 2>>(
+          attr<"radii">(*self()).data()->data(),
+          attr<"radii">(*self()).size(),
+          attr<"radii">(*self()).data()->size());
+    }
 
     decltype(auto) positions(auto step)
     {
@@ -132,8 +158,8 @@ struct io : item<> {
         if (activation) {
           auto index_ds1 =
               prop<"index">(hds1); /* cf one_step_intergator.hpp,
-                                    * assemble_h_matrix_for_involved_ds => row
-                                    * of p0_vector_assembled */
+                                    * assemble_h_matrix_for_involved_ds =>
+                                    * row of p0_vector_assembled */
           auto index_ds2 = prop<"index">(hds2);
           auto p0 =
               algebra::get_vector(p0_v, index_ds1); /* in 2D, 2 components */
@@ -202,8 +228,9 @@ struct io : item<> {
                       cb = c2 - radius2 * cn;
                     },
                     [&](auto) {
-                      throw(std::runtime_error(
-                          "Error: not a disk-segment or disk-disk relation"));
+                      throw(
+                          std::runtime_error("Error: not a disk-segment or "
+                                             "disk-disk relation"));
                     }));
           };
 
@@ -303,6 +330,7 @@ struct io : item<> {
       using indice = typename env_t::indice;
 
       return collect(
+          method("radii", &interface<Handle>::radii<indice>),
           method("positions", &interface<Handle>::positions<indice>),
           method("velocities", &interface<Handle>::velocities<indice>),
           method("contact_points",

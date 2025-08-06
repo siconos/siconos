@@ -155,7 +155,16 @@ static auto constexpr attached_storage_name(Astor astor)
 template <typename Data, typename Attribute>
 static auto constexpr get_storage_type(Data&& data, Attribute)
 {
-  using env_t = typename get_info_t<decltype(data)>::env;
+  using val_store_t = std::decay_t<decltype(ground::get<Attribute>(data.store()))>;
+  using val_t = typename val_store_t::value_type::value_type;
+  return val_t{};
+}
+
+template <typename Data, typename Attribute>
+static auto constexpr convert_storage_type(Data&& data, Attribute)
+{
+  using env_t = typename get_info_t<Data>::env;
   return typename traits::config<env_t>::template convert<Attribute>::type{};
 }
+
 }  // namespace siconos::storage

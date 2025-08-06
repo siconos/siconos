@@ -186,6 +186,7 @@ class MechanicsHdf5(object):
 
         self._output_backup = False
         self._mode = mode
+        self._radii_data = None
         self._static_data = None
         self._velocities_data = None
         self._dynamic_data = None
@@ -247,6 +248,10 @@ class MechanicsHdf5(object):
             )
         except Exception as e:
             print("Warning -  group(self._data, boundary_conditions ) : ", e)
+
+        self._radii_data = data(
+            self._data, "radii", 2, use_compression=self._use_compression)
+
         self._static_data = data(
             self._data, "static", 9, use_compression=self._use_compression
         )
@@ -423,6 +428,13 @@ class MechanicsHdf5(object):
         Permanent interactions.
         """
         return self._permanent_interactions
+
+    def radii_data(self):
+        """
+        Radii of objects
+        """
+        return self._radii_data
+
 
     def static_data(self):
         """

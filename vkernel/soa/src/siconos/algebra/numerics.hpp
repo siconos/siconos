@@ -152,6 +152,29 @@ struct vec {
 // };
 
 template <typename T>
+diag_mat<T> mat_view(match::diag_mat auto& m, indice_t row_offset,
+                     indice_t col_offset)
+{
+  diag_mat<T> vm;
+  /* pointers copy */
+  vm._m = m._m;
+  vm._mt = m._mt;
+  vm._inversed = m._inversed;
+  vm._offsets[0] = row_offset;
+  vm._offsets[1] = col_offset;
+  vm._view = true;
+
+  return vm; /* RVO */
+}
+
+template <typename T>
+diag_mat<T> mat_view(T, match::diag_mat auto& m, indice_t row_offset,
+                     indice_t col_offset)
+{
+  return mat_view<T>(m, row_offset, col_offset);
+}
+
+template <typename T>
 mat<T> mat_view(match::any_mat auto& m, indice_t row_offset,
                 indice_t col_offset)
 {
@@ -347,7 +370,6 @@ decltype(auto) get_vector(const vec<T>& v, match::indice auto i)
 {
   return matrix_view<T>(v._v->matrix0 + i * v.vnrows + v._offset);
 }
-
 
 template <typename T>
 decltype(auto) get_vector(vec<T>&& v, match::indice auto i)

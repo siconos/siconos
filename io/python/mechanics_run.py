@@ -1741,6 +1741,19 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # print('current_line , self._static_data', current_line, self._static_data)
         # input()
 
+    def output_radii(self):
+        """
+        Outputs radii.
+        """
+
+        current_line = self._radii_data.shape[0]
+
+        radii = self.get_io_array(self._io.radii(self._nsds))
+
+        if radii is not None:
+            self._radii_data.resize(current_line + radii.shape[0], 0)
+            self._radii_data[current_line:, :] = radii
+
     def output_dynamic_objects(self, initial=False):
         """
         Outputs translations and orientations of dynamic objects.
@@ -2119,6 +2132,10 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         if self.config.backend != "vnative":
             self.log(self.output_solver_infos, with_timer)()
+
+
+        if (self.config.backend == "vnative"):
+            self.log(self.output_radii, with_timer)()
 
         self.log(self._out.flush)()
 
