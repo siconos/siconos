@@ -966,6 +966,47 @@ class IOReader(VTKPythonAlgorithmBase):
         self.time = 0
         self.timestep = 0
         self.points = vtk.vtkPoints()
+        self.glyph_mapper = None
+        self.polydata = vtk.vtkPolyData()
+        self.ctf = vtk.vtkColorTransferFunction()
+
+    def InitGlyphs(self):
+        self.polydata.SetPoints(self.points)
+        self.polydata.GetPointData().AddArray(
+            self.vtk_radii_data)
+        self.polydata.GetPointData().AddArray(
+            self.vtk_p0_norm_data)
+        self.polydata.GetPointData().SetActiveScalars("radii")
+
+        self.disk_source = vtk.vtkDiskSource()
+        self.disk_source.SetInnerRadius(0)
+        self.disk_source.SetOuterRadius(1)
+        self.disk_source.SetRadialResolution(20)
+        self.disk_source.SetCircumferentialResolution(20)
+
+        self.glyph_filter = vtk.vtkGlyph3D()
+        self.glyph_filter.SetInputData(self.polydata)
+        self.glyph_filter.SetSourceConnection(self.disk_source.GetOutputPort())
+        self.glyph_filter.SetScaleModeToScaleByScalar()
+        self.glyph_filter.SetScaleFactor(1.0)
+        self.glyph_filter.SetColorModeToColorByScalar()
+        self.glyph_filter.Update()
+
+        min_p0v = 0.0
+        max_p0v = 1.0
+
+        self.ctf.RemoveAllPoints()
+#        self.ctf.AddRGBPoint((min_p0v+max_p0v)/2, 1.0, 1.0, 1.0)
+
+        self.glyph_mapper = vtk.vtkPolyDataMapper()
+        self.glyph_mapper.SetInputConnection(self.glyph_filter.GetOutputPort())
+        self.glyph_mapper.SetScalarModeToUsePointFieldData()
+        self.glyph_mapper.SelectColorArray("p0_norm")
+        self.glyph_mapper.SetLookupTable(self.ctf)
+        self.glyph_mapper.SetScalarRange(min_p0v, max_p0v)
+
+        self.glyph_actor = vtk.vtkActor()
+        self.glyph_actor.SetMapper(self.glyph_mapper)
 
     def RequestInformation(self, request, inInfo, outInfo):
 
@@ -1032,16 +1073,65 @@ class IOReader(VTKPythonAlgorithmBase):
         vtk_velo_data = dsa.numpyTovtkDataArray(self.velo_data)
         vtk_velo_data.SetName("velo_data")
 
-        self.vtk_radii_data = dsa.numpyTovtkDataArray(self._radii_data)
-        self.vtk_radii_data.SetName("radii")
+        if self._radii_data is not None:
+            self.vtk_radii_data = dsa.numpyTovtkDataArray(
+                self._radii_data[self._id_t_m,1])
+            self.vtk_radii_data.SetName("radii")
 
-        vtk_points_data = dsa.numpyTovtkDataArray(self.pos_data[:, 2:5])
+        if self._p0s_data is not None:
 
-        self.points.SetData(vtk_points_data)
+            self.current_p0_norm = self.p0_norm[self._id_t_m]
+            self.vtk_p0_norm_data = dsa.numpyTovtkDataArray(
+                self.current_p0_norm)
+            self.vtk_p0_norm_data.SetName("p0_norm")
 
+        self.vtk_points_data = dsa.numpyTovtkDataArray(self.pos_data[:, 2:5])
+
+        self.points.SetData(self.vtk_points_data)
+        self.points.Modified()
+
+        self.polydata.SetPoints(self.points)
+
+        if self._radii_data is not None:
+            self.polydata.GetPointData().AddArray(
+                self.vtk_radii_data)
+            self.polydata.GetPointData().SetActiveScalars("radii")
+
+        if self._p0s_data is not None:
+            self.polydata.GetPointData().AddArray(
+                self.vtk_p0_norm_data)
+
+            min_p0v = numpy.min(self.current_p0_norm)
+            max_p0v = numpy.max(self.current_p0_norm)
+
+            print(f'min_p0v={min_p0v}')
+            print(f'max_p0v={max_p0v}')
+
+            self.ctf.RemoveAllPoints()
+
+            for t in numpy.flip(numpy.linspace(0,0.9,3)):
+                color = 1-t
+
+                print(f'setting color = {1-t} for {numpy.quantile(self.current_p0_norm, t)}')
+                self.ctf.AddRGBPoint(numpy.quantile(self.current_p0_norm, t),
+                                                    color, color, color)
+
+            #self.ctf.SetScaleToLog10()
+            self.ctf.Modified()
+
+        self.polydata.Modified()
+
+        if self.glyph_mapper is not None:
+            self.glyph_mapper.SetScalarRange(min_p0v, max_p0v)
+            self.glyph_filter.Update()
+            self.glyph_mapper.Update()
+
+        # useless if not used with GetOutputPort()
         output.GetPointData().AddArray(vtk_pos_data)
         output.GetPointData().AddArray(vtk_velo_data)
         output.GetPointData().AddArray(self.vtk_radii_data)
+        output.GetPointData().AddArray(self.vtk_p0_norm_data)
+        output.GetPointData().SetActiveScalars("radii")
 
         try:
             if self._with_contact_forces:
@@ -1187,6 +1277,16 @@ class IOReader(VTKPythonAlgorithmBase):
         self._io = io
 
         self._radii_data = self._io.radii_data()
+        self._p0s_data = self._io.p0s_data()
+
+        if self._p0s_data is not None:
+            self.p0_norm = numpy.sqrt(
+                self._p0s_data[:,1]*self._p0s_data[:,1]+
+                self._p0s_data[:,2]*self._p0s_data[:,2]+
+                self._p0s_data[:,3]*self._p0s_data[:,3])
+
+            self.global_min_p0v = numpy.min(self.p0_norm)
+            self.global_max_p0v = numpy.max(self.p0_norm)
 
         self._ispos_data = self._io.static_data()
         self._idpos_data = self._io.dynamic_data()
@@ -3171,30 +3271,8 @@ class VView(object):
             self.interactor_renderer = vtk.vtkRenderWindowInteractor()
 
             if self.opts.view_as_glyphs:
-                self.polydata = vtk.vtkPolyData()
-                self.polydata.SetPoints(self.io_reader.points)
-#                self.polydata.GetPointData().SetScalars(self.io_reader.vtk_radii_data)
-                self.obj_glyph = vtk.vtkGlyph2D()
-
-                self.disk_source = vtk.vtkDiskSource()
-                self.disk_source.SetInnerRadius(0)
-                self.disk_source.SetOuterRadius(1)
-                self.disk_source.SetRadialResolution(20)
-                self.disk_source.SetCircumferentialResolution(20)
-
-                self.glyph_filter = vtk.vtkGlyph2D()
-                self.glyph_filter.SetInputData(self.polydata)
-                self.glyph_filter.SetSourceConnection(self.disk_source.GetOutputPort())
-                self.glyph_filter.SetScaleModeToScaleByScalar()
-                self.glyph_filter.SetScaleFactor(1.0)
-                self.glyph_filter.Update()
-
-                self.glyph_mapper = vtk.vtkPolyDataMapper()
-                self.glyph_mapper.SetInputConnection(self.glyph_filter.GetOutputPort())
-                self.glyph_actor = vtk.vtkActor()
-                self.glyph_actor.SetMapper(self.glyph_mapper)
-
-                self.renderer.AddActor(self.glyph_actor)
+                self.io_reader.InitGlyphs()
+                self.renderer.AddActor(self.io_reader.glyph_actor)
 
             self.init_shapes()
             self.init_instances()

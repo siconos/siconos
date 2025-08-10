@@ -1754,6 +1754,20 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
             self._radii_data.resize(current_line + radii.shape[0], 0)
             self._radii_data[current_line:, :] = radii
 
+    def output_p0s(self):
+        """
+        Outputs p0 vectors
+        """
+
+        current_line = self._p0s_data.shape[0]
+
+        p0s = self.get_io_array(self._io.p0s(self._nsds))
+
+        if p0s is not None:
+            self._p0s_data.resize(current_line + p0s.shape[0], 0)
+            self._p0s_data[current_line:, :] = p0s
+
+
     def output_dynamic_objects(self, initial=False):
         """
         Outputs translations and orientations of dynamic objects.
@@ -2087,6 +2101,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         self.log(self.output_dynamic_objects, with_timer)()
 
         self.log(self.output_velocities, with_timer)()
+
+        self.log(self.output_p0s, with_timer)()
 
         if self._output_contact_forces:
             self.log(self.output_contact_forces, with_timer)()

@@ -206,8 +206,6 @@ struct one_step_integrator {
 
           resize(tmp_matrix, size1(h_mat), size0(h_mat));
           solvet(m_mat, h_mat, tmp_matrix);
-          resize(w_mat, size0(h_mat), size1(tmp_matrix));
-
           prod(h_mat, tmp_matrix, w_mat);
 
         }

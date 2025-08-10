@@ -27,18 +27,20 @@ struct io : item<> {
   using relations_t = typename interaction::relations;
   using contact_shapes = gather<ContactShapes...>;
 
-  using attributes =
-      gather<attribute<"osi", some::item_ref<osi>>,
-             attribute<"radii", some::unbounded_collection<some::vector<
-                                    some::scalar, some::indice_value<2>>>>,
-             attribute<"pos_info", some::unbounded_collection<some::vector<
-                                       some::scalar, some::indice_value<4>>>>,
-             attribute<"vel_info", some::unbounded_collection<some::vector<
-                                       some::scalar, some::indice_value<4>>>>,
-             attribute<"cp_info", some::unbounded_collection<some::vector<
-                                      some::scalar, some::indice_value<25>>>>,
-             attribute<"co_info", some::unbounded_collection<some::vector<
-                                      some::scalar, some::indice_value<4>>>>>;
+  using attributes = gather<
+      attribute<"osi", some::item_ref<osi>>,
+      attribute<"p0_info", some::unbounded_collection<some::vector<
+                               some::scalar, some::indice_value<4>>>>,
+      attribute<"radii_info", some::unbounded_collection<some::vector<
+                                  some::scalar, some::indice_value<2>>>>,
+      attribute<"pos_info", some::unbounded_collection<some::vector<
+                                some::scalar, some::indice_value<4>>>>,
+      attribute<"vel_info", some::unbounded_collection<some::vector<
+                                some::scalar, some::indice_value<4>>>>,
+      attribute<"cp_info", some::unbounded_collection<some::vector<
+                               some::scalar, some::indice_value<25>>>>,
+      attribute<"co_info", some::unbounded_collection<some::vector<
+                               some::scalar, some::indice_value<4>>>>>;
 
   using properties =
       // an attached global ident for contact shapes
@@ -51,27 +53,61 @@ struct io : item<> {
 
     decltype(auto) osi() { return storage::attr<"osi">(*self()); }
 
+    decltype(auto) p0s(auto step)
+    {
+      auto& data = self()->data();
+      using env_t = decltype(self()->env());
+      using scalar = typename env_t::scalar;
+
+      auto& ids = storage::prop_values<system, "id">(data, step);
+      auto& involveds = storage::prop_values<system, "involved">(data, step);
+      auto& indices = storage::prop_values<system, "index">(data, step);
+
+      /* /!\ first osi */
+      const auto& p0_v = self()->make_handle(osi()).template visit_element<0>(
+          [](auto elem) { return elem.p0_vector_assembled(); });
+
+      attr<"p0_info">(*self()).clear();
+
+      for (auto [id, involved, index] : view::zip(ids, involveds, indices)) {
+        if (involved) {
+          /* contact */
+          auto&& p0 = algebra::get_vector(p0_v, index);
+          attr<"p0_info">(*self()).push_back(
+              {(scalar)id, p0[0], p0[1], p0[2]});
+        }
+        else {
+          /* without contact */
+          attr<"p0_info">(*self()).push_back({(scalar)id, 0., 0., 0.});
+        }
+      }
+
+      return algebra::matrix_view<algebra::unbounded_col_matrix<scalar, 4>>(
+          attr<"p0_info">(*self()).data()->data(),
+          attr<"p0_info">(*self()).size(),
+          attr<"p0_info">(*self()).data()->size());
+    }
+
     decltype(auto) radii(auto step)
     {
       auto& data = self()->data();
       using env_t = decltype(self()->env());
-      //      using indice = typename env_t::indice;
       using scalar = typename env_t::scalar;
 
       auto& ids = storage::prop_values<system, "id">(data, step);
       auto& shapes = storage::prop_values<system, "shape">(data, step);
 
-      attr<"radii">(*self()).clear();
+      attr<"radii_info">(*self()).clear();
 
       for (auto [id, shape] : view::zip(ids, shapes)) {
-        attr<"radii">(*self()).push_back(
+        attr<"radii_info">(*self()).push_back(
             {(scalar)id, storage::handle(data, shape).radius()});
       }
 
       return algebra::matrix_view<algebra::unbounded_col_matrix<scalar, 2>>(
-          attr<"radii">(*self()).data()->data(),
-          attr<"radii">(*self()).size(),
-          attr<"radii">(*self()).data()->size());
+          attr<"radii_info">(*self()).data()->data(),
+          attr<"radii_info">(*self()).size(),
+          attr<"radii_info">(*self()).data()->size());
     }
 
     decltype(auto) positions(auto step)
@@ -157,7 +193,7 @@ struct io : item<> {
 
         if (activation) {
           auto index_ds1 =
-              prop<"index">(hds1); /* cf one_step_intergator.hpp,
+              prop<"index">(hds1); /* cf one_step_integrator.hpp,
                                     * assemble_h_matrix_for_involved_ds =>
                                     * row of p0_vector_assembled */
           auto index_ds2 = prop<"index">(hds2);
@@ -330,6 +366,7 @@ struct io : item<> {
       using indice = typename env_t::indice;
 
       return collect(
+          method("p0s", &interface<Handle>::p0s<indice>),
           method("radii", &interface<Handle>::radii<indice>),
           method("positions", &interface<Handle>::positions<indice>),
           method("velocities", &interface<Handle>::velocities<indice>),

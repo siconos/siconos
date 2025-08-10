@@ -187,6 +187,7 @@ class MechanicsHdf5(object):
         self._output_backup = False
         self._mode = mode
         self._radii_data = None
+        self._p0s_data = None
         self._static_data = None
         self._velocities_data = None
         self._dynamic_data = None
@@ -249,8 +250,19 @@ class MechanicsHdf5(object):
         except Exception as e:
             print("Warning -  group(self._data, boundary_conditions ) : ", e)
 
-        self._radii_data = data(
-            self._data, "radii", 2, use_compression=self._use_compression)
+        try:
+            self._radii_data = data(
+                self._data, "radii", 2, use_compression=self._use_compression)
+        except Exception as e:
+            print("Warning -  group(self._data, radii ) : ", e)
+
+
+        try:
+            self._p0s_data = data(
+                self._data, "p0s", 4, use_compression=self._use_compression)
+        except Exception as e:
+            print("Warning -  group(self._data, p0s ) : ", e)
+
 
         self._static_data = data(
             self._data, "static", 9, use_compression=self._use_compression
@@ -435,6 +447,11 @@ class MechanicsHdf5(object):
         """
         return self._radii_data
 
+    def p0s_data(self):
+        """
+        Vector p0 for each object
+        """
+        return self._p0s_data
 
     def static_data(self):
         """
