@@ -19,7 +19,7 @@ static auto move_back = [](const auto i, auto& a) constexpr {
   // else...
 };
 
-static auto remove = [](auto& data, auto& h) {
+static auto remove = [](auto& data, auto&& h) {
   using item_t = typename std::decay_t<decltype(h)>::type;
   using info_t = get_info_t<decltype(data)>;
   using all_keeps_t = decltype(all_properties_as<property::keep>(data));
@@ -30,8 +30,9 @@ static auto remove = [](auto& data, auto& h) {
       concat(attributes(item_t{}), attached_storages(h.item_type(), data)));
 
   // call handle delete function if present
-  if constexpr (has_del(h)) {
-    h.__del__();
+  auto h1 = h; // clang 19
+  if constexpr (has_del(h1)) {
+    h1.__del__();
   }
 
   if constexpr (ground::size(attrs) > ground::size_c<0>) {

@@ -11,7 +11,7 @@ timer_args=""
 python_version=`python3 -c 'import sys; print(".".join(map(str, sys.version_info[:2])))'`
 python_site_packages_path=`python3 -c 'import os; import sys; print(os.path.join(sys.prefix, "lib", "python" + sys.version[:4], "site-packages"))'`
 venv=${VRUN_VENV:-venv}
-VRUN_GUIX_CXX_TOOLCHAIN=${VRUN_GUIX_CXX_TOOLCHAIN:-clang-toolchain}
+VRUN_GUIX_CXX_TOOLCHAIN=${VRUN_GUIX_CXX_TOOLCHAIN:-clang-toolchain@19}
 case $VRUN_SETX in 1) set -x;; esac
 while [ $# -gt 0 ]; do
   case $1 in
@@ -62,6 +62,7 @@ while [ $# -gt 0 ]; do
  "cmake"
  "coreutils"
  "cppunit"
+ "cuda-toolkit"
  "eigen"
  "emacs-next"
  "findutils"
@@ -107,16 +108,49 @@ EOF
 
       cat>.siconos-vrun-channels.scm<<EOF
 (list (channel
+        (name 'guix-science-nonfree)
+        (url "https://codeberg.org/guix-science/guix-science-nonfree.git")
+        (branch "master")
+        (commit
+          "86f3bd89a211eddc4db273de8ce6cf3bbfccfba1")
+        (introduction
+          (make-channel-introduction
+            "58661b110325fd5d9b40e6f0177cc486a615817e"
+            (openpgp-fingerprint
+              "CA4F 8CF4 37D7 478F DA05  5FD4 4213 7701 1A37 8446"))))
+      (channel
         (name 'guix)
         (url "https://codeberg.org/guix/guix-mirror")
         (branch "master")
         (commit
-          "efac01f19b65d7d77a98bbfd57fe2073fb13064a")
+          "356cc64411f7fa2c2dbf35f72f8be4957f00dce0")
         (introduction
           (make-channel-introduction
             "9edb3f66fd807b096b48283debdcddccfea34bad"
             (openpgp-fingerprint
-              "BBB0 2DDF 2CEA F6A8 0D1D  E643 A2A0 6DF2 A33A 54FA")))))
+              "BBB0 2DDF 2CEA F6A8 0D1D  E643 A2A0 6DF2 A33A 54FA"))))
+      (channel
+        (name 'guix-science)
+        (url "https://codeberg.org/guix-science/guix-science.git")
+        (branch "master")
+        (commit
+          "cc75cd2beacfeadf5a0d1a89c3a13bf44abf796c")
+        (introduction
+          (make-channel-introduction
+            "b1fe5aaff3ab48e798a4cce02f0212bc91f423dc"
+            (openpgp-fingerprint
+              "CA4F 8CF4 37D7 478F DA05  5FD4 4213 7701 1A37 8446"))))
+      (channel
+        (name 'guix-past)
+        (url "https://codeberg.org/guix-science/guix-past.git")
+        (branch "master")
+        (commit
+          "a6fc9859837de4a3d8cc824845f8bd28f68c530f")
+        (introduction
+          (make-channel-introduction
+            "0c119db2ea86a389769f4d2b9c6f5c41c027e336"
+            (openpgp-fingerprint
+              "3CE4 6455 8A84 FDC6 9DB4  0CFB 090B 1199 3D9A EBB5")))))
 EOF
       # guix environment setup
       # export PATH=/var/guix/profiles/per-user/root/current-guix/bin:$PATH
@@ -124,8 +158,8 @@ EOF
       [ -f /applis/site/guix-start.sh ] && . /applis/site/guix-start.sh
       pwd=`pwd`
       rm -f $pwd/.siconos-guix-profile
-      #guix_isolation_args="--container -N --emulate-fhs --share=/tmp --share=/scratch --share=$HOME"
-      guix_isolation_args="--pure --preserve=OMP* --preserve=VRUN*"
+      guix_isolation_args="--container -N --emulate-fhs --share=/tmp --share=/scratch --share=$HOME"
+      #guix_isolation_args="--pure --preserve=OMP* --preserve=VRUN*"
       guix_cmd="guix time-machine -C ./.siconos-vrun-channels.scm --"
       # it seems that we need to pass explicitely the package for transformations
       exec $guix_cmd shell $guix_isolation_args \

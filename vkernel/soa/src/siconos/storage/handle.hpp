@@ -144,11 +144,11 @@ static auto handles =
 };
 
 // Check if a  __init__ member function is present.
-auto has_init =
+static constexpr auto has_init =
   ground::is_valid([](auto &&x) -> decltype(x.__init__()) {});
 
 // Check if a  __del__ member function is present.
-auto has_del =
+static constexpr auto has_del =
   ground::is_valid([](auto &&x) -> decltype(x.__del__()) {});
 
 template <typename B>

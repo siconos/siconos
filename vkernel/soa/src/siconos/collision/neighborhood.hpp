@@ -6,7 +6,7 @@
 
 #define USE_DOUBLE
 #ifdef WITH_GPU
-#include "cuNSearch/cuNSearch.h"
+#include "cuNSearch.h"
 namespace CompactNSearch = cuNSearch;
 #else
 #include "CompactNSearch/CompactNSearch.h"

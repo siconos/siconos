@@ -16,10 +16,10 @@ include(WindowsKernelSetup)
 include(ComponentSetup)
 create_siconos_component(${COMPONENT})
 
-
 set(SOA_CMAKE_SOURCE_DIR ${CMAKE_SOURCE_DIR}/vkernel/soa)
 
 set(CMAKE_CUDA_FLAGS "-ccbin=${CMAKE_CXX_COMPILER} -allow-unsupported-compiler")
+set(CUDA_STANDARD 17)
 
 #set(WITH_GPU 1)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -36,6 +36,8 @@ include_directories(${SOA_CMAKE_SOURCE_DIR}/src)
 
 if(WITH_GPU)
   include_directories(${SOA_CMAKE_SOURCE_DIR}/src/cuNSearch)
+  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/extern/cuNSearch/include)
+  include_directories(${CMAKE_CURRENT_BINARY_DIR}/extern/cuNSearch/cuNSearch)
 else()
   include_directories(${SOA_CMAKE_SOURCE_DIR}/src/CompactNSearch)
 endif()
