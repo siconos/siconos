@@ -82,7 +82,7 @@ struct neighborhood
       auto& data = self()->data();
       ground::for_each(points_t{}, [&data, &step]<typename Point>(Point) {
         for (auto point : storage::handles<Point>(data, step)) {
-          point.update();
+          point.update(step);
         }
       });
     }
@@ -102,7 +102,7 @@ struct neighborhood
       indice i = 0;
       ground::for_each(
           points_t{}, [&instance, &data, &i]<typename Point>(Point p) {
-            auto ps = instance->point_set(i++);
+            auto&& ps = instance->point_set(i++);
             // apply function only if some points exist
             if (ps.n_points() > 0) {
               storage::apply_fun(data, p, [&ps]<typename Array>(Array& a) {

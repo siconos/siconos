@@ -110,7 +110,7 @@ class SpaceFilter(Stored):
         self._interman.insert_nonsmooth_law(nslaw.handle(), gid1, gid2)
         self._handle.set_nslaw(self._interman.get_nonsmooth_law(gid1, gid2)) # one nslaw!!
 
-    def updateInteractions(self):
+    def updateInteractions(self, step):
         if not self._initialized:
             self._handle.make_points()
             self._ngbh.add_point_sets(0)
@@ -126,9 +126,13 @@ class SpaceFilter(Stored):
 
             self._initialized = True
 
-        self._ngbh.update(0)
+        if step <= 2:
+            self._ngbh.update(step)
+        else:
+            self._ngbh.update(step+1)
+
         self._ngbh.search()
-        self._handle.update_index_set0(0);
+        self._handle.update_index_set0(step);
         self._ngbh.sort()
 
     def removeStaticBody(self, body):
@@ -264,10 +268,9 @@ class Simulation(Stored):
         return self.handle().has_next_event()
 
     def updateInteractions(self):
-        self._interman.updateInteractions()
+        self._interman.updateInteractions(self.handle().current_step())
 
     def computeOneStep(self):
-        self._interman.updateInteractions()
         return self.handle().compute_one_step()
 
     def clearNSDSChangeLog(self):

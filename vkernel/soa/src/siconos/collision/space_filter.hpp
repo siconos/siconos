@@ -274,7 +274,7 @@ struct space_filter : item<> {
               // the system has just one point associated
               auto new_point = storage::add<Point>(data);
               new_point.item() = ds;
-              new_point.update();
+              new_point.update(0);
             }
           }
         }

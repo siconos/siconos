@@ -28,15 +28,15 @@ struct point : item<> {
     decltype(auto) coord() { return storage::attr<"coord">(*self()); };
     decltype(auto) item() { return storage::attr<"item">(*self()); };
 
-    void update()
+    void update(auto step)
     {
       auto& data = self()->data();
 
       if constexpr (std::derived_from<item_t, model::lagrangian_ds>) {
         // one body / one point
         auto hbody = storage::handle(data, item());
-        storage::attr<"coord">(*self())[0] = storage::attr<"q">(hbody)(0);
-        storage::attr<"coord">(*self())[1] = storage::attr<"q">(hbody)(1);
+        storage::attr<"coord">(*self())[0] = storage::attr<"q">(hbody, step)(0);
+        storage::attr<"coord">(*self())[1] = storage::attr<"q">(hbody, step)(1);
         storage::attr<"coord">(*self())[2] = 0.; /* 2D */
       }
     }
@@ -64,7 +64,7 @@ struct point<collision::shape::chained_segment> {
     decltype(auto) item() { return storage::attr<"item">(*self()); };
     decltype(auto) index() { return storage::attr<"index">(*self()); };
 
-    void update()
+    void update(auto step)
     {
       auto& data = self()->data();
 
@@ -72,9 +72,9 @@ struct point<collision::shape::chained_segment> {
       if constexpr (std::derived_from<item_t, model::lagrangian_ds>) {
         // one body / one point
         auto hbody = storage::handle(data, item());
-        storage::attr<"coord">(*self())[0] = storage::attr<"q">(hbody)(index);
+        storage::attr<"coord">(*self())[0] = storage::attr<"q">(hbody, step)(index);
         storage::attr<"coord">(*self())[1] =
-            storage::attr<"q">(hbody)(index + 1);
+          storage::attr<"q">(hbody, step)(index + 1);
         storage::attr<"coord">(*self())[2] = 0.; /* 2D */
       }
     }
