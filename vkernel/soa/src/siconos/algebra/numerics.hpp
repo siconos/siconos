@@ -65,12 +65,11 @@ struct mat : any_mat {
   NumericsMatrix* _m = nullptr;
   NumericsMatrix* _mt = nullptr;  // transposed is allocated with Numerics
 
-  bool _inversed = false;  // for diagonal format
-  bool _view = false;      // for destruction
+  bool _view = false;  // for destruction
 
   constexpr mat() {}
 
-  ~mat()
+  virtual ~mat()
   {
     if (_m) {
       if (_view) {
@@ -81,14 +80,8 @@ struct mat : any_mat {
       }
     }
     if (_mt) {
-      if (_view) {
-        _mt = nullptr;
-      }
-      else {
-        _mt = NM_free(_mt);
-      }
+      _mt = NM_free(_mt);
     }
-    _inversed = false;
     _view = false;
   }
 };
@@ -159,7 +152,6 @@ diag_mat<T> mat_view(match::diag_mat auto& m, indice_t row_offset,
   /* pointers copy */
   vm._m = m._m;
   vm._mt = m._mt;
-  vm._inversed = m._inversed;
   vm._offsets[0] = row_offset;
   vm._offsets[1] = col_offset;
   vm._view = true;
@@ -182,7 +174,6 @@ mat<T> mat_view(match::any_mat auto& m, indice_t row_offset,
   /* pointers copy */
   vm._m = m._m;
   vm._mt = m._mt;
-  vm._inversed = m._inversed;
   vm._offsets[0] = row_offset;
   vm._offsets[1] = col_offset;
   vm._view = true;
@@ -227,8 +218,6 @@ void resize(match::any_mat auto& m, match::indice auto nrows,
 {
   if (m._m) m._m = NM_free(m._m);
   if (m._mt) m._mt = NM_free(m._mt);
-
-  m._inversed = false;
 
   m._m = NM_create(NM_SPARSE, nrows * m.vnrows, ncols * m.vncols);
 
@@ -324,11 +313,11 @@ void set_value(match::vec auto&& m, match::indice auto i, const T& value)
 template <match::diagonal_matrix A>
 void inverse(diag_mat<A>& a)
 {
-  if (!a._inversed) {
+  if (!NM_internalData(a._m)->isInversed) {
     for (auto i = 0; i < NM_triplet(a._m)->nz; ++i)
       a._m->matrix2->triplet->x[i] = 1.0 / a._m->matrix2->triplet->x[i];
   }
-  a._inversed = true;
+  NM_internalData(a._m)->isInversed = true;
 }
 
 // b += a
@@ -388,14 +377,14 @@ decltype(auto) get_vector(vec<T>& v, match::indice auto i,
 // c <- a b
 // Matrix Matrix
 template <typename A, typename B>
-void prod(mat<A>& a, mat<B>& b, mat<prod_t<A, B>>& c)
+void prod(const mat<A>& a, const mat<B>& b, mat<prod_t<A, B>>& c)
 {
   NM_gemm(1, a._m, b._m, 1, c._m);
 }
 
 // Matrix Vector
 template <typename A, typename B>
-void prod(mat<A>& a, vec<B>& b, vec<prod_t<A, B>>& c)
+void prod(const mat<A>& a, const vec<B>& b, vec<prod_t<A, B>>&& c)
 {
   NM_gemv(1, a._m, b._v->matrix0, 1, c._v->matrix0);
 }
@@ -429,10 +418,16 @@ void solve(diag_mat<A>& a, vec<B>& b, vec<B>& c)
 template <match::any_matrix A, typename B>
 void solve(const mat<A>& a, const vec<B>& b, vec<B>& c)
 {
-  copy(b, c);
-  if (NM_gesv_expert(a._m, c._v->matrix0, 1) != 0) {
-    throw std::runtime_error(
-        "NumericsMatrix solve failed in NM_gesv_expert.");
+  if (!NM_internalData(a._m)->isInversed) {
+    copy(b, c);
+    if (NM_gesv_expert(a._m, c._v->matrix0, 1) != 0) {
+      throw std::runtime_error(
+          "NumericsMatrix solve failed in NM_gesv_expert.");
+    }
+  }
+  else {
+    // this case occurs if a solve has been done with a diagonal view.
+    prod(a, b, vec_view<prod_t<A, B>>(c, 0));
   }
 }
 
