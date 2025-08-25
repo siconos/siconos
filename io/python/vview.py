@@ -97,8 +97,12 @@ class VViewOptions(object):
         self.depth_peeling = True
         self.maximum_number_of_peels = 100
         self.occlusion_ratio = 0.1
+        self.offscreen = False
+        self.zoom = 1
+        self.record = False
         self.global_filter = False
         self.view_as_glyphs = False
+        self.glyphs_ratio = None
         self.initial_camera = [None] * 5
         self.visible_mode = "all"
         self.export = False
@@ -118,9 +122,13 @@ class VViewOptions(object):
         if not long:
             print(
                 """[--help] [--tmin=<float value>] [--tmax=<float value>]
-            [--cf-scale=<float value>] [--no-cf] [--imr] [--view-as-glyphs] [--global-filter]
+            [--cf-scale=<float value>] [--no-cf] [--imr]
+            [--view-as-glyphs] [--glyphs-ratio=<float value>] [--global-filter]
             [--no-depth-peeling] [--maximum-number-of-peels=<int value>]
             [--occlusion-ratio=<float value>]
+            [--offscreen]
+            [--record]
+            [--zoom]
             [--normalcone-ratio = <float value>]
             [--advance=<'fps' or float value>] [--fps=float value]
             [--camera=x,y,z] [--lookat=x,y,z] [--up=x,y,z]
@@ -162,6 +170,12 @@ class VViewOptions(object):
        maximum number of peels when depth peeling is on
      --occlusion-ratio= value
        occlusion-ratio when depth peeling is on
+     --offscreen
+       do not open a rendering window.
+     --record
+       record a movie.
+     --zoom = value
+       zoom with a factor = value.
      --normalcone-ratio = value  (default : 1.0 )
        introduce a ratio between the representation of the contact
        forces arrows the normal cone and the contact points. useful
@@ -217,9 +231,13 @@ class VViewOptions(object):
                     "imr",
                     "global-filter",
                     "view-as-glyphs",
+                    "glyphs-ratio=",
                     "no-depth-peeling",
                     "maximum-number-of-peels=",
                     "occlusion-ratio=",
+                    "offscreen",
+                    "zoom=",
+                    "record",
                     "cf-scale=",
                     "normalcone-ratio=",
                     "advance=",
@@ -277,11 +295,23 @@ class VViewOptions(object):
             elif o == "--occlusion-ratio":
                 self.occlusion_ratio = float(a)
 
+            elif o == "--offscreen":
+                self.offscreen = True
+
+            elif o == "--zoom":
+                self.zoom = float(a)
+
+            elif o == "--record":
+                self.record = True
+
             elif o == "--global-filter":
                 self.global_filter = True
 
             elif o == "--view-as-glyphs":
                 self.view_as_glyphs = True
+
+            elif o == "--glyphs-ratio":
+                self.glyphs_ratio = int(a)
 
             elif o == "--normalcone-ratio":
                 self.normalcone_ratio = float(a)
@@ -357,8 +387,11 @@ def display(self):
         depth_peeling : {self.depth_peeling}
         maximum_number_of_peels : {self.maximum_number_of_peels}
         occlusion_ratio : {self.occlusion_ratio}
+        offscreen : {self.offscreen}
+        zoom : {self.zoom}
         global_filter : {self.global_filter}
         view_as_glyphs : {self.view_as_glyphs}
+        glyphs_ratio : {self.glyphs_ratio}
         initial_camera : {self.initial_camera}
         visible_mode : {self.visible_mode}
         export : {self.export}
@@ -885,6 +918,7 @@ class InputObserver:
 
             # End video if done
             if self._time >= max(self._times):
+                print(f"stop video at {self._time} > {max(self._times)}")
                 self.toggle_recording(False)
 
 
@@ -956,7 +990,7 @@ def makeConvexSourceClass():
 # in vview and export from python members
 class IOReader(VTKPythonAlgorithmBase):
 
-    def __init__(self):
+    def __init__(self, opts):
         VTKPythonAlgorithmBase.__init__(
             self, nInputPorts=0, nOutputPorts=1, outputType="vtkPolyData"
         )
@@ -968,7 +1002,9 @@ class IOReader(VTKPythonAlgorithmBase):
         self.points = vtk.vtkPoints()
         self.glyph_mapper = None
         self.polydata = vtk.vtkPolyData()
+        self.stream_actor = None
         self.ctf = vtk.vtkColorTransferFunction()
+        self.options = opts
 
     def InitGlyphs(self):
         self.polydata.SetPoints(self.points)
@@ -976,6 +1012,7 @@ class IOReader(VTKPythonAlgorithmBase):
             self.vtk_radii_data)
         self.polydata.GetPointData().AddArray(
             self.vtk_p0_norm_data)
+
         self.polydata.GetPointData().SetActiveScalars("radii")
 
         self.disk_source = vtk.vtkDiskSource()
@@ -984,8 +1021,22 @@ class IOReader(VTKPythonAlgorithmBase):
         self.disk_source.SetRadialResolution(20)
         self.disk_source.SetCircumferentialResolution(20)
 
+        if self.options.glyphs_ratio is not None:
+            self.mask_points = vtk.vtkMaskPoints()
+            self.mask_points.SetInputData(self.polydata)
+            self.mask_points.SetOnRatio(self.options.glyphs_ratio)  # Keep 1 out of 10 points
+            self.mask_points.SetRandomMode(1)  # Random sampling
+            self.mask_points.Update()
+
+
         self.glyph_filter = vtk.vtkGlyph3D()
-        self.glyph_filter.SetInputData(self.polydata)
+
+        if self.options.glyphs_ratio:
+            # mask some points
+            self.glyph_filter.SetInputData(self.mask_points.GetOutput())
+        else:
+            # all points are visualizated
+            self.glyph_filter.SetInputData(self.polydata)
         self.glyph_filter.SetSourceConnection(self.disk_source.GetOutputPort())
         self.glyph_filter.SetScaleModeToScaleByScalar()
         self.glyph_filter.SetScaleFactor(1.0)
@@ -996,7 +1047,6 @@ class IOReader(VTKPythonAlgorithmBase):
         max_p0v = 1.0
 
         self.ctf.RemoveAllPoints()
-#        self.ctf.AddRGBPoint((min_p0v+max_p0v)/2, 1.0, 1.0, 1.0)
 
         self.glyph_mapper = vtk.vtkPolyDataMapper()
         self.glyph_mapper.SetInputConnection(self.glyph_filter.GetOutputPort())
@@ -1007,6 +1057,38 @@ class IOReader(VTKPythonAlgorithmBase):
 
         self.glyph_actor = vtk.vtkActor()
         self.glyph_actor.SetMapper(self.glyph_mapper)
+
+        self.polydata.GetPointData().AddArray(self.vtk_velo_data)
+
+        # Create a vtkPointSource or use seed points as starting points
+        self.seeds = vtk.vtkPointSource()
+        self.seeds.SetNumberOfPoints(100)  # e.g., 100 seed points
+        # Place seed points as needed or set seed points elsewhere
+
+        self.stream_tracer = vtk.vtkStreamTracer()
+        self.stream_tracer.SetInputData(self.polydata)
+        self.stream_tracer.SetSourceConnection(self.seeds.GetOutputPort())
+        self.stream_tracer.SetMaximumPropagation(10)
+        self.stream_tracer.SetInitialIntegrationStep(.1)
+        self.stream_tracer.SetIntegrationDirectionToForward()
+        self.stream_tracer.SetIntegratorTypeToRungeKutta4()
+
+        # self.stream_tracer.SetInputArrayToProcess(
+        #     0,  # index, usually 0
+        #     0,  # process as point data
+        #     0,  # attribute component index
+        #     vtk.vtkDataObject.FIELD_ASSOCIATION_POINTS,  # attribute type
+        #     "velo_data"  # array name
+        # )
+        self.stream_tracer.Update()
+
+        # Map to actor
+        self.stream_mapper = vtk.vtkPolyDataMapper()
+        self.stream_mapper.SetInputConnection(self.stream_tracer.GetOutputPort())
+
+        self.stream_actor = vtk.vtkActor()
+        self.stream_actor.SetMapper(self.stream_mapper)
+
 
     def RequestInformation(self, request, inInfo, outInfo):
 
@@ -1070,8 +1152,8 @@ class IOReader(VTKPythonAlgorithmBase):
         vtk_pos_data = dsa.numpyTovtkDataArray(self.pos_data)
         vtk_pos_data.SetName("pos_data")
 
-        vtk_velo_data = dsa.numpyTovtkDataArray(self.velo_data)
-        vtk_velo_data.SetName("velo_data")
+        self.vtk_velo_data = dsa.numpyTovtkDataArray(self.velo_data[:,0:2])
+        self.vtk_velo_data.SetName("velocity")
 
         if self._radii_data is not None:
             self.vtk_radii_data = dsa.numpyTovtkDataArray(
@@ -1104,31 +1186,29 @@ class IOReader(VTKPythonAlgorithmBase):
             min_p0v = numpy.min(self.current_p0_norm)
             max_p0v = numpy.max(self.current_p0_norm)
 
-            print(f'min_p0v={min_p0v}')
-            print(f'max_p0v={max_p0v}')
-
             self.ctf.RemoveAllPoints()
 
             for t in numpy.flip(numpy.linspace(0,0.9,3)):
                 color = 1-t
 
-                print(f'setting color = {1-t} for {numpy.quantile(self.current_p0_norm, t)}')
                 self.ctf.AddRGBPoint(numpy.quantile(self.current_p0_norm, t),
-                                                    color, color, color)
+                                     color, color, color)
 
-            #self.ctf.SetScaleToLog10()
             self.ctf.Modified()
 
         self.polydata.Modified()
 
         if self.glyph_mapper is not None:
             self.glyph_mapper.SetScalarRange(min_p0v, max_p0v)
+            if self.options.glyphs_ratio is not None:
+                self.mask_points.Update()
             self.glyph_filter.Update()
             self.glyph_mapper.Update()
+            self.stream_tracer.Update()
 
         # useless if not used with GetOutputPort()
         output.GetPointData().AddArray(vtk_pos_data)
-        output.GetPointData().AddArray(vtk_velo_data)
+        output.GetPointData().AddArray(self.vtk_velo_data)
         output.GetPointData().AddArray(self.vtk_radii_data)
         output.GetPointData().AddArray(self.vtk_p0_norm_data)
         output.GetPointData().SetActiveScalars("radii")
@@ -1195,15 +1275,16 @@ class IOReader(VTKPythonAlgorithmBase):
                             self.ids_at_time[mu] = None
 
             else:
-                try:
-                    for mu in self._mu_coefs:
-                        self.cpa_at_time[mu] = [[nan, nan, nan]]
-                        self.cpb_at_time[mu] = [[nan, nan, nan]]
-                        self.cn_at_time[mu] = [[nan, nan, nan]]
-                        self.cf_at_time[mu] = [[nan, nan, nan]]
-                        self.ids_at_time[mu] = None
-                except KeyError:
-                    pass
+                if hasattr(self, "_mu_coefs"):
+                    try:
+                        for mu in self._mu_coefs:
+                            self.cpa_at_time[mu] = [[nan, nan, nan]]
+                            self.cpb_at_time[mu] = [[nan, nan, nan]]
+                            self.cn_at_time[mu] = [[nan, nan, nan]]
+                            self.cf_at_time[mu] = [[nan, nan, nan]]
+                            self.ids_at_time[mu] = None
+                    except KeyError:
+                        pass
 
             if self._with_contact_forces:
                 for mu in self._mu_coefs:
@@ -1458,7 +1539,7 @@ class VView(object):
 
         self.offsets = dict()
 
-        self.io_reader = IOReader()
+        self.io_reader = IOReader(self.opts)
 
         self.io_reader.SetIO(io=self.io)
 
@@ -2698,6 +2779,12 @@ class VView(object):
                 self.opts.initial_camera[3]
             )
 
+        self.renderer.GetActiveCamera().Zoom(self.opts.zoom)
+        self.renderer.ResetCameraClippingRange()
+
+        if self.opts.offscreen:
+            self.renderer_window.SetOffScreenRendering(1)
+
         self.image_maker = vtk.vtkWindowToImageFilter()
         self.image_maker.SetInput(self.renderer_window)
 
@@ -2854,6 +2941,8 @@ class VView(object):
             self.input_observer = InputObserver(self)
 
         self.input_observer.set_opacity()
+
+        self.input_observer.toggle_recording(self.opts.record)
 
         self.interactor_renderer.AddObserver("KeyPressEvent", self.input_observer.key)
 
@@ -3273,6 +3362,9 @@ class VView(object):
             if self.opts.view_as_glyphs:
                 self.io_reader.InitGlyphs()
                 self.renderer.AddActor(self.io_reader.glyph_actor)
+
+            if self.io_reader.stream_actor is not None:
+                self.renderer.AddActor(self.io_reader.stream_actor)
 
             self.init_shapes()
             self.init_instances()
