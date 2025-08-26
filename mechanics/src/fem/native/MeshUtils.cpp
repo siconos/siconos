@@ -340,6 +340,28 @@ std::string siconos::mechanics::fem::prepareWriteTensorforPython(std::string bas
   fclose(foutput);
   return filename;
 }
+
+std::string siconos::mechanics::fem::prepareWriteBeamTensorforPython(std::string basename, std::string tensorName) {
+  std::string filename = basename + "_tensor.py";
+
+  std::cout << "Output Tensor for python post-processing in " << filename << std::endl;
+
+  FILE *foutput = fopen(filename.c_str(), "w");
+  fprintf(foutput, "import numpy as np\n");
+
+  std::string strTC = tensorName + "_tension=[]\n";
+  fprintf(foutput, strTC.c_str());
+
+  std::string strBending1 = tensorName + "_bending1=[]\n";
+  fprintf(foutput, strBending1.c_str());
+
+  std::string strBending2 = tensorName + "_bending2=[]\n";
+  fprintf(foutput, strBending2.c_str());
+
+  fclose(foutput);
+  return filename;
+}
+
 void siconos::mechanics::fem::writeDisplacementforPython(
     std::shared_ptr<Mesh> mesh, std::shared_ptr<FiniteElementModel> femodel,
     std::shared_ptr<siconos::algebra::SiconosVector> x, std::string filename) {

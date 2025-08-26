@@ -648,6 +648,8 @@ void siconos::simulation::Simulation::computeResidu() {
 }
 
 void siconos::simulation::Simulation::updateAllInput() {
+  std::cout << "In updateAllInput" << std::endl;
+
   DEBUG_BEGIN("Simulation::updateAllInput()\n");
   // nonSmoothDynamicalSystem()->resetNonSmoothPart();
 
@@ -658,6 +660,7 @@ void siconos::simulation::Simulation::updateAllInput() {
     for (auto osi : *_allOSI) osi->updateInput(nextTime());
     //_nsds->updateInput(nextTime(),levelInput);
   }
+  std::cout << "Out updateAllInput" << std::endl;
   DEBUG_END("siconos::simulation::Simulation::updateAllInput()\n");
 }
 

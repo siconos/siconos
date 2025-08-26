@@ -399,7 +399,7 @@ int siconos::nonsmooth_formulations::GlobalFrictionContact::compute(double time)
 
   if (!cont) return info;
   updateMu();
-
+  std::cout << "mu updated!" <<std::endl;
   // --- Call Numerics solver ---
   // if(_sizeGlobalOutput != 0)
   {
@@ -421,15 +421,19 @@ int siconos::nonsmooth_formulations::GlobalFrictionContact::compute(double time)
 
 int siconos::nonsmooth_formulations::GlobalFrictionContact::solve(
     std::shared_ptr<GlobalFrictionContactProblem> problem) {
+  std::cout << "solve start... " << std::endl;
   if (!problem) {
     problem = globalFrictionContactProblem();
   }
+  std::cout << "globalFrictionContactProblem created " << std::endl;
+  std::cout << problem->H->storageType << std::endl;
+  std::cout << "H size: " << problem->H->size0 << " " << problem->H->size1 << std::endl;
 
   auto info = (*_gfc_driver)(&*problem, _z->getArray(), _w->getArray(),
                              _globalVelocities->getArray(), &*_numerics_solver_options);
-  // std::cout << "display of z and w" << std::endl;
-  // _z->display();
-  // _w->display();
+  std::cout << "display of z and w" << std::endl;
+  _z->display();
+  _w->display();
 //  getchar();
   return info;
 }

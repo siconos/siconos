@@ -33,7 +33,7 @@
 #pragma clang diagnostic ignored "-Wformat-nonliteral"
 #endif
 
-tlsvar int verbose = 0;
+tlsvar int verbose = 1;
 tlsvar FILE* logger_f = NULL;
 tlsvar void* numerics_logger = NULL;
 tlsvar enum numerics_loggers numerics_logger_type = NUMERICS_LOG_TO_SCREEN;

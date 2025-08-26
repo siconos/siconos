@@ -176,6 +176,7 @@ void siconos::integrators::MoreauJeanGOSI::initializeWorkVectorsForInteraction(
 }
 
 double siconos::integrators::MoreauJeanGOSI::computeResidu() {
+  std::cout << "In compute Residu GOSI" << std::endl;
   DEBUG_PRINT("\nsiconos::integrators::MoreauJeanGOSI::computeResidu(), start\n");
   // This function is used to compute the residu for each "MoreauJeanGOSI-discretized"
   // dynamical system. It then computes the norm of each of them and finally return the
@@ -370,7 +371,8 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
             coeff = _theta;
             siconos::algebra::scal(coeff, *(solid.fExt()), *fextTheta,
                                    false);  // fext_k+theta += _theta * fext(ti+1)
-//            double conditionningMagicCoeff = 1/solid.S()->normInf();
+           // double conditionningMagicCoeff = (1/solid.S()->normInf())/100000;
+            // std::cout << "conditionningMagicCoeff:" << conditionningMagicCoeff << std::endl;
             double conditionningMagicCoeff = 1.0;
 
 
@@ -564,6 +566,7 @@ double siconos::integrators::MoreauJeanGOSI::computeResidu() {
 
     if (normResidu > maxResidu) maxResidu = normResidu;
   }
+  std::cout << "End compute Residu GOSI" << std::endl;
   return maxResidu;
 }
 
@@ -571,7 +574,7 @@ void siconos::integrators::MoreauJeanGOSI::applyBoundaryConditions(
     siconos::modeling::SecondOrderDS &d,
     siconos::algebra::SiconosVector &residu,
     siconos::graphs::DynamicalSystemsGraph::VIterator dsi, double t) {
-
+std::cout << "In applyBoundaryConditions  GOSI" << std::endl;
   DEBUG_BEGIN(
       "siconos::integrators::MoreauJeanOSI::applyBoundaryConditions(...)\n");
   if (d.boundaryConditions()) {
@@ -603,6 +606,7 @@ void siconos::integrators::MoreauJeanGOSI::applyBoundaryConditions(
   }
   DEBUG_END(
       "siconos::integrators::MoreauJeanOSI::applyBoundaryConditions(...)\n");
+  std::cout << "End applyBoundaryConditions  GOSI" << std::endl;
 }
 
 void siconos::integrators::MoreauJeanGOSI::computeFreeState() {
@@ -630,6 +634,7 @@ void siconos::integrators::MoreauJeanGOSI::integrate(double& tinit, double& tend
                                                      int& notUsed) {}
 
 void siconos::integrators::MoreauJeanGOSI::updateState(const unsigned int) {
+  std::cout << "In updateState  GOSI" << std::endl;
   DEBUG_BEGIN("siconos::integrators::MoreauJeanGOSI::updateState(const unsigned int )\n");
 
   auto RelativeTol = _simulation->relativeConvergenceTol();
@@ -696,6 +701,7 @@ void siconos::integrators::MoreauJeanGOSI::updateState(const unsigned int) {
           "kind of ds.")
   }
   DEBUG_END("siconos::integrators::MoreauJeanGOSI::updateState(const unsigned int )\n");
+  std::cout << "End updateState  GOSI" << std::endl;
 }
 
 void siconos::integrators::MoreauJeanGOSI::display() const {

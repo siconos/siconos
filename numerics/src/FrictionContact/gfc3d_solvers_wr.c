@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 #include <assert.h>  // for assert
+
 #include <stdio.h>   // for printf, fclose, fopen
 #include <stdlib.h>  // for malloc, free, exit
 
@@ -31,21 +32,25 @@
 #include "gfc3d_compute_error.h"
 #include "numerics_verbose.h"  // for verbose, numerics_pr...
 
-/* #define DEBUG_MESSAGES */
-/* #define DEBUG_STDOUT */
+ #define DEBUG_MESSAGES
+ #define DEBUG_STDOUT
 #include "siconos_debug.h"  // for DEBUG_EXPR, DEBUG_P...
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
 void gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double* reaction, double* velocity,
                    double* globalVelocity, int* info, SolverOptions* options) {
-  /* verbose=1; */
+   verbose=1;
+
+  fopen("plopReformulation.txt", "w");
+
   DEBUG_BEGIN("gfc3d_nsgs_wr\n");
   NumericsMatrix* H = problem->H;
   // We compute only if the local problem has contacts
   DEBUG_PRINTF("Number of contacts = %i \n", H->size1 / 3);
   if (H->size1 > 0) {
     // Reformulation
+    numerics_warning("fc3d_nsgs", "Reformulation info a reduced problem onto local variables ...\n");
     numerics_printf_verbose(1,
                             "Reformulation info a reduced problem onto local variables ...\n");
     FrictionContactProblem* localproblem =

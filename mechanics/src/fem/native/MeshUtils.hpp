@@ -47,6 +47,7 @@ void writeMeshforPython(std::shared_ptr<Mesh> mesh);
 
 std::string prepareWriteDisplacementforPython(std::string basename);
 std::string prepareWriteTensorforPython(std::string basename, std::string tensorName);
+std::string prepareWriteBeamTensorforPython(std::string basename, std::string tensorName);
 void writeDisplacementforPython(std::shared_ptr<Mesh> mesh,
                                 std::shared_ptr<FiniteElementModel> femodel,
                                 std::shared_ptr<siconos::algebra::SiconosVector> x,

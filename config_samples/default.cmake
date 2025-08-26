@@ -25,5 +25,7 @@ option(WITH_UMFPACK "Compilation with the UMFPACK solver" OFF)
 option(WITH_SUPERLU "Compilation with the SuperLU solver" OFF)
 option(WITH_SUPERLU_MT "Compilation with the SuperLU solver, multithreaded version" OFF)
 option(WITH_FCLIB "link with fclib when this mode is enable" OFF)
+option(WITH_SYSTEM_INFO "Verbose mode to get some system/arch details. Default = off." ON)
+
 
 

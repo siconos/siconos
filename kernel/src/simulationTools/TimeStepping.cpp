@@ -547,21 +547,24 @@ void siconos::simulation::TimeStepping::newtonSolve(double criterion,
     computeFreeState();
 
     bool hasNSProblems = (!_allNSProblems->empty()) ? true : false;
-
+std::cout << "About to computeOneStepNSProblem" << std::endl;
     if (hasNSProblems)
       info = computeOneStepNSProblem(SICONOS_OSNSP_TS_VELOCITY);
+    std::cout << "Done computeOneStepNSProblem" << std::endl;
 
     // Check output from solver (convergence or not ...)
     if (!checkSolverOutput)
       DefaultCheckSolverOutput(info);
     else
       checkSolverOutput(info, this);
+    std::cout << "About to update inputs outputs, states" << std::endl;
 
     if (!_skip_last_updateInput)  // warning:  _skip_last_updateInput=True
                                   // should be only for globalOSI
       updateAllInput();
 
     updateState();
+    std::cout << "Done update inputs outputs" << std::endl;
 
     if (!_skip_last_updateOutput) updateOutput();
 

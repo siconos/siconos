@@ -511,7 +511,7 @@ static int determine_convergence_with_full_final(FrictionContactProblem *problem
 
 void fc3d_nsgs(FrictionContactProblem *problem, double *reaction, double *velocity, int *info,
                SolverOptions *options) {
-  /* verbose=1; */
+   verbose=1;
   /* int and double parameters */
   int *iparam = options->iparam;
   double *dparam = options->dparam;
@@ -649,7 +649,7 @@ void fc3d_nsgs(FrictionContactProblem *problem, double *reaction, double *veloci
    * variations to have dedicated loops, but add more if there are
    * common cases to avoid checking booleans on every iteration. **/
   else {
-    /* verbose=1; */
+     verbose=1;
     while ((iter < itermax) && (hasNotConverged > 0)) {
       ++iter;
       double light_error_sum = 0.0;
