@@ -70,7 +70,7 @@ else()
 endif()
 
 
-set_target_properties(cuNSearch PROPERTIES CUDA_ARCHITECTURES "86")
+set_target_properties(cuNSearch PROPERTIES CUDA_ARCHITECTURES "${CUDA_ARCHITECTURES}")
 
 include(GenerateExportHeader)
 generate_export_header(cuNSearch
