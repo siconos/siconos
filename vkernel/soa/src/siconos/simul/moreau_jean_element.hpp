@@ -101,7 +101,6 @@ struct moreau_jean_element : item<> {
           self()->data(),
           some::matrix<some::scalar, nth_t<0, typename h_matrix1::sizes>,
                        nth_t<0, typename h_matrix1::sizes>>{});
-      ;
 
       return algebra::mat_view(w_matrix_storage,
                                assembled_osi().w_matrix_assembled(),
