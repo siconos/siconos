@@ -2102,7 +2102,8 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         self.log(self.output_velocities, with_timer)()
 
-        self.log(self.output_p0s, with_timer)()
+        if self.config.backend == "vnative":
+            self.log(self.output_p0s, with_timer)()
 
         if self._output_contact_forces:
             self.log(self.output_contact_forces, with_timer)()
