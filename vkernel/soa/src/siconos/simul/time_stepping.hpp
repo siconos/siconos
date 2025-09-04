@@ -129,9 +129,8 @@ struct time_stepping : item<> {
     void solve_nonsmooth_problem(auto step)
     {  // for a LCP:
        // M z = w + q
-       //  z _|_ w
+       // 0 <= z _|_ w >= 0
       auto osi = self()->one_step_integrator();
-
       //      resize(osi.lambda_vector_assembled(), ninter);
       //      resize(osi.ydot_vector_assembled(), ninter);
 
@@ -139,7 +138,8 @@ struct time_stepping : item<> {
           osi.w_matrix_assembled(),       // M
           osi.q_nsp_vector_assembled(),   // q
           osi.lambda_vector_assembled(),  // z
-          osi.ydot_vector_assembled());   // w
+          osi.ydot_vector_assembled(),    // w
+          osi.mu_vector_assembled());     // mu
     }
 
     bool has_next_event()

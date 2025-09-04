@@ -1,7 +1,7 @@
 #pragma once
 
-#include "siconos/simul/simul_head.hpp"
 #include "siconos/algebra/algebra.hpp"
+#include "siconos/simul/simul_head.hpp"
 
 namespace siconos::simul {
 
@@ -28,8 +28,10 @@ struct moreau_jean_assembled : item<> {
                 some::assembled_vector<some::vector<some::scalar, size_1_t>>>,
       attribute<"p0_vector_assembled",
                 some::assembled_vector<some::vector<some::scalar, size_1_t>>>,
-      attribute<"q_nsp_vector_assembled", some::assembled_vector<some::vector<
-                                              some::scalar, size_1_t>>>>;
+      attribute<"q_nsp_vector_assembled",
+                some::assembled_vector<some::vector<some::scalar, size_1_t>>>,
+      attribute<"mu_vector_assembled", some::assembled_vector<some::vector<
+                                           some::scalar, size_1_t>>>>;
 
   template <typename Handle>
   struct interface : default_interface<Handle> {
@@ -82,6 +84,11 @@ struct moreau_jean_assembled : item<> {
       return attr<"ydot_vector_assembled">(*self());
     }
 
+    decltype(auto) mu_vector_assembled()
+    {
+      return attr<"mu_vector_assembled">(*self());
+    }
+
     decltype(auto) theta() { return attr<"theta">(*self()); }
     decltype(auto) gamma() { return attr<"gamma">(*self()); }
     decltype(auto) constraint_activation_threshold()
@@ -89,7 +96,8 @@ struct moreau_jean_assembled : item<> {
       return attr<"constraint_activation_threshold">(*self());
     }
 
-    void assemble_setup(auto raw_ds_size, auto raw_inter_size)
+    void assemble_setup(auto raw_ds_size, auto raw_inter_size,
+                        auto num_frictions)
     {
       algebra::resize(mass_matrix_assembled(), raw_ds_size, raw_ds_size);
       algebra::resize(h_matrix_assembled(), raw_inter_size, raw_ds_size);
@@ -100,13 +108,17 @@ struct moreau_jean_assembled : item<> {
       algebra::resize(ydot_vector_assembled(), raw_inter_size);
       algebra::resize(q_nsp_vector_assembled(), raw_inter_size);
       algebra::resize(p0_vector_assembled(), raw_ds_size);
+
+      if (num_frictions > 0) {
+        algebra::resize(mu_vector_assembled(), num_frictions);
+      }
     }
 
     void compute_w_matrix(auto step)
     {
-        algebra::compute_kkt_matrix(h_matrix_assembled(),
-                                    mass_matrix_assembled(),
-                                    w_matrix_assembled());
+      algebra::compute_kkt_matrix(h_matrix_assembled(),
+                                  mass_matrix_assembled(),
+                                  w_matrix_assembled());
     }
 
     void compute_input()

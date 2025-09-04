@@ -1,12 +1,12 @@
 #pragma once
 
 #include <FrictionContactProblem.h>
+#include <Friction_cst.h>
 #include <LinearComplementarityProblem.h>
 #include <NonSmoothDrivers.h>
-#include <lcp_cst.h>
-#include <Friction_cst.h>
 #include <NumericsVerbose.h>
 #include <SolverOptions.h>
+#include <lcp_cst.h>
 
 #include "siconos/algebra/algebra.hpp"
 #include "siconos/simul/simul_head.hpp"
@@ -102,7 +102,6 @@ struct one_step_nonsmooth_problem : item<> {
   using attributes =
       gather<attribute<"level", some::indice>,
              attribute<"verbose", some::boolean>,
-             attribute<"mu", some::scalar>,
              attribute<"options", some::item_ref<solver_options>>,
              attribute<"problem", some::item_ref<NonsmoothProblem>>>;
 
@@ -122,7 +121,8 @@ struct one_step_nonsmooth_problem : item<> {
 
     template <typename Formulation, match::matrix W, match::vector V>
     void solve(algebra::mat<W>& w_mat, algebra::vec<V>& q_vec,
-               algebra::vec<V>& z_vec, algebra::vec<V>& w_vec)
+               algebra::vec<V>& z_vec, algebra::vec<V>& w_vec,
+               algebra::vec<V>& mu_vec) // mu_vec can be empty for LCP
     {
       using fmt::print;
 
@@ -139,42 +139,42 @@ struct one_step_nonsmooth_problem : item<> {
         self()->problem().instance()->M = w_mat_dense;
         self()->problem().instance()->q = q_vec._v->matrix0;
 
-        print("LCP [\n");
+        // print("LCP [\n");
 
-        print("W:\n");
-        algebra::display(w_mat);
-        print("----\n");
-        print("----\n");
+        // print("W:\n");
+        // algebra::display(w_mat);
+        // print("----\n");
+        // print("----\n");
 
-        print("q:\n");
-        algebra::display(q_vec);
-        print("----\n");
+        // print("q:\n");
+        // algebra::display(q_vec);
+        // print("----\n");
 
-        print("z:\n");
-        algebra::display(z_vec);
-        print("----\n");
+        // print("z:\n");
+        // algebra::display(z_vec);
+        // print("----\n");
 
-        print("w:\n");
-        algebra::display(w_vec);
-        print("----\n");
+        // print("w:\n");
+        // algebra::display(w_vec);
+        // print("----\n");
 
         linearComplementarity_driver(&*self()->problem().instance(),
                                      z_vec._v->matrix0, w_vec._v->matrix0,
                                      &*options().instance());
 
-        print("q:\n");
-        algebra::display(q_vec);
-        print("----\n");
+        // print("q:\n");
+        // algebra::display(q_vec);
+        // print("----\n");
 
-        print("z:\n");
-        algebra::display(z_vec);
-        print("----\n");
+        // print("z:\n");
+        // algebra::display(z_vec);
+        // print("----\n");
 
-        print("w:\n");
-        algebra::display(w_vec);
-        print("----\n");
+        // print("w:\n");
+        // algebra::display(w_vec);
+        // print("----\n");
 
-        print("]\n\n");
+        // print("]\n\n");
         NM_free(w_mat_dense);
       }
       else if constexpr (std::derived_from<Formulation,
@@ -184,18 +184,11 @@ struct one_step_nonsmooth_problem : item<> {
             size0(w_mat) / self()->problem().instance()->dimension;
         self()->problem().instance()->M = w_mat._m;
         self()->problem().instance()->q = q_vec._v->matrix0;
-        self()->problem().instance()->mu =
-            (double*)malloc(size0(w_mat) * sizeof(double));
+        self()->problem().instance()->mu = mu_vec._v->matrix0;
 
-        // auto w_mat_dense = NM_create(NM_DENSE, size0(w_mat), size1(w_mat));
-        // NM_to_dense(w_mat._m, w_mat_dense);
-
-        for (auto i = 0; i < size0(w_mat); ++i)
-          self()->problem().instance()->mu[i] = storage::attr<"mu">(*self());
         fc2d_driver(&*self()->problem().instance(), z_vec._v->matrix0,
                     w_vec._v->matrix0, &*options().instance());
 
-        free(self()->problem().instance()->mu);
       }
     }
 

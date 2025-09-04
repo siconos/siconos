@@ -368,7 +368,6 @@ class OSNSPB(Stored):
         self._handle.set_options(self._so)
         self._fc2d.create(self._so.solver_id())
         self.handle().set_problem(self._fc2d)
-        self.handle().set_mu(0.5)
         self.handle().set_verbose(False)
 #        self._fc2d.instance().dimension = 2
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <concepts>
+
 #include "siconos/algebra/numerics.hpp"
 #include "siconos/simul/topology.hpp"
 #include "siconos/utils/variant.hpp"
@@ -55,6 +57,12 @@ struct moreau_jean_element : item<> {
     }
 
     decltype(auto) nslaw_size() { return nslaw_size_t{}.value; }
+
+    static constexpr auto nslaw_with_friction()
+    {
+      return std::derived_from<nslaw, model::newton_impact_friction>;
+    }
+
     decltype(auto) dof()
     {
       using env_t = decltype(self()->env());
@@ -155,6 +163,24 @@ struct moreau_jean_element : item<> {
       return algebra::vec_view(ydot_storage,
                                assembled_osi().ydot_vector_assembled(),
                                inter_offset());
+    }
+
+    decltype(auto) mu_vector_assembled()
+    {
+      if constexpr (nslaw_with_friction()) {
+        using env_t = decltype(self()->env());
+        using vec_mu_t = traits::config<env_t>::template convert<
+            some::vector<some::scalar, some::indice_value<1>>>::type;
+        return algebra::vec_view<vec_mu_t>(
+            assembled_osi().mu_vector_assembled(), inter_offset());
+      }
+      else {
+        // cf
+        // https://stackoverflow.com/questions/38304847/constexpr-if-and-static-assert
+        []<bool flag = false>() {
+          static_assert(flag, "no mu vector with this nslaw");
+        }();
+      }
     }
 
     void initialize(auto step)
@@ -565,16 +591,24 @@ struct moreau_jean_element : item<> {
       auto &data = self()->data();
 
       auto &lambdas = storage::attr_values<interaction, "lambda">(data, step);
+      auto &nslaws = storage::attr_values<interaction, "nslaw">(data, step);
+
       auto &ydots_bck =
           storage::prop_values<interaction, "ydot_backup">(data, step);
       auto activations =
           storage::prop_values<interaction, "activation">(data, step);
 
       size_t k = 0;
-      for (auto [lambda, ydot_bck, activation] :
-           view::zip(lambdas, ydots_bck, activations)) {
+      for (auto [lambda, nslaw, ydot_bck, activation] :
+           view::zip(lambdas, nslaws, ydots_bck, activations)) {
         if (activation) {
           set_value(lambda_vector_assembled(), k, lambda);
+
+          if constexpr (nslaw_with_friction()) {
+            set_value(mu_vector_assembled(), k,
+                      storage::handle(data, nslaw).mu());
+          }
+
           set_value(ydot_vector_assembled(), k, ydot_bck);
           k++;
         }

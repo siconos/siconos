@@ -156,23 +156,35 @@ struct one_step_integrator {
         return assembled_osi().ydot_vector_assembled();
       };
 
+      decltype(auto) mu_vector_assembled()
+      {
+        return assembled_osi().mu_vector_assembled();
+      };
+
       void assemble_setup()
       {
         using env_t = decltype(self()->env());
         using indice_t = typename env_t::indice;
 
-        indice_t ods = 0;
-        indice_t ointer = 0;
+        indice_t ods = 0;     // offset ds
+        indice_t ointer = 0;  // offset inter
+        indice_t num_fric =
+            0;  // total number of friction nslaws for mu vector size.
 
-        ground::for_each(elements(), [&ods, &ointer](auto elem) {
+        ground::for_each(elements(), [&ods, &ointer, &num_fric](auto elem) {
           elem.ds_offset() = ods;
           elem.inter_offset() = ointer;
 
           ods += elem.number_of_involved_ds() * elem.dof();
           ointer += elem.number_of_interactions() * elem.nslaw_size();
+
+          if constexpr (elem.nslaw_with_friction())
+          {
+            num_fric += elem.number_of_interactions();
+          }
         });
 
-        assembled_osi().assemble_setup(ods, ointer);
+        assembled_osi().assemble_setup(ods, ointer, num_fric);
       }
 
       void compute_w_matrix(auto step)
@@ -182,7 +194,7 @@ struct one_step_integrator {
         // get the number of interactions where dof is defined at
         // runtime
         auto runtime_inters =
-          storage::prop_values<rt_interaction, "nds">(data, step);
+            storage::prop_values<rt_interaction, "nds">(data, step);
 
         if (std::size(runtime_inters) > 0) {
           // general case: mass matrix is not diagonal
@@ -194,6 +206,8 @@ struct one_step_integrator {
           using info_t = storage::get_info_t<decltype(data)>;
 
           using env = typename info_t::env;
+
+          // xxx properties on h_matrix1, if any, are lost here
           auto tmp_matrix = typename traits::config<env>::template convert<
               some::assembled_matrix<some::transposed_matrix<
                   typename ct_osi_t::h_matrix1>>>::type{};
@@ -207,7 +221,6 @@ struct one_step_integrator {
           resize(tmp_matrix, size1(h_mat), size0(h_mat));
           solvet(m_mat, h_mat, tmp_matrix);
           prod(h_mat, tmp_matrix, w_mat);
-
         }
       }
 

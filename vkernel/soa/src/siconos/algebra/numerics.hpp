@@ -293,7 +293,7 @@ template <typename T>
 void set_value(match::vec auto&& m, match::indice auto i, const T& value)
 {
   if constexpr (match::scalar<T>) {
-    NM_zentry(m._m, i * m.vnrows + m._offset, 0, value, zero_threshold);
+    NM_zentry(m._v, i * m.vnrows + m._offset, 0, value, zero_threshold);
   }
   // vector block
   else if constexpr (match::vector<T>) {
