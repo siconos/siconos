@@ -42,7 +42,6 @@ void gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double* reaction, doub
                    double* globalVelocity, int* info, SolverOptions* options) {
    verbose=1;
 
-  fopen("plopReformulation.txt", "w");
 
   DEBUG_BEGIN("gfc3d_nsgs_wr\n");
   NumericsMatrix* H = problem->H;
@@ -50,7 +49,6 @@ void gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double* reaction, doub
   DEBUG_PRINTF("Number of contacts = %i \n", H->size1 / 3);
   if (H->size1 > 0) {
     // Reformulation
-    numerics_warning("fc3d_nsgs", "Reformulation info a reduced problem onto local variables ...\n");
     numerics_printf_verbose(1,
                             "Reformulation info a reduced problem onto local variables ...\n");
     FrictionContactProblem* localproblem =

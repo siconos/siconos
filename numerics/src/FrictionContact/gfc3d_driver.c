@@ -87,7 +87,6 @@ static int gfc3d_balancing_check_drift(GlobalFrictionContactProblem* balanced_pr
 
 int gfc3d_driver(GlobalFrictionContactProblem* problem, double* reaction, double* velocity,
                  double* globalVelocity, SolverOptions* options) {
-  fopen("plopReformulation.txt", "w");
 
   verbose = 1;
   assert(options->isSet);
