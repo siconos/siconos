@@ -22,11 +22,11 @@ if(WITH_FCLIB)
     set(WITH_TESTS ${WITH_TESTING})
     FetchContent_MakeAvailable(fclib)
     add_library(FCLIB::fclib ALIAS fclib)
-  endif()
-  target_compile_options(fclib INTERFACE
+    target_compile_options(fclib INTERFACE
     $<$<CXX_COMPILER_ID:GNU>:-w>
     $<$<CXX_COMPILER_ID:Clang>:-w>
   )
+  endif()
 
   message(STATUS "End setup for fclib ... ")
 
