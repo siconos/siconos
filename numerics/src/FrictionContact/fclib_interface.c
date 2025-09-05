@@ -274,8 +274,8 @@ int frictionContact_fclib_write_csr(FrictionContactProblem* problem, char* title
 
   return info;
 }
-int frictionContact_fclib_write(FrictionContactProblem* problem, char* title,
-                                char* description, char* mathInfo, const char* path,
+int frictionContact_fclib_write(FrictionContactProblem* problem, const char* title,
+                                const char* description, const char* mathInfo, const char* path,
                                 int ndof) {
   int info = 0;
 

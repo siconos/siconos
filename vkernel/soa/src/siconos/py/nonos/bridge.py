@@ -343,6 +343,16 @@ class Body(Stored):
     def swapInMemory(self):
         pass # compatibility
 
+class TraceParams(Stored):
+    def __init__(self, tp_args):
+        self._args = tp_args
+        self._handle = vkernel.disks.add_trace_params(self.data())
+        self.handle().set_filename(tp_args._fileName)
+        self.handle().set_title(tp_args._title)
+        self.handle().set_description(tp_args._description)
+        self.handle().set_math_info(tp_args._mathInfo)
+
+
 class OSNSPB(Stored):
     def __init__(self, dim, solvopts):
 
@@ -369,6 +379,7 @@ class OSNSPB(Stored):
         self._fc2d.create(self._so.solver_id())
         self.handle().set_problem(self._fc2d)
         self.handle().set_verbose(False)
+        self.handle().set_trace(False)
 #        self._fc2d.instance().dimension = 2
 
     def setMaxSize(self, maxs):

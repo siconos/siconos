@@ -44,6 +44,7 @@ using translated_disk_shape = collision::translated<disk_shape>;
 struct fc2d : simul::nonsmooth_problem<FrictionContactProblem> {};
 struct osnspb : simul::one_step_nonsmooth_problem<fc2d> {};
 using solver_options = simul::solver_options;
+using trace_params = simul::trace_params;
 struct ct_interaction
     : simul::interaction<nslaw, diskdisk_r, diskfdisk_r, diskfsegment_r> {};
 struct rt_interaction : simul::rt_interaction<nslaw, diskmesh_r> {};
@@ -137,6 +138,7 @@ struct maker
               storage::bind<config::ct_interaction, "rt_interaction">,
               storage::bind<config::osnspb, "osnspb">,
               storage::bind<config::solver_options, "solver_options">,
+              storage::bind<config::trace_params, "trace_params">,
               storage::bind<config::osi, "osi">,
               storage::bind<config::td, "time_discretization">,
               storage::bind<config::topo, "topology">,

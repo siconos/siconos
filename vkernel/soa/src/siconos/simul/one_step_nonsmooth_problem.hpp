@@ -6,10 +6,12 @@
 #include <NonSmoothDrivers.h>
 #include <NumericsVerbose.h>
 #include <SolverOptions.h>
+#include <fclib_interface.h>
 #include <lcp_cst.h>
 
 #include "siconos/algebra/algebra.hpp"
 #include "siconos/simul/simul_head.hpp"
+#include "siconos/utils/print.hpp"
 
 namespace siconos {
 
@@ -24,6 +26,7 @@ struct solver_options : storage::data_holder<SolverOptions> {
     using default_interface<Handle>::self;
     void create(int solver_id = SICONOS_FRICTION_2D_LEMKE)
     {
+      // need to be fixed : solver_options_delete not called
       self()->instance().reset(solver_options_create(solver_id),
                                [](SolverOptions* so) {
                                  solver_options_delete(so);
@@ -96,11 +99,36 @@ struct nonsmooth_problem : storage::data_holder<Formulation> {
   };
 };
 
+struct trace_params : item<> {
+  using attributes =
+      gather<attribute<"maxiter", some::indice>,
+             attribute<"counter", some::indice>,
+             attribute<"title", some::specific<std::string>>,
+             attribute<"description", some::specific<std::string>>,
+             attribute<"math_info", some::specific<std::string>>,
+             attribute<"filename", some::specific<std::string>>>;
+
+  template <typename Handle>
+  struct interface : default_interface<Handle> {
+    using default_interface<Handle>::self;
+
+    void __init__() { counter() = 1; }
+    auto maxiter() { return attr<"maxiter">(*self()); }
+    decltype(auto) counter() { return attr<"counter">(*self()); }
+    auto title() { return attr<"title">(*self()); }
+    auto description() { return attr<"description">(*self()); }
+    auto math_info() { return attr<"math_info">(*self()); }
+    auto filename() { return attr<"filename">(*self()); }
+  };
+};
+
 template <typename NonsmoothProblem>
 struct one_step_nonsmooth_problem : item<> {
   using problem_t = NonsmoothProblem;
   using attributes =
       gather<attribute<"level", some::indice>,
+             attribute<"trace", some::boolean>,
+             attribute<"trace_params", some::item_ref<trace_params>>,
              attribute<"verbose", some::boolean>,
              attribute<"options", some::item_ref<solver_options>>,
              attribute<"problem", some::item_ref<NonsmoothProblem>>>;
@@ -109,20 +137,26 @@ struct one_step_nonsmooth_problem : item<> {
   struct interface : default_interface<Handle> {
     using default_interface<Handle>::self;
 
+    decltype(auto) trace() { return attr<"trace">(*self()); }
+    decltype(auto) trace_params()
+    {
+      return storage::handle(self()->data(), attr<"trace_params">(*self()));
+    }
+
     decltype(auto) options()
     {
       return storage::handle(self()->data(), attr<"options">(*self()));
-    };
+    }
     decltype(auto) problem()
     {
       return storage::handle(self()->data(), attr<"problem">(*self()));
-    };
+    }
     decltype(auto) level() { return attr<"level">(*self()); };
 
     template <typename Formulation, match::matrix W, match::vector V>
     void solve(algebra::mat<W>& w_mat, algebra::vec<V>& q_vec,
                algebra::vec<V>& z_vec, algebra::vec<V>& w_vec,
-               algebra::vec<V>& mu_vec) // mu_vec can be empty for LCP
+               algebra::vec<V>& mu_vec)  // mu_vec can be empty for LCP
     {
       using fmt::print;
 
@@ -133,48 +167,14 @@ struct one_step_nonsmooth_problem : item<> {
         auto w_mat_dense = NM_create(NM_DENSE, size0(w_mat), size1(w_mat));
         NM_to_dense(w_mat._m, w_mat_dense);
 
-        /*        print("w_mat_dense:\n");
-                  NM_display(w_mat_dense);*/
         self()->problem().instance()->size = size0(w_mat);
         self()->problem().instance()->M = w_mat_dense;
         self()->problem().instance()->q = q_vec._v->matrix0;
-
-        // print("LCP [\n");
-
-        // print("W:\n");
-        // algebra::display(w_mat);
-        // print("----\n");
-        // print("----\n");
-
-        // print("q:\n");
-        // algebra::display(q_vec);
-        // print("----\n");
-
-        // print("z:\n");
-        // algebra::display(z_vec);
-        // print("----\n");
-
-        // print("w:\n");
-        // algebra::display(w_vec);
-        // print("----\n");
 
         linearComplementarity_driver(&*self()->problem().instance(),
                                      z_vec._v->matrix0, w_vec._v->matrix0,
                                      &*options().instance());
 
-        // print("q:\n");
-        // algebra::display(q_vec);
-        // print("----\n");
-
-        // print("z:\n");
-        // algebra::display(z_vec);
-        // print("----\n");
-
-        // print("w:\n");
-        // algebra::display(w_vec);
-        // print("----\n");
-
-        // print("]\n\n");
         NM_free(w_mat_dense);
       }
       else if constexpr (std::derived_from<Formulation,
@@ -186,12 +186,46 @@ struct one_step_nonsmooth_problem : item<> {
         self()->problem().instance()->q = q_vec._v->matrix0;
         self()->problem().instance()->mu = mu_vec._v->matrix0;
 
-        fc2d_driver(&*self()->problem().instance(), z_vec._v->matrix0,
-                    w_vec._v->matrix0, &*options().instance());
+        if (!trace()) {
+          fc2d_driver(&*self()->problem().instance(), z_vec._v->matrix0,
+                      w_vec._v->matrix0, &*options().instance());
+        }
+        else {
+          auto z_bck = algebra::copy(z_vec);
+          auto w_bck = algebra::copy(w_vec);
 
+          fc2d_driver(&*self()->problem().instance(), z_vec._v->matrix0,
+                      w_vec._v->matrix0, &*options().instance());
+
+          // trace_params must be set!
+          if (options().iparam(SICONOS_IPARAM_ITER_DONE) >
+              trace_params().maxiter()) {
+            auto solver_maxiter = options().iparam(SICONOS_IPARAM_MAX_ITER);
+            auto n_format_string = std::to_string(solver_maxiter).length();
+
+            auto iter_filename = format(
+                "{}-i{:0{}d}-{}-{}.hdf5",
+                trace_params().filename(),
+                solver_maxiter, n_format_string, size0(w_mat),
+                trace_params().counter());
+
+            frictionContact_fclib_write(&*self()->problem().instance(),
+                                        trace_params().title().c_str(),
+                                        trace_params().description().c_str(),
+                                        trace_params().math_info().c_str(),
+                                        iter_filename.c_str(),
+                                        3  // dof
+            );
+
+            frictionContact_fclib_write_guess(
+                z_vec._v->matrix0, w_vec._v->matrix0,
+                trace_params().filename().c_str());
+
+            trace_params().counter()++;
+          }
+        }
       }
     }
-
     auto methods()
     {
       return collect(method("options", &interface<Handle>::options),

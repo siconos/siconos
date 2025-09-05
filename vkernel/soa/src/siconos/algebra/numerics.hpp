@@ -235,6 +235,20 @@ void resize(match::vec auto& v, match::indice auto nrows)
   v._v = NM_create(NM_DENSE, nrows * v.vnrows, v.vncols);
 }
 
+template <typename T>
+vec<T> copy(vec<T>& v)
+{
+  vec<T> new_vec;
+
+  auto* new_v = NM_new();
+  NM_copy(v._v, new_v);
+
+  // new_vec destructor will free new_v
+  new_vec._v = new_v;
+
+  return new_vec;
+}
+
 void insert(match::any_mat auto& am, match::any_mat auto& bm,
             match::indice auto offset0, match::indice auto offset1)
 {

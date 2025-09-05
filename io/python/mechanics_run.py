@@ -2754,7 +2754,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         else:
             msg = "Simulation time {0} >= T={1}, exiting.".format(t0, T)
             self.print_verbose(msg)
-            return
+            exit(0)
 
         # Respect run() parameter for multipoints_iterations for
         # backwards compatibility, but this is overridden by
@@ -2961,33 +2961,41 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 osnspb.setMStorageType(sn.params.NM_SPARSE)
                 osnspb.setAssemblyType(osnspb_assembly_type)
 
-        else:  # With trace
-            if solver_options is None:
-                solver_options = sn.solver_options_create(
-                    sn.solver_ids.SICONOS_FRICTION_3D_NSGS
-                )
-            # sid = solver_options.solverId
-            if osi == integrators.MoreauJeanGOSI:
-                if "NewtonImpactFrictionNSL" in set(nslaw_type_list):
-                    osnspb = GFCTrace(
-                        3, solver_options, friction_contact_trace_params, nsds
-                    )
-                    osnspb.setMStorageType(sn.params.NM_SPARSE)
-                    osnspb.setMaxSize(osnspb_max_size)
-                elif "NewtonImpactRollingFrictionNSL" in set(nslaw_type_list):
-                    osnspb = GRFCTrace(
-                        5, solver_options, friction_contact_trace_params, nsds
-                    )
-                    osnspb.setMStorageType(sn.params.NM_SPARSE)
-                    osnspb.setMaxSize(osnspb_max_size)
-                else:
-                    msg = "Unknown nslaw type"
-                    msg += str(set(nslaw_type_list))
-                    raise RuntimeError(msg)
+        else: # With trace
+            pass
+            if self.config.backend == "vnative":
+                osnspb = nsf.FrictionContact(self._dimension, solver_options)
+
+                vnative_tp = nsf.TraceParams(friction_contact_trace_params)
+                osnspb.handle().set_trace_params(vnative_tp.handle())
+                osnspb.handle().set_trace(True)
             else:
-                osnspb = FCTrace(3, solver_options, friction_contact_trace_params, nsds)
-                osnspb.setMaxSize(osnspb_max_size)
-                osnspb.setMStorageType(sn.params.NM_SPARSE_BLOCK)
+                if solver_options is None:
+                    solver_options = sn.solver_options_create(
+                        sn.solver_ids.SICONOS_FRICTION_3D_NSGS
+                    )
+                # sid = solver_options.solverId
+                if osi == integrators.MoreauJeanGOSI:
+                    if "NewtonImpactFrictionNSL" in set(nslaw_type_list):
+                        osnspb = GFCTrace(
+                            3, solver_options, friction_contact_trace_params, nsds
+                        )
+                        osnspb.setMStorageType(sn.params.NM_SPARSE)
+                        osnspb.setMaxSize(osnspb_max_size)
+                    elif "NewtonImpactRollingFrictionNSL" in set(nslaw_type_list):
+                        osnspb = GRFCTrace(
+                            5, solver_options, friction_contact_trace_params, nsds
+                        )
+                        osnspb.setMStorageType(sn.params.NM_SPARSE)
+                        osnspb.setMaxSize(osnspb_max_size)
+                    else:
+                        msg = "Unknown nslaw type"
+                        msg += str(set(nslaw_type_list))
+                        raise RuntimeError(msg)
+                else:
+                    osnspb = FCTrace(3, solver_options, friction_contact_trace_params, nsds)
+                    osnspb.setMaxSize(osnspb_max_size)
+                    osnspb.setMStorageType(sn.params.NM_SPARSE_BLOCK)
 
         numerics_verbose = run_options.get("numerics_verbose")
         osnspb.setNumericsVerboseMode(numerics_verbose)
