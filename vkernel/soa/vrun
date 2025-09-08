@@ -160,10 +160,14 @@ EOF
       # guix environment setup
       # export PATH=/var/guix/profiles/per-user/root/current-guix/bin:$PATH
       # export GUIX_DAEMON_SOCKET=guix://luke.u-ga.fr
-      [ -f /applis/site/guix-start.sh ] && . /applis/site/guix-start.sh
+      if [ -f /applis/site/guix-start.sh ]; then
+        . /applis/site/guix-start.sh
+        guix_isolation_args="--container -N --emulate-fhs --share=/tmp --share=/bettik --share=$HOME"
+      else
+        guix_isolation_args="--container -N --emulate-fhs --share=/tmp --share=/scratch --share=$HOME"
+      fi
       pwd=`pwd`
       rm -f $pwd/.siconos-guix-profile
-      guix_isolation_args="--container -N --emulate-fhs --share=/tmp --share=/scratch --share=$HOME"
       #guix_isolation_args="--pure --preserve=OMP* --preserve=VRUN*"
       guix_cmd="guix time-machine -C ./.siconos-vrun-channels.scm --"
       # it seems that we need to pass explicitely the package for transformations
