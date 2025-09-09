@@ -262,6 +262,7 @@ class MechanicsHdf5(object):
                 self._data, "p0s", 4, use_compression=self._use_compression)
         except Exception as e:
             print("Warning -  group(self._data, p0s ) : ", e)
+            self._p0s_data = None
 
 
         self._static_data = data(

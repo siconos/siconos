@@ -1155,17 +1155,21 @@ class IOReader(VTKPythonAlgorithmBase):
         self.vtk_velo_data = dsa.numpyTovtkDataArray(self.velo_data[:,0:2])
         self.vtk_velo_data.SetName("velocity")
 
-        if self._radii_data is not None:
+        if len(self._radii_data) > 0:
             self.vtk_radii_data = dsa.numpyTovtkDataArray(
                 self._radii_data[self._id_t_m,1])
             self.vtk_radii_data.SetName("radii")
+        else:
+            self.vtk_radii_data = None
 
-        if self._p0s_data is not None:
+        if len(self._p0s_data) > 0:
 
             self.current_p0_norm = self.p0_norm[self._id_t_m]
             self.vtk_p0_norm_data = dsa.numpyTovtkDataArray(
                 self.current_p0_norm)
             self.vtk_p0_norm_data.SetName("p0_norm")
+        else:
+            self.vtk_p0_norm_data = None
 
         self.vtk_points_data = dsa.numpyTovtkDataArray(self.pos_data[:, 2:5])
 
@@ -1174,12 +1178,12 @@ class IOReader(VTKPythonAlgorithmBase):
 
         self.polydata.SetPoints(self.points)
 
-        if self._radii_data is not None:
+        if len(self._radii_data) > 0:
             self.polydata.GetPointData().AddArray(
                 self.vtk_radii_data)
             self.polydata.GetPointData().SetActiveScalars("radii")
 
-        if self._p0s_data is not None:
+        if len(self._p0s_data) > 0:
             self.polydata.GetPointData().AddArray(
                 self.vtk_p0_norm_data)
 
@@ -1209,9 +1213,11 @@ class IOReader(VTKPythonAlgorithmBase):
         # useless if not used with GetOutputPort()
         output.GetPointData().AddArray(vtk_pos_data)
         output.GetPointData().AddArray(self.vtk_velo_data)
-        output.GetPointData().AddArray(self.vtk_radii_data)
-        output.GetPointData().AddArray(self.vtk_p0_norm_data)
-        output.GetPointData().SetActiveScalars("radii")
+        if self.vtk_radii_data is not None:
+            output.GetPointData().AddArray(self.vtk_radii_data)
+            output.GetPointData().SetActiveScalars("radii")
+        if self.vtk_p0_norm_data is not None:
+            output.GetPointData().AddArray(self.vtk_p0_norm_data)
 
         try:
             if self._with_contact_forces:
@@ -1360,7 +1366,7 @@ class IOReader(VTKPythonAlgorithmBase):
         self._radii_data = self._io.radii_data()
         self._p0s_data = self._io.p0s_data()
 
-        if self._p0s_data is not None:
+        if len(self._p0s_data) > 0:
             self.p0_norm = numpy.sqrt(
                 self._p0s_data[:,1]*self._p0s_data[:,1]+
                 self._p0s_data[:,2]*self._p0s_data[:,2]+
@@ -2782,9 +2788,6 @@ class VView(object):
         self.renderer.GetActiveCamera().Zoom(self.opts.zoom)
         self.renderer.ResetCameraClippingRange()
 
-        if self.opts.offscreen:
-            self.renderer_window.SetOffScreenRendering(1)
-
         self.image_maker = vtk.vtkWindowToImageFilter()
         self.image_maker.SetInput(self.renderer_window)
 
@@ -3007,7 +3010,7 @@ class VView(object):
         txtprop = txt.GetTextProperty()
         txtprop.SetFontFamilyToArial()
         txtprop.BoldOn()
-        txtprop.SetFontSize(88)
+        txtprop.SetFontSize(44)
         txtprop.ShadowOn()
         txtprop.SetShadowOffset(4, 4)
         background_color = self.config.get("background_color", [0.0, 0.0, 0.0])
@@ -3357,6 +3360,9 @@ class VView(object):
 
             self.renderer = vtk.vtkRenderer()
             self.renderer_window = vtk.vtkRenderWindow()
+            if self.opts.offscreen:
+                self.renderer_window.SetOffScreenRendering(1)
+
             self.interactor_renderer = vtk.vtkRenderWindowInteractor()
 
             if self.opts.view_as_glyphs:
