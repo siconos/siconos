@@ -203,7 +203,8 @@ struct one_step_nonsmooth_problem : item<> {
             auto solver_maxiter = options().iparam(SICONOS_IPARAM_MAX_ITER);
             auto n_format_string = std::to_string(solver_maxiter).length();
 
-            auto iter_filename = format(
+            // format alone ambiguous for clang-19
+            auto iter_filename = fmt::format(
                 "{}-i{:0{}d}-{}-{}.hdf5",
                 trace_params().filename(),
                 solver_maxiter, n_format_string, size0(w_mat),
