@@ -39,9 +39,8 @@ while [ $# -gt 0 ]; do
 
     --fast)
       shift
-      pwd=`pwd`
       unset GUIX_PROFILE
-      export GUIX_PROFILE=$pwd/.siconos-guix-profile
+      export GUIX_PROFILE=$VRUN_GUIX_BASE_DIR/.siconos-guix-profile
       . ${GUIX_PROFILE}/etc/profile
 
       export PYTHONPATH=$GUIX_PYTHONPATH:$PYTHONPATH
