@@ -533,7 +533,7 @@ void fc3d_nsgs(FrictionContactProblem *problem, double *reaction, double *veloci
   /* Number of contacts */
   unsigned int nc = problem->numberOfContacts;
 
-  /* Maximum number of iters */
+  /* Maximum number of iterations */
   int itermax = iparam[SICONOS_IPARAM_MAX_ITER];
 
   /* Tolerance */
@@ -789,7 +789,7 @@ void fc3d_nsgs(FrictionContactProblem *problem, double *reaction, double *veloci
 
         if (!(tolerance > 0.0)) {
           numerics_warning("fc3d_nsgs", "tolerance has to be positive!!");
-          numerics_warning("fc3d_nsgs", "we stop the iters");
+          numerics_warning("fc3d_nsgs", "we stop the iterations");
           break;
         }
 
