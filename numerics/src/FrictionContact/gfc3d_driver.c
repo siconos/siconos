@@ -61,6 +61,7 @@ const char* const SICONOS_GLOBAL_FRICTION_3D_IPM_WR_STR = "GFC3D_IPM_WR";
 const char* const SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_WR_STR = "GFC3D_IPM_SNM_WR";
 const char* const SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_SEP_STR = "GFC3D_IPM_SNM_SEP";
 const char* const SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_PROX_STR = "GFC3D IPM SNM PROX";
+const char* const SICONOS_GLOBAL_FRICTION_3D_IPM_SEP_STR = "GFC3D IPM SEP";
 
 static int gfc3d_balancing_check_drift(GlobalFrictionContactProblem* balanced_problem,
                                        GlobalFrictionContactProblem* problem, double* reaction,

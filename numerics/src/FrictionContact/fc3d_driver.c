@@ -81,6 +81,7 @@ const char* const SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_STR = "FC3D_QUARTIC";
 const char* const SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU_STR = "FC3D_QUARTIC_NU";
 const char* const SICONOS_FRICTION_3D_ACLMFP_STR = "FC3D_ACLMFP";
 const char* const SICONOS_FRICTION_3D_SOCLCP_STR = "FC3D_SOCLCP";
+const char* const SICONOS_FRICTION_3D_IPM_STR = "FC3D_IPM";
 
 int fc3d_driver(FrictionContactProblem* problem, double* reaction, double* velocity,
                 SolverOptions* options) {
@@ -278,6 +279,7 @@ int fc3d_driver(FrictionContactProblem* problem, double* reaction, double* veloc
       fc3d_projectionOnConeWithLocalIteration_initialize(problem, problem, options);
       info = fc3d_projectionOnConeWithLocalIteration_solve(problem, reaction, options);
       fc3d_projectionOnConeWithLocalIteration_free(problem, problem, options);
+      break;
     }
     case SICONOS_FRICTION_3D_IPM_SNM: {
       numerics_printf(
