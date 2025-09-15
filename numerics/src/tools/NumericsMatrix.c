@@ -4465,7 +4465,6 @@ NumericsMatrix* NM_inverse_diagonal_block_matrix(NumericsMatrix* A, unsigned int
       // brute force implementation.
       // We assume that it is used for convenience
       // must be optimized for serious use.
-
       A_inv = NM_create(NM_SPARSE, A->size0, A->size1);
       NM_triplet_alloc(A_inv, A->size0);
 
@@ -4533,16 +4532,16 @@ NumericsMatrix* NM_inverse_diagonal_block_matrix(NumericsMatrix* A, unsigned int
           start_row = start_row + block_size;
         }
       }
-    }
-      
-
-      default:
-        assert(0 && "NM_inverse_diagonal_block_matrix_in_place :  unknown storageType");
+      break;
     }
 
-      DEBUG_BEGIN("NM_inverse_diagonal_block_matrix(NumericsMatrix* A, int * blocksizes))\n");
-      return A_inv;
+    default:
+      assert(0 && "NM_inverse_diagonal_block_matrix :  unknown storageType");
   }
+
+  DEBUG_BEGIN("NM_inverse_diagonal_block_matrix(NumericsMatrix* A, int * blocksizes))\n");
+  return A_inv;
+}
 
   void NM_update_size(NumericsMatrix * A) {
     switch (A->storageType) {
