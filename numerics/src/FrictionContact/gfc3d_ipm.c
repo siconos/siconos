@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,27 @@
  * limitations under the License.
  */
 
-#include "CSparseMatrix_internal.h"
+/* solver based on Interior Point Method (IPM) for friction-contact 3D problem based on an AVI
+ * reformulation Vincent Acary, Paul Armand, Hoang Minh NGUYEN. High-accuracy computation of
+ * rolling friction contact problems. 2022. https://hal.inria.fr/hal-03741048
+ */
+
+#include <assert.h>
+#include <float.h>
+#include <math.h>
+#include <stdio.h>
+
+#include "CSparseMatrix.h"
+#include "Friction_cst.h"
+#include "JordanAlgebra.h"
+#include "NumericsMatrix.h"
+#include "NumericsSparseMatrix.h"
+#include "NumericsVector.h"
+#include "SiconosBlas.h"
+
 #include "gfc3d_Solvers.h"
 #include "gfc3d_compute_error.h"
-#include "SiconosLapack.h"
 
-#include "SparseBlockMatrix.h"
 #include <stdio.h>
 #include <assert.h>
 #include <math.h>
@@ -31,10 +46,6 @@
 #include "numerics_verbose.h"
 #include "NumericsVector.h"
 #include "float.h"
-#include "JordanAlgebra.h"
-
-#include "NumericsSparseMatrix.h"
-#include "NumericsMatrix.h"
 
 #include "projectionOnCone.h"
 
@@ -1187,7 +1198,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   {
     printf("#################### SYMMETRIZATION ####################\n");
     NumericsMatrix *MT = NM_transpose(problem->M);
-    NumericsMatrix * MSym = NM_add(1 / 2., problem->M, 1 / 2., MT);
+    NumericsMatrix *MSym = NM_add(1 / 2., problem->M, 1 / 2., MT);
     NM_free(problem->M);
     problem->M = MSym;
     NM_free(MT);
@@ -1292,14 +1303,13 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   cblas_dcopy(nd, data->starting_point->velocity, 1, velocity, 1);
   cblas_dcopy(m, data->starting_point->globalVelocity, 1, globalVelocity, 1);
 
-
   NumericsMatrix *minus_M = NM_create(
-              M->storageType, M->size0,
-              M->size1);  // store the matrix -M to build the matrix of the Newton linear system
+      M->storageType, M->size0,
+      M->size1);  // store the matrix -M to build the matrix of the Newton linear system
+
   /* Create the matrix -M to build the matrix of the reduced linear system */
   NM_copy(M, minus_M);
   NM_scal(-1.0, minus_M);
-
 
   /* COMPUTATION OF A NEW STARTING POINT */
 
@@ -1376,6 +1386,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   double *dvdr_jprod = data->tmp_vault_nd[7];
 
 
+
   //double * r_p = (double*)calloc(nd,sizeof(double));                          // scaling vector p
   NumericsMatrix* r_Qp = NULL;                                                // matrix Qp
   //NumericsMatrix *QpH = NM_create(H->storageType, H->size0, H->size1);        // store the matrix Qp*H
@@ -1394,7 +1405,8 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   double r_alpha_p, r_alpha_d; /* primal and dual steplengths */
   double r_alpha_primal, r_alpha_dual;
   double r_mu, r_mu_a; /* duality gap, affine duality gap */
-  NumericsMatrix *JR = NULL; /* Reduced Jacobian with NT scaling */
+  NumericsMatrix *JR = 0; /* Reduced Jacobian with NT scaling */
+
   long JR_nzmax;
   double * Hvw = (double*)calloc(nd, sizeof(double));
   double err = 1e300;
@@ -1418,8 +1430,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
   nB = nN = nR = nT = 0;
 
 
-  NumericsMatrix *J = NULL;
-
+  NumericsMatrix *J = 0;
   long J_nzmax;
 
   size_t H_nzmax = NM_nnz(H);
@@ -1848,6 +1859,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
 
         NM_LU_solve(J, rhs, 1);
 
+
         cblas_dcopy(m, rhs, 1, d_globalVelocity, 1);
         cblas_dcopy(nd, rhs+m, 1, d_velocity, 1);
         cblas_dcopy(nd, rhs+m+nd, 1, d_reaction, 1);
@@ -2233,6 +2245,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
       	else
       	  NM_LU_solve(J, rhs_tmp, 1);
 
+
         cblas_dcopy(m, rhs_tmp, 1, d_globalVelocity, 1);
         cblas_dcopy(nd, rhs_tmp + m, 1, d_velocity, 1);
         cblas_dcopy(nd, rhs_tmp + m + nd, 1, d_reaction, 1);
@@ -2246,7 +2259,7 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
         total_time += (double)(t2-t1)/(double)clk_tck;
 
         free(rhs_tmp);
-        //free(sol);
+        // free(sol);
 
         J = NM_free(J);
 
@@ -2318,15 +2331,13 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
         double * rhs_tmp = (double*)calloc(m+2*nd,sizeof(double));
         cblas_dcopy(m+2*nd, rhs_2, 1, rhs_tmp, 1);
 
-        if ( options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] == SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_YES )
-        {
-        	double *rhs_save = (double*)calloc(m+2*nd,sizeof(double));
-        	cblas_dcopy(m+2*nd, rhs_2, 1, rhs_save, 1);
-        	NM_LDLT_refine(J, rhs_2, rhs_save, 1, 1e-14, 10, 0);
-        	free(rhs_save);
-        }
-        else
-        {
+        if (options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT] ==
+            SICONOS_FRICTION_3D_IPM_IPARAM_REFINEMENT_YES) {
+          double *rhs_save = (double *)calloc(m + 2 * nd, sizeof(double));
+          cblas_dcopy(m + 2 * nd, rhs_2, 1, rhs_save, 1);
+          NM_LDLT_refine(J, rhs_2, rhs_save, 1, tol, 10, 0);
+          free(rhs_save);
+        } else {
           NM_LDLT_solve(J, rhs_2, 1);
         }
 
@@ -2436,7 +2447,6 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
           NM_LDLT_solve(JR, r_rhs_2, 1);
         }
 
-
         cblas_dcopy(m, r_rhs_2, 1, d_globalVelocity, 1);
         QNTpz(velocity, reaction, r_rhs_2+m, nd, n, d_reaction);
         NM_gemv(1.0, H, d_globalVelocity, 0.0, d_velocity);
@@ -2495,7 +2505,6 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
         {
           NM_LDLT_solve(JR, sr_rhs_2, 1);
         }
-
 
         QNTpz(velocity, reaction, sr_rhs_2, nd, n, d_reaction);
 

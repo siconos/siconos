@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ namespace siconosBindings = boost::numeric::bindings;
 #include "SiconosAlgebra.hpp"
 #include "SiconosAlgebraProd.hpp" // for prod
 
-using namespace Siconos;
+using namespace siconos;
 
 
 
@@ -72,114 +72,114 @@ using namespace Siconos;
 //   if((A.size(1) != B.size(0)))
 //     THROW_EXCEPTION("Matrix function C=prod(A,B): inconsistent sizes");
 
-//   Siconos::UBLAS_TYPE numA = A.num();
-//   Siconos::UBLAS_TYPE numB = B.num();
+//   siconos::UBLAS_TYPE numA = A.num();
+//   siconos::UBLAS_TYPE numB = B.num();
 
 //   // == TODO: implement block product ==
 //   if(numA == 0 || numB == 0)
 //     THROW_EXCEPTION("Matrix product ( C=prod(A,B) ): not yet implemented for BlockMatrix objects.");
 
-//   if(numA == Siconos::IDENTITY || numB == Siconos::ZERO)  // A = identity or B = 0
+//   if(numA == siconos::IDENTITY || numB == siconos::ZERO)  // A = identity or B = 0
 //     return SimpleMatrix(B);
 
-//   else if(numB == Siconos::IDENTITY || numA == Siconos::ZERO)  // B = identity or A = 0
+//   else if(numB == siconos::IDENTITY || numA == siconos::ZERO)  // B = identity or A = 0
 //     return SimpleMatrix(A);
 
 //   else // neither A or B is equal to identity or zero.
 //   {
-//     if(numB == Siconos::DENSE)
+//     if(numB == siconos::DENSE)
 //     {
-//       if(numA == Siconos::DENSE)
+//       if(numA == siconos::DENSE)
 //       {
 //         DenseMat p(A.size(0), B.size(1));
 //         siconosBindings::blas::gemm(1.0, *A.dense(), *B.dense(), 1.0, p);
 //         //      return (DenseMat)(prod(*A.dense(),*B.dense()));
 //         return p;
 //       }
-//       else if(numA == Siconos::TRIANGULAR)
+//       else if(numA == siconos::TRIANGULAR)
 //         return (DenseMat)(prod(*A.triang(), *B.dense()));
-//       else if(numA == Siconos::SYMMETRIC)
+//       else if(numA == siconos::SYMMETRIC)
 //         return (DenseMat)(prod(*A.sym(), *B.dense()));
-//       else if(numA == Siconos::SPARSE)
+//       else if(numA == siconos::SPARSE)
 //         return (DenseMat)(prod(*A.sparse(), *B.dense()));
-//       else if(numA == Siconos::SPARSE_COORDINATE)
+//       else if(numA == siconos::SPARSE_COORDINATE)
 //         return (DenseMat)(prod(*A.sparseCoordinate(), *B.dense()));
-//       else// if(numA==Siconos::BANDED)
+//       else// if(numA==siconos::BANDED)
 //         return (DenseMat)(prod(*A.banded(), *B.dense()));
 //     }
-//     else if(numB == Siconos::TRIANGULAR)
+//     else if(numB == siconos::TRIANGULAR)
 //     {
-//       if(numA == Siconos::DENSE)
+//       if(numA == siconos::DENSE)
 //         return (DenseMat)(prod(*A.dense(), *B.triang()));
-//       else if(numA == Siconos::TRIANGULAR)
+//       else if(numA == siconos::TRIANGULAR)
 //         return (TriangMat)(prod(*A.triang(), *B.triang()));
-//       else if(numA == Siconos::SYMMETRIC)
+//       else if(numA == siconos::SYMMETRIC)
 //         return (DenseMat)(prod(*A.sym(), *B.triang()));
-//       else if(numA == Siconos::SPARSE)
+//       else if(numA == siconos::SPARSE)
 //         return (DenseMat)(prod(*A.sparse(), *B.triang()));
-//       else if(numA == Siconos::SPARSE_COORDINATE)
+//       else if(numA == siconos::SPARSE_COORDINATE)
 //         return (DenseMat)(prod(*A.sparseCoordinate(), *B.triang()));
-//       else //if(numA==Siconos::BANDED)
+//       else //if(numA==siconos::BANDED)
 //         return (DenseMat)(prod(*A.banded(), *B.triang()));
 //     }
-//     else if(numB == Siconos::SYMMETRIC)
+//     else if(numB == siconos::SYMMETRIC)
 //     {
-//       if(numA == Siconos::DENSE)
+//       if(numA == siconos::DENSE)
 //         return (DenseMat)(prod(*A.dense(), *B.sym()));
-//       else if(numA == Siconos::TRIANGULAR)
+//       else if(numA == siconos::TRIANGULAR)
 //         return (DenseMat)(prod(*A.triang(), *B.sym()));
-//       else if(numA == Siconos::SYMMETRIC)
+//       else if(numA == siconos::SYMMETRIC)
 //         return (SymMat)(prod(*A.sym(), *B.sym()));
-//       else if(numA == Siconos::SPARSE)
+//       else if(numA == siconos::SPARSE)
 //         return (DenseMat)(prod(*A.sparse(), *B.sym()));
-//       else if(numA == Siconos::SPARSE_COORDINATE)
+//       else if(numA == siconos::SPARSE_COORDINATE)
 //         return (DenseMat)(prod(*A.sparseCoordinate(), *B.sym()));
-//       else // if (numA == Siconos::BANDED)
+//       else // if (numA == siconos::BANDED)
 //         return (DenseMat)(prod(*A.banded(), *B.sym()));
 //     }
-//     else if(numB == Siconos::SPARSE)
+//     else if(numB == siconos::SPARSE)
 //     {
-//       if(numA == Siconos::DENSE)
+//       if(numA == siconos::DENSE)
 //         return (DenseMat)(prod(*A.dense(), *B.sparse()));
-//       else if(numA == Siconos::TRIANGULAR)
+//       else if(numA == siconos::TRIANGULAR)
 //         return (DenseMat)(prod(*A.triang(), *B.sparse()));
-//       else if(numA == Siconos::SYMMETRIC)
+//       else if(numA == siconos::SYMMETRIC)
 //         return (DenseMat)(prod(*A.sym(), *B.sparse()));
-//       else if(numA == Siconos::SPARSE)
+//       else if(numA == siconos::SPARSE)
 //         return (SparseMat)(prod(*A.sparse(), *B.sparse()));
-//       else if(numA == Siconos::SPARSE_COORDINATE)
+//       else if(numA == siconos::SPARSE_COORDINATE)
 //         return (SparseMat)(prod(*A.sparseCoordinate(), *B.sparse()));
-//       else //if(numA==Siconos::BANDED){
+//       else //if(numA==siconos::BANDED){
 //         return (DenseMat)(prod(*A.banded(), *B.sparse()));
 //     }
-//     else if(numB == Siconos::SPARSE_COORDINATE)
+//     else if(numB == siconos::SPARSE_COORDINATE)
 //     {
-//       if(numA == Siconos::DENSE)
+//       if(numA == siconos::DENSE)
 //         return (DenseMat)(prod(*A.dense(), *B.sparseCoordinate()));
-//       else if(numA == Siconos::TRIANGULAR)
+//       else if(numA == siconos::TRIANGULAR)
 //         return (DenseMat)(prod(*A.triang(), *B.sparseCoordinate()));
-//       else if(numA == Siconos::SYMMETRIC)
+//       else if(numA == siconos::SYMMETRIC)
 //         return (DenseMat)(prod(*A.sym(), *B.sparseCoordinate()));
-//       else if(numA == Siconos::SPARSE)
+//       else if(numA == siconos::SPARSE)
 //         return (SparseMat)(prod(*A.sparse(), *B.sparseCoordinate()));
-//       else if(numA == Siconos::SPARSE_COORDINATE)
+//       else if(numA == siconos::SPARSE_COORDINATE)
 //         return (SparseMat)(prod(*A.sparseCoordinate(), *B.sparseCoordinate()));
-//       else //if(numA==Siconos::BANDED){
+//       else //if(numA==siconos::BANDED){
 //         return (DenseMat)(prod(*A.banded(), *B.sparseCoordinate()));
 //     }
-//     else //if(numB==Siconos::BANDED)
+//     else //if(numB==siconos::BANDED)
 //     {
-//       if(numA == Siconos::DENSE)
+//       if(numA == siconos::DENSE)
 //         return (DenseMat)(prod(*A.dense(), *B.banded()));
-//       else if(numA == Siconos::TRIANGULAR)
+//       else if(numA == siconos::TRIANGULAR)
 //         return (DenseMat)(prod(*A.triang(), *B.banded()));
-//       else if(numA == Siconos::SYMMETRIC)
+//       else if(numA == siconos::SYMMETRIC)
 //         return (DenseMat)(prod(*A.sym(), *B.banded()));
-//       else if(numA == Siconos::SPARSE)
+//       else if(numA == siconos::SPARSE)
 //         return (DenseMat)(prod(*A.sparse(), *B.banded()));
-//       else if(numA == Siconos::SPARSE_COORDINATE)
+//       else if(numA == siconos::SPARSE_COORDINATE)
 //         return (DenseMat)(prod(*A.sparseCoordinate(), *B.banded()));
-//       else //if(numA==Siconos::BANDED)
+//       else //if(numA==siconos::BANDED)
 //         return (DenseMat)(prod(*A.banded(), *B.banded()));
 //     }
 //   }
@@ -195,18 +195,18 @@ dim : dim[0] number of raw, dim[1] number of col
 // void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C, int indexACol, bool init){
 //   // To compute C[indexAcol::] = A * B
 
-//   Siconos::UBLAS_TYPE numA = A.num();
-//   Siconos::UBLAS_TYPE numB = B.num();
-//   Siconos::UBLAS_TYPE numC = C.num();
+//   siconos::UBLAS_TYPE numA = A.num();
+//   siconos::UBLAS_TYPE numB = B.num();
+//   siconos::UBLAS_TYPE numC = C.num();
 //   if (numA == 0 || numB == 0 || numC == 0)
 //     THROW_EXCEPTION("Matrix function prod(A,B,C,index): inconsistent sizes");
 //   // === if C is zero or identity => read-only ===
-//   if (numC == Siconos::Zero || numC == Siconos::IDENTITY)
+//   if (numC == siconos::Zero || numC == siconos::IDENTITY)
 //     THROW_EXCEPTION("Matrix product ( prod(A,B,C,index) ): wrong type for resulting matrix C (read-only: zero or identity).");
 
 
-//   if (numA == Siconos::IDENTITY || numC == Siconos::Zero) // A = identity or 0
-//     THROW_EXCEPTION("Matrix function prod(A,B,C,index): numA == Siconos::IDENTITY || numC == Siconos::Zero not yet implemented");
+//   if (numA == siconos::IDENTITY || numC == siconos::Zero) // A = identity or 0
+//     THROW_EXCEPTION("Matrix function prod(A,B,C,index): numA == siconos::IDENTITY || numC == siconos::Zero not yet implemented");
 
 //   int rawB = B.size(0);
 //   int colB = B.size(1);
@@ -237,19 +237,19 @@ void axpy_prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
   assert(!(B.isPLUFactorizedInPlace()) && "B is PLUFactorized in place in prod !!");
   if(!C.isBlock())
     C.resetFactorizationFlags();
-  Siconos::UBLAS_TYPE numA = A.num();
-  Siconos::UBLAS_TYPE numB = B.num();
-  Siconos::UBLAS_TYPE numC = C.num();
+  siconos::UBLAS_TYPE numA = A.num();
+  siconos::UBLAS_TYPE numB = B.num();
+  siconos::UBLAS_TYPE numC = C.num();
   // == TODO: implement block product ==
-  if(numA == Siconos::BLOCK || numB == Siconos::BLOCK)
+  if(numA == siconos::BLOCK || numB == siconos::BLOCK)
     THROW_EXCEPTION("Matrix product ( prod(A,B,C) ): not yet implemented for BlockMatrix objects.");
 
   // === if C is zero or identity => read-only ===
-  if(numC == Siconos::ZERO || numC == Siconos::IDENTITY)
+  if(numC == siconos::ZERO || numC == siconos::IDENTITY)
     THROW_EXCEPTION("Matrix product ( prod(A,B,C) ): wrong type for resulting matrix C (read-only: zero or identity).");
 
 
-  if(numA == Siconos::IDENTITY)  // A = identity ...
+  if(numA == siconos::IDENTITY)  // A = identity ...
   {
     if(!init)
       C += B;
@@ -257,7 +257,7 @@ void axpy_prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
       C = B; // if C and B are two different objects.
   }
 
-  else if(numB == Siconos::IDENTITY)  // B = identity
+  else if(numB == siconos::IDENTITY)  // B = identity
   {
     if(!init)
       C += A;
@@ -266,11 +266,11 @@ void axpy_prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
   }
 
 
-  else if(numA == Siconos::ZERO || numB == Siconos::ZERO)  // if A or B = 0
+  else if(numA == siconos::ZERO || numB == siconos::ZERO)  // if A or B = 0
   {
     if(init) C.zero();  // else nothing
   }
-  else if(numC == Siconos::BLOCK)  // if C is Block - Temp. solution
+  else if(numC == siconos::BLOCK)  // if C is Block - Temp. solution
   {
     SimpleMatrix tmp(C);
     axpy_prod(A, B, tmp, init);
@@ -280,85 +280,85 @@ void axpy_prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
   {
     switch(numC)
     {
-    case Siconos::DENSE:
-      if(numB == Siconos::DENSE)
+    case siconos::DENSE:
+      if(numB == siconos::DENSE)
       {
-        if(numA == Siconos::DENSE)
+        if(numA == siconos::DENSE)
           ublas::axpy_prod(*A.dense(), *B.dense(), *C.dense(), init);
-        else if(numA == Siconos::TRIANGULAR)
+        else if(numA == siconos::TRIANGULAR)
           ublas::axpy_prod(*A.triang(), *B.dense(), *C.dense(), init);
-        else if(numA == Siconos::SYMMETRIC)
+        else if(numA == siconos::SYMMETRIC)
           ublas::axpy_prod(*A.sym(), *B.dense(), *C.dense(), init);
-        else if(numA == Siconos::SPARSE)
+        else if(numA == siconos::SPARSE)
           ublas::axpy_prod(*A.sparse(), *B.dense(), *C.dense(), init);
-        else// if(numA==Siconos::BANDED)
+        else// if(numA==siconos::BANDED)
           ublas::axpy_prod(*A.banded(), *B.dense(), *C.dense(), init);
       }
-      else if(numB == Siconos::TRIANGULAR)
+      else if(numB == siconos::TRIANGULAR)
       {
-        if(numA == Siconos::DENSE)
+        if(numA == siconos::DENSE)
           ublas::axpy_prod(*A.dense(), *B.triang(), *C.dense(), init);
-        else if(numA == Siconos::TRIANGULAR)
+        else if(numA == siconos::TRIANGULAR)
           ublas::axpy_prod(*A.triang(), *B.triang(), *C.dense(), init);
-        else if(numA == Siconos::SYMMETRIC)
+        else if(numA == siconos::SYMMETRIC)
           ublas::axpy_prod(*A.sym(), *B.triang(), *C.dense(), init);
-        else if(numA == Siconos::SPARSE)
+        else if(numA == siconos::SPARSE)
           ublas::axpy_prod(*A.sparse(), *B.triang(), *C.dense(), init);
-        else //if(numA==Siconos::BANDED)
+        else //if(numA==siconos::BANDED)
           ublas::axpy_prod(*A.banded(), *B.triang(), *C.dense(), init);
       }
-      else if(numB == Siconos::SYMMETRIC)
+      else if(numB == siconos::SYMMETRIC)
       {
-        if(numA == Siconos::DENSE)
+        if(numA == siconos::DENSE)
           ublas::axpy_prod(*A.dense(), *B.sym(), *C.dense(), init);
-        else if(numA == Siconos::TRIANGULAR)
+        else if(numA == siconos::TRIANGULAR)
           ublas::axpy_prod(*A.triang(), *B.sym(), *C.dense(), init);
-        else if(numA == Siconos::SYMMETRIC)
+        else if(numA == siconos::SYMMETRIC)
           ublas::axpy_prod(*A.sym(), *B.sym(), *C.dense(), init);
-        else if(numA == Siconos::SPARSE)
+        else if(numA == siconos::SPARSE)
           ublas::axpy_prod(*A.sparse(), *B.sym(), *C.dense(), init);
-        else // if (numA == Siconos::BANDED)
+        else // if (numA == siconos::BANDED)
           ublas::axpy_prod(*A.banded(), *B.sym(), *C.dense(), init);
       }
-      else if(numB == Siconos::SPARSE)
+      else if(numB == siconos::SPARSE)
       {
-        if(numA == Siconos::DENSE)
+        if(numA == siconos::DENSE)
           ublas::axpy_prod(*A.dense(), *B.sparse(), *C.dense(), init);
-        else if(numA == Siconos::TRIANGULAR)
+        else if(numA == siconos::TRIANGULAR)
           ublas::axpy_prod(*A.triang(), *B.sparse(), *C.dense(), init);
-        else if(numA == Siconos::SYMMETRIC)
+        else if(numA == siconos::SYMMETRIC)
           ublas::axpy_prod(*A.sym(), *B.sparse(), *C.dense(), init);
-        else if(numA == Siconos::SPARSE)
+        else if(numA == siconos::SPARSE)
           ublas::axpy_prod(*A.sparse(), *B.sparse(), *C.dense(), init);
-        else //if(numA==Siconos::BANDED){
+        else //if(numA==siconos::BANDED){
           ublas::axpy_prod(*A.banded(), *B.sparse(), *C.dense(), init);
       }
-      else //if(numB==Siconos::BANDED)
+      else //if(numB==siconos::BANDED)
       {
-        if(numA == Siconos::DENSE)
+        if(numA == siconos::DENSE)
           ublas::axpy_prod(*A.dense(), *B.banded(), *C.dense(), init);
-        else if(numA == Siconos::TRIANGULAR)
+        else if(numA == siconos::TRIANGULAR)
           ublas::axpy_prod(*A.triang(), *B.banded(), *C.dense(), init);
-        else if(numA == Siconos::SYMMETRIC)
+        else if(numA == siconos::SYMMETRIC)
           ublas::axpy_prod(*A.sym(), *B.banded(), *C.dense(), init);
-        else if(numA == Siconos::SPARSE)
+        else if(numA == siconos::SPARSE)
           ublas::axpy_prod(*A.sparse(), *B.banded(), *C.dense(), init);
-        else //if(numA==Siconos::BANDED)
+        else //if(numA==siconos::BANDED)
           ublas::axpy_prod(*A.banded(), *B.banded(), *C.dense(), init);
       }
       break;
-    case Siconos::TRIANGULAR:
-      // if(numA!= Siconos::TRIANGULAR || numB != Siconos::TRIANGULAR)
+    case siconos::TRIANGULAR:
+      // if(numA!= siconos::TRIANGULAR || numB != siconos::TRIANGULAR)
       THROW_EXCEPTION("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
       //ublas::axpy_prod(*A.triang(), *B.triang(),*C.triang(), init);
       break;
-    case Siconos::SYMMETRIC:
-      //        if(numA!= Siconos::SYMMETRIC || numB != Siconos::SYMMETRIC)
+    case siconos::SYMMETRIC:
+      //        if(numA!= siconos::SYMMETRIC || numB != siconos::SYMMETRIC)
       THROW_EXCEPTION("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
       //ublas::axpy_prod(*A.sym(), *B.sym(),*C.sym(),init);
       break;
-    case Siconos::SPARSE:
-      if(numA != Siconos::SPARSE || numB != Siconos::SPARSE)
+    case siconos::SPARSE:
+      if(numA != siconos::SPARSE || numB != siconos::SPARSE)
         THROW_EXCEPTION("Matrix function axpy_prod(A,B,C): wrong type for C (according to A and B types).");
       ublas::sparse_prod(*A.sparse(), *B.sparse(), *C.sparse(), init);
       break;
@@ -376,10 +376,10 @@ void axpy_prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
 // {
 //   if(A.isBlock() || B.isBlock() || C.isBlock())
 //     THROW_EXCEPTION("gemm(...) not yet implemented for block matrices.");
-//   Siconos::UBLAS_TYPE numA = A.num();
-//   Siconos::UBLAS_TYPE numB = B.num();
-//   Siconos::UBLAS_TYPE numC = C.num();
-//   if(numA != Siconos::DENSE || numB != Siconos::DENSE || numC != Siconos::DENSE)
+//   siconos::UBLAS_TYPE numA = A.num();
+//   siconos::UBLAS_TYPE numB = B.num();
+//   siconos::UBLAS_TYPE numC = C.num();
+//   if(numA != siconos::DENSE || numB != siconos::DENSE || numC != siconos::DENSE)
 //     THROW_EXCEPTION("gemm(...) failed: reserved to dense matrices.");
 
 
@@ -396,9 +396,9 @@ void axpy_prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
 // Note FP: this function is never used. We keep it for the record. Remove it later ?
 // void gemm(double a, const SiconosMatrix& A, const SiconosMatrix& B, double b, SiconosMatrix& C)
 // {
-//   Siconos::UBLAS_TYPE numA = A.num();
-//   Siconos::UBLAS_TYPE numB = B.num();
-//   Siconos::UBLAS_TYPE numC = C.num();
+//   siconos::UBLAS_TYPE numA = A.num();
+//   siconos::UBLAS_TYPE numB = B.num();
+//   siconos::UBLAS_TYPE numC = C.num();
 //   assert(!(B.isPLUFactorized()) && "B is PLUFactorized in prod !!");
 //   assert(!(A.isPLUFactorized()) && "A is PLUFactorized in prod !!");
 //   C.resetFactorizationFlags();
@@ -408,9 +408,9 @@ void axpy_prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C,
 //   if(numA == 0 || numB == 0 || numC == 0)
 //     THROW_EXCEPTION("gemm(...) not yet implemented for block matrices.");
 
-//   if(numA == Siconos::DENSE && numB == Siconos::DENSE && numC == Siconos::DENSE)
+//   if(numA == siconos::DENSE && numB == siconos::DENSE && numC == siconos::DENSE)
 //     siconosBindings::blas::gemm(a, *A.dense(), *B.dense(), b, *C.dense());
-//   else if(numA == Siconos::DENSE && numB == Siconos::DENSE && numC != Siconos::DENSE)
+//   else if(numA == siconos::DENSE && numB == siconos::DENSE && numC != siconos::DENSE)
 //   {
 //     // Copy C into tmpC ...
 //     tmpC = new DenseMat(*C.dense());

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #include "NonlinearComplementarityProblem.h"
-#include <stdlib.h>          // for free, NULL, malloc
+
+#include <stdlib.h>  // for free, NULL, malloc
+
 #include "NumericsMatrix.h"  // for NM_clear
 
-
-void freeNCP(NonlinearComplementarityProblem* ncp)
-{
-  if(ncp->nabla_F)
-  {
+void freeNCP(NonlinearComplementarityProblem* ncp) {
+  if (ncp->nabla_F) {
     NM_clear(ncp->nabla_F);
     free(ncp->nabla_F);
     ncp->nabla_F = NULL;
@@ -33,9 +32,9 @@ void freeNCP(NonlinearComplementarityProblem* ncp)
   free(ncp);
 }
 
-NonlinearComplementarityProblem* newNCP(void)
-{
-  NonlinearComplementarityProblem* ncp = (NonlinearComplementarityProblem*) malloc(sizeof(NonlinearComplementarityProblem));
+NonlinearComplementarityProblem* newNCP(void) {
+  NonlinearComplementarityProblem* ncp =
+      (NonlinearComplementarityProblem*)malloc(sizeof(NonlinearComplementarityProblem));
 
   ncp->n = 0;
   ncp->compute_F = NULL;

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
-#include <assert.h>                                    // for assert
-#include <math.h>                                      // for sqrt
+ */
+#include "fc3d_AlartCurnier_functions.h"  // for computeAlartCu...
+
+#include <assert.h>  // for assert
+#include <math.h>    // for sqrt
+
 #include "FrictionContactProblem.h"                    // for FrictionContac...
 #include "NumericsFwd.h"                               // for FrictionContac...
 #include "NumericsMatrix.h"                            // for NumericsMatrix
-#include "siconos_debug.h"                                     // for DEBUG_PRINTF
-#include "fc3d_AlartCurnier_functions.h"               // for computeAlartCu...
 #include "fc3d_onecontact_nonsmooth_Newton_solvers.h"  // for computeNonsmoo...
 #include "numerics_verbose.h"                          // for numerics_printf
 #include "op3x3.h"                                     // for SET3, eig_3x3
+#include "siconos_debug.h"                             // for DEBUG_PRINTF
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 
@@ -35,7 +37,6 @@ extern computeNonsmoothFunction Function;
 /* #define AC_Generated */
 /* #define AC_JeanMoreau  Christensen & Pang */
 
-
 /*Static variables */
 /* Local problem operators */
 /* static const int nLocal = 3; */
@@ -45,8 +46,8 @@ extern computeNonsmoothFunction Function;
 /* static double qLocal[3]; */
 /* static double mu_i = 0.0; */
 
-
-/* The global problem of size n= 3*nc, nc being the number of contacts, is locally saved in MGlobal and qGlobal */
+/* The global problem of size n= 3*nc, nc being the number of contacts, is locally saved in
+ * MGlobal and qGlobal */
 /* mu corresponds to the vector of friction coefficients */
 /* note that either MGlobal or MBGlobal is used, depending on the chosen storage */
 /* static int n=0; */
@@ -57,7 +58,6 @@ extern computeNonsmoothFunction Function;
 /* static FrictionContactProblem* localFC3D = NULL; */
 /* static FrictionContactProblem* globalFC3D = NULL; */
 
-
 /* static double an; */
 /* static double at; */
 /* static double projN; */
@@ -66,15 +66,11 @@ extern computeNonsmoothFunction Function;
 // Set the function for computing F and its gradient
 // \todo should nbe done in initialization
 
-
-
 /* /\* Compute function F(Reaction) *\/ */
 /* void F_AC(int Fsize, double *reaction , double *F, int up2Date) */
 /* { */
 
 /*   int nLocal = 3; */
-
-
 
 /*   if (F == NULL) */
 /*   { */
@@ -90,8 +86,8 @@ extern computeNonsmoothFunction Function;
 /*   double * MLocal = localFC3D->M->matrix0; */
 /*   double mu_i = localFC3D->mu[0]; */
 
-
-/*   /\* up2Date = 1 = true if jacobianF(n, reaction,jacobianF) has been called just before jacobianFMatrix(...). In that case the computation of */
+/*   /\* up2Date = 1 = true if jacobianF(n, reaction,jacobianF) has been called just before
+ * jacobianFMatrix(...). In that case the computation of */
 /*      velocityLocal is not required again. */
 /*   *\/ */
 /*   if (up2Date == 0) */
@@ -99,14 +95,19 @@ extern computeNonsmoothFunction Function;
 /*     /\* velocityLocal = M.reaction + qLocal *\/ */
 /*     int incx = 1, incy = 1; */
 /*     cblas_dcopy(Fsize, qLocal, incx, velocityLocal, incy); */
-/*     cblas_dgemv(CblasColMajor,CblasNoTrans, nLocal, nLocal, 1.0, MLocal, 3, reaction, incx, 1.0, velocityLocal, incy); */
-/*     /\*   velocityLocal[0] = MLocal[0]*reaction[0] + MLocal[Fsize]*reaction[1] + MLocal[2*Fsize]*reaction[2] + qLocal[0]; *\/ */
-/*     /\*   velocityLocal[1] = MLocal[1]*reaction[0] + MLocal[Fsize+1]*reaction[1] + MLocal[2*Fsize+1]*reaction[2] + qLocal[1]; *\/ */
-/*     /\*   velocityLocal[2] = MLocal[2]*reaction[0] + MLocal[Fsize+2]*reaction[1] + MLocal[2*Fsize+2]*reaction[2] + qLocal[2]; *\/ */
+/*     cblas_dgemv(CblasColMajor,CblasNoTrans, nLocal, nLocal, 1.0, MLocal, 3, reaction,
+ * incx, 1.0, velocityLocal, incy); */
+/*     /\*   velocityLocal[0] = MLocal[0]*reaction[0] + MLocal[Fsize]*reaction[1] +
+ * MLocal[2*Fsize]*reaction[2] + qLocal[0]; *\/ */
+/*     /\*   velocityLocal[1] = MLocal[1]*reaction[0] + MLocal[Fsize+1]*reaction[1] +
+ * MLocal[2*Fsize+1]*reaction[2] + qLocal[1]; *\/ */
+/*     /\*   velocityLocal[2] = MLocal[2]*reaction[0] + MLocal[Fsize+2]*reaction[1] +
+ * MLocal[2*Fsize+2]*reaction[2] + qLocal[2]; *\/ */
 
 /*     an = 1. / MLocal[0]; */
 /*     double alpha = MLocal[Fsize + 1] + MLocal[2 * Fsize + 2]; */
-/*     double det = MLocal[1 * Fsize + 1] * MLocal[2 * Fsize + 2] - MLocal[2 * Fsize + 1] * MLocal[1 * Fsize + 2]; */
+/*     double det = MLocal[1 * Fsize + 1] * MLocal[2 * Fsize + 2] - MLocal[2 * Fsize + 1] *
+ * MLocal[1 * Fsize + 2]; */
 /*     double beta = alpha * alpha - 4 * det; */
 /*     if (beta > 0.) */
 /*       beta = sqrt(beta); */
@@ -159,8 +160,6 @@ extern computeNonsmoothFunction Function;
 /*   double * MLocal = localFC3D->M->matrix0; */
 /*   double mu_i = localFC3D->mu[0]; */
 
-
-
 /*   if (jacobianFMatrix == NULL) */
 /*   { */
 /*     fprintf(stderr, "fc3d_AlartCurnier::jacobianF_AC error: jacobianMatrix == NULL.\n"); */
@@ -172,13 +171,11 @@ extern computeNonsmoothFunction Function;
 /*     exit(EXIT_FAILURE); */
 /*   } */
 
+/*   /\* Warning: input reaction is not necessary equal to the last computed value of
+ * reactionBlock *\/ */
 
-
-
-
-/*   /\* Warning: input reaction is not necessary equal to the last computed value of reactionBlock *\/ */
-
-/*   /\* up2Date = 1 = true if F(n, reaction,F) has been called just before jacobianFMatrix(...). In that case the computation of */
+/*   /\* up2Date = 1 = true if F(n, reaction,F) has been called just before
+ * jacobianFMatrix(...). In that case the computation of */
 /*      velocityLocal is not required again. */
 /*   *\/ */
 /*   if (up2Date == 0) */
@@ -186,11 +183,13 @@ extern computeNonsmoothFunction Function;
 /*     /\* velocityLocal = M.reaction + qLocal *\/ */
 /*     int incx = 1, incy = 1; */
 /*     cblas_dcopy(Fsize, qLocal, incx, velocityLocal, incy); */
-/*     cblas_dgemv(CblasColMajor,CblasNoTrans, nLocal, nLocal, 1.0, MLocal, 3, reaction, incx, 1.0, velocityLocal, incy); */
+/*     cblas_dgemv(CblasColMajor,CblasNoTrans, nLocal, nLocal, 1.0, MLocal, 3, reaction,
+ * incx, 1.0, velocityLocal, incy); */
 
 /*     an = 1. / MLocal[0]; */
 /*     double alpha = MLocal[Fsize + 1] + MLocal[2 * Fsize + 2]; */
-/*     double det = MLocal[1 * Fsize + 1] * MLocal[2 * Fsize + 2] - MLocal[2 * Fsize + 1] * MLocal[1 * Fsize + 2]; */
+/*     double det = MLocal[1 * Fsize + 1] * MLocal[2 * Fsize + 2] - MLocal[2 * Fsize + 1] *
+ * MLocal[1 * Fsize + 2]; */
 /*     double beta = alpha * alpha - 4 * det; */
 /*     if (beta > 0.) */
 /*       beta = sqrt(beta); */
@@ -234,18 +233,22 @@ extern computeNonsmoothFunction Function;
 /*     jacobianFMatrix[2] = -rcof * (num * projS + reaction[0] * projS * tmp); */
 
 /*     tmp = mrn3 * ((1 - at * MLocal[Fsize + 1]) * projT - at * MLocal[Fsize + 2] * projS); */
-/*     jacobianFMatrix[1 * Fsize + 1] = (1 - mu_i * reaction[0] * (num * (1 - at * MLocal[Fsize + 1]) - projT * tmp)) / at; */
-/*     jacobianFMatrix[1 * Fsize + 2] =  - rcof * reaction[0] * ((-num * at * MLocal[Fsize + 2]) - projS * tmp); */
+/*     jacobianFMatrix[1 * Fsize + 1] = (1 - mu_i * reaction[0] * (num * (1 - at * MLocal[Fsize
+ * + 1]) - projT * tmp)) / at; */
+/*     jacobianFMatrix[1 * Fsize + 2] =  - rcof * reaction[0] * ((-num * at * MLocal[Fsize +
+ * 2]) - projS * tmp); */
 
-/*     tmp = mrn3 * ((1 - at * MLocal[2 * Fsize + 2]) * projS - at * MLocal[2 * Fsize + 1] * projT); */
-/*     jacobianFMatrix[2 * Fsize + 1] =  - rcof * reaction[0] * ((-num * at * MLocal[2 * Fsize + 1]) - projT * tmp); */
-/*     jacobianFMatrix[2 * Fsize + 2] = (1 - mu_i * reaction[0] * (num * (1 - at * MLocal[2 * Fsize + 2]) - projS * tmp)) / at; */
+/*     tmp = mrn3 * ((1 - at * MLocal[2 * Fsize + 2]) * projS - at * MLocal[2 * Fsize + 1] *
+ * projT); */
+/*     jacobianFMatrix[2 * Fsize + 1] =  - rcof * reaction[0] * ((-num * at * MLocal[2 * Fsize
+ * + 1]) - projT * tmp); */
+/*     jacobianFMatrix[2 * Fsize + 2] = (1 - mu_i * reaction[0] * (num * (1 - at * MLocal[2 *
+ * Fsize + 2]) - projS * tmp)) / at; */
 /*   } */
 /*   /\*   for(int l = 0; l < 9 ; ++l) *\/ */
 /*   /\*     printf(" %lf", jacobianFMatrix[l]); *\/ */
 /*   /\*   printf("\n"); *\/ */
 /* } */
-
 
 /* void computeFGlobal_AC(double* reaction, double* FGlobal) */
 /* { */
@@ -259,7 +262,6 @@ extern computeNonsmoothFunction Function;
 /*   double * qLocal = localFC3D->q; */
 /*   double *mu = globalFC3D->mu; */
 
-
 /*   int contact, diagPos = 0, position; */
 /*   int in, it, is, inc, incx; */
 /*   double * reactionLocal; */
@@ -269,7 +271,8 @@ extern computeNonsmoothFunction Function;
 /*     position = 3 * contact; */
 /*     if (MGlobal->storageType == 1) /\* Sparse storage *\/ */
 /*     { */
-/*       /\* The part of MGlobal which corresponds to the current block is copied into MLocal *\/ */
+/*       /\* The part of MGlobal which corresponds to the current block is copied into MLocal
+ * *\/ */
 /*       diagPos = numberOfContacts * contact + contact; */
 /*       MLocal = MGlobal->matrix1->block[diagPos]; */
 /*     } */
@@ -332,11 +335,9 @@ extern computeNonsmoothFunction Function;
 /*   } */
 /* } */
 
-
-
 /* Alart & Curnier version (Radius = mu*max(0,RVN)) */
-void computeAlartCurnierSTDOld(double R[3], double velocity[3], double mu, double rho[3], double F[3], double A[9], double B[9])
-{
+void computeAlartCurnierSTDOld(double R[3], double velocity[3], double mu, double rho[3],
+                               double F[3], double A[9], double B[9]) {
   double RVN, RVT, RVS;
   double RhoN = rho[0];
   double RhoT = rho[1];
@@ -346,42 +347,35 @@ void computeAlartCurnierSTDOld(double R[3], double velocity[3], double mu, doubl
   RVT = R[1] - RhoT * velocity[1];
   RVS = R[2] - RhoT * velocity[2];
   RV = sqrt(RVT * RVT + RVS * RVS);
-  //Radius = mu*R[0];
+  // Radius = mu*R[0];
 
-  if(A)
-  {
+  if (A) {
     A[0 + 3 * 1] = 0.;
     A[0 + 3 * 2] = 0.;
     A[1 + 3 * 0] = 0.;
     A[2 + 3 * 0] = 0.;
   }
 
-  if(B)
-  {
+  if (B) {
     B[0 + 3 * 1] = 0.;
     B[0 + 3 * 2] = 0.;
     B[1 + 3 * 0] = 0.;
     B[2 + 3 * 0] = 0.;
   }
 
-  if(RVN >= 0.0)
-  {
+  if (RVN >= 0.0) {
     DEBUG_PRINT("Normal part in the cone\n");
     Radius = mu * RVN;
     F[0] = RhoN * (velocity[0]);
-    if(A && B)
-    {
-      A[0 + 3 * 0] =  RhoN;
+    if (A && B) {
+      A[0 + 3 * 0] = RhoN;
       B[0 + 3 * 0] = 0.0;
     }
-  }
-  else
-  {
+  } else {
     DEBUG_PRINT("Normal part out the cone\n");
     Radius = 0.0;
     F[0] = R[0];
-    if(A && B)
-    {
+    if (A && B) {
       A[0 + 3 * 0] = 0.0;
       B[0 + 3 * 0] = 1.0;
     }
@@ -389,17 +383,15 @@ void computeAlartCurnierSTDOld(double R[3], double velocity[3], double mu, doubl
 
   // Compute the value of the Alart--Curnier Function and its gradient for the tangential part
 
-
   DEBUG_PRINTF("Radius=%le\n", Radius);
   DEBUG_PRINTF("RV=%le\n", RV);
 
-  if(RV <= Radius)  // We are in the disk and Radius is positive
+  if (RV <= Radius)  // We are in the disk and Radius is positive
   {
     DEBUG_PRINT("We are in the disk\n");
     F[1] = RhoT * (velocity[1]);
     F[2] = RhoT * (velocity[2]);
-    if(A && B)
-    {
+    if (A && B) {
       A[1 + 3 * 1] = RhoT;
       A[1 + 3 * 2] = 0.0;
       A[2 + 3 * 1] = 0.0;
@@ -411,27 +403,22 @@ void computeAlartCurnierSTDOld(double R[3], double velocity[3], double mu, doubl
       B[2 + 3 * 1] = 0.0;
       B[2 + 3 * 2] = 0.0;
     }
-  }
-  else if(RV > Radius)  // We are out the disk and Radius is postive
+  } else if (RV > Radius)  // We are out the disk and Radius is postive
   {
-
-    if(Radius > 0)
-    {
+    if (Radius > 0) {
       DEBUG_PRINT("We are out the disk and Radius is positive\n");
       RV1 = 1.0 / RV;
       F[1] = R[1] - Radius * RVT * RV1;
       F[2] = R[2] - Radius * RVS * RV1;
-      if(A && B)
-      {
+      if (A && B) {
         RV3 = RV1 * RV1 * RV1;
         GammaTT = RV1 - RVT * RVT * RV3;
-        GammaTS =  - RVT * RVS * RV3;
-        GammaST =  GammaTS;
+        GammaTS = -RVT * RVS * RV3;
+        GammaST = GammaTS;
         GammaSS = RV1 - RVS * RVS * RV3;
 
         A[1 + 3 * 0] = mu * RhoN * RVT * RV1;
         A[2 + 3 * 0] = mu * RhoN * RVS * RV1;
-
 
         A[1 + 3 * 1] = GammaTT * RhoT * Radius;
 
@@ -442,23 +429,20 @@ void computeAlartCurnierSTDOld(double R[3], double velocity[3], double mu, doubl
 
         B[1 + 3 * 0] = -mu * RVT * RV1;
 
-        B[1 + 3 * 1] = 1.0 - GammaTT * Radius ;
-        B[1 + 3 * 2] = - GammaTS  * Radius ;
+        B[1 + 3 * 1] = 1.0 - GammaTT * Radius;
+        B[1 + 3 * 2] = -GammaTS * Radius;
 
         B[2 + 3 * 0] = -mu * RVS * RV1;
 
-        B[2 + 3 * 1] = - GammaST  * Radius;
+        B[2 + 3 * 1] = -GammaST * Radius;
         B[2 + 3 * 2] = 1.0 - GammaSS * Radius;
       }
-    }
-    else
-    {
+    } else {
       DEBUG_PRINT("We are out the disk and Radius is zero\n");
 
-      F[1] = R[1] ;
-      F[2] = R[2] ;
-      if(A && B)
-      {
+      F[1] = R[1];
+      F[2] = R[2];
+      if (A && B) {
         A[1 + 3 * 1] = 0.0;
         A[1 + 3 * 2] = 0.0;
         A[2 + 3 * 1] = 0.0;
@@ -472,7 +456,6 @@ void computeAlartCurnierSTDOld(double R[3], double velocity[3], double mu, doubl
         B[2 + 3 * 2] = 1.0;
       }
     }
-
   }
   /*   else // We are out the disk and Radius is negative */
   /*     { */
@@ -501,32 +484,29 @@ void computeAlartCurnierSTDOld(double R[3], double velocity[3], double mu, doubl
   DEBUG_PRINTF("F[1] = %le\t", F[1]);
   DEBUG_PRINTF("F[2] = %le\n", F[2]);
 
-  DEBUG_EXPR(if(A) NM_dense_display(A, 3, 3, 3););
-  DEBUG_EXPR(if(B) NM_dense_display(B, 3, 3, 3););
-  DEBUG_EXPR(
-    if(B)
-{
-  double diago = 0.0;
-  for(int l = 0; l < 3; l++)
-    {
-      for(int k = 0; k < 3; k++)
-      {
-        if(k == l)  diago = 1.0;
-        else diago = 0.0;
+  DEBUG_EXPR(if (A) NM_dense_display(A, 3, 3, 3););
+  DEBUG_EXPR(if (B) NM_dense_display(B, 3, 3, 3););
+  DEBUG_EXPR(if (B) {
+    double diago = 0.0;
+    for (int l = 0; l < 3; l++) {
+      for (int k = 0; k < 3; k++) {
+        if (k == l)
+          diago = 1.0;
+        else
+          diago = 0.0;
         printf("I-B[%i+3*%i] = %le\t", l, k, diago - B[l + 3 * k]);
       }
       printf("\n");
     }
-  }
-  );
+  });
 }
 
-
 /* Alart & Curnier version (Radius = mu*max(0,RVN)) */
-void computeAlartCurnierSTD(double R[3], double velocity[3], double mu, double rho[3], double F[3], double A[9], double B[9])
-{
+void computeAlartCurnierSTD(double R[3], double velocity[3], double mu, double rho[3],
+                            double F[3], double A[9], double B[9]) {
   DEBUG_PRINT("computeAlartCurnierSTD starts\n");
-  DEBUG_EXPR_WE(for(int i =0 ; i < 3; i++)printf("R[%i]= %12.8e,\t velocity[%i]= %12.8e,\n",i,R[i],i,velocity[i]););
+  DEBUG_EXPR_WE(for (int i = 0; i < 3; i++) printf("R[%i]= %12.8e,\t velocity[%i]= %12.8e,\n",
+                                                   i, R[i], i, velocity[i]););
 
   SET3(R);
   SET3(velocity);
@@ -534,7 +514,6 @@ void computeAlartCurnierSTD(double R[3], double velocity[3], double mu, double r
   SET3(F);
   SET3X3MAYBE(A);
   SET3X3MAYBE(B);
-
 
   double RVN, RVT, RVS;
   double RhoN = *rho0;
@@ -545,10 +524,9 @@ void computeAlartCurnierSTD(double R[3], double velocity[3], double mu, double r
   RVT = *R1 - RhoT * *velocity1;
   RVS = *R2 - RhoT * *velocity2;
   RV = sqrt(RVT * RVT + RVS * RVS);
-  //Radius = mu*R[0];
+  // Radius = mu*R[0];
 
-  if(A00)
-  {
+  if (A00) {
     // always true
     *A01 = 0.;
     *A02 = 0.;
@@ -558,8 +536,7 @@ void computeAlartCurnierSTD(double R[3], double velocity[3], double mu, double r
     *A20 = 0.;
   }
 
-  if(B00)
-  {
+  if (B00) {
     // always true
     *B01 = 0.;
     *B02 = 0.;
@@ -569,25 +546,20 @@ void computeAlartCurnierSTD(double R[3], double velocity[3], double mu, double r
     *B20 = 0.;
   }
 
-  if(RVN > 0.0)
-  {
+  if (RVN > 0.0) {
     DEBUG_PRINT("Normal part in the cone\n");
 
     Radius = mu * RVN;
     *F0 = RhoN * *velocity0;
-    if(A00 && B00)
-    {
-      *A00 =  RhoN;
+    if (A00 && B00) {
+      *A00 = RhoN;
       *B00 = 0.0;
     }
-  }
-  else
-  {
+  } else {
     DEBUG_PRINT("Normal part out the cone\n");
     Radius = 0.0;
     *F0 = *R0;
-    if(A00 && B00)
-    {
+    if (A00 && B00) {
       *A00 = 0.0;
       *B00 = 1.0;
     }
@@ -595,19 +567,16 @@ void computeAlartCurnierSTD(double R[3], double velocity[3], double mu, double r
 
   // Compute the value of the Alart--Curnier Function and its gradient for the tangential part
 
-
   DEBUG_PRINTF("Radius=%le\n", Radius);
   DEBUG_PRINTF("RV=%le\n", RV);
 
-  if(RV <= Radius)  // We are in the disk and Radius is positive
+  if (RV <= Radius)  // We are in the disk and Radius is positive
   {
-
     DEBUG_PRINT("We are in the disk\n");
 
     *F1 = RhoT * *velocity1;
     *F2 = RhoT * *velocity2;
-    if(A00 && B00)
-    {
+    if (A00 && B00) {
       *A11 = RhoT;
       *A12 = 0.0;
       *A21 = 0.0;
@@ -619,28 +588,22 @@ void computeAlartCurnierSTD(double R[3], double velocity[3], double mu, double r
       *B21 = 0.0;
       *B22 = 0.0;
     }
-  }
-  else if(RV > Radius)  // We are out the disk and Radius is positive
+  } else if (RV > Radius)  // We are out the disk and Radius is positive
   {
-
-    if(Radius > 0)
-    {
-
+    if (Radius > 0) {
       DEBUG_PRINT("We are out the disk and Radius is positive\n");
       RV1 = 1.0 / RV;
       *F1 = *R1 - Radius * RVT * RV1;
       *F2 = *R2 - Radius * RVS * RV1;
-      if(A00 && B00)
-      {
+      if (A00 && B00) {
         RV3 = RV1 * RV1 * RV1;
         GammaTT = RV1 - RVT * RVT * RV3;
-        GammaTS =  - RVT * RVS * RV3;
-        GammaST =  GammaTS;
+        GammaTS = -RVT * RVS * RV3;
+        GammaST = GammaTS;
         GammaSS = RV1 - RVS * RVS * RV3;
 
         *A10 = mu * RhoN * RVT * RV1;
         *A20 = mu * RhoN * RVS * RV1;
-
 
         *A11 = GammaTT * RhoT * Radius;
 
@@ -651,26 +614,20 @@ void computeAlartCurnierSTD(double R[3], double velocity[3], double mu, double r
 
         *B10 = -mu * RVT * RV1;
 
-        *B11 = 1.0 - GammaTT * Radius ;
-        *B12 = - GammaTS  * Radius ;
+        *B11 = 1.0 - GammaTT * Radius;
+        *B12 = -GammaTS * Radius;
 
         *B20 = -mu * RVS * RV1;
 
-        *B21 = - GammaST  * Radius;
+        *B21 = -GammaST * Radius;
         *B22 = 1.0 - GammaSS * Radius;
       }
-    }
-    else
-    {
-
-
+    } else {
       DEBUG_PRINT("We are out the disk and Radius is zero\n");
 
-
-      *F1 = *R1 ;
-      *F2 = *R2 ;
-      if(A00 && B00)
-      {
+      *F1 = *R1;
+      *F2 = *R2;
+      if (A00 && B00) {
         *A11 = 0.0;
         *A12 = 0.0;
         *A21 = 0.0;
@@ -684,15 +641,12 @@ void computeAlartCurnierSTD(double R[3], double velocity[3], double mu, double r
         *B22 = 1.0;
       }
     }
-
   }
 }
 
-
 /* Christensen & Pang version (Radius = mu* R[0])*/
-void computeAlartCurnierJeanMoreau(double R[3], double velocity[3], double mu, double rho[3], double F[3], double A[9], double B[9])
-{
-
+void computeAlartCurnierJeanMoreau(double R[3], double velocity[3], double mu, double rho[3],
+                                   double F[3], double A[9], double B[9]) {
   double RVN, RVT, RVS;
   double RhoN = rho[0];
   double RhoT = rho[1];
@@ -706,22 +660,17 @@ void computeAlartCurnierJeanMoreau(double R[3], double velocity[3], double mu, d
 
   // Compute the value of the Alart--Curnier Function and its gradient for the normal part
   DEBUG_PRINTF("[Numerics]  computeAlartCurnierJeanMoreau - RVN = %e\n", RVN);
-  if(RVN >= 0.0)
-  {
+  if (RVN >= 0.0) {
     DEBUG_PRINT("[Numerics]  computeAlartCurnierJeanMoreau - Normal part in the cone\n");
     F[0] = RhoN * (velocity[0]);
-    if(A && B)
-    {
-      A[0 + 3 * 0] =  RhoN;
+    if (A && B) {
+      A[0 + 3 * 0] = RhoN;
       B[0 + 3 * 0] = 0.0;
     }
-  }
-  else
-  {
+  } else {
     DEBUG_PRINT("[Numerics]  computeAlartCurnierJeanMoreau - Normal part out the cone\n");
     F[0] = R[0];
-    if(A && B)
-    {
+    if (A && B) {
       A[0 + 3 * 0] = 0.0;
       B[0 + 3 * 0] = 1.0;
     }
@@ -731,15 +680,13 @@ void computeAlartCurnierJeanMoreau(double R[3], double velocity[3], double mu, d
 
   DEBUG_PRINTF("[Numerics]  computeAlartCurnierJeanMoreau - Radius=%le\n", Radius);
   DEBUG_PRINTF("[Numerics]  computeAlartCurnierJeanMoreau - RV=%le\n", RV);
-  if(RV < Radius || RV < 1e-20)   // We are in the disk
+  if (RV < Radius || RV < 1e-20)  // We are in the disk
   {
-
     DEBUG_PRINT("[Numerics]  computeAlartCurnierJeanMoreau - We are in the disk \n");
 
     F[1] = RhoT * (velocity[1]);
     F[2] = RhoT * (velocity[2]);
-    if(A && B)
-    {
+    if (A && B) {
       A[1 + 3 * 1] = RhoT;
       A[1 + 3 * 2] = 0.0;
       A[2 + 3 * 1] = 0.0;
@@ -751,8 +698,7 @@ void computeAlartCurnierJeanMoreau(double R[3], double velocity[3], double mu, d
       B[2 + 3 * 1] = 0.0;
       B[2 + 3 * 2] = 0.0;
     }
-  }
-  else  // We are out the disk
+  } else  // We are out the disk
   {
     DEBUG_PRINT("[Numerics]  computeAlartCurnierJeanMoreau - We are out the disk\n");
 
@@ -760,23 +706,20 @@ void computeAlartCurnierJeanMoreau(double R[3], double velocity[3], double mu, d
     /*        F[1] = R[1] - Radius*RVT*RV1; */
     /*        F[2] = R[2] - Radius*RVS*RV1; */
 
-
     /*        RV3 = RV1*RV1*RV1; */
     /*        GammaTT = (RV - RVT*RVT)*RV3; */
     /*        GammaTS =  - RVT*RVS*RV3; */
     /*        GammaST =  GammaTS; */
     /*        GammaSS = (RV - RVS*RVS)*RV3; */
 
-
     RV1 = 1.0 / RV;
     F[1] = R[1] - Radius * RVT * RV1;
     F[2] = R[2] - Radius * RVS * RV1;
-    if(A && B)
-    {
+    if (A && B) {
       RV3 = RV1 * RV1 * RV1;
       GammaTT = RV1 - RVT * RVT * RV3;
-      GammaTS =  - RVT * RVS * RV3;
-      GammaST =  GammaTS;
+      GammaTS = -RVT * RVS * RV3;
+      GammaST = GammaTS;
       GammaSS = RV1 - RVS * RVS * RV3;
 
       // come back to r2146
@@ -792,36 +735,35 @@ void computeAlartCurnierJeanMoreau(double R[3], double velocity[3], double mu, d
 
       B[1 + 3 * 0] = -mu * RVT * RV1;
 
-      B[1 + 3 * 1] = 1.0 - GammaTT * Radius ;
-      B[1 + 3 * 2] = - GammaTS * Radius ;
+      B[1 + 3 * 1] = 1.0 - GammaTT * Radius;
+      B[1 + 3 * 2] = -GammaTS * Radius;
 
       B[2 + 3 * 0] = -mu * RVS * RV1;
 
-      B[2 + 3 * 1] = - GammaST * Radius;
+      B[2 + 3 * 1] = -GammaST * Radius;
       B[2 + 3 * 2] = 1.0 - GammaSS * Radius;
     }
   }
 
-  DEBUG_EXPR(NV_display(F,3););
+  DEBUG_EXPR(NV_display(F, 3););
 
-  DEBUG_EXPR(if(A) NM_dense_display(A, 3, 3, 3););
-  DEBUG_EXPR(if(B) NM_dense_display(B, 3, 3, 3););
-
+  DEBUG_EXPR(if (A) NM_dense_display(A, 3, 3, 3););
+  DEBUG_EXPR(if (B) NM_dense_display(B, 3, 3, 3););
 }
 
-
-void compute_rho_split_spectral_norm_cond(FrictionContactProblem* localproblem, double * rho)
-{
-  double * MLocal = localproblem->M->matrix0;
+void compute_rho_split_spectral_norm_cond(FrictionContactProblem* localproblem, double* rho) {
+  double* MLocal = localproblem->M->matrix0;
   assert(MLocal[0 + 0 * 3] > 0);
 
-  DEBUG_EXPR(NM_dense_display(MLocal,3,3,3););
+  DEBUG_EXPR(NM_dense_display(MLocal, 3, 3, 3););
   double sw = MLocal[1 + 1 * 3] + MLocal[2 + 2 * 3];
 
-  double dw = sw * sw - 4.0 * (sw -  MLocal[2 + 1 * 3] + MLocal[1 + 2 * 3]);
-  DEBUG_PRINTF("dw = %e\n",dw);
-  if(dw > 0.0) dw = sqrt(dw);
-  else dw = 0.0;
+  double dw = sw * sw - 4.0 * (sw - MLocal[2 + 1 * 3] + MLocal[1 + 2 * 3]);
+  DEBUG_PRINTF("dw = %e\n", dw);
+  if (dw > 0.0)
+    dw = sqrt(dw);
+  else
+    dw = 0.0;
 
   rho[0] = 1.0 / MLocal[0 + 0 * 3];
   rho[1] = 2.0 * (sw - dw) / ((sw + dw) * (sw + dw));
@@ -836,26 +778,25 @@ void compute_rho_split_spectral_norm_cond(FrictionContactProblem* localproblem, 
   DEBUG_PRINTF("rho[0]=%le\t", rho[0]);
   DEBUG_PRINTF("rho[1]=%le\t", rho[1]);
   DEBUG_PRINTF("rho[2]=%le\n", rho[2]);
-
 }
 
-void compute_rho_split_spectral_norm(FrictionContactProblem* localproblem, double * rho)
-{
-  double * MLocal = localproblem->M->matrix0;
+void compute_rho_split_spectral_norm(FrictionContactProblem* localproblem, double* rho) {
+  double* MLocal = localproblem->M->matrix0;
   assert(MLocal[0 + 0 * 3] > 0);
 
-  DEBUG_EXPR(NM_dense_display(MLocal,3,3,3););
+  DEBUG_EXPR(NM_dense_display(MLocal, 3, 3, 3););
   double sw = MLocal[1 + 1 * 3] + MLocal[2 + 2 * 3];
 
-  double dw = sw * sw - 4.0 * (sw -  MLocal[2 + 1 * 3] + MLocal[1 + 2 * 3]);
-  DEBUG_PRINTF("dw = %e\n",dw);
-  if(dw > 0.0) dw = sqrt(dw);
-  else dw = 0.0;
+  double dw = sw * sw - 4.0 * (sw - MLocal[2 + 1 * 3] + MLocal[1 + 2 * 3]);
+  DEBUG_PRINTF("dw = %e\n", dw);
+  if (dw > 0.0)
+    dw = sqrt(dw);
+  else
+    dw = 0.0;
 
   rho[0] = 1.0 / MLocal[0 + 0 * 3];
 
-
-  rho[1] = 2.0/(sw + dw);
+  rho[1] = 2.0 / (sw + dw);
   rho[2] = rho[1];
 
   assert(rho[0] > 0);
@@ -867,24 +808,21 @@ void compute_rho_split_spectral_norm(FrictionContactProblem* localproblem, doubl
   DEBUG_PRINTF("rho[0]=%le\t", rho[0]);
   DEBUG_PRINTF("rho[1]=%le\t", rho[1]);
   DEBUG_PRINTF("rho[2]=%le\n", rho[2]);
-
 }
 
-void compute_rho_spectral_norm(FrictionContactProblem* localproblem, double * rho)
-{
-  double * MLocal = localproblem->M->matrix0;
-  double worktmp[9] = {0.0, 0.0, 0.0,0.0, 0.0, 0.0,0.0, 0.0, 0.0};
-  double eig[3]= {0.0, 0.0, 0.0};
-  if(eig_3x3(MLocal, worktmp, eig))
-    numerics_printf("compute_rho_spectral_norm : failed");
+void compute_rho_spectral_norm(FrictionContactProblem* localproblem, double* rho) {
+  double* MLocal = localproblem->M->matrix0;
+  double worktmp[9] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+  double eig[3] = {0.0, 0.0, 0.0};
+  if (eig_3x3(MLocal, worktmp, eig)) numerics_printf("compute_rho_spectral_norm : failed");
   DEBUG_PRINTF("eig[0] = %4.2e, eig[1] = %4.2e, eig[2] = %4.2e", eig[0], eig[1], eig[2]);
-  DEBUG_PRINTF("1/eig[0] = %4.2e, 1/eig[1] = %4.2e, 1/eig[2] = %4.2e", 1.0/eig[0], 1.0/eig[1], 1.0/eig[2]);
-  rho[0]=1.0/eig[0];
-  rho[1]=rho[0];
-  rho[2]=rho[0];
+  DEBUG_PRINTF("1/eig[0] = %4.2e, 1/eig[1] = %4.2e, 1/eig[2] = %4.2e", 1.0 / eig[0],
+               1.0 / eig[1], 1.0 / eig[2]);
+  rho[0] = 1.0 / eig[0];
+  rho[1] = rho[0];
+  rho[2] = rho[0];
 
   DEBUG_PRINTF("rho[0]=%le\t", rho[0]);
   DEBUG_PRINTF("rho[1]=%le\t", rho[1]);
   DEBUG_PRINTF("rho[2]=%le\n", rho[2]);
-
 }

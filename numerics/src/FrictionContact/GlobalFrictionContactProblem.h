@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,11 @@
   problems.
 */
 
-#include "NumericsFwd.h"    // for GlobalFrictionContactProblem, NumericsMatrix
-#include "NumericsMatrix.h" // for BalancingMatrices
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
+#include <stdio.h>  // for NULL, FILE
 
-#include <stdio.h> // for NULL, FILE
+#include "NumericsFwd.h"     // for GlobalFrictionContactProblem, NumericsMatrix
+#include "NumericsMatrix.h"  // for BalancingMatrices
+#include "SiconosConfig.h"   // for BUILD_AS_CPP // IWYU pragma: keep
 
 /**
     The structure that defines a Friction-Contact (3D or 2D ) problem
@@ -92,8 +92,7 @@ void globalFrictionContact_display(GlobalFrictionContactProblem *problem);
    \param[in] file file descriptor
    \return file status (1 if everything has worked properly)
 */
-int globalFrictionContact_printInFile(GlobalFrictionContactProblem *problem,
-                                      FILE *file);
+int globalFrictionContact_printInFile(GlobalFrictionContactProblem *problem, FILE *file);
 
 /**
    Saves problem struct into a file.
@@ -118,8 +117,7 @@ GlobalFrictionContactProblem *globalFrictionContact_newFromFile(FILE *file);
  *  \param filename the name of the input file
  *  \return problem the problem to read
  */
-GlobalFrictionContactProblem *
-globalFrictionContact_new_from_filename(const char *filename);
+GlobalFrictionContactProblem *globalFrictionContact_new_from_filename(const char *filename);
 
 /**
    Release memory for the problem structure
@@ -128,8 +126,8 @@ globalFrictionContact_new_from_filename(const char *filename);
 */
 void globalFrictionContact_free(GlobalFrictionContactProblem *problem);
 
-GlobalFrictionContactProblem *
-globalFrictionContact_copy(GlobalFrictionContactProblem *problem);
+GlobalFrictionContactProblem *globalFrictionContact_copy(
+    GlobalFrictionContactProblem *problem);
 
 /** Compute the global velocity given the reaction
  *
@@ -138,9 +136,8 @@ globalFrictionContact_copy(GlobalFrictionContactProblem *problem);
  *  \param[out] globalVelocity the global velocity computed by inverting the
  *  system.
  */
-int globalFrictionContact_computeGlobalVelocity(
-    GlobalFrictionContactProblem *problem, double *reaction,
-    double *globalVelocity);
+int globalFrictionContact_computeGlobalVelocity(GlobalFrictionContactProblem *problem,
+                                                double *reaction, double *globalVelocity);
 
 /** Refomulation into local problem */
 FrictionContactProblem *globalFrictionContact_reformulation_FrictionContact(

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ namespace siconosBindings = boost::numeric::bindings;
 #include "BlockMatrix.hpp"
 #include "SiconosAlgebra.hpp"
 
-using namespace Siconos;
+using namespace siconos;
 
 // void axpy_prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y, bool init)
 // {
@@ -49,9 +49,9 @@ using namespace Siconos;
 //   if(A.size(0) != y.size())
 //     THROW_EXCEPTION("prod(A,x,y) error: inconsistent sizes between A and y.");
 
-//   Siconos::UBLAS_TYPE numA = A.num();
-//   Siconos::UBLAS_TYPE numX = x.num();
-//   Siconos::UBLAS_TYPE numY = y.num();
+//   siconos::UBLAS_TYPE numA = A.num();
+//   siconos::UBLAS_TYPE numX = x.num();
+//   siconos::UBLAS_TYPE numY = y.num();
 
 //   if(numA == 0)  // If A is Block
 //     THROW_EXCEPTION("axpy_prod(A,x,y) error: not yet implemented for block matrices.");
@@ -156,9 +156,9 @@ using namespace Siconos;
 //     THROW_EXCEPTION("gemv(...) not yet implemented for block vectors or matrices.");
 //   assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
-//   Siconos::UBLAS_TYPE numA = A.num();
-//   Siconos::UBLAS_TYPE numX = x.num();
-//   Siconos::UBLAS_TYPE numY = y.num();
+//   siconos::UBLAS_TYPE numA = A.num();
+//   siconos::UBLAS_TYPE numX = x.num();
+//   siconos::UBLAS_TYPE numY = y.num();
 //   if(numA != DENSE || numX != DENSE || numY != DENSE)
 //     THROW_EXCEPTION("gemv(...) failed: reserved to dense matrices or vectors.");
 
@@ -171,9 +171,9 @@ using namespace Siconos;
 //     THROW_EXCEPTION("gemv(...) not yet implemented for block vectors or matrices.");
 //   assert(!(A.isPLUFactorizedInPlace()) && "A is PLUFactorizedInPlace in prod !!");
 
-//   Siconos::UBLAS_TYPE numA = A.num();
-//   Siconos::UBLAS_TYPE numX = x.num();
-//   Siconos::UBLAS_TYPE numY = y.num();
+//   siconos::UBLAS_TYPE numA = A.num();
+//   siconos::UBLAS_TYPE numX = x.num();
+//   siconos::UBLAS_TYPE numY = y.num();
 //   if(numA != DENSE || numX != DENSE || numY != DENSE)
 //     THROW_EXCEPTION("gemv(...) failed: reserved to dense matrices or vectors.");
 

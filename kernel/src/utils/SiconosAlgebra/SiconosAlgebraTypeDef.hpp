@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,9 +55,9 @@ const char N_DOUBLE_PRECISION[] = "%1.52e "; // double mantisse precision /!\ DE
 const unsigned int M_MAXSIZEFORDISPLAY = 10;
 const std::string DEFAULT_FORMAT = "ascii";
 
-namespace Siconos
+namespace siconos
 {
-  /** Siconos::UBLAS_TYPE is an enumerated type of Siconos::DENSE, TRIANGULAR, SYMMETRIC,
+  /** siconos::UBLAS_TYPE is an enumerated type of siconos::DENSE, TRIANGULAR, SYMMETRIC,
       SPARSE, BANDED. It is used to describe the type of matrix or
       vector we want to construct.
   */

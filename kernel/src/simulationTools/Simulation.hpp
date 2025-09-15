@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /*! \file Simulation.hpp
   Global interface for simulation process description.
 */
@@ -22,25 +22,25 @@
 #ifndef SIMULATION_H
 #define SIMULATION_H
 
-#include "SiconosConst.hpp"
-#include "SimulationTypeDef.hpp"
-#include "SiconosFwd.hpp"
 #include <fstream>
-#include "NonSmoothDynamicalSystem.hpp"
+
 #include "InteractionManager.hpp"
+#include "NonSmoothDynamicalSystem.hpp"
+#include "SiconosConst.hpp"
+#include "SiconosFwd.hpp"
+#include "SimulationTypeDef.hpp"
 
 /**
    Description of the simulation process (integrators, time
    discretisation and so on).
-   
+
    This is an abstract class.
-   
+
    The available simulations are TimeStepping, EventDriven and TimeSteppingD1Minus.
 */
 
-class Simulation : public std::enable_shared_from_this<Simulation>
-{
-protected:
+class Simulation : public std::enable_shared_from_this<Simulation> {
+ protected:
   ACCEPT_SERIALIZATION(Simulation);
 
   /** name or id of the Simulation */
@@ -123,11 +123,9 @@ protected:
   NonSmoothDynamicalSystem::ChangeLogIter _nsdsChangeLogPosition;
 
   /** map of not-yet-initialized DS variables for each OSI */
-  std::map< SP::OneStepIntegrator, std::list<SP::DynamicalSystem> >  _OSIDSmap;
+  std::map<SP::OneStepIntegrator, std::list<SP::DynamicalSystem> > _OSIDSmap;
 
-
-private:
-
+ private:
   /** copy constructor. Private => no copy nor pass-by value.
    */
   Simulation(const Simulation&);
@@ -136,11 +134,10 @@ private:
    */
   Simulation& operator=(const Simulation&);
 
-public:
-
+ public:
   /** default constructor, for serialization
    */
-  Simulation() {};
+  Simulation(){};
 
   /** default constructor
    *
@@ -176,18 +173,12 @@ public:
    *
    *  \return std::string : the name of the Simulation
    */
-  inline const std::string name() const
-  {
-    return _name;
-  }
+  inline const std::string name() const { return _name; }
 
   /** set the name of the Simulation
       \param newName the new name
    */
-  inline void setName(const std::string& newName)
-  {
-    _name = newName;
-  }
+  inline void setName(const std::string& newName) { _name = newName; }
 
   /** returns time instant k of the time discretisation  */
   double getTk() const;
@@ -213,10 +204,7 @@ public:
 
   /** returns a pointer to the EventsManager
    */
-  inline SP::EventsManager eventsManager() const
-  {
-    return _eventsManager;
-  };
+  inline SP::EventsManager eventsManager() const { return _eventsManager; };
 
   /** get "current time" (ie starting point for current integration,
       time of currentEvent of eventsManager.)
@@ -236,10 +224,7 @@ public:
    *
    *  \return a double.
    */
-  inline double timeStep() const
-  {
-    return (nextTime() - startingTime());
-  };
+  inline double timeStep() const { return (nextTime() - startingTime()); };
 
   /** true if a future event is to be treated or not (ie if some
       events remain in the eventsManager).
@@ -250,19 +235,13 @@ public:
    *
    *  \return an OSISset
    */
-  inline const SP::OSISet oneStepIntegrators() const
-  {
-    return _allOSI;
-  };
+  inline const SP::OSISet oneStepIntegrators() const { return _allOSI; };
 
   /** get the number of OSIs in the Simulation (ie the size of allOSI)
    *
    *  \return an unsigned int
    */
-  inline size_t numberOfOSI() const
-  {
-    return _allOSI->size();
-  }
+  inline size_t numberOfOSI() const { return _allOSI->size(); }
 
   /** insert an Integrator into the simulation list of integrators
    *
@@ -273,9 +252,9 @@ public:
   /** associate an OSI with a DS */
   void associate(SP::OneStepIntegrator osi, SP::DynamicalSystem ds);
 
-  /** 
+  /**
       get a pointer to indexSets[i]
-      
+
       \param i number of the required index set
       \return a graph of interactions
    */
@@ -286,29 +265,23 @@ public:
    *  \return a pointer to OneStepNSProblems object (container of
    *  SP::OneStepNSProblem)
    */
-  inline const SP::OneStepNSProblems oneStepNSProblems() const
-  {
-    return _allNSProblems;
-  };
+  inline const SP::OneStepNSProblems oneStepNSProblems() const { return _allNSProblems; };
 
   /** get the number of OSNSP in the Simulation (ie the size of allNSProblems)
    *
    *  \return an unsigned int
    */
-  inline size_t numberOfOSNSProblems() const
-  {
-    return _allNSProblems->size();
-  }
+  inline size_t numberOfOSNSProblems() const { return _allNSProblems->size(); }
 
   /**
      get a OneStep nonsmooth problem of the simulation, identify with its number.
-     
+
      \param id number of the required osnspb
      \return a pointer to OneStepNSProblem
   */
   SP::OneStepNSProblem oneStepNSProblem(int id);
 
-  /** 
+  /**
       add a OneStepNSProblem in the Simulation
 
       \param osns the OneStepNSProblem to insert
@@ -316,23 +289,19 @@ public:
       at impact level SICONOS_OSNSP_ED_IMPACT, at acceleration level
       SICONOS_OSNSP_ED_ACCELERATION
    */
-  virtual void insertNonSmoothProblem(SP::OneStepNSProblem osns, int Id = SICONOS_OSNSP_DEFAULT);
-
+  virtual void insertNonSmoothProblem(SP::OneStepNSProblem osns,
+                                      int Id = SICONOS_OSNSP_DEFAULT);
 
   /** get the NonSmoothDynamicalSystem
    *
    *  \return NonSmoothDynamicalSystem
    */
-  inline SP::NonSmoothDynamicalSystem nonSmoothDynamicalSystem() const
-  {
-    return _nsds;
-  }
+  inline SP::NonSmoothDynamicalSystem nonSmoothDynamicalSystem() const { return _nsds; }
   /** set the NonSmoothDynamicalSystem of the Simulation
    *
    *  \param newPtr a pointer on NonSmoothDynamicalSystem
    */
-  void setNonSmoothDynamicalSystemPtr(SP::NonSmoothDynamicalSystem newPtr)
-  {
+  void setNonSmoothDynamicalSystemPtr(SP::NonSmoothDynamicalSystem newPtr) {
     _nsdsChangeLogPosition = _nsds->changeLogBegin();
     _nsds = newPtr;
   }
@@ -341,39 +310,28 @@ public:
    *
    *  \return a double
    */
-  double tolerance() const
-  {
-    return _tolerance;
-  };
+  double tolerance() const { return _tolerance; };
 
   /** set the value of offset for q dof vector in dynamical systems
       (to avoid events accumulation)
 
       \param inputVal new tolerance
    */
-  void setTolerance(double inputVal)
-  {
-    _tolerance = inputVal;
-  };
+  void setTolerance(double inputVal) { _tolerance = inputVal; };
 
   /**
      set printStat value: if true, print solver stats.
-     
+
      \param newVal true to activate stats
   */
-  inline void setPrintStat(const bool& newVal)
-  {
-    _printStat = newVal;
-  };
+  inline void setPrintStat(const bool& newVal) { _printStat = newVal; };
 
   /** \return true if stats are activated
    */
-  inline bool getPrintStat() const
-  {
-    return _printStat;
-  };
+  inline bool getPrintStat() const { return _printStat; };
+  virtual void computeInitialStateOfTheStep(){};
 
-  /** 
+  /**
       update all index sets of the topology, using current y and lambda values of Interactions
    */
   void updateIndexSets();
@@ -398,9 +356,7 @@ public:
    *
    *  \param manager
    */
-  void insertInteractionManager(SP::InteractionManager manager)
-    { _interman = manager; }
-
+  void insertInteractionManager(SP::InteractionManager manager) { _interman = manager; }
 
   /** Compute the residu of all OSI
    */
@@ -423,28 +379,31 @@ public:
    *  \param level lambda order used to compute input
    */
   virtual void updateInput(unsigned int level);
-  
+
   /** update all input terms
    */
   virtual void updateAllInput();
   /** update state of each dynamical system
    */
-  virtual void updateState(unsigned int level=0);
+  virtual void updateState(unsigned int level = 0);
 
   /** update output
    *
    *  \param level lambda order used to compute output
    *  level is set to 0 by default since in all time-stepping schemes we update all the state
    */
-  virtual void updateOutput(unsigned int level=0);
+  virtual void updateOutput(unsigned int level = 0);
 
   /** update output, state, and input
    *
    *  \param level lambda order used to compute input
    *  level is set to 0 by default since in all time-stepping schemes we update all the state
    */
-  void update(unsigned int level=0)
-    { updateInput(level); updateState(level); updateOutput(level); }
+  void update(unsigned int level = 0) {
+    updateInput(level);
+    updateState(level);
+    updateOutput(level);
+  }
 
   /** run the simulation, from t0 to T
    *  with default parameters if any particular settings has been done
@@ -453,13 +412,11 @@ public:
 
   /** initialisation for OneStepNSProblem.
    */
-  virtual void initOSNS() = 0;
-
+  virtual void initializeOneStepNSProblem() = 0;
 
   /** step from current event to next event of EventsManager
    */
   virtual void advanceToEvent() = 0;
-
 
   /** clear the NSDS changelog up to current position.  If you have a
    *  particularly dynamic simulation (DS and Interactions created and
@@ -468,57 +425,42 @@ public:
    */
   void clearNSDSChangeLog();
 
-
   /** Set the option to specify if a relative convergence criterion must
       be used to stop the Newton iterations.
 
       \param use true if relative critarion activated
   */
-  inline void setUseRelativeConvergenceCriteron(bool use)
-  {
+  inline void setUseRelativeConvergenceCriteron(bool use) {
     _useRelativeConvergenceCriterion = use;
   };
   /**\return true if the relative convergence criterion is activated.
    */
-  inline bool useRelativeConvergenceCriteron()
-  {
-    return _useRelativeConvergenceCriterion;
-  };
+  inline bool useRelativeConvergenceCriteron() { return _useRelativeConvergenceCriterion; };
 
   /**
      Set the relative convergence tolerance
-     
+
      \param v tolerance value
   */
-  inline void setRelativeConvergenceTol(double v)
-  {
-    _relativeConvergenceTol = v;
-  };
+  inline void setRelativeConvergenceTol(double v) { _relativeConvergenceTol = v; };
 
   /** \return the relative convergence tolerence.
    *
    */
-  inline double relativeConvergenceTol()
-  {
-    return _relativeConvergenceTol;
-  };
+  inline double relativeConvergenceTol() { return _relativeConvergenceTol; };
 
   /**
    \param newVal a new relative convergence criterion
    *
    */
-  inline void setRelativeConvergenceCriterionHeld(bool newVal)
-  {
+  inline void setRelativeConvergenceCriterionHeld(bool newVal) {
     _relativeConvergenceCriterionHeld = newVal;
   };
   /**
      \return true if the relative convergence criterion held.
    *
    */
-  inline bool relativeConvergenceCriterionHeld()
-  {
-    return _relativeConvergenceCriterionHeld;
-  };
+  inline bool relativeConvergenceCriterionHeld() { return _relativeConvergenceCriterionHeld; };
 
   /**
      return input lambda[level](coor) for all the interactions
@@ -527,30 +469,26 @@ public:
      \param coor the coordinate of interest
      \return a SP::SiconosVector that contains the concatenated value
   */
-  SP::SiconosVector lambda(unsigned int level = 0, unsigned int coor=0 );
+  SP::SiconosVector lambda(unsigned int level = 0, unsigned int coor = 0);
 
-  /** 
+  /**
       return output y[level](coor) for all the interactions
-      
+
       \param level y min order to be computed
       \param coor the coordinate of interest
       \return a SP::SiconosVector that contains the concatenated value
   */
-  SP::SiconosVector y(unsigned int level = 0, unsigned int coor=0 );
+  SP::SiconosVector y(unsigned int level = 0, unsigned int coor = 0);
 
   /** call eventsManager processEvents.
    */
   void processEvents();
 
-
   /** set staticLevels
    *
    *  \param b decides whether levels should be computed at each iteration
    */
-  void setStaticLevels(bool b)
-  {
-    _staticLevels = b;
-  }
+  void setStaticLevels(bool b) { _staticLevels = b; }
 
   /** This updates the end of the Simulation.
    *  \warning this should be called only from the Model, to synchronise the 2 values
@@ -569,8 +507,7 @@ public:
    *  \param ds1 the first SP::DynamicalSystem in the Interaction
    *  \param ds2 the second SP::DynamicalSystem in the Interaction, if any
    */
-  void link(SP::Interaction inter,
-            SP::DynamicalSystem ds1,
+  void link(SP::Interaction inter, SP::DynamicalSystem ds1,
             SP::DynamicalSystem ds2 = SP::DynamicalSystem());
 
   /** Remove an Interaction from the simulation.
@@ -584,10 +521,7 @@ public:
 
   /*TS set the ds->q memory, the world (CAD model for example) must be updated.
     Overload this method to update user model.*/
-  virtual void updateWorldFromDS()
-  {
-    ;
-  };
+  virtual void updateWorldFromDS() { ; };
 
   /** initialize OSI-DS links in the NSDS graph. */
   void initializeOSIAssociations();
@@ -596,6 +530,8 @@ public:
    *  Changelog and update the changelog iterator.
    */
   void initializeNSDSChangelog();
+
+  void applyNSDSChangelogForDS();
 
   /** initialize index sets for OSIs */
   void initializeIndexSets();
@@ -608,4 +544,4 @@ public:
   VIRTUAL_ACCEPT_VISITORS(Simulation);
 };
 
-#endif // SIMULATION_H
+#endif  // SIMULATION_H

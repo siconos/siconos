@@ -49,6 +49,9 @@ def test_lagrangian_and_osis():
         ds.computeForces(0.0, q0, v0)
 
     assert np.allclose(ds_list["LTIDS+MJ"].forces(), ds_list["LTIDS+MJ"].forces())
+    assert np.allclose(ds_list["LTIDS+MJ"].forces(), ds_list["LLDDS+MJB"].forces())
+    assert np.allclose(ds_list["LTIDS+MJ"].forces(), ds_list["LLDDS+MJB2"].forces())
+
 
     # --- Interactions ---
     cor = 0.9
@@ -65,7 +68,7 @@ def test_lagrangian_and_osis():
         interactions.append(sk.Interaction(nslaw, relation))
 
     # --- NSDS ---
-    time_step = 1e-2
+    time_step = 0.005
     tinit = 0.0
     tend = 3  # 1.5+10*time_step
     nsds = sk.NonSmoothDynamicalSystem(tinit, tend)

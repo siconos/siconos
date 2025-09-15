@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,10 +34,6 @@
 #if defined(_MSC_VER) && _MSC_VER < 1800
 extern "C" double rint(double x);
 #endif
-
-// tick default value
-// it has to be greater than DBL_EPSILON ...
-const double DEFAULT_TICK = 1e-16;
 
 /** 
     Abstract class that represents generic time events.

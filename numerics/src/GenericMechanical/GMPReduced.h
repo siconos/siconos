@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*!\file GMPReduced.h
  * \brief Functions to solve GMP */
@@ -33,7 +33,8 @@
  * Vi=(Mi_2-Mi_1 Me_1^{-1} Me_2)Ri+Qi-Mi1 Me_1^{-1} Qe
  *
  */
-void gmp_reduced_solve(GenericMechanicalProblem* pInProblem, double *reaction , double *velocity, int* info, SolverOptions* options);
+void gmp_reduced_solve(GenericMechanicalProblem* pInProblem, double* reaction,
+                       double* velocity, int* info, SolverOptions* options);
 
 /*  The equalities are assembled in an single block.
  *
@@ -42,18 +43,19 @@ void gmp_reduced_solve(GenericMechanicalProblem* pInProblem, double *reaction , 
  *
  * and GS.
  */
-void gmp_reduced_equality_solve(GenericMechanicalProblem* pInProblem, double *reaction , double *velocity, int* info, SolverOptions* options);
+void gmp_reduced_equality_solve(GenericMechanicalProblem* pInProblem, double* reaction,
+                                double* velocity, int* info, SolverOptions* options);
 
 /* It converts the solution of the reduced problem to the initial problem.
  */
-void gmp_reduced_convert_solution(GenericMechanicalProblem* pInProblem, double * reaction, double * velocity,
-                                  double * Re, double * Rreduced, double * Vreduced);
+void gmp_reduced_convert_solution(GenericMechanicalProblem* pInProblem, double* reaction,
+                                  double* velocity, double* Re, double* Rreduced,
+                                  double* Vreduced);
 
-/* If the GMP is composed only of equalities and complementarities, 
+/* If the GMP is composed only of equalities and complementarities,
  * it is possible to used MLCP solvers.
  */
-void gmp_as_mlcp(GenericMechanicalProblem* pInProblem, double *reaction , double *velocity, int* info, SolverOptions* options);
-
-
+void gmp_as_mlcp(GenericMechanicalProblem* pInProblem, double* reaction, double* velocity,
+                 int* info, SolverOptions* options);
 
 #endif

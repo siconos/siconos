@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ LagrangianLinearDiagonalDS::LagrangianLinearDiagonalDS(SP::SiconosVector q0, SP:
     SP::SiconosVector mass):
   LagrangianDS(q0, velocity0)
 {
-  _mass.reset(new SimpleMatrix(dimension(), dimension(), Siconos::BANDED, 0, 0));
+  _mass.reset(new SimpleMatrix(dimension(), dimension(), siconos::BANDED, 0, 0));
   for(unsigned int i = 0; i<dimension(); ++i)
     (*_mass)(i, i) = (*mass)(i);
   _stiffness = stiffness;

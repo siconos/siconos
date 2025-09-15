@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*!\file vertex_extraction.c
  * \brief interface to various LP solvers
  */
 
 #include "vertex_extraction.h"
+
 #include <stdio.h>   // for printf
 #include <stdlib.h>  // for exit, EXIT_FAILURE
-#include "SiconosConfig.h" // for HAS_ONE_LP_SOLVER // IWYU pragma: keep
+
+#include "SiconosConfig.h"  // for HAS_ONE_LP_SOLVER // IWYU pragma: keep
 #ifdef __cplusplus
 #undef restrict
 #define restrict __restrict
@@ -36,68 +38,57 @@
 #ifdef HAS_ONE_LP_SOLVER
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-function"
+#include "NumericsMatrix.h"
 #include "lp_lib.h"
 
-#include "NumericsMatrix.h"
-
-
-void siconos_find_vertex(const polyhedron* P, unsigned size, lapack_int* basis)
-{
+void siconos_find_vertex(const polyhedron* P, unsigned size, lapack_int* basis) {
   unsigned nrows = P->size_ineq;
   assert(P->H->matrix0);
   double* restrict H = P->H->matrix0;
   double* restrict K = P->K;
-  lprec *lp;
-  lp = make_lp(nrows, nrows+size);
+  lprec* lp;
+  lp = make_lp(nrows, nrows + size);
   set_verbose(lp, CRITICAL);
   set_minim(lp);
 
-  int* rowno = (int*) malloc(nrows * sizeof(int));
-  for(unsigned i = 0; i < nrows; ++i)
-  {
-    rowno[i] = i+1;
-    set_mat(lp, i+1, size+i+1, -1.0);
-    //assert(K[nrows-1-i] >= 0.0);
-    set_mat(lp, 0, size+1+i, fabs(K[nrows-1-i]) + 0.0001*(rand()%100));
-    set_constr_type(lp, i+1, EQ);
+  int* rowno = (int*)malloc(nrows * sizeof(int));
+  for (unsigned i = 0; i < nrows; ++i) {
+    rowno[i] = i + 1;
+    set_mat(lp, i + 1, size + i + 1, -1.0);
+    // assert(K[nrows-1-i] >= 0.0);
+    set_mat(lp, 0, size + 1 + i, fabs(K[nrows - 1 - i]) + 0.0001 * (rand() % 100));
+    set_constr_type(lp, i + 1, EQ);
   }
-//    set_constr_type(lp, nrows+1, GE);
+  //    set_constr_type(lp, nrows+1, GE);
 
-  for(unsigned i = 1, j = 0; i <= size; ++i, j+= nrows)
-  {
+  for (unsigned i = 1, j = 0; i <= size; ++i, j += nrows) {
     set_columnex(lp, i, nrows, &H[j], rowno);
     set_unbounded(lp, i);
   }
   set_rh_vec(lp, &K[-1]);
-//  set_mat(lp, nrows+1, size+1, 1.0);
+  //  set_mat(lp, nrows+1, size+1, 1.0);
 
 #ifdef DEBUG_STDOUT
   print_lp(lp);
 #endif
   /* Solve the LP */
   int info = solve(lp);
-  if(info != 0)
-  {
+  if (info != 0) {
     printf("find_vertex_lpsolve: failure in the LP solver: info = %d\n", info);
     exit(EXIT_FAILURE);
   }
 
   int* lp_basis = NULL;
-  if(sizeof(lapack_int) != sizeof(int))
-  {
-    lp_basis = (int*)malloc((nrows + 1)*sizeof(int));
-  }
-  else
-  {
+  if (sizeof(lapack_int) != sizeof(int)) {
+    lp_basis = (int*)malloc((nrows + 1) * sizeof(int));
+  } else {
     lp_basis = (int*)basis;
   }
 
   get_basis(lp, lp_basis, FALSE);
 
-  if(sizeof(lapack_int) != sizeof(int))
-  {
-    for(size_t i = 0; i < (nrows + 1); ++i)
-    {
+  if (sizeof(lapack_int) != sizeof(int)) {
+    for (size_t i = 0; i < (nrows + 1); ++i) {
       basis[i] = (lapack_int)lp_basis[i];
     }
   }
@@ -109,12 +100,11 @@ void siconos_find_vertex(const polyhedron* P, unsigned size, lapack_int* basis)
   free(rowno);
 }
 
-#pragma  GCC diagnostic pop
+#pragma GCC diagnostic pop
 
 #else
 
-void siconos_find_vertex(const polyhedron* P, unsigned size, int* basis)
-{
+void siconos_find_vertex(const polyhedron* P, unsigned size, int* basis) {
   printf("You need to compile the lp_solve support");
   exit(EXIT_FAILURE);
 }

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 /*! \file SiconosProperties.hpp
 
   \brief Exterior properties to vertices or edges of a SiconosGraph
-  can be attach with Siconos::Properties. These properties are
+  can be attach with siconos::Properties. These properties are
   referenced with vertices or edges indices. update_vertices_indices()
   or update_edges_indices() must have been done after any vertices or
   edges insertion or deletion.
@@ -55,7 +55,7 @@
 #include <boost/mpl/bool.hpp>
 #include <boost/type_traits.hpp>
 
-namespace Siconos
+namespace siconos
 {
 
 /** some local type traits */
@@ -315,11 +315,11 @@ public:
   typedef void serializable;
 
   /* Note: compilation with clang fail on this. And friend
-   * Siconos::siconos_io is not recognized anyway (attributes are public)
+   * siconos::siconos_io is not recognized anyway (attributes are public)
 
   protected:
     template<typename Archive>
-    friend void Siconos::siconos_io(Archive&, Properties<T,G,IndexMap>&, const unsigned int);
+    friend void siconos::siconos_io(Archive&, Properties<T,G,IndexMap>&, const unsigned int);
     friend class boost::serialization::access;
   */
 };
@@ -342,7 +342,7 @@ public:
   /*
   protected:
     template<typename Archive>
-    friend void Siconos::siconos_io(Archive&, VertexProperties<T,G>&, const unsigned int);
+    friend void siconos::siconos_io(Archive&, VertexProperties<T,G>&, const unsigned int);
     friend class boost::serialization::access;
   */
 };
@@ -395,7 +395,7 @@ public:
   /*
   protected:
     template<typename Archive>
-    friend void Siconos::siconos_io(Archive&, EdgeProperties<T,G>&, const unsigned int);
+    friend void siconos::siconos_io(Archive&, EdgeProperties<T,G>&, const unsigned int);
     friend class boost::serialization::access;
   */
 };
@@ -479,10 +479,10 @@ public:
 #include <boost/preprocessor/cat.hpp>
 
 #define I_DECLARE_MEMBERS(r,gt,p) \
-  Siconos:: BOOST_PP_CAT(BOOST_PP_TUPLE_ELEM(3,0,p),Properties)< BOOST_PP_TUPLE_ELEM(3,1,p), BOOST_PP_CAT(_,gt)> BOOST_PP_TUPLE_ELEM(3,2,p);
+  siconos:: BOOST_PP_CAT(BOOST_PP_TUPLE_ELEM(3,0,p),Properties)< BOOST_PP_TUPLE_ELEM(3,1,p), BOOST_PP_CAT(_,gt)> BOOST_PP_TUPLE_ELEM(3,2,p);
 
 #define I_CONS_MEMBERS(r,gt,p) \
-  BOOST_PP_TUPLE_ELEM(3,2,p) (Siconos:: BOOST_PP_CAT(BOOST_PP_TUPLE_ELEM(3,0,p),Properties)< BOOST_PP_TUPLE_ELEM(3,1,p), BOOST_PP_CAT(_,gt)>(*static_cast<BOOST_PP_CAT(_,gt)*>(this))),
+  BOOST_PP_TUPLE_ELEM(3,2,p) (siconos:: BOOST_PP_CAT(BOOST_PP_TUPLE_ELEM(3,0,p),Properties)< BOOST_PP_TUPLE_ELEM(3,1,p), BOOST_PP_CAT(_,gt)>(*static_cast<BOOST_PP_CAT(_,gt)*>(this))),
 
 #define INSTALL_GRAPH_PROPERTIES(GraphType, PROPERTIES)                 \
   BOOST_PP_SEQ_FOR_EACH(I_DECLARE_MEMBERS, BOOST_PP_CAT(GraphType, Graph), PROPERTIES) \

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
-#include <stdlib.h>                        // for malloc, free
+#include <stdlib.h>  // for malloc, free
+
 #include "LCP_Solvers.h"                   // for lcp_compute_error, lcp_enu...
 #include "LinearComplementarityProblem.h"  // for LinearComplementarityProblem
 #include "NonSmoothDrivers.h"              // for linearComplementarity_driver
@@ -27,12 +28,12 @@
 #include "lcp_cst.h"                       // for SICONOS_LCP_ENUM
 #include "relay_cst.h"                     // for SICONOS_RELAY_ENUM
 
-void relay_enum(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options)
-{
+void relay_enum(RelayProblem *problem, double *z, double *w, int *info,
+                SolverOptions *options) {
   int i;
   // conversion into LCP
-  LinearComplementarityProblem* lcp_problem = (LinearComplementarityProblem*)malloc(sizeof(LinearComplementarityProblem));
-
+  LinearComplementarityProblem *lcp_problem =
+      (LinearComplementarityProblem *)malloc(sizeof(LinearComplementarityProblem));
 
   /* Relay_display(problem); */
 
@@ -40,31 +41,30 @@ void relay_enum(RelayProblem* problem, double *z, double *w, int *info, SolverOp
 
   /* linearComplementarity_display(lcp_problem);  */
 
-  double *zlcp = (double*)malloc(lcp_problem->size * sizeof(double));
-  double *wlcp = (double*)malloc(lcp_problem->size * sizeof(double));
+  double *zlcp = (double *)malloc(lcp_problem->size * sizeof(double));
+  double *wlcp = (double *)malloc(lcp_problem->size * sizeof(double));
 
   /*  FILE * fcheck = fopen("lcp_relay.dat","w"); */
   /*  info = linearComplementarity_printInFile(lcp_problem,fcheck); */
-
 
   // Call the lcp_solver
   options->solverId = SICONOS_LCP_ENUM;
   lcp_enum_init(lcp_problem, options, 1);
 
-  * info = linearComplementarity_driver(lcp_problem, zlcp, wlcp, options);
-  if(options->filterOn > 0)
-    lcp_compute_error(lcp_problem, zlcp, wlcp, options->dparam[SICONOS_DPARAM_TOL], &(options->dparam[SICONOS_DPARAM_RESIDU]));
+  *info = linearComplementarity_driver(lcp_problem, zlcp, wlcp, options);
+  if (options->filterOn > 0)
+    lcp_compute_error(lcp_problem, zlcp, wlcp, options->dparam[SICONOS_DPARAM_TOL],
+                      &(options->dparam[SICONOS_DPARAM_RESIDU]));
 
   lcp_enum_reset(lcp_problem, options, 1);
 
   // Conversion of result
-  for(i = 0; i < problem->size; i++)
-  {
+  for (i = 0; i < problem->size; i++) {
     /* z[i] = 1.0/2.0*(zlcp[i]-wlcp[i+problem->size]); works only for ub=1 and lb=-1 */
-    z[i] = zlcp[i] +  problem->lb[i];
+    z[i] = zlcp[i] + problem->lb[i];
 
     w[i] = wlcp[i] - zlcp[i + problem->size];
-    //printf("w[ %i]=%12.10e\n", i, w[i]);
+    // printf("w[ %i]=%12.10e\n", i, w[i]);
   }
 
   /* for (i=0; i< lcp_problem->size; i++){ */
@@ -81,6 +81,4 @@ void relay_enum(RelayProblem* problem, double *z, double *w, int *info, SolverOp
   free(zlcp);
   free(wlcp);
   freeLinearComplementarityProblem(lcp_problem);
-
 }
-

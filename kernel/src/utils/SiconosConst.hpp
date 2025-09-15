@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,42 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
+
 /*! \file SiconosConst.hpp
 \brief General constants for Siconos Kernel.
 */
-#ifndef __SICONOSCONST__
-#define __SICONOSCONST__
+
+#ifndef KernelConst_H
+#define KernelConst_H
+
+#include <limits>
+
+// const or tools for internal use (i.e. not intended to be in the user API)
+namespace siconos::internal {
 
 /**
-   Internal bound max levels for time integrators.
-   This value may be checked to see if initialization has occured.
- */
-#define LEVELMAX 999
+ Internal bound max levels for time integrators.
+ This value may be checked to see if initialization has occured.
+*/
+inline constexpr auto LEVELMAX = 999;
 
 /** double precision machine */
-#define MACHINE_PREC std::numeric_limits<double>::epsilon()
+inline constexpr double MACHINE_PREC = std::numeric_limits<const double>::epsilon();
 
-// #ifndef nullptr
-// const int nullptr = 0;
-// #endif
+/** default tolerance for simulation algorithms. */
+inline constexpr double DEFAULT_TOLERANCE = 10 * MACHINE_PREC;
+
+/** default tolerance for EventDriven algorithms */
+inline constexpr double DEFAULT_TOL_ED = 1000 * DEFAULT_TOLERANCE;
+
+/** tick default value (for events in event-driven scheme)
+ *  it has to be greater than DBL_EPSILON */
+inline constexpr double DEFAULT_TICK = 1e-16;
+
+// Events management stuff
+inline constexpr unsigned long int GAPLIMIT_DEFAULT = 100;
+
+}  // namespace siconos::internal
 
 #endif
-

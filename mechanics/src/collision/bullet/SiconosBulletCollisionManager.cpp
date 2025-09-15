@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,6 +80,7 @@ DEFINE_SPTR(UpdateShapeVisitor)
 #include <NonSmoothLaw.hpp>
 #include <OneStepIntegrator.hpp>
 #include <NewtonImpactFrictionNSL.hpp>
+#include <FremondImpactFrictionNSL.hpp>
 #include <NewtonImpactRollingFrictionNSL.hpp>
 
 #include <SiconosMatrix.hpp>
@@ -148,7 +149,7 @@ DEFINE_SPTR(UpdateShapeVisitor)
 // This value is compared to the initial distance computed
 // at the creation of the interaction
 // if distance < - WARNING_TOLERANCE_AT_CREATION_INTERACTION
-// a warning is raised. 
+// a warning is raised.
 #define WARNING_TOLERANCE_AT_CREATION_INTERACTION 1e-5
 
 // Comment this to try un-queued static contactor behaviour
@@ -237,6 +238,7 @@ SiconosBulletOptions::SiconosBulletOptions()
   , enableSatConvex(false)
   , enablePolyhedralContactClipping(false)
   , Depth2D(0.04)
+  , extrapolationCoefficient(0.0)
 {
 }
 
@@ -808,7 +810,18 @@ void SiconosBulletCollisionManager_impl::updateShapePosition(const BodyBulletSha
     if(record.base->size() ==7)
     {
       DEBUG_PRINT("3D DS\n");
-      q = *record.base;
+      if (_options.extrapolationCoefficient){
+	if (record.ds)
+	  {
+	    //record.ds->display();
+	    SP::RigidBodyDS rbds=std::static_pointer_cast<RigidBodyDS>(record.ds);
+	    rbds->compute_extrapolated_position(_options.extrapolationCoefficient);
+	  }
+
+	q = *record.base;
+      }
+      else
+	q = *record.base;
     }
     else if(record.base->size() ==3)
     {
@@ -2129,7 +2142,18 @@ void SiconosBulletCollisionManager_impl::createCollisionObjectsForBodyContactorS
   {
     DEBUG_PRINT("RigidBodyDS case");
     con = rbds->contactors();
-    base = rbds->q();
+    // printf("\n\n extrapolation %e\n", _options.extrapolationCoefficient);
+    //getchar();
+    if (_options.extrapolationCoefficient > 0.)
+      {
+	rbds->compute_extrapolated_position(_options.extrapolationCoefficient);
+	base = rbds->base_extrapolated_position();
+      }
+    else
+      {
+	base = rbds->base_position();
+	//base->display();
+      }
   }
   if(rb2dds)
   {
@@ -2803,6 +2827,7 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
 
       /* test nslaw type and then deduce the type of relation to be created */
       SP::NewtonImpactFrictionNSL nslaw_NewtonImpactFrictionNSL(std::dynamic_pointer_cast<NewtonImpactFrictionNSL>(nslaw));
+      SP::FremondImpactFrictionNSL nslaw_FremondImpactFrictionNSL(std::dynamic_pointer_cast<FremondImpactFrictionNSL>(nslaw));
       SP::NewtonImpactRollingFrictionNSL nslaw_NewtonImpactRollingFrictionNSL(std::dynamic_pointer_cast<NewtonImpactRollingFrictionNSL>(nslaw));
 
       // DEBUG_EXPR(std::cout << nslaw_NewtonImpactFrictionNSL << std::endl;);
@@ -2810,7 +2835,7 @@ void SiconosBulletCollisionManager::updateInteractions(SP::Simulation simulation
 
       // we assume that this test checks if  we deal with 3D problem with RigidBodies
       // Clearly, it will not be sufficient with meshed FE bodies.
-      if(nslaw && nslaw_NewtonImpactFrictionNSL)
+      if(nslaw && (nslaw_NewtonImpactFrictionNSL || nslaw_FremondImpactFrictionNSL))
       {
         if(nslaw->size() == 3)
         {

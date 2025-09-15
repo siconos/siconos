@@ -4,8 +4,10 @@ lxml
 pytest
 matplotlib
 h5py
-pyhull
+pybind11
 wheel
 vtk
 packaging
 bullet
+swig>=3,<4.3
+setuptools

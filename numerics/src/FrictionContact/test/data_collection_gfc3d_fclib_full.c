@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,15 @@
  * limitations under the License.
  */
 
-#include <stdlib.h>      // for malloc
+#include <stdlib.h>  // for malloc
+
 #include "test_utils.h"  // for data_collection
 
-const char ** data_collection()
-{
+const char **data_collection() {
+  int n_data_1 = 1027;
 
-  int n_data_1=1027 ;
-
-  const char ** data_collection_1 = (const char **)malloc(n_data_1*sizeof(const char *));
-  int n_data=0;
+  const char **data_collection_1 = (const char **)malloc(n_data_1 * sizeof(const char *));
+  int n_data = 0;
 
   int listprob[7] = {0, 0, 0, 0, 0, 0, 1};
   // int listprob[7] = {1, 1, 1, 1, 1, 1, 1};
@@ -38,1061 +37,2211 @@ const char ** data_collection()
   /* 6: Chute*              #175 problems mu = 1.0 */
   /*   TOTAL                #1027 problems */
 
-  if (listprob[0]==1)
-  {
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/BoxStacks-ndof-450-nc-31-0.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/BoxStacks-ndof-450-nc-73-1.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/BoxStacks-ndof-450-nc-109-3.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/BoxStacks-ndof-450-nc-112-2.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/BoxStacks-ndof-450-nc-404-4.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/BoxStacks-ndof-450-nc-464-7.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/BoxStacks-ndof-450-nc-552-8.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/BoxStacks-ndof-450-nc-580-6.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/BoxStacks-ndof-450-nc-638-10.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/BoxStacks-ndof-450-nc-639-13.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/BoxStacks-ndof-450-nc-640-14.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/BoxStacks-ndof-450-nc-641-19.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/BoxStacks-ndof-450-nc-642-72.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/BoxStacks-ndof-450-nc-644-12.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/BoxStacks-ndof-450-nc-645-11.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/BoxStacks/BoxStacks-ndof-450-nc-660-9.hdf5";
+  if (listprob[0] == 1) {
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/BoxStacks/BoxStacks-ndof-450-nc-31-0.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/BoxStacks/BoxStacks-ndof-450-nc-73-1.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/BoxStacks/BoxStacks-ndof-450-nc-109-3.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/BoxStacks/BoxStacks-ndof-450-nc-112-2.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/BoxStacks/BoxStacks-ndof-450-nc-404-4.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/BoxStacks/BoxStacks-ndof-450-nc-464-7.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/BoxStacks/BoxStacks-ndof-450-nc-552-8.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/BoxStacks/BoxStacks-ndof-450-nc-580-6.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/BoxStacks/BoxStacks-ndof-450-nc-638-10.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/BoxStacks/BoxStacks-ndof-450-nc-639-13.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/BoxStacks/BoxStacks-ndof-450-nc-640-14.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/BoxStacks/BoxStacks-ndof-450-nc-641-19.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/BoxStacks/BoxStacks-ndof-450-nc-642-72.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/BoxStacks/BoxStacks-ndof-450-nc-644-12.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/BoxStacks/BoxStacks-ndof-450-nc-645-11.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/BoxStacks/BoxStacks-ndof-450-nc-660-9.hdf5";
   }
 
-  if (listprob[1]==1)
-  {
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-2-2505.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-3-536.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-4-724.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-5-2299.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-11-4036.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-13-5130.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-14-5611.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-16-4589.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-17-4723.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-20-6978.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-22-7123.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-23-7519.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-24-7206.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-26-7743.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-29-8238.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-30-9952.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-31-8401.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-33-8433.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-34-9800.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-35-10048.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-37-10046.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-38-9816.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-42-10505.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-43-10319.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-45-10749.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-46-10805.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-47-10807.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-50-10987.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-51-10992.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-53-11042.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-54-11011.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-58-11165.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-59-11576.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-60-11224.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-61-12252.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-62-11959.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-65-11333.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-67-12960.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-69-12431.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-71-12680.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-73-13715.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-74-13707.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-75-13586.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-78-13483.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-80-13581.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-82-14045.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-83-14290.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-84-13999.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-86-14336.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-88-14521.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-89-13818.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-91-14199.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-92-14159.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-93-14530.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-100-15174.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-101-14399.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-102-15592.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-104-14772.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-106-15594.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-109-15281.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-110-14908.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-111-14785.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-113-15205.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-116-15798.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-117-16442.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-118-15166.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-119-15859.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-120-15855.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-125-16064.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-128-15970.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-129-16122.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-130-16647.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-131-16407.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-133-16660.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-134-16457.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-136-16922.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-138-16597.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-139-16292.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-141-16999.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-143-17171.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-146-17799.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-150-17265.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-154-18355.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-155-18120.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-156-17670.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-157-17826.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-160-17397.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-163-18489.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-166-18594.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-168-18927.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-171-18959.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-172-18659.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-173-19019.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-174-19031.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-175-18937.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-176-19306.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-177-19158.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-179-19746.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-180-19442.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-182-19731.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-185-19388.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-187-19480.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-191-19810.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-192-20094.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-196-20083.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-197-19889.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-198-19924.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-199-19904.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-201-19880.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-202-19882.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-203-20499.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-204-20191.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-205-20346.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-206-20213.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-207-20348.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-208-20200.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-210-20664.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-213-20398.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-216-20547.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-217-20374.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-221-20649.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-224-20891.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-225-20838.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-226-20898.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-231-20764.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-232-20936.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-233-20763.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-234-20794.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-235-20762.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-236-20755.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-238-21040.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-241-21085.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-243-21083.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-244-20980.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-245-20971.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-246-21386.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-250-21158.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-251-21286.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-253-21182.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-254-21172.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-259-21436.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-263-21529.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-264-22800.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-267-23557.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-268-21731.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-269-23090.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-273-21784.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-275-21826.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-277-23035.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-278-23900.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-279-22388.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-280-23762.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-281-23835.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-282-23935.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-283-23857.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-284-23843.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-288-25061.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-289-24129.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-290-24970.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-291-24076.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-292-25025.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-294-25106.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-295-24984.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-296-28285.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-297-28068.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-299-25333.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-302-28366.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-305-29311.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-306-29664.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-310-31717.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-312-31446.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-314-31199.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-316-30363.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-320-30284.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-321-30159.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-323-31919.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-324-31843.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-325-32051.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-326-31903.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-327-31899.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-329-31928.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-330-32393.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-332-32464.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-333-32504.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-334-33608.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-335-33344.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-339-33059.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-341-33099.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-342-34459.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-343-34609.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-346-35350.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-347-35241.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-350-35393.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-351-35401.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-352-35515.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-353-35087.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-355-36003.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-357-35805.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-358-35075.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-359-36046.hdf5";
+  if (listprob[1] == 1) {
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-2-2505.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-3-536.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-4-724.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-5-2299.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-11-4036.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-13-5130.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-14-5611.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-16-4589.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-17-4723.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-20-6978.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-22-7123.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-23-7519.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-24-7206.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-26-7743.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-29-8238.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-30-9952.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-31-8401.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-33-8433.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-34-9800.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-35-10048.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-37-10046.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-38-9816.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-42-10505.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-43-10319.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-45-10749.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-46-10805.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-47-10807.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-50-10987.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-51-10992.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-53-11042.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-54-11011.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-58-11165.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-59-11576.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-60-11224.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-61-12252.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-62-11959.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-65-11333.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-67-12960.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-69-12431.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-71-12680.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-73-13715.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-74-13707.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-75-13586.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-78-13483.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-80-13581.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-82-14045.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-83-14290.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-84-13999.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-86-14336.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-88-14521.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-89-13818.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-91-14199.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-92-14159.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-93-14530.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-100-15174.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-101-14399.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-102-15592.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-104-14772.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-106-15594.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-109-15281.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-110-14908.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-111-14785.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-113-15205.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-116-15798.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-117-16442.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-118-15166.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-119-15859.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-120-15855.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-125-16064.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-128-15970.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-129-16122.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-130-16647.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-131-16407.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-133-16660.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-134-16457.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-136-16922.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-138-16597.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-139-16292.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-141-16999.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-143-17171.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-146-17799.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-150-17265.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-154-18355.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-155-18120.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-156-17670.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-157-17826.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-160-17397.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-163-18489.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-166-18594.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-168-18927.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-171-18959.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-172-18659.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-173-19019.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-174-19031.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-175-18937.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-176-19306.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-177-19158.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-179-19746.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-180-19442.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-182-19731.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-185-19388.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-187-19480.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-191-19810.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-192-20094.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-196-20083.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-197-19889.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-198-19924.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-199-19904.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-201-19880.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-202-19882.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-203-20499.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-204-20191.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-205-20346.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-206-20213.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-207-20348.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-208-20200.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-210-20664.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-213-20398.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-216-20547.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-217-20374.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-221-20649.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-224-20891.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-225-20838.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-226-20898.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-231-20764.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-232-20936.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-233-20763.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-234-20794.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-235-20762.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-236-20755.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-238-21040.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-241-21085.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-243-21083.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-244-20980.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-245-20971.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-246-21386.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-250-21158.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-251-21286.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-253-21182.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-254-21172.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-259-21436.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-263-21529.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-264-22800.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-267-23557.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-268-21731.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-269-23090.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-273-21784.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-275-21826.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-277-23035.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-278-23900.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-279-22388.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-280-23762.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-281-23835.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-282-23935.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-283-23857.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-284-23843.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-288-25061.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-289-24129.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-290-24970.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-291-24076.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-292-25025.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-294-25106.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-295-24984.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-296-28285.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-297-28068.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-299-25333.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-302-28366.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-305-29311.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-306-29664.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-310-31717.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-312-31446.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-314-31199.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-316-30363.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-320-30284.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-321-30159.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-323-31919.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-324-31843.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-325-32051.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-326-31903.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-327-31899.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-329-31928.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-330-32393.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-332-32464.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-333-32504.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-334-33608.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-335-33344.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-339-33059.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-341-33099.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-342-34459.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-343-34609.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-346-35350.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-347-35241.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-350-35393.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-351-35401.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-352-35515.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-353-35087.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-355-36003.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-357-35805.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-358-35075.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Capsules/Capsules-ndof-600-nc-359-36046.hdf5";
   }
 
-  if (listprob[2]==1)
-  {
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-2-13.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-5-25.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-6-30.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-35-147.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-36-93.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-45-308.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-47-316.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-48-314.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-59-566.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-64-321.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-68-584.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-70-357.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-71-774.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-74-547.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-75-516.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-81-700.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-83-665.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-85-858.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-92-876.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-93-724.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-96-920.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-99-980.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-100-739.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-102-996.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-103-729.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-108-995.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-118-1007.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-119-1030.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-133-1202.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-134-1087.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-136-1085.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-137-1201.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-138-1199.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-139-1176.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-146-1207.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-150-1170.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-152-1220.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-155-1259.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-158-1134.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-160-1256.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-165-1135.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-166-1131.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-177-1106.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-179-1262.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-190-1340.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-198-1476.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-200-1318.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-204-1544.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-205-1319.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-208-1508.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-216-1364.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-217-1366.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-224-1363.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-227-1290.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-239-1447.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-250-1285.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-253-1649.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-254-1568.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-257-1642.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-262-1439.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-267-1421.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-285-1606.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-287-1604.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-293-1917.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-298-1578.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-302-1920.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-304-1955.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-307-1947.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-309-1909.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-310-1701.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-318-1772.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-321-1898.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-322-1884.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-324-1768.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-329-1764.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-334-1804.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-338-1806.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-340-1709.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-346-1816.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-348-2272.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-353-1779.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-355-1878.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-356-1835.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-360-2294.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-361-1745.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-363-2283.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-366-1965.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-385-1841.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-387-1966.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-388-2308.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-389-1851.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-391-2237.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-392-2328.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-396-1734.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-401-2358.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-406-2197.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-407-2214.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-413-2135.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-417-2130.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-423-2377.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-451-2449.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-452-2070.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-453-2075.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-455-2063.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-466-2477.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-468-2029.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-469-2043.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-472-2053.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-477-2469.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-482-2537.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-483-2561.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-487-2476.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-488-2485.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-489-2484.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-490-2544.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-492-2575.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-494-2533.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-497-2525.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-505-2611.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-506-1976.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-511-2596.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-512-2590.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-514-2597.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-516-2609.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-530-2631.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-532-2616.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-544-2626.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-551-2628.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-561-2644.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-562-2625.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-563-1993.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-577-1991.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-579-2661.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-580-2692.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-581-3735.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-582-2698.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-584-2665.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-585-2694.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-589-2754.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-593-2756.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-600-2703.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-604-11438.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-610-3876.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-611-11429.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-612-3736.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-617-3796.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-620-3797.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-632-11394.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-633-3770.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-634-3807.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-641-11340.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-644-9914.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-645-2858.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-646-9824.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-651-3596.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-652-3789.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-656-2866.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-660-3841.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-667-11516.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-671-2887.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-674-9764.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-678-3088.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-693-3964.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-698-2920.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-702-2932.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-712-4000.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-715-11607.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-721-3188.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-724-3264.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-733-3431.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-736-4524.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-744-5584.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-753-4678.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-754-4930.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-755-5712.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-758-9340.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-766-8284.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-768-6530.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-769-9320.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-771-6558.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-800-10583.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-803-16221.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-804-17375.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-805-15948.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-807-15857.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-809-18144.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-810-16130.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-811-10878.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-812-16086.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-818-17116.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-821-11143.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-823-17059.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-824-17047.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-826-11242.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-829-11323.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-837-11278.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-839-11280.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-841-11259.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-845-11306.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-851-11250.hdf5";
+  if (listprob[2] == 1) {
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-2-13.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-5-25.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-6-30.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-35-147.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-36-93.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-45-308.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-47-316.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-48-314.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-59-566.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-64-321.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-68-584.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-70-357.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-71-774.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-74-547.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-75-516.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-81-700.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-83-665.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-85-858.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-92-876.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-93-724.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-96-920.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-99-980.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-100-739.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-102-996.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-103-729.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-108-995.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-118-1007.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-119-1030.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-133-1202.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-134-1087.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-136-1085.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-137-1201.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-138-1199.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-139-1176.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-146-1207.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-150-1170.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-152-1220.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-155-1259.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-158-1134.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-160-1256.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-165-1135.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-166-1131.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-177-1106.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-179-1262.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-190-1340.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-198-1476.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-200-1318.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-204-1544.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-205-1319.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-208-1508.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-216-1364.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-217-1366.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-224-1363.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-227-1290.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-239-1447.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-250-1285.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-253-1649.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-254-1568.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-257-1642.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-262-1439.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-267-1421.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-285-1606.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-287-1604.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-293-1917.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-298-1578.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-302-1920.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-304-1955.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-307-1947.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-309-1909.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-310-1701.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-318-1772.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-321-1898.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-322-1884.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-324-1768.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-329-1764.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-334-1804.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-338-1806.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-340-1709.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-346-1816.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-348-2272.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-353-1779.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-355-1878.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-356-1835.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-360-2294.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-361-1745.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-363-2283.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-366-1965.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-385-1841.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-387-1966.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-388-2308.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-389-1851.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-391-2237.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-392-2328.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-396-1734.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-401-2358.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-406-2197.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-407-2214.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-413-2135.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-417-2130.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-423-2377.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-451-2449.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-452-2070.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-453-2075.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-455-2063.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-466-2477.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-468-2029.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-469-2043.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-472-2053.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-477-2469.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-482-2537.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-483-2561.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-487-2476.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-488-2485.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-489-2484.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-490-2544.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-492-2575.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-494-2533.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-497-2525.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-505-2611.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-506-1976.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-511-2596.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-512-2590.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-514-2597.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-516-2609.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-530-2631.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-532-2616.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-544-2626.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-551-2628.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-561-2644.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-562-2625.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-563-1993.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-577-1991.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-579-2661.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-580-2692.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-581-3735.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-582-2698.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-584-2665.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-585-2694.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-589-2754.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-593-2756.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-600-2703.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-604-11438.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-610-3876.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-611-11429.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-612-3736.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-617-3796.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-620-3797.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-632-11394.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-633-3770.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-634-3807.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-641-11340.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-644-9914.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-645-2858.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-646-9824.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-651-3596.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-652-3789.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-656-2866.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-660-3841.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-667-11516.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-671-2887.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-674-9764.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-678-3088.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-693-3964.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-698-2920.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-702-2932.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-712-4000.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-715-11607.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-721-3188.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-724-3264.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-733-3431.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-736-4524.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-744-5584.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-753-4678.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-754-4930.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-755-5712.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-758-9340.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-766-8284.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-768-6530.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-769-9320.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-771-6558.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-800-10583.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-803-16221.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-804-17375.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-805-15948.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-807-15857.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-809-18144.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-810-16130.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-811-10878.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-812-16086.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-818-17116.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-821-11143.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-823-17059.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-824-17047.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-826-11242.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-829-11323.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-837-11278.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-839-11280.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-841-11259.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-845-11306.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/KaplasTower/KaplasTower-ndof-864-nc-851-11250.hdf5";
   }
 
-  if (listprob[3]==1)
-  {
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-30-5.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-131-6.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-194-7.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-203-9.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-205-8.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-209-10.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-298-11.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-300-12.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-302-13.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-313-17.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-315-14.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-316-18.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-317-15.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-318-16.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-323-19.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-352-23.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-361-24.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-367-25.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-385-28.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-412-32.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-413-33.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-418-31.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-421-35.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-475-36.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-479-37.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-486-38.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-547-40.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-555-42.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-558-43.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-566-45.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-568-46.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-597-48.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-615-49.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-631-52.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-633-51.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-695-53.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-722-56.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-751-58.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-757-59.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-773-61.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-860-67.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-883-123.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-888-124.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-889-133.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-897-132.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-899-129.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-910-121.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-911-119.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-916-144.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-939-116.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-947-151.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-949-75.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-954-154.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-974-77.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-983-113.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-985-114.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-986-157.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-993-112.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1003-161.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1028-88.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1039-90.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1050-171.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1087-183.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1102-194.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1107-108.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1109-105.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1116-201.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1122-204.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1152-206.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1181-212.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1184-211.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1230-223.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1264-227.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1276-233.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1283-232.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1350-242.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1353-243.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1378-248.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1387-255.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1415-274.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1419-280.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1429-279.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1440-278.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1474-290.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1475-295.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1480-299.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1504-298.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1531-305.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1556-306.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1578-327.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1583-325.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1593-326.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1598-315.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1611-330.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1620-317.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1649-336.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1706-344.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1709-345.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1723-346.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1729-343.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1738-352.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1747-358.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1762-362.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1768-366.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1781-357.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1785-363.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1787-367.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1798-364.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1825-369.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1857-389.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1858-387.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1860-386.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1909-382.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1934-391.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1962-398.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1995-412.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2009-420.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2045-431.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2077-427.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2082-445.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2088-437.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2090-440.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2174-457.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2178-460.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2214-488.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2222-461.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2239-485.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2248-470.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2250-473.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2256-472.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2273-499.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2279-479.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2282-500.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2283-502.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2289-509.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2332-518.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2369-523.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2371-526.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2372-533.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2388-531.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2437-557.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2438-544.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2460-578.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2470-580.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2488-575.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2489-568.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2491-564.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2498-586.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2517-590.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2521-594.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2537-611.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2545-622.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2597-636.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2612-641.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2616-648.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2633-643.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2639-651.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2708-701.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2720-703.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2722-717.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2724-713.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2734-712.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2744-737.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2893-938.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2902-990.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2920-1003.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2923-1005.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2925-1012.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2926-1006.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-2999-1148.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-3004-1135.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-3047-1333.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-3059-1383.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-3066-1595.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-3141-1907.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-3144-1937.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-3147-1925.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-3154-1968.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-3179-2042.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-3190-2112.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-3194-2081.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-3199-2147.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-3221-2232.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-3235-2535.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-3246-2536.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-3249-2486.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-3256-2494.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-3271-2771.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-3277-2770.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-3282-2721.hdf5";
+  if (listprob[3] == 1) {
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-30-5.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-131-6.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-194-7.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-203-9.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-205-8.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-209-10.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-298-11.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-300-12.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-302-13.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-313-17.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-315-14.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-316-18.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-317-15.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-318-16.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-323-19.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-352-23.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-361-24.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-367-25.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-385-28.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-412-32.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-413-33.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-418-31.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-421-35.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-475-36.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-479-37.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-486-38.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-547-40.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-555-42.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-558-43.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-566-45.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-568-46.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-597-48.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-615-49.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-631-52.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-633-51.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-695-53.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-722-56.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-751-58.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-757-59.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-773-61.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-860-67.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-883-123.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-888-124.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-889-133.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-897-132.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-899-129.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-910-121.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-911-119.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-916-144.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-939-116.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-947-151.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-949-75.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-954-154.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-974-77.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-983-113.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-985-114.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-986-157.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-993-112.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1003-161.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1028-88.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/PrimitiveSoup-ndof-6000-nc-1039-90.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1050-171.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1087-183.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1102-194.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1107-108.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1109-105.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1116-201.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1122-204.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1152-206.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1181-212.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1184-211.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1230-223.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1264-227.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1276-233.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1283-232.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1350-242.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1353-243.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1378-248.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1387-255.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1415-274.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1419-280.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1429-279.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1440-278.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1474-290.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1475-295.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1480-299.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1504-298.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1531-305.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1556-306.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1578-327.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1583-325.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1593-326.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1598-315.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1611-330.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1620-317.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1649-336.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1706-344.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1709-345.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1723-346.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1729-343.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1738-352.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1747-358.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1762-362.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1768-366.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1781-357.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1785-363.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1787-367.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1798-364.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1825-369.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1857-389.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1858-387.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1860-386.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1909-382.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1934-391.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1962-398.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-1995-412.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2009-420.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2045-431.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2077-427.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2082-445.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2088-437.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2090-440.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2174-457.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2178-460.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2214-488.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2222-461.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2239-485.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2248-470.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2250-473.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2256-472.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2273-499.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2279-479.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2282-500.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2283-502.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2289-509.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2332-518.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2369-523.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2371-526.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2372-533.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2388-531.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2437-557.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2438-544.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2460-578.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2470-580.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2488-575.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2489-568.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2491-564.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2498-586.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2517-590.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2521-594.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2537-611.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2545-622.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2597-636.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2612-641.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2616-648.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2633-643.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2639-651.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2708-701.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2720-703.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2722-717.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2724-713.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2734-712.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2744-737.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2893-938.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2902-990.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2920-1003.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2923-1005.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2925-1012.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2926-1006.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-2999-1148.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-3004-1135.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-3047-1333.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-3059-1383.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-3066-1595.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-3141-1907.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-3144-1937.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-3147-1925.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-3154-1968.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-3179-2042.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-3190-2112.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-3194-2081.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-3199-2147.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-3221-2232.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-3235-2535.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-3246-2536.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-3249-2486.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-3256-2494.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-3271-2771.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-3277-2770.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/PrimitiveSoup/"
+        "PrimitiveSoup-ndof-6000-nc-3282-2721.hdf5";
   }
 
-  if (listprob[4]==1)
-  {
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-174-101.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-240-201.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-279-238.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-364-346.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-369-735.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-373-351.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-381-757.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-393-710.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-402-779.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-406-899.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-408-907.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-443-539.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-445-433.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-452-838.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-456-1176.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-466-1091.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-482-660.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-507-1384.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-510-1410.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-516-1378.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-610-1767.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-633-1790.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-634-1717.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-689-1700.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-710-1692.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-723-1686.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-734-1830.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-757-2010.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-758-1876.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-788-2017.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-789-1998.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-796-2019.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-835-2212.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-885-2192.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-886-2294.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-898-2306.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-904-2445.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-931-2454.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-936-2415.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-943-2430.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-996-2474.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1021-2689.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1067-2588.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1075-2770.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1077-2590.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1084-2727.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1105-2785.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1122-2819.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1123-2820.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1124-3390.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1204-3804.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1206-3781.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1227-3330.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1231-3652.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1232-3267.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1253-4002.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1254-4214.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1304-4271.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1321-4395.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1361-4349.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1375-4528.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1377-4549.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1386-4495.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1390-4584.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1426-4625.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1427-4624.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1447-4648.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1532-4772.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1559-4946.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1568-4895.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1585-5011.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1649-5230.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1681-5160.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1704-5345.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1724-5294.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1775-5422.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1787-5516.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1790-5503.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1792-5514.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1799-5431.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1807-5556.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1829-5592.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1850-5598.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1911-5681.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1953-5713.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1957-5792.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1965-5799.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1966-5796.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1990-5815.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2022-5855.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2024-5981.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2040-5847.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2067-6128.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2090-6149.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2129-6110.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2141-6186.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2150-6170.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2152-6278.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2192-6358.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2228-6373.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2283-6436.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2311-6466.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2315-6475.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2319-6479.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2337-6653.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2339-6535.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2373-6588.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2390-6741.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2421-6832.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2434-6864.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2439-6765.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2478-6953.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2486-6930.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2503-7067.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2512-7003.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2530-7116.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2556-7099.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2575-7150.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2579-7151.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2630-7255.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2658-7448.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2768-7722.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2773-7698.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2779-7699.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2802-7763.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2822-7926.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2828-7848.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2840-7935.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2850-7954.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2881-8002.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2953-8294.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2963-8251.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2967-8115.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3002-8309.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3013-8445.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3033-8373.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3038-8510.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3040-8470.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3045-8393.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3084-8622.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3094-8679.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3105-8750.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3134-8838.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3143-8862.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3162-8944.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3172-8890.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3209-9146.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3234-9251.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3372-9824.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3381-9741.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3419-9867.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3432-9890.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3458-10018.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3468-10034.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3521-10193.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3525-10094.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3527-10170.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3564-10244.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3602-10372.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3605-10519.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3622-10418.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3700-10899.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3712-10989.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3717-10927.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3728-11062.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3737-11065.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3744-11009.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3812-11179.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3895-11737.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3918-11500.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3920-11602.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3928-11551.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3960-11806.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4023-12160.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4070-12579.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4077-12622.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4085-13149.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4157-13366.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4159-13705.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4164-13707.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4168-13718.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4169-13598.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4199-13842.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4237-15402.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4250-15000.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4255-15460.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4271-15612.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4280-15670.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4334-16513.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4346-18262.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4371-17786.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4375-18220.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4435-26334.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4440-33607.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4454-32008.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4461-32433.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4464-27544.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4466-31772.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4482-38823.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4517-49149.hdf5";
+  if (listprob[4] == 1) {
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-174-101.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-240-201.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-279-238.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-364-346.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-369-735.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-373-351.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-381-757.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-393-710.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-402-779.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-406-899.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-408-907.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-443-539.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-445-433.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-452-838.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-456-1176.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-466-1091.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-482-660.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-507-1384.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-510-1410.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-516-1378.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-610-1767.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-633-1790.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-634-1717.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-689-1700.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-710-1692.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-723-1686.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-734-1830.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-757-2010.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-758-1876.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-788-2017.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-789-1998.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-796-2019.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-835-2212.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-885-2192.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-886-2294.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-898-2306.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-904-2445.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-931-2454.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-936-2415.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-943-2430.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-996-2474.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1021-2689.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1067-2588.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1075-2770.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1077-2590.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1084-2727.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1105-2785.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1122-2819.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1123-2820.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1124-3390.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1204-3804.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1206-3781.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1227-3330.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1231-3652.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1232-3267.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1253-4002.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1254-4214.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1304-4271.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1321-4395.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1361-4349.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1375-4528.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1377-4549.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1386-4495.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1390-4584.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1426-4625.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1427-4624.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1447-4648.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1532-4772.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1559-4946.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1568-4895.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1585-5011.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1649-5230.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1681-5160.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1704-5345.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1724-5294.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1775-5422.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1787-5516.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1790-5503.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1792-5514.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1799-5431.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1807-5556.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1829-5592.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1850-5598.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1911-5681.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1953-5713.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1957-5792.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1965-5799.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1966-5796.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-1990-5815.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2022-5855.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2024-5981.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2040-5847.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2067-6128.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2090-6149.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2129-6110.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2141-6186.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2150-6170.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2152-6278.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2192-6358.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2228-6373.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2283-6436.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2311-6466.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2315-6475.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2319-6479.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2337-6653.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2339-6535.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2373-6588.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2390-6741.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2421-6832.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2434-6864.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2439-6765.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2478-6953.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2486-6930.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2503-7067.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2512-7003.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2530-7116.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2556-7099.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2575-7150.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2579-7151.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2630-7255.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2658-7448.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2768-7722.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2773-7698.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2779-7699.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2802-7763.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2822-7926.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2828-7848.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2840-7935.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2850-7954.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2881-8002.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2953-8294.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2963-8251.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-2967-8115.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3002-8309.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3013-8445.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3033-8373.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3038-8510.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3040-8470.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3045-8393.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3084-8622.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3094-8679.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3105-8750.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3134-8838.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3143-8862.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3162-8944.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3172-8890.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3209-9146.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3234-9251.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3372-9824.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3381-9741.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3419-9867.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3432-9890.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3458-10018.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3468-10034.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3521-10193.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3525-10094.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3527-10170.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3564-10244.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3602-10372.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3605-10519.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3622-10418.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3700-10899.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3712-10989.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3717-10927.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3728-11062.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3737-11065.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3744-11009.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3812-11179.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3895-11737.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3918-11500.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3920-11602.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3928-11551.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-3960-11806.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4023-12160.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4070-12579.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4077-12622.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4085-13149.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4157-13366.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4159-13705.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4164-13707.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4168-13718.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4169-13598.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4199-13842.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4237-15402.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4250-15000.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4255-15460.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4271-15612.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4280-15670.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4334-16513.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4346-18262.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4371-17786.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4375-18220.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4435-26334.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4440-33607.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4454-32008.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4461-32433.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4464-27544.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4466-31772.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4482-38823.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres/Spheres-ndof-12000-nc-4517-49149.hdf5";
   }
 
-  if (listprob[5]==1)
-  {
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-731-0.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-904-1.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-1332-2.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-2407-3.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-2444-5.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-2481-4.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-2730-6.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-2941-7.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-3120-8.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-3284-9.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-3389-10.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-3459-11.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-3940-12.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4025-13.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4144-14.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4369-17.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4383-18.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4430-20.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4432-21.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4451-85.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4464-23.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4481-105.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4484-70.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4487-76.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4488-135.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4489-114.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4490-51.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4500-148.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4506-172.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4515-182.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4520-251.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4536-377.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4547-441.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4557-720.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4559-682.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4564-791.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4573-845.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4575-901.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4581-866.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4603-1534.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4610-1948.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4613-1698.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4615-1898.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4620-1879.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4625-1864.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4627-1845.hdf5";
+  if (listprob[5] == 1) {
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-731-0.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-904-1.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-1332-2.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-2407-3.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-2444-5.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-2481-4.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-2730-6.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-2941-7.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-3120-8.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-3284-9.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-3389-10.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-3459-11.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-3940-12.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4025-13.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4144-14.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4369-17.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4383-18.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4430-20.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4432-21.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4451-85.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4464-23.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4481-105.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4484-70.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4487-76.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4488-135.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4489-114.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Spheres1mmScaled/"
+        "Spheres1mmScaled-ndof-12000-nc-4490-51.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4500-148.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4506-172.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4515-182.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4520-251.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4536-377.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4547-441.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4557-720.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4559-682.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4564-791.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4573-845.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4575-901.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4581-866.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4603-1534.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4610-1948.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4613-1698.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4615-1898.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4620-1879.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4625-1864.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Spheres1mmScaled/Spheres1mmScaled-ndof-12000-nc-4627-1845.hdf5";
   }
 
-  if (listprob[6]==1)
-  {
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-4416-nc-130-1177.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-4608-nc-172-1258.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-4608-nc-186-1255.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-4608-nc-216-1280.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-4752-nc-203-1306.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-4992-nc-278-1363.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-4992-nc-284-1376.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-4992-nc-323-1386.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-4992-nc-329-1390.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-5376-nc-381-1489.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-5376-nc-384-1499.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-5376-nc-434-1550.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-5448-nc-452-1564.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-5484-nc-489-1574.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-5532-nc-482-1583.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-5844-nc-542-1694.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-6138-nc-577-1733.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-6144-nc-599-1743.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-6144-nc-650-1778.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-6144-nc-654-1784.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-6144-nc-684-1805.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-6324-nc-733-1828.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-6324-nc-735-1831.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-6528-nc-787-1864.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-6528-nc-815-1897.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-6528-nc-886-1917.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-6816-nc-859-1963.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-6912-nc-862-1988.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-6912-nc-934-2030.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-6912-nc-961-2051.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-6912-nc-965-2050.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-6942-nc-979-2057.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-7242-nc-1017-2093.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-7296-nc-1035-2111.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-7296-nc-1068-2169.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-7296-nc-1121-2138.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-7614-nc-1192-2224.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-7680-nc-1151-2254.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-7680-nc-1226-2312.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-7692-nc-1247-2315.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-8412-nc-1369-2481.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-8448-nc-1356-2492.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-8448-nc-1408-2507.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-8448-nc-1412-2509.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-8448-nc-1436-2501.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-8574-nc-1557-2575.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-8604-nc-1556-2580.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-9216-nc-1885-2782.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-9216-nc-1900-2778.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-9216-nc-1957-2807.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-9600-nc-2023-2861.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-9600-nc-2037-2879.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-9600-nc-2063-2881.hdf5";
-    // data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-9600-nc-2065-2894.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-10752-nc-2385-3278.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-10752-nc-2459-3293.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-10752-nc-2514-3305.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-10872-nc-2558-3334.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-11082-nc-2572-3351.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-11100-nc-2574-3352.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-11136-nc-2604-3371.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-11136-nc-2657-3373.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-11136-nc-2716-3407.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-11136-nc-2750-3414.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-11136-nc-2758-3424.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-11184-nc-2797-3439.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-11304-nc-2865-3458.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-11520-nc-2871-3523.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-11520-nc-2873-3515.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-11520-nc-2888-3508.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-11520-nc-2944-3551.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-11520-nc-2965-3556.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-11520-nc-3015-3505.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-11610-nc-3066-3579.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-11904-nc-3025-3652.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-11904-nc-3073-3675.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-12012-nc-3018-3692.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-12090-nc-3167-3702.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-12192-nc-3091-3717.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-12270-nc-3101-3728.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-12288-nc-3130-3742.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-12354-nc-3188-3832.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-12534-nc-3157-3853.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-12648-nc-3178-3869.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-12672-nc-3248-3892.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-12672-nc-3271-3893.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-12690-nc-3210-3939.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-13056-nc-3278-4017.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-13056-nc-3509-4052.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-13194-nc-3513-4089.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-13200-nc-3482-4093.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-13440-nc-3561-4133.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-13440-nc-3572-4190.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-13614-nc-3613-4210.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-13746-nc-3686-4220.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-13776-nc-3694-4222.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-13824-nc-3622-4289.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-13824-nc-3722-4252.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-13824-nc-3809-4269.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-13974-nc-3848-4325.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-13980-nc-3852-4329.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-14208-nc-3906-4373.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-14208-nc-3918-4388.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-14208-nc-3935-4385.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-14208-nc-3954-4382.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-14208-nc-4013-4415.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-14358-nc-4144-4452.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-14460-nc-4227-4461.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-14532-nc-4164-4470.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-14592-nc-4053-4513.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-14592-nc-4111-4501.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-14592-nc-4130-4492.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-14592-nc-4143-4519.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-14592-nc-4145-4528.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-14592-nc-4287-4557.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-14694-nc-4259-4564.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-14934-nc-4214-4587.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-14952-nc-4281-4592.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-14970-nc-4314-4597.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-14976-nc-4332-4626.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-14976-nc-4343-4629.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-14976-nc-4362-4637.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-14976-nc-4386-4610.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-14976-nc-4421-4638.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-14976-nc-4512-4650.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-15360-nc-4616-4709.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-15360-nc-4682-4771.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-15462-nc-4726-4801.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-15732-nc-4824-4841.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-15744-nc-4702-4862.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-15744-nc-4728-4853.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-15744-nc-4755-4857.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-15744-nc-4768-4907.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-15744-nc-4846-4894.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-16080-nc-4855-4950.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-16128-nc-4881-5010.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-16128-nc-4903-4978.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-16128-nc-4983-4973.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-16128-nc-4993-4991.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-16512-nc-5057-5067.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-16512-nc-5059-5068.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-16512-nc-5075-5085.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-16512-nc-5081-5111.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-16512-nc-5155-5092.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-16512-nc-5185-5089.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-16668-nc-5148-5159.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-16740-nc-5287-5167.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-16824-nc-5239-5183.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-16896-nc-5251-5270.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-16896-nc-5259-5228.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-16896-nc-5312-5213.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-17028-nc-5387-5293.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-17082-nc-5343-5299.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-17124-nc-5293-5305.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-17280-nc-5472-5349.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-17280-nc-5602-5411.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-17280-nc-5616-5391.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-17280-nc-5648-5395.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-17280-nc-5654-5402.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-17400-nc-5727-5423.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-17478-nc-5630-5428.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-17664-nc-5710-5497.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-17664-nc-5733-5514.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-17664-nc-5737-5485.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-17664-nc-5743-5509.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-17664-nc-5759-5488.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-17664-nc-5763-5461.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-17748-nc-5811-5528.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-17856-nc-5813-5541.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-18000-nc-5766-5553.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-18048-nc-5922-5600.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-18048-nc-5940-5601.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-18054-nc-5959-5635.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-18090-nc-6040-5640.hdf5";
-    data_collection_1[n_data++] = "./fclib-library/Global/siconos/Chute/Chute-ndof-18138-nc-6060-5654.hdf5";
+  if (listprob[6] == 1) {
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-4416-nc-130-1177.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-4608-nc-172-1258.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-4608-nc-186-1255.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-4608-nc-216-1280.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-4752-nc-203-1306.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-4992-nc-278-1363.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-4992-nc-284-1376.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-4992-nc-323-1386.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-4992-nc-329-1390.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-5376-nc-381-1489.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-5376-nc-384-1499.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-5376-nc-434-1550.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-5448-nc-452-1564.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-5484-nc-489-1574.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-5532-nc-482-1583.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-5844-nc-542-1694.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-6138-nc-577-1733.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-6144-nc-599-1743.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-6144-nc-650-1778.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-6144-nc-654-1784.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-6144-nc-684-1805.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-6324-nc-733-1828.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-6324-nc-735-1831.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-6528-nc-787-1864.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-6528-nc-815-1897.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-6528-nc-886-1917.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-6816-nc-859-1963.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-6912-nc-862-1988.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-6912-nc-934-2030.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-6912-nc-961-2051.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-6912-nc-965-2050.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-6942-nc-979-2057.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-7242-nc-1017-2093.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-7296-nc-1035-2111.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-7296-nc-1068-2169.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-7296-nc-1121-2138.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-7614-nc-1192-2224.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-7680-nc-1151-2254.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-7680-nc-1226-2312.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-7692-nc-1247-2315.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-8412-nc-1369-2481.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-8448-nc-1356-2492.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-8448-nc-1408-2507.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-8448-nc-1412-2509.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-8448-nc-1436-2501.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-8574-nc-1557-2575.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-8604-nc-1556-2580.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-9216-nc-1885-2782.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-9216-nc-1900-2778.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-9216-nc-1957-2807.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-9600-nc-2023-2861.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-9600-nc-2037-2879.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-9600-nc-2063-2881.hdf5";
+    // data_collection_1[n_data++] =
+    // "./fclib-library/Global/siconos/Chute/Chute-ndof-9600-nc-2065-2894.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-10752-nc-2385-3278.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-10752-nc-2459-3293.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-10752-nc-2514-3305.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-10872-nc-2558-3334.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-11082-nc-2572-3351.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-11100-nc-2574-3352.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-11136-nc-2604-3371.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-11136-nc-2657-3373.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-11136-nc-2716-3407.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-11136-nc-2750-3414.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-11136-nc-2758-3424.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-11184-nc-2797-3439.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-11304-nc-2865-3458.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-11520-nc-2871-3523.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-11520-nc-2873-3515.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-11520-nc-2888-3508.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-11520-nc-2944-3551.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-11520-nc-2965-3556.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-11520-nc-3015-3505.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-11610-nc-3066-3579.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-11904-nc-3025-3652.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-11904-nc-3073-3675.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-12012-nc-3018-3692.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-12090-nc-3167-3702.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-12192-nc-3091-3717.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-12270-nc-3101-3728.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-12288-nc-3130-3742.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-12354-nc-3188-3832.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-12534-nc-3157-3853.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-12648-nc-3178-3869.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-12672-nc-3248-3892.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-12672-nc-3271-3893.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-12690-nc-3210-3939.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-13056-nc-3278-4017.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-13056-nc-3509-4052.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-13194-nc-3513-4089.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-13200-nc-3482-4093.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-13440-nc-3561-4133.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-13440-nc-3572-4190.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-13614-nc-3613-4210.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-13746-nc-3686-4220.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-13776-nc-3694-4222.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-13824-nc-3622-4289.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-13824-nc-3722-4252.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-13824-nc-3809-4269.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-13974-nc-3848-4325.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-13980-nc-3852-4329.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-14208-nc-3906-4373.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-14208-nc-3918-4388.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-14208-nc-3935-4385.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-14208-nc-3954-4382.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-14208-nc-4013-4415.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-14358-nc-4144-4452.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-14460-nc-4227-4461.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-14532-nc-4164-4470.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-14592-nc-4053-4513.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-14592-nc-4111-4501.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-14592-nc-4130-4492.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-14592-nc-4143-4519.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-14592-nc-4145-4528.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-14592-nc-4287-4557.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-14694-nc-4259-4564.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-14934-nc-4214-4587.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-14952-nc-4281-4592.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-14970-nc-4314-4597.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-14976-nc-4332-4626.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-14976-nc-4343-4629.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-14976-nc-4362-4637.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-14976-nc-4386-4610.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-14976-nc-4421-4638.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-14976-nc-4512-4650.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-15360-nc-4616-4709.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-15360-nc-4682-4771.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-15462-nc-4726-4801.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-15732-nc-4824-4841.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-15744-nc-4702-4862.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-15744-nc-4728-4853.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-15744-nc-4755-4857.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-15744-nc-4768-4907.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-15744-nc-4846-4894.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-16080-nc-4855-4950.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-16128-nc-4881-5010.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-16128-nc-4903-4978.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-16128-nc-4983-4973.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-16128-nc-4993-4991.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-16512-nc-5057-5067.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-16512-nc-5059-5068.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-16512-nc-5075-5085.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-16512-nc-5081-5111.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-16512-nc-5155-5092.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-16512-nc-5185-5089.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-16668-nc-5148-5159.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-16740-nc-5287-5167.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-16824-nc-5239-5183.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-16896-nc-5251-5270.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-16896-nc-5259-5228.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-16896-nc-5312-5213.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-17028-nc-5387-5293.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-17082-nc-5343-5299.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-17124-nc-5293-5305.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-17280-nc-5472-5349.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-17280-nc-5602-5411.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-17280-nc-5616-5391.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-17280-nc-5648-5395.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-17280-nc-5654-5402.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-17400-nc-5727-5423.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-17478-nc-5630-5428.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-17664-nc-5710-5497.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-17664-nc-5733-5514.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-17664-nc-5737-5485.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-17664-nc-5743-5509.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-17664-nc-5759-5488.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-17664-nc-5763-5461.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-17748-nc-5811-5528.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-17856-nc-5813-5541.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-18000-nc-5766-5553.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-18048-nc-5922-5600.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-18048-nc-5940-5601.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-18054-nc-5959-5635.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-18090-nc-6040-5640.hdf5";
+    data_collection_1[n_data++] =
+        "./fclib-library/Global/siconos/Chute/Chute-ndof-18138-nc-6060-5654.hdf5";
   }
-
 
   data_collection_1[n_data++] = "---";
   return data_collection_1;

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@
 #include "SiconosFwd.hpp"
 
 
-namespace Siconos {
+namespace siconos {
   namespace algebra {
     namespace tools {
 
@@ -40,7 +40,7 @@ namespace Siconos {
 
     } // namespace tools
   } // namespace algebra
-} // namespace Siconos
+} // namespace siconos
 
 
 #endif

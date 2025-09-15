@@ -16,7 +16,6 @@
  * limitations under the License.
  */
 
-#include "CSparseMatrix_internal.h"
 
 #include "FrictionContactProblem.h"  // for FrictionContactProblem, friction...
 #include "fc3d_Solvers.h"

@@ -1,7 +1,7 @@
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.
 #
-# Copyright 2022 INRIA.
+# Copyright 2024 INRIA.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -71,7 +71,6 @@ if(DATE_COMMAND)
   execute_process(COMMAND date "+\"%Y\"" OUTPUT_VARIABLE YEAR)
   string(STRIP ${YEAR} YEAR)
 endif()
-# Read devel or advanced user options
 # Read user option file, if provided on command line
 if(USER_OPTIONS_FILE)
   # Check for tilde in file name (not handled properly by cmake)
@@ -95,6 +94,7 @@ else()
   message("\n !!!!! Load default configuration set from file ${CMAKE_SOURCE_DIR}/config_samples/default.cmake !!!!! \n")
   include(${CMAKE_SOURCE_DIR}/config_samples/default.cmake)
 endif()
+# Read devel or advanced user options
 include(cmake/advanced_options.cmake)
 
 # Set target names from components list
@@ -116,8 +116,6 @@ if(HAVE_SICONOS_KERNEL AND NOT WITH_CXX)
   message(FATAL_ERROR "You can not build kernel component without C++. Please set WITH_CXX=ON.")
 endif()
   
-
-
 # Get last component in the list;
 # It might be usefull to set some dependencies in targets.
 list(GET COMPONENTS -1 last_component)
@@ -130,6 +128,7 @@ list(GET COMPONENTS -1 last_component)
 
 if(WITH_CXX)
   project(${PROJECT_NAME} CXX C) # C or not C ?
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
   set(CMAKE_CXX_STANDARD 17)
 else()
   # we may need to compile only numerics and only in C.
@@ -144,8 +143,8 @@ endif()
 # Activate fortran, if needed.
 if(WITH_FORTRAN)
   enable_language(Fortran)
-  include(FCompilerSetup)
   set(HAS_FORTRAN TRUE)
+  set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Modules)
 endif()
 
 # Common setup
@@ -235,34 +234,36 @@ message("    Lapack headers : ${LAPACK_HEADER} in ${LAPACK_INCLUDE_DIR}.")
 if(WITH_FCLIB)
   message(STATUS "Use fclib installed in ${fclib_ROOT}.")
 endif()
-if(WITH_SYSTEM_SUITESPARSE)
   message(STATUS "Use system-provided SuiteSparse library, with:")
   message("    - CXSparse headers path: ${SuiteSparse_CXSparse_INCLUDE_DIR}")
   message("    - CXSparse library : ${SuiteSparse_CXSparse_LIBRARY}")
   message("    - LDL headers path: ${SuiteSparse_LDL_INCLUDE_DIR}")
   message("    - LDL library : ${SuiteSparse_LDL_LIBRARY}")
-else()
-  message(STATUS "Use Siconos-provided SuiteSparse, with:")
-  message("    - CXSparse headers path : externals/SuiteSparse/CXSparse")
-  message("    - LDL headers path : externals/SuiteSparse/LDL")
-endif()
 message(STATUS "Python interpreter is ${Python_EXECUTABLE}")
 if(WITH_PYTHON_WRAPPER)
   message(STATUS "Python libraries are ${Python_LIBRARIES}")
 else()
   message("Siconos Python API is off\n")
 endif()
+if(NOT WITH_FORTRAN)
+  message(STATUS "Siconos Fortran API is off. Some integrators won't be available (Lsodar and Hem5).\n")
+endif()
 message(STATUS "------------ Installation information ------------\n")
-message("    Please check them with care and be sure to have the proper rights to write in those directories ...\n")
-message("    - The project will be installed in ${CMAKE_INSTALL_PREFIX}")
+message("    Please check this info with care ...\n")
+if(SICONOS_SYSTEM_WIDE_INSTALL)
+  message(WARNING "\nYou asked for a system wide installation. This requires root privileges and means that you MUST run make install as root (or sudo).
+Else, a correct behavior of python packages installation process is not guaranteed.\n")
+endif()
+if(SICONOS_CUSTOM_INSTALL AND ISOLATED_INSTALL)
+  message(WARNING "You asked for a fully isolated installation in ${SICONOS_CUSTOM_INSTALL} at your own risks.\n")
+endif()
+message("    - The binaries, libraries and headers will be installed in ${CMAKE_INSTALL_PREFIX} \n")
 if(WITH_PYTHON_WRAPPER)
-  message("    - Siconos python packages will be installed in ${SICONOS_PYTHON_INSTALL_DIR} (${sicopy_install_mode} mode),")
+  message("    - Siconos python packages will be installed in ${SICONOS_PYTHON_INSTALL_DIR}\n")
   message("    with the command ${Python_EXECUTABLE} -m pip install -U ${PIP_INSTALL_OPTIONS} ...\n")
-  if(NOT sicopy_install_mode STREQUAL "standard")
-    message("    If this path is not in the standard python environment, you'll probably have to fill PYTHONPATH.\n")
-    message("    To check python known paths, run: python3 -c 'import sys; print(sys.path)' \n")
-    message("    If siconos package path is not in sys.path, to add it, execute: export PYTHONPATH=${SICONOS_PYTHON_INSTALL_DIR}")
-  endif()
+  message("    If this path is not in the standard python environment, you'll probably have to fill PYTHONPATH.\n")
+  message("    To check python known paths, run: python3 -c 'import sys; print(sys.path)' \n")
+  message("    If siconos package path is not in sys.path, to add it, execute: export PYTHONPATH=${SICONOS_PYTHON_INSTALL_DIR}")
 endif()
 message(STATUS "------------------------------------- ------------\n")
 message(STATUS "To get more information about dependencies, config or else, ")

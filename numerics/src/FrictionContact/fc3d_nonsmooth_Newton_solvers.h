@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef FRICTIONCONTACT3D_NONSMOOTH_NEWTON_SOLVERS_H
 #define FRICTIONCONTACT3D_NONSMOOTH_NEWTON_SOLVERS_H
 
@@ -33,36 +33,23 @@
  - problem_size, mu and rho should be moved outside parameters (inside *data)
 */
 
-
 /** The nonsmooth function signature.
 [...]
  */
-typedef void (*fc3d_nonsmooth_Newton_solversFunPtr)
-(void* data,
- unsigned int problem_size,
- double* reaction,
- double* velocity,
- double* mu,
- double* rho,
- double* F,
- double* A,
- double* B);
+typedef void (*fc3d_nonsmooth_Newton_solversFunPtr)(void* data, unsigned int problem_size,
+                                                    double* reaction, double* velocity,
+                                                    double* mu, double* rho, double* F,
+                                                    double* A, double* B);
 
 /** The nonsmooth function signature for a 3x3 block.
  */
-typedef void (*FrictionContactNSFun3x3Ptr)(double* reaction,
-                                           double* velocity,
-                                           double mu,
-                                           double* rho,
-                                           double* F,
-                                           double* A,
-                                           double* B);
+typedef void (*FrictionContactNSFun3x3Ptr)(double* reaction, double* velocity, double mu,
+                                           double* rho, double* F, double* A, double* B);
 
 /** The nonsmooth equation structure.
 [...]
  */
-typedef struct
-{
+typedef struct {
   FrictionContactProblem* problem;
   void* data;
   fc3d_nonsmooth_Newton_solversFunPtr function;

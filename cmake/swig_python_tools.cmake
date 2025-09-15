@@ -65,9 +65,7 @@ function(add_swig_sub_module)
   endif()
   # If a target with that name  already exists, we prepend py to this name.
   set(pythonfile_name ${python_module_name}.py)
-  #if(TARGET ${python_module_name})
-  set(target_NAME py${python_module_name})
-  #endif()
+  set(target_NAME sicpy${python_module_name})
 
 
   # --- Set properties for the current swig file ---

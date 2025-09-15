@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,8 +62,20 @@ void OneStepIntegrator::initialize()
   _isInitialized=true;
 
 }
+void OneStepIntegrator::UpdateAndSwapAllOutput(double time)
+{
+  InteractionsGraph::VIterator ui, uiend;
+  InteractionsGraph & indexSet0 = *_simulation->nonSmoothDynamicalSystem()->topology()->indexSet0();
+  for(std::tie(ui, uiend) = indexSet0.vertices(); ui != uiend; ++ui)
+  {
+    if(!checkInteractionOSI(indexSet0, ui)) continue;
+    Interaction & inter = *indexSet0.bundle(*ui);
+    UpdateAndSwapAllOutput(inter,time);
+  }
+}
 
-void OneStepIntegrator::update_interaction_output(Interaction& inter, double time, InteractionProperties& interaction_properties)
+
+void OneStepIntegrator::UpdateAndSwapAllOutput(Interaction& inter, double time)
 {
   // - compute interaction output (y) for all levels
   // - swaps in memory
@@ -75,7 +87,7 @@ void OneStepIntegrator::update_interaction_output(Interaction& inter, double tim
   //      - contact detection
   //      - inter = ew interaction + link with ds
   //      - simu->osi->initializeWorkVectorsForInteraction(inter)
-  //      - simu->osi->update_interaction_output()
+  //      - simu->osi->UpdateAndSwapAllOutput()
 
   if(_steps > 1)  // Multi--step methods
   {
@@ -95,7 +107,10 @@ void OneStepIntegrator::update_interaction_output(Interaction& inter, double tim
     }
     inter.swapInMemory();
   }
+
+  
   // Compute a first value for the output
+  // VA 10/04/2024 What is the interest of the following line ?
   inter.computeOutput(time,  0);
 
   // prepare the gradients

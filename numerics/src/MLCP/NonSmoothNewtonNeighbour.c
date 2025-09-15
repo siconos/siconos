@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,68 +14,64 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #include "NonSmoothNewtonNeighbour.h"
-#include <stdio.h>             // for FILE
-#include <stdlib.h>            // for free, malloc
-#include <string.h>            // for NULL, memcpy, strcpy
-#include "NonSmoothNewton.h"   // for NewtonFunctionPtr
+
+#include <stdio.h>   // for FILE
+#include <stdlib.h>  // for free, malloc
+#include <string.h>  // for NULL, memcpy, strcpy
+
+#include "NonSmoothNewton.h"  // for NewtonFunctionPtr
+#include "SiconosBlas.h"      // for cblas_dnrm2, cblas_dcopy, cblas_daxpy
+#include "SiconosLapack.h"    // for DGESV, lapack_int
+#include "SolverOptions.h"
 #include "math.h"              // for fabs, pow
 #include "numerics_verbose.h"  // for verbose
 #include "stdio.h"             // for printf, fprintf, fclose, fopen, stderr
 #include "stdlib.h"            // for exit, rand, EXIT_FAILURE
-#include "SiconosBlas.h"       // for cblas_dnrm2, cblas_dcopy, cblas_daxpy
-#include "SiconosLapack.h"     // for DGESV, lapack_int
-#include "SolverOptions.h"
-static  int sN ;
-static  int sN2 ;
+static int sN;
+static int sN2;
 
-static  double * sphi_z ;
-static  double * sdir_descent ;
-static  double * sphi_zaux ;
-static  double *sjacobianPhi_z ;
-static  double *sjacobianPhi_zaux ;
-static  double *sgrad_psi_z ;
-static  double *sgrad_psi_zaux ;
-static  double *sPrevDirDescent;
-static  double *szaux ;
-static  double *szzaux ;
-static  double *sz2 ;
-static  lapack_int* sipiv ;
-static  int* sW2V;
+static double *sphi_z;
+static double *sdir_descent;
+static double *sphi_zaux;
+static double *sjacobianPhi_z;
+static double *sjacobianPhi_zaux;
+static double *sgrad_psi_z;
+static double *sgrad_psi_zaux;
+static double *sPrevDirDescent;
+static double *szaux;
+static double *szzaux;
+static double *sz2;
+static lapack_int *sipiv;
+static int *sW2V;
 
 static int sPlotMerit = 1;
 static char fileName[64];
 /* static char fileId[16]; */
 
-static double* sZsol = 0;
+static double *sZsol = 0;
 
-static NewtonFunctionPtr* sFphi;
-static NewtonFunctionPtr* sFjacobianPhi;
-
+static NewtonFunctionPtr *sFphi;
+static NewtonFunctionPtr *sFjacobianPhi;
 
 static void plotMerit(double *z, double psi_k, double descentCondition);
-//static void plotMeritToZsol(double *z);
+// static void plotMeritToZsol(double *z);
 static int linesearch2_Armijo(int n, double *z, double psi_k, double descentCondition);
-//static int lineSearch_Wolfe(double *z, double qp_0);
-//static int NonMonotomnelineSearch(double *z, double Rk);
-
+// static int lineSearch_Wolfe(double *z, double qp_0);
+// static int NonMonotomnelineSearch(double *z, double Rk);
 
 /************************************************************************/
 /*useful for debug*/
-void NSNN_thisIsTheSolution(int n, double * z)
-{
+void NSNN_thisIsTheSolution(int n, double *z) {
   sZsol = (double *)malloc(n * sizeof(double));
   memcpy(sZsol, z, n * sizeof(double));
 }
-void  NSNN_reset()
-{
-  if(sZsol)
-    free(sZsol);
+void NSNN_reset() {
+  if (sZsol) free(sZsol);
   sZsol = 0;
 }
-void plotMerit(double *z, double psi_k, double descentCondition)
-{
+void plotMerit(double *z, double psi_k, double descentCondition) {
   int incx = 1, incy = 1;
   double q_0, q_tk, qp_tk, merit_k;
   /* double tmin = 1e-12; */
@@ -92,18 +88,14 @@ void plotMerit(double *z, double psi_k, double descentCondition)
   aux = 0.5 * aux * aux;
   printf("plot psi_z %e\n", aux);
 
+  if (!sPlotMerit) return;
 
-  if(!sPlotMerit)
-    return;
-
-  if(sPlotMerit)
-  {
+  if (sPlotMerit) {
     /*    sPlotMerit=0;*/
     strcpy(fileName, "outputLS");
 
-
     (*sFphi)(sN, z, sphi_z, 0);
-    q_0 =  cblas_dnrm2(sN, sphi_z, incx);
+    q_0 = cblas_dnrm2(sN, sphi_z, incx);
     q_0 = 0.5 * q_0 * q_0;
 
     fp = fopen(fileName, "w");
@@ -112,25 +104,24 @@ void plotMerit(double *z, double psi_k, double descentCondition)
     tk = 5e-7;
     aux = -tk;
     Nstep = 1e4;
-    for(i = 0; i < 2 * Nstep; i++)
-    {
+    for (i = 0; i < 2 * Nstep; i++) {
       cblas_dcopy(sN, z, incx, sz2, incx);
       cblas_daxpy(sN, aux, sdir_descent, incx, sz2, incy);
       (*sFphi)(sN, sz2, sphi_z, 0);
-      q_tk =  cblas_dnrm2(sN, sphi_z, incx);
+      q_tk = cblas_dnrm2(sN, sphi_z, incx);
       q_tk = 0.5 * q_tk * q_tk;
 
-
       (*sFjacobianPhi)(sN, sz2, sjacobianPhi_z, 1);
-      /* Computes the jacobian of the merit function, jacobian_psi = transpose(jacobianPhiMatrix).phiVector */
-      cblas_dgemv(CblasColMajor,CblasTrans, sN, sN, 1.0, sjacobianPhi_z, sN, sphi_z, incx, 0.0, sgrad_psi_z, incx);
+      /* Computes the jacobian of the merit function, jacobian_psi =
+       * transpose(jacobianPhiMatrix).phiVector */
+      cblas_dgemv(CblasColMajor, CblasTrans, sN, sN, 1.0, sjacobianPhi_z, sN, sphi_z, incx,
+                  0.0, sgrad_psi_z, incx);
       qp_tk = cblas_ddot(sN, sgrad_psi_z, 1, sdir_descent, 1);
 
       merit_k = psi_k + m1 * aux * descentCondition;
 
-
       fprintf(fp, "%e %.16e %.16e %e\n", aux, q_tk, merit_k, qp_tk);
-      if(i == Nstep - 1)
+      if (i == Nstep - 1)
         aux = 0;
       else
         aux += tk / Nstep;
@@ -156,8 +147,6 @@ void plotMerit(double *z, double psi_k, double descentCondition)
 
 /*   for (ii = 0; ii < sN; ii++) */
 /*     szzaux[ii] = sZsol[ii] - z[ii]; */
-
-
 
 /*   if (sPlotMerit) */
 /*   { */
@@ -190,9 +179,7 @@ void plotMerit(double *z, double psi_k, double descentCondition)
 /************************************************************************/
 
 /* Linesearch */
-int linesearch2_Armijo(int n, double *z, double psi_k, double descentCondition)
-{
-
+int linesearch2_Armijo(int n, double *z, double psi_k, double descentCondition) {
   /* IN :
      psi_k (merit function for current iteration)
      jacobian_psi_k (jacobian of the merit function)
@@ -216,49 +203,43 @@ int linesearch2_Armijo(int n, double *z, double psi_k, double descentCondition)
 
   tk = 3.25;
 
-
-  while(tk > tmin)
-  {
-
+  while (tk > tmin) {
     /* Computes merit function = 1/2*norm(phi(z_{k+1}))^2 */
     cblas_dcopy(sN, z, incx, sz2, incx);
     cblas_daxpy(n, tk, sdir_descent, incx, sz2, incy);
 
-
     (*sFphi)(n, sz2, sphi_z, 0);
-    merit =  cblas_dnrm2(n, sphi_z, incx);
+    merit = cblas_dnrm2(n, sphi_z, incx);
     merit = 0.5 * merit * merit;
     merit_k = psi_k + m1 * tk * descentCondition;
-    if(merit < merit_k)
-    {
+    if (merit < merit_k) {
       tkl = 0;
       tkr = tk;
 
       /*calcul merit'(tk)*/
       (*sFjacobianPhi)(sN, sz2, sjacobianPhi_z, 1);
-      /* Computes the jacobian of the merit function, jacobian_psi = transpose(jacobianPhiMatrix).phiVector */
-      cblas_dgemv(CblasColMajor,CblasTrans, sN, sN, 1.0, sjacobianPhi_z, sN, sphi_z, incx, 0.0, sgrad_psi_zaux, incx);
+      /* Computes the jacobian of the merit function, jacobian_psi =
+       * transpose(jacobianPhiMatrix).phiVector */
+      cblas_dgemv(CblasColMajor, CblasTrans, sN, sN, 1.0, sjacobianPhi_z, sN, sphi_z, incx,
+                  0.0, sgrad_psi_zaux, incx);
       qp_tk = cblas_ddot(sN, sgrad_psi_zaux, 1, sdir_descent, 1);
 
-      if(qp_tk > 0)
-      {
-        while(fabs(tkl - tkr) > tmin)
-        {
+      if (qp_tk > 0) {
+        while (fabs(tkl - tkr) > tmin) {
           tkaux = 0.5 * (tkl + tkr);
           cblas_dcopy(sN, z, incx, sz2, incx);
           cblas_daxpy(n, tkaux, sdir_descent, incx, sz2, incy);
           /*calcul merit'(tk)*/
           (*sFphi)(n, sz2, sphi_z, 0);
           (*sFjacobianPhi)(sN, sz2, sjacobianPhi_z, 1);
-          /* Computes the jacobian of the merit function, jacobian_psi = transpose(jacobianPhiMatrix).phiVector */
-          cblas_dgemv(CblasColMajor,CblasTrans, sN, sN, 1.0, sjacobianPhi_z, sN, sphi_z, incx, 0.0, sgrad_psi_zaux, incx);
+          /* Computes the jacobian of the merit function, jacobian_psi =
+           * transpose(jacobianPhiMatrix).phiVector */
+          cblas_dgemv(CblasColMajor, CblasTrans, sN, sN, 1.0, sjacobianPhi_z, sN, sphi_z, incx,
+                      0.0, sgrad_psi_zaux, incx);
           qp_tk = cblas_ddot(sN, sgrad_psi_zaux, 1, sdir_descent, 1);
-          if(qp_tk > 0)
-          {
+          if (qp_tk > 0) {
             tkr = tkaux;
-          }
-          else
-          {
+          } else {
             tkl = tkaux;
           }
         }
@@ -270,17 +251,16 @@ int linesearch2_Armijo(int n, double *z, double psi_k, double descentCondition)
     }
     tk = tk * 0.5;
   }
-  if(tk <= tmin)
-  {
+  if (tk <= tmin) {
     cblas_dcopy(sN, sz2, incx, z, incx);
-    printf("NonSmoothNewton::linesearch2_Armijo warning, resulting tk=%e < tmin, linesearch stopped.\n", tk);
+    printf(
+        "NonSmoothNewton::linesearch2_Armijo warning, resulting tk=%e < tmin, linesearch "
+        "stopped.\n",
+        tk);
     return 0;
-
   }
   return 1;
-
 }
-
 
 /* int lineSearch_Wolfe(double *z, double qp_0) */
 /* { */
@@ -293,7 +273,6 @@ int linesearch2_Armijo(int n, double *z, double psi_k, double descentCondition)
 /*   double tg, td; */
 /*   double m1 = 0.1; */
 /*   double m2 = 0.9; */
-
 
 /*   (*sFphi)(sN, z, sphi_z, 0); */
 /*   q_0 =  cblas_dnrm2(sN, sphi_z , incx); */
@@ -315,8 +294,10 @@ int linesearch2_Armijo(int n, double *z, double psi_k, double descentCondition)
 /*     q_tk = 0.5 * q_tk * q_tk; */
 
 /*     (*sFjacobianPhi)(sN, sz2, sjacobianPhi_z, 1); */
-/*     /\* Computes the jacobian of the merit function, jacobian_psi = transpose(jacobianPhiMatrix).phiVector *\/ */
-/*     cblas_dgemv(CblasColMajor,CblasTrans, sN, sN, 1.0, sjacobianPhi_z, sN, sphi_z, incx, 0.0, sgrad_psi_z, incx); */
+/*     /\* Computes the jacobian of the merit function, jacobian_psi =
+ * transpose(jacobianPhiMatrix).phiVector *\/ */
+/*     cblas_dgemv(CblasColMajor,CblasTrans, sN, sN, 1.0, sjacobianPhi_z, sN, sphi_z, incx,
+ * 0.0, sgrad_psi_z, incx); */
 /*     qp_tk = cblas_ddot(sN, sgrad_psi_z, 1, sdir_descent, 1); */
 /*     if (qp_tk <  m2 * qp_0 && q_tk < q_0 + m1 * tk * qp_0) */
 /*     { */
@@ -342,7 +323,8 @@ int linesearch2_Armijo(int n, double *z, double psi_k, double descentCondition)
 
 /*   if ((td - tg) <= tmin) */
 /*   { */
-/*     printf("NonSmoothNewton2::lineSearchWolfe warning, resulting tk < tmin, linesearch stopped.\n"); */
+/*     printf("NonSmoothNewton2::lineSearchWolfe warning, resulting tk < tmin, linesearch
+ * stopped.\n"); */
 /*     return 0; */
 /*   } */
 /*   return 1; */
@@ -359,12 +341,9 @@ int linesearch2_Armijo(int n, double *z, double psi_k, double descentCondition)
 /*   double tk = 1; */
 /*   /\*   double m1=0.5; *\/ */
 
-
-
 /*   (*sFphi)(sN, z, sphi_z, 0); */
 /*   q_0 =  cblas_dnrm2(sN, sphi_z , incx); */
 /*   q_0 = 0.5 * q_0 * q_0; */
-
 
 /*   while ((tmax - tmin) > 1e-1) */
 /*   { */
@@ -392,22 +371,11 @@ int linesearch2_Armijo(int n, double *z, double psi_k, double descentCondition)
 
 /* } */
 
+int nonSmoothNewtonNeigh_getNbIWork(int n, int m) { return 2 * (n + m); }
+int nonSmoothNewtonNeigh_getNbDWork(int n, int m) { return (11 + 2 * (n + m)) * (n + m) + 1; }
 
-int nonSmoothNewtonNeigh_getNbIWork(int n, int m)
-{
-  return 2 * (n + m);
-
-}
-int nonSmoothNewtonNeigh_getNbDWork(int n, int m)
-{
-  return (11 + 2 * (n + m)) * (n + m) + 1;
-}
-
-double * nonSmoothNewtonNeighInitMemory(int n, double * dWork, int * iWork)
-{
-
-  if(dWork == NULL || iWork == NULL)
-  {
+double *nonSmoothNewtonNeighInitMemory(int n, double *dWork, int *iWork) {
+  if (dWork == NULL || iWork == NULL) {
     fprintf(stderr, "nonSmoothNewtonNeighInitMemory, memory allocation failed.\n");
     exit(EXIT_FAILURE);
   }
@@ -415,7 +383,7 @@ double * nonSmoothNewtonNeighInitMemory(int n, double * dWork, int * iWork)
   sN2 = n * n;
   sphi_z = dWork;
   sdir_descent = sphi_z + sN;
-  sphi_zaux = sdir_descent + sN ;
+  sphi_zaux = sdir_descent + sN;
   sjacobianPhi_z = sphi_zaux + sN;
   sjacobianPhi_zaux = sjacobianPhi_z + sN2;
   sgrad_psi_z = sjacobianPhi_zaux + sN2;
@@ -425,29 +393,23 @@ double * nonSmoothNewtonNeighInitMemory(int n, double * dWork, int * iWork)
   szzaux = szaux + sN;
   sz2 = szzaux + sN;
 
-
   sipiv = iWork;
   sW2V = sipiv + sN;
 
   return sz2 + sN;
-
 }
 
-
-int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctionPtr* jacobianPhi, int* iparam, double* dparam)
-{
-
-
-  int itermax = iparam[SICONOS_IPARAM_MAX_ITER]; // maximum number of iterations allowed
+int nonSmoothNewtonNeigh(int n, double *z, NewtonFunctionPtr *phi,
+                         NewtonFunctionPtr *jacobianPhi, int *iparam, double *dparam) {
+  int itermax = iparam[SICONOS_IPARAM_MAX_ITER];  // maximum number of iterations allowed
   int iterMaxWithSameZ = itermax / 4;
-  int niter = 0; // current iteration number
+  int niter = 0;  // current iteration number
   double tolerance = dparam[SICONOS_DPARAM_TOL];
   /*   double coef; */
   sFphi = phi;
   sFjacobianPhi = jacobianPhi;
   //  verbose=1;
-  if(verbose > 0)
-  {
+  if (verbose > 0) {
     printf(" ============= Starting of Newton process =============\n");
     printf(" - tolerance: %14.7e\n - maximum number of iterations: %i\n", tolerance, itermax);
   }
@@ -459,8 +421,9 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
   /** merit function and its jacobian */
   double psi_z;
 
-  /** The algorithm is alg 4.1 of the paper of Kanzow and Kleinmichel, "A new class of semismooth Newton-type methods
-      for nonlinear complementarity problems", in Computational Optimization and Applications, 11, 227-251 (1998).
+  /** The algorithm is alg 4.1 of the paper of Kanzow and Kleinmichel, "A new class of
+     semismooth Newton-type methods for nonlinear complementarity problems", in Computational
+     Optimization and Applications, 11, 227-251 (1998).
 
       We try to keep the same notations
   */
@@ -483,21 +446,20 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
   NbLookingForANewZ = 0;
 
   /** Iterations ... */
-  while((niter < itermax) && (terminationCriterion > tolerance))
-  {
+  while ((niter < itermax) && (terminationCriterion > tolerance)) {
     ++niter;
     /** Computes phi and its jacobian */
-    if(sZsol)
-    {
-      for(ii = 0; ii < sN; ii++)
-        szzaux[ii] = sZsol[ii] - z[ii];
+    if (sZsol) {
+      for (ii = 0; ii < sN; ii++) szzaux[ii] = sZsol[ii] - z[ii];
       printf("dist zzsol %.32e.\n", cblas_dnrm2(n, szzaux, 1));
     }
 
     (*sFphi)(n, z, sphi_z, 0);
     (*sFjacobianPhi)(n, z, sjacobianPhi_z, 1);
-    /* Computes the jacobian of the merit function, jacobian_psi = transpose(jacobianPhiMatrix).phiVector */
-    cblas_dgemv(CblasColMajor,CblasTrans, n, n, 1.0, sjacobianPhi_z, n, sphi_z, incx, 0.0, sgrad_psi_z, incx);
+    /* Computes the jacobian of the merit function, jacobian_psi =
+     * transpose(jacobianPhiMatrix).phiVector */
+    cblas_dgemv(CblasColMajor, CblasTrans, n, n, 1.0, sjacobianPhi_z, n, sphi_z, incx, 0.0,
+                sgrad_psi_z, incx);
     norm_jacobian_psi_z = cblas_dnrm2(n, sgrad_psi_z, 1);
 
     /* Computes norm2(phi) */
@@ -505,25 +467,25 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
     /* Computes merit function */
     psi_z = 0.5 * normPhi_z * normPhi_z;
 
-    if(normPhi_z < tolerance)
-    {
+    if (normPhi_z < tolerance) {
       /*it is the solution*/
       terminationCriterion = tolerance / 2.0;
       break;
     }
 
-    if(verbose > 0)
-    {
-      printf("Non Smooth Newton, iteration number %i, norm grad psi= %14.7e , psi = %14.7e, normPhi = %e .\n", niter, norm_jacobian_psi_z, psi_z, normPhi_z);
+    if (verbose > 0) {
+      printf(
+          "Non Smooth Newton, iteration number %i, norm grad psi= %14.7e , psi = %14.7e, "
+          "normPhi = %e .\n",
+          niter, norm_jacobian_psi_z, psi_z, normPhi_z);
       printf(" -----------\n");
     }
 
     NbLookingForANewZ++;
 
-    if(niter > 2)
-    {
-      if(10 * norm_jacobian_psi_z < tolerance || !resls || NbLookingForANewZ > iterMaxWithSameZ)
-      {
+    if (niter > 2) {
+      if (10 * norm_jacobian_psi_z < tolerance || !resls ||
+          NbLookingForANewZ > iterMaxWithSameZ) {
         NbLookingForANewZ = 0;
         resls = 1;
         /*   if (NbLookingForANewZ % 10 ==1 && 0){
@@ -536,8 +498,7 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
         */
 
         /* FOR DEBUG ONLY*/
-        if(sZsol)
-        {
+        if (sZsol) {
           printf("begin plot prev dir\n");
           plotMerit(z, 0, 0);
           printf("end\n");
@@ -547,8 +508,7 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
           cblas_dcopy(n, sZsol, incx, szaux, incx);
           cblas_daxpy(n, -1, z, 1, szaux, 1);
           printf("dist to sol %e \n", cblas_dnrm2(n, szaux, 1));
-          for(ii = 0; ii < n; ii++)
-            sdir_descent[ii] = sZsol[ii] - z[ii];
+          for (ii = 0; ii < n; ii++) sdir_descent[ii] = sZsol[ii] - z[ii];
 
           aux = norm;
           norm = 1;
@@ -564,26 +524,18 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
         /*find a gradiant going out of this cul-de-sac.*/
         norm = n / 2;
         findNewZ = 0;
-        for(j = 0; j < 20; j++)
-        {
-
-          for(i = 0; i < n; i++)
-          {
-            if(sZsol)
-            {
+        for (j = 0; j < 20; j++) {
+          for (i = 0; i < n; i++) {
+            if (sZsol) {
               /* FOR DEBUG ONLY*/
               (*sFphi)(n, sZsol, sphi_zaux, 0);
               norm = cblas_dnrm2(n, sphi_zaux, 1);
               printf("Norm of the sol %e.\n", norm);
 
-              for(ii = 0; ii < n; ii++)
-                sdir_descent[ii] = sZsol[ii] - z[ii];
+              for (ii = 0; ii < n; ii++) sdir_descent[ii] = sZsol[ii] - z[ii];
               norm = 1;
-            }
-            else
-            {
-              for(ii = 0; ii < n; ii++)
-              {
+            } else {
+              for (ii = 0; ii < n; ii++) {
                 sdir_descent[ii] = 1.0 * rand();
               }
               cblas_dscal(n, 1 / cblas_dnrm2(n, sdir_descent, 1), sdir_descent, incx);
@@ -593,21 +545,20 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
             // cblas_dscal(n,0.0,zaux,incx);
             /* zaux = z + dir */
             cblas_daxpy(n, norm, sdir_descent, 1, szaux, 1);
-            /* Computes the jacobian of the merit function, jacobian_psi_zaux = transpose(jacobianPhi_zaux).phi_zaux */
+            /* Computes the jacobian of the merit function, jacobian_psi_zaux =
+             * transpose(jacobianPhi_zaux).phi_zaux */
             (*sFphi)(n, szaux, sphi_zaux, 0);
             (*sFjacobianPhi)(n, szaux, sjacobianPhi_zaux, 1);
 
             /* FOR DEBUG ONLY*/
-            if(sZsol)
-            {
+            if (sZsol) {
               aux = cblas_dnrm2(n, sphi_zaux, 1);
               printf("Norm of the sol is now %e.\n", aux);
-              for(ii = 0; ii < n; ii++)
-                printf("zsol %e zaux %e \n", sZsol[ii], szaux[ii]);
+              for (ii = 0; ii < n; ii++) printf("zsol %e zaux %e \n", sZsol[ii], szaux[ii]);
             }
 
-
-            cblas_dgemv(CblasColMajor, CblasTrans, n, n, 1.0, sjacobianPhi_zaux, n, sphi_zaux, incx, 0.0, sgrad_psi_zaux, incx);
+            cblas_dgemv(CblasColMajor, CblasTrans, n, n, 1.0, sjacobianPhi_zaux, n, sphi_zaux,
+                        incx, 0.0, sgrad_psi_zaux, incx);
             cblas_dcopy(n, szaux, 1, szzaux, 1);
             cblas_daxpy(n, -1, z, incx, szzaux, incx);
             /*zzaux must be a descente direction.*/
@@ -616,39 +567,32 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
             /*cblas_dcopy(n,sdir,incx,sdir_descent,incx);
             plotMerit(z, phi);*/
 
-
             aux = cblas_ddot(n, sgrad_psi_zaux, 1, szzaux, 1);
             /*       aux1 = cblas_dnrm2(n,szzaux,1);
             aux1 = cblas_dnrm2(n,sgrad_psi_zaux,1);*/
             aux = aux / (cblas_dnrm2(n, szzaux, 1) * cblas_dnrm2(n, sgrad_psi_zaux, 1));
             /*       printf("aux: %e\n",aux);*/
-            if(aux < 0.1 * (j + 1))
-            {
-              //zaux is the new point.
+            if (aux < 0.1 * (j + 1)) {
+              // zaux is the new point.
               findNewZ = 1;
               cblas_dcopy(n, szaux, incx, z, incx);
               break;
             }
           }
-          if(findNewZ)
-            break;
-          if(j == 10)
-          {
+          if (findNewZ) break;
+          if (j == 10) {
             norm = n / 2;
-          }
-          else if(j > 10)
+          } else if (j > 10)
             norm = -2 * norm;
           else
             norm = -norm / 2.0;
         }
-        if(! findNewZ)
-        {
+        if (!findNewZ) {
           printf("failed to find a new z\n");
           /* exit(1);*/
           continue;
 
-        }
-        else
+        } else
           continue;
       }
     }
@@ -665,8 +609,7 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
     */
     cblas_dscal(n, -1.0, sphi_z, incx);
     DGESV(n, 1, sjacobianPhi_z, n, sipiv, sphi_z, n, &infoDGESV);
-    if(infoDGESV)
-    {
+    if (infoDGESV) {
       printf("DGEV error %d.\n", infoDGESV);
     }
     cblas_dcopy(n, sphi_z, 1, sdir_descent, 1);
@@ -683,36 +626,34 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
     printf("end\n");
           gets(&c);*/
 
-
     /*
     norm = cblas_dnrm2(n,sdir_descent,1);
     printf("norm desc %e \n",norm);
     cblas_dscal( n , 1/norm , sdir_descent, 1);
     */
     /* descentCondition = jacobian_psi.dk */
-    descentCondition = cblas_ddot(n, sgrad_psi_z,  1,  sdir_descent, 1);
+    descentCondition = cblas_ddot(n, sgrad_psi_z, 1, sdir_descent, 1);
 
     /* Criterion to be satisfied: error < -rho*norm(dk)^p */
     criterion = -rho * pow(criterion, p);
 
-//    if ((infoDGESV != 0 || descentCondition > criterion) && 0)
-//    {
-//      printf("no a desc dir, get grad psy\n");
+    //    if ((infoDGESV != 0 || descentCondition > criterion) && 0)
+    //    {
+    //      printf("no a desc dir, get grad psy\n");
     /* dk = - jacobian_psi (remind that dk is saved in phi_z) */
-//      cblas_dcopy(n, sgrad_psi_z, 1, sdir_descent, 1);
-//      cblas_dscal(n , -1.0 , sdir_descent, incx);
+    //      cblas_dcopy(n, sgrad_psi_z, 1, sdir_descent, 1);
+    //      cblas_dscal(n , -1.0 , sdir_descent, incx);
     /*DEBUG ONLY*/
     /*printf("begin plot new descent dir\n");
     plotMerit(z);
     printf("end\n");
      gets(&c);*/
-//    }
+    //    }
     /*      coef=fabs(norm_jacobian_psi_z*norm_jacobian_psi_z/descentCondition);
     if (coef <1){
     cblas_dscal(n,coef,sdir_descent,incx);
     printf("coef %e norm dir descent is now %e\n",coef,cblas_dnrm2(n,sdir_descent,1));
     }*/
-
 
     /* Step-3 Line search: computes z_k+1 */
     /*linesearch_Armijo(n,z,sdir_descent,psi_z, descentCondition, phi);*/
@@ -725,9 +666,7 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
     /*      memcpy(oldz,z,n*sizeof(double));*/
 
     resls = linesearch2_Armijo(n, z, psi_z, descentCondition);
-    if(!resls && niter > 1)
-    {
-
+    if (!resls && niter > 1) {
       /* NM_dense_display(sjacobianPhi_z,n,n,n);
       printf("begin plot new descent dir\n");
       plotMerit(oldz,psi_z, descentCondition);
@@ -735,10 +674,10 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
       gets(&c);*/
     }
 
-
     /*      lineSearch_Wolfe(z, descentCondition, phi,jacobianPhi);*/
     /*      if (niter>3){
-    printf("angle between prev dir %e.\n",acos(cblas_ddot(n, sdir_descent,  1,  sPrevDirDescent, 1)/(cblas_dnrm2(n,sdir_descent,1)*cblas_dnrm2(n,sPrevDirDescent,1))));
+    printf("angle between prev dir %e.\n",acos(cblas_ddot(n, sdir_descent,  1, sPrevDirDescent,
+    1)/(cblas_dnrm2(n,sdir_descent,1)*cblas_dnrm2(n,sPrevDirDescent,1))));
     }*/
     cblas_dcopy(n, sdir_descent, 1, sPrevDirDescent, 1);
 
@@ -749,8 +688,8 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
 
     /*      if( 1 || verbose>0)
     {
-     printf("Non Smooth Newton, iteration number %i, error grad equal to %14.7e , psi value is %14.7e .\n",niter, terminationCriterion,psi_z);
-       printf(" -----------\n");
+     printf("Non Smooth Newton, iteration number %i, error grad equal to %14.7e , psi value is
+    %14.7e .\n",niter, terminationCriterion,psi_z); printf(" -----------\n");
        }*/
   }
 
@@ -761,18 +700,18 @@ int nonSmoothNewtonNeigh(int n, double* z, NewtonFunctionPtr* phi, NewtonFunctio
 
   /** Free memory*/
 
+  if (dparam[SICONOS_DPARAM_RESIDU] > tolerance)
+    numerics_printf_verbose(
+        1, "Non Smooth Newton warning: no convergence after %i iterations\n", niter);
 
-    if(dparam[SICONOS_DPARAM_RESIDU] > tolerance)
-      numerics_printf_verbose(1,"Non Smooth Newton warning: no convergence after %i iterations\n", niter);
-
-    else
-      numerics_printf_verbose(1,"Non Smooth Newton: convergence after %i iterations\n", niter);
-    numerics_printf_verbose(1," The residue is : %e \n", dparam[SICONOS_DPARAM_RESIDU]);
-
+  else
+    numerics_printf_verbose(1, "Non Smooth Newton: convergence after %i iterations\n", niter);
+  numerics_printf_verbose(1, " The residue is : %e \n", dparam[SICONOS_DPARAM_RESIDU]);
 
   /*  free(oldz);*/
 
-  if(dparam[SICONOS_DPARAM_RESIDU] > tolerance)
+  if (dparam[SICONOS_DPARAM_RESIDU] > tolerance)
     return 1;
-  else return 0;
+  else
+    return 0;
 }

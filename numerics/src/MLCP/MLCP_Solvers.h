@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,12 +57,11 @@ extern "C" {
    - mlcp_direct_simplex
 
    \param[in] problem the MixedLinearComplementarityProblem structure which
-   handles the problem (M,q) 
+   handles the problem (M,q)
    \param[in] options structure used to define the
    solver(s) and their parameters
 */
-void mlcp_driver_init(MixedLinearComplementarityProblem *problem,
-                      SolverOptions *options);
+void mlcp_driver_init(MixedLinearComplementarityProblem *problem, SolverOptions *options);
 /**
    General interface to reset a solver.
 
@@ -80,8 +79,7 @@ void mlcp_driver_init(MixedLinearComplementarityProblem *problem,
    \param[in] options structure used to define the
    solver(s) and their parameters
 */
-void mlcp_driver_reset(MixedLinearComplementarityProblem *problem,
-                       SolverOptions *options);
+void mlcp_driver_reset(MixedLinearComplementarityProblem *problem, SolverOptions *options);
 
 /** mlcp_pgs (Projected Gauss-Seidel) is a basic Projected Gauss-Seidel solver
  *  for MLCP.
@@ -99,8 +97,8 @@ void mlcp_driver_reset(MixedLinearComplementarityProblem *problem,
  *  parameters.
  *
  */
-void mlcp_pgs(MixedLinearComplementarityProblem *problem, double *z, double *w,
-              int *info, SolverOptions *options);
+void mlcp_pgs(MixedLinearComplementarityProblem *problem, double *z, double *w, int *info,
+              SolverOptions *options);
 
 /** mlcp_rpgs (Projected Gauss-Seidel) is a basic Projected Gauss-Seidel solver
  *  for MLCP.
@@ -118,8 +116,8 @@ void mlcp_pgs(MixedLinearComplementarityProblem *problem, double *z, double *w,
  * parameters.
  *
  */
-void mlcp_rpgs(MixedLinearComplementarityProblem *problem, double *z, double *w,
-               int *info, SolverOptions *options);
+void mlcp_rpgs(MixedLinearComplementarityProblem *problem, double *z, double *w, int *info,
+               SolverOptions *options);
 
 /** mlcp_psor (projected successive overrelaxation method) is a solver for MLCP.
  *
@@ -135,8 +133,8 @@ void mlcp_rpgs(MixedLinearComplementarityProblem *problem, double *z, double *w,
  *  \param[in,out] options structure used to define the solver and its
  * parameters.
  */
-void mlcp_psor(MixedLinearComplementarityProblem *problem, double *z, double *w,
-               int *info, SolverOptions *options);
+void mlcp_psor(MixedLinearComplementarityProblem *problem, double *z, double *w, int *info,
+               SolverOptions *options);
 
 /**
    mlcp_rpsor (regularized projected successive overrelaxation method) is a
@@ -154,8 +152,8 @@ void mlcp_psor(MixedLinearComplementarityProblem *problem, double *z, double *w,
    \param[in,out] options structure used to define the solver and its
    parameters.
 */
-void mlcp_rpsor(MixedLinearComplementarityProblem *problem, double *z,
-                double *w, int *info, SolverOptions *options);
+void mlcp_rpsor(MixedLinearComplementarityProblem *problem, double *z, double *w, int *info,
+                SolverOptions *options);
 
 /**
    path solver
@@ -172,8 +170,8 @@ void mlcp_rpsor(MixedLinearComplementarityProblem *problem, double *z,
    \param[in,out] options structure used to define the solver and its
    parameters.
 */
-void mlcp_path(MixedLinearComplementarityProblem *problem, double *z, double *w,
-               int *info, SolverOptions *options);
+void mlcp_path(MixedLinearComplementarityProblem *problem, double *z, double *w, int *info,
+               SolverOptions *options);
 
 /**
    enum solver
@@ -189,8 +187,8 @@ void mlcp_path(MixedLinearComplementarityProblem *problem, double *z, double *w,
    \param[in,out] options structure used to define the solver and its
    parameters.
 */
-void mlcp_enum(MixedLinearComplementarityProblem *problem, double *z, double *w,
-               int *info, SolverOptions *options);
+void mlcp_enum(MixedLinearComplementarityProblem *problem, double *z, double *w, int *info,
+               SolverOptions *options);
 
 /**
    direct solver
@@ -207,8 +205,8 @@ void mlcp_enum(MixedLinearComplementarityProblem *problem, double *z, double *w,
    \param[in,out] options structure used to define the solver and its
    parameters.
 */
-void mlcp_direct(MixedLinearComplementarityProblem *problem, double *z,
-                 double *w, int *info, SolverOptions *options);
+void mlcp_direct(MixedLinearComplementarityProblem *problem, double *z, double *w, int *info,
+                 SolverOptions *options);
 
 /**
    direct-enum solver
@@ -224,8 +222,8 @@ void mlcp_direct(MixedLinearComplementarityProblem *problem, double *z,
    \param[in,out] options structure used to define the solver and its
    parameters.
 */
-void mlcp_direct_enum(MixedLinearComplementarityProblem *problem, double *z,
-                      double *w, int *info, SolverOptions *options);
+void mlcp_direct_enum(MixedLinearComplementarityProblem *problem, double *z, double *w,
+                      int *info, SolverOptions *options);
 
 /**
    direct-simplex solver
@@ -241,8 +239,8 @@ void mlcp_direct_enum(MixedLinearComplementarityProblem *problem, double *z,
    \param[in,out] options structure used to define the solver and its
    parameters.
 */
-void mlcp_direct_simplex(MixedLinearComplementarityProblem *problem, double *z,
-                         double *w, int *info, SolverOptions *options);
+void mlcp_direct_simplex(MixedLinearComplementarityProblem *problem, double *z, double *w,
+                         int *info, SolverOptions *options);
 
 /**
    direct-path solver
@@ -251,14 +249,14 @@ void mlcp_direct_simplex(MixedLinearComplementarityProblem *problem, double *z,
    \param[out] z a m+n-vector of doubles which contains the initial solution
    and returns the solution of the problem.
    \param[out] w a m+n-vector of doubles which returns the solution of the problem.
-   \param[out] info an integer which returns the termination value: 
+   \param[out] info an integer which returns the termination value:
    0 : success, solution found
    1 : failure,it did not find any solution
    \param[in,out] options structure used to define the solver and its
    parameters.
 */
-void mlcp_direct_path(MixedLinearComplementarityProblem *problem, double *z,
-                      double *w, int *info, SolverOptions *options);
+void mlcp_direct_path(MixedLinearComplementarityProblem *problem, double *z, double *w,
+                      int *info, SolverOptions *options);
 
 /**
    simplex solver
@@ -274,8 +272,8 @@ void mlcp_direct_path(MixedLinearComplementarityProblem *problem, double *z,
    \param[in,out] options structure used to define the solver and its
    parameters.
 */
-void mlcp_simplex(MixedLinearComplementarityProblem *problem, double *z,
-                  double *w, int *info, SolverOptions *options);
+void mlcp_simplex(MixedLinearComplementarityProblem *problem, double *z, double *w, int *info,
+                  SolverOptions *options);
 
 /**
    Fischer Burmeister solver
@@ -291,8 +289,8 @@ void mlcp_simplex(MixedLinearComplementarityProblem *problem, double *z,
    \param[in,out] options structure used to define the solver and its
    parameters.
 */
-void mlcp_FB(MixedLinearComplementarityProblem *problem, double *z, double *w,
-             int *info, SolverOptions *options);
+void mlcp_FB(MixedLinearComplementarityProblem *problem, double *z, double *w, int *info,
+             SolverOptions *options);
 
 /**
    Direct Fischer Burmeister solver
@@ -301,14 +299,14 @@ void mlcp_FB(MixedLinearComplementarityProblem *problem, double *z, double *w,
    \param[out] z a m+n-vector of doubles which contains the initial solution
    and returns the solution of the problem.
    \param[out] w a m+n-vector of doubles which returns the solution of the problem.
-   \param[out] info an integer which returns the termination value: 
+   \param[out] info an integer which returns the termination value:
    0 : success, solution found
    1 : failure,it did not find any solution
    \param[in,out] options structure used to define the solver and its
    parameters.
 */
-void mlcp_direct_FB(MixedLinearComplementarityProblem *problem, double *z,
-                    double *w, int *info, SolverOptions *options);
+void mlcp_direct_FB(MixedLinearComplementarityProblem *problem, double *z, double *w,
+                    int *info, SolverOptions *options);
 
 /**
    generic interface used to call any MLCP solver applied on a Sparse-Block
@@ -328,11 +326,11 @@ void mlcp_direct_FB(MixedLinearComplementarityProblem *problem, double *z,
    \param[in,out] options structure used to define the solver and its
    parameters.
 */
-void mlcp_pgs_SBM(MixedLinearComplementarityProblem *problem, double *z,
-                  double *w, int *info, SolverOptions *options);
+void mlcp_pgs_SBM(MixedLinearComplementarityProblem *problem, double *z, double *w, int *info,
+                  SolverOptions *options);
 
-void mlcp_lcp_lemke(MixedLinearComplementarityProblem *problem, double *z,
-                    double *w, int *info, SolverOptions *options);
+void mlcp_lcp_lemke(MixedLinearComplementarityProblem *problem, double *z, double *w,
+                    int *info, SolverOptions *options);
 
 void mlcp_lcp_lemke_default(SolverOptions *options);
 
@@ -350,8 +348,8 @@ void mlcp_lcp_lemke_default(SolverOptions *options);
    \param[in,out] error
    \return status: 0 : convergence, 1: error > tolerance
 */
-int mlcp_compute_error(MixedLinearComplementarityProblem *problem, double *z,
-                       double *w, double tolerance, double *error);
+int mlcp_compute_error(MixedLinearComplementarityProblem *problem, double *z, double *w,
+                       double tolerance, double *error);
 
 /** @addtogroup SetSolverOptions
     @{

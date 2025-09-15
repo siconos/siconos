@@ -2,7 +2,7 @@
 // Siconos is a program dedicated to modeling, simulation and control
 // of non smooth dynamical systems.
 //
-// Copyright 2022 INRIA.
+// Copyright 2024 INRIA.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -135,7 +135,7 @@ static char* format_msg_concat(const char* msg1, const char* msg2)
 #include "SiconosConfig.h"
 #include "SiconosNumerics.h"
 #include "SolverOptions.h"
-#include "CSparseMatrix_internal.h"
+#include "CSparseMatrix.h"
 #include "NumericsMatrix.h"
 #include "SparseBlockMatrix.h"
 #include "NumericsSparseMatrix.h"
@@ -224,6 +224,12 @@ static char* format_msg_concat(const char* msg1, const char* msg2)
  {(double velocity[3])}
 
  %apply (double IN_ARRAY1[ANY])
+ {(double stress[3])}
+
+ %apply (double IN_ARRAY1[ANY])
+ {(double plastic_strain_rate[3])}
+
+ %apply (double IN_ARRAY1[ANY])
  {(double rho[3])}
 
  %apply (double ARGOUT_ARRAY1[ANY])
@@ -308,7 +314,7 @@ static char* format_msg_concat(const char* msg1, const char* msg2)
 // solverOptions.i, numerics_common and fwd decl
 // all this because of SolverOptions extend.
 %begin %{
-#include "CSparseMatrix_internal.h" // must be before NumericsMatrix.h
+#include "CSparseMatrix.h" // must be before NumericsMatrix.h
 #include "relay_cst.h"
 #include "AVI_cst.h"
 #include "SOCLCP_cst.h"
@@ -320,6 +326,7 @@ static char* format_msg_concat(const char* msg1, const char* msg2)
 #include "VI_cst.h"
 #include "ConvexQP_cst.h"
 #include "GenericMechanical_cst.h"
+#include "Plasticity_cst.h"
 #include "fc2d_Solvers.h"
 #include "fc3d_Solvers.h"
 #include "gfc3d_Solvers.h"
@@ -331,6 +338,7 @@ static char* format_msg_concat(const char* msg1, const char* msg2)
 #include "ConvexQP_Solvers.h"
 #include "SiconosCompat.h"
 #include "SOCLCP_Solvers.h"
+#include "mc2d_solvers.h"
 #include "NonSmoothDrivers.h"
   %}
 
@@ -390,6 +398,88 @@ static char* format_msg_concat(const char* msg1, const char* msg2)
   if (!$1) { $1 = (double*)malloc(arg1->numberOfContacts * sizeof(double)); }
   memcpy($1, $input, arg1->numberOfContacts * sizeof(double));
 
+ }
+%typemap(out) (double* mu) {
+
+  if (arg1->numberOfContacts <= 0) { SWIG_exception_fail(SWIG_RuntimeError, "numberOfContacts is not set"); }
+
+  if ($1)
+  {
+    SN_OBJ_TYPE *obj;
+    C_to_target_lang1(obj, arg1->numberOfContacts, $1, SWIG_fail);
+    $result = obj;
+  }
+  else
+    SWIG_fail;
+ }
+
+
+// vectors of size numberOfCones
+%typemap(memberin) (double *eta) {
+  // Still some dark magic :( --xhub
+  if (arg1->numberOfCones <= 0)
+  {
+    SWIG_exception(SWIG_RuntimeError, "numberOfCones is not set, it sould be done first!");
+    SWIG_fail;
+  }
+
+  if (arg1->numberOfCones !=  array_size(array2, 0))
+  {
+    char msg[1024];
+    snprintf(msg, sizeof(msg), "Size of eta is %ld, but the number of contacts is %d! Both should be equal!\n", array_size(array2, 0), arg1->numberOfCones);
+    SWIG_exception_fail(SWIG_ValueError, msg);
+  }
+
+  if (!$1) { $1 = (double*)malloc(arg1->numberOfCones * sizeof(double)); }
+  memcpy($1, $input, arg1->numberOfCones * sizeof(double));
+
+ }
+%typemap(out) (double* eta) {
+
+  if (arg1->numberOfCones <= 0) { SWIG_exception_fail(SWIG_RuntimeError, "numberOfCones is not set"); }
+
+  if ($1)
+  {
+    SN_OBJ_TYPE *obj;
+    C_to_target_lang1(obj, arg1->numberOfCones, $1, SWIG_fail);
+    $result = obj;
+  }
+  else
+    SWIG_fail;
+ }
+
+// // vectors of size numberOfCones
+%typemap(memberin) (double *theta) {
+  // Still some dark magic :( --xhub
+  if (arg1->numberOfCones <= 0)
+  {
+    SWIG_exception(SWIG_RuntimeError, "numberOfCones is not set, it sould be done first!");
+    SWIG_fail;
+  }
+
+  if (arg1->numberOfCones !=  array_size(array2, 0))
+  {
+    char msg[1024];
+    snprintf(msg, sizeof(msg), "Size of theta is %ld, but the number of contacts is %d! Both should be equal!\n", array_size(array2, 0), arg1->numberOfCones);
+    SWIG_exception_fail(SWIG_ValueError, msg);
+  }
+
+  if (!$1) { $1 = (double*)malloc(arg1->numberOfCones * sizeof(double)); }
+  memcpy($1, $input, arg1->numberOfCones * sizeof(double));
+
+ }
+%typemap(out) (double* theta) {
+
+  if (arg1->numberOfCones <= 0) { SWIG_exception_fail(SWIG_RuntimeError, "numberOfCones is not set"); }
+
+  if ($1)
+  {
+    SN_OBJ_TYPE *obj;
+    C_to_target_lang1(obj, arg1->numberOfCones, $1, SWIG_fail);
+    $result = obj;
+  }
+  else
+    SWIG_fail;
  }
 
 // vectors of size M
@@ -474,6 +564,8 @@ static char* format_msg_concat(const char* msg1, const char* msg2)
 
 %ignore frictionContactProblem_new; // signature issue with mu param
 
+%ignore mohrCoulomb2DProblem_new; // signature issue with mu param
+
 %include "typemaps.i"
 
 %apply double *OUTPUT { double *error };
@@ -501,6 +593,8 @@ static char* format_msg_concat(const char* msg1, const char* msg2)
 %include numerics_GFC.i
 %include numerics_RFC.i
 %include numerics_GRFC.i
+
+%include numerics_MC2D.i
 
 %define STR_FIELD_COPY(field,strobj)
 {

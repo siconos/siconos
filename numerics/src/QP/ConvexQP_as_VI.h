@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef CONVEXQP_AS_VI_H
 #define CONVEXQP_AS_VI_H
 
@@ -23,29 +23,27 @@
 */
 
 #include "NumericsFwd.h"
-#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 /** \struct ConvexQP_as_VI ConvexQP_as_VI.h
  *
  */
-struct ConvexQP_as_VI
-{
+struct ConvexQP_as_VI {
   /* the VI associated with the CQP problem */
-  VariationalInequality * vi;
+  VariationalInequality *vi;
   /* the CQP associated with the VI  */
-  ConvexQP * cqp;
+  ConvexQP *cqp;
   /* the SolverOptions that might be used to pass some numerical parameters */
-  SolverOptions * options;
+  SolverOptions *options;
 };
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-extern "C"
-{
+extern "C" {
 #endif
 
-  void Function_VI_CQP(void * self, int n, double *x, double *F);
+void Function_VI_CQP(void *self, int n, double *x, double *F);
 
-  void Projection_VI_CQP(void *viIn, double *x, double *PX);
+void Projection_VI_CQP(void *viIn, double *x, double *PX);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

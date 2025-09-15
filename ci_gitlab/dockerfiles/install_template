@@ -1,8 +1,8 @@
 FROM IMAGENAME
 WORKDIR /home
 ARG BUILD_DIR=build
-RUN cmake --install $BUILD_DIR
-RUN python3 -m pip install pyhull lxml matplotlib
-ENV SICONOS_INSTALL_DIR=/home/install-siconos PATH=/home/install-siconos/bin/:$PATH
+RUN env ; cmake --install $BUILD_DIR
+RUN siconos --info
+
 
 

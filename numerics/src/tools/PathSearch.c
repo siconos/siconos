@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
+
+#include "PathSearch.h"
 
 #include <assert.h>
-#include "PathSearch.h"
-#include "SolverOptions.h"  // for SolverOptions
-#include "line_search.h"    // for ARCSEARCH, LINESEARCH, NM_LS_MEAN
-#include "lcp_cst.h"
 
-void pathsearch_set_default(SolverOptions* options)
-{
+#include "SolverOptions.h"  // for SolverOptions
+#include "lcp_cst.h"
+#include "line_search.h"  // for ARCSEARCH, LINESEARCH, NM_LS_MEAN
+
+void pathsearch_set_default(SolverOptions* options) {
   options->iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS] = NM_LS_MEAN;
   options->iparam[SICONOS_IPARAM_LSA_NONMONOTONE_LS_M] = 10;
   options->iparam[SICONOS_IPARAM_PATHSEARCH_STACKSIZE] = 5;
@@ -41,7 +42,7 @@ void pathsearch_set_default(SolverOptions* options)
   assert(options->numberOfInternalSolvers == 1);
   options->internalSolvers[0] = solver_options_create(SICONOS_LCP_PIVOT);
 
-  SolverOptions * lcp_options = options->internalSolvers[0];
+  SolverOptions* lcp_options = options->internalSolvers[0];
 
   /* We always allocate once and for all since we are supposed to solve
    * many LCPs */
@@ -49,9 +50,6 @@ void pathsearch_set_default(SolverOptions* options)
   /* set the right pivot rule */
   lcp_options->iparam[SICONOS_LCP_IPARAM_PIVOTING_METHOD_TYPE] = SICONOS_LCP_PIVOT_PATHSEARCH;
   /* set the right stacksize */
-  lcp_options->iparam[SICONOS_IPARAM_PATHSEARCH_STACKSIZE] = options->iparam[SICONOS_IPARAM_PATHSEARCH_STACKSIZE];
-
-
+  lcp_options->iparam[SICONOS_IPARAM_PATHSEARCH_STACKSIZE] =
+      options->iparam[SICONOS_IPARAM_PATHSEARCH_STACKSIZE];
 }
-
-

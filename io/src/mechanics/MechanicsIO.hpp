@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,10 +77,16 @@ public:
   /** get the dissipation values  of all contact points
    * \param nsds current nonsmooth dynamical system
    * \param index_set the index set number.
+   * \param omega the value of the weigth for the weight in the computaion of the contact work
+   *  by default omega =1/2 and the contact work corresponds to the theoretical formula
+   *        1/2 (v^+ + v^-)^\top p
+   * otherwise it corresponds to v_{k+omega} p 
    * \param tol double for the computation of contact status
    \return a matrix where the columns are id, normal contact work, tangent contact work, friction dissipation, contact status
   */
-  SP::SimpleMatrix contactContactWork(const NonSmoothDynamicalSystem& nsds, unsigned int index_set=1, double tol=1e-08) const;
+  SP::SimpleMatrix contactContactWork(const NonSmoothDynamicalSystem& nsds,
+				      unsigned int index_set=1,
+				      double omega = 0.5) const;
 
   /** get the domain of each contact point
    * \param nsds current nonsmooth dynamical system

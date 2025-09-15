@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,18 @@
  * limitations under the License.
  */
 
-#include <stdlib.h>      // for malloc
+#include <stdlib.h>  // for malloc
+
 #include "test_utils.h"  // for data_collection
 
-const char ** data_collection()
-{
+const char **data_collection() {
+  int n_data_1 = 150;
 
-  int n_data_1=150;
-
-  const char ** data_collection_1 = (const char **)malloc(n_data_1*sizeof(const char *));
-  int n_data=0;
+  const char **data_collection_1 = (const char **)malloc(n_data_1 * sizeof(const char *));
+  int n_data = 0;
   data_collection_1[n_data++] = "./data/FrictionContactProblem00374.dat";
   data_collection_1[n_data++] = "./data/FrictionContactProblem00394.dat";
 
- 
   data_collection_1[n_data++] = "./data/FC2D_SliderCrankLagrangian00000.dat";
   data_collection_1[n_data++] = "./data/FC2D_SliderCrankLagrangian00001.dat";
 
@@ -39,15 +37,12 @@ const char ** data_collection()
   data_collection_1[n_data++] = "./data/FrictionContactProblem00071.dat";
   data_collection_1[n_data++] = "./data/FrictionContactProblem00237.dat"; /* 5 */
 
-
   /* ## test 2D sparse  on 4 differents files */
   data_collection_1[n_data++] = "./data/fc2d_granularflowonwall_00667_00000.dat";
   data_collection_1[n_data++] = "./data/fc2d_granularflowonwall_02020_00213.dat";
   data_collection_1[n_data++] = "./data/fc2d_granularflowonwall_07002_00801.dat";
-  
-  data_collection_1[n_data++] = "---";
 
+  data_collection_1[n_data++] = "---";
 
   return data_collection_1;
 }
-

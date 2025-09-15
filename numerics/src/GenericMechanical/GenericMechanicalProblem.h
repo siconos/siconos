@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*! \file GenericMechanicalProblem.h
  * \brief struct for GenericMechanicalProblem
@@ -23,9 +23,10 @@
 #ifndef NUMERICSGENERICMECHANICALPROBLEM_H
 #define NUMERICSGENERICMECHANICALPROBLEM_H
 
-#include "NumericsFwd.h"
 #include <stdio.h>
-#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+
+#include "NumericsFwd.h"
+#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 /* void * solverFC3D; */
 /* void * solverEquality; */
@@ -40,25 +41,24 @@
  *   \param nextProblem the list of the next problems
  *   \param prevProblem the list of the previous problems
  *   Remark:
- *   The M and q contains the matrices of the GMP problem. The sub problems (problems) has also a M and q member usfull for the computation of the local error.
+ *   The M and q contains the matrices of the GMP problem. The sub problems (problems) has also
+ * a M and q member usfull for the computation of the local error.
  *
  */
-struct listNumericsProblem
-{
+struct listNumericsProblem {
   int type;
-  void * problem;
-  double *q;/*a pointer on the q of the problem*/
-  int size;/*size of the local problem.(needed because of dense case)*/
-  int error;/*non-zero if there was an error reported*/
-  struct listNumericsProblem * nextProblem;
-  struct listNumericsProblem * prevProblem;
+  void* problem;
+  double* q; /*a pointer on the q of the problem*/
+  int size;  /*size of the local problem.(needed because of dense case)*/
+  int error; /*non-zero if there was an error reported*/
+  struct listNumericsProblem* nextProblem;
+  struct listNumericsProblem* prevProblem;
 };
 
-
-/** \enum SICONOS_NUMERICS_PROBLEM_TYPE ids for the possible/allowed numerics problem formulations
+/** \enum SICONOS_NUMERICS_PROBLEM_TYPE ids for the possible/allowed numerics problem
+ * formulations
  */
-enum SICONOS_NUMERICS_PROBLEM_TYPE
-{
+enum SICONOS_NUMERICS_PROBLEM_TYPE {
   SICONOS_NUMERICS_PROBLEM_LCP = 0,
   SICONOS_NUMERICS_PROBLEM_MLCP = 1,
   SICONOS_NUMERICS_PROBLEM_EQUALITY = 2,
@@ -82,7 +82,8 @@ enum SICONOS_NUMERICS_PROBLEM_TYPE
  *
  *  Remark:
  *  The M and q contains the matrices of the GMP problem.
- *  The sub problems (problems) has also a M and q member usfull for the computation of the local error.
+ *  The sub problems (problems) has also a M and q member usfull for the computation of the
+ * local error.
  *
  * ONLY q and M must be allocated/free by the users, the others fields are private:
  * DO NOT FILL THIS STRUCTURE BY YOURSELF, BUT USE THE
@@ -90,8 +91,7 @@ enum SICONOS_NUMERICS_PROBLEM_TYPE
  * - gmp_add() ,
  * - and genericMechanicalProblem_free() FUNCTIONS.
  */
-struct GenericMechanicalProblem
-{
+struct GenericMechanicalProblem {
   /*Number of line of blocks.*/
   /*PRIVATE: manage by gmp_add.*/
   int size;
@@ -103,65 +103,67 @@ struct GenericMechanicalProblem
   /*must be set by the user.*/
   double* q;
   /*PRIVATE: manage by gmp_add.*/
-  listNumericsProblem *firstListElem;
+  listNumericsProblem* firstListElem;
   /*PRIVATE: manage by gmp_add.*/
-  listNumericsProblem *lastListElem;
+  listNumericsProblem* lastListElem;
   //  void * * problems;
 };
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-extern "C"
-{
+extern "C" {
 #endif
-  /* Build an empty GenericMechanicalProblem
-   * \return a pointer on the built GenericMechanicalProblem.
-   */
-  GenericMechanicalProblem * genericMechanicalProblem_new(void);
+/* Build an empty GenericMechanicalProblem
+ * \return a pointer on the built GenericMechanicalProblem.
+ */
+GenericMechanicalProblem* genericMechanicalProblem_new(void);
 
-  /* Free the list of the contained sub-problem, coherently with the memory allocated in the gmp_add function, it also free the pGMP.
-   */
-  void genericMechanicalProblem_free(GenericMechanicalProblem * pGMP, unsigned int level);
+/* Free the list of the contained sub-problem, coherently with the memory allocated in the
+ * gmp_add function, it also free the pGMP.
+ */
+void genericMechanicalProblem_free(GenericMechanicalProblem* pGMP, unsigned int level);
 
-  /* To print a GenericMechanicalProblem in a file.
-   *  \param[in] problem, the printed problem.
-   *  \param[in,out] output file.
-   */
-  void genericMechanicalProblem_printInFile(GenericMechanicalProblem*  problem, FILE* file);
+/* To print a GenericMechanicalProblem in a file.
+ *  \param[in] problem, the printed problem.
+ *  \param[in,out] output file.
+ */
+void genericMechanicalProblem_printInFile(GenericMechanicalProblem* problem, FILE* file);
 
-  /** read a GenericMechanicalProblem from a file descriptor
-   * \param file descriptor
-   * \return problem the problem to read
-   */
-  GenericMechanicalProblem*  genericMechanical_newFromFile(FILE* file);
+/** read a GenericMechanicalProblem from a file descriptor
+ * \param file descriptor
+ * \return problem the problem to read
+ */
+GenericMechanicalProblem* genericMechanical_newFromFile(FILE* file);
 
-  /** read a GenericMechanicalProblem from a file (.dat or hdf5 if fclib is on) from its filename
-   * \param filename the name of the input file
-   * \return problem the problem to read
-   */
-  GenericMechanicalProblem* genericMechanical_new_from_filename(const char * filename);
-  
-  /* A recursive displaying method.
-   *  \param[in], pGMP the displayed problem.
-   */
-  void genericMechanicalProblem_display(GenericMechanicalProblem * pGMP);
+/** read a GenericMechanicalProblem from a file (.dat or hdf5 if fclib is on) from its filename
+ * \param filename the name of the input file
+ * \return problem the problem to read
+ */
+GenericMechanicalProblem* genericMechanical_new_from_filename(const char* filename);
 
-  /* Insert a problem in the GenericMechanicalProblem pGMP. The memory of the elematary block is not managed. The user has to ensure it.
-   *   In the case of SICONOS, the Kernel ensure this allocation in building the global problem. In other words, the matrix0 is shared with the global NumericsMatrix,
-   * the plug is done in the function gmp_gauss_seidel (ie: localProblem->M->matrix0= m->block[diagBlockNumber];)
-   * \param[in,out] pGMP a pointer.
-   * \param[in] problemType type of the added sub-problem (either SICONOS_NUMERICS_PROBLEM_LCP, SICONOS_NUMERICS_PROBLEM_EQUALITY, SICONOS_NUMERICS_PROBLEM_FC3D, or SICONOS_NUMERICS_PROBLEM_RELAY)
-   * \param[in] size size of the formulation (dim of the LCP, or dim of the linear system, 3 for the fc3d)
-   * \ return the localProblem (either lcp, linearSystem of fc3d
-   */
-  void * gmp_add(GenericMechanicalProblem * pGMP, int problemType, int size);
-  
-  /** returns nonsmooth problem formulation name, from its id number.
-   \param id problem id (must be one of the allowed values in SICONOS_NUMERICS_PROBLEM_TYPE enum).
-   \return const char
-  */
-  const char * ns_problem_id_to_name(enum SICONOS_NUMERICS_PROBLEM_TYPE id);
+/* A recursive displaying method.
+ *  \param[in], pGMP the displayed problem.
+ */
+void genericMechanicalProblem_display(GenericMechanicalProblem* pGMP);
 
-  
+/* Insert a problem in the GenericMechanicalProblem pGMP. The memory of the elematary block is
+ * not managed. The user has to ensure it. In the case of SICONOS, the Kernel ensure this
+ * allocation in building the global problem. In other words, the matrix0 is shared with the
+ * global NumericsMatrix, the plug is done in the function gmp_gauss_seidel (ie:
+ * localProblem->M->matrix0= m->block[diagBlockNumber];) \param[in,out] pGMP a pointer.
+ * \param[in] problemType type of the added sub-problem (either SICONOS_NUMERICS_PROBLEM_LCP,
+ * SICONOS_NUMERICS_PROBLEM_EQUALITY, SICONOS_NUMERICS_PROBLEM_FC3D, or
+ * SICONOS_NUMERICS_PROBLEM_RELAY) \param[in] size size of the formulation (dim of the LCP, or
+ * dim of the linear system, 3 for the fc3d) \ return the localProblem (either lcp,
+ * linearSystem of fc3d
+ */
+void* gmp_add(GenericMechanicalProblem* pGMP, int problemType, int size);
+
+/** returns nonsmooth problem formulation name, from its id number.
+ \param id problem id (must be one of the allowed values in SICONOS_NUMERICS_PROBLEM_TYPE
+ enum). \return const char
+*/
+const char* ns_problem_id_to_name(enum SICONOS_NUMERICS_PROBLEM_TYPE id);
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

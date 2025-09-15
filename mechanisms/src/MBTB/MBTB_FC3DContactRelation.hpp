@@ -9,7 +9,7 @@
 //! It is a relation dedicated for the unilateral constraint with Coulomb friction.
 /*!
   Aggregation to the class MBTB_Contact, the member _pContact contains the CAD information.
-  It derivates from Siconos::NewtonEuler3DR. This class does the link between CAD and Siconos.
+  It derivates from siconos::NewtonEuler3DR. This class does the link between CAD and Siconos.
  */
 
 class MBTB_FC3DContactRelation : public NewtonEuler3DR
@@ -29,7 +29,7 @@ public :
    * \param q0 the position
    * \param y the output
    */
-  virtual void computeh(double time, const BlockVector& q0, SiconosVector& y);
+  virtual void computeh(double time, const BlockVector& q0, SiconosVector& y) override;
   
   //! Doing nothing.
   virtual ~MBTB_FC3DContactRelation();

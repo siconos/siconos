@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,23 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #ifndef AVI_CST_H
 #define AVI_CST_H
 /*!\file AVI_cst.h
-  \brief Constants to define the list of available AVI solvers. See the solver list \ref aviSolversList
+  \brief Constants to define the list of available AVI solvers. See the solver list \ref
+  aviSolversList
 */
 /**\enum AVI_SOLVER
    List of available ids for AVI solvers.
 */
-enum AVI_SOLVER
-{
+enum AVI_SOLVER {
   SICONOS_AVI_CAOFERRIS = 800,
-  SICONOS_AVI_PATHAVI   = 801,
+  SICONOS_AVI_PATHAVI = 801,
 };
 
-extern const char* const   SICONOS_AVI_CAOFERRIS_STR;
-extern const char* const   SICONOS_AVI_PATHAVI_STR;
+extern const char* const SICONOS_AVI_CAOFERRIS_STR;
+extern const char* const SICONOS_AVI_PATHAVI_STR;
 
 #endif

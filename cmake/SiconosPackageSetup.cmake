@@ -12,7 +12,12 @@ set(cmake_macros
   FindBLASDEV.cmake
   FindLAPACKDEV.cmake
   BlasLapackUtils.cmake
-  )
+)
+
+
+if(SICONOS_HAS_OpenCASCADE)
+  list(APPEND cmake_macros occ_setup.cmake)
+endif()
 
 foreach(file IN LISTS cmake_macros)
   install(FILES cmake/${file} DESTINATION ${SiconosConfigPackageLocation})
@@ -88,10 +93,10 @@ if(WITH_GIT)
   # to tag cdash builds.
   # git reference name (branch, tag ...) 
   execute_process(COMMAND
-    git rev-parse --abbrev-ref HEAD
+    ${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD
     OUTPUT_VARIABLE COMMIT_REF_NAME
     OUTPUT_STRIP_TRAILING_WHITESPACE
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
   file(WRITE ${CMAKE_BINARY_DIR}/siconos-commit.txt "${COMMIT_REF_NAME}-${SOURCE_ABBREV_GIT_SHA1}")
-  install(FILES ${CMAKE_BINARY_DIR}/siconos-commit.txt DESTINATION share)
+  install(FILES ${CMAKE_BINARY_DIR}/siconos-commit.txt DESTINATION ${SiconosConfigPackageLocation})
 endif()

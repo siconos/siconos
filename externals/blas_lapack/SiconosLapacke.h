@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #ifndef SiconosLAPACKE_H
 #define SiconosLAPACKE_H
 
 // IWYU pragma: private, include "SiconosLapack.h"
-//#include "SiconosBlas.h"
-#include <stdlib.h>
+// #include "SiconosBlas.h"
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-// -------- Headers and routines naming conventions for the different Lapack implementations --------
+// -------- Headers and routines naming conventions for the different Lapack implementations
+// --------
 
 // --- Intel MKL Header ---
 #if defined(HAS_MKL_LAPACKE)
@@ -55,67 +56,61 @@
 
 // --- DGESVD ---
 #if defined(HAS_LAPACK_dgesvd)
-#define WRAP_DGESVD(F,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,INFO)      \
-  INFO = F(CblasColMajor,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12)
+#define WRAP_DGESVD(F, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, INFO) \
+  INFO = F(CblasColMajor, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12)
 #else
-#define WRAP_DGESVD(F,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10,A11,A12,INFO)      \
+#define WRAP_DGESVD(F, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, INFO) \
   fprintf(stderr, "Your lapack version misses dgesvd function.\n");
 #endif
 
 // --- DGETRS ---
-#define WRAP_DGETRS(F,A1,A2,A3,A4,A5,A6,A7,A8,INFO)   \
-  INFO = F(CblasColMajor,A1,A2,A3,A4,A5,A6,A7,A8)
+#define WRAP_DGETRS(F, A1, A2, A3, A4, A5, A6, A7, A8, INFO) \
+  INFO = F(CblasColMajor, A1, A2, A3, A4, A5, A6, A7, A8)
 
 // --- DPOTRS ---
-#define WRAP_DPOTRS(F,A1,A2,A3,A4,A5,A6,A7,INFO) \
-  INFO = F(CblasColMajor,A1,A2,A3,A4,A5,A6,A7)
+#define WRAP_DPOTRS(F, A1, A2, A3, A4, A5, A6, A7, INFO) \
+  INFO = F(CblasColMajor, A1, A2, A3, A4, A5, A6, A7)
 
 // --- DSYTRS ---
-#define WRAP_DSYTRS(F,A1,A2,A3,A4,A5,A6,A7,A8,INFO) \
-  INFO = F(CblasColMajor,A1,A2,A3,A4,A5,A6,A7,A8)
-
+#define WRAP_DSYTRS(F, A1, A2, A3, A4, A5, A6, A7, A8, INFO) \
+  INFO = F(CblasColMajor, A1, A2, A3, A4, A5, A6, A7, A8)
 
 // --- DGESV ---
-#define WRAP_DGESV(F,A1,A2,A3,A4,A5,A6,A7,INFO)   \
-  INFO = F(CblasColMajor,A1,A2,A3,A4,A5,A6,A7)
+#define WRAP_DGESV(F, A1, A2, A3, A4, A5, A6, A7, INFO) \
+  INFO = F(CblasColMajor, A1, A2, A3, A4, A5, A6, A7)
 
 // --- DPOSV ---
-#define WRAP_DPOSV(F,A1,A2,A3,A4,A5,A6,A7,INFO) \
-  INFO = F(CblasColMajor,A1,A2,A3,A4,A5,A6,A7)
+#define WRAP_DPOSV(F, A1, A2, A3, A4, A5, A6, A7, INFO) \
+  INFO = F(CblasColMajor, A1, A2, A3, A4, A5, A6, A7)
 
 // --- DGELS ---
 #if defined(HAS_LAPACK_dgels)
-#define WRAP_DGELS(F,A1,A2,A3,A4,A5,A6,A7,A8,INFO)    \
-  INFO = F(CblasColMajor,A1,A2,A3,A4,A5,A6,A7,A8)
+#define WRAP_DGELS(F, A1, A2, A3, A4, A5, A6, A7, A8, INFO) \
+  INFO = F(CblasColMajor, A1, A2, A3, A4, A5, A6, A7, A8)
 #else
-#define WRAP_DGELS(F,A1,A2,A3,A4,A5,A6,A7,A8,INFO)                      \
+#define WRAP_DGELS(F, A1, A2, A3, A4, A5, A6, A7, A8, INFO) \
   fprintf(stderr, "Your lapack version misses dgels function.\n");
 #endif
 
 // --- DGETRI ---
-#define WRAP_DGETRI(F,A1,A2,A3,A4,INFO)         \
-  INFO = F(CblasColMajor,A1,A2,A3,A4)
-
+#define WRAP_DGETRI(F, A1, A2, A3, A4, INFO) INFO = F(CblasColMajor, A1, A2, A3, A4)
 
 // --- DGETRF ---
-#define WRAP_DGETRF(F,A1,A2,A3,A4,A5,INFO)  \
-  INFO = F(CblasColMajor,A1,A2,A3,A4,A5)
+#define WRAP_DGETRF(F, A1, A2, A3, A4, A5, INFO) INFO = F(CblasColMajor, A1, A2, A3, A4, A5)
 
 // --- DPOTRF ---
-#define WRAP_DPOTRF(F,A1,A2,A3,A4,INFO)  \
-  INFO = F(CblasColMajor,A1,A2,A3,A4)
+#define WRAP_DPOTRF(F, A1, A2, A3, A4, INFO) INFO = F(CblasColMajor, A1, A2, A3, A4)
 
 // --- DSYTRF ---
-#define WRAP_DSYTRF(F,A1,A2,A3,A4,A5,INFO)      \
-  INFO = F(CblasColMajor,A1,A2,A3,A4,A5)
+#define WRAP_DSYTRF(F, A1, A2, A3, A4, A5, INFO) INFO = F(CblasColMajor, A1, A2, A3, A4, A5)
 
 // --- DTRTRS ---
 #if defined(HAS_LAPACK_dtrtrs)
-#define WRAP_DTRTRS(F,A1,A2,A3,A4,A5,A6,A7,A8,A9,INFO)  \
-  INFO = F(CblasColMajor,A1,A2,A3,A4,A5,A6,A7,A8,A9)
+#define WRAP_DTRTRS(F, A1, A2, A3, A4, A5, A6, A7, A8, A9, INFO) \
+  INFO = F(CblasColMajor, A1, A2, A3, A4, A5, A6, A7, A8, A9)
 #else
-#define WRAP_DTRTRS(F,A1,A2,A3,A4,A5,A6,A7,A8,A9,INFO)                \
+#define WRAP_DTRTRS(F, A1, A2, A3, A4, A5, A6, A7, A8, A9, INFO) \
   fprintf(stderr, "Your lapack version misses dtrtrs function.\n");
 #endif
 
-#endif // SICONOSLAPACKE_H
+#endif  // SICONOSLAPACKE_H

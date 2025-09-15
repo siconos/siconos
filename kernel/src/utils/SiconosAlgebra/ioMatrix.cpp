@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,7 +117,7 @@ bool write(const std::string& fileName, const std::string& mode, const SiconosMa
   if(outputType != "noDim")
     outfile << m.size(0) << " " << m.size(1) << std::endl;
 
-  if(m.num() == Siconos::DENSE)
+  if(m.num() == siconos::DENSE)
   {
     // DenseMat * p = m.dense();
     DenseMat::iterator1 row;
@@ -136,7 +136,7 @@ bool write(const std::string& fileName, const std::string& mode, const SiconosMa
 
     }
   }
-  else if(m.num() == Siconos::TRIANGULAR)
+  else if(m.num() == siconos::TRIANGULAR)
   {
     TriangMat * p = m.triang();
     TriangMat::iterator1 row;
@@ -146,7 +146,7 @@ bool write(const std::string& fileName, const std::string& mode, const SiconosMa
       outfile << std::endl;
     }
   }
-  else if(m.num() == Siconos::SYMMETRIC)
+  else if(m.num() == siconos::SYMMETRIC)
   {
     SymMat * p = m.sym();
     SymMat::iterator1 row;
@@ -156,7 +156,7 @@ bool write(const std::string& fileName, const std::string& mode, const SiconosMa
       outfile << std::endl;
     }
   }
-  else if(m.num() == Siconos::SPARSE)
+  else if(m.num() == siconos::SPARSE)
   {
     SparseMat * p = m.sparse();
     SparseMat::iterator1 row;
@@ -200,7 +200,7 @@ double compareRefFile(const SimpleMatrix& data, std::string filename, double eps
     if(verbose)
       std::cout << "Warning: reference file " << filename
                 << " not found, no comparison performed." << std::endl;
-    Siconos::exception::process();
+    siconos::exception::process();
   }
   if(!compare)
     return -1.0;

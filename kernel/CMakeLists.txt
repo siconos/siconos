@@ -8,8 +8,6 @@
 # - COMPONENT component name
 # - <COMPONENT>_DIRS: the list of paths (relative to CMAKE_CURRENT_SOURCE_DIR) that
 #   contain source files
-# - <COMPONENT>_EXCLUDE_SRCS: the list of files, in <COMPONENT>_DIRS, that must be excluded
-#   from build.
 # - <COMPONENT>_INTERFACE_INCLUDE_DIRECTORIES: a list of directories
 #   to populate the interface of the target for include directories at build time
 
@@ -42,19 +40,6 @@ set(${COMPONENT}_EXCLUDE_DOXY src/utils/SiconosTools
   # if included, it breaks swig process for mechanics
   )
 
-# ------ include interface ------
-# What is needed at build time
-# by other targets to compile with current component.
-# 
-# It means that a call to
-#  target_link_libraries(truc PRIVATE kernel)
-# will imply -I<dirs> with dirs listed in
-# ${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES.
-#
-# If all dirs are required, just set
-# set(${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES ${${COMPONENT}_DIRS})
-set(${COMPONENT}_INTERFACE_INCLUDE_DIRECTORIES ${${COMPONENT}_DIRS})
-
 # ---- Final setup for the library ----
 
 # Windows stuff
@@ -62,7 +47,11 @@ include(WindowsKernelSetup)
 
 # -- create/setup component target --
 include(ComponentSetup)
+
 create_siconos_component(${COMPONENT})
+foreach(dir IN LISTS kernel_DIRS)
+  target_include_directories(kernel PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${dir}>)
+endforeach()
 
 # We require C++ 17. PUBLIC to propagate to other components.
 target_compile_features(kernel PUBLIC cxx_std_17)
@@ -70,12 +59,23 @@ target_compile_features(kernel PUBLIC cxx_std_17)
 # --- Extra setup for the component ---
 # remove boring warnings from boost bindings includes
 set_source_files_properties(
-  ${CMAKE_SOURCE_DIR}/kernel/src/utils/SiconosAlgebra/EigenProblems.cpp
+  #${CMAKE_SOURCE_DIR}/kernel/src/utils/SiconosAlgebra/EigenProblems.cpp
   ${CMAKE_SOURCE_DIR}/kernel/src/utils/SiconosAlgebra/SimpleMatrixSolvers.cpp
-  PROPERTIES COMPILE_OPTIONS "-Wno-unused-variable")
+  ${CMAKE_SOURCE_DIR}/kernel/src/utils/SiconosAlgebra/SimpleMatrixMisc.cpp # many warnings due to boost bindings headers
+  PROPERTIES COMPILE_OPTIONS "-Wno-unused-variable;-Wno-unused-local-typedefs")
+
+
 
 # Links with other Siconos components
 target_link_libraries(kernel PRIVATE externals numerics)
+if(WITH_FORTRAN)
+  target_link_libraries(kernel PRIVATE externals_fortran) # lsodar and hem5
+endif()
+# boost bindings
+target_include_directories(kernel PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/externals/numeric_bindings>)
+target_include_directories(kernel PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/externals/boost_contribs>)
+# Mostly for the fortran API (empty if HAS_FORTRAN is off but required anyway)
+target_include_directories(kernel PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/externals/tools>)
 
 # Links with non-Siconos libraries
 
@@ -89,7 +89,7 @@ target_link_libraries(kernel PUBLIC Boost::boost)
 
 if(WITH_BOOST_LOG)
   find_package(Boost 1.61 REQUIRED COMPONENTS log)
-  target_compile_definition(kernel PRIVATE BOOST_LOG_DYN_LINK)
+  target_compile_definitions(kernel PRIVATE BOOST_LOG_DYN_LINK)
 endif()
 
 # --- python bindings ---
@@ -109,9 +109,6 @@ endif()
 set(${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES
   ${${COMPONENT}_DIRS} # All .hpp are installed
   )
-
-# List header files (in dir above) that must not be installed 
-#set(${COMPONENT}_HDRS_EXCLUDE)
 
 siconos_component_install_setup(${COMPONENT})
 

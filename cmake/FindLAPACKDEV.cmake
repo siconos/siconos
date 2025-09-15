@@ -98,8 +98,9 @@ endif()
 
 if(NOT BLAS_NAME STREQUAL "mkl")
   find_package(LAPACK ${_LAPACK_SEARCH_OPTS})
+else()
+  set(LAPACK_FOUND 1)
 endif()
-
 ## Now the headers ...
 if(BLASDEV_FOUND AND LAPACK_FOUND)
   if(BLAS_NAME STREQUAL "Accelerate")
@@ -110,6 +111,9 @@ if(BLASDEV_FOUND AND LAPACK_FOUND)
       PATH_SUFFIXES ${BLAS_INCLUDE_SUFFIXES}
       NO_DEFAULT_PATH
       )
+  elseif(BLAS_NAME STREQUAL "mkl")
+    # No need to find headers : we will use -qmkl compilation option
+    set(LAPACK_INCLUDE_DIR $ENV{MKLROOT}/include)
   else()
     find_path(LAPACK_INCLUDE_DIR
       NAMES ${LAPACK_HEADER}
@@ -120,6 +124,7 @@ if(BLASDEV_FOUND AND LAPACK_FOUND)
 
   # SiconosConfig.h setup
   if(BLAS_NAME STREQUAL "mkl")
+    set(HAS_MKL_CBLAS 1 CACHE BOOL "Blas comes from Intel MKL.")
     set(HAS_MKL_LAPACKE 1 CACHE BOOL "Blas comes from Intel MKL.")
   elseif(BLAS_NAME STREQUAL "OpenBlas")
     set(HAS_OpenBLAS 1 CACHE BOOL "Blas comes from OpenBLAS.")   
@@ -131,10 +136,10 @@ if(BLASDEV_FOUND AND LAPACK_FOUND)
     message(FATAL_ERROR "Found Atlas for blas implementation. Not compatible with Siconos.")
   endif()
 
-  if(MSVC AND HAS_LAPACKE)
-    SET(CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS} "-DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE")
-    SET(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${EXTRA_LAPACK_LIB})
-  endif(MSVC AND HAS_LAPACKE)
+  #if(MSVC AND HAS_LAPACKE)
+    #SET(CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS} "-DHAVE_LAPACK_CONFIG_H -DLAPACK_COMPLEX_STRUCTURE")
+    #SET(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} ${EXTRA_LAPACK_LIB})
+  #endif(MSVC AND HAS_LAPACKE)
   
   if(HAS_MATLAB_LAPACK)
     SET(CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS} "-Dptrdiff_t=long")
@@ -157,17 +162,23 @@ if(BLASDEV_FOUND AND LAPACK_FOUND)
     dgels
     dtrtrs)
 
-  check_interface(LAPACK
-    FUNCTIONS ${lapack_functions}
-    OPT_FUNCTIONS ${opt_functions}
-    EXTRA_LIBS ${LAPACK_EXTRA_LIBS}
-    PREFIX ${LAPACK_PREFIX}
-    SUFFIX ${LAPACK_SUFFIX})
+  if(NOT BLAS_NAME STREQUAL "mkl")
+    check_interface(LAPACK
+        FUNCTIONS ${lapack_functions}
+        OPT_FUNCTIONS ${opt_functions}
+        EXTRA_LIBS ${LAPACK_EXTRA_LIBS}
+        PREFIX ${LAPACK_PREFIX}
+        SUFFIX ${LAPACK_SUFFIX})
+      
+        list(APPEND LAPACK_LIBRARIES ${CLAPACK_LIBRARY})
+        list(REMOVE_DUPLICATES LAPACK_LIBRARIES)
 
+  else()
+    # we assume mkl is complete ...
+    set(LAPACK_LIBRARIES ${BLAS_LIBRARIES} CACHE STRING "")
+    
+  endif()
   
-  list(APPEND LAPACK_LIBRARIES ${CLAPACK_LIBRARY})
-  list(REMOVE_DUPLICATES LAPACK_LIBRARIES)
-
 endif()
 
 # -- Library setup --

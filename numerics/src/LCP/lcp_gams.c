@@ -13,33 +13,29 @@
 
 /* GAMS stuff */
 
-#include "LCP_Solvers.h"  // for lcp_gams
-#include "NumericsFwd.h"  // for LinearComplementarityProblem, SolverOptions
-#include "numerics_verbose.h" // for numerics_error
+#include "LCP_Solvers.h"       // for lcp_gams
+#include "NumericsFwd.h"       // for LinearComplementarityProblem, SolverOptions
+#include "numerics_verbose.h"  // for numerics_error
 
 #ifdef HAVE_GAMS_C_API
 
-#include "GAMSlink.h"
-
-#include <string.h>
 #include <assert.h>
+#include <string.h>
 
-#include "NumericsMatrix.h"
+#include "GAMSlink.h"
 #include "LinearComplementarityProblem.h"
+#include "NumericsMatrix.h"
 #include "SolverOptions.h"
 #endif
 
-
-void lcp_gams(LinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
-{
-
+void lcp_gams(LinearComplementarityProblem *problem, double *z, double *w, int *info,
+              SolverOptions *options) {
 #ifndef HAVE_GAMS_C_API
   numerics_error("lcp_gams", "GAMS API is not enabled. Try to re-compile Siconos with GAMS.");
 #else
 
-  if(!options->solverParameters)
+  if (!options->solverParameters)
     options->solverParameters = createGAMSparams(GAMS_MODELS_SHARE_DIR, GAMS_DIR);
-
 
   assert(problem);
   assert(problem->size > 0);
@@ -57,42 +53,36 @@ void lcp_gams(LinearComplementarityProblem* problem, double *z, double *w, int *
   const char defModel[] = SPACE_CONC(GAMS_MODELS_SHARE_DIR, "/lcp.gms");
   const char defGAMSdir[] = GAMS_DIR;
 
-  SN_Gams_set_dirs((SN_GAMSparams*)options->solverParameters, defModel, defGAMSdir, model, sysdir, "/lcp.gms");
+  SN_Gams_set_dirs((SN_GAMSparams *)options->solverParameters, defModel, defGAMSdir, model,
+                   sysdir, "/lcp.gms");
 
   /* Create objects */
-  if(! gamsxCreateD(&Gptr, sysdir, msg, sizeof(msg)))
-  {
+  if (!gamsxCreateD(&Gptr, sysdir, msg, sizeof(msg))) {
     printf("Could not create gamsx object: %s\n", msg);
     return;
   }
 
-  if(! idxCreateD(&Xptr, sysdir, msg, sizeof(msg)))
-  {
+  if (!idxCreateD(&Xptr, sysdir, msg, sizeof(msg))) {
     printf("Could not create gdx object: %s\n", msg);
     return;
   }
 
-  if(! optCreateD(&solverOptPtr, sysdir, msg, sizeof(msg)))
-  {
+  if (!optCreateD(&solverOptPtr, sysdir, msg, sizeof(msg))) {
     printf("Could not create solver opt object: %s\n", msg);
     return;
   }
 
-  if(! optCreateD(&Optr, sysdir, msg, sizeof(msg)))
-  {
+  if (!optCreateD(&Optr, sysdir, msg, sizeof(msg))) {
     printf("Could not create opt object: %s\n", msg);
     return;
   }
 
   char gdxFileName[GMS_SSSIZE];
   char solFileName[GMS_SSSIZE];
-  const char* base_name = GAMSP_get_filename(options->solverParameters);
-  if(base_name)
-  {
+  const char *base_name = GAMSP_get_filename(options->solverParameters);
+  if (base_name) {
     strncpy(gdxFileName, base_name, sizeof(gdxFileName));
-  }
-  else
-  {
+  } else {
     strncpy(gdxFileName, "lcp", sizeof(gdxFileName));
   }
 
@@ -111,49 +101,38 @@ void lcp_gams(LinearComplementarityProblem* problem, double *z, double *w, int *
   optSetDblStr(solverOptPtr, "convergence_tolerance", options->dparam[SICONOS_DPARAM_TOL]);
   optWriteParameterFile(solverOptPtr, "path.opt");
 
-
   idxOpenWrite(Xptr, gdxFileName, "Siconos/Numerics NM_to_GDX", &status);
-  if(status)
-    idxerror(status, "idxOpenWrite");
+  if (status) idxerror(status, "idxOpenWrite");
 
-  if((status=NM_to_GDX(Xptr, "M", "M matrix", problem->M)))
-  {
+  if ((status = NM_to_GDX(Xptr, "M", "M matrix", problem->M))) {
     printf("Model data not written\n");
     goto TERMINATE;
   }
 
-  if((status=NV_to_GDX(Xptr, "q", "q vector", problem->q, problem->size)))
-  {
+  if ((status = NV_to_GDX(Xptr, "q", "q vector", problem->q, problem->size))) {
     printf("Model data not written\n");
     goto TERMINATE;
   }
 
-  if(idxClose(Xptr))
-    idxerror(idxGetLastError(Xptr), "idxClose");
+  if (idxClose(Xptr)) idxerror(idxGetLastError(Xptr), "idxClose");
 
-
-  if((status=CallGams(Gptr, Optr, sysdir, model)))
-  {
+  if ((status = CallGams(Gptr, Optr, sysdir, model))) {
     printf("Call to GAMS failed\n");
     goto TERMINATE;
   }
-
 
   /************************************************
    * Read back solution
    ************************************************/
   idxOpenRead(Xptr, solFileName, &status);
-  if(status)
-    idxerror(status, "idxOpenRead");
+  if (status) idxerror(status, "idxOpenRead");
 
-  if((status=GDX_to_NV(Xptr, "sol", z, problem->size)))
-  {
+  if ((status = GDX_to_NV(Xptr, "sol", z, problem->size))) {
     printf("Model data not read\n");
     goto TERMINATE;
   }
 
-  if(idxClose(Xptr))
-    idxerror(idxGetLastError(Xptr), "idxClose");
+  if (idxClose(Xptr)) idxerror(idxGetLastError(Xptr), "idxClose");
 
 TERMINATE:
   optFree(&Optr);
@@ -163,9 +142,5 @@ TERMINATE:
 
   *info = status;
 
-#endif // HAVE_GAMS_C_API
-
+#endif  // HAVE_GAMS_C_API
 }
-
-
-

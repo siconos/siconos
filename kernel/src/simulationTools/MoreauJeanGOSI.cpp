@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -322,7 +322,7 @@ double MoreauJeanGOSI::computeResidu()
 
       SP::SiconosMatrix C = d->C();
       if(C)
-        prod(h, *C, vold, free_rhs, false); // free_rhs += h*C*vi
+        prod(-h, *C, vold, free_rhs, false); // free_rhs -= h*C*vi
 
       SP::SiconosMatrix K = d->K();
       if(K)
@@ -477,7 +477,7 @@ void MoreauJeanGOSI::NonSmoothLawContributionToOutput(SP::Interaction inter, One
   {
     InteractionsGraph& indexSet = *osnsp.simulation()->indexSet(osnsp.indexSetLevel());
     InteractionsGraph::VDescriptor ivd = indexSet.descriptor(inter);
-    struct _NSLEffectOnFreeOutput nslEffectOnFreeOutput =  _NSLEffectOnFreeOutput(osnsp, *inter, indexSet.properties(ivd));
+    struct _NSLEffectOnFreeOutput nslEffectOnFreeOutput =  _NSLEffectOnFreeOutput(osnsp, *inter, indexSet.properties(ivd), _theta);
     SiconosVector & osnsp_rhs = *(*indexSet.properties(ivd).workVectors)[MoreauJeanOSI::OSNSP_RHS];
     osnsp_rhs.zero();
     inter->nonSmoothLaw()->accept(nslEffectOnFreeOutput);

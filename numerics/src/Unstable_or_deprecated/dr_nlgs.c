@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,24 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
+
 #include "Relay_Solvers.h"
 #include "SiconosBlas.h"
 
-void dr_nlgs(RelayProblem* problem, double *z, double *w, int *info, SolverOptions* options)
-{
-  double* vec = problem->M->matrix0;
-  double* q = problem->q;
-  int n = problem -> size;
+void dr_nlgs(RelayProblem *problem, double *z, double *w, int *info, SolverOptions *options) {
+  double *vec = problem->M->matrix0;
+  double *q = problem->q;
+  int n = problem->size;
   double *a = problem->ub;
   double *b = problem->lb;
   //\todo Rewrite completely the algorithm with a projection.
   int ib;
-  for(ib = 0; ib < n; ib++) b[ib] = -b[ib];
+  for (ib = 0; ib < n; ib++) b[ib] = -b[ib];
   int itt = options->iparam[0];
   double errmax = options->dparam[0];
 
@@ -41,62 +41,47 @@ void dr_nlgs(RelayProblem* problem, double *z, double *w, int *info, SolverOptio
   double err1, num, den, avn, xn, apn;
   double *zt, *wnum1;
 
-  wnum1    = (double*) malloc(n * sizeof(double));
-  zt       = (double*) malloc(n * sizeof(double));
+  wnum1 = (double *)malloc(n * sizeof(double));
+  zt = (double *)malloc(n * sizeof(double));
 
-  for(i = 0; i < n; i++)
-  {
-    w[i]     = 0.;
-    z[i]     = 0.;
-    zt[i]    = 0.;
+  for (i = 0; i < n; i++) {
+    w[i] = 0.;
+    z[i] = 0.;
+    zt[i] = 0.;
     wnum1[i] = 0.;
   }
-
 
   iter1 = 1;
   err1 = 1.;
 
-
-  while((iter1 < itt) && (err1 > errmax))
-  {
-
+  while ((iter1 < itt) && (err1 > errmax)) {
     iter1 = iter1 + 1;
 
-    for(i = 0; i < n; i++)
-    {
+    for (i = 0; i < n; i++) {
       avn = 0.;
       apn = 0.;
 
-      for(j = 0; j <= i - 1; j++)
-        avn = avn + vec[j * n + i] * z[j];
+      for (j = 0; j <= i - 1; j++) avn = avn + vec[j * n + i] * z[j];
 
-      for(k = i + 1; k < n; k++)
-        apn = apn + vec[k * n + i] * z[k];
+      for (k = i + 1; k < n; k++) apn = apn + vec[k * n + i] * z[k];
 
       xn = -q[i] - avn - apn;
 
       zt[i] = -xn;
 
-      if(a[i] < zt[i])
-      {
+      if (a[i] < zt[i]) {
         mina = a[i];
-      }
-      else
-      {
+      } else {
         mina = zt[i];
       }
 
-      if(-b[i] < mina)
-      {
+      if (-b[i] < mina) {
         w[i] = mina;
-      }
-      else
-      {
+      } else {
         w[i] = -b[i];
       }
 
-      if(fabs(vec[i * n + i]) < 1e-12)
-      {
+      if (fabs(vec[i * n + i]) < 1e-12) {
         printf("\n Warning nul diagonal term of M \n");
 
         free(zt);
@@ -106,11 +91,8 @@ void dr_nlgs(RelayProblem* problem, double *z, double *w, int *info, SolverOptio
 
         return;
 
-      }
-      else
+      } else
         z[i] = 1 / vec[i * n + i] * (w[i] + xn);
-
-
     }
 
     /*              Convergence criterium              */
@@ -122,7 +104,7 @@ void dr_nlgs(RelayProblem* problem, double *z, double *w, int *info, SolverOptio
 
     alpha = 1.;
     beta = -1.;
-    cblas_dgemv(CblasColMajor,CblasNoTrans, n, n, alpha, vec, n, z, incx, beta, wnum1, incy);
+    cblas_dgemv(CblasColMajor, CblasNoTrans, n, n, alpha, vec, n, z, incx, beta, wnum1, incy);
 
     num = cblas_ddot(n, wnum1, incx, wnum1, incy);
 
@@ -131,30 +113,20 @@ void dr_nlgs(RelayProblem* problem, double *z, double *w, int *info, SolverOptio
     err1 = sqrt(num) / sqrt(den);
     options->iparam[1] = iter1;
     options->dparam[1] = err1;
-
   }
 
-
-  if(err1 > errmax)
-  {
-    if(verbose > 0)
+  if (err1 > errmax) {
+    if (verbose > 0)
       printf("No convergence after %d iterations, the residue is %g\n", iter1, err1);
 
     *info = 1;
-  }
-  else
-  {
-    if(verbose > 0)
+  } else {
+    if (verbose > 0)
       printf("Convergence after %d iterations, the residue is %g \n", iter1, err1);
 
     *info = 0;
   }
 
-
-
   free(wnum1);
   free(zt);
-
-
-
 }

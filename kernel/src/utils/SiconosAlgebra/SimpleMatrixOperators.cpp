@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@
 #include "SiconosAlgebra.hpp"
 #include "SiconosException.hpp"
 
-using namespace Siconos;
+using namespace siconos;
 
 
 // =================================================
@@ -108,26 +108,26 @@ SimpleMatrix& SimpleMatrix::operator = (const SiconosMatrix& m)
 
   if(&m == this) return *this;  // auto-assignment.
 
-  Siconos::UBLAS_TYPE numM = m.num();
+  siconos::UBLAS_TYPE numM = m.num();
 
   if(size(0) != m.size(0) || size(1) != m.size(1))
   {
     resize(m.size(0), m.size(1));
   }
 
-  if(numM == Siconos::ZERO)
+  if(numM == siconos::ZERO)
   {
     zero();
     return *this;
   }
 
-  if(numM == Siconos::IDENTITY)
+  if(numM == siconos::IDENTITY)
   {
     eye();
     return *this;
   }
 
-  if(numM == Siconos::BLOCK)
+  if(numM == siconos::BLOCK)
   {
     const BlockMatrix& mB = static_cast<const BlockMatrix&>(m);
     ConstBlocksIterator1 it;
@@ -188,7 +188,7 @@ SimpleMatrix& SimpleMatrix::operator = (const SiconosMatrix& m)
       }
       break;
     case SYMMETRIC:
-      if(numM == Siconos::IDENTITY || numM ==  Siconos::SYMMETRIC )
+      if(numM == siconos::IDENTITY || numM ==  siconos::SYMMETRIC )
         noalias(*(mat.Sym)) = *m.sym();
       else
         THROW_EXCEPTION("bad assignment of matrix (symmetric one = dense or ...)");
@@ -270,17 +270,17 @@ SimpleMatrix& SimpleMatrix::operator = (const SimpleMatrix& m)
 
   if(&m == this) return *this;  // auto-assignment.
 
-  Siconos::UBLAS_TYPE numM = m.num();
+  siconos::UBLAS_TYPE numM = m.num();
 
   if(size(0) != m.size(0) || size(1) != m.size(1))
     resize(m.size(0), m.size(1));
 
-  if(numM == Siconos::ZERO)
+  if(numM == siconos::ZERO)
   {
     zero();
     return *this;
   }
-  else if(numM == Siconos::IDENTITY)
+  else if(numM == siconos::IDENTITY)
   {
     eye();
     return *this;
@@ -326,7 +326,7 @@ SimpleMatrix& SimpleMatrix::operator = (const SimpleMatrix& m)
     }
     break;
   case SYMMETRIC:
-    if(numM == Siconos::SYMMETRIC)
+    if(numM == siconos::SYMMETRIC)
       noalias(*(mat.Sym)) = *m.sym();
     else
       THROW_EXCEPTION("bad assignment of matrix (symmetric one = dense or ...)");
@@ -402,7 +402,7 @@ SimpleMatrix& SimpleMatrix::operator = (const SimpleMatrix& m)
 
 SimpleMatrix& SimpleMatrix::operator = (const DenseMat& m)
 {
-  if(_num != Siconos::DENSE)
+  if(_num != siconos::DENSE)
     THROW_EXCEPTION("the current matrix is not dense.");
 
   if(size(0) != m.size1() || size(1) != m.size2())
@@ -421,8 +421,8 @@ SimpleMatrix& SimpleMatrix::operator = (const DenseMat& m)
 SimpleMatrix& SimpleMatrix::operator +=(const SiconosMatrix& m)
 {
 
-  Siconos::UBLAS_TYPE numM = m.num();
-  if(numM == Siconos::ZERO)  // m = 0
+  siconos::UBLAS_TYPE numM = m.num();
+  if(numM == siconos::ZERO)  // m = 0
     return *this;
 
   if(&m == this)  // auto-assignment
@@ -457,7 +457,7 @@ SimpleMatrix& SimpleMatrix::operator +=(const SiconosMatrix& m)
   if(size(0) != m.size(0) || size(1) != m.size(1))
     resize(m.size(0), m.size(1));
 
-  if(numM == Siconos::BLOCK)
+  if(numM == siconos::BLOCK)
   {
     const BlockMatrix& mB = static_cast<const BlockMatrix&>(m);
     ConstBlocksIterator1 it1;
@@ -524,9 +524,9 @@ SimpleMatrix& SimpleMatrix::operator +=(const SiconosMatrix& m)
       }
       break;
     case SYMMETRIC:
-      if(numM == Siconos::SYMMETRIC)
+      if(numM == siconos::SYMMETRIC)
         noalias(*(mat.Sym)) += *m.sym();
-      else if(numM == Siconos::IDENTITY)
+      else if(numM == siconos::IDENTITY)
         noalias(*(mat.Sym)) += *m.identity();
       else
         THROW_EXCEPTION("bad assignment of matrix (symmetric one = dense or ...)");
@@ -609,8 +609,8 @@ SimpleMatrix& SimpleMatrix::operator +=(const SiconosMatrix& m)
 SimpleMatrix& SimpleMatrix::operator -= (const SiconosMatrix& m)
 {
 
-  Siconos::UBLAS_TYPE numM = m.num();
-  if(numM == Siconos::ZERO)  // m = 0
+  siconos::UBLAS_TYPE numM = m.num();
+  if(numM == siconos::ZERO)  // m = 0
     return *this;
 
   if(&m == this)  // auto-assignment
@@ -644,7 +644,7 @@ SimpleMatrix& SimpleMatrix::operator -= (const SiconosMatrix& m)
   if(size(0) != m.size(0) || size(1) != m.size(1))
     THROW_EXCEPTION("inconsistent sizes.");
 
-  if(numM == Siconos::BLOCK)  // m is a BlockMatrix
+  if(numM == siconos::BLOCK)  // m is a BlockMatrix
   {
     const BlockMatrix& mB = static_cast<const BlockMatrix&>(m);
     ConstBlocksIterator1 it1;
@@ -711,9 +711,9 @@ SimpleMatrix& SimpleMatrix::operator -= (const SiconosMatrix& m)
       }
       break;
     case SYMMETRIC:
-      if(numM == Siconos::SYMMETRIC)
+      if(numM == siconos::SYMMETRIC)
         noalias(*(mat.Sym)) -= *m.sym();
-      else if(numM == Siconos::IDENTITY)
+      else if(numM == siconos::IDENTITY)
         noalias(*(mat.Sym)) -= *m.identity();
       else
         THROW_EXCEPTION("bad assignment of matrix (symmetric one = dense or ...)");

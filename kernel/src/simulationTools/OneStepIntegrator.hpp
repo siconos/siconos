@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -297,12 +297,19 @@ public:
 
   /**
      compute interaction output (y) for all levels and swaps in memory
+     \param time value for output computation
+     \param interaction_properties properties of the interaction, in the Interaction Graph I0
+  */
+  void UpdateAndSwapAllOutput(double time);
+
+  /**
+     compute interaction output (y) for all levels and swaps in memory
 
      \param inter the interaction to update
      \param time value for output computation
      \param interaction_properties properties of the interaction, in the Interaction Graph I0
   */
-  void update_interaction_output(Interaction& inter, double time, InteractionProperties& interaction_properties);
+  void UpdateAndSwapAllOutput(Interaction& inter, double time);
 
   /** compute the initial state (for dynamical system variables) of the Newton loop. */
   virtual void computeInitialNewtonState(){

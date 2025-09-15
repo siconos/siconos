@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@
 #ifndef NCP_PROBLEM_H
 #define NCP_PROBLEM_H
 
-#include "NumericsFwd.h"   // for NonlinearComplementarityProblem, NumericsMa...
-#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"    // for NonlinearComplementarityProblem, NumericsMa...
+#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 /*!\file NonlinearComplementarityProblem.h
  * Data structure to formalize a Nonlinear Complementarity Problem (NCP)
@@ -29,8 +29,7 @@
 /** type for user defined function used to compute F and its jacobian.
  */
 typedef void (*ptrFunctionNCP)(void *env, int n, double *z, double *F);
-typedef void (*ptrFunctionJacNCP)(void *env, int n, double *z,
-                                  NumericsMatrix *jacF);
+typedef void (*ptrFunctionJacNCP)(void *env, int n, double *z, NumericsMatrix *jacF);
 
 /**
     The structure that defines a Nonlinear Complementarity Problem (NCP) :
@@ -41,9 +40,8 @@ typedef void (*ptrFunctionJacNCP)(void *env, int n, double *z,
     \f]
 */
 struct NonlinearComplementarityProblem {
-  unsigned n; /**< size of the problem */
-  ptrFunctionNCP
-      compute_F; /**< pointer to the function used to compute \f$ F(z) \f$ */
+  unsigned n;               /**< size of the problem */
+  ptrFunctionNCP compute_F; /**< pointer to the function used to compute \f$ F(z) \f$ */
   ptrFunctionJacNCP compute_nabla_F; /**< pointer to the function used to
                                         compute \f$ \nabla_z F(z) \f$ */
   NumericsMatrix *nabla_F;           /**< storage for \f$ \nabla_z F \f$*/

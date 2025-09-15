@@ -27,8 +27,20 @@ set(PACKAGE_NAME siconos)
 set_and_check(siconos_ROOT "@CMAKE_INSTALL_PREFIX@")
 set_and_check(siconos_SCRIPT "@CMAKE_INSTALL_PREFIX@/bin/siconos")
 
+
+
+# list of directories specifying installation prefixes to be searched by the find... routines
+# of CMake. If set during build process of Siconos, it may be also useful at runtime.
+set(CMAKE_PREFIX_PATH "@CMAKE_PREFIX_PATH@")
+
 # set list of targets build by siconos project
 set(installed_targets "@installed_targets@")
+
+
+if(@HAVE_SICONOS_MECHANISMS@)
+  set_and_check(siconos_mechanisms_SCRIPT "@CMAKE_INSTALL_PREFIX@/bin/siconos_mechanisms")
+endif()
+
 
 # Path (relative to siconos install) to cmake extra tools
 set(SICONOS_CMAKE_MODULE_PATH @CMAKE_INSTALL_PREFIX@/@SiconosConfigPackageLocation@)
@@ -55,8 +67,8 @@ set(HAS_ONE_LP_SOLVER @HAS_ONE_LP_SOLVER@)
 # mechanics component with bullet?
 set(SICONOS_HAS_BULLET @SICONOS_HAS_BULLET@)
 
-# mechanics (and/or mechanisms) component with oce?
-set(SICONOS_HAS_OCE @SICONOS_HAS_OCE@)
+# mechanics (and/or mechanisms) component with occt?
+set(SICONOS_HAS_OpenCASCADE @SICONOS_HAS_OpenCASCADE@)
 
 if(@WITH_FCLIB@)
   set(FCLIB_ROOT @FCLIB_ROOT@)
@@ -71,10 +83,6 @@ endif()
 
 # include siconos project targets
 include("${CMAKE_CURRENT_LIST_DIR}/siconosTargets.cmake")
-
-if(${mechanisms_installed})
-  set_and_check(siconos_mechanisms_SCRIPT "@CMAKE_INSTALL_PREFIX@/bin/siconos_mechanisms")
-endif()
 
 # --- Final check to set (or not) siconos_FOUND, siconos_numerics_FOUND and so on
 check_required_components(siconos)

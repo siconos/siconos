@@ -375,11 +375,19 @@ static inline long int array_size(mxArray* m, int indx)
 
 %apply (double *z) { (double *reaction) };
 
-%apply (double *z) { (double *velocity) };
+%apply(double *z){(double *velocity)};
+
+%apply (double *z) { (double *stress) };
+
+%apply (double *z) { (double *plastic_strain_rate) };
 
 %apply (double *z) { (double *globalVelocity) };
 
-%apply (double *z) { (double *mu) };
+%apply(double *z){(double *mu)};
+
+%apply (double *z) { (double *eta) };
+
+%apply (double *z) { (double *theta) };
 
 %apply (double *z) { (double *q) };
 

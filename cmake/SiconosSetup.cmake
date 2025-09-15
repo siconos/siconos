@@ -19,30 +19,41 @@ include(FetchContent)
 #Current binary dir, for generated headers.Only at build time !
 include_directories($<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>)
 
-#Add extra logs about git references(branch name, commit number...)
-#Useful for documentation and continuous integration
-option(WITH_GIT "Consider sources are under GIT" OFF)
-
-if(WITH_GIT) # User defined option, default = off
-#Check if git is available
-#and get last commit id(long and short).
-#Saved in SOURCE_ABBREV_GIT_SHA1 and SOURCE_GIT_SHA1
-#These vars are useful for tests logs and 'write_notes' macro.
-  find_package(Git)
-  if(GIT_FOUND)
-    set(CTEST_GIT_COMMAND "${GIT_EXECUTABLE}" )     
-    execute_process(COMMAND 
-      ${GIT_EXECUTABLE} rev-parse --short HEAD
-      OUTPUT_VARIABLE SOURCE_ABBREV_GIT_SHA1
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
-    
-    execute_process(COMMAND 
-      ${GIT_EXECUTABLE} rev-parse HEAD
-      OUTPUT_VARIABLE SOURCE_GIT_SHA1
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-      WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+# Add extra logs about git references(branch name, commit number...)
+# Useful for documentation and continuous integration
+find_package(Git)
+if(Git_FOUND)
+  execute_process(COMMAND
+    ${GIT_EXECUTABLE} -C ${CMAKE_SOURCE_DIR} rev-parse
+    OUTPUT_VARIABLE NO_GIT
+    ERROR_VARIABLE NO_GIT
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+  if(NO_GIT STREQUAL "")
+    set(WITH_GIT 1 CACHE INTERNAL "True if Git is available and Siconos sources are managed as a git repository.")
+  else()
+    set(WITH_GIT 0 CACHE INTERNAL "True if Git is available and Siconos sources are managed as a git repository.")
   endif()
+else()
+  set(WITH_GIT 0 CACHE INTERNAL "True if Git is available and Siconos sources are managed as a git repository.")
+endif()
+
+if(WITH_GIT)
+# Get last commit id(long and short).
+# Saved in SOURCE_ABBREV_GIT_SHA1 and SOURCE_GIT_SHA1
+# These vars are useful for tests logs and 'write_notes' macro.
+set(CTEST_GIT_COMMAND "${GIT_EXECUTABLE}" )     
+execute_process(COMMAND 
+  ${GIT_EXECUTABLE} rev-parse --short HEAD
+  OUTPUT_VARIABLE SOURCE_ABBREV_GIT_SHA1
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
+execute_process(COMMAND 
+  ${GIT_EXECUTABLE} rev-parse HEAD
+  OUTPUT_VARIABLE SOURCE_GIT_SHA1
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 endif()
 
 
@@ -82,42 +93,10 @@ message(STATUS "------------------------------------------------\n")
 #-- - End of python conf -- -
 
 #== == == == == = install setup == == == == == =
+include(SiconosInstallSetup)
+set_install_path()
 
-# --- A specific option to install everything in a completely isolated path (use-case: guix), lib, binaries AND python packages.
-# In that case:
-# - CMAKE_INSTALL_PREFIX is ignored and its content overwritten with ISOLATED_INSTALL value.
-# - eveything is installed as usual (binaries in bin, libraries in lib ...) with ISOLATED_INSTALL as root dir
-# - python packages are installed by pip with the option --prefix=${ISOLATED_INSTALL}.
 
-if(ISOLATED_INSTALL)
-  message(WARNING "You asked for a fully isolated installation in ${ISOLATED_INSTALL}.")
-  if(NOT CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    # if CMAKE_INSTALL_PREFIX has been explicitely set
-    if(NOT EXISTS ${CMAKE_BINARY_DIR}/CMakeCache.txt) # if it's the first cmake run
-      message(FATAL_ERROR "You can not set both ISOLATED_INSTALL and CMAKE_INSTALL_PREFIX. CMAKE_INSTALL_PREFIX value will be ignored.")
-    endif()
-    # Overwrite CMAKE_INSTALL_PREFIX with ISOLATED_INSTALL value
-  endif()
-  set(CMAKE_INSTALL_PREFIX ${ISOLATED_INSTALL} CACHE PATH "Install root directory." FORCE)
-  set(sicopy_install_mode isolated CACHE STRING "Siconos Python packages install mode." FORCE)
-else()
-  if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    set(sicopy_install_mode standard CACHE STRING "Siconos Python packages install mode." FORCE)
-    set(install_fixed ON CACHE INTERNAL "internal var: true after first run of cmake."  FORCE)
-  # elseif(${install_fixed}) # second run (or more) of cmake, with standard install. We don't want any change.
-  #   # this is just a double check to be sure to avoid install mess when users are playing with cache variables ...
-  #   set(sicopy_install_mode standard CACHE STRING "Siconos Python packages install mode." FORCE)     
-  else()
-    set(sicopy_install_mode user CACHE STRING "Siconos Python packages install mode.")
-  endif()
-endif()
-  
-if(WITH_PYTHON_WRAPPER)
-  if(siconos_python_install_mode)
-    message(WARNING "You explicitely set siconos_python_install_mode to ${siconos_python_install_mode}! Be sure to know what you're doing and check the install paths printed after cmake run ... Or remove the whole build dir and start again!")
-    set(sicopy_install_mode ${siconos_python_install_mode} CACHE STRING "Siconos Python packages install mode." FORCE)
-  endif()
-endif()
 
 #Set directory used to save cmake config files
 #required to use Siconos(e.g.to call find_package(siconos))
@@ -177,8 +156,6 @@ if(WITH_PYTHON_WRAPPER)
   # --------------- Python install setup ---------------
   # Set path for siconos-python installation (SICONOS_PYTHON_INSTALL_DIR)
   # and get pip install options (PIP_INSTALL_OPTIONS).
-  include(PythonInstallSetup)
-  set_python_install_path()
 
   # -- swig stuff --
   include(swig_setup)
@@ -208,8 +185,8 @@ if(WITH_CXX)
   #From boost 1.71, something is wrong in cmake and boost support for multithread
   #https: // gitlab.kitware.com/cmake/cmake/issues/19714
   #set(Boost_USE_MULTITHREADED ON)
-  set(Boost_NO_BOOST_CMAKE 1)
-  set(boost_min_version 1.61)
+  #set(Boost_NO_BOOST_CMAKE 1)
+  set(boost_min_version 1.71)
 #Set the list of required boost components
   if(WITH_SERIALIZATION)
     list(APPEND boost_required_components serialization filesystem)
@@ -219,16 +196,11 @@ if(WITH_CXX)
   endif()
 
 #Search boost...
-  find_package(Boost ${boost_min_version} ${boost_opts} REQUIRED)
+  find_package(Boost ${boost_min_version} ${boost_opts} REQUIRED CONFIG)
 
   if(WITH_SERIALIZATION)
     set(WITH_SYSTEM_BOOST_SERIALIZATION ON CACHE INTERNAL "Siconos uses boost serialization lib.")
   endif()
-endif()
-
-#-- Open Cascade Community Edition --
-if(WITH_OCE)
-  include(oce_setup)
 endif()
 
 #-- -- Extra 'developers only' options -- --

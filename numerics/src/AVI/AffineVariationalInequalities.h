@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,10 @@
  *
  */
 
-#include "NumericsFwd.h" // for AffineVariationalInequalities, NumericsMatrix
-#include "SiconosSets.h" // for polyhedron_set
+#include <stdio.h>  // for FILE
 
-#include <stdio.h> // for FILE
+#include "NumericsFwd.h"  // for AffineVariationalInequalities, NumericsMatrix
+#include "SiconosSets.h"  // for polyhedron_set
 
 /**
    Structure that contains and defines an AVI
@@ -34,7 +34,7 @@
    The problem is : given a matrix \f$ M \f$ and a vector \f$ q \f$, find \f$ z
    \f$ such that
 
-   
+
 
    \f[
    \langle x - z, q + Mz \rangle \geq 0 \ \text{for all }x\in K
@@ -44,11 +44,10 @@
 
 */
 struct AffineVariationalInequalities {
-  size_t size; /**< size of the problem */
-  NumericsMatrix
-      *M;    /**< M matrix of the AVI (see the mathematical description)*/
-  double *q; /**< vector of the AVI (see the mathematical description)*/
-  double *d; /**< Covering vector (optional) */
+  size_t size;         /**< size of the problem */
+  NumericsMatrix *M;   /**< M matrix of the AVI (see the mathematical description)*/
+  double *q;           /**< vector of the AVI (see the mathematical description)*/
+  double *d;           /**< Covering vector (optional) */
   polyhedron_set poly; /**< Polyhedra where the solution has to belong */
   double *lb;          /**< Lower bounds for the variables */
   double *ub;          /**< Upper bounds for the variables */
@@ -74,7 +73,7 @@ void AVI_display(AffineVariationalInequalities *avi);
 int AVI_printInFile(AffineVariationalInequalities *avi, FILE *file);
 
 /** read from file and create AffineVariationalInequalities
- *  
+ *
  *  \param avi pointer to a AffineVariationalInequalities to create
  *  \param file pointer to a FILE
  *  \return 1 if successfull

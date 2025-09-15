@@ -47,6 +47,7 @@ jobs:
         libpython3-dev \
         libcppunit-dev \
         libbullet-dev \
+        libbullet-extras-dev \
         libfreetype6-dev \
         freeglut3-dev
         python3 -m pip install -U vtk

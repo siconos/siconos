@@ -140,7 +140,7 @@ if(io_DIRS) # the component may be empty if mechanics and serialization are off
     # add dependencies for header generation
     add_custom_target(SerializersGeneration ALL
       DEPENDS ${GENERATED_HEADER} ${GENERATED_HEADER_KERNEL})
-    add_dependencies(pykernel SerializersGeneration)
+    add_dependencies(sicpykernel SerializersGeneration)
     add_dependencies(${COMPONENT} SerializersGeneration)
   endif()
   
@@ -160,19 +160,27 @@ if(io_DIRS) # the component may be empty if mechanics and serialization are off
   
   if(HAVE_SICONOS_MECHANICS)
     target_link_libraries(io PUBLIC mechanics)
+    # This will bring the links with Opencascade, if required ...
   endif()
   
   if(HAVE_SICONOS_MECHANISMS)
-    # FP : do we really need this link?
     target_link_libraries(io PUBLIC mechanisms)
+    # This will bring the links with Opencascade, if required ...
   endif()
 
   # Links with non-Siconos libraries
-  if(SICONOS_HAS_OCE)
-    if(HAVE_SICONOS_MECHANICS OR HAVE_SICONOS_MECHANISMS)
-      target_link_libraries(io PRIVATE ${OCE_LIBRARIES})
-    endif()
-  endif()
+  # if(SICONOS_HAS_OpenCASCADE)
+  #   if(HAVE_SICONOS_MECHANICS OR HAVE_SICONOS_MECHANISMS)
+  #     target_link_libraries(io PRIVATE ${OCE_LIBRARIES})
+  #   endif()
+  # endif()
+  
+  # # Links with non-Siconos libraries
+  # if(SICONOS_HAS_OCC)
+  #   if(HAVE_SICONOS_MECHANICS OR HAVE_SICONOS_MECHANISMS)
+  #     target_link_libraries(io PRIVATE ${OpenCASCADE_LIBRARIES})
+  #   endif()
+  # endif()
   
   # --- Search component dependencies ---
   if(WITH_SERIALIZATION)

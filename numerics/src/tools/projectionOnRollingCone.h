@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@
  * function to project on cones
  */
 
-#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 enum {
   PROJRCONE_DUAL,
@@ -59,7 +59,7 @@ unsigned int projectionOn2DRollingCone(double *r, double mu, double mur);
 /**
    projectionOnDualCone Projection on the second Order Cone in \f$ R^3 \f$, \f$ K
    \{ r, r_1 \geq 0, 0 mu \sqrt(u_2^2+u_3^2) \geq u_1  \} \f$
-   
+
    \param[in,out] u the vector to be projected
    \param[in] mu the angle of the cone
    \return the type of projection

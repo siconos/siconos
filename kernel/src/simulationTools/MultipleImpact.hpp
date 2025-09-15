@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,13 @@
 #define _OSNSMULTIPLEIMPACT_
 
 #include "LinearOSNS.hpp"
-#include "SiconosConst.hpp" // for MACHINE_PREC
+#include "SiconosConst.hpp" // for siconos::internal::MACHINE_PREC
 
 #include <string>
 
-#define DEFAULT__tolImpact MACHINE_PREC
-#define DEFAULT_TOL_VEL MACHINE_PREC
-#define DEFAULT_TOL_ENER MACHINE_PREC
+#define DEFAULT__tolImpact siconos::internal::MACHINE_PREC
+#define DEFAULT_TOL_VEL siconos::internal::MACHINE_PREC
+#define DEFAULT_TOL_ENER siconos::internal::MACHINE_PREC
 
 /** Formalization and Resolution of a Multiple Impact Non-Smooth problem.
 

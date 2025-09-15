@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #ifndef fc3d_compute_error_H
 #define fc3d_compute_error_H
@@ -24,103 +24,124 @@
 
 */
 
-#include "NumericsFwd.h"  // for FrictionContactProblem, SolverOptions
-#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"    // for FrictionContactProblem, SolverOptions
+#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-extern "C"
-{
+extern "C" {
 #endif
 
-  /** 
-      Error computation (using the normal map residual) for friction-contact 3D problem
-      
-      \param problem the structure which defines the friction-contact problem
-      \param z vector
-      \param w vector
-      \param tolerance value for error computation
-      \param options
-      \param norm norm of a vector (problem->q) for relative error
-      \param[in,out] error value
-      \return 0 if ok
-   */
-  int fc3d_compute_error(FrictionContactProblem* problem, double *z , double *w, double tolerance, SolverOptions * options, double norm, double * error);
+/**
+    Error computation using the norm infinity conic for friction-contact 3D problem
 
-  /**
-      Error computation using the norm infinity conic for friction-contact 3D problem
+    \param problem the structure which defines the friction-contact problem
+    \param z vector
+    \param w vector
+    \param tolerance value for error computation
+    \param options
+    \param norm norm of a vector (problem->q) for relative error
+    \param[in,out] error value
+    \return 0 if ok
+ */
+int fc3d_compute_error_norm_infinity_conic(FrictionContactProblem *problem, double *z,
+                                           double *w, double tolerance, SolverOptions *options,
+                                           double norm, double *error, int on_dual_cone);
 
-      \param problem the structure which defines the friction-contact problem
-      \param z vector
-      \param w vector
-      \param tolerance value for error computation
-      \param options
-      \param norm norm of a vector (problem->q) for relative error
-      \param[in,out] error value
-      \return 0 if ok
-   */
-  int fc3d_compute_error_norm_infinity_conic(FrictionContactProblem* problem, double *z , double *w, double tolerance, SolverOptions * options, double norm, double * error, int on_dual_cone);
+/**
+    Error computation on dual cone (using the normal map residual) for one friction-contact 3D
+   problem
 
-  /** 
-      Error computation (using the normal map residual) for one friction-contact 3D problem
-      
-      \param r the reaction force
-      \param u the local velocity
-      \param mu coeficient of friction
-      \param worktmp work vector
-      \param[in,out] error value
-   */
-  void fc3d_unitary_compute_and_add_error(double r[3] , double u[3], double mu, double * error, double * worktmp);
+    \param r the reaction force
+    \param u the local velocity
+    \param mu coeficient of friction
+    \param worktmp work vector
+    \param[in,out] error value
+ */
+void fc3d_unitary_compute_dual_and_add_error(double r[3], double u[3], double mu,
+                                             double *error, double *worktmp);
 
-  /**
-      Error computation on dual cone (using the normal map residual) for one friction-contact 3D problem
+/**
+    Error computation for a friction-contact 3D problem
 
-      \param r the reaction force
-      \param u the local velocity
-      \param mu coeficient of friction
-      \param worktmp work vector
-      \param[in,out] error value
-   */
-  void fc3d_unitary_compute_dual_and_add_error(double r[3] , double u[3], double mu, double * error, double * worktmp);
+    \param problem the structure which defines the friction-contact problem
+    \param z vector
+    \param w vector
+    \param options
+    \param tolerance value for error computation
+    \param[in,out] error value
+    \return 0 if ok
+ */
+int fc3d_compute_error_velocity(FrictionContactProblem *problem, double *z, double *w,
+                                double tolerance, SolverOptions *options, double *error);
 
+/**
+    Error computation for a friction-contact 3D problem
 
-  /** 
-      Error computation for a friction-contact 3D problem
-      
-      \param problem the structure which defines the friction-contact problem
-      \param z vector
-      \param w vector
-      \param options
-      \param tolerance value for error computation
-      \param[in,out] error value
-      \return 0 if ok
-   */
-  int fc3d_compute_error_velocity(FrictionContactProblem* problem, double *z , double *w, double tolerance, SolverOptions * options, double * error);
+    \param problem the structure which defines the friction-contact problem
+    \param z vector
+    \param w vector
+    \param tolerance value for error computation
+    \param options
+    \param norm norm of a vector (problem->q) for relative error
+    \param[in,out] error value
+    \return 0 if ok
+*/
+int fc3d_compute_error(FrictionContactProblem *problem, double *z, double *w, double tolerance,
+                       SolverOptions *options, double norm, double *error);
 
-  /** 
-      Error computation for one friction-contact 3D problem
-      
-      \param z vector
-      \param w vector
-      \param R radius of the cylinder
-      \param worktmp work vector
-      \param[in,out] error value
-   */
-  void fc3d_Tresca_unitary_compute_and_add_error(double z[3] , double w[3], double R, double * error, double *worktmp);
+/**
+    Error computation (using the normal map residual) for one friction-contact 3D problem
 
+    \param r the reaction force
+    \param u the local velocity
+    \param mu coeficient of friction
+    \param worktmp work vector
+    \param[in,out] error value
+ */
+void fc3d_unitary_compute_and_add_error(double r[3], double u[3], double mu, double *error,
+                                        double *worktmp);
 
-  /** 
-      Error computation for friction-contact 3D problem with Tresca Friction
-      
-      \param problem the structure which defines the friction-contact problem
-      \param z vector
-      \param w vector
-      \param tolerance value for error computation
-      \param options
-      \param norm normalisation coeff
-      \param[in,out] error value
-      \return 0 if ok
-   */
-  int fc3d_Tresca_compute_error(FrictionContactProblem* problem, double *z , double *w, double tolerance, SolverOptions * options,  double norm, double * error);
+/**
+    Error computation for a friction-contact 3D problem
+
+    \param problem the structure which defines the friction-contact problem
+    \param z vector
+    \param w vector
+    \param options
+    \param tolerance value for error computation
+    \param[in,out] error value
+    \return 0 if ok
+ */
+int fc3d_compute_error_velocity(FrictionContactProblem *problem, double *z, double *w,
+                                double tolerance, SolverOptions *options, double *error);
+
+/**
+    Error computation for one friction-contact 3D problem
+
+    \param z vector
+    \param w vector
+    \param R radius of the cylinder
+    \param worktmp work vector
+    \param[in,out] error value
+ */
+void fc3d_Tresca_unitary_compute_and_add_error(double z[3], double w[3], double R,
+                                               double *error, double *worktmp);
+
+/**
+    Error computation for friction-contact 3D problem with Tresca Friction
+
+    \param problem the structure which defines the friction-contact problem
+    \param z vector
+    \param w vector
+    \param tolerance value for error computation
+    \param options
+    \param norm normalisation coeff
+    \param[in,out] error value
+    \return 0 if ok
+ */
+int fc3d_Tresca_compute_error(FrictionContactProblem *problem, double *z, double *w,
+                              double tolerance, SolverOptions *options, double norm,
+                              double *error);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

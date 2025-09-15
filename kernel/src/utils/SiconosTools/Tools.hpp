@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,6 +157,12 @@ void print(Iter first, Iter last, const char* nm = "", const char * sep = "\n", 
   std::copy(first, last, std::ostream_iterator<T>(os, sep));
   os << std::endl;
 }
+
+template <typename T>
+std::string enum_to_string(T value) {
+  return std::to_string(static_cast<typename std::underlying_type<T>::type>(value));
+}
+
 #endif // PRINTSEQUENCE_H
 
 

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,33 +14,33 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
-#include <assert.h>                         // for assert
-#include <stdlib.h>                         // for malloc, free, NULL
+#include <assert.h>  // for assert
+#include <stdlib.h>  // for malloc, free, NULL
+
 #include "Newton_methods.h"                 // for functions_LSA, init_lsa_f...
 #include "NumericsFwd.h"                    // for RelayProblem, SolverOptions
 #include "NumericsMatrix.h"                 // for NM_assert, NM_create_from...
 #include "RelayProblem.h"                   // for RelayProblem, freeRelay_p...
 #include "Relay_Solvers.h"                  // for relay_avi_caoferris
-#include "relay_cst.h"                      // for SICONOS_RELAY_AVI_CAOFERRIS
 #include "SiconosBlas.h"                    // for cblas_daxpy
 #include "SiconosSets.h"                    // for box_constraints
 #include "SolverOptions.h"                  // for SolverOptions, solver_opt...
 #include "VI_Newton.h"                      // for VI_compute_F, VI_compute_...
 #include "VariationalInequality.h"          // for VariationalInequality
 #include "VariationalInequality_Solvers.h"  // for variationalInequality_BOX...
+#include "relay_cst.h"                      // for SICONOS_RELAY_AVI_CAOFERRIS
 #include "sanitizer.h"                      // for cblas_dcopy_msan
 
-typedef struct
-{
+typedef struct {
   NumericsMatrix* mat;
   RelayProblem* relay_pb;
 } vi_box_AVI_LSA_data;
 
-static int vi_compute_decent_dir_by_avi(void* problem, double* z, double* F, double* descent_dir, SolverOptions* options)
-{
-  VariationalInequality* vi_pb = (VariationalInequality*) problem;
+static int vi_compute_decent_dir_by_avi(void* problem, double* z, double* F,
+                                        double* descent_dir, SolverOptions* options) {
+  VariationalInequality* vi_pb = (VariationalInequality*)problem;
   int n = vi_pb->size;
   vi_pb->F(vi_pb, n, z, F);
   RelayProblem* relay_pb = ((vi_box_AVI_LSA_data*)options->solverData)->relay_pb;
@@ -59,16 +59,12 @@ static int vi_compute_decent_dir_by_avi(void* problem, double* z, double* F, dou
 
   return local_info;
 
-//  avi_caoferris_stage3(avi_options, x, s_vec, problem->size, A,
-//  options->internalSolver);
-//  for (unsigned int i = 0; i<n; ++i) x[i] = s_vec[A[i]-1] + problem->lb[i];
+  //  avi_caoferris_stage3(avi_options, x, s_vec, problem->size, A,
+  //  options->internalSolver);
+  //  for (unsigned int i = 0; i<n; ++i) x[i] = s_vec[A[i]-1] + problem->lb[i];
 }
 
-void * vi_get_set(void* problem)
-{
-  return ((VariationalInequality*) problem)->set;
-}
-
+void* vi_get_set(void* problem) { return ((VariationalInequality*)problem)->set; }
 
 /** Release memory used by SolverOptions member solverData.
 
@@ -77,10 +73,8 @@ void * vi_get_set(void* problem)
     specific to this solver. All others (iparam ...) are handled
     in solver_options_delete generic function.
  */
-static void vi_box_AVI_free(SolverOptions* options)
-{
-  if(options->solverData)
-  {
+static void vi_box_AVI_free(SolverOptions* options) {
+  if (options->solverData) {
     vi_box_AVI_LSA_data* sData = (vi_box_AVI_LSA_data*)options->solverData;
     NM_clear(sData->mat);
     free(sData->mat);
@@ -93,19 +87,18 @@ static void vi_box_AVI_free(SolverOptions* options)
   options->solverData = NULL;
 }
 
-void vi_box_AVI_LSA(VariationalInequality* problem, double* z, double* F, int* info, SolverOptions* options)
-{
-
+void vi_box_AVI_LSA(VariationalInequality* problem, double* z, double* F, int* info,
+                    SolverOptions* options) {
   int n = problem->size;
 
-  if(!options->solverData)
-  {
+  if (!options->solverData) {
     RelayProblem* relay_pb = (RelayProblem*)malloc(sizeof(RelayProblem));
     relay_pb->size = n;
-    relay_pb->M = NM_create_from_data(NM_DENSE, n, n, malloc(n * n * sizeof(double)));;
-    relay_pb->q = (double*) malloc(n * sizeof(double));
+    relay_pb->M = NM_create_from_data(NM_DENSE, n, n, malloc(n * n * sizeof(double)));
+    ;
+    relay_pb->q = (double*)malloc(n * sizeof(double));
 
-    box_constraints* box = (box_constraints*) problem->set;
+    box_constraints* box = (box_constraints*)problem->set;
     relay_pb->lb = box->lb;
     relay_pb->ub = box->ub;
     vi_box_AVI_LSA_data* sData = (vi_box_AVI_LSA_data*)malloc(sizeof(vi_box_AVI_LSA_data));
@@ -121,17 +114,14 @@ void vi_box_AVI_LSA(VariationalInequality* problem, double* z, double* F, int* i
   functions_AVI_LSA.compute_descent_direction = &vi_compute_decent_dir_by_avi;
   functions_AVI_LSA.get_set_from_problem_data = &vi_get_set;
   set_lsa_params_data(options, problem->nabla_F);
-  newton_LSA(problem->size, z, F, info, (void *)problem, options, &functions_AVI_LSA);
+  newton_LSA(problem->size, z, F, info, (void*)problem, options, &functions_AVI_LSA);
 
   vi_box_AVI_free(options);
-
 }
 
-void variationalInequality_BOX_AVI_set_default(SolverOptions* options)
-{
+void variationalInequality_BOX_AVI_set_default(SolverOptions* options) {
   options->iparam[SICONOS_IPARAM_LSA_FORCE_ARCSEARCH] = 1;
 
   assert(options->numberOfInternalSolvers == 1);
   options->internalSolvers[0] = solver_options_create(SICONOS_RELAY_AVI_CAOFERRIS);
 }
-

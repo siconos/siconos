@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 /*!\file sn_logger.h
  * \brief Common data structures used by loggers in Siconos/Numerics
@@ -35,9 +35,12 @@ typedef enum {
   SN_LOGLEVEL_ALL
 } SN_loglevels;
 
-#define SN_LOG_LIGHT(log_lvl, expr) if (log_lvl >= SN_LOGLEVEL_LIGHT) expr;
+#define SN_LOG_LIGHT(log_lvl, expr) \
+  if (log_lvl >= SN_LOGLEVEL_LIGHT) expr;
 #define SN_LOG_SCALAR(log_lvl, expr) SN_LOG_LIGHT(log_lvl, expr)
-#define SN_LOG_VEC(log_lvl, expr) if (log_lvl >= SN_LOGLEVEL_VEC) expr;
-#define SN_LOG_MAT(log_lvl, expr) if (log_lvl >= SN_LOGLEVEL_MAT) expr;
+#define SN_LOG_VEC(log_lvl, expr) \
+  if (log_lvl >= SN_LOGLEVEL_VEC) expr;
+#define SN_LOG_MAT(log_lvl, expr) \
+  if (log_lvl >= SN_LOGLEVEL_MAT) expr;
 
 #endif

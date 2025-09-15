@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@
  * \brief function to project on cones
  */
 
-#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 enum { PROJCONE_DUAL, PROJCONE_INSIDE, PROJCONE_BOUNDARY };
 
@@ -40,6 +40,19 @@ extern "C" {
    \return the type of projection
 */
 unsigned projectionOnCone(double *r, double mu);
+
+/**
+   subdifferentialProjectionOnCone.
+   Compute an element of the the subdifferential of the
+   projection on the second Order Cone in \f$ R^3 \f$, \f$ K \{
+   r, r_1 \geq 0, 0 \sqrt(r_2^2+r_3^2) \geq mu r_1  \} \f$
+
+   \param[out] H an element of the the subdifferential
+   \param[in] r the vector to be projected
+   \param[in] mu the angle of the cone
+   \return the type of projection
+*/
+unsigned subdifferentialProjectionOnCone(double *H, double *r, double mu);
 
 /**
     projectionOnDualCone Projection on the second Order Cone in \f$ R^3 \f$,

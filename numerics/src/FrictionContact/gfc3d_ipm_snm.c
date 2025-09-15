@@ -16,7 +16,6 @@
  * limitations under the License.
  */
 
-#include "CSparseMatrix_internal.h"
 #include "gfc3d_Solvers.h"
 #include "gfc3d_compute_error.h"
 #include "fc3d_compute_error.h"

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@
 
 
 
-namespace Siconos
+namespace siconos
 {
 
 
@@ -53,13 +53,13 @@ namespace Siconos
       try{
       ... // call to functions that may throw exceptions
       }
-      catch(Siconos::exception::Exception& e)
+      catch(siconos::exception::Exception& e)
       {
-      Siconos::exception::process(e);
+      siconos::exception::process(e);
       }
       catch(...)
       {
-      Siconos::exception::process();
+      siconos::exception::process();
       }
 
       The outputs are :
@@ -93,16 +93,16 @@ namespace Siconos
        Outputs diagnostic information about exceptions.
        Must be called inside a catch section.
     */
-    static inline void process(Siconos::exception& e)
+    static inline void process(siconos::exception& e)
     {
       std::cerr << boost::diagnostic_information(e, true) << std::endl;
     }
 
   };
 
-}//namespace Siconos
+}//namespace siconos
 
 /** Wrap exception throwing inside Siconos. */
-#define THROW_EXCEPTION(X) BOOST_THROW_EXCEPTION(Siconos::exception() << Siconos::exception::extra_message(X) << Siconos::exception::errno_code(errno) <<Siconos::exception::errno_description(std::strerror(errno)));
+#define THROW_EXCEPTION(X) BOOST_THROW_EXCEPTION(siconos::exception() << siconos::exception::extra_message(X) << siconos::exception::errno_code(errno) <<siconos::exception::errno_description(std::strerror(errno)));
 
 #endif

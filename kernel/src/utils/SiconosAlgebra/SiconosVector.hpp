@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ union VECTOR_UBLAS_TYPE
 /**
    Vectors of double. (Interface to various types of Boost-Ublas vectors).
    
-   Two possible types: Siconos::DENSE (default) and Siconos:SPARSE.
+   Two possible types: siconos::DENSE (default) and Siconos:SPARSE.
    
 */
 class SiconosVector : public std::enable_shared_from_this<SiconosVector>
@@ -67,7 +67,7 @@ public:
    *  \param row the size of the vector
    *  \param type the type of vector (dense or sparse)
    */
-  SiconosVector(unsigned row, Siconos::UBLAS_TYPE type = Siconos::DENSE);
+  SiconosVector(unsigned row, siconos::UBLAS_TYPE type = siconos::DENSE);
 
   /** creates a vector and initializes its content with a single value
    *
@@ -75,14 +75,14 @@ public:
    *  \param val value to initialize its content
    *  \param type type of vector (dense or sparse)
    */
-  SiconosVector(unsigned row, double val, Siconos::UBLAS_TYPE type = Siconos::DENSE);
+  SiconosVector(unsigned row, double val, siconos::UBLAS_TYPE type = siconos::DENSE);
 
   /** creates a dense vector from a copy of a stl vector.
    *
    *  \param vec vector to be copied
    *  \param type of the vector (dense or sparse)
    */
-  SiconosVector(const std::vector<double>& vec, Siconos::UBLAS_TYPE type = Siconos::DENSE);
+  SiconosVector(const std::vector<double>& vec, siconos::UBLAS_TYPE type = siconos::DENSE);
 
   /** copy constructor
    *
@@ -137,10 +137,10 @@ public:
    *
    *  \return an unsigned int
    */
-  Siconos::UBLAS_TYPE num() const
+  siconos::UBLAS_TYPE num() const
   {
-    if (_dense) return Siconos::DENSE;
-    else return Siconos::SPARSE;
+    if (_dense) return siconos::DENSE;
+    else return siconos::SPARSE;
   }
 
   /** get a pointer to the ublas embedded vector if it's type is Dense

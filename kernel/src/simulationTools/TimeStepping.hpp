@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ typedef void (*CheckSolverFPtr)(int, Simulation *);
 #define SICONOS_TS_LINEAR 1
 #define SICONOS_TS_LINEAR_IMPLICIT 2
 #define SICONOS_TS_NONLINEAR 3
+#define SICONOS_TS_NONLINEAR_FULL 4
 
 class TimeStepping : public Simulation {
 protected:
@@ -142,7 +143,7 @@ protected:
 public:
   /** initialisation specific to TimeStepping for OneStepNSProblem.
    */
-  void initOSNS() override;
+  void initializeOneStepNSProblem() override;
 
   /** Standard constructor
    *
@@ -228,9 +229,8 @@ public:
    *  It computes the initial residu and set the, if needed to Newton variable
    *  to start the newton algorithm.
    */
-  void initializeNewtonLoop();
-
-  void computeInitialNewtonState();
+  void initializeNewtonSolve();
+  void computeInitialStateOfTheStep() override;
   void prepareNewtonIteration();
 
   /** check the convergence of Newton algorithm according to criterion

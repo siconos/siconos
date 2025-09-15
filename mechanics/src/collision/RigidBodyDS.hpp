@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,6 +45,9 @@ protected:
    *  collide. See also NewtonEulerJointR::_allowSelfCollide */
   bool _allowSelfCollide = true;
 
+
+  SP::SiconosVector _qExtrapolated;
+
 public:
 
   RigidBodyDS(SP::SiconosVector position,
@@ -78,6 +81,14 @@ public:
    *
    *  \return a SP::SiconosVector */
   virtual SP::SiconosVector base_position() { return q(); }
+
+
+  virtual SP::SiconosVector base_extrapolated_position(){return _qExtrapolated;};
+  virtual void compute_extrapolated_position(double extrapolationCoefficient);
+
+
+
+
 
   ACCEPT_BASE_VISITORS(NewtonEulerDS);
 };

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef LCP_AS_CONVEXQP_H
 #define LCP_AS_CONVEXQP_H
 
@@ -22,28 +22,26 @@
   \brief Definition of a structure to handle with LCP problems.
 */
 
-#include "NumericsFwd.h"  // for ConvexQP, LinearComplementarityProblem, Sol...
-#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "NumericsFwd.h"    // for ConvexQP, LinearComplementarityProblem, Sol...
+#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 /** \struct LinearComplementarityProblem_as_ConvexQP LinearComplementarityProblem_as_ConvexQP.h
  *
  */
-struct LinearComplementarityProblem_as_ConvexQP
-{
+struct LinearComplementarityProblem_as_ConvexQP {
   /* the ConvexQP associated with the FC3D problem */
-  ConvexQP * cqp;
+  ConvexQP *cqp;
   /* the FC3D associated with the ConvexQP  */
-  LinearComplementarityProblem * lcp;
+  LinearComplementarityProblem *lcp;
   /* the SolverOptions that might be used to pass some numerical parameters */
-  SolverOptions * options;
+  SolverOptions *options;
 };
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-extern "C"
-{
+extern "C" {
 #endif
 
-  void Projection_ConvexQP_LCP(void *cqpIn, double *x, double *PX);
+void Projection_ConvexQP_LCP(void *cqpIn, double *x, double *PX);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

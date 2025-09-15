@@ -16,6 +16,8 @@
  * limitations under the License.
  */
 
+#include "NumericsMatrix.h"
+
 typedef struct
 {
   double * globalVelocity;
@@ -82,8 +84,7 @@ typedef long double float_type;
 #define NOT_ON_DUAL_CONE 0
 
 /* Returns the 2-norm of a vector - uses long double - based on blas_dnrm2 */
-float_type dnrm2l(const unsigned int n, const double * x);
-
+float_type dnrm2l(const unsigned int n, const double* x);
 
 /* Returns the step length for variables update in IPM [1, p. 29] */
 /* \param x is the initial point to update. */
@@ -96,8 +97,10 @@ float_type dnrm2l(const unsigned int n, const double * x);
 /*          On the implementation and usage of SDPT3 - a Matlab software package */
 /*          for semidefinite-quadratic-linear programming, version 4.0 */
 /*          Draft, 17 July 2006 */
-double getNewtonStepLength(const double * const x, const double * const dx,
-                                  const unsigned int vecSize, const unsigned int varsCount, const double gamma);
+
+double getNewtonStepLength(const double* const x, const double* const dx,
+                           const unsigned int vecSize, const unsigned int varsCount,
+                           const double gamma);
 
 /* Returns array of step-lengths to the boundary reduced by a factor gamma. Uses long double. */
 double *array_getStepLength(const double * const x, const double * const dx, const unsigned int vecSize,
@@ -108,17 +111,21 @@ double *array_getStepLength(const double * const x, const double * const dx, con
 double getStepLength(const double * const x, const double * const dx, const unsigned int vecSize,
                             const unsigned int varsCount, const double gamma);
 
+/* Returns the maximum step-length to the boundary reduced by a factor gamma. Uses long double.
+ */
+double getStepLength(const double* const x, const double* const dx, const unsigned int vecSize,
+                     const unsigned int varsCount, const double gamma);
 
 /**
- * Returns the primal constraint vector for global fricprob ( velocity - H @ globalVelocity - w )
- * \param velocity is the vector of relative velocities.
- * \param H is the constraint matrix.
+ * Returns the primal constraint vector for global fricprob ( velocity - H @ globalVelocity - w
+ * ) \param velocity is the vector of relative velocities. \param H is the constraint matrix.
  * \param globalVelocity is the vector of generalized velocities.
  * \param w is the constraint vector.
  * \param out is the result velocity - H x globalVelocity - w vector.
  * \param rnorm is the relative norm of out = |out|/max{|velocity|, |H x globalVelocity|, |w|}
  * \param type is the norm type used: NORM_2 = L-2, NORM_INF = L-inf
  */
+
 void primalResidual_s(const double * velocity, NumericsMatrix * H, const double * globalVelocity, const double * w,
 		    const double * s, double * out, double * rnorm, const double tol);
 void primalResidual(const double * velocity, NumericsMatrix * H, const double * globalVelocity, const double * w,
@@ -173,7 +180,6 @@ double xdoty_type(const unsigned int varsCount, const unsigned int vecSize, cons
 /* double primalResidualNorm(const double * velocity, NumericsMatrix * H, */
 /*                                  const double * globalVelocity, const double * w); */
 
-
 /**
  * Returns the Inf-norm of the dual residual vector ( M @ globalVelocity + f - H @ reaction )
  * \param M is the mass matrix.
@@ -183,8 +189,8 @@ double xdoty_type(const unsigned int varsCount, const unsigned int vecSize, cons
  * \param f is the constraint vector (vector of internal and external forces).
  */
 /* double dualResidualNorm(NumericsMatrix * M, const double * globalVelocity, */
-/*                                NumericsMatrix * H, const double * reaction, const double * f); */
-
+/*                                NumericsMatrix * H, const double * reaction, const double *
+ * f); */
 
 /**
  * Returns the Inf-norm of the cemplementarity residual vector ( velocity o reaction )
@@ -193,8 +199,8 @@ double xdoty_type(const unsigned int varsCount, const unsigned int vecSize, cons
  * \param vecSize is the size of reaction and velocity vector.
  * \param varsCount is a count of variables concatenated into vectors reaction and velocity.
  */
-double complemResidualNorm(const double * const velocity, const double * const reaction,
-                                  const unsigned int vecSize, const unsigned int varsCount);
+double complemResidualNorm(const double* const velocity, const double* const reaction,
+                           const unsigned int vecSize, const unsigned int varsCount);
 
 /* Returns the type-norm of the complementarity residual vector = type-norm of the Jordan product velocity o reaction
  *\param type is the norm type used: NORM_2 = L-2, NORM_INF = L-inf, NORM_2_INF = L-inf conic = max {ui o ri}
@@ -203,30 +209,28 @@ double complemResidualNorm_type(const double * const velocity, const double * co
                            const unsigned int vecSize, const unsigned int varsCount, const int type);
 
 
-/* Returns the 2-norm of the complementarity residual vector = 2-norm of the Jordan product (Qp*velocity) o (Qp_inv * reaction)  */
-double complemResidualNorm_p(const double * const velocity, const double * const reaction,
-                                    const unsigned int vecSize, const unsigned int varsCount);
 
-
-/* Returns the 2-norm of the complementarity residual vector = 2-norm of the Jordan product (Qp*velocity) o (Qp_inv * reaction)  */
+/* Returns the 2-norm of the complementarity residual vector = 2-norm of the Jordan product
+ * (Qp*velocity) o (Qp_inv * reaction)  */
 /* This computation is done with the formula "F" */
-double complemResidualNorm_p_F(NumericsMatrix * Qp, NumericsMatrix * Qpinv,
-                                  const double * const velocity, const double * const reaction,
-                                  const unsigned int vecSize, const unsigned int varsCount);
-
+double complemResidualNorm_p_F(NumericsMatrix* Qp, NumericsMatrix* Qpinv,
+                               const double* const velocity, const double* const reaction,
+                               const unsigned int vecSize, const unsigned int varsCount);
 
 /* computation of the duality gap  */
-double dualGap(NumericsMatrix * M, const double * f, const double * w, const double * globalVelocity, const double * reaction, const unsigned int nd, const unsigned int m);
-
+double dualGap(NumericsMatrix* M, const double* f, const double* w,
+               const double* globalVelocity, const double* reaction, const unsigned int nd,
+               const unsigned int m);
 
 /* computation of the relative gap  */
-double relGap(NumericsMatrix * M, const double * f, const double * w, const double * globalVelocity, const double * reaction, const unsigned int nd, const unsigned int m, const double gapVal);
-
+double relGap(NumericsMatrix* M, const double* f, const double* w,
+              const double* globalVelocity, const double* reaction, const unsigned int nd,
+              const unsigned int m, const double gapVal);
 
 /* Establish an array of calculation errors  */
-void setErrorArray(double * error, const double pinfeas, const double dinfeas,
-		   const double dualgap, const double complem, const double complem_p, const double projerr);
-
+void setErrorArray(double* error, const double pinfeas, const double dinfeas,
+                   const double dualgap, const double complem, const double complem_p,
+                   const double projerr);
 
 /* Return the 2-norm of the difference between two vectors */
 double norm2VecDiff (const double * vec1, const double * vec2, const unsigned int vecSize);
@@ -288,3 +292,4 @@ void classify_indices_R(const double * velocity, const double * reaction, const 
                    int *nR, int *setR);
 
 void printBlockVec(double * vec, int vecSize, int sizeBlock, int cl);
+

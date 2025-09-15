@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,9 @@
 #include "SiconosAlgebraTools.hpp"
 #include <iostream>
 
-namespace Siconos
+namespace siconos
 {
-namespace Algebra
+namespace algebra
 {
 
 bool isComparableTo(const BlockVector& v1, const BlockVector& v2)

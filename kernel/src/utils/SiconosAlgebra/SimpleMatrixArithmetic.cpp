@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@
 #include "SimpleMatrix.hpp"
 #include "SiconosAlgebra.hpp"
 
-using namespace Siconos;
+using namespace siconos;
 
 
 void add(const SiconosMatrix & A, const SiconosMatrix& B, SiconosMatrix& C)
@@ -34,12 +34,12 @@ void add(const SiconosMatrix & A, const SiconosMatrix& B, SiconosMatrix& C)
   if((A.size(0) != C.size(0)) || (A.size(1) != C.size(1)))
     THROW_EXCEPTION("Matrix addition: inconsistent sizes");
 
-  Siconos::UBLAS_TYPE numA = A.num();
-  Siconos::UBLAS_TYPE numB = B.num();
-  Siconos::UBLAS_TYPE numC = C.num();
+  siconos::UBLAS_TYPE numA = A.num();
+  siconos::UBLAS_TYPE numB = B.num();
+  siconos::UBLAS_TYPE numC = C.num();
 
   // === if C is zero or identity => read-only ===
-  if(numC == Siconos::ZERO || numC == Siconos::IDENTITY)
+  if(numC == siconos::ZERO || numC == siconos::IDENTITY)
     THROW_EXCEPTION("Matrix addition ( add(A,B,C) ): wrong type for resulting matrix C (read-only: zero or identity).");
 
   // === common memory between A, B, C ===
@@ -53,9 +53,9 @@ void add(const SiconosMatrix & A, const SiconosMatrix& B, SiconosMatrix& C)
   }
   else // No common memory between C and A or B.
   {
-    if(numA == Siconos::ZERO)  // A = 0
+    if(numA == siconos::ZERO)  // A = 0
       C = B ;
-    else if(numB == Siconos::ZERO)  // B = 0
+    else if(numB == siconos::ZERO)  // B = 0
       C = A;
     else // A and B different from 0
     {
@@ -78,163 +78,163 @@ void add(const SiconosMatrix & A, const SiconosMatrix& B, SiconosMatrix& C)
         {
           if(numC == numA)
           {
-            if(numA == Siconos::DENSE)
+            if(numA == siconos::DENSE)
               noalias(*C.dense()) = *A.dense() + *B.dense();
-            else if(numA == Siconos::TRIANGULAR)
+            else if(numA == siconos::TRIANGULAR)
               noalias(*C.triang()) = *A.triang() + *B.triang();
-            else if(numA == Siconos::SYMMETRIC)
+            else if(numA == siconos::SYMMETRIC)
               noalias(*C.sym()) = *A.sym() + *B.sym();
-            else if(numA == Siconos::SPARSE)
+            else if(numA == siconos::SPARSE)
               noalias(*C.sparse()) = *A.sparse() + *B.sparse();
-            else //if(numA==Siconos::BANDED)
+            else //if(numA==siconos::BANDED)
               noalias(*C.banded()) = *A.banded() + *B.banded();
           }
           else // C and A of different types.
           {
-            if(numC != Siconos::DENSE)
+            if(numC != siconos::DENSE)
               THROW_EXCEPTION("Matrix addition ( add(A,B,C) ): wrong type for resulting matrix C.");
             // Only dense matrices are allowed for output.
 
-            if(numA == Siconos::DENSE)
+            if(numA == siconos::DENSE)
               noalias(*C.dense()) = *A.dense() + *B.dense();
-            else if(numA == Siconos::TRIANGULAR)
+            else if(numA == siconos::TRIANGULAR)
               noalias(*C.dense()) = *A.triang() + *B.triang();
-            else if(numA == Siconos::SYMMETRIC)
+            else if(numA == siconos::SYMMETRIC)
               noalias(*C.dense()) = *A.sym() + *B.sym();
-            else if(numA == Siconos::SPARSE)
+            else if(numA == siconos::SPARSE)
               noalias(*C.dense()) = *A.sparse() + *B.sparse();
-            else //if(numA==Siconos::BANDED)
+            else //if(numA==siconos::BANDED)
               noalias(*C.dense()) = *A.banded() + *B.banded();
           }
           C.resetFactorizationFlags();
         }
         else if(numA != 0 && numB != 0 && numA != numB)  // A and B of different types and none is block
         {
-          if(numC != Siconos::DENSE)
+          if(numC != siconos::DENSE)
             THROW_EXCEPTION("Matrix addition ( add(A,B,C) ): wrong type for resulting matrix C.");
           // Only dense matrices are allowed for output.
 
-          if(numA == Siconos::DENSE)
+          if(numA == siconos::DENSE)
             switch(numB)
             {
-            case Siconos::TRIANGULAR:
+            case siconos::TRIANGULAR:
               noalias(*C.dense()) = *A.dense() + *B.triang();
               break;
-            case Siconos::SYMMETRIC:
+            case siconos::SYMMETRIC:
               noalias(*C.dense()) = *A.dense() + *B.sym();
               break;
-            case Siconos::SPARSE:
+            case siconos::SPARSE:
               noalias(*C.dense()) = *A.dense() + *B.sparse();
               break;
-            case Siconos::BANDED:
+            case siconos::BANDED:
               noalias(*C.dense()) = *A.dense() + *B.banded();
               break;
-            case Siconos::IDENTITY:
+            case siconos::IDENTITY:
               noalias(*C.dense()) = *A.dense() + *B.identity();
               break;
             default:
               THROW_EXCEPTION("Matrix function add(A,B,C): invalid type of matrix");
             }
-          else if(numA == Siconos::TRIANGULAR)
+          else if(numA == siconos::TRIANGULAR)
             switch(numB)
             {
-            case Siconos::DENSE:
+            case siconos::DENSE:
               noalias(*C.dense()) = *A.triang() + *B.dense();
               break;
-            case Siconos::SYMMETRIC:
+            case siconos::SYMMETRIC:
               noalias(*C.dense()) = *A.triang() + *B.sym();
               break;
-            case Siconos::SPARSE:
+            case siconos::SPARSE:
               noalias(*C.dense()) = *A.triang() + *B.sparse();
               break;
-            case Siconos::BANDED:
+            case siconos::BANDED:
               noalias(*C.dense()) = *A.triang() + *B.banded();
               break;
-            case Siconos::IDENTITY:
+            case siconos::IDENTITY:
               noalias(*C.dense()) = *A.triang() + *B.identity();
               break;
             default:
               THROW_EXCEPTION("Matrix function add(A,B,C): invalid type of matrix");
             }
-          else if(numA == Siconos::SYMMETRIC)
+          else if(numA == siconos::SYMMETRIC)
             switch(numB)
             {
-            case Siconos::DENSE:
+            case siconos::DENSE:
               noalias(*C.dense()) = *A.sym() + *B.dense();
               break;
-            case Siconos::TRIANGULAR:
+            case siconos::TRIANGULAR:
               noalias(*C.dense()) = *A.sym() + *B.triang();
               break;
-            case Siconos::SPARSE:
+            case siconos::SPARSE:
               noalias(*C.dense()) = *A.sym() + *B.sparse();
               break;
-            case Siconos::BANDED:
+            case siconos::BANDED:
               noalias(*C.dense()) = *A.sym() + *B.banded();
               break;
-            case Siconos::IDENTITY:
+            case siconos::IDENTITY:
               noalias(*C.dense()) = *A.sym() + *B.identity();
               break;
             default:
               THROW_EXCEPTION("Matrix function add(A,B,C): invalid type of matrix");
             }
-          else if(numA == Siconos::SPARSE)
+          else if(numA == siconos::SPARSE)
             switch(numB)
             {
-            case Siconos::DENSE:
+            case siconos::DENSE:
               noalias(*C.dense()) = *A.sparse() + *B.dense();
               break;
-            case Siconos::TRIANGULAR:
+            case siconos::TRIANGULAR:
               noalias(*C.dense()) = *A.sparse() + *B.triang();
               break;
-            case Siconos::SYMMETRIC:
+            case siconos::SYMMETRIC:
               noalias(*C.dense()) = *A.sparse() + *B.sym();
               break;
-            case Siconos::BANDED:
+            case siconos::BANDED:
               noalias(*C.dense()) = *A.sparse() + *B.banded();
               break;
-            case Siconos::IDENTITY:
+            case siconos::IDENTITY:
               noalias(*C.dense()) = *A.sparse() + *B.identity();
               break;
             default:
               THROW_EXCEPTION("Matrix function add(A,B,C): invalid type of matrix");
             }
-          else if(numA == Siconos::BANDED)
+          else if(numA == siconos::BANDED)
             switch(numB)
             {
-            case Siconos::DENSE:
+            case siconos::DENSE:
               noalias(*C.dense()) = *A.banded() + *B.dense();
               break;
-            case Siconos::TRIANGULAR:
+            case siconos::TRIANGULAR:
               noalias(*C.dense()) = *A.banded() + *B.triang();
               break;
-            case Siconos::SYMMETRIC:
+            case siconos::SYMMETRIC:
               noalias(*C.dense()) = *A.banded() + *B.sym();
               break;
-            case Siconos::SPARSE:
+            case siconos::SPARSE:
               noalias(*C.dense()) = *A.banded() + *B.sparse();
               break;
-            case Siconos::IDENTITY:
+            case siconos::IDENTITY:
               noalias(*C.dense()) = *A.banded() + *B.identity();
               break;
             default:
               THROW_EXCEPTION("Matrix function add(A,B,C): invalid type of matrix");
             }
-          else if(numA == Siconos::IDENTITY)
+          else if(numA == siconos::IDENTITY)
             switch(numB)
             {
-            case Siconos::DENSE:
+            case siconos::DENSE:
               noalias(*C.dense()) = *A.identity() + *B.dense();
               break;
-            case Siconos::TRIANGULAR:
+            case siconos::TRIANGULAR:
               noalias(*C.dense()) = *A.identity() + *B.triang();
               break;
-            case Siconos::SYMMETRIC:
+            case siconos::SYMMETRIC:
               noalias(*C.dense()) = *A.identity() + *B.sym();
               break;
-            case Siconos::SPARSE:
+            case siconos::SPARSE:
               noalias(*C.dense()) = *A.identity() + *B.sparse();
               break;
-            case Siconos::BANDED:
+            case siconos::BANDED:
               noalias(*C.dense()) = *A.identity() + *B.banded();
               break;
             default:
@@ -272,12 +272,12 @@ void sub(const SiconosMatrix & A, const SiconosMatrix& B, SiconosMatrix& C)
   if((A.size(0) != C.size(0)) || (A.size(1) != C.size(1)))
     THROW_EXCEPTION("Matrix addition: inconsistent sizes");
 
-  Siconos::UBLAS_TYPE numA = A.num();
-  Siconos::UBLAS_TYPE numB = B.num();
-  Siconos::UBLAS_TYPE numC = C.num();
+  siconos::UBLAS_TYPE numA = A.num();
+  siconos::UBLAS_TYPE numB = B.num();
+  siconos::UBLAS_TYPE numC = C.num();
 
   // === if C is zero or identity => read-only ===
-  if(numC == Siconos::ZERO || numC == Siconos::IDENTITY)
+  if(numC == siconos::ZERO || numC == siconos::IDENTITY)
     THROW_EXCEPTION("Matrix addition ( add(A,B,C) ): wrong type for resulting matrix C (read-only: zero or identity).");
 
   // === common memory between A, B, C ===
@@ -303,36 +303,36 @@ void sub(const SiconosMatrix & A, const SiconosMatrix& B, SiconosMatrix& C)
       {
         if(numA == numB && numA != 0)  // A and B are of the same type and NOT block
         {
-          if(numA == Siconos::DENSE)
+          if(numA == siconos::DENSE)
             *C.dense() = *A.dense() - *B.dense();
-          else if(numA == Siconos::TRIANGULAR)
+          else if(numA == siconos::TRIANGULAR)
             *C.triang() = *A.triang() - *B.triang();
-          else if(numA == Siconos::SYMMETRIC)
+          else if(numA == siconos::SYMMETRIC)
             *C.sym() = *A.sym() - *B.sym();
-          else if(numA == Siconos::SPARSE)
+          else if(numA == siconos::SPARSE)
             *C.sparse() = *A.sparse() - *B.sparse();
-          else //if(numA==Siconos::BANDED)
+          else //if(numA==siconos::BANDED)
             *C.banded() = *A.banded() - *B.banded();
         }
         else if(numA != 0 && numB != 0 && numA != numB)  // A and B of different types and none is block
         {
-          if(numC != Siconos::DENSE)   // => numB == Siconos::DENSE
+          if(numC != siconos::DENSE)   // => numB == siconos::DENSE
             THROW_EXCEPTION("Matrix addition ( add(A,B,C) ): wrong type for resulting matrix C.");
           // Only dense matrices are allowed for output.
 
-          if(numA == Siconos::DENSE)
+          if(numA == siconos::DENSE)
             *C.dense() = *A.dense() - *B.dense();
-          else if(numA == Siconos::TRIANGULAR)
+          else if(numA == siconos::TRIANGULAR)
             *C.dense() = *A.triang() - *B.dense();
-          else if(numA == Siconos::SYMMETRIC)
+          else if(numA == siconos::SYMMETRIC)
             *C.dense() = *A.sym() - *B.dense();
-          else if(numA == Siconos::SPARSE)
+          else if(numA == siconos::SPARSE)
             *C.dense() = *A.sparse() - *B.dense();
-          else if(numA == Siconos::BANDED)
+          else if(numA == siconos::BANDED)
             *C.dense() = *A.banded() - *B.dense();
-          else if(numA == Siconos::ZERO)
+          else if(numA == siconos::ZERO)
             *C.dense() = *A.zero_mat() - *B.dense();
-          else //if(numA==Siconos::IDENTITY)
+          else //if(numA==siconos::IDENTITY)
             *C.dense() = *A.identity() - *B.dense();
         }
         else // A and/or B is Block
@@ -346,7 +346,7 @@ void sub(const SiconosMatrix & A, const SiconosMatrix& B, SiconosMatrix& C)
   }
   else // No common memory between C and A or B.
   {
-    if(numB == Siconos::ZERO)  // B = 0
+    if(numB == siconos::ZERO)  // B = 0
       C = A;
     else // B different from 0
     {
@@ -361,184 +361,184 @@ void sub(const SiconosMatrix & A, const SiconosMatrix& B, SiconosMatrix& C)
         {
           if(numC == numA)
           {
-            if(numA == Siconos::DENSE)
+            if(numA == siconos::DENSE)
               noalias(*C.dense()) = *A.dense() - *B.dense();
-            else if(numA == Siconos::TRIANGULAR)
+            else if(numA == siconos::TRIANGULAR)
               noalias(*C.triang()) = *A.triang() - *B.triang();
-            else if(numA == Siconos::SYMMETRIC)
+            else if(numA == siconos::SYMMETRIC)
               noalias(*C.sym()) = *A.sym() - *B.sym();
-            else if(numA == Siconos::SPARSE)
+            else if(numA == siconos::SPARSE)
               noalias(*C.sparse()) = *A.sparse() - *B.sparse();
-            else //if(numA==Siconos::BANDED)
+            else //if(numA==siconos::BANDED)
               noalias(*C.banded()) = *A.banded() - *B.banded();
           }
           else // C and A of different types.
           {
-            if(numC != Siconos::DENSE)
+            if(numC != siconos::DENSE)
               THROW_EXCEPTION("Matrix addition ( add(A,B,C) ): wrong type for resulting matrix C.");
             // Only dense matrices are allowed for output.
 
-            if(numA == Siconos::DENSE)
+            if(numA == siconos::DENSE)
               noalias(*C.dense()) = *A.dense() - *B.dense();
-            else if(numA == Siconos::TRIANGULAR)
+            else if(numA == siconos::TRIANGULAR)
               noalias(*C.dense()) = *A.triang() - *B.triang();
-            else if(numA == Siconos::SYMMETRIC)
+            else if(numA == siconos::SYMMETRIC)
               noalias(*C.dense()) = *A.sym() - *B.sym();
-            else if(numA == Siconos::SPARSE)
+            else if(numA == siconos::SPARSE)
               noalias(*C.dense()) = *A.sparse() - *B.sparse();
-            else //if(numA==Siconos::BANDED)
+            else //if(numA==siconos::BANDED)
               noalias(*C.dense()) = *A.banded() - *B.banded();
           }
           C.resetFactorizationFlags();
         }
         else if(numA != 0 && numB != 0 && numA != numB)  // A and B of different types and none is block
         {
-          if(numC != Siconos::DENSE)
+          if(numC != siconos::DENSE)
             THROW_EXCEPTION("Matrix addition ( add(A,B,C) ): wrong type for resulting matrix C.");
           // Only dense matrices are allowed for output.
 
-          if(numA == Siconos::DENSE)
+          if(numA == siconos::DENSE)
             switch(numB)
             {
-            case Siconos::TRIANGULAR:
+            case siconos::TRIANGULAR:
               noalias(*C.dense()) = *A.dense() - *B.triang();
               break;
-            case Siconos::SYMMETRIC:
+            case siconos::SYMMETRIC:
               noalias(*C.dense()) = *A.dense() - *B.sym();
               break;
-            case Siconos::SPARSE:
+            case siconos::SPARSE:
               noalias(*C.dense()) = *A.dense() - *B.sparse();
               break;
-            case Siconos::BANDED:
+            case siconos::BANDED:
               noalias(*C.dense()) = *A.dense() - *B.banded();
               break;
-            case Siconos::IDENTITY:
+            case siconos::IDENTITY:
               noalias(*C.dense()) = *A.dense() - *B.identity();
               break;
             default:
               THROW_EXCEPTION("Matrix function add(A,B,C): invalid type of matrix");
             }
-          else if(numA == Siconos::TRIANGULAR)
+          else if(numA == siconos::TRIANGULAR)
             switch(numB)
             {
-            case Siconos::DENSE:
+            case siconos::DENSE:
               noalias(*C.dense()) = *A.triang() - *B.dense();
               break;
-            case Siconos::SYMMETRIC:
+            case siconos::SYMMETRIC:
               noalias(*C.dense()) = *A.triang() - *B.sym();
               break;
-            case Siconos::SPARSE:
+            case siconos::SPARSE:
               noalias(*C.dense()) = *A.triang() - *B.sparse();
               break;
-            case Siconos::BANDED:
+            case siconos::BANDED:
               noalias(*C.dense()) = *A.triang() - *B.banded();
               break;
-            case Siconos::IDENTITY:
+            case siconos::IDENTITY:
               noalias(*C.dense()) = *A.triang() - *B.identity();
               break;
             default:
               THROW_EXCEPTION("Matrix function add(A,B,C): invalid type of matrix");
             }
-          else if(numA == Siconos::SYMMETRIC)
+          else if(numA == siconos::SYMMETRIC)
             switch(numB)
             {
-            case Siconos::DENSE:
+            case siconos::DENSE:
               noalias(*C.dense()) = *A.sym() - *B.dense();
               break;
-            case Siconos::TRIANGULAR:
+            case siconos::TRIANGULAR:
               noalias(*C.dense()) = *A.sym() - *B.triang();
               break;
-            case Siconos::SPARSE:
+            case siconos::SPARSE:
               noalias(*C.dense()) = *A.sym() - *B.sparse();
               break;
-            case Siconos::BANDED:
+            case siconos::BANDED:
               noalias(*C.dense()) = *A.sym() - *B.banded();
               break;
-            case Siconos::IDENTITY:
+            case siconos::IDENTITY:
               noalias(*C.dense()) = *A.sym() - *B.identity();
               break;
             default:
               THROW_EXCEPTION("Matrix function add(A,B,C): invalid type of matrix");
             }
-          else if(numA == Siconos::SPARSE)
+          else if(numA == siconos::SPARSE)
             switch(numB)
             {
-            case Siconos::DENSE:
+            case siconos::DENSE:
               noalias(*C.dense()) = *A.sparse() - *B.dense();
               break;
-            case Siconos::TRIANGULAR:
+            case siconos::TRIANGULAR:
               noalias(*C.dense()) = *A.sparse() - *B.triang();
               break;
-            case Siconos::SYMMETRIC:
+            case siconos::SYMMETRIC:
               noalias(*C.dense()) = *A.sparse() - *B.sym();
               break;
-            case Siconos::BANDED:
+            case siconos::BANDED:
               noalias(*C.dense()) = *A.sparse() - *B.banded();
               break;
-            case Siconos::IDENTITY:
+            case siconos::IDENTITY:
               noalias(*C.dense()) = *A.sparse() - *B.identity();
               break;
             default:
               THROW_EXCEPTION("Matrix function add(A,B,C): invalid type of matrix");
             }
-          else if(numA == Siconos::BANDED)
+          else if(numA == siconos::BANDED)
             switch(numB)
             {
-            case Siconos::DENSE:
+            case siconos::DENSE:
               noalias(*C.dense()) = *A.banded() - *B.dense();
               break;
-            case Siconos::TRIANGULAR:
+            case siconos::TRIANGULAR:
               noalias(*C.dense()) = *A.banded() - *B.triang();
               break;
-            case Siconos::SYMMETRIC:
+            case siconos::SYMMETRIC:
               noalias(*C.dense()) = *A.banded() - *B.sym();
               break;
-            case Siconos::SPARSE:
+            case siconos::SPARSE:
               noalias(*C.dense()) = *A.banded() - *B.sparse();
               break;
-            case Siconos::IDENTITY:
+            case siconos::IDENTITY:
               noalias(*C.dense()) = *A.banded() - *B.identity();
               break;
             default:
               THROW_EXCEPTION("Matrix function add(A,B,C): invalid type of matrix");
             }
-          else if(numA == Siconos::ZERO)
+          else if(numA == siconos::ZERO)
             switch(numB)
             {
-            case Siconos::DENSE:
+            case siconos::DENSE:
               noalias(*C.dense()) = *A.zero_mat() - *B.dense();
               break;
-            case Siconos::TRIANGULAR:
+            case siconos::TRIANGULAR:
               noalias(*C.dense()) = *A.zero_mat() - *B.triang();
               break;
-            case Siconos::SYMMETRIC:
+            case siconos::SYMMETRIC:
               noalias(*C.dense()) = *A.zero_mat() - *B.sym();
               break;
-            case Siconos::SPARSE:
+            case siconos::SPARSE:
               noalias(*C.dense()) = *A.zero_mat() - *B.sparse();
               break;
-            case Siconos::IDENTITY:
+            case siconos::IDENTITY:
               noalias(*C.dense()) = *A.zero_mat() - *B.identity();
               break;
             default:
               THROW_EXCEPTION("Matrix function add(A,B,C): invalid type of matrix");
             }
-          else if(numA == Siconos::IDENTITY)
+          else if(numA == siconos::IDENTITY)
             switch(numB)
             {
-            case Siconos::DENSE:
+            case siconos::DENSE:
               noalias(*C.dense()) = *A.identity() - *B.dense();
               break;
-            case Siconos::TRIANGULAR:
+            case siconos::TRIANGULAR:
               noalias(*C.dense()) = *A.identity() - *B.triang();
               break;
-            case Siconos::SYMMETRIC:
+            case siconos::SYMMETRIC:
               noalias(*C.dense()) = *A.identity() - *B.sym();
               break;
-            case Siconos::SPARSE:
+            case siconos::SPARSE:
               noalias(*C.dense()) = *A.identity() - *B.sparse();
               break;
-            case Siconos::BANDED:
+            case siconos::BANDED:
               noalias(*C.dense()) = *A.identity() - *B.banded();
               break;
             default:

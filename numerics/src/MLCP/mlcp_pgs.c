@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,23 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
-#include <float.h>                              // for DBL_EPSILON
-#include <math.h>                               // for fabs
+ */
+#include <float.h>  // for DBL_EPSILON
+#include <math.h>   // for fabs
 #ifndef __cplusplus
-#include <stdbool.h>                       // for false
+#include <stdbool.h>  // for false
 #endif
-#include <stdio.h>                              // for printf
-#include <stdlib.h>                             // for free, malloc, exit
+#include <stdio.h>   // for printf
+#include <stdlib.h>  // for free, malloc, exit
+
 #include "MLCP_Solvers.h"                       // for mlcp_compute_error
 #include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
 #include "NumericsFwd.h"                        // for SolverOptions, MixedL...
+#include "NumericsMatrix.h"                     // for storageType
 #include "SiconosBlas.h"                        // for cblas_ddot, cblas_dcopy
 #include "SolverOptions.h"                      // for SolverOptions, SICONO...
 #include "mlcp_cst.h"                           // for SICONOS_IPARAM_MLCP_P...
-#include "NumericsMatrix.h"                     // for storageType
-#include "numerics_verbose.h"                     // for numerics_printf
-
+#include "numerics_verbose.h"                   // for numerics_printf
 
 /*
  *
@@ -38,24 +38,22 @@
  * double *w : size n+m
  */
 
-void mlcp_pgs(MixedLinearComplementarityProblem* problem_orig, double *z, double *w, int *info, SolverOptions* options)
-{
+void mlcp_pgs(MixedLinearComplementarityProblem* problem_orig, double* z, double* w, int* info,
+              SolverOptions* options) {
   /* verbose=1; */
 
   MixedLinearComplementarityProblem* problem;
 
-  if(!problem_orig->isStorageType2)
-  {
-    //mixedLinearComplementarity_display(problem_orig);
-    numerics_printf_verbose(0,"mlcp_pgs: Wrong Storage (!isStorageType2) for PGS solver\n");
-    MixedLinearComplementarityProblem* mlcp_abcd =  mixedLinearComplementarity_fromMtoABCD(problem_orig);
-    //mixedLinearComplementarity_display(mlcp_abcd);
+  if (!problem_orig->isStorageType2) {
+    // mixedLinearComplementarity_display(problem_orig);
+    numerics_printf_verbose(0, "mlcp_pgs: Wrong Storage (!isStorageType2) for PGS solver\n");
+    MixedLinearComplementarityProblem* mlcp_abcd =
+        mixedLinearComplementarity_fromMtoABCD(problem_orig);
+    // mixedLinearComplementarity_display(mlcp_abcd);
     problem = mlcp_abcd;
-    //exit(EXIT_FAILURE);
-  }
-  else
-  {
-    problem =problem_orig;
+    // exit(EXIT_FAILURE);
+  } else {
+    problem = problem_orig;
   }
 
   double* A = problem->A;
@@ -66,9 +64,9 @@ void mlcp_pgs(MixedLinearComplementarityProblem* problem_orig, double *z, double
   double* b = problem->b;
   int n = problem->n;
   int m = problem->m;
-  double *u = &z[0];
-  double *v = &z[n];
-  double *Buf;
+  double* u = &z[0];
+  double* v = &z[n];
+  double* Buf;
 
   int incx, incy, incAx, incAy, incBx, incBy;
   int i, iter;
@@ -85,7 +83,7 @@ void mlcp_pgs(MixedLinearComplementarityProblem* problem_orig, double *z, double
 
   itermax = options->iparam[SICONOS_IPARAM_MAX_ITER];
   pgsExplicit = options->iparam[SICONOS_IPARAM_MLCP_PGS_EXPLICIT];
-  tol   = options->dparam[SICONOS_DPARAM_TOL];
+  tol = options->dparam[SICONOS_DPARAM_TOL];
 
   /* Initialize output */
 
@@ -97,62 +95,50 @@ void mlcp_pgs(MixedLinearComplementarityProblem* problem_orig, double *z, double
   diagA = (double*)malloc(n * sizeof(double));
   diagB = (double*)malloc(m * sizeof(double));
 
-
-
   incx = 1;
   incy = 1;
 
   /* Preparation of the diagonal of the inverse matrix */
 
-  for(i = 0 ; i < n ; ++i)
-  {
-    if((fabs(A[i * n + i]) < DBL_EPSILON))
-    {
-      numerics_printf_verbose(1," Vanishing diagonal term A[%i,%i]= %14.8e", i, i,  A[i * n + i] );
-      numerics_printf_verbose(1," The local problem cannot be solved");
+  for (i = 0; i < n; ++i) {
+    if ((fabs(A[i * n + i]) < DBL_EPSILON)) {
+      numerics_printf_verbose(1, " Vanishing diagonal term A[%i,%i]= %14.8e", i, i,
+                              A[i * n + i]);
+      numerics_printf_verbose(1, " The local problem cannot be solved");
 
       *info = 2;
       free(diagA);
       free(diagB);
       *info = 1;
-      if(!problem_orig->isStorageType2)
-      {
+      if (!problem_orig->isStorageType2) {
         mixedLinearComplementarity_free(problem);
       }
       return;
-    }
-    else
-    {
+    } else {
       diagA[i] = 1.0 / A[i * n + i];
     }
   }
-  for(i = 0 ; i < m ; ++i)
-  {
-    if((fabs(B[i * m + i]) < DBL_EPSILON))
-    {
-
-      numerics_printf_verbose(1," Vanishing diagonal term \n");
-      numerics_printf_verbose(1," The local problem cannot be solved \n");
+  for (i = 0; i < m; ++i) {
+    if ((fabs(B[i * m + i]) < DBL_EPSILON)) {
+      numerics_printf_verbose(1, " Vanishing diagonal term \n");
+      numerics_printf_verbose(1, " The local problem cannot be solved \n");
 
       *info = 2;
       free(diagA);
       free(diagB);
 
-      if(!problem_orig->isStorageType2)
-      {
+      if (!problem_orig->isStorageType2) {
         mixedLinearComplementarity_free(problem);
       }
       return;
-    }
-    else
-    {
+    } else {
       diagB[i] = 1.0 / B[i * m + i];
     }
   }
   /*start iterations*/
 
   iter = 0;
-  err  = 1.;
+  err = 1.;
 
   incx = 1;
   incy = 1;
@@ -161,98 +147,98 @@ void mlcp_pgs(MixedLinearComplementarityProblem* problem_orig, double *z, double
   incBx = m;
   incBy = 1;
 
-
   mlcp_compute_error(problem_orig, z, w, tol, &err);
 
-  while((iter < itermax) && (err > tol))
-  {
-
+  while ((iter < itermax) && (err > tol)) {
     ++iter;
 
     incx = 1;
     incy = 1;
 
-    if(pgsExplicit)
-    {
+    if (pgsExplicit) {
       /*Use w like a buffer*/
-      cblas_dcopy(n, w, incx, u, incy);      //w <- q
+      cblas_dcopy(n, w, incx, u, incy);  // w <- q
       Buf = w;
 
-      for(i = 0 ; i < n ; ++i)
-      {
+      for (i = 0; i < n; ++i) {
         prev = Buf[i];
         Buf[i] = 0;
-        //zi = -( q[i] + cblas_ddot( n , &vec[i] , incx , z , incy ))*diag[i];
-        u[i] =  - (a[i] + cblas_ddot(n, &A[i], incAx, Buf, incAy)   + cblas_ddot(m, &C[i], incAx, v, incBy)) * diagA[i];
+        // zi = -( q[i] + cblas_ddot( n , &vec[i] , incx , z , incy ))*diag[i];
+        u[i] = -(a[i] + cblas_ddot(n, &A[i], incAx, Buf, incAy) +
+                 cblas_ddot(m, &C[i], incAx, v, incBy)) *
+               diagA[i];
         Buf[i] = prev;
       }
-      for(i = 0 ; i < m ; ++i)
-      {
+      for (i = 0; i < m; ++i) {
         v[i] = 0.0;
-        //zi = -( q[i] + cblas_ddot( n , &vec[i] , incx , z , incy ))*diag[i];
-        vi = -(b[i] + cblas_ddot(n, &D[i], incBx, u, incAy)   + cblas_ddot(m, &B[i], incBx, v, incBy)) * diagB[i];
+        // zi = -( q[i] + cblas_ddot( n , &vec[i] , incx , z , incy ))*diag[i];
+        vi = -(b[i] + cblas_ddot(n, &D[i], incBx, u, incAy) +
+               cblas_ddot(m, &B[i], incBx, v, incBy)) *
+             diagB[i];
 
-        if(vi < 0) v[i] = 0.0;
-        else v[i] = vi;
+        if (vi < 0)
+          v[i] = 0.0;
+        else
+          v[i] = vi;
       }
-    }
-    else
-    {
-
-      for(i = 0 ; i < n ; ++i)
-      {
+    } else {
+      for (i = 0; i < n; ++i) {
         u[i] = 0.0;
 
-        //zi = -( q[i] + cblas_ddot( n , &vec[i] , incx , z , incy ))*diag[i];
-        u[i] =  - (a[i] + cblas_ddot(n, &A[i], incAx, u, incAy)   + cblas_ddot(m, &C[i], incAx, v, incBy)) * diagA[i];
+        // zi = -( q[i] + cblas_ddot( n , &vec[i] , incx , z , incy ))*diag[i];
+        u[i] = -(a[i] + cblas_ddot(n, &A[i], incAx, u, incAy) +
+                 cblas_ddot(m, &C[i], incAx, v, incBy)) *
+               diagA[i];
       }
 
-      for(i = 0 ; i < m ; ++i)
-      {
+      for (i = 0; i < m; ++i) {
         v[i] = 0.0;
-        //zi = -( q[i] + cblas_ddot( n , &vec[i] , incx , z , incy ))*diag[i];
-        vi = -(b[i] + cblas_ddot(n, &D[i], incBx, u, incAy)   + cblas_ddot(m, &B[i], incBx, v, incBy)) * diagB[i];
+        // zi = -( q[i] + cblas_ddot( n , &vec[i] , incx , z , incy ))*diag[i];
+        vi = -(b[i] + cblas_ddot(n, &D[i], incBx, u, incAy) +
+               cblas_ddot(m, &B[i], incBx, v, incBy)) *
+             diagB[i];
 
-        if(vi < 0) v[i] = 0.0;
-        else v[i] = vi;
+        if (vi < 0)
+          v[i] = 0.0;
+        else
+          v[i] = vi;
       }
     }
 
     /* **** Criterium convergence compliant with filter_result_MLCP **** */
 
     mlcp_compute_error(problem_orig, z, w, tol, &err);
-    numerics_printf_verbose(1,"---- MLCP - PGS  - Iteration %i residual = %14.7e, tol = %14.7e", iter, err, tol);
-    if(verbose > 1)
-    {
-      for(i = 0 ; i < n ; ++i) printf(" %g", u[i]);
-      for(i = 0 ; i < m ; ++i) printf(" %g", v[i]);
-      for(i = 0 ; i < m ; ++i) printf(" %g", w[i]);
+    numerics_printf_verbose(
+        1, "---- MLCP - PGS  - Iteration %i residual = %14.7e, tol = %14.7e", iter, err, tol);
+    if (verbose > 1) {
+      for (i = 0; i < n; ++i) printf(" %g", u[i]);
+      for (i = 0; i < m; ++i) printf(" %g", v[i]);
+      for (i = 0; i < m; ++i) printf(" %g", w[i]);
       printf("\n");
     }
 
     /* **** ********************* **** */
-
   }
 
   options->iparam[SICONOS_IPARAM_ITER_DONE] = iter;
   options->dparam[SICONOS_DPARAM_RESIDU] = err;
 
-  if(err > tol)
-  {
-    numerics_printf_verbose(1,"---- MLCP - PGS  - No convergence of PGS after %d iterations with error = %14.7e ", iter, err);
+  if (err > tol) {
+    numerics_printf_verbose(
+        1, "---- MLCP - PGS  - No convergence of PGS after %d iterations with error = %14.7e ",
+        iter, err);
     *info = 1;
-  }
-  else
-  {
-    numerics_printf_verbose(1,"---- MLCP - PGS  - Convergence of PGS after %d iterations with error = %14.7e ", iter, err);
+  } else {
+    numerics_printf_verbose(
+        1, "---- MLCP - PGS  - Convergence of PGS after %d iterations with error = %14.7e ",
+        iter, err);
     *info = 0;
   }
 
   free(diagA);
   free(diagB);
 
-  if(!problem_orig->isStorageType2)
-  {
+  if (!problem_orig->isStorageType2) {
     mixedLinearComplementarity_free(problem);
   }
 
@@ -261,9 +247,8 @@ void mlcp_pgs(MixedLinearComplementarityProblem* problem_orig, double *z, double
   return;
 }
 
-void mlcp_pgs_set_default(SolverOptions* options)
-{
+void mlcp_pgs_set_default(SolverOptions* options) {
   options->filterOn = false;
-  options->iparam[SICONOS_IPARAM_MAX_ITER]  = 50000;
-  options->iparam[SICONOS_IPARAM_MLCP_PGS_EXPLICIT] = 0; //implicit
+  options->iparam[SICONOS_IPARAM_MAX_ITER] = 50000;
+  options->iparam[SICONOS_IPARAM_MLCP_PGS_EXPLICIT] = 0;  // implicit
 }

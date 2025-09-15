@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #include "mlcp_direct_simplex.h"
+
 #include "MLCP_Solvers.h"                       // for mixedLinearComplement...
 #include "MixedLinearComplementarityProblem.h"  // for MixedLinearComplement...
 #include "mlcp_direct.h"                        // for mlcp_direct_addConfig...
@@ -25,16 +26,14 @@
 static int sN;
 static int sM;
 
-void mlcp_direct_simplex_init(MixedLinearComplementarityProblem* problem, SolverOptions* options)
-{
+void mlcp_direct_simplex_init(MixedLinearComplementarityProblem* problem,
+                              SolverOptions* options) {
   sN = problem->n;
   sM = problem->m;
   mlcp_direct_init(problem, options);
   mlcp_simplex_init(problem, options);
-
 }
-void mlcp_direct_simplex_reset()
-{
+void mlcp_direct_simplex_reset() {
   mlcp_direct_reset();
   mlcp_simplex_reset();
 }
@@ -46,16 +45,14 @@ void mlcp_direct_simplex_reset()
  * double *w : size n+m
  * info : output. info == 0 if success
  */
-void mlcp_direct_simplex(MixedLinearComplementarityProblem* problem, double *z, double *w, int *info, SolverOptions* options)
-{
+void mlcp_direct_simplex(MixedLinearComplementarityProblem* problem, double* z, double* w,
+                         int* info, SolverOptions* options) {
   /*First, try direct solver*/
   mlcp_direct(problem, z, w, info, options);
-  if(*info)
-  {
+  if (*info) {
     /*solver direct failed, so run the simplex solver.*/
     mlcp_simplex(problem, z, w, info, options);
-    if(!(*info))
-    {
+    if (!(*info)) {
       /*       for (i=0;i<problem->n+problem->m;i++){ */
       /*  printf("w[%d]=%f z[%d]=%f\t",i,w[i],i,z[i]);  */
       /*       } */
@@ -63,5 +60,3 @@ void mlcp_direct_simplex(MixedLinearComplementarityProblem* problem, double *z, 
     }
   }
 }
-
-

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef SOCLCP_H
 #define SOCLCP_H
 
-#include <stdio.h>          // for FILE
+#include <stdio.h>  // for FILE
+
 #include "NumericsFwd.h"    // for SecondOrderConeLinearComplementarityProblem
-#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 /** The structure that defines a Second Order Cone Linear Complementarity Problem.
  */
-struct SecondOrderConeLinearComplementarityProblem
-{
+struct SecondOrderConeLinearComplementarityProblem {
   /** the problem dimension. must be equal to\f$ \sum_{i}^{n_c} d_i \f$   */
   int n;
 
@@ -44,7 +44,6 @@ struct SecondOrderConeLinearComplementarityProblem
   double* tau;
 };
 
-
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C"
 
@@ -54,7 +53,8 @@ extern "C"
  *
  *  \param problem the problem to display
  */
-void secondOrderConeLinearComplementarityProblem_display(SecondOrderConeLinearComplementarityProblem*  problem);
+void secondOrderConeLinearComplementarityProblem_display(
+    SecondOrderConeLinearComplementarityProblem* problem);
 
 /** print a SecondOrderConeLinearComplementarityProblem in a file (numerics .dat format)
  *
@@ -62,15 +62,18 @@ void secondOrderConeLinearComplementarityProblem_display(SecondOrderConeLinearCo
  *  \param file the dest file
  *  \return 0 if successfull
  */
-int secondOrderConeLinearComplementarityProblem_printInFile(SecondOrderConeLinearComplementarityProblem*  problem, FILE* file);
+int secondOrderConeLinearComplementarityProblem_printInFile(
+    SecondOrderConeLinearComplementarityProblem* problem, FILE* file);
 
-/** print a SecondOrderConeLinearComplementarityProblem in a file (numerics .dat format) from its filename
+/** print a SecondOrderConeLinearComplementarityProblem in a file (numerics .dat format) from
+ * its filename
  *
  *  \param problem the problem to print out
  *  \param filename the dest file
  *  \return 0 if successfull
  */
-int secondOrderConeLinearComplementarityProblem_printInFilename(SecondOrderConeLinearComplementarityProblem*  problem, char * filename);
+int secondOrderConeLinearComplementarityProblem_printInFilename(
+    SecondOrderConeLinearComplementarityProblem* problem, char* filename);
 
 /** read a SecondOrderConeLinearComplementarityProblem in a file (numerics .dat format)
  *
@@ -78,22 +81,25 @@ int secondOrderConeLinearComplementarityProblem_printInFilename(SecondOrderConeL
  *  \param file the target file
  *  \return 0 if successfull
  */
-int secondOrderConeLinearComplementarityProblem_newFromFile(SecondOrderConeLinearComplementarityProblem*  problem, FILE* file);
+int secondOrderConeLinearComplementarityProblem_newFromFile(
+    SecondOrderConeLinearComplementarityProblem* problem, FILE* file);
 
-/** read a SecondOrderConeLinearComplementarityProblem in a file (numerics .dat format) from its filename
+/** read a SecondOrderConeLinearComplementarityProblem in a file (numerics .dat format) from
+ * its filename
  *
  *  \param problem the problem to read
  *  \param filename the name of the target file
  *  \return 0 if successfull
  */
-int secondOrderConeLinearComplementarityProblem_newFromFilename(SecondOrderConeLinearComplementarityProblem*  problem, char * filename);
+int secondOrderConeLinearComplementarityProblem_newFromFilename(
+    SecondOrderConeLinearComplementarityProblem* problem, char* filename);
 
 /** free a SecondOrderConeLinearComplementarityProblem
  *
  *  \param problem the problem to free
  */
-void freeSecondOrderConeLinearComplementarityProblem(SecondOrderConeLinearComplementarityProblem* problem);
-
+void freeSecondOrderConeLinearComplementarityProblem(
+    SecondOrderConeLinearComplementarityProblem* problem);
 
 /** new SecondOrderConeLinearComplementarityProblem from minimal set of data
  *
@@ -105,11 +111,8 @@ void freeSecondOrderConeLinearComplementarityProblem(SecondOrderConeLinearComple
  *  \param[in] mu the mu vector
  *  \return a pointer to a SecondOrderConeLinearComplementarityProblem structure
  */
-SecondOrderConeLinearComplementarityProblem* secondOrderConeLinearComplementarityProblem_new
-(int n, int nc, NumericsMatrix* M, double* q,
- unsigned int *coneIndex, double* mu);
-
-
+SecondOrderConeLinearComplementarityProblem* secondOrderConeLinearComplementarityProblem_new(
+    int n, int nc, NumericsMatrix* M, double* q, unsigned int* coneIndex, double* mu);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

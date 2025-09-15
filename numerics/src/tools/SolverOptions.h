@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,11 @@
   Structure used to send options (name, parameters and so on) to a specific
   solver-driver (mainly from Kernel to Numerics).
 */
-#include "NumericsFwd.h"   // for SolverOptions
-#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include <stdbool.h>  // for boolean type
+#include <stdio.h>    // for size_t
 
-#include <stdbool.h> // for boolean type
-#include <stdio.h>   // for size_t
+#include "NumericsFwd.h"    // for SolverOptions
+#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 /**
     Structure used to store user callbacks inside solvers
@@ -36,9 +36,9 @@ typedef struct {
   void (*collectStatsIteration)(
       void *env, int size, double *reaction, double *velocity, double error,
       void *extra_data); /**<pointer on a function
-			    * Its signature is: user env, problem size, reaction,
-			    * velocity, error at end of solver iteration (when
-			    * this makes sense) and an extra data structure */
+                          * Its signature is: user env, problem size, reaction,
+                          * velocity, error at end of solver iteration (when
+                          * this makes sense) and an extra data structure */
 } Callback;
 
 // length of iparam/dparam arrays in solver options.
@@ -49,25 +49,25 @@ typedef struct {
   solver (mainly from Kernel to Numerics).
 
   Creation, update and destruction:
-  
+
   - solver_options_create()
-  
+
   - solver_options_update_internal()
-  
+
   - solver_options_delete()
 
-  
+
   Details in users'guide.
 
 */
 struct SolverOptions {
-  int solverId; /**< id number of the solver. */
-  bool isSet;   /**< true(1) if the structure is ready to be used by a numerics
-                   driver. */
-  int iSize;    /**< iSize size of vector iparam */
-  int *iparam;  /**< list of solver parameters (integer type); Check solvers doc
-                   for details. */
-  int dSize;    /**< size of vector dparam */
+  int solverId;     /**< id number of the solver. */
+  bool isSet;       /**< true(1) if the structure is ready to be used by a numerics
+                       driver. */
+  int iSize;        /**< iSize size of vector iparam */
+  int *iparam;      /**< list of solver parameters (integer type); Check solvers doc
+                       for details. */
+  int dSize;        /**< size of vector dparam */
   double *dparam;   /**< list of solver parameters (double type); Check solvers
                        doc for details. */
   bool filterOn;    /**< if true (1), check solution validity after the driver
@@ -82,10 +82,10 @@ struct SolverOptions {
                                              'sub-solvers' used by the solver         (size of
                                              internalSolvers) .*/
   struct SolverOptions **internalSolvers; /**< list of internal solver options*/
-  Callback *callback;     /**< pointer to user-defined callback*/
-  void *solverParameters; /**< additional parameters specific to the solver
-                             (GAMS and NewtonMethod only) */
-  void *solverData;       /**< additional data specific to the solver */
+  Callback *callback;                     /**< pointer to user-defined callback*/
+  void *solverParameters;                 /**< additional parameters specific to the solver
+                                             (GAMS and NewtonMethod only) */
+  void *solverData;                       /**< additional data specific to the solver */
 };
 
 /** Some value for iparam index */
@@ -94,8 +94,7 @@ enum SICONOS_IPARAM {
   SICONOS_IPARAM_ITER_DONE = 1,
   SICONOS_IPARAM_PREALLOC = 2,
   SICONOS_IPARAM_NSGS_SHUFFLE = 5,
-  SICONOS_IPARAM_ERROR_EVALUATION =
-      3, // CHECK IF THERE ARE NO CONFLICT WITH THIS !!
+  SICONOS_IPARAM_ERROR_EVALUATION = 3,  // CHECK IF THERE ARE NO CONFLICT WITH THIS !!
   SICONOS_IPARAM_PATHSEARCH_STACKSIZE = 19
 };
 
@@ -170,8 +169,7 @@ SolverOptions *solver_options_copy(SolverOptions *source);
    \param solver_id id number of the new internal solver to be
    created/updated
 */
-void solver_options_update_internal(SolverOptions *parent,
-                                    size_t internal_solver_number,
+void solver_options_update_internal(SolverOptions *parent, size_t internal_solver_number,
                                     int solver_id);
 
 /** return the id of a solver based on its name
@@ -195,8 +193,7 @@ const char *solver_options_id_to_name(int Id);
     \param number of the targeted solver
     \return a pointer to the internal solver options set
 */
-SolverOptions *solver_options_get_internal_solver(SolverOptions *options,
-                                                  size_t n);
+SolverOptions *solver_options_get_internal_solver(SolverOptions *options, size_t n);
 
 /**
    set internal solver
@@ -205,8 +202,7 @@ SolverOptions *solver_options_get_internal_solver(SolverOptions *options,
    \param number of the targeted solver
    \param the solver options to be used as internal solver number n
 */
-void solver_options_set_internal_solver(SolverOptions *options, size_t n,
-                                        SolverOptions *NSO);
+void solver_options_set_internal_solver(SolverOptions *options, size_t n, SolverOptions *NSO);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

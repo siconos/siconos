@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,12 +103,12 @@ bool write(const std::string& fileName,
     if(outputType != "noDim")
       outfile << m.size() << std::endl;
 
-    if(m.num() == Siconos::DENSE)
+    if(m.num() == siconos::DENSE)
     {
       DenseVect*  p = m.dense();
       std::copy(p->begin(), p->end(), std::ostream_iterator<double>(outfile, " "));
     }
-    else if(m.num() == Siconos::SPARSE)
+    else if(m.num() == siconos::SPARSE)
     {
       SparseVect* p = m.sparse();
       std::copy(p->begin(), p->end(), std::ostream_iterator<double>(outfile, " "));

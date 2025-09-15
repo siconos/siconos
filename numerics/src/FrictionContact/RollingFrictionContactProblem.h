@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,12 @@
   Definition of a structure to handle friction-contact (2D or 3D) problems.
 */
 
-#include "NumericsFwd.h"   // for RollingFrictionContactProblem, NumericsMatrix
-#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include <stdio.h>  // for FILE
 
-#include <stdio.h> // for FILE
+#include "NumericsFwd.h"    // for RollingFrictionContactProblem, NumericsMatrix
+#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
-/** 
+/**
     The structure that defines a (reduced or dual) Friction-Contact (3D or 2D)
     problem.
 */
@@ -88,8 +88,7 @@ void rollingFrictionContact_display(RollingFrictionContactProblem *problem);
  *  \param file the dest file
  *  \return 0 if successfull
  */
-int rollingFrictionContact_printInFile(RollingFrictionContactProblem *problem,
-                                       FILE *file);
+int rollingFrictionContact_printInFile(RollingFrictionContactProblem *problem, FILE *file);
 
 /** print a RollingFrictionContactProblem in a file (numerics .dat format) from
  *  its filename
@@ -98,8 +97,8 @@ int rollingFrictionContact_printInFile(RollingFrictionContactProblem *problem,
  *  \param filename the dest file
  *  \return 0 if successfull
  */
-int rollingFrictionContact_printInFilename(
-    RollingFrictionContactProblem *problem, char *filename);
+int rollingFrictionContact_printInFilename(RollingFrictionContactProblem *problem,
+                                           char *filename);
 
 /** read a RollingFrictionContactProblem from a file descriptor
  *
@@ -114,12 +113,11 @@ RollingFrictionContactProblem *rollingFrictionContact_newFromFile(FILE *file);
  *  \param filename the name of the input file
  *  \return problem the problem to read
  */
-RollingFrictionContactProblem *
-rollingFrictionContact_new_from_filename(const char *filename);
+RollingFrictionContactProblem *rollingFrictionContact_new_from_filename(const char *filename);
 
-void rollingFrictionContactProblem_compute_statistics(
-    RollingFrictionContactProblem *problem, double *reaction, double *velocity,
-    double tol, int do_print);
+void rollingFrictionContactProblem_compute_statistics(RollingFrictionContactProblem *problem,
+                                                      double *reaction, double *velocity,
+                                                      double tol, int do_print);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

@@ -18,7 +18,7 @@ option(WITH_DOCUMENTATION "Build Documentation" ON)
 
 # --- List of external libraries/dependencies to be searched (or not) ---
 option(WITH_BULLET "compilation with Bullet Bindings. Default = OFF" ON)
-option(WITH_OCE "compilation with OpenCascade Bindings. Default = OFF" OFF)
+option(WITH_OpenCASCADE "compilation with OpenCascade Bindings. Default = OFF" OFF)
 option(WITH_MUMPS "Compilation with the MUMPS solver. Default = OFF" OFF)
 option(WITH_UMFPACK "Compilation with the UMFPACK solver. Default = OFF" OFF)
 option(WITH_SUPERLU "Compilation with the SuperLU solver. Default = OFF" OFF)

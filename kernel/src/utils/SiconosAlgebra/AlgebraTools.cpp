@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@
 #include <boost/numeric/ublas/io.hpp>
 #include "expm.hpp"
 
-namespace Siconos
+namespace siconos
 {
 namespace algebra
 {
@@ -36,7 +36,7 @@ void expm(SiconosMatrix& A, SiconosMatrix& Exp, bool computeAndAdd)
   // Do not work with sparse.
   A.resetFactorizationFlags();
   Exp.resetFactorizationFlags();
-  assert(Exp.num() == Siconos::DENSE || A.num() == Siconos::DENSE);
+  assert(Exp.num() == siconos::DENSE || A.num() == siconos::DENSE);
   if(computeAndAdd)
     *Exp.dense() += expm_pad(*A.dense());
   else
@@ -44,4 +44,4 @@ void expm(SiconosMatrix& A, SiconosMatrix& Exp, bool computeAndAdd)
 }
 } // namespace tools
 } // namespace algebra
-} // namespace Siconos
+} // namespace siconos

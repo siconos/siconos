@@ -1,4 +1,4 @@
-# Copyright 2022 INRIA
+# Copyright 2024 INRIA
 
 import numpy as np
 
@@ -177,7 +177,7 @@ def test_vi_C_interface():
         vi = sn.VI(2)
         import siconos
 
-        D = ffi.dlopen(siconos.__path__[0] + "/_pynumerics.so")
+        D = ffi.dlopen(siconos.__path__[0] + "/_sicpynumerics.so")
         D.set_cstruct(vi.get_env_as_long(), ffi.cast("void*", data_struct))
         vi.set_compute_F_and_nabla_F_as_C_functions(
             "ZhuravlevIvanov.so", "compute_F", "compute_nabla_F"

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,38 +14,34 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #include "NM_MPI.h"
+
 #include <assert.h>
 #ifdef SICONOS_HAS_MPI
 #include "NumericsMatrix.h"
 #include "numerics_verbose.h"
-MPI_Comm NM_MPI_comm(NumericsMatrix* A)
-{
+MPI_Comm NM_MPI_comm(NumericsMatrix* A) {
   assert(A);
-
-  if(NM_internalData(A)->mpi_comm == MPI_COMM_NULL)
-  {
-
-    if(verbose>1)
-      numerics_warning("NM_MPI_comm", "warning, MPI communicator has not been initialized, MPI_COMM_WORLD will be used." );   
-
+  if (NM_internalData(A)->mpi_comm == MPI_COMM_NULL) {
+    if (verbose) {
+      fprintf(stderr,
+              "siconos/numerics: warning, MPI communicator has not been initialized,\n");
+      fprintf(stderr, "siconos/numerics: MPI_COMM_WORLD will be used.\n");
+    }
     NM_internalData(A)->mpi_comm = MPI_COMM_WORLD;
   }
   return NM_internalData(A)->mpi_comm = MPI_COMM_WORLD;
 }
 
-void NM_MPI_set_comm(NumericsMatrix* A, MPI_Comm comm)
-{
+void NM_MPI_set_comm(NumericsMatrix* A, MPI_Comm comm) {
   assert(A);
   NM_internalData(A)->mpi_comm = comm;
 }
 
-
 #endif /* WITH_MPI */
 
-int NM_MPI_rank(NumericsMatrix* A)
-{
+int NM_MPI_rank(NumericsMatrix* A) {
   assert(A);
   int myid;
 #ifdef SICONOS_HAS_MPI
@@ -56,13 +52,11 @@ int NM_MPI_rank(NumericsMatrix* A)
   return myid;
 }
 
-void NM_MPI_copy(const NumericsMatrix* A, NumericsMatrix* B)
-{
+void NM_MPI_copy(const NumericsMatrix* A, NumericsMatrix* B) {
   assert(A);
   assert(B);
 #ifdef SICONOS_HAS_MPI
-  if(A->internalData && A->internalData->mpi_comm)
-  {
+  if (A->internalData && A->internalData->mpi_comm) {
     NM_MPI_set_comm(B, A->internalData->mpi_comm);
   }
 #endif

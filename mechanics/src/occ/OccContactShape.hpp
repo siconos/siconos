@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,73 +14,65 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 /** \file OccContactShape.hpp
     \brief OpenCascade contact shape
  */
 #ifndef OccContactShape_hpp
 #define OccContactShape_hpp
-
-#include "MechanicsFwd.hpp"
-
-#include "SiconosFwd.hpp"
-#include "SiconosVisitor.hpp"
 #include <string>
 
-struct OccContactShape
-{
+#include "MechanicsFwd.hpp"
+#include "SiconosFwd.hpp"
+#include "SiconosVisitor.hpp"
 
+struct OccContactShape {
   /** Default constructor.
    */
   OccContactShape();
 
+  /** Copy constructor */
+  OccContactShape(const OccContactShape& shape) = default;
+
+  // Rule of five
+  OccContactShape(OccContactShape&& shape) = default;
+  OccContactShape& operator=(OccContactShape&&) = delete;
+  OccContactShape& operator=(const OccContactShape&) = delete;
+
   /** Constructor from OpenCascade object.
    *
-   *  \param shape
+   *  \param shape a TopoDS_Shape
    */
-  OccContactShape(TopoDS_Shape& shape)
-    : _shape(createSPtrTopoDS_Shape(shape))
-  {};
+  OccContactShape(TopoDS_Shape& shape) : _shape(createSPtrTopoDS_Shape(shape)){};
 
   /** Constructor from const OpenCascade object : remove constness.
    *
-   *  \param shape
+   *  \param shape a const TopoDS_Shape
    */
   OccContactShape(const TopoDS_Shape& shape)
-    : _shape(createSPtrTopoDS_Shape(const_cast<TopoDS_Shape&>(shape)))
-  {};
+      : _shape(createSPtrTopoDS_Shape(const_cast<TopoDS_Shape&>(shape))){};
 
-  /** Constructor from OccContactShape
-   *
-   *  \param shape : an OccContactShape
-   */
-  OccContactShape(const OccContactShape& shape)
-    : _shape(shape.shape()) {};
+  /** Destructor */
+  virtual ~OccContactShape() = default;
 
-  /** Destructor.
+  /** Return shared pointer to OpenCascade data
    */
-  virtual ~OccContactShape() {};
-
-  /** Return shared pointer on OpenCascade data
-   */
-  SP::TopoDS_Shape shape() const { return this->_shape;};
+  SP::TopoDS_Shape shape() const { return this->_shape; };
 
   /** Return reference on OpenCascade data.
    */
-  TopoDS_Shape& data() const { return *this->_shape;};
+  TopoDS_Shape& data() const { return *this->_shape; };
 
   /** Set OpenCascade data from a shared pointer.
    */
-  void setShape(SP::TopoDS_Shape shape)
-  {
+  void setShape(SP::TopoDS_Shape shape) {
     this->_shape = shape;
     this->computeUVBounds();
   }
 
   /** Set OpenCascade data.
    */
-  void setData(TopoDS_Shape& data)
-  {
+  void setData(TopoDS_Shape& data) {
     this->_shape = createSPtrTopoDS_Shape(data);
     this->computeUVBounds();
   }
@@ -95,14 +87,14 @@ struct OccContactShape
 
   /**
      Get a face from its index.
-     
+
      \param index : the index of the face.
   */
   SPC::TopoDS_Face face(unsigned int index) const;
 
   /**
      Get an edge from its index.
-     
+
      \param index : the index of the face.
   */
   SPC::TopoDS_Edge edge(unsigned int index) const;
@@ -112,7 +104,7 @@ struct OccContactShape
   std::string exportBRepToString() const;
 
   /** Import the contact shape from a string.
-   * 
+   *
    *  \param brepstr : the string containing the whole brep.
    */
   void importBRepFromString(const std::string& brepstr);
@@ -121,15 +113,14 @@ struct OccContactShape
    */
   virtual void computeUVBounds();
 
-
   /** Set id.
-   * 
+   *
    * \param id the new id
    */
   void setId(unsigned int id) { this->_id = id; }
 
   /** Get id.
-   * 
+   *
    *  \return an unsigned int
    */
   unsigned int id() { return this->_id; }
@@ -153,7 +144,6 @@ struct OccContactShape
   unsigned int _id;
 
   VIRTUAL_ACCEPT_VISITORS(OccContactShape);
-
 };
 
 #endif

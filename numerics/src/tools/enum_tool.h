@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,26 +18,20 @@
 #ifndef ENUM_TOOL_H
 #define ENUM_TOOL_H
 
-
-typedef struct EnumerationStruct
-{
+typedef struct EnumerationStruct {
   unsigned long long int current;
   unsigned long long int counter;
   unsigned long long int nb_cases;
-  double progress ;
+  double progress;
 } EnumerationStruct;
 
-
-EnumerationStruct * enum_init(int M);
-int enum_next(int * zw, int size, EnumerationStruct * enum_struct);
-
-
+EnumerationStruct* enum_init(int M);
+int enum_next(int* zw, int size, EnumerationStruct* enum_struct);
 
 /** Compute the total number of cases that should be enumerated
  * \param M the size of the MCLP problem.
  */
 unsigned long long int enum_compute_nb_cases(int M);
-
 
 /* /\** Initialize the enumeration process. */
 /*  * \param M the size of the MCLP problem. */

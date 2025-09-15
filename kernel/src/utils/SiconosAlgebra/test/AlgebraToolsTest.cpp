@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@
 
 CPPUNIT_TEST_SUITE_REGISTRATION(AlgebraToolsTest);
 
-//using namespace Siconos::algebra;
+//using namespace siconos::algebra;
 
 
 void AlgebraToolsTest::setUp()
@@ -46,7 +46,7 @@ void AlgebraToolsTest::testExpm()
   SP::SimpleMatrix ref(new SimpleMatrix(fic2, true));
   SP::SimpleMatrix Exp(new SimpleMatrix(3,3));
 
-  Siconos::algebra::tools::expm(*A, *Exp);
+  siconos::algebra::tools::expm(*A, *Exp);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testExpm : ", (*ref - *Exp).normInf() < 1e-6, true);
   std::cout << "--> Expm test ended with success." <<std::endl;
 }

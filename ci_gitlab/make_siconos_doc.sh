@@ -21,6 +21,7 @@
 : ${CI_PROJECT_DIR:?"Please set environment variable CI_PROJECT_DIR with the path to 'siconos' repository (absolute) path."}
 
 cmake -S $CI_PROJECT_DIR -B $CI_PROJECT_DIR/build -DUSER_OPTIONS_FILE=$CI_PROJECT_DIR/config_samples/siconos_docs.cmake -DWITH_GIT=ON 
-cmake --build $CI_PROJECT_DIR/build  -j 4
+cmake --build $CI_PROJECT_DIR/build  -j 8
+cmake --install $CI_PROJECT_DIR/build  -j 8
 cd $CI_PROJECT_DIR/build
-make doc -j 4
+make doc -j 8

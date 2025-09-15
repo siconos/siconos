@@ -1,16 +1,16 @@
-FROM debian:bookworm
-RUN apt update  && apt install -y -qq \
+FROM debian:bookworm AS siconos-base
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt update  && apt install  --no-install-recommends -y -qq \
         git-core \
 	cmake \
 	make \
-        libboost-dev \
-        libboost-serialization-dev \
-        libboost-filesystem-dev \
-        libboost-timer-dev \
-        libboost-chrono-dev \
+        #libboost-dev \
+        #libboost-serialization-dev \
+        #libboost-filesystem-dev \
+        #libboost-timer-dev \
+        #libboost-chrono-dev \
         libgmp-dev \
         libhdf5-mpi-dev \
-        swig \
         gcc \
         gfortran \
         g++ \
@@ -30,12 +30,22 @@ RUN apt update  && apt install -y -qq \
 	libxrender1 \
 	libbullet-dev \
 	libbullet-extras-dev \
+	libeigen3-dev \
+	libeigen3-doc \
+	wget \
+        bzip2 \
         vim && apt clean && apt autoremove && rm -rf /var/lib/apt/lists/*
-COPY ci_gitlab/dockerfiles/requirements.txt /home
-ENV VIRTUAL_ENV=/home/siconosenv
+RUN useradd -ms /bin/bash siconos-user
+RUN wget https://archives.boost.io/release/1.81.0/source/boost_1_81_0.tar.bz2 && \
+    tar -jxvf boost_1_81_0.tar.bz2 && \
+    cd boost_1_81_0 && ./bootstrap.sh && ./b2 install
+
+FROM siconos-base AS siconos-base-python
+USER siconos-user
+WORKDIR /home/siconos-user
+COPY ci_gitlab/dockerfiles/requirements.txt .
+ENV VIRTUAL_ENV=/home/siconos-user/siconosenv
 RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
-RUN pip install -U -r /home/requirements.txt
-WORKDIR /home
-ENV CI_PROJECT_DIR /home
+RUN pip install --no-cache-dir -U -r requirements.txt
 

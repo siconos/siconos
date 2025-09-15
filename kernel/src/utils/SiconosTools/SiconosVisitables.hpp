@@ -19,6 +19,7 @@
   REGISTER(MultipleImpactNSL)                          \
   REGISTER(NewtonImpactFrictionNSL)                    \
   REGISTER(NewtonImpactRollingFrictionNSL)             \
+  REGISTER(FremondImpactFrictionNSL)		       \
   REGISTER(Simulation)                                 \
   REGISTER(TimeStepping)                               \
   REGISTER(TimeSteppingD1Minus)                        \

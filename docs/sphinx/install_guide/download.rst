@@ -9,31 +9,24 @@ Download Siconos
 
 
 
-Packages
---------
-
-Debian packages :
-
-* Siconos 4.2.0 https://packages.debian.org/sid/siconos  sid(unstable)
-
-
-
 Latest source release
 ---------------------
 
 Latest source release is downloadable in zip or tar.gz format from here:
 
+https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos/-/releases
+or
 https://github.com/siconos/siconos/releases/latest
 
 
 Development sources
 -------------------
 
-Siconos project is hosted on github : https://github.com/siconos/siconos
+Siconos project is hosted on https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos.git
 
 and the development source code can be freely downloaded. Try for example::
 
-  git clone https://github.com/siconos/siconos.git
+  git clone https://gricad-gitlab.univ-grenoble-alpes.fr/nonsmooth/siconos.git
 
 As user, you will probably only need to clone the repository (as shown above) once and then just update your local copy to
 include the last revision::
@@ -41,7 +34,8 @@ include the last revision::
   cd /path/to/siconos
   git pull
 
-As developer, you will need to learn more about git. Check for example https://git-scm.com/book/en/v1/Getting-Started-About-Version-Control.
+As developer, an access to the private (devel) part of Siconos is necessary. Contact us if required.
+You will also need to learn more about git. Check for example https://git-scm.com/book/en/v1/Getting-Started-About-Version-Control.
 
 Below, you can find a short git refresher:
 
@@ -76,4 +70,26 @@ Below, you can find a short git refresher:
 * propagate your changes to the main repository::
 
     git push
+
+Packages
+--------
+
+Guix
+""""
+
+https://guix.gnu.org/
+
+Siconos is available as a guix package. Please contact us for details regarding the required channels and how to install Siconos with the guix command.
+
+
+Debian
+""""""
+
+.. warning::
+   Siconos version in Debian packages is outdated
+   
+
+* Siconos 4.2.0 https://packages.debian.org/sid/siconos  sid(unstable)
+
+
 

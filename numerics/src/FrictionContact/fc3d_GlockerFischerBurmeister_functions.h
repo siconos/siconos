@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 #ifndef FRICTIONCONTACT3D_GlockerFischerBurmeister_functions_H
 #define FRICTIONCONTACT3D_GlockerFischerBurmeister_functions_H
 
@@ -22,19 +22,17 @@
 
   \brief Typedef and functions declarations related GlockerFischerBurmeister
  */
-#include "SiconosConfig.h" // for BUILD_AS_CPP // IWYU pragma: keep
+#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
-extern "C"
-{
+extern "C" {
 #endif
 typedef void (*UpdateSolverPtr)(int, double*);
 
+void F_GlockerFischerBurmeister(int sizeF, double* reaction, double* FVector, int up2Date);
 
-  void F_GlockerFischerBurmeister(int sizeF, double* reaction, double* FVector, int up2Date);
-
-
-  void jacobianF_GlockerFischerBurmeister(int sizeF, double* reaction, double* jacobianFMatrix, int up2Date);
+void jacobianF_GlockerFischerBurmeister(int sizeF, double* reaction, double* jacobianFMatrix,
+                                        int up2Date);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@
 #include <iostream>
 
 
-double Event::_tick = DEFAULT_TICK;
+double Event::_tick = siconos::internal::DEFAULT_TICK;
 bool Event::_eventCreated = false;
 
 Event::Event(double time, int newType, bool reschedule):

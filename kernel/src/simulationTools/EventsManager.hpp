@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,6 @@
 #include <limits>
 #include "SiconosFwd.hpp"
 #include "TimeDiscretisation.hpp"
-
-const unsigned long int GAPLIMIT_DEFAULT = 100;
 
 /** set of events, with an ordering based on Event time value (mpz_t) to compare Events */
 typedef std::vector<SP::Event> EventsContainer; // Event are already sorted

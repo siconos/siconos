@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2021 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,30 +16,32 @@
  * limitations under the License.
  */
 
-#include "CSparseMatrix_internal.h"
-#include "grfc3d_Solvers.h"             // for GRFCProb, SolverOpt, Friction_cst, grfc3d_...
-#include "grfc3d_compute_error.h"       // for grfc3d_compute_error
-#include "SiconosLapack.h"
 
-#include "SparseBlockMatrix.h"
+#include "grfc3d_compute_error.h"       // for grfc3d_compute_error
+#include "GlobalRollingFrictionContactProblem.h"
+#include "grfc3d_Solvers.h"
+#include "SolverOptions.h"
+#include "Friction_cst.h"
 #include <stdio.h>
 #include <assert.h>
 #include <math.h>
 #include <float.h>
 
 #include "numerics_verbose.h"
-#include "NumericsVector.h"
+
 #include "float.h"
 #include "JordanAlgebra.h"              // for JA functions
 
 #include "NumericsSparseMatrix.h"
 #include "NumericsMatrix.h"
+#include "NumericsVector.h"
+#include "SiconosBlas.h"
 
 #include <time.h>                       // for clock()
-// #include "gfc3d_ipm.h"                  // for primalResidual, dualResidual, ...
+#include "gfc3d_ipm.h"                  // for primalResidual, dualResidual, ...
 #include "grfc3d_ipm.h"                 // for dnrm2sqrl
 #include "cs.h"
-#include "projectionOnRollingCone.h"    // for projectionOnRollingCone
+
 #include <complex.h>
 
 /* #define DEBUG_MESSAGES */
@@ -72,21 +74,8 @@ typedef struct
 }
   IPM_grfc3d_point;
 
-typedef struct
-{
-  NumericsMatrix* mat;
-  NumericsMatrix* inv_mat;
-}
-  IPM_change_of_variable;
 
-typedef struct
-{
-  double alpha_primal; // primal step length
-  double alpha_dual;   // dual step length
-  double sigma;        // centering parameter
-  double barr_param;   // barrier parameter
-}
-  IPM_internal_params;
+
 
 typedef struct
 {
@@ -114,6 +103,84 @@ typedef struct
 
 
 
+
+// Note FP: these functions (getStepLength ...) are also defined in gfc3d_ipm with the same
+// names. They are almost the same. These might lead to quite a mess ... To be reviewed by
+// whoever is concerned with the ipm implementation.
+/* Returns the maximum step-length to the boundary reduced by a factor gamma. Uses long double.
+ */
+static double grfc3d_getStepLength(const double *const x, const double *const dx,
+                            const unsigned int vecSize, const unsigned int varsCount,
+                            const double gamma) {
+  int dimension = (int)(vecSize / varsCount);
+  unsigned int pos;
+  float_type aL, bL, cL, dL, alphaL, nxb;
+  double min_alpha;
+
+  min_alpha = 1e20;  // 1.0;
+
+  for (unsigned int i = 0; i < varsCount; ++i) {
+    pos = i * dimension;
+    aL = dnrm2l(dimension - 1, dx + pos + 1);
+    aL = (dx[pos] - aL) * (dx[pos] + aL);
+    bL = x[pos] * dx[pos];
+    for (int k = 1; k < dimension; bL -= x[pos + k] * dx[pos + k], k++);
+    nxb = dnrm2l(dimension - 1, x + pos + 1);
+    // cL = (x[pos] - nxb)*(x[pos] + nxb);
+    cL = x[pos] - nxb;
+    if (cL <= 0.)
+      cL = DBL_EPSILON * (x[pos] + nxb);
+    else
+      cL = (x[pos] - nxb) *
+           (x[pos] + nxb);  // to avoid negative number b/c of different data types
+    dL = bL * bL - aL * cL;
+    if (aL < 0 || (bL < 0 && dL > 0))
+      if (bL > 0)
+        alphaL = -(bL + sqrtl(dL)) / aL;
+      else
+        alphaL = cL / (-bL + sqrtl(dL));
+    else if ((fabsl(aL) == 0.0) && (bL < 0))
+      alphaL = -cL / bL / 2;
+    else
+      alphaL = DBL_MAX;
+    min_alpha = ((alphaL < min_alpha) ? alphaL : min_alpha);
+  }
+  min_alpha = gamma * min_alpha;
+  min_alpha = ((min_alpha < 1.0) ? min_alpha : 1.0);
+  return min_alpha;
+}
+
+/* Rel gap = gapVal / (1 + abs(primal value) + abs(dual value)) */
+static double grfc3d_relGap(NumericsMatrix *M, const double *f, const double *w,
+                     const double *globalVelocity, const double *reaction,
+                     const unsigned int nd, const unsigned int m, const double gapVal) {
+  double *Mv = (double *)calloc(m, sizeof(double));
+  double vMv, pval, dval;
+
+  NM_gemv(0.5, M, globalVelocity, 0.0, Mv);
+  vMv = cblas_ddot(m, globalVelocity, 1, Mv, 1);
+  free(Mv);
+  pval = vMv - cblas_ddot(m, f, 1, globalVelocity, 1);
+  dval = -vMv - cblas_ddot(nd, w, 1, reaction, 1);
+  return gapVal / (1 + fabs(pval) + fabs(dval));
+}
+
+/* Returns the 2-norm of the complementarity residual vector = 2-norm of the Jordan product
+ * velocity o reaction  */
+static double grfc3d_complemResidualNorm(const double *const velocity, const double *const reaction,
+                                  const unsigned int vecSize, const unsigned int varsCount) {
+  double *resid = (double *)calloc(vecSize, sizeof(double));
+  JA_prod(velocity, reaction, vecSize, varsCount, resid);
+  double norm2 = cblas_dnrm2(vecSize, resid, 1);
+  free(resid);
+  return norm2;
+}
+
+NumericsMatrix *compute_JQinv2Jt(const double *u1, const double *r1, const double *u2,
+                                 const double *r2, const size_t vecSize,
+                                 const size_t varsCount);
+
+CS_INT cs_dupl_zeros(cs *A);
 
 /* ------------------------- Helper functions ------------------------------ */
 /** Return a speacial sub-vector such that
@@ -743,6 +810,7 @@ static void PinvTy(const double *u1, const double *r1, const double *u2, const d
 
 
 
+
 /* Return the matrix P^-1*H where P is the matrix satisfying Jac = P*P'. Using the formula Qp. */
 static  NumericsMatrix *  multiply_PinvH(const double *u1, const double *r1, const double *u2, const double *r2, const size_t vecSize, const size_t varsCount, NumericsMatrix *H)
 {
@@ -784,8 +852,7 @@ static  NumericsMatrix *  multiply_PinvH(const double *u1, const double *r1, con
   CS_ENTRY *Hx, *outx ;
   Hx = H_csc->x ;
 
-  CS_INT nz = 0;
-
+  CS_INT nz = 0; 
 
   bool multiplied = 0;
   for (CS_INT k = 0 ; k < H->size1 ; k++) // traverse all cols of H
@@ -917,15 +984,18 @@ static  NumericsMatrix *  multiply_PinvH(const double *u1, const double *r1, con
   outp[H->size1] = nz ;
   cs_sprealloc (out_csc, 0) ;
 
-  out->storageType = H->storageType;
-  numericsSparseMatrix(out)->csc = out_csc;
-  out->size0 = (int)out->matrix2->csc->m;
-  out->size1 = (int)out->matrix2->csc->n;
-  numericsSparseMatrix(out)->origin = NSM_CSC;
+
+/*   out->storageType = H->storageType; */
+/*   numericsSparseMatrix(out)->csc = out_csc; */
+/*   out->size0 = (int)out->matrix2->csc->m; */
+/*   out->size1 = (int)out->matrix2->csc->n; */
+/*   numericsSparseMatrix(out)->origin = NSM_CSC; */
+
 
   free(x); free(z); free(othor1); free(othor2);
   return out;
 }
+
 
 
 
@@ -972,6 +1042,7 @@ CS_INT cs_dupl_zeros (cs *A)
 
 
 /* L = chol (A, [pinv parent cp]), pinv is optional */
+
 static csn *cs_chol_2 (const cs *A, const css *S, size_t iteration)
 {
     // CS_ENTRY d, lki, *Lx, *x, *Cx ;
@@ -1226,6 +1297,7 @@ static  NumericsMatrix *  multiply_LinvH(const double *u1, const double *r1, con
 static  NumericsMatrix *  multiply_UinvH(CSparseMatrix *chol_U, NumericsMatrix *H)
 {
   NumericsMatrix * UinvH = NM_new();
+
   NM_types storage = H->storageType;
 
   switch(storage)
@@ -1238,8 +1310,10 @@ static  NumericsMatrix *  multiply_UinvH(CSparseMatrix *chol_U, NumericsMatrix *
     CSparseMatrix *B = NM_csc(H);
     CS_INT n = chol_U->n;
 
+
     // X = U\B
     CSparseMatrix* X  = cs_spalloc (B->m, B->n, B->nzmax , 1, 0) ;        /* allocate result */
+
 
     CS_ENTRY *x, *b, *Xx, *Bx ;
     CS_INT *xi, *pinv, top, k, i, p, *Bp, *Bi, *Xp, *Xi;
@@ -1303,19 +1377,10 @@ static  NumericsMatrix *  multiply_UinvH(CSparseMatrix *chol_U, NumericsMatrix *
   return UinvH;
 }
 
-
-
-
-
-
-
-
-
-
-
 static NumericsMatrix * compute_factor_U(const double *u1, const double *r1, const double *u2, const double *r2, const size_t vecSize, const size_t varsCount)
 {
   size_t d3 = (size_t)(vecSize / varsCount); // d3 = 3
+
   assert(d3 == 3);
   size_t d5 = d3+2;  // d5 = 5
 
@@ -1586,11 +1651,6 @@ static void printInteresProbPythonFile(int iteration, double *v, double *u, doub
   return;
 }
 
-
-
-
-
-
 static void printVectorMatlabFile(int iteration, double * vec, int vecSize, FILE * file)
 {
   fprintf(file,"vector(%4i,:) = [",iteration+1);
@@ -1689,7 +1749,6 @@ static void compute_errors(NumericsMatrix * M, NumericsMatrix * H, const double 
   /* --- Full error = Relative dual residual + Relative primal residual + Projection error --- */
   *full_error = *dinfeas + *pinfeas + *proj_error;
 }
-
 
 
 static void print_NAN_in_matrix(const NumericsMatrix* const m)
@@ -1810,7 +1869,10 @@ static void is_in_int_of_Lcone(const double * const x, const size_t vecSize, con
       printf("\n(double)|x_bar| = %9.65e", cblas_dnrm2(dim-1, x+id3+1, 1));
       printf("\n(l doub)|x_bar| = %9.65Le\n", dnrm2l(dim-1, x+id3+1));
 
-      printf("\ni = %zu: (double)x0 - (double)|x_bar| = (double) %9.65e\n", i, diff);
+
+/*       printf("\ni = %zu: (double)x0 - (double)|x_bar| = (double) %9.65e\n",
+ * i, */
+/*              diff); */
 
       diffL = (float_type)(x[id3]-cblas_dnrm2(dim-1, x+id3+1, 1));
       printf("\ni = %zu: (double)x0 - (double)|x_bar| = (l doub) %9.65Le\n", i, diffL);
@@ -1828,6 +1890,7 @@ static void is_in_int_of_Lcone(const double * const x, const size_t vecSize, con
 
 static void update_w(double * w, double * w_origin, const double * velocity, const size_t vecSize, const size_t varsCount, int update)
 {
+
   if (update == 0) return;
 
   size_t dim = vecSize/varsCount;
@@ -1841,18 +1904,20 @@ static void update_w(double * w, double * w_origin, const double * velocity, con
 }
 
 
+
 static double compute_min_steplenght_of4(const double * x, const double * dx,
                                 const double * y, const double * dy,
                                 const double * z, const double * dz,
                                 const double * t, const double * dt,
                                 const size_t vecSize, const size_t varsCount, double gamma)
 {
-  double alpha_primal_1 = getStepLength(x, dx, vecSize, varsCount, gamma);
-  double alpha_primal_2 = getStepLength(y, dy, vecSize, varsCount, gamma);
-  double alpha_dual_1   = getStepLength(z, dz, vecSize, varsCount, gamma);
-  double alpha_dual_2   = getStepLength(t, dt, vecSize, varsCount, gamma);
+  double alpha_primal_1 = grfc3d_getStepLength(x, dx, vecSize, varsCount, gamma);
+  double alpha_primal_2 = grfc3d_getStepLength(y, dy, vecSize, varsCount, gamma);
+  double alpha_dual_1   = grfc3d_getStepLength(z, dz, vecSize, varsCount, gamma);
+  double alpha_dual_2   = grfc3d_getStepLength(t, dt, vecSize, varsCount, gamma);
 
-  return fmin(alpha_primal_1, fmin(alpha_primal_2, fmin(alpha_dual_1, alpha_dual_2)));
+  return fmin(alpha_primal_1,
+              fmin(alpha_primal_2, fmin(alpha_dual_1, alpha_dual_2)));
 }
 
 
@@ -1883,9 +1948,11 @@ static double compute_min_steplenght_of4(const double * x, const double * dx,
  *      |                                                                      |
  *      | ...   ...   ...   ...   ...   ...   ...   ...   ...   ...   ... ...  |
  */
+
 static NumericsMatrix * compute_JQinv(const double *u1, const double *r1, const double *u2, const double *r2, const size_t vecSize, const size_t varsCount)
 {
   size_t d3 = (size_t)(vecSize / varsCount); // d3 = 3
+
   assert(d3 == 3);
   size_t d5 = d3+2;  // d5 = 5
 
@@ -2079,10 +2146,6 @@ NumericsMatrix * compute_JQinv2Jt(const double *u1, const double *r1, const doub
 
 
 
-
-
-
-
 static void print_neg_eigval(const double *x, const size_t vecSize, const size_t varsCount)
 {
   size_t d3 = (size_t)(vecSize / varsCount); // d3 = 3
@@ -2105,7 +2168,6 @@ static void print_neg_eigval(const double *x, const size_t vecSize, const size_t
 
 
 static double detMat(NumericsMatrix *A)
-// double detMat()
 {
   double det = 1.;
 
@@ -2144,6 +2206,7 @@ static double detMat(NumericsMatrix *A)
   cs_sfree (S) ;
   cs_nfree (N) ;
 
+
   return det;
 }
 
@@ -2167,11 +2230,13 @@ static double detMat(NumericsMatrix *A)
    f = m-vector
    H = n*d x m matrix
    w = n*d-vector */
+
 void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* restrict reaction,
                double* restrict velocity, double* restrict globalVelocity,
                int* restrict info, SolverOptions* restrict options)
 {
   clock_t t1 = clock();
+
   printf("\n\n#################### grfc3d_IPM is starting ####################\n\n");
 
   /* -------------------------- Variable declaration -------------------------- */
@@ -2179,6 +2244,7 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
   size_t m = problem->M->size0;
   size_t nd = problem->H->size1;
   size_t d = problem->dimension;
+
   size_t n = problem->numberOfContacts; //n = 1; nd = 5;
   size_t m_plus_nd = m+nd;
   size_t d_minus_2 = d-2;
@@ -2186,6 +2252,7 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
   size_t n_dminus2 = n*d_minus_2;
   size_t n_dplus1 = n*d_plus_1;
   size_t pos_t = 0;
+
   size_t id3 = 0;  // id3 = i*d_minus_2 used for the loop of cones
   size_t id5 = 0;  // id5 = i*d         used for the loop of cones
 
@@ -2249,7 +2316,6 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
 
   Grfc3d_IPM_data * data = (Grfc3d_IPM_data *)options->solverData;
   NumericsMatrix *P_mu = data->P_mu->mat;
-  NumericsMatrix *P_mu_inv = data->P_mu->inv_mat;
 
   double *w_origin = problem->b;
   double *f = problem->q;
@@ -2269,7 +2335,7 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
   cblas_dcopy(nd, data->starting_point->velocity, 1, velocity, 1);
   cblas_dcopy(m, data->starting_point->globalVelocity, 1, globalVelocity, 1);
 
-  size_t no_n = 0, no_m = 0, no_ndp1 = 0, no_nd = 0, no_ndm2 = 0;
+  size_t no_n = 0, no_m = 0, no_nd = 0, no_ndm2 = 0;
 
 
   double * t = data->tmp_vault_n[no_n++];
@@ -2299,17 +2365,18 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
   double *d_t_prime = data->tmp_vault_n[no_n++];
 
   double *rhs = options->dWork;
+
   double *rhs_tmp = NULL,*rhs_tmp2 = NULL;
 
   double *velocity_tmp1=NULL, *velocity_tmp2=NULL, *reaction_tmp1=NULL, *reaction_tmp2=NULL;
   double *d_velocity_tmp1=NULL, *d_velocity_tmp2=NULL, *d_reaction_tmp1=NULL, *d_reaction_tmp2=NULL;
+
 
   double tol = options->dparam[SICONOS_DPARAM_TOL];
   size_t max_iter = options->iparam[SICONOS_IPARAM_MAX_ITER];
   double sgmp1 = options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_1];
   double sgmp2 = options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_2];
   double sgmp3 = options->dparam[SICONOS_FRICTION_3D_IPM_SIGMA_PARAMETER_3];
-  double sgmp4 = 0, sgmp5 = 0;
   double gmmp0 = 0.999;
   double gmmp1 = options->dparam[SICONOS_FRICTION_3D_IPM_GAMMA_PARAMETER_1];
   double gmmp2 = options->dparam[SICONOS_FRICTION_3D_IPM_GAMMA_PARAMETER_2];
@@ -2322,19 +2389,22 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
   double complem_2 = 1e300;
   double gapVal = 1e300;
   double relgap = 1e300;
+
   double u1dotr1 = 1e300;     // u1 = velecity_1, r1 = reaction_1
   double u2dotr2 = 1e300;     // u2 = velecity_2, r2 = reaction_2
+
   double udotr = 1e300;
   double proj_error = 1e300;  // projection error
-  double error_array[7];
 
   double residu_LS1_m = 0.0, residu_LS2_m = 0.0;
   double residu_LS1_nd = 0.0, residu_LS2_nd = 0.0;
   double residu_LS1_ndplus1 = 0.0, residu_LS2_ndplus1 = 0.0;
 
+
   long blocks_nzmax = 3*2*n;  // for 3x3 no scaling
 
   NumericsMatrix *Jac=NULL, *Jactmp=NULL; /* Jacobian matrix */
+
   long Jac_nzmax;
   int jacobian_is_nan = 0;
 
@@ -2390,17 +2460,20 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
   NumericsMatrix *chol_U = NULL;
   CSparseMatrix *chol_L = NULL, *chol_U_csc = NULL, *chol_UT_csc = NULL;
 
+
   double *p_bar = NULL, *p_tilde = NULL, *pinv_tilde = NULL, *pinv2_bar = NULL;
   double *p2_bar = NULL, *p2_tilde = NULL, *pinv_bar = NULL,  *pinv2_tilde = NULL;
+
   double *d_velocity_1_hat = NULL, *d_velocity_2_hat = NULL;
   double *d_reaction_1_check = NULL, *d_reaction_2_check = NULL;
   double *velocity_1_inv = NULL, *velocity_2_inv = NULL;
-  double *reaction_1_inv = NULL, *reaction_2_inv = NULL;
   double *velocity_1_hat = NULL, *velocity_2_hat = NULL;
   double *velocity_1_hat_inv = NULL, *velocity_2_hat_inv = NULL;
   double *velocity_1_hat_inv_dvhat_drcheck_1 = NULL, *velocity_2_hat_inv_dvhat_drcheck_2 = NULL;
   double *velocity_hat_inv_dvhat_drcheck = NULL;
+
   double *tmp_n_dplus1 = NULL, *tmp_nd = NULL,  *tmp_nd2 = NULL;
+
 
   double *Qinv2x_bar = NULL, *Qinv2x_tilde = NULL;
 
@@ -2416,9 +2489,12 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
 
   double *primalConstraint = data->tmp_vault_nd[no_nd++];
 
-   // For predictor step
-  double *v_plus_dv = data->tmp_vault_nd[no_nd++];                // v_plus_dv = velocity + alpha_primal * d_velocity
-  double *r_plus_dr = data->tmp_vault_nd[no_nd++];                // r_plus_dr = reaction + alpha_primal * d_reaction
+  // For predictor step
+  double *v_plus_dv = data->tmp_vault_nd[no_nd++];  // v_plus_dv = velocity +
+                                                    // alpha_primal * d_velocity
+  double *r_plus_dr = data->tmp_vault_nd[no_nd++];  // r_plus_dr = reaction +
+                                                    // alpha_primal * d_reaction
+
 
   double *complemConstraint_1 = data->tmp_vault_n_dminus2[no_ndm2++];
   double *complemConstraint_2 = data->tmp_vault_n_dminus2[no_ndm2++];
@@ -2656,8 +2732,6 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
   }
 
 
-
-
   /* -------------------------- Print into matlab file -------------------------- */
   FILE *iterates, *iterates_python;
   FILE * matrixH;
@@ -2666,6 +2740,7 @@ void grfc3d_IPM(GlobalRollingFrictionContactProblem* restrict problem, double* r
 
   char python_name[100];
   sprintf(python_name, "PrimitiveSoup-nc-%zu.py",n);
+
 
 
 
@@ -2883,15 +2958,15 @@ while(1)
     // gapVal = cblas_ddot(n_dminus2, reaction_1, 1, velocity_1, 1) + cblas_ddot(n_dminus2, reaction_1, 1, velocity_1, 1);
 
     // Note: primal objectif func = 1/2 * v' * M *v + f' * v
-    relgap = relGap(M, f, w, globalVelocity, reaction, nd, m, gapVal);
+    relgap = grfc3d_relGap(M, f, w, globalVelocity, reaction, nd, m, gapVal);
 
     barr_param = gapVal / n;
-    //barr_param = complemResidualNorm(velocity, reaction, nd, n);
+    //barr_param = grfc3d_complemResidualNorm(velocity, reaction, nd, n);
     //barr_param = fabs(barr_param);
 
 
-    complem_1 = complemResidualNorm(velocity_1, reaction_1, n_dminus2, n); // (t, u_bar) o (r0, r_bar)
-    complem_2 = complemResidualNorm(velocity_2, reaction_2, n_dminus2, n); // (t', u_tilde) o (r0, r_tilde)
+    complem_1 = grfc3d_complemResidualNorm(velocity_1, reaction_1, n_dminus2, n); // (t, u_bar) o (r0, r_bar)
+    complem_2 = grfc3d_complemResidualNorm(velocity_2, reaction_2, n_dminus2, n); // (t', u_tilde) o (r0, r_tilde)
 
     udotr   = gapVal;
 
@@ -3098,10 +3173,11 @@ while(1)
 
 
       /* 5. Computing the affine step-length */
-      alpha_primal_1 = getStepLength(velocity_1, d_velocity_1, n_dminus2, n, gmm);
-      alpha_primal_2 = getStepLength(velocity_2, d_velocity_2, n_dminus2, n, gmm);
-      alpha_dual_1 = getStepLength(reaction_1, d_reaction_1, n_dminus2, n, gmm);
-      alpha_dual_2 = getStepLength(reaction_2, d_reaction_2, n_dminus2, n, gmm);
+
+      alpha_primal_1 = grfc3d_getStepLength(velocity_1, d_velocity_1, n_dminus2, n, gmm);
+      alpha_primal_2 = grfc3d_getStepLength(velocity_2, d_velocity_2, n_dminus2, n, gmm);
+      alpha_dual_1 = grfc3d_getStepLength(reaction_1, d_reaction_1, n_dminus2, n, gmm);
+      alpha_dual_2 = grfc3d_getStepLength(reaction_2, d_reaction_2, n_dminus2, n, gmm);
 
       alpha_primal = fmin(alpha_primal_1, fmin(alpha_primal_2, fmin(alpha_dual_1, alpha_dual_2)));
       alpha_dual = alpha_primal;
@@ -3344,10 +3420,10 @@ while(1)
 
 
       /* 5. Computing the affine step-length */
-      alpha_primal_1 = getStepLength(velocity_1, d_velocity_1, n_dminus2, n, gmm);
-      alpha_primal_2 = getStepLength(velocity_2, d_velocity_2, n_dminus2, n, gmm);
-      alpha_dual_1 = getStepLength(reaction_1, d_reaction_1, n_dminus2, n, gmm);
-      alpha_dual_2 = getStepLength(reaction_2, d_reaction_2, n_dminus2, n, gmm);
+      alpha_primal_1 = grfc3d_getStepLength(velocity_1, d_velocity_1, n_dminus2, n, gmm);
+      alpha_primal_2 = grfc3d_getStepLength(velocity_2, d_velocity_2, n_dminus2, n, gmm);
+      alpha_dual_1 = grfc3d_getStepLength(reaction_1, d_reaction_1, n_dminus2, n, gmm);
+      alpha_dual_2 = grfc3d_getStepLength(reaction_2, d_reaction_2, n_dminus2, n, gmm);
 
       alpha_primal = fmin(alpha_primal_1, fmin(alpha_primal_2, fmin(alpha_dual_1, alpha_dual_2)));
       alpha_dual = alpha_primal;
@@ -3650,10 +3726,10 @@ while(1)
 
 
       /* 5. Computing the affine step-length */
-      alpha_primal_1 = getStepLength(velocity_1, d_velocity_1, n_dminus2, n, gmm);
-      alpha_primal_2 = getStepLength(velocity_2, d_velocity_2, n_dminus2, n, gmm);
-      alpha_dual_1 = getStepLength(reaction_1, d_reaction_1, n_dminus2, n, gmm);
-      alpha_dual_2 = getStepLength(reaction_2, d_reaction_2, n_dminus2, n, gmm);
+      alpha_primal_1 = grfc3d_getStepLength(velocity_1, d_velocity_1, n_dminus2, n, gmm);
+      alpha_primal_2 = grfc3d_getStepLength(velocity_2, d_velocity_2, n_dminus2, n, gmm);
+      alpha_dual_1 = grfc3d_getStepLength(reaction_1, d_reaction_1, n_dminus2, n, gmm);
+      alpha_dual_2 = grfc3d_getStepLength(reaction_2, d_reaction_2, n_dminus2, n, gmm);
 
       alpha_primal = fmin(alpha_primal_1, fmin(alpha_primal_2, fmin(alpha_dual_1, alpha_dual_2)));
       alpha_dual = alpha_primal;
@@ -3991,10 +4067,10 @@ while(1)
 
 
       /* 5. Computing the affine step-length */
-      alpha_primal_1 = getStepLength(velocity_1, d_velocity_1, n_dminus2, n, gmm);
-      alpha_primal_2 = getStepLength(velocity_2, d_velocity_2, n_dminus2, n, gmm);
-      alpha_dual_1 = getStepLength(reaction_1, d_reaction_1, n_dminus2, n, gmm);
-      alpha_dual_2 = getStepLength(reaction_2, d_reaction_2, n_dminus2, n, gmm);
+      alpha_primal_1 = grfc3d_getStepLength(velocity_1, d_velocity_1, n_dminus2, n, gmm);
+      alpha_primal_2 = grfc3d_getStepLength(velocity_2, d_velocity_2, n_dminus2, n, gmm);
+      alpha_dual_1 = grfc3d_getStepLength(reaction_1, d_reaction_1, n_dminus2, n, gmm);
+      alpha_dual_2 = grfc3d_getStepLength(reaction_2, d_reaction_2, n_dminus2, n, gmm);
 
       alpha_primal = fmin(alpha_primal_1, fmin(alpha_primal_2, fmin(alpha_dual_1, alpha_dual_2)));
       alpha_dual = alpha_primal;
@@ -4411,10 +4487,10 @@ while(1)
 
 
       /* 5. Computing the affine step-length */
-      alpha_primal_1 = getStepLength(velocity_1, d_velocity_1, n_dminus2, n, gmm);
-      alpha_primal_2 = getStepLength(velocity_2, d_velocity_2, n_dminus2, n, gmm);
-      alpha_dual_1 = getStepLength(reaction_1, d_reaction_1, n_dminus2, n, gmm);
-      alpha_dual_2 = getStepLength(reaction_2, d_reaction_2, n_dminus2, n, gmm);
+      alpha_primal_1 = grfc3d_getStepLength(velocity_1, d_velocity_1, n_dminus2, n, gmm);
+      alpha_primal_2 = grfc3d_getStepLength(velocity_2, d_velocity_2, n_dminus2, n, gmm);
+      alpha_dual_1 = grfc3d_getStepLength(reaction_1, d_reaction_1, n_dminus2, n, gmm);
+      alpha_dual_2 = grfc3d_getStepLength(reaction_2, d_reaction_2, n_dminus2, n, gmm);
 
       alpha_primal = fmin(alpha_primal_1, fmin(alpha_primal_2, fmin(alpha_dual_1, alpha_dual_2)));
       alpha_dual = alpha_primal;
@@ -4778,10 +4854,10 @@ while(1)
 
 
       /* 5. Computing the affine step-length */
-      alpha_primal_1 = getStepLength(velocity_1, d_velocity_1, n_dminus2, n, gmm);
-      alpha_primal_2 = getStepLength(velocity_2, d_velocity_2, n_dminus2, n, gmm);
-      alpha_dual_1 = getStepLength(reaction_1, d_reaction_1, n_dminus2, n, gmm);
-      alpha_dual_2 = getStepLength(reaction_2, d_reaction_2, n_dminus2, n, gmm);
+      alpha_primal_1 = grfc3d_getStepLength(velocity_1, d_velocity_1, n_dminus2, n, gmm);
+      alpha_primal_2 = grfc3d_getStepLength(velocity_2, d_velocity_2, n_dminus2, n, gmm);
+      alpha_dual_1 = grfc3d_getStepLength(reaction_1, d_reaction_1, n_dminus2, n, gmm);
+      alpha_dual_2 = grfc3d_getStepLength(reaction_2, d_reaction_2, n_dminus2, n, gmm);
 
       alpha_primal = fmin(alpha_primal_1, fmin(alpha_primal_2, fmin(alpha_dual_1, alpha_dual_2)));
       alpha_dual = alpha_primal;
@@ -5079,10 +5155,10 @@ while(1)
 
 
       /* 5. Computing the affine step-length */
-      alpha_primal_1 = getStepLength(velocity_1, d_velocity_1, n_dminus2, n, gmm);
-      alpha_primal_2 = getStepLength(velocity_2, d_velocity_2, n_dminus2, n, gmm);
-      alpha_dual_1 = getStepLength(reaction_1, d_reaction_1, n_dminus2, n, gmm);
-      alpha_dual_2 = getStepLength(reaction_2, d_reaction_2, n_dminus2, n, gmm);
+      alpha_primal_1 = grfc3d_getStepLength(velocity_1, d_velocity_1, n_dminus2, n, gmm);
+      alpha_primal_2 = grfc3d_getStepLength(velocity_2, d_velocity_2, n_dminus2, n, gmm);
+      alpha_dual_1 = grfc3d_getStepLength(reaction_1, d_reaction_1, n_dminus2, n, gmm);
+      alpha_dual_2 = grfc3d_getStepLength(reaction_2, d_reaction_2, n_dminus2, n, gmm);
 
       alpha_primal = fmin(alpha_primal_1, fmin(alpha_primal_2, fmin(alpha_dual_1, alpha_dual_2)));
       alpha_dual = alpha_primal;
@@ -5256,10 +5332,10 @@ while(1)
 
 
     // 9. Compute again the affine step-length
-    alpha_primal_1 = getStepLength(velocity_1, d_velocity_1, n_dminus2, n, gmm);
-    alpha_primal_2 = getStepLength(velocity_2, d_velocity_2, n_dminus2, n, gmm);
-    alpha_dual_1   = getStepLength(reaction_1, d_reaction_1, n_dminus2, n, gmm);
-    alpha_dual_2   = getStepLength(reaction_2, d_reaction_2, n_dminus2, n, gmm);
+    alpha_primal_1 = grfc3d_getStepLength(velocity_1, d_velocity_1, n_dminus2, n, gmm);
+    alpha_primal_2 = grfc3d_getStepLength(velocity_2, d_velocity_2, n_dminus2, n, gmm);
+    alpha_dual_1   = grfc3d_getStepLength(reaction_1, d_reaction_1, n_dminus2, n, gmm);
+    alpha_dual_2   = grfc3d_getStepLength(reaction_2, d_reaction_2, n_dminus2, n, gmm);
 
     alpha_primal = fmin(alpha_primal_1, fmin(alpha_primal_2, fmin(alpha_dual_1, alpha_dual_2)));
     alpha_dual = alpha_primal;
@@ -5381,7 +5457,6 @@ else break;
   //options->dparam[SICONOS_DPARAM_RESIDU] = full_error; //NV_max(error, 4);
   options->dparam[SICONOS_DPARAM_RESIDU] = fmax(pinfeas, fmax(dinfeas, fmin(udotr, proj_error)));
   options->iparam[SICONOS_IPARAM_ITER_DONE] = iteration;
-
 
 
 

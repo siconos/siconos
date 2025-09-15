@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2022 INRIA.
+ * Copyright 2024 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,8 +47,7 @@ int main (int argc, char *argv[])
   int number_of_tests;
   TestCase * collection = build_test_collection(n_data, _data_collection, &number_of_tests);
   printf("%i tests for %i data files.\n", number_of_tests, n_data);
-  //int out = run_test_collection(collection, number_of_tests, gmp_test_function);
-  int out = 0;
+  int out = run_test_collection(collection, number_of_tests, gmp_test_function);
 
   free_test_collection(collection, number_of_tests);
   
