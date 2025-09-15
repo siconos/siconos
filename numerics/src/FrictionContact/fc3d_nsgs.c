@@ -868,7 +868,7 @@ void fc3d_nsgs_set_default(SolverOptions *options) {
   options->iparam[SICONOS_FRICTION_3D_NSGS_RELAXATION] =
       SICONOS_FRICTION_3D_NSGS_RELAXATION_FALSE;
   options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION_FREQUENCY] = 0;
-  options->dparam[SICONOS_DPARAM_TOL] = 1e-14;
+  options->dparam[SICONOS_DPARAM_TOL] = 1e-4;
   options->dparam[SICONOS_FRICTION_3D_DPARAM_INTERNAL_ERROR_RATIO] = 10.0;
   // Internal solver
   assert(options->numberOfInternalSolvers == 1);
