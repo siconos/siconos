@@ -210,10 +210,8 @@ if(WITH_TESTING)
     EXTRA_SOURCES data_collection_5.c test_quartic_1.c)
 
   new_tests_collection(
-       DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_IPM_SNM_COLLECTION_1
-      EXTRA_SOURCES data_collection_1.c test_ipm_snm_fc3d_1.c DEPS FCLIB::fclib
-      HDF5 ON
-      )
+    DRIVER fc_test_collection.c.in FORMULATION fc3d COLLECTION TEST_IPM_SNM_COLLECTION_1
+    EXTRA_SOURCES data_collection_1.c test_ipm_snm_fc3d_1.c)
 
 
   # --- LMGC driver ---
