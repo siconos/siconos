@@ -192,9 +192,9 @@ EOF
       suffix="${script##*.}"
       case $suffix in py) interp=python3;; *) interp="";; esac
       shift
-      args=""
+      args=()
       while [[ $# -gt 0 && "$1" != "--" ]]; do
-        args="$args $1"
+        args+=("$1")
         shift
       done
       if [[ $# -gt 0 && "$1" == "--" ]]; then
@@ -210,10 +210,25 @@ EOF
         export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:`pwd`/${venv}/lib/python${python_version}/site-packages/nonos/
       fi
 
-      if [ ! -z "$timer" ]; then
-        $xex $timer -f "$timer_args" $interp $script $args
+      case "$(basename "$script")" in
+        python|python3) script="$(command -v "$script")" ;;
+      esac
+
+      # Construit la commande finale comme tableau
+      cmd=()
+      if [ -n "$timer" ]; then
+        cmd+=("$time" -f "$timer_args")
+      fi
+      if [ -n "$interp" ]; then
+        cmd+=("$interp")
+      fi
+      cmd+=("$script")
+      cmd+=("${args[@]}")
+
+      if [ -n "$xex" ]; then
+        exec "${cmd[@]}"
       else
-        $xex $interp $script $args
+        "${cmd[@]}"
       fi
       ;;
   esac
