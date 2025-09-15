@@ -1218,7 +1218,8 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
       // projerr = projectionError(velocity, reaction, n, tol);
       projerr = projectionError_based_reaction_norm_infinity_conic(H, M, f, w, reaction, n, NOT_ON_DUAL_CONE);
 
-      if (total_time > max_time)
+      //if (total_time > max_time)
+      if ( 0 == 1)
       {
         hasNotConverged = 5;
         numerics_printf_verbose(-1, "| %3i%c| %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e ||",

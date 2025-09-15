@@ -1670,7 +1670,8 @@ void gfc3d_IPM(GlobalFrictionContactProblem* restrict problem, double* restrict 
     totalresidual = fmax(fmax(error[0], error[1]),error[2]);
     totalresidual_Jor = fmax(fmax(pinfeas, dinfeas),complem);
 
-    if (total_time > max_time)
+    //if (total_time > max_time)
+    if (0 == 1)  
     {
       hasNotConverged = 5;
       numerics_printf_verbose(-1, "| %3i%c| %8.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e |",
