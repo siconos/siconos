@@ -43,7 +43,6 @@
 #endif
 
 const char* const SICONOS_GLOBAL_FRICTION_3D_NSGS_WR_STR = "GFC3D_NSGS_WR";
-const char* const SICONOS_GLOBAL_FRICTION_3D_NSGS_SEP_WR_STR = "GFC3D_NSGS_SEP_WR";
 const char* const SICONOS_GLOBAL_FRICTION_3D_NSN_AC_WR_STR = "GFC3D_NSN_AC_WR";
 const char* const SICONOS_GLOBAL_FRICTION_3D_NSGSV_WR_STR = "GFC3D_NSGSV_WR";
 const char* const SICONOS_GLOBAL_FRICTION_3D_PROX_WR_STR = "GFC3D_PROX_WR";
@@ -59,9 +58,7 @@ const char* const SICONOS_GLOBAL_FRICTION_3D_VI_FPP_STR = "GFC3D_VI_FPP";
 const char* const SICONOS_GLOBAL_FRICTION_3D_ADMM_WR_STR = "GFC3D_ADMM_WR";
 const char* const SICONOS_GLOBAL_FRICTION_3D_IPM_WR_STR = "GFC3D_IPM_WR";
 const char* const SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_WR_STR = "GFC3D_IPM_SNM_WR";
-const char* const SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_SEP_STR = "GFC3D_IPM_SNM_SEP";
 const char* const SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_PROX_STR = "GFC3D IPM SNM PROX";
-const char* const SICONOS_GLOBAL_FRICTION_3D_IPM_SEP_STR = "GFC3D IPM SEP";
 
 static int gfc3d_balancing_check_drift(GlobalFrictionContactProblem* balanced_problem,
                                        GlobalFrictionContactProblem* problem, double* reaction,
@@ -183,15 +180,6 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double* reaction, double
       gfc3d_nsgs(problem, reaction, velocity, globalVelocity, &info, options);
       break;
     }
-    case SICONOS_GLOBAL_FRICTION_3D_NSGS_SEP_WR: {
-      numerics_printf_verbose(
-          1,
-          " ========================== Call NSGS_SEP_WR solver with reformulation into "
-          "Friction-Contact 3D problem ==========================\n");
-      gfc3d_nsgs_wr(problem, reaction, velocity, globalVelocity, &info, options);
-      break;
-    }
-
     case SICONOS_GLOBAL_FRICTION_3D_NSN_AC: {
       /* Balancing */
       /* here, the balancing is done outside the solver */
@@ -256,8 +244,7 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double* reaction, double
       gfc3d_admm_wr(problem, reaction, velocity, globalVelocity, &info, options);
       break;
     }
-    case SICONOS_GLOBAL_FRICTION_3D_IPM:
-    case SICONOS_GLOBAL_FRICTION_3D_IPM_SEP: {
+    case SICONOS_GLOBAL_FRICTION_3D_IPM: {
       GlobalFrictionContactProblem* balanced_problem =
           gfc3d_balancing_problem(problem, options);
       gfc3d_balancing_go_to_balanced_variables(balanced_problem, options, reaction, velocity,
@@ -309,10 +296,6 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double* reaction, double
     }
     case SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_WR: {
       gfc3d_ipm_snm_wr(problem, reaction, velocity, globalVelocity, &info, options);
-      break;
-    }
-    case SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_SEP: {
-      gfc3d_IPM_SNM(problem, reaction, velocity, globalVelocity, &info, options);
       break;
     }
     default: {

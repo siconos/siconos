@@ -296,26 +296,6 @@ if(WITH_TESTING)
     #   HDF5 ON
     #   )
 
-    # new_tests_collection(
-    #   DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_NSGS_SEP_WR_COLLECTION_FCLIB_TEST
-    #   EXTRA_SOURCES data_collection_gfc3d_fclib_separation_TEST.c test_nsgs_sep_wr_gfc3d_1.c DEPS FCLIB::fclib
-    #   HDF5 ON
-    #   )
-
-    # new_tests_collection(
-    #   DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_ADMM_SEP_COLLECTION_FCLIB_TEST
-    #   EXTRA_SOURCES data_collection_gfc3d_fclib_separation_TEST.c test_admm_sep_gfc3d_1.c DEPS FCLIB::fclib
-    #   HDF5 ON
-    #   )
-
-    # new_tests_collection(
-    #   DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_NSGS_SEP_WR_COLLECTION_FCLIB_FULL
-    #   EXTRA_SOURCES data_collection_gfc3d_fclib_full_separation.c test_nsgs_sep_wr_gfc3d_1.c DEPS FCLIB::fclib
-    #   HDF5 ON
-    #   )
-
-
-
     new_tests_collection(
       DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_FIRST_ORDER_COLLECTION_FCLIB
       EXTRA_SOURCES data_collection_gfc3d_fclib.c test_first_order_gfc3d_1.c DEPS FCLIB::fclib
@@ -336,11 +316,6 @@ if(WITH_TESTING)
     # new_tests_collection(
     #   DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_ADMM_COLLECTION_FCLIB_FULL
     #   EXTRA_SOURCES data_collection_gfc3d_fclib_full.c test_admm_gfc3d_1.c DEPS FCLIB::fclib
-    #   HDF5 ON
-    #   )
-    # new_tests_collection(
-    #   DRIVER gfc3d_test_collection.c.in FORMULATION gfc3d COLLECTION TEST_ADMM_SEP_COLLECTION_FCLIB_FULL
-    #   EXTRA_SOURCES data_collection_gfc3d_fclib_full_separation.c test_admm_sep_gfc3d_1.c DEPS FCLIB::fclib
     #   HDF5 ON
     #   )
 
@@ -387,29 +362,6 @@ if(WITH_TESTING)
     #   HDF5 ON
     #   )
 
-    # new_tests_collection(
-    #   DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_IPM_SEP_COLLECTION_FCLIB_FULL
-    #   EXTRA_SOURCES data_collection_gfc3d_fclib_full_separation.c test_ipm_sep_gfc3d_1.c DEPS FCLIB::fclib
-    #   HDF5 ON
-    #   )
-
-    # new_tests_collection(
-    #   DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_IPM_SEP_COLLECTION_FCLIB_TEST
-    #   EXTRA_SOURCES data_collection_gfc3d_fclib_separation_TEST.c test_ipm_sep_gfc3d_1.c DEPS FCLIB::fclib
-    #   HDF5 ON
-    #   )
-
-    # new_tests_collection(
-    #   DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_IPM_SNM_SEP_COLLECTION_FCLIB_FULL
-    #   EXTRA_SOURCES data_collection_gfc3d_fclib_full_separation.c test_ipm_snm_gfc3d_1.c DEPS FCLIB::fclib
-    #   HDF5 ON
-    #   )
-
-    # new_tests_collection(
-    #   DRIVER gfc3d_test_collection.c.in  FORMULATION gfc3d COLLECTION TEST_IPM_SNM_SEP_COLLECTION_FCLIB_TEST
-    #   EXTRA_SOURCES data_collection_gfc3d_fclib_separation_TEST.c test_ipm_snm_gfc3d_1.c DEPS FCLIB::fclib
-    #   HDF5 ON
-    #   )
 
     # ---------------------------------------------------
     # --- Rolling friction contact problem formulation ---

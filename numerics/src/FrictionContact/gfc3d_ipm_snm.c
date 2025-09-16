@@ -627,15 +627,6 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
   int type = NORM_INF;
 
   char *blk_num_name = NULL;
-  if (options->solverId == SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_SEP)
-  {
-    blk_num_name = (char *)malloc(10*sizeof(char));
-    char *blk_num_ptr = options->solverData;
-    strcpy(blk_num_name, blk_num_ptr);
-    free(options->solverData); options->solverData = NULL;
-  }
-
-
 
   // the size of the problem detection
   unsigned int m = problem->M->size0;
@@ -955,20 +946,11 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
     if(strToken != NULL) strToken = strtok ( NULL, separators );
   }
 
-
-
   strToken = strtok ( strToken, "." );
   // for(int i=0; i<strlen(strToken); i++)
   // {
   //   if(strToken[i] == '-') strToken[i] = '_';
   // }
-
-  // Append the block number into the test name
-  if (options->solverId == SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_SEP)
-  {
-    strcat(strToken, blk_num_name);
-  }
-
 
   char matlab_name[100], probName[100];
   sprintf(matlab_name, "iterates_Spheres_no_s.m");

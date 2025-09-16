@@ -141,7 +141,6 @@ See functions in SolverOptions.h
       SICONOS_ROLLING_FRICTION_2D_ONECONTACT_ProjectionOnConeWithLocalIteration);           \
   SICONOS_SOLVER_MACRO(SICONOS_GLOBAL_FRICTION_3D_NSGS_WR);                                 \
   SICONOS_SOLVER_MACRO(SICONOS_GLOBAL_FRICTION_3D_NSGSV_WR);                                \
-  SICONOS_SOLVER_MACRO(SICONOS_GLOBAL_FRICTION_3D_NSGS_SEP_WR);                             \
   SICONOS_SOLVER_MACRO(SICONOS_GLOBAL_FRICTION_3D_PROX_WR);                                 \
   SICONOS_SOLVER_MACRO(SICONOS_GLOBAL_FRICTION_3D_DSFP_WR);                                 \
   SICONOS_SOLVER_MACRO(SICONOS_GLOBAL_FRICTION_3D_TFP_WR);                                  \
@@ -157,7 +156,6 @@ See functions in SolverOptions.h
   SICONOS_SOLVER_MACRO(SICONOS_GLOBAL_FRICTION_3D_ADMM_WR);                                 \
   SICONOS_SOLVER_MACRO(SICONOS_GLOBAL_FRICTION_3D_IPM);                                     \
   SICONOS_SOLVER_MACRO(SICONOS_GLOBAL_FRICTION_3D_IPM_SNM);                                 \
-  SICONOS_SOLVER_MACRO(SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_SEP);                             \
   SICONOS_SOLVER_MACRO(SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_WR);                              \
   SICONOS_SOLVER_MACRO(SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_PROX);                            \
   SICONOS_SOLVER_MACRO(SICONOS_GLOBAL_ROLLING_FRICTION_3D_NSGS_WR);                         \
