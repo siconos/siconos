@@ -31,7 +31,7 @@
 #include "op3x3.h"                   // for SET3, print3, print3x3, SET3X3
 #include "projectionOnCone.h"        // for projectionOnCone
 #include "quartic.h"                 // for BIQUADROOTS, CUBICROOTS, QUADROOTS
-//#define FC3D_UE_DEBUG
+// #define FC3D_UE_DEBUG
 
 #define FC3D_UE_TEST_NULL(EXPR) (fabs(EXPR) < 1e-15)
 

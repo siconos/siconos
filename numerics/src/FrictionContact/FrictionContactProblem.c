@@ -27,8 +27,8 @@
 #include "NumericsMatrix.h"     // for NumericsMatrix, NM_create, RawNumeric...
 #include "SiconosBlas.h"        // for cblas_dscal
 #include "SparseBlockMatrix.h"  // for SBM_extract_component_3x3
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "io_tools.h"
 #include "numerics_verbose.h"  // for CHECK_IO, numerics_error, numerics_pr...
 #include "siconos_debug.h"     // for DEBUG_PRINT, DEBUG_PRINTF
@@ -201,7 +201,7 @@ FrictionContactProblem* frictionContactProblem_new_with_data(int dim, int nc,
   return fcp;
 }
 
-//#define SN_SBM_TO_DENSE
+// #define SN_SBM_TO_DENSE
 
 void createSplittedFrictionContactProblem(FrictionContactProblem* problem,
                                           SplittedFrictionContactProblem* splitted_problem) {

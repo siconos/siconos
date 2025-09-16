@@ -18,10 +18,11 @@
 
 /* Factorisation with Newton_methods.c is needed */
 #include "fc3d_nonsmooth_Newton_solvers.h"
-#include "FischerBurmeisterGenerated.h"
 
 #include <assert.h>  // for assert
 #include <math.h>    // for isnan, isinf, pow
+
+#include "FischerBurmeisterGenerated.h"
 #ifndef __cplusplus
 #include <stdbool.h>  // for true
 #endif

@@ -20,7 +20,7 @@
 #include <stdlib.h>  // for malloc, free, abs
 #include <string.h>  // for strncpy, NULL, memcpy
 
-#include "CSparseMatrix.h"        // for CSparseMatrix, CS_INT
+#include "CSparseMatrix.h"                 // for CSparseMatrix, CS_INT
 #include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
 #include "NonSmoothDrivers.h"              // for gfc3d_driver, gfc3d_LmgcDr...
 #include "NumericsFwd.h"                   // for NumericsMatrix, GlobalFric...
@@ -39,7 +39,7 @@ static int gfccounter = -1;
 
 #endif
 
-//#define USE_NM_DENSE
+// #define USE_NM_DENSE
 
 static double *alloc_memory_double(unsigned int size, double *p) {
   double *r = (double *)malloc(size * sizeof(double));
@@ -377,7 +377,8 @@ int gfc3d_LmgcDriver(double *reaction, double *velocity, double *globalVelocity,
 /*   { */
 /* #ifdef WITH_FCLIB */
 /*     char fname[256]; */
-/*     snprintf(fname, sizeof(fname), "LMGC_GlobalFrictionContactProblem%.5d.hdf5", gfccounter++); */
+/*     snprintf(fname, sizeof(fname), "LMGC_GlobalFrictionContactProblem%.5d.hdf5",
+ * gfccounter++); */
 /*     printf("Dump of LMGC_GlobalFrictionContactProblem%.5d.hdf5", gfccounter); */
 
 /*     FILE * foutput  =  fopen(fname, "w"); */

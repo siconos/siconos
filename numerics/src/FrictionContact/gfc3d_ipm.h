@@ -18,42 +18,31 @@
 
 #include "NumericsMatrix.h"
 
-typedef struct
-{
-  double * globalVelocity;
-  double * reaction;
-  double * velocity;
-}
-  IPM_starting_point;
+typedef struct {
+  double* globalVelocity;
+  double* reaction;
+  double* velocity;
+} IPM_starting_point;
 
-typedef struct
-{
-  double * t_globalVelocity;
-  double * t_reaction;
-  double * t_velocity;
-}
-  IPM_tmp_point;
+typedef struct {
+  double* t_globalVelocity;
+  double* t_reaction;
+  double* t_velocity;
+} IPM_tmp_point;
 
-typedef struct
-{
+typedef struct {
   NumericsMatrix* mat;
   NumericsMatrix* inv_mat;
-}
-  IPM_change_of_variable;
+} IPM_change_of_variable;
 
-typedef struct
-{
-  double alpha_primal; // primal step length
-  double alpha_dual;   // dual step length
-  double sigma;        // centering parameter
-  double barr_param;   // barrier parameter
-}
-  IPM_internal_params;
+typedef struct {
+  double alpha_primal;  // primal step length
+  double alpha_dual;    // dual step length
+  double sigma;         // centering parameter
+  double barr_param;    // barrier parameter
+} IPM_internal_params;
 
-
-typedef struct
-{
-
+typedef struct {
   /* initial interior points */
   IPM_tmp_point* tmp_point;
 
@@ -66,14 +55,12 @@ typedef struct
   /* initial internal solver parameters */
   IPM_internal_params* internal_params;
 
-  double **tmp_vault_nd;
-  double **tmp_vault_m;
-}
-  Gfc3d_IPM_init_data;
-
+  double** tmp_vault_nd;
+  double** tmp_vault_m;
+} Gfc3d_IPM_init_data;
 
 typedef long double float_type;
- // typedef double float_type;
+// typedef double float_type;
 
 #define MIN_RELATIVE_SCALING sqrt(DBL_EPSILON)
 #define STANDARD 0
@@ -102,14 +89,16 @@ double getNewtonStepLength(const double* const x, const double* const dx,
                            const unsigned int vecSize, const unsigned int varsCount,
                            const double gamma);
 
-/* Returns array of step-lengths to the boundary reduced by a factor gamma. Uses long double. */
-double *array_getStepLength(const double * const x, const double * const dx, const unsigned int vecSize,
+/* Returns array of step-lengths to the boundary reduced by a factor gamma. Uses long double.
+ */
+double* array_getStepLength(const double* const x, const double* const dx,
+                            const unsigned int vecSize, const unsigned int varsCount,
+                            const double gamma);
+
+/* Returns the maximum step-length to the boundary reduced by a factor gamma. Uses long double.
+ */
+double getStepLength(const double* const x, const double* const dx, const unsigned int vecSize,
                      const unsigned int varsCount, const double gamma);
-
-
-/* Returns the maximum step-length to the boundary reduced by a factor gamma. Uses long double. */
-double getStepLength(const double * const x, const double * const dx, const unsigned int vecSize,
-                            const unsigned int varsCount, const double gamma);
 
 /* Returns the maximum step-length to the boundary reduced by a factor gamma. Uses long double.
  */
@@ -126,40 +115,46 @@ double getStepLength(const double* const x, const double* const dx, const unsign
  * \param type is the norm type used: NORM_2 = L-2, NORM_INF = L-inf
  */
 
-void primalResidual_s(const double * velocity, NumericsMatrix * H, const double * globalVelocity, const double * w,
-		    const double * s, double * out, double * rnorm, const double tol);
-void primalResidual(const double * velocity, NumericsMatrix * H, const double * globalVelocity, const double * w,
-                    double * out, double * rnorm, const double tol);
-void primalResidual_type(const double * velocity, NumericsMatrix * H, const double * globalVelocity, const double * w,
-                    double * out, double * rnorm, const double tol, const int type);
-void primalResidual_s_type(const double * velocity, NumericsMatrix * H, const double * globalVelocity, const double * w,
-        const double * s, double * out, double * rnorm, const double tol, const int type);
-
+void primalResidual_s(const double* velocity, NumericsMatrix* H, const double* globalVelocity,
+                      const double* w, const double* s, double* out, double* rnorm,
+                      const double tol);
+void primalResidual(const double* velocity, NumericsMatrix* H, const double* globalVelocity,
+                    const double* w, double* out, double* rnorm, const double tol);
+void primalResidual_type(const double* velocity, NumericsMatrix* H,
+                         const double* globalVelocity, const double* w, double* out,
+                         double* rnorm, const double tol, const int type);
+void primalResidual_s_type(const double* velocity, NumericsMatrix* H,
+                           const double* globalVelocity, const double* w, const double* s,
+                           double* out, double* rnorm, const double tol, const int type);
 
 /**
- * Returns the dual constraint vector for global fricprob ( M @ globalVelocity + f - H @ reaction )
+ * Returns the dual constraint vector for global fricprob ( M @ globalVelocity + f - H @
+ * reaction )
  * \param M is the mass matrix.
  * \param globalVelocity is the vector of generalized velocities.
  * \param H is the constraint matrix.
  * \param reaction is the vector of reaction forces at each contact point.
  * \param f is the constraint vector (vector of internal and external forces).
  * \param out os the result M x globalVelocity + f - H' x reaction vector.
- * \param rnorm is the relative 2-norm of out = |out| / max{|M x globalVelocity|, |f|, |H' x r|}
+ * \param rnorm is the relative 2-norm of out = |out| / max{|M x globalVelocity|, |f|, |H' x
+ * r|}
  * \param type is the norm type used: NORM_2 = L-2, NORM_INF = L-inf
  */
-void dualResidual(NumericsMatrix * M, const double * globalVelocity, NumericsMatrix * H, const double * reaction, const double * f,
-		  double * out, double * rnorm, const double tol);
-void dualResidual_type(NumericsMatrix * M, const double * globalVelocity, NumericsMatrix * H, const double * reaction, const double * f,
-      double * out, double * rnorm, const double tol, const int type);
+void dualResidual(NumericsMatrix* M, const double* globalVelocity, NumericsMatrix* H,
+                  const double* reaction, const double* f, double* out, double* rnorm,
+                  const double tol);
+void dualResidual_type(NumericsMatrix* M, const double* globalVelocity, NumericsMatrix* H,
+                       const double* reaction, const double* f, double* out, double* rnorm,
+                       const double tol, const int type);
 
-  /** Find a norm of vertor depending on:
-   *  type = NORM_2   = L-2 ( sqrt(sum(vec^2)) )
-   *  type = NORM_INF = L-inf ( max(abs(vec)) )
-   *  note: only use CBLAS routines. Extensibility to other types
-      \param vec is the vector
-      \param vecSize the size of the vector vec
-   */
-  double NV_norm_type(const unsigned int vecSize, const double * const vec, const int type);
+/** Find a norm of vertor depending on:
+ *  type = NORM_2   = L-2 ( sqrt(sum(vec^2)) )
+ *  type = NORM_INF = L-inf ( max(abs(vec)) )
+ *  note: only use CBLAS routines. Extensibility to other types
+    \param vec is the vector
+    \param vecSize the size of the vector vec
+ */
+double NV_norm_type(const unsigned int vecSize, const double* const vec, const int type);
 
 /**
  * Returns the scalar product of 2 vectors depending on:
@@ -168,7 +163,8 @@ void dualResidual_type(NumericsMatrix * M, const double * globalVelocity, Numeri
  * type = NORM_2_INF: <x,y>_2_inf = max_i norm_2 ( xi o yi )
  *
  */
-double xdoty_type(const unsigned int varsCount, const unsigned int vecSize, const double * x, const double * y, const int type);
+double xdoty_type(const unsigned int varsCount, const unsigned int vecSize, const double* x,
+                  const double* y, const int type);
 
 /**
  * Returns the Inf-norm of primal residual vecor ( velocity - H @ globalVelocity - w )
@@ -202,13 +198,14 @@ double xdoty_type(const unsigned int varsCount, const unsigned int vecSize, cons
 double complemResidualNorm(const double* const velocity, const double* const reaction,
                            const unsigned int vecSize, const unsigned int varsCount);
 
-/* Returns the type-norm of the complementarity residual vector = type-norm of the Jordan product velocity o reaction
- *\param type is the norm type used: NORM_2 = L-2, NORM_INF = L-inf, NORM_2_INF = L-inf conic = max {ui o ri}
+/* Returns the type-norm of the complementarity residual vector = type-norm of the Jordan
+ *product velocity o reaction
+ *\param type is the norm type used: NORM_2 = L-2, NORM_INF = L-inf, NORM_2_INF = L-inf conic =
+ *max {ui o ri}
  */
-double complemResidualNorm_type(const double * const velocity, const double * const reaction,
-                           const unsigned int vecSize, const unsigned int varsCount, const int type);
-
-
+double complemResidualNorm_type(const double* const velocity, const double* const reaction,
+                                const unsigned int vecSize, const unsigned int varsCount,
+                                const int type);
 
 /* Returns the 2-norm of the complementarity residual vector = 2-norm of the Jordan product
  * (Qp*velocity) o (Qp_inv * reaction)  */
@@ -233,63 +230,70 @@ void setErrorArray(double* error, const double pinfeas, const double dinfeas,
                    const double projerr);
 
 /* Return the 2-norm of the difference between two vectors */
-double norm2VecDiff (const double * vec1, const double * vec2, const unsigned int vecSize);
+double norm2VecDiff(const double* vec1, const double* vec2, const unsigned int vecSize);
 
-int gfc3d_compute_error_r(GlobalFrictionContactProblem* problem,
-                        double*  reaction, double*  velocity,
-                        double*  globalVelocity,
-                        double tolerance,
-                        SolverOptions * options,
-                        double norm_q, double norm_b,
-                        double* restrict error);
+int gfc3d_compute_error_r(GlobalFrictionContactProblem* problem, double* reaction,
+                          double* velocity, double* globalVelocity, double tolerance,
+                          SolverOptions* options, double norm_q, double norm_b,
+                          double* restrict error);
 
-void NM_clear_cone_matrix_H(NumericsMatrix *H, unsigned int n_cones_to_clear, int *cones_to_clear);
+void NM_clear_cone_matrix_H(NumericsMatrix* H, unsigned int n_cones_to_clear,
+                            int* cones_to_clear);
 
-NumericsMatrix * NM_extract(NumericsMatrix *A, int n_rows, int *target_rows, int n_cols, int *target_cols);
+NumericsMatrix* NM_extract(NumericsMatrix* A, int n_rows, int* target_rows, int n_cols,
+                           int* target_cols);
 
-double projectionError(const double * velocity, const double * reaction, const unsigned int nc, const double tol);
-double projectionError_norm_infinity_conic(const double * velocity, const double * reaction, const unsigned int nc);
-double projectionError_dual_norm_infinity_conic(const double * velocity, const double * reaction, const unsigned int nc);
+double projectionError(const double* velocity, const double* reaction, const unsigned int nc,
+                       const double tol);
+double projectionError_norm_infinity_conic(const double* velocity, const double* reaction,
+                                           const unsigned int nc);
+double projectionError_dual_norm_infinity_conic(const double* velocity, const double* reaction,
+                                                const unsigned int nc);
 
 /*
  * Velocity u is re-computed by vector r
  * on_dual_cone = 0: Error projection on cone K = max{ | ri - Pi_K (ri - ui) |_2 }, i = 1,...,n
- * on_dual_cone = 1: Error projection on dual cone K* = max{ | ui - Pi_K* (ui - ri) |_2 }, i = 1,...,n
+ * on_dual_cone = 1: Error projection on dual cone K* = max{ | ui - Pi_K* (ui - ri) |_2 }, i =
+ * 1,...,n
  */
-double projectionError_based_reaction_norm_infinity_conic(NumericsMatrix *H, NumericsMatrix *M,
-                    const double * f, const double * w, const double * reaction, const unsigned int varsCount,
-                    const int on_dual_cone);
+double projectionError_based_reaction_norm_infinity_conic(NumericsMatrix* H, NumericsMatrix* M,
+                                                          const double* f, const double* w,
+                                                          const double* reaction,
+                                                          const unsigned int varsCount,
+                                                          const int on_dual_cone);
 
 /* Routine is to read matrix-block in hdf5 file
  * type = 0 : return number of blocks (blk_index is neglected)
- * = 1: contact indices, = 2: body indices (in this case, the 1st element is the size of vector)
- * = 3: rank of block-matrix Hc (blk_index is neglected)
+ * = 1: contact indices, = 2: body indices (in this case, the 1st element is the size of
+ * vector) = 3: rank of block-matrix Hc (blk_index is neglected)
  */
-int *read_fricprob_block(const char* path, int type, int blk_index);
-
+int* read_fricprob_block(const char* path, int type, int blk_index);
 
 /* Return the classification BNRT of the input: u and r
  * these vectors belong to Lorentz cones
  */
-void classify_BNRT(const double * velocity, const double * reaction, const unsigned int vecSize, const unsigned int varsCount,
-                   int *nB, int *nN, int *nR, int *nT);
-
+void classify_BNRT(const double* velocity, const double* reaction, const unsigned int vecSize,
+                   const unsigned int varsCount, int* nB, int* nN, int* nR, int* nT);
 
 /* Return the classification BNRT of the input: orignal u (uN;uT) and r (rN; rT)
  * We need first a change of velocity : u_tilde = (uN + mu*|uT|; mu*uT)
  * these u_tilde and r belong to friction cones
  */
-void classify_BNRT_velocity_original(const double *mu, const double * velocity, const double * reaction, const unsigned int vecSize, const unsigned int varsCount,
-                   int *nB, int *nN, int *nR, int *nT);
+void classify_BNRT_velocity_original(const double* mu, const double* velocity,
+                                     const double* reaction, const unsigned int vecSize,
+                                     const unsigned int varsCount, int* nB, int* nN, int* nR,
+                                     int* nT);
 
 /* Return the classification BNRT of the input: modified u (uN + mu*|uT|; uT) and r (rN; rT)
  * these u and r belong to friction cones
  */
-void classify_BNRT_velocity_modified(const double *mu, const double * velocity, const double * reaction, const unsigned int vecSize, const unsigned int varsCount,
-                   int *nB, int *nN, int *nR, int *nT);
+void classify_BNRT_velocity_modified(const double* mu, const double* velocity,
+                                     const double* reaction, const unsigned int vecSize,
+                                     const unsigned int varsCount, int* nB, int* nN, int* nR,
+                                     int* nT);
 
-void classify_indices_R(const double * velocity, const double * reaction, const unsigned int vecSize, const unsigned int varsCount,
-                   int *nR, int *setR);
+void classify_indices_R(const double* velocity, const double* reaction,
+                        const unsigned int vecSize, const unsigned int varsCount, int* nR,
+                        int* setR);
 
-void printBlockVec(double * vec, int vecSize, int sizeBlock, int cl);
-
+void printBlockVec(double* vec, int vecSize, int sizeBlock, int cl);

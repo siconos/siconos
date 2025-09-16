@@ -37,22 +37,19 @@ int globalRollingFrictionContact_test_function(TestCase *current) {
   GlobalRollingFrictionContactProblem *problem =
       globalRollingFrictionContact_new_from_filename(current->filename);
 
-  problem->name  = malloc(1 + strlen(current->filename));
+  problem->name = malloc(1 + strlen(current->filename));
   strcpy(problem->name, current->filename);
 
   char *problem_name = NULL;
-  char *str = (char *) malloc(200);
-  strcpy( str, problem->name );
-  const char * separators = "/";
-  problem_name = strtok( str, separators );
-  for(int i=0; i<5; i++)
-  {
-    if(problem_name != NULL) problem_name = strtok ( NULL, separators );
+  char *str = (char *)malloc(200);
+  strcpy(str, problem->name);
+  const char *separators = "/";
+  problem_name = strtok(str, separators);
+  for (int i = 0; i < 5; i++) {
+    if (problem_name != NULL) problem_name = strtok(NULL, separators);
   }
 
-  problem_name = strtok ( problem_name, "." );
-
-
+  problem_name = strtok(problem_name, ".");
 
   numerics_set_verbose(1);
 
@@ -122,20 +119,22 @@ int globalRollingFrictionContact_test_function(TestCase *current) {
   else
     printf("test: failure\n");
 
-  if (current->options->solverId == SICONOS_GLOBAL_ROLLING_FRICTION_3D_IPM)
-  {
+  if (current->options->solverId == SICONOS_GLOBAL_ROLLING_FRICTION_3D_IPM) {
     // Take projerr value from test
     double *projerr_ptr = current->options->solverData;
-    printf("\nsumry: %d  %.2e  %.2e   %5i %5i    %.6f   %s\n",
-          info, current->options->dparam[SICONOS_DPARAM_RESIDU], *projerr_ptr,
-          current->options->iparam[SICONOS_IPARAM_ITER_DONE], NC,
-          (double)(t2-t1)/(double)clk_tck, problem_name);
-  }
-  else
-  {
-    // printf("\nsumry: %d %03.2e %04i %05.4f ", info, current->options->dparam[SICONOS_DPARAM_RESIDU], current->options->iparam[SICONOS_IPARAM_ITER_DONE], (double)(t2-t1)/(double)clk_tck);
+    printf("\nsumry: %d  %.2e  %.2e   %5i %5i    %.6f   %s\n", info,
+           current->options->dparam[SICONOS_DPARAM_RESIDU], *projerr_ptr,
+           current->options->iparam[SICONOS_IPARAM_ITER_DONE], NC,
+           (double)(t2 - t1) / (double)clk_tck, problem_name);
+  } else {
+    // printf("\nsumry: %d %03.2e %04i %05.4f ", info,
+    // current->options->dparam[SICONOS_DPARAM_RESIDU],
+    // current->options->iparam[SICONOS_IPARAM_ITER_DONE], (double)(t2-t1)/(double)clk_tck);
     // printf("%02i %05i %05i %s\n\n", dim, NC, n, current->filename);
-    printf("\nsumry: %d  %9.2e  %5i  %10.4f", info, current->options->dparam[SICONOS_DPARAM_RESIDU], current->options->iparam[SICONOS_IPARAM_ITER_DONE], (double)(t2-t1)/(double)clk_tck);
+    printf("\nsumry: %d  %9.2e  %5i  %10.4f", info,
+           current->options->dparam[SICONOS_DPARAM_RESIDU],
+           current->options->iparam[SICONOS_IPARAM_ITER_DONE],
+           (double)(t2 - t1) / (double)clk_tck);
     printf("%3i %5i %5i     %s\n\n", dim, NC, n, current->filename);
   }
 

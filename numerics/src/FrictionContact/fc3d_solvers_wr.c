@@ -19,14 +19,14 @@
 
 #include <stdlib.h>  // for malloc, calloc
 
-#include "CSparseMatrix.h"        // for CSparseMatrix
+#include "CSparseMatrix.h"                 // for CSparseMatrix
 #include "FrictionContactProblem.h"        // for FrictionContactProblem
 #include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
 #include "NumericsMatrix.h"                // for NM_create, NM_display, NM_eye
 #include "NumericsSparseMatrix.h"          // for NumericsSparseMatrix, NSM_...
 #include "SiconosBlas.h"                   // for cblas_dcopy
 
-//#define TEST_COND
+// #define TEST_COND
 
 #pragma GCC diagnostic ignored "-Wmissing-prototypes"
 

@@ -45,8 +45,8 @@
 #include "sanitizer.h"
 
 #define DEBUG_NOCOLOR
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
 #define NB_APPROX 10
@@ -65,7 +65,7 @@ enum { TAKEOFF_CASE, STICKING_CASE, SLIDING_CASE };
 #define LAST_MODEL_STATUS 3
 #define LAST_SOLVE_STATUS 4
 
-//#define SMALL_APPROX
+// #define SMALL_APPROX
 
 #include <errno.h>
 #include <fcntl.h>
@@ -893,7 +893,7 @@ static int fc3d_AVI_gams_base(FrictionContactProblem* problem, double* reaction,
                 free(pts);*/
 
       } else  // r = 0, or r in int(cone) but other interactions moved u
-      bad_angle : {
+      bad_angle: {
         double offset_angle = atan2(ri[2], ri[1]);
         if (offset_angle >= 0.) {
           offset_angle -= M_PI;

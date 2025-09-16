@@ -17,43 +17,42 @@
  */
 
 #define _XOPEN_SOURCE 700
-#include <stdio.h>                       // for printf
-#include <string.h>                      // for strcmp
+#include <stdio.h>   // for printf
+#include <string.h>  // for strcmp
+
+#include "SiconosConfig.h"               // for SICONOS_HAS_MPI // IWYU pragma: keep
 #include "frictionContact_test_utils.h"  // for build_test_collection, frict...
 #include "test_utils.h"                  // for data_collection, free_test_c...
-#include "SiconosConfig.h" // for SICONOS_HAS_MPI // IWYU pragma: keep
 
-#define @PROBLEM_COLLECTION@ 1
+#define @PROBLEM_COLLECTION@1
 
 #ifdef SICONOS_HAS_MPI
 #include "mpi.h"
 #endif
 
-int main (int argc, char *argv[])
-{
-  const char ** _data_collection = data_collection();
+int main(int argc, char *argv[]) {
+  const char **_data_collection = data_collection();
   int n_data = 0;
 
 #ifdef SICONOS_HAS_MPI
   MPI_Init(&argc, &argv);
 #endif
 
-  while (strcmp(_data_collection[n_data], "---") !=0)
-    {
-      n_data++;
-    }
+  while (strcmp(_data_collection[n_data], "---") != 0) {
+    n_data++;
+  }
   printf("number of data = %i\n", n_data);
 
   int number_of_tests;
 
-  TestCase * collection = build_test_collection(n_data, _data_collection, &number_of_tests);
+  TestCase *collection = build_test_collection(n_data, _data_collection, &number_of_tests);
 
 #if defined(TEST_ADMM_COLLECTION_FCLIB)
   collection[1].will_fail = 1;  // FC3D ADMM LMGC_100_PR_PerioBox-i00361-60-03000.hdf5
   collection[3].will_fail = 1;  // FC3D ADMM LMGC_100_PR_PerioBox-i00361-60-03000.hdf5
 #endif
 #if defined(TEST_ADMM_COLLECTION_1)
-  collection[24].will_fail = 1;   /* FC3D ADMM	./data/Confeti-ex13-Fc3D-SBM.dat */
+  collection[24].will_fail = 1; /* FC3D ADMM	./data/Confeti-ex13-Fc3D-SBM.dat */
 #endif
 
   printf("%i tests for %i data files.\n", number_of_tests, n_data);

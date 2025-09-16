@@ -119,7 +119,8 @@ double Compute_NCP_error2(int contact, double error);
 void compute_Z_GlockerFixedP(int contact, double* reactionstep);
 
 /** free memory for friction contact to NCP-Glocker */
-void NCPGlocker_free(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options);
+void NCPGlocker_free(FrictionContactProblem* problem, FrictionContactProblem* localproblem,
+                     SolverOptions* localsolver_options);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

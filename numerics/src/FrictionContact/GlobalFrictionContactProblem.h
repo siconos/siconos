@@ -62,8 +62,8 @@ struct GlobalFrictionContactProblem {
   NumericsMatrix *M_inverse;
 
   /** name of the problem **/
-  char * name;
-  
+  char *name;
+
   /** opaque environment, solver specific */
   void *env;
 };

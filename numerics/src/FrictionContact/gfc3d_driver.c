@@ -18,22 +18,20 @@
 #include <assert.h>  // for assert
 #include <stdio.h>   // for NULL, fprintf, stderr
 #include <stdlib.h>  // for exit, EXIT_FAILURE
+#include <string.h>
+#include <time.h>
 
 #include "Friction_cst.h"                  // for SICONOS_GLOBAL_FRICTION_3D...
 #include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
 #include "NonSmoothDrivers.h"              // for gfc3d_driver
 #include "NumericsFwd.h"                   // for SolverOptions, GlobalFrict...
 #include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dscal
+#include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dscal
 #include "SolverOptions.h"                 // for SolverOptions, solver_opti...
 #include "gfc3d_Solvers.h"                 // for gfc3d_ACLMFixedPoint, gfc3...
 #include "gfc3d_balancing.h"
 #include "gfc3d_compute_error.h"
-#include <string.h>
-#include <time.h>
-
-#include "SiconosBlas.h"   // for cblas_dcopy, cblas_dscal
 #include "gfc3d_ipm.h"
-
 #include "numerics_verbose.h"
 #include "siconos_debug.h"
 
@@ -109,7 +107,7 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double* reaction, double
     fprintf(fileName, "%s", problem_name);
     fclose(fileName);
   }
-   int info = -1;
+  int info = -1;
 
   if (problem->dimension != 3)
     numerics_error(
@@ -186,7 +184,6 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double* reaction, double
       /* therfore the solver does not account for the possible drift of error measure between
          the balanced problem and the original one */
 
-
       GlobalFrictionContactProblem* balanced_problem =
           gfc3d_balancing_problem(problem, options);
       gfc3d_balancing_go_to_balanced_variables(balanced_problem, options, reaction, velocity,
@@ -199,7 +196,7 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double* reaction, double
       // int info_check_drift =
       gfc3d_balancing_check_drift(balanced_problem, problem, reaction, velocity,
                                   globalVelocity, options);
-      
+
       balanced_problem = gfc3d_balancing_free(balanced_problem, options);
 
       break;

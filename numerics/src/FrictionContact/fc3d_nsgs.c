@@ -44,19 +44,16 @@
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
 
-#include "siconos_debug.h"                                     // for DEBUG_EXPR
-#include "NumericsVector.h"
-
-#include "gfc3d_ipm.h"
-#include "projectionOnCone.h"        // for projectionOnCone
 #include <time.h>
 
-
+#include "NumericsVector.h"
+#include "gfc3d_ipm.h"
 #include "op3x3.h"
-#include "siconos_debug.h"  // for DEBUG_EXPR
+#include "projectionOnCone.h"  // for projectionOnCone
+#include "siconos_debug.h"     // for DEBUG_EXPR
+#include "siconos_debug.h"     // for DEBUG_EXPR
 
-
-//#define FCLIB_OUTPUT
+// #define FCLIB_OUTPUT
 
 #ifdef FCLIB_OUTPUT
 static int fccounter = -1;
@@ -153,7 +150,6 @@ void fc3d_nsgs_initialize_local_solver(
     local_function_toolkit->perform_relaxation = &performRelaxation_3;
     local_function_toolkit->light_error_squared = &light_error_squared_3;
     local_function_toolkit->squared_norm = &squared_norm_3;
-
   }
 
   /** Connect to local solver */
@@ -288,7 +284,7 @@ void fc3d_nsgs_initialize_local_solver(
       fc3d_unitary_enumerative_initialize(localproblem);
       break;
     }
-  default: {
+    default: {
       numerics_error("fc3d_nsgs_initialize_local_solver",
                      "Numerics, fc3d_nsgs failed. Unknown internal solver : %s.\n",
                      solver_options_id_to_name(localsolver_options->solverId));
@@ -366,7 +362,6 @@ static void acceptLocalReactionFiltered(FrictionContactProblem *localproblem,
         "with local_error = %e\n",
         contact, iter, localsolver_options->dparam[SICONOS_DPARAM_RESIDU]);
 
-
 #ifdef FCLIB_OUTPUT
 
     /* printf("step counter value = %i\n", localsolver_options->iparam[19]); */
@@ -406,7 +401,6 @@ static void acceptLocalReactionFiltered(FrictionContactProblem *localproblem,
   } else
     memcpy(&reaction[contact * localproblem->dimension], localreaction,
            sizeof(double) * localproblem->dimension);
-
 }
 
 static double calculateFullErrorAdaptiveInterval(FrictionContactProblem *problem,
@@ -517,7 +511,6 @@ static int determine_convergence_with_full_final(FrictionContactProblem *problem
         "--------------- FC3D - NSGS - Iteration %i "
         "Residual = %14.7e > %7.3e",
         iter, error, *tolerance);
-
   }
   return hasNotConverged;
 }
@@ -560,7 +553,7 @@ void fc3d_nsgs(FrictionContactProblem *problem, double *reaction, double *veloci
   double localreaction[3];
 
   /*****  NSGS Iterations *****/
-  int iter = 0;      /* Current iteration number */
+  int iter = 0; /* Current iteration number */
 
   double error = 1.; /* Current error */
   int hasNotConverged = 1;
@@ -617,7 +610,7 @@ void fc3d_nsgs(FrictionContactProblem *problem, double *reaction, double *veloci
                    "SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_ADAPTIVE (3)");
     return;
   }
-// FILE *iterates = NULL;
+  // FILE *iterates = NULL;
   /*****  NSGS Iterations *****/
 
   /* A special case for the most common options (should correspond
@@ -815,7 +808,6 @@ void fc3d_nsgs(FrictionContactProblem *problem, double *reaction, double *veloci
       /*   printf("number of frozen contacts %i at iter : %i over number of contacts: %i\n",
        * frozen_contact, iter, nc ); */
       /* } */
-
     }
   }
   /* Full criterium */
@@ -826,7 +818,6 @@ void fc3d_nsgs(FrictionContactProblem *problem, double *reaction, double *veloci
 
     hasNotConverged = determine_convergence(error, dparam[SICONOS_DPARAM_TOL], iter, options);
   }
-
 
   *info = hasNotConverged;
 
@@ -847,9 +838,7 @@ void fc3d_nsgs(FrictionContactProblem *problem, double *reaction, double *veloci
   fc3d_local_problem_free(localproblem, problem);
 
   if (scontacts) free(scontacts);
-   
 }
-
 
 void fc3d_nsgs_set_default(SolverOptions *options) {
   options->iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] =
@@ -875,6 +864,6 @@ void fc3d_nsgs_set_default(SolverOptions *options) {
   options->internalSolvers[0] =
       solver_options_create(SICONOS_FRICTION_3D_ONECONTACT_NSN_GP_HYBRID);
   // Printing in the same style as in IPM solver
-  options->iparam[SICONOS_FRICTION_3D_NSGS_PRINTING_LIKE_IPM] = SICONOS_FRICTION_3D_NSGS_PRINTING_LIKE_IPM_TRUE;
-
+  options->iparam[SICONOS_FRICTION_3D_NSGS_PRINTING_LIKE_IPM] =
+      SICONOS_FRICTION_3D_NSGS_PRINTING_LIKE_IPM_TRUE;
 }

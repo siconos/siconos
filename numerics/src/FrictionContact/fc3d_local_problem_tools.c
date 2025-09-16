@@ -25,27 +25,26 @@
 #include "NumericsMatrix.h"          // for NM_create_from_data, NumericsMatrix
 #include "SparseBlockMatrix.h"
 
-
 struct LocalProblemFunctionToolkit* localProblemFunctionToolkit_new() {
-  struct LocalProblemFunctionToolkit * lpft = (struct LocalProblemFunctionToolkit*)malloc(sizeof(struct LocalProblemFunctionToolkit));
-   
+  struct LocalProblemFunctionToolkit* lpft =
+      (struct LocalProblemFunctionToolkit*)malloc(sizeof(struct LocalProblemFunctionToolkit));
+
   lpft->local_solver = NULL;
   lpft->update_local_problem = NULL;
   lpft->post_processed_local_result = NULL;
-  lpft->free_local_solver =NULL;
+  lpft->free_local_solver = NULL;
   return lpft;
 }
-void localProblemFunctionToolkit_display(struct LocalProblemFunctionToolkit* lpft)
-{
+void localProblemFunctionToolkit_display(struct LocalProblemFunctionToolkit* lpft) {
   printf("local_solver %p\n ", lpft->local_solver);
   printf("update_local_problem %p\n ", lpft->update_local_problem);
   printf("post_processed_local_result %p\n ", lpft->post_processed_local_result);
   printf("free_local_solver %p\n ", lpft->free_local_solver);
 };
-void fc3d_local_problem_compute_q(FrictionContactProblem * problem, FrictionContactProblem * localproblem, double *reaction, int contact)
-{
-
-  double *qLocal = localproblem->q;
+void fc3d_local_problem_compute_q(FrictionContactProblem* problem,
+                                  FrictionContactProblem* localproblem, double* reaction,
+                                  int contact) {
+  double* qLocal = localproblem->q;
 
   int n = 3 * problem->numberOfContacts;
 
@@ -59,17 +58,12 @@ void fc3d_local_problem_compute_q(FrictionContactProblem * problem, FrictionCont
   NM_row_prod_no_diag3(n, contact, 3 * contact, problem->M, reaction, qLocal, false);
 }
 
-
-void fc3d_local_problem_fill_M(FrictionContactProblem * problem, FrictionContactProblem * localproblem, int contact)
-{
-
-  if (problem->M->storageType == NM_SPARSE)
-    {
-      localproblem->M->matrix0 = problem->M->matrix1->block[contact];
-    }
-  else
+void fc3d_local_problem_fill_M(FrictionContactProblem* problem,
+                               FrictionContactProblem* localproblem, int contact) {
+  if (problem->M->storageType == NM_SPARSE) {
+    localproblem->M->matrix0 = problem->M->matrix1->block[contact];
+  } else
     NM_extract_diag_block3(problem->M, contact, &localproblem->M->matrix0);
-
 }
 
 FrictionContactProblem* fc3d_local_problem_allocate(FrictionContactProblem* problem) {
@@ -92,11 +86,10 @@ FrictionContactProblem* fc3d_local_problem_allocate(FrictionContactProblem* prob
 }
 
 void fc3d_local_problem_free(FrictionContactProblem* localproblem,
-                             FrictionContactProblem* problem)
-{
-  if(problem->M->storageType == NM_SPARSE_BLOCK || problem->M->storageType == NM_SPARSE)
-  {
-    /* we release the pointer to avoid deallocation of the diagonal blocks of the original matrix of the problem*/
+                             FrictionContactProblem* problem) {
+  if (problem->M->storageType == NM_SPARSE_BLOCK || problem->M->storageType == NM_SPARSE) {
+    /* we release the pointer to avoid deallocation of the diagonal blocks of the original
+     * matrix of the problem*/
     localproblem->M->matrix0 = NULL;
   }
   frictionContactProblem_free(localproblem);
