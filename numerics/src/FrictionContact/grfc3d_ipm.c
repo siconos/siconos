@@ -18,7 +18,6 @@
 
 
 #include "grfc3d_compute_error.h"       // for grfc3d_compute_error
-#include "GlobalRollingFrictionContactProblem.h"
 #include "grfc3d_Solvers.h"
 #include "SolverOptions.h"
 #include "Friction_cst.h"
@@ -39,7 +38,6 @@
 
 #include <time.h>                       // for clock()
 #include "gfc3d_ipm.h"                  // for primalResidual, dualResidual, ...
-#include "grfc3d_ipm.h"                 // for dnrm2sqrl
 #include "cs.h"
 
 #include <complex.h>
@@ -175,12 +173,6 @@ static double grfc3d_complemResidualNorm(const double *const velocity, const dou
   free(resid);
   return norm2;
 }
-
-NumericsMatrix *compute_JQinv2Jt(const double *u1, const double *r1, const double *u2,
-                                 const double *r2, const size_t vecSize,
-                                 const size_t varsCount);
-
-CS_INT cs_dupl_zeros(cs *A);
 
 /* ------------------------- Helper functions ------------------------------ */
 /** Return a speacial sub-vector such that
@@ -1003,7 +995,7 @@ static  NumericsMatrix *  multiply_PinvH(const double *u1, const double *r1, con
 
 #include "cs.h"
 /* remove duplicate entries and zero entries from A */
-CS_INT cs_dupl_zeros (cs *A)
+static CS_INT cs_dupl_zeros (cs *A)
 {
     CS_INT i, j, p, q, nz = 0, n, m, *Ap, *Ai, *w ;
     CS_ENTRY *Ax ;
@@ -1124,6 +1116,102 @@ static csn *cs_chol_2 (const cs *A, const css *S, size_t iteration)
     return (cs_ndone (N, E, c, x, 1)) ; /* success: free E,s,x; return N */
 }
 
+
+
+
+
+
+
+static NumericsMatrix * compute_JQinv2Jt(const double *u1, const double *r1, const double *u2, const double *r2, const size_t vecSize, const size_t varsCount)
+{
+  size_t d3 = (size_t)(vecSize / varsCount); // d3 = 3
+  assert(d3 == 3);
+  size_t d5 = d3+2;  // d5 = 5
+
+  double *x = (double*)calloc(vecSize, sizeof(double));
+  double *z = (double*)calloc(vecSize, sizeof(double));
+  Nesterov_Todd_vector(3, u1, r1, vecSize, varsCount, x); // x = pinv2_bar
+  Nesterov_Todd_vector(3, u2, r2, vecSize, varsCount, z); // z = pinv2_tilde
+
+  NumericsMatrix * out = NM_create(NM_SPARSE, 5*varsCount, 5*varsCount);
+  NM_triplet_alloc(out, (9+2*(2*2))*varsCount);
+  CSparseMatrix *out_triplet = out->matrix2->triplet;
+
+  float_type data=0., nub=0., nrb=0., det_u=0., det_r=0.;
+
+  int id3, id5;
+  for(size_t i = 0; i < varsCount; i++)
+  {
+    id3 = i*d3;
+    id5 = i*d5;
+
+    // Assign data for out[0,0]
+    cs_entry(out_triplet, id5, id5, dnrm2sqrl(d3, x+id3) + dnrm2sqrl(d3, z+id3));
+
+    // Assign data for out[0,1:2] & out[1:2, 0]
+    for(size_t k = 1; k < d3; k++)
+    {
+      data = 2.*x[id3]*x[id3+k];
+      cs_entry(out_triplet, id5, id5+k, data);
+      cs_entry(out_triplet, id5+k, id5, data);
+    }
+
+    // Assign data for out[0,3:4] & out[3:4, 0]
+    for(size_t k = 1; k < d3; k++)
+    {
+      data = 2.*z[id3]*z[id3+k];
+      cs_entry(out_triplet, id5, id5+2+k, data);
+      cs_entry(out_triplet, id5+2+k, id5, data);
+    }
+
+    // Assign data for matrix A = out[1:2,1:2]
+    // Compute det(r1), det(u1)
+    nrb = dnrm2l(d3-1,r1+id3+1);
+    nub = dnrm2l(d3-1,u1+id3+1);
+    // det_r = (r1[id3]+nrb)*(r1[id3]-nrb);
+    det_r = r1[id3]-nrb;
+    if (det_r <= 0.) det_r = (r1[id3]+nrb)*DBL_EPSILON; else det_r = (r1[id3]+nrb)*(r1[id3]-nrb);
+
+    // det_u = (u1[id3]+nub)*(u1[id3]-nub);
+    det_u = u1[id3]-nub;
+    if (det_u < 0.) det_u = (u1[id3]+nub)*DBL_EPSILON; else det_u = (u1[id3]+nub)*(u1[id3]-nub);
+
+    for(size_t k = 1; k < d3; k++)
+    {
+      for(size_t l = 1; l < d3; l++)
+      {
+        if (k==l) data = sqrtl(det_u/det_r) + 2.*x[id3+k]*x[id3+l];
+        else data = 2.*x[id3+k]*x[id3+l];
+        cs_entry(out_triplet, id5+k, id5+l, data);
+      }
+    }
+
+    // Assign data for matrix C = out[3:4,3:4]
+    // Compute det(r2), det(u2)
+    nrb = dnrm2l(d3-1,r2+id3+1);
+    nub = dnrm2l(d3-1,u2+id3+1);
+    // det_r = (r2[id3]+nrb)*(r2[id3]-nrb);
+    det_r = r2[id3]-nrb;
+    if (det_r <= 0.) det_r = (r2[id3]+nrb)*DBL_EPSILON; else det_r = (r2[id3]+nrb)*(r2[id3]-nrb);
+
+    // det_u = (u2[id3]+nub)*(u2[id3]-nub);
+    det_u = u2[id3]-nub;
+    if (det_u < 0.) det_u = (u2[id3]+nub)*DBL_EPSILON; else det_u = (u2[id3]+nub)*(u2[id3]-nub);
+
+    for(size_t k = 1; k < d3; k++)
+    {
+      for(size_t l = 1; l < d3; l++)
+      {
+        if (k==l) data = sqrtl(det_u/det_r) + 2.*z[id3+k]*z[id3+l];
+        else data = 2.*z[id3+k]*z[id3+l];
+        cs_entry(out_triplet, id5+k+2, id5+l+2, data);
+      }
+    }
+  }
+
+  free(x); free(z);
+  return out;
+}
 
 
 
@@ -2045,102 +2133,6 @@ static NumericsMatrix * compute_JQinv(const double *u1, const double *r1, const 
   free(x); free(z);
   return out;
 }
-
-
-
-
-
-NumericsMatrix * compute_JQinv2Jt(const double *u1, const double *r1, const double *u2, const double *r2, const size_t vecSize, const size_t varsCount)
-{
-  size_t d3 = (size_t)(vecSize / varsCount); // d3 = 3
-  assert(d3 == 3);
-  size_t d5 = d3+2;  // d5 = 5
-
-  double *x = (double*)calloc(vecSize, sizeof(double));
-  double *z = (double*)calloc(vecSize, sizeof(double));
-  Nesterov_Todd_vector(3, u1, r1, vecSize, varsCount, x); // x = pinv2_bar
-  Nesterov_Todd_vector(3, u2, r2, vecSize, varsCount, z); // z = pinv2_tilde
-
-  NumericsMatrix * out = NM_create(NM_SPARSE, 5*varsCount, 5*varsCount);
-  NM_triplet_alloc(out, (9+2*(2*2))*varsCount);
-  CSparseMatrix *out_triplet = out->matrix2->triplet;
-
-  float_type data=0., nub=0., nrb=0., det_u=0., det_r=0.;
-
-  int id3, id5;
-  for(size_t i = 0; i < varsCount; i++)
-  {
-    id3 = i*d3;
-    id5 = i*d5;
-
-    // Assign data for out[0,0]
-    cs_entry(out_triplet, id5, id5, dnrm2sqrl(d3, x+id3) + dnrm2sqrl(d3, z+id3));
-
-    // Assign data for out[0,1:2] & out[1:2, 0]
-    for(size_t k = 1; k < d3; k++)
-    {
-      data = 2.*x[id3]*x[id3+k];
-      cs_entry(out_triplet, id5, id5+k, data);
-      cs_entry(out_triplet, id5+k, id5, data);
-    }
-
-    // Assign data for out[0,3:4] & out[3:4, 0]
-    for(size_t k = 1; k < d3; k++)
-    {
-      data = 2.*z[id3]*z[id3+k];
-      cs_entry(out_triplet, id5, id5+2+k, data);
-      cs_entry(out_triplet, id5+2+k, id5, data);
-    }
-
-    // Assign data for matrix A = out[1:2,1:2]
-    // Compute det(r1), det(u1)
-    nrb = dnrm2l(d3-1,r1+id3+1);
-    nub = dnrm2l(d3-1,u1+id3+1);
-    // det_r = (r1[id3]+nrb)*(r1[id3]-nrb);
-    det_r = r1[id3]-nrb;
-    if (det_r <= 0.) det_r = (r1[id3]+nrb)*DBL_EPSILON; else det_r = (r1[id3]+nrb)*(r1[id3]-nrb);
-
-    // det_u = (u1[id3]+nub)*(u1[id3]-nub);
-    det_u = u1[id3]-nub;
-    if (det_u < 0.) det_u = (u1[id3]+nub)*DBL_EPSILON; else det_u = (u1[id3]+nub)*(u1[id3]-nub);
-
-    for(size_t k = 1; k < d3; k++)
-    {
-      for(size_t l = 1; l < d3; l++)
-      {
-        if (k==l) data = sqrtl(det_u/det_r) + 2.*x[id3+k]*x[id3+l];
-        else data = 2.*x[id3+k]*x[id3+l];
-        cs_entry(out_triplet, id5+k, id5+l, data);
-      }
-    }
-
-    // Assign data for matrix C = out[3:4,3:4]
-    // Compute det(r2), det(u2)
-    nrb = dnrm2l(d3-1,r2+id3+1);
-    nub = dnrm2l(d3-1,u2+id3+1);
-    // det_r = (r2[id3]+nrb)*(r2[id3]-nrb);
-    det_r = r2[id3]-nrb;
-    if (det_r <= 0.) det_r = (r2[id3]+nrb)*DBL_EPSILON; else det_r = (r2[id3]+nrb)*(r2[id3]-nrb);
-
-    // det_u = (u2[id3]+nub)*(u2[id3]-nub);
-    det_u = u2[id3]-nub;
-    if (det_u < 0.) det_u = (u2[id3]+nub)*DBL_EPSILON; else det_u = (u2[id3]+nub)*(u2[id3]-nub);
-
-    for(size_t k = 1; k < d3; k++)
-    {
-      for(size_t l = 1; l < d3; l++)
-      {
-        if (k==l) data = sqrtl(det_u/det_r) + 2.*z[id3+k]*z[id3+l];
-        else data = 2.*z[id3+k]*z[id3+l];
-        cs_entry(out_triplet, id5+k+2, id5+l+2, data);
-      }
-    }
-  }
-
-  free(x); free(z);
-  return out;
-}
-
 
 
 
