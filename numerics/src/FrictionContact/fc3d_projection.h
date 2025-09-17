@@ -68,6 +68,13 @@ void fc3d_projection_update(int number, FrictionContactProblem* problem,
                             FrictionContactProblem* localproblem, double* reaction,
                             SolverOptions* options);
 
+/** Same as above but usable in parallel
+ * 
+ */
+void fc3d_projection_update_parallel(int number, FrictionContactProblem* problem,
+                                     FrictionContactProblem* localproblem, double* reaction,
+                                     SolverOptions* options);
+
 /** Update friction-contact 3D projection solver: formalize local problem for one contact.
  * \param number (position in global matrix) of the considered contact
  * \param problem :  the global problem to solve

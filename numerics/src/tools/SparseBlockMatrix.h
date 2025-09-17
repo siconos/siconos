@@ -628,6 +628,9 @@ void SBM_free_from_SBCM(SparseBlockStructuredMatrix* M);
 int SBM_from_csparse(int blocksize, const CSparseMatrix* const sparseMat,
                      SparseBlockStructuredMatrix* outSBM);
 
+int SBM_from_csparse_2(int blocksize, const CSparseMatrix* const sparseMat,
+                       SparseBlockStructuredMatrix* A);
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif

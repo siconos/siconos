@@ -98,7 +98,7 @@ FrictionContactProblem* from_fclib_local(const fclib_local* fclib_problem) {
 
   W.nz = fclib_problem->W->nz;
 
-  SBM_from_csparse(problem->dimension, &W, problem->M->matrix1);
+  SBM_from_csparse_2(problem->dimension, &W, problem->M->matrix1);
 
   free(W.p);
   free(W.i);

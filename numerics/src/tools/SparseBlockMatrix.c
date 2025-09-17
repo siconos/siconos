@@ -37,6 +37,8 @@
 #include "op3x3.h"             // for mvp3x3, mvp_alpha3x3
 #include "siconos_debug.h"     // for DEBUG_PRINTF, DEBUG_END, DEBUG_BEGIN
 
+#include "NM_conversions.h"
+
 #ifdef DEBUG_MESSAGES
 #include "NumericsMatrix.h"
 #endif
@@ -2568,6 +2570,168 @@ void SBM_free_from_SBCM(SparseBlockStructuredMatrix* M) {
   free(M->index2_data);
   free(M->block);
   free(M);
+}
+
+int SBM_from_csparse_2(int blocksize, const CSparseMatrix* const sparseMat,
+                       SparseBlockStructuredMatrix* A) {
+
+  assert(sparseMat);
+  assert(sparseMat->p);
+  assert(sparseMat->i);
+  assert(sparseMat->x);
+
+  assert(sparseMat->m % blocksize == 0);
+  assert(sparseMat->n % blocksize == 0);
+
+  /* Convert CSparse to CSR format */
+  CSparseMatrix *sparseMatcsr;
+
+  if (sparseMat->nz >= 0) { // triplet
+    sparseMatcsr = NM_triplet_to_csr(sparseMat);
+  } else if (sparseMat->nz == -1) { // csc
+    sparseMatcsr = NM_csc_to_csr(sparseMat);
+  } else if (sparseMat->nz == -2) { // csr
+    sparseMatcsr = sparseMat;
+  }
+
+  size_t R = blocksize;
+  size_t C = blocksize;
+  size_t RC = R * C;
+
+  size_t n_brow = sparseMatcsr->m / R;
+  size_t n_bcol = sparseMatcsr->n / C;
+
+  /* Count number of non-empty blocks */
+  size_t n_blcks = 0;
+  size_t *blocks = (size_t *)calloc(n_bcol, sizeof(size_t));
+
+  size_t last_nonempty_line = 0; 
+
+  /* TODO : COMPUTE INDEX OF LAST NON EMPTY LINE IN THUIS LOOP */
+
+  for (size_t bi = 0; bi < n_brow; bi++) {
+    for (size_t r = 0; r < R; r++) {
+      size_t i = R * bi + r; // row index
+      for (size_t jj = sparseMatcsr->p[i]; jj < sparseMatcsr->p[i + 1]; jj++) { // go through row i
+        size_t j = sparseMatcsr->i[jj]; // column index
+        size_t bj = j / C;
+        size_t c = j % C;
+
+        if ( blocks[bj] != bi + 1) {
+          blocks[bj] = bi + 1;
+          n_blcks++;
+          last_nonempty_line = bi;
+          /* if ( sparseMatcsr->x[jj] != 0) {
+            blocks[bj] = bi + 1;
+            n_blcks++;
+            last_nonempty_line = bi;
+          } */
+        }
+      }
+    }
+  }
+
+  // printf("Number of blocks: %d\n", n_blcks);
+
+  free(blocks);
+
+  /* Fill SparseBlockMatrix */
+  A->blocknumber0 = (int)n_brow;
+  A->blocknumber1 = (int)n_bcol;
+  A->diagonal_blocks = NULL;
+
+  A->blocksize0 = (unsigned int*)malloc(A->blocknumber0 * sizeof(unsigned int));
+  A->blocksize1 = (unsigned int*)malloc(A->blocknumber1 * sizeof(unsigned int));
+
+  for (unsigned int i = 0; i < A->blocknumber0; i++) {
+    A->blocksize0[i] = (i + 1) * blocksize;
+  }
+
+  for (unsigned int i = 0; i < A->blocknumber1; i++) {
+    A->blocksize1[i] = (i + 1) * blocksize;
+  }
+
+  /* Allocate array of blocks. Why not in a single contiguous blocksize * blocksize * nbblocks array ? */
+  A->nbblocks = n_blcks;
+  if (!A->block) A->block = (double**)malloc(A->nbblocks * sizeof(double *));
+  for (unsigned int i = 0; i < A->nbblocks; i++)  
+    A->block[i] = (double *)calloc(blocksize * blocksize, sizeof(double)); // all blocks are filled with 0
+
+  /* 6: count non empty lines */
+  A->filled1 = last_nonempty_line + 2; // index (starting at 0) of last nonempty line + 2
+  A->filled2 = (size_t)A->nbblocks; /* one of them should be deprecated! */
+
+  if (!A->index1_data) A->index1_data = (size_t*)malloc(A->filled1 * sizeof(size_t));
+  if (!A->index2_data) A->index2_data = (size_t*)malloc(A->filled2 * sizeof(size_t));
+
+  A->index1_data[0] = 0;
+
+  double **blocks_again = (double **)malloc((n_bcol + 1) * sizeof(double *));
+  for (size_t i = 0; i < n_bcol + 1; i++) blocks_again[i] = NULL;
+
+  n_blcks = 0;
+
+  for (size_t bi = 0; bi < n_brow; bi++) {
+    for (size_t r = 0; r < R; r++) {
+      size_t i = R * bi + r; // row index
+      for (size_t jj = sparseMatcsr->p[i]; jj < sparseMatcsr->p[i + 1]; jj++) { // go through row i
+        size_t j = sparseMatcsr->i[jj]; // column index
+        size_t bj = j / C;
+        size_t c = j % C;
+
+        if ( blocks_again[bj] == NULL) {
+          blocks_again[bj] = A->block[n_blcks];
+          A->index2_data[n_blcks] = bj;
+          n_blcks++;
+        }
+
+        *(blocks_again[bj] + r + c * C) += sparseMatcsr->x[jj];
+
+        // printf("%d %d %d %d %f\n", i, j, bi, bj, sparseMatcsr->x[jj]);
+      }
+      // printf("\n");
+    }
+
+    for (size_t jj = sparseMatcsr->p[R * bi]; jj < sparseMatcsr->p[R * (bi + 1)]; jj++) {
+      blocks_again[sparseMatcsr->i[jj] / C] = NULL;
+    }
+
+    A->index1_data[bi + 1] = n_blcks;
+  }
+
+  /* printf("A->index1_data = [");
+  for (int i = 0; i < A->filled1; i++) printf(" %d ", A->index1_data[i]);
+  printf("]\n");
+
+  printf("A->index2_data = [");
+  for (int i = 0; i < A->filled2; i++) printf(" %d ", A->index2_data[i]);
+  printf("]\n");
+
+  int count = 0;
+
+  for (int rb = 0; rb < A->filled1 - 1; rb++) {
+    printf("Block Line %d\n", rb);
+    for (int j = A->index1_data[rb]; j < A->index1_data[rb + 1]; j++) {
+      for (int i = 0; i < blocksize * blocksize; i++) {
+        printf(" %f ", A->block[j][i]);
+      }
+      count++;
+      printf("\n");
+    }
+  }
+
+  printf("%d\n", count); */
+
+  /* for (int b = 0; b < A->filled2; b++) {
+    for (int i = 0; i < blocksize * blocksize; i++) {
+        printf(" %f ", A->block[b][i]);
+    }
+    printf("\n");
+  } */
+
+  free(blocks_again);
+
+  return 0;
 }
 
 int SBM_from_csparse(int blocksize, const CSparseMatrix* const sparseMat,
