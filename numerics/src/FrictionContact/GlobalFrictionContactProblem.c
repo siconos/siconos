@@ -473,8 +473,8 @@ FrictionContactProblem* globalFrictionContact_reformulation_FrictionContact(
           NM_is_diagonal_block_matrix(problem->M, &block_number, &blocksizes);
 
       if (is_diagonal_block_matrix) {
-        printf("the matrix is block diagonal\n");
-        printf("block_number = %i\n", block_number);
+        numerics_printf_verbose(1,"the matrix is block diagonal\n");
+        numerics_printf_verbose(1,"block_number = %i\n", block_number);
         /* for (unsigned int k = 0; k < block_number; k++) */
         /*   printf("blocksize[%i] = %i\n", k , (blocksizes)[k]); */
         block_number = M->size0 / 3;
@@ -483,7 +483,7 @@ FrictionContactProblem* globalFrictionContact_reformulation_FrictionContact(
         free(blocksizes);
         blocksizes = NULL;
       } else {
-        printf("the matrix is not block diagonal\n");
+        numerics_printf_verbose(1, "the matrix is not block diagonal\n");
         numerics_printf_verbose(1, "inversion of the matrix M ...");
         Minv = NM_LU_inv(M);
       }
