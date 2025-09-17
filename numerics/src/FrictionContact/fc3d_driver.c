@@ -22,6 +22,7 @@
 
 #include "FrictionContactProblem.h"                    // for FrictionContac...
 #include "Friction_cst.h"                              // for SICONOS_FRICTI...
+#include "Friction_tools.h" 
 #include "NonSmoothDrivers.h"                          // for fc3d_driver
 #include "NumericsFwd.h"                               // for SolverOptions
 #include "SolverOptions.h"                             // for SolverOptions

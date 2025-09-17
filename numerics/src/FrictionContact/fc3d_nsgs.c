@@ -24,17 +24,16 @@
 
 #include "FrictionContactProblem.h"  // for FrictionContac...
 #include "Friction_cst.h"            // for SICONOS_FRICTI...
+#include "Friction_tools.h"                  // for ComputeErrorPtr                                     // 
 #include "NumericsArrays.h"          // for uint_shuffle
-#include "NumericsFwd.h"             // for SolverOptions
 #include "NumericsMatrix.h"
-#include "NumericsSparseMatrix.h"
 #include "SiconosBlas.h"    // for cblas_dnrm2
 #include "SolverOptions.h"  // for SolverOptions
 #include "SparseBlockMatrix.h"
 #include "fc3d_2NCP_Glocker.h"                         // for NCPGlocker_update
 #include "fc3d_NCPGlockerFixedPoint.h"                 // for fc3d_FixedP_in...
 #include "fc3d_Path.h"                                 // for fc3d_Path_init...
-#include "fc3d_Solvers.h"                              // for ComputeErrorPtr
+
 #include "fc3d_compute_error.h"                        // for fc3d_compute_e...
 #include "fc3d_local_problem_tools.h"                  // for fc3d_local_pro...
 #include "fc3d_onecontact_nonsmooth_Newton_solvers.h"  // for fc3d_onecontac...
@@ -51,7 +50,7 @@
 #include "op3x3.h"
 #include "projectionOnCone.h"  // for projectionOnCone
 #include "siconos_debug.h"     // for DEBUG_EXPR
-#include "siconos_debug.h"     // for DEBUG_EXPR
+
 
 // #define FCLIB_OUTPUT
 
