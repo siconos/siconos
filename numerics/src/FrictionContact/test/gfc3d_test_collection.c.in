@@ -17,61 +17,61 @@
  */
 
 #define _XOPEN_SOURCE 700
-#include <stdio.h>   // for printf
-#include <stdlib.h>  // for free
-#include <string.h>  // for strcmp
+#include <stdio.h>                                // for printf
+#include <string.h>                               // for strcmp
+#include <stdlib.h>                               // for free
+#include "frictionContact_test_utils.h"           // for build_test_collection
+#include "test_utils.h"                           // for data_collection
+#include "SiconosConfig.h" // for HAVE_GAMS_C_API, SICONOS_HAS_MPI // IWYU pragma: keep
 
-#include "SiconosConfig.h"  // for HAVE_GAMS_C_API, SICONOS_HAS_MPI // IWYU pragma: keep
-#include "frictionContact_test_utils.h"  // for build_test_collection
-#include "test_utils.h"                  // for data_collection
-
-#define @PROBLEM_COLLECTION@1
+#define @PROBLEM_COLLECTION@ 1
 
 #ifdef SICONOS_HAS_MPI
 #include "mpi.h"
 #endif
 
-int main(int argc, char *argv[]) {
-  const char **_data_collection = data_collection();
+int main (int argc, char *argv[])
+{
+  const char ** _data_collection = data_collection();
   int n_data = 0;
 
 #ifdef SICONOS_HAS_MPI
   MPI_Init(&argc, &argv);
 #endif
 
-  while (strcmp(_data_collection[n_data], "---") != 0) {
-    n_data++;
-  }
+  while (strcmp(_data_collection[n_data], "---") !=0)
+    {
+      n_data++;
+    }
   printf("number of data = %i\n", n_data);
 
   int number_of_tests;
-  TestCase *collection = build_test_collection(n_data, _data_collection, &number_of_tests);
+  TestCase * collection = build_test_collection(n_data, _data_collection, &number_of_tests);
 
   printf("%i tests for %i data files.\n", number_of_tests, n_data);
 
 #if defined(TEST_FIRST_ORDER_COLLECTION_1)
-  collection[2].will_fail = 1;  /* GFC3D_NSGS, on ./data/GFC3D_Example00_badly_scaled.dat */
-  collection[8].will_fail = 1;  /* GFC3D_NSGS, on ./data/GFC3D_Example00_badly_scaled.dat*/
-  collection[14].will_fail = 1; /* GFC3D_VI_EG, on ./data/GFC3D_Example00_badly_scaled.dat */
-  collection[20].will_fail = 1; /* GFC3D_VI_FPP, on ./data/GFC3D_Example00_badly_scaled.dat */
-  collection[22].will_fail = 1; /* GFC3D_VI_FPP	./data/GFC3D_OneContact.dat  */
-  collection[53].will_fail =
-      1; /* GFC3D ADMM, on ./data/GFC3D_TwoRods1.dat with scalar rescaling*/
+  collection[2].will_fail = 1;   /* GFC3D_NSGS, on ./data/GFC3D_Example00_badly_scaled.dat */
+  collection[8].will_fail = 1;   /* GFC3D_NSGS, on ./data/GFC3D_Example00_badly_scaled.dat*/
+  collection[14].will_fail = 1;  /* GFC3D_VI_EG, on ./data/GFC3D_Example00_badly_scaled.dat */
+  collection[20].will_fail = 1;  /* GFC3D_VI_FPP, on ./data/GFC3D_Example00_badly_scaled.dat */
+  collection[22].will_fail = 1;  /* GFC3D_VI_FPP	./data/GFC3D_OneContact.dat  */
+  collection[53].will_fail = 1;  /* GFC3D ADMM, on ./data/GFC3D_TwoRods1.dat with scalar rescaling*/
 #endif
 
 #ifdef TEST_WR_COLLECTION_1
-  collection[7].will_fail = 1;   // GFC3D_PROX_WR	./data/GFC3D_Example1.dat
-  collection[9].will_fail = 1;   // GFC3D_PROX_WR	./data/GFC3D_TwoRods1.dat
-  collection[14].will_fail = 1;  // GFC3D_DSFP_WR, on ./data/GFC3D_Example00_badly_scaled.dat
-  collection[11].will_fail = 2;  // GFC3D_PROX_WR, on ./data/GFC3D_TwoRods1.dat
-  collection[15].will_fail = 2;  // GFC3D_DSFP_WR, on ./data/GFC3D_Example1.dat
-  collection[16].will_fail = 2;  // GFC3D_DSFP_WR, on ./data/GFC3D_OneContact.dat
+  collection[7].will_fail = 1;  // GFC3D_PROX_WR	./data/GFC3D_Example1.dat
+  collection[9].will_fail = 1;  // GFC3D_PROX_WR	./data/GFC3D_TwoRods1.dat
+  collection[14].will_fail = 1; // GFC3D_DSFP_WR, on ./data/GFC3D_Example00_badly_scaled.dat
+  collection[11].will_fail = 2; // GFC3D_PROX_WR, on ./data/GFC3D_TwoRods1.dat
+  collection[15].will_fail = 2; // GFC3D_DSFP_WR, on ./data/GFC3D_Example1.dat
+  collection[16].will_fail = 2; // GFC3D_DSFP_WR, on ./data/GFC3D_OneContact.dat
 #endif
+
 
 #ifdef TEST_NSN_COLLECTION_1
   // expected to fail
-  /* collection[2].will_fail = 1; // GFC3D_NSN_AC, on ./data/GFC3D_Example00_badly_scaled.dat
-   */
+  /* collection[2].will_fail = 1; // GFC3D_NSN_AC, on ./data/GFC3D_Example00_badly_scaled.dat */
   /* collection[3].will_fail = 1; // NSN_AC on data/GFC3D_OneContact.dat */
   /* collection[5].will_fail = 1; // GFC3D_NSN_AC, on ./data/GFC3D_TwoRods1.dat */
 
@@ -98,9 +98,8 @@ int main(int argc, char *argv[]) {
 //    collection[10].will_fail = 1;
 #endif
 
-  int out =
-      run_test_collection(collection, number_of_tests, globalFrictionContact_test_function);
-  // int out = 0;
+  int out = run_test_collection(collection, number_of_tests, globalFrictionContact_test_function);
+  //int out = 0;
 
   free_test_collection(collection, number_of_tests);
   free(_data_collection);
