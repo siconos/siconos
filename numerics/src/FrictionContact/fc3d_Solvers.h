@@ -25,30 +25,7 @@
 */
 
 #include "FrictionContactProblem.h"
-#include "Friction_cst.h"
-#include "SolverOptions.h"
-#include "fc3d_2NCP_Glocker.h"
-#include "fc3d_AlartCurnier_functions.h"
-#include "fc3d_NCPGlockerFixedPoint.h"
-#include "fc3d_local_problem_tools.h"
-#include "fc3d_nonsmooth_Newton_AlartCurnier.h"
-#include "fc3d_nonsmooth_Newton_FischerBurmeister.h"
-#include "fc3d_nonsmooth_Newton_natural_map.h"
-#include "fc3d_onecontact_nonsmooth_Newton_solvers.h"
-#include "fc3d_projection.h"
-#include "fc3d_unitary_enumerative.h"
 
-/** pointer to function used to update velocity and compute error */
-typedef void (*ComputeErrorPtr)(FrictionContactProblem *, double *, double *, double,
-                                SolverOptions *, double, double *);
-
-/** pointer to function used to call internal solver for proximal point solver
- */
-typedef void (*internalSolverPtr)(FrictionContactProblem *, double *, double *, int *,
-                                  SolverOptions *);
-
-/** pointer to function used to free memory for objects used in nsgs solvers */
-typedef void (*FreeSolverPtr)();
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 extern "C" {
@@ -335,24 +312,11 @@ void fc3d_lcp_gams_path(FrictionContactProblem *problem, double *reaction, doubl
 void fc3d_lcp_gams_pathvi(FrictionContactProblem *problem, double *reaction, double *velocity,
                           int *info, SolverOptions *options);
 
-/**
-    Check for trivial solution in the friction-contact 3D problem
-
-    \param problem FrictionContactProblem*  the problem
-    \param velocity global vector (n), in-out parameter
-    \param reaction global vector (n), in-out parameters
-    \param options the pointer to the array of options to set
-    \return info  =0 if a trivial solution has been found, else = -1
-*/
-int fc3d_checkTrivialCase(FrictionContactProblem *problem, double *velocity, double *reaction,
-                          SolverOptions *options);
 
 void fc3d_nonsmooth_Newton_AlartCurnier_new(FrictionContactProblem *problem, double *reaction,
                                             double *velocity, int *info,
                                             SolverOptions *options);
 
-void fc3d_set_internalsolver_tolerance(FrictionContactProblem *problem, SolverOptions *options,
-                                       SolverOptions *internalsolver_options, double error);
 
 /*
  * Info to complete

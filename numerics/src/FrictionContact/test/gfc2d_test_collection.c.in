@@ -17,44 +17,43 @@
  */
 
 #define _XOPEN_SOURCE 700
-#include <stdio.h>   // for printf
-#include <string.h>  // for strcmp
+#include <stdio.h>                                // for printf
+#include <string.h>                               // for strcmp
+#include "frictionContact_test_utils.h"           // for build_test_collection
+#include "test_utils.h"                           // for data_collection
+#include "SiconosConfig.h" // for HAVE_GAMS_C_API, SICONOS_HAS_MPI // IWYU pragma: keep
 
-#include "SiconosConfig.h"  // for HAVE_GAMS_C_API, SICONOS_HAS_MPI // IWYU pragma: keep
-#include "frictionContact_test_utils.h"  // for build_test_collection
-#include "test_utils.h"                  // for data_collection
-
-#define @PROBLEM_COLLECTION@1
+#define @PROBLEM_COLLECTION@ 1
 
 #ifdef SICONOS_HAS_MPI
 #include "mpi.h"
 #endif
 
-int main(int argc, char *argv[]) {
-  const char **_data_collection = data_collection();
+int main (int argc, char *argv[])
+{
+  const char ** _data_collection = data_collection();
   int n_data = 0;
 
 #ifdef SICONOS_HAS_MPI
   MPI_Init(&argc, &argv);
 #endif
 
-  while (strcmp(_data_collection[n_data], "---") != 0) {
-    n_data++;
-  }
+  while (strcmp(_data_collection[n_data], "---") !=0)
+    {
+      n_data++;
+    }
   printf("number of data = %i\n", n_data);
 
   int number_of_tests;
-  TestCase *collection = build_test_collection(n_data, _data_collection, &number_of_tests);
+  TestCase * collection = build_test_collection(n_data, _data_collection, &number_of_tests);
 
   printf("%i tests for %i data files.\n", number_of_tests, n_data);
 
 #if defined(TEST_FIRST_ORDER_COLLECTION_1)
-  // collection[2].will_fail = 1;   /* GFC2D_NSGS, on ./data/GFC3D_Example00_badly_scaled.dat
-  // */
+  //collection[2].will_fail = 1;   /* GFC2D_NSGS, on ./data/GFC3D_Example00_badly_scaled.dat */
 #endif
 
-  int out =
-      run_test_collection(collection, number_of_tests, globalFrictionContact_test_function);
+  int out = run_test_collection(collection, number_of_tests, globalFrictionContact_test_function);
 
   free_test_collection(collection, number_of_tests);
 

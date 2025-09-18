@@ -29,8 +29,10 @@
 #include "NumericsVector.h"
 #include "SiconosLapack.h"
 #include "SparseBlockMatrix.h"
-#include "fc3d_Solvers.h"
+#include "Friction_tools.h"                  // for ComputeErrorPtr
+#include "Friction_cst.h"                  // for ComputeErrorPtr
 #include "fc3d_compute_error.h"
+#include "SolverOptions.h"
 #include "float.h"
 #include "numerics_verbose.h"
 #include "projectionOnCone.h"
