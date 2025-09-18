@@ -35,7 +35,7 @@
 #include "fclib_interface.h"
 #endif
 
-//#define OUTPUT_DEBUG 1
+// #define OUTPUT_DEBUG 1
 #ifdef OUTPUT_DEBUG
 #include "NumericsVector.h"
 #endif
@@ -49,6 +49,7 @@ GlobalFrictionContactProblem* globalFrictionContactProblem_new(void) {
   problem->mu = NULL;
   problem->M_inverse = NULL;
   problem->env = NULL;
+  problem->name = NULL;
   problem->numberOfContacts = 0;
   problem->dimension = 0;
   return problem;
@@ -258,6 +259,7 @@ GlobalFrictionContactProblem* globalFrictionContact_copy(
   if (problem->M_inverse) {
     NM_copy(problem->M_inverse, new->M_inverse);
   }
+  if (problem->name) new->name = problem->name;
   new->env = NULL;
   return new;
 }
@@ -459,18 +461,40 @@ FrictionContactProblem* globalFrictionContact_reformulation_FrictionContact(
 
     // Product M^-1 H
     DEBUG_EXPR(NM_display(H););
+
     NumericsMatrix* Minv;
     if (problem->M_inverse) {
       numerics_printf_verbose(1, "use the given inverse of the matrix M ...");
       Minv = problem->M_inverse;
     } else {
-      numerics_printf_verbose(1, "inversion of the matrix M ...");
-      Minv = NM_LU_inv(M);
+      unsigned int block_number;
+      unsigned int* blocksizes = NULL;
+      int is_diagonal_block_matrix =
+          NM_is_diagonal_block_matrix(problem->M, &block_number, &blocksizes);
+
+      if (is_diagonal_block_matrix) {
+        numerics_printf_verbose(1,"the matrix is block diagonal\n");
+        numerics_printf_verbose(1,"block_number = %i\n", block_number);
+        /* for (unsigned int k = 0; k < block_number; k++) */
+        /*   printf("blocksize[%i] = %i\n", k , (blocksizes)[k]); */
+        block_number = M->size0 / 3;
+        for (unsigned int k = 0; k < block_number; k++) blocksizes[k] = 3;
+        Minv = NM_inverse_diagonal_block_matrix(M, block_number, blocksizes);
+        free(blocksizes);
+        blocksizes = NULL;
+      } else {
+        numerics_printf_verbose(1, "the matrix is not block diagonal\n");
+        numerics_printf_verbose(1, "inversion of the matrix M ...");
+        Minv = NM_LU_inv(M);
+      }
     }
     DEBUG_EXPR(NM_display(Minv););
-
+    // printf("\nNSGS: M = \n"); NM_display(problem->M);
+    // printf("\nNSGS: H = \n"); NM_display(problem->H);
+    // printf("\nNSGS: Minv = \n"); NM_display(Minv);
     numerics_printf_verbose(1, "multiplication  H^T M^{-1} H ...");
     NumericsMatrix* MinvH = NM_multiply(Minv, H);
+
     DEBUG_EXPR(NM_display(MinvH););
 
     // Product H^T M^-1 H

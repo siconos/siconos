@@ -18,18 +18,22 @@
 #include <assert.h>  // for assert
 #include <stdio.h>   // for NULL, fprintf, stderr
 #include <stdlib.h>  // for exit, EXIT_FAILURE
+#include <string.h>
+#include <time.h>
 
 #include "Friction_cst.h"                  // for SICONOS_GLOBAL_FRICTION_3D...
 #include "GlobalFrictionContactProblem.h"  // for GlobalFrictionContactProblem
 #include "NonSmoothDrivers.h"              // for gfc3d_driver
 #include "NumericsFwd.h"                   // for SolverOptions, GlobalFrict...
 #include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dscal
+#include "SiconosBlas.h"                   // for cblas_dcopy, cblas_dscal
 #include "SolverOptions.h"                 // for SolverOptions, solver_opti...
 #include "gfc3d_Solvers.h"                 // for gfc3d_ACLMFixedPoint, gfc3...
 #include "gfc3d_balancing.h"
 #include "gfc3d_compute_error.h"
-#include "numerics_verbose.h"  // for numerics_printf_verbose
-#include "siconos_debug.h"     // for DEBUG_EXPR
+#include "gfc3d_ipm.h"
+#include "numerics_verbose.h"
+#include "siconos_debug.h"
 
 #ifdef DEBUG_MESSAGES
 #include "NumericsMatrix.h"
@@ -50,6 +54,9 @@ const char* const SICONOS_GLOBAL_FRICTION_3D_VI_EG_STR = "GFC3D_VI_EG";
 const char* const SICONOS_GLOBAL_FRICTION_3D_ACLMFP_STR = "GFC3D_ACLMFP";
 const char* const SICONOS_GLOBAL_FRICTION_3D_VI_FPP_STR = "GFC3D_VI_FPP";
 const char* const SICONOS_GLOBAL_FRICTION_3D_ADMM_WR_STR = "GFC3D_ADMM_WR";
+const char* const SICONOS_GLOBAL_FRICTION_3D_IPM_WR_STR = "GFC3D_IPM_WR";
+const char* const SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_WR_STR = "GFC3D_IPM_SNM_WR";
+const char* const SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_PROX_STR = "GFC3D IPM SNM PROX";
 
 static int gfc3d_balancing_check_drift(GlobalFrictionContactProblem* balanced_problem,
                                        GlobalFrictionContactProblem* problem, double* reaction,
@@ -94,6 +101,12 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double* reaction, double
   /* Solver name */
   /*  const char* const  name = options->solverName;*/
 
+  if (problem->name) {
+    FILE* fileName = fopen("problem_name.res", "w");
+    char* problem_name = problem->name;
+    fprintf(fileName, "%s", problem_name);
+    fclose(fileName);
+  }
   int info = -1;
 
   if (problem->dimension != 3)
@@ -240,6 +253,46 @@ int gfc3d_driver(GlobalFrictionContactProblem* problem, double* reaction, double
                                   globalVelocity, options);
 
       balanced_problem = gfc3d_balancing_free(balanced_problem, options);
+      break;
+    }
+
+    case SICONOS_GLOBAL_FRICTION_3D_IPM_SNM: {
+      gfc3d_IPM_SNM(problem, reaction, velocity, globalVelocity, &info, options);
+      break;
+    }
+    case SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_PROX: {
+      verbose = 1;
+      gfc3d_IPM_SNM(problem, reaction, velocity, globalVelocity, &info, options);
+
+      SolverOptions* nsn_options = options->internalSolvers[0];
+
+      gfc3d_proximal_wr(problem, reaction, velocity, globalVelocity, &info, nsn_options);
+
+      if (problem->name) {
+        numerics_printf_verbose(
+            1,
+            "problem = %s --  NSN_PROX gfc3d_error = %e, prox iterations %i, cumulative "
+            "newton iterations %i \n",
+            problem->name, nsn_options->dparam[1], nsn_options->iparam[1],
+            nsn_options->iparam[SICONOS_FRICTION_3D_PROXIMAL_IPARAM_CUMULATIVE_ITER_DONE]);
+      } else {
+        numerics_printf_verbose(
+            1,
+            " --  NSN_PROX gfc3d_error = %e, prox iterations %i, cumulative newton iterations "
+            "%i \n",
+            nsn_options->dparam[1], nsn_options->iparam[1],
+            nsn_options->iparam[SICONOS_FRICTION_3D_PROXIMAL_IPARAM_CUMULATIVE_ITER_DONE]);
+      }
+
+      options->iparam[SICONOS_IPARAM_ITER_DONE] =
+          options->iparam[0] +
+          nsn_options->iparam[SICONOS_FRICTION_3D_PROXIMAL_IPARAM_CUMULATIVE_ITER_DONE];
+      options->dparam[SICONOS_DPARAM_RESIDU] = nsn_options->dparam[SICONOS_DPARAM_RESIDU];
+
+      break;
+    }
+    case SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_WR: {
+      gfc3d_ipm_snm_wr(problem, reaction, velocity, globalVelocity, &info, options);
       break;
     }
     default: {

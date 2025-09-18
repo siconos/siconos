@@ -61,6 +61,9 @@ struct GlobalFrictionContactProblem {
       a matrix with \f$ n \f$ stored in NumericsMatrix structure */
   NumericsMatrix *M_inverse;
 
+  /** name of the problem **/
+  char *name;
+
   /** opaque environment, solver specific */
   void *env;
 };

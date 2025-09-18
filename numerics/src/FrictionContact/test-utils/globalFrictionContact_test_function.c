@@ -32,6 +32,7 @@
 #include "SiconosLapack.h"
 #include "SolverOptions.h"               // for SolverOptions, SICONOS_DPA...
 #include "frictionContact_test_utils.h"  // for globalFrictionContact_test...
+#include "gfc3d_ipm.h"                   // for classify_BNRT_velocity_original, ...
 #include "test_utils.h"                  // for TestCase
 
 void print_problem_data_in_Matlab_file(GlobalFrictionContactProblem *problem, FILE *file);
@@ -43,6 +44,22 @@ int globalFrictionContact_test_function(TestCase *current) {
   int k, info = -1;
   GlobalFrictionContactProblem *problem =
       globalFrictionContact_new_from_filename(current->filename);
+
+  // alloc and copy current->filename;
+
+  problem->name = malloc(1 + strlen(current->filename));
+  strcpy(problem->name, current->filename);
+
+  char *problem_name = NULL;
+  char *str = (char *)malloc(200);
+  strcpy(str, problem->name);
+  const char *separators = "/";
+  problem_name = strtok(str, separators);
+  for (int i = 0; i < 5; i++) {
+    if (problem_name != NULL) problem_name = strtok(NULL, separators);
+  }
+
+  problem_name = strtok(problem_name, ".");
 
   /* globalFrictionContact_display(problem); */
 
@@ -147,16 +164,36 @@ int globalFrictionContact_test_function(TestCase *current) {
   else
     printf("test: failure\n");
 
-  printf(
-      "\nsumry: %d  %9.2e  %5i  %10.4f", info, current->options->dparam[SICONOS_DPARAM_RESIDU],
-      current->options->iparam[SICONOS_IPARAM_ITER_DONE], (double)(t2 - t1) / (double)clk_tck);
-  printf("%3i %5i %5i     %s\n\n", dim, NC, n, current->filename);
+  // classification BNRT
+  int nB, nN, nR, nT;
+  if (current->options->solverId == SICONOS_GLOBAL_FRICTION_3D_IPM_SNM ||
+      current->options->solverId == SICONOS_GLOBAL_FRICTION_3D_IPM) {
+    // Take projerr value from test
+    double *projerr_ptr = current->options->solverData;
+    classify_BNRT_velocity_modified(problem->mu, velocity, reaction, NC * dim, NC, &nB, &nN,
+                                    &nR, &nT);
+    printf("\nsumry: %d  %.2e  %.2e   %5i %5i   %4i %4i %4i %4i    %.6f   %s\n", info,
+           current->options->dparam[SICONOS_DPARAM_RESIDU], *projerr_ptr,
+           current->options->iparam[SICONOS_IPARAM_ITER_DONE], NC, nB, nN, nR,
+           NC - nB - nN - nR, (double)(t2 - t1) / (double)clk_tck, problem_name);
+  } else {
+    // classify_BNRT_velocity_original(problem->mu, velocity, reaction, NC*dim, NC, &nB, &nN,
+    // &nR, &nT);
+    printf("\nsumry: %d  %9.2e  %5i  %10.4f", info,
+           current->options->dparam[SICONOS_DPARAM_RESIDU],
+           current->options->iparam[SICONOS_IPARAM_ITER_DONE],
+           (double)(t2 - t1) / (double)clk_tck);
+    printf("%3i %5i %5i     %s\n\n", dim, NC, n, current->filename);
+  }
 
   /* system(filename); */
 
   free(reaction);
   free(velocity);
   free(globalvelocity);
+  free(str);
+  free(current->options->solverData);
+  current->options->solverData = NULL;
   /* fclose(foutput); */
   globalFrictionContact_free(problem);
   return info;

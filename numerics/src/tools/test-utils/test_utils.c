@@ -143,6 +143,12 @@ int run_test_collection(TestCase* collection, int number_of_tests,
       printf("Internal solver : %s (id: %d) \n", internal_name, sid);
     }
     printf("Data file : %s \n", collection[test_num].filename);
+
+    /* // Data writing below is only for fc3d_ipm_snm.c */
+    /* FILE *f = fopen("problem_names.res", "w"); */
+    /* fprintf(f,"%s\n", collection[test_num].filename); */
+    /* fclose(f); */
+
     clock_t t1 = clock();
     // Execute a single test
     int info = test_function(&collection[test_num]);

@@ -47,7 +47,7 @@ NumericsMatrix* Arrow_repr(const double* const vec, const unsigned int vecSize,
   }
 
   NumericsMatrix* Arw_mat = NM_create(NM_SPARSE, vecSize, vecSize);
-  size_t nzmax = (dimension * 3 - 2) * varsCount;
+  size_t nzmax = (dimension * 3 - 2) * varsCount;   // This formula is uniquely correct for 3-dimensional mat
   NM_triplet_alloc(Arw_mat, nzmax);
   NM_fill(Arw_mat, NM_SPARSE, vecSize, vecSize, Arw_mat->matrix2);
 
@@ -64,6 +64,73 @@ NumericsMatrix* Arrow_repr(const double* const vec, const unsigned int vecSize,
     }
   }
   return Arw_mat;
+}
+
+void Arrow_repr_replace(NumericsMatrix* Arw_mat, const double* const vec, const unsigned int vecSize,
+                           const size_t varsCount) {
+  /* validation */
+  if (vecSize % varsCount != 0) {
+    fprintf(stderr, "Arrow_repr_replace: %zu variables can not be extracted from vector of size %d.\n",
+            varsCount, vecSize);
+    exit(EXIT_FAILURE);
+  }
+
+  size_t dimension = (size_t)(vecSize / varsCount);
+  if (dimension < 2) {
+    fprintf(stderr,
+            "Arrow_repr_replace: The dimension of variables can not be less than 2 but given %zu.\n",
+            dimension);
+    exit(EXIT_FAILURE);
+  }
+
+  if (!Arw_mat ||
+      !Arw_mat->matrix2 ||
+      Arw_mat->matrix2->origin != NSM_TRIPLET){
+    fprintf(stderr,
+            "Arrow_repr_replace: Arw_mat is not valid. Need a declaration of triplet sparse matrix.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  if (Arw_mat->size0 != vecSize && Arw_mat->size1 != vecSize){
+    fprintf(stderr,
+            "Arrow_repr_replace: Size of the input Arw_mat does not match size of vector.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  /* Arrow matrix filling */
+  size_t pos;
+  CSparseMatrix *cs = Arw_mat->matrix2->triplet;
+
+  if (cs->nz != ((dimension * 3 - 2) * varsCount)){
+    fprintf(stderr,
+            "Arrow_repr_replace: Size of allocated triplet memory is not sufficient.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  // Reset data
+  cs->nz = 0;
+
+  for (size_t i = 0; i < varsCount; ++i) {
+    pos = i * dimension;
+
+    cs->x [cs->nz] = vec[pos];
+    cs->i [cs->nz] = pos;
+    cs->p [cs->nz++] = pos;
+
+    for (size_t j = 1; j < dimension; ++j) {
+      cs->x [cs->nz] = vec[pos + j];
+      cs->i [cs->nz] = pos;
+      cs->p [cs->nz++] = pos + j;
+
+      cs->x [cs->nz] = vec[pos + j];
+      cs->i [cs->nz] = pos + j;
+      cs->p [cs->nz++] = pos;
+
+      cs->x [cs->nz] = vec[pos];
+      cs->i [cs->nz] = pos + j;
+      cs->p [cs->nz++] = pos + j;
+    }
+  }
 }
 
 NumericsMatrix* Reflect_mat(const unsigned int size, NM_types type) {

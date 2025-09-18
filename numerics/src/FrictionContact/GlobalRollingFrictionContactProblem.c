@@ -31,8 +31,8 @@
 #include "io_tools.h"          // for check_hdf5_file
 #include "numerics_verbose.h"  // for CHECK_IO, numerics_printf_verbose
 
-//#define DEBUG_STDOUT
-//#define DEBUG_MESSAGES
+// #define DEBUG_STDOUT
+// #define DEBUG_MESSAGES
 #include "siconos_debug.h"  // for DEBUG_PRINT, DEBUG_PRINTF
 #if defined(WITH_FCLIB)
 #include "fclib_interface.h"  // for globalRollingFrictionContact_fclib_read
@@ -49,6 +49,7 @@ GlobalRollingFrictionContactProblem* globalRollingFrictionContactProblem_new(voi
   problem->b = NULL;
   problem->mu = NULL;
   problem->mu_r = NULL;
+  problem->name = NULL;
 
   return problem;
 }

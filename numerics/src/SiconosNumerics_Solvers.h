@@ -97,7 +97,7 @@ See functions in SolverOptions.h
   SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_TFP);                                            \
   SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_PFP);                                            \
   SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_NSN_AC);                                         \
-  SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_NSN_AC_TEST);                                    \
+  SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_NSN_AC_NEW);                                     \
   SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_NSN_FB);                                         \
   SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_NSN_NM);                                         \
   SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_DSFP);                                           \
@@ -130,6 +130,7 @@ See functions in SolverOptions.h
   SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_ONECONTACT_QUARTIC);                             \
   SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU);                          \
   SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_ADMM);                                           \
+  SICONOS_SOLVER_MACRO(SICONOS_FRICTION_3D_IPM_SNM);                                        \
   SICONOS_SOLVER_MACRO(SICONOS_ROLLING_FRICTION_3D_NSGS);                                   \
   SICONOS_SOLVER_MACRO(                                                                     \
       SICONOS_ROLLING_FRICTION_3D_ONECONTACT_ProjectionOnConeWithLocalIteration);           \
@@ -154,6 +155,9 @@ See functions in SolverOptions.h
   SICONOS_SOLVER_MACRO(SICONOS_GLOBAL_FRICTION_3D_ADMM);                                    \
   SICONOS_SOLVER_MACRO(SICONOS_GLOBAL_FRICTION_3D_ADMM_WR);                                 \
   SICONOS_SOLVER_MACRO(SICONOS_GLOBAL_FRICTION_3D_IPM);                                     \
+  SICONOS_SOLVER_MACRO(SICONOS_GLOBAL_FRICTION_3D_IPM_SNM);                                 \
+  SICONOS_SOLVER_MACRO(SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_WR);                              \
+  SICONOS_SOLVER_MACRO(SICONOS_GLOBAL_FRICTION_3D_IPM_SNM_PROX);                            \
   SICONOS_SOLVER_MACRO(SICONOS_GLOBAL_ROLLING_FRICTION_3D_NSGS_WR);                         \
   SICONOS_SOLVER_MACRO(SICONOS_GLOBAL_ROLLING_FRICTION_3D_IPM);                             \
   SICONOS_SOLVER_MACRO(SICONOS_SOCLCP_NSGS);                                                \

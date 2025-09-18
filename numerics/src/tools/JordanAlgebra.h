@@ -37,6 +37,14 @@ typedef long double float_type;
 NumericsMatrix* Arrow_repr(const double* const vec, const unsigned int vecSize,
                            const size_t varsCount);
 
+/** Replace the content of an existing Arrow representation matrix from vector.
+ * This is an alternative of Arrow_repr, without creation of matrix
+ * (not allocation of memory)
+ */
+void Arrow_repr_replace(NumericsMatrix* Arw_mat, const double* const vec,
+                      const unsigned int vecSize, const size_t varsCount);
+
+
 /**
  * Returns reflection matrix.
 

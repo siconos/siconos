@@ -69,5 +69,25 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers* equation
                                          double* reaction, double* velocity, int* info,
                                          SolverOptions* options);
 
-void computeAWpB(double* A, NumericsMatrix* W, double* B, NumericsMatrix* AWpB);
+int fc3d_nonsmooth_Newton_linesearch_GoldsteinPrice(fc3d_nonsmooth_Newton_solvers* equation,
+                                                    double* reaction, double* velocity,
+                                                    double* mu, double* rho, double* F,
+                                                    double* A, double* B, NumericsMatrix* W,
+                                                    double* qfree, NumericsMatrix* AWpB,
+                                                    double* direction, double* tmp,
+                                                    double alpha[1], unsigned int maxiter_ls);
+
+/* cf Fachicchinei & Pang, Finite-Dimensional Variational Inequalities
+ * and Complementarity Problems, Volume II, p 805. */
+int fc3d_nonsmooth_Newton_linesearch_FBLSA(fc3d_nonsmooth_Newton_solvers* equation,
+                                           double* reaction, double* velocity, double* mu,
+                                           double* rho, double* F, double* A, double* B,
+                                           NumericsMatrix* W, double* qfree,
+                                           NumericsMatrix* blockAWpB, double* direction,
+                                           double* tmp, double alpha[1],
+                                           unsigned int maxiter_ls);
+
+void fc3d_nonsmooth_Newton_computeAWpB(double* A, NumericsMatrix* W, double* B,
+                                       NumericsMatrix* AWpB);
+
 #endif

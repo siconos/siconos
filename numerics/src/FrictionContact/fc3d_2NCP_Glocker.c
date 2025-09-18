@@ -401,5 +401,5 @@ void compute_Z_GlockerFixedP(int i, double* reactionstep) {
   }
 }
 
-void NCPGlocker_free(FrictionContactProblem * problem, FrictionContactProblem * localproblem, SolverOptions* localsolver_options) {}
-
+void NCPGlocker_free(FrictionContactProblem* problem, FrictionContactProblem* localproblem,
+                     SolverOptions* localsolver_options) {}
