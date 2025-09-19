@@ -214,6 +214,9 @@ double complemResidualNorm_p_F(NumericsMatrix* Qp, NumericsMatrix* Qpinv,
                                const double* const velocity, const double* const reaction,
                                const unsigned int vecSize, const unsigned int varsCount);
 
+double complemResidualNorm_p(const double* const velocity, const double* const reaction,
+                             const unsigned int vecSize, const unsigned int varsCount);
+
 /* computation of the duality gap  */
 double dualGap(NumericsMatrix* M, const double* f, const double* w,
                const double* globalVelocity, const double* reaction, const unsigned int nd,
@@ -249,7 +252,9 @@ double projectionError_norm_infinity_conic(const double* velocity, const double*
                                            const unsigned int nc);
 double projectionError_dual_norm_infinity_conic(const double* velocity, const double* reaction,
                                                 const unsigned int nc);
-
+double projectionError_relative_norm_infinity_conic(const double* velocity,
+                                                    const double* reaction,
+                                                    const unsigned int nc);
 /*
  * Velocity u is re-computed by vector r
  * on_dual_cone = 0: Error projection on cone K = max{ | ri - Pi_K (ri - ui) |_2 }, i = 1,...,n

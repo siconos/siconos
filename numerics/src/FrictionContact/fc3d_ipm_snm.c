@@ -20,36 +20,36 @@
 #include <float.h>
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "FrictionContactProblem.h"  // for FrictionContactProblem, friction...
+#include "Friction_cst.h"            // for ComputeErrorPtr
+#include "Friction_tools.h"          // for ComputeErrorPtr
 #include "JordanAlgebra.h"
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"
 #include "NumericsVector.h"
 #include "SiconosLapack.h"
-#include "SparseBlockMatrix.h"
-#include "Friction_tools.h"                  // for ComputeErrorPtr
-#include "Friction_cst.h"                  // for ComputeErrorPtr
-#include "fc3d_compute_error.h"
 #include "SolverOptions.h"
-#include "float.h"
+#include "SparseBlockMatrix.h"
+#include "fc3d_Solvers.h"
+#include "fc3d_compute_error.h"
 #include "numerics_verbose.h"
 #include "projectionOnCone.h"
-
 /* #define DEBUG_MESSAGES */
 /* #define DEBUG_STDOUT */
 #include "gfc3d_ipm.h"
 #include "siconos_debug.h"
 
-const char *const SICONOS_FRICTION_3D_IPM_SNM_STR = "FC3D IPM SNM";
+const char* const SICONOS_FRICTION_3D_IPM_SNM_STR = "FC3D IPM SNM";
 
 /* ------------------------- Helper functions implementation ------------------------------ */
 /* Compute the primal constraint vector for local fricprob: out = Wr + q + Es - u
    and the relative 2-norm of this vector: rnorm = |out|/max{|Wr|, |q|, |velocity|, |Es|} */
-static void primalResidual_s_for_local_friction(const double *velocity, const double *reaction,
-                                                NumericsMatrix *W, const double *q,
-                                                const double *s, double *out, double *rnorm,
+static void primalResidual_s_for_local_friction(const double* velocity, const double* reaction,
+                                                NumericsMatrix* W, const double* q,
+                                                const double* s, double* out, double* rnorm,
                                                 const double tol) {
   size_t nd = W->size0;
   double rn;
@@ -79,25 +79,25 @@ static void primalResidual_s_for_local_friction(const double *velocity, const do
  * NOTE: Friction contact (local) has the same structure of velocity and reaction with Global
  * friction contact. So, it is not necessary to create a separate struct
  */
-void fc3d_IPM_SNM_init(FrictionContactProblem *problem, SolverOptions *options) {
+void fc3d_IPM_SNM_init(FrictionContactProblem* problem, SolverOptions* options) {
   size_t n = problem->numberOfContacts;
   size_t m = 3 * n;
   size_t d = problem->dimension;
   size_t nd = n * d;
 
   if (!options->dWork || options->dWorkSize != (2 * nd + n)) {
-    options->dWork = (double *)calloc(2 * nd + n, sizeof(double));
+    options->dWork = (double*)calloc(2 * nd + n, sizeof(double));
     options->dWorkSize = 2 * nd + n;
   }
 
   /* ------------- initialize starting point ------------- */
-  options->solverData = (Gfc3d_IPM_init_data *)malloc(sizeof(Gfc3d_IPM_init_data));
-  Gfc3d_IPM_init_data *data = (Gfc3d_IPM_init_data *)options->solverData;
+  options->solverData = (Gfc3d_IPM_init_data*)malloc(sizeof(Gfc3d_IPM_init_data));
+  Gfc3d_IPM_init_data* data = (Gfc3d_IPM_init_data*)options->solverData;
 
   /* --------- allocate memory for tmp point ----------- */
-  data->tmp_point = (IPM_tmp_point *)malloc(sizeof(IPM_tmp_point));
-  data->tmp_point->t_velocity = (double *)calloc(nd, sizeof(double));
-  data->tmp_point->t_reaction = (double *)calloc(nd, sizeof(double));
+  data->tmp_point = (IPM_tmp_point*)malloc(sizeof(IPM_tmp_point));
+  data->tmp_point->t_velocity = (double*)calloc(nd, sizeof(double));
+  data->tmp_point->t_reaction = (double*)calloc(nd, sizeof(double));
 
   /* NOTE: Assigning values for starting points is done in fc3d_IPM_SNM for convenience */
   // /* u */
@@ -119,7 +119,7 @@ void fc3d_IPM_SNM_init(FrictionContactProblem *problem, SolverOptions *options) 
   // }
 
   /* ------ initialize the change of variable matrix P_mu ------- */
-  data->P_mu = (IPM_change_of_variable *)malloc(sizeof(IPM_change_of_variable));
+  data->P_mu = (IPM_change_of_variable*)malloc(sizeof(IPM_change_of_variable));
   data->P_mu->mat = NM_create(NM_SPARSE, nd, nd);
   NM_triplet_alloc(data->P_mu->mat, nd);
   data->P_mu->mat->matrix2->origin = NSM_TRIPLET;
@@ -140,26 +140,26 @@ void fc3d_IPM_SNM_init(FrictionContactProblem *problem, SolverOptions *options) 
       NM_entry(data->P_mu->inv_mat, i, i, 1.0 / problem->mu[(int)(i / d)]);
 
   /* ------ initial parameters initialization ---------- */
-  data->internal_params = (IPM_internal_params *)malloc(sizeof(IPM_internal_params));
+  data->internal_params = (IPM_internal_params*)malloc(sizeof(IPM_internal_params));
   data->internal_params->alpha_primal = 1.0;
   data->internal_params->alpha_dual = 1.0;
   data->internal_params->sigma = 0.1;
   data->internal_params->barr_param = 1.0;
 
   /* ----- temporary vaults initialization ------- */
-  data->tmp_vault_nd = (double **)malloc(10 * sizeof(double *));
+  data->tmp_vault_nd = (double**)malloc(10 * sizeof(double*));
   for (unsigned int i = 0; i < 10; ++i)
-    data->tmp_vault_nd[i] = (double *)calloc(nd, sizeof(double));
+    data->tmp_vault_nd[i] = (double*)calloc(nd, sizeof(double));
 }
 
-void fc3d_IPM_SNM_free(FrictionContactProblem *problem, SolverOptions *options) {
+void fc3d_IPM_SNM_free(FrictionContactProblem* problem, SolverOptions* options) {
   if (options->dWork) {
     free(options->dWork);
     options->dWork = NULL;
     options->dWorkSize = 0;
   }
   if (options->solverData) {
-    Gfc3d_IPM_init_data *data = (Gfc3d_IPM_init_data *)options->solverData;
+    Gfc3d_IPM_init_data* data = (Gfc3d_IPM_init_data*)options->solverData;
 
     NM_clear(data->P_mu->mat);
     free(data->P_mu->mat);
@@ -187,9 +187,9 @@ void fc3d_IPM_SNM_free(FrictionContactProblem *problem, SolverOptions *options) 
   }
 }
 
-void fc3d_IPM_SNM(FrictionContactProblem *restrict problem, double *restrict reaction,
-                  double *restrict velocity, int *restrict info,
-                  SolverOptions *restrict options) {
+void fc3d_IPM_SNM(FrictionContactProblem* restrict problem, double* restrict reaction,
+                  double* restrict velocity, int* restrict info,
+                  SolverOptions* restrict options) {
   // the size of the problem detection
   size_t n = problem->numberOfContacts;
   size_t m = 3 * n;
@@ -204,17 +204,17 @@ void fc3d_IPM_SNM(FrictionContactProblem *restrict problem, double *restrict rea
     internal_allocation = 1;
   }
 
-  Gfc3d_IPM_init_data *data = (Gfc3d_IPM_init_data *)options->solverData;
-  NumericsMatrix *P_mu = data->P_mu->mat;
-  NumericsMatrix *P_mu_inv = data->P_mu->inv_mat;
+  Gfc3d_IPM_init_data* data = (Gfc3d_IPM_init_data*)options->solverData;
+  NumericsMatrix* P_mu = data->P_mu->mat;
+  NumericsMatrix* P_mu_inv = data->P_mu->inv_mat;
 
-  NumericsMatrix *W_ori = problem->M;
-  double *q_ori = problem->q;
-  double *q = data->tmp_vault_nd[no_nd++];
+  NumericsMatrix* W_ori = problem->M;
+  double* q_ori = problem->q;
+  double* q = data->tmp_vault_nd[no_nd++];
 
   // change of variable to eliminate the friction coefficients: W_ori --> W and q_ori --> q
-  NumericsMatrix *WP = NM_multiply(W_ori, P_mu);
-  NumericsMatrix *W = NM_multiply(P_mu, WP);
+  NumericsMatrix* WP = NM_multiply(W_ori, P_mu);
+  NumericsMatrix* W = NM_multiply(P_mu, WP);
   NM_gemv(1.0, P_mu, q_ori, 0.0, q);
 
   size_t W_nzmax = NM_nnz(W);
@@ -242,15 +242,15 @@ void fc3d_IPM_SNM(FrictionContactProblem *restrict problem, double *restrict rea
     else
       velocity[i] = 0.01;
 
-  double *s = (double *)calloc(n, sizeof(double));
+  double* s = (double*)calloc(n, sizeof(double));
   for (size_t i = 0; i < n; i++) s[i] = 0.014;
 
-  double *d_velocity = (double *)calloc(nd, sizeof(double));
-  double *d_reaction = (double *)calloc(nd, sizeof(double));
-  double *d_s = (double *)calloc(n, sizeof(double));
-  double *u_plus_du = data->tmp_vault_nd[no_nd++];   // for Mehrotra
-  double *r_plus_dr = data->tmp_vault_nd[no_nd++];   // for Mehrotra
-  double *dudr_jprod = data->tmp_vault_nd[no_nd++];  // for Mehrotra
+  double* d_velocity = (double*)calloc(nd, sizeof(double));
+  double* d_reaction = (double*)calloc(nd, sizeof(double));
+  double* d_s = (double*)calloc(n, sizeof(double));
+  double* u_plus_du = data->tmp_vault_nd[no_nd++];   // for Mehrotra
+  double* r_plus_dr = data->tmp_vault_nd[no_nd++];   // for Mehrotra
+  double* dudr_jprod = data->tmp_vault_nd[no_nd++];  // for Mehrotra
 
   double tol = options->dparam[SICONOS_DPARAM_TOL];
   unsigned int max_iter = options->iparam[SICONOS_IPARAM_MAX_ITER];
@@ -272,17 +272,17 @@ void fc3d_IPM_SNM(FrictionContactProblem *restrict problem, double *restrict rea
   double totalresidual = 1e300, totalresidual_mu = 1e300;
   double diff_fixp = 1e300;
 
-  double *primalConstraint = data->tmp_vault_nd[no_nd++];
-  double *complemConstraint = data->tmp_vault_nd[no_nd++];
-  double *fixpConstraint = (double *)calloc(n, sizeof(double));
+  double* primalConstraint = data->tmp_vault_nd[no_nd++];
+  double* complemConstraint = data->tmp_vault_nd[no_nd++];
+  double* fixpConstraint = (double*)calloc(n, sizeof(double));
 
   double kappa_mu = 1.;  // reduction of barparam
   double max_uor_2mu = 0., tmp_uor_2mu = 0.;
   double scale_sub_diff = 0.9;
 
-  double *rhs = options->dWork;
-  double *rhs_2 = (double *)calloc(2 * nd + n, sizeof(double));
-  double *sol = (double *)calloc(2 * nd + n, sizeof(double));
+  double* rhs = options->dWork;
+  double* rhs_2 = (double*)calloc(2 * nd + n, sizeof(double));
+  double* sol = (double*)calloc(2 * nd + n, sizeof(double));
 
   char fws = ' '; /* finish without scaling */
 
@@ -291,15 +291,15 @@ void fc3d_IPM_SNM(FrictionContactProblem *restrict problem, double *restrict rea
   double LS_norm_c = 0.;  // complementarity
   double LS_norm_f = 0.;  // fixed point
 
-  NumericsMatrix *J = NULL;
+  NumericsMatrix* J = NULL;
   long J_nzmax;
 
-  NumericsMatrix *minus_eye_nd = NM_eye(nd);
+  NumericsMatrix* minus_eye_nd = NM_eye(nd);
   NM_scal(-1.0, minus_eye_nd);
-  NumericsMatrix *eye_n = NM_eye(n);
-  NumericsMatrix *subdiff_u = NULL;
+  NumericsMatrix* eye_n = NM_eye(n);
+  NumericsMatrix* subdiff_u = NULL;
 
-  NumericsMatrix *mat_E = NULL;
+  NumericsMatrix* mat_E = NULL;
   mat_E = NM_create(NM_SPARSE, nd, n);
   size_t mat_E_nzmax = n;
   NM_triplet_alloc(mat_E, mat_E_nzmax);
@@ -329,13 +329,13 @@ void fc3d_IPM_SNM(FrictionContactProblem *restrict problem, double *restrict rea
       "---------------------------------------------------------------------------------------"
       "-------------------------------------------------------------------------");
 
-  FILE *iterates = NULL;
-  FILE *matrixH = NULL;
-  FILE *iterates_2 = NULL;
-  FILE *sol_file = NULL;
+  FILE* iterates = NULL;
+  FILE* matrixH = NULL;
+  FILE* iterates_2 = NULL;
+  FILE* sol_file = NULL;
 
   // Read problem names
-  FILE *f_problem_name = fopen("problem_names.res", "r");
+  FILE* f_problem_name = fopen("problem_names.res", "r");
   char problem_name[100];
   if (!f_problem_name)
     printf("\n\nProblem names data file is not available!!! \n\n");
@@ -343,10 +343,10 @@ void fc3d_IPM_SNM(FrictionContactProblem *restrict problem, double *restrict rea
     fscanf(f_problem_name, "%s\n", problem_name);
   }
 
-  char *str = (char *)malloc(200);
+  char* str = (char*)malloc(200);
   strcpy(str, problem_name);
-  const char *separators = "/";
-  char *strToken = strtok(str, separators);
+  const char* separators = "/";
+  char* strToken = strtok(str, separators);
   for (int i = 0; i < 5; i++) {
     if (strToken != NULL) strToken = strtok(NULL, separators);
   }
@@ -454,8 +454,8 @@ void fc3d_IPM_SNM(FrictionContactProblem *restrict problem, double *restrict rea
         NM_triplet_alloc(J, J_nzmax);
         J->matrix2->origin = NSM_TRIPLET;
 
-        NumericsMatrix *arrow_r = Arrow_repr(reaction, nd, n);
-        NumericsMatrix *arrow_u = Arrow_repr(velocity, nd, n);
+        NumericsMatrix* arrow_r = Arrow_repr(reaction, nd, n);
+        NumericsMatrix* arrow_u = Arrow_repr(velocity, nd, n);
 
         // Create subdiff_u
         subdiff_u = NM_create(NM_SPARSE, n, nd);
@@ -520,7 +520,7 @@ void fc3d_IPM_SNM(FrictionContactProblem *restrict problem, double *restrict rea
           cblas_dscal(2 * nd + n, -1.0, rhs, 1);
           cblas_dcopy(2 * nd + n, rhs, 1, rhs_2, 1);  // rhs_2 = old rhs
 
-          double *rhs_tmp = (double *)calloc(2 * nd + n, sizeof(double));
+          double* rhs_tmp = (double*)calloc(2 * nd + n, sizeof(double));
           cblas_dcopy(2 * nd + n, rhs_2, 1, rhs_tmp, 1);
           for (int k = 0; k < 2 * nd + n; sol[k] = 0., k++);  // reset sol
 
@@ -607,7 +607,7 @@ void fc3d_IPM_SNM(FrictionContactProblem *restrict problem, double *restrict rea
         // SOLVE
         // NM_LU_solve(J, rhs, 1);
 
-        double *rhs_tmp = (double *)calloc(2 * nd + n, sizeof(double));
+        double* rhs_tmp = (double*)calloc(2 * nd + n, sizeof(double));
         cblas_dcopy(2 * nd + n, rhs_2, 1, rhs_tmp, 1);
         for (int k = 0; k < 2 * nd + n; sol[k] = 0., k++);  // reset sol
 
@@ -987,7 +987,7 @@ void fc3d_IPM_SNM(FrictionContactProblem *restrict problem, double *restrict rea
   *info = hasNotConverged;
 }
 
-void fc3d_ipm_snm_set_default(SolverOptions *options) {
+void fc3d_ipm_snm_set_default(SolverOptions* options) {
   options->iparam[SICONOS_FRICTION_3D_IPM_IPARAM_GET_PROBLEM_INFO] =
       SICONOS_FRICTION_3D_IPM_GET_PROBLEM_INFO_NO;
 

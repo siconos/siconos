@@ -20,6 +20,7 @@
 #include <math.h>    // for isfinite
 #include <stdio.h>   // for printf, fclose, fopen, FILE
 #include <stdlib.h>  // for calloc, free
+#include <string.h>  //  fo strlen
 #include <time.h>    // for clock
 
 #include "GlobalRollingFrictionContactProblem.h"  // for globalRollingFrictionContactPro...
@@ -32,18 +33,18 @@
 #include "frictionContact_test_utils.h"           // for globalRollingFrictionContact_te...
 #include "test_utils.h"                           // for TestCase
 
-int globalRollingFrictionContact_test_function(TestCase *current) {
+int globalRollingFrictionContact_test_function(TestCase* current) {
   int k;
-  GlobalRollingFrictionContactProblem *problem =
+  GlobalRollingFrictionContactProblem* problem =
       globalRollingFrictionContact_new_from_filename(current->filename);
 
   problem->name = malloc(1 + strlen(current->filename));
   strcpy(problem->name, current->filename);
 
-  char *problem_name = NULL;
-  char *str = (char *)malloc(200);
+  char* problem_name = NULL;
+  char* str = (char*)malloc(200);
   strcpy(str, problem->name);
-  const char *separators = "/";
+  const char* separators = "/";
   problem_name = strtok(str, separators);
   for (int i = 0; i < 5; i++) {
     if (problem_name != NULL) problem_name = strtok(NULL, separators);
@@ -53,7 +54,7 @@ int globalRollingFrictionContact_test_function(TestCase *current) {
 
   numerics_set_verbose(1);
 
-  FILE *foutput = fopen("checkinput.dat", "w");
+  FILE* foutput = fopen("checkinput.dat", "w");
   globalRollingFrictionContact_printInFile(problem, foutput);
 
   int NC = problem->numberOfContacts;
@@ -61,9 +62,9 @@ int globalRollingFrictionContact_test_function(TestCase *current) {
   int n = problem->M->size1;
 
   int info;
-  double *reaction = (double *)calloc(dim * NC, sizeof(double));
-  double *velocity = (double *)calloc(dim * NC, sizeof(double));
-  double *globalvelocity = calloc(n, sizeof(double));
+  double* reaction = (double*)calloc(dim * NC, sizeof(double));
+  double* velocity = (double*)calloc(dim * NC, sizeof(double));
+  double* globalvelocity = calloc(n, sizeof(double));
 
   long clk_tck = CLOCKS_PER_SEC;
 
@@ -121,7 +122,7 @@ int globalRollingFrictionContact_test_function(TestCase *current) {
 
   if (current->options->solverId == SICONOS_GLOBAL_ROLLING_FRICTION_3D_IPM) {
     // Take projerr value from test
-    double *projerr_ptr = current->options->solverData;
+    double* projerr_ptr = current->options->solverData;
     printf("\nsumry: %d  %.2e  %.2e   %5i %5i    %.6f   %s\n", info,
            current->options->dparam[SICONOS_DPARAM_RESIDU], *projerr_ptr,
            current->options->iparam[SICONOS_IPARAM_ITER_DONE], NC,
