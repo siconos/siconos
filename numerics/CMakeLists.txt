@@ -263,12 +263,17 @@ if(WITH_OPENSSL)
 endif()
 
 # -- HDF5 --
-# For logging
 if(WITH_HDF5)
   find_package(HDF5 REQUIRED COMPONENTS C HL)
-  target_include_directories(numerics PRIVATE ${HDF5_C_INCLUDE_DIRS})
-  target_link_libraries(numerics PRIVATE ${HDF5_C_LIBRARIES})
-  target_link_libraries(numerics PRIVATE ${HDF5_HL_LIBRARIES})
+  if(HDF5_IS_PARALLEL)
+      message(STATUS "HDF5 was built with MPI support")
+      find_package(MPI REQUIRED)
+      target_link_libraries(numerics PRIVATE MPI::MPI_C HDF5::HDF5)
+  else()
+      target_link_libraries(numerics PRIVATE HDF5::HDF5)
+  endif()
+  target_compile_definitions(numerics PRIVATE WITH_HDF5)
+
 endif()
 
 # -- OpenMP --

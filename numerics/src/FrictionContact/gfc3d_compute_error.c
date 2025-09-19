@@ -30,7 +30,7 @@
 #include "numerics_verbose.h"              // for numerics_error, numerics_w...
 #include "projectionOnCone.h"
 #include "sanitizer.h"  // for cblas_dcopy_msan
-
+#include "gfc3d_ipm.h" // for gfc3d_compute_error_r
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */

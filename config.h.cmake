@@ -116,7 +116,6 @@ Example : if cmake is executed with WITH_MPI=ON
 #cmakedefine HAVE_SERIALIZATION
 #cmakedefine WITH_SERIALIZATION
 #cmakedefine HAVE_GENERATION
-#cmakedefine WITH_HDF5
 
 
 

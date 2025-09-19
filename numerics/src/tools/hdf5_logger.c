@@ -19,9 +19,6 @@
 #include "hdf5_logger.h"
 
 #include <stdio.h>  // for fprintf, stderr
-
-#include "SiconosConfig.h"  // for WITH_HDF5  // IWYU pragma: keep
-
 #ifdef WITH_HDF5
 
 #include <math.h>
@@ -30,7 +27,7 @@
 #include "NumericsMatrix.h"
 #include "NumericsSparseMatrix.h"
 #include "assert.h"
-//#include "CSparseMatrix.h"
+// #include "CSparseMatrix.h"
 #include "CSparseMatrix.h"
 
 bool SN_logh5_check_gzip(void) {

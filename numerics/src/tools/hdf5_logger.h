@@ -32,7 +32,6 @@
 
 #include "CSparseMatrix.h"  // for CSparseMatrix, cs
 #include "NumericsFwd.h"    // for NumericsMatrix
-#include "SiconosConfig.h"  // for BUILD_AS_CPP // IWYU pragma: keep
 #include "sn_logger.h"      // for SN_loglevels, SN_LOGLEVEL_NO
 
 #ifdef WITH_HDF5
