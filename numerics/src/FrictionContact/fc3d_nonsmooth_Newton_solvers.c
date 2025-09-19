@@ -21,13 +21,15 @@
 
 #include <assert.h>  // for assert
 #include <math.h>    // for isnan, isinf, pow
+
+#include "FischerBurmeisterGenerated.h"
 #ifndef __cplusplus
 #include <stdbool.h>  // for true
 #endif
 #include <stdio.h>   // for printf, NULL
 #include <stdlib.h>  // for free, calloc, exit
 
-#include "CSparseMatrix.h"  // for CSparseMatrix_z...
+#include "CSparseMatrix.h"           // for CSparseMatrix_z...
 #include "FrictionContactProblem.h"  // for FrictionContact...
 #include "Friction_cst.h"            // for SICONOS_FRICTIO...
 #include "NumericsMatrix.h"          // for NumericsMatrix
@@ -165,7 +167,8 @@ static void computeSparseAWpB(double *A, NumericsMatrix *W, double *B, NumericsM
   free(Bmat);
 }
 
-void computeAWpB(double *A, NumericsMatrix *W, double *B, NumericsMatrix *AWpB) {
+void fc3d_nonsmooth_Newton_computeAWpB(double *A, NumericsMatrix *W, double *B,
+                                       NumericsMatrix *AWpB) {
   switch (W->storageType) {
     case NM_DENSE: {
       computeDenseAWpB(A, W, B, AWpB);
@@ -186,16 +189,13 @@ void computeAWpB(double *A, NumericsMatrix *W, double *B, NumericsMatrix *AWpB) 
   }
 }
 
-int globalLineSearchGP(fc3d_nonsmooth_Newton_solvers *equation, double *reaction,
-                       double *velocity, double *mu, double *rho, double *F, double *A,
-                       double *B, NumericsMatrix *W, double *qfree, NumericsMatrix *AWpB,
-                       double *direction, double *tmp, double alpha[1],
-                       unsigned int maxiter_ls);
-int globalLineSearchGP(fc3d_nonsmooth_Newton_solvers *equation, double *reaction,
-                       double *velocity, double *mu, double *rho, double *F, double *A,
-                       double *B, NumericsMatrix *W, double *qfree, NumericsMatrix *AWpB,
-                       double *direction, double *tmp, double alpha[1],
-                       unsigned int maxiter_ls) {
+int fc3d_nonsmooth_Newton_linesearch_GoldsteinPrice(fc3d_nonsmooth_Newton_solvers *equation,
+                                                    double *reaction, double *velocity,
+                                                    double *mu, double *rho, double *F,
+                                                    double *A, double *B, NumericsMatrix *W,
+                                                    double *qfree, NumericsMatrix *AWpB,
+                                                    double *direction, double *tmp,
+                                                    double alpha[1], unsigned int maxiter_ls) {
   unsigned problemSize = W->size0;
 
   double inf = 1e10;
@@ -246,14 +246,11 @@ int globalLineSearchGP(fc3d_nonsmooth_Newton_solvers *equation, double *reaction
     int C2 = (slope <= m1 * dqdt0);
 
     if (C1 && C2) {
-      if (verbose > 0) {
-        printf(
-            "             globalLineSearchGP. success. ls_iter = %i  alpha = %.10e, q = "
-            "%.10e\n",
-            iter, alpha[0], q);
-      }
-
-      return 0;
+      numerics_printf_verbose(2,
+                              "fc3d_nonsmooth_Newton_linesearch_GoldsteinPrice. success. "
+                              "ls_iter = %i  alpha = %.10e, q = %.10e\n",
+                              iter, alpha[0], q);
+      return iter;
 
     } else if (!C1) {
       alphamin = alpha[0];
@@ -274,31 +271,24 @@ int globalLineSearchGP(fc3d_nonsmooth_Newton_solvers *equation, double *reaction
         maxiter_ls, alpha[0]);
   }
 
+  numerics_printf_verbose(
+      1,
+      "global line search reached the  max number of iteration  = %i  with alpha = %.10e \n",
+      maxiter_ls, alpha[0]);
+
   return -1;
 }
 
-void fc3d_FischerBurmeisterFunctionGenerated(double *reaction, double *velocity, double mu,
-                                             double *rho, double *f, double *A, double *B);
-
-void fc3d_FischerBurmeisterGradFMeritGenerated(double rn, double rt1, double rt2, double un,
-                                               double ut1, double ut2, double mu, double rhon,
-                                               double rhot1, double rhot2, double *result);
-
-void fc3d_FischerBurmeisterGradMeritFunctionGenerated(double *reaction, double *velocity,
-                                                      double mu, double *rho, double *gf);
-
-/* cf Fachicchinei & Pang, Finite-Dimensional Variational Inequalities
+/* cf Facchinei & Pang, Finite-Dimensional Variational Inequalities
  * and Complementarity Problems, Volume II, p 805. */
-int frictionContactFBLSA(fc3d_nonsmooth_Newton_solvers *equation, double *reaction,
-                         double *velocity, double *mu, double *rho, double *F, double *A,
-                         double *B, NumericsMatrix *W, double *qfree,
-                         NumericsMatrix *blockAWpB, double *direction, double *tmp,
-                         double alpha[1], unsigned int maxiter_ls);
-int frictionContactFBLSA(fc3d_nonsmooth_Newton_solvers *equation, double *reaction,
-                         double *velocity, double *mu, double *rho, double *F, double *A,
-                         double *B, NumericsMatrix *W, double *qfree,
-                         NumericsMatrix *blockAWpB, double *direction, double *tmp,
-                         double alpha[1], unsigned int maxiter_ls) {
+
+int fc3d_nonsmooth_Newton_linesearch_FBLSA(fc3d_nonsmooth_Newton_solvers *equation,
+                                           double *reaction, double *velocity, double *mu,
+                                           double *rho, double *F, double *A, double *B,
+                                           NumericsMatrix *W, double *qfree,
+                                           NumericsMatrix *blockAWpB, double *direction,
+                                           double *tmp, double alpha[1],
+                                           unsigned int maxiter_ls) {
   unsigned problemSize = W->size0;
 
   // notes :
@@ -373,22 +363,19 @@ int frictionContactFBLSA(fc3d_nonsmooth_Newton_solvers *equation, double *reacti
 
     if (!isinf(grad_meritf_reaction) && !isnan(grad_meritf_reaction) &&
         thetafb < thetafb0 + gamma * scal * grad_meritf_reaction) {
-      if (verbose > 0) {
-        printf(
-            "fc3d FBLSA success. iteration  = %i, thetafb=%g, thetafb0=%g, "
-            "gradmeritf,reaction=%g\n",
-            iter, thetafb, thetafb0, gamma * scal * grad_meritf_reaction);
-      }
+      numerics_printf_verbose(2,
+                              "fc3d FBLSA success. iteration  = %i, thetafb=%g, thetafb0=%g, "
+                              "gradmeritf_reaction=%g",
+                              iter, thetafb, thetafb0, gamma * scal * grad_meritf_reaction);
       // tmp <- reaction + tmp
       cblas_daxpy(problemSize, 1, reaction, 1, tmp, 1);
-
-      return 0;
+      *alpha = scal;
+      return iter;
     }
   }
 
-  if (verbose > 0) {
-    printf("fc3d FBLSA reached the max number of iteration reached  = %i\n", maxiter_ls);
-  }
+  numerics_printf_verbose(1, "fc3d FBLSA reached the max number of iteration reached  = %i",
+                          maxiter_ls);
 
   return -1;
 }
@@ -431,9 +418,7 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers *equation
   double tolerance = options->dparam[SICONOS_DPARAM_TOL];
   assert(tolerance > 0);
 
-  if (verbose > 0)
-    printf("---- FC3D - _nonsmooth_Newton_solversSolve - Start with tolerance = %g\n",
-           tolerance);
+  numerics_printf_verbose(1, "---- FC3D - NSN - start with tolerance = %g", tolerance);
 
   unsigned int _3problemSize = 3 * problemSize;
   double norm_q = cblas_dnrm2(problemSize, problem->q, 1);
@@ -451,9 +436,10 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers *equation
     buffer = options->dWork;
   }
   double *F = (double *)buffer;
-  double *tmp1 = (double *)F + problemSize;
-  double *tmp2 = (double *)tmp1 + problemSize;
-  double *tmp3 = (double *)tmp2 + problemSize;
+  double *direction = (double *)F + problemSize;
+  double *reaction_ls_tmp = (double *)direction + problemSize;
+  double *tmp3 = (double *)reaction_ls_tmp + problemSize;
+
   double *Ax = tmp3 + problemSize;
   double *Bx = Ax + _3problemSize;
   double *rho = Bx + _3problemSize;
@@ -485,24 +471,20 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers *equation
   }
 
   // compute rho here
-  FrictionContactProblem * localproblem =fc3d_local_problem_allocate(problem);
-  assert(options->dparam[SICONOS_FRICTION_3D_NSN_RHO]>0.0);
-  SparseBlockStructuredMatrix* matrix1 = problem->M->matrix1;
+  FrictionContactProblem *localproblem = fc3d_local_problem_allocate(problem);
+  assert(options->dparam[SICONOS_FRICTION_3D_NSN_RHO] > 0.0);
+  SparseBlockStructuredMatrix *matrix1 = problem->M->matrix1;
   if (problem->M->storageType == NM_SPARSE) {
-
-    if (problem->M->matrix1)
-      {
-	printf("Warning matrix 1 different from NULL");
-      }
+    if (problem->M->matrix1) {
+      printf("Warning matrix 1 different from NULL");
+    }
 
     problem->M->matrix1 = NM_extract_diagonal_blocks(problem->M, problem->dimension);
   }
 
-
-  for(int contact = 0; contact < problem->numberOfContacts; ++contact)
-  {
-    if(options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] == SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPLIT_SPECTRAL_NORM_COND)
-    {
+  for (int contact = 0; contact < problem->numberOfContacts; ++contact) {
+    if (options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] ==
+        SICONOS_FRICTION_3D_NSN_FORMULATION_RHO_STRATEGY_SPLIT_SPECTRAL_NORM_COND) {
       fc3d_local_problem_fill_M(problem, localproblem, contact);
       compute_rho_split_spectral_norm_cond(localproblem, &rho[3 * contact]);
     } else if (options->iparam[SICONOS_FRICTION_3D_NSN_RHO_STRATEGY] ==
@@ -525,20 +507,21 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers *equation
     } else
       numerics_error("fc3d_nonsmooth_Newton_solvers_solve",
                      "unknown strategy for computing rho");
-    numerics_printf(
-        "fc3d_AC_initialize"
-        "contact = %i, rho[0] = %4.2e, rho[1] = %4.2e, rho[2] = %4.2e",
-        contact, rho[3 * contact], rho[3 * contact + 1], rho[3 * contact + 2]);
+    numerics_printf_verbose(2,
+                            "fc3d_AC_initialize"
+                            "contact = %i, rho[0] = %4.2e, rho[1] = %4.2e, rho[2] = %4.2e",
+                            contact, rho[3 * contact], rho[3 * contact + 1],
+                            rho[3 * contact + 2]);
   }
   if (problem->M->storageType == NM_SPARSE) {
     SBM_clear_block(problem->M->matrix1);
     SBM_clear(problem->M->matrix1);
-    problem->M->matrix1= matrix1;
+    problem->M->matrix1 = matrix1;
     localproblem->M->matrix0 = NULL;
   }
-  if(problem->M->storageType == NM_SPARSE_BLOCK)
-  {
-    /* we release the pointer to avoid deallocation of the diagonal blocks of the original matrix of the problem*/
+  if (problem->M->storageType == NM_SPARSE_BLOCK) {
+    /* we release the pointer to avoid deallocation of the diagonal blocks of the original
+     * matrix of the problem*/
     localproblem->M->matrix0 = NULL;
   }
   frictionContactProblem_free(localproblem);
@@ -547,24 +530,30 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers *equation
   cblas_dcopy(problemSize, problem->q, 1, velocity, 1);
   NM_gemv(1., problem->M, reaction, 1., velocity);
 
+  numerics_printf_verbose(
+      1, "---- FC3D - NSN | it  | residual | merit    | ls iter  | ls step  |  Ax=b error |");
+  numerics_printf_verbose(
+      1, "---- FC3D - NSN |---------------------------------------------------------------|");
+
   double linear_solver_residual = 0.0;
 
   while (iter++ < itermax) {
     equation->function(equation->data, problemSize, reaction, velocity, equation->problem->mu,
                        rho, F, Ax, Bx);
     // AW + B
-    computeAWpB(Ax, problem->M, Bx, AWpB);
+    fc3d_nonsmooth_Newton_computeAWpB(Ax, problem->M, Bx, AWpB);
 
-    cblas_dcopy_msan(problemSize, F, 1, tmp1, 1);
-    cblas_dscal(problemSize, -1., tmp1, 1);
+    cblas_dcopy_msan(problemSize, F, 1, direction, 1);
+    cblas_dscal(problemSize, -1., direction, 1);
 
     /* Solve: AWpB X = -F */
+
     //    NM_copy(AWpB, AWpB_backup);
-    // int lsi = NM_gesv(AWpB, tmp1, true);
+    // int lsi = NM_gesv(AWpB, direction, true);
     NM_unpreserve(AWpB);
     NM_preserve(AWpB);
     NM_set_LU_factorized(AWpB, false);
-    int lsi = NM_LU_solve(AWpB, tmp1, 1);
+    int lsi = NM_LU_solve(AWpB, direction, 1);
 
     /* NM_copy needed here */
     //    NM_copy(AWpB_backup, AWpB);
@@ -576,9 +565,10 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers *equation
       }
     }
 
+    // for verbose, we compute the residual of the linear solver
     if (verbose > 0) {
       cblas_dcopy_msan(problemSize, F, 1, tmp3, 1);
-      NM_gemv(1., AWpB, tmp1, 1., tmp3);
+      NM_gemv(1., AWpB, direction, 1., tmp3);
       linear_solver_residual = cblas_dnrm2(problemSize, tmp3, 1);
       /* fprintf(stderr, "fc3d esolve: linear equation residual = %g\n", */
       /*         cblas_dnrm2(problemSize, tmp3, 1)); */
@@ -589,39 +579,41 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers *equation
     double alpha = 1;
     int info_ls = 0;
 
-    cblas_dcopy_msan(problemSize, tmp1, 1, tmp3, 1);
+    cblas_dcopy_msan(problemSize, direction, 1, tmp3, 1);
 
     switch (options->iparam[SICONOS_FRICTION_3D_NSN_LINESEARCH]) {
       case SICONOS_FRICTION_3D_NSN_LINESEARCH_NO:
         /* without line search */
         info_ls = 1;
         break;
-
       case SICONOS_FRICTION_3D_NSN_LINESEARCH_GOLDSTEINPRICE:
         /* Goldstein Price */
-        info_ls = globalLineSearchGP(equation, reaction, velocity, problem->mu, rho, F, Ax, Bx,
-                                     problem->M, problem->q, AWpB, tmp1, tmp2, &alpha,
-                                     options->iparam[12]);
+        info_ls = fc3d_nonsmooth_Newton_linesearch_GoldsteinPrice(
+            equation, reaction, velocity, problem->mu, rho, F, Ax, Bx, problem->M, problem->q,
+            AWpB, direction, reaction_ls_tmp, &alpha, options->iparam[12]);
         break;
       case SICONOS_FRICTION_3D_NSN_LINESEARCH_ARMIJO:
         /* FBLSA */
-        info_ls = frictionContactFBLSA(equation, reaction, velocity, problem->mu, rho, F, Ax,
-                                       Bx, problem->M, problem->q, AWpB, tmp1, tmp2, &alpha,
-                                       options->iparam[12]);
+        info_ls = fc3d_nonsmooth_Newton_linesearch_FBLSA(
+            equation, reaction, velocity, problem->mu, rho, F, Ax, Bx, problem->M, problem->q,
+            AWpB, direction, reaction_ls_tmp, &alpha, options->iparam[12]);
         break;
       default: {
         numerics_error("fc3d_nonsmooth_Newton_solvers_solve", "Unknown line search option.\n");
       }
     }
 
-    if (!info_ls)
-      // tmp2 should contains the reaction iterate of the line search
-      //  for GP this should be the same as cblas_daxpy(problemSize, alpha, tmp1, 1, reaction,
-      //  1);
-      cblas_dcopy(problemSize, tmp2, 1, reaction, 1);
-    else
-      cblas_daxpy(problemSize, 1., tmp3, 1., reaction, 1);
-
+    if (info_ls >= 0) {
+      // line search success
+      // reaction_ls_tmp should contains the reaction iterate of the line search
+      // for GP this should be the same as
+      // cblas_daxpy(problemSize, alpha, direction, 1, reaction, 1);
+      cblas_dcopy(problemSize, reaction_ls_tmp, 1, reaction, 1);
+    } else {
+      double alpha_ls_fail = 1.;  // 1e-08;
+      // line search failed
+      cblas_daxpy(problemSize, alpha_ls_fail, tmp3, 1., reaction, 1);  // full Newton step
+    }
     // velocity <- M*reaction + qfree
     cblas_dcopy(problemSize, problem->q, 1, velocity, 1);
     NM_gemv(1., problem->M, reaction, 1., velocity);
@@ -645,12 +637,13 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers *equation
     if (verbose > 0) {
       equation->function(equation->data, problemSize, reaction, velocity,
                          equation->problem->mu, rho, F, NULL, NULL);
-
-      printf(
-          "   ---- fc3d_nonsmooth_Newton_solvers_solve: iteration %d : , linear solver "
-          "residual =%g, residual=%g, ||F||=%g\n",
-          iter, linear_solver_residual, options->dparam[SICONOS_DPARAM_RESIDU],
-          cblas_dnrm2(problemSize, F, 1));
+      numerics_printf_verbose(1, "---- FC3D - NSN | %3i | %.1e | %.1e | %8i | %.1e | %.1e |",
+                              iter, options->dparam[SICONOS_DPARAM_RESIDU],
+                              cblas_dnrm2(problemSize, F, 1), info_ls, alpha,
+                              linear_solver_residual);
+      /* printf("   ---- fc3d_nonsmooth_Newton_solvers_solve: iteration %d : , linear solver
+       * residual =%g, residual=%g, ||F||=%g\n", iter, linear_solver_residual,
+       * options->dparam[SICONOS_DPARAM_RESIDU],cblas_dnrm2(problemSize, F, 1)); */
     }
 
     if (options->callback) {
@@ -678,11 +671,13 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers *equation
 
   if (verbose > 0) {
     if (!info[0])
-      printf("---- FC3D - NSN - convergence after %d iterations, residual : %g < %g \n", iter,
-             options->dparam[SICONOS_DPARAM_RESIDU], tolerance);
+      numerics_printf_verbose(
+          1, "---- FC3D - NSN - convergence after %d iterations, residual : %g < %g", iter,
+          options->dparam[SICONOS_DPARAM_RESIDU], tolerance);
     else {
-      printf("---- FC3D - NSN - no convergence after %d iterations, residual : %g  < %g \n",
-             iter, options->dparam[SICONOS_DPARAM_RESIDU], tolerance);
+      numerics_printf_verbose(
+          1, "---- FC3D - NSN - no convergence after %d iterations, residual : %g  < %g ",
+          iter, options->dparam[SICONOS_DPARAM_RESIDU], tolerance);
     }
   }
 
@@ -701,5 +696,4 @@ void fc3d_nonsmooth_Newton_solvers_solve(fc3d_nonsmooth_Newton_solvers *equation
 
     free(AWpB);
   }
-  if (verbose > 0) printf("---- FC3D - NSN - End\n");
 }

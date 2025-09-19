@@ -18,6 +18,7 @@
 #include <math.h>    // for isfinite
 #include <stdio.h>   // for printf, fclose, fopen, FILE
 #include <stdlib.h>  // for calloc, free, rand, srand
+#include <time.h>
 
 #include "FrictionContactProblem.h"  // for frictionContactProblem_free
 #include "NonSmoothDrivers.h"        // for fc2d_driver, fc3d_driver
@@ -28,6 +29,7 @@
 #include "SolverOptions.h"  // for SolverOptions, solver_option...
 #include "frictionContact_test_utils.h"  // for frictionContact_test_function
 #include "test_utils.h"                  // for TestCase
+
 // avoid a conflict with old csparse.h in case fclib includes it
 #define _CS_H
 
@@ -125,6 +127,8 @@ int frictionContact_test_function(TestCase* current) {
   double* reaction = (double*)calloc(dim * NC, sizeof(double));
   double* velocity = (double*)calloc(dim * NC, sizeof(double));
 
+  long clk_tck = CLOCKS_PER_SEC;
+
   solver_options_print(current->options);
 
 // --- Extra setup for options when the solver belongs to GAMS family ---
@@ -132,6 +136,7 @@ int frictionContact_test_function(TestCase* current) {
   frictionContact_test_gams_opts(current->options);
 #endif
 
+  clock_t t1 = clock();
   if (dim == 2) {
     info = fc2d_driver(problem, reaction, velocity, current->options);
   } else if (dim == 3) {
@@ -140,6 +145,13 @@ int frictionContact_test_function(TestCase* current) {
     info = 1;
 
   int print_size = 10;
+
+  for (int k = 0; k < dim * NC; ++k) {
+    info = info == 0 ? !(isfinite(velocity[k]) && isfinite(reaction[k])) : info;
+  }
+
+  clock_t t2 = clock();
+
   printf("Norm velocity:  %12.8e\n", cblas_dnrm2(NC * dim, velocity, 1));
   printf("Norm reaction:  %12.8e\n", cblas_dnrm2(NC * dim, reaction, 1));
 
@@ -157,10 +169,6 @@ int frictionContact_test_function(TestCase* current) {
   }
   printf(" ..... \n");
 
-  for (int k = 0; k < dim * NC; ++k) {
-    info = info == 0 ? !(isfinite(velocity[k]) && isfinite(reaction[k])) : info;
-  }
-
   if (!info)
     printf("test success, residual = %9.2e, info = %d, nb iter = %i\n",
            current->options->dparam[SICONOS_DPARAM_RESIDU], info,
@@ -169,6 +177,11 @@ int frictionContact_test_function(TestCase* current) {
     printf("test failure, residual = %9.2e, info = %d, nb iter = %i\n",
            current->options->dparam[SICONOS_DPARAM_RESIDU], info,
            current->options->iparam[SICONOS_IPARAM_ITER_DONE]);
+
+  printf(
+      "\nsumry: %d  %9.2e  %5i  %10.4f", info, current->options->dparam[SICONOS_DPARAM_RESIDU],
+      current->options->iparam[SICONOS_IPARAM_ITER_DONE], (double)(t2 - t1) / (double)clk_tck);
+  printf("%3i %5i     %s\n\n", dim, NC, current->filename);
 
   free(reaction);
   free(velocity);

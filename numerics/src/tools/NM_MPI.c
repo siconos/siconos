@@ -23,7 +23,6 @@
 #include "numerics_verbose.h"
 MPI_Comm NM_MPI_comm(NumericsMatrix* A) {
   assert(A);
-
   if (NM_internalData(A)->mpi_comm == MPI_COMM_NULL) {
     if (verbose) {
       fprintf(stderr,

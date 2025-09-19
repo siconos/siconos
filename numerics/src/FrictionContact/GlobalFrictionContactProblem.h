@@ -60,6 +60,9 @@ struct GlobalFrictionContactProblem {
   /** \f$ M^{-1} \in {\mathrm{I\!R}}^{n \times n} \f$ */
   NumericsMatrix *M_inverse;
 
+  /** name of the problem **/
+  char *name;
+
   /** opaque environment, solver specific */
   void *env;
 };

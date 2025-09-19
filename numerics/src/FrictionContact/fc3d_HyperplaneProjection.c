@@ -30,7 +30,7 @@
 #include "numerics_verbose.h"        // for verbose
 #include "projectionOnCone.h"        // for projectionOnCone
 
-//#define VERBOSE_DEBUG
+// #define VERBOSE_DEBUG
 
 void fc3d_HyperplaneProjection(FrictionContactProblem* problem, double* reaction,
                                double* velocity, int* info, SolverOptions* options) {

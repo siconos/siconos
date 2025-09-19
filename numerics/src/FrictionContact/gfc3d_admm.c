@@ -19,6 +19,7 @@
 #include <math.h>    // for fabs, sqrt, fmax, INFINITY
 #include <stdio.h>   // for NULL, printf
 #include <stdlib.h>  // for calloc, free, malloc
+#include <time.h>
 
 #include "CSparseMatrix.h"
 #include "Friction_cst.h"                  // for SICONOS_FRICTION_3D_ADMM_I...
@@ -33,8 +34,9 @@
 #include "gfc3d_Solvers.h"  // for gfc3d_checkTrivialCaseGlobal
 #include "gfc3d_balancing.h"
 #include "gfc3d_compute_error.h"  // for gfc3d_compute_error
-#include "numerics_verbose.h"     // for numerics_printf_verbose
-#include "projectionOnCone.h"     // for projectionOnDualCone
+#include "gfc3d_ipm.h"
+#include "numerics_verbose.h"  // for numerics_printf_verbose
+#include "projectionOnCone.h"  // for projectionOnDualCone
 
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
@@ -278,6 +280,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
                 double* restrict globalVelocity, int* restrict info,
                 SolverOptions* restrict options) {
   /* verbose=1; */
+
   int* iparam = options->iparam;
   double* dparam = options->dparam;
   size_t nc = problem_original->numberOfContacts;
@@ -332,6 +335,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
   /**************************************************************************/
 
   DEBUG_PRINT("Strategies for dealing with symmetry \n");
+
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] =
       SICONOS_FRICTION_3D_ADMM_SYMMETRIZE;
   options->iparam[SICONOS_FRICTION_3D_ADMM_IPARAM_SYMMETRY] =
@@ -927,6 +931,7 @@ void gfc3d_ADMM(GlobalFrictionContactProblem* restrict problem_original,
       }
       // getchar();
     }
+
     *info = hasNotConverged;
   }
 
@@ -1006,4 +1011,6 @@ void gfc3d_admm_set_default(SolverOptions* options) {
   options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING] = SICONOS_FRICTION_3D_RESCALING_NO;
   options->iparam[SICONOS_FRICTION_3D_IPARAM_RESCALING_CONE] =
       SICONOS_FRICTION_3D_RESCALING_CONE_NO;
+  options->iparam[SICONOS_FRICTION_3D_ADMM_PRINTING_LIKE_IPM] =
+      SICONOS_FRICTION_3D_ADMM_PRINTING_LIKE_IPM_TRUE;
 }

@@ -27,8 +27,8 @@
 #include "SolverOptions.h"                        // for SolverOptions, solver_opti...
 #include "grfc3d_Solvers.h"                       // for grfc3d...
 #include "numerics_verbose.h"                     // for numerics_printf_verbose
-//#include "gfc3d_compute_error.h"
-//#include "SiconosBlas.h"                         // for cblas_dcopy, cblas_dscal
+// #include "gfc3d_compute_error.h"
+// #include "SiconosBlas.h"                         // for cblas_dcopy, cblas_dscal
 
 #include "siconos_debug.h"  // for DEBUG_EXPR
 #ifdef DEBUG_MESSAGES
@@ -45,7 +45,7 @@ const char* const SICONOS_GLOBAL_ROLLING_FRICTION_3D_IPM_STR =
 #include "string.h"           // for strcpy, strcat
 #endif
 
-//#define FCLIB_OUTPUT
+// #define FCLIB_OUTPUT
 
 #ifdef FCLIB_OUTPUT
 #ifdef WITH_FCLIB

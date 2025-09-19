@@ -26,7 +26,8 @@
 #include "NumericsMatrix.h"          // for NumericsMatrix
 #include "SiconosBlas.h"             // for cblas_dnrm2
 #include "SolverOptions.h"           // for SolverOptions, SICONOS_DPARAM_TOL
-#include "fc3d_Solvers.h"            // for ComputeErrorPtr, FreeSolverPtr
+#include "Friction_tools.h"          // for ComputeErrorPtr, FreeSolverPtr
+#include "fc3d_local_problem_tools.h" // 
 #include "fc3d_compute_error.h"      // for fc3d_compute_error_velocity
 #include "fc3d_projection.h"         // for fc3d_projection_initialize, fc3d...
 #include "numerics_verbose.h"        // for numerics_error, verbose

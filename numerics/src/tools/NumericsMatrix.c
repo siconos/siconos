@@ -19,11 +19,11 @@
 
 #include <assert.h>  // for assert
 #include <float.h>   // for DBL_EPSILON
+#include <inttypes.h>
 #include <math.h>    // for fabs, fmax, NAN
 #include <stdint.h>  // for SIZE_MAX
 #include <stdio.h>   // for printf, fprintf, size_t, fscanf
 #include <stdlib.h>  // for exit, malloc, free, EXIT_FAILURE
-#include <inttypes.h>
 #include <string.h>  // for memcpy, memset
 #include <time.h>
 
@@ -32,12 +32,17 @@
 #include "NM_MUMPS.h"        // for NM_MUMPS_copy
 #include "NM_conversions.h"  // for NM_csc_to_csr, NM_csc_to_triplet
 #include "NM_types.h"
+#include "NSSTools.h"
+#include "NumericsArrays.h"
 #include "NumericsFwd.h"              // for NumericsMatrix, NumericsSparseM...
 #include "NumericsMatrix_internal.h"  // for NM_internalData_free
 #include "NumericsSparseMatrix.h"     // for NumericsSparseMatrix, NSM_new
 #include "SiconosBlas.h"              // for cblas_ddot, cblas_dgemv, CblasN...
 #include "SiconosLapack.h"            // for lapack_int, DGESV, DGETRF, DGETRS, LA_NOTRANS
 #include "SparseBlockMatrix.h"        // for SparseBlockStructuredMatrix
+#include "graph.h"
+#include "op3x3.h"
+
 /* #define DEBUG_NOCOLOR */
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES */
@@ -4342,8 +4347,10 @@ int NM_gesv_expert_multiple_rhs(NumericsMatrix* A, double* b, unsigned int n_rhs
   NM_version_sync(A);
   return info;
 }
+
 NumericsMatrix* NM_gesv_inv(NumericsMatrix* A) {
   DEBUG_BEGIN("NM_inv(NumericsMatrix* A, double *b, unsigned keep)\n");
+
   assert(A->size0 == A->size1);
   double* b = (double*)malloc(A->size0 * sizeof(double));
   for (int i = 0; i < A->size0; ++i) {
@@ -4441,6 +4448,8 @@ int NM_inverse_diagonal_block_matrix_in_place(NumericsMatrix* A) {
   return (int)info;
 }
 
+#define MAX(x, y) (((x) > (y)) ? (x) : (y))
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))
 NumericsMatrix* NM_inverse_diagonal_block_matrix(NumericsMatrix* A, unsigned int block_number,
                                                  unsigned int* blocksizes) {
   DEBUG_BEGIN("NM_inverse_diagonal_block_matrix(NumericsMatrix* A, int * blocksizes))\n");
@@ -4459,8 +4468,7 @@ NumericsMatrix* NM_inverse_diagonal_block_matrix(NumericsMatrix* A, unsigned int
 
       lapack_int* ipiv = (lapack_int*)NM_iWork(A_inv, A_inv->size0, sizeof(lapack_int));
       assert(A_inv->matrix1);
-      // int info =
-      SBM_inverse_diagonal_block_matrix_in_place(A_inv->matrix1, ipiv);
+      int info = SBM_inverse_diagonal_block_matrix_in_place(A_inv->matrix1, ipiv);
       NM_internalData(A_inv)->isInversed = true;
       break;
     }
@@ -4468,33 +4476,78 @@ NumericsMatrix* NM_inverse_diagonal_block_matrix(NumericsMatrix* A, unsigned int
       // brute force implementation.
       // We assume that it is used for convenience
       // must be optimized for serious use.
-
       A_inv = NM_create(NM_SPARSE, A->size0, A->size1);
       NM_triplet_alloc(A_inv, A->size0);
-      int start_row = 0;
-      for (unsigned b = 0; b < block_number; b++) {
-        int block_size = blocksizes[b];
 
-        NumericsMatrix* block_NM = NM_create(NM_DENSE, block_size, block_size);
+      unsigned int block_size_max = blocksizes[0];
+      unsigned int block_size_min = blocksizes[0];
 
-        double** block_adress = &block_NM->matrix0;
+      for (int b = 0; b < block_number; b++) {
+        block_size_max = MAX(block_size_max, blocksizes[b]);
+        block_size_min = MIN(block_size_min, blocksizes[b]);
+      }
 
-        NM_extract_diag_block(A, b, start_row, block_size, block_adress);
+      /* When the matrix is diagonal */
+      if ((block_size_max == 1) && (block_size_min == 1)) {
+        CSparseMatrix* T = NM_triplet(A);
+        CSparseMatrix* T_inv = NM_triplet(A_inv);
+        CS_INT nb_row = T->m;
+        CS_INT nb_col = T->n;
+        CS_INT* Ti = T->i;
+        CS_INT* Tp = T->p;
+        CS_ENTRY* Tx = T->x;
 
-        NumericsMatrix* block_NM_inv = NM_LU_inv(block_NM);
+        for (CS_INT indx = 0; indx < T->nz; ++indx) {
+          CSparseMatrix_entry(T_inv, Ti[indx], Tp[indx], 1.0 / Tx[indx]);
+        }
+      }
+      /* When the matrix is block 3x3 diagonal */
+      else if ((block_size_max == 3) && (block_size_min == 3)) {
+        int start_row = 0;
+        for (unsigned b = 0; b < block_number; b++) {
+          NumericsMatrix* block_NM = NM_create(NM_DENSE, 3, 3);
 
-        NM_insert(A_inv, block_NM_inv, start_row, start_row);
+          double** block_adress = &block_NM->matrix0;
 
-        NM_free(block_NM);
-        NM_free(block_NM_inv);
+          NM_extract_diag_block(A, b, start_row, 3, block_adress);
 
-        start_row = start_row + block_size;
+          inv_3x3_gepp(*block_adress);
+
+          // NumericsMatrix* block_NM_inv =  NM_LU_inv(block_NM);
+
+          NM_insert(A_inv, block_NM, start_row, start_row);
+
+          NM_free(block_NM);
+          // NM_free(block_NM_inv);
+
+          start_row = start_row + 3;
+        }
+      } else {
+        int start_row = 0;
+        for (unsigned b = 0; b < block_number; b++) {
+          int block_size = blocksizes[b];
+
+          NumericsMatrix* block_NM = NM_create(NM_DENSE, block_size, block_size);
+
+          double** block_adress = &block_NM->matrix0;
+
+          NM_extract_diag_block(A, b, start_row, block_size, block_adress);
+
+          NumericsMatrix* block_NM_inv = NM_LU_inv(block_NM);
+
+          NM_insert(A_inv, block_NM_inv, start_row, start_row);
+
+          NM_free(block_NM);
+          NM_free(block_NM_inv);
+
+          start_row = start_row + block_size;
+        }
       }
       break;
     }
 
     default:
-      assert(0 && "NM_inverse_diagonal_block_matrix_in_place :  unknown storageType");
+      assert(0 && "NM_inverse_diagonal_block_matrix :  unknown storageType");
   }
 
   DEBUG_BEGIN("NM_inverse_diagonal_block_matrix(NumericsMatrix* A, int * blocksizes))\n");
@@ -4555,6 +4608,7 @@ void NM_update_size(NumericsMatrix* A) {
 void NM_csc_alloc(NumericsMatrix* A, CS_INT nzmax) {
   numericsSparseMatrix(A)->csc = cs_spalloc(A->size0, A->size1, nzmax, 1, 0);
 }
+
 void NM_csc_empty_alloc(NumericsMatrix* A, CS_INT nzmax) {
   NM_csc_alloc(A, nzmax);
   CS_INT* Ap = numericsSparseMatrix(A)->csc->p;
@@ -4591,6 +4645,44 @@ void NM_assert(NM_types type, NumericsMatrix* M) {
       assert(0 && "NM_assert :: unknown storageType");
   }
 #endif
+}
+
+int NM_check(const NumericsMatrix* const A) {
+  int info = 0;
+  if (!A->matrix2) return info;
+
+  if (A->matrix2->csc) info = CSparseMatrix_check_csc(A->matrix2->csc);
+  if (A->matrix2->csr) info = info ? info : CSparseMatrix_check_csc(A->matrix2->csr);
+  if (A->matrix2->triplet)
+    info = info ? info : CSparseMatrix_check_triplet(A->matrix2->triplet);
+  return info;
+}
+
+size_t NM_nnz(const NumericsMatrix* M) {
+  switch (M->storageType) {
+    case NM_DENSE: {
+      return M->size0 * M->size1;
+    }
+    case NM_SPARSE_BLOCK: {
+      return SBM_nnz(M->matrix1);
+    }
+    case NM_SPARSE: {
+      assert(M->matrix2);
+      return NSM_nnz(NSM_get_origin(M->matrix2));
+    }
+    default:
+      numerics_warning("NM_nnz", "Unsupported matrix type %d in %s", M->storageType, "NM_nnz");
+      return SIZE_MAX;
+  }
+}
+
+void NM_triplet_alloc(NumericsMatrix* A, CS_INT nzmax) {
+  numericsSparseMatrix(A)->triplet = cs_spalloc(A->size0, A->size1, nzmax, 1, 1);
+  numericsSparseMatrix(A)->origin = NSM_TRIPLET;
+}
+
+void NM_setSparseSolver(NumericsMatrix* A, NSM_linear_solver solver_id) {
+  NSM_linearSolverParams(A)->solver = solver_id;
 }
 
 int NM_check(const NumericsMatrix* const A) {
@@ -5895,12 +5987,12 @@ int NM_LU_refine(NumericsMatrix* Ao, double* x, double tol, int max_iter, double
             NM_gemv(-1.0, A, x, 1.0, dx);  // dx = b - Ax
             *residu = cblas_dnrm2(vecsize, dx, 1);
             printf(
-                "-------------------------------------------------> NM_LU_refine: iteration = "
+                "-------------------------------------------------> NM_LU_refine: iteration "
+                "= "
                 "%i,\t residu = %e\n",
                 iteration, *residu);
             while (*residu > tol && iteration < max_iter) {
               iteration++;
-
               NM_LU_solve(A, dx, 1);      // solve A(dx) = b - Ax
               if (NV_isnan(dx, vecsize))  // return -1 if solution contains NaNs
               {
@@ -5918,7 +6010,8 @@ int NM_LU_refine(NumericsMatrix* Ao, double* x, double tol, int max_iter, double
               NM_gemv(-1.0, A, x, 1.0, dx);  // dx   = b - Ax
               *residu = cblas_dnrm2(vecsize, dx, 1);
               printf(
-                  "-------------------------------------------------> NM_LU_refine: iteration "
+                  "-------------------------------------------------> NM_LU_refine: "
+                  "iteration "
                   "= %i,\t residu = %e\n",
                   iteration, *residu);
             }
@@ -5936,8 +6029,8 @@ int NM_LU_refine(NumericsMatrix* Ao, double* x, double tol, int max_iter, double
           /* 	} */
           break;
         }
-        // if (iteration == max_iter) cblas_dcopy(vecsize, x_origin, 1, x, 1);  // get solution
-        // back
+        // if (iteration == max_iter) cblas_dcopy(vecsize, x_origin, 1, x, 1);  // get
+        // solution back
         break;
       }
       default:
@@ -5983,7 +6076,8 @@ int NM_Linear_solver_finalize(NumericsMatrix* Ao) {
         /*       { */
         /*       case NSM_CSPARSE: */
         /*       { */
-        /*         numerics_printf_verbose(2,"NM_Linear_solver__finalize. using SuiteSparse" );
+        /*         numerics_printf_verbose(2,"NM_Linear_solver__finalize. using SuiteSparse"
+         * );
          */
         /* 	/\* Do not know waht to do in that case for the moment *\/ */
         /*         break; */
@@ -6053,4 +6147,392 @@ int NM_Linear_solver_finalize(NumericsMatrix* Ao) {
   }
   NM_version_sync(A);
   return info;
+}
+
+NumericsMatrix* NM_clear_zero(NumericsMatrix* A, const double tol) {
+  /* Currently, this routine is only useful for type NM_SPARSE */
+  NumericsMatrix* B = NM_create(NM_SPARSE, A->size0, A->size1);
+  size_t B_nzmax = NM_nnz(A);
+  NM_triplet_alloc(B, B_nzmax);
+  B->matrix2->origin = NSM_TRIPLET;
+
+  switch (B->storageType) {
+    case NM_SPARSE: {
+      CSparseMatrix* A_csc = NM_csc(A);
+
+      CS_INT n, *Ap, *Ai;
+      double* Ax;
+      n = A_csc->n;
+      Ap = A_csc->p;
+      Ai = A_csc->i;
+      Ax = A_csc->x;
+      for (int j = 0; j < n; j++) {
+        for (CS_INT p = Ap[j]; p < Ap[j + 1]; p++) {
+          if (fabs(Ax[p]) >= tol) {
+            cs_entry(NM_triplet(B), Ai[p], j, Ax[p]);
+          }
+        }
+      }
+    }
+
+    default: {
+      assert(0 && "NM_clear_zero supports only NM_SPARSE, or unknown storageType");
+    }
+  }
+
+  return B;
+}
+
+int compareTriplets(const void* a, const void* b) {
+  return ((struct Triplet*)a)->row_index - ((struct Triplet*)b)->row_index;
+}
+
+void sortTriplets(struct Triplet* triplets, size_t num_triplets) {
+  qsort(triplets, num_triplets, sizeof(struct Triplet), compareTriplets);
+}
+
+// This function is to delete 3*n columns of matrix H related to an array of cones which
+// needs to be deleted The 1st cone is 0 Not allocation and H should be stored as in CSC type
+// after deletion
+void NM_clear_cone_matrix_H(NumericsMatrix* H, unsigned int n_cones_to_clear,
+                            int* cones_to_clear) {
+  // #include "CSparseMatrix.h"
+  switch (H->storageType) {
+    case NM_SPARSE: {
+      assert(H->matrix2);
+      if (H->matrix2->origin == NSM_CSC) {
+        NM_triplet(H);
+        H->matrix2->origin = NSM_TRIPLET;
+        NM_clearCSC(H);
+      }
+
+      if (H->matrix2->origin == NSM_TRIPLET) {
+        CSparseMatrix* H_triplet = H->matrix2->triplet;
+        int first = 0, last = H_triplet->nz - 1, delete_counter = 0, stop = 0;
+        cs_long_t *rows = H_triplet->i, *cols = H_triplet->p, target = -1;
+        double* val = H_triplet->x;
+        for (unsigned int i = 0; i < n_cones_to_clear; i++) {
+          // printf("\nNM_clear_cone_matrix_H: cones_to_clear[%d] =
+          // %d\n",i,cones_to_clear[i]);
+          target = (cs_long_t)cones_to_clear[i] * 3;
+          if (target > H_triplet->m) {
+            n_cones_to_clear--;
+            continue;
+          }
+
+          first = 0;
+          stop = 0;
+          while (first <= last && target < H_triplet->m && !stop) {
+            if (rows[last] == target || rows[last] == target + 1 ||
+                rows[last] == target + 2)  // Last row is to be deleted
+            {
+              last--;
+              delete_counter++;
+            } else {
+              for (unsigned int j = first; j < last; j++) {
+                if (rows[j] == target || rows[j] == target + 1 ||
+                    rows[j] == target + 2)  // Search is done
+                {
+                  // Swap this value with the last one
+                  rows[j] = rows[last];
+                  cols[j] = cols[last];
+                  val[j] = val[last];
+                  last--;
+                  delete_counter++;
+                  first = j + 1;
+                  break;
+                }
+                if (j == last - 1) stop = 1;
+              }
+            }
+          }
+        }
+        // Update nz of H
+        H_triplet->nz = last + 1;
+
+        // Reduce size of H
+        H_triplet->m -= 3 * n_cones_to_clear;
+
+        // Sort row_index
+        struct Triplet* triplets = malloc(H_triplet->nz * sizeof(struct Triplet));
+        for (int k = 0; k < H_triplet->nz; k++) {
+          triplets[k].row_index = rows[k];
+          triplets[k].col_index = cols[k];
+          triplets[k].value = val[k];
+        }
+        sortTriplets(triplets, H_triplet->nz);
+
+        for (int k = 0; k < H_triplet->nz; k++) {
+          rows[k] = triplets[k].row_index;
+          cols[k] = triplets[k].col_index;
+          val[k] = triplets[k].value;
+        }
+
+        for (unsigned int i = 0; i < n_cones_to_clear; i++) {
+          target = ((cs_long_t)cones_to_clear[i] - i) * 3;
+          if (target > H_triplet->m) continue;
+
+          for (unsigned int j = 0; j <= last; j++) {
+            if (rows[j] >= target) {
+              rows[j] -= 3;
+            }
+          }
+        }
+
+        NM_csc(H);
+        H->matrix2->origin = NSM_CSC;
+        H->size0 -= 3 * n_cones_to_clear;
+      } else
+        assert(0 &&
+               "NM_clear_cone_matrix_H supports only NSM_TRIPLET and NSM_CSC, or unknown "
+               "origin");
+    }
+
+    default: {
+      assert(0 && "NM_clear_cone_matrix_H supports only NM_SPARSE, or unknown storageType");
+    }
+  }
+}
+
+struct HashSet* createHashSet(int capacity) {
+  struct HashSet* set = (struct HashSet*)malloc(sizeof(struct HashSet));
+  set->capacity = capacity;
+  set->allElements = (int*)malloc(capacity * sizeof(int));
+  for (int i = 0; i < capacity; i++) set->allElements[i] = -1;
+  return set;
+}
+
+void addToHashSet(struct HashSet* set, int element, int index) {
+  if (element < set->capacity) set->allElements[element] = index;
+}
+
+bool isInHashSet(struct HashSet* set, int element) {
+  return element < set->capacity && set->allElements[element] >= 0;
+}
+
+void freeHashSet(struct HashSet* set) {
+  free(set->allElements);
+  free(set);
+}
+
+NumericsMatrix* NM_extract(NumericsMatrix* A, int n_rows, int* target_rows, int n_cols,
+                           int* target_cols) {
+  NumericsMatrix* Ac = NULL;
+  switch (A->storageType) {
+    case NM_SPARSE: {
+      // Get triplet of A
+      assert(A->matrix2);
+      NM_triplet(A);
+      if (A->matrix2->origin == NSM_CSC) NM_clearCSC(A);
+      if (A->matrix2->origin == NSM_CSR) NM_clearCSR(A);
+      A->matrix2->origin = NSM_TRIPLET;
+
+      // Create HashSet for target
+      struct HashSet* target_rows_HS = createHashSet(A->matrix2->triplet->m);
+      struct HashSet* target_cols_HS = createHashSet(A->matrix2->triplet->n);
+      for (int i = 0; i < n_rows; i++) addToHashSet(target_rows_HS, target_rows[i], i);
+      for (int i = 0; i < n_cols; i++) addToHashSet(target_cols_HS, target_cols[i], i);
+
+      // Create compressed matrix
+      Ac = NM_create(NM_SPARSE, n_rows, n_cols);
+
+      CSparseMatrix* A_triplet = A->matrix2->triplet;
+      CS_INT A_nz = A_triplet->nz, Ac_nz = 0;
+      CSparseMatrix* Ac_triplet = cs_spalloc(n_rows, n_cols, A_nz, 1, 1);
+
+      cs_long_t *A_rows = A_triplet->i, *A_cols = A_triplet->p;
+      cs_long_t *Ac_rows = Ac_triplet->i, *Ac_cols = Ac_triplet->p;
+      double* A_vals = A_triplet->x;
+      double* Ac_vals = Ac_triplet->x;
+
+      int index = 0;
+      cs_long_t min_row = 100000, min_col = 100000;
+      for (int i = 0; i < A_nz; i++) {
+        if (isInHashSet(target_rows_HS, A_rows[i]) && isInHashSet(target_cols_HS, A_cols[i])) {
+          Ac_rows[index] = target_rows_HS->allElements[A_rows[i]];
+          Ac_cols[index] = target_cols_HS->allElements[A_cols[i]];
+          Ac_vals[index++] = A_vals[i];
+
+          if (min_row > A_rows[i]) min_row = A_rows[i];
+          if (min_col > A_cols[i]) min_col = A_cols[i];
+          // printf("min_row = %lld, min_col = %lld\n", min_row, min_col);
+        }
+      }
+
+      freeHashSet(target_rows_HS);
+      freeHashSet(target_cols_HS);
+
+      Ac_nz = index;
+      if (Ac_nz == 0) return NULL;
+
+      // printf("\nmin_row = %lld, min_col = %lld\n\n", min_row, min_col);
+
+      // for (int i=0; i<Ac_nz; i++)
+      // {
+      //   // printf("\nAc_rows = %lld, min_col = %lld\n\n", min_row, min_col);
+      //   Ac_rows[i] -= min_row;
+      //   Ac_cols[i] -= min_col;
+      // }
+
+      // printf("Ac_rows ="); for (int i=0; i<Ac_nz; i++) printf(" %lld", Ac_rows[i]);
+      // printf("\n\nAc_cols ="); for (int i=0; i<Ac_nz; i++) printf(" %lld", Ac_cols[i]);
+      // // Create compressed matrix
+      // CSparseMatrix *A_triplet = A->matrix2->triplet;
+      // cs_long_t *A_rows = A_triplet->i, *A_cols = A_triplet->p;
+      // double *A_vals = A_triplet->x;
+      // CS_INT A_nz = A_triplet->nz, Ac_nz = 0;
+      // int out_of_size = 0;
+
+      // Ac = NM_create(NM_SPARSE, n_rows, n_cols);
+      // // printf("\nn_rows = %d, n_cols = %d, M_nz = %lld\nMc_nz =", n_rows, n_cols, A_nz);
+      // // Count the number of non-zero elements in the target rows and columns
+      // for (int i=0; i<n_rows; i++)
+      //   for (int j=0; j<n_cols; j++)
+      //     for (int k=0; k<A_nz; k++)
+      //     {
+      //       if (A_rows[k] == target_rows[i] && A_cols[k] == target_cols[j])
+      //       {
+      //         Ac_nz++;
+      //         printf(" %lld", Ac_nz);
+      //       }
+      //     }
+
+      // // printf("\nMc_nz all = %lld\n", Ac_nz);
+
+      // if (Ac_nz == 0) return NULL;
+
+      // // Create the compressed matrix
+      // CSparseMatrix *Ac_triplet = cs_spalloc(n_rows, n_cols, Ac_nz, 1, 1);
+      // cs_long_t *Ac_rows = Ac_triplet->i, *Ac_cols = Ac_triplet->p;
+      // double *Ac_vals = Ac_triplet->x;
+      // int index = 0;
+
+      // for (int i=0; i<n_rows; i++)
+      //   for (int j=0; j<n_cols; j++)
+      //     for (int k=0; k<A_nz; k++)
+      //       if (A_rows[k] == target_rows[i] && A_cols[k] == target_cols[j])
+      //       {
+      //         Ac_rows[index] = i;
+      //         Ac_cols[index] = j;
+      //         Ac_vals[index++] = A_vals[k];
+      //       }
+
+      Ac->matrix2->triplet = Ac_triplet;
+      Ac->matrix2->origin = NSM_TRIPLET;
+      Ac->matrix2->triplet->nz = Ac_nz;
+    }
+
+    default: {
+      assert(0 && "NM_extract supports only NM_SPARSE, or unknown storageType");
+    }
+  }
+
+  if (Ac) {
+    NM_csc(Ac);
+    Ac->matrix2->origin = NSM_CSC;
+  }
+  return Ac;
+}
+struct Graph* NM_create_adjacency_graph(NumericsMatrix* A) {
+  struct Graph* graph = NULL;
+
+  switch (A->storageType) {
+    case NM_SPARSE: {
+      CSparseMatrix* T = NM_triplet(A);
+      CS_INT nb_row = T->m;
+      CS_INT nb_col = T->n;
+      CS_INT* Ti = T->i;
+      CS_INT* Tp = T->p;
+
+      int n_vertices = max(nb_row, nb_col);
+      graph = create_graph(n_vertices);
+
+      for (CS_INT indx = 0; indx < T->nz; ++indx) {
+        add_edge(graph, Ti[indx], Tp[indx]);
+      }
+      /* printGraph(graph); */
+      break;
+    }
+    default: {
+      assert(0 && "NM_create_adjacency_graph only NM_SPARSE, or unknown storageType");
+    }
+  }
+  return graph;
+}
+
+struct connectedcomponent_node* NM_compute_connectedcomponents(NumericsMatrix* A) {
+  struct connectedcomponent_node* connectedcomponents = NULL;
+
+  switch (A->storageType) {
+    case NM_SPARSE: {
+      struct Graph* graph = NM_create_adjacency_graph(A);
+      connectedcomponents = compute_connectedcomponents(graph);
+      /* print_connectedcomponents(connectedcomponents); */
+      free_graph(graph);
+      break;
+    }
+    default: {
+      assert(0 && "NM_compute_connectedcomponents only NM_SPARSE, or unknown storageType");
+    }
+  }
+  return connectedcomponents;
+}
+
+int NM_is_diagonal_block_matrix(NumericsMatrix* A, unsigned int* block_number,
+                                unsigned int** blocksizes) {
+  assert(A);
+  struct connectedcomponent_node* connectedcomponents = NM_compute_connectedcomponents(A);
+  unsigned int n_component = len_connectedcomponents(connectedcomponents);
+  /* print_connectedcomponents(connectedcomponents); */
+
+  int is_diagonal_block_matrix = 1;
+
+  *block_number = 0;
+  *blocksizes = (unsigned int*)malloc(n_component * sizeof(unsigned int));
+
+  struct connectedcomponent_node* temp = connectedcomponents;
+  while (temp != NULL) {
+    /* printf("connected component number %i :\n", *block_number); */
+    struct node* connectedcomponent = temp->connectedcomponent;
+    /* print_connectedcomponent(connectedcomponent); */
+
+    int len = len_connectedcomponent(connectedcomponent);
+    size_t* indices = (size_t*)malloc(len * sizeof(size_t));
+
+    struct node* temp1 = connectedcomponent;
+    int i = 0;
+    while (temp1 != NULL) {
+      indices[i] = temp1->vertex;
+
+      temp1 = temp1->next;
+      i++;
+    }
+    NA_sort_bubble(indices, len);
+    /* NA_display(indices,len); */
+
+    for (size_t k = 1; k < len; k++) {
+      if (indices[k] != indices[k - 1] + 1) {
+        is_diagonal_block_matrix = 0;
+        free(indices);
+        free(*blocksizes);
+        *blocksizes = NULL;
+      }
+    }
+
+    if (is_diagonal_block_matrix == 0) break;
+
+    (*blocksizes)[*block_number] = len;
+    free(indices);
+
+    temp = temp->next;
+    (*block_number)++;
+  }
+
+  /* printf("block_number = %i\n", *block_number ); */
+  /* for (unsigned int k = 0; k < n_component; k++) */
+  /*   printf("blocksize[%i] = %i\n", k , (*blocksizes)[k]); */
+
+  connectedcomponents = free_connectedcomponents(connectedcomponents);
+
+  return is_diagonal_block_matrix;
 }

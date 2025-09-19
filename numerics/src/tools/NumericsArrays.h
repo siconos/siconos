@@ -57,6 +57,8 @@ size_t NA_merge_and_sort_sorted_arrays(size_t *arr1, size_t *arr2, size_t n1, si
                                        size_t *arr3);
 void NA_display(size_t *arr1, size_t n1);
 
+size_t NA_max(size_t *arr, size_t len);
+size_t NA_min(size_t *arr, size_t len);
 /* swap two indices */
 void uint_swap(unsigned int *a, unsigned int *b);
 /* shuffle an unsigned array */

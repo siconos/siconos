@@ -10,9 +10,13 @@
 #endif
 #include "fc2d_Solvers.h"
 #include "fc3d_AlartCurnier_functions.h"
+#include "fc3d_nonsmooth_Newton_AlartCurnier.h"
 #include "AlartCurnierGenerated.h"
+#include "fc3d_nonsmooth_Newton_FischerBurmeister.h"
 #include "FischerBurmeisterGenerated.h"
+#include "fc3d_nonsmooth_Newton_natural_map.h"
 #include "NaturalMapGenerated.h"
+#include "fc3d_unitary_enumerative.h"
 %}
 
 %include "FrictionContactProblem.h"

@@ -34,7 +34,7 @@
 #include "rolling_fc_Solvers.h"                // for RollingComputeErrorPtr
 #include "siconos_debug.h"                     // for DEBUG_PRINTF, DEBUG_BEGIN
 
-//#define FCLIB_OUTPUT
+// #define FCLIB_OUTPUT
 
 #ifdef FCLIB_OUTPUT
 static int fccounter = -1;

@@ -103,9 +103,7 @@ int fc3d_Path_solve(FrictionContactProblem* localproblem, double* reaction,
   /*   (*postSolver)(contact,reaction); */
 }
 
-
-void fc3d_Path_free() { }
-
+void fc3d_Path_free() {}
 
 void fc3d_Path_computeError(int n, double* velocity, double* reaction, double* error) {
   /*   int numberOfContacts = n/3; */

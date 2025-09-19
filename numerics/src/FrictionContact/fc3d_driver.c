@@ -22,6 +22,7 @@
 
 #include "FrictionContactProblem.h"                    // for FrictionContac...
 #include "Friction_cst.h"                              // for SICONOS_FRICTI...
+#include "Friction_tools.h" 
 #include "NonSmoothDrivers.h"                          // for fc3d_driver
 #include "NumericsFwd.h"                               // for SolverOptions
 #include "SolverOptions.h"                             // for SolverOptions
@@ -39,7 +40,7 @@ const char* const SICONOS_FRICTION_3D_NSGSV_STR = "FC3D_NSGSV";
 const char* const SICONOS_FRICTION_3D_TFP_STR = "FC3D_TFP";
 const char* const SICONOS_FRICTION_3D_PFP_STR = "FC3D_PFP";
 const char* const SICONOS_FRICTION_3D_NSN_AC_STR = "FC3D_NSN_AC";
-const char* const SICONOS_FRICTION_3D_NSN_AC_TEST_STR = "FC3D_NSN_AC_TEST";
+const char* const SICONOS_FRICTION_3D_NSN_AC_NEW_STR = "FC3D_NSN_AC_NEW (Newton method LSA)";
 const char* const SICONOS_FRICTION_3D_NSN_FB_STR = "FC3D_NSN_FB";
 const char* const SICONOS_FRICTION_3D_NSN_NM_STR = "FC3D_NSN_NM";
 const char* const SICONOS_FRICTION_3D_DSFP_STR = "FC3D_DeSaxceFixedPoint";
@@ -67,7 +68,6 @@ const char* const SICONOS_FRICTION_3D_ONECONTACT_ProjectionOnCone_velocity_STR =
     "FC3D_ProjectionOnCone_velocity";
 const char* const SICONOS_FRICTION_3D_CONVEXQP_PG_CYLINDER_STR = "FC3D ConvexQP PG solver";
 const char* const SICONOS_FRICTION_3D_VI_FPP_Cylinder_STR = "FC3D_VI_FPP_Cylinder";
-
 const char* const SICONOS_FRICTION_3D_EG_STR = "FC3D_ExtraGradient";
 const char* const SICONOS_FRICTION_3D_FPP_STR = "FC3D_FixedPointProjection";
 const char* const SICONOS_FRICTION_3D_VI_EG_STR = "FC3D_VI_ExtraGradient";
@@ -82,6 +82,7 @@ const char* const SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_STR = "FC3D_QUARTIC";
 const char* const SICONOS_FRICTION_3D_ONECONTACT_QUARTIC_NU_STR = "FC3D_QUARTIC_NU";
 const char* const SICONOS_FRICTION_3D_ACLMFP_STR = "FC3D_ACLMFP";
 const char* const SICONOS_FRICTION_3D_SOCLCP_STR = "FC3D_SOCLCP";
+const char* const SICONOS_FRICTION_3D_IPM_STR = "FC3D_IPM";
 
 int fc3d_driver(FrictionContactProblem* problem, double* reaction, double* velocity,
                 SolverOptions* options) {
@@ -232,11 +233,11 @@ int fc3d_driver(FrictionContactProblem* problem, double* reaction, double* veloc
       break;
     }
     /*  XXX to delete */
-    case SICONOS_FRICTION_3D_NSN_AC_TEST: {
+    case SICONOS_FRICTION_3D_NSN_AC_NEW: {
       numerics_printf(
           " ========================== Call Alart Curnier solver for Friction-Contact 3D "
           "problem ==========================\n");
-      fc3d_nonsmooth_Newton_AlartCurnier2(problem, reaction, velocity, &info, options);
+      fc3d_nonsmooth_Newton_AlartCurnier_new(problem, reaction, velocity, &info, options);
       break;
     }
     /* Fischer Burmeister in local coordinates */
@@ -279,12 +280,20 @@ int fc3d_driver(FrictionContactProblem* problem, double* reaction, double* veloc
       fc3d_projectionOnConeWithLocalIteration_initialize(problem, problem, options);
       info = fc3d_projectionOnConeWithLocalIteration_solve(problem, reaction, options);
       fc3d_projectionOnConeWithLocalIteration_free(problem, problem, options);
-
       break;
     }
+    case SICONOS_FRICTION_3D_IPM_SNM: {
+      numerics_printf(
+          " ========================== Call IPM-SNM solver for Friction-Contact 3D problem "
+          "==========================\n");
+      fc3d_IPM_SNM(problem, reaction, velocity, &info, options);
+      break;
+    }
+
     case SICONOS_FRICTION_3D_GAMS_PATH: {
       numerics_printf(
-          " ========================== Call PATH solver via GAMS for an AVI Friction-Contact "
+          " ========================== Call PATH solver via GAMS for an AVI "
+          "Friction-Contact "
           "3D problem ==========================\n");
       fc3d_AVI_gams_path(problem, reaction, velocity, &info, options);
       break;
@@ -299,14 +308,16 @@ int fc3d_driver(FrictionContactProblem* problem, double* reaction, double* veloc
     case SICONOS_FRICTION_3D_GAMS_LCP_PATH: {
       numerics_printf(
           " ========================== Call PATH solver via GAMS for an LCP-based "
-          "reformulation of the AVI Friction-Contact 3D problem ==========================\n");
+          "reformulation of the AVI Friction-Contact 3D problem "
+          "==========================\n");
       fc3d_lcp_gams_path(problem, reaction, velocity, &info, options);
       break;
     }
     case SICONOS_FRICTION_3D_GAMS_LCP_PATHVI: {
       numerics_printf(
           " ========================== Call PATHVI solver via GAMS for an LCP-based "
-          "reformulation of the AVI Friction-Contact 3D problem ==========================\n");
+          "reformulation of the AVI Friction-Contact 3D problem "
+          "==========================\n");
       fc3d_lcp_gams_pathvi(problem, reaction, velocity, &info, options);
       break;
     }
@@ -343,6 +354,7 @@ int fc3d_checkTrivialCase(FrictionContactProblem* problem, double* velocity, dou
   }
 
   numerics_printf(
-      "fc3d fc3d_checkTrivialCase, take off, trivial solution reaction = 0, velocity = q.\n");
+      "fc3d fc3d_checkTrivialCase, take off, trivial solution reaction = 0, velocity = "
+      "q.\n");
   return 0;
 }

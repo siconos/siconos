@@ -21,7 +21,7 @@
 #include <stdio.h>   // for NULL, printf
 #include <stdlib.h>  // for calloc, free, malloc
 
-#include "CSparseMatrix.h"         // for CSparseMatrix_zentry, CSparseMatrix
+#include "CSparseMatrix.h"                  // for CSparseMatrix_zentry, CSparseMatrix
 #include "Friction_cst.h"                   // for SICONOS_FRICTION_3D_ADMM_IPARAM_...
 #include "NumericsFwd.h"                    // for SolverOptions, FrictionContactPr...
 #include "NumericsMatrix.h"                 // for NM_gemv, NM_clear, NM_copy, NM_new

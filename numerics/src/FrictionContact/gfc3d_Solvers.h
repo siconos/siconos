@@ -229,6 +229,20 @@ void gfc3d_AVI_gams_path(GlobalFrictionContactProblem* problem, double* reaction
 void gfc3d_AVI_gams_pathvi(GlobalFrictionContactProblem* problem, double* reaction,
                            double* velocity, int* info, SolverOptions* options);
 
+/* This routine is a short version of gfc3d_IPM. It allows to solve the convex model with fixed
+ * barrier parameter and s parameter. Param s will be updated (s = || u_bar ||) according to
+ * different strategies. SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S_EXTERNAL: after solving the
+ * system with a desired tolerance SICONOS_FRICTION_3D_IPM_IPARAM_UPDATE_S_INTERNAL: at each
+ * iteration Currently, gfc3d_IPM_fixed solves the optimaltily system under format 2X2_QPH
+ * (more detail in the paper/documentation) 03 inputs reaction, velocity, globalVelocity must
+ * be assigned values before
+ */
+void gfc3d_IPM_fixed(GlobalFrictionContactProblem* problem, double* reaction, double* velocity,
+                     double* globalVelocity, int* info, SolverOptions* options,
+                     double barr_param, const char* problem_name);
+
+void gfc3d_IPM_init(GlobalFrictionContactProblem* problem, SolverOptions* options);
+
 void gfc3d_nonsmooth_Newton_AlartCurnier(GlobalFrictionContactProblem* problem,
                                          double* reaction, double* velocity,
                                          double* globalVelocity, int* info,
@@ -241,6 +255,29 @@ void gfc3d_VI_ExtraGradient(GlobalFrictionContactProblem* problem, double* react
 void gfc3d_VI_FixedPointProjection(GlobalFrictionContactProblem* problem, double* reaction,
                                    double* velocity, double* globalVelocity, int* info,
                                    SolverOptions* options);
+
+/*
+ * Info to complete
+ */
+void gfc3d_IPM_SNM(GlobalFrictionContactProblem* problem, double* reaction, double* velocity,
+                   double* globalVelocity, int* info, SolverOptions* options);
+
+void gfc3d_IPM_SNM_init(GlobalFrictionContactProblem* problem, SolverOptions* options);
+
+void gfc3d_IPM_SNM_free(GlobalFrictionContactProblem* problem, SolverOptions* options);
+
+void gfc3d_ipm_snm_set_default(SolverOptions* options);
+
+void gfc3d_ipm_snm_wr(GlobalFrictionContactProblem* problem, double* reaction,
+                      double* velocity, double* globalVelocity, int* info,
+                      SolverOptions* options);
+
+/** \addtogroup SetSolverOptions
+ * @{
+ */
+void gfc3d_nsn_ac_set_default(SolverOptions* options);
+void gfc3d_aclmfp_set_default(SolverOptions* options);
+void gfc3d_admm_set_default(SolverOptions* options);
 
 void gfc3d_ADMM(GlobalFrictionContactProblem* problem, double* reaction, double* velocity,
                 double* globalVelocity, int* info, SolverOptions* options);

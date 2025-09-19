@@ -10,7 +10,7 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
+ * distributed under the License is distributed on an "AS IS" BASIS,fc2
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -22,6 +22,7 @@
 
 #include "FrictionContactProblem.h"  // for FrictionContactProblem
 #include "Friction_cst.h"            // for SICONOS_FRICTION_3D_NSGS, SICONO...
+#include "Friction_tools.h"                  // for ComputeErrorPtr                                       
 #include "NumericsFwd.h"             // for SolverOptions, FrictionContactPr...
 #include "SiconosBlas.h"             // for cblas_dnrm2
 #include "SolverOptions.h"           // for SolverOptions, solver_options_cr...

@@ -809,6 +809,10 @@ static void compute_contact_work_and_status(
   auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
   auto e = siconos::modeling::nonsmooth_laws::ask<ForE>(*inter->nonSmoothLaw());
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> master
   // Compute normal contact work
   auto vn_minus = (inter->y_k(1))(0);
   auto vn_plus = (*inter->y(1))(0);
@@ -962,7 +966,6 @@ static void compute_contact_work_and_status_2d(
     }
   } else
     answer(4) = -1;  // undetermined = -1
-
   if ((pn > tol) and (vn_minus > tol)) {
     // std::cout << "WARNING: we apply the impact law of positive velocity " << std::endl;
     // std::cout << "pn " << pn << " vn minus " << vn_minus << " vn plus " << vn_plus
@@ -992,6 +995,7 @@ static void compute_contact_work_and_status_2d(
   // std::cout << "vn_plus + e * vn_minus  " << vn_plus + e * vn_minus   << std::endl;
   // std::cout << "status   "<<   answer(4) << std::endl;
 }
+
 }  // namespace siconos::io
 
 template <>

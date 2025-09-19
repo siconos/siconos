@@ -33,11 +33,11 @@ const char* const SICONOS_FRICTION_2D_NSGS_STR = "FC2D_NSGS";
 const char* const SICONOS_FRICTION_2D_CPG_STR = "FC2D_CPG";
 const char* const SICONOS_FRICTION_2D_LEMKE_STR = "FC2D_LEMKE";
 const char* const SICONOS_FRICTION_2D_ENUM_STR = "FC2D_ENUM";
-//#define DUMP_PROBLEM
+// #define DUMP_PROBLEM
 #ifdef DUMP_PROBLEM
 static int fccounter = 0;
 #endif
-//#define DUMP_PROBLEM_IF_INFO
+// #define DUMP_PROBLEM_IF_INFO
 #ifdef DUMP_PROBLEM_IF_INFO
 static int fccounter = 0;
 #endif

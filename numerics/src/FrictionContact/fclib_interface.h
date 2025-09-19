@@ -37,14 +37,11 @@ typedef struct fclib_solution fclib_solution;
 extern "C" {
 #endif
 
+FrictionContactProblem *from_fclib_local(const fclib_local *fclib_problem);
 
-FrictionContactProblem* from_fclib_local(const fclib_local *fclib_problem);
-  
-FrictionContactProblem* from_fclib_local_sparse(const fclib_local* fclib_problem);
-  
+FrictionContactProblem *from_fclib_local_sparse(const fclib_local *fclib_problem);
 
 FrictionContactProblem *frictionContact_fclib_read(const char *path);
-
 
 int frictionContact_fclib_write_csr(FrictionContactProblem *problem, char *title,
                                     char *description, char *mathInfo, const char *path,
