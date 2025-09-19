@@ -809,10 +809,6 @@ static void compute_contact_work_and_status(
   auto mu = siconos::modeling::nonsmooth_laws::ask<ForMu>(*inter->nonSmoothLaw());
   auto e = siconos::modeling::nonsmooth_laws::ask<ForE>(*inter->nonSmoothLaw());
 
-<<<<<<< HEAD
-=======
-
->>>>>>> master
   // Compute normal contact work
   auto vn_minus = (inter->y_k(1))(0);
   auto vn_plus = (*inter->y(1))(0);
