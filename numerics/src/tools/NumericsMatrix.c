@@ -4468,7 +4468,7 @@ NumericsMatrix* NM_inverse_diagonal_block_matrix(NumericsMatrix* A, unsigned int
 
       lapack_int* ipiv = (lapack_int*)NM_iWork(A_inv, A_inv->size0, sizeof(lapack_int));
       assert(A_inv->matrix1);
-      int info = SBM_inverse_diagonal_block_matrix_in_place(A_inv->matrix1, ipiv);
+      SBM_inverse_diagonal_block_matrix_in_place(A_inv->matrix1, ipiv);
       NM_internalData(A_inv)->isInversed = true;
       break;
     }
@@ -4482,7 +4482,7 @@ NumericsMatrix* NM_inverse_diagonal_block_matrix(NumericsMatrix* A, unsigned int
       unsigned int block_size_max = blocksizes[0];
       unsigned int block_size_min = blocksizes[0];
 
-      for (int b = 0; b < block_number; b++) {
+      for (size_t b = 0; b < block_number; b++) {
         block_size_max = MAX(block_size_max, blocksizes[b]);
         block_size_min = MIN(block_size_min, blocksizes[b]);
       }
@@ -4491,8 +4491,6 @@ NumericsMatrix* NM_inverse_diagonal_block_matrix(NumericsMatrix* A, unsigned int
       if ((block_size_max == 1) && (block_size_min == 1)) {
         CSparseMatrix* T = NM_triplet(A);
         CSparseMatrix* T_inv = NM_triplet(A_inv);
-        CS_INT nb_row = T->m;
-        CS_INT nb_col = T->n;
         CS_INT* Ti = T->i;
         CS_INT* Tp = T->p;
         CS_ENTRY* Tx = T->x;
@@ -4645,44 +4643,6 @@ void NM_assert(NM_types type, NumericsMatrix* M) {
       assert(0 && "NM_assert :: unknown storageType");
   }
 #endif
-}
-
-int NM_check(const NumericsMatrix* const A) {
-  int info = 0;
-  if (!A->matrix2) return info;
-
-  if (A->matrix2->csc) info = CSparseMatrix_check_csc(A->matrix2->csc);
-  if (A->matrix2->csr) info = info ? info : CSparseMatrix_check_csc(A->matrix2->csr);
-  if (A->matrix2->triplet)
-    info = info ? info : CSparseMatrix_check_triplet(A->matrix2->triplet);
-  return info;
-}
-
-size_t NM_nnz(const NumericsMatrix* M) {
-  switch (M->storageType) {
-    case NM_DENSE: {
-      return M->size0 * M->size1;
-    }
-    case NM_SPARSE_BLOCK: {
-      return SBM_nnz(M->matrix1);
-    }
-    case NM_SPARSE: {
-      assert(M->matrix2);
-      return NSM_nnz(NSM_get_origin(M->matrix2));
-    }
-    default:
-      numerics_warning("NM_nnz", "Unsupported matrix type %d in %s", M->storageType, "NM_nnz");
-      return SIZE_MAX;
-  }
-}
-
-void NM_triplet_alloc(NumericsMatrix* A, CS_INT nzmax) {
-  numericsSparseMatrix(A)->triplet = cs_spalloc(A->size0, A->size1, nzmax, 1, 1);
-  numericsSparseMatrix(A)->origin = NSM_TRIPLET;
-}
-
-void NM_setSparseSolver(NumericsMatrix* A, NSM_linear_solver solver_id) {
-  NSM_linearSolverParams(A)->solver = solver_id;
 }
 
 int NM_check(const NumericsMatrix* const A) {
@@ -6208,7 +6168,7 @@ void NM_clear_cone_matrix_H(NumericsMatrix* H, unsigned int n_cones_to_clear,
 
       if (H->matrix2->origin == NSM_TRIPLET) {
         CSparseMatrix* H_triplet = H->matrix2->triplet;
-        int first = 0, last = H_triplet->nz - 1, delete_counter = 0, stop = 0;
+        int first = 0, last = H_triplet->nz - 1, stop = 0;
         cs_long_t *rows = H_triplet->i, *cols = H_triplet->p, target = -1;
         double* val = H_triplet->x;
         for (unsigned int i = 0; i < n_cones_to_clear; i++) {
@@ -6227,9 +6187,8 @@ void NM_clear_cone_matrix_H(NumericsMatrix* H, unsigned int n_cones_to_clear,
                 rows[last] == target + 2)  // Last row is to be deleted
             {
               last--;
-              delete_counter++;
             } else {
-              for (unsigned int j = first; j < last; j++) {
+              for (int j = first; j < last; j++) {
                 if (rows[j] == target || rows[j] == target + 1 ||
                     rows[j] == target + 2)  // Search is done
                 {
@@ -6238,7 +6197,6 @@ void NM_clear_cone_matrix_H(NumericsMatrix* H, unsigned int n_cones_to_clear,
                   cols[j] = cols[last];
                   val[j] = val[last];
                   last--;
-                  delete_counter++;
                   first = j + 1;
                   break;
                 }
@@ -6272,7 +6230,7 @@ void NM_clear_cone_matrix_H(NumericsMatrix* H, unsigned int n_cones_to_clear,
           target = ((cs_long_t)cones_to_clear[i] - i) * 3;
           if (target > H_triplet->m) continue;
 
-          for (unsigned int j = 0; j <= last; j++) {
+          for (int j = 0; j <= last; j++) {
             if (rows[j] >= target) {
               rows[j] -= 3;
             }
@@ -6510,7 +6468,7 @@ int NM_is_diagonal_block_matrix(NumericsMatrix* A, unsigned int* block_number,
     NA_sort_bubble(indices, len);
     /* NA_display(indices,len); */
 
-    for (size_t k = 1; k < len; k++) {
+    for (int k = 1; k < len; k++) {
       if (indices[k] != indices[k - 1] + 1) {
         is_diagonal_block_matrix = 0;
         free(indices);

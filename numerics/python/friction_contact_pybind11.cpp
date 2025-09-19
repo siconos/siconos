@@ -732,8 +732,8 @@ void wrap_friction_contact(py::module_ &m, py::module_ &params, py::module_ &sol
              "VI formulation, GAMS/PATH (Ferris) LCP, local formulation")
       .value("SICONOS_FRICTION_3D_NSN_NM", FRICTION_SOLVER::SICONOS_FRICTION_3D_NSN_NM,
              "Non-smooth Newton, natural map, local formulation")
-      .value("SICONOS_FRICTION_3D_NSN_AC_TEST",
-             FRICTION_SOLVER::SICONOS_FRICTION_3D_NSN_AC_TEST, "NSN AC Test solver")
+      .value("SICONOS_FRICTION_3D_NSN_AC_NEW",
+             FRICTION_SOLVER::SICONOS_FRICTION_3D_NSN_AC_NEW, "NSN AC Test solver")
       .value("SICONOS_FRICTION_3D_PFP", FRICTION_SOLVER::SICONOS_FRICTION_3D_PFP,
              "Panagiotopoulos, fixed point, local formulation")
       .value("SICONOS_FRICTION_3D_ADMM", FRICTION_SOLVER::SICONOS_FRICTION_3D_ADMM,

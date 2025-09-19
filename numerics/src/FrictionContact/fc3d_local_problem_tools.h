@@ -29,27 +29,27 @@ extern "C" {
 #endif
 
 /** pointer to function used to call local solver */
-typedef int (*SolverPtr)(FrictionContactProblem *, double *, SolverOptions *);
+typedef int (*SolverPtr)(FrictionContactProblem*, double*, SolverOptions*);
 
 /** pointer to function used to update local problem */
-typedef void (*UpdatePtr)(int, FrictionContactProblem *, FrictionContactProblem *, double *,
-                          SolverOptions *);
+typedef void (*UpdatePtr)(int, FrictionContactProblem*, FrictionContactProblem*, double*,
+                          SolverOptions*);
 
 /** pointer to function used to post-processed results after a call to the
  * (local) solver */
-typedef void (*PostSolverPtr)(int, double *);
+typedef void (*PostSolverPtr)(int, double*);
 
 /** pointer to function used to free memory for objects used in nsgs solvers */
-typedef void (*FreeLocalSolverPtr)(FrictionContactProblem *, FrictionContactProblem *,
-                                   SolverOptions *);
+typedef void (*FreeLocalSolverPtr)(FrictionContactProblem*, FrictionContactProblem*,
+                                   SolverOptions*);
 
-typedef void (*CopyLocalReactionPtr)(double *, double *);
+typedef void (*CopyLocalReactionPtr)(double*, double*);
 
-typedef void (*PerformRelaxationPtr)(double *, double *, double);
+typedef void (*PerformRelaxationPtr)(double*, double*, double);
 
-typedef double (*LightErrorSquaredPtr)(double *, double *);
+typedef double (*LightErrorSquaredPtr)(double*, double*);
 
-typedef double (*SquaredNormPtr)(double *);
+typedef double (*SquaredNormPtr)(double*);
 
 struct LocalProblemFunctionToolkit {
   SolverPtr local_solver;
@@ -62,19 +62,19 @@ struct LocalProblemFunctionToolkit {
   SquaredNormPtr squared_norm;
 };
 
-struct LocalProblemFunctionToolkit *localProblemFunctionToolkit_new(void);
+struct LocalProblemFunctionToolkit* localProblemFunctionToolkit_new(void);
 
-void localProblemFunctionToolkit_display(struct LocalProblemFunctionToolkit *);
+void localProblemFunctionToolkit_display(struct LocalProblemFunctionToolkit*);
 
-FrictionContactProblem *fc3d_local_problem_allocate(FrictionContactProblem *problem);
+FrictionContactProblem* fc3d_local_problem_allocate(FrictionContactProblem* problem);
 
-void fc3d_local_problem_free(FrictionContactProblem *localproblem,
-                             FrictionContactProblem *problem);
-void fc3d_local_problem_compute_q(FrictionContactProblem *problem,
-                                  FrictionContactProblem *localproblem, double *reaction,
+void fc3d_local_problem_free(FrictionContactProblem* localproblem,
+                             FrictionContactProblem* problem);
+void fc3d_local_problem_compute_q(FrictionContactProblem* problem,
+                                  FrictionContactProblem* localproblem, double* reaction,
                                   int contact);
-void fc3d_local_problem_fill_M(FrictionContactProblem *problem,
-                               FrictionContactProblem *localproblem, int contact);
+void fc3d_local_problem_fill_M(FrictionContactProblem* problem,
+                               FrictionContactProblem* localproblem, int contact);
 
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }

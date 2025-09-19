@@ -1100,21 +1100,22 @@ void gfc3d_IPM_SNM(GlobalFrictionContactProblem* restrict problem, double* restr
 
         // if (total_time > max_time)
         if (0 == 1) {
-          hasNotConverged = 5;
-          numerics_printf_verbose(
-              -1, "| %3i%c| %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e ||",
-              iteration, fws, pinfeas, dinfeas, diff_fixp, udotr, complem, projerr, barr_param,
-              sigma);
-          printf("\nREQUEST TIMEOUT\n");
-          break;
-        } else if (alpha_primal <= 1e-13) {
-          hasNotConverged = 6;
-          numerics_printf_verbose(
-              -1, "| %3i%c| %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e ||",
-              iteration, fws, pinfeas, dinfeas, diff_fixp, udotr, complem, projerr, barr_param,
-              sigma);
-          printf("\nTiny step-length\n\n");
-          break;
+          // FP: add comment to be able to compile when -Werror,-Wunreachable-code
+          //   hasNotConverged = 5;
+          //   numerics_printf_verbose(
+          //       -1, "| %3i%c| %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e ||",
+          //       iteration, fws, pinfeas, dinfeas, diff_fixp, udotr, complem, projerr,
+          //       barr_param, sigma);
+          //   printf("\nREQUEST TIMEOUT\n");
+          //   break;
+          // } else if (alpha_primal <= 1e-13) {
+          //   hasNotConverged = 6;
+          //   numerics_printf_verbose(
+          //       -1, "| %3i%c| %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e | %.1e ||",
+          //       iteration, fws, pinfeas, dinfeas, diff_fixp, udotr, complem, projerr,
+          //       barr_param, sigma);
+          //   printf("\nTiny step-length\n\n");
+          //   break;
         }
 
         // if ( projerr <= tol && totalresidual_Jor <= tol )
