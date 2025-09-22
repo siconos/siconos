@@ -288,10 +288,6 @@ constexpr decltype(auto) all_storages(Item, auto& data)
       concat(attributes(item_t{}), attached_storages(item_t{}, data)));
 }
 
-template <typename Handle, typename Data>
-using attached_storages_t =
-    std::decay_t<decltype(attached_storages(Handle{}.item_type(), Data{}))>;
-
 // use storage::attached_storages(...) instead
 template <typename Item>
 static constexpr auto is_attached_storage =
