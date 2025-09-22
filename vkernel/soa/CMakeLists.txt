@@ -143,6 +143,6 @@ endif()
 #  ${${COMPONENT}_DIRS} # All .hpp are installed
 #  )
 
-#siconos_component_install_setup(${COMPONENT})
+siconos_component_install_setup(${COMPONENT})
 
 include(vkernel_tests.cmake)
