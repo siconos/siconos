@@ -547,11 +547,11 @@ void fc3d_nsgs_graph(FrictionContactProblem *problem, double *reaction, double *
   if (*info == 0) return;
 
   /*****  Initialize various solver options *****/
-  /* localproblem = fc3d_local_problem_allocate(problem);
+  localproblem = fc3d_local_problem_allocate(problem);
 
   fc3d_nsgs_initialize_local_solver_parallel(&local_solver, &update_localproblem,
                                              (FreeSolverNSGSPtr *)&freeSolver, &computeError, problem,
-                                             localproblem, options, localsolver_options); */
+                                             localproblem, options, localsolver_options);
 
   scontacts = allocShuffledContacts(problem, options);
   freeze_contacts = allocfreezingContacts(problem, options);
