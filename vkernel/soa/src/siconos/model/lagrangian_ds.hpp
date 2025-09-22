@@ -95,10 +95,18 @@ struct rt_lagrangian_ds : item<> {
    * - fext: external forces vector (unbounded)
    */
   using attributes =
-      gather<attribute<"q", some::unbounded_vector<some::scalar>>,
+      gather<attribute<"dof", some::scalar>,
+             attribute<"q", some::unbounded_vector<some::scalar>>,
              attribute<"velocity", some::unbounded_vector<some::scalar>>,
              attribute<"mass_matrix", some::unbounded_matrix<some::scalar>>,
              attribute<"fext", some::unbounded_vector<some::scalar>>>;
+
+  template <typename Handle>
+  struct interface : lagrangian_ds::interface<Handle> {
+    using lagrangian_ds::interface<Handle>::self;
+
+    decltype(auto) dof() { return attr<"dof">(*self()); }
+  };
 };
 
 }  // namespace siconos::model
