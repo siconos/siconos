@@ -17,39 +17,45 @@ struct segment_base : item<> {
 
     decltype(auto) points() { return attr<"points">(*self()); }
 
-    decltype(auto) p1(indice_t index = 0) { return points()[index * 2]; };
-    decltype(auto) p2(indice_t index = 0) { return points()[index * 2 + 1]; };
-    decltype(auto) x1(indice_t index = 0) { return p1(index)[0]; };
-    decltype(auto) y1(indice_t index = 0) { return p1(index)[1]; };
-    decltype(auto) x2(indice_t index = 0) { return p2(index)[0]; };
-    decltype(auto) y2(indice_t index = 0) { return p2(index)[1]; };
-    decltype(auto) dp2p1(indice_t index = 0)
+    decltype(auto) p1(indice_t seg_index = 0)
     {
-      return attr<"dp2p1">(*self())[index];
+      return points()[seg_index * 2];
+    };
+    decltype(auto) p2(indice_t seg_index = 0)
+    {
+      return points()[seg_index * 2 + 1];
+    };
+    decltype(auto) x1(indice_t seg_index = 0) { return p1(seg_index)[0]; };
+    decltype(auto) y1(indice_t seg_index = 0) { return p1(seg_index)[1]; };
+    decltype(auto) x2(indice_t seg_index = 0) { return p2(seg_index)[0]; };
+    decltype(auto) y2(indice_t seg_index = 0) { return p2(seg_index)[1]; };
+    decltype(auto) dp2p1(indice_t seg_index = 0)
+    {
+      return attr<"dp2p1">(*self())[seg_index];
     };
     decltype(auto) maxpoints() { return attr<"maxpoints">(*self()); };
-    decltype(auto) length_sq(indice_t index = 0)
+    decltype(auto) length_sq(indice_t seg_index = 0)
     {
-      return attr<"length_sq">(*self())[index];
+      return attr<"length_sq">(*self())[seg_index];
     };
 
-    void compute_dp2p1(indice_t index = 0)
+    void compute_dp2p1(indice_t seg_index = 0)
     {
-      dp2p1(index) = p2(index) - p1(index);
+      dp2p1(seg_index) = p2(seg_index) - p1(seg_index);
     };
-    void compute_length_sq(indice_t index = 0)
+    void compute_length_sq(indice_t seg_index = 0)
     {
-      const auto& v = dp2p1(index);
+      const auto& v = dp2p1(seg_index);
       length_sq() = algebra::dot(v, v);
     };
 
-    void initialize(indice_t index = 0)
+    void initialize(indice_t seg_index = 0)
     {
-      compute_dp2p1(index);
-      compute_length_sq(index);
+      compute_dp2p1(seg_index);
+      compute_length_sq(seg_index);
     }
 
-    decltype(auto) distance(match::vector auto& q, indice_t index = 0)
+    decltype(auto) distance(match::vector auto& q, indice_t seg_index = 0)
     {
       /* dof 3 -> 2D + 1 (CompactNSearch) */
       auto qp = q;
@@ -61,20 +67,28 @@ struct segment_base : item<> {
       return collision::distance(qp, p);
     }
 
-    decltype(auto) points_coords(indice_t index = 0)
+    decltype(auto) point_coord(indice_t point_index, indice_t seg_index = 0)
     {
-      const auto p = p1(index);
-      const auto dir = dp2p1(index);
+      const auto p = p1(seg_index);
+      const auto dir = dp2p1(seg_index);
       const auto pstep = 1. / maxpoints();
 
-      return view::iota(0, maxpoints()) |
-             view::transform([=](auto i) { return p + i * pstep * dir; });
+      return p + point_index * pstep * dir;
     }
 
-    void set_points(auto points_array, indice_t index = 0)
+    decltype(auto) points_coords(indice_t seg_index = 0)
     {
-      p1(index) = {points_array[0], points_array[1], points_array[2]};
-      p2(index) = {points_array[3], points_array[4], points_array[5]};
+      auto myself = self();
+      return view::iota(0, maxpoints()) |
+        view::transform([myself,seg_index](auto i) {
+               return myself->point_coord(i, seg_index);
+             });
+    }
+
+    void set_points(auto points_array, indice_t seg_index = 0)
+    {
+      p1(seg_index) = {points_array[0], points_array[1], points_array[2]};
+      p2(seg_index) = {points_array[3], points_array[4], points_array[5]};
     }
 
     void set_maxpoints(indice_t mp) { maxpoints() = mp; }
