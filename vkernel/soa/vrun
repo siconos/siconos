@@ -69,7 +69,6 @@ while [ $# -gt 0 ]; do
  "cuda-toolkit"
  "eigen"
  "emacs-next"
- "fclib"
  "findutils"
  "fmt"
  "fmt"
@@ -138,10 +137,9 @@ EOF
               "BBB0 2DDF 2CEA F6A8 0D1D  E643 A2A0 6DF2 A33A 54FA"))))
       (channel
         (name 'guix-science)
-        (url "https://codeberg.org/Maurice/guix-science.git")
-        (branch "add-siconos")
+        (url "https://codeberg.org/guix-science/guix-science.git")
         (commit
-          "fd0063327c3faf318a6ec43895dbb0c19587004e"))
+          "345dfdf8b9afbae96a8d4c47820e1b058d696093"))
       (channel
         (name 'guix-past)
         (url "https://codeberg.org/guix-science/guix-past.git")
