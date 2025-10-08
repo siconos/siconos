@@ -22,6 +22,8 @@ This file is to be copied into CMAKE_BINARY_DIR/share using configure_file
  limitations under the License.
 """
 
+import textwrap
+
 
 def parse_cmake_list(var):
     """Transform cmake list-like variables
@@ -45,11 +47,11 @@ def parse_cmake_list(var):
     if isinstance(var, list):
         return var
     if var != "":
-        res = list(set(var.split(';')))
+        res = list(set(var.split(";")))
         # list/set stuff to avoid duplicates
         # remove empty strings to avoid '-I -I' things leading to bugs
-        if res.count(''):
-            res.remove('')
+        if res.count(""):
+            res.remove("")
         return res
 
     return []

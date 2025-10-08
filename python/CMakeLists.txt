@@ -25,6 +25,8 @@ endif()
 configure_file(setup.cfg.in setup.cfg)
 
 configure_file(pyproject.toml pyproject.toml)
+# Some python tools and functions, used to configure the project, called by cmake.
+configure_file(utils.py siconos/utils.py COPYONLY)
 
 if(EXISTS  ${CMAKE_CURRENT_SOURCE_DIR}/MANIFEST.in)
   configure_file(MANIFEST.in MANIFEST.in)
