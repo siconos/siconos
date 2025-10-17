@@ -23,6 +23,7 @@
 #include "FENode.hpp"
 #include "Mesh.hpp"  // MElement
 #include "SiconosException.hpp"
+#include "SiconosMatrixOp.hpp"  // prod ...
 #include "Tools.hpp"  // enum_to_string
 
 siconos::mechanics::fem::FElement::FElement(FiniteElementType type, unsigned int ndof,
@@ -64,6 +65,75 @@ double siconos::mechanics::fem::FElement::length() {
       throw("FElement::norm(). element type not recognized");
   }
 }
+
+void siconos::mechanics::fem::FElement::setGlobalToLocalMatrix(int dim){
+
+  if (dim==2)
+  {
+    _Te = std::make_shared<siconos::algebra::SimpleMatrix>(6, 6);
+    _Te->zero();
+    double c = (_nodes[1]->x() - _nodes[0]->x())/length();
+    double s = (_nodes[1]->y() - _nodes[0]->y())/length();
+    _Te->setValue(0,0,c);
+    _Te->setValue(0,1,s);
+    _Te->setValue(1,0,-s);
+    _Te->setValue(1,1,c);
+    _Te->setValue(2,2,1);
+    _Te->setValue(3,3,c);
+    _Te->setValue(3,4,s);
+    _Te->setValue(4,3,-s);
+    _Te->setValue(4,4,c);
+    _Te->setValue(5,5,1);
+  }
+  else if (dim ==3)
+  {
+    auto vx = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
+    vx->zero();
+    auto vx2 = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
+    auto ones = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
+    ones->zero();
+    ones->setValue(0,0,1.0);
+    ones->setValue(1,1,1.0);
+    ones->setValue(2,2,1.0);
+    auto R = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
+    R->zero();
+    _Te = std::make_shared<siconos::algebra::SimpleMatrix>(12, 12);
+    _Te->zero();
+
+    double lx = (_nodes[1]->x() - _nodes[0]->x())/length();
+    double ly = (_nodes[1]->y() - _nodes[0]->y())/length();
+    double lz = (_nodes[1]->z() - _nodes[0]->z())/length();
+
+    double s = sqrt(lz*lz + ly*ly);
+    double c = lx;
+
+    vx->setValue(0,1,ly);
+    vx->setValue(0,2,lz);
+    vx->setValue(1,0,-ly);
+    vx->setValue(2,0,-lz);
+
+    siconos::algebra::prod(*vx, *vx, *vx2, true);
+    siconos::algebra::scal(1.0/(1.0+c),*vx2,*vx2);
+    add(*vx,*vx2,*vx2);
+    add(*ones,*vx2,*R);
+
+    for(int a=0;a<2;a++){
+      for (int i=0; i<3;i++){
+        for (int j=0; j<3;j++){
+          _Te->setValue(6*a + i,6*a + j,R->getValue(i,j));
+        }
+      }
+    }
+    for(int a=0;a<2;a++){
+      for (int i=0; i<3;i++){
+        _Te->setValue(3+6*a + i,3+6*a + i,ones->getValue(i,i));
+      }
+    }
+  }
+
+}
+
+
 
 const siconos::mechanics::fem::GaussPointsTab& siconos::mechanics::fem::FElement::GaussPoints(
     int order) {

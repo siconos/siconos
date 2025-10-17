@@ -23,6 +23,7 @@
 #include <vector>
 
 #include "FETypes.hpp"
+#include "SimpleMatrix.hpp"
 namespace siconos::mechanics::fem {
 
 class FENode;
@@ -70,6 +71,9 @@ class FElement {
   /** nodes */
   std::vector<std::shared_ptr<FENode>> _nodes = {};
 
+  /** Global To Local Matrix */
+  std::shared_ptr<siconos::algebra::SimpleMatrix> _Te;
+
   /* associated Mesh element */
   std::shared_ptr<MElement> _mElement{nullptr};
   /** Rule of five */
@@ -107,6 +111,11 @@ class FElement {
   const GaussPointsTab& GaussPoints(int order);
 
   std::vector<std::shared_ptr<FENode>>& nodes() { return _nodes; }
+
+
+  std::shared_ptr<siconos::algebra::SimpleMatrix>& getGlobalToLocalMatrix() { return _Te; }
+
+  void setGlobalToLocalMatrix(int dim);
 
   void shapeFunctionIso2D(double ksi, double eta, std::vector<double>& N,
                           std::vector<double>& Nksi, std::vector<double>& Neta);

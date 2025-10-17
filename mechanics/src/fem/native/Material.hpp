@@ -22,6 +22,7 @@
 #ifndef MATERIAL_H
 #define MATERIAL_H
 
+#include <cmath>
 #include <iostream>
 #include <vector>
 
@@ -57,6 +58,11 @@ class Material {
   /** Cross section area for Beams */
   double _A{1.0};
 
+  /** Torsional cosntant **/
+  double _J{_A*_A/(2* M_PI)};
+
+  /** Shear Modulus **/
+  double _G{_elasticYoungModulus/(2*(1+_poissonCoefficient))};
 
   /** default constructor */
   Material() = default;
@@ -90,6 +96,10 @@ class Material {
   auto momentOfInertia() { return _I; }
 
   auto crossSectionArea() { return _A; }
+
+  auto secondMomentOfArea() { return _J; }
+
+  auto shearModulus() { return _G; }
 
 };
 }  // namespace siconos::mechanics::fem

@@ -87,8 +87,7 @@ siconos::mechanics::fem::SolidLinearTIDS::SolidLinearTIDS(std::shared_ptr<Mesh> 
     int nElements = _FEModel->elements().size();
     int dim = _FEModel->mesh()->dim();
 //    int dimStressInElem = (dim == 2) ? 4 : 9;
-    int dimStressInElem = (dim == 2) ? 3 : 6; // Careful for Beam case, OK for 2D Beam , should be 5 for 3D beam
-
+    int dimStressInElem = (dim == 2) ? 3 : 6; // Works also for Beam cases
     _dimStress = dimStressInElem*nElements;
 //    _dimStress = dim*(dim+1)/2;
 
@@ -122,7 +121,6 @@ _epsilonp[1] = std::make_shared<siconos::algebra::SiconosVector>(*_epsilonp0);
                                                                  _storageType);
     }
     _FEModel->computeBMatrix(_B, _materials);
-
 
   DEBUG_END("SolidLinearTIDS::SolidLinearTIDS(std::shared_ptr<Mesh> mesh, std::shared_ptr<Material> material\n");
 

@@ -140,7 +140,11 @@ unsigned int siconos::mechanics::fem::FiniteElementModel::init() {
       // assert(_nodes[num_node]);
       // DEBUG_EXPR(vertexNode.at(v)->display(););
       fe->nodes().push_back(_vertexToNode.at(v));
+
     }
+  }
+  for (auto &fe : elements()) {
+    fe->setGlobalToLocalMatrix(_mesh->dim());
   }
   std::cout << "Element type not recognised or ignored : [";
   for (auto e : ignored_elements) {
@@ -642,16 +646,31 @@ void siconos::mechanics::fem::FiniteElementModel::computeElementaryStiffnessMatr
 void siconos::mechanics::fem::FiniteElementModel::computeBeamElementaryStiffnessMatrix_direct(
     siconos::algebra::SimpleMatrix &Ke, FElement &fe, std::map<unsigned int, std::shared_ptr<Material>> &materials) {
   int dim = _mesh->dim();
+
   auto &nodes = fe.nodes();
   int nnodes = nodes.size();
   Material &mat = *(materials[fe.mElement()->tags(0)]);
   double E = mat.elasticYoungModulus();
   double I = mat.momentOfInertia();
   double A = mat.crossSectionArea();
+  double G = mat.shearModulus();
+  double J = mat.secondMomentOfArea();
+
   double length  = fe.length();
   double length2  = length*length;
   double length3  = length2*length;
-  double c, s;
+  double c, s, lx,ly,lz;
+
+  double axial, shearing, bending, torsion;
+  double shearOnBend, shearOnshear, bendOnBend;
+  axial = E*A/length;
+  shearing = E*I*12/length3;
+  bending = E*I*4/length;
+  torsion = G*J/length;
+  shearOnBend = E*I*6/length2;
+  shearOnshear = shearing;
+  bendOnBend = E*I*2/length;
+
   if (dim == 2)
   {
     auto Te = std::make_shared<siconos::algebra::SimpleMatrix>(6, 6);
@@ -671,36 +690,138 @@ void siconos::mechanics::fem::FiniteElementModel::computeBeamElementaryStiffness
     Te->setValue(4,4,c);
     Te->setValue(5,5,1);
 
-    Ke_loc->setValue(0,0,E*A/length);
-    Ke_loc->setValue(0,3,-E*A/length);
+    Ke_loc->setValue(0,0,axial);
+    Ke_loc->setValue(0,3,-axial);
     Ke_loc->setValue(3,0,Ke_loc->getValue(0,3));
 
-    Ke_loc->setValue(1,1,E*I*12/length3);
-    Ke_loc->setValue(1,2,E*I*6/length2);
-    Ke_loc->setValue(1,4,-E*I*12/length3);
-    Ke_loc->setValue(1,5,E*I*6/length2);
+    Ke_loc->setValue(1,1,shearing);
+    Ke_loc->setValue(1,2,shearOnBend);
+    Ke_loc->setValue(1,4,-shearOnshear);
+    Ke_loc->setValue(1,5,shearOnBend);
     Ke_loc->setValue(2,1,Ke_loc->getValue(1,2));
     Ke_loc->setValue(4,1,Ke_loc->getValue(1,4));
     Ke_loc->setValue(5,1,Ke_loc->getValue(1,5));
 
-    Ke_loc->setValue(2,2,E*I*4/length);
-    Ke_loc->setValue(2,4,-E*I*6/length2);
-    Ke_loc->setValue(2,5,E*I*2/length);
+    Ke_loc->setValue(2,2,bending);
+    Ke_loc->setValue(2,4,-shearOnBend);
+    Ke_loc->setValue(2,5,bendOnBend);
     Ke_loc->setValue(4,2,Ke_loc->getValue(2,4));
     Ke_loc->setValue(5,2,Ke_loc->getValue(2,5));
 
-    Ke_loc->setValue(3,3,E*A/length);
+    Ke_loc->setValue(3,3,axial);
 
-    Ke_loc->setValue(4,4,E*I*12/length3);
-    Ke_loc->setValue(4,5,-E*I*6/length2);
+    Ke_loc->setValue(4,4,shearing);
+    Ke_loc->setValue(4,5,-shearOnBend);
     Ke_loc->setValue(5,4,Ke_loc->getValue(4,5));
 
-    Ke_loc->setValue(5,5,E*I*4/length);
+    Ke_loc->setValue(5,5,bending);
 
     prod(*Ke_loc, *Te, *KT, true);
     Te->trans();
     prod(*Te, *KT, Ke, true);
   }
+  else if (dim==3)
+  {
+    auto Te = std::make_shared<siconos::algebra::SimpleMatrix>(12, 12);
+    auto vx = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
+    vx->zero();
+    auto vx2 = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
+    auto ones = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
+    ones->zero();
+    ones->setValue(0,0,1.0);
+    ones->setValue(1,1,1.0);
+    ones->setValue(2,2,1.0);
+    auto R = std::make_shared<siconos::algebra::SimpleMatrix>(3, 3);
+    R->zero();
+    auto Ke_loc = std::make_shared<siconos::algebra::SimpleMatrix>(12, 12);
+    auto KT = std::make_shared<siconos::algebra::SimpleMatrix>(12, 12);
+    Te->zero();
+    lx = (nodes[1]->x() - nodes[0]->x())/length;
+    ly = (nodes[1]->y() - nodes[0]->y())/length;
+    lz = (nodes[1]->z() - nodes[0]->z())/length;
+
+    s = sqrt(lz*lz + ly*ly);
+    c = lx;
+
+    vx->setValue(0,1,ly);
+    vx->setValue(0,2,lz);
+    vx->setValue(1,0,-ly);
+    vx->setValue(2,0,-lz);
+
+    prod(*vx, *vx, *vx2, true);
+    scal(1.0/(1.0+c),*vx2,*vx2);
+    add(*vx,*vx2,*vx2);
+    add(*ones,*vx2,*R);
+    std::cout << "rotation matrix is:" << std::endl;
+    R->display();
+
+    for(int a=0;a<2;a++){
+      for (int i=0; i<3;i++){
+        for (int j=0; j<3;j++){
+          Te->setValue(6*a + i,6*a + j,R->getValue(i,j));
+        }
+      }
+    }
+    for(int a=0;a<2;a++){
+      for (int i=0; i<3;i++){
+        Te->setValue(3+6*a + i,3+6*a + i,ones->getValue(i,i));
+      }
+    }
+
+    Ke_loc->setValue(0,0,axial);
+    Ke_loc->setValue(0,6,-axial);
+    Ke_loc->setValue(6,0,Ke_loc->getValue(0,5));
+
+    Ke_loc->setValue(1,1,shearing);
+    Ke_loc->setValue(1,5,shearOnBend);
+    Ke_loc->setValue(1,7,-shearOnshear);
+    Ke_loc->setValue(1,11,shearOnBend);
+    Ke_loc->setValue(2,2,shearing);
+    Ke_loc->setValue(2,4,-shearOnBend);
+    Ke_loc->setValue(2,8,-shearOnshear);
+    Ke_loc->setValue(2,10,-shearOnBend);
+    Ke_loc->setValue(5,1,Ke_loc->getValue(1,4));
+    Ke_loc->setValue(7,1,Ke_loc->getValue(1,6));
+    Ke_loc->setValue(11,1,Ke_loc->getValue(1,9));
+    Ke_loc->setValue(4,2,Ke_loc->getValue(2,3));
+    Ke_loc->setValue(8,2,Ke_loc->getValue(2,7));
+    Ke_loc->setValue(10,2,Ke_loc->getValue(2,8));
+
+    Ke_loc->setValue(3,3,torsion);
+    Ke_loc->setValue(3,9,-torsion);
+    Ke_loc->setValue(9,3,Ke_loc->getValue(3,9));
+
+    Ke_loc->setValue(4,4,bending);
+    Ke_loc->setValue(4,8,shearOnBend);
+    Ke_loc->setValue(4,10,bendOnBend);
+    Ke_loc->setValue(8,4,Ke_loc->getValue(4,8));
+    Ke_loc->setValue(10,4,Ke_loc->getValue(4,10));
+    Ke_loc->setValue(5,5,bending);
+    Ke_loc->setValue(5,7,-shearOnBend);
+    Ke_loc->setValue(5,11,bendOnBend);
+    Ke_loc->setValue(7,5,Ke_loc->getValue(5,7));
+    Ke_loc->setValue(11,5,Ke_loc->getValue(5,11));
+
+    Ke_loc->setValue(6,6,axial);
+
+    Ke_loc->setValue(7,7,shearing);
+    Ke_loc->setValue(7,11,-shearOnBend);
+    Ke_loc->setValue(11,7,Ke_loc->getValue(7,11));
+    Ke_loc->setValue(8,8,shearing);
+    Ke_loc->setValue(8,10,shearOnBend);
+    Ke_loc->setValue(10,8,Ke_loc->getValue(8,10));
+
+    Ke_loc->setValue(9,9,torsion);
+
+    Ke_loc->setValue(10,10,bending);
+    Ke_loc->setValue(11,11,bending);
+
+    prod(*Ke_loc, *Te, *KT, true);
+    Te->trans();
+    prod(*Te, *KT, Ke, true);
+
+  }
+
 
 }
 
@@ -1046,35 +1167,55 @@ void siconos::mechanics::fem::FiniteElementModel::computeBeamElementaryBMatrix_d
   int dim = _mesh->dim();
   // Direct computation without Gauss Integration
 
-  B.setValue(0,0, - 1/length);
-  B.setValue(0,3,   1/length);
+  if (dim==2)
+  {
+    B.setValue(0,0, - 1/length);
+    B.setValue(0,3,   1/length);
 
-  int integrationOrder = 3, gp_cnt = 1;
-  for (const auto &gp : fe.GaussPoints(integrationOrder)) {
-    double gp_eta = gp[0];
-    double gp_w = gp[1];
+    int integrationOrder = 3, gp_cnt = 1;
+    for (const auto &gp : fe.GaussPoints(integrationOrder)) {
+      double gp_eta = gp[0];
+      double gp_w = gp[1];
 
-    B.setValue(gp_cnt,1, sqrt(gp_w)*6*gp_eta/length2);
-    B.setValue(gp_cnt,2, sqrt(gp_w)*(3*gp_eta-1)/length);
-    B.setValue(gp_cnt,4, sqrt(gp_w)*(-6)*gp_eta/length2);
-    B.setValue(gp_cnt,5, sqrt(gp_w)*(3*gp_eta+1)/length);
-    gp_cnt++;
+      B.setValue(gp_cnt,1, sqrt(gp_w)*6*gp_eta/length2);
+      B.setValue(gp_cnt,2, sqrt(gp_w)*(3*gp_eta-1)/length);
+      B.setValue(gp_cnt,4, sqrt(gp_w)*(-6)*gp_eta/length2);
+      B.setValue(gp_cnt,5, sqrt(gp_w)*(3*gp_eta+1)/length);
+      gp_cnt++;
+    }
+
   }
-  auto Te = std::make_shared<siconos::algebra::SimpleMatrix>(6, 6);
-  // auto KT = std::make_shared<siconos::algebra::SimpleMatrix>(6, 6);
-  Te->zero();
-  double c = (nodes[1]->x() - nodes[0]->x())/length;
-  double s = (nodes[1]->y() - nodes[0]->y())/length;
-  Te->setValue(0,0,c);
-  Te->setValue(0,1,s);
-  Te->setValue(1,0,-s);
-  Te->setValue(1,1,c);
-  Te->setValue(2,2,1);
-  Te->setValue(3,3,c);
-  Te->setValue(3,4,s);
-  Te->setValue(4,3,-s);
-  Te->setValue(4,4,c);
-  Te->setValue(5,5,1);
+  else if (dim==3)
+  {
+    B.setValue(0,0, - 1/length); // axial
+    B.setValue(0,6,   1/length); // axial
+
+    B.setValue(3,3, - 1/length); // twisting
+    B.setValue(3,9,   1/length); // twisting
+
+    int integrationOrder = 3, gp_cnt = 1;
+    for (const auto &gp : fe.GaussPoints(integrationOrder)) {
+      double gp_eta = gp[0];
+      double gp_w = gp[1];
+
+      B.setValue(gp_cnt,1, sqrt(gp_w)*6*gp_eta/length2);
+      B.setValue(gp_cnt+3,2, sqrt(gp_w)*6*gp_eta/length2);
+
+
+      B.setValue(gp_cnt,4, sqrt(gp_w)*(3*gp_eta-1)/length);
+      B.setValue(gp_cnt+3,5, sqrt(gp_w)*(3*gp_eta-1)/length);
+
+      B.setValue(gp_cnt,7, sqrt(gp_w)*(-6)*gp_eta/length2);
+      B.setValue(gp_cnt+3,8, sqrt(gp_w)*(-6)*gp_eta/length2);
+
+      B.setValue(gp_cnt,10, sqrt(gp_w)*(3*gp_eta+1)/length);
+      B.setValue(gp_cnt+3,11, sqrt(gp_w)*(3*gp_eta+1)/length);
+
+      gp_cnt++;
+    }
+
+  }
+  auto Te = fe.getGlobalToLocalMatrix();
 
   // Transfer to global coordinates
   prod(B, *Te, B, true);
@@ -1141,12 +1282,16 @@ void siconos::mechanics::fem::FiniteElementModel::computeBMatrix(
 {
   DEBUG_BEGIN("siconos::mechanics::fem::native::FiniteElementModel::computeMassMatrix(std::shared_ptr<SiconosMatrix> M, double massDensity )\n");
   int elem_cnt=0;
-
+  std::shared_ptr<siconos::algebra::SimpleMatrix> Be;
   /* loop over the elements */
   for(std::shared_ptr<FElement> fe : elements())
   {
     if (fe->type() == FiniteElementType::B2){
-      std::shared_ptr<siconos::algebra::SimpleMatrix> Be = std::make_shared<siconos::algebra::SimpleMatrix>(3, 6);
+      double dim = _mesh->dim();
+      if (dim==2)
+        Be = std::make_shared<siconos::algebra::SimpleMatrix>(3, 6);
+      else
+        Be = std::make_shared<siconos::algebra::SimpleMatrix>(6, 12);
       computeBeamElementaryBMatrix_direct(*fe, *Be, mat);
       AssembleElementary_B_Matrix(B, *Be, *fe, elem_cnt);
       elem_cnt++;
@@ -1154,7 +1299,7 @@ void siconos::mechanics::fem::FiniteElementModel::computeBMatrix(
     else
     {
       int dimStress = fe->ndofPerNode()*(fe->ndofPerNode()+1)/2;
-      std::shared_ptr<siconos::algebra::SimpleMatrix> Be = std::make_shared<siconos::algebra::SimpleMatrix>(dimStress, fe->ndof());
+      Be = std::make_shared<siconos::algebra::SimpleMatrix>(dimStress, fe->ndof());
       Material &material = *(mat[fe->mElement()->tags(0)]);
       computeElementaryBMatrix_direct(*fe, *Be, material.thickness());
       AssembleElementary_B_Matrix(B, *Be, *fe, elem_cnt);
@@ -1183,7 +1328,9 @@ void siconos::mechanics::fem::FiniteElementModel::computeSMatrix(
   for(std::shared_ptr<FElement> fe : elements())
   {
     if (fe->type() == FiniteElementType::B2){
-      int dimStress = 3;
+      int dim = _mesh->dim();
+
+      int dimStress = (dim == 2) ? 3 : 6;
       D = std::make_shared<siconos::algebra::SimpleMatrix>(dimStress,dimStress);
       Material &mat = *(materials[fe->mElement()->tags(0)]);
       E = mat.elasticYoungModulus();

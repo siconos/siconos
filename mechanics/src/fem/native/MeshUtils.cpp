@@ -472,6 +472,15 @@ void siconos::mechanics::fem::prepareWriteBeamPositionforSOFA(std::string filena
   FILE *foutput = fopen(filename.c_str(), "w");
   fclose(foutput);
 }
+
+void siconos::mechanics::fem::prepareWriteBlockPositionforSOFA(std::string filename) {
+
+  std::cout << "Output displacement for SOFA post-processing in " << filename << std::endl;
+
+  FILE *foutput = fopen(filename.c_str(), "w");
+  fclose(foutput);
+}
+
 void  siconos::mechanics::fem::writeBeamPositionforSOFA(std::shared_ptr<Mesh>  mesh,
                                                                std::shared_ptr<FiniteElementModel> femodel,
                                                                std::shared_ptr<siconos::algebra::SiconosVector> x, std::string filename, double t)
@@ -531,3 +540,18 @@ void  siconos::mechanics::fem::writeBeamPositionforSOFA(std::shared_ptr<Mesh>  m
   fprintf(foutput, "\n");
   fclose(foutput);
 }
+
+void  siconos::mechanics::fem::writeBlockPositionforSOFA(std::shared_ptr<siconos::algebra::SiconosVector> x, std::string filename, double t)
+{
+  FILE * foutput = fopen(filename.c_str(), "a");
+  fprintf(foutput, "T= %f\n", t);
+  fprintf(foutput, "X=");
+  fprintf(foutput, " %e", (*x)(0)) ;
+  fprintf(foutput, " %e", (*x)(1)) ;
+  // 2D case
+  fprintf(foutput, " %e", 0.0) ;
+
+  fprintf(foutput, "\n");
+  fclose(foutput);
+}
+
