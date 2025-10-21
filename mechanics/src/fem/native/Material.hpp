@@ -52,14 +52,17 @@ class Material {
   /** thickness in 2D plane stress analysis */
   double _thickness{1.0};
 
-  /** Moment of Inertia for Beams */
-  double _I{1.0};
+  /** Radius for circular Beams */
+  double _r{1.0};
+
+  /** Moment of Inertia for Beams (assumed equal in x and y: Iy=Iz) */
+  double _I{M_PI*_r*_r*_r*_r/4.0};
 
   /** Cross section area for Beams */
-  double _A{1.0};
+  double _A{M_PI*_r*_r};
 
-  /** Torsional cosntant **/
-  double _J{_A*_A/(2* M_PI)};
+  /** Torsional constant (Polar moment = Ix) **/
+  double _J{2*_I};
 
   /** Shear Modulus **/
   double _G{_elasticYoungModulus/(2*(1+_poissonCoefficient))};
@@ -74,11 +77,11 @@ class Material {
         _elasticYoungModulus(ElasticYoungModulus),
         _poissonCoefficient(poissonCoefficient) {}
 
-  Material(double massDensity, double ElasticYoungModulus, double poissonCoefficient, double I)
+  Material(double massDensity, double ElasticYoungModulus, double poissonCoefficient, double radius)
       : _massDensity(massDensity),
         _elasticYoungModulus(ElasticYoungModulus),
         _poissonCoefficient(poissonCoefficient),
-        _I(I)  {}
+        _r(radius)  {}
 
   /** destructor */
   ~Material() noexcept = default;
