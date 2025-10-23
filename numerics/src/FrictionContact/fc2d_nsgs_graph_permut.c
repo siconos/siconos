@@ -34,6 +34,7 @@
 #include "fc2d_compute_error.h"            // for fc2d_compute_error
 #include "numerics_verbose.h"              // for numerics_printf, verbose
 #include "graph_tools.h"
+#include "op3x3.h"
 
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES 1 */
@@ -70,6 +71,7 @@ static void *fc2d_free_diagonal_blocks(double *sbcm)
 }
 
 static void fc2d_nsgs_buildLocalProblem_parallel(unsigned int contact, FrictionContactProblem *problem,
+                                                 double *blocks_contiguous,
                                                  double *diagonal_blocks,
                                                  LinearComplementarityProblem *local_problem,
                                                  double *reaction)
@@ -83,8 +85,15 @@ static void fc2d_nsgs_buildLocalProblem_parallel(unsigned int contact, FrictionC
     local_problem->q[0] = problem->q[contact * 2];
     local_problem->q[1] = problem->q[contact * 2 + 1];
 
-    NM_row_prod_no_diag2_parallel(2 * problem->numberOfContacts, contact, 2 * contact, problem->M,
-                                  reaction, local_problem->q, false);
+    for (size_t blockNum = problem->M->matrix1->index1_data[contact]; blockNum < problem->M->matrix1->index1_data[contact + 1]; ++blockNum) {
+        size_t colNumber = problem->M->matrix1->index2_data[blockNum];
+        if (colNumber != contact) {
+            mvp2x2(&blocks_contiguous[blockNum * 4], &reaction[2 * colNumber], local_problem->q);
+        }
+    }
+
+    /* NM_row_prod_no_diag2_parallel(2 * problem->numberOfContacts, contact, 2 * contact, problem->M,
+                                  reaction, local_problem->q, false); */
 }
 
 static void shuffle(unsigned int size, unsigned int *randnum)  // size is the given range
@@ -330,6 +339,19 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem *problem, double *z, double *
 
   problem->M->matrix1 = SBM_permuted;
 
+  /* Store all blocks in contiguous array */
+  unsigned int nbblocks = problem->M->matrix1->nbblocks;
+  double *blocks_contiguous = (double *)malloc(nbblocks * 4 * sizeof(double));
+  double *current_block;
+  for (unsigned int blockNum = 0; blockNum < nbblocks; blockNum++)
+  {
+    current_block = problem->M->matrix1->block[blockNum];
+    for (unsigned int j = 0; j < 4; j++)
+    {
+      blocks_contiguous[blockNum * 4 + j] = current_block[j];
+    }
+  }
+
   double *mu_permuted = (double *)malloc(nc * sizeof(double));
   double *q_permuted = (double *)malloc(nc * 2 * sizeof(double));
   for (unsigned int i = 0; i < nc; i++)
@@ -373,10 +395,10 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem *problem, double *z, double *
     freeze_contacts = f2d_nsgs_allocate_freezing_contacts(problem, options);
 
     #pragma omp parallel default(none) \
-                         private(contact, pos, local_problem, localreaction, light_error_2) \
-                         shared(problem, diagonal_blocks, diagonal_block_determinant, z, partition_size, partitions, sum_sizes, iter) \
+                         private(pos, local_problem, localreaction, light_error_2) \
+                         shared(problem, diagonal_blocks, diagonal_block_determinant, z, sum_sizes, iter) \
                          shared(iparam, light_error_sum, n_colors, norm_r, nc, error, options, tolerance, has_not_converged, norm_q, w, itermax) \
-                         shared(tmp_criteria1, tmp_criteria2, freeze_contacts, number_of_freezed_contact)
+                         shared(tmp_criteria1, tmp_criteria2, freeze_contacts, number_of_freezed_contact, blocks_contiguous)
     {
     local_problem = (LinearComplementarityProblem *)malloc(sizeof(LinearComplementarityProblem));
     local_problem->M = NM_new();
@@ -422,7 +444,7 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem *problem, double *z, double *
           localreaction[1] = z[pos + 1];
 
           /* Local problem formalization */
-          fc2d_nsgs_buildLocalProblem_parallel(permuted_contact, problem, diagonal_blocks, local_problem, z);
+          fc2d_nsgs_buildLocalProblem_parallel(permuted_contact, problem, blocks_contiguous, diagonal_blocks, local_problem, z);
 
           /* Solve local problem */
           fc2d_nsgs_local_solve(local_problem->M->matrix0, diagonal_block_determinant[permuted_contact],
@@ -495,8 +517,8 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem *problem, double *z, double *
     double localreaction[2];
     
     #pragma omp parallel default(none) \
-                         private(contact, pos, local_problem, localreaction) \
-                         shared(problem, diagonal_blocks, diagonal_block_determinant, z, partition_size, partitions, sum_sizes, iter) \
+                         private(pos, local_problem, localreaction) \
+                         shared(problem, diagonal_blocks, diagonal_block_determinant, z, sum_sizes, iter, blocks_contiguous) \
                          shared(iparam, light_error_sum, n_colors, norm_r, nc, error, options, tolerance, has_not_converged, norm_q, w, itermax)
     {
     local_problem = (LinearComplementarityProblem *)malloc(sizeof(*local_problem));
@@ -517,7 +539,7 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem *problem, double *z, double *
             localreaction[1] = z[pos + 1];
 
             /* Local problem formalization */
-            fc2d_nsgs_buildLocalProblem_parallel(permuted_contact, problem, diagonal_blocks, local_problem, z);
+            fc2d_nsgs_buildLocalProblem_parallel(permuted_contact, problem, blocks_contiguous, diagonal_blocks, local_problem, z);
 
             /* Solve local problem */
             fc2d_nsgs_local_solve(local_problem->M->matrix0, diagonal_block_determinant[permuted_contact],
