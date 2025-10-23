@@ -64,6 +64,8 @@ int color_graph_block(int nc, NumericsMatrix *M, size_t *n_colors, size_t **set_
 Functions for equitable graph coloring, to implement lists
 */
 
+int color_graph_block_permut(int nc, NumericsMatrix *M, size_t *n_colors, size_t **set_sizes, size_t ***set_indices, size_t *inv_permutation);
+
 typedef struct node node_t;
 
 node_t *create_node(size_t val);

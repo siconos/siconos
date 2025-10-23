@@ -35,6 +35,7 @@ const char* const SICONOS_FRICTION_2D_LEMKE_STR = "FC2D_LEMKE";
 const char* const SICONOS_FRICTION_2D_ENUM_STR = "FC2D_ENUM";
 const char* const SICONOS_FRICTION_2D_NSGS_GRAPH_STR = "FC2D_NSGS_GRAPH";
 const char* const SICONOS_FRICTION_2D_NSGS_GRAPH_OPTI_STR = "FC2D_NSGS_GRAPH_OPTI";
+const char* const SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT_STR = "FC2D_NSGS_GRAPH_PERMUT";
 //#define DUMP_PROBLEM
 #ifdef DUMP_PROBLEM
 static int fccounter = 0;
@@ -153,6 +154,15 @@ int fc2d_driver(FrictionContactProblem* problem, double* reaction, double* veloc
               " ========================== Call parallel graph NSGS solver for Friction-Contact 2D problem "
               "problem ==========================\n");
         fc2d_nsgs_graph_opti(problem, reaction, velocity, &info, options);
+        break;
+      }
+      /****** Parallel Graph NSGS algorithm ******/
+      case SICONOS_FRICTION_2D_NSGS_GRAPH_PERMUT: {
+        if (verbose)
+          printf(
+              " ========================== Call parallel graph NSGS solver for Friction-Contact 2D problem "
+              "problem ==========================\n");
+        fc2d_nsgs_graph_permut(problem, reaction, velocity, &info, options);
         break;
       }
       /*error */

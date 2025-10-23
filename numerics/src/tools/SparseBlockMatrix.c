@@ -1464,20 +1464,20 @@ void SBM_row_prod_no_diag_2x2(unsigned int sizeX, unsigned int sizeY,
   */
 
   /* Number of columns of the current block */
-  unsigned int nbColumns;
+  // unsigned int nbColumns;
 
   /* Position of the sub-block of x multiplied by the sub-block of
    * A */
-  unsigned int posInX = 0;
+  // unsigned int posInX = 0;
 
   /* Look for the first element of the wanted row */
 
   /* Assertions */
-  assert(A);
-  assert(x);
-  assert(y);
-  assert(sizeX == A->blocksize1[A->blocknumber1 - 1]);
-  assert(currentRowNumber <= A->blocknumber0);
+  // assert(A);
+  // assert(x);
+  // assert(y);
+  // assert(sizeX == A->blocksize1[A->blocknumber1 - 1]);
+  // assert(currentRowNumber <= A->blocknumber0);
 
   /* Loop over all non-null blocks. Works whatever the ordering order
      of the block is, in A->block, but it requires a set to 0 of all y
@@ -1491,17 +1491,33 @@ void SBM_row_prod_no_diag_2x2(unsigned int sizeX, unsigned int sizeY,
     /* Computes product only for extra diagonal blocks */
     if (colNumber != currentRowNumber) {
       /* Get dim(columns) of the current block */
-      nbColumns = A->blocksize1[colNumber];
-      if (colNumber != 0) nbColumns -= A->blocksize1[colNumber - 1];
+      // nbColumns = A->blocksize1[colNumber];
+      // if (colNumber != 0) nbColumns -= A->blocksize1[colNumber - 1];
 
       /* Get position in x of the sub-block multiplied by A sub-block */
-      posInX = 0;
-      if (colNumber != 0) posInX += A->blocksize0[colNumber - 1];
+      // posInX = 0;
+      // if (colNumber != 0) posInX += A->blocksize0[colNumber - 1];
       /* Computes y[] += currentBlock*x[] */
       /* cblas_dgemv(CblasColMajor,CblasNoTrans, nbRows, nbColumns, 1.0, A->block[blockNum],
        * nbRows, &x[posInX], 1, 1.0, y, 1); */
-      assert((nbColumns == 2));
-      mvp2x2(A->block[blockNum], &x[posInX], y);
+      // assert((nbColumns == 2));
+      mvp2x2(A->block[blockNum], &x[2 * colNumber], y);
+    }
+  }
+}
+void SBM_row_prod_no_diag_2x2_permut(unsigned int sizeX, unsigned int sizeY,
+                                     unsigned int currentRowNumber, unsigned int ignoredCol,
+                                     const SparseBlockStructuredMatrix* const A, double* const x,
+                                     double* y) {
+
+  for (size_t blockNum = A->index1_data[currentRowNumber];
+       blockNum < A->index1_data[currentRowNumber + 1]; ++blockNum) {
+    /* Get row/column position of the current block */
+    size_t colNumber = A->index2_data[blockNum];
+
+    /* Computes product only for extra diagonal blocks */
+    if (colNumber != ignoredCol) {
+      mvp2x2(A->block[blockNum], &x[2 * colNumber], y);
     }
   }
 }
@@ -3183,6 +3199,66 @@ void SBM_column_permutation(unsigned int* colIndex, SparseBlockStructuredMatrix*
   }
 #ifdef SBM_DEBUG_SBM_COL_PERM
   titi = fopen("SBM_column_permutation_output.txt", "w");
+  SBM_write_in_fileForScilab(C, titi);
+  fclose(titi);
+#endif
+}
+
+void SBM_row_permutation_copy(size_t* rowIndex, SparseBlockStructuredMatrix* A,
+                              SparseBlockStructuredMatrix* C) {
+#ifdef SBM_DEBUG_SBM_ROW_PERM
+  FILE* titi = fopen("SBM_row_permutation_input.txt", "w");
+  SBM_write_in_fileForScilab(A, titi);
+  fclose(titi);
+#endif
+  int nbRow = A->blocknumber0;
+  int nbCol = A->blocknumber1;
+  C->nbblocks = A->nbblocks;
+  C->block = (double**)malloc(A->nbblocks * sizeof(double*));
+  C->blocknumber0 = A->blocknumber0;
+  C->blocknumber1 = A->blocknumber1;
+  C->blocksize0 = (unsigned int*)malloc(nbRow * sizeof(unsigned int));
+  C->blocksize1 = (unsigned int*)malloc(nbCol * sizeof(unsigned int));
+  C->filled1 = A->filled1;
+  C->filled2 = A->filled2;
+  C->index1_data = (size_t*)malloc(C->filled1 * sizeof(size_t));
+  C->index2_data = (size_t*)malloc(C->filled2 * sizeof(size_t));
+  /*Row permutation ==> same col size*/
+  for (int i = 0; i < nbCol; i++) {
+    C->blocksize1[i] = A->blocksize1[i];
+  }
+  int curNbBlockC = 0;
+  C->index1_data[0] = 0;
+  for (int rowC = 0; rowC < nbCol; rowC++) {
+    int rowA = rowIndex[rowC];
+    /*C->blocksize0[rowC+1]=C->blocksize0[rowC]+ number of row of the current block*/
+    int nbRowInBlock = A->blocksize0[rowA];
+    if (rowA) nbRowInBlock -= A->blocksize0[rowA - 1];
+#ifdef SBM_DEBUG_SBM_ROW_PERM
+    printf("SBM_row_permutation rowA=%i, rowC=%i\n", rowA, rowC);
+#endif
+    if (rowC)
+      C->blocksize0[rowC] = C->blocksize0[rowC - 1] + nbRowInBlock;
+    else
+      C->blocksize0[rowC] = nbRowInBlock;
+    size_t NbBlockCurRow = A->index1_data[rowA + 1] - A->index1_data[rowA];
+
+    C->index1_data[rowC + 1] = C->index1_data[rowC] + NbBlockCurRow;
+    for (size_t numBlockInRowA = A->index1_data[rowA];
+         numBlockInRowA < A->index1_data[rowA + 1]; numBlockInRowA++) {
+      C->index2_data[curNbBlockC] = A->index2_data[numBlockInRowA];
+
+      int colC = C->index2_data[curNbBlockC];
+      int nbColInBlock = C->blocksize1[colC];
+      if (colC) nbColInBlock -= C->blocksize1[colC - 1];
+      // Copy block
+      C->block[curNbBlockC] = (double *)malloc(nbRowInBlock * nbColInBlock * sizeof(double));
+      memcpy(C->block[curNbBlockC], A->block[numBlockInRowA], nbRowInBlock * nbColInBlock * sizeof(double));
+      curNbBlockC++;
+    }
+  }
+#ifdef SBM_DEBUG_SBM_ROW_PERM
+  titi = fopen("SBM_row_permutation_output.txt", "w");
   SBM_write_in_fileForScilab(C, titi);
   fclose(titi);
 #endif

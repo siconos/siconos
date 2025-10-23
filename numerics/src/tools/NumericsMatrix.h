@@ -1229,6 +1229,11 @@ void NM_row_prod_no_diag2_parallel(size_t sizeX, int block_start, size_t row_sta
 */
 void NM_row_prod_no_diag3_parallel(size_t sizeX, int block_start, size_t row_start, NumericsMatrix* A, const double* x, double* y, bool init);
 
+/** Same as NM_row_prod_no_diag2_parallel but allows to choose which column is ignored.
+ * Only implemented for SBM format.
+ */
+void NM_row_prod_no_diag2_parallel_permut(size_t sizeX, int block_start, size_t row_start, unsigned int ignoredCol, NumericsMatrix* A,
+                                          const double* x, double* y, bool init);
 
 #ifdef WITH_OPENSSL
 /** Compute sha1 hash of matrix values. Matrices of differents size and same

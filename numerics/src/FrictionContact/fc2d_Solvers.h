@@ -92,6 +92,19 @@ void fc2d_nsgs_graph(FrictionContactProblem *problem, double *z, double *w, int 
 void fc2d_nsgs_graph_opti(FrictionContactProblem *problem, double *z, double *w, int *info,
                           SolverOptions *options);
 
+/**
+     Non Linear Parallel Gauss Seidel solver (sbm) for global contact problem with friction in 2D case.
+     Permutates the problem to optimize the performance.
+
+     \param[in] problem the friction-contact problem
+     \param[out] reaction vector
+     \param[out] velocity vector
+     \param[in,out] info termination value
+     \param[in,out] options structure
+*/
+void fc2d_nsgs_graph_permut(FrictionContactProblem *problem, double *z, double *w, int *info,
+                            SolverOptions *options);
+
 /** fc2d_projc is a specific projection operator related to CPG (conjugated projected gradient)
  * algorithm for global contact problem with friction.
  *

@@ -631,6 +631,18 @@ int SBM_from_csparse(int blocksize, const CSparseMatrix* const sparseMat,
 int SBM_from_csparse_2(int blocksize, const CSparseMatrix* const sparseMat,
                        SparseBlockStructuredMatrix* A);
 
+/** Same as SBM_row_permutation, but copies blocks */
+void SBM_row_permutation_copy(size_t* rowIndex, SparseBlockStructuredMatrix* A,
+                              SparseBlockStructuredMatrix* C);
+
+/** Same as SBM_row_prod_no_diag_2x2 but allows to choose which column is ignored.
+ * Useful when permutation.
+ */
+void SBM_row_prod_no_diag_2x2_permut(unsigned int sizeX, unsigned int sizeY,
+                                     unsigned int currentRowNumber, unsigned int ignoredCol,
+                                     const SparseBlockStructuredMatrix* const A, double* const x,
+                                     double* y);
+
 #if defined(__cplusplus) && !defined(BUILD_AS_CPP)
 }
 #endif
