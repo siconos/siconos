@@ -35,7 +35,11 @@ void siconos::mechanics::fem::MVertex::display() {
   std::cout << " - Vertex - number: " << _num << " ; (x,y,z): " << _x << ", " << _y << ", "
             << _z << "\n";
 };
-
+void siconos::mechanics::fem::MBeamVertex::display() {
+  siconos::mechanics::fem::MVertex::display();
+  std::cout <<  " ; (qx,qy,qz): " << _qx << ", " << _qy << ", "
+            << _qz << "\n";
+};
 void siconos::mechanics::fem::MElement::display() {
   std::cout << " - Element - number: " << _num
             << " ; type: " << siconos::tools::enum_to_string(_type) << " ; vertices: ";

@@ -81,7 +81,6 @@ siconos::mechanics::fem::SolidLinearTIDS::SolidLinearTIDS(std::shared_ptr<Mesh> 
 //    _mesh = mesh;
 //    _materials = materials;
 //    _storageType = storageType;
-    std::cout << "In SolidTIDS constructor" << std::endl;
     _FEModel.reset(new FiniteElementModel(mesh));
     _ndof = _FEModel->init();
     int nElements = _FEModel->elements().size();
@@ -92,8 +91,6 @@ siconos::mechanics::fem::SolidLinearTIDS::SolidLinearTIDS(std::shared_ptr<Mesh> 
 //    _dimStress = dim*(dim+1)/2;
 
     _n = _ndof + _dimStress; // aka the true unknowns are v and sigma
-    std::cout << "_ndof !" << _ndof << " _dimStress: " << _dimStress << std::endl;
-    std::cout << "Fe model inintialized !" << std::endl;
 //    _q0.reset(new siconos::algebra::SiconosVector(_ndof,0.0));
 //    _velocity0.reset(new siconos::algebra::SiconosVector(_ndof,0.0));
     _sigma0.reset(new siconos::algebra::SiconosVector(_dimStress,0.0));
@@ -104,9 +101,8 @@ siconos::mechanics::fem::SolidLinearTIDS::SolidLinearTIDS(std::shared_ptr<Mesh> 
     _stress[1] = std::make_shared<siconos::algebra::SiconosVector>(*_sigma0);
     _stress[2] = std::make_shared<siconos::algebra::SiconosVector>(*_sigma0);
     _epsilonp[0] = std::make_shared<siconos::algebra::SiconosVector>(_dimStress);
-_epsilonp[1] = std::make_shared<siconos::algebra::SiconosVector>(*_epsilonp0);
+    _epsilonp[1] = std::make_shared<siconos::algebra::SiconosVector>(*_epsilonp0);
 //  LagrangianDS::_init(_q0,_velocity0);
-
 
   if(!_S)
   {

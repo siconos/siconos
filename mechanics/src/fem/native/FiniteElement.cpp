@@ -51,6 +51,8 @@ int siconos::mechanics::fem::FElement::ndofPerNode() {
       return 3;
     case FiniteElementType::B2:
       return 3;
+    case FiniteElementType::B3:
+      return 6;
     default:
       throw("FElement::ndorPernode(). element type not recognized");
   }
@@ -58,12 +60,12 @@ int siconos::mechanics::fem::FElement::ndofPerNode() {
 }
 
 double siconos::mechanics::fem::FElement::length() {
-  switch (_type) {
-    case FiniteElementType::B2:
-      return sqrt(pow(_nodes[0]->x()-_nodes[1]->x(),2) + pow(_nodes[0]->y()-_nodes[1]->y(),2) + pow(_nodes[0]->z()-_nodes[1]->z(),2));
-    default:
-      throw("FElement::norm(). element type not recognized");
-  }
+
+  if (_type == FiniteElementType::B2 || _type == FiniteElementType::B3)
+    return sqrt(pow(_nodes[0]->x()-_nodes[1]->x(),2) + pow(_nodes[0]->y()-_nodes[1]->y(),2) + pow(_nodes[0]->z()-_nodes[1]->z(),2));
+  else
+    throw("FElement::length(). element type not recognized");
+
 }
 
 void siconos::mechanics::fem::FElement::setGlobalToLocalMatrix(int dim){
@@ -151,6 +153,7 @@ const siconos::mechanics::fem::GaussPointsTab& siconos::mechanics::fem::FElement
         return GaussPointsTH4_2;
       break;
     case FiniteElementType::B2:
+    case FiniteElementType::B3:
       return GaussPointsB2_3;
       break;
 

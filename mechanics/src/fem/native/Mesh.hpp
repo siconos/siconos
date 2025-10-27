@@ -68,8 +68,33 @@ class MVertex {
 
   auto &elements() { return _elements; };
 
-  void display();
+  virtual void display();
 };
+
+class MBeamVertex : public MVertex{
+  private:
+  /* Vextex Rotation Coordinate */
+  double _qx = 0.;
+  double _qy = 0.;
+  double _qz = 0.;
+
+ public:
+  /* Constructor from data */
+  MBeamVertex(size_t num, double x, double y, double z, double qx, double qy, double qz) : MVertex(num, x, y, z)  {
+    _qx=qx;
+    _qy=qy;
+    _qz=qz;
+  };
+
+  ~MBeamVertex() noexcept = default;
+
+  auto qx() { return _qx; };
+  auto qy() { return _qy; };
+  auto qz() { return _qz; };
+  void display() override;
+};
+
+
 
 /** a mesh element */
 class MElement {

@@ -104,14 +104,19 @@ std::shared_ptr<siconos::mechanics::fem::Mesh> siconos::mechanics::fem::createBe
   vertices.resize(nbBeams+1);
   std::vector<std::shared_ptr<MElement>> elements;
 
-  if (dim == 2)
+  siconos::mechanics::fem::FiniteElementType FEtype;
+  if (dim == 2){
     for (int i=0; i<nbBeams+1;i++){
       vertices[i] = std::make_shared<MVertex>(i+1,i*(vEnd->x() - v0->x())/nbBeams + v0->x(), i*(vEnd->y() - v0->y())/nbBeams + v0->y(), 0.0);
     }
-  else if (dim ==3)
+    FEtype = FiniteElementType::B2;
+  }
+  else if (dim ==3){
     for (int i=0; i<nbBeams+1;i++){
-      vertices[i] = std::make_shared<MVertex>(i+1,i*(vEnd->x() - v0->x())/nbBeams + v0->x(), i*(vEnd->y() - v0->y())/nbBeams + v0->y(), i*(vEnd->z() - v0->z())/nbBeams + v0->z());
+      vertices[i] = std::make_shared<MBeamVertex>(i+1,i*(vEnd->x() - v0->x())/nbBeams + v0->x(), i*(vEnd->y() - v0->y())/nbBeams + v0->y(), i*(vEnd->z() - v0->z())/nbBeams + v0->z(), 0, 0, 0);
     }
+    FEtype = FiniteElementType::B3;
+  }
   else
     THROW_EXCEPTION("Invalid beam dimension, should be 2 or 3 !");
   std::vector<int> tag = {1};
@@ -121,11 +126,11 @@ std::shared_ptr<siconos::mechanics::fem::Mesh> siconos::mechanics::fem::createBe
     std::shared_ptr<MElement> e;
     std::vector<std::shared_ptr<MVertex>> verticesInBeamElement = {vertices[i], vertices[i + 1]};
     if (i == 0)
-       e = std::make_shared<MElement>(i+1, FiniteElementType::B2, verticesInBeamElement, BCtag);
+       e = std::make_shared<MElement>(i+1, FEtype, verticesInBeamElement, BCtag);
     else if (i == nbBeams-1)
-       e = std::make_shared<MElement>(i+1, FiniteElementType::B2, verticesInBeamElement, Forcetag);
+       e = std::make_shared<MElement>(i+1, FEtype, verticesInBeamElement, Forcetag);
     else
-       e = std::make_shared<MElement>(i+1, FiniteElementType::B2, verticesInBeamElement, tag); // Tag by default
+       e = std::make_shared<MElement>(i+1, FEtype, verticesInBeamElement, tag); // Tag by default
     elements.push_back(e);
   }
 

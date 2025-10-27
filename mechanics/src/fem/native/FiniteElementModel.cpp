@@ -85,6 +85,7 @@ unsigned int siconos::mechanics::fem::FiniteElementModel::init() {
         }
         case FiniteElementType::B2:  // Beam in 2D.
         {
+
           fe = std::make_shared<FElement>(FiniteElementType::B2, 6, e);
           break;
         }
@@ -103,9 +104,9 @@ unsigned int siconos::mechanics::fem::FiniteElementModel::init() {
           /* the FE element number is equal to the MElement number */
           break;
         }
-        case FiniteElementType::B2:  // Beam in 2D.
+        case FiniteElementType::B3:  // Beam in 3D.
         {
-          fe = std::make_shared<FElement>(FiniteElementType::B2, 12, e);
+          fe = std::make_shared<FElement>(FiniteElementType::B3, 12, e);
           break;
         }
 
@@ -118,8 +119,8 @@ unsigned int siconos::mechanics::fem::FiniteElementModel::init() {
     /* ------------- add the FE element in the elements vector */
     _elements.push_back(fe);
     _mElementTOFElement[e] = _elements.back();
-
     int ndofPerNode = fe->ndofPerNode();
+
     /* ------------- contruction of  FE nodes */
     for (auto v : e->vertices()) {
       if (_vertexToNode.find(v) ==
@@ -189,13 +190,27 @@ void siconos::mechanics::fem::FiniteElementModel::AssembleElementaryMatrix(
 void siconos::mechanics::fem::FiniteElementModel::AssembleElementary_B_Matrix(std::shared_ptr<siconos::algebra::SiconosMatrix> bigB,
                                                                                       siconos::algebra::SimpleMatrix& Be, FElement& fe, int elem_cnt)
 {
+  int dimStress;
+  switch (fe.type()) {
+    case FiniteElementType::T3:
+    case FiniteElementType::B2:
+      dimStress = 3; // T3: sigma_xx, sigma_yy, sigma_xy // B2: axial, curvature GP1, curvature GP2
+      break;
+    case FiniteElementType::TH4:
+    case FiniteElementType::B3:
+      dimStress = 6; // TH4: sigma_xx, sigma_yy, sigma_zz, sigma_xy, sigma_xz, sigma_yz // B2: axial, curvature_x GP1, curvature_x GP2, twisting, , curvature_y GP1, curvature_y GP2
+      break;
+    default:
+      throw("AssembleElementary_B_Matrix. Stress dimension not defined ");
+  }
     int node1_cnt =0;
+
     for(std::shared_ptr<FENode> node1 : fe.nodes())
     {
         auto& dofIndex1 = *node1->dofIndex();
-        for(int i=0;i<3;i++)  // 3 because in 2D ?
+        for(int i=0;i<dofIndex1.size();i++)
             for(int j=0;j<dofIndex1.size();j++){
-                bigB->setValue(3*elem_cnt+i, dofIndex1[j], Be.getValue(i,j+node1_cnt*dofIndex1.size())+ bigB->getValue(3*elem_cnt+i, dofIndex1[j]));
+                bigB->setValue(dimStress*elem_cnt+i, dofIndex1[j], Be.getValue(i,j+node1_cnt*dofIndex1.size())+ bigB->getValue(dimStress*elem_cnt+i, dofIndex1[j]));
             }
         node1_cnt++;
     }
@@ -204,15 +219,27 @@ void siconos::mechanics::fem::FiniteElementModel::AssembleElementary_B_Matrix(st
 void siconos::mechanics::fem::FiniteElementModel::AssembleElementary_S_Matrix(std::shared_ptr<siconos::algebra::SiconosMatrix> S,
                                                                               siconos::algebra::SimpleMatrix& Se, FElement& fe, int elem_cnt)
 {
-  //    int dimStress = _mesh->dim()*(_mesh->dim()+1)/2;
   int dimStress;
-  if (fe.type() == FiniteElementType::B2){
-    dimStress = 3;
+  switch (fe.type()) {
+    case FiniteElementType::T3:
+    case FiniteElementType::B2:
+      dimStress = 3;
+      break;      // T3: sigma_xx, sigma_yy, sigma_xy // B2: axial, curvature GP1, curvature GP2
+    case FiniteElementType::TH4:
+    case FiniteElementType::B3:
+      dimStress = 6; // TH4: sigma_xx, sigma_yy, sigma_zz, sigma_xy, sigma_xz, sigma_yz // B2: axial, curvature_x GP1, curvature_x GP2, twisting, , curvature_y GP1, curvature_y GP2
+      break;
+    default:
+      throw("AssembleElementary_S_Matrix. Stress dimension not defined ");
   }
-  else
-  {
-    dimStress = (_mesh->dim() == 2) ? 3 : 6;
-  };
+
+  // if (fe.type() == FiniteElementType::B2){
+  //   dimStress = (_mesh->dim() == 2) ? 3 : 6;
+  // }
+  // else
+  // {
+  //   dimStress = (_mesh->dim() == 2) ? 3 : 6;
+  // };
   for(int i=0;i<dimStress;i++)
     for(int j=0;j<dimStress;j++){
       S->setValue(dimStress*elem_cnt+i, dimStress*elem_cnt+j, Se.getValue(i,j)+ S->getValue(dimStress*elem_cnt+i, dimStress*elem_cnt+j));
@@ -476,7 +503,7 @@ void siconos::mechanics::fem::FiniteElementModel::computeMassMatrix(
     auto Me = std::make_shared<siconos::algebra::SimpleMatrix>(ndofElement, ndofElement);
     // to be optimized if all the element are similar
     double massDensity = mat[fe->mElement()->tags(0)]->massDensity();
-    if (fe->type() == FiniteElementType::B2){
+    if (fe->type() == FiniteElementType::B2 || fe->type() == FiniteElementType::B3){
       computeBeamElementaryMassMatrix_direct(*Me, *fe, mat);
     }
     else {
@@ -805,7 +832,7 @@ void siconos::mechanics::fem::FiniteElementModel::computeBeamElementaryStiffness
 
     Ke_loc->setValue(0,0,axial);
     Ke_loc->setValue(0,6,-axial);
-    Ke_loc->setValue(6,0,Ke_loc->getValue(0,5));
+    Ke_loc->setValue(6,0,Ke_loc->getValue(0,6));
 
     Ke_loc->setValue(1,1,shearing);
     Ke_loc->setValue(1,5,shearOnBend);
@@ -815,12 +842,12 @@ void siconos::mechanics::fem::FiniteElementModel::computeBeamElementaryStiffness
     Ke_loc->setValue(2,4,-shearOnBend);
     Ke_loc->setValue(2,8,-shearOnshear);
     Ke_loc->setValue(2,10,-shearOnBend);
-    Ke_loc->setValue(5,1,Ke_loc->getValue(1,4));
-    Ke_loc->setValue(7,1,Ke_loc->getValue(1,6));
-    Ke_loc->setValue(11,1,Ke_loc->getValue(1,9));
-    Ke_loc->setValue(4,2,Ke_loc->getValue(2,3));
-    Ke_loc->setValue(8,2,Ke_loc->getValue(2,7));
-    Ke_loc->setValue(10,2,Ke_loc->getValue(2,8));
+    Ke_loc->setValue(5,1,Ke_loc->getValue(1,5));
+    Ke_loc->setValue(7,1,Ke_loc->getValue(1,7));
+    Ke_loc->setValue(11,1,Ke_loc->getValue(1,11));
+    Ke_loc->setValue(4,2,Ke_loc->getValue(2,4));
+    Ke_loc->setValue(8,2,Ke_loc->getValue(2,8));
+    Ke_loc->setValue(10,2,Ke_loc->getValue(2,10));
 
     Ke_loc->setValue(3,3,torsion);
     Ke_loc->setValue(3,9,-torsion);
@@ -1075,7 +1102,7 @@ void siconos::mechanics::fem::FiniteElementModel::computeStiffnessMatrix(
 
   /* loop over the elements */
   for (std::shared_ptr<FElement> fe : elements()) {
-    if (fe->type() == FiniteElementType::B2){
+    if (fe->type() == FiniteElementType::B2 || fe->type() == FiniteElementType::B3){
       unsigned int ndofElement = fe->ndof();
       auto Ke = std::make_shared<siconos::algebra::SimpleMatrix>(
           ndofElement,
@@ -1234,15 +1261,19 @@ void siconos::mechanics::fem::FiniteElementModel::computeBeamElementaryBMatrix_d
       double gp_eta = gp[0];
       double gp_w = gp[1];
 
-      B.setValue(gp_cnt,1, sqrt(gp_w)*6*gp_eta/length2);
-      B.setValue(gp_cnt+3,2, sqrt(gp_w)*6*gp_eta/length2);
-
+      // B.setValue(gp_cnt,1, sqrt(gp_w)*6*gp_eta/length2);
+      // B.setValue(gp_cnt+3,2, sqrt(gp_w)*6*gp_eta/length2);
+      B.setValue(gp_cnt,2, -sqrt(gp_w)*6*gp_eta/length2);
+      B.setValue(gp_cnt+3,1, sqrt(gp_w)*6*gp_eta/length2);
 
       B.setValue(gp_cnt,4, sqrt(gp_w)*(3*gp_eta-1)/length);
       B.setValue(gp_cnt+3,5, sqrt(gp_w)*(3*gp_eta-1)/length);
 
-      B.setValue(gp_cnt,7, sqrt(gp_w)*(-6)*gp_eta/length2);
-      B.setValue(gp_cnt+3,8, sqrt(gp_w)*(-6)*gp_eta/length2);
+      // B.setValue(gp_cnt,7, sqrt(gp_w)*(-6)*gp_eta/length2);
+      // B.setValue(gp_cnt+3,8, sqrt(gp_w)*(-6)*gp_eta/length2);
+      B.setValue(gp_cnt,8, sqrt(gp_w)*(6)*gp_eta/length2);
+      B.setValue(gp_cnt+3,7, sqrt(gp_w)*(-6)*gp_eta/length2);
+
 
       B.setValue(gp_cnt,10, sqrt(gp_w)*(3*gp_eta+1)/length);
       B.setValue(gp_cnt+3,11, sqrt(gp_w)*(3*gp_eta+1)/length);
@@ -1255,7 +1286,6 @@ void siconos::mechanics::fem::FiniteElementModel::computeBeamElementaryBMatrix_d
 
   // Transfer to global coordinates
   prod(B, *Te, B, true);
-
 }
 
 void siconos::mechanics::fem::FiniteElementModel::computeElementaryBMatrix_direct(FElement& fe, siconos::algebra::SimpleMatrix& B, double thickness)
@@ -1322,7 +1352,7 @@ void siconos::mechanics::fem::FiniteElementModel::computeBMatrix(
   /* loop over the elements */
   for(std::shared_ptr<FElement> fe : elements())
   {
-    if (fe->type() == FiniteElementType::B2){
+    if (fe->type() == FiniteElementType::B2 || fe->type() == FiniteElementType::B3){
       double dim = _mesh->dim();
       if (dim==2)
         Be = std::make_shared<siconos::algebra::SimpleMatrix>(3, 6);
@@ -1357,15 +1387,14 @@ void siconos::mechanics::fem::FiniteElementModel::computeSMatrix(
 
 
 //  Dinv = std::make_shared<siconos::algebra::SimpleMatrix>(dimStress,dimStress);
-  double E, I, A, length;
+  double E, I, A, length, G,J;
   double nu;
   double coef;
   /* loop over the elements */
   for(std::shared_ptr<FElement> fe : elements())
   {
-    if (fe->type() == FiniteElementType::B2){
+    if (fe->type() == FiniteElementType::B2 || fe->type() == FiniteElementType::B3){
       int dim = _mesh->dim();
-
       int dimStress = (dim == 2) ? 3 : 6;
       D = std::make_shared<siconos::algebra::SimpleMatrix>(dimStress,dimStress);
       Material &mat = *(materials[fe->mElement()->tags(0)]);
@@ -1377,14 +1406,25 @@ void siconos::mechanics::fem::FiniteElementModel::computeSMatrix(
       (*D)(0,0) = E*A*length;
       (*D)(1,1) = E*I*length/2;
       (*D)(2,2) = E*I*length/2;
+
+      if (dim==3)
+      {
+        G = mat.shearModulus();
+        J = mat.secondMomentOfArea();
+        (*D)(3,3) = G*J*length;
+        (*D)(4,4) = E*I*length/2;
+        (*D)(5,5) = E*I*length/2;
+      }
       Dinv = std::make_shared<siconos::algebra::SimpleMatrix>(*D);
       (*Dinv)(0,0) = 1/(*D)(0,0);
       (*Dinv)(1,1) = 1/(*D)(1,1);
       (*Dinv)(2,2) = 1/(*D)(2,2);
-      // (*Dinv)(0,0) = (*D)(0,0);
-      // (*Dinv)(1,1) = (*D)(1,1);
-      // (*Dinv)(2,2) = (*D)(2,2);
-
+      if (dim==3)
+      {
+        (*Dinv)(3,3) = 1/(*D)(3,3);
+        (*Dinv)(4,4) = 1/(*D)(4,4);
+        (*Dinv)(5,5) = 1/(*D)(5,5);
+      }
     }
     else
     {
@@ -1468,8 +1508,6 @@ void siconos::mechanics::fem::FiniteElementModel::applyNodalForces(
     std::shared_ptr<siconos::algebra::SiconosVector> forces) {
   auto f_index = std::make_shared<std::vector<int>>(0);
   for (auto &e : _mesh->elements()) {
-    std::cout << "element " << std::endl;
-    e->display();
     if (e->tags(0) == physical_entity_tag) {
       std::cout << "We apply a force on this element " << std::endl;
       for (auto &v : e->vertices()) {       
