@@ -35,6 +35,8 @@
 #include "numerics_verbose.h"              // for numerics_printf, verbose
 #include "graph_tools.h"
 
+#include "op3x3.h"
+
 /* #define DEBUG_STDOUT */
 /* #define DEBUG_MESSAGES 1 */
 #include "siconos_debug.h"  // for DEBUG_BEGIN, DEBUG_END
@@ -615,4 +617,331 @@ void fc2d_nsgs_graph_opti(FrictionContactProblem *problem, double *z, double *w,
   free(partition_size);
   for (size_t i = 0; i < n_colors; i++) free(partitions[i]);
   free(partitions);
+}
+
+
+/* *********** */
+/* EXPERIMENTS */
+/* *********** */
+
+static void fc2d_nsgs_buildLocalProblem_2(unsigned int contact, FrictionContactProblem *problem,
+                                        double *blocks_contiguous,
+                                        double *diagonal_blocks,
+					                              size_t *index1_data,
+					                              size_t *index2_data,
+                                        LinearComplementarityProblem *local_problem,
+                                        double *reaction)
+{
+    local_problem->M->matrix0 = &diagonal_blocks[4 * contact];
+
+    local_problem->M->size0 = 2; // Necessary ?
+    local_problem->M->size1 = 2;
+
+    local_problem->q[0] = problem->q[contact * 2];
+    local_problem->q[1] = problem->q[contact * 2 + 1];
+
+    size_t colNumber;
+    // size_t nextColNumber;
+    // unsigned int prefetch_distance = 4;
+
+    for (size_t blockNum = index1_data[contact]; blockNum < index1_data[contact + 1]; blockNum++)
+    {
+      
+      colNumber = index2_data[blockNum];
+      // nextColNumber = index2_data[blockNum + prefetch_distance];
+      // __builtin_prefetch(&reaction[2 * nextColNumber], 0, 3);
+
+      if (colNumber != contact)
+      {
+        mvp2x2(&blocks_contiguous[blockNum * 4], &reaction[2 * colNumber], local_problem->q);
+      }
+
+    }
+}
+
+static double *fc2d_extract_diagonal_blocks(FrictionContactProblem *problem)
+{
+    unsigned int nc = problem->numberOfContacts;
+    double *sbcm = (double *)calloc(4 * nc, sizeof(double));
+    double *block;
+    int diagPos;
+
+    for (unsigned int i = 0; i < nc; ++i)
+    {
+        diagPos = SBM_diagonal_block_index(problem->M->matrix1, i);
+        block = problem->M->matrix1->block[diagPos];
+        for (int j = 0; j < 4; j++)
+            sbcm[i * 4 + j] = block[j];
+    }
+
+    return sbcm;
+}
+
+static double *fc2d_nsgs_compute_local_problem_determinant_2(unsigned int nc, double *diagonal_blocks)
+{
+    double *diagonal_block_determinant = (double *)calloc(sizeof(double), nc);
+    double *block;
+
+    for (unsigned int i = 0; i < nc; ++i)
+    {
+        block = &diagonal_blocks[4 * i];
+        diagonal_block_determinant[i] = block[0] * block[3] - block[1] * block[2];
+        if (diagonal_block_determinant[i] < DBL_EPSILON)
+        {
+            free(diagonal_block_determinant);
+            return NULL;
+        }
+    }
+    return diagonal_block_determinant;
+}
+
+/* MAIN FUNCTION */
+void test_solver(FrictionContactProblem *problem, double *z, double *w, int *info, SolverOptions *options)
+{
+    unsigned int nc = problem->numberOfContacts;
+    unsigned int n = problem->numberOfContacts * problem->dimension;
+
+    printf("Number of contacts = %d, dimension = %d\n", nc, n / nc);
+    
+    /* Coloring */
+    size_t n_colors = 0;
+    size_t *partition_size = NULL;
+    size_t **partitions = NULL;
+    size_t *inv_permutation = (size_t *)malloc((size_t)nc * sizeof(size_t));
+    color_graph_block_permut(problem->numberOfContacts, problem->M, &n_colors, &partition_size, &partitions, inv_permutation);
+
+    unsigned int *sum_sizes = (unsigned int *)calloc(n_colors + 1, sizeof(unsigned int));
+    for (unsigned int color = 0; color < n_colors; color++)
+    {
+        sum_sizes[color + 1] = sum_sizes[color] + partition_size[color];
+    }
+
+    /* Permutate rows and columns of SBM */
+    SparseBlockStructuredMatrix *SBM_col_permuted = SBM_new();
+    SparseBlockStructuredMatrix *SBM_permuted = SBM_new();
+    unsigned int *rowIndex = (unsigned int *)malloc((unsigned int)nc * sizeof(unsigned int));
+    for (int i = 0; i < nc; i++)
+        rowIndex[inv_permutation[i]] = i;
+
+    SBM_column_permutation(rowIndex, problem->M->matrix1, SBM_col_permuted);
+    SBM_row_permutation_copy(inv_permutation, SBM_col_permuted, SBM_permuted);
+
+    problem->M->matrix1 = SBM_permuted;
+
+    /* Cool stuff */
+    /* unsigned int *columns_seen = (unsigned int *)calloc(nc, sizeof(unsigned int));
+    size_t col;
+    unsigned int nbdiffcol = 0, already_seen = 0;
+
+    for (size_t color = 0; color < n_colors; color++)
+    {
+
+      printf("\n\nCOLOR %d\n\n", color);
+
+      for (unsigned int contact = sum_sizes[color]; contact < sum_sizes[color + 1]; contact++)
+      {
+
+        for (size_t blockNum = SBM_permuted->index1_data[contact]; blockNum < SBM_permuted->index1_data[contact + 1]; blockNum++)
+        {
+
+          col = SBM_permuted->index2_data[blockNum];
+          printf(" %d ", col);
+          columns_seen[col]++;
+          if (columns_seen[col] == 1)
+          {
+            nbdiffcol++;
+          }
+          else
+          {
+            already_seen++;
+            // printf(" : SEEN ");
+          }
+
+        }
+
+        printf("\n");
+      }
+
+      // printf("Color %d, number of different columns : %d / %d, already_seen = %d\n", color, nbdiffcol, nc, already_seen);
+
+      for (unsigned int i = 0; i < nc; i++) columns_seen[i] = 0;
+      nbdiffcol = 0;
+      already_seen = 0;
+    } */
+
+    /* Store all blocks in contiguous array */
+    unsigned int nbblocks = problem->M->matrix1->nbblocks;
+    double *blocks_contiguous = (double *)malloc(nbblocks * 4 * sizeof(double));
+    double *current_block;
+    for (unsigned int blockNum = 0; blockNum < nbblocks; blockNum++)
+    {
+        current_block = problem->M->matrix1->block[blockNum];
+        for (unsigned int j = 0; j < 4; j++)
+        {
+            blocks_contiguous[blockNum * 4 + j] = current_block[j];
+        }
+    }
+
+    double *diagonal_blocks = fc2d_extract_diagonal_blocks(problem);
+    double *diagonal_block_determinant = fc2d_nsgs_compute_local_problem_determinant_2(nc, diagonal_blocks);
+
+    LinearComplementarityProblem *local_problem = (LinearComplementarityProblem *)malloc(sizeof(LinearComplementarityProblem));
+    local_problem->M = NM_new();
+    local_problem->M->storageType = NM_DENSE;
+    local_problem->M->size0 = 2;
+    local_problem->M->size1 = 2;
+    local_problem->q = (double *)malloc(2 * sizeof(double));
+
+    double localreaction[2];
+    unsigned int pos;
+    unsigned int contact;
+
+    unsigned int permuted_contact;
+
+    double *mu_permuted = (double *)malloc(nc * sizeof(double));
+    double *q_permuted = (double *)malloc(nc * 2 * sizeof(double));
+    for (unsigned int i = 0; i < nc; i++)
+    {
+        q_permuted[2 * i] = problem->q[2 * inv_permutation[i]];
+        q_permuted[2 * i + 1] = problem->q[2 * inv_permutation[i] + 1];
+        mu_permuted[i] = problem->mu[inv_permutation[i]];
+    }
+
+    problem->q = q_permuted;
+    problem->mu = mu_permuted;
+
+    double norm_q = cblas_dnrm2(nc * 2, problem->q, 1);
+    double norm_r[] = {INFINITY};
+
+    for (int i = 0; i < n; i++)
+        z[i] = 1.;
+
+    double error = INFINITY;
+    double light_error_sum = 0.;
+    int has_not_converged = 1;
+    int iter = 0;
+
+    int *iparam = options->iparam;
+    double tolerance = 1e-3;
+    int n_iter = iparam[SICONOS_IPARAM_MAX_ITER];
+
+    size_t *index1_data;
+    size_t *index2_data;
+
+    unsigned int max_blocks_in_one_line = 0;
+
+    for (unsigned int line = 0; line < problem->numberOfContacts; line++)
+    {
+      if (max_blocks_in_one_line < (problem->M->matrix1->index1_data[line + 1] - problem->M->matrix1->index1_data[line]))
+      {
+        max_blocks_in_one_line = (problem->M->matrix1->index1_data[line + 1] - problem->M->matrix1->index1_data[line]);
+      }
+    }
+    printf("Maximum number of non empty blocks in one line = %d\n", max_blocks_in_one_line);
+
+    double time = omp_get_wtime();
+
+    #pragma omp parallel default(none) \
+                         private(pos, local_problem, localreaction, index1_data, index2_data) \
+                         shared(problem, diagonal_blocks, diagonal_block_determinant, blocks_contiguous, z, sum_sizes, n_colors, n_iter) \
+                         // shared(light_error_sum, iparam, error, norm_r, norm_q, tolerance, has_not_converged, iter, options, w, nc)
+    {
+
+    printf("Thread num: %d\n", omp_get_thread_num());
+
+    // Copy index1_data and index2_data
+    index1_data = (size_t *)malloc((problem->numberOfContacts + 1) * sizeof(size_t));
+    index2_data = (size_t *)malloc(problem->M->matrix1->nbblocks * sizeof(size_t));
+
+    memcpy(index1_data, problem->M->matrix1->index1_data, (problem->numberOfContacts + 1) * sizeof(size_t));
+    memcpy(index2_data, problem->M->matrix1->index2_data, problem->M->matrix1->nbblocks * sizeof(size_t));
+
+    double *z_local = (double *)malloc(problem->numberOfContacts * 2 * sizeof(double));
+    memcpy(z_local, z, problem->numberOfContacts * 2 * sizeof(double));
+
+    double *blocks_contiguous_local = (double *)malloc(problem->M->matrix1->nbblocks * 4 * sizeof(double));
+    memcpy(blocks_contiguous_local, blocks_contiguous, problem->M->matrix1->nbblocks * 4 * sizeof(double));
+    double *diagonal_blocks_local = fc2d_extract_diagonal_blocks(problem);
+
+    // Allocate local_problem for each thread
+    local_problem = (LinearComplementarityProblem *)malloc(sizeof(*local_problem));
+    local_problem->M = NM_new();
+    local_problem->M->storageType = NM_DENSE;
+    local_problem->M->size0 = 2;
+    local_problem->M->size1 = 2;
+    local_problem->q = (double *)malloc(2 * sizeof(double));
+  
+    for (int i = 0; i < n_iter; i++)
+    {
+        for (size_t color = 0; color < n_colors; color++)
+        {
+	    // #pragma omp for reduction(+:light_error_sum)
+            #pragma omp for
+            for (unsigned int permuted_contact = sum_sizes[color]; permuted_contact < sum_sizes[color + 1]; permuted_contact++)
+            {
+                // printf("[%d] Contact : %d\n", omp_get_thread_num(), permuted_contact);
+                // contact = partitions[color][v];
+                pos = 2 * permuted_contact;
+                localreaction[0] = z[pos];
+                localreaction[1] = z[pos + 1];
+
+                fc2d_nsgs_buildLocalProblem_2(permuted_contact, problem, blocks_contiguous_local, diagonal_blocks_local, index1_data, index2_data, local_problem, z_local);
+
+                /* printf("Contact %d, q[0] = %e, q[1] = %e\n", contact, local_problem->q[0], local_problem->q[1]);
+                printf("M->matrix0 = %e %e %e %e \n", local_problem->M->matrix0[0], local_problem->M->matrix0[1], local_problem->M->matrix0[2], local_problem->M->matrix0[3]);
+                printf("%e %e\n", diagonal_block_determinant[permuted_contact], problem->mu[permuted_contact]);
+                printf("%e %e\n", localreaction[0], localreaction[1]); */
+
+                /* Solve local problem */
+                // fc2d_nsgs_local_solve(local_problem->M->matrix0, diagonal_block_determinant[permuted_contact], local_problem->q, problem->mu[permuted_contact], localreaction);
+
+                // light_error_sum += light_error_squared(localreaction, &z[pos]);
+
+                /* printf("AFTER LOCAL SOLVE\n");
+                printf("%e %e\n", localreaction[0], localreaction[1]); */
+                // z[pos] = localreaction[0];
+                // z[pos + 1] = localreaction[1];
+                // printf("\n");
+            }
+
+            // printf("\nCOLOR %d DONE\n", color);
+        }
+
+	/* 
+	#pragma omp single
+        {
+        if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT) {
+            error = calculateLightError(light_error_sum, nc, z, norm_r);
+            has_not_converged = determine_convergence(error, tolerance, iter, options);
+        } else if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
+            error = calculateLightError(light_error_sum, nc, z, norm_r);
+            has_not_converged = determine_convergence_with_full_final(problem, options, z, w, &tolerance, norm_q, error, iter);
+        }
+
+	light_error_sum = 0.0;
+        iter++;
+	}
+	*/
+
+        /* for (int j = 0; j < n; j++)
+            printf("%e \n", z[j]); */
+    }
+    // End of parallel section
+    }
+
+    /* for (int j = 0; j < n; j++)
+        printf("%e \n", z[j]); */
+
+    time = omp_get_wtime() - time;
+    printf("Time iterating: %e seconds\n", time);
+
+    double *z_permut = (double *)malloc(2 * nc * sizeof(double));
+    for (unsigned int i = 0; i < nc; i++)
+    {
+        z_permut[2 * inv_permutation[i]] = z[2 * i];
+        z_permut[2 * inv_permutation[i] + 1] = z[2 * i + 1];
+    }
+
+    //for (int j = 0; j < n; j++)
+    //    printf("%e \n", z_permut[j]);
 }

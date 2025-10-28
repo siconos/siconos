@@ -105,6 +105,8 @@ void fc2d_nsgs_graph_opti(FrictionContactProblem *problem, double *z, double *w,
 void fc2d_nsgs_graph_permut(FrictionContactProblem *problem, double *z, double *w, int *info,
                             SolverOptions *options);
 
+void test_solver(FrictionContactProblem *problem, double *z, double *w, int *info, SolverOptions *options);
+
 /** fc2d_projc is a specific projection operator related to CPG (conjugated projected gradient)
  * algorithm for global contact problem with friction.
  *
