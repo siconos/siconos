@@ -195,6 +195,8 @@ run_options['with_timer'] = True
 run_options['time_stepping'] = None
 #run_options['friction_contact_trace'] = True
 #run_options['friction_contact_trace_params'] = friction_contact_trace_params
+run_options['output_backup'] = True
+run_options['output_backup_frequency'] = 100
 
 import nonos
 vnative_options=nonos.bridge.SpaceFilterOptions()
