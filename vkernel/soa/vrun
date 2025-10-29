@@ -10,7 +10,7 @@ timer_args=""
 python_version=`python3 -c 'import sys; print(".".join(map(str, sys.version_info[:2])))'`
 python_site_packages_path=`python3 -c 'import os; import sys; print(os.path.join(sys.prefix, "lib", "python" + sys.version[:4], "site-packages"))'`
 venv=${VRUN_VENV:-venv}
-VRUN_GUIX_CXX_TOOLCHAIN=${VRUN_GUIX_CXX_TOOLCHAIN:-clang-toolchain@19}
+VRUN_GUIX_CXX_TOOLCHAIN=${VRUN_GUIX_CXX_TOOLCHAIN:-clang-toolchain@18}
 VRUN_GUIX_BASE_DIR=${VRUN_GUIX_BASE_DIR:-`pwd`}
 case $VRUN_SETX in 1) set -x;; esac
 while [ $# -gt 0 ]; do
@@ -19,6 +19,12 @@ while [ $# -gt 0 ]; do
     --guix-base-dir)
       shift
       VRUN_GUIX_BASE_DIR=$1
+      shift
+      ;;
+
+    --packages)
+      shift
+      VRUN_PACKAGES=(${1//,/ })
       shift
       ;;
 
@@ -83,50 +89,65 @@ while [ $# -gt 0 ]; do
 EOF
 
       cat>${VRUN_GUIX_BASE_DIR}/.siconos-vrun-channels.scm<<EOF
+;; https://guix.bordeaux.inria.fr/eval/9029823
+;; 2025-10-29 13:40:39
+
 (list (channel
-        (name 'guix-past)
-        (url "https://codeberg.org/guix-science/guix-past.git")
-        (branch "master")
-        (commit
-          "bd37d989285ea44c7deca398a76cd1cb0009ec58")
-        (introduction
-          (make-channel-introduction
-            "0c119db2ea86a389769f4d2b9c6f5c41c027e336"
-            (openpgp-fingerprint
-              "3CE4 6455 8A84 FDC6 9DB4  0CFB 090B 1199 3D9A EBB5"))))
-      (channel
-        (name 'guix-science-nonfree)
-        (url "https://codeberg.org/guix-science/guix-science-nonfree.git")
-        (branch "master")
-        (commit
-          "37db564819b9a5a8c5515eb758aed7e4ed45d780")
-        (introduction
-          (make-channel-introduction
-            "58661b110325fd5d9b40e6f0177cc486a615817e"
-            (openpgp-fingerprint
-              "CA4F 8CF4 37D7 478F DA05  5FD4 4213 7701 1A37 8446"))))
-      (channel
         (name 'guix-science)
         (url "https://codeberg.org/guix-science/guix-science.git")
         (branch "master")
         (commit
-          "702b1223ae2b1e5151959fbb30c328db9bf71462")
+          "bf921f7e84953f940a63b81c2ec9804d5ccaf586")
         (introduction
           (make-channel-introduction
             "b1fe5aaff3ab48e798a4cce02f0212bc91f423dc"
             (openpgp-fingerprint
               "CA4F 8CF4 37D7 478F DA05  5FD4 4213 7701 1A37 8446"))))
       (channel
-        (name 'guix)
-        (url "https://codeberg.org/guix/guix-mirror")
+        (name 'guix-science-nonfree)
+        (url "https://codeberg.org/guix-science/guix-science-nonfree.git")
         (branch "master")
         (commit
-          "3755088384294652d4ca58aa2045ec58b9ac2ac4")
+          "53c488dd622d83c5c19705f0f95d48d9d5bc3720")
+        (introduction
+          (make-channel-introduction
+            "58661b110325fd5d9b40e6f0177cc486a615817e"
+            (openpgp-fingerprint
+              "CA4F 8CF4 37D7 478F DA05  5FD4 4213 7701 1A37 8446"))))
+      (channel
+        (name 'guix-hpc)
+        (url "https://gitlab.inria.fr/guix-hpc/guix-hpc.git")
+        (branch "master")
+        (commit
+          "641e030a8bebfeaa43ca2ff12cab66763ec57aa4"))
+      (channel
+        (name 'guix-hpc-non-free)
+        (url "https://gitlab.inria.fr/guix-hpc/guix-hpc-non-free.git")
+        (branch "master")
+        (commit
+          "d96a225137d7934477bcf53bfab591b3b1871896"))
+      (channel
+        (name 'guix)
+        (url "https://git.guix.gnu.org/guix.git")
+        (branch "master")
+        (commit
+          "df23a503998a210697f49a169ab314039889515b")
         (introduction
           (make-channel-introduction
             "9edb3f66fd807b096b48283debdcddccfea34bad"
             (openpgp-fingerprint
-              "BBB0 2DDF 2CEA F6A8 0D1D  E643 A2A0 6DF2 A33A 54FA")))))
+              "BBB0 2DDF 2CEA F6A8 0D1D  E643 A2A0 6DF2 A33A 54FA"))))
+      (channel
+        (name 'guix-past)
+        (url "https://codeberg.org/guix-science/guix-past.git")
+        (branch "master")
+        (commit
+          "c3bc94ee752ec545e39c1b8a29f739405767b51c")
+        (introduction
+          (make-channel-introduction
+            "0c119db2ea86a389769f4d2b9c6f5c41c027e336"
+            (openpgp-fingerprint
+              "3CE4 6455 8A84 FDC6 9DB4  0CFB 090B 1199 3D9A EBB5")))))
 EOF
       # guix environment setup
       # export PATH=/var/guix/profiles/per-user/root/current-guix/bin:$PATH
@@ -145,6 +166,7 @@ EOF
            --root=${VRUN_GUIX_BASE_DIR}/.siconos-guix-profile \
            -m ${VRUN_GUIX_BASE_DIR}/.siconos-disks-manifest.scm \
            -D siconos \
+           ${VRUN_PACKAGES} \
            -- $0 "$@"
       ;;
 
