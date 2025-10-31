@@ -18,7 +18,7 @@ create_siconos_component(${COMPONENT})
 
 set(SOA_CMAKE_SOURCE_DIR ${CMAKE_SOURCE_DIR}/vkernel/soa)
 
-set(CMAKE_CUDA_FLAGS "-ccbin=${CMAKE_CXX_COMPILER} -allow-unsupported-compiler")
+#set(CMAKE_CUDA_FLAGS "-ccbin gcc")
 set(CUDA_STANDARD 17)
 
 #set(WITH_GPU 1)
