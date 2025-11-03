@@ -1,7 +1,6 @@
 #pragma once
 
 #include <concepts>
-#include <range/v3/view/enumerate.hpp>
 
 #include "siconos/collision/collision_head.hpp"
 #include "siconos/collision/diskdisk_r.hpp"
@@ -263,13 +262,11 @@ struct space_filter : item<> {
               auto nbsegments = std::size(shape.points()) / 2;
               // multiple points are associated to the system
               for (std::size_t index = 0; index < nbsegments; ++index) {
-                for (auto [i, point_coord] :
-                     shape.points_coords(index) | view::enumerate) {
+                for (auto point_coord : shape.points_coords(index)) {
                   auto new_point = storage::add<Point>(data);
                   new_point.item() = ds;
                   new_point.coord() = point_coord;
-                  new_point.seg_index() = index;
-                  new_point.point_index() = i;
+                  new_point.index() = index;
                 }
               }
             }
@@ -286,12 +283,15 @@ struct space_filter : item<> {
                                              collision::shape::segment>) {
           auto all_segments = storage::handles<item_t>(data);
           for (auto segment : all_segments) {
-            for (auto [i, point_coord] :
-                 segment.points_coords() | view::enumerate) {
+            for (auto point_coord : segment.points_coords()) {
+              //              print("segment point for {},{},{},{} :
+              //              {},{}\n", segment.x1(),
+              //                    segment.x2(), segment.y1(),
+              //                    segment.y2(), point_coord(0),
+              //                    point_coord(1));
               auto new_point = storage::add<Point>(data);
               new_point.item() = segment;
               new_point.coord() = point_coord;
-              new_point.point_index() = i;
             }
           }
         }
@@ -399,7 +399,7 @@ struct space_filter : item<> {
           if constexpr (std::derived_from<
                             shape2_t, collision::shape::chained_segment>) {
             auto mesh = hp2.mesh();
-            auto contact_index = hp2.seg_index();
+            auto contact_index = hp2.index();
             if (auto search = relmap.find({mesh.get(), contact_index});
                 search != relmap.end()) {
               inter.relation = search->second;
