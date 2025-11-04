@@ -29,6 +29,7 @@
 #include "FiniteElementModel.hpp"  // FENode
 #include "SiconosException.hpp"
 #include "SiconosVector.hpp"
+#include "RotationQuaternion.hpp"
 
 template <class Container>
 void split(const std::string &str, Container &cont, const std::string &delims = " ") {
@@ -500,7 +501,7 @@ void  siconos::mechanics::fem::writeBeamPositionforSOFA(std::shared_ptr<Mesh>  m
     double value = 0.0, valueqx, valueqy, valueqz;
     if(n)
     {
-      unsigned int idx, idy, idtheta, idqx, idqy, idqz;
+      unsigned int idx, idy, idtheta,idz, idqx, idqy, idqz;
       idx = (*n->dofIndex())[0];
       idy = (*n->dofIndex())[1];
 
@@ -509,36 +510,65 @@ void  siconos::mechanics::fem::writeBeamPositionforSOFA(std::shared_ptr<Mesh>  m
 
       value =(*x)(idy);
       fprintf(foutput, " %e", value+v->y()) ;
-      // 2D case
-      fprintf(foutput, " %e", 0.0) ;
 
-      idtheta = (*n->dofIndex())[2];
-      // idqx= (*n->dofIndex())[3];
-      valueqx =(*x)(idtheta);
-      // idqy= (*n->dofIndex())[4];
-      // valueqy =(*x)(idqy);
-      // idqz= (*n->dofIndex())[5];
-      // valueqz =(*x)(idqz);
+      if ((*n->dofIndex()).size() == 3){
+        // 2D case
+        fprintf(foutput, " %e", 0.0) ;
 
-      double quat[4];
+        idtheta = (*n->dofIndex())[2];
+        // idqx= (*n->dofIndex())[3];
+        valueqx =(*x)(idtheta);
+        // idqy= (*n->dofIndex())[4];
+        // valueqy =(*x)(idqy);
+        // idqz= (*n->dofIndex())[5];
+        // valueqz =(*x)(idqz);
 
-      double c3 = cos( (valueqx+v->z()) / 2 );
-      double c1 = cos( 0 );
-      double c2 = cos( 0 );
+        double quat[4];
 
-      double s3 = sin( (valueqx+v->z()) / 2 );
-      double s1 = sin( 0 );
-      double s2 = sin( 0 );
+        double c3 = cos( (valueqx+v->z()) / 2 );
+        double c1 = cos( 0 );
+        double c2 = cos( 0 );
 
-      quat[0] = s1 * c2 * c3 - c1 * s2 * s3;
-      quat[1] = c1 * s2 * c3 + s1 * c2 * s3;
-      quat[2] = c1 * c2 * s3 - s1 * s2 * c3;
-      quat[3] = c1 * c2 * c3 + s1 * s2 * s3;
+        double s3 = sin( (valueqx+v->z()) / 2 );
+        double s1 = sin( 0 );
+        double s2 = sin( 0 );
 
-      fprintf(foutput, " %e", quat[0]) ;
-      fprintf(foutput, " %e", quat[1]) ;
-      fprintf(foutput, " %e", quat[2]) ;
-      fprintf(foutput, " %e", quat[3]) ;
+        quat[0] = s1 * c2 * c3 - c1 * s2 * s3;
+        quat[1] = c1 * s2 * c3 + s1 * c2 * s3;
+        quat[2] = c1 * c2 * s3 - s1 * s2 * c3;
+        quat[3] = c1 * c2 * c3 + s1 * s2 * s3;
+
+        fprintf(foutput, " %e", quat[0]) ;
+        fprintf(foutput, " %e", quat[1]) ;
+        fprintf(foutput, " %e", quat[2]) ;
+        fprintf(foutput, " %e", quat[3]) ;
+      }
+      else
+      {
+        idz = (*n->dofIndex())[2];
+        value =(*x)(idz);
+        fprintf(foutput, " %e", value+v->z()) ;
+
+        idqx = (*n->dofIndex())[3];
+        valueqx =(*x)(idqx);
+        idqy = (*n->dofIndex())[4];
+        valueqy =(*x)(idqy);
+        idqz = (*n->dofIndex())[5];
+        valueqz =(*x)(idqz);
+
+        auto angle = std::make_shared<siconos::algebra::SiconosVector>(3);
+        angle->setValue(0,valueqx);
+        angle->setValue(1,valueqy);
+        angle->setValue(2,valueqz);
+        auto quat = std::make_shared<siconos::algebra::SiconosVector>(7);
+
+        siconos::geometry::quaternionFromRotationVector(angle,quat);
+
+        fprintf(foutput, " %e", (*quat)(4)) ;
+        fprintf(foutput, " %e", (*quat)(5)) ;
+        fprintf(foutput, " %e", (*quat)(6)) ;
+        fprintf(foutput, " %e", (*quat)(3)) ;
+      }
 
     }
   }
