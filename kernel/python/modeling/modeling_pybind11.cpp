@@ -76,6 +76,12 @@ PYBIND11_MODULE(modeling, m) {
       .def(py::init<double, double>())
       .def("insertDynamicalSystem",
            &siconos::modeling::NonSmoothDynamicalSystem::insertDynamicalSystem)
+      .def("getNumberOfDS",
+           &siconos::modeling::NonSmoothDynamicalSystem::getNumberOfDS,
+	   "get the number of DS contained in the NonSmoothDynamicalSystem")
+      .def("dynamicalSystemsVector",
+           &siconos::modeling::NonSmoothDynamicalSystem::dynamicalSystemsVector,
+	   "get the array of all DSs contained in the NonSmoothDynamicalSystem")
 
       .def("link", &siconos::modeling::NonSmoothDynamicalSystem::link,
            "link an interaction to two dynamical systems", py::arg("inter"), py::arg("ds1"),
