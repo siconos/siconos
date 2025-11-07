@@ -65,7 +65,7 @@ PYBIND11_MODULE(modeling, m) {
       .def("y", &siconos::modeling::Interaction::y_python,
            py::return_value_policy::reference_internal)
       .def("relation", &siconos::modeling::Interaction::relation,
-           py::return_value_policy::reference_internal);    
+           py::return_value_policy::reference_internal);
 
   m.def("interactions", &interactions, py::arg("graph"),
         "Return a list of Interaction objects from an InteractionsGraph");
@@ -79,6 +79,14 @@ PYBIND11_MODULE(modeling, m) {
       .def("getNumberOfDS",
            &siconos::modeling::NonSmoothDynamicalSystem::getNumberOfDS,
 	   "get the number of DS contained in the NonSmoothDynamicalSystem")
+      .def("dynamicalSystem",
+           &siconos::modeling::NonSmoothDynamicalSystem::dynamicalSystem,
+	   "get the Ds number nb")
+      .def("removeDynamicalSystem",
+           &siconos::modeling::NonSmoothDynamicalSystem::removeDynamicalSystem,
+	   py::arg("ds"),
+	   "remove the Ds")
+
       .def("dynamicalSystemsVector",
            &siconos::modeling::NonSmoothDynamicalSystem::dynamicalSystemsVector,
 	   "get the array of all DSs contained in the NonSmoothDynamicalSystem")

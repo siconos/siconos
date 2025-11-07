@@ -26,7 +26,7 @@
 #include "SiconosBulletCollisionManager.hpp"
 #include "SiconosBulletOptions.hpp"
 #include "SiconosContactor.hpp"
-
+#include "SecondOrderDS.hpp"
 namespace py = pybind11;
 
 PYBIND11_MODULE(_bullet, m) {
@@ -124,6 +124,9 @@ PYBIND11_MODULE(_bullet, m) {
       .def("addStaticBody",
            &siconos::collision::bullet::SiconosBulletCollisionManager::addStaticBody,
            py::arg("cs"), py::arg("position"), py::arg("number") = 0)
+      .def("removeBody",
+           &siconos::collision::bullet::SiconosBulletCollisionManager::removeBody,
+           py::arg("ds") = 0)
       .def("useEqualityConstraints",
            &siconos::collision::bullet::SiconosBulletCollisionManager::useEqualityConstraints)
       .def("statistics",

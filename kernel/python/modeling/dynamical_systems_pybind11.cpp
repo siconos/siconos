@@ -49,6 +49,7 @@ void wrap_dynamical_systems(py::module_ &m) {
            py::return_value_policy::reference_internal)
       .def("resetCount", &siconos::modeling::DynamicalSystem::resetCount)
       .def("setNumber", &siconos::modeling::DynamicalSystem::setNumber)
+      .def("number", &siconos::modeling::DynamicalSystem::number)
       .def("display", &siconos::modeling::DynamicalSystem::display)
       .def("__str__",
            [](const siconos::modeling::DynamicalSystem &self) {
