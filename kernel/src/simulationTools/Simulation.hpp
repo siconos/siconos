@@ -464,7 +464,7 @@ class Simulation : public std::enable_shared_from_this<Simulation> {
   /** Set the option to specify if a relative convergence criterion must
       be used to stop the Newton iterations.
 
-      \param use true if relative critarion activated
+      \param use true if relative criterion activated
   */
   inline void setUseRelativeConvergenceCriteron(bool use) {
     _useRelativeConvergenceCriterion = use;
