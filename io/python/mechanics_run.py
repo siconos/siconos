@@ -2338,7 +2338,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         # 2.1   newtonSolve:
         # Again the access to s._newtonTolerance generates a segfault due to director
-        # newtonTolerance = s.newtonTolerance()
+        newtonTolerance = s.newtonTolerance
         newtonMaxIteration = s.newtonMaxIteration
 
         # return _kernel.TimeStepping_newtonSolve(self, criterion, maxStep)
@@ -2410,7 +2410,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
                 self.log(s.updateState, with_timer)()
                 if (not isNewtonConverge) and (newtonNbIterations < newtonMaxIteration):
                     self.log(s.updateOutput, with_timer)()
-                isNewtonConverge = self.log(s.newtonCheckConvergence, with_timer)
+                isNewtonConverge = self.log(s.newtonCheckConvergence, with_timer)(newtonTolerance)
                 if s.displayNewtonConvergence():
                     s.displayNewtonConvergenceInTheLoop()
 

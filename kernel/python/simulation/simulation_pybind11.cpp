@@ -82,6 +82,9 @@ PYBIND11_MODULE(simulation, m) {
            "Interactions")
       .def("initializeOneStepNSProblem",
            &siconos::simulation::Simulation::initializeOneStepNSProblem)
+      .def("computeOneStepNSProblem",
+           &siconos::simulation::Simulation::computeOneStepNSProblem,
+	   py::arg("osnspb_number"))
       .def("firstInitialize", &siconos::simulation::Simulation::firstInitialize)
       .def("updateDSPlugins", &siconos::simulation::Simulation::updateDSPlugins)
       .def("computeResidu", &siconos::simulation::Simulation::computeResidu,
@@ -142,6 +145,10 @@ PYBIND11_MODULE(simulation, m) {
                              &siconos::simulation::TimeStepping::newtonMaxIteration)
       .def_property_readonly("newtonOptions",
                              &siconos::simulation::TimeStepping::newtonOptions)
+      .def("newtonCheckConvergence",
+	   &siconos::simulation::TimeStepping::newtonCheckConvergence)
+      .def("displayNewtonConvergence",
+	   &siconos::simulation::TimeStepping::displayNewtonConvergence)
       .def("computeFreeState", &siconos::simulation::TimeStepping::computeFreeState)
       .def("DefaultCheckSolverOutput",
            &siconos::simulation::TimeStepping::DefaultCheckSolverOutput)
