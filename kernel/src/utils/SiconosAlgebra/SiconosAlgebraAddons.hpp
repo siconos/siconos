@@ -76,10 +76,11 @@ bool isSymmetric(const SiconosSparseMatrix& mat, double tol = 1e-12);
 // Concept : any eigen matrix complient with middleCols * vec, which means for us dense, sparse
 // and map(dense)
 template <typename MatrixType>
-concept MatrixBlockCompatible = requires(const MatrixType& A, Eigen::Index startCol,
-                                         Eigen::Index blockSize, const SiconosVector& vec) {
-  { A.middleCols(startCol, blockSize) * vec };  // -> std::same_as<SiconosVector>;
-};
+concept MatrixBlockCompatible =
+    requires(const MatrixType& A, siconos::algebra::Index startCol,
+             siconos::algebra::Index blockSize, const SiconosVector& vec) {
+      { A.middleCols(startCol, blockSize) * vec };  // -> std::same_as<SiconosVector>;
+    };
 
 /**
  * Compute y += A.x with A a sparse or dense matrix and x a BlockVector
@@ -95,9 +96,9 @@ void matrixBlockVector_prod(const MatrixType& A, const BlockVector& x,
   if (init) y.setZero();
   assert(y.size() == A.rows());
   assert(x.size() == A.cols());
-  Eigen::Index startCol = 0;
+  siconos::algebra::Index startCol = 0;
   for (const auto& it : x) {
-    Eigen::Index blockSize = it->size();
+    siconos::algebra::Index blockSize = it->size();
     auto subA = A.middleCols(startCol, blockSize);
     y.noalias() += subA * (*it);
 
@@ -132,9 +133,9 @@ void transposeMatrixVector_prod_toBlock(const SiconosVector& x, const MatrixType
     for (auto& block : y) block->setZero();
   }
 
-  Eigen::Index startCol = 0;
+  siconos::algebra::Index startCol = 0;
   for (auto& block : y) {
-    Eigen::Index blockSize = block->size();
+    siconos::algebra::Index blockSize = block->size();
     auto subA = A.middleCols(startCol, blockSize);
     *block += subA.transpose() * x;
     startCol += blockSize;
@@ -142,7 +143,9 @@ void transposeMatrixVector_prod_toBlock(const SiconosVector& x, const MatrixType
 }
 
 /** Generate a random sparse matrix. Useful for tests */
-SiconosSparseMatrix generateRandomSparseMatrix(Eigen::Index rows, Eigen::Index cols, int nnz,
+SiconosSparseMatrix generateRandomSparseMatrix(siconos::algebra::Index rows,
+                                               siconos::algebra::Index cols,
+                                               siconos::algebra::Index nnz,
                                                std::optional<double> density = std::nullopt);
 }  // namespace siconos::algebra
 

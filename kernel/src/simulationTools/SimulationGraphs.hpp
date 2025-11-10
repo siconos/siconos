@@ -98,13 +98,14 @@ namespace siconos::graphs {
 struct InteractionProperties {
   std::shared_ptr<siconos::algebra::SiconosMatrix> block{nullptr}; /**< diagonal block */
   std::shared_ptr<siconos::modeling::DynamicalSystem> source{nullptr};
-  unsigned int source_pos;
+  siconos::algebra::Index source_pos;
   std::shared_ptr<siconos::modeling::DynamicalSystem> target{nullptr};
-  unsigned int target_pos{0};
-  unsigned int absolute_position{
+  siconos::algebra::Index target_pos{0};
+  siconos::algebra::Index absolute_position{
       0}; /**< Absolute position of the interaction variables in the unknown vector in osnsp*/
-  unsigned int absolute_position_proj{0}; /**< Absolute position of the interaction variables
-                                          in the unknown vector in osnsp for projection*/
+  siconos::algebra::Index absolute_position_proj{
+      0};                 /**< Absolute position of the interaction variables
+               in the unknown vector in osnsp for projection*/
   bool forControl{false}; /**< true if the relation is used to add a control input to a DS */
   std::shared_ptr<std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>>
       workVectors; /**< set of SiconosVector, useful to ensure contiguous memory vectors, used
@@ -140,9 +141,9 @@ struct DynamicalSystemProperties {
   std::shared_ptr<siconos::algebra::SiconosMatrix> iterationMatrixInverse{
       nullptr}; /**< Matrix for integration */
   std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>> LUW{
-      nullptr};                      /**< LU factorisation of W */
-  unsigned int absolute_position{0}; /**< Absolute position of the ds variables in the unknown
-                                     vector in osnsp*/
+      nullptr};                                 /**< LU factorisation of W */
+  siconos::algebra::Index absolute_position{0}; /**< Absolute position of the ds variables in
+                                     the unknown vector in osnsp*/
   //  std::shared_ptr<siconos::algebra::SiconosMemory> xMemory_            /**< old value of x,
   //  TBD */
 

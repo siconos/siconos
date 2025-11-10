@@ -788,7 +788,7 @@ struct siconos::collision::native::SpaceFilter::FindInteractionsVisitor_
 
     if (parent->_plans) {
       siconos::algebra::print(*parent->_plans);
-      for (unsigned int i = 0; i < parent->_plans->rows(); ++i) {
+      for (siconos::algebra::Index i = 0; i < parent->_plans->rows(); ++i) {
         parent->_PlanCircularFilter(sim, (*parent->_plans)(i, 0), (*parent->_plans)(i, 1),
                                     (*parent->_plans)(i, 2), (*parent->_plans)(i, 3),
                                     (*parent->_plans)(i, 4), (*parent->_plans)(i, 5), ds1);
@@ -843,7 +843,7 @@ struct siconos::collision::native::SpaceFilter::FindInteractionsVisitor_
 
   void visit(std::shared_ptr<siconos::collision::native::bodies::SphereLDS> ds1) override {
     // interactions with plans
-    for (unsigned int i = 0; i < parent->_plans->rows(); ++i) {
+    for (siconos::algebra::Index i = 0; i < parent->_plans->rows(); ++i) {
       parent->_PlanSphereLDSFilter(sim, (*parent->_plans)(i, 0), (*parent->_plans)(i, 1),
                                    (*parent->_plans)(i, 2), (*parent->_plans)(i, 3), ds1);
     }
@@ -884,7 +884,7 @@ struct siconos::collision::native::SpaceFilter::FindInteractionsVisitor_
 
   void visit(std::shared_ptr<siconos::collision::native::bodies::SphereNEDS> ds1) override {
     // interactions with plans
-    for (unsigned int i = 0; i < parent->_plans->rows(); ++i) {
+    for (siconos::algebra::Index i = 0; i < parent->_plans->rows(); ++i) {
       parent->_PlanSphereNEDSFilter(sim, (*parent->_plans)(i, 0), (*parent->_plans)(i, 1),
                                     (*parent->_plans)(i, 2), (*parent->_plans)(i, 3), ds1);
     }

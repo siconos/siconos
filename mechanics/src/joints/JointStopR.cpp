@@ -47,7 +47,8 @@ siconos::joints::JointStopR::JointStopR(std::shared_ptr<NewtonEulerJointR> joint
   (*_dir)(0) = dir ? -1 : 1;
   _axisMin = axis;
   _axisMax = axis;
-  assert((_axisMax - _axisMin + 1) <= _joint->numberOfDoF());
+  assert(static_cast<siconos::algebra::Index>(_axisMax - _axisMin + 1) <=
+         _joint->numberOfDoF());
 }
 
 /** Initialize a multidimensional joint stop, e.g. the cone stop on
@@ -68,7 +69,8 @@ siconos::joints::JointStopR::JointStopR(
     if ((*_axis)[i] > _axisMax) _axisMax = (*_axis)[i];
     if ((*_axis)[i] < _axisMin) _axisMin = (*_axis)[i];
   }
-  assert((_axisMax - _axisMin + 1) <= _joint->numberOfDoF());
+  assert(static_cast<siconos::algebra::Index>(_axisMax - _axisMin + 1) <=
+         _joint->numberOfDoF());
 }
 
 #if 0  // Disabled, see JointStopR.hpp.  Use multiple JointStopR instead.
@@ -118,15 +120,15 @@ void siconos::joints::JointStopR::computeh(const siconos::algebra::BlockVector& 
     _joint->computehDoF(*q.vector(0), std::nullopt, tmp_y, _axisMin);
 
   // Copy and scale each stop for its axis/position/direction
-  for (unsigned int i = 0; i < y.size(); i++) {
+  for (siconos::algebra::Index i = 0; i < y.size(); i++) {
     y(i) = (tmp_y((*_axis)[i]) - (*_pos)(i)) * (*_dir)(i);
   }
 }
 
-void siconos::joints::JointStopR::computeH_NE_(
-    double time, siconos::modeling::Interaction& inter,
-    const siconos::algebra::BlockVector& q0) {
-  unsigned int n = _axisMax - _axisMin + 1;
+void siconos::joints::JointStopR::computeH_NE_(double time,
+                                               siconos::modeling::Interaction& inter,
+                                               const siconos::algebra::BlockVector& q0) {
+  auto n = static_cast<siconos::algebra::Index>(_axisMax - _axisMin + 1);
 
   if (!jacobianhOver_q_Tmp ||
       !(jacobianhOver_q_Tmp->cols() == q0.size() && jacobianhOver_q_Tmp->rows() == n)) {
@@ -137,22 +139,18 @@ void siconos::joints::JointStopR::computeH_NE_(
   _joint->computeJachqDoF(inter, q0, *jacobianhOver_q_Tmp, _axisMin);
 
   // Copy indicated axes into the stop jacobian, possibly flipped for negative stops
-  for (unsigned int i = 0; i < H_NE_view_->rows(); i++)
-    for (unsigned int j = 0; j < H_NE_view_->cols(); j++)
-      H_NE_view_->setValue(
-          i, j, (*jacobianhOver_q_Tmp)((*_axis)[i] - _axisMin, j) * (*_dir)(i));
+  for (siconos::algebra::Index i = 0; i < H_NE_view_->rows(); i++)
+    for (siconos::algebra::Index j = 0; j < H_NE_view_->cols(); j++)
+      H_NE_view_->setValue(i, j,
+                           (*jacobianhOver_q_Tmp)((*_axis)[i] - _axisMin, j) * (*_dir)(i));
 }
 
 unsigned int siconos::joints::JointStopR::numberOfConstraints() const { return _axis->size(); }
 
 auto siconos::joints::JointStopR::axis(unsigned int _index) { return _axis->at(_index); }
 
-double siconos::joints::JointStopR::position(unsigned int _index) {
-  return (*_pos)(_index);
-}
+double siconos::joints::JointStopR::position(unsigned int _index) { return (*_pos)(_index); }
 
-double siconos::joints::JointStopR::direction(unsigned int _index) {
-  return (*_dir)(_index);
-}
+double siconos::joints::JointStopR::direction(unsigned int _index) { return (*_dir)(_index); }
 
 auto siconos::joints::JointStopR::numberOfAxes() { return _axis->size(); }

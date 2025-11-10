@@ -82,7 +82,7 @@ class RelayNSL : public NonSmoothLaw {
    *  \param lb lower endpoint of the interval, default value is -1.0
    *  \param ub upper endpoint of the interval, default value is 1.0
    */
-  RelayNSL(unsigned int size, double lb = -1.0, double ub = 1.0);
+  RelayNSL(siconos::algebra::Index size, double lb = -1.0, double ub = 1.0);
 
   ~RelayNSL() noexcept = default;
 

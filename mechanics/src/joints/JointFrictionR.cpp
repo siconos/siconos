@@ -38,7 +38,8 @@ siconos::joints::JointFrictionR::JointFrictionR(std::shared_ptr<NewtonEulerJoint
   _axis->push_back(axis);
   _axisMin = axis;
   _axisMax = axis;
-  assert((_axisMax - _axisMin + 1) <= _joint->numberOfDoF());
+  assert(static_cast<siconos::algebra::Index>(_axisMax - _axisMin + 1) <=
+         _joint->numberOfDoF());
 }
 
 /** Initialize a multidimensional joint friction, e.g. the cone friction on
@@ -59,7 +60,8 @@ siconos::joints::JointFrictionR::JointFrictionR(
     _axis->push_back(0);
   }
 
-  assert((_axisMax - _axisMin + 1) <= _joint->numberOfDoF());
+  assert(static_cast<siconos::algebra::Index>(_axisMax - _axisMin + 1) <=
+         _joint->numberOfDoF());
 }
 
 void siconos::joints::JointFrictionR::computeh(const siconos::algebra::BlockVector& q,
@@ -71,7 +73,7 @@ void siconos::joints::JointFrictionR::computeh(const siconos::algebra::BlockVect
 void siconos::joints::JointFrictionR::computeH_NE_(double time,
                                                    siconos::modeling::Interaction& inter,
                                                    const siconos::algebra::BlockVector& q0) {
-  unsigned int n = _axisMax - _axisMin + 1;
+  auto n = static_cast<siconos::algebra::Index>(_axisMax - _axisMin + 1);
   assert(n == 1);  // For now, multi-axis support TODO
 
   if (!jacobianhOver_q_Tmp ||
@@ -85,14 +87,16 @@ void siconos::joints::JointFrictionR::computeH_NE_(double time,
   // Copy indicated axes into the friction jacobian, negative and positive sides
   // NOTE trying ==1 using Relay, maybe don't need LCP formulation
   assert(H_NE_view_->rows() == 1);
-  for (unsigned int i = 0; i < 1; i++)
-    for (unsigned int j = 0; j < H_NE_view_->cols(); j++) {
+  for (siconos::algebra::Index i = 0; i < 1; i++)
+    for (siconos::algebra::Index j = 0; j < H_NE_view_->cols(); j++) {
       H_NE_view_->setValue(
           i, j, (*jacobianhOver_q_Tmp)((*_axis)[i] - _axisMin, j) * (i == 1 ? 1 : -1));
     }
 }
 
-unsigned int siconos::joints::JointFrictionR::numberOfConstraints() const { return _axis->size(); }
+unsigned int siconos::joints::JointFrictionR::numberOfConstraints() const {
+  return _axis->size();
+}
 unsigned int siconos::joints::JointFrictionR::axis(unsigned int _index) {
   return _axis->at(_index);
 }

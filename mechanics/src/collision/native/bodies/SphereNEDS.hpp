@@ -42,9 +42,9 @@ class SphereNEDS : public siconos::modeling::NewtonEulerDS,
 
   ~SphereNEDS() noexcept = default;
 
-  double getQ(unsigned int pos);
+  double getQ(siconos::algebra::Index pos);
 
-  double getTwist(unsigned int pos);
+  double getTwist(siconos::algebra::Index pos);
 
   inline double getRadius() const { return radius; };
   virtual void acceptSP(modeling::dynamical_systems::Visitor& tourist) override {

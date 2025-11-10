@@ -49,9 +49,9 @@ class CircularDS : public siconos::modeling::LagrangianDS {
 
   virtual ~CircularDS() noexcept = default;
 
-  double getQ(unsigned int pos);
+  double getQ(siconos::algebra::Index pos);
 
-  double getVelocity(unsigned int pos);
+  double getVelocity(siconos::algebra::Index pos);
 
   inline double getMassValue() const { return massValue_; };
 

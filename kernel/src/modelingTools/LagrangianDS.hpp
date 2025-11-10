@@ -413,7 +413,7 @@ class LagrangianDS : public SecondOrderDS {
    *  \param newValue mass matrix
    *
    */
-  void setConstantMass(Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue);
+  void setConstantMassAlias(Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue);
 
   /** \return True if the mass matrix has been set (i.e. different from identity) */
   bool hasMass() const { return hasMass_; }

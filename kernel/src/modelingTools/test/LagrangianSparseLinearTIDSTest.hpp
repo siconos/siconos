@@ -15,35 +15,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __LagrangianSparseDSTest__
-#define __LagrangianSparseDSTest__
+#ifndef __LagrangianSparseLinearTIDSTest__
+#define __LagrangianSparseLinearTIDSTest__
 
 #include <cppunit/extensions/HelperMacros.h>
 
-#include "LagrangianSparseDS.hpp"
-#include "SiconosException.hpp"
+#include <SiconosMatrix.hpp>
+#include <SiconosVector.hpp>
 
-class LagrangianSparseDSTest : public CppUnit::TestFixture {
+class LagrangianSparseLinearTIDSTest : public CppUnit::TestFixture {
  private:
-  ACCEPT_SERIALIZATION(LagrangianSparseDSTest);
-
   // Name of the tests suite
-  CPPUNIT_TEST_SUITE(LagrangianSparseDSTest);
+  CPPUNIT_TEST_SUITE(LagrangianSparseLinearTIDSTest);
 
   // tests to be done ...
 
-  CPPUNIT_TEST(testBuildLagrangianSparseDS_basic);
-  CPPUNIT_TEST(testBuildLagrangianSparseDS_alias);
-  CPPUNIT_TEST(testBuildLagrangianSparseDS_copy);
-  CPPUNIT_TEST(testBuildLagrangianSparseDS_compute);
+  CPPUNIT_TEST(testBuildLagrangianSparseLinearTIDS_basic);
+  CPPUNIT_TEST(testBuildLagrangianSparseLinearTIDS_alias);
+  CPPUNIT_TEST(testBuildLagrangianSparseLinearTIDS_copy);
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
 
-  void testBuildLagrangianSparseDS_basic();
-  void testBuildLagrangianSparseDS_alias();
-  void testBuildLagrangianSparseDS_copy();
-  void testBuildLagrangianSparseDS_compute();
+  void testBuildLagrangianSparseLinearTIDS_basic();
+  void testBuildLagrangianSparseLinearTIDS_alias();
+  void testBuildLagrangianSparseLinearTIDS_copy();
   // void testcomputeDS();
 
   // Members

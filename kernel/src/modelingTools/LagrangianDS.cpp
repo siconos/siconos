@@ -147,7 +147,7 @@ void siconos::modeling::LagrangianDS::initRhs(double time) {
 
   // Fill null and identity part
   jacobianRhsOver_x_.setZero();
-  for (unsigned int j = 0; j < ndof_; ++j) {
+  for (siconos::algebra::Index j = 0; j < ndof_; ++j) {
     jacobianRhsOver_x_((ndof_ + j) * x_size_ + j) = 1.0;
   }
   if (!jacobianTotalForcesOver_q_ && !jacobianTotalForcesOver_velocity_) {
@@ -182,15 +182,15 @@ void siconos::modeling::LagrangianDS::initRhs(double time) {
       jacv = LUMass_->solve(*jacobianTotalForcesOver_velocity_);
     }
     // Now fill in jacobianRhsOver_x_
-    for (unsigned int j = 0; j < ndof_; ++j) {
+    for (siconos::algebra::Index j = 0; j < ndof_; ++j) {
       // Bottom-left block (jacobian / q)
       if (hasJacobianTotalForcesOver_q()) {
-        for (unsigned int i = 0; i < ndof_; ++i)
+        for (siconos::algebra::Index i = 0; i < ndof_; ++i)
           jacobianRhsOver_x_(j * x_size_ + i + ndof_) = jacq(i, j);
       }
       // Bottom-right block (jacobian / vel)
       if (hasJacobianTotalForcesOver_velocity()) {
-        for (unsigned int i = 0; i < ndof_; ++i)
+        for (siconos::algebra::Index i = 0; i < ndof_; ++i)
           jacobianRhsOver_x_((j + ndof_) * x_size_ + i + ndof_) = jacv(i, j);
       }
     }
@@ -205,15 +205,15 @@ void siconos::modeling::LagrangianDS::initRhs(double time) {
       computeJacobianTotalForcesOver_velocity(*state_q_[1], *state_q_[0], time);
     }
     // Now fill in jacobianRhsOver_x_
-    for (unsigned int j = 0; j < ndof_; ++j) {
+    for (siconos::algebra::Index j = 0; j < ndof_; ++j) {
       // Bottom-left block (jacobian / q)
       if (hasJacobianTotalForcesOver_q()) {
-        for (unsigned int i = 0; i < ndof_; ++i)
+        for (siconos::algebra::Index i = 0; i < ndof_; ++i)
           jacobianRhsOver_x_(j * x_size_ + i + ndof_) = (*jacobianTotalForcesOver_q_)(i, j);
       }
       // Bottom-right block (jacobian / vel)
       if (hasJacobianTotalForcesOver_velocity()) {
-        for (unsigned int i = 0; i < ndof_; ++i)
+        for (siconos::algebra::Index i = 0; i < ndof_; ++i)
           jacobianRhsOver_x_((j + ndof_) * x_size_ + i + ndof_) =
               (*jacobianTotalForcesOver_velocity_)(i, j);
       }
@@ -226,7 +226,7 @@ void siconos::modeling::LagrangianDS::initRhs(double time) {
 
 ////  MASS ////
 
-void siconos::modeling::LagrangianDS::setConstantMass(
+void siconos::modeling::LagrangianDS::setConstantMassAlias(
     Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue) {
   /**  Must:
 
@@ -578,15 +578,15 @@ void siconos::modeling::LagrangianDS::computeJacobianRhsOver_x(double time) {
 
     if (!is_jacobianRhsOver_x_uptodate_) {
       // Now fill in jacobianRhsOver_x_
-      for (unsigned int j = 0; j < ndof_; ++j) {
+      for (siconos::algebra::Index j = 0; j < ndof_; ++j) {
         // Bottom-left block (jacobian / q)
         if (hasJacobianTotalForcesOver_q()) {
-          for (unsigned int i = 0; i < ndof_; ++i)
+          for (siconos::algebra::Index i = 0; i < ndof_; ++i)
             jacobianRhsOver_x_(j * x_size_ + i + ndof_) = jacq(i, j);
         }
         // Bottom-right block (jacobian / vel)
         if (hasJacobianTotalForcesOver_velocity()) {
-          for (unsigned int i = 0; i < ndof_; ++i)
+          for (siconos::algebra::Index i = 0; i < ndof_; ++i)
             jacobianRhsOver_x_((j + ndof_) * x_size_ + i + ndof_) = jacv(i, j);
         }
       }
@@ -594,15 +594,15 @@ void siconos::modeling::LagrangianDS::computeJacobianRhsOver_x(double time) {
   } else  // No mass
   {       // ==> no buffer
           // Now fill in jacobianRhsOver_x_
-    for (unsigned int j = 0; j < ndof_; ++j) {
+    for (siconos::algebra::Index j = 0; j < ndof_; ++j) {
       // Bottom-left block (jacobian / q)
       if (!hasConstantJacobianTotalForcesOver_q()) {
-        for (unsigned int i = 0; i < ndof_; ++i)
+        for (siconos::algebra::Index i = 0; i < ndof_; ++i)
           jacobianRhsOver_x_(j * x_size_ + i + ndof_) = (*jacobianTotalForcesOver_q_)(i, j);
       }
       // Bottom-right block (jacobian / vel)
       if (!hasConstantJacobianTotalForcesOver_velocity()) {
-        for (unsigned int i = 0; i < ndof_; ++i)
+        for (siconos::algebra::Index i = 0; i < ndof_; ++i)
           jacobianRhsOver_x_((j + ndof_) * x_size_ + i + ndof_) =
               (*jacobianTotalForcesOver_velocity_)(i, j);
       }

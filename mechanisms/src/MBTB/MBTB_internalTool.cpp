@@ -32,8 +32,7 @@
 #include "NewtonEulerJointR.hpp"
 #include "OneStepNSProblem.hpp"
 #include "RotationQuaternion.hpp"
-
-#include "SolverOptions.h"            // for SolverOptions struct
+#include "SolverOptions.h"  // for SolverOptions struct
 #include "TimeStepping.hpp"
 #include "Topology.hpp"
 
@@ -261,13 +260,14 @@ void siconos::mechanisms::mbtb::internal::MBTB_displayStep() {
     for (unsigned int numDS = 0; numDS < mbtb::data::sNbOfBodies; numDS++) {
       printf("Body number %i\n", numDS);
       printf("Position of body %i\n", numDS);
-      for (unsigned int ii = 0; ii < mbtb::data::sDS[numDS]->q()->size(); ii++) {
+      for (siconos::algebra::Index ii = 0; ii < mbtb::data::sDS[numDS]->q()->size(); ii++) {
         printf("%e", (*mbtb::data::sDS[numDS]->q())(ii));
         printf("\t");
       }
       printf("\n");
       printf("Velocity of body %i\n", numDS);
-      for (unsigned int ii = 0; ii < mbtb::data::sDS[numDS]->twist()->size(); ii++) {
+      for (siconos::algebra::Index ii = 0; ii < mbtb::data::sDS[numDS]->twist()->size();
+           ii++) {
         printf("%e", (*mbtb::data::sDS[numDS]->twist())(ii));
         printf("\t");
       }

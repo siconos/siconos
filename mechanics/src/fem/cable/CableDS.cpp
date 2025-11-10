@@ -27,7 +27,7 @@ siconos::fem::cable::CableDS::CableDS(Eigen::Ref<siconos::algebra::SiconosVector
                                       double a_EA, double a_elem_length)
     : LagrangianSparseDS(q0, velocity0), EA_{a_EA}, l_e_{a_elem_length} {
   std::cout << " BUlD CABLE DS \n";
-  setConstantMassWithCopy(mass);
+  setConstantMassCopy(mass);
 
   TRNp_Np = std::make_shared<siconos::algebra::SiconosSparseMatrix>(6, 6);
   std::vector<siconos::algebra::Triplet> triplets;
@@ -211,7 +211,7 @@ void siconos::fem::cable::CableDS::dampingMatrix(/** ...*/) {
 
 // void siconos::fem::cable::CableDS::matmult(
 //     const Eigen::Ref<const siconos::algebra::SiconosVector> &V,
-//     siconos::algebra::SiconosSize_t a_startIdx,
+//     siconos::algebra::Index a_startIdx,
 //     Eigen::Ref<siconos::algebra::SiconosVector> R) {
 //   R.setZero();
 //   assert(TRNp_Np);

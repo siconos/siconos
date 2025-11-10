@@ -17,14 +17,13 @@
  */
 #include "FirstOrderLinearDS.hpp"
 
-#include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 // #define DEBUG_MESSAGES
 // #define DEBUG_STDOUT
 #include <iostream>
 
-#include "siconos_debug.h"
+// #include "siconos_debug.h"
 
 // --- Constructors ---
 
@@ -39,7 +38,7 @@ siconos::modeling::FirstOrderLinearDS::FirstOrderLinearDS(
 }
 
 // Copy constructor
-siconos::modeling::FirstOrderLinearDS::FirstOrderLinearDS(const FirstOrderLinearDS &ds)
+siconos::modeling::FirstOrderLinearDS::FirstOrderLinearDS(const FirstOrderLinearDS& ds)
     : FirstOrderNonLinearDS(ds) {
   if (ds.bVector_view_) {
     bVector_internal_storage_ =
@@ -70,7 +69,7 @@ void siconos::modeling::FirstOrderLinearDS::setConstantA(
 }
 
 void siconos::modeling::FirstOrderLinearDS::setComputeAFunction(
-    const siconos::modeling::func_prototypes::FunctionS_M &func) {
+    const siconos::modeling::func_prototypes::FunctionS_M& func) {
   // Ensure that memory is properly allocated for jacobianfOver_x_
   if (!jacobianfOver_x_internal_storage_) {
     jacobianfOver_x_internal_storage_ =
@@ -105,7 +104,7 @@ void siconos::modeling::FirstOrderLinearDS::setConstantbVector(
 }
 
 void siconos::modeling::FirstOrderLinearDS::setComputebVectorFunction(
-    const siconos::modeling::func_prototypes::FunctionS_V &func) {
+    const siconos::modeling::func_prototypes::FunctionS_V& func) {
   // Ensure that memory is properly allocated for bVector
   if (!bVector_internal_storage_) {
     bVector_internal_storage_ = std::make_unique<std::vector<double>>(x_size_);

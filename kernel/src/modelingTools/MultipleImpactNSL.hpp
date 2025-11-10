@@ -41,7 +41,7 @@ class MultipleImpactNSL : public NonSmoothLaw {
   // Default Constructor
   MultipleImpactNSL() : NonSmoothLaw(1){};
   // Constructor with parameters
-  MultipleImpactNSL(double, double, double, unsigned int _dim = 1);
+  MultipleImpactNSL(double, double, double, siconos::algebra::Index _dim = 1);
   // Destructor
   ~MultipleImpactNSL() noexcept = default;
   // Get the value of the energytical restitution coefficientx

@@ -93,7 +93,7 @@ class GlobalFrictionContact : public LinearOSNS {
   int _contactProblemDim = 3;
 
   /** size of the local problem to solve */
-  siconos::algebra::SiconosSize_t _sizeGlobalOutput = 0;
+  siconos::algebra::Index _sizeGlobalOutput = 0;
 
   /** contains the vector globalVelocities of a GlobalFrictionContact system */
   std::shared_ptr<siconos::algebra::SiconosVector> _globalVelocities{nullptr};

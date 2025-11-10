@@ -28,12 +28,12 @@ siconos::collision::native::bodies::CircularDS::CircularDS(
   // Nothing is done regarding the mass matrix ...
 }
 
-double siconos::collision::native::bodies::CircularDS::getQ(unsigned int pos) {
+double siconos::collision::native::bodies::CircularDS::getQ(siconos::algebra::Index pos) {
   assert(pos < ndof_);
   return (*state_q_[0])(pos);
 };
 
-double siconos::collision::native::bodies::CircularDS::getVelocity(unsigned int pos) {
+double siconos::collision::native::bodies::CircularDS::getVelocity(siconos::algebra::Index pos) {
   assert(pos < ndof_);
   return (*state_q_[1])(pos);
 };

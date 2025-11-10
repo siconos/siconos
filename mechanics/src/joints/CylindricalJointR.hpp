@@ -169,14 +169,14 @@ class CylindricalJointR : public NewtonEulerJointR {
 
      \return the number of constraints
    */
-  virtual unsigned int numberOfConstraints() const override { return 4; }
+  virtual siconos::algebra::Index numberOfConstraints() const override { return 4; }
 
   /**
      Return the number of degrees of freedom of this joint.
 
      \return the number of degrees of freedom (DoF)
    */
-  virtual unsigned int numberOfDoF() const override { return 2; }
+  virtual siconos::algebra::Index numberOfDoF() const override { return 2; }
 
   /**
      Return the type of a degree of freedom of this joint.

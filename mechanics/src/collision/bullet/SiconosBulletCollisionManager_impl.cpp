@@ -48,15 +48,15 @@ namespace {  // anonymous because only for local use
 
 // helper to enable polyhedral contact clipping for shape types
 // derived from btPolyhedralConvexShape
-void initPolyhedralFeatures(btPolyhedralConvexShape &btshape) {
+void initPolyhedralFeatures(btPolyhedralConvexShape& btshape) {
   btshape.initializePolyhedralFeatures();
 }
 
-void initPolyhedralFeatures(btCollisionShape &btshape) {}
+void initPolyhedralFeatures(btCollisionShape& btshape) {}
 
-int find_index_closest_point_btConvexHullShape(btVector3 &pointA, btConvexHullShape &btch) {
+int find_index_closest_point_btConvexHullShape(btVector3& pointA, btConvexHullShape& btch) {
   int numPoints = btch.getNumPoints();
-  const btVector3 *points = btch.getPoints();
+  const btVector3* points = btch.getPoints();
   btScalar min_dist = 1e30;
   int p_idx = -1;
   for (int p = 0; p < numPoints; p++) {
@@ -71,38 +71,38 @@ int find_index_closest_point_btConvexHullShape(btVector3 &pointA, btConvexHullSh
 
 // If type of SiconosMatrix is the same as btScalar, we can avoid a copy
 template <typename SCALAR>
-std::pair<std::shared_ptr<btTriangleIndexVertexArray>, SCALAR *> make_bt_vertex_array(
+std::pair<std::shared_ptr<btTriangleIndexVertexArray>, SCALAR*> make_bt_vertex_array(
     std::shared_ptr<siconos::collision::SiconosMesh> mesh, SCALAR _s1, SCALAR _s2) {
   assert(mesh->vertices()->rows() == 3);
   auto bttris = std::make_shared<btTriangleIndexVertexArray>(
-      mesh->indexes()->size() / 3, (int *)mesh->indexes()->data(), sizeof(int) * 3,
+      mesh->indexes()->size() / 3, (int*)mesh->indexes()->data(), sizeof(int) * 3,
       mesh->vertices()->cols(), mesh->vertices()->data(), sizeof(btScalar) * 3);
 
-  return std::make_pair(bttris, (btScalar *)nullptr);
+  return std::make_pair(bttris, (btScalar*)nullptr);
 }
 
 // If type of SiconosMatrix is not the same as btScalar, we must copy
 template <typename SCALAR1, typename SCALAR2>
-std::pair<std::shared_ptr<btTriangleIndexVertexArray>, btScalar *> make_bt_vertex_array(
+std::pair<std::shared_ptr<btTriangleIndexVertexArray>, btScalar*> make_bt_vertex_array(
     std::shared_ptr<siconos::collision::SiconosMesh> mesh, SCALAR1 _s1, SCALAR2 _s2) {
   assert(mesh->vertices()->rows() == 3);
-  unsigned int numIndices = mesh->indexes()->size();
-  unsigned int numVertices = mesh->vertices()->cols();
-  btScalar *vertices = new btScalar[numVertices * 3];
-  for (unsigned int i = 0; i < numVertices; i++) {
+  auto numIndices = mesh->indexes()->size();
+  auto numVertices = mesh->vertices()->cols();
+  btScalar* vertices = new btScalar[numVertices * 3];
+  for (siconos::algebra::Index i = 0; i < numVertices; i++) {
     vertices[i * 3 + 0] = (*mesh->vertices())(0, i);
     vertices[i * 3 + 1] = (*mesh->vertices())(1, i);
     vertices[i * 3 + 2] = (*mesh->vertices())(2, i);
   }
   auto bttris = std::make_shared<btTriangleIndexVertexArray>(
-      numIndices / 3, (int *)mesh->indexes()->data(), sizeof(int) * 3, numVertices, vertices,
+      numIndices / 3, (int*)mesh->indexes()->data(), sizeof(int) * 3, numVertices, vertices,
       sizeof(btScalar) * 3);
   return std::make_pair(bttris, vertices);
 }
 }  // namespace
 
 bool siconos::collision::bullet::internal::SiconosBulletFilterCallback::
-    needBroadphaseCollision(btBroadphaseProxy *proxy0, btBroadphaseProxy *proxy1) const {
+    needBroadphaseCollision(btBroadphaseProxy* proxy0, btBroadphaseProxy* proxy1) const {
   DEBUG_BEGIN("SiconosBulletFilterCallback :: needBroadphaseCollision\n");
 
   /* standard filter in Bullet */
@@ -121,8 +121,8 @@ bool siconos::collision::bullet::internal::SiconosBulletFilterCallback::
 }
 
 void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
-    updateAllShapesForDS(const siconos::modeling::SecondOrderDS &bds) {
-  for (auto &it : bodyShapeMap[&bds])
+    updateAllShapesForDS(const siconos::modeling::SecondOrderDS& bds) {
+  for (auto& it : bodyShapeMap[&bds])
     std::visit([this](auto rec) { this->updateShape(rec); }, it);
 }
 
@@ -130,8 +130,8 @@ template <typename ST, typename BT, typename DST, typename BR>
 std::shared_ptr<btCollisionObject> siconos::collision::bullet::internal::
     SiconosBulletCollisionManager_impl::createCollisionObjectHelper(
         std::shared_ptr<siconos::algebra::SiconosVector> base, const std::shared_ptr<DST> ds,
-        std::shared_ptr<ST> shape, std::shared_ptr<BT> btshape, BodyShapeMap &bodyShapeMap,
-        std::shared_ptr<SiconosContactor> contactor, StaticBodyShapeMap &StaticBodyShapeMap,
+        std::shared_ptr<ST> shape, std::shared_ptr<BT> btshape, BodyShapeMap& bodyShapeMap,
+        std::shared_ptr<SiconosContactor> contactor, StaticBodyShapeMap& StaticBodyShapeMap,
         std::shared_ptr<StaticBody> staticBody) {
   assert(base && "Collision objects must have a base position.");
 
@@ -185,7 +185,7 @@ std::shared_ptr<btCollisionObject> siconos::collision::bullet::internal::
   // Allow Bullet to report colliding DSs.  We need to access it from
   // the collision callback as the record base class so down-cast it.
   btobject->setUserPointer(
-      reinterpret_cast<void *>(static_cast<siconos::collision::BodyShapeRecord *>(&*record)));
+      reinterpret_cast<void*>(static_cast<siconos::collision::BodyShapeRecord*>(&*record)));
 
   // initial parameter update (change version to make something happen)
   record->shape_version -= 1;
@@ -582,7 +582,7 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
     } else {
       btch = std::make_shared<btConvexHullShape>();
       for (int i = 0; i < shrinkCH.vertices.size(); i++) {
-        const btVector3 &v(shrinkCH.vertices[i]);
+        const btVector3& v(shrinkCH.vertices[i]);
 #if defined(BT_BULLET_VERSION) && (BT_BULLET_VERSION <= 281)
         btch->addPoint(v);
 #else
@@ -647,7 +647,7 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
 
   // Create Bullet triangle list, either by copying on non-copying method
   // TODO: worldScale on vertices
-  std::pair<std::shared_ptr<btTriangleIndexVertexArray>, btScalar *> datapair{
+  std::pair<std::shared_ptr<btTriangleIndexVertexArray>, btScalar*> datapair{
       make_bt_vertex_array(mesh, (btScalar)0, (*mesh->vertices())(0, 0))};
   std::shared_ptr<btTriangleIndexVertexArray> bttris(datapair.first);
 
@@ -724,8 +724,8 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
 
   heightfield->resize(data->rows() * data->cols());
 
-  for (unsigned int i = 0; i < data->rows(); i++) {
-    for (unsigned int j = 0; j < data->cols(); j++) {
+  for (siconos::algebra::Index i = 0; i < data->rows(); i++) {
+    for (siconos::algebra::Index j = 0; j < data->cols(); j++) {
       double v = (*data)(i, j);
       (*heightfield)[j * data->rows() + i] = v;
       if (v > vmax) vmax = v;
@@ -851,7 +851,7 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
   // This version is ok
   double SCALING = 1.0;
 
-  auto *childShape2 = new btCylinderShapeZ(
+  auto* childShape2 = new btCylinderShapeZ(
       btVector3(btScalar(SCALING * 1), btScalar(SCALING * 1), btScalar(_options->Depth2D)));
   // btConvexShape* colShape3= new btConvex2dShape(childShape2);
   auto btconvex2d1 = std::make_shared<btConvex2dShape>(childShape2);
@@ -941,7 +941,7 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
 
   // This version is ok
   double SCALING = 1.0;
-  btConvexShape *childShape0 = new btBoxShape(
+  btConvexShape* childShape0 = new btBoxShape(
       btVector3(btScalar(SCALING * 1), btScalar(SCALING * 1), btScalar(SCALING * 1)));
   // btConvexShape* colShape= new btConvex2dShape(childShape0);
   auto btconvex2d = std::make_shared<btConvex2dShape>(childShape0);
@@ -1072,7 +1072,7 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
   // btConvexHullShape* childShape1 = new btConvexHullShape(&pts[0],rows,
   // sizeof(btScalar)*3);
 
-  auto *btch =
+  auto* btch =
       new btConvexHullShape(&pts[0], rows,
                             sizeof(btScalar) * 3);  // Warning: Possible loss of memory
 
@@ -1125,7 +1125,7 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
         // printf("shrinkCH.original_vertex_index[%i] %i \n", i,
         // shrinkCH.original_vertex_index[i] ); const btVector3
         // &v(shrinkCH.vertices[shrinkCH_0.original_vertex_index[i] ]);
-        const btVector3 &v(shrinkCH.vertices[i]);
+        const btVector3& v(shrinkCH.vertices[i]);
 #if defined(BT_BULLET_VERSION) && (BT_BULLET_VERSION <= 281)
         btch->addPoint(v);
 #else
@@ -1308,7 +1308,7 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
 
   /* Call createCollisionObject for each shape type using the visitor
    * defined above */
-  for (auto &it : *con->vector()) {
+  for (auto& it : *con->vector()) {
     // special collision group -1 = do not collide, thus we can skip
     // creation of associated collision objects
     if (it->collision_group == -1) continue;
@@ -1389,8 +1389,8 @@ void siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::
 
 btTransform
 siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::offsetTransform(
-    const siconos::algebra::SiconosVector &position,
-    const siconos::algebra::SiconosVector &offset) {
+    const siconos::algebra::SiconosVector& position,
+    const siconos::algebra::SiconosVector& offset) {
   /* Adjust offset position according to current rotation */
   btQuaternion rbase(position(4), position(5), position(6), position(3));
   btVector3 rboffset = quatRotate(rbase, btVector3(offset(0), offset(1), offset(2)));
@@ -1405,7 +1405,7 @@ siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::offset
 
 btTransform
 siconos::collision::bullet::internal::SiconosBulletCollisionManager_impl::offsetTransform(
-    const siconos::algebra::SiconosVector &position) {
+    const siconos::algebra::SiconosVector& position) {
   /* Adjust offset position according to current rotation */
   btQuaternion rbase(position(4), position(5), position(6), position(3));
 

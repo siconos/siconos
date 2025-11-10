@@ -84,7 +84,7 @@ void siconos::modeling::LagrangianLinearTIDS::initRhs(double time) {
 
   // Fill null and identity part
   jacobianRhsOver_x_.setZero();
-  for (unsigned int j = 0; j < ndof_; ++j) {
+  for (siconos::algebra::Index j = 0; j < ndof_; ++j) {
     jacobianRhsOver_x_((ndof_ + j) * x_size_ + j) = 1.0;
   }
   // - Fill parts corresponding to the jacobians of total forces -
@@ -108,30 +108,30 @@ void siconos::modeling::LagrangianLinearTIDS::initRhs(double time) {
       jacv = LUMass_->solve(-1. * *dampingMatrix_view_);
     }
     // Now fill in jacobianRhsOver_x_
-    for (unsigned int j = 0; j < ndof_; ++j) {
+    for (siconos::algebra::Index j = 0; j < ndof_; ++j) {
       // Bottom-left block (jacobian / q)
       if (hasStiffnessMatrix()) {
-        for (unsigned int i = 0; i < ndof_; ++i)
+        for (siconos::algebra::Index i = 0; i < ndof_; ++i)
           jacobianRhsOver_x_(j * x_size_ + i + ndof_) = jacq(i, j);
       }
       // Bottom-right block (jacobian / vel)
       if (hasDampingMatrix()) {
-        for (unsigned int i = 0; i < ndof_; ++i)
+        for (siconos::algebra::Index i = 0; i < ndof_; ++i)
           jacobianRhsOver_x_((j + ndof_) * x_size_ + i + ndof_) = jacv(i, j);
       }
     }
   } else  // No mass
   {       // ==> no buffer
     //  fill in jacobianRhsOver_x_
-    for (unsigned int j = 0; j < ndof_; ++j) {
+    for (siconos::algebra::Index j = 0; j < ndof_; ++j) {
       // Bottom-left block (jacobian / q)
       if (hasStiffnessMatrix()) {
-        for (unsigned int i = 0; i < ndof_; ++i)
+        for (siconos::algebra::Index i = 0; i < ndof_; ++i)
           jacobianRhsOver_x_(j * x_size_ + i + ndof_) = -(*stiffnessMatrix_view_)(i, j);
       }
       // Bottom-right block (jacobian / vel)
       if (hasDampingMatrix()) {
-        for (unsigned int i = 0; i < ndof_; ++i)
+        for (siconos::algebra::Index i = 0; i < ndof_; ++i)
           jacobianRhsOver_x_((j + ndof_) * x_size_ + i + ndof_) =
               -(*dampingMatrix_view_)(i, j);
       }

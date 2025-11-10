@@ -20,10 +20,9 @@
 
 #include "BlockVector.hpp"
 #include "Interaction.hpp"
-#include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
-#include "siconos_debug.h"
+//#include "siconos_debug.h"
 
 void siconos::modeling::FirstOrderNonLinearR::initialize(Interaction& inter) {
   FirstOrderR::initialize(inter);

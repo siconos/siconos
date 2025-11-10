@@ -22,7 +22,6 @@
 #include "LagrangianR.hpp"
 #include "NewtonEulerDS.hpp"
 #include "NewtonEulerR.hpp"
-#include "NonSmoothLaw.hpp"
 #include "OneStepNSProblem.hpp"
 #include "Relation.hpp"
 #include "SiconosAlgebraAddons.hpp"
@@ -30,7 +29,6 @@
 #include "SiconosVector.hpp"
 #include "Simulation.hpp"
 #include "Tools.hpp"  // for enum_to_string
-#include "Topology.hpp"
 
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -591,9 +589,7 @@ void siconos::integrators::D1MinusLinearOSI::computeFreeOutputHalfExplicitVeloci
   // get relation and non smooth law information
   auto relationType = inter->relation()->getType();  // relation
   auto relationSubType = inter->relation()->getSubType();
-  auto sizeY = inter->nonSmoothLaw()->size();  // related NSL
 
-  std::vector<std::size_t> coord = {0, sizeY, 0, 0, 0, 0, 0, sizeY};
   std::shared_ptr<siconos::algebra::SiconosMatrix>
       C;  // Jacobian of Relation with respect to degree of freedom
   std::shared_ptr<siconos::algebra::BlockVector> Xfree;  // free degree of freedom

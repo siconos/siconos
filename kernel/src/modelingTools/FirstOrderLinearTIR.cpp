@@ -22,7 +22,6 @@
 #include "BlockVector.hpp"
 #include "Interaction.hpp"
 #include "SiconosAlgebraAddons.hpp"
-#include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 
@@ -39,7 +38,7 @@ siconos::modeling::FirstOrderLinearTIR::FirstOrderLinearTIR(
   setConstantB(B);
 }
 
-void siconos::modeling::FirstOrderLinearTIR::initialize(Interaction &inter) {
+void siconos::modeling::FirstOrderLinearTIR::initialize(Interaction& inter) {
   DEBUG_PRINT("siconos::modeling::FirstOrderLinearTIR::initialize(Interaction & inter)\n");
 
   FirstOrderR::initialize(inter);  // ?
@@ -55,7 +54,7 @@ void siconos::modeling::FirstOrderLinearTIR::initialize(Interaction &inter) {
   checkSize(inter);
 }
 
-void siconos::modeling::FirstOrderLinearTIR::checkSize(const Interaction &inter) const {
+void siconos::modeling::FirstOrderLinearTIR::checkSize(const Interaction& inter) const {
   // get inter and ds sizes
   auto sizeY = inter.dimension();
   auto sizeX = inter.getSizeOfDS();
@@ -140,12 +139,12 @@ void siconos::modeling::FirstOrderLinearTIR::setConstanteVector(
 //   if (_F) siconos::algebra::matrixBlockVector_prod(*_F, z, y, false);
 // }
 
-void siconos::modeling::FirstOrderLinearTIR::computeOutput(double time, Interaction &inter,
+void siconos::modeling::FirstOrderLinearTIR::computeOutput(double time, Interaction& inter,
                                                            unsigned int level) {
   // We get y and lambda of the interaction (pointers)
-  siconos::algebra::SiconosVector &y = *inter.y(level);
-  siconos::algebra::SiconosVector &lambda = *inter.lambda(level);
-  auto &DSlink = inter.linkToDSVariables();
+  siconos::algebra::SiconosVector& y = *inter.y(level);
+  siconos::algebra::SiconosVector& lambda = *inter.lambda(level);
+  auto& DSlink = inter.linkToDSVariables();
   if (jacobianhOver_state_view_) {
     siconos::algebra::matrixBlockVector_prod(*jacobianhOver_state_view_,
                                              *DSlink[FirstOrderR::Xxx], y, true);
@@ -164,14 +163,14 @@ void siconos::modeling::FirstOrderLinearTIR::computeOutput(double time, Interact
 //   siconos::algebra::matrixVector_prod_toBlock(*_B, lambda, r, false);
 // }
 
-void siconos::modeling::FirstOrderLinearTIR::computeInput(double time, Interaction &inter,
+void siconos::modeling::FirstOrderLinearTIR::computeInput(double time, Interaction& inter,
                                                           unsigned int level) {
   DEBUG_BEGIN(
       "siconos::modeling::FirstOrderLinearTIR::computeInput(double time, Interaction& "
       "inter, unsigned int level)\n")
   DEBUG_EXPR(siconos::algebra::print(*inter.lambda(level)););
   if (jacobiangOver_lambda_view_) {
-    auto &DSlink = inter.linkToDSVariables();
+    auto& DSlink = inter.linkToDSVariables();
     *DSlink[FirstOrderR::Rrr] += *jacobiangOver_lambda_view_ * *inter.lambda(0);
   }
   DEBUG_END(

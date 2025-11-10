@@ -21,29 +21,25 @@
 #include <cassert>
 #include <iostream>
 
-#include "SiconosException.hpp"
-#include "SiconosVector.hpp"
 #include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 
 siconos::modeling::NormalConeNSL::NormalConeNSL(
-    unsigned size, std::shared_ptr<siconos::algebra::SiconosMatrix> H,
+    siconos::algebra::Index size, std::shared_ptr<siconos::algebra::SiconosMatrix> H,
     std::shared_ptr<siconos::algebra::SiconosVector> K)
-    : NonSmoothLaw(size), _H(H), _K(K)
-{
+    : NonSmoothLaw(size), _H(H), _K(K) {
   assert(H->cols() == size &&
          "NormalConeNSL::NormalConeNSL - the number of columns in H and the declared size are "
          "not equal, check your code !");
 }
 
-bool siconos::modeling::NormalConeNSL::isVerified(void) const
-{
+bool siconos::modeling::NormalConeNSL::isVerified(void) const {
   bool res = false;
   // to do
   return res;
 }
 
-void siconos::modeling::NormalConeNSL::display() const
-{
+void siconos::modeling::NormalConeNSL::display() const {
   std::cout << "------------------------------------" << std::endl;
   std::cout << "____ data of the NormalConeNSL" << std::endl;
   std::cout << "| nSLawSize : " << _size << std::endl;

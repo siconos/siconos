@@ -74,7 +74,7 @@ void siconos::control::Actuator::initialize(
   DSG0.u[dsgVD] = _u;
 }
 
-void siconos::control::Actuator::setSizeu(unsigned size) {
+void siconos::control::Actuator::setSizeu(siconos::algebra::Index size) {
   if (_B && size != _B->cols()) {
   }
   _u = std::make_shared<siconos::algebra::SiconosVector>(size);

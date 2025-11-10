@@ -158,10 +158,11 @@ void SiconosMatrixTest::testBuildSparse() {
   std::cout << "Start testBuildSparse \n";
   // 1. Random values.
   // Input = dimension and number of nonzeros values
-  int rows = 20;
-  int cols = 20;
+  siconos::algebra::Index rows = 20;
+  siconos::algebra::Index cols = 20;
   int nnz = 150;
   auto m = siconos::algebra::generateRandomSparseMatrix(rows, cols, nnz);
+  std::cout << "nnz" << m.nonZeros() << "\n";
   CPPUNIT_ASSERT_EQUAL_MESSAGE("Build random - check size: ", m.rows() == rows, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("Build random - check size: ", m.cols() == cols, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("Build random - check nnz: ", m.nonZeros() == nnz, true);

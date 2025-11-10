@@ -20,11 +20,11 @@
 
 #include <iostream>
 
-siconos::modeling::RelayNSL::RelayNSL(unsigned int size, double lb, double ub):
+siconos::modeling::RelayNSL::RelayNSL(siconos::algebra::Index size, double lb, double ub):
   NonSmoothLaw(size), _lb(lb), _ub(ub)
 {
   if(ub < lb)
-    THROW_EXCEPTION("RelayNSL::RelayNSL(unsigned int size, double lb, double ub). Upper bound ub must be greater than lower bound lb");
+    THROW_EXCEPTION("RelayNSL::RelayNSL). Upper bound ub must be greater than lower bound lb");
 }
 
 

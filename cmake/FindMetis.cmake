@@ -16,7 +16,7 @@
 # limitations under the License.
 # --
 #[=======================================================================[.rst:
-FindUMFPACK
+FindMetis
 -----------
 
 Find UMFPACK libraries and headers
@@ -26,16 +26,11 @@ Usage :
 find_package(Metis REQUIRED)
 target_link_libraries(yourlib PRIVATE Metis::Metis)
 
-Set UMFPACK_ROOT=<where UMFPACK is installed>
+Set Metis_ROOT=<where Metis is installed>
 if it's not in a "classic" place or if you want a specific version
 
-header : umfpack.h
-lib : <prefi>umfpack.<suffix> 
-
-Note : umfpack lib usually requires linking to a blas library.
-It is up to the user of this module to find a BLAS and link to it.
-
-Warning : this routine tries first to find umfpack in SuiteSparse.
+header : metis.h
+lib : <prefi>metis.<suffix> 
 
 #]=======================================================================]
 

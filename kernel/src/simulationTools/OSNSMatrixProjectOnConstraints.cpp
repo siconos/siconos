@@ -31,10 +31,11 @@
 #include "siconos_debug.h"
 
 siconos::nonsmooth_formulations::OSNSMatrixProjectOnConstraints::
-    OSNSMatrixProjectOnConstraints(unsigned int n, unsigned int m, NM_types stor)
+    OSNSMatrixProjectOnConstraints(siconos::algebra::Index n, siconos::algebra::Index m,
+                                   NM_types stor)
     : OSNSMatrix(n, m, stor) {}
 
-unsigned
+siconos::algebra::Index
 siconos::nonsmooth_formulations::OSNSMatrixProjectOnConstraints::updateSizeAndPositions(
     siconos::graphs::InteractionsGraph& indexSet) {
   // === Description ===
@@ -50,7 +51,7 @@ siconos::nonsmooth_formulations::OSNSMatrixProjectOnConstraints::updateSizeAndPo
 
   // Computes real size of the current matrix = sum of the dim. of all
   // Interactionin indexSet
-  unsigned dim = 0;
+  siconos::algebra::Index dim = 0;
   siconos::graphs::InteractionsGraph::VIterator vd, vdend;
   DEBUG_EXPR_WE(std::cout << "indexSet :" << &indexSet << std::endl;
                 siconos::algebra::print(indexSet););
@@ -97,7 +98,7 @@ void siconos::nonsmooth_formulations::OSNSMatrixProjectOnConstraints::fillM(
     // common DynamicalSystems.  Then get the corresponding matrix
     // from map interactionBlocks, and copy it into M
 
-    unsigned int pos = 0, col = 0;  // index position used for
+    siconos::algebra::Index pos = 0, col = 0;  // index position used for
     // interactionBlock copy into M, see
     // below.
     // === Loop through "active" Interactions (ie present in
@@ -151,7 +152,7 @@ void siconos::nonsmooth_formulations::OSNSMatrixProjectOnConstraints::fillM(
   if (update) convert();
 }
 
-unsigned int
+siconos::algebra::Index
 siconos::nonsmooth_formulations::OSNSMatrixProjectOnConstraints::computeSizeForProjection(
     std::shared_ptr<siconos::modeling::Interaction> inter) {
   DEBUG_BEGIN(

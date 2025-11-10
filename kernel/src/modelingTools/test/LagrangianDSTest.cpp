@@ -89,7 +89,7 @@ void LagrangianDSTest::testBuildLagrangianDS2() {
   std::cout << "--> Test: constructor 2." << std::endl;
 
   auto ds = std::make_shared<siconos::modeling::LagrangianDS>(q0, velocity0);
-  ds->setConstantMass(mass);
+  ds->setConstantMassAlias(mass);
 
   siconos::algebra::SiconosVector3 fext;
   fext << 1, 2, 3;

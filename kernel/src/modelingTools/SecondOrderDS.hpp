@@ -26,7 +26,6 @@
 #include <memory>
 
 #include "DynamicalSystem.hpp"
-#include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
 
 namespace siconos::modeling {
@@ -115,7 +114,7 @@ class SecondOrderDS : public DynamicalSystem {
   // -- MEMBERS --
 
   /** number of degrees of freedom of the system */
-  unsigned int ndof_{0};
+  siconos::algebra::Index ndof_{0};
 
   /** "Reaction", generalized forces or impulses due to the non smooth law
    * The index corresponds to the kinematic
@@ -146,10 +145,10 @@ class SecondOrderDS : public DynamicalSystem {
 
   // Rule of five
   SecondOrderDS() = default;
-  SecondOrderDS(const SecondOrderDS &) = delete;
-  SecondOrderDS &operator=(const SecondOrderDS &) = delete;
-  SecondOrderDS(SecondOrderDS &&) = delete;
-  SecondOrderDS &operator=(SecondOrderDS &&) = delete;
+  SecondOrderDS(const SecondOrderDS&) = delete;
+  SecondOrderDS& operator=(const SecondOrderDS&) = delete;
+  SecondOrderDS(SecondOrderDS&&) = delete;
+  SecondOrderDS& operator=(SecondOrderDS&&) = delete;
 
   /** minimal constructor, from state dimension
    *  result in \f$ \dot x = r \f$
@@ -157,7 +156,7 @@ class SecondOrderDS : public DynamicalSystem {
    *  \param dimension dimension of corresponding first order system
    *  \param ndof number of degrees of freedom
    */
-  SecondOrderDS(unsigned int dimension, unsigned int ndof)
+  SecondOrderDS(siconos::algebra::Index dimension, siconos::algebra::Index ndof)
       : DynamicalSystem(dimension), ndof_(ndof) {};
 
  public:
@@ -184,12 +183,12 @@ class SecondOrderDS : public DynamicalSystem {
    *
    *  \param level unsigned int, required level for p, default = 2
    */
-  siconos::algebra::SiconosVector &p_python(unsigned int level = 2) const {
+  siconos::algebra::SiconosVector& p_python(unsigned int level = 2) const {
     return *(p_[level]);
   }
 
   /** \return the number of degrees of freedom of the system */
-  inline unsigned int dimension() const override { return ndof_; }
+  inline siconos::algebra::Index dimension() const override { return ndof_; }
 
   /** \return a read-only view on the generalized coordinates of the system */
   virtual const siconos::algebra::ConstMapVectorType q_read() const = 0;
@@ -216,13 +215,13 @@ class SecondOrderDS : public DynamicalSystem {
    *
    *  \return a memory
    */
-  virtual const siconos::algebra::SiconosMemory &qMemory() = 0;
+  virtual const siconos::algebra::SiconosMemory& qMemory() = 0;
 
   /** get forces in memory buff
    *
    *  \return pointer on a SiconosMemory
    */
-  virtual const siconos::algebra::SiconosMemory &forcesMemory() = 0;
+  virtual const siconos::algebra::SiconosMemory& forcesMemory() = 0;
 
   /** initialize the SiconosMemory objects with a positive size.
    *

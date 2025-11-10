@@ -166,10 +166,10 @@ class PrismaticJointR : public NewtonEulerJointR {
               double qdot21, double qdot22, double qdot23);
 
   /** \return the number of constraints */
-  unsigned int numberOfConstraints() const override { return 5; }
+  siconos::algebra::Index numberOfConstraints() const override { return 5; }
 
   /** \return the number of degrees of freedom (DoF) */
-  unsigned int numberOfDoF() const override { return 2; }
+  siconos::algebra::Index numberOfDoF() const override { return 2; }
 
   /** \return the type of the degree of freedom (DoF) */
   DofType typeOfDoF(unsigned int axis) const override {

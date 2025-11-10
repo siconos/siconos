@@ -436,7 +436,7 @@ void siconos::simulation::EventDriven::computef(siconos::integrators::OneStepInt
   // Update Index sets? No !!
 
   // Get the required value, ie xdot for output.
-  unsigned pos = 0;
+  siconos::algebra::Index pos = 0;
 
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
   auto osiDSGraph = lsodar.dynamicalSystemsGraph();
@@ -447,7 +447,9 @@ void siconos::simulation::EventDriven::computef(siconos::integrators::OneStepInt
     if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
       auto qdot = lds->velocity_read();
       auto acc = lds->acceleration_read();
-      assert((pos + acc.size() + qdot.size()) <= *sizeOfX && "Destination buffer too small!");
+      assert((pos + acc.size() + qdot.size()) <=
+                 static_cast<siconos::algebra::Index>(*sizeOfX) &&
+             "Destination buffer too small!");
       std::copy(qdot.data(), qdot.data() + qdot.size(), &xdot[pos]);
       pos += qdot.size();
       std::copy(acc.data(), acc.data() + acc.size(), &xdot[pos]);

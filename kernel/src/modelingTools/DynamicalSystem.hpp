@@ -22,12 +22,10 @@
 #ifndef DynamicalSystem_H
 #define DynamicalSystem_H
 
-#include <iostream>
 #include <memory>
 #include <vector>
 
 #include "DynamicalSystemVisitor.hpp"
-#include "FunctionTypes.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosMemory.hpp"
 #include "SiconosVector.hpp"
@@ -86,7 +84,7 @@ class DynamicalSystem {
   size_t number_{__count++};
 
   /** the dimension of the system (\e ie size of the state vector x) */
-  unsigned int x_size_{0};
+  siconos::algebra::Index x_size_{0};
 
   /** initial state of the system */
   std::shared_ptr<siconos::algebra::MapVectorType> x0_view_{nullptr};
@@ -134,7 +132,7 @@ class DynamicalSystem {
       result in \f$ \dot x = r \f$
    *  \param dimension size of the system (n)
    */
-  DynamicalSystem(unsigned int dimension) : x_size_(dimension) {};
+  DynamicalSystem(siconos::algebra::Index dimension) : x_size_(dimension) {};
 
   /** Copy constructor
    * \param ds the DynamicalSystem to copy
@@ -208,14 +206,14 @@ class DynamicalSystem {
   }
 
   /** returns the size of the vector state x */
-  inline unsigned int x_size() const { return x_size_; }
+  inline auto x_size() const { return x_size_; }
 
   /**
       returns the dimension of the system
       (depends on system type, e.g. n for first order,
       ndof for Lagrangian).
    */
-  virtual inline unsigned int dimension() const { return x_size_; };
+  virtual inline siconos::algebra::Index dimension() const { return x_size_; };
 
   /** \return a read-only view on the state vector (size=dimension()) */
   inline const siconos::algebra::ConstMapVectorType x_read() const {

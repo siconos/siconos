@@ -99,7 +99,7 @@ class FiniteElementModel {
 
   /* create the FEM model from the mesh and the element type
    * \return the number of dof */
-  unsigned int init();
+  siconos::algebra::Index init();
 
   /* Assembly method for elemetary matrix */
   void AssembleElementaryMatrix(siconos::algebra::SiconosSparseMatrix& M,

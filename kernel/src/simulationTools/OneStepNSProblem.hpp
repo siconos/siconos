@@ -90,7 +90,7 @@ class OneStepNSProblem {
   std::shared_ptr<SolverOptions> _numerics_solver_options;
 
   /** size of the nonsmooth problem */
-  unsigned int _sizeOutput = 0;
+  siconos::algebra::Index _sizeOutput = 0;
 
   /** link to the simulation that owns the nonsmooth problem */
   std::shared_ptr<siconos::simulation::Simulation> _simulation;
@@ -109,7 +109,7 @@ class OneStepNSProblem {
       call. The best choice is to set maxSize to the estimated maximum
       dimension of the problem. It must not exceed ...
   */
-  unsigned int _maxSize = 0;
+  siconos::algebra::Index _maxSize = 0;
 
   /* set of nslaw types */
   std::set<float> _nslawtype = {};
@@ -132,7 +132,7 @@ class OneStepNSProblem {
    *  \param options the options set
    */
   OneStepNSProblem(std::shared_ptr<SolverOptions> options)
-      : _numerics_solver_options(options){};
+      : _numerics_solver_options(options) {};
 
   /** destructor
    */
@@ -148,7 +148,7 @@ class OneStepNSProblem {
 
   /** returns the dimension of the nonsmooth problem
    */
-  inline unsigned int getSizeOutput() const { return _sizeOutput; }
+  inline siconos::algebra::Index getSizeOutput() const { return _sizeOutput; }
 
   /** get the simulation which owns this nonsmooth problem
    *
@@ -166,41 +166,32 @@ class OneStepNSProblem {
     _simulation = newS;
   }
 
-  /** get indexSetLevel
-   *
-   *  \return an unsigned int
-   */
+  /** \return the index set level */
   inline unsigned int indexSetLevel() const { return _indexSetLevel; }
 
   /** set the value of level min
    *
-   *  \param newVal an unsigned int
+   *  \param newVal new value
    */
   inline void setIndexSetLevel(unsigned int newVal) { _indexSetLevel = newVal; }
 
-  /** get the Input/Output level
-   *
-   *  \return an unsigned int
-   */
+  /** \return the Input/Output level */
   inline unsigned int inputOutputLevel() const { return _inputOutputLevel; }
 
   /** set the value of Input/Output level
    *
-   *  \param newVal an unsigned int
+   *  \param newVal new value
    */
   inline void setInputOutputLevel(unsigned int newVal) { _inputOutputLevel = newVal; }
 
-  /** get maximum value allowed for the dimension of the problem
-   *
-   *  \return an unsigned int
-   */
-  inline unsigned int maxSize() const { return _maxSize; }
+  /** \return the maximum value allowed for the dimension of the problem */
+  inline siconos::algebra::Index maxSize() const { return _maxSize; }
 
   /** set the value of maxSize
    *
-   *  \param newVal an unsigned int
+   *  \param newVal new value
    */
-  inline void setMaxSize(const unsigned int newVal) { _maxSize = newVal; }
+  inline void setMaxSize(const siconos::algebra::Index newVal) { _maxSize = newVal; }
 
   /** Turn on/off verbose mode in numerics solver*/
   void setNumericsVerboseMode(bool vMode);

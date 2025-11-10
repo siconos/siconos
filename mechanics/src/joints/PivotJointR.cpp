@@ -486,8 +486,8 @@ void siconos::joints::pivot::computeH_for_2DS(
               (-cq2q(0) * qp1(0) + cq2q(1) * qp1(1) + cq2q(2) * qp1(2) - cq2q(3) * qp1(3)));
 
   /*proj_with_q
-  for (unsigned int ii=0; ii <result.rows(); ii++)
-    for (unsigned int jj=0; jj <result.cols(); jj++)
+  for (siconos::algebra::Index ii=0; ii <result.rows(); ii++)
+    for (siconos::algebra::Index jj=0; jj <result.cols(); jj++)
   H_NE_view_Proj->setValue(ii,jj,result(ii, jj));
 
   H_NE_view_Proj->setValue(5,0,0);
@@ -528,8 +528,8 @@ void siconos::joints::pivot::computeH_for_1DS(
   result.setValue(4, 6, A2(0) * (-cq2q(2)) + A2(1) * (cq2q(1)) + A2(2) * (cq2q(0)));
 
   /*proj_with_q
-      for (unsigned int ii=0; ii <result.rows(); ii++)
-        for (unsigned int jj=0; jj <result.cols(); jj++)
+      for (siconos::algebra::Index ii=0; ii <result.rows(); ii++)
+        for (siconos::algebra::Index jj=0; jj <result.cols(); jj++)
     H_NE_view_Proj->setValue(ii,jj,result(ii, jj));
 
       H_NE_view_Proj->setValue(5,0,0);

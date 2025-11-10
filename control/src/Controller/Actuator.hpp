@@ -181,7 +181,7 @@ class Actuator {
    *
    *  \param size dimension of the control input u
    */
-  void setSizeu(unsigned size);
+  void setSizeu(siconos::algebra::Index size);
 
   /** Set the B matrix
    *

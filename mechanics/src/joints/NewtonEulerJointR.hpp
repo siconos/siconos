@@ -165,14 +165,14 @@ class NewtonEulerJointR : public siconos::modeling::NewtonEulerR {
 
      \return the number of constraints
    */
-  virtual unsigned int numberOfConstraints() const = 0;
+  virtual siconos::algebra::Index numberOfConstraints() const = 0;
 
   /**
      Return the number of degrees of freedom of this joint.
 
      \return the number of degrees of freedom (DoF)
    */
-  virtual unsigned int numberOfDoF() const = 0;
+  virtual siconos::algebra::Index numberOfDoF() const = 0;
 
   /**
      Return the type of a degree of freedom of this joint.

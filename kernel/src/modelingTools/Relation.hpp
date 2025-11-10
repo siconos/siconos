@@ -112,10 +112,10 @@ class Relation {
  private:
   // Rule of five ...
   Relation() = delete;
-  Relation(const Relation &) = delete;
-  Relation(Relation &&) = delete;
-  Relation &operator=(const Relation &) = delete;
-  Relation &operator=(Relation &&) = delete;
+  Relation(const Relation&) = delete;
+  Relation(Relation&&) = delete;
+  Relation& operator=(const Relation&) = delete;
+  Relation& operator=(Relation&&) = delete;
 
  public:
   /** destructor */
@@ -131,20 +131,20 @@ class Relation {
    *
    *  \param inter the interaction using this relation
    */
-  virtual void initialize(Interaction &inter) = 0;
+  virtual void initialize(Interaction& inter) = 0;
 
   /** check sizes of the relation specific operators.
    *
    *  \param inter an Interaction using this relation
    */
-  virtual void checkSize(const Interaction &inter) const = 0;
+  virtual void checkSize(const Interaction& inter) const = 0;
 
   /** compute all the H Jacobian
    *
    *  \param time the current time
    *  \param inter the interaction using this relation
    */
-  virtual void computeJach(double time, Interaction &inter) = 0;
+  virtual void computeJach(double time, Interaction& inter) = 0;
 
   /** compute all the G Jacobian
    *
@@ -154,7 +154,7 @@ class Relation {
    */
   virtual void computeJacg(
       double time,
-      Interaction &inter) { /*Does nothing by default. Reimplement if required*/ };
+      Interaction& inter) { /*Does nothing by default. Reimplement if required*/ };
 
   /** default function to compute y
    *
@@ -163,7 +163,7 @@ class Relation {
    *  \param derivativeNumber number of the derivative to compute (optional,
    *  default = 0)
    */
-  virtual void computeOutput(double time, Interaction &inter,
+  virtual void computeOutput(double time, Interaction& inter,
                              unsigned int derivativeNumber = 0) = 0;
   /** default function to compute r
    *
@@ -171,7 +171,7 @@ class Relation {
    *  \param inter the interaction using this relation
    *  \param level the input "derivative" order of lambda used to compute input
    */
-  virtual void computeInput(double time, Interaction &inter, unsigned int level = 0) = 0;
+  virtual void computeInput(double time, Interaction& inter, unsigned int level = 0) = 0;
 
   /** \return true if the relation is linear */
   virtual bool isLinear() const { return false; }
@@ -199,7 +199,7 @@ class Relation {
     // return empty_map;
   }
 
-  virtual void accept(relations::Visitor &) const {
+  virtual void accept(relations::Visitor&) const {
     throw std::logic_error("accept (relation): no visitor defined");
   }
 };

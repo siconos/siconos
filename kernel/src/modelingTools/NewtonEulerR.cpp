@@ -20,8 +20,6 @@
 
 #include "NewtonEulerR.hpp"
 
-#include <iostream>
-
 #include "BlockVector.hpp"
 #include "Interaction.hpp"
 #include "NewtonEulerDS.hpp"  // computeT ...
@@ -38,9 +36,9 @@
 void siconos::modeling::NewtonEulerR::initialize(Interaction& inter) {
   DEBUG_BEGIN("siconos::modeling::NewtonEulerR::initialize(Interaction& inter)\n");
 
-  unsigned int ySize = inter.dimension();
-  unsigned int qSize = inter.getSizeOfDS();  // sum of considered DS sizes
-  unsigned int Hcols = 7 * (qSize / 6);      // 7 * number of DS in the interaction
+  auto ySize = inter.dimension();
+  auto qSize = inter.getSizeOfDS();  // sum of considered DS sizes
+  auto Hcols = 7 * (qSize / 6);      // 7 * number of DS in the interaction
 
   // setHMatrix is the only way to set jacobianhOver_q. So if it's required, storage
   // is already allocated at this point.
@@ -90,9 +88,9 @@ void siconos::modeling::NewtonEulerR::initialize(Interaction& inter) {
 }
 
 void siconos::modeling::NewtonEulerR::checkSize(const Interaction& inter) const {
-  unsigned int ySize = inter.dimension();
-  unsigned int qSize = inter.getSizeOfDS();  // sum of considered DS sizes
-  unsigned int Hcols = 7 * (qSize / 6);      // 7 * number of DS in the interaction
+  auto ySize = inter.dimension();
+  auto qSize = inter.getSizeOfDS();  // sum of considered DS sizes
+  auto Hcols = 7 * (qSize / 6);      // 7 * number of DS in the interaction
 
   if (H_NE_view_) {
     assert(H_NE_view_->rows() == ySize);

@@ -101,10 +101,10 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
   unsigned int _upperLevelForInput = 0;
 
   /** size of the interaction, ie size of y[i] and _lambda[i] */
-  unsigned int _interactionSize = 0;
+  siconos::algebra::Index _interactionSize = 0;
 
   /** sum of all DS sizes, for DS involved in the interaction */
-  unsigned int _sizeOfDS = 0;
+  siconos::algebra::Index _sizeOfDS = 0;
 
   /** Bool to check the number of DS concerned by this interaction
       (1 or 2 indeed)
@@ -281,7 +281,7 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
 
   /** Set the lower level for output y.
    *
-   *  \param newVal : an unsigned int
+   *  \param newVal new level
    */
   inline void setLowerLevelForOutput(const unsigned int newVal) {
     _lowerLevelForOutput = newVal;
@@ -289,29 +289,21 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
 
   /** Set the upper level for output y.
    *
-   *  \param newVal : an unsigned int
+   *  \param newVal :new level
    */
   inline void setUpperLevelForOutput(const unsigned int newVal) {
     _upperLevelForOutput = newVal;
   };
 
-  /**
-     Get the lower level for output y.
-
-     \return an unsigned int.
-   */
+  /** \return the lower level for output y. */
   inline unsigned int lowerLevelForOutput() { return _lowerLevelForOutput; };
 
-  /**
-     Get the upper level for output y.
-
-     \return an unsigned int.
-   */
+  /**\return the upper level for output y. */
   inline unsigned int upperLevelForOutput() { return _upperLevelForOutput; };
 
   /** Set the lower level for input Lambda.
    *
-   *  \param newVal : an unsigned int
+   *  \param newVal : new level
    */
   inline void setLowerLevelForInput(const unsigned int newVal) {
     _lowerLevelForInput = newVal;
@@ -319,31 +311,23 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
 
   /** Set the upper level for input Lambda.
    *
-   *  \param newVal : an unsigned int.
+   *  \param newVal new level
    */
   inline void setUpperLevelForInput(const unsigned int newVal) {
     _upperLevelForInput = newVal;
   };
 
-  /**
-     Get the lower level for input Lambda.
-
-     \return an unsigned int.
-  */
+  /**\return the lower level for input Lambda */
   inline unsigned int lowerLevelForInput() { return _lowerLevelForInput; };
 
-  /**
-     Get the upper level for input Lambda.
-
-     \return an unsigned int.
-  */
+  /**\return the upper level for input Lambda  */
   inline unsigned int upperLevelForInput() { return _upperLevelForInput; };
 
   /** returns dimension (i.e. nslaw size == y and lambda size) */
-  inline unsigned int dimension() const { return _interactionSize; }
+  inline auto dimension() const { return _interactionSize; }
 
   /** \return the sum of DS sizes, for DS involved in interaction */
-  inline unsigned int getSizeOfDS() const { return _sizeOfDS; }
+  inline auto getSizeOfDS() const { return _sizeOfDS; }
 
   /**
      Set the number of dynamical systems concerned by
@@ -413,17 +397,17 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
    */
   void setYPtr(const std::vector<std::shared_ptr<siconos::algebra::SiconosVector>>& v);
 
-  /** set y[i] to newValue
+  /** set y[i]
    *
    *  \param i derivative number i of output
-   *  \param v a SiconosVector and an unsigned int
+   *  \param v the new yi value
    */
   void setY(const unsigned int i, const siconos::algebra::SiconosVector& v);
 
   /** set y[i] to pointer newPtr
    *
    *  \param i derivative number i of output
-   *  \param v a std::shared_ptr<siconos::algebra::SiconosVector>  and an unsigned int
+   *  \param v the new value for yi
    */
   void setYPtr(const unsigned int i, std::shared_ptr<siconos::algebra::SiconosVector> v);
 
@@ -548,7 +532,7 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
    *
    *  \param s1 int sum of ds sizes
    */
-  inline void setDSSizes(unsigned int s1) { _sizeOfDS = s1; }
+  inline void setDSSizes(siconos::algebra::Index s1) { _sizeOfDS = s1; }
 
   /** Must be call to fill the memory. (after convergence of the Newton iterations)
    */
@@ -601,7 +585,8 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
    interactionBlock matrix
    */
   std::shared_ptr<siconos::algebra::SiconosMatrix> getLeftInteractionBlockForDS(
-      unsigned int pos, unsigned int size, unsigned int sizeDS) const;
+      siconos::algebra::Index pos, siconos::algebra::Index size,
+      siconos::algebra::Index sizeDS) const;
 
   /** gets the matrix used in interactionBlock computation. Used only for the formulation
    * projecting on the constraints. We get only the part corresponding to ds.
@@ -611,7 +596,7 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
    * resulting interactionBlock matrix
    */
   void getLeftInteractionBlockForDSProjectOnConstraints(
-      unsigned int pos,
+      siconos::algebra::Index pos,
       std::shared_ptr<siconos::algebra::SiconosMatrix> InteractionBlock) const;
 
   /** gets the matrix used in interactionBlock computation
@@ -625,7 +610,8 @@ class Interaction : public std::enable_shared_from_this<Interaction> {
    *  \return the resulting interactionBlock matrix
    */
   std::shared_ptr<siconos::algebra::SiconosMatrix> getRightInteractionBlockForDS(
-      unsigned int pos, unsigned int sizeDS, unsigned size) const;
+      siconos::algebra::Index pos, siconos::algebra::Index sizeDS,
+      siconos::algebra::Index size) const;
 
   /** gets extra interactionBlock corresponding to the present Interaction
    *

@@ -176,7 +176,7 @@ void CableDSTest::testComputeBouncingBall() {
   // ================= Creation of the model =======================
 
   // User-defined main parameters
-  unsigned int nDof = 3;       // degrees of freedom for the ball
+  int nDof = 3;       // degrees of freedom for the ball
   double t0 = 0;               // initial computation time
   double T = 10;               // final computation time
   double h = 0.005;            // time step

@@ -22,21 +22,22 @@
 
 #include "BlockCSRMatrix.hpp"
 #include "Interaction.hpp"
-#include "MoreauJeanGOSI.hpp"
+// #include "MoreauJeanGOSI.hpp"
 #include "MoreauJeanOSI.hpp"
-#include "NonSmoothLaw.hpp"
+// #include "NonSmoothLaw.hpp"
 #include "NumericsToolsNamespace.h"  // For NumericsMatrix
 #include "SecondOrderDS.hpp"
 #include "SiconosAlgebraAddons.hpp"
 #include "SiconosMatrix.hpp"
-#include "SiconosVector.hpp"
+// #include "SiconosVector.hpp"
 
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 #include "siconos_debug.h"
 
-siconos::nonsmooth_formulations::OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m,
+siconos::nonsmooth_formulations::OSNSMatrix::OSNSMatrix(siconos::algebra::Index n,
+                                                        siconos::algebra::Index m,
                                                         NM_types stor)
     : _dimRow(n), _dimColumn(m), _storageType(stor) {
   // Note:
@@ -45,7 +46,8 @@ siconos::nonsmooth_formulations::OSNSMatrix::OSNSMatrix(unsigned int n, unsigned
   // the matrix and for sparse storage (_storageType == 1) the number
   // of interactionBlocks in a row or column.
   DEBUG_BEGIN(
-      "siconos:simulation::OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, "
+      "siconos:simulation::OSNSMatrix::OSNSMatrix(siconos::algebra::Index n, "
+      "siconos::algebra::Index m, "
       "NM_types stor)\n");
   switch (_storageType) {
     case NM_DENSE: {
@@ -65,7 +67,8 @@ siconos::nonsmooth_formulations::OSNSMatrix::OSNSMatrix(unsigned int n, unsigned
   }
 
   DEBUG_END(
-      "siconos:simulation::OSNSMatrix::OSNSMatrix(unsigned int n, unsigned int m, "
+      "siconos:simulation::OSNSMatrix::OSNSMatrix(siconos::algebra::Index n, "
+      "siconos::algebra::Index m, "
       "NM_types stor)\n");
 }
 
@@ -93,7 +96,7 @@ siconos::nonsmooth_formulations::OSNSMatrix::OSNSMatrix(
   _M1 = std::make_shared<siconos::algebra::SiconosMatrix>(MSource);
 }
 
-unsigned siconos::nonsmooth_formulations::OSNSMatrix::updateSizeAndPositions(
+siconos::algebra::Index siconos::nonsmooth_formulations::OSNSMatrix::updateSizeAndPositions(
     siconos::graphs::InteractionsGraph& indexSet) {
   // === Description ===
 
@@ -109,7 +112,7 @@ unsigned siconos::nonsmooth_formulations::OSNSMatrix::updateSizeAndPositions(
 
   // Computes real size of the current matrix = sum of the dim. of all
   // Interactionin indexSet
-  unsigned dim = 0;
+  siconos::algebra::Index dim = 0;
   siconos::graphs::InteractionsGraph::VIterator vd, vdend;
   for (std::tie(vd, vdend) = indexSet.vertices(); vd != vdend; ++vd) {
     assert(indexSet.descriptor(indexSet.bundle(*vd)) == *vd);
@@ -122,7 +125,7 @@ unsigned siconos::nonsmooth_formulations::OSNSMatrix::updateSizeAndPositions(
   return dim;
 }
 
-unsigned siconos::nonsmooth_formulations::OSNSMatrix::updateSizeAndPositions(
+siconos::algebra::Index siconos::nonsmooth_formulations::OSNSMatrix::updateSizeAndPositions(
     siconos::graphs::DynamicalSystemsGraph& DSG) {
   // === Description ===
 
@@ -133,7 +136,7 @@ unsigned siconos::nonsmooth_formulations::OSNSMatrix::updateSizeAndPositions(
 
   // Computes real size of the current matrix = sum of the dim. of all
   // Interactionin indexSet
-  unsigned dim = 0;
+  siconos::algebra::Index dim = 0;
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
   for (std::tie(dsi, dsend) = DSG.vertices(); dsi != dsend; ++dsi) {
     std::shared_ptr<siconos::modeling::DynamicalSystem> ds = DSG.bundle(*dsi);
@@ -169,7 +172,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillM(
       }
     }
 
-    unsigned int pos = 0, col = 0;  // index position used for
+    siconos::algebra::Index pos = 0, col = 0;  // index position used for
 
     // === Loop through "active" Interactions (ie vertices present in indexSets[level]) ===
     siconos::graphs::InteractionsGraph::VIterator vi, viend;
@@ -301,7 +304,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillW(
         NM_triplet_alloc(&M_NM, _triplet_nzmax);
         auto Mtriplet = NM_triplet(&M_NM);
 
-        unsigned int pos = 0;
+        siconos::algebra::Index pos = 0;
         // Loop over the DS for filling M
         siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
         for (std::tie(dsi, dsend) = DSG.vertices(); dsi != dsend; ++dsi) {
@@ -356,7 +359,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillWinverse(
         NM_triplet_alloc(&M_NM, _triplet_nzmax);
         auto Mtriplet = NM_triplet(&M_NM);
 
-        unsigned int pos = 0;
+        siconos::algebra::Index pos = 0;
         // Loop over the DS for filling M
         siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsend;
         for (std::tie(dsi, dsend) = DSG.vertices(); dsi != dsend; ++dsi) {
@@ -386,7 +389,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillWinverse(
         }
 
         // // Ugly inversion
-        // for (unsigned int k =0 ; k < M_NM.size0; k++)
+        // for (siconos::algebra::Index k =0 ; k < M_NM.size0; k++)
         // {
         //   Mtriplet->x[k] = 1.0/Mtriplet->x[k];
         // }
@@ -457,7 +460,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillHtrans(
         NM_triplet_alloc(&H_NM, _triplet_nzmax);
         auto Htriplet = NM_triplet(&H_NM);
 
-        unsigned int pos = 0, abs_pos_ds = 0;
+        siconos::algebra::Index pos = 0, abs_pos_ds = 0;
 
         siconos::graphs::InteractionsGraph::VIterator ui, uiend;
         for (std::tie(ui, uiend) = indexSet.vertices(); ui != uiend; ++ui) {
@@ -490,7 +493,7 @@ void siconos::nonsmooth_formulations::OSNSMatrix::fillHtrans(
                 // for(const auto itindex: bc->velocityIndices())
                 // {
 
-                //   for (unsigned int row; row < sizeY; row++  )
+                //   for (siconos::algebra::Index row; row < sizeY; row++  )
                 //   {
                 //     array_with_bc[row + (sizeY) * (posBlock + itindex)] = 0.0
                 //   }

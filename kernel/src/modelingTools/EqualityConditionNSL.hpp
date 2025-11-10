@@ -39,7 +39,7 @@ class EqualityConditionNSL : public NonSmoothLaw {
    *
    *  \param size of the non smooth law
    */
-  EqualityConditionNSL(unsigned int size) : NonSmoothLaw(size){};
+  EqualityConditionNSL(siconos::algebra::Index size) : NonSmoothLaw(size){};
 
   /** Destructor */
   ~EqualityConditionNSL() noexcept = default;

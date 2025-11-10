@@ -48,9 +48,6 @@
 #include "Tools.hpp"
 #include "siconos_debug.h"
 
-// Test : the following line is allowed only from C++17.
-#include <variant>
-
 size_t siconos::modeling::Interaction::count_ = 0;
 
 struct siconos::modeling::Interaction::SetLevels
@@ -260,14 +257,14 @@ void siconos::modeling::Interaction::reset() {
 
   // get the dimension of the non smooth law, ie the size of an Interaction blocks (one per
   // relation)
-  unsigned int nslawSize = _nslaw->size();
+  auto nslawSize = _nslaw->size();
 
-  for (unsigned int i = _lowerLevelForOutput; i < _upperLevelForOutput + 1; i++) {
+  for (auto i = _lowerLevelForOutput; i < _upperLevelForOutput + 1; i++) {
     _y[i] = std::make_shared<siconos::algebra::SiconosVector>(nslawSize);
     _y[i]->setZero();
   }
 
-  for (unsigned int i = _lowerLevelForInput; i < _upperLevelForInput + 1; i++) {
+  for (auto i = _lowerLevelForInput; i < _upperLevelForInput + 1; i++) {
     _lambda[i] = std::make_shared<siconos::algebra::SiconosVector>(nslawSize);
   }
 }
@@ -345,12 +342,12 @@ void siconos::modeling::Interaction::initializeMemory(unsigned int steps) {
 
   _yMemory.resize(_upperLevelForOutput + 1);
   _lambdaMemory.resize(_upperLevelForInput + 1);
-  unsigned int nslawSize = _nslaw->size();
+  auto nslawSize = _nslaw->size();
 
-  for (unsigned int i = _lowerLevelForOutput; i < _upperLevelForOutput + 1; i++)
+  for (auto i = _lowerLevelForOutput; i < _upperLevelForOutput + 1; i++)
     _yMemory[i].setMemorySize(steps, nslawSize);
 
-  for (unsigned int i = _lowerLevelForInput; i < _upperLevelForInput + 1; i++) {
+  for (auto i = _lowerLevelForInput; i < _upperLevelForInput + 1; i++) {
     DEBUG_PRINTF(
         "siconos::modeling::Interaction::initializeMemory(). "
         "_lambdaMemory[%i].setMemorySize()\n",
@@ -362,7 +359,7 @@ void siconos::modeling::Interaction::initializeMemory(unsigned int steps) {
 }
 
 void siconos::modeling::Interaction::resetAllLambda() {
-  for (unsigned int i = _lowerLevelForInput; i < _upperLevelForInput + 1; i++) {
+  for (auto i = _lowerLevelForInput; i < _upperLevelForInput + 1; i++) {
     if (_lambda[i]) _lambda[i]->setZero();
   }
 }
@@ -639,10 +636,10 @@ const siconos::algebra::SiconosVector& siconos::modeling::Interaction::lambda_k(
 void siconos::modeling::Interaction::swapInMemory() {
   DEBUG_BEGIN("void siconos::modeling::Interaction::swapInMemory()\n");
   // i corresponds to the derivative number and j the relation number.
-  for (unsigned int i = _lowerLevelForOutput; i < _upperLevelForOutput + 1; i++) {
+  for (auto i = _lowerLevelForOutput; i < _upperLevelForOutput + 1; i++) {
     _yMemory[i].swap(*_y[i]);
   }
-  for (unsigned int i = _lowerLevelForInput; i < _upperLevelForInput + 1; i++) {
+  for (auto i = _lowerLevelForInput; i < _upperLevelForInput + 1; i++) {
     _lambdaMemory[i].swap(*_lambda[i]);
   }
   DEBUG_END("void siconos::modeling::Interaction::swapInMemory()\n");
@@ -687,9 +684,9 @@ const siconos::algebra::ConstMapType siconos::modeling::Interaction::getLeftInte
 }
 
 std::shared_ptr<siconos::algebra::SiconosMatrix>
-siconos::modeling::Interaction::getLeftInteractionBlockForDS(unsigned int pos,
-                                                             unsigned nslaw_size,
-                                                             unsigned int ds_size) const {
+siconos::modeling::Interaction::getLeftInteractionBlockForDS(
+    siconos::algebra::Index pos, siconos::algebra::Index nslaw_size,
+    siconos::algebra::Index ds_size) const {
   auto interactionBlock =
       std::make_shared<siconos::algebra::SiconosMatrix>(nslaw_size, ds_size);
 
@@ -721,7 +718,7 @@ siconos::modeling::Interaction::getLeftInteractionBlockForDS(unsigned int pos,
 }
 
 void siconos::modeling::Interaction::getLeftInteractionBlockForDSProjectOnConstraints(
-    unsigned int pos,
+    siconos::algebra::Index pos,
     std::shared_ptr<siconos::algebra::SiconosMatrix> interactionBlock) const {
   DEBUG_PRINT(
       "siconos::modeling::Interaction::getLeftInteractionBlockForDSProjectOnConstraints()\n");
@@ -734,8 +731,7 @@ void siconos::modeling::Interaction::getLeftInteractionBlockForDSProjectOnConstr
   //   THROW_EXCEPTION("siconos::modeling::Interaction::getLeftInteractionBlockForDSForProject-
   //   ds is not from NewtonEulerDS.");
 
-  auto relationType = relation()->getType();
-  assert(relationType == RelationType::NewtonEuler);
+  assert(relation()->getType() == RelationType::NewtonEuler);
 
   auto neR = std::static_pointer_cast<NewtonEulerR>(relation());
   // proj_with_q originalMatrix = r->jachqProj();
@@ -747,9 +743,9 @@ void siconos::modeling::Interaction::getLeftInteractionBlockForDSProjectOnConstr
 }
 
 std::shared_ptr<siconos::algebra::SiconosMatrix>
-siconos::modeling::Interaction::getRightInteractionBlockForDS(unsigned int pos,
-                                                              unsigned int ds_size,
-                                                              unsigned int nslaw_size) const {
+siconos::modeling::Interaction::getRightInteractionBlockForDS(
+    siconos::algebra::Index pos, siconos::algebra::Index ds_size,
+    siconos::algebra::Index nslaw_size) const {
   auto interactionBlock =
       std::make_shared<siconos::algebra::SiconosMatrix>(ds_size, nslaw_size);
 

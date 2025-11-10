@@ -19,12 +19,12 @@
 #include "SiconosAlgebraAddons.hpp"
 
 #include <random>
-#include <set>
 
 siconos::algebra::SiconosVector siconos::algebra::normInfByColumn(
     const siconos::algebra::SiconosDenseMatrix& m) {
   siconos::algebra::SiconosVector v(m.cols());
-  for (Eigen::Index j = 0; j < m.cols(); ++j) v(j) = m.col(j).lpNorm<Eigen::Infinity>();
+  for (siconos::algebra::Index j = 0; j < m.cols(); ++j)
+    v(j) = m.col(j).lpNorm<Eigen::Infinity>();
   return v;
 }
 
@@ -64,9 +64,9 @@ void siconos::algebra::fillTriplet(const SiconosSparseMatrix& m, CSparseMatrix* 
                                    size_t row_off, size_t col_off) {
   assert(triplet);
 
-  const int* outer = m.outerIndexPtr();  // column pointers
-  const int* inner = m.innerIndexPtr();  // row indices
-  const double* values = m.valuePtr();   // non-zero values
+  const SparseIndex* outer = m.outerIndexPtr();  // column pointers
+  const SparseIndex* inner = m.innerIndexPtr();  // row indices
+  const double* values = m.valuePtr();           // non-zero values
 
   int cols = m.cols();
 
@@ -96,38 +96,52 @@ void siconos::algebra::fillTriplet(SiconosDenseMatrix& m, CSparseMatrix* triplet
 }
 
 siconos::algebra::SiconosSparseMatrix siconos::algebra::generateRandomSparseMatrix(
-    Eigen::Index rows, Eigen::Index cols, int nnz, std::optional<double> density) {
-  siconos::algebra::SiconosSparseMatrix mat(rows, cols);
-  std::vector<Eigen::Triplet<double>> triplets;
-
+    siconos::algebra::Index rows, siconos::algebra::Index cols, SparseIndex nnz,
+    std::optional<double> density) {
   std::mt19937 rng(42);
-  std::uniform_int_distribution<int> rowDist(0, rows - 1);
-  std::uniform_int_distribution<int> colDist(0, cols - 1);
+  std::uniform_int_distribution<siconos::algebra::Index> rowDist(0, rows - 1);
+  std::uniform_int_distribution<siconos::algebra::Index> colDist(0, cols - 1);
   std::uniform_real_distribution<double> valDist(1e-6, 1.0);  // never equal to zero
   std::bernoulli_distribution signDist(0.5);
 
   if (density) {
-    assert(*density <= 1.);
-    assert(*density >= 0.);
-    nnz = static_cast<int>(rows * cols * *density);
+    assert(*density >= 0.0 && *density <= 1.0);
+    nnz = static_cast<SparseIndex>(*density * rows) * cols;
   }
 
+  // --- Generate keys (i,j) encoded in an uint64_t
+  std::vector<uint64_t> keys;
+  keys.reserve(nnz * 1.1);
+  while (static_cast<SparseIndex>(keys.size()) < nnz) {
+    uint64_t key =
+        (static_cast<uint64_t>(rowDist(rng)) << 32) | static_cast<uint32_t>(colDist(rng));
+    keys.push_back(key);
+  }
+
+  // --- Sort and eliminate duplicate val
+  std::sort(keys.begin(), keys.end());
+  keys.erase(std::unique(keys.begin(), keys.end()), keys.end());
+
+  // --- Add values to match nnz
+  while (static_cast<SparseIndex>(keys.size()) < nnz) {
+    uint64_t key =
+        (static_cast<uint64_t>(rowDist(rng)) << 32) | static_cast<uint32_t>(colDist(rng));
+    if (!std::binary_search(keys.begin(), keys.end(), key)) {
+      keys.push_back(key);
+      std::inplace_merge(keys.begin(), keys.end() - 1, keys.end());  // to keep the same order
+    }
+  }
+
+  // --- Generate triplets
+  std::vector<Eigen::Triplet<double>> triplets;
   triplets.reserve(nnz);
-  std::set<std::pair<int, int>> used_positions;
-
-  // Step 1: Generate unique positions
-  while ((int)used_positions.size() < nnz) {
-    int i = rowDist(rng);
-    int j = colDist(rng);
-    used_positions.emplace(i, j);
-  }
-
-  // Step 2: Generate triplets with non-zero values
-  for (const auto& [i, j] : used_positions) {
+  for (uint64_t key : keys) {
+    Index i = static_cast<Index>(key >> 32);
+    Index j = static_cast<Index>(key & 0xffffffffu);
     double val = (signDist(rng) ? 1.0 : -1.0) * valDist(rng);
     triplets.emplace_back(i, j, val);
   }
-
+  siconos::algebra::SiconosSparseMatrix mat(rows, cols);
   mat.setFromTriplets(triplets.begin(), triplets.end());
   return mat;
 }

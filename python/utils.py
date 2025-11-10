@@ -110,9 +110,11 @@ def generate_cppimport_header(info_file, output="cppimport_header.py"):
     data = parse_cmake_info(info_file)
 
     include_dirs = data.get("INCLUDE_DIRS", [])
-    link_dirs = format_list_multiline(data.get("LINK_DIRS", []), comment=True)
+    link_dirs = format_list_multiline(data.get("LINK_DIRS", []))
     libs = format_list_multiline(
-        [name.split("::")[-1] for name in data.get("LIBS", [])], comment=True
+        # [name.split("::")[-1] for name in data.get("LIBS", [])]
+        # No cmake namespace in python outputs ...
+        [name for name in data.get("LIBS", []) if "::" not in name]  # , comment=True
     )
     compiler_args = data.get("FLAGS", []) + [f"-D{d}" for d in data.get("DEFINES", [])]
     # move includes to compile options, to use isystem and avoid
@@ -130,7 +132,7 @@ def generate_cppimport_header(info_file, output="cppimport_header.py"):
 #
 # /*cppimport
 # <%
-# 
+#
 # import os
 # setup_pybind11(cfg)
 #
@@ -140,7 +142,7 @@ def generate_cppimport_header(info_file, output="cppimport_header.py"):
 # %>
 # */
 
-# Uncomment these lines to activate verbose mode    
+# Uncomment these lines to activate verbose mode
 # cfg["compiler_args"] += ["-v"]
 # cfg["verbose"] = True
 
@@ -150,8 +152,8 @@ cfg["compiler_args"] += {compile_opts}
 
 # Libraries
 # (not always needed, uncomment and complete according to your needs)
-# cfg["library_dirs"] += {link_dirs}
-# cfg["libraries"] += {libs}
+cfg["library_dirs"] += {link_dirs}
+cfg["libraries"] += {libs}
     """
     )
 

@@ -795,7 +795,7 @@ void siconos::joints::CylindricalJointR::computehDoF(
   const double x23 = q13 * x18;
 
   /* Linear axis */
-  unsigned int i = 0;
+  siconos::algebra::Index i = 0;
   if (axis + i == 0 && y.size() > i) {
     /* axis 0 = Linear position */
     y(i) = -x13 * (X1 - X2 + q10 * x10 + q11 * x5 + q12 * x12 - q13 * x11 - q20 * x7 -
@@ -982,7 +982,7 @@ void siconos::joints::CylindricalJointR::computeJachqDoF(
   const double x83 = _cq2q101 * q13 + _cq2q102 * q12 - _cq2q103 * q11 - _cq2q104 * q10;
 
   /* Linear axis */
-  unsigned int i = 0;
+  siconos::algebra::Index i = 0;
   if (axis + i == 0 && jachq.rows() > i) {
     /* axis 0 = Linear position */
     jachq.setValue(i, 0, -x1 + x3 - x5 - x7);

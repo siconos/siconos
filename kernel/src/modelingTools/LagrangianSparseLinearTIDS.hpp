@@ -20,10 +20,8 @@
 #ifndef LAGRANGIANSPARSETIDS_H
 #define LAGRANGIANSPARSETIDS_H
 
-#include "SiconosMatrix.hpp"
-
 #include "LagrangianSparseDS.hpp"
-#include "SiconosPointers.hpp"
+#include "SiconosMatrix.hpp"
 
 namespace siconos::modeling {
 
@@ -102,10 +100,10 @@ class LagrangianSparseLinearTIDS : public LagrangianSparseDS {
   ACCEPT_SERIALIZATION(LagrangianSparseLinearTIDS);
 
   /** stiffness matrix */
-  std::shared_ptr<siconos::algebra::SiconosSparseMatrix> stiffnessMatrix_{nullptr};
+  siconos::algebra::SparseStorage stiffnessMatrix_storage{std::monostate{}};
 
   /** damping matrix */
-  std::shared_ptr<siconos::algebra::SiconosSparseMatrix> dampingMatrix_{nullptr};
+  siconos::algebra::SparseStorage dampingMatrix_storage{std::monostate{}};
 
   /** default constructor */
   LagrangianSparseLinearTIDS() = default;  // Used in FiniteElementLinearTIDS
@@ -119,6 +117,65 @@ class LagrangianSparseLinearTIDS : public LagrangianSparseDS {
                              Eigen::Ref<siconos::algebra::SiconosVector> v0)
       : LagrangianSparseDS{q0, v0} {}
 
+  /**
+   * @brief Utility function providing uniform access to the stiffness matrix.
+   *
+   * generic and efficient access to the underlying `SiconosSparseMatrix` object, avoiding any
+   * copy.
+   *
+   * @tparam F a callable type (e.g., lambda) taking a reference to
+   *           `SiconosSparseMatrix` or `const SiconosSparseMatrix&`.
+   *
+   * @param f the functor to apply to the matrix.
+   * @return whatever is returned by @p f.
+   *
+   * @throws std::runtime_error if no matrix (owned or external) is set.
+   *
+   * @note This function does not copy the matrix; it forwards a reference
+   *       to the actual internal or external object.
+   */
+  template <typename F>
+  decltype(auto) useStiffness(F&& f) const {
+    return siconos::algebra::visitSparseStorage(stiffnessMatrix_storage, std::forward<F>(f),
+                                                "stiffnessMatrix_storage");
+  }
+
+  /**
+   * @brief Utility function providing uniform access to the damping matrix.
+   *
+   * generic and efficient access to the underlying `SiconosSparseMatrix` object, avoiding any
+   * copy.
+   *
+   * @tparam F a callable type (e.g., lambda) taking a reference to
+   *           `SiconosSparseMatrix` or `const SiconosSparseMatrix&`.
+   *
+   * @param f the functor to apply to the matrix.
+   * @return whatever is returned by @p f.
+   *
+   * @throws std::runtime_error if no matrix (owned or external) is set.
+   *
+   * @note This function does not copy the matrix; it forwards a reference
+   *       to the actual internal or external object.
+   */
+  template <typename F>
+  decltype(auto) useDamping(F&& f) const {
+    return siconos::algebra::visitSparseStorage(dampingMatrix_storage, std::forward<F>(f),
+                                                "dampingMatrix_storage");
+  }
+
+  // template <typename F>
+  // decltype(auto) useStiffness(F&& f) {
+  //   if (owned_stiffnessMatrix_) return f(*owned_stiffnessMatrix_);
+  //   if (external_stiffnessMatrix_) return f(*external_mass_mat_);
+  //   throw std::runtime_error("mass not set");
+  // }
+  // template <typename F>
+  // decltype(auto) useDamping(F&& f) {
+  //   if (owned_dampingMatrix_) return f(*owned_dampingMatrix_);
+  //   if (external_dampingMatrix_) return f(*external_dampingMatrix_);
+  //   throw std::runtime_error("mass not set");
+  // }
+
  public:
   /** constructor from initial state and mass matrix only. Leads to \f$ M\dot v
    *  = F_{ext}(t) + p \f$ .
@@ -130,7 +187,20 @@ class LagrangianSparseLinearTIDS : public LagrangianSparseDS {
    */
   LagrangianSparseLinearTIDS(Eigen::Ref<siconos::algebra::SiconosVector> q0,
                              Eigen::Ref<siconos::algebra::SiconosVector> v0,
-                             const siconos::algebra::SiconosSparseMatrix &M);
+                             const siconos::algebra::SiconosSparseMatrix& M);
+
+  /** constructor from initial state and mass matrix only. Leads to \f$ M\dot v
+   *  = F_{ext}(t) + p \f$ .
+   * warning: M will be aliased into mass attribute --> mass memory not owned by the current
+   * object This should be used with care: input M must survive to the current object.
+   *
+   *  \param q0 initial coordinates
+   *  \param v0 initial velocity
+   *  \param M mass matrix
+   */
+  LagrangianSparseLinearTIDS(Eigen::Ref<siconos::algebra::SiconosVector> q0,
+                             Eigen::Ref<siconos::algebra::SiconosVector> v0,
+                             Eigen::Map<siconos::algebra::SiconosSparseMatrix>& M);
 
   /** destructor */
   ~LagrangianSparseLinearTIDS() noexcept = default;
@@ -145,7 +215,7 @@ class LagrangianSparseLinearTIDS : public LagrangianSparseDS {
    *
    *  \param K new stiffness matrix
    */
-  void setStiffnessMatrix(siconos::algebra::SiconosSparseMatrix &K);
+  void setStiffnessMatrixAlias(Eigen::Map<siconos::algebra::SiconosSparseMatrix>& K);
 
   /** Set a constant stiffness matrix for the system
    *  The input matrix is copied into the internal stiffness.
@@ -153,13 +223,23 @@ class LagrangianSparseLinearTIDS : public LagrangianSparseDS {
    *  \param newValue stiffness matrix
    *
    */
-  void setStiffnessMatrixWithCopy(const siconos::algebra::SiconosSparseMatrix &newValue);
+  template <typename T>
+  void setStiffnessMatrixCopy(T&& newValue) {
+    static_assert(std::is_same_v<std::decay_t<T>, siconos::algebra::SiconosSparseMatrix>,
+                  "Type must be SiconosSparseMatrix");
+
+    if (newValue.rows() != ndof_ || newValue.cols() != ndof_)
+      throw std::invalid_argument("Input stiffness matrix has wrong dimensions");
+
+    stiffnessMatrix_storage =
+        std::make_unique<siconos::algebra::SiconosSparseMatrix>(std::forward<T>(newValue));
+  }
 
   /** set the damping matrix. Warning: shared memory with input
    *
    *  \param C new damping matrix
    */
-  void setDampingMatrix(siconos::algebra::SiconosSparseMatrix &C);
+  void setDampingMatrixAlias(Eigen::Map<siconos::algebra::SiconosSparseMatrix>& C);
 
   /** Set a constant damping matrix for the system
    *  The input matrix is copied into the internal damping.
@@ -167,22 +247,62 @@ class LagrangianSparseLinearTIDS : public LagrangianSparseDS {
    *  \param newValue damping matrix
    *
    */
-  void setDampingMatrixWithCopy(const siconos::algebra::SiconosSparseMatrix &newValue);
+  template <typename T>
+  void setDampingMatrixCopy(T&& newValue) {
+    static_assert(std::is_same_v<std::decay_t<T>, siconos::algebra::SiconosSparseMatrix>,
+                  "Type must be SiconosSparseMatrix");
+
+    if (newValue.rows() != ndof_ || newValue.cols() != ndof_)
+      throw std::invalid_argument("Input damping matrix has wrong dimensions");
+
+    dampingMatrix_storage =
+        std::make_unique<siconos::algebra::SiconosSparseMatrix>(std::forward<T>(newValue));
+  }
 
   /** \return a read-only ref onto the stiffness matrix */
-  inline const siconos::algebra::SiconosSparseMatrix &stiffnessMatrix() const {
-    return *stiffnessMatrix_;
+  inline Eigen::Ref<const siconos::algebra::SiconosSparseMatrix> stiffnessMatrix() const {
+    return useStiffness([](Eigen::Ref<const siconos::algebra::SiconosSparseMatrix> M) {
+      return Eigen::Ref<const siconos::algebra::SiconosSparseMatrix>(M);
+    });
+  }
+
+  /*  \return a reference to the stiffness matrix
+
+    pybind11 use only!
+  */
+  const siconos::algebra::SiconosSparseMatrix& stiffnessMatrix_py() const {
+    return siconos::algebra::visitSparseStorage<siconos::algebra::AccessMode::OwnedOnly>(
+        stiffnessMatrix_storage,
+        [](const auto& M) -> const siconos::algebra::SiconosSparseMatrix& { return M; },
+        "stiffnessMatrix_storage");
   }
 
   /** True if stiffness matrix is defined */
-  bool hasStiffnessMatrix() const { return stiffnessMatrix_ != nullptr; }
+  bool hasStiffnessMatrix() const {
+    return !std::holds_alternative<std::monostate>(stiffnessMatrix_storage);
+  }
 
-  /** True if stiffness matrix is defined */
-  bool hasDampingMatrix() const { return dampingMatrix_ != nullptr; }
+  /** True if damping matrix is defined */
+  bool hasDampingMatrix() const {
+    return !std::holds_alternative<std::monostate>(dampingMatrix_storage);
+  }
 
-  /** \return a read-only ref onto the damping matrix */
-  inline const siconos::algebra::SiconosSparseMatrix &dampingMatrix() const {
-    return *dampingMatrix_;
+  /** \return a read-only ref onto the stiffness matrix */
+  inline Eigen::Ref<const siconos::algebra::SiconosSparseMatrix> dampingMatrix() const {
+    return useDamping([](Eigen::Ref<const siconos::algebra::SiconosSparseMatrix> M) {
+      return Eigen::Ref<const siconos::algebra::SiconosSparseMatrix>(M);
+    });
+  }
+
+  /*  \return a reference to the damping matrix
+
+    pybind11 use only!
+  */
+  const siconos::algebra::SiconosSparseMatrix& dampingMatrix_py() const {
+    return siconos::algebra::visitSparseStorage<siconos::algebra::AccessMode::OwnedOnly>(
+        dampingMatrix_storage,
+        [](const auto& M) -> const siconos::algebra::SiconosSparseMatrix& { return M; },
+        "dampingMatrix_storage");
   }
 
   /** Compute  \f$ F_{total}(v,q,t) = -Kq - Cv + f_{ext}(t)\f$
@@ -191,8 +311,8 @@ class LagrangianSparseLinearTIDS : public LagrangianSparseDS {
    *  \param q state
    *  \param time the current time
    */
-  void computeTotalForces(const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
-                          const Eigen::Ref<const siconos::algebra::SiconosVector> &q,
+  void computeTotalForces(const Eigen::Ref<const siconos::algebra::SiconosVector>& velocity,
+                          const Eigen::Ref<const siconos::algebra::SiconosVector>& q,
                           double time) override;
 
   /** \return true if the Dynamical system is linear.
@@ -203,7 +323,7 @@ class LagrangianSparseLinearTIDS : public LagrangianSparseDS {
    */
   void display(bool brief = true) const override;
 
-  Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
+  Type acceptType(types::FindType& ft) const override { return ft.visit(*this); }
 };
 }  // namespace siconos::modeling
 #endif  // LAGRANGIANTIDS_H

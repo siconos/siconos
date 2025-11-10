@@ -26,7 +26,7 @@
 #include "RelayNSL.hpp"
 #include "SiconosVector.hpp"
 #include "Simulation.hpp"
-#include "Tools.hpp"
+// #include "Tools.hpp"
 
 // // --- Numerics headers ---
 // #include "NonSmoothDrivers.h"
@@ -57,14 +57,14 @@ struct siconos::nonsmooth_formulations::Relay::_BoundsNSLEffect
       : _parent(p), _inter(inter), _pos(pos) {};
 
   void visit(const siconos::modeling::RelayNSL& nslaw) override {
-    for (unsigned i = 0; i < _inter->nonSmoothLaw()->size(); ++i) {
+    for (siconos::algebra::Index i = 0; i < _inter->nonSmoothLaw()->size(); ++i) {
       (*(_parent->lb()))(_pos + i) = nslaw.lb();
       (*(_parent->ub()))(_pos + i) = nslaw.ub();
     }
   }
 
   void visit(const siconos::modeling::ComplementarityConditionNSL& nslaw) override {
-    for (unsigned i = 0; i < _inter->nonSmoothLaw()->size(); ++i) {
+    for (siconos::algebra::Index i = 0; i < _inter->nonSmoothLaw()->size(); ++i) {
       (*(_parent->lb()))(_pos + i) = 0.0;
       (*(_parent->ub()))(_pos + i) = std::numeric_limits<double>::infinity();
     }

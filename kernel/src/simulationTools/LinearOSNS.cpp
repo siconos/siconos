@@ -384,10 +384,10 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
 
   inter->getExtraInteractionBlock(currentInteractionBlock);
 
-  unsigned int nslawSize = nslaw->size();
+  auto nslawSize = nslaw->size();
   // loop over the DS connected to the interaction.
   bool endl = false;
-  unsigned int pos = pos1;
+  auto pos = pos1;
   for (auto ds = ds1; !endl; ds = ds2) {
     assert(ds == ds1 || ds == ds2);
     endl = (ds == ds2);
@@ -558,10 +558,10 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeInteractionBlock(
     pos2 = indexSet->properties(vertex_inter).target_pos;
   }
 
-  unsigned int index1 = indexSet->index(indexSet->source(ed));
-  unsigned int index2 = indexSet->index(indexSet->target(ed));
-  unsigned int nslawSize1 = inter1->nonSmoothLaw()->size();
-  unsigned int nslawSize2 = inter2->nonSmoothLaw()->size();
+  auto index1 = indexSet->index(indexSet->source(ed));
+  auto index2 = indexSet->index(indexSet->target(ed));
+  auto nslawSize1 = inter1->nonSmoothLaw()->size();
+  auto nslawSize2 = inter2->nonSmoothLaw()->size();
 
   std::shared_ptr<siconos::algebra::SiconosMatrix> currentInteractionBlock;
 
@@ -864,7 +864,7 @@ bool siconos::nonsmooth_formulations::LinearOSNS::preCompute(double time) {
         auto& inter = *indexSet.bundle(*ui);
         // Get the position of inter-interactionBlock in the vector w
         // or z
-        unsigned int pos = indexSet.properties(*ui).absolute_position;
+        auto pos = indexSet.properties(*ui).absolute_position;
         // VA 30/08/2021  : Warning. the values of y_k and lambda_k that are stored in Memory
         // may be undefined at the first time step.
         const auto& yOutput_k = inter.y_k(inputOutputLevel());

@@ -211,7 +211,7 @@ void siconos::integrators::MoreauJeanBilbaoOSI::_initialize_iteration_matrix(
     double one = 1.;
     double two = 2.;
     double omega2k, sigmak, massk;
-    for (unsigned int k = 0; k < ndof; ++k) {
+    for (siconos::algebra::Index k = 0; k < ndof; ++k) {
       massk = 1.;
       sigmak = 0.;
       omega2k = 0.;
@@ -401,7 +401,7 @@ void siconos::integrators::MoreauJeanBilbaoOSI::updateState(const unsigned int) 
           v(itindex) = 0.0;
         }
       auto ndof = lldds.dimension();
-      for (unsigned int k = 0; k < ndof; ++k)
+      for (siconos::algebra::Index k = 0; k < ndof; ++k)
         v(k) = vfree(k) + v(k) * inv_iteration_matrix(k, k);
     } else
       v = vfree;

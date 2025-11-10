@@ -19,10 +19,9 @@
 
 #include <iostream>
 
-#include "BlockVector.hpp"
 #include "Interaction.hpp"
-#include "SiconosMatrix.hpp"
 #include "SiconosAlgebraAddons.hpp"  // for matrix-vector prod
+#include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 // #define DEBUG_NOCOLOR
 // #define DEBUG_STDOUT
@@ -52,7 +51,9 @@ siconos::modeling::LagrangianLinearTIR::LagrangianLinearTIR(
 void siconos::modeling::LagrangianLinearTIR::checkSize(const Interaction& inter) const {
   auto sizeY = inter.dimension();
 
-  if (!(jacobianhOver_q_view_) || jacobianhOver_q_view_->cols() != inter.getSizeOfDS() ||
+  if (!(jacobianhOver_q_view_) ||
+      jacobianhOver_q_view_->cols() !=
+          inter.getSizeOfDS() ||
       jacobianhOver_q_view_->rows() != sizeY)
     THROW_EXCEPTION(
         "siconos::modeling::LagrangianLinearTIR::checkSize inconsistent sizes "

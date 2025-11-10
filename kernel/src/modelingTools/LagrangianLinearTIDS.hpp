@@ -21,7 +21,7 @@
 #define LAGRANGIANTIDS_H
 
 #include "LagrangianDS.hpp"
-#include "SiconosPointers.hpp"
+
 
 namespace siconos::modeling {
 

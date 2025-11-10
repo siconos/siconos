@@ -1,7 +1,7 @@
 /* Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  *
- * Copyright 2024 INRIA.
+ * Copyright 2025 INRIA.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@
 #include "FunctionTypes.hpp"
 #include "SecondOrderDS.hpp"
 #include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
+#include "StorageTools.hpp"
 
 namespace siconos::modeling {
 
@@ -142,14 +144,11 @@ class LagrangianSparseDS : public SecondOrderDS {
   siconos::algebra::SiconosMemory velocityMemory_;
 
   /** mass matrix of the system (as a view onto memory)*/
-  std::shared_ptr<siconos::algebra::SiconosSparseMatrix> mass_mat_{nullptr};
-  //  std::shared_ptr<siconos::algebra::MapType> mass_view_{nullptr};
-
-  /** internal storage (optional) for the mass matrix */
-  // std::unique_ptr<std::vector<double>> mass_internal_storage_{nullptr};
+  siconos::algebra::SparseStorage mass_storage_{std::monostate{}};
 
   /** function wrapper used to compute mass */
   siconos::modeling::func_prototypes::FunctionV_Ms computemass_{nullptr};
+  siconos::modeling::func_prototypes::RFunction_V_Ms computemass_python_{nullptr};
 
   /** true if mass is required/set and constant */
   bool hasConstantMass_{false};
@@ -169,15 +168,14 @@ class LagrangianSparseDS : public SecondOrderDS {
   /** True if internal forces are  taken into account */
   bool hasFint_{false};
 
-  /** jacobianFintOver_q matrix (as a view onto memory)*/
-  // std::shared_ptr<siconos::algebra::MapType> jacobianFintOver_q_view_{nullptr};
-  std::shared_ptr<siconos::algebra::SiconosSparseMatrix> jacobianFintOver_q_mat_{nullptr};
-
-  /** internal storage (optional) for the jacobianFintOver_q matrix */
-  // std::unique_ptr<std::vector<double>> jacobianFintOver_q_internal_storage_{nullptr};
+  /** jacobianFintOver_q matrix */
+  siconos::algebra::SparseStorage jacobianFintOver_q_storage_{std::monostate{}};
+  //  std::shared_ptr<siconos::algebra::SiconosSparseMatrix> jacobianFintOver_q_mat_{nullptr};
 
   /** function wrapper used to compute jacobianFintOver_q */
   siconos::modeling::func_prototypes::FunctionVVS_Ms computejacobianFintOver_q_{nullptr};
+  siconos::modeling::func_prototypes::RFunctionVVS_Ms computejacobianFintOver_q_python_{
+      nullptr};
 
   /** true if jacobianFintOver_q is not set or set and constant */
   bool hasConstantJacobianFintOver_q_{true};
@@ -186,15 +184,17 @@ class LagrangianSparseDS : public SecondOrderDS {
   bool hasJacobianFintOver_q_{false};
 
   /** jacobianFintOver_velocity matrix (as a view onto memory)*/
-  // std::shared_ptr<siconos::algebra::MapType> jacobianFintOver_velocity_view_{nullptr};
-  std::shared_ptr<siconos::algebra::SiconosSparseMatrix> jacobianFintOver_velocity_mat_{
-      nullptr};
+  siconos::algebra::SparseStorage jacobianFintOver_velocity_storage_{std::monostate{}};
+  // std::shared_ptr<siconos::algebra::SiconosSparseMatrix> jacobianFintOver_velocity_mat_{
+  //     nullptr};
 
   /** internal storage (optional) for the jacobianFintOver_velocity matrix */
   // std::unique_ptr<std::vector<double>> jacobianFintOver_velocity_internal_storage_{nullptr};
 
   /** function wrapper used to compute jacobianFintOver_velocity */
   siconos::modeling::func_prototypes::FunctionVVS_Ms computejacobianFintOver_velocity_{
+      nullptr};
+  siconos::modeling::func_prototypes::RFunctionVVS_Ms computejacobianFintOver_velocity_python_{
       nullptr};
 
   /** true if jacobianFintOver_velocity is not set or required/set and constant */
@@ -228,14 +228,16 @@ class LagrangianSparseDS : public SecondOrderDS {
   bool hasFgyr_{false};
 
   /** jacobianFgyrOver_q matrix (as a view onto memory)*/
-  //  std::shared_ptr<siconos::algebra::MapType> jacobianFgyrOver_q_view_{nullptr};
-  std::shared_ptr<siconos::algebra::SiconosSparseMatrix> jacobianFgyrOver_q_mat_{nullptr};
+  // std::shared_ptr<siconos::algebra::SiconosSparseMatrix> jacobianFgyrOver_q_mat_{nullptr};
+  siconos::algebra::SparseStorage jacobianFgyrOver_q_storage_{std::monostate{}};
 
   /** internal storage (optional) for the jacobianFgyrOver_q matrix */
   // std::unique_ptr<std::vector<double>> jacobianFgyrOver_q_internal_storage_{nullptr};
 
   /** function wrapper used to compute jacobianFgyrOver_q */
   siconos::modeling::func_prototypes::FunctionVV_Ms computejacobianFgyrOver_q_{nullptr};
+  siconos::modeling::func_prototypes::RFunctionVV_Ms computejacobianFgyrOver_q_python_{
+      nullptr};
 
   /** true if jacobianFgyrOver_q is not set or required/set and constant */
   bool hasConstantJacobianFgyrOver_q_{true};
@@ -244,9 +246,9 @@ class LagrangianSparseDS : public SecondOrderDS {
   bool hasJacobianFgyrOver_q_{false};
 
   /** jacobianFgyrOver_velocity matrix (as a view onto memory)*/
-  //  std::shared_ptr<siconos::algebra::MapType> jacobianFgyrOver_velocity_view_{nullptr};
-  std::shared_ptr<siconos::algebra::SiconosSparseMatrix> jacobianFgyrOver_velocity_mat_{
-      nullptr};
+  // std::shared_ptr<siconos::algebra::SiconosSparseMatrix> jacobianFgyrOver_velocity_mat_{
+  //     nullptr};
+  siconos::algebra::SparseStorage jacobianFgyrOver_velocity_storage_{std::monostate{}};
 
   /** internal storage (optional) for the jacobianFgyrOver_velocity matrix */
   //  std::unique_ptr<std::vector<double>>
@@ -254,6 +256,8 @@ class LagrangianSparseDS : public SecondOrderDS {
 
   /** function wrapper used to compute jacobianFgyrOver_velocity */
   siconos::modeling::func_prototypes::FunctionVV_Ms computejacobianFgyrOver_velocity_{nullptr};
+  siconos::modeling::func_prototypes::RFunctionVV_Ms computejacobianFgyrOver_velocity_python_{
+      nullptr};
 
   /** true if jacobianFgyrOver_velocity is not set or required/set and constant */
   bool hasConstantJacobianFgyrOver_velocity_{true};
@@ -279,6 +283,126 @@ class LagrangianSparseDS : public SecondOrderDS {
 
   /** Default constructor */
   LagrangianSparseDS() = default;
+
+  /**
+   * @brief Utility function providing uniform access to the  \f$ \nabla_qF_{int} \f$ matrix.
+   *
+   * generic and efficient access to the underlying `SiconosSparseMatrix` object, avoiding any
+   * copy.
+   *
+   * @tparam F a callable type (e.g., lambda) taking a reference to
+   *           `SiconosSparseMatrix` or `const SiconosSparseMatrix&`.
+   *
+   * @param f the functor to apply to the matrix.
+   * @return whatever is returned by @p f.
+   *
+   * @throws std::runtime_error if no matrix (owned or external) is set.
+   *
+   * @note This function does not copy the matrix; it forwards a reference
+   *       to the actual internal or external object.
+   */
+  template <typename F>
+  decltype(auto) useJacobianFintOver_q(F&& f) const {
+    return siconos::algebra::visitSparseStorage(
+        jacobianFintOver_q_storage_, std::forward<F>(f), "jacobianFintOver_q_storage_");
+  }
+
+  template <typename F>
+  decltype(auto) useJacobianFintOver_q(F&& f) {
+    return siconos::algebra::visitSparseStorage(
+        jacobianFintOver_q_storage_, std::forward<F>(f), "jacobianFintOver_q_storage_");
+  }
+
+  /**
+   * @brief Utility function providing uniform access to the  \f$ \nabla_vF_{int} \f$ matrix.
+   *
+   * generic and efficient access to the underlying `SiconosSparseMatrix` object, avoiding any
+   * copy.
+   *
+   * @tparam F a callable type (e.g., lambda) taking a reference to
+   *           `SiconosSparseMatrix` or `const SiconosSparseMatrix&`.
+   *
+   * @param f the functor to apply to the matrix.
+   * @return whatever is returned by @p f.
+   *
+   * @throws std::runtime_error if no matrix (owned or external) is set.
+   *
+   * @note This function does not copy the matrix; it forwards a reference
+   *       to the actual internal or external object.
+   */
+  template <typename F>
+  decltype(auto) useJacobianFintOver_velocity(F&& f) const {
+    return siconos::algebra::visitSparseStorage(jacobianFintOver_velocity_storage_,
+                                                std::forward<F>(f),
+                                                "jacobianFintOver_velocity_storage_");
+  }
+
+  template <typename F>
+  decltype(auto) useJacobianFintOver_velocity(F&& f) {
+    return siconos::algebra::visitSparseStorage(jacobianFintOver_velocity_storage_,
+                                                std::forward<F>(f),
+                                                "jacobianFintOver_velocity_storage_");
+  }
+
+  /**
+   * @brief Utility function providing uniform access to the  \f$ \nabla_qF_{gyr} \f$ matrix.
+   *
+   * generic and efficient access to the underlying `SiconosSparseMatrix` object, avoiding any
+   * copy.
+   *
+   * @tparam F a callable type (e.g., lambda) taking a reference to
+   *           `SiconosSparseMatrix` or `const SiconosSparseMatrix&`.
+   *
+   * @param f the functor to apply to the matrix.
+   * @return whatever is returned by @p f.
+   *
+   * @throws std::runtime_error if no matrix (owned or external) is set.
+   *
+   * @note This function does not copy the matrix; it forwards a reference
+   *       to the actual internal or external object.
+   */
+  template <typename F>
+  decltype(auto) useJacobianFgyrOver_q(F&& f) const {
+    return siconos::algebra::visitSparseStorage(
+        jacobianFgyrOver_q_storage_, std::forward<F>(f), "jacobianFgyrOver_q_storage_");
+  }
+
+  template <typename F>
+  decltype(auto) useJacobianFgyrOver_q(F&& f) {
+    return siconos::algebra::visitSparseStorage(
+        jacobianFgyrOver_q_storage_, std::forward<F>(f), "jacobianFgyrOver_q_storage_");
+  }
+
+  /**
+   * @brief Utility function providing uniform access to the  \f$ \nabla_qF_{gyr} \f$ matrix.
+   *
+   * generic and efficient access to the underlying `SiconosSparseMatrix` object, avoiding any
+   * copy.
+   *
+   * @tparam F a callable type (e.g., lambda) taking a reference to
+   *           `SiconosSparseMatrix` or `const SiconosSparseMatrix&`.
+   *
+   * @param f the functor to apply to the matrix.
+   * @return whatever is returned by @p f.
+   *
+   * @throws std::runtime_error if no matrix (owned or external) is set.
+   *
+   * @note This function does not copy the matrix; it forwards a reference
+   *       to the actual internal or external object.
+   */
+  template <typename F>
+  decltype(auto) useJacobianFgyrOver_velocity(F&& f) const {
+    return siconos::algebra::visitSparseStorage(jacobianFgyrOver_velocity_storage_,
+                                                std::forward<F>(f),
+                                                "jacobianFgyrOver_velocity_storage_");
+  }
+
+  template <typename F>
+  decltype(auto) useJacobianFgyrOver_velocity(F&& f) {
+    return siconos::algebra::visitSparseStorage(jacobianFgyrOver_velocity_storage_,
+                                                std::forward<F>(f),
+                                                "jacobianFgyrOver_velocity_storage_");
+  }
 
  public:
   // /** constructor from initial state and velocity
@@ -343,8 +467,8 @@ class LagrangianSparseDS : public SecondOrderDS {
    *  \param time the current time
    */
   virtual void computeTotalForces(
-      const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
-      const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time);
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& velocity,
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& q, double time);
 
   /** Compute  \f$ \nabla_qF_{total}(v,q,t) \f$
    *
@@ -353,8 +477,8 @@ class LagrangianSparseDS : public SecondOrderDS {
    *  \param time the current time
    */
   virtual void computeJacobianTotalForcesOver_q(
-      const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
-      const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time);
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& velocity,
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& q, double time);
 
   /** Compute  \f$ \nabla_{\dot q}F_{total}(v,q,t) \f$
    *
@@ -363,8 +487,8 @@ class LagrangianSparseDS : public SecondOrderDS {
    *  \param time the current time
    */
   virtual void computeJacobianTotalForcesOver_velocity(
-      const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
-      const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time);
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& velocity,
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& q, double time);
 
   /** \return a read-only view on the generalized coordinates vector (size=dimension()) */
   inline const siconos::algebra::ConstMapVectorType q_read() const override {
@@ -378,7 +502,7 @@ class LagrangianSparseDS : public SecondOrderDS {
   //  *
   //  *  \return pointer on a siconos::algebra::SiconosVector
   //  */
-  inline siconos::algebra::SiconosVector &q_python() const { return *(state_q_[0]); }
+  inline siconos::algebra::SiconosVector& q_python() const { return *(state_q_[0]); }
 
   /** \return  a read-only view on velocity vector */
   inline const siconos::algebra::ConstMapVectorType velocity_read() const override {
@@ -389,7 +513,7 @@ class LagrangianSparseDS : public SecondOrderDS {
   std::shared_ptr<siconos::algebra::SiconosVector> velocity() const { return state_q_[1]; }
 
   // /** \return  a read-only view on velocity vector */
-  inline siconos::algebra::SiconosVector &velocity_python() const { return *(state_q_[1]); }
+  inline siconos::algebra::SiconosVector& velocity_python() const { return *(state_q_[1]); }
 
   /** \return a read-only view on the initial velocity vector */
   inline const siconos::algebra::ConstMapVectorType velocity0() const {
@@ -406,27 +530,55 @@ class LagrangianSparseDS : public SecondOrderDS {
   std::shared_ptr<siconos::algebra::SiconosVector> acceleration() const override {
     return state_q_[2];
   }
+  /**
+   * @brief Utility function providing uniform access to the mass matrix.
+   *
+   * generic and efficient access to the underlying `SiconosSparseMatrix` object, avoiding any
+   * copy.
+   *
+   * @tparam F a callable type (e.g., lambda) taking a reference to
+   *           `SiconosSparseMatrix` or `const SiconosSparseMatrix&`.
+   *
+   * @param f the functor to apply to the mass matrix.
+   * @return whatever is returned by @p f.
+   *
+   * @throws std::runtime_error if no mass matrix (owned or external) is set.
+   *
+   * @note This function does not copy the matrix; it forwards a reference
+   *       to the actual internal or external object.
+   */
+  template <typename F>
+  decltype(auto) useMass(F&& f) {
+    return siconos::algebra::visitSparseStorage(mass_storage_, std::forward<F>(f),
+                                                "mass_storage_");
+  }
+
+  template <typename F>
+  decltype(auto) useMass(F&& f) const {
+    return siconos::algebra::visitSparseStorage(mass_storage_, std::forward<F>(f),
+                                                "mass_storage_");
+  }
 
   /*  \return a read-only reference on the mass matrix */
-  inline const siconos::algebra::SiconosSparseMatrix &mass() const { return *mass_mat_; }
+  Eigen::Ref<const siconos::algebra::SiconosSparseMatrix> mass() const {
+    return useMass([](auto const& M) {
+      return Eigen::Ref<const siconos::algebra::SiconosSparseMatrix>(M);
+    });
+  }
 
-  const siconos::algebra::SiconosSparseMatrix &mass_py() const { return *mass_mat_; }
+  /*  \return a reference to the mass matrix
 
-  // inline const siconos::algebra::SiconosSparseMatrix &mass_py() const { return * _; }
+    pybind11 use only!
+  */
+  const siconos::algebra::SiconosSparseMatrix& mass_py() const {
+    return siconos::algebra::visitSparseStorage<siconos::algebra::AccessMode::OwnedOnly>(
+        mass_storage_,
+        [](const auto& M) -> const siconos::algebra::SiconosSparseMatrix& { return M; },
+        "mass_storage_");
+  }
 
   /** \return LU-factorization of the mass (pointer link) */
   inline auto LUMass() const { return LUMass_; }
-
-  /** Set a constant mass matrix for the system
-   *  Warning: no copy! Shared memory between internal mass and newValue
-   *  newValue must not be resized, deleted or its structure changed!
-   *
-   *  \param newValue mass matrix
-   *
-   */
-  void setConstantMass(siconos::algebra::SiconosSparseMatrix &newValue);
-  //  void setConstantMass(const std::shared_ptr<siconos::algebra::SiconosSparseMatrix>
-  //  &input);
 
   /** Set a constant mass matrix for the system
    *  The input matrix is copied into the internal mass.
@@ -434,7 +586,32 @@ class LagrangianSparseDS : public SecondOrderDS {
    *  \param newValue mass matrix
    *
    */
-  void setConstantMassWithCopy(const siconos::algebra::SiconosSparseMatrix &newValue);
+  template <typename T>
+  void setConstantMassCopy(T&& newValue) {
+    static_assert(std::is_same_v<std::decay_t<T>, siconos::algebra::SiconosSparseMatrix>,
+                  "Type must be SiconosSparseMatrix");
+
+    if (newValue.rows() != ndof_ || newValue.cols() != ndof_)
+      throw std::invalid_argument("Input mass matrix has wrong dimensions");
+
+    mass_storage_ =
+        std::make_unique<siconos::algebra::SiconosSparseMatrix>(std::forward<T>(newValue));
+    hasMass_ = hasConstantMass_ = true;
+    computemass_ = nullptr;
+    computemass_python_ = nullptr;
+    hasMass_ = hasConstantMass_ = true;
+    computemass_ = nullptr;
+    computemass_python_ = nullptr;
+  }
+
+  /** Set a constant mass matrix for the system
+   *  Warning: no copy! Shared memory between internal mass and newValue
+   *  newValue must not be resized, deleted or be subject to a structure change!
+   *
+   *  \param newValue mass matrix
+   *
+   */
+  void setConstantMassAlias(Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newValue);
 
   /** \return True if the mass matrix has been set (i.e. different from identity) */
   bool hasMass() const { return hasMass_; }
@@ -447,13 +624,39 @@ class LagrangianSparseDS : public SecondOrderDS {
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeMassFunction(const siconos::modeling::func_prototypes::FunctionV_Ms &fct);
+  // void setComputeMassFunction(const siconos::modeling::func_prototypes::FunctionV_Ms& fct);
+  // void setComputeMassFunction2(const siconos::modeling::func_prototypes::RFunction_V_Ms&
+  // fct);
+
+  template <typename Func>
+  void setComputeMassFunction(Func&& f) {
+    using Ret =
+        std::invoke_result_t<Func, const Eigen::Ref<const siconos::algebra::SiconosVector>&,
+                             siconos::algebra::SiconosSparseMatrix&>;
+    // Ensure that memory is properly allocated for mass_
+    // allocate owned matrix if none exists
+    if (!std::holds_alternative<siconos::algebra::OwnedSparse>(mass_storage_)) {
+      mass_storage_ = std::make_unique<siconos::algebra::SiconosSparseMatrix>(ndof_, ndof_);
+    }  // Note FP: find a way to call reserve to optimize future insertion?
+       // Or force an initial setFromTriplets?
+
+    hasMass_ = true;
+    hasConstantMass_ = false;
+
+    if constexpr (std::is_same_v<Ret, void>) {
+      computemass_ = std::forward<Func>(f);
+      computemass_python_ = nullptr;
+    } else {
+      computemass_python_ = std::forward<Func>(f);
+      computemass_ = nullptr;
+    }
+  }
 
   /** to compute the mass matrix operator \f$ M(q) \f$
    *
    *  \param position q vector
    */
-  virtual void computeMass(const Eigen::Ref<const siconos::algebra::SiconosVector> &position);
+  virtual void computeMass(const Eigen::Ref<const siconos::algebra::SiconosVector>& position);
 
   /** \return  a read-only view on \f$ F_{int}(\dot q, q, t) \f$  */
   inline auto fint() const {
@@ -467,33 +670,34 @@ class LagrangianSparseDS : public SecondOrderDS {
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeFintFunction(const siconos::modeling::func_prototypes::FunctionVVS_V &fct);
+  void setComputeFintFunction(const siconos::modeling::func_prototypes::FunctionVVS_V& fct);
 
   /** Update \f$ F_{int}(\dot q, q, t) \f$
    *  \param velocity \f$ \dot q \f$ vector
    *  \param position q vector
    *  \param time the current time
    */
-  void computeFint(const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
-                   const Eigen::Ref<const siconos::algebra::SiconosVector> &position,
+  void computeFint(const Eigen::Ref<const siconos::algebra::SiconosVector>& velocity,
+                   const Eigen::Ref<const siconos::algebra::SiconosVector>& position,
                    double time);
 
-  //   /** \return a read-only view on \f$ \nabla_qF_{int} \f$ matrix */
-  //   inline auto jacobianFintOver_q_view() const {
-  //     return siconos::algebra::ConstMapType(jacobianFintOver_q_view_->data(),
-  //                                           jacobianFintOver_q_view_->rows(),
-  //                                           jacobianFintOver_q_view_->cols());
-  //   }
+  /*  \return a read-only reference on the jacobian matrix */
+  inline Eigen::Ref<const siconos::algebra::SiconosSparseMatrix> jacobianFintOver_q() const {
+    return useJacobianFintOver_q([](auto const& M) {
+      return Eigen::Ref<const siconos::algebra::SiconosSparseMatrix>(M);
+    });
+  }
 
-  /** Set a constant \f$ \nabla_qF_{int} \f$
-   *  Warning: no copy! Shared memory between internal mass and newValue
-   *  newValue must not be resized, deleted or its structure changed!
-   *
-   *
-   *  \param newValue jacobianFintOver_q matrix
-   *
-   */
-  void setConstantJacobianFintOver_q(siconos::algebra::SiconosSparseMatrix &newValue);
+  /*  \return a reference to the jacobian matrix
+
+    pybind11 use only!
+  */
+  const siconos::algebra::SiconosSparseMatrix& jacobianFintOver_q_py() const {
+    return siconos::algebra::visitSparseStorage<siconos::algebra::AccessMode::OwnedOnly>(
+        jacobianFintOver_q_storage_,
+        [](const auto& M) -> const siconos::algebra::SiconosSparseMatrix& { return M; },
+        "jacobianFintOver_q_storage_");
+  }
 
   /** Set a constant \f$ \nabla_qF_{int} \f$
    *  The input matrix is copied.
@@ -501,8 +705,32 @@ class LagrangianSparseDS : public SecondOrderDS {
    *  \param newValue jacobianFintOver_q matrix
    *
    */
-  void setConstantJacobianFintOver_q_WithCopy(
-      const siconos::algebra::SiconosSparseMatrix &newValue);
+  template <typename T>
+  void setConstantJacobianFintOver_qCopy(T&& newValue) {
+    static_assert(std::is_same_v<std::decay_t<T>, siconos::algebra::SiconosSparseMatrix>,
+                  "Type must be SiconosSparseMatrix");
+
+    if (newValue.rows() != ndof_ || newValue.cols() != ndof_)
+      throw std::invalid_argument("Input jacobian matrix has wrong dimensions");
+    jacobianFintOver_q_storage_ =
+        std::make_unique<siconos::algebra::SiconosSparseMatrix>(std::forward<T>(newValue));
+    hasJacobianFintOver_q_ = true;
+    hasConstantJacobianFintOver_q_ = true;
+    computejacobianFintOver_q_ = nullptr;
+    computejacobianFintOver_q_python_ = nullptr;
+    is_jacobianRhsOver_x_uptodate_ = false;
+  }
+
+  /** Set a constant \f$ \nabla_qF_{int} \f$
+   *  Warning: no copy! Shared memory between internal matrix and newValue
+   *  newValue must not be resized, deleted or be subject to a structure change!
+   *
+   *
+   *  \param newValue jacobianFintOver_q matrix
+   *
+   */
+  void setConstantJacobianFintOver_qAlias(
+      Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newValue);
 
   /** \return True if  \f$ \nabla_qF_{int} \f$ matrix has been set */
   bool hasJacobianFintOver_q() const { return hasJacobianFintOver_q_; }
@@ -511,62 +739,130 @@ class LagrangianSparseDS : public SecondOrderDS {
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeJacobianFintOver_qFunction(
-      const siconos::modeling::func_prototypes::FunctionVVS_Ms &fct);
+  template <typename Func>
+  void setComputeJacobianFintOver_qFunction(Func&& f) {
+    using Ret =
+        std::invoke_result_t<Func, const Eigen::Ref<const siconos::algebra::SiconosVector>&,
+                             const Eigen::Ref<const siconos::algebra::SiconosVector>&, double,
+                             siconos::algebra::SiconosSparseMatrix&>;
+    if (!std::holds_alternative<siconos::algebra::OwnedSparse>(jacobianFintOver_q_storage_)) {
+      jacobianFintOver_q_storage_ =
+          std::make_unique<siconos::algebra::SiconosSparseMatrix>(ndof_, ndof_);
+    }
+
+    hasJacobianFintOver_q_ = true;
+    hasConstantJacobianFintOver_q_ = false;
+
+    if constexpr (std::is_same_v<Ret, void>) {
+      computejacobianFintOver_q_ = std::forward<Func>(f);
+      computejacobianFintOver_q_python_ = nullptr;
+    } else {
+      computejacobianFintOver_q_python_ = std::forward<Func>(f);
+      computejacobianFintOver_q_ = nullptr;
+    }
+  }
 
   /** to compute  \f$ \nabla_qF_{int}(\dot q, q, t) \f$
    *  \param velocity \f$ \dot q \f$ vector
    *  \param position q vector
    *  \param time the current time
    */
-  void computeJacobianFintOver_q(const Eigen::Ref<siconos::algebra::SiconosVector> &velocity,
-                                 const Eigen::Ref<siconos::algebra::SiconosVector> &position,
+  void computeJacobianFintOver_q(const Eigen::Ref<siconos::algebra::SiconosVector>& velocity,
+                                 const Eigen::Ref<siconos::algebra::SiconosVector>& position,
                                  double time);
 
-  //   /** \return \f$ \nabla_{\dot q}F_{int} \f$ (view onto memory) */
-  //   inline auto jacobianFintOver_velocity_view() const {
-  //     return siconos::algebra::ConstMapType(jacobianFintOver_velocity_view_->data(),
-  //                                           jacobianFintOver_velocity_view_->rows(),
-  //                                           jacobianFintOver_velocity_view_->cols());
-  //   }
+  /*  \return a read-only reference on the jacobian matrix */
+  inline Eigen::Ref<const siconos::algebra::SiconosSparseMatrix> jacobianFintOver_velocity()
+      const {
+    return useJacobianFintOver_velocity([](auto const& M) {
+      return Eigen::Ref<const siconos::algebra::SiconosSparseMatrix>(M);
+    });
+  }
 
-  /** Set a constant \f$ \nabla_{\dot q}F_{int} \f$ matrix for the system
-   *  Warning: no copy! Shared memory between internal mass and newValue
-   *  newValue must not be resized, deleted or its structure changed!
-   *
-   *  \param newValue \f$ \nabla_{\dot q}F_{int} \f$ matrix
-   *
-   */
-  void setConstantJacobianFintOver_velocity(siconos::algebra::SiconosSparseMatrix &newValue);
+  /*  \return a reference to the jacobian matrix
 
-  /** Set a constant \f$ \nabla_{\dot q}F_{int} \f$ matrix for the system
+    pybind11 use only!
+  */
+  const siconos::algebra::SiconosSparseMatrix& jacobianFintOver_velocity_py() const {
+    return siconos::algebra::visitSparseStorage<siconos::algebra::AccessMode::OwnedOnly>(
+        jacobianFintOver_velocity_storage_,
+        [](const auto& M) -> const siconos::algebra::SiconosSparseMatrix& { return M; },
+        "jacobianFintOver_velocity_storage_");
+  }
+
+  /** Set a constant \f$ \nabla_qF_{int} \f$
    *  The input matrix is copied.
    *
-   *  \param newValue \f$ \nabla_{\dot q}F_{int} \f$ matrix
+   *  \param newValue jacobianFintOver_velocity matrix
    *
    */
-  void setConstantJacobianFintOver_velocity_WithCopy(
-      const siconos::algebra::SiconosSparseMatrix &newValue);
+  template <typename T>
+  void setConstantJacobianFintOver_velocityCopy(T&& newValue) {
+    static_assert(std::is_same_v<std::decay_t<T>, siconos::algebra::SiconosSparseMatrix>,
+                  "Type must be SiconosSparseMatrix");
 
-  /** \return True if \f$ \nabla_{\dot q}F_{int} \f$ matrix has been set */
+    if (newValue.rows() != ndof_ || newValue.cols() != ndof_)
+      throw std::invalid_argument("Input jacobian matrix has wrong dimensions");
+    jacobianFintOver_velocity_storage_ =
+        std::make_unique<siconos::algebra::SiconosSparseMatrix>(std::forward<T>(newValue));
+    hasJacobianFintOver_velocity_ = true;
+    hasConstantJacobianFintOver_velocity_ = true;
+    computejacobianFintOver_velocity_ = nullptr;
+    computejacobianFintOver_velocity_python_ = nullptr;
+    is_jacobianRhsOver_x_uptodate_ = false;
+  }
+
+  /** Set a constant \f$ \nabla_qF_{int} \f$
+   *  Warning: no copy! Shared memory between internal matrix and newValue
+   *  newValue must not be resized, deleted or be subject to a structure change!
+   *
+   *
+   *  \param newValue jacobianFintOver_velocity matrix
+   *
+   */
+  void setConstantJacobianFintOver_velocityAlias(
+      Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newValue);
+
+  /** \return True if  \f$ \nabla_qF_{int} \f$ matrix has been set */
   bool hasJacobianFintOver_velocity() const { return hasJacobianFintOver_velocity_; }
 
   /** set a user-defined function to compute \f$ \nabla_{\dot q}F_{int} \f$
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeJacobianFintOver_velocityFunction(
-      const siconos::modeling::func_prototypes::FunctionVVS_Ms &fct);
+  template <typename Func>
+  void setComputeJacobianFintOver_velocityFunction(Func&& f) {
+    using Ret =
+        std::invoke_result_t<Func, const Eigen::Ref<const siconos::algebra::SiconosVector>&,
+                             const Eigen::Ref<const siconos::algebra::SiconosVector>&, double,
+                             siconos::algebra::SiconosSparseMatrix&>;
 
-  /** to compute \f$ \nabla_{\dot q}F_{int} \f$
-   *
+    if (!std::holds_alternative<siconos::algebra::OwnedSparse>(
+            jacobianFintOver_velocity_storage_)) {
+      jacobianFintOver_velocity_storage_ =
+          std::make_unique<siconos::algebra::SiconosSparseMatrix>(ndof_, ndof_);
+    }
+
+    hasJacobianFintOver_velocity_ = true;
+    hasConstantJacobianFintOver_velocity_ = false;
+
+    if constexpr (std::is_same_v<Ret, void>) {
+      computejacobianFintOver_velocity_ = std::forward<Func>(f);
+      computejacobianFintOver_velocity_python_ = nullptr;
+    } else {
+      computejacobianFintOver_velocity_python_ = std::forward<Func>(f);
+      computejacobianFintOver_velocity_ = nullptr;
+    }
+  }
+
+  /** to compute  \f$ \nabla_qF_{int}(\dot q, q, t) \f$
    *  \param velocity \f$ \dot q \f$ vector
    *  \param position q vector
    *  \param time the current time
    */
   void computeJacobianFintOver_velocity(
-      const Eigen::Ref<siconos::algebra::SiconosVector> &velocity,
-      const Eigen::Ref<siconos::algebra::SiconosVector> &position, double time);
+      const Eigen::Ref<siconos::algebra::SiconosVector>& velocity,
+      const Eigen::Ref<siconos::algebra::SiconosVector>& position, double time);
 
   /** \return  a read-only view on \f$ F_{gyr}(\dot q, q) \f$ */
   inline auto fgyr() const {
@@ -586,100 +882,190 @@ class LagrangianSparseDS : public SecondOrderDS {
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeFgyrFunction(const siconos::modeling::func_prototypes::FunctionVV_V &fct);
+  void setComputeFgyrFunction(const siconos::modeling::func_prototypes::FunctionVV_V& fct);
 
   /** Update \f$ F_{gyr}(\dot q, q) \f$
    *  \param velocity \f$ \dot q \f$ vector
    *  \param position q vector
    */
-  void computeFgyr(const Eigen::Ref<const siconos::algebra::SiconosVector> &velocity,
-                   const Eigen::Ref<const siconos::algebra::SiconosVector> &position);
+  void computeFgyr(const Eigen::Ref<const siconos::algebra::SiconosVector>& velocity,
+                   const Eigen::Ref<const siconos::algebra::SiconosVector>& position);
 
-  /** \return  \f$ \nabla_qF_{gyr} \f$ matrix (view onto memory) */
-  //   inline auto jacobianFgyrOver_q_view() const {
-  //     return siconos::algebra::ConstMapType(jacobianFgyrOver_q_view_->data(),
-  //                                           jacobianFgyrOver_q_view_->rows(),
-  //                                           jacobianFgyrOver_q_view_->cols());
-  //   }
+  /*  \return a read-only reference on the \f$ \nabla_qF_{gyr} \f$ matrix */
+  inline Eigen::Ref<const siconos::algebra::SiconosSparseMatrix> jacobianFgyrOver_q() const {
+    return useJacobianFgyrOver_q([](auto const& M) {
+      return Eigen::Ref<const siconos::algebra::SiconosSparseMatrix>(M);
+    });
+  }
 
-  /** Set a constant \f$ \nabla_qF_{gyr} \f$
-   *  Warning: no copy! Shared memory between internal mass and newValue
-   *  newValue must not be resized, deleted or its structure changed!
-   *
-   *  \param newValue jacobianFgyrOver_q matrix
-   *
-   */
-  void setConstantJacobianFgyrOver_q(siconos::algebra::SiconosSparseMatrix &newValue);
+  /*  \return a reference to the jacobian matrix
 
-  /** Set a constant \f$ \nabla_qF_{gyr} \f$
+    pybind11 use only!
+  */
+  const siconos::algebra::SiconosSparseMatrix& jacobianFgyrOver_q_py() const {
+    return siconos::algebra::visitSparseStorage<siconos::algebra::AccessMode::OwnedOnly>(
+        jacobianFgyrOver_q_storage_,
+        [](const auto& M) -> const siconos::algebra::SiconosSparseMatrix& { return M; },
+        "jacobianFgyrOver_q_storage_");
+  }
+
+  /** Set a constant \f$ \nabla_{\dot q}F_{gyr} \f$
    *  The input matrix is copied.
    *
    *  \param newValue jacobianFgyrOver_q matrix
    *
    */
-  void setConstantJacobianFgyrOver_q_WithCopy(
-      const siconos::algebra::SiconosSparseMatrix &newValue);
+  template <typename T>
+  void setConstantJacobianFgyrOver_qCopy(T&& newValue) {
+    static_assert(std::is_same_v<std::decay_t<T>, siconos::algebra::SiconosSparseMatrix>,
+                  "Type must be SiconosSparseMatrix");
 
-  /** \return True if  \f$ \nabla_qF_{gyr} \f$ matrix has been set */
+    if (newValue.rows() != ndof_ || newValue.cols() != ndof_)
+      throw std::invalid_argument("Input jacobian matrix has wrong dimensions");
+    jacobianFgyrOver_q_storage_ =
+        std::make_unique<siconos::algebra::SiconosSparseMatrix>(std::forward<T>(newValue));
+    hasJacobianFgyrOver_q_ = true;
+    hasConstantJacobianFgyrOver_q_ = true;
+    computejacobianFgyrOver_q_ = nullptr;
+    computejacobianFgyrOver_q_python_ = nullptr;
+    is_jacobianRhsOver_x_uptodate_ = false;
+  }
+
+  /** Set a constant \f$ \nabla_{\dot q}F_{gyr} \f$
+   *  Warning: no copy! Shared memory between internal matrix and newValue
+   *  newValue must not be resized, deleted or be subject to a structure change!
+   *
+   *
+   *  \param newValue jacobianFgyrOver_q matrix
+   *
+   */
+  void setConstantJacobianFgyrOver_qAlias(
+      Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newValue);
+
+  /** \return True if  \f$ \nabla_{\dot q}F_{gyr} \f$  matrix has been set */
   bool hasJacobianFgyrOver_q() const { return hasJacobianFgyrOver_q_; }
 
   /** set a user-defined function to compute \f$ \nabla_qF_{gyr}(\dot q, q) \f$
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeJacobianFgyrOver_qFunction(
-      const siconos::modeling::func_prototypes::FunctionVV_Ms &fct);
+  template <typename Func>
+  void setComputeJacobianFgyrOver_qFunction(Func&& f) {
+    using Ret =
+        std::invoke_result_t<Func, const Eigen::Ref<const siconos::algebra::SiconosVector>&,
+                             const Eigen::Ref<const siconos::algebra::SiconosVector>&,
+                             siconos::algebra::SiconosSparseMatrix&>;
+    if (!std::holds_alternative<siconos::algebra::OwnedSparse>(jacobianFgyrOver_q_storage_)) {
+      jacobianFgyrOver_q_storage_ =
+          std::make_unique<siconos::algebra::SiconosSparseMatrix>(ndof_, ndof_);
+    }
+    hasJacobianFgyrOver_q_ = true;
+    hasConstantJacobianFgyrOver_q_ = false;
 
-  /** to compute  \f$ \nabla_qF_{gyr}(\dot q, q, t) \f$
+    if constexpr (std::is_same_v<Ret, void>) {
+      computejacobianFgyrOver_q_ = std::forward<Func>(f);
+      computejacobianFgyrOver_q_python_ = nullptr;
+    } else {
+      computejacobianFgyrOver_q_python_ = std::forward<Func>(f);
+      computejacobianFgyrOver_q_ = nullptr;
+    }
+  }
+
+  /** to compute  \f$ \nabla_vF_{gyr}(\dot q, q) \f$
    *  \param velocity \f$ \dot q \f$ vector
    *  \param position q vector
    */
-  void computeJacobianFgyrOver_q(const Eigen::Ref<siconos::algebra::SiconosVector> &velocity,
-                                 const Eigen::Ref<siconos::algebra::SiconosVector> &position);
+  void computeJacobianFgyrOver_q(const Eigen::Ref<siconos::algebra::SiconosVector>& velocity,
+                                 const Eigen::Ref<siconos::algebra::SiconosVector>& position);
 
-  //   /** \return \f$ \nabla_{\dot q}F_{gyr} \f$ (view onto memory) */
-  //   inline auto jacobianFgyrOver_velocity_view() const {
-  //     return siconos::algebra::ConstMapType(jacobianFgyrOver_velocity_view_->data(),
-  //                                           jacobianFgyrOver_velocity_view_->rows(),
-  //                                           jacobianFgyrOver_velocity_view_->cols());
-  //   }
+  /*  \return a read-only reference on the jacobian matrix  \f$ \nabla_vF_{gyr} \f$*/
+  inline Eigen::Ref<const siconos::algebra::SiconosSparseMatrix> jacobianFgyrOver_velocity()
+      const {
+    return useJacobianFgyrOver_velocity([](auto const& M) {
+      return Eigen::Ref<const siconos::algebra::SiconosSparseMatrix>(M);
+    });
+  }
 
-  /** Set a constant \f$ \nabla_{\dot q}F_{gyr} \f$ matrix for the system
-   *  Warning: no copy! Shared memory between internal mass and newValue
-   *  newValue must not be resized, deleted or its structure changed!
-   *
-   *  \param newValue \f$ \nabla_{\dot q}F_{gyr} \f$ matrix
-   *
-   */
-  void setConstantJacobianFgyrOver_velocity(siconos::algebra::SiconosSparseMatrix &newValue);
+  /*  \return a reference to the jacobian matrix  \f$ \nabla_qF_{gyr} \f$
 
-  /** Set a constant \f$ \nabla_{\dot q}F_{gyr} \f$ matrix for the system
+    pybind11 use only!
+  */
+  const siconos::algebra::SiconosSparseMatrix& jacobianFgyrOver_velocity_py() const {
+    return siconos::algebra::visitSparseStorage<siconos::algebra::AccessMode::OwnedOnly>(
+        jacobianFgyrOver_velocity_storage_,
+        [](const auto& M) -> const siconos::algebra::SiconosSparseMatrix& { return M; },
+        "jacobianFgyrOver_velocity_storage_");
+  }
+
+  /** Set a constant \f$ \nabla_qF_{gyr} \f$
    *  The input matrix is copied.
    *
-   *  \param newValue \f$ \nabla_{\dot q}F_{gyr} \f$ matrix
+   *  \param newValue jacobianFgyrOver_velocity matrix
    *
    */
-  void setConstantJacobianFgyrOver_velocity_WithCopy(
-      const siconos::algebra::SiconosSparseMatrix &newValue);
+  template <typename T>
+  void setConstantJacobianFgyrOver_velocityCopy(T&& newValue) {
+    static_assert(std::is_same_v<std::decay_t<T>, siconos::algebra::SiconosSparseMatrix>,
+                  "Type must be SiconosSparseMatrix");
 
-  /** \return True if \f$ \nabla_{\dot q}F_{gyr} \f$ matrix has been set */
+    if (newValue.rows() != ndof_ || newValue.cols() != ndof_)
+      throw std::invalid_argument("Input jacobian matrix has wrong dimensions");
+    jacobianFgyrOver_velocity_storage_ =
+        std::make_unique<siconos::algebra::SiconosSparseMatrix>(std::forward<T>(newValue));
+    hasJacobianFgyrOver_velocity_ = true;
+    hasConstantJacobianFgyrOver_velocity_ = true;
+    computejacobianFgyrOver_velocity_ = nullptr;
+    computejacobianFgyrOver_velocity_python_ = nullptr;
+    is_jacobianRhsOver_x_uptodate_ = false;
+  }
+
+  /** Set a constant \f$ \nabla_qF_{gyr} \f$
+   *  Warning: no copy! Shared memory between internal matrix and newValue
+   *  newValue must not be resized, deleted or be subject to a structure change!
+   *
+   *
+   *  \param newValue jacobianFgyrOver_velocity matrix
+   *
+   */
+  void setConstantJacobianFgyrOver_velocityAlias(
+      Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newValue);
+
+  /** \return True if  \f$ \nabla_qF_{gyr}(\dot q, q) \f$matrix has been set */
   bool hasJacobianFgyrOver_velocity() const { return hasJacobianFgyrOver_velocity_; }
 
-  /** set a user-defined function to compute \f$ \nabla_{\dot q}F_{gyr} \f$
+  /** set a user-defined function to compute \f$ \nabla_qF_{gyr}(\dot q, q) \f$
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeJacobianFgyrOver_velocityFunction(
-      const siconos::modeling::func_prototypes::FunctionVV_Ms &fct);
+  template <typename Func>
+  void setComputeJacobianFgyrOver_velocityFunction(Func&& f) {
+    using Ret =
+        std::invoke_result_t<Func, const Eigen::Ref<const siconos::algebra::SiconosVector>&,
+                             const Eigen::Ref<const siconos::algebra::SiconosVector>&,
+                             siconos::algebra::SiconosSparseMatrix&>;
+    if (!std::holds_alternative<siconos::algebra::OwnedSparse>(
+            jacobianFgyrOver_velocity_storage_)) {
+      jacobianFgyrOver_velocity_storage_ =
+          std::make_unique<siconos::algebra::SiconosSparseMatrix>(ndof_, ndof_);
+    }
+    hasJacobianFgyrOver_velocity_ = true;
+    hasConstantJacobianFgyrOver_velocity_ = false;
 
-  /** to compute \f$ \nabla_{\dot q}F_{gyr} \f$
-   *
+    if constexpr (std::is_same_v<Ret, void>) {
+      computejacobianFgyrOver_velocity_ = std::forward<Func>(f);
+      computejacobianFgyrOver_velocity_python_ = nullptr;
+    } else {
+      computejacobianFgyrOver_velocity_python_ = std::forward<Func>(f);
+      computejacobianFgyrOver_velocity_ = nullptr;
+    }
+  }
+  /** to compute  \f$ \nabla_{velocity}F_{gyr}(\dot q, q) \f$
    *  \param velocity \f$ \dot q \f$ vector
    *  \param position q vector
    */
   void computeJacobianFgyrOver_velocity(
-      const Eigen::Ref<siconos::algebra::SiconosVector> &velocity,
-      const Eigen::Ref<siconos::algebra::SiconosVector> &position);
+      const Eigen::Ref<siconos::algebra::SiconosVector>& velocity,
+      const Eigen::Ref<siconos::algebra::SiconosVector>& position);
 
   /** \return  a read-only view on \f$ F_{ext}(t) \f$ */
   inline auto fext() const {
@@ -699,7 +1085,7 @@ class LagrangianSparseDS : public SecondOrderDS {
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeFextFunction(const siconos::modeling::func_prototypes::FunctionS_V &fct);
+  void setComputeFextFunction(const siconos::modeling::func_prototypes::FunctionS_V& fct);
 
   /** Update external forces values
    *
@@ -738,31 +1124,31 @@ class LagrangianSparseDS : public SecondOrderDS {
   }
 
   /** \return a read-only reference on \f$  \nabla_qF_{total}(v,q,t) \f$ */
-  inline const siconos::algebra::SiconosSparseMatrix &jacobianTotalForcesOver_q() const {
+  inline const siconos::algebra::SiconosSparseMatrix& jacobianTotalForcesOver_q() const {
     return *jacobianTotalForcesOver_q_;
   }
 
   /** \return a read-only reference on \f$ \nabla_{\dot q}F_{total}(v,q,t) \f$ */
-  inline const siconos::algebra::SiconosSparseMatrix &jacobianTotalForcesOver_velocity()
+  inline const siconos::algebra::SiconosSparseMatrix& jacobianTotalForcesOver_velocity()
       const {
     return *jacobianTotalForcesOver_velocity_;
   }
 
   /** \return last saved (memory) values of the state vector*/
-  inline const siconos::algebra::SiconosMemory &qMemory() override { return qMemory_; }
+  inline const siconos::algebra::SiconosMemory& qMemory() override { return qMemory_; }
 
   /** \return last saved (memory) values of the velocity vector*/
-  inline const siconos::algebra::SiconosMemory &velocityMemory() { return velocityMemory_; }
+  inline const siconos::algebra::SiconosMemory& velocityMemory() { return velocityMemory_; }
 
   /** \return last saved (memory) values of p[level] vector
    * \param level required index for p
    */
-  inline const siconos::algebra::SiconosMemory &pMemory(unsigned int level) {
+  inline const siconos::algebra::SiconosMemory& pMemory(unsigned int level) {
     return pMemory_[level];
   }
 
   /** \return last saved (memory) values of the total forces vector*/
-  inline const siconos::algebra::SiconosMemory &forcesMemory() override {
+  inline const siconos::algebra::SiconosMemory& forcesMemory() override {
     return totalForcesMemory_;
   }
 
@@ -807,10 +1193,10 @@ class LagrangianSparseDS : public SecondOrderDS {
   void init_lu_mass() override;
 
   // visitors hook
-  virtual void accept(dynamical_systems::Visitor &tourist) const override {
+  virtual void accept(dynamical_systems::Visitor& tourist) const override {
     tourist.visit(*this);
   }
-  Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
+  Type acceptType(types::FindType& ft) const override { return ft.visit(*this); }
 };
 
 }  // namespace siconos::modeling

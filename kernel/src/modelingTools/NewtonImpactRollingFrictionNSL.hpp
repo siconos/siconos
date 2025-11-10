@@ -51,7 +51,8 @@ class NewtonImpactRollingFrictionNSL : public NonSmoothLaw {
    *
    *  \param size size of the ns law
    */
-  explicit NewtonImpactRollingFrictionNSL(unsigned int size) : NonSmoothLaw(size){};
+  explicit NewtonImpactRollingFrictionNSL(siconos::algebra::Index size)
+      : NonSmoothLaw(size) {};
 
   /** constructor with the value of the NewtonImpactRollingFrictionNSL
    *  attributes \param en double : normal e coefficient
@@ -59,11 +60,11 @@ class NewtonImpactRollingFrictionNSL : public NonSmoothLaw {
    *  \param et double tangent e coefficient
    *  \param mu double : friction coefficient
    *  \param muR double : rolling friction coefficient
-   *  \param size unsigned int: size of the ns law
+   *  \param size size of the ns law
    */
   NewtonImpactRollingFrictionNSL(double en, double et, double mu, double muR,
-                                 unsigned int size)
-      : NonSmoothLaw(size), _en(en), _et(et), _mu(mu), _muR(muR){};
+                                 siconos::algebra::Index size)
+      : NonSmoothLaw(size), _en(en), _et(et), _mu(mu), _muR(muR) {};
 
   /** Destructor */
   ~NewtonImpactRollingFrictionNSL() noexcept = default;
@@ -123,9 +124,11 @@ class NewtonImpactRollingFrictionNSL : public NonSmoothLaw {
   void display() const override;
 
   // visitors hook
-    virtual void accept(nonsmooth_laws::Visitor &tourist) const override { tourist.visit(*this); }
+  virtual void accept(nonsmooth_laws::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 
-  Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
+  Type acceptType(types::FindType& ft) const override { return ft.visit(*this); }
 };
 }  // namespace siconos::modeling
 

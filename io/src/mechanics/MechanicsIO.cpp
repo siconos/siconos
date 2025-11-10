@@ -542,7 +542,7 @@ siconos::algebra::SiconosMatrix siconos::io::MechanicsIO::visitAllVerticesForVec
   typename G::VIterator vi, viend;
   unsigned int current_col;
 
-  long max_size = 0;
+  siconos::algebra::Index max_size = 0;
   for (current_col = 0, std::tie(vi, viend) = graph.vertices(); vi != viend;
        ++vi, ++current_col) {
     auto ds = std::dynamic_pointer_cast<siconos::modeling::SecondOrderDS>(graph.bundle(*vi));

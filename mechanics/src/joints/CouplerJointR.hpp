@@ -44,8 +44,8 @@ class CouplerJointR : public NewtonEulerJointR {
   std::shared_ptr<siconos::algebra::SiconosVector> _ref1{nullptr};
   std::shared_ptr<siconos::algebra::SiconosVector> _ref2{nullptr};
 
-  unsigned int _dof1{0}, _dof2{0};
-  unsigned int _ref1_index{0}, _ref2_index{0};
+  siconos::algebra::Index _dof1{0}, _dof2{0};
+  siconos::algebra::Index _ref1_index{0}, _ref2_index{0};
   double _ratio{0.}, _offset{0.};
 
   /** An internal helper function to assign reference vectors during
@@ -67,21 +67,22 @@ class CouplerJointR : public NewtonEulerJointR {
  public:
   /** Initialize a coupler. See setReferences() for an explanation of
    *  the parameters. */
-  CouplerJointR(std::shared_ptr<NewtonEulerJointR> joint1, unsigned int dof1,
-                std::shared_ptr<NewtonEulerJointR> joint2, unsigned int dof2, double ratio,
+  CouplerJointR(std::shared_ptr<NewtonEulerJointR> joint1, siconos::algebra::Index dof1,
+                std::shared_ptr<NewtonEulerJointR> joint2, siconos::algebra::Index dof2,
+                double ratio,
                 std::optional<siconos::algebra::SiconosVector> ref1 = std::nullopt,
-                unsigned int ref1_index = 0,
+                siconos::algebra::Index ref1_index = 0,
                 std::optional<siconos::algebra::SiconosVector> ref2 = std::nullopt,
-                unsigned int ref2_index = 0);
+                siconos::algebra::Index ref2_index = 0);
 
   /** Initialize a coupler. See setReferences() for an explanation of
    *  the parameters. */
-  CouplerJointR(std::shared_ptr<NewtonEulerJointR> joint1, unsigned int dof1,
-                std::shared_ptr<NewtonEulerJointR> joint2, unsigned int dof2, double ratio,
-                std::shared_ptr<siconos::modeling::NewtonEulerDS> refds1,
-                unsigned int ref1_index,
+  CouplerJointR(std::shared_ptr<NewtonEulerJointR> joint1, siconos::algebra::Index dof1,
+                std::shared_ptr<NewtonEulerJointR> joint2, siconos::algebra::Index dof2,
+                double ratio, std::shared_ptr<siconos::modeling::NewtonEulerDS> refds1,
+                siconos::algebra::Index ref1_index,
                 std::shared_ptr<siconos::modeling::NewtonEulerDS> refds2,
-                unsigned int ref2_index);
+                siconos::algebra::Index ref2_index);
 
   ~CouplerJointR() noexcept = default;
 
@@ -95,10 +96,10 @@ class CouplerJointR : public NewtonEulerJointR {
                 Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
   /* Return the joint DoF index assigned to the first DoF. */
-  unsigned int dof1() { return _dof1; }
+  siconos::algebra::Index dof1() { return _dof1; }
 
   /* Return the joint DoF index assigned to the second DoF. */
-  unsigned int dof2() { return _dof2; }
+  siconos::algebra::Index dof2() { return _dof2; }
 
   /* Return the first reference joint assigned to this friction relation. */
   auto joint1() { return _joint1; }
@@ -130,12 +131,12 @@ class CouplerJointR : public NewtonEulerJointR {
    *  \param ref2_index Must be 0 or 1, depending on where ref2
    *                    appears in joint2.
    */
-  void setReferences(std::shared_ptr<NewtonEulerJointR> joint1, unsigned int dof1,
-                     std::shared_ptr<NewtonEulerJointR> joint2, unsigned int dof2,
+  void setReferences(std::shared_ptr<NewtonEulerJointR> joint1, siconos::algebra::Index dof1,
+                     std::shared_ptr<NewtonEulerJointR> joint2, siconos::algebra::Index dof2,
                      std::shared_ptr<siconos::algebra::SiconosVector> ref1,
-                     unsigned int ref1_index,
+                     siconos::algebra::Index ref1_index,
                      std::shared_ptr<siconos::algebra::SiconosVector> ref2,
-                     unsigned int ref2_index);
+                     siconos::algebra::Index ref2_index);
 
   /** Set reference joints and vectors.  This constraint maintains the
    *  equality theta2=theta1*ratio; theta1 is measured by joint1 with
@@ -164,12 +165,12 @@ class CouplerJointR : public NewtonEulerJointR {
    *  \param ref2_index Must be 0 or 1, depending on where ref2
    *                    appears in joint2.
    */
-  void setReferences(std::shared_ptr<NewtonEulerJointR> joint1, unsigned int dof1,
-                     std::shared_ptr<NewtonEulerJointR> joint2, unsigned int dof2,
+  void setReferences(std::shared_ptr<NewtonEulerJointR> joint1, siconos::algebra::Index dof1,
+                     std::shared_ptr<NewtonEulerJointR> joint2, siconos::algebra::Index dof2,
                      std::shared_ptr<siconos::modeling::NewtonEulerDS> refds1,
-                     unsigned int ref1_index,
+                     siconos::algebra::Index ref1_index,
                      std::shared_ptr<siconos::modeling::NewtonEulerDS> refds2,
-                     unsigned int ref2_index);
+                     siconos::algebra::Index ref2_index);
 
   /* Set the gear ratio. */
   void setRatio(double ratio);
@@ -191,14 +192,14 @@ class CouplerJointR : public NewtonEulerJointR {
 
      \return the number of constraints
    */
-  virtual unsigned int numberOfConstraints() const override { return 1; }
+  virtual siconos::algebra::Index numberOfConstraints() const override { return 1; }
 
   /**
      Get the number of degrees of freedom defined in the joint
 
      \return the number of degrees of freedom (DoF)
    */
-  virtual unsigned int numberOfDoF() const override { return 1; }
+  virtual siconos::algebra::Index numberOfDoF() const override { return 1; }
 
   /**
      Return the type of a degree of freedom of this joint.

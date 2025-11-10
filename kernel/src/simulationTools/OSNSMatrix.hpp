@@ -110,10 +110,10 @@ class OSNSMatrix {
   ACCEPT_SERIALIZATION(OSNSMatrix);
 
   /** number of rows */
-  unsigned int _dimRow{0};
+  siconos::algebra::Index _dimRow{0};
 
   /** number of columns */
-  unsigned int _dimColumn{0};
+  siconos::algebra::Index _dimColumn{0};
 
   /** Storage type used for the present matrix */
   NM_types _storageType{NM_DENSE};
@@ -137,7 +137,8 @@ class OSNSMatrix {
    *  \return the dimension of the problem (or size of the matrix),
    *  computed as the sum of the nslaw of all the Interaction in the indexSet
    */
-  virtual unsigned updateSizeAndPositions(siconos::graphs::InteractionsGraph& indexSet);
+  virtual siconos::algebra::Index updateSizeAndPositions(
+      siconos::graphs::InteractionsGraph& indexSet);
 
   /** For each DynamicalSystem in the graph, compute its absolute position
    *
@@ -145,7 +146,8 @@ class OSNSMatrix {
    *  \return the dimension of the problem (or size of the matrix),
    *  computed as the sum of the size of all DS in the indexSet
    */
-  virtual unsigned updateSizeAndPositions(siconos::graphs::DynamicalSystemsGraph& DSG);
+  virtual siconos::algebra::Index updateSizeAndPositions(
+      siconos::graphs::DynamicalSystemsGraph& DSG);
 
  private:
   // Rule of five
@@ -166,7 +168,7 @@ class OSNSMatrix {
    *  \param stor storage type (NM_DENSE or
    * NM_SPARSE_BLOCK)
    */
-  OSNSMatrix(unsigned int n, unsigned int m, NM_types stor);
+  OSNSMatrix(siconos::algebra::Index n, siconos::algebra::Index m, NM_types stor);
 
   /** Constructor from index set and map
    *
@@ -186,21 +188,17 @@ class OSNSMatrix {
   virtual ~OSNSMatrix() noexcept = default;
 
   /** \return number of rows */
-  inline unsigned int rows() const { return _dimRow; };
+  inline siconos::algebra::Index rows() const { return _dimRow; };
 
   /** set dimension of the square matrix
-   *
-   *  \return unsigned int
+   *  \param size the dimension
    */
-  inline void setSize(unsigned int size) { _dimRow = size; };
+  inline void setSize(siconos::algebra::Index size) { _dimRow = size; };
 
   /** \return number of columns of the matrix */
-  inline unsigned int cols() const { return _dimColumn; };
+  inline siconos::algebra::Index cols() const { return _dimColumn; };
 
-  /** get the type of storage for current matrix
-   *
-   *  \return unsigned int
-   */
+  /** \return the type of storage for current matrix */
   inline NM_types storagetype() const { return _storageType; };
 
   /** set which type of storage will be used for current matrix

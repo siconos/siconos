@@ -52,7 +52,7 @@ We start by setting some parameters, like the number of balls, their initial pos
 
   // User-defined main parameters 
   unsigned int dsNumber = 10;      // the number of dynamical systems 
-  unsigned int nDof = 3;           // degrees of freedom for beads
+  int nDof = 3;           // degrees of freedom for beads
   double increment_position = 1;   // initial position increment from one DS to the following
   double increment_velocity = 0;   // initial velocity increment from one DS to the following
   double t0 = 0;                   // initial computation time

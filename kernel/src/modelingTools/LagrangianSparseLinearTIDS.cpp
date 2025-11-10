@@ -33,11 +33,48 @@ siconos::modeling::LagrangianSparseLinearTIDS::LagrangianSparseLinearTIDS(
   hasConstantMass_ = true;
   hasMass_ = true;
   computemass_ = nullptr;
-  mass_mat_ = std::make_shared<siconos::algebra::SiconosSparseMatrix>(newmass);
+  setConstantMassCopy(newmass);
 };
 
+siconos::modeling::LagrangianSparseLinearTIDS::LagrangianSparseLinearTIDS(
+    Eigen::Ref<siconos::algebra::SiconosVector> q0,
+    Eigen::Ref<siconos::algebra::SiconosVector> v0,
+    Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newmass)
+    : LagrangianSparseDS(q0, v0) {
+  hasConstantMass_ = true;
+  hasMass_ = true;
+  computemass_ = nullptr;
+  setConstantMassAlias(newmass);
+};
+
+void siconos::modeling::LagrangianSparseLinearTIDS::setStiffnessMatrixAlias(
+    Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newValue) {
+  /**  Must:
+
+   - create the Map (view onto memory handled by newValue) for mass
+   - set the corresponding booleans
+   - reset internal storage (should already be null but who knows ...)
+   */
+
+  stiffnessMatrix_storage =
+      std::make_shared<Eigen::Map<siconos::algebra::SiconosSparseMatrix>>(newValue);
+}
+
+void siconos::modeling::LagrangianSparseLinearTIDS::setDampingMatrixAlias(
+    Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newValue) {
+  /**  Must:
+
+   - create the Map (view onto memory handled by newValue) for mass
+   - set the corresponding booleans
+   - reset internal storage (should already be null but who knows ...)
+   */
+
+  dampingMatrix_storage =
+      std::make_shared<Eigen::Map<siconos::algebra::SiconosSparseMatrix>>(newValue);
+}
+
 // Note FP: if required, add another constructor with shared memory between input M and
-// internal mass matrix See for example LagrangianSparseDS::setConstantMass.
+// internal mass matrix See for example LagrangianSparseDS::setConstantMassAlias.
 
 void siconos::modeling::LagrangianSparseLinearTIDS::initRhs(double time) {
   // dim
@@ -73,59 +110,61 @@ void siconos::modeling::LagrangianSparseLinearTIDS::initRhs(double time) {
   }
 
   // Compute mass and LU factorization
-  if (mass_mat_) {
+  if (hasMass_) {
     // LU factorization
-    LUMass_ = std::make_shared<siconos::algebra::SiconosSparseLUMatrix>(*mass_mat_);
+    LUMass_ = std::make_shared<siconos::algebra::SiconosSparseLUMatrix>(mass());
     hasLUMass_ = true;
   }
 
   computeRhs(time);
 
   // The jacobian is saved in a flattened version, as a vector
+  // which contains the concatenation of the columns of the real matrix
   jacobianRhsOver_x_.resize(x_size_ * x_size_);
-
-  // Fill null and identity part
   jacobianRhsOver_x_.setZero();
-  for (unsigned int j = 0; j < ndof_; ++j) {
-    jacobianRhsOver_x_((ndof_ + j) * x_size_ + j) = 1.0;
-  }
+
+  // A lambda to compute the position in jacobian vector from the
+  // coordinates in the "real" jacobian matrix.
+  auto idx = [&](int row, int col) { return col * (2 * ndof_) + row; };
+  // Upper-left block of the jacobian=0. Nothing to be done
+  // Upper-right block = identity
+  for (Eigen::Index i = 0; i < ndof_; ++i) jacobianRhsOver_x_(idx(i, ndof_ + i)) = 1.0;
+
   // - Fill parts corresponding to the jacobians of total forces -
   // mass and lu_mass are up to date since we have already called init_lu_mass
+  // in computeRhs()
+
   if (hasMass()) {
     // In that case, we'll need a buffer to save inv(Mass).jacobian_qForces and
     // inv(Mass).jacobian_v Forces
 
-    siconos::algebra::SiconosSparseMatrix jacq;
-    siconos::algebra::SiconosSparseMatrix jacv;
+    // In that case, we need to compute inv(Mass).jacobian_v or _q Forces
+    siconos::algebra::SiconosSparseMatrix jacq;  // to save -M^-1 . stiffness
+    siconos::algebra::SiconosSparseMatrix jacv;  // to save -M^-1 . damping
 
     if (hasStiffnessMatrix()) {
       // Solve MjacobianX(1,0) = jacobianFL[0]
-      jacq = LUMass_->solve(-1. * *stiffnessMatrix_);
+      useStiffness([&](const auto& K) { jacq = LUMass_->solve(-1. * K); });
     }
     if (hasDampingMatrix()) {
       // Solve MjacobianX(1,1) = jacobianFL[1]
-      jacv = LUMass_->solve(-1. * *dampingMatrix_);
+      useDamping([&](const auto& C) { jacv = LUMass_->solve(-1. * C); });
     }
+
     // Now fill in jacobianRhsOver_x_
     if (hasStiffnessMatrix()) {
-      for (int k = 0; k < jacq.outerSize(); ++k) {
+      for (Eigen::Index k = 0; k < jacq.outerSize(); ++k) {
         for (siconos::algebra::SiconosSparseMatrix::InnerIterator it(jacq, k); it; ++it) {
-          int i = it.row();
-          int j = it.col();
           double value = it.value();
-          int idx = j * x_size_ + i + ndof_;
-          jacobianRhsOver_x_(idx) = value;
+          jacobianRhsOver_x_(idx(ndof_ + it.row(), it.col())) = value;
         }
       }
     }
     if (hasDampingMatrix()) {
-      for (int k = 0; k < jacv.outerSize(); ++k) {
+      for (Eigen::Index k = 0; k < jacv.outerSize(); ++k) {
         for (siconos::algebra::SiconosSparseMatrix::InnerIterator it(jacv, k); it; ++it) {
-          int i = it.row();
-          int j = it.col();
           double value = it.value();
-          int idx = (j + ndof_) * x_size_ + i + ndof_;
-          jacobianRhsOver_x_(idx) = value;
+          jacobianRhsOver_x_(idx(ndof_ + it.row(), ndof_ + it.col())) = value;
         }
       }
     }
@@ -133,85 +172,42 @@ void siconos::modeling::LagrangianSparseLinearTIDS::initRhs(double time) {
   } else  // No mass
   {       //  fill in jacobianRhsOver_x_
     if (hasStiffnessMatrix()) {
-      for (int k = 0; k < stiffnessMatrix_->outerSize(); ++k) {
-        for (siconos::algebra::SiconosSparseMatrix::InnerIterator it(*stiffnessMatrix_, k); it;
-             ++it) {
-          int i = it.row();
-          int j = it.col();
-          double value = -it.value();
-          int idx = j * x_size_ + i + ndof_;
-          jacobianRhsOver_x_(idx) = value;
+      useStiffness([&](const auto& K) {
+        for (Eigen::Index k = 0; k < K.outerSize(); ++k) {
+          for (Eigen::InnerIterator it(K, k); it; ++it) {
+            double value = -it.value();
+            jacobianRhsOver_x_(idx(ndof_ + it.row(), it.col())) = value;
+          }
         }
-      }
+      });
     }
     if (hasDampingMatrix()) {
-      for (int k = 0; k < dampingMatrix_->outerSize(); ++k) {
-        for (siconos::algebra::SiconosSparseMatrix::InnerIterator it(*dampingMatrix_, k); it;
-             ++it) {
-          int i = it.row();
-          int j = it.col();
-          double value = -it.value();
-          int idx = (j + ndof_) * x_size_ + i + ndof_;
-          jacobianRhsOver_x_(idx) = value;
+      useStiffness([&](const auto& C) {
+        for (Eigen::Index k = 0; k < C.outerSize(); ++k) {
+          for (Eigen::InnerIterator it(C, k); it; ++it) {
+            double value = -it.value();
+            jacobianRhsOver_x_(idx(ndof_ + it.row(), ndof_ + it.col())) = value;
+          }
         }
-      }
+      });
     }
   }
   is_jacobianRhsOver_x_uptodate_ = true;
-}
-
-void siconos::modeling::LagrangianSparseLinearTIDS::setStiffnessMatrix(
-    siconos::algebra::SiconosSparseMatrix& newValue) {
-  assert(newValue.rows() == newValue.cols());
-  assert(newValue.rows() == ndof_);
-  stiffnessMatrix_.reset(&newValue, [](siconos::algebra::SiconosSparseMatrix*) {
-    // No-op deleter: the shared ptr does not own the matrix memory
-    // Be cautious !!!
-  });
-
-  hasFint_ = true;
-}
-void siconos::modeling::LagrangianSparseLinearTIDS::setStiffnessMatrixWithCopy(
-    const siconos::algebra::SiconosSparseMatrix& newValue) {
-  assert(newValue.rows() == ndof_);
-  assert(newValue.cols() == ndof_);
-  stiffnessMatrix_ =
-      std::make_shared<siconos::algebra::SiconosSparseMatrix>(newValue);  // copy
-  hasFint_ = true;
-}
-void siconos::modeling::LagrangianSparseLinearTIDS::setDampingMatrix(
-    siconos::algebra::SiconosSparseMatrix& newValue) {
-  assert(newValue.rows() == newValue.cols());
-  assert(newValue.rows() == ndof_);
-
-  dampingMatrix_.reset(&newValue, [](siconos::algebra::SiconosSparseMatrix*) {
-    // No-op deleter: the shared ptr does not own the matrix memory
-    // Be cautious !!!
-  });
-
-  hasFint_ = true;
-}
-void siconos::modeling::LagrangianSparseLinearTIDS::setDampingMatrixWithCopy(
-    const siconos::algebra::SiconosSparseMatrix& newValue) {
-  assert(newValue.rows() == ndof_);
-  assert(newValue.cols() == ndof_);
-  dampingMatrix_ = std::make_shared<siconos::algebra::SiconosSparseMatrix>(newValue);  // copy
-  hasFint_ = true;
 }
 
 void siconos::modeling::LagrangianSparseLinearTIDS::display(bool brief) const {
   LagrangianSparseDS::display(brief);
   std::cout << "===== Lagrangian Linear Time Invariant System display ===== \n";
 
-  if (stiffnessMatrix_) {
+  if (hasStiffnessMatrix()) {
     std::cout << "- Stiffness Matrix K:\n";
-    siconos::algebra::print(*stiffnessMatrix_);
+    useStiffness([&](const auto& K) { siconos::algebra::print(K); });
     std::cout << "\n";
   }
 
-  if (dampingMatrix_) {
+  if (hasDampingMatrix()) {
     std::cout << "- Viscosity Matrix C:\n";
-    siconos::algebra::print(*dampingMatrix_);
+    useDamping([&](const auto& C) { siconos::algebra::print(C); });
     std::cout << "\n";
   }
   std::cout << "=========================================================== \n";
@@ -235,6 +231,7 @@ void siconos::modeling::LagrangianSparseLinearTIDS::computeTotalForces(
     *totalForces_ += *fext_view_;
   }
 
-  if (stiffnessMatrix_) *totalForces_ -= *stiffnessMatrix_ * q;
-  if (dampingMatrix_) *totalForces_ -= *dampingMatrix_ * velocity;
+  if (hasStiffnessMatrix()) useStiffness([&](const auto& K) { *totalForces_ -= K * q; });
+
+  if (hasDampingMatrix()) useDamping([&](const auto& C) { *totalForces_ -= C * velocity; });
 }

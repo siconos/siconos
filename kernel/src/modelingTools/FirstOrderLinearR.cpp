@@ -31,7 +31,7 @@
 
 #include "siconos_debug.h"
 
-void siconos::modeling::FirstOrderLinearR::initialize(Interaction &inter) {
+void siconos::modeling::FirstOrderLinearR::initialize(Interaction& inter) {
   FirstOrderR::initialize(inter);
 
   // get interesting size
@@ -79,7 +79,7 @@ void siconos::modeling::FirstOrderLinearR::initialize(Interaction &inter) {
   checkSize(inter);
 }
 
-void siconos::modeling::FirstOrderLinearR::checkSize(const Interaction &inter) const {
+void siconos::modeling::FirstOrderLinearR::checkSize(const Interaction& inter) const {
   // get inter and ds sizes
   auto sizeY = inter.dimension();
   auto sizeX = inter.getSizeOfDS();
@@ -120,7 +120,7 @@ void siconos::modeling::FirstOrderLinearR::setConstantB(
 }
 
 void siconos::modeling::FirstOrderLinearR::setComputeBFunction(
-    const siconos::modeling::func_prototypes::FunctionS_M &func) {
+    const siconos::modeling::func_prototypes::FunctionS_M& func) {
   hasConstantJacobiangOver_lambda_ = false;
   computeB_ = func;
 }
@@ -145,7 +145,7 @@ void siconos::modeling::FirstOrderLinearR::setConstantC(
 }
 
 void siconos::modeling::FirstOrderLinearR::setComputeCFunction(
-    const siconos::modeling::func_prototypes::FunctionS_M &func) {
+    const siconos::modeling::func_prototypes::FunctionS_M& func) {
   hasConstantJacobianhOver_state_ = false;
   computeC_ = func;
 }
@@ -170,7 +170,7 @@ void siconos::modeling::FirstOrderLinearR::setConstantD(
 }
 
 void siconos::modeling::FirstOrderLinearR::setComputeDFunction(
-    const siconos::modeling::func_prototypes::FunctionS_M &func) {
+    const siconos::modeling::func_prototypes::FunctionS_M& func) {
   hasConstantJacobianhOver_lambda_ = false;
   computeD_ = func;
 }
@@ -191,7 +191,7 @@ void siconos::modeling::FirstOrderLinearR::setConstanteVector(
 }
 
 void siconos::modeling::FirstOrderLinearR::setComputeeVectorFunction(
-    const siconos::modeling::func_prototypes::FunctionS_V &fct) {
+    const siconos::modeling::func_prototypes::FunctionS_V& fct) {
   haseVector_ = true;
   hasConstanteVector_ = false;
   computeeVector_ = fct;
@@ -225,12 +225,12 @@ void siconos::modeling::FirstOrderLinearR::computee(double time) {
 //   }
 // }
 
-void siconos::modeling::FirstOrderLinearR::computeOutput(double time, Interaction &inter,
+void siconos::modeling::FirstOrderLinearR::computeOutput(double time, Interaction& inter,
                                                          unsigned int) {
   DEBUG_BEGIN("siconos::modeling::FirstOrderLinearR::computeOutput \n");
-  siconos::algebra::SiconosVector &y = *inter.y(0);
-  siconos::algebra::SiconosVector &lambda = *inter.lambda(0);
-  auto &DSlink = inter.linkToDSVariables();
+  siconos::algebra::SiconosVector& y = *inter.y(0);
+  siconos::algebra::SiconosVector& lambda = *inter.lambda(0);
+  auto& DSlink = inter.linkToDSVariables();
   if (jacobianhOver_state_view_) {
     if (!hasConstantJacobianhOver_state_)  // C not constant
       computeC_(time, *jacobianhOver_state_view_);
@@ -259,10 +259,10 @@ void siconos::modeling::FirstOrderLinearR::computeOutput(double time, Interactio
 //   r += *_B * lambda;
 // }
 
-void siconos::modeling::FirstOrderLinearR::computeInput(double time, Interaction &inter,
+void siconos::modeling::FirstOrderLinearR::computeInput(double time, Interaction& inter,
                                                         unsigned int) {
   if (jacobiangOver_lambda_view_) {
-    auto &DSlink = inter.linkToDSVariables();
+    auto& DSlink = inter.linkToDSVariables();
     if (!hasConstantJacobiangOver_lambda_)  // B not constant
       computeB_(time, *jacobiangOver_lambda_view_);
     *DSlink[FirstOrderR::Rrr] += *jacobiangOver_lambda_view_ * *inter.lambda(0);

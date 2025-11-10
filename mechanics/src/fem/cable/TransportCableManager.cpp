@@ -36,28 +36,28 @@
 #include "TransportCableProfile.h"
 
 siconos::fem::cable::TransportCableManager::TransportCableManager(
-    const std::string &a_filename) {
+    const std::string& a_filename) {
   auto j = siconos::fem::cable::tools::load_json_file(a_filename);
   model_ = std::make_unique<TransportCableModel>(j);
 }
 
-void siconos::fem::cable::TransportCableManager::importModel(const nlohmann::json &input) {
+void siconos::fem::cable::TransportCableManager::importModel(const nlohmann::json& input) {
   assert(!input.is_null());
   model_ = std::make_unique<TransportCableModel>(input);
   assert(model_->isLoaded() &&
          "Something went wrong during model loading: there are no pylons in the setup.");
 }
 
-void siconos::fem::cable::TransportCableManager::importModel(const std::string &filename) {
+void siconos::fem::cable::TransportCableManager::importModel(const std::string& filename) {
   auto input = siconos::fem::cable::tools::load_json_file(filename);
   model_ = std::make_unique<TransportCableModel>(input);
   assert(model_->isLoaded() &&
          "Something went wrong during model loading: there are no pylons in the setup.");
 }
 
-void siconos::fem::cable::TransportCableManager::computeFEM(const nlohmann::json &a_args,
-                                                            const std::string &a_outfile,
-                                                            nlohmann::ordered_json &output) {
+void siconos::fem::cable::TransportCableManager::computeFEM(const nlohmann::json& a_args,
+                                                            const std::string& a_outfile,
+                                                            nlohmann::ordered_json& output) {
   // Ensures the model is valid
   assert(model_->isLoaded());
 
@@ -85,20 +85,18 @@ void siconos::fem::cable::TransportCableManager::computeFEM(const nlohmann::json
   exportTC(a_args, a_outfile, output);
 }
 
-int siconos::fem::cable::TransportCableManager::exportTC(const nlohmann::json &a_args,
-                                                         const std::string &a_outfile,
-                                                         nlohmann::ordered_json &output) {
+void siconos::fem::cable::TransportCableManager::exportTC(const nlohmann::json& a_args,
+                                                          const std::string& a_outfile,
+                                                          nlohmann::ordered_json& output) {
   auto vOption = siconos::fem::cable::tools::getParam(a_args, "export", (std::string) "all");
   m_results.exportTC(a_outfile, output, vOption);
-
-  return EXIT_SUCCESS;
 }
 
-void siconos::fem::cable::TransportCableManager::simulation(const nlohmann::json &a_model,
-                                                            const nlohmann::json &a_args,
-                                                            const std::string &a_filename,
-                                                            const std::string &a_outfile,
-                                                            nlohmann::ordered_json &output) {
+void siconos::fem::cable::TransportCableManager::simulation(const nlohmann::json& a_model,
+                                                            const nlohmann::json& a_args,
+                                                            const std::string& a_filename,
+                                                            const std::string& a_outfile,
+                                                            nlohmann::ordered_json& output) {
   if (a_model.is_null())
     importModel(a_filename);
   else

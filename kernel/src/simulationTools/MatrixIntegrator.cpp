@@ -111,7 +111,7 @@ void siconos::simulation::MatrixIntegrator::integrate() {
   std::shared_ptr<siconos::algebra::SiconosVector> Ecol;
   if (auto linear_ds =
           std::dynamic_pointer_cast<siconos::modeling::FirstOrderLinearDS>(fods)) {
-    for (unsigned int i = 0; i < p; i++) {
+    for (siconos::algebra::Index i = 0; i < p; i++) {
       x0->setZero();
       if (E_buffer_ && !computeEMatrix_) {
         linear_ds->setConstantbVector(E_buffer_->col(i));
@@ -137,7 +137,7 @@ void siconos::simulation::MatrixIntegrator::integrate() {
     // computeE is used to compute b(t) of the ds.
     // So, only Matrix Integrators with first order linear ds can have a computeE.
     assert(!computeEMatrix_);
-    for (unsigned int i = 0; i < p; i++) {
+    for (siconos::algebra::Index i = 0; i < p; i++) {
       x0->setZero();
       (*x0)(i) = 1.;
       // Reset LsodarOSI

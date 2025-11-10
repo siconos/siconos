@@ -19,7 +19,7 @@
 
 #include <iostream>
 
-#include "BlockVector.hpp"
+// #include "BlockVector.hpp"
 #include "Interaction.hpp"
 #include "SiconosAlgebraAddons.hpp"
 #include "SiconosException.hpp"

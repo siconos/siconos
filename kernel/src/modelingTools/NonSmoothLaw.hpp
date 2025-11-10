@@ -25,6 +25,7 @@
 
 #include "NSLVisitor.hpp"
 #include "SiconosException.hpp"
+#include "SiconosMatrix.hpp"
 #include "SiconosSerialization.hpp"  // For ACCEPT_SERIALIZATION
 #include "TypeName.hpp"              // visitor to get ds type
 
@@ -59,21 +60,21 @@ class NonSmoothLaw {
   ACCEPT_SERIALIZATION(NonSmoothLaw);
 
   /** "size" of the NonSmoothLaw */
-  unsigned int _size{1};
+  siconos::algebra::Index _size{1};
 
   // Rule of five ...
   NonSmoothLaw() = default;
-  NonSmoothLaw(const NonSmoothLaw &) = delete;
-  NonSmoothLaw(NonSmoothLaw &&) = delete;
-  NonSmoothLaw &operator=(const NonSmoothLaw &) = delete;
-  NonSmoothLaw &operator=(NonSmoothLaw &&) = delete;
+  NonSmoothLaw(const NonSmoothLaw&) = delete;
+  NonSmoothLaw(NonSmoothLaw&&) = delete;
+  NonSmoothLaw& operator=(const NonSmoothLaw&) = delete;
+  NonSmoothLaw& operator=(NonSmoothLaw&&) = delete;
 
  public:
   /** basic constructor
    *
    *  \param size the nonsmooth law size
    */
-  NonSmoothLaw(unsigned int size) : _size(size) {}
+  NonSmoothLaw(siconos::algebra::Index size) : _size(size) {}
 
   /** destructor */
   virtual ~NonSmoothLaw() noexcept = default;
@@ -88,16 +89,16 @@ class NonSmoothLaw {
   }
 
   /** \return the size of the NS law */
-  inline unsigned int size() const { return _size; }
+  inline siconos::algebra::Index size() const { return _size; }
 
   /** display the data of the NonSmoothLaw on the standard output */
   virtual void display() const = 0;
 
   // visitors stuff.
-  virtual void accept(nonsmooth_laws::Visitor &) const {
+  virtual void accept(nonsmooth_laws::Visitor&) const {
     throw std::logic_error("accept (nonsmooth law): no visitor defined");
   }
-  virtual Type acceptType(siconos::types::FindType &ft) const = 0;
+  virtual Type acceptType(siconos::types::FindType& ft) const = 0;
 };
 }  // namespace siconos::modeling
 #endif

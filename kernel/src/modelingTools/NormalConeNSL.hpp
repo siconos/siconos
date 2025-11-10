@@ -72,7 +72,8 @@ class NormalConeNSL : public NonSmoothLaw {
    *  \param H matrix in the (H-K)-representation of the polytope P
    *  \param K vector in the (H-K)-representation of the polytope P
    */
-  NormalConeNSL(unsigned size, std::shared_ptr<siconos::algebra::SiconosMatrix> H,
+  NormalConeNSL(siconos::algebra::Index size,
+                std::shared_ptr<siconos::algebra::SiconosMatrix> H,
                 std::shared_ptr<siconos::algebra::SiconosVector> K);
 
   virtual ~NormalConeNSL() noexcept = default;
@@ -99,7 +100,7 @@ class NormalConeNSL : public NonSmoothLaw {
   void display() const override;
 
   // visitors hook
-  virtual void accept(nonsmooth_laws::Visitor &tourist) const override {
+  virtual void accept(nonsmooth_laws::Visitor& tourist) const override {
     tourist.visit(*this);
   }
 

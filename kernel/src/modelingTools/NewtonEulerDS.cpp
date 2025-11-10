@@ -146,8 +146,8 @@ void siconos::modeling::NewtonEulerDS::initRhs(double time) {
   jacobianRhsOver_x_.setZero();
 
   // Set top-right block to T
-  for (unsigned int j = 0; j < 6; ++j) {
-    for (unsigned int i = 0; i < qDim_; ++i) {
+  for (siconos::algebra::Index j = 0; j < 6; ++j) {
+    for (siconos::algebra::Index i = 0; i < qDim_; ++i) {
       jacobianRhsOver_x_((j + qDim_) * x_size_ + i) = (*T_)(i, j);
     }
   }
@@ -167,8 +167,8 @@ void siconos::modeling::NewtonEulerDS::initRhs(double time) {
     Eigen::Map<siconos::algebra::SiconosMatrix67> jacq(buffer_.data(), ndof_, qDim_);
     // Solve MjacobianX(1,0) = jacobianFL[0]
     jacq = LUMass_->solve(*jacobianWrenchOver_q_);
-    for (unsigned int j = 0; j < qDim_; ++j) {
-      for (unsigned int i = 0; i < 6; ++i) {
+    for (siconos::algebra::Index j = 0; j < qDim_; ++j) {
+      for (siconos::algebra::Index i = 0; i < 6; ++i) {
         jacobianRhsOver_x_(j * x_size_ + i + qDim_) = jacq(i, j);
       }
     }
@@ -183,8 +183,8 @@ void siconos::modeling::NewtonEulerDS::initRhs(double time) {
                                                        ndof_);
     // Solve MjacobianX(1,1) = jacobianFL[1]
     jacv = LUMass_->solve(*jacobianWrenchOver_twist_);
-    for (unsigned int j = 0; j < 6; ++j) {
-      for (unsigned int i = 0; i < 6; ++i) {
+    for (siconos::algebra::Index j = 0; j < 6; ++j) {
+      for (siconos::algebra::Index i = 0; i < 6; ++i) {
         jacobianRhsOver_x_((j + qDim_) * x_size_ + i + qDim_) = jacv(i, j);
       }
     }
@@ -229,8 +229,8 @@ void siconos::modeling::NewtonEulerDS::computeRhs(double time) {
 
 void siconos::modeling::NewtonEulerDS::computeJacobianRhsOver_x(double time) {
   siconos::modeling::newton_euler::computeT(*state_q_, *T_);
-  for (unsigned int j = 0; j < 6; ++j) {
-    for (unsigned int i = 0; i < qDim_; ++i) {
+  for (siconos::algebra::Index j = 0; j < 6; ++j) {
+    for (siconos::algebra::Index i = 0; i < qDim_; ++i) {
       jacobianRhsOver_x_((j + qDim_) * x_size_ + i) = (*T_)(i, j);
     }
   }
@@ -242,8 +242,8 @@ void siconos::modeling::NewtonEulerDS::computeJacobianRhsOver_x(double time) {
     Eigen::Map<siconos::algebra::SiconosMatrix67> jacq(buffer_.data(), ndof_, ndof_);
     // Solve MjacobianX(1,0) = jacobianFL[0]
     jacq = LUMass_->solve(*jacobianWrenchOver_q_);
-    for (unsigned int j = 0; j < qDim_; ++j) {
-      for (unsigned int i = 0; i < 6; ++i) {
+    for (siconos::algebra::Index j = 0; j < qDim_; ++j) {
+      for (siconos::algebra::Index i = 0; i < 6; ++i) {
         jacobianRhsOver_x_(j * x_size_ + i + qDim_) = jacq(i, j);
       }
     }
@@ -256,8 +256,8 @@ void siconos::modeling::NewtonEulerDS::computeJacobianRhsOver_x(double time) {
     Eigen::Map<siconos::algebra::SiconosMatrix66> jacv(buffer_.data(), ndof_, ndof_);
     // Solve MjacobianX(1,1) = jacobianFL[1]
     jacv = LUMass_->solve(*jacobianWrenchOver_twist_);
-    for (unsigned int j = 0; j < 6; ++j) {
-      for (unsigned int i = 0; i < 6; ++i) {
+    for (siconos::algebra::Index j = 0; j < 6; ++j) {
+      for (siconos::algebra::Index i = 0; i < 6; ++i) {
         jacobianRhsOver_x_((j + qDim_) * x_size_ + i + qDim_) = jacv(i, j);
       }
     }

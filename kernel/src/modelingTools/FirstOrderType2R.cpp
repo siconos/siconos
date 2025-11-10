@@ -20,7 +20,6 @@
 #include "BlockVector.hpp"
 #include "FirstOrderR.hpp"
 #include "Interaction.hpp"
-#include "SiconosException.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 

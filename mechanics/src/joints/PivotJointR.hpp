@@ -120,14 +120,14 @@ class PivotJointR : public KneeJointR {
 
        \return the number of constraints
      */
-  virtual unsigned int numberOfConstraints() const override { return 5; }
+  virtual siconos::algebra::Index numberOfConstraints() const override { return 5; }
 
   /**
      Return the number of degrees of freedom of this joint.
 
      \return the number of degrees of freedom (DoF)
    */
-  virtual unsigned int numberOfDoF() const override { return 1; }
+  virtual siconos::algebra::Index numberOfDoF() const override { return 1; }
 
   /**
      Return the type of a degree of freedom of this joint.

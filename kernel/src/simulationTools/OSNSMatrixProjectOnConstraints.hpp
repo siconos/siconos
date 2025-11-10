@@ -103,7 +103,8 @@ class OSNSMatrixProjectOnConstraints : public OSNSMatrix {
   OSNSMatrixProjectOnConstraints();
 
   using OSNSMatrix::updateSizeAndPositions;
-  virtual unsigned updateSizeAndPositions(siconos::graphs::InteractionsGraph& indexSet);
+  virtual siconos::algebra::Index updateSizeAndPositions(
+      siconos::graphs::InteractionsGraph& indexSet);
 
  public:
   /** Constructor with dimRow and DimColumn of the matrix
@@ -111,14 +112,15 @@ class OSNSMatrixProjectOnConstraints : public OSNSMatrix {
    * \param m column size of the rectangle matrix
    * \param stor storage type (NM_DENSE, NM_SPARSE_BLOCK)
    */
-  OSNSMatrixProjectOnConstraints(unsigned int n, unsigned int m,
+  OSNSMatrixProjectOnConstraints(siconos::algebra::Index n, siconos::algebra::Index m,
                                  NM_types stor);
 
   /** compute the size of the vector to project for a given Interaction.
    * \param inter the corresponding interaction
-   * \return  unsigned int
+   * \return the computed size
    */
-  unsigned int computeSizeForProjection(std::shared_ptr<siconos::modeling::Interaction> inter);
+  siconos::algebra::Index computeSizeForProjection(
+      std::shared_ptr<siconos::modeling::Interaction> inter);
 
   /** destructor
    */

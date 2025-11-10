@@ -24,7 +24,6 @@
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "Simulation.hpp"
-#include "Topology.hpp"
 #include "io.hpp"  // for siconos::algebra::write
 
 siconos::nonsmooth_formulations::MultipleImpact::MultipleImpact(std::string newTypeLaw,
@@ -93,9 +92,9 @@ void siconos::nonsmooth_formulations::MultipleImpact::SetSizeDataSave(unsigned i
 }
 //---------------------------------------------------------------------------------------------------
 void siconos::nonsmooth_formulations::MultipleImpact::WriteVectorIntoMatrix(
-    const siconos::algebra::SiconosVector& m, const unsigned int pos_row,
-    const unsigned int pos_col) {
-  for (unsigned int i = 0; i < m.size(); ++i) {
+    const siconos::algebra::SiconosVector& m, const siconos::algebra::Index pos_row,
+    const siconos::algebra::Index pos_col) {
+  for (siconos::algebra::Index i = 0; i < m.size(); ++i) {
     (*_DataMatrix)(pos_row, pos_col + i) = m(i);
   }
 }
@@ -122,23 +121,23 @@ bool siconos::nonsmooth_formulations::MultipleImpact::isEnerZero(double Var) {
     return false;
 }
 //--------------------------------------------------------------------------------------------------
-unsigned int siconos::nonsmooth_formulations::MultipleImpact::EstimateNdataCols() {
-  unsigned int _numberCols = 1;
+siconos::algebra::Index siconos::nonsmooth_formulations::MultipleImpact::EstimateNdataCols() {
+  siconos::algebra::Index numberCols = 1;
   // Number of columns for data at contacts
   auto indexSet = simulation()->indexSet(0);  // get indexSet[0]
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
   for (std::tie(ui, uiend) = indexSet->vertices(); ui != uiend; ++ui) {
-    //_numberCols = _numberCols +
-    // 3*(indexSet->bundle(*ui)->interaction()->nonSmoothLaw()->size()) + 1;
-    _numberCols = _numberCols + (indexSet->bundle(*ui)->dimension());
+    // numberCols = numberCols +
+    //  3*(indexSet->bundle(*ui)->interaction()->nonSmoothLaw()->size()) + 1;
+    numberCols = numberCols + (indexSet->bundle(*ui)->dimension());
   }
   // Number of columns for data at particles
   auto DSG = simulation()->nonSmoothDynamicalSystem()->dynamicalSystems();
   siconos::graphs::DynamicalSystemsGraph::VIterator dsi, dsiend;
   for (std::tie(dsi, dsiend) = DSG->vertices(); dsi != dsiend; ++dsi) {
-    _numberCols = _numberCols + (DSG->bundle(*dsi)->dimension());
+    numberCols = numberCols + (DSG->bundle(*dsi)->dimension());
   }
-  return (_numberCols);
+  return (numberCols);
 }
 //-----------------------------------------------------------------------------------------------
 void siconos::nonsmooth_formulations::MultipleImpact::AllocateMemory() {
@@ -173,9 +172,10 @@ void siconos::nonsmooth_formulations::MultipleImpact::AllocateMemory() {
   };
   //
   if (!_stateContact)
-    _stateContact = std::make_shared<std::vector<unsigned int>>(maxSize());
+    _stateContact = std::make_shared<std::vector<siconos::algebra::Index>>(maxSize());
   else {
-    if (_stateContact->size() != maxSize()) _stateContact->resize(maxSize());
+    if (static_cast<siconos::algebra::Index>(_stateContact->size()) != maxSize())
+      _stateContact->resize(maxSize());
   };
   //
   if (!_Kcontact)
@@ -220,13 +220,12 @@ void siconos::nonsmooth_formulations::MultipleImpact::AllocateMemory() {
     if (_forceContact->size() != maxSize()) _forceContact->resize(maxSize());
   };
   // for the data matrix
-  auto _numberCols = EstimateNdataCols();
+  auto numberCols = EstimateNdataCols();
   if (!_DataMatrix)
-    _DataMatrix =
-        std::make_shared<siconos::algebra::SiconosMatrix>(_sizeDataSave, _numberCols);
+    _DataMatrix = std::make_shared<siconos::algebra::SiconosMatrix>(_sizeDataSave, numberCols);
   else {
-    if ((_DataMatrix->rows() != _sizeDataSave) || (_DataMatrix->cols() != _numberCols))
-      _DataMatrix->resize(_sizeDataSave, _numberCols);
+    if ((_DataMatrix->rows() != _sizeDataSave) || (_DataMatrix->cols() != numberCols))
+      _DataMatrix->resize(_sizeDataSave, numberCols);
   }
 }
 //=====================================================================================
@@ -278,7 +277,7 @@ void siconos::nonsmooth_formulations::MultipleImpact::PreComputeImpact() {
     _M->fillM(indexSet, !_hasBeenUpdated);
     _sizeOutput = _M->rows();
   }
-  if (_nContact != _sizeOutput)
+  if (static_cast<siconos::algebra::Index>(_nContact) != _sizeOutput)
     THROW_EXCEPTION(
         "siconos::nonsmooth_formulations::MultipleImpact::ComputeWMinvWtrans: number of "
         "contacts "
@@ -309,7 +308,7 @@ void siconos::nonsmooth_formulations::MultipleImpact::PreComputeImpact() {
   }
   _distributionVector->setZero();
   //
-  if (_stateContact->size() != _sizeOutput) {
+  if (static_cast<siconos::algebra::Index>(_stateContact->size()) != _sizeOutput) {
     _stateContact->resize(_sizeOutput);
   }
   //
@@ -364,7 +363,7 @@ void siconos::nonsmooth_formulations::MultipleImpact::InitializeInput() {
     // at beginning of impact
     const auto& Vc0 = inter->y_k(1);  // Relative velocity at beginning of impact
 
-    unsigned int pos_inter = indexSet.properties(*ui).absolute_position;
+    auto pos_inter = indexSet.properties(*ui).absolute_position;
 
     _velocityContact->segment(pos_inter, Vc0.size()) = Vc0;
     auto ener0 = std::make_shared<siconos::algebra::SiconosVector>(Vc0.size());
@@ -772,7 +771,8 @@ void siconos::nonsmooth_formulations::MultipleImpact::UpdateDuringImpact() {
   _impulseContactUpdate->setZero();  // reset input[1] to zero after each update
 }
 //--------------------------------------------------------------------------------------
-void siconos::nonsmooth_formulations::MultipleImpact::SaveDataOneStep(unsigned int _ithPoint) {
+void siconos::nonsmooth_formulations::MultipleImpact::SaveDataOneStep(
+    siconos::algebra::Index _ithPoint) {
   // Save the total impulse at the primary contacts (time-like independent variable) and the
   // time evolution during impact
   if (_ithPoint >= _DataMatrix->rows())
@@ -786,7 +786,7 @@ void siconos::nonsmooth_formulations::MultipleImpact::SaveDataOneStep(unsigned i
   auto indexSet0 = simulation()->indexSet(0);
   auto indexSet1 = simulation()->indexSet(indexSetLevel());
   siconos::graphs::InteractionsGraph::VIterator ui, uiend;
-  unsigned int col_pos = 1;
+  siconos::algebra::Index col_pos = 1;
   for (std::tie(ui, uiend) = indexSet0->vertices(); ui != uiend; ++ui) {
     auto inter = indexSet0->bundle(*ui);
     auto ydot = inter->y(1);

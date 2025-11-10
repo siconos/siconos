@@ -34,7 +34,7 @@ class MixedComplementarityConditionNSL : public NonSmoothLaw {
   /** default constructor
    */
   MixedComplementarityConditionNSL() = default;
-  unsigned int _equalitySize{0};
+  siconos::algebra::Index _equalitySize{0};
 
  public:
   /** basic constructor
@@ -42,7 +42,8 @@ class MixedComplementarityConditionNSL : public NonSmoothLaw {
    *  \param newSize size of the non smooth law
    *  \param equalitySize size of the equality relation
    */
-  MixedComplementarityConditionNSL(unsigned int newSize, unsigned int equalitySize)
+  MixedComplementarityConditionNSL(siconos::algebra::Index newSize,
+                                   siconos::algebra::Index equalitySize)
       : NonSmoothLaw(newSize + equalitySize), _equalitySize{equalitySize} {};
 
   /** Destructor */
@@ -50,18 +51,17 @@ class MixedComplementarityConditionNSL : public NonSmoothLaw {
 
   /** print the data to the screen
    */
-  inline void display() const override{};
+  inline void display() const override {};
 
-  /** get the number of equality present in the MLCP
-   *
-   *  \return an unsigned int
-   */
-  inline unsigned int equalitySize() { return _equalitySize; };
+  /**\return the number of equality present in the MLCP */
+  inline auto equalitySize() { return _equalitySize; };
 
   // visitors hook
-    virtual void accept(nonsmooth_laws::Visitor &tourist) const override { tourist.visit(*this); }
+  virtual void accept(nonsmooth_laws::Visitor& tourist) const override {
+    tourist.visit(*this);
+  }
 
-  Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
+  Type acceptType(types::FindType& ft) const override { return ft.visit(*this); }
 };
 }  // namespace siconos::modeling
 #endif  // MIXEDCOMPLEMENTARITYCONDITIONNSLAW_H

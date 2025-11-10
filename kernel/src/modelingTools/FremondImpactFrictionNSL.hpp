@@ -49,16 +49,16 @@ class FremondImpactFrictionNSL : public NonSmoothLaw {
    *
    *  \param size size of the ns law
    */
-  FremondImpactFrictionNSL(unsigned int size) : NonSmoothLaw(size) {};
+  FremondImpactFrictionNSL(siconos::algebra::Index size) : NonSmoothLaw(size) {};
 
   /** constructor with the value of the FremondImpactFrictionNSL attributes
    *
    *  \param en double : normal e coefficient
    *  \param et double : tangent e coefficient
    *  \param mu double : friction coefficient
-   *  \param size unsigned int: size of the ns law
+   *  \param size size of the ns law
    */
-  FremondImpactFrictionNSL(double en, double et, double mu, unsigned int size)
+  FremondImpactFrictionNSL(double en, double et, double mu, siconos::algebra::Index size)
       : NonSmoothLaw(size), _en(en), _et(et), _mu(mu) {};
 
   /** Destructor */

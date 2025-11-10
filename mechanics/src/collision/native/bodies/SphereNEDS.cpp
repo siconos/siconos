@@ -33,12 +33,12 @@ siconos::collision::native::bodies::SphereNEDS::SphereNEDS(
   assert(vinit.size() == 6);  // == ndof_
 }
 
-double siconos::collision::native::bodies::SphereNEDS::getQ(unsigned int pos) {
+double siconos::collision::native::bodies::SphereNEDS::getQ(siconos::algebra::Index pos) {
   assert(pos < 7);
   return ((*state_q_)(pos));
 };
 
-double siconos::collision::native::bodies::SphereNEDS::getTwist(unsigned int pos) {
+double siconos::collision::native::bodies::SphereNEDS::getTwist(siconos::algebra::Index pos) {
   assert(pos < 6);
   return ((*twist_)(pos));
 };

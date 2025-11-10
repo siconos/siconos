@@ -61,7 +61,7 @@ class NewtonImpactNSL : public NonSmoothLaw {
   NewtonImpactNSL(double e) : NonSmoothLaw(1), _e(e){};
 
   /** Apply multiple-axis impact */
-  NewtonImpactNSL(unsigned int size, double e) : NonSmoothLaw(size), _e(e){};
+  NewtonImpactNSL(siconos::algebra::Index size, double e) : NonSmoothLaw(size), _e(e){};
 
   /** destructor
    */

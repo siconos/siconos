@@ -22,8 +22,6 @@ This file is to be copied into CMAKE_BINARY_DIR/share using configure_file
  limitations under the License.
 """
 
-import textwrap
-
 
 def parse_cmake_list(var):
     """Transform cmake list-like variables

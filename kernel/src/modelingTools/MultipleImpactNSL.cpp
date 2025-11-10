@@ -7,7 +7,7 @@
 
 // Constructor with parameters
 siconos::modeling::MultipleImpactNSL::MultipleImpactNSL(double newResCof, double newStiff,
-                                                        double newElasCoeff, unsigned int _dim)
+                                                        double newElasCoeff, siconos::algebra::Index _dim)
     : NonSmoothLaw(_dim)
 {
   _ResCof = newResCof;

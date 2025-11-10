@@ -242,20 +242,20 @@ void siconos::integrators::Hem5OSI::Hem5OSI_impl::fprob(
 
   if ((ifcn == 1) || (ifcn >= 7))  // compute Mass AM
   {
-    unsigned int pos = 0;
+    int pos = 0;
     for (auto vi : *dsGraph) {
       auto ds = dsGraph->bundle(vi);
       if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
         if (lds->hasMass()) {
           lds->computeMass(*lds->q());
-          for (auto ii = pos; ii < ((unsigned int)(*NV) + pos); ii++) {
-            for (auto jj = pos; jj < ((unsigned int)(*NV) + pos); jj++) {
+          for (auto ii = pos; ii < ((*NV) + pos); ii++) {
+            for (auto jj = pos; jj < ((*NV) + pos); jj++) {
               AM[ii + jj * (int)(*NV)] = lds->mass()(ii, jj);
             }
           }
         } else {
-          for (auto ii = pos; ii < ((unsigned int)(*NV) + pos); ii++) {
-            for (auto jj = pos; jj < ((unsigned int)(*NV) + pos); jj++) {
+          for (auto ii = pos; ii < ((*NV) + pos); ii++) {
+            for (auto jj = pos; jj < ((*NV) + pos); jj++) {
               if (ii == jj)
                 AM[ii + jj * (int)(*NV)] = 1.;
               else
@@ -287,7 +287,7 @@ void siconos::integrators::Hem5OSI::Hem5OSI_impl::fprob(
             "allowed");
       }
     }
-    for (unsigned int ii = 0; ii < (unsigned int)(*NV); ii++) {
+    for (int ii = 0; ii < (*NV); ii++) {
       F[ii] = (*hem5osi->_forcesWork)(ii);
     }
   }
@@ -342,12 +342,12 @@ void siconos::integrators::Hem5OSI::Hem5OSI_impl::fprob(
 
   if ((ifcn == 1) || (ifcn == 2) || (ifcn == 10))  // compute QDOT
   {
-    unsigned int pos = 0;
+    siconos::algebra::Index pos = 0;
     for (auto vi : *dsGraph) {
       auto ds = dsGraph->bundle(vi);
       if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
         auto dim = lds->dimension();
-        for (unsigned int i = 0; i < dim; i++) {
+        for (siconos::algebra::Index i = 0; i < dim; i++) {
           QDOT[i + pos] = v[i + pos];
         }
         pos += dim;
@@ -741,7 +741,7 @@ void siconos::integrators::Hem5OSI::integrate(double& tinit, double& tend, doubl
   auto indexSet2 = _simulation->nonSmoothDynamicalSystem()->topology()->indexSet(2);
   assert(indexSet2);
   std::shared_ptr<siconos::algebra::SiconosVector> y;
-  unsigned int pos = 0;
+  siconos::algebra::Index pos = 0;
   for (std::tie(ui, uiend) = indexSet2->vertices(); ui != uiend; ++ui) {
     auto inter = indexSet2->bundle(*ui);
     (*inter->lambda(2))(0) = (*_lambdatmp)(pos);

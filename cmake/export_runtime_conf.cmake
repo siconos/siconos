@@ -1,55 +1,44 @@
-# Generate a txt file which contains compile/link info
-# to be used at runtime, in the form
-# 
-#  INCLUDE_DIRS=...
-#  DEFINES=...
-#  FLAGS=...
-#  LIBS=...
-#  LINK_DIRS=...
+#  Siconos is a program dedicated to modeling, simulation and control
+# of non smooth dynamical systems.
 #
-#  The resulting file is useful to generate a dedicated header for cppimport when 
-#  c++ functions are required at runtime, in Python, to run siconos
+# Copyright 2025 INRIA.
 #
-#  Usage
-# 
-#  export_runtime_conf()
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 #
-function(export_runtime_conf target)
-    set(oneValueArgs VAR) # output variable name
-    set(multiValueArgs DIRS EXTS)
-    set(options RECURSIVE)
-    cmake_parse_arguments(collect "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-    
-    # Look for target properties
-    #get_target_property(_inc_dirs ${target} INCLUDE_DIRECTORIES)
-    #get_target_property(_compile_defs ${target} COMPILE_DEFINITIONS)
-    #get_target_property(_compile_opts ${target} COMPILE_OPTIONS)
-    get_target_property(_link_libs  ${target} LINK_LIBRARIES)
-    #get_target_property(_link_dirs  ${target} LINK_DIRECTORIES)
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# --
+#[=======================================================================[.rst:
+
+export_runtime_conf
+-------------------
 
 
+ Generate a txt file which contains compile/link info
+ to be used at runtime, in the form
+ 
+  INCLUDE_DIRS=...
+  DEFINES=...
+  FLAGS=...
+  LIBS=...
+  LINK_DIRS=...
 
-    if (CMAKE_CXX_STANDARD)
-        list(APPEND _compile_opts "-std=gnu++${CMAKE_CXX_STANDARD}")
-    endif()
+  The resulting file is useful to generate a dedicated header for cppimport when 
+  c++ functions are required at runtime, in Python, to run siconos
 
-    # clean lists
-    foreach(var _inc_dirs _compile_defs _compile_opts _link_libs _link_dirs)
-        list(FILTER ${var} EXCLUDE REGEX "NOTFOUND")
-        list(REMOVE_DUPLICATES ${var})
-    endforeach()
+  Usage
+ 
+  export_runtime_conf(target_name)
 
-    # Export in a file that can be processed by python
-    set(_outfile "${CMAKE_BINARY_DIR}/siconos_runtime_build_info.txt")
-    file(WRITE ${_outfile} "INCLUDE_DIRS=${_inc_dirs}\n")
-    file(APPEND ${_outfile} "DEFINES=${_compile_defs}\n")
-    file(APPEND ${_outfile} "FLAGS=${_compile_opts}\n")
-    file(APPEND ${_outfile} "LIBS=${_link_libs}\n")
-    file(APPEND ${_outfile} "LINK_DIRS=${_link_dirs}\n")
 
-    message(STATUS "✅ Siconos runtime build info has been written in: ${_outfile}")
-
-endfunction()
+#]=======================================================================]
 
 
 # For a given target, collect info regarding 
@@ -95,18 +84,33 @@ function(export_properties)
     list(APPEND _link_libs ${lib_link})
     list(APPEND _link_libs ${lib_imp_inc})
 
-
-    get_target_property(lib_imported_inc ${lib} IMPORTED_LOCATION)
+    # get_target_property(lib_type ${lib} TYPE)
+    # get_target_property(lib_imported_inc ${lib} IMPORTED_LOCATION)
     get_target_property(lib_location ${lib} LOCATION)
 
     if(lib_location)
+
         get_filename_component(real_name ${lib_location} NAME_WE)
         get_filename_component(lib_dir ${lib_location} DIRECTORY)
-        string(REGEX REPLACE "^lib" "" real_name ${real_name})  # enleve le prefixe lib
+        string(REGEX REPLACE "^lib" "" real_name ${real_name})
         list(APPEND _resolved_libs ${real_name})
         list(APPEND _link_dirs ${lib_dir})
+
     else()
-        list(APPEND _resolved_libs ${lib})      
+        #list(APPEND _resolved_libs ${lib})      
+        get_target_property(children ${lib} INTERFACE_LINK_LIBRARIES)
+        if(children)
+            foreach(child ${children})
+                get_target_property(lib_location ${child} LOCATION)
+                if(lib_location)
+                   get_filename_component(real_name ${lib_location} NAME_WE)
+                    get_filename_component(lib_dir ${lib_location} DIRECTORY)
+                    string(REGEX REPLACE "^lib" "" real_name ${real_name})
+                    list(APPEND _resolved_libs ${real_name})
+                    list(APPEND _link_dirs ${lib_dir})
+                endif()
+            endforeach()
+        endif()
     endif()
         
     set(${lib}_inc_dirs ${_inc_dirs} PARENT_SCOPE)
@@ -119,6 +123,22 @@ function(export_properties)
     set(${lib}_lib_location ${lib_location} PARENT_SCOPE)  
 endfunction()
 
+# Generate a txt file which contains compile/link info
+# to be used at runtime, in the form
+# 
+#  INCLUDE_DIRS=...
+#  DEFINES=...
+#  FLAGS=...
+#  LIBS=...
+#  LINK_DIRS=...
+#
+#  The resulting file is useful to generate a dedicated header for cppimport when 
+#  c++ functions are required at runtime, in Python, to run siconos
+#
+#  Usage
+# 
+#  export_runtime_conf(target_name)
+#
 function (export_runtime_conf MyTarget)
 
     # First run to collect input lib properties

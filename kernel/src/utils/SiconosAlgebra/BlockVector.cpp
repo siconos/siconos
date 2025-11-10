@@ -33,7 +33,7 @@
 //
 
 siconos::algebra::BlockVector::BlockVector(std::size_t numberOfBlocks,
-                                           Eigen::Index blockSize) {
+                                           siconos::algebra::Index blockSize) {
   blockStartIndices_.reserve(numberOfBlocks + 1);
   blocks_.reserve(numberOfBlocks);
   totalSize_ = 0;
@@ -81,13 +81,13 @@ void siconos::algebra::BlockVector::setConstant(double value) {
 
 void siconos::algebra::BlockVector::fill(std::size_t size_of_data, const double* data) {
   assert(data && "BlockVector::fill: input data pointer is null");
-  assert(static_cast<Eigen::Index>(size_of_data) == totalSize_ &&
+  assert(static_cast<siconos::algebra::Index>(size_of_data) == totalSize_ &&
          "total size of data does not match expected BlockVector size");
   // Warning: we do not check data and assumes it is properly allocated
   std::size_t offset = 0;
   for (std::size_t nb = 0; nb < blocks_.size(); ++nb) {
     auto& block = *(blocks_[nb]);
-    Eigen::Index size = block.size();
+    siconos::algebra::Index size = block.size();
     ConstMapVectorType src{data + offset, size};
     block = src;  // copy data viewed by the map into the current block
     offset += size;
@@ -107,7 +107,7 @@ void siconos::algebra::BlockVector::fill(const SiconosVector& input) {
   }
 }
 
-double siconos::algebra::BlockVector::operator()(Eigen::Index globalIndex) const {
+double siconos::algebra::BlockVector::operator()(siconos::algebra::Index globalIndex) const {
   // Find the block ...
   for (std::size_t i = 0; i < blockStartIndices_.size() - 1; ++i) {
     if (globalIndex >= blockStartIndices_[i] && globalIndex < blockStartIndices_[i + 1]) {
@@ -165,8 +165,8 @@ siconos::algebra::BlockVector& siconos::algebra::BlockVector::operator+=(
     const SiconosVector& input) {
   assert(totalSize_ == input.size());
 
-  Eigen::Index currentSize;
-  Eigen::Index offset = 0;
+  siconos::algebra::Index currentSize;
+  siconos::algebra::Index offset = 0;
 
   for (auto& it : blocks_) {
     currentSize = it->size();
@@ -180,8 +180,8 @@ siconos::algebra::BlockVector& siconos::algebra::BlockVector::operator-=(
     const SiconosVector& input) {
   assert(totalSize_ == input.size());
 
-  Eigen::Index currentSize;
-  Eigen::Index offset = 0;
+  siconos::algebra::Index currentSize;
+  siconos::algebra::Index offset = 0;
 
   for (auto& it : blocks_) {
     currentSize = it->size();

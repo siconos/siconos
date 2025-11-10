@@ -25,7 +25,6 @@
 
 #include <cassert>
 #include <string>
-#include <variant>
 
 namespace siconos::modeling {
 
@@ -33,6 +32,9 @@ class FirstOrderNonLinearDS;
 class NewtonEulerDS;
 class LagrangianDS;
 class LagrangianSparseDS;
+class LDSOrig;
+class LDSv3;
+class LagrangianFullStorageDS;
 class FirstOrderLinearDS;
 class LagrangianLinearTIDS;
 class LagrangianSparseLinearTIDS;
@@ -54,6 +56,9 @@ enum class Type {
   LagrangianDS,
   FirstOrderLinearDS,
   LagrangianSparseDS,
+  LDSOrig,
+  LDSv3,
+  LagrangianFullStorageDS,
   LagrangianLinearTIDS,
   LagrangianSparseLinearTIDS,
   LagrangianLinearDiagonalDS,
@@ -94,6 +99,11 @@ struct FindType {
   };
   auto visit(const siconos::modeling::LagrangianSparseDS&) const {
     return siconos::modeling::Type::LagrangianSparseDS;
+  };
+  auto visit(const siconos::modeling::LDSOrig&) const { return siconos::modeling::Type::LDSOrig; };
+  auto visit(const siconos::modeling::LDSv3&) const { return siconos::modeling::Type::LDSv3; };
+  auto visit(const siconos::modeling::LagrangianFullStorageDS&) const {
+    return siconos::modeling::Type::LagrangianFullStorageDS;
   };
   auto visit(const siconos::modeling::LagrangianLinearTIDS&) const {
     return siconos::modeling::Type::LagrangianLinearTIDS;

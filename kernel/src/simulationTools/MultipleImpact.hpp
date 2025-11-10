@@ -68,7 +68,7 @@ class MultipleImpact : public LinearOSNS {
    place at this contact without potential energy (beginning of impact or
    repeating impact) if *_stateContact[i] = 2 => impact takes place with
    not-zero potential energy */
-  std::shared_ptr<std::vector<unsigned int>> _stateContact{nullptr};
+  std::shared_ptr<std::vector<siconos::algebra::Index>> _stateContact{nullptr};
   //! Stiffness at contacts
   std::shared_ptr<siconos::algebra::SiconosVector> _Kcontact{nullptr};
   //! Restitution coefficient of contacts
@@ -109,7 +109,7 @@ class MultipleImpact : public LinearOSNS {
   //! Matrix on which the data during impact is saved
   std::shared_ptr<siconos::algebra::SiconosMatrix> _DataMatrix{nullptr};
   //! Number of points to be save during impacts
-  unsigned int _sizeDataSave = 1000;
+  siconos::algebra::Index _sizeDataSave = 1000;
   /** indicator on the termination of the multiple impact process
       _IsImpactEnd = true: impact is terminated
       _IsImpactEnd = false: otherwise */
@@ -323,7 +323,7 @@ class MultipleImpact : public LinearOSNS {
    */
   void initialize(std::shared_ptr<siconos::simulation::Simulation> sim) override;
 
-  bool checkCompatibleNSLaw(siconos::modeling::NonSmoothLaw &nslaw) override;
+  bool checkCompatibleNSLaw(siconos::modeling::NonSmoothLaw& nslaw) override;
   /** print the data to the screen */
   void display() const override;
 
@@ -333,17 +333,16 @@ class MultipleImpact : public LinearOSNS {
    * \param col position starting to write
    */
 
-  void WriteVectorIntoMatrix(const siconos::algebra::SiconosVector &v, const unsigned int row,
-                             const unsigned int col);
+  void WriteVectorIntoMatrix(const siconos::algebra::SiconosVector& v,
+                             const siconos::algebra::Index row,
+                             const siconos::algebra::Index col);
 
   /** Save data for each step
    * \param i pointer to be save */
-  void SaveDataOneStep(unsigned int i);
+  void SaveDataOneStep(siconos::algebra::Index i);
 
-  /** Estimate size of data matrix
-   * \return unsigned int
-   */
-  unsigned int EstimateNdataCols();
+  /** \return the estimate size of data matrix */
+  siconos::algebra::Index EstimateNdataCols();
 };
 }  // namespace siconos::nonsmooth_formulations
 #endif

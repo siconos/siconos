@@ -23,6 +23,8 @@
 #ifndef SICOMAT
 #define SICOMAT
 
+// #define EIGEN_DEFAULT_DENSE_INDEX_TYPE long long // Done using CMake def.
+
 #include "EigenInclude.hpp"  // IWYU pragma: keep - Must be included before Eigen/Core
 //
 #include <Eigen/Core>
@@ -33,6 +35,16 @@
 
 #include "CSparseMatrix.h"  // IWYU pragma: keep
 #include "SiconosVector.hpp"
+
+// Default type for sparse storage indices
+// Rq: dense storage indices type is defined by
+// EIGEN_DEFAULT_DENSE_INDEX_TYPE
+// Both SPARSE_STORAGE_INDEX and EIGEN_DEFAULT_DENSE_INDEX_TYPE
+// are supposed to be set during cmake conf
+// (look for target_compile_definition ...)
+#ifndef SICONOS_SPARSE_STORAGE_INDEX_TYPE
+#define SICONOS_SPARSE_STORAGE_INDEX_TYPE EIGEN_DEFAULT_DENSE_INDEX_TYPE
+#endif
 
 struct NumericsMatrix;
 
@@ -57,9 +69,10 @@ using SiconosMatrix37 = Eigen::Matrix<double_t, 3, 7, Eigen::ColMajor>;
 using SiconosMatrix66 = Eigen::Matrix<double_t, 6, 6, Eigen::ColMajor>;
 using SiconosMatrix76 = Eigen::Matrix<double_t, 7, 6, Eigen::ColMajor>;
 using SiconosMatrix67 = Eigen::Matrix<double_t, 6, 7, Eigen::ColMajor>;
-
+using Index = Eigen::Index;
 /** Sparse matrix storage */
-using SiconosSparseMatrix = Eigen::SparseMatrix<double, Eigen::ColMajor, int>;
+using SparseIndex = SICONOS_SPARSE_STORAGE_INDEX_TYPE;
+using SiconosSparseMatrix = Eigen::SparseMatrix<double, Eigen::ColMajor, SparseIndex>;
 using Triplet = Eigen::Triplet<double>;  // Used to fill sparse matrices
 
 // Map types
@@ -68,9 +81,6 @@ using SiconosDiagonalMatrix = Eigen::DiagonalMatrix<double_t, Eigen::Dynamic>;
 
 // Tmp version. To replace BlockVector ?
 using EigenBlock = std::vector<Eigen::Ref<SiconosVector>>;
-
-// type used as return value for vectors and matrix dimensions.
-using SiconosSize_t = Eigen::Index;
 
 // LU Factorization
 using SiconosDenseLUMatrix = Eigen::FullPivLU<siconos::algebra::SiconosDenseMatrix>;
@@ -96,12 +106,12 @@ enum class StorageType { dense, sparse };
  *  \param mat the matrix to be displayed
  */
 template <typename Derived>
-void print(const Eigen::EigenBase<Derived> &mat) {
+void print(const Eigen::EigenBase<Derived>& mat) {
   std::cout << std::scientific << std::setprecision(6) << mat.derived() << std::endl;
 }
 
 // Specialization for sparse matrices
-inline void print(const SiconosSparseMatrix &mat) {
+inline void print(const SiconosSparseMatrix& mat) {
   std::cout << "Sparse Matrix (" << mat.rows() << "x" << mat.cols()
             << "), non-zeros: " << mat.nonZeros() << "\n";
 
@@ -114,7 +124,7 @@ inline void print(const SiconosSparseMatrix &mat) {
 }
 
 // Specialization for column vectors (prints as row)
-inline void print(const SiconosVector &vec) {
+inline void print(const SiconosVector& vec) {
   std::cout << std::scientific << std::setprecision(6) << vec.transpose() << "\n";
 }
 
@@ -122,12 +132,12 @@ inline void print(const SiconosVector &vec) {
  *  \param mat the input matrix
  */
 template <typename Derived>
-auto normInf(const Eigen::MatrixBase<Derived> &mat) {
+auto normInf(const Eigen::MatrixBase<Derived>& mat) {
   return mat.cwiseAbs().rowwise().sum().maxCoeff();
 }
 
 // Specialization for sparse matrices (uses iterators)
-inline double normInf(const SiconosSparseMatrix &mat) {
+inline double normInf(const SiconosSparseMatrix& mat) {
   double maxNorm = 0.0;
   // Warn: col-major
   std::vector<double> rowSums(mat.rows(), 0.0);
@@ -145,7 +155,7 @@ inline double normInf(const SiconosSparseMatrix &mat) {
 }
 
 template <typename Derived>
-void normInf(const Eigen::EigenBase<Derived> &mat) {
+void normInf(const Eigen::EigenBase<Derived>& mat) {
   return mat->cwiseAbs().rowwise().sum().maxCoeff();
 }
 
@@ -157,7 +167,7 @@ void normInf(const Eigen::EigenBase<Derived> &mat) {
  */
 template <typename Derived>
 inline void setBlock(typename Derived::Index row_min, typename Derived::Index col_min,
-                     const Eigen::MatrixBase<Derived> &input,
+                     const Eigen::MatrixBase<Derived>& input,
                      Eigen::Ref<SiconosDenseMatrix> m_out) {
   // assert(m != *this);
   assert(row_min < m_out.rows() && "row is out of range");
@@ -204,7 +214,7 @@ inline void setBlock(typename Derived::Index row_min, typename Derived::Index co
  */
 template <typename Derived>
 inline void setBlock(typename Derived::Index row_min, typename Derived::Index col_min,
-                     const Eigen::MatrixBase<Derived> &input, SiconosSparseMatrix &m_out) {
+                     const Eigen::MatrixBase<Derived>& input, SiconosSparseMatrix& m_out) {
   // Assert if row and column are in range
   assert(row_min < m_out.rows() && "row is out of range");
   assert(col_min < m_out.cols() && "column is out of range");

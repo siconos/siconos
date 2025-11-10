@@ -68,15 +68,21 @@ siconos::mechanics::fem::FiniteElementLinearTIDS::FiniteElementLinearTIDS(
 
   // Mass ...
   // Deal with 'plugged' mass later
-  hasConstantMass_ = true;
-  hasMass_ = true;
+  mass_storage_ = std::make_unique<siconos::algebra::SiconosSparseMatrix>(ndof_, ndof_);
+  hasMass_ = hasConstantMass_ = true;
   computemass_ = nullptr;
-  mass_mat_ = std::make_shared<siconos::algebra::SiconosSparseMatrix>(ndof_, ndof_);
   // Note FP - todo: evaluate number of nonzeros in mass_mat_ and reserve.
-  _FEModel->computeMassMatrix(*mass_mat_, _materials);
+  siconos::algebra::visitSparseStorage<siconos::algebra::AccessMode::OwnedOnly>(
+      mass_storage_, [&](auto& matrix) { _FEModel->computeMassMatrix(matrix, _materials); },
+      "mass_storage_");
+  //  _FEModel->computeMassMatrix(mass_storage_, _materials);
   //
-  stiffnessMatrix_ = std::make_shared<siconos::algebra::SiconosSparseMatrix>(ndof_, ndof_);
-  _FEModel->computeStiffnessMatrix(*stiffnessMatrix_, _materials);
+  stiffnessMatrix_storage =
+      std::make_unique<siconos::algebra::SiconosSparseMatrix>(ndof_, ndof_);
+  siconos::algebra::visitSparseStorage<siconos::algebra::AccessMode::OwnedOnly>(
+      stiffnessMatrix_storage,
+      [&](auto& matrix) { _FEModel->computeStiffnessMatrix(matrix, _materials); },
+      "stiffnessMatrix_storage");
 
   // dampingMatrix_ = std::make_shared<siconos::algebra::SiconosSparseMatrix>(ndof_, ndof_);
 
@@ -113,7 +119,7 @@ void siconos::mechanics::fem::FiniteElementLinearTIDS::applyNodalForces(
 
 double siconos::mechanics::fem::FiniteElementLinearTIDS::elasticPotentialEnergy() const {
   siconos::algebra::SiconosVector tmp{ndof_};
-  tmp = *stiffnessMatrix_ * *state_q_[0];
+  useStiffness([&](const auto& K) { tmp = K * *state_q_[0]; });
   return 0.5 * state_q_[0]->dot(tmp);
 }
 

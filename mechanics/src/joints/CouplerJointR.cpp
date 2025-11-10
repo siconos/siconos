@@ -39,10 +39,10 @@
 /** Initialize a coupler joint. For use with EqualityConditionNSL to
  * bind two degrees of freedom into one by a ratio and offset. */
 siconos::joints::CouplerJointR::CouplerJointR(
-    std::shared_ptr<NewtonEulerJointR> joint1, unsigned int dof1,
-    std::shared_ptr<NewtonEulerJointR> joint2, unsigned int dof2, double ratio,
-    std::optional<siconos::algebra::SiconosVector> ref1, unsigned int ref1_index,
-    std::optional<siconos::algebra::SiconosVector> ref2, unsigned int ref2_index)
+    std::shared_ptr<NewtonEulerJointR> joint1, siconos::algebra::Index dof1,
+    std::shared_ptr<NewtonEulerJointR> joint2, siconos::algebra::Index dof2, double ratio,
+    std::optional<siconos::algebra::SiconosVector> ref1, siconos::algebra::Index ref1_index,
+    std::optional<siconos::algebra::SiconosVector> ref2, siconos::algebra::Index ref2_index)
     : NewtonEulerJointR{},
       _joint1(joint1),
       _joint2(joint2),
@@ -75,10 +75,10 @@ siconos::joints::CouplerJointR::CouplerJointR(
  * should be using the reference ds's temporary work vector in order
  * to perform correctly in the Newton loop. (TODO) */
 siconos::joints::CouplerJointR::CouplerJointR(
-    std::shared_ptr<NewtonEulerJointR> joint1, unsigned int dof1,
-    std::shared_ptr<NewtonEulerJointR> joint2, unsigned int dof2, double ratio,
-    std::shared_ptr<siconos::modeling::NewtonEulerDS> refds1, unsigned int ref1_index,
-    std::shared_ptr<siconos::modeling::NewtonEulerDS> refds2, unsigned int ref2_index)
+    std::shared_ptr<NewtonEulerJointR> joint1, siconos::algebra::Index dof1,
+    std::shared_ptr<NewtonEulerJointR> joint2, siconos::algebra::Index dof2, double ratio,
+    std::shared_ptr<siconos::modeling::NewtonEulerDS> refds1, siconos::algebra::Index ref1_index,
+    std::shared_ptr<siconos::modeling::NewtonEulerDS> refds2, siconos::algebra::Index ref2_index)
     : NewtonEulerJointR(),
       _joint1(joint1),
       _joint2(joint2),
@@ -94,10 +94,10 @@ siconos::joints::CouplerJointR::CouplerJointR(
 }
 
 void siconos::joints::CouplerJointR::setReferences(
-    std::shared_ptr<NewtonEulerJointR> joint1, unsigned int dof1,
-    std::shared_ptr<NewtonEulerJointR> joint2, unsigned int dof2,
-    std::shared_ptr<siconos::algebra::SiconosVector> ref1, unsigned int ref1_index,
-    std::shared_ptr<siconos::algebra::SiconosVector> ref2, unsigned int ref2_index) {
+    std::shared_ptr<NewtonEulerJointR> joint1, siconos::algebra::Index dof1,
+    std::shared_ptr<NewtonEulerJointR> joint2, siconos::algebra::Index dof2,
+    std::shared_ptr<siconos::algebra::SiconosVector> ref1, siconos::algebra::Index ref1_index,
+    std::shared_ptr<siconos::algebra::SiconosVector> ref2, siconos::algebra::Index ref2_index) {
   _joint1 = joint1;
   _joint2 = joint2;
   _dof1 = dof1;
@@ -109,10 +109,10 @@ void siconos::joints::CouplerJointR::setReferences(
 }
 
 void siconos::joints::CouplerJointR::setReferences(
-    std::shared_ptr<NewtonEulerJointR> joint1, unsigned int dof1,
-    std::shared_ptr<NewtonEulerJointR> joint2, unsigned int dof2,
-    std::shared_ptr<siconos::modeling::NewtonEulerDS> refds1, unsigned int ref1_index,
-    std::shared_ptr<siconos::modeling::NewtonEulerDS> refds2, unsigned int ref2_index) {
+    std::shared_ptr<NewtonEulerJointR> joint1, siconos::algebra::Index dof1,
+    std::shared_ptr<NewtonEulerJointR> joint2, siconos::algebra::Index dof2,
+    std::shared_ptr<siconos::modeling::NewtonEulerDS> refds1, siconos::algebra::Index ref1_index,
+    std::shared_ptr<siconos::modeling::NewtonEulerDS> refds2, siconos::algebra::Index ref2_index) {
   _joint1 = joint1;
   _joint2 = joint2;
   _dof1 = dof1;
@@ -267,8 +267,8 @@ void siconos::joints::CouplerJointR::computeH_NE_(double time,
   _joint2->computeJachqDoF(inter, *q02, *jachq2, _dof2);
 
   // Constraint is the linear relation between them
-  for (unsigned int i = 0; i < 1; i++)
-    for (unsigned int j = 0; j < H_NE_view_->cols(); j++)
+  for (siconos::algebra::Index i = 0; i < 1; i++)
+    for (siconos::algebra::Index j = 0; j < H_NE_view_->cols(); j++)
       H_NE_view_->setValue(i, j, (*jachq2)(i, j) - (*jachq1)(i, j) * _ratio);
 }
 
@@ -337,7 +337,7 @@ void siconos::joints::CouplerJointR::computeJachqDoF(
   _joint2->computeJachqDoF(inter, *q02, *jachq2, _dof2);
 
   // Constraint is the linear relation between them
-  for (unsigned int i = 0; i < 1; i++)
-    for (unsigned int j = 0; j < H_NE_view_->cols(); j++)
+  for (siconos::algebra::Index i = 0; i < 1; i++)
+    for (siconos::algebra::Index j = 0; j < H_NE_view_->cols(); j++)
       jachq.setValue(i, j, (*jachq2)(i, j) - (*jachq1)(i, j) * _ratio);
 }

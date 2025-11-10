@@ -195,7 +195,7 @@ void MBTB_BodyBuildComputeInitPosition(
   /*3) compute the q0 of Siconos, that is the coordinate of G at the initial
    * position*/
   // unsigned int qDim=7;
-  // unsigned int nDof = 3;
+  // int nDof = 3;
   // unsigned int nDim = 6;
   // auto q10(new SiconosVector(qDim));
   // auto v10(new SiconosVector(nDim));
@@ -269,7 +269,7 @@ void siconos::mechanisms::MBTB_BodyBuild(
     const siconos::modeling::BoundaryCondition::Indices& boundaryConditionIndex) {
   assert(mbtb::data::sNbOfBodies > numDS && "MBTB_BodyBuild numDS out of range.");
   unsigned int qDim = 7;
-  // unsigned int nDof = 3;
+  // int nDof = 3;
   unsigned int nDim = 6;
 
   auto q10 = std::make_shared<siconos::algebra::SiconosVector>(qDim);

@@ -24,9 +24,6 @@
 
 #include <math.h>
 
-#include <limits>
-
-#include "DynamicalSystem.hpp"
 #include "FunctionTypes.hpp"
 #include "SecondOrderDS.hpp"
 
@@ -104,7 +101,7 @@ class NewtonEulerDS : public SecondOrderDS {
   std::shared_ptr<siconos::algebra::SiconosVector> state_q_{nullptr};
 
   /** Dimension of state_q_, = 7 because of quaternion parametrization */
-  unsigned int qDim_{7};
+  siconos::algebra::Index qDim_{7};
 
   /** The time derivative of  \f$ q \f$ ,  \f$ \dot q(t) \f$ */
   std::shared_ptr<siconos::algebra::SiconosVector> dotq_{nullptr};
@@ -317,7 +314,7 @@ class NewtonEulerDS : public SecondOrderDS {
   }
 
   /** \return dimension of vector q */
-  inline unsigned int getqDim() const { return qDim_; }
+  inline auto getqDim() const { return qDim_; }
 
   /**  \return a read-only view on q state vector */
   inline const siconos::algebra::ConstMapVectorType q_read() const override {
@@ -328,7 +325,7 @@ class NewtonEulerDS : public SecondOrderDS {
   std::shared_ptr<siconos::algebra::SiconosVector> q() const override { return state_q_; }
 
   // Only for pybind11
-  inline siconos::algebra::SiconosVector &q_python() const { return *(state_q_); }
+  inline siconos::algebra::SiconosVector& q_python() const { return *(state_q_); }
 
   /**  \return a read-only view on  $\dot q$ */
   inline auto dotq_read() {
@@ -349,7 +346,7 @@ class NewtonEulerDS : public SecondOrderDS {
   std::shared_ptr<siconos::algebra::SiconosVector> twist() const { return twist_; }
 
   // Only for pybind11
-  inline siconos::algebra::SiconosVector &twist_python() const { return *(twist_); }
+  inline siconos::algebra::SiconosVector& twist_python() const { return *(twist_); }
 
   // FP: override SecondOrderDS. Used only in visitors of MechanicsIO. To be reviewed ...
   inline const siconos::algebra::ConstMapVectorType velocity_read() const override {
@@ -430,13 +427,13 @@ class NewtonEulerDS : public SecondOrderDS {
   }
 
   /** \return last saved (memory) values of the state vector*/
-  inline const siconos::algebra::SiconosMemory &qMemory() override { return qMemory_; }
+  inline const siconos::algebra::SiconosMemory& qMemory() override { return qMemory_; }
 
   /** \return last saved (memory) values of the twist*/
-  inline const siconos::algebra::SiconosMemory &twistMemory() { return twistMemory_; }
+  inline const siconos::algebra::SiconosMemory& twistMemory() { return twistMemory_; }
 
   /** \return last saved (memory) values of the wrench*/
-  inline const siconos::algebra::SiconosMemory &forcesMemory() override {
+  inline const siconos::algebra::SiconosMemory& forcesMemory() override {
     return wrenchMemory_;
   }
   /** initialize the siconos::algebra::SiconosMemory objects with a positive size.
@@ -451,9 +448,9 @@ class NewtonEulerDS : public SecondOrderDS {
    */
   void swapInMemory() override;
 
-  inline const siconos::algebra::SiconosMemory &wrenchMemory() { return wrenchMemory_; }
+  inline const siconos::algebra::SiconosMemory& wrenchMemory() { return wrenchMemory_; }
 
-  inline const siconos::algebra::SiconosMemory &dotqMemory() { return dotqMemory_; }
+  inline const siconos::algebra::SiconosMemory& dotqMemory() { return dotqMemory_; }
 
   /** To compute the kinetic energy
    */
@@ -496,7 +493,7 @@ class NewtonEulerDS : public SecondOrderDS {
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeFextFunction(const func_prototypes::FunctionS_V &fct);
+  void setComputeFextFunction(const func_prototypes::FunctionS_V& fct);
 
   /** set a constant external moment vector
    *
@@ -511,43 +508,43 @@ class NewtonEulerDS : public SecondOrderDS {
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeMextFunction(const func_prototypes::FunctionS_V &fct);
+  void setComputeMextFunction(const func_prototypes::FunctionS_V& fct);
 
   /** set a user-defined function to compute \f$ f_{int}(twist, q, t) \f$
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeFintFunction(const func_prototypes::FunctionVVS_V &fct);
+  void setComputeFintFunction(const func_prototypes::FunctionVVS_V& fct);
 
   /** set a user-defined function to compute \f$ \nabla_q f_{int}(twist, q, t) \f$
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeJacobianFintOver_qFunction(const func_prototypes::FunctionVVS_M &fct);
+  void setComputeJacobianFintOver_qFunction(const func_prototypes::FunctionVVS_M& fct);
 
   /** set a user-defined function to compute \f$ \nabla_{twist} f_{int}(twist, q, t) \f$
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeJacobianFintOver_twistFunction(const func_prototypes::FunctionVVS_M &fct);
+  void setComputeJacobianFintOver_twistFunction(const func_prototypes::FunctionVVS_M& fct);
 
   /** set a user-defined function to compute \f$ m_{int}(twist, q, t) \f$
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeMintFunction(const func_prototypes::FunctionVVS_V &fct);
+  void setComputeMintFunction(const func_prototypes::FunctionVVS_V& fct);
 
   /** set a user-defined function to compute \f$ \nabla_q m_{int}(twist, q, t) \f$
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeJacobianMintOver_qFunction(const func_prototypes::FunctionVVS_M &fct);
+  void setComputeJacobianMintOver_qFunction(const func_prototypes::FunctionVVS_M& fct);
 
   /** set a user-defined function to compute \f$ \nabla_{twist} m_{int}(twist, q, t) \f$
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeJacobianMintOver_twistFunction(const func_prototypes::FunctionVVS_M &fct);
+  void setComputeJacobianMintOver_twistFunction(const func_prototypes::FunctionVVS_M& fct);
 
   /** if true, use finite-differences to compute \f$ \nabla_q f_{int}(twist, q, t) \f$  */
   void setComputeJacobianFintOver_q_byFD(bool value);
@@ -580,8 +577,8 @@ class NewtonEulerDS : public SecondOrderDS {
       \param q state
       \param time the current time
   */
-  void computeWrench(const Eigen::Ref<const siconos::algebra::SiconosVector> &twist,
-                     const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time);
+  void computeWrench(const Eigen::Ref<const siconos::algebra::SiconosVector>& twist,
+                     const Eigen::Ref<const siconos::algebra::SiconosVector>& q, double time);
 
   /** Compute  \f$ \nabla_{twist}wrench(v,q,t) \f$
    *
@@ -590,8 +587,8 @@ class NewtonEulerDS : public SecondOrderDS {
    *  \param time the current time
    */
   void computeJacobianWrenchOver_twist(
-      const Eigen::Ref<const siconos::algebra::SiconosVector> &twist,
-      const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time);
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& twist,
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& q, double time);
 
   /** Compute  \f$ \nabla_q wrench(v,q,t) \f$
    *
@@ -600,8 +597,8 @@ class NewtonEulerDS : public SecondOrderDS {
    *  \param time the current time
    */
   void computeJacobianWrenchOver_q(
-      const Eigen::Ref<const siconos::algebra::SiconosVector> &twist,
-      const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time);
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& twist,
+      const Eigen::Ref<const siconos::algebra::SiconosVector>& q, double time);
 
   /** To compute the jacobian w.r.t q of the internal forces
    *  by forward finite difference
@@ -611,8 +608,8 @@ class NewtonEulerDS : public SecondOrderDS {
    *  \param twist const Eigen::Ref<siconos::algebra::SiconosVector> &
    */
   void computeJacobianFIntqByFD(double time,
-                                const Eigen::Ref<siconos::algebra::SiconosVector> &position,
-                                const Eigen::Ref<siconos::algebra::SiconosVector> &twist);
+                                const Eigen::Ref<siconos::algebra::SiconosVector>& position,
+                                const Eigen::Ref<siconos::algebra::SiconosVector>& twist);
 
   /** To compute the jacobian w.r.t v of the internal forces
    *  by forward finite difference
@@ -622,18 +619,18 @@ class NewtonEulerDS : public SecondOrderDS {
    *  \param twist const Eigen::Ref<siconos::algebra::SiconosVector> &
    */
   void computeJacobianFIntvByFD(double time,
-                                const Eigen::Ref<siconos::algebra::SiconosVector> &position,
-                                const Eigen::Ref<siconos::algebra::SiconosVector> &twist);
+                                const Eigen::Ref<siconos::algebra::SiconosVector>& position,
+                                const Eigen::Ref<siconos::algebra::SiconosVector>& twist);
 
-  void computeT(const Eigen::Ref<const siconos::algebra::SiconosVector> &q);
+  void computeT(const Eigen::Ref<const siconos::algebra::SiconosVector>& q);
 
   virtual void computeTdot();
 
-  virtual void accept(dynamical_systems::Visitor &tourist) const override {
+  virtual void accept(dynamical_systems::Visitor& tourist) const override {
     tourist.visit(*this);
   }
 
-  Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
+  Type acceptType(types::FindType& ft) const override { return ft.visit(*this); }
 };
 
 ///////// Free functions /////////
@@ -646,7 +643,7 @@ namespace newton_euler {
     \param[in,out] T result
 
 */
-void computeT(const Eigen::Ref<const siconos::algebra::SiconosVector> &q,
+void computeT(const Eigen::Ref<const siconos::algebra::SiconosVector>& q,
               Eigen::Ref<siconos::algebra::SiconosMatrix76> T);
 
 /** Compute the moment vectors applied to a body with state
@@ -665,11 +662,11 @@ void computeT(const Eigen::Ref<const siconos::algebra::SiconosVector> &q,
  *  \param[in,out] result resulting momemt
  *  \param[in] accumulate if true, mext += result, else mext is reinitialized
  */
-void computeMextForceAtPos(const Eigen::Ref<siconos::algebra::SiconosVector> &q,
+void computeMextForceAtPos(const Eigen::Ref<siconos::algebra::SiconosVector>& q,
                            bool isMextExpressedInInertialFrame,
-                           const Eigen::Ref<siconos::algebra::SiconosVector> &force,
+                           const Eigen::Ref<siconos::algebra::SiconosVector>& force,
                            bool forceAbsRef,
-                           const Eigen::Ref<siconos::algebra::SiconosVector> &pos,
+                           const Eigen::Ref<siconos::algebra::SiconosVector>& pos,
                            bool posAbsRef, Eigen::Ref<siconos::algebra::SiconosVector> result,
                            bool accumulate);
 
@@ -683,8 +680,8 @@ void computeMextForceAtPos(const Eigen::Ref<siconos::algebra::SiconosVector> &q,
  *  \param[in, out] fext resulting force
  *  \param[in] accumulate if true, fext += result, else fext is reinitialized
  */
-void computeFextForceAtPos(const Eigen::Ref<siconos::algebra::SiconosVector> &q,
-                           const Eigen::Ref<siconos::algebra::SiconosVector> &force,
+void computeFextForceAtPos(const Eigen::Ref<siconos::algebra::SiconosVector>& q,
+                           const Eigen::Ref<siconos::algebra::SiconosVector>& force,
                            bool forceAbsRef, Eigen::Ref<siconos::algebra::MapVectorType> fExt,
                            bool accumulate);
 
@@ -695,8 +692,8 @@ void computeFextForceAtPos(const Eigen::Ref<siconos::algebra::SiconosVector> &q,
  *  \param[in,out] result the computed jacobian matrix (size 3x6)
  */
 void computeJacobianMGyrOver_twist(
-    const Eigen::Ref<const siconos::algebra::SiconosVector> &twist,
-    const Eigen::Ref<const siconos::algebra::SiconosMatrix66> &inertia,
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& twist,
+    const Eigen::Ref<const siconos::algebra::SiconosMatrix66>& inertia,
     Eigen::Ref<siconos::algebra::SiconosMatrix36> result);
 
 /** Compute \f$ \nabla_{twist} m_{gyr}(twist) \f$ by forward finite difference
@@ -709,9 +706,9 @@ void computeJacobianMGyrOver_twist(
  *  \param[in,out] result the computed jacobian matrix (size 3x6)
  */
 void computeJacobianMGyrOver_twist_byFD(
-    const Eigen::Ref<const siconos::algebra::SiconosVector> &twist, double epsilonFD,
-    const Eigen::Ref<const siconos::algebra::SiconosMatrix66> &inertia,
-    const siconos::modeling::func_prototypes::FunctionMV_V &computeMgyr,
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& twist, double epsilonFD,
+    const Eigen::Ref<const siconos::algebra::SiconosMatrix66>& inertia,
+    const siconos::modeling::func_prototypes::FunctionMV_V& computeMgyr,
     Eigen::Ref<siconos::algebra::SiconosMatrix36> result);
 
 /** Compute \f$ \nabla_{twist} f(twist, q, time) \f$ by forward finite difference
@@ -724,9 +721,9 @@ void computeJacobianMGyrOver_twist_byFD(
  *  \param[in,out] result the computed jacobian matrix (size: 3xsize twist)
  */
 void computeJacobianFOver_twist_byFD(
-    const Eigen::Ref<const siconos::algebra::SiconosVector> &twist,
-    const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time, double epsilonFD,
-    const siconos::modeling::func_prototypes::FunctionVVS_V &computeMint,
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& twist,
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& q, double time, double epsilonFD,
+    const siconos::modeling::func_prototypes::FunctionVVS_V& computeMint,
     Eigen::Ref<siconos::algebra::SiconosMatrix36> result);
 
 /** Compute \f$ \nabla_{q} f(twist, q, time) \f$ by forward finite difference
@@ -739,9 +736,9 @@ void computeJacobianFOver_twist_byFD(
  *  \param[in,out] result the computed jacobian matrix (size: 3xsize q)
  */
 void computeJacobianFOver_q_byFD(
-    const Eigen::Ref<const siconos::algebra::SiconosVector> &twist,
-    const Eigen::Ref<const siconos::algebra::SiconosVector> &q, double time, double epsilonFD,
-    const siconos::modeling::func_prototypes::FunctionVVS_V &computeMint,
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& twist,
+    const Eigen::Ref<const siconos::algebra::SiconosVector>& q, double time, double epsilonFD,
+    const siconos::modeling::func_prototypes::FunctionVVS_V& computeMint,
     Eigen::Ref<siconos::algebra::SiconosMatrix37> result);
 
 /** Compute \f$\nabla_q(m_{ext})\f$, required when mext is expressed in the inertial frame.
@@ -751,8 +748,8 @@ void computeJacobianFOver_q_byFD(
  *  \param[in,out] result the computed jacobian matrix (size: 3x7)
  */
 void computeJacobianMExtqExpressedInInertialFrame(
-    const Eigen::Ref<siconos::algebra::SiconosVector> &q, double time,
-    const siconos::algebra::SiconosVector3 &mext,
+    const Eigen::Ref<siconos::algebra::SiconosVector>& q, double time,
+    const siconos::algebra::SiconosVector3& mext,
     Eigen::Ref<siconos::algebra::SiconosMatrix37> result);
 
 /** Compute \f$\nabla_q(m_{ext})\f$, required when mext is expressed in the inertial frame.
@@ -765,8 +762,8 @@ void computeJacobianMExtqExpressedInInertialFrame(
  *
  */
 void computeJacobianMExtqExpressedInInertialFrameByFD(
-    const Eigen::Ref<siconos::algebra::SiconosVector> &q, double time,
-    const func_prototypes::FunctionS_V &computeMext, bool isMextExpressedInInertialFrame,
+    const Eigen::Ref<siconos::algebra::SiconosVector>& q, double time,
+    const func_prototypes::FunctionS_V& computeMext, bool isMextExpressedInInertialFrame,
     double epsilonFD, Eigen::Ref<siconos::algebra::SiconosMatrix33> result);
 
 /** function to compute gyroscopic forces
@@ -775,8 +772,8 @@ void computeJacobianMExtqExpressedInInertialFrameByFD(
  *  \param[in] inertia total inertia matrix, size=6x6
  *  \param[in,out] result the computed jacobian matrix (size 3x6)
  */
-void computeMgyr(const Eigen::Ref<const siconos::algebra::SiconosVector> &twist,
-                 const Eigen::Ref<const siconos::algebra::SiconosMatrix66> &inertia,
+void computeMgyr(const Eigen::Ref<const siconos::algebra::SiconosVector>& twist,
+                 const Eigen::Ref<const siconos::algebra::SiconosMatrix66>& inertia,
                  Eigen::Ref<siconos::algebra::SiconosVector> mGyr);
 }  // namespace newton_euler
 

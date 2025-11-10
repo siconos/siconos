@@ -39,7 +39,7 @@ class ComplementarityConditionNSL : public NonSmoothLaw {
    *
    *  \param size of the non smooth law
    */
-  ComplementarityConditionNSL(unsigned int size) : NonSmoothLaw(size) {};
+  ComplementarityConditionNSL(siconos::algebra::Index size) : NonSmoothLaw(size) {};
 
   /** Destructor */
   ~ComplementarityConditionNSL() noexcept = default;

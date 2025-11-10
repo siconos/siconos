@@ -81,7 +81,7 @@ class FixedJointR : public NewtonEulerJointR {
 
      \return the number of constraints
    */
-  virtual unsigned int numberOfConstraints() const override { return 6; }
+  virtual siconos::algebra::Index numberOfConstraints() const override { return 6; }
 
   /**
      to compute the output y = h(q) of the Relation
@@ -92,7 +92,7 @@ class FixedJointR : public NewtonEulerJointR {
   void computeh(const siconos::algebra::BlockVector& q,
                 Eigen::Ref<siconos::algebra::SiconosVector> y) override;
 
-  virtual unsigned int numberOfDoF() const override { return 0; }
+  virtual siconos::algebra::Index numberOfDoF() const override { return 0; }
 
   virtual DofType typeOfDoF(unsigned int axis) const override { return DofType::INVALID; }
 

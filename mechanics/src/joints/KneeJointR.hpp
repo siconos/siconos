@@ -103,14 +103,14 @@ class KneeJointR : public NewtonEulerJointR {
 
      \return the number of constraints
    */
-  virtual unsigned int numberOfConstraints() const override { return 3; }
+  virtual siconos::algebra::Index numberOfConstraints() const override { return 3; }
 
   /**
      Get the number of degrees of freedom defined in the joint
 
      \return the number of degrees of freedom (DoF)
    */
-  virtual unsigned int numberOfDoF() const override { return 3; }
+  virtual siconos::algebra::Index numberOfDoF() const override { return 3; }
 
   /**
      Return the type of a degree of freedom of this joint.

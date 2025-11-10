@@ -20,7 +20,6 @@
 #include <iostream>
 #include <memory>
 
-#include "BlockVector.hpp"
 #include "SiconosConst.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
@@ -28,6 +27,7 @@
 // #define DEBUG_STDOUT
 // #define DEBUG_MESSAGES
 
+#include "StorageTools.hpp"
 #include "siconos_debug.h"
 
 // Build from initial state only
@@ -81,10 +81,14 @@ void siconos::modeling::LagrangianSparseDS::initMemoryForGeneralizedCoordinates(
 }
 
 void siconos::modeling::LagrangianSparseDS::init_lu_mass() {
-  if (mass_mat_ && !hasConstantMass_) {
+  //  if (mass_mat_ && !hasConstantMass_) {
+  if (!hasMass_) return;
+  if (!hasConstantMass_) {
     computeMass(*state_q_[0]);
     // LU factorization
-    LUMass_ = std::make_shared<siconos::algebra::SiconosSparseLUMatrix>(*mass_mat_);
+    useMass([&](const auto& M) {
+      LUMass_ = std::make_shared<siconos::algebra::SiconosSparseLUMatrix>(M);
+    });
     hasLUMass_ = true;
   }
 }
@@ -135,10 +139,12 @@ void siconos::modeling::LagrangianSparseDS::initRhs(double time) {
   }
 
   // Compute mass and LU factorization
-  if (mass_mat_) {
+  if (hasMass_) {
     computeMass(*state_q_[0]);
     // LU factorization
-    LUMass_ = std::make_shared<siconos::algebra::SiconosSparseLUMatrix>(*mass_mat_);
+    useMass([&](const auto& M) {
+      LUMass_ = std::make_shared<siconos::algebra::SiconosSparseLUMatrix>(M);
+    });
     hasLUMass_ = true;
   }
 
@@ -146,13 +152,17 @@ void siconos::modeling::LagrangianSparseDS::initRhs(double time) {
   // -- Jacobian Rhs over x --
 
   // The jacobian is saved in a flattened version, as a vector
+  // which contains the concatenation of the columns of the real matrix
   jacobianRhsOver_x_.resize(x_size_ * x_size_);
-
-  // Fill null and identity part
   jacobianRhsOver_x_.setZero();
-  for (unsigned int j = 0; j < ndof_; ++j) {
-    jacobianRhsOver_x_((ndof_ + j) * x_size_ + j) = 1.0;
-  }
+
+  // A lambda to compute the position in jacobian vector from the
+  // coordinates in the "real" jacobian matrix.
+  auto idx = [&](int row, int col) { return col * (2 * ndof_) + row; };
+  // Upper-left block of the jacobian=0. Nothing to be done
+  // Upper-right block = identity
+  for (Eigen::Index i = 0; i < ndof_; ++i) jacobianRhsOver_x_(idx(i, ndof_ + i)) = 1.0;
+
   if (!jacobianTotalForcesOver_q_ && !jacobianTotalForcesOver_velocity_) {
     is_jacobianRhsOver_x_uptodate_ = true;
 
@@ -162,10 +172,12 @@ void siconos::modeling::LagrangianSparseDS::initRhs(double time) {
 
   // - Fill parts corresponding to the jacobians of total forces -
   // mass and lu_mass are up to date since we have already called init_lu_mass
+  // in computeRhs()
+
   if (hasMass()) {
     // In that case, we need to compute inv(Mass).jacobian_v or _q Forces
-    siconos::algebra::SiconosSparseMatrix jacq;
-    siconos::algebra::SiconosSparseMatrix jacv;
+    siconos::algebra::SiconosSparseMatrix jacq;  // to save M^-1 . jac totalforces/q
+    siconos::algebra::SiconosSparseMatrix jacv;  // to save M^-1 . jac totalforces/v
 
     if (hasJacobianTotalForcesOver_q()) {
       // Update if required
@@ -184,43 +196,22 @@ void siconos::modeling::LagrangianSparseDS::initRhs(double time) {
     // Now fill in jacobianRhsOver_x_
     // Bottom-left block (jacobian / q)
     if (hasJacobianTotalForcesOver_q()) {
-      for (int k = 0; k < jacq.outerSize(); ++k) {
+      for (Eigen::Index k = 0; k < jacq.outerSize(); ++k) {
         for (siconos::algebra::SiconosSparseMatrix::InnerIterator it(jacq, k); it; ++it) {
-          int i = it.row();
-          int j = it.col();
           double value = it.value();
-          int idx = j * x_size_ + i + ndof_;
-          jacobianRhsOver_x_(idx) = value;
+          jacobianRhsOver_x_(idx(ndof_ + it.row(), it.col())) = value;
         }
       }
     }
     // Bottom-right block (jacobian / vel)
     if (hasJacobianTotalForcesOver_velocity()) {
-      for (int k = 0; k < jacv.outerSize(); ++k) {
+      for (Eigen::Index k = 0; k < jacv.outerSize(); ++k) {
         for (siconos::algebra::SiconosSparseMatrix::InnerIterator it(jacv, k); it; ++it) {
-          int i = it.row();
-          int j = it.col();
           double value = it.value();
-          int idx = (j + ndof_) * x_size_ + i + ndof_;
-          jacobianRhsOver_x_(idx) = value;
+          jacobianRhsOver_x_(idx(ndof_ + it.row(), ndof_ + it.col())) = value;
         }
       }
     }
-
-    // for (unsigned int j = 0; j < ndof_; ++j) {
-    //   // Bottom-left block (jacobian /
-    //   // q)
-    //   if (hasJacobianTotalForcesOver_q()) {
-    //     for (unsigned int i = 0; i < ndof_; ++i)
-    //       jacobianRhsOver_x_(j * x_size_ + i + ndof_) = jacq.coeff(i, j);
-    //   }
-    //   // Bottom-right block (jacobian /
-    //   // vel)
-    //   if (hasJacobianTotalForcesOver_velocity()) {
-    //     for (unsigned int i = 0; i < ndof_; ++i)
-    //       jacobianRhsOver_x_((j + ndof_) * x_size_ + i + ndof_) = jacv.coeff(i, j);
-    //   }
-    // }
   } else  // No mass
   {
     if (hasJacobianTotalForcesOver_q()) {
@@ -235,29 +226,23 @@ void siconos::modeling::LagrangianSparseDS::initRhs(double time) {
 
     // Bottom-left block (jacobian / q)
     if (hasJacobianTotalForcesOver_q()) {
-      for (int k = 0; k < jacobianTotalForcesOver_q_->outerSize(); ++k) {
+      for (Eigen::Index k = 0; k < jacobianTotalForcesOver_q_->outerSize(); ++k) {
         for (siconos::algebra::SiconosSparseMatrix::InnerIterator it(
                  *jacobianTotalForcesOver_q_, k);
              it; ++it) {
-          int i = it.row();
-          int j = it.col();
           double value = it.value();
-          int idx = j * x_size_ + i + ndof_;
-          jacobianRhsOver_x_(idx) = value;
+          jacobianRhsOver_x_(idx(ndof_ + it.row(), it.col())) = value;
         }
       }
     }
     // Bottom-right block (jacobian / vel)
     if (hasJacobianTotalForcesOver_velocity()) {
-      for (int k = 0; k < jacobianTotalForcesOver_velocity_->outerSize(); ++k) {
+      for (Eigen::Index k = 0; k < jacobianTotalForcesOver_velocity_->outerSize(); ++k) {
         for (siconos::algebra::SiconosSparseMatrix::InnerIterator it(
                  *jacobianTotalForcesOver_velocity_, k);
              it; ++it) {
-          int i = it.row();
-          int j = it.col();
           double value = it.value();
-          int idx = (j + ndof_) * x_size_ + i + ndof_;
-          jacobianRhsOver_x_(idx) = value;
+          jacobianRhsOver_x_(idx(ndof_ + it.row(), ndof_ + it.col())) = value;
         }
       }
     }
@@ -267,62 +252,34 @@ void siconos::modeling::LagrangianSparseDS::initRhs(double time) {
   DEBUG_END("siconos::modeling::LagrangianSparseDS::initRhs(double time)\n");
 }
 
-////  MASS ////
+// ////  MASS ////
 
-void siconos::modeling::LagrangianSparseDS::setConstantMass(
-    siconos::algebra::SiconosSparseMatrix& newValue) {
-  assert(newValue.rows() == ndof_);
-  assert(newValue.cols() == ndof_);
-  mass_mat_.reset(&newValue, [](siconos::algebra::SiconosSparseMatrix*) {
-    // No-op deleter: the shared ptr does not own the matrix memory
-    // Be cautious !!!
-  });
+void siconos::modeling::LagrangianSparseDS::setConstantMassAlias(
+    Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newValue) {
+  /**  Must:
 
+   - create the Map (view onto memory handled by newValue) for mass
+   - set the corresponding booleans
+   - reset internal storage (should already be null but who knows ...)
+   */
+
+  mass_storage_ =
+      std::make_shared<Eigen::Map<siconos::algebra::SiconosSparseMatrix>>(newValue);
   hasMass_ = true;
   hasConstantMass_ = true;
   computemass_ = nullptr;
-}
-
-void siconos::modeling::LagrangianSparseDS::setConstantMassWithCopy(
-    const siconos::algebra::SiconosSparseMatrix& newValue) {
-  assert(newValue.rows() == ndof_);
-  assert(newValue.cols() == ndof_);
-  mass_mat_ = std::make_shared<siconos::algebra::SiconosSparseMatrix>(newValue);  // copy
-  hasMass_ = true;
-  hasConstantMass_ = true;
-  computemass_ = nullptr;
-}
-// void siconos::modeling::LagrangianSparseDS::setConstantMass(
-//     const std::shared_ptr<siconos::algebra::SiconosSparseMatrix>& input) {
-//   if (!input || input->rows() != ndof_ || input->cols() != ndof_) {
-//     throw std::invalid_argument("Incompatible mass matrix dimensions");
-//   }
-//   mass_mat_ = input;
-// }
-
-void siconos::modeling::LagrangianSparseDS::setComputeMassFunction(
-    const siconos::modeling::func_prototypes::FunctionV_Ms& new_func) {
-  // Ensure that memory is properly allocated for mass_
-  if (!mass_mat_) {
-    mass_mat_ = std::make_shared<siconos::algebra::SiconosSparseMatrix>(ndof_, ndof_);
-    // Note FP: find a way to call reserve to optimize future insertion?
-    // Or force an initial setFromTriplets?
-  }
-  hasMass_ = true;
-  hasConstantMass_ = false;
-  computemass_ = new_func;
+  computemass_python_ = nullptr;
 }
 
 void siconos::modeling::LagrangianSparseDS::computeMass(
     const Eigen::Ref<const siconos::algebra::SiconosVector>& position) {
-  if (computemass_) {
-    computemass_(position, *mass_mat_);
+  auto isComputed = siconos::algebra::computeSparse(
+      mass_storage_, computemass_, computemass_python_, "mass_storage", position);
+  if (isComputed) {
     hasLUMass_ = false;  // LU factorisation needs update
     is_jacobianRhsOver_x_uptodate_ = false;
   }
 }
-
-////////////////
 
 void siconos::modeling::LagrangianSparseDS::setComputeFintFunction(
     const siconos::modeling::func_prototypes::FunctionVVS_V& fint_func) {
@@ -343,90 +300,62 @@ void siconos::modeling::LagrangianSparseDS::computeFint(
     computefint_(velocity, position, time, *fint_);
 }
 
-void siconos::modeling::LagrangianSparseDS::setConstantJacobianFintOver_q(
-    siconos::algebra::SiconosSparseMatrix& newValue) {
-  jacobianFintOver_q_mat_.reset(&newValue, [](siconos::algebra::SiconosSparseMatrix*) {
-    // No-op deleter: the shared ptr does not own the matrix memory
-    // Be cautious !!!
-  });
+void siconos::modeling::LagrangianSparseDS::setConstantJacobianFintOver_qAlias(
+    Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newValue) {
+  /**  Must:
+
+   - create the Map (view onto memory handled by newValue) for the jacobian
+   - set the corresponding booleans
+   - reset internal storage (should already be null but who knows ...)
+   */
+
+  jacobianFintOver_q_storage_ =
+      std::make_shared<Eigen::Map<siconos::algebra::SiconosSparseMatrix>>(newValue);
   hasJacobianFintOver_q_ = true;
   hasConstantJacobianFintOver_q_ = true;
   computejacobianFintOver_q_ = nullptr;
+  computejacobianFintOver_q_python_ = nullptr;
   is_jacobianRhsOver_x_uptodate_ = false;
-}
-
-void siconos::modeling::LagrangianSparseDS::setConstantJacobianFintOver_q_WithCopy(
-    const siconos::algebra::SiconosSparseMatrix& newValue) {
-  jacobianFintOver_q_mat_ =
-      std::make_shared<siconos::algebra::SiconosSparseMatrix>(newValue);  // copy
-  hasJacobianFintOver_q_ = true;
-  hasConstantJacobianFintOver_q_ = true;
-  computejacobianFintOver_q_ = nullptr;
-  is_jacobianRhsOver_x_uptodate_ = false;
-}
-
-void siconos::modeling::LagrangianSparseDS::setComputeJacobianFintOver_qFunction(
-    const siconos::modeling::func_prototypes::FunctionVVS_Ms& new_func) {
-  // Ensure that memory is properly allocated for jacobianFintOver_q_
-  if (!jacobianFintOver_q_mat_) {
-    jacobianFintOver_q_mat_ =
-        std::make_shared<siconos::algebra::SiconosSparseMatrix>(ndof_, ndof_);
-  }
-  hasJacobianFintOver_q_ = true;
-  hasConstantJacobianFintOver_q_ = false;
-  computejacobianFintOver_q_ = new_func;
 }
 
 void siconos::modeling::LagrangianSparseDS::computeJacobianFintOver_q(
     const Eigen::Ref<siconos::algebra::SiconosVector>& velocity,
     const Eigen::Ref<siconos::algebra::SiconosVector>& position, double time) {
-  if (computejacobianFintOver_q_) {
-    computejacobianFintOver_q_(velocity, position, time, *jacobianFintOver_q_mat_);
-    is_jacobianRhsOver_x_uptodate_ = false;
-  }
+  auto isComputed =
+      siconos::algebra::computeSparse(jacobianFintOver_q_storage_, computejacobianFintOver_q_,
+                                      computejacobianFintOver_q_python_,
+                                      "jacobianFintOver_q_storage_", velocity, position, time);
+
+  if (isComputed) is_jacobianRhsOver_x_uptodate_ = false;
 }
 
-void siconos::modeling::LagrangianSparseDS::setConstantJacobianFintOver_velocity(
-    siconos::algebra::SiconosSparseMatrix& newValue) {
-  jacobianFintOver_velocity_mat_.reset(&newValue, [](siconos::algebra::SiconosSparseMatrix*) {
-    // No-op deleter: the shared ptr does not own the matrix memory
-    // Be cautious !!!
-  });
+void siconos::modeling::LagrangianSparseDS::setConstantJacobianFintOver_velocityAlias(
+    Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newValue) {
+  /**  Must:
+
+   - create the Map (view onto memory handled by newValue) for the jacobian
+   - set the corresponding booleans
+   - reset internal storage (should already be null but who knows ...)
+   */
+
+  jacobianFintOver_velocity_storage_ =
+      std::make_shared<Eigen::Map<siconos::algebra::SiconosSparseMatrix>>(newValue);
   hasJacobianFintOver_velocity_ = true;
   hasConstantJacobianFintOver_velocity_ = true;
   computejacobianFintOver_velocity_ = nullptr;
+  computejacobianFintOver_velocity_python_ = nullptr;
   is_jacobianRhsOver_x_uptodate_ = false;
-}
-
-void siconos::modeling::LagrangianSparseDS::setConstantJacobianFintOver_velocity_WithCopy(
-    const siconos::algebra::SiconosSparseMatrix& newValue) {
-  jacobianFintOver_velocity_mat_ =
-      std::make_shared<siconos::algebra::SiconosSparseMatrix>(newValue);  // copy
-  hasJacobianFintOver_velocity_ = true;
-  hasConstantJacobianFintOver_velocity_ = true;
-  computejacobianFintOver_velocity_ = nullptr;
-  is_jacobianRhsOver_x_uptodate_ = false;
-}
-
-void siconos::modeling::LagrangianSparseDS::setComputeJacobianFintOver_velocityFunction(
-    const siconos::modeling::func_prototypes::FunctionVVS_Ms& new_func) {
-  if (!jacobianFintOver_velocity_mat_) {
-    jacobianFintOver_velocity_mat_ =
-        std::make_shared<siconos::algebra::SiconosSparseMatrix>(ndof_, ndof_);
-  }
-  hasJacobianFintOver_velocity_ = true;
-  hasConstantJacobianFintOver_velocity_ = false;
-  computejacobianFintOver_velocity_ = new_func;
 }
 
 void siconos::modeling::LagrangianSparseDS::computeJacobianFintOver_velocity(
     const Eigen::Ref<siconos::algebra::SiconosVector>& velocity,
     const Eigen::Ref<siconos::algebra::SiconosVector>& position, double time) {
-  if (computejacobianFintOver_velocity_) {
-    computejacobianFintOver_velocity_(velocity, position, time,
-                                      *jacobianFintOver_velocity_mat_);
-    is_jacobianRhsOver_x_uptodate_ = false;
-  }
+  auto isComputed = siconos::algebra::computeSparse(
+      jacobianFintOver_velocity_storage_, computejacobianFintOver_velocity_,
+      computejacobianFintOver_velocity_python_, "jacobianFintOver_velocity_storage_", velocity,
+      position, time);
+
+  if (isComputed) is_jacobianRhsOver_x_uptodate_ = false;
 }
 
 void siconos::modeling::LagrangianSparseDS::setComputeFgyrFunction(
@@ -446,87 +375,61 @@ void siconos::modeling::LagrangianSparseDS::computeFgyr(
   if (computefgyr_) computefgyr_(velocity, position, *fgyr_);
 }
 
-void siconos::modeling::LagrangianSparseDS::setConstantJacobianFgyrOver_q(
-    siconos::algebra::SiconosSparseMatrix& newValue) {
-  jacobianFgyrOver_q_mat_.reset(&newValue, [](siconos::algebra::SiconosSparseMatrix*) {
-    // No-op deleter: the shared ptr does not own the matrix memory
-    // Be cautious !!!
-  });
+void siconos::modeling::LagrangianSparseDS::setConstantJacobianFgyrOver_qAlias(
+    Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newValue) {
+  /**  Must:
+
+   - create the Map (view onto memory handled by newValue) for the jacobian
+   - set the corresponding booleans
+   - reset internal storage (should already be null but who knows ...)
+   */
+
+  jacobianFgyrOver_q_storage_ =
+      std::make_shared<Eigen::Map<siconos::algebra::SiconosSparseMatrix>>(newValue);
   hasJacobianFgyrOver_q_ = true;
   hasConstantJacobianFgyrOver_q_ = true;
   computejacobianFgyrOver_q_ = nullptr;
+  computejacobianFgyrOver_q_python_ = nullptr;
   is_jacobianRhsOver_x_uptodate_ = false;
-}
-
-void siconos::modeling::LagrangianSparseDS::setConstantJacobianFgyrOver_q_WithCopy(
-    const siconos::algebra::SiconosSparseMatrix& newValue) {
-  jacobianFgyrOver_q_mat_ =
-      std::make_shared<siconos::algebra::SiconosSparseMatrix>(newValue);  // copy
-  hasJacobianFgyrOver_q_ = true;
-  hasConstantJacobianFgyrOver_q_ = true;
-  computejacobianFgyrOver_q_ = nullptr;
-  is_jacobianRhsOver_x_uptodate_ = false;
-}
-
-void siconos::modeling::LagrangianSparseDS::setComputeJacobianFgyrOver_qFunction(
-    const siconos::modeling::func_prototypes::FunctionVV_Ms& new_func) {
-  if (!jacobianFgyrOver_q_mat_) {
-    jacobianFgyrOver_q_mat_ =
-        std::make_shared<siconos::algebra::SiconosSparseMatrix>(ndof_, ndof_);
-  }
-  hasJacobianFgyrOver_q_ = true;
-  hasConstantJacobianFgyrOver_q_ = false;
-  computejacobianFgyrOver_q_ = new_func;
 }
 
 void siconos::modeling::LagrangianSparseDS::computeJacobianFgyrOver_q(
     const Eigen::Ref<siconos::algebra::SiconosVector>& velocity,
     const Eigen::Ref<siconos::algebra::SiconosVector>& position) {
-  if (computejacobianFgyrOver_q_) {
-    computejacobianFgyrOver_q_(velocity, position, *jacobianFgyrOver_q_mat_);
-    is_jacobianRhsOver_x_uptodate_ = false;
-  }
+  auto isComputed = siconos::algebra::computeSparse(
+      jacobianFgyrOver_q_storage_, computejacobianFgyrOver_q_,
+      computejacobianFgyrOver_q_python_, "jacobianFgyrOver_q_storage_", velocity, position);
+
+  if (isComputed) is_jacobianRhsOver_x_uptodate_ = false;
 }
 
-void siconos::modeling::LagrangianSparseDS::setConstantJacobianFgyrOver_velocity(
-    siconos::algebra::SiconosSparseMatrix& newValue) {
-  jacobianFgyrOver_velocity_mat_.reset(&newValue, [](siconos::algebra::SiconosSparseMatrix*) {
-    // No-op deleter: the shared ptr does not own the
-    // matrix memory Be cautious !!!
-  });
+void siconos::modeling::LagrangianSparseDS::setConstantJacobianFgyrOver_velocityAlias(
+    Eigen::Map<siconos::algebra::SiconosSparseMatrix>& newValue) {
+  /**  Must:
+
+   - create the Map (view onto memory handled by newValue) for the jacobian
+   - set the corresponding booleans
+   - reset internal storage (should already be null but who knows ...)
+   */
+
+  jacobianFgyrOver_velocity_storage_ =
+      std::make_shared<Eigen::Map<siconos::algebra::SiconosSparseMatrix>>(newValue);
   hasJacobianFgyrOver_velocity_ = true;
   hasConstantJacobianFgyrOver_velocity_ = true;
   computejacobianFgyrOver_velocity_ = nullptr;
+  computejacobianFgyrOver_velocity_python_ = nullptr;
   is_jacobianRhsOver_x_uptodate_ = false;
-}
-
-void siconos::modeling::LagrangianSparseDS::setConstantJacobianFgyrOver_velocity_WithCopy(
-    const siconos::algebra::SiconosSparseMatrix& newValue) {
-  jacobianFgyrOver_velocity_mat_ =
-      std::make_shared<siconos::algebra::SiconosSparseMatrix>(newValue);  // copy
-  hasJacobianFgyrOver_velocity_ = true;
-  hasConstantJacobianFgyrOver_velocity_ = true;
-  computejacobianFgyrOver_velocity_ = nullptr;
-  is_jacobianRhsOver_x_uptodate_ = false;
-}
-void siconos::modeling::LagrangianSparseDS::setComputeJacobianFgyrOver_velocityFunction(
-    const siconos::modeling::func_prototypes::FunctionVV_Ms& new_func) {
-  if (!jacobianFgyrOver_velocity_mat_) {
-    jacobianFgyrOver_velocity_mat_ =
-        std::make_shared<siconos::algebra::SiconosSparseMatrix>(ndof_, ndof_);
-  }
-  hasJacobianFgyrOver_velocity_ = true;
-  hasConstantJacobianFgyrOver_velocity_ = false;
-  computejacobianFgyrOver_velocity_ = new_func;
 }
 
 void siconos::modeling::LagrangianSparseDS::computeJacobianFgyrOver_velocity(
     const Eigen::Ref<siconos::algebra::SiconosVector>& velocity,
     const Eigen::Ref<siconos::algebra::SiconosVector>& position) {
-  if (computejacobianFgyrOver_velocity_) {
-    computejacobianFgyrOver_velocity_(velocity, position, *jacobianFgyrOver_velocity_mat_);
-    is_jacobianRhsOver_x_uptodate_ = false;
-  }
+  auto isComputed = siconos::algebra::computeSparse(
+      jacobianFgyrOver_velocity_storage_, computejacobianFgyrOver_velocity_,
+      computejacobianFgyrOver_velocity_python_, "jacobianFgyrOver_velocity_storage_", velocity,
+      position);
+
+  if (isComputed) is_jacobianRhsOver_x_uptodate_ = false;
 }
 
 void siconos::modeling::LagrangianSparseDS::setConstantFext(
@@ -594,9 +497,13 @@ void siconos::modeling::LagrangianSparseDS::computeJacobianRhsOver_x(double time
   if (is_jacobianRhsOver_x_uptodate_ && hasConstantMass_ &&
       hasConstantJacobianTotalForcesOver_q() && hasConstantJacobianTotalForcesOver_velocity())
     return;  // Mass and all jacobian constants and jacobian rhs already up to date
+  // --> this has importance for the LagrangianSparseLinearTIDS case, where this method is not
+  // reimplemented
 
   is_jacobianRhsOver_x_uptodate_ = true;
   // Any compute(...) below if active, will turn this to false
+
+  // We only need to update the lower part of the jacobian matrix
 
   if (!hasConstantJacobianTotalForcesOver_q())
     computeJacobianTotalForcesOver_q(*state_q_[1], *state_q_[0], time);
@@ -610,57 +517,67 @@ void siconos::modeling::LagrangianSparseDS::computeJacobianRhsOver_x(double time
   if (is_jacobianRhsOver_x_uptodate_) return;
 
   // At this point, all operators are up to date
-  assert(false);
+
+  // A lambda to compute the position in jacobian vector from the
+  // coordinates in the "real" jacobian matrix.
+  // Remind that jacobianRhsOver_x_ is a vector which contains
+  // the concatenation of the columns of the real matrix
+  auto idx = [&](int row, int col) { return col * (2 * ndof_) + row; };
+
+  // - Fill parts corresponding to the jacobians of total forces -
   if (hasMass()) {
-    // // View onto left part of buffer_
-    // Eigen::Map<siconos::algebra::SiconosSparseMatrix> jacq(buffer_.data(), ndof_, ndof_);
-    // // View onto right part of buffer_
-    // Eigen::Map<siconos::algebra::SiconosSparseMatrix> jacv(buffer_.data(), ndof_, ndof_);
-
-    // if (hasJacobianTotalForcesOver_q()) {
-    //   if (!hasConstantMass_ || !hasConstantJacobianTotalForcesOver_q())
-    //     // Solve MjacobianX(1,0) = jacobianFL[0]
-    //     jacq = LUMass_->solve(*jacobianTotalForcesOver_q_);
-    // }
-
-    // if (hasJacobianTotalForcesOver_velocity()) {
-    //   if (!hasConstantMass_ || !hasConstantJacobianTotalForcesOver_velocity())
-    //     // Solve MjacobianX(1,1) = jacobianFL[1]
-    //     jacv = LUMass_->solve(*jacobianTotalForcesOver_velocity_);
-    // }
-
-    // if (!is_jacobianRhsOver_x_uptodate_) {
-    //   // Now fill in jacobianRhsOver_x_
-    //   for (unsigned int j = 0; j < ndof_; ++j) {
-    //     // Bottom-left block (jacobian / q)
-    //     if (hasJacobianTotalForcesOver_q()) {
-    //       for (unsigned int i = 0; i < ndof_; ++i)
-    //         jacobianRhsOver_x_(j * x_size_ + i + ndof_) = jacq(i, j);
-    //     }
-    //     // Bottom-right block (jacobian / vel)
-    //     if (hasJacobianTotalForcesOver_velocity()) {
-    //       for (unsigned int i = 0; i < ndof_; ++i)
-    //         jacobianRhsOver_x_((j + ndof_) * x_size_ + i + ndof_) = jacv(i, j);
-    //     }
-    //   }
-    // }
+    // In that case, we need to compute inv(Mass).jacobian_v or _q Forces
+    siconos::algebra::SiconosSparseMatrix jacq;  // to save M^-1 . jac totalforces/q
+    siconos::algebra::SiconosSparseMatrix jacv;  // to save M^-1 . jac totalforces/v
+    // Now fill in jacobianRhsOver_x_
+    // Bottom-left block (jacobian / q)
+    if (hasJacobianTotalForcesOver_q()) {
+      // Solve MjacobianX(1,0) =
+      // jacobianFL[0]
+      jacq = LUMass_->solve(*jacobianTotalForcesOver_q_);
+      for (Eigen::Index k = 0; k < jacq.outerSize(); ++k) {
+        for (siconos::algebra::SiconosSparseMatrix::InnerIterator it(jacq, k); it; ++it) {
+          double value = it.value();
+          jacobianRhsOver_x_(idx(ndof_ + it.row(), it.col())) = value;
+        }
+      }
+    }
+    // Bottom-right block (jacobian / vel)
+    if (hasJacobianTotalForcesOver_velocity()) {
+      // Solve MjacobianX(1,1) =
+      // jacobianFL[1]
+      jacv = LUMass_->solve(*jacobianTotalForcesOver_velocity_);
+      for (Eigen::Index k = 0; k < jacv.outerSize(); ++k) {
+        for (siconos::algebra::SiconosSparseMatrix::InnerIterator it(jacv, k); it; ++it) {
+          double value = it.value();
+          jacobianRhsOver_x_(ndof_ + it.row(), ndof_ + it.col()) = value;
+        }
+      }
+    }
   } else  // No mass
-  {       // ==> no buffer
-          //       // Now fill in jacobianRhsOver_x_
-          // for (unsigned int j = 0; j < ndof_; ++j) {
-          //   // Bottom-left block (jacobian / q)
-          //   if (!hasConstantJacobianTotalForcesOver_q()) {
-          //     for (unsigned int i = 0; i < ndof_; ++i)
-     //       jacobianRhsOver_x_(j * x_size_ + i + ndof_) = (*jacobianTotalForcesOver_q_)(i,
-     //       j);
-     //   }
-     //   // Bottom-right block (jacobian / vel)
-     //   if (!hasConstantJacobianTotalForcesOver_velocity()) {
-     //     for (unsigned int i = 0; i < ndof_; ++i)
-     //       jacobianRhsOver_x_((j + ndof_) * x_size_ + i + ndof_) =
-     //           (*jacobianTotalForcesOver_velocity_)(i, j);
-     //   }
-     // }
+  {
+    // Bottom-left block (jacobian / q)
+    if (hasJacobianTotalForcesOver_q()) {
+      for (Eigen::Index k = 0; k < jacobianTotalForcesOver_q_->outerSize(); ++k) {
+        for (siconos::algebra::SiconosSparseMatrix::InnerIterator it(
+                 *jacobianTotalForcesOver_q_, k);
+             it; ++it) {
+          double value = it.value();
+          jacobianRhsOver_x_(idx(ndof_ + it.row(), it.col())) = value;
+        }
+      }
+    }
+    // Bottom-right block (jacobian / vel)
+    if (hasJacobianTotalForcesOver_velocity()) {
+      for (Eigen::Index k = 0; k < jacobianTotalForcesOver_velocity_->outerSize(); ++k) {
+        for (siconos::algebra::SiconosSparseMatrix::InnerIterator it(
+                 *jacobianTotalForcesOver_velocity_, k);
+             it; ++it) {
+          double value = it.value();
+          jacobianRhsOver_x_(ndof_ + it.row(), ndof_ + it.col()) = value;
+        }
+      }
+    }
   }
   is_jacobianRhsOver_x_uptodate_ = true;
 }
@@ -704,8 +621,10 @@ void siconos::modeling::LagrangianSparseDS::computeJacobianTotalForcesOver_q(
   computeJacobianFintOver_q(*state_q_[1], *state_q_[0], time);
   computeJacobianFgyrOver_q(*state_q_[1], *state_q_[0]);
   jacobianTotalForcesOver_q_->setZero();
-  if (hasJacobianFintOver_q_) *jacobianTotalForcesOver_q_ -= *jacobianFintOver_q_mat_;
-  if (hasJacobianFgyrOver_q_) *jacobianTotalForcesOver_q_ -= *jacobianFgyrOver_q_mat_;
+  if (hasJacobianFintOver_q_)
+    useJacobianFintOver_q([&](const auto& M) { *jacobianTotalForcesOver_q_ -= M; });
+  if (hasJacobianFgyrOver_q_)
+    useJacobianFgyrOver_q([&](const auto& M) { *jacobianTotalForcesOver_q_ -= M; });
 }
 
 void siconos::modeling::LagrangianSparseDS::computeJacobianTotalForcesOver_velocity(
@@ -724,13 +643,16 @@ void siconos::modeling::LagrangianSparseDS::computeJacobianTotalForcesOver_veloc
   computeJacobianFgyrOver_velocity(*state_q_[1], *state_q_[0]);
   jacobianTotalForcesOver_velocity_->setZero();
   if (hasJacobianFintOver_velocity_)
-    *jacobianTotalForcesOver_velocity_ -= *jacobianFintOver_velocity_mat_;
+    useJacobianFintOver_velocity(
+        [&](const auto& M) { *jacobianTotalForcesOver_velocity_ -= M; });
   if (hasJacobianFgyrOver_q_)
-    *jacobianTotalForcesOver_velocity_ -= *jacobianFgyrOver_velocity_mat_;
+    useJacobianFgyrOver_velocity(
+        [&](const auto& M) { *jacobianTotalForcesOver_velocity_ -= M; });
 }
 
 void siconos::modeling::LagrangianSparseDS::display(bool brief) const {
-  std::cout << "=====> Lagrangian System display (number: " << number_ << ").\n";
+  brief = false;  // Full display always.
+  std::cout << "=====> LDS2  System display (number: " << number_ << ").\n";
   std::cout << "- ndof_ : " << ndof_ << "\n";
   std::cout << "- q \n";
   siconos::algebra::print(*state_q_[0]);
@@ -752,15 +674,15 @@ void siconos::modeling::LagrangianSparseDS::display(bool brief) const {
     std::cout << "-> nullptr\n";
   std::cout << "- p[1]\n";
   siconos::algebra::print(*p_[1]);
+  std::cout << "- p[2]\n";
   if (p_[2])
     siconos::algebra::print(*p_[2]);
   else
     std::cout << "-> nullptr\n";
-
   if (!brief) {
-    if (mass_mat_) {
+    if (hasMass_) {
       std::cout << "- Mass\n ";
-      siconos::algebra::print(*mass_mat_);
+      useMass([&](const auto& M) { siconos::algebra::print(M); });
       std::cout << "\n";
     }
 
@@ -784,19 +706,28 @@ void siconos::modeling::LagrangianSparseDS::display(bool brief) const {
 
     if (fint_) std::cout << "- FInt \n" << *fint_ << "\n";
 
-    if (hasJacobianFintOver_q_)
-      std::cout << "- jacobian of fint over q\n" << *jacobianFintOver_q_mat_ << "\n";
-    if (hasJacobianFintOver_velocity_)
-      std::cout << "- jacobian of fint over velocity\n"
-                << *jacobianFintOver_velocity_mat_ << "\n";
-
+    if (hasJacobianFintOver_q_) {
+      std::cout << "- jacobian of fint over q\n";
+      useJacobianFintOver_q([&](const auto& M) { siconos::algebra::print(M); });
+      std::cout << "\n";
+    }
+    if (hasJacobianFintOver_velocity_) {
+      std::cout << "- jacobian of fint over velocity\n";
+      useJacobianFintOver_velocity([&](const auto& M) { siconos::algebra::print(M); });
+      std::cout << "\n";
+    }
     if (fgyr_) std::cout << "- FGyr \n" << *fgyr_ << "\n";
 
-    if (hasJacobianFgyrOver_q_)
-      std::cout << "- jacobian of fgyr over q\n" << *jacobianFgyrOver_q_mat_ << "\n";
-    if (hasJacobianFgyrOver_velocity_)
-      std::cout << "- jacobian of fgyr over velocity\n " << *jacobianFgyrOver_velocity_mat_
-                << "\n";
+    if (hasJacobianFgyrOver_q_) {
+      std::cout << "- jacobian of fgyr over q\n";
+      useJacobianFgyrOver_q([&](const auto& M) { siconos::algebra::print(M); });
+      std::cout << "\n";
+    }
+    if (hasJacobianFgyrOver_velocity_) {
+      std::cout << "- jacobian of fgyr over velocity\n";
+      useJacobianFgyrOver_velocity([&](const auto& M) { siconos::algebra::print(M); });
+      std::cout << "\n";
+    }
   }
 
   std::cout << "===================================== \n";
@@ -862,8 +793,9 @@ void siconos::modeling::LagrangianSparseDS::computePostImpactVelocity() {
 double siconos::modeling::LagrangianSparseDS::computeKineticEnergy() {
   DEBUG_BEGIN("NewtonEulerDS::computeKineticEnergy()\n");
   double K;
-  if (mass_mat_)
-    K = 0.5 * state_q_[1]->dot(*mass_mat_ * *state_q_[1]);
+  if (hasMass_)
+    useMass([&](const auto& M) { K = 0.5 * (M * *state_q_[1]).dot(*state_q_[1]); });
+  // warning: sparse*dense --> dense, a temp. vector is allocated.
   else
     K = 0.5 * state_q_[1]->dot(*state_q_[1]);
 

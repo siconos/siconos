@@ -89,20 +89,20 @@ if(WITH_BOOST_LOG)
   target_compile_definitions(kernel PRIVATE BOOST_LOG_DYN_LINK)
 endif()
 
-# target_compile_definitions(kernel PRIVATE BOOST_UBLAS_SHALLOW_ARRAY_ADAPTOR)
-#if(WITH_JSON OR WITH_JSON_INSTALL)
-#  include(json_nlohmann_setup)
+if(WITH_JSON OR WITH_JSON_INSTALL)
+ include(json_nlohmann_setup)
   # Do not use implicit conversion from a json file
   # This is a recommandation from nlohmann doc.
-#  target_compile_definitions(kernel PUBLIC JSON_ImplicitConversions=OFF)
-#  target_link_libraries(kernel PUBLIC nlohmann_json::nlohmann_json)
-#endif()
+ target_compile_definitions(kernel PUBLIC JSON_ImplicitConversions=OFF)
+ target_link_libraries(kernel PUBLIC nlohmann_json::nlohmann_json)
+endif()
 
 # Eigen
 find_package(Eigen3 REQUIRED)
 # Should we propagate Eigen dep? Check this later ...
 target_link_libraries (kernel PUBLIC Eigen3::Eigen) 
-
+target_compile_definitions(kernel PUBLIC EIGEN_DEFAULT_DENSE_INDEX_TYPE=int) # To be complient with scipy sparse
+target_compile_definitions(kernel PUBLIC SICONOS_SPARSE_STORAGE_INDEX_TYPE=int)
 # Sparse storage
 if(SICONOS_SPARSE)
   message("Activate sparse storage (Eigen) for all matrices in Siconos. Warning: expermimental setup, still under test!")

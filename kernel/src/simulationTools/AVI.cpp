@@ -100,7 +100,7 @@ int siconos::nonsmooth_formulations::AVI::compute(double time) {
   bool cont = preCompute(time);
   if (!cont) return info;
 
-  if (_numerics_problem->size != _sizeOutput) {
+  if (static_cast<siconos::algebra::Index>(_numerics_problem->size) != _sizeOutput) {
     THROW_EXCEPTION(
         "siconos::nonsmooth_formulations::AVI::compute - size mismatch between AVI size and "
         "and the "

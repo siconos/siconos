@@ -24,6 +24,7 @@
 #define FIRSTORDERNONLINEARDS_H
 
 #include "DynamicalSystem.hpp"
+#include "FunctionTypes.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosMemory.hpp"
 #include "SiconosVector.hpp"
@@ -80,8 +81,8 @@ namespace siconos::modeling {
 class FirstOrderNonLinearDS : public DynamicalSystem {
  private:
   /** plugin signature */
-  typedef void (*FNLDSPtrfct)(double, unsigned int, const double *, double *, unsigned int,
-                              double *);
+  typedef void (*FNLDSPtrfct)(double, unsigned int, const double*, double*, unsigned int,
+                              double*);
 
  protected:
   ACCEPT_SERIALIZATION(FirstOrderNonLinearDS);
@@ -168,7 +169,7 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
    *
    *  \param FONLDS the FirstOrderNonLinearDS to copy
    */
-  FirstOrderNonLinearDS(const FirstOrderNonLinearDS &FONLDS);
+  FirstOrderNonLinearDS(const FirstOrderNonLinearDS& FONLDS);
 
   /** destructor */
   virtual ~FirstOrderNonLinearDS() noexcept = default;
@@ -204,7 +205,7 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
    *
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputeMMatrixFunction(const siconos::modeling::func_prototypes::FunctionS_M &fct);
+  void setComputeMMatrixFunction(const siconos::modeling::func_prototypes::FunctionS_M& fct);
 
   /** to compute the matrix M(t)
    *
@@ -234,14 +235,14 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
   /** set a user-defined function to compute f(x,t)
    *  \param fct the user-defined function (std::function, lambda ...)
    */
-  void setComputefVectorFunction(const siconos::modeling::func_prototypes::FunctionVS_V &fct);
+  void setComputefVectorFunction(const siconos::modeling::func_prototypes::FunctionVS_V& fct);
 
   /** Update  f(x,t)
    *
    * \param state state vector
    *  \param time the current time
    */
-  void computefVector(const Eigen::Ref<siconos::algebra::SiconosVector> &state, double time);
+  void computefVector(const Eigen::Ref<siconos::algebra::SiconosVector>& state, double time);
 
   /** \return a read-only view on \f$ \nabla_xf(x,t) \f$ matrix */
   inline auto jacobianfOver_x() const {
@@ -265,13 +266,13 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
    *  \param fct the user-defined function (std::function, lambda ...)
    */
   void setComputeJacobianfOver_xFunction(
-      const siconos::modeling::func_prototypes::FunctionVS_M &fct);
+      const siconos::modeling::func_prototypes::FunctionVS_M& fct);
 
   /** to compute  \f$ \nabla_xf(x,t) \f$
    *  \param state x vector
    *  \param time the current time
    */
-  void computeJacobianfOver_x(const Eigen::Ref<siconos::algebra::SiconosVector> &state,
+  void computeJacobianfOver_x(const Eigen::Ref<siconos::algebra::SiconosVector>& state,
                               double time);
 
   /** reset the state to the initial state */
@@ -327,7 +328,7 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
    *
    *  \return a memory vector
    */
-  inline const siconos::algebra::SiconosMemory &rMemory() const { return rMemory_; }
+  inline const siconos::algebra::SiconosMemory& rMemory() const { return rMemory_; }
 
   /**
      initialize the SiconosMemory objects: reserve memory for i
@@ -357,7 +358,7 @@ class FirstOrderNonLinearDS : public DynamicalSystem {
    * Any call to setCompute... turns this to false */
   auto isTimeInvariant() const { return isTimeInvariant_; }
 
-  Type acceptType(types::FindType &ft) const override { return ft.visit(*this); }
+  Type acceptType(types::FindType& ft) const override { return ft.visit(*this); }
 };
 }  // namespace siconos::modeling
 #endif
