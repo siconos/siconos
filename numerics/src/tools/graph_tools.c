@@ -872,7 +872,7 @@ int color_graph_block(int nc, NumericsMatrix *M, size_t *n_colors, size_t **set_
 }
 
 
-int color_graph_block_permut(int nc, NumericsMatrix *M, size_t *n_colors, size_t **set_sizes, size_t ***set_indices, size_t *inv_permutation) {
+int color_graph_block_permut(int nc, NumericsMatrix *M, size_t *n_colors, size_t **sum_sizes, size_t *inv_permutation) {
     assert(M->size0 == M->size1); // Check M is a squared matrix
     int n = M->size0;
     int d = n / nc; // dimension of contact space
@@ -1056,7 +1056,7 @@ int color_graph_block_permut(int nc, NumericsMatrix *M, size_t *n_colors, size_t
                 // Iterate through blocks of a line of blocks
                 for (int block_number = sbm->index1_data[row_block_number]; block_number < sbm->index1_data[row_block_number + 1]; block_number++) {
                     nb_col_block = nb_col_blocks[sbm->index2_data[block_number]];
-                    // Inline function in if statement, is it good? 
+
                     if (block_is_full_of_zeros(sbm->block[block_number], nb_row_block, nb_col_block, nb_col_block) == false) nnz++;  
                 }
             }
@@ -1119,27 +1119,24 @@ int color_graph_block_permut(int nc, NumericsMatrix *M, size_t *n_colors, size_t
     /* Get index sets for each color */
     PetscInt nn;
     IS *is;
-    size_t *size = NULL; // Array of sizes of each color set
-    size_t **indexes = NULL; // Array of pointers to index sets
+    size_t *sum_size = NULL; // Array of sizes of each color set
     const PetscInt *idxin = NULL;
     PetscCall(ISColoringGetIS(iscoloring, PETSC_USE_POINTER, &nn, &is)); // Get index sets
 
     PetscInt size_petsc;
 
-    size = (size_t *)malloc((size_t)nn * sizeof(size_t));
-    indexes = (size_t **)malloc((size_t)nn * sizeof(size_t *));
+    sum_size = (size_t *)malloc((size_t)(nn + 1) * sizeof(size_t));
+    sum_size[0] = 0;
 
     int k = 0;
 
     for (int i = 0; i < (int)nn; i++) {
         PetscCall(ISGetLocalSize(is[i], &size_petsc));
-        size[i] = (size_t)size_petsc;
-        indexes[i] = (size_t *)malloc(size[i] * sizeof(size_t)); // allocate indexes
+        sum_size[i + 1] = sum_size[i] + size_petsc;
         PetscCall(ISGetIndices(is[i], &idxin)); // Get indices for i-th color
 
         // Copy index sets
-        for (int j = 0; j < (int)size[i]; j++) {
-            indexes[i][j] = (size_t)idxin[j];
+        for (int j = 0; j < (int)size_petsc; j++) {
             inv_permutation[k] = (size_t)idxin[j];
             k++;
         }
@@ -1161,8 +1158,7 @@ int color_graph_block_permut(int nc, NumericsMatrix *M, size_t *n_colors, size_t
 
     // Ouputs
     *n_colors = (size_t)nn;
-    *set_sizes = size;
-    *set_indices = indexes;
+    *sum_sizes = sum_size;
 
     return 0;
 

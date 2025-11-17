@@ -144,13 +144,13 @@ static void shuffle(unsigned int size, unsigned int *randnum)  // size is the gi
   }
 }
 
-static inline double light_error_squared(double localreaction[2], double *oldreaction) {
+static inline double light_error_squared(const double *restrict localreaction, const double *restrict oldreaction) {
   double x0 = oldreaction[0] - localreaction[0];
   double x1 = oldreaction[1] - localreaction[1];
   return x0 * x0 + x1 * x1;
 }
-static inline double squared_norm(double localreaction[2]) {
-  return (localreaction[0] * localreaction[0] + localreaction[1] * localreaction[1]);
+static inline double squared_norm(const double *restrict localreaction) {
+  return localreaction[0] * localreaction[0] + localreaction[1] * localreaction[1];
 }
 
 static inline void accumulateLightErrorSum(double *light_error_sum, double localreaction[2],
@@ -627,8 +627,8 @@ void fc2d_nsgs_graph_opti(FrictionContactProblem *problem, double *z, double *w,
 static void fc2d_nsgs_buildLocalProblem_2(unsigned int contact, FrictionContactProblem *problem,
                                         double *blocks_contiguous,
                                         double *diagonal_blocks,
-					                              size_t *index1_data,
-					                              size_t *index2_data,
+					size_t *index1_data,
+					size_t *index2_data,
                                         LinearComplementarityProblem *local_problem,
                                         double *reaction)
 {
@@ -705,16 +705,9 @@ void test_solver(FrictionContactProblem *problem, double *z, double *w, int *inf
     
     /* Coloring */
     size_t n_colors = 0;
-    size_t *partition_size = NULL;
-    size_t **partitions = NULL;
+    size_t *sum_sizes = NULL;
     size_t *inv_permutation = (size_t *)malloc((size_t)nc * sizeof(size_t));
-    color_graph_block_permut(problem->numberOfContacts, problem->M, &n_colors, &partition_size, &partitions, inv_permutation);
-
-    unsigned int *sum_sizes = (unsigned int *)calloc(n_colors + 1, sizeof(unsigned int));
-    for (unsigned int color = 0; color < n_colors; color++)
-    {
-        sum_sizes[color + 1] = sum_sizes[color] + partition_size[color];
-    }
+    color_graph_block_permut(problem->numberOfContacts, problem->M, &n_colors, &sum_sizes, inv_permutation);
 
     /* Permutate rows and columns of SBM */
     SparseBlockStructuredMatrix *SBM_col_permuted = SBM_new();
@@ -811,7 +804,7 @@ void test_solver(FrictionContactProblem *problem, double *z, double *w, int *inf
     problem->mu = mu_permuted;
 
     double norm_q = cblas_dnrm2(nc * 2, problem->q, 1);
-    double norm_r[] = {INFINITY};
+    double norm_r = 0.;
 
     for (int i = 0; i < n; i++)
         z[i] = 1.;
@@ -844,10 +837,9 @@ void test_solver(FrictionContactProblem *problem, double *z, double *w, int *inf
     #pragma omp parallel default(none) \
                          private(pos, local_problem, localreaction, index1_data, index2_data) \
                          shared(problem, diagonal_blocks, diagonal_block_determinant, blocks_contiguous, z, sum_sizes, n_colors, n_iter) \
-                         // shared(light_error_sum, iparam, error, norm_r, norm_q, tolerance, has_not_converged, iter, options, w, nc)
+                         shared(light_error_sum, norm_r, iparam, error, norm_q, tolerance, has_not_converged, iter, options, w, nc)
     {
-
-    printf("Thread num: %d\n", omp_get_thread_num());
+    // printf("Thread num: %d\n", omp_get_thread_num());
 
     // Copy index1_data and index2_data
     index1_data = (size_t *)malloc((problem->numberOfContacts + 1) * sizeof(size_t));
@@ -856,8 +848,8 @@ void test_solver(FrictionContactProblem *problem, double *z, double *w, int *inf
     memcpy(index1_data, problem->M->matrix1->index1_data, (problem->numberOfContacts + 1) * sizeof(size_t));
     memcpy(index2_data, problem->M->matrix1->index2_data, problem->M->matrix1->nbblocks * sizeof(size_t));
 
-    double *z_local = (double *)malloc(problem->numberOfContacts * 2 * sizeof(double));
-    memcpy(z_local, z, problem->numberOfContacts * 2 * sizeof(double));
+    // double *z_local = (double *)malloc(problem->numberOfContacts * 2 * sizeof(double));
+    // memcpy(z_local, z, problem->numberOfContacts * 2 * sizeof(double));
 
     double *blocks_contiguous_local = (double *)malloc(problem->M->matrix1->nbblocks * 4 * sizeof(double));
     memcpy(blocks_contiguous_local, blocks_contiguous, problem->M->matrix1->nbblocks * 4 * sizeof(double));
@@ -865,18 +857,23 @@ void test_solver(FrictionContactProblem *problem, double *z, double *w, int *inf
 
     // Allocate local_problem for each thread
     local_problem = (LinearComplementarityProblem *)malloc(sizeof(*local_problem));
+    // local_problem->M = NM_create(NM_DENSE, 2, 2);
     local_problem->M = NM_new();
     local_problem->M->storageType = NM_DENSE;
     local_problem->M->size0 = 2;
     local_problem->M->size1 = 2;
     local_problem->q = (double *)malloc(2 * sizeof(double));
+
+    double local_light_error_sum = 0.0;
+    double local_norm_r = 0.0;
   
     for (int i = 0; i < n_iter; i++)
     {
         for (size_t color = 0; color < n_colors; color++)
         {
-	    // #pragma omp for reduction(+:light_error_sum)
-            #pragma omp for
+	          local_light_error_sum = 0.0;
+	          local_norm_r = 0.0;
+            #pragma omp for // reduction(+:light_error_sum,norm_r)
             for (unsigned int permuted_contact = sum_sizes[color]; permuted_contact < sum_sizes[color + 1]; permuted_contact++)
             {
                 // printf("[%d] Contact : %d\n", omp_get_thread_num(), permuted_contact);
@@ -885,7 +882,7 @@ void test_solver(FrictionContactProblem *problem, double *z, double *w, int *inf
                 localreaction[0] = z[pos];
                 localreaction[1] = z[pos + 1];
 
-                fc2d_nsgs_buildLocalProblem_2(permuted_contact, problem, blocks_contiguous_local, diagonal_blocks_local, index1_data, index2_data, local_problem, z_local);
+                fc2d_nsgs_buildLocalProblem_2(permuted_contact, problem, blocks_contiguous_local, diagonal_blocks_local, index1_data, index2_data, local_problem, z);
 
                 /* printf("Contact %d, q[0] = %e, q[1] = %e\n", contact, local_problem->q[0], local_problem->q[1]);
                 printf("M->matrix0 = %e %e %e %e \n", local_problem->M->matrix0[0], local_problem->M->matrix0[1], local_problem->M->matrix0[2], local_problem->M->matrix0[3]);
@@ -893,36 +890,46 @@ void test_solver(FrictionContactProblem *problem, double *z, double *w, int *inf
                 printf("%e %e\n", localreaction[0], localreaction[1]); */
 
                 /* Solve local problem */
-                // fc2d_nsgs_local_solve(local_problem->M->matrix0, diagonal_block_determinant[permuted_contact], local_problem->q, problem->mu[permuted_contact], localreaction);
+                fc2d_nsgs_local_solve(local_problem->M->matrix0, diagonal_block_determinant[permuted_contact], local_problem->q, problem->mu[permuted_contact], localreaction);
 
-                // light_error_sum += light_error_squared(localreaction, &z[pos]);
+                local_light_error_sum += light_error_squared(localreaction, &z[pos]);
+		            local_norm_r += squared_norm(localreaction);
 
                 /* printf("AFTER LOCAL SOLVE\n");
                 printf("%e %e\n", localreaction[0], localreaction[1]); */
-                // z[pos] = localreaction[0];
-                // z[pos + 1] = localreaction[1];
+                z[pos] = localreaction[0];
+                z[pos + 1] = localreaction[1];
                 // printf("\n");
             }
+
+            #pragma omp atomic
+	          light_error_sum += local_light_error_sum;
+            #pragma omp atomic
+	          norm_r += local_norm_r;
 
             // printf("\nCOLOR %d DONE\n", color);
         }
 
-	/* 
-	#pragma omp single
+	
+	      #pragma omp single
         {
+         	
         if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT) {
-            error = calculateLightError(light_error_sum, nc, z, norm_r);
-            has_not_converged = determine_convergence(error, tolerance, iter, options);
+          error = sqrt(light_error_sum);
+	        norm_r = sqrt(norm_r);
+	        if (fabs(norm_r) > DBL_EPSILON) error /= norm_r;
+	        // error = calculateLightError(light_error_sum, nc, z, norm_r);
+          has_not_converged = determine_convergence(error, tolerance, iter, options);
         } else if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] == SICONOS_FRICTION_3D_NSGS_ERROR_EVALUATION_LIGHT_WITH_FULL_FINAL) {
-            error = calculateLightError(light_error_sum, nc, z, norm_r);
+            error = calculateLightError(light_error_sum, nc, z, &norm_r);
             has_not_converged = determine_convergence_with_full_final(problem, options, z, w, &tolerance, norm_q, error, iter);
         }
-
-	light_error_sum = 0.0;
+        
+	      light_error_sum = 0.0;
+	      norm_r = 0.0;
         iter++;
-	}
-	*/
-
+	      }
+	
         /* for (int j = 0; j < n; j++)
             printf("%e \n", z[j]); */
     }

@@ -281,6 +281,12 @@ static inline void mtv3x3(double* restrict a, double* restrict v, double* restri
  */
 static inline void mvp2x2(const double* restrict a, const double* restrict v,
                           double* restrict r) {
+
+  /*
+  r[0] += a[0] * v[0] + a[2] * v[1];
+  r[1] += a[1] * v[0] + a[3] * v[1];
+  */
+  	
   double* pr;
 
   pr = r;

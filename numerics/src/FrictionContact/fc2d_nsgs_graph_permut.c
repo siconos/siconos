@@ -323,15 +323,9 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem *problem, double *z, double *
 
   /* Coloring */
   size_t n_colors = 0;
-  size_t *partition_size = NULL;
-  size_t **partitions = NULL;
+  size_t *sum_sizes = NULL;
   size_t *inv_permutation = (size_t *)malloc((size_t)nc * sizeof(size_t));
-  color_graph_block_permut(problem->numberOfContacts, problem->M, &n_colors, &partition_size, &partitions, inv_permutation);
-
-  unsigned int *sum_sizes = (unsigned int *)calloc(n_colors + 1, sizeof(unsigned int));
-  for (unsigned int color = 0; color < n_colors; color++) {
-    sum_sizes[color + 1] = sum_sizes[color] + partition_size[color];
-  }
+  color_graph_block_permut(problem->numberOfContacts, problem->M, &n_colors, &sum_sizes, inv_permutation);
 
   /* Permutate rows and columns of SBM */
   /* Can  do better? In place stuff? */
@@ -344,6 +338,9 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem *problem, double *z, double *
   SBM_column_permutation(rowIndex, problem->M->matrix1, SBM_col_permuted);
   SBM_row_permutation_copy(inv_permutation, SBM_col_permuted, SBM_permuted);
 
+  free(rowIndex);
+
+  SparseBlockStructuredMatrix *old_matrix1 = problem->M->matrix1;
   problem->M->matrix1 = SBM_permuted;
 
   /* Store all blocks in contiguous array */
@@ -368,6 +365,8 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem *problem, double *z, double *
     mu_permuted[i] = problem->mu[inv_permutation[i]];
   }
 
+  double *old_q = problem->q;
+  double *old_mu = problem->mu;
   problem->q = q_permuted;
   problem->mu = mu_permuted;
 
@@ -389,7 +388,7 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem *problem, double *z, double *
   int has_not_converged = 1;
 
   size_t *index1_data;
-  size_t *index2_data;
+  size_t *index2_data; 
 
   /* time_o = omp_get_wtime() - time_o;
   printf("Time before iterations = %es\n", time_o);
@@ -666,6 +665,8 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem *problem, double *z, double *
   }
   memcpy(z, z_permut, 2 * nc * sizeof(double));
   memcpy(w, w_permut, 2 * nc * sizeof(double));
+  free(z_permut);
+  free(w_permut);
 
   /* Number of GS iterations */
   iparam[SICONOS_IPARAM_ITER_DONE] = iter;
@@ -680,9 +681,18 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem *problem, double *z, double *
   free(local_problem->M);
   free(local_problem);
 
-  free(partition_size);
-  for (size_t i = 0; i < n_colors; i++) free(partitions[i]);
-  free(partitions);
+  free(sum_sizes);
+  free(inv_permutation);
+
+  /* Restore problem before permutation */
+  problem->M->matrix1 = old_matrix1;
+  problem->q = old_q;
+  problem->mu = old_mu;
+
+  free(SBM_col_permuted);
+  free(SBM_permuted);
+  free(q_permuted);
+  free(mu_permuted);
 
   /* time_o = omp_get_wtime() - time_o;
   printf("Time after iterations = %es\n", time_o); */
