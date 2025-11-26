@@ -1,5 +1,4 @@
 add_subdirectory(storage)
 add_subdirectory(tests)
 add_subdirectory(benchmarks)
-add_subdirectory(py)
 add_subdirectory(algebra)
