@@ -105,22 +105,6 @@ void fc2d_nsgs_graph_opti(FrictionContactProblem *problem, double *z, double *w,
 void fc2d_nsgs_graph_permut(FrictionContactProblem *problem, double *z, double *w, int *info,
                             SolverOptions *options);
 
-#ifdef WITH_CUDA
-/**
-     GPU-accelerated version of fc2d_nsgs_graph_permut using CUDA and CUSparse.
-     Non Linear Parallel Gauss Seidel solver for 2D friction contact problems.
-     Uses graph coloring and permutation with GPU acceleration for large problems.
-
-     \param[in] problem the friction-contact problem
-     \param[out] z reaction vector
-     \param[out] w velocity vector
-     \param[in,out] info termination value (0=converged, 1=not converged, 2=error)
-     \param[in,out] options structure for solver options
-*/
-void fc2d_nsgs_graph_permut_cuda(FrictionContactProblem *problem, double *z, double *w, int *info,
-                                  SolverOptions *options);
-#endif
-
 void test_solver(FrictionContactProblem *problem, double *z, double *w, int *info, SolverOptions *options);
 
 /** fc2d_projc is a specific projection operator related to CPG (conjugated projected gradient)
