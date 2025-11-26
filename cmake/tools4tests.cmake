@@ -18,6 +18,7 @@
 # - create a library from test-utils files (if any), named <COMPONENT>-test,
 #   linked (PUBLIC) with <COMPONENT> lib.
 #
+
 function(begin_tests SOURCE_DIR)
   
   set(multiValueArgs DEPS)
@@ -418,28 +419,6 @@ macro(set_ldlibpath)
   endif()
 endmacro()
 
-# ----------------------------------------
-# Declaration of a siconos test run with python.
-#
-# Usage :
-#
-#  add_pythons_test(<name> <file>)
-#
-# Result :
-#
-#  Add a test :
-#  - named <name>
-#  - that will be run using python
-#  - with PYTHONPATH set to ${CMAKE_BINARY_DIR}/wrap
-# 
-function(add_python_test test_name test_file)
-  add_test(${test_name} ${Python_EXECUTABLE} -m pytest "${pytest_opt}" ${DRIVE_LETTER}${test_file})
-  set_tests_properties(${test_name} PROPERTIES WORKING_DIRECTORY ${SICONOS_PB11_BINARY_DIR}/tests)
-  set_tests_properties(${test_name} PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;[^x]failed;ERROR;Assertion")
-  set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "PYTHONPATH=${SICONOS_PB11_BINARY_DIR}")
-  
-endfunction()
-
 
 # ----------------------------------------
 # Prepare python tests for the current
@@ -477,7 +456,9 @@ function(build_python_tests)
   set(multiValueArgs DEPS EXCLUDE)
   cmake_parse_arguments(test "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
-  
+  # Where tests will be executed --> where the cppimport_header file should be generated
+  set(RUNDIR ${SICONOS_PB11_BINARY_DIR}/tests/${COMPONENT})
+
   # build plugins, if any
   # Note : all built libraries are saved in SICONOS_PB11_BINARY_DIR/tests/plugins
   if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests/plugins)
@@ -487,24 +468,11 @@ function(build_python_tests)
     endforeach()
   endif()
     
-  # copy test dir to binary dir (tests dir inside swig working dir)
-  # ---> allows py.test run in binary dir
-  if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests/data)
-    file(GLOB data4tests RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/tests/data
-      ${CMAKE_CURRENT_SOURCE_DIR}/tests/data/*)
-    foreach(datafile IN LISTS data4tests)
-      configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tests/data/${datafile}
-	${SICONOS_PB11_BINARY_DIR}/tests/data/${datafile} COPYONLY)
-    endforeach()
-  endif()
-  if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests/CAD)
-    file(GLOB data4tests RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/tests/CAD
-      ${CMAKE_CURRENT_SOURCE_DIR}/tests/CAD/*)
-    foreach(datafile IN LISTS data4tests)
-      configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tests/CAD/${datafile}
-	${SICONOS_PB11_BINARY_DIR}/tests/CAD/${datafile} COPYONLY)
-    endforeach()
-  endif()
+  copy_directory_contents("${CMAKE_CURRENT_SOURCE_DIR}/tests/data"
+                        "${RUNDIR}/data")
+
+  copy_directory_contents("${CMAKE_CURRENT_SOURCE_DIR}/tests/CAD"
+                        "${RUNDIR}/CAD")
 
   # windows stuff, probably obsolete ...
   if(CROSSCOMPILING_LINUX_TO_WINDOWS)
@@ -513,6 +481,31 @@ function(build_python_tests)
   else()
     set(EMULATOR "")
   endif()
+
+  # addons for cppimport
+  copy_directory_contents("${CMAKE_CURRENT_SOURCE_DIR}/tests/addons"
+                        "${RUNDIR}/addons")
+
+  set(PY_SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/generate_cppimport_header.py")
+   
+  # Name of the python cppimport header file
+  set(CPPIMPORT_PYFILE cppimport_header.py)
+  configure_file(
+      "${CMAKE_SOURCE_DIR}/cmake/generate_cppimport_header.py.in"
+      "${PY_SCRIPT}"
+      @ONLY
+  )                        
+
+  add_custom_command(
+    OUTPUT ${RUNDIR}/${CPPIMPORT_PYFILE}
+    COMMAND ${Python_EXECUTABLE} ${PY_SCRIPT}
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/cppimport_build_info.txt
+    COMMENT "Generating ${CPPIMPORT_PYFILE}"
+  ) 
+
+  add_custom_target(${COMPONENT}_generate_cppimport_header ALL
+    DEPENDS ${RUNDIR}/${CPPIMPORT_PYFILE}
+  ) 
 
   if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     file(GLOB testfiles ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_*.py)
@@ -523,11 +516,17 @@ function(build_python_tests)
       get_filename_component(testname ${file} NAME_WE)
       get_filename_component(exename ${file} NAME)
       # Each file is copied into siconos/tests.
-      configure_file(${file} ${SICONOS_PB11_BINARY_DIR}/tests COPYONLY)
+      configure_file(${file} ${RUNDIR}/${exename} COPYONLY)
       set(name "python_${testname}")
-      set(exename ${SICONOS_PB11_BINARY_DIR}/tests/${exename})
+      set(exename ${RUNDIR}/${exename})
       # set_ldlibpath()
-      add_python_test(${name} ${exename})
+
+      add_test(${name} ${Python_EXECUTABLE} -m pytest "${pytest_opt}" ${DRIVE_LETTER}${exename})
+      set_tests_properties(${name} PROPERTIES WORKING_DIRECTORY ${RUNDIR})
+      set_tests_properties(${name} PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;[^x]failed;ERROR;Assertion")
+      set_tests_properties(${name} PROPERTIES ENVIRONMENT "PYTHONPATH=${SICONOS_PB11_BINARY_DIR}")
+      set_tests_properties(${name} PROPERTIES REQUIRED_FILES "${RUNDIR}/${CPPIMPORT_PYFILE}"
+)
     endforeach()
   endif()
 endfunction()

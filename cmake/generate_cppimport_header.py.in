@@ -1,0 +1,6 @@
+import os, siconos.utils
+build_dir = "@CMAKE_CURRENT_BINARY_DIR@"
+rundir = "@RUNDIR@"
+src = os.path.join(build_dir, 'cppimport_build_info.txt')
+dst = os.path.join(rundir, '@CPPIMPORT_PYFILE@')
+siconos.utils.generate_cppimport_header(src, dst)

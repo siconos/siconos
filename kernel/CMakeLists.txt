@@ -64,7 +64,7 @@ target_compile_features(kernel PUBLIC cxx_std_20)
 
 
 # Links with other Siconos components
-target_link_libraries(kernel PRIVATE externals numerics)
+target_link_libraries(kernel PUBLIC externals numerics)
 if(WITH_FORTRAN)
   target_link_libraries(kernel PRIVATE externals_fortran) # lsodar and hem5
 endif()
@@ -83,7 +83,6 @@ target_link_libraries(kernel PRIVATE GMP::GMP)
 # Boost must be set as a public dependency because of SiconosAlgebraTypeDefs.hpp
 # This has to be reviewed !!!
 target_link_libraries(kernel PUBLIC Boost::boost)
-
 if(WITH_BOOST_LOG)
   find_package(Boost 1.61 REQUIRED COMPONENTS log)
   target_compile_definitions(kernel PRIVATE BOOST_LOG_DYN_LINK)
@@ -108,6 +107,10 @@ if(SICONOS_SPARSE)
   message("Activate sparse storage (Eigen) for all matrices in Siconos. Warning: expermimental setup, still under test!")
   target_compile_definitions(kernel PUBLIC SICONOS_SPARSE)
 endif()
+
+get_target_property(raw_libs kernel INTERFACE_LINK_LIBRARIES)
+message("KERNEL TEST ${raw_libs}")
+
 
 # --- python bindings ---
 if(WITH_${COMPONENT}_PYTHON_WRAPPER)

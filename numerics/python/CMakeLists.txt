@@ -45,5 +45,7 @@ endforeach()
 
 
 if(WITH_TESTING)
+  include(export_runtime_conf)
+  export_build_conf(numerics)
   build_python_tests()
 endif()

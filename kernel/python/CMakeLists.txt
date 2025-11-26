@@ -50,7 +50,14 @@ install(TARGETS
   LIBRARY DESTINATION "${SICONOS_PYTHON_INSTALL_DIR}/siconos/"
   )
 
-  # --- Tests ---
+# --- Tests ---
 if(WITH_TESTING)
+  include(export_runtime_conf)
+  add_library(${COMPONENT}_pytests INTERFACE)
+  target_link_libraries(${COMPONENT}_pytests INTERFACE ${COMPONENT})
+  # Ensure build dir is in the include path for SiconosConfig.h
+  target_include_directories(${COMPONENT}_pytests INTERFACE $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>) 
+
+  export_build_conf(${COMPONENT}_pytests)
   build_python_tests()
 endif()

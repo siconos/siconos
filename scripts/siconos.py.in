@@ -606,7 +606,7 @@ def prepare_target(target, extra_args):
     # -- link with siconos components --
     for comp in components:
         result += "target_link_libraries({}".format(target)
-        result += " PRIVATE Siconos::{})\n".format(comp)
+        result += " PUBLIC Siconos::{})\n".format(comp)
     # User-defined path to search for libraries
     for libdir in extra_args.link_directories:
         result += "\t target_link_directories({}".format(target)
@@ -794,7 +794,7 @@ def generate_cmakelists(args):
         # target setup (compile options, headers, links ...)
         result += prepare_target("dummy", args)
         result += "include(export_runtime_conf)\n"
-        result += "export_runtime_conf(dummy)\n"
+        result += f"export_build_conf(dummy)\n"
         result += "install(TARGETS dummy"
         result += f" DESTINATION {args.rundir})\n"
         build_required = False  # We only need to configure

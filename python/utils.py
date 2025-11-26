@@ -109,13 +109,15 @@ def generate_cppimport_header(info_file, output="cppimport_header.py"):
     """
     data = parse_cmake_info(info_file)
 
-    include_dirs = data.get("INCLUDE_DIRS", [])
-    link_dirs = format_list_multiline(data.get("LINK_DIRS", []))
-    libs = format_list_multiline(
-        # [name.split("::")[-1] for name in data.get("LIBS", [])]
-        # No cmake namespace in python outputs ...
-        [name for name in data.get("LIBS", []) if "::" not in name]  # , comment=True
-    )
+    # Remove duplicates while preserving order
+    include_dirs = list(dict.fromkeys(data.get("INCLUDE_DIRS", [])))
+    link_dirs = format_list_multiline(list(dict.fromkeys(data.get("LINK_DIRS", []))))
+    # [name.split("::")[-1] for name in data.get("LIBS", [])]
+    # No cmake namespace in python outputs ...
+    raw_libs = [
+        name for name in data.get("LIBS", []) if "::" not in name
+    ]  # , comment=True
+    libs = format_list_multiline(list(dict.fromkeys(raw_libs)))
     compiler_args = data.get("FLAGS", []) + [f"-D{d}" for d in data.get("DEFINES", [])]
     # move includes to compile options, to use isystem and avoid
     # warnings from Eigen

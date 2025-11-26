@@ -492,3 +492,20 @@ function(create_pybind11_module)
     target_link_libraries(${PYMOD_MODULE_NAME} PUBLIC ${PYMOD_DEPENDENCIES})
   endif()
 endfunction()
+
+
+# --------------------------------------------------------
+# Function : copy_directory_contents
+# Copy all files from a given source dir into a target 
+# BUT using configure_file
+#   SRC_DIR : répertoire source
+#   DST_DIR : répertoire de destination
+# --------------------------------------------------------
+function(copy_directory_contents SRC_DIR DST_DIR)
+  if(EXISTS "${SRC_DIR}")
+    file(GLOB files RELATIVE "${SRC_DIR}" "${SRC_DIR}/*")
+    foreach(f IN LISTS files)
+      configure_file("${SRC_DIR}/${f}" "${DST_DIR}/${f}" COPYONLY)
+    endforeach()
+  endif()
+endfunction()
