@@ -73,16 +73,21 @@ struct segment_base : item<> {
       const auto dir = dp2p1(seg_index);
       const auto pstep = 1. / maxpoints();
 
-      return p + point_index * pstep * dir;
+      // explicit return type to avoid dangling references
+      decltype(p) return_value = p + point_index * pstep * dir;
+      return return_value;
     }
 
     decltype(auto) points_coords(indice_t seg_index = 0)
     {
-      auto myself = self();
+      const auto p = p1(seg_index);
+      const auto dir = dp2p1(seg_index);
+      const auto pstep = 1. / maxpoints();
+
       return view::iota(0, maxpoints()) |
-        view::transform([myself,seg_index](auto i) {
-               return myself->point_coord(i, seg_index);
-             });
+             // return expression is ok as p and dir are copied into lambda
+             // closure.
+             view::transform([=](auto i) { return p + i * pstep * dir; });
     }
 
     void set_points(auto points_array, indice_t seg_index = 0)
