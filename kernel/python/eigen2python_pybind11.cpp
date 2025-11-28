@@ -24,6 +24,14 @@ namespace py = pybind11;
 PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
 using namespace pybind11::literals;  // to use "_a"
 
+/**
+ * @brief convert a scipy array (sparse) to a SiconosSparseMatrix (Eigen)
+ *
+ * @param csc the input array
+ * @return the expected sparse matrix
+ *
+ * @note This function creates (and so allocate memory) for a SiconosSparseMatrix
+ */
 siconos::algebra::SiconosSparseMatrix siconos::pybind11_utils::csc_to_eigen(py::object csc) {
   auto data =
       csc.attr("data").cast<py::array_t<double, py::array::c_style | py::array::forcecast>>();
@@ -57,6 +65,14 @@ siconos::algebra::SiconosSparseMatrix siconos::pybind11_utils::csc_to_eigen(py::
   return M;  // RVO
 }
 
+/**
+ * @brief convert a scipy array (sparse) to a Map onto a SiconosSparseMatrix (Eigen)
+ *
+ * @param csc the input array
+ * @return the expected sparse matrix (as a shared pointer)
+ *
+ * @note No memory allocation!
+ */
 std::shared_ptr<Eigen::Map<siconos::algebra::SiconosSparseMatrix>>
 siconos::pybind11_utils::csc_to_eigen_map(py::object csc) {
   auto data =
@@ -85,6 +101,13 @@ siconos::pybind11_utils::csc_to_eigen_map(py::object csc) {
   return map_ptr;
 }
 
+/**
+ * @brief print info regarding a python array. Debug tool.
+ *
+ * @param arr the input array
+ *
+ * @note No memory allocation!
+ */
 void siconos::pybind11_utils::inspect_array(py::array arr) {
   py::buffer_info info = arr.request();
 
@@ -124,32 +147,39 @@ void siconos::pybind11_utils::inspect_array(py::array arr) {
   std::cout << "]" << std::endl;
 }
 
-// template <typename T>
-py::object siconos::pybind11_utils::eigensparse_to_scipy(
-    const siconos::algebra::SiconosSparseMatrix& M, py::handle owner) {
-  py::array_t<double> data({M.nonZeros()}, {sizeof(double)}, M.valuePtr(),
-                           py::capsule(M.valuePtr()));
-  data.attr("flags").attr("writeable") = false;  // readonly
-  py::array_t<siconos::algebra::SparseIndex> indices(
-      {M.nonZeros()}, {sizeof(siconos::algebra::SparseIndex)}, M.innerIndexPtr(),
-      py::capsule(M.innerIndexPtr()));
-  indices.attr("flags").attr("writeable") = false;  // readonly
-  py::array_t<siconos::algebra::SparseIndex> indptr(
-      {M.outerSize() + 1}, {sizeof(siconos::algebra::SparseIndex)}, M.outerIndexPtr(),
-      py::capsule(M.outerIndexPtr()));
-  indptr.attr("flags").attr("writeable") = false;  // readonly
-  py::module scipy_sparse = py::module::import("scipy.sparse");
-  py::tuple shape = py::make_tuple(M.rows(), M.cols());
-  py::object csc = scipy_sparse.attr("csc_matrix")(py::make_tuple(data, indices, indptr),
-                                                   shape, "copy"_a = false);
-  // No copy ... assuming parameters have the proper types (complient with scipy)
+//    py::object siconos::pybind11_utils::eigensparse_to_scipy(
+//     const siconos::algebra::SiconosSparseMatrix& M, py::handle owner) {
+//   py::array_t<double> data({M.nonZeros()}, {sizeof(double)}, M.valuePtr(),
+//                            py::capsule(M.valuePtr()));
+//   data.attr("flags").attr("writeable") = false;  // readonly
+//   py::array_t<siconos::algebra::SparseIndex> indices(
+//       {M.nonZeros()}, {sizeof(siconos::algebra::SparseIndex)}, M.innerIndexPtr(),
+//       py::capsule(M.innerIndexPtr()));
+//   indices.attr("flags").attr("writeable") = false;  // readonly
+//   py::array_t<siconos::algebra::SparseIndex> indptr(
+//       {M.outerSize() + 1}, {sizeof(siconos::algebra::SparseIndex)}, M.outerIndexPtr(),
+//       py::capsule(M.outerIndexPtr()));
+//   indptr.attr("flags").attr("writeable") = false;  // readonly
+//   py::module scipy_sparse = py::module::import("scipy.sparse");
+//   py::tuple shape = py::make_tuple(M.rows(), M.cols());
+//   py::object csc = scipy_sparse.attr("csc_matrix")(py::make_tuple(data, indices, indptr),
+//                                                    shape, "copy"_a = false);
+//   // No copy ... assuming parameters have the proper types (complient with scipy)
 
-  if (!owner.is_none()) {
-    csc.attr("_cpp_owner") = owner;
-  }
-  return csc;
-}
+//   if (!owner.is_none()) {
+//     csc.attr("_cpp_owner") = owner;
+//   }
+//   return csc;
+// }
 
+/**
+ * @brief Creates a sparse python array (scipy) from a SiconosSparseMatrix (eigen)
+ *
+ * @param M the input matrix
+ * @param owner the object which calls this function
+ *
+ * @note No memory allocation!
+ */
 py::object siconos::pybind11_utils::make_readonly_csc_array(
     const siconos::algebra::SiconosSparseMatrix& M, py::handle owner) {
   auto data = siconos::pybind11_utils::make_readonly_array(M.valuePtr(), M.nonZeros(), owner);
@@ -164,85 +194,3 @@ py::object siconos::pybind11_utils::make_readonly_csc_array(
 
   return sp.attr("csc_array")(py::make_tuple(data, indices, indptr), shape);
 }
-
-// inline py::object make_readonly_csc_array_capsule(
-//     const siconos::algebra::SiconosSparseMatrix& M) {  //, py::handle owner) {
-//   // créer les arrays numpy readonly
-
-//   auto capsule_data = py::capsule(M.valuePtr(), [](void* /*p*/) {});
-
-//   py::array arr_data(py::buffer_info(const_cast<double*>(M.valuePtr()), sizeof(double),
-//                                      py::format_descriptor<double>::format(), 1,
-//                                      {M.nonZeros()}, {sizeof(double)}),
-//                      capsule_data);
-
-//   arr_data.attr("flags").attr("writeable") = false;
-//   std::cout << "DATA OK \n";
-//   auto capsule_indices = py::capsule(M.innerIndexPtr(), [](void* /*p*/) {});
-
-//   //   py::array_t<int64_t> arr_indices(
-//   //       py::buffer_info(const_cast<int*>(M.innerIndexPtr()), sizeof(int64_t),
-//   //                       py::format_descriptor<int64_t>::format(), 1, {M.nonZeros()},
-//   //                       {sizeof(int64_t)}),
-//   //       capsule_indices);
-//   //   py::array_t<int64_t> arr_indices({M.nonZeros()}, {sizeof(int64_t)},
-//   //                                    const_cast<int*>(M.innerIndexPtr()),
-//   //                                    py::capsule(M.innerIndexPtr()));
-//   //  py::buffer_info(const_cast<int*>(M.innerIndexPtr()), sizeof(int64_t),
-//   //                  py::format_descriptor<int64_t>::format(), 1, {M.nonZeros()},
-//   //                  {sizeof(int64_t)}),
-//   //  capsule_indices);
-
-//   //  arr_indices.attr("flags").attr("writeable") = false;
-//   std::cout << "INDICES OK \n";
-
-//   auto capsule_indptr = py::capsule(M.outerIndexPtr(), [](void* /*p*/) {});
-
-//   py::array_t<int64_t> arr_indptr(
-//       py::buffer_info(const_cast<int*>(M.outerIndexPtr()), sizeof(int64_t),
-//                       py::format_descriptor<int64_t>::format(), 1, {M.outerSize() + 1},
-//                       {sizeof(int64_t)}),
-//       capsule_indptr);
-
-//   arr_indptr.attr("flags").attr("writeable") = false;
-//   std::cout << "INDPTR OK \n";
-
-//   std::cout << "sizeof(valuePtr) = " << sizeof(*M.valuePtr()) << "\n";
-//   std::cout << "sizeof(innerIndexPtr) = " << sizeof(*M.innerIndexPtr()) << "\n";
-//   std::cout << "sizeof(outerIndexPtr) = " << sizeof(*M.outerIndexPtr()) << "\n";
-
-//   // importer scipy.sparse
-//   py::object sp = py::module_::import("scipy.sparse");
-//   py::tuple shape = py::make_tuple(M.rows(), M.cols());
-
-//   return sp.attr("csc_array")(py::make_tuple(arr_data, arr_indptr, arr_indptr), shape);
-// }
-
-// inline py::object make_readonly_csc_array_map(
-//     const Eigen::Map<siconos::algebra::SiconosSparseMatrix>& M, py::handle owner) {
-//   auto data =
-//       py::array(py::buffer_info(const_cast<double*>(M.valuePtr()), sizeof(double),
-//                                 py::format_descriptor<double>::format(), 1,
-//                                 {static_cast<ssize_t>(M.nonZeros())}, {sizeof(double)}),
-//                 owner);
-//   data.attr("flags").attr("writeable") = false;
-
-//   auto indices = py::array(py::buffer_info(const_cast<int*>(M.innerIndexPtr()),
-//   sizeof(int),
-//                                            py::format_descriptor<int>::format(), 1,
-//                                            std::vector<ssize_t>{sizeof(int)}),
-//                            owner);
-//   indices.attr("flags").attr("writeable") = false;
-
-//   auto indptr = py::array(py::buffer_info(const_cast<int*>(M.outerIndexPtr()),
-//   sizeof(int),
-//                                           py::format_descriptor<int>::format(), 1,
-//                                           std::vector<ssize_t>{sizeof(int)}),
-//                           owner);
-//   indptr.attr("flags").attr("writeable") = false;
-
-//   py::object sp = py::module_::import("scipy.sparse");
-//   py::tuple shape = py::make_tuple(M.rows(), M.cols());
-
-//   return sp.attr("csc_array")(py::make_tuple(data, indices, indptr), shape);
-// }

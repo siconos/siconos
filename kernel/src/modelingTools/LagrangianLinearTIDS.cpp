@@ -28,7 +28,7 @@
 siconos::modeling::LagrangianLinearTIDS::LagrangianLinearTIDS(
     Eigen::Ref<siconos::algebra::SiconosVector> q0,
     Eigen::Ref<siconos::algebra::SiconosVector> v0,
-    Eigen::Ref<siconos::algebra::SiconosMatrix> newmass)
+    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newmass)
     : LagrangianDS(q0, v0) {
   hasConstantMass_ = true;
   hasMass_ = true;
@@ -94,10 +94,10 @@ void siconos::modeling::LagrangianLinearTIDS::initRhs(double time) {
     // inv(Mass).jacobian_v Forces
     if (hasStiffnessMatrix() || hasDampingMatrix()) buffer_.resize(ndof_ * ndof_ * 2);
     // View onto left part of buffer_
-    Eigen::Map<siconos::algebra::SiconosMatrix> jacq(buffer_.data(), ndof_, ndof_);
+    Eigen::Map<siconos::algebra::SiconosDenseMatrix> jacq(buffer_.data(), ndof_, ndof_);
     // View onto right part of buffer_
-    Eigen::Map<siconos::algebra::SiconosMatrix> jacv(buffer_.data() + ndof_ * ndof_, ndof_,
-                                                     ndof_);
+    Eigen::Map<siconos::algebra::SiconosDenseMatrix> jacv(buffer_.data() + ndof_ * ndof_,
+                                                          ndof_, ndof_);
 
     if (hasStiffnessMatrix()) {
       // Solve MjacobianX(1,0) = jacobianFL[0]
@@ -141,7 +141,7 @@ void siconos::modeling::LagrangianLinearTIDS::initRhs(double time) {
 }
 
 void siconos::modeling::LagrangianLinearTIDS::setStiffnessMatrix(
-    Eigen::Ref<siconos::algebra::SiconosMatrix> newValue) {
+    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue) {
   assert(newValue.rows() == newValue.cols());
   assert(newValue.rows() == ndof_);
   stiffnessMatrix_view_ = std::make_shared<siconos::algebra::MapType>(
@@ -150,7 +150,7 @@ void siconos::modeling::LagrangianLinearTIDS::setStiffnessMatrix(
 }
 
 void siconos::modeling::LagrangianLinearTIDS::setDampingMatrix(
-    Eigen::Ref<siconos::algebra::SiconosMatrix> newValue) {
+    Eigen::Ref<siconos::algebra::SiconosDenseMatrix> newValue) {
   assert(newValue.rows() == newValue.cols());
   assert(newValue.rows() == ndof_);
 

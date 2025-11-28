@@ -26,6 +26,7 @@
 
 #include "FunctionTypes.hpp"
 #include "SecondOrderDS.hpp"
+#include "SiconosVector.hpp"
 
 namespace siconos::modeling {
 
@@ -92,7 +93,7 @@ class NewtonEulerDS : public SecondOrderDS {
   std::shared_ptr<siconos::algebra::SiconosVector> twist_{nullptr};
 
   /** Initial value for the twist (view)*/
-  std::shared_ptr<siconos::algebra::MapVectorType> twist0_view_{nullptr};
+  std::shared_ptr<siconos::algebra::MapVector6Type> twist0_view_{nullptr};
 
   /** Internal storage for twist0_view_ */
   std::unique_ptr<std::vector<double>> twist0_internal_storage{nullptr};
@@ -101,7 +102,7 @@ class NewtonEulerDS : public SecondOrderDS {
   std::shared_ptr<siconos::algebra::SiconosVector> state_q_{nullptr};
 
   /** Dimension of state_q_, = 7 because of quaternion parametrization */
-  siconos::algebra::Index qDim_{7};
+  static constexpr siconos::algebra::Index qDim_{7};
 
   /** The time derivative of  \f$ q \f$ ,  \f$ \dot q(t) \f$ */
   std::shared_ptr<siconos::algebra::SiconosVector> dotq_{nullptr};
@@ -148,7 +149,7 @@ class NewtonEulerDS : public SecondOrderDS {
 
   /** wrench(twist, q, t)= [ fExt(t) - fInt(twist,q, t) ; mExt(t) - mGyr(twist) -
    * mInt(twist,q,t) ]^T */
-  std::shared_ptr<siconos::algebra::SiconosVector> wrench_{nullptr};
+  std::shared_ptr<siconos::algebra::SiconosVector6> wrench_{nullptr};
 
   /** \nabla_{twist} wrench(twist, q, t) */
   std::shared_ptr<siconos::algebra::SiconosMatrix66> jacobianWrenchOver_twist_{nullptr};
@@ -160,7 +161,7 @@ class NewtonEulerDS : public SecondOrderDS {
    This map is used only when fext is set as a constant external provided memory.
    In any other cases 'fext' is appended to wrench_.
    */
-  std::shared_ptr<siconos::algebra::MapVectorType> fext_view_{nullptr};
+  std::shared_ptr<siconos::algebra::MapVector3Type> fext_view_{nullptr};
 
   /** function wrapper used to compute external forces \f$f_{ext}(t)\f$ */
   func_prototypes::FunctionS_V computefext_{nullptr};
@@ -199,7 +200,7 @@ class NewtonEulerDS : public SecondOrderDS {
    This map is used only when mext is set as a constant external provided memory.
    In any other cases 'mext' is appended to wrench_.
    */
-  std::shared_ptr<siconos::algebra::MapVectorType> mext_view_{nullptr};
+  std::shared_ptr<siconos::algebra::MapVector3Type> mext_view_{nullptr};
 
   /** function wrapper used to compute external moment \f$m_{ext}(t)\f$ */
   func_prototypes::FunctionS_V computemext_{nullptr};
@@ -211,7 +212,7 @@ class NewtonEulerDS : public SecondOrderDS {
   bool hasMext_{false};
 
   /** external forces storage. Used only if hasConstantMext_ is true */
-  std::unique_ptr<siconos::algebra::SiconosVector> mext_{nullptr};
+  std::unique_ptr<siconos::algebra::SiconosVector3> mext_{nullptr};
 
   /** if true, we assume that mExt is given in inertial frame (default false) */
   bool isMextExpressedInInertialFrame_{false};
@@ -249,8 +250,8 @@ class NewtonEulerDS : public SecondOrderDS {
    *  \param mass the mass
    *  \param inertia the inertia matrix
    */
-  NewtonEulerDS(Eigen::Ref<siconos::algebra::SiconosVector> position,
-                Eigen::Ref<siconos::algebra::SiconosVector> twist, double mass,
+  NewtonEulerDS(Eigen::Ref<siconos::algebra::SiconosVector7> position,
+                Eigen::Ref<siconos::algebra::SiconosVector6> twist, double mass,
                 Eigen::Ref<siconos::algebra::SiconosMatrix33> inertia);
 
   /** destructor */
@@ -294,7 +295,7 @@ class NewtonEulerDS : public SecondOrderDS {
 
   /** \return a read-only view onto the wrench vector */
   inline auto wrench() const {
-    return siconos::algebra::ConstMapVectorType(wrench_->data(), wrench_->size());
+    return siconos::algebra::ConstMapVector6Type(wrench_->data(), wrench_->size());
   }
 
   // -- Jacobian Forces w.r.t q --
@@ -329,7 +330,7 @@ class NewtonEulerDS : public SecondOrderDS {
 
   /**  \return a read-only view on  $\dot q$ */
   inline auto dotq_read() {
-    return siconos::algebra::ConstMapVectorType(dotq_->data(), dotq_->size());
+    return siconos::algebra::ConstMapVector7Type(dotq_->data(), dotq_->size());
   }
 
   /** \return  $\dot q$ (pointer link) */
@@ -355,17 +356,17 @@ class NewtonEulerDS : public SecondOrderDS {
 
   /** \return a read-only view onto linear velocity (twist(0:2))*/
   inline auto linearVelocity_view() const {
-    return siconos::algebra::ConstMapVectorType(twist_->data(), 3);
+    return siconos::algebra::ConstMapVector3Type(twist_->data(), 3);
   }
 
   /** \return a read-only view onto angular velocity (twist(3:6))*/
   inline auto angularVelocity_view() const {
-    return siconos::algebra::ConstMapVectorType(twist_->data() + 3, 3);
+    return siconos::algebra::ConstMapVector3Type(twist_->data() + 3, 3);
   }
 
   /** \return a read-only view on initial values of the twist */
-  inline const siconos::algebra::ConstMapVectorType twist0() const {
-    return siconos::algebra::ConstMapVectorType(twist0_view_->data(), twist0_view_->size());
+  inline const siconos::algebra::ConstMapVector6Type twist0() const {
+    return siconos::algebra::ConstMapVector6Type(twist0_view_->data(), twist0_view_->size());
   }
 
   /** \return a read-only view on acceleration vector */
@@ -379,10 +380,10 @@ class NewtonEulerDS : public SecondOrderDS {
   }
 
   /** \return the linear velocity written in therelative (body) frame */
-  siconos::algebra::SiconosVector linearVelocityInBodyFrame() const;
+  siconos::algebra::SiconosVector3 linearVelocityInBodyFrame() const;
 
   /** \return the angular velocity written in the relative (body) frame */
-  siconos::algebra::SiconosVector angularVelocityInBodyFrame() const;
+  siconos::algebra::SiconosVector3 angularVelocityInBodyFrame() const;
 
   /** \return mass value */
   inline double scalarMass() const { return scalarMass_; };
@@ -577,8 +578,8 @@ class NewtonEulerDS : public SecondOrderDS {
       \param q state
       \param time the current time
   */
-  void computeWrench(const Eigen::Ref<const siconos::algebra::SiconosVector>& twist,
-                     const Eigen::Ref<const siconos::algebra::SiconosVector>& q, double time);
+  void computeWrench(const Eigen::Ref<const siconos::algebra::SiconosVector6>& twist,
+                     const Eigen::Ref<const siconos::algebra::SiconosVector7>& q, double time);
 
   /** Compute  \f$ \nabla_{twist}wrench(v,q,t) \f$
    *
@@ -587,8 +588,8 @@ class NewtonEulerDS : public SecondOrderDS {
    *  \param time the current time
    */
   void computeJacobianWrenchOver_twist(
-      const Eigen::Ref<const siconos::algebra::SiconosVector>& twist,
-      const Eigen::Ref<const siconos::algebra::SiconosVector>& q, double time);
+      const Eigen::Ref<const siconos::algebra::SiconosVector6>& twist,
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q, double time);
 
   /** Compute  \f$ \nabla_q wrench(v,q,t) \f$
    *
@@ -597,8 +598,8 @@ class NewtonEulerDS : public SecondOrderDS {
    *  \param time the current time
    */
   void computeJacobianWrenchOver_q(
-      const Eigen::Ref<const siconos::algebra::SiconosVector>& twist,
-      const Eigen::Ref<const siconos::algebra::SiconosVector>& q, double time);
+      const Eigen::Ref<const siconos::algebra::SiconosVector6>& twist,
+      const Eigen::Ref<const siconos::algebra::SiconosVector7>& q, double time);
 
   /** To compute the jacobian w.r.t q of the internal forces
    *  by forward finite difference
@@ -608,8 +609,8 @@ class NewtonEulerDS : public SecondOrderDS {
    *  \param twist const Eigen::Ref<siconos::algebra::SiconosVector> &
    */
   void computeJacobianFIntqByFD(double time,
-                                const Eigen::Ref<siconos::algebra::SiconosVector>& position,
-                                const Eigen::Ref<siconos::algebra::SiconosVector>& twist);
+                                const Eigen::Ref<siconos::algebra::SiconosVector7>& position,
+                                const Eigen::Ref<siconos::algebra::SiconosVector6>& twist);
 
   /** To compute the jacobian w.r.t v of the internal forces
    *  by forward finite difference
@@ -619,10 +620,10 @@ class NewtonEulerDS : public SecondOrderDS {
    *  \param twist const Eigen::Ref<siconos::algebra::SiconosVector> &
    */
   void computeJacobianFIntvByFD(double time,
-                                const Eigen::Ref<siconos::algebra::SiconosVector>& position,
-                                const Eigen::Ref<siconos::algebra::SiconosVector>& twist);
+                                const Eigen::Ref<siconos::algebra::SiconosVector7>& position,
+                                const Eigen::Ref<siconos::algebra::SiconosVector6>& twist);
 
-  void computeT(const Eigen::Ref<const siconos::algebra::SiconosVector>& q);
+  void computeT(const Eigen::Ref<const siconos::algebra::SiconosVector7>& q);
 
   virtual void computeTdot();
 
@@ -643,7 +644,7 @@ namespace newton_euler {
     \param[in,out] T result
 
 */
-void computeT(const Eigen::Ref<const siconos::algebra::SiconosVector>& q,
+void computeT(const Eigen::Ref<const siconos::algebra::SiconosVector7>& q,
               Eigen::Ref<siconos::algebra::SiconosMatrix76> T);
 
 /** Compute the moment vectors applied to a body with state
@@ -662,12 +663,12 @@ void computeT(const Eigen::Ref<const siconos::algebra::SiconosVector>& q,
  *  \param[in,out] result resulting momemt
  *  \param[in] accumulate if true, mext += result, else mext is reinitialized
  */
-void computeMextForceAtPos(const Eigen::Ref<siconos::algebra::SiconosVector>& q,
+void computeMextForceAtPos(const Eigen::Ref<siconos::algebra::SiconosVector7>& q,
                            bool isMextExpressedInInertialFrame,
-                           const Eigen::Ref<siconos::algebra::SiconosVector>& force,
+                           const Eigen::Ref<siconos::algebra::SiconosVector3>& force,
                            bool forceAbsRef,
-                           const Eigen::Ref<siconos::algebra::SiconosVector>& pos,
-                           bool posAbsRef, Eigen::Ref<siconos::algebra::SiconosVector> result,
+                           const Eigen::Ref<siconos::algebra::SiconosVector3>& pos,
+                           bool posAbsRef, Eigen::Ref<siconos::algebra::SiconosVector3> result,
                            bool accumulate);
 
 /** To add a force impulse to body's forces vector in
@@ -680,9 +681,9 @@ void computeMextForceAtPos(const Eigen::Ref<siconos::algebra::SiconosVector>& q,
  *  \param[in, out] fext resulting force
  *  \param[in] accumulate if true, fext += result, else fext is reinitialized
  */
-void computeFextForceAtPos(const Eigen::Ref<siconos::algebra::SiconosVector>& q,
-                           const Eigen::Ref<siconos::algebra::SiconosVector>& force,
-                           bool forceAbsRef, Eigen::Ref<siconos::algebra::MapVectorType> fExt,
+void computeFextForceAtPos(const Eigen::Ref<siconos::algebra::SiconosVector7>& q,
+                           const Eigen::Ref<siconos::algebra::SiconosVector3>& force,
+                           bool forceAbsRef, Eigen::Ref<siconos::algebra::MapVector3Type> fExt,
                            bool accumulate);
 
 /** Compute \f$ \nabla_{twist} m_{gyr}(twist) \f$
@@ -692,7 +693,7 @@ void computeFextForceAtPos(const Eigen::Ref<siconos::algebra::SiconosVector>& q,
  *  \param[in,out] result the computed jacobian matrix (size 3x6)
  */
 void computeJacobianMGyrOver_twist(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& twist,
+    const Eigen::Ref<const siconos::algebra::SiconosVector6>& twist,
     const Eigen::Ref<const siconos::algebra::SiconosMatrix66>& inertia,
     Eigen::Ref<siconos::algebra::SiconosMatrix36> result);
 
@@ -706,7 +707,7 @@ void computeJacobianMGyrOver_twist(
  *  \param[in,out] result the computed jacobian matrix (size 3x6)
  */
 void computeJacobianMGyrOver_twist_byFD(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& twist, double epsilonFD,
+    const Eigen::Ref<const siconos::algebra::SiconosVector6>& twist, double epsilonFD,
     const Eigen::Ref<const siconos::algebra::SiconosMatrix66>& inertia,
     const siconos::modeling::func_prototypes::FunctionMV_V& computeMgyr,
     Eigen::Ref<siconos::algebra::SiconosMatrix36> result);
@@ -721,8 +722,8 @@ void computeJacobianMGyrOver_twist_byFD(
  *  \param[in,out] result the computed jacobian matrix (size: 3xsize twist)
  */
 void computeJacobianFOver_twist_byFD(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& twist,
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& q, double time, double epsilonFD,
+    const Eigen::Ref<const siconos::algebra::SiconosVector6>& twist,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q, double time, double epsilonFD,
     const siconos::modeling::func_prototypes::FunctionVVS_V& computeMint,
     Eigen::Ref<siconos::algebra::SiconosMatrix36> result);
 
@@ -736,8 +737,8 @@ void computeJacobianFOver_twist_byFD(
  *  \param[in,out] result the computed jacobian matrix (size: 3xsize q)
  */
 void computeJacobianFOver_q_byFD(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& twist,
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& q, double time, double epsilonFD,
+    const Eigen::Ref<const siconos::algebra::SiconosVector6>& twist,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q, double time, double epsilonFD,
     const siconos::modeling::func_prototypes::FunctionVVS_V& computeMint,
     Eigen::Ref<siconos::algebra::SiconosMatrix37> result);
 
@@ -748,7 +749,7 @@ void computeJacobianFOver_q_byFD(
  *  \param[in,out] result the computed jacobian matrix (size: 3x7)
  */
 void computeJacobianMExtqExpressedInInertialFrame(
-    const Eigen::Ref<siconos::algebra::SiconosVector>& q, double time,
+    const Eigen::Ref<siconos::algebra::SiconosVector7>& q, double time,
     const siconos::algebra::SiconosVector3& mext,
     Eigen::Ref<siconos::algebra::SiconosMatrix37> result);
 
@@ -762,7 +763,7 @@ void computeJacobianMExtqExpressedInInertialFrame(
  *
  */
 void computeJacobianMExtqExpressedInInertialFrameByFD(
-    const Eigen::Ref<siconos::algebra::SiconosVector>& q, double time,
+    const Eigen::Ref<siconos::algebra::SiconosVector7>& q, double time,
     const func_prototypes::FunctionS_V& computeMext, bool isMextExpressedInInertialFrame,
     double epsilonFD, Eigen::Ref<siconos::algebra::SiconosMatrix33> result);
 
@@ -772,9 +773,9 @@ void computeJacobianMExtqExpressedInInertialFrameByFD(
  *  \param[in] inertia total inertia matrix, size=6x6
  *  \param[in,out] result the computed jacobian matrix (size 3x6)
  */
-void computeMgyr(const Eigen::Ref<const siconos::algebra::SiconosVector>& twist,
+void computeMgyr(const Eigen::Ref<const siconos::algebra::SiconosVector6>& twist,
                  const Eigen::Ref<const siconos::algebra::SiconosMatrix66>& inertia,
-                 Eigen::Ref<siconos::algebra::SiconosVector> mGyr);
+                 Eigen::Ref<siconos::algebra::SiconosVector3> mGyr);
 }  // namespace newton_euler
 
 }  // namespace siconos::modeling

@@ -66,6 +66,10 @@ target_link_libraries(control PUBLIC numerics)
 target_link_libraries(control PUBLIC kernel)
 # Links with non-Siconos libraries
 
+
+# --- tests ---
+include(${COMPONENT}_tests.cmake)
+
 # --- python bindings ---
 if(WITH_${COMPONENT}_PYTHON_WRAPPER)
   add_subdirectory(swig)
@@ -88,6 +92,3 @@ set(${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES
 
 siconos_component_install_setup(${COMPONENT})
 
-
-# --- tests ---
-include(${COMPONENT}_tests.cmake)

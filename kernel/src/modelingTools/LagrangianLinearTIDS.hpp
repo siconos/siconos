@@ -22,7 +22,6 @@
 
 #include "LagrangianDS.hpp"
 
-
 namespace siconos::modeling {
 
 /**
@@ -127,7 +126,7 @@ class LagrangianLinearTIDS : public LagrangianDS {
    */
   LagrangianLinearTIDS(Eigen::Ref<siconos::algebra::SiconosVector> q0,
                        Eigen::Ref<siconos::algebra::SiconosVector> v0,
-                       Eigen::Ref<siconos::algebra::SiconosMatrix> M);
+                       Eigen::Ref<siconos::algebra::SiconosDenseMatrix> M);
 
   /** destructor */
   ~LagrangianLinearTIDS() noexcept = default;
@@ -142,13 +141,13 @@ class LagrangianLinearTIDS : public LagrangianDS {
    *
    *  \param K new stiffness matrix
    */
-  void setStiffnessMatrix(Eigen::Ref<siconos::algebra::SiconosMatrix> K);
+  void setStiffnessMatrix(Eigen::Ref<siconos::algebra::SiconosDenseMatrix> K);
 
   /** set the damping matrix. Warning: shared memory with input
    *
    *  \param C new damping matrix
    */
-  void setDampingMatrix(Eigen::Ref<siconos::algebra::SiconosMatrix> C);
+  void setDampingMatrix(Eigen::Ref<siconos::algebra::SiconosDenseMatrix> C);
 
   /** \return a read-only view on the stiffness matrix */
   inline auto stiffnessMatrix() const {

@@ -108,15 +108,6 @@ class LagrangianSparseLinearTIDS : public LagrangianSparseDS {
   /** default constructor */
   LagrangianSparseLinearTIDS() = default;  // Used in FiniteElementLinearTIDS
 
-  /** constructor from initial state - Used for RigidBodies
-   *
-   *  \param q0 initial coordinates
-   *  \param v0 initial velocity
-   */
-  LagrangianSparseLinearTIDS(Eigen::Ref<siconos::algebra::SiconosVector> q0,
-                             Eigen::Ref<siconos::algebra::SiconosVector> v0)
-      : LagrangianSparseDS{q0, v0} {}
-
   /**
    * @brief Utility function providing uniform access to the stiffness matrix.
    *
@@ -163,6 +154,7 @@ class LagrangianSparseLinearTIDS : public LagrangianSparseDS {
                                                 "dampingMatrix_storage");
   }
 
+  // Non const versions. Not needed but kept for the record ...
   // template <typename F>
   // decltype(auto) useStiffness(F&& f) {
   //   if (owned_stiffnessMatrix_) return f(*owned_stiffnessMatrix_);
@@ -177,6 +169,21 @@ class LagrangianSparseLinearTIDS : public LagrangianSparseDS {
   // }
 
  public:
+  /** constructor from initial state only.
+   *  Leads to \f$ M\dot v = F_{ext}(t) + p \f$ .
+   *
+   *  \param q0 initial coordinates
+   *  \param v0 initial velocity
+   */
+  /** constructor from initial state - Used for RigidBodies
+   *
+   *  \param q0 initial coordinates
+   *  \param v0 initial velocity
+   */
+  LagrangianSparseLinearTIDS(Eigen::Ref<siconos::algebra::SiconosVector> q0,
+                             Eigen::Ref<siconos::algebra::SiconosVector> v0)
+      : LagrangianSparseDS{q0, v0} {}
+
   /** constructor from initial state and mass matrix only. Leads to \f$ M\dot v
    *  = F_{ext}(t) + p \f$ .
    * warning: M will be copied into mass attribute.

@@ -83,6 +83,7 @@ target_link_libraries(kernel PRIVATE GMP::GMP)
 # Boost must be set as a public dependency because of SiconosAlgebraTypeDefs.hpp
 # This has to be reviewed !!!
 target_link_libraries(kernel PUBLIC Boost::boost)
+
 if(WITH_BOOST_LOG)
   find_package(Boost 1.61 REQUIRED COMPONENTS log)
   target_compile_definitions(kernel PRIVATE BOOST_LOG_DYN_LINK)
@@ -108,8 +109,9 @@ if(SICONOS_SPARSE)
   target_compile_definitions(kernel PUBLIC SICONOS_SPARSE)
 endif()
 
-get_target_property(raw_libs kernel INTERFACE_LINK_LIBRARIES)
-message("KERNEL TEST ${raw_libs}")
+
+# --- tests ---
+include(${COMPONENT}_tests.cmake)
 
 
 # --- python bindings ---
@@ -134,10 +136,6 @@ set(${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES
   )
 
 siconos_component_install_setup(${COMPONENT})
-
-# --- tests ---
-include(${COMPONENT}_tests.cmake)
-
 
 # CHECK THIS LATER :
 # --- set linked libraries and linker language ---

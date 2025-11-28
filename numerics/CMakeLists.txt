@@ -268,6 +268,17 @@ if(WITH_OPENMP)
   target_link_libraries(numerics  PRIVATE OpenMP::OpenMP_CXX)
 endif()
 
+
+# --- tests ---
+include(${COMPONENT}_tests.cmake)
+
+if(WITH_MPI AND WITH_TESTING)
+  # Note FP : temporary fix, to deal with PRIVATE deps of some components.
+  # This will be reviewed later.
+  target_include_directories(numerics-tests PUBLIC ${MPI_C_INCLUDE_DIRS})
+  target_link_libraries(numerics-tests PUBLIC ${MPI_C_LIBRARIES})
+endif()
+
 # --- python bindings ---
 if(WITH_${COMPONENT}_PYTHON_WRAPPER)
   add_subdirectory(swig)
@@ -300,22 +311,11 @@ endif()
 #   src/FrictionContact
 #   )
 
-  set(${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES
-  ${${COMPONENT}_DIRS} # All .hpp are installed
-  )
+set(${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES
+${${COMPONENT}_DIRS} # All .hpp are installed
+)
 
 # List header files (in dir above) that must not be installed 
 set(${COMPONENT}_HDRS_EXCLUDE src/FrictionContact/Generated/funcodegen.h)
 
 siconos_component_install_setup(${COMPONENT})
-
-# --- tests ---
-include(${COMPONENT}_tests.cmake)
-
-if(WITH_MPI AND WITH_TESTING)
-  # Note FP : temporary fix, to deal with PRIVATE deps of some components.
-  # This will be reviewed later.
-  target_include_directories(numerics-test PUBLIC ${MPI_C_INCLUDE_DIRS})
-  target_link_libraries(numerics-test PUBLIC ${MPI_C_LIBRARIES})
-endif()
-

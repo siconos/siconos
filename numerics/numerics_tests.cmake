@@ -474,12 +474,12 @@ if(WITH_TESTING)
   #new_test(SOURCES soclcp_test5.c)
   new_test(SOURCES fc3d_to_soclcp.c)
 
-  # ---- Extra conf for ${COMPONENT}-test library ---
-  if(TARGET numerics-test)
+  # ---- Extra conf for ${COMPONENT}-tests library ---
+  if(TARGET numerics-tests)
     if(MSVC)
       # This part should be reviewed by a windows expert ...
       include(WindowsLibrarySetup)
-      windows_library_extra_setup("numerics-test" "numerics-test")
+      windows_library_extra_setup("numerics-tests" "numerics-tests")
     endif()
   endif()
 

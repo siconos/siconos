@@ -28,8 +28,8 @@
 #include "siconos_debug.h"
 
 siconos::modeling::NewtonEulerDS::NewtonEulerDS(
-    Eigen::Ref<siconos::algebra::SiconosVector> initial_position,
-    Eigen::Ref<siconos::algebra::SiconosVector> initial_twist, double mass,
+    Eigen::Ref<siconos::algebra::SiconosVector7> initial_position,
+    Eigen::Ref<siconos::algebra::SiconosVector6> initial_twist, double mass,
     Eigen::Ref<siconos::algebra::SiconosMatrix33> inertia)
     : SecondOrderDS(13, 6), scalarMass_{mass} {
   DEBUG_BEGIN("siconos::modeling::NewtonEulerDS::NewtonEulerDS(...)\n");
@@ -40,8 +40,8 @@ siconos::modeling::NewtonEulerDS::NewtonEulerDS(
   // (dim(VTwist0)=6)
   q0_view_ = std::make_shared<siconos::algebra::MapVectorType>(initial_position.data(),
                                                                initial_position.size());
-  twist0_view_ = std::make_shared<siconos::algebra::MapVectorType>(initial_twist.data(),
-                                                                   initial_twist.size());
+  twist0_view_ = std::make_shared<siconos::algebra::MapVector6Type>(initial_twist.data(),
+                                                                    initial_twist.size());
   // warning : q0_view_ and twist0_view_ are views onto initial_position and initial_twist
   // memory is shared!
 
@@ -49,7 +49,7 @@ siconos::modeling::NewtonEulerDS::NewtonEulerDS(
   state_q_ = std::make_shared<siconos::algebra::SiconosVector>(*q0_view_);
   twist_ = std::make_shared<siconos::algebra::SiconosVector>(*twist0_view_);
 
-  dotq_ = std::make_shared<siconos::algebra::SiconosVector>(qDim_);
+  dotq_ = std::make_shared<siconos::algebra::SiconosVector>();
   dotq_->setZero();
 
   /** \todo lazy Memory allocation */
@@ -80,7 +80,7 @@ siconos::modeling::NewtonEulerDS::NewtonEulerDS(
   // lazy init, at first call of computeTdot()
 
   // --- Wrench ---
-  wrench_ = std::make_shared<siconos::algebra::SiconosVector>(ndof_);
+  wrench_ = std::make_shared<siconos::algebra::SiconosVector6>();
   wrench_->setZero();
   /** The follwing jacobian are always allocated since we have always
    * Gyroscopical forces that has non linear forces
@@ -281,8 +281,9 @@ void siconos::modeling::NewtonEulerDS::init_lu_mass() {
 /////////////////// FEXT  ////////////////////
 void siconos::modeling::NewtonEulerDS::setConstantFext(
     Eigen::Ref<siconos::algebra::SiconosVector> newValue) {
+  assert(newValue.size() == 3);
   fext_view_ =
-      std::make_shared<siconos::algebra::MapVectorType>(newValue.data(), newValue.size());
+      std::make_shared<siconos::algebra::MapVector3Type>(newValue.data(), newValue.size());
   hasFext_ = true;
   hasConstantFext_ = true;
   computefext_ = nullptr;
@@ -301,8 +302,9 @@ void siconos::modeling::NewtonEulerDS::setComputeFextFunction(
 
 void siconos::modeling::NewtonEulerDS::setConstantMext(
     Eigen::Ref<siconos::algebra::SiconosVector> newValue) {
+  assert(newValue.size() == 3);
   mext_view_ =
-      std::make_shared<siconos::algebra::MapVectorType>(newValue.data(), newValue.size());
+      std::make_shared<siconos::algebra::MapVector3Type>(newValue.data(), newValue.size());
 
   hasMext_ = true;
   hasConstantMext_ = true;
@@ -395,8 +397,8 @@ void siconos::modeling::NewtonEulerDS::setComputeJacobianMintOver_twist_byFD(boo
 }
 
 void siconos::modeling::NewtonEulerDS::computeWrench(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& twist,
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& q, double time) {
+    const Eigen::Ref<const siconos::algebra::SiconosVector6>& twist,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q, double time) {
   DEBUG_BEGIN("siconos::modeling::NewtonEulerDS::computeWrench(...)\n")
 
   assert(wrench_);
@@ -459,8 +461,8 @@ void siconos::modeling::NewtonEulerDS::computeWrench(
 }
 
 void siconos::modeling::NewtonEulerDS::computeJacobianWrenchOver_q(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& twist,
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& q, double time) {
+    const Eigen::Ref<const siconos::algebra::SiconosVector6>& twist,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q, double time) {
   DEBUG_BEGIN("siconos::modeling::NewtonEulerDS::computeJacobianWrenchOver_q(double time) \n");
 
   if (!jacobianWrenchOver_q_) return;
@@ -512,8 +514,8 @@ void siconos::modeling::NewtonEulerDS::computeJacobianWrenchOver_q(
 }
 
 void siconos::modeling::NewtonEulerDS::computeJacobianWrenchOver_twist(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& twist,
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& q, double time) {
+    const Eigen::Ref<const siconos::algebra::SiconosVector6>& twist,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q, double time) {
   if (!jacobianWrenchOver_twist_) return;
 
   jacobianWrenchOver_twist_->setZero();
@@ -636,7 +638,7 @@ void siconos::modeling::NewtonEulerDS::resetNonSmoothPart(unsigned int level) {
 }
 
 void siconos::modeling::NewtonEulerDS::computeT(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& q) {
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q) {
   siconos::modeling::newton_euler::computeT(q, *T_);
 }
 
@@ -668,14 +670,14 @@ double siconos::modeling::NewtonEulerDS::computeKineticEnergy() {
   return K;
 }
 
-siconos::algebra::SiconosVector siconos::modeling::NewtonEulerDS::linearVelocityInBodyFrame()
+siconos::algebra::SiconosVector3 siconos::modeling::NewtonEulerDS::linearVelocityInBodyFrame()
     const {
-  siconos::algebra::SiconosVector v = twist_->head(3);  // copy
+  siconos::algebra::SiconosVector3 v = twist_->head(3);  // copy
   siconos::geometry::rewriteVectorFromAbsoluteToBodyFrame(*state_q_, v);
   return v;  // RVO, no copy!
 }
 
-siconos::algebra::SiconosVector siconos::modeling::NewtonEulerDS::angularVelocityInBodyFrame()
+siconos::algebra::SiconosVector3 siconos::modeling::NewtonEulerDS::angularVelocityInBodyFrame()
     const {
   siconos::algebra::SiconosVector3 w = twist_->tail(3);
   siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(*state_q_, w);
@@ -695,11 +697,9 @@ void siconos::modeling::NewtonEulerDS::setScalarMass(double mass) {
 ///////////////////////////////////////////////////////////////////////////////////////
 
 void siconos::modeling::newton_euler::computeT(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& q,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q,
     Eigen::Ref<siconos::algebra::SiconosMatrix76> T) {
-  DEBUG_BEGIN(
-      "computeT(const Eigen::Ref<siconos::algebra::SiconosVector> & q, "
-      "std::shared_ptr<siconos::algebra::SiconosMatrix> T)\n")
+  DEBUG_BEGIN("computeT(...)\n")
 
   // Warning : we assume that
   // - T is properly allocated and of size 7x6
@@ -721,16 +721,14 @@ void siconos::modeling::newton_euler::computeT(
   T(6, 3) = -q2;
   T(6, 4) = q1;
   T(6, 5) = q0;
-  DEBUG_END(
-      "computeT(const Eigen::Ref<siconos::algebra::SiconosVector> & q, "
-      "std::shared_ptr<siconos::algebra::SiconosMatrix> T)\n")
+  DEBUG_END("computeT(...)\n")
 }
 
 void siconos::modeling::newton_euler::computeMextForceAtPos(
-    const Eigen::Ref<siconos::algebra::SiconosVector>& q, bool isMextExpressedInInertialFrame,
-    const Eigen::Ref<siconos::algebra::SiconosVector>& force, bool forceAbsRef,
-    const Eigen::Ref<siconos::algebra::SiconosVector>& pos, bool posAbsRef,
-    Eigen::Ref<siconos::algebra::SiconosVector> mExt, bool accumulate) {
+    const Eigen::Ref<siconos::algebra::SiconosVector7>& q, bool isMextExpressedInInertialFrame,
+    const Eigen::Ref<siconos::algebra::SiconosVector3>& force, bool forceAbsRef,
+    const Eigen::Ref<siconos::algebra::SiconosVector3>& pos, bool posAbsRef,
+    Eigen::Ref<siconos::algebra::SiconosVector3> mExt, bool accumulate) {
   assert(force.size() == 3);
   assert(mExt.size() == 3);
 
@@ -742,13 +740,11 @@ void siconos::modeling::newton_euler::computeMextForceAtPos(
 
   siconos::algebra::SiconosVector3 moment;
   if (posAbsRef) {
-    siconos::algebra::SiconosVector3 local_pos = pos - q;
+    siconos::algebra::SiconosVector3 local_pos = pos - q.head<3>();
     siconos::geometry::rewriteVectorFromAbsoluteToBodyFrame(q, local_pos);
     moment = local_pos.cross(local_frc);
   } else {
-    auto posview = pos.head<3>();  // trick to get a view with the proper size to fit with
-                                   // cross. No copy.
-    moment = posview.cross(local_frc);
+    moment = pos.cross(local_frc);
   }
 
   if (isMextExpressedInInertialFrame)
@@ -761,12 +757,9 @@ void siconos::modeling::newton_euler::computeMextForceAtPos(
 }
 
 void siconos::modeling::newton_euler::computeFextForceAtPos(
-    const Eigen::Ref<siconos::algebra::SiconosVector>& q,
-    const Eigen::Ref<siconos::algebra::SiconosVector>& force, bool forceAbsRef,
-    Eigen::Ref<siconos::algebra::MapVectorType> fext, bool accumulate) {
-  assert(fext.size() == 3);
-  assert(force.size() == 3);
-
+    const Eigen::Ref<siconos::algebra::SiconosVector7>& q,
+    const Eigen::Ref<siconos::algebra::SiconosVector3>& force, bool forceAbsRef,
+    Eigen::Ref<siconos::algebra::MapVector3Type> fext, bool accumulate) {
   siconos::algebra::SiconosVector3 abs_frc(force);
 
   if (!forceAbsRef) siconos::geometry::rewriteVectorFromBodyToAbsoluteFrame(q, abs_frc);
@@ -777,16 +770,16 @@ void siconos::modeling::newton_euler::computeFextForceAtPos(
 }
 
 void siconos::modeling::newton_euler::computeMgyr(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& twist,
+    const Eigen::Ref<const siconos::algebra::SiconosVector6>& twist,
     const Eigen::Ref<const siconos::algebra::SiconosMatrix66>& inertiaMatrix,
-    Eigen::Ref<siconos::algebra::SiconosVector> result) {
+    Eigen::Ref<siconos::algebra::SiconosVector3> result) {
   auto omega = twist.tail<3>();
   auto inertia = inertiaMatrix.block<3, 3>(3, 3);
   result = omega.cross(inertia * omega);
 }
 
 void siconos::modeling::newton_euler::computeJacobianMGyrOver_twist(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& twist,
+    const Eigen::Ref<const siconos::algebra::SiconosVector6>& twist,
     const Eigen::Ref<const siconos::algebra::SiconosMatrix66>& inertia,
     Eigen::Ref<siconos::algebra::SiconosMatrix36> result) {
   result.setZero();
@@ -810,7 +803,7 @@ void siconos::modeling::newton_euler::computeJacobianMGyrOver_twist(
 }
 
 void siconos::modeling::newton_euler::computeJacobianMGyrOver_twist_byFD(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& twist, double epsilonFD,
+    const Eigen::Ref<const siconos::algebra::SiconosVector6>& twist, double epsilonFD,
     const Eigen::Ref<const siconos::algebra::SiconosMatrix66>& inertia,
     const siconos::modeling::func_prototypes::FunctionMV_V& mgyr_func,
     Eigen::Ref<siconos::algebra::SiconosMatrix36> result) {
@@ -818,7 +811,7 @@ void siconos::modeling::newton_euler::computeJacobianMGyrOver_twist_byFD(
   mgyr_func(inertia, twist, mgyr0);
 
   result.setZero();
-  siconos::algebra::SiconosVector veps = twist;  // copy
+  siconos::algebra::SiconosVector6 veps = twist;  // copy
   for (int j = 0; j < 3; j++) {
     veps(0) += epsilonFD;
     mgyr_func(inertia, veps, mgyr);
@@ -828,7 +821,7 @@ void siconos::modeling::newton_euler::computeJacobianMGyrOver_twist_byFD(
 }
 
 void siconos::modeling::newton_euler::computeJacobianMExtqExpressedInInertialFrame(
-    const Eigen::Ref<siconos::algebra::SiconosVector>& q, double time,
+    const Eigen::Ref<siconos::algebra::SiconosVector7>& q, double time,
     const siconos::algebra::SiconosVector3& mext,
     Eigen::Ref<siconos::algebra::SiconosMatrix37> result) {
   DEBUG_EXPR(siconos::algebra::print(q));
@@ -863,7 +856,7 @@ void siconos::modeling::newton_euler::computeJacobianMExtqExpressedInInertialFra
 }
 
 void siconos::modeling::newton_euler::computeJacobianMExtqExpressedInInertialFrameByFD(
-    const Eigen::Ref<siconos::algebra::SiconosVector>& q, double time,
+    const Eigen::Ref<siconos::algebra::SiconosVector7>& q, double time,
     const siconos::modeling::func_prototypes::FunctionS_V& mext_func,
     bool isMextExpressedInInertialFrame, double epsilonFD,
     Eigen::Ref<siconos::algebra::SiconosMatrix33> result)
@@ -893,14 +886,14 @@ void siconos::modeling::newton_euler::computeJacobianMExtqExpressedInInertialFra
 }
 
 void siconos::modeling::newton_euler::computeJacobianFOver_twist_byFD(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& twist,
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& q, double time, double epsilonFD,
+    const Eigen::Ref<const siconos::algebra::SiconosVector6>& twist,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q, double time, double epsilonFD,
     const siconos::modeling::func_prototypes::FunctionVVS_V& f_func,
     Eigen::Ref<siconos::algebra::SiconosMatrix36> result) {
   siconos::algebra::SiconosVector3 mint0, mint;
   f_func(twist, q, time, mint0);
   result.setZero();
-  siconos::algebra::SiconosVector veps = twist;  // copy
+  siconos::algebra::SiconosVector6 veps = twist;  // copy
   auto inveps = 1. / epsilonFD;
   for (int j = 0; j < veps.size(); j++) {
     veps(j) += epsilonFD;
@@ -911,8 +904,8 @@ void siconos::modeling::newton_euler::computeJacobianFOver_twist_byFD(
 }
 
 void siconos::modeling::newton_euler::computeJacobianFOver_q_byFD(
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& twist,
-    const Eigen::Ref<const siconos::algebra::SiconosVector>& q, double time, double epsilonFD,
+    const Eigen::Ref<const siconos::algebra::SiconosVector6>& twist,
+    const Eigen::Ref<const siconos::algebra::SiconosVector7>& q, double time, double epsilonFD,
     const siconos::modeling::func_prototypes::FunctionVVS_V& f_func,
     Eigen::Ref<siconos::algebra::SiconosMatrix37> result) {
   siconos::algebra::SiconosVector3 mint0, mint;

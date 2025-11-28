@@ -39,6 +39,17 @@ SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/io/io_pybind11.cpp
 DEPENDENCIES kernel numerics
 )
 
+add_custom_target(py${COMPONENT}
+    DEPENDS pb11_template
+    modeling
+    integrators
+    simulation
+    nonsmooth_formulations
+    input
+  ) 
+
+ 
+
 install(TARGETS
   pb11_template
   modeling
@@ -52,12 +63,12 @@ install(TARGETS
 
 # --- Tests ---
 if(WITH_TESTING)
-  include(export_runtime_conf)
-  add_library(${COMPONENT}_pytests INTERFACE)
-  target_link_libraries(${COMPONENT}_pytests INTERFACE ${COMPONENT})
-  # Ensure build dir is in the include path for SiconosConfig.h
-  target_include_directories(${COMPONENT}_pytests INTERFACE $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>) 
-
-  export_build_conf(${COMPONENT}_pytests)
+  # include(export_runtime_conf)
+  # add_library(${COMPONENT}-pytests INTERFACE)
+  # target_link_libraries(${COMPONENT}-pytests INTERFACE ${COMPONENT})
+  # # Ensure build dir is in the include path for SiconosConfig.h
+  # target_include_directories(${COMPONENT}-pytests INTERFACE $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>) 
+  # add_dependencies(${COMPONENT}-tests ${COMPONENT}-pytests)
+  # export_build_conf(${COMPONENT}-pytests)
   build_python_tests()
 endif()

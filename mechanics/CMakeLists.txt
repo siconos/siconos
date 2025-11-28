@@ -96,6 +96,9 @@ if(WITH_OpenCASCADE)
 endif()
 
 
+# --- tests ---
+include(${COMPONENT}_tests.cmake)
+
 # --- python bindings ---
 if(WITH_PYB11_WRAPPER)
   add_subdirectory(python)
@@ -115,6 +118,3 @@ set(${COMPONENT}_INSTALL_INTERFACE_INCLUDE_DIRECTORIES
   )
 
 siconos_component_install_setup(${COMPONENT})
-
-# --- tests ---
-include(${COMPONENT}_tests.cmake)

@@ -29,7 +29,6 @@
 
 #include "FirstOrderLinearDS.hpp"
 #include "FunctionTypes.hpp"
-#include "LDSOrig.hpp"
 #include "LagrangianDS.hpp"
 #include "LagrangianLinearTIDS.hpp"
 #include "LagrangianSparseDS.hpp"
@@ -90,7 +89,7 @@ void wrap_dynamical_systems(py::module_& m) {
       .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>&>(), py::keep_alive<1, 2>(),
            py::arg("x0"))
       .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>&,
-                    Eigen::Ref<siconos::algebra::SiconosMatrix>&,
+                    Eigen::Ref<siconos::algebra::SiconosDenseMatrix>&,
                     Eigen::Ref<siconos::algebra::SiconosVector>&>(),
            py::keep_alive<1, 2>(), py::keep_alive<1, 3>(), py::keep_alive<1, 4>(),
            py::arg("x0"), py::arg("A"), py::arg("b"))
@@ -120,6 +119,22 @@ void wrap_dynamical_systems(py::module_& m) {
 
       .def("setConstantFext", &siconos::modeling::LagrangianSparseDS::setConstantFext,
            py::keep_alive<1, 2>(), "To define a constant external forces vector")
+      .def(
+          "setComputeFextFunction",
+          [](siconos::modeling::LagrangianSparseDS& self, py::function f) {
+            // Catch Python function and create a complient std::function
+            self.setComputeFextFunction(
+                [f](double val, Eigen::Ref<siconos::algebra::MapVectorType> result) {
+                  f(val, result);  // Call python func with a memory view ...
+                });
+          },
+          "How to compute external forces")
+
+      .def("computeFext", &siconos::modeling::LagrangianSparseDS::computeFext,
+           "compute external forces")
+
+      .def("fext", &siconos::modeling::LagrangianSparseDS::fext,
+           "current values of external forces")
 
       .def("setConstantMassCopy",
            [](siconos::modeling::LagrangianSparseDS& self, py::object csc) {
@@ -638,19 +653,12 @@ void wrap_dynamical_systems(py::module_& m) {
               warning: M will be copied into mass attribute.
          )pbdoc")
 
-      // .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>,
-      //               Eigen::Ref<siconos::algebra::SiconosVector>, py::object csc>(),
-      //      py::keep_alive<1, 2>(),  // keep python object (np array arguments) memory
-      //                               // alive as long as object is referenced
-      //      py::keep_alive<1, 3>(), py::keep_alive<1, 4>(), py::arg("q0"), py::arg("v0"),
-      //      py::arg("mass"),
-      //      R"pbdoc(
-      //        constructor from initial state and mass matrix only.
-      //        warning: mass will be aliased into ds.mass attribute
-      //        --> mass memory not owned by the current object.
-      //        This should be used with care: input mass matrix
-      //        must survive to the current object.
-      //    )pbdoc")
+      .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>,
+                    Eigen::Ref<siconos::algebra::SiconosVector>>(),
+           py::keep_alive<1, 2>(),  // keep python object (np array arguments) memory
+                                    // alive as long as object is referenced
+           py::keep_alive<1, 3>(), py::arg("q0"), py::arg("v0"),
+           R"pbdoc(constructor from initial state only.)pbdoc")
       .def("setStiffnessMatrixCopy",
            [](siconos::modeling::LagrangianSparseLinearTIDS& self, py::object csc) {
              py::object py_self = py::cast(self);
@@ -927,7 +935,7 @@ void wrap_dynamical_systems(py::module_& m) {
              siconos::modeling::LagrangianDS>(m, "LagrangianLinearTIDS")
       .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>,
                     Eigen::Ref<siconos::algebra::SiconosVector>,
-                    Eigen::Ref<siconos::algebra::SiconosMatrix>>(),
+                    Eigen::Ref<siconos::algebra::SiconosDenseMatrix>>(),
            py::keep_alive<1, 2>(),  // keep python object (np array arguments) memory
                                     // alive as long as object is referenced
            py::keep_alive<1, 3>(), py::keep_alive<1, 4>(), py::arg("q0"), py::arg("v0"),
@@ -936,15 +944,21 @@ void wrap_dynamical_systems(py::module_& m) {
       .def("setStiffnessMatrix", &siconos::modeling::LagrangianLinearTIDS::setStiffnessMatrix,
            py::keep_alive<1, 2>(), "To define the stiffness matrix (constant)")
       .def("setDampingMatrix", &siconos::modeling::LagrangianLinearTIDS::setDampingMatrix,
-           py::keep_alive<1, 2>(), "To define the damping matrix (constant)");
+           py::keep_alive<1, 2>(), "To define the damping matrix (constant)")
+      .def_property_readonly("stiffnessMatrix",
+                             &siconos::modeling::LagrangianLinearTIDS::stiffnessMatrix,
+                             "stiffness matrix")
+      .def_property_readonly("dampingMatrix",
+                             &siconos::modeling::LagrangianLinearTIDS::dampingMatrix,
+                             "damping matrix");
 
   py::class_<siconos::modeling::NewtonEulerDS,
              std::shared_ptr<siconos::modeling::NewtonEulerDS>,
              siconos::modeling::SecondOrderDS>(m, "NewtonEulerDS")
 
-      .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>,
-                    Eigen::Ref<siconos::algebra::SiconosVector>, double,
-                    Eigen::Ref<siconos::algebra::SiconosMatrix>>(),
+      .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector7>,
+                    Eigen::Ref<siconos::algebra::SiconosVector6>, double,
+                    Eigen::Ref<siconos::algebra::SiconosDenseMatrix>>(),
            py::keep_alive<1, 2>(),  // keep python object (np array arguments) memory
                                     // alive as long as object is referenced
            py::keep_alive<1, 3>(), py::keep_alive<1, 5>(), py::arg("q0"), py::arg("twist0"),
@@ -964,7 +978,7 @@ void wrap_dynamical_systems(py::module_& m) {
           [](siconos::modeling::NewtonEulerDS& self, py::function f) {
             // Catch Python function and create a complient std::function
             self.setComputeFextFunction(
-                [f](double val, Eigen::Ref<siconos::algebra::MapVectorType> result) {
+                [f](double val, Eigen::Ref<siconos::algebra::MapVector3Type> result) {
                   f(val, result);  // Call python func with a memory view ...
                 });
           },
@@ -976,7 +990,7 @@ void wrap_dynamical_systems(py::module_& m) {
           [](siconos::modeling::NewtonEulerDS& self, py::function f) {
             // Catch Python function and create a complient std::function
             self.setComputeMextFunction(
-                [f](double val, Eigen::Ref<siconos::algebra::MapVectorType> result) {
+                [f](double val, Eigen::Ref<siconos::algebra::MapVector3Type> result) {
                   f(val, result);  // Call python func with a memory view ...
                 });
           },

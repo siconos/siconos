@@ -176,6 +176,9 @@ if(io_DIRS) # the component may be empty if mechanics and serialization are off
   #   find_package(VTK)
   #   target_link_libraries(io PRIVATE vtkIO;vtkCommon;vtkGraphics;vtkRendering)
   # endif()
+ 
+  # --- tests ---
+  include(${COMPONENT}_tests.cmake)
 
   # --- python bindings ---
   if(WITH_${COMPONENT}_PYTHON_WRAPPER)
@@ -211,10 +214,7 @@ if(io_DIRS) # the component may be empty if mechanics and serialization are off
   )
 
   siconos_component_install_setup(${COMPONENT})
-  
-  # --- tests ---
-  include(${COMPONENT}_tests.cmake)
-endif()
+ endif()
 
 
 

@@ -26,8 +26,13 @@
 #include <variant>
 
 #include "SiconosMatrix.hpp"
+#include "SiconosVector.hpp"
 
 namespace siconos::algebra {
+
+using OwnedDenseVector = std::unique_ptr<std::vector<double>>;
+using MapDenseVector = std::shared_ptr<siconos::algebra::MapVectorType>;
+using DenseVectorStorage = std::variant<std::monostate, OwnedDenseVector, MapDenseVector>;
 
 using OwnedSparse = std::unique_ptr<siconos::algebra::SiconosSparseMatrix>;
 using MapSparse = std::shared_ptr<Eigen::Map<siconos::algebra::SiconosSparseMatrix>>;

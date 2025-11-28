@@ -453,6 +453,14 @@ endmacro()
 #
 function(build_python_tests)
 
+  include(export_runtime_conf)
+  add_library(${COMPONENT}-pytests INTERFACE)
+  target_link_libraries(${COMPONENT}-pytests INTERFACE ${COMPONENT})
+  # Ensure build dir is in the include path for SiconosConfig.h
+  target_include_directories(${COMPONENT}-pytests INTERFACE $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>) 
+  add_dependencies(${COMPONENT}-tests ${COMPONENT}-pytests)
+  export_build_conf(${COMPONENT}-pytests)
+
   set(multiValueArgs DEPS EXCLUDE)
   cmake_parse_arguments(test "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN} )
 
@@ -498,14 +506,18 @@ function(build_python_tests)
 
   add_custom_command(
     OUTPUT ${RUNDIR}/${CPPIMPORT_PYFILE}
-    COMMAND ${Python_EXECUTABLE} ${PY_SCRIPT}
+    COMMAND ${CMAKE_COMMAND} -E env
+        PYTHONPATH=${CMAKE_BINARY_DIR}/python:$ENV{PYTHONPATH}
+        ${Python_EXECUTABLE} ${PY_SCRIPT}
     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/cppimport_build_info.txt
-    COMMENT "Generating ${CPPIMPORT_PYFILE}"
+    COMMENT "Generating ${CPPIMPORT_PYFILE} for ${COMPONENT} python tests."
   ) 
 
   add_custom_target(${COMPONENT}_generate_cppimport_header ALL
     DEPENDS ${RUNDIR}/${CPPIMPORT_PYFILE}
   ) 
+
+  add_dependencies(${COMPONENT}-pytests ${COMPONENT}_generate_cppimport_header py${COMPONENT})
 
   if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests)
     file(GLOB testfiles ${CMAKE_CURRENT_SOURCE_DIR}/tests/test_*.py)
@@ -524,7 +536,7 @@ function(build_python_tests)
       add_test(${name} ${Python_EXECUTABLE} -m pytest "${pytest_opt}" ${DRIVE_LETTER}${exename})
       set_tests_properties(${name} PROPERTIES WORKING_DIRECTORY ${RUNDIR})
       set_tests_properties(${name} PROPERTIES FAIL_REGULAR_EXPRESSION "FAILURE;Exception;[^x]failed;ERROR;Assertion")
-      set_tests_properties(${name} PROPERTIES ENVIRONMENT "PYTHONPATH=${SICONOS_PB11_BINARY_DIR}")
+      set_tests_properties(${name} PROPERTIES ENVIRONMENT "PYTHONPATH=${SICONOS_PB11_BINARY_DIR}:${PYTHONPATH};LDFLAGS=${TEST_RPATH_FLAGS}")
       set_tests_properties(${name} PROPERTIES REQUIRED_FILES "${RUNDIR}/${CPPIMPORT_PYFILE}"
 )
     endforeach()

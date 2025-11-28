@@ -170,7 +170,6 @@ class LagrangianSparseDS : public SecondOrderDS {
 
   /** jacobianFintOver_q matrix */
   siconos::algebra::SparseStorage jacobianFintOver_q_storage_{std::monostate{}};
-  //  std::shared_ptr<siconos::algebra::SiconosSparseMatrix> jacobianFintOver_q_mat_{nullptr};
 
   /** function wrapper used to compute jacobianFintOver_q */
   siconos::modeling::func_prototypes::FunctionVVS_Ms computejacobianFintOver_q_{nullptr};
@@ -183,13 +182,8 @@ class LagrangianSparseDS : public SecondOrderDS {
   /** True if jacobianFintOver_q is required */
   bool hasJacobianFintOver_q_{false};
 
-  /** jacobianFintOver_velocity matrix (as a view onto memory)*/
+  /** jacobianFintOver_velocity matrix */
   siconos::algebra::SparseStorage jacobianFintOver_velocity_storage_{std::monostate{}};
-  // std::shared_ptr<siconos::algebra::SiconosSparseMatrix> jacobianFintOver_velocity_mat_{
-  //     nullptr};
-
-  /** internal storage (optional) for the jacobianFintOver_velocity matrix */
-  // std::unique_ptr<std::vector<double>> jacobianFintOver_velocity_internal_storage_{nullptr};
 
   /** function wrapper used to compute jacobianFintOver_velocity */
   siconos::modeling::func_prototypes::FunctionVVS_Ms computejacobianFintOver_velocity_{
@@ -227,12 +221,8 @@ class LagrangianSparseDS : public SecondOrderDS {
   /** True if non-linear inertia terms are  taken into account */
   bool hasFgyr_{false};
 
-  /** jacobianFgyrOver_q matrix (as a view onto memory)*/
-  // std::shared_ptr<siconos::algebra::SiconosSparseMatrix> jacobianFgyrOver_q_mat_{nullptr};
+  /** jacobianFgyrOver_q matrix */
   siconos::algebra::SparseStorage jacobianFgyrOver_q_storage_{std::monostate{}};
-
-  /** internal storage (optional) for the jacobianFgyrOver_q matrix */
-  // std::unique_ptr<std::vector<double>> jacobianFgyrOver_q_internal_storage_{nullptr};
 
   /** function wrapper used to compute jacobianFgyrOver_q */
   siconos::modeling::func_prototypes::FunctionVV_Ms computejacobianFgyrOver_q_{nullptr};
@@ -245,14 +235,8 @@ class LagrangianSparseDS : public SecondOrderDS {
   /** True if jacobianFgyrOver_q is required */
   bool hasJacobianFgyrOver_q_{false};
 
-  /** jacobianFgyrOver_velocity matrix (as a view onto memory)*/
-  // std::shared_ptr<siconos::algebra::SiconosSparseMatrix> jacobianFgyrOver_velocity_mat_{
-  //     nullptr};
+  /** jacobianFgyrOver_velocity matrix */
   siconos::algebra::SparseStorage jacobianFgyrOver_velocity_storage_{std::monostate{}};
-
-  /** internal storage (optional) for the jacobianFgyrOver_velocity matrix */
-  //  std::unique_ptr<std::vector<double>>
-  //  jacobianFgyrOver_velocity_internal_storage_{nullptr};
 
   /** function wrapper used to compute jacobianFgyrOver_velocity */
   siconos::modeling::func_prototypes::FunctionVV_Ms computejacobianFgyrOver_velocity_{nullptr};
