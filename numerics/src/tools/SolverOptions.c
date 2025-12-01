@@ -566,7 +566,7 @@ SolverOptions* solver_options_create(int solverId) {
       break;
     }
     case SICONOS_MLCP_LCP_LEMKE: {
-      options = solver_options_initialize(solverId, 10000, 1e-12, 0);
+      options = solver_options_initialize(solverId, 10000, 1e-11, 0);
       mlcp_direct_set_default(options);
       break;
     }

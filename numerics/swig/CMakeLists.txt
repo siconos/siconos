@@ -37,7 +37,7 @@ add_swig_sub_module(
 if(WITH_FCLIB)
   add_swig_sub_module(
     FILE fclib.i
-    DEPS FCLIB::fclib numerics # fclib swig depends on numerics because of start.i. This is quite illogical ... 
+    DEPS fclib::fclib numerics # fclib swig depends on numerics because of start.i. This is quite illogical ... 
     )
 else()
   list(APPEND python_excluded_tests tests/test_fclib.py)

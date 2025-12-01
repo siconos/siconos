@@ -112,7 +112,6 @@ function(resolve_link_libraries LIBS_OUT LINK_DIRS_OUT INC_DIRS_OUT FLAGS_OUT DE
             if(lib_inc)
                 list(APPEND _inc_dirs "${lib_inc}")                
             endif() 
-
             if(imported_loc)
                 # For imported targets, IMPORTED_LOCATION gives the full path
                 get_filename_component(dir "${imported_loc}" DIRECTORY)
@@ -210,8 +209,10 @@ function(export_build_conf target_name)
     # They are searched by default and keeping them leads to failure on linux
     # system during cppimport build
     set(all_filtered_incs "")
+
     foreach(inc_dir ${all_incs})
         if(inc_dir MATCHES "^\\$<") # to ignore generator expr
+            list(APPEND all_filtered_incs "${inc_dir}")
             continue()
         endif()
         file(REAL_PATH "${inc_dir}" inc_full)

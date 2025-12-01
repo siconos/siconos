@@ -154,7 +154,7 @@ endif()
 include(FetchContent)
 
 if(WITH_FCLIB)
-  target_link_libraries(numerics PRIVATE FCLIB::fclib)
+  target_link_libraries(numerics PRIVATE fclib::fclib)
 endif()
 
 # - SuiteSparse -

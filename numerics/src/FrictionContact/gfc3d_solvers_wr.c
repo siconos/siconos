@@ -57,7 +57,12 @@ void gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double* reaction, doub
   }
   strToken = strtok(strToken, ".");
   FILE* fileName = fopen("problem_name.res", "w");
-  fprintf(fileName, "%s", strToken);
+
+  if (strToken != NULL) {
+    fprintf(fileName, "%s", strToken);
+  } else {
+    fprintf(fileName, "%s", str);
+  }
   fclose(fileName);
   free(str);
 

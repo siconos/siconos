@@ -19,13 +19,12 @@
 # cmake utility to configure pybind11 (Python wrapper for C++) interface for Siconos. 
 #====================================================================================
 include(FindPythonModule)
-message(STATUS "------------------------------------------------\n")
-message(STATUS " Start pybind11 configuration to generate python packages for Siconos ...\n")
+message(" ---- Start pybind11 configuration to generate python packages for Siconos ... ----")
 set(PYBIND11_FINDPYTHON ON) # Just to be sure. See https://pybind11.readthedocs.io/en/stable/cmake/index.html#modes
 find_package(Python COMPONENTS Development Interpreter NumPy REQUIRED)
 
 # Check if pybind11 is installed ...
-find_python_module(pybind11 REQUIRED)
+# find_python_module(pybind11 REQUIRED)
 
 # And get its cmake root dir
 execute_process(COMMAND 

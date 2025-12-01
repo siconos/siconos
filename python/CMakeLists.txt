@@ -2,8 +2,7 @@ if(NOT WITH_PYB11_WRAPPER)
   return()
 endif()
 
-message("------------------------------------------\n")
-message("-- Start set up for Python Siconos API ...\n")
+message(" ---- Start set up for Siconos Python package ... ----")
 
 # ------------- Tests -------------
 if(WITH_TESTING)
@@ -48,5 +47,3 @@ add_custom_target(pyclean COMMAND rm -f ${PYCFILES}
   COMMAND rm -rf ${CMAKE_BINARY_DIR}/build
   COMMENT "Clean sources and build.")
 
-message("-- End set up for Python Siconos API\n")
-message("------------------------------------------\n")

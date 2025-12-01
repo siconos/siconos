@@ -90,8 +90,6 @@ if(WITH_PYTHON_WRAPPER OR WITH_DOCUMENTATION)
     endif()
   endif()
 endif()
-message(STATUS "End of Python configuration.\n")
-message(STATUS "------------------------------------------------\n")
 
 #-- - End of python conf -- -
 

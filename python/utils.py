@@ -121,6 +121,7 @@ def generate_cppimport_header(info_file, output="cppimport_header.py"):
         for d in include_dirs
         if os.path.realpath(d) not in [os.path.realpath(s) for s in system_paths]
     ]
+
     link_dirs = format_list_multiline(list(dict.fromkeys(data.get("LINK_DIRS", []))))
     # [name.split("::")[-1] for name in data.get("LIBS", [])]
     # No cmake namespace in python outputs ...
@@ -128,7 +129,10 @@ def generate_cppimport_header(info_file, output="cppimport_header.py"):
         name for name in data.get("LIBS", []) if "::" not in name
     ]  # , comment=True
     libs = format_list_multiline(list(dict.fromkeys(raw_libs)))
-    compiler_args = data.get("FLAGS", []) + [f"-D{d}" for d in data.get("DEFINES", [])]
+    compiler_flags = list(dict.fromkeys(data.get("FLAGS", [])))
+    compiler_defines = list(dict.fromkeys(data.get("DEFINES", [])))
+
+    compiler_args = compiler_flags + [f"-D{d}" for d in compiler_defines]
     # move includes to compile options, to use isystem and avoid
     # warnings from Eigen
     for path in filtered_inc:
