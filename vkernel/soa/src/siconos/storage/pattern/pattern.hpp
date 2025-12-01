@@ -638,8 +638,6 @@ concept without_attached_storages_bindings =
 
 }  // namespace match
 
-
-  struct empty_item : item<> {};
-
+struct empty_item : item<> {};
 
 }  // namespace siconos::storage::pattern

@@ -5,7 +5,7 @@
 
 namespace siconos::storage {
 
-namespace match = pattern::match;
+using namespace pattern;
 // the storage info key
 struct info {};
 
