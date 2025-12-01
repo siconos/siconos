@@ -423,7 +423,9 @@ release_job:
 bridge:examples:
   stage: examples
   variables:
-    LAB_NAME: siconoslab-occ # base name of the docker image used in child project
+    # base name of the docker image used in child project.
+    # We choose the one including opencascade
+    LAB_NAME: siconoslab-occ 
   trigger: 
     project: nonsmooth/siconos-tutorials
     branch: $CI_COMMIT_REF_NAME # Use a branch in siconos-tutorials with the same name as the current one --> assume it exists!

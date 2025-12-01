@@ -654,6 +654,7 @@ def write_plugin(plugin, extra_args):
         result += "install(TARGETS {}".format(plugin.name)
         result += " DESTINATION {})\n".format(extra_args.rundir)
 
+
     return result
 
 
@@ -701,9 +702,11 @@ def generate_cmakelists(args):
         # exit if no build has been set from command line.
         return False
     # cmake minimum version
-    result = "cmake_minimum_required(VERSION 3.14)\n"
+    result = "cmake_minimum_required(VERSION 3.19)\n"
     result += "cmake_policy(SET CMP0074 NEW)\n"
     result += "project({} CXX C)\n".format(args.exe_name)
+    result += "set(CMAKE_CXX_STANDARD_REQUIRED ON)\n"
+    result += "set(CMAKE_CXX_STANDARD 20)\n"
 
     if args.debug:
         build_type = "Debug"
@@ -750,7 +753,6 @@ def generate_cmakelists(args):
         # -- Main target --
         result += "add_executable({}".format(args.exe_name)
         result += " {})\n".format(str(args.main_source))
-
         # -- Extra sources --
         if Path(args.driver_dir, "src").exists():
             srcdirs = [Path(args.driver_dir, "src")]
@@ -764,6 +766,7 @@ def generate_cmakelists(args):
             for sourcefile in srcfiles:
                 result += "target_sources({}".format(args.exe_name)
                 result += " PRIVATE {})\n".format(sourcefile)
+        result += f"target_compile_features({args.exe_name} PUBLIC cxx_std_20)\n"
 
         # -- user-defined cmake setup commands --
         # check for a .cmake file with the same name

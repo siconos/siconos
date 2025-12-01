@@ -692,6 +692,14 @@ void siconos::modeling::NewtonEulerDS::setScalarMass(double mass) {
   hasLUMass_ = false;
 };
 
+void siconos::modeling::NewtonEulerDS::addExtForceAtPos(
+    const Eigen::Ref<siconos::algebra::SiconosVector3>& force, bool forceAbsRef,
+    const Eigen::Ref<siconos::algebra::SiconosVector3>& pos, bool posAbsRef) {
+  newton_euler::computeFextForceAtPos(*state_q_, force, forceAbsRef, *fext_view_, true);
+  newton_euler::computeMextForceAtPos(*state_q_, isMextExpressedInInertialFrame_, force,
+                                      forceAbsRef, pos, posAbsRef, *mext_view_, true);
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////
 /////////// Free functions in the namespace siconos::modeling::newton_euler ///////////
 ///////////////////////////////////////////////////////////////////////////////////////

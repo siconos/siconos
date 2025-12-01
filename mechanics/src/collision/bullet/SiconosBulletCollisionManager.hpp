@@ -24,6 +24,8 @@
 #ifndef SiconosBulletCollisionManager_h
 #define SiconosBulletCollisionManager_h
 
+#include <variant>
+
 #include "BulletDeclarations.h"
 #include "SiconosBulletOptions.hpp"  // header only, for options and stats
 #include "SiconosCollisionManager.hpp"

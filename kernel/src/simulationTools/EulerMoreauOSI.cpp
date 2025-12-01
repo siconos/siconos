@@ -754,8 +754,7 @@ void siconos::integrators::EulerMoreauOSI::computeFreeOutput(
 
   auto& inter_work = *indexSet->properties(vertex_inter).workVectors;
   auto& inter_work_block = *(indexSet->properties(vertex_inter)).workBlockVectors;
-  // Get relation and non smooth law types
-  auto relationType = inter->relation()->getType();
+
   auto relationSubType = inter->relation()->getSubType();
 
   std::shared_ptr<siconos::algebra::SiconosVector> H_alpha{nullptr};
@@ -772,7 +771,7 @@ void siconos::integrators::EulerMoreauOSI::computeFreeOutput(
   auto mainInteraction = inter;
   assert(mainInteraction);
   assert(mainInteraction->relation());
-  assert(relationType == siconos::modeling::RelationType::FirstOrder);
+  assert(inter->relation()->getType() == siconos::modeling::RelationType::FirstOrder);
   auto forel =
       std::static_pointer_cast<siconos::modeling::FirstOrderR>(mainInteraction->relation());
   if (relationSubType == siconos::modeling::RelationSubType::Type2R ||

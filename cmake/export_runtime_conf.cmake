@@ -110,7 +110,7 @@ function(resolve_link_libraries LIBS_OUT LINK_DIRS_OUT INC_DIRS_OUT FLAGS_OUT DE
             get_target_property(imported_loc "${item}" IMPORTED_LOCATION)
             get_target_property(lib_inc "${item}" INTERFACE_INCLUDE_DIRECTORIES)
             if(lib_inc)
-                list(APPEND _inc_dirs "${lib_inc}")
+                list(APPEND _inc_dirs "${lib_inc}")                
             endif() 
 
             if(imported_loc)
@@ -163,7 +163,7 @@ function(resolve_link_libraries LIBS_OUT LINK_DIRS_OUT INC_DIRS_OUT FLAGS_OUT DE
         list(APPEND _dirs "${subdirs}")
         list(APPEND _inc_dirs "${sub_inc_dirs}")
         list(APPEND _compile_flags "${sub_flags}")
-        list(APPEND _compile_defs "${sub_defs}")
+        list(APPEND _compile_defs "${sub_defs}")        
     endforeach()
 
     # Remove duplicates
@@ -179,6 +179,8 @@ function(resolve_link_libraries LIBS_OUT LINK_DIRS_OUT INC_DIRS_OUT FLAGS_OUT DE
     set(${INC_DIRS_OUT} "${_inc_dirs}" PARENT_SCOPE)
     set(${FLAGS_OUT} "${_compile_flags}" PARENT_SCOPE)
     set(${DEFS_OUT} "${_compile_defs}" PARENT_SCOPE)
+
+
 endfunction()
 
 function(export_build_conf target_name)
@@ -204,12 +206,30 @@ function(export_build_conf target_name)
     list(REMOVE_DUPLICATES compile_defs)
     list(REMOVE_DUPLICATES compile_flags)
 
+    # Remove known/standards systems dir from the include list 
+    # They are searched by default and keeping them leads to failure on linux
+    # system during cppimport build
+    set(all_filtered_incs "")
+    foreach(inc_dir ${all_incs})
+        if(inc_dir MATCHES "^\\$<") # to ignore generator expr
+            continue()
+        endif()
+        file(REAL_PATH "${inc_dir}" inc_full)
+        # Check in default list
+        list(FIND CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES "${inc_full}" IS_SYSTEM)
+        if(IS_SYSTEM EQUAL -1)
+            # keep it ...
+            list(APPEND all_filtered_incs "${inc_dir}")
+        #else()
+        #    message(STATUS "----------> Skipping system path: ${inc_dir}")
+        endif()
+    endforeach()
     set(out_file "${CMAKE_CURRENT_BINARY_DIR}/cppimport_build_info.txt")
     file(GENERATE
       OUTPUT "${out_file}"
       CONTENT 
-      "INCLUDE_DIRS=${all_incs}\n
-    # DEFINES=$<JOIN:$<TARGET_PROPERTY:${target_name},INTERFACE_COMPILE_DEFINITIONS>,$<SEMICOLON>>\n
+      "INCLUDE_DIRS=${all_filtered_incs}\n
+    SYSTEM_PATHS=${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES}\n  
     DEFINES=${compile_defs}\n
     FLAGS=${compile_flags}\n
     LIBS=$<JOIN:${RESOLVED_LIBS},$<SEMICOLON>>\n

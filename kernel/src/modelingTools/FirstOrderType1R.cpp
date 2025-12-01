@@ -53,20 +53,16 @@ void siconos::modeling::FirstOrderType1R::initialize(Interaction& inter) {
 }
 
 void siconos::modeling::FirstOrderType1R::checkSize(const Interaction& inter) const {
-  // get inter and ds sizes
-  auto sizeY = inter.dimension();
-  auto sizeX = inter.getSizeOfDS();
-
   // Check if various operators sizes are consistent.
   // Reference: interaction.
 
   if (jacobianhOver_state_view_) {
-    assert(jacobianhOver_state_view_->rows() == sizeY);
-    assert(jacobianhOver_state_view_->cols() == sizeX);
+    assert(jacobianhOver_state_view_->rows() == inter.dimension());
+    assert(jacobianhOver_state_view_->cols() == inter.getSizeOfDS());
   }
   if (jacobiangOver_lambda_view_) {
-    assert(jacobiangOver_lambda_view_->rows() == sizeX);
-    assert(jacobiangOver_lambda_view_->cols() == sizeY);
+    assert(jacobiangOver_lambda_view_->rows() == inter.getSizeOfDS());
+    assert(jacobiangOver_lambda_view_->cols() == inter.dimension());
   }
 }
 

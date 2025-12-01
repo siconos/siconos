@@ -24,7 +24,7 @@
 # Set minimum version for cmake
 # We advise the most recent version of cmake.
 # Use python3 -m pip install cmake to get it.
-cmake_minimum_required(VERSION 3.14) 
+cmake_minimum_required(VERSION 3.19) 
 
 cmake_policy(SET CMP0074 NEW) # find_package() uses <PackageName>_ROOT variables.
 cmake_policy(SET CMP0086 NEW) # UseSWIG honors SWIG_MODULE_NAME via -module flag.
@@ -129,7 +129,7 @@ list(GET COMPONENTS -1 last_component)
 if(WITH_CXX)
   project(${PROJECT_NAME} CXX C) # C or not C ?
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
-  set(CMAKE_CXX_STANDARD 20)
+  set(CMAKE_CXX_STANDARD 20) # Default standard
 
   # check if the compiler has the required features ...
   include(CheckCXXSourceCompiles)

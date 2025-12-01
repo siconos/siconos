@@ -29,6 +29,7 @@ RUN  apt update && apt upgrade -y && apt install --no-install-recommends -y -qq 
 	libgl1 \
 	libeigen3-dev \
 	libeigen3-doc \
+	gdb \
 	&&  apt autoclean -y && apt autoremove -y&& rm -rf /var/lib/apt/lists/*
 RUN useradd -ms /bin/bash siconos-user
 

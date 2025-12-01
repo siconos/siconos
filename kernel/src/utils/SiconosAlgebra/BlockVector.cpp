@@ -37,6 +37,7 @@ siconos::algebra::BlockVector::BlockVector(std::size_t numberOfBlocks,
   blockStartIndices_.reserve(numberOfBlocks + 1);
   blocks_.reserve(numberOfBlocks);
   totalSize_ = 0;
+  blockStartIndices_[0] = 0;
   for (std::size_t i = 0; i < numberOfBlocks; ++i) {
     blocks_.emplace_back(std::make_shared<SiconosVector>(blockSize));
     totalSize_ += blockSize;
@@ -109,6 +110,18 @@ void siconos::algebra::BlockVector::fill(const SiconosVector& input) {
 
 double siconos::algebra::BlockVector::operator()(siconos::algebra::Index globalIndex) const {
   // Find the block ...
+  for (std::size_t i = 0; i < blockStartIndices_.size() - 1; ++i) {
+    if (globalIndex >= blockStartIndices_[i] && globalIndex < blockStartIndices_[i + 1]) {
+      // Then the index in the block
+      std::size_t localIndex = globalIndex - blockStartIndices_[i];
+      return (*blocks_[i])(localIndex);
+    }
+  }
+  throw std::out_of_range("Index out of range in BlockVector");
+}
+
+double& siconos::algebra::BlockVector::BlockVector::operator()(
+    siconos::algebra::Index globalIndex) {
   for (std::size_t i = 0; i < blockStartIndices_.size() - 1; ++i) {
     if (globalIndex >= blockStartIndices_[i] && globalIndex < blockStartIndices_[i + 1]) {
       // Then the index in the block
@@ -207,7 +220,6 @@ void siconos::algebra::BlockVector::insertPtr(std::shared_ptr<SiconosVector> v) 
 double siconos::algebra::BlockVector::norm() const {
   double d = 0;
   for (auto& v : blocks_) {
-
     d += v->squaredNorm();
   }
   return std::sqrt(d);

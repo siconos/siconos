@@ -31,9 +31,9 @@ dependencies:
   - black
   - flake8
   - autopep8
-  - pyhull
   - eigen
   - pyqt
   - gmsh
   - pythreejs
   - ifcopenshell
+  - cppimport

@@ -134,6 +134,7 @@ class BlockVector {
    *  \param globalIndex index of the required component
    */
   double operator()(Eigen::Index globalIndex) const;
+  double& operator()(Eigen::Index globalIndex);
 
   /** get a block (SiconosVector) of the vector
    *

@@ -30,6 +30,6 @@ dependencies:
   - black
   - flake8
   - autopep8
-  - pyhull
   - eigen
+  - cppimport
 

@@ -116,9 +116,9 @@ void siconos::geometry::quaternionRotateMatrix(
   // Direct computation with cross product for each column
   siconos::algebra::ConstMapVector3Type qvect(q.data() + 4);  // view onto  q4, 5, 6
   auto q0 = q(3);
-  for (unsigned int j = 0; j < m.cols(); j++) {
+  for (siconos::algebra::Index j = 0; j < m.cols(); j++) {
     Eigen::Map<Eigen::Vector3d> mcol(m.col(j).data());
-    auto t = 2 * qvect.cross(mcol);
+    Eigen::Vector3d t = 2 * qvect.cross(mcol);
     mcol += qvect.cross(t) + q0 * t;
   }
   DEBUG_EXPR(std::cout << m << "\n";);

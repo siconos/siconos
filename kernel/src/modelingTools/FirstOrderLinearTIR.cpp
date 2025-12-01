@@ -55,24 +55,21 @@ void siconos::modeling::FirstOrderLinearTIR::initialize(Interaction& inter) {
 }
 
 void siconos::modeling::FirstOrderLinearTIR::checkSize(const Interaction& inter) const {
-  // get inter and ds sizes
-  auto sizeY = inter.dimension();
-  auto sizeX = inter.getSizeOfDS();
 
   if (jacobianhOver_state_view_) {
-    assert(jacobianhOver_state_view_->rows() == sizeY);
-    assert(jacobianhOver_state_view_->cols() == sizeX);
+    assert(jacobianhOver_state_view_->rows() == inter.dimension());
+    assert(jacobianhOver_state_view_->cols() == inter.getSizeOfDS());
   }
   if (jacobiangOver_lambda_view_) {
-    assert(jacobiangOver_lambda_view_->rows() == sizeX);
-    assert(jacobiangOver_lambda_view_->cols() == sizeY);
+    assert(jacobiangOver_lambda_view_->rows() == inter.getSizeOfDS());
+    assert(jacobiangOver_lambda_view_->cols() == inter.dimension());
   }
   if (jacobianhOver_lambda_view_) {
-    assert(jacobianhOver_lambda_view_->rows() == sizeY);
-    assert(jacobianhOver_lambda_view_->cols() == sizeY);
+    assert(jacobianhOver_lambda_view_->rows() == inter.dimension());
+    assert(jacobianhOver_lambda_view_->cols() == inter.dimension());
   }
   if (eVector_view_) {
-    assert(eVector_view_->size() == sizeY);
+    assert(eVector_view_->size() == inter.dimension());
   }
 }
 void siconos::modeling::FirstOrderLinearTIR::setConstantB(

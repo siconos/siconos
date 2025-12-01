@@ -627,6 +627,25 @@ class NewtonEulerDS : public SecondOrderDS {
 
   virtual void computeTdot();
 
+  /** Adds a force/torque impulse to a body's FExt and MExt vectors in
+   *  either absolute (inertial) or relative (body) frame.  Modifies
+   *  contents of _fExt and _mExt! Therefore these must have been set
+   *  as constant vectors using setFExtPtr and setMExtPtr prior to
+   *  calling this function.  Adjustments to _mExt will take into
+   *  account the value of _isMextExpressedInInertialFrame.
+   *
+   *  \param force A force vector to be added.
+   *  \param forceAbsRef If true, force is in inertial frame, otherwise
+   *  it is in body frame.
+   *  \param pos A position at which force should be applied.
+   *  \param posAbsRef If true, pos is in inertial frame, otherwise it
+   *  is in body frame.
+   */
+  void addExtForceAtPos(const Eigen::Ref<siconos::algebra::SiconosVector3>& force,
+                        bool forceAbsRef,
+                        const Eigen::Ref<siconos::algebra::SiconosVector3>& pos,
+                        bool posAbsRef = false);
+
   virtual void accept(dynamical_systems::Visitor& tourist) const override {
     tourist.visit(*this);
   }

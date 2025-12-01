@@ -69,7 +69,7 @@ function(begin_tests SOURCE_DIR)
 
     # local includes, to build <component>-tests-utils only
     target_include_directories(${COMPONENT}-tests-utils PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_DIR}-utils)
-    target_link_libraries(${COMPONENT}-tests-utils PUBLIC ${COMPONENT})
+    target_link_libraries(${COMPONENT}-tests-utils PRIVATE ${COMPONENT})
     # All include dirs from component are taken into account in ${COMPONENT}-lib (and so propagated to tests)
     foreach(dir IN LISTS ${COMPONENT}_DIRS)
       target_include_directories(${COMPONENT}-tests-utils PRIVATE
@@ -236,7 +236,7 @@ function(new_test)
     add_dependencies(${COMPONENT}-tests ${TEST_NAME})
   endif()
   if(TARGET ${COMPONENT}-tests-utils)
-    target_link_libraries(${TEST_NAME} PUBLIC ${COMPONENT}-tests-utils)
+    target_link_libraries(${TEST_NAME} PRIVATE ${COMPONENT}-tests-utils)
   endif()
 
   if(WITH_CXX)

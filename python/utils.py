@@ -23,6 +23,7 @@ This file is to be copied into CMAKE_BINARY_DIR/share using configure_file
 """
 
 import textwrap
+import os
 
 
 def parse_cmake_list(var):
@@ -111,6 +112,15 @@ def generate_cppimport_header(info_file, output="cppimport_header.py"):
 
     # Remove duplicates while preserving order
     include_dirs = list(dict.fromkeys(data.get("INCLUDE_DIRS", [])))
+    #  known/standards systems dir from the include list
+    # They are searched by default and keeping them leads to failure on linux
+    # system during cppimport build
+    system_paths = list(dict.fromkeys(data.get("SYSTEM_PATHS", [])))
+    filtered_inc = [
+        d
+        for d in include_dirs
+        if os.path.realpath(d) not in [os.path.realpath(s) for s in system_paths]
+    ]
     link_dirs = format_list_multiline(list(dict.fromkeys(data.get("LINK_DIRS", []))))
     # [name.split("::")[-1] for name in data.get("LIBS", [])]
     # No cmake namespace in python outputs ...
@@ -121,11 +131,16 @@ def generate_cppimport_header(info_file, output="cppimport_header.py"):
     compiler_args = data.get("FLAGS", []) + [f"-D{d}" for d in data.get("DEFINES", [])]
     # move includes to compile options, to use isystem and avoid
     # warnings from Eigen
-    for path in include_dirs:
+    for path in filtered_inc:
         compiler_args.append("-isystem")
         compiler_args.append(path)
-    include_dirs = []
+    filtered_inc = []
     compile_opts = format_list_multiline(compiler_args)
+    linker_args = []
+    for path in data.get("LINK_DIRS", []):
+        linker_args.append("-Wl,-rpath")
+        linker_args.append(path)
+    linker_args = format_list_multiline(linker_args)
 
     header = textwrap.dedent(
         f"""\
@@ -148,7 +163,7 @@ def generate_cppimport_header(info_file, output="cppimport_header.py"):
 cfg["compiler_args"] += ["-v"]
 cfg["verbose"] = True
 cfg['parallel'] = True
-cfg["include_dirs"] += {include_dirs}
+cfg["include_dirs"] += {filtered_inc}
 
 cfg["compiler_args"] += {compile_opts}
 
@@ -156,6 +171,7 @@ cfg["compiler_args"] += {compile_opts}
 # (not always needed, uncomment and complete according to your needs)
 cfg["library_dirs"] += {link_dirs}
 cfg["libraries"] += {libs}
+cfg["linker_args"] += {linker_args}
     """
     )
 
