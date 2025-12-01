@@ -5,7 +5,7 @@ if(WITH_FCLIB)
   # - User asks explicitely for a specific (already installed) version of fclib
   #   by providing fclib_ROOT on cmake command line
   # - else: use fetchcontent to download and install fclib as a siconos part
-  find_package(fclib 3.1.0 CONFIG REQUIRED)
+  find_package(fclib 3.1.0 CONFIG)
 
   if(NOT fclib_FOUND)
     message(STATUS "  fclib will be downloaded from github repository and installed as a siconos component")

@@ -44,28 +44,6 @@
 
 void gfc3d_nsgs_wr(GlobalFrictionContactProblem* problem, double* reaction, double* velocity,
                    double* globalVelocity, int* info, SolverOptions* options) {
-  char* str = (char*)malloc(200);
-  if (problem->name) {
-    strcpy(str, problem->name);
-  } else {
-    strcpy(str, "foo_");
-  }
-  const char* separators = "/";
-  char* strToken = strtok(str, separators);
-  for (int i = 0; i < 5; i++) {
-    if (strToken != NULL) strToken = strtok(NULL, separators);
-  }
-  strToken = strtok(strToken, ".");
-  FILE* fileName = fopen("problem_name.res", "w");
-
-  if (strToken != NULL) {
-    fprintf(fileName, "%s", strToken);
-  } else {
-    fprintf(fileName, "%s", str);
-  }
-  fclose(fileName);
-  free(str);
-
   /* verbose=1; */
   DEBUG_BEGIN("gfc3d_nsgs_wr\n");
   NumericsMatrix* H = problem->H;

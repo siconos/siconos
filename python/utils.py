@@ -164,8 +164,8 @@ def generate_cppimport_header(info_file, output="cppimport_header.py"):
 # */
 
 # Uncomment these lines to activate verbose mode
-cfg["compiler_args"] += ["-v"]
-cfg["verbose"] = True
+#cfg["compiler_args"] += ["-v"]
+#cfg["verbose"] = True
 cfg['parallel'] = True
 cfg["include_dirs"] += {filtered_inc}
 

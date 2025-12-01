@@ -1,7 +1,6 @@
 # Docker
 
-This directory contains dockerfiles and other configuration files used to build docker images with all the libraries and tools
-required to configure and build siconos.
+This directory contains dockerfiles and other configuration files used to build docker images with all the libraries and tools required to configure and build siconos.
 
 Sub-directories are named according to the standard image used as a base to prepare the image and corresponds to the targeted operating system.
 
