@@ -18,6 +18,7 @@
 #include "siconos/collision/shape/mesh.hpp"
 #include "siconos/collision/shape/segment.hpp"
 #include "siconos/collision/space_filter.hpp"
+#include "siconos/collision/translated.hpp"
 #include "siconos/io/io.hpp"
 #include "siconos/siconos.hpp"
 #include "siconos/storage/ground/ground.hpp"
@@ -40,7 +41,6 @@ using segment_shape = collision::shape::segment;
 using disk_shape = collision::shape::disk;
 using mesh_shape = collision::shape::chained_segment;
 using translated_disk_shape = collision::translated<disk_shape>;
-
 struct fc2d : simul::nonsmooth_problem<FrictionContactProblem> {};
 struct osnspb : simul::one_step_nonsmooth_problem<fc2d> {};
 using solver_options = simul::solver_options;
@@ -155,12 +155,6 @@ static auto idata = imake_storage();
 
 struct idata_t : std::decay_t<decltype(idata)> {};
 
-// static_assert(storage::pattern::match::diagonal_matrix<
-//               decltype(storage::get<
-//                        storage::pattern::attr_t<config::disk,
-//                        "mass_matrix">>(
-//                   idata_t{}, 0, storage::add<config::disk>(idata_t{})))>);
-
 // just hide idata_t to pybind11
 struct data_t {
   data_t() : _data(idata_t{}){};
@@ -171,12 +165,6 @@ struct data_t {
 };
 
 }  // namespace siconos::python::disks
-
-// namespace PYBIND11_NAMESPACE {
-// namespace detail {
-// template <>
-// struct type_caster<siconos::python::disks::data_t> {};
-// }}
 
 namespace ground = siconos::storage::ground;
 namespace match = siconos::storage::pattern::match;
@@ -215,56 +203,3 @@ static decltype(auto) in_formatter(H&& h, T&& in_value)
 }
 
 using namespace boost::hana::literals;
-
-// static auto py_handles(py::module& mod)
-// {
-//   using disks_info_t = std::decay_t<decltype(ground::get<storage::info>(
-//       siconos::python::disks::idata_t{}))>;
-
-//   using disks_properties_t = typename disks_info_t::all_properties_t;
-
-//   using disks_items_t = decltype(ground::transform(
-//       typename disks_info_t::all_items_t{}, []<match::item I>(I) {
-//         if constexpr (match::wrap<I>) {
-//           return typename I::type{};
-//         }
-//         else {
-//           return I{};
-//         }
-//       }));
-
-//   // ground::type_trace<disks_items_t>();
-//   auto named_disks_items = ground::filter(
-//       disks_items_t{}, ground::is_a_model<[]<typename T>() {
-//         return storage::has_property_from<T, storage::property::bind,
-//                                           disks_properties_t>();
-//       }>);
-
-//   // ground::type_trace<std::decay_t<decltype(named_disks_items)>>();
-
-//   auto disks_handles = ground::transform(
-//       // only named items
-//       named_disks_items, []<match::item I>(I item) {
-//         // get handle
-//         return storage::add<I>(siconos::python::disks::idata_t{});
-//       });
-
-//   // add corresponding py::class_
-//   auto pyhandles = ground::transform(disks_handles, [&mod]<typename H>(
-//                                                         H handle) {
-//     using item_t = typename H::type;
-//     using base_index_t = typename H::base_index_t;
-//     auto base_index = py::class_<base_index_t>(
-//         mod, fmt::format("index_{}",
-//                          storage::bind_name<item_t, disks_properties_t>())
-//                  .c_str());
-//     return ground::make_tuple(
-//         base_index,
-//         py::class_<H>(mod, storage::bind_name<item_t,
-//         disks_properties_t>(),
-//                       base_index),
-//         ground::type_c<H>);
-//   });
-
-//   return pyhandles;
-// }

@@ -26,7 +26,6 @@ using neighborhood = collision::neighborhood<pointd, pointl, pointtds>;
 using space_filter = collision::space_filter<topo, neighborhood>;
 using interaction_manager = simul::interaction_manager<space_filter>;
 using simulation = simul::time_stepping<td, osi, osnspb>;
-
 using io = io::io<osi>;
 using params = map<iparam<"dof", 3>, iparam<"ncgroups", 1>>;
 }  // namespace siconos::config
@@ -45,6 +44,7 @@ int main(int argc, char* argv[])
       config::pointtds, config::interaction, config::segment_shape,
       config::disk_shape,
       storage::with_properties<
+          storage::wrapped<config::disk_shape, some::unbounded_collection>,
           storage::wrapped<config::disk, some::unbounded_collection>,
           storage::wrapped<config::diskdisk_r, some::unbounded_collection>,
           storage::wrapped<config::diskfdisk_r, some::unbounded_collection>,
@@ -150,12 +150,15 @@ int main(int argc, char* argv[])
 
   auto ngbh = storage::add<config::neighborhood>(data);
 
-  ngbh.create(0.6);  // radius
+  ngbh.create(0.6);  // radius for broadphase detection
 
   auto diskdisk_r = storage::add<config::diskdisk_r>(data);
   auto ground_r = storage::add<config::diskfdisk_r>(data);
   auto tds = storage::add<config::translated_disk_shape>(data);
-  tds.item() = disk_shape;
+  auto big_disk = storage::add<config::disk_shape>(data);
+  big_disk.radius() = 1;
+  big_disk.maxpoints() = 100;
+  tds.translated() = big_disk;
   tds.translation() = {0., 0., 0.};
   ground_r.translated_disk_shape() = tds;
 

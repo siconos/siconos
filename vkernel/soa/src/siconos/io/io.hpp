@@ -252,7 +252,7 @@ struct io : item<> {
                       auto tds = hrel.translated_disk_shape();
 
                       c2 = tds.translation();
-                      scalar radius2 = tds.item().radius();
+                      scalar radius2 = tds.translated().radius();
 
                       scalar dc2c1 = collision::distance(c2, c1);
 

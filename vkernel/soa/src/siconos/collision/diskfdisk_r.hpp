@@ -33,7 +33,7 @@ struct diskfdisk_r : item<>,
       auto& q = storage::attr<"q">(ds);
       return collision::distance(q, translated_disk_shape().translation()) -
              handle(data, prop<"shape">(ds)).radius() -
-             translated_disk_shape().item().radius();
+             translated_disk_shape().translated().radius();
     }
 
     void compute_jachq(auto step, auto& ds, auto& h_matrix1)
