@@ -78,8 +78,13 @@ void siconos::modeling::LagrangianDS::initMemoryForGeneralizedCoordinates(unsign
 }
 
 void siconos::modeling::LagrangianDS::init_lu_mass() {
-  if (mass_view_ && !hasConstantMass_) {
-    computeMass(*state_q_[0]);
+  if (!hasMass_) return;
+
+  // Update mass if required
+  computeMass(*state_q_[0]);
+  // Line above does nothing if computemass_ = null (which is the case if mass
+  // is not set or constant)
+  if (mass_view_ && !hasLUMass_) {
     // LU factorization
     LUMass_ = std::make_shared<siconos::algebra::SiconosDenseLUMatrix>(*mass_view_);
     hasLUMass_ = true;

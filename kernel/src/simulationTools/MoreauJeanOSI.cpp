@@ -390,7 +390,7 @@ void siconos::integrators::MoreauJeanOSI::initializeIterationMatrix(
     if (ltids->boundaryConditions()) _initializeIterationMatrixBoundaryConditions(*ltids, dsv);
     // LU factorization
     _dynamicalSystemsGraph->properties(dsv).LUW =
-        std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(*iterationMat);
+        std::make_shared<siconos::algebra::SiconosDenseLUMatrix>(*iterationMat);
   } else if (auto lstids =
                  std::dynamic_pointer_cast<siconos::modeling::LagrangianSparseLinearTIDS>(
                      ds)) {
@@ -405,7 +405,7 @@ void siconos::integrators::MoreauJeanOSI::initializeIterationMatrix(
       _initializeIterationMatrixBoundaryConditions(*ltids, dsv);
     // LU factorization
     _dynamicalSystemsGraph->properties(dsv).LUW =
-        std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(*iterationMat);
+        std::make_shared<siconos::algebra::SiconosDenseLUMatrix>(*iterationMat);
   }
   // General Lagrangian DS
   else if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
@@ -540,7 +540,7 @@ void siconos::integrators::MoreauJeanOSI::_computeIterationMatrixBoundaryConditi
 std::shared_ptr<siconos::algebra::SiconosMatrix>
 siconos::integrators::MoreauJeanOSI::iterationMatrixInverse(
     std::shared_ptr<siconos::modeling::SecondOrderDS> ds,
-    const Eigen::FullPivLU<siconos::algebra::SiconosMatrix>& LUW) {
+    const siconos::algebra::SiconosDenseLUMatrix& LUW) {
   /* We compute and return the current inverse of W matrix */
 
   // WARNING FP: we assume that LUW is up to date and contains the LU factorization of W
@@ -1870,7 +1870,7 @@ void siconos::integrators::MoreauJeanOSI::display() const {
 // void siconos::integrators::moreau_jean::computeIterationMatrix_Lagrangian(
 //     double time, double time_step, double theta, siconos::modeling::LagrangianDS &lds,
 //     Eigen::Ref<siconos::algebra::SiconosMatrix> iterationMatrix,
-//     std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>> &luw) {
+//     std::shared_ptr<siconos::algebra::SiconosDenseLUMatrix> &luw) {
 //   // Compute W matrix of the Dynamical System ds, at time t and for the current
 //   // ds state.
 //   DEBUG_BEGIN("siconos::integrators::MoreauJeanOSI::computeIterationMatrix\n");
@@ -1896,13 +1896,13 @@ void siconos::integrators::MoreauJeanOSI::display() const {
 
 //   // LU Factorize the iteration matrix
 //   luw =
-//   std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(iterationMatrix);
+//   std::make_shared<siconos::algebra::SiconosDenseLUMatrix>(iterationMatrix);
 // }
 
 void siconos::integrators::moreau_jean::computeIterationMatrix_NewtonEuler(
     double time, double time_step, double theta, siconos::modeling::NewtonEulerDS& neds,
     Eigen::Ref<siconos::algebra::SiconosMatrix> iterationMatrix,
-    std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>& luw) {
+    std::shared_ptr<siconos::algebra::SiconosDenseLUMatrix>& luw) {
   // Compute W matrix of the Dynamical System ds, at time t and for the current
   // ds state.
   iterationMatrix = neds.totalInertiaMatrix();
@@ -1919,7 +1919,7 @@ void siconos::integrators::moreau_jean::computeIterationMatrix_NewtonEuler(
   }
 
   // LU Factorize the iteration matrix
-  luw = std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(iterationMatrix);
+  luw = std::make_shared<siconos::algebra::SiconosDenseLUMatrix>(iterationMatrix);
 }
 
 void siconos::integrators::moreau_jean::updatePosition(

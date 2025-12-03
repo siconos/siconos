@@ -312,12 +312,12 @@ void siconos::modeling::NewtonEulerDS::setConstantMext(
 }
 
 void siconos::modeling::NewtonEulerDS::setComputeMextFunction(
-    const func_prototypes::FunctionS_V& fext_func) {
+    const func_prototypes::FunctionS_V& mext_func) {
   // No need to ensure memory alloc -> computed directly into wrench_
   hasMext_ = true;
   hasConstantMext_ = false;
   mext_view_ = nullptr;
-  computemext_ = fext_func;
+  computemext_ = mext_func;
 }
 
 /////////////////// FINT and its Jacobians  ////////////////////

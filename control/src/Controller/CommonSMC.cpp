@@ -241,7 +241,7 @@ void siconos::control::CommonSMC::computeUeq() {
     // W = I + \theta B^{*})CB)^{-1}CA
 
     auto tmpW = siconos::algebra::SiconosMatrix::Identity(n, n) + _thetaSMC * tmpN;
-    Eigen::FullPivLU<siconos::algebra::SiconosMatrix> luW(tmpW);
+    siconos::algebra::SiconosDenseLUMatrix luW(tmpW);
 
     // compute e^{Ah}x_k
     *xTk = zoh->Ad(_DS_SMC) * *xTk;

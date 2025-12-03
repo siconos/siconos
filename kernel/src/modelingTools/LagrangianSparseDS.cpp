@@ -83,8 +83,8 @@ void siconos::modeling::LagrangianSparseDS::initMemoryForGeneralizedCoordinates(
 void siconos::modeling::LagrangianSparseDS::init_lu_mass() {
   //  if (mass_mat_ && !hasConstantMass_) {
   if (!hasMass_) return;
-  if (!hasConstantMass_) {
-    computeMass(*state_q_[0]);
+  if (!hasConstantMass_) computeMass(*state_q_[0]);
+  if (!hasLUMass_) {
     // LU factorization
     useMass([&](const auto& M) {
       LUMass_ = std::make_shared<siconos::algebra::SiconosSparseLUMatrix>(M);

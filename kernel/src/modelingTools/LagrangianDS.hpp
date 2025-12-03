@@ -406,7 +406,9 @@ class LagrangianDS : public SecondOrderDS {
   // inline siconos::algebra::MapType &mass_view() const { return *mass_view_; }
 
   /** \return LU-factorization of the mass (pointer link) */
-  inline auto LUMass() const { return LUMass_; }
+  inline std::shared_ptr<siconos::algebra::SiconosDenseLUMatrix> LUMass() const {
+    return LUMass_;
+  }
 
   /** Set a constant mass matrix for the system
    *

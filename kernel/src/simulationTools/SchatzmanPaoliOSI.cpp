@@ -222,7 +222,7 @@ void siconos::integrators::SchatzmanPaoliOSI::initializeIterationMatrix(
 
     // LU Factorisation
     _dynamicalSystemsGraph->properties(dsv).LUW =
-        std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(*iterationMat);
+        std::make_shared<siconos::algebra::SiconosDenseLUMatrix>(*iterationMat);
   }
 
   else

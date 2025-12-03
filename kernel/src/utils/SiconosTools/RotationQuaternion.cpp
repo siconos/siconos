@@ -22,6 +22,7 @@
 #include "RotationQuaternion.hpp"
 
 #include <boost/math/quaternion.hpp>
+#include <numbers>  // pi
 
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
@@ -203,35 +204,30 @@ double siconos::geometry::axisAngleFromConfiguration(
   return angle;
 }
 
-void siconos::geometry::rotationVectorFromQuaternion(
-    double q0, double q1, double q2, double q3,
-    siconos::algebra::SiconosVector &rotationVector) {
-  DEBUG_BEGIN(
-      "rotationVectorFromQuaternion(double q0, double q1, double q2, double q3, "
-      "std::shared_ptr<siconos::algebra::SiconosVector> rotationVector )\n");
+siconos::algebra::SiconosVector3 siconos::geometry::rotationVectorFromQuaternion(double q0,
+                                                                                 double q1,
+                                                                                 double q2,
+                                                                                 double q3) {
+  DEBUG_BEGIN("rotationVectorFromQuaternion(...)\n");
+  siconos::algebra::SiconosVector3 rotationVector;
 
-  rotationVector(0) = q1;
-  rotationVector(1) = q2;
-  rotationVector(2) = q3;
-
-  double norm_v = sqrt(q1 * q1 + q2 * q2 + q3 * q3);
-  assert(norm_v <= M_PI); /* it should be called for a unit quaternion */
+  rotationVector << q1, q2, q3;
+  double norm_v = rotationVector.norm();
+  norm_v = std::clamp(norm_v, 0., 1.);  // To avoid nan in asin(nv)
+  // assert(norm_v <= std::numbers::pi); /* it should be called for a unit quaternion */
   if (norm_v < 1e-12) {
-    rotationVector(0) = 0.0;
-    rotationVector(1) = 0.0;
-    rotationVector(2) = 0.0;
+    rotationVector.setZero();
   } else {
-    rotationVector *= 2.0 * asin(norm_v) / norm_v;
+    rotationVector *= 2.0 * std::asin(norm_v) / norm_v;
   }
   DEBUG_EXPR(siconos::algebra::print(*rotationVector);)
-  DEBUG_END(
-      "rotationVectorFromQuaternion(double q0, double q1, double q2, double q3, "
-      "std::shared_ptr<siconos::algebra::SiconosVector> rotationVector )\n");
+  DEBUG_END("rotationVectorFromQuaternion(...)\n");
+  return rotationVector;
 }
 
-void siconos::geometry::rotationVectorFromConfiguration(
-    siconos::algebra::SiconosVector &q, siconos::algebra::SiconosVector &rotationVector) {
-  siconos::geometry::rotationVectorFromQuaternion(q(3), q(4), q(5), q(6), rotationVector);
+siconos::algebra::SiconosVector3 siconos::geometry::rotationVectorFromConfiguration(
+    siconos::algebra::SiconosVector7 &q) {
+  return siconos::geometry::rotationVectorFromQuaternion(q(3), q(4), q(5), q(6));  // RVO
 }
 
 void siconos::geometry::quaternionFromAxisAngle(const siconos::algebra::SiconosVector3 &axis,
@@ -252,19 +248,19 @@ double siconos::geometry::sin_x(double x) {
   }
 }
 
-void siconos::geometry::quaternionFromRotationVector(
-    const siconos::algebra::SiconosVector &rotationVector,
-    siconos::algebra::SiconosVector &q) {
-  double angle =
-      sqrt(rotationVector(0) * rotationVector(0) + rotationVector(1) * rotationVector(1) +
-           rotationVector(2) * rotationVector(2));
+siconos::algebra::SiconosVector7 siconos::geometry::quaternionFromRotationVector(
+    const siconos::algebra::SiconosVector3 &rotationVector) {
+  siconos::algebra::SiconosVector7 q;
+  q.setZero();
+  double angle = rotationVector.norm();
+  double half_angle = angle * 0.5;
+  double f = 0.5 * sin_x(half_angle);
 
-  double f = 0.5 * sin_x(angle * 0.5);
-
-  q(3) = cos(angle / 2.0);
+  q(3) = cos(half_angle);
   q(4) = rotationVector(0) * f;
   q(5) = rotationVector(1) * f;
   q(6) = rotationVector(2) * f;
+  return q;
 }
 
 double siconos::geometry::quaternionNorm(const siconos::algebra::SiconosVector7 &q) {

@@ -179,7 +179,7 @@ void siconos::mechanisms::MBTB_JointR::computeEquivalentForces() {
 
   /*Solve the system.*/
   try {
-    auto luM = std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(*_M);
+    auto luM = std::make_shared<siconos::algebra::SiconosDenseLUMatrix>(*_M);
     luM->solve(*_F);
 #ifdef MBTB_JOINTR_DEBUG
     printf(

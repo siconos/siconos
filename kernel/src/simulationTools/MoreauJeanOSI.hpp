@@ -364,7 +364,7 @@ class MoreauJeanOSI : public OneStepIntegrator {
    */
   std::shared_ptr<siconos::algebra::SiconosMatrix> iterationMatrixInverse(
       std::shared_ptr<siconos::modeling::SecondOrderDS> ds,
-      const Eigen::FullPivLU<siconos::algebra::SiconosMatrix> &LUW);
+      const siconos::algebra::SiconosDenseLUMatrix &LUW);
 
   /** compute IterationMatrixBoundaryConditionsMap[ds] MoreauJeanOSI matrix at time t
    *
@@ -491,7 +491,7 @@ namespace moreau_jean {
 void computeIterationMatrix_NewtonEuler(
     double time, double h, double theta, siconos::modeling::NewtonEulerDS &ds,
     Eigen::Ref<siconos::algebra::SiconosMatrix> W,
-    std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>> &LUW);
+    std::shared_ptr<siconos::algebra::SiconosDenseLUMatrix> &LUW);
 
 /** Update the state vector of a given dynamical system
  *  \param time_step current time step

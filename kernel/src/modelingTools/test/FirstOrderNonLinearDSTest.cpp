@@ -85,7 +85,7 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS1() {
                                true);
 
   ds->initRhs(time);
-  auto LU_M_ = std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(ref_mat);
+  auto LU_M_ = std::make_shared<siconos::algebra::SiconosDenseLUMatrix>(ref_mat);
   auto ref_rhs = LU_M_->solve(ref_vec);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderNonLinearDS1 : ", *ds->rhs() == ref_rhs,
                                true);
@@ -173,7 +173,7 @@ void FirstOrderNonLinearDSTest::testBuildFirstOrderNonLinearDS3() {
 
   // Rhs ...
   ds->initRhs(time);     // compute rhs and its jacobian
-  auto LUM = Mref.lu();  // Eigen::FullPivLU<siconos::algebra::SiconosMatrix>(Mref);
+  auto LUM = Mref.lu();  // siconos::algebra::SiconosDenseLUMatrix(Mref);
   auto ref_rhs = LUM.solve(ds->fVector()).eval();
   CPPUNIT_ASSERT_EQUAL_MESSAGE(
       "testBuildFirstOrderNonLinearDS3 : ", (*ds->rhs() - ref_rhs).norm() < 1e-15, true);

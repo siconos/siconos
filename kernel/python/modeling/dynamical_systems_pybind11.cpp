@@ -30,6 +30,7 @@
 #include "FirstOrderLinearDS.hpp"
 #include "FunctionTypes.hpp"
 #include "LagrangianDS.hpp"
+#include "LagrangianLinearDiagonalDS.hpp"
 #include "LagrangianLinearTIDS.hpp"
 #include "LagrangianSparseDS.hpp"
 #include "LagrangianSparseLinearTIDS.hpp"
@@ -81,7 +82,10 @@ void wrap_dynamical_systems(py::module_& m) {
       .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>>(),
            py::keep_alive<1, 2>(),  // keep python object (np array arguments) memory alive
                                     // as long as object is referenced
-           py::arg("x0"));
+           py::arg("x0"))
+      .def("setConstantMMatrixAlias",
+           &siconos::modeling::FirstOrderNonLinearDS::setConstantMMatrix,
+           py::keep_alive<1, 2>(), "To define a constant mass matrix");
 
   py::class_<siconos::modeling::FirstOrderLinearDS,
              std::shared_ptr<siconos::modeling::FirstOrderLinearDS>,
@@ -94,7 +98,19 @@ void wrap_dynamical_systems(py::module_& m) {
            py::keep_alive<1, 2>(), py::keep_alive<1, 3>(), py::keep_alive<1, 4>(),
            py::arg("x0"), py::arg("A"), py::arg("b"))
       .def("setConstantA", &siconos::modeling::FirstOrderLinearDS::setConstantA,
-           py::keep_alive<1, 2>(), "To define a constant A operator");
+           py::keep_alive<1, 2>(), "To define a constant A operator")
+      .def("setConstantbVector", &siconos::modeling::FirstOrderLinearDS::setConstantbVector,
+           py::keep_alive<1, 2>(), "To define a constant b operator")
+      .def(
+          "setComputebVectorFunction",
+          [](siconos::modeling::FirstOrderLinearDS& self, py::function f) {
+            // Catch Python function and create a complient std::function
+            self.setComputebVectorFunction(
+                [f](double val, Eigen::Ref<siconos::algebra::MapVectorType> result) {
+                  f(val, result);  // Call python func with a memory view ...
+                });
+          },
+          "How to compute b(t)");
 
   // ============================== SECOND ORDER DS ==============================
 
@@ -952,6 +968,27 @@ void wrap_dynamical_systems(py::module_& m) {
                              &siconos::modeling::LagrangianLinearTIDS::dampingMatrix,
                              "damping matrix");
 
+  py::class_<siconos::modeling::LagrangianLinearDiagonalDS,
+             std::shared_ptr<siconos::modeling::LagrangianLinearDiagonalDS>,
+             siconos::modeling::LagrangianDS>(m, "LagrangianLinearDiagonalDS")
+      .def(py::init<Eigen::Ref<siconos::algebra::SiconosVector>,
+                    Eigen::Ref<siconos::algebra::SiconosVector>,
+                    Eigen::Ref<siconos::algebra::SiconosVector>>(),
+           py::keep_alive<1, 2>(),  // keep python object (np array arguments) memory
+                                    // alive as long as object is referenced
+           py::keep_alive<1, 3>(), py::keep_alive<1, 4>(), py::arg("q0"), py::arg("v0"),
+           py::arg("stiffness_diag"))
+
+      .def_property_readonly("massMatrix",
+                             &siconos::modeling::LagrangianLinearDiagonalDS::massMatrix,
+                             "mass matrix")
+      .def_property_readonly("stiffnessMatrix",
+                             &siconos::modeling::LagrangianLinearDiagonalDS::stiffnessMatrix,
+                             "stiffness matrix")
+      .def_property_readonly("dampingMatrix",
+                             &siconos::modeling::LagrangianLinearDiagonalDS::dampingMatrix,
+                             "damping matrix");
+
   py::class_<siconos::modeling::NewtonEulerDS,
              std::shared_ptr<siconos::modeling::NewtonEulerDS>,
              siconos::modeling::SecondOrderDS>(m, "NewtonEulerDS")
@@ -997,9 +1034,15 @@ void wrap_dynamical_systems(py::module_& m) {
           "How to compute external torques")
       .def("setIsMextExpressedInInertialFrame",
            &siconos::modeling::NewtonEulerDS::setIsMextExpressedInInertialFrame)
+      .def("setComputeJacobianMintOver_q_byFD",
+           &siconos::modeling::NewtonEulerDS::setComputeJacobianMintOver_q_byFD)
       .def_property("scalarMass", &siconos::modeling::NewtonEulerDS::scalarMass,
                     &siconos::modeling::NewtonEulerDS::setScalarMass)
       .def("angularVelocity", &siconos::modeling::NewtonEulerDS::angularVelocity_view)
       .def("angularVelocityInBodyFrame",
-           &siconos::modeling::NewtonEulerDS::angularVelocityInBodyFrame);
+           &siconos::modeling::NewtonEulerDS::angularVelocityInBodyFrame)
+      .def_property_readonly("totalInertiaMatrix",
+                             &siconos::modeling::NewtonEulerDS::totalInertiaMatrix,
+                             "total Inertia matrix");
+  ;
 }

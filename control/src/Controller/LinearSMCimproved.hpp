@@ -62,7 +62,7 @@ class LinearSMCimproved : public LinearSMC {
    *  \param CBstar matrix  \f$ CB^{*} \f$
    */
   void predictionPerturbation(const siconos::algebra::SiconosVector& xTk,
-                              const Eigen::FullPivLU<siconos::algebra::SiconosMatrix>& CBstar);
+                              const siconos::algebra::SiconosDenseLUMatrix& CBstar);
 
  public:
   /** Constructor

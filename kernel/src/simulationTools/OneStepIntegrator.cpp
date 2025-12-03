@@ -166,7 +166,7 @@ siconos::integrators::OneStepIntegrator::iterationMatrix(
       .iterationMatrix;
 }
 
-std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>
+std::shared_ptr<siconos::algebra::SiconosDenseLUMatrix>
 siconos::integrators::OneStepIntegrator::LUiterationMatrix(
     std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
   assert(ds && "siconos::integrators::OneStepIntegrator::iterationMatrix(ds): ds == nullptr.");

@@ -470,7 +470,8 @@ void siconos::nonsmooth_formulations::LinearOSNS::computeDiagonalInteractionBloc
         auto work = std::make_shared<siconos::algebra::SiconosMatrix>(*leftInteractionBlock);
         work->transposeInPlace();
         auto centralInteractionBlock = getOSIMatrix(osi, ds);
-        *work = centralInteractionBlock->solve(*work);
+        if (centralInteractionBlock)  // else it means centralInteractionBlock = identity
+          *work = centralInteractionBlock->solve(*work);
         //*currentInteractionBlock +=  *leftInteractionBlock ** work;
         DEBUG_EXPR(siconos::algebra::print(*work););
         *currentInteractionBlock += *leftInteractionBlock * *work;

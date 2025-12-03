@@ -56,9 +56,9 @@ void wrap_relations(py::module_ &m) {
              std::shared_ptr<siconos::modeling::FirstOrderLinearR>,
              siconos::modeling::FirstOrderR>(m, "FirstOrderLinearR")
       .def(py::init<>())
-      .def("setConstantB", &siconos::modeling::FirstOrderLinearR::setConstantB,
+      .def("setConstantBAlias", &siconos::modeling::FirstOrderLinearR::setConstantB,
            py::keep_alive<1, 2>(), "To define a constant B operator")
-      .def("setConstantC", &siconos::modeling::FirstOrderLinearR::setConstantC,
+      .def("setConstantCAlias", &siconos::modeling::FirstOrderLinearR::setConstantC,
            py::keep_alive<1, 2>(), "To define a constant C operator")
       .def("__repr__", [](const siconos::modeling::FirstOrderLinearR &a) {
         a.display();

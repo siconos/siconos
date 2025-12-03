@@ -71,11 +71,7 @@ void siconos::modeling::LagrangianLinearTIDS::initRhs(double time) {
   }
 
   // Compute mass and LU factorization
-  if (mass_view_) {
-    // LU factorization
-    LUMass_ = std::make_shared<siconos::algebra::SiconosDenseLUMatrix>(*mass_view_);
-    hasLUMass_ = true;
-  }
+  init_lu_mass();
 
   computeRhs(time);
 
@@ -88,7 +84,7 @@ void siconos::modeling::LagrangianLinearTIDS::initRhs(double time) {
     jacobianRhsOver_x_((ndof_ + j) * x_size_ + j) = 1.0;
   }
   // - Fill parts corresponding to the jacobians of total forces -
-  // mass and lu_mass are up to date since we have already called init_lu_mass
+  // mass and lu_mass are (must be) up to date
   if (hasMass()) {
     // In that case, we'll need a buffer to save inv(Mass).jacobian_qForces and
     // inv(Mass).jacobian_v Forces

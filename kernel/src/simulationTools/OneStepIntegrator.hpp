@@ -362,7 +362,7 @@ class OneStepIntegrator : public std::enable_shared_from_this<OneStepIntegrator>
    *
    *  \param ds a dynamical system
    */
-  virtual std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>> LUiterationMatrix(
+  virtual std::shared_ptr<siconos::algebra::SiconosDenseLUMatrix> LUiterationMatrix(
       std::shared_ptr<siconos::modeling::DynamicalSystem> ds);
 
   /** update the state of the DynamicalSystem attached to this Integrator

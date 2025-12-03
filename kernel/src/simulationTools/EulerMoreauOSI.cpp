@@ -292,7 +292,7 @@ void siconos::integrators::EulerMoreauOSI::initializeIterationMatrix(
     }
     // LU Factorisation
     _dynamicalSystemsGraph->properties(dsv).LUW =
-        std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(*iterationMat);
+        std::make_shared<siconos::algebra::SiconosDenseLUMatrix>(*iterationMat);
   }
   //}
   // In all other cases, we use computeIterationMatrix
@@ -405,7 +405,7 @@ void siconos::integrators::EulerMoreauOSI::computeIterationMatrix(
   }
   // LU Factorisation
   _dynamicalSystemsGraph->properties(dsv).LUW =
-      std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(iterationMatrix);
+      std::make_shared<siconos::algebra::SiconosDenseLUMatrix>(iterationMatrix);
 
   DEBUG_EXPR(siconos::algebra::print(W));
   DEBUG_END("siconos::integrators::EulerMoreauOSI::computeIterationMatrix(...)\n");

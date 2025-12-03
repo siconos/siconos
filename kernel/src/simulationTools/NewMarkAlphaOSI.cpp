@@ -92,7 +92,7 @@ void siconos::integrators::NewMarkAlphaOSI::initializeIterationMatrix(
 
     // LU Factorisation
     _dynamicalSystemsGraph->properties(dsv).LUW =
-        std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(
+        std::make_shared<siconos::algebra::SiconosDenseLUMatrix>(
             *_dynamicalSystemsGraph->properties(dsv).iterationMatrix);
 
   } else if (auto lds = std::dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
@@ -852,7 +852,7 @@ void siconos::integrators::newmark_alpha::computeIterationMatrix_Lagrangian(
     double time, double time_step, const std::array<double, 4>& params,
     siconos::modeling::LagrangianDS& lds,
     Eigen::Ref<siconos::algebra::SiconosMatrix> iterationMatrix,
-    std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>& luw) {
+    std::shared_ptr<siconos::algebra::SiconosDenseLUMatrix>& luw) {
   // Compute W matrix of the Dynamical System ds, at time t and for the current
   // ds state.
 
@@ -890,7 +890,7 @@ void siconos::integrators::newmark_alpha::computeIterationMatrix_Lagrangian(
   }
 
   // LU Factorisation
-  luw = std::make_shared<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>(iterationMatrix);
+  luw = std::make_shared<siconos::algebra::SiconosDenseLUMatrix>(iterationMatrix);
 
   //
 #ifdef DEBUG_NEWMARK

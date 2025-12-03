@@ -6,6 +6,13 @@ create_pybind11_module(
   SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/pb11_template.cpp
   DEPENDENCIES kernel numerics
 )
+create_pybind11_module(
+  MODULE_NAME geometry 
+  SOURCES 
+    ${CMAKE_CURRENT_SOURCE_DIR}/geometry_pybind11.cpp
+  DEPENDENCIES kernel numerics
+)
+target_include_directories(geometry PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 
 create_pybind11_module(
   MODULE_NAME modeling 
@@ -41,6 +48,7 @@ DEPENDENCIES kernel numerics
 
 add_custom_target(py${COMPONENT}
     DEPENDS pb11_template
+    geometry
     modeling
     integrators
     simulation
@@ -52,6 +60,7 @@ add_custom_target(py${COMPONENT}
 
 install(TARGETS
   pb11_template
+  geometry
   modeling
   integrators
   simulation
@@ -63,12 +72,5 @@ install(TARGETS
 
 # --- Tests ---
 if(WITH_TESTING)
-  # include(export_runtime_conf)
-  # add_library(${COMPONENT}-pytests INTERFACE)
-  # target_link_libraries(${COMPONENT}-pytests INTERFACE ${COMPONENT})
-  # # Ensure build dir is in the include path for SiconosConfig.h
-  # target_include_directories(${COMPONENT}-pytests INTERFACE $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>) 
-  # add_dependencies(${COMPONENT}-tests ${COMPONENT}-pytests)
-  # export_build_conf(${COMPONENT}-pytests)
   build_python_tests()
 endif()

@@ -48,7 +48,7 @@ void siconos::control::LinearSMCimproved::initialize(
 
 void siconos::control::LinearSMCimproved::predictionPerturbation(
     const siconos::algebra::SiconosVector& xTk,
-    const Eigen::FullPivLU<siconos::algebra::SiconosMatrix>& LUCBstar) {
+    const siconos::algebra::SiconosDenseLUMatrix& LUCBstar) {
   if (siconos::algebra::normInf(*_us) < _alpha) {
     if (_inDisceteTimeSlidingPhase) {
       if (_measuredPert->full()) {
@@ -123,7 +123,7 @@ void siconos::control::LinearSMCimproved::actuate() {
   // compute C(I-e^{Ah})x_k
   *_ueq = tmpM1 * *xTk;
   // compute the solution u^eq of the system CB^{*}u^eq = C(I-e^{Ah})x_k
-  Eigen::FullPivLU<siconos::algebra::SiconosMatrix> luCBstar(CBstar);
+  siconos::algebra::SiconosDenseLUMatrix luCBstar(CBstar);
   *_ueq = luCBstar.solve(*_ueq);
   *(_DS_SMC->x()) = *xTk;
 

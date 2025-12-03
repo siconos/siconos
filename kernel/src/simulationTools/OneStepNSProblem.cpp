@@ -350,15 +350,14 @@ void siconos::nonsmooth_formulations::OneStepNSProblem::initialize(
     _maxSize = simulation()->nonSmoothDynamicalSystem()->topology()->numberOfConstraints();
 }
 
-std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>>
+std::shared_ptr<siconos::algebra::SiconosDenseLUMatrix>
 siconos::nonsmooth_formulations::OneStepNSProblem::getOSIMatrix(
     siconos::integrators::OneStepIntegrator& osi,
     std::shared_ptr<siconos::modeling::DynamicalSystem> ds) {
   // Returns the LU factorization of the integration matrix of the one-step integrator
 
   // Matrix depends on OSI type.
-  std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>> luIterationMatrix{
-      nullptr};
+  std::shared_ptr<siconos::algebra::SiconosDenseLUMatrix> luIterationMatrix{nullptr};
 
   auto osiType = osi.getType();
   // auto dsType = Type::value(*ds);
@@ -396,10 +395,10 @@ siconos::nonsmooth_formulations::OneStepNSProblem::getOSIMatrix(
     OSNSP*/
     if (auto lds = dynamic_pointer_cast<siconos::modeling::LagrangianDS>(ds)) {
       /*Copy of the current mass matrix. */
-      luIterationMatrix = lds->LUMass();
+      if (lds->hasLUMass()) luIterationMatrix = lds->LUMass();
       //   block = std::make_shared<siconos::algebra::SiconosMatrix>(*Mass);
     } else if (auto d = dynamic_pointer_cast<siconos::modeling::NewtonEulerDS>(ds)) {
-      luIterationMatrix = d->LUMass();
+      if (d->hasLUMass()) luIterationMatrix = d->LUMass();
     } else
       THROW_EXCEPTION(
           "siconos::nonsmooth_formulations::OneStepNS::getOSIMatrix for D1Minus, only "

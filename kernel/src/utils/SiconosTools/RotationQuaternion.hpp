@@ -49,14 +49,14 @@ double axisAngleFromConfiguration(const Eigen::Ref<siconos::algebra::SiconosVect
 
 /* For a given quaternion, compute the rotation vector representation
  */
-void rotationVectorFromQuaternion(double q0, double q1, double q2, double q3,
-                                  siconos::algebra::SiconosVector &rotationVector);
+siconos::algebra::SiconosVector3 rotationVectorFromQuaternion(double q0, double q1, double q2,
+                                                              double q3);
 
 /* For a given configuration vector q composed of a position and a quaternion,
  * compute the rotation vector representation
  */
-void rotationVectorFromConfiguration(siconos::algebra::SiconosVector &q,
-                                     siconos::algebra::SiconosVector &rotationVector);
+siconos::algebra::SiconosVector3 rotationVectorFromConfiguration(
+    siconos::algebra::SiconosVector7 &q);
 
 /* For a given angle and rotation vector, compute the unit quaternion
  */
@@ -65,8 +65,8 @@ void quaternionFromAxisAngle(const siconos::algebra::SiconosVector3 &axis, doubl
 
 /* For a given  rotation vector, compute the quaternion
  */
-void quaternionFromRotationVector(const siconos::algebra::SiconosVector &rotationVector,
-                                  siconos::algebra::SiconosVector &q);
+siconos::algebra::SiconosVector7 quaternionFromRotationVector(
+    const siconos::algebra::SiconosVector3 &rotationVector);
 
 double sin_x(double x);
 

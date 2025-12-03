@@ -17,11 +17,13 @@
  */
 
 #include <pybind11/eigen.h>
+#include <pybind11/iostream.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
 #include <Eigen/Sparse>
 #include <cstddef>
+#include <iostream>
 
 #include "DynamicalSystem.hpp"
 #include "Interaction.hpp"
@@ -66,7 +68,15 @@ PYBIND11_MODULE(modeling, m) {
       .def("y", &siconos::modeling::Interaction::y_python,
            py::return_value_policy::reference_internal)
       .def("relation", &siconos::modeling::Interaction::relation,
-           py::return_value_policy::reference_internal);
+           py::return_value_policy::reference_internal)
+      .def("__repr__", [](const siconos::modeling::Interaction& self) {
+        std::ostringstream buffer;
+        py::scoped_ostream_redirect redirect(std::cout,
+                                             py::module_::import("sys").attr("stdout"));
+        self.display();
+        return buffer.str();
+      });
+  ;
 
   m.def("interactions", &interactions, py::arg("graph"),
         "Return a list of Interaction objects from an InteractionsGraph");
@@ -77,20 +87,17 @@ PYBIND11_MODULE(modeling, m) {
       .def(py::init<double, double>())
       .def("insertDynamicalSystem",
            &siconos::modeling::NonSmoothDynamicalSystem::insertDynamicalSystem)
-      .def("getNumberOfDS",
-           &siconos::modeling::NonSmoothDynamicalSystem::getNumberOfDS,
-	   "get the number of DS contained in the NonSmoothDynamicalSystem")
-      .def("dynamicalSystem",
-           &siconos::modeling::NonSmoothDynamicalSystem::dynamicalSystem,
-	   "get the Ds number nb")
+      .def("getNumberOfDS", &siconos::modeling::NonSmoothDynamicalSystem::getNumberOfDS,
+           "get the number of DS contained in the NonSmoothDynamicalSystem")
+      .def("dynamicalSystem", &siconos::modeling::NonSmoothDynamicalSystem::dynamicalSystem,
+           "get the Ds number nb")
       .def("removeDynamicalSystem",
-           &siconos::modeling::NonSmoothDynamicalSystem::removeDynamicalSystem,
-	   py::arg("ds"),
-	   "remove the Ds")
+           &siconos::modeling::NonSmoothDynamicalSystem::removeDynamicalSystem, py::arg("ds"),
+           "remove the Ds")
 
       .def("dynamicalSystemsVector",
            &siconos::modeling::NonSmoothDynamicalSystem::dynamicalSystemsVector,
-	   "get the array of all DSs contained in the NonSmoothDynamicalSystem")
+           "get the array of all DSs contained in the NonSmoothDynamicalSystem")
 
       .def("link", &siconos::modeling::NonSmoothDynamicalSystem::link,
            "link an interaction to two dynamical systems", py::arg("inter"), py::arg("ds1"),

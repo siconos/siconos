@@ -54,7 +54,7 @@ constexpr int Alpha_f = 3;
 void computeIterationMatrix_Lagrangian(
     double time, double h, const std::array<double, 4> &params,
     siconos::modeling::LagrangianDS &ds, Eigen::Ref<siconos::algebra::SiconosMatrix> W,
-    std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>> &LUW);
+    std::shared_ptr<siconos::algebra::SiconosDenseLUMatrix> &LUW);
 
 }  // namespace newmark_alpha
 

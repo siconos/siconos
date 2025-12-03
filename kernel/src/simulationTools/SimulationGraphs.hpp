@@ -140,7 +140,7 @@ struct DynamicalSystemProperties {
       nullptr}; /**< Matrix for integration of boundary conditions*/
   std::shared_ptr<siconos::algebra::SiconosMatrix> iterationMatrixInverse{
       nullptr}; /**< Matrix for integration */
-  std::shared_ptr<Eigen::FullPivLU<siconos::algebra::SiconosMatrix>> LUW{
+  std::shared_ptr<siconos::algebra::SiconosDenseLUMatrix> LUW{
       nullptr};                                 /**< LU factorisation of W */
   siconos::algebra::Index absolute_position{0}; /**< Absolute position of the ds variables in
                                      the unknown vector in osnsp*/
