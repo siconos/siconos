@@ -5,6 +5,9 @@ if(WITH_TESTING)
 
   begin_tests(src/siconos/simul/tests DEPS "numerics;kernel;mechanics;CPPUNIT::CPPUNIT")
   new_test(SOURCES RtOsiTest.cpp ${SIMPLE_TEST_MAIN})
+  #end_tests()
 
+  begin_tests(src/siconos/storage/tests DEPS "vkernel;CPPUNIT::CPPUNIT")
+  new_test(SOURCES StorageTest.cpp ${SIMPLE_TEST_MAIN})
   #end_tests()
 endif()

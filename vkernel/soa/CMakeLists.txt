@@ -144,5 +144,6 @@ endif()
 #  )
 
 siconos_component_install_setup(${COMPONENT})
+target_compile_features(vkernel PUBLIC cxx_std_20)
 
 include(vkernel_tests.cmake)
