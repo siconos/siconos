@@ -1782,8 +1782,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
         # is the ds number.
         positions = self.get_io_array(self._io.positions(self._nsds))
 
-        self._ds_positions = positions
-        if positions is not None:
+        if positions.shape[0] > 0 :
             number_of_ds = positions.shape[0]
             self._dynamic_data.resize(current_line + number_of_ds, 0)
 
@@ -1803,6 +1802,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
                 new_positions[:, 4] = np.cos(positions[:, 3] / 2.0)
                 new_positions[:, 7] = np.sin(positions[:, 3] / 2.0)
+
                 self._dynamic_data[current_line:, :] = np.concatenate(
                     (times, new_positions), axis=1
                 )
@@ -1817,7 +1817,7 @@ class MechanicsHdf5Runner(siconos.io.mechanics_hdf5.MechanicsHdf5):
 
         velocities = self.get_io_array(self._io.velocities(self._nsds))
 
-        if velocities is not None:
+        if velocities.shape[0] > 0 :
             number_of_ds = velocities.shape[0]
             self._velocities_data.resize(current_line + number_of_ds, 0)
 
