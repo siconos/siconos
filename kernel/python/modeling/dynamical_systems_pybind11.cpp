@@ -56,6 +56,8 @@ void wrap_dynamical_systems(py::module_& m) {
                              "dimension of the system")
 
       .def("resetCount", &siconos::modeling::DynamicalSystem::resetCount)
+      .def("resetToInitialState", &siconos::modeling::DynamicalSystem::resetToInitialState)
+      .def("swapInMemory", &siconos::modeling::DynamicalSystem::swapInMemory)
       .def("setNumber", &siconos::modeling::DynamicalSystem::setNumber)
       .def("number", &siconos::modeling::DynamicalSystem::number)
       .def("display", &siconos::modeling::DynamicalSystem::display)
@@ -132,7 +134,6 @@ void wrap_dynamical_systems(py::module_& m) {
            py::return_value_policy::reference_internal)
       .def("velocity", &siconos::modeling::LagrangianSparseDS::velocity_python,
            py::return_value_policy::reference_internal)
-
       .def("setConstantFext", &siconos::modeling::LagrangianSparseDS::setConstantFext,
            py::keep_alive<1, 2>(), "To define a constant external forces vector")
       .def(
@@ -848,7 +849,12 @@ void wrap_dynamical_systems(py::module_& m) {
 
       .def("q", &siconos::modeling::LagrangianDS::q_python,
            py::return_value_policy::reference_internal)
+      .def("q0", &siconos::modeling::LagrangianDS::q0_python,
+           py::return_value_policy::reference_internal)
+
       .def("velocity", &siconos::modeling::LagrangianDS::velocity_python,
+           py::return_value_policy::reference_internal)
+      .def("velocity0", &siconos::modeling::LagrangianDS::velocity0_python,
            py::return_value_policy::reference_internal)
 
       .def("setConstantFext", &siconos::modeling::LagrangianDS::setConstantFext,
