@@ -135,7 +135,7 @@ struct maker
               storage::bind<config::interaction_manager,
                             "interaction_manager">,
               storage::bind<config::ct_interaction, "ct_interaction">,
-              storage::bind<config::ct_interaction, "rt_interaction">,
+              storage::bind<config::rt_interaction, "rt_interaction">,
               storage::bind<config::osnspb, "osnspb">,
               storage::bind<config::solver_options, "solver_options">,
               storage::bind<config::trace_params, "trace_params">,
