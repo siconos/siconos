@@ -2,12 +2,15 @@
 
 namespace siconos::collision::shape {
 struct disk : item<> {
+
   using attributes = gather<attribute<"radius", some::scalar>,
                             attribute<"maxpoints", some::indice>>;
 
   template <typename Handle>
   struct interface : default_interface<Handle> {
     using default_interface<Handle>::self;
+
+    void __init__() { maxpoints() = 0; };
 
     decltype(auto) radius() { return attr<"radius">(*self()); };
 
@@ -19,10 +22,18 @@ struct disk : item<> {
       using scalar = typename env_t::scalar;
       using vector_t = typename env_t::template vector<scalar, 3>;
 
-      scalar t = 2 * std::numbers::pi_v<scalar> * point_index / maxpoints();
-      vector_t coord = {radius() * cos(t), radius() * sin(t), 0.};
+      if (maxpoints() < 3) {
+        // not enough points, returns the center of the disk
+        vector_t coord = {0., 0., 0.};
+        return coord;
+      }
+      else {
+        // returns a point on the circle.
+        scalar t = 2 * std::numbers::pi_v<scalar> * point_index / maxpoints();
+        vector_t coord = {radius() * cos(t), radius() * sin(t), 0.};
 
-      return coord;
+        return coord;
+      }
     }
   };
 };

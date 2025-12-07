@@ -1,23 +1,30 @@
+import siconos.numerics as sn
+import siconos.simulation as sim
+
+from math import log
+import sys
+
 from siconos.mechanics.collision.tools import Contactor
-from siconos.io.mechanics_run import MechanicsHdf5Runner, \
-    MechanicsHdf5Runner_run_options, set_backend
+from siconos.mechanics.collision.bullet import SiconosBulletOptions
+
+from siconos.io.mechanics_run import MechanicsHdf5Runner,\
+    MechanicsHdf5Runner_run_options,\
+    RunnerConfig
+import nonos
+
+backend = str(sys.argv[1])
+runner_config = RunnerConfig(backend)
 
 import nonos
-import siconos.numerics as sn
-import siconos.kernel as sk
-
-import siconos
 
 import numpy
 from math import sqrt
 from random import random
 
-set_backend('vnative')
-
 disk_radius = 1
 N = 10
 
-with MechanicsHdf5Runner() as io:
+with MechanicsHdf5Runner(config=runner_config) as io:
 
     io.add_primitive_shape('DiskR1', 'Disk', [disk_radius])
     io.add_primitive_shape('DiskR2', 'Disk', [0.1*disk_radius])
@@ -37,9 +44,10 @@ with MechanicsHdf5Runner() as io:
 
 #    io.add_object('ground' , [Contactor('Ground')], translation=[0, 0])
 
-options = sk.solver_options_create(sn.SICONOS_FRICTION_2D_NSGS)
-options.iparam[sn.SICONOS_IPARAM_MAX_ITER] = 10
-options.dparam[sn.SICONOS_DPARAM_TOL] = 1e-3
+options = sn.solver_options_create(sn.solver_ids.SICONOS_FRICTION_2D_NSGS)
+options.iparam[sn.params.SICONOS_IPARAM_MAX_ITER] = 500
+options.dparam[sn.params.SICONOS_DPARAM_TOL] = 1e-6
+options.iparam[sn.params.SICONOS_FRICTION_3D_NSGS_FREEZING_CONTACT] = 10
 
 class recirculation_start_hook():
 
@@ -63,7 +71,7 @@ class recirculation_start_hook():
 
             jj = nds
 
-            ds.setQ0Ptr([(random()-0.5)/100, maxy + 0.2*(i+1), 0.])
+            ds.setQ0Ptr([(random()-0.5)/10, maxy + 0.2*(i+1), 0.])
             ds.setVelocity0Ptr([0., 0., 0.])
             ds.resetToInitialState()
             ds.swapInMemory()
@@ -78,5 +86,13 @@ run_options['theta']=0.50001
 run_options['solver_options']=options
 run_options['start_run_iteration_hook']=recirculation_start_hook()
 
-with MechanicsHdf5Runner(mode='r+') as io:
+vnative_options=nonos.bridge.SpaceFilterOptions()
+vnative_options.neighborhood_radius = 2.1 * 0.1 *disk_radius
+vnative_options.min_radius = 0.5 * 0.1 * disk_radius
+
+run_options['vnative_options'] = vnative_options
+
+
+
+with MechanicsHdf5Runner(mode='r+', config=runner_config) as io:
         io.run(run_options)

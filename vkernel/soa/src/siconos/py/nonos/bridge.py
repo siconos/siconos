@@ -3,6 +3,8 @@ import numpy as np
 from math import sqrt
 import siconos.numerics as sn
 
+from math import pi
+
 def array(l):
     return np.array(l, dtype=np.float64)
 
@@ -34,6 +36,7 @@ class SpaceFilter(Stored):
         self._handle.set_diskdisk_r(vkernel.disks.add_diskdisk_r(self.data()))
         self._fdisks = {}
 
+    # Fixed segment
     def insertSegment(self, x1, y1, x2, y2):
         segment = vkernel.disks.add_segment_shape(self.data())
         segment.set_points(array([x1, y1, 0, x2, y2, 0]), 0)
@@ -58,6 +61,7 @@ class SpaceFilter(Stored):
     def insertMesh(self, points):
         mesh
 
+    # Fixed line (to be removed)
     def insertLine(self, a, b , c):
         line = vkernel.disks.add_line_shape(self.data())
         line.set_a(a)
@@ -80,6 +84,7 @@ class SpaceFilter(Stored):
 
         return line
 
+    # Fixed disk
     def insertTranslatedDisk(self, radius, translation):
 
         disk_shape = None
@@ -90,10 +95,13 @@ class SpaceFilter(Stored):
             disk_shape.set_radius(radius)
             self._fdisks[radius] = disk_shape
 
+        mp = int(2 * pi * radius / self._options.min_radius)
+
         translated_disk_shape = \
             vkernel.disks.add_translated_disk_shape(self.data())
-        translated_disk_shape.set_item(disk_shape)
+        translated_disk_shape.set_translated(disk_shape)
         translated_disk_shape.set_translation(array([translation[0],translation[1],0]))
+        translated_disk_shape.translated().set_maxpoints(mp)
 
         # negative for static shape
         translated_disk_shape.set_ident(- self._static_shape_counter)
@@ -113,10 +121,10 @@ class SpaceFilter(Stored):
     def updateInteractions(self, step):
         if not self._initialized:
             self._handle.make_points()
-            self._ngbh.add_point_sets(0)
-            self._ngbh.set_active(0, 0, True)
-            self._ngbh.set_active(0, 1, True)
-            self._ngbh.set_active(0, 2, True)
+            self._ngbh.add_point_sets(step)
+            self._ngbh.set_active(0, 0, True)       # disk - disk
+            self._ngbh.set_active(0, 1, True)       # disk - segment
+            self._ngbh.set_active(0, 2, True)       # disk - fixed disk
             self._ngbh.set_active(1, 1, False)
             self._ngbh.set_active(2, 2, False)
             self._ngbh.set_active(1, 0, False)
