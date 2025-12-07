@@ -25,7 +25,6 @@ class Simplex(object):
     def __init__(self, coordinates):
         if not len(coordinates) == 4:
             raise RuntimeError("You must provide only 4 coordinates!")
-        print('Simplex coordinates',coordinates )
         self._coordinates = numpy.array(coordinates)
 
     def volume(self):
@@ -332,7 +331,6 @@ class ConvexHull2d(ConvexHull):
         nb_vertices = len(coordinates)
         coord_3d = list(coordinates)
         coord_3d.extend(coordinates)
-        print('ConvexHull2d coord_3d',coord_3d)
         for i, v in enumerate(coord_3d):
             if i < nb_vertices:
                 coord_3d[i] = numpy.append(v, 0.0)
