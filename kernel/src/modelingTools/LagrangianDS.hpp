@@ -370,6 +370,11 @@ class LagrangianDS : public SecondOrderDS {
   //  */
   inline siconos::algebra::SiconosVector &q_python() const { return *(state_q_[0]); }
 
+  /** \return  a view on initial position vector q0 */
+  inline const siconos::algebra::MapVectorType q0_python()  {
+    return *(q0_view_);
+  }
+
   /** \return  a read-only view on velocity vector */
   inline const siconos::algebra::ConstMapVectorType velocity_read() const override {
     return siconos::algebra::ConstMapVectorType(state_q_[1]->data(), state_q_[1]->size());
@@ -385,6 +390,11 @@ class LagrangianDS : public SecondOrderDS {
   inline const siconos::algebra::ConstMapVectorType velocity0() const {
     return siconos::algebra::ConstMapVectorType(velocity0_view_->data(),
                                                 velocity0_view_->size());
+  }
+
+  /** \return a  view on the initial velocity vector */  
+  inline const siconos::algebra::MapVectorType velocity0_python()  {
+    return *(velocity0_view_);
   }
 
   /** \return a read-only view on acceleration vector */
