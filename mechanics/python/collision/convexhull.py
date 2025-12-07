@@ -25,6 +25,7 @@ class Simplex(object):
     def __init__(self, coordinates):
         if not len(coordinates) == 4:
             raise RuntimeError("You must provide only 4 coordinates!")
+        print('Simplex coordinates',coordinates )
         self._coordinates = numpy.array(coordinates)
 
     def volume(self):
@@ -228,7 +229,7 @@ class ConvexHull(object):
             raise RuntimeError("You must provide at least 4 coordinates!")
         self.hull = scipy.spatial.ConvexHull(coordinates)
 
-    def centroid(self):
+    def centroid_3d(self):
         cm = numpy.zeros(3)
         vol = self.hull.volume  # self.volume_divergence_theorem()
         # volume is a method of Scipy ConvexHull
@@ -248,6 +249,10 @@ class ConvexHull(object):
                 * ((a[:] + b[:]) ** 2 + (c[:] + b[:]) ** 2 + (c[:] + a[:]) ** 2)
             )
         return cm
+
+    def centroid(self):
+        return self.centroid_3d()
+
 
     def barycenter(self):
         # compute barycenter
@@ -294,7 +299,7 @@ class ConvexHull(object):
         volume = 0
         imat = numpy.zeros((3, 3))
         # compute centroid
-        c = self.centroid()
+        c = self.centroid_3d()
         for vertices in self.hull.simplices:
             coords = [list(c)]
             for i in vertices:
@@ -327,6 +332,7 @@ class ConvexHull2d(ConvexHull):
         nb_vertices = len(coordinates)
         coord_3d = list(coordinates)
         coord_3d.extend(coordinates)
+        print('ConvexHull2d coord_3d',coord_3d)
         for i, v in enumerate(coord_3d):
             if i < nb_vertices:
                 coord_3d[i] = numpy.append(v, 0.0)
