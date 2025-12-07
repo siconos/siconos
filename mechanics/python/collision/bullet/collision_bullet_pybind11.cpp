@@ -124,6 +124,9 @@ PYBIND11_MODULE(_bullet, m) {
       .def("addStaticBody",
            &siconos::collision::bullet::SiconosBulletCollisionManager::addStaticBody,
            py::arg("cs"), py::arg("position"), py::arg("number") = 0)
+     .def("removeStaticBody",
+           &siconos::collision::bullet::SiconosBulletCollisionManager::removeStaticBody,
+	   py::arg("body") = 0)
       .def("removeBody",
            &siconos::collision::bullet::SiconosBulletCollisionManager::removeBody,
            py::arg("ds") = 0)
