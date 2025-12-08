@@ -903,7 +903,8 @@ class InputObserver:
         if self._recording:
             if self.vview.opts.advance_by_time is not None:
                 self._time += self.vview.opts.advance_by_time
-                self.vview.slwsc.SetEnabled(False)  # Scale slider
+                if hasattr(self.vview, 'slwsc'):
+                    self.vview.slwsc.SetEnabled(False)  # Scale slider
                 self.vview.xslwsc.SetEnabled(False)  # Time scale slider
                 # slider_widget.SetEnabled(False) # Time slider (TODO video options)
                 # widget.SetEnabled(False) # Axis widget
@@ -911,7 +912,8 @@ class InputObserver:
             self.vview.image_maker.Modified()
             self.vview.recorder.Write()
             if self.vview.opts.advance_by_time is not None:
-                self.vview.slwsc.SetEnabled(True)
+                if hasattr(self.vview, 'slwsc'):
+                    self.vview.slwsc.SetEnabled(True)
                 self.vview.xslwsc.SetEnabled(True)
                 # slider_widget.SetEnabled(True)
                 # widget.SetEnabled(True) # Axis widget
