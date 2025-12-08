@@ -39,6 +39,7 @@ PYBIND11_DECLARE_HOLDER_TYPE(T, std::shared_ptr<T>);
 void wrap_dynamical_systems(py::module_& m);
 void wrap_nonsmoothlaws(py::module_& m);
 void wrap_relations(py::module_& m);
+void wrap_boundaryconditions(py::module_& m);
 
 std::vector<std::shared_ptr<siconos::modeling::Interaction>> interactions(
     std::shared_ptr<siconos::graphs::InteractionsGraph> dsg) {
@@ -65,6 +66,7 @@ PYBIND11_MODULE(modeling, m) {
   wrap_dynamical_systems(m);
   wrap_nonsmoothlaws(m);
   wrap_relations(m);
+  wrap_boundaryconditions(m);
 
   // CLASSES with no Derived classes
   py::class_<siconos::modeling::Interaction, std::shared_ptr<siconos::modeling::Interaction>>(

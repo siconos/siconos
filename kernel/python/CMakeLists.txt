@@ -22,6 +22,7 @@ create_pybind11_module(
     ${CMAKE_CURRENT_SOURCE_DIR}/modeling/dynamical_systems_pybind11.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/modeling/relations_pybind11.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/modeling/nonsmoothlaws_pybind11.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/modeling/boundaryconditions_pybind11.cpp
   DEPENDENCIES kernel numerics
 )
 target_include_directories(modeling PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)

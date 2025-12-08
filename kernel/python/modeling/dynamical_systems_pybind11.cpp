@@ -33,6 +33,7 @@
 #include "LagrangianSparseDS.hpp"
 #include "LagrangianSparseLinearTIDS.hpp"
 #include "NewtonEulerDS.hpp"
+#include "BoundaryCondition.hpp"
 #include "SiconosMatrix.hpp"
 #include "SiconosVector.hpp"
 #include "StorageTools.hpp"
@@ -176,7 +177,8 @@ void wrap_dynamical_systems(py::module_& m) {
              std::shared_ptr<siconos::modeling::SecondOrderDS>,
              siconos::modeling::DynamicalSystem>(m, "SecondOrderDS")
       .def("p", &siconos::modeling::SecondOrderDS::p_python,
-           py::return_value_policy::reference_internal);
+           py::return_value_policy::reference_internal)
+      .def("setBoundaryConditions", &siconos::modeling::SecondOrderDS::setBoundaryConditions);
 
   py::class_<siconos::modeling::LagrangianSparseDS,
              std::shared_ptr<siconos::modeling::LagrangianSparseDS>,
