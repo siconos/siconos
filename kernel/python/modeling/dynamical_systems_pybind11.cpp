@@ -1273,7 +1273,7 @@ void wrap_dynamical_systems(py::module_& m) {
           },
           py::arg("fext"), py::arg("alias_t"), py::keep_alive<1, 2>(),
           "Set constant external forces (alias).")
-      .def("fext", &siconos::modeling::NewtonEulerDS::fext_read, "current values of external forces")
+      .def("fext", &siconos::modeling::NewtonEulerDS::fext, "current values of external forces")
       .def(
           "setComputeFextFunction",
           [](siconos::modeling::NewtonEulerDS& self, py::function f) {

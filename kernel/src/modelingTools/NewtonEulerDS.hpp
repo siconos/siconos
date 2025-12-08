@@ -492,11 +492,11 @@ class NewtonEulerDS : public SecondOrderDS {
     return wrenchMemory_;
   }
 
-  /**  \return a read-only view on fext state vector */
-  inline const siconos::algebra::ConstMapVectorType fext_read() const {
-    return siconos::algebra::ConstMapVectorType(fext_view_->data(), fext_view_->size());
+  /**   \return a read - only reference on the initial state vector */
+  Eigen::Ref<const siconos::algebra::SiconosVector3> fext() const {
+    return use_fext(
+        [](auto const& v) { return Eigen::Ref<const siconos::algebra::SiconosVector3>(v); });
   }
-
 
   /** initialize the siconos::algebra::SiconosMemory objects with a positive size.
    *
