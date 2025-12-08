@@ -91,28 +91,43 @@ class MovedShape:
         # and easier to use in mechanics_run
         self.translation = np.array(self.relative_translation, dtype=np.float64)
 
+
         ori = self.relative_orientation
 
-        if isinstance(ori, tuple) and len(ori) == 2:
-            axis, angle = ori
-            assert len(axis) == 3
-            assert isinstance(angle, float)
-            n = sin(angle / 2) / norm(axis)
-            # Maybe it would be better to normalize axis ?
-            ori = np.array(
-                [
-                    cos(angle / 2),
-                    axis[0] * n,
-                    axis[1] * n,
-                    axis[2] * n,
-                ],
-                dtype=np.float64,
-            )
-        else:
-            assert len(ori) == 4
-            ori = np.array(ori, dtype=np.float64)
+        #print(ori)
 
-        self.orientation = ori
+        if isinstance(ori, np.ndarray) or \
+           (isinstance(ori, list) and len(ori) == 4) or \
+           (isinstance(ori, tuple) and len(ori) == 4):
+            ori = np.asarray(ori, dtype=np.float64)
+
+            if ori.shape[0] != 4:
+                raise AssertionError("quaternion_get. The quaternion must be of size 4")
+            self.orientation = ori
+            return
+
+        if isinstance(ori, tuple) or isinstance(ori, list):
+            if len(ori) != 2:  # ori is a tuple
+                raise AssertionError("Wrong input format for orientation")
+            # axis + angle
+            axis, angle = ori
+            if len(axis) != 3:
+                raise ValueError("Axis must be a 3D vector.")
+            if not isinstance(angle, float):
+                raise ValueError("Angle must be a float.")
+            axis_norm = np.linalg.norm(axis)
+            if axis_norm == 0:
+                raise ValueError("Axis vector cannot be the zero vector.")
+            n = sin(angle / 2.0) / axis_norm
+            self.orientation = np.array([cos(angle / 2.0), axis[0] * n, axis[1] * n, axis[2] * n])
+            return
+        else:
+            raise ValueError(
+                "Orientation must be either an axis-angle pair (3D vector + float)"
+                + " or a quaternion."
+            )
+
+
 
 
 @dataclass

@@ -66,11 +66,11 @@ def quaternion_get(orientation):
         - Axis-angle: ([x, y, z], angle) where [x, y, z] is a 3D vector and angle is a float.
         - Quaternion: [w, x, y, z] where w, x, y, z are the quaternion components.
     """
-    print('orientation', orientation)
+
     if isinstance(orientation, np.ndarray) or \
        (isinstance(orientation, list) and len(orientation) == 4) :
         orientation = np.asarray(orientation, dtype=np.float64)
-        
+
         if orientation.shape[0] != 4:
             raise AssertionError("quaternion_get. The quaternion must be of size 4")
         return orientation
@@ -109,4 +109,3 @@ def quaternion_multiply(q1, q0):
         ],
         dtype=np.float64,
     )
-
