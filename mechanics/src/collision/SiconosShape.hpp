@@ -277,6 +277,8 @@ class SiconosMesh : public SiconosShape, public std::enable_shared_from_this<Sic
  public:
   SiconosMesh(std::shared_ptr<std::vector<unsigned int>> indexes,
               std::shared_ptr<siconos::algebra::SiconosMatrix> vertices);
+  SiconosMesh(std::shared_ptr<std::vector<unsigned int>> indexes,
+              Eigen::Ref<siconos::algebra::SiconosMatrix> vertices);
 
   std::shared_ptr<std::vector<unsigned int>> indexes() { return _indexes; }
   std::shared_ptr<siconos::algebra::SiconosMatrix> vertices() { return _vertices; }
@@ -300,6 +302,11 @@ class SiconosHeightMap : public SiconosShape,
   SiconosHeightMap(std::shared_ptr<siconos::algebra::SiconosMatrix> height_data,
                    double length_x, double length_y)
       : SiconosShape(), _height_data(height_data), _length_x(length_x), _length_y(length_y) {}
+  SiconosHeightMap(Eigen::Ref<siconos::algebra::SiconosMatrix> height_data, double length_x,
+                   double length_y)
+      : SiconosShape(),
+        _height_data(std::make_shared<siconos::algebra::SiconosMatrix>(height_data)),
+        _length_x(length_x), _length_y(length_y) {}
 
   std::shared_ptr<siconos::algebra::SiconosMatrix> height_data() { return _height_data; }
   double length_x() { return _length_x; }

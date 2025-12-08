@@ -105,7 +105,7 @@ def load_heightmap(hm_data):
     if len(r) != 2:
         raise AssertionError("len(r) != 2")
     # assert(len(r) == 2)
-    hm = siconos.mechanics.collision.SiconosHeightMap(hm_data, r[0], r[1])
+    hm = siconos.mechanics.collision.SiconosHeightMap(np.array(hm_data, dtype=np.float64, order="F"), r[0], r[1])
     # dims = list(r) + [np.max(hm_data) - np.min(hm_data)]
     # hm.setInsideMargin(
     #    hm_data.attrs.get('insideMargin', np.min(dims) * 0.02))

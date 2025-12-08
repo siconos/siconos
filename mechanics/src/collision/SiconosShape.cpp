@@ -67,6 +67,15 @@ siconos::collision::SiconosMesh::SiconosMesh(
   if (!_vertices || _vertices->rows() != 3)
     THROW_EXCEPTION("Mesh vertices matrix must have 3 columns.");
 }
+siconos::collision::SiconosMesh::SiconosMesh(
+    std::shared_ptr<std::vector<unsigned int>> indexes,
+    Eigen::Ref<siconos::algebra::SiconosMatrix> vertices)
+  : SiconosShape(), _indexes(indexes), _vertices(std::make_shared<siconos::algebra::SiconosMatrix>(vertices)) {
+  if (!_indexes || (_indexes->size() % 3) != 0)
+    THROW_EXCEPTION("Mesh indexes size must be divisible by 3.");
+  if (!_vertices || _vertices->rows() != 3)
+    THROW_EXCEPTION("Mesh vertices matrix must have 3 columns.");
+}
 
 siconos::collision::SiconosBox2d::SiconosBox2d(double width, double height)
     : SiconosShape(), _dimensions(std::make_shared<siconos::algebra::SiconosVector>(2)) {
