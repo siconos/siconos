@@ -78,7 +78,9 @@ PYBIND11_MODULE(_joints, m) {
   py::class_<siconos::joints::PrismaticJointR,
              std::shared_ptr<siconos::joints::PrismaticJointR>,
              siconos::joints::NewtonEulerJointR>(m, "PrismaticJointR")
-      .def(py::init<>(), "Default constructor for PrismaticJointR");
+      .def(py::init<>(), "Default constructor for PrismaticJointR")
+      .def("numberOfConstraints", &siconos::joints::PrismaticJointR::numberOfConstraints,
+           "To get the number of constraints in the joint")      ;
 
   py::class_<siconos::joints::FixedJointR, std::shared_ptr<siconos::joints::FixedJointR>,
              siconos::joints::NewtonEulerJointR>(m, "FixedJointR")
