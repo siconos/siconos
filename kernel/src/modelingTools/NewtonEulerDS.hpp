@@ -491,6 +491,13 @@ class NewtonEulerDS : public SecondOrderDS {
   inline const siconos::algebra::SiconosMemory& forcesMemory() override {
     return wrenchMemory_;
   }
+
+  /**  \return a read-only view on fext state vector */
+  inline const siconos::algebra::ConstMapVectorType fext_read() const {
+    return siconos::algebra::ConstMapVectorType(fext_view_->data(), fext_view_->size());
+  }
+
+
   /** initialize the siconos::algebra::SiconosMemory objects with a positive size.
    *
    *  \param steps the size of the siconos::algebra::SiconosMemory (i)
