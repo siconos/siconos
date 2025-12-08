@@ -50,6 +50,7 @@
 #include "IterateContactPoint.hpp"
 #include "NewtonEulerJointR.hpp"
 #include "NewtonImpactFrictionNSL.hpp"
+#include <FremondImpactFrictionNSL.hpp>
 #include "NewtonImpactRollingFrictionNSL.hpp"
 #include "RigidBody2dDS.hpp"
 #include "RigidBodyDS.hpp"
@@ -658,6 +659,8 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::updateInteractio
       /* test nslaw type and then deduce the type of relation to be created */
       auto nslaw_NewtonImpactFrictionNSL =
           std::dynamic_pointer_cast<siconos::modeling::NewtonImpactFrictionNSL>(nslaw);
+      auto nslaw_FremondImpactFrictionNSL =
+          std::dynamic_pointer_cast<siconos::modeling::FremondImpactFrictionNSL>(nslaw);
       auto nslaw_NewtonImpactRollingFrictionNSL =
           std::dynamic_pointer_cast<siconos::modeling::NewtonImpactRollingFrictionNSL>(nslaw);
 
@@ -666,7 +669,7 @@ void siconos::collision::bullet::SiconosBulletCollisionManager::updateInteractio
 
       // we assume that this test checks if  we deal with 3D problem with RigidBodies
       // Clearly, it will not be sufficient with meshed FE bodies.
-      if (nslaw && nslaw_NewtonImpactFrictionNSL) {
+      if (nslaw && nslaw_NewtonImpactFrictionNSL  || nslaw_FremondImpactFrictionNSL) {
         if (nslaw->size() == 3) {
           DEBUG_PRINT("Creation of a relation for 3D frictional contact\n");
           auto rbdsA = std::static_pointer_cast<RigidBodyDS>(pairA->ds);
