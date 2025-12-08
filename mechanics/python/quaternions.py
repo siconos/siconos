@@ -66,14 +66,16 @@ def quaternion_get(orientation):
         - Axis-angle: ([x, y, z], angle) where [x, y, z] is a 3D vector and angle is a float.
         - Quaternion: [w, x, y, z] where w, x, y, z are the quaternion components.
     """
-
-    if isinstance(orientation, np.ndarray) or isinstance(orientation, list):
+    print('orientation', orientation)
+    if isinstance(orientation, np.ndarray) or \
+       (isinstance(orientation, list) and len(orientation) == 4) :
         orientation = np.asarray(orientation, dtype=np.float64)
+        
         if orientation.shape[0] != 4:
             raise AssertionError("quaternion_get. The quaternion must be of size 4")
         return orientation
 
-    if isinstance(orientation, tuple):
+    if isinstance(orientation, tuple) or isinstance(orientation, list):
         if len(orientation) != 2:  # orientation is a tuple
             raise AssertionError("quaternion_get. Wrong input format")
         # axis + angle
