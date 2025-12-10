@@ -50,8 +50,8 @@ PYBIND11_MODULE(_nonos, m)
   auto pyhandles = ground::transform(disks_handles, [&disks]<typename H>(
                                                         H handle) {
     using item_t = typename H::type;
-    using base_index_t = typename H::base_index_t;
-    auto base_index = py::class_<base_index_t>(
+    using index_t = typename H::index_t;
+    auto base_index = py::class_<index_t>(
         disks, fmt::format("index_{}",
                            storage::bind_name<item_t, disks_properties_t>())
                    .c_str());

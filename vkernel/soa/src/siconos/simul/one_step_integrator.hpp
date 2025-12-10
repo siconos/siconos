@@ -59,16 +59,17 @@ struct one_step_integrator {
 
       auto assembled_osi()
       {
-        return storage::handle(self()->data(),
-                               attr<"assembled_osi">(*self()));
+        return storage::make_ref_handle(self()->data(),
+                                        attr<"assembled_osi">(*self()));
       }
       void __init__()
       {
-        assembled_osi() = storage::add<assembled_osi_t>(self()->data());
+        auto osi = storage::add<assembled_osi_t>(self()->data());
+        assembled_osi() = osi;
 
-        ground::for_each(elements(), [&]<typename Elem>(Elem elem) {
-          elem = storage::add<typename Elem::type>(self()->data());
-          elem.assembled_osi() = self()->assembled_osi();
+        ground::for_each(elements(), [&]<typename Elem>(Elem) {
+          auto elem = storage::add<typename Elem::type>(self()->data());
+          elem.assembled_osi() = osi;
         });
       }
 
@@ -101,8 +102,9 @@ struct one_step_integrator {
       decltype(auto) elements()
       {
         return ground::transform(
-            storage::attr<"elements">(*self()),
-            [&](auto elem) { return storage::handle(self()->data(), elem); });
+            storage::attr<"elements">(*self()), [&](auto elem) {
+              return storage::make_handle(self()->data(), elem);
+            });
       }
 
       template <size_t N, typename Func>
@@ -178,8 +180,7 @@ struct one_step_integrator {
           ods += elem.number_of_involved_ds() * elem.dof();
           ointer += elem.number_of_interactions() * elem.nslaw_size();
 
-          if constexpr (elem.nslaw_with_friction())
-          {
+          if constexpr (elem.nslaw_with_friction()) {
             num_fric += elem.number_of_interactions();
           }
         });

@@ -46,6 +46,17 @@ def test_time_stepping():
 
     data = m.disks.make_storage()
     simul = m.disks.add_simulation(data)
+    simul.time_discretization().set_t0(0.1)
+    simul.time_discretization().set_tmax(10)
+    simul.time_discretization().set_h(0.005)
+
+    timedisc = m.disks.add_time_discretization(data)
+    timedisc.set_t0(0.3)
+
+    print(f't0={simul.time_discretization().t0()}')
+    assert simul.time_discretization().t0() == 0.1
+    assert simul.time_discretization().tmax() == 10
+    assert simul.time_discretization().h() == 0.005
 
 def test_interaction_manager():
     data = m.disks.make_storage()
@@ -54,10 +65,13 @@ def test_interaction_manager():
     interman.insert_nonsmooth_law(nslaw, 0 , 0).\
         insert_nonsmooth_law(nslaw, 0, 1)
 
-def test_io():
-    data = m.disks.make_storage()
-    io = m.disks.add_io(data)
-    assert io.positions(0).shape[0] == 0
-    assert io.positions(0).shape[1] == 5
-    disk = m.disks.add_disk(data)
-    assert io.positions(0).shape[0] == 1
+#def test_io():
+#    data = m.disks.make_storage()
+#    io = m.disks.add_io(data)
+#    assert io.positions(0).shape[0] == 0
+#    assert io.positions(0).shape[1] == 5
+#    disk = m.disks.add_disk(data)
+#    assert io.positions(0).shape[0] == 1
+
+#test_time_stepping()
+

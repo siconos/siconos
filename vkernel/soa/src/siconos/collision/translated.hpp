@@ -22,8 +22,8 @@ struct translated : item<> {
     // access to the translated shape
     decltype(auto) translated()
     {
-      return storage::handle(self()->data(),
-                             storage::attr<"translated">(*self()));
+      return storage::make_ref_handle(self()->data(),
+                                      storage::attr<"translated">(*self()));
     };
 
     // translated points coordinates
@@ -43,8 +43,8 @@ struct translated : item<> {
       using env_t = decltype(self()->env());
       using indice_t = typename env_t::indice;
 
-      return view::iota((indice_t) 0, translated().maxpoints()) |
-        view::transform([this](auto i) { return point_coord(i); });
+      return view::iota((indice_t)0, translated().maxpoints()) |
+             view::transform([this](auto i) { return point_coord(i); });
     }
 
     decltype(auto) translation()

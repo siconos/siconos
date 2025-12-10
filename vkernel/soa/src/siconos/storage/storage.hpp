@@ -63,7 +63,8 @@ struct composite_item : item<> {
       // Assignment from Item1 handle (e.g., translated_disk_shape =
       // disk_shape)
       template <typename I, typename R, typename D>
-      const composite_holder& operator=(const storage::handle<I, R, D>& other)
+      const composite_holder& operator=(
+          const storage::handle<storage::handle_base, I, R, D>& other)
       {
         if constexpr (std::derived_from<Item1, I> ||
                       std::derived_from<Item2, I>) {
@@ -77,14 +78,14 @@ struct composite_item : item<> {
               storages_to_copy,
               [this, &other, &data]<match::attribute Storage>(Storage) {
                 ground::get<Storage>(data.store())[(*handlep).get()] =
-                    ground::get<Storage>(data.store())[other.get()];
+                  ground::get<Storage>(data.store())[other.index().value()];
               });
           return *this;
         }
         else {
           []<bool flag = false>() {
-            static_assert(flag,
-                          "cannot copy this handle in this composite handle!");
+            static_assert(
+                flag, "cannot copy this handle in this composite handle!");
           }();
         }
       }
@@ -93,7 +94,6 @@ struct composite_item : item<> {
     };
 
     composite_holder composite() { return composite_holder(self()); }
-
   };
 };
 

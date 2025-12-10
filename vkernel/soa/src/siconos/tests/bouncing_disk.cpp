@@ -63,7 +63,7 @@ int main(int argc, char* argv[])
   d1.velocity() = {0, velocity_init, 0};
   d1.mass_matrix().diagonal() << m, m, 2. / 5. * m * radius * radius;
 
-  storage::handle(data, prop<"shape">(d1)).radius() = radius;
+  storage::make_handle(data, prop<"shape">(d1)).radius() = radius;
 
   // -- Set external forces (weight) --
   d1.fext() = {0., -m * g, 0.};
@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
   osnspb.options() = so;
 
   auto ground_r = storage::add<config::diskfsegment_r>(data);
-  auto segment = storage::handle(data, ground_r.segment());
+  auto segment = ground_r.segment();
   segment.x1() = -1.;
   segment.y1() = 0;
   segment.x2() = 1;

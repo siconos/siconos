@@ -16,7 +16,7 @@ struct diskmesh_r : item<>, model::relation2, model::any_lagrangian_relation {
 
     decltype(auto) mesh()
     {
-      return storage::handle(self()->data(), attr<"mesh">(*self()));
+      return storage::make_ref_handle(self()->data(), attr<"mesh">(*self()));
     }
     decltype(auto) shape() { return self()->mesh(); }
     decltype(auto) contact_index()
@@ -33,7 +33,7 @@ struct diskmesh_r : item<>, model::relation2, model::any_lagrangian_relation {
       auto& cindex = self()->contact_index();
 
       return mesh().distance(q1, cindex) -
-             handle(self()->data(), prop<"shape">(ds1)).radius();
+             make_handle(self()->data(), prop<"shape">(ds1)).radius();
     }
 
     template <typename I, match::handle<model::lagrangian_ds> DS1,
@@ -48,7 +48,8 @@ struct diskmesh_r : item<>, model::relation2, model::any_lagrangian_relation {
       auto& q1 = storage::attr<"q">(ds1);
       auto& q2 = storage::attr<"q">(ds2);
 
-      auto& r = storage::handle(data, storage::prop<"shape">(ds1)).radius();
+      auto& r =
+          storage::make_handle(data, storage::prop<"shape">(ds1)).radius();
 
       /* disk coordinates */
       const scalar& x = q1(0);
@@ -61,8 +62,8 @@ struct diskmesh_r : item<>, model::relation2, model::any_lagrangian_relation {
       const scalar& x2 = q2(self()->contact_index() + 2);
       const scalar& y2 = q2(self()->contact_index() + 3);
 
-      //auto& g1 = h_matrix1;
-      //auto& g2 = h_matrix2;
+      // auto& g1 = h_matrix1;
+      // auto& g2 = h_matrix2;
 
       double tmp0 = x1 - x2;
       double tmp1 = y1 - y2;

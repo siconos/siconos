@@ -32,9 +32,9 @@ struct item_b : item<> {
 
     decltype(auto) ref() { return attr<"ref">(*self()); };
 
-    decltype(auto) handle_ref()
+    decltype(auto) href()
     {
-      return handle(self()->data(), attr<"ref">(*self()));
+      return make_ref_handle(self()->data(), attr<"ref">(*self()));
     };
   };
 };
@@ -86,23 +86,28 @@ void StorageTest::testStorage0()
   auto a2 = store::add<config::item_a>(data);
 
   // With unbounded storage index is incremented at each addition.
-  CPPUNIT_ASSERT(a2.get() == a1.get() + 1);
+  CPPUNIT_ASSERT(a2.index().value() == a1.index().value() + 1);
 
   auto b1 = store::add<config::item_b>(data);
   auto b2 = store::add<config::item_b>(data);
 
-  b1.ref() = a1;
-  b2.ref() = a2;
+  b1.ref() = a1.index();
+  b2.ref() = a2.index();
 
   // Check index as lvalue reference is set from handle.
-  CPPUNIT_ASSERT(b1.ref().get() == a1.get());
-  CPPUNIT_ASSERT(b2.ref().get() == a2.get());
+  CPPUNIT_ASSERT(b1.ref().value() == a1.index().value());
+  CPPUNIT_ASSERT(b2.ref().value() == a2.index().value());
 
   auto a3 = store::add<config::item_a>(data);
   auto a4 = store::add<config::item_a>(data);
 
-  // must not compile
-  //b1.handle_ref() = a3;
-  //b2.handle_ref() = a4;
+  CPPUNIT_ASSERT(a3.index().value() == 2);
+  CPPUNIT_ASSERT(a4.index().value() == 3);
+
+  b1.href() = a3;
+  b2.href() = a4;
+
+  CPPUNIT_ASSERT(b1.ref().value() == a3.index().value());
+  CPPUNIT_ASSERT(b2.ref().value() == a4.index().value());
 
 };

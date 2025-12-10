@@ -178,7 +178,11 @@ static decltype(auto) out_formatter(H h, T&& out_value)
       return algebra::matrix_ref<out_t>(static_cast<T&&>(out_value));
     }
     else if constexpr (match::index<out_t>) {
-      return storage::handle(h.data(), static_cast<T&&>(out_value));
+      auto ret_val = siconos::storage::handle<
+          siconos::storage::handle_base, typename out_t::type,
+          typename out_t::value_t, siconos::python::disks::idata_t>(
+          h.data(), out_value);
+      return ret_val;
     }
     else {
       return static_cast<T&&>(out_value);

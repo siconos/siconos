@@ -67,7 +67,7 @@ int main(int argc, char* argv[])
   // d2.velocity() = {velocity_init, 0, 0};
   // d2.mass_matrix().diagonal() << m, m, 2. / 5. * m * radius * radius;
 
-  storage::handle(data, prop<"shape">(d1)).radius() = radius;
+  storage::make_handle(data, prop<"shape">(d1)).radius() = radius;
   //  storage::handle(data, prop<"shape">(d2)).radius() = 2;
 
   // -- Set external forces (weight) --
@@ -110,7 +110,7 @@ int main(int argc, char* argv[])
   osnspb.options() = so;
 
   auto ground_r = storage::add<config::diskline_r>(data);
-  auto line = storage::handle(data, ground_r.line());
+  auto line = ground_r.line();
   line.a() = 0.;
   line.b() = 1.;
   line.c() = 0.;

@@ -30,7 +30,7 @@ static auto remove = [](auto& data, auto&& h) {
       concat(attributes(item_t{}), attached_storages(h.item_type(), data)));
 
   // call handle delete function if present
-  auto h1 = h; // clang 19
+  auto h1 = h;  // clang 19
   if constexpr (has_del(h1)) {
     h1.__del__();
   }
@@ -40,7 +40,8 @@ static auto remove = [](auto& data, auto&& h) {
       return ground::for_each(
           ground::range<memory_size<A, all_keeps_t>()>,
           [&data, &h](indice step) {
-            move_back(h.get(), memory(step, ground::get<A>(data.store())));
+            move_back(h.index().value(),
+                      memory(step, ground::get<A>(data.store())));
           });
     });
   }

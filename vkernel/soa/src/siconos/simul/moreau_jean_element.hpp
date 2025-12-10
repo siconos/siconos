@@ -46,8 +46,8 @@ struct moreau_jean_element : item<> {
 
     decltype(auto) assembled_osi()
     {
-      return storage::handle(self()->data(),
-                             storage::attr<"assembled_osi">(*self()));
+      return storage::make_ref_handle(
+          self()->data(), storage::attr<"assembled_osi">(*self()));
     }
 
     decltype(auto) ds_offset() { return storage::attr<"ds_offset">(*self()); }
@@ -238,8 +238,8 @@ struct moreau_jean_element : item<> {
         // local binding not enough to be passed to lambda...
         auto &hhm1 = hm1;
         auto &hhm2 = hm2;
-        auto hds1 = storage::handle(data, ds1);
-        auto hds2 = storage::handle(data, ds2);
+        auto hds1 = storage::make_handle(data, ds1);
+        auto hds2 = storage::make_handle(data, ds2);
         auto rnds = nds;
 
         siconos::variant::visit(
@@ -344,17 +344,17 @@ struct moreau_jean_element : item<> {
                 [&](auto) { return false; }));
 
         if (linear_case) {
-          y = hm1 * qs[ds1.get()];
-          ydot = hm1 * velocities[ds1.get()];
+          y = hm1 * qs[ds1.value()];
+          ydot = hm1 * velocities[ds1.value()];
 
           if (nds == 2) {
-            y += hm2 * qs[ds2.get()];
-            ydot += hm2 * velocities[ds2.get()];
+            y += hm2 * qs[ds2.value()];
+            ydot += hm2 * velocities[ds2.value()];
           }
         }
         else {
-          auto hds1 = storage::handle(data, ds1);
-          auto hds2 = storage::handle(data, ds2);
+          auto hds1 = storage::make_handle(data, ds1);
+          auto hds2 = storage::make_handle(data, ds2);
 
           y[0] = siconos::variant::visit(
               data, inter.relation(),
@@ -369,11 +369,11 @@ struct moreau_jean_element : item<> {
                   [&](match::relation2 auto rrel) {
                     return rrel.compute_h(hds1, hds2);
                   }));
-          ydot = hm1 * velocities[ds1.get()];
+          ydot = hm1 * velocities[ds1.value()];
           if (nds == 2) {
-            ydot += hm2 * velocities[ds2.get()];
+            ydot += hm2 * velocities[ds2.value()];
           }
-          // std::cout << "interaction:" << inter.get() << ","
+          // std::cout << "interaction:" << inter.index().value() << ","
           //           << "y:" << y[0] << ",ydot:" << ydot << std::endl;
         }
       }
@@ -497,8 +497,8 @@ struct moreau_jean_element : item<> {
         if (activation) {
           inter_counter++;
 
-          auto ds1 = storage::handle(data, ids1);
-          auto ds2 = storage::handle(data, ids2);
+          auto ds1 = storage::make_handle(data, ids1);
+          auto ds2 = storage::make_handle(data, ids2);
 
           if (!prop<"involved">(ds1)) {
             prop<"involved">(ds1) = true;
@@ -513,8 +513,8 @@ struct moreau_jean_element : item<> {
           //          print(
           //              "\nstep: {}, time: {} => ACTIVATION {}<->{}
           //              !\ny:{}, " "ydot:{}\n",
-          //             step, step * h, ids1.get(), ids2.get(), y,
-          //             ydot);
+          //             step, step * h, ids1.index().value(),
+          //             ids2.index().value(), y, ydot);
         }
       }
 
@@ -561,11 +561,11 @@ struct moreau_jean_element : item<> {
       for (auto [activation, h_mat1, h_mat2, ids1, ids2] :
            view::zip(activations, h_mat1s, h_mat2s, ids1s, ids2s)) {
         if (activation) {
-          assert(storage::prop<"involved">(storage::handle(data, ids1)));
-          assert(storage::prop<"involved">(storage::handle(data, ids2)));
+          assert(storage::prop<"involved">(storage::make_handle(data, ids1)));
+          assert(storage::prop<"involved">(storage::make_handle(data, ids2)));
 
-          auto j1 = indices[ids1.get()];
-          auto j2 = indices[ids2.get()];
+          auto j1 = indices[ids1.value()];
+          auto j2 = indices[ids2.value()];
           if (j1 == j2) {
             // one block
             set_value(h_matrix, i, j1,
@@ -605,8 +605,8 @@ struct moreau_jean_element : item<> {
           set_value(lambda_vector_assembled(), k, lambda);
 
           if constexpr (nslaw_with_friction()) {
-            set_value(mu_vector_assembled(), k,
-                      storage::handle(data, nslaw).mu());
+            auto hnslaw = storage::make_handle(data, nslaw);
+            set_value(mu_vector_assembled(), k, hnslaw.mu());
           }
 
           set_value(ydot_vector_assembled(), k, ydot_bck);
@@ -653,7 +653,7 @@ struct moreau_jean_element : item<> {
 
       for (auto [ydot, ydot_next, inslaw] :
            view::zip(ydots, ydots_next, inslaws)) {
-        ydot_next += es[inslaw.get()] * ydot;
+        ydot_next += es[inslaw.value()] * ydot;
       }
     }
 

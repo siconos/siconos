@@ -65,7 +65,7 @@ int main(int argc, char* argv[])
   }
 
   for (auto ball : storage::handles<config::ball>(data, 0)) {
-    print("ball:{} , ball.q()={}\n", ball.get(), ball.q()[0]);
+    print("ball:{} , ball.q()={}\n", ball.index().value(), ball.q()[0]);
   }
   // ------------------
   // -- The relation --
@@ -126,7 +126,8 @@ int main(int argc, char* argv[])
   //    });
 
   for (auto [ball1, ball2] : view::zip(balls, balls | view::drop(1))) {
-    print("new interaction ball<->ball : {} {}\n", ball1.get(), ball2.get());
+    print("new interaction ball<->ball : {} {}\n", ball1.index().value(),
+          ball2.index().value());
     auto interaction = simulation.topology().link(ball1, ball2);
     //    interaction.h_matrix1() << -1., 0., 0., 0., 1., -radius;
     //    interaction.h_matrix2() << 1., 0., 0., 0., 1., -radius;
@@ -144,8 +145,8 @@ int main(int argc, char* argv[])
   auto ball1 = (balls | view::take(1)).front();
   auto ball2 = (balls | view::take(2)).back();
 
-  print("ball1:{}, ball2:{} ball1.q()={}, ball2.q()={}\n", ball1.get(),
-        ball2.get(), ball1.q(), ball2.q());
+  print("ball1:{}, ball2:{} ball1.q()={}, ball2.q()={}\n",
+        ball1.index().value(), ball2.index().value(), ball1.q(), ball2.q());
 
   // iteration matrix & h_matrices
   simulation.initialize();

@@ -128,12 +128,13 @@ struct topology : item<> {
 
     void set_dynamical_system_id(auto hds, auto id)
     {
-      attr<"system_id">(*self())[id] = hds.index_cast();
+      attr<"system_id">(*self())[id] = hds.index();
     }
 
     decltype(auto) dynamical_system(auto id)
     {
-      return storage::handle(self()->data(), attr<"system_id">(*self())[id]);
+      return storage::make_handle(self()->data(),
+                                  attr<"system_id">(*self())[id]);
     }
 
     auto methods()
@@ -141,7 +142,8 @@ struct topology : item<> {
       using data_t = std::decay_t<decltype(self()->data())>;
       using env_t = decltype(self()->env());
       using indice = typename env_t::indice;
-      using hds_t = storage::handle<fsystem, indice, data_t>;
+      using hds_t =
+          storage::handle<storage::handle_base, fsystem, indice, data_t>;
 
       return collect(
           method("set_dynamical_system_id",

@@ -41,17 +41,17 @@ struct point<Item> : item<> {
     decltype(auto) coord() { return storage::attr<"coord">(*self()); };
     decltype(auto) item()
     {
-      return storage::handle(self()->data(), storage::attr<"item">(*self()));
+      return storage::make_ref_handle(self()->data(),
+                                      storage::attr<"item">(*self()));
     };
 
     void update(auto step)
     {
-      auto& data = self()->data();
-
       // one body / one point
-      auto hbody = storage::handle(data, item());
-      storage::attr<"coord">(*self())[0] = storage::attr<"q">(hbody, step)(0);
-      storage::attr<"coord">(*self())[1] = storage::attr<"q">(hbody, step)(1);
+      storage::attr<"coord">(*self())[0] =
+          storage::attr<"q">(item(), step)(0);
+      storage::attr<"coord">(*self())[1] =
+          storage::attr<"q">(item(), step)(1);
       storage::attr<"coord">(*self())[2] = 0.; /* 2D */
     }
   };
@@ -81,7 +81,8 @@ struct point<Item> {
     decltype(auto) coord() { return storage::attr<"coord">(*self()); };
     decltype(auto) item()
     {
-      return storage::handle(self()->data(), storage::attr<"item">(*self()));
+      return storage::make_ref_handle(self()->data(),
+                                      storage::attr<"item">(*self()));
     };
     decltype(auto) point_index()
     {
@@ -123,7 +124,8 @@ struct point<Item> {
     decltype(auto) coord() { return storage::attr<"coord">(*self()); };
     decltype(auto) item()
     {
-      return storage::handle(self()->data(), storage::attr<"item">(*self()));
+      return storage::make_ref_handle(self()->data(),
+                                      storage::attr<"item">(*self()));
     };
     decltype(auto) point_index()
     {

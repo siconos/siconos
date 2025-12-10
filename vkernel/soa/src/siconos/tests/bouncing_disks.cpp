@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
     d1.velocity() = {0, velocity_init, 0};
     d1.mass_matrix().diagonal() << m, m, 2. / 5. * m * radius * radius;
 
-    storage::handle(data, prop<"shape">(d1)) = disk_shape;
+    prop<"shape">(d1) = disk_shape;
 
     // -- Set external forces (weight) --
     d1.fext() = {0., -m * g, 0.};
@@ -106,7 +106,7 @@ int main(int argc, char* argv[])
   }
 
   for (auto disk : storage::handles<config::disk>(data, 0)) {
-    print("disk:{} , disk.q()={}\n", disk.get(), disk.q()[0]);
+    print("disk:{} , disk.q()={}\n", disk.index().value(), disk.q()[0]);
   }
 
   // ------------------
@@ -152,7 +152,7 @@ int main(int argc, char* argv[])
   auto segment = storage::add<config::segment_shape>(data);
   auto diskdisk_r = storage::add<config::diskdisk_r>(data);
   auto ground_r = storage::add<config::diskfsegment_r>(data);
-  storage::handle(data, ground_r.segment()) = segment;
+  ground_r.segment() = segment;
   segment.x1() = -10.;
   segment.y1() = 0.;
   segment.x2() = 10.;
@@ -178,8 +178,8 @@ int main(int argc, char* argv[])
   auto disk1 = (disks | view::take(1)).front();
   auto disk2 = (disks | view::take(2)).back();
 
-  print("disk1:{}, disk2:{} disk1.q()={}, disk2.q()={}\n", disk1.get(),
-        disk2.get(), disk1.q(), disk2.q());
+  print("disk1:{}, disk2:{} disk1.q()={}, disk2.q()={}\n",
+        disk1.index().value(), disk2.index().value(), disk1.q(), disk2.q());
 
   // fix this for constant fext
   simulation.initialize();

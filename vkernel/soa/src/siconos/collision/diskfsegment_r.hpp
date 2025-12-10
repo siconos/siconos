@@ -23,7 +23,7 @@ struct diskfsegment_r : item<>,
 
     decltype(auto) segment()
     {
-      return handle(self()->data(), attr<"segment">(*self()));
+      return make_ref_handle(self()->data(), attr<"segment">(*self()));
     }
 
     decltype(auto) shape() { return self()->segment(); }
@@ -32,7 +32,7 @@ struct diskfsegment_r : item<>,
     {
       auto& q = storage::attr<"q">(ds);
       return segment().distance(q) -
-             handle(self()->data(), prop<"shape">(ds)).radius();
+             make_handle(self()->data(), prop<"shape">(ds)).radius();
     }
 
     void compute_jachq(auto step, auto& ds, auto& h_matrix1)
@@ -42,7 +42,7 @@ struct diskfsegment_r : item<>,
 
       const auto& q = storage::attr<"q">(ds);
       const scalar& r =
-          storage::handle(data, storage::prop<"shape">(ds)).radius();
+          storage::make_handle(data, storage::prop<"shape">(ds)).radius();
 
       const scalar& x = q(0);
       const scalar& y = q(1);

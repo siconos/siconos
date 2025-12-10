@@ -29,13 +29,15 @@ struct interaction_manager : item<> {
     decltype(auto) get_nonsmooth_law(auto gid1, auto gid2)
     {
       auto& data = self()->data();
-      return storage::handle(data, attr<"nslaws">(*self())(gid1, gid2));
+      return storage::make_handle(data,
+                                  attr<"nslaws">(*self())(gid1, gid2));
     }
 
     void update_interactions(auto step)
     {
       auto& data = self()->data();
-      storage::handle(data, attr<"space_filter">(*self())).update_index_set0(step);
+      storage::make_handle(data, attr<"space_filter">(*self()))
+          .update_index_set0(step);
     }
 
     auto methods()
@@ -55,6 +57,5 @@ struct interaction_manager : item<> {
                  &interface<Handle>::update_interactions<indice>));
     }
   };
-
 };
 }  // namespace siconos::simul

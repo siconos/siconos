@@ -101,7 +101,7 @@ struct io : item<> {
 
       for (auto [id, shape] : view::zip(ids, shapes)) {
         attr<"radii_info">(*self()).push_back(
-            {(scalar)id, storage::handle(data, shape).radius()});
+            {(scalar)id, storage::make_handle(data, shape).radius()});
       }
 
       return algebra::matrix_view<algebra::unbounded_col_matrix<scalar, 2>>(
@@ -184,8 +184,8 @@ struct io : item<> {
       for (auto [relation, nslaw, y, ydot, lambda, ds1, ds2, activation] :
            view::zip(relations, nslaws, ys, ydots, lambdas, ds1s, ds2s,
                      activations)) {
-        auto hds1 = storage::handle(data, ds1);
-        auto hds2 = storage::handle(data, ds2);
+        auto hds1 = storage::make_handle(data, ds1);
+        auto hds2 = storage::make_handle(data, ds2);
 
         using vect = std::decay_t<decltype(hds1.q())>; /* in 2D, 3 components:
                                                           translation 2 +
@@ -214,14 +214,12 @@ struct io : item<> {
             scalar dc2c1 = collision::distance(c2, c1);
 
             cn = (c2 - c1) / dc2c1;
-            ca =
-                c1 +
-                storage::handle(data, storage::prop<"shape">(hds1)).radius() *
-                    cn;
-            cb =
-                c2 -
-                storage::handle(data, storage::prop<"shape">(hds2)).radius() *
-                    cn;
+            ca = c1 + storage::make_handle(data, storage::prop<"shape">(hds1))
+                              .radius() *
+                          cn;
+            cb = c2 - storage::make_handle(data, storage::prop<"shape">(hds2))
+                              .radius() *
+                          cn;
           }
           else {
             variant::visit(
@@ -230,11 +228,11 @@ struct io : item<> {
                     /* disk / segment */
                     [&](storage::index<collision::diskfsegment_r, indice>
                             rrel) {
-                      auto hrel = storage::handle(data, rrel);
+                      auto hrel = storage::make_handle(data, rrel);
                       /* cb is the proj point on the segment, computed a
                        * second time!
                        */
-                      auto segment = storage::handle(data, hrel.segment());
+                      auto segment = hrel.segment();
                       const scalar t =
                           fmax(0, fmin(1, algebra::dot(c1 - segment.p1(),
                                                        segment.dp2p1()) /
@@ -242,13 +240,13 @@ struct io : item<> {
                       cb = segment.p1() + t * segment.dp2p1();
                       scalar dcbc1 = collision::distance(cb, c1);
                       cn = (cb - c1) / dcbc1;
-                      ca = c1 + cn * storage::handle(
+                      ca = c1 + cn * storage::make_handle(
                                          data, storage::prop<"shape">(hds1))
                                          .radius();
                     },
                     /* disk / fixed disk */
                     [&](storage::index<collision::diskfdisk_r, indice> rrel) {
-                      auto hrel = storage::handle(data, rrel);
+                      auto hrel = storage::make_handle(data, rrel);
                       auto tds = hrel.translated_disk_shape();
 
                       c2 = tds.translation();
@@ -257,10 +255,10 @@ struct io : item<> {
                       scalar dc2c1 = collision::distance(c2, c1);
 
                       cn = (c2 - c1) / dc2c1;
-                      ca = c1 +
-                           storage::handle(data, storage::prop<"shape">(hds1))
-                                   .radius() *
-                               cn;
+                      ca = c1 + storage::make_handle(
+                                    data, storage::prop<"shape">(hds1))
+                                        .radius() *
+                                    cn;
                       cb = c2 - radius2 * cn;
                     },
                     [&](auto) {
@@ -272,7 +270,7 @@ struct io : item<> {
 
           /* disk / segment */
           attr<"cp_info">(*self()).push_back(
-              {storage::handle(data, nslaw).mu(),
+              {storage::make_handle(data, nslaw).mu(),
                ca[0],
                ca[1],
                0. /* 2D */,
@@ -327,8 +325,8 @@ struct io : item<> {
       for (auto [relation, ds1, ds2, activation] :
            view::zip(relations, ds1s, ds2s, activations)) {
         if (activation) {
-          auto hds1 = storage::handle(data, ds1);
-          auto hds2 = storage::handle(data, ds2);
+          auto hds1 = storage::make_handle(data, ds1);
+          auto hds2 = storage::make_handle(data, ds2);
           auto index_ds1 = prop<"index">(hds1);
           auto index_ds2 = prop<"index">(hds2);
 
@@ -339,9 +337,8 @@ struct io : item<> {
               ground::overload(
                   // relation1 with static shape : the concept is missing
                   [&]<match::relation1 Relation>(Relation rrel) {
-                    auto hrel = storage::handle(data, rrel);
                     // must provide shape method
-                    return storage::prop<"ident">(hrel.shape());
+                    return storage::prop<"ident">(rrel.shape());
                   },
                   [&](auto) {
                     // another kind of relation

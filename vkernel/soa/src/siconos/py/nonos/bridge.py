@@ -115,8 +115,8 @@ class SpaceFilter(Stored):
         return translated_disk_shape
 
     def insertNonSmoothLaw(self, nslaw, gid1, gid2):
+        self._handle.set_nslaw(nslaw.handle()) # one nslaw !
         self._interman.insert_nonsmooth_law(nslaw.handle(), gid1, gid2)
-        self._handle.set_nslaw(self._interman.get_nonsmooth_law(gid1, gid2)) # one nslaw!!
 
     def updateInteractions(self, step):
         if not self._initialized:
@@ -224,8 +224,14 @@ class Simulation(Stored):
         self._need_init = True
         self._nsds = nsds
         self._timedisc = timedisc
-        self._timedisc.handle().set_tmax(self._nsds._T) # vkernel does not have nsds
+        t0 = timedisc.handle().t0()
+        h = timedisc.handle().h()
+        # overwrite timedisc if time_discretization is not wrapped by unbounded collection
         self._handle = vkernel.disks.add_simulation(self.data())
+        self._timedisc.handle().set_tmax(self._nsds._T) # vkernel does not have nsds
+        self._timedisc.handle().set_h(h)
+        self._timedisc.handle().set_t0(t0)
+
         self.handle().initialize()
         self.handle().one_step_integrator().assembled_osi().set_theta(0.50001)
 

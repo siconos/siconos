@@ -15,25 +15,58 @@ struct time_stepping : item<> {
 
   using formulation_t =
       typename one_step_nonsmooth_problem_t::problem_t::formulation_t;
-  using attributes = attributes_of_items<Items...>;
+  using attributes = gather<
+      attribute<"time_discretization", some::item_ref<time_discretization_t>>,
+      attribute<"one_step_integrator", some::item_ref<one_step_integrator_t>>,
+      attribute<"one_step_nonsmooth_problem",
+                some::item_ref<one_step_nonsmooth_problem_t>>,
+      attribute<"topology", some::item_ref<topology_t>>>;
 
   template <typename Handle>
   struct interface : default_interface<Handle> {
     using default_interface<Handle>::self;
 
+    void __init__()
+    {
+      auto& data = self()->data();
+      time_discretization() = storage::add<time_discretization_t>(data);
+      one_step_integrator() = storage::add<one_step_integrator_t>(data);
+      one_step_nonsmooth_problem() =
+          storage::add<one_step_nonsmooth_problem_t>(data);
+      topology() = storage::add<topology_t>(data);
+    }
+
+    void __del__()
+    {
+      // not implemented
+        throw std::runtime_error("Stable pointers need to be implemented");
+        storage::remove(time_discretization());
+        storage::remove(one_step_integrator());
+        storage::remove(one_step_nonsmooth_problem());
+        storage::remove(topology());
+    }
+
     decltype(auto) time_discretization()
     {
-      return make_handle<time_discretization_t>(*self());
+      return storage::make_ref_handle(
+          self()->data(), storage::attr<"time_discretization">(*self()));
     }
     decltype(auto) one_step_integrator()
     {
-      return make_handle<one_step_integrator_t>(*self());
+      return make_ref_handle(self()->data(),
+                             storage::attr<"one_step_integrator">(*self()));
     }
     decltype(auto) one_step_nonsmooth_problem()
     {
-      return make_handle<one_step_nonsmooth_problem_t>(*self());
+      return make_ref_handle(
+          self()->data(),
+          storage::attr<"one_step_nonsmooth_problem">(*self()));
     }
-    decltype(auto) topology() { return make_handle<topology_t>(*self()); }
+    decltype(auto) topology()
+    {
+      return make_ref_handle(self()->data(),
+                             storage::attr<"topology">(*self()));
+    }
 
     decltype(auto) current_step()
     {
@@ -78,11 +111,9 @@ struct time_stepping : item<> {
             elem.compute_active_interactions(step, time_step());
 
         total_number_of_involved_ds += nds;
-
       });
 
       if (total_number_of_involved_ds > 0) {
-
         // resize assembled matrices and vectors
         osi.assemble_setup();
 
@@ -159,13 +190,6 @@ struct time_stepping : item<> {
 
       return collect(
           method("initialize", &interface<Handle>::initialize),
-          method("time_discretization",
-                 &interface<Handle>::time_discretization),
-          method("one_step_integrator",
-                 &interface<Handle>::one_step_integrator),
-          method("one_step_nonsmooth_problem",
-                 &interface<Handle>::one_step_nonsmooth_problem),
-          method("topology", &interface<Handle>::topology),
           method("current_step", &interface<Handle>::current_step),
           method("time_step", &interface<Handle>::time_step),
           method("compute_one_step", &interface<Handle>::compute_one_step),

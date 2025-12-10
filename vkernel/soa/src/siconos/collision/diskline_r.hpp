@@ -15,7 +15,7 @@ struct diskline_r : item<>, model::relation1, model::any_lagrangian_relation {
 
     decltype(auto) line()
     {
-      return handle(self()->data(), attr<"line">(*self()));
+      return make_ref_handle(self()->data(), attr<"line">(*self()));
     }
 
     decltype(auto) shape() { return self()->line(); }
@@ -24,7 +24,7 @@ struct diskline_r : item<>, model::relation1, model::any_lagrangian_relation {
     {
       auto& q = storage::attr<"q">(ds);
       return line().distance(q) -
-             handle(self()->data(), prop<"shape">(ds)).radius();
+             make_handle(self()->data(), prop<"shape">(ds)).radius();
     }
 
     void compute_jachq(auto step, auto& ds, auto& h_matrix1)
@@ -32,7 +32,7 @@ struct diskline_r : item<>, model::relation1, model::any_lagrangian_relation {
       auto& data = self()->data();
 
       auto& q = storage::attr<"q">(ds);
-      auto& r = storage::handle(data, storage::prop<"shape">(ds)).radius();
+      auto& r = storage::make_handle(data, storage::prop<"shape">(ds)).radius();
 
       auto& x = q(0);
       auto& y = q(1);

@@ -140,16 +140,19 @@ struct one_step_nonsmooth_problem : item<> {
     decltype(auto) trace() { return attr<"trace">(*self()); }
     decltype(auto) trace_params()
     {
-      return storage::handle(self()->data(), attr<"trace_params">(*self()));
+      return storage::make_ref_handle(self()->data(),
+                                      attr<"trace_params">(*self()));
     }
 
     decltype(auto) options()
     {
-      return storage::handle(self()->data(), attr<"options">(*self()));
+      return storage::make_ref_handle(self()->data(),
+                                      attr<"options">(*self()));
     }
     decltype(auto) problem()
     {
-      return storage::handle(self()->data(), attr<"problem">(*self()));
+      return storage::make_ref_handle(self()->data(),
+                                      attr<"problem">(*self()));
     }
     decltype(auto) level() { return attr<"level">(*self()); };
 
@@ -205,8 +208,7 @@ struct one_step_nonsmooth_problem : item<> {
 
             // format alone ambiguous for clang-19
             auto iter_filename = fmt::format(
-                "{}-i{:0{}d}-{}-{}.hdf5",
-                trace_params().filename(),
+                "{}-i{:0{}d}-{}-{}.hdf5", trace_params().filename(),
                 solver_maxiter, n_format_string, size0(w_mat),
                 trace_params().counter());
 

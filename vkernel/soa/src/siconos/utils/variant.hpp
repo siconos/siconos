@@ -26,7 +26,7 @@ V apply_if_valid(Variant& var, V&& default_value, F&& fun)
 {
   return std::visit(
     [&data, &fun](auto& rvar) {
-      auto h = storage::handle(data, rvar);
+      auto h = storage::make_handle(data, rvar);
         return static_cast<F&&>(fun)(h);
       },
       static_cast<V&&>(var));

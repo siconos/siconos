@@ -28,6 +28,7 @@ with MechanicsHdf5Runner(config=runner_config) as io:
 
     io.add_primitive_shape('DiskR1', 'Disk', [disk_radius])
     io.add_primitive_shape('DiskR2', 'Disk', [0.1*disk_radius])
+    io.add_primitive_shape('DiskR3', 'Disk', [1.5*disk_radius])
 
     io.add_Newton_impact_friction_nsl('contact', mu=0.3, e=0)
 
@@ -88,8 +89,9 @@ run_options['start_run_iteration_hook']=recirculation_start_hook()
 
 vnative_options=nonos.bridge.SpaceFilterOptions()
 vnative_options.neighborhood_radius = 2.1 * 0.1 *disk_radius
-vnative_options.min_radius = 0.5 * 0.1 * disk_radius
+vnative_options.min_radius = 0.005 * 0.5 * disk_radius
 
+run_options['verbose'] = True
 run_options['vnative_options'] = vnative_options
 
 

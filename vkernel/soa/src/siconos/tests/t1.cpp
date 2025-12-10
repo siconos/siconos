@@ -282,7 +282,7 @@ struct is_polymorhic : std::integral_constant<bool, []() {
   return match::polymorphic_type<T>;
 }()> {};
 
-static_assert(match::relation1<storage::handle<
+static_assert(match::relation1<storage::handle<storage::handle_base,
                   relation, int, decltype(storage::make<env, relation>())>>);
 
 //  {

@@ -5,6 +5,7 @@
 #include "siconos/storage/pattern/base.hpp"
 #include "siconos/storage/pattern/base_concepts.hpp"
 #include "siconos/storage/pattern/pattern.hpp"
+#include "siconos/storage/properties.hpp"
 #include "siconos/storage/traits/traits.hpp"
 
 namespace siconos::storage {
@@ -18,17 +19,19 @@ static auto get = ground::overload(
         Data&& data, auto step, Handle&& handle) constexpr -> decltype(auto) {
       return memory(
           step,
-          ground::get<A>(static_cast<Data&&>(data).store()))[handle.get()];
+          ground::get<A>(
+              static_cast<Data&&>(data).store()))[handle.index().value()];
     },
     // get<Attr>(data, step, handle)
     []<match::handle_attribute<A> Handle, match::store Data>(
         Data& data, auto step, Handle& handle) constexpr -> decltype(auto) {
-      return memory(step, ground::get<A>(data.store()))[handle.get()];
+      return memory(step,
+                    ground::get<A>(data.store()))[handle.index().value()];
     },
     // get<Attr>(data, handle)
     []<match::handle_attribute<A> Handle, match::store Data>(
         Data& data, Handle& handle) constexpr -> decltype(auto) {
-      return memory(0, ground::get<A>(data.store()))[handle.get()];
+      return memory(0, ground::get<A>(data.store()))[handle.index().value()];
     });
 
 template <typename T>
@@ -62,7 +65,8 @@ template <string_literal S>
 static auto attr = []<typename H>(H h, typename H::indice step =
                                            0) constexpr -> decltype(auto) {
   using attr_n = attr_t<typename H::type, S>;
-  return memory(step, ground::get<attr_n>(h.data().store()))[h.get()];
+  return memory(step,
+                ground::get<attr_n>(h.data().store()))[h.index().value()];
 };
 
 template <match::attribute T>
@@ -155,7 +159,8 @@ static auto constexpr attached_storage_name(Astor astor)
 template <typename Data, typename Attribute>
 static auto constexpr get_storage_type(Data&& data, Attribute)
 {
-  using val_store_t = std::decay_t<decltype(ground::get<Attribute>(data.store()))>;
+  using val_store_t =
+      std::decay_t<decltype(ground::get<Attribute>(data.store()))>;
   using val_t = typename val_store_t::value_type::value_type;
   return val_t{};
 }
