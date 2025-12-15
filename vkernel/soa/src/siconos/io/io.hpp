@@ -372,10 +372,15 @@ struct io : item<> {
 
       auto& nslaws = storage::attr_values<interaction, "nslaw">(data, step);
 
-      for (auto [ydot, ydot_k, lambda, nslaw] :
+      attr<"work_info">(*self()).clear();
+
+      for (auto [ydot, ydot_k, lambda, index_nslaw] :
            view::zip(ydots, ydot_ks, lambdas, nslaws)) {
-        scalar e = storage::make_handle(data, nslaw).e();
-        scalar mu = storage::make_handle(data, nslaw).mu();
+
+        auto nslaw = storage::make_handle(data, index_nslaw);
+
+        scalar e = nslaw.e();
+        scalar mu = nslaw.mu();
 
         // Compute normal contact work
         scalar vn_minus = ydot_k(0);
