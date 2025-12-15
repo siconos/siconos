@@ -457,8 +457,10 @@ function(build_python_tests)
   add_library(${COMPONENT}-pytests INTERFACE)
   target_link_libraries(${COMPONENT}-pytests INTERFACE ${COMPONENT})
   # Ensure build dir is in the include path for SiconosConfig.h
-  target_include_directories(${COMPONENT}-pytests INTERFACE $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>) 
-  add_dependencies(${COMPONENT}-tests ${COMPONENT}-pytests)
+  target_include_directories(${COMPONENT}-pytests INTERFACE $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>)
+  if(TARGET ${COMPONENT}-tests)
+    add_dependencies(${COMPONENT}-tests ${COMPONENT}-pytests)
+  endif()
   export_build_conf(${COMPONENT}-pytests)
 
   set(multiValueArgs DEPS EXCLUDE)
