@@ -1,5 +1,8 @@
 #include "graph_tools.h"
 
+#include <petscmat.h>
+#include <petscsys.h>
+
 
 int color_graph(int n, NumericsMatrix *M, size_t *n_colors, size_t **set_sizes, size_t ***set_indices) {
     Mat A;

@@ -1,8 +1,6 @@
 #ifndef GRAPH_TOOLS_H
 #define GRAPH_TOOLS_H
 
-#include <petscmat.h>
-#include <petscsys.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -60,11 +58,17 @@ int color_graph_permut_equitable(int n, NumericsMatrix *M, size_t *n_colors, siz
  */
 int color_graph_block(int nc, NumericsMatrix *M, size_t *n_colors, size_t **set_sizes, size_t ***set_indices);
 
-/*
-Functions for equitable graph coloring, to implement lists
-*/
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 int color_graph_block_permut(int nc, NumericsMatrix *M, size_t *n_colors, size_t **set_sizes, size_t *inv_permutation);
+
+#ifdef __cplusplus
+}
+#endif
+
 
 typedef struct node node_t;
 

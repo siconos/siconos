@@ -284,6 +284,47 @@ if(WITH_OPENMP)
   target_link_libraries(numerics  PRIVATE OpenMP::OpenMP_CXX)
 endif()
 
+# -- CUDA --
+if(WITH_CUDA)
+  enable_language(CUDA)
+  
+  # Required for cuSPARSE
+  find_package(CUDAToolkit REQUIRED)
+
+  # CUDA architectures (adjust based on target GPU)
+  # 60=Pascal, 70=Volta, 75=Turing, 80=Ampere, 86=Ampere(RTX30xx), 89=Ada
+  # if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+  #   set(CMAKE_CUDA_ARCHITECTURES "60;70;75;80;86" CACHE STRING
+  #       "CUDA architectures to compile for")
+  # endif()
+
+  set_property(TARGET ${COMPONENT} PROPERTY CUDA_ARCHITECTURES "80;86")
+
+  # CUDA compilation options
+  target_compile_options(${COMPONENT} PRIVATE
+    $<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-fPIC>)
+
+  # Link CUDA libraries
+  target_link_libraries(${COMPONENT} PRIVATE
+    CUDA::cudart
+    CUDA::cusparse
+    CUDA::cublas)
+
+  # Set CUDA standard
+  set_target_properties(${COMPONENT} PROPERTIES
+    CUDA_STANDARD ${CMAKE_CXX_STANDARD}
+    CUDA_STANDARD_REQUIRED ON
+    CUDA_SEPARABLE_COMPILATION ON)
+
+  target_compile_definitions(${COMPONENT} PUBLIC WITH_CUDA)
+
+  target_sources(${COMPONENT} PRIVATE "src/FrictionContact/fc2d_nsgs_graph_permut_cuda.cu")
+
+  message(STATUS "CUDA support enabled for numerics")
+  message(STATUS "  CUDA Toolkit version: ${CUDAToolkit_VERSION}")
+  message(STATUS "  CUDA architectures: ${CMAKE_CUDA_ARCHITECTURES}")
+endif()
+
 # --- python bindings ---
 if(WITH_${COMPONENT}_PYTHON_WRAPPER)
   add_subdirectory(swig)

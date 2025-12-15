@@ -307,8 +307,6 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem *problem, double *z, double *
   /* verbose=1; */
   /* Global Solver parameters*/
 
-  /* double time_o = omp_get_wtime(); */
-
   int *iparam = options->iparam;
   double *dparam = options->dparam;
 
@@ -389,11 +387,6 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem *problem, double *z, double *
 
   size_t *index1_data;
   size_t *index2_data; 
-
-  /* time_o = omp_get_wtime() - time_o;
-  printf("Time before iterations = %es\n", time_o);
-
-  double time = omp_get_wtime(); */
 
   unsigned int *freeze_contacts = NULL;
   // FREEZING CONTACTS
@@ -632,11 +625,6 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem *problem, double *z, double *
     }
     }
 
-  /* time = omp_get_wtime() - time;
-  printf("Time iterating: %es\n", time);
-
-  time_o = omp_get_wtime(); */
-
 
   /* Full criterium */
   if (iparam[SICONOS_FRICTION_3D_IPARAM_ERROR_EVALUATION] ==
@@ -693,9 +681,6 @@ void fc2d_nsgs_graph_permut(FrictionContactProblem *problem, double *z, double *
   free(SBM_permuted);
   free(q_permuted);
   free(mu_permuted);
-
-  /* time_o = omp_get_wtime() - time_o;
-  printf("Time after iterations = %es\n", time_o); */
 
   /* DO NOT FORGET TO FREE THE REST */
 

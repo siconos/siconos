@@ -210,6 +210,9 @@ endif()
 #== == == == == = OpenMP == == == == ==
 option(WITH_OPENMP "Use OpenMP" OFF)
 
+#== == == == == = CUDA == == == == ==
+option(WITH_CUDA "Use CUDA" OFF)
+
 #== == == == == = use ccache if available == == == == == =
 option(WITH_CCACHE "Use ccache" OFF)
 if(WITH_CCACHE)
