@@ -44,7 +44,7 @@ struct translated : item<> {
       using indice_t = typename env_t::indice;
 
       return view::iota((indice_t)0, translated().maxpoints()) |
-             view::transform([this](auto i) { return point_coord(i); });
+             view::transform([&](auto i) { return point_coord(i); });
     }
 
     decltype(auto) translation()

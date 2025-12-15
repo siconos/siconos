@@ -40,7 +40,9 @@ struct io : item<> {
       attribute<"cp_info", some::unbounded_collection<some::vector<
                                some::scalar, some::indice_value<25>>>>,
       attribute<"co_info", some::unbounded_collection<some::vector<
-                               some::scalar, some::indice_value<4>>>>>;
+                               some::scalar, some::indice_value<4>>>>,
+      attribute<"work_info", some::unbounded_collection<some::vector<
+                                 some::scalar, some::indice_value<5>>>>>;
 
   using properties =
       // an attached global ident for contact shapes
@@ -357,10 +359,92 @@ struct io : item<> {
           attr<"co_info">(*self()).data()->size());
     }
 
+    decltype(auto) contact_work(auto step, auto omega, auto tol)
+    {
+      auto& data = self()->data();
+      using env_t = decltype(self()->env());
+      using scalar = typename env_t::scalar;
+
+      auto& ydots = storage::attr_values<interaction, "ydot">(data, step);
+      auto& ydot_ks =
+          storage::attr_values<interaction, "ydot">(data, step - 1);
+      auto& lambdas = storage::attr_values<interaction, "lambda">(data, step);
+
+      auto& nslaws = storage::attr_values<interaction, "nslaw">(data, step);
+
+      for (auto [ydot, ydot_k, lambda, nslaw] :
+           view::zip(ydots, ydot_ks, lambdas, nslaws)) {
+        scalar e = storage::make_handle(data, nslaw).e();
+        scalar mu = storage::make_handle(data, nslaw).mu();
+
+        // Compute normal contact work
+        scalar vn_minus = ydot_k(0);
+        scalar vn_plus = ydot(0);
+        scalar pn = lambda(0);
+
+        scalar vn_average = omega * vn_plus + (1. - omega) * vn_minus;
+        scalar normal_contact_work = vn_average * pn;
+
+        // Compute tangent contact work of impulse
+        scalar vt_1_minus = ydot_k(1);
+        scalar vt_1_plus = ydot(1);
+
+        scalar vt_1_average = omega * vt_1_plus + (1. - omega) * vt_1_minus;
+        scalar pt_1 = lambda(1);
+
+        scalar tangent_contact_work = vt_1_average * pt_1;
+
+        // Compute work dissipated by friction impulse
+        scalar norm_vt_average = sqrt(vt_1_average * vt_1_average);
+        scalar friction_dissipation = mu * norm_vt_average * pn;
+
+        // Compute contact status
+        // Warning the status are consistent for the sticking and sliding
+        // only with fully implicit discretization o NewtonImpact law
+        // and not wih Fremond impact law
+        scalar norm_pt = sqrt(pt_1 * pt_1);
+        scalar norm_vt_plus = sqrt(vt_1_plus * vt_1_plus);
+
+        scalar answer_4;
+        scalar answer_5;
+        if ((pn < tol) and (vn_plus + e * vn_minus > tol)) {
+          answer_4 = 0;  // take-off = 0
+        }
+        else if ((pn > tol) and (vn_plus + e * vn_minus > tol)) {
+          if ((norm_pt - mu * pn > tol)) {
+            answer_4 = -3;  // outside the cone
+          }
+          else if (norm_pt - mu * pn < -tol) {
+            if (norm_vt_plus > tol) {
+              answer_4 =
+                  -2;  // sticking with a non zero slifing velocity = -2
+            }
+            else {
+              answer_4 = 1;  // sticking
+            }
+          }
+          else {
+            answer_4 = 2;
+          }  // sliding
+        }
+        else {
+          answer_4 = -1;
+        }  // undetermined
+        if ((pn > tol) and (vn_minus > tol)) {
+          answer_5 = normal_contact_work;
+        }
+
+        attr<"work_info">(*self()).push_back(
+            {normal_contact_work, tangent_contact_work, friction_dissipation,
+             answer_4, answer_5});
+      }
+    }
+
     auto methods()
     {
       using env_t = decltype(self()->env());
       using indice = typename env_t::indice;
+      using scalar = typename env_t::scalar;
 
       return collect(
           method("p0s", &interface<Handle>::p0s<indice>),
@@ -369,7 +453,9 @@ struct io : item<> {
           method("velocities", &interface<Handle>::velocities<indice>),
           method("contact_points",
                  &interface<Handle>::contact_points<indice>),
-          method("contact_info", &interface<Handle>::contact_info<indice>));
+          method("contact_info", &interface<Handle>::contact_info<indice>),
+          method("contact_work",
+                 &interface<Handle>::contact_work<indice, scalar, scalar>));
     }
   };
 };
