@@ -954,6 +954,7 @@ static void compute_contact_work_and_status_2d(
         // std::cout << "WARNING: but the norm of vt is not zero  " << std::endl;
         answer(4) = -2;  // sticking with a non zero slifing velocity = -2
       }
+      // ?? answer(4) = -2 is always overwritten
       answer(4) = 1;  // sticking = 1
     } else {
       // std::cout << "the impulse is on the *boundary* of the Coulomb cone  " << std::endl;
